@@ -505,7 +505,6 @@ R.Screens.today = (function(){
         <div id="pane-reward">${RewardCard()}</div>
         ${BadDayCard(day)}
         ${DistractionCard(day)}
-        ${when(R.Coach.available(), () => raw(R.Coach.panel('motivation', S.coach && S.coach['motivation-'+U.todayISO()])))}
         ${PlanHealthCard()}
         ${StreakCard()}
         ${SleepCard(day)}

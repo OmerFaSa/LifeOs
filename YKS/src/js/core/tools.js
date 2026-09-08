@@ -1,12 +1,13 @@
-/* AI koçun sistemi okuyabilmesi için araç katmanı.
+/* Veri okuma katmani — ofis ajanlarinin sistemi gorebilmesi icin.
 
-   Claude, sample() cagrisinda bu fonksiyonlari cagirarak uygulamadaki
-   gercek veriyi okur. Araclar YALNIZ OKUR — hicbiri veriyi degistirmez.
-   Kisisel alanlar (ad, sehir) disari verilmez. */
+   Ajanlar bu fonksiyonlar araciligiyla uygulamadaki gercek veriyi okur.
+   Araclar YALNIZ OKUR — hicbiri veriyi degistirmez.
+   sanitize() modele giden her nesneyi suzer: kisisel alanlar (ad, sehir,
+   okul) her derinlikte silinir ve metin icinde de maskelenir. */
 
 window.R = window.R || {};
 
-R.CoachTools = (function(){
+R.Tools = (function(){
   const U = R.U, M = R.Model, C = R.Calc, S = R.S;
 
   function num(x){ return x == null ? null : (typeof x === 'number' ? U.round(x, 2) : x); }

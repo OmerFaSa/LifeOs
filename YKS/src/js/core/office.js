@@ -11,7 +11,7 @@
      meet(...)          gundem → sirayla konusma → Patron'un tek karari
 
    Yetki: her ajan yalnizca kendi brifingini gorur; ham veriye erisemez.
-   Gizlilik: LLM'e giden her nesne R.CoachTools.sanitize'dan gecer. */
+   Gizlilik: LLM'e giden her nesne R.Tools.sanitize'dan gecer. */
 
 window.R = window.R || {};
 
@@ -502,9 +502,28 @@ R.Office = (function(){
         + (ctx.action.why || '') + ' Diğer başlıklar sıraya girer; aynı anda iki müdahale yapılmaz.';
     }
 
-    const body = lines.length
-      ? lines.join(' ') + (b.suggestion ? ' ' + b.suggestion.text : '')
-      : b.headline + '. Bu masada bugün ayrıca bildirilecek bir şey yok.';
+    /* Tur farkli sey soruyorsa cevap da farkli olmali. Model yokken ajanin
+       elinde yalnizca brifing vardir; ucuncu turdan sonra soyleyecek YENI
+       bir seyi yoktur ve bunu uydurmak yerine acikca soyler. */
+    const round = (ctx && ctx.round && ctx.round.key) || null;
+    let body;
+    if(kind === 'turn' && round === 'fikir'){
+      body = b.suggestion
+        ? b.suggestion.text + ' Gerekçe: ' + (lines[0] || b.headline)
+        : b.headline + '. Bu masadan çıkacak somut bir öneri yok.';
+    }else if(kind === 'turn' && round === 'itiraz'){
+      body = lines[1]
+        ? 'Buna itirazım şu: ' + lines[1]
+        : 'Kendi alanımdan itirazım yok; ' + (lines[0] || b.headline);
+    }else if(kind === 'turn' && (round === 'sentez' || round === 'serbest')){
+      body = b.suggestion
+        ? 'Bana düşen iş: ' + b.suggestion.text
+        : 'Ekleyecek bir şeyim yok.';
+    }else{
+      body = lines.length
+        ? lines.join(' ') + (b.suggestion ? ' ' + b.suggestion.text : '')
+        : b.headline + '. Bu masada bugün ayrıca bildirilecek bir şey yok.';
+    }
 
     /* Soruya yanit verirken durustluk: model bagli degilken ajan soruyu
        okuyamaz, yalnizca masasindaki tabloyu okur. Bunu saklamaz. */
@@ -520,9 +539,106 @@ R.Office = (function(){
 
   function toneId(){ return (S.profile && S.profile.coachTone) || 'dengeli'; }
 
+  /* ---------- kural motoru dogrulamasi ----------
+     Model ne yazarsa yazsin cikti ev kurallarina karsi denetlenir.
+     Gardlar veri katmanindan gelir (R.PROMPTS.forbidden); when() kural
+     motorunu alir, yani yasak yalnizca veri onu destekliyorsa uygulanir. */
+
   function validate(text){
-    if(R.Coach && typeof R.Coach.validate === 'function') return R.Coach.validate(text);
-    return { text, warnings:[] };
+    const warnings = [];
+    (R.PROMPTS.forbidden || []).forEach(rule => {
+      try{ if(rule.re.test(text) && rule.when(C)) warnings.push(rule.why); }
+      catch(e){ /* gard hesaplanamadiysa uyari uretme */ }
+    });
+    return { text, warnings };
+  }
+
+  /* ---------- nottan kart uretimi ----------
+     Once koc katmanindaydi; artik ofisin isi ve ucretsiz modellerle de
+     calisir. LLM yalniz metin onerir, kart nesnesini kural motoru kurar:
+     sema, uzunluk ve SRS asamalari uygulamada kalir. */
+
+  function noteContext(noteId){
+    const note = S.videoNotes.find(n => n.id === noteId);
+    if(!note || !note.segments.length) return null;
+    return {
+      baslik:note.title,
+      konu:M.noteTopicName(note),
+      notlar:note.segments.slice(0, 40).map(s => ({
+        saniye:s.ts, etiket:s.tag, metin:String(s.text).slice(0, 220),
+      })),
+      mevcutKartSayisi:S.cards.filter(c => c.source === 'note' && c.sourceRef === noteId).length,
+    };
+  }
+
+  function validateCards(rawObj, note){
+    const cfg = R.PROMPTS.cards;
+    const list = (rawObj && Array.isArray(rawObj.cards)) ? rawObj.cards : [];
+    const seen = {};
+    const out = [];
+    let dropped = 0;
+
+    for(const c of list){
+      const front = String((c && c.front) || '').trim();
+      const back = String((c && c.back) || '').trim();
+      if(!front || !back){ dropped++; continue; }
+      if(front.length > cfg.frontMax || back.length > cfg.backMax){ dropped++; continue; }
+      const key = front.toLowerCase();
+      if(seen[key]){ dropped++; continue; }
+      seen[key] = true;
+      out.push(M.newCard({
+        front, back,
+        topic:String((c && c.topic) || M.noteTopicName(note)).slice(0, 80),
+        subjectId:note.subjectId || null,
+        source:'note', sourceRef:note.id,
+      }));
+      if(out.length >= cfg.max) break;
+    }
+    return { cards:out, dropped };
+  }
+
+  /* Ucretsiz modeller JSON'u kod cercevesi icinde dondurebiliyor;
+     metinden ilk gecerli nesne cikarilir. */
+  function parseJson(text){
+    const raw = String(text || '').trim();
+    const fence = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+    const body = fence ? fence[1] : raw;
+    try{ return JSON.parse(body); }catch(e){}
+    const start = body.indexOf('{');
+    const end = body.lastIndexOf('}');
+    if(start >= 0 && end > start){
+      try{ return JSON.parse(body.slice(start, end + 1)); }catch(e){}
+    }
+    return null;
+  }
+
+  async function generateCards(noteId, opts){
+    const o = opts || {};
+    const note = S.videoNotes.find(n => n.id === noteId);
+    if(!note || !note.segments.length){
+      throw Object.assign(new Error('Bu derste not yok'), { code:'no_data' });
+    }
+    const chain = chainFor('analist');
+    if(!chain.length){
+      throw Object.assign(new Error('Model bağlı değil'), { code:'unavailable' });
+    }
+
+    const cfg = R.PROMPTS.cards;
+    const ctx = R.Tools.sanitize(noteContext(noteId));
+    const res = await R.LLM.complete(chain, {
+      system:cfg.system + '\nEn fazla ' + cfg.max + ' kart üret.',
+      messages:[{ role:'user', text:'NOTLAR (JSON):\n' + JSON.stringify(ctx, null, 1) }],
+      maxTokens:900,
+      temperature:0.2,
+      signal:o.signal,
+    });
+
+    const parsed = parseJson(res.text);
+    const checked = validateCards(parsed, note);
+    if(!checked.cards.length){
+      throw Object.assign(new Error('Geçerli kart üretilemedi'), { code:'empty' });
+    }
+    return checked;
   }
 
   /* Tek bir ajan konusturur. Model yoksa ya da cagri basarisiz olursa
@@ -586,7 +702,7 @@ R.Office = (function(){
     if(!q) throw Object.assign(new Error('boş soru'), { code:'empty' });
 
     resetBriefs();
-    const data = R.CoachTools.sanitize(brief(agentId).data);
+    const data = R.Tools.sanitize(brief(agentId).data);
     const history = chatOf(agentId).slice(-4)
       .map(m => ({ role:m.role === 'user' ? 'user' : 'assistant', text:m.text }));
 
@@ -601,7 +717,7 @@ R.Office = (function(){
   async function briefing(agentId, opts){
     const agent = R.AGENT_BY_ID[agentId];
     resetBriefs();
-    const data = R.CoachTools.sanitize(brief(agentId).data);
+    const data = R.Tools.sanitize(brief(agentId).data);
     return speak(agentId, 'briefing', {
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.briefing(agent, data) }],
       ctx:{},
@@ -685,72 +801,331 @@ R.Office = (function(){
 
   /* Toplanti: Patron acar → uzmanlar sirayla konusur → Patron tek karar verir.
      onTurn her konusmadan sonra cagirilir (ekranda canli akis icin). */
-  async function meet(opts){
-    const o = opts || {};
-    resetBriefs();
+  /* ---------- turlar ----------
+     Toplanti tek turluk bir yoklama degil, tur tur ilerleyen bir fikir
+     patlamasidir. Her turun AYRI bir sorusu vardir; boylece ajanlar ayni
+     cumleyi tekrar etmez, tartisma derinlesir. */
 
-    const ag = o.agenda || agenda();
-    const action = nextAction();
-    const turns = [];
-    const said = [];
+  const ROUNDS = [
+    { key:'durum',  title:'Durum tespiti',
+      ask:'Kendi alanindan gundemle ilgili TEK bulgu bildir. Sayilari raporundan al.' },
+    { key:'fikir',  title:'Fikir turu',
+      ask:'Gundemi cozecek TEK somut fikir at. Baskasinin fikrini tekrarlama; '
+        + 'senden onceki fikirlerden farkli bir sey soyle.' },
+    { key:'itiraz', title:'İtiraz turu',
+      ask:'Masadaki fikirlerden hangisi kendi alaninda TUTMAZ, nedenini veriyle soyle. '
+        + 'Itirazin yoksa hangisini destekledigini ve neden oldugunu tek cumlede yaz.' },
+    { key:'sentez', title:'Toparlama turu',
+      ask:'Konusulanlardan kendi alanina dusen tek isi soyle: sen ne yapacaksin, '
+        + 'aday senden ne bekleyecek.' },
+    { key:'serbest', title:'Serbest tur',
+      ask:'Sana kalan son sozu soyle. Yeni bir sey yoksa "ekleyecegim yok" de, uzatma.' },
+  ];
 
-    const emit = async turn => {
-      turns.push(turn);
-      if(o.onTurn) await o.onTurn(turn, turns);
-    };
+  function roundDef(n){ return ROUNDS[Math.min(n, ROUNDS.length) - 1] || ROUNDS[ROUNDS.length - 1]; }
 
-    const agendaData = R.CoachTools.sanitize(ag.data || {});
-    const ctx = { topic:ag.topic, why:ag.why, data:agendaData, action };
+  /* Kac tur anlamli? Model bagliyken bes turun hepsi ayri bir soru sorar.
+     Model yokken ajanin elinde yalnizca brifing vardir: ucuncu turdan sonra
+     yeni bir sey cikmaz, bu yuzden toplanti orada durur. */
+  function maxRounds(){ return mode() === 'llm' ? ROUNDS.length : 3; }
 
-    /* 1) acilis */
-    const opening = await speak('patron', 'opening', {
-      messages:[{ role:'user', text:R.OFFICE_PROMPTS.opening({ topic:ag.topic, why:ag.why, data:agendaData }) }],
-      ctx,
-    }, Object.assign({}, o, { maxTokens:240, onText:o.onText ? t => o.onText('patron', t) : null }));
-    await emit(opening);
-    said.push(opening);
+  /* ---------- canli oturum ----------
+     Toplanti artik tek bir cagriyla bitmez: kullanici bitirene kadar
+     tur tur ilerler. Her konusma bir model cagrisidir ve kota yoneticisi
+     araya bosluk koyar; bu yuzden "hepsi aninda" degil sirayla akar. */
 
-    /* 2) uzmanlar — her biri yalniz kendi brifingini gorur */
-    const order = (o.only && o.only.length) ? o.only : R.MEETING_ORDER;
-    for(const id of order){
-      const agent = R.AGENT_BY_ID[id];
-      if(!agent) continue;
-      const data = R.CoachTools.sanitize(brief(id).data);
-      const prev = said.slice(-TURN_CONTEXT).map(s => ({ name:s.name, role:s.role, text:s.text }));
-      const turn = await speak(id, 'turn', {
-        messages:[{ role:'user', text:R.OFFICE_PROMPTS.turn(agent, ag, data, prev) }],
-        ctx,
-      }, Object.assign({}, o, { maxTokens:320, onText:o.onText ? t => o.onText(id, t) : null }));
-      await emit(turn);
-      said.push(turn);
-    }
-
-    /* 3) kapanis — eylem kural motorundan gelir, Patron yalniz gerekcelendirir */
-    const closing = await speak('patron', 'closing', {
-      messages:[{ role:'user', text:R.OFFICE_PROMPTS.closing(ag,
-        said.slice(1).map(s => ({ name:s.name, role:s.role, text:s.text })), action) }],
-      ctx,
-    }, Object.assign({}, o, { maxTokens:300, onText:o.onText ? t => o.onText('patron', t) : null }));
-    closing.closing = true;
-    await emit(closing);
-
-    const meeting = {
+  function newSession(ag){
+    return {
       id:U.uid('m'),
       at:new Date().toISOString(),
-      topic:ag.topic,
-      why:ag.why,
-      mode:turns.every(t => t.mode === 'llm') ? 'llm' : (turns.some(t => t.mode === 'llm') ? 'karma' : 'kural'),
+      topic:ag.topic, why:ag.why, agendaData:ag.data || {},
+      round:0,
+      turns:[],
+      status:'live',
       promptVersion:R.OFFICE_PROMPTS.version,
-      action:{ title:action.title, why:action.why, route:action.route || 'today', label:action.label || '' },
-      turns:turns.map(t => ({ agent:t.agent, name:t.name, role:t.role, text:t.text,
-        warnings:t.warnings || [], mode:t.mode, closing:!!t.closing, error:t.error || null })),
     };
+  }
+
+  /* Bir uzmanin konusma sirasi. Toplantida herkes ayni tur icinde bir kez konusur. */
+  function speakerAt(index){
+    return R.MEETING_ORDER[index % R.MEETING_ORDER.length];
+  }
+
+  /* Toplantida o ana kadar soylenenlerin son N tanesi (ajanin baglamı). */
+  function saidSoFar(session, limit){
+    return session.turns.slice(-(limit || TURN_CONTEXT))
+      .map(t => ({ name:t.name, role:t.role, text:t.text }));
+  }
+
+  /* Toplantiyi acar: gundem secilir, Patron soz alir. */
+  async function openMeeting(opts){
+    const o = opts || {};
+    resetBriefs();
+    const ag = o.agenda || agenda();
+    const session = newSession(ag);
+
+    const pending = pendingDecision();
+    const turn = await speak('patron', 'opening', {
+      messages:[{ role:'user', text:R.OFFICE_PROMPTS.opening(
+        { topic:ag.topic, why:ag.why, data:R.Tools.sanitize(ag.data || {}) }, pending) }],
+      ctx:{ topic:ag.topic, why:ag.why, pending },
+    }, Object.assign({}, o, { maxTokens:260 }));
+
+    turn.round = 0;
+    turn.roundTitle = 'Açılış';
+    session.turns.push(turn);
+    return session;
+  }
+
+  /* Siradaki konusmaciyi konusturur. index tur icindeki sirayi verir. */
+  async function nextTurn(session, index, opts){
+    const o = opts || {};
+    const roundNo = Math.floor(index / R.MEETING_ORDER.length) + 1;
+    const def = roundDef(roundNo);
+    const agentId = speakerAt(index);
+    const agent = R.AGENT_BY_ID[agentId];
+
+    resetBriefs();
+    const data = R.Tools.sanitize(brief(agentId).data);
+    const turn = await speak(agentId, 'turn', {
+      messages:[{ role:'user', text:R.OFFICE_PROMPTS.turn(agent,
+        { topic:session.topic }, data, saidSoFar(session), def, recentSaid(agentId)) }],
+      ctx:{ topic:session.topic, round:def },
+    }, Object.assign({}, o, { maxTokens:320 }));
+
+    turn.round = roundNo;
+    turn.roundTitle = def.title;
+    session.round = roundNo;
+    session.turns.push(turn);
+    return turn;
+  }
+
+  /* Kullanici soz alir: konusma kaydina girer, sonraki ajanlar bunu gorur. */
+  function userTurn(session, text){
+    const turn = {
+      agent:'aday', name:'Sen', role:'aday', text:String(text || '').trim(),
+      warnings:[], mode:'kullanici', round:session.round, roundTitle:'Söz aldın',
+    };
+    if(!turn.text) return null;
+    session.turns.push(turn);
+    return turn;
+  }
+
+  /* Toplantiyi kapatir: Patron karari gerekcelendirir, rapor uretilir,
+     karar takibe alinir ve tutanak kaydedilir. */
+  async function closeMeeting(session, opts){
+    const o = opts || {};
+    resetBriefs();
+    const action = nextAction();
+    const said = session.turns.slice(1)
+      .map(t => ({ name:t.name, role:t.role, text:t.text }));
+
+    const closing = await speak('patron', 'closing', {
+      messages:[{ role:'user', text:R.OFFICE_PROMPTS.closing(
+        { topic:session.topic }, said, action) }],
+      ctx:{ topic:session.topic, action },
+    }, Object.assign({}, o, { maxTokens:320 }));
+
+    closing.closing = true;
+    closing.round = session.round;
+    closing.roundTitle = 'Karar';
+    session.turns.push(closing);
+
+    const modes = session.turns.filter(t => t.mode !== 'kullanici').map(t => t.mode);
+    const meeting = {
+      id:session.id,
+      at:session.at,
+      closedAt:new Date().toISOString(),
+      topic:session.topic,
+      why:session.why,
+      rounds:session.round,
+      status:'closed',
+      mode:modes.every(m => m === 'llm') ? 'llm' : (modes.some(m => m === 'llm') ? 'karma' : 'kural'),
+      promptVersion:R.OFFICE_PROMPTS.version,
+      action:{ title:action.title, why:action.why, route:action.route || 'today',
+        label:action.label || '' },
+      decision:{
+        id:session.id, title:action.title, why:action.why,
+        route:action.route || 'today', state:'open', at:new Date().toISOString(),
+      },
+      turns:session.turns.map(t => ({ agent:t.agent, name:t.name, role:t.role, text:t.text,
+        warnings:t.warnings || [], mode:t.mode, round:t.round || 0,
+        roundTitle:t.roundTitle || '', closing:!!t.closing, error:t.error || null })),
+      report:buildReport(session, action, closing),
+    };
+
     await saveMeeting(meeting);
+    await rememberTurns(meeting);
+    return meeting;
+  }
+
+  /* ---------- rapor ----------
+     Rapor kural motorunun urettigi bir belgedir: kim ne dedi, hangi tur,
+     karar ne. Patron'un kapanis metni ozet olarak basa konur — LLM'e
+     ayrica bir rapor yazdirilmaz, boylece fazladan kota harcanmaz. */
+
+  function buildReport(session, action, closing){
+    const byAgent = {};
+    session.turns.forEach(t => {
+      if(t.agent === 'patron' || t.agent === 'aday') return;
+      byAgent[t.agent] = byAgent[t.agent] || { name:t.name, role:t.role, lines:[] };
+      byAgent[t.agent].lines.push({ round:t.round, roundTitle:t.roundTitle, text:t.text });
+    });
+
+    const warnings = [];
+    session.turns.forEach(t => (t.warnings || []).forEach(w => {
+      if(warnings.indexOf(w) < 0) warnings.push(w);
+    }));
+
+    const userSaid = session.turns.filter(t => t.agent === 'aday').map(t => t.text);
+
+    return {
+      summary:closing ? closing.text : '',
+      topic:session.topic,
+      why:session.why,
+      rounds:session.round,
+      turnCount:session.turns.length,
+      speakers:Object.keys(byAgent).length,
+      byAgent,
+      userSaid,
+      warnings,
+      decision:{ title:action.title, why:action.why, route:action.route || 'today' },
+      /* Kararin dayandigi sayilar: rapor sonradan okundugunda baglam kalsin. */
+      basis:(function(){
+        const d = R.Tools.durum();
+        return {
+          hafta:d.programHaftasi,
+          planTamamlama:d.planTamamlama,
+          tytMedyan:d.tytMedyan,
+          aytMedyan:d.aytMedyan,
+          konuKapanisi:d.konuKapanisYuzdesi,
+          analizBorcu:d.analizBorcu,
+          tekrarBorcu:d.tekrarBorcuYuzdesi,
+        };
+      })(),
+    };
+  }
+
+  /* Raporu duz metne cevirir — kopyalanip disariya tasinabilsin. */
+  function reportText(meeting){
+    const r = meeting.report || {};
+    const out = [];
+    out.push('TOPLANTI RAPORU — ' + new Date(meeting.at).toLocaleString('tr-TR'));
+    out.push('Gündem: ' + meeting.topic);
+    if(r.why) out.push('Neden: ' + r.why);
+    out.push('');
+    out.push('KARAR: ' + meeting.action.title);
+    if(meeting.action.why) out.push(meeting.action.why);
+    out.push('');
+    if(r.summary){ out.push('PATRON’UN KAPANIŞI'); out.push(r.summary); out.push(''); }
+    Object.keys(r.byAgent || {}).forEach(id => {
+      const a = r.byAgent[id];
+      out.push(a.name.toUpperCase() + ' — ' + a.role);
+      a.lines.forEach(l => out.push('  · [' + (l.roundTitle || 'tur') + '] ' + l.text));
+      out.push('');
+    });
+    if((r.userSaid || []).length){
+      out.push('SENİN SÖZLERİN');
+      r.userSaid.forEach(t => out.push('  · ' + t));
+      out.push('');
+    }
+    if((r.warnings || []).length){
+      out.push('KURAL MOTORU UYARILARI');
+      r.warnings.forEach(w => out.push('  ! ' + w));
+      out.push('');
+    }
+    const b = r.basis || {};
+    out.push('DAYANDIĞI VERİ');
+    out.push('  hafta ' + b.hafta + ' · plan %' + (b.planTamamlama == null ? '—' : b.planTamamlama)
+      + ' · kapanış %' + b.konuKapanisi
+      + ' · analiz borcu ' + b.analizBorcu + ' · tekrar borcu %' + b.tekrarBorcu);
+    return out.join('\n');
+  }
+
+  /* ---------- karar takibi ----------
+     Ofisi "gercek" yapan sey: verilen karar unutulmaz. Bir sonraki
+     toplantiyi Patron hesap sorarak acar. */
+
+  function decisions(){
+    return meetings()
+      .filter(m => m.decision)
+      .map(m => Object.assign({}, m.decision, { topic:m.topic, meetingId:m.id }));
+  }
+  function openDecisions(){ return decisions().filter(d => d.state === 'open'); }
+  function pendingDecision(){ return openDecisions()[0] || null; }
+
+  async function closeDecision(id, state){
+    const m = (S.officeMeetings || []).find(x => x.id === id);
+    if(!m || !m.decision) return null;
+    m.decision.state = (state === 'done' || state === 'carried') ? state : 'open';
+    m.decision.closedAt = new Date().toISOString();
+    await R.Store.set('meetings/' + m.id, m);
+    return m.decision;
+  }
+
+  /* ---------- ajan hafizasi ----------
+     Ajan ayni cumleyi iki toplanti ust uste kurmasin diye son sozleri
+     hatirlanir. Koc katmanindaki recentSaid ile ayni fikir. */
+
+  function recentSaid(agentId, limit){
+    const out = [];
+    meetings().forEach(m => {
+      (m.turns || []).forEach(t => {
+        if(t.agent === agentId && t.text) out.push({ at:m.at, text:t.text });
+      });
+    });
+    (chatOf(agentId) || []).forEach(msg => {
+      if(msg.role !== 'user' && msg.text) out.push({ at:msg.at || '', text:msg.text });
+    });
+    return out.sort((a, b) => (b.at || '').localeCompare(a.at || ''))
+      .slice(0, limit || 3)
+      .map(x => String(x.text).slice(0, 180));
+  }
+
+  /* Tutanak kaydedildikten sonra hafiza zaten meetings() uzerinden okunur;
+     ayrica bir yazma gerekmez. Kanca ileride genisletilebilir diye durur. */
+  async function rememberTurns(){ return true; }
+
+  /* ---------- kota ---------- */
+
+  /* Bir ajanin siradaki cagrisi ne zaman yapilabilir? Ekran bunu gosterir. */
+  function agentQuota(agentId){
+    const chain = chainFor(agentId);
+    if(!chain.length) return null;
+    const state = R.Quota.check(chain[0]);
+    const st = R.Quota.status(chain[0]);
+    return {
+      waitMs:state.waitMs || 0,
+      full:!state.ok && state.reason === 'daily',
+      usedToday:st.usedToday, rpd:st.rpd, rpm:st.rpm, known:st.known,
+    };
+  }
+
+  /* Bir toplanti turu kac saniye surer (kota bosluklariyla)? */
+  function roundEstimateMs(agentId){
+    const chain = chainFor(agentId || 'patron');
+    if(!chain.length) return 0;
+    return R.Quota.estimateMs(chain[0], R.MEETING_ORDER.length);
+  }
+
+  /* ---------- tek cagriyla toplanti (test ve otomasyon icin) ----------
+     Ekran turlu akisi kullanir; bu sarmalayici bir turu acar, kosar, kapatir. */
+  async function meet(opts){
+    const o = opts || {};
+    const session = await openMeeting(o);
+    if(o.onTurn) await o.onTurn(session.turns[0], session.turns);
+    const count = (o.rounds || 1) * R.MEETING_ORDER.length;
+    for(let i = 0; i < count; i++){
+      const turn = await nextTurn(session, i, o);
+      if(o.onTurn) await o.onTurn(turn, session.turns);
+    }
+    const meeting = await closeMeeting(session, o);
+    if(o.onTurn) await o.onTurn(meeting.turns[meeting.turns.length - 1], session.turns);
     return meeting;
   }
 
   async function saveMeeting(meeting){
-    S.officeMeetings = [meeting].concat(S.officeMeetings || [])
+    S.officeMeetings = [meeting].concat((S.officeMeetings || []).filter(m => m.id !== meeting.id))
       .sort((a, b) => (b.at || '').localeCompare(a.at || ''));
     const drop = S.officeMeetings.slice(MEETING_MAX);
     S.officeMeetings = S.officeMeetings.slice(0, MEETING_MAX);
@@ -767,6 +1142,7 @@ R.Office = (function(){
   }
 
   function meetings(){ return S.officeMeetings || []; }
+
   function lastMeeting(){ return meetings()[0] || null; }
 
   /* ==================== yukleme ==================== */
@@ -801,14 +1177,21 @@ R.Office = (function(){
     /* ayar */
     defaultSettings, settings, saveSettings, agentConfig, chainFor, ready, mode, providerLabel,
     /* brifing */
-    brief, resetBriefs, snapshot, ruleText, nextAction,
+    brief, resetBriefs, snapshot, ruleText, nextAction, recentSaid,
+    /* dogrulama ve kart uretimi (eski koc katmanindan devralindi) */
+    validate, validateCards, generateCards, noteContext, parseJson,
     /* sohbet */
     ask, briefing, chatOf, pushChat, clearChat,
-    /* toplanti */
-    agenda, agendaCandidates, meet, meetings, lastMeeting, saveMeeting, deleteMeeting,
+    /* toplanti — turlu canli oturum */
+    agenda, agendaCandidates, openMeeting, nextTurn, userTurn, closeMeeting, speakerAt, roundDef,
+    meet, meetings, lastMeeting, saveMeeting, deleteMeeting, reportText, maxRounds,
+    /* karar takibi */
+    decisions, openDecisions, pendingDecision, closeDecision,
+    /* kota */
+    agentQuota, roundEstimateMs,
     /* yasam dongusu */
     load,
     /* sabitler */
-    CHAT_MAX, MEETING_MAX,
+    CHAT_MAX, MEETING_MAX, ROUNDS,
   };
 })();

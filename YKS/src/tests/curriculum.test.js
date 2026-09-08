@@ -141,15 +141,15 @@
 
   describe('Koç araç katmanı', function(){
     it('araçların hepsi adlı, açıklamalı ve çalıştırılabilir', function(){
-      expect(R.CoachTools.TOOLS.length).toBeGreaterThan(7);
-      R.CoachTools.TOOLS.forEach(t => {
+      expect(R.Tools.TOOLS.length).toBeGreaterThan(7);
+      R.Tools.TOOLS.forEach(t => {
         if(!t.name || !t.description || typeof t.execute !== 'function') throw new Error(t.name+' eksik');
       });
     });
     it('durum özeti temel alanları döndürür', function(){
       resetState();
       withToday('2026-09-21', function(){
-        const d = R.CoachTools.durum();
+        const d = R.Tools.durum();
         expect(d.bugun).toBe('2026-09-21');
         expect(typeof d.programHaftasi).toBe('number');
         expect(typeof d.konuKapanisYuzdesi).toBe('number');
@@ -157,38 +157,38 @@
     });
     it('araçlar kişisel bilgi sızdırmaz', function(){
       resetState();
-      const json = JSON.stringify([R.CoachTools.durum(), R.CoachTools.gunler({gun:3}), R.CoachTools.haftalar({})]);
+      const json = JSON.stringify([R.Tools.durum(), R.Tools.gunler({gun:3}), R.Tools.haftalar({})]);
       expect(json.indexOf('Ömer')).toBe(-1);
       expect(json.indexOf('Adana')).toBe(-1);
     });
     it('deneme aracı kayıtları özetler', function(){
       resetState();
       S.exams = [R.Test.makeExam({ date:'2026-09-19', correct:30, wrong:4 })];
-      const list = R.CoachTools.denemeler({});
+      const list = R.Tools.denemeler({});
       expect(list).toHaveLength(1);
       expect(list[0].toplamNet).toBe(29);
     });
     it('hata aracı dağılım ve kayıtları verir', function(){
       resetState();
       S.errors = [{ id:'r1', tag:'K', rootCause:'birim atladım', createdAt:'2026-09-19T10:00:00Z' }];
-      const h = R.CoachTools.hatalar({});
+      const h = R.Tools.hatalar({});
       expect(h.dagilim[0].etiket).toBe('K');
       expect(h.kayitlar[0].kokNeden).toBe('birim atladım');
     });
     it('konu aracı belirli dersi filtreler', function(){
       resetState();
-      const k = R.CoachTools.konular({ ders:'tyt-sosyal', tumKonular:true });
+      const k = R.Tools.konular({ ders:'tyt-sosyal', tumKonular:true });
       expect(k).toHaveLength(1);
       expect(k[0].toplamKonu).toBe(30);
     });
     it('araç hatası çökmeden döner', function(){
-      const tools = R.CoachTools.forSample();
+      const tools = R.Tools.forSample();
       const bad = tools.find(t => t.name === 'konular');
       const out = bad.execute({ ders:'yok-boyle-ders' });
       expect(Array.isArray(out)).toBeTruthy();
     });
     it('sample formatında inputSchema taşır', function(){
-      R.CoachTools.forSample().forEach(t => {
+      R.Tools.forSample().forEach(t => {
         if(!t.inputSchema || t.inputSchema.type !== 'object') throw new Error(t.name+' şema eksik');
       });
     });

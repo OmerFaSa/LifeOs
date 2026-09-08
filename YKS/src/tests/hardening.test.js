@@ -40,7 +40,7 @@
     }
     it('ad ve şehir anahtarlarını siler', function(){
       withProfile(() => {
-        const out = R.CoachTools.sanitize({ name:'Ömer Faruk', city:'Adana', net:42 });
+        const out = R.Tools.sanitize({ name:'Ömer Faruk', city:'Adana', net:42 });
         expect(out.name).toBeUndefined();
         expect(out.city).toBeUndefined();
         expect(out.net).toBe(42);
@@ -48,7 +48,7 @@
     });
     it('iç içe nesnelerde de siler', function(){
       withProfile(() => {
-        const out = R.CoachTools.sanitize({ profil:{ ad:'Ömer Faruk', okul:'X' }, hafta:3 });
+        const out = R.Tools.sanitize({ profil:{ ad:'Ömer Faruk', okul:'X' }, hafta:3 });
         expect(out.profil.ad).toBeUndefined();
         expect(out.profil.okul).toBeUndefined();
         expect(out.hafta).toBe(3);
@@ -56,21 +56,21 @@
     });
     it('serbest metin içindeki kişisel değeri maskeler', function(){
       withProfile(() => {
-        const out = R.CoachTools.sanitize({ not:'Ömer Faruk bugün Adana’da çalıştı' });
+        const out = R.Tools.sanitize({ not:'Ömer Faruk bugün Adana’da çalıştı' });
         expect(out.not.indexOf('Ömer Faruk')).toBe(-1);
         expect(out.not.indexOf('Adana')).toBe(-1);
       });
     });
     it('dizileri gezerek temizler', function(){
       withProfile(() => {
-        const out = R.CoachTools.sanitize([{ name:'Ömer Faruk' }, { net:10 }]);
+        const out = R.Tools.sanitize([{ name:'Ömer Faruk' }, { net:10 }]);
         expect(out[0].name).toBeUndefined();
         expect(out[1].net).toBe(10);
       });
     });
     it('araç çıktısı kişisel bilgi taşımaz', function(){
       withProfile(() => {
-        const tools = R.CoachTools.forSample();
+        const tools = R.Tools.forSample();
         const durum = tools.find(t => t.name === 'durum_ozeti').execute({});
         const json = JSON.stringify(durum);
         expect(json.indexOf('Ömer')).toBe(-1);
@@ -80,7 +80,7 @@
     it('hedef aracında program adı kalır ama kişisel alan gitmez', function(){
       withProfile(() => {
         S.profile.program = 'Ege Üniversitesi Hemşirelik';
-        const tools = R.CoachTools.forSample();
+        const tools = R.Tools.forSample();
         const hedef = tools.find(t => t.name === 'hedef_ve_net_matrisi').execute({});
         expect(hedef.program).toContain('Hemşirelik');
         expect(JSON.stringify(hedef).indexOf('Adana')).toBe(-1);
@@ -88,7 +88,7 @@
     });
     it('araç sonucu aynı çağrıda önbelleğe alınır', function(){
       resetState();
-      const tools = R.CoachTools.forSample();
+      const tools = R.Tools.forSample();
       const t = tools.find(x => x.name === 'durum_ozeti');
       expect(t.execute({}) === t.execute({})).toBeTruthy();
     });
@@ -105,17 +105,17 @@
     });
     it('tıbbi tavsiye içeren çıktı işaretlenir', function(){
       resetState();
-      const v = R.Coach.validate('Bu durumda bir antidepresan kullanman iyi gelebilir.');
+      const v = R.Office.validate('Bu durumda bir antidepresan kullanman iyi gelebilir.');
       expect(v.warnings.length).toBeGreaterThan(0);
     });
     it('kesin sıra vaadi işaretlenir', function(){
       resetState();
-      const v = R.Coach.validate('Bu tempoyla 60.000 sıraya gireceksin.');
+      const v = R.Office.validate('Bu tempoyla 60.000 sıraya gireceksin.');
       expect(v.warnings.length).toBeGreaterThan(0);
     });
     it('kurallara uyan yanıt geçer', function(){
       resetState();
-      const v = R.Coach.validate('Plan tamamlaman %78; işlem hatası baskın. Üç gün 10 benzer soru çöz.');
+      const v = R.Office.validate('Plan tamamlaman %78; işlem hatası baskın. Üç gün 10 benzer soru çöz.');
       expect(v.warnings).toHaveLength(0);
     });
     it('çevrimdışı şablon kuralları ve veriyi taşır', function(){

@@ -189,62 +189,28 @@
     });
   });
 
-  describe('Coach kural motoru dogrulamasi', function(){
+  describe('Ofis kural motoru dogrulamasi', function(){
     it('konu kapanisi dusukken yeni kaynak onerisini isaretler', function(){
       resetState();   // kapanis %0
-      const v = R.Coach.validate('Bence yeni bir kaynak açman iyi olur.');
+      const v = R.Office.validate('Bence yeni bir kaynak açman iyi olur.');
       expect(v.warnings.length).toBeGreaterThan(0);
     });
     it('yerlesme garantisi iceren metni isaretler', function(){
       resetState();
-      const v = R.Coach.validate('Bu tempoyla kesinlikle kazanırsın.');
+      const v = R.Office.validate('Bu tempoyla kesinlikle kazanırsın.');
       expect(v.warnings.length).toBeGreaterThan(0);
     });
     it('gece calisma onerisini isaretler', function(){
       resetState();
-      const v = R.Coach.validate('Açığı kapatmak için gece çalışmayı deneyebilirsin.');
+      const v = R.Office.validate('Açığı kapatmak için gece çalışmayı deneyebilirsin.');
       expect(v.warnings.length).toBeGreaterThan(0);
     });
     it('kurallara uyan metni gecirir', function(){
       resetState();
-      const v = R.Coach.validate('Plan tamamlaman %78; en büyük sapma işlem hatası. Gelecek hafta üç gün 10 benzer soru çöz.');
+      const v = R.Office.validate('Plan tamamlaman %78; en büyük sapma işlem hatası. Gelecek hafta üç gün 10 benzer soru çöz.');
       expect(v.warnings).toHaveLength(0);
       expect(v.text).toContain('işlem hatası');
     });
   });
 
-  describe('Coach baglam kurucular', function(){
-    it('hafta baglami kisisel bilgi tasimaz', function(){
-      resetState();
-      withToday('2026-09-16', function(){
-        S.weeks['w01'] = M.defaultWeek(1);
-        const ctx = R.Coach.weekContext(1);
-        const json = JSON.stringify(ctx);
-        expect(json.indexOf('Ömer')).toBe(-1);
-        expect(json.indexOf('Adana')).toBe(-1);
-        expect(ctx.hafta).toBe(1);
-      });
-    });
-    it('hafta baglami hesaplanmis KPI alanlarini icerir', function(){
-      resetState();
-      withToday('2026-09-16', function(){
-        S.weeks['w01'] = M.defaultWeek(1);
-        const ctx = R.Coach.weekContext(1);
-        expect(ctx.konuKapanisYuzdesi).toBe(0);
-        expect(ctx.tekrarBorcu).toBe(0);
-      });
-    });
-    it('kok neden baglami yalniz metni olan kayitlari alir', function(){
-      resetState();
-      S.errors = [
-        { id:'r1', tag:'K', rootCause:'birim atladım', createdAt:'2026-09-19T10:00:00Z' },
-        { id:'r2', tag:'İ', rootCause:'', createdAt:'2026-09-19T11:00:00Z' },
-      ];
-      const ctx = R.Coach.rootCauseContext(40);
-      expect(ctx.kayitlar).toHaveLength(1);
-    });
-    it('yetenek yokken koc paneli hicbir sey cizmez', function(){
-      expect(R.Coach.panel('week', null)).toBe('');
-    });
-  });
 })();

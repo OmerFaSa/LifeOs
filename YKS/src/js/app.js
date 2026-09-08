@@ -28,8 +28,7 @@ R.App = (function(){
       { id:'analytics', icon:'search', label:'Analiz' },
       { id:'protocols', icon:'shield', label:'Telafi' },
     ]},
-    { label:'Koç', items:[
-      { id:'coach', icon:'zap',   label:'Koça sor' },
+    { label:'Rehber', items:[
       { id:'guide', icon:'guide', label:'Rehber' },
       { id:'profiles', icon:'shield', label:'Profiller' },
     ]},
@@ -327,27 +326,10 @@ R.App = (function(){
     },
     async 'sheet-close'(){ UI.closeSheet(); },
     async reload(){ location.reload(); },
-    async 'coach-run'(el){
-      const kind = el.dataset.kind;
-      const out = document.getElementById('coach-out');
-      el.disabled = true;
-      if(out) out.innerHTML = String(html`<p class="small muted">Düşünüyor…
-        <span class="dim">(ilk yanıt 5–60 saniye sürebilir)</span></p>`);
-      try{
-        await R.Coach.run(kind, {
-          onText(ev){
-            if(out) out.innerHTML = String(html`<p class="prose">${ev.text}</p>`);
-          },
-        });
-        render();
-      }catch(err){
-        const code = err && err.code;
-        if(out){
-          out.innerHTML = String(html`
-            ${R.C.Notice({ tone:'warn', body:R.Coach.errorText(code) })}
-            ${R.C.Button({ label:'Tekrar dene', size:'sm', class:'mt-10', act:'coach-run', data:{ 'data-kind':kind } })}`);
-        }
-      }
+    /* Herhangi bir ekrandan bir ajana soru sormak icin. */
+    async 'ask-agent'(el){
+      S.ui.officeAgent = el.dataset.agent || 'patron';
+      go('team');
     },
     async 'show-store-error'(){
       const sh = S.storeHealth;
@@ -617,7 +599,17 @@ R.App = (function(){
     try{
       // Arayuz Turkce: CSS buyuk harfe cevirirken "i" → "İ" olsun.
       // (Tek dosya surumunde <html> kabugu disaridan gelir, bu yuzden burada.)
-      document.documentElement.lang = 'tr';
+      const root = document.documentElement;
+      root.lang = 'tr';
+      /* Derlenmis surumde <html> kabugu disaridan gelir: mobil tarayicinin
+         sayfayi cevirmesini burada da engelle, yoksa arayuz Turkce-Ingilizce
+         karisir. Hem nitelik hem sinif gerekir; motorlar ikisine de bakar. */
+      root.setAttribute('translate', 'no');
+      root.classList.add('notranslate');
+      if(document.body){
+        document.body.setAttribute('translate', 'no');
+        document.body.classList.add('notranslate');
+      }
       wireStoreErrors();
       await M.loadAll();
       applyTheme();
@@ -628,7 +620,6 @@ R.App = (function(){
       R.Auto.onDayOpen().then(done => { if(done.length) render(); });
       /* Profil özeti gözetmen tablosu için sessizce tazelenir. */
       try{ if(R.Screens.profiles) R.Screens.profiles.writeSnapshot(); }catch(e){}
-      R.Coach.init().then(ok => { if(ok) render(); });
       /* Ofis ekibi: ayarlar, sohbetler ve tutanaklar acilisi bloklamaz. */
       R.Office.load().then(() => { if(S.route === 'office' || S.route === 'team' || S.route === 'meeting') render(); });
       if(R.Setup.needed()) setTimeout(() => R.Setup.open(), 400);

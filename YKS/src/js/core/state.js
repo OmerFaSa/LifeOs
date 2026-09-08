@@ -27,8 +27,6 @@ R.S = {
   breaks:[],       // alinan molalar
   meta:null,       // { lastBackupAt, schemaVersion }
   storeHealth:null,// son depolama hatasi (varsa)
-  coach:{},        // AI koc yorumlari (onbellek): 'week-w05' -> payload
-  coachChat:[],    // koc sohbeti
   office:null,     // ofis ayarlari (saglayici, model, ajan basina secim)
   officeChats:{},  // agentId -> mesajlar
   officeMeetings:[],// ajanlarin toplanti tutanaklari
@@ -1007,12 +1005,6 @@ R.Model = (function(){
       R.Store.list('sessions'),
       R.Store.list('profiles'),
     ]);
-
-    const coachDocs = await R.Store.list('coach');
-    R.S.coach = {};
-    coachDocs.forEach(c => { if(c.id !== 'chat') R.S.coach[c.id] = c; });
-    const chat = coachDocs.find(c => c.id === 'chat');
-    R.S.coachChat = (chat && Array.isArray(chat.messages)) ? chat.messages : [];
 
     weeks.forEach(w => { R.S.weeks[w.id] = normWeek(w); });
     days.forEach(d => { R.S.days[d.id] = normDay(d); });

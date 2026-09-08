@@ -1,9 +1,17 @@
 /* Model saglayicilari — ofis ajanlarinin kullandigi ucretsiz LLM uclari.
 
-   Bu dosya ICERIKTIR, mantik degil: uc nokta adresleri ve model kimlikleri
-   saglayicilar tarafindan sik degistirilir. Liste eskirse kullanici
-   Ofis → Ayarlar ekranindan kendi model kimligini yazabilir; motor
-   (core/llm.js) buradaki kayitlari yalnizca okur.
+   Bu dosya ICERIKTIR, mantik degil: uc nokta adresleri, model kimlikleri ve
+   istek sinirlari saglayicilar tarafindan sik degistirilir. Liste eskirse
+   kullanici Ofis → Ayarlar ekranindan kendi model kimligini yazabilir;
+   motor (core/llm.js) ve kota yoneticisi (core/quota.js) burayi yalnizca okur.
+
+   SINIRLAR (limits): { rpm, rpd, tpm } — saglayicinin ucretsiz katmani.
+   core/quota.js bunlarin %85'ini kullanir ve istekler arasina
+   60000/rpm ms bosluk koyar; boylece sinir hic asilmaz.
+   Deger bilinmiyorsa alan yazilmaz ve o eksen sinirsiz sayilir.
+
+   Kaynak ve tarih her saglayicinin `checked` alaninda durur; sayilar
+   degistiginde yalnizca bu dosya guncellenir.
 
    Gizlilik: API anahtari yalnizca tarayicida, ayri bir localStorage
    anahtarinda durur. Yedege girmez, buluta gitmez, LLM'e gonderilmez. */
@@ -21,6 +29,8 @@ R.PROVIDERS = {
     free:true,
     needsKey:false,
     note:'Uygulama Claude içinde çalışıyorsa açıktır. Anahtar istemez, ayar gerektirmez.',
+    /* Yerlesik yetenegin kendi sinirlari vardir ve disaridan okunamaz;
+       kota yoneticisi bu yuzden araya girmez. */
     models:[
       { id:'default', label:'Varsayılan', strength:'denge' },
       { id:'quick',   label:'Hızlı',      strength:'hız' },
@@ -36,8 +46,16 @@ R.PROVIDERS = {
     endpoint:'https://openrouter.ai/api/v1/chat/completions',
     keyUrl:'https://openrouter.ai/keys',
     keyHint:'sk-or-v1-…',
-    note:'Ücretsiz modellerin çoğu burada toplanır. Günlük istek sınırı vardır; '
-       + 'sınıra takılınca motor yedek modele geçer.',
+    note:'Ücretsiz modellerin çoğu burada toplanır. Dakikada 20 istek sınırı vardır; '
+       + 'günlük hak hesabında hiç kredi yoksa 50, bir kez 10 $ yüklediysen 1000 istektir.',
+    checked:'2026-09 · openrouter.ai/docs/api-reference/limits',
+    /* Tum ucretsiz modeller ayni havuzu paylasir. */
+    limits:{ rpm:20, rpd:50 },
+    /* Gunluk hak hesaba bagli oldugu icin kullanici ayarlardan yukseltebilir. */
+    rpdChoices:[
+      { value:50,   label:'50 / gün — hiç kredi yüklemedim' },
+      { value:1000, label:'1000 / gün — bir kez 10 $ yükledim' },
+    ],
     models:[
       { id:'deepseek/deepseek-chat-v3-0324:free',            label:'DeepSeek V3',       free:true, strength:'analiz' },
       { id:'meta-llama/llama-3.3-70b-instruct:free',         label:'Llama 3.3 70B',     free:true, strength:'denge' },
@@ -57,13 +75,19 @@ R.PROVIDERS = {
     endpoint:'https://api.groq.com/openai/v1/chat/completions',
     keyUrl:'https://console.groq.com/keys',
     keyHint:'gsk_…',
-    note:'Ücretsiz katmanı çok hızlıdır; dakikalık istek sınırı düşüktür. '
-       + 'Toplantı gibi arka arkaya çağrılarda sınıra takılabilir.',
+    note:'Ücretsiz katmanı çok hızlıdır: dakikada 30 istek. Günlük hak modele göre '
+       + '1000 ile 14 400 arasında değişir. Toplantı için en akıcı seçenek.',
+    checked:'2026-09 · console.groq.com/docs/rate-limits',
+    limits:{ rpm:30, rpd:1000 },
     models:[
-      { id:'llama-3.3-70b-versatile', label:'Llama 3.3 70B', free:true, strength:'denge' },
-      { id:'llama-3.1-8b-instant',    label:'Llama 3.1 8B',  free:true, strength:'hız' },
-      { id:'openai/gpt-oss-20b',      label:'GPT-OSS 20B',   free:true, strength:'denge' },
-      { id:'qwen/qwen3-32b',          label:'Qwen 3 32B',    free:true, strength:'analiz' },
+      { id:'llama-3.3-70b-versatile', label:'Llama 3.3 70B', free:true, strength:'denge',
+        limits:{ rpm:30, rpd:1000,  tpm:12000 } },
+      { id:'llama-3.1-8b-instant',    label:'Llama 3.1 8B',  free:true, strength:'hız',
+        limits:{ rpm:30, rpd:14400, tpm:6000 } },
+      { id:'openai/gpt-oss-20b',      label:'GPT-OSS 20B',   free:true, strength:'denge',
+        limits:{ rpm:30, rpd:1000,  tpm:8000 } },
+      { id:'qwen/qwen3-32b',          label:'Qwen 3 32B',    free:true, strength:'analiz',
+        limits:{ rpm:30, rpd:1000,  tpm:6000 } },
     ],
   },
 
@@ -76,16 +100,23 @@ R.PROVIDERS = {
     endpoint:'https://generativelanguage.googleapis.com/v1beta/models',
     keyUrl:'https://aistudio.google.com/apikey',
     keyHint:'AIza…',
-    note:'Ücretsiz katmanda günlük istek hakkı geniştir. Uzun toplantılar için uygundur.',
+    note:'Ücretsiz katmanda günde 1500 isteğe kadar hak vardır; dakikalık sınır '
+       + 'Flash için 15, Flash-Lite için 30 istektir. Uzun toplantılar için uygun.',
+    checked:'2026-09 · ai.google.dev/gemini-api/docs/rate-limits',
+    limits:{ rpm:15, rpd:1500 },
     models:[
-      { id:'gemini-2.0-flash',      label:'Gemini 2.0 Flash',      free:true, strength:'denge' },
-      { id:'gemini-2.5-flash',      label:'Gemini 2.5 Flash',      free:true, strength:'analiz' },
-      { id:'gemini-2.0-flash-lite', label:'Gemini 2.0 Flash Lite', free:true, strength:'hız' },
+      { id:'gemini-2.5-flash',      label:'Gemini 2.5 Flash',      free:true, strength:'analiz',
+        limits:{ rpm:15, rpd:1500 } },
+      { id:'gemini-2.0-flash',      label:'Gemini 2.0 Flash',      free:true, strength:'denge',
+        limits:{ rpm:15, rpd:1500 } },
+      { id:'gemini-2.0-flash-lite', label:'Gemini 2.0 Flash Lite', free:true, strength:'hız',
+        limits:{ rpm:30, rpd:1500 } },
     ],
   },
 
   /* Kendi sunucusunu ya da listede olmayan bir saglayiciyi kullanmak icin.
-     OpenAI uyumlu /chat/completions bekler. */
+     OpenAI uyumlu /chat/completions bekler. Sinir bilinmedigi icin
+     kota yoneticisi araya girmez; kullanici kendi sinirini ayarlardan yazar. */
   custom: {
     id:'custom',
     label:'Özel uç (OpenAI uyumlu)',
@@ -96,7 +127,7 @@ R.PROVIDERS = {
     editableEndpoint:true,
     keyHint:'anahtarın',
     note:'OpenAI uyumlu bir /chat/completions adresi ver. Ollama, LM Studio ya da '
-       + 'listede olmayan bir servis buradan bağlanır.',
+       + 'listede olmayan bir servis buradan bağlanır. İstek sınırını kendin yazabilirsin.',
     models:[],
   },
 };

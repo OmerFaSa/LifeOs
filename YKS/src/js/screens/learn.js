@@ -284,13 +284,10 @@ R.Screens.learn = (function(){
             : K.Field({ label:'Video bağlantısı', hint:'YouTube bağlantısı gömülü açılır',
                 input:K.Input({ id:'nd-url', value:note.url, placeholder:'https://…', change:'note-url' }) })}` }),
 
-        when(R.Coach.available() && note.segments.length, () => raw(R.Coach.panel('note-summary',
-          S.coach && S.coach['note-summary-n-'+note.id]))),
-
-        when(R.Coach.available() && note.segments.length, () => K.Card({
-          title:'Koçtan kart üret', sub:'Notlardan geri çağırma kartı önerir; sen onaylarsın',
+        when(R.Office.mode() === 'llm' && note.segments.length, () => K.Card({
+          title:'Ofisten kart üret', sub:'Notlardan geri çağırma kartı önerir; sen onaylarsın',
           body:html`
-            <p class="small muted">Koç yalnız metin önerir. Kart nesnesini kural motoru kurar:
+            <p class="small muted">Ajan yalnız metin önerir. Kart nesnesini kural motoru kurar:
               aşama 0, ilk tekrar yarın, konu bu derse bağlı.</p>
             ${K.Button({ label:'Kart önerileri getir', icon:'zap', tone:'primary', block:true,
               class:'mt-10', act:'note-ai-cards', data:{ 'data-id':note.id } })}
@@ -484,7 +481,7 @@ R.Screens.learn = (function(){
       if(out) out.innerHTML = String(html`<p class="small muted mt-10">Notlar okunuyor…
         <span class="dim">(10–60 sn)</span></p>`);
       try{
-        const res = await R.Coach.generateCards(id);
+        const res = await R.Office.generateCards(id);
         pendingCards = res.cards;
         UI.sheet({
           title:'Önerilen kartlar', subtitle:res.cards.length+' kart · '+(res.dropped ? res.dropped+' öneri elendi' : 'hepsi geçerli'),
@@ -501,7 +498,7 @@ R.Screens.learn = (function(){
             ${K.Button({ label:'Hepsini ekle', tone:'primary', act:'note-ai-accept' })}`),
         });
       }catch(err){
-        const msg = R.Coach.errorText(err && err.code);
+        const msg = R.LLM.errorText(err && err.code);
         if(out) out.innerHTML = String(html`<div class="mt-10">${K.Notice({ tone:'warn', body:msg })}</div>`);
       }
     },

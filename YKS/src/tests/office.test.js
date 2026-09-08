@@ -190,7 +190,7 @@
       R.S.profile.city = 'Adana';
       O.resetBriefs();
       R.AGENT_IDS.forEach(id => {
-        const json = JSON.stringify(R.CoachTools.sanitize(O.brief(id).data));
+        const json = JSON.stringify(R.Tools.sanitize(O.brief(id).data));
         expect(json.indexOf('Ömer Faruk')).toBe(-1);
         expect(json.indexOf('Adana')).toBe(-1);
       });
@@ -501,6 +501,298 @@
       expect(R.LLM.ready({ provider:'yok', model:'x' })).toBeFalsy();
       expect(R.LLM.ready({ provider:'openrouter', model:'' })).toBeFalsy();
       expect(R.LLM.ready({ provider:'custom', model:'x', endpoint:'' })).toBeFalsy();
+    });
+  });
+
+
+  /* ==================== istek siniri (kota) ==================== */
+
+  describe('Ofis — istek sınırı yöneticisi', () => {
+    function fresh(){
+      reset();
+      R.Quota.reset();
+      R.Quota.clearOverrides();
+    }
+
+    it('katalogdaki sınırlar okunur ve güvenlik payı uygulanır', () => {
+      fresh();
+      const cfg = { provider:'groq', model:'llama-3.3-70b-versatile' };
+      expect(R.Quota.limitsFor(cfg).rpm).toBe(30);
+      const eff = R.Quota.effective(cfg);
+      expect(eff.rpm < 30).toBeTruthy();           // dakikalık sınırda pay düşülür
+      expect(eff.rpd).toBe(1000);                  // günlük hak tam kullanılır
+      expect(eff.gapMs > 0).toBeTruthy();          // istekler arasına boşluk konur
+    });
+
+    it('sınırı bilinmeyen sağlayıcıda kuyruk devreye girmez', () => {
+      fresh();
+      expect(R.Quota.effective({ provider:'builtin', model:'default' })).toBeNull();
+      expect(R.Quota.check({ provider:'builtin', model:'default' }).ok).toBeTruthy();
+    });
+
+    it('ilk istek hemen geçer, ikincisi boşluk kadar bekler', async () => {
+      fresh();
+      const cfg = { provider:'gemini', model:'gemini-2.0-flash' };
+      expect(R.Quota.check(cfg).waitMs).toBe(0);
+      await R.Quota.acquire(cfg);
+      const next = R.Quota.check(cfg);
+      expect(next.waitMs > 0).toBeTruthy();
+      expect(next.waitMs <= R.Quota.effective(cfg).gapMs).toBeTruthy();
+    });
+
+    it('günlük sayaç tutulur ve dolunca bekletmeden hata verir', async () => {
+      fresh();
+      const cfg = { provider:'openrouter', model:'x:free' };
+      R.Quota.setOverride('openrouter', { rpm:600, rpd:2 });   // rpm yüksek: bekleme olmasın
+      await R.Quota.acquire(cfg);
+      await R.Quota.acquire(cfg);
+      let code = null;
+      try{ await R.Quota.acquire(cfg); }catch(e){ code = e.code; }
+      expect(code).toBe('daily_quota');
+      expect(R.Quota.status(cfg).full).toBeTruthy();
+      R.Quota.clearOverrides();
+    });
+
+    it('gönderilemeyen istek günlük haktan düşülmez', async () => {
+      fresh();
+      const cfg = { provider:'groq', model:'llama-3.1-8b-instant' };
+      await R.Quota.acquire(cfg);
+      expect(R.Quota.status(cfg).usedToday).toBe(1);
+      R.Quota.release(cfg);
+      expect(R.Quota.status(cfg).usedToday).toBe(0);
+    });
+
+    it('sağlayıcı yine de 429 derse pencere kapatılır', async () => {
+      fresh();
+      const cfg = { provider:'groq', model:'llama-3.3-70b-versatile' };
+      R.Quota.penalize(cfg, 30);
+      expect(R.Quota.check(cfg).waitMs > 20000).toBeTruthy();
+    });
+
+    it('kullanıcı düzeltmesi katalogdan üstündür', () => {
+      fresh();
+      R.Quota.setOverride('openrouter', { rpd:1000 });
+      expect(R.Quota.limitsFor({ provider:'openrouter', model:'a:free' }).rpd).toBe(1000);
+      R.Quota.clearOverrides();
+      expect(R.Quota.limitsFor({ provider:'openrouter', model:'a:free' }).rpd).toBe(50);
+    });
+
+    it('kota anahtarı uygulama verisinden ayrıdır', () => {
+      expect(R.Quota.STORE.indexOf('rota84285')).toBe(-1);
+      expect(R.Quota.OVERRIDE_STORE.indexOf('rota84285')).toBe(-1);
+    });
+
+    it('bir tur ne kadar sürer diye hesaplanabilir', () => {
+      fresh();
+      const cfg = { provider:'gemini', model:'gemini-2.0-flash' };
+      expect(R.Quota.estimateMs(cfg, 1)).toBe(0);
+      expect(R.Quota.estimateMs(cfg, 4) > 0).toBeTruthy();
+    });
+
+    it('her sağlayıcının ücretsiz sınırı katalogda yazılıdır', () => {
+      ['openrouter', 'groq', 'gemini'].forEach(id => {
+        const p = R.PROVIDERS[id];
+        expect(p.limits.rpm > 0).toBeTruthy();
+        expect(p.limits.rpd > 0).toBeTruthy();
+        expect(p.checked.length > 5).toBeTruthy();   // sayının kaynağı yazılı
+      });
+    });
+  });
+
+  /* ==================== turlu toplanti ==================== */
+
+  describe('Ofis — turlu toplantı', () => {
+    it('turlar tanımlıdır ve her turun ayrı sorusu vardır', () => {
+      expect(O.ROUNDS.length >= 3).toBeTruthy();
+      const asks = {};
+      O.ROUNDS.forEach(r => {
+        expect(r.title.length > 2).toBeTruthy();
+        expect(r.ask.length > 20).toBeTruthy();
+        asks[r.ask] = 1;
+      });
+      expect(Object.keys(asks).length).toBe(O.ROUNDS.length);   // tekrar yok
+    });
+
+    it('konuşma sırası uzmanlar arasında döner', () => {
+      expect(O.speakerAt(0)).toBe(R.MEETING_ORDER[0]);
+      expect(O.speakerAt(R.MEETING_ORDER.length)).toBe(R.MEETING_ORDER[0]);
+      expect(O.roundDef(1).key).toBe(O.ROUNDS[0].key);
+      expect(O.roundDef(99).key).toBe(O.ROUNDS[O.ROUNDS.length - 1].key);
+    });
+
+    it('oturum açılır, tur tur ilerler, kullanıcı bitirir', async () => {
+      reset();
+      const session = await O.openMeeting();
+      expect(session.status).toBe('live');
+      expect(session.turns).toHaveLength(1);
+      expect(session.turns[0].agent).toBe('patron');
+
+      for(let i = 0; i < 4; i++) await O.nextTurn(session, i);
+      expect(session.turns).toHaveLength(5);
+      expect(session.turns[1].round).toBe(1);
+
+      const m = await O.closeMeeting(session);
+      expect(m.status).toBe('closed');
+      expect(m.turns[m.turns.length - 1].closing).toBeTruthy();
+      expect(m.rounds).toBe(1);
+    });
+
+    it('ikinci turda tur başlığı değişir', async () => {
+      reset();
+      const session = await O.openMeeting();
+      const n = R.MEETING_ORDER.length;
+      for(let i = 0; i < n + 1; i++) await O.nextTurn(session, i);
+      const first = session.turns[1];
+      const second = session.turns[n + 1];
+      expect(first.round).toBe(1);
+      expect(second.round).toBe(2);
+      expect(first.roundTitle === second.roundTitle).toBeFalsy();
+    });
+
+    it('kullanıcı araya girip söz alabilir', async () => {
+      reset();
+      const session = await O.openMeeting();
+      const t = O.userTurn(session, 'Bu hafta hastaydım.');
+      expect(t.agent).toBe('aday');
+      expect(session.turns[session.turns.length - 1].text).toContain('hastaydım');
+      expect(O.userTurn(session, '   ')).toBeNull();
+    });
+
+    it('kullanıcının sözü sonraki ajana bağlam olarak gider', async () => {
+      reset();
+      await withStubLLM('anlaşıldı', async calls => {
+        const session = await O.openMeeting();
+        O.userTurn(session, 'Sınav kaygım arttı.');
+        await O.nextTurn(session, 0);
+        const prompt = calls[calls.length - 1].req.messages[0].text;
+        expect(prompt).toContain('Sınav kaygım arttı');
+      });
+    });
+
+    it('ajan hafızası istemine geçmiş sözleri koyar', async () => {
+      reset();
+      await withStubLLM('yeni bulgu', async calls => {
+        const s1 = await O.openMeeting();
+        await O.nextTurn(s1, 0);
+        await O.closeMeeting(s1);
+
+        const s2 = await O.openMeeting();
+        await O.nextTurn(s2, 0);
+        const prompt = calls[calls.length - 1].req.messages[0].text;
+        expect(prompt).toContain('DAHA ÖNCE SENİN SÖYLEDİKLERİN');
+      });
+    });
+
+    it('açık karar varsa Patron açılışta hesap sorar', async () => {
+      reset();
+      const first = await O.meet();
+      expect(first.decision.state).toBe('open');
+      await withStubLLM('açıyorum', async calls => {
+        await O.openMeeting();
+        expect(calls[0].req.messages[0].text).toContain('HENÜZ KAPANMAYAN KARAR');
+      });
+    });
+  });
+
+  /* ==================== rapor ve karar takibi ==================== */
+
+  describe('Ofis — rapor ve karar takibi', () => {
+    it('toplantı sonunda rapor üretilir', async () => {
+      reset();
+      const m = await O.meet({ rounds:1 });
+      const r = m.report;
+      expect(r.topic).toBe(m.topic);
+      expect(r.rounds).toBe(1);
+      expect(Object.keys(r.byAgent)).toHaveLength(R.MEETING_ORDER.length);
+      expect(r.decision.title).toBe(m.action.title);
+      expect(r.basis.hafta > 0).toBeTruthy();
+    });
+
+    it('rapor düz metne çevrilebilir', async () => {
+      reset();
+      const m = await O.meet({ rounds:1 });
+      const text = O.reportText(m);
+      expect(text).toContain('TOPLANTI RAPORU');
+      expect(text).toContain('KARAR:');
+      expect(text).toContain(m.topic);
+      R.MEETING_ORDER.forEach(id => expect(text).toContain(R.AGENT_BY_ID[id].name.toUpperCase()));
+    });
+
+    it('rapor kullanıcının sözlerini de taşır', async () => {
+      reset();
+      const session = await O.openMeeting();
+      O.userTurn(session, 'Pazartesi denemem var.');
+      await O.nextTurn(session, 0);
+      const m = await O.closeMeeting(session);
+      expect(m.report.userSaid).toContain('Pazartesi denemem var.');
+      expect(O.reportText(m)).toContain('SENİN SÖZLERİN');
+    });
+
+    it('karar açık kalır ve kapatılabilir', async () => {
+      reset();
+      const m = await O.meet({ rounds:1 });
+      expect(O.openDecisions()).toHaveLength(1);
+      expect(O.pendingDecision().title).toBe(m.action.title);
+
+      await O.closeDecision(m.id, 'done');
+      expect(O.openDecisions()).toHaveLength(0);
+      expect(O.decisions()[0].state).toBe('done');
+
+      const doc = await R.Store.get('meetings/' + m.id);
+      expect(doc.decision.state).toBe('done');
+    });
+
+    it('karar devredilebilir', async () => {
+      reset();
+      const m = await O.meet({ rounds:1 });
+      await O.closeDecision(m.id, 'carried');
+      expect(O.decisions()[0].state).toBe('carried');
+      expect(O.openDecisions()).toHaveLength(0);
+    });
+
+    it('geçersiz durum kararı açık bırakır', async () => {
+      reset();
+      const m = await O.meet({ rounds:1 });
+      await O.closeDecision(m.id, 'saçma');
+      expect(O.openDecisions()).toHaveLength(1);
+    });
+  });
+
+  /* ==================== devralinan yetenekler ==================== */
+
+  describe('Ofis — kart üretimi ve doğrulama', () => {
+    it('JSON kod çerçevesi içinden çıkarılır', () => {
+      expect(O.parseJson('```json\n{"cards":[]}\n```').cards).toEqual([]);
+      expect(O.parseJson('İşte kartlar: {"cards":[{"front":"a"}]} umarım olur').cards).toHaveLength(1);
+      expect(O.parseJson('hiç json yok')).toBeNull();
+    });
+
+    it('geçersiz kartlar elenir', () => {
+      reset();
+      const note = { id:'n1', title:'Ders', subjectId:'tyt-turkce', segments:[{ ts:0, text:'x' }] };
+      const res = O.validateCards({ cards:[
+        { front:'', back:'x' },
+        { front:'Soru?', back:'Cevap' },
+        { front:'Soru?', back:'Tekrar' },
+      ] }, note);
+      expect(res.cards).toHaveLength(1);
+      expect(res.dropped).toBe(2);
+      expect(res.cards[0].source).toBe('note');
+    });
+
+    it('ev kurallarını çiğneyen metin işaretlenir', () => {
+      reset();
+      expect(O.validate('Bu tempoyla kesinlikle kazanırsın.').warnings.length > 0).toBeTruthy();
+      expect(O.validate('Plan tamamlaman %78; işlem hatası baskın.').warnings).toHaveLength(0);
+    });
+
+    it('model yokken kart üretimi açıkça reddedilir', async () => {
+      reset();
+      R.S.videoNotes = [{ id:'n1', title:'Ders', subjectId:'tyt-turkce',
+        segments:[{ ts:0, tag:'not', text:'içerik' }], createdAt:'2026-09-01' }];
+      let code = null;
+      try{ await O.generateCards('n1'); }catch(e){ code = e.code; }
+      expect(code).toBe('unavailable');
     });
   });
 

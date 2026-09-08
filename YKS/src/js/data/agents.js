@@ -197,26 +197,39 @@ R.OFFICE_PROMPTS = {
       + 'sonra nedenini veriye bağla. Öneri yazacaksan tek öneri yaz.';
   },
 
-  /* Toplanti — Patron gundemi acar. */
-  opening(agenda){
+  /* Toplanti — Patron gundemi acar.
+     Onceki toplantinin karari kapanmadiysa Patron once onun hesabini sorar:
+     ofisi gercek yapan sey verilen karari takip etmesidir. */
+  opening(agenda, pending){
     return 'GÜNDEM (kural motoru seçti): ' + agenda.topic + '\n'
       + 'SEÇİLME NEDENİ: ' + agenda.why + '\n'
       + 'VERİ:\n' + JSON.stringify(agenda.data, null, 1) + '\n\n'
+      + (pending
+          ? 'GEÇEN TOPLANTIDA VERİLEN VE HENÜZ KAPANMAYAN KARAR: "' + pending.title + '"\n'
+            + 'Önce bunun hesabını sor: yapıldı mı, yapılmadıysa neden. Tek cümle yeter.\n\n'
+          : '')
       + 'GÖREV: Toplantıyı aç. Gündemi tek cümlede koy, ekipten ne istediğini söyle. '
       + 'Karar verme — kararı toplantı sonunda vereceksin. En fazla 3 cümle.';
   },
 
-  /* Toplanti — uzman soz aliyor. */
-  turn(agent, agenda, brief, said){
-    return 'GÜNDEM: ' + agenda.topic + '\n\n'
+  /* Toplanti — uzman soz aliyor.
+     round: o turun kendi sorusu (durum / fikir / itiraz / sentez / serbest).
+     said: o ana kadar soylenenler.  memory: ajanin daha once kurdugu cumleler. */
+  turn(agent, agenda, brief, said, round, memory){
+    const r = round || { title:'Tur', ask:'Kendi alanından tek bulgu bildir.' };
+    return 'GÜNDEM: ' + agenda.topic + '\n'
+      + 'TUR: ' + r.title + '\n\n'
       + 'MASANDAKİ RAPOR (JSON):\n' + JSON.stringify(brief, null, 1) + '\n\n'
-      + (said.length
+      + (said && said.length
           ? 'TOPLANTIDA ŞU ANA KADAR SÖYLENENLER:\n'
             + said.map(s => s.name + ' (' + s.role + '): ' + s.text).join('\n') + '\n\n'
           : '')
-      + 'GÖREV: Kendi alanından tek bulgu bildir. Söylenenleri tekrarlama; '
-      + 'katılmıyorsan nedenini veriyle söyle. Alanın dışına çıkma. '
-      + 'En fazla ' + agent.maxSentences + ' cümle.';
+      + (memory && memory.length
+          ? 'DAHA ÖNCE SENİN SÖYLEDİKLERİN (tekrarlama, yenisini söyle):\n'
+            + memory.map(t => '- ' + t).join('\n') + '\n\n'
+          : '')
+      + 'GÖREV: ' + r.ask + ' Söylenenleri tekrarlama; katılmıyorsan nedenini veriyle söyle. '
+      + 'Alanın dışına çıkma. En fazla ' + agent.maxSentences + ' cümle.';
   },
 
   /* Toplanti — Patron kapatir. Eylem kural motorundan gelir, uydurulmaz. */

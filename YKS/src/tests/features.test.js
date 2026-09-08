@@ -502,31 +502,14 @@
       expect(R.PROMPTS.memoryLine([])).toBe('');
       expect(R.PROMPTS.memoryLine(['a'])).toContain('DAHA ÖNCE');
     });
-    it('geçmiş yorumlar türüne göre okunur', function(){
+    it('ajan hafızası kendi sözlerini geri verir', async function(){
       resetState();
-      S.coach = {
-        'week-w01':{ text:'ilk', generatedAt:'2026-01-01' },
-        'week-w02':{ text:'ikinci', generatedAt:'2026-01-08' },
-        'gate-2026-01':{ text:'kapı', generatedAt:'2026-01-05' },
-      };
-      const said = R.Coach.recentSaid('week');
-      expect(said).toHaveLength(2);
-      expect(said[0]).toBe('ikinci');
-    });
-    it('haftalık rapor bağlamı plan sağlığı taşır', function(){
-      resetState();
-      const ctx = R.Coach.weeklyReportContext();
-      expect('planSagligi' in ctx).toBeTruthy();
-      expect('davranisSerisi' in ctx).toBeTruthy();
-    });
-    it('karşı argüman bağlamı hedef ve kapsama taşır', function(){
-      resetState();
-      const ctx = R.Coach.devilContext();
-      expect('hedefSira' in ctx).toBeTruthy();
-      expect('planKapsama' in ctx).toBeTruthy();
-    });
-    it('ipucu istemi cevabı yasaklar', function(){
-      expect(R.PROMPTS.kinds.hint.ask).toContain('CEVABI VERME');
+      R.S.officeMeetings = [];
+      R.S.officeChats = {};
+      await R.Office.pushChat('tyt', 'agent', 'TYT kapanışı düşük.');
+      const said = R.Office.recentSaid('tyt');
+      expect(said).toHaveLength(1);
+      expect(said[0]).toContain('kapanış');
     });
   });
 

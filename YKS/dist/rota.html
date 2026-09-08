@@ -1,3 +1,6 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google" content="notranslate">
 <title>Rota — YKS Çalışma Sistemi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1739,6 +1742,67 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .meetturn__body{ font-size:var(--fs-base); line-height:1.55; }
 .meetturn--closing{ background:var(--primary-soft); border-color:var(--primary); }
 .meetturn.is-live{ border-style:dashed; }
+
+/* ---------- ofis panosu ---------- */
+/* Girişte asılı tahta: gün, kalan süre, toplantı ve açık karar sayısı. */
+.board__row{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; }
+.board__cell{ min-width:0; }
+.board__label{ display:block; font-size:var(--fs-xs); color:var(--text-3); text-transform:uppercase;
+  letter-spacing:.04em; }
+.board__value{ display:block; font-family:var(--font-display); font-size:var(--fs-lg);
+  line-height:1.2; margin-top:2px; }
+.board__value.is-warn{ color:var(--accent); }
+.board__note{ display:block; font-size:var(--fs-xs); color:var(--text-3); }
+@media (max-width:560px){
+  .board__row{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+
+/* ---------- masa durumu ---------- */
+/* Ofis hissini veren satır: herkesin ne yaptığı bir bakışta belli. */
+.deskstate{ display:flex; align-items:center; gap:7px; margin-top:8px;
+  font-size:var(--fs-xs); color:var(--text-3); }
+.deskstate__dot{ width:7px; height:7px; border-radius:50%; flex:none; background:var(--text-3); }
+.deskstate--ok .deskstate__dot{ background:var(--primary); }
+.deskstate--warn{ color:var(--accent); }
+.deskstate--warn .deskstate__dot{ background:var(--accent); }
+.deskstate--danger{ color:var(--danger); }
+.deskstate--danger .deskstate__dot{ background:var(--danger); }
+
+/* ---------- takipteki kararlar ---------- */
+.decisionrow{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:10px 12px; border-radius:var(--r-sm);
+  border:1px solid var(--border); background:var(--surface-2);
+}
+.decisionrow b{ display:block; }
+.decisionrow span{ display:block; }
+
+/* ---------- toplantı denetimi ---------- */
+.meetbar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:10px 12px; border-radius:var(--r-sm);
+  border:1px solid var(--border); background:var(--surface-2);
+}
+.meetbar__state{ display:flex; align-items:center; gap:8px; font-size:var(--fs-sm); }
+/* Sabit nokta: yanıp sönmez — dikkat çekmek için animasyon kullanılmaz. */
+.meetbar__live{ width:8px; height:8px; border-radius:50%; background:var(--primary); flex:none; }
+
+.meetplan{ padding:12px 14px; border-radius:var(--r-sm); background:var(--surface-2); }
+.meetplan__list{ margin:8px 0 8px 18px; padding:0; font-size:var(--fs-sm); color:var(--text-2); }
+.meetplan__list li{ margin:3px 0; }
+
+/* Toplantıda kullanıcının kendi sözü */
+.meetturn--me{ background:var(--surface); border-style:dashed; }
+.meetturn__round{
+  font-size:var(--fs-xs); color:var(--text-3);
+  padding:1px 8px; border-radius:20px; background:var(--surface-3);
+}
+
+/* ---------- toplantı raporu ---------- */
+.reportrow{ padding:10px 12px; border-radius:var(--r-sm); background:var(--surface-2); }
+.reportrow__list{ margin:6px 0 0 18px; padding:0; font-size:var(--fs-sm);
+  color:var(--text-2); line-height:1.5; }
+.reportrow__list li{ margin:3px 0; }
 </style>
 <div id="app">
   <div class="boot">
@@ -2981,11 +3045,12 @@ R.HINTS = {
   'command':{ t:'Komut paleti', b:'Ctrl+K ile her yere atla, kayıt aç, tema değiştir.' },
 };
 
-/* ==== js/data/coach-prompts.js ==== */
-/* Koç istemleri — tek kaynak, sürümlü.
+/* ==== js/data/rules.js ==== */
+/* Ev kuralları ve istem parçaları — tek kaynak, sürümlü.
 
-   Kural motoru otoritedir; buradaki metinler LLM'in YALNIZCA yorum yapmasını
-   sağlar. Karar, eşik ve hesap uygulamada kalır.
+   Ofis ajanlarının tamamı bu kuralları taşır. Kural motoru otoritedir;
+   buradaki metinler LLM'in YALNIZCA yorum yapmasını sağlar.
+   Karar, eşik ve hesap uygulamada kalır.
 
    Sürüm artırıldığında önbellek anahtarı değişir, eski yorumlar yeniden üretilir. */
 
@@ -3151,10 +3216,18 @@ R.PROMPTS = {
 /* ==== js/data/providers.js ==== */
 /* Model saglayicilari — ofis ajanlarinin kullandigi ucretsiz LLM uclari.
 
-   Bu dosya ICERIKTIR, mantik degil: uc nokta adresleri ve model kimlikleri
-   saglayicilar tarafindan sik degistirilir. Liste eskirse kullanici
-   Ofis → Ayarlar ekranindan kendi model kimligini yazabilir; motor
-   (core/llm.js) buradaki kayitlari yalnizca okur.
+   Bu dosya ICERIKTIR, mantik degil: uc nokta adresleri, model kimlikleri ve
+   istek sinirlari saglayicilar tarafindan sik degistirilir. Liste eskirse
+   kullanici Ofis → Ayarlar ekranindan kendi model kimligini yazabilir;
+   motor (core/llm.js) ve kota yoneticisi (core/quota.js) burayi yalnizca okur.
+
+   SINIRLAR (limits): { rpm, rpd, tpm } — saglayicinin ucretsiz katmani.
+   core/quota.js bunlarin %85'ini kullanir ve istekler arasina
+   60000/rpm ms bosluk koyar; boylece sinir hic asilmaz.
+   Deger bilinmiyorsa alan yazilmaz ve o eksen sinirsiz sayilir.
+
+   Kaynak ve tarih her saglayicinin `checked` alaninda durur; sayilar
+   degistiginde yalnizca bu dosya guncellenir.
 
    Gizlilik: API anahtari yalnizca tarayicida, ayri bir localStorage
    anahtarinda durur. Yedege girmez, buluta gitmez, LLM'e gonderilmez. */
@@ -3172,6 +3245,8 @@ R.PROVIDERS = {
     free:true,
     needsKey:false,
     note:'Uygulama Claude içinde çalışıyorsa açıktır. Anahtar istemez, ayar gerektirmez.',
+    /* Yerlesik yetenegin kendi sinirlari vardir ve disaridan okunamaz;
+       kota yoneticisi bu yuzden araya girmez. */
     models:[
       { id:'default', label:'Varsayılan', strength:'denge' },
       { id:'quick',   label:'Hızlı',      strength:'hız' },
@@ -3187,8 +3262,16 @@ R.PROVIDERS = {
     endpoint:'https://openrouter.ai/api/v1/chat/completions',
     keyUrl:'https://openrouter.ai/keys',
     keyHint:'sk-or-v1-…',
-    note:'Ücretsiz modellerin çoğu burada toplanır. Günlük istek sınırı vardır; '
-       + 'sınıra takılınca motor yedek modele geçer.',
+    note:'Ücretsiz modellerin çoğu burada toplanır. Dakikada 20 istek sınırı vardır; '
+       + 'günlük hak hesabında hiç kredi yoksa 50, bir kez 10 $ yüklediysen 1000 istektir.',
+    checked:'2026-09 · openrouter.ai/docs/api-reference/limits',
+    /* Tum ucretsiz modeller ayni havuzu paylasir. */
+    limits:{ rpm:20, rpd:50 },
+    /* Gunluk hak hesaba bagli oldugu icin kullanici ayarlardan yukseltebilir. */
+    rpdChoices:[
+      { value:50,   label:'50 / gün — hiç kredi yüklemedim' },
+      { value:1000, label:'1000 / gün — bir kez 10 $ yükledim' },
+    ],
     models:[
       { id:'deepseek/deepseek-chat-v3-0324:free',            label:'DeepSeek V3',       free:true, strength:'analiz' },
       { id:'meta-llama/llama-3.3-70b-instruct:free',         label:'Llama 3.3 70B',     free:true, strength:'denge' },
@@ -3208,13 +3291,19 @@ R.PROVIDERS = {
     endpoint:'https://api.groq.com/openai/v1/chat/completions',
     keyUrl:'https://console.groq.com/keys',
     keyHint:'gsk_…',
-    note:'Ücretsiz katmanı çok hızlıdır; dakikalık istek sınırı düşüktür. '
-       + 'Toplantı gibi arka arkaya çağrılarda sınıra takılabilir.',
+    note:'Ücretsiz katmanı çok hızlıdır: dakikada 30 istek. Günlük hak modele göre '
+       + '1000 ile 14 400 arasında değişir. Toplantı için en akıcı seçenek.',
+    checked:'2026-09 · console.groq.com/docs/rate-limits',
+    limits:{ rpm:30, rpd:1000 },
     models:[
-      { id:'llama-3.3-70b-versatile', label:'Llama 3.3 70B', free:true, strength:'denge' },
-      { id:'llama-3.1-8b-instant',    label:'Llama 3.1 8B',  free:true, strength:'hız' },
-      { id:'openai/gpt-oss-20b',      label:'GPT-OSS 20B',   free:true, strength:'denge' },
-      { id:'qwen/qwen3-32b',          label:'Qwen 3 32B',    free:true, strength:'analiz' },
+      { id:'llama-3.3-70b-versatile', label:'Llama 3.3 70B', free:true, strength:'denge',
+        limits:{ rpm:30, rpd:1000,  tpm:12000 } },
+      { id:'llama-3.1-8b-instant',    label:'Llama 3.1 8B',  free:true, strength:'hız',
+        limits:{ rpm:30, rpd:14400, tpm:6000 } },
+      { id:'openai/gpt-oss-20b',      label:'GPT-OSS 20B',   free:true, strength:'denge',
+        limits:{ rpm:30, rpd:1000,  tpm:8000 } },
+      { id:'qwen/qwen3-32b',          label:'Qwen 3 32B',    free:true, strength:'analiz',
+        limits:{ rpm:30, rpd:1000,  tpm:6000 } },
     ],
   },
 
@@ -3227,16 +3316,23 @@ R.PROVIDERS = {
     endpoint:'https://generativelanguage.googleapis.com/v1beta/models',
     keyUrl:'https://aistudio.google.com/apikey',
     keyHint:'AIza…',
-    note:'Ücretsiz katmanda günlük istek hakkı geniştir. Uzun toplantılar için uygundur.',
+    note:'Ücretsiz katmanda günde 1500 isteğe kadar hak vardır; dakikalık sınır '
+       + 'Flash için 15, Flash-Lite için 30 istektir. Uzun toplantılar için uygun.',
+    checked:'2026-09 · ai.google.dev/gemini-api/docs/rate-limits',
+    limits:{ rpm:15, rpd:1500 },
     models:[
-      { id:'gemini-2.0-flash',      label:'Gemini 2.0 Flash',      free:true, strength:'denge' },
-      { id:'gemini-2.5-flash',      label:'Gemini 2.5 Flash',      free:true, strength:'analiz' },
-      { id:'gemini-2.0-flash-lite', label:'Gemini 2.0 Flash Lite', free:true, strength:'hız' },
+      { id:'gemini-2.5-flash',      label:'Gemini 2.5 Flash',      free:true, strength:'analiz',
+        limits:{ rpm:15, rpd:1500 } },
+      { id:'gemini-2.0-flash',      label:'Gemini 2.0 Flash',      free:true, strength:'denge',
+        limits:{ rpm:15, rpd:1500 } },
+      { id:'gemini-2.0-flash-lite', label:'Gemini 2.0 Flash Lite', free:true, strength:'hız',
+        limits:{ rpm:30, rpd:1500 } },
     ],
   },
 
   /* Kendi sunucusunu ya da listede olmayan bir saglayiciyi kullanmak icin.
-     OpenAI uyumlu /chat/completions bekler. */
+     OpenAI uyumlu /chat/completions bekler. Sinir bilinmedigi icin
+     kota yoneticisi araya girmez; kullanici kendi sinirini ayarlardan yazar. */
   custom: {
     id:'custom',
     label:'Özel uç (OpenAI uyumlu)',
@@ -3247,7 +3343,7 @@ R.PROVIDERS = {
     editableEndpoint:true,
     keyHint:'anahtarın',
     note:'OpenAI uyumlu bir /chat/completions adresi ver. Ollama, LM Studio ya da '
-       + 'listede olmayan bir servis buradan bağlanır.',
+       + 'listede olmayan bir servis buradan bağlanır. İstek sınırını kendin yazabilirsin.',
     models:[],
   },
 };
@@ -3463,26 +3559,39 @@ R.OFFICE_PROMPTS = {
       + 'sonra nedenini veriye bağla. Öneri yazacaksan tek öneri yaz.';
   },
 
-  /* Toplanti — Patron gundemi acar. */
-  opening(agenda){
+  /* Toplanti — Patron gundemi acar.
+     Onceki toplantinin karari kapanmadiysa Patron once onun hesabini sorar:
+     ofisi gercek yapan sey verilen karari takip etmesidir. */
+  opening(agenda, pending){
     return 'GÜNDEM (kural motoru seçti): ' + agenda.topic + '\n'
       + 'SEÇİLME NEDENİ: ' + agenda.why + '\n'
       + 'VERİ:\n' + JSON.stringify(agenda.data, null, 1) + '\n\n'
+      + (pending
+          ? 'GEÇEN TOPLANTIDA VERİLEN VE HENÜZ KAPANMAYAN KARAR: "' + pending.title + '"\n'
+            + 'Önce bunun hesabını sor: yapıldı mı, yapılmadıysa neden. Tek cümle yeter.\n\n'
+          : '')
       + 'GÖREV: Toplantıyı aç. Gündemi tek cümlede koy, ekipten ne istediğini söyle. '
       + 'Karar verme — kararı toplantı sonunda vereceksin. En fazla 3 cümle.';
   },
 
-  /* Toplanti — uzman soz aliyor. */
-  turn(agent, agenda, brief, said){
-    return 'GÜNDEM: ' + agenda.topic + '\n\n'
+  /* Toplanti — uzman soz aliyor.
+     round: o turun kendi sorusu (durum / fikir / itiraz / sentez / serbest).
+     said: o ana kadar soylenenler.  memory: ajanin daha once kurdugu cumleler. */
+  turn(agent, agenda, brief, said, round, memory){
+    const r = round || { title:'Tur', ask:'Kendi alanından tek bulgu bildir.' };
+    return 'GÜNDEM: ' + agenda.topic + '\n'
+      + 'TUR: ' + r.title + '\n\n'
       + 'MASANDAKİ RAPOR (JSON):\n' + JSON.stringify(brief, null, 1) + '\n\n'
-      + (said.length
+      + (said && said.length
           ? 'TOPLANTIDA ŞU ANA KADAR SÖYLENENLER:\n'
             + said.map(s => s.name + ' (' + s.role + '): ' + s.text).join('\n') + '\n\n'
           : '')
-      + 'GÖREV: Kendi alanından tek bulgu bildir. Söylenenleri tekrarlama; '
-      + 'katılmıyorsan nedenini veriyle söyle. Alanın dışına çıkma. '
-      + 'En fazla ' + agent.maxSentences + ' cümle.';
+      + (memory && memory.length
+          ? 'DAHA ÖNCE SENİN SÖYLEDİKLERİN (tekrarlama, yenisini söyle):\n'
+            + memory.map(t => '- ' + t).join('\n') + '\n\n'
+          : '')
+      + 'GÖREV: ' + r.ask + ' Söylenenleri tekrarlama; katılmıyorsan nedenini veriyle söyle. '
+      + 'Alanın dışına çıkma. En fazla ' + agent.maxSentences + ' cümle.';
   },
 
   /* Toplanti — Patron kapatir. Eylem kural motorundan gelir, uydurulmaz. */
@@ -4009,8 +4118,6 @@ R.S = {
   breaks:[],       // alinan molalar
   meta:null,       // { lastBackupAt, schemaVersion }
   storeHealth:null,// son depolama hatasi (varsa)
-  coach:{},        // AI koc yorumlari (onbellek): 'week-w05' -> payload
-  coachChat:[],    // koc sohbeti
   office:null,     // ofis ayarlari (saglayici, model, ajan basina secim)
   officeChats:{},  // agentId -> mesajlar
   officeMeetings:[],// ajanlarin toplanti tutanaklari
@@ -4989,12 +5096,6 @@ R.Model = (function(){
       R.Store.list('sessions'),
       R.Store.list('profiles'),
     ]);
-
-    const coachDocs = await R.Store.list('coach');
-    R.S.coach = {};
-    coachDocs.forEach(c => { if(c.id !== 'chat') R.S.coach[c.id] = c; });
-    const chat = coachDocs.find(c => c.id === 'chat');
-    R.S.coachChat = (chat && Array.isArray(chat.messages)) ? chat.messages : [];
 
     weeks.forEach(w => { R.S.weeks[w.id] = normWeek(w); });
     days.forEach(d => { R.S.days[d.id] = normDay(d); });
@@ -8292,16 +8393,17 @@ R.Auto = (function(){
     driftStreak, closeWeekDraft };
 })();
 
-/* ==== js/core/coachtools.js ==== */
-/* AI koçun sistemi okuyabilmesi için araç katmanı.
+/* ==== js/core/tools.js ==== */
+/* Veri okuma katmani — ofis ajanlarinin sistemi gorebilmesi icin.
 
-   Claude, sample() cagrisinda bu fonksiyonlari cagirarak uygulamadaki
-   gercek veriyi okur. Araclar YALNIZ OKUR — hicbiri veriyi degistirmez.
-   Kisisel alanlar (ad, sehir) disari verilmez. */
+   Ajanlar bu fonksiyonlar araciligiyla uygulamadaki gercek veriyi okur.
+   Araclar YALNIZ OKUR — hicbiri veriyi degistirmez.
+   sanitize() modele giden her nesneyi suzer: kisisel alanlar (ad, sehir,
+   okul) her derinlikte silinir ve metin icinde de maskelenir. */
 
 window.R = window.R || {};
 
-R.CoachTools = (function(){
+R.Tools = (function(){
   const U = R.U, M = R.Model, C = R.Calc, S = R.S;
 
   function num(x){ return x == null ? null : (typeof x === 'number' ? U.round(x, 2) : x); }
@@ -8688,543 +8790,281 @@ R.CoachTools = (function(){
     videoNotlari, mesgaleler, enerjiDurumu, gununAkisi, konuRiski, puanTahmini };
 })();
 
-/* ==== js/core/coach.js ==== */
-/* AI koc katmani (opsiyonel).
+/* ==== js/core/quota.js ==== */
+/* Istek sinir yoneticisi — ucretsiz modellerin kotasi asilmaz.
 
-   Ilke: kural motoru otoritedir. LLM yalnizca hesaplanmis veriyi yorumlar;
-   ciktisi kural motoruna karsi dogrulanir ve ihlaller kullaniciya bildirilir.
-   Yetenek yoksa (cevrimdisi / izin verilmemis) tum arayuz gizlenir. */
+   Ucretsiz saglayicilarin uc sinirı vardir ve ucu de asilirsa istek reddedilir:
+     RPM  dakikada istek     (asilirsa 429; birkac saniye beklemek yeter)
+     RPD  gunde istek        (asilirsa gun bitene kadar kapali; beklemek anlamsiz)
+     TPM  dakikada jeton     (buyuk istemlerde binder; ofis istemleri kucuk)
+
+   Bu modul iki sey yapar:
+
+   1) ARALIK KOYAR. Ard arda gelen iki istek arasina en az 60000/RPM ms boşluk
+      birakir. Boylece patlama (burst) hic olusmaz; toplanti da bu sayede
+      "sirayla konusuluyor" ritmine kavusur.
+
+   2) GUNU SAYAR. Gunluk sayac localStorage'da durur; sayfa yenilense de
+      kaybolmaz. Gun dolduysa beklemek yerine acik bir hata dondurur.
+
+   Sayaclar saglayici+model basina ayri tutulur: Groq'ta sinira takilmak
+   Gemini'yi durdurmaz. */
 
 window.R = window.R || {};
 
-R.Coach = (function(){
-  const U = R.U, M = R.Model, C = R.Calc, S = R.S;
+R.Quota = (function(){
 
-  let sample = null;
-  let state = 'unknown';   // 'unknown' | 'ready' | 'unavailable'
+  const STORE = 'rota.llm.quota';
+  /* Saglayicinin bildirdigi sinirin tamami kullanilmaz: saat farki, ayni
+     anahtarla acilmis baska sekme ve saglayicinin kendi yuvarlamasi icin pay. */
+  const SAFETY = 0.85;
+  /* Bir istegin kuyrukta bekleyebilecegi en uzun sure. Daha uzunu kullaniciyi
+     bekletmek yerine acikca soylenir. */
+  const MAX_WAIT_MS = 75000;
 
-  async function init(){
+  /* ---------- kalici gunluk sayac ---------- */
+
+  function todayKey(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function readStore(){
     try{
-      if(window.claude && typeof window.claude.use === 'function'){
-        const api = await window.claude.use('sample');
-        if(api){ sample = api; state = 'ready'; return true; }
-      }
-    }catch(e){ /* sessizce dus */ }
-    state = 'unavailable';
-    return false;
+      const raw = JSON.parse(localStorage.getItem(STORE) || '{}');
+      if(raw.day !== todayKey()) return { day:todayKey(), used:{} };
+      return { day:raw.day, used:raw.used || {} };
+    }catch(e){ return { day:todayKey(), used:{} }; }
   }
 
-  function available(){ return state === 'ready'; }
+  let daily = readStore();
 
-  /* ---------- baglam kurucular (kisisel bilgi gondermez) ---------- */
-
-  function weekContext(n){
-    const week = S.weeks[M.weekId(n)];
-    const review = S.reviews[M.weekId(n)];
-    const comp = C.planCompletion(n);
-    const qr = C.questionRealization(n);
-    const tyt = C.medianTrend('TYT'), ayt = C.medianTrend('AYT');
-    const pareto = C.errorPareto().filter(p => p.count);
-    const reasons = C.skipReasonCounts(n);
-    const closure = C.overallClosure();
-
-    return {
-      hafta:n,
-      haftaBasligi:week ? week.title : '',
-      anaKonular:(week ? week.mainTopics : []).map(t => ({ konu:t.name, soruHedefi:t.questionTarget, dogrulukHedefi:t.accuracy })),
-      planTamamlama:comp,
-      soruGerceklesme:qr ? { cozulen:qr.solved, hedef:qr.target, yuzde:qr.pct } : null,
-      tytMedyan:tyt.last3, tytOncekiMedyan:tyt.prev3, tytDelta:tyt.delta, tytTaban:C.examBase('TYT'),
-      aytMedyan:ayt.last3, aytDelta:ayt.delta,
-      hataDagilimi:pareto.map(p => ({ etiket:p.tag, ad:R.ERROR_TAGS[p.tag].name, adet:p.count, yuzde:p.pct })),
-      atlamaNedenleri:reasons,
-      konuKapanisYuzdesi:closure.pct,
-      tekrarBorcu:C.cardDebt(),
-      uykuOrtalamasi:C.sleepAverage(7),
-      adayinYazdigi:review ? {
-        planlandi:review.planned, yapildi:review.done, nedenSapildi:review.why, duzeltme:review.decision,
-      } : null,
-    };
+  function persist(){
+    try{ localStorage.setItem(STORE, JSON.stringify(daily)); }catch(e){}
   }
 
-  function gateContext(){
-    const gate = C.currentGate();
-    if(!gate) return null;
-    const g = C.gateSuggestions(gate);
-    const prevKey = U.monthKey(U.addDays(U.today(), -28));
-    const prev = S.decisions[prevKey];
-    return {
-      ay:gate.month,
-      tytGozlenenBant:gate.tyt, tytGuvenliBant:gate.tytSafe,
-      aytGozlenenBant:gate.ayt, aytGuvenliBant:gate.aytSafe,
-      tytMedyan:g.tyt.last3, tytDurum:g.tytStatus,
-      aytMedyan:g.ayt.last3, aytDurum:g.aytStatus,
-      tytTaban:C.examBase('TYT'),
-      ayinKurali:gate.note,
-      kuralMotoruOnerileri:g.suggestions.map(s => s.text),
-      gecenAyinMudahalesi:prev ? prev.action : null,
-      konuKapanisYuzdesi:C.overallClosure().pct,
-      hataDagilimi:C.errorPareto().filter(p => p.count).map(p => ({ etiket:p.tag, adet:p.count })),
-    };
+  function rollDay(){
+    if(daily.day !== todayKey()){ daily = { day:todayKey(), used:{} }; persist(); }
   }
 
-  function rootCauseContext(limit){
-    const errors = S.errors
-      .slice()
-      .sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''))
-      .slice(0, limit || 40);
-    return {
-      toplamKayit:errors.length,
-      kayitlar:errors.map(e => ({
-        etiket:e.tag,
-        ders:e.topic || e.testName || '',
-        durum:e.status,
-        kokNeden:e.rootCause || '',
-        ilke:e.principle || '',
-      })).filter(e => e.kokNeden),
-      dagilim:C.errorPareto().filter(p => p.count).map(p => ({ etiket:p.tag, ad:R.ERROR_TAGS[p.tag].name, adet:p.count })),
-    };
+  /* ---------- dakikalik pencere (bellekte) ---------- */
+
+  /* key -> { times:[ms], nextFreeAt:ms } */
+  const minute = new Map();
+
+  function bucket(key){
+    if(!minute.has(key)) minute.set(key, { times:[], nextFreeAt:0 });
+    return minute.get(key);
   }
 
-  /* ---------- istem (prompt) ---------- */
-
-  const HOUSE_RULES = R.PROMPTS.houseRules;
-
-  function prompt(role, contextObj, ask){
-    const tone = (S.profile && S.profile.coachTone) || 'dengeli';
-    return 'Sen bir YKS koçusun. Aşağıda bir adayın çalışma verisinin makine tarafından hesaplanmış özeti var.\n'
-      + 'Bu veriler bir kural motorundan geliyor; sen yalnızca yorumlarsın, hesapları yeniden yapmazsın.\n\n'
-      + 'KURALLAR:\n' + HOUSE_RULES.map(r => '- '+r).join('\n') + '\n'
-      + R.PROMPTS.toneLine(tone) + '\n\n'
-      + R.PROMPTS.memoryLine(recentSaid(role))
-      + 'GÖREV: ' + ask + '\n\n'
-      + 'VERİ (JSON):\n' + JSON.stringify(contextObj, null, 1) + '\n\n'
-      + 'Yanıtı düz metin olarak yaz, başlık ve madde işareti kullanma, en fazla '
-      + ((R.PROMPTS.kinds[role] && R.PROMPTS.kinds[role].maxSentences) || 5) + ' cümle.';
+  function prune(b, now){
+    while(b.times.length && now - b.times[0] >= 60000) b.times.shift();
   }
 
-  /* Koç hafızası: aynı türden son üç yorumun metni.
-     Böylece koç üç hafta üst üste aynı cümleyi kurmaz. */
-  function recentSaid(kind, limit){
-    const out = [];
-    Object.keys(S.coach || {}).forEach(key => {
-      if(key.indexOf(kind + '-') !== 0) return;
-      const p = S.coach[key];
-      if(p && p.text) out.push({ at:p.generatedAt || '', text:p.text });
+  /* ---------- sinirlarin okunmasi ---------- */
+
+  function key(cfg){ return (cfg && cfg.provider) + '|' + (cfg && cfg.model); }
+
+  /* ---------- kullanici duzeltmesi ----------
+     Gunluk hak hesaba bagli olabilir (OpenRouter'da kredi yuklediysen 50 yerine
+     1000). Kullanici gercek sinirini ayarlardan yazar; katalog degismez. */
+
+  const OVERRIDE_STORE = 'rota.llm.limits';
+
+  function readOverrides(){
+    try{ return JSON.parse(localStorage.getItem(OVERRIDE_STORE) || '{}'); }
+    catch(e){ return {}; }
+  }
+  let overrides = readOverrides();
+
+  function setOverride(providerId, patch){
+    const next = Object.assign({}, overrides[providerId] || {});
+    Object.keys(patch || {}).forEach(k => {
+      const v = Number(patch[k]);
+      if(Number.isFinite(v) && v > 0) next[k] = v; else delete next[k];
     });
-    return out.sort((a, b) => (b.at || '').localeCompare(a.at || ''))
-      .slice(0, limit || 3)
-      .map(x => x.text);
+    if(Object.keys(next).length) overrides[providerId] = next;
+    else delete overrides[providerId];
+    try{ localStorage.setItem(OVERRIDE_STORE, JSON.stringify(overrides)); }catch(e){}
+    return next;
+  }
+  function getOverride(providerId){ return overrides[providerId] || {}; }
+  function clearOverrides(){
+    overrides = {};
+    try{ localStorage.removeItem(OVERRIDE_STORE); }catch(e){}
   }
 
-  /* ---------- kural motoru dogrulamasi ---------- */
-
-  /* Gardlar veri katmanindan gelir; when() kural motorunu alir. */
-  const FORBIDDEN = R.PROMPTS.forbidden;
-
-  function validate(text){
-    const warnings = [];
-    FORBIDDEN.forEach(rule => {
-      if(rule.re.test(text) && rule.when(C)) warnings.push(rule.why);
-    });
-    return { text, warnings };
+  /* Modelin kendi siniri yoksa saglayicinin varsayilanina duser;
+     kullanici duzeltmesi ikisinin de ustundedir. */
+  function limitsFor(cfg){
+    const p = R.PROVIDERS[cfg && cfg.provider];
+    if(!p) return null;
+    const m = (p.models || []).find(x => x.id === cfg.model);
+    const l = Object.assign({}, p.limits || {}, (m && m.limits) || {}, getOverride(p.id));
+    if(l.rpm == null && l.rpd == null) return null;   // sinirsiz sayilir (yerlesik, ozel uc)
+    return l;
   }
 
-  /* ---------- onbellek ---------- */
+  /* Etkin sinirlar.
 
-  /* Istem surumu degisince eski yorumlar gecersiz olur. */
-  function cacheKey(kind, id){ return kind + '-' + id; }
+     Pay YALNIZ dakikalik sinira uygulanir: orada saatin kaymasi ve
+     saglayicinin kendi yuvarlamasi bizi sinirin ustune tasiyabilir.
 
-  async function getCached(kind, id){
-    const key = cacheKey(kind, id);
-    if(S.coach && S.coach[key]) return S.coach[key];
-    const doc = await R.Store.get('coach/'+key);
-    if(doc){
-      S.coach = S.coach || {};
-      S.coach[key] = doc;
+     Gunluk sayacta pay YOKTUR ve olmamalidir: bu bir zamanlama sorunu degil
+     duz bir sayimdir; pay dusmek kullanicinin ucretsiz hakkinin bir kismini
+     harcamadan curutur. Sayimimiz saglayicininkinden ancak DUSUK olabilir
+     (baska bir sekme ayni anahtari kullaniyorsa); o durumda gercek 429 gelir
+     ve penalize() devreye girer. */
+  function effective(cfg){
+    const l = limitsFor(cfg);
+    if(!l) return null;
+    const rpm = l.rpm ? Math.max(1, Math.floor(l.rpm * SAFETY)) : null;
+    return {
+      rpm,
+      rpd: l.rpd || null,
+      gapMs: rpm ? Math.ceil(60000 / rpm) : 0,
+    };
+  }
+
+  /* ---------- sorgu ---------- */
+
+  /* Simdi istek yapilsa ne olurdu: hemen mi, ne kadar bekleyerek mi, yoksa
+     gun dolduğu icin hic mi? UI bunu cagirarak "3 sn sonra" yazabilir. */
+  function check(cfg, now){
+    const eff = effective(cfg);
+    if(!eff) return { ok:true, waitMs:0, limited:false };
+
+    const t = now == null ? Date.now() : now;
+    rollDay();
+
+    const k = key(cfg);
+    const usedToday = daily.used[k] || 0;
+    if(eff.rpd && usedToday >= eff.rpd){
+      return { ok:false, reason:'daily', waitMs:0, limited:true, usedToday, rpd:eff.rpd };
     }
-    return doc;
+
+    const b = bucket(k);
+    prune(b, t);
+
+    let waitMs = Math.max(0, b.nextFreeAt - t);
+    if(eff.rpm && b.times.length >= eff.rpm){
+      waitMs = Math.max(waitMs, 60000 - (t - b.times[0]) + 50);
+    }
+    return { ok:waitMs === 0, waitMs, limited:waitMs > 0, usedToday, rpd:eff.rpd, rpm:eff.rpm };
   }
 
-  async function putCached(kind, id, payload){
-    const key = cacheKey(kind, id);
-    S.coach = S.coach || {};
-    S.coach[key] = payload;
-    await R.Store.set('coach/'+key, payload);
+  /* ---------- ayirma ---------- */
+
+  function sleep(ms, signal){
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { cleanup(); resolve(); }, ms);
+      const onAbort = () => { cleanup(); reject(Object.assign(new Error('iptal'), { code:'cancelled' })); };
+      function cleanup(){
+        clearTimeout(timer);
+        if(signal) signal.removeEventListener('abort', onAbort);
+      }
+      if(signal){
+        if(signal.aborted){ cleanup(); reject(Object.assign(new Error('iptal'), { code:'cancelled' })); return; }
+        signal.addEventListener('abort', onAbort);
+      }
+    });
   }
 
-  /* ---------- kamu API ---------- */
+  /* Bir istek icin sira bekler ve yerini ayirir.
+     opts.onWait(ms) beklemeden once cagirilir; ekran "3 sn" yazabilir.
+     Gun dolduysa beklemez, 'daily_quota' hatasi atar. */
+  async function acquire(cfg, opts){
+    const o = opts || {};
+    const eff = effective(cfg);
+    if(!eff){ return { waited:0 }; }
 
-  const KINDS = {
-    week:{
-      id(){ return M.weekId(S.ui.weekView || M.currentWeek()); },
-      context(){ return weekContext(S.ui.weekView || M.currentWeek()); },
-      ask:R.PROMPTS.kinds.week.ask,
-    },
-    gate:{
-      id(){ return U.monthKey(U.today()); },
-      context(){ return gateContext(); },
-      ask:R.PROMPTS.kinds.gate.ask,
-    },
-    roots:{
-      id(){ return U.todayISO(); },
-      context(){ return rootCauseContext(40); },
-      ask:R.PROMPTS.kinds.roots.ask,
-    },
-    'daily-flow':{
-      id(){ return U.todayISO(); },
-      context(){ return R.CoachTools.gununAkisi(); },
-      ask:R.PROMPTS.kinds['daily-flow'].ask,
-    },
-    motivation:{
-      id(){ return U.todayISO(); },
-      context(){ return motivationContext(); },
-      ask:R.PROMPTS.kinds.motivation.ask,
-    },
-    risk:{
-      id(){ return U.monthKey(U.today()) + '-' + Math.floor(U.diffDays(R.PLAN.startISO, U.todayISO())/7); },
-      context(){ return R.CoachTools.konuRiski({ limit:10 }); },
-      ask:R.PROMPTS.kinds.risk.ask,
-    },
-    'weekly-report':{
-      id(){ return M.weekId(M.currentWeek()); },
-      context(){ return weeklyReportContext(); },
-      ask:R.PROMPTS.kinds['weekly-report'].ask,
-    },
-    devil:{
-      id(){ return U.monthKey(U.today()); },
-      context(){ return devilContext(); },
-      ask:R.PROMPTS.kinds.devil.ask,
-    },
-    'note-summary':{
-      id(){ return 'n-' + (S.ui.noteOpen || 'yok'); },
-      context(){ return noteContext(S.ui.noteOpen); },
-      ask:R.PROMPTS.kinds['note-summary'].ask,
-    },
-  };
-
-  function motivationContext(){
-    const reward = C.todayReward();
-    const streak = C.behaviorStreak();
-    const days = [];
-    for(let i = 0; i < 7; i++){
-      const iso = U.iso(U.addDays(U.today(), -i));
-      const d = S.days[iso];
-      if(!d) continue;
-      const blocks = d.blocks.filter(b => b.slot !== 'Dinlenme');
-      days.push({
-        tarih:iso,
-        tamamlanan:blocks.filter(b => b.status === 'done').length,
-        toplam:blocks.length,
-        uyku:d.sleepHours,
-        atlamaNedeni:blocks.filter(b => b.skipReason).map(b => b.skipReason),
+    const state = check(cfg);
+    if(!state.ok && state.reason === 'daily'){
+      throw Object.assign(new Error('gunluk kota doldu'), {
+        code:'daily_quota', usedToday:state.usedToday, rpd:state.rpd,
       });
     }
-    return {
-      davranisSerisi:streak.streak,
-      kazanilan:reward.earned.map(e => e.label),
-      minimumGun:C.minimumDayMet(),
-      uykuOrtalamasi:C.sleepAverage(7),
-      enerjiOrtalamasi:M.energyAverage(7),
-      planTamamlama:C.planCompletion(M.currentWeek()),
-      analizBorcu:C.analysisDebt().length,
-      son7Gun:days,
-    };
-  }
-
-  /* Haftalık rapor: hafta verisi + davranış + plan sağlığı tek pakette. */
-  function weeklyReportContext(){
-    const n = M.currentWeek();
-    const week = weekContext(n);
-    const health = M.planHealth();
-    const reward = C.todayReward();
-    return Object.assign({}, week, {
-      planSagligi:health ? { durum:health.status, yuzde:health.pct, geride:health.behind } : null,
-      davranisSerisi:reward.streak,
-      kazanilanDavranis:reward.earned.map(e => e.label),
-      enerjiOrtalamasi:M.energyAverage(7),
-      molaSayisi:M.breaksOf(U.todayISO()).length,
-      sinamaOturumu:(S.sessions || []).length,
-    });
-  }
-
-  /* Karşı argüman: planın kırılgan varsayımını göstermesi için gereken veri. */
-  function devilContext(){
-    const est = C.estimateScore();
-    const health = M.planHealth();
-    const cap = R.Analytics.capacityReality();
-    const plan = M.activePlan();
-    return {
-      hedefSira:(S.profile && S.profile.targetRank) || null,
-      tahmin:est.ok ? { puan:est.score, siraBandi:[est.rankBest, est.rankWorst], konum:est.meta.label } : null,
-      planKapsama:plan ? plan.meta.coverage : null,
-      planaGirmeyenKonu:plan ? plan.meta.dropped.length : null,
-      planSagligi:health ? health.status : null,
-      kapasiteGercekligi:cap.ok ? { yazilan:cap.claimed, calisilan:cap.actualAvg, oran:cap.ratio } : null,
-      konuKapanisi:C.overallClosure().pct,
-      tekrarBorcu:C.cardDebt(),
-      analizBorcu:C.analysisDebt().length,
-      haftaSayisi:R.PLAN.totalWeeks,
-      kalanHafta:Math.max(0, R.PLAN.totalWeeks - M.currentWeek()),
-    };
-  }
-
-  function noteContext(noteId){
-    const note = S.videoNotes.find(n => n.id === noteId);
-    if(!note || !note.segments.length) return null;
-    return {
-      baslik:note.title,
-      konu:M.noteTopicName(note),
-      notlar:note.segments.slice(0, 40).map(s => ({
-        saniye:s.ts, etiket:s.tag, metin:String(s.text).slice(0, 220),
-      })),
-      mevcutKartSayisi:S.cards.filter(c => c.source === 'note' && c.sourceRef === note.id).length,
-    };
-  }
-
-  async function run(kind, opts){
-    const def = KINDS[kind];
-    if(!def) throw new Error('bilinmeyen koç türü: '+kind);
-    if(!available()) throw Object.assign(new Error('AI koç bu ortamda kullanılamıyor'), { code:'unavailable' });
-
-    const o = opts || {};
-    const id = def.id();
-    const context = def.context();
-    if(!context) throw Object.assign(new Error('Yorumlanacak veri yok'), { code:'no_data' });
-
-    const safeContext = R.CoachTools.sanitize(context);
-    const { text } = await sample(prompt(kind, safeContext, def.ask), {
-      modelTier:'default',
-      onText:o.onText,
-      signal:o.signal,
-    });
-
-    const checked = validate(text);
-    const payload = {
-      kind, id, promptVersion:R.PROMPTS.version,
-      text:checked.text,
-      warnings:checked.warnings,
-      generatedAt:new Date().toISOString(),
-      basis:{
-        planTamamlama:context.planTamamlama != null ? context.planTamamlama : null,
-        tytMedyan:context.tytMedyan != null ? context.tytMedyan : null,
-        konuKapanis:context.konuKapanisYuzdesi != null ? context.konuKapanisYuzdesi : null,
-      },
-    };
-    await putCached(kind, id, payload);
-    return payload;
-  }
-
-  async function cached(kind){
-    const def = KINDS[kind];
-    if(!def) return null;
-    try{ return await getCached(kind, def.id()); }
-    catch(e){ return null; }
-  }
-
-  /* Hata kodundan kullaniciya gosterilecek metin */
-  function errorText(code){
-    const map = {
-      not_granted:'AI koç için izin verilmedi. Menüden tekrar deneyebilirsin.',
-      rate_limited:'Şu an çok fazla istek var; birkaç dakika sonra dene.',
-      prompt_too_large:'Veri özeti çok büyük; daha dar bir aralık seç.',
-      cancelled:'İptal edildi.',
-      session_expired:'Oturum süresi doldu; sayfayı yenile.',
-      sampling_disabled:'AI koç bu ortamda kapalı.',
-      not_declared:'AI koç bu sürümde tanımlı değil.',
-      refused:'Bu istek yanıtlanamadı.',
-      empty_completion:'Boş yanıt geldi; tekrar dene.',
-      upstream_error:'Servise ulaşılamadı; sonra tekrar dene.',
-      unavailable:'AI koç çevrimdışıyken kullanılamaz.',
-      no_data:'Henüz yorumlanacak veri yok.',
-    };
-    return map[code] || 'AI koç şu an yanıt veremedi.';
-  }
-
-  /* ---------- nottan kart üretimi ----------
-     LLM yalniz metin onerir; kart nesnesini kural motoru kurar, sema ve
-     SRS asamalari uygulamada kalir. Gecersiz oneri sessizce elenir. */
-
-  function validateCards(raw, note){
-    const cfg = R.PROMPTS.cards;
-    const list = (raw && Array.isArray(raw.cards)) ? raw.cards : [];
-    const seen = {};
-    const out = [];
-    const dropped = [];
-
-    for(const c of list){
-      const front = String((c && c.front) || '').trim();
-      const back = String((c && c.back) || '').trim();
-      if(!front || !back){ dropped.push('boş alan'); continue; }
-      if(front.length > cfg.frontMax || back.length > cfg.backMax){ dropped.push('çok uzun'); continue; }
-      const key = front.toLowerCase();
-      if(seen[key]){ dropped.push('tekrar'); continue; }
-      seen[key] = true;
-      out.push(M.newCard({
-        front, back,
-        topic:String((c && c.topic) || M.noteTopicName(note)).slice(0, 80),
-        subjectId:note.subjectId || null,
-        source:'note', sourceRef:note.id,
-      }));
-      if(out.length >= cfg.max) break;
+    if(state.waitMs > MAX_WAIT_MS){
+      throw Object.assign(new Error('sira cok uzun'), {
+        code:'rate_wait', waitMs:state.waitMs,
+      });
     }
-    return { cards:out, dropped:dropped.length };
-  }
 
-  async function generateCards(noteId, opts){
-    if(!available()) throw Object.assign(new Error('AI koç bu ortamda kullanılamıyor'), { code:'unavailable' });
-    const note = S.videoNotes.find(n => n.id === noteId);
-    if(!note || !note.segments.length){
-      throw Object.assign(new Error('Bu derste not yok'), { code:'no_data' });
+    if(state.waitMs > 0){
+      if(o.onWait) o.onWait(state.waitMs);
+      await sleep(state.waitMs, o.signal);
     }
-    const o = opts || {};
-    const ctx = R.CoachTools.sanitize(noteContext(noteId));
-    const cfg = R.PROMPTS.cards;
-    const input = cfg.system
-      + '\nEn fazla ' + cfg.max + ' kart üret.\n\nNOTLAR (JSON):\n'
-      + JSON.stringify(ctx, null, 1);
 
-    const raw = await sample.json(input, { modelTier:'default', signal:o.signal });
-    const res = validateCards(raw, note);
-    if(!res.cards.length){
-      throw Object.assign(new Error('Geçerli kart üretilemedi'), { code:'empty_completion' });
-    }
-    return res;
+    /* Yeri simdi ayir: ayni anda baslayan iki cagri ayni yuvayi kapmasin. */
+    const now = Date.now();
+    const k = key(cfg);
+    const b = bucket(k);
+    prune(b, now);
+    b.times.push(now);
+    b.nextFreeAt = now + eff.gapMs;
+    daily.used[k] = (daily.used[k] || 0) + 1;
+    persist();
+
+    return { waited:state.waitMs, usedToday:daily.used[k], rpd:eff.rpd };
   }
 
-  /* ---------- soru ipucu ----------
-     Cevabı vermez, bir sonraki adımı söyler. Görsel desteği varsa
-     fotoğraf da gönderilir; yoksa yalnız metinle çalışır. */
-  async function questionHint(input, opts){
-    if(!available()) throw Object.assign(new Error('AI koç bu ortamda kullanılamıyor'), { code:'unavailable' });
-    const o = opts || {};
-    const tone = (S.profile && S.profile.coachTone) || 'dengeli';
-    const text = 'Sen bir YKS koçusun. Aday bir soruda takıldı.\n'
-      + 'KURALLAR:\n' + HOUSE_RULES.map(r => '- ' + r).join('\n') + '\n'
-      + R.PROMPTS.toneLine(tone) + '\n\n'
-      + 'GÖREV: ' + R.PROMPTS.kinds.hint.ask + '\n\n'
-      + 'SORU / TAKILDIĞI YER:\n' + String(input || '').slice(0, 1200) + '\n\n'
-      + 'En fazla ' + R.PROMPTS.kinds.hint.maxSentences + ' cümle. Cevabı asla yazma.';
-
-    const payload = o.image
-      ? [{ role:'user', content:[{ type:'text', text }, o.image] }]
-      : text;
-
-    const { text:out } = await sample(payload, { modelTier:'quick', signal:o.signal, onText:o.onText });
-    return validate(out);
+  /* Saglayici yine de 429 dondurduyse: sayilan sinir gercekte daha dusuk.
+     Pencereyi doldur ve bir sonraki denemeyi bir sonraki dakikaya at. */
+  function penalize(cfg, seconds){
+    const eff = effective(cfg);
+    if(!eff) return;
+    const b = bucket(key(cfg));
+    const now = Date.now();
+    b.nextFreeAt = Math.max(b.nextFreeAt, now + (seconds ? seconds*1000 : 60000));
   }
 
-  async function supportsImages(){
-    if(!available() || !sample.limits) return false;
-    try{ const l = await sample.limits(); return !!(l && l.images); }
-    catch(e){ return false; }
+  /* Basarisiz istek gunluk kotadan dusulmez mi? OpenRouter'da DUSULUR:
+     429 alan istek de gunu tuketir. Bu yuzden acquire'da sayilir ve
+     burada geri alinmaz. Yalniz istek hic gonderilmediyse geri alinir. */
+  function release(cfg){
+    const k = key(cfg);
+    if(daily.used[k]) { daily.used[k]--; persist(); }
+    const b = bucket(k);
+    if(b.times.length) b.times.pop();
   }
 
-  /* ---------- arayuz parcasi (uc ekranda ortak kullanilir) ---------- */
+  /* ---------- ekran icin ozet ---------- */
 
-  const LABELS = {
-    week:{ title:'AI koç — hafta yorumu', hint:'Haftanın verisini ve kendi review notlarını yorumlar', cta:'Haftayı yorumla' },
-    gate:{ title:'AI koç — kapı yorumu', hint:'Medyanın bandın neresinde olduğunu ve neden o müdahalenin uygun olduğunu açıklar', cta:'Kapıyı yorumla' },
-    roots:{ title:'AI koç — kök neden kalıbı', hint:'Yanlış defterindeki kök neden metinlerinde tekrar eden kalıbı arar', cta:'Kalıpları çözümle' },
-    'daily-flow':{ title:'AI koç — bugünün akışı', hint:'Hangi adımın atlandığını ve bedelini söyler', cta:'Günü yorumla' },
-    motivation:{ title:'AI koç — davranış notu', hint:'Son 7 günün davranış verisine bakar; övgü değil gözlem yazar', cta:'Davranışı yorumla' },
-    risk:{ title:'AI koç — risk yorumu', hint:'En riskli konunun neden orada olduğunu açıklar', cta:'Riski yorumla' },
-    'weekly-report':{
-      id(){ return M.weekId(M.currentWeek()); },
-      context(){ return weeklyReportContext(); },
-      ask:R.PROMPTS.kinds['weekly-report'].ask,
-    },
-    devil:{
-      id(){ return U.monthKey(U.today()); },
-      context(){ return devilContext(); },
-      ask:R.PROMPTS.kinds.devil.ask,
-    },
-    'weekly-report':{ title:'AI koç — haftalık rapor', hint:'Haftanın verisini, davranışı ve plan sağlığını tek raporda toplar', cta:'Haftalık raporu üret' },
-    devil:{ title:'AI koç — karşı argüman', hint:'Planın kırılgan varsayımını dürüstçe söyler', cta:'Planımı sorgula' },
-    'note-summary':{ title:'AI koç — ders özeti', hint:'Bu dersin notlarını tek özete indirir ve eksiği söyler', cta:'Notları özetle' },
-  };
-
-  /* payload: cached() ile alinan kayit veya null */
-  function panel(kind, payload){
-    if(!available()) return '';
-    const { html, when } = R.h;
-    const K = R.C;
-    const L = LABELS[kind];
-    const fresh = !!payload && !(kind === 'week' && payload.id !== KINDS.week.id());
-
-    const body = fresh
-      ? html`
-        <p class="prose">${payload.text}</p>
-        ${when(payload.warnings && payload.warnings.length, () => html`<div class="mt-10">
-          ${K.Notice({ tone:'warn', title:'Kural motoru düzeltmesi:', body:payload.warnings.join(' ') })}</div>`)}
-        <div class="row between mt-10">
-          <span class="tiny dim">${new Date(payload.generatedAt).toLocaleString('tr-TR')} · veriden üretildi</span>
-          ${K.Button({ label:'Yenile', icon:'refresh', size:'sm', tone:'ghost', act:'coach-run', data:{ 'data-kind':kind } })}
-        </div>`
-      : html`
-        <p class="small muted">${L.hint}</p>
-        ${K.Button({ label:L.cta, tone:'primary', block:true, class:'mt-10', act:'coach-run', data:{ 'data-kind':kind } })}`;
-
-    return String(K.Card({
-      class:'card--primary', title:L.title,
-      sub:'Kural motorunun hesapladığı veriyi yorumlar; kararı değiştirmez',
-      badge:fresh ? K.Badge({ label:'hazır', tone:'ok' }) : K.Badge({ label:'çevrimiçi', tone:'info' }),
-      body:html`<div id="coach-out">${body}</div>`,
-    }));
+  function status(cfg){
+    const eff = effective(cfg);
+    const k = key(cfg);
+    rollDay();
+    const usedToday = daily.used[k] || 0;
+    if(!eff) return { known:false, usedToday };
+    const b = bucket(k);
+    prune(b, Date.now());
+    return {
+      known:true,
+      rpm:eff.rpm, rpd:eff.rpd, gapMs:eff.gapMs,
+      lastMinute:b.times.length,
+      usedToday,
+      remainingToday:eff.rpd ? Math.max(0, eff.rpd - usedToday) : null,
+      full:!!(eff.rpd && usedToday >= eff.rpd),
+    };
   }
 
-  /* ---------- sohbet: koc sistemi okuyarak yanit verir ---------- */
-
-  const CHAT_SYSTEM = R.PROMPTS.chatSystem
-    + 'KURALLAR:\n' + HOUSE_RULES.map(r => '- '+r).join('\n') + '\n';
-
-  function chatTurns(question){
-    const history = (S.coachChat || []).slice(-6);
-    const turns = [];
-    history.forEach(m => turns.push({ role:m.role, content:m.text }));
-    turns.push({ role:'user', content: (turns.length ? '' : CHAT_SYSTEM + '\nSORU: ') + question });
-    return turns;
+  /* Bir dizi cagri (ornegin toplanti) kac saniye surer? */
+  function estimateMs(cfg, calls){
+    const eff = effective(cfg);
+    if(!eff || !eff.gapMs) return 0;
+    return Math.max(0, (calls - 1)) * eff.gapMs;
   }
 
-  async function ask(question, opts){
-    if(!available()) throw Object.assign(new Error('AI koç kullanılamıyor'), { code:'unavailable' });
-    const o = opts || {};
-    const { text } = await sample(chatTurns(question), {
-      modelTier:'default',
-      tools:R.CoachTools.forSample(),
-      onText:o.onText,
-      signal:o.signal,
-    });
-    const checked = validate(text);
-    return { text:checked.text, warnings:checked.warnings };
+  function reset(){
+    minute.clear();
+    daily = { day:todayKey(), used:{} };
+    persist();
+    overrides = readOverrides();
   }
 
-  async function pushChat(role, text, warnings){
-    S.coachChat = (S.coachChat || []).concat([{ role, text, warnings:warnings || [], at:new Date().toISOString() }]).slice(-24);
-    await R.Store.set('coach/chat', { messages:S.coachChat });
-  }
-  async function clearChat(){
-    S.coachChat = [];
-    await R.Store.remove('coach/chat');
-  }
-
-  /* Baglama gore onerilen sorular */
-  function suggestions(){
-    const C2 = R.Calc;
-    const out = [];
-    if(C2.analysisDebt().length) out.push('Analiz borcum var, hangi denemeden başlamalıyım?');
-    if(C2.openErrors().length >= 5) out.push('Kök neden metinlerimde tekrar eden bir kalıp var mı?');
-    if(C2.medianTrend('TYT').last3 != null) out.push('Net trendim hedef bandın neresinde?');
-    out.push('Bu hafta neye odaklanmalıyım?');
-    out.push('Hangi konular en çok net kaybettiriyor?');
-    out.push('Konu kapanışımda en zayıf ders hangisi?');
-    return out.slice(0, 4);
-  }
-
-  return { init, available, run, cached, panel, errorText, weekContext, gateContext, rootCauseContext,
-    motivationContext, noteContext, weeklyReportContext, devilContext, recentSaid,
-    generateCards, validateCards, questionHint, supportsImages,
-    validate, KINDS, ask, pushChat, clearChat, suggestions, CHAT_SYSTEM };
+  return { acquire, release, penalize, check, status, estimateMs, effective, limitsFor, reset,
+    setOverride, getOverride, clearOverrides,
+    SAFETY, MAX_WAIT_MS, STORE, OVERRIDE_STORE };
 })();
 
 /* ==== js/core/llm.js ==== */
@@ -9299,6 +9139,21 @@ R.LLM = (function(){
     return Object.assign(new Error(message || code), { code });
   }
 
+  /* Yayimlanmis bir Artifact icinde disariya fetch CSP ile engellenir ve
+     tarayici bunu ayirt edilemeyen bir TypeError olarak verir. Ayni hata
+     cevrimdisiyken de olusur; window.claude varsa neden neredeyse kesin
+     kum havuzudur ve kullaniciya bu soylenir. */
+  function inSandbox(){
+    return !!(window.claude && typeof window.claude.use === 'function');
+  }
+  function networkCode(){ return inSandbox() ? 'sandboxed' : 'network'; }
+
+  function retryAfterSeconds(response){
+    const raw = response.headers && response.headers.get('retry-after');
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? Math.min(n, 300) : null;
+  }
+
   function codeForStatus(status){
     if(status === 401 || status === 403) return 'unauthorized';
     if(status === 402) return 'no_credit';
@@ -9325,6 +9180,11 @@ R.LLM = (function(){
     cancelled:'İptal edildi.',
     empty:'Model boş yanıt döndürdü. Tekrar dene.',
     unavailable:'Yerleşik model bu ortamda kapalı. Ofis → Ayarlar’dan ücretsiz bir sağlayıcı bağla.',
+    daily_quota:'Bu modelin günlük ücretsiz hakkı doldu. Yarın sıfırlanır; o zamana kadar başka bir sağlayıcı kullanabilirsin.',
+    rate_wait:'Dakikalık sıra çok uzun. Birkaç dakika sonra tekrar dene ya da dakikalık sınırı daha yüksek bir sağlayıcı seç.',
+    sandboxed:'Bu ortam dış servislere bağlanmaya izin vermiyor. Uygulama Claude içinde yayımlanmış bir sayfa olarak '
+      + 'çalışırken dış API çağrıları engellenir: burada yerleşik modeli kullan, ücretsiz sağlayıcılar için uygulamayı '
+      + 'kendi tarayıcında (dosyadan ya da kendi sunucundan) aç.',
   };
   function errorText(code){ return ERRORS[code] || 'Model şu an yanıt veremedi.'; }
 
@@ -9447,13 +9307,18 @@ R.LLM = (function(){
       guard.done();
       if(guard.timedOut()) throw fail('timeout');
       if(req.signal && req.signal.aborted) throw fail('cancelled');
-      throw fail('network', e && e.message);
+      throw fail(networkCode(), e && e.message);
     }
 
     if(!response.ok){
       const detail = await errorMessage(response);
+      const code = codeForStatus(response.status);
       guard.done();
-      throw fail(codeForStatus(response.status), detail);
+      /* Saglayici bizim saydigimizdan daha siki davraniyor: pencereyi kapat. */
+      if(code === 'rate_limited'){
+        R.Quota.penalize({ provider:provider.id, model:req.model }, retryAfterSeconds(response));
+      }
+      throw fail(code, detail);
     }
 
     let text = '';
@@ -9525,13 +9390,17 @@ R.LLM = (function(){
       guard.done();
       if(guard.timedOut()) throw fail('timeout');
       if(req.signal && req.signal.aborted) throw fail('cancelled');
-      throw fail('network', e && e.message);
+      throw fail(networkCode(), e && e.message);
     }
 
     if(!response.ok){
       const detail = await errorMessage(response);
+      const code = codeForStatus(response.status);
       guard.done();
-      throw fail(codeForStatus(response.status), detail);
+      if(code === 'rate_limited'){
+        R.Quota.penalize({ provider:provider.id, model:req.model }, retryAfterSeconds(response));
+      }
+      throw fail(code, detail);
     }
 
     function partsText(obj){
@@ -9583,13 +9452,29 @@ R.LLM = (function(){
       key:provider.needsKey ? getKey(provider.id) : null,
     });
 
+    /* Sira: kota yoneticisi izin verene kadar bekle. Boylece dakikalik
+       sinir HIC asilmaz; gun dolduysa beklemek yerine acikca soylenir. */
+    const slot = await R.Quota.acquire(cfg, { signal:req && req.signal, onWait:req && req.onWait });
+
     const started = Date.now();
     let text;
-    if(provider.kind === 'builtin') text = await callBuiltin(payload);
-    else if(provider.kind === 'gemini') text = await callGemini(payload, provider);
-    else text = await callOpenAI(payload, provider);
+    try{
+      if(provider.kind === 'builtin') text = await callBuiltin(payload);
+      else if(provider.kind === 'gemini') text = await callGemini(payload, provider);
+      else text = await callOpenAI(payload, provider);
+    }catch(err){
+      /* Istek hic gonderilemediyse gunluk hakki tuketmis sayma. */
+      if(err && (err.code === 'cancelled' || err.code === 'sandboxed' || err.code === 'no_key')){
+        R.Quota.release(cfg);
+      }
+      throw err;
+    }
 
-    return { text, provider:provider.id, model:cfg.model || 'yerleşik', ms:Date.now() - started };
+    return {
+      text, provider:provider.id, model:cfg.model || 'yerleşik',
+      ms:Date.now() - started, waited:slot.waited || 0,
+      usedToday:slot.usedToday, rpd:slot.rpd,
+    };
   }
 
   /* Yedekli cagri: zincirdeki ilk calisani kullanir.
@@ -9608,9 +9493,14 @@ R.LLM = (function(){
         last = err;
         const code = err && err.code;
         if(code === 'cancelled') throw err;
-        if(!retryable(code)) {
-          /* Anahtar/adres hatasi zincirin geri kalanini da vurmayabilir:
-             farkli saglayici varsa denemeye devam et, ayni saglayiciysa dur. */
+        if(code === 'daily_quota'){
+          /* Gunluk hak modele ozeldir: ayni saglayicinin baska modeli de
+             ayni havuzu paylasiyor olabilir, yine de denemeye deger. */
+          continue;
+        }
+        if(!retryable(code)){
+          /* Anahtar/adres/kum havuzu hatasi zincirin geri kalanini da
+             vurabilir: farkli saglayici varsa dene, ayni saglayiciysa dur. */
           const next = list[i+1];
           if(!next || next.provider === list[i].provider) throw err;
         }
@@ -9619,7 +9509,8 @@ R.LLM = (function(){
     throw last;
   }
 
-  /* Baglanti sinamasi — ayar ekraninda "Bağlantıyı dene" icin. */
+  /* Baglanti sinamasi — ayar ekraninda "Bağlantıyı dene" icin.
+     Gercek bir istek yapar; bu yuzden gunluk haktan bir tane harcar. */
   async function test(cfg){
     const started = Date.now();
     const res = await chat(cfg, {
@@ -9646,7 +9537,7 @@ R.LLM = (function(){
     initBuiltin, builtinReady,
     getKey, setKey, clearKeys, maskKey,
     chat, complete, test, ready,
-    errorText, retryable, KEY_STORE,
+    errorText, retryable, inSandbox, KEY_STORE,
   };
 })();
 
@@ -9664,7 +9555,7 @@ R.LLM = (function(){
      meet(...)          gundem → sirayla konusma → Patron'un tek karari
 
    Yetki: her ajan yalnizca kendi brifingini gorur; ham veriye erisemez.
-   Gizlilik: LLM'e giden her nesne R.CoachTools.sanitize'dan gecer. */
+   Gizlilik: LLM'e giden her nesne R.Tools.sanitize'dan gecer. */
 
 window.R = window.R || {};
 
@@ -10155,9 +10046,28 @@ R.Office = (function(){
         + (ctx.action.why || '') + ' Diğer başlıklar sıraya girer; aynı anda iki müdahale yapılmaz.';
     }
 
-    const body = lines.length
-      ? lines.join(' ') + (b.suggestion ? ' ' + b.suggestion.text : '')
-      : b.headline + '. Bu masada bugün ayrıca bildirilecek bir şey yok.';
+    /* Tur farkli sey soruyorsa cevap da farkli olmali. Model yokken ajanin
+       elinde yalnizca brifing vardir; ucuncu turdan sonra soyleyecek YENI
+       bir seyi yoktur ve bunu uydurmak yerine acikca soyler. */
+    const round = (ctx && ctx.round && ctx.round.key) || null;
+    let body;
+    if(kind === 'turn' && round === 'fikir'){
+      body = b.suggestion
+        ? b.suggestion.text + ' Gerekçe: ' + (lines[0] || b.headline)
+        : b.headline + '. Bu masadan çıkacak somut bir öneri yok.';
+    }else if(kind === 'turn' && round === 'itiraz'){
+      body = lines[1]
+        ? 'Buna itirazım şu: ' + lines[1]
+        : 'Kendi alanımdan itirazım yok; ' + (lines[0] || b.headline);
+    }else if(kind === 'turn' && (round === 'sentez' || round === 'serbest')){
+      body = b.suggestion
+        ? 'Bana düşen iş: ' + b.suggestion.text
+        : 'Ekleyecek bir şeyim yok.';
+    }else{
+      body = lines.length
+        ? lines.join(' ') + (b.suggestion ? ' ' + b.suggestion.text : '')
+        : b.headline + '. Bu masada bugün ayrıca bildirilecek bir şey yok.';
+    }
 
     /* Soruya yanit verirken durustluk: model bagli degilken ajan soruyu
        okuyamaz, yalnizca masasindaki tabloyu okur. Bunu saklamaz. */
@@ -10173,9 +10083,106 @@ R.Office = (function(){
 
   function toneId(){ return (S.profile && S.profile.coachTone) || 'dengeli'; }
 
+  /* ---------- kural motoru dogrulamasi ----------
+     Model ne yazarsa yazsin cikti ev kurallarina karsi denetlenir.
+     Gardlar veri katmanindan gelir (R.PROMPTS.forbidden); when() kural
+     motorunu alir, yani yasak yalnizca veri onu destekliyorsa uygulanir. */
+
   function validate(text){
-    if(R.Coach && typeof R.Coach.validate === 'function') return R.Coach.validate(text);
-    return { text, warnings:[] };
+    const warnings = [];
+    (R.PROMPTS.forbidden || []).forEach(rule => {
+      try{ if(rule.re.test(text) && rule.when(C)) warnings.push(rule.why); }
+      catch(e){ /* gard hesaplanamadiysa uyari uretme */ }
+    });
+    return { text, warnings };
+  }
+
+  /* ---------- nottan kart uretimi ----------
+     Once koc katmanindaydi; artik ofisin isi ve ucretsiz modellerle de
+     calisir. LLM yalniz metin onerir, kart nesnesini kural motoru kurar:
+     sema, uzunluk ve SRS asamalari uygulamada kalir. */
+
+  function noteContext(noteId){
+    const note = S.videoNotes.find(n => n.id === noteId);
+    if(!note || !note.segments.length) return null;
+    return {
+      baslik:note.title,
+      konu:M.noteTopicName(note),
+      notlar:note.segments.slice(0, 40).map(s => ({
+        saniye:s.ts, etiket:s.tag, metin:String(s.text).slice(0, 220),
+      })),
+      mevcutKartSayisi:S.cards.filter(c => c.source === 'note' && c.sourceRef === noteId).length,
+    };
+  }
+
+  function validateCards(rawObj, note){
+    const cfg = R.PROMPTS.cards;
+    const list = (rawObj && Array.isArray(rawObj.cards)) ? rawObj.cards : [];
+    const seen = {};
+    const out = [];
+    let dropped = 0;
+
+    for(const c of list){
+      const front = String((c && c.front) || '').trim();
+      const back = String((c && c.back) || '').trim();
+      if(!front || !back){ dropped++; continue; }
+      if(front.length > cfg.frontMax || back.length > cfg.backMax){ dropped++; continue; }
+      const key = front.toLowerCase();
+      if(seen[key]){ dropped++; continue; }
+      seen[key] = true;
+      out.push(M.newCard({
+        front, back,
+        topic:String((c && c.topic) || M.noteTopicName(note)).slice(0, 80),
+        subjectId:note.subjectId || null,
+        source:'note', sourceRef:note.id,
+      }));
+      if(out.length >= cfg.max) break;
+    }
+    return { cards:out, dropped };
+  }
+
+  /* Ucretsiz modeller JSON'u kod cercevesi icinde dondurebiliyor;
+     metinden ilk gecerli nesne cikarilir. */
+  function parseJson(text){
+    const raw = String(text || '').trim();
+    const fence = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+    const body = fence ? fence[1] : raw;
+    try{ return JSON.parse(body); }catch(e){}
+    const start = body.indexOf('{');
+    const end = body.lastIndexOf('}');
+    if(start >= 0 && end > start){
+      try{ return JSON.parse(body.slice(start, end + 1)); }catch(e){}
+    }
+    return null;
+  }
+
+  async function generateCards(noteId, opts){
+    const o = opts || {};
+    const note = S.videoNotes.find(n => n.id === noteId);
+    if(!note || !note.segments.length){
+      throw Object.assign(new Error('Bu derste not yok'), { code:'no_data' });
+    }
+    const chain = chainFor('analist');
+    if(!chain.length){
+      throw Object.assign(new Error('Model bağlı değil'), { code:'unavailable' });
+    }
+
+    const cfg = R.PROMPTS.cards;
+    const ctx = R.Tools.sanitize(noteContext(noteId));
+    const res = await R.LLM.complete(chain, {
+      system:cfg.system + '\nEn fazla ' + cfg.max + ' kart üret.',
+      messages:[{ role:'user', text:'NOTLAR (JSON):\n' + JSON.stringify(ctx, null, 1) }],
+      maxTokens:900,
+      temperature:0.2,
+      signal:o.signal,
+    });
+
+    const parsed = parseJson(res.text);
+    const checked = validateCards(parsed, note);
+    if(!checked.cards.length){
+      throw Object.assign(new Error('Geçerli kart üretilemedi'), { code:'empty' });
+    }
+    return checked;
   }
 
   /* Tek bir ajan konusturur. Model yoksa ya da cagri basarisiz olursa
@@ -10239,7 +10246,7 @@ R.Office = (function(){
     if(!q) throw Object.assign(new Error('boş soru'), { code:'empty' });
 
     resetBriefs();
-    const data = R.CoachTools.sanitize(brief(agentId).data);
+    const data = R.Tools.sanitize(brief(agentId).data);
     const history = chatOf(agentId).slice(-4)
       .map(m => ({ role:m.role === 'user' ? 'user' : 'assistant', text:m.text }));
 
@@ -10254,7 +10261,7 @@ R.Office = (function(){
   async function briefing(agentId, opts){
     const agent = R.AGENT_BY_ID[agentId];
     resetBriefs();
-    const data = R.CoachTools.sanitize(brief(agentId).data);
+    const data = R.Tools.sanitize(brief(agentId).data);
     return speak(agentId, 'briefing', {
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.briefing(agent, data) }],
       ctx:{},
@@ -10338,72 +10345,331 @@ R.Office = (function(){
 
   /* Toplanti: Patron acar → uzmanlar sirayla konusur → Patron tek karar verir.
      onTurn her konusmadan sonra cagirilir (ekranda canli akis icin). */
-  async function meet(opts){
-    const o = opts || {};
-    resetBriefs();
+  /* ---------- turlar ----------
+     Toplanti tek turluk bir yoklama degil, tur tur ilerleyen bir fikir
+     patlamasidir. Her turun AYRI bir sorusu vardir; boylece ajanlar ayni
+     cumleyi tekrar etmez, tartisma derinlesir. */
 
-    const ag = o.agenda || agenda();
-    const action = nextAction();
-    const turns = [];
-    const said = [];
+  const ROUNDS = [
+    { key:'durum',  title:'Durum tespiti',
+      ask:'Kendi alanindan gundemle ilgili TEK bulgu bildir. Sayilari raporundan al.' },
+    { key:'fikir',  title:'Fikir turu',
+      ask:'Gundemi cozecek TEK somut fikir at. Baskasinin fikrini tekrarlama; '
+        + 'senden onceki fikirlerden farkli bir sey soyle.' },
+    { key:'itiraz', title:'İtiraz turu',
+      ask:'Masadaki fikirlerden hangisi kendi alaninda TUTMAZ, nedenini veriyle soyle. '
+        + 'Itirazin yoksa hangisini destekledigini ve neden oldugunu tek cumlede yaz.' },
+    { key:'sentez', title:'Toparlama turu',
+      ask:'Konusulanlardan kendi alanina dusen tek isi soyle: sen ne yapacaksin, '
+        + 'aday senden ne bekleyecek.' },
+    { key:'serbest', title:'Serbest tur',
+      ask:'Sana kalan son sozu soyle. Yeni bir sey yoksa "ekleyecegim yok" de, uzatma.' },
+  ];
 
-    const emit = async turn => {
-      turns.push(turn);
-      if(o.onTurn) await o.onTurn(turn, turns);
-    };
+  function roundDef(n){ return ROUNDS[Math.min(n, ROUNDS.length) - 1] || ROUNDS[ROUNDS.length - 1]; }
 
-    const agendaData = R.CoachTools.sanitize(ag.data || {});
-    const ctx = { topic:ag.topic, why:ag.why, data:agendaData, action };
+  /* Kac tur anlamli? Model bagliyken bes turun hepsi ayri bir soru sorar.
+     Model yokken ajanin elinde yalnizca brifing vardir: ucuncu turdan sonra
+     yeni bir sey cikmaz, bu yuzden toplanti orada durur. */
+  function maxRounds(){ return mode() === 'llm' ? ROUNDS.length : 3; }
 
-    /* 1) acilis */
-    const opening = await speak('patron', 'opening', {
-      messages:[{ role:'user', text:R.OFFICE_PROMPTS.opening({ topic:ag.topic, why:ag.why, data:agendaData }) }],
-      ctx,
-    }, Object.assign({}, o, { maxTokens:240, onText:o.onText ? t => o.onText('patron', t) : null }));
-    await emit(opening);
-    said.push(opening);
+  /* ---------- canli oturum ----------
+     Toplanti artik tek bir cagriyla bitmez: kullanici bitirene kadar
+     tur tur ilerler. Her konusma bir model cagrisidir ve kota yoneticisi
+     araya bosluk koyar; bu yuzden "hepsi aninda" degil sirayla akar. */
 
-    /* 2) uzmanlar — her biri yalniz kendi brifingini gorur */
-    const order = (o.only && o.only.length) ? o.only : R.MEETING_ORDER;
-    for(const id of order){
-      const agent = R.AGENT_BY_ID[id];
-      if(!agent) continue;
-      const data = R.CoachTools.sanitize(brief(id).data);
-      const prev = said.slice(-TURN_CONTEXT).map(s => ({ name:s.name, role:s.role, text:s.text }));
-      const turn = await speak(id, 'turn', {
-        messages:[{ role:'user', text:R.OFFICE_PROMPTS.turn(agent, ag, data, prev) }],
-        ctx,
-      }, Object.assign({}, o, { maxTokens:320, onText:o.onText ? t => o.onText(id, t) : null }));
-      await emit(turn);
-      said.push(turn);
-    }
-
-    /* 3) kapanis — eylem kural motorundan gelir, Patron yalniz gerekcelendirir */
-    const closing = await speak('patron', 'closing', {
-      messages:[{ role:'user', text:R.OFFICE_PROMPTS.closing(ag,
-        said.slice(1).map(s => ({ name:s.name, role:s.role, text:s.text })), action) }],
-      ctx,
-    }, Object.assign({}, o, { maxTokens:300, onText:o.onText ? t => o.onText('patron', t) : null }));
-    closing.closing = true;
-    await emit(closing);
-
-    const meeting = {
+  function newSession(ag){
+    return {
       id:U.uid('m'),
       at:new Date().toISOString(),
-      topic:ag.topic,
-      why:ag.why,
-      mode:turns.every(t => t.mode === 'llm') ? 'llm' : (turns.some(t => t.mode === 'llm') ? 'karma' : 'kural'),
+      topic:ag.topic, why:ag.why, agendaData:ag.data || {},
+      round:0,
+      turns:[],
+      status:'live',
       promptVersion:R.OFFICE_PROMPTS.version,
-      action:{ title:action.title, why:action.why, route:action.route || 'today', label:action.label || '' },
-      turns:turns.map(t => ({ agent:t.agent, name:t.name, role:t.role, text:t.text,
-        warnings:t.warnings || [], mode:t.mode, closing:!!t.closing, error:t.error || null })),
     };
+  }
+
+  /* Bir uzmanin konusma sirasi. Toplantida herkes ayni tur icinde bir kez konusur. */
+  function speakerAt(index){
+    return R.MEETING_ORDER[index % R.MEETING_ORDER.length];
+  }
+
+  /* Toplantida o ana kadar soylenenlerin son N tanesi (ajanin baglamı). */
+  function saidSoFar(session, limit){
+    return session.turns.slice(-(limit || TURN_CONTEXT))
+      .map(t => ({ name:t.name, role:t.role, text:t.text }));
+  }
+
+  /* Toplantiyi acar: gundem secilir, Patron soz alir. */
+  async function openMeeting(opts){
+    const o = opts || {};
+    resetBriefs();
+    const ag = o.agenda || agenda();
+    const session = newSession(ag);
+
+    const pending = pendingDecision();
+    const turn = await speak('patron', 'opening', {
+      messages:[{ role:'user', text:R.OFFICE_PROMPTS.opening(
+        { topic:ag.topic, why:ag.why, data:R.Tools.sanitize(ag.data || {}) }, pending) }],
+      ctx:{ topic:ag.topic, why:ag.why, pending },
+    }, Object.assign({}, o, { maxTokens:260 }));
+
+    turn.round = 0;
+    turn.roundTitle = 'Açılış';
+    session.turns.push(turn);
+    return session;
+  }
+
+  /* Siradaki konusmaciyi konusturur. index tur icindeki sirayi verir. */
+  async function nextTurn(session, index, opts){
+    const o = opts || {};
+    const roundNo = Math.floor(index / R.MEETING_ORDER.length) + 1;
+    const def = roundDef(roundNo);
+    const agentId = speakerAt(index);
+    const agent = R.AGENT_BY_ID[agentId];
+
+    resetBriefs();
+    const data = R.Tools.sanitize(brief(agentId).data);
+    const turn = await speak(agentId, 'turn', {
+      messages:[{ role:'user', text:R.OFFICE_PROMPTS.turn(agent,
+        { topic:session.topic }, data, saidSoFar(session), def, recentSaid(agentId)) }],
+      ctx:{ topic:session.topic, round:def },
+    }, Object.assign({}, o, { maxTokens:320 }));
+
+    turn.round = roundNo;
+    turn.roundTitle = def.title;
+    session.round = roundNo;
+    session.turns.push(turn);
+    return turn;
+  }
+
+  /* Kullanici soz alir: konusma kaydina girer, sonraki ajanlar bunu gorur. */
+  function userTurn(session, text){
+    const turn = {
+      agent:'aday', name:'Sen', role:'aday', text:String(text || '').trim(),
+      warnings:[], mode:'kullanici', round:session.round, roundTitle:'Söz aldın',
+    };
+    if(!turn.text) return null;
+    session.turns.push(turn);
+    return turn;
+  }
+
+  /* Toplantiyi kapatir: Patron karari gerekcelendirir, rapor uretilir,
+     karar takibe alinir ve tutanak kaydedilir. */
+  async function closeMeeting(session, opts){
+    const o = opts || {};
+    resetBriefs();
+    const action = nextAction();
+    const said = session.turns.slice(1)
+      .map(t => ({ name:t.name, role:t.role, text:t.text }));
+
+    const closing = await speak('patron', 'closing', {
+      messages:[{ role:'user', text:R.OFFICE_PROMPTS.closing(
+        { topic:session.topic }, said, action) }],
+      ctx:{ topic:session.topic, action },
+    }, Object.assign({}, o, { maxTokens:320 }));
+
+    closing.closing = true;
+    closing.round = session.round;
+    closing.roundTitle = 'Karar';
+    session.turns.push(closing);
+
+    const modes = session.turns.filter(t => t.mode !== 'kullanici').map(t => t.mode);
+    const meeting = {
+      id:session.id,
+      at:session.at,
+      closedAt:new Date().toISOString(),
+      topic:session.topic,
+      why:session.why,
+      rounds:session.round,
+      status:'closed',
+      mode:modes.every(m => m === 'llm') ? 'llm' : (modes.some(m => m === 'llm') ? 'karma' : 'kural'),
+      promptVersion:R.OFFICE_PROMPTS.version,
+      action:{ title:action.title, why:action.why, route:action.route || 'today',
+        label:action.label || '' },
+      decision:{
+        id:session.id, title:action.title, why:action.why,
+        route:action.route || 'today', state:'open', at:new Date().toISOString(),
+      },
+      turns:session.turns.map(t => ({ agent:t.agent, name:t.name, role:t.role, text:t.text,
+        warnings:t.warnings || [], mode:t.mode, round:t.round || 0,
+        roundTitle:t.roundTitle || '', closing:!!t.closing, error:t.error || null })),
+      report:buildReport(session, action, closing),
+    };
+
     await saveMeeting(meeting);
+    await rememberTurns(meeting);
+    return meeting;
+  }
+
+  /* ---------- rapor ----------
+     Rapor kural motorunun urettigi bir belgedir: kim ne dedi, hangi tur,
+     karar ne. Patron'un kapanis metni ozet olarak basa konur — LLM'e
+     ayrica bir rapor yazdirilmaz, boylece fazladan kota harcanmaz. */
+
+  function buildReport(session, action, closing){
+    const byAgent = {};
+    session.turns.forEach(t => {
+      if(t.agent === 'patron' || t.agent === 'aday') return;
+      byAgent[t.agent] = byAgent[t.agent] || { name:t.name, role:t.role, lines:[] };
+      byAgent[t.agent].lines.push({ round:t.round, roundTitle:t.roundTitle, text:t.text });
+    });
+
+    const warnings = [];
+    session.turns.forEach(t => (t.warnings || []).forEach(w => {
+      if(warnings.indexOf(w) < 0) warnings.push(w);
+    }));
+
+    const userSaid = session.turns.filter(t => t.agent === 'aday').map(t => t.text);
+
+    return {
+      summary:closing ? closing.text : '',
+      topic:session.topic,
+      why:session.why,
+      rounds:session.round,
+      turnCount:session.turns.length,
+      speakers:Object.keys(byAgent).length,
+      byAgent,
+      userSaid,
+      warnings,
+      decision:{ title:action.title, why:action.why, route:action.route || 'today' },
+      /* Kararin dayandigi sayilar: rapor sonradan okundugunda baglam kalsin. */
+      basis:(function(){
+        const d = R.Tools.durum();
+        return {
+          hafta:d.programHaftasi,
+          planTamamlama:d.planTamamlama,
+          tytMedyan:d.tytMedyan,
+          aytMedyan:d.aytMedyan,
+          konuKapanisi:d.konuKapanisYuzdesi,
+          analizBorcu:d.analizBorcu,
+          tekrarBorcu:d.tekrarBorcuYuzdesi,
+        };
+      })(),
+    };
+  }
+
+  /* Raporu duz metne cevirir — kopyalanip disariya tasinabilsin. */
+  function reportText(meeting){
+    const r = meeting.report || {};
+    const out = [];
+    out.push('TOPLANTI RAPORU — ' + new Date(meeting.at).toLocaleString('tr-TR'));
+    out.push('Gündem: ' + meeting.topic);
+    if(r.why) out.push('Neden: ' + r.why);
+    out.push('');
+    out.push('KARAR: ' + meeting.action.title);
+    if(meeting.action.why) out.push(meeting.action.why);
+    out.push('');
+    if(r.summary){ out.push('PATRON’UN KAPANIŞI'); out.push(r.summary); out.push(''); }
+    Object.keys(r.byAgent || {}).forEach(id => {
+      const a = r.byAgent[id];
+      out.push(a.name.toUpperCase() + ' — ' + a.role);
+      a.lines.forEach(l => out.push('  · [' + (l.roundTitle || 'tur') + '] ' + l.text));
+      out.push('');
+    });
+    if((r.userSaid || []).length){
+      out.push('SENİN SÖZLERİN');
+      r.userSaid.forEach(t => out.push('  · ' + t));
+      out.push('');
+    }
+    if((r.warnings || []).length){
+      out.push('KURAL MOTORU UYARILARI');
+      r.warnings.forEach(w => out.push('  ! ' + w));
+      out.push('');
+    }
+    const b = r.basis || {};
+    out.push('DAYANDIĞI VERİ');
+    out.push('  hafta ' + b.hafta + ' · plan %' + (b.planTamamlama == null ? '—' : b.planTamamlama)
+      + ' · kapanış %' + b.konuKapanisi
+      + ' · analiz borcu ' + b.analizBorcu + ' · tekrar borcu %' + b.tekrarBorcu);
+    return out.join('\n');
+  }
+
+  /* ---------- karar takibi ----------
+     Ofisi "gercek" yapan sey: verilen karar unutulmaz. Bir sonraki
+     toplantiyi Patron hesap sorarak acar. */
+
+  function decisions(){
+    return meetings()
+      .filter(m => m.decision)
+      .map(m => Object.assign({}, m.decision, { topic:m.topic, meetingId:m.id }));
+  }
+  function openDecisions(){ return decisions().filter(d => d.state === 'open'); }
+  function pendingDecision(){ return openDecisions()[0] || null; }
+
+  async function closeDecision(id, state){
+    const m = (S.officeMeetings || []).find(x => x.id === id);
+    if(!m || !m.decision) return null;
+    m.decision.state = (state === 'done' || state === 'carried') ? state : 'open';
+    m.decision.closedAt = new Date().toISOString();
+    await R.Store.set('meetings/' + m.id, m);
+    return m.decision;
+  }
+
+  /* ---------- ajan hafizasi ----------
+     Ajan ayni cumleyi iki toplanti ust uste kurmasin diye son sozleri
+     hatirlanir. Koc katmanindaki recentSaid ile ayni fikir. */
+
+  function recentSaid(agentId, limit){
+    const out = [];
+    meetings().forEach(m => {
+      (m.turns || []).forEach(t => {
+        if(t.agent === agentId && t.text) out.push({ at:m.at, text:t.text });
+      });
+    });
+    (chatOf(agentId) || []).forEach(msg => {
+      if(msg.role !== 'user' && msg.text) out.push({ at:msg.at || '', text:msg.text });
+    });
+    return out.sort((a, b) => (b.at || '').localeCompare(a.at || ''))
+      .slice(0, limit || 3)
+      .map(x => String(x.text).slice(0, 180));
+  }
+
+  /* Tutanak kaydedildikten sonra hafiza zaten meetings() uzerinden okunur;
+     ayrica bir yazma gerekmez. Kanca ileride genisletilebilir diye durur. */
+  async function rememberTurns(){ return true; }
+
+  /* ---------- kota ---------- */
+
+  /* Bir ajanin siradaki cagrisi ne zaman yapilabilir? Ekran bunu gosterir. */
+  function agentQuota(agentId){
+    const chain = chainFor(agentId);
+    if(!chain.length) return null;
+    const state = R.Quota.check(chain[0]);
+    const st = R.Quota.status(chain[0]);
+    return {
+      waitMs:state.waitMs || 0,
+      full:!state.ok && state.reason === 'daily',
+      usedToday:st.usedToday, rpd:st.rpd, rpm:st.rpm, known:st.known,
+    };
+  }
+
+  /* Bir toplanti turu kac saniye surer (kota bosluklariyla)? */
+  function roundEstimateMs(agentId){
+    const chain = chainFor(agentId || 'patron');
+    if(!chain.length) return 0;
+    return R.Quota.estimateMs(chain[0], R.MEETING_ORDER.length);
+  }
+
+  /* ---------- tek cagriyla toplanti (test ve otomasyon icin) ----------
+     Ekran turlu akisi kullanir; bu sarmalayici bir turu acar, kosar, kapatir. */
+  async function meet(opts){
+    const o = opts || {};
+    const session = await openMeeting(o);
+    if(o.onTurn) await o.onTurn(session.turns[0], session.turns);
+    const count = (o.rounds || 1) * R.MEETING_ORDER.length;
+    for(let i = 0; i < count; i++){
+      const turn = await nextTurn(session, i, o);
+      if(o.onTurn) await o.onTurn(turn, session.turns);
+    }
+    const meeting = await closeMeeting(session, o);
+    if(o.onTurn) await o.onTurn(meeting.turns[meeting.turns.length - 1], session.turns);
     return meeting;
   }
 
   async function saveMeeting(meeting){
-    S.officeMeetings = [meeting].concat(S.officeMeetings || [])
+    S.officeMeetings = [meeting].concat((S.officeMeetings || []).filter(m => m.id !== meeting.id))
       .sort((a, b) => (b.at || '').localeCompare(a.at || ''));
     const drop = S.officeMeetings.slice(MEETING_MAX);
     S.officeMeetings = S.officeMeetings.slice(0, MEETING_MAX);
@@ -10420,6 +10686,7 @@ R.Office = (function(){
   }
 
   function meetings(){ return S.officeMeetings || []; }
+
   function lastMeeting(){ return meetings()[0] || null; }
 
   /* ==================== yukleme ==================== */
@@ -10454,15 +10721,22 @@ R.Office = (function(){
     /* ayar */
     defaultSettings, settings, saveSettings, agentConfig, chainFor, ready, mode, providerLabel,
     /* brifing */
-    brief, resetBriefs, snapshot, ruleText, nextAction,
+    brief, resetBriefs, snapshot, ruleText, nextAction, recentSaid,
+    /* dogrulama ve kart uretimi (eski koc katmanindan devralindi) */
+    validate, validateCards, generateCards, noteContext, parseJson,
     /* sohbet */
     ask, briefing, chatOf, pushChat, clearChat,
-    /* toplanti */
-    agenda, agendaCandidates, meet, meetings, lastMeeting, saveMeeting, deleteMeeting,
+    /* toplanti — turlu canli oturum */
+    agenda, agendaCandidates, openMeeting, nextTurn, userTurn, closeMeeting, speakerAt, roundDef,
+    meet, meetings, lastMeeting, saveMeeting, deleteMeeting, reportText, maxRounds,
+    /* karar takibi */
+    decisions, openDecisions, pendingDecision, closeDecision,
+    /* kota */
+    agentQuota, roundEstimateMs,
     /* yasam dongusu */
     load,
     /* sabitler */
-    CHAT_MAX, MEETING_MAX,
+    CHAT_MAX, MEETING_MAX, ROUNDS,
   };
 })();
 
@@ -11718,7 +11992,6 @@ R.Screens.today = (function(){
         <div id="pane-reward">${RewardCard()}</div>
         ${BadDayCard(day)}
         ${DistractionCard(day)}
-        ${when(R.Coach.available(), () => raw(R.Coach.panel('motivation', S.coach && S.coach['motivation-'+U.todayISO()])))}
         ${PlanHealthCard()}
         ${StreakCard()}
         ${SleepCard(day)}
@@ -12236,7 +12509,6 @@ R.Screens.week = (function(){
       K.Span(4, K.Stack([
         digestCard(n),
         reviewCard(n),
-        when(S.reviews[M.weekId(n)], () => raw(R.Coach.panel('week', S.coach && S.coach['week-'+M.weekId(n)]))),
         K.Card({ title:'Müfredat referansı', sub:'Bu haftanın plandaki karşılığı', body:html`
           <div class="stack-xs"><span class="mono-label">Konu blokları</span>
             ${K.Row(map(curriculum.topics, t => K.Chip(t)), { wrap:true })}</div>
@@ -13198,7 +13470,6 @@ R.Screens.cards = (function(){
                 : 'Açık yanlış yok. Deneme analizinde etiketlenen her hata buraya düşer.' }) }),
       ])),
       K.Span(4, K.Stack([
-        when(C.openErrors().length >= 5, () => raw(R.Coach.panel('roots', S.coach && S.coach['roots-'+U.todayISO()]))),
         K.Card({ title:'Defter alanları', hint:'notebook', sub:'Her kayıtta doldurulacak alanlar',
           body:K.Table({ tight:true, headers:['Alan', 'Yazılacak bilgi'],
             rows:R.NOTEBOOK_FIELDS.map(f => [html`<b class="small">${f[0]}</b>`, html`<span class="small muted">${f[1]}</span>`]) }) }),
@@ -13667,13 +13938,10 @@ R.Screens.learn = (function(){
             : K.Field({ label:'Video bağlantısı', hint:'YouTube bağlantısı gömülü açılır',
                 input:K.Input({ id:'nd-url', value:note.url, placeholder:'https://…', change:'note-url' }) })}` }),
 
-        when(R.Coach.available() && note.segments.length, () => raw(R.Coach.panel('note-summary',
-          S.coach && S.coach['note-summary-n-'+note.id]))),
-
-        when(R.Coach.available() && note.segments.length, () => K.Card({
-          title:'Koçtan kart üret', sub:'Notlardan geri çağırma kartı önerir; sen onaylarsın',
+        when(R.Office.mode() === 'llm' && note.segments.length, () => K.Card({
+          title:'Ofisten kart üret', sub:'Notlardan geri çağırma kartı önerir; sen onaylarsın',
           body:html`
-            <p class="small muted">Koç yalnız metin önerir. Kart nesnesini kural motoru kurar:
+            <p class="small muted">Ajan yalnız metin önerir. Kart nesnesini kural motoru kurar:
               aşama 0, ilk tekrar yarın, konu bu derse bağlı.</p>
             ${K.Button({ label:'Kart önerileri getir', icon:'zap', tone:'primary', block:true,
               class:'mt-10', act:'note-ai-cards', data:{ 'data-id':note.id } })}
@@ -13867,7 +14135,7 @@ R.Screens.learn = (function(){
       if(out) out.innerHTML = String(html`<p class="small muted mt-10">Notlar okunuyor…
         <span class="dim">(10–60 sn)</span></p>`);
       try{
-        const res = await R.Coach.generateCards(id);
+        const res = await R.Office.generateCards(id);
         pendingCards = res.cards;
         UI.sheet({
           title:'Önerilen kartlar', subtitle:res.cards.length+' kart · '+(res.dropped ? res.dropped+' öneri elendi' : 'hepsi geçerli'),
@@ -13884,7 +14152,7 @@ R.Screens.learn = (function(){
             ${K.Button({ label:'Hepsini ekle', tone:'primary', act:'note-ai-accept' })}`),
         });
       }catch(err){
-        const msg = R.Coach.errorText(err && err.code);
+        const msg = R.LLM.errorText(err && err.code);
         if(out) out.innerHTML = String(html`<div class="mt-10">${K.Notice({ tone:'warn', body:msg })}</div>`);
       }
     },
@@ -14535,8 +14803,8 @@ R.Screens.subjects = (function(){
     return K.Card({
       title:'Öncelik sırası', hint:'closure',
       sub:'Frekans, kapanış, açık yanlış, gecikmiş kart ve tazelikten hesaplanır',
-      actions:when(R.Coach.available(), () => K.Button({ label:'Yorumla', icon:'zap', size:'sm',
-        act:'coach-run', data:{ 'data-kind':'risk' } })),
+      actions:K.Button({ label:'Analiste sor', icon:'zap', size:'sm',
+        act:'ask-agent', data:{ 'data-agent':'analist' } }),
       body:html`
         ${map(list, r => html`
           <div class="riskrow" data-act="open-topic" data-subject="${r.subjectId}" data-topic="${r.topicId}">
@@ -15653,7 +15921,6 @@ R.Screens.progress = (function(){
 
       K.Span(4, K.Stack([
         gateCard(),
-        raw(R.Coach.panel('gate', S.coach && S.coach['gate-'+U.monthKey(U.today())])),
         K.Card({ title:'Hata paretosu', sub:'Son haftaların hata dağılımı', body:html`
           ${raw(UI.paretoBars(pareto))}
           ${when(pareto[0] && pareto[0].count, () => html`<div class="mt-10">${K.Notice({ tone:'info',
@@ -16290,210 +16557,6 @@ R.Screens.protocols = (function(){
     },
     actions(){ return ''; },
     render, handle,
-  };
-})();
-
-/* ==== js/screens/coach.js ==== */
-/* Koç — sistemdeki veriyi okuyarak yanıtlayan sohbet ekranı.
-
-   Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz.
-   Yetenek yoksa arayuz cevrimdisi moda duser; kisisel alan LLM'e gitmez. */
-
-window.R = window.R || {};
-R.Screens = R.Screens || {};
-
-R.Screens.coach = (function(){
-  const U = R.U, UI = R.UI, S = R.S;
-  const { html, raw, when, map } = R.h;
-  const K = R.C;
-
-  let busy = false;
-  let controller = null;
-
-  function Bubble(m){
-    return html`
-      <div class="${m.role === 'user' ? 'msg msg--me' : 'msg msg--coach'}">
-        <div class="msg__body">${raw(U.esc(m.text).replace(/\n/g, '<br/>'))}</div>
-        ${when(m.warnings && m.warnings.length, () => html`
-          <div class="msg__warn">${raw(UI.icon('warn'))} ${m.warnings.join(' ')}</div>`)}
-      </div>`;
-  }
-
-  /* Kocun okudugu ozet — sohbetin ustunde sabit kalir. */
-  function dataStrip(){
-    const d = R.CoachTools.durum();
-    const chips = [
-      ['Hafta', d.programHaftasi+'/'+d.toplamHafta],
-      ['TYT medyan', d.tytMedyan == null ? '—' : U.fmtNet(d.tytMedyan)],
-      ['Plan', d.planTamamlama == null ? '—' : '%'+d.planTamamlama],
-      ['Kapanış', '%'+d.konuKapanisYuzdesi],
-      ['Due kart', String(d.dueKart)],
-      ['Açık yanlış', String(d.acikYanlis)],
-    ];
-    return K.Row(map(chips, c => html`
-      <span class="chip"><span class="dim">${c[0]}</span> <b>${c[1]}</b></span>`), { wrap:true });
-  }
-
-  function offlineView(){
-    const note = R.PROMPTS.offlineTemplate(R.CoachTools.sanitize(R.CoachTools.durum()));
-    return K.Grid([
-      K.Span(8, K.Stack([
-        K.Notice({ tone:'info', title:'Koç çevrimdışı.',
-          body:'Yorum üretmek için bağlantı gerekir. Aşağıdaki not verini kural özetiyle birlikte hazırlar; '
-             + 'kopyalayıp kendi yapay zekâna yapıştırabilirsin.' }),
-        K.Card({ title:'Koç notu', sub:'Kişisel bilgin çıkarılmış hâliyle',
-          actions:K.Button({ label:'Kopyala', icon:'edit', size:'sm', act:'coach-copy' }),
-          body:html`<textarea class="textarea coachnote" id="coach-note" readonly rows="14"
-            aria-label="koç notu">${note}</textarea>` }),
-      ])),
-      K.Span(4, raw(UI.rail(['ai-coach', 'offline', 'median', 'gate']))),
-    ]);
-  }
-
-  function toolsCard(){
-    return K.Card({
-      title:'Koç neyi okuyabilir?', sub:'Yalnız okur, veriyi değiştirmez',
-      body:html`<div class="stack-xs">${map(R.CoachTools.TOOLS, t => html`
-        <div class="row-top gap-8">
-          <span class="statedot state-closed mt-6"></span>
-          <div><b class="small">${t.name.replace(/_/g, ' ')}</b>
-            <div class="tiny dim">${t.description.split('.')[0]}</div></div>
-        </div>`)}</div>`,
-    });
-  }
-
-  async function render(){
-    if(!R.Coach.available()) return String(offlineView());
-
-    const msgs = S.coachChat || [];
-
-    return String(K.Grid([
-      K.Span(8, K.Stack([
-        K.Card({
-          title:'Koça sor', hint:'ai-coach',
-          sub:'Verini okuyarak yanıtlar — deneme, hata, konu, hafta ve gün kayıtların',
-          actions:when(msgs.length, () => K.Button({ label:'Sohbeti temizle', size:'sm', tone:'ghost', act:'coach-clear' })),
-          body:dataStrip(),
-        }),
-
-        html`<div class="chat" id="chat-log">
-          ${msgs.length
-            ? map(msgs, Bubble)
-            : html`<div class="chat__empty">${raw(UI.icon('guide'))}
-                <p>Bir soru sor; koç önce verine bakar, sonra yanıtlar.</p></div>`}
-          <div id="chat-pending"></div>
-        </div>`,
-
-        when(!msgs.length, () => K.Row(map(R.Coach.suggestions(), q =>
-          K.Chip({ label:q, act:'coach-suggest', data:{ 'data-q':q } })), { wrap:true })),
-
-        html`<div class="composer">
-          ${K.Textarea({ id:'chat-input', rows:2, class:'composer__input',
-            placeholder:'ör. bu hafta neye odaklanmalıyım?' })}
-          ${K.Button({ label:'Sor', icon:'zap', tone:'primary', act:'coach-send' })}
-        </div>`,
-      ])),
-
-      K.Span(4, K.Stack([
-        toolsCard(),
-        raw(UI.rail(['ai-coach', 'median', 'gate', 'closure'])),
-      ])),
-    ]));
-  }
-
-  async function send(question){
-    if(busy) return;
-    const q = (question || '').trim();
-    if(!q) return;
-    busy = true;
-    controller = new AbortController();
-
-    await R.Coach.pushChat('user', q);
-    await R.App.render();
-
-    const pending = document.getElementById('chat-pending');
-    if(pending){
-      pending.innerHTML = String(html`<div class="msg msg--coach">
-        <div class="msg__body dim" id="chat-stream">Verine bakıyor…
-          <span class="tiny">(ilk yanıt 10–60 sn sürebilir)</span></div></div>`);
-    }
-    scrollLog();
-
-    try{
-      const res = await R.Coach.ask(q, {
-        signal:controller.signal,
-        onText(ev){
-          const el = document.getElementById('chat-stream');
-          if(!el) return;
-          el.classList.remove('dim');
-          el.innerHTML = U.esc(ev.text).replace(/\n/g, '<br/>');
-          scrollLog();
-        },
-      });
-      await R.Coach.pushChat('assistant', res.text, res.warnings);
-    }catch(err){
-      const code = err && err.code;
-      if(code !== 'cancelled') await R.Coach.pushChat('assistant', R.Coach.errorText(code));
-    }finally{
-      busy = false;
-      controller = null;
-      await R.App.render();
-      scrollLog();
-    }
-  }
-
-  function scrollLog(){
-    const log = document.getElementById('chat-log');
-    if(log) log.scrollTop = log.scrollHeight;
-  }
-
-  const handle = {
-    async 'coach-send'(){
-      const el = document.getElementById('chat-input');
-      const q = el ? el.value : '';
-      if(el) el.value = '';
-      await send(q);
-    },
-    async 'coach-suggest'(el){ await send(el.dataset.q); },
-    async 'coach-copy'(){
-      const el = document.getElementById('coach-note');
-      if(!el) return;
-      try{
-        await navigator.clipboard.writeText(el.value);
-        UI.toast('Koç notu kopyalandı');
-      }catch(e){
-        el.select();
-        UI.toast('Metni seç ve kopyala');
-      }
-    },
-    async 'coach-clear'(){
-      UI.confirmSheet('Sohbeti temizle', 'Koçla yaptığın konuşma silinecek. Çalışma verilerin etkilenmez.', async () => {
-        await R.Coach.clearChat();
-        UI.closeSheet();
-        R.App.render();
-      });
-    },
-  };
-
-  function onKey(e){
-    if(e.key !== 'Enter' || !(e.ctrlKey || e.metaKey)) return;
-    const el = document.getElementById('chat-input');
-    if(el && document.activeElement === el){
-      e.preventDefault();
-      handle['coach-send']();
-    }
-  }
-
-  return {
-    id:'coach',
-    title:'Koç',
-    subtitle(){
-      if(!R.Coach.available()) return 'Çevrimdışı — koç kullanılamıyor';
-      const n = (S.coachChat || []).length;
-      return n ? Math.ceil(n/2)+' soru soruldu · verini okuyarak yanıtlar' : 'Verini okuyarak yanıtlar';
-    },
-    actions(){ return ''; },
-    render, handle, onKey, afterRender:scrollLog,
   };
 })();
 
@@ -17361,24 +17424,24 @@ R.Screens.profiles = (function(){
 })();
 
 /* ==== js/screens/office.js ==== */
-/* Ofis — bes ajanin masasi, gunun karari ve model ayarlari.
+/* Ofis — bes ajanin masasi, gunun karari, kota panosu ve model ayarlari.
 
    Yazim bicimi: STIL.md / DONUSTURME.md. String birlestirme yok,
-   etkilesim yalniz data-act ile baglanir. */
+   etkilesim yalniz data-act / data-change ile baglanir. */
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
 
 R.Screens.office = (function(){
   const U = R.U, UI = R.UI, S = R.S;
-  const { html, raw, when, map } = R.h;
+  const { html, raw, when, map, cls } = R.h;
   const K = R.C;
   const O = R.Office;
 
   /* ---------- parcalar ---------- */
 
   function Avatar(agent, size){
-    return html`<span class="${'agentav agentav--' + agent.id + (size === 'sm' ? ' agentav--sm' : '')}"
+    return html`<span class="${cls('agentav', 'agentav--' + agent.id, size === 'sm' && 'agentav--sm')}"
       aria-hidden="true">${agent.initial}</span>`;
   }
 
@@ -17393,14 +17456,24 @@ R.Screens.office = (function(){
     return html`<div class="deskstats">${map(b.metrics, m => html`
       <div class="deskstat">
         <span class="deskstat__label">${m.label}</span>
-        <b class="${'deskstat__value num' + (m.tone && m.tone !== 'muted' ? ' is-' + m.tone : '')}">${m.value}</b>
+        <b class="${cls('deskstat__value num', m.tone && m.tone !== 'muted' && 'is-' + m.tone)}">${m.value}</b>
         ${when(m.note, () => html`<span class="deskstat__note">${m.note}</span>`)}
       </div>`)}</div>`;
+  }
+
+  /* Masanin durum satiri — ofis hissini veren sey: herkesin ne yaptigi belli. */
+  function deskStatus(agent){
+    const q = O.agentQuota(agent.id);
+    if(O.mode() !== 'llm') return { text:'kural motoruyla çalışıyor', tone:'muted' };
+    if(q && q.full) return { text:'günlük hakkı doldu', tone:'danger' };
+    if(q && q.waitMs > 1500) return { text:'sırada · ' + Math.ceil(q.waitMs/1000) + ' sn', tone:'warn' };
+    return { text:'masasında, müsait', tone:'ok' };
   }
 
   function Desk(agent){
     const b = O.brief(agent.id);
     const open = S.ui.officeDesk === agent.id;
+    const st = deskStatus(agent);
     const worst = b.findings.some(f => f.tone === 'danger') ? 'danger'
       : b.findings.some(f => f.tone === 'warn') ? 'warn' : 'ok';
 
@@ -17416,13 +17489,18 @@ R.Screens.office = (function(){
           ${K.Badge({ label:worst === 'danger' ? 'dikkat' : worst === 'warn' ? 'izliyor' : 'temiz', tone:worst })}
         </div>
 
+        <div class="${'deskstate deskstate--' + st.tone}">
+          <span class="deskstate__dot"></span>${st.text}
+        </div>
+
         <p class="desk__line">${b.headline}</p>
         ${deskMetrics(b)}
 
         ${when(open, () => html`
           <div class="desk__open">
-            <div class="stack-xs mt-10">${map(b.findings, findingRow)}</div>
-            ${when(b.suggestion, () => K.Notice({ tone:'info', title:'Önerisi:', body:b.suggestion.text }))}
+            <div class="stack-xs">${map(b.findings, findingRow)}</div>
+            ${when(b.suggestion, () => html`<div class="mt-10">
+              ${K.Notice({ tone:'info', title:'Önerisi:', body:b.suggestion.text })}</div>`)}
             <p class="tiny dim mt-8">Masasındaki veri: ${agent.reads.join(' · ')}</p>
           </div>`)}
 
@@ -17437,23 +17515,68 @@ R.Screens.office = (function(){
     });
   }
 
+  /* Ofis panosu — girişte asılı tahta: hangi gün, kaç gün kaldı, ekip ne durumda. */
+  function boardCard(){
+    const n = M().currentWeek();
+    const daysLeft = U.diffDays(U.todayISO(), R.PLAN.examTytISO);
+    const meetings = O.meetings().length;
+    const open = O.openDecisions().length;
+
+    return K.Card({
+      class:'board',
+      body:html`
+        <div class="board__row">
+          <div class="board__cell">
+            <span class="board__label">Bugün</span>
+            <b class="board__value">${U.fmtShort(U.today())}</b>
+            <span class="board__note">hafta ${n}/${R.PLAN.totalWeeks}</span>
+          </div>
+          <div class="board__cell">
+            <span class="board__label">TYT’ye kalan</span>
+            <b class="board__value num">${daysLeft}</b>
+            <span class="board__note">gün (tahmin)</span>
+          </div>
+          <div class="board__cell">
+            <span class="board__label">Toplantı</span>
+            <b class="board__value num">${meetings}</b>
+            <span class="board__note">${meetings ? 'tutanak arşivde' : 'henüz yapılmadı'}</span>
+          </div>
+          <div class="board__cell">
+            <span class="board__label">Açık karar</span>
+            <b class="${cls('board__value num', open && 'is-warn')}">${open}</b>
+            <span class="board__note">${open ? 'takipte' : 'temiz'}</span>
+          </div>
+        </div>`,
+    });
+  }
+
+  function M(){ return R.Model; }
+
   /* Patron karti — gunun tek isini gosterir, digerlerinden ayrilir. */
   function BossCard(){
-    const patron = R.AGENT_BY_ID.patron;
     const b = O.brief('patron');
     const action = O.nextAction();
+    const patron = R.AGENT_BY_ID.patron;
 
     return K.Card({
       class:'card--primary',
-      title:'Patron’un masası',
-      sub:'Dört uzmanın raporunu birleştirir; günün tek işini o söyler',
-      badge:K.Badge({ label:O.mode() === 'llm' ? 'model bağlı' : 'kural motoru',
-        tone:O.mode() === 'llm' ? 'ok' : 'info' }),
       body:html`
-        ${K.NextUp({ icon:action.icon || 'zap', label:action.label || 'Sıradaki iş',
-          title:action.title, why:action.why, hint:'next-action',
-          action:K.Button({ label:'Şimdi yap', tone:'primary', size:'sm', act:'go',
-            data:{ 'data-route':action.route || 'today' } }) })}
+        <div class="desk__head">
+          ${Avatar(patron)}
+          <div class="minw0">
+            <b class="desk__name">Patron’un masası</b>
+            <span class="desk__role">Dört uzmanın raporunu birleştirir; günün tek işini o söyler</span>
+          </div>
+          ${K.Badge({ label:O.mode() === 'llm' ? 'model bağlı' : 'kural motoru',
+            tone:O.mode() === 'llm' ? 'ok' : 'info' })}
+        </div>
+
+        <div class="mt-12">
+          ${K.NextUp({ icon:action.icon || 'zap', label:action.label || 'Sıradaki iş',
+            title:action.title, why:action.why, hint:'next-action',
+            action:K.Button({ label:'Şimdi yap', tone:'primary', size:'sm', act:'go',
+              data:{ 'data-route':action.route || 'today' } }) })}
+        </div>
 
         <div class="stack-xs mt-12">${map(b.findings, findingRow)}</div>
 
@@ -17467,33 +17590,69 @@ R.Screens.office = (function(){
     });
   }
 
-  function modeCard(){
-    if(O.mode() === 'llm'){
-      const st = O.settings();
-      const custom = Object.keys(st.perAgent || {}).length;
+  /* Takipteki kararlar — ofisi "gercek" yapan sey: verilen karar unutulmaz. */
+  function decisionsCard(){
+    const open = O.openDecisions();
+    if(!open.length) return '';
+    return K.Card({
+      title:'Takipteki kararlar', sub:'Toplantıda verildi, henüz kapanmadı',
+      badge:K.Badge({ label:String(open.length), tone:'warn' }),
+      body:html`<div class="stack-sm">${map(open, d => html`
+        <div class="decisionrow">
+          <div class="minw0">
+            <b class="small">${d.title}</b>
+            <span class="tiny dim">${U.relativeDay(d.at.slice(0, 10))} · ${d.topic}</span>
+          </div>
+          <div class="row gap-6">
+            ${K.Button({ label:'Yapıldı', size:'sm', tone:'primary', act:'office-decision',
+              data:{ 'data-id':d.id, 'data-state':'done' } })}
+            ${K.Button({ label:'Devret', size:'sm', tone:'ghost', act:'office-decision',
+              data:{ 'data-id':d.id, 'data-state':'carried' } })}
+          </div>
+        </div>`)}</div>`,
+    });
+  }
+
+  /* ---------- model ve kota panosu ---------- */
+
+  function quotaCard(){
+    const cfg = O.agentConfig('patron');
+    const q = R.Quota.status(cfg);
+    const sandbox = R.LLM.inSandbox() && cfg.provider !== 'builtin';
+
+    if(O.mode() !== 'llm'){
       return K.Card({
-        title:'Ofis modeli', sub:'Ajanların konuşmak için kullandığı model',
-        actions:K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }),
+        title:'Ofis modeli', sub:'Ücretsiz bir model bağlayınca ajanlar konuşmaya başlar',
+        actions:K.Button({ label:'Bağla', icon:'gear', size:'sm', tone:'primary', act:'office-settings' }),
         body:html`
-          ${K.Notice({ tone:'ok', title:'Bağlı:', body:O.providerLabel() })}
-          <p class="tiny dim mt-8">
-            ${custom ? custom + ' ajan kendi modelini kullanıyor. ' : ''}Model düşerse motor
-            yedek modele geçer; hiçbiri yanıt vermezse ajanlar kural motoru metniyle konuşur.
-          </p>`,
+          ${K.Notice({ tone:'info', title:'Şu an kural motoru modundasın.',
+            body:'Ajanlar veriyi okuyup bulgularını yazıyor ama cümleleri sabit. '
+               + 'Ücretsiz bir anahtar bağlarsan aynı bulguları kendi cümleleriyle tartışırlar.' })}
+          <div class="row wrap gap-6 mt-10">
+            ${map(['openrouter', 'groq', 'gemini'], id => K.Chip({ label:R.PROVIDERS[id].label,
+              act:'office-settings', data:{ 'data-provider':id } }))}
+          </div>`,
       });
     }
+
     return K.Card({
-      title:'Ofis modeli', sub:'Ücretsiz bir model bağlayınca ajanlar konuşmaya başlar',
-      actions:K.Button({ label:'Bağla', icon:'gear', size:'sm', tone:'primary', act:'office-settings' }),
+      title:'Ofis modeli', sub:O.providerLabel(),
+      actions:K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }),
       body:html`
-        ${K.Notice({ tone:'info', title:'Şu an kural motoru modundasın.',
-          body:'Ajanlar veriyi okuyup bulgularını yazıyor ama cümleleri sabit. '
-             + 'OpenRouter, Groq ya da Google AI Studio’dan ücretsiz bir anahtar alıp bağlarsan '
-             + 'aynı bulguları kendi cümleleriyle tartışırlar.' })}
-        <div class="row wrap gap-6 mt-10">
-          ${map(['openrouter', 'groq', 'gemini'], id => K.Chip({ label:R.PROVIDERS[id].label,
-            act:'office-settings', data:{ 'data-provider':id } }))}
-        </div>`,
+        ${when(sandbox, () => K.Notice({ tone:'warn', title:'Bu ortamda dış model çalışmayabilir.',
+          body:'Uygulama Claude içinde yayımlanmış bir sayfa olarak açıldığında dış API çağrıları '
+             + 'engellenir. Yerleşik modeli seç ya da uygulamayı kendi tarayıcında aç.' }))}
+
+        ${when(q.known, () => html`
+          ${K.Meter({ label:'Bugün kullanılan hak', value:q.rpd ? (100 * q.usedToday / q.rpd) : 0,
+            text:q.usedToday + ' / ' + q.rpd, tone:q.full ? 'danger' : (q.remainingToday < 10 ? 'warn' : ''),
+            note:'dakikada en fazla ' + q.rpm + ' istek · istekler arası ' + Math.round(q.gapMs/100)/10 + ' sn' })}
+          <p class="tiny dim mt-8">
+            Sınır motorda uygulanıyor: istekler sıraya alınır, kota hiçbir zaman aşılmaz.
+            Bir toplantı turu ${Math.round(R.Quota.estimateMs(O.agentConfig('patron'), 6)/1000)} sn sürer.
+          </p>`)}
+        ${when(!q.known, () => html`<p class="small muted">Bu sağlayıcı için bilinen bir istek sınırı yok;
+          kota yöneticisi araya girmiyor.</p>`)}`,
     });
   }
 
@@ -17502,72 +17661,129 @@ R.Screens.office = (function(){
     if(!m){
       return K.Card({ title:'Son toplantı', sub:'Ekip henüz toplanmadı',
         body:K.Empty({ icon:'guide', text:'Toplantıda gündemi kural motoru seçer, uzmanlar sırayla konuşur, '
-          + 'Patron tek karar çıkarır.',
+          + 'sen bitirdiğinde rapor çıkar.',
           action:K.Button({ label:'İlk toplantıyı başlat', tone:'primary', act:'office-meet' }) }) });
     }
-    const closing = m.turns.filter(t => t.closing).pop();
     return K.Card({
       title:'Son toplantı', sub:U.relativeDay(m.at.slice(0, 10)) + ' · ' + m.topic,
       badge:K.Badge({ label:m.mode, tone:m.mode === 'llm' ? 'ok' : 'info' }),
       body:html`
-        ${when(closing, () => html`<p class="prose">${closing.text}</p>`)}
-        ${K.Notice({ tone:'info', title:'Karar:', body:m.action.title })}
+        ${when(m.report, () => html`<p class="prose">${m.report.summary}</p>`)}
+        ${when(m.action, () => K.Notice({ tone:'info', title:'Karar:', body:m.action.title }))}
         <div class="row wrap gap-6 mt-10">
           ${K.Button({ label:'Tutanağı aç', size:'sm', act:'go', data:{ 'data-route':'meeting' } })}
-          ${K.Button({ label:'Kararı uygula', size:'sm', tone:'primary', act:'go',
-            data:{ 'data-route':m.action.route || 'today' } })}
+          ${when(m.action, () => K.Button({ label:'Kararı uygula', size:'sm', tone:'primary', act:'go',
+            data:{ 'data-route':m.action.route || 'today' } }))}
         </div>`,
     });
   }
 
-  /* ---------- ayar sayfasi (sheet) ---------- */
+  /* ---------- ayar sayfasi ---------- */
+
+  /* Anahtar bicimi saglayiciya gore bellidir; yanlis yapistirmayi kaydetmeden
+     once yakalamak icin uyarilir (engellenmez: bicim degisebilir). */
+  const KEY_SHAPES = {
+    openrouter:{ re:/^sk-or-/, hint:'OpenRouter anahtarları "sk-or-" ile başlar.' },
+    groq:      { re:/^gsk_/,   hint:'Groq anahtarları "gsk_" ile başlar.' },
+    gemini:    { re:/^AIza/,   hint:'Google AI Studio anahtarları "AIza" ile başlar.' },
+  };
+
+  function keyWarning(providerId, value){
+    const shape = KEY_SHAPES[providerId];
+    if(!shape || !value) return null;
+    if(shape.re.test(value)) return null;
+    return shape.hint + ' Yanlış sağlayıcının anahtarını yapıştırmış olabilirsin.';
+  }
 
   function providerForm(providerId){
     const st = O.settings();
     const p = R.PROVIDERS[providerId];
     const models = p.models || [];
     const current = providerId === st.provider ? st.model : (models[0] ? models[0].id : '');
+    const hasKey = !!R.LLM.getKey(providerId);
+    const lim = R.Quota.limitsFor({ provider:providerId, model:current });
+    const over = R.Quota.getOverride(providerId);
 
     return K.Stack([
       K.Notice({ tone:'info', body:p.note }),
 
+      /* --- 1. anahtar --- */
       when(p.needsKey, () => K.Stack([
-        K.Field({ label:'API anahtarı', hint:R.LLM.getKey(providerId) ? 'kayıtlı: ' + R.LLM.maskKey(providerId) : p.keyHint,
+        K.SectionTitle('1. API anahtarı'),
+        when(hasKey, () => K.Notice({ tone:'ok', title:'Kayıtlı anahtar var:',
+          body:html`${R.LLM.maskKey(providerId)}
+            <div class="mt-8">${K.Button({ label:'Anahtarı sil', size:'sm', tone:'ghost',
+              act:'office-forget', data:{ 'data-provider':providerId } })}</div>` })),
+        K.Field({ label:hasKey ? 'Yeni anahtarla değiştir' : 'Anahtarı yapıştır',
+          hint:p.keyHint,
           input:K.Input({ id:'llm-key', type:'password', placeholder:p.keyHint,
-            aria:'API anahtarı' }) }),
+            aria:'API anahtarı', change:'office-key' }) }),
+        html`<div id="llm-key-warn"></div>`,
         html`<p class="tiny dim">Anahtar yalnız bu tarayıcıda durur; yedeğe girmez, buluta gitmez,
           modele gönderilmez. ${when(p.keyUrl, () => html`Ücretsiz anahtar:
           <a href="${p.keyUrl}" target="_blank" rel="noopener">${p.keyUrl.replace(/^https:\/\//, '')}</a>`)}</p>`,
-      ], 'xs')),
+      ], 'sm')),
 
-      when(p.editableEndpoint, () => K.Field({ label:'Uç adresi',
-        hint:'OpenAI uyumlu /chat/completions',
-        input:K.Input({ id:'llm-endpoint', value:st.endpoint || '',
-          placeholder:'http://localhost:11434/v1/chat/completions' }) })),
+      /* --- 2. uc adresi (yalniz ozel) --- */
+      when(p.editableEndpoint, () => K.Stack([
+        K.SectionTitle('Uç adresi'),
+        K.Field({ label:'OpenAI uyumlu /chat/completions',
+          input:K.Input({ id:'llm-endpoint', value:st.endpoint || '',
+            placeholder:'http://localhost:11434/v1/chat/completions' }) }),
+      ], 'sm')),
 
-      when(models.length, () => K.Field({ label:'Varsayılan model',
-        input:K.Select({ id:'llm-model', value:current,
-          options:models.map(m => ({ value:m.id, label:m.label + (m.strength ? ' · ' + m.strength : '') })) }) })),
+      /* --- 3. model --- */
+      K.Stack([
+        K.SectionTitle(p.needsKey ? '2. Model' : 'Model'),
+        when(models.length, () => K.Field({ label:'Listeden seç',
+          input:K.Select({ id:'llm-model', value:current, change:'office-model',
+            options:models.map(m => ({ value:m.id,
+              label:m.label + (m.strength ? ' · ' + m.strength : '') })) }) })),
+        K.Field({ label:'Ya da model kimliğini elle yaz',
+          hint:'liste eskiyse doldur; boş bırakırsan yukarıdaki seçilir',
+          input:K.Input({ id:'llm-model-custom', placeholder:'ör. deepseek/deepseek-chat-v3-0324:free' }) }),
+      ], 'sm'),
 
-      K.Field({ label:'Model kimliğini elle yaz', hint:'liste eskiyse doldur, boş bırakırsan yukarıdaki seçilir',
-        input:K.Input({ id:'llm-model-custom', placeholder:'ör. deepseek/deepseek-chat-v3-0324:free' }) }),
+      /* --- 4. istek siniri --- */
+      when(p.needsKey, () => K.Stack([
+        K.SectionTitle(p.editableEndpoint ? 'İstek sınırı' : '3. İstek sınırı'),
+        html`<p class="small muted">Motor bu sınırı hiç aşmaz: istekleri sıraya alır ve aralarına
+          boşluk koyar. Sınır senin hesabında farklıysa buradan düzelt.
+          ${when(p.checked, () => html`<span class="tiny dim">(katalog: ${p.checked})</span>`)}</p>`,
+        html`<div class="cols-2">
+          ${K.Field({ label:'Dakikada istek',
+            input:K.Input({ id:'llm-rpm', type:'number', min:1, numeric:true,
+              value:over.rpm || (lim && lim.rpm) || '', placeholder:'—' }) })}
+          ${K.Field({ label:'Günde istek',
+            input:K.Input({ id:'llm-rpd', type:'number', min:1, numeric:true,
+              value:over.rpd || (lim && lim.rpd) || '', placeholder:'—' }) })}
+        </div>`,
+        when(p.rpdChoices, () => K.Row(map(p.rpdChoices, c =>
+          K.Chip({ label:c.label, act:'office-rpd', data:{ 'data-rpd':c.value } })), { wrap:true })),
+      ], 'sm')),
 
+      /* --- 5. yedek --- */
       K.Checkbox({ label:'Model düşerse yedeğe geç (önerilir)', checked:st.fallback !== false,
         act:'office-toggle-fallback' }),
 
-      html`<div id="llm-test" class="mt-8"></div>`,
+      html`<div id="llm-test"></div>`,
     ]);
   }
 
   function openSettings(providerId){
     const st = O.settings();
     const pid = providerId || st.provider || 'builtin';
+    const sandbox = R.LLM.inSandbox();
 
     UI.sheet({
       title:'Ofis ayarları',
       subtitle:'Ajanların kullandığı model — ücretsiz sağlayıcılar desteklenir',
       wide:true,
       body:String(K.Stack([
+        when(sandbox, () => K.Notice({ tone:'warn', title:'Dikkat: bu ortam dışa kapalı olabilir.',
+          body:'Uygulama Claude içinde yayımlanmış bir sayfa olarak çalışıyor. Bu ortamda dış API '
+             + 'çağrıları engellenir; "Yerleşik" sağlayıcı çalışır, diğerleri çalışmayabilir. '
+             + 'Ücretsiz sağlayıcıları kullanmak için uygulamayı kendi tarayıcında aç.' })),
         K.Field({ label:'Sağlayıcı', input:K.Select({ id:'llm-provider', change:'office-provider',
           value:pid,
           options:R.PROVIDER_ORDER.map(id => ({ value:id,
@@ -17577,7 +17793,7 @@ R.Screens.office = (function(){
           open:!!S.ui.officePerAgent,
           body:html`<div class="stack-sm">
             <p class="small muted">Boş bırakılan ajan ofis varsayılanını kullanır.
-              Toplantıda Patron’a daha güçlü, uzmanlara daha hızlı model verebilirsin.</p>
+              Patron’a güçlü, uzmanlara hızlı model verebilirsin.</p>
             ${map(R.AGENTS, a => K.Field({ label:a.name + ' · ' + a.role,
               input:K.Input({ id:'llm-agent-' + a.id,
                 value:(st.perAgent && st.perAgent[a.id] && st.perAgent[a.id].model) || '',
@@ -17590,6 +17806,47 @@ R.Screens.office = (function(){
     });
   }
 
+  /* Sheet icindeki alanlari tek yerden okur. */
+  function readForm(){
+    const provider = (document.getElementById('llm-provider') || {}).value;
+    if(!provider || !R.PROVIDERS[provider]){ UI.toast('Sağlayıcı seçilmedi'); return null; }
+    const p = R.PROVIDERS[provider];
+    const val = id => { const el = document.getElementById(id); return el ? String(el.value).trim() : ''; };
+    const custom = val('llm-model-custom');
+    const picked = val('llm-model');
+    const model = custom || picked || (p.models[0] ? p.models[0].id : '');
+    return {
+      provider, model,
+      endpoint:document.getElementById('llm-endpoint') ? val('llm-endpoint') : (O.settings().endpoint || ''),
+      key:val('llm-key'),
+      rpm:val('llm-rpm'),
+      rpd:val('llm-rpd'),
+    };
+  }
+
+  /* Kaydetmeden once eksigi soyler; sessizce kabul edip sonra patlamaz. */
+  function validate(cfg){
+    const p = R.PROVIDERS[cfg.provider];
+    if(p.needsKey && !cfg.key && !R.LLM.getKey(cfg.provider)){
+      return 'Bu sağlayıcı için API anahtarı gerekiyor. Ücretsiz anahtarı bağlantıdan alabilirsin.';
+    }
+    if(p.editableEndpoint && !cfg.endpoint){
+      return 'Özel uç için adres gerekiyor (OpenAI uyumlu /chat/completions).';
+    }
+    if(!cfg.model) return 'Model seçilmedi. Listeden seç ya da model kimliğini elle yaz.';
+    return null;
+  }
+
+  function applyForm(cfg){
+    if(cfg.key) R.LLM.setKey(cfg.provider, cfg.key);
+    R.Quota.setOverride(cfg.provider, { rpm:cfg.rpm, rpd:cfg.rpd });
+  }
+
+  function testOutput(node){
+    const out = document.getElementById('llm-test');
+    if(out) out.innerHTML = String(node);
+  }
+
   /* ---------- ekran ---------- */
 
   async function render(){
@@ -17598,14 +17855,16 @@ R.Screens.office = (function(){
 
     return String(K.Grid([
       K.Span(8, K.Stack([
+        boardCard(),
         BossCard(),
+        decisionsCard(),
         K.SectionTitle('Uzman masaları'),
         html`<div class="desks">${map(specialists, Desk)}</div>`,
       ])),
       K.Span(4, K.Stack([
-        modeCard(),
+        quotaCard(),
         lastMeetingCard(),
-        raw(UI.rail(['ai-coach', 'next-action', 'median'])),
+        raw(UI.rail(['next-action', 'median', 'closure'])),
       ])),
     ]));
   }
@@ -17635,28 +17894,50 @@ R.Screens.office = (function(){
 
     async 'office-peragent'(){
       S.ui.officePerAgent = !S.ui.officePerAgent;
-      openSettings(document.getElementById('llm-provider') ? document.getElementById('llm-provider').value : null);
+      const sel = document.getElementById('llm-provider');
+      openSettings(sel ? sel.value : null);
     },
 
     async 'office-toggle-fallback'(el){
       await O.saveSettings({ fallback:!!el.checked });
     },
 
+    async 'office-forget'(el){
+      R.LLM.setKey(el.dataset.provider, '');
+      UI.toast('Anahtar silindi');
+      const sel = document.getElementById('llm-provider');
+      const form = document.getElementById('llm-form');
+      if(form && sel) form.innerHTML = String(providerForm(sel.value));
+    },
+
+    async 'office-rpd'(el){
+      const input = document.getElementById('llm-rpd');
+      if(input) input.value = el.dataset.rpd;
+    },
+
     async 'office-test'(el){
-      const out = document.getElementById('llm-test');
       const cfg = readForm();
       if(!cfg) return;
-      if(cfg.key) R.LLM.setKey(cfg.provider, cfg.key);
+      const problem = validate(cfg);
+      if(problem){ testOutput(K.Notice({ tone:'warn', body:problem })); return; }
+      applyForm(cfg);
+
       el.disabled = true;
-      if(out) out.innerHTML = String(K.Notice({ tone:'info', body:'Deneniyor…' }));
+      testOutput(K.Notice({ tone:'info', body:'Deneniyor… (ücretsiz modellerde 5–30 sn sürebilir)' }));
       try{
         const res = await R.LLM.test({ provider:cfg.provider, model:cfg.model, endpoint:cfg.endpoint });
-        if(out) out.innerHTML = String(K.Notice({ tone:'ok', title:'Bağlantı çalışıyor.',
-          body:res.model + ' · ' + res.ms + ' ms · yanıt: ' + res.text }));
+        const q = R.Quota.status({ provider:cfg.provider, model:cfg.model });
+        testOutput(K.Notice({ tone:'ok', title:'Bağlantı çalışıyor.',
+          body:res.model + ' · ' + res.ms + ' ms'
+            + (q.known ? ' · bugün ' + q.usedToday + '/' + q.rpd + ' istek kullanıldı' : '')
+            + ' · yanıt: “' + res.text + '”' }));
       }catch(err){
-        if(out) out.innerHTML = String(K.Notice({ tone:'danger', title:'Bağlanamadı.',
-          body:R.LLM.errorText(err && err.code) + (err && err.message && err.code !== err.message
-            ? ' (' + String(err.message).slice(0, 120) + ')' : '') }));
+        const code = err && err.code;
+        const detail = (err && err.message && err.message !== code)
+          ? String(err.message).slice(0, 160) : '';
+        testOutput(K.Notice({ tone:'danger', title:'Bağlanamadı.',
+          body:html`${R.LLM.errorText(code)}
+            ${when(detail, () => html`<span class="tiny dim"> — sağlayıcının yanıtı: ${detail}</span>`)}` }));
       }finally{
         el.disabled = false;
       }
@@ -17665,7 +17946,9 @@ R.Screens.office = (function(){
     async 'office-save'(){
       const cfg = readForm();
       if(!cfg) return;
-      if(cfg.key) R.LLM.setKey(cfg.provider, cfg.key);
+      const problem = validate(cfg);
+      if(problem){ testOutput(K.Notice({ tone:'warn', body:problem })); return; }
+      applyForm(cfg);
 
       const perAgent = {};
       R.AGENTS.forEach(a => {
@@ -17681,30 +17964,36 @@ R.Screens.office = (function(){
       UI.toast(O.mode() === 'llm' ? 'Ofis modeli bağlandı' : 'Ayarlar kaydedildi');
       R.App.render();
     },
-  };
 
-  /* Sheet icindeki alanlari tek yerden okur. */
-  function readForm(){
-    const provider = (document.getElementById('llm-provider') || {}).value;
-    if(!provider || !R.PROVIDERS[provider]){ UI.toast('Sağlayıcı seçilmedi'); return null; }
-    const p = R.PROVIDERS[provider];
-    const keyEl = document.getElementById('llm-key');
-    const custom = (document.getElementById('llm-model-custom') || {}).value;
-    const picked = (document.getElementById('llm-model') || {}).value;
-    const endpointEl = document.getElementById('llm-endpoint');
-    const model = (custom && custom.trim()) || picked || (p.models[0] ? p.models[0].id : '');
-    return {
-      provider,
-      model,
-      endpoint:endpointEl ? endpointEl.value.trim() : (O.settings().endpoint || ''),
-      key:keyEl ? keyEl.value.trim() : '',
-    };
-  }
+    async 'office-decision'(el){
+      await O.closeDecision(el.dataset.id, el.dataset.state);
+      UI.toast(el.dataset.state === 'done' ? 'Karar kapandı' : 'Karar devredildi');
+      R.App.render();
+    },
+  };
 
   const change = {
     async 'office-provider'(el){
       const form = document.getElementById('llm-form');
       if(form) form.innerHTML = String(providerForm(el.value));
+      testOutput('');
+    },
+    async 'office-key'(el){
+      const sel = document.getElementById('llm-provider');
+      const warn = keyWarning(sel ? sel.value : '', el.value.trim());
+      const box = document.getElementById('llm-key-warn');
+      if(box) box.innerHTML = warn ? String(K.Notice({ tone:'warn', body:warn })) : '';
+    },
+    async 'office-model'(el){
+      const custom = document.getElementById('llm-model-custom');
+      if(custom) custom.value = '';
+      const sel = document.getElementById('llm-provider');
+      const lim = R.Quota.limitsFor({ provider:sel ? sel.value : '', model:el.value });
+      const rpm = document.getElementById('llm-rpm');
+      const rpd = document.getElementById('llm-rpd');
+      const over = R.Quota.getOverride(sel ? sel.value : '');
+      if(rpm && !over.rpm) rpm.value = (lim && lim.rpm) || '';
+      if(rpd && !over.rpd) rpd.value = (lim && lim.rpd) || '';
     },
   };
 
@@ -17713,9 +18002,9 @@ R.Screens.office = (function(){
     title:'Ofis',
     subtitle(){
       const m = O.mode();
-      const n = O.meetings().length;
+      const open = O.openDecisions().length;
       return (m === 'llm' ? O.providerLabel() : 'kural motoru modu')
-        + ' · 5 ajan' + (n ? ' · ' + n + ' toplantı' : '');
+        + ' · 5 ajan' + (open ? ' · ' + open + ' açık karar' : '');
     },
     actions(){
       return String(K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }));
@@ -17973,8 +18262,11 @@ R.Screens.team = (function(){
 /* ==== js/screens/meeting.js ==== */
 /* Toplanti odasi — ajanlarin birbiriyle konustugu yer.
 
-   Akis sabittir: Patron gundemi acar → Analist, TYT, AYT ve Rehber sirayla
-   kendi alanindan tek bulgu bildirir → Patron tek karar cikarir.
+   Akis: Patron gundemi acar → uzmanlar TUR TUR konusur (durum → fikir →
+   itiraz → toparlama → serbest) → toplantiyi SEN bitirirsin → rapor cikar.
+
+   Konusmalar ard arda degil SIRAYLA akar: her tur bir model cagrisidir ve
+   kota yoneticisi aralarina bosluk koyar, boylece dakikalik sinir asilmaz.
    Gundemi ve karari kural motoru belirler; ajanlar yalnizca gerekcelendirir. */
 
 window.R = window.R || {};
@@ -17986,27 +18278,40 @@ R.Screens.meeting = (function(){
   const K = R.C;
   const O = R.Office;
 
-  /* Konusma sirasi — ekranin "siradaki konusmaci"yi bilmesi icin. */
-  const SEQ = ['patron'].concat(R.MEETING_ORDER).concat(['patron']);
-
+  /* Canli oturum durumu — ekranda tutulur, kaydedilmez. */
+  let session = null;
   let running = false;
+  let stopAsked = false;
+  let turnIndex = 0;
   let controller = null;
-  let liveTurns = [];
-  let liveAgenda = null;
+  let closed = null;       // biten toplantinin kaydi
+  let waitTimer = null;
+
+  const PER_ROUND = R.MEETING_ORDER.length;
+  function maxRounds(){ return O.maxRounds(); }
+  function maxTurns(){ return maxRounds() * PER_ROUND; }
 
   /* ---------- parcalar ---------- */
 
   function Avatar(agent){
-    return html`<span class="${'agentav agentav--' + agent.id + ' agentav--sm'}"
+    return html`<span class="${cls('agentav', 'agentav--' + agent.id, 'agentav--sm')}"
       aria-hidden="true">${agent.initial}</span>`;
   }
 
   function Turn(t){
+    if(t.agent === 'aday'){
+      return html`
+        <div class="meetturn meetturn--me">
+          <div class="meetturn__who"><b>Sen</b><span class="dim">söz aldın</span></div>
+          <div class="meetturn__body">${raw(U.esc(t.text).replace(/\n/g, '<br/>'))}</div>
+        </div>`;
+    }
     const agent = R.AGENT_BY_ID[t.agent] || R.AGENT_BY_ID.patron;
     return html`
       <div class="${cls('meetturn', t.closing && 'meetturn--closing')}">
         <div class="meetturn__who">
           ${Avatar(agent)}<b>${agent.name}</b><span class="dim">${agent.role}</span>
+          ${when(t.roundTitle, () => html`<span class="meetturn__round">${t.roundTitle}</span>`)}
           ${when(t.closing, () => K.Badge({ label:'karar', tone:'ok' }))}
           ${when(t.mode === 'kural', () => K.Badge({ label:'kural motoru', tone:'info' }))}
         </div>
@@ -18018,7 +18323,7 @@ R.Screens.meeting = (function(){
   }
 
   function pendingTurn(agentId, label){
-    const agent = R.AGENT_BY_ID[agentId];
+    const agent = R.AGENT_BY_ID[agentId] || R.AGENT_BY_ID.patron;
     return html`
       <div class="meetturn is-live">
         <div class="meetturn__who">${Avatar(agent)}<b>${agent.name}</b>
@@ -18027,10 +18332,14 @@ R.Screens.meeting = (function(){
       </div>`;
   }
 
+  /* ---------- gundem ---------- */
+
   function agendaCard(){
+    if(session || closed) return '';
     const list = O.agendaCandidates().slice(0, 5);
     const picked = list[U.clamp(S.ui.meetingAgenda || 0, 0, list.length - 1)] || list[0];
-    const calls = SEQ.length;
+    const q = O.agentQuota('patron');
+    const roundMs = O.roundEstimateMs('patron');
 
     return K.Card({
       title:'Gündem', sub:'Kural motoru en yüksek öncelikli başlığı seçti',
@@ -18038,52 +18347,139 @@ R.Screens.meeting = (function(){
         tone:O.mode() === 'llm' ? 'ok' : 'info' }),
       body:html`
         ${K.Notice({ tone:'info', title:picked.topic + '.', body:picked.why })}
+
+        ${(function(){
+          const d = O.pendingDecision();
+          return when(d, () => html`<div class="mt-10">
+            ${K.Notice({ tone:'warn', title:'Geçen toplantının kararı hâlâ açık:',
+              body:d.title + ' — Patron toplantıyı bunun hesabını sorarak açacak.' })}
+          </div>`);
+        })()}
+
         ${when(list.length > 1, () => html`<div class="mt-10">
           ${K.Field({ label:'Başka bir gündemle topla',
             input:K.Select({ id:'meet-agenda', change:'meet-agenda',
               value:String(S.ui.meetingAgenda || 0),
               options:list.map((c, i) => ({ value:String(i), label:c.topic })) }) })}
         </div>`)}
+
         <div class="row wrap gap-6 mt-12">
-          ${running
-            ? K.Button({ label:'Toplantıyı durdur', tone:'danger', act:'meet-stop' })
-            : K.Button({ label:'Toplantıyı başlat', icon:'zap', tone:'primary', act:'meet-start' })}
+          ${K.Button({ label:'Toplantıyı başlat', icon:'zap', tone:'primary', act:'meet-start' })}
           ${K.Button({ label:'Ofise dön', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'office' } })}
         </div>
-        <p class="tiny dim mt-8">Bir toplantı ${calls} konuşma turu sürer.
-          ${O.mode() === 'llm'
-            ? 'Ücretsiz modellerde istek sınırına takılırsan motor yedek modele, o da olmazsa kural motoruna düşer.'
-            : 'Model bağlı değil; ajanlar kural motoru metniyle konuşacak.'}</p>`,
+
+        <div class="meetplan mt-12">
+          <b class="small">Nasıl işleyecek?</b>
+          <ol class="meetplan__list">
+            ${map(R.Office.ROUNDS.slice(0, maxRounds()), (r, i) =>
+              html`<li><b>${i+1}. ${r.title}</b> — dört uzman sırayla konuşur</li>`)}
+          </ol>
+          <p class="tiny dim">Toplantıyı <b>sen</b> bitirirsin; istediğin turda “Bitir ve rapor al”a bas.
+            Araya girip söz de alabilirsin.
+            ${when(roundMs > 0, () => html`Bir tur yaklaşık
+              ${Math.round(roundMs/1000)} sn sürer — istekler kotayı aşmamak için sıraya alınır.`)}
+            ${when(q && q.known, () => html`Bugünkü hak: ${q.usedToday}/${q.rpd} istek kullanıldı.`)}
+            ${when(O.mode() !== 'llm', () => html`Model bağlı olmadığı için toplantı
+              ${maxRounds()} turda durur: ajanların elinde yalnızca kural motorunun raporu var,
+              sonrasında söyleyecek yeni bir şeyleri olmaz.`)}
+          </p>
+        </div>`,
     });
+  }
+
+  /* ---------- canli toplanti ---------- */
+
+  function controls(){
+    const round = session ? Math.min(maxRounds(), Math.floor(turnIndex / PER_ROUND) + 1) : 0;
+    return html`
+      <div class="meetbar">
+        <div class="meetbar__state">
+          ${when(running, () => html`<span class="meetbar__live"></span>`)}
+          <b>${running ? 'Tur ' + round + '/' + maxRounds() : 'Toplantı duraklatıldı'}</b>
+          <span class="dim">${session ? session.turns.length + ' konuşma' : ''}</span>
+        </div>
+        <div class="row wrap gap-6">
+          ${K.Button({ label:'Söz al', icon:'edit', size:'sm', act:'meet-say' })}
+          ${when(running, () => K.Button({ label:'Duraklat', size:'sm', tone:'ghost', act:'meet-pause' }))}
+          ${when(!running && session,
+            () => K.Button({ label:'Devam et', size:'sm', act:'meet-resume' }))}
+          ${K.Button({ label:'Bitir ve rapor al', size:'sm', tone:'primary', act:'meet-finish' })}
+        </div>
+      </div>`;
   }
 
   function liveCard(){
-    const turns = liveTurns.length ? liveTurns : null;
+    if(!session) return '';
     return K.Card({
-      title:running ? 'Toplantı sürüyor' : 'Toplantı',
-      sub:liveAgenda ? liveAgenda.topic : 'Başlat’a bas; ekip sırayla konuşacak',
+      title:'Toplantı sürüyor', sub:session.topic,
       body:html`
-        <div class="meet" id="meet-live">
-          <div id="meet-turns">${when(turns, () => map(turns, Turn))}</div>
+        ${controls()}
+        <div class="meet mt-12" id="meet-live">
+          <div id="meet-turns">${map(session.turns, Turn)}</div>
           <div id="meet-pending"></div>
         </div>
-        ${when(!turns && !running, () => K.Empty({ icon:'guide',
-          text:'Ekip henüz toplanmadı. Patron gündemi açar, uzmanlar sırayla kendi alanından '
-             + 'tek bulgu bildirir, sonunda tek karar çıkar.' }))}`,
+        <div id="meet-say-box"></div>`,
     });
   }
 
-  function decisionCard(m){
+  /* ---------- rapor ---------- */
+
+  function reportCard(m){
     if(!m) return '';
+    const r = m.report || {};
     return K.Card({
-      class:'card--primary', title:'Toplantı kararı',
-      sub:'Kural motorunun belirlediği tek iş — Patron gerekçelendirdi',
+      class:'card--primary',
+      title:'Toplantı raporu',
+      sub:U.relativeDay(m.at.slice(0, 10)) + ' · ' + m.topic + ' · ' + m.rounds + ' tur',
+      actions:K.Button({ label:'Kopyala', icon:'edit', size:'sm', act:'meet-copy',
+        data:{ 'data-id':m.id } }),
       body:html`
-        ${K.NextUp({ icon:'zap', label:'Karar', title:m.action.title, why:m.action.why,
-          action:K.Button({ label:'Şimdi yap', tone:'primary', size:'sm', act:'go',
-            data:{ 'data-route':m.action.route || 'today' } }) })}`,
+        ${when(r.summary, () => html`<p class="prose">${r.summary}</p>`)}
+
+        <div class="mt-12">
+          ${K.NextUp({ icon:'zap', label:'Karar', title:m.action.title, why:m.action.why,
+            action:K.Button({ label:'Şimdi yap', tone:'primary', size:'sm', act:'go',
+              data:{ 'data-route':m.action.route || 'today' } }) })}
+        </div>
+
+        <div class="mt-12">${K.SectionTitle('Kim ne dedi')}</div>
+        <div class="stack-sm">${map(Object.keys(r.byAgent || {}), id => {
+          const a = r.byAgent[id];
+          const agent = R.AGENT_BY_ID[id];
+          return html`<div class="reportrow">
+            <div class="meetturn__who">${when(agent, () => Avatar(agent))}
+              <b>${a.name}</b><span class="dim">${a.role}</span></div>
+            <ul class="reportrow__list">${map(a.lines, l =>
+              html`<li><span class="dim">${l.roundTitle}:</span> ${l.text}</li>`)}</ul>
+          </div>`;
+        })}</div>
+
+        ${when((r.userSaid || []).length, () => html`<div class="mt-12">
+          ${K.Notice({ tone:'info', title:'Senin sözlerin:', body:r.userSaid.join(' · ') })}</div>`)}
+
+        ${when((r.warnings || []).length, () => html`<div class="mt-12">
+          ${K.Notice({ tone:'warn', title:'Kural motoru düzeltmesi:', body:r.warnings.join(' ') })}</div>`)}
+
+        <div class="mt-12">
+          ${K.Table({ tight:true, headers:['Dayandığı veri', { label:'Değer', num:true }], rows:[
+            ['Program haftası', r.basis.hafta],
+            ['Plan tamamlama', r.basis.planTamamlama == null ? '—' : '%' + r.basis.planTamamlama],
+            ['Konu kapanışı', '%' + r.basis.konuKapanisi],
+            ['TYT medyan', r.basis.tytMedyan == null ? '—' : U.fmtNet(r.basis.tytMedyan)],
+            ['Analiz borcu', r.basis.analizBorcu],
+            ['Tekrar borcu', '%' + r.basis.tekrarBorcu],
+          ] })}
+        </div>
+
+        <div class="row wrap gap-6 mt-12">
+          ${K.Button({ label:'Kararı yapıldı işaretle', size:'sm', act:'meet-decide',
+            data:{ 'data-id':m.id, 'data-state':'done' } })}
+          ${K.Button({ label:'Yeni toplantı', size:'sm', tone:'ghost', act:'meet-new' })}
+        </div>`,
     });
   }
+
+  /* ---------- arsiv ---------- */
 
   function archiveCard(){
     const list = O.meetings();
@@ -18092,13 +18488,16 @@ R.Screens.meeting = (function(){
       title:'Geçmiş toplantılar', sub:list.length + ' tutanak saklanıyor',
       body:html`<div class="stack-xs">${map(list, m => K.Collapsible({
         title:m.topic,
-        meta:U.relativeDay(m.at.slice(0, 10)) + ' · ' + m.mode,
+        meta:U.relativeDay(m.at.slice(0, 10)) + ' · ' + (m.rounds || 1) + ' tur · '
+          + (m.decision && m.decision.state === 'open' ? 'karar açık' : 'karar kapandı'),
         act:'meet-open', data:{ 'data-id':m.id },
         open:S.ui.meetingOpen === m.id,
         body:html`
-          <div class="meet">${map(m.turns, Turn)}</div>
+          ${when(m.report && m.report.summary, () => html`<p class="prose">${m.report.summary}</p>`)}
           ${K.Notice({ tone:'info', title:'Karar:', body:m.action.title })}
+          <div class="meet mt-12">${map(m.turns, Turn)}</div>
           <div class="row wrap gap-6 mt-10">
+            ${K.Button({ label:'Raporu kopyala', size:'sm', act:'meet-copy', data:{ 'data-id':m.id } })}
             ${K.Button({ label:'Kararı uygula', size:'sm', tone:'primary', act:'go',
               data:{ 'data-route':m.action.route || 'today' } })}
             ${K.Button({ label:'Tutanağı sil', size:'sm', tone:'ghost', act:'meet-delete',
@@ -18109,14 +18508,17 @@ R.Screens.meeting = (function(){
   }
 
   function teamCard(){
+    const ids = ['patron'].concat(R.MEETING_ORDER);
     return K.Card({
-      title:'Masadakiler', sub:'Konuşma sırası: Patron açar, uzmanlar konuşur, Patron kapatır',
-      body:html`<div class="stack-xs">${map(SEQ.filter((id, i) => SEQ.indexOf(id) === i), id => {
+      title:'Masadakiler', sub:'Patron açar, uzmanlar tur tur konuşur, sen bitirirsin',
+      body:html`<div class="stack-xs">${map(ids, id => {
         const a = R.AGENT_BY_ID[id];
+        const q = O.agentQuota(id);
         return html`<button class="agentrow" data-act="meet-talk" data-agent="${a.id}">
           ${Avatar(a)}
           <span class="minw0"><b class="small">${a.name}</b>
             <span class="tiny dim">${a.desk}</span></span>
+          ${when(q && q.full, () => K.Badge({ label:'kota', tone:'danger' }))}
         </button>`;
       })}</div>`,
     });
@@ -18126,107 +18528,264 @@ R.Screens.meeting = (function(){
 
   async function render(){
     O.resetBriefs();
-    const last = O.lastMeeting();
-    const showDecision = !running && liveTurns.length ? last : null;
-
     return String(K.Grid([
       K.Span(8, K.Stack([
         agendaCard(),
         liveCard(),
-        when(showDecision, () => decisionCard(showDecision)),
+        when(!session && closed, () => reportCard(closed)),
         archiveCard(),
       ])),
       K.Span(4, K.Stack([
         teamCard(),
-        raw(UI.rail(['next-action', 'gate', 'ai-coach'])),
+        raw(UI.rail(['next-action', 'gate'])),
       ])),
     ]));
   }
 
-  /* ---------- toplanti yurutme ---------- */
+  /* ---------- yurutme ---------- */
 
   function paint(){
     const box = document.getElementById('meet-turns');
-    if(box) box.innerHTML = String(map(liveTurns, Turn));
+    if(box && session) box.innerHTML = String(map(session.turns, Turn));
+    scrollToLive();
   }
 
-  function paintPending(){
+  function setPending(node){
     const box = document.getElementById('meet-pending');
-    if(!box) return;
-    const nextId = SEQ[liveTurns.length];
-    if(!nextId || !running){ box.innerHTML = ''; return; }
-    const label = liveTurns.length === 0 ? 'Gündemi açıyor…'
-      : liveTurns.length === SEQ.length - 1 ? 'Kararı yazıyor…' : 'Raporuna bakıyor…';
-    box.innerHTML = String(pendingTurn(nextId, label));
+    if(box) box.innerHTML = node ? String(node) : '';
   }
 
   function scrollToLive(){
-    const el = document.getElementById('meet-pending');
-    if(el && el.firstChild && el.scrollIntoView) el.scrollIntoView({ block:'nearest' });
+    const el = document.getElementById('meet-pending') || document.getElementById('meet-turns');
+    if(el && el.scrollIntoView) el.scrollIntoView({ block:'nearest' });
+  }
+
+  /* Kota sirasi beklenirken geri sayim gosterilir; bekleme gizlenmez. */
+  function showWait(agentId, ms){
+    clearInterval(waitTimer);
+    let left = Math.ceil(ms/1000);
+    const tick = () => {
+      setPending(pendingTurn(agentId, 'Sırasını bekliyor — ' + left + ' sn '
+        + '(istek sınırı aşılmasın diye)'));
+      if(--left < 0) clearInterval(waitTimer);
+    };
+    tick();
+    waitTimer = setInterval(tick, 1000);
+  }
+
+  function stopWait(){ clearInterval(waitTimer); waitTimer = null; }
+
+  function pause(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  async function loop(){
+    while(running && !stopAsked && turnIndex < maxTurns()){
+      const agentId = O.speakerAt(turnIndex);
+
+      /* Kota doluysa toplanti kendiliginden durur ve nedeni soylenir. */
+      const q = O.agentQuota(agentId);
+      if(q && q.full){
+        running = false;
+        stopWait();
+        setPending('');
+        UI.toast(R.AGENT_BY_ID[agentId].name + ' için günlük hak doldu — toplantı duraklatıldı');
+        await R.App.render();
+        return;
+      }
+
+      setPending(pendingTurn(agentId, 'Söz alıyor…'));
+      try{
+        await O.nextTurn(session, turnIndex, {
+          signal:controller.signal,
+          onWait(ms){ showWait(agentId, ms); },
+          onText(ev){
+            stopWait();
+            const el = document.getElementById('meet-stream');
+            if(!el) return;
+            el.classList.remove('dim');
+            el.innerHTML = U.esc(ev.text).replace(/\n/g, '<br/>');
+            scrollToLive();
+          },
+        });
+      }catch(err){
+        stopWait();
+        if(err && err.code === 'cancelled') return;
+        UI.toast(R.LLM.errorText(err && err.code));
+        running = false;
+        setPending('');
+        await R.App.render();
+        return;
+      }
+      stopWait();
+      turnIndex++;
+      paint();
+      setPending('');
+      await R.App.render();
+
+      /* Model yokken kota bosluğu da yoktur: turlar goz acip kapayana kadar
+         akar ve okunmaz. Konusmanin okunabilir bir ritmi olsun diye kisa
+         bir duraklama konur. */
+      if(O.mode() !== 'llm' && running && !stopAsked) await pause(700);
+    }
+
+    /* Turlar bittiyse kullaniciya soyle; kapatmayi yine o secsin. */
+    if(running && turnIndex >= maxTurns()){
+      running = false;
+      UI.toast('Bütün turlar tamamlandı — bitirip raporu alabilirsin');
+      await R.App.render();
+    }
   }
 
   async function start(){
-    if(running) return;
     const list = O.agendaCandidates().slice(0, 5);
     const picked = list[U.clamp(S.ui.meetingAgenda || 0, 0, list.length - 1)] || list[0];
 
-    running = true;
-    liveTurns = [];
-    liveAgenda = picked;
+    closed = null;
+    stopAsked = false;
+    turnIndex = 0;
     controller = new AbortController();
-    await R.App.render();
-    paintPending();
+    running = true;
 
     try{
-      await O.meet({
-        agenda:picked,
-        signal:controller.signal,
-        onText(agentId, ev){
+      session = await O.openMeeting({ agenda:picked, signal:controller.signal });
+    }catch(err){
+      running = false;
+      if(!(err && err.code === 'cancelled')) UI.toast(R.LLM.errorText(err && err.code));
+      await R.App.render();
+      return;
+    }
+    await R.App.render();
+    await loop();
+  }
+
+  async function finish(){
+    stopAsked = true;
+    running = false;
+    stopWait();
+    if(!session) return;
+
+    setPending(pendingTurn('patron', 'Kararı ve raporu yazıyor…'));
+    try{
+      closed = await O.closeMeeting(session, {
+        signal:controller ? controller.signal : null,
+        onText(ev){
           const el = document.getElementById('meet-stream');
           if(!el) return;
           el.classList.remove('dim');
           el.innerHTML = U.esc(ev.text).replace(/\n/g, '<br/>');
-          scrollToLive();
-        },
-        async onTurn(turn, turns){
-          liveTurns = turns.slice();
-          paint();
-          paintPending();
-          scrollToLive();
         },
       });
     }catch(err){
-      if(!(err && err.code === 'cancelled')){
-        UI.toast(R.LLM.errorText(err && err.code));
-      }
+      if(!(err && err.code === 'cancelled')) UI.toast(R.LLM.errorText(err && err.code));
     }finally{
-      running = false;
+      session = null;
       controller = null;
       await R.App.render();
     }
   }
 
+  /* ---------- eylemler ---------- */
+
   const handle = {
-    async 'meet-start'(){ await start(); },
-    async 'meet-stop'(){
-      if(controller) controller.abort();
+    async 'meet-start'(){ if(!running && !session) await start(); },
+
+    async 'meet-pause'(){
       running = false;
+      stopWait();
+      if(controller) controller.abort();
+      controller = new AbortController();
+      setPending('');
       await R.App.render();
     },
+
+    async 'meet-resume'(){
+      if(running || !session) return;
+      running = true;
+      stopAsked = false;
+      controller = new AbortController();
+      await R.App.render();
+      await loop();
+    },
+
+    async 'meet-finish'(){
+      if(!session) return;
+      if(running){
+        running = false;
+        if(controller) controller.abort();
+        controller = new AbortController();
+      }
+      await finish();
+    },
+
+    /* Kullanici araya girer: sozu tutanaga girer, sonraki ajanlar gorur. */
+    async 'meet-say'(){
+      if(!session) return;
+      const box = document.getElementById('meet-say-box');
+      if(!box) return;
+      box.innerHTML = String(html`
+        <div class="composer mt-12">
+          ${K.Textarea({ id:'meet-say-input', rows:2, class:'composer__input',
+            placeholder:'Ekibe söylemek istediğin…' })}
+          ${K.Button({ label:'Söyle', icon:'zap', tone:'primary', act:'meet-say-send' })}
+        </div>`);
+      const el = document.getElementById('meet-say-input');
+      if(el) el.focus();
+    },
+
+    async 'meet-say-send'(){
+      const el = document.getElementById('meet-say-input');
+      const text = el ? el.value.trim() : '';
+      const box = document.getElementById('meet-say-box');
+      if(box) box.innerHTML = '';
+      if(!text || !session) return;
+      O.userTurn(session, text);
+      paint();
+      await R.App.render();
+    },
+
+    async 'meet-new'(){
+      closed = null;
+      session = null;
+      turnIndex = 0;
+      await R.App.render();
+    },
+
     async 'meet-open'(el){
       const id = el.dataset.id;
       S.ui.meetingOpen = S.ui.meetingOpen === id ? null : id;
       R.App.render();
     },
+
+    async 'meet-copy'(el){
+      const m = O.meetings().find(x => x.id === el.dataset.id) || closed;
+      if(!m) return;
+      const text = O.reportText(m);
+      try{
+        await navigator.clipboard.writeText(text);
+        UI.toast('Rapor kopyalandı');
+      }catch(e){
+        UI.sheet({ title:'Toplantı raporu', wide:true,
+          body:String(html`<textarea class="textarea coachnote" rows="18" readonly>${text}</textarea>`),
+          footer:String(K.Button({ label:'Kapat', act:'sheet-close' })) });
+      }
+    },
+
+    async 'meet-decide'(el){
+      await O.closeDecision(el.dataset.id, el.dataset.state);
+      UI.toast('Karar kapandı');
+      R.App.render();
+    },
+
     async 'meet-delete'(el){
       const id = el.dataset.id;
-      UI.confirmSheet('Tutanağı sil', 'Bu toplantı kaydı silinecek. Çalışma verilerin etkilenmez.',
+      UI.confirmSheet('Tutanağı sil', 'Bu toplantı kaydı ve raporu silinecek. Çalışma verilerin etkilenmez.',
         async () => {
           await O.deleteMeeting(id);
+          if(closed && closed.id === id) closed = null;
           UI.closeSheet();
           R.App.render();
         }, true);
     },
+
     async 'meet-talk'(el){
       S.ui.officeAgent = el.dataset.agent;
       R.App.go('team');
@@ -18242,7 +18801,7 @@ R.Screens.meeting = (function(){
 
   /* Ofisten "Toplantı başlat" ile gelindiyse ekran acilir acilmaz baslar. */
   function afterRender(){
-    if(S.ui.meetingAuto && !running){
+    if(S.ui.meetingAuto && !running && !session){
       S.ui.meetingAuto = false;
       setTimeout(start, 60);
     }
@@ -18252,10 +18811,14 @@ R.Screens.meeting = (function(){
     id:'meeting',
     title:'Toplantı odası',
     subtitle(){
-      if(running) return 'Toplantı sürüyor · ' + liveTurns.length + '/' + SEQ.length + ' konuşma';
+      if(session){
+        const round = Math.min(maxRounds(), Math.floor(turnIndex / PER_ROUND) + 1);
+        return (running ? 'Sürüyor' : 'Duraklatıldı') + ' · tur ' + round + '/' + maxRounds()
+          + ' · ' + session.turns.length + ' konuşma';
+      }
       const last = O.lastMeeting();
       return last ? 'Son toplantı ' + U.relativeDay(last.at.slice(0, 10)) + ' · ' + last.topic
-        : 'Ekip 5 kişi · gündemi kural motoru seçer';
+        : 'Ekip 5 kişi · gündemi kural motoru seçer, bitişi sen';
     },
     actions(){
       return String(K.Button({ label:'Ofis', icon:'guide', size:'sm', act:'go',
@@ -18297,8 +18860,7 @@ R.App = (function(){
       { id:'analytics', icon:'search', label:'Analiz' },
       { id:'protocols', icon:'shield', label:'Telafi' },
     ]},
-    { label:'Koç', items:[
-      { id:'coach', icon:'zap',   label:'Koça sor' },
+    { label:'Rehber', items:[
       { id:'guide', icon:'guide', label:'Rehber' },
       { id:'profiles', icon:'shield', label:'Profiller' },
     ]},
@@ -18596,27 +19158,10 @@ R.App = (function(){
     },
     async 'sheet-close'(){ UI.closeSheet(); },
     async reload(){ location.reload(); },
-    async 'coach-run'(el){
-      const kind = el.dataset.kind;
-      const out = document.getElementById('coach-out');
-      el.disabled = true;
-      if(out) out.innerHTML = String(html`<p class="small muted">Düşünüyor…
-        <span class="dim">(ilk yanıt 5–60 saniye sürebilir)</span></p>`);
-      try{
-        await R.Coach.run(kind, {
-          onText(ev){
-            if(out) out.innerHTML = String(html`<p class="prose">${ev.text}</p>`);
-          },
-        });
-        render();
-      }catch(err){
-        const code = err && err.code;
-        if(out){
-          out.innerHTML = String(html`
-            ${R.C.Notice({ tone:'warn', body:R.Coach.errorText(code) })}
-            ${R.C.Button({ label:'Tekrar dene', size:'sm', class:'mt-10', act:'coach-run', data:{ 'data-kind':kind } })}`);
-        }
-      }
+    /* Herhangi bir ekrandan bir ajana soru sormak icin. */
+    async 'ask-agent'(el){
+      S.ui.officeAgent = el.dataset.agent || 'patron';
+      go('team');
     },
     async 'show-store-error'(){
       const sh = S.storeHealth;
@@ -18886,7 +19431,17 @@ R.App = (function(){
     try{
       // Arayuz Turkce: CSS buyuk harfe cevirirken "i" → "İ" olsun.
       // (Tek dosya surumunde <html> kabugu disaridan gelir, bu yuzden burada.)
-      document.documentElement.lang = 'tr';
+      const root = document.documentElement;
+      root.lang = 'tr';
+      /* Derlenmis surumde <html> kabugu disaridan gelir: mobil tarayicinin
+         sayfayi cevirmesini burada da engelle, yoksa arayuz Turkce-Ingilizce
+         karisir. Hem nitelik hem sinif gerekir; motorlar ikisine de bakar. */
+      root.setAttribute('translate', 'no');
+      root.classList.add('notranslate');
+      if(document.body){
+        document.body.setAttribute('translate', 'no');
+        document.body.classList.add('notranslate');
+      }
       wireStoreErrors();
       await M.loadAll();
       applyTheme();
@@ -18897,7 +19452,6 @@ R.App = (function(){
       R.Auto.onDayOpen().then(done => { if(done.length) render(); });
       /* Profil özeti gözetmen tablosu için sessizce tazelenir. */
       try{ if(R.Screens.profiles) R.Screens.profiles.writeSnapshot(); }catch(e){}
-      R.Coach.init().then(ok => { if(ok) render(); });
       /* Ofis ekibi: ayarlar, sohbetler ve tutanaklar acilisi bloklamaz. */
       R.Office.load().then(() => { if(S.route === 'office' || S.route === 'team' || S.route === 'meeting') render(); });
       if(R.Setup.needed()) setTimeout(() => R.Setup.open(), 400);

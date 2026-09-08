@@ -148,7 +148,16 @@ def build(minify: bool = False) -> None:
         sys.exit("HATA: <body> bulunamadi")
     body = body_match.group(1).strip()
 
-    parts = [f"<title>{title}</title>"]
+    # Charset ve ceviri kapatma parcanin EN BASINDA durur: tarayici kodlamayi
+    # yalniz ilk 1024 baytta arar. Artifact kabugu kendi charset'ini eklese de
+    # dosya tek basina acildiginda (mobil, file://, kendi sunucu) Turkce
+    # karakterlerin bozulmamasi buna bagli.
+    parts = [
+        '<meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        '<meta name="google" content="notranslate">',
+        f"<title>{title}</title>",
+    ]
     parts.extend(font_links)
     parts.extend(style_blocks)
     parts.append(body)

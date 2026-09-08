@@ -376,10 +376,10 @@
 
   describe('Koç araçları ve gardlar', function(){
     it('yeni araçlar kayıtlı ve şemalı', function(){
-      const names = R.CoachTools.TOOLS.map(t => t.name);
+      const names = R.Tools.TOOLS.map(t => t.name);
       ['video_notlari','mesgaleler','enerji_durumu','gunun_akisi','konu_riski','puan_tahmini']
         .forEach(n => expect(names.indexOf(n) >= 0).toBeTruthy());
-      R.CoachTools.TOOLS.forEach(t => {
+      R.Tools.TOOLS.forEach(t => {
         expect(typeof t.execute).toBe('function');
         expect(t.inputSchema.type).toBe('object');
       });
@@ -390,18 +390,18 @@
       n.transcript = 'ÇOK UZUN GİZLİ TRANSCRIPT METNİ';
       n.segments.push({ ts:1, text:'kısa not', tag:'not' });
       await M.saveVideoNote(n);
-      const out = JSON.stringify(R.CoachTools.videoNotlari({}));
+      const out = JSON.stringify(R.Tools.videoNotlari({}));
       expect(out.indexOf('GİZLİ')).toBe(-1);
       expect(out).toContain('kısa not');
     });
     it('puan tahmini aracı veri yokken uyarır', function(){
       resetState();
-      expect(R.CoachTools.puanTahmini().yeterliVeri).toBeFalsy();
+      expect(R.Tools.puanTahmini().yeterliVeri).toBeFalsy();
     });
     it('puan tahmini aracı bant ve uyarı taşır', async function(){
       await withTodayAsync('2026-11-20', async () => {
         await withExams([40, 42, 41], () => {
-          const out = R.CoachTools.puanTahmini();
+          const out = R.Tools.puanTahmini();
           expect(out.tahminiSiraBandi).toHaveLength(2);
           expect(out.uyari).toContain('koçluk bandı');
         });
@@ -413,8 +413,8 @@
     it('yeni istem türleri tanımlı', function(){
       ['note-summary','daily-flow','motivation','risk']
         .forEach(k => expect(R.PROMPTS.kinds[k].ask.length).toBeGreaterThan(20));
-      expect(R.Coach.KINDS['daily-flow']).toBeTruthy();
-      expect(R.Coach.KINDS.motivation).toBeTruthy();
+      expect(R.Office.ROUNDS.length).toBeGreaterThan(2);
+      expect(R.AGENT_IDS.length).toBe(5);
     });
   });
 
@@ -423,27 +423,27 @@
 
     it('boş alan elenir', function(){
       resetState();
-      const res = R.Coach.validateCards({ cards:[{ front:'', back:'x' }, { front:'a', back:'' }] }, note);
+      const res = R.Office.validateCards({ cards:[{ front:'', back:'x' }, { front:'a', back:'' }] }, note);
       expect(res.cards).toHaveLength(0);
       expect(res.dropped).toBe(2);
     });
     it('çok uzun kart elenir', function(){
       const long = 'x'.repeat(R.PROMPTS.cards.frontMax + 1);
-      expect(R.Coach.validateCards({ cards:[{ front:long, back:'y' }] }, note).cards).toHaveLength(0);
+      expect(R.Office.validateCards({ cards:[{ front:long, back:'y' }] }, note).cards).toHaveLength(0);
     });
     it('tekrar eden ön yüz elenir', function(){
-      const res = R.Coach.validateCards({ cards:[
+      const res = R.Office.validateCards({ cards:[
         { front:'Aynı soru', back:'a' }, { front:'aynı soru', back:'b' },
       ] }, note);
       expect(res.cards).toHaveLength(1);
     });
     it('üst sınır aşılmaz', function(){
       const many = Array.from({ length:20 }, (_, i) => ({ front:'soru '+i, back:'cevap '+i }));
-      expect(R.Coach.validateCards({ cards:many }, note).cards.length <= R.PROMPTS.cards.max).toBeTruthy();
+      expect(R.Office.validateCards({ cards:many }, note).cards.length <= R.PROMPTS.cards.max).toBeTruthy();
     });
     it('üretilen kart uygulama şemasını taşır', function(){
       resetState();
-      const c = R.Coach.validateCards({ cards:[{ front:'Soru?', back:'Cevap' }] }, note).cards[0];
+      const c = R.Office.validateCards({ cards:[{ front:'Soru?', back:'Cevap' }] }, note).cards[0];
       expect(c.stage).toBe(0);
       expect(c.source).toBe('note');
       expect(c.sourceRef).toBe('v9');
@@ -451,8 +451,8 @@
       expect(c.history).toHaveLength(0);
     });
     it('bozuk yanıt çökmez', function(){
-      expect(R.Coach.validateCards(null, note).cards).toHaveLength(0);
-      expect(R.Coach.validateCards({ cards:'metin' }, note).cards).toHaveLength(0);
+      expect(R.Office.validateCards(null, note).cards).toHaveLength(0);
+      expect(R.Office.validateCards({ cards:'metin' }, note).cards).toHaveLength(0);
     });
   });
 })();

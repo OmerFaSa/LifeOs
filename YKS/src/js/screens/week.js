@@ -298,7 +298,6 @@ R.Screens.week = (function(){
       K.Span(4, K.Stack([
         digestCard(n),
         reviewCard(n),
-        when(S.reviews[M.weekId(n)], () => raw(R.Coach.panel('week', S.coach && S.coach['week-'+M.weekId(n)]))),
         K.Card({ title:'Müfredat referansı', sub:'Bu haftanın plandaki karşılığı', body:html`
           <div class="stack-xs"><span class="mono-label">Konu blokları</span>
             ${K.Row(map(curriculum.topics, t => K.Chip(t)), { wrap:true })}</div>

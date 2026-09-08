@@ -1,7 +1,8 @@
-/* Koç istemleri — tek kaynak, sürümlü.
+/* Ev kuralları ve istem parçaları — tek kaynak, sürümlü.
 
-   Kural motoru otoritedir; buradaki metinler LLM'in YALNIZCA yorum yapmasını
-   sağlar. Karar, eşik ve hesap uygulamada kalır.
+   Ofis ajanlarının tamamı bu kuralları taşır. Kural motoru otoritedir;
+   buradaki metinler LLM'in YALNIZCA yorum yapmasını sağlar.
+   Karar, eşik ve hesap uygulamada kalır.
 
    Sürüm artırıldığında önbellek anahtarı değişir, eski yorumlar yeniden üretilir. */
 

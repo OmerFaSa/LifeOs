@@ -249,7 +249,6 @@ R.Screens.progress = (function(){
 
       K.Span(4, K.Stack([
         gateCard(),
-        raw(R.Coach.panel('gate', S.coach && S.coach['gate-'+U.monthKey(U.today())])),
         K.Card({ title:'Hata paretosu', sub:'Son haftaların hata dağılımı', body:html`
           ${raw(UI.paretoBars(pareto))}
           ${when(pareto[0] && pareto[0].count, () => html`<div class="mt-10">${K.Notice({ tone:'info',

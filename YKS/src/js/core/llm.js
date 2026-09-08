@@ -69,6 +69,21 @@ R.LLM = (function(){
     return Object.assign(new Error(message || code), { code });
   }
 
+  /* Yayimlanmis bir Artifact icinde disariya fetch CSP ile engellenir ve
+     tarayici bunu ayirt edilemeyen bir TypeError olarak verir. Ayni hata
+     cevrimdisiyken de olusur; window.claude varsa neden neredeyse kesin
+     kum havuzudur ve kullaniciya bu soylenir. */
+  function inSandbox(){
+    return !!(window.claude && typeof window.claude.use === 'function');
+  }
+  function networkCode(){ return inSandbox() ? 'sandboxed' : 'network'; }
+
+  function retryAfterSeconds(response){
+    const raw = response.headers && response.headers.get('retry-after');
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? Math.min(n, 300) : null;
+  }
+
   function codeForStatus(status){
     if(status === 401 || status === 403) return 'unauthorized';
     if(status === 402) return 'no_credit';
@@ -95,6 +110,11 @@ R.LLM = (function(){
     cancelled:'İptal edildi.',
     empty:'Model boş yanıt döndürdü. Tekrar dene.',
     unavailable:'Yerleşik model bu ortamda kapalı. Ofis → Ayarlar’dan ücretsiz bir sağlayıcı bağla.',
+    daily_quota:'Bu modelin günlük ücretsiz hakkı doldu. Yarın sıfırlanır; o zamana kadar başka bir sağlayıcı kullanabilirsin.',
+    rate_wait:'Dakikalık sıra çok uzun. Birkaç dakika sonra tekrar dene ya da dakikalık sınırı daha yüksek bir sağlayıcı seç.',
+    sandboxed:'Bu ortam dış servislere bağlanmaya izin vermiyor. Uygulama Claude içinde yayımlanmış bir sayfa olarak '
+      + 'çalışırken dış API çağrıları engellenir: burada yerleşik modeli kullan, ücretsiz sağlayıcılar için uygulamayı '
+      + 'kendi tarayıcında (dosyadan ya da kendi sunucundan) aç.',
   };
   function errorText(code){ return ERRORS[code] || 'Model şu an yanıt veremedi.'; }
 
@@ -217,13 +237,18 @@ R.LLM = (function(){
       guard.done();
       if(guard.timedOut()) throw fail('timeout');
       if(req.signal && req.signal.aborted) throw fail('cancelled');
-      throw fail('network', e && e.message);
+      throw fail(networkCode(), e && e.message);
     }
 
     if(!response.ok){
       const detail = await errorMessage(response);
+      const code = codeForStatus(response.status);
       guard.done();
-      throw fail(codeForStatus(response.status), detail);
+      /* Saglayici bizim saydigimizdan daha siki davraniyor: pencereyi kapat. */
+      if(code === 'rate_limited'){
+        R.Quota.penalize({ provider:provider.id, model:req.model }, retryAfterSeconds(response));
+      }
+      throw fail(code, detail);
     }
 
     let text = '';
@@ -295,13 +320,17 @@ R.LLM = (function(){
       guard.done();
       if(guard.timedOut()) throw fail('timeout');
       if(req.signal && req.signal.aborted) throw fail('cancelled');
-      throw fail('network', e && e.message);
+      throw fail(networkCode(), e && e.message);
     }
 
     if(!response.ok){
       const detail = await errorMessage(response);
+      const code = codeForStatus(response.status);
       guard.done();
-      throw fail(codeForStatus(response.status), detail);
+      if(code === 'rate_limited'){
+        R.Quota.penalize({ provider:provider.id, model:req.model }, retryAfterSeconds(response));
+      }
+      throw fail(code, detail);
     }
 
     function partsText(obj){
@@ -353,13 +382,29 @@ R.LLM = (function(){
       key:provider.needsKey ? getKey(provider.id) : null,
     });
 
+    /* Sira: kota yoneticisi izin verene kadar bekle. Boylece dakikalik
+       sinir HIC asilmaz; gun dolduysa beklemek yerine acikca soylenir. */
+    const slot = await R.Quota.acquire(cfg, { signal:req && req.signal, onWait:req && req.onWait });
+
     const started = Date.now();
     let text;
-    if(provider.kind === 'builtin') text = await callBuiltin(payload);
-    else if(provider.kind === 'gemini') text = await callGemini(payload, provider);
-    else text = await callOpenAI(payload, provider);
+    try{
+      if(provider.kind === 'builtin') text = await callBuiltin(payload);
+      else if(provider.kind === 'gemini') text = await callGemini(payload, provider);
+      else text = await callOpenAI(payload, provider);
+    }catch(err){
+      /* Istek hic gonderilemediyse gunluk hakki tuketmis sayma. */
+      if(err && (err.code === 'cancelled' || err.code === 'sandboxed' || err.code === 'no_key')){
+        R.Quota.release(cfg);
+      }
+      throw err;
+    }
 
-    return { text, provider:provider.id, model:cfg.model || 'yerleşik', ms:Date.now() - started };
+    return {
+      text, provider:provider.id, model:cfg.model || 'yerleşik',
+      ms:Date.now() - started, waited:slot.waited || 0,
+      usedToday:slot.usedToday, rpd:slot.rpd,
+    };
   }
 
   /* Yedekli cagri: zincirdeki ilk calisani kullanir.
@@ -378,9 +423,14 @@ R.LLM = (function(){
         last = err;
         const code = err && err.code;
         if(code === 'cancelled') throw err;
-        if(!retryable(code)) {
-          /* Anahtar/adres hatasi zincirin geri kalanini da vurmayabilir:
-             farkli saglayici varsa denemeye devam et, ayni saglayiciysa dur. */
+        if(code === 'daily_quota'){
+          /* Gunluk hak modele ozeldir: ayni saglayicinin baska modeli de
+             ayni havuzu paylasiyor olabilir, yine de denemeye deger. */
+          continue;
+        }
+        if(!retryable(code)){
+          /* Anahtar/adres/kum havuzu hatasi zincirin geri kalanini da
+             vurabilir: farkli saglayici varsa dene, ayni saglayiciysa dur. */
           const next = list[i+1];
           if(!next || next.provider === list[i].provider) throw err;
         }
@@ -389,7 +439,8 @@ R.LLM = (function(){
     throw last;
   }
 
-  /* Baglanti sinamasi — ayar ekraninda "Bağlantıyı dene" icin. */
+  /* Baglanti sinamasi — ayar ekraninda "Bağlantıyı dene" icin.
+     Gercek bir istek yapar; bu yuzden gunluk haktan bir tane harcar. */
   async function test(cfg){
     const started = Date.now();
     const res = await chat(cfg, {
@@ -416,6 +467,6 @@ R.LLM = (function(){
     initBuiltin, builtinReady,
     getKey, setKey, clearKeys, maskKey,
     chat, complete, test, ready,
-    errorText, retryable, KEY_STORE,
+    errorText, retryable, inSandbox, KEY_STORE,
   };
 })();

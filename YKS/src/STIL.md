@@ -94,7 +94,7 @@ Dikkat çekmek için animasyon yoktur: yanıp sönme, zıplama, sürekli döngü
 
 ## Ekranlar
 
-Altı gezinme grubu, on sekiz ekran:
+Altı gezinme grubu, on yedi ekran:
 
 | Grup | Ekranlar |
 |---|---|
@@ -102,7 +102,7 @@ Altı gezinme grubu, on sekiz ekran:
 | Plan | Program · Dersler · Hedef |
 | Kayıt | Öğrenme · Deneme · Tekrar · Sınama |
 | Analiz | İlerleme · **Analiz** · Telafi |
-| Koç | Koça sor · Rehber · **Profiller** |
+| Rehber | Rehber · **Profiller** |
 | Ofis | **Ofis** · Ekip sohbeti · Toplantı |
 
 `Analiz` altı alt sekmedir: deneme karşılaştırma · boş bırakma · hata haritası ·
@@ -139,7 +139,8 @@ Ekrana özel yapılar CSS'te adlandırılır, bileşene çevrilmez:
 `flowstep` (günün akışı), `energy` / `reward` (davranış), `player` / `seg-row` (ders notu),
 `runclock` (süreli deneme oturumu), `wizstep` / `levelbtn` (kurulum sihirbazı),
 `palettebtn` (palet seçici), `notedot` (profil notu), `msg--me` / `msg--coach` (koç),
-`agentav` / `desk` / `finding` (ofis masaları), `meetturn` (toplantı tutanağı).
+`agentav` / `desk` / `deskstate` / `finding` (ofis masaları), `board` (ofis panosu),
+`meetbar` / `meetturn` / `reportrow` (toplantı ve rapor).
 
 **Bileşen tek yerdedir.** Eski `UI.stat / badge / notice / table / field / input`
 köprüsü kaldırıldı; `R.UI` yalnız ikon, SVG çizim, ipucu rayı ve katman

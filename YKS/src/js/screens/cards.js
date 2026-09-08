@@ -151,7 +151,6 @@ R.Screens.cards = (function(){
                 : 'Açık yanlış yok. Deneme analizinde etiketlenen her hata buraya düşer.' }) }),
       ])),
       K.Span(4, K.Stack([
-        when(C.openErrors().length >= 5, () => raw(R.Coach.panel('roots', S.coach && S.coach['roots-'+U.todayISO()]))),
         K.Card({ title:'Defter alanları', hint:'notebook', sub:'Her kayıtta doldurulacak alanlar',
           body:K.Table({ tight:true, headers:['Alan', 'Yazılacak bilgi'],
             rows:R.NOTEBOOK_FIELDS.map(f => [html`<b class="small">${f[0]}</b>`, html`<span class="small muted">${f[1]}</span>`]) }) }),

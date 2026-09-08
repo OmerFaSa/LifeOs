@@ -205,8 +205,8 @@ R.Screens.subjects = (function(){
     return K.Card({
       title:'Öncelik sırası', hint:'closure',
       sub:'Frekans, kapanış, açık yanlış, gecikmiş kart ve tazelikten hesaplanır',
-      actions:when(R.Coach.available(), () => K.Button({ label:'Yorumla', icon:'zap', size:'sm',
-        act:'coach-run', data:{ 'data-kind':'risk' } })),
+      actions:K.Button({ label:'Analiste sor', icon:'zap', size:'sm',
+        act:'ask-agent', data:{ 'data-agent':'analist' } }),
       body:html`
         ${map(list, r => html`
           <div class="riskrow" data-act="open-topic" data-subject="${r.subjectId}" data-topic="${r.topicId}">

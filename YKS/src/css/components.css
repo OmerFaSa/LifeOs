@@ -1051,3 +1051,64 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .meetturn__body{ font-size:var(--fs-base); line-height:1.55; }
 .meetturn--closing{ background:var(--primary-soft); border-color:var(--primary); }
 .meetturn.is-live{ border-style:dashed; }
+
+/* ---------- ofis panosu ---------- */
+/* Girişte asılı tahta: gün, kalan süre, toplantı ve açık karar sayısı. */
+.board__row{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; }
+.board__cell{ min-width:0; }
+.board__label{ display:block; font-size:var(--fs-xs); color:var(--text-3); text-transform:uppercase;
+  letter-spacing:.04em; }
+.board__value{ display:block; font-family:var(--font-display); font-size:var(--fs-lg);
+  line-height:1.2; margin-top:2px; }
+.board__value.is-warn{ color:var(--accent); }
+.board__note{ display:block; font-size:var(--fs-xs); color:var(--text-3); }
+@media (max-width:560px){
+  .board__row{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+
+/* ---------- masa durumu ---------- */
+/* Ofis hissini veren satır: herkesin ne yaptığı bir bakışta belli. */
+.deskstate{ display:flex; align-items:center; gap:7px; margin-top:8px;
+  font-size:var(--fs-xs); color:var(--text-3); }
+.deskstate__dot{ width:7px; height:7px; border-radius:50%; flex:none; background:var(--text-3); }
+.deskstate--ok .deskstate__dot{ background:var(--primary); }
+.deskstate--warn{ color:var(--accent); }
+.deskstate--warn .deskstate__dot{ background:var(--accent); }
+.deskstate--danger{ color:var(--danger); }
+.deskstate--danger .deskstate__dot{ background:var(--danger); }
+
+/* ---------- takipteki kararlar ---------- */
+.decisionrow{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:10px 12px; border-radius:var(--r-sm);
+  border:1px solid var(--border); background:var(--surface-2);
+}
+.decisionrow b{ display:block; }
+.decisionrow span{ display:block; }
+
+/* ---------- toplantı denetimi ---------- */
+.meetbar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:10px 12px; border-radius:var(--r-sm);
+  border:1px solid var(--border); background:var(--surface-2);
+}
+.meetbar__state{ display:flex; align-items:center; gap:8px; font-size:var(--fs-sm); }
+/* Sabit nokta: yanıp sönmez — dikkat çekmek için animasyon kullanılmaz. */
+.meetbar__live{ width:8px; height:8px; border-radius:50%; background:var(--primary); flex:none; }
+
+.meetplan{ padding:12px 14px; border-radius:var(--r-sm); background:var(--surface-2); }
+.meetplan__list{ margin:8px 0 8px 18px; padding:0; font-size:var(--fs-sm); color:var(--text-2); }
+.meetplan__list li{ margin:3px 0; }
+
+/* Toplantıda kullanıcının kendi sözü */
+.meetturn--me{ background:var(--surface); border-style:dashed; }
+.meetturn__round{
+  font-size:var(--fs-xs); color:var(--text-3);
+  padding:1px 8px; border-radius:20px; background:var(--surface-3);
+}
+
+/* ---------- toplantı raporu ---------- */
+.reportrow{ padding:10px 12px; border-radius:var(--r-sm); background:var(--surface-2); }
+.reportrow__list{ margin:6px 0 0 18px; padding:0; font-size:var(--fs-sm);
+  color:var(--text-2); line-height:1.5; }
+.reportrow__list li{ margin:3px 0; }
