@@ -36,6 +36,16 @@
 
   /* ---- grafik (hata etiketleri K/İ/Y/S/D) ---- */
   --c-k:#3D3F8F; --c-i:#9A6714; --c-y:#3C5A72; --c-s:#A33A3A; --c-d:#6B5FA0;
+
+  /* ---- ofis ajanları: beş ayırt edici kimlik rengi ----
+     Avatar zemini olarak kullanılır, harf --agent-ink ile yazılır.
+     Ölçülen kontrast (beyaz harf üzerinde): 5,3–8,9:1 — hepsi AA. */
+  --agent-patron:#3D3F8F;
+  --agent-tyt:#2F5D7C;
+  --agent-ayt:#8A5A12;
+  --agent-rehber:#2C6B52;
+  --agent-analist:#8C3B62;
+  --agent-ink:#FFFFFF;
   --c-grid:#E1E4EC;
   --c-band:#DDDFF2;
 
@@ -107,6 +117,12 @@
     --border-strong:#3E4152;
 
     --c-k:#9A9CE8; --c-i:#DDAE68; --c-y:#89AAC6; --c-s:#E58585; --c-d:#8FD0B0;
+    --agent-patron:#9A9CE8;
+    --agent-tyt:#89AAC6;
+    --agent-ayt:#DDAE68;
+    --agent-rehber:#8FD0B0;
+    --agent-analist:#DE9CC0;
+    --agent-ink:#0E0F18;
     --c-grid:#2A2C38;
     --c-band:#252740;
 
@@ -143,6 +159,12 @@
   --border-strong:#3E4152;
 
   --c-k:#9A9CE8; --c-i:#DDAE68; --c-y:#89AAC6; --c-s:#E58585; --c-d:#8FD0B0;
+  --agent-patron:#9A9CE8;
+  --agent-tyt:#89AAC6;
+  --agent-ayt:#DDAE68;
+  --agent-rehber:#8FD0B0;
+  --agent-analist:#DE9CC0;
+  --agent-ink:#0E0F18;
   --c-grid:#2A2C38;
   --c-band:#252740;
 

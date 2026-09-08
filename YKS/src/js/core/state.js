@@ -29,6 +29,9 @@ R.S = {
   storeHealth:null,// son depolama hatasi (varsa)
   coach:{},        // AI koc yorumlari (onbellek): 'week-w05' -> payload
   coachChat:[],    // koc sohbeti
+  office:null,     // ofis ayarlari (saglayici, model, ajan basina secim)
+  officeChats:{},  // agentId -> mesajlar
+  officeMeetings:[],// ajanlarin toplanti tutanaklari
   ui:{
     weekView:null,     // gorunen hafta no
     examTab:'list',
@@ -60,6 +63,12 @@ R.S = {
     noteTag:'not',
     noteForce:false,
     examWeekAck:false,
+    officeAgent:'patron', // ekip sohbetinde secili ajan
+    officeDesk:null,      // ofiste raporu acik masa
+    officePerAgent:false, // ayarlarda ajan basina model bolumu acik mi
+    meetingAgenda:0,      // secili gundem adayi
+    meetingOpen:null,     // acik gecmis tutanak
+    meetingAuto:false,    // ofisten gelindiyse toplantiyi hemen baslat
   },
 };
 

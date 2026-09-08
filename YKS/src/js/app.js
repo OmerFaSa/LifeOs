@@ -33,6 +33,11 @@ R.App = (function(){
       { id:'guide', icon:'guide', label:'Rehber' },
       { id:'profiles', icon:'shield', label:'Profiller' },
     ]},
+    { label:'Ofis', items:[
+      { id:'office',  icon:'guide', label:'Ofis' },
+      { id:'team',    icon:'zap',   label:'Ekip sohbeti' },
+      { id:'meeting', icon:'list',  label:'Toplantı' },
+    ]},
   ];
 
   const MOBILE_TABS = ['today','learn','cards','quiz','progress'];
@@ -624,6 +629,8 @@ R.App = (function(){
       /* Profil özeti gözetmen tablosu için sessizce tazelenir. */
       try{ if(R.Screens.profiles) R.Screens.profiles.writeSnapshot(); }catch(e){}
       R.Coach.init().then(ok => { if(ok) render(); });
+      /* Ofis ekibi: ayarlar, sohbetler ve tutanaklar acilisi bloklamaz. */
+      R.Office.load().then(() => { if(S.route === 'office' || S.route === 'team' || S.route === 'meeting') render(); });
       if(R.Setup.needed()) setTimeout(() => R.Setup.open(), 400);
     }catch(err){
       console.error('Açılış hatası:', err);

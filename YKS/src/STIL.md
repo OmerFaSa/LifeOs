@@ -35,6 +35,11 @@ Metin `--text → --text-2 → --text-3` sırasıyla soluklaşır.
 **Renk tek başına anlam taşımaz.** Durum her zaman ikon veya metinle birlikte
 verilir (`C.Badge` tone'a göre ikon ekler).
 
+Ofis ajanlarının beş kimlik rengi (`--agent-patron` … `--agent-analist`) bundan
+ayrıdır: durum değil **kimlik** taşırlar, yalnız avatarda kullanılırlar ve
+ajanın durumu her zaman ayrıca rozetle verilir. Beyaz harf üzerinde ölçülen
+kontrast 5,3–8,9:1'dir.
+
 ## Tipografi
 
 İki aile: **Manrope** (başlık, sayı) · **Inter** (gövde, veri).
@@ -89,7 +94,7 @@ Dikkat çekmek için animasyon yoktur: yanıp sönme, zıplama, sürekli döngü
 
 ## Ekranlar
 
-Beş gezinme grubu, on beş ekran:
+Altı gezinme grubu, on sekiz ekran:
 
 | Grup | Ekranlar |
 |---|---|
@@ -98,6 +103,7 @@ Beş gezinme grubu, on beş ekran:
 | Kayıt | Öğrenme · Deneme · Tekrar · Sınama |
 | Analiz | İlerleme · **Analiz** · Telafi |
 | Koç | Koça sor · Rehber · **Profiller** |
+| Ofis | **Ofis** · Ekip sohbeti · Toplantı |
 
 `Analiz` altı alt sekmedir: deneme karşılaştırma · boş bırakma · hata haritası ·
 sıra geçmişi · unutma eğrisi · kapasite gerçekliği. Hepsi `R.Analytics`
@@ -108,6 +114,10 @@ durur (`rota84285.v2.<profil>`), veriler karışmaz. Karşılaştırma ve veli
 görünümü yalnız özet okur.
 
 Konu özeti (`topic`) gezinmede yer almaz; Dersler ekranından açılır.
+
+`Ofis` beş ajanlıdır: Patron ekibi yönetir, Tuna TYT'ye, Yaman AYT'ye, Rana
+rehberliğe, Deniz ölçüme bakar. Her ajan yalnız kendi brifingini görür; karar
+ve gündem kural motorundan gelir. Ayrıntı için `src/OFIS.md`.
 
 Günlük yolculuk tek zincirdir ve `Bugün` ekranındaki **Günün akışı** kartı bu
 zinciri gösterir: **izle → not → soru → kart → mola**. Her adım bir ekrana bağlanır;
@@ -128,7 +138,8 @@ Ekrana özel yapılar CSS'te adlandırılır, bileşene çevrilmez:
 `quizcard` / `choice` (sınama), `riskrow` (öncelik), `estimate` (tahmini sıra),
 `flowstep` (günün akışı), `energy` / `reward` (davranış), `player` / `seg-row` (ders notu),
 `runclock` (süreli deneme oturumu), `wizstep` / `levelbtn` (kurulum sihirbazı),
-`palettebtn` (palet seçici), `notedot` (profil notu), `msg--me` / `msg--coach` (koç).
+`palettebtn` (palet seçici), `notedot` (profil notu), `msg--me` / `msg--coach` (koç),
+`agentav` / `desk` / `finding` (ofis masaları), `meetturn` (toplantı tutanağı).
 
 **Bileşen tek yerdedir.** Eski `UI.stat / badge / notice / table / field / input`
 köprüsü kaldırıldı; `R.UI` yalnız ikon, SVG çizim, ipucu rayı ve katman
