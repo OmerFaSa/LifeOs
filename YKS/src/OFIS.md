@@ -152,6 +152,28 @@ Sayaçlar sağlayıcı+model başına ayrıdır: Groq'ta sınıra takılmak Gemi
 değiştirilir; ayar sayfasındaki *"Model kimliğini elle yaz"* alanı bu yüzden
 vardır. Listeyi güncellemek için yalnızca `data/providers.js` düzenlenir.
 
+### Düşünme ayarı
+
+Gemini'nin "düşünme"si **aynı çıktı bütçesinden** yer: açık bırakılırsa model
+bütçeyi düşünerek harcar ve yanıt yarım ya da boş döner. Ofis ajanları kısa
+konuşur, düşünmeye ihtiyaçları yoktur — bu yüzden kapatılır ya da en düşük
+seviyeye çekilir.
+
+Ayar **katalogda**, model başına durur (`data/providers.js`):
+
+```js
+{ id:'gemini-3.5-flash', thinking:{ mode:'level',  value:'LOW' } }   // 3.x → thinkingLevel
+{ id:'gemini-2.5-flash', thinking:{ mode:'budget', value:0 } }       // 2.5 → thinkingBudget
+```
+
+Kural koda gömülmez: Google hem model adlarını hem de alan adını değiştiriyor
+(2.5'te `thinkingBudget` tamsayı, 3.x'te `thinkingLevel` metin).
+
+**Alan reddedilirse uygulama durmaz.** Model 400 dönerse istek bir kez de
+düşünme alanı olmadan denenir ve o model işaretlenir; sonraki çağrılarda alan
+hiç gönderilmez. Yani katalogdaki değer eskidiğinde en kötü sonuç "model kendi
+varsayılan düşünmesiyle çalışır" olur, kırılma olmaz.
+
 ### Anahtar nerede durur
 
 `localStorage['rota.llm.keys']` — **uygulama verisinden ayrı** bir anahtarda.
@@ -197,7 +219,7 @@ Ajanların yazısının yarıda kesilmesinin dört ayrı nedeni vardı; dördü 
 | **Akışın son karesi** | SSE gövdesi son `data:` satırını yeni satırla kapatmadan bitiyor, o satır tamponda kalıp atılıyordu | Akış bitince tampon boşaltılır |
 | **Çok baytlı harf** | `ç ğ ı ö ş ü` iki bayttır; parça sınırına denk gelirse son harf düşüyordu | Bitişte çözücü de boşaltılır (`decode()`) |
 | **Token sınırı** | `max_tokens` 200–420'ydi ve `finish_reason` hiç okunmuyordu: model cümle ortasında kesiliyor, kimse fark etmiyordu | Bütçeler üçe katlandı (`BUDGET`), bitiş sebebi okunur |
-| **Gemini düşünmesi** | 2.5 ailesinde "düşünme" aynı bütçeden yer; cevap boş ya da yarım dönüyordu | Destekleyen modelde `thinkingBudget: 0` |
+| **Gemini düşünmesi** | "Düşünme" aynı çıktı bütçesinden yer; cevap boş ya da yarım dönüyordu | Katalogdaki `thinking` ayarı (aşağıda) |
 
 Kesilme yine de olursa üç kademe devreye girer:
 

@@ -29,6 +29,22 @@ R.LLM = (function(){
      pahaliya gelir. */
   const MAX_CONTINUATIONS = 2;
 
+  /* Modelin "dusunme" ayarini KATALOGDAN okur (data/providers.js) ve API
+     alanina cevirir. Kural koda gomulmez: model isimleri de alan adlari da
+     surumle degisir (2.5 ailesinde thinkingBudget, 3.x'te thinkingLevel). */
+  function thinkingFor(provider, modelId){
+    const m = ((provider && provider.models) || []).find(x => x.id === modelId);
+    const t = m && m.thinking;
+    if(!t) return null;
+    if(t.mode === 'level') return { thinkingLevel:t.value };
+    if(t.mode === 'budget') return { thinkingBudget:t.value };
+    return null;
+  }
+
+  /* Bir model dusunme alanini reddettiyse o alan bir daha gonderilmez:
+     aksi hâlde katalog eskidiginde her cagri iki istege mal olurdu. */
+  const thinkingRejected = {};
+
   /* Saglayicilar "token siniri doldu"yu farkli adlandirir. */
   const TRUNCATED_FINISH = ['length', 'max_tokens', 'MAX_TOKENS'];
   function truncated(finish){
@@ -461,13 +477,12 @@ R.LLM = (function(){
         temperature:req.temperature == null ? 0.4 : req.temperature,
       },
     };
-    /* 2.5 ailesinde "dusunme" ayni butceden yer: acik birakilirsa model
-       butceyi dusunerek harcar ve cevap YARIM ya da bos doner. Ofis
-       ajanlari kisa konusur, dusunmeye ihtiyaclari yok — kapatilir.
-       Alan yalniz destekleyen modele gonderilir; digerleri 400 verir. */
-    if(/2\.5.*flash/i.test(String(req.model || ''))){
-      body.generationConfig.thinkingConfig = { thinkingBudget:0 };
-    }
+    /* "Dusunme" AYNI cikti butcesinden yer: acik birakilirsa model butceyi
+       dusunerek harcar ve cevap yarim ya da bos doner. Ofis ajanlari kisa
+       konusur, dusunmeye ihtiyaclari yok. Ayar katalogdan gelir; model
+       alani reddettiyse bir daha gonderilmez. */
+    const thinking = thinkingRejected[req.model] ? null : thinkingFor(provider, req.model);
+    if(thinking) body.generationConfig.thinkingConfig = thinking;
     if(req.system) body.systemInstruction = { parts:[{ text:req.system }] };
 
     const guard = withTimeout(req.signal, req.timeout);
@@ -490,6 +505,14 @@ R.LLM = (function(){
       const detail = await errorMessage(response);
       const code = codeForStatus(response.status);
       guard.done();
+      /* Dusunme alani bu modelce taninmiyorsa istek bir kez de ALANSIZ
+         denenir: katalogdaki deger eskimis olabilir (Google alan adini
+         2.5 -> 3.x gecisinde degistirdi) ve uygulama bu yuzden durmamali.
+         Model isaretlenir, bir daha gonderilmez. */
+      if(thinking && response.status === 400){
+        thinkingRejected[req.model] = true;
+        return callGemini(req, provider);
+      }
       if(code === 'rate_limited'){
         R.Quota.penalize({ provider:provider.id, model:req.model, keyId:req.keyId }, retryAfterSeconds(response));
       }

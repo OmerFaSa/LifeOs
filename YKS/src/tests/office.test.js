@@ -656,6 +656,60 @@
       done();
     });
 
+    it('Gemini 3.5 Flash’ta düşünme seviyesi düşürülür', async () => {
+      fresh();
+      R.LLM.setKey('gemini', 'AIzaTest');
+      let sent = null;
+      window.fetch = async (url, init) => {
+        sent = JSON.parse(init.body);
+        return {
+          ok:true, status:200,
+          headers:{ get:() => 'application/json' },
+          json:async () => ({ candidates:[
+            { content:{ parts:[{ text:'Hazır.' }] }, finishReason:'STOP' },
+          ] }),
+        };
+      };
+      await R.LLM.chat({ provider:'gemini', model:'gemini-3.5-flash' },
+        { messages:[{ role:'user', text:'x' }] });
+      /* 3.x ailesi thinkingBudget degil thinkingLevel bekler. */
+      expect(sent.generationConfig.thinkingConfig.thinkingLevel).toBe('LOW');
+      expect(sent.generationConfig.thinkingConfig.thinkingBudget).toBe(undefined);
+      done();
+    });
+
+    it('model düşünme alanını reddederse istek alansız tekrarlanır', async () => {
+      fresh();
+      R.LLM.setKey('gemini', 'AIzaTest');
+      const bodies = [];
+      let call = 0;
+      window.fetch = async (url, init) => {
+        bodies.push(JSON.parse(init.body));
+        call++;
+        if(call === 1){
+          /* Katalogdaki alan eskimis: saglayici istegi reddediyor. */
+          return { ok:false, status:400,
+            headers:{ get:() => 'application/json' },
+            text:async () => JSON.stringify({ error:{ message:'Unknown name "thinkingLevel"' } }) };
+        }
+        return {
+          ok:true, status:200,
+          headers:{ get:() => 'application/json' },
+          json:async () => ({ candidates:[
+            { content:{ parts:[{ text:'Hazır.' }] }, finishReason:'STOP' },
+          ] }),
+        };
+      };
+      const res = await R.LLM.chat({ provider:'gemini', model:'gemini-3.5-flash-lite' },
+        { messages:[{ role:'user', text:'x' }] });
+      /* Uygulama durmaz: ikinci istek dusunme alani olmadan gider. */
+      expect(res.text).toBe('Hazır.');
+      expect(call).toBe(2);
+      expect(!!bodies[0].generationConfig.thinkingConfig).toBeTruthy();
+      expect(bodies[1].generationConfig.thinkingConfig).toBe(undefined);
+      done();
+    });
+
     it('Gemini 2.5 Flash’ta düşünme bütçesi kapatılır', async () => {
       fresh();
       R.LLM.setKey('gemini', 'AIzaTest');
@@ -677,7 +731,7 @@
       done();
     });
 
-    it('düşünme alanı desteklemeyen Gemini modeline gönderilmez', async () => {
+    it('katalogda olmayan modele düşünme alanı gönderilmez', async () => {
       fresh();
       R.LLM.setKey('gemini', 'AIzaTest');
       let sent = null;
@@ -691,7 +745,8 @@
           ] }),
         };
       };
-      await R.LLM.chat({ provider:'gemini', model:'gemini-2.0-flash' },
+      /* Elle yazilmis, katalogda karsiligi olmayan model kimligi. */
+      await R.LLM.chat({ provider:'gemini', model:'gemini-deneysel-xyz' },
         { messages:[{ role:'user', text:'x' }] });
       expect(sent.generationConfig.thinkingConfig).toBe(undefined);
       done();
@@ -709,7 +764,7 @@
           { text:'Türkçede net kaybın var.' },
         ] }, finishReason:'STOP' }] }),
       });
-      const res = await R.LLM.chat({ provider:'gemini', model:'gemini-2.0-flash' },
+      const res = await R.LLM.chat({ provider:'gemini', model:'gemini-3.5-flash' },
         { messages:[{ role:'user', text:'x' }] });
       expect(res.text).toBe('Türkçede net kaybın var.');
       done();

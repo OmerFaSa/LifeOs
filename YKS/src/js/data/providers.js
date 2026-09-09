@@ -104,13 +104,26 @@ R.PROVIDERS = {
        + 'Flash için 15, Flash-Lite için 30 istektir. Uzun toplantılar için uygun.',
     checked:'2026-09 · ai.google.dev/gemini-api/docs/rate-limits',
     limits:{ rpm:15, rpd:1500 },
+    /* thinking: modelin "dusunme" ayari — ofis ajanlari kisa konusur,
+       dusunmeye ihtiyaclari yoktur ve acik birakilirsa AYNI cikti
+       butcesinden yiyip yaniti yarim birakir.
+
+         { mode:'level',  value:'LOW' }  3.x ailesi — thinkingLevel
+         { mode:'budget', value:0 }      2.5 ailesi — thinkingBudget
+         yok                             dusunmeyen model, alan gonderilmez
+
+       Alan modelce reddedilirse (400) istek bir kez de alansiz denenir;
+       yani buradaki deger yanlissa uygulama durmaz, yalnizca modelin
+       varsayilan dusunmesiyle calisir. */
     models:[
-      { id:'gemini-2.5-flash',      label:'Gemini 2.5 Flash',      free:true, strength:'analiz',
-        limits:{ rpm:15, rpd:1500 } },
-      { id:'gemini-2.0-flash',      label:'Gemini 2.0 Flash',      free:true, strength:'denge',
-        limits:{ rpm:15, rpd:1500 } },
-      { id:'gemini-2.0-flash-lite', label:'Gemini 2.0 Flash Lite', free:true, strength:'hız',
-        limits:{ rpm:30, rpd:1500 } },
+      { id:'gemini-3.5-flash',      label:'Gemini 3.5 Flash',      free:true, strength:'analiz',
+        thinking:{ mode:'level', value:'LOW' }, limits:{ rpm:15, rpd:1500 } },
+      { id:'gemini-3.5-flash-lite', label:'Gemini 3.5 Flash Lite', free:true, strength:'hız',
+        thinking:{ mode:'level', value:'LOW' }, limits:{ rpm:30, rpd:1500 } },
+      { id:'gemini-2.5-flash',      label:'Gemini 2.5 Flash',      free:true, strength:'denge',
+        thinking:{ mode:'budget', value:0 }, limits:{ rpm:15, rpd:1500 } },
+      { id:'gemini-2.5-flash-lite', label:'Gemini 2.5 Flash Lite', free:true, strength:'hız',
+        thinking:{ mode:'budget', value:0 }, limits:{ rpm:30, rpd:1500 } },
     ],
   },
 
