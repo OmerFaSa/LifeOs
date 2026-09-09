@@ -1486,3 +1486,12 @@ button.listitem.is-on{ background:var(--primary-soft); }
   text-transform:uppercase; color:var(--primary);
 }
 .srsrow__detail{ font-size:var(--fs-sm); color:var(--text-3); line-height:1.45; }
+
+/* ---------- ekip sohbeti: ajan sekmesi ----------
+   Sekmede avatar durur; kat planındaki kimlik rengi burada tekrarlanır. */
+.agenttab{ display:inline-flex; align-items:center; gap:7px; min-width:0; }
+.agentav--xs{ width:20px; height:20px; font-size:10px; }
+.agenttab__name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+@media (max-width:640px){
+  .agenttab__name{ display:none; }
+}

@@ -56,7 +56,11 @@ R.Screens.team = (function(){
   function picker(){
     return K.Segmented({
       act:'team-agent', value:current().id, block:true, aria:'Ajan seç',
-      items:R.AGENTS.map(a => ({ value:a.id, label:a.name })),
+      /* Sekmede de avatar durur: ofis kat planındaki kimlik rengi burada
+         tekrarlanınca kimin masasında olduğun bakınca anlaşılır. */
+      items:R.AGENTS.map(a => ({ value:a.id, label:html`<span class="agenttab">
+        <span class="${'agentav agentav--xs agentav--' + a.id}" aria-hidden="true">${a.initial}</span>
+        <span class="agenttab__name">${a.name}</span></span>` })),
     });
   }
 
