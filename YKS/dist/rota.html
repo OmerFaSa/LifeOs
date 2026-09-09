@@ -2186,6 +2186,16 @@ button.listitem.is-on{ background:var(--primary-soft); }
 @media (max-width:640px){
   .agenttab__name{ display:none; }
 }
+
+/* ---------- otomatik anlık görüntüler ---------- */
+.snaps{ display:grid; gap:2px; }
+.snaprow{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:9px 0; border-bottom:1px solid var(--border);
+}
+.snaprow:last-child{ border-bottom:none; }
+.snaprow b{ display:block; }
+.snaprow .tiny{ display:block; margin-top:1px; }
 </style>
 <div id="app">
   <div class="boot">
@@ -4693,6 +4703,9 @@ R.Store = (function(){
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
     get mode(){ return mode; },
+    /* Anlik goruntuler de profil basina ayrilmali; anahtari core/backup.js
+       bu degerden turetir. */
+    get profile(){ return PROFILE; },
   };
 })();
 
@@ -5767,6 +5780,164 @@ R.Model = (function(){
     saveMood, moodOf, energyAverage, saveBreak, breaksOf,
     markBackup, backupAgeDays, backupDue, dataFootprint,
     migrate, loadAll,
+  };
+})();
+
+/* ==== js/core/backup.js ==== */
+/* Otomatik yedek — veri kaybına karşı iki ayrı katman.
+
+   Bütün veri tarayıcının localStorage'ında durur ve iki ayrı riske açıktır.
+   Bunlar aynı şey değildir ve çözümleri de aynı değildir:
+
+   1. KAZA — uygulama hatası, yanlış bir içe aktarma, yanlışlıkla "sıfırla".
+      Veri hâlâ tarayıcıdadır ama bozulmuştur.
+      Çözüm: aynı depoda AYRI bir anahtarda tutulan dönen anlık görüntü.
+      Sessizce alınır, tek dokunuşla geri yüklenir.
+
+   2. KAYIP — tarayıcı verisi temizlendi, cihaz değişti, disk gitti.
+      Anlık görüntü de aynı depoda olduğu için bunu KURTARMAZ.
+      Tek çare veriyi tarayıcının dışına çıkarmaktır: indirilen dosya.
+
+   Bu modül birincisini otomatikleştirir. İkincisi otomatikleştirilemez —
+   tarayıcılar kullanıcı hareketi olmadan dosya indirtmez — ama görünmez
+   olmaktan çıkarılabilir; ekrandaki hatırlatma bu yüzden vardır.
+
+   ALAN. Anlık görüntü ana verinin bir kopyasıdır, yani depoyu ikiye katlar.
+   Kota zaten dar (~5 MB) olduğu için en fazla iki görüntü tutulur; yazma
+   kotayı zorlarsa önce eskisi atılır, yine olmazsa görüntü hiç alınmaz.
+   Asıl veriyi riske atmak, yedek almamaktan kötüdür. */
+
+window.R = window.R || {};
+
+R.Backup = (function(){
+  const U = R.U;
+
+  const MAX_SNAPSHOTS = 2;
+  const INTERVAL_HOURS = 12;   // bu süre geçmeden yeni görüntü alınmaz
+  const MIN_RECORDS = 5;       // korunacak veri yoksa görüntü alınmaz
+  const QUOTA_CEILING = 60;    // yerel alan bu yüzdenin üstündeyse alınmaz
+
+  /* Anlik goruntuler profil basina ayrilir. Sahte depoda profil alani
+     bulunmayabilir; o durumda ana profil varsayilir. */
+  function key(){ return 'rota84285.snap.' + (R.Store.profile || 'main'); }
+
+  function read(){
+    try{
+      const raw = localStorage.getItem(key());
+      const doc = raw ? JSON.parse(raw) : null;
+      return (doc && Array.isArray(doc.items)) ? doc : { items:[] };
+    }catch(e){ return { items:[] }; }
+  }
+
+  /* Yazma kotaya takilabilir; cagiran yakalar ve daraltip tekrar dener. */
+  function write(doc){ localStorage.setItem(key(), JSON.stringify(doc)); }
+
+  /* ---------- okuma ---------- */
+
+  /* Govdesiz liste — ekranda gosterilir, payload tasinmaz. */
+  function list(){
+    return read().items.map(x => ({
+      id:x.id, at:x.at, reason:x.reason, records:x.records,
+    }));
+  }
+
+  function ageHours(iso){
+    if(!iso) return null;
+    return Math.floor((Date.now() - new Date(iso).getTime()) / 3600000);
+  }
+
+  function status(){
+    const items = read().items;
+    const last = items[0] || null;
+    return {
+      count:items.length,
+      lastAt:last ? last.at : null,
+      lastAgeHours:last ? ageHours(last.at) : null,
+      /* Disari alinan gercek yedek — asil koruma budur. */
+      exportAgeDays:R.Model.backupAgeDays(),
+      exportDue:R.Model.backupDue(),
+      quota:R.Store.localQuota(),
+    };
+  }
+
+  /* ---------- yazma ---------- */
+
+  function take(reason){
+    const foot = R.Model.dataFootprint();
+    if(foot.total < MIN_RECORDS) return { ok:false, why:'Korunacak veri yok.' };
+
+    /* Alan darsa once eski goruntuleri at; yine dar kaliyorsa vazgec. */
+    if(R.Store.localQuota().pct >= QUOTA_CEILING){
+      try{ write({ items:[] }); }catch(e){}
+      const after = R.Store.localQuota();
+      if(after.pct >= QUOTA_CEILING){
+        return { ok:false, why:'Yerel alan %' + after.pct + ' dolu; anlık görüntü alınmadı.' };
+      }
+    }
+
+    const payload = R.Store.exportAll();
+    /* Depo kayitlari ya {__meta, data} sarmalinda ya da duz sozluk olarak
+       verir; sayim ikisinde de dogru olsun. Govde ne gelirse geri yuklemeye
+       de o gider, yani bicim burada yorumlanmaz. */
+    const bag = (payload && payload.data) ? payload.data : payload;
+    const item = {
+      id:U.uid('s'),
+      at:new Date().toISOString(),
+      reason:String(reason || 'otomatik'),
+      records:Object.keys(bag || {}).length,
+      payload,
+    };
+
+    const doc = read();
+    doc.items = [item].concat(doc.items).slice(0, MAX_SNAPSHOTS);
+    try{
+      write(doc);
+    }catch(e){
+      /* Kota taşti: yalnizca en yenisini tut ve bir kez daha dene. */
+      try{ write({ items:[item] }); }
+      catch(e2){ return { ok:false, why:'Yerel alan yetmedi; anlık görüntü alınamadı.' }; }
+    }
+    return { ok:true, id:item.id, at:item.at, records:item.records };
+  }
+
+  /* Uygulama acilisinda cagrilir. Sessizdir: bir sey sormaz, bir sey
+     gostermez, hata verirse yutar — acilisi bir yedek yuzunden bozmak
+     yedegin kendisinden kotudur. */
+  function maybeTake(){
+    try{
+      const last = read().items[0];
+      if(last && ageHours(last.at) < INTERVAL_HOURS){
+        return { ok:false, why:'Görüntü zamanı değil.' };
+      }
+      return take('otomatik');
+    }catch(e){
+      return { ok:false, why:'Anlık görüntü alınamadı.' };
+    }
+  }
+
+  async function restore(id){
+    const item = read().items.find(x => x.id === id);
+    if(!item || !item.payload) return { ok:false, why:'Anlık görüntü bulunamadı.' };
+    /* Geri yuklemeden ONCE simdiki hâlin goruntusu alinir: yanlis goruntuyu
+       geri yuklemek de bir kazadir ve ondan da donulebilmeli. */
+    take('geri yükleme öncesi');
+    await R.Store.importAll(item.payload);
+    return { ok:true, records:item.records, at:item.at };
+  }
+
+  function remove(id){
+    const doc = read();
+    doc.items = doc.items.filter(x => x.id !== id);
+    try{ write(doc); return true; }catch(e){ return false; }
+  }
+
+  function clear(){
+    try{ localStorage.removeItem(key()); return true; }catch(e){ return false; }
+  }
+
+  return {
+    list, status, take, maybeTake, restore, remove, clear,
+    MAX_SNAPSHOTS, INTERVAL_HOURS,
   };
 })();
 
@@ -19279,6 +19450,47 @@ R.Screens.guide = (function(){
     });
   }
 
+  /* Kaza kurtarma — otomatik anlık görüntüler.
+     İki katmanın FARKI burada açıkça yazılır: bu görüntüler aynı tarayıcıda
+     durur, tarayıcı verisi silinince onlar da gider. Kullanıcı ikisini
+     karıştırırsa yanlış bir güvenlik duygusuyla yedek almayı bırakır. */
+  function snapshotCard(){
+    const st = R.Backup.status();
+    const items = R.Backup.list();
+
+    return K.Card({
+      title:'Otomatik anlık görüntü', sub:'Kaza kurtarma — günde iki kez, sessizce alınır',
+      badge:items.length
+        ? K.Badge({ label:items.length + ' görüntü', tone:'ok' })
+        : K.Badge({ label:'henüz yok', tone:'muted' }),
+      actions:K.Button({ label:'Şimdi al', icon:'refresh', size:'sm', act:'snapshot-take' }),
+      body:html`
+        ${K.Notice({ tone:'info',
+          title:'Bu, yedeğin yerine geçmez.',
+          body:'Anlık görüntüler bu tarayıcının içinde durur; uygulama hatası ya da '
+             + 'yanlışlıkla silme gibi kazalardan korur. Tarayıcı verisi temizlenirse '
+             + 'ya da cihaz değişirse onlar da gider — bunun tek çaresi yedek dosyasıdır.' })}
+
+        ${items.length
+          ? html`<div class="snaps mt-12">${map(items, s => html`
+              <div class="snaprow">
+                <div class="minw0">
+                  <b class="small">${U.fmtDate(s.at.slice(0, 10))} ·
+                    ${new Date(s.at).toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' })}</b>
+                  <span class="tiny dim">${U.fmtNum(s.records)} kayıt · ${s.reason}</span>
+                </div>
+                ${K.Button({ label:'Geri yükle', size:'sm', act:'snapshot-restore',
+                  data:{ 'data-id':s.id } })}
+              </div>`)}</div>`
+          : html`<p class="small muted mt-12">Kayda değer veri biriktiğinde ilk görüntü
+              kendiliğinden alınır.</p>`}
+
+        ${when(st.quota.pct >= 60, () => html`<div class="mt-10">${K.Notice({ tone:'warn',
+          body:'Yerel alan %' + st.quota.pct + ' dolu; alan açılana kadar otomatik '
+             + 'görüntü alınmayacak. Bir yedek al, sonra eski kayıtları sadeleştir.' })}</div>`)}`,
+    });
+  }
+
   /* Yedek dosyasinin yapisi — disariya acik tek bicim.
      Kullanici dosyayi acip ne oldugunu gorebilmeli; bu tablo o sozlesmedir. */
   const BACKUP_SHAPE = [
@@ -19383,6 +19595,7 @@ R.Screens.guide = (function(){
       ])),
       K.Span(6, K.Stack([
         dataCard(),
+        snapshotCard(),
         backupShapeCard(),
         installCard(),
         K.Card({ title:'Klavye kısayolları',
@@ -19465,6 +19678,37 @@ R.Screens.guide = (function(){
       UI.toast('Profil kaydedildi');
       R.App.render();
     },
+    async 'snapshot-take'(){
+      const res = R.Backup.take('elle');
+      UI.toast(res.ok ? 'Anlık görüntü alındı — ' + res.records + ' kayıt' : res.why);
+      R.App.render();
+    },
+
+    /* Geri yukleme mevcut veriyi DEGISTIRIR; bu yuzden onay istenir ve
+       geri yuklemeden once simdiki hâlin goruntusu alinir (Backup.restore
+       icinde), yani yanlis goruntuyu secmek de geri alinabilir. */
+    async 'snapshot-restore'(el){
+      const id = el.dataset.id;
+      const item = R.Backup.list().find(x => x.id === id);
+      if(!item) return;
+      const stamp = U.fmtDate(item.at.slice(0, 10)) + ' '
+        + new Date(item.at).toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
+      UI.confirmSheet('Anlık görüntüyü geri yükle',
+        stamp + ' tarihli görüntü (' + item.records + ' kayıt) yüklenecek ve şu anki veri '
+        + 'onunla değişecek. Şu anki hâlin görüntüsü önce alınır, istersen ona dönebilirsin.',
+        async () => {
+          try{
+            const res = await R.Backup.restore(id);
+            if(!res.ok){ UI.toast(res.why); return; }
+            await M.loadAll();
+            UI.toast('Geri yüklendi — ' + res.records + ' kayıt');
+            R.App.render();
+          }catch(err){
+            UI.toast('Geri yüklenemedi: ' + (err && err.message ? err.message : 'bilinmeyen hata'));
+          }
+        });
+    },
+
     async 'export-data'(){
       const payload = R.Store.exportAll();
       const json = JSON.stringify(payload, null, 2);
@@ -22424,6 +22668,10 @@ R.App = (function(){
       await M.loadAll();
       applyTheme();
       await render();
+
+      /* Kaza kurtarma goruntusu — gunde iki kez, sessizce. Ekrani cizdikten
+         SONRA calisir: acilisi bir yedek yuzunden geciktirmek anlamsizdir. */
+      try{ R.Backup.maybeTake(); }catch(e){ /* yedek acilisi bozmaz */ }
 
       // AI koc yetenegi acilisi bloklamaz; hazir olunca panelleri gostermek icin yeniden ciz.
       installManifest();

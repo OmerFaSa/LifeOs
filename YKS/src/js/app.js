@@ -662,6 +662,10 @@ R.App = (function(){
       applyTheme();
       await render();
 
+      /* Kaza kurtarma goruntusu — gunde iki kez, sessizce. Ekrani cizdikten
+         SONRA calisir: acilisi bir yedek yuzunden geciktirmek anlamsizdir. */
+      try{ R.Backup.maybeTake(); }catch(e){ /* yedek acilisi bozmaz */ }
+
       // AI koc yetenegi acilisi bloklamaz; hazir olunca panelleri gostermek icin yeniden ciz.
       installManifest();
       R.Auto.onDayOpen().then(done => { if(done.length) render(); });

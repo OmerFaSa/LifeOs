@@ -254,5 +254,8 @@ R.Store = (function(){
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
     get mode(){ return mode; },
+    /* Anlik goruntuler de profil basina ayrilmali; anahtari core/backup.js
+       bu degerden turetir. */
+    get profile(){ return PROFILE; },
   };
 })();

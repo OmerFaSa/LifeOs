@@ -284,6 +284,47 @@ R.Screens.guide = (function(){
     });
   }
 
+  /* Kaza kurtarma — otomatik anlık görüntüler.
+     İki katmanın FARKI burada açıkça yazılır: bu görüntüler aynı tarayıcıda
+     durur, tarayıcı verisi silinince onlar da gider. Kullanıcı ikisini
+     karıştırırsa yanlış bir güvenlik duygusuyla yedek almayı bırakır. */
+  function snapshotCard(){
+    const st = R.Backup.status();
+    const items = R.Backup.list();
+
+    return K.Card({
+      title:'Otomatik anlık görüntü', sub:'Kaza kurtarma — günde iki kez, sessizce alınır',
+      badge:items.length
+        ? K.Badge({ label:items.length + ' görüntü', tone:'ok' })
+        : K.Badge({ label:'henüz yok', tone:'muted' }),
+      actions:K.Button({ label:'Şimdi al', icon:'refresh', size:'sm', act:'snapshot-take' }),
+      body:html`
+        ${K.Notice({ tone:'info',
+          title:'Bu, yedeğin yerine geçmez.',
+          body:'Anlık görüntüler bu tarayıcının içinde durur; uygulama hatası ya da '
+             + 'yanlışlıkla silme gibi kazalardan korur. Tarayıcı verisi temizlenirse '
+             + 'ya da cihaz değişirse onlar da gider — bunun tek çaresi yedek dosyasıdır.' })}
+
+        ${items.length
+          ? html`<div class="snaps mt-12">${map(items, s => html`
+              <div class="snaprow">
+                <div class="minw0">
+                  <b class="small">${U.fmtDate(s.at.slice(0, 10))} ·
+                    ${new Date(s.at).toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' })}</b>
+                  <span class="tiny dim">${U.fmtNum(s.records)} kayıt · ${s.reason}</span>
+                </div>
+                ${K.Button({ label:'Geri yükle', size:'sm', act:'snapshot-restore',
+                  data:{ 'data-id':s.id } })}
+              </div>`)}</div>`
+          : html`<p class="small muted mt-12">Kayda değer veri biriktiğinde ilk görüntü
+              kendiliğinden alınır.</p>`}
+
+        ${when(st.quota.pct >= 60, () => html`<div class="mt-10">${K.Notice({ tone:'warn',
+          body:'Yerel alan %' + st.quota.pct + ' dolu; alan açılana kadar otomatik '
+             + 'görüntü alınmayacak. Bir yedek al, sonra eski kayıtları sadeleştir.' })}</div>`)}`,
+    });
+  }
+
   /* Yedek dosyasinin yapisi — disariya acik tek bicim.
      Kullanici dosyayi acip ne oldugunu gorebilmeli; bu tablo o sozlesmedir. */
   const BACKUP_SHAPE = [
@@ -388,6 +429,7 @@ R.Screens.guide = (function(){
       ])),
       K.Span(6, K.Stack([
         dataCard(),
+        snapshotCard(),
         backupShapeCard(),
         installCard(),
         K.Card({ title:'Klavye kısayolları',
@@ -470,6 +512,37 @@ R.Screens.guide = (function(){
       UI.toast('Profil kaydedildi');
       R.App.render();
     },
+    async 'snapshot-take'(){
+      const res = R.Backup.take('elle');
+      UI.toast(res.ok ? 'Anlık görüntü alındı — ' + res.records + ' kayıt' : res.why);
+      R.App.render();
+    },
+
+    /* Geri yukleme mevcut veriyi DEGISTIRIR; bu yuzden onay istenir ve
+       geri yuklemeden once simdiki hâlin goruntusu alinir (Backup.restore
+       icinde), yani yanlis goruntuyu secmek de geri alinabilir. */
+    async 'snapshot-restore'(el){
+      const id = el.dataset.id;
+      const item = R.Backup.list().find(x => x.id === id);
+      if(!item) return;
+      const stamp = U.fmtDate(item.at.slice(0, 10)) + ' '
+        + new Date(item.at).toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
+      UI.confirmSheet('Anlık görüntüyü geri yükle',
+        stamp + ' tarihli görüntü (' + item.records + ' kayıt) yüklenecek ve şu anki veri '
+        + 'onunla değişecek. Şu anki hâlin görüntüsü önce alınır, istersen ona dönebilirsin.',
+        async () => {
+          try{
+            const res = await R.Backup.restore(id);
+            if(!res.ok){ UI.toast(res.why); return; }
+            await M.loadAll();
+            UI.toast('Geri yüklendi — ' + res.records + ' kayıt');
+            R.App.render();
+          }catch(err){
+            UI.toast('Geri yüklenemedi: ' + (err && err.message ? err.message : 'bilinmeyen hata'));
+          }
+        });
+    },
+
     async 'export-data'(){
       const payload = R.Store.exportAll();
       const json = JSON.stringify(payload, null, 2);

@@ -1495,3 +1495,13 @@ button.listitem.is-on{ background:var(--primary-soft); }
 @media (max-width:640px){
   .agenttab__name{ display:none; }
 }
+
+/* ---------- otomatik anlık görüntüler ---------- */
+.snaps{ display:grid; gap:2px; }
+.snaprow{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:9px 0; border-bottom:1px solid var(--border);
+}
+.snaprow:last-child{ border-bottom:none; }
+.snaprow b{ display:block; }
+.snaprow .tiny{ display:block; margin-top:1px; }
