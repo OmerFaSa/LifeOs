@@ -30,6 +30,8 @@ R.S = {
   office:null,     // ofis ayarlari (saglayici, model, ajan basina secim)
   officeChats:{},  // agentId -> mesajlar
   officeMeetings:[],// ajanlarin toplanti tutanaklari
+  journal:{},      // agentId -> dogrulanmis gozlemler (ajan defteri)
+  officeBriefings:{},// YYYY-MM-DD -> gunluk brifing (gunde tek model cagrisi)
   ui:{
     weekView:null,     // gorunen hafta no
     examTab:'list',

@@ -30,6 +30,7 @@ R.Office = (function(){
       model:'default',
       endpoint:'',
       fallback:true,          // ilk model dusunce sirayi dene
+      autoBriefing:true,      // sabah gunun brifingini kendiliginden uret
       perAgent:{},            // agentId -> { provider, model }
       updatedAt:null,
       promptVersion:R.OFFICE_PROMPTS.version,
@@ -448,6 +449,147 @@ R.Office = (function(){
     },
   };
 
+  /* ==================== masa notlari (proaktiflik) ====================
+     Ofis sen kapisini acinca degil, esik asilinca konusur. Notlar TAMAMEN
+     kural motorundan uretilir: model gerektirmez, kota harcamaz, cevrimdisi
+     calisir. Ajanin masasinda ve Bugun ekraninda gorunur. */
+
+  const WATCHERS = [
+    { id:'analiz-borcu', agent:'analist', tone:'danger', route:'exams',
+      when(){ return C.analysisDebt().length >= 2; },
+      text(){ return C.analysisDebt().length + ' deneme analizsiz bekliyor; ölçüm değerini yitiriyor.'; } },
+
+    { id:'tekrar-borcu', agent:'analist', tone:'warn', route:'cards',
+      when(){ return C.cardDebt() > 15; },
+      text(){ return 'Tekrar borcu %' + C.cardDebt() + ' — eşik %10, borç birikiyor.'; } },
+
+    { id:'acik-yanlis', agent:'analist', tone:'warn', route:'cards',
+      when(){ return C.openErrors().length >= 12; },
+      text(){ return C.openErrors().length + ' açık yanlış var; kök neden yazılmadan defter işe yaramaz.'; } },
+
+    { id:'uyku', agent:'rehber', tone:'danger', route:'today',
+      when(){
+        const s = C.sleepAverage(7);
+        const t = (S.profile && S.profile.sleepTarget) || 7.5;
+        return s != null && s < t - 1;
+      },
+      text(){ return 'Uyku ortalaması ' + U.fmtNet(C.sleepAverage(7)) + ' saate düştü; hacim tartışmasından önce bu.'; } },
+
+    { id:'plan', agent:'rehber', tone:'warn', route:'week',
+      when(){ const c = C.planCompletion(M.currentWeek()); return c != null && c < 70; },
+      text(){ return 'Plan tamamlaması %' + C.planCompletion(M.currentWeek()) + '; sözleşme kapasitenin üstünde olabilir.'; } },
+
+    { id:'seri', agent:'rehber', tone:'ok', route:'today',
+      when(){ return C.behaviorStreak().streak >= 7; },
+      text(){ return 'Davranış serisi ' + C.behaviorStreak().streak + ' gün — bu düzen korunmaya değer.'; } },
+
+    { id:'tyt-dusus', agent:'tyt', tone:'danger', route:'progress',
+      when(){ const t = C.medianTrend('TYT'); return t.delta != null && t.delta <= -2; },
+      text(){ return 'TYT medyanı ' + U.fmtNet(Math.abs(C.medianTrend('TYT').delta)) + ' net geriledi.'; } },
+
+    { id:'ayt-dusus', agent:'ayt', tone:'danger', route:'progress',
+      when(){ const t = C.medianTrend('AYT'); return t.delta != null && t.delta <= -2; },
+      text(){ return 'AYT medyanı ' + U.fmtNet(Math.abs(C.medianTrend('AYT').delta)) + ' net geriledi.'; } },
+
+    { id:'ikinci-olcum', agent:'tyt', tone:'warn', route:'subjects',
+      when(){ return C.pendingSecondChecks().filter(p => p.overdue).length >= 2; },
+      text(){ return C.pendingSecondChecks().filter(p => p.overdue).length
+        + ' konu 7. gün testini bekliyor; ölçülmeyen konu kapanmış sayılmaz.'; } },
+
+    { id:'karar', agent:'patron', tone:'warn', route:'office',
+      when(){ return openDecisions().length > 0; },
+      text(){
+        const d = openDecisions()[0];
+        const gun = U.diffDays(d.at.slice(0, 10), U.todayISO());
+        return 'Karar ' + (gun > 0 ? gun + ' gündür ' : '') + 'açık: ' + d.title;
+      } },
+  ];
+
+  /* Etkin notlar. agentId verilirse yalniz o masaninkiler. */
+  function notes(agentId){
+    const out = [];
+    WATCHERS.forEach(w => {
+      let on = false;
+      try{ on = !!w.when(); }catch(e){ on = false; }
+      if(!on) return;
+      let text = '';
+      try{ text = w.text(); }catch(e){ return; }
+      const agent = R.AGENT_BY_ID[w.agent];
+      out.push({ id:w.id, agent:w.agent, name:agent ? agent.name : '',
+        tone:w.tone, text, route:w.route });
+    });
+    const rank = { danger:0, warn:1, ok:2, info:3 };
+    out.sort((a, b) => (rank[a.tone] || 9) - (rank[b.tone] || 9));
+    return agentId ? out.filter(n => n.agent === agentId) : out;
+  }
+
+  /* ==================== gunluk brifing ====================
+     Sabah bir kez calisir ve gun boyu onbellekten okunur; ikinci bir model
+     cagrisi yapilmaz. Model yoksa notlardan kural motoru metni uretilir. */
+
+  /* Brifingin dayandigi not kumesinin parmak izi. Notlar gun icinde
+     degisirse (deneme girildi, uyku kaydedildi) brifing BAYATLAR: aksi hâlde
+     ayni ekranda "uyarı yok" yazarken iki uyari gorunur. */
+  function noteFingerprint(){
+    return notes().map(n => n.id).sort().join(',');
+  }
+
+  function briefingOf(dayISO){
+    const b = (S.officeBriefings || {})[dayISO || U.todayISO()];
+    if(!b) return null;
+    return Object.assign({}, b, { stale:b.noteIds !== noteFingerprint() });
+  }
+
+  function ruleBriefingText(){
+    const list = notes();
+    const action = nextAction();
+    if(!list.length) return 'Masalarda bekleyen bir uyarı yok. Bugünün işi: ' + action.title + '.';
+    return list.slice(0, 2).map(n => n.name + ': ' + n.text).join(' ')
+      + ' Bugünün işi: ' + action.title + '.';
+  }
+
+  async function dailyBriefing(opts){
+    const o = opts || {};
+    const id = U.todayISO();
+    const cached = briefingOf(id);
+    /* Bayat brifing kural motoru modunda kendiliginden tazelenir (bedava);
+       model bagliyken kota harcamamak icin bayat isaretiyle birakilir ve
+       tazeleme kullaniciya birakilir. */
+    if(cached && !o.force && !(cached.stale && !ready('patron'))) return cached;
+
+    const list = notes();
+    let text, mode = 'kural';
+    if(ready('patron') && !o.rulesOnly){
+      const agent = R.AGENT_BY_ID.patron;
+      const data = compactData(R.Tools.sanitize({
+        masaNotlari:list.map(n => ({ ajan:n.name, not:n.text, onem:n.tone })),
+        gununIsi:{ baslik:nextAction().title, neden:nextAction().why },
+        acikKarar:openDecisions().map(d => d.title),
+      }));
+      const turn = await speak('patron', 'briefing', {
+        messages:[{ role:'user', text:R.OFFICE_PROMPTS.daily(data) }],
+        ctx:{},
+      }, Object.assign({}, o, { maxTokens:200 }));
+      text = turn.text;
+      mode = turn.mode;
+    }else{
+      text = ruleBriefingText();
+    }
+
+    const payload = { id, at:new Date().toISOString(), text, mode,
+      noteCount:list.length, noteIds:list.map(n => n.id).sort().join(','),
+      action:nextAction().title };
+    S.officeBriefings = S.officeBriefings || {};
+    S.officeBriefings[id] = payload;
+    await R.Store.set('briefings/' + id, payload);
+
+    /* Eski brifingler birikmesin: son yedi gun yeter. */
+    const keep = {};
+    Object.keys(S.officeBriefings).sort().slice(-7).forEach(k => { keep[k] = S.officeBriefings[k]; });
+    S.officeBriefings = keep;
+    return payload;
+  }
+
   /* nextAction() veri yokken null donebilir; ofis her zaman bir is gosterir. */
   function nextAction(){
     return C.nextAction() || {
@@ -496,12 +638,23 @@ R.Office = (function(){
   }
 
   const briefCache = new Map();
-  /* Ayni cizimde bes ajan da brifing ister; hesap bir kez yapilir. */
+  /* Ayni cizimde bes ajan da brifing ister; hesap bir kez yapilir.
+     Brifinge ajanin DEFTERI de eklenir: kural motorunun gecmiste buldugu
+     oruntuler ve dogrulanmis gozlemler. Bunlar veriden gelir, modelden degil. */
   function brief(agentId){
     const agent = R.AGENT_BY_ID[agentId];
     if(!agent) throw new Error('bilinmeyen ajan: ' + agentId);
     if(briefCache.has(agentId)) return briefCache.get(agentId);
+
     const out = BRIEFS[agentId](agent);
+    let journal = [];
+    try{ journal = R.Journal.forBrief(agentId); }catch(e){ journal = []; }
+    out.journal = journal;
+    if(journal.length){
+      out.data = Object.assign({}, out.data, {
+        defterim:journal.map(j => j.text),
+      });
+    }
     briefCache.set(agentId, out);
     return out;
   }
@@ -870,6 +1023,16 @@ R.Office = (function(){
     const risks = C.riskRanking(1);
     const out = [];
 
+    /* Pazar aksami haftanin kapanisi gundemi one gecer: hafta bitiyor ve
+       sozlesme degil GERCEKLESEN konusulur. */
+    if(U.weekdayIndex(U.today()) === 6){
+      out.push({ score:92, topic:'Haftanın kapanışı',
+        why:'Hafta bitiyor. Planlanan ile gerçekleşen arasındaki farkı ekip birlikte okur.',
+        data:{ hafta:n, tamamlama:comp, soruGerceklesme:C.questionRealization(n),
+          atlamaNedenleri:C.skipReasonCounts(n),
+          devir:(S.reviews[M.weekId(n)] || {}).carry || null } });
+    }
+
     if(gate && !decided){
       out.push({ score:95, topic:'Bu ayın karar kapısı',
         why:'Ayda bir medyanın bandın neresinde olduğuna bakılır ve tek müdahale seçilir.',
@@ -1074,6 +1237,10 @@ R.Office = (function(){
       decision:{
         id:session.id, title:action.title, why:action.why,
         route:action.route || 'today', state:'open', at:new Date().toISOString(),
+        /* Isin hangi ajanin alanina dustugu: guven skoru bunun uzerinden
+           hesaplanir. Kural motorunun is anahtari (Calc.nextAction) tasinir. */
+        key:action.key || null,
+        owner:(R.ACTION_OWNER && R.ACTION_OWNER[action.key]) || null,
       },
       turns:session.turns.map(t => ({ agent:t.agent, name:t.name, role:t.role, text:t.text,
         warnings:t.warnings || [], mode:t.mode, round:t.round || 0,
@@ -1296,6 +1463,11 @@ R.Office = (function(){
       .sort((a, b) => (b.at || '').localeCompare(a.at || ''))
       .slice(0, MEETING_MAX);
 
+    const briefs = await R.Store.list('briefings');
+    S.officeBriefings = {};
+    (briefs || []).forEach(b => { if(b && b.id) S.officeBriefings[b.id] = b; });
+
+    await R.Journal.load();
     await R.LLM.initBuiltin();
     return S.office;
   }
@@ -1313,6 +1485,8 @@ R.Office = (function(){
     /* toplanti — turlu canli oturum */
     agenda, agendaCandidates, openMeeting, nextTurn, userTurn, closeMeeting, speakerAt, roundDef,
     meet, meetings, lastMeeting, saveMeeting, deleteMeeting, reportText, maxRounds,
+    /* proaktiflik */
+    notes, WATCHERS, dailyBriefing, briefingOf, ruleBriefingText, noteFingerprint,
     /* karar takibi */
     decisions, openDecisions, pendingDecision, closeDecision,
     /* kota */

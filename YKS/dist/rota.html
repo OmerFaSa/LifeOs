@@ -1813,6 +1813,22 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .keyrow__mask{ font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size:var(--fs-sm); flex:1; min-width:0; }
 .keyrow__q{ font-size:var(--fs-xs); color:var(--text-3); white-space:nowrap; }
+
+
+/* ---------- masa notları (proaktif uyarılar) ---------- */
+.notes{ display:flex; flex-direction:column; gap:6px; }
+.note{
+  display:grid; grid-template-columns:8px minmax(0,1fr) auto; gap:9px; align-items:center;
+  padding:8px 10px; border-radius:var(--r-sm);
+  background:var(--surface-2); font-size:var(--fs-sm); line-height:1.45;
+}
+.note__dot{ width:8px; height:8px; border-radius:50%; background:var(--text-3); }
+.note--danger{ background:var(--danger-soft); }
+.note--danger .note__dot{ background:var(--danger); }
+.note--warn{ background:var(--accent-soft); }
+.note--warn .note__dot{ background:var(--accent); }
+.note--ok{ background:var(--primary-soft); }
+.note--ok .note__dot{ background:var(--primary); }
 </style>
 <div id="app">
   <div class="boot">
@@ -3621,6 +3637,14 @@ R.OFFICE_PROMPTS = {
       + 'hangi arkadaşının baktığını söyle.';
   },
 
+  /* Gunluk brifing: Patron sabah tek cumleyle masalari ozetler. */
+  daily(data){
+    return 'BUGÜNÜN MASA NOTLARI (kural motoru üretti, JSON):\n'
+      + JSON.stringify(data, null, 1) + '\n\n'
+      + 'GÖREV: Günün brifingini ver. En önemli tek şeyi söyle ve günün işini hatırlat. '
+      + 'En fazla 2 cümle. Not yoksa bunu da açıkça söyle, boş övgü yazma.';
+  },
+
   /* Brifing: soru yok, ajan kendi alanini ozetler. */
   briefing(agent, brief){
     return 'MASANDAKİ RAPOR (kural motoru hesapladı, JSON):\n'
@@ -4191,6 +4215,8 @@ R.S = {
   office:null,     // ofis ayarlari (saglayici, model, ajan basina secim)
   officeChats:{},  // agentId -> mesajlar
   officeMeetings:[],// ajanlarin toplanti tutanaklari
+  journal:{},      // agentId -> dogrulanmis gozlemler (ajan defteri)
+  officeBriefings:{},// YYYY-MM-DD -> gunluk brifing (gunde tek model cagrisi)
   ui:{
     weekView:null,     // gorunen hafta no
     examTab:'list',
@@ -9694,6 +9720,357 @@ R.LLM = (function(){
   };
 })();
 
+/* ==== js/core/journal.js ==== */
+/* Ajan defteri — ajanlarin hatirladigi seyler.
+
+   SORUN: bir ekip uyesini degerli yapan sey aylardir seni izliyor olmasidir
+   ("sen pazartesileri hep atliyorsun"). Ama LLM'e "hatirla" demek, ona
+   uydurma izni vermektir: model gecmiste olmayan bir sey soyler ve bunu
+   kimse yakalayamaz.
+
+   COZUM: hafiza LLM'in hatirladigi degil, VERININ DESTEKLEDIGI seydir.
+   Iki yol vardir ve ikisi de kural motorundan gecer:
+
+   1) BULUNAN gozlem (detect) — kural motoru gecmisi tarar ve oruntuyu
+      kendisi bulur. Saklanmaz, her okumada yeniden hesaplanir; bu yuzden
+      bayatlamaz ve dogrulugu tanim geregi kesindir.
+
+   2) ONERILEN gozlem (record) — ajan yapisal bir olcut onerir
+      ({olcut, karsilastirma, esik}), kural motoru bunu veri uzerinde
+      calistirir. Dogrulanamayan gozlem deftere GIRMEZ. Deftere girmis
+      gozlem de her okumada yeniden dogrulanir; artik dogru degilse duser.
+
+   Serbest metin hicbir yolda hafizaya giremez. */
+
+window.R = window.R || {};
+
+R.Journal = (function(){
+  const U = R.U, M = R.Model, C = R.Calc, S = R.S;
+
+  const MAX_PER_AGENT = 12;
+
+  /* ==================== dogrulanabilir olcutler ====================
+     Bir gozlem ancak bu listedeki bir olcut uzerine kurulabilir.
+     Liste kapalidir: ajan yeni olcut uyduramaz. */
+
+  const METRICS = {
+    planTamamlama:   { label:'plan tamamlama',   unit:'%',      agent:'rehber',
+                       get:() => C.planCompletion(M.currentWeek()) },
+    uykuOrtalamasi:  { label:'uyku ortalaması',  unit:' saat',  agent:'rehber',
+                       get:() => C.sleepAverage(7) },
+    enerjiOrtalamasi:{ label:'enerji ortalaması',unit:'/5',     agent:'rehber',
+                       get:() => M.energyAverage(7) },
+    davranisSerisi:  { label:'davranış serisi',  unit:' gün',   agent:'rehber',
+                       get:() => C.behaviorStreak().streak },
+    analizBorcu:     { label:'analiz borcu',     unit:' deneme',agent:'analist',
+                       get:() => C.analysisDebt().length },
+    tekrarBorcu:     { label:'tekrar borcu',     unit:'%',      agent:'analist',
+                       get:() => C.cardDebt() },
+    acikYanlis:      { label:'açık yanlış',      unit:' kayıt', agent:'analist',
+                       get:() => C.openErrors().length },
+    konuKapanisi:    { label:'konu kapanışı',    unit:'%',      agent:'analist',
+                       get:() => C.overallClosure().pct },
+    tytMedyan:       { label:'TYT medyanı',      unit:' net',   agent:'tyt',
+                       get:() => C.medianTrend('TYT').last3 },
+    tytKapanis:      { label:'TYT kapanışı',     unit:'%',      agent:'tyt',
+                       get:() => C.examClosure('TYT').pct },
+    aytMedyan:       { label:'AYT medyanı',      unit:' net',   agent:'ayt',
+                       get:() => C.medianTrend('AYT').last3 },
+    aytKapanis:      { label:'AYT kapanışı',     unit:'%',      agent:'ayt',
+                       get:() => C.examClosure('AYT').pct },
+  };
+
+  const OPS = {
+    lt:  { sign:'<',  test:(a, b) => a <  b },
+    lte: { sign:'≤',  test:(a, b) => a <= b },
+    gt:  { sign:'>',  test:(a, b) => a >  b },
+    gte: { sign:'≥',  test:(a, b) => a >= b },
+  };
+
+  function metricList(){
+    return Object.keys(METRICS).map(k => Object.assign({ key:k }, METRICS[k]));
+  }
+
+  /* Bir gozlemi veri uzerinde calistirir. */
+  function verify(obs){
+    if(!obs || !METRICS[obs.metric]) return { ok:false, why:'bilinmeyen ölçüt' };
+    const op = OPS[obs.op];
+    if(!op) return { ok:false, why:'bilinmeyen karşılaştırma' };
+    const value = Number(obs.value);
+    if(!Number.isFinite(value)) return { ok:false, why:'eşik sayı değil' };
+
+    let actual;
+    try{ actual = METRICS[obs.metric].get(); }
+    catch(e){ return { ok:false, why:'ölçüt hesaplanamadı' }; }
+    if(actual == null) return { ok:false, why:'bu ölçüt için henüz veri yok', actual:null };
+
+    return { ok:op.test(actual, value), actual, metric:METRICS[obs.metric] };
+  }
+
+  /* Gozlemi okunur cumleye cevirir — metin kural motorundan uretilir,
+     modelden gelmez. */
+  function say(obs, actual){
+    const m = METRICS[obs.metric];
+    if(!m) return '';
+    const op = OPS[obs.op];
+    const val = a => (a == null ? '—' : U.fmtNet(a)) + (m.unit || '');
+    return m.label + ' ' + op.sign + ' ' + val(obs.value)
+      + (actual == null ? '' : ' (şu an ' + val(actual) + ')');
+  }
+
+  /* ==================== bulunan gozlemler ====================
+     Kural motorunun tek bir anlik goruntude goremedigi oruntuler.
+     Saklanmaz: her cagrida yeniden hesaplanir, bu yuzden bayatlamaz. */
+
+  const TR_DAYS = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+
+  /* Hangi gun daha cok blok atlaniyor? Tek haftadan degil, butun kayittan. */
+  function weekdayMiss(){
+    const stat = TR_DAYS.map(() => ({ done:0, total:0 }));
+    Object.keys(S.days).forEach(iso => {
+      const day = S.days[iso];
+      if(!day || iso > U.todayISO()) return;
+      const idx = U.weekdayIndex(iso);
+      day.blocks.forEach(b => {
+        if(b.slot === 'Dinlenme') return;
+        stat[idx].total++;
+        if(b.status === 'done') stat[idx].done++;
+      });
+    });
+    const rows = stat.map((s, i) => ({ gun:TR_DAYS[i], ...s, pct:U.pct(s.done, s.total) }))
+      .filter(r => r.total >= 3);
+    if(rows.length < 3) return null;
+
+    const worst = rows.slice().sort((a, b) => a.pct - b.pct)[0];
+    const avg = U.pct(U.sum(rows.map(r => r.done)), U.sum(rows.map(r => r.total)));
+    if(worst.pct >= avg - 15) return null;      // belirgin bir fark yoksa oruntu yok
+
+    return {
+      id:'weekday-miss', agent:'rehber', tone:'warn',
+      text:worst.gun + ' günleri diğer günlerden belirgin olarak geride: '
+        + 'bu günde blokların %' + worst.pct + '’i tamamlanmış, genel ortalama %' + avg + '.',
+      evidence:{ gun:worst.gun, yuzde:worst.pct, ortalama:avg, blok:worst.total },
+    };
+  }
+
+  /* Plan tamamlama kac haftadir hedefin altinda? */
+  function planStreak(){
+    const hist = C.completionHistory(8).filter(h => h.value != null);
+    if(hist.length < 3) return null;
+    let miss = 0;
+    for(let i = hist.length - 1; i >= 0; i--){
+      if(hist[i].value < 85) miss++; else break;
+    }
+    if(miss < 2) return null;
+    return {
+      id:'plan-streak', agent:'rehber', tone:miss >= 3 ? 'danger' : 'warn',
+      text:miss + ' haftadır plan tamamlaması %85 hedefinin altında kalıyor '
+        + '(son hafta %' + hist[hist.length - 1].value + ').',
+      evidence:{ hafta:miss, sonDeger:hist[hist.length - 1].value },
+    };
+  }
+
+  /* Ayni atlama nedeni haftalar boyu tekrar ediyor mu? */
+  function repeatedSkip(){
+    const cur = M.currentWeek();
+    const totals = {};
+    let weeks = 0;
+    for(let n = Math.max(1, cur - 3); n <= cur; n++){
+      const counts = C.skipReasonCounts(n);
+      const keys = Object.keys(counts);
+      if(!keys.length) continue;
+      weeks++;
+      keys.forEach(k => { totals[k] = (totals[k] || 0) + counts[k]; });
+    }
+    if(weeks < 2) return null;
+    const top = Object.keys(totals).map(k => ({ neden:k, adet:totals[k] }))
+      .sort((a, b) => b.adet - a.adet)[0];
+    if(!top || top.adet < 3) return null;
+    return {
+      id:'repeated-skip', agent:'rehber', tone:'warn',
+      text:'Son ' + weeks + ' haftada en sık atlama nedeni "' + top.neden + '" ('
+        + top.adet + ' blok) — tek seferlik bir aksama değil, tekrar eden bir kalıp.',
+      evidence:{ neden:top.neden, adet:top.adet, hafta:weeks },
+    };
+  }
+
+  /* Uykunun deneme netine etkisi olculebiliyor mu? Belirgin degilse
+     (|fark| < 2 net) gozlem uretilmez — zayif iliskiden cikarim yapilmaz. */
+  function sleepLink(){
+    const imp = R.Analytics.sleepImpact();
+    if(!imp || !imp.ok || Math.abs(imp.diff) < 2) return null;
+    return {
+      id:'sleep-link', agent:'rehber', tone:imp.diff > 0 ? 'warn' : 'info',
+      text:'Deneme öncesi yeterli uyunan günlerde medyanın '
+        + U.fmtNet(Math.abs(imp.diff)) + ' net ' + (imp.diff > 0 ? 'yüksek' : 'düşük')
+        + ' çıkıyor (' + imp.goodCount + ' yeterli, ' + imp.badCount + ' yetersiz uyku kaydı).',
+      evidence:{ fark:imp.diff, yeterli:imp.goodCount, yetersiz:imp.badCount },
+    };
+  }
+
+  /* Analiz borcu tekrar tekrar birikiyor mu? */
+  function debtHabit(){
+    const done = S.exams.filter(e => e.analysisCompletedAt);
+    if(done.length < 4) return null;
+    const late = done.filter(e => U.diffDays(e.date, e.analysisCompletedAt.slice(0, 10)) > 1);
+    const pct = U.pct(late.length, done.length);
+    if(pct < 50) return null;
+    return {
+      id:'debt-habit', agent:'analist', tone:'warn',
+      text:'Analiz edilen denemelerin %' + pct + '’i 24 saatten geç çözümlenmiş ('
+        + late.length + '/' + done.length + ') — borç birikmesi tek seferlik değil.',
+      evidence:{ yuzde:pct, gec:late.length, toplam:done.length },
+    };
+  }
+
+  /* Kapanan konular gercekten kapali kaliyor mu? */
+  function reopenHabit(){
+    let reopened = 0, closed = 0;
+    R.SUBJECTS.forEach(s => s.topics.forEach(t => {
+      const st = M.topicState(s.id, t.id);
+      if(st.state === 'closed') closed++;
+      if(st.state === 'reopened') reopened++;
+    }));
+    if(reopened < 2) return null;
+    return {
+      id:'reopen-habit', agent:'analist', tone:'warn',
+      text:reopened + ' konu kapandıktan sonra yeniden açıldı; kapanış ölçütü '
+        + 'erken uygulanıyor olabilir.',
+      evidence:{ yenidenAcilan:reopened, kapali:closed },
+    };
+  }
+
+  const DETECTORS = [weekdayMiss, planStreak, repeatedSkip, sleepLink, debtHabit, reopenHabit];
+
+  /* Butun bulunan gozlemler. agentId verilirse yalniz o ajanin alanindakiler. */
+  function detect(agentId){
+    const out = [];
+    DETECTORS.forEach(fn => {
+      let obs = null;
+      try{ obs = fn(); }catch(e){ obs = null; }
+      if(obs) out.push(Object.assign({ kind:'bulunan' }, obs));
+    });
+    return agentId ? out.filter(o => o.agent === agentId) : out;
+  }
+
+  /* ==================== onerilen gozlemler ====================
+     Ajan yapisal bir olcut onerir; kural motoru dogrular ve saklar. */
+
+  function all(){ return S.journal || {}; }
+
+  async function record(agentId, obs){
+    if(!R.AGENT_BY_ID[agentId]) return { ok:false, why:'bilinmeyen ajan' };
+    const check = verify(obs);
+    if(!check.ok){
+      return { ok:false, why:check.why || 'veri bu gözlemi desteklemiyor', actual:check.actual };
+    }
+    const entry = {
+      id:U.uid('j'),
+      agent:agentId,
+      metric:obs.metric, op:obs.op, value:Number(obs.value),
+      note:String(obs.note || '').slice(0, 160),
+      at:new Date().toISOString(),
+      seenAt:new Date().toISOString(),
+      actual:check.actual,
+    };
+    S.journal = S.journal || {};
+    const list = (S.journal[agentId] || []).filter(e =>
+      !(e.metric === entry.metric && e.op === entry.op && e.value === entry.value));
+    list.unshift(entry);
+    S.journal[agentId] = list.slice(0, MAX_PER_AGENT);
+    await R.Store.set('journal/' + agentId, { entries:S.journal[agentId] });
+    return { ok:true, entry };
+  }
+
+  /* Saklanan gozlemler her okumada YENIDEN dogrulanir: veri degistiyse
+     gozlem duser. Boylece defter bayat bilgi tasimaz. */
+  function forAgent(agentId){
+    const stored = (all()[agentId] || []).map(e => {
+      const check = verify(e);
+      return Object.assign({}, e, { kind:'önerilen', stillTrue:check.ok, actual:check.actual });
+    });
+    return stored.filter(e => e.stillTrue);
+  }
+
+  async function prune(agentId){
+    const keep = forAgent(agentId).map(e => {
+      const copy = Object.assign({}, e);
+      delete copy.kind; delete copy.stillTrue;
+      return copy;
+    });
+    S.journal = S.journal || {};
+    S.journal[agentId] = keep;
+    await R.Store.set('journal/' + agentId, { entries:keep });
+    return keep;
+  }
+
+  async function clear(agentId){
+    S.journal = S.journal || {};
+    delete S.journal[agentId];
+    await R.Store.remove('journal/' + agentId);
+  }
+
+  /* Bir ajanin defteri: bulunan + dogrulanmis onerilen gozlemler. */
+  function forBrief(agentId){
+    const found = detect(agentId).map(o => ({ kind:'bulunan', tone:o.tone, text:o.text }));
+    const proposed = forAgent(agentId).map(e => ({
+      kind:'önerilen', tone:'info', text:say(e, e.actual) + (e.note ? ' — ' + e.note : ''),
+    }));
+    return found.concat(proposed);
+  }
+
+  /* ==================== guven skoru ====================
+     Bir ajanin alanina dusen kararlarin kaci uygulandi?
+     Karar kural motorundan gelir (Calc.nextAction) ve is anahtari
+     R.ACTION_OWNER ile bir ajana baglanir. */
+
+  function ownerOf(decision){
+    if(!decision) return null;
+    if(decision.owner) return decision.owner;
+    return R.ACTION_OWNER[decision.key] || null;
+  }
+
+  function trust(agentId){
+    const rows = (S.officeMeetings || [])
+      .map(m => m.decision)
+      .filter(d => d && ownerOf(d) === agentId);
+    const closed = rows.filter(d => d.state !== 'open');
+    const done = rows.filter(d => d.state === 'done');
+    return {
+      toplam:rows.length,
+      kapanan:closed.length,
+      uygulanan:done.length,
+      yuzde:closed.length ? U.pct(done.length, closed.length) : null,
+    };
+  }
+
+  function trustAll(){
+    const out = {};
+    R.AGENT_IDS.forEach(id => { out[id] = trust(id); });
+    return out;
+  }
+
+  /* ==================== yukleme ==================== */
+
+  async function load(){
+    const docs = await R.Store.list('journal');
+    S.journal = {};
+    (docs || []).forEach(d => {
+      if(!R.AGENT_BY_ID[d.id]) return;
+      S.journal[d.id] = Array.isArray(d.entries) ? d.entries.slice(0, MAX_PER_AGENT) : [];
+    });
+    return S.journal;
+  }
+
+  return {
+    METRICS, OPS, metricList,
+    verify, say, record, forAgent, forBrief, prune, clear, all,
+    detect, DETECTORS,
+    trust, trustAll, ownerOf,
+    load, MAX_PER_AGENT,
+  };
+})();
+
 /* ==== js/core/office.js ==== */
 /* Ofis motoru — bes ajanin veri okumasi, konusmasi ve toplanti yapmasi.
 
@@ -9727,6 +10104,7 @@ R.Office = (function(){
       model:'default',
       endpoint:'',
       fallback:true,          // ilk model dusunce sirayi dene
+      autoBriefing:true,      // sabah gunun brifingini kendiliginden uret
       perAgent:{},            // agentId -> { provider, model }
       updatedAt:null,
       promptVersion:R.OFFICE_PROMPTS.version,
@@ -10145,6 +10523,147 @@ R.Office = (function(){
     },
   };
 
+  /* ==================== masa notlari (proaktiflik) ====================
+     Ofis sen kapisini acinca degil, esik asilinca konusur. Notlar TAMAMEN
+     kural motorundan uretilir: model gerektirmez, kota harcamaz, cevrimdisi
+     calisir. Ajanin masasinda ve Bugun ekraninda gorunur. */
+
+  const WATCHERS = [
+    { id:'analiz-borcu', agent:'analist', tone:'danger', route:'exams',
+      when(){ return C.analysisDebt().length >= 2; },
+      text(){ return C.analysisDebt().length + ' deneme analizsiz bekliyor; ölçüm değerini yitiriyor.'; } },
+
+    { id:'tekrar-borcu', agent:'analist', tone:'warn', route:'cards',
+      when(){ return C.cardDebt() > 15; },
+      text(){ return 'Tekrar borcu %' + C.cardDebt() + ' — eşik %10, borç birikiyor.'; } },
+
+    { id:'acik-yanlis', agent:'analist', tone:'warn', route:'cards',
+      when(){ return C.openErrors().length >= 12; },
+      text(){ return C.openErrors().length + ' açık yanlış var; kök neden yazılmadan defter işe yaramaz.'; } },
+
+    { id:'uyku', agent:'rehber', tone:'danger', route:'today',
+      when(){
+        const s = C.sleepAverage(7);
+        const t = (S.profile && S.profile.sleepTarget) || 7.5;
+        return s != null && s < t - 1;
+      },
+      text(){ return 'Uyku ortalaması ' + U.fmtNet(C.sleepAverage(7)) + ' saate düştü; hacim tartışmasından önce bu.'; } },
+
+    { id:'plan', agent:'rehber', tone:'warn', route:'week',
+      when(){ const c = C.planCompletion(M.currentWeek()); return c != null && c < 70; },
+      text(){ return 'Plan tamamlaması %' + C.planCompletion(M.currentWeek()) + '; sözleşme kapasitenin üstünde olabilir.'; } },
+
+    { id:'seri', agent:'rehber', tone:'ok', route:'today',
+      when(){ return C.behaviorStreak().streak >= 7; },
+      text(){ return 'Davranış serisi ' + C.behaviorStreak().streak + ' gün — bu düzen korunmaya değer.'; } },
+
+    { id:'tyt-dusus', agent:'tyt', tone:'danger', route:'progress',
+      when(){ const t = C.medianTrend('TYT'); return t.delta != null && t.delta <= -2; },
+      text(){ return 'TYT medyanı ' + U.fmtNet(Math.abs(C.medianTrend('TYT').delta)) + ' net geriledi.'; } },
+
+    { id:'ayt-dusus', agent:'ayt', tone:'danger', route:'progress',
+      when(){ const t = C.medianTrend('AYT'); return t.delta != null && t.delta <= -2; },
+      text(){ return 'AYT medyanı ' + U.fmtNet(Math.abs(C.medianTrend('AYT').delta)) + ' net geriledi.'; } },
+
+    { id:'ikinci-olcum', agent:'tyt', tone:'warn', route:'subjects',
+      when(){ return C.pendingSecondChecks().filter(p => p.overdue).length >= 2; },
+      text(){ return C.pendingSecondChecks().filter(p => p.overdue).length
+        + ' konu 7. gün testini bekliyor; ölçülmeyen konu kapanmış sayılmaz.'; } },
+
+    { id:'karar', agent:'patron', tone:'warn', route:'office',
+      when(){ return openDecisions().length > 0; },
+      text(){
+        const d = openDecisions()[0];
+        const gun = U.diffDays(d.at.slice(0, 10), U.todayISO());
+        return 'Karar ' + (gun > 0 ? gun + ' gündür ' : '') + 'açık: ' + d.title;
+      } },
+  ];
+
+  /* Etkin notlar. agentId verilirse yalniz o masaninkiler. */
+  function notes(agentId){
+    const out = [];
+    WATCHERS.forEach(w => {
+      let on = false;
+      try{ on = !!w.when(); }catch(e){ on = false; }
+      if(!on) return;
+      let text = '';
+      try{ text = w.text(); }catch(e){ return; }
+      const agent = R.AGENT_BY_ID[w.agent];
+      out.push({ id:w.id, agent:w.agent, name:agent ? agent.name : '',
+        tone:w.tone, text, route:w.route });
+    });
+    const rank = { danger:0, warn:1, ok:2, info:3 };
+    out.sort((a, b) => (rank[a.tone] || 9) - (rank[b.tone] || 9));
+    return agentId ? out.filter(n => n.agent === agentId) : out;
+  }
+
+  /* ==================== gunluk brifing ====================
+     Sabah bir kez calisir ve gun boyu onbellekten okunur; ikinci bir model
+     cagrisi yapilmaz. Model yoksa notlardan kural motoru metni uretilir. */
+
+  /* Brifingin dayandigi not kumesinin parmak izi. Notlar gun icinde
+     degisirse (deneme girildi, uyku kaydedildi) brifing BAYATLAR: aksi hâlde
+     ayni ekranda "uyarı yok" yazarken iki uyari gorunur. */
+  function noteFingerprint(){
+    return notes().map(n => n.id).sort().join(',');
+  }
+
+  function briefingOf(dayISO){
+    const b = (S.officeBriefings || {})[dayISO || U.todayISO()];
+    if(!b) return null;
+    return Object.assign({}, b, { stale:b.noteIds !== noteFingerprint() });
+  }
+
+  function ruleBriefingText(){
+    const list = notes();
+    const action = nextAction();
+    if(!list.length) return 'Masalarda bekleyen bir uyarı yok. Bugünün işi: ' + action.title + '.';
+    return list.slice(0, 2).map(n => n.name + ': ' + n.text).join(' ')
+      + ' Bugünün işi: ' + action.title + '.';
+  }
+
+  async function dailyBriefing(opts){
+    const o = opts || {};
+    const id = U.todayISO();
+    const cached = briefingOf(id);
+    /* Bayat brifing kural motoru modunda kendiliginden tazelenir (bedava);
+       model bagliyken kota harcamamak icin bayat isaretiyle birakilir ve
+       tazeleme kullaniciya birakilir. */
+    if(cached && !o.force && !(cached.stale && !ready('patron'))) return cached;
+
+    const list = notes();
+    let text, mode = 'kural';
+    if(ready('patron') && !o.rulesOnly){
+      const agent = R.AGENT_BY_ID.patron;
+      const data = compactData(R.Tools.sanitize({
+        masaNotlari:list.map(n => ({ ajan:n.name, not:n.text, onem:n.tone })),
+        gununIsi:{ baslik:nextAction().title, neden:nextAction().why },
+        acikKarar:openDecisions().map(d => d.title),
+      }));
+      const turn = await speak('patron', 'briefing', {
+        messages:[{ role:'user', text:R.OFFICE_PROMPTS.daily(data) }],
+        ctx:{},
+      }, Object.assign({}, o, { maxTokens:200 }));
+      text = turn.text;
+      mode = turn.mode;
+    }else{
+      text = ruleBriefingText();
+    }
+
+    const payload = { id, at:new Date().toISOString(), text, mode,
+      noteCount:list.length, noteIds:list.map(n => n.id).sort().join(','),
+      action:nextAction().title };
+    S.officeBriefings = S.officeBriefings || {};
+    S.officeBriefings[id] = payload;
+    await R.Store.set('briefings/' + id, payload);
+
+    /* Eski brifingler birikmesin: son yedi gun yeter. */
+    const keep = {};
+    Object.keys(S.officeBriefings).sort().slice(-7).forEach(k => { keep[k] = S.officeBriefings[k]; });
+    S.officeBriefings = keep;
+    return payload;
+  }
+
   /* nextAction() veri yokken null donebilir; ofis her zaman bir is gosterir. */
   function nextAction(){
     return C.nextAction() || {
@@ -10193,12 +10712,23 @@ R.Office = (function(){
   }
 
   const briefCache = new Map();
-  /* Ayni cizimde bes ajan da brifing ister; hesap bir kez yapilir. */
+  /* Ayni cizimde bes ajan da brifing ister; hesap bir kez yapilir.
+     Brifinge ajanin DEFTERI de eklenir: kural motorunun gecmiste buldugu
+     oruntuler ve dogrulanmis gozlemler. Bunlar veriden gelir, modelden degil. */
   function brief(agentId){
     const agent = R.AGENT_BY_ID[agentId];
     if(!agent) throw new Error('bilinmeyen ajan: ' + agentId);
     if(briefCache.has(agentId)) return briefCache.get(agentId);
+
     const out = BRIEFS[agentId](agent);
+    let journal = [];
+    try{ journal = R.Journal.forBrief(agentId); }catch(e){ journal = []; }
+    out.journal = journal;
+    if(journal.length){
+      out.data = Object.assign({}, out.data, {
+        defterim:journal.map(j => j.text),
+      });
+    }
     briefCache.set(agentId, out);
     return out;
   }
@@ -10567,6 +11097,16 @@ R.Office = (function(){
     const risks = C.riskRanking(1);
     const out = [];
 
+    /* Pazar aksami haftanin kapanisi gundemi one gecer: hafta bitiyor ve
+       sozlesme degil GERCEKLESEN konusulur. */
+    if(U.weekdayIndex(U.today()) === 6){
+      out.push({ score:92, topic:'Haftanın kapanışı',
+        why:'Hafta bitiyor. Planlanan ile gerçekleşen arasındaki farkı ekip birlikte okur.',
+        data:{ hafta:n, tamamlama:comp, soruGerceklesme:C.questionRealization(n),
+          atlamaNedenleri:C.skipReasonCounts(n),
+          devir:(S.reviews[M.weekId(n)] || {}).carry || null } });
+    }
+
     if(gate && !decided){
       out.push({ score:95, topic:'Bu ayın karar kapısı',
         why:'Ayda bir medyanın bandın neresinde olduğuna bakılır ve tek müdahale seçilir.',
@@ -10771,6 +11311,10 @@ R.Office = (function(){
       decision:{
         id:session.id, title:action.title, why:action.why,
         route:action.route || 'today', state:'open', at:new Date().toISOString(),
+        /* Isin hangi ajanin alanina dustugu: guven skoru bunun uzerinden
+           hesaplanir. Kural motorunun is anahtari (Calc.nextAction) tasinir. */
+        key:action.key || null,
+        owner:(R.ACTION_OWNER && R.ACTION_OWNER[action.key]) || null,
       },
       turns:session.turns.map(t => ({ agent:t.agent, name:t.name, role:t.role, text:t.text,
         warnings:t.warnings || [], mode:t.mode, round:t.round || 0,
@@ -10993,6 +11537,11 @@ R.Office = (function(){
       .sort((a, b) => (b.at || '').localeCompare(a.at || ''))
       .slice(0, MEETING_MAX);
 
+    const briefs = await R.Store.list('briefings');
+    S.officeBriefings = {};
+    (briefs || []).forEach(b => { if(b && b.id) S.officeBriefings[b.id] = b; });
+
+    await R.Journal.load();
     await R.LLM.initBuiltin();
     return S.office;
   }
@@ -11010,6 +11559,8 @@ R.Office = (function(){
     /* toplanti — turlu canli oturum */
     agenda, agendaCandidates, openMeeting, nextTurn, userTurn, closeMeeting, speakerAt, roundDef,
     meet, meetings, lastMeeting, saveMeeting, deleteMeeting, reportText, maxRounds,
+    /* proaktiflik */
+    notes, WATCHERS, dailyBriefing, briefingOf, ruleBriefingText, noteFingerprint,
     /* karar takibi */
     decisions, openDecisions, pendingDecision, closeDecision,
     /* kota */
@@ -12233,6 +12784,38 @@ R.Screens.today = (function(){
       ${when(trend.ok && trend.avg >= 2, () => html`<p class="tiny dim mt-6">${trend.note}</p>`)}` });
   }
 
+  /* Ofisten gelen — ekip sen ekrani acmadan da calisir. Notlar kural
+     motorundan gelir; brifing gunde bir kez uretilip onbellekten okunur. */
+  function OfficeCard(){
+    const notes = R.Office.notes();
+    /* Bayat brifing burada hic gosterilmez: notlar her zaman tazedir ve
+       ikisi celisirse kullanici hangisine inanacagini bilemez. */
+    const cached = R.Office.briefingOf();
+    const brief = (cached && !cached.stale) ? cached : null;
+    const open = R.Office.openDecisions();
+    if(!notes.length && !brief && !open.length) return '';
+
+    return c.Card({
+      title:'Ofisten', sub:'Ekibin bugünkü notu',
+      badge:when(notes.length, () => c.Badge({ label:notes.length + ' not',
+        tone:notes.some(n => n.tone === 'danger') ? 'danger' : 'warn' })),
+      body:html`
+        ${when(brief, () => html`<p class="small">${brief.text}</p>`)}
+        ${when(notes.length, () => html`<div class="notes mt-10">${map(notes.slice(0, 3), n => html`
+          <div class="${'note note--' + n.tone}">
+            <span class="note__dot"></span>
+            <span class="minw0"><b class="small">${n.name}:</b> ${n.text}</span>
+          </div>`)}</div>`)}
+        ${when(open.length, () => html`<div class="mt-10">${c.Notice({ tone:'warn',
+          title:'Açık karar:', body:open[0].title })}</div>`)}
+        <div class="row wrap gap-6 mt-10">
+          ${c.Button({ label:'Ofise git', size:'sm', act:'go', data:{ 'data-route':'office' } })}
+          ${c.Button({ label:'Patron’a sor', size:'sm', tone:'ghost', act:'ask-agent',
+            data:{ 'data-agent':'patron' } })}
+        </div>`,
+    });
+  }
+
   async function render(){
     const dateISO = U.todayISO();
     const n = M.currentWeek();
@@ -12268,6 +12851,7 @@ R.Screens.today = (function(){
       `))}
 
       ${c.Span(4, c.Stack(html`
+        ${OfficeCard()}
         <div id="pane-anchors">${AnchorPane(day)}</div>
         <div id="pane-energy">${EnergyCard()}</div>
         <div id="pane-reward">${RewardCard()}</div>
@@ -17755,6 +18339,8 @@ R.Screens.office = (function(){
     const b = O.brief(agent.id);
     const open = S.ui.officeDesk === agent.id;
     const st = deskStatus(agent);
+    const notes = O.notes(agent.id);
+    const trust = R.Journal.trust(agent.id);
     const worst = b.findings.some(f => f.tone === 'danger') ? 'danger'
       : b.findings.some(f => f.tone === 'warn') ? 'warn' : 'ok';
 
@@ -17777,11 +18363,32 @@ R.Screens.office = (function(){
         <p class="desk__line">${b.headline}</p>
         ${deskMetrics(b)}
 
+        ${when(notes.length, () => html`<div class="notes mt-10">${map(notes, n => html`
+          <div class="${'note note--' + n.tone}">
+            <span class="note__dot"></span>
+            <span class="minw0">${n.text}</span>
+            ${when(n.route, () => K.Button({ label:'Git', size:'sm', tone:'ghost', act:'go',
+              data:{ 'data-route':n.route } }))}
+          </div>`)}</div>`)}
+
         ${when(open, () => html`
           <div class="desk__open">
             <div class="stack-xs">${map(b.findings, findingRow)}</div>
             ${when(b.suggestion, () => html`<div class="mt-10">
               ${K.Notice({ tone:'info', title:'Önerisi:', body:b.suggestion.text })}</div>`)}
+
+            ${when(b.journal && b.journal.length, () => html`
+              <div class="mt-12">${K.SectionTitle('Defteri')}</div>
+              <div class="stack-xs">${map(b.journal, j => html`
+                <div class="finding">
+                  <span class="${'finding__dot finding__dot--' + (j.tone || 'info')}"></span>
+                  <span>${j.text} <span class="tiny dim">· ${j.kind}</span></span>
+                </div>`)}</div>`)}
+
+            ${when(trust.toplam, () => html`<p class="tiny dim mt-10">
+              Alanına düşen ${trust.toplam} karardan ${trust.kapanan} tanesi kapandı;
+              ${trust.yuzde == null ? 'henüz oran çıkmadı' : 'uygulanma oranı %' + trust.yuzde}.</p>`)}
+
             <p class="tiny dim mt-8">Masasındaki veri: ${agent.reads.join(' · ')}</p>
           </div>`)}
 
@@ -17832,6 +18439,41 @@ R.Screens.office = (function(){
   }
 
   function M(){ return R.Model; }
+
+  /* Gunluk brifing — sabah bir kez uretilir, gun boyu onbellekten okunur. */
+  function briefingCard(){
+    const b = O.briefingOf();
+    const notes = O.notes();
+    return K.Card({
+      title:'Bugünün brifingi',
+      sub:b ? new Date(b.at).toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' })
+            + ' · günde bir kez üretilir'
+            : 'Patron masaları henüz özetlemedi',
+      badge:when(notes.length, () => K.Badge({ label:notes.length + ' not', tone:'warn' })),
+      actions:K.Button({ label:b ? 'Yenile' : 'Brifing al', icon:'refresh', size:'sm',
+        act:'office-briefing' }),
+      body:html`
+        <div id="office-briefing">
+          ${b
+            ? html`<p class="prose">${b.text}</p>
+                ${when(b.stale, () => html`<div class="mt-10">${K.Notice({ tone:'warn',
+                  title:'Bu brifing eskidi.',
+                  body:'Masalardaki notlar brifing yazıldıktan sonra değişti. '
+                     + 'Aşağıdaki notlar günceldir; brifingi yenileyebilirsin.' })}</div>`)}
+                ${when(b.mode === 'kural', () => html`<p class="tiny dim mt-8">
+                  Kural motoru metni — model bağlı değil.</p>`)}`
+            : html`<p class="small muted">${O.ruleBriefingText()}</p>`}
+        </div>
+
+        ${when(notes.length, () => html`<div class="notes mt-12">${map(notes.slice(0, 4), n => html`
+          <div class="${'note note--' + n.tone}">
+            <span class="note__dot"></span>
+            <span class="minw0"><b class="small">${n.name}:</b> ${n.text}</span>
+            ${when(n.route, () => K.Button({ label:'Git', size:'sm', tone:'ghost', act:'go',
+              data:{ 'data-route':n.route } }))}
+          </div>`)}</div>`)}`,
+    });
+  }
 
   /* Patron karti — gunun tek isini gosterir, digerlerinden ayrilir. */
   function BossCard(){
@@ -17978,6 +18620,26 @@ R.Screens.office = (function(){
     return q.usedToday + '/' + q.rpd + (q.full ? ' · doldu' : '');
   }
 
+  /* Bildirim izni — istenmeden bildirim gonderilmez. */
+  function notifyRow(){
+    const state = R.App.notifyState();
+    if(state === 'unsupported'){
+      return html`<p class="tiny dim">Bu tarayıcı bildirim desteklemiyor.</p>`;
+    }
+    if(state === 'granted'){
+      return K.Notice({ tone:'ok', body:'Bildirim açık. Ofis acil bir not bulduğunda '
+        + 'ya da karar iki gündür açık kaldığında günde en fazla bir kez haber verir.' });
+    }
+    if(state === 'denied'){
+      return html`<p class="tiny dim">Bildirim izni reddedilmiş. Tarayıcı ayarlarından
+        bu siteye izin verirsen ofis haber verebilir.</p>`;
+    }
+    return html`<div class="row wrap gap-6">
+      ${K.Button({ label:'Bildirime izin ver', icon:'info', size:'sm', act:'office-notify' })}
+      <span class="tiny dim">Ofis acil bir not bulduğunda haber verir; günde en fazla bir kez.</span>
+    </div>`;
+  }
+
   function keyWarning(providerId, value){
     const shape = KEY_SHAPES[providerId];
     if(!shape || !value) return null;
@@ -18059,9 +18721,15 @@ R.Screens.office = (function(){
           K.Chip({ label:c.label, act:'office-rpd', data:{ 'data-rpd':c.value } })), { wrap:true })),
       ], 'sm')),
 
-      /* --- 5. yedek --- */
-      K.Checkbox({ label:'Model düşerse yedeğe geç (önerilir)', checked:st.fallback !== false,
-        act:'office-toggle-fallback' }),
+      /* --- 5. ofis davranisi --- */
+      K.Stack([
+        K.SectionTitle('Ofis davranışı'),
+        K.Checkbox({ label:'Model düşerse yedeğe geç (önerilir)', checked:st.fallback !== false,
+          act:'office-toggle-fallback' }),
+        K.Checkbox({ label:'Sabah günün brifingini kendiliğinden üret (günde 1 istek)',
+          checked:st.autoBriefing !== false, act:'office-toggle-briefing' }),
+        html`<div id="office-notify">${notifyRow()}</div>`,
+      ], 'sm'),
 
       html`<div id="llm-test"></div>`,
     ]);
@@ -18154,6 +18822,7 @@ R.Screens.office = (function(){
     return String(K.Grid([
       K.Span(8, K.Stack([
         boardCard(),
+        briefingCard(),
         BossCard(),
         decisionsCard(),
         K.SectionTitle('Uzman masaları'),
@@ -18198,6 +18867,16 @@ R.Screens.office = (function(){
 
     async 'office-toggle-fallback'(el){
       await O.saveSettings({ fallback:!!el.checked });
+    },
+
+    async 'office-toggle-briefing'(el){
+      await O.saveSettings({ autoBriefing:!!el.checked });
+    },
+
+    async 'office-notify'(){
+      await R.App.askNotify();
+      const box = document.getElementById('office-notify');
+      if(box) box.innerHTML = String(notifyRow());
     },
 
     async 'office-forget'(el){
@@ -18261,6 +18940,20 @@ R.Screens.office = (function(){
       UI.closeSheet();
       UI.toast(O.mode() === 'llm' ? 'Ofis modeli bağlandı' : 'Ayarlar kaydedildi');
       R.App.render();
+    },
+
+    async 'office-briefing'(el){
+      const out = document.getElementById('office-briefing');
+      el.disabled = true;
+      if(out) out.innerHTML = String(html`<p class="small muted">Masaları okuyor…</p>`);
+      try{
+        await O.dailyBriefing({ force:true });
+      }catch(err){
+        UI.toast(R.LLM.errorText(err && err.code));
+      }finally{
+        el.disabled = false;
+        R.App.render();
+      }
     },
 
     async 'office-decision'(el){
@@ -19725,6 +20418,43 @@ R.App = (function(){
     }catch(e){}
   }
 
+  /* ---------- bildirim ----------
+     Ofis bir seyi kacirdiginda haber verir. Izin kullanicidan acikca istenir;
+     istenmeden bildirim gonderilmez ve gunde en fazla bir tane gider. */
+
+  function notifySupported(){ return typeof Notification !== 'undefined'; }
+  function notifyState(){ return notifySupported() ? Notification.permission : 'unsupported'; }
+
+  async function askNotify(){
+    if(!notifySupported()) return 'unsupported';
+    try{ return await Notification.requestPermission(); }
+    catch(e){ return Notification.permission; }
+  }
+
+  const NOTIFY_KEY = 'rota.notify.lastDay';
+
+  function notifyFromOffice(){
+    if(notifyState() !== 'granted') return false;
+    try{
+      const today = U.todayISO();
+      if(localStorage.getItem(NOTIFY_KEY) === today) return false;
+
+      const notes = R.Office.notes();
+      const urgent = notes.filter(n => n.tone === 'danger');
+      const open = R.Office.openDecisions();
+      const stale = open.filter(d => U.diffDays(d.at.slice(0, 10), today) >= 2);
+      if(!urgent.length && !stale.length) return false;
+
+      const body = urgent.length
+        ? urgent[0].name + ': ' + urgent[0].text
+        : 'Karar ' + U.diffDays(stale[0].at.slice(0, 10), today) + ' gündür açık: ' + stale[0].title;
+
+      new Notification('Rota — ofisten', { body, tag:'rota-office', lang:'tr' });
+      localStorage.setItem(NOTIFY_KEY, today);
+      return true;
+    }catch(e){ return false; }
+  }
+
   function canInstall(){ return !!installPrompt; }
   async function promptInstall(){
     if(!installPrompt) return false;
@@ -19768,8 +20498,17 @@ R.App = (function(){
       R.Auto.onDayOpen().then(done => { if(done.length) render(); });
       /* Profil özeti gözetmen tablosu için sessizce tazelenir. */
       try{ if(R.Screens.profiles) R.Screens.profiles.writeSnapshot(); }catch(e){}
-      /* Ofis ekibi: ayarlar, sohbetler ve tutanaklar acilisi bloklamaz. */
-      R.Office.load().then(() => { if(S.route === 'office' || S.route === 'team' || S.route === 'meeting') render(); });
+      /* Ofis ekibi: ayarlar, defter, sohbetler ve tutanaklar acilisi bloklamaz.
+         Yuklendikten sonra gunun brifingi bir kez uretilir — ofisin sen
+         kapisini acmadan calismasi bununla baslar. */
+      R.Office.load().then(async () => {
+        render();
+        try{
+          if(R.Office.settings().autoBriefing !== false) await R.Office.dailyBriefing();
+        }catch(e){ /* brifing acilisi bozmaz */ }
+        notifyFromOffice();
+        render();
+      });
       if(R.Setup.needed()) setTimeout(() => R.Setup.open(), 400);
     }catch(err){
       console.error('Açılış hatası:', err);
@@ -19781,7 +20520,8 @@ R.App = (function(){
     }
   }
 
-  return { boot, render, patch, go, applyTheme, NAV, canInstall, promptInstall, installManifest };
+  return { boot, render, patch, go, applyTheme, NAV, canInstall, promptInstall, installManifest,
+    notifyState, askNotify, notifyFromOffice };
 })();
 
 R.App.boot();

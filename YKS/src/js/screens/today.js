@@ -465,6 +465,38 @@ R.Screens.today = (function(){
       ${when(trend.ok && trend.avg >= 2, () => html`<p class="tiny dim mt-6">${trend.note}</p>`)}` });
   }
 
+  /* Ofisten gelen — ekip sen ekrani acmadan da calisir. Notlar kural
+     motorundan gelir; brifing gunde bir kez uretilip onbellekten okunur. */
+  function OfficeCard(){
+    const notes = R.Office.notes();
+    /* Bayat brifing burada hic gosterilmez: notlar her zaman tazedir ve
+       ikisi celisirse kullanici hangisine inanacagini bilemez. */
+    const cached = R.Office.briefingOf();
+    const brief = (cached && !cached.stale) ? cached : null;
+    const open = R.Office.openDecisions();
+    if(!notes.length && !brief && !open.length) return '';
+
+    return c.Card({
+      title:'Ofisten', sub:'Ekibin bugünkü notu',
+      badge:when(notes.length, () => c.Badge({ label:notes.length + ' not',
+        tone:notes.some(n => n.tone === 'danger') ? 'danger' : 'warn' })),
+      body:html`
+        ${when(brief, () => html`<p class="small">${brief.text}</p>`)}
+        ${when(notes.length, () => html`<div class="notes mt-10">${map(notes.slice(0, 3), n => html`
+          <div class="${'note note--' + n.tone}">
+            <span class="note__dot"></span>
+            <span class="minw0"><b class="small">${n.name}:</b> ${n.text}</span>
+          </div>`)}</div>`)}
+        ${when(open.length, () => html`<div class="mt-10">${c.Notice({ tone:'warn',
+          title:'Açık karar:', body:open[0].title })}</div>`)}
+        <div class="row wrap gap-6 mt-10">
+          ${c.Button({ label:'Ofise git', size:'sm', act:'go', data:{ 'data-route':'office' } })}
+          ${c.Button({ label:'Patron’a sor', size:'sm', tone:'ghost', act:'ask-agent',
+            data:{ 'data-agent':'patron' } })}
+        </div>`,
+    });
+  }
+
   async function render(){
     const dateISO = U.todayISO();
     const n = M.currentWeek();
@@ -500,6 +532,7 @@ R.Screens.today = (function(){
       `))}
 
       ${c.Span(4, c.Stack(html`
+        ${OfficeCard()}
         <div id="pane-anchors">${AnchorPane(day)}</div>
         <div id="pane-energy">${EnergyCard()}</div>
         <div id="pane-reward">${RewardCard()}</div>

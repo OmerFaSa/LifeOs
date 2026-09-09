@@ -1122,3 +1122,19 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .keyrow__mask{ font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size:var(--fs-sm); flex:1; min-width:0; }
 .keyrow__q{ font-size:var(--fs-xs); color:var(--text-3); white-space:nowrap; }
+
+
+/* ---------- masa notları (proaktif uyarılar) ---------- */
+.notes{ display:flex; flex-direction:column; gap:6px; }
+.note{
+  display:grid; grid-template-columns:8px minmax(0,1fr) auto; gap:9px; align-items:center;
+  padding:8px 10px; border-radius:var(--r-sm);
+  background:var(--surface-2); font-size:var(--fs-sm); line-height:1.45;
+}
+.note__dot{ width:8px; height:8px; border-radius:50%; background:var(--text-3); }
+.note--danger{ background:var(--danger-soft); }
+.note--danger .note__dot{ background:var(--danger); }
+.note--warn{ background:var(--accent-soft); }
+.note--warn .note__dot{ background:var(--accent); }
+.note--ok{ background:var(--primary-soft); }
+.note--ok .note__dot{ background:var(--primary); }

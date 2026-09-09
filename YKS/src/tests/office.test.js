@@ -11,6 +11,8 @@
     R.S.office = null;
     R.S.officeChats = {};
     R.S.officeMeetings = [];
+    R.S.journal = {};
+    R.S.officeBriefings = {};
     R.S.ui.officeAgent = 'patron';
     R.S.ui.meetingAgenda = 0;
     O.resetBriefs();
@@ -1008,6 +1010,342 @@
       await withStubLLM('ok', async calls => {
         await O.ask('rehber', 'Durum ne?');
         expect(calls[0].req.messages[0].text.length < 12000).toBeTruthy();
+      });
+    });
+  });
+
+
+  /* ==================== FAZ 2 — ajan defteri ==================== */
+
+  describe('Ofis — doğrulanabilir gözlem', () => {
+    it('ölçüt listesi kapalıdır, uydurma ölçüt reddedilir', () => {
+      reset();
+      expect(R.Journal.verify({ metric:'uydurma', op:'lt', value:5 }).ok).toBeFalsy();
+      expect(R.Journal.verify({ metric:'analizBorcu', op:'yok', value:1 }).ok).toBeFalsy();
+      expect(R.Journal.verify({ metric:'analizBorcu', op:'lt', value:'çok' }).ok).toBeFalsy();
+    });
+
+    it('veriye uyan gözlem doğrulanır, uymayan reddedilir', () => {
+      reset();
+      expect(R.Journal.verify({ metric:'analizBorcu', op:'lt', value:5 }).ok).toBeTruthy();
+      expect(R.Journal.verify({ metric:'analizBorcu', op:'gt', value:5 }).ok).toBeFalsy();
+    });
+
+    it('verisi olmayan ölçüt gözlem üretmez', () => {
+      reset();
+      const v = R.Journal.verify({ metric:'tytMedyan', op:'gt', value:50 });
+      expect(v.ok).toBeFalsy();
+      expect(v.actual).toBeNull();
+    });
+
+    it('doğrulanmayan gözlem deftere girmez', async () => {
+      reset();
+      const res = await R.Journal.record('analist', { metric:'analizBorcu', op:'gt', value:99 });
+      expect(res.ok).toBeFalsy();
+      expect(R.Journal.forAgent('analist')).toHaveLength(0);
+    });
+
+    it('doğrulanan gözlem saklanır ve geri okunur', async () => {
+      reset();
+      const res = await R.Journal.record('analist',
+        { metric:'analizBorcu', op:'lt', value:3, note:'borç birikmiyor' });
+      expect(res.ok).toBeTruthy();
+      const list = R.Journal.forAgent('analist');
+      expect(list).toHaveLength(1);
+      expect(list[0].metric).toBe('analizBorcu');
+      const doc = await R.Store.get('journal/analist');
+      expect(doc.entries).toHaveLength(1);
+    });
+
+    it('veri değişince gözlem kendiliğinden düşer', async () => {
+      reset();
+      await R.Journal.record('analist', { metric:'analizBorcu', op:'lt', value:1 });
+      expect(R.Journal.forAgent('analist')).toHaveLength(1);
+      await withTodayAsync('2026-10-05', async () => {
+        R.S.exams = [makeExam({ date:'2026-10-01', analysisCompletedAt:null })];
+        expect(R.Journal.forAgent('analist')).toHaveLength(0);   // artık doğru değil
+      });
+    });
+
+    it('aynı gözlem iki kez yazılmaz', async () => {
+      reset();
+      await R.Journal.record('rehber', { metric:'davranisSerisi', op:'lt', value:3 });
+      await R.Journal.record('rehber', { metric:'davranisSerisi', op:'lt', value:3 });
+      expect(R.Journal.forAgent('rehber')).toHaveLength(1);
+    });
+
+    it('gözlem cümlesi kural motorundan üretilir', () => {
+      reset();
+      const t = R.Journal.say({ metric:'tekrarBorcu', op:'gt', value:10 }, 24);
+      expect(t).toContain('tekrar borcu');
+      expect(t).toContain('>');
+      expect(t).toContain('24');
+    });
+
+    it('bilinmeyen ajanın defteri olmaz', async () => {
+      reset();
+      const res = await R.Journal.record('hayalet', { metric:'analizBorcu', op:'lt', value:5 });
+      expect(res.ok).toBeFalsy();
+    });
+  });
+
+  describe('Ofis — bulunan gözlemler', () => {
+    it('boş veride örüntü uydurmaz', () => {
+      reset();
+      expect(R.Journal.detect()).toHaveLength(0);
+    });
+
+    it('plan üst üste düşükse örüntü bulunur', async () => {
+      reset();
+      await withTodayAsync('2026-12-01', async () => {
+        const M = R.Model, U = R.U;
+        const cur = M.currentWeek();
+        for(let n = cur - 2; n <= cur; n++){
+          await M.ensureWeek(n);
+          for(const d of M.weekDates(n)){
+            if(U.iso(d) > U.todayISO()) continue;
+            await M.ensureDay(d);
+            const day = R.S.days[U.iso(d)];
+            day.blocks.forEach(b => { b.status = 'skipped'; b.skipReason = 'Süre yoktu'; });
+          }
+        }
+        const found = R.Journal.detect('rehber');
+        expect(found.length > 0).toBeTruthy();
+        expect(found.some(o => o.id === 'plan-streak')).toBeTruthy();
+      });
+    });
+
+    it('tekrar eden atlama nedeni bulunur', async () => {
+      reset();
+      await withTodayAsync('2026-12-01', async () => {
+        const M = R.Model, U = R.U;
+        const cur = M.currentWeek();
+        for(let n = cur - 1; n <= cur; n++){
+          await M.ensureWeek(n);
+          for(const d of M.weekDates(n)){
+            if(U.iso(d) > U.todayISO()) continue;
+            await M.ensureDay(d);
+            R.S.days[U.iso(d)].blocks.forEach(b => { b.status = 'skipped'; b.skipReason = 'Sağlık / enerji'; });
+          }
+        }
+        const found = R.Journal.detect('rehber');
+        expect(found.some(o => o.id === 'repeated-skip')).toBeTruthy();
+      });
+    });
+
+    it('bulunan gözlemler ajanın alanına düşer', () => {
+      reset();
+      R.Journal.detect().forEach(o => {
+        expect(!!R.AGENT_BY_ID[o.agent]).toBeTruthy();
+        expect(o.text.length > 20).toBeTruthy();
+        expect(typeof o.evidence).toBe('object');
+      });
+    });
+
+    it('defter brifinge girer', async () => {
+      reset();
+      await R.Journal.record('analist', { metric:'analizBorcu', op:'lt', value:3 });
+      O.resetBriefs();
+      const b = O.brief('analist');
+      expect(b.journal.length > 0).toBeTruthy();
+      expect(b.data.defterim.length > 0).toBeTruthy();
+    });
+  });
+
+  describe('Ofis — güven skoru', () => {
+    it('veri yokken oran hesaplanmaz', () => {
+      reset();
+      expect(R.Journal.trust('analist').yuzde).toBeNull();
+    });
+
+    it('kararın sahibi iş anahtarından bulunur', async () => {
+      reset();
+      await withTodayAsync('2026-10-05', async () => {
+        R.S.exams = [makeExam({ date:'2026-10-01', analysisCompletedAt:null })];
+        O.resetBriefs();
+        const m = await O.meet({ rounds:1 });
+        expect(m.decision.key).toBe('analysis');
+        expect(m.decision.owner).toBe('analist');
+      });
+    });
+
+    it('uygulanan karar güven skorunu yükseltir', async () => {
+      reset();
+      await withTodayAsync('2026-10-05', async () => {
+        R.S.exams = [makeExam({ date:'2026-10-01', analysisCompletedAt:null })];
+        O.resetBriefs();
+        const m = await O.meet({ rounds:1 });
+        await O.closeDecision(m.id, 'done');
+        const t = R.Journal.trust('analist');
+        expect(t.toplam).toBe(1);
+        expect(t.uygulanan).toBe(1);
+        expect(t.yuzde).toBe(100);
+      });
+    });
+
+    it('her ajan için skor üretilir', () => {
+      reset();
+      const all = R.Journal.trustAll();
+      R.AGENT_IDS.forEach(id => expect(typeof all[id].toplam).toBe('number'));
+    });
+  });
+
+  /* ==================== FAZ 1 — proaktiflik ==================== */
+
+  describe('Ofis — masa notları', () => {
+    it('sakin veride not üretmez', () => {
+      reset();
+      expect(O.notes()).toHaveLength(0);
+    });
+
+    it('analiz borcu analistin masasına not bırakır', async () => {
+      reset();
+      await withTodayAsync('2026-10-05', async () => {
+        R.S.exams = [
+          makeExam({ date:'2026-10-01', analysisCompletedAt:null }),
+          makeExam({ date:'2026-10-02', analysisCompletedAt:null }),
+        ];
+        const n = O.notes();
+        expect(n.some(x => x.id === 'analiz-borcu' && x.agent === 'analist')).toBeTruthy();
+        expect(O.notes('analist').length > 0).toBeTruthy();
+        expect(O.notes('tyt')).toHaveLength(0);
+      });
+    });
+
+    it('uyku düşünce rehber not bırakır', async () => {
+      reset();
+      await withTodayAsync('2026-10-05', async () => {
+        const U = R.U, M = R.Model;
+        await M.ensureWeek(M.currentWeek());
+        for(let i = 0; i < 7; i++){
+          const d = U.addDays(U.today(), -i);
+          await M.ensureDay(d);
+          R.S.days[U.iso(d)].sleepHours = 5;
+        }
+        expect(O.notes('rehber').some(x => x.id === 'uyku')).toBeTruthy();
+      });
+    });
+
+    it('notlar önem sırasına dizilir', async () => {
+      reset();
+      await withTodayAsync('2026-10-05', async () => {
+        R.S.exams = [
+          makeExam({ date:'2026-10-01', analysisCompletedAt:null }),
+          makeExam({ date:'2026-10-02', analysisCompletedAt:null }),
+        ];
+        R.S.cards = [];
+        const list = O.notes();
+        const rank = { danger:0, warn:1, ok:2 };
+        for(let i = 1; i < list.length; i++){
+          expect(rank[list[i-1].tone] <= rank[list[i].tone]).toBeTruthy();
+        }
+      });
+    });
+
+    it('açık karar Patron’un masasına düşer', async () => {
+      reset();
+      await O.meet({ rounds:1 });
+      expect(O.notes('patron').some(n => n.id === 'karar')).toBeTruthy();
+    });
+
+    it('her notun rotası geçerli bir ekrandır', () => {
+      reset();
+      /* Test sayfasi ekranlari yuklemez; rota adlari acikca listelenir. */
+      const ROUTES = ['today', 'week', 'plan', 'subjects', 'target', 'learn', 'exams',
+        'cards', 'quiz', 'progress', 'analytics', 'protocols', 'guide', 'profiles',
+        'office', 'team', 'meeting', 'topic'];
+      O.WATCHERS.forEach(w => {
+        expect(ROUTES).toContain(w.route);
+        expect(!!R.AGENT_BY_ID[w.agent]).toBeTruthy();
+        expect(['danger', 'warn', 'ok', 'info']).toContain(w.tone);
+      });
+    });
+  });
+
+  describe('Ofis — günlük brifing', () => {
+    it('günde bir kez üretilir, ikinci çağrı önbellekten gelir', async () => {
+      reset();
+      const a = await O.dailyBriefing();
+      const b = await O.dailyBriefing();
+      expect(b.at).toBe(a.at);
+      expect(O.briefingOf().text).toBe(a.text);
+    });
+
+    it('zorlanınca yeniden üretilir', async () => {
+      reset();
+      await O.dailyBriefing();
+      const forced = await O.dailyBriefing({ force:true });
+      expect(forced.id).toBe(R.U.todayISO());
+    });
+
+    it('model yokken kural motoru metni gelir', async () => {
+      reset();
+      const b = await O.dailyBriefing();
+      expect(b.mode).toBe('kural');
+      expect(b.text.length > 20).toBeTruthy();
+    });
+
+    it('model bağlıyken tek çağrı yapar', async () => {
+      reset();
+      await withStubLLM('Bugün analiz borcu öncelikli.', async calls => {
+        const b = await O.dailyBriefing({ force:true });
+        expect(calls).toHaveLength(1);
+        expect(b.mode).toBe('llm');
+      });
+    });
+
+    it('notlar değişince brifing bayat işaretlenir', async () => {
+      reset();
+      await withTodayAsync('2026-10-05', async () => {
+        await O.dailyBriefing();
+        expect(O.briefingOf().stale).toBeFalsy();
+        R.S.exams = [
+          makeExam({ date:'2026-10-01', analysisCompletedAt:null }),
+          makeExam({ date:'2026-10-02', analysisCompletedAt:null }),
+        ];
+        O.resetBriefs();
+        expect(O.briefingOf().stale).toBeTruthy();
+      });
+    });
+
+    it('kural motoru modunda bayat brifing kendiliğinden tazelenir', async () => {
+      reset();
+      await withTodayAsync('2026-10-05', async () => {
+        const first = await O.dailyBriefing();
+        R.S.exams = [
+          makeExam({ date:'2026-10-01', analysisCompletedAt:null }),
+          makeExam({ date:'2026-10-02', analysisCompletedAt:null }),
+        ];
+        const second = await O.dailyBriefing();
+        expect(second.text === first.text).toBeFalsy();
+        expect(second.text).toContain('analizsiz');
+      });
+    });
+
+    it('brifing kaydedilir ve yüklemede geri gelir', async () => {
+      reset();
+      const b = await O.dailyBriefing();
+      R.S.officeBriefings = {};
+      await O.load();
+      expect(O.briefingOf().text).toBe(b.text);
+    });
+  });
+
+  describe('Ofis — haftalık kapanış gündemi', () => {
+    it('pazar günü kapanış gündemi öne geçer', async () => {
+      reset();
+      await withTodayAsync('2026-09-20', async () => {   // pazar
+        const list = O.agendaCandidates();
+        const idx = list.findIndex(c => c.topic === 'Haftanın kapanışı');
+        expect(idx >= 0).toBeTruthy();
+        expect(idx <= 1).toBeTruthy();
+      });
+    });
+
+    it('hafta içi kapanış gündemi çıkmaz', async () => {
+      reset();
+      await withTodayAsync('2026-09-16', async () => {   // çarşamba
+        expect(O.agendaCandidates().some(c => c.topic === 'Haftanın kapanışı')).toBeFalsy();
       });
     });
   });

@@ -577,6 +577,43 @@ R.App = (function(){
     }catch(e){}
   }
 
+  /* ---------- bildirim ----------
+     Ofis bir seyi kacirdiginda haber verir. Izin kullanicidan acikca istenir;
+     istenmeden bildirim gonderilmez ve gunde en fazla bir tane gider. */
+
+  function notifySupported(){ return typeof Notification !== 'undefined'; }
+  function notifyState(){ return notifySupported() ? Notification.permission : 'unsupported'; }
+
+  async function askNotify(){
+    if(!notifySupported()) return 'unsupported';
+    try{ return await Notification.requestPermission(); }
+    catch(e){ return Notification.permission; }
+  }
+
+  const NOTIFY_KEY = 'rota.notify.lastDay';
+
+  function notifyFromOffice(){
+    if(notifyState() !== 'granted') return false;
+    try{
+      const today = U.todayISO();
+      if(localStorage.getItem(NOTIFY_KEY) === today) return false;
+
+      const notes = R.Office.notes();
+      const urgent = notes.filter(n => n.tone === 'danger');
+      const open = R.Office.openDecisions();
+      const stale = open.filter(d => U.diffDays(d.at.slice(0, 10), today) >= 2);
+      if(!urgent.length && !stale.length) return false;
+
+      const body = urgent.length
+        ? urgent[0].name + ': ' + urgent[0].text
+        : 'Karar ' + U.diffDays(stale[0].at.slice(0, 10), today) + ' gündür açık: ' + stale[0].title;
+
+      new Notification('Rota — ofisten', { body, tag:'rota-office', lang:'tr' });
+      localStorage.setItem(NOTIFY_KEY, today);
+      return true;
+    }catch(e){ return false; }
+  }
+
   function canInstall(){ return !!installPrompt; }
   async function promptInstall(){
     if(!installPrompt) return false;
@@ -620,8 +657,17 @@ R.App = (function(){
       R.Auto.onDayOpen().then(done => { if(done.length) render(); });
       /* Profil özeti gözetmen tablosu için sessizce tazelenir. */
       try{ if(R.Screens.profiles) R.Screens.profiles.writeSnapshot(); }catch(e){}
-      /* Ofis ekibi: ayarlar, sohbetler ve tutanaklar acilisi bloklamaz. */
-      R.Office.load().then(() => { if(S.route === 'office' || S.route === 'team' || S.route === 'meeting') render(); });
+      /* Ofis ekibi: ayarlar, defter, sohbetler ve tutanaklar acilisi bloklamaz.
+         Yuklendikten sonra gunun brifingi bir kez uretilir — ofisin sen
+         kapisini acmadan calismasi bununla baslar. */
+      R.Office.load().then(async () => {
+        render();
+        try{
+          if(R.Office.settings().autoBriefing !== false) await R.Office.dailyBriefing();
+        }catch(e){ /* brifing acilisi bozmaz */ }
+        notifyFromOffice();
+        render();
+      });
       if(R.Setup.needed()) setTimeout(() => R.Setup.open(), 400);
     }catch(err){
       console.error('Açılış hatası:', err);
@@ -633,7 +679,8 @@ R.App = (function(){
     }
   }
 
-  return { boot, render, patch, go, applyTheme, NAV, canInstall, promptInstall, installManifest };
+  return { boot, render, patch, go, applyTheme, NAV, canInstall, promptInstall, installManifest,
+    notifyState, askNotify, notifyFromOffice };
 })();
 
 R.App.boot();

@@ -48,6 +48,8 @@ R.Screens.office = (function(){
     const b = O.brief(agent.id);
     const open = S.ui.officeDesk === agent.id;
     const st = deskStatus(agent);
+    const notes = O.notes(agent.id);
+    const trust = R.Journal.trust(agent.id);
     const worst = b.findings.some(f => f.tone === 'danger') ? 'danger'
       : b.findings.some(f => f.tone === 'warn') ? 'warn' : 'ok';
 
@@ -70,11 +72,32 @@ R.Screens.office = (function(){
         <p class="desk__line">${b.headline}</p>
         ${deskMetrics(b)}
 
+        ${when(notes.length, () => html`<div class="notes mt-10">${map(notes, n => html`
+          <div class="${'note note--' + n.tone}">
+            <span class="note__dot"></span>
+            <span class="minw0">${n.text}</span>
+            ${when(n.route, () => K.Button({ label:'Git', size:'sm', tone:'ghost', act:'go',
+              data:{ 'data-route':n.route } }))}
+          </div>`)}</div>`)}
+
         ${when(open, () => html`
           <div class="desk__open">
             <div class="stack-xs">${map(b.findings, findingRow)}</div>
             ${when(b.suggestion, () => html`<div class="mt-10">
               ${K.Notice({ tone:'info', title:'Önerisi:', body:b.suggestion.text })}</div>`)}
+
+            ${when(b.journal && b.journal.length, () => html`
+              <div class="mt-12">${K.SectionTitle('Defteri')}</div>
+              <div class="stack-xs">${map(b.journal, j => html`
+                <div class="finding">
+                  <span class="${'finding__dot finding__dot--' + (j.tone || 'info')}"></span>
+                  <span>${j.text} <span class="tiny dim">· ${j.kind}</span></span>
+                </div>`)}</div>`)}
+
+            ${when(trust.toplam, () => html`<p class="tiny dim mt-10">
+              Alanına düşen ${trust.toplam} karardan ${trust.kapanan} tanesi kapandı;
+              ${trust.yuzde == null ? 'henüz oran çıkmadı' : 'uygulanma oranı %' + trust.yuzde}.</p>`)}
+
             <p class="tiny dim mt-8">Masasındaki veri: ${agent.reads.join(' · ')}</p>
           </div>`)}
 
@@ -125,6 +148,41 @@ R.Screens.office = (function(){
   }
 
   function M(){ return R.Model; }
+
+  /* Gunluk brifing — sabah bir kez uretilir, gun boyu onbellekten okunur. */
+  function briefingCard(){
+    const b = O.briefingOf();
+    const notes = O.notes();
+    return K.Card({
+      title:'Bugünün brifingi',
+      sub:b ? new Date(b.at).toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' })
+            + ' · günde bir kez üretilir'
+            : 'Patron masaları henüz özetlemedi',
+      badge:when(notes.length, () => K.Badge({ label:notes.length + ' not', tone:'warn' })),
+      actions:K.Button({ label:b ? 'Yenile' : 'Brifing al', icon:'refresh', size:'sm',
+        act:'office-briefing' }),
+      body:html`
+        <div id="office-briefing">
+          ${b
+            ? html`<p class="prose">${b.text}</p>
+                ${when(b.stale, () => html`<div class="mt-10">${K.Notice({ tone:'warn',
+                  title:'Bu brifing eskidi.',
+                  body:'Masalardaki notlar brifing yazıldıktan sonra değişti. '
+                     + 'Aşağıdaki notlar günceldir; brifingi yenileyebilirsin.' })}</div>`)}
+                ${when(b.mode === 'kural', () => html`<p class="tiny dim mt-8">
+                  Kural motoru metni — model bağlı değil.</p>`)}`
+            : html`<p class="small muted">${O.ruleBriefingText()}</p>`}
+        </div>
+
+        ${when(notes.length, () => html`<div class="notes mt-12">${map(notes.slice(0, 4), n => html`
+          <div class="${'note note--' + n.tone}">
+            <span class="note__dot"></span>
+            <span class="minw0"><b class="small">${n.name}:</b> ${n.text}</span>
+            ${when(n.route, () => K.Button({ label:'Git', size:'sm', tone:'ghost', act:'go',
+              data:{ 'data-route':n.route } }))}
+          </div>`)}</div>`)}`,
+    });
+  }
 
   /* Patron karti — gunun tek isini gosterir, digerlerinden ayrilir. */
   function BossCard(){
@@ -271,6 +329,26 @@ R.Screens.office = (function(){
     return q.usedToday + '/' + q.rpd + (q.full ? ' · doldu' : '');
   }
 
+  /* Bildirim izni — istenmeden bildirim gonderilmez. */
+  function notifyRow(){
+    const state = R.App.notifyState();
+    if(state === 'unsupported'){
+      return html`<p class="tiny dim">Bu tarayıcı bildirim desteklemiyor.</p>`;
+    }
+    if(state === 'granted'){
+      return K.Notice({ tone:'ok', body:'Bildirim açık. Ofis acil bir not bulduğunda '
+        + 'ya da karar iki gündür açık kaldığında günde en fazla bir kez haber verir.' });
+    }
+    if(state === 'denied'){
+      return html`<p class="tiny dim">Bildirim izni reddedilmiş. Tarayıcı ayarlarından
+        bu siteye izin verirsen ofis haber verebilir.</p>`;
+    }
+    return html`<div class="row wrap gap-6">
+      ${K.Button({ label:'Bildirime izin ver', icon:'info', size:'sm', act:'office-notify' })}
+      <span class="tiny dim">Ofis acil bir not bulduğunda haber verir; günde en fazla bir kez.</span>
+    </div>`;
+  }
+
   function keyWarning(providerId, value){
     const shape = KEY_SHAPES[providerId];
     if(!shape || !value) return null;
@@ -352,9 +430,15 @@ R.Screens.office = (function(){
           K.Chip({ label:c.label, act:'office-rpd', data:{ 'data-rpd':c.value } })), { wrap:true })),
       ], 'sm')),
 
-      /* --- 5. yedek --- */
-      K.Checkbox({ label:'Model düşerse yedeğe geç (önerilir)', checked:st.fallback !== false,
-        act:'office-toggle-fallback' }),
+      /* --- 5. ofis davranisi --- */
+      K.Stack([
+        K.SectionTitle('Ofis davranışı'),
+        K.Checkbox({ label:'Model düşerse yedeğe geç (önerilir)', checked:st.fallback !== false,
+          act:'office-toggle-fallback' }),
+        K.Checkbox({ label:'Sabah günün brifingini kendiliğinden üret (günde 1 istek)',
+          checked:st.autoBriefing !== false, act:'office-toggle-briefing' }),
+        html`<div id="office-notify">${notifyRow()}</div>`,
+      ], 'sm'),
 
       html`<div id="llm-test"></div>`,
     ]);
@@ -447,6 +531,7 @@ R.Screens.office = (function(){
     return String(K.Grid([
       K.Span(8, K.Stack([
         boardCard(),
+        briefingCard(),
         BossCard(),
         decisionsCard(),
         K.SectionTitle('Uzman masaları'),
@@ -491,6 +576,16 @@ R.Screens.office = (function(){
 
     async 'office-toggle-fallback'(el){
       await O.saveSettings({ fallback:!!el.checked });
+    },
+
+    async 'office-toggle-briefing'(el){
+      await O.saveSettings({ autoBriefing:!!el.checked });
+    },
+
+    async 'office-notify'(){
+      await R.App.askNotify();
+      const box = document.getElementById('office-notify');
+      if(box) box.innerHTML = String(notifyRow());
     },
 
     async 'office-forget'(el){
@@ -554,6 +649,20 @@ R.Screens.office = (function(){
       UI.closeSheet();
       UI.toast(O.mode() === 'llm' ? 'Ofis modeli bağlandı' : 'Ayarlar kaydedildi');
       R.App.render();
+    },
+
+    async 'office-briefing'(el){
+      const out = document.getElementById('office-briefing');
+      el.disabled = true;
+      if(out) out.innerHTML = String(html`<p class="small muted">Masaları okuyor…</p>`);
+      try{
+        await O.dailyBriefing({ force:true });
+      }catch(err){
+        UI.toast(R.LLM.errorText(err && err.code));
+      }finally{
+        el.disabled = false;
+        R.App.render();
+      }
     },
 
     async 'office-decision'(el){

@@ -211,6 +211,14 @@ R.OFFICE_PROMPTS = {
       + 'hangi arkadaşının baktığını söyle.';
   },
 
+  /* Gunluk brifing: Patron sabah tek cumleyle masalari ozetler. */
+  daily(data){
+    return 'BUGÜNÜN MASA NOTLARI (kural motoru üretti, JSON):\n'
+      + JSON.stringify(data, null, 1) + '\n\n'
+      + 'GÖREV: Günün brifingini ver. En önemli tek şeyi söyle ve günün işini hatırlat. '
+      + 'En fazla 2 cümle. Not yoksa bunu da açıkça söyle, boş övgü yazma.';
+  },
+
   /* Brifing: soru yok, ajan kendi alanini ozetler. */
   briefing(agent, brief){
     return 'MASANDAKİ RAPOR (kural motoru hesapladı, JSON):\n'
