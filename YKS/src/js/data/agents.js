@@ -53,6 +53,9 @@ R.AGENTS = [
     hint:'closure',
     maxSentences:4,
     temperature:0.4,
+    /* Alan gardi: metin bu kaliba uyarsa uzman kendi masasinin disina cikmistir.
+       Engellemez, isaretler — bicim degisebilir, yanlis pozitif kullaniciyi yorar. */
+    taboo:[{ re:/\bAYT\b/i, why:'AYT’den söz etti; orası Yaman’ın masası.' }],
     system:
       'Sen bir YKS ofisinde TYT uzmanısın. Yalnızca TYT derslerinden sorumlusun: '
       + 'Türkçe, Temel Matematik, Fen Bilimleri, Sosyal Bilimler.\n'
@@ -81,6 +84,7 @@ R.AGENTS = [
     hint:'net-matrix',
     maxSentences:4,
     temperature:0.4,
+    taboo:[{ re:/\bTYT\b/i, why:'TYT’den söz etti; orası Tuna’nın masası.' }],
     system:
       'Sen bir YKS ofisinde AYT uzmanısın. Yalnızca AYT alan derslerinden sorumlusun: '
       + 'Matematik, Fizik, Kimya, Biyoloji.\n'
@@ -109,6 +113,10 @@ R.AGENTS = [
     hint:'streak',
     maxSentences:4,
     temperature:0.5,
+    /* "net olarak" gibi zarf kullanimlari yanlis pozitif uretmesin diye
+       yalniz sinav anlamindaki kaliplar aranir. */
+    taboo:[{ re:/(\d\s*net\b|\bnetin\b|\bnetim\b|\bnetleri?\b)/i,
+      why:'Net yorumladı; net Tuna ile Yaman’ın alanı, Rana davranışa bakar.' }],
     system:
       'Sen bir YKS ofisinde rehberlik uzmanısın. Netlerden değil DAVRANIŞTAN sorumlusun: '
       + 'düzen, uyku, enerji, molalar, planın tutup tutmadığı, sapma nedenleri.\n'
@@ -139,6 +147,9 @@ R.AGENTS = [
     hint:'pareto',
     maxSentences:5,
     temperature:0.3,
+    /* Analist bulgu bildirir, tavsiye vermez: emir kipi alan ihlalidir. */
+    taboo:[{ re:/(malısın|melisin|tavsiye ederim|öneririm|yapmanı öneri)/i,
+      why:'Tavsiye verdi; analistin işi bulgu bildirmek, kararı Patron verir.' }],
     system:
       'Sen bir YKS ofisinde analistsin. Ölçümden sorumlusun: deneme kayıtları, hata '
       + 'dağılımı (K/İ/Y/S/D), konu risk sıralaması, analiz ve tekrar borcu.\n'
@@ -154,6 +165,17 @@ R.AGENTS = [
     ],
   },
 ];
+
+/* Kural motorunun sectigi isin (Calc.nextAction) hangi ajanin alanina dustugu.
+   Guven skoru bunun uzerinden hesaplanir: bir ajanin alanindaki kararlar
+   ne siklikla uygulandi? 'second-check' derse gore degistigi icin
+   calisma aninda cozulur. */
+R.ACTION_OWNER = {
+  analysis:'analist', exam:'analist', cards:'analist', due:'analist', 'note-cards':'analist',
+  sleep:'rehber', minimum:'rehber', break:'rehber', review:'rehber', contract:'rehber',
+  block:'rehber', blocks:'rehber', running:'rehber', anchor:'rehber', done:'rehber',
+  watch:'tyt',
+};
 
 R.AGENT_IDS = R.AGENTS.map(a => a.id);
 R.AGENT_BY_ID = R.AGENTS.reduce((m, a) => { m[a.id] = a; return m; }, {});

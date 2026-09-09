@@ -796,6 +796,222 @@
     });
   });
 
+
+  /* ==================== FAZ 3 — kalite guvencesi ==================== */
+
+  describe('Ofis — sayı sadakati', () => {
+    it('Türkçe sayı yazımını tanır', () => {
+      const v = O.numbersIn('Medyan 19,50 net; plan %78; sıra 12.500; 3 gün kaldı.')
+        .map(x => x.value);
+      expect(v).toContain(19.5);
+      expect(v).toContain(78);
+      expect(v).toContain(12500);
+      expect(v).toContain(3);
+    });
+
+    it('brifingde olmayan sayıyı yakalar', () => {
+      reset();
+      const brief = O.brief('analist');
+      const bad = O.numberFidelity('Tekrar borcun %47 ve sıran 84.200 civarı.', brief);
+      expect(bad.length > 0).toBeTruthy();
+    });
+
+    it('brifingdeki sayıyı yakalamaz', () => {
+      reset();
+      const brief = O.brief('analist');
+      const text = brief.findings.map(f => f.text).join(' ');
+      expect(O.numberFidelity(text, brief)).toHaveLength(0);
+    });
+
+    it('doğal dil sayıları ve yıllar elenir', () => {
+      reset();
+      const brief = O.brief('rehber');
+      expect(O.numberFidelity('Üç gün, 2 blok ve 5 soru yeter; 2026 sınavı.', brief)).toHaveLength(0);
+    });
+
+    it('uydurulmuş sayı doğrulamada uyarıya döner', () => {
+      reset();
+      const v = O.validate('Sıralaman 84.200 olacak.', { agentId:'analist', brief:O.brief('analist') });
+      expect(v.warnings.length > 0).toBeTruthy();
+      expect(v.unsupported.length > 0).toBeTruthy();
+    });
+
+    it('brifing verilmezse sayı denetimi çalışmaz', () => {
+      reset();
+      expect(O.validate('Sıralaman 84.200 olacak.').unsupported).toHaveLength(0);
+    });
+  });
+
+  describe('Ofis — alan ihlali', () => {
+    it('TYT uzmanı AYT’den söz ederse işaretlenir', () => {
+      reset();
+      const v = O.validate('AYT matematiğe ağırlık ver.', { agentId:'tyt' });
+      expect(v.warnings.length > 0).toBeTruthy();
+    });
+
+    it('AYT uzmanı TYT’den söz ederse işaretlenir', () => {
+      reset();
+      expect(O.validate('TYT tarafın zayıf.', { agentId:'ayt' }).warnings.length > 0).toBeTruthy();
+    });
+
+    it('rehber net yorumlarsa işaretlenir, "net olarak" işaretlenmez', () => {
+      reset();
+      expect(O.validate('Netin 24 civarında.', { agentId:'rehber' }).warnings.length > 0).toBeTruthy();
+      expect(O.scopeBreaches('Bunu net olarak söyleyebilirim.', R.AGENT_BY_ID.rehber)).toHaveLength(0);
+    });
+
+    it('analist tavsiye verirse işaretlenir', () => {
+      reset();
+      expect(O.validate('Bu konuya dönmelisin.', { agentId:'analist' }).warnings.length > 0).toBeTruthy();
+      expect(O.scopeBreaches('Hata dağılımında K başta.', R.AGENT_BY_ID.analist)).toHaveLength(0);
+    });
+
+    it('Patron bütün alanları konuşabilir', () => {
+      reset();
+      expect(R.AGENT_BY_ID.patron.taboo).toBeUndefined();
+      expect(O.validate('TYT ve AYT birlikte değerlendirilmeli.', { agentId:'patron' }).warnings).toHaveLength(0);
+    });
+
+    it('toplantıda uydurulan sayı tutanağa uyarı olarak geçer', async () => {
+      reset();
+      await withStubLLM('Sıralaman kesin 84.200 olacak.', async () => {
+        const m = await O.meet({ rounds:1 });
+        const flagged = m.turns.filter(t => (t.warnings || []).length);
+        expect(flagged.length > 0).toBeTruthy();
+      });
+    });
+  });
+
+  /* ==================== FAZ 6 — kota ve dayaniklilik ==================== */
+
+  describe('Ofis — çoklu anahtar havuzu', () => {
+    function fresh(){
+      reset(); R.Quota.reset(); R.Quota.clearOverrides(); R.LLM.setKey('groq', '');
+    }
+
+    it('tek anahtar dizi olarak okunur, eski biçim korunur', () => {
+      fresh();
+      R.LLM.setKey('groq', 'gsk_bir');
+      expect(R.LLM.getKeys('groq')).toEqual(['gsk_bir']);
+      expect(R.LLM.getKey('groq')).toBe('gsk_bir');
+      R.LLM.setKey('groq', '');
+    });
+
+    it('anahtar eklenir, tekrar eklenmez, silinir', () => {
+      fresh();
+      R.LLM.addKey('groq', 'gsk_a');
+      R.LLM.addKey('groq', 'gsk_b');
+      R.LLM.addKey('groq', 'gsk_a');
+      expect(R.LLM.getKeys('groq')).toHaveLength(2);
+      R.LLM.removeKeyAt('groq', 0);
+      expect(R.LLM.getKeys('groq')).toEqual(['gsk_b']);
+      R.LLM.setKey('groq', '');
+    });
+
+    it('kota her anahtar için ayrı sayılır', async () => {
+      fresh();
+      const base = { provider:'groq', model:'llama-3.3-70b-versatile' };
+      R.Quota.setOverride('groq', { rpm:600, rpd:1 });
+      await R.Quota.acquire(Object.assign({}, base, { keyId:0 }));
+      expect(R.Quota.status(Object.assign({}, base, { keyId:0 })).full).toBeTruthy();
+      expect(R.Quota.status(Object.assign({}, base, { keyId:1 })).full).toBeFalsy();
+      R.Quota.clearOverrides();
+    });
+
+    it('dolu anahtar atlanır, boşta olan seçilir', async () => {
+      fresh();
+      R.LLM.setKey('groq', ['gsk_a', 'gsk_b']);
+      const cfg = { provider:'groq', model:'llama-3.1-8b-instant' };
+      R.Quota.setOverride('groq', { rpm:600, rpd:1 });
+      expect(R.LLM.pickKey(cfg).index).toBe(0);
+      await R.Quota.acquire(Object.assign({}, cfg, { keyId:0 }));
+      expect(R.LLM.pickKey(cfg).index).toBe(1);
+      R.Quota.clearOverrides();
+      R.LLM.setKey('groq', '');
+    });
+
+    it('maskeleme anahtarı sızdırmaz', () => {
+      fresh();
+      R.LLM.setKey('groq', ['gsk_0123456789abcdef']);
+      const masked = R.LLM.maskKeys('groq');
+      expect(masked).toHaveLength(1);
+      expect(masked[0].indexOf('0123456789')).toBe(-1);
+      R.LLM.setKey('groq', '');
+    });
+
+    it('anahtar yoksa sağlayıcı hazır sayılmaz', () => {
+      fresh();
+      expect(R.LLM.ready({ provider:'groq', model:'llama-3.1-8b-instant' })).toBeFalsy();
+      R.LLM.setKey('groq', 'gsk_x');
+      expect(R.LLM.ready({ provider:'groq', model:'llama-3.1-8b-instant' })).toBeTruthy();
+      R.LLM.setKey('groq', '');
+    });
+  });
+
+  describe('Ofis — çevrimdışı ve yerel model', () => {
+    it('devam edilebilir hatalar ayrılır', () => {
+      expect(R.LLM.resumable('offline')).toBeTruthy();
+      expect(R.LLM.resumable('network')).toBeTruthy();
+      expect(R.LLM.resumable('unauthorized')).toBeFalsy();
+      expect(R.LLM.resumable('daily_quota')).toBeFalsy();
+    });
+
+    it('çevrimdışı hatası kullanıcı diline çevrilir', () => {
+      expect(R.LLM.errorText('offline').length > 20).toBeTruthy();
+    });
+
+    it('yerel sağlayıcılar anahtarsız ve sınırsızdır', () => {
+      ['ollama', 'lmstudio'].forEach(id => {
+        const p = R.PROVIDERS[id];
+        expect(p.needsKey).toBeFalsy();
+        expect(p.editableEndpoint).toBeTruthy();
+        expect(p.endpoint.indexOf('localhost') > 0).toBeTruthy();
+        expect(R.Quota.limitsFor({ provider:id, model:'x' })).toBeNull();
+      });
+    });
+
+    it('yerel sağlayıcı uç adresi verilince hazır olur', () => {
+      expect(R.LLM.ready({ provider:'ollama', model:'llama3.1:8b',
+        endpoint:'http://localhost:11434/v1/chat/completions' })).toBeTruthy();
+      expect(R.LLM.ready({ provider:'ollama', model:'llama3.1:8b', endpoint:'' })).toBeFalsy();
+    });
+  });
+
+  describe('Ofis — brifing sıkıştırma', () => {
+    it('küçük veriye dokunmaz', () => {
+      const small = { a:1, b:'iki' };
+      expect(O.compactData(small)).toEqual(small);
+    });
+
+    it('bütçeyi aşan veride ayrıntılı diziler kırpılır', () => {
+      reset();
+      const big = { son7Gun:[], dersler:[] };
+      for(let i = 0; i < 40; i++){
+        big.son7Gun.push({ tarih:'2026-09-0' + (i%9), tamamlanan:i, toplam:9, uyku:7, calisilanDakika:120 });
+        big.dersler.push({ id:'d'+i, ders:'Ders '+i, kapanan:i, toplam:30, yuzde:i, hedefBant:'20–30 net' });
+      }
+      const before = JSON.stringify(big).length;
+      const after = JSON.stringify(O.compactData(big, 800)).length;
+      expect(after < before).toBeTruthy();
+      expect(O.compactData(big, 800).son7Gun.length <= 4).toBeTruthy();
+    });
+
+    it('kırpılan kayıt sayısı metinde belirtilir', () => {
+      reset();
+      const big = { son7Gun:Array.from({ length:30 }, (_, i) => ({ tarih:'g'+i, uyku:7, calisilanDakika:100 })) };
+      const out = O.compactData(big, 300);
+      expect(String(out.son7Gun[out.son7Gun.length - 1])).toContain('kısaltıldı');
+    });
+
+    it('ajana giden veri sıkıştırılmış hâlde gider', async () => {
+      reset();
+      await withStubLLM('ok', async calls => {
+        await O.ask('rehber', 'Durum ne?');
+        expect(calls[0].req.messages[0].text.length < 12000).toBeTruthy();
+      });
+    });
+  });
+
   /* ==================== yukleme ==================== */
 
   describe('Ofis — kalıcılık', () => {

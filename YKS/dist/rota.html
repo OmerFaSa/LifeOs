@@ -1803,6 +1803,16 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .reportrow__list{ margin:6px 0 0 18px; padding:0; font-size:var(--fs-sm);
   color:var(--text-2); line-height:1.5; }
 .reportrow__list li{ margin:3px 0; }
+
+/* ---------- çoklu API anahtarı ---------- */
+.keyrow{
+  display:flex; align-items:center; gap:10px;
+  padding:7px 10px; border-radius:var(--r-sm);
+  border:1px solid var(--border); background:var(--surface-2);
+}
+.keyrow__mask{ font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:var(--fs-sm); flex:1; min-width:0; }
+.keyrow__q{ font-size:var(--fs-xs); color:var(--text-3); white-space:nowrap; }
 </style>
 <div id="app">
   <div class="boot">
@@ -3330,6 +3340,44 @@ R.PROVIDERS = {
     ],
   },
 
+  /* Bilgisayarda calisan model. Kotasi, ucreti ve internet ihtiyaci YOKTUR;
+     ucretsiz katmanlarin butun sinirlarindan kacmanin tek yolu budur. */
+  ollama: {
+    id:'ollama',
+    label:'Ollama (kendi bilgisayarın)',
+    kind:'openai',
+    free:true,
+    needsKey:false,
+    endpoint:'http://localhost:11434/v1/chat/completions',
+    editableEndpoint:true,
+    keyUrl:'https://ollama.com/download',
+    note:'Modeli kendi bilgisayarında çalıştırır: kota yok, ücret yok, internet gerekmez. '
+       + 'Tarayıcıdan erişebilmek için Ollama’yı OLLAMA_ORIGINS="*" ile başlatman gerekir. '
+       + 'Türkçe için 7B ve üstü bir model seç.',
+    checked:'2026-09 · ollama.com/blog/openai-compatibility',
+    models:[
+      { id:'llama3.1:8b',   label:'Llama 3.1 8B',   free:true, strength:'denge' },
+      { id:'qwen2.5:7b',    label:'Qwen 2.5 7B',    free:true, strength:'hız' },
+      { id:'gemma2:9b',     label:'Gemma 2 9B',     free:true, strength:'denge' },
+      { id:'mistral-nemo',  label:'Mistral Nemo',   free:true, strength:'analiz' },
+    ],
+  },
+
+  lmstudio: {
+    id:'lmstudio',
+    label:'LM Studio (kendi bilgisayarın)',
+    kind:'openai',
+    free:true,
+    needsKey:false,
+    endpoint:'http://localhost:1234/v1/chat/completions',
+    editableEndpoint:true,
+    keyUrl:'https://lmstudio.ai',
+    note:'LM Studio’da yerel sunucuyu başlat ve CORS’u aç. Kota yok, ücret yok. '
+       + 'Model kimliğini LM Studio’nun sunucu ekranından kopyala.',
+    checked:'2026-09 · lmstudio.ai/docs/local-server',
+    models:[],
+  },
+
   /* Kendi sunucusunu ya da listede olmayan bir saglayiciyi kullanmak icin.
      OpenAI uyumlu /chat/completions bekler. Sinir bilinmedigi icin
      kota yoneticisi araya girmez; kullanici kendi sinirini ayarlardan yazar. */
@@ -3349,7 +3397,7 @@ R.PROVIDERS = {
 };
 
 /* Sirali liste — ayar ekrani bu sirayla gosterir. */
-R.PROVIDER_ORDER = ['builtin', 'openrouter', 'groq', 'gemini', 'custom'];
+R.PROVIDER_ORDER = ['builtin', 'openrouter', 'groq', 'gemini', 'ollama', 'lmstudio', 'custom'];
 
 /* Ajan basina onerilen model gucu: kural motoru zaten hesabi yapar,
    modelden beklenen yalnizca kisa ve net Turkce yorumdur. */
@@ -3415,6 +3463,9 @@ R.AGENTS = [
     hint:'closure',
     maxSentences:4,
     temperature:0.4,
+    /* Alan gardi: metin bu kaliba uyarsa uzman kendi masasinin disina cikmistir.
+       Engellemez, isaretler — bicim degisebilir, yanlis pozitif kullaniciyi yorar. */
+    taboo:[{ re:/\bAYT\b/i, why:'AYT’den söz etti; orası Yaman’ın masası.' }],
     system:
       'Sen bir YKS ofisinde TYT uzmanısın. Yalnızca TYT derslerinden sorumlusun: '
       + 'Türkçe, Temel Matematik, Fen Bilimleri, Sosyal Bilimler.\n'
@@ -3443,6 +3494,7 @@ R.AGENTS = [
     hint:'net-matrix',
     maxSentences:4,
     temperature:0.4,
+    taboo:[{ re:/\bTYT\b/i, why:'TYT’den söz etti; orası Tuna’nın masası.' }],
     system:
       'Sen bir YKS ofisinde AYT uzmanısın. Yalnızca AYT alan derslerinden sorumlusun: '
       + 'Matematik, Fizik, Kimya, Biyoloji.\n'
@@ -3471,6 +3523,10 @@ R.AGENTS = [
     hint:'streak',
     maxSentences:4,
     temperature:0.5,
+    /* "net olarak" gibi zarf kullanimlari yanlis pozitif uretmesin diye
+       yalniz sinav anlamindaki kaliplar aranir. */
+    taboo:[{ re:/(\d\s*net\b|\bnetin\b|\bnetim\b|\bnetleri?\b)/i,
+      why:'Net yorumladı; net Tuna ile Yaman’ın alanı, Rana davranışa bakar.' }],
     system:
       'Sen bir YKS ofisinde rehberlik uzmanısın. Netlerden değil DAVRANIŞTAN sorumlusun: '
       + 'düzen, uyku, enerji, molalar, planın tutup tutmadığı, sapma nedenleri.\n'
@@ -3501,6 +3557,9 @@ R.AGENTS = [
     hint:'pareto',
     maxSentences:5,
     temperature:0.3,
+    /* Analist bulgu bildirir, tavsiye vermez: emir kipi alan ihlalidir. */
+    taboo:[{ re:/(malısın|melisin|tavsiye ederim|öneririm|yapmanı öneri)/i,
+      why:'Tavsiye verdi; analistin işi bulgu bildirmek, kararı Patron verir.' }],
     system:
       'Sen bir YKS ofisinde analistsin. Ölçümden sorumlusun: deneme kayıtları, hata '
       + 'dağılımı (K/İ/Y/S/D), konu risk sıralaması, analiz ve tekrar borcu.\n'
@@ -3516,6 +3575,17 @@ R.AGENTS = [
     ],
   },
 ];
+
+/* Kural motorunun sectigi isin (Calc.nextAction) hangi ajanin alanina dustugu.
+   Guven skoru bunun uzerinden hesaplanir: bir ajanin alanindaki kararlar
+   ne siklikla uygulandi? 'second-check' derse gore degistigi icin
+   calisma aninda cozulur. */
+R.ACTION_OWNER = {
+  analysis:'analist', exam:'analist', cards:'analist', due:'analist', 'note-cards':'analist',
+  sleep:'rehber', minimum:'rehber', break:'rehber', review:'rehber', contract:'rehber',
+  block:'rehber', blocks:'rehber', running:'rehber', anchor:'rehber', done:'rehber',
+  watch:'tyt',
+};
 
 R.AGENT_IDS = R.AGENTS.map(a => a.id);
 R.AGENT_BY_ID = R.AGENTS.reduce((m, a) => { m[a.id] = a; return m; }, {});
@@ -8863,7 +8933,12 @@ R.Quota = (function(){
 
   /* ---------- sinirlarin okunmasi ---------- */
 
-  function key(cfg){ return (cfg && cfg.provider) + '|' + (cfg && cfg.model); }
+  /* Sayac anahtari saglayici + model + ANAHTAR kimligidir: ayni saglayiciya
+     iki API anahtari verildiginde kota ayri sayilir ve gunluk hak katlanir. */
+  function key(cfg){
+    const k = (cfg && cfg.keyId != null) ? '#' + cfg.keyId : '';
+    return (cfg && cfg.provider) + '|' + (cfg && cfg.model) + k;
+  }
 
   /* ---------- kullanici duzeltmesi ----------
      Gunluk hak hesaba bagli olabilir (OpenRouter'da kredi yuklediysen 50 yerine
@@ -9094,25 +9169,69 @@ R.LLM = (function(){
     try{ return JSON.parse(localStorage.getItem(KEY_STORE) || '{}'); }
     catch(e){ return {}; }
   }
-  function getKey(providerId){
-    const k = readKeys()[providerId];
-    return typeof k === 'string' ? k.trim() : '';
+
+  /* Bir saglayiciya BIRDEN COK anahtar verilebilir. Kota anahtar basina
+     sayildigi icin ikinci anahtar gunluk hakki ikiye katlar — ucretsiz
+     katmanda en ucuz buyume yolu budur.
+     Eski bicim (tek dize) okunmaya devam eder. */
+  function getKeys(providerId){
+    const v = readKeys()[providerId];
+    const list = Array.isArray(v) ? v : (typeof v === 'string' ? [v] : []);
+    return list.map(k => String(k || '').trim()).filter(Boolean);
   }
+  function getKey(providerId){ return getKeys(providerId)[0] || ''; }
+
+  /* value: dize (tek anahtar) ya da dizi. Bos deger anahtarlari siler. */
   function setKey(providerId, value){
     const all = readKeys();
-    const v = String(value || '').trim();
-    if(v) all[providerId] = v; else delete all[providerId];
+    const list = (Array.isArray(value) ? value : [value])
+      .map(k => String(k || '').trim()).filter(Boolean);
+    /* Ayni anahtar iki kez sayilmasin: kota anahtar kimligine bagli. */
+    const uniq = list.filter((k, i) => list.indexOf(k) === i);
+    if(uniq.length) all[providerId] = uniq; else delete all[providerId];
     try{ localStorage.setItem(KEY_STORE, JSON.stringify(all)); return true; }
     catch(e){ return false; }
+  }
+
+  function addKey(providerId, value){
+    const v = String(value || '').trim();
+    if(!v) return getKeys(providerId);
+    const list = getKeys(providerId);
+    if(list.indexOf(v) < 0) list.push(v);
+    setKey(providerId, list);
+    return list;
+  }
+  function removeKeyAt(providerId, index){
+    const list = getKeys(providerId);
+    list.splice(index, 1);
+    setKey(providerId, list);
+    return list;
   }
   function clearKeys(){
     try{ localStorage.removeItem(KEY_STORE); }catch(e){}
   }
-  /* Ayar ekraninda gosterilecek maskeli hâl — tam anahtar hicbir yerde cizilmez. */
-  function maskKey(providerId){
-    const k = getKey(providerId);
+
+  function mask(k){
     if(!k) return '';
     return k.length <= 10 ? '••••' : k.slice(0, 6) + '…' + k.slice(-4);
+  }
+  /* Ayar ekraninda gosterilecek maskeli hâl — tam anahtar hicbir yerde cizilmez. */
+  function maskKey(providerId){ return mask(getKey(providerId)); }
+  function maskKeys(providerId){ return getKeys(providerId).map(mask); }
+
+  /* Kotasi musait olan anahtari secer; hepsi doluysa en az bekleyeni.
+     Donen index kota sayacinin anahtarina girer. */
+  function pickKey(cfg){
+    const keys = getKeys(cfg.provider);
+    if(!keys.length) return null;
+    let best = null;
+    for(let i = 0; i < keys.length; i++){
+      const state = R.Quota.check(Object.assign({}, cfg, { keyId:i }));
+      if(state.ok) return { key:keys[i], index:i, waitMs:0 };
+      if(state.reason === 'daily') continue;              // bu anahtarin gunu bitti
+      if(!best || state.waitMs < best.waitMs) best = { key:keys[i], index:i, waitMs:state.waitMs };
+    }
+    return best;   // hepsinin gunu bittiyse null → daily_quota
   }
 
   /* ---------- yerlesik yetenek ---------- */
@@ -9164,6 +9283,12 @@ R.LLM = (function(){
     return 'bad_request';
   }
 
+  /* Tarayici cevrimdisi oldugunu biliyorsa istek hic gonderilmez: kota
+     harcanmaz, kullaniciya dogru sebep soylenir, baglanti gelince devam edilir. */
+  function offline(){
+    return typeof navigator !== 'undefined' && navigator.onLine === false;
+  }
+
   const ERRORS = {
     no_provider:'Model sağlayıcı seçilmedi. Ofis → Ayarlar bölümünden bir sağlayıcı seç.',
     no_key:'Bu sağlayıcı için API anahtarı girilmedi.',
@@ -9180,6 +9305,7 @@ R.LLM = (function(){
     cancelled:'İptal edildi.',
     empty:'Model boş yanıt döndürdü. Tekrar dene.',
     unavailable:'Yerleşik model bu ortamda kapalı. Ofis → Ayarlar’dan ücretsiz bir sağlayıcı bağla.',
+    offline:'Bağlantı yok. Çevrimiçi olunca kaldığın yerden devam edersin; kural motoru bu sırada çalışmayı sürdürüyor.',
     daily_quota:'Bu modelin günlük ücretsiz hakkı doldu. Yarın sıfırlanır; o zamana kadar başka bir sağlayıcı kullanabilirsin.',
     rate_wait:'Dakikalık sıra çok uzun. Birkaç dakika sonra tekrar dene ya da dakikalık sınırı daha yüksek bir sağlayıcı seç.',
     sandboxed:'Bu ortam dış servislere bağlanmaya izin vermiyor. Uygulama Claude içinde yayımlanmış bir sayfa olarak '
@@ -9190,7 +9316,18 @@ R.LLM = (function(){
 
   /* Yeniden denenebilir hatalar: yedek modele gecmek anlamli olanlar. */
   const RETRYABLE = ['rate_limited', 'server', 'bad_model', 'timeout', 'empty'];
+  /* Baglanti gelince kaldigi yerden devam edilebilecek hatalar. */
+  const RESUMABLE = ['offline', 'network', 'server', 'timeout'];
   function retryable(code){ return RETRYABLE.indexOf(code) >= 0; }
+  function resumable(code){ return RESUMABLE.indexOf(code) >= 0; }
+
+  /* Baglanti geri gelince haber verir; toplanti kaldigi yerden devam eder. */
+  function onceOnline(fn){
+    if(!offline()){ fn(); return function(){}; }
+    const h = function(){ window.removeEventListener('online', h); fn(); };
+    window.addEventListener('online', h);
+    return function(){ window.removeEventListener('online', h); };
+  }
 
   /* ---------- ortak yardimcilar ---------- */
 
@@ -9316,7 +9453,7 @@ R.LLM = (function(){
       guard.done();
       /* Saglayici bizim saydigimizdan daha siki davraniyor: pencereyi kapat. */
       if(code === 'rate_limited'){
-        R.Quota.penalize({ provider:provider.id, model:req.model }, retryAfterSeconds(response));
+        R.Quota.penalize({ provider:provider.id, model:req.model, keyId:req.keyId }, retryAfterSeconds(response));
       }
       throw fail(code, detail);
     }
@@ -9398,7 +9535,7 @@ R.LLM = (function(){
       const code = codeForStatus(response.status);
       guard.done();
       if(code === 'rate_limited'){
-        R.Quota.penalize({ provider:provider.id, model:req.model }, retryAfterSeconds(response));
+        R.Quota.penalize({ provider:provider.id, model:req.model, keyId:req.keyId }, retryAfterSeconds(response));
       }
       throw fail(code, detail);
     }
@@ -9446,15 +9583,29 @@ R.LLM = (function(){
     if(!provider) throw fail('no_provider');
     if(!cfg.model && provider.kind !== 'builtin') throw fail('no_model');
 
+    /* Cevrimdisiyken hic deneme: kota harcanmaz, sebep dogru soylenir. */
+    if(provider.kind !== 'builtin' && offline()) throw fail('offline');
+
+    /* Cok anahtarli havuz: kotasi musait olan anahtar secilir. */
+    let picked = null;
+    if(provider.needsKey){
+      if(!getKeys(provider.id).length) throw fail('no_key');
+      picked = pickKey(cfg);
+      if(!picked) throw Object.assign(new Error('gunluk kota doldu'), { code:'daily_quota' });
+    }
+
+    const quotaCfg = picked ? Object.assign({}, cfg, { keyId:picked.index }) : cfg;
+
     const payload = Object.assign({}, req, {
       model:cfg.model,
       endpoint:cfg.endpoint,
-      key:provider.needsKey ? getKey(provider.id) : null,
+      key:picked ? picked.key : null,
+      keyId:picked ? picked.index : null,
     });
 
     /* Sira: kota yoneticisi izin verene kadar bekle. Boylece dakikalik
        sinir HIC asilmaz; gun dolduysa beklemek yerine acikca soylenir. */
-    const slot = await R.Quota.acquire(cfg, { signal:req && req.signal, onWait:req && req.onWait });
+    const slot = await R.Quota.acquire(quotaCfg, { signal:req && req.signal, onWait:req && req.onWait });
 
     const started = Date.now();
     let text;
@@ -9464,14 +9615,16 @@ R.LLM = (function(){
       else text = await callOpenAI(payload, provider);
     }catch(err){
       /* Istek hic gonderilemediyse gunluk hakki tuketmis sayma. */
-      if(err && (err.code === 'cancelled' || err.code === 'sandboxed' || err.code === 'no_key')){
-        R.Quota.release(cfg);
+      if(err && (err.code === 'cancelled' || err.code === 'sandboxed'
+              || err.code === 'no_key' || err.code === 'offline')){
+        R.Quota.release(quotaCfg);
       }
       throw err;
     }
 
     return {
       text, provider:provider.id, model:cfg.model || 'yerleşik',
+      keyIndex:picked ? picked.index : null,
       ms:Date.now() - started, waited:slot.waited || 0,
       usedToday:slot.usedToday, rpd:slot.rpd,
     };
@@ -9528,16 +9681,16 @@ R.LLM = (function(){
     const provider = R.PROVIDERS[cfg && cfg.provider];
     if(!provider) return false;
     if(provider.kind === 'builtin') return builtinReady();
-    if(provider.needsKey && !getKey(provider.id)) return false;
+    if(provider.needsKey && !getKeys(provider.id).length) return false;
     if(provider.editableEndpoint && !(cfg.endpoint || '').trim()) return false;
     return !!cfg.model;
   }
 
   return {
     initBuiltin, builtinReady,
-    getKey, setKey, clearKeys, maskKey,
+    getKey, getKeys, setKey, addKey, removeKeyAt, clearKeys, maskKey, maskKeys, pickKey,
     chat, complete, test, ready,
-    errorText, retryable, inSandbox, KEY_STORE,
+    errorText, retryable, resumable, offline, onceOnline, inSandbox, KEY_STORE,
   };
 })();
 
@@ -10000,6 +10153,45 @@ R.Office = (function(){
     };
   }
 
+  /* ---------- brifing sikistirma ----------
+     Brifing JSON'u oldugu gibi gidiyordu. Ucretsiz modellerin dakikalik JETON
+     siniri (TPM) istek sinirindan once dolar; ayrica uzun istem yaniti
+     yavaslatir ve modelin dikkatini dagitir. Budama SIRALIDIR: once en
+     ayrintili diziler kirpilir, ozet alanlara hic dokunulmaz. */
+
+  const BRIEF_BUDGET = 2600;      // karakter — yaklasik 900 jeton
+
+  /* Once kirpilacak diziler: ayrintili, tekrarli ve yorum icin gereksiz olanlar. */
+  const TRIM_ORDER = [
+    ['son7Gun', 3], ['dersler', 4], ['netMatrisi', 4], ['riskliKonular', 2],
+    ['riskSiralamasi', 3], ['analizBorcu', 3], ['hataDagilimi', 3],
+  ];
+
+  function compactData(data, budget){
+    const cap = budget || BRIEF_BUDGET;
+    let out = JSON.parse(JSON.stringify(data || {}));
+    const size = () => JSON.stringify(out).length;
+    if(size() <= cap) return out;
+
+    for(const [field, keep] of TRIM_ORDER){
+      const trim = node => {
+        if(!node || typeof node !== 'object') return;
+        Object.keys(node).forEach(k => {
+          if(k === field && Array.isArray(node[k]) && node[k].length > keep){
+            const dropped = node[k].length - keep;
+            node[k] = node[k].slice(0, keep);
+            node[k].push('… ' + dropped + ' kayıt daha (kısaltıldı)');
+          }else if(node[k] && typeof node[k] === 'object'){
+            trim(node[k]);
+          }
+        });
+      };
+      trim(out);
+      if(size() <= cap) return out;
+    }
+    return out;
+  }
+
   const briefCache = new Map();
   /* Ayni cizimde bes ajan da brifing ister; hesap bir kez yapilir. */
   function brief(agentId){
@@ -10088,13 +10280,96 @@ R.Office = (function(){
      Gardlar veri katmanindan gelir (R.PROMPTS.forbidden); when() kural
      motorunu alir, yani yasak yalnizca veri onu destekliyorsa uygulanir. */
 
-  function validate(text){
+  /* Metindeki sayilari cikarir. Turkce yazimi tanir:
+     "19,50" ondalik, "1.500" binlik, "%78" yuzde. */
+  function numbersIn(text){
+    const out = [];
+    const re = /%?\s?\d{1,3}(?:\.\d{3})+(?:,\d+)?|%?\s?\d+(?:[.,]\d+)?/g;
+    const raw = String(text || '');
+    let m;
+    while((m = re.exec(raw)) !== null){
+      let t = m[0].replace(/%/g, '').trim();
+      if(/^\d{1,3}(?:\.\d{3})+/.test(t)) t = t.replace(/\./g, '');   // binlik ayraci
+      const n = Number(t.replace(',', '.'));
+      if(Number.isFinite(n)) out.push({ raw:m[0].trim(), value:n });
+    }
+    return out;
+  }
+
+  /* Brifingdeki butun sayilar — hem ham veriden hem bulgu metinlerinden.
+     Bulgu metni sayilari bicimlenmis hâlde tasidigi icin ikisi de gerekir. */
+  function supportedNumbers(brief){
+    const set = [];
+    const walk = v => {
+      if(v == null) return;
+      if(typeof v === 'number'){ if(Number.isFinite(v)) set.push(v); return; }
+      if(typeof v === 'string'){ numbersIn(v).forEach(x => set.push(x.value)); return; }
+      if(Array.isArray(v)){ v.forEach(walk); return; }
+      if(typeof v === 'object'){ Object.keys(v).forEach(k => walk(v[k])); }
+    };
+    walk(brief && brief.data);
+    (brief && brief.findings || []).forEach(f => walk(f.text));
+    if(brief && brief.headline) walk(brief.headline);
+    if(brief && brief.metrics) walk(brief.metrics);
+    return set;
+  }
+
+  /* Sayi sadakati: ajanin yazdigi her sayi brifingde var mi?
+
+     Kucuk tam sayilar (≤12) elenir — "uc gun", "iki blok", "bir konu" gibi
+     dogal dil sayilaridir ve brifingde karsiligi olmasi gerekmez. Yil da
+     elenir. Kalan bir sayi brifingde yoksa model onu UYDURMUS demektir;
+     bu, kural motoru otoritesinin en dogrudan ihlalidir. */
+  function numberFidelity(text, brief){
+    if(!brief) return [];
+    const supported = supportedNumbers(brief);
+    const near = n => supported.some(s => Math.abs(s - n) < 0.051);
+    const bad = [];
+    numbersIn(text).forEach(x => {
+      const n = x.value;
+      if(Number.isInteger(n) && n <= 12) return;          // dogal dil sayisi
+      if(n >= 1900 && n <= 2100 && Number.isInteger(n)) return;  // yil
+      if(near(n)) return;
+      if(bad.indexOf(x.raw) < 0) bad.push(x.raw);
+    });
+    return bad;
+  }
+
+  /* Alan ihlali: ajan kendi masasinin disina cikti mi?
+     Gardlar data/agents.js icinde ajanin yaninda durur. */
+  function scopeBreaches(text, agent){
+    if(!agent || !agent.taboo) return [];
+    return agent.taboo.filter(t => t.re.test(text)).map(t => t.why);
+  }
+
+  /* ---------- kural motoru dogrulamasi ----------
+     Model ne yazarsa yazsin cikti uc katmanda denetlenir:
+       1) ev kurallari  — garanti, kaynak degistirme, uykudan feda, tibbi tavsiye
+       2) sayi sadakati — brifingde olmayan sayi
+       3) alan ihlali   — uzmanin kendi masasinin disina cikmasi
+     Gardlar veri katmanindan gelir; when() kural motorunu alir, yani yasak
+     yalnizca veri onu destekliyorsa uygulanir. */
+
+  function validate(text, opts){
+    const o = opts || {};
     const warnings = [];
+
     (R.PROMPTS.forbidden || []).forEach(rule => {
       try{ if(rule.re.test(text) && rule.when(C)) warnings.push(rule.why); }
       catch(e){ /* gard hesaplanamadiysa uyari uretme */ }
     });
-    return { text, warnings };
+
+    const agent = o.agentId ? R.AGENT_BY_ID[o.agentId] : null;
+    scopeBreaches(text, agent).forEach(w => warnings.push(w));
+
+    if(o.brief){
+      const made = numberFidelity(text, o.brief);
+      if(made.length){
+        warnings.push('Bu sayılar raporda yok: ' + made.join(', ')
+          + '. Kural motorunun hesabına bak, metne değil.');
+      }
+    }
+    return { text, warnings, unsupported:o.brief ? numberFidelity(text, o.brief) : [] };
   }
 
   /* ---------- nottan kart uretimi ----------
@@ -10206,7 +10481,12 @@ R.Office = (function(){
         signal:o.signal,
         onText:o.onText,
       });
-      const checked = validate(res.text);
+      /* Cikti kendi brifingine karsi denetlenir: uydurulmus sayi ve alan
+         ihlali burada yakalanir. Patron'un brifingi dort raporu tasidigi
+         icin onun sayilari da kapsanir. */
+      let ownBrief = null;
+      try{ ownBrief = brief(agentId); }catch(e){}
+      const checked = validate(res.text, { agentId, brief:ownBrief });
       return { agent:agentId, name:agent.name, role:agent.role, text:checked.text,
         warnings:checked.warnings, mode:'llm', model:res.model, provider:res.provider,
         fellBack:!!res.fellBack, ms:res.ms };
@@ -10246,7 +10526,7 @@ R.Office = (function(){
     if(!q) throw Object.assign(new Error('boş soru'), { code:'empty' });
 
     resetBriefs();
-    const data = R.Tools.sanitize(brief(agentId).data);
+    const data = compactData(R.Tools.sanitize(brief(agentId).data));
     const history = chatOf(agentId).slice(-4)
       .map(m => ({ role:m.role === 'user' ? 'user' : 'assistant', text:m.text }));
 
@@ -10261,7 +10541,7 @@ R.Office = (function(){
   async function briefing(agentId, opts){
     const agent = R.AGENT_BY_ID[agentId];
     resetBriefs();
-    const data = R.Tools.sanitize(brief(agentId).data);
+    const data = compactData(R.Tools.sanitize(brief(agentId).data));
     return speak(agentId, 'briefing', {
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.briefing(agent, data) }],
       ctx:{},
@@ -10430,7 +10710,7 @@ R.Office = (function(){
     const agent = R.AGENT_BY_ID[agentId];
 
     resetBriefs();
-    const data = R.Tools.sanitize(brief(agentId).data);
+    const data = compactData(R.Tools.sanitize(brief(agentId).data));
     const turn = await speak(agentId, 'turn', {
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.turn(agent,
         { topic:session.topic }, data, saidSoFar(session), def, recentSaid(agentId)) }],
@@ -10721,9 +11001,10 @@ R.Office = (function(){
     /* ayar */
     defaultSettings, settings, saveSettings, agentConfig, chainFor, ready, mode, providerLabel,
     /* brifing */
-    brief, resetBriefs, snapshot, ruleText, nextAction, recentSaid,
+    brief, resetBriefs, snapshot, ruleText, nextAction, recentSaid, compactData,
     /* dogrulama ve kart uretimi (eski koc katmanindan devralindi) */
     validate, validateCards, generateCards, noteContext, parseJson,
+    numbersIn, numberFidelity, scopeBreaches, supportedNumbers,
     /* sohbet */
     ask, briefing, chatOf, pushChat, clearChat,
     /* toplanti — turlu canli oturum */
@@ -17617,7 +17898,8 @@ R.Screens.office = (function(){
 
   function quotaCard(){
     const cfg = O.agentConfig('patron');
-    const q = R.Quota.status(cfg);
+    const q = R.Quota.status(Object.assign({}, cfg, { keyId:0 }));
+    const keyCount = R.LLM.getKeys(cfg.provider).length;
     const sandbox = R.LLM.inSandbox() && cfg.provider !== 'builtin';
 
     if(O.mode() !== 'llm'){
@@ -17650,6 +17932,7 @@ R.Screens.office = (function(){
           <p class="tiny dim mt-8">
             Sınır motorda uygulanıyor: istekler sıraya alınır, kota hiçbir zaman aşılmaz.
             Bir toplantı turu ${Math.round(R.Quota.estimateMs(O.agentConfig('patron'), 6)/1000)} sn sürer.
+            ${when(keyCount > 1, () => html`${keyCount} anahtar bağlı — günlük hak ${keyCount} katı.`)}
           </p>`)}
         ${when(!q.known, () => html`<p class="small muted">Bu sağlayıcı için bilinen bir istek sınırı yok;
           kota yöneticisi araya girmiyor.</p>`)}`,
@@ -17688,6 +17971,13 @@ R.Screens.office = (function(){
     gemini:    { re:/^AIza/,   hint:'Google AI Studio anahtarları "AIza" ile başlar.' },
   };
 
+  /* Bir anahtarin bugunku durumu — coklu anahtarda hangisinin dolduğu görünsün. */
+  function keyUsage(providerId, model, index){
+    const q = R.Quota.status({ provider:providerId, model, keyId:index });
+    if(!q.known) return 'sınır bilinmiyor';
+    return q.usedToday + '/' + q.rpd + (q.full ? ' · doldu' : '');
+  }
+
   function keyWarning(providerId, value){
     const shape = KEY_SHAPES[providerId];
     if(!shape || !value) return null;
@@ -17700,25 +17990,30 @@ R.Screens.office = (function(){
     const p = R.PROVIDERS[providerId];
     const models = p.models || [];
     const current = providerId === st.provider ? st.model : (models[0] ? models[0].id : '');
-    const hasKey = !!R.LLM.getKey(providerId);
+    const keys = R.LLM.maskKeys(providerId);
     const lim = R.Quota.limitsFor({ provider:providerId, model:current });
     const over = R.Quota.getOverride(providerId);
 
     return K.Stack([
       K.Notice({ tone:'info', body:p.note }),
 
-      /* --- 1. anahtar --- */
+      /* --- 1. anahtarlar (birden cok olabilir) --- */
       when(p.needsKey, () => K.Stack([
         K.SectionTitle('1. API anahtarı'),
-        when(hasKey, () => K.Notice({ tone:'ok', title:'Kayıtlı anahtar var:',
-          body:html`${R.LLM.maskKey(providerId)}
-            <div class="mt-8">${K.Button({ label:'Anahtarı sil', size:'sm', tone:'ghost',
-              act:'office-forget', data:{ 'data-provider':providerId } })}</div>` })),
-        K.Field({ label:hasKey ? 'Yeni anahtarla değiştir' : 'Anahtarı yapıştır',
+        when(keys.length, () => html`<div class="stack-xs">${map(keys, (masked, i) => html`
+          <div class="keyrow">
+            <span class="keyrow__mask">${masked}</span>
+            <span class="keyrow__q">${keyUsage(providerId, current, i)}</span>
+            ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'office-forget',
+              data:{ 'data-provider':providerId, 'data-index':i } })}
+          </div>`)}</div>`),
+        K.Field({ label:keys.length ? 'Başka bir anahtar ekle' : 'Anahtarı yapıştır',
           hint:p.keyHint,
           input:K.Input({ id:'llm-key', type:'password', placeholder:p.keyHint,
             aria:'API anahtarı', change:'office-key' }) }),
         html`<div id="llm-key-warn"></div>`,
+        when(keys.length, () => html`<p class="tiny dim">Kota her anahtar için ayrı sayılır:
+          ikinci anahtar günlük hakkı ikiye katlar. Motor kotası müsait olanı seçer.</p>`),
         html`<p class="tiny dim">Anahtar yalnız bu tarayıcıda durur; yedeğe girmez, buluta gitmez,
           modele gönderilmez. ${when(p.keyUrl, () => html`Ücretsiz anahtar:
           <a href="${p.keyUrl}" target="_blank" rel="noopener">${p.keyUrl.replace(/^https:\/\//, '')}</a>`)}</p>`,
@@ -17728,8 +18023,10 @@ R.Screens.office = (function(){
       when(p.editableEndpoint, () => K.Stack([
         K.SectionTitle('Uç adresi'),
         K.Field({ label:'OpenAI uyumlu /chat/completions',
-          input:K.Input({ id:'llm-endpoint', value:st.endpoint || '',
-            placeholder:'http://localhost:11434/v1/chat/completions' }) }),
+          hint:p.endpoint ? 'varsayılan: ' + p.endpoint : null,
+          input:K.Input({ id:'llm-endpoint',
+            value:(providerId === st.provider ? st.endpoint : '') || p.endpoint || '',
+            placeholder:p.endpoint || 'http://localhost:11434/v1/chat/completions' }) }),
       ], 'sm')),
 
       /* --- 3. model --- */
@@ -17827,7 +18124,7 @@ R.Screens.office = (function(){
   /* Kaydetmeden once eksigi soyler; sessizce kabul edip sonra patlamaz. */
   function validate(cfg){
     const p = R.PROVIDERS[cfg.provider];
-    if(p.needsKey && !cfg.key && !R.LLM.getKey(cfg.provider)){
+    if(p.needsKey && !cfg.key && !R.LLM.getKeys(cfg.provider).length){
       return 'Bu sağlayıcı için API anahtarı gerekiyor. Ücretsiz anahtarı bağlantıdan alabilirsin.';
     }
     if(p.editableEndpoint && !cfg.endpoint){
@@ -17838,7 +18135,8 @@ R.Screens.office = (function(){
   }
 
   function applyForm(cfg){
-    if(cfg.key) R.LLM.setKey(cfg.provider, cfg.key);
+    /* Yeni anahtar eskisinin yerine gecmez, havuza EKLENIR. */
+    if(cfg.key) R.LLM.addKey(cfg.provider, cfg.key);
     R.Quota.setOverride(cfg.provider, { rpm:cfg.rpm, rpd:cfg.rpd });
   }
 
@@ -17903,7 +18201,7 @@ R.Screens.office = (function(){
     },
 
     async 'office-forget'(el){
-      R.LLM.setKey(el.dataset.provider, '');
+      R.LLM.removeKeyAt(el.dataset.provider, Number(el.dataset.index) || 0);
       UI.toast('Anahtar silindi');
       const sel = document.getElementById('llm-provider');
       const form = document.getElementById('llm-form');
@@ -18608,8 +18906,26 @@ R.Screens.meeting = (function(){
         });
       }catch(err){
         stopWait();
-        if(err && err.code === 'cancelled') return;
-        UI.toast(R.LLM.errorText(err && err.code));
+        const code = err && err.code;
+        if(code === 'cancelled') return;
+
+        /* Baglanti ya da sunucu sorunuysa toplanti bitmez, DURAKLAR:
+           konusulanlar duruyor, baglanti gelince kaldigi yerden devam eder. */
+        if(R.LLM.resumable(code)){
+          running = false;
+          setPending('');
+          UI.toast(R.LLM.errorText(code));
+          await R.App.render();
+          R.LLM.onceOnline(() => {
+            if(session && !running && !stopAsked){
+              UI.toast('Bağlantı geldi — toplantı kaldığı yerden devam ediyor');
+              handle['meet-resume']();
+            }
+          });
+          return;
+        }
+
+        UI.toast(R.LLM.errorText(code));
         running = false;
         setPending('');
         await R.App.render();

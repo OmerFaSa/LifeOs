@@ -456,6 +456,45 @@ R.Office = (function(){
     };
   }
 
+  /* ---------- brifing sikistirma ----------
+     Brifing JSON'u oldugu gibi gidiyordu. Ucretsiz modellerin dakikalik JETON
+     siniri (TPM) istek sinirindan once dolar; ayrica uzun istem yaniti
+     yavaslatir ve modelin dikkatini dagitir. Budama SIRALIDIR: once en
+     ayrintili diziler kirpilir, ozet alanlara hic dokunulmaz. */
+
+  const BRIEF_BUDGET = 2600;      // karakter — yaklasik 900 jeton
+
+  /* Once kirpilacak diziler: ayrintili, tekrarli ve yorum icin gereksiz olanlar. */
+  const TRIM_ORDER = [
+    ['son7Gun', 3], ['dersler', 4], ['netMatrisi', 4], ['riskliKonular', 2],
+    ['riskSiralamasi', 3], ['analizBorcu', 3], ['hataDagilimi', 3],
+  ];
+
+  function compactData(data, budget){
+    const cap = budget || BRIEF_BUDGET;
+    let out = JSON.parse(JSON.stringify(data || {}));
+    const size = () => JSON.stringify(out).length;
+    if(size() <= cap) return out;
+
+    for(const [field, keep] of TRIM_ORDER){
+      const trim = node => {
+        if(!node || typeof node !== 'object') return;
+        Object.keys(node).forEach(k => {
+          if(k === field && Array.isArray(node[k]) && node[k].length > keep){
+            const dropped = node[k].length - keep;
+            node[k] = node[k].slice(0, keep);
+            node[k].push('… ' + dropped + ' kayıt daha (kısaltıldı)');
+          }else if(node[k] && typeof node[k] === 'object'){
+            trim(node[k]);
+          }
+        });
+      };
+      trim(out);
+      if(size() <= cap) return out;
+    }
+    return out;
+  }
+
   const briefCache = new Map();
   /* Ayni cizimde bes ajan da brifing ister; hesap bir kez yapilir. */
   function brief(agentId){
@@ -544,13 +583,96 @@ R.Office = (function(){
      Gardlar veri katmanindan gelir (R.PROMPTS.forbidden); when() kural
      motorunu alir, yani yasak yalnizca veri onu destekliyorsa uygulanir. */
 
-  function validate(text){
+  /* Metindeki sayilari cikarir. Turkce yazimi tanir:
+     "19,50" ondalik, "1.500" binlik, "%78" yuzde. */
+  function numbersIn(text){
+    const out = [];
+    const re = /%?\s?\d{1,3}(?:\.\d{3})+(?:,\d+)?|%?\s?\d+(?:[.,]\d+)?/g;
+    const raw = String(text || '');
+    let m;
+    while((m = re.exec(raw)) !== null){
+      let t = m[0].replace(/%/g, '').trim();
+      if(/^\d{1,3}(?:\.\d{3})+/.test(t)) t = t.replace(/\./g, '');   // binlik ayraci
+      const n = Number(t.replace(',', '.'));
+      if(Number.isFinite(n)) out.push({ raw:m[0].trim(), value:n });
+    }
+    return out;
+  }
+
+  /* Brifingdeki butun sayilar — hem ham veriden hem bulgu metinlerinden.
+     Bulgu metni sayilari bicimlenmis hâlde tasidigi icin ikisi de gerekir. */
+  function supportedNumbers(brief){
+    const set = [];
+    const walk = v => {
+      if(v == null) return;
+      if(typeof v === 'number'){ if(Number.isFinite(v)) set.push(v); return; }
+      if(typeof v === 'string'){ numbersIn(v).forEach(x => set.push(x.value)); return; }
+      if(Array.isArray(v)){ v.forEach(walk); return; }
+      if(typeof v === 'object'){ Object.keys(v).forEach(k => walk(v[k])); }
+    };
+    walk(brief && brief.data);
+    (brief && brief.findings || []).forEach(f => walk(f.text));
+    if(brief && brief.headline) walk(brief.headline);
+    if(brief && brief.metrics) walk(brief.metrics);
+    return set;
+  }
+
+  /* Sayi sadakati: ajanin yazdigi her sayi brifingde var mi?
+
+     Kucuk tam sayilar (≤12) elenir — "uc gun", "iki blok", "bir konu" gibi
+     dogal dil sayilaridir ve brifingde karsiligi olmasi gerekmez. Yil da
+     elenir. Kalan bir sayi brifingde yoksa model onu UYDURMUS demektir;
+     bu, kural motoru otoritesinin en dogrudan ihlalidir. */
+  function numberFidelity(text, brief){
+    if(!brief) return [];
+    const supported = supportedNumbers(brief);
+    const near = n => supported.some(s => Math.abs(s - n) < 0.051);
+    const bad = [];
+    numbersIn(text).forEach(x => {
+      const n = x.value;
+      if(Number.isInteger(n) && n <= 12) return;          // dogal dil sayisi
+      if(n >= 1900 && n <= 2100 && Number.isInteger(n)) return;  // yil
+      if(near(n)) return;
+      if(bad.indexOf(x.raw) < 0) bad.push(x.raw);
+    });
+    return bad;
+  }
+
+  /* Alan ihlali: ajan kendi masasinin disina cikti mi?
+     Gardlar data/agents.js icinde ajanin yaninda durur. */
+  function scopeBreaches(text, agent){
+    if(!agent || !agent.taboo) return [];
+    return agent.taboo.filter(t => t.re.test(text)).map(t => t.why);
+  }
+
+  /* ---------- kural motoru dogrulamasi ----------
+     Model ne yazarsa yazsin cikti uc katmanda denetlenir:
+       1) ev kurallari  — garanti, kaynak degistirme, uykudan feda, tibbi tavsiye
+       2) sayi sadakati — brifingde olmayan sayi
+       3) alan ihlali   — uzmanin kendi masasinin disina cikmasi
+     Gardlar veri katmanindan gelir; when() kural motorunu alir, yani yasak
+     yalnizca veri onu destekliyorsa uygulanir. */
+
+  function validate(text, opts){
+    const o = opts || {};
     const warnings = [];
+
     (R.PROMPTS.forbidden || []).forEach(rule => {
       try{ if(rule.re.test(text) && rule.when(C)) warnings.push(rule.why); }
       catch(e){ /* gard hesaplanamadiysa uyari uretme */ }
     });
-    return { text, warnings };
+
+    const agent = o.agentId ? R.AGENT_BY_ID[o.agentId] : null;
+    scopeBreaches(text, agent).forEach(w => warnings.push(w));
+
+    if(o.brief){
+      const made = numberFidelity(text, o.brief);
+      if(made.length){
+        warnings.push('Bu sayılar raporda yok: ' + made.join(', ')
+          + '. Kural motorunun hesabına bak, metne değil.');
+      }
+    }
+    return { text, warnings, unsupported:o.brief ? numberFidelity(text, o.brief) : [] };
   }
 
   /* ---------- nottan kart uretimi ----------
@@ -662,7 +784,12 @@ R.Office = (function(){
         signal:o.signal,
         onText:o.onText,
       });
-      const checked = validate(res.text);
+      /* Cikti kendi brifingine karsi denetlenir: uydurulmus sayi ve alan
+         ihlali burada yakalanir. Patron'un brifingi dort raporu tasidigi
+         icin onun sayilari da kapsanir. */
+      let ownBrief = null;
+      try{ ownBrief = brief(agentId); }catch(e){}
+      const checked = validate(res.text, { agentId, brief:ownBrief });
       return { agent:agentId, name:agent.name, role:agent.role, text:checked.text,
         warnings:checked.warnings, mode:'llm', model:res.model, provider:res.provider,
         fellBack:!!res.fellBack, ms:res.ms };
@@ -702,7 +829,7 @@ R.Office = (function(){
     if(!q) throw Object.assign(new Error('boş soru'), { code:'empty' });
 
     resetBriefs();
-    const data = R.Tools.sanitize(brief(agentId).data);
+    const data = compactData(R.Tools.sanitize(brief(agentId).data));
     const history = chatOf(agentId).slice(-4)
       .map(m => ({ role:m.role === 'user' ? 'user' : 'assistant', text:m.text }));
 
@@ -717,7 +844,7 @@ R.Office = (function(){
   async function briefing(agentId, opts){
     const agent = R.AGENT_BY_ID[agentId];
     resetBriefs();
-    const data = R.Tools.sanitize(brief(agentId).data);
+    const data = compactData(R.Tools.sanitize(brief(agentId).data));
     return speak(agentId, 'briefing', {
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.briefing(agent, data) }],
       ctx:{},
@@ -886,7 +1013,7 @@ R.Office = (function(){
     const agent = R.AGENT_BY_ID[agentId];
 
     resetBriefs();
-    const data = R.Tools.sanitize(brief(agentId).data);
+    const data = compactData(R.Tools.sanitize(brief(agentId).data));
     const turn = await speak(agentId, 'turn', {
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.turn(agent,
         { topic:session.topic }, data, saidSoFar(session), def, recentSaid(agentId)) }],
@@ -1177,9 +1304,10 @@ R.Office = (function(){
     /* ayar */
     defaultSettings, settings, saveSettings, agentConfig, chainFor, ready, mode, providerLabel,
     /* brifing */
-    brief, resetBriefs, snapshot, ruleText, nextAction, recentSaid,
+    brief, resetBriefs, snapshot, ruleText, nextAction, recentSaid, compactData,
     /* dogrulama ve kart uretimi (eski koc katmanindan devralindi) */
     validate, validateCards, generateCards, noteContext, parseJson,
+    numbersIn, numberFidelity, scopeBreaches, supportedNumbers,
     /* sohbet */
     ask, briefing, chatOf, pushChat, clearChat,
     /* toplanti — turlu canli oturum */

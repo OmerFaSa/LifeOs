@@ -114,6 +114,44 @@ R.PROVIDERS = {
     ],
   },
 
+  /* Bilgisayarda calisan model. Kotasi, ucreti ve internet ihtiyaci YOKTUR;
+     ucretsiz katmanlarin butun sinirlarindan kacmanin tek yolu budur. */
+  ollama: {
+    id:'ollama',
+    label:'Ollama (kendi bilgisayarın)',
+    kind:'openai',
+    free:true,
+    needsKey:false,
+    endpoint:'http://localhost:11434/v1/chat/completions',
+    editableEndpoint:true,
+    keyUrl:'https://ollama.com/download',
+    note:'Modeli kendi bilgisayarında çalıştırır: kota yok, ücret yok, internet gerekmez. '
+       + 'Tarayıcıdan erişebilmek için Ollama’yı OLLAMA_ORIGINS="*" ile başlatman gerekir. '
+       + 'Türkçe için 7B ve üstü bir model seç.',
+    checked:'2026-09 · ollama.com/blog/openai-compatibility',
+    models:[
+      { id:'llama3.1:8b',   label:'Llama 3.1 8B',   free:true, strength:'denge' },
+      { id:'qwen2.5:7b',    label:'Qwen 2.5 7B',    free:true, strength:'hız' },
+      { id:'gemma2:9b',     label:'Gemma 2 9B',     free:true, strength:'denge' },
+      { id:'mistral-nemo',  label:'Mistral Nemo',   free:true, strength:'analiz' },
+    ],
+  },
+
+  lmstudio: {
+    id:'lmstudio',
+    label:'LM Studio (kendi bilgisayarın)',
+    kind:'openai',
+    free:true,
+    needsKey:false,
+    endpoint:'http://localhost:1234/v1/chat/completions',
+    editableEndpoint:true,
+    keyUrl:'https://lmstudio.ai',
+    note:'LM Studio’da yerel sunucuyu başlat ve CORS’u aç. Kota yok, ücret yok. '
+       + 'Model kimliğini LM Studio’nun sunucu ekranından kopyala.',
+    checked:'2026-09 · lmstudio.ai/docs/local-server',
+    models:[],
+  },
+
   /* Kendi sunucusunu ya da listede olmayan bir saglayiciyi kullanmak icin.
      OpenAI uyumlu /chat/completions bekler. Sinir bilinmedigi icin
      kota yoneticisi araya girmez; kullanici kendi sinirini ayarlardan yazar. */
@@ -133,7 +171,7 @@ R.PROVIDERS = {
 };
 
 /* Sirali liste — ayar ekrani bu sirayla gosterir. */
-R.PROVIDER_ORDER = ['builtin', 'openrouter', 'groq', 'gemini', 'custom'];
+R.PROVIDER_ORDER = ['builtin', 'openrouter', 'groq', 'gemini', 'ollama', 'lmstudio', 'custom'];
 
 /* Ajan basina onerilen model gucu: kural motoru zaten hesabi yapar,
    modelden beklenen yalnizca kisa ve net Turkce yorumdur. */

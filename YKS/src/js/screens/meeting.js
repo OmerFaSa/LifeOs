@@ -346,8 +346,26 @@ R.Screens.meeting = (function(){
         });
       }catch(err){
         stopWait();
-        if(err && err.code === 'cancelled') return;
-        UI.toast(R.LLM.errorText(err && err.code));
+        const code = err && err.code;
+        if(code === 'cancelled') return;
+
+        /* Baglanti ya da sunucu sorunuysa toplanti bitmez, DURAKLAR:
+           konusulanlar duruyor, baglanti gelince kaldigi yerden devam eder. */
+        if(R.LLM.resumable(code)){
+          running = false;
+          setPending('');
+          UI.toast(R.LLM.errorText(code));
+          await R.App.render();
+          R.LLM.onceOnline(() => {
+            if(session && !running && !stopAsked){
+              UI.toast('Bağlantı geldi — toplantı kaldığı yerden devam ediyor');
+              handle['meet-resume']();
+            }
+          });
+          return;
+        }
+
+        UI.toast(R.LLM.errorText(code));
         running = false;
         setPending('');
         await R.App.render();

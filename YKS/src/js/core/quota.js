@@ -70,7 +70,12 @@ R.Quota = (function(){
 
   /* ---------- sinirlarin okunmasi ---------- */
 
-  function key(cfg){ return (cfg && cfg.provider) + '|' + (cfg && cfg.model); }
+  /* Sayac anahtari saglayici + model + ANAHTAR kimligidir: ayni saglayiciya
+     iki API anahtari verildiginde kota ayri sayilir ve gunluk hak katlanir. */
+  function key(cfg){
+    const k = (cfg && cfg.keyId != null) ? '#' + cfg.keyId : '';
+    return (cfg && cfg.provider) + '|' + (cfg && cfg.model) + k;
+  }
 
   /* ---------- kullanici duzeltmesi ----------
      Gunluk hak hesaba bagli olabilir (OpenRouter'da kredi yuklediysen 50 yerine

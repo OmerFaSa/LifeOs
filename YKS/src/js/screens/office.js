@@ -191,7 +191,8 @@ R.Screens.office = (function(){
 
   function quotaCard(){
     const cfg = O.agentConfig('patron');
-    const q = R.Quota.status(cfg);
+    const q = R.Quota.status(Object.assign({}, cfg, { keyId:0 }));
+    const keyCount = R.LLM.getKeys(cfg.provider).length;
     const sandbox = R.LLM.inSandbox() && cfg.provider !== 'builtin';
 
     if(O.mode() !== 'llm'){
@@ -224,6 +225,7 @@ R.Screens.office = (function(){
           <p class="tiny dim mt-8">
             Sınır motorda uygulanıyor: istekler sıraya alınır, kota hiçbir zaman aşılmaz.
             Bir toplantı turu ${Math.round(R.Quota.estimateMs(O.agentConfig('patron'), 6)/1000)} sn sürer.
+            ${when(keyCount > 1, () => html`${keyCount} anahtar bağlı — günlük hak ${keyCount} katı.`)}
           </p>`)}
         ${when(!q.known, () => html`<p class="small muted">Bu sağlayıcı için bilinen bir istek sınırı yok;
           kota yöneticisi araya girmiyor.</p>`)}`,
@@ -262,6 +264,13 @@ R.Screens.office = (function(){
     gemini:    { re:/^AIza/,   hint:'Google AI Studio anahtarları "AIza" ile başlar.' },
   };
 
+  /* Bir anahtarin bugunku durumu — coklu anahtarda hangisinin dolduğu görünsün. */
+  function keyUsage(providerId, model, index){
+    const q = R.Quota.status({ provider:providerId, model, keyId:index });
+    if(!q.known) return 'sınır bilinmiyor';
+    return q.usedToday + '/' + q.rpd + (q.full ? ' · doldu' : '');
+  }
+
   function keyWarning(providerId, value){
     const shape = KEY_SHAPES[providerId];
     if(!shape || !value) return null;
@@ -274,25 +283,30 @@ R.Screens.office = (function(){
     const p = R.PROVIDERS[providerId];
     const models = p.models || [];
     const current = providerId === st.provider ? st.model : (models[0] ? models[0].id : '');
-    const hasKey = !!R.LLM.getKey(providerId);
+    const keys = R.LLM.maskKeys(providerId);
     const lim = R.Quota.limitsFor({ provider:providerId, model:current });
     const over = R.Quota.getOverride(providerId);
 
     return K.Stack([
       K.Notice({ tone:'info', body:p.note }),
 
-      /* --- 1. anahtar --- */
+      /* --- 1. anahtarlar (birden cok olabilir) --- */
       when(p.needsKey, () => K.Stack([
         K.SectionTitle('1. API anahtarı'),
-        when(hasKey, () => K.Notice({ tone:'ok', title:'Kayıtlı anahtar var:',
-          body:html`${R.LLM.maskKey(providerId)}
-            <div class="mt-8">${K.Button({ label:'Anahtarı sil', size:'sm', tone:'ghost',
-              act:'office-forget', data:{ 'data-provider':providerId } })}</div>` })),
-        K.Field({ label:hasKey ? 'Yeni anahtarla değiştir' : 'Anahtarı yapıştır',
+        when(keys.length, () => html`<div class="stack-xs">${map(keys, (masked, i) => html`
+          <div class="keyrow">
+            <span class="keyrow__mask">${masked}</span>
+            <span class="keyrow__q">${keyUsage(providerId, current, i)}</span>
+            ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'office-forget',
+              data:{ 'data-provider':providerId, 'data-index':i } })}
+          </div>`)}</div>`),
+        K.Field({ label:keys.length ? 'Başka bir anahtar ekle' : 'Anahtarı yapıştır',
           hint:p.keyHint,
           input:K.Input({ id:'llm-key', type:'password', placeholder:p.keyHint,
             aria:'API anahtarı', change:'office-key' }) }),
         html`<div id="llm-key-warn"></div>`,
+        when(keys.length, () => html`<p class="tiny dim">Kota her anahtar için ayrı sayılır:
+          ikinci anahtar günlük hakkı ikiye katlar. Motor kotası müsait olanı seçer.</p>`),
         html`<p class="tiny dim">Anahtar yalnız bu tarayıcıda durur; yedeğe girmez, buluta gitmez,
           modele gönderilmez. ${when(p.keyUrl, () => html`Ücretsiz anahtar:
           <a href="${p.keyUrl}" target="_blank" rel="noopener">${p.keyUrl.replace(/^https:\/\//, '')}</a>`)}</p>`,
@@ -302,8 +316,10 @@ R.Screens.office = (function(){
       when(p.editableEndpoint, () => K.Stack([
         K.SectionTitle('Uç adresi'),
         K.Field({ label:'OpenAI uyumlu /chat/completions',
-          input:K.Input({ id:'llm-endpoint', value:st.endpoint || '',
-            placeholder:'http://localhost:11434/v1/chat/completions' }) }),
+          hint:p.endpoint ? 'varsayılan: ' + p.endpoint : null,
+          input:K.Input({ id:'llm-endpoint',
+            value:(providerId === st.provider ? st.endpoint : '') || p.endpoint || '',
+            placeholder:p.endpoint || 'http://localhost:11434/v1/chat/completions' }) }),
       ], 'sm')),
 
       /* --- 3. model --- */
@@ -401,7 +417,7 @@ R.Screens.office = (function(){
   /* Kaydetmeden once eksigi soyler; sessizce kabul edip sonra patlamaz. */
   function validate(cfg){
     const p = R.PROVIDERS[cfg.provider];
-    if(p.needsKey && !cfg.key && !R.LLM.getKey(cfg.provider)){
+    if(p.needsKey && !cfg.key && !R.LLM.getKeys(cfg.provider).length){
       return 'Bu sağlayıcı için API anahtarı gerekiyor. Ücretsiz anahtarı bağlantıdan alabilirsin.';
     }
     if(p.editableEndpoint && !cfg.endpoint){
@@ -412,7 +428,8 @@ R.Screens.office = (function(){
   }
 
   function applyForm(cfg){
-    if(cfg.key) R.LLM.setKey(cfg.provider, cfg.key);
+    /* Yeni anahtar eskisinin yerine gecmez, havuza EKLENIR. */
+    if(cfg.key) R.LLM.addKey(cfg.provider, cfg.key);
     R.Quota.setOverride(cfg.provider, { rpm:cfg.rpm, rpd:cfg.rpd });
   }
 
@@ -477,7 +494,7 @@ R.Screens.office = (function(){
     },
 
     async 'office-forget'(el){
-      R.LLM.setKey(el.dataset.provider, '');
+      R.LLM.removeKeyAt(el.dataset.provider, Number(el.dataset.index) || 0);
       UI.toast('Anahtar silindi');
       const sel = document.getElementById('llm-provider');
       const form = document.getElementById('llm-form');

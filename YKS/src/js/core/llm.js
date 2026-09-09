@@ -24,25 +24,69 @@ R.LLM = (function(){
     try{ return JSON.parse(localStorage.getItem(KEY_STORE) || '{}'); }
     catch(e){ return {}; }
   }
-  function getKey(providerId){
-    const k = readKeys()[providerId];
-    return typeof k === 'string' ? k.trim() : '';
+
+  /* Bir saglayiciya BIRDEN COK anahtar verilebilir. Kota anahtar basina
+     sayildigi icin ikinci anahtar gunluk hakki ikiye katlar — ucretsiz
+     katmanda en ucuz buyume yolu budur.
+     Eski bicim (tek dize) okunmaya devam eder. */
+  function getKeys(providerId){
+    const v = readKeys()[providerId];
+    const list = Array.isArray(v) ? v : (typeof v === 'string' ? [v] : []);
+    return list.map(k => String(k || '').trim()).filter(Boolean);
   }
+  function getKey(providerId){ return getKeys(providerId)[0] || ''; }
+
+  /* value: dize (tek anahtar) ya da dizi. Bos deger anahtarlari siler. */
   function setKey(providerId, value){
     const all = readKeys();
-    const v = String(value || '').trim();
-    if(v) all[providerId] = v; else delete all[providerId];
+    const list = (Array.isArray(value) ? value : [value])
+      .map(k => String(k || '').trim()).filter(Boolean);
+    /* Ayni anahtar iki kez sayilmasin: kota anahtar kimligine bagli. */
+    const uniq = list.filter((k, i) => list.indexOf(k) === i);
+    if(uniq.length) all[providerId] = uniq; else delete all[providerId];
     try{ localStorage.setItem(KEY_STORE, JSON.stringify(all)); return true; }
     catch(e){ return false; }
+  }
+
+  function addKey(providerId, value){
+    const v = String(value || '').trim();
+    if(!v) return getKeys(providerId);
+    const list = getKeys(providerId);
+    if(list.indexOf(v) < 0) list.push(v);
+    setKey(providerId, list);
+    return list;
+  }
+  function removeKeyAt(providerId, index){
+    const list = getKeys(providerId);
+    list.splice(index, 1);
+    setKey(providerId, list);
+    return list;
   }
   function clearKeys(){
     try{ localStorage.removeItem(KEY_STORE); }catch(e){}
   }
-  /* Ayar ekraninda gosterilecek maskeli hâl — tam anahtar hicbir yerde cizilmez. */
-  function maskKey(providerId){
-    const k = getKey(providerId);
+
+  function mask(k){
     if(!k) return '';
     return k.length <= 10 ? '••••' : k.slice(0, 6) + '…' + k.slice(-4);
+  }
+  /* Ayar ekraninda gosterilecek maskeli hâl — tam anahtar hicbir yerde cizilmez. */
+  function maskKey(providerId){ return mask(getKey(providerId)); }
+  function maskKeys(providerId){ return getKeys(providerId).map(mask); }
+
+  /* Kotasi musait olan anahtari secer; hepsi doluysa en az bekleyeni.
+     Donen index kota sayacinin anahtarina girer. */
+  function pickKey(cfg){
+    const keys = getKeys(cfg.provider);
+    if(!keys.length) return null;
+    let best = null;
+    for(let i = 0; i < keys.length; i++){
+      const state = R.Quota.check(Object.assign({}, cfg, { keyId:i }));
+      if(state.ok) return { key:keys[i], index:i, waitMs:0 };
+      if(state.reason === 'daily') continue;              // bu anahtarin gunu bitti
+      if(!best || state.waitMs < best.waitMs) best = { key:keys[i], index:i, waitMs:state.waitMs };
+    }
+    return best;   // hepsinin gunu bittiyse null → daily_quota
   }
 
   /* ---------- yerlesik yetenek ---------- */
@@ -94,6 +138,12 @@ R.LLM = (function(){
     return 'bad_request';
   }
 
+  /* Tarayici cevrimdisi oldugunu biliyorsa istek hic gonderilmez: kota
+     harcanmaz, kullaniciya dogru sebep soylenir, baglanti gelince devam edilir. */
+  function offline(){
+    return typeof navigator !== 'undefined' && navigator.onLine === false;
+  }
+
   const ERRORS = {
     no_provider:'Model sağlayıcı seçilmedi. Ofis → Ayarlar bölümünden bir sağlayıcı seç.',
     no_key:'Bu sağlayıcı için API anahtarı girilmedi.',
@@ -110,6 +160,7 @@ R.LLM = (function(){
     cancelled:'İptal edildi.',
     empty:'Model boş yanıt döndürdü. Tekrar dene.',
     unavailable:'Yerleşik model bu ortamda kapalı. Ofis → Ayarlar’dan ücretsiz bir sağlayıcı bağla.',
+    offline:'Bağlantı yok. Çevrimiçi olunca kaldığın yerden devam edersin; kural motoru bu sırada çalışmayı sürdürüyor.',
     daily_quota:'Bu modelin günlük ücretsiz hakkı doldu. Yarın sıfırlanır; o zamana kadar başka bir sağlayıcı kullanabilirsin.',
     rate_wait:'Dakikalık sıra çok uzun. Birkaç dakika sonra tekrar dene ya da dakikalık sınırı daha yüksek bir sağlayıcı seç.',
     sandboxed:'Bu ortam dış servislere bağlanmaya izin vermiyor. Uygulama Claude içinde yayımlanmış bir sayfa olarak '
@@ -120,7 +171,18 @@ R.LLM = (function(){
 
   /* Yeniden denenebilir hatalar: yedek modele gecmek anlamli olanlar. */
   const RETRYABLE = ['rate_limited', 'server', 'bad_model', 'timeout', 'empty'];
+  /* Baglanti gelince kaldigi yerden devam edilebilecek hatalar. */
+  const RESUMABLE = ['offline', 'network', 'server', 'timeout'];
   function retryable(code){ return RETRYABLE.indexOf(code) >= 0; }
+  function resumable(code){ return RESUMABLE.indexOf(code) >= 0; }
+
+  /* Baglanti geri gelince haber verir; toplanti kaldigi yerden devam eder. */
+  function onceOnline(fn){
+    if(!offline()){ fn(); return function(){}; }
+    const h = function(){ window.removeEventListener('online', h); fn(); };
+    window.addEventListener('online', h);
+    return function(){ window.removeEventListener('online', h); };
+  }
 
   /* ---------- ortak yardimcilar ---------- */
 
@@ -246,7 +308,7 @@ R.LLM = (function(){
       guard.done();
       /* Saglayici bizim saydigimizdan daha siki davraniyor: pencereyi kapat. */
       if(code === 'rate_limited'){
-        R.Quota.penalize({ provider:provider.id, model:req.model }, retryAfterSeconds(response));
+        R.Quota.penalize({ provider:provider.id, model:req.model, keyId:req.keyId }, retryAfterSeconds(response));
       }
       throw fail(code, detail);
     }
@@ -328,7 +390,7 @@ R.LLM = (function(){
       const code = codeForStatus(response.status);
       guard.done();
       if(code === 'rate_limited'){
-        R.Quota.penalize({ provider:provider.id, model:req.model }, retryAfterSeconds(response));
+        R.Quota.penalize({ provider:provider.id, model:req.model, keyId:req.keyId }, retryAfterSeconds(response));
       }
       throw fail(code, detail);
     }
@@ -376,15 +438,29 @@ R.LLM = (function(){
     if(!provider) throw fail('no_provider');
     if(!cfg.model && provider.kind !== 'builtin') throw fail('no_model');
 
+    /* Cevrimdisiyken hic deneme: kota harcanmaz, sebep dogru soylenir. */
+    if(provider.kind !== 'builtin' && offline()) throw fail('offline');
+
+    /* Cok anahtarli havuz: kotasi musait olan anahtar secilir. */
+    let picked = null;
+    if(provider.needsKey){
+      if(!getKeys(provider.id).length) throw fail('no_key');
+      picked = pickKey(cfg);
+      if(!picked) throw Object.assign(new Error('gunluk kota doldu'), { code:'daily_quota' });
+    }
+
+    const quotaCfg = picked ? Object.assign({}, cfg, { keyId:picked.index }) : cfg;
+
     const payload = Object.assign({}, req, {
       model:cfg.model,
       endpoint:cfg.endpoint,
-      key:provider.needsKey ? getKey(provider.id) : null,
+      key:picked ? picked.key : null,
+      keyId:picked ? picked.index : null,
     });
 
     /* Sira: kota yoneticisi izin verene kadar bekle. Boylece dakikalik
        sinir HIC asilmaz; gun dolduysa beklemek yerine acikca soylenir. */
-    const slot = await R.Quota.acquire(cfg, { signal:req && req.signal, onWait:req && req.onWait });
+    const slot = await R.Quota.acquire(quotaCfg, { signal:req && req.signal, onWait:req && req.onWait });
 
     const started = Date.now();
     let text;
@@ -394,14 +470,16 @@ R.LLM = (function(){
       else text = await callOpenAI(payload, provider);
     }catch(err){
       /* Istek hic gonderilemediyse gunluk hakki tuketmis sayma. */
-      if(err && (err.code === 'cancelled' || err.code === 'sandboxed' || err.code === 'no_key')){
-        R.Quota.release(cfg);
+      if(err && (err.code === 'cancelled' || err.code === 'sandboxed'
+              || err.code === 'no_key' || err.code === 'offline')){
+        R.Quota.release(quotaCfg);
       }
       throw err;
     }
 
     return {
       text, provider:provider.id, model:cfg.model || 'yerleşik',
+      keyIndex:picked ? picked.index : null,
       ms:Date.now() - started, waited:slot.waited || 0,
       usedToday:slot.usedToday, rpd:slot.rpd,
     };
@@ -458,15 +536,15 @@ R.LLM = (function(){
     const provider = R.PROVIDERS[cfg && cfg.provider];
     if(!provider) return false;
     if(provider.kind === 'builtin') return builtinReady();
-    if(provider.needsKey && !getKey(provider.id)) return false;
+    if(provider.needsKey && !getKeys(provider.id).length) return false;
     if(provider.editableEndpoint && !(cfg.endpoint || '').trim()) return false;
     return !!cfg.model;
   }
 
   return {
     initBuiltin, builtinReady,
-    getKey, setKey, clearKeys, maskKey,
+    getKey, getKeys, setKey, addKey, removeKeyAt, clearKeys, maskKey, maskKeys, pickKey,
     chat, complete, test, ready,
-    errorText, retryable, inSandbox, KEY_STORE,
+    errorText, retryable, resumable, offline, onceOnline, inSandbox, KEY_STORE,
   };
 })();
