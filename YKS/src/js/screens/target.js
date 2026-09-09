@@ -213,7 +213,7 @@ R.Screens.target = (function(){
         prefsCard(),
       ])),
 
-      K.Span(2, raw(UI.rail(['rank', 'tiers', 'net-matrix', 'obp', 'preferences', 'certainty']))),
+      K.Span(12, raw(UI.rail(['rank', 'tiers', 'net-matrix', 'obp', 'preferences', 'certainty']))),
 
       K.Span(4, K.Stack([
         estimateCard(),

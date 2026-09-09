@@ -269,19 +269,32 @@ R.UI = (function(){
   }
 
   /* Bolum kenarinda duran kisa aciklama kartlari — uzun metin yerine. */
+  /* Ekran acıklamaları. Eskiden her ekranın altında acık duran bir metin
+     duvariydi ve sayfanin sonunu bozuyordu; artik katlanir bir panel:
+     varsayilan kapali, tek dokunusla acilir, tercih oturumda hatirlanir. */
   function rail(keys, title){
-    const cards = keys.map(k => {
+    const list = keys.filter(k => R.HINTS[k]);
+    if(!list.length) return '';
+    const open = !!(R.S.ui && R.S.ui.railOpen);
+    const label = title === false ? 'Bu ekran nasıl okunur' : (title || 'Bu ekran nasıl okunur');
+
+    const cards = list.map(k => {
       const h = R.HINTS[k];
-      if(!h) return '';
       return '<button class="railcard" data-act="hint" data-hint="'+k+'">'
         + '<span class="railcard__t">'+U.esc(h.t)+'</span>'
         + '<span class="railcard__b">'+U.esc(h.b)+'</span>'
         + '</button>';
     }).join('');
-    if(!cards) return '';
-    return '<div class="rail">'
-      + (title === false ? '' : '<div class="rail__head">'+U.esc(title || 'Bu ekran nasıl okunur')+'</div>')
-      + cards + '</div>';
+
+    return '<section class="rail'+(open ? ' is-open' : '')+'">'
+      + '<button class="rail__toggle" data-act="rail-toggle" aria-expanded="'+(open ? 'true' : 'false')+'">'
+      +   icon('guide', 'rail__icon')
+      +   '<span class="rail__label">'+U.esc(label)+'</span>'
+      +   '<span class="rail__count">'+list.length+'</span>'
+      +   '<span class="rail__chev">'+icon('down')+'</span>'
+      + '</button>'
+      + '<div class="rail__body"'+(open ? '' : ' hidden')+'>'+cards+'</div>'
+      + '</section>';
   }
 
   function openHint(key, anchorEl){

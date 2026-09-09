@@ -298,6 +298,16 @@ R.App = (function(){
       UI._lastHint = el.dataset.hint;
       UI.openHint(el.dataset.hint, el);
     },
+    /* Ekran acıklamaları paneli — kapali baslar, tercih oturumda kalir. */
+    async 'rail-toggle'(el){
+      S.ui.railOpen = !S.ui.railOpen;
+      const rail = el.closest('.rail');
+      if(!rail) return render();
+      const body = rail.querySelector('.rail__body');
+      rail.classList.toggle('is-open', S.ui.railOpen);
+      el.setAttribute('aria-expanded', S.ui.railOpen ? 'true' : 'false');
+      if(body) body.hidden = !S.ui.railOpen;
+    },
     async 'open-palette'(){ R.Palette.open(); },
     async 'setup-open'(){ R.Setup.open(); },
     async 'setup-save'(){ await R.Setup.save(); },

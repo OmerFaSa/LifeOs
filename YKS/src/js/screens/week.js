@@ -310,7 +310,7 @@ R.Screens.week = (function(){
             <div class="small"><b>${U.fmtShort(r.at.slice(0, 10))}</b> — ${r.reason}</div>`)}</div>` })),
       ])),
 
-      K.Span(2, raw(UI.rail(['contract', 'capacity', 'review', 'carry', 'plan-completion']))),
+      K.Span(12, raw(UI.rail(['contract', 'capacity', 'review', 'carry', 'plan-completion']))),
     ]));
   }
 

@@ -516,10 +516,16 @@ R.Screens.today = (function(){
       ${c.Span(12, R.Setup.needed() ? raw(R.Setup.card()) : NextUpCard())}
 
       ${c.Span(12, c.Cols(4, html`
-        ${c.Stat({ label:'Bugünün bloğu', value:html`${doneBlocks}<small>/${planBlocks}</small>`, note:wd.label+' düzeni' })}
-        ${c.Stat({ label:'Minimum gün', value:minMet ? 'Tamam' : 'Açık', tone:minMet ? 'ok' : 'warn', note:'45 dk · 15 paragraf · kart' })}
-        ${c.Stat({ label:'Due kart', value:C.dueCards().length, tone:debt > 10 ? 'warn' : null, note:'borç %'+debt })}
-        ${c.Stat({ label:'Sınava kalan', value:U.diffDays(dateISO, R.PLAN.examTytISO), unit:' gün', note:'TYT tahmini' })}
+        ${c.Stat({ label:'Bugünün bloğu', value:html`${doneBlocks}<small>/${planBlocks}</small>`,
+          note:wd.label+' düzeni',
+          tone:planBlocks && doneBlocks >= planBlocks ? 'ok' : null,
+          progress:planBlocks ? (100 * doneBlocks / planBlocks) : null })}
+        ${c.Stat({ label:'Minimum gün', value:minMet ? 'Tamam' : 'Açık', tone:minMet ? 'ok' : 'warn',
+          note:'45 dk · 15 paragraf · kart', progress:minMet ? 100 : 0 })}
+        ${c.Stat({ label:'Due kart', value:C.dueCards().length, tone:debt > 10 ? 'warn' : null,
+          note:'borç %'+debt, progress:debt })}
+        ${c.Stat({ label:'Sınava kalan', value:U.diffDays(dateISO, R.PLAN.examTytISO), unit:' gün',
+          note:'TYT tahmini', progress:M.programProgress() })}
       `))}
 
       ${c.Span(6, c.Stack(html`
@@ -548,7 +554,7 @@ R.Screens.today = (function(){
         ${WeekContext(week, n)}
       `))}
 
-      ${c.Span(2, raw(UI.rail(['next-action','anchor','minimum-day','timer','streak','skip-reason'])))}
+      ${c.Span(12, raw(UI.rail(['next-action','anchor','minimum-day','timer','streak','skip-reason'])))}
     `);
   }
 

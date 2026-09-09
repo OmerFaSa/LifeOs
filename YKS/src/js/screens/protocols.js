@@ -124,7 +124,7 @@ R.Screens.protocols = (function(){
         routineCard('Sınav kaygısı', R.ROUTINES.anxiety, 'anxiety'),
       ])),
 
-      K.Span(2, raw(UI.rail(['protocol', 'trigger', 'minimum-day', 'sleep', 'anxiety']))),
+      K.Span(12, raw(UI.rail(['protocol', 'trigger', 'minimum-day', 'sleep', 'anxiety']))),
     ]));
   }
 

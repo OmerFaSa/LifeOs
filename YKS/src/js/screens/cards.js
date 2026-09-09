@@ -233,7 +233,7 @@ R.Screens.cards = (function(){
       header(),
       K.Span(6, K.Stack(tab() === 'due' ? dueSession() : allCards())),
       sidebar(),
-      K.Span(2, raw(UI.rail(['srs', 'card-debt', 'recall', 'notebook']))),
+      K.Span(12, raw(UI.rail(['srs', 'card-debt', 'recall', 'notebook']))),
     ]));
   }
 

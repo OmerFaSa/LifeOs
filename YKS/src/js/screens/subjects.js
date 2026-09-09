@@ -211,8 +211,8 @@ R.Screens.subjects = (function(){
         ${map(list, r => html`
           <div class="riskrow" data-act="open-topic" data-subject="${r.subjectId}" data-topic="${r.topicId}">
             <span class="riskrow__score is-${r.band}">${r.score}</span>
-            <div class="minw0">
-              <div class="small strong truncate">${r.topicName}</div>
+            <div class="riskrow__text">
+              <div class="small strong">${r.topicName}</div>
               <div class="tiny dim truncate">${r.subjectName} · ${reason(r)}</div>
             </div>
             ${K.Badge({ label:r.label, tone:r.tone })}
@@ -241,9 +241,11 @@ R.Screens.subjects = (function(){
 
     return String(K.Grid([
       K.Span(12, K.Cols(3, [
-        K.Stat({ label:'Toplam konu kapanışı', value:'%'+overall.pct, hint:'closure', note:overall.closed+' / '+overall.total+' konu' }),
-        K.Stat({ label:'TYT kapanış', value:'%'+tyt.pct, note:tyt.closed+' / '+tyt.total }),
-        K.Stat({ label:'AYT kapanış', value:'%'+ayt.pct, note:ayt.closed+' / '+ayt.total, tone:ayt.pct < 55 ? 'warn' : null }),
+        K.Stat({ label:'Toplam konu kapanışı', value:'%'+overall.pct, hint:'closure',
+          note:overall.closed+' / '+overall.total+' konu', progress:overall.pct }),
+        K.Stat({ label:'TYT kapanış', value:'%'+tyt.pct, note:tyt.closed+' / '+tyt.total, progress:tyt.pct }),
+        K.Stat({ label:'AYT kapanış', value:'%'+ayt.pct, note:ayt.closed+' / '+ayt.total,
+          progress:ayt.pct, tone:ayt.pct < 55 ? 'warn' : null }),
       ])),
       pendingCard(C.pendingSecondChecks()),
       K.Span(3, K.Stack([
@@ -251,7 +253,7 @@ R.Screens.subjects = (function(){
         riskCard(),
       ])),
       K.Span(7, subjectPanel(subject)),
-      K.Span(2, raw(UI.rail(['closure', 'second-check', 'source-arch']))),
+      K.Span(12, raw(UI.rail(['closure', 'second-check', 'source-arch']))),
     ]));
   }
 

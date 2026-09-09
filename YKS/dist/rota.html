@@ -833,6 +833,26 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .stat--warn .stat__value{ color:var(--accent); }
 .stat--danger .stat__value{ color:var(--danger); }
 
+/* Hedefe doluluk şeridi — sayının yanında "neresindeyim" bilgisi.
+   İnce tutulur: ölçüm kutusunun ana işi hâlâ sayıyı okutmak. */
+.stat__bar{
+  position:relative; display:block; height:4px; margin-top:6px;
+  border-radius:3px; background:var(--surface-3);
+}
+.stat__bar i{
+  display:block; height:100%; border-radius:3px;
+  background:var(--text-3);
+  transition:width var(--dur-lg) var(--ease);
+}
+/* Hedef çizgisi: doluluk şeridin neresinde bitmeli. */
+.stat__bar b{
+  position:absolute; top:-3px; height:10px; width:2px;
+  margin-left:-1px; border-radius:1px; background:var(--text-2);
+}
+.stat--ok .stat__bar i{ background:var(--primary); }
+.stat--warn .stat__bar i{ background:var(--accent); }
+.stat--danger .stat__bar i{ background:var(--danger); }
+
 .bar{ height:7px; border-radius:5px; background:var(--surface-3); overflow:hidden; }
 .bar__fill{ height:100%; border-radius:5px; background:var(--primary); transition:width var(--dur-lg) var(--ease); }
 .bar__fill--warn{ background:var(--accent); }
@@ -1148,28 +1168,56 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .popover__body{ font-size:var(--fs-sm); color:var(--text-2); line-height:1.5; }
 .popover__more{ font-size:var(--fs-sm); color:var(--text-2); line-height:1.5; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
 
-/* ---------- kenar bilgi rayi ---------- */
-.rail{ display:flex; flex-direction:column; gap:8px; }
+/* ---------- ekran açıklamaları paneli ----------
+   Eskiden her ekranın altında açık duran bir metin duvarıydı ve sayfanın
+   sonunu bozuyordu. Artık katlanır bir panel: kapalı hâlde tek satırlık
+   sakin bir çubuk, açılınca kartlar ızgaraya yayılır. */
+
+.rail{
+  border:1px solid var(--border); border-radius:var(--r);
+  background:var(--surface); overflow:hidden;
+}
+.rail__toggle{
+  display:flex; align-items:center; gap:10px; width:100%;
+  padding:11px 14px; border:0; background:none; cursor:pointer;
+  text-align:left; color:var(--text-2);
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.rail__toggle:hover{ background:var(--surface-2); color:var(--text); }
+.rail__toggle:focus-visible{ outline:2px solid var(--primary); outline-offset:-2px; }
+.rail__icon{ width:16px; height:16px; flex:none; stroke:currentColor; fill:none; stroke-width:1.8; color:var(--text-3); }
+.rail__label{
+  flex:1; min-width:0;
+  font-size:var(--fs-xs); font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  /* Dar bir kolonda dört satıra bölünmesin. */
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.rail__count{
+  flex:none; min-width:19px; padding:1px 6px; border-radius:20px;
+  background:var(--surface-3); color:var(--text-3);
+  font-size:10px; font-weight:700; text-align:center;
+}
+.rail__chev{ flex:none; display:grid; place-items:center; color:var(--text-3);
+  transition:transform var(--dur) var(--ease); }
+.rail__chev svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.9; }
+.rail.is-open .rail__chev{ transform:rotate(180deg); }
+
+.rail__body{
+  display:grid; gap:14px 20px;
+  padding:2px 14px 14px;
+  border-top:1px solid var(--border);
+  /* min() olmadan dar bir kapta 210px sabit kalıp taşıyordu. */
+  grid-template-columns:repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+}
+/* display:grid, tarayıcının [hidden] kuralını ezer — kapalıyken de
+   görünüyordu. Sınıf seçicisiyle geri alınır. */
+.rail__body[hidden]{ display:none; }
 .railcard{
   border-left:2px solid var(--border-strong);
   padding:2px 0 2px 11px;
   cursor:pointer; background:none; border-top:none; border-right:none; border-bottom:none;
   text-align:left; width:100%;
-}
-
-/* Kenar rayi yalnız gerçekten yer varken sütundur; dar ekranda içeriğin
-   altına yatay şerit olarak akar.
-   Bu blok layout.css'te DEĞİL burada durmalı: components.css daha sonra
-   yüklendiği için oradaki medya kuralı temel `.rail` kuralının altında
-   kalıyor ve hiç uygulanmıyordu — kartlar sütunda kalıp sayfa boyunca
-   gerilerek aralarında boş şerit bırakıyordu. */
-@media (max-width:1400px){
-  .rail{
-    flex-direction:row; flex-wrap:wrap; gap:12px 16px;
-    align-items:flex-start; align-content:flex-start;
-  }
-  .rail .railcard{ width:auto; flex:1 1 220px; }
-  .rail__head{ width:100%; }
+  transition:border-color var(--dur) var(--ease);
 }
 .railcard:hover{ border-left-color:var(--primary); }
 .railcard__t{
@@ -1178,10 +1226,6 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 }
 .railcard:hover .railcard__t{ color:var(--primary); }
 .railcard__b{ font-size:var(--fs-sm); color:var(--text-3); line-height:1.45; display:block; }
-.rail__head{
-  font-size:var(--fs-xs); font-weight:700; letter-spacing:.07em; text-transform:uppercase;
-  color:var(--text-3); margin-bottom:2px;
-}
 
 /* ---------- siradaki hamle ---------- */
 .nextup{
@@ -1538,8 +1582,15 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .quizcard__answer p{ font-size:var(--fs-base); line-height:1.55; margin-top:4px; }
 
 /* ---------- risk listesi ---------- */
-.riskrow{ display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:10px;
+/* Rozet konu adının ALTINA iner. Üç sütunlu düzende "Yüksek risk" rozeti
+   yerin çoğunu alıyor, dar kolonda konu adı dört harfe kırpılıyordu
+   ("Paragrafta konu ve ana düşünce" → "Para…"). */
+.riskrow{ display:grid; grid-template-columns:44px minmax(0,1fr);
+  grid-template-areas:'score text' 'score badge'; gap:3px 10px;
   align-items:center; padding:9px 6px; border-bottom:1px solid var(--border); }
+.riskrow__score{ grid-area:score; }
+.riskrow__text{ grid-area:text; min-width:0; }
+.riskrow .badge{ grid-area:badge; justify-self:start; }
 .riskrow:last-child{ border-bottom:none; }
 .riskrow:hover{ background:var(--surface-2); }
 .riskrow__score{ width:40px; height:34px; border-radius:var(--r-sm); display:grid; place-items:center;
@@ -2095,6 +2146,26 @@ button.listitem.is-on{ background:var(--primary-soft); }
   .diff__arrow{ display:none; }
   .diff__before::after{ content:' →'; color:var(--text-3); }
 }
+
+/* ---------- deneme hacmi: dönem listesi ----------
+   Dar kolonda dört sütunlu tablo taşıyordu; dönem üstte, ölçümler altında. */
+.vollist{ display:block; }
+.volrow{ padding:9px 0; border-bottom:1px solid var(--border); }
+.volrow:last-child{ border-bottom:none; }
+.volrow__head{ display:flex; align-items:center; gap:8px; justify-content:space-between; }
+.volrow__period{ font-size:var(--fs-sm); font-weight:600; color:var(--text-2); }
+.volrow.is-now .volrow__period{ color:var(--text); font-weight:700; }
+.volrow__cells{ display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+.volpill{
+  display:inline-flex; align-items:baseline; gap:4px;
+  padding:2px 8px; border-radius:20px;
+  font-size:var(--fs-xs); line-height:1.6;
+  background:var(--surface-2); border:1px solid var(--border); color:var(--text-2);
+}
+.volpill b{ color:var(--text-3); font-weight:700; }
+.volpill.is-ok{ background:var(--primary-soft); border-color:transparent; color:var(--primary); }
+.volpill.is-ok b{ color:var(--primary); }
+.volpill--off{ opacity:.65; }
 </style>
 <div id="app">
   <div class="boot">
@@ -7632,19 +7703,32 @@ R.UI = (function(){
   }
 
   /* Bolum kenarinda duran kisa aciklama kartlari — uzun metin yerine. */
+  /* Ekran acıklamaları. Eskiden her ekranın altında acık duran bir metin
+     duvariydi ve sayfanin sonunu bozuyordu; artik katlanir bir panel:
+     varsayilan kapali, tek dokunusla acilir, tercih oturumda hatirlanir. */
   function rail(keys, title){
-    const cards = keys.map(k => {
+    const list = keys.filter(k => R.HINTS[k]);
+    if(!list.length) return '';
+    const open = !!(R.S.ui && R.S.ui.railOpen);
+    const label = title === false ? 'Bu ekran nasıl okunur' : (title || 'Bu ekran nasıl okunur');
+
+    const cards = list.map(k => {
       const h = R.HINTS[k];
-      if(!h) return '';
       return '<button class="railcard" data-act="hint" data-hint="'+k+'">'
         + '<span class="railcard__t">'+U.esc(h.t)+'</span>'
         + '<span class="railcard__b">'+U.esc(h.b)+'</span>'
         + '</button>';
     }).join('');
-    if(!cards) return '';
-    return '<div class="rail">'
-      + (title === false ? '' : '<div class="rail__head">'+U.esc(title || 'Bu ekran nasıl okunur')+'</div>')
-      + cards + '</div>';
+
+    return '<section class="rail'+(open ? ' is-open' : '')+'">'
+      + '<button class="rail__toggle" data-act="rail-toggle" aria-expanded="'+(open ? 'true' : 'false')+'">'
+      +   icon('guide', 'rail__icon')
+      +   '<span class="rail__label">'+U.esc(label)+'</span>'
+      +   '<span class="rail__count">'+list.length+'</span>'
+      +   '<span class="rail__chev">'+icon('down')+'</span>'
+      + '</button>'
+      + '<div class="rail__body"'+(open ? '' : ' hidden')+'>'+cards+'</div>'
+      + '</section>';
   }
 
   function openHint(key, anchorEl){
@@ -7788,12 +7872,18 @@ R.C = (function(){
 
   /* ---------- olcum ---------- */
 
+  /* progress: 0–100. Sayinin yaninda "hedefin neresindeyim" seridi cizer —
+     ciplak bir sayi ile dolulugu gorunen bir sayi ayni sey degildir.
+     Deger anlamsizsa (hesaplanamiyorsa) alan hic verilmez, serit cizilmez. */
   function Stat(o){
+    const pct = o.progress == null ? null : Math.max(0, Math.min(100, Number(o.progress) || 0));
     return html`
       <div class="${cls('stat', o.tone && 'stat--'+o.tone)}">
         <span class="stat__label">${o.label}${when(o.hint, () => raw(R.UI.hint(o.hint)))}</span>
         <span class="stat__value">${o.value}${when(o.unit, () => html`<small>${o.unit}</small>`)}</span>
         ${when(o.spark, o.spark)}
+        ${when(pct != null, () => html`<span class="stat__bar" aria-hidden="true">
+          <i style="width:${pct}%"></i></span>`)}
         ${when(o.note, () => html`<span class="stat__note">${o.note}</span>`)}
       </div>`;
   }
@@ -14223,10 +14313,16 @@ R.Screens.today = (function(){
       ${c.Span(12, R.Setup.needed() ? raw(R.Setup.card()) : NextUpCard())}
 
       ${c.Span(12, c.Cols(4, html`
-        ${c.Stat({ label:'Bugünün bloğu', value:html`${doneBlocks}<small>/${planBlocks}</small>`, note:wd.label+' düzeni' })}
-        ${c.Stat({ label:'Minimum gün', value:minMet ? 'Tamam' : 'Açık', tone:minMet ? 'ok' : 'warn', note:'45 dk · 15 paragraf · kart' })}
-        ${c.Stat({ label:'Due kart', value:C.dueCards().length, tone:debt > 10 ? 'warn' : null, note:'borç %'+debt })}
-        ${c.Stat({ label:'Sınava kalan', value:U.diffDays(dateISO, R.PLAN.examTytISO), unit:' gün', note:'TYT tahmini' })}
+        ${c.Stat({ label:'Bugünün bloğu', value:html`${doneBlocks}<small>/${planBlocks}</small>`,
+          note:wd.label+' düzeni',
+          tone:planBlocks && doneBlocks >= planBlocks ? 'ok' : null,
+          progress:planBlocks ? (100 * doneBlocks / planBlocks) : null })}
+        ${c.Stat({ label:'Minimum gün', value:minMet ? 'Tamam' : 'Açık', tone:minMet ? 'ok' : 'warn',
+          note:'45 dk · 15 paragraf · kart', progress:minMet ? 100 : 0 })}
+        ${c.Stat({ label:'Due kart', value:C.dueCards().length, tone:debt > 10 ? 'warn' : null,
+          note:'borç %'+debt, progress:debt })}
+        ${c.Stat({ label:'Sınava kalan', value:U.diffDays(dateISO, R.PLAN.examTytISO), unit:' gün',
+          note:'TYT tahmini', progress:M.programProgress() })}
       `))}
 
       ${c.Span(6, c.Stack(html`
@@ -14255,7 +14351,7 @@ R.Screens.today = (function(){
         ${WeekContext(week, n)}
       `))}
 
-      ${c.Span(2, raw(UI.rail(['next-action','anchor','minimum-day','timer','streak','skip-reason'])))}
+      ${c.Span(12, raw(UI.rail(['next-action','anchor','minimum-day','timer','streak','skip-reason'])))}
     `);
   }
 
@@ -14774,7 +14870,7 @@ R.Screens.week = (function(){
             <div class="small"><b>${U.fmtShort(r.at.slice(0, 10))}</b> — ${r.reason}</div>`)}</div>` })),
       ])),
 
-      K.Span(2, raw(UI.rail(['contract', 'capacity', 'review', 'carry', 'plan-completion']))),
+      K.Span(12, raw(UI.rail(['contract', 'capacity', 'review', 'carry', 'plan-completion']))),
     ]));
   }
 
@@ -14952,24 +15048,33 @@ R.Screens.exams = (function(){
       </div>`;
   }
 
+  /* Dönem başına plan/gerçekleşen. Dört sütunlu tablo bu dar kolonda
+     taşıp kesiliyordu ("Branş" başlığı yarım, değerler görünmüyordu);
+     dönem başlığı üstte, üç ölçüm altında etiket olarak dizilir. */
   function volumeTable(){
     const curWeek = M.currentWeek();
-    const cell = (actual, target, note) => {
-      if(!target) return html`<span class="dim">${note || '—'}</span>`;
+    const pill = (label, actual, target, note) => {
+      if(!target){
+        return html`<span class="volpill volpill--off"><b>${label}</b> ${note || '—'}</span>`;
+      }
       const span = target[1] !== target[0] ? target[0]+'–'+target[1] : String(target[0]);
-      return html`<span class="${actual >= target[0] ? 'num' : 'num dim'}">${actual}</span><span class="dim tiny"> / ${span}</span>`;
+      return html`<span class="${'volpill' + (actual >= target[0] ? ' is-ok' : '')}">
+        <b>${label}</b> <span class="num">${actual}</span><span class="dim">/${span}</span></span>`;
     };
-    const rows = C.examVolumeProgress().map(v => {
+    return html`<div class="vollist">${map(C.examVolumeProgress(), v => {
       const active = curWeek >= v.weeks[0] && curWeek <= v.weeks[1];
-      return [
-        active ? html`<b>${v.period}</b> ${K.Badge({ label:'şimdi', tone:'ok' })}` : v.period,
-        cell(v.actual.tyt, v.tyt),
-        cell(v.actual.ayt, v.ayt, v.aytNote),
-        cell(v.actual.branch, v.branch, v.branchNote),
-      ];
-    });
-    return K.Table({ tight:true, rows,
-      headers:['Dönem', { label:'TYT', num:true }, { label:'AYT', num:true }, { label:'Branş', num:true }] });
+      return html`<div class="${'volrow' + (active ? ' is-now' : '')}">
+        <div class="volrow__head">
+          <span class="volrow__period">${v.period}</span>
+          ${when(active, () => K.Badge({ label:'şimdi', tone:'ok' }))}
+        </div>
+        <div class="volrow__cells">
+          ${pill('TYT', v.actual.tyt, v.tyt)}
+          ${pill('AYT', v.actual.ayt, v.ayt, v.aytNote)}
+          ${pill('Branş', v.actual.branch, v.branch, v.branchNote)}
+        </div>
+      </div>`;
+    })}</div>`;
   }
 
   function listView(){
@@ -15000,7 +15105,7 @@ R.Screens.exams = (function(){
             <div class="ladder__row"><span class="ladder__level">${l.level}</span>
               <span class="muted">${l.detail}</span></div>`)}</div>` }),
       ])),
-      K.Span(2, raw(UI.rail(['net', 'analysis-debt', 'error-tags', 'exam-volume', 'publisher']))),
+      K.Span(12, raw(UI.rail(['net', 'analysis-debt', 'error-tags', 'exam-volume', 'publisher']))),
     ]);
   }
 
@@ -15805,7 +15910,7 @@ R.Screens.cards = (function(){
       header(),
       K.Span(6, K.Stack(tab() === 'due' ? dueSession() : allCards())),
       sidebar(),
-      K.Span(2, raw(UI.rail(['srs', 'card-debt', 'recall', 'notebook']))),
+      K.Span(12, raw(UI.rail(['srs', 'card-debt', 'recall', 'notebook']))),
     ]));
   }
 
@@ -17062,8 +17167,8 @@ R.Screens.subjects = (function(){
         ${map(list, r => html`
           <div class="riskrow" data-act="open-topic" data-subject="${r.subjectId}" data-topic="${r.topicId}">
             <span class="riskrow__score is-${r.band}">${r.score}</span>
-            <div class="minw0">
-              <div class="small strong truncate">${r.topicName}</div>
+            <div class="riskrow__text">
+              <div class="small strong">${r.topicName}</div>
               <div class="tiny dim truncate">${r.subjectName} · ${reason(r)}</div>
             </div>
             ${K.Badge({ label:r.label, tone:r.tone })}
@@ -17092,9 +17197,11 @@ R.Screens.subjects = (function(){
 
     return String(K.Grid([
       K.Span(12, K.Cols(3, [
-        K.Stat({ label:'Toplam konu kapanışı', value:'%'+overall.pct, hint:'closure', note:overall.closed+' / '+overall.total+' konu' }),
-        K.Stat({ label:'TYT kapanış', value:'%'+tyt.pct, note:tyt.closed+' / '+tyt.total }),
-        K.Stat({ label:'AYT kapanış', value:'%'+ayt.pct, note:ayt.closed+' / '+ayt.total, tone:ayt.pct < 55 ? 'warn' : null }),
+        K.Stat({ label:'Toplam konu kapanışı', value:'%'+overall.pct, hint:'closure',
+          note:overall.closed+' / '+overall.total+' konu', progress:overall.pct }),
+        K.Stat({ label:'TYT kapanış', value:'%'+tyt.pct, note:tyt.closed+' / '+tyt.total, progress:tyt.pct }),
+        K.Stat({ label:'AYT kapanış', value:'%'+ayt.pct, note:ayt.closed+' / '+ayt.total,
+          progress:ayt.pct, tone:ayt.pct < 55 ? 'warn' : null }),
       ])),
       pendingCard(C.pendingSecondChecks()),
       K.Span(3, K.Stack([
@@ -17102,7 +17209,7 @@ R.Screens.subjects = (function(){
         riskCard(),
       ])),
       K.Span(7, subjectPanel(subject)),
-      K.Span(2, raw(UI.rail(['closure', 'second-check', 'source-arch']))),
+      K.Span(12, raw(UI.rail(['closure', 'second-check', 'source-arch']))),
     ]));
   }
 
@@ -17860,7 +17967,7 @@ R.Screens.target = (function(){
         prefsCard(),
       ])),
 
-      K.Span(2, raw(UI.rail(['rank', 'tiers', 'net-matrix', 'obp', 'preferences', 'certainty']))),
+      K.Span(12, raw(UI.rail(['rank', 'tiers', 'net-matrix', 'obp', 'preferences', 'certainty']))),
 
       K.Span(4, K.Stack([
         estimateCard(),
@@ -17964,10 +18071,13 @@ R.Screens.progress = (function(){
 
     return [
       { key:'planCompletion', value:comp == null ? '—' : '%'+comp, spark:history, note:'bu hafta',
+        progress:comp, target:85,
         tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' },
       { key:'questionRate', value:qr ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
+        progress:qr ? qr.pct : null, target:90,
         tone:qr && qr.pct >= 90 ? 'ok' : qr && qr.pct >= 70 ? 'warn' : null },
       { key:'topicClosure', value:'%'+closure.pct, tone:closure.pct >= 55 ? 'ok' : 'warn',
+        progress:closure.pct, target:55,
         note:closure.closed+' / '+closure.total+' konu' },
       { key:'netTrend', spark:tyt.series,
         value:tyt.delta == null ? '—' : (tyt.delta > 0 ? '+' : '')+U.fmtNet(tyt.delta),
@@ -17980,7 +18090,9 @@ R.Screens.progress = (function(){
       { key:'timeDrift', value:timeDrift == null ? '—' : (timeDrift > 0 ? '+' : '')+timeDrift,
         unit:timeDrift == null ? '' : ' dk', note:'son tam TYT',
         tone:timeDrift == null ? null : timeDrift > 5 ? 'warn' : 'ok' },
-      { key:'cardDebt', value:'%'+debt, tone:debt > 10 ? 'danger' : 'ok', note:C.overdueCards().length+' gecikmiş kart' },
+      { key:'cardDebt', value:'%'+debt, tone:debt > 10 ? 'danger' : 'ok',
+        progress:debt, target:10,
+        note:C.overdueCards().length+' gecikmiş kart' },
     ];
   }
 
@@ -17993,6 +18105,10 @@ R.Screens.progress = (function(){
           <span class="tiny dim">${def.target}</span></div>
         <span class="stat__value">${c.value}${when(c.unit, () => html`<small>${c.unit}</small>`)}</span>
         ${when(hasSpark, () => raw(UI.sparkline(c.spark)))}
+        ${when(c.progress != null, () => html`<span class="stat__bar" aria-hidden="true">
+          <i style="width:${Math.max(0, Math.min(100, c.progress))}%"></i>
+          ${when(c.target != null, () => html`<b style="left:${Math.max(0, Math.min(100, c.target))}%"></b>`)}
+        </span>`)}
         <span class="stat__note">${c.note || ''}</span>
       </div>`;
   }
@@ -18186,7 +18302,7 @@ R.Screens.progress = (function(){
         ], 'sm') }),
       ])),
 
-      K.Span(2, raw(UI.rail(['median', 'base-score', 'bands', 'gate', 'pareto', 'plan-completion', 'test-trend']))),
+      K.Span(12, raw(UI.rail(['median', 'base-score', 'bands', 'gate', 'pareto', 'plan-completion', 'test-trend']))),
     ]));
   }
 
@@ -18751,7 +18867,7 @@ R.Screens.protocols = (function(){
         routineCard('Sınav kaygısı', R.ROUTINES.anxiety, 'anxiety'),
       ])),
 
-      K.Span(2, raw(UI.rail(['protocol', 'trigger', 'minimum-day', 'sleep', 'anxiety']))),
+      K.Span(12, raw(UI.rail(['protocol', 'trigger', 'minimum-day', 'sleep', 'anxiety']))),
     ]));
   }
 
@@ -21877,6 +21993,16 @@ R.App = (function(){
       if(UI.isHintOpen() && el.dataset.hint === UI._lastHint){ UI.closeHint(); UI._lastHint = null; return; }
       UI._lastHint = el.dataset.hint;
       UI.openHint(el.dataset.hint, el);
+    },
+    /* Ekran acıklamaları paneli — kapali baslar, tercih oturumda kalir. */
+    async 'rail-toggle'(el){
+      S.ui.railOpen = !S.ui.railOpen;
+      const rail = el.closest('.rail');
+      if(!rail) return render();
+      const body = rail.querySelector('.rail__body');
+      rail.classList.toggle('is-open', S.ui.railOpen);
+      el.setAttribute('aria-expanded', S.ui.railOpen ? 'true' : 'false');
+      if(body) body.hidden = !S.ui.railOpen;
     },
     async 'open-palette'(){ R.Palette.open(); },
     async 'setup-open'(){ R.Setup.open(); },

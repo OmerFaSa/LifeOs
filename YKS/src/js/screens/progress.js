@@ -39,10 +39,13 @@ R.Screens.progress = (function(){
 
     return [
       { key:'planCompletion', value:comp == null ? '—' : '%'+comp, spark:history, note:'bu hafta',
+        progress:comp, target:85,
         tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' },
       { key:'questionRate', value:qr ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
+        progress:qr ? qr.pct : null, target:90,
         tone:qr && qr.pct >= 90 ? 'ok' : qr && qr.pct >= 70 ? 'warn' : null },
       { key:'topicClosure', value:'%'+closure.pct, tone:closure.pct >= 55 ? 'ok' : 'warn',
+        progress:closure.pct, target:55,
         note:closure.closed+' / '+closure.total+' konu' },
       { key:'netTrend', spark:tyt.series,
         value:tyt.delta == null ? '—' : (tyt.delta > 0 ? '+' : '')+U.fmtNet(tyt.delta),
@@ -55,7 +58,9 @@ R.Screens.progress = (function(){
       { key:'timeDrift', value:timeDrift == null ? '—' : (timeDrift > 0 ? '+' : '')+timeDrift,
         unit:timeDrift == null ? '' : ' dk', note:'son tam TYT',
         tone:timeDrift == null ? null : timeDrift > 5 ? 'warn' : 'ok' },
-      { key:'cardDebt', value:'%'+debt, tone:debt > 10 ? 'danger' : 'ok', note:C.overdueCards().length+' gecikmiş kart' },
+      { key:'cardDebt', value:'%'+debt, tone:debt > 10 ? 'danger' : 'ok',
+        progress:debt, target:10,
+        note:C.overdueCards().length+' gecikmiş kart' },
     ];
   }
 
@@ -68,6 +73,10 @@ R.Screens.progress = (function(){
           <span class="tiny dim">${def.target}</span></div>
         <span class="stat__value">${c.value}${when(c.unit, () => html`<small>${c.unit}</small>`)}</span>
         ${when(hasSpark, () => raw(UI.sparkline(c.spark)))}
+        ${when(c.progress != null, () => html`<span class="stat__bar" aria-hidden="true">
+          <i style="width:${Math.max(0, Math.min(100, c.progress))}%"></i>
+          ${when(c.target != null, () => html`<b style="left:${Math.max(0, Math.min(100, c.target))}%"></b>`)}
+        </span>`)}
         <span class="stat__note">${c.note || ''}</span>
       </div>`;
   }
@@ -261,7 +270,7 @@ R.Screens.progress = (function(){
         ], 'sm') }),
       ])),
 
-      K.Span(2, raw(UI.rail(['median', 'base-score', 'bands', 'gate', 'pareto', 'plan-completion', 'test-trend']))),
+      K.Span(12, raw(UI.rail(['median', 'base-score', 'bands', 'gate', 'pareto', 'plan-completion', 'test-trend']))),
     ]));
   }
 

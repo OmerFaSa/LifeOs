@@ -53,12 +53,18 @@ R.C = (function(){
 
   /* ---------- olcum ---------- */
 
+  /* progress: 0–100. Sayinin yaninda "hedefin neresindeyim" seridi cizer —
+     ciplak bir sayi ile dolulugu gorunen bir sayi ayni sey degildir.
+     Deger anlamsizsa (hesaplanamiyorsa) alan hic verilmez, serit cizilmez. */
   function Stat(o){
+    const pct = o.progress == null ? null : Math.max(0, Math.min(100, Number(o.progress) || 0));
     return html`
       <div class="${cls('stat', o.tone && 'stat--'+o.tone)}">
         <span class="stat__label">${o.label}${when(o.hint, () => raw(R.UI.hint(o.hint)))}</span>
         <span class="stat__value">${o.value}${when(o.unit, () => html`<small>${o.unit}</small>`)}</span>
         ${when(o.spark, o.spark)}
+        ${when(pct != null, () => html`<span class="stat__bar" aria-hidden="true">
+          <i style="width:${pct}%"></i></span>`)}
         ${when(o.note, () => html`<span class="stat__note">${o.note}</span>`)}
       </div>`;
   }

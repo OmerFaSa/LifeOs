@@ -40,24 +40,33 @@ R.Screens.exams = (function(){
       </div>`;
   }
 
+  /* Dönem başına plan/gerçekleşen. Dört sütunlu tablo bu dar kolonda
+     taşıp kesiliyordu ("Branş" başlığı yarım, değerler görünmüyordu);
+     dönem başlığı üstte, üç ölçüm altında etiket olarak dizilir. */
   function volumeTable(){
     const curWeek = M.currentWeek();
-    const cell = (actual, target, note) => {
-      if(!target) return html`<span class="dim">${note || '—'}</span>`;
+    const pill = (label, actual, target, note) => {
+      if(!target){
+        return html`<span class="volpill volpill--off"><b>${label}</b> ${note || '—'}</span>`;
+      }
       const span = target[1] !== target[0] ? target[0]+'–'+target[1] : String(target[0]);
-      return html`<span class="${actual >= target[0] ? 'num' : 'num dim'}">${actual}</span><span class="dim tiny"> / ${span}</span>`;
+      return html`<span class="${'volpill' + (actual >= target[0] ? ' is-ok' : '')}">
+        <b>${label}</b> <span class="num">${actual}</span><span class="dim">/${span}</span></span>`;
     };
-    const rows = C.examVolumeProgress().map(v => {
+    return html`<div class="vollist">${map(C.examVolumeProgress(), v => {
       const active = curWeek >= v.weeks[0] && curWeek <= v.weeks[1];
-      return [
-        active ? html`<b>${v.period}</b> ${K.Badge({ label:'şimdi', tone:'ok' })}` : v.period,
-        cell(v.actual.tyt, v.tyt),
-        cell(v.actual.ayt, v.ayt, v.aytNote),
-        cell(v.actual.branch, v.branch, v.branchNote),
-      ];
-    });
-    return K.Table({ tight:true, rows,
-      headers:['Dönem', { label:'TYT', num:true }, { label:'AYT', num:true }, { label:'Branş', num:true }] });
+      return html`<div class="${'volrow' + (active ? ' is-now' : '')}">
+        <div class="volrow__head">
+          <span class="volrow__period">${v.period}</span>
+          ${when(active, () => K.Badge({ label:'şimdi', tone:'ok' }))}
+        </div>
+        <div class="volrow__cells">
+          ${pill('TYT', v.actual.tyt, v.tyt)}
+          ${pill('AYT', v.actual.ayt, v.ayt, v.aytNote)}
+          ${pill('Branş', v.actual.branch, v.branch, v.branchNote)}
+        </div>
+      </div>`;
+    })}</div>`;
   }
 
   function listView(){
@@ -88,7 +97,7 @@ R.Screens.exams = (function(){
             <div class="ladder__row"><span class="ladder__level">${l.level}</span>
               <span class="muted">${l.detail}</span></div>`)}</div>` }),
       ])),
-      K.Span(2, raw(UI.rail(['net', 'analysis-debt', 'error-tags', 'exam-volume', 'publisher']))),
+      K.Span(12, raw(UI.rail(['net', 'analysis-debt', 'error-tags', 'exam-volume', 'publisher']))),
     ]);
   }
 
