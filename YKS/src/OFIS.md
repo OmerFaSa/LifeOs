@@ -187,6 +187,33 @@ ajan kural motoru metnine döner ve bunu rozetle söyler.
 Bir toplantı 6 model çağrısıdır; ajan başına model seçerek Patron'a güçlü,
 uzmanlara hızlı model verilebilir.
 
+### Yanıt bütünlüğü — cümle yarıda kalmaz
+
+Ajanların yazısının yarıda kesilmesinin dört ayrı nedeni vardı; dördü de
+`core/llm.js` içinde kapatıldı ve testle kilitlendi:
+
+| Neden | Ne oluyordu | Çözüm |
+|---|---|---|
+| **Akışın son karesi** | SSE gövdesi son `data:` satırını yeni satırla kapatmadan bitiyor, o satır tamponda kalıp atılıyordu | Akış bitince tampon boşaltılır |
+| **Çok baytlı harf** | `ç ğ ı ö ş ü` iki bayttır; parça sınırına denk gelirse son harf düşüyordu | Bitişte çözücü de boşaltılır (`decode()`) |
+| **Token sınırı** | `max_tokens` 200–420'ydi ve `finish_reason` hiç okunmuyordu: model cümle ortasında kesiliyor, kimse fark etmiyordu | Bütçeler üçe katlandı (`BUDGET`), bitiş sebebi okunur |
+| **Gemini düşünmesi** | 2.5 ailesinde "düşünme" aynı bütçeden yer; cevap boş ya da yarım dönüyordu | Destekleyen modelde `thinkingBudget: 0` |
+
+Kesilme yine de olursa üç kademe devreye girer:
+
+1. **Devam isteği.** Yanıt `finish_reason: length` ile dönerse model kaldığı
+   yerden sürdürülür (en fazla 2 ek istek). Yarım kalmış son kelime atılır ve
+   modele nerede kesildiği gösterilir, böylece birleştirme ne kelime böler ne
+   kelime kaybeder. Örtüşen tekrar tek kez yazılır.
+2. **Sarkan cümleyi kırp.** Devam hakkı bittiyse yarım kalan son cümle atılır —
+   ama yalnız metnin gövdesi korunuyorsa. Kesilen cümle metnin çoğuysa
+   kırpılmaz: yarım cümle kötüdür, boş ekran daha kötüdür.
+3. **Söyle.** Yanıt hâlâ kesikse `truncated` bayrağı ekrana kadar gider;
+   kullanıcı eksik cümleyi sessizce okumaz.
+
+Devam isteği düşerse eldeki sağlam metin döner — hata gösterilmez.
+Bütçeler `core/office.js` içindeki `BUDGET` tablosunda tek yerde durur.
+
 ## Ajan defteri — uydurmadan hatırlama
 
 Bir ekip üyesini değerli yapan şey aylardır seni izliyor olmasıdır. Ama LLM'e

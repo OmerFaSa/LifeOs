@@ -22,6 +22,23 @@ R.Office = (function(){
   const MEETING_MAX = 20;     // saklanan toplanti kaydi
   const TURN_CONTEXT = 4;     // toplantida bir uzmana gosterilen onceki konusma
 
+  /* Token butceleri — tek yerde, cunku hepsi ayni hataya acikti.
+     Turkce ekli bir dildir ve genis alfabesiyle ayni cumleyi Ingilizceden
+     belirgin daha cok token'a yazar: dort cumlelik bir uzman yaniti
+     rahatlikla 250 token eder. Eski butceler (200-420) bu yuzden
+     cumlenin ortasinda bitiyordu. Asagidaki degerler beklenen uzunlugun
+     yaklasik uc kati: model erken bitirirse fazlasi harcanmaz, uzun
+     yazarsa da kesilmez. */
+  const BUDGET = {
+    turn:900,       // toplantida bir uzmanin turu (en fazla 4-5 cumle)
+    opening:700,    // Patron toplantiyi acar (3 cumle)
+    closing:1000,   // Patron kapatir: celiski + oylama + gerekce (4 cumle)
+    cross:500,      // Patron tek cumlelik capraz soru sorar
+    answer:800,     // capraz soruya yanit
+    daily:600,      // gunluk brifing (2 cumle)
+    cards:1600,     // nottan kart uretimi — JSON, uzun
+  };
+
   /* ==================== ayarlar ==================== */
 
   function defaultSettings(){
@@ -569,7 +586,7 @@ R.Office = (function(){
       const turn = await speak('patron', 'briefing', {
         messages:[{ role:'user', text:R.OFFICE_PROMPTS.daily(data) }],
         ctx:{},
-      }, Object.assign({}, o, { maxTokens:200 }));
+      }, Object.assign({}, o, { maxTokens:BUDGET.daily }));
       text = turn.text;
       mode = turn.mode;
     }else{
@@ -910,7 +927,7 @@ R.Office = (function(){
     const res = await R.LLM.complete(chain, {
       system:cfg.system + '\nEn fazla ' + cfg.max + ' kart üret.',
       messages:[{ role:'user', text:'NOTLAR (JSON):\n' + JSON.stringify(ctx, null, 1) }],
-      maxTokens:900,
+      maxTokens:BUDGET.cards,
       temperature:0.2,
       signal:o.signal,
     });
@@ -939,7 +956,7 @@ R.Office = (function(){
       const res = await R.LLM.complete(chain, {
         system:R.OFFICE_PROMPTS.system(agent, toneId()),
         messages:payload.messages,
-        maxTokens:o.maxTokens || 420,
+        maxTokens:o.maxTokens || BUDGET.turn,
         temperature:agent.temperature,
         signal:o.signal,
         onText:o.onText,
@@ -952,7 +969,10 @@ R.Office = (function(){
       const checked = validate(res.text, { agentId, brief:ownBrief });
       return { agent:agentId, name:agent.name, role:agent.role, text:checked.text,
         warnings:checked.warnings, mode:'llm', model:res.model, provider:res.provider,
-        fellBack:!!res.fellBack, ms:res.ms };
+        fellBack:!!res.fellBack, ms:res.ms,
+        /* Devam istekleri de yetmediyse yanit kirpildi: ekran bunu soyler,
+           kullanici eksik cumleyi sessizce okumaz. */
+        truncated:!!res.truncated };
     }catch(err){
       if(err && err.code === 'cancelled') throw err;
       const text = ruleText(agentId, kind, payload.ctx || {});
@@ -1291,7 +1311,7 @@ R.Office = (function(){
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.opening(
         { topic:ag.topic, why:ag.why, data:R.Tools.sanitize(ag.data || {}) }, pending) }],
       ctx:{ topic:ag.topic, why:ag.why, pending },
-    }, Object.assign({}, o, { maxTokens:260 }));
+    }, Object.assign({}, o, { maxTokens:BUDGET.opening }));
 
     turn.round = 0;
     turn.roundTitle = 'Açılış';
@@ -1315,7 +1335,7 @@ R.Office = (function(){
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.turn(agent,
         { topic:session.topic }, data, saidSoFar(session), def, recentSaid(agentId), options) }],
       ctx:{ topic:session.topic, round:def, options },
-    }, Object.assign({}, o, { maxTokens:320 }));
+    }, Object.assign({}, o, { maxTokens:BUDGET.turn }));
 
     turn.round = roundNo;
     turn.roundKey = def.key;
@@ -1347,7 +1367,7 @@ R.Office = (function(){
     const q = await speak('patron', 'cross', {
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.cross(conflict) }],
       ctx:{ topic:session.topic, conflict },
-    }, Object.assign({}, o, { maxTokens:200 }));
+    }, Object.assign({}, o, { maxTokens:BUDGET.cross }));
     q.round = session.round;
     q.roundKey = 'capraz';
     q.roundTitle = 'Çapraz soru';
@@ -1364,7 +1384,7 @@ R.Office = (function(){
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.answer(agent, conflict, data,
         saidSoFar(session)) }],
       ctx:{ topic:session.topic, conflict },
-    }, Object.assign({}, o, { maxTokens:280 }));
+    }, Object.assign({}, o, { maxTokens:BUDGET.answer }));
     a.round = session.round;
     a.roundKey = 'capraz';
     a.roundTitle = 'Yanıt';
@@ -1400,7 +1420,7 @@ R.Office = (function(){
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.closing(
         { topic:session.topic }, said, action, vote) }],
       ctx:{ topic:session.topic, action, vote },
-    }, Object.assign({}, o, { maxTokens:320 }));
+    }, Object.assign({}, o, { maxTokens:BUDGET.closing }));
 
     closing.closing = true;
     closing.round = session.round;

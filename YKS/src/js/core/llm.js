@@ -18,6 +18,71 @@ R.LLM = (function(){
   const KEY_STORE = 'rota.llm.keys';
   const TIMEOUT_MS = 90000;
 
+  /* Turkce ayni cumleyi Ingilizceden belirgin daha cok token'la yazar:
+     ekler ve genis alfabe yuzunden bes cumlelik bir ajan yaniti rahatlikla
+     300 token eder. Eski 700'luk tavan uzun yanitlari cumle ortasinda
+     kesiyordu ve kesildigi hicbir yerde fark edilmiyordu. */
+  const DEFAULT_MAX_TOKENS = 1200;
+
+  /* Yanit yine de kesilirse kac ek istekle tamamlanmaya calisilir.
+     Her devam bir kota hakki harcar; ucretsiz katmanda ikiden fazlasi
+     pahaliya gelir. */
+  const MAX_CONTINUATIONS = 2;
+
+  /* Saglayicilar "token siniri doldu"yu farkli adlandirir. */
+  const TRUNCATED_FINISH = ['length', 'max_tokens', 'MAX_TOKENS'];
+  function truncated(finish){
+    return TRUNCATED_FINISH.indexOf(String(finish || '')) >= 0;
+  }
+
+  /* Devam istekleri de yetmediyse yarim kalan son cumle atilir: kesik bir
+     cumle gostermek, bir cumle eksik gostermekten kotudur. Sayi icindeki
+     nokta (1.500) cumle sonu sayilmaz — noktalamayi bosluk ya da metin
+     sonu izlemelidir. */
+  function trimToSentence(text){
+    const s = String(text || '').trim();
+    const m = s.match(/^[\s\S]*[.!?…](?=\s|$)/);
+    if(!m) return s;                        // hic tam cumle yok: dokunma
+    const head = m[0].trim();
+    /* Yalniz SARKAN bir parca kirpilir. Kesilen cumle metnin govdesiyse
+       (geriye yarisindan azi kaliyorsa) atmak yerine eksik hâliyle
+       gosterilir: yarim cumle kotudur, bos ekran daha kotudur. */
+    return head.length >= s.length * 0.4 ? head : s;
+  }
+
+  /* Kesilen metnin son kelimesi yarim kalmis olabilir ("kaybı" degil
+     "kayb"). Devam istemeden once o kelime atilir ve modelden kaldigi
+     noktadan sonrasi istenir: boylece birlestirme ne kelime boler ne de
+     kelime kaybeder — atilan kelimeyi model yeniden yazar. */
+  function dropLastWord(s){
+    const t = String(s || '').trimEnd();
+    const i = t.search(/\s\S*$/);
+    return i <= 0 ? t : t.slice(0, i);
+  }
+
+  /* Kesilen yaniti tamamlatma istemi. Tekrar, kesik cumleden daha kotu
+     bir bozulmadir; acikca yasaklanir. */
+  function continueAsk(tail){
+    return 'Yanıtın uzunluk sınırı yüzünden yarıda kesildi. Yukarıdaki metnin '
+      + 'DEVAMINI yaz: baştan başlama, yazdıklarını tekrar etme, selamlama ekleme. '
+      + 'Yalnızca eksik kalan kısmı yaz ve cümleyi tamamla.\n\n'
+      + 'KESİLDİĞİ YER: …' + tail;
+  }
+
+  /* Devam parcasini birlestirir. Model uyariya ragmen sondan bir parcayi
+     tekrarlamis olabilir: ortusen en uzun ek bir kez yazilir. */
+  function joinContinuation(prev, piece){
+    if(!piece) return prev;
+    if(!prev) return piece;
+    const max = Math.min(prev.length, piece.length, 240);
+    for(let n = max; n >= 12; n--){
+      if(prev.slice(-n).toLowerCase() === piece.slice(0, n).toLowerCase()){
+        return prev + piece.slice(n);
+      }
+    }
+    return prev + (/\s$/.test(prev) ? '' : ' ') + piece;
+  }
+
   /* ---------- anahtar deposu ---------- */
 
   function readKeys(){
@@ -206,26 +271,49 @@ R.LLM = (function(){
     };
   }
 
-  /* SSE govdesini satir satir okur; her 'data:' satirini fn'e verir. */
+  /* SSE govdesini satir satir okur; her 'data:' satirini fn'e verir.
+
+     Iki kapanis tuzagi vardir ve ikisi de yanitin SONUNU goturur:
+     akis son 'data:' satirini yeni satirla kapatmadan bitebilir, ve cok
+     baytli bir karakter (Turkce ç/ğ/ş/ü hepsi iki bayt) son parcaya
+     bolunmus olabilir. Bu yuzden bitiste hem cozucu hem tampon bosaltilir. */
   async function readSSE(response, fn){
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let buffer = '';
-    for(;;){
-      const { done, value } = await reader.read();
-      if(done) break;
-      buffer += decoder.decode(value, { stream:true });
-      let nl;
-      while((nl = buffer.indexOf('\n')) >= 0){
-        const line = buffer.slice(0, nl).trim();
-        buffer = buffer.slice(nl + 1);
-        if(!line || line.indexOf(':') === 0) continue;      // yorum / keep-alive
-        if(line.indexOf('data:') !== 0) continue;
-        const payload = line.slice(5).trim();
-        if(payload === '[DONE]') return;
-        try{ fn(JSON.parse(payload)); }
-        catch(e){ /* parcali kare — bir sonraki satirda tamamlanir */ }
+    let closed = false;
+
+    /* true donerse akis kapanmistir ([DONE]) ve okuma biter. */
+    function handle(line){
+      const s = line.trim();
+      if(!s || s.indexOf(':') === 0) return false;          // yorum / keep-alive
+      if(s.indexOf('data:') !== 0) return false;
+      const payload = s.slice(5).trim();
+      if(payload === '[DONE]'){ closed = true; return true; }
+      try{ fn(JSON.parse(payload)); }
+      catch(e){ /* parcali kare — bir sonraki satirda tamamlanir */ }
+      return false;
+    }
+
+    try{
+      for(;;){
+        const { done, value } = await reader.read();
+        if(done){
+          buffer += decoder.decode();                       // yarim kalan cok baytli karakter
+          break;
+        }
+        buffer += decoder.decode(value, { stream:true });
+        let nl;
+        while((nl = buffer.indexOf('\n')) >= 0){
+          const line = buffer.slice(0, nl);
+          buffer = buffer.slice(nl + 1);
+          if(handle(line)) return;
+        }
       }
+      /* Kapanis satiri yeni satirla bitmediyse elde kalan HÂLÂ veridir. */
+      if(!closed && buffer) handle(buffer);
+    }finally{
+      try{ reader.cancel(); }catch(e){}
     }
   }
 
@@ -254,7 +342,7 @@ R.LLM = (function(){
     });
     const text = String((res && res.text) || '').trim();
     if(!text) throw fail('empty');
-    return text;
+    return { text, finish:'' };
   }
 
   /* ---------- OpenAI uyumlu cagri ---------- */
@@ -290,7 +378,7 @@ R.LLM = (function(){
         body:JSON.stringify({
           model:req.model,
           messages,
-          max_tokens:req.maxTokens || 700,
+          max_tokens:req.maxTokens || DEFAULT_MAX_TOKENS,
           temperature:req.temperature == null ? 0.4 : req.temperature,
           stream,
         }),
@@ -314,12 +402,17 @@ R.LLM = (function(){
     }
 
     let text = '';
+    let finish = '';
     try{
       const ctype = response.headers.get('content-type') || '';
       if(stream && ctype.indexOf('event-stream') >= 0){
         await readSSE(response, obj => {
           const ch = obj.choices && obj.choices[0];
-          const delta = ch && ((ch.delta && ch.delta.content) || ch.text);
+          if(!ch) return;
+          /* Bitis sebebi genelde SON karede, govdesi bos olarak gelir:
+             delta kontrolunden ONCE okunmali, yoksa kesilme hic gorulmez. */
+          if(ch.finish_reason) finish = String(ch.finish_reason);
+          const delta = (ch.delta && ch.delta.content) || ch.text;
           if(!delta) return;
           text += delta;
           req.onText({ text, delta });
@@ -328,6 +421,7 @@ R.LLM = (function(){
         /* Akis istendigi hâlde duz JSON dondu — ayni govdeden okunur. */
         const json = await response.json();
         const ch = json.choices && json.choices[0];
+        if(ch && ch.finish_reason) finish = String(ch.finish_reason);
         text = String((ch && ch.message && ch.message.content) || (ch && ch.text) || '');
         if(req.onText && text) req.onText({ text, delta:text });
       }
@@ -341,7 +435,7 @@ R.LLM = (function(){
 
     text = text.trim();
     if(!text) throw fail('empty');
-    return text;
+    return { text, finish };
   }
 
   /* ---------- Gemini cagrisi ---------- */
@@ -363,10 +457,17 @@ R.LLM = (function(){
     const body = {
       contents,
       generationConfig:{
-        maxOutputTokens:req.maxTokens || 700,
+        maxOutputTokens:req.maxTokens || DEFAULT_MAX_TOKENS,
         temperature:req.temperature == null ? 0.4 : req.temperature,
       },
     };
+    /* 2.5 ailesinde "dusunme" ayni butceden yer: acik birakilirsa model
+       butceyi dusunerek harcar ve cevap YARIM ya da bos doner. Ofis
+       ajanlari kisa konusur, dusunmeye ihtiyaclari yok — kapatilir.
+       Alan yalniz destekleyen modele gonderilir; digerleri 400 verir. */
+    if(/2\.5.*flash/i.test(String(req.model || ''))){
+      body.generationConfig.thinkingConfig = { thinkingBudget:0 };
+    }
     if(req.system) body.systemInstruction = { parts:[{ text:req.system }] };
 
     const guard = withTimeout(req.signal, req.timeout);
@@ -398,14 +499,22 @@ R.LLM = (function(){
     function partsText(obj){
       const cand = obj.candidates && obj.candidates[0];
       const parts = cand && cand.content && cand.content.parts;
-      return (parts || []).map(p => p.text || '').join('');
+      /* Dusunme parcalari metin degildir; cevaba karistirilmaz. */
+      return (parts || []).filter(p => !p.thought).map(p => p.text || '').join('');
+    }
+    function finishOf(obj){
+      const cand = obj.candidates && obj.candidates[0];
+      return (cand && cand.finishReason) ? String(cand.finishReason) : '';
     }
 
     let text = '';
+    let finish = '';
     try{
       const ctype = response.headers.get('content-type') || '';
       if(stream && ctype.indexOf('event-stream') >= 0){
         await readSSE(response, obj => {
+          const f = finishOf(obj);
+          if(f) finish = f;
           const delta = partsText(obj);
           if(!delta) return;
           text += delta;
@@ -413,7 +522,9 @@ R.LLM = (function(){
         });
       }else{
         const json = await response.json();
-        text = Array.isArray(json) ? json.map(partsText).join('') : partsText(json);
+        const list = Array.isArray(json) ? json : [json];
+        text = list.map(partsText).join('');
+        list.forEach(o => { const f = finishOf(o); if(f) finish = f; });
         if(req.onText && text) req.onText({ text, delta:text });
       }
     }catch(e){
@@ -426,7 +537,7 @@ R.LLM = (function(){
 
     text = text.trim();
     if(!text) throw fail('empty');
-    return text;
+    return { text, finish };
   }
 
   /* ---------- kamu API ---------- */
@@ -441,47 +552,98 @@ R.LLM = (function(){
     /* Cevrimdisiyken hic deneme: kota harcanmaz, sebep dogru soylenir. */
     if(provider.kind !== 'builtin' && offline()) throw fail('offline');
 
-    /* Cok anahtarli havuz: kotasi musait olan anahtar secilir. */
-    let picked = null;
-    if(provider.needsKey){
-      if(!getKeys(provider.id).length) throw fail('no_key');
-      picked = pickKey(cfg);
-      if(!picked) throw Object.assign(new Error('gunluk kota doldu'), { code:'daily_quota' });
-    }
-
-    const quotaCfg = picked ? Object.assign({}, cfg, { keyId:picked.index }) : cfg;
-
-    const payload = Object.assign({}, req, {
-      model:cfg.model,
-      endpoint:cfg.endpoint,
-      key:picked ? picked.key : null,
-      keyId:picked ? picked.index : null,
-    });
-
-    /* Sira: kota yoneticisi izin verene kadar bekle. Boylece dakikalik
-       sinir HIC asilmaz; gun dolduysa beklemek yerine acikca soylenir. */
-    const slot = await R.Quota.acquire(quotaCfg, { signal:req && req.signal, onWait:req && req.onWait });
-
     const started = Date.now();
-    let text;
-    try{
-      if(provider.kind === 'builtin') text = await callBuiltin(payload);
-      else if(provider.kind === 'gemini') text = await callGemini(payload, provider);
-      else text = await callOpenAI(payload, provider);
-    }catch(err){
-      /* Istek hic gonderilemediyse gunluk hakki tuketmis sayma. */
-      if(err && (err.code === 'cancelled' || err.code === 'sandboxed'
-              || err.code === 'no_key' || err.code === 'offline')){
-        R.Quota.release(quotaCfg);
+    const baseMessages = (req && req.messages) || [];
+    /* Yanit token sinirina carparsa devam istegiyle tamamlanir. Kapatmak
+       icin continue:false, sayiyi degistirmek icin maxContinuations. */
+    const limit = (req && req.continue === false) ? 0
+      : (req && req.maxContinuations != null ? req.maxContinuations : MAX_CONTINUATIONS);
+
+    let text = '';
+    let finish = '';
+    let rounds = 0;
+    let waited = 0;
+    let slot = null;
+    let picked = null;
+
+    for(let round = 0; round <= limit; round++){
+      /* Cok anahtarli havuz: kotasi musait anahtar HER turda yeniden
+         secilir — ilk anahtarin gunu devam isteginde dolmus olabilir. */
+      picked = null;
+      if(provider.needsKey){
+        if(!getKeys(provider.id).length) throw fail('no_key');
+        picked = pickKey(cfg);
+        /* Devam turunda kota bittiyse elde saglam bir metin var: onunla yetin. */
+        if(!picked){
+          if(round > 0) break;
+          throw Object.assign(new Error('gunluk kota doldu'), { code:'daily_quota' });
+        }
       }
-      throw err;
+      const quotaCfg = picked ? Object.assign({}, cfg, { keyId:picked.index }) : cfg;
+
+      /* Devam turunda yarim kalmis son kelime atilir ve model oradan
+         surdurur. Kirpma YALNIZ bu turun tabanina uygulanir; elde duran
+         metne dokunulmaz, cunku devam istegi duserse onu dondurecegiz. */
+      const prefix = round === 0 ? '' : dropLastWord(text);
+      const messages = round === 0 ? baseMessages : baseMessages.concat([
+        { role:'assistant', text:prefix },
+        { role:'user', text:continueAsk(prefix.slice(-120)) },
+      ]);
+
+      const payload = Object.assign({}, req, {
+        messages,
+        model:cfg.model,
+        endpoint:cfg.endpoint,
+        key:picked ? picked.key : null,
+        keyId:picked ? picked.index : null,
+        /* Akis kullaniciya kesintisiz gorunmeli: parca degil birikmis
+           metin yayinlanir. */
+        onText:(req && req.onText)
+          ? ev => req.onText({ text:joinContinuation(prefix, ev.text), delta:ev.delta })
+          : undefined,
+      });
+
+      /* Sira: kota yoneticisi izin verene kadar bekle. Boylece dakikalik
+         sinir HIC asilmaz; gun dolduysa beklemek yerine acikca soylenir. */
+      slot = await R.Quota.acquire(quotaCfg, { signal:req && req.signal, onWait:req && req.onWait });
+      waited += slot.waited || 0;
+
+      let out;
+      try{
+        if(provider.kind === 'builtin') out = await callBuiltin(payload);
+        else if(provider.kind === 'gemini') out = await callGemini(payload, provider);
+        else out = await callOpenAI(payload, provider);
+      }catch(err){
+        /* Istek hic gonderilemediyse gunluk hakki tuketmis sayma. */
+        if(err && (err.code === 'cancelled' || err.code === 'sandboxed'
+                || err.code === 'no_key' || err.code === 'offline')){
+          R.Quota.release(quotaCfg);
+        }
+        if(err && err.code === 'cancelled') throw err;
+        /* Devam istegi duserse ilk turun metni durur: hata gostermektense
+           eksik cumleyi kirpip eldekini vermek daha iyidir. */
+        if(round > 0) break;
+        throw err;
+      }
+
+      rounds++;
+      text = round === 0 ? out.text : joinContinuation(prefix, out.text);
+      finish = out.finish;
+      if(!truncated(finish)) break;
     }
+
+    /* Devam haklari bittigi hâlde hâlâ kesikse yarim cumle atilir. */
+    const cut = truncated(finish);
+    if(cut) text = trimToSentence(text);
+    text = text.trim();
+    if(!text) throw fail('empty');
 
     return {
       text, provider:provider.id, model:cfg.model || 'yerleşik',
       keyIndex:picked ? picked.index : null,
-      ms:Date.now() - started, waited:slot.waited || 0,
-      usedToday:slot.usedToday, rpd:slot.rpd,
+      ms:Date.now() - started, waited,
+      usedToday:slot && slot.usedToday, rpd:slot && slot.rpd,
+      rounds, truncated:cut,
     };
   }
 
@@ -527,6 +689,9 @@ R.LLM = (function(){
       maxTokens:16,
       temperature:0,
       timeout:30000,
+      /* Sinama kasten dar butceli: kesilme beklenen sonuctur, devam
+         istegiyle bosuna kota harcanmaz. */
+      continue:false,
     });
     return { ok:true, text:res.text.slice(0, 60), ms:Date.now() - started, model:res.model };
   }
@@ -546,5 +711,6 @@ R.LLM = (function(){
     getKey, getKeys, setKey, addKey, removeKeyAt, clearKeys, maskKey, maskKeys, pickKey,
     chat, complete, test, ready,
     errorText, retryable, resumable, offline, onceOnline, inSandbox, KEY_STORE,
+    truncated, trimToSentence, joinContinuation, dropLastWord, DEFAULT_MAX_TOKENS,
   };
 })();

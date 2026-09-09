@@ -507,6 +507,242 @@
   });
 
 
+  /* ==================== yanit butunlugu ====================
+     "Ajanlar yazilari yarim yaziyor" sikayetinin dort ayri sebebi vardi ve
+     hepsi burada kilitlenir: akisin son karesinin dusmesi, token sinirinin
+     sessizce vurmasi, Gemini'nin dusunme butcesini yemesi, ve butce yine
+     yetmediginde kesik cumlenin oldugu gibi gosterilmesi. */
+
+  describe('Ofis — yanıt bütünlüğü', () => {
+    const realFetch = window.fetch;
+
+    function fresh(){
+      R.Quota.reset(); R.Quota.clearOverrides();
+      /* Devam istekleri arasinda dakikalik aralik beklenmesin. */
+      R.Quota.setOverride('groq', { rpm:60000, rpd:99999 });
+      R.Quota.setOverride('gemini', { rpm:60000, rpd:99999 });
+      R.LLM.setKey('groq', 'gsk_test');
+    }
+    function done(){
+      window.fetch = realFetch;
+      R.LLM.setKey('groq', '');
+      R.LLM.setKey('gemini', '');
+      R.Quota.reset(); R.Quota.clearOverrides();
+    }
+
+    /* Gercek bir SSE govdesi taklit eder: parcalar verildigi gibi akitilir. */
+    function sse(chunks){
+      const enc = new TextEncoder();
+      let i = 0;
+      return {
+        ok:true, status:200,
+        headers:{ get:k => (String(k).toLowerCase() === 'content-type' ? 'text/event-stream' : null) },
+        body:{ getReader:() => ({
+          read(){
+            return Promise.resolve(i >= chunks.length
+              ? { done:true, value:undefined }
+              : { done:false, value:enc.encode(chunks[i++]) });
+          },
+          cancel(){ return Promise.resolve(); },
+        }) },
+      };
+    }
+    function frame(text, finish){
+      const ch = { delta:{ content:text } };
+      if(finish) ch.finish_reason = finish;
+      return 'data: ' + JSON.stringify({ choices:[ch] });
+    }
+
+    it('akış son satırı yeni satırla kapanmadan bitse de metin tam gelir', async () => {
+      fresh();
+      /* Son kare \n ile kapanmiyor ve [DONE] gelmiyor: eski okuyucu bu
+         kareyi tamponda birakip atiyordu, cumlenin sonu kayboluyordu. */
+      window.fetch = async () => sse([
+        frame('Bu hafta ') + '\n',
+        frame('matematiğe dön.', 'stop'),
+      ]);
+      const res = await R.LLM.chat({ provider:'groq', model:'test-model' },
+        { messages:[{ role:'user', text:'x' }], onText(){} });
+      expect(res.text).toBe('Bu hafta matematiğe dön.');
+      done();
+    });
+
+    it('çok baytlı harf iki parçaya bölünse de bozulmaz', async () => {
+      fresh();
+      /* 'ğ' iki bayttir; parca siniri ortasina duserse eski kod son
+         baytlari bosaltmadigi icin harf kayboluyordu. */
+      const enc = new TextEncoder();
+      const line = enc.encode(frame('doğru', 'stop') + '\n');
+      const cut = 24;                       // 'ğ'nin baytlarinin arasi
+      let i = 0;
+      const parts = [line.slice(0, cut), line.slice(cut)];
+      window.fetch = async () => ({
+        ok:true, status:200,
+        headers:{ get:() => 'text/event-stream' },
+        body:{ getReader:() => ({
+          read(){
+            return Promise.resolve(i >= parts.length
+              ? { done:true, value:undefined }
+              : { done:false, value:parts[i++] });
+          },
+          cancel(){ return Promise.resolve(); },
+        }) },
+      });
+      const res = await R.LLM.chat({ provider:'groq', model:'test-model' },
+        { messages:[{ role:'user', text:'x' }], onText(){} });
+      expect(res.text).toBe('doğru');
+      done();
+    });
+
+    it('token sınırında kesilen yanıt devam isteğiyle tamamlanır', async () => {
+      fresh();
+      const bodies = [];
+      let call = 0;
+      window.fetch = async (url, init) => {
+        bodies.push(JSON.parse(init.body));
+        call++;
+        return call === 1
+          ? sse([frame('TYT matematikte üslü sayılardan net kaybı', 'length') + '\n'])
+          : sse([frame('kaybı var; önce o konuyu kapat.', 'stop') + '\n']);
+      };
+      const res = await R.LLM.chat({ provider:'groq', model:'test-model' },
+        { messages:[{ role:'user', text:'x' }], onText(){} });
+      expect(call).toBe(2);
+      expect(res.rounds).toBe(2);
+      expect(res.truncated).toBeFalsy();
+      expect(res.text).toBe('TYT matematikte üslü sayılardan net kaybı var; önce o konuyu kapat.');
+      /* Devam istegi modele yazdigini ve nerede kesildigini gosterir. */
+      const second = bodies[1].messages;
+      expect(second[second.length - 1].content).toContain('KESİLDİĞİ YER');
+      expect(second[second.length - 2].role).toBe('assistant');
+      done();
+    });
+
+    it('devam hakkı yokken sarkan yarım cümle atılır', async () => {
+      fresh();
+      window.fetch = async () => sse([
+        frame('Birinci cümle tamam. İkinci cümle yarıda kal', 'length') + '\n',
+      ]);
+      const res = await R.LLM.chat({ provider:'groq', model:'test-model' },
+        { messages:[{ role:'user', text:'x' }], maxContinuations:0, onText(){} });
+      expect(res.truncated).toBeTruthy();
+      expect(res.text).toBe('Birinci cümle tamam.');
+      done();
+    });
+
+    it('kesilme tek uzun cümledeyse metin atılmaz', async () => {
+      fresh();
+      const uzun = 'Son üç denemenin medyanı düşerken analiz borcunun birikmesi '
+        + 'net kaybının asıl nedenini gösteriyor ve bu hafta';
+      window.fetch = async () => sse([frame('Kısa. ' + uzun, 'length') + '\n']);
+      const res = await R.LLM.chat({ provider:'groq', model:'test-model' },
+        { messages:[{ role:'user', text:'x' }], maxContinuations:0, onText(){} });
+      /* Kirpmak govdeyi goturecekti: eksik cumle gostermek daha iyidir. */
+      expect(res.text).toContain('analiz borcunun');
+      done();
+    });
+
+    it('devam isteği başarısız olursa eldeki metin verilir', async () => {
+      fresh();
+      let call = 0;
+      window.fetch = async () => {
+        call++;
+        if(call === 1) return sse([frame('Bu hafta matematiğe dön ve tekrar yap.', 'length') + '\n']);
+        throw new TypeError('baglanti koptu');
+      };
+      const res = await R.LLM.chat({ provider:'groq', model:'test-model' },
+        { messages:[{ role:'user', text:'x' }], onText(){} });
+      expect(res.text).toBe('Bu hafta matematiğe dön ve tekrar yap.');
+      done();
+    });
+
+    it('Gemini 2.5 Flash’ta düşünme bütçesi kapatılır', async () => {
+      fresh();
+      R.LLM.setKey('gemini', 'AIzaTest');
+      let sent = null;
+      window.fetch = async (url, init) => {
+        sent = JSON.parse(init.body);
+        return {
+          ok:true, status:200,
+          headers:{ get:() => 'application/json' },
+          json:async () => ({ candidates:[
+            { content:{ parts:[{ text:'Hazır.' }] }, finishReason:'STOP' },
+          ] }),
+        };
+      };
+      const res = await R.LLM.chat({ provider:'gemini', model:'gemini-2.5-flash' },
+        { messages:[{ role:'user', text:'x' }] });
+      expect(res.text).toBe('Hazır.');
+      expect(sent.generationConfig.thinkingConfig.thinkingBudget).toBe(0);
+      done();
+    });
+
+    it('düşünme alanı desteklemeyen Gemini modeline gönderilmez', async () => {
+      fresh();
+      R.LLM.setKey('gemini', 'AIzaTest');
+      let sent = null;
+      window.fetch = async (url, init) => {
+        sent = JSON.parse(init.body);
+        return {
+          ok:true, status:200,
+          headers:{ get:() => 'application/json' },
+          json:async () => ({ candidates:[
+            { content:{ parts:[{ text:'Hazır.' }] }, finishReason:'STOP' },
+          ] }),
+        };
+      };
+      await R.LLM.chat({ provider:'gemini', model:'gemini-2.0-flash' },
+        { messages:[{ role:'user', text:'x' }] });
+      expect(sent.generationConfig.thinkingConfig).toBe(undefined);
+      done();
+    });
+
+    it('Gemini düşünme parçaları cevaba karışmaz', async () => {
+      fresh();
+      R.LLM.setKey('gemini', 'AIzaTest');
+      window.fetch = async () => ({
+        ok:true, status:200,
+        headers:{ get:() => 'application/json' },
+        /* thought:true tasiyan parca modelin ic sesidir, cevap degildir. */
+        json:async () => ({ candidates:[{ content:{ parts:[
+          { text:'Kullanıcı TYT soruyor, önce medyana bakayım…', thought:true },
+          { text:'Türkçede net kaybın var.' },
+        ] }, finishReason:'STOP' }] }),
+      });
+      const res = await R.LLM.chat({ provider:'gemini', model:'gemini-2.0-flash' },
+        { messages:[{ role:'user', text:'x' }] });
+      expect(res.text).toBe('Türkçede net kaybın var.');
+      done();
+    });
+
+    it('sağlayıcıların kesilme adları tanınır', () => {
+      ['length', 'max_tokens', 'MAX_TOKENS'].forEach(f => expect(R.LLM.truncated(f)).toBeTruthy());
+      ['stop', 'STOP', '', null, undefined].forEach(f => expect(R.LLM.truncated(f)).toBeFalsy());
+    });
+
+    it('sayı içindeki nokta cümle sonu sayılmaz', () => {
+      const s = 'Hedefin 1.500 puan ve bu hafta net kaybı yaşan';
+      expect(R.LLM.trimToSentence(s)).toBe(s);
+    });
+
+    it('devam parçası önceki metinle örtüşürse tekrar yazılmaz', () => {
+      expect(R.LLM.joinContinuation('Bu hafta matematiğe dön', 'matematiğe dön ve tekrar yap.'))
+        .toBe('Bu hafta matematiğe dön ve tekrar yap.');
+      expect(R.LLM.joinContinuation('Bu hafta', 'matematiğe dön.'))
+        .toBe('Bu hafta matematiğe dön.');
+    });
+
+    it('yarım kalan son kelime devam isteğinden önce atılır', () => {
+      expect(R.LLM.dropLastWord('net kaybı yaşan')).toBe('net kaybı');
+      expect(R.LLM.dropLastWord('tek')).toBe('tek');
+    });
+
+    it('varsayılan token bütçesi kısa yanıtları kesmeyecek kadar geniştir', () => {
+      expect(R.LLM.DEFAULT_MAX_TOKENS >= 1000).toBeTruthy();
+    });
+  });
+
+
   /* ==================== istek siniri (kota) ==================== */
 
   describe('Ofis — istek sınırı yöneticisi', () => {
