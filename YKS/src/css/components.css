@@ -465,6 +465,21 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   cursor:pointer; background:none; border-top:none; border-right:none; border-bottom:none;
   text-align:left; width:100%;
 }
+
+/* Kenar rayi yalnız gerçekten yer varken sütundur; dar ekranda içeriğin
+   altına yatay şerit olarak akar.
+   Bu blok layout.css'te DEĞİL burada durmalı: components.css daha sonra
+   yüklendiği için oradaki medya kuralı temel `.rail` kuralının altında
+   kalıyor ve hiç uygulanmıyordu — kartlar sütunda kalıp sayfa boyunca
+   gerilerek aralarında boş şerit bırakıyordu. */
+@media (max-width:1400px){
+  .rail{
+    flex-direction:row; flex-wrap:wrap; gap:12px 16px;
+    align-items:flex-start; align-content:flex-start;
+  }
+  .rail .railcard{ width:auto; flex:1 1 220px; }
+  .rail__head{ width:100%; }
+}
 .railcard:hover{ border-left-color:var(--primary); }
 .railcard__t{
   font-size:var(--fs-xs); font-weight:700; letter-spacing:.03em;
@@ -1171,4 +1186,221 @@ button.listitem.is-on{ background:var(--primary-soft); }
   .meetturn__body{ font-size:var(--fs-sm); }
   .meet{ gap:9px; }
   .reportrow__list{ margin-left:14px; }
+}
+
+/* ==================== ofis: kat planı ====================
+   Ofisi "panel" olmaktan çıkaran şey mekân hissidir: masalar bir zemin
+   üzerinde durur, herkesin ışığı yanar, kimin meşgul olduğu bakınca
+   anlaşılır. Renk yalnız token'lardan gelir; her ajanın kimlik rengi
+   masasının üst şeridinde tekrarlanır. */
+
+.floor{
+  position:relative;
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:var(--sp-4);
+  background:
+    linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+  box-shadow:inset 0 1px 0 var(--surface), var(--shadow);
+  overflow:hidden;
+}
+/* Zeminin dokusu: ince ızgara, içeriğin okunmasını engellemeyecek kadar soluk. */
+.floor::before{
+  content:'';
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(var(--c-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-grid) 1px, transparent 1px);
+  background-size:34px 34px;
+  opacity:.34;
+  pointer-events:none;
+}
+.floor > *{ position:relative; }
+
+.floor__head{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:var(--sp-3); flex-wrap:wrap; margin-bottom:var(--sp-4);
+}
+.floor__title{
+  font-family:var(--font-display); font-size:var(--fs-md); font-weight:700;
+  display:flex; align-items:center; gap:8px;
+}
+.floor__title svg{
+  width:18px; height:18px; flex:none;
+  stroke:currentColor; fill:none; stroke-width:1.8; color:var(--text-3);
+}
+.floor__meta{ font-size:var(--fs-xs); color:var(--text-3); }
+
+/* Masalar ikişerli dizilir; ekran gerçekten genişse dördü bir sırada.
+   auto-fit denendi ve 3+1 gibi dengesiz sıralar ürettiği için bırakıldı:
+   uzman sayısı dört, sıra ya ikili ya dörtlü olmalı. */
+.floor__room{
+  display:grid; gap:var(--sp-3);
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+@media (min-width:1500px){
+  .floor__room{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
+}
+/* Patron masası öndedir: tüm sırayı kaplar, diğerleri karşısına dizilir. */
+.floor__lead{ grid-column:1 / -1; }
+
+.seat{
+  position:relative;
+  display:flex; align-items:center; gap:10px;
+  padding:11px 12px 12px;
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  text-align:left; width:100%;
+  cursor:pointer;
+  transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+             border-color var(--dur) var(--ease);
+}
+/* Masanın üst kenarı ajanın kimlik rengidir — kim nerede oturuyor, bakınca belli. */
+.seat::before{
+  content:'';
+  position:absolute; left:12px; right:12px; top:0; height:3px;
+  border-radius:0 0 3px 3px;
+  background:var(--seat-color, var(--border-strong));
+}
+.seat:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-lg);
+  border-color:var(--border-strong);
+}
+.seat:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.seat.is-open{ border-color:var(--seat-color, var(--primary)); }
+
+.seat--patron { --seat-color:var(--agent-patron); }
+.seat--tyt    { --seat-color:var(--agent-tyt); }
+.seat--ayt    { --seat-color:var(--agent-ayt); }
+.seat--rehber { --seat-color:var(--agent-rehber); }
+.seat--analist{ --seat-color:var(--agent-analist); }
+
+.seat__body{ min-width:0; flex:1; }
+.seat__name{
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--font-display); font-size:var(--fs-sm); font-weight:700;
+  line-height:1.3;
+}
+.seat__role{
+  display:block; font-size:var(--fs-xs); color:var(--text-3);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.seat__state{
+  display:flex; align-items:center; gap:6px;
+  margin-top:6px; font-size:var(--fs-xs); color:var(--text-3);
+}
+/* Durum metni masayı büyütmesin: taşarsa kırpılır, masalar aynı boyda kalır. */
+.seat__state span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* Patron masası öndedir: daha geniş, avatarı büyük, günün işini de taşır. */
+.floor__lead .seat{ padding:14px 15px; gap:13px; }
+.floor__lead .agentav{ width:42px; height:42px; font-size:var(--fs-md); }
+.floor__lead .seat__name{ font-size:var(--fs-md); }
+.seat__task{
+  display:block; margin-top:7px; padding-top:7px;
+  border-top:1px dashed var(--border);
+  font-size:var(--fs-xs); color:var(--text-2);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.seat__task b{ color:var(--text); font-weight:600; }
+
+/* Durum ışığı: boşta sabit, çalışırken nabız atar. */
+.seatlight{
+  width:8px; height:8px; border-radius:50%; flex:none;
+  background:var(--text-3);
+  box-shadow:0 0 0 3px transparent;
+}
+.seatlight--ok{ background:var(--agent-rehber); box-shadow:0 0 0 3px var(--surface-2); }
+.seatlight--warn{ background:var(--accent); }
+.seatlight--danger{ background:var(--danger); }
+.seatlight--busy{ background:var(--primary); animation:seatpulse 1.4s var(--ease) infinite; }
+@keyframes seatpulse{
+  0%,100%{ box-shadow:0 0 0 0 var(--primary-soft); }
+  50%    { box-shadow:0 0 0 5px transparent; }
+}
+@media (prefers-reduced-motion:reduce){
+  .seatlight--busy{ animation:none; }
+}
+
+/* Masadaki iş yükü: kaç not bekliyor. Sayı değil ağırlık gösterir. */
+/* İş yükü şeridi Patron'un geniş masasında satır boyunca uzamasın. */
+.seat__load{ display:flex; gap:3px; margin-top:7px; max-width:190px; }
+.seat__load i{
+  height:3px; flex:1; border-radius:2px; background:var(--surface-3);
+}
+.seat__load i.is-on{ background:var(--seat-color, var(--primary)); }
+
+.seat__count{
+  position:absolute; top:9px; right:10px;
+  min-width:17px; height:17px; padding:0 4px;
+  border-radius:9px;
+  background:var(--danger); color:#fff;
+  font-size:10px; font-weight:700; line-height:17px; text-align:center;
+}
+
+@media (max-width:520px){
+  .floor{ padding:var(--sp-3); }
+  .floor__room{ grid-template-columns:1fr; }
+}
+
+/* ==================== ofis: onay kutusu ====================
+   Ajan sisteme dokunmayı önerir; ne değişeceği ONAYDAN ÖNCE önce/sonra
+   olarak gösterilir. Onaysız hiçbir satır uygulanmaz. */
+
+.props{ display:grid; gap:10px; }
+
+.prop{
+  border:1px solid var(--border);
+  border-left:3px solid var(--seat-color, var(--primary));
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  padding:11px 12px;
+}
+.prop--patron { --seat-color:var(--agent-patron); }
+.prop--tyt    { --seat-color:var(--agent-tyt); }
+.prop--ayt    { --seat-color:var(--agent-ayt); }
+.prop--rehber { --seat-color:var(--agent-rehber); }
+.prop--analist{ --seat-color:var(--agent-analist); }
+
+.prop__head{ display:flex; align-items:flex-start; gap:9px; }
+.prop__who{ min-width:0; flex:1; }
+.prop__title{
+  display:block; font-family:var(--font-display);
+  font-size:var(--fs-sm); font-weight:700; line-height:1.3;
+}
+.prop__by{ display:block; font-size:var(--fs-xs); color:var(--text-3); margin-top:1px; }
+.prop__why{
+  margin-top:8px; font-size:var(--fs-sm); color:var(--text-2); line-height:1.45;
+}
+
+/* Önce → sonra: değişimin tamamı tek bakışta okunur. */
+.diff{
+  margin-top:10px; border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface-2); overflow:hidden;
+}
+.diff__row{
+  display:grid; grid-template-columns:minmax(84px, 1fr) 1.2fr 16px 1.2fr;
+  align-items:center; gap:8px;
+  padding:7px 10px; font-size:var(--fs-xs);
+}
+.diff__row + .diff__row{ border-top:1px solid var(--border); }
+.diff__label{ color:var(--text-3); }
+/* Eski değer oka yaslanır: değişim tek satırda "şu → bu" diye okunur. */
+.diff__before{ color:var(--text-3); min-width:0; overflow-wrap:anywhere; text-align:right; }
+.diff__arrow{ color:var(--text-3); text-align:center; }
+.diff__after{ color:var(--text); font-weight:600; min-width:0; overflow-wrap:anywhere; }
+
+.prop__acts{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+
+/* Uygulanmış öneriler — geri alınabilir olduğu görünsün. */
+.prop--done{ border-left-color:var(--border-strong); background:var(--surface-2); }
+.prop--done .prop__title{ color:var(--text-2); }
+
+@media (max-width:560px){
+  .diff__row{ grid-template-columns:1fr; gap:2px; }
+  .diff__arrow{ display:none; }
+  .diff__before::after{ content:' →'; color:var(--text-3); }
 }

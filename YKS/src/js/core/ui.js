@@ -43,6 +43,13 @@ R.UI = (function(){
     refresh:'<path d="M20 11a8 8 0 10-1.7 5.3"/><path d="M20 5v6h-6"/>',
     search:'<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>',
     zap:'<path d="M13 3L5.5 13.5H11l-.8 7.5L18.5 10.5H13z"/>',
+    users:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/>'
+      + '<path d="M16 5.6a3.2 3.2 0 010 4.8M17.5 14.9c2 .6 3.2 2.3 3.2 4.6"/>',
+    layers:'<path d="M12 3.5l8.5 4.5-8.5 4.5L3.5 8z"/><path d="M3.5 12.5L12 17l8.5-4.5"/>',
+    target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.2"/><path d="M12 11.9v.01"/>',
+    undo:'<path d="M4 11a8 8 0 111.7 5.3"/><path d="M4 5v6h6"/>',
+    shield:'<path d="M12 3.5l7 2.6v5.4c0 4-2.9 7.4-7 8.9-4.1-1.5-7-4.9-7-8.9V6.1z"/>'
+      + '<path d="M9 12.2l2.2 2.2L15.2 10"/>',
   };
 
   function icon(name, cls){

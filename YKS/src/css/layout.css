@@ -133,9 +133,9 @@
   .span-2{ grid-column:span 12; }
   .span-6{ grid-column:span 7; }
   .span-4{ grid-column:span 5; }
-  .rail{ flex-direction:row; flex-wrap:wrap; gap:12px 16px; align-items:flex-start; align-content:flex-start; }
-  .rail .railcard{ width:auto; flex:1 1 220px; }
-  .rail__head{ width:100%; }
+  /* Kenar rayinin dar ekran davranisi components.css'te durur: bu dosya
+     ondan ONCE yuklendigi icin buradaki kural temel .rail kuralinin
+     altinda kalir ve hic uygulanmazdi. */
 }
 @media (max-width:1120px){
   .span-2, .span-4, .span-6, .span-8{ grid-column:span 12; }

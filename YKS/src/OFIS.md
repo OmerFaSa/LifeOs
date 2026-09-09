@@ -277,6 +277,66 @@ Birden çok model tek komutla karşılaştırılabilir.
 ROTA_PROVIDER=groq ROTA_KEY=gsk_… ROTA_MODEL=llama-3.3-70b-versatile,llama-3.1-8b-instant   node tools/evalagents.js
 ```
 
+## Öneri kutusu — ofis artık sisteme dokunabilir
+
+Ofis bugüne kadar yalnızca **okuyordu**. Artık yazabilir, ama tek bir yoldan:
+
+```
+ajan önerir → kural motoru DOĞRULAR → SEN onaylarsın → motor uygular → geri alınabilir
+```
+
+**Onaysız hiçbir şey değişmez.** `core/proposals.js` içinde "otomatik uygula"
+diye bir yol yoktur ve olmamalıdır: ofisin değeri önerisinde, yetkisinde değil.
+
+### Üç kural
+
+1. **Kapalı katalog.** Ajan yalnızca `data/actions.js`'teki bir eylemi
+   önerebilir. Serbest metin hiçbir yoldan eyleme dönüşmez — ajan
+   defterindeki "kapalı ölçüt listesi" ile aynı doktrin.
+2. **Yapısal parametre.** Her eylemin parametreleri adıyla ve türüyle
+   yazılıdır. Fazladan alan taşınmaz, uydurulan değer kural motorunda
+   doğrulanamaz ve geçmez.
+3. **Geri alınabilirlik.** Uygulanan her eylem, uygulamadan **önce** alınmış
+   bir anlık görüntü bırakır; tek dokunuşla geri alınır.
+
+### Katalog
+
+| Eylem | Kim önerebilir | Neye dokunur |
+|---|---|---|
+| `topic-review` | Tuna, Yaman | Konu durumu — kapalı görünen konu yeniden açılır |
+| `block-add` | Rana, Tuna, Yaman | Bugünün planı — tekrar bloğu eklenir |
+| `cards-due-today` | Deniz | Tekrar kartları — geciken tekrarlar bugüne çekilir |
+| `card-from-error` | Deniz | Tekrar kartları — açık yanlıştan kart üretilir |
+| `week-target` | Patron, Rana | Haftalık soru hedefi |
+| `decision-close` | Patron | Karar takibi |
+
+Yetki ayrımı burada da geçerlidir: Rana konu durumuna dokunamaz, Deniz
+haftalık hedefi değiştiremez. `agents` alanı bunu kilitler.
+
+### İki öneri kaynağı, tek kapı
+
+- **Kural motoru** (`Proposals.suggest`) veriden kendisi çıkarır: model
+  gerekmez, kota harcamaz, çevrimdışı çalışır. Masa notlarıyla aynı doktrin —
+  eşik aşılırsa öneri doğar, aşılmazsa doğmaz.
+- **Ajan** (`Proposals.fromModel`) yanıtının sonuna tek bir JSON nesnesi
+  ekleyebilir. Nesne katalog ve şemaya uymuyorsa **sessizce düşürülür**;
+  konuşma metninden ayrılır, ekranda JSON görünmez.
+
+Doğrulama her iki kaynakta da aynıdır ve **her çizimde yeniden** çalışır:
+bekleyen bir öneri, arada veri değiştiği için geçersizleşmiş olabilir —
+o öneri kullanıcıya hiç gösterilmez. Onay anında da yeniden doğrulanır;
+veri değişmişse öneri `stale` işaretlenir ve uygulanmaz.
+
+### Ekranda
+
+Ofis ekranındaki **kat planı** beş masayı bir zemin üzerinde gösterir: kimin
+ışığı yanıyor, kimin masasında iş birikmiş, kim şu an konuşuyor. Masaya
+dokununca o masanın raporu açılır.
+
+**Ofisin önerileri** kartı ne değişeceğini onaydan önce *önce → sonra*
+satırlarıyla gösterir. Uygulananlar ayrı bölümde durur ve "Geri al" düğmesi
+taşır.
+
 ## Gizlilik
 
 Modele giden her nesne `CoachTools.sanitize()` süzgecinden geçer: ad, şehir,
@@ -289,6 +349,8 @@ akademik metrik taşır.
 | Dosya | Sorumluluk |
 |---|---|
 | `data/agents.js` | Beş ajanın kimliği, yetki alanı, tur soruları, istemleri (deklaratif) |
+| `data/actions.js` | Ajanların önerebileceği eylemlerin kapalı kataloğu (deklaratif) |
+| `core/proposals.js` | Öneri kutusu: doğrulama, önizleme, onay, uygulama, geri alma |
 | `data/providers.js` | Sağlayıcı, model ve istek sınırı kataloğu (deklaratif, sık değişir) |
 | `data/rules.js` | Ev kuralları, yasak kalıplar, üslup, kart kuralları |
 | `core/quota.js` | İstek sınırı: aralık koyar, günü sayar, 429'u cezalandırır |

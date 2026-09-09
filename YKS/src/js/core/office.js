@@ -952,27 +952,50 @@ R.Office = (function(){
       return { agent:agentId, name:agent.name, role:agent.role, text, warnings:[], mode:'kural' };
     }
 
+    /* Ajan sisteme dokunmayi ONEREBILIR (sohbet ve toplanti turlarinda).
+       Onerdigi sey dogrudan uygulanmaz: kapali katalogdan secilir, kural
+       motorunda dogrulanir ve kullanicinin onayina duser. */
+    const catalog = o.allowAction ? R.Proposals.catalogPrompt(agentId) : '';
+
     try{
       const res = await R.LLM.complete(chain, {
-        system:R.OFFICE_PROMPTS.system(agent, toneId()),
+        system:R.OFFICE_PROMPTS.system(agent, toneId()) + (catalog ? '\n\n' + catalog : ''),
         messages:payload.messages,
         maxTokens:o.maxTokens || BUDGET.turn,
         temperature:agent.temperature,
         signal:o.signal,
-        onText:o.onText,
+        /* Akista JSON kuyrugu kullaniciya gorunmez. */
+        onText:(o.onText && catalog)
+          ? ev => o.onText({ text:R.Proposals.stripTrailingJson(ev.text), delta:ev.delta })
+          : o.onText,
       });
+
+      /* Eylem nesnesi metinden ayrilir: ekranda konusma kalir, oneri
+         kutuya gider. */
+      let said = res.text;
+      let proposal = null;
+      if(catalog){
+        const split = R.Proposals.splitAction(said);
+        if(split.obj){
+          said = split.text || said;
+          const p = R.Proposals.fromModel(agentId, split.obj);
+          if(p) proposal = await R.Proposals.propose(p);
+        }
+      }
+
       /* Cikti kendi brifingine karsi denetlenir: uydurulmus sayi ve alan
          ihlali burada yakalanir. Patron'un brifingi dort raporu tasidigi
          icin onun sayilari da kapsanir. */
       let ownBrief = null;
       try{ ownBrief = brief(agentId); }catch(e){}
-      const checked = validate(res.text, { agentId, brief:ownBrief });
+      const checked = validate(said, { agentId, brief:ownBrief });
       return { agent:agentId, name:agent.name, role:agent.role, text:checked.text,
         warnings:checked.warnings, mode:'llm', model:res.model, provider:res.provider,
         fellBack:!!res.fellBack, ms:res.ms,
         /* Devam istekleri de yetmediyse yanit kirpildi: ekran bunu soyler,
            kullanici eksik cumleyi sessizce okumaz. */
-        truncated:!!res.truncated };
+        truncated:!!res.truncated,
+        proposal:proposal || null };
     }catch(err){
       if(err && err.code === 'cancelled') throw err;
       const text = ruleText(agentId, kind, payload.ctx || {});
@@ -1017,7 +1040,9 @@ R.Office = (function(){
       { role:'user', text:R.OFFICE_PROMPTS.chat(agent, data, q) },
     ]);
 
-    return speak(agentId, 'chat', { messages, ctx:{} }, opts);
+    /* Sohbette ajan bir duzeltme onerebilir; oneri onaya duser. */
+    return speak(agentId, 'chat', { messages, ctx:{} },
+      Object.assign({}, opts, { allowAction:true }));
   }
 
   /* Ajanin kendi alanini ozetlemesi (soru olmadan). */
@@ -1335,7 +1360,9 @@ R.Office = (function(){
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.turn(agent,
         { topic:session.topic }, data, saidSoFar(session), def, recentSaid(agentId), options) }],
       ctx:{ topic:session.topic, round:def, options },
-    }, Object.assign({}, o, { maxTokens:BUDGET.turn }));
+      /* Toplanti turunda da oneri cikabilir: ofisin masada aldigi karar
+         kullanicinin onayina duser, kendiliginden uygulanmaz. */
+    }, Object.assign({}, o, { maxTokens:BUDGET.turn, allowAction:true }));
 
     turn.round = roundNo;
     turn.roundKey = def.key;
@@ -1579,7 +1606,9 @@ R.Office = (function(){
     const m = (S.officeMeetings || []).find(x => x.id === id);
     if(!m || !m.decision) return null;
     m.decision.state = (state === 'done' || state === 'carried') ? state : 'open';
-    m.decision.closedAt = new Date().toISOString();
+    /* Yeniden acilan karar kapanma zamanini da birakir: aksi hâlde acik
+       ama "kapanmis" gorunen bir kayit kalirdi. */
+    m.decision.closedAt = m.decision.state === 'open' ? null : new Date().toISOString();
     await R.Store.set('meetings/' + m.id, m);
     return m.decision;
   }
@@ -1695,6 +1724,7 @@ R.Office = (function(){
     (briefs || []).forEach(b => { if(b && b.id) S.officeBriefings[b.id] = b; });
 
     await R.Journal.load();
+    await R.Proposals.load();
     await R.LLM.initBuiltin();
     return S.office;
   }

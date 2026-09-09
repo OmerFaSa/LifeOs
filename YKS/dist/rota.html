@@ -634,9 +634,9 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
   .span-2{ grid-column:span 12; }
   .span-6{ grid-column:span 7; }
   .span-4{ grid-column:span 5; }
-  .rail{ flex-direction:row; flex-wrap:wrap; gap:12px 16px; align-items:flex-start; align-content:flex-start; }
-  .rail .railcard{ width:auto; flex:1 1 220px; }
-  .rail__head{ width:100%; }
+  /* Kenar rayinin dar ekran davranisi components.css'te durur: bu dosya
+     ondan ONCE yuklendigi icin buradaki kural temel .rail kuralinin
+     altinda kalir ve hic uygulanmazdi. */
 }
 @media (max-width:1120px){
   .span-2, .span-4, .span-6, .span-8{ grid-column:span 12; }
@@ -1155,6 +1155,21 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   padding:2px 0 2px 11px;
   cursor:pointer; background:none; border-top:none; border-right:none; border-bottom:none;
   text-align:left; width:100%;
+}
+
+/* Kenar rayi yalnız gerçekten yer varken sütundur; dar ekranda içeriğin
+   altına yatay şerit olarak akar.
+   Bu blok layout.css'te DEĞİL burada durmalı: components.css daha sonra
+   yüklendiği için oradaki medya kuralı temel `.rail` kuralının altında
+   kalıyor ve hiç uygulanmıyordu — kartlar sütunda kalıp sayfa boyunca
+   gerilerek aralarında boş şerit bırakıyordu. */
+@media (max-width:1400px){
+  .rail{
+    flex-direction:row; flex-wrap:wrap; gap:12px 16px;
+    align-items:flex-start; align-content:flex-start;
+  }
+  .rail .railcard{ width:auto; flex:1 1 220px; }
+  .rail__head{ width:100%; }
 }
 .railcard:hover{ border-left-color:var(--primary); }
 .railcard__t{
@@ -1862,6 +1877,223 @@ button.listitem.is-on{ background:var(--primary-soft); }
   .meetturn__body{ font-size:var(--fs-sm); }
   .meet{ gap:9px; }
   .reportrow__list{ margin-left:14px; }
+}
+
+/* ==================== ofis: kat planı ====================
+   Ofisi "panel" olmaktan çıkaran şey mekân hissidir: masalar bir zemin
+   üzerinde durur, herkesin ışığı yanar, kimin meşgul olduğu bakınca
+   anlaşılır. Renk yalnız token'lardan gelir; her ajanın kimlik rengi
+   masasının üst şeridinde tekrarlanır. */
+
+.floor{
+  position:relative;
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:var(--sp-4);
+  background:
+    linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+  box-shadow:inset 0 1px 0 var(--surface), var(--shadow);
+  overflow:hidden;
+}
+/* Zeminin dokusu: ince ızgara, içeriğin okunmasını engellemeyecek kadar soluk. */
+.floor::before{
+  content:'';
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(var(--c-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-grid) 1px, transparent 1px);
+  background-size:34px 34px;
+  opacity:.34;
+  pointer-events:none;
+}
+.floor > *{ position:relative; }
+
+.floor__head{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:var(--sp-3); flex-wrap:wrap; margin-bottom:var(--sp-4);
+}
+.floor__title{
+  font-family:var(--font-display); font-size:var(--fs-md); font-weight:700;
+  display:flex; align-items:center; gap:8px;
+}
+.floor__title svg{
+  width:18px; height:18px; flex:none;
+  stroke:currentColor; fill:none; stroke-width:1.8; color:var(--text-3);
+}
+.floor__meta{ font-size:var(--fs-xs); color:var(--text-3); }
+
+/* Masalar ikişerli dizilir; ekran gerçekten genişse dördü bir sırada.
+   auto-fit denendi ve 3+1 gibi dengesiz sıralar ürettiği için bırakıldı:
+   uzman sayısı dört, sıra ya ikili ya dörtlü olmalı. */
+.floor__room{
+  display:grid; gap:var(--sp-3);
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+@media (min-width:1500px){
+  .floor__room{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
+}
+/* Patron masası öndedir: tüm sırayı kaplar, diğerleri karşısına dizilir. */
+.floor__lead{ grid-column:1 / -1; }
+
+.seat{
+  position:relative;
+  display:flex; align-items:center; gap:10px;
+  padding:11px 12px 12px;
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  text-align:left; width:100%;
+  cursor:pointer;
+  transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+             border-color var(--dur) var(--ease);
+}
+/* Masanın üst kenarı ajanın kimlik rengidir — kim nerede oturuyor, bakınca belli. */
+.seat::before{
+  content:'';
+  position:absolute; left:12px; right:12px; top:0; height:3px;
+  border-radius:0 0 3px 3px;
+  background:var(--seat-color, var(--border-strong));
+}
+.seat:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-lg);
+  border-color:var(--border-strong);
+}
+.seat:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.seat.is-open{ border-color:var(--seat-color, var(--primary)); }
+
+.seat--patron { --seat-color:var(--agent-patron); }
+.seat--tyt    { --seat-color:var(--agent-tyt); }
+.seat--ayt    { --seat-color:var(--agent-ayt); }
+.seat--rehber { --seat-color:var(--agent-rehber); }
+.seat--analist{ --seat-color:var(--agent-analist); }
+
+.seat__body{ min-width:0; flex:1; }
+.seat__name{
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--font-display); font-size:var(--fs-sm); font-weight:700;
+  line-height:1.3;
+}
+.seat__role{
+  display:block; font-size:var(--fs-xs); color:var(--text-3);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.seat__state{
+  display:flex; align-items:center; gap:6px;
+  margin-top:6px; font-size:var(--fs-xs); color:var(--text-3);
+}
+/* Durum metni masayı büyütmesin: taşarsa kırpılır, masalar aynı boyda kalır. */
+.seat__state span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* Patron masası öndedir: daha geniş, avatarı büyük, günün işini de taşır. */
+.floor__lead .seat{ padding:14px 15px; gap:13px; }
+.floor__lead .agentav{ width:42px; height:42px; font-size:var(--fs-md); }
+.floor__lead .seat__name{ font-size:var(--fs-md); }
+.seat__task{
+  display:block; margin-top:7px; padding-top:7px;
+  border-top:1px dashed var(--border);
+  font-size:var(--fs-xs); color:var(--text-2);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.seat__task b{ color:var(--text); font-weight:600; }
+
+/* Durum ışığı: boşta sabit, çalışırken nabız atar. */
+.seatlight{
+  width:8px; height:8px; border-radius:50%; flex:none;
+  background:var(--text-3);
+  box-shadow:0 0 0 3px transparent;
+}
+.seatlight--ok{ background:var(--agent-rehber); box-shadow:0 0 0 3px var(--surface-2); }
+.seatlight--warn{ background:var(--accent); }
+.seatlight--danger{ background:var(--danger); }
+.seatlight--busy{ background:var(--primary); animation:seatpulse 1.4s var(--ease) infinite; }
+@keyframes seatpulse{
+  0%,100%{ box-shadow:0 0 0 0 var(--primary-soft); }
+  50%    { box-shadow:0 0 0 5px transparent; }
+}
+@media (prefers-reduced-motion:reduce){
+  .seatlight--busy{ animation:none; }
+}
+
+/* Masadaki iş yükü: kaç not bekliyor. Sayı değil ağırlık gösterir. */
+/* İş yükü şeridi Patron'un geniş masasında satır boyunca uzamasın. */
+.seat__load{ display:flex; gap:3px; margin-top:7px; max-width:190px; }
+.seat__load i{
+  height:3px; flex:1; border-radius:2px; background:var(--surface-3);
+}
+.seat__load i.is-on{ background:var(--seat-color, var(--primary)); }
+
+.seat__count{
+  position:absolute; top:9px; right:10px;
+  min-width:17px; height:17px; padding:0 4px;
+  border-radius:9px;
+  background:var(--danger); color:#fff;
+  font-size:10px; font-weight:700; line-height:17px; text-align:center;
+}
+
+@media (max-width:520px){
+  .floor{ padding:var(--sp-3); }
+  .floor__room{ grid-template-columns:1fr; }
+}
+
+/* ==================== ofis: onay kutusu ====================
+   Ajan sisteme dokunmayı önerir; ne değişeceği ONAYDAN ÖNCE önce/sonra
+   olarak gösterilir. Onaysız hiçbir satır uygulanmaz. */
+
+.props{ display:grid; gap:10px; }
+
+.prop{
+  border:1px solid var(--border);
+  border-left:3px solid var(--seat-color, var(--primary));
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  padding:11px 12px;
+}
+.prop--patron { --seat-color:var(--agent-patron); }
+.prop--tyt    { --seat-color:var(--agent-tyt); }
+.prop--ayt    { --seat-color:var(--agent-ayt); }
+.prop--rehber { --seat-color:var(--agent-rehber); }
+.prop--analist{ --seat-color:var(--agent-analist); }
+
+.prop__head{ display:flex; align-items:flex-start; gap:9px; }
+.prop__who{ min-width:0; flex:1; }
+.prop__title{
+  display:block; font-family:var(--font-display);
+  font-size:var(--fs-sm); font-weight:700; line-height:1.3;
+}
+.prop__by{ display:block; font-size:var(--fs-xs); color:var(--text-3); margin-top:1px; }
+.prop__why{
+  margin-top:8px; font-size:var(--fs-sm); color:var(--text-2); line-height:1.45;
+}
+
+/* Önce → sonra: değişimin tamamı tek bakışta okunur. */
+.diff{
+  margin-top:10px; border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface-2); overflow:hidden;
+}
+.diff__row{
+  display:grid; grid-template-columns:minmax(84px, 1fr) 1.2fr 16px 1.2fr;
+  align-items:center; gap:8px;
+  padding:7px 10px; font-size:var(--fs-xs);
+}
+.diff__row + .diff__row{ border-top:1px solid var(--border); }
+.diff__label{ color:var(--text-3); }
+/* Eski değer oka yaslanır: değişim tek satırda "şu → bu" diye okunur. */
+.diff__before{ color:var(--text-3); min-width:0; overflow-wrap:anywhere; text-align:right; }
+.diff__arrow{ color:var(--text-3); text-align:center; }
+.diff__after{ color:var(--text); font-weight:600; min-width:0; overflow-wrap:anywhere; }
+
+.prop__acts{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+
+/* Uygulanmış öneriler — geri alınabilir olduğu görünsün. */
+.prop--done{ border-left-color:var(--border-strong); background:var(--surface-2); }
+.prop--done .prop__title{ color:var(--text-2); }
+
+@media (max-width:560px){
+  .diff__row{ grid-template-columns:1fr; gap:2px; }
+  .diff__arrow{ display:none; }
+  .diff__before::after{ content:' →'; color:var(--text-3); }
 }
 </style>
 <div id="app">
@@ -3766,6 +3998,117 @@ R.OFFICE_PROMPTS = {
       + 'sonra yukarıdaki eylemi kendi cümlenle gerekçelendir. Eylemi DEĞİŞTİRME, '
       + 'yerine başka iş önerme. En fazla 4 cümle.';
   },
+};
+
+/* ==== js/data/actions.js ==== */
+/* Ajanlarin onerebilecegi eylemler — KAPALI katalog.
+
+   Ofis bugune kadar yalnizca OKUYORDU. Artik yazabilir; ama yazma yetkisi
+   sinirsiz degil, sayili ve onaya bagli:
+
+     ajan onerir  →  kural motoru dogrular  →  SEN onaylarsin  →  motor uygular
+
+   Uc kural bu dosyayi ayakta tutar:
+
+   1. KAPALI KATALOG. Ajan yalnizca buradaki bir eylemi onerebilir. Serbest
+      metin hicbir yoldan eyleme donusmez — ajan defterindeki "kapali olcut
+      listesi" ile ayni doktrin.
+   2. YAPISAL PARAMETRE. Her eylemin parametreleri burada adiyla ve turuyle
+      yazilidir. Fazladan alan gelirse oneri dusurulur, uydurulmus deger
+      kural motorunda dogrulanamaz ve gecmez.
+   3. GERI ALINABILIRLIK. Uygulanan her eylem oncesi durumun anlik goruntusunu
+      birakir; kullanici tek dokunusla geri alir.
+
+   Yetki ayrimi burada da gecerlidir: Tuna AYT konusunu tekrara alamaz,
+   Rana net ile ilgili bir eylem oneremez. `agents` alani bunu kilitler.
+
+   Eylem eklemek: buraya bir kayit yaz, core/proposals.js icindeki IMPL'e
+   ayni id ile check/preview/apply/undo ekle, testine bir satir ekle. */
+
+window.R = window.R || {};
+
+R.ACTIONS = [
+  {
+    id:'topic-review',
+    title:'Konuyu tekrara al',
+    /* Kullaniciya "ne olacak" tek satirda soylenir. */
+    summary:'Kapanmış görünen konunun durumu “çalışılıyor”a döner.',
+    touches:'Konu durumu',
+    icon:'refresh',
+    route:'subjects',
+    agents:['tyt', 'ayt'],
+    params:{ subjectId:'string', topicId:'string' },
+    why:'Kapanmış sayılan bir konu denemede net kaybettiriyorsa kapanış '
+      + 'gerçek değildir; konu tekrar listesine döner.',
+  },
+
+  {
+    id:'block-add',
+    title:'Bugüne tekrar bloğu ekle',
+    summary:'Günün planına yeni bir çalışma bloğu eklenir.',
+    touches:'Bugünün planı',
+    icon:'plus',
+    route:'today',
+    agents:['rehber', 'tyt', 'ayt'],
+    params:{ subjectId:'string', topicId:'string', minutes:'number' },
+    why:'Bir konu açık kaldıysa plana girmeden kapanmaz.',
+  },
+
+  {
+    id:'cards-due-today',
+    title:'Geciken tekrarları bugüne çek',
+    summary:'Tarihi geçmiş tekrar kartları bugüne alınır.',
+    touches:'Tekrar kartları',
+    icon:'layers',
+    route:'cards',
+    agents:['analist'],
+    params:{ limit:'number' },
+    why:'Biriken tekrar borcu ertelendikçe büyür; bugüne çekilirse kapanır.',
+  },
+
+  {
+    id:'card-from-error',
+    title:'Açık yanlıştan kart üret',
+    summary:'Yanlış defterindeki kayıttan bir tekrar kartı oluşturulur.',
+    touches:'Tekrar kartları',
+    icon:'plus',
+    route:'cards',
+    agents:['analist'],
+    params:{ errorId:'string' },
+    why:'Kök nedeni yazılmış ama karta dönmemiş yanlış, tekrar edilmediği '
+      + 'için yine yapılır.',
+  },
+
+  {
+    id:'week-target',
+    title:'Haftalık soru hedefini güncelle',
+    summary:'Bu haftanın soru hedefi değiştirilir.',
+    touches:'Haftalık hedef',
+    icon:'target',
+    route:'week',
+    agents:['patron', 'rehber'],
+    params:{ weekN:'number', questionTarget:'number' },
+    why:'Hedef sürekli tutmuyorsa sorun hedeftedir; gerçekçi hedef tutar.',
+  },
+
+  {
+    id:'decision-close',
+    title:'Açık kararı kapat',
+    summary:'Takipteki karar “yapıldı” ya da “devredildi” olarak kapanır.',
+    touches:'Karar takibi',
+    icon:'check',
+    route:'office',
+    agents:['patron'],
+    params:{ decisionId:'string', state:'string' },
+    why:'Kapanmayan karar bir sonraki toplantının önüne düşer.',
+  },
+];
+
+R.ACTION_BY_ID = R.ACTIONS.reduce((m, a) => { m[a.id] = a; return m; }, {});
+
+/* Bir ajanin onerebilecegi eylemler — yetki ayrimi burada uygulanir. */
+R.actionsFor = function(agentId){
+  return R.ACTIONS.filter(a => a.agents.indexOf(agentId) >= 0);
 };
 
 /* ==== js/core/utils.js ==== */
@@ -7063,6 +7406,13 @@ R.UI = (function(){
     refresh:'<path d="M20 11a8 8 0 10-1.7 5.3"/><path d="M20 5v6h-6"/>',
     search:'<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>',
     zap:'<path d="M13 3L5.5 13.5H11l-.8 7.5L18.5 10.5H13z"/>',
+    users:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/>'
+      + '<path d="M16 5.6a3.2 3.2 0 010 4.8M17.5 14.9c2 .6 3.2 2.3 3.2 4.6"/>',
+    layers:'<path d="M12 3.5l8.5 4.5-8.5 4.5L3.5 8z"/><path d="M3.5 12.5L12 17l8.5-4.5"/>',
+    target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.2"/><path d="M12 11.9v.01"/>',
+    undo:'<path d="M4 11a8 8 0 111.7 5.3"/><path d="M4 5v6h6"/>',
+    shield:'<path d="M12 3.5l7 2.6v5.4c0 4-2.9 7.4-7 8.9-4.1-1.5-7-4.9-7-8.9V6.1z"/>'
+      + '<path d="M9 12.2l2.2 2.2L15.2 10"/>',
   };
 
   function icon(name, cls){
@@ -9258,6 +9608,71 @@ R.LLM = (function(){
   const KEY_STORE = 'rota.llm.keys';
   const TIMEOUT_MS = 90000;
 
+  /* Turkce ayni cumleyi Ingilizceden belirgin daha cok token'la yazar:
+     ekler ve genis alfabe yuzunden bes cumlelik bir ajan yaniti rahatlikla
+     300 token eder. Eski 700'luk tavan uzun yanitlari cumle ortasinda
+     kesiyordu ve kesildigi hicbir yerde fark edilmiyordu. */
+  const DEFAULT_MAX_TOKENS = 1200;
+
+  /* Yanit yine de kesilirse kac ek istekle tamamlanmaya calisilir.
+     Her devam bir kota hakki harcar; ucretsiz katmanda ikiden fazlasi
+     pahaliya gelir. */
+  const MAX_CONTINUATIONS = 2;
+
+  /* Saglayicilar "token siniri doldu"yu farkli adlandirir. */
+  const TRUNCATED_FINISH = ['length', 'max_tokens', 'MAX_TOKENS'];
+  function truncated(finish){
+    return TRUNCATED_FINISH.indexOf(String(finish || '')) >= 0;
+  }
+
+  /* Devam istekleri de yetmediyse yarim kalan son cumle atilir: kesik bir
+     cumle gostermek, bir cumle eksik gostermekten kotudur. Sayi icindeki
+     nokta (1.500) cumle sonu sayilmaz — noktalamayi bosluk ya da metin
+     sonu izlemelidir. */
+  function trimToSentence(text){
+    const s = String(text || '').trim();
+    const m = s.match(/^[\s\S]*[.!?…](?=\s|$)/);
+    if(!m) return s;                        // hic tam cumle yok: dokunma
+    const head = m[0].trim();
+    /* Yalniz SARKAN bir parca kirpilir. Kesilen cumle metnin govdesiyse
+       (geriye yarisindan azi kaliyorsa) atmak yerine eksik hâliyle
+       gosterilir: yarim cumle kotudur, bos ekran daha kotudur. */
+    return head.length >= s.length * 0.4 ? head : s;
+  }
+
+  /* Kesilen metnin son kelimesi yarim kalmis olabilir ("kaybı" degil
+     "kayb"). Devam istemeden once o kelime atilir ve modelden kaldigi
+     noktadan sonrasi istenir: boylece birlestirme ne kelime boler ne de
+     kelime kaybeder — atilan kelimeyi model yeniden yazar. */
+  function dropLastWord(s){
+    const t = String(s || '').trimEnd();
+    const i = t.search(/\s\S*$/);
+    return i <= 0 ? t : t.slice(0, i);
+  }
+
+  /* Kesilen yaniti tamamlatma istemi. Tekrar, kesik cumleden daha kotu
+     bir bozulmadir; acikca yasaklanir. */
+  function continueAsk(tail){
+    return 'Yanıtın uzunluk sınırı yüzünden yarıda kesildi. Yukarıdaki metnin '
+      + 'DEVAMINI yaz: baştan başlama, yazdıklarını tekrar etme, selamlama ekleme. '
+      + 'Yalnızca eksik kalan kısmı yaz ve cümleyi tamamla.\n\n'
+      + 'KESİLDİĞİ YER: …' + tail;
+  }
+
+  /* Devam parcasini birlestirir. Model uyariya ragmen sondan bir parcayi
+     tekrarlamis olabilir: ortusen en uzun ek bir kez yazilir. */
+  function joinContinuation(prev, piece){
+    if(!piece) return prev;
+    if(!prev) return piece;
+    const max = Math.min(prev.length, piece.length, 240);
+    for(let n = max; n >= 12; n--){
+      if(prev.slice(-n).toLowerCase() === piece.slice(0, n).toLowerCase()){
+        return prev + piece.slice(n);
+      }
+    }
+    return prev + (/\s$/.test(prev) ? '' : ' ') + piece;
+  }
+
   /* ---------- anahtar deposu ---------- */
 
   function readKeys(){
@@ -9446,26 +9861,49 @@ R.LLM = (function(){
     };
   }
 
-  /* SSE govdesini satir satir okur; her 'data:' satirini fn'e verir. */
+  /* SSE govdesini satir satir okur; her 'data:' satirini fn'e verir.
+
+     Iki kapanis tuzagi vardir ve ikisi de yanitin SONUNU goturur:
+     akis son 'data:' satirini yeni satirla kapatmadan bitebilir, ve cok
+     baytli bir karakter (Turkce ç/ğ/ş/ü hepsi iki bayt) son parcaya
+     bolunmus olabilir. Bu yuzden bitiste hem cozucu hem tampon bosaltilir. */
   async function readSSE(response, fn){
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let buffer = '';
-    for(;;){
-      const { done, value } = await reader.read();
-      if(done) break;
-      buffer += decoder.decode(value, { stream:true });
-      let nl;
-      while((nl = buffer.indexOf('\n')) >= 0){
-        const line = buffer.slice(0, nl).trim();
-        buffer = buffer.slice(nl + 1);
-        if(!line || line.indexOf(':') === 0) continue;      // yorum / keep-alive
-        if(line.indexOf('data:') !== 0) continue;
-        const payload = line.slice(5).trim();
-        if(payload === '[DONE]') return;
-        try{ fn(JSON.parse(payload)); }
-        catch(e){ /* parcali kare — bir sonraki satirda tamamlanir */ }
+    let closed = false;
+
+    /* true donerse akis kapanmistir ([DONE]) ve okuma biter. */
+    function handle(line){
+      const s = line.trim();
+      if(!s || s.indexOf(':') === 0) return false;          // yorum / keep-alive
+      if(s.indexOf('data:') !== 0) return false;
+      const payload = s.slice(5).trim();
+      if(payload === '[DONE]'){ closed = true; return true; }
+      try{ fn(JSON.parse(payload)); }
+      catch(e){ /* parcali kare — bir sonraki satirda tamamlanir */ }
+      return false;
+    }
+
+    try{
+      for(;;){
+        const { done, value } = await reader.read();
+        if(done){
+          buffer += decoder.decode();                       // yarim kalan cok baytli karakter
+          break;
+        }
+        buffer += decoder.decode(value, { stream:true });
+        let nl;
+        while((nl = buffer.indexOf('\n')) >= 0){
+          const line = buffer.slice(0, nl);
+          buffer = buffer.slice(nl + 1);
+          if(handle(line)) return;
+        }
       }
+      /* Kapanis satiri yeni satirla bitmediyse elde kalan HÂLÂ veridir. */
+      if(!closed && buffer) handle(buffer);
+    }finally{
+      try{ reader.cancel(); }catch(e){}
     }
   }
 
@@ -9494,7 +9932,7 @@ R.LLM = (function(){
     });
     const text = String((res && res.text) || '').trim();
     if(!text) throw fail('empty');
-    return text;
+    return { text, finish:'' };
   }
 
   /* ---------- OpenAI uyumlu cagri ---------- */
@@ -9530,7 +9968,7 @@ R.LLM = (function(){
         body:JSON.stringify({
           model:req.model,
           messages,
-          max_tokens:req.maxTokens || 700,
+          max_tokens:req.maxTokens || DEFAULT_MAX_TOKENS,
           temperature:req.temperature == null ? 0.4 : req.temperature,
           stream,
         }),
@@ -9554,12 +9992,17 @@ R.LLM = (function(){
     }
 
     let text = '';
+    let finish = '';
     try{
       const ctype = response.headers.get('content-type') || '';
       if(stream && ctype.indexOf('event-stream') >= 0){
         await readSSE(response, obj => {
           const ch = obj.choices && obj.choices[0];
-          const delta = ch && ((ch.delta && ch.delta.content) || ch.text);
+          if(!ch) return;
+          /* Bitis sebebi genelde SON karede, govdesi bos olarak gelir:
+             delta kontrolunden ONCE okunmali, yoksa kesilme hic gorulmez. */
+          if(ch.finish_reason) finish = String(ch.finish_reason);
+          const delta = (ch.delta && ch.delta.content) || ch.text;
           if(!delta) return;
           text += delta;
           req.onText({ text, delta });
@@ -9568,6 +10011,7 @@ R.LLM = (function(){
         /* Akis istendigi hâlde duz JSON dondu — ayni govdeden okunur. */
         const json = await response.json();
         const ch = json.choices && json.choices[0];
+        if(ch && ch.finish_reason) finish = String(ch.finish_reason);
         text = String((ch && ch.message && ch.message.content) || (ch && ch.text) || '');
         if(req.onText && text) req.onText({ text, delta:text });
       }
@@ -9581,7 +10025,7 @@ R.LLM = (function(){
 
     text = text.trim();
     if(!text) throw fail('empty');
-    return text;
+    return { text, finish };
   }
 
   /* ---------- Gemini cagrisi ---------- */
@@ -9603,10 +10047,17 @@ R.LLM = (function(){
     const body = {
       contents,
       generationConfig:{
-        maxOutputTokens:req.maxTokens || 700,
+        maxOutputTokens:req.maxTokens || DEFAULT_MAX_TOKENS,
         temperature:req.temperature == null ? 0.4 : req.temperature,
       },
     };
+    /* 2.5 ailesinde "dusunme" ayni butceden yer: acik birakilirsa model
+       butceyi dusunerek harcar ve cevap YARIM ya da bos doner. Ofis
+       ajanlari kisa konusur, dusunmeye ihtiyaclari yok — kapatilir.
+       Alan yalniz destekleyen modele gonderilir; digerleri 400 verir. */
+    if(/2\.5.*flash/i.test(String(req.model || ''))){
+      body.generationConfig.thinkingConfig = { thinkingBudget:0 };
+    }
     if(req.system) body.systemInstruction = { parts:[{ text:req.system }] };
 
     const guard = withTimeout(req.signal, req.timeout);
@@ -9638,14 +10089,22 @@ R.LLM = (function(){
     function partsText(obj){
       const cand = obj.candidates && obj.candidates[0];
       const parts = cand && cand.content && cand.content.parts;
-      return (parts || []).map(p => p.text || '').join('');
+      /* Dusunme parcalari metin degildir; cevaba karistirilmaz. */
+      return (parts || []).filter(p => !p.thought).map(p => p.text || '').join('');
+    }
+    function finishOf(obj){
+      const cand = obj.candidates && obj.candidates[0];
+      return (cand && cand.finishReason) ? String(cand.finishReason) : '';
     }
 
     let text = '';
+    let finish = '';
     try{
       const ctype = response.headers.get('content-type') || '';
       if(stream && ctype.indexOf('event-stream') >= 0){
         await readSSE(response, obj => {
+          const f = finishOf(obj);
+          if(f) finish = f;
           const delta = partsText(obj);
           if(!delta) return;
           text += delta;
@@ -9653,7 +10112,9 @@ R.LLM = (function(){
         });
       }else{
         const json = await response.json();
-        text = Array.isArray(json) ? json.map(partsText).join('') : partsText(json);
+        const list = Array.isArray(json) ? json : [json];
+        text = list.map(partsText).join('');
+        list.forEach(o => { const f = finishOf(o); if(f) finish = f; });
         if(req.onText && text) req.onText({ text, delta:text });
       }
     }catch(e){
@@ -9666,7 +10127,7 @@ R.LLM = (function(){
 
     text = text.trim();
     if(!text) throw fail('empty');
-    return text;
+    return { text, finish };
   }
 
   /* ---------- kamu API ---------- */
@@ -9681,47 +10142,98 @@ R.LLM = (function(){
     /* Cevrimdisiyken hic deneme: kota harcanmaz, sebep dogru soylenir. */
     if(provider.kind !== 'builtin' && offline()) throw fail('offline');
 
-    /* Cok anahtarli havuz: kotasi musait olan anahtar secilir. */
-    let picked = null;
-    if(provider.needsKey){
-      if(!getKeys(provider.id).length) throw fail('no_key');
-      picked = pickKey(cfg);
-      if(!picked) throw Object.assign(new Error('gunluk kota doldu'), { code:'daily_quota' });
-    }
-
-    const quotaCfg = picked ? Object.assign({}, cfg, { keyId:picked.index }) : cfg;
-
-    const payload = Object.assign({}, req, {
-      model:cfg.model,
-      endpoint:cfg.endpoint,
-      key:picked ? picked.key : null,
-      keyId:picked ? picked.index : null,
-    });
-
-    /* Sira: kota yoneticisi izin verene kadar bekle. Boylece dakikalik
-       sinir HIC asilmaz; gun dolduysa beklemek yerine acikca soylenir. */
-    const slot = await R.Quota.acquire(quotaCfg, { signal:req && req.signal, onWait:req && req.onWait });
-
     const started = Date.now();
-    let text;
-    try{
-      if(provider.kind === 'builtin') text = await callBuiltin(payload);
-      else if(provider.kind === 'gemini') text = await callGemini(payload, provider);
-      else text = await callOpenAI(payload, provider);
-    }catch(err){
-      /* Istek hic gonderilemediyse gunluk hakki tuketmis sayma. */
-      if(err && (err.code === 'cancelled' || err.code === 'sandboxed'
-              || err.code === 'no_key' || err.code === 'offline')){
-        R.Quota.release(quotaCfg);
+    const baseMessages = (req && req.messages) || [];
+    /* Yanit token sinirina carparsa devam istegiyle tamamlanir. Kapatmak
+       icin continue:false, sayiyi degistirmek icin maxContinuations. */
+    const limit = (req && req.continue === false) ? 0
+      : (req && req.maxContinuations != null ? req.maxContinuations : MAX_CONTINUATIONS);
+
+    let text = '';
+    let finish = '';
+    let rounds = 0;
+    let waited = 0;
+    let slot = null;
+    let picked = null;
+
+    for(let round = 0; round <= limit; round++){
+      /* Cok anahtarli havuz: kotasi musait anahtar HER turda yeniden
+         secilir — ilk anahtarin gunu devam isteginde dolmus olabilir. */
+      picked = null;
+      if(provider.needsKey){
+        if(!getKeys(provider.id).length) throw fail('no_key');
+        picked = pickKey(cfg);
+        /* Devam turunda kota bittiyse elde saglam bir metin var: onunla yetin. */
+        if(!picked){
+          if(round > 0) break;
+          throw Object.assign(new Error('gunluk kota doldu'), { code:'daily_quota' });
+        }
       }
-      throw err;
+      const quotaCfg = picked ? Object.assign({}, cfg, { keyId:picked.index }) : cfg;
+
+      /* Devam turunda yarim kalmis son kelime atilir ve model oradan
+         surdurur. Kirpma YALNIZ bu turun tabanina uygulanir; elde duran
+         metne dokunulmaz, cunku devam istegi duserse onu dondurecegiz. */
+      const prefix = round === 0 ? '' : dropLastWord(text);
+      const messages = round === 0 ? baseMessages : baseMessages.concat([
+        { role:'assistant', text:prefix },
+        { role:'user', text:continueAsk(prefix.slice(-120)) },
+      ]);
+
+      const payload = Object.assign({}, req, {
+        messages,
+        model:cfg.model,
+        endpoint:cfg.endpoint,
+        key:picked ? picked.key : null,
+        keyId:picked ? picked.index : null,
+        /* Akis kullaniciya kesintisiz gorunmeli: parca degil birikmis
+           metin yayinlanir. */
+        onText:(req && req.onText)
+          ? ev => req.onText({ text:joinContinuation(prefix, ev.text), delta:ev.delta })
+          : undefined,
+      });
+
+      /* Sira: kota yoneticisi izin verene kadar bekle. Boylece dakikalik
+         sinir HIC asilmaz; gun dolduysa beklemek yerine acikca soylenir. */
+      slot = await R.Quota.acquire(quotaCfg, { signal:req && req.signal, onWait:req && req.onWait });
+      waited += slot.waited || 0;
+
+      let out;
+      try{
+        if(provider.kind === 'builtin') out = await callBuiltin(payload);
+        else if(provider.kind === 'gemini') out = await callGemini(payload, provider);
+        else out = await callOpenAI(payload, provider);
+      }catch(err){
+        /* Istek hic gonderilemediyse gunluk hakki tuketmis sayma. */
+        if(err && (err.code === 'cancelled' || err.code === 'sandboxed'
+                || err.code === 'no_key' || err.code === 'offline')){
+          R.Quota.release(quotaCfg);
+        }
+        if(err && err.code === 'cancelled') throw err;
+        /* Devam istegi duserse ilk turun metni durur: hata gostermektense
+           eksik cumleyi kirpip eldekini vermek daha iyidir. */
+        if(round > 0) break;
+        throw err;
+      }
+
+      rounds++;
+      text = round === 0 ? out.text : joinContinuation(prefix, out.text);
+      finish = out.finish;
+      if(!truncated(finish)) break;
     }
+
+    /* Devam haklari bittigi hâlde hâlâ kesikse yarim cumle atilir. */
+    const cut = truncated(finish);
+    if(cut) text = trimToSentence(text);
+    text = text.trim();
+    if(!text) throw fail('empty');
 
     return {
       text, provider:provider.id, model:cfg.model || 'yerleşik',
       keyIndex:picked ? picked.index : null,
-      ms:Date.now() - started, waited:slot.waited || 0,
-      usedToday:slot.usedToday, rpd:slot.rpd,
+      ms:Date.now() - started, waited,
+      usedToday:slot && slot.usedToday, rpd:slot && slot.rpd,
+      rounds, truncated:cut,
     };
   }
 
@@ -9767,6 +10279,9 @@ R.LLM = (function(){
       maxTokens:16,
       temperature:0,
       timeout:30000,
+      /* Sinama kasten dar butceli: kesilme beklenen sonuctur, devam
+         istegiyle bosuna kota harcanmaz. */
+      continue:false,
     });
     return { ok:true, text:res.text.slice(0, 60), ms:Date.now() - started, model:res.model };
   }
@@ -9786,6 +10301,7 @@ R.LLM = (function(){
     getKey, getKeys, setKey, addKey, removeKeyAt, clearKeys, maskKey, maskKeys, pickKey,
     chat, complete, test, ready,
     errorText, retryable, resumable, offline, onceOnline, inSandbox, KEY_STORE,
+    truncated, trimToSentence, joinContinuation, dropLastWord, DEFAULT_MAX_TOKENS,
   };
 })();
 
@@ -10164,6 +10680,23 @@ R.Office = (function(){
   const CHAT_MAX = 30;        // ajan basina saklanan mesaj
   const MEETING_MAX = 20;     // saklanan toplanti kaydi
   const TURN_CONTEXT = 4;     // toplantida bir uzmana gosterilen onceki konusma
+
+  /* Token butceleri — tek yerde, cunku hepsi ayni hataya acikti.
+     Turkce ekli bir dildir ve genis alfabesiyle ayni cumleyi Ingilizceden
+     belirgin daha cok token'a yazar: dort cumlelik bir uzman yaniti
+     rahatlikla 250 token eder. Eski butceler (200-420) bu yuzden
+     cumlenin ortasinda bitiyordu. Asagidaki degerler beklenen uzunlugun
+     yaklasik uc kati: model erken bitirirse fazlasi harcanmaz, uzun
+     yazarsa da kesilmez. */
+  const BUDGET = {
+    turn:900,       // toplantida bir uzmanin turu (en fazla 4-5 cumle)
+    opening:700,    // Patron toplantiyi acar (3 cumle)
+    closing:1000,   // Patron kapatir: celiski + oylama + gerekce (4 cumle)
+    cross:500,      // Patron tek cumlelik capraz soru sorar
+    answer:800,     // capraz soruya yanit
+    daily:600,      // gunluk brifing (2 cumle)
+    cards:1600,     // nottan kart uretimi — JSON, uzun
+  };
 
   /* ==================== ayarlar ==================== */
 
@@ -10712,7 +11245,7 @@ R.Office = (function(){
       const turn = await speak('patron', 'briefing', {
         messages:[{ role:'user', text:R.OFFICE_PROMPTS.daily(data) }],
         ctx:{},
-      }, Object.assign({}, o, { maxTokens:200 }));
+      }, Object.assign({}, o, { maxTokens:BUDGET.daily }));
       text = turn.text;
       mode = turn.mode;
     }else{
@@ -11053,7 +11586,7 @@ R.Office = (function(){
     const res = await R.LLM.complete(chain, {
       system:cfg.system + '\nEn fazla ' + cfg.max + ' kart üret.',
       messages:[{ role:'user', text:'NOTLAR (JSON):\n' + JSON.stringify(ctx, null, 1) }],
-      maxTokens:900,
+      maxTokens:BUDGET.cards,
       temperature:0.2,
       signal:o.signal,
     });
@@ -11078,24 +11611,50 @@ R.Office = (function(){
       return { agent:agentId, name:agent.name, role:agent.role, text, warnings:[], mode:'kural' };
     }
 
+    /* Ajan sisteme dokunmayi ONEREBILIR (sohbet ve toplanti turlarinda).
+       Onerdigi sey dogrudan uygulanmaz: kapali katalogdan secilir, kural
+       motorunda dogrulanir ve kullanicinin onayina duser. */
+    const catalog = o.allowAction ? R.Proposals.catalogPrompt(agentId) : '';
+
     try{
       const res = await R.LLM.complete(chain, {
-        system:R.OFFICE_PROMPTS.system(agent, toneId()),
+        system:R.OFFICE_PROMPTS.system(agent, toneId()) + (catalog ? '\n\n' + catalog : ''),
         messages:payload.messages,
-        maxTokens:o.maxTokens || 420,
+        maxTokens:o.maxTokens || BUDGET.turn,
         temperature:agent.temperature,
         signal:o.signal,
-        onText:o.onText,
+        /* Akista JSON kuyrugu kullaniciya gorunmez. */
+        onText:(o.onText && catalog)
+          ? ev => o.onText({ text:R.Proposals.stripTrailingJson(ev.text), delta:ev.delta })
+          : o.onText,
       });
+
+      /* Eylem nesnesi metinden ayrilir: ekranda konusma kalir, oneri
+         kutuya gider. */
+      let said = res.text;
+      let proposal = null;
+      if(catalog){
+        const split = R.Proposals.splitAction(said);
+        if(split.obj){
+          said = split.text || said;
+          const p = R.Proposals.fromModel(agentId, split.obj);
+          if(p) proposal = await R.Proposals.propose(p);
+        }
+      }
+
       /* Cikti kendi brifingine karsi denetlenir: uydurulmus sayi ve alan
          ihlali burada yakalanir. Patron'un brifingi dort raporu tasidigi
          icin onun sayilari da kapsanir. */
       let ownBrief = null;
       try{ ownBrief = brief(agentId); }catch(e){}
-      const checked = validate(res.text, { agentId, brief:ownBrief });
+      const checked = validate(said, { agentId, brief:ownBrief });
       return { agent:agentId, name:agent.name, role:agent.role, text:checked.text,
         warnings:checked.warnings, mode:'llm', model:res.model, provider:res.provider,
-        fellBack:!!res.fellBack, ms:res.ms };
+        fellBack:!!res.fellBack, ms:res.ms,
+        /* Devam istekleri de yetmediyse yanit kirpildi: ekran bunu soyler,
+           kullanici eksik cumleyi sessizce okumaz. */
+        truncated:!!res.truncated,
+        proposal:proposal || null };
     }catch(err){
       if(err && err.code === 'cancelled') throw err;
       const text = ruleText(agentId, kind, payload.ctx || {});
@@ -11140,7 +11699,9 @@ R.Office = (function(){
       { role:'user', text:R.OFFICE_PROMPTS.chat(agent, data, q) },
     ]);
 
-    return speak(agentId, 'chat', { messages, ctx:{} }, opts);
+    /* Sohbette ajan bir duzeltme onerebilir; oneri onaya duser. */
+    return speak(agentId, 'chat', { messages, ctx:{} },
+      Object.assign({}, opts, { allowAction:true }));
   }
 
   /* Ajanin kendi alanini ozetlemesi (soru olmadan). */
@@ -11434,7 +11995,7 @@ R.Office = (function(){
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.opening(
         { topic:ag.topic, why:ag.why, data:R.Tools.sanitize(ag.data || {}) }, pending) }],
       ctx:{ topic:ag.topic, why:ag.why, pending },
-    }, Object.assign({}, o, { maxTokens:260 }));
+    }, Object.assign({}, o, { maxTokens:BUDGET.opening }));
 
     turn.round = 0;
     turn.roundTitle = 'Açılış';
@@ -11458,7 +12019,9 @@ R.Office = (function(){
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.turn(agent,
         { topic:session.topic }, data, saidSoFar(session), def, recentSaid(agentId), options) }],
       ctx:{ topic:session.topic, round:def, options },
-    }, Object.assign({}, o, { maxTokens:320 }));
+      /* Toplanti turunda da oneri cikabilir: ofisin masada aldigi karar
+         kullanicinin onayina duser, kendiliginden uygulanmaz. */
+    }, Object.assign({}, o, { maxTokens:BUDGET.turn, allowAction:true }));
 
     turn.round = roundNo;
     turn.roundKey = def.key;
@@ -11490,7 +12053,7 @@ R.Office = (function(){
     const q = await speak('patron', 'cross', {
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.cross(conflict) }],
       ctx:{ topic:session.topic, conflict },
-    }, Object.assign({}, o, { maxTokens:200 }));
+    }, Object.assign({}, o, { maxTokens:BUDGET.cross }));
     q.round = session.round;
     q.roundKey = 'capraz';
     q.roundTitle = 'Çapraz soru';
@@ -11507,7 +12070,7 @@ R.Office = (function(){
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.answer(agent, conflict, data,
         saidSoFar(session)) }],
       ctx:{ topic:session.topic, conflict },
-    }, Object.assign({}, o, { maxTokens:280 }));
+    }, Object.assign({}, o, { maxTokens:BUDGET.answer }));
     a.round = session.round;
     a.roundKey = 'capraz';
     a.roundTitle = 'Yanıt';
@@ -11543,7 +12106,7 @@ R.Office = (function(){
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.closing(
         { topic:session.topic }, said, action, vote) }],
       ctx:{ topic:session.topic, action, vote },
-    }, Object.assign({}, o, { maxTokens:320 }));
+    }, Object.assign({}, o, { maxTokens:BUDGET.closing }));
 
     closing.closing = true;
     closing.round = session.round;
@@ -11702,7 +12265,9 @@ R.Office = (function(){
     const m = (S.officeMeetings || []).find(x => x.id === id);
     if(!m || !m.decision) return null;
     m.decision.state = (state === 'done' || state === 'carried') ? state : 'open';
-    m.decision.closedAt = new Date().toISOString();
+    /* Yeniden acilan karar kapanma zamanini da birakir: aksi hâlde acik
+       ama "kapanmis" gorunen bir kayit kalirdi. */
+    m.decision.closedAt = m.decision.state === 'open' ? null : new Date().toISOString();
     await R.Store.set('meetings/' + m.id, m);
     return m.decision;
   }
@@ -11818,6 +12383,7 @@ R.Office = (function(){
     (briefs || []).forEach(b => { if(b && b.id) S.officeBriefings[b.id] = b; });
 
     await R.Journal.load();
+    await R.Proposals.load();
     await R.LLM.initBuiltin();
     return S.office;
   }
@@ -11847,6 +12413,550 @@ R.Office = (function(){
     load,
     /* sabitler */
     CHAT_MAX, MEETING_MAX, ROUNDS,
+  };
+})();
+
+/* ==== js/core/proposals.js ==== */
+/* Öneri kutusu — ofisin sisteme dokunabildiği tek kapı.
+
+   Ofis bugüne kadar yalnizca okuyordu. Artik yazabilir, ama tek bir yoldan:
+
+     ajan onerir → kural motoru DOGRULAR → kullanici ONAYLAR → motor uygular
+                                                            → geri alinabilir
+
+   Onaysiz hicbir sey degismez. Bu dosyada "otomatik uygula" diye bir yol
+   YOKTUR ve olmamalidir: ofisin degeri onerisinde, yetkisinde degil.
+
+   Iki oneri kaynagi vardir ve ikisi de ayni kapidan gecer:
+
+     suggest()          kural motoru: veriden kendisi cikarir, model gerekmez,
+                        cevrimdisi calisir, kota harcamaz
+     fromModel(...)     ajanin onerisi: KAPALI katalogdan bir eylem + yapisal
+                        parametre. Serbest metin eyleme donusmez; parametreler
+                        gercek veriye karsi dogrulanir, uydurulan duser.
+
+   Dogrulama (check) her zaman calisir — onerinin kaynagi ne olursa olsun.
+   Model "kapanmis konuyu tekrara al" derken var olmayan bir konu kimligi
+   uydurursa oneri kullaniciya hic gosterilmez.
+
+   Uygulama sirasi kasitlidir: once anlik goruntu alinir (undo), sonra
+   degisiklik yazilir. Boylece geri alma her zaman mumkundur. */
+
+window.R = window.R || {};
+
+R.Proposals = (function(){
+  const U = R.U, M = R.Model, S = R.S;
+
+  const MAX = 40;             // saklanan oneri (uygulanan + reddedilen dahil)
+  const STORE = 'office/proposals';
+
+  /* ==================== eylem uygulamalari ====================
+
+     Her eylemin dort islevi vardir ve dordu de ayrilir:
+       check   : uygulanabilir mi — hayirsa NEDEN (kullaniciya gosterilir)
+       preview : ne degisecek — once/sonra satirlari
+       apply   : degisikligi yazar, geri alma anlik goruntusunu DONDURUR
+       revert  : o anlik goruntuden geri alir
+
+     check her cagrida yeniden calisir: bekleyen bir oneri, arada veri
+     degistigi icin gecersizlesmis olabilir. */
+
+  function subjectOf(id){ return (R.SUBJECTS || []).find(s => s.id === id) || null; }
+  function topicOf(subject, id){
+    return subject ? (subject.topics || []).find(t => t.id === id) || null : null;
+  }
+  function stateLabel(id){
+    const st = R.TOPIC_STATES[id];
+    return st ? st.label : String(id || '—');
+  }
+  function fail(why){ return { ok:false, why }; }
+  function pass(ctx){ return { ok:true, ctx:ctx || {} }; }
+
+  const IMPL = {
+
+    'topic-review':{
+      check(p){
+        const subject = subjectOf(p.subjectId);
+        if(!subject) return fail('Bu ders sistemde yok.');
+        const topic = topicOf(subject, p.topicId);
+        if(!topic) return fail('Bu konu bu derste yok.');
+        const st = M.topicState(p.subjectId, p.topicId);
+        if(st.state !== 'closed' && st.state !== 'provisional'){
+          return fail('Konu zaten kapalı sayılmıyor; tekrara almanın etkisi olmaz.');
+        }
+        return pass({ subject, topic, from:st.state });
+      },
+      preview(p, ctx){
+        return [
+          { label:'Konu', before:ctx.subject.name, after:ctx.topic.name },
+          { label:'Durum', before:stateLabel(ctx.from), after:stateLabel('reopened') },
+        ];
+      },
+      async apply(p, ctx){
+        await M.setTopicState(p.subjectId, p.topicId, { state:'reopened' });
+        return { subjectId:p.subjectId, topicId:p.topicId, state:ctx.from };
+      },
+      async revert(s){
+        await M.setTopicState(s.subjectId, s.topicId, { state:s.state });
+      },
+    },
+
+    'block-add':{
+      check(p){
+        const subject = subjectOf(p.subjectId);
+        if(!subject) return fail('Bu ders sistemde yok.');
+        const topic = topicOf(subject, p.topicId);
+        if(!topic) return fail('Bu konu bu derste yok.');
+        const min = Math.round(Number(p.minutes) || 0);
+        if(!(min >= 15 && min <= 120)) return fail('Blok süresi 15–120 dakika arasında olmalı.');
+        const day = M.dayOf(U.todayISO());
+        if(!day) return fail('Bugünün planı henüz açılmadı.');
+        return pass({ subject, topic, min, day });
+      },
+      preview(p, ctx){
+        const blocks = ctx.day.blocks || [];
+        const sum = blocks.reduce((a, b) => a + (Number(b.targetMin) || 0), 0);
+        return [
+          { label:'Eklenecek blok', before:'—', after:ctx.subject.name + ' · ' + ctx.topic.name },
+          { label:'Bugünkü blok sayısı', before:String(blocks.length), after:String(blocks.length + 1) },
+          { label:'Bugünkü hedef süre', before:sum + ' dk', after:(sum + ctx.min) + ' dk' },
+        ];
+      },
+      async apply(p, ctx){
+        const date = U.todayISO();
+        const day = await M.ensureDay(date);
+        const id = U.uid('b');
+        day.blocks.push({
+          id, slot:'Ek tekrar',
+          subject:ctx.subject.name, topic:ctx.topic.name,
+          targetMin:ctx.min, targetQ:0, status:'pending',
+          subjectId:p.subjectId, topicId:p.topicId,
+          actualMin:null, actualQ:null, correctQ:null,
+          skipReason:null, startedAt:null,
+        });
+        await M.saveDay(date);
+        return { date, blockId:id };
+      },
+      async revert(s){
+        const day = M.dayOf(s.date);
+        if(!day) return;
+        day.blocks = (day.blocks || []).filter(b => b.id !== s.blockId);
+        await M.saveDay(s.date);
+      },
+    },
+
+    'cards-due-today':{
+      check(p){
+        const limit = Math.round(Number(p.limit) || 0);
+        if(!(limit >= 1 && limit <= 50)) return fail('Kart sayısı 1–50 arasında olmalı.');
+        const today = U.todayISO();
+        const late = (S.cards || [])
+          .filter(c => c.dueAt && c.dueAt < today)
+          .sort((a, b) => String(a.dueAt).localeCompare(String(b.dueAt)))
+          .slice(0, limit);
+        if(!late.length) return fail('Geciken tekrar kartı yok.');
+        return pass({ late, today });
+      },
+      preview(p, ctx){
+        const oldest = ctx.late[0];
+        return [
+          { label:'Bugüne çekilecek kart', before:'—', after:ctx.late.length + ' kart' },
+          { label:'En eski gecikme', before:U.fmtShort(oldest.dueAt), after:'bugün' },
+        ];
+      },
+      async apply(p, ctx){
+        const before = [];
+        for(const c of ctx.late){
+          before.push({ id:c.id, dueAt:c.dueAt });
+          c.dueAt = ctx.today;
+          await M.saveCard(c);
+        }
+        return { cards:before };
+      },
+      async revert(s){
+        for(const row of (s.cards || [])){
+          const c = (S.cards || []).find(x => x.id === row.id);
+          if(!c) continue;
+          c.dueAt = row.dueAt;
+          await M.saveCard(c);
+        }
+      },
+    },
+
+    'card-from-error':{
+      check(p){
+        const err = (S.errors || []).find(e => e.id === p.errorId);
+        if(!err) return fail('Bu yanlış kaydı bulunamadı.');
+        if(err.closedAt) return fail('Bu yanlış zaten kapanmış.');
+        const back = String(err.principle || err.recipe || '').trim();
+        if(!back) return fail('Kayıtta ilke ya da reçete yazılmamış; karta dönüştürülemez.');
+        const already = (S.cards || []).some(c => c.sourceRef === err.id);
+        if(already) return fail('Bu yanlıştan zaten kart üretilmiş.');
+        return pass({ err, back });
+      },
+      preview(p, ctx){
+        const front = cardFront(ctx.err);
+        return [
+          { label:'Kartın ön yüzü', before:'—', after:front },
+          { label:'Kartın arkası', before:'—', after:ctx.back.slice(0, 90) },
+          { label:'İlk tekrar', before:'—', after:'yarın' },
+        ];
+      },
+      async apply(p, ctx){
+        const card = M.newCard({
+          front:cardFront(ctx.err),
+          back:ctx.back,
+          topic:ctx.err.topic || ctx.err.testName || '',
+          subjectId:ctx.err.subjectId || null,
+          source:'office', sourceRef:ctx.err.id,
+        });
+        await M.saveCard(card);
+        return { cardId:card.id };
+      },
+      async revert(s){ await M.deleteCard(s.cardId); },
+    },
+
+    'week-target':{
+      check(p){
+        const n = Math.round(Number(p.weekN) || 0);
+        const q = Math.round(Number(p.questionTarget) || 0);
+        if(!(n >= 1 && n <= R.PLAN.totalWeeks)) return fail('Hafta numarası plan dışında.');
+        if(!(q >= 100 && q <= 3000)) return fail('Haftalık hedef 100–3000 soru arasında olmalı.');
+        const week = S.weeks[M.weekId(n)];
+        if(!week) return fail(n + '. hafta henüz açılmadı.');
+        if(Number(week.questionTarget) === q) return fail('Hedef zaten bu değerde.');
+        return pass({ week, n, q });
+      },
+      preview(p, ctx){
+        return [
+          { label:'Hafta', before:'—', after:ctx.n + '. hafta' },
+          { label:'Soru hedefi', before:ctx.week.questionTarget + ' soru', after:ctx.q + ' soru' },
+        ];
+      },
+      async apply(p, ctx){
+        const before = ctx.week.questionTarget;
+        ctx.week.questionTarget = ctx.q;
+        await M.saveWeek(ctx.n);
+        return { n:ctx.n, questionTarget:before };
+      },
+      async revert(s){
+        const week = S.weeks[M.weekId(s.n)];
+        if(!week) return;
+        week.questionTarget = s.questionTarget;
+        await M.saveWeek(s.n);
+      },
+    },
+
+    'decision-close':{
+      check(p){
+        const state = p.state === 'carried' ? 'carried' : 'done';
+        const d = R.Office.openDecisions().find(x => x.id === p.decisionId);
+        if(!d) return fail('Bu karar açık değil ya da bulunamadı.');
+        return pass({ d, state });
+      },
+      preview(p, ctx){
+        return [
+          { label:'Karar', before:'—', after:ctx.d.title },
+          { label:'Durum', before:'açık', after:ctx.state === 'done' ? 'yapıldı' : 'devredildi' },
+        ];
+      },
+      async apply(p, ctx){
+        await R.Office.closeDecision(p.decisionId, ctx.state);
+        return { id:p.decisionId };
+      },
+      async revert(s){ await R.Office.closeDecision(s.id, 'open'); },
+    },
+  };
+
+  function cardFront(err){
+    const head = err.topic || err.testName || 'Yanlış';
+    const root = String(err.rootCause || '').trim();
+    return root ? head + ' — ' + root : head;
+  }
+
+  /* ==================== dogrulama ==================== */
+
+  /* Bir onerinin su anda uygulanabilir olup olmadigi. Bekleyen oneri de
+     her cizimde yeniden gecer: arada veri degismis olabilir. */
+  function check(p){
+    const def = R.ACTION_BY_ID[p && p.action];
+    if(!def) return fail('Bilinmeyen eylem.');
+    if(def.agents.indexOf(p.agent) < 0){
+      return fail(agentName(p.agent) + ' bu eylemi öneremez; alanı dışında.');
+    }
+    const impl = IMPL[def.id];
+    if(!impl) return fail('Bu eylemin uygulaması yok.');
+    try{ return impl.check(p.params || {}); }
+    catch(e){ return fail('Öneri doğrulanamadı.'); }
+  }
+
+  /* Ne degisecek — onaydan ONCE gosterilir. */
+  function preview(p){
+    const res = check(p);
+    if(!res.ok) return { ok:false, why:res.why, rows:[] };
+    const impl = IMPL[p.action];
+    try{ return { ok:true, rows:impl.preview(p.params || {}, res.ctx) || [] }; }
+    catch(e){ return { ok:false, why:'Önizleme üretilemedi.', rows:[] }; }
+  }
+
+  function agentName(id){
+    const a = R.AGENT_BY_ID[id];
+    return a ? a.name : 'Bu ajan';
+  }
+
+  /* ==================== depo ==================== */
+
+  function all(){ return (S.officeProposals || []).slice(); }
+  function pending(){ return all().filter(p => p.status === 'pending'); }
+  function applied(){ return all().filter(p => p.status === 'applied'); }
+
+  /* Gecerliligini yitirmis bekleyen oneriler kullaniciya gosterilmez:
+     veri degistiyse oneri de gecersizdir. */
+  function actionable(){
+    return pending().map(p => Object.assign({}, p, { preview:preview(p) }))
+      .filter(p => p.preview.ok);
+  }
+
+  async function save(){
+    S.officeProposals = (S.officeProposals || []).slice(-MAX);
+    await R.Store.set(STORE, { items:S.officeProposals });
+    return S.officeProposals;
+  }
+
+  async function load(){
+    const doc = await R.Store.get(STORE);
+    S.officeProposals = (doc && Array.isArray(doc.items)) ? doc.items : [];
+    return S.officeProposals;
+  }
+
+  /* Ayni eylem+parametre ikinci kez kuyruga girmez. */
+  function fingerprint(p){
+    return p.action + '|' + JSON.stringify(p.params || {});
+  }
+
+  async function propose(p){
+    const res = check(p);
+    if(!res.ok) return null;
+    S.officeProposals = S.officeProposals || [];
+    const fp = fingerprint(p);
+    if(S.officeProposals.some(x => x.status === 'pending' && fingerprint(x) === fp)) return null;
+
+    const row = {
+      id:U.uid('p'),
+      action:p.action,
+      agent:p.agent,
+      params:p.params || {},
+      reason:String(p.reason || '').slice(0, 240),
+      source:p.source === 'llm' ? 'llm' : 'kural',
+      at:new Date().toISOString(),
+      status:'pending',
+      appliedAt:null,
+      undo:null,
+    };
+    S.officeProposals.push(row);
+    await save();
+    return row;
+  }
+
+  /* ==================== onay ==================== */
+
+  async function approve(id){
+    const row = (S.officeProposals || []).find(p => p.id === id);
+    if(!row || row.status !== 'pending') return null;
+    /* Onay anında yeniden dogrula: kullanici oneriyi gordukten sonra
+       veri degismis olabilir, eski dogrulamaya guvenilmez. */
+    const res = check(row);
+    if(!res.ok){
+      row.status = 'stale';
+      row.why = res.why;
+      await save();
+      return { ok:false, why:res.why };
+    }
+    const impl = IMPL[row.action];
+    /* Once anlik goruntu, sonra yazma: geri alma her zaman mumkun olmali. */
+    row.undo = await impl.apply(row.params || {}, res.ctx);
+    row.status = 'applied';
+    row.appliedAt = new Date().toISOString();
+    await save();
+    return { ok:true, row };
+  }
+
+  async function reject(id){
+    const row = (S.officeProposals || []).find(p => p.id === id);
+    if(!row || row.status !== 'pending') return null;
+    row.status = 'rejected';
+    await save();
+    return row;
+  }
+
+  async function undo(id){
+    const row = (S.officeProposals || []).find(p => p.id === id);
+    if(!row || row.status !== 'applied') return null;
+    const impl = IMPL[row.action];
+    await impl.revert(row.undo || {});
+    row.status = 'undone';
+    row.undoneAt = new Date().toISOString();
+    await save();
+    return row;
+  }
+
+  async function clearResolved(){
+    S.officeProposals = (S.officeProposals || []).filter(p => p.status === 'pending');
+    await save();
+  }
+
+  /* ==================== kural motoru onerileri ====================
+
+     Model gerekmez, kota harcanmaz, cevrimdisi calisir. Masa notlariyla
+     ayni doktrin: esik asilirsa oneri dogar, asilmazsa dogmaz. */
+
+  function suggest(){
+    const out = [];
+    const today = U.todayISO();
+
+    /* 1. Geciken tekrar borcu — analistin alani. */
+    const late = (S.cards || []).filter(c => c.dueAt && c.dueAt < today);
+    if(late.length >= 5){
+      out.push({
+        action:'cards-due-today', agent:'analist', source:'kural',
+        params:{ limit:Math.min(late.length, 30) },
+        reason:late.length + ' kartın tekrar tarihi geçmiş; borç ertelendikçe büyüyor.',
+      });
+    }
+
+    /* 2. Kok nedeni yazilmis ama karta donmemis yanlis. */
+    const orphan = (S.errors || []).find(e => !e.closedAt
+      && String(e.principle || e.recipe || '').trim()
+      && !(S.cards || []).some(c => c.sourceRef === e.id));
+    if(orphan){
+      out.push({
+        action:'card-from-error', agent:'analist', source:'kural',
+        params:{ errorId:orphan.id },
+        reason:'Kök nedeni yazılmış bu yanlış karta dönmemiş; tekrar edilmezse yine yapılır.',
+      });
+    }
+
+    /* 3. Kapali gorunen ama acik yanlisi olan konu — brans uzmaninin alani. */
+    (R.SUBJECTS || []).forEach(subject => {
+      const owner = subject.exam === 'TYT' ? 'tyt' : 'ayt';
+      (subject.topics || []).forEach(topic => {
+        const st = M.topicState(subject.id, topic.id);
+        if(st.state !== 'closed' && st.state !== 'provisional') return;
+        const openErrors = (S.errors || []).filter(e => !e.closedAt
+          && e.subjectId === subject.id && e.topicId === topic.id).length;
+        if(openErrors < 2) return;
+        out.push({
+          action:'topic-review', agent:owner, source:'kural',
+          params:{ subjectId:subject.id, topicId:topic.id },
+          reason:topic.name + ' kapalı görünüyor ama üzerinde ' + openErrors
+            + ' açık yanlış var; kapanış gerçek değil.',
+        });
+      });
+    });
+
+    /* Dogrulanmayan oneri hic dogmaz. */
+    return out.filter(p => check(p).ok);
+  }
+
+  /* Kural motorunun buldugu onerileri kuyruga alir; var olanlar tekrarlanmaz. */
+  async function refresh(){
+    const found = suggest();
+    const added = [];
+    for(const p of found){
+      const row = await propose(p);
+      if(row) added.push(row);
+    }
+    return added;
+  }
+
+  /* ==================== modelin onerisi ====================
+
+     Ajan yaniti bir JSON nesnesi tasiyabilir. Nesne kapali kataloga ve
+     yapisal parametreye uymuyorsa sessizce dusurulur — model bir eylem
+     UYDURAMAZ, yalnizca var olanlardan birini secebilir. */
+
+  function fromModel(agentId, obj){
+    if(!obj || typeof obj !== 'object') return null;
+    const def = R.ACTION_BY_ID[obj.eylem || obj.action];
+    if(!def) return null;
+    if(def.agents.indexOf(agentId) < 0) return null;
+
+    /* Parametreler semadan okunur: fazladan alan tasinmaz. */
+    const raw = obj.parametreler || obj.params || {};
+    const params = {};
+    let missing = false;
+    Object.keys(def.params).forEach(key => {
+      const want = def.params[key];
+      const v = raw[key];
+      if(v == null || v === ''){ missing = true; return; }
+      if(want === 'number'){
+        const n = Number(v);
+        if(!Number.isFinite(n)){ missing = true; return; }
+        params[key] = n;
+      }else{
+        params[key] = String(v).slice(0, 120);
+      }
+    });
+    if(missing) return null;
+
+    const p = {
+      action:def.id, agent:agentId, params, source:'llm',
+      reason:String(obj.gerekce || obj.reason || '').slice(0, 240),
+    };
+    return check(p).ok ? p : null;
+  }
+
+  /* Ajana katalogu anlatan istem parcasi. Ekran degil motor kurar:
+     katalog degisirse istem kendiliginden degisir. */
+  function catalogPrompt(agentId){
+    const list = R.actionsFor(agentId);
+    if(!list.length) return '';
+    return 'SİSTEME MÜDAHALE (isteğe bağlı):\n'
+      + 'Aşağıdaki eylemlerden biri durumu düzeltecekse yanıtının SONUNA tek bir '
+      + 'JSON nesnesi ekleyebilirsin. Eylem uydurma, listede olmayanı yazma; '
+      + 'yazdığın şey doğrudan uygulanmaz, kullanıcının onayına düşer.\n'
+      + list.map(a => '- ' + a.id + ' (' + a.title + ') · parametreler: '
+          + Object.keys(a.params).join(', ')).join('\n') + '\n'
+      + 'Biçim: {"eylem":"<id>","parametreler":{…},"gerekce":"tek cümle"}\n'
+      + 'Gerek yoksa JSON yazma.';
+  }
+
+  /* Akis sirasinda yarim kalmis JSON kullaniciya gorunmesin. Yalniz eylem
+     nesnesine benzeyen kuyruk gizlenir; duz metindeki suslu parantez
+     (nadir de olsa) kirpilmaz. */
+  function stripTrailingJson(text){
+    const s = String(text || '');
+    const i = s.lastIndexOf('{');
+    if(i < 0) return s;
+    if(!/"(eylem|action)"/.test(s.slice(i))) return s;
+    return s.slice(0, i).replace(/```(?:json)?\s*$/, '').trimEnd();
+  }
+
+  /* Ajan yanitinin sonundaki JSON'u ayirir: kullaniciya gosterilen metin
+     JSON tasimaz, oneri ayri durur. */
+  function splitAction(text){
+    const s = String(text || '');
+    const end = s.lastIndexOf('}');
+    if(end < 0) return { text:s.trim(), obj:null };
+    /* Nesne ic ice oldugunda SON '{' dis nesnenin basi degildir
+       ("parametreler":{…} icerideki paranteze denk gelir). Bu yuzden
+       gecerli ayrisan EN ERKEN baslangic aranir. */
+    for(let i = s.indexOf('{'); i >= 0 && i <= end; i = s.indexOf('{', i + 1)){
+      let obj = null;
+      try{ obj = JSON.parse(s.slice(i, end + 1)); }catch(e){ continue; }
+      if(!obj || (!obj.eylem && !obj.action)) continue;
+      /* JSON'dan once kod cercevesi kalmis olabilir. */
+      const head = s.slice(0, i).replace(/```(?:json)?\s*$/, '').trim();
+      return { text:head, obj };
+    }
+    return { text:s.trim(), obj:null };
+  }
+
+  return {
+    all, pending, applied, actionable, check, preview,
+    propose, approve, reject, undo, clearResolved,
+    suggest, refresh, fromModel, catalogPrompt, splitAction, stripTrailingJson,
+    load, save, MAX,
   };
 })();
 
@@ -18605,12 +19715,18 @@ R.Screens.office = (function(){
   }
 
   /* Masanin durum satiri — ofis hissini veren sey: herkesin ne yaptigi belli. */
+  /* short: kat planındaki dar masa için — orada uzun metin kırpılıyordu. */
   function deskStatus(agent){
     const q = O.agentQuota(agent.id);
-    if(O.mode() !== 'llm') return { text:'kural motoruyla çalışıyor', tone:'muted' };
-    if(q && q.full) return { text:'günlük hakkı doldu', tone:'danger' };
-    if(q && q.waitMs > 1500) return { text:'sırada · ' + Math.ceil(q.waitMs/1000) + ' sn', tone:'warn' };
-    return { text:'masasında, müsait', tone:'ok' };
+    if(O.mode() !== 'llm'){
+      return { text:'kural motoruyla çalışıyor', short:'kural motoru', tone:'muted' };
+    }
+    if(q && q.full) return { text:'günlük hakkı doldu', short:'hak doldu', tone:'danger' };
+    if(q && q.waitMs > 1500){
+      const sn = Math.ceil(q.waitMs / 1000);
+      return { text:'sırada · ' + sn + ' sn', short:'sırada · ' + sn + ' sn', tone:'warn' };
+    }
+    return { text:'masasında, müsait', short:'müsait', tone:'ok' };
   }
 
   function Desk(agent){
@@ -18678,6 +19794,141 @@ R.Screens.office = (function(){
           ${when(b.suggestion && b.suggestion.route, () => K.Button({ label:b.suggestion.label, size:'sm',
             act:'go', data:{ 'data-route':b.suggestion.route } }))}
         </div>`,
+    });
+  }
+
+  /* ---------- kat planı ----------
+     Ofisi "panel" olmaktan çıkaran katman. Beş masa bir zemin üzerinde
+     durur: kimin ışığı yanıyor, kimin masasında iş birikmiş, kim şu an
+     konuşuyor — bakınca anlaşılır. Tıklayınca o masanın raporu açılır. */
+
+  function seat(agent){
+    const st = deskStatus(agent);
+    const notes = O.notes(agent.id);
+    const open = S.ui.officeDesk === agent.id;
+    const busy = S.ui.officeBusy === agent.id;
+    const load = Math.min(notes.length, 4);
+
+    return html`<button type="button"
+      class="${cls('seat', 'seat--' + agent.id, open && 'is-open')}"
+      data-act="office-desk" data-agent="${agent.id}"
+      aria-expanded="${open ? 'true' : 'false'}">
+      ${Avatar(agent)}
+      <span class="seat__body">
+        <span class="seat__name">${agent.name}</span>
+        <span class="seat__role">${agent.role}</span>
+        <span class="seat__state">
+          <i class="${cls('seatlight', busy ? 'seatlight--busy' : 'seatlight--' + st.tone)}"></i>
+          <span>${busy ? 'konuşuyor…' : (agent.lead ? st.text : st.short)}</span>
+        </span>
+        <span class="seat__load" aria-hidden="true">${map([0, 1, 2, 3], i =>
+          html`<i class="${cls(i < load && 'is-on')}"></i>`)}</span>
+        ${when(agent.lead, () => html`<span class="seat__task">Günün işi:
+          <b>${O.nextAction().title}</b></span>`)}
+      </span>
+      ${when(notes.length, () => html`<span class="seat__count">${notes.length}</span>`)}
+    </button>`;
+  }
+
+  function floorPlan(){
+    const specialists = R.AGENTS.filter(a => !a.lead);
+    const waiting = R.Proposals.actionable().length;
+
+    return html`
+      <div class="floor">
+        <div class="floor__head">
+          <div class="minw0">
+            <div class="floor__title">${raw(UI.icon('users'))} Ofis kat planı</div>
+            <div class="floor__meta">${O.mode() === 'llm' ? O.providerLabel() : 'kural motoru modu'}
+              · masaya dokununca raporu açılır</div>
+          </div>
+          <div class="row wrap gap-6">
+            ${when(waiting, () => K.Badge({ label:waiting + ' öneri bekliyor', tone:'warn' }))}
+            ${K.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' })}
+          </div>
+        </div>
+        <div class="floor__room">
+          <div class="floor__lead">${seat(R.AGENT_BY_ID.patron)}</div>
+          ${map(specialists, seat)}
+        </div>
+      </div>`;
+  }
+
+  /* ---------- onay kutusu ----------
+     Ofisin sisteme dokunabildiği TEK kapı. Ne değişeceği onaydan önce
+     önce/sonra olarak gösterilir; onaysız hiçbir satır uygulanmaz. */
+
+  function diffRows(rows){
+    return html`<div class="diff">${map(rows, r => html`
+      <div class="diff__row">
+        <span class="diff__label">${r.label}</span>
+        <span class="diff__before">${r.before}</span>
+        <span class="diff__arrow" aria-hidden="true">→</span>
+        <span class="diff__after">${r.after}</span>
+      </div>`)}</div>`;
+  }
+
+  function proposalRow(p){
+    const def = R.ACTION_BY_ID[p.action];
+    const agent = R.AGENT_BY_ID[p.agent];
+    return html`
+      <div class="${cls('prop', 'prop--' + p.agent)}">
+        <div class="prop__head">
+          ${Avatar(agent, 'sm')}
+          <div class="prop__who">
+            <b class="prop__title">${def.title}</b>
+            <span class="prop__by">${agent.name} · ${def.touches}
+              · ${p.source === 'llm' ? 'ajanın önerisi' : 'kural motoru buldu'}</span>
+          </div>
+        </div>
+        <p class="prop__why">${p.reason || def.summary}</p>
+        ${diffRows(p.preview.rows)}
+        <div class="prop__acts">
+          ${K.Button({ label:'Onayla ve uygula', icon:'check', size:'sm', tone:'primary',
+            act:'office-approve', data:{ 'data-id':p.id } })}
+          ${K.Button({ label:'Reddet', size:'sm', tone:'ghost',
+            act:'office-reject', data:{ 'data-id':p.id } })}
+          ${when(def.route, () => K.Button({ label:'Yerini gör', size:'sm', tone:'ghost',
+            act:'go', data:{ 'data-route':def.route } }))}
+        </div>
+      </div>`;
+  }
+
+  function appliedRow(p){
+    const def = R.ACTION_BY_ID[p.action];
+    const agent = R.AGENT_BY_ID[p.agent];
+    return html`
+      <div class="prop prop--done">
+        <div class="prop__head">
+          ${Avatar(agent, 'sm')}
+          <div class="prop__who">
+            <b class="prop__title">${def.title}</b>
+            <span class="prop__by">${agent.name} ·
+              ${U.relativeDay(String(p.appliedAt || '').slice(0, 10))} uygulandı</span>
+          </div>
+          ${K.Button({ label:'Geri al', icon:'undo', size:'sm', tone:'ghost',
+            act:'office-undo', data:{ 'data-id':p.id } })}
+        </div>
+      </div>`;
+  }
+
+  function proposalsCard(){
+    const list = R.Proposals.actionable();
+    const done = R.Proposals.applied().slice(-3).reverse();
+    if(!list.length && !done.length) return '';
+
+    return K.Card({
+      title:'Ofisin önerileri',
+      sub:'Ajanlar değişiklik önerir; uygulanıp uygulanmayacağına sen karar verirsin',
+      badge:when(list.length, () => K.Badge({ label:String(list.length), tone:'warn' })),
+      body:html`
+        ${when(!list.length, () => K.Notice({ tone:'ok',
+          title:'Bekleyen öneri yok.',
+          body:'“Masaları tara” dersen ofis veriyi yeniden okur ve gerekiyorsa öneri bırakır.' }))}
+        ${when(list.length, () => html`<div class="props">${map(list, proposalRow)}</div>`)}
+        ${when(done.length, () => html`
+          <div class="mt-12">${K.SectionTitle('Uygulananlar')}</div>
+          <div class="props">${map(done, appliedRow)}</div>`)}`,
     });
   }
 
@@ -19100,6 +20351,8 @@ R.Screens.office = (function(){
     return String(K.Grid([
       K.Span(8, K.Stack([
         boardCard(),
+        floorPlan(),
+        proposalsCard(),
         briefingCard(),
         BossCard(),
         decisionsCard(),
@@ -19223,6 +20476,10 @@ R.Screens.office = (function(){
     async 'office-briefing'(el){
       const out = document.getElementById('office-briefing');
       el.disabled = true;
+      /* Kat planinda Patron'un isigi yanip sonsun: ofis calisiyor gorunmeli.
+         Tum ekrani yeniden cizmek yerine tek dugum degistirilir. */
+      const light = document.querySelector('.seat--patron .seatlight');
+      if(light) light.className = 'seatlight seatlight--busy';
       if(out) out.innerHTML = String(html`<p class="small muted">Masaları okuyor…</p>`);
       try{
         await O.dailyBriefing({ force:true });
@@ -19232,6 +20489,40 @@ R.Screens.office = (function(){
         el.disabled = false;
         R.App.render();
       }
+    },
+
+    /* Kural motoru masalari yeniden okur; model gerekmez, kota harcanmaz. */
+    async 'office-scan'(el){
+      el.disabled = true;
+      try{
+        const added = await R.Proposals.refresh();
+        UI.toast(added.length
+          ? added.length + ' yeni öneri masaya bırakıldı'
+          : 'Ofis her şeyi yerinde buldu');
+      }finally{
+        el.disabled = false;
+        R.App.render();
+      }
+    },
+
+    /* Onay kapisi: uygulama YALNIZ buradan gecer. */
+    async 'office-approve'(el){
+      const res = await R.Proposals.approve(el.dataset.id);
+      if(!res) return;
+      UI.toast(res.ok ? 'Uygulandı — istersen geri alabilirsin' : res.why);
+      R.App.render();
+    },
+
+    async 'office-reject'(el){
+      await R.Proposals.reject(el.dataset.id);
+      UI.toast('Öneri reddedildi');
+      R.App.render();
+    },
+
+    async 'office-undo'(el){
+      await R.Proposals.undo(el.dataset.id);
+      UI.toast('Geri alındı');
+      R.App.render();
     },
 
     async 'office-decision'(el){
