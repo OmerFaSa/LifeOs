@@ -1,0 +1,183 @@
+/* PALETLER — renk kimliği tek yerde, tema seçiminden bağımsız.
+
+   İki eksen vardır:
+     data-theme   → açık / koyu / sistem   (tokens.css)
+     data-palette → renk ailesi            (bu dosya)
+
+   tokens.css taban paleti (indigo) tanımlar; buradaki bloklar yalnız
+   HUE'ye bağlı jetonları yeniden yazar. Ölçü, tipografi, gölge, hareket
+   asla burada değişmez.
+
+   Her palet için kontrast hedefi: metin ve rozet renkleri kendi zemininde
+   en az 4.5:1 (WCAG AA). */
+
+/* ==================== GRAFİT — nötr, en sakin ==================== */
+:root[data-palette="grafit"]{
+  --bg:#F6F7F8; --surface:#FFFFFF; --surface-2:#EEF0F2; --surface-3:#E3E6E9;
+  --sidebar:#FFFFFF; --sidebar-active:#E4E8EC;
+  --text:#191C1F; --text-2:#5C646C; --text-3:#6C757D;
+  --primary:#3D4E5C; --primary-hover:#31404C; --primary-soft:#E4E8EC; --primary-ink:#FFFFFF;
+  --accent:#8A6A20; --accent-soft:#F5EEDD;
+  --border:#E2E5E8; --border-strong:#C8CDD2;
+  --c-k:#3D4E5C; --c-band:#E1E6EA;
+  --scrim:rgba(16,19,22,.5);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-palette="grafit"]:not([data-theme="light"]){
+    --bg:#111315; --surface:#191C1F; --surface-2:#202428; --surface-3:#272C31;
+    --sidebar:#141719; --sidebar-active:#242C33;
+    --text:#EDEFF1; --text-2:#AAB2B9; --text-3:#8A939B;
+    --primary:#8FA9BD; --primary-hover:#A3BACD; --primary-soft:#1E272E; --primary-ink:#0D1114;
+    --accent:#D6AE68; --accent-soft:#2C2618;
+    --border:#2F343A; --border-strong:#3E454C;
+    --c-k:#8FA9BD; --c-band:#232C33;
+    --scrim:rgba(0,0,0,.62);
+  }
+}
+:root[data-palette="grafit"][data-theme="dark"]{
+  --bg:#111315; --surface:#191C1F; --surface-2:#202428; --surface-3:#272C31;
+  --sidebar:#141719; --sidebar-active:#242C33;
+  --text:#EDEFF1; --text-2:#AAB2B9; --text-3:#8A939B;
+  --primary:#8FA9BD; --primary-hover:#A3BACD; --primary-soft:#1E272E; --primary-ink:#0D1114;
+  --accent:#D6AE68; --accent-soft:#2C2618;
+  --border:#2F343A; --border-strong:#3E454C;
+  --c-k:#8FA9BD; --c-band:#232C33;
+  --scrim:rgba(0,0,0,.62);
+}
+
+/* ==================== BORDO — sıcak, yüksek karakter ==================== */
+:root[data-palette="bordo"]{
+  --bg:#F9F7F7; --surface:#FFFFFF; --surface-2:#F2EDEE; --surface-3:#E8E1E2;
+  --sidebar:#FFFFFF; --sidebar-active:#F0E3E5;
+  --text:#1F1A1B; --text-2:#655A5C; --text-3:#75696B;
+  --primary:#7D2E3E; --primary-hover:#6A2634; --primary-soft:#F3E4E7; --primary-ink:#FFFFFF;
+  --accent:#8A6320; --accent-soft:#F6EEDE;
+  --info:#3F566E; --info-soft:#E7EBF0;
+  --border:#E7E0E1; --border-strong:#D0C5C7;
+  --c-k:#7D2E3E; --c-band:#EFE0E3;
+  --scrim:rgba(26,18,20,.5);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-palette="bordo"]:not([data-theme="light"]){
+    --bg:#151112; --surface:#1E1819; --surface-2:#261F21; --surface-3:#2E2528;
+    --sidebar:#181314; --sidebar-active:#332227;
+    --text:#F2EDEE; --text-2:#B7A9AC; --text-3:#968A8C;
+    --primary:#DE8D9D; --primary-hover:#E9A2B0; --primary-soft:#2E1D22; --primary-ink:#150E10;
+    --accent:#D9AE6A; --accent-soft:#2C2417;
+    --border:#362C2E; --border-strong:#473A3D;
+    --c-k:#DE8D9D; --c-band:#2E2025;
+    --scrim:rgba(0,0,0,.64);
+  }
+}
+:root[data-palette="bordo"][data-theme="dark"]{
+  --bg:#151112; --surface:#1E1819; --surface-2:#261F21; --surface-3:#2E2528;
+  --sidebar:#181314; --sidebar-active:#332227;
+  --text:#F2EDEE; --text-2:#B7A9AC; --text-3:#968A8C;
+  --primary:#DE8D9D; --primary-hover:#E9A2B0; --primary-soft:#2E1D22; --primary-ink:#150E10;
+  --accent:#D9AE6A; --accent-soft:#2C2417;
+  --border:#362C2E; --border-strong:#473A3D;
+  --c-k:#DE8D9D; --c-band:#2E2025;
+  --scrim:rgba(0,0,0,.64);
+}
+
+/* ==================== MOR — çalışma masası, düşük yorgunluk ==================== */
+:root[data-palette="mor"]{
+  --bg:#F8F7FA; --surface:#FFFFFF; --surface-2:#EFEDF4; --surface-3:#E5E2EE;
+  --sidebar:#FFFFFF; --sidebar-active:#E8E4F3;
+  --text:#1B1922; --text-2:#5D5870; --text-3:#6E6880;
+  --primary:#54408F; --primary-hover:#463579; --primary-soft:#E8E4F3; --primary-ink:#FFFFFF;
+  --accent:#8A6320; --accent-soft:#F6EEDE;
+  --border:#E4E1EC; --border-strong:#C9C4D8;
+  --c-k:#54408F; --c-band:#E3DEF2;
+  --scrim:rgba(18,16,26,.5);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-palette="mor"]:not([data-theme="light"]){
+    --bg:#121118; --surface:#1A1822; --surface-2:#211E2B; --surface-3:#292535;
+    --sidebar:#151320; --sidebar-active:#2A2440;
+    --text:#EFEDF5; --text-2:#ABA5BC; --text-3:#8C869C;
+    --primary:#A99BE0; --primary-hover:#BBAEEC; --primary-soft:#231E38; --primary-ink:#100E18;
+    --accent:#D6AE68; --accent-soft:#2C2618;
+    --border:#302B3E; --border-strong:#413A52;
+    --c-k:#A99BE0; --c-band:#262039;
+    --scrim:rgba(0,0,0,.64);
+  }
+}
+:root[data-palette="mor"][data-theme="dark"]{
+  --bg:#121118; --surface:#1A1822; --surface-2:#211E2B; --surface-3:#292535;
+  --sidebar:#151320; --sidebar-active:#2A2440;
+  --text:#EFEDF5; --text-2:#ABA5BC; --text-3:#8C869C;
+  --primary:#A99BE0; --primary-hover:#BBAEEC; --primary-soft:#231E38; --primary-ink:#100E18;
+  --accent:#D6AE68; --accent-soft:#2C2618;
+  --border:#302B3E; --border-strong:#413A52;
+  --c-k:#A99BE0; --c-band:#262039;
+  --scrim:rgba(0,0,0,.64);
+}
+
+/* ==================== OKYANUS — soğuk mavi, uzun oturum ==================== */
+:root[data-palette="okyanus"]{
+  --bg:#F5F8FA; --surface:#FFFFFF; --surface-2:#EAF0F5; --surface-3:#DFE8EF;
+  --sidebar:#FFFFFF; --sidebar-active:#DFEAF3;
+  --text:#161E24; --text-2:#556570; --text-3:#65757F;
+  --primary:#1F5D80; --primary-hover:#194E6B; --primary-soft:#DFEAF3; --primary-ink:#FFFFFF;
+  --accent:#9A6714; --accent-soft:#F7EDDD;
+  --border:#DEE6EC; --border-strong:#C1CDD6;
+  --c-k:#1F5D80; --c-band:#DAE7F0;
+  --scrim:rgba(12,20,26,.5);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-palette="okyanus"]:not([data-theme="light"]){
+    --bg:#0F1418; --surface:#171D22; --surface-2:#1E252B; --surface-3:#252D34;
+    --sidebar:#121820; --sidebar-active:#1E2F3C;
+    --text:#ECF1F5; --text-2:#A6B4BE; --text-3:#87949E;
+    --primary:#7CB8DA; --primary-hover:#93C7E5; --primary-soft:#152833; --primary-ink:#0B1116;
+    --accent:#D6AE68; --accent-soft:#2C2618;
+    --border:#2C343B; --border-strong:#3B454D;
+    --c-k:#7CB8DA; --c-band:#1B2C37;
+    --scrim:rgba(0,0,0,.62);
+  }
+}
+:root[data-palette="okyanus"][data-theme="dark"]{
+  --bg:#0F1418; --surface:#171D22; --surface-2:#1E252B; --surface-3:#252D34;
+  --sidebar:#121820; --sidebar-active:#1E2F3C;
+  --text:#ECF1F5; --text-2:#A6B4BE; --text-3:#87949E;
+  --primary:#7CB8DA; --primary-hover:#93C7E5; --primary-soft:#152833; --primary-ink:#0B1116;
+  --accent:#D6AE68; --accent-soft:#2C2618;
+  --border:#2C343B; --border-strong:#3B454D;
+  --c-k:#7CB8DA; --c-band:#1B2C37;
+  --scrim:rgba(0,0,0,.62);
+}
+
+/* ==================== ORMAN — 1.0 sürümünün yeşili ==================== */
+:root[data-palette="orman"]{
+  --bg:#F7F8F6; --surface:#FFFFFF; --surface-2:#EFF2ED; --surface-3:#E5EAE4;
+  --sidebar:#FFFFFF; --sidebar-active:#E4EDE8;
+  --text:#18201B; --text-2:#5A665E; --text-3:#69756D;
+  --primary:#2F6B4F; --primary-hover:#26583F; --primary-soft:#E4EDE8; --primary-ink:#FFFFFF;
+  --accent:#9A6714; --accent-soft:#F7EDDD;
+  --border:#E1E6E1; --border-strong:#C9D2CB;
+  --c-k:#2F6B4F; --c-band:#DCE8E1;
+  --scrim:rgba(15,20,17,.5);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-palette="orman"]:not([data-theme="light"]){
+    --bg:#111412; --surface:#191D1A; --surface-2:#20241F; --surface-3:#272C26;
+    --sidebar:#141815; --sidebar-active:#22302A;
+    --text:#EDF2EE; --text-2:#AAB5AD; --text-3:#8B968D;
+    --primary:#7FBE9A; --primary-hover:#93CDAB; --primary-soft:#1E2C24; --primary-ink:#0D1210;
+    --accent:#DDAE68; --accent-soft:#2E2618;
+    --border:#2C332E; --border-strong:#3F4941;
+    --c-k:#7FBE9A; --c-band:#25342C;
+    --scrim:rgba(0,0,0,.62);
+  }
+}
+:root[data-palette="orman"][data-theme="dark"]{
+  --bg:#111412; --surface:#191D1A; --surface-2:#20241F; --surface-3:#272C26;
+  --sidebar:#141815; --sidebar-active:#22302A;
+  --text:#EDF2EE; --text-2:#AAB5AD; --text-3:#8B968D;
+  --primary:#7FBE9A; --primary-hover:#93CDAB; --primary-soft:#1E2C24; --primary-ink:#0D1210;
+  --accent:#DDAE68; --accent-soft:#2E2618;
+  --border:#2C332E; --border-strong:#3F4941;
+  --c-k:#7FBE9A; --c-band:#25342C;
+  --scrim:rgba(0,0,0,.62);
+}
