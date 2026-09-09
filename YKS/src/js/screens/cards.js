@@ -218,12 +218,17 @@ R.Screens.cards = (function(){
     return K.Span(4, K.Stack([
       K.Cols(2, [
         K.Stat({ label:'Due', value:due, tone:due ? null : 'ok' }),
-        K.Stat({ label:'Borç', value:'%'+debt, tone:debt > 10 ? 'warn' : 'ok' }),
+        K.Stat({ label:'Borç', value:'%'+debt, tone:debt > 10 ? 'warn' : 'ok',
+          progress:debt, note:'hedef ≤%10' }),
       ]),
+      /* Aciklama tek satira sigmiyordu ve yarida kesiliyordu; gun etiketi
+         ustte, aciklama altinda tam metin olarak durur. */
       K.Card({ title:'Tekrar takvimi', hint:'srs', sub:'Aralıklar sabittir',
-        body:html`<div class="stack-xs">${map(R.SRS_PROTOCOL, p => html`
-          <div class="row between" title="${p.detail}"><b class="small">${p.day}</b>
-            <span class="tiny dim truncate mw-60p">${p.detail}</span></div>`)}</div>` }),
+        body:html`<div class="srslist">${map(R.SRS_PROTOCOL, p => html`
+          <div class="srsrow">
+            <b class="srsrow__day">${p.day}</b>
+            <span class="srsrow__detail">${p.detail}</span>
+          </div>`)}</div>` }),
     ]));
   }
 

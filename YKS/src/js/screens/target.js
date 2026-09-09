@@ -213,8 +213,6 @@ R.Screens.target = (function(){
         prefsCard(),
       ])),
 
-      K.Span(12, raw(UI.rail(['rank', 'tiers', 'net-matrix', 'obp', 'preferences', 'certainty']))),
-
       K.Span(4, K.Stack([
         estimateCard(),
         K.Cols(2, [
@@ -241,6 +239,10 @@ R.Screens.target = (function(){
             </div>`),
         }),
       ])),
+
+      /* Aciklama paneli her zaman EN SONDA durur: tam genislik oldugu
+         icin araya girerse kendinden sonraki kolonlari alt satira iter. */
+      K.Span(12, raw(UI.rail(['rank', 'tiers', 'net-matrix', 'obp', 'preferences', 'certainty']))),
     ]));
   }
 

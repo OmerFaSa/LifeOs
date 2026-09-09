@@ -2166,6 +2166,17 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .volpill.is-ok{ background:var(--primary-soft); border-color:transparent; color:var(--primary); }
 .volpill.is-ok b{ color:var(--primary); }
 .volpill--off{ opacity:.65; }
+
+/* ---------- tekrar takvimi ----------
+   Açıklama tek satıra sığmıyordu ve yarıda kesiliyordu. */
+.srslist{ display:grid; gap:9px; }
+.srsrow{ display:grid; gap:2px; }
+.srsrow + .srsrow{ padding-top:9px; border-top:1px solid var(--border); }
+.srsrow__day{
+  font-size:var(--fs-xs); font-weight:700; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--primary);
+}
+.srsrow__detail{ font-size:var(--fs-sm); color:var(--text-3); line-height:1.45; }
 </style>
 <div id="app">
   <div class="boot">
@@ -15895,12 +15906,17 @@ R.Screens.cards = (function(){
     return K.Span(4, K.Stack([
       K.Cols(2, [
         K.Stat({ label:'Due', value:due, tone:due ? null : 'ok' }),
-        K.Stat({ label:'Borç', value:'%'+debt, tone:debt > 10 ? 'warn' : 'ok' }),
+        K.Stat({ label:'Borç', value:'%'+debt, tone:debt > 10 ? 'warn' : 'ok',
+          progress:debt, note:'hedef ≤%10' }),
       ]),
+      /* Aciklama tek satira sigmiyordu ve yarida kesiliyordu; gun etiketi
+         ustte, aciklama altinda tam metin olarak durur. */
       K.Card({ title:'Tekrar takvimi', hint:'srs', sub:'Aralıklar sabittir',
-        body:html`<div class="stack-xs">${map(R.SRS_PROTOCOL, p => html`
-          <div class="row between" title="${p.detail}"><b class="small">${p.day}</b>
-            <span class="tiny dim truncate mw-60p">${p.detail}</span></div>`)}</div>` }),
+        body:html`<div class="srslist">${map(R.SRS_PROTOCOL, p => html`
+          <div class="srsrow">
+            <b class="srsrow__day">${p.day}</b>
+            <span class="srsrow__detail">${p.detail}</span>
+          </div>`)}</div>` }),
     ]));
   }
 
@@ -17967,8 +17983,6 @@ R.Screens.target = (function(){
         prefsCard(),
       ])),
 
-      K.Span(12, raw(UI.rail(['rank', 'tiers', 'net-matrix', 'obp', 'preferences', 'certainty']))),
-
       K.Span(4, K.Stack([
         estimateCard(),
         K.Cols(2, [
@@ -17995,6 +18009,10 @@ R.Screens.target = (function(){
             </div>`),
         }),
       ])),
+
+      /* Aciklama paneli her zaman EN SONDA durur: tam genislik oldugu
+         icin araya girerse kendinden sonraki kolonlari alt satira iter. */
+      K.Span(12, raw(UI.rail(['rank', 'tiers', 'net-matrix', 'obp', 'preferences', 'certainty']))),
     ]));
   }
 
