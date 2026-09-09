@@ -89,6 +89,58 @@ R.ACTIONS = [
   },
 
   {
+    id:'block-move',
+    title:'Atlanan bloğu yarına taşı',
+    summary:'Bugün atlanan çalışma bloğu yarının planına eklenir.',
+    touches:'Yarının planı',
+    icon:'right',
+    route:'today',
+    agents:['rehber'],
+    params:{ blockId:'string' },
+    why:'Atlanan blok silinmez, taşınır: telafi edilmeyen blok sessizce '
+      + 'borç olur ve haftanın sonunda görünmez.',
+  },
+
+  {
+    id:'exam-analysis-done',
+    title:'Deneme analizini kapat',
+    summary:'Protokolü tamamlanmış deneme “analiz tamam” işaretlenir.',
+    touches:'Deneme kaydı',
+    icon:'check',
+    route:'exams',
+    agents:['analist'],
+    params:{ examId:'string' },
+    why:'Protokolün her adımı işaretli ama kayıt hâlâ açık görünüyorsa '
+      + 'analiz borcu yapay olarak şişer.',
+  },
+
+  {
+    id:'sleep-target',
+    title:'Uyku hedefini güncelle',
+    summary:'Günlük uyku hedefi değiştirilir.',
+    touches:'Profil',
+    icon:'moon',
+    route:'guide',
+    agents:['rehber'],
+    params:{ hours:'number' },
+    why:'Sürekli tutmayan bir uyku hedefi ölçüm olmaktan çıkar; '
+      + 'gerçekçi hedef tutar ve tutunca ölçülebilir.',
+  },
+
+  {
+    id:'week-topic-add',
+    title:'Konuyu haftanın planına al',
+    summary:'Konu, bu haftanın ana konularına eklenir.',
+    touches:'Haftalık sözleşme',
+    icon:'plus',
+    route:'week',
+    agents:['tyt', 'ayt'],
+    params:{ subjectId:'string', topicId:'string' },
+    why:'Plana girmeyen konu kapanmaz; risk sırasının başındaki konu '
+      + 'haftanın sözleşmesinde yer almalı.',
+  },
+
+  {
     id:'decision-close',
     title:'Açık kararı kapat',
     summary:'Takipteki karar “yapıldı” ya da “devredildi” olarak kapanır.',

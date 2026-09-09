@@ -357,6 +357,170 @@
     });
   });
 
+  /* ==================== yeni eylemler ==================== */
+
+  describe('Öneri — blok taşıma', () => {
+    it('atlanan blok yarına taşınır ve geri alınır', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const day = await M.ensureDay(TODAY);
+        day.blocks[0].status = 'skipped';
+        await M.saveDay(TODAY);
+        const yarin = U.iso(U.addDays(U.parse(TODAY), 1));
+
+        const row = await P.propose({ action:'block-move', agent:'rehber',
+          params:{ blockId:day.blocks[0].id } });
+        await P.approve(row.id);
+
+        const dst = M.dayOf(yarin);
+        expect(dst.blocks.some(b => b.movedFrom === day.blocks[0].id)).toBeTruthy();
+        expect(dst.blocks.some(b => b.slot === 'Telafi')).toBeTruthy();
+
+        await P.undo(row.id);
+        expect(M.dayOf(yarin).blocks.some(b => b.movedFrom === day.blocks[0].id)).toBeFalsy();
+      });
+    });
+
+    it('atlanmamış blok taşınmaz', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const day = await M.ensureDay(TODAY);
+        expect(P.check({ action:'block-move', agent:'rehber',
+          params:{ blockId:day.blocks[0].id } }).ok).toBeFalsy();
+      });
+    });
+
+    it('aynı blok iki kez taşınmaz', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const day = await M.ensureDay(TODAY);
+        day.blocks[0].status = 'skipped';
+        await M.saveDay(TODAY);
+        const row = await P.propose({ action:'block-move', agent:'rehber',
+          params:{ blockId:day.blocks[0].id } });
+        await P.approve(row.id);
+        expect(P.check({ action:'block-move', agent:'rehber',
+          params:{ blockId:day.blocks[0].id } }).ok).toBeFalsy();
+      });
+    });
+  });
+
+  describe('Öneri — deneme analizi', () => {
+    function tamProtokol(){
+      const p = {};
+      R.ANALYSIS_PROTOCOL.forEach(x => { p[x.key] = true; });
+      return p;
+    }
+
+    it('protokolü biten deneme kapatılır ve geri alınır', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        await M.saveExam({ id:'e1', date:TODAY, type:'TYT Genel', family:'TYT',
+          kind:'full', tests:[], protocol:tamProtokol(), analysisCompletedAt:null });
+
+        const row = await P.propose({ action:'exam-analysis-done', agent:'analist',
+          params:{ examId:'e1' } });
+        await P.approve(row.id);
+        expect(!!S.exams.find(e => e.id === 'e1').analysisCompletedAt).toBeTruthy();
+
+        await P.undo(row.id);
+        expect(S.exams.find(e => e.id === 'e1').analysisCompletedAt).toBe(null);
+      });
+    });
+
+    it('protokolü yarım deneme kapatılamaz', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        await M.saveExam({ id:'e2', date:TODAY, type:'TYT Genel', family:'TYT',
+          kind:'full', tests:[], protocol:{ score:true }, analysisCompletedAt:null });
+        /* Yapilmamis analizi "yapildi" saymak olcumu bozar. */
+        const res = P.check({ action:'exam-analysis-done', agent:'analist',
+          params:{ examId:'e2' } });
+        expect(res.ok).toBeFalsy();
+        expect(res.why).toContain('işaretsiz');
+      });
+    });
+  });
+
+  describe('Öneri — uyku hedefi', () => {
+    it('hedef güncellenir ve geri alınır', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const before = S.profile.sleepTarget;
+        const row = await P.propose({ action:'sleep-target', agent:'rehber',
+          params:{ hours:8 } });
+        await P.approve(row.id);
+        expect(S.profile.sleepTarget).toBe(8);
+        await P.undo(row.id);
+        expect(S.profile.sleepTarget).toBe(before);
+      });
+    });
+
+    it('mantıksız hedef reddedilir', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        expect(P.check({ action:'sleep-target', agent:'rehber', params:{ hours:3 } }).ok).toBeFalsy();
+        expect(P.check({ action:'sleep-target', agent:'rehber', params:{ hours:14 } }).ok).toBeFalsy();
+      });
+    });
+
+    it('kural motoru uyku hedefini kendiliğinden önermez', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        /* Hedefi kendiliginden dusurmek "uykudan feda ettirme" yasagiyla
+           ayni kapiya cikar; bu eylem yalniz ajan konusurken onerilebilir. */
+        expect(P.suggest().some(x => x.action === 'sleep-target')).toBeFalsy();
+      });
+    });
+  });
+
+  describe('Öneri — haftaya konu alma', () => {
+    it('konu haftanın planına eklenir ve geri alınır', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const n = M.currentWeek();
+        const week = await M.ensureWeek(n);
+        week.mainTopics = [];
+        await M.saveWeek(n);
+
+        const row = await P.propose({ action:'week-topic-add', agent:'tyt',
+          params:{ subjectId:SUBJECT.id, topicId:TOPIC.id } });
+        await P.approve(row.id);
+        expect(S.weeks[M.weekId(n)].mainTopics.some(t => t.topicId === TOPIC.id)).toBeTruthy();
+
+        await P.undo(row.id);
+        expect(S.weeks[M.weekId(n)].mainTopics.some(t => t.topicId === TOPIC.id)).toBeFalsy();
+      });
+    });
+
+    it('imzalanmış haftanın sözleşmesi değiştirilmez', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const n = M.currentWeek();
+        const week = await M.ensureWeek(n);
+        week.mainTopics = [];
+        week.signedAt = new Date().toISOString();
+        await M.saveWeek(n);
+        const res = P.check({ action:'week-topic-add', agent:'tyt',
+          params:{ subjectId:SUBJECT.id, topicId:TOPIC.id } });
+        expect(res.ok).toBeFalsy();
+        expect(res.why).toContain('imzalanmış');
+      });
+    });
+
+    it('üç konu doluysa yenisi alınmaz', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const n = M.currentWeek();
+        const week = await M.ensureWeek(n);
+        week.mainTopics = [{ topicId:'a' }, { topicId:'b' }, { topicId:'c' }];
+        await M.saveWeek(n);
+        expect(P.check({ action:'week-topic-add', agent:'tyt',
+          params:{ subjectId:SUBJECT.id, topicId:TOPIC.id } }).ok).toBeFalsy();
+      });
+    });
+  });
+
   /* ==================== kural motoru onerileri ==================== */
 
   describe('Öneri — kural motoru', () => {
@@ -392,6 +556,47 @@
         expect(row.params.topicId).toBe(TOPIC.id);
         /* Sahibi dersin sinavina gore secilir. */
         expect(row.agent).toBe(SUBJECT.exam === 'TYT' ? 'tyt' : 'ayt');
+      });
+    });
+
+    it('atlanan blok için taşıma önerilir', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const day = await M.ensureDay(TODAY);
+        day.blocks[0].status = 'skipped';
+        await M.saveDay(TODAY);
+        const row = P.suggest().find(x => x.action === 'block-move');
+        expect(!!row).toBeTruthy();
+        expect(row.agent).toBe('rehber');
+      });
+    });
+
+    it('protokolü biten ama kapanmayan deneme için öneri doğar', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const protocol = {};
+        R.ANALYSIS_PROTOCOL.forEach(x => { protocol[x.key] = true; });
+        await M.saveExam({ id:'e1', date:TODAY, type:'TYT Genel', family:'TYT',
+          kind:'full', tests:[], protocol, analysisCompletedAt:null });
+        const row = P.suggest().find(x => x.action === 'exam-analysis-done');
+        expect(!!row).toBeTruthy();
+        expect(row.agent).toBe('analist');
+      });
+    });
+
+    it('risk sırasındaki konu haftaya alınması için önerilir', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const n = M.currentWeek();
+        const week = await M.ensureWeek(n);
+        week.mainTopics = [];
+        week.signedAt = null;
+        await M.saveWeek(n);
+        /* Riski yukseltmek icin acik yanlis birak. */
+        await M.saveError({ id:'e1', closedAt:null, subjectId:SUBJECT.id, topicId:TOPIC.id });
+        const row = P.suggest().find(x => x.action === 'week-topic-add');
+        expect(!!row).toBeTruthy();
+        expect(['tyt', 'ayt'].indexOf(row.agent) >= 0).toBeTruthy();
       });
     });
 

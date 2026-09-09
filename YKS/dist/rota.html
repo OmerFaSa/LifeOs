@@ -4235,6 +4235,58 @@ R.ACTIONS = [
   },
 
   {
+    id:'block-move',
+    title:'Atlanan bloğu yarına taşı',
+    summary:'Bugün atlanan çalışma bloğu yarının planına eklenir.',
+    touches:'Yarının planı',
+    icon:'right',
+    route:'today',
+    agents:['rehber'],
+    params:{ blockId:'string' },
+    why:'Atlanan blok silinmez, taşınır: telafi edilmeyen blok sessizce '
+      + 'borç olur ve haftanın sonunda görünmez.',
+  },
+
+  {
+    id:'exam-analysis-done',
+    title:'Deneme analizini kapat',
+    summary:'Protokolü tamamlanmış deneme “analiz tamam” işaretlenir.',
+    touches:'Deneme kaydı',
+    icon:'check',
+    route:'exams',
+    agents:['analist'],
+    params:{ examId:'string' },
+    why:'Protokolün her adımı işaretli ama kayıt hâlâ açık görünüyorsa '
+      + 'analiz borcu yapay olarak şişer.',
+  },
+
+  {
+    id:'sleep-target',
+    title:'Uyku hedefini güncelle',
+    summary:'Günlük uyku hedefi değiştirilir.',
+    touches:'Profil',
+    icon:'moon',
+    route:'guide',
+    agents:['rehber'],
+    params:{ hours:'number' },
+    why:'Sürekli tutmayan bir uyku hedefi ölçüm olmaktan çıkar; '
+      + 'gerçekçi hedef tutar ve tutunca ölçülebilir.',
+  },
+
+  {
+    id:'week-topic-add',
+    title:'Konuyu haftanın planına al',
+    summary:'Konu, bu haftanın ana konularına eklenir.',
+    touches:'Haftalık sözleşme',
+    icon:'plus',
+    route:'week',
+    agents:['tyt', 'ayt'],
+    params:{ subjectId:'string', topicId:'string' },
+    why:'Plana girmeyen konu kapanmaz; risk sırasının başındaki konu '
+      + 'haftanın sözleşmesinde yer almalı.',
+  },
+
+  {
     id:'decision-close',
     title:'Açık kararı kapat',
     summary:'Takipteki karar “yapıldı” ya da “devredildi” olarak kapanır.',
@@ -13039,7 +13091,7 @@ R.Office = (function(){
 window.R = window.R || {};
 
 R.Proposals = (function(){
-  const U = R.U, M = R.Model, S = R.S;
+  const U = R.U, M = R.Model, C = R.Calc, S = R.S;
 
   const MAX = 40;             // saklanan oneri (uygulanan + reddedilen dahil)
   const STORE = 'office/proposals';
@@ -13237,6 +13289,154 @@ R.Proposals = (function(){
         const week = S.weeks[M.weekId(s.n)];
         if(!week) return;
         week.questionTarget = s.questionTarget;
+        await M.saveWeek(s.n);
+      },
+    },
+
+    'block-move':{
+      check(p){
+        const today = U.todayISO();
+        const day = M.dayOf(today);
+        if(!day) return fail('Bugünün planı henüz açılmadı.');
+        const block = (day.blocks || []).find(b => b.id === p.blockId);
+        if(!block) return fail('Bu blok bugünün planında yok.');
+        if(block.status !== 'skipped') return fail('Bu blok atlanmamış; taşımanın anlamı yok.');
+        const tomorrow = U.iso(U.addDays(U.parse(today), 1));
+        /* Ayni blok iki kez tasinmasin. */
+        const dst = M.dayOf(tomorrow);
+        if(dst && (dst.blocks || []).some(b => b.movedFrom === p.blockId)){
+          return fail('Bu blok yarına zaten taşınmış.');
+        }
+        return pass({ block, tomorrow, dst });
+      },
+      preview(p, ctx){
+        const count = ctx.dst ? (ctx.dst.blocks || []).length : 0;
+        return [
+          { label:'Taşınacak blok', before:'bugün · atlandı',
+            after:ctx.block.topic || ctx.block.subject },
+          { label:'Süre', before:'—', after:(ctx.block.targetMin || 0) + ' dk' },
+          { label:'Yarınki blok sayısı', before:String(count), after:String(count + 1) },
+        ];
+      },
+      async apply(p, ctx){
+        const day = await M.ensureDay(ctx.tomorrow);
+        const id = U.uid('b');
+        day.blocks.push(Object.assign({}, ctx.block, {
+          id, slot:'Telafi', status:'pending',
+          actualMin:null, actualQ:null, correctQ:null,
+          skipReason:null, startedAt:null,
+          /* Kaynagi tasinir: ayni blok ikinci kez tasinmasin. */
+          movedFrom:p.blockId,
+        }));
+        await M.saveDay(ctx.tomorrow);
+        return { date:ctx.tomorrow, blockId:id };
+      },
+      async revert(s){
+        const day = M.dayOf(s.date);
+        if(!day) return;
+        day.blocks = (day.blocks || []).filter(b => b.id !== s.blockId);
+        await M.saveDay(s.date);
+      },
+    },
+
+    'exam-analysis-done':{
+      check(p){
+        const exam = (S.exams || []).find(e => e.id === p.examId);
+        if(!exam) return fail('Bu deneme bulunamadı.');
+        if(exam.analysisCompletedAt) return fail('Bu denemenin analizi zaten kapalı.');
+        /* Kural: protokolun HER adimi isaretli olmali. Yapilmamis analizi
+           "yapildi" saymak olcumu bozar; oneri ancak is bittiginde dogar. */
+        const steps = exam.protocol || {};
+        const missing = R.ANALYSIS_PROTOCOL.filter(x => !steps[x.key]);
+        if(missing.length){
+          return fail('Protokolün ' + missing.length + ' adımı hâlâ işaretsiz.');
+        }
+        return pass({ exam });
+      },
+      preview(p, ctx){
+        return [
+          { label:'Deneme', before:'—',
+            after:ctx.exam.type + ' · ' + U.fmtDate(ctx.exam.date) },
+          { label:'Protokol', before:'tamamı işaretli', after:'analiz kapandı' },
+        ];
+      },
+      async apply(p, ctx){
+        ctx.exam.analysisCompletedAt = new Date().toISOString();
+        await M.saveExam(ctx.exam);
+        return { id:ctx.exam.id };
+      },
+      async revert(s){
+        const exam = (S.exams || []).find(e => e.id === s.id);
+        if(!exam) return;
+        exam.analysisCompletedAt = null;
+        await M.saveExam(exam);
+      },
+    },
+
+    'sleep-target':{
+      check(p){
+        const hours = Math.round((Number(p.hours) || 0) * 2) / 2;   // yarim saat adimi
+        if(!(hours >= 6 && hours <= 10)){
+          return fail('Uyku hedefi 6–10 saat arasında olmalı.');
+        }
+        const cur = (S.profile && S.profile.sleepTarget) || 7.5;
+        if(cur === hours) return fail('Hedef zaten bu değerde.');
+        return pass({ hours, cur });
+      },
+      preview(p, ctx){
+        return [{ label:'Günlük uyku hedefi',
+          before:U.fmtNet(ctx.cur) + ' saat', after:U.fmtNet(ctx.hours) + ' saat' }];
+      },
+      async apply(p, ctx){
+        S.profile.sleepTarget = ctx.hours;
+        await M.saveProfile();
+        return { sleepTarget:ctx.cur };
+      },
+      async revert(s){
+        S.profile.sleepTarget = s.sleepTarget;
+        await M.saveProfile();
+      },
+    },
+
+    'week-topic-add':{
+      check(p){
+        const subject = subjectOf(p.subjectId);
+        if(!subject) return fail('Bu ders sistemde yok.');
+        const topic = topicOf(subject, p.topicId);
+        if(!topic) return fail('Bu konu bu derste yok.');
+        const n = M.currentWeek();
+        const week = S.weeks[M.weekId(n)];
+        if(!week) return fail('Bu hafta henüz açılmadı.');
+        /* Imzalanmis sozlesme degistirilmez: haftanin sozu haftanin sozudur. */
+        if(week.signedAt) return fail('Bu haftanın sözleşmesi imzalanmış; değiştirilmez.');
+        if((week.mainTopics || []).length >= 3){
+          return fail('Haftanın ana konuları dolu (en fazla üç).');
+        }
+        if((week.mainTopics || []).some(t => t.topicId === p.topicId)){
+          return fail('Bu konu zaten haftanın planında.');
+        }
+        return pass({ subject, topic, week, n });
+      },
+      preview(p, ctx){
+        const cur = (ctx.week.mainTopics || []).length;
+        return [
+          { label:'Eklenecek konu', before:'—', after:ctx.topic.name },
+          { label:'Ders', before:'—', after:ctx.subject.name },
+          { label:'Haftanın ana konuları', before:cur + ' / 3', after:(cur + 1) + ' / 3' },
+        ];
+      },
+      async apply(p, ctx){
+        ctx.week.mainTopics = (ctx.week.mainTopics || []).concat([{
+          name:ctx.topic.name, questionTarget:100, accuracy:70,
+          subjectId:p.subjectId, topicId:p.topicId,
+        }]);
+        await M.saveWeek(ctx.n);
+        return { n:ctx.n, topicId:p.topicId };
+      },
+      async revert(s){
+        const week = S.weeks[M.weekId(s.n)];
+        if(!week) return;
+        week.mainTopics = (week.mainTopics || []).filter(t => t.topicId !== s.topicId);
         await M.saveWeek(s.n);
       },
     },
@@ -13447,6 +13647,54 @@ R.Proposals = (function(){
         });
       });
     });
+
+    /* 4. Bugun atlanan blok — telafi edilmezse sessizce borca doner. */
+    const day = M.dayOf(today);
+    const skipped = day ? (day.blocks || []).find(b => b.status === 'skipped') : null;
+    if(skipped){
+      out.push({
+        action:'block-move', agent:'rehber', source:'kural',
+        params:{ blockId:skipped.id },
+        reason:'“' + (skipped.topic || skipped.subject) + '” bugün atlandı; '
+          + 'telafi edilmezse haftanın sonunda görünmez.',
+      });
+    }
+
+    /* 5. Protokolu bitmis ama kapanmamis deneme — analiz borcunu yapay sisirir. */
+    const stale = (S.exams || []).find(e => !e.analysisCompletedAt
+      && R.ANALYSIS_PROTOCOL.every(x => (e.protocol || {})[x.key]));
+    if(stale){
+      out.push({
+        action:'exam-analysis-done', agent:'analist', source:'kural',
+        params:{ examId:stale.id },
+        reason:'Bu denemenin protokolü tamamen işaretli ama kayıt hâlâ açık; '
+          + 'analiz borcu olduğundan fazla görünüyor.',
+      });
+    }
+
+    /* 6. Risk sirasinin basindaki konu haftanin planinda degilse.
+       Plana girmeyen konu kapanmaz. */
+    const week = S.weeks[M.weekId(M.currentWeek())];
+    if(week && !week.signedAt && (week.mainTopics || []).length < 3){
+      const top = (C.riskRanking(5) || []).find(r =>
+        !(week.mainTopics || []).some(t => t.topicId === r.topicId));
+      if(top){
+        const subject = (R.SUBJECTS || []).find(s => s.id === top.subjectId);
+        out.push({
+          action:'week-topic-add',
+          agent:(subject && subject.exam === 'TYT') ? 'tyt' : 'ayt',
+          source:'kural',
+          params:{ subjectId:top.subjectId, topicId:top.topicId },
+          reason:top.topicName + ' risk sırasının başında ama bu haftanın '
+            + 'planında yok; plana girmeyen konu kapanmaz.',
+        });
+      }
+    }
+
+    /* Uyku hedefi kural motoru tarafindan ONERILMEZ. Hedefin surekli
+       tutmamasi bir davranis bulgusudur; hedefi kendiliginden dusurmek
+       "uykudan feda ettirme" yasagiyla ayni kapiya cikar. Eylem katalogda
+       durur ve Rana konusurken onerebilir — ama kararini sen verirsin. */
 
     /* Dogrulanmayan oneri hic dogmaz. */
     return out.filter(p => check(p).ok);

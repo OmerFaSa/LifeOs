@@ -327,10 +327,26 @@ diye bir yol yoktur ve olmamalıdır: ofisin değeri önerisinde, yetkisinde de�
 |---|---|---|
 | `topic-review` | Tuna, Yaman | Konu durumu — kapalı görünen konu yeniden açılır |
 | `block-add` | Rana, Tuna, Yaman | Bugünün planı — tekrar bloğu eklenir |
+| `block-move` | Rana | Yarının planı — atlanan blok taşınır |
 | `cards-due-today` | Deniz | Tekrar kartları — geciken tekrarlar bugüne çekilir |
 | `card-from-error` | Deniz | Tekrar kartları — açık yanlıştan kart üretilir |
+| `exam-analysis-done` | Deniz | Deneme kaydı — protokolü biten analiz kapanır |
 | `week-target` | Patron, Rana | Haftalık soru hedefi |
+| `week-topic-add` | Tuna, Yaman | Haftalık sözleşme — konu plana alınır |
+| `sleep-target` | Rana | Profil — günlük uyku hedefi |
 | `decision-close` | Patron | Karar takibi |
+
+İki sınır kasıtlıdır:
+
+- **İmzalanmış haftanın sözleşmesi değiştirilmez.** `week-topic-add` imzadan
+  sonra reddedilir; haftanın sözü haftanın sözüdür.
+- **Uyku hedefini kural motoru kendiliğinden önermez.** Hedefin sürekli
+  tutmaması bir davranış bulgusudur; hedefi otomatik düşürmek "uykudan feda
+  ettirme" yasağıyla aynı kapıya çıkar. Eylem katalogda durur ve Rana
+  konuşurken önerebilir — ama kararı sen verirsin.
+
+Ayrıca `exam-analysis-done` yalnızca protokolün **her** adımı işaretliyse
+doğar: yapılmamış bir analizi "yapıldı" saymak ölçümü bozar.
 
 Yetki ayrımı burada da geçerlidir: Rana konu durumuna dokunamaz, Deniz
 haftalık hedefi değiştiremez. `agents` alanı bunu kilitler.
