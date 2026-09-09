@@ -707,10 +707,17 @@ R.Office = (function(){
       body = lines[1]
         ? 'Buna itirazım şu: ' + lines[1]
         : 'Kendi alanımdan itirazım yok; ' + (lines[0] || b.headline);
+    }else if(kind === 'turn' && round === 'oylama'){
+      /* Oy kural motoru modunda nextTurn icinde secilir; burada gerekce yazilir. */
+      body = b.suggestion ? 'Kendi alanımdaki en somut iş bu: ' + b.suggestion.text
+        : (lines[0] || b.headline);
     }else if(kind === 'turn' && (round === 'sentez' || round === 'serbest')){
       body = b.suggestion
         ? 'Bana düşen iş: ' + b.suggestion.text
         : 'Ekleyecek bir şeyim yok.';
+    }else if(kind === 'answer'){
+      body = 'Masamdaki veriye göre: ' + (lines[0] || b.headline)
+        + (lines[1] ? ' ' + lines[1] : '');
     }else{
       body = lines.length
         ? lines.join(' ') + (b.suggestion ? ' ' + b.suggestion.text : '')
@@ -1105,19 +1112,27 @@ R.Office = (function(){
     { key:'itiraz', title:'İtiraz turu',
       ask:'Masadaki fikirlerden hangisi kendi alaninda TUTMAZ, nedenini veriyle soyle. '
         + 'Itirazin yoksa hangisini destekledigini ve neden oldugunu tek cumlede yaz.' },
+    { key:'oylama', title:'Oylama turu', vote:true,
+      ask:'Fikirlerden birini SEC. Yanitina o fikrin NUMARASIYLA basla, sonra tek cumlede '
+        + 'neden onu sectigini soyle. Kendi fikrini de secebilirsin ama gerekcen veriye dayanmali.' },
     { key:'sentez', title:'Toparlama turu',
       ask:'Konusulanlardan kendi alanina dusen tek isi soyle: sen ne yapacaksin, '
         + 'aday senden ne bekleyecek.' },
-    { key:'serbest', title:'Serbest tur',
-      ask:'Sana kalan son sozu soyle. Yeni bir sey yoksa "ekleyecegim yok" de, uzatma.' },
   ];
 
   function roundDef(n){ return ROUNDS[Math.min(n, ROUNDS.length) - 1] || ROUNDS[ROUNDS.length - 1]; }
 
   /* Kac tur anlamli? Model bagliyken bes turun hepsi ayri bir soru sorar.
-     Model yokken ajanin elinde yalnizca brifing vardir: ucuncu turdan sonra
-     yeni bir sey cikmaz, bu yuzden toplanti orada durur. */
-  function maxRounds(){ return mode() === 'llm' ? ROUNDS.length : 3; }
+
+     Model yokken ajanin elinde yalnizca brifing vardir ve uc turdan sonra
+     soyleyecek yeni bir seyi kalmaz. Oylama turu bunun istisnasidir: oyu
+     model degil kural motoru verir ve tablo YENI bilgi uretir. Bu yuzden
+     kural motoru modunda toplanti oylamayla biter, toparlama turu yapilmaz. */
+  function maxRounds(){
+    if(mode() === 'llm') return ROUNDS.length;
+    const vote = ROUNDS.findIndex(r => r.vote);
+    return vote >= 0 ? vote + 1 : 3;
+  }
 
   /* ---------- canli oturum ----------
      Toplanti artik tek bir cagriyla bitmez: kullanici bitirene kadar
@@ -1134,6 +1149,123 @@ R.Office = (function(){
       status:'live',
       promptVersion:R.OFFICE_PROMPTS.version,
     };
+  }
+
+  /* Fikir turunda ortaya atilan oneriler — oylamanin secenekleri. */
+  function voteOptions(session){
+    return (session.turns || [])
+      .filter(t => t.roundKey === 'fikir' && t.agent !== 'aday')
+      .map((t, i) => ({ n:i + 1, agent:t.agent, name:t.name, text:t.text }));
+  }
+
+  /* Ajanin yanitindan sectigi numarayi cikarir. Model numara yazmadiysa
+     oy sayilmaz — uydurma bir oy tabloyu bozar. */
+  function parseVote(text, count){
+    const m = String(text || '').match(/\b([1-9])\b/);
+    if(!m) return null;
+    const n = Number(m[1]);
+    return (n >= 1 && n <= count) ? n : null;
+  }
+
+  /* Oy tablosu. Agirlik ajanin GUVEN SKORUNDAN gelir: onerisi tutan ajanin
+     oyu daha agir basar. Kural motoru sayar, model saymaz. */
+  function tally(session){
+    const options = voteOptions(session);
+    if(!options.length) return null;
+    const votes = (session.turns || []).filter(t => t.roundKey === 'oylama' && t.vote);
+    if(!votes.length) return null;
+
+    const rows = options.map(o => ({ n:o.n, agent:o.agent, name:o.name, text:o.text,
+      oy:0, agirlik:0, verenler:[] }));
+    votes.forEach(v => {
+      const row = rows.find(r => r.n === v.vote);
+      if(!row) return;
+      let w = 1;
+      try{
+        const t = R.Journal.trust(v.agent);
+        if(t.yuzde != null) w = 1 + t.yuzde / 100;
+      }catch(e){}
+      row.oy++;
+      row.agirlik = U.round(row.agirlik + w, 2);
+      row.verenler.push(v.name);
+    });
+    const sorted = rows.slice().sort((a, b) => b.agirlik - a.agirlik || b.oy - a.oy);
+    return { rows:sorted, kazanan:sorted[0] && sorted[0].oy ? sorted[0] : null,
+      oyVeren:votes.length };
+  }
+
+  /* ==================== capraz soru ====================
+     Toplantiyi yoklamadan tartismaya cikaran sey: iki masanin verisi
+     birbiriyle celisiyorsa Patron ilgili ajana TEK takip sorusu sorar.
+     Celiskiyi KURAL MOTORU bulur; model celiski uyduramaz. */
+
+  const CONFLICTS = [
+    {
+      id:'olcum-davranis', target:'rehber',
+      when(){
+        const c = C.planCompletion(M.currentWeek());
+        return C.analysisDebt().length > 0 && c != null && c >= 85;
+      },
+      ask(){
+        return 'Plan tamamlaması %' + C.planCompletion(M.currentWeek()) + ' ile tutmuş görünüyor '
+          + 'ama ' + C.analysisDebt().length + ' deneme analizsiz duruyor. '
+          + 'Plan gerçekten tuttu mu, yoksa analiz plana hiç yazılmadı mı?';
+      },
+    },
+    {
+      id:'kapanis-net', target:'tyt',
+      when(){
+        const t = C.medianTrend('TYT');
+        return C.examClosure('TYT').pct >= 60 && t.delta != null && t.delta <= -1.5;
+      },
+      ask(){
+        return 'TYT kapanışı %' + C.examClosure('TYT').pct + ' ama medyan '
+          + U.fmtNet(Math.abs(C.medianTrend('TYT').delta)) + ' net geriledi. '
+          + 'Kapanmış saydığımız konular gerçekten kapandı mı?';
+      },
+    },
+    {
+      id:'uyku-hacim', target:'rehber',
+      when(){
+        const s = C.sleepAverage(7);
+        const t = (S.profile && S.profile.sleepTarget) || 7.5;
+        const c = C.planCompletion(M.currentWeek());
+        return s != null && s < t - 1 && c != null && c >= 85;
+      },
+      ask(){
+        return 'Plan %' + C.planCompletion(M.currentWeek()) + ' tutmuş ama uyku '
+          + U.fmtNet(C.sleepAverage(7)) + ' saate düşmüş. '
+          + 'Bu tempo uykudan mı ödünç alıyor?';
+      },
+    },
+    {
+      id:'kart-borcu', target:'analist',
+      when(){ return C.cardDebt() > 15 && C.overallClosure().pct >= 50; },
+      ask(){
+        return 'Konu kapanışı %' + C.overallClosure().pct + ' ama tekrar borcu %' + C.cardDebt() + '. '
+          + 'Kapanan konular tekrar edilmiyorsa kapanış ne kadar gerçek?';
+      },
+    },
+  ];
+
+  function conflicts(){
+    const out = [];
+    CONFLICTS.forEach(c => {
+      let on = false;
+      try{ on = !!c.when(); }catch(e){ on = false; }
+      if(!on) return;
+      let question = '';
+      try{ question = c.ask(); }catch(e){ return; }
+      out.push({ id:c.id, target:c.target, question,
+        name:(R.AGENT_BY_ID[c.target] || {}).name || c.target });
+    });
+    return out;
+  }
+
+  /* Toplantida henuz sorulmamis ilk celiski. */
+  function nextConflict(session){
+    const asked = (session.turns || []).filter(t => t.conflict).map(t => t.conflict);
+    return conflicts().find(c => asked.indexOf(c.id) < 0) || null;
   }
 
   /* Bir uzmanin konusma sirasi. Toplantida herkes ayni tur icinde bir kez konusur. */
@@ -1177,17 +1309,70 @@ R.Office = (function(){
 
     resetBriefs();
     const data = compactData(R.Tools.sanitize(brief(agentId).data));
+    const options = def.vote ? voteOptions(session) : null;
+
     const turn = await speak(agentId, 'turn', {
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.turn(agent,
-        { topic:session.topic }, data, saidSoFar(session), def, recentSaid(agentId)) }],
-      ctx:{ topic:session.topic, round:def },
+        { topic:session.topic }, data, saidSoFar(session), def, recentSaid(agentId), options) }],
+      ctx:{ topic:session.topic, round:def, options },
     }, Object.assign({}, o, { maxTokens:320 }));
 
     turn.round = roundNo;
+    turn.roundKey = def.key;
     turn.roundTitle = def.title;
+    if(def.vote && options && options.length){
+      turn.vote = parseVote(turn.text, options.length);
+      /* Kural motoru modunda model yok: oy kural motorunun sectigi isin
+         sahibine gider, o da yoksa ilk fikre. */
+      if(turn.vote == null && turn.mode === 'kural'){
+        const owner = R.ACTION_OWNER && R.ACTION_OWNER[nextAction().key];
+        const match = options.find(x => x.agent === owner);
+        turn.vote = match ? match.n : options[0].n;
+        turn.text = turn.vote + '. seçeneği destekliyorum: ' + turn.text;
+      }
+    }
     session.round = roundNo;
     session.turns.push(turn);
     return turn;
+  }
+
+  /* Capraz soru: Patron celiskili masalardan birine takip sorusu sorar,
+     o ajan yanitlar. Iki tur harcar; celiski yoksa hic calismaz. */
+  async function askCross(session, opts){
+    const o = opts || {};
+    const conflict = nextConflict(session);
+    if(!conflict) return null;
+
+    const patron = R.AGENT_BY_ID.patron;
+    const q = await speak('patron', 'cross', {
+      messages:[{ role:'user', text:R.OFFICE_PROMPTS.cross(conflict) }],
+      ctx:{ topic:session.topic, conflict },
+    }, Object.assign({}, o, { maxTokens:200 }));
+    q.round = session.round;
+    q.roundKey = 'capraz';
+    q.roundTitle = 'Çapraz soru';
+    q.conflict = conflict.id;
+    /* Model yoksa Patron soruyu kural motorunun yazdigi hâliyle sorar. */
+    if(q.mode === 'kural') q.text = conflict.name + ', ' + conflict.question;
+    session.turns.push(q);
+    if(o.onTurn) await o.onTurn(q, session.turns);
+
+    const agent = R.AGENT_BY_ID[conflict.target];
+    resetBriefs();
+    const data = compactData(R.Tools.sanitize(brief(conflict.target).data));
+    const a = await speak(conflict.target, 'answer', {
+      messages:[{ role:'user', text:R.OFFICE_PROMPTS.answer(agent, conflict, data,
+        saidSoFar(session)) }],
+      ctx:{ topic:session.topic, conflict },
+    }, Object.assign({}, o, { maxTokens:280 }));
+    a.round = session.round;
+    a.roundKey = 'capraz';
+    a.roundTitle = 'Yanıt';
+    a.conflict = conflict.id;
+    session.turns.push(a);
+    if(o.onTurn) await o.onTurn(a, session.turns);
+
+    return { conflict, question:q, answer:a };
   }
 
   /* Kullanici soz alir: konusma kaydina girer, sonraki ajanlar bunu gorur. */
@@ -1210,10 +1395,11 @@ R.Office = (function(){
     const said = session.turns.slice(1)
       .map(t => ({ name:t.name, role:t.role, text:t.text }));
 
+    const vote = tally(session);
     const closing = await speak('patron', 'closing', {
       messages:[{ role:'user', text:R.OFFICE_PROMPTS.closing(
-        { topic:session.topic }, said, action) }],
-      ctx:{ topic:session.topic, action },
+        { topic:session.topic }, said, action, vote) }],
+      ctx:{ topic:session.topic, action, vote },
     }, Object.assign({}, o, { maxTokens:320 }));
 
     closing.closing = true;
@@ -1242,10 +1428,13 @@ R.Office = (function(){
         key:action.key || null,
         owner:(R.ACTION_OWNER && R.ACTION_OWNER[action.key]) || null,
       },
+      vote,
       turns:session.turns.map(t => ({ agent:t.agent, name:t.name, role:t.role, text:t.text,
         warnings:t.warnings || [], mode:t.mode, round:t.round || 0,
-        roundTitle:t.roundTitle || '', closing:!!t.closing, error:t.error || null })),
-      report:buildReport(session, action, closing),
+        roundKey:t.roundKey || '', roundTitle:t.roundTitle || '',
+        vote:t.vote || null, conflict:t.conflict || null,
+        closing:!!t.closing, error:t.error || null })),
+      report:buildReport(session, action, closing, vote),
     };
 
     await saveMeeting(meeting);
@@ -1258,7 +1447,7 @@ R.Office = (function(){
      karar ne. Patron'un kapanis metni ozet olarak basa konur — LLM'e
      ayrica bir rapor yazdirilmaz, boylece fazladan kota harcanmaz. */
 
-  function buildReport(session, action, closing){
+  function buildReport(session, action, closing, vote){
     const byAgent = {};
     session.turns.forEach(t => {
       if(t.agent === 'patron' || t.agent === 'aday') return;
@@ -1273,10 +1462,15 @@ R.Office = (function(){
 
     const userSaid = session.turns.filter(t => t.agent === 'aday').map(t => t.text);
 
+    const crossed = session.turns.filter(t => t.roundKey === 'capraz' && t.agent !== 'patron')
+      .map(t => ({ ajan:t.name, yanit:t.text }));
+
     return {
       summary:closing ? closing.text : '',
       topic:session.topic,
       why:session.why,
+      vote:vote || null,
+      crossed,
       rounds:session.round,
       turnCount:session.turns.length,
       speakers:Object.keys(byAgent).length,
@@ -1318,6 +1512,19 @@ R.Office = (function(){
       a.lines.forEach(l => out.push('  · [' + (l.roundTitle || 'tur') + '] ' + l.text));
       out.push('');
     });
+    if(r.vote && r.vote.kazanan){
+      out.push('OYLAMA');
+      r.vote.rows.forEach(row => out.push('  ' + row.n + '. ' + row.name + ' — '
+        + row.oy + ' oy (ağırlık ' + row.agirlik + ')'
+        + (row.verenler.length ? ' · ' + row.verenler.join(', ') : '')));
+      out.push('  Kazanan: ' + r.vote.kazanan.name + ' — ' + r.vote.kazanan.text);
+      out.push('');
+    }
+    if((r.crossed || []).length){
+      out.push('ÇAPRAZ SORU');
+      r.crossed.forEach(c => out.push('  · ' + c.ajan + ': ' + c.yanit));
+      out.push('');
+    }
     if((r.userSaid || []).length){
       out.push('SENİN SÖZLERİN');
       r.userSaid.forEach(t => out.push('  · ' + t));
@@ -1484,6 +1691,8 @@ R.Office = (function(){
     ask, briefing, chatOf, pushChat, clearChat,
     /* toplanti — turlu canli oturum */
     agenda, agendaCandidates, openMeeting, nextTurn, userTurn, closeMeeting, speakerAt, roundDef,
+    /* tartisma */
+    conflicts, nextConflict, askCross, CONFLICTS, voteOptions, parseVote, tally,
     meet, meetings, lastMeeting, saveMeeting, deleteMeeting, reportText, maxRounds,
     /* proaktiflik */
     notes, WATCHERS, dailyBriefing, briefingOf, ruleBriefingText, noteFingerprint,

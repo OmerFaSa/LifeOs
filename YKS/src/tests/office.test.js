@@ -1350,6 +1350,163 @@
     });
   });
 
+
+  /* ==================== FAZ 4 — gercek tartisma ==================== */
+
+  describe('Ofis — çapraz soru', () => {
+    it('çelişki yokken soru sorulmaz', () => {
+      reset();
+      expect(O.conflicts()).toHaveLength(0);
+    });
+
+    it('ölçüm ile davranış çelişince rehbere sorulur', async () => {
+      reset();
+      await withTodayAsync('2026-10-05', async () => {
+        const M = R.Model, U = R.U;
+        await M.ensureWeek(M.currentWeek());
+        for(const d of M.weekDates(M.currentWeek())){
+          if(U.iso(d) > U.todayISO()) continue;
+          await M.ensureDay(d);
+          R.S.days[U.iso(d)].blocks.forEach(b => { b.status = 'done'; });
+        }
+        R.S.exams = [makeExam({ date:'2026-10-01', analysisCompletedAt:null })];
+        const list = O.conflicts();
+        expect(list.some(c => c.id === 'olcum-davranis' && c.target === 'rehber')).toBeTruthy();
+        expect(list[0].question.length > 30).toBeTruthy();
+      });
+    });
+
+    it('çelişki kural motorundan gelir, her birinin hedefi bir ajandır', () => {
+      reset();
+      O.CONFLICTS.forEach(c => {
+        expect(!!R.AGENT_BY_ID[c.target]).toBeTruthy();
+        expect(typeof c.when).toBe('function');
+        expect(typeof c.ask).toBe('function');
+      });
+    });
+
+    it('sorulan çelişki bir daha sorulmaz', async () => {
+      reset();
+      await withTodayAsync('2026-10-05', async () => {
+        R.S.exams = [makeExam({ date:'2026-10-01', analysisCompletedAt:null })];
+        const M = R.Model, U = R.U;
+        await M.ensureWeek(M.currentWeek());
+        for(const d of M.weekDates(M.currentWeek())){
+          if(U.iso(d) > U.todayISO()) continue;
+          await M.ensureDay(d);
+          R.S.days[U.iso(d)].blocks.forEach(b => { b.status = 'done'; });
+        }
+        const session = await O.openMeeting();
+        const first = O.nextConflict(session);
+        expect(first).toBeTruthy();
+        await O.askCross(session);
+        expect(session.turns.filter(t => t.roundKey === 'capraz')).toHaveLength(2);
+        const after = O.nextConflict(session);
+        expect(after && after.id === first.id).toBeFalsy();
+      });
+    });
+
+    it('çapraz soruda Patron sorar, hedef ajan yanıtlar', async () => {
+      reset();
+      await withTodayAsync('2026-10-05', async () => {
+        R.S.exams = [makeExam({ date:'2026-10-01', analysisCompletedAt:null })];
+        const M = R.Model, U = R.U;
+        await M.ensureWeek(M.currentWeek());
+        for(const d of M.weekDates(M.currentWeek())){
+          if(U.iso(d) > U.todayISO()) continue;
+          await M.ensureDay(d);
+          R.S.days[U.iso(d)].blocks.forEach(b => { b.status = 'done'; });
+        }
+        const session = await O.openMeeting();
+        const res = await O.askCross(session);
+        expect(res.question.agent).toBe('patron');
+        expect(res.answer.agent).toBe(res.conflict.target);
+      });
+    });
+  });
+
+  describe('Ofis — oylama', () => {
+    it('fikir turu oylamanın seçeneklerini üretir', async () => {
+      reset();
+      const session = await O.openMeeting();
+      const n = R.MEETING_ORDER.length;
+      for(let i = 0; i < 2 * n; i++) await O.nextTurn(session, i);
+      const opts = O.voteOptions(session);
+      expect(opts).toHaveLength(n);
+      expect(opts[0].n).toBe(1);
+    });
+
+    it('oy numarası metinden okunur, geçersiz numara sayılmaz', () => {
+      expect(O.parseVote('2. fikri destekliyorum', 4)).toBe(2);
+      expect(O.parseVote('Hiçbirini seçmiyorum', 4)).toBeNull();
+      expect(O.parseVote('9. fikir', 4)).toBeNull();
+    });
+
+    it('kural motoru modunda her ajan oy verir', async () => {
+      reset();
+      const session = await O.openMeeting();
+      const n = R.MEETING_ORDER.length;
+      for(let i = 0; i < 4 * n; i++) await O.nextTurn(session, i);
+      const votes = session.turns.filter(t => t.roundKey === 'oylama');
+      expect(votes).toHaveLength(n);
+      votes.forEach(v => expect(v.vote != null).toBeTruthy());
+    });
+
+    it('oy tablosu kural motoru tarafından sayılır', async () => {
+      reset();
+      const session = await O.openMeeting();
+      const n = R.MEETING_ORDER.length;
+      for(let i = 0; i < 4 * n; i++) await O.nextTurn(session, i);
+      const t = O.tally(session);
+      expect(t.oyVeren).toBe(n);
+      expect(t.kazanan).toBeTruthy();
+      expect(R.U.sum(t.rows.map(r => r.oy))).toBe(n);
+    });
+
+    it('oylama yapılmadan tablo çıkmaz', async () => {
+      reset();
+      const session = await O.openMeeting();
+      expect(O.tally(session)).toBeNull();
+    });
+
+    it('oylama sonucu rapora ve tutanağa girer', async () => {
+      reset();
+      const session = await O.openMeeting();
+      const n = R.MEETING_ORDER.length;
+      for(let i = 0; i < 4 * n; i++) await O.nextTurn(session, i);
+      const m = await O.closeMeeting(session);
+      expect(m.vote.kazanan).toBeTruthy();
+      expect(m.report.vote.kazanan).toBeTruthy();
+      expect(O.reportText(m)).toContain('OYLAMA');
+    });
+
+    it('güven skoru oy ağırlığını değiştirir', async () => {
+      reset();
+      await withTodayAsync('2026-10-05', async () => {
+        R.S.exams = [makeExam({ date:'2026-10-01', analysisCompletedAt:null })];
+        O.resetBriefs();
+        const first = await O.meet({ rounds:1 });
+        await O.closeDecision(first.id, 'done');       // analist güven kazanır
+        expect(R.Journal.trust('analist').yuzde).toBe(100);
+
+        const session = await O.openMeeting();
+        const n = R.MEETING_ORDER.length;
+        for(let i = 0; i < 4 * n; i++) await O.nextTurn(session, i);
+        const t = O.tally(session);
+        const analistVote = session.turns.find(x => x.roundKey === 'oylama' && x.agent === 'analist');
+        const row = t.rows.find(r => r.n === analistVote.vote);
+        expect(row.agirlik > row.oy).toBeTruthy();     // ağırlık 1'den büyük
+      });
+    });
+
+    it('turlar oylamayı içerir ve her turun sorusu ayrıdır', () => {
+      expect(O.ROUNDS.some(r => r.vote)).toBeTruthy();
+      const keys = O.ROUNDS.map(r => r.key);
+      expect(keys.indexOf('fikir') < keys.indexOf('oylama')).toBeTruthy();
+      expect(keys.indexOf('itiraz') < keys.indexOf('oylama')).toBeTruthy();
+    });
+  });
+
   /* ==================== yukleme ==================== */
 
   describe('Ofis — kalıcılık', () => {

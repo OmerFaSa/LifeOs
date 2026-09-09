@@ -60,8 +60,21 @@ cümleyi tekrarlamaz:
 | 1. Durum tespiti | Kendi alanından tek bulgu |
 | 2. Fikir turu | Gündemi çözecek tek somut fikir, öncekilerden farklı |
 | 3. İtiraz turu | Masadaki hangi fikir tutmaz, neden |
-| 4. Toparlama | Kendi alanına düşen tek iş |
-| 5. Serbest tur | Son söz (yoksa "ekleyecek bir şey yok") |
+| 4. Oylama turu | Fikirlerden birini seç, numarasıyla başla |
+| 5. Toparlama | Kendi alanına düşen tek iş |
+
+**Çapraz soru.** Tur aralarında kural motoru iki masanın verisi arasında
+çelişki arar (plan tutmuş görünürken analiz borcu duruyorsa, kapanış yüksekken
+medyan düşüyorsa, plan tutmuş ama uyku düşmüşse, kapanış yüksekken tekrar borcu
+birikmişse). Çelişki bulunursa Patron ilgili ajana **tek** takip sorusu sorar ve
+o ajan yanıtlar. Çelişkiyi kural motoru bulur; model çelişki uyduramaz.
+Aynı çelişki bir toplantıda iki kez sorulmaz.
+
+**Oylama.** Fikir turundaki öneriler numaralanır, her uzman birini seçer.
+Sayımı kural motoru yapar ve oyları **güven skoruyla ağırlıklandırır**:
+önerisi tutan ajanın oyu daha ağır basar. Model numara yazmadıysa oy sayılmaz —
+uydurma bir oy tabloyu bozar. Kural motoru modunda oy deterministiktir:
+sıradaki işin sahibi olan ajanın fikrine gider.
 
 Her turda dört uzman sırayla konuşur: `Deniz → Tuna → Yaman → Rana`.
 Patron açar; açık bir karar varsa **önce onun hesabını sorar**.
@@ -86,8 +99,14 @@ Toplantı bitince rapor üretilir ve tutanakla birlikte saklanır:
 - Kural motoru uyarıları
 - **Dayandığı veri** — kararın verildiği andaki sayılar
 
-`Office.reportText(m)` raporu düz metne çevirir; ekrandaki "Kopyala" bunu kullanır.
-Tutanaklar `meetings/<id>` altında saklanır; en son 20 tanesi tutulur.
+Rapor ayrıca **oylama tablosunu** ve **çapraz soru yanıtlarını** taşır.
+`Office.reportText(m)` raporu düz metne çevirir; ekrandaki "Kopyala" ve
+"Raporu indir" bunu kullanır. Tutanaklar `meetings/<id>` altında saklanır;
+en son 20 tanesi tutulur ve arşivde aranabilir.
+
+Toplantı **sesli dinlenebilir**: her ajanın sesi perde ve hızla ayrılır,
+kimin konuştuğu bakmadan anlaşılır. Konuşma metninde geçen ajan adları
+tıklanabilir — "bu Tuna'nın alanı" dendiğinde o masaya geçilir.
 
 ### Karar takibi
 
@@ -139,6 +158,19 @@ vardır. Listeyi güncellemek için yalnızca `data/providers.js` düzenlenir.
 Yedeğe girmez (`Store.exportAll` başka bir anahtarı okur), buluta gitmez,
 modele gönderilmez, ekranda hep maskeli gösterilir.
 
+### Çoklu anahtar
+
+Bir sağlayıcıya **birden çok API anahtarı** verilebilir. Kota anahtar başına
+sayıldığı için ikinci anahtar günlük hakkı ikiye katlar — ücretsiz katmanda en
+ucuz büyüme yolu. Motor kotası müsait olanı seçer, dolanı atlar. Ayar ekranı
+anahtarları tek tek listeler ve her birinin günlük kullanımını gösterir.
+
+### Çevrimdışı
+
+Bağlantı yokken istek hiç gönderilmez: kota harcanmaz, sebep doğru söylenir.
+Toplantı bitmez **duraklar**; konuşulanlar durur ve bağlantı gelince kaldığı
+yerden devam eder.
+
 ### Yedek zinciri
 
 Ücretsiz modeller sık sık istek sınırına takılır. `Office.chainFor()` şu sırayı
@@ -155,6 +187,69 @@ ajan kural motoru metnine döner ve bunu rozetle söyler.
 Bir toplantı 6 model çağrısıdır; ajan başına model seçerek Patron'a güçlü,
 uzmanlara hızlı model verilebilir.
 
+## Ajan defteri — uydurmadan hatırlama
+
+Bir ekip üyesini değerli yapan şey aylardır seni izliyor olmasıdır. Ama LLM'e
+"hatırla" demek ona uydurma izni vermektir. Bu yüzden hafıza, modelin
+hatırladığı değil **verinin desteklediği** şeydir (`core/journal.js`):
+
+**Bulunan gözlem.** Kural motoru geçmişi tarar ve örüntüyü kendisi bulur:
+hangi gün daha çok blok atlanıyor, plan kaç haftadır hedefin altında, aynı
+atlama nedeni tekrar ediyor mu, uykunun deneme netine ölçülebilir etkisi var mı,
+analiz borcu alışkanlığa mı dönüştü, kapanan konu yeniden açılıyor mu.
+Saklanmaz — her okumada yeniden hesaplanır, bu yüzden bayatlamaz. Belirgin bir
+fark yoksa gözlem üretilmez: zayıf ilişkiden çıkarım yapılmaz.
+
+**Önerilen gözlem.** Ajan yapısal bir ölçüt önerir (`{ölçüt, karşılaştırma,
+eşik}`); ölçüt listesi **kapalıdır**, ajan yeni ölçüt uyduramaz. Kural motoru
+gözlemi veri üzerinde çalıştırır; doğrulanmayan gözlem deftere girmez. Deftere
+girmiş gözlem de her okumada yeniden doğrulanır ve artık doğru değilse düşer.
+
+Serbest metin hiçbir yoldan hafızaya giremez.
+
+**Güven skoru.** Kararın hangi ajanın alanına düştüğü kural motorunun iş
+anahtarından (`Calc.nextAction`) türetilir; bir ajanın alanına düşen kararların
+kaçı uygulandı ölçülebilir. Oylamada oy ağırlığı buradan gelir.
+
+## Masa notları — ofis sen kapısını açmadan çalışır
+
+On eşik izlenir; aşılınca ilgili ajan masasına not bırakır: analiz borcu,
+tekrar borcu, açık yanlış, uyku, plan tamamlama, davranış serisi, TYT/AYT
+düşüşü, bekleyen ikinci ölçüm, açık karar. Notlar **tamamen kural motorundan**
+üretilir: model gerekmez, kota harcanmaz, çevrimdışı çalışır. Önem sırasına
+dizilir ve Bugün ekranındaki "Ofisten" kartında da görünür.
+
+**Günlük brifing.** Patron sabah masaları tek cümleyle özetler; gün boyu
+önbellekten okunur (günde 1 istek, ayarlardan kapatılabilir). Brifing dayandığı
+not kümesinin parmak izini taşır: notlar gün içinde değişirse **bayat**
+işaretlenir. Kural motoru modunda bayat brifing kendiliğinden tazelenir;
+model bağlıyken kota harcamamak için tazeleme kullanıcıya bırakılır.
+
+**Bildirim.** Ofis acil bir not bulduğunda ya da karar iki gündür açık
+kaldığında haber verir. İzin açıkça istenir, günde en fazla bir bildirim gider.
+
+## Çıktı denetimi — modelin yazdığı da denetlenir
+
+Ajanın her yanıtı üç katmanda denetlenir (`Office.validate`):
+
+| Katman | Ne arar |
+|---|---|
+| Ev kuralları | Garanti, kaynak değiştirme, uykudan feda, tıbbi tavsiye |
+| **Sayı sadakati** | Metindeki her sayı brifingde var mı — yoksa uydurmadır |
+| Alan ihlali | Uzman kendi masasının dışına çıktı mı |
+
+Sayı denetimi Türkçe yazımı tanır (`19,50` ondalık · `1.500` binlik · `%78`
+yüzde) ve doğal dil sayılarını (≤12) ile yılları eler — yanlış pozitif
+kullanıcıyı yorar.
+
+`tools/evalagents.js` sabit senaryolarla her ajanı konuşturup makineyle puanlar:
+uydurulan sayı, alan ihlali, ev kuralı, cümle sınırı, Türkçe harf oranı, süre.
+Birden çok model tek komutla karşılaştırılabilir.
+
+```bash
+ROTA_PROVIDER=groq ROTA_KEY=gsk_… ROTA_MODEL=llama-3.3-70b-versatile,llama-3.1-8b-instant   node tools/evalagents.js
+```
+
 ## Gizlilik
 
 Modele giden her nesne `CoachTools.sanitize()` süzgecinden geçer: ad, şehir,
@@ -170,13 +265,15 @@ akademik metrik taşır.
 | `data/providers.js` | Sağlayıcı, model ve istek sınırı kataloğu (deklaratif, sık değişir) |
 | `data/rules.js` | Ev kuralları, yasak kalıplar, üslup, kart kuralları |
 | `core/quota.js` | İstek sınırı: aralık koyar, günü sayar, 429'u cezalandırır |
+| `core/journal.js` | Ajan defteri: doğrulanabilir gözlem, örüntü bulma, güven skoru |
 | `core/llm.js` | Taşıma: fetch, SSE akış, hata haritası, anahtar deposu, yedek zinciri |
 | `core/tools.js` | Veri okuma katmanı + gizlilik süzgeci (`sanitize`) |
 | `core/office.js` | Brifingler, sohbet, gündem, turlu toplantı, rapor, karar takibi |
 | `screens/office.js` | Pano, masalar, günün kararı, kota, model ayarları |
 | `screens/team.js` | Ajanla sohbet |
 | `screens/meeting.js` | Canlı turlu toplantı + rapor + tutanak arşivi |
-| `tests/office.test.js` | 78 test: kayıt, brifing, yetki, gizlilik, gündem, tur, rapor, karar, kota, taşıma |
+| `tests/office.test.js` | 150 test: kayıt, brifing, yetki, gizlilik, gündem, tur, oylama, çapraz soru, defter, not, rapor, karar, kota, taşıma |
+| `tools/evalagents.js` | Model karşılaştırma: ajanları senaryolarda konuşturup makineyle puanlar |
 
 ## Yeni ajan eklemek
 
@@ -194,7 +291,7 @@ akademik metrik taşır.
 
 ```bash
 python devserver.py                       # http://localhost:4173
-node tools/runtests.js                    # 570 testin tamamı geçmeli (Playwright ile)
+node tools/runtests.js                    # 642 testin tamamı geçmeli (Playwright ile)
 python build.py                           # dist/rota.html
 python tools/audit.py                     # satır, concat, sınıf sayıları
 ```

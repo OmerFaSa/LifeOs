@@ -69,6 +69,8 @@ R.S = {
     meetingAgenda:0,      // secili gundem adayi
     meetingOpen:null,     // acik gecmis tutanak
     meetingAuto:false,    // ofisten gelindiyse toplantiyi hemen baslat
+    meetingVoice:false,   // toplantiyi sesli dinle
+    meetingSearch:'',     // tutanak aramasi
   },
 };
 

@@ -139,8 +139,9 @@ Ekrana özel yapılar CSS'te adlandırılır, bileşene çevrilmez:
 `flowstep` (günün akışı), `energy` / `reward` (davranış), `player` / `seg-row` (ders notu),
 `runclock` (süreli deneme oturumu), `wizstep` / `levelbtn` (kurulum sihirbazı),
 `palettebtn` (palet seçici), `notedot` (profil notu), `msg--me` / `msg--coach` (koç),
-`agentav` / `desk` / `deskstate` / `finding` (ofis masaları), `board` (ofis panosu),
-`meetbar` / `meetturn` / `reportrow` (toplantı ve rapor).
+`agentav` / `desk` / `deskstate` / `finding` / `note` (ofis masaları),
+`board` (ofis panosu), `keyrow` (API anahtarları),
+`meetbar` / `meetturn` / `agentref` / `reportrow` (toplantı, hitap ve rapor).
 
 **Bileşen tek yerdedir.** Eski `UI.stat / badge / notice / table / field / input`
 köprüsü kaldırıldı; `R.UI` yalnız ikon, SVG çizim, ipucu rayı ve katman

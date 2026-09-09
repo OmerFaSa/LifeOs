@@ -1138,3 +1138,37 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .note--warn .note__dot{ background:var(--accent); }
 .note--ok{ background:var(--primary-soft); }
 .note--ok .note__dot{ background:var(--primary); }
+
+
+/* ---------- doğrudan hitap ---------- */
+/* Ajan adı konuşma metninde geçtiğinde o masaya gitmek için tıklanabilir. */
+.agentref{
+  font: inherit; font-weight:700; padding:0 1px;
+  border:0; background:none; cursor:pointer;
+  border-bottom:1px dashed currentColor;
+}
+.agentref--patron { color:var(--agent-patron); }
+.agentref--tyt    { color:var(--agent-tyt); }
+.agentref--ayt    { color:var(--agent-ayt); }
+.agentref--rehber { color:var(--agent-rehber); }
+.agentref--analist{ color:var(--agent-analist); }
+.agentref:hover{ border-bottom-style:solid; }
+
+/* Çapraz soru — Patron’un tur arasında sorduğu takip sorusu */
+.meetturn--cross{ border-left:1px solid var(--accent); background:var(--accent-soft); }
+
+/* ---------- toplantı: dar ekran ---------- */
+@media (max-width:720px){
+  /* Denetim çubuğu tek elle erişilebilsin diye üstte sabit durur. */
+  .meetbar{
+    position:sticky; top:0; z-index:var(--z-topbar);
+    flex-direction:column; align-items:stretch; gap:8px;
+  }
+  .meetbar .row{ justify-content:space-between; }
+  .meetbar .btn{ flex:1 1 auto; justify-content:center; }
+  .meetturn{ padding:10px 11px; }
+  .meetturn__who{ font-size:var(--fs-xs); }
+  .meetturn__body{ font-size:var(--fs-sm); }
+  .meet{ gap:9px; }
+  .reportrow__list{ margin-left:14px; }
+}

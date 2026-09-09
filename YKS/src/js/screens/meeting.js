@@ -36,24 +36,41 @@ R.Screens.meeting = (function(){
       aria-hidden="true">${agent.initial}</span>`;
   }
 
+  /* Metinde gecen ajan adlarini tiklanabilir yapar: "bu Tuna'nin alani"
+     dendiginde o masaya gecilebilsin. Kacirma ONCE yapilir, baglanti sonra;
+     boylece model ne yazarsa yazsin HTML enjeksiyonu olmaz. */
+  const NAME_RE = new RegExp('\\b(' + R.AGENTS.map(a => a.name).join('|') + ')\\b', 'g');
+
+  function body(text){
+    const escaped = U.esc(String(text || '')).replace(/\n/g, '<br/>');
+    return escaped.replace(NAME_RE, name => {
+      const a = R.AGENTS.find(x => x.name === name);
+      if(!a) return name;
+      return '<button class="agentref agentref--' + a.id + '" data-act="meet-talk" '
+        + 'data-agent="' + a.id + '" title="' + U.esc(a.role) + '">' + name + '</button>';
+    });
+  }
+
   function Turn(t){
     if(t.agent === 'aday'){
       return html`
         <div class="meetturn meetturn--me">
           <div class="meetturn__who"><b>Sen</b><span class="dim">söz aldın</span></div>
-          <div class="meetturn__body">${raw(U.esc(t.text).replace(/\n/g, '<br/>'))}</div>
+          <div class="meetturn__body">${raw(body(t.text))}</div>
         </div>`;
     }
     const agent = R.AGENT_BY_ID[t.agent] || R.AGENT_BY_ID.patron;
     return html`
-      <div class="${cls('meetturn', t.closing && 'meetturn--closing')}">
+      <div class="${cls('meetturn', t.closing && 'meetturn--closing',
+        t.roundKey === 'capraz' && 'meetturn--cross')}">
         <div class="meetturn__who">
           ${Avatar(agent)}<b>${agent.name}</b><span class="dim">${agent.role}</span>
           ${when(t.roundTitle, () => html`<span class="meetturn__round">${t.roundTitle}</span>`)}
+          ${when(t.vote, () => K.Badge({ label:t.vote + '. fikre oy', tone:'info' }))}
           ${when(t.closing, () => K.Badge({ label:'karar', tone:'ok' }))}
           ${when(t.mode === 'kural', () => K.Badge({ label:'kural motoru', tone:'info' }))}
         </div>
-        <div class="meetturn__body">${raw(U.esc(t.text).replace(/\n/g, '<br/>'))}</div>
+        <div class="meetturn__body">${raw(body(t.text))}</div>
         ${when(t.warnings && t.warnings.length, () => html`
           <div class="msg__warn">${raw(UI.icon('warn'))} ${t.warnings.join(' ')}</div>`)}
         ${when(t.error, () => html`<div class="msg__warn">${raw(UI.icon('warn'))} ${t.error}</div>`)}
@@ -106,6 +123,15 @@ R.Screens.meeting = (function(){
           ${K.Button({ label:'Ofise dön', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'office' } })}
         </div>
 
+        ${(function(){
+          const list = O.conflicts();
+          return when(list.length, () => html`<div class="mt-10">
+            ${K.Notice({ tone:'info', title:'Kural motoru ' + list.length + ' çelişki buldu:',
+              body:list.map(c => c.name + '’ya sorulacak' ).join(' · ')
+                + ' — Patron tur aralarında çapraz soru soracak.' })}
+          </div>`);
+        })()}
+
         <div class="meetplan mt-12">
           <b class="small">Nasıl işleyecek?</b>
           <ol class="meetplan__list">
@@ -137,6 +163,10 @@ R.Screens.meeting = (function(){
           <span class="dim">${session ? session.turns.length + ' konuşma' : ''}</span>
         </div>
         <div class="row wrap gap-6">
+          ${when(voiceAvailable(), () => K.Button({
+            label:S.ui.meetingVoice ? 'Sesi kapat' : 'Sesli dinle',
+            icon:S.ui.meetingVoice ? 'pause' : 'play', size:'sm',
+            tone:S.ui.meetingVoice ? 'primary' : 'ghost', act:'meet-voice' }))}
           ${K.Button({ label:'Söz al', icon:'edit', size:'sm', act:'meet-say' })}
           ${when(running, () => K.Button({ label:'Duraklat', size:'sm', tone:'ghost', act:'meet-pause' }))}
           ${when(!running && session,
@@ -180,6 +210,26 @@ R.Screens.meeting = (function(){
               data:{ 'data-route':m.action.route || 'today' } }) })}
         </div>
 
+        ${when(r.vote && r.vote.kazanan, () => html`
+          <div class="mt-12">${K.SectionTitle('Oylama', K.Badge({
+            label:r.vote.oyVeren + ' oy', tone:'info' }))}</div>
+          ${K.Table({ tight:true,
+            headers:['Fikir', 'Sahibi', { label:'Oy', num:true }, { label:'Ağırlık', num:true }],
+            rows:r.vote.rows.map(row => [
+              html`<span class="small">${row.text.slice(0, 90)}</span>`,
+              row.name, row.oy, row.agirlik,
+            ]) })}
+          <p class="tiny dim mt-8">Ağırlık ajanın güven skorundan gelir: önerisi tutan ajanın
+            oyu daha ağır basar. Sayımı kural motoru yapar.</p>`)}
+
+        ${when((r.crossed || []).length, () => html`
+          <div class="mt-12">${K.SectionTitle('Çapraz soru')}</div>
+          <div class="stack-xs">${map(r.crossed, c => html`
+            <div class="finding">
+              <span class="finding__dot finding__dot--warn"></span>
+              <span><b>${c.ajan}:</b> ${c.yanit}</span>
+            </div>`)}</div>`)}
+
         <div class="mt-12">${K.SectionTitle('Kim ne dedi')}</div>
         <div class="stack-sm">${map(Object.keys(r.byAgent || {}), id => {
           const a = r.byAgent[id];
@@ -212,6 +262,8 @@ R.Screens.meeting = (function(){
         <div class="row wrap gap-6 mt-12">
           ${K.Button({ label:'Kararı yapıldı işaretle', size:'sm', act:'meet-decide',
             data:{ 'data-id':m.id, 'data-state':'done' } })}
+          ${K.Button({ label:'Raporu indir', icon:'download', size:'sm', act:'meet-download',
+            data:{ 'data-id':m.id } })}
           ${K.Button({ label:'Yeni toplantı', size:'sm', tone:'ghost', act:'meet-new' })}
         </div>`,
     });
@@ -219,12 +271,33 @@ R.Screens.meeting = (function(){
 
   /* ---------- arsiv ---------- */
 
+  /* Tutanak arama: gundem, karar ve butun konusma metni taranir. */
+  function matches(m, q){
+    if(!q) return true;
+    const hay = [m.topic, m.why, m.action && m.action.title,
+      m.report && m.report.summary]
+      .concat((m.turns || []).map(t => t.name + ' ' + t.text))
+      .join(' ').toLocaleLowerCase('tr');
+    return hay.indexOf(q.toLocaleLowerCase('tr')) >= 0;
+  }
+
   function archiveCard(){
-    const list = O.meetings();
-    if(!list.length) return '';
+    const all = O.meetings();
+    if(!all.length) return '';
+    const q = S.ui.meetingSearch || '';
+    const list = all.filter(m => matches(m, q));
+
     return K.Card({
-      title:'Geçmiş toplantılar', sub:list.length + ' tutanak saklanıyor',
-      body:html`<div class="stack-xs">${map(list, m => K.Collapsible({
+      title:'Geçmiş toplantılar',
+      sub:q ? list.length + ' / ' + all.length + ' tutanak eşleşti'
+            : all.length + ' tutanak saklanıyor',
+      actions:when(all.length > 2, () => K.Input({ id:'meet-search', size:'sm',
+        value:q, placeholder:'Tutanaklarda ara…', change:'meet-search', data:{ 'data-debounce':'250' } })),
+      body:html`
+        ${when(!list.length, () => K.Empty({ icon:'search',
+          text:'“' + q + '” için tutanak bulunamadı.',
+          action:K.Button({ label:'Süzgeci sıfırla', size:'sm', act:'meet-search-clear' }) }))}
+        <div class="stack-xs">${map(list, m => K.Collapsible({
         title:m.topic,
         meta:U.relativeDay(m.at.slice(0, 10)) + ' · ' + (m.rounds || 1) + ' tur · '
           + (m.decision && m.decision.state === 'open' ? 'karar açık' : 'karar kapandı'),
@@ -315,6 +388,38 @@ R.Screens.meeting = (function(){
 
   function pause(ms){ return new Promise(r => setTimeout(r, ms)); }
 
+  /* ---------- sesli toplanti ----------
+     Ders arasinda dinlenebilsin diye konusmalar okunur. Her ajanin sesi
+     perde ve hizla ayrilir; boylece kimin konustugu bakmadan anlasilir. */
+
+  function voiceAvailable(){ return typeof window.speechSynthesis !== 'undefined'; }
+
+  const VOICE = {
+    patron: { pitch:0.85, rate:0.98 },
+    tyt:    { pitch:1.05, rate:1.04 },
+    ayt:    { pitch:0.95, rate:1.02 },
+    rehber: { pitch:1.15, rate:0.96 },
+    analist:{ pitch:1.0,  rate:1.08 },
+    aday:   { pitch:1.0,  rate:1.0 },
+  };
+
+  function say(turn){
+    if(!S.ui.meetingVoice || !voiceAvailable() || !turn || !turn.text) return;
+    try{
+      const v = VOICE[turn.agent] || VOICE.aday;
+      const u = new SpeechSynthesisUtterance(
+        (turn.name ? turn.name + '. ' : '') + turn.text);
+      u.lang = 'tr-TR';
+      u.pitch = v.pitch;
+      u.rate = v.rate;
+      window.speechSynthesis.speak(u);
+    }catch(e){ /* ses yoksa toplanti aksamaz */ }
+  }
+
+  function stopVoice(){
+    if(voiceAvailable()){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+  }
+
   async function loop(){
     while(running && !stopAsked && turnIndex < maxTurns()){
       const agentId = O.speakerAt(turnIndex);
@@ -373,6 +478,7 @@ R.Screens.meeting = (function(){
       }
       stopWait();
       turnIndex++;
+      say(session.turns[session.turns.length - 1]);
       paint();
       setPending('');
       await R.App.render();
@@ -381,6 +487,31 @@ R.Screens.meeting = (function(){
          akar ve okunmaz. Konusmanin okunabilir bir ritmi olsun diye kisa
          bir duraklama konur. */
       if(O.mode() !== 'llm' && running && !stopAsked) await pause(700);
+
+      /* Tur bitti: kural motoru celiski bulduysa Patron takip sorusu sorar.
+         Toplantiyi yoklamadan tartismaya cikaran adim budur. */
+      if(running && !stopAsked && turnIndex % PER_ROUND === 0 && O.nextConflict(session)){
+        setPending(pendingTurn('patron', 'Çapraz soru soruyor…'));
+        try{
+          await O.askCross(session, {
+            signal:controller.signal,
+            onWait(ms){ showWait('patron', ms); },
+            async onTurn(turn){
+              stopWait();
+              say(turn);
+              paint();
+              setPending('');
+              await R.App.render();
+              if(O.mode() !== 'llm') await pause(700);
+            },
+          });
+        }catch(err){
+          stopWait();
+          if(err && err.code === 'cancelled') return;
+          /* Capraz soru bir ek: basarisiz olursa toplanti devam eder. */
+        }
+        setPending('');
+      }
     }
 
     /* Turlar bittiyse kullaniciya soyle; kapatmayi yine o secsin. */
@@ -447,6 +578,7 @@ R.Screens.meeting = (function(){
     async 'meet-pause'(){
       running = false;
       stopWait();
+      stopVoice();
       if(controller) controller.abort();
       controller = new AbortController();
       setPending('');
@@ -464,6 +596,7 @@ R.Screens.meeting = (function(){
 
     async 'meet-finish'(){
       if(!session) return;
+      stopVoice();
       if(running){
         running = false;
         if(controller) controller.abort();
@@ -495,6 +628,39 @@ R.Screens.meeting = (function(){
       if(!text || !session) return;
       O.userTurn(session, text);
       paint();
+      await R.App.render();
+    },
+
+    async 'meet-voice'(){
+      S.ui.meetingVoice = !S.ui.meetingVoice;
+      if(!S.ui.meetingVoice) stopVoice();
+      await R.App.render();
+    },
+
+    async 'meet-download'(el){
+      const m = O.meetings().find(x => x.id === el.dataset.id) || closed;
+      if(!m) return;
+      const text = O.reportText(m);
+      const name = 'rota-toplanti-' + m.at.slice(0, 10) + '.txt';
+      try{
+        const url = URL.createObjectURL(new Blob([text], { type:'text/plain;charset=utf-8' }));
+        const a = document.createElement('a');
+        a.href = url; a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        UI.toast('Rapor indirildi');
+      }catch(e){
+        /* Bazi ortamlar indirmeyi engeller; rapor yine de alinabilsin. */
+        UI.sheet({ title:'Toplantı raporu', subtitle:'Kopyalayıp kaydedebilirsin', wide:true,
+          body:String(html`<textarea class="textarea coachnote" rows="18" readonly>${text}</textarea>`),
+          footer:String(K.Button({ label:'Kapat', act:'sheet-close' })) });
+      }
+    },
+
+    async 'meet-search-clear'(){
+      S.ui.meetingSearch = '';
       await R.App.render();
     },
 
@@ -551,6 +717,10 @@ R.Screens.meeting = (function(){
   const change = {
     async 'meet-agenda'(el){
       S.ui.meetingAgenda = Number(el.value) || 0;
+      R.App.render();
+    },
+    async 'meet-search'(el){
+      S.ui.meetingSearch = el.value.trim();
       R.App.render();
     },
   };

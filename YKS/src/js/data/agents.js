@@ -245,10 +245,14 @@ R.OFFICE_PROMPTS = {
   /* Toplanti — uzman soz aliyor.
      round: o turun kendi sorusu (durum / fikir / itiraz / sentez / serbest).
      said: o ana kadar soylenenler.  memory: ajanin daha once kurdugu cumleler. */
-  turn(agent, agenda, brief, said, round, memory){
+  turn(agent, agenda, brief, said, round, memory, options){
     const r = round || { title:'Tur', ask:'Kendi alanından tek bulgu bildir.' };
     return 'GÜNDEM: ' + agenda.topic + '\n'
       + 'TUR: ' + r.title + '\n\n'
+      + (options && options.length
+          ? 'OYLANACAK FİKİRLER:\n'
+            + options.map(o => o.n + '. ' + o.name + ': ' + o.text).join('\n') + '\n\n'
+          : '')
       + 'MASANDAKİ RAPOR (JSON):\n' + JSON.stringify(brief, null, 1) + '\n\n'
       + (said && said.length
           ? 'TOPLANTIDA ŞU ANA KADAR SÖYLENENLER:\n'
@@ -262,14 +266,43 @@ R.OFFICE_PROMPTS = {
       + 'Alanın dışına çıkma. En fazla ' + agent.maxSentences + ' cümle.';
   },
 
+  /* Toplanti — Patron celiskili masaya takip sorusu sorar.
+     Celiskiyi kural motoru bulur; soru metni de ondan gelir. */
+  cross(conflict){
+    return 'KURAL MOTORU İKİ MASA ARASINDA ÇELİŞKİ BULDU.\n'
+      + 'Sorulacak kişi: ' + conflict.name + '\n'
+      + 'Sorulacak soru: ' + conflict.question + '\n\n'
+      + 'GÖREV: Bu soruyu kendi ağzınla, adıyla hitap ederek sor. Soruyu DEĞİŞTİRME, '
+      + 'cevabını da sen verme. Tek cümle.';
+  },
+
+  /* Toplanti — capraz soruya yanit. */
+  answer(agent, conflict, brief, said){
+    return 'PATRON SANA SORDU: ' + conflict.question + '\n\n'
+      + 'MASANDAKİ RAPOR (JSON):\n' + JSON.stringify(brief, null, 1) + '\n\n'
+      + (said && said.length
+          ? 'TOPLANTIDA SÖYLENENLER:\n'
+            + said.map(s => s.name + ': ' + s.text).join('\n') + '\n\n'
+          : '')
+      + 'GÖREV: Soruya doğrudan yanıt ver. Savunma yapma, veriye bak: '
+      + 'çelişki gerçekse kabul et, değilse nedenini sayıyla göster. '
+      + 'En fazla ' + agent.maxSentences + ' cümle.';
+  },
+
   /* Toplanti — Patron kapatir. Eylem kural motorundan gelir, uydurulmaz. */
-  closing(agenda, said, action){
+  closing(agenda, said, action, vote){
     return 'GÜNDEM: ' + agenda.topic + '\n\n'
       + 'EKİBİN SÖYLEDİKLERİ:\n'
       + said.map(s => s.name + ' (' + s.role + '): ' + s.text).join('\n') + '\n\n'
+      + (vote && vote.kazanan
+          ? 'OYLAMA SONUCU (kural motoru saydı, güven skoruyla ağırlıklı):\n'
+            + vote.rows.map(r => r.n + '. ' + r.name + ' — ' + r.oy + ' oy, ağırlık ' + r.agirlik).join('\n')
+            + '\nEn çok destek: ' + vote.kazanan.name + ' — ' + vote.kazanan.text + '\n\n'
+          : '')
       + 'KURAL MOTORUNUN BELİRLEDİĞİ EYLEM: ' + action.title
       + (action.why ? ' — ' + action.why : '') + '\n\n'
       + 'GÖREV: Toplantıyı kapat. Ekipte çelişki varsa hangisinin haklı olduğunu söyle, '
+      + (vote && vote.kazanan ? 'oylamanın sonucunu da an, ' : '')
       + 'sonra yukarıdaki eylemi kendi cümlenle gerekçelendir. Eylemi DEĞİŞTİRME, '
       + 'yerine başka iş önerme. En fazla 4 cümle.';
   },
