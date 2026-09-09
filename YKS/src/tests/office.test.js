@@ -792,6 +792,53 @@
       expect(R.LLM.dropLastWord('tek')).toBe('tek');
     });
 
+    it('sağlayıcı token bildirirse ölçüm kullanılır', async () => {
+      fresh();
+      window.fetch = async () => sse([
+        frame('Hazır.', 'stop') + '\n',
+        'data: ' + JSON.stringify({ choices:[], usage:{ prompt_tokens:1234, completion_tokens:56 } }) + '\n',
+      ]);
+      const res = await R.LLM.chat({ provider:'groq', model:'test-model' },
+        { messages:[{ role:'user', text:'x' }], onText(){} });
+      expect(res.usage.inTok).toBe(1234);
+      expect(res.usage.outTok).toBe(56);
+      expect(res.usage.measured).toBeTruthy();
+      done();
+    });
+
+    it('bildirmezse tahmin edilir ve tahmin olduğu işaretlenir', async () => {
+      fresh();
+      window.fetch = async () => sse([frame('Hazır.', 'stop') + '\n']);
+      const res = await R.LLM.chat({ provider:'groq', model:'test-model' },
+        { system:'Uzun bir sistem istemi burada durur.',
+          messages:[{ role:'user', text:'Bir soru' }], onText(){} });
+      expect(res.usage.measured).toBeFalsy();
+      expect(res.usage.inTok > 0).toBeTruthy();
+      expect(res.usage.outTok > 0).toBeTruthy();
+      done();
+    });
+
+    it('devam turlarının tokenı toplanır', async () => {
+      fresh();
+      let call = 0;
+      window.fetch = async () => {
+        call++;
+        const usage = { prompt_tokens:100, completion_tokens:20 };
+        return call === 1
+          ? sse([frame('Yarim kalan', 'length') + '\n',
+              'data: ' + JSON.stringify({ choices:[], usage }) + '\n'])
+          : sse([frame('kalan tamam.', 'stop') + '\n',
+              'data: ' + JSON.stringify({ choices:[], usage }) + '\n']);
+      };
+      const res = await R.LLM.chat({ provider:'groq', model:'test-model' },
+        { messages:[{ role:'user', text:'x' }], onText(){} });
+      /* Iki tur = iki cagri: sayim ikisinin toplami olmali. */
+      expect(res.rounds).toBe(2);
+      expect(res.usage.inTok).toBe(200);
+      expect(res.usage.outTok).toBe(40);
+      done();
+    });
+
     it('varsayılan token bütçesi kısa yanıtları kesmeyecek kadar geniştir', () => {
       expect(R.LLM.DEFAULT_MAX_TOKENS >= 1000).toBeTruthy();
     });

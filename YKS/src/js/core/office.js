@@ -983,6 +983,15 @@ R.Office = (function(){
         }
       }
 
+      /* Token sayaci — hangi ajanin brifingi sisiyor, hangisi ne kadar
+         yaziyor. Sayac ofisi durdurmaz: yazilamazsa sessizce gecilir. */
+      if(res.usage){
+        try{
+          await R.Usage.record(Object.assign({ agent:agentId,
+            provider:res.provider, model:res.model }, res.usage));
+        }catch(e){ /* sayac ofisi durdurmaz */ }
+      }
+
       /* Cikti kendi brifingine karsi denetlenir: uydurulmus sayi ve alan
          ihlali burada yakalanir. Patron'un brifingi dort raporu tasidigi
          icin onun sayilari da kapsanir. */
@@ -1725,6 +1734,7 @@ R.Office = (function(){
 
     await R.Journal.load();
     await R.Proposals.load();
+    await R.Usage.load();
     await R.LLM.initBuiltin();
     return S.office;
   }

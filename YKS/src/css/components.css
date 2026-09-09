@@ -1505,3 +1505,19 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .snaprow:last-child{ border-bottom:none; }
 .snaprow b{ display:block; }
 .snaprow .tiny{ display:block; margin-top:1px; }
+
+/* ---------- token sayacı: ajan başına yük ---------- */
+.uselist{ display:grid; gap:7px; }
+.userow{
+  display:grid; grid-template-columns:72px 1fr 48px;
+  align-items:center; gap:9px; font-size:var(--fs-xs);
+}
+.userow__name{ color:var(--text-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.userow__bar{ height:6px; border-radius:4px; background:var(--surface-3); overflow:hidden; }
+.userow__bar i{ display:block; height:100%; border-radius:4px; background:var(--text-3); }
+.userow__bar i.is-patron { background:var(--agent-patron); }
+.userow__bar i.is-tyt    { background:var(--agent-tyt); }
+.userow__bar i.is-ayt    { background:var(--agent-ayt); }
+.userow__bar i.is-rehber { background:var(--agent-rehber); }
+.userow__bar i.is-analist{ background:var(--agent-analist); }
+.userow__val{ text-align:right; color:var(--text-2); }

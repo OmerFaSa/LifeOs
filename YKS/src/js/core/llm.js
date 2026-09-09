@@ -45,6 +45,40 @@ R.LLM = (function(){
      aksi hâlde katalog eskidiginde her cagri iki istege mal olurdu. */
   const thinkingRejected = {};
 
+  /* ---------- token sayimi ----------
+     Saglayici yanitinda token sayisi bildiriyorsa O kullanilir; bildirmiyorsa
+     metin uzunlugundan tahmin edilir ve tahmin oldugu isaretlenir. Tahmini
+     olcum gibi gostermek, hic gostermemekten kotudur. */
+
+  function promptTokens(req){
+    let n = R.Usage.estimate(req && req.system);
+    ((req && req.messages) || []).forEach(m => { n += R.Usage.estimate(m && m.text); });
+    return n;
+  }
+
+  /* OpenAI uyumlu uclarin `usage` nesnesi. */
+  function usageFrom(raw, req, text){
+    const inTok = raw && (raw.prompt_tokens != null ? raw.prompt_tokens : raw.input_tokens);
+    const outTok = raw && (raw.completion_tokens != null ? raw.completion_tokens : raw.output_tokens);
+    if(inTok != null && outTok != null){
+      return { inTok:Number(inTok) || 0, outTok:Number(outTok) || 0, measured:true };
+    }
+    return { inTok:promptTokens(req), outTok:R.Usage.estimate(text), measured:false };
+  }
+
+  /* Gemini'nin usageMetadata'si. Dusunme token'i cikti butcesinden yer,
+     bu yuzden sayimda da cikti tarafina yazilir. */
+  function usageFromGemini(meta, req, text){
+    if(meta && meta.promptTokenCount != null){
+      return {
+        inTok:Number(meta.promptTokenCount) || 0,
+        outTok:(Number(meta.candidatesTokenCount) || 0) + (Number(meta.thoughtsTokenCount) || 0),
+        measured:true,
+      };
+    }
+    return { inTok:promptTokens(req), outTok:R.Usage.estimate(text), measured:false };
+  }
+
   /* Saglayicilar "token siniri doldu"yu farkli adlandirir. */
   const TRUNCATED_FINISH = ['length', 'max_tokens', 'MAX_TOKENS'];
   function truncated(finish){
@@ -358,7 +392,8 @@ R.LLM = (function(){
     });
     const text = String((res && res.text) || '').trim();
     if(!text) throw fail('empty');
-    return { text, finish:'' };
+    /* Yerlesik yetenek token bildirmez; tahmin edilir. */
+    return { text, finish:'', usage:usageFrom(null, req, text) };
   }
 
   /* ---------- OpenAI uyumlu cagri ---------- */
@@ -419,10 +454,15 @@ R.LLM = (function(){
 
     let text = '';
     let finish = '';
+    let rawUsage = null;
     try{
       const ctype = response.headers.get('content-type') || '';
       if(stream && ctype.indexOf('event-stream') >= 0){
         await readSSE(response, obj => {
+          /* Cogu saglayici son karede usage yollar; Groq onu x_groq altina
+             koyar. Istenmeden geldigi icin ek bir alan gondermeye gerek yok. */
+          if(obj.usage) rawUsage = obj.usage;
+          else if(obj.x_groq && obj.x_groq.usage) rawUsage = obj.x_groq.usage;
           const ch = obj.choices && obj.choices[0];
           if(!ch) return;
           /* Bitis sebebi genelde SON karede, govdesi bos olarak gelir:
@@ -436,6 +476,7 @@ R.LLM = (function(){
       }else{
         /* Akis istendigi hâlde duz JSON dondu — ayni govdeden okunur. */
         const json = await response.json();
+        if(json.usage) rawUsage = json.usage;
         const ch = json.choices && json.choices[0];
         if(ch && ch.finish_reason) finish = String(ch.finish_reason);
         text = String((ch && ch.message && ch.message.content) || (ch && ch.text) || '');
@@ -451,7 +492,7 @@ R.LLM = (function(){
 
     text = text.trim();
     if(!text) throw fail('empty');
-    return { text, finish };
+    return { text, finish, usage:usageFrom(rawUsage, req, text) };
   }
 
   /* ---------- Gemini cagrisi ---------- */
@@ -532,10 +573,12 @@ R.LLM = (function(){
 
     let text = '';
     let finish = '';
+    let meta = null;
     try{
       const ctype = response.headers.get('content-type') || '';
       if(stream && ctype.indexOf('event-stream') >= 0){
         await readSSE(response, obj => {
+          if(obj.usageMetadata) meta = obj.usageMetadata;
           const f = finishOf(obj);
           if(f) finish = f;
           const delta = partsText(obj);
@@ -547,7 +590,10 @@ R.LLM = (function(){
         const json = await response.json();
         const list = Array.isArray(json) ? json : [json];
         text = list.map(partsText).join('');
-        list.forEach(o => { const f = finishOf(o); if(f) finish = f; });
+        list.forEach(o => {
+          const f = finishOf(o); if(f) finish = f;
+          if(o.usageMetadata) meta = o.usageMetadata;
+        });
         if(req.onText && text) req.onText({ text, delta:text });
       }
     }catch(e){
@@ -560,7 +606,7 @@ R.LLM = (function(){
 
     text = text.trim();
     if(!text) throw fail('empty');
-    return { text, finish };
+    return { text, finish, usage:usageFromGemini(meta, req, text) };
   }
 
   /* ---------- kamu API ---------- */
@@ -588,6 +634,9 @@ R.LLM = (function(){
     let waited = 0;
     let slot = null;
     let picked = null;
+    /* Devam turlari da token harcar: sayim turlarin TOPLAMI olmali.
+       Turlardan biri bile tahminse toplam tahmin sayilir. */
+    const usage = { inTok:0, outTok:0, measured:true };
 
     for(let round = 0; round <= limit; round++){
       /* Cok anahtarli havuz: kotasi musait anahtar HER turda yeniden
@@ -650,6 +699,11 @@ R.LLM = (function(){
       }
 
       rounds++;
+      if(out.usage){
+        usage.inTok += out.usage.inTok;
+        usage.outTok += out.usage.outTok;
+        if(!out.usage.measured) usage.measured = false;
+      }
       text = round === 0 ? out.text : joinContinuation(prefix, out.text);
       finish = out.finish;
       if(!truncated(finish)) break;
@@ -666,7 +720,7 @@ R.LLM = (function(){
       keyIndex:picked ? picked.index : null,
       ms:Date.now() - started, waited,
       usedToday:slot && slot.usedToday, rpd:slot && slot.rpd,
-      rounds, truncated:cut,
+      rounds, truncated:cut, usage,
     };
   }
 

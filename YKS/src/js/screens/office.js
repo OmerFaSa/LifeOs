@@ -386,6 +386,71 @@ R.Screens.office = (function(){
     });
   }
 
+  /* ---------- token ve maliyet ----------
+     Kota kartı İSTEK sayar, bu kart TOKEN sayar. Neyin şiştiğini gösterir:
+     girdi/çıktı oranı yüksekse sorun ajanların yazdığında değil, onlara
+     gönderilen brifingdedir.
+
+     Tutar "şu an ödediğin" değildir — modeller ücretsiz katmanda çalışır ve
+     orada sıfırdır. Gösterilen sayı "ücretli katmana geçsen ne tutardı"dır;
+     kart bunu açıkça yazar, yoksa ödenmemiş bir tutar ödenmiş sanılır. */
+  function usageCard(){
+    const Us = R.Usage;
+    const today = Us.today();
+    const month = Us.range(30);
+    if(!month.calls) return '';
+
+    const cToday = Us.cost(today);
+    const cMonth = Us.cost(month);
+    const ratio = month.outTok ? (month.inTok / month.outTok) : null;
+
+    /* Ajan basina yuk — en cok yer tutan ustte. */
+    const agents = Object.keys(month.byAgent)
+      .map(id => Object.assign({ id }, month.byAgent[id]))
+      .sort((a, b) => (b.inTok + b.outTok) - (a.inTok + a.outTok));
+    const peak = agents.length ? (agents[0].inTok + agents[0].outTok) : 1;
+
+    return K.Card({
+      title:'Token ve maliyet', sub:'Bugün ve son 30 gün',
+      badge:month.estimated
+        ? K.Badge({ label:month.estimated + ' çağrı tahmini', tone:'muted' })
+        : K.Badge({ label:'ölçüldü', tone:'ok' }),
+      body:html`
+        ${K.Cols(2, [
+          K.Stat({ label:'Bugün', value:Us.fmtTokens(today.inTok + today.outTok),
+            note:today.calls + ' çağrı · ' + Us.fmtTokens(today.inTok) + ' girdi / '
+               + Us.fmtTokens(today.outTok) + ' çıktı' }),
+          K.Stat({ label:'Son 30 gün', value:Us.fmtTokens(month.inTok + month.outTok),
+            note:month.calls + ' çağrı · ' + month.days + ' günde' }),
+        ])}
+
+        ${when(ratio != null, () => html`<p class="tiny dim mt-10">
+          Girdi/çıktı oranı <b>${ratio.toFixed(1).replace('.', ',')}:1</b> —
+          ${ratio >= 4
+            ? 'yükün çoğu ajanlara gönderilen brifinglerde, yazdıkları cevaplarda değil.'
+            : 'brifingler makul; yük dengeli dağılmış.'}</p>`)}
+
+        <div class="mt-12">${K.Notice({ tone:'info',
+          title:'Ücretsiz katmanda ödediğin: $0.',
+          body:html`Aşağıdaki tutar “ücretli katmana geçsen ne tutardı”dır:
+            bugün <b>${Us.fmtCost(cToday.total)}</b> · son 30 gün <b>${Us.fmtCost(cMonth.total)}</b>${
+            cMonth.unknown ? raw(' — ' + cMonth.unknown + ' modelin birim fiyatı katalogda yazılı değil, o çağrılar tutara girmedi.') : raw('')}` })}</div>
+
+        ${when(agents.length, () => html`
+          <div class="mt-12">${K.SectionTitle('Ajan başına · son 30 gün')}</div>
+          <div class="uselist">${map(agents, a => {
+            const total = a.inTok + a.outTok;
+            const agent = R.AGENT_BY_ID[a.id];
+            return html`<div class="userow">
+              <span class="userow__name">${agent ? agent.name : a.id}</span>
+              <span class="userow__bar"><i class="${'is-' + a.id}"
+                style="width:${Math.max(3, Math.round(100 * total / peak))}%"></i></span>
+              <span class="userow__val num">${Us.fmtTokens(total)}</span>
+            </div>`;
+          })}</div>`)}`,
+    });
+  }
+
   /* ---------- model ve kota panosu ---------- */
 
   function quotaCard(){
@@ -682,6 +747,7 @@ R.Screens.office = (function(){
       ])),
       K.Span(4, K.Stack([
         quotaCard(),
+        usageCard(),
         lastMeetingCard(),
         raw(UI.rail(['next-action', 'median', 'closure'])),
       ])),

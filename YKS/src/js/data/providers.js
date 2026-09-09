@@ -18,6 +18,16 @@
 
 window.R = window.R || {};
 
+/* price: UCRETLI katmanin birim fiyati — 1 milyon token basina ABD dolari.
+
+   Bu alan "su an ne odiyorum"u DEGIL, "ucretli katmana gecsem ne tutardi"yi
+   anlatir: asagidaki modellerin cogu ucretsiz katmanda calisir ve orada
+   maliyet sifirdir. Sayac bu ikisini ayri gosterir, yoksa kullanici hic
+   odemedigi bir tutari odedigini sanir.
+
+   Fiyati bilinmeyen modelde alan hic yazilmaz; sayac o modelde token sayar
+   ama tutar gostermez — uydurulmus bir fiyat, gosterilmeyen fiyattan kotudur. */
+
 R.PROVIDERS = {
 
   /* Uygulama Artifact olarak calisirken acik olan yerlesik yetenek.
@@ -57,8 +67,10 @@ R.PROVIDERS = {
       { value:1000, label:'1000 / gün — bir kez 10 $ yükledim' },
     ],
     models:[
-      { id:'deepseek/deepseek-chat-v3-0324:free',            label:'DeepSeek V3',       free:true, strength:'analiz' },
-      { id:'meta-llama/llama-3.3-70b-instruct:free',         label:'Llama 3.3 70B',     free:true, strength:'denge' },
+      { id:'deepseek/deepseek-chat-v3-0324:free',            label:'DeepSeek V3',       free:true, strength:'analiz',
+        price:{ in:0, out:0 } },
+      { id:'meta-llama/llama-3.3-70b-instruct:free',         label:'Llama 3.3 70B',     free:true, strength:'denge',
+        price:{ in:0, out:0 } },
       { id:'google/gemini-2.0-flash-exp:free',               label:'Gemini 2.0 Flash',  free:true, strength:'hız' },
       { id:'qwen/qwen-2.5-72b-instruct:free',                label:'Qwen 2.5 72B',      free:true, strength:'denge' },
       { id:'mistralai/mistral-small-3.2-24b-instruct:free',  label:'Mistral Small 3.2', free:true, strength:'hız' },
@@ -81,9 +93,9 @@ R.PROVIDERS = {
     limits:{ rpm:30, rpd:1000 },
     models:[
       { id:'llama-3.3-70b-versatile', label:'Llama 3.3 70B', free:true, strength:'denge',
-        limits:{ rpm:30, rpd:1000,  tpm:12000 } },
+        price:{ in:0.59, out:0.79 }, limits:{ rpm:30, rpd:1000,  tpm:12000 } },
       { id:'llama-3.1-8b-instant',    label:'Llama 3.1 8B',  free:true, strength:'hız',
-        limits:{ rpm:30, rpd:14400, tpm:6000 } },
+        price:{ in:0.05, out:0.08 }, limits:{ rpm:30, rpd:14400, tpm:6000 } },
       { id:'openai/gpt-oss-20b',      label:'GPT-OSS 20B',   free:true, strength:'denge',
         limits:{ rpm:30, rpd:1000,  tpm:8000 } },
       { id:'qwen/qwen3-32b',          label:'Qwen 3 32B',    free:true, strength:'analiz',
@@ -117,7 +129,8 @@ R.PROVIDERS = {
        varsayilan dusunmesiyle calisir. */
     models:[
       { id:'gemini-3.5-flash',      label:'Gemini 3.5 Flash',      free:true, strength:'analiz',
-        thinking:{ mode:'level', value:'LOW' }, limits:{ rpm:15, rpd:1500 } },
+        thinking:{ mode:'level', value:'LOW' },
+        price:{ in:1.50, out:9.00 }, limits:{ rpm:15, rpd:1500 } },
       { id:'gemini-3.5-flash-lite', label:'Gemini 3.5 Flash Lite', free:true, strength:'hız',
         thinking:{ mode:'level', value:'LOW' }, limits:{ rpm:30, rpd:1500 } },
       { id:'gemini-2.5-flash',      label:'Gemini 2.5 Flash',      free:true, strength:'denge',
