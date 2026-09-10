@@ -1,0 +1,184 @@
+/* TEK TASARIM TOKEN KAYNAĞI.
+   Kategoriler: surface · text · primary/accent/danger/info · border · shadow
+   · radius · spacing · type-scale · motion · z-index
+   Kural: bileşenler yalnız bu değişkenleri kullanır; ham renk/ölçü yazılmaz.
+   Ayrıntı ve gerekçe için src/STIL.md. */
+
+:root{
+  /* ---- yüzeyler ---- */
+  --bg:#F7F8FA;
+  --surface:#FFFFFF;
+  --surface-2:#EEF0F5;
+  --surface-3:#E3E7EF;
+  --sidebar:#FFFFFF;
+  --sidebar-active:#E5E7F5;
+
+  /* ---- metin ---- */
+  --text:#181A22;
+  --text-2:#585E6E;   /* AA: #F7F8FA üzerinde 6.4:1 */
+  --text-3:#686E7E;   /* AA: 4.6:1 — küçük ikincil metin */
+
+  /* ---- anlam renkleri (dört tane; gerisi nötr) ---- */
+  --primary:#3D3F8F;
+  --primary-hover:#323478;
+  --primary-soft:#E5E7F5;
+  --primary-ink:#FFFFFF;
+  --accent:#9A6714;        /* AA: beyaz üzerinde 4.8:1 */
+  --accent-soft:#F7EDDD;
+  --danger:#A33A3A;        /* AA: beyaz üzerinde 5.6:1 */
+  --danger-soft:#F8E6E6;
+  --info:#3C5A72;          /* AA: beyaz üzerinde 7.3:1 */
+  --info-soft:#E6ECF1;
+
+  /* ---- çizgi ---- */
+  --border:#E1E4EC;
+  --border-strong:#C7CCD9;
+
+  /* ---- makro renkleri ----
+     Kimlik taşır, durum değil: protein/yağ/karbonhidrat şeridinde hangi
+     dilimin ne olduğunu söyler. Şeridin yanında her zaman yazılı etiket durur,
+     çünkü renk tek başına anlam taşımaz. */
+  --macro-protein:#3D3F8F;
+  --macro-fat:#9A6714;
+  --macro-carb:#3C5A72;
+
+  /* ---- ofis ajanları: beş ayırt edici kimlik rengi ----
+     Avatar zemini olarak kullanılır, harf --agent-ink ile yazılır.
+     Ölçülen kontrast (beyaz harf üzerinde): 5,3–8,9:1 — hepsi AA. */
+  --agent-patron:#3D3F8F;
+  --agent-lab:#2F5D7C;
+  --agent-nutri:#8A5A12;
+  --agent-move:#2C6B52;
+  --agent-money:#8C3B62;
+  --agent-ink:#FFFFFF;
+  --c-grid:#E1E4EC;
+  --c-band:#DDDFF2;
+
+  /* ---- gölge: iki seviye ---- */
+  --shadow:0 1px 2px rgba(22,24,34,.05);
+  --shadow-lg:0 12px 34px rgba(22,24,34,.16);
+
+  /* ---- yarıçap: iki seviye ---- */
+  --r-sm:8px;
+  --r:14px;
+
+  /* ---- boşluk: 8px ritmi ---- */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-6:24px; --sp-8:32px; --sp-10:40px;
+
+  /* ---- tipografi: 2 aile, 6 adım ---- */
+  --font-display:'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body:'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fs-xs:11.5px;
+  --fs-sm:13px;
+  --fs-base:14.5px;
+  --fs-md:16px;
+  --fs-lg:20px;
+  --fs-xl:28px;
+
+  /* ---- hareket: tek easing, iki süre ---- */
+  --ease:cubic-bezier(.2,.7,.3,1);
+  --dur:160ms;
+  --dur-lg:220ms;
+
+  /* Katman perdesi: acik ve koyu temada ayni koyulukta okunur. */
+  --scrim:rgba(16,17,26,.5);
+
+  /* ---- katman ---- */
+  --z-nav:30; --z-topbar:25; --z-overlay:60; --z-toast:80;
+
+  /* ---- düzen ---- */
+  --sidebar-w:238px;
+  --topbar-h:62px;
+  --content-max:1680px;
+}
+
+/* Koyu mod: saf siyah/beyaz yok; aynı token adları yeniden tanımlanır. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111218;
+    --surface:#191B22;
+    --surface-2:#20222B;
+    --surface-3:#272A34;
+    --sidebar:#141620;
+    --sidebar-active:#252740;
+
+    --text:#EDEEF5;
+    --text-2:#ADB1C0;
+    --text-3:#8B8FA0;
+
+    --primary:#9A9CE8;
+    --primary-hover:#AEB0F0;
+    --primary-soft:#22243C;
+    --primary-ink:#0E0F18;
+    --accent:#DDAE68;
+    --accent-soft:#2E2618;
+    --danger:#E58585;
+    --danger-soft:#2E1D1D;
+    --info:#89AAC6;
+    --info-soft:#1A232A;
+
+    --border:#2C2E3A;
+    --border-strong:#3E4152;
+
+    --macro-protein:#9A9CE8; --macro-fat:#DDAE68; --macro-carb:#89AAC6;
+    --agent-patron:#9A9CE8;
+    --agent-lab:#89AAC6;
+    --agent-nutri:#DDAE68;
+    --agent-move:#8FD0B0;
+    --agent-money:#DE9CC0;
+    --agent-ink:#0E0F18;
+    --c-grid:#2A2C38;
+    --c-band:#252740;
+
+    --shadow:0 1px 2px rgba(0,0,0,.34);
+    --shadow-lg:0 16px 42px rgba(0,0,0,.5);
+    --scrim:rgba(0,0,0,.62);
+  }
+}
+
+:root[data-theme="dark"]{
+  --bg:#111218;
+  --surface:#191B22;
+  --surface-2:#20222B;
+  --surface-3:#272A34;
+  --sidebar:#141620;
+  --sidebar-active:#252740;
+
+  --text:#EDEEF5;
+  --text-2:#ADB1C0;
+  --text-3:#8B8FA0;
+
+  --primary:#9A9CE8;
+  --primary-hover:#AEB0F0;
+  --primary-soft:#22243C;
+  --primary-ink:#0E0F18;
+  --accent:#DDAE68;
+  --accent-soft:#2E2618;
+  --danger:#E58585;
+  --danger-soft:#2E1D1D;
+  --info:#89AAC6;
+  --info-soft:#1A232A;
+
+  --border:#2C2E3A;
+  --border-strong:#3E4152;
+
+  --macro-protein:#9A9CE8; --macro-fat:#DDAE68; --macro-carb:#89AAC6;
+  --agent-patron:#9A9CE8;
+  --agent-lab:#89AAC6;
+  --agent-nutri:#DDAE68;
+  --agent-move:#8FD0B0;
+  --agent-money:#DE9CC0;
+  --agent-ink:#0E0F18;
+  --c-grid:#2A2C38;
+  --c-band:#252740;
+
+  --shadow:0 1px 2px rgba(0,0,0,.34);
+  --shadow-lg:0 16px 42px rgba(0,0,0,.5);
+  --scrim:rgba(0,0,0,.62);
+}
+
+/* Hareket tercihine saygı: tüm süreler sıfırlanır. */
+@media (prefers-reduced-motion:reduce){
+  :root{ --dur:0ms; --dur-lg:0ms; }
+}

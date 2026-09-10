@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>SPİ — Testler</title>
+<link rel="stylesheet" href="../css/tokens.css"/>
+<link rel="stylesheet" href="../css/palettes.css"/>
+<link rel="stylesheet" href="../css/base.css"/>
+<link rel="stylesheet" href="../css/components.css"/>
+<style>
+  body{ padding:24px; max-width:900px; margin:0 auto; }
+  .head{ display:flex; align-items:baseline; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+  .summary{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+  .pill{ padding:6px 14px; border-radius:20px; font-weight:700; font-size:14px; }
+  .pill--pass{ background:var(--primary-soft); color:var(--primary); }
+  .pill--fail{ background:var(--danger-soft); color:var(--danger); }
+  .pill--total{ background:var(--surface-2); color:var(--text-2); }
+  .suite{ margin-bottom:18px; }
+  .suite h3{ font-size:14px; margin-bottom:6px; padding-bottom:5px; border-bottom:1px solid var(--border); }
+  .t{ display:flex; gap:9px; align-items:flex-start; padding:3px 0; font-size:13px; }
+  .t__mark{ width:15px; flex:none; font-weight:700; }
+  .t--ok .t__mark{ color:var(--primary); }
+  .t--fail .t__mark{ color:var(--danger); }
+  .t--fail{ color:var(--danger); }
+  .t__err{ display:block; font-size:12px; color:var(--text-2); margin-top:2px; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1 style="font-size:22px">SPİ — Test Paketi</h1>
+  <a href="../index.html" style="font-size:13px">← uygulamaya dön</a>
+</div>
+<div id="out" class="muted">Testler çalışıyor…</div>
+
+<!-- Kabuk yok: app.js yuklenir ama boot tetiklenmez. -->
+<script>window.__SPI_NO_BOOT__ = true;</script>
+
+<!-- veri once, cekirdek sonra: index.html ile ayni sira -->
+<script src="../js/data/biomarkers.js"></script>
+<script src="../js/data/nutrients.js"></script>
+<script src="../js/data/foods.js"></script>
+<script src="../js/data/prices.js"></script>
+<script src="../js/data/movement.js"></script>
+<script src="../js/data/rules.js"></script>
+<script src="../js/data/agents.js"></script>
+<script src="../js/data/hints.js"></script>
+<script src="../js/data/palettes.js"></script>
+<script src="../js/data/providers.js"></script>
+
+<script src="../js/core/utils.js"></script>
+<script src="../js/core/h.js"></script>
+<script src="../js/core/store.js"></script>
+<script src="../js/core/state.js"></script>
+<script src="../js/core/bio.js"></script>
+<script src="../js/core/nutri.js"></script>
+<script src="../js/core/move.js"></script>
+<script src="../js/core/money.js"></script>
+<script src="../js/core/calc.js"></script>
+<script src="../js/core/parse.js"></script>
+<script src="../js/core/ui.js"></script>
+<script src="../js/core/components.js"></script>
+<script src="../js/core/parts.js"></script>
+<script src="../js/core/quota.js"></script>
+<script src="../js/core/llm.js"></script>
+<script src="../js/core/office.js"></script>
+<script src="../js/core/palette.js"></script>
+<script src="../js/core/setup.js"></script>
+
+<script src="../js/screens/today.js"></script>
+<script src="../js/screens/vitals.js"></script>
+<script src="../js/screens/labs.js"></script>
+<script src="../js/screens/meals.js"></script>
+<script src="../js/screens/kitchen.js"></script>
+<script src="../js/screens/move.js"></script>
+<script src="../js/screens/basket.js"></script>
+<script src="../js/screens/analytics.js"></script>
+<script src="../js/screens/office.js"></script>
+<script src="../js/screens/team.js"></script>
+<script src="../js/screens/meeting.js"></script>
+<script src="../js/screens/family.js"></script>
+<script src="../js/screens/guide.js"></script>
+<script src="../js/app.js"></script>
+
+<!-- test altyapisi ve paketler -->
+<script src="harness.js"></script>
+<script src="data.test.js"></script>
+<script src="bio.test.js"></script>
+<script src="nutri.test.js"></script>
+<script src="move.test.js"></script>
+<script src="money.test.js"></script>
+<script src="parse.test.js"></script>
+<script src="calc.test.js"></script>
+<script src="model.test.js"></script>
+<script src="office.test.js"></script>
+<script src="ui.test.js"></script>
+
+<script>
+(async function(){
+  const summary = await SP.Test.run();
+  const bySuite = {};
+  summary.results.forEach(r => { (bySuite[r.suite] = bySuite[r.suite] || []).push(r); });
+
+  let html = '<div class="summary">'
+    + '<span class="pill pill--pass">' + summary.passed + ' geçti</span>'
+    + (summary.failed ? '<span class="pill pill--fail">' + summary.failed + ' kaldı</span>' : '')
+    + '<span class="pill pill--total">' + summary.total + ' test</span>'
+    + '</div>';
+
+  Object.keys(bySuite).forEach(name => {
+    const rows = bySuite[name];
+    const failed = rows.filter(r => !r.ok).length;
+    html += '<div class="suite"><h3>' + name + (failed ? ' — ' + failed + ' hata' : '') + '</h3>';
+    rows.forEach(r => {
+      html += '<div class="t ' + (r.ok ? 't--ok' : 't--fail') + '">'
+        + '<span class="t__mark">' + (r.ok ? '✓' : '✕') + '</span>'
+        + '<span>' + r.name + (r.ok ? '' : '<span class="t__err">' + r.error + '</span>') + '</span>'
+        + '</div>';
+    });
+    html += '</div>';
+  });
+
+  document.getElementById('out').innerHTML = html;
+  document.title = (summary.failed ? '✕ ' : '✓ ') + summary.passed + '/' + summary.total + ' — SPİ Testleri';
+})();
+</script>
+
+</body>
+</html>

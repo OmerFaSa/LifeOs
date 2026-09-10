@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="tr" translate="no">
+<head>
+<meta charset="utf-8"/>
+<!-- Mobil tarayicilar sayfayi yabanci sanip otomatik cevirebiliyor ve arayuz
+     Turkce-Ingilizce karisik gorunuyor. Ceviri acikca kapatilir. -->
+<meta name="google" content="notranslate"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>SPİ — Sağlık Performans İzleyicisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css"/>
+<link rel="stylesheet" href="css/palettes.css"/>
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/layout.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link id="pwa-manifest" rel="manifest"/>
+<meta name="theme-color" content="#3D3F8F"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="SPİ"/>
+</head>
+<body>
+
+<div id="app">
+  <div class="boot">
+    <div class="boot__mark">S</div>
+    <div class="boot__bar"><span></span></div>
+    <p class="boot__text">SPİ yükleniyor…</p>
+  </div>
+</div>
+
+<div id="overlay-root"></div>
+<div id="toast-root" class="toast-root" role="status" aria-live="polite"></div>
+
+<!-- veri once, cekirdek sonra, ekranlar en son: bagimlilik siralamasi budur -->
+<script src="js/data/biomarkers.js"></script>
+<script src="js/data/nutrients.js"></script>
+<script src="js/data/foods.js"></script>
+<script src="js/data/prices.js"></script>
+<script src="js/data/movement.js"></script>
+<script src="js/data/rules.js"></script>
+<script src="js/data/agents.js"></script>
+<script src="js/data/hints.js"></script>
+<script src="js/data/palettes.js"></script>
+<script src="js/data/providers.js"></script>
+
+<script src="js/core/utils.js"></script>
+<script src="js/core/h.js"></script>
+<script src="js/core/store.js"></script>
+<script src="js/core/state.js"></script>
+<script src="js/core/bio.js"></script>
+<script src="js/core/nutri.js"></script>
+<script src="js/core/move.js"></script>
+<script src="js/core/money.js"></script>
+<script src="js/core/calc.js"></script>
+<script src="js/core/parse.js"></script>
+<script src="js/core/ui.js"></script>
+<script src="js/core/components.js"></script>
+<script src="js/core/parts.js"></script>
+<script src="js/core/quota.js"></script>
+<script src="js/core/llm.js"></script>
+<script src="js/core/office.js"></script>
+<script src="js/core/palette.js"></script>
+<script src="js/core/setup.js"></script>
+
+<script src="js/screens/today.js"></script>
+<script src="js/screens/vitals.js"></script>
+<script src="js/screens/labs.js"></script>
+<script src="js/screens/meals.js"></script>
+<script src="js/screens/kitchen.js"></script>
+<script src="js/screens/move.js"></script>
+<script src="js/screens/basket.js"></script>
+<script src="js/screens/analytics.js"></script>
+<script src="js/screens/office.js"></script>
+<script src="js/screens/team.js"></script>
+<script src="js/screens/meeting.js"></script>
+<script src="js/screens/family.js"></script>
+<script src="js/screens/guide.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
