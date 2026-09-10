@@ -122,7 +122,7 @@ SP.Calc = (function(){
       return { id:'vitals', rank:3, tone:'info', icon:'pulse',
         label:'Ölçüm', title:'Bugünün ölçümü girilmedi',
         why:'Toparlanma skoru en az uyku süresiyle hesaplanır; onsuz günün yükü körlemesine verilir.',
-        route:'vitals', action:'Uyku ve nabzı gir.' };
+        route:'today', action:'Uyku ve nabzı gir.' };
     }
     const due = SP.Bio.overdue();
     if(due.length){

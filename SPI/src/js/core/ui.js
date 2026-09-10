@@ -195,7 +195,11 @@ SP.UI = (function(){
        ref     [low, high]  laboratuvarin referans araligi
        optimal [low, high]  kisisel hedef bant (varsa)
        value   olculen deger  */
-  function rangeBar(value, ref, optimal, unit){
+  /* `opts.bare` verilirse yalnizca cubuk cizilir, altindaki sayi satiri
+     cizilmez. Uzun bir listede her satirin altinda "30 · referans · hedef
+     80-250 · 400 ng/mL" yazmak satiri okunmaz hale getiriyordu; o ayrinti
+     satira tiklayinca acilan kagitta zaten tam haliyle duruyor. */
+  function rangeBar(value, ref, optimal, unit, opts){
     if(!ref || ref.length !== 2) return '';
     const lo = Number(ref[0]), hi = Number(ref[1]);
     const span = hi - lo;
@@ -219,6 +223,7 @@ SP.UI = (function(){
         + p(value).toFixed(1) + '%"></div>';
     }
     out += '</div>';
+    if(opts && opts.bare) return out;
     out += '<div class="rangebar__scale"><span class="num">' + U.fmtNum(lo) + '</span>'
       + '<span class="dim">referans' + (optimal ? ' &middot; hedef ' + U.fmtNum(optimal[0]) + '&ndash;' + U.fmtNum(optimal[1]) : '') + '</span>'
       + '<span class="num">' + U.fmtNum(hi) + (unit ? ' ' + esc(unit) : '') + '</span></div>';

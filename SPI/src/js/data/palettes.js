@@ -1,10 +1,11 @@
-/* Seçilebilir renk paletleri. tokens.css tabanı (indigo) tanımlar,
+/* Seçilebilir renk paletleri. tokens.css tabanı (kâğıt) tanımlar,
    palettes.css diğerlerini yeniden yazar. */
 
 window.SP = window.SP || {};
 
 SP.PALETTES = [
-  { id:'indigo',  name:'İndigo',  note:'Varsayılan — sakin ve nötr',        swatch:['#3D3F8F', '#E5E7F5'] },
+  { id:'kagit',   name:'Kâğıt',   note:'Varsayılan — sıcak kâğıt, derin yeşil', swatch:['#1F4E3D', '#E4EBE7'] },
+  { id:'indigo',  name:'İndigo',  note:'Soğuk mor-mavi, nötr',             swatch:['#3D3F8F', '#E5E7F5'] },
   { id:'grafit',  name:'Grafit',  note:'En düşük renk yükü, uzun oturum',   swatch:['#3D4E5C', '#E4E8EC'] },
   { id:'okyanus', name:'Okyanus', note:'Soğuk mavi, odak hissi',            swatch:['#1F5D80', '#DFEAF3'] },
   { id:'mor',     name:'Mor',     note:'Yumuşak kontrast, göz yormaz',      swatch:['#54408F', '#E8E4F3'] },
@@ -12,4 +13,4 @@ SP.PALETTES = [
   { id:'orman',   name:'Orman',   note:'1.0 sürümünün yeşili',              swatch:['#2F6B4F', '#E4EDE8'] },
 ];
 
-SP.DEFAULT_PALETTE = 'indigo';
+SP.DEFAULT_PALETTE = 'kagit';

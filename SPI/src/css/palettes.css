@@ -181,3 +181,54 @@
   --macro-protein:#7FBE9A; --c-band:#25342C;
   --scrim:rgba(0,0,0,.62);
 }
+
+/* ==================== İNDİGO — soğuk mor-mavi ====================
+
+   1.x sürümlerinin varsayılanıydı; artık seçilebilir bir palet. */
+:root[data-palette="indigo"]{
+  --bg:#F5F6F8; --surface:#FFFFFF; --surface-2:#F0F1F5; --surface-3:#E7E9EF;
+  --surface-hover:#F7F8FA;
+  --sidebar:#FFFFFF; --sidebar-active:#E9EAF7;
+  --text:#14161D; --text-2:#575D6C; --text-3:#6B7180;
+  --primary:#3F3FA0; --primary-hover:#34348A; --primary-soft:#E9EAF7; --primary-ink:#FFFFFF;
+  --accent:#96640F; --accent-soft:#F8EFDE;
+  --danger:#A63838; --danger-soft:#FAE7E7;
+  --info:#3A5871; --info-soft:#E8EDF2;
+  --border:#E4E6EC; --border-strong:#CBCFDA;
+  --macro-protein:#3F3FA0; --macro-fat:#96640F; --macro-carb:#3A5871;
+  --agent-patron:#3F3FA0; --agent-move:#2C6B52;
+  --c-grid:#E4E6EC; --c-band:#E0E1F3;
+  --scrim:rgba(16,18,27,.5);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-palette="indigo"]:not([data-theme="light"]){
+    --bg:#0D0F14; --surface:#15171D; --surface-2:#1B1E25; --surface-3:#23262F;
+    --surface-hover:#1A1D24;
+    --sidebar:#111319; --sidebar-active:#242545;
+    --text:#ECEEF4; --text-2:#A9AEBD; --text-3:#878C9C;
+    --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-soft:#212244; --primary-ink:#0C0D14;
+    --accent:#E0B46E; --accent-soft:#2C2517;
+    --danger:#EA8C8C; --danger-soft:#2E1C1C;
+    --info:#8DAECA; --info-soft:#182129;
+    --border:#252932; --border-strong:#343945;
+    --macro-protein:#9EA0EE; --macro-fat:#E0B46E; --macro-carb:#8DAECA;
+    --agent-patron:#9EA0EE; --agent-move:#8FD0B0;
+    --c-grid:#242832; --c-band:#242545;
+    --scrim:rgba(0,0,0,.62);
+  }
+}
+:root[data-palette="indigo"][data-theme="dark"]{
+  --bg:#0D0F14; --surface:#15171D; --surface-2:#1B1E25; --surface-3:#23262F;
+  --surface-hover:#1A1D24;
+  --sidebar:#111319; --sidebar-active:#242545;
+  --text:#ECEEF4; --text-2:#A9AEBD; --text-3:#878C9C;
+  --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-soft:#212244; --primary-ink:#0C0D14;
+  --accent:#E0B46E; --accent-soft:#2C2517;
+  --danger:#EA8C8C; --danger-soft:#2E1C1C;
+  --info:#8DAECA; --info-soft:#182129;
+  --border:#252932; --border-strong:#343945;
+  --macro-protein:#9EA0EE; --macro-fat:#E0B46E; --macro-carb:#8DAECA;
+  --agent-patron:#9EA0EE; --agent-move:#8FD0B0;
+  --c-grid:#242832; --c-band:#242545;
+  --scrim:rgba(0,0,0,.62);
+}

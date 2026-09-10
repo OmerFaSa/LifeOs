@@ -4,7 +4,7 @@
 <title>SPİ — Sağlık Performans İzleyicisi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ==== css/tokens.css ==== */
 /* TEK TASARIM TOKEN KAYNAĞI.
@@ -22,34 +22,42 @@
 
 :root{
   /* ---- yüzeyler ---- */
-  --bg:#F5F6F8;
+  /* Notrler saf gri degil, cok hafif sicak. Saf gri ekranda klinik ve
+     ucuz durur; bir derece sicaklik ayni duzeni pahali gosterir. */
+  /* Zemin kâğıt gibi: hafif sıcak, kırık beyaz. Saf gri bir zemin
+     ekranda klinik ve ucuz durur; bir derece sıcaklık aynı düzeni
+     pahalı gösterir. */
+  --bg:#F7F5F1;
   --surface:#FFFFFF;
-  --surface-2:#F0F1F5;
-  --surface-3:#E7E9EF;
-  --surface-hover:#F7F8FA;
+  --surface-2:#F2EFE9;
+  --surface-3:#E7E2D9;
+  --surface-hover:#FBF9F6;
   --sidebar:#FFFFFF;
-  --sidebar-active:#E9EAF7;
+  --sidebar-active:#E3EBE6;
 
   /* ---- metin ---- */
-  --text:#14161D;
-  --text-2:#575D6C;   /* AA: --bg üzerinde 6.5:1 */
-  --text-3:#6B7180;   /* AA: 4.6:1 — küçük ikincil metin */
+  --text:#191815;
+  --text-2:#54524C;   /* AA: --bg üzerinde 7.1:1 */
+  --text-3:#6E6B63;   /* AA: 4.9:1 — küçük ikincil metin */
 
-  /* ---- anlam renkleri (dört tane; gerisi nötr) ---- */
-  --primary:#3F3FA0;       /* AA: beyaz üzerinde 8.5:1 */
-  --primary-hover:#34348A;
-  --primary-soft:#E9EAF7;
+  /* ---- anlam renkleri (dört tane; gerisi nötr) ----
+     Ana renk derin yeşil: sağlıkla ilişkili, doygun ama bağırmayan bir
+     renk. Mavi-mor bir arayüz her yönetim panelinin varsayılanıdır ve
+     kimlik taşımaz. */
+  --primary:#1F4E3D;       /* AA: beyaz üzerinde 8.9:1 */
+  --primary-hover:#173E30;
+  --primary-soft:#E4EBE7;
   --primary-ink:#FFFFFF;
-  --accent:#96640F;        /* AA: beyaz üzerinde 5.0:1 */
-  --accent-soft:#F8EFDE;
-  --danger:#A63838;        /* AA: beyaz üzerinde 5.7:1 */
-  --danger-soft:#FAE7E7;
-  --info:#3A5871;          /* AA: beyaz üzerinde 7.5:1 */
-  --info-soft:#E8EDF2;
+  --accent:#8A5A18;        /* AA: beyaz üzerinde 5.7:1 */
+  --accent-soft:#F6EDE0;
+  --danger:#9B3327;        /* AA: beyaz üzerinde 6.6:1 */
+  --danger-soft:#F8E7E3;
+  --info:#3A5468;          /* AA: beyaz üzerinde 8.0:1 */
+  --info-soft:#E9EDF0;
 
   /* ---- çizgi ---- */
-  --border:#E4E6EC;
-  --border-strong:#CBCFDA;
+  --border:#E7E2D9;
+  --border-strong:#CDC6B8;
 
   /* ---- odak halkası: her temada görünür kalır ---- */
   --ring:color-mix(in srgb, var(--primary) 45%, transparent);
@@ -58,21 +66,21 @@
      Kimlik taşır, durum değil: protein/yağ/karbonhidrat şeridinde hangi
      dilimin ne olduğunu söyler. Şeridin yanında her zaman yazılı etiket durur,
      çünkü renk tek başına anlam taşımaz. */
-  --macro-protein:#3F3FA0;
-  --macro-fat:#96640F;
-  --macro-carb:#3A5871;
+  --macro-protein:#1F4E3D;
+  --macro-fat:#8A5A18;
+  --macro-carb:#3A5468;
 
   /* ---- ofis ajanları: beş ayırt edici kimlik rengi ----
      Avatar zemini olarak kullanılır, harf --agent-ink ile yazılır.
      Ölçülen kontrast (beyaz harf üzerinde): 5,3–8,9:1 — hepsi AA. */
-  --agent-patron:#3F3FA0;
+  --agent-patron:#1F4E3D;
   --agent-lab:#2F5D7C;
   --agent-nutri:#8A5A12;
-  --agent-move:#2C6B52;
+  --agent-move:#4A6B2C;
   --agent-money:#8C3B62;
   --agent-ink:#FFFFFF;
-  --c-grid:#E4E6EC;
-  --c-band:#E0E1F3;
+  --c-grid:#E7E2D9;
+  --c-band:#E0E9E4;
 
   /* ---- gölge: iki seviye, ikisi de yumuşak ----
      Kart gölgesi bir kenarlık kadar sessizdir; derinliği kenarlık değil
@@ -89,17 +97,26 @@
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
   --sp-6:24px; --sp-8:32px; --sp-10:40px;
 
-  /* ---- tipografi: 2 aile, 6 adım + sayı adımı ---- */
+  /* ---- tipografi: 3 aile, her birinin tek işi var ----
+
+     serif    yalnız BAŞLIK (hero h1, bölüm h2). Editoryal ağırlık verir
+              ve arayüzü bir panelden çok bir yayına benzetir.
+     display  yalnız SAYI ve kart başlığı. Tabular rakamlar hizalanır.
+     body     geri kalan her şey.
+
+     Kural: serif hiçbir yerde sayı taşımaz, display hiçbir yerde
+     paragraf taşımaz. Karıştırıldığında ikisi de amatörleşir. */
+  --font-serif:'Newsreader', Georgia, 'Times New Roman', serif;
   --font-display:'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body:'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --fs-xs:11.5px;
   --fs-sm:12.75px;
   --fs-base:14px;
   --fs-md:15.5px;
-  --fs-lg:18.5px;
+  --fs-lg:19px;
   --fs-xl:24px;
   --fs-hero:30px;     /* yalnız KPI sayısı */
-  --fs-display:44px;  /* yalnız bölüm başlığı (hero) */
+  --fs-display:40px;  /* yalnız bölüm başlığı (hero) */
 
   /* ---- hareket: tek easing, iki süre ---- */
   --ease:cubic-bezier(.2,.7,.3,1);
@@ -120,44 +137,44 @@
 
   /* ================= KOYU PALET — tek tanım =================
      Buradaki değerler yalnızca aşağıdaki iki blokta kullanılır. */
-  --d-bg:#0D0F14;
-  --d-surface:#15171D;
-  --d-surface-2:#1B1E25;
-  --d-surface-3:#23262F;
-  --d-surface-hover:#1A1D24;
-  --d-sidebar:#111319;
-  --d-sidebar-active:#242545;
+  --d-bg:#12120F;
+  --d-surface:#1A1A16;
+  --d-surface-2:#21211C;
+  --d-surface-3:#2A2A24;
+  --d-surface-hover:#1F1F1A;
+  --d-sidebar:#161612;
+  --d-sidebar-active:#1E2C25;
 
-  --d-text:#ECEEF4;
-  --d-text-2:#A9AEBD;
-  --d-text-3:#878C9C;
+  --d-text:#EFEDE7;
+  --d-text-2:#ACA89E;
+  --d-text-3:#8B877D;
 
-  --d-primary:#9EA0EE;
-  --d-primary-hover:#B2B4F5;
-  --d-primary-soft:#212244;
-  --d-primary-ink:#0C0D14;
-  --d-accent:#E0B46E;
-  --d-accent-soft:#2C2517;
-  --d-danger:#EA8C8C;
-  --d-danger-soft:#2E1C1C;
-  --d-info:#8DAECA;
-  --d-info-soft:#182129;
+  --d-primary:#7FBFA0;
+  --d-primary-hover:#95CFB2;
+  --d-primary-soft:#1B2B23;
+  --d-primary-ink:#0E1611;
+  --d-accent:#D6A961;
+  --d-accent-soft:#2B2415;
+  --d-danger:#E28C7C;
+  --d-danger-soft:#2E1B17;
+  --d-info:#8FADC2;
+  --d-info-soft:#1A2126;
 
-  --d-border:#252932;
-  --d-border-strong:#343945;
+  --d-border:#2B2B25;
+  --d-border-strong:#3B3B33;
 
-  --d-macro-protein:#9EA0EE;
-  --d-macro-fat:#E0B46E;
-  --d-macro-carb:#8DAECA;
+  --d-macro-protein:#7FBFA0;
+  --d-macro-fat:#D6A961;
+  --d-macro-carb:#8FADC2;
 
-  --d-agent-patron:#9EA0EE;
-  --d-agent-lab:#8DAECA;
-  --d-agent-nutri:#E0B46E;
-  --d-agent-move:#8FD0B0;
+  --d-agent-patron:#7FBFA0;
+  --d-agent-lab:#8FADC2;
+  --d-agent-nutri:#D6A961;
+  --d-agent-move:#B6CE7E;
   --d-agent-money:#DE9CC0;
-  --d-agent-ink:#0C0D14;
-  --d-c-grid:#242832;
-  --d-c-band:#242545;
+  --d-agent-ink:#0E1611;
+  --d-c-grid:#2B2B25;
+  --d-c-band:#1E2C25;
 
   --d-shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
   --d-shadow-lg:0 22px 60px rgba(0,0,0,.62);
@@ -442,6 +459,57 @@
   --scrim:rgba(0,0,0,.62);
 }
 
+/* ==================== İNDİGO — soğuk mor-mavi ====================
+
+   1.x sürümlerinin varsayılanıydı; artık seçilebilir bir palet. */
+:root[data-palette="indigo"]{
+  --bg:#F5F6F8; --surface:#FFFFFF; --surface-2:#F0F1F5; --surface-3:#E7E9EF;
+  --surface-hover:#F7F8FA;
+  --sidebar:#FFFFFF; --sidebar-active:#E9EAF7;
+  --text:#14161D; --text-2:#575D6C; --text-3:#6B7180;
+  --primary:#3F3FA0; --primary-hover:#34348A; --primary-soft:#E9EAF7; --primary-ink:#FFFFFF;
+  --accent:#96640F; --accent-soft:#F8EFDE;
+  --danger:#A63838; --danger-soft:#FAE7E7;
+  --info:#3A5871; --info-soft:#E8EDF2;
+  --border:#E4E6EC; --border-strong:#CBCFDA;
+  --macro-protein:#3F3FA0; --macro-fat:#96640F; --macro-carb:#3A5871;
+  --agent-patron:#3F3FA0; --agent-move:#2C6B52;
+  --c-grid:#E4E6EC; --c-band:#E0E1F3;
+  --scrim:rgba(16,18,27,.5);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-palette="indigo"]:not([data-theme="light"]){
+    --bg:#0D0F14; --surface:#15171D; --surface-2:#1B1E25; --surface-3:#23262F;
+    --surface-hover:#1A1D24;
+    --sidebar:#111319; --sidebar-active:#242545;
+    --text:#ECEEF4; --text-2:#A9AEBD; --text-3:#878C9C;
+    --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-soft:#212244; --primary-ink:#0C0D14;
+    --accent:#E0B46E; --accent-soft:#2C2517;
+    --danger:#EA8C8C; --danger-soft:#2E1C1C;
+    --info:#8DAECA; --info-soft:#182129;
+    --border:#252932; --border-strong:#343945;
+    --macro-protein:#9EA0EE; --macro-fat:#E0B46E; --macro-carb:#8DAECA;
+    --agent-patron:#9EA0EE; --agent-move:#8FD0B0;
+    --c-grid:#242832; --c-band:#242545;
+    --scrim:rgba(0,0,0,.62);
+  }
+}
+:root[data-palette="indigo"][data-theme="dark"]{
+  --bg:#0D0F14; --surface:#15171D; --surface-2:#1B1E25; --surface-3:#23262F;
+  --surface-hover:#1A1D24;
+  --sidebar:#111319; --sidebar-active:#242545;
+  --text:#ECEEF4; --text-2:#A9AEBD; --text-3:#878C9C;
+  --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-soft:#212244; --primary-ink:#0C0D14;
+  --accent:#E0B46E; --accent-soft:#2C2517;
+  --danger:#EA8C8C; --danger-soft:#2E1C1C;
+  --info:#8DAECA; --info-soft:#182129;
+  --border:#252932; --border-strong:#343945;
+  --macro-protein:#9EA0EE; --macro-fat:#E0B46E; --macro-carb:#8DAECA;
+  --agent-patron:#9EA0EE; --agent-move:#8FD0B0;
+  --c-grid:#242832; --c-band:#242545;
+  --scrim:rgba(0,0,0,.62);
+}
+
 /* ==== css/base.css ==== */
 /* Sifirlama, tipografi ve erisilebilirlik temelleri (WCAG 2.2 AA hedefi). */
 
@@ -606,13 +674,13 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 /* ---------- üst gezinme ---------- */
 .sitenav{
   position:sticky; top:0; z-index:var(--z-nav);
-  background:color-mix(in srgb, var(--surface) 88%, transparent);
-  backdrop-filter:saturate(1.6) blur(14px);
+  background:color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter:saturate(1.4) blur(14px);
   border-bottom:1px solid var(--border);
 }
 .sitenav__in{
   height:var(--nav-h);
-  display:flex; align-items:center; gap:22px;
+  display:flex; align-items:center; gap:28px;
 }
 
 .brand{
@@ -621,19 +689,20 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
   min-width:0; flex:none;
 }
 .brand__mark{
-  width:30px; height:30px; border-radius:9px; flex:none;
+  width:28px; height:28px; border-radius:50%; flex:none;
   background:var(--primary); color:var(--primary-ink);
   display:grid; place-items:center;
-  font-family:var(--font-display); font-weight:800; font-size:14px;
-  letter-spacing:-.02em;
+  font-family:var(--font-serif); font-weight:500; font-size:14px;
+  letter-spacing:0; line-height:1;
 }
 .brand__text{ display:flex; flex-direction:column; line-height:1.15; min-width:0; text-align:left; }
 .brand__text b{
-  font-family:var(--font-display); font-size:15px; font-weight:800;
-  letter-spacing:-.015em; color:var(--text);
+  font-family:var(--font-serif); font-size:17px; font-weight:500;
+  letter-spacing:.01em; color:var(--text); line-height:1.1;
 }
 .brand__text span{
-  font-size:10.5px; font-weight:600; color:var(--text-3);
+  font-size:10px; font-weight:500; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--text-3);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 
@@ -645,23 +714,26 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 }
 .navlinks::-webkit-scrollbar{ display:none; }
 
+/* Gezinmede İKON YOK. Yedi ikon + yedi etiket + dört araç ikonu aynı
+   satırda yarışınca çubuk kalabalıklaşıyor ve hiçbiri okunmuyordu.
+   Metin tek başına daha net ve daha sakin. */
 .navlink{
   position:relative;
   flex:0 0 auto;
-  display:inline-flex; align-items:center; gap:7px;
-  padding:8px 12px;
-  border:none; background:none; border-radius:var(--r-sm);
-  color:var(--text-2); font-size:13.5px; font-weight:600;
-  white-space:nowrap;
-  transition:color var(--dur) var(--ease), background var(--dur) var(--ease);
+  display:inline-flex; align-items:center; gap:6px;
+  padding:8px 13px;
+  border:none; background:none;
+  color:var(--text-2); font-size:13px; font-weight:500;
+  letter-spacing:.005em; white-space:nowrap;
+  transition:color var(--dur) var(--ease);
 }
-.navlink svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.8; }
-.navlink:hover{ color:var(--text); background:var(--surface-hover); }
-.navlink.is-active{ color:var(--text); font-weight:700; }
+.navlink svg{ display:none; }
+.navlink:hover{ color:var(--text); }
+.navlink.is-active{ color:var(--text); font-weight:600; }
 /* Etkin bölüm altındaki çizgi — hap değil, site gezinmesi dili. */
 .navlink.is-active::after{
-  content:''; position:absolute; left:12px; right:12px; bottom:-11px; height:2px;
-  background:var(--primary); border-radius:2px;
+  content:''; position:absolute; left:13px; right:13px; bottom:-11px; height:1.5px;
+  background:var(--primary);
 }
 .navlink__badge{
   min-width:16px; height:16px; padding:0 4px; border-radius:var(--r-pill);
@@ -677,68 +749,84 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .sitenav__menu{ display:none; }
 
 /* ---------- hero ---------- */
-.hero{
-  background:
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--primary) 5%, var(--surface)) 0%,
-      var(--bg) 100%);
-  border-bottom:1px solid var(--border);
-}
+/* Hero'nun zemini yok. Renkli bir bant koymak dikkati başlıktan alır ve
+   arayüzü bir açılış sayfasına benzetir; burada tek ayırıcı ince bir
+   çizgidir. */
+.hero{ border-bottom:1px solid var(--border); }
 .hero__in{
-  padding-block:38px 26px;
-  display:flex; align-items:flex-end; gap:40px; flex-wrap:wrap;
+  padding-block:44px 30px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end; gap:20px 56px;
 }
-.hero__main{ flex:1 1 460px; min-width:0; }
+.hero__main{ min-width:0; }
 
+/* Bölüm satırı: numara, ince çizgi, ad. İkon yok — hero'da ikon
+   başlığın ağırlığını böler. */
 .hero__eyebrow{
-  display:flex; align-items:center; gap:8px;
-  font-size:11px; font-weight:800; letter-spacing:.11em; text-transform:uppercase;
-  color:var(--primary);
-  margin-bottom:12px;
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--font-body);
+  font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text-3);
+  margin-bottom:18px;
 }
-.hero__eyebrow svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; }
-.hero__num{ color:var(--text-3); font-variant-numeric:tabular-nums; }
+.hero__eyebrow svg{ display:none; }
+.hero__num{
+  color:var(--text-3); font-variant-numeric:tabular-nums; font-weight:600;
+}
+.hero__num::after{
+  content:''; display:inline-block; vertical-align:middle;
+  width:22px; height:1px; background:var(--border-strong); margin:0 0 2px 10px;
+}
 
+/* Başlık serif. Tek büyük sayı gibi durmasın diye ağırlığı orta,
+   satır arası rahat, harf aralığı hafif sıkı. */
 .hero__title{
-  font-family:var(--font-display);
-  font-size:var(--fs-display); font-weight:800; line-height:1.06;
-  letter-spacing:-.032em; color:var(--text);
+  font-family:var(--font-serif);
+  font-size:var(--fs-display); font-weight:500; line-height:1.12;
+  letter-spacing:-.018em; color:var(--text);
   margin:0;
   text-wrap:balance;
 }
 /* Ledenin satır uzunluğu sınırlıdır: hero geniştir, cümle değil. */
 .hero__lede{
-  margin:12px 0 0;
-  max-width:56ch;
-  font-size:16px; line-height:1.55; color:var(--text-2);
+  margin:14px 0 0;
+  max-width:54ch;
+  font-size:15.5px; line-height:1.6; color:var(--text-2);
 }
-.hero__actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:20px; }
+.hero__actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:22px; }
 
-/* Sağdaki sayı bloğu: bölümün tek özet ölçüsü. Kart değildir, çerçevesizdir. */
+/* Sağdaki sayı bloğu. Kart değil: aralarında ince dikey çizgi var,
+   çerçeve yok. Rakamlar aynı taban çizgisinde hizalanır. */
 .hero__side{
-  flex:0 1 auto;
-  display:flex; gap:32px; flex-wrap:wrap;
-  padding-bottom:6px;
+  display:flex; align-items:flex-end;
+  padding-bottom:4px;
 }
-.herostat{ min-width:76px; }
+.herostat{
+  min-width:72px; padding:0 20px;
+  border-left:1px solid var(--border);
+}
+.herostat:first-child{ border-left:none; padding-left:0; }
+.herostat:last-child{ padding-right:0; }
 .herostat__value{
   display:block;
-  font-family:var(--font-display); font-size:30px; font-weight:800;
-  letter-spacing:-.03em; line-height:1;
+  font-family:var(--font-display); font-size:27px; font-weight:700;
+  letter-spacing:-.025em; line-height:1;
   color:var(--text); font-variant-numeric:tabular-nums;
 }
-.herostat__value small{ font-size:14px; font-weight:700; color:var(--text-3); margin-left:2px; }
+.herostat__value small{ font-size:13px; font-weight:600; color:var(--text-3); margin-left:2px; }
 .herostat__label{
-  display:block; margin-top:7px;
-  font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  display:block; margin-top:9px;
+  font-size:10.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
   color:var(--text-3);
+  white-space:nowrap;
 }
 
 /* ---------- bölüm sekmeleri (hero altı) ---------- */
 .pagenav{
   position:sticky; top:var(--nav-h); z-index:calc(var(--z-nav) - 1);
   background:color-mix(in srgb, var(--bg) 90%, transparent);
-  backdrop-filter:saturate(1.4) blur(10px);
+  backdrop-filter:saturate(1.3) blur(10px);
   border-bottom:1px solid var(--border);
 }
 .pagenav__in{
@@ -751,16 +839,16 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
   display:inline-flex; align-items:center; gap:7px;
   padding:12px 13px;
   border:none; background:none;
-  color:var(--text-3); font-size:13.5px; font-weight:600;
+  color:var(--text-3); font-size:13px; font-weight:500;
   white-space:nowrap;
   transition:color var(--dur) var(--ease);
 }
-.pagelink svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.8; }
+.pagelink svg{ display:none; }
 .pagelink:hover{ color:var(--text-2); }
-.pagelink.is-active{ color:var(--text); font-weight:700; }
+.pagelink.is-active{ color:var(--text); font-weight:600; }
 .pagelink.is-active::after{
-  content:''; position:absolute; left:13px; right:13px; bottom:-1px; height:2px;
-  background:var(--text); border-radius:2px;
+  content:''; position:absolute; left:13px; right:13px; bottom:-1px; height:1.5px;
+  background:var(--text);
 }
 .pagelink__count{
   font-size:10.5px; font-weight:700; color:var(--text-3);
@@ -773,24 +861,24 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 }
 
 /* Bölüm: başlık + gövde. Kartın içine kart konmaz; ayrım boşlukla yapılır. */
-.sect{ margin-bottom:44px; }
+.sect{ margin-bottom:52px; }
 .sect:last-child{ margin-bottom:0; }
 .sect__h{
   display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
   flex-wrap:wrap;
-  margin-bottom:16px;
+  margin-bottom:20px;
 }
 .sect__ht{ min-width:0; }
-.sect__eyebrow{
-  font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
-  color:var(--text-3); margin-bottom:5px;
-}
+/* Bölüm üstü etiketi kaldırıldı: «ALAN», «ÖLÇÜLEN», «GİRİŞ» gibi
+   etiketler bilgi taşımıyor, yalnız gürültü üretiyordu. */
+.sect__eyebrow{ display:none; }
 .sect__h h2{
-  font-family:var(--font-display);
-  font-size:var(--fs-lg); font-weight:800; letter-spacing:-.02em;
+  font-family:var(--font-serif);
+  font-size:23px; font-weight:500; letter-spacing:-.012em; line-height:1.25;
   margin:0; color:var(--text);
 }
-.sect__h p{ margin:4px 0 0; font-size:var(--fs-sm); color:var(--text-3); max-width:62ch; }
+.sect__h p{ margin:7px 0 0; font-size:var(--fs-base); line-height:1.55;
+  color:var(--text-2); max-width:62ch; }
 .sect__actions{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
 
 /* ---------- ızgara yardımcıları ---------- */
@@ -834,15 +922,19 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
   .span-7, .span-8, .span-9, .span-10{ grid-column:span 12; }
   .span-6{ grid-column:span 12; }
   .cols-4{ grid-template-columns:repeat(2,1fr); }
-  :root{ --fs-display:38px; }
+  :root{ --fs-display:35px; }
+  .hero__in{ grid-template-columns:minmax(0,1fr); gap:26px; }
+  .hero__side{ align-items:flex-start; }
+  .herostat:first-child{ padding-left:0; }
 }
 
 @media (max-width:860px){
   .wrapc{ padding-inline:20px; }
-  .hero__in{ padding-block:28px 22px; gap:24px; }
-  .hero__side{ gap:24px; }
-  .herostat__value{ font-size:25px; }
-  :root{ --fs-display:33px; }
+  .hero__in{ padding-block:32px 24px; gap:22px; }
+  .herostat{ padding:0 16px; }
+  .herostat__value{ font-size:23px; }
+  .sect__h h2{ font-size:21px; }
+  :root{ --fs-display:31px; }
   .hero__lede{ font-size:15px; }
 
   /* Bölüm bağlantıları menüye taşınır; üst çubuk tek satır kalır. */
@@ -862,9 +954,11 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
   :root{ --fs-display:28px; }
   .cols-2, .cols-3, .cols-4{ grid-template-columns:1fr; }
   .brand__text span{ display:none; }
-  .hero__in{ padding-block:22px 18px; }
-  .hero__side{ gap:20px; }
-  .herostat__value{ font-size:22px; }
+  .hero__in{ padding-block:26px 20px; }
+  .hero__side{ flex-wrap:wrap; row-gap:18px; }
+  .herostat{ padding:0 14px; }
+  .herostat__value{ font-size:21px; }
+  .sect__h h2{ font-size:20px; }
 }
 
 /* ---------- mobil bölüm menüsü ----------
@@ -925,28 +1019,34 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
    Tek kart stili. Vurgu için renkli kenarlık kullanılmaz; başlığın yanına
    rozet konur. Gölge bir kenarlık kadar sessizdir — kart sayfadan kopmaz,
    yalnızca zemininden bir kâğıt kalınlığı ayrılır. */
+/* Kart bir kutu degil, bir YUZEYDIR. Golge kaldirildi: on onbes kartin
+   yan yana golge dusurdugu bir sayfa, kagit yigini gibi durur ve
+   ucuzlar. Derinlik yalnizca ince kenarlikla anlatilir. */
 .card{
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:var(--r);
-  padding:16px 18px;
-  box-shadow:var(--shadow);
+  padding:20px 22px;
 }
 .card--flat{ box-shadow:none; background:var(--surface-2); border-color:transparent; }
-.card--pad-sm{ padding:12px 14px; }
+.card--pad-sm{ padding:14px 16px; }
 /* Eski sinif adlari geriye donuk uyum icin durur ama gorsel etkisi yoktur. */
 .card--accent, .card--primary, .card--danger{ border-left:1px solid var(--border); }
 .card__head{
   display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
   flex-wrap:wrap;
-  margin-bottom:12px;
+  margin-bottom:14px;
 }
 .card__head > div:first-child{ min-width:min(100%, 180px); flex:1 1 auto; }
+/* Kart başlığı da serif. Bölüm başlığıyla aynı ailede olması sayfayı
+   tek bir yayın gibi okutur; sans bir kart başlığı serif bir bölüm
+   başlığının altında yabancı durur. */
 .card__head h3{
-  font-size:var(--fs-md); font-weight:700; letter-spacing:-.01em;
+  font-family:var(--font-serif);
+  font-size:18px; font-weight:500; letter-spacing:-.004em; line-height:1.3;
   display:flex; align-items:center; gap:6px;
 }
-.card__head p{ font-size:var(--fs-sm); color:var(--text-3); margin-top:2px; line-height:1.4; }
+.card__head p{ font-size:var(--fs-sm); color:var(--text-3); margin-top:3px; line-height:1.45; }
 .card__foot{
   margin-top:14px; padding-top:12px; border-top:1px solid var(--border);
   display:flex; align-items:center; gap:8px; flex-wrap:wrap;
@@ -959,24 +1059,25 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .section-title h2{ font-size:var(--fs-lg); font-weight:800; letter-spacing:-.015em; }
 
 /* ---------- dugme ---------- */
+/* Düğme hap biçiminde ve gölgesiz. Köşeli ve gölgeli düğme bir yönetim
+   panelinin dilidir; hap biçimi arayüzü yumuşatır ve dokunma hedefini
+   büyütür. */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
-  padding:8px 13px;
-  border-radius:10px;
-  border:1px solid var(--border);
+  padding:9px 17px;
+  border-radius:var(--r-pill);
+  border:1px solid var(--border-strong);
   background:var(--surface);
   color:var(--text);
-  font-size:var(--fs-sm); font-weight:650;
+  font-size:13px; font-weight:550; letter-spacing:.005em;
   white-space:nowrap;
-  box-shadow:0 1px 1px rgba(16,18,27,.03);
   transition:background var(--dur) var(--ease), border-color var(--dur) var(--ease),
-             transform var(--dur) var(--ease);
+             color var(--dur) var(--ease);
 }
 .btn svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.9; flex:none; }
-.btn:hover{ background:var(--surface-2); border-color:var(--border-strong); }
+.btn:hover{ background:var(--surface-2); border-color:var(--text-3); }
 .btn--primary{
   background:var(--primary); border-color:var(--primary); color:var(--primary-ink);
-  box-shadow:0 1px 2px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 .btn--primary:hover{ background:var(--primary-hover); border-color:var(--primary-hover); }
 .btn--danger{ color:var(--danger); border-color:color-mix(in srgb, var(--danger) 45%, var(--border)); background:transparent; }
@@ -1008,17 +1109,19 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .field .hint{ font-size:var(--fs-xs); color:var(--text-3); font-weight:400; }
 .input, .select, .textarea{
   width:100%;
-  padding:8px 11px;
+  padding:10px 13px;
   border-radius:10px;
-  border:1px solid var(--border-strong);
-  background:var(--surface);
+  border:1px solid var(--border);
+  background:var(--surface-hover);
   color:var(--text);
   font-size:var(--fs-base);
-  transition:border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease),
+             box-shadow var(--dur) var(--ease);
 }
+.input:hover, .select:hover, .textarea:hover{ border-color:var(--border-strong); }
 .input::placeholder, .textarea::placeholder{ color:var(--text-3); }
 .input:focus, .select:focus, .textarea:focus{
-  outline:none; border-color:var(--primary);
+  outline:none; background:var(--surface); border-color:var(--primary);
   box-shadow:0 0 0 3px var(--ring);
 }
 .textarea{ resize:vertical; min-height:72px; line-height:1.45; }
@@ -1051,11 +1154,13 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .seg--primary button.is-on{ background:var(--primary); color:var(--primary-ink); }
 
 /* ---------- rozet / etiket ---------- */
+/* Rozet küçük ve sakin: kalın harf ve dar yükseklik onu bir etikete
+   çevirir, bir düğmeye değil. */
 .badge{
   display:inline-flex; align-items:center; gap:5px;
-  padding:2px 8px; border-radius:var(--r-pill);
-  font-size:var(--fs-xs); font-weight:700; white-space:nowrap;
-  line-height:1.5;
+  padding:3px 9px; border-radius:var(--r-pill);
+  font-size:11.5px; font-weight:600; letter-spacing:.012em;
+  white-space:nowrap; line-height:1.5;
 }
 .badge svg{ width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2.2; }
 .badge--ok{ background:var(--primary-soft); color:var(--primary); }
@@ -1219,13 +1324,15 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 
    Şerit yatayda kaydırılabilir: dar ekranda sekmeler alt satıra sarmaz,
    çünkü sarılan bir sekme şeridi hangi bölümde olduğunu gizler. */
+/* Sekme şeridi hap biçiminde ve zemini kâğıt rengi. Köşeli bir kutu
+   içinde köşeli sekmeler bir araç çubuğu gibi durur. */
 .subtabs{
-  display:inline-flex; gap:3px;
+  display:inline-flex; gap:2px;
   max-width:100%;
   padding:4px;
   background:var(--surface-2);
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:var(--r-pill);
   overflow-x:auto;
   scrollbar-width:none;
   -webkit-overflow-scrolling:touch;
@@ -1234,16 +1341,15 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .subtab{
   flex:0 0 auto;
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
-  border:none; background:none; border-radius:9px;
-  padding:8px 16px; white-space:nowrap;
-  font-size:var(--fs-sm); font-weight:650; color:var(--text-2);
+  border:none; background:none; border-radius:var(--r-pill);
+  padding:8px 17px; white-space:nowrap;
+  font-size:13px; font-weight:500; letter-spacing:.005em; color:var(--text-2);
   transition:background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
-.subtab svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.9; flex:none; }
-.subtab:hover{ color:var(--text); background:color-mix(in srgb, var(--surface) 60%, transparent); }
+.subtab svg{ display:none; }
+.subtab:hover{ color:var(--text); }
 .subtab.is-active{
-  background:var(--surface); color:var(--text); font-weight:700;
-  box-shadow:0 1px 2px rgba(16,18,27,.09);
+  background:var(--surface); color:var(--text); font-weight:600;
 }
 .subtab__count{
   min-width:18px; padding:0 5px; border-radius:var(--r-pill);
@@ -2235,41 +2341,44 @@ button.minrow:hover{ background:var(--surface-2); }
    Ölçümler organa göre kutulanmaz; tek düz listede durur. Her satır bir
    düğmedir ve ayrıntıyı açar. Sol kenardaki nokta durumu RENKLE değil,
    yanındaki rozetle birlikte söyler: renk tek başına anlam taşımaz. */
-.reslist{
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  background:var(--surface);
-  overflow:hidden;
-}
+/* Liste bir kutu değil, bir CETVELDIR: çerçevesi yok, satırları ince
+   çizgiyle ayrılır. On beş satırı kutuya almak sayfayı ağırlaştırıyordu. */
+.reslist{ border-top:1px solid var(--border); }
 .resrow{
   width:100%;
   display:grid;
-  grid-template-columns:6px minmax(150px,1.5fr) 118px minmax(120px,1.2fr) 108px 96px;
-  align-items:center; gap:14px;
-  padding:11px 16px 11px 12px;
-  border:none; border-top:1px solid var(--border);
+  grid-template-columns:3px minmax(150px,1.4fr) 128px minmax(110px,1fr) 104px 78px;
+  align-items:center; gap:16px;
+  padding:14px 10px 14px 0;
+  border:none; border-bottom:1px solid var(--border);
   background:none; color:var(--text); text-align:left;
   transition:background var(--dur) var(--ease);
 }
-.reslist .resrow:first-child{ border-top:none; }
 .resrow:hover{ background:var(--surface-hover); }
 
-.resrow__dot{ width:6px; height:22px; border-radius:3px; background:var(--surface-3); }
+.resrow__dot{ width:3px; height:26px; border-radius:2px; background:var(--surface-3); }
 .resrow__dot--ok{ background:var(--primary); }
 .resrow__dot--info{ background:var(--info); }
 .resrow__dot--warn{ background:var(--accent); }
 .resrow__dot--danger{ background:var(--danger); }
 
 .resrow__name{ min-width:0; display:flex; flex-direction:column; gap:2px; }
-.resrow__name b{ font-size:var(--fs-base); font-weight:650; line-height:1.25; }
-.resrow__panel{ font-size:var(--fs-xs); color:var(--text-3); }
+.resrow__name b{ font-size:15px; font-weight:550; line-height:1.3; letter-spacing:-.003em; }
+.resrow__panel{ font-size:11.5px; color:var(--text-3); letter-spacing:.02em; }
 .resrow__val{
-  font-family:var(--font-display); font-size:var(--fs-md); font-weight:700;
-  white-space:nowrap;
+  font-family:var(--font-display); font-size:19px; font-weight:600;
+  letter-spacing:-.02em; white-space:nowrap;
 }
-.resrow__val small{ font-size:var(--fs-xs); font-weight:600; color:var(--text-3); margin-left:3px; }
+.resrow__val small{ font-size:11.5px; font-weight:500; color:var(--text-3); margin-left:4px; }
 .resrow__bar{ min-width:0; }
 .resrow__status{ justify-self:start; }
+/* Listede rozetler yan yana on beş kez tekrarlanır; orada çerçeveli ve
+   ikonlu bir rozet gürültü üretir. Satır içindeki rozet düz metne iner. */
+.resrow__status .badge{
+  background:none; border:none; padding:0;
+  font-size:12px; font-weight:550; letter-spacing:.01em;
+}
+.resrow__status .badge svg{ display:none; }
 .resrow__trend{ justify-self:end; white-space:nowrap; }
 
 @media (max-width:900px){
@@ -2445,6 +2554,20 @@ button.minrow:hover{ background:var(--surface-2); }
   .demand__cert{ grid-column:2; justify-self:end; }
 }
 .minw0{ min-width:0; }
+
+
+/* ================= kayan şeritlerin kenarı =================
+
+   Taşan bir sekme şeridinin sağ kenarında öge yarım kesilir ve bu bir
+   çizim hatası gibi durur. Kenara doğru solan bir maske, kesilmenin
+   kasıtlı olduğunu ve devamının bulunduğunu söyler. */
+.subtabs, .pagenav__in, .navlinks{
+  -webkit-mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+  mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+}
+/* Taşma yoksa maske de gerekmez; `scroll-timeline` yok, bu yüzden ölçüyü
+   şerit kendi genişliğinden anlayamaz. Maske zararsızdır: taşmayan
+   şeritte son 28px zaten boştur. */
 </style>
 <div id="app">
   <div class="boot">
@@ -3907,9 +4030,11 @@ SP.READINESS_BANDS = [
 SP.LOAD_RULES = {
   acwr:{
     low:0.8, high:1.5,
-    lowNote:'Son hafta alışkın olduğundan hafif geçti. Kondisyon korunmuyor.',
-    highNote:'Son hafta alıştığından belirgin ağır geçti. Bu bölgede sakatlanma riski yükselir.',
-    okNote:'Yük, alıştığın bandın içinde.',
+    lowNote:'Son hafta, son bir ayın ortalamasına göre hafif geçti. '
+      + 'Kondisyon korunmuyor.',
+    highNote:'Son hafta, son bir ayın ortalamasına göre belirgin ağır geçti. '
+      + 'Bu bölgede sakatlanma riski yükselir.',
+    okNote:'Son hafta, son bir ayda alıştığın bandın içinde.',
   },
   weeklyGrowth:{
     max:0.10,
@@ -4167,7 +4292,7 @@ SP.AGENTS = [
     opening:'Tahlillerine referans aralığından değil, kendi geçmişinden bakıyorum. '
           + 'Eğilim tek ölçümden daha çok şey söyler.',
     redirect:'Bu beslenme tarafında; Nesrin\'e bağlıyorum.',
-    owns:['labs', 'vitals'] },
+    owns:['labs', 'today'] },
 
   { id:'nutri', name:'Nesrin', role:'Beslenme ve biyoyararlanım',
     color:'var(--agent-nutri)', initial:'N',
@@ -4325,13 +4450,14 @@ SP.HINTS = {
 };
 
 /* ==== js/data/palettes.js ==== */
-/* Seçilebilir renk paletleri. tokens.css tabanı (indigo) tanımlar,
+/* Seçilebilir renk paletleri. tokens.css tabanı (kâğıt) tanımlar,
    palettes.css diğerlerini yeniden yazar. */
 
 window.SP = window.SP || {};
 
 SP.PALETTES = [
-  { id:'indigo',  name:'İndigo',  note:'Varsayılan — sakin ve nötr',        swatch:['#3D3F8F', '#E5E7F5'] },
+  { id:'kagit',   name:'Kâğıt',   note:'Varsayılan — sıcak kâğıt, derin yeşil', swatch:['#1F4E3D', '#E4EBE7'] },
+  { id:'indigo',  name:'İndigo',  note:'Soğuk mor-mavi, nötr',             swatch:['#3D3F8F', '#E5E7F5'] },
   { id:'grafit',  name:'Grafit',  note:'En düşük renk yükü, uzun oturum',   swatch:['#3D4E5C', '#E4E8EC'] },
   { id:'okyanus', name:'Okyanus', note:'Soğuk mavi, odak hissi',            swatch:['#1F5D80', '#DFEAF3'] },
   { id:'mor',     name:'Mor',     note:'Yumuşak kontrast, göz yormaz',      swatch:['#54408F', '#E8E4F3'] },
@@ -4339,7 +4465,7 @@ SP.PALETTES = [
   { id:'orman',   name:'Orman',   note:'1.0 sürümünün yeşili',              swatch:['#2F6B4F', '#E4EDE8'] },
 ];
 
-SP.DEFAULT_PALETTE = 'indigo';
+SP.DEFAULT_PALETTE = 'kagit';
 
 /* ==== js/data/providers.js ==== */
 /* Model saglayicilari — ofis ajanlarinin kullandigi ucretsiz LLM uclari.
@@ -5074,6 +5200,7 @@ SP.S = {
 
   ui:{
     railOpen:false,
+    dayTab:'giris',        // giris | ozet | gecmis
     labTab:'sonuc',        // sonuc | giris | gecmis | trend
     labPanel:'vital',      // acik panel id'si
     labQuery:'',           // sonuc ve giris listesindeki arama
@@ -6615,7 +6742,7 @@ SP.Move = (function(){
     const span = U.diffDays(first, endISO || U.todayISO());
     if(span < 21){
       return { ok:false, span,
-        note:'Akut/kronik oran için en az 3 haftalık geçmiş gerekir; şu an ' + (span + 1) + ' gün var.' };
+        note:'Son haftayı son aya kıyaslamak için en az 3 haftalık geçmiş gerekir; şu an ' + (span + 1) + ' gün var.' };
     }
     const acute = loadWindow(7, endISO) / 7;
     const chronic = loadWindow(28, endISO) / 28;
@@ -7243,7 +7370,7 @@ SP.Calc = (function(){
       return { id:'vitals', rank:3, tone:'info', icon:'pulse',
         label:'Ölçüm', title:'Bugünün ölçümü girilmedi',
         why:'Toparlanma skoru en az uyku süresiyle hesaplanır; onsuz günün yükü körlemesine verilir.',
-        route:'vitals', action:'Uyku ve nabzı gir.' };
+        route:'today', action:'Uyku ve nabzı gir.' };
     }
     const due = SP.Bio.overdue();
     if(due.length){
@@ -7972,7 +8099,11 @@ SP.UI = (function(){
        ref     [low, high]  laboratuvarin referans araligi
        optimal [low, high]  kisisel hedef bant (varsa)
        value   olculen deger  */
-  function rangeBar(value, ref, optimal, unit){
+  /* `opts.bare` verilirse yalnizca cubuk cizilir, altindaki sayi satiri
+     cizilmez. Uzun bir listede her satirin altinda "30 · referans · hedef
+     80-250 · 400 ng/mL" yazmak satiri okunmaz hale getiriyordu; o ayrinti
+     satira tiklayinca acilan kagitta zaten tam haliyle duruyor. */
+  function rangeBar(value, ref, optimal, unit, opts){
     if(!ref || ref.length !== 2) return '';
     const lo = Number(ref[0]), hi = Number(ref[1]);
     const span = hi - lo;
@@ -7996,6 +8127,7 @@ SP.UI = (function(){
         + p(value).toFixed(1) + '%"></div>';
     }
     out += '</div>';
+    if(opts && opts.bare) return out;
     out += '<div class="rangebar__scale"><span class="num">' + U.fmtNum(lo) + '</span>'
       + '<span class="dim">referans' + (optimal ? ' &middot; hedef ' + U.fmtNum(optimal[0]) + '&ndash;' + U.fmtNum(optimal[1]) : '') + '</span>'
       + '<span class="num">' + U.fmtNum(hi) + (unit ? ' ' + esc(unit) : '') + '</span></div>';
@@ -10243,7 +10375,7 @@ SP.Palette = (function(){
       hint:'Modül 2', run:() => { SP.App.go('meals'); setTimeout(() => {
         const el = document.getElementById('meal-text'); if(el) el.focus(); }, 160); } });
     out.push({ id:'act:vitals', kind:'Eylem', label:'Günün ölçümünü gir',
-      hint:'Toparlanma', run:() => SP.App.go('vitals') });
+      hint:'Toparlanma', run:() => SP.App.go('today') });
     out.push({ id:'act:session', kind:'Eylem', label:'Antrenman seansı ekle',
       hint:'Modül 3', run:() => { SP.App.go('move'); setTimeout(() => {
         const fn = SP.Screens.move.handle['start-session'];
@@ -10466,259 +10598,27 @@ SP.Setup = (function(){
 })();
 
 /* ==== js/screens/today.js ==== */
-/* Bugün — günün tek ekranı.
+/* Günlük — sistemin ilk ve tek günlük sayfası.
 
-   Sıra bilinçli: önce kırmızı bayrak, sonra sıradaki hamle, sonra ölçüm ve
-   asgari gün. Kullanıcı bu ekranı açtığında ne yapacağını düşünmek zorunda
-   kalmaz; tek bir öncelik gösterilir.
+   Önceden iki ayrı ekran vardı: "Bugün" (özet) ve "Günlük ölçüm" (giriş).
+   İkisi de aynı günü anlatıyordu ve kullanıcı hangisine gireceğini
+   düşünmek zorunda kalıyordu. Şimdi tek sayfa, üç sekme:
 
-   Yazım biçimi: STIL.md. Ekran string birleştirme kullanmaz. */
+     Giriş    günün verisi buraya yazılır — sayfanın VARSAYILANI budur
+     Özet     yazılanın karşılığı: toparlanma, beslenme, asgari gün, bütçe
+     Geçmiş   son iki hafta ve kişisel taban çizgi
+
+   Giriş önce gelir çünkü bu sayfaya girmenin sebebi çoğu zaman okumak
+   değil YAZMAKtır. Özet, yazılanın sonucudur; sonuç girdiden önce
+   gelmez.
+
+   Hiçbir alan zorunlu değildir: eksik girdi sıfır sayılmaz, ağırlığı
+   kalan girdilere dağıtılır. */
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
 
 SP.Screens.today = (function(){
-  const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
-  const { html, raw, when, map } = SP.h;
-  const K = SP.C, P = SP.Parts;
-
-  /* ---------------------------------------------------------- kartlar */
-
-  function minimumCard(){
-    const m = SP.Calc.minimumDay();
-    const streak = SP.Calc.streak();
-    return K.Card({
-      title:'Asgari gün', hint:'minimum-day',
-      sub:'Kötü günün alt sınırı',
-      badge:K.Badge({ label:m.done + '/' + m.total, tone:m.complete ? 'ok' : 'warn' }),
-      body:html`
-        <div class="mt-2">${map(m.rows, P.minRow)}</div>
-        <p class="small muted mt-10">${m.note}</p>`,
-      foot:html`<span class="small">Davranış serisi <b class="num">${streak}</b> gün</span>`,
-    });
-  }
-
-  function readinessCard(){
-    const rx = SP.Move.prescription();
-    const r = rx.readiness;
-    if(!r.ok){
-      return K.Card({ title:'Toparlanma', hint:'readiness',
-        body:html`${K.Notice({ tone:'info', body:r.note })}
-          <div class="mt-10">${K.Button({ label:'Bugünün ölçümünü gir', size:'sm', tone:'primary',
-            act:'go', data:{ 'data-route':'vitals' } })}</div>` });
-    }
-    /* Gerekcelerin tamami Hareket ekraninda durur; burada yalnizca bandin
-       emri gorunur. Ayni uyariyi iki ekranda tekrarlamak sadelik degil
-       gurultudur. */
-    return K.Card({
-      title:'Toparlanma', hint:'readiness',
-      badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
-      body:html`
-        <div class="row wrap" style="gap:16px">
-          <div class="kpi"><span class="kpi__value">${r.score}</span><span class="kpi__unit">/ 100</span></div>
-          <div class="grow" style="min-width:160px">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
-        </div>
-        <div class="mt-12">${map(r.parts, p => html`
-          <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
-            <span class="readypart__label">${p.label}</span>
-            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))}</span>
-            <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
-          </div>`)}</div>
-        ${K.Notice({ tone:r.band.tone === 'ok' ? 'ok' : r.band.tone, class:'mt-12', body:r.band.order })}`,
-      foot:html`${K.Button({ label:'Hareket ekranını aç', size:'sm', act:'go', data:{ 'data-route':'move' } })}
-        ${when(r.missing.length, () => html`<span class="small dim">Eksik girdi:
-          ${r.missing.join(', ')} — ağırlığı kalanlara dağıtıldı.</span>`)}`,
-    });
-  }
-
-  function nutritionCard(){
-    const d = U.todayISO();
-    const t = SP.Nutri.dayTotals(d);
-    const tg = SP.Nutri.targets();
-
-    if(!tg.ok){
-      return K.Card({ title:'Beslenme',
-        body:K.Notice({ tone:'warn', title:'Hedef hesaplanamıyor.',
-          body:'Profilde ' + tg.missing.join(', ') + ' eksik. Bu üçü olmadan '
-             + 'kalori ve protein hedefi tahmin edilmez.' }),
-        foot:K.Button({ label:'Profili tamamla', size:'sm', tone:'primary',
-          act:'go', data:{ 'data-route':'family' } }) });
-    }
-    if(t.empty){
-      return K.Card({ title:'Beslenme', sub:'Hedef ' + U.fmtNum(tg.kcal) + ' kcal',
-        body:P.empty('Bugün hiç öğün girilmedi.', 'Öğün ekle', 'go', { 'data-route':'meals' }) });
-    }
-
-    return K.Card({
-      title:'Beslenme', sub:t.meals + ' öğün girildi',
-      /* Gün sürerken hedefin altında olmak bir hata değildir: yalnızca
-         hedefin belirgin ÜSTÜNE çıkmak uyarı tonuyla işaretlenir. */
-      badge:K.Badge({ label:Math.round(t.kcal) + ' / ' + tg.kcal + ' kcal',
-        tone:t.kcal > tg.kcal * 1.15 ? 'warn' : 'info' }),
-      body:html`
-        ${raw(UI.macroSplit({ protein:t.protein * 4, fat:t.fat * 9, carb:t.carb * 4 }))}
-        <div class="nutgrid mt-12">
-          ${P.nutCell({ label:'Protein', got:t.protein, target:tg.protein.min, unit:'g' })}
-          ${P.nutCell({ label:'Lif', got:t.fiber, target:tg.fiber, unit:'g' })}
-          ${P.nutCell({ label:'Yağ', got:t.fat, target:tg.fat.min, unit:'g' })}
-        </div>
-        ${map(t.notes.slice(0, 1), P.absorbNote)}`,
-      foot:K.Button({ label:'Öğünleri aç', size:'sm', act:'go', data:{ 'data-route':'meals' } }),
-    });
-  }
-
-  function officeCard(){
-    const d = U.todayISO();
-    const b = S.officeBriefings[d];
-    const notes = SP.Office.notes().slice(0, 3);
-    return K.Card({
-      title:'Ofisten', hint:'office',
-      sub:'Beş ajan · günün notu',
-      badge:b ? P.sourceBadge(b.source) : null,
-      body:html`
-        ${when(b, () => html`<p class="small">${b.text}</p>`)}
-        ${when(!b, () => html`<p class="small dim">Günün brifingi henüz üretilmedi.</p>`)}
-        ${when(notes.length, () => html`<div class="notes mt-12">${map(notes, n => html`
-          <div class="note note--${n.tone}">
-            ${P.avatar(n.agent, 'sm')}
-            <div><b class="tiny">${n.name}</b> <span class="small">${n.text}</span></div>
-          </div>`)}</div>`)}`,
-      foot:html`${K.Button({ label:'Ofisi aç', size:'sm', act:'go', data:{ 'data-route':'office' } })}
-        ${K.Button({ label:'Brifingi tazele', size:'sm', act:'refresh-briefing' })}`,
-    });
-  }
-
-  function moneyCard(){
-    const m = SP.Money.status();
-    return K.Card({
-      title:'Bütçe', hint:'budget-rank',
-      badge:K.Badge({ label:m.tone === 'ok' ? 'uyumlu' : m.tone === 'muted' ? 'boş' : 'gözden geçir',
-        tone:m.tone }),
-      body:html`<p class="small">${m.text}</p>
-        ${when(m.basket.limit != null && m.basket.rows.length, () => html`<div class="mt-10">
-          ${K.Meter({ label:'Haftalık sınır', value:Math.min(100, m.basket.pct || 0),
-            text:U.fmtNum(Math.round(m.basket.total)) + ' / ' + U.fmtNum(m.basket.limit) + ' TL',
-            tone:m.basket.over ? 'danger' : '' })}</div>`)}`,
-      foot:K.Button({ label:'Finansı aç', size:'sm', act:'go', data:{ 'data-route':'basket' } }),
-    });
-  }
-
-  /* ------------------------------------------------------------- ekran */
-
-  async function render(){
-    const flags = M.openFlags();
-
-    return String(K.Grid([
-      when(flags.length, () => K.Span(12, K.Stack(map(flags, P.flagCard), 'sm'))),
-
-      K.Span(8, K.Stack([
-        readinessCard(),
-        nutritionCard(),
-        officeCard(),
-      ])),
-
-      K.Span(4, K.Stack([
-        minimumCard(),
-        moneyCard(),
-        K.Card({ title:'Hızlı giriş', sub:'Tek satır, tek Enter',
-          body:html`
-            <div class="quick">
-              ${K.Input({ id:'quick-meal', placeholder:'1 tabak etli kuru fasulye, 1 bardak ayran',
-                aria:'Öğün metni' })}
-              ${K.Button({ label:'Öğüne ekle', tone:'primary', act:'quick-meal' })}
-              <span class="quick__hint">Gramaj ev ölçüsünden gelir ve «tahmin» olarak işaretlenir.
-                Tarttıysan «150 g tavuk» yaz, «ölçüldü» olur.</span>
-            </div>` }),
-      ])),
-
-      K.Span(12, raw(UI.rail(['next-action', 'minimum-day', 'readiness', 'certainty', 'privacy']))),
-    ]));
-  }
-
-  const handle = {
-    async 'flag-ack'(el){
-      await M.ackFlag(el.dataset.id);
-      UI.toast('İşaretlendi — kayıt geçmişte duruyor');
-      SP.App.render();
-    },
-    async 'refresh-briefing'(){
-      UI.toast('Brifing üretiliyor…');
-      await SP.Office.dailyBriefing(true);
-      SP.App.render();
-    },
-    async 'quick-meal'(){
-      const el = document.getElementById('quick-meal');
-      if(!el || !el.value.trim()) return;
-      const parsed = SP.Parse.parseMeal(el.value);
-      if(!parsed.items.length){ UI.toast(parsed.note); return; }
-      const slot = SP.Screens.meals.guessSlot();
-      const meal = M.newMeal(slot);
-      meal.items = parsed.items.map(i => ({ foodId:i.foodId, g:i.g, cert:i.cert, portion:i.portion }));
-      meal.note = el.value.trim();
-      await M.addMeal(U.todayISO(), meal);
-      el.value = '';
-      UI.toast(parsed.items.length + ' gıda eklendi'
-        + (parsed.unmatched.length ? ' · ' + parsed.unmatched.length + ' parça eşleşmedi' : ''));
-      SP.App.render();
-    },
-  };
-
-  return {
-    id:'today',
-    title:'Bugün',
-    headline(){
-      const n = SP.Calc.nextAction();
-      return n.calm ? 'Bugün için bekleyen bir hamle yok.' : n.title;
-    },
-    lede(){
-      const n = SP.Calc.nextAction();
-      const m = SP.Calc.minimumDay();
-      const base = n.calm
-        ? 'Asgari gün ' + m.done + '/' + m.total + '. Kötü günün alt sınırı bu; '
-          + 'onu tutturmak zinciri korur.'
-        : n.why;
-      return base;
-    },
-    stats(){
-      const m = SP.Calc.minimumDay();
-      const out = [
-        { value:m.done + '/' + m.total, label:'asgari gün' },
-        { value:SP.Calc.streak(), label:'gün seri' },
-      ];
-      const r = SP.Move.readiness();
-      if(r.ok) out.push({ value:r.score, unit:'/100', label:'toparlanma' });
-      const f = SP.Model.openFlags().filter(x => !x.ack).length;
-      if(f) out.push({ value:f, label:'kırmızı bayrak' });
-      return out;
-    },
-    subtitle(){
-      const n = SP.Calc.nextAction();
-      return n.calm ? 'Sıradaki hamle yok' : n.label + ' · ' + n.title;
-    },
-    /* Sıradaki hamle artık başlığın kendisi; düğmesi de hero'da durur.
-       Aynı cümleyi bir de kart olarak tekrarlamak sadelik değil gürültüdür. */
-    actions(){
-      const n = SP.Calc.nextAction();
-      return String(html`${when(!n.calm, () => K.Button({ label:n.action || 'Aç',
-        tone:'primary', size:'sm', icon:n.icon, act:'go', data:{ 'data-route':n.route } }))}
-        ${K.Button({ label:'Ölçüm gir', size:'sm', icon:'pulse',
-          act:'go', data:{ 'data-route':'vitals' } })}`);
-    },
-    render, handle,
-  };
-})();
-
-/* ==== js/screens/vitals.js ==== */
-/* Günlük ölçüm — vital bulgular, vücut ölçüleri ve günün hissi.
-
-   Bu ekran toparlanma skorunun hammaddesini toplar. Hiçbir alan zorunlu
-   değildir: eksik girdi sıfır sayılmaz, ağırlığı kalan girdilere dağıtılır.
-   Cihazı olmayan kullanıcı da uyku ve nabızla anlamlı bir skor alır. */
-
-window.SP = window.SP || {};
-SP.Screens = SP.Screens || {};
-
-SP.Screens.vitals = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
   const { html, raw, when, map } = SP.h;
   const K = SP.C, P = SP.Parts;
@@ -10845,19 +10745,225 @@ SP.Screens.vitals = (function(){
         rows }) });
   }
 
+
+  /* Öğün girişi de günlük veridir: aynı sayfada, aynı sekmede durur.
+     Kullanıcı günün verisini yazarken öğün için başka ekrana gitmez. */
+  function quickCard(){
+    return K.Card({
+      title:'Öğün ekle', hint:'portion',
+      sub:'Tek satır yaz, Enter\'a bas',
+      body:html`
+        <div class="quick">
+          ${K.Input({ id:'quick-meal', placeholder:'1 tabak etli kuru fasulye, 1 bardak ayran',
+            aria:'Öğün metni' })}
+          ${K.Button({ label:'Öğüne ekle', tone:'primary', act:'quick-meal' })}
+          <span class="quick__hint">Ev ölçüsünden gelen gramaj «tahmin» olarak işaretlenir.
+            Tarttıysan «150 g tavuk» yaz, «ölçüldü» olur.</span>
+        </div>`,
+      foot:K.Button({ label:'Bütün öğünleri aç', size:'sm', act:'go', data:{ 'data-route':'meals' } }),
+    });
+  }
+
+  function whyCard(){
+    return K.Card({ title:'Bu ölçümler ne işe yarıyor?',
+      body:html`<ul class="bullets small muted">
+        ${map(SP.READINESS_INPUTS, i => html`<li><b>${i.label}</b> — ${i.note}</li>`)}
+      </ul>
+      <p class="small muted mt-10">Hiçbiri zorunlu değil. Girmediğin ölçüm sıfır
+        sayılmaz; ağırlığı girdiklerine dağıtılır.</p>` });
+  }
+
+  /* ---------------------------------------------------------- kartlar */
+
+  function minimumCard(){
+    const m = SP.Calc.minimumDay();
+    const streak = SP.Calc.streak();
+    return K.Card({
+      title:'Asgari gün', hint:'minimum-day',
+      sub:'Kötü günün alt sınırı',
+      badge:K.Badge({ label:m.done + '/' + m.total, tone:m.complete ? 'ok' : 'warn' }),
+      body:html`
+        <div class="mt-2">${map(m.rows, P.minRow)}</div>
+        <p class="small muted mt-10">${m.note}</p>`,
+      foot:html`<span class="small">Davranış serisi <b class="num">${streak}</b> gün</span>`,
+    });
+  }
+
+  function readinessCard(){
+    const rx = SP.Move.prescription();
+    const r = rx.readiness;
+    if(!r.ok){
+      return K.Card({ title:'Toparlanma', hint:'readiness',
+        body:html`${K.Notice({ tone:'info', body:r.note })}
+          <div class="mt-10">${K.Button({ label:'Bugünün ölçümünü gir', size:'sm', tone:'primary',
+            act:'go', data:{ 'data-route':'today' } })}</div>` });
+    }
+    /* Gerekcelerin tamami Hareket ekraninda durur; burada yalnizca bandin
+       emri gorunur. Ayni uyariyi iki ekranda tekrarlamak sadelik degil
+       gurultudur. */
+    return K.Card({
+      title:'Toparlanma', hint:'readiness',
+      badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
+      body:html`
+        <div class="row wrap" style="gap:16px">
+          <div class="kpi"><span class="kpi__value">${r.score}</span><span class="kpi__unit">/ 100</span></div>
+          <div class="grow" style="min-width:160px">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
+        </div>
+        <div class="mt-12">${map(r.parts, p => html`
+          <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
+            <span class="readypart__label">${p.label}</span>
+            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))}</span>
+            <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
+          </div>`)}</div>
+        ${K.Notice({ tone:r.band.tone === 'ok' ? 'ok' : r.band.tone, class:'mt-12', body:r.band.order })}`,
+      foot:html`${K.Button({ label:'Hareket ekranını aç', size:'sm', act:'go', data:{ 'data-route':'move' } })}
+        ${when(r.missing.length, () => html`<span class="small dim">Eksik girdi:
+          ${r.missing.join(', ')} — ağırlığı kalanlara dağıtıldı.</span>`)}`,
+    });
+  }
+
+  function nutritionCard(){
+    const d = U.todayISO();
+    const t = SP.Nutri.dayTotals(d);
+    const tg = SP.Nutri.targets();
+
+    if(!tg.ok){
+      return K.Card({ title:'Beslenme',
+        body:K.Notice({ tone:'warn', title:'Hedef hesaplanamıyor.',
+          body:'Profilde ' + tg.missing.join(', ') + ' eksik. Bu üçü olmadan '
+             + 'kalori ve protein hedefi tahmin edilmez.' }),
+        foot:K.Button({ label:'Profili tamamla', size:'sm', tone:'primary',
+          act:'go', data:{ 'data-route':'family' } }) });
+    }
+    if(t.empty){
+      return K.Card({ title:'Beslenme', sub:'Hedef ' + U.fmtNum(tg.kcal) + ' kcal',
+        body:P.empty('Bugün hiç öğün girilmedi.', 'Öğün ekle', 'go', { 'data-route':'meals' }) });
+    }
+
+    return K.Card({
+      title:'Beslenme', sub:t.meals + ' öğün girildi',
+      /* Gün sürerken hedefin altında olmak bir hata değildir: yalnızca
+         hedefin belirgin ÜSTÜNE çıkmak uyarı tonuyla işaretlenir. */
+      badge:K.Badge({ label:Math.round(t.kcal) + ' / ' + tg.kcal + ' kcal',
+        tone:t.kcal > tg.kcal * 1.15 ? 'warn' : 'info' }),
+      body:html`
+        ${raw(UI.macroSplit({ protein:t.protein * 4, fat:t.fat * 9, carb:t.carb * 4 }))}
+        <div class="nutgrid mt-12">
+          ${P.nutCell({ label:'Protein', got:t.protein, target:tg.protein.min, unit:'g' })}
+          ${P.nutCell({ label:'Lif', got:t.fiber, target:tg.fiber, unit:'g' })}
+          ${P.nutCell({ label:'Yağ', got:t.fat, target:tg.fat.min, unit:'g' })}
+        </div>
+        ${map(t.notes.slice(0, 1), P.absorbNote)}`,
+      foot:K.Button({ label:'Öğünleri aç', size:'sm', act:'go', data:{ 'data-route':'meals' } }),
+    });
+  }
+
+  function officeCard(){
+    const d = U.todayISO();
+    const b = S.officeBriefings[d];
+    const notes = SP.Office.notes().slice(0, 3);
+    return K.Card({
+      title:'Ofisten', hint:'office',
+      sub:'Beş ajan · günün notu',
+      badge:b ? P.sourceBadge(b.source) : null,
+      body:html`
+        ${when(b, () => html`<p class="small">${b.text}</p>`)}
+        ${when(!b, () => html`<p class="small dim">Günün brifingi henüz üretilmedi.</p>`)}
+        ${when(notes.length, () => html`<div class="notes mt-12">${map(notes, n => html`
+          <div class="note note--${n.tone}">
+            ${P.avatar(n.agent, 'sm')}
+            <div><b class="tiny">${n.name}</b> <span class="small">${n.text}</span></div>
+          </div>`)}</div>`)}`,
+      foot:html`${K.Button({ label:'Ofisi aç', size:'sm', act:'go', data:{ 'data-route':'office' } })}
+        ${K.Button({ label:'Brifingi tazele', size:'sm', act:'refresh-briefing' })}`,
+    });
+  }
+
+  function moneyCard(){
+    const m = SP.Money.status();
+    return K.Card({
+      title:'Bütçe', hint:'budget-rank',
+      badge:K.Badge({ label:m.tone === 'ok' ? 'uyumlu' : m.tone === 'muted' ? 'boş' : 'gözden geçir',
+        tone:m.tone }),
+      body:html`<p class="small">${m.text}</p>
+        ${when(m.basket.limit != null && m.basket.rows.length, () => html`<div class="mt-10">
+          ${K.Meter({ label:'Haftalık sınır', value:Math.min(100, m.basket.pct || 0),
+            text:U.fmtNum(Math.round(m.basket.total)) + ' / ' + U.fmtNum(m.basket.limit) + ' TL',
+            tone:m.basket.over ? 'danger' : '' })}</div>`)}`,
+      foot:K.Button({ label:'Finansı aç', size:'sm', act:'go', data:{ 'data-route':'basket' } }),
+    });
+  }
+
+  /* ------------------------------------------------------------- ekran */
+
+  const TABS = [
+    { id:'giris',  label:'Giriş',  icon:'pulse' },
+    { id:'ozet',   label:'Özet',   icon:'today' },
+    { id:'gecmis', label:'Geçmiş', icon:'clock' },
+  ];
+
+  function tabs(){
+    const v = M.vitalsOf(shownDate());
+    const n = v ? Object.keys(v).filter(k => v[k] != null && k !== 'date').length : 0;
+    const items = TABS.map(t => Object.assign({}, t,
+      t.id === 'giris' && n ? { count:n } : {}));
+    return K.Subtabs({ items, value:S.ui.dayTab || 'giris', act:'day-tab',
+      aria:'Günlük görünümü' });
+  }
+
   async function render(){
-    return String(K.Grid([
-      K.Span(7, K.Stack([formCard(), statusCard(), historyCard()])),
-      K.Span(5, K.Stack([readinessCard(), baselineCard(),
-        K.Card({ title:'Neden bu ölçümler?',
-          body:html`<ul class="bullets small muted">
-            ${map(SP.READINESS_INPUTS, i => html`<li><b>${i.label}</b> — ${i.note}</li>`)}
-          </ul>` })])),
-      K.Span(12, raw(UI.rail(['readiness', 'ref-range', 'certainty']))),
-    ]));
+    const tab = S.ui.dayTab || 'giris';
+    const flags = M.openFlags();
+
+    /* Kirmizi bayrak her sekmede en ustte durur: sayfanin hangi
+       bolumunde olursan ol gorunmeden gecilmez. */
+    const head = html`
+      ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
+      <div class="mb-20">${tabs()}</div>`;
+
+    if(tab === 'ozet'){
+      return String(html`
+        ${head}
+        <section class="sect">
+          <div class="grid">
+            <div class="span-8"><div class="stack">${[
+              readinessCard(), nutritionCard(), officeCard(),
+            ]}</div></div>
+            <div class="span-4"><div class="stack">${[
+              minimumCard(), moneyCard(),
+            ]}</div></div>
+          </div>
+        </section>
+        <div class="mt-24">${raw(UI.rail(['next-action', 'minimum-day', 'readiness', 'certainty']))}</div>`);
+    }
+
+    if(tab === 'gecmis'){
+      return String(html`
+        ${head}
+        <section class="sect">
+          <div class="grid">
+            <div class="span-7"><div class="stack">${[historyCard()
+              || K.Card({ body:K.Empty({ text:'Son iki haftada kayıt yok.' }) })]}</div></div>
+            <div class="span-5"><div class="stack">${[baselineCard()]}</div></div>
+          </div>
+        </section>
+        <div class="mt-24">${raw(UI.rail(['readiness', 'certainty']))}</div>`);
+    }
+
+    /* ---- giriş (varsayılan) ---- */
+    return String(html`
+      ${head}
+      <section class="sect">
+        <div class="grid">
+          <div class="span-7"><div class="stack">${[formCard(), quickCard(), statusCard()]}</div></div>
+          <div class="span-5"><div class="stack">${[whyCard()]}</div></div>
+        </div>
+      </section>
+      <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'certainty']))}</div>`);
   }
 
   const handle = {
+    async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; SP.App.render(); },
     async 'shift-day'(el){
       const n = Number(el.dataset.value);
       S.ui.mealDate = n === 0 ? null : U.iso(U.addDays(U.parse(shownDate()), n));
@@ -10887,36 +10993,85 @@ SP.Screens.vitals = (function(){
       UI.toast(flags.length ? 'Kaydedildi — ' + flags.length + ' kırmızı bayrak açık' : 'Kaydedildi');
       SP.App.render();
     },
+  
+    async 'flag-ack'(el){
+      await M.ackFlag(el.dataset.id);
+      UI.toast('İşaretlendi — kayıt geçmişte duruyor');
+      SP.App.render();
+    },
+    async 'refresh-briefing'(){
+      UI.toast('Brifing üretiliyor…');
+      await SP.Office.dailyBriefing(true);
+      SP.App.render();
+    },
+    async 'quick-meal'(){
+      const el = document.getElementById('quick-meal');
+      if(!el || !el.value.trim()) return;
+      const parsed = SP.Parse.parseMeal(el.value);
+      if(!parsed.items.length){ UI.toast(parsed.note); return; }
+      const slot = SP.Screens.meals.guessSlot();
+      const meal = M.newMeal(slot);
+      meal.items = parsed.items.map(i => ({ foodId:i.foodId, g:i.g, cert:i.cert, portion:i.portion }));
+      meal.note = el.value.trim();
+      await M.addMeal(U.todayISO(), meal);
+      el.value = '';
+      UI.toast(parsed.items.length + ' gıda eklendi'
+        + (parsed.unmatched.length ? ' · ' + parsed.unmatched.length + ' parça eşleşmedi' : ''));
+      SP.App.render();
+    },
   };
 
   return {
-    id:'vitals',
-    title:'Günlük ölçüm',
+    id:'today',
+    title:'Günlük',
+    /* Bu sayfanın başlığı BUGÜNÜ anlatır. Sıradaki hamle başka bir
+       bölüme aitse (tahlil, sepet) onu buraya başlık yapmak kafa
+       karıştırıyordu: kullanıcı günlük sayfasını açıp tahlil cümlesi
+       okuyordu. Hamle artık düğme olarak duruyor, başlık olarak değil. */
     headline(){
-      const r = SP.Move.readiness(shownDate());
-      if(!r.ok) return 'Bugünün ölçümü girilmedi.';
+      const d = shownDate();
+      const r = SP.Move.readiness(d);
+      if(!r.ok) return 'Bugünün verisi henüz girilmedi.';
+      const m = SP.Calc.minimumDay();
+      if(m.complete) return 'Bugün tamam — toparlanma '
+        + r.band.label.toLocaleLowerCase('tr-TR') + '.';
       return 'Toparlanma ' + r.band.label.toLocaleLowerCase('tr-TR') + '.';
     },
     lede(){
-      const r = SP.Move.readiness(shownDate());
-      if(!r.ok) return 'Uyku süresi tek başına bile anlamlı bir toparlanma skoru üretir. '
-        + 'Girilmeyen ölçüm sıfır sayılmaz; ağırlığı kalan girdilere dağıtılır.';
+      const d = shownDate();
+      const r = SP.Move.readiness(d);
+      if(!r.ok){
+        return 'Uyku süresini yazman bile yeter: tek girdiyle anlamlı bir sonuç '
+          + 'çıkar. Boş bıraktığın alan sıfır sayılmaz, hesaba hiç girmez.';
+      }
+      const m = SP.Calc.minimumDay();
+      const eksik = m.rows.filter(x => !x.ok).map(x => x.label.toLocaleLowerCase('tr-TR'));
       return r.band.order
-        + (r.missing.length ? ' Eksik girdi: ' + r.missing.join(', ') + '.' : '');
+        + (eksik.length ? ' Asgari gün için kalan: ' + eksik.join(', ') + '.' : '');
     },
     stats(){
+      const m = SP.Calc.minimumDay();
       const r = SP.Move.readiness(shownDate());
-      if(!r.ok) return [];
-      return [{ value:r.score, unit:'/100', label:'toparlanma' }]
-        .concat(r.parts.filter(p => p.score != null).slice(0, 3)
-          .map(p => ({ value:Math.round(p.score), label:p.label.toLocaleLowerCase('tr-TR') })));
+      const out = [];
+      if(r.ok) out.push({ value:r.score, unit:'/100', label:'toparlanma' });
+      out.push({ value:m.done + '/' + m.total, label:'asgari gün' });
+      out.push({ value:SP.Calc.streak(), label:'gün seri' });
+      const f = M.openFlags().filter(x => !x.ack).length;
+      if(f) out.push({ value:f, label:'kırmızı bayrak' });
+      return out.slice(0, 4);
     },
     subtitle(){
       const d = shownDate();
       const r = SP.Move.readiness(d);
-      return U.fmtDate(d) + (r.ok ? ' · toparlanma ' + r.score : ' · ölçüm bekliyor');
+      return U.fmtDate(d) + (r.ok ? ' · toparlanma ' + r.score : ' · veri bekliyor');
     },
-    actions(){ return ''; },
+    actions(){
+      const n = SP.Calc.nextAction();
+      return String(html`${K.Button({ label:'Veri gir', tone:'primary', size:'sm', icon:'pulse',
+        act:'day-tab', data:{ 'data-tab':'giris' } })}
+        ${when(!n.calm && n.route !== 'today', () => K.Button({ label:n.action || 'Aç',
+          size:'sm', act:'go', data:{ 'data-route':n.route } }))}`);
+    },
     render, handle,
   };
 })();
@@ -11058,7 +11213,7 @@ SP.Screens.labs = (function(){
               </span>
               <span class="resrow__val num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
               <span class="resrow__bar">${when(r.ref,
-                () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit)))}</span>
+                () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit, { bare:true })))}</span>
               <span class="resrow__status">${K.Badge({ label:r.status.label, tone:r.status.tone })}</span>
               <span class="resrow__trend tiny dim">${when(tr.ok,
                 () => html`${raw(UI.trend(tr.dir))}`)} ${r.at ? U.fmtShort(r.at) : ''}</span>
@@ -12344,7 +12499,7 @@ SP.Screens.kitchen = (function(){
      Kuvvet     vücut ağırlığıyla altı kalıp — kendi içinde ikinci şeritle ayrılır
      Esneklik   mobilite akışları
      Dinlenme   yükün diğer yarısı: indirme haftası, boş gün, uyku
-     İlerleme   yük eğrisi, akut/kronik oran
+     İlerleme   yük eğrisi, son hafta / son ay oranı
 
    Dinlenmenin kendi sayfası olması kasıtlıdır. Antrenman programlarında
    dinlenme çoğu zaman "yapılmayan şey" olarak geçer ve görünmez olur;
@@ -12396,7 +12551,8 @@ SP.Screens.move = (function(){
     return K.Card({
       title:'Günün yük emri', hint:'recovery-order',
       sub:'Toparlanma belirler, istek değil',
-      badge:K.Badge({ label:'yük ×' + U.fmtNet(rx.factor), tone }),
+      badge:K.Badge({ label:rx.factor >= 1 ? 'tam yük'
+        : 'yükün %' + Math.round(rx.factor * 100) + '\u2019i', tone }),
       body:html`
         ${when(r.ok, () => html`<div class="row wrap" style="gap:18px">
           <div class="kpi">
@@ -12477,7 +12633,7 @@ SP.Screens.move = (function(){
       return K.Card({ title:'Toparlanma', hint:'readiness',
         body:html`${K.Notice({ tone:'info', body:r.note })}`,
         foot:K.Button({ label:'Ölçüm gir', size:'sm', tone:'primary',
-          act:'go', data:{ 'data-route':'vitals' } }) });
+          act:'go', data:{ 'data-route':'today' } }) });
     }
     return K.Card({
       title:'Toparlanma', hint:'readiness',
@@ -12627,7 +12783,7 @@ SP.Screens.move = (function(){
 
      Dinlenme sayfası yeni bir kural icat etmez; var olan kuralların
      dinlenmeye bakan yüzünü tek yerde toplar: toparlanma bandı, indirme
-     haftası, akut/kronik oran, uyku ve boş gün sayısı. */
+     haftası, son hafta / son ay oranı, uyku ve boş gün sayısı. */
   function restView(){
     const r = SP.Move.readiness();
     const rx = SP.Move.prescription();
@@ -12667,7 +12823,7 @@ SP.Screens.move = (function(){
                   body:'Tam dinlenme günü de boş değildir: asgari gün geçerli — '
                     + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş ve bir mobilite akışı.' }))}`,
               foot:when(!r.ok, () => K.Button({ label:'Bugünün ölçümünü gir', size:'sm', tone:'primary',
-                act:'go', data:{ 'data-route':'vitals' } })),
+                act:'go', data:{ 'data-route':'today' } })),
             })}
 
             ${K.Card({
@@ -12688,15 +12844,17 @@ SP.Screens.move = (function(){
                 <div class="mt-12">${K.Stat({ label:'Ortalama uyku',
                   value:avgSleep == null ? '—' : U.fmtNum(avgSleep), unit:'saat',
                   note:avgSleep == null ? 'girilmedi' : sleepVals.length + ' gün girildi' })}</div>
-                <div class="mt-12">${K.Stat({ label:'Akut/kronik',
+                <div class="mt-12">${K.Stat({ label:'Son hafta / son ay',
                   value:a.ok ? U.fmtNet(a.ratio) : '—',
                   tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
-                  note:a.ok ? a.zone : 'veri yetersiz' })}</div>` })}
+                  note:a.ok ? (a.zone === 'ok' ? 'alıştığın bandın içinde'
+                    : a.zone === 'high' ? 'alıştığından ağır' : 'alıştığından hafif')
+                    : 'veri yetersiz' })}</div>` })}
 
             ${K.Card({ title:'Dinlenme neden plandır?',
               body:html`<p class="small muted">Yük eğrisi yalnız yapılan işi değil,
                 yapılmayanı da sayar. Üst üste boş geçen günler kondisyonu düşürür;
-                hiç boş geçmeyen haftalar akut/kronik oranı yükseltir. İkisi de
+                hiç boş geçmeyen haftalar son haftayı son aya göre şişirir. İkisi de
                 aynı ölçüde izlenir.</p>` })}
           </div></div>
         </div>
@@ -12720,9 +12878,10 @@ SP.Screens.move = (function(){
           { max:top, height:160, goodAt:0 }))}
         <div class="cols-3 mt-12">
           ${K.Stat({ label:'Bu hafta', value:U.fmtNum(SP.Move.loadWindow(7)), unit:'yük' })}
-          ${K.Stat({ label:'Akut/kronik', value:a.ok ? U.fmtNet(a.ratio) : '—',
+          ${K.Stat({ label:'Son hafta / son ay', value:a.ok ? U.fmtNet(a.ratio) : '—',
             tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
-            note:a.ok ? a.zone : 'veri yetersiz' })}
+            note:a.ok ? (a.zone === 'ok' ? 'normal' : a.zone === 'high' ? 'ağır' : 'hafif')
+              : 'veri yetersiz' })}
           ${K.Stat({ label:'Döngü haftası', value:dl.started ? String(dl.week) : '—',
             note:!dl.started ? 'başlamadı' : dl.due ? 'indirme haftası' : dl.inCycle + '/' + dl.every })}
         </div>
@@ -12950,17 +13109,19 @@ SP.Screens.move = (function(){
       const out = [];
       if(rx.readiness.ok){
         out.push({ value:rx.readiness.score, unit:'/100', label:'toparlanma' });
-        out.push({ value:'×' + U.fmtNet(rx.factor), label:'yük katsayısı' });
+        out.push({ value:rx.factor >= 1 ? '%100' : '%' + Math.round(rx.factor * 100),
+          label:'bugünkü yük' });
       }
       out.push({ value:SP.Move.loadWindow(7), label:'haftalık yük' });
       const a = SP.Move.acwr();
-      if(a.ok) out.push({ value:U.fmtNet(a.ratio), label:'akut/kronik' });
+      if(a.ok) out.push({ value:U.fmtNet(a.ratio), label:'hafta / ay' });
       return out;
     },
     subtitle(){
       const rx = SP.Move.prescription();
       if(!rx.readiness.ok) return 'Ölçüm bekliyor';
-      return rx.readiness.band.label + ' · yük ×' + U.fmtNet(rx.factor);
+      return rx.readiness.band.label + (rx.factor >= 1 ? ' · tam yük'
+        : ' · yükün %' + Math.round(rx.factor * 100) + '\u2019i');
     },
     actions(){
       return String(K.Button({ label:'Seans ekle', icon:'plus', size:'sm', tone:'primary',
@@ -12999,10 +13160,9 @@ SP.Screens.basket = (function(){
   function toolbar(tab){
     const n = ((S.basket && S.basket.items) || []).length;
     const items = TABS.map(t => Object.assign({}, t, t.id === 'sepet' && n ? { count:n } : {}));
-    return K.Toolbar({
-      tabs:K.Subtabs({ items, value:tab, act:'basket-tab', aria:'Sepet görünümü' }),
-      actions:K.Button({ label:'Kalem ekle', icon:'plus', size:'sm', tone:'primary', act:'open-add' }),
-    });
+    /* Eylemler hero'da duruyor; burada tekrar etmek aynı düğmeyi iki kez
+       göstermek olurdu. */
+    return K.Subtabs({ items, value:tab, act:'basket-tab', aria:'Sepet görünümü' });
   }
 
   /* ---------------------------------------------------------------- sepet */
@@ -13246,9 +13406,6 @@ SP.Screens.basket = (function(){
             <p>Bütçe diğer koçların talebinden çıkar: Nesrin gıdayı, Kerem testi,
               Barış ekipmanı ister. Fiyatı bilinmeyen kalem toplama katılmaz.</p>
           </div>
-          <div class="sect__actions">
-            ${K.Button({ label:'Sınır ve ücretler', icon:'sliders', size:'sm', act:'open-limits' })}
-          </div>
         </div>
 
         <div class="grid">
@@ -13270,7 +13427,7 @@ SP.Screens.basket = (function(){
                     ${r.monthly == null ? html`<span class="dim">veri yok</span>`
                       : html`${U.fmtNum(r.monthly)}<small>TL</small>`}
                   </div>
-                  <div class="demand__cert">${P.cert(r.cert)}</div>
+                  <div class="demand__cert">${when(r.monthly != null, () => P.cert(r.cert))}</div>
                   ${when(r.note, () => html`<p class="demand__note">${r.note}</p>`)}
                 </div>`)}`,
               foot:html`
@@ -13820,7 +13977,7 @@ SP.Screens.office = (function(){
         ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
           ['Toparlanma', b.readiness == null ? 'ölçüm yok' : b.readiness + '/100 · ' + b.band],
           ['Yük çarpanı', '×' + U.fmtNet(b.factor)],
-          ['Akut/kronik', b.acwr.ratio != null ? U.fmtNet(b.acwr.ratio) + ' · ' + b.acwr.zone : b.acwr.note],
+          ['Son hafta / son ay', b.acwr.ratio != null ? U.fmtNet(b.acwr.ratio) + ' · ' + b.acwr.zone : b.acwr.note],
           ['Bu hafta yük', U.fmtNum(b.week)],
           ['Bugün', b.doneToday + ' seans · ' + U.fmtNum(b.loadToday) + ' yük'],
           ['Eksik kalıp', b.balance.length ? b.balance.join(', ') : 'yok'],
@@ -14971,31 +15128,28 @@ SP.App = (function(){
      çizilmez: tek sekmelik bir sekme çubuğu gürültüden başka bir şey
      değildir. */
   const SECTIONS = [
-    { id:'testler', num:'01', icon:'flask', label:'Testler',
+    { id:'gunluk', num:'01', icon:'pulse', label:'Günlük',
+      note:'Günün verisini gir, karşılığını gör',
+      views:[{ route:'today', label:'Günlük', icon:'pulse' }] },
+
+    { id:'testler', num:'02', icon:'flask', label:'Testler',
       note:'Hastane testini gir, sonucu izle',
       views:[{ route:'labs', label:'Testler', icon:'flask' }] },
 
-    { id:'besin', num:'02', icon:'meal', label:'Besin',
+    { id:'besin', num:'03', icon:'meal', label:'Besin',
       note:'Bazal metabolizma, hedef ve öğün önerisi',
       views:[
         { route:'meals',   label:'Öğünler', icon:'meal' },
         { route:'kitchen', label:'Mutfak',  icon:'leaf' },
       ] },
 
-    { id:'hareket', num:'03', icon:'dumbbell', label:'Hareket',
+    { id:'hareket', num:'04', icon:'dumbbell', label:'Hareket',
       note:'Kardiyo, kuvvet, esneklik ve dinlenme',
       views:[{ route:'move', label:'Hareket', icon:'dumbbell' }] },
 
-    { id:'finans', num:'04', icon:'wallet', label:'Finans',
+    { id:'finans', num:'05', icon:'wallet', label:'Finans',
       note:'Bu işin bütçesi',
       views:[{ route:'basket', label:'Finans', icon:'wallet' }] },
-
-    { id:'gunluk', num:'05', icon:'today', label:'Günlük',
-      note:'Günün asgari kaydı',
-      views:[
-        { route:'today',  label:'Bugün', icon:'today' },
-        { route:'vitals', label:'Ölçüm', icon:'pulse' },
-      ] },
 
     { id:'ofis', num:'06', icon:'users', label:'Ofis',
       note:'Patron ve dört koç',
@@ -15022,7 +15176,7 @@ SP.App = (function(){
     return m;
   })();
 
-  function sectionOf(route){ return SECTION_OF[route] || SECTIONS[4]; }
+  function sectionOf(route){ return SECTION_OF[route] || SECTIONS[0]; }
 
 
   function screen(){ return SP.Screens[S.route] || SP.Screens.today; }
@@ -15035,7 +15189,7 @@ SP.App = (function(){
       const due = SP.Bio.overdue().length;
       return due ? { text:String(due), quiet:true } : null;
     }
-    if(id === 'vitals'){
+    if(id === 'today'){
       const v = S.vitals[U.todayISO()];
       return (!v || v.sleep == null) ? { text:'!', quiet:true } : null;
     }

@@ -16,28 +16,34 @@
    Tek kart stili. Vurgu için renkli kenarlık kullanılmaz; başlığın yanına
    rozet konur. Gölge bir kenarlık kadar sessizdir — kart sayfadan kopmaz,
    yalnızca zemininden bir kâğıt kalınlığı ayrılır. */
+/* Kart bir kutu degil, bir YUZEYDIR. Golge kaldirildi: on onbes kartin
+   yan yana golge dusurdugu bir sayfa, kagit yigini gibi durur ve
+   ucuzlar. Derinlik yalnizca ince kenarlikla anlatilir. */
 .card{
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:var(--r);
-  padding:16px 18px;
-  box-shadow:var(--shadow);
+  padding:20px 22px;
 }
 .card--flat{ box-shadow:none; background:var(--surface-2); border-color:transparent; }
-.card--pad-sm{ padding:12px 14px; }
+.card--pad-sm{ padding:14px 16px; }
 /* Eski sinif adlari geriye donuk uyum icin durur ama gorsel etkisi yoktur. */
 .card--accent, .card--primary, .card--danger{ border-left:1px solid var(--border); }
 .card__head{
   display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
   flex-wrap:wrap;
-  margin-bottom:12px;
+  margin-bottom:14px;
 }
 .card__head > div:first-child{ min-width:min(100%, 180px); flex:1 1 auto; }
+/* Kart başlığı da serif. Bölüm başlığıyla aynı ailede olması sayfayı
+   tek bir yayın gibi okutur; sans bir kart başlığı serif bir bölüm
+   başlığının altında yabancı durur. */
 .card__head h3{
-  font-size:var(--fs-md); font-weight:700; letter-spacing:-.01em;
+  font-family:var(--font-serif);
+  font-size:18px; font-weight:500; letter-spacing:-.004em; line-height:1.3;
   display:flex; align-items:center; gap:6px;
 }
-.card__head p{ font-size:var(--fs-sm); color:var(--text-3); margin-top:2px; line-height:1.4; }
+.card__head p{ font-size:var(--fs-sm); color:var(--text-3); margin-top:3px; line-height:1.45; }
 .card__foot{
   margin-top:14px; padding-top:12px; border-top:1px solid var(--border);
   display:flex; align-items:center; gap:8px; flex-wrap:wrap;
@@ -50,24 +56,25 @@
 .section-title h2{ font-size:var(--fs-lg); font-weight:800; letter-spacing:-.015em; }
 
 /* ---------- dugme ---------- */
+/* Düğme hap biçiminde ve gölgesiz. Köşeli ve gölgeli düğme bir yönetim
+   panelinin dilidir; hap biçimi arayüzü yumuşatır ve dokunma hedefini
+   büyütür. */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
-  padding:8px 13px;
-  border-radius:10px;
-  border:1px solid var(--border);
+  padding:9px 17px;
+  border-radius:var(--r-pill);
+  border:1px solid var(--border-strong);
   background:var(--surface);
   color:var(--text);
-  font-size:var(--fs-sm); font-weight:650;
+  font-size:13px; font-weight:550; letter-spacing:.005em;
   white-space:nowrap;
-  box-shadow:0 1px 1px rgba(16,18,27,.03);
   transition:background var(--dur) var(--ease), border-color var(--dur) var(--ease),
-             transform var(--dur) var(--ease);
+             color var(--dur) var(--ease);
 }
 .btn svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.9; flex:none; }
-.btn:hover{ background:var(--surface-2); border-color:var(--border-strong); }
+.btn:hover{ background:var(--surface-2); border-color:var(--text-3); }
 .btn--primary{
   background:var(--primary); border-color:var(--primary); color:var(--primary-ink);
-  box-shadow:0 1px 2px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 .btn--primary:hover{ background:var(--primary-hover); border-color:var(--primary-hover); }
 .btn--danger{ color:var(--danger); border-color:color-mix(in srgb, var(--danger) 45%, var(--border)); background:transparent; }
@@ -99,17 +106,19 @@
 .field .hint{ font-size:var(--fs-xs); color:var(--text-3); font-weight:400; }
 .input, .select, .textarea{
   width:100%;
-  padding:8px 11px;
+  padding:10px 13px;
   border-radius:10px;
-  border:1px solid var(--border-strong);
-  background:var(--surface);
+  border:1px solid var(--border);
+  background:var(--surface-hover);
   color:var(--text);
   font-size:var(--fs-base);
-  transition:border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease),
+             box-shadow var(--dur) var(--ease);
 }
+.input:hover, .select:hover, .textarea:hover{ border-color:var(--border-strong); }
 .input::placeholder, .textarea::placeholder{ color:var(--text-3); }
 .input:focus, .select:focus, .textarea:focus{
-  outline:none; border-color:var(--primary);
+  outline:none; background:var(--surface); border-color:var(--primary);
   box-shadow:0 0 0 3px var(--ring);
 }
 .textarea{ resize:vertical; min-height:72px; line-height:1.45; }
@@ -142,11 +151,13 @@
 .seg--primary button.is-on{ background:var(--primary); color:var(--primary-ink); }
 
 /* ---------- rozet / etiket ---------- */
+/* Rozet küçük ve sakin: kalın harf ve dar yükseklik onu bir etikete
+   çevirir, bir düğmeye değil. */
 .badge{
   display:inline-flex; align-items:center; gap:5px;
-  padding:2px 8px; border-radius:var(--r-pill);
-  font-size:var(--fs-xs); font-weight:700; white-space:nowrap;
-  line-height:1.5;
+  padding:3px 9px; border-radius:var(--r-pill);
+  font-size:11.5px; font-weight:600; letter-spacing:.012em;
+  white-space:nowrap; line-height:1.5;
 }
 .badge svg{ width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2.2; }
 .badge--ok{ background:var(--primary-soft); color:var(--primary); }
@@ -310,13 +321,15 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 
    Şerit yatayda kaydırılabilir: dar ekranda sekmeler alt satıra sarmaz,
    çünkü sarılan bir sekme şeridi hangi bölümde olduğunu gizler. */
+/* Sekme şeridi hap biçiminde ve zemini kâğıt rengi. Köşeli bir kutu
+   içinde köşeli sekmeler bir araç çubuğu gibi durur. */
 .subtabs{
-  display:inline-flex; gap:3px;
+  display:inline-flex; gap:2px;
   max-width:100%;
   padding:4px;
   background:var(--surface-2);
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:var(--r-pill);
   overflow-x:auto;
   scrollbar-width:none;
   -webkit-overflow-scrolling:touch;
@@ -325,16 +338,15 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .subtab{
   flex:0 0 auto;
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
-  border:none; background:none; border-radius:9px;
-  padding:8px 16px; white-space:nowrap;
-  font-size:var(--fs-sm); font-weight:650; color:var(--text-2);
+  border:none; background:none; border-radius:var(--r-pill);
+  padding:8px 17px; white-space:nowrap;
+  font-size:13px; font-weight:500; letter-spacing:.005em; color:var(--text-2);
   transition:background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
-.subtab svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.9; flex:none; }
-.subtab:hover{ color:var(--text); background:color-mix(in srgb, var(--surface) 60%, transparent); }
+.subtab svg{ display:none; }
+.subtab:hover{ color:var(--text); }
 .subtab.is-active{
-  background:var(--surface); color:var(--text); font-weight:700;
-  box-shadow:0 1px 2px rgba(16,18,27,.09);
+  background:var(--surface); color:var(--text); font-weight:600;
 }
 .subtab__count{
   min-width:18px; padding:0 5px; border-radius:var(--r-pill);
@@ -1326,41 +1338,44 @@ button.minrow:hover{ background:var(--surface-2); }
    Ölçümler organa göre kutulanmaz; tek düz listede durur. Her satır bir
    düğmedir ve ayrıntıyı açar. Sol kenardaki nokta durumu RENKLE değil,
    yanındaki rozetle birlikte söyler: renk tek başına anlam taşımaz. */
-.reslist{
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  background:var(--surface);
-  overflow:hidden;
-}
+/* Liste bir kutu değil, bir CETVELDIR: çerçevesi yok, satırları ince
+   çizgiyle ayrılır. On beş satırı kutuya almak sayfayı ağırlaştırıyordu. */
+.reslist{ border-top:1px solid var(--border); }
 .resrow{
   width:100%;
   display:grid;
-  grid-template-columns:6px minmax(150px,1.5fr) 118px minmax(120px,1.2fr) 108px 96px;
-  align-items:center; gap:14px;
-  padding:11px 16px 11px 12px;
-  border:none; border-top:1px solid var(--border);
+  grid-template-columns:3px minmax(150px,1.4fr) 128px minmax(110px,1fr) 104px 78px;
+  align-items:center; gap:16px;
+  padding:14px 10px 14px 0;
+  border:none; border-bottom:1px solid var(--border);
   background:none; color:var(--text); text-align:left;
   transition:background var(--dur) var(--ease);
 }
-.reslist .resrow:first-child{ border-top:none; }
 .resrow:hover{ background:var(--surface-hover); }
 
-.resrow__dot{ width:6px; height:22px; border-radius:3px; background:var(--surface-3); }
+.resrow__dot{ width:3px; height:26px; border-radius:2px; background:var(--surface-3); }
 .resrow__dot--ok{ background:var(--primary); }
 .resrow__dot--info{ background:var(--info); }
 .resrow__dot--warn{ background:var(--accent); }
 .resrow__dot--danger{ background:var(--danger); }
 
 .resrow__name{ min-width:0; display:flex; flex-direction:column; gap:2px; }
-.resrow__name b{ font-size:var(--fs-base); font-weight:650; line-height:1.25; }
-.resrow__panel{ font-size:var(--fs-xs); color:var(--text-3); }
+.resrow__name b{ font-size:15px; font-weight:550; line-height:1.3; letter-spacing:-.003em; }
+.resrow__panel{ font-size:11.5px; color:var(--text-3); letter-spacing:.02em; }
 .resrow__val{
-  font-family:var(--font-display); font-size:var(--fs-md); font-weight:700;
-  white-space:nowrap;
+  font-family:var(--font-display); font-size:19px; font-weight:600;
+  letter-spacing:-.02em; white-space:nowrap;
 }
-.resrow__val small{ font-size:var(--fs-xs); font-weight:600; color:var(--text-3); margin-left:3px; }
+.resrow__val small{ font-size:11.5px; font-weight:500; color:var(--text-3); margin-left:4px; }
 .resrow__bar{ min-width:0; }
 .resrow__status{ justify-self:start; }
+/* Listede rozetler yan yana on beş kez tekrarlanır; orada çerçeveli ve
+   ikonlu bir rozet gürültü üretir. Satır içindeki rozet düz metne iner. */
+.resrow__status .badge{
+  background:none; border:none; padding:0;
+  font-size:12px; font-weight:550; letter-spacing:.01em;
+}
+.resrow__status .badge svg{ display:none; }
 .resrow__trend{ justify-self:end; white-space:nowrap; }
 
 @media (max-width:900px){
@@ -1536,3 +1551,17 @@ button.minrow:hover{ background:var(--surface-2); }
   .demand__cert{ grid-column:2; justify-self:end; }
 }
 .minw0{ min-width:0; }
+
+
+/* ================= kayan şeritlerin kenarı =================
+
+   Taşan bir sekme şeridinin sağ kenarında öge yarım kesilir ve bu bir
+   çizim hatası gibi durur. Kenara doğru solan bir maske, kesilmenin
+   kasıtlı olduğunu ve devamının bulunduğunu söyler. */
+.subtabs, .pagenav__in, .navlinks{
+  -webkit-mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+  mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+}
+/* Taşma yoksa maske de gerekmez; `scroll-timeline` yok, bu yüzden ölçüyü
+   şerit kendi genişliğinden anlayamaz. Maske zararsızdır: taşmayan
+   şeritte son 28px zaten boştur. */

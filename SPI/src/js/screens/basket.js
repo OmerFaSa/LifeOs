@@ -26,10 +26,9 @@ SP.Screens.basket = (function(){
   function toolbar(tab){
     const n = ((S.basket && S.basket.items) || []).length;
     const items = TABS.map(t => Object.assign({}, t, t.id === 'sepet' && n ? { count:n } : {}));
-    return K.Toolbar({
-      tabs:K.Subtabs({ items, value:tab, act:'basket-tab', aria:'Sepet görünümü' }),
-      actions:K.Button({ label:'Kalem ekle', icon:'plus', size:'sm', tone:'primary', act:'open-add' }),
-    });
+    /* Eylemler hero'da duruyor; burada tekrar etmek aynı düğmeyi iki kez
+       göstermek olurdu. */
+    return K.Subtabs({ items, value:tab, act:'basket-tab', aria:'Sepet görünümü' });
   }
 
   /* ---------------------------------------------------------------- sepet */
@@ -273,9 +272,6 @@ SP.Screens.basket = (function(){
             <p>Bütçe diğer koçların talebinden çıkar: Nesrin gıdayı, Kerem testi,
               Barış ekipmanı ister. Fiyatı bilinmeyen kalem toplama katılmaz.</p>
           </div>
-          <div class="sect__actions">
-            ${K.Button({ label:'Sınır ve ücretler', icon:'sliders', size:'sm', act:'open-limits' })}
-          </div>
         </div>
 
         <div class="grid">
@@ -297,7 +293,7 @@ SP.Screens.basket = (function(){
                     ${r.monthly == null ? html`<span class="dim">veri yok</span>`
                       : html`${U.fmtNum(r.monthly)}<small>TL</small>`}
                   </div>
-                  <div class="demand__cert">${P.cert(r.cert)}</div>
+                  <div class="demand__cert">${when(r.monthly != null, () => P.cert(r.cert))}</div>
                   ${when(r.note, () => html`<p class="demand__note">${r.note}</p>`)}
                 </div>`)}`,
               foot:html`

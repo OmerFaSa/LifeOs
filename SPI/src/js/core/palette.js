@@ -32,7 +32,7 @@ SP.Palette = (function(){
       hint:'Modül 2', run:() => { SP.App.go('meals'); setTimeout(() => {
         const el = document.getElementById('meal-text'); if(el) el.focus(); }, 160); } });
     out.push({ id:'act:vitals', kind:'Eylem', label:'Günün ölçümünü gir',
-      hint:'Toparlanma', run:() => SP.App.go('vitals') });
+      hint:'Toparlanma', run:() => SP.App.go('today') });
     out.push({ id:'act:session', kind:'Eylem', label:'Antrenman seansı ekle',
       hint:'Modül 3', run:() => { SP.App.go('move'); setTimeout(() => {
         const fn = SP.Screens.move.handle['start-session'];

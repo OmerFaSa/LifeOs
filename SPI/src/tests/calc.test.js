@@ -123,7 +123,7 @@
       withToday('2026-03-01', () => {
         const n = SP.Calc.nextAction();
         expect(n.id).toBe('vitals');
-        expect(n.route).toBe('vitals');
+        expect(n.route).toBe('today');
       });
     });
 

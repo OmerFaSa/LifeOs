@@ -31,7 +31,7 @@ SP.AGENTS = [
     opening:'Tahlillerine referans aralığından değil, kendi geçmişinden bakıyorum. '
           + 'Eğilim tek ölçümden daha çok şey söyler.',
     redirect:'Bu beslenme tarafında; Nesrin\'e bağlıyorum.',
-    owns:['labs', 'vitals'] },
+    owns:['labs', 'today'] },
 
   { id:'nutri', name:'Nesrin', role:'Beslenme ve biyoyararlanım',
     color:'var(--agent-nutri)', initial:'N',

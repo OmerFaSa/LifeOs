@@ -208,20 +208,31 @@ haberin arkasına saklamaz:
 
 ## 3. Bölümler
 
-Yedi bölüm, on üç sayfa. Bölüm alana göre değil, kullanıcının hayatındaki
+Yedi bölüm, on iki sayfa. Bölüm alana göre değil, kullanıcının hayatındaki
 **işe** göre ayrılır ve sırası kasıtlıdır: önce ölçülen, sonra ölçüme göre
 karar verilen, sonra bunların bedeli, sonra günün kaydı, sonra danışma, en
 sonda ayar.
 
 | # | Bölüm | Sayfalar | Ne yapar |
 |---|---|---|---|
-| 01 | Testler | Testler | Kapsamlı bir hastane testi tek seferde girilir; sonuçlar tek düz listede durur |
-| 02 | Besin | Öğünler · Mutfak | Bazal metabolizma, hedef ve tahlile bağlı öğün önerisi |
-| 03 | Hareket | Hareket | Kardiyo, kuvvet, esneklik ve dinlenme ayrı alanlar |
-| 04 | Finans | Finans | Diğer koçların talebinden çıkan bütçe |
-| 05 | Günlük | Bugün · Ölçüm | Günün asgari kaydı |
+| 01 | **Günlük** | Günlük | Günün verisi girilir; karşılığı aynı sayfada görünür |
+| 02 | Testler | Testler | Kapsamlı bir hastane testi tek seferde girilir; sonuçlar tek düz listede durur |
+| 03 | Besin | Öğünler · Mutfak | Bazal metabolizma, hedef ve tahlile bağlı öğün önerisi |
+| 04 | Hareket | Hareket | Kardiyo, kuvvet, esneklik ve dinlenme ayrı alanlar |
+| 05 | Finans | Finans | Diğer koçların talebinden çıkan bütçe |
 | 06 | Ofis | Masalar · Danışma · Toplantı · Analiz | Patron ve dört koç |
 | 07 | Ayarlar | Hane · Rehber | Profil, görünüm, veri, sınırlar |
+
+### Günlük neden tek sayfa ve neden ilk sırada?
+
+Önce iki ekran vardı: «Bugün» özeti ve «Günlük ölçüm» girişi. İkisi de aynı
+günü anlatıyordu; kullanıcı her seferinde hangisine gireceğini düşünmek
+zorunda kalıyordu. Şimdi tek sayfa ve üç sekme (**Giriş** · Özet · Geçmiş).
+
+Giriş varsayılan sekmedir çünkü bu sayfaya girmenin sebebi çoğu zaman okumak
+değil **yazmak**tır. Özet, yazılanın sonucudur; sonuç girdiden önce gelmez.
+Bölüm de ilk sıradadır: sistemin her günkü teması buradan başlar, geri kalan
+altı bölüm buraya yazılanı işler.
 
 Yönlendirme kimlikleri (`labs`, `meals`, `move`, `basket`, …) değişmedi;
 değişen yalnızca kullanıcıya görünen gruplama. Böylece komut paleti, testler
@@ -366,9 +377,9 @@ src/
       llm.js quota.js   model çağrısı ve kota yönetimi
       palette.js        komut paleti
       setup.js          ilk kurulum
-    screens/            13 ekran
+    screens/            12 ekran
     app.js              kabuk: gezinme, görünüm paneli, olay dağıtımı, açılış
-  tests/                394 test, 10 paket
+  tests/                401 test, 10 paket
 tools/
   runtests.js           birim testleri (başsız tarayıcı)
   smoke.js              duman testi: gerçek uygulamayı gezer
@@ -384,7 +395,7 @@ derleyici, ne paket. Playwright yalnızca test betikleri için gerekir.
 ```bash
 python devserver.py          # http://localhost:4183
 python build.py              # dist/spi.html üretir
-node tools/runtests.js       # 394 birim testi
+node tools/runtests.js       # 401 birim testi
 node tools/smoke.js          # gerçek uygulamayı gez
 ```
 

@@ -147,7 +147,7 @@ SP.Move = (function(){
     const span = U.diffDays(first, endISO || U.todayISO());
     if(span < 21){
       return { ok:false, span,
-        note:'Akut/kronik oran için en az 3 haftalık geçmiş gerekir; şu an ' + (span + 1) + ' gün var.' };
+        note:'Son haftayı son aya kıyaslamak için en az 3 haftalık geçmiş gerekir; şu an ' + (span + 1) + ' gün var.' };
     }
     const acute = loadWindow(7, endISO) / 7;
     const chronic = loadWindow(28, endISO) / 28;

@@ -134,7 +134,7 @@ SP.Screens.labs = (function(){
               </span>
               <span class="resrow__val num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
               <span class="resrow__bar">${when(r.ref,
-                () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit)))}</span>
+                () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit, { bare:true })))}</span>
               <span class="resrow__status">${K.Badge({ label:r.status.label, tone:r.status.tone })}</span>
               <span class="resrow__trend tiny dim">${when(tr.ok,
                 () => html`${raw(UI.trend(tr.dir))}`)} ${r.at ? U.fmtShort(r.at) : ''}</span>

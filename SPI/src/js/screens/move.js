@@ -9,7 +9,7 @@
      Kuvvet     vücut ağırlığıyla altı kalıp — kendi içinde ikinci şeritle ayrılır
      Esneklik   mobilite akışları
      Dinlenme   yükün diğer yarısı: indirme haftası, boş gün, uyku
-     İlerleme   yük eğrisi, akut/kronik oran
+     İlerleme   yük eğrisi, son hafta / son ay oranı
 
    Dinlenmenin kendi sayfası olması kasıtlıdır. Antrenman programlarında
    dinlenme çoğu zaman "yapılmayan şey" olarak geçer ve görünmez olur;
@@ -61,7 +61,8 @@ SP.Screens.move = (function(){
     return K.Card({
       title:'Günün yük emri', hint:'recovery-order',
       sub:'Toparlanma belirler, istek değil',
-      badge:K.Badge({ label:'yük ×' + U.fmtNet(rx.factor), tone }),
+      badge:K.Badge({ label:rx.factor >= 1 ? 'tam yük'
+        : 'yükün %' + Math.round(rx.factor * 100) + '\u2019i', tone }),
       body:html`
         ${when(r.ok, () => html`<div class="row wrap" style="gap:18px">
           <div class="kpi">
@@ -142,7 +143,7 @@ SP.Screens.move = (function(){
       return K.Card({ title:'Toparlanma', hint:'readiness',
         body:html`${K.Notice({ tone:'info', body:r.note })}`,
         foot:K.Button({ label:'Ölçüm gir', size:'sm', tone:'primary',
-          act:'go', data:{ 'data-route':'vitals' } }) });
+          act:'go', data:{ 'data-route':'today' } }) });
     }
     return K.Card({
       title:'Toparlanma', hint:'readiness',
@@ -292,7 +293,7 @@ SP.Screens.move = (function(){
 
      Dinlenme sayfası yeni bir kural icat etmez; var olan kuralların
      dinlenmeye bakan yüzünü tek yerde toplar: toparlanma bandı, indirme
-     haftası, akut/kronik oran, uyku ve boş gün sayısı. */
+     haftası, son hafta / son ay oranı, uyku ve boş gün sayısı. */
   function restView(){
     const r = SP.Move.readiness();
     const rx = SP.Move.prescription();
@@ -332,7 +333,7 @@ SP.Screens.move = (function(){
                   body:'Tam dinlenme günü de boş değildir: asgari gün geçerli — '
                     + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş ve bir mobilite akışı.' }))}`,
               foot:when(!r.ok, () => K.Button({ label:'Bugünün ölçümünü gir', size:'sm', tone:'primary',
-                act:'go', data:{ 'data-route':'vitals' } })),
+                act:'go', data:{ 'data-route':'today' } })),
             })}
 
             ${K.Card({
@@ -353,15 +354,17 @@ SP.Screens.move = (function(){
                 <div class="mt-12">${K.Stat({ label:'Ortalama uyku',
                   value:avgSleep == null ? '—' : U.fmtNum(avgSleep), unit:'saat',
                   note:avgSleep == null ? 'girilmedi' : sleepVals.length + ' gün girildi' })}</div>
-                <div class="mt-12">${K.Stat({ label:'Akut/kronik',
+                <div class="mt-12">${K.Stat({ label:'Son hafta / son ay',
                   value:a.ok ? U.fmtNet(a.ratio) : '—',
                   tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
-                  note:a.ok ? a.zone : 'veri yetersiz' })}</div>` })}
+                  note:a.ok ? (a.zone === 'ok' ? 'alıştığın bandın içinde'
+                    : a.zone === 'high' ? 'alıştığından ağır' : 'alıştığından hafif')
+                    : 'veri yetersiz' })}</div>` })}
 
             ${K.Card({ title:'Dinlenme neden plandır?',
               body:html`<p class="small muted">Yük eğrisi yalnız yapılan işi değil,
                 yapılmayanı da sayar. Üst üste boş geçen günler kondisyonu düşürür;
-                hiç boş geçmeyen haftalar akut/kronik oranı yükseltir. İkisi de
+                hiç boş geçmeyen haftalar son haftayı son aya göre şişirir. İkisi de
                 aynı ölçüde izlenir.</p>` })}
           </div></div>
         </div>
@@ -385,9 +388,10 @@ SP.Screens.move = (function(){
           { max:top, height:160, goodAt:0 }))}
         <div class="cols-3 mt-12">
           ${K.Stat({ label:'Bu hafta', value:U.fmtNum(SP.Move.loadWindow(7)), unit:'yük' })}
-          ${K.Stat({ label:'Akut/kronik', value:a.ok ? U.fmtNet(a.ratio) : '—',
+          ${K.Stat({ label:'Son hafta / son ay', value:a.ok ? U.fmtNet(a.ratio) : '—',
             tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
-            note:a.ok ? a.zone : 'veri yetersiz' })}
+            note:a.ok ? (a.zone === 'ok' ? 'normal' : a.zone === 'high' ? 'ağır' : 'hafif')
+              : 'veri yetersiz' })}
           ${K.Stat({ label:'Döngü haftası', value:dl.started ? String(dl.week) : '—',
             note:!dl.started ? 'başlamadı' : dl.due ? 'indirme haftası' : dl.inCycle + '/' + dl.every })}
         </div>
@@ -615,17 +619,19 @@ SP.Screens.move = (function(){
       const out = [];
       if(rx.readiness.ok){
         out.push({ value:rx.readiness.score, unit:'/100', label:'toparlanma' });
-        out.push({ value:'×' + U.fmtNet(rx.factor), label:'yük katsayısı' });
+        out.push({ value:rx.factor >= 1 ? '%100' : '%' + Math.round(rx.factor * 100),
+          label:'bugünkü yük' });
       }
       out.push({ value:SP.Move.loadWindow(7), label:'haftalık yük' });
       const a = SP.Move.acwr();
-      if(a.ok) out.push({ value:U.fmtNet(a.ratio), label:'akut/kronik' });
+      if(a.ok) out.push({ value:U.fmtNet(a.ratio), label:'hafta / ay' });
       return out;
     },
     subtitle(){
       const rx = SP.Move.prescription();
       if(!rx.readiness.ok) return 'Ölçüm bekliyor';
-      return rx.readiness.band.label + ' · yük ×' + U.fmtNet(rx.factor);
+      return rx.readiness.band.label + (rx.factor >= 1 ? ' · tam yük'
+        : ' · yükün %' + Math.round(rx.factor * 100) + '\u2019i');
     },
     actions(){
       return String(K.Button({ label:'Seans ekle', icon:'plus', size:'sm', tone:'primary',

@@ -180,7 +180,7 @@
   });
 
   describe('Ekranlar — sözleşme', () => {
-    const ids = ['today', 'vitals', 'labs', 'meals', 'kitchen', 'move', 'basket',
+    const ids = ['today', 'labs', 'meals', 'kitchen', 'move', 'basket',
       'analytics', 'office', 'team', 'meeting', 'family', 'guide'];
 
     it('bütün ekranlar kayıtlı', () => {

@@ -189,9 +189,11 @@ SP.READINESS_BANDS = [
 SP.LOAD_RULES = {
   acwr:{
     low:0.8, high:1.5,
-    lowNote:'Son hafta alışkın olduğundan hafif geçti. Kondisyon korunmuyor.',
-    highNote:'Son hafta alıştığından belirgin ağır geçti. Bu bölgede sakatlanma riski yükselir.',
-    okNote:'Yük, alıştığın bandın içinde.',
+    lowNote:'Son hafta, son bir ayın ortalamasına göre hafif geçti. '
+      + 'Kondisyon korunmuyor.',
+    highNote:'Son hafta, son bir ayın ortalamasına göre belirgin ağır geçti. '
+      + 'Bu bölgede sakatlanma riski yükselir.',
+    okNote:'Son hafta, son bir ayda alıştığın bandın içinde.',
   },
   weeklyGrowth:{
     max:0.10,

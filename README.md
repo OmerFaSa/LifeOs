@@ -46,7 +46,7 @@ node tools/runtests.js       # birim testleri
 SPİ ayrıca gerçek uygulamayı gezen bir duman testi taşır:
 
 ```bash
-node tools/smoke.js          # 13 ekranı gezer, akışları dener
+node tools/smoke.js          # 12 ekranı gezer, akışları dener
 ```
 
 ## Klinik sınır

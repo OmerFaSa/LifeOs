@@ -13,34 +13,42 @@
 
 :root{
   /* ---- yüzeyler ---- */
-  --bg:#F5F6F8;
+  /* Notrler saf gri degil, cok hafif sicak. Saf gri ekranda klinik ve
+     ucuz durur; bir derece sicaklik ayni duzeni pahali gosterir. */
+  /* Zemin kâğıt gibi: hafif sıcak, kırık beyaz. Saf gri bir zemin
+     ekranda klinik ve ucuz durur; bir derece sıcaklık aynı düzeni
+     pahalı gösterir. */
+  --bg:#F7F5F1;
   --surface:#FFFFFF;
-  --surface-2:#F0F1F5;
-  --surface-3:#E7E9EF;
-  --surface-hover:#F7F8FA;
+  --surface-2:#F2EFE9;
+  --surface-3:#E7E2D9;
+  --surface-hover:#FBF9F6;
   --sidebar:#FFFFFF;
-  --sidebar-active:#E9EAF7;
+  --sidebar-active:#E3EBE6;
 
   /* ---- metin ---- */
-  --text:#14161D;
-  --text-2:#575D6C;   /* AA: --bg üzerinde 6.5:1 */
-  --text-3:#6B7180;   /* AA: 4.6:1 — küçük ikincil metin */
+  --text:#191815;
+  --text-2:#54524C;   /* AA: --bg üzerinde 7.1:1 */
+  --text-3:#6E6B63;   /* AA: 4.9:1 — küçük ikincil metin */
 
-  /* ---- anlam renkleri (dört tane; gerisi nötr) ---- */
-  --primary:#3F3FA0;       /* AA: beyaz üzerinde 8.5:1 */
-  --primary-hover:#34348A;
-  --primary-soft:#E9EAF7;
+  /* ---- anlam renkleri (dört tane; gerisi nötr) ----
+     Ana renk derin yeşil: sağlıkla ilişkili, doygun ama bağırmayan bir
+     renk. Mavi-mor bir arayüz her yönetim panelinin varsayılanıdır ve
+     kimlik taşımaz. */
+  --primary:#1F4E3D;       /* AA: beyaz üzerinde 8.9:1 */
+  --primary-hover:#173E30;
+  --primary-soft:#E4EBE7;
   --primary-ink:#FFFFFF;
-  --accent:#96640F;        /* AA: beyaz üzerinde 5.0:1 */
-  --accent-soft:#F8EFDE;
-  --danger:#A63838;        /* AA: beyaz üzerinde 5.7:1 */
-  --danger-soft:#FAE7E7;
-  --info:#3A5871;          /* AA: beyaz üzerinde 7.5:1 */
-  --info-soft:#E8EDF2;
+  --accent:#8A5A18;        /* AA: beyaz üzerinde 5.7:1 */
+  --accent-soft:#F6EDE0;
+  --danger:#9B3327;        /* AA: beyaz üzerinde 6.6:1 */
+  --danger-soft:#F8E7E3;
+  --info:#3A5468;          /* AA: beyaz üzerinde 8.0:1 */
+  --info-soft:#E9EDF0;
 
   /* ---- çizgi ---- */
-  --border:#E4E6EC;
-  --border-strong:#CBCFDA;
+  --border:#E7E2D9;
+  --border-strong:#CDC6B8;
 
   /* ---- odak halkası: her temada görünür kalır ---- */
   --ring:color-mix(in srgb, var(--primary) 45%, transparent);
@@ -49,21 +57,21 @@
      Kimlik taşır, durum değil: protein/yağ/karbonhidrat şeridinde hangi
      dilimin ne olduğunu söyler. Şeridin yanında her zaman yazılı etiket durur,
      çünkü renk tek başına anlam taşımaz. */
-  --macro-protein:#3F3FA0;
-  --macro-fat:#96640F;
-  --macro-carb:#3A5871;
+  --macro-protein:#1F4E3D;
+  --macro-fat:#8A5A18;
+  --macro-carb:#3A5468;
 
   /* ---- ofis ajanları: beş ayırt edici kimlik rengi ----
      Avatar zemini olarak kullanılır, harf --agent-ink ile yazılır.
      Ölçülen kontrast (beyaz harf üzerinde): 5,3–8,9:1 — hepsi AA. */
-  --agent-patron:#3F3FA0;
+  --agent-patron:#1F4E3D;
   --agent-lab:#2F5D7C;
   --agent-nutri:#8A5A12;
-  --agent-move:#2C6B52;
+  --agent-move:#4A6B2C;
   --agent-money:#8C3B62;
   --agent-ink:#FFFFFF;
-  --c-grid:#E4E6EC;
-  --c-band:#E0E1F3;
+  --c-grid:#E7E2D9;
+  --c-band:#E0E9E4;
 
   /* ---- gölge: iki seviye, ikisi de yumuşak ----
      Kart gölgesi bir kenarlık kadar sessizdir; derinliği kenarlık değil
@@ -80,17 +88,26 @@
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
   --sp-6:24px; --sp-8:32px; --sp-10:40px;
 
-  /* ---- tipografi: 2 aile, 6 adım + sayı adımı ---- */
+  /* ---- tipografi: 3 aile, her birinin tek işi var ----
+
+     serif    yalnız BAŞLIK (hero h1, bölüm h2). Editoryal ağırlık verir
+              ve arayüzü bir panelden çok bir yayına benzetir.
+     display  yalnız SAYI ve kart başlığı. Tabular rakamlar hizalanır.
+     body     geri kalan her şey.
+
+     Kural: serif hiçbir yerde sayı taşımaz, display hiçbir yerde
+     paragraf taşımaz. Karıştırıldığında ikisi de amatörleşir. */
+  --font-serif:'Newsreader', Georgia, 'Times New Roman', serif;
   --font-display:'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body:'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --fs-xs:11.5px;
   --fs-sm:12.75px;
   --fs-base:14px;
   --fs-md:15.5px;
-  --fs-lg:18.5px;
+  --fs-lg:19px;
   --fs-xl:24px;
   --fs-hero:30px;     /* yalnız KPI sayısı */
-  --fs-display:44px;  /* yalnız bölüm başlığı (hero) */
+  --fs-display:40px;  /* yalnız bölüm başlığı (hero) */
 
   /* ---- hareket: tek easing, iki süre ---- */
   --ease:cubic-bezier(.2,.7,.3,1);
@@ -111,44 +128,44 @@
 
   /* ================= KOYU PALET — tek tanım =================
      Buradaki değerler yalnızca aşağıdaki iki blokta kullanılır. */
-  --d-bg:#0D0F14;
-  --d-surface:#15171D;
-  --d-surface-2:#1B1E25;
-  --d-surface-3:#23262F;
-  --d-surface-hover:#1A1D24;
-  --d-sidebar:#111319;
-  --d-sidebar-active:#242545;
+  --d-bg:#12120F;
+  --d-surface:#1A1A16;
+  --d-surface-2:#21211C;
+  --d-surface-3:#2A2A24;
+  --d-surface-hover:#1F1F1A;
+  --d-sidebar:#161612;
+  --d-sidebar-active:#1E2C25;
 
-  --d-text:#ECEEF4;
-  --d-text-2:#A9AEBD;
-  --d-text-3:#878C9C;
+  --d-text:#EFEDE7;
+  --d-text-2:#ACA89E;
+  --d-text-3:#8B877D;
 
-  --d-primary:#9EA0EE;
-  --d-primary-hover:#B2B4F5;
-  --d-primary-soft:#212244;
-  --d-primary-ink:#0C0D14;
-  --d-accent:#E0B46E;
-  --d-accent-soft:#2C2517;
-  --d-danger:#EA8C8C;
-  --d-danger-soft:#2E1C1C;
-  --d-info:#8DAECA;
-  --d-info-soft:#182129;
+  --d-primary:#7FBFA0;
+  --d-primary-hover:#95CFB2;
+  --d-primary-soft:#1B2B23;
+  --d-primary-ink:#0E1611;
+  --d-accent:#D6A961;
+  --d-accent-soft:#2B2415;
+  --d-danger:#E28C7C;
+  --d-danger-soft:#2E1B17;
+  --d-info:#8FADC2;
+  --d-info-soft:#1A2126;
 
-  --d-border:#252932;
-  --d-border-strong:#343945;
+  --d-border:#2B2B25;
+  --d-border-strong:#3B3B33;
 
-  --d-macro-protein:#9EA0EE;
-  --d-macro-fat:#E0B46E;
-  --d-macro-carb:#8DAECA;
+  --d-macro-protein:#7FBFA0;
+  --d-macro-fat:#D6A961;
+  --d-macro-carb:#8FADC2;
 
-  --d-agent-patron:#9EA0EE;
-  --d-agent-lab:#8DAECA;
-  --d-agent-nutri:#E0B46E;
-  --d-agent-move:#8FD0B0;
+  --d-agent-patron:#7FBFA0;
+  --d-agent-lab:#8FADC2;
+  --d-agent-nutri:#D6A961;
+  --d-agent-move:#B6CE7E;
   --d-agent-money:#DE9CC0;
-  --d-agent-ink:#0C0D14;
-  --d-c-grid:#242832;
-  --d-c-band:#242545;
+  --d-agent-ink:#0E1611;
+  --d-c-grid:#2B2B25;
+  --d-c-band:#1E2C25;
 
   --d-shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
   --d-shadow-lg:0 22px 60px rgba(0,0,0,.62);

@@ -22,31 +22,28 @@ SP.App = (function(){
      çizilmez: tek sekmelik bir sekme çubuğu gürültüden başka bir şey
      değildir. */
   const SECTIONS = [
-    { id:'testler', num:'01', icon:'flask', label:'Testler',
+    { id:'gunluk', num:'01', icon:'pulse', label:'Günlük',
+      note:'Günün verisini gir, karşılığını gör',
+      views:[{ route:'today', label:'Günlük', icon:'pulse' }] },
+
+    { id:'testler', num:'02', icon:'flask', label:'Testler',
       note:'Hastane testini gir, sonucu izle',
       views:[{ route:'labs', label:'Testler', icon:'flask' }] },
 
-    { id:'besin', num:'02', icon:'meal', label:'Besin',
+    { id:'besin', num:'03', icon:'meal', label:'Besin',
       note:'Bazal metabolizma, hedef ve öğün önerisi',
       views:[
         { route:'meals',   label:'Öğünler', icon:'meal' },
         { route:'kitchen', label:'Mutfak',  icon:'leaf' },
       ] },
 
-    { id:'hareket', num:'03', icon:'dumbbell', label:'Hareket',
+    { id:'hareket', num:'04', icon:'dumbbell', label:'Hareket',
       note:'Kardiyo, kuvvet, esneklik ve dinlenme',
       views:[{ route:'move', label:'Hareket', icon:'dumbbell' }] },
 
-    { id:'finans', num:'04', icon:'wallet', label:'Finans',
+    { id:'finans', num:'05', icon:'wallet', label:'Finans',
       note:'Bu işin bütçesi',
       views:[{ route:'basket', label:'Finans', icon:'wallet' }] },
-
-    { id:'gunluk', num:'05', icon:'today', label:'Günlük',
-      note:'Günün asgari kaydı',
-      views:[
-        { route:'today',  label:'Bugün', icon:'today' },
-        { route:'vitals', label:'Ölçüm', icon:'pulse' },
-      ] },
 
     { id:'ofis', num:'06', icon:'users', label:'Ofis',
       note:'Patron ve dört koç',
@@ -73,7 +70,7 @@ SP.App = (function(){
     return m;
   })();
 
-  function sectionOf(route){ return SECTION_OF[route] || SECTIONS[4]; }
+  function sectionOf(route){ return SECTION_OF[route] || SECTIONS[0]; }
 
 
   function screen(){ return SP.Screens[S.route] || SP.Screens.today; }
@@ -86,7 +83,7 @@ SP.App = (function(){
       const due = SP.Bio.overdue().length;
       return due ? { text:String(due), quiet:true } : null;
     }
-    if(id === 'vitals'){
+    if(id === 'today'){
       const v = S.vitals[U.todayISO()];
       return (!v || v.sleep == null) ? { text:'!', quiet:true } : null;
     }

@@ -15,7 +15,18 @@ yapılardır: referans aralığı çubuğu, öğün kartı, porsiyon paylaştır
 | Eksen | Nitelik | Değerler |
 |---|---|---|
 | Tema | `data-theme` | açık · koyu · sistem (varsayılan) |
-| Palet | `data-palette` | indigo (varsayılan) · grafit · okyanus · mor · bordo · orman |
+| Palet | `data-palette` | **kâğıt** (varsayılan) · indigo · grafit · okyanus · mor · bordo · orman |
+
+**Varsayılan palet «kâğıt»tır:** sıcak kırık beyaz bir zemin üzerinde derin
+yeşil. İki tercih de kasıtlı:
+
+- Zemin saf gri değildir. Saf gri bir zemin ekranda klinik ve ucuz durur;
+  bir derece sıcaklık aynı düzeni pahalı gösterir.
+- Ana renk mavi-mor değildir. Mavi-mor her yönetim panelinin varsayılanıdır
+  ve kimlik taşımaz. Derin yeşil sağlıkla ilişkilidir, doygundur ama
+  bağırmaz.
+
+Eski indigo palet kaybolmadı; seçilebilir bir palet olarak duruyor.
 
 Dört anlam rengi, gerisi nötr.
 
@@ -36,8 +47,8 @@ iki yere yazılmaz.
 
 **Renk tek başına anlam taşımaz.** Bu kural sağlık verisinde ihmal edilemez:
 bir tahlil değeri asla yalnızca renkle «kötü» gösterilmez. Durum her zaman
-rozet ve metinle birlikte verilir; referans çubuğunun yanında daima sayı,
-birim ve gerekçe durur.
+metinle birlikte verilir; referans çubuğunun yanında daima sayı, birim ve
+gerekçe durur.
 
 İki renk grubu **kimlik** taşır, durum değil:
 
@@ -48,25 +59,39 @@ birim ve gerekçe durur.
 
 ## Tipografi
 
-İki aile: **Manrope** (başlık, sayı) · **Inter** (gövde, veri).
-Ağırlıklar: 400 / 600 / 700 / 800.
+**Üç aile, her birinin tek işi var.** Karıştırıldıklarında üçü de amatörleşir.
+
+| Aile | Nerede | Kural |
+|---|---|---|
+| `--font-serif` (Newsreader) | Hero başlığı, bölüm başlığı, kart başlığı | Hiçbir yerde **sayı** taşımaz |
+| `--font-display` (Manrope) | Sayı, KPI, ölçüm değeri | Hiçbir yerde **paragraf** taşımaz |
+| `--font-body` (Inter) | Geri kalan her şey | — |
+
+Serif başlıklar kasıtlıdır: bir yönetim panelinin dili kalın sans başlıktır;
+editoryal bir serif aynı içeriği bir yayın gibi okutur.
 
 | Adım | Token | Kullanım |
 |---|---|---|
 | xs | 11.5px | Etiket, kesinlik rozeti, yardımcı bilgi |
 | sm | 12.75px | İkincil metin, tablo hücresi |
 | base | 14px | Gövde, form |
-| md | 15.5px | Kart başlığı (h3), ölçüm değeri |
-| lg | 18.5px | Bölüm başlığı (h2) |
-| xl | 24px | Ekran başlığı (h1) |
+| md | 15.5px | Ölçüm değeri |
+| lg | 19px | — |
+| xl | 24px | — |
 | hero | 30px | Yalnız KPI sayısı |
+| display | 40px | Yalnız hero başlığı (serif) |
 
-Ölçek bilinçli olarak dardır. Altı adım arasındaki fark küçüktür; hiyerarşi
-punto sıçratarak değil **ağırlık, renk ve boşlukla** kurulur. Bir ekranda en
-fazla bir `hero` sayı bulunur.
+Ölçek bilinçli olarak dardır. Hiyerarşi punto sıçratarak değil **aile,
+ağırlık, renk ve boşlukla** kurulur. Bir ekranda en fazla bir `display`
+başlık ve bir `hero` sayı bulunur.
 
 Sayısal veride `.num` (tabular-nums) zorunlu. Ölçüm değerleri, gramajlar ve
 fiyatlar hizalanmadan okunamaz.
+
+**Gezinmede ikon yoktur.** Yedi ikon + yedi etiket + dört araç ikonu aynı
+satırda yarışınca hiçbiri okunmaz. Üst gezinme ve sayfa sekmeleri yalnız
+metindir; ikon, anlamı metnin taşımadığı yerlerde kalır (araç düğmeleri,
+boş durum, uyarı).
 
 ## Ölçü
 
@@ -138,17 +163,24 @@ gövdede onu tekrarlayan kart bulunmaz.
 
 ## Gezinme
 
-Yedi bölüm, on üç sayfa. Bölüm alana göre değil **işe** göre ayrılır.
+Yedi bölüm, on iki sayfa. Bölüm alana göre değil **işe** göre ayrılır.
 
 | # | Bölüm | Sayfalar |
 |---|---|---|
-| 01 | Testler | Testler |
-| 02 | Besin | Öğünler · Mutfak |
-| 03 | Hareket | Hareket |
-| 04 | Finans | Finans |
-| 05 | Günlük | Bugün · Ölçüm |
+| 01 | **Günlük** | Günlük |
+| 02 | Testler | Testler |
+| 03 | Besin | Öğünler · Mutfak |
+| 04 | Hareket | Hareket |
+| 05 | Finans | Finans |
 | 06 | Ofis | Masalar · Danışma · Toplantı · Analiz |
 | 07 | Ayarlar | Hane · Rehber |
+
+**Günlük ilk sıradadır ve tek sayfadır.** Önce «Bugün» (özet) ve «Günlük
+ölçüm» (giriş) diye iki ayrı ekran vardı; ikisi de aynı günü anlatıyor,
+kullanıcı hangisine gireceğini düşünmek zorunda kalıyordu. Şimdi tek sayfa,
+üç sekme — ve **Giriş varsayılan sekmedir**: bu sayfaya girmenin sebebi çoğu
+zaman okumak değil yazmaktır. Özet, yazılanın sonucudur; sonuç girdiden önce
+gelmez.
 
 Üst çubukta etkin bölümün altında ince bir çizgi durur — hap değil, site
 gezinmesi dili. 860px altında bölümler tam ekran menüye iner (`navsheet`);
@@ -164,6 +196,7 @@ boş. Alt çizgi kullanılmaz — dokunmatikte hedef alanı belirsizdir.
 
 | Ekran | Sekmeler |
 |---|---|
+| Günlük | **Giriş** · Özet · Geçmiş |
 | Testler | Sonuçlar · Test gir · Geçmiş · Eğilim |
 | Öğünler | Öğünler · Öneri · Besin değeri |
 | Hareket | Bugün · Kardiyo · Kuvvet · Esneklik · Dinlenme · İlerleme |
@@ -213,6 +246,11 @@ düzen: `C.Grid` `C.Span` `C.Stack` `C.Cols` `C.Row` `C.SectionTitle`
 - `C.PickCard` — seçilebilir kart (`on` niteliğiyle dolu görünür). Seans
   şablonu ve egzersiz seçimi bu kartlarla yapılır; onay kutusu kullanılmaz.
 
+Düğme **hap** biçiminde ve gölgesizdir; köşeli ve gölgeli düğme bir yönetim
+panelinin dilidir. Rozet küçük ve sakindir. Uzun bir listede rozet düz metne
+iner (`.resrow__status .badge`): aynı rozet on beş kez tekrarlandığında
+çerçevesi gürültü üretir.
+
 Site düzenine ait sınıflar (bileşen değil, kabuk): `wrapc` (ortalayıcı),
 `sitenav` / `navlink` / `navtools`, `navsheet` (mobil bölüm menüsü),
 `hero` / `herostat`, `pagenav` / `pagelink`, `sect` / `sect__h`.
@@ -241,6 +279,11 @@ girişi), `chain` (bazal metabolizmadan hedefe giden zincir), `link`
 `meetturn` (toplantı turu), `msg` (danışma sohbeti).
 
 ## Kart kuralı
+
+**Kart bir kutu değil, bir yüzeydir.** Gölge kaldırıldı: on beş kartın yan
+yana gölge düşürdüğü bir sayfa kâğıt yığını gibi durur ve ucuzlar. Derinlik
+yalnız ince kenarlıkla anlatılır. Uzun listeler kart içine hiç alınmaz —
+`reslist` gibi yapılar çerçevesizdir, satırları ince çizgiyle ayrılır.
 
 Tek kart stili vardır. Vurgu için renkli sol kenarlık **kullanılmaz**; başlık
 yanında rozet kullanılır. Kart içinde en fazla üç bilgi katmanı.

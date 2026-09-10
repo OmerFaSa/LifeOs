@@ -87,7 +87,7 @@ SP.Screens.office = (function(){
         ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
           ['Toparlanma', b.readiness == null ? 'ölçüm yok' : b.readiness + '/100 · ' + b.band],
           ['Yük çarpanı', '×' + U.fmtNet(b.factor)],
-          ['Akut/kronik', b.acwr.ratio != null ? U.fmtNet(b.acwr.ratio) + ' · ' + b.acwr.zone : b.acwr.note],
+          ['Son hafta / son ay', b.acwr.ratio != null ? U.fmtNet(b.acwr.ratio) + ' · ' + b.acwr.zone : b.acwr.note],
           ['Bu hafta yük', U.fmtNum(b.week)],
           ['Bugün', b.doneToday + ' seans · ' + U.fmtNum(b.loadToday) + ' yük'],
           ['Eksik kalıp', b.balance.length ? b.balance.join(', ') : 'yok'],

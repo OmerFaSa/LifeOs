@@ -55,6 +55,7 @@ SP.S = {
 
   ui:{
     railOpen:false,
+    dayTab:'giris',        // giris | ozet | gecmis
     labTab:'sonuc',        // sonuc | giris | gecmis | trend
     labPanel:'vital',      // acik panel id'si
     labQuery:'',           // sonuc ve giris listesindeki arama
