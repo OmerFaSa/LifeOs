@@ -342,6 +342,7 @@ engellendiği yazılır.
 src/
   index.html            yükleme sırası: veri → çekirdek → ekranlar
   MIMARI.md             bu belge
+  YOLHARITASI.md        sonraki iki plan: veri girişi ve tasarım
   OFIS.md               beş ajanın çalışma düzeni
   STIL.md               tasarım sistemi
   css/
@@ -412,6 +413,10 @@ Spesifikasyondaki MVP aşamalarının karşılığı:
 | 2 · Tahlil ayrıştırma + öğün girişi | **Tamam.** Metin yapıştırma ve serbest metin öğün; foto/ses kanalı açık değil |
 | 3 · Finans katmanı ve toparlanma | **Tamam** (fiyat kullanıcı girişiyle; canlı market taraması yok) |
 | 4 · Patron ajan ve haftalık konsolide rapor | **Tamam.** Ofis, toplantı, çapraz çıkarım ve sohbet |
+
+Bundan sonrası için ayrı bir belge var: **`src/YOLHARITASI.md`** — veri
+girişini kolaylaştırma (belge, fotoğraf, dikte) ve tasarımı derinleştirme
+(düzen, görsel kalite, yeni mekanikler) planları.
 
 **Henüz olmayan ve bilinçli olarak ertelenen:**
 
