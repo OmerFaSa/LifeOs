@@ -187,7 +187,9 @@ SP.Office = (function(){
           + ' (' + a.statusLabel + '). ' + (a.verdict || ''));
       }
       if(d.overdue.length){
-        lines.push(d.overdue[0].panel + ' paneli ' + d.overdue[0].note.toLocaleLowerCase('tr-TR'));
+        const pn = d.overdue[0].panel;
+        lines.push((/paneli$/i.test(pn) ? pn : pn + ' paneli') + ' '
+          + d.overdue[0].note.toLocaleLowerCase('tr-TR'));
       }
       if(!d.attention.length && !d.flags.length) lines.push('Dikkat isteyen bir ölçüm yok.');
       return lines.join(' ');
@@ -351,7 +353,12 @@ SP.Office = (function(){
     };
 
     SP.Model.openFlags().forEach(f => add('lab', 'flag', f.label + ' — ' + f.detail));
-    SP.Bio.overdue().forEach(o => add('lab', 'gap', o.panel.name + ' paneli ' + o.note.toLocaleLowerCase('tr-TR')));
+    /* Panel adi zaten "Demir paneli" gibi olabilir; "paneli" iki kez yazilmaz. */
+    SP.Bio.overdue().forEach(o => {
+      const name = o.panel.name;
+      const label = /paneli$/i.test(name) ? name : name + ' paneli';
+      add('lab', 'gap', label + ' ' + o.note.toLocaleLowerCase('tr-TR'));
+    });
 
     const g = SP.Nutri.gaps(7);
     if(g.ok) g.rows.slice(0, 2).forEach(r => {

@@ -258,7 +258,7 @@ SP.Screens.office = (function(){
       return n.length + ' masa notu' + (open ? ' · ' + open + ' karar takipte' : '');
     },
     actions(){
-      return String(K.Button({ label:'Toplantı', size:'sm', icon:'users',
+      return String(K.Button({ label:'Toplantı', size:'sm', icon:'users', class:'btn--screen',
         act:'go', data:{ 'data-route':'meeting' } }));
     },
     render, handle,

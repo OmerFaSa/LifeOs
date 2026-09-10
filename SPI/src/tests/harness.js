@@ -168,7 +168,7 @@ SP.Test = (function(){
       railOpen:false, labTab:'panel', labPanel:'vital', labOpen:null, markerOpen:null,
       mealDate:null, mealSlot:'kahvalti', foodQuery:'', foodCat:'all', foodPage:1,
       kitchenDish:null, kitchenGrams:1000,
-      moveTab:'bugun', workoutOpen:null,
+      moveTab:'bugun', movePattern:'all', workoutOpen:null,
       basketTab:'sepet', priceEdit:null,
       trendMarker:'weight', trendRange:90, analyticsTab:'capraz',
       officeAgent:'patron', officeDesk:null, officePerAgent:false,

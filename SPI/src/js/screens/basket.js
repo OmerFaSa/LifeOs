@@ -17,10 +17,19 @@ SP.Screens.basket = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'sepet', label:'Sepet' },
-    { id:'ikame', label:'İkame' },
-    { id:'fiyat', label:'Fiyat' },
+    { id:'sepet', label:'Sepet', icon:'wallet' },
+    { id:'ikame', label:'İkame', icon:'refresh' },
+    { id:'fiyat', label:'Fiyat', icon:'list' },
   ];
+
+  function toolbar(tab){
+    const n = ((S.basket && S.basket.items) || []).length;
+    const items = TABS.map(t => Object.assign({}, t, t.id === 'sepet' && n ? { count:n } : {}));
+    return K.Toolbar({
+      tabs:K.Subtabs({ items, value:tab, act:'basket-tab', aria:'Sepet görünümü' }),
+      actions:K.Button({ label:'Kalem ekle', icon:'plus', size:'sm', tone:'primary', act:'open-add' }),
+    });
+  }
 
   /* ---------------------------------------------------------------- sepet */
 
@@ -250,7 +259,7 @@ SP.Screens.basket = (function(){
     const tab = S.ui.basketTab;
     if(tab === 'ikame'){
       return String(K.Grid([
-        K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'basket-tab', aria:'Sepet görünümü' })),
+        K.Span(12, toolbar(tab)),
         K.Span(8, K.Stack([swapCard(), bulkCard()])),
         K.Span(4, K.Stack([
           K.Card({ title:'Bütçenin yeri', hint:'budget-rank',
@@ -263,13 +272,13 @@ SP.Screens.basket = (function(){
     }
     if(tab === 'fiyat'){
       return String(K.Grid([
-        K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'basket-tab', aria:'Sepet görünümü' })),
+        K.Span(12, toolbar(tab)),
         K.Span(12, priceCard()),
         K.Span(12, raw(UI.rail(['price-estimate', 'certainty']))),
       ]));
     }
     return String(K.Grid([
-      K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'basket-tab', aria:'Sepet görünümü' })),
+      K.Span(12, toolbar(tab)),
       K.Span(7, K.Stack([totalCard(), itemsCard()])),
       K.Span(5, K.Stack([coverageCard()])),
       K.Span(12, raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))),
@@ -349,9 +358,7 @@ SP.Screens.basket = (function(){
       if(!b.rows.length) return 'Sepet boş';
       return U.fmtNum(Math.round(b.total)) + ' TL · %' + b.estimate.pct + ' tahmin';
     },
-    actions(){
-      return String(K.Button({ label:'Kalem ekle', size:'sm', icon:'wallet', act:'open-add' }));
-    },
+    actions(){ return ''; },
     render, handle, change,
   };
 })();

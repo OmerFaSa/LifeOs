@@ -13,9 +13,9 @@ SP.Screens.analytics = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'capraz', label:'Çapraz bağlar' },
-    { id:'hafta', label:'Haftalık rapor' },
-    { id:'seri', label:'Seriler' },
+    { id:'capraz', label:'Çapraz bağlar',  icon:'layers' },
+    { id:'hafta',  label:'Haftalık rapor', icon:'list' },
+    { id:'seri',   label:'Seriler',        icon:'chart' },
   ];
 
   /* --------------------------------------------------------------- capraz */

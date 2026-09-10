@@ -28,6 +28,11 @@ Dört anlam rengi, gerisi nötr.
 
 Yüzeyler `--bg → --surface → --surface-2 → --surface-3` sırasıyla derinleşir.
 Metin `--text → --text-2 → --text-3` sırasıyla soluklaşır.
+`--surface-hover` yalnız fare üstündeyken, `--ring` yalnız odak halkasında.
+
+Koyu palet **tek yerde** tanımlanır: `--d-*` değişkenleri. `data-theme="dark"`
+ve `prefers-color-scheme:dark` bu tek kaynağı eşler. Bir rengin koyu karşılığı
+iki yere yazılmaz.
 
 **Renk tek başına anlam taşımaz.** Bu kural sağlık verisinde ihmal edilemez:
 bir tahlil değeri asla yalnızca renkle «kötü» gösterilmez. Durum her zaman
@@ -49,11 +54,16 @@ Ağırlıklar: 400 / 600 / 700 / 800.
 | Adım | Token | Kullanım |
 |---|---|---|
 | xs | 11.5px | Etiket, kesinlik rozeti, yardımcı bilgi |
-| sm | 13px | İkincil metin, tablo hücresi |
-| base | 14.5px | Gövde, form |
-| md | 16px | Kart başlığı (h3), ölçüm değeri |
-| lg | 20px | Bölüm başlığı (h2) |
-| xl | 28px | Ekran başlığı (h1), KPI sayısı |
+| sm | 12.75px | İkincil metin, tablo hücresi |
+| base | 14px | Gövde, form |
+| md | 15.5px | Kart başlığı (h3), ölçüm değeri |
+| lg | 18.5px | Bölüm başlığı (h2) |
+| xl | 24px | Ekran başlığı (h1) |
+| hero | 30px | Yalnız KPI sayısı |
+
+Ölçek bilinçli olarak dardır. Altı adım arasındaki fark küçüktür; hiyerarşi
+punto sıçratarak değil **ağırlık, renk ve boşlukla** kurulur. Bir ekranda en
+fazla bir `hero` sayı bulunur.
 
 Sayısal veride `.num` (tabular-nums) zorunlu. Ölçüm değerleri, gramajlar ve
 fiyatlar hizalanmadan okunamaz.
@@ -67,8 +77,11 @@ Tekrar eden boşluk/hizalama için `style=""` yerine yardımcı sınıf kullanı
 `style=""` yalnız **değere bağlı** yerlerde kalır: çubuk genişliği, referans
 çubuğundaki işaret konumu, iskelet satırı.
 
-**Yarıçap iki seviye:** `--r-sm` 8px (kontrol) · `--r` 14px (kart, panel).
-**Gölge iki seviye:** `--shadow` (kart) · `--shadow-lg` (katman).
+**Yarıçap üç seviye:** `--r-sm` 9px (kontrol) · `--r` 16px (kart, panel) ·
+`--r-pill` (sekme hapı, rozet, avatar).
+**Gölge iki seviye:** `--shadow` (kart) · `--shadow-lg` (katman). Kart gölgesi
+kasıtlı olarak çok soluktur: derinlik gölgeyle değil kenarlıkla anlatılır,
+gölge yalnız yüzeyi zeminden ayırır.
 **Perde:** `--scrim` — sheet, palet ve mobil kenar çubuğunun arkasındaki karartma.
 
 ## Hareket
@@ -80,26 +93,53 @@ Dikkat çekmek için animasyon yoktur: yanıp sönme, zıplama, sürekli döngü
 (iskelet ve açılış çubuğu dışında) kullanılmaz. Bir kırmızı bayrak yanıp
 sönerek değil, sayfanın en üstünde durarak dikkat çeker.
 
-## Ekranlar
+## Gezinme
 
-Sekiz gezinme grubu, on üç ekran:
+Dört gezinme grubu, on üç ekran. Grup **iş türüne** göre ayrılır, alana göre
+değil: kullanıcı «tahlil mi hareket mi» diye değil «girecek miyim, bakacak
+mıyım» diye düşünür.
 
 | Grup | Ekranlar |
 |---|---|
 | Günlük | Bugün · Günlük ölçüm |
-| Ölçüm | Tahliller |
-| Beslenme | Öğünler · **Mutfak** |
-| Hareket | Hareket |
-| Ekonomi | Sepet |
-| Analiz | Analiz |
-| Ofis | **Ofis** · Danışma · Toplantı |
+| İzleme | Tahliller · Öğünler · **Mutfak** · Hareket · Sepet |
+| Değerlendirme | Analiz · **Ofis** · Danışma · Toplantı |
 | Sistem | Hane · Rehber |
 
-`Tahliller` üç alt sekmedir: paneller · eğilim · geçmiş.
-`Hareket` üç alt sekmedir: bugün · program · ilerleme.
-`Sepet` üç alt sekmedir: sepet · ikame · fiyat.
-`Analiz` üç alt sekmedir: çapraz bağlar · haftalık rapor · seriler.
-`Rehber` dört alt sekmedir: kullanım · model · veri · sınırlar.
+Her ekranın bir de `short` etiketi vardır (Günlük ölçüm → Ölçüm). Uzun ad
+kenar çubuğunda, kısa ad mobil sekme çubuğunda görünür; etiket **hiçbir yerde
+sarmaz**. Mobil sekme çubuğu beş ekrandır: Bugün · Ölçüm · Öğün · Hareket · Ofis.
+
+### Alt sekmeler
+
+Alt sekme bir filtre değil **yer**dir: seçilen sekme hap biçiminde dolu görünür,
+seçilmeyen boş. Alt çizgi kullanılmaz — dokunmatikte hedef alanı belirsizdir.
+Sekmenin yanında sayı varsa (`subtab__count`) o sekmedeki kayıt sayısıdır.
+
+| Ekran | Alt sekmeler |
+|---|---|
+| Tahliller | paneller · eğilim · geçmiş |
+| Hareket | bugün · program · ilerleme |
+| Sepet | sepet · ikame · fiyat |
+| Analiz | çapraz bağlar · haftalık rapor · seriler |
+| Rehber | kullanım · model · veri · sınırlar |
+
+`Hareket` **iki** hap şeridi taşır: üstte bölüm (bugün/program/ilerleme), altta
+hareket kalıbı (Tümü · itiş · çekiş · diz · kalça · taşıma · gövde ·
+Dayanıklılık · Mobilite). İkinci şerit egzersiz listesini süzer; hangi kalıpta
+kaç hareket olduğu sekmenin üstünde yazar. Bu ayrım kasıtlıdır: antrenman
+ekranı tek uzun liste değil, net seçilebilir bölümlerdir.
+
+### Görünüm paneli
+
+Tema ve palet üst çubuktaki palet düğmesinden açılır (`.appear`), ekranın
+içine gömülmez. Panel iki satırdır: üç tema düğmesi (Sistem · Açık · Koyu),
+altında altı palet. Seçim profile yazılır ve anında uygulanır; `Escape`,
+dışarı tıklama ve pencere boyutu değişimi paneli kapatır.
+
+Üst çubuk tek satırdır ve şu sırayla okunur:
+ekran eylemi → ayraç → arama → palet → ayarlar. 620px altında ekran eylemi
+düğmesinin **etiketi** gizlenir, ikonu kalır; satır asla ikiye bölünmez.
 
 `Mutfak` tek tencereyi hane hedeflerine göre paylaştırır; Öğünler ekranından
 açılır ama kendi gezinme yerine de sahiptir.
@@ -112,10 +152,20 @@ beslenmeye, Barış harekete, Sedef ekonomiye bakar. Ayrıntı için `src/OFIS.m
 Genel (uygulamadan bağımsız, `core/components.js`):
 
 `C.Card` `C.Collapsible` `C.Stat` `C.Bar` `C.Meter` `C.Badge` `C.Chip`
-`C.Button` `C.IconButton` `C.Segmented` `C.Subtabs` `C.Field` `C.Input`
-`C.Textarea` `C.Select` `C.Checkbox` `C.Notice` `C.Empty` `C.Skeleton`
-`C.NextUp` `C.Table` `C.Pager` (+ `C.paginate`)
+`C.Button` `C.IconButton` `C.Segmented` `C.Subtabs` `C.PickCard` `C.Toolbar`
+`C.Field` `C.Input` `C.Textarea` `C.Select` `C.Checkbox` `C.Notice` `C.Empty`
+`C.Skeleton` `C.NextUp` `C.Table` `C.Pager` (+ `C.paginate`)
 düzen: `C.Grid` `C.Span` `C.Stack` `C.Cols` `C.Row` `C.SectionTitle`
+
+Üçü yeni ve seçim dilini taşır:
+
+- `C.Subtabs` — hap şeridi. `icon` ve `count` alır; taşarsa yatay kayar,
+  720px altında tam genişliğe yayılır.
+- `C.Toolbar` — alt sekme şeridi ile ekran eylemlerini aynı satırda tutar.
+  Ekranların `actions()` gövdesi bu yüzden çoğu yerde boştur: eylem üst
+  çubukta değil, ait olduğu sekmenin yanındadır.
+- `C.PickCard` — seçilebilir kart (`on` niteliğiyle dolu görünür). Seans
+  şablonu ve egzersiz seçimi bu kartlarla yapılır; onay kutusu kullanılmaz.
 
 SPİ'ye özel, veriye bağlı (`core/parts.js`):
 
@@ -130,6 +180,8 @@ Ekrana özel yapılar CSS'te adlandırılır, bileşene çevrilmez:
 bayrak), `mealcard` / `mealitem` / `absorb` (öğün ve emilim), `foodrow` (besin
 arama), `splitrow` (hane paylaştırma), `pricerow` (fiyat), `minrow` (asgari gün),
 `readypart` (toparlanma bileşeni), `ladder` / `ladderstep` (ilerleme merdiveni),
+`kpi` (tek büyük sayı), `picks` / `pickcard` (seçim ızgarası), `appear`
+(görünüm paneli), `toolbar` (sekme + eylem satırı),
 `quick` (hızlı giriş), `pasterow` (yapıştırılan tahlil), `nutgrid` / `nutcell`
 (besin öğesi ölçeri), `agentav` / `desk` / `note` (ofis masaları),
 `meetturn` (toplantı turu), `msg` (danışma sohbeti).
@@ -142,6 +194,20 @@ yanında rozet kullanılır. Kart içinde en fazla üç bilgi katmanı.
 Tek istisna `flagcard`'dır: kırmızı bayrak kart değil **uyarıdır**, kendi
 kenarlığı ve `role="alert"` niteliği vardır. Sistemde yorum yapmayı bıraktığı
 tek durum budur ve görsel olarak da ayrılır.
+
+## Ölçer kuralı
+
+`C.Bar` **kendiliğinden renk seçmez.** Doluluğa bakıp «%40 ise kırmızı» demek
+gün ortasında hedefin yarısında olan herkesi alarma sokar; bütün çubuklar
+kırmızıya döner ve gerçek uyarı görünmez olur. Ton yalnız çağıran tarafından
+verilir; otomatik ton isteniyorsa `auto:true` açıkça yazılır.
+
+Bundan çıkan iki kural:
+
+- Besin öğesi ölçeri (`nutCell`) nötr çizilir. Yalnız **sınır** tipindeki bir
+  öğenin (sodyum) aşılması kırmızı işaretlenir; eksik kalmak hata değildir.
+- Yüzde her zaman çubuğun altında **sayıyla** yazılır. Çubuk tek başına
+  ölçü bildirmez.
 
 ## Durumlar
 

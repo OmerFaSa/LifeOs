@@ -64,6 +64,19 @@ SP.UI = (function(){
     pill:'<rect x="2.8" y="8.6" width="18.4" height="6.8" rx="3.4" transform="rotate(-45 12 12)"/><path d="M8.5 8.5l7 7"/>',
     fire:'<path d="M12 3.5c3.5 3.4 5.5 6 5.5 8.9a5.5 5.5 0 11-11 0c0-1.5.6-2.9 1.7-4.2.4 1.2 1 2 1.9 2.4C10.5 8.4 11 5.9 12 3.5z"/>',
     bed:'<path d="M3 19v-8M3 13h18v6M7.5 10.5h3.5a2 2 0 012 2v.5"/><path d="M3 19h18"/>',
+
+    /* --- gorunum --- */
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8'
+      + 'M2 12h2.5M19.5 12H22M4.2 19.8L6 18M18 6l1.8-1.8"/>',
+    moon2:'<path d="M20.5 14.8A8.6 8.6 0 019.2 3.5a8.6 8.6 0 1011.3 11.3z"/>',
+    monitor:'<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8.5 21h7M12 17v4"/>',
+    palette:'<path d="M12 3.5a8.5 8.5 0 000 17c1.2 0 1.9-.8 1.9-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2'
+      + ' 0-1 .8-1.8 1.9-1.8h1.4a4.3 4.3 0 004.3-4.3c0-3.9-3.8-6.7-8.5-6.7z"/>'
+      + '<circle cx="7.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"/>'
+      + '<circle cx="10.5" cy="7" r="1.1" fill="currentColor" stroke="none"/>'
+      + '<circle cx="15" cy="7.8" r="1.1" fill="currentColor" stroke="none"/>',
+    sliders:'<path d="M4 7h10M18 7h2M4 12h4M12 12h8M4 17h9M17 17h3"/>'
+      + '<circle cx="16" cy="7" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="15" cy="17" r="2"/>',
   };
 
   function icon(name, cls){
@@ -213,12 +226,21 @@ SP.UI = (function(){
   }
 
   /* Makro dagilimi — protein/yag/karbonhidrat oranini tek seritte verir.
-     Segment renkleri kimliktir (hangi makro), durum degil. */
+     Segment renkleri kimliktir (hangi makro), durum degil.
+
+     Girdi KALORI cinsindendir ama efsanede YUZDE yazar: "Protein 384" gibi
+     bir sayi okuyucuya hicbir sey soylemez, "Protein %28" soyler. */
   function macroSplit(macros){
+    const p = Math.max(0, macros.protein || 0);
+    const f = Math.max(0, macros.fat || 0);
+    const c = Math.max(0, macros.carb || 0);
+    const total = p + f + c;
+    if(!total) return '<p class="small dim">Makro dağılımı için öğün gerekir.</p>';
+    const seg = (label, v, color) => ({ label:label + ' %' + Math.round(100 * v / total), value:v, color });
     return stackBar([
-      { label:'Protein', value:Math.round(macros.protein || 0), color:'var(--macro-protein)' },
-      { label:'Yağ', value:Math.round(macros.fat || 0), color:'var(--macro-fat)' },
-      { label:'Karbonhidrat', value:Math.round(macros.carb || 0), color:'var(--macro-carb)' },
+      seg('Protein', p, 'var(--macro-protein)'),
+      seg('Yağ', f, 'var(--macro-fat)'),
+      seg('Karbonhidrat', c, 'var(--macro-carb)'),
     ]);
   }
 

@@ -208,18 +208,24 @@ haberin arkasına saklamaz:
 
 ## 3. Ekranlar
 
-Sekiz gezinme grubu, on üç ekran.
+Dört gezinme grubu, on üç ekran. Grup alana göre değil **iş türüne** göre
+ayrılır: günlük giriş, izleme, değerlendirme, sistem.
 
 | Grup | Ekranlar |
 |---|---|
 | Günlük | Bugün · Günlük ölçüm |
-| Ölçüm | Tahliller |
-| Beslenme | Öğünler · Mutfak |
-| Hareket | Hareket |
-| Ekonomi | Sepet |
-| Analiz | Analiz |
-| Ofis | Ofis · Danışma · Toplantı |
+| İzleme | Tahliller · Öğünler · Mutfak · Hareket · Sepet |
+| Değerlendirme | Analiz · Ofis · Danışma · Toplantı |
 | Sistem | Hane · Rehber |
+
+Mobilde alt sekme çubuğu beş ekrandır (Bugün · Ölçüm · Öğün · Hareket · Ofis);
+kalanı kenar çubuğundan açılır.
+
+Ekran içi bölümleme hap biçimli alt sekmelerle yapılır. `Hareket` iki şerit
+taşır — bölüm (bugün · program · ilerleme) ve hareket kalıbı (Tümü · itiş ·
+çekiş · diz · kalça · taşıma · gövde · Dayanıklılık · Mobilite) — böylece
+antrenman tek uzun liste değil, net seçilebilir bölümler halinde durur.
+Ayrıntı: `src/STIL.md`.
 
 Her ekran aynı sözleşmeyi uygular:
 
@@ -283,7 +289,7 @@ src/
   OFIS.md               beş ajanın çalışma düzeni
   STIL.md               tasarım sistemi
   css/
-    tokens.css          tek token kaynağı
+    tokens.css          tek token kaynağı (açık/koyu iki eksen)
     palettes.css        altı renk paleti
     base.css            temel öğeler
     layout.css          kabuk ve ızgara
@@ -316,7 +322,7 @@ src/
       palette.js        komut paleti
       setup.js          ilk kurulum
     screens/            13 ekran
-    app.js              kabuk: gezinme, olay dağıtımı, açılış
+    app.js              kabuk: gezinme, görünüm paneli, olay dağıtımı, açılış
   tests/                394 test, 10 paket
 tools/
   runtests.js           birim testleri (başsız tarayıcı)

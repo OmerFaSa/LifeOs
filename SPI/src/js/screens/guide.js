@@ -13,10 +13,10 @@ SP.Screens.guide = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'kullanim', label:'Kullanım' },
-    { id:'model', label:'Model' },
-    { id:'veri', label:'Veri' },
-    { id:'sinir', label:'Sınırlar' },
+    { id:'kullanim', label:'Kullanım', icon:'guide' },
+    { id:'model',    label:'Model',    icon:'zap' },
+    { id:'veri',     label:'Veri',     icon:'layers' },
+    { id:'sinir',    label:'Sınırlar', icon:'shield' },
   ];
 
   /* ------------------------------------------------------------ kullanim */

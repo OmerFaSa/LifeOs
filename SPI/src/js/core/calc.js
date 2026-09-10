@@ -127,7 +127,8 @@ SP.Calc = (function(){
     const due = SP.Bio.overdue();
     if(due.length){
       return { id:'panel', rank:3, tone:'info', icon:'flask',
-        label:'Ölçüm', title:due[0].panel.name + ' paneli bekliyor',
+        label:'Ölçüm', title:(/paneli$/i.test(due[0].panel.name)
+          ? due[0].panel.name : due[0].panel.name + ' paneli') + ' bekliyor',
         why:due[0].note + ' Eğilim okumak için düzenli aralık gerekir.',
         route:'labs', action:'Tahlil sonucunu gir.' };
     }

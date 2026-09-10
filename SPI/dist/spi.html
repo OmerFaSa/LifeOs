@@ -8,183 +8,246 @@
 <style>
 /* ==== css/tokens.css ==== */
 /* TEK TASARIM TOKEN KAYNAĞI.
+
    Kategoriler: surface · text · primary/accent/danger/info · border · shadow
    · radius · spacing · type-scale · motion · z-index
+
    Kural: bileşenler yalnız bu değişkenleri kullanır; ham renk/ölçü yazılmaz.
-   Ayrıntı ve gerekçe için src/STIL.md. */
+   Ayrıntı ve gerekçe için src/STIL.md.
+
+   KOYU PALET TEK YERDE. Aşağıdaki `--d-*` jetonları koyu temanın renklerini
+   bir kez tanımlar; iki uygulama bloğu (sistem tercihi ve açık seçim) yalnız
+   eşlemeyi tekrarlar. Böylece bir rengi değiştirmek için tek satır yeter ve
+   iki blok birbirinden kayamaz. */
 
 :root{
   /* ---- yüzeyler ---- */
-  --bg:#F7F8FA;
+  --bg:#F5F6F8;
   --surface:#FFFFFF;
-  --surface-2:#EEF0F5;
-  --surface-3:#E3E7EF;
+  --surface-2:#F0F1F5;
+  --surface-3:#E7E9EF;
+  --surface-hover:#F7F8FA;
   --sidebar:#FFFFFF;
-  --sidebar-active:#E5E7F5;
+  --sidebar-active:#E9EAF7;
 
   /* ---- metin ---- */
-  --text:#181A22;
-  --text-2:#585E6E;   /* AA: #F7F8FA üzerinde 6.4:1 */
-  --text-3:#686E7E;   /* AA: 4.6:1 — küçük ikincil metin */
+  --text:#14161D;
+  --text-2:#575D6C;   /* AA: --bg üzerinde 6.5:1 */
+  --text-3:#6B7180;   /* AA: 4.6:1 — küçük ikincil metin */
 
   /* ---- anlam renkleri (dört tane; gerisi nötr) ---- */
-  --primary:#3D3F8F;
-  --primary-hover:#323478;
-  --primary-soft:#E5E7F5;
+  --primary:#3F3FA0;       /* AA: beyaz üzerinde 8.5:1 */
+  --primary-hover:#34348A;
+  --primary-soft:#E9EAF7;
   --primary-ink:#FFFFFF;
-  --accent:#9A6714;        /* AA: beyaz üzerinde 4.8:1 */
-  --accent-soft:#F7EDDD;
-  --danger:#A33A3A;        /* AA: beyaz üzerinde 5.6:1 */
-  --danger-soft:#F8E6E6;
-  --info:#3C5A72;          /* AA: beyaz üzerinde 7.3:1 */
-  --info-soft:#E6ECF1;
+  --accent:#96640F;        /* AA: beyaz üzerinde 5.0:1 */
+  --accent-soft:#F8EFDE;
+  --danger:#A63838;        /* AA: beyaz üzerinde 5.7:1 */
+  --danger-soft:#FAE7E7;
+  --info:#3A5871;          /* AA: beyaz üzerinde 7.5:1 */
+  --info-soft:#E8EDF2;
 
   /* ---- çizgi ---- */
-  --border:#E1E4EC;
-  --border-strong:#C7CCD9;
+  --border:#E4E6EC;
+  --border-strong:#CBCFDA;
+
+  /* ---- odak halkası: her temada görünür kalır ---- */
+  --ring:color-mix(in srgb, var(--primary) 45%, transparent);
 
   /* ---- makro renkleri ----
      Kimlik taşır, durum değil: protein/yağ/karbonhidrat şeridinde hangi
      dilimin ne olduğunu söyler. Şeridin yanında her zaman yazılı etiket durur,
      çünkü renk tek başına anlam taşımaz. */
-  --macro-protein:#3D3F8F;
-  --macro-fat:#9A6714;
-  --macro-carb:#3C5A72;
+  --macro-protein:#3F3FA0;
+  --macro-fat:#96640F;
+  --macro-carb:#3A5871;
 
   /* ---- ofis ajanları: beş ayırt edici kimlik rengi ----
      Avatar zemini olarak kullanılır, harf --agent-ink ile yazılır.
      Ölçülen kontrast (beyaz harf üzerinde): 5,3–8,9:1 — hepsi AA. */
-  --agent-patron:#3D3F8F;
+  --agent-patron:#3F3FA0;
   --agent-lab:#2F5D7C;
   --agent-nutri:#8A5A12;
   --agent-move:#2C6B52;
   --agent-money:#8C3B62;
   --agent-ink:#FFFFFF;
-  --c-grid:#E1E4EC;
-  --c-band:#DDDFF2;
+  --c-grid:#E4E6EC;
+  --c-band:#E0E1F3;
 
-  /* ---- gölge: iki seviye ---- */
-  --shadow:0 1px 2px rgba(22,24,34,.05);
-  --shadow-lg:0 12px 34px rgba(22,24,34,.16);
+  /* ---- gölge: iki seviye, ikisi de yumuşak ----
+     Kart gölgesi bir kenarlık kadar sessizdir; derinliği kenarlık değil
+     iki katmanlı çok düşük opaklık verir. */
+  --shadow:0 1px 2px rgba(16,18,27,.04), 0 4px 12px rgba(16,18,27,.045);
+  --shadow-lg:0 20px 52px rgba(16,18,27,.18);
 
-  /* ---- yarıçap: iki seviye ---- */
-  --r-sm:8px;
-  --r:14px;
+  /* ---- yarıçap: iki seviye + hap ---- */
+  --r-sm:9px;
+  --r:16px;
+  --r-pill:999px;
 
   /* ---- boşluk: 8px ritmi ---- */
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
   --sp-6:24px; --sp-8:32px; --sp-10:40px;
 
-  /* ---- tipografi: 2 aile, 6 adım ---- */
+  /* ---- tipografi: 2 aile, 6 adım + sayı adımı ---- */
   --font-display:'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body:'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --fs-xs:11.5px;
-  --fs-sm:13px;
-  --fs-base:14.5px;
-  --fs-md:16px;
-  --fs-lg:20px;
-  --fs-xl:28px;
+  --fs-sm:12.75px;
+  --fs-base:14px;
+  --fs-md:15.5px;
+  --fs-lg:18.5px;
+  --fs-xl:24px;
+  --fs-hero:30px;     /* yalnız KPI sayısı */
 
   /* ---- hareket: tek easing, iki süre ---- */
   --ease:cubic-bezier(.2,.7,.3,1);
   --dur:160ms;
   --dur-lg:220ms;
 
-  /* Katman perdesi: acik ve koyu temada ayni koyulukta okunur. */
-  --scrim:rgba(16,17,26,.5);
+  /* Katman perdesi: açık ve koyu temada aynı koyulukta okunur. */
+  --scrim:rgba(14,15,22,.46);
 
   /* ---- katman ---- */
   --z-nav:30; --z-topbar:25; --z-overlay:60; --z-toast:80;
 
   /* ---- düzen ---- */
-  --sidebar-w:238px;
-  --topbar-h:62px;
-  --content-max:1680px;
+  --sidebar-w:236px;
+  --topbar-h:60px;
+  --content-max:1560px;
+
+  /* ================= KOYU PALET — tek tanım =================
+     Buradaki değerler yalnızca aşağıdaki iki blokta kullanılır. */
+  --d-bg:#0D0F14;
+  --d-surface:#15171D;
+  --d-surface-2:#1B1E25;
+  --d-surface-3:#23262F;
+  --d-surface-hover:#1A1D24;
+  --d-sidebar:#111319;
+  --d-sidebar-active:#242545;
+
+  --d-text:#ECEEF4;
+  --d-text-2:#A9AEBD;
+  --d-text-3:#878C9C;
+
+  --d-primary:#9EA0EE;
+  --d-primary-hover:#B2B4F5;
+  --d-primary-soft:#212244;
+  --d-primary-ink:#0C0D14;
+  --d-accent:#E0B46E;
+  --d-accent-soft:#2C2517;
+  --d-danger:#EA8C8C;
+  --d-danger-soft:#2E1C1C;
+  --d-info:#8DAECA;
+  --d-info-soft:#182129;
+
+  --d-border:#252932;
+  --d-border-strong:#343945;
+
+  --d-macro-protein:#9EA0EE;
+  --d-macro-fat:#E0B46E;
+  --d-macro-carb:#8DAECA;
+
+  --d-agent-patron:#9EA0EE;
+  --d-agent-lab:#8DAECA;
+  --d-agent-nutri:#E0B46E;
+  --d-agent-move:#8FD0B0;
+  --d-agent-money:#DE9CC0;
+  --d-agent-ink:#0C0D14;
+  --d-c-grid:#242832;
+  --d-c-band:#242545;
+
+  --d-shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  --d-shadow-lg:0 22px 60px rgba(0,0,0,.62);
+  --d-scrim:rgba(0,0,0,.64);
 }
 
-/* Koyu mod: saf siyah/beyaz yok; aynı token adları yeniden tanımlanır. */
+/* Koyu eşleme — iki blok, aynı liste. Renkler yukarıda tek yerde durur. */
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#111218;
-    --surface:#191B22;
-    --surface-2:#20222B;
-    --surface-3:#272A34;
-    --sidebar:#141620;
-    --sidebar-active:#252740;
-
-    --text:#EDEEF5;
-    --text-2:#ADB1C0;
-    --text-3:#8B8FA0;
-
-    --primary:#9A9CE8;
-    --primary-hover:#AEB0F0;
-    --primary-soft:#22243C;
-    --primary-ink:#0E0F18;
-    --accent:#DDAE68;
-    --accent-soft:#2E2618;
-    --danger:#E58585;
-    --danger-soft:#2E1D1D;
-    --info:#89AAC6;
-    --info-soft:#1A232A;
-
-    --border:#2C2E3A;
-    --border-strong:#3E4152;
-
-    --macro-protein:#9A9CE8; --macro-fat:#DDAE68; --macro-carb:#89AAC6;
-    --agent-patron:#9A9CE8;
-    --agent-lab:#89AAC6;
-    --agent-nutri:#DDAE68;
-    --agent-move:#8FD0B0;
-    --agent-money:#DE9CC0;
-    --agent-ink:#0E0F18;
-    --c-grid:#2A2C38;
-    --c-band:#252740;
-
-    --shadow:0 1px 2px rgba(0,0,0,.34);
-    --shadow-lg:0 16px 42px rgba(0,0,0,.5);
-    --scrim:rgba(0,0,0,.62);
+    --bg:var(--d-bg);
+    --surface:var(--d-surface);
+    --surface-2:var(--d-surface-2);
+    --surface-3:var(--d-surface-3);
+    --surface-hover:var(--d-surface-hover);
+    --sidebar:var(--d-sidebar);
+    --sidebar-active:var(--d-sidebar-active);
+    --text:var(--d-text);
+    --text-2:var(--d-text-2);
+    --text-3:var(--d-text-3);
+    --primary:var(--d-primary);
+    --primary-hover:var(--d-primary-hover);
+    --primary-soft:var(--d-primary-soft);
+    --primary-ink:var(--d-primary-ink);
+    --accent:var(--d-accent);
+    --accent-soft:var(--d-accent-soft);
+    --danger:var(--d-danger);
+    --danger-soft:var(--d-danger-soft);
+    --info:var(--d-info);
+    --info-soft:var(--d-info-soft);
+    --border:var(--d-border);
+    --border-strong:var(--d-border-strong);
+    --macro-protein:var(--d-macro-protein);
+    --macro-fat:var(--d-macro-fat);
+    --macro-carb:var(--d-macro-carb);
+    --agent-patron:var(--d-agent-patron);
+    --agent-lab:var(--d-agent-lab);
+    --agent-nutri:var(--d-agent-nutri);
+    --agent-move:var(--d-agent-move);
+    --agent-money:var(--d-agent-money);
+    --agent-ink:var(--d-agent-ink);
+    --c-grid:var(--d-c-grid);
+    --c-band:var(--d-c-band);
+    --shadow:var(--d-shadow);
+    --shadow-lg:var(--d-shadow-lg);
+    --scrim:var(--d-scrim);
   }
 }
 
 :root[data-theme="dark"]{
-  --bg:#111218;
-  --surface:#191B22;
-  --surface-2:#20222B;
-  --surface-3:#272A34;
-  --sidebar:#141620;
-  --sidebar-active:#252740;
+  --bg:var(--d-bg);
+  --surface:var(--d-surface);
+  --surface-2:var(--d-surface-2);
+  --surface-3:var(--d-surface-3);
+  --surface-hover:var(--d-surface-hover);
+  --sidebar:var(--d-sidebar);
+  --sidebar-active:var(--d-sidebar-active);
+  --text:var(--d-text);
+  --text-2:var(--d-text-2);
+  --text-3:var(--d-text-3);
+  --primary:var(--d-primary);
+  --primary-hover:var(--d-primary-hover);
+  --primary-soft:var(--d-primary-soft);
+  --primary-ink:var(--d-primary-ink);
+  --accent:var(--d-accent);
+  --accent-soft:var(--d-accent-soft);
+  --danger:var(--d-danger);
+  --danger-soft:var(--d-danger-soft);
+  --info:var(--d-info);
+  --info-soft:var(--d-info-soft);
+  --border:var(--d-border);
+  --border-strong:var(--d-border-strong);
+  --macro-protein:var(--d-macro-protein);
+  --macro-fat:var(--d-macro-fat);
+  --macro-carb:var(--d-macro-carb);
+  --agent-patron:var(--d-agent-patron);
+  --agent-lab:var(--d-agent-lab);
+  --agent-nutri:var(--d-agent-nutri);
+  --agent-move:var(--d-agent-move);
+  --agent-money:var(--d-agent-money);
+  --agent-ink:var(--d-agent-ink);
+  --c-grid:var(--d-c-grid);
+  --c-band:var(--d-c-band);
+  --shadow:var(--d-shadow);
+  --shadow-lg:var(--d-shadow-lg);
+  --scrim:var(--d-scrim);
+}
 
-  --text:#EDEEF5;
-  --text-2:#ADB1C0;
-  --text-3:#8B8FA0;
-
-  --primary:#9A9CE8;
-  --primary-hover:#AEB0F0;
-  --primary-soft:#22243C;
-  --primary-ink:#0E0F18;
-  --accent:#DDAE68;
-  --accent-soft:#2E2618;
-  --danger:#E58585;
-  --danger-soft:#2E1D1D;
-  --info:#89AAC6;
-  --info-soft:#1A232A;
-
-  --border:#2C2E3A;
-  --border-strong:#3E4152;
-
-  --macro-protein:#9A9CE8; --macro-fat:#DDAE68; --macro-carb:#89AAC6;
-  --agent-patron:#9A9CE8;
-  --agent-lab:#89AAC6;
-  --agent-nutri:#DDAE68;
-  --agent-move:#8FD0B0;
-  --agent-money:#DE9CC0;
-  --agent-ink:#0E0F18;
-  --c-grid:#2A2C38;
-  --c-band:#252740;
-
-  --shadow:0 1px 2px rgba(0,0,0,.34);
-  --shadow-lg:0 16px 42px rgba(0,0,0,.5);
-  --scrim:rgba(0,0,0,.62);
+/* Tarayıcının kendi kontrollerini (kaydırma çubuğu, form) temaya uydur. */
+:root{ color-scheme:light; }
+:root[data-theme="dark"]{ color-scheme:dark; }
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ color-scheme:dark; }
 }
 
 /* Hareket tercihine saygı: tüm süreler sıfırlanır. */
@@ -504,9 +567,18 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .boot__text{ font-size:var(--fs-sm); }
 
 /* ==== css/layout.css ==== */
-/* Uygulama kabugu: sabit kenar cubugu + tam genislikte icerik izgarasi. */
+/* Uygulama kabuğu: sabit kenar çubuğu + tam genişlikte içerik ızgarası.
 
-.shell__body{ min-width:0; }
+   Kabuk üç parçadır ve hiçbiri diğerinin yerini kaplamaz:
+     sidebar   gezinme, her zaman aynı yerde
+     topbar    ekranın adı, alt başlığı ve o ekrana ait eylemler
+     content   yalnız içerik
+
+   Üst çubuk TEK SATIRDIR ve dar ekranda da tek satır kalır: başlık kısalır,
+   eylemler ikonlaşır. Sarılan bir üst çubuk ekranın yüksekliğini oynatır ve
+   arayüzü amatörleştirir. */
+
+.shell__body{ min-width:0; display:flex; flex-direction:column; min-height:100vh; }
 
 .shell{
   display:grid;
@@ -514,7 +586,7 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
   min-height:100vh;
 }
 
-/* ---------- kenar cubugu ---------- */
+/* ---------- kenar çubuğu ---------- */
 .sidebar{
   position:sticky; top:0; align-self:start;
   height:100vh;
@@ -525,40 +597,58 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 }
 .sidebar__head{
   display:flex; align-items:center; gap:10px;
-  padding:16px 18px 14px;
+  padding:16px 16px 12px;
+  min-width:0;
 }
 .sidebar__mark{
-  width:34px; height:34px; border-radius:var(--r-sm); flex:none;
+  width:32px; height:32px; border-radius:10px; flex:none;
   background:var(--primary); color:var(--primary-ink);
   display:grid; place-items:center;
-  font-family:var(--font-display); font-weight:800; font-size:16px;
+  font-family:var(--font-display); font-weight:800; font-size:15px;
+  letter-spacing:-.02em;
 }
-.sidebar__title{ display:flex; flex-direction:column; line-height:1.15; min-width:0; }
-.sidebar__title b{ font-family:var(--font-display); font-size:var(--fs-md); font-weight:800; }
-.sidebar__title span{ font-size:var(--fs-xs); color:var(--accent); font-weight:700; letter-spacing:.03em; }
+.sidebar__title{ display:flex; flex-direction:column; line-height:1.2; min-width:0; }
+.sidebar__title b{
+  font-family:var(--font-display); font-size:var(--fs-md); font-weight:800;
+  letter-spacing:-.01em;
+}
+/* Marka satırı profilden gelir ve uzayabilir: sarmaz, kısalır. */
+.sidebar__title span{
+  font-size:var(--fs-xs); color:var(--text-3); font-weight:600;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
 
-.sidebar__scroll{ flex:1; overflow-y:auto; padding:4px 10px 10px; }
-.navgroup{ margin-bottom:14px; }
+.sidebar__scroll{ flex:1; overflow-y:auto; padding:2px 10px 10px; }
+.navgroup{ margin-bottom:12px; }
 .navgroup__label{
-  font-size:var(--fs-xs); font-weight:700; letter-spacing:.08em; text-transform:uppercase;
-  color:var(--text-3); padding:6px 10px 5px;
+  font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--text-3); padding:8px 10px 4px; opacity:.85;
 }
 .navitem{
+  position:relative;
   width:100%;
   display:flex; align-items:center; gap:10px;
   padding:8px 10px; margin-bottom:1px;
-  border:none; background:none; border-radius:var(--r-sm);
-  color:var(--text-2); font-size:var(--fs-base); font-weight:600;
+  border:none; background:none; border-radius:10px;
+  color:var(--text-2); font-size:var(--fs-base); font-weight:550;
   text-align:left; line-height:1.3;
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
-.navitem svg{ width:18px; height:18px; flex:none; stroke:currentColor; fill:none; stroke-width:1.7; }
+.navitem svg{ width:17px; height:17px; flex:none; stroke:currentColor; fill:none; stroke-width:1.7; }
 .navitem:hover{ background:var(--surface-2); color:var(--text); }
-.navitem.is-active{ background:var(--sidebar-active); color:var(--primary); }
+.navitem.is-active{
+  background:var(--sidebar-active); color:var(--primary); font-weight:700;
+}
+/* Aktif öğenin sol kenarında ince bir işaret: renk tek başına anlam taşımaz. */
+.navitem.is-active::before{
+  content:''; position:absolute; left:-10px; top:8px; bottom:8px;
+  width:3px; border-radius:0 3px 3px 0; background:var(--primary);
+}
 .navitem__badge{
   margin-left:auto; flex:none;
-  min-width:20px; height:19px; padding:0 6px; border-radius:20px;
+  min-width:19px; height:18px; padding:0 6px; border-radius:var(--r-pill);
   background:var(--danger); color:#fff;
-  font-size:var(--fs-xs); font-weight:700;
+  font-size:10.5px; font-weight:700;
   display:grid; place-items:center;
 }
 .navitem__badge.is-quiet{ background:var(--surface-3); color:var(--text-2); }
@@ -566,33 +656,55 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .sidebar__foot{
   border-top:1px solid var(--border);
   padding:12px 14px;
-  display:flex; flex-direction:column; gap:8px;
+  display:flex; flex-direction:column; gap:9px;
 }
 .countdown{ display:flex; align-items:baseline; gap:7px; }
-.countdown b{ font-family:var(--font-display); font-size:var(--fs-xl); font-weight:800; }
-.countdown span{ font-size:var(--fs-xs); color:var(--text-2); }
+.countdown b{
+  font-family:var(--font-display); font-size:var(--fs-lg); font-weight:800;
+  font-variant-numeric:tabular-nums; line-height:1;
+}
+.countdown span{ font-size:var(--fs-xs); color:var(--text-3); line-height:1.25; }
 .weekmeter{ display:flex; flex-direction:column; gap:5px; }
-.weekmeter__row{ display:flex; justify-content:space-between; font-size:var(--fs-xs); color:var(--text-2); }
+.weekmeter__row{
+  display:flex; justify-content:space-between; gap:8px;
+  font-size:var(--fs-xs); color:var(--text-3);
+}
 
-/* ---------- ust cubuk ---------- */
+/* ---------- üst çubuk ---------- */
 .topbar{
   position:sticky; top:0; z-index:var(--z-topbar);
   display:flex; align-items:center; gap:var(--sp-4);
   min-height:var(--topbar-h);
-  padding:10px 28px;
-  background:color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter:saturate(1.4) blur(10px);
+  padding:9px 26px;
+  background:color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter:saturate(1.5) blur(12px);
   border-bottom:1px solid var(--border);
 }
-.topbar__titles{ min-width:0; }
-.topbar__titles h1{ font-size:var(--fs-xl); font-weight:800; }
-.topbar__titles p{ font-size:var(--fs-sm); color:var(--text-2); margin-top:1px; }
-.topbar__actions{ margin-left:auto; display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.topbar__titles{ min-width:0; flex:1; }
+.topbar__titles h1{
+  font-size:var(--fs-xl); font-weight:800; letter-spacing:-.02em; line-height:1.15;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.topbar__titles p{
+  font-size:var(--fs-sm); color:var(--text-3); margin-top:2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.topbar__actions{
+  margin-left:auto; flex:none;
+  display:flex; align-items:center; gap:7px;
+  flex-wrap:nowrap;
+}
+/* İnce bir ayraç: ekran eylemleri ile kabuk eylemlerini ayırır. */
+.topbar__sep{
+  width:1px; align-self:stretch; margin:6px 2px;
+  background:var(--border); flex:none;
+}
 .topbar__menu{ display:none; }
 
-/* ---------- icerik ---------- */
+/* ---------- içerik ---------- */
 .content{
-  padding:22px 28px 60px;
+  flex:1;
+  padding:20px 26px 64px;
   max-width:var(--content-max);
   width:100%;
 }
@@ -600,7 +712,7 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .grid{
   display:grid;
   grid-template-columns:repeat(12, minmax(0,1fr));
-  gap:16px;
+  gap:14px;
   align-items:start;
 }
 .span-2{ grid-column:span 2; }
@@ -614,7 +726,7 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .span-10{ grid-column:span 10; }
 .span-12{ grid-column:span 12; }
 
-.stack{ display:flex; flex-direction:column; gap:16px; }
+.stack{ display:flex; flex-direction:column; gap:14px; }
 .stack-sm{ display:flex; flex-direction:column; gap:8px; }
 .stack-xs{ display:flex; flex-direction:column; gap:5px; }
 .row{ display:flex; align-items:center; gap:10px; }
@@ -628,9 +740,7 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .cols-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
 .auto-fit{ display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:12px; }
 
-/* ---------- duyarli ---------- */
-/* Kenar rayi yalnizca gercekten yer varken sutun olur;
-   altinda icerigin altina yatay serit olarak akar. */
+/* ---------- duyarlı ---------- */
 @media (max-width:1400px){
   .span-3{ grid-column:span 4; }
   .span-5{ grid-column:span 6; }
@@ -639,9 +749,6 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
   .span-2{ grid-column:span 12; }
   .span-6{ grid-column:span 7; }
   .span-4{ grid-column:span 5; }
-  /* Kenar rayinin dar ekran davranisi components.css'te durur: bu dosya
-     ondan ONCE yuklendigi icin buradaki kural temel .rail kuralinin
-     altinda kalir ve hic uygulanmazdi. */
 }
 @media (max-width:1120px){
   .span-2, .span-4, .span-6, .span-8{ grid-column:span 12; }
@@ -652,19 +759,29 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 @media (max-width:1000px){
   .shell{ grid-template-columns:minmax(0,1fr); }
   .sidebar{
-    position:fixed; top:0; left:0; bottom:0; width:min(86vw, 300px);
+    position:fixed; top:0; left:0; bottom:0; width:min(86vw, 296px);
     transform:translateX(-102%);
     transition:transform var(--dur-lg) var(--ease);
     box-shadow:var(--shadow-lg);
   }
   .sidebar.is-open{ transform:translateX(0); }
-  .topbar{ padding:10px 16px; }
+  .topbar{ padding:8px 14px; gap:10px; }
+  .topbar__titles h1{ font-size:var(--fs-lg); }
   .topbar__menu{ display:inline-flex; }
-  .content{ padding:16px 16px 96px; }
+  .content{ padding:14px 14px 92px; }
   .scrim{
     position:fixed; inset:0; background:var(--scrim);
     z-index:calc(var(--z-nav) - 1);
   }
+}
+/* Dar ekranda üst çubuk tek satır kalsın diye ekrana ait eylemin
+   YAZISI gizlenir, ikonu kalır. Düğme kaybolmaz, küçülür. */
+@media (max-width:620px){
+  .topbar__titles p{ display:none; }
+  .topbar .btn--screen .btn__label{ display:none; }
+  .topbar .btn--screen{ width:34px; padding:0; justify-content:center; }
+  .topbar .btn--screen svg{ margin:0; }
+  .topbar__sep{ display:none; }
 }
 @media (max-width:720px){
   .cols-3, .cols-4{ grid-template-columns:repeat(2,1fr); }
@@ -680,16 +797,22 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
   .tabbar{
     position:fixed; left:0; right:0; bottom:0; z-index:var(--z-nav);
     display:flex; gap:2px;
-    padding:6px 6px calc(6px + env(safe-area-inset-bottom));
-    background:var(--surface); border-top:1px solid var(--border);
+    padding:5px 5px calc(5px + env(safe-area-inset-bottom));
+    background:color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter:saturate(1.5) blur(12px);
+    border-top:1px solid var(--border);
   }
   .tabbar__item{
-    flex:1; border:none; background:none; border-radius:var(--r-sm);
-    display:flex; flex-direction:column; align-items:center; gap:3px;
-    padding:6px 2px; color:var(--text-2);
+    flex:1; min-width:0; border:none; background:none; border-radius:11px;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:6px 2px; color:var(--text-3);
   }
   .tabbar__item svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.7; }
-  .tabbar__item span{ font-size:10.5px; font-weight:700; }
+  /* Etiket tek satır: sarılan etiket alt çubuğun yüksekliğini oynatır. */
+  .tabbar__item span{
+    font-size:10px; font-weight:700; line-height:1.2;
+    max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
   .tabbar__item.is-active{ color:var(--primary); background:var(--primary-soft); }
 }
 
@@ -708,7 +831,10 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
    ya da olcu yazilmaz. Ayrinti icin src/STIL.md. */
 
 
-/* ---------- kart ---------- */
+/* ---------- kart ----------
+   Tek kart stili. Vurgu için renkli kenarlık kullanılmaz; başlığın yanına
+   rozet konur. Gölge bir kenarlık kadar sessizdir — kart sayfadan kopmaz,
+   yalnızca zemininden bir kâğıt kalınlığı ayrılır. */
 .card{
   background:var(--surface);
   border:1px solid var(--border);
@@ -716,60 +842,72 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
   padding:16px 18px;
   box-shadow:var(--shadow);
 }
-.card--flat{ box-shadow:none; background:var(--surface-2); }
+.card--flat{ box-shadow:none; background:var(--surface-2); border-color:transparent; }
 .card--pad-sm{ padding:12px 14px; }
-/* Vurgu icin renkli kenarlik kullanilmaz; rozet veya baslik tonu kullanilir.
-   Eski sinif adlari geriye donuk uyum icin durur ama gorsel etkisi yoktur. */
+/* Eski sinif adlari geriye donuk uyum icin durur ama gorsel etkisi yoktur. */
 .card--accent, .card--primary, .card--danger{ border-left:1px solid var(--border); }
 .card__head{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
   flex-wrap:wrap;
   margin-bottom:12px;
 }
 .card__head > div:first-child{ min-width:min(100%, 180px); flex:1 1 auto; }
-.card__head h3{ font-size:var(--fs-md); }
-.card__head p{ font-size:var(--fs-sm); color:var(--text-2); margin-top:2px; }
-.card__foot{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+.card__head h3{
+  font-size:var(--fs-md); font-weight:700; letter-spacing:-.01em;
+  display:flex; align-items:center; gap:6px;
+}
+.card__head p{ font-size:var(--fs-sm); color:var(--text-3); margin-top:2px; line-height:1.4; }
+.card__foot{
+  margin-top:14px; padding-top:12px; border-top:1px solid var(--border);
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
 
 .section-title{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
-  margin:6px 0 2px;
+  margin:4px 0 0;
 }
-.section-title h2{ font-size:var(--fs-lg); }
+.section-title h2{ font-size:var(--fs-lg); font-weight:800; letter-spacing:-.015em; }
 
 /* ---------- dugme ---------- */
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
-  padding:8px 14px;
-  border-radius:var(--r-sm);
-  border:1px solid var(--border-strong);
+  padding:8px 13px;
+  border-radius:10px;
+  border:1px solid var(--border);
   background:var(--surface);
   color:var(--text);
-  font-size:var(--fs-base); font-weight:600;
+  font-size:var(--fs-sm); font-weight:650;
   white-space:nowrap;
-  transition:background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  box-shadow:0 1px 1px rgba(16,18,27,.03);
+  transition:background var(--dur) var(--ease), border-color var(--dur) var(--ease),
+             transform var(--dur) var(--ease);
 }
-.btn svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.8; flex:none; }
-.btn:hover{ background:var(--surface-2); }
-.btn--primary{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); }
+.btn svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.9; flex:none; }
+.btn:hover{ background:var(--surface-2); border-color:var(--border-strong); }
+.btn--primary{
+  background:var(--primary); border-color:var(--primary); color:var(--primary-ink);
+  box-shadow:0 1px 2px color-mix(in srgb, var(--primary) 30%, transparent);
+}
 .btn--primary:hover{ background:var(--primary-hover); border-color:var(--primary-hover); }
 .btn--danger{ color:var(--danger); border-color:color-mix(in srgb, var(--danger) 45%, var(--border)); background:transparent; }
 .btn--danger:hover{ background:var(--danger-soft); }
 .btn--ghost{ border-color:transparent; background:transparent; color:var(--text-2); }
 .btn--ghost:hover{ background:var(--surface-2); color:var(--text); }
-.btn--sm{ padding:5px 10px; font-size:var(--fs-sm); border-radius:var(--r-sm); }
-.btn--lg{ padding:11px 18px; font-size:var(--fs-md); border-radius:var(--r-sm); }
+.btn--sm{ padding:5px 10px; font-size:var(--fs-sm); border-radius:9px; }
+.btn--lg{ padding:11px 18px; font-size:var(--fs-md); border-radius:12px; }
 .btn--block{ width:100%; }
 .btn:disabled{ opacity:.45; cursor:not-allowed; }
 
 .iconbtn{
   width:34px; height:34px; flex:none;
   display:inline-grid; place-items:center;
-  border-radius:var(--r-sm); border:1px solid var(--border-strong);
-  background:var(--surface); color:var(--text);
+  border-radius:10px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text-2);
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 .iconbtn svg{ width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:1.8; }
-.iconbtn:hover{ background:var(--surface-2); }
+.iconbtn:hover{ background:var(--surface-2); color:var(--text); border-color:var(--border-strong); }
+.iconbtn.is-on{ background:var(--primary-soft); color:var(--primary); border-color:transparent; }
 .iconbtn--plain{ border-color:transparent; background:transparent; }
 .iconbtn--sm{ width:26px; height:26px; border-radius:var(--r-sm); }
 .iconbtn--sm svg{ width:14px; height:14px; }
@@ -781,14 +919,18 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .input, .select, .textarea{
   width:100%;
   padding:8px 11px;
-  border-radius:var(--r-sm);
+  border-radius:10px;
   border:1px solid var(--border-strong);
   background:var(--surface);
   color:var(--text);
   font-size:var(--fs-base);
+  transition:border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
 .input::placeholder, .textarea::placeholder{ color:var(--text-3); }
-.input:focus, .select:focus, .textarea:focus{ outline:2px solid var(--primary); outline-offset:0; border-color:var(--primary); }
+.input:focus, .select:focus, .textarea:focus{
+  outline:none; border-color:var(--primary);
+  box-shadow:0 0 0 3px var(--ring);
+}
 .textarea{ resize:vertical; min-height:72px; line-height:1.45; }
 .input--sm{ padding:5px 8px; font-size:var(--fs-sm); border-radius:var(--r-sm); }
 .input--num{ text-align:right; font-variant-numeric:tabular-nums; }
@@ -799,13 +941,21 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .check input{ margin-top:3px; accent-color:var(--primary); flex:none; width:15px; height:15px; }
 .check.is-done > span{ color:var(--text-3); text-decoration:line-through; }
 
-.seg{ display:inline-flex; padding:3px; gap:2px; background:var(--surface-2); border-radius:var(--r-sm); }
+.seg{
+  display:inline-flex; padding:3px; gap:2px;
+  background:var(--surface-2); border:1px solid var(--border);
+  border-radius:11px;
+}
 .seg button{
-  border:none; background:none; border-radius:var(--r-sm);
-  padding:5px 11px; font-size:var(--fs-sm); font-weight:600; color:var(--text-2);
+  border:none; background:none; border-radius:8px;
+  padding:5px 11px; font-size:var(--fs-sm); font-weight:650; color:var(--text-2);
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 .seg button:hover{ color:var(--text); }
-.seg button.is-on{ background:var(--surface); color:var(--text); box-shadow:var(--shadow); }
+.seg button.is-on{
+  background:var(--surface); color:var(--text);
+  box-shadow:0 1px 2px rgba(16,18,27,.08);
+}
 .seg--block{ display:flex; }
 .seg--block button{ flex:1; }
 .seg--primary button.is-on{ background:var(--primary); color:var(--primary-ink); }
@@ -813,8 +963,9 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 /* ---------- rozet / etiket ---------- */
 .badge{
   display:inline-flex; align-items:center; gap:5px;
-  padding:2px 9px; border-radius:20px;
+  padding:2px 8px; border-radius:var(--r-pill);
   font-size:var(--fs-xs); font-weight:700; white-space:nowrap;
+  line-height:1.5;
 }
 .badge svg{ width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2.2; }
 .badge--ok{ background:var(--primary-soft); color:var(--primary); }
@@ -825,7 +976,7 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 
 .chip{
   display:inline-flex; align-items:center; gap:6px;
-  padding:4px 10px; border-radius:20px;
+  padding:4px 10px; border-radius:var(--r-pill);
   border:1px solid var(--border); background:var(--surface-2);
   font-size:var(--fs-sm); font-weight:600; color:var(--text-2);
 }
@@ -837,10 +988,10 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .stat{
   display:flex; flex-direction:column; gap:3px;
   padding:13px 15px;
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm);
 }
 .stat__label{ font-size:var(--fs-xs); font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-3); }
-.stat__value{ font-family:var(--font-display); font-size:var(--fs-xl); font-weight:800; font-variant-numeric:tabular-nums; line-height:1.1; }
+.stat__value{ font-family:var(--font-display); font-size:var(--fs-xl); font-weight:800; font-variant-numeric:tabular-nums; line-height:1.1; letter-spacing:-.02em; }
 .stat__value small{ font-size:var(--fs-md); font-weight:700; color:var(--text-3); }
 .stat__note{ font-size:var(--fs-xs); color:var(--text-2); }
 .stat--ok .stat__value{ color:var(--primary); }
@@ -955,6 +1106,11 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   z-index:var(--z-toast);
   display:flex; flex-direction:column; gap:8px; align-items:center;
   pointer-events:none;
+  max-width:calc(100vw - 24px);
+}
+/* Mobilde alt gezinme çubuğunun üstünde durur; içeriği örtmez. */
+@media (max-width:1000px){
+  .toast-root{ bottom:calc(74px + env(safe-area-inset-bottom)); }
 }
 .toast{
   background:var(--text); color:var(--bg);
@@ -965,20 +1121,50 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 }
 @keyframes toast-in{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:none;} }
 
-/* ---------- alt sekmeler ---------- */
+/* ---------- alt sekmeler ----------
+   İnce bir alt çizgi yerine SEÇİLEBİLİR hap şeridi. Bir ekranın kaç bölüme
+   ayrıldığı ve hangisinde olduğun tek bakışta görünür; dokunma hedefi de
+   çizginin değil hapın tamamıdır.
+
+   Şerit yatayda kaydırılabilir: dar ekranda sekmeler alt satıra sarmaz,
+   çünkü sarılan bir sekme şeridi hangi bölümde olduğunu gizler. */
 .subtabs{
-  display:flex; gap:4px; flex-wrap:wrap;
-  border-bottom:1px solid var(--border);
-  margin-bottom:4px;
+  display:inline-flex; gap:3px;
+  max-width:100%;
+  padding:4px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
 }
+.subtabs::-webkit-scrollbar{ display:none; }
 .subtab{
-  border:none; background:none;
-  padding:8px 12px; margin-bottom:-1px;
-  border-bottom:2px solid transparent;
-  font-size:var(--fs-base); font-weight:700; color:var(--text-2);
+  flex:0 0 auto;
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  border:none; background:none; border-radius:9px;
+  padding:8px 16px; white-space:nowrap;
+  font-size:var(--fs-sm); font-weight:650; color:var(--text-2);
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
-.subtab:hover{ color:var(--text); }
-.subtab.is-active{ color:var(--primary); border-bottom-color:var(--primary); }
+.subtab svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.9; flex:none; }
+.subtab:hover{ color:var(--text); background:color-mix(in srgb, var(--surface) 60%, transparent); }
+.subtab.is-active{
+  background:var(--surface); color:var(--text); font-weight:700;
+  box-shadow:0 1px 2px rgba(16,18,27,.09);
+}
+.subtab__count{
+  min-width:18px; padding:0 5px; border-radius:var(--r-pill);
+  background:var(--surface-3); color:var(--text-3);
+  font-size:10.5px; font-weight:700; line-height:17px; text-align:center;
+}
+.subtab.is-active .subtab__count{ background:var(--primary-soft); color:var(--primary); }
+/* Dar ekranda şerit genişliği doldurur ve sekmeler eşit paylaşır. */
+@media (max-width:720px){
+  .subtabs{ display:flex; width:100%; }
+  .subtab{ flex:1 1 auto; padding:8px 10px; }
+}
 
 /* ---------- grafik ---------- */
 .chart{ width:100%; display:block; }
@@ -1124,6 +1310,12 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .nextup--calm{ background:var(--surface); border-color:var(--border); }
 .nextup--calm .nextup__icon{ background:var(--surface-3); color:var(--text-2); }
 .nextup--calm .nextup__label{ color:var(--text-3); }
+/* Dar ekranda eylem düğmesi gövdeyi sıkıştırmasın: alt satıra iner. */
+@media (max-width:640px){
+  .nextup{ flex-wrap:wrap; }
+  .nextup__body{ flex:1 1 100%; }
+  .nextup .btn{ width:100%; }
+}
 
 /* ---------- davranis serisi ---------- */
 .streak{ display:flex; align-items:center; gap:9px; }
@@ -1498,8 +1690,10 @@ button.listitem.is-on{ background:var(--primary-soft); }
 /* ---------- masa notları (proaktif uyarılar) ---------- */
 .notes{ display:flex; flex-direction:column; gap:6px; }
 .note{
-  display:grid; grid-template-columns:8px minmax(0,1fr) auto; gap:9px; align-items:center;
-  padding:8px 10px; border-radius:var(--r-sm);
+  /* İlk sütun ya küçük bir nokta ya da bir ajan avatarı taşır; bu yüzden
+     sabit değil içeriğe göre genişler. */
+  display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:9px; align-items:center;
+  padding:8px 10px; border-radius:10px;
   background:var(--surface-2); font-size:var(--fs-sm); line-height:1.45;
 }
 .note__dot{ width:8px; height:8px; border-radius:50%; background:var(--text-3); }
@@ -1608,7 +1802,9 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .markerrow__val small{ font-weight:600; font-size:var(--fs-xs); color:var(--text-3); margin-left:3px; }
 .markerrow__bar{ grid-column:1 / -1; }
 .markerrow__note{ grid-column:1 / -1; font-size:var(--fs-sm); color:var(--text-2); }
-.markerrow--empty .markerrow__val{ color:var(--text-3); font-weight:600; }
+.markerrow--empty{ padding:7px 0; }
+.markerrow--empty .markerrow__name{ color:var(--text-2); font-weight:550; }
+.markerrow--empty .markerrow__val{ color:var(--text-3); font-weight:600; font-size:var(--fs-base); }
 
 /* ---------- kırmızı bayrak ---------- */
 .flagcard{
@@ -1688,7 +1884,12 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .minrow{
   display:flex; align-items:center; gap:10px; padding:7px 0;
   border-top:1px solid var(--border); font-size:var(--fs-sm);
+  /* Kalıp dengesinde satır bir düğmedir; tarayıcı varsayılanları sıfırlanır. */
+  background:none; border-left:0; border-right:0; border-bottom:0;
+  color:inherit; font-family:inherit; text-align:left; width:100%;
 }
+button.minrow{ cursor:pointer; border-radius:8px; padding:7px 6px; }
+button.minrow:hover{ background:var(--surface-2); }
 .minrow:first-child{ border-top:0; }
 .minrow__mark{
   width:20px; height:20px; border-radius:50%; flex:none;
@@ -1696,7 +1897,7 @@ button.listitem.is-on{ background:var(--primary-soft); }
   background:var(--surface-3); color:var(--text-3);
 }
 .minrow.is-done .minrow__mark{ background:var(--primary); color:var(--primary-ink); }
-.minrow__label{ flex:1; min-width:0; }
+.minrow__label{ flex:1; min-width:0; line-height:1.35; }
 .minrow__detail{ color:var(--text-3); font-variant-numeric:tabular-nums; white-space:nowrap; }
 
 /* ---------- toparlanma bileşenleri ---------- */
@@ -1766,6 +1967,103 @@ button.listitem.is-on{ background:var(--primary-soft); }
   font-variant-numeric:tabular-nums; margin:2px 0 6px;
 }
 .nutcell__val small{ font-size:var(--fs-xs); font-weight:600; color:var(--text-3); }
+.nutcell__pct{
+  display:flex; justify-content:space-between; gap:8px; margin-top:5px;
+  font-size:var(--fs-xs); color:var(--text-3); font-variant-numeric:tabular-nums;
+}
+.nutcell__over{ color:var(--danger); font-weight:700; }
+
+/* ---------- görünüm paneli ----------
+   Tema ve palet seçimi üst çubuktan tek dokunuşla açılır. Ayarların içine
+   gömülü bir tercih, hiç kullanılmayan bir tercihtir. */
+.appear{
+  position:absolute; z-index:var(--z-overlay);
+  width:308px; padding:14px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; box-shadow:var(--shadow-lg);
+}
+.appear__label{
+  font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--text-3); margin-bottom:7px;
+}
+.appear__label:not(:first-child){ margin-top:16px; }
+.appear__themes{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.themebtn{
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding:10px 6px; border-radius:11px;
+  border:1px solid var(--border); background:var(--surface);
+  color:var(--text-2); font-size:var(--fs-xs); font-weight:650;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.themebtn svg{ width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:1.8; }
+.themebtn:hover{ background:var(--surface-2); }
+.themebtn.is-on{ border-color:var(--primary); background:var(--primary-soft); color:var(--primary); }
+
+.appear__palettes{ display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
+.palbtn{
+  display:flex; align-items:center; gap:7px;
+  padding:7px 8px; border-radius:10px;
+  border:1px solid var(--border); background:var(--surface);
+  color:var(--text-2); font-size:var(--fs-xs); font-weight:650;
+  min-width:0;
+}
+.palbtn:hover{ background:var(--surface-2); }
+.palbtn.is-on{ border-color:var(--primary); background:var(--primary-soft); color:var(--primary); }
+.palbtn__dot{
+  width:14px; height:14px; border-radius:50%; flex:none;
+  border:1px solid rgba(0,0,0,.12);
+}
+.palbtn span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.appear__note{ margin-top:12px; font-size:var(--fs-xs); color:var(--text-3); line-height:1.45; }
+
+/* ---------- seçilebilir kart ----------
+   Antrenman hareketleri, seans şablonları ve porsiyon seçimi gibi
+   "birden çoğunu işaretle" durumları için. Onay kutusu bir satırda
+   kaybolur; kart tıklanabilir bir hedeftir ve seçili olduğu bellidir. */
+.picks{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(210px,1fr));
+  gap:8px;
+}
+.pickcard{
+  position:relative; text-align:left; width:100%;
+  display:flex; align-items:flex-start; gap:10px;
+  padding:11px 12px; border-radius:12px;
+  border:1px solid var(--border); background:var(--surface);
+  color:inherit; font:inherit;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.pickcard:hover{ background:var(--surface-hover); border-color:var(--border-strong); }
+.pickcard.is-on{ border-color:var(--primary); background:var(--primary-soft); }
+.pickcard__box{
+  width:18px; height:18px; flex:none; margin-top:1px;
+  border-radius:6px; border:1.5px solid var(--border-strong);
+  display:grid; place-items:center;
+  color:transparent; font-size:11px; font-weight:800;
+}
+.pickcard.is-on .pickcard__box{
+  background:var(--primary); border-color:var(--primary); color:var(--primary-ink);
+}
+.pickcard__body{ min-width:0; flex:1; }
+.pickcard__name{ display:block; font-size:var(--fs-sm); font-weight:650; line-height:1.3; }
+.pickcard__meta{ display:block; font-size:var(--fs-xs); color:var(--text-3); margin-top:2px; line-height:1.35; }
+
+/* ---------- ekran araç şeridi ----------
+   Sekme şeridi ile o bölüme ait eylemi aynı satırda tutar. */
+.toolbar{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  margin-bottom:2px;
+}
+.toolbar__tabs{ flex:1 1 320px; min-width:0; }
+.toolbar__actions{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+
+/* ---------- büyük ölçüm ----------
+   Ekranın tek ana sayısı: toparlanma skoru, haftalık maliyet, seri. */
+.kpi{ display:flex; align-items:baseline; gap:8px; }
+.kpi__value{
+  font-family:var(--font-display); font-size:var(--fs-hero); font-weight:800;
+  font-variant-numeric:tabular-nums; line-height:1; letter-spacing:-.03em;
+}
+.kpi__unit{ font-size:var(--fs-sm); font-weight:650; color:var(--text-3); }
 
 /* ---------- danışma sohbeti ----------
    Baloncuk düzeni: kullanıcı sağda, ajan solda. Ajan balonunun altında
@@ -1880,19 +2178,21 @@ button.listitem.is-on{ background:var(--primary-soft); }
 
 window.SP = window.SP || {};
 
+/* Panel adlari ve notlari EKRANDA gorunur; bu yuzden duzgun Turkce yazilir.
+   Kod yorumlari ASCII kalabilir, kullaniciya giden metin kalamaz. */
 SP.PANELS = [
-  { id:'vital',      name:'Vital bulgular',     note:'Evde olculebilen gunluk degerler' },
-  { id:'body',       name:'Vucut olcumleri',    note:'Kilo, cevre ve bilesim' },
-  { id:'hemogram',   name:'Hemogram',           note:'Tam kan sayimi' },
-  { id:'iron',       name:'Demir paneli',       note:'Depo ve tasima kapasitesi' },
-  { id:'metabolic',  name:'Seker metabolizmasi',note:'Glukoz, insulin ve direnc' },
-  { id:'lipid',      name:'Lipid paneli',       note:'Kolesterol ve trigliserit' },
-  { id:'liver',      name:'Karaciger',          note:'Enzimler ve protein' },
-  { id:'kidney',     name:'Bobrek',             note:'Atik urunler ve suzme hizi' },
-  { id:'electro',    name:'Elektrolitler',      note:'Mineral dengesi' },
-  { id:'vitamin',    name:'Vitamin ve mineral', note:'Depo durumu' },
-  { id:'hormone',    name:'Hormonlar',          note:'Tiroid ve steroid' },
-  { id:'inflam',     name:'Inflamasyon',        note:'Sistemik yangi belirtecleri' },
+  { id:'vital',      name:'Vital bulgular',      note:'Evde ölçülebilen günlük değerler' },
+  { id:'body',       name:'Vücut ölçüleri',      note:'Kilo, çevre ve bileşim' },
+  { id:'hemogram',   name:'Hemogram',            note:'Tam kan sayımı' },
+  { id:'iron',       name:'Demir paneli',        note:'Depo ve taşıma kapasitesi' },
+  { id:'metabolic',  name:'Şeker metabolizması', note:'Glukoz, insülin ve direnç' },
+  { id:'lipid',      name:'Lipid paneli',        note:'Kolesterol ve trigliserit' },
+  { id:'liver',      name:'Karaciğer',           note:'Enzimler ve protein' },
+  { id:'kidney',     name:'Böbrek',              note:'Atık ürünler ve süzme hızı' },
+  { id:'electro',    name:'Elektrolitler',       note:'Mineral dengesi' },
+  { id:'vitamin',    name:'Vitamin ve mineral',  note:'Depo durumu' },
+  { id:'hormone',    name:'Hormonlar',           note:'Tiroit ve steroit' },
+  { id:'inflam',     name:'İnflamasyon',         note:'Sistemik yangı belirteçleri' },
 ];
 
 SP.BIOMARKERS = [
@@ -4428,6 +4728,7 @@ SP.S = {
     kitchenDish:null,      // mutfakta paylastirilan yemek
     kitchenGrams:1000,
     moveTab:'bugun',       // bugun | program | ilerleme
+    movePattern:'all',     // program bolumundeki kalip seridinde secili olan
     workoutOpen:null,
     basketTab:'sepet',     // sepet | ikame | toplu
     priceEdit:null,
@@ -6008,21 +6309,29 @@ SP.Move = (function(){
     let factor = r.ok ? r.band.factor : 1;
     const reasons = [];
 
+    /* Her gerekce kimliklidir: ekran skoru zaten buyuk yaziyorsa ayni cumleyi
+       ikinci kez basmasin diye 'readiness' gerekcesini eleyebilir. */
     if(r.ok){
-      reasons.push({ kind:r.band.tone, text:'Toparlanma ' + r.score + '/100 — ' + r.band.label + '. ' + r.band.order });
+      reasons.push({ id:'readiness', kind:r.band.tone,
+        text:'Toparlanma ' + r.score + '/100 — ' + r.band.label + '. ' + r.band.order,
+        short:r.band.order });
     }else{
-      reasons.push({ kind:'muted', text:r.note + ' Yük planlandığı gibi kabul edildi.' });
+      reasons.push({ id:'no-data', kind:'muted',
+        text:r.note + ' Yük planlandığı gibi kabul edildi.',
+        short:r.note });
     }
     if(r.override){
-      reasons.push({ kind:'danger', text:r.override.why });
+      reasons.push({ id:'override', kind:'danger', text:r.override.why, short:r.override.why });
     }
     if(a.ok && a.zone === 'high'){
       factor = Math.min(factor, 0.7);
-      reasons.push({ kind:'danger', text:'Akut/kronik yük oranı ' + U.fmtNet(a.ratio) + '. ' + a.note });
+      const t = 'Akut/kronik yük oranı ' + U.fmtNet(a.ratio) + '. ' + a.note;
+      reasons.push({ id:'acwr', kind:'danger', text:t, short:t });
     }
     if(dl.due){
       factor = Math.min(factor, dl.factor);
-      reasons.push({ kind:'warn', text:dl.week + '. hafta — yük indirme haftası. ' + dl.note });
+      const t = dl.week + '. hafta — yük indirme haftası. ' + dl.note;
+      reasons.push({ id:'deload', kind:'warn', text:t, short:t });
     }
 
     const kind = factor === 0 ? 'rest' : factor <= 0.6 ? 'light' : factor < 1 ? 'reduced' : 'full';
@@ -6486,7 +6795,8 @@ SP.Calc = (function(){
     const due = SP.Bio.overdue();
     if(due.length){
       return { id:'panel', rank:3, tone:'info', icon:'flask',
-        label:'Ölçüm', title:due[0].panel.name + ' paneli bekliyor',
+        label:'Ölçüm', title:(/paneli$/i.test(due[0].panel.name)
+          ? due[0].panel.name : due[0].panel.name + ' paneli') + ' bekliyor',
         why:due[0].note + ' Eğilim okumak için düzenli aralık gerekir.',
         route:'labs', action:'Tahlil sonucunu gir.' };
     }
@@ -7078,6 +7388,19 @@ SP.UI = (function(){
     pill:'<rect x="2.8" y="8.6" width="18.4" height="6.8" rx="3.4" transform="rotate(-45 12 12)"/><path d="M8.5 8.5l7 7"/>',
     fire:'<path d="M12 3.5c3.5 3.4 5.5 6 5.5 8.9a5.5 5.5 0 11-11 0c0-1.5.6-2.9 1.7-4.2.4 1.2 1 2 1.9 2.4C10.5 8.4 11 5.9 12 3.5z"/>',
     bed:'<path d="M3 19v-8M3 13h18v6M7.5 10.5h3.5a2 2 0 012 2v.5"/><path d="M3 19h18"/>',
+
+    /* --- gorunum --- */
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8'
+      + 'M2 12h2.5M19.5 12H22M4.2 19.8L6 18M18 6l1.8-1.8"/>',
+    moon2:'<path d="M20.5 14.8A8.6 8.6 0 019.2 3.5a8.6 8.6 0 1011.3 11.3z"/>',
+    monitor:'<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8.5 21h7M12 17v4"/>',
+    palette:'<path d="M12 3.5a8.5 8.5 0 000 17c1.2 0 1.9-.8 1.9-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2'
+      + ' 0-1 .8-1.8 1.9-1.8h1.4a4.3 4.3 0 004.3-4.3c0-3.9-3.8-6.7-8.5-6.7z"/>'
+      + '<circle cx="7.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"/>'
+      + '<circle cx="10.5" cy="7" r="1.1" fill="currentColor" stroke="none"/>'
+      + '<circle cx="15" cy="7.8" r="1.1" fill="currentColor" stroke="none"/>',
+    sliders:'<path d="M4 7h10M18 7h2M4 12h4M12 12h8M4 17h9M17 17h3"/>'
+      + '<circle cx="16" cy="7" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="15" cy="17" r="2"/>',
   };
 
   function icon(name, cls){
@@ -7227,12 +7550,21 @@ SP.UI = (function(){
   }
 
   /* Makro dagilimi — protein/yag/karbonhidrat oranini tek seritte verir.
-     Segment renkleri kimliktir (hangi makro), durum degil. */
+     Segment renkleri kimliktir (hangi makro), durum degil.
+
+     Girdi KALORI cinsindendir ama efsanede YUZDE yazar: "Protein 384" gibi
+     bir sayi okuyucuya hicbir sey soylemez, "Protein %28" soyler. */
   function macroSplit(macros){
+    const p = Math.max(0, macros.protein || 0);
+    const f = Math.max(0, macros.fat || 0);
+    const c = Math.max(0, macros.carb || 0);
+    const total = p + f + c;
+    if(!total) return '<p class="small dim">Makro dağılımı için öğün gerekir.</p>';
+    const seg = (label, v, color) => ({ label:label + ' %' + Math.round(100 * v / total), value:v, color });
     return stackBar([
-      { label:'Protein', value:Math.round(macros.protein || 0), color:'var(--macro-protein)' },
-      { label:'Yağ', value:Math.round(macros.fat || 0), color:'var(--macro-fat)' },
-      { label:'Karbonhidrat', value:Math.round(macros.carb || 0), color:'var(--macro-carb)' },
+      seg('Protein', p, 'var(--macro-protein)'),
+      seg('Yağ', f, 'var(--macro-fat)'),
+      seg('Karbonhidrat', c, 'var(--macro-carb)'),
     ]);
   }
 
@@ -7506,9 +7838,17 @@ SP.C = (function(){
       </div>`;
   }
 
+  /* Doluluk seridi.
+
+     Ton ACIKCA verilir. Eskiden %60 altindaki her deger kendiliginden
+     kirmiziya boyaniyordu; ogle saatinde gunluk hedefin yarisinda olmak
+     bir hata degildir ve arayuzu bos yere alarma cevirir. Esige gore
+     renklendirme isteniyorsa `auto:true` ile acikca istenir. */
   function Bar(o){
     const pct = Math.max(0, Math.min(100, Number(o.value) || 0));
-    const tone = o.tone || (pct >= 85 ? '' : pct >= 60 ? 'warn' : 'danger');
+    const tone = o.tone != null && o.tone !== ''
+      ? o.tone
+      : (o.auto ? (pct >= 85 ? '' : pct >= 60 ? 'warn' : 'danger') : '');
     return html`<div class="${cls('bar', o.large && 'bar--lg')}">
       <div class="${cls('bar__fill', tone && 'bar__fill--'+tone)}" style="width:${pct}%"></div>
     </div>`;
@@ -7539,11 +7879,13 @@ SP.C = (function(){
 
   /* ---------- etkilesim ---------- */
 
+  /* Etiket ayri bir span icinde durur: dar ekranda yazi gizlenip ikon
+     kalabilsin diye. Ikonu olmayan dugmede etiket her zaman gorunur. */
   function Button(o){
     return html`<button
       class="${cls('btn', o.tone && 'btn--'+o.tone, o.size && 'btn--'+o.size, o.block && 'btn--block', o.class)}"
       ${attrs(Object.assign({ 'data-act':o.act, disabled:o.disabled, 'aria-label':o.aria, title:o.title }, o.data || {}))}
-    >${when(o.icon, () => icon(o.icon))}${o.label}</button>`;
+    >${when(o.icon, () => icon(o.icon))}<span class="btn__label">${o.label}</span></button>`;
   }
 
   function IconButton(o){
@@ -7561,12 +7903,39 @@ SP.C = (function(){
     </div>`;
   }
 
-  /* Ekran ici sekmeler: [{id,label}] + aktif id */
+  /* Ekran ici sekmeler: [{id, label, icon?, count?}] + aktif id.
+
+     Ince alt cizgi yerine secilebilir hap seridi: bir ekranin kac bolume
+     ayrildigi ve hangisinde oldugun tek bakista gorunur. Sayac verilirse
+     sekmenin sagina yazilir — hangi bolumde is bekledigi gizlenmez. */
   function Subtabs(o){
     return html`<div class="subtabs" role="tablist" ${attrs({ 'aria-label':o.aria })}>
       ${map(o.items, t => html`<button class="${cls('subtab', t.id === o.value && 'is-active')}"
         role="tab" aria-selected="${t.id === o.value ? 'true' : 'false'}"
-        ${attrs({ 'data-act':o.act, 'data-tab':t.id })}>${t.label}</button>`)}
+        ${attrs({ 'data-act':o.act, 'data-tab':t.id })}
+      >${when(t.icon, () => icon(t.icon))}${t.label}${when(t.count,
+        () => html`<span class="subtab__count">${t.count}</span>`)}</button>`)}
+    </div>`;
+  }
+
+  /* Secilebilir kart — "birden cogunu isaretle" durumlari icin.
+     Onay kutusu uzun listede kaybolur; kartin tamami dokunma hedefidir. */
+  function PickCard(o){
+    return html`<button class="${cls('pickcard', o.on && 'is-on')}"
+      ${attrs(Object.assign({ 'data-act':o.act, 'aria-pressed':o.on ? 'true' : 'false' }, o.data || {}))}>
+      <span class="pickcard__box" aria-hidden="true">&#10003;</span>
+      <span class="pickcard__body">
+        <span class="pickcard__name">${o.label}</span>
+        ${when(o.meta, () => html`<span class="pickcard__meta">${o.meta}</span>`)}
+      </span>
+    </button>`;
+  }
+
+  /* Ekran arac seridi: sekme seridi ile o bolume ait eylemi ayni satirda tutar. */
+  function Toolbar(o){
+    return html`<div class="toolbar">
+      <div class="toolbar__tabs">${o.tabs}</div>
+      ${when(o.actions, () => html`<div class="toolbar__actions">${o.actions}</div>`)}
     </div>`;
   }
 
@@ -7698,6 +8067,7 @@ SP.C = (function(){
 
   return {
     Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, NextUp, Table, Pager, paginate,
     Grid, Span, Stack, Cols, Row, SectionTitle,
   };
@@ -7727,11 +8097,24 @@ SP.Parts = (function(){
     return K.Badge({ label:c.label, tone:c.tone, icon:false });
   }
 
-  /* Bir biyobelirtec satiri: ad, deger, durum, referans cubugu ve gerekce. */
+  /* Bir biyobelirtec satiri: ad, deger, durum, referans cubugu ve gerekce.
+
+     Hic olculmemis satir TEK SATIRA iner. Bos bir olcum icin uc satir yer
+     ayirmak paneli sisirir ve olculmus degerleri gormeyi zorlastirir. */
   function markerRow(row, opts){
     const o = opts || {};
     const b = row.marker;
     const has = row.value != null;
+    if(!has){
+      return html`
+        <div class="markerrow markerrow--empty">
+          <div class="markerrow__head">
+            <span class="markerrow__name">${b.name}</span>
+            ${K.Badge({ label:'veri yok', tone:'muted', icon:false })}
+          </div>
+          <div class="markerrow__val num">—<small>${b.unit}</small></div>
+        </div>`;
+    }
     return html`
       <div class="${cls('markerrow', !has && 'markerrow--empty')}">
         <div class="markerrow__head">
@@ -7783,18 +8166,24 @@ SP.Parts = (function(){
       : K.Badge({ label:'kural motoru', tone:'muted', icon:false });
   }
 
-  /* Besin ogesi hucresi — hedefe gore doluluk. */
+  /* Besin ogesi hucresi — hedefe gore doluluk.
+
+     Serit NOTR renktedir. Gunun ortasinda hedefin yarisinda olmak bir hata
+     degildir; her eksigi kirmiziya boyamak arayuzu bos yere alarma cevirir
+     ve gercek uyarilari gormeyi zorlastirir. Yalnizca SINIR tipindeki bir
+     ogenin (sodyum) asilmasi kirmizi ile isaretlenir. */
   function nutCell(o){
     const pct = o.target ? U.pct(o.got, o.target) : null;
-    const tone = pct == null ? '' : o.limit
-      ? (pct > 100 ? 'danger' : '')
-      : (pct >= 100 ? '' : pct >= 70 ? 'warn' : 'danger');
+    const over = o.limit && pct != null && pct > 100;
     return html`
       <div class="nutcell">
         <div class="nutcell__label">${o.label}</div>
         <div class="nutcell__val num">${U.fmtNum(U.round(o.got, o.digits == null ? 0 : o.digits))}<small> / ${U.fmtNum(o.target)} ${o.unit || ''}</small></div>
-        ${K.Bar({ value:pct == null ? 0 : Math.min(100, pct), tone })}
-        ${when(o.note, () => html`<div class="tiny dim mt-2">${o.note}</div>`)}
+        ${K.Bar({ value:pct == null ? 0 : Math.min(100, pct), tone:over ? 'danger' : '' })}
+        <div class="nutcell__pct">
+          <span class="${over ? 'nutcell__over' : ''}">%${pct == null ? '—' : pct}</span>
+          ${when(o.note, () => html`<span class="dim">${o.note}</span>`)}
+        </div>
       </div>`;
   }
 
@@ -9020,7 +9409,9 @@ SP.Office = (function(){
           + ' (' + a.statusLabel + '). ' + (a.verdict || ''));
       }
       if(d.overdue.length){
-        lines.push(d.overdue[0].panel + ' paneli ' + d.overdue[0].note.toLocaleLowerCase('tr-TR'));
+        const pn = d.overdue[0].panel;
+        lines.push((/paneli$/i.test(pn) ? pn : pn + ' paneli') + ' '
+          + d.overdue[0].note.toLocaleLowerCase('tr-TR'));
       }
       if(!d.attention.length && !d.flags.length) lines.push('Dikkat isteyen bir ölçüm yok.');
       return lines.join(' ');
@@ -9184,7 +9575,12 @@ SP.Office = (function(){
     };
 
     SP.Model.openFlags().forEach(f => add('lab', 'flag', f.label + ' — ' + f.detail));
-    SP.Bio.overdue().forEach(o => add('lab', 'gap', o.panel.name + ' paneli ' + o.note.toLocaleLowerCase('tr-TR')));
+    /* Panel adi zaten "Demir paneli" gibi olabilir; "paneli" iki kez yazilmaz. */
+    SP.Bio.overdue().forEach(o => {
+      const name = o.panel.name;
+      const label = /paneli$/i.test(name) ? name : name + ' paneli';
+      add('lab', 'gap', label + ' ' + o.note.toLocaleLowerCase('tr-TR'));
+    });
 
     const g = SP.Nutri.gaps(7);
     if(g.ok) g.rows.slice(0, 2).forEach(r => {
@@ -9667,23 +10063,27 @@ SP.Screens.today = (function(){
           <div class="mt-10">${K.Button({ label:'Bugünün ölçümünü gir', size:'sm', tone:'primary',
             act:'go', data:{ 'data-route':'vitals' } })}</div>` });
     }
+    /* Gerekcelerin tamami Hareket ekraninda durur; burada yalnizca bandin
+       emri gorunur. Ayni uyariyi iki ekranda tekrarlamak sadelik degil
+       gurultudur. */
     return K.Card({
       title:'Toparlanma', hint:'readiness',
-      sub:r.band.label,
-      badge:K.Badge({ label:r.score + '/100', tone:r.band.tone }),
+      badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
       body:html`
-        ${K.Meter({ label:'Skor', value:r.score, text:String(r.score), tone:r.band.tone })}
-        <div class="mt-10">${map(r.parts, p => html`
+        <div class="row wrap" style="gap:16px">
+          <div class="kpi"><span class="kpi__value">${r.score}</span><span class="kpi__unit">/ 100</span></div>
+          <div class="grow" style="min-width:160px">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
+        </div>
+        <div class="mt-12">${map(r.parts, p => html`
           <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
             <span class="readypart__label">${p.label}</span>
-            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(p.value)}</span>
+            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))}</span>
             <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
           </div>`)}</div>
-        ${when(r.missing.length, () => K.Notice({ tone:'info', class:'mt-10',
-          body:'Eksik girdi: ' + r.missing.join(', ') + '. Ağırlığı kalan girdilere dağıtıldı — '
-             + 'eksik veri sıfır sayılmaz.' }))}
-        ${map(rx.reasons, x => K.Notice({ tone:x.kind === 'muted' ? 'info' : x.kind, class:'mt-8', body:x.text }))}`,
-      foot:K.Button({ label:'Hareket ekranını aç', size:'sm', act:'go', data:{ 'data-route':'move' } }),
+        ${K.Notice({ tone:r.band.tone === 'ok' ? 'ok' : r.band.tone, class:'mt-12', body:r.band.order })}`,
+      foot:html`${K.Button({ label:'Hareket ekranını aç', size:'sm', act:'go', data:{ 'data-route':'move' } })}
+        ${when(r.missing.length, () => html`<span class="small dim">Eksik girdi:
+          ${r.missing.join(', ')} — ağırlığı kalanlara dağıtıldı.</span>`)}`,
     });
   }
 
@@ -9707,8 +10107,10 @@ SP.Screens.today = (function(){
 
     return K.Card({
       title:'Beslenme', sub:t.meals + ' öğün girildi',
+      /* Gün sürerken hedefin altında olmak bir hata değildir: yalnızca
+         hedefin belirgin ÜSTÜNE çıkmak uyarı tonuyla işaretlenir. */
       badge:K.Badge({ label:Math.round(t.kcal) + ' / ' + tg.kcal + ' kcal',
-        tone:t.kcal >= tg.kcal * 0.85 && t.kcal <= tg.kcal * 1.15 ? 'ok' : 'warn' }),
+        tone:t.kcal > tg.kcal * 1.15 ? 'warn' : 'info' }),
       body:html`
         ${raw(UI.macroSplit({ protein:t.protein * 4, fat:t.fat * 9, carb:t.carb * 4 }))}
         <div class="nutgrid mt-12">
@@ -9716,7 +10118,7 @@ SP.Screens.today = (function(){
           ${P.nutCell({ label:'Lif', got:t.fiber, target:tg.fiber, unit:'g' })}
           ${P.nutCell({ label:'Yağ', got:t.fat, target:tg.fat.min, unit:'g' })}
         </div>
-        ${map(t.notes.slice(0, 2), P.absorbNote)}`,
+        ${map(t.notes.slice(0, 1), P.absorbNote)}`,
       foot:K.Button({ label:'Öğünleri aç', size:'sm', act:'go', data:{ 'data-route':'meals' } }),
     });
   }
@@ -9724,7 +10126,7 @@ SP.Screens.today = (function(){
   function officeCard(){
     const d = U.todayISO();
     const b = S.officeBriefings[d];
-    const notes = SP.Office.notes().slice(0, 4);
+    const notes = SP.Office.notes().slice(0, 3);
     return K.Card({
       title:'Ofisten', hint:'office',
       sub:'Beş ajan · günün notu',
@@ -9827,7 +10229,7 @@ SP.Screens.today = (function(){
       return n.calm ? 'Sıradaki hamle yok' : n.label + ' · ' + n.title;
     },
     actions(){
-      return String(K.Button({ label:'Ölçüm gir', size:'sm', icon:'pulse',
+      return String(K.Button({ label:'Ölçüm gir', size:'sm', icon:'pulse', class:'btn--screen',
         act:'go', data:{ 'data-route':'vitals' } }));
     },
     render, handle,
@@ -9921,13 +10323,14 @@ SP.Screens.vitals = (function(){
       body:K.Notice({ tone:'info', body:r.note }) });
     return K.Card({
       title:'Toparlanma', hint:'readiness',
-      badge:K.Badge({ label:r.score + '/100', tone:r.band.tone }),
+      badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
       body:html`
-        ${K.Meter({ label:r.band.label, value:r.score, text:String(r.score), tone:r.band.tone })}
+        <div class="kpi"><span class="kpi__value">${r.score}</span><span class="kpi__unit">/ 100</span></div>
+        <div class="mt-8">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
         <div class="mt-10">${map(r.parts, p => html`
           <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
             <span class="readypart__label">${p.label}</span>
-            <span class="small dim">ağırlık %${Math.round(p.weight * 100)}</span>
+            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))} · ağırlık %${Math.round(p.weight * 100)}</span>
             <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
             <span class="readypart__note">${p.note}</span>
           </div>`)}</div>
@@ -10047,10 +10450,23 @@ SP.Screens.labs = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'panel', label:'Paneller' },
-    { id:'trend', label:'Eğilim' },
-    { id:'gecmis', label:'Geçmiş' },
+    { id:'panel',  label:'Paneller', icon:'layers' },
+    { id:'trend',  label:'Eğilim',   icon:'chart' },
+    { id:'gecmis', label:'Geçmiş',   icon:'clock' },
   ];
+
+  /* Sekme seridi ile o bolume ait eylem ayni satirda durur: deger eklemek
+     her bolumden tek dokunus uzakta kalir. */
+  function toolbar(tab){
+    const items = TABS.map(t => Object.assign({}, t,
+      t.id === 'gecmis' && S.labs.length ? { count:S.labs.length } : {}));
+    return K.Toolbar({
+      tabs:K.Subtabs({ items, value:tab, act:'lab-tab', aria:'Tahlil görünümü' }),
+      actions:html`${K.Button({ label:'Rapor yapıştır', icon:'flask', size:'sm', tone:'primary',
+        act:'open-paste' })}
+        ${K.Button({ label:'Elle gir', size:'sm', act:'open-manual' })}`,
+    });
+  }
 
   /* Yapistirma onizlemesi oturum boyunca burada durur; kaydedilene kadar
      hicbir sey depoya yazilmaz. */
@@ -10306,16 +10722,9 @@ SP.Screens.labs = (function(){
 
     return String(K.Grid([
       when(flags.length, () => K.Span(12, K.Stack(map(flags, P.flagCard), 'sm'))),
-      K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'lab-tab', aria:'Tahlil görünümü' })),
+      K.Span(12, toolbar(tab)),
       body,
       when(tab === 'panel', () => K.Span(4, K.Stack([
-        K.Card({ title:'Değer ekle', hint:'lab-paste',
-          body:html`<p class="small muted">Rapor metnini yapıştırmak elle yazmaktan
-            hem hızlı hem daha az hatalıdır.</p>
-            <div class="row wrap mt-12">
-              ${K.Button({ label:'Rapor yapıştır', tone:'primary', size:'sm', act:'open-paste' })}
-              ${K.Button({ label:'Elle gir', size:'sm', act:'open-manual' })}
-            </div>` }),
         overdueCard(),
         K.Card({ title:'Hesaplanan ölçümler', hint:'derived',
           body:html`<ul class="bullets small muted">${map(Object.keys(SP.DERIVED), id => {
@@ -10426,9 +10835,7 @@ SP.Screens.labs = (function(){
       if(f) return f + ' kırmızı bayrak açık';
       return s.measured + ' ölçüm · ' + s.out + ' referans dışı · ' + s.offTarget + ' hedef dışı';
     },
-    actions(){
-      return String(K.Button({ label:'Rapor yapıştır', size:'sm', icon:'flask', act:'open-paste' }));
-    },
+    actions(){ return ''; },
     render, handle, change,
   };
 })();
@@ -10820,7 +11227,7 @@ SP.Screens.meals = (function(){
         + (tg.ok ? ' / ' + tg.protein.min + ' g' : '');
     },
     actions(){
-      return String(K.Button({ label:'Mutfak', size:'sm', icon:'meal',
+      return String(K.Button({ label:'Mutfak', size:'sm', icon:'leaf', class:'btn--screen',
         act:'go', data:{ 'data-route':'kitchen' } }));
     },
     render, handle, change, guessSlot,
@@ -10994,10 +11401,17 @@ SP.Screens.kitchen = (function(){
 /* ==== js/screens/move.js ==== */
 /* Hareket — Modül 3'ün ekranı.
 
-   Üç sekme:
+   Ekran üç bölüme ayrılır ve bölümler seçilebilir bir şerittir, ince bir alt
+   çizgi değil:
+
      Bugün     toparlanmaya göre günün yük emri ve seans kaydı
-     Program   hareket merdivenleri ve kalıp dengesi
+     Program   hareket merdivenleri — kalıba göre ikinci bir şeritle ayrılır
      İlerleme  yük eğrisi, akut/kronik oran, indirme haftası
+
+   Program bölümünde hareketler KALIBA göre ayrılır (itme, çekme, çömelme,
+   kalça, gövde, taşıma, dayanıklılık, mobilite). Böylece "bugün ne
+   çalışacağım" sorusu tek dokunuşla cevaplanır ve haftada hangi kalıbın
+   eksik kaldığı gizlenmez.
 
    Ekranın kuralı: sistem yükü kendiliğinden azaltabilir ama asla
    kendiliğinden artıramaz. Artırma kararı hep kullanıcınındır. */
@@ -11011,30 +11425,88 @@ SP.Screens.move = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'bugun', label:'Bugün' },
-    { id:'program', label:'Program' },
-    { id:'ilerleme', label:'İlerleme' },
+    { id:'bugun',    label:'Bugün',    icon:'today' },
+    { id:'program',  label:'Program',  icon:'layers' },
+    { id:'ilerleme', label:'İlerleme', icon:'chart' },
   ];
 
-  /* --------------------------------------------------------------- bugun */
+  /* Program bölümünün ikinci şeridi. "Tümü" ilk sırada durur ki kullanıcı
+     kalıp seçmeye mecbur kalmasın. */
+  function patternTabs(){
+    const rows = SP.Move.patternBalance();
+    const byId = {};
+    rows.forEach(r => { byId[r.pattern.id] = r.count; });
+    return [{ id:'all', label:'Tümü' }]
+      .concat(SP.PATTERNS.map(p => ({ id:p.id, label:p.label, count:byId[p.id] || null })))
+      .concat([
+        { id:'cardio',   label:'Dayanıklılık' },
+        { id:'mobility', label:'Mobilite' },
+      ]);
+  }
+
+  function exercisesFor(patternId){
+    if(patternId === 'cardio') return SP.EXERCISES.filter(e => e.kind === 'cardio');
+    if(patternId === 'mobility') return SP.EXERCISES.filter(e => e.kind === 'mobility');
+    if(!patternId || patternId === 'all') return SP.EXERCISES;
+    return SP.EXERCISES.filter(e => e.pattern === patternId);
+  }
+
+  /* --------------------------------------------------------------- bugün */
 
   function orderCard(){
     const rx = SP.Move.prescription();
     const tone = rx.kind === 'rest' ? 'danger' : rx.kind === 'full' ? 'ok' : 'warn';
+    const r = rx.readiness;
+
     return K.Card({
       title:'Günün yük emri', hint:'recovery-order',
       sub:'Toparlanma belirler, istek değil',
       badge:K.Badge({ label:'yük ×' + U.fmtNet(rx.factor), tone }),
       body:html`
-        ${map(rx.reasons, r => K.Notice({ tone:r.kind === 'muted' ? 'info' : r.kind, body:r.text, class:'mt-4' }))}
+        ${when(r.ok, () => html`<div class="row wrap" style="gap:18px">
+          <div class="kpi">
+            <span class="kpi__value">${r.score}</span>
+            <span class="kpi__unit">/ 100 · ${r.band.label}</span>
+          </div>
+          <div class="grow" style="min-width:180px">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
+        </div>`)}
+        ${map(rx.reasons, x => K.Notice({ tone:x.kind === 'muted' ? 'info' : x.kind, class:'mt-10',
+          /* Skor yukarıda büyük yazıyor: bandın gerekçesi kısa hâliyle basılır,
+             aynı cümle iki kez görünmez. */
+          body:(r.ok && x.id === 'readiness') ? x.short : x.text }))}
         ${when(rx.kind === 'rest', () => K.Notice({ tone:'info', class:'mt-8',
           body:'Bu bir geri adım değil, planın parçası. Asgari gün yine geçerli: '
-            + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş.' }))}
-        <div class="row wrap mt-12">${map(rx.suggest, t => K.Button({
-          label:t.name + ' · ' + t.minutes + ' dk', size:'sm',
-          tone:rx.suggest[0] === t ? 'primary' : null,
-          act:'start-session', data:{ 'data-id':t.id } }))}</div>`,
-      foot:html`<span class="small dim">Öneri toparlanma bandından gelir; istediğin seansı yine seçebilirsin.</span>`,
+            + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş.' }))}`,
+    });
+  }
+
+  /* Seans seçimi — şablonlar seçilebilir kart olarak durur.
+     Bir düğme satırı hangi seansın önerildiğini gizler; kart hem öneriyi
+     hem içeriğini gösterir. */
+  function pickSessionCard(){
+    const rx = SP.Move.prescription();
+    const suggested = rx.suggest.map(t => t.id);
+    return K.Card({
+      title:'Seans seç', sub:'Öneri toparlanma bandından gelir; istediğini seçebilirsin',
+      body:html`
+        <div class="picks">${map(SP.SESSION_TEMPLATES, t => html`
+          <button class="${cls('pickcard', suggested[0] === t.id && 'is-on')}"
+            data-act="start-session" data-id="${t.id}">
+            <span class="pickcard__box" aria-hidden="true">${suggested[0] === t.id ? '★' : ''}</span>
+            <span class="pickcard__body">
+              <span class="pickcard__name">${t.name}
+                ${when(suggested.indexOf(t.id) >= 0, () => html`<span class="tiny dim"> · önerilen</span>`)}</span>
+              <span class="pickcard__meta">${t.minutes} dk · ${t.items.length} hareket — ${t.note}</span>
+            </span>
+          </button>`)}
+          <button class="pickcard" data-act="start-session" data-id="">
+            <span class="pickcard__box" aria-hidden="true"></span>
+            <span class="pickcard__body">
+              <span class="pickcard__name">Serbest seans</span>
+              <span class="pickcard__meta">Hareketleri kendin seç</span>
+            </span>
+          </button>
+        </div>`,
     });
   }
 
@@ -11043,8 +11515,7 @@ SP.Screens.move = (function(){
     const rows = M.workoutsOf(d);
     if(!rows.length){
       return K.Card({ title:'Bugünün seansları',
-        body:P.empty('Bugün henüz seans kaydı yok.', 'Serbest seans ekle', 'start-session',
-          { 'data-id':'' }) });
+        body:K.Empty({ text:'Bugün henüz seans kaydı yok. Yukarıdan bir seans seç.' }) });
     }
     return K.Card({
       title:'Bugünün seansları', sub:rows.length + ' seans',
@@ -11069,30 +11540,35 @@ SP.Screens.move = (function(){
     const r = SP.Move.readiness();
     if(!r.ok){
       return K.Card({ title:'Toparlanma', hint:'readiness',
-        body:html`${K.Notice({ tone:'info', body:r.note })}
-          <div class="mt-10">${K.Button({ label:'Ölçüm gir', size:'sm', tone:'primary',
-            act:'go', data:{ 'data-route':'vitals' } })}</div>` });
+        body:html`${K.Notice({ tone:'info', body:r.note })}`,
+        foot:K.Button({ label:'Ölçüm gir', size:'sm', tone:'primary',
+          act:'go', data:{ 'data-route':'vitals' } }) });
     }
     return K.Card({
       title:'Toparlanma', hint:'readiness',
-      badge:K.Badge({ label:r.score + '/100', tone:r.band.tone }),
-      body:html`${K.Meter({ label:r.band.label, value:r.score, text:String(r.score), tone:r.band.tone })}
-        <div class="mt-10">${map(r.parts, p => html`
+      badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
+      body:html`
+        <div class="kpi"><span class="kpi__value">${r.score}</span><span class="kpi__unit">/ 100</span></div>
+        <div class="mt-8">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
+        <div class="mt-12">${map(r.parts, p => html`
           <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
             <span class="readypart__label">${p.label}</span>
-            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(p.value)}</span>
+            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))}</span>
             <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
-          </div>`)}</div>` });
+          </div>`)}</div>`,
+    });
   }
 
-  /* -------------------------------------------------------------- program */
+  /* ------------------------------------------------------------- program */
 
   function ladderCard(ex){
     const p = SP.Move.progressionCheck(ex.id);
-    const cur = SP.Model.levelIndex(ex.id);
+    const cur = M.levelIndex(ex.id);
+    const pattern = SP.PATTERNS.find(x => x.id === ex.pattern);
     return K.Card({
       title:ex.name,
-      sub:(SP.PATTERNS.find(x => x.id === ex.pattern) || {}).label || ex.kind,
+      sub:(pattern ? pattern.label : ex.kind === 'cardio' ? 'Dayanıklılık' : 'Mobilite')
+        + ' · ' + (ex.equip === 'yok' ? 'ekipmansız' : ex.equip),
       badge:p.ready ? K.Badge({ label:'üst basamak açık', tone:'ok' })
         : K.Badge({ label:p.sessions + '/' + p.needed + ' seans', tone:'muted' }),
       body:html`
@@ -11113,39 +11589,48 @@ SP.Screens.move = (function(){
 
   function balanceCard(){
     const rows = SP.Move.patternBalance();
+    const missing = rows.filter(r => r.missing).length;
     return K.Card({
       title:'Haftalık kalıp dengesi',
       sub:'Her kalıp haftada en az bir kez',
-      body:html`${K.Table({ tight:true, headers:['Kalıp', { label:'Bu hafta', num:true }, 'Durum'],
-        rows:rows.map(r => [
-          html`<b>${r.pattern.label}</b> <span class="tiny dim">${r.pattern.note}</span>`,
-          String(r.count),
-          r.missing ? K.Badge({ label:'eksik', tone:'warn' }) : K.Badge({ label:'var', tone:'ok' }),
-        ]) })}` });
+      badge:missing ? K.Badge({ label:missing + ' eksik', tone:'warn' })
+        : K.Badge({ label:'dengeli', tone:'ok' }),
+      body:html`${map(rows, r => html`
+        <button class="${cls('minrow', !r.missing && 'is-done')}" style="width:100%"
+          data-act="pick-pattern" data-id="${r.pattern.id}">
+          <span class="minrow__mark">${r.missing ? '' : '✓'}</span>
+          <span class="minrow__label"><b>${r.pattern.label}</b>
+            <span class="tiny dim"> · ${r.pattern.note}</span></span>
+          <span class="minrow__detail num">${r.count}</span>
+        </button>`)}`,
+      foot:html`<span class="small dim">Bir kalıba dokunarak o kalıbın hareketlerini aç.</span>`,
+    });
   }
 
-  /* ------------------------------------------------------------- ilerleme */
+  /* ------------------------------------------------------------ ilerleme */
 
   function loadCard(){
     const series = SP.Move.loadSeries(30);
     const a = SP.Move.acwr();
     const g = SP.Move.weeklyGrowth();
     const dl = SP.Move.deloadWeek();
+    const top = Math.max(100, Math.max.apply(null, series.map(s => s.value)) * 1.1);
 
     return K.Card({
       title:'Yük eğrisi', hint:'load',
       sub:'Son 30 gün',
       body:html`
         ${raw(UI.barChart(series.map(s => ({ label:U.fmtShort(s.date), value:s.value })),
-          { max:Math.max(100, Math.max.apply(null, series.map(s => s.value)) * 1.1), height:160, goodAt:0 }))}
+          { max:top, height:160, goodAt:0 }))}
         <div class="cols-3 mt-12">
           ${K.Stat({ label:'Bu hafta', value:U.fmtNum(SP.Move.loadWindow(7)), unit:'yük' })}
           ${K.Stat({ label:'Akut/kronik', value:a.ok ? U.fmtNet(a.ratio) : '—',
+            tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
             note:a.ok ? a.zone : 'veri yetersiz' })}
-          ${K.Stat({ label:'Hafta', value:dl.due ? String(dl.week) : String(dl.week || 0),
-            note:dl.due ? 'indirme haftası' : 'normal' })}
+          ${K.Stat({ label:'Döngü haftası', value:String(dl.week || 0),
+            note:dl.due ? 'indirme haftası' : dl.inCycle + '/' + dl.every })}
         </div>
-        ${K.Notice({ tone:a.ok ? a.tone : 'info', class:'mt-12', body:a.ok ? a.note : a.note })}
+        ${K.Notice({ tone:a.ok ? a.tone : 'info', class:'mt-12', body:a.note })}
         ${when(g.ok, () => K.Notice({ tone:g.over ? 'warn' : 'info', class:'mt-8',
           body:'Geçen haftaya göre değişim %' + Math.round(g.growth * 100) + '. ' + g.note }))}
         ${when(dl.due, () => K.Notice({ tone:'warn', class:'mt-8', body:dl.note }))}`,
@@ -11164,24 +11649,38 @@ SP.Screens.move = (function(){
 
   /* -------------------------------------------------------------- sheet'ler */
 
+  /* Düzenlenen seans kaydedilene kadar burada bekler. */
+  let draft = null;
+
   function sessionSheet(rec){
     const isNew = !S.workouts.some(w => w.id === rec.id);
+    const chosen = (rec.items || []).map(i => i.exId);
     UI.sheet({
       title:isNew ? 'Seans ekle' : 'Seansı düzenle', subtitle:rec.name, wide:true,
       body:String(K.Stack([
         html`<div class="cols-2">
           ${K.Field({ label:'Süre (dakika)',
             input:K.Input({ id:'w-min', type:'number', numeric:true, min:1, step:'5', value:rec.minutes }) })}
-          ${K.Field({ label:'Algılanan zorluk (1–10)', hint:'boş bırakılırsa MET\'ten hesaplanır',
+          ${K.Field({ label:'Algılanan zorluk (1–10)', hint:'boş bırakılırsa MET değerinden hesaplanır',
             input:K.Input({ id:'w-rpe', type:'number', numeric:true, min:1, max:10, step:'1',
               value:rec.rpe == null ? '' : rec.rpe }) })}
         </div>`,
-        html`<h3 class="section-h">Hareketler</h3>`,
-        html`<div class="stack-xs">${map(SP.EXERCISES, ex => {
-          const on = (rec.items || []).some(i => i.exId === ex.id);
+        html`<h3 class="section-h">Hareketler
+          <span class="tiny dim">· ${chosen.length} seçili</span></h3>`,
+        /* Uzun bir onay listesi yerine seçilebilir kartlar. Kalıp her kartın
+           kendi satırında yazar: kalıba göre ayrı ayrı bölmek on bir hareket
+           için gereksiz yere uzun bir kağıt üretiyordu. */
+        html`<div class="picks">${map(SP.EXERCISES, ex => {
           const lvl = SP.EX_BY_ID[ex.id].levels.find(l => l.id === M.currentLevel(ex.id));
-          return K.Checkbox({ label:ex.name + ' — ' + (lvl ? lvl.name : ''), checked:on,
-            act:'toggle-ex', data:{ 'data-id':rec.id, 'data-ex':ex.id } });
+          const pattern = SP.PATTERNS.find(x => x.id === ex.pattern);
+          const group = pattern ? pattern.label
+            : ex.kind === 'cardio' ? 'Dayanıklılık' : 'Mobilite';
+          return K.PickCard({
+            label:ex.name,
+            meta:group + ' · ' + (lvl ? lvl.name : '') + ' · hedef ' + (lvl ? lvl.to : '—'),
+            on:chosen.indexOf(ex.id) >= 0,
+            act:'toggle-ex', data:{ 'data-id':rec.id, 'data-ex':ex.id },
+          });
         })}</div>`,
         K.Field({ label:'Not', input:K.Textarea({ id:'w-note', rows:2, value:rec.note || '' }) }),
       ])),
@@ -11191,20 +11690,33 @@ SP.Screens.move = (function(){
     });
   }
 
-  /* Duzenlenen seans kaydedilene kadar burada bekler. */
-  let draft = null;
+  /* --------------------------------------------------------------- ekran */
+
+  function toolbar(tab){
+    const done = M.workoutsOf(U.todayISO()).length;
+    const items = TABS.map(t => Object.assign({}, t,
+      t.id === 'bugun' && done ? { count:done } : {}));
+    return K.Toolbar({
+      tabs:K.Subtabs({ items, value:tab, act:'move-tab', aria:'Hareket görünümü' }),
+      actions:K.Button({ label:'Seans ekle', icon:'plus', size:'sm', tone:'primary',
+        act:'start-session', data:{ 'data-id':'' } }),
+    });
+  }
 
   async function render(){
     const tab = S.ui.moveTab;
+
     if(tab === 'program'){
+      const pat = S.ui.movePattern || 'all';
+      const list = exercisesFor(pat);
       return String(K.Grid([
-        K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'move-tab', aria:'Hareket görünümü' })),
-        K.Span(8, K.Stack(map(SP.EXERCISES.filter(e => e.kind !== 'mobility'), ladderCard))),
+        K.Span(12, toolbar(tab)),
+        K.Span(12, K.Subtabs({ items:patternTabs(), value:pat, act:'pick-pattern-tab',
+          aria:'Hareket kalıbı' })),
+        K.Span(8, K.Stack(list.length
+          ? map(list, ladderCard)
+          : [K.Card({ body:K.Empty({ text:'Bu kalıpta tanımlı hareket yok.' }) })])),
         K.Span(4, K.Stack([balanceCard(),
-          K.Card({ title:'Mobilite akışları',
-            body:html`<div class="list">${map(SP.EXERCISES.filter(e => e.kind === 'mobility'), e => html`
-              <div class="listitem"><div class="grow"><b class="small">${e.name}</b>
-                <div class="tiny dim">${e.cue}</div></div></div>`)}</div>` }),
           K.Card({ title:'İlerleme kuralı', hint:'progression',
             body:html`<p class="small muted">Bir üst basamak, mevcut basamakta son
               ${SP.Move.ADVANCE_WINDOW} günde ${SP.Move.ADVANCE_SESSIONS} seans yapıldığında açılır.
@@ -11213,9 +11725,10 @@ SP.Screens.move = (function(){
         K.Span(12, raw(UI.rail(['progression', 'load', 'deload']))),
       ]));
     }
+
     if(tab === 'ilerleme'){
       return String(K.Grid([
-        K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'move-tab', aria:'Hareket görünümü' })),
+        K.Span(12, toolbar(tab)),
         K.Span(8, K.Stack([loadCard(), historyCard()])),
         K.Span(4, K.Stack([balanceCard(),
           K.Card({ title:'Yük nasıl hesaplanır?',
@@ -11226,9 +11739,10 @@ SP.Screens.move = (function(){
         K.Span(12, raw(UI.rail(['load', 'deload', 'recovery-order']))),
       ]));
     }
+
     return String(K.Grid([
-      K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'move-tab', aria:'Hareket görünümü' })),
-      K.Span(8, K.Stack([orderCard(), todaySessionsCard()])),
+      K.Span(12, toolbar(tab)),
+      K.Span(8, K.Stack([orderCard(), pickSessionCard(), todaySessionsCard()])),
       K.Span(4, K.Stack([readyCard(), balanceCard()])),
       K.Span(12, raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))),
     ]));
@@ -11236,6 +11750,12 @@ SP.Screens.move = (function(){
 
   const handle = {
     async 'move-tab'(el){ S.ui.moveTab = el.dataset.tab; SP.App.render(); },
+    async 'pick-pattern-tab'(el){ S.ui.movePattern = el.dataset.tab; SP.App.render(); },
+    async 'pick-pattern'(el){
+      S.ui.moveTab = 'program';
+      S.ui.movePattern = el.dataset.id;
+      SP.App.render();
+    },
     async 'start-session'(el){
       draft = M.newWorkout(U.todayISO(), el.dataset.id || null);
       sessionSheet(draft);
@@ -11251,6 +11771,15 @@ SP.Screens.move = (function(){
       const i = draft.items.findIndex(x => x.exId === exId);
       if(i >= 0) draft.items.splice(i, 1);
       else draft.items.push({ exId, levelId:M.currentLevel(exId), sets:3, reps:null, minutes:null });
+      /* Kağıdı yeniden çiz ki seçim anında görünsün; girilen süre ve zorluk
+         kaybolmasın diye önce okunur. */
+      const min = document.getElementById('w-min');
+      const rpe = document.getElementById('w-rpe');
+      const note = document.getElementById('w-note');
+      if(min) draft.minutes = Number(min.value) || draft.minutes;
+      if(rpe) draft.rpe = rpe.value.trim() === '' ? null : Number(rpe.value);
+      if(note) draft.note = note.value;
+      sessionSheet(draft);
     },
     async 'save-session'(el){
       if(!draft) return;
@@ -11279,11 +11808,15 @@ SP.Screens.move = (function(){
     },
     async 'pick-level'(el){
       const ex = SP.EX_BY_ID[el.dataset.id];
-      UI.sheet({ title:ex.name, subtitle:'Basamak seç',
-        body:String(html`<div class="stack-xs">${map(ex.levels, (l, i) => K.Button({
-          label:(i + 1) + '. ' + l.name + ' — hedef ' + l.to, block:true, size:'sm',
-          tone:l.id === M.currentLevel(ex.id) ? 'primary' : null,
-          act:'set-level', data:{ 'data-id':ex.id, 'data-level':l.id } }))}</div>`),
+      const cur = M.currentLevel(ex.id);
+      UI.sheet({ title:ex.name, subtitle:'Basamak seç', wide:true,
+        body:String(html`
+          <p class="small muted">${ex.cue}</p>
+          <div class="picks mt-12">${map(ex.levels, (l, i) => K.PickCard({
+            label:(i + 1) + '. ' + l.name, meta:'hedef ' + l.to,
+            on:l.id === cur,
+            act:'set-level', data:{ 'data-id':ex.id, 'data-level':l.id },
+          }))}</div>`),
         footer:String(K.Button({ label:'Kapat', act:'sheet-close' })), noFocus:true });
     },
     async 'set-level'(el){
@@ -11303,10 +11836,7 @@ SP.Screens.move = (function(){
       return rx.readiness.band.label + ' · yük ×' + U.fmtNet(rx.factor)
         + (rx.done ? ' · ' + rx.done + ' seans yapıldı' : '');
     },
-    actions(){
-      return String(K.Button({ label:'Seans ekle', size:'sm', icon:'dumbbell',
-        act:'start-session', data:{ 'data-id':'' } }));
-    },
+    actions(){ return ''; },
     render, handle,
   };
 })();
@@ -11331,10 +11861,19 @@ SP.Screens.basket = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'sepet', label:'Sepet' },
-    { id:'ikame', label:'İkame' },
-    { id:'fiyat', label:'Fiyat' },
+    { id:'sepet', label:'Sepet', icon:'wallet' },
+    { id:'ikame', label:'İkame', icon:'refresh' },
+    { id:'fiyat', label:'Fiyat', icon:'list' },
   ];
+
+  function toolbar(tab){
+    const n = ((S.basket && S.basket.items) || []).length;
+    const items = TABS.map(t => Object.assign({}, t, t.id === 'sepet' && n ? { count:n } : {}));
+    return K.Toolbar({
+      tabs:K.Subtabs({ items, value:tab, act:'basket-tab', aria:'Sepet görünümü' }),
+      actions:K.Button({ label:'Kalem ekle', icon:'plus', size:'sm', tone:'primary', act:'open-add' }),
+    });
+  }
 
   /* ---------------------------------------------------------------- sepet */
 
@@ -11564,7 +12103,7 @@ SP.Screens.basket = (function(){
     const tab = S.ui.basketTab;
     if(tab === 'ikame'){
       return String(K.Grid([
-        K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'basket-tab', aria:'Sepet görünümü' })),
+        K.Span(12, toolbar(tab)),
         K.Span(8, K.Stack([swapCard(), bulkCard()])),
         K.Span(4, K.Stack([
           K.Card({ title:'Bütçenin yeri', hint:'budget-rank',
@@ -11577,13 +12116,13 @@ SP.Screens.basket = (function(){
     }
     if(tab === 'fiyat'){
       return String(K.Grid([
-        K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'basket-tab', aria:'Sepet görünümü' })),
+        K.Span(12, toolbar(tab)),
         K.Span(12, priceCard()),
         K.Span(12, raw(UI.rail(['price-estimate', 'certainty']))),
       ]));
     }
     return String(K.Grid([
-      K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'basket-tab', aria:'Sepet görünümü' })),
+      K.Span(12, toolbar(tab)),
       K.Span(7, K.Stack([totalCard(), itemsCard()])),
       K.Span(5, K.Stack([coverageCard()])),
       K.Span(12, raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))),
@@ -11663,9 +12202,7 @@ SP.Screens.basket = (function(){
       if(!b.rows.length) return 'Sepet boş';
       return U.fmtNum(Math.round(b.total)) + ' TL · %' + b.estimate.pct + ' tahmin';
     },
-    actions(){
-      return String(K.Button({ label:'Kalem ekle', size:'sm', icon:'wallet', act:'open-add' }));
-    },
+    actions(){ return ''; },
     render, handle, change,
   };
 })();
@@ -11686,9 +12223,9 @@ SP.Screens.analytics = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'capraz', label:'Çapraz bağlar' },
-    { id:'hafta', label:'Haftalık rapor' },
-    { id:'seri', label:'Seriler' },
+    { id:'capraz', label:'Çapraz bağlar',  icon:'layers' },
+    { id:'hafta',  label:'Haftalık rapor', icon:'list' },
+    { id:'seri',   label:'Seriler',        icon:'chart' },
   ];
 
   /* --------------------------------------------------------------- capraz */
@@ -12150,7 +12687,7 @@ SP.Screens.office = (function(){
       return n.length + ' masa notu' + (open ? ' · ' + open + ' karar takipte' : '');
     },
     actions(){
-      return String(K.Button({ label:'Toplantı', size:'sm', icon:'users',
+      return String(K.Button({ label:'Toplantı', size:'sm', icon:'users', class:'btn--screen',
         act:'go', data:{ 'data-route':'meeting' } }));
     },
     render, handle,
@@ -12749,10 +13286,10 @@ SP.Screens.guide = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'kullanim', label:'Kullanım' },
-    { id:'model', label:'Model' },
-    { id:'veri', label:'Veri' },
-    { id:'sinir', label:'Sınırlar' },
+    { id:'kullanim', label:'Kullanım', icon:'guide' },
+    { id:'model',    label:'Model',    icon:'zap' },
+    { id:'veri',     label:'Veri',     icon:'layers' },
+    { id:'sinir',    label:'Sınırlar', icon:'shield' },
   ];
 
   /* ------------------------------------------------------------ kullanim */
@@ -13086,36 +13623,35 @@ SP.App = (function(){
   const U = SP.U, M = SP.Model, UI = SP.UI, S = SP.S;
   const { html, raw, when, map, cls, attrs } = SP.h;
 
-  /* Beş gezinme grubu — PDF'teki beş modülle birebir örtüşür. */
+  /* Dört gezinme grubu.
+
+     Önceki düzende her modülün kendi başlığı vardı ve tek öğelik gruplar
+     ("EKONOMİ → Sepet") başlık gürültüsünden başka bir şey üretmiyordu.
+     Şimdi gruplar İŞE göre ayrılıyor: her gün girilen şey, izlenen dört
+     modül, değerlendirme ve sistem.
+
+     `short` alanı mobil alt çubuk içindir: orada etiket tek satıra sığmalı. */
   const NAV = [
     { label:'Günlük', items:[
-      { id:'today',  icon:'today', label:'Bugün' },
-      { id:'vitals', icon:'pulse', label:'Günlük ölçüm' },
+      { id:'today',  icon:'today', label:'Bugün',        short:'Bugün' },
+      { id:'vitals', icon:'pulse', label:'Günlük ölçüm', short:'Ölçüm' },
     ]},
-    { label:'Ölçüm', items:[
-      { id:'labs', icon:'flask', label:'Tahliller' },
+    { label:'İzleme', items:[
+      { id:'labs',    icon:'flask',    label:'Tahliller', short:'Tahlil' },
+      { id:'meals',   icon:'meal',     label:'Öğünler',   short:'Öğün' },
+      { id:'kitchen', icon:'leaf',     label:'Mutfak',    short:'Mutfak' },
+      { id:'move',    icon:'dumbbell', label:'Hareket',   short:'Hareket' },
+      { id:'basket',  icon:'wallet',   label:'Sepet',     short:'Sepet' },
     ]},
-    { label:'Beslenme', items:[
-      { id:'meals',   icon:'meal', label:'Öğünler' },
-      { id:'kitchen', icon:'leaf', label:'Mutfak' },
-    ]},
-    { label:'Hareket', items:[
-      { id:'move', icon:'dumbbell', label:'Hareket' },
-    ]},
-    { label:'Ekonomi', items:[
-      { id:'basket', icon:'wallet', label:'Sepet' },
-    ]},
-    { label:'Analiz', items:[
-      { id:'analytics', icon:'chart', label:'Analiz' },
-    ]},
-    { label:'Ofis', items:[
-      { id:'office',  icon:'users', label:'Ofis' },
-      { id:'team',    icon:'zap',   label:'Danışma' },
-      { id:'meeting', icon:'list',  label:'Toplantı' },
+    { label:'Değerlendirme', items:[
+      { id:'analytics', icon:'chart', label:'Analiz',   short:'Analiz' },
+      { id:'office',    icon:'users', label:'Ofis',     short:'Ofis' },
+      { id:'team',      icon:'zap',   label:'Danışma',  short:'Danışma' },
+      { id:'meeting',   icon:'list',  label:'Toplantı', short:'Toplantı' },
     ]},
     { label:'Sistem', items:[
-      { id:'family', icon:'heart', label:'Hane' },
-      { id:'guide',  icon:'guide', label:'Rehber' },
+      { id:'family', icon:'heart', label:'Hane',   short:'Hane' },
+      { id:'guide',  icon:'guide', label:'Rehber', short:'Rehber' },
     ]},
   ];
 
@@ -13208,20 +13744,108 @@ SP.App = (function(){
       const on = S.route === id;
       return html`<button class="${cls('tabbar__item', on && 'is-active')}" data-act="go" data-route="${id}"
         aria-label="${item.label}" ${when(on, () => attrs({ 'aria-current':'page' }))}>
-        ${raw(UI.icon(item.icon))}<span>${item.label}</span></button>`;
+        ${raw(UI.icon(item.icon))}<span>${item.short || item.label}</span></button>`;
     })}</nav>`;
   }
 
   function topbarHtml(sc){
+    const screenActions = safe(() => sc.actions ? sc.actions() : '');
     return html`
       <header class="topbar" role="banner">
         ${SP.C.IconButton({ icon:'menu', aria:'Menü', act:'toggle-sidebar', class:'topbar__menu' })}
         <div class="topbar__titles"><h1>${sc.title}</h1><p>${raw(safe(() => sc.subtitle()))}</p></div>
-        <div class="topbar__actions">${raw(safe(() => sc.actions ? sc.actions() : ''))}
+        <div class="topbar__actions">
+          ${raw(screenActions)}
+          ${when(screenActions, () => html`<span class="topbar__sep" aria-hidden="true"></span>`)}
           ${SP.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
+          ${SP.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema ve palet',
+            act:'open-appearance', data:{ id:'appearance-btn' } })}
           ${SP.C.IconButton({ icon:'gear', aria:'Rehber ve ayarlar', act:'go', data:{ 'data-route':'guide' } })}
         </div>
       </header>`;
+  }
+
+  /* ------------------------------------------------------------- görünüm
+
+     Tema ve palet üst çubuktan tek dokunuşla değişir. Ayarların dördüncü
+     sekmesine gömülü bir tercih, hiç kullanılmayan bir tercihtir.
+
+     Seçim profile yazılır; yani cihaz değil KİŞİ hatırlanır ve hane
+     profilleri arasında geçerken herkesin kendi görünümü gelir. */
+  const THEMES = [
+    { id:'system', icon:'monitor', label:'Sistem' },
+    { id:'light',  icon:'sun',     label:'Açık' },
+    { id:'dark',   icon:'moon2',   label:'Koyu' },
+  ];
+
+  function appearanceHtml(){
+    const p = S.profile || {};
+    const theme = p.theme || 'system';
+    const palette = p.palette || SP.DEFAULT_PALETTE;
+    return String(html`
+      <div class="appear" id="appearance" role="dialog" aria-label="Görünüm">
+        <div class="appear__label">Tema</div>
+        <div class="appear__themes">${map(THEMES, t => html`
+          <button class="${cls('themebtn', t.id === theme && 'is-on')}"
+            data-act="set-theme" data-theme="${t.id}"
+            aria-pressed="${t.id === theme ? 'true' : 'false'}">
+            ${raw(UI.icon(t.icon))}<span>${t.label}</span>
+          </button>`)}
+        </div>
+
+        <div class="appear__label">Palet</div>
+        <div class="appear__palettes">${map(SP.PALETTES, pal => html`
+          <button class="${cls('palbtn', pal.id === palette && 'is-on')}"
+            data-act="set-palette" data-palette="${pal.id}" title="${pal.note}"
+            aria-pressed="${pal.id === palette ? 'true' : 'false'}">
+            <span class="palbtn__dot" style="background:${pal.swatch[0]}"></span>
+            <span>${pal.name}</span>
+          </button>`)}
+        </div>
+
+        <p class="appear__note">Tema ve palet bu profile kaydedilir.
+          «Sistem» seçiliyken cihazın açık/koyu tercihi izlenir.</p>
+      </div>`);
+  }
+
+  function openAppearance(anchor){
+    closeAppearance();
+    const root = document.getElementById('overlay-root');
+    const el = document.createElement('div');
+    el.innerHTML = appearanceHtml();
+    const panel = el.firstElementChild;
+    root.appendChild(panel);
+
+    /* Çapaya göre konumla; ekranın dışına taşarsa içeri çek. */
+    const r = anchor.getBoundingClientRect();
+    const w = panel.offsetWidth;
+    let left = r.right - w;
+    left = Math.max(12, Math.min(left, window.innerWidth - w - 12));
+    let top = r.bottom + 8;
+    if(top + panel.offsetHeight > window.innerHeight - 12){
+      top = Math.max(12, r.top - panel.offsetHeight - 8);
+    }
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+  }
+  function closeAppearance(){
+    const el = document.getElementById('appearance');
+    if(el) el.remove();
+  }
+  function isAppearanceOpen(){ return !!document.getElementById('appearance'); }
+
+  /* Paneli yerinde tazele: tema değişince sayfa yeniden çizilmez, yalnızca
+     kök nitelikleri ve panelin işaretli düğmesi değişir. Böylece açık panel
+     kapanmaz ve seçimin etkisi anında görülür. */
+  function refreshAppearance(){
+    const el = document.getElementById('appearance');
+    if(!el) return;
+    const left = el.style.left, top = el.style.top;
+    const wrap = document.createElement('div');
+    wrap.innerHTML = appearanceHtml();
+    const next = wrap.firstElementChild;
+    next.style.left = left; next.style.top = top;
+    el.replaceWith(next);
   }
 
   function errorPanel(err){
@@ -13374,6 +13998,20 @@ SP.App = (function(){
       if(body) body.hidden = !S.ui.railOpen;
     },
     async 'open-palette'(){ SP.Palette.open(); },
+    async 'open-appearance'(el){
+      if(isAppearanceOpen()){ closeAppearance(); return; }
+      openAppearance(el);
+    },
+    async 'set-theme'(el){
+      await M.saveProfile({ theme:el.dataset.theme });
+      applyTheme();
+      refreshAppearance();
+    },
+    async 'set-palette'(el){
+      await M.saveProfile({ palette:el.dataset.palette });
+      applyTheme();
+      refreshAppearance();
+    },
     async 'cmdk-run'(el){ SP.Palette.runById(el.dataset.id); },
     async 'sheet-close'(){ UI.closeSheet(); },
     async reload(){ location.reload(); },
@@ -13476,6 +14114,7 @@ SP.App = (function(){
     }
     if(e.key === 'Escape'){
       if(SP.Palette.isOpen()){ SP.Palette.close(); return; }
+      if(isAppearanceOpen()){ closeAppearance(); return; }
       if(UI.isHintOpen()){ UI.closeHint(); return; }
       if(UI.isSheetOpen()){ UI.closeSheet(); return; }
       if(S.sidebarOpen){ S.sidebarOpen = false; render(); return; }
@@ -13495,12 +14134,21 @@ SP.App = (function(){
     if(sc.onKey) sc.onKey(e);
   });
 
-  /* Balonu dışarıya tıklayınca kapat */
+  /* Açık katmanları dışarıya tıklayınca kapat. */
   document.addEventListener('mousedown', e => {
-    if(!UI.isHintOpen()) return;
-    if(e.target.closest('#popover') || e.target.closest('[data-act="hint"]')) return;
-    UI.closeHint();
+    if(UI.isHintOpen()
+      && !e.target.closest('#popover') && !e.target.closest('[data-act="hint"]')){
+      UI.closeHint();
+    }
+    if(isAppearanceOpen()
+      && !e.target.closest('#appearance') && !e.target.closest('[data-act="open-appearance"]')){
+      closeAppearance();
+    }
   });
+
+  /* Pencere boyutu değişince panelin çapası kayar; yeniden konumlamak
+     yerine kapatmak daha dürüst: kullanıcı nereye tıkladığını bilir. */
+  window.addEventListener('resize', () => { if(isAppearanceOpen()) closeAppearance(); });
 
   /* ------------------------------------------------------------ depolama sağlığı */
   let lastErrorToastAt = 0;
@@ -13588,7 +14236,8 @@ SP.App = (function(){
     }
   }
 
-  return { boot, render, go, applyTheme, NAV, installManifest };
+  return { boot, render, go, applyTheme, NAV, THEMES, installManifest,
+    openAppearance, closeAppearance, isAppearanceOpen };
 })();
 
 /* Test paketi bu dosyayı da yükler (ekran sözleşmelerini denetlemek için)
