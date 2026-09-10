@@ -268,7 +268,9 @@ R.Solver = (function(){
       difficulty:null,    // 1-5, dogrulanmis
       answer:'', trap:'',
       result:null,        // R.SOLVE_RESULTS anahtari
-      sourceId:null,      // kaynak (yayin) kimligi — ikinci asamada baglanir
+      sourceId:null,      // kaynak (yayin) kimligi
+      sourceName:'',      // kaynak silinse de kayit hangi yayindan geldigini bilsin
+      questionNo:'',      // kaynaktaki soru numarasi
       seconds:null,
       fromImage:false,
       model:'',

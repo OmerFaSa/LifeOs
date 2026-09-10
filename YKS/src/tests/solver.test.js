@@ -325,4 +325,183 @@
       expect(code).toBe('empty');
     });
   });
+
+  /* ==================== kaynak zorluğu ====================
+     İki ayrı şey vardır ve karıştırılmamalıdır:
+       ETİKET — kaynağın kademesi. Bir başlangıç noktasıdır.
+       ÖLÇÜM  — o kaynaktan çözdüğün sorularda SENİN oranın. Asıl bilgi bu.
+     Genel olarak %75 çözüp bir kitapta %45'te kalan biri için o kitap
+     zordur — etiketinde ne yazarsa yazsın. */
+
+  describe('Kaynak — gerçek zorluk ölçümü', () => {
+    const Src = R.Sources;
+
+    function fresh(){
+      resetState();
+      R.S.solved = [];
+      R.S.sources = [];
+    }
+
+    /* n soruyu verilen kaynağa, verilen başarı oranıyla yazar. */
+    async function seedSolved(sourceId, n, okCount, diff){
+      for(let i = 0; i < n; i++){
+        await Q.save({
+          sourceId,
+          result:i < okCount ? 'dogru' : 'yanlis',
+          difficulty:diff || null,
+        });
+      }
+    }
+
+    it('tohum liste uygulamanın kendi kaynak mimarisinden gelir', () => {
+      /* Kademeler uydurulmadı: yayın merdiveni ve ders başına kaynak
+         listesi zaten uygulamanın içindeydi. */
+      const names = R.SOURCE_SEED.map(x => x.name);
+      expect(names).toContain('345');
+      expect(names).toContain('Bilgi Sarmal');
+      expect(names).toContain('3D');
+      R.SOURCE_SEED.forEach(x => {
+        expect(!!R.SOURCE_LEVELS[x.level]).toBeTruthy();
+        expect(!!R.SOURCE_KINDS[x.kind]).toBeTruthy();
+        expect(x.from.length > 3).toBeTruthy();
+      });
+    });
+
+    it('kaynak eklenir, güncellenir ve silinir', async () => {
+      fresh();
+      const s = await Src.save({ name:'  345 TYT Matematik  ', level:'orta', kind:'banka' });
+      expect(s.name).toBe('345 TYT Matematik');       // kırpılır
+      expect(Src.all()).toHaveLength(1);
+      await Src.save(Object.assign({}, s, { level:'ust' }));
+      expect(Src.all()).toHaveLength(1);
+      expect(Src.byId(s.id).level).toBe('ust');
+      await Src.remove(s.id);
+      expect(Src.all()).toHaveLength(0);
+    });
+
+    it('adsız kaynak kaydedilmez', async () => {
+      fresh();
+      let code = null;
+      try{ await Src.save({ name:'   ' }); }catch(e){ code = e.code; }
+      expect(code).toBe('empty');
+    });
+
+    it('bilinmeyen kademe ve tür varsayılana düşer', async () => {
+      fresh();
+      const s = await Src.save({ name:'X', level:'uydurma', kind:'uydurma' });
+      expect(s.level).toBe('orta');
+      expect(s.kind).toBe('banka');
+    });
+
+    it('yeterli kayıt yokken oran HİÇ hesaplanmaz', async () => {
+      fresh();
+      const s = await Src.save({ name:'Kitap' });
+      await seedSolved(s.id, 5, 1);
+      const m = Src.measure(s.id);
+      /* Altı sorudan çıkan bir oran gürültüdür; uydurma bir zorluk
+         etiketi, etiketsiz bırakmaktan kötüdür. */
+      expect(m.soru).toBe(5);
+      expect(m.oran).toBeNull();
+      expect(m.yeterli).toBeFalsy();
+      expect(m.eksik).toBe(R.SOURCE_MIN_SAMPLE - 5);
+      expect(Src.relative(s.id).durum).toBe('bilinmiyor');
+      expect(Src.sentence(s.id)).toContain('en az');
+    });
+
+    it('yeterli kayıt varken oran çıkar', async () => {
+      fresh();
+      const s = await Src.save({ name:'Kitap' });
+      await seedSolved(s.id, 10, 7, 3);
+      const m = Src.measure(s.id);
+      expect(m.oran).toBe(70);
+      expect(m.ortZorluk).toBe(3);
+      expect(m.yeterli).toBeTruthy();
+    });
+
+    it('kaynak SENİN genel oranınla karşılaştırılır', async () => {
+      fresh();
+      const kolay = await Src.save({ name:'Kolay Kitap' });
+      const zor = await Src.save({ name:'Zor Kitap' });
+      /* Genel oran ~%70; zor kitapta %20 → sana göre ZOR. */
+      await seedSolved(kolay.id, 20, 18);
+      await seedSolved(zor.id, 10, 2);
+
+      const genel = Src.overallRate();
+      expect(genel > 60).toBeTruthy();
+      const r = Src.relative(zor.id);
+      expect(r.durum).toBe('zor');
+      expect(r.fark < -R.SOURCE_DELTA).toBeTruthy();
+      expect(Src.sentence(zor.id)).toContain('ZOR');
+
+      const k = Src.relative(kolay.id);
+      expect(k.durum).toBe('kolay');
+    });
+
+    it('genel orana yakın kaynak "denk" sayılır', async () => {
+      fresh();
+      const a = await Src.save({ name:'A' });
+      const b = await Src.save({ name:'B' });
+      await seedSolved(a.id, 10, 7);
+      await seedSolved(b.id, 10, 7);
+      expect(Src.relative(a.id).durum).toBe('dengeli');
+    });
+
+    it('“çözüme baktım” kaynağın oranını yükseltmez', async () => {
+      fresh();
+      const s = await Src.save({ name:'Kitap' });
+      for(let i = 0; i < 10; i++) await Q.save({ sourceId:s.id, result:'bakarak' });
+      expect(Src.measure(s.id).oran).toBe(0);
+    });
+
+    it('tablo en zoru üste koyar, ölçümsüzleri sona atar', async () => {
+      fresh();
+      const zor = await Src.save({ name:'Zor' });
+      const kolay = await Src.save({ name:'Kolay' });
+      const bos = await Src.save({ name:'Boş' });
+      await seedSolved(kolay.id, 12, 11);
+      await seedSolved(zor.id, 12, 3);
+
+      const rows = Src.table();
+      expect(rows[0].src.id).toBe(zor.id);
+      expect(rows[rows.length - 1].src.id).toBe(bos.id);
+    });
+
+    it('kaynağı silinen kayıt yine de ada göre sayılır', async () => {
+      fresh();
+      const s = await Src.save({ name:'345' });
+      await Q.save({ sourceName:'345', result:'dogru' });
+      /* Kayıt sourceId taşımıyor ama sourceName eşleşiyor. */
+      expect(Src.recordsOf(s.id)).toHaveLength(1);
+    });
+
+    it('merdiven uyarısı yalnız VERİ destekliyorsa çıkar', async () => {
+      fresh();
+      /* Kapanış zaten %0; üst seviye kaynaktan üç soru gerekiyor. */
+      const ust = await Src.save({ name:'3D', level:'ust' });
+      expect(Src.ladderWarning()).toBeNull();      // henüz kayıt yok
+      await seedSolved(ust.id, 3, 1);
+      const w = Src.ladderWarning();
+      expect(!!w).toBeTruthy();
+      expect(w.text).toContain('temel oturmadan');
+    });
+
+    it('temel seviye kaynaktan çözmek uyarı üretmez', async () => {
+      fresh();
+      const temel = await Src.save({ name:'Karekök', level:'temel' });
+      await seedSolved(temel.id, 10, 5);
+      expect(Src.ladderWarning()).toBeNull();
+    });
+
+    it('tohum bir kez yüklenir, silinen kaynak geri gelmez', async () => {
+      fresh();
+      await Src.seed();
+      const n = Src.all().length;
+      expect(n).toBe(R.SOURCE_SEED.length);
+      await Src.remove(Src.all()[0].id);
+      await Src.seed();
+      /* İkinci çağrı hiçbir şey eklememeli. */
+      expect(Src.all()).toHaveLength(n - 1);
+    });
+  });
+
 })();

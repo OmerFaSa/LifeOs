@@ -24,6 +24,12 @@ R.Screens.solve = (function(){
   let controller = null;
   let followBusy = false;
   let follows = [];        // [{ q, a }]
+  let lastSource = '';     // arka arkaya aynı kitaptan çözmek yaygın
+
+  function sourceNameOf(id){
+    const s = id ? R.Sources.byId(id) : null;
+    return s ? s.name : '';
+  }
 
   /* ---------- parçalar ---------- */
 
@@ -174,6 +180,17 @@ R.Screens.solve = (function(){
           input:K.Input({ id:'q-secs', type:'number', numeric:true, min:0 }) }),
         K.Field({ label:'Cevap', input:K.Input({ id:'q-answer', value:m.answer || '' }) }),
       ]),
+      /* Kaynak: zorluğu ETİKETİNDEN değil, senin bu kaynaktaki oranından
+         öğreneceğiz. Onun için soru kaynağa bağlanmalı. */
+      K.Cols(2, [
+        K.Field({ label:'Kaynak', hint:'hangi yayından',
+          input:K.Select({ id:'q-source', value:lastSource,
+            options:[{ value:'', label:'— kaynak seç —' }].concat(
+              R.Sources.all().map(x => ({ value:x.id,
+                label:x.name + ' · ' + R.SOURCE_LEVELS[x.level].label }))) }) }),
+        K.Field({ label:'Soru no', hint:'isteğe bağlı',
+          input:K.Input({ id:'q-no', placeholder:'ör. 42' }) }),
+      ]),
       when(m.trap, () => K.Notice({ tone:'info', title:'Tuzak:', body:m.trap })),
       K.Row([
         K.Button({ label:'Kaydet', icon:'check', tone:'primary', act:'q-save' }),
@@ -226,12 +243,91 @@ R.Screens.solve = (function(){
     });
   }
 
+  /* ---------- kaynaklar ----------
+     Etiket bir başlangıç noktasıdır; asıl ölçü SENİN o kaynaktaki oranın.
+     Genel olarak %75 çözüp bir kitapta %45'te kalıyorsan o kitap zordur —
+     etiketinde ne yazarsa yazsın. */
+
+  function sourceCard(){
+    const rows = R.Sources.table();
+    const warn = R.Sources.ladderWarning();
+
+    return K.Card({
+      title:'Kaynaklarım', sub:'Zorluk etiketten değil, senin oranından çıkar',
+      actions:K.Button({ label:'Kaynak ekle', icon:'plus', size:'sm', act:'q-src-new' }),
+      body:html`
+        ${when(warn, () => K.Notice({ tone:'warn', title:'Yayın merdiveni:', body:warn.text }))}
+        ${when(!rows.length, () => K.Empty({ icon:'book',
+          text:'Henüz kaynak yok. Kullandığın yayınları ekle; çözdüğün soruları onlara '
+             + 'bağladıkça hangisinin sana zor geldiği kendiliğinden çıkar.',
+          action:K.Button({ label:'Kaynakları yükle', size:'sm', tone:'primary', act:'q-src-seed' }) }))}
+        ${when(rows.length, () => html`<div class="stack-xs">${map(rows, r => html`
+          <div class="srcrow">
+            <span class="minw0">
+              <b class="srcrow__name">${r.src.name}</b>
+              <span class="srcrow__meta">${R.SOURCE_LEVELS[r.src.level].label}
+                · ${R.SOURCE_KINDS[r.src.kind].label}${
+                  when(r.olcum.soru, () => ' · ' + r.olcum.soru + ' soru')}</span>
+            </span>
+            ${K.Badge({ label:badgeOf(r), tone:toneOf(r) })}
+            ${K.IconButton({ icon:'edit', size:'sm', plain:true, aria:'Kaynağı düzenle',
+              act:'q-src-edit', data:{ 'data-id':r.src.id } })}
+          </div>`)}</div>
+        <p class="tiny dim mt-8">Bir kaynak hakkında konuşabilmek için en az
+          ${R.SOURCE_MIN_SAMPLE} çözülmüş soru gerekir; altı sorudan çıkan oran gürültüdür.</p>`)}`,
+    });
+  }
+
+  function badgeOf(r){
+    if(r.durum === 'bilinmiyor') return r.olcum.soru ? r.olcum.soru + '/' + R.SOURCE_MIN_SAMPLE : 'kayıt yok';
+    return '%' + r.oran + ' · ' + (r.durum === 'zor' ? 'sana zor'
+      : r.durum === 'kolay' ? 'sana kolay' : 'denk');
+  }
+  function toneOf(r){
+    return r.durum === 'zor' ? 'danger' : r.durum === 'kolay' ? 'ok'
+      : r.durum === 'dengeli' ? 'info' : 'muted';
+  }
+
+  function sourceSheet(id){
+    const src = id ? R.Sources.byId(id) : null;
+    const v = (f, d) => src ? (src[f] == null ? '' : src[f]) : (d == null ? '' : d);
+    UI.sheet({
+      title:src ? 'Kaynağı düzenle' : 'Kaynak ekle',
+      subtitle:'Kademe bir başlangıç noktası; gerçek zorluk çözdükçe ölçülür',
+      body:String(K.Stack([
+        K.Field({ label:'Ad', input:K.Input({ id:'src-name', value:v('name'),
+          placeholder:'ör. 345 TYT Matematik Soru Bankası' }) }),
+        K.Cols(2, [
+          K.Field({ label:'Zorluk kademesi',
+            input:K.Select({ id:'src-level', value:v('level', 'orta'),
+              options:R.SOURCE_LEVEL_ORDER.map(k => ({ value:k, label:R.SOURCE_LEVELS[k].label })) }) }),
+          K.Field({ label:'Tür',
+            input:K.Select({ id:'src-kind', value:v('kind', 'banka'),
+              options:R.SOURCE_KIND_ORDER.map(k => ({ value:k, label:R.SOURCE_KINDS[k].label })) }) }),
+        ]),
+        K.Field({ label:'Ders', hint:'yalnız bir derse aitse',
+          input:K.Select({ id:'src-subject', value:v('subjectId'),
+            options:[{ value:'', label:'— hepsi —' }].concat(
+              R.SUBJECTS.map(x => ({ value:x.id, label:x.name }))) }) }),
+        K.Field({ label:'Not', input:K.Input({ id:'src-note', value:v('note') }) }),
+        when(src, () => K.Notice({ tone:'info', body:R.Sources.sentence(src.id) })),
+        when(src && src.from, () => html`<p class="tiny dim">Kademe varsayılanı
+          uygulamanın kendi kaynak mimarisinden geldi (${src.from}); değiştirebilirsin.</p>`),
+      ])),
+      footer:String(html`
+        ${when(src, () => K.Button({ label:'Sil', tone:'ghost', act:'q-src-del',
+          data:{ 'data-id':src.id } }))}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'q-src-save',
+          data:{ 'data-id':src ? src.id : '' } })}`),
+    });
+  }
+
   /* ---------- ekran ---------- */
 
   async function render(){
     return String(K.Grid([
       K.Span(8, K.Stack([ inputCard(), resultCard() ])),
-      K.Span(4, K.Stack([ statCard(), topicCard(), historyCard() ])),
+      K.Span(4, K.Stack([ statCard(), sourceCard(), topicCard(), historyCard() ])),
     ]));
   }
 
@@ -371,6 +467,38 @@ R.Screens.solve = (function(){
     async 'q-save'(){ await saveRecord(false); },
     async 'q-save-error'(){ await saveRecord(true); },
 
+    async 'q-src-new'(){ sourceSheet(null); },
+    async 'q-src-edit'(el){ sourceSheet(el.dataset.id); },
+
+    async 'q-src-seed'(){
+      await R.Sources.seed();
+      UI.toast(R.Sources.all().length + ' kaynak eklendi — kademelerini değiştirebilirsin');
+      await R.App.render();
+    },
+
+    async 'q-src-save'(el){
+      const val = id => { const e = document.getElementById(id); return e ? String(e.value).trim() : ''; };
+      const name = val('src-name');
+      if(!name){ UI.toast('Kaynağın adı gerekiyor'); return; }
+      const old = el.dataset.id ? R.Sources.byId(el.dataset.id) : null;
+      await R.Sources.save(Object.assign({}, old || {}, {
+        id:el.dataset.id || undefined,
+        name, level:val('src-level'), kind:val('src-kind'),
+        subjectId:val('src-subject') || null,
+        note:val('src-note'),
+      }));
+      UI.closeSheet();
+      UI.toast('Kaynak kaydedildi');
+      await R.App.render();
+    },
+
+    async 'q-src-del'(el){
+      await R.Sources.remove(el.dataset.id);
+      UI.closeSheet();
+      UI.toast('Kaynak silindi');
+      await R.App.render();
+    },
+
     async 'q-del'(el){
       await Q.remove(el.dataset.id);
       UI.toast('Kayıt silindi');
@@ -402,7 +530,13 @@ R.Screens.solve = (function(){
       seconds:Number(val('q-secs')) || null,
       fromImage:!!image,
       model:result.model || '',
+      sourceId:val('q-source') || null,
+      sourceName:sourceNameOf(val('q-source')),
+      questionNo:val('q-no'),
     });
+
+    /* Sonraki soru genelde AYNI kitaptan gelir: seçim hatırlanır. */
+    lastSource = val('q-source') || '';
 
     if(alsoError){
       /* Yanlis defteri ayri bir kayittir ve kendi semasi vardir; cozum

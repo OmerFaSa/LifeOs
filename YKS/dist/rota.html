@@ -2581,6 +2581,20 @@ button.listitem.is-on{ background:var(--primary-soft); }
   .qdrop{ min-height:104px; }
   .qdrop__img{ max-height:240px; }
 }
+
+/* Kaynak satırı: ad + kademe + ölçülen zorluk rozeti. */
+.srcrow{
+  display:flex; align-items:center; gap:9px;
+  padding:7px 0;
+  border-bottom:1px solid var(--border);
+  font-size:var(--fs-sm);
+}
+.srcrow:last-child{ border-bottom:0; }
+.srcrow__name{ display:block; line-height:1.25; }
+.srcrow__meta{
+  display:block; font-size:var(--fs-xs); color:var(--text-3);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
 </style>
 <div id="app">
   <div class="boot">
@@ -4768,6 +4782,80 @@ R.SOLVER = {
   },
 };
 
+/* ==== js/data/sources.js ==== */
+/* Kaynaklar (yayinlar) — zorluk kademesi ve tur katalogu.
+
+   Bu dosya DEKLARATIFTIR. Olcum ve karar core/sources.js icindedir.
+
+   TOHUM LISTE NEREDEN GELIYOR?
+   Uydurulmadi. Uygulamanin ZATEN tasidigi iki yerden derlendi:
+     - R.PUBLISHER_LADDER (data/reference.js) — yayin zorluk merdiveni
+     - R.SUBJECTS[].sources (data/subjects.js) — ders basina kaynak mimarisi
+   Yani kademeler benim yargim degil, sistemin kendi icerigidir. Listede
+   olmayan yayini kullanici kendisi ekler.
+
+   VE ASIL OLCU BU DEGIL.
+   Etiket bir baslangic noktasidir. Bir kaynagin SANA gore zorlugu, o
+   kaynaktan cozdugun sorularda kendi oranindir: genel olarak %75 cozen ama
+   bir kitapta %45'te kalan biri icin o kitap zordur — etiketinde ne yazarsa
+   yazsin. core/sources.js bunu olcer. */
+
+window.R = window.R || {};
+
+/* Zorluk kademeleri. Sira anlamlidir: merdiven asagidan yukari cikilir. */
+R.SOURCE_LEVELS = {
+  temel: { id:'temel', order:1, label:'Temel',      tone:'ok',
+    note:'Konuyu yeni bitirdiğinde — anlaşılır dil, dengeli seçki.' },
+  orta:  { id:'orta',  order:2, label:'Orta',       tone:'info',
+    note:'Konu oturduktan sonra günlük çalışma bankası.' },
+  ust:   { id:'ust',   order:3, label:'Üst',        tone:'warn',
+    note:'Yalnız temel oturduktan sonra. Zor kaynağı bitirmek başarı ölçütü değildir.' },
+  resmi: { id:'resmi', order:4, label:'Resmî (ÖSYM)', tone:'danger',
+    note:'Sınavın kendi dili. Konu öğrenmek için erken tüketilmez; Mart–Mayıs arasında setlenir.' },
+};
+R.SOURCE_LEVEL_ORDER = ['temel', 'orta', 'ust', 'resmi'];
+
+R.SOURCE_KINDS = {
+  banka:  { id:'banka',  label:'Soru bankası' },
+  konu:   { id:'konu',   label:'Konu anlatımı' },
+  deneme: { id:'deneme', label:'Deneme' },
+  foy:    { id:'foy',    label:'Föy / fasikül' },
+};
+R.SOURCE_KIND_ORDER = ['banka', 'konu', 'deneme', 'foy'];
+
+/* Tohum liste — uygulamanin kendi kaynak mimarisinden derlendi.
+   `from` alani nereden geldigini soyler; kullanici bir kademeyi
+   degistirdiginde bunun bir TAHMIN degil, sistemin varsayilani oldugunu
+   bilsin diye durur. */
+R.SOURCE_SEED = [
+  { name:'Hız ve Renk',              level:'temel', kind:'banka',  from:'yayın merdiveni' },
+  { name:'Karekök',                  level:'temel', kind:'banka',  from:'TYT Türkçe / Matematik temel' },
+  { name:'Antrenmanlarla Matematik', level:'temel', kind:'banka',  from:'TYT Matematik temel' },
+  { name:'Palme',                    level:'temel', kind:'konu',   from:'Fen dersleri temel föy' },
+  { name:'Acil',                     level:'temel', kind:'konu',   from:'AYT Matematik konu anlatımı' },
+  { name:'Biyotik',                  level:'temel', kind:'konu',   from:'Biyoloji temel özet' },
+  { name:'Aydın',                    level:'temel', kind:'foy',    from:'Kimya konu föyü' },
+
+  { name:'345',                      level:'orta',  kind:'banka',  from:'yayın merdiveni' },
+  { name:'Bilgi Sarmal',             level:'orta',  kind:'banka',  from:'yayın merdiveni' },
+
+  { name:'Orijinal',                 level:'ust',   kind:'banka',  from:'yayın merdiveni' },
+  { name:'3D',                       level:'ust',   kind:'banka',  from:'yayın merdiveni' },
+  { name:'Endemik',                  level:'ust',   kind:'deneme', from:'yayın merdiveni' },
+  { name:'Orbital',                  level:'ust',   kind:'banka',  from:'AYT Fizik seçilmiş test' },
+
+  { name:'ÖSYM çıkmış sorular',      level:'resmi', kind:'deneme', from:'yayın merdiveni' },
+];
+
+/* Bir kaynak hakkinda konusmak icin en az kac cozulmus soru gerekir?
+   Ev kurali: tek olcumle karar verilmez. Alti sorudan cikan bir oran
+   gurultudur; kullaniciya "henuz yeterli kayit yok" denir. */
+R.SOURCE_MIN_SAMPLE = 8;
+
+/* Kendi genel oranindan bu kadar sapan bir kaynak "sana gore zor/kolay"
+   sayilir. Daha dar bir esik her kaynagi bir yana savururdu. */
+R.SOURCE_DELTA = 15;
+
 /* ==== js/data/actions.js ==== */
 /* Ajanlarin onerebilecegi eylemler — KAPALI katalog.
 
@@ -5386,6 +5474,7 @@ R.S = {
   profiles:[],     // cihazdaki profiller (cok kullanicili kullanim)
   videoNotes:[],   // izlenen ders kaydi + zaman damgali notlar
   solved:[],       // cozulen sorular: metin/fotograf, anlatim, konu, zorluk
+  sources:[],      // kaynaklar (yayinlar): kademe, tur, olculen zorluk
   activities:[],   // kullanicinin kendi ekledigi/gizledigi mesgaleler
   mood:{},         // YYYY-MM-DD -> { energy, note } (gunde tek kayit)
   breaks:[],       // alinan molalar
@@ -6355,7 +6444,7 @@ R.Model = (function(){
 
     const [weeks, days, exams, errors, cards, reviews, decisions, protocols, prefs,
            videoNotes, activities, mood, breaks, plan, calendar, sessions, profiles,
-           solved] = await Promise.all([
+           solved, sources] = await Promise.all([
       R.Store.list('weeks'),
       R.Store.list('days'),
       R.Store.list('exams'),
@@ -6374,6 +6463,7 @@ R.Model = (function(){
       R.Store.list('sessions'),
       R.Store.list('profiles'),
       R.Store.list('solved'),
+      R.Store.list('sources'),
     ]);
 
     weeks.forEach(w => { R.S.weeks[w.id] = normWeek(w); });
@@ -6387,6 +6477,7 @@ R.Model = (function(){
     /* Cozulen sorular: en yeni once. */
     R.S.solved = (solved || []).filter(x => x && x.id)
       .sort((a, b) => (b.at || '').localeCompare(a.at || ''));
+    R.S.sources = (sources || []).filter(x => x && x.id && x.name);
     R.S.prefs = (prefs && Array.isArray(prefs.rows) && prefs.rows.length === 24) ? prefs : defaultPrefs();
 
     R.S.videoNotes = videoNotes.map(normVideoNote)
@@ -14573,7 +14664,9 @@ R.Solver = (function(){
       difficulty:null,    // 1-5, dogrulanmis
       answer:'', trap:'',
       result:null,        // R.SOLVE_RESULTS anahtari
-      sourceId:null,      // kaynak (yayin) kimligi — ikinci asamada baglanir
+      sourceId:null,      // kaynak (yayin) kimligi
+      sourceName:'',      // kaynak silinse de kayit hangi yayindan geldigini bilsin
+      questionNo:'',      // kaynaktaki soru numarasi
       seconds:null,
       fromImage:false,
       model:'',
@@ -14665,6 +14758,199 @@ R.Solver = (function(){
     all, newRecord, save, remove, load,
     byTopic, daily, summary, solvedOk,
     MAX_EDGE, MAX_BYTES, MAX_RECORDS,
+  };
+})();
+
+/* ==== js/core/sources.js ==== */
+/* Kaynak (yayin) kaydi ve GERCEK zorluk olcumu.
+
+   Iki ayri sey vardir ve karistirilmamalidir:
+
+     ETIKET  — kaynagin kademesi (temel/orta/ust/resmi). Tohum listeden
+               gelir ya da kullanici secer. Bir baslangic noktasidir.
+     OLCUM   — o kaynaktan cozdugun sorularda SENIN oranin. Asil bilgi budur.
+
+   Genel olarak %75 cozen ama bir kitapta %45'te kalan biri icin o kitap
+   zordur — etiketinde ne yazarsa yazsin. relative() bunu soyler.
+
+   OLCUM TEK OLCUMDEN CIKMAZ. Ev kurali burada da gecerli: alti sorudan
+   cikan bir oran gurultudur. R.SOURCE_MIN_SAMPLE altinda oran HIC
+   hesaplanmaz, "henuz yeterli kayit yok" denir. Uydurma bir zorluk
+   etiketi, etiketsiz birakmaktan kotudur. */
+
+window.R = window.R || {};
+
+R.Sources = (function(){
+  const U = R.U, S = R.S;
+
+  function all(){ return (S.sources || []).slice(); }
+  function byId(id){ return (S.sources || []).find(x => x.id === id) || null; }
+
+  function newSource(fields){
+    return Object.assign({
+      id:U.uid('src'),
+      name:'',
+      level:'orta',
+      kind:'banka',
+      subjectId:null,      // yalniz bir derse aitse
+      note:'',
+      from:'',             // tohumdan geldiyse nereden
+      addedAt:new Date().toISOString(),
+    }, fields || {});
+  }
+
+  async function save(src){
+    const rec = Object.assign(newSource(), src);
+    rec.name = String(rec.name || '').trim().slice(0, 60);
+    if(!rec.name) throw Object.assign(new Error('ad gerekli'), { code:'empty' });
+    if(!R.SOURCE_LEVELS[rec.level]) rec.level = 'orta';
+    if(!R.SOURCE_KINDS[rec.kind]) rec.kind = 'banka';
+
+    S.sources = S.sources || [];
+    const i = S.sources.findIndex(x => x.id === rec.id);
+    if(i >= 0) S.sources[i] = rec; else S.sources.push(rec);
+    await R.Store.set('sources/' + rec.id, rec);
+    return rec;
+  }
+
+  async function remove(id){
+    S.sources = (S.sources || []).filter(x => x.id !== id);
+    await R.Store.remove('sources/' + id);
+  }
+
+  async function load(){
+    const rows = await R.Store.list('sources');
+    S.sources = (rows || []).filter(x => x && x.id && x.name);
+    return S.sources;
+  }
+
+  /* Tohum liste BIR KEZ eklenir ve bir daha dokunulmaz: kullanici bir
+     kaynagi sildiyse geri gelmemeli, kademesini degistirdiyse ustune
+     yazilmamali. */
+  async function seed(){
+    if((S.sources || []).length) return S.sources;
+    const flag = await R.Store.get('meta/sourceSeed');
+    if(flag && flag.done) return S.sources || [];
+    for(const row of R.SOURCE_SEED){
+      await save(newSource(row));
+    }
+    await R.Store.set('meta/sourceSeed', { done:true, at:new Date().toISOString() });
+    return S.sources;
+  }
+
+  /* ---------- olcum ---------- */
+
+  /* Bir kaynaga bagli cozum kayitlari. Deneme kayitlari da sayilir:
+     yayin adi eslesen denemeler ayni kaynagin olcumune girer. */
+  function recordsOf(id){
+    const src = byId(id);
+    if(!src) return [];
+    const name = U.norm(src.name);
+    return (S.solved || []).filter(r =>
+      r.sourceId === id || (!r.sourceId && r.sourceName && U.norm(r.sourceName) === name));
+  }
+
+  /* Genel oranin: butun kaynaklardaki cozum oranin.
+     Karsilastirmanin tabani budur. */
+  function overallRate(){
+    const rows = (S.solved || []).filter(r => r.result);
+    if(rows.length < R.SOURCE_MIN_SAMPLE) return null;
+    const ok = rows.filter(R.Solver.solvedOk).length;
+    return Math.round(100 * ok / rows.length);
+  }
+
+  /* Bir kaynagin olcumu. oran null ise yeterli kayit yok demektir —
+     ekran bunu "henuz bilmiyoruz" diye gostermeli, sifir diye degil. */
+  function measure(id){
+    const rows = recordsOf(id).filter(r => r.result);
+    const zor = rows.filter(r => r.difficulty);
+    const ok = rows.filter(R.Solver.solvedOk).length;
+    const enough = rows.length >= R.SOURCE_MIN_SAMPLE;
+    return {
+      soru:rows.length,
+      cozulen:ok,
+      yeterli:enough,
+      eksik:Math.max(0, R.SOURCE_MIN_SAMPLE - rows.length),
+      oran:enough ? Math.round(100 * ok / rows.length) : null,
+      ortZorluk:zor.length ? U.round(zor.reduce((s, r) => s + r.difficulty, 0) / zor.length, 1) : null,
+    };
+  }
+
+  /* Kaynagin SANA gore zorlugu: genel oranindan sapmasi.
+     { durum:'zor'|'kolay'|'dengeli'|'bilinmiyor', fark, oran, genel } */
+  function relative(id){
+    const m = measure(id);
+    const genel = overallRate();
+    if(m.oran == null || genel == null){
+      return { durum:'bilinmiyor', fark:null, oran:m.oran, genel, olcum:m };
+    }
+    const fark = m.oran - genel;
+    const durum = fark <= -R.SOURCE_DELTA ? 'zor'
+      : fark >= R.SOURCE_DELTA ? 'kolay' : 'dengeli';
+    return { durum, fark, oran:m.oran, genel, olcum:m };
+  }
+
+  /* Ekran icin tek satirlik cumle. Sayiyi yorumlamak ekranin degil
+     kural motorunun isi. */
+  function sentence(id){
+    const r = relative(id);
+    const src = byId(id);
+    const ad = src ? src.name : 'Bu kaynak';
+    if(r.durum === 'bilinmiyor'){
+      const m = r.olcum;
+      return m.soru
+        ? ad + ' için henüz karar verilemez: ' + m.soru + ' soru var, en az '
+          + R.SOURCE_MIN_SAMPLE + ' gerekiyor.'
+        : ad + ' için henüz çözüm kaydı yok.';
+    }
+    const yon = r.fark > 0 ? '+' : '';
+    if(r.durum === 'zor'){
+      return ad + ' sana göre ZOR: burada %' + r.oran + ' çözüyorsun, genel oranın %'
+        + r.genel + ' (' + yon + r.fark + ').';
+    }
+    if(r.durum === 'kolay'){
+      return ad + ' sana göre kolay: burada %' + r.oran + ', genel oranın %'
+        + r.genel + ' (' + yon + r.fark + ').';
+    }
+    return ad + ' seviyene denk: %' + r.oran + ', genel oranın %' + r.genel + '.';
+  }
+
+  /* Butun kaynaklarin tablosu — en zoru ustte. Olcumu olmayanlar sona. */
+  function table(){
+    return all().map(src => Object.assign({ src }, relative(src.id)))
+      .sort((a, b) => {
+        if((a.fark == null) !== (b.fark == null)) return a.fark == null ? 1 : -1;
+        if(a.fark == null) return a.src.name.localeCompare(b.src.name, 'tr');
+        return a.fark - b.fark;
+      });
+  }
+
+  /* ---------- merdiven kurali ----------
+     Uygulamanin kendi kurali: "Temel oturmadan ust seviye yayina gecilmez."
+     Kural motoru kapanis yuzdesini okur; uyari yalnizca VERI onu
+     destekliyorsa cikar. */
+  function ladderWarning(){
+    const closure = R.Calc.overallClosure();
+    if(!closure || closure.pct >= 55) return null;
+
+    const recent = (S.solved || []).slice(0, 20);
+    const ust = recent.filter(r => {
+      const s = r.sourceId ? byId(r.sourceId) : null;
+      return s && (s.level === 'ust' || s.level === 'resmi');
+    });
+    if(ust.length < 3) return null;
+    return {
+      pct:closure.pct,
+      adet:ust.length,
+      text:'Konu kapanışın %' + closure.pct + ' iken son ' + recent.length + ' sorunun '
+        + ust.length + ' tanesi üst seviye kaynaktan. Ev kuralı: temel oturmadan üst '
+        + 'seviye yayına geçilmez — zor kaynağı bitirmek başarı ölçütü değildir.',
+    };
+  }
+
+  return {
+    all, byId, newSource, save, remove, load, seed,
+    recordsOf, overallRate, measure, relative, sentence, table, ladderWarning,
   };
 })();
 
@@ -19147,6 +19433,12 @@ R.Screens.solve = (function(){
   let controller = null;
   let followBusy = false;
   let follows = [];        // [{ q, a }]
+  let lastSource = '';     // arka arkaya aynı kitaptan çözmek yaygın
+
+  function sourceNameOf(id){
+    const s = id ? R.Sources.byId(id) : null;
+    return s ? s.name : '';
+  }
 
   /* ---------- parçalar ---------- */
 
@@ -19297,6 +19589,17 @@ R.Screens.solve = (function(){
           input:K.Input({ id:'q-secs', type:'number', numeric:true, min:0 }) }),
         K.Field({ label:'Cevap', input:K.Input({ id:'q-answer', value:m.answer || '' }) }),
       ]),
+      /* Kaynak: zorluğu ETİKETİNDEN değil, senin bu kaynaktaki oranından
+         öğreneceğiz. Onun için soru kaynağa bağlanmalı. */
+      K.Cols(2, [
+        K.Field({ label:'Kaynak', hint:'hangi yayından',
+          input:K.Select({ id:'q-source', value:lastSource,
+            options:[{ value:'', label:'— kaynak seç —' }].concat(
+              R.Sources.all().map(x => ({ value:x.id,
+                label:x.name + ' · ' + R.SOURCE_LEVELS[x.level].label }))) }) }),
+        K.Field({ label:'Soru no', hint:'isteğe bağlı',
+          input:K.Input({ id:'q-no', placeholder:'ör. 42' }) }),
+      ]),
       when(m.trap, () => K.Notice({ tone:'info', title:'Tuzak:', body:m.trap })),
       K.Row([
         K.Button({ label:'Kaydet', icon:'check', tone:'primary', act:'q-save' }),
@@ -19349,12 +19652,91 @@ R.Screens.solve = (function(){
     });
   }
 
+  /* ---------- kaynaklar ----------
+     Etiket bir başlangıç noktasıdır; asıl ölçü SENİN o kaynaktaki oranın.
+     Genel olarak %75 çözüp bir kitapta %45'te kalıyorsan o kitap zordur —
+     etiketinde ne yazarsa yazsın. */
+
+  function sourceCard(){
+    const rows = R.Sources.table();
+    const warn = R.Sources.ladderWarning();
+
+    return K.Card({
+      title:'Kaynaklarım', sub:'Zorluk etiketten değil, senin oranından çıkar',
+      actions:K.Button({ label:'Kaynak ekle', icon:'plus', size:'sm', act:'q-src-new' }),
+      body:html`
+        ${when(warn, () => K.Notice({ tone:'warn', title:'Yayın merdiveni:', body:warn.text }))}
+        ${when(!rows.length, () => K.Empty({ icon:'book',
+          text:'Henüz kaynak yok. Kullandığın yayınları ekle; çözdüğün soruları onlara '
+             + 'bağladıkça hangisinin sana zor geldiği kendiliğinden çıkar.',
+          action:K.Button({ label:'Kaynakları yükle', size:'sm', tone:'primary', act:'q-src-seed' }) }))}
+        ${when(rows.length, () => html`<div class="stack-xs">${map(rows, r => html`
+          <div class="srcrow">
+            <span class="minw0">
+              <b class="srcrow__name">${r.src.name}</b>
+              <span class="srcrow__meta">${R.SOURCE_LEVELS[r.src.level].label}
+                · ${R.SOURCE_KINDS[r.src.kind].label}${
+                  when(r.olcum.soru, () => ' · ' + r.olcum.soru + ' soru')}</span>
+            </span>
+            ${K.Badge({ label:badgeOf(r), tone:toneOf(r) })}
+            ${K.IconButton({ icon:'edit', size:'sm', plain:true, aria:'Kaynağı düzenle',
+              act:'q-src-edit', data:{ 'data-id':r.src.id } })}
+          </div>`)}</div>
+        <p class="tiny dim mt-8">Bir kaynak hakkında konuşabilmek için en az
+          ${R.SOURCE_MIN_SAMPLE} çözülmüş soru gerekir; altı sorudan çıkan oran gürültüdür.</p>`)}`,
+    });
+  }
+
+  function badgeOf(r){
+    if(r.durum === 'bilinmiyor') return r.olcum.soru ? r.olcum.soru + '/' + R.SOURCE_MIN_SAMPLE : 'kayıt yok';
+    return '%' + r.oran + ' · ' + (r.durum === 'zor' ? 'sana zor'
+      : r.durum === 'kolay' ? 'sana kolay' : 'denk');
+  }
+  function toneOf(r){
+    return r.durum === 'zor' ? 'danger' : r.durum === 'kolay' ? 'ok'
+      : r.durum === 'dengeli' ? 'info' : 'muted';
+  }
+
+  function sourceSheet(id){
+    const src = id ? R.Sources.byId(id) : null;
+    const v = (f, d) => src ? (src[f] == null ? '' : src[f]) : (d == null ? '' : d);
+    UI.sheet({
+      title:src ? 'Kaynağı düzenle' : 'Kaynak ekle',
+      subtitle:'Kademe bir başlangıç noktası; gerçek zorluk çözdükçe ölçülür',
+      body:String(K.Stack([
+        K.Field({ label:'Ad', input:K.Input({ id:'src-name', value:v('name'),
+          placeholder:'ör. 345 TYT Matematik Soru Bankası' }) }),
+        K.Cols(2, [
+          K.Field({ label:'Zorluk kademesi',
+            input:K.Select({ id:'src-level', value:v('level', 'orta'),
+              options:R.SOURCE_LEVEL_ORDER.map(k => ({ value:k, label:R.SOURCE_LEVELS[k].label })) }) }),
+          K.Field({ label:'Tür',
+            input:K.Select({ id:'src-kind', value:v('kind', 'banka'),
+              options:R.SOURCE_KIND_ORDER.map(k => ({ value:k, label:R.SOURCE_KINDS[k].label })) }) }),
+        ]),
+        K.Field({ label:'Ders', hint:'yalnız bir derse aitse',
+          input:K.Select({ id:'src-subject', value:v('subjectId'),
+            options:[{ value:'', label:'— hepsi —' }].concat(
+              R.SUBJECTS.map(x => ({ value:x.id, label:x.name }))) }) }),
+        K.Field({ label:'Not', input:K.Input({ id:'src-note', value:v('note') }) }),
+        when(src, () => K.Notice({ tone:'info', body:R.Sources.sentence(src.id) })),
+        when(src && src.from, () => html`<p class="tiny dim">Kademe varsayılanı
+          uygulamanın kendi kaynak mimarisinden geldi (${src.from}); değiştirebilirsin.</p>`),
+      ])),
+      footer:String(html`
+        ${when(src, () => K.Button({ label:'Sil', tone:'ghost', act:'q-src-del',
+          data:{ 'data-id':src.id } }))}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'q-src-save',
+          data:{ 'data-id':src ? src.id : '' } })}`),
+    });
+  }
+
   /* ---------- ekran ---------- */
 
   async function render(){
     return String(K.Grid([
       K.Span(8, K.Stack([ inputCard(), resultCard() ])),
-      K.Span(4, K.Stack([ statCard(), topicCard(), historyCard() ])),
+      K.Span(4, K.Stack([ statCard(), sourceCard(), topicCard(), historyCard() ])),
     ]));
   }
 
@@ -19494,6 +19876,38 @@ R.Screens.solve = (function(){
     async 'q-save'(){ await saveRecord(false); },
     async 'q-save-error'(){ await saveRecord(true); },
 
+    async 'q-src-new'(){ sourceSheet(null); },
+    async 'q-src-edit'(el){ sourceSheet(el.dataset.id); },
+
+    async 'q-src-seed'(){
+      await R.Sources.seed();
+      UI.toast(R.Sources.all().length + ' kaynak eklendi — kademelerini değiştirebilirsin');
+      await R.App.render();
+    },
+
+    async 'q-src-save'(el){
+      const val = id => { const e = document.getElementById(id); return e ? String(e.value).trim() : ''; };
+      const name = val('src-name');
+      if(!name){ UI.toast('Kaynağın adı gerekiyor'); return; }
+      const old = el.dataset.id ? R.Sources.byId(el.dataset.id) : null;
+      await R.Sources.save(Object.assign({}, old || {}, {
+        id:el.dataset.id || undefined,
+        name, level:val('src-level'), kind:val('src-kind'),
+        subjectId:val('src-subject') || null,
+        note:val('src-note'),
+      }));
+      UI.closeSheet();
+      UI.toast('Kaynak kaydedildi');
+      await R.App.render();
+    },
+
+    async 'q-src-del'(el){
+      await R.Sources.remove(el.dataset.id);
+      UI.closeSheet();
+      UI.toast('Kaynak silindi');
+      await R.App.render();
+    },
+
     async 'q-del'(el){
       await Q.remove(el.dataset.id);
       UI.toast('Kayıt silindi');
@@ -19525,7 +19939,13 @@ R.Screens.solve = (function(){
       seconds:Number(val('q-secs')) || null,
       fromImage:!!image,
       model:result.model || '',
+      sourceId:val('q-source') || null,
+      sourceName:sourceNameOf(val('q-source')),
+      questionNo:val('q-no'),
     });
+
+    /* Sonraki soru genelde AYNI kitaptan gelir: seçim hatırlanır. */
+    lastSource = val('q-source') || '';
 
     if(alsoError){
       /* Yanlis defteri ayri bir kayittir ve kendi semasi vardir; cozum

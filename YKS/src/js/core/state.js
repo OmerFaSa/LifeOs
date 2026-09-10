@@ -23,6 +23,7 @@ R.S = {
   profiles:[],     // cihazdaki profiller (cok kullanicili kullanim)
   videoNotes:[],   // izlenen ders kaydi + zaman damgali notlar
   solved:[],       // cozulen sorular: metin/fotograf, anlatim, konu, zorluk
+  sources:[],      // kaynaklar (yayinlar): kademe, tur, olculen zorluk
   activities:[],   // kullanicinin kendi ekledigi/gizledigi mesgaleler
   mood:{},         // YYYY-MM-DD -> { energy, note } (gunde tek kayit)
   breaks:[],       // alinan molalar
@@ -992,7 +993,7 @@ R.Model = (function(){
 
     const [weeks, days, exams, errors, cards, reviews, decisions, protocols, prefs,
            videoNotes, activities, mood, breaks, plan, calendar, sessions, profiles,
-           solved] = await Promise.all([
+           solved, sources] = await Promise.all([
       R.Store.list('weeks'),
       R.Store.list('days'),
       R.Store.list('exams'),
@@ -1011,6 +1012,7 @@ R.Model = (function(){
       R.Store.list('sessions'),
       R.Store.list('profiles'),
       R.Store.list('solved'),
+      R.Store.list('sources'),
     ]);
 
     weeks.forEach(w => { R.S.weeks[w.id] = normWeek(w); });
@@ -1024,6 +1026,7 @@ R.Model = (function(){
     /* Cozulen sorular: en yeni once. */
     R.S.solved = (solved || []).filter(x => x && x.id)
       .sort((a, b) => (b.at || '').localeCompare(a.at || ''));
+    R.S.sources = (sources || []).filter(x => x && x.id && x.name);
     R.S.prefs = (prefs && Array.isArray(prefs.rows) && prefs.rows.length === 24) ? prefs : defaultPrefs();
 
     R.S.videoNotes = videoNotes.map(normVideoNote)

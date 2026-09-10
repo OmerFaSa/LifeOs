@@ -100,17 +100,63 @@ bilgisidir: bir konuda 20 soru çözmek, o konuyu bildiğin anlamına gelmez.
 Takip istemi çözümü bağlamda tutar ve modelden **yalnız o adımı** açıklamasını
 ister — çözümü baştan yazmasını değil.
 
+## Kaynak (yayın) zorluğu
+
+İki ayrı şey vardır ve karıştırılmamalıdır:
+
+| | Ne | Nereden |
+|---|---|---|
+| **Etiket** | Kaynağın kademesi: temel / orta / üst / resmî | Tohum listeden ya da senin seçiminden. Bir **başlangıç noktası** |
+| **Ölçüm** | O kaynaktan çözdüğün sorularda **senin** oranın | Kendi çözüm kayıtlarından. **Asıl bilgi bu** |
+
+Genel olarak %75 çözüp bir kitapta %45'te kalıyorsan **o kitap sana zordur** —
+etiketinde ne yazarsa yazsın. `Sources.relative(id)` bunu söyler: kaynağın
+oranını senin genel oranınla karşılaştırır ve ±15 puanlık sapmayı "sana zor" /
+"sana kolay" diye adlandırır.
+
+> 3D sana göre **ZOR**: burada %25 çözüyorsun, genel oranın %59 (−34).
+
+### Tohum liste uydurulmadı
+
+Kaynak listesi ve kademeleri uygulamanın **zaten taşıdığı** iki yerden derlendi:
+`R.PUBLISHER_LADDER` (yayın merdiveni) ve `R.SUBJECTS[].sources` (ders başına
+kaynak mimarisi). Yani kademeler benim yargım değil, sistemin kendi içeriği —
+her kaydın `from` alanı nereden geldiğini söyler. Listede olmayan yayını
+kullanıcı kendisi ekler, kademesini değiştirebilir.
+
+Tohum **bir kez** yüklenir: sildiğin kaynak geri gelmez, değiştirdiğin kademe
+üzerine yazılmaz.
+
+### Tek ölçümle karar verilmez
+
+Ev kuralı burada da geçerli. Altı sorudan çıkan bir oran gürültüdür:
+`R.SOURCE_MIN_SAMPLE` (8) altında oran **hiç hesaplanmaz** ve ekran "5/8" der,
+"%20" demez. Uydurma bir zorluk etiketi, etiketsiz bırakmaktan kötüdür.
+
+"Çözüme baktım" burada da çözülmüş sayılmaz — bir kitapta 20 soruya bakmak, o
+kitabı çözebildiğin anlamına gelmez.
+
+### Merdiven kuralı
+
+Uygulamanın kendi kuralı: *"Temel oturmadan üst seviye yayına geçilmez."*
+`Sources.ladderWarning()` bunu **veri destekliyorsa** söyler: konu kapanışın
+%55'in altındayken son 20 sorunun üçü ya da fazlası üst seviye kaynaktan
+geldiyse uyarı çıkar. Kapanış iyiyse ya da üst seviyeden çözmüyorsan hiçbir şey
+yazmaz — koşulsuz uyarı, okunmayan uyarıdır.
+
 ## Dosya haritası
 
 | Dosya | Sorumluluk |
 |---|---|
 | `data/solver.js` | İstemler, zorluk ölçeği, sonuç işaretleri, çıktı sözleşmesi (deklaratif) |
+| `data/sources.js` | Kaynak kademeleri, türleri, tohum liste (deklaratif) |
 | `core/solver.js` | Kapalı katalog eşleşmesi, çıktı ayrımı, doğrulama, fotoğraf hazırlama, kayıt, ölçüm |
-| `screens/solve.js` | Soru kutusu, çözüm, kayda geçirme, geçmiş |
-| `tests/solver.test.js` | Katalog eşleşmesi, ayrım, doğrulama, kayıt, görsel taşıma |
+| `core/sources.js` | Kaynak kaydı ve **ölçülen** zorluk: senin oranın vs. genel oranın |
+| `screens/solve.js` | Soru kutusu, çözüm, kayda geçirme, kaynaklar, geçmiş |
+| `tests/solver.test.js` | Katalog eşleşmesi, ayrım, doğrulama, kayıt, görsel taşıma, kaynak ölçümü |
 
 ## Doğrulama
 
 ```bash
-node tools/runtests.js       # 791 testin tamamı geçmeli
+node tools/runtests.js       # 805 testin tamamı geçmeli
 ```

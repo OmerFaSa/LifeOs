@@ -1890,3 +1890,17 @@ button.listitem.is-on{ background:var(--primary-soft); }
   .qdrop{ min-height:104px; }
   .qdrop__img{ max-height:240px; }
 }
+
+/* Kaynak satırı: ad + kademe + ölçülen zorluk rozeti. */
+.srcrow{
+  display:flex; align-items:center; gap:9px;
+  padding:7px 0;
+  border-bottom:1px solid var(--border);
+  font-size:var(--fs-sm);
+}
+.srcrow:last-child{ border-bottom:0; }
+.srcrow__name{ display:block; line-height:1.25; }
+.srcrow__meta{
+  display:block; font-size:var(--fs-xs); color:var(--text-3);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
