@@ -54,6 +54,7 @@
   --agent-ayt:#8A5A12;
   --agent-rehber:#2C6B52;
   --agent-analist:#8C3B62;
+  --agent-koc:#1F6F73;
   --agent-ink:#FFFFFF;
   --c-grid:#E1E4EC;
   --c-band:#DDDFF2;
@@ -131,6 +132,8 @@
     --agent-ayt:#DDAE68;
     --agent-rehber:#8FD0B0;
     --agent-analist:#DE9CC0;
+  --agent-koc:#7FCBCF;
+    --agent-koc:#7FCBCF;
     --agent-ink:#0E0F18;
     --c-grid:#2A2C38;
     --c-band:#252740;
@@ -1751,6 +1754,7 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .agentav--ayt    { background:var(--agent-ayt);     color:var(--agent-ink); }
 .agentav--rehber { background:var(--agent-rehber);  color:var(--agent-ink); }
 .agentav--analist{ background:var(--agent-analist); color:var(--agent-ink); }
+.agentav--koc    { background:var(--agent-koc);     color:var(--agent-ink); }
 
 .desks{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(272px, 1fr)); }
 .desk__head{ display:flex; align-items:center; gap:11px; }
@@ -1930,6 +1934,7 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .agentref--ayt    { color:var(--agent-ayt); }
 .agentref--rehber { color:var(--agent-rehber); }
 .agentref--analist{ color:var(--agent-analist); }
+.agentref--koc    { color:var(--agent-koc); }
 .agentref:hover{ border-bottom-style:solid; }
 
 /* Çapraz soru — Patron’un tur arasında sorduğu takip sorusu */
@@ -2040,6 +2045,7 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .seat--ayt    { --seat-color:var(--agent-ayt); }
 .seat--rehber { --seat-color:var(--agent-rehber); }
 .seat--analist{ --seat-color:var(--agent-analist); }
+.seat--koc    { --seat-color:var(--agent-koc); }
 
 .seat__body{ min-width:0; flex:1; }
 .seat__name{
@@ -2431,6 +2437,7 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .prop--ayt    { --seat-color:var(--agent-ayt); }
 .prop--rehber { --seat-color:var(--agent-rehber); }
 .prop--analist{ --seat-color:var(--agent-analist); }
+.prop--koc    { --seat-color:var(--agent-koc); }
 
 .prop__head{ display:flex; align-items:flex-start; gap:9px; }
 .prop__who{ min-width:0; flex:1; }
@@ -2658,6 +2665,14 @@ button.listitem.is-on{ background:var(--primary-soft); }
 }
 @media (max-width:520px){
   .qdiff{ grid-template-columns:1fr; }
+}
+
+/* Ses eşleştirme satırı: kim, hangi ses, dinle. */
+.voicerow{ display:flex; align-items:center; gap:8px; }
+.voicerow__name{ flex:none; min-width:64px; font-size:var(--fs-sm); font-weight:600; }
+.voicerow .select{ flex:1; min-width:0; }
+@media (max-width:520px){
+  .voicerow__name{ min-width:0; }
 }
 </style>
 <div id="app">
@@ -4344,8 +4359,8 @@ R.AGENTS = [
     maxSentences:5,
     temperature:0.3,
     system:
-      'Sen bir YKS çalışma ofisinin patronusun. Dört uzmanın var: TYT uzmanı, AYT uzmanı, '
-      + 'rehber ve analist. Onların raporlarını okur, çelişkileri çözer ve TEK bir karar çıkarırsın.\n'
+      'Sen bir YKS çalışma ofisinin patronusun. Beş uzmanın var: TYT uzmanı, AYT uzmanı, '
+      + 'rehber, analist ve soru çözüm koçu. Onların raporlarını okur, çelişkileri çözer ve TEK bir karar çıkarırsın.\n'
       + '- Hesap yapmazsın: bütün sayılar kural motorundan gelir, geldiği gibi kullanılır.\n'
       + '- Aynı anda birden fazla müdahale yazmazsın; bu haftanın tek işini söylersin.\n'
       + '- Uzmanlar çelişiyorsa hangisinin haklı olduğunu veriye dayanarak söylersin.\n'
@@ -4486,6 +4501,42 @@ R.AGENTS = [
       'Analiz borcum ne durumda?',
     ],
   },
+
+  {
+    id:'koc',
+    name:'Kerem',
+    role:'Soru koçu',
+    initial:'K',
+    tone:'accent',
+    desk:'Çözülen sorular: hangi konu, hangi yayın, nerede zorlanıyorsun.',
+    scope:'Soru çözümü tarafı: çözüm kayıtları, konu başına oran, kaynak zorluğu.',
+    reads:['cozulen_sorular', 'konu_basina_oran', 'kaynaklar', 'kaynak_zorlugu'],
+    route:'solve',
+    hint:'closure',
+    maxSentences:4,
+    temperature:0.4,
+    /* Koc COZULEN SORUYA bakar, denemeye degil: deneme neti Deniz'in masasi.
+       Ayrimi korumak onemli — ikisi ayni sey degildir ve karistirilirsa
+       "bu hafta 200 soru cozdum ama netim dusuk" celiskisi kaybolur. */
+    taboo:[{ re:/(deneme net|denemede\s+\d|\bmedyan\b)/i,
+      why:'Deneme netinden söz etti; orası Deniz’in masası, koç çözülen soruya bakar.' }],
+    system:
+      'Sen bir YKS ofisinde soru çözüm koçusun. Adayın ÇÖZDÜĞÜ SORULARA bakarsın: '
+      + 'hangi konudan kaç soru çözdü, kaçını kendi çözdü, hangi yayında zorlandı.\n'
+      + '- Deneme neti yorumlamazsın; o Deniz’in alanı. Sen soru çözümüne bakarsın.\n'
+      + '- "Çözüme baktım" ile "kendim çözdüm" arasındaki farkı önemsersin: bir '
+      + 'konuda 20 soru çözmek o konuyu bildiğin anlamına gelmez.\n'
+      + '- Kaynağın zorluğunu etiketinden değil adayın o kaynaktaki oranından '
+      + 'okursun: etikette "orta" yazan bir kitap adaya zor gelebilir.\n'
+      + '- Tek ölçümle karar vermezsin; az kayıtta "henüz yeterli soru yok" dersin.\n'
+      + '- Somut konuşursun: hangi konu, hangi yayın, kaç soru.',
+    ask:[
+      'Hangi konuda en çok zorlanıyorum?',
+      'Hangi yayın bana zor geliyor?',
+      'Bu hafta kaç soru çözdüm?',
+      'Çözüme bakmadan çözebildiğim konular hangileri?',
+    ],
+  },
 ];
 
 /* ---------- sohbet turleri ----------
@@ -4545,6 +4596,9 @@ R.ACTION_OWNER = {
   sleep:'rehber', minimum:'rehber', break:'rehber', review:'rehber', contract:'rehber',
   block:'rehber', blocks:'rehber', running:'rehber', anchor:'rehber', done:'rehber',
   watch:'tyt',
+  /* Soru cozumune dusen isler kocun alanina yazilir: guven skoru dogru
+     ajana islensin. */
+  solve:'koc', question:'koc', source:'koc',
 };
 
 R.AGENT_IDS = R.AGENTS.map(a => a.id);
@@ -4552,7 +4606,9 @@ R.AGENT_BY_ID = R.AGENTS.reduce((m, a) => { m[a.id] = a; return m; }, {});
 
 /* Toplantida konusma sirasi: once olcum, sonra branslar, sonra davranis.
    Patron acar ve kapatir; sirasi burada degil orkestratordedir. */
-R.MEETING_ORDER = ['analist', 'tyt', 'ayt', 'rehber'];
+/* Toplanti sirasi. Koc, uzmanlardan SONRA konusur: once konu ve net
+   tablosu masaya konur, sonra "peki gercekten cozebiliyor mu" sorusu. */
+R.MEETING_ORDER = ['analist', 'tyt', 'ayt', 'rehber', 'koc'];
 
 /* Ofis istemleri — tek kaynak, surumlu.
    Surum artinca onbellekteki brifingler gecersiz olur. */
@@ -12002,13 +12058,23 @@ R.Voice = (function(){
 
   /* Ajan sesleri. Perde ve hiz, cihazda tek ses olsa bile ajanlari
      ayirt edilebilir kilar; ayri ses bulunursa ustune biner. */
+  /* Perde araligi KASITLI OLARAK dar. Ilk surumde 0.80-1.24 idi ve
+     "her ajanin kendi sesi olsun" istegini karsiliyor gibi gorunuyordu;
+     gercekte ses kalitesini bozan sey buydu: konusma sentezleyicileri
+     perdeyi ne kadar kaydirirsan o kadar metalik ses uretir. 1.24 perde
+     "farkli bir kisi" degil, "bozulmus ayni kisi" gibi duyuluyordu.
+
+     Ayrim once GERCEK SESLERDEN yapilir (cihazda kac ses varsa hepsi
+     dagitilir); perde yalnizca ince ayardir. Hiz de 1.0'in cok uzagina
+     gitmez: hizli konusma anlasilirligi, yavas konusma dogalligi bozar. */
   const PROFILES = {
-    patron: { pitch:0.80, rate:0.95 },
-    tyt:    { pitch:1.12, rate:1.03 },
-    ayt:    { pitch:0.92, rate:0.99 },
-    rehber: { pitch:1.24, rate:0.93 },
-    analist:{ pitch:1.00, rate:1.10 },
-    aday:   { pitch:1.05, rate:1.00 },
+    patron: { pitch:0.92, rate:0.97 },
+    tyt:    { pitch:1.06, rate:1.02 },
+    ayt:    { pitch:0.96, rate:1.00 },
+    rehber: { pitch:1.10, rate:0.96 },
+    analist:{ pitch:1.00, rate:1.05 },
+    koc:    { pitch:0.88, rate:1.03 },
+    aday:   { pitch:1.04, rate:1.00 },
   };
 
   /* Okuma hizi: kelime/saniye. Sesli degilken turlar arasindaki mola
@@ -12100,12 +12166,66 @@ R.Voice = (function(){
     return waiting;
   }
 
-  /* Turkce sesler once; hicbiri yoksa liste oldugu gibi kullanilir —
-     yabanci bir sesle Turkce okumak, hic okumamaktan iyidir. */
+  /* ---------- ses kalitesi ----------
+
+     Tarayicinin verdigi sesler ESIT DEGILDIR ve aradaki fark buyuktur:
+     Linux'ta eSpeak metalik ve robotik konusur, Chrome'un "Google turkce"
+     sesi ya da Edge'in "Natural/Neural" sesleri neredeyse insan gibidir.
+     Ilk surum listeden SIRAYLA aliyordu; cihazda iyi ses olsa bile
+     kotusune denk gelebiliyordu. "Ses kalitesi kotu" sikayetinin sebebi
+     buydu — sentezleyiciyi biz yazamayiz ama HANGISINI kullandigimizi
+     secebiliriz.
+
+     Puanlama isimlerden ve bayraklardan okunur; hicbiri kesin degildir,
+     bu yuzden puan sirasi bir TERCIH sirasidir, filtre degil. */
+  function score(v){
+    const name = String(v.name || '').toLowerCase();
+    const lang = String(v.lang || '');
+    let n = 0;
+    /* Turkce olmak her seyden onemli: iyi bir Ingilizce ses Turkce metni
+       okuyamaz. */
+    if(/^tr\b|^tr[-_]/i.test(lang)) n += 200;
+    /* Sinirsel/bulut sesler yerel gomulu seslerden belirgin iyidir. */
+    if(/natural|neural/.test(name)) n += 60;
+    if(/google/.test(name)) n += 45;
+    if(/microsoft/.test(name)) n += 25;
+    if(/online/.test(name)) n += 20;
+    if(v.localService === false) n += 30;
+    /* Bilinen robotik motorlar geriye atilir. */
+    if(/espeak|festival|pico|compact|klatt/.test(name)) n -= 80;
+    if(v.default) n += 3;
+    return n;
+  }
+
+  /* Turkce sesler once ve KALITE SIRASIYLA; hicbiri yoksa liste oldugu
+     gibi kullanilir — yabanci bir sesle Turkce okumak, hic okumamaktan
+     iyidir. */
   function voices(){
     const all = (cached && cached.length) ? cached : rawVoices();
     const tr = all.filter(v => /^tr\b|^tr[-_]/i.test(v.lang || ''));
-    return tr.length ? tr : all;
+    const use = tr.length ? tr : all;
+    return use.slice().sort((a, b) => score(b) - score(a));
+  }
+
+  /* Cihazdaki en iyi ses gercekten iyi mi? Ekran "bu cihazda ses kalitesi
+     dusuk" diyebilsin diye. */
+  function quality(list){
+    const use = Array.isArray(list) ? list.slice().sort((a, b) => score(b) - score(a)) : voices();
+    if(!use.length) return { level:'yok', voice:null };
+    const best = use[0];
+    const n = score(best);
+    return {
+      voice:best,
+      level:n >= 260 ? 'iyi' : n >= 200 ? 'orta' : 'dusuk',
+      turkish:/^tr\b|^tr[-_]/i.test(String(best.lang || '')),
+      count:use.length,
+    };
+  }
+
+  function byURI(uri, list){
+    if(!uri) return null;
+    const use = Array.isArray(list) ? list : voices();
+    return use.find(v => (v.voiceURI || v.name) === uri) || null;
   }
 
   /* ---------- ajan → ses dagitimi ----------
@@ -12136,13 +12256,23 @@ R.Voice = (function(){
   }
 
   /* Bir ajanin ses ayari: { voice, pitch, rate, name }. */
+  /* Kullanicinin ajan basina sectigi sesler. Ofis ayarlarinda durur ve
+     otomatik dagitimin USTUNDEDIR: "her ajanin kendine has sesi olsun"
+     isteginin tam karsiligi budur — cihazda hangi ses varsa kullanici
+     kendi eslestirmesini yapabilmeli. */
+  function overrides(){
+    try{ return (R.Office.settings().voices) || {}; }
+    catch(e){ return {}; }
+  }
+
   function profileFor(agentId, ids, list){
     const base = PROFILES[agentId] || PROFILES.aday;
-    const map = assign(ids, list);
-    const voice = map[agentId] || null;
+    const chosen = byURI(overrides()[agentId], list);
+    const voice = chosen || assign(ids, list)[agentId] || null;
     return {
       voice,
       name:voice ? voice.name : null,
+      chosen:!!chosen,
       pitch:base.pitch,
       rate:base.rate,
     };
@@ -12151,6 +12281,69 @@ R.Voice = (function(){
   /* Cihazda kac ayri ses var? Ekran "hepsi ayni sesle konusuyor" durumunu
      kullaniciya soyleyebilsin diye. */
   function voiceCount(){ return voices().length; }
+
+  /* ---------- metnin okunusa hazirlanmasi ----------
+
+     Ekranda dogru gorunen metin, sesli okundugunda yanlis duyulur:
+
+       "%78"        → sentezleyici "yuzde" demez, isareti ya atlar ya da
+                      "yuzde" yerine sayidan SONRA okur.
+       "TYT"        → tek hece gibi "tit" diye okunur; dogrusu harf harf.
+       "x^2"        → "x sapka iki" diye okunur.
+       "5/40"       → "bes bolu kirk" degil "bes kirk" diye gecer.
+       "1.500"      → bazi motorlar "bir nokta bes yuz" der.
+
+     Bunlar duzeltilmezse ses kalitesi degil, ANLASILIRLIK bozulur — ve
+     kullanicinin "kotu" dedigi seyin buyuk kismi budur. Metin yalniz
+     KONUSMA icin donusturulur; ekranda gorunen degismez. */
+
+  /* Harf harf okunmasi gereken kisaltmalar. Turkce harf adlariyla
+     yazilir, yoksa motor Ingilizce harf adi kullanir ("ti vay ti"). */
+  const SPELL = {
+    'TYT':'Te Ye Te', 'AYT':'A Ye Te', 'YKS':'Ye Ka Se', 'ÖSYM':'Ö Se Ye Me',
+    'YDT':'Ye De Te', 'MEB':'Me E Be', 'SRS':'Se Er Se',
+    'K/İ/Y/S/D':'Ka, İ, Ye, Se, De',
+  };
+
+  function speechText(text){
+    let t = String(text || '');
+    if(!t) return '';
+
+    /* Kisaltmalar — once, cunku sonraki adimlar harfleri bozabilir. */
+    Object.keys(SPELL).forEach(k => {
+      t = t.split(k).join(SPELL[k]);
+    });
+
+    /* Yuzde isareti Turkce'de sayidan ONCE okunur. */
+    t = t.replace(/%\s*(\d+(?:[.,]\d+)?)/g, 'yüzde $1');
+
+    /* Binlik ayraci noktasi okunmasin: 1.500 → 1500 */
+    t = t.replace(/(\d)\.(\d{3})(?!\d)/g, '$1$2');
+
+    /* Matematik yazimi. Ekranda "x^2" dogru, kulakta "x kare" dogru. */
+    t = t.replace(/\^2\b/g, ' kare').replace(/\^3\b/g, ' küp')
+         .replace(/\^(\d+)/g, ' üzeri $1');
+    t = t.replace(/\bkök\s*\(([^)]{1,12})\)/gi, 'kök $1');
+    t = t.replace(/(\d)\s*\/\s*(\d)/g, '$1 bölü $2');
+    t = t.replace(/\s*=\s*/g, ' eşittir ')
+         .replace(/\s*<=\s*/g, ' küçük eşittir ').replace(/\s*>=\s*/g, ' büyük eşittir ')
+         .replace(/\s*<\s*/g, ' küçüktür ').replace(/\s*>\s*/g, ' büyüktür ');
+
+    /* Okunmayan isaretler: madde imleri, yildizlar, uzun tireler. */
+    t = t.replace(/[*_`#|]/g, ' ').replace(/[—–]/g, ', ');
+
+    /* Cok satirli metin: bos satir bir duraklamadir. Sentezleyici satir
+       sonunu duraklama saymaz; noktalamaya cevrilir. */
+    t = t.replace(/\n{2,}/g, '. ').replace(/\n/g, ', ');
+
+    /* Ust uste birikmis noktalama ve bosluk. Noktalamadan ONCEKI bosluk da
+       silinir: "bir , iki" duraklamayi yanlis yere koyar. */
+    t = t.replace(/([.,;:!?])\s*(?=[.,;:])/g, '')
+         .replace(/\s+([.,;:!?])/g, '$1')
+         .replace(/\s{2,}/g, ' ')
+         .trim();
+    return t;
+  }
 
   /* ---------- konusma ---------- */
 
@@ -12268,7 +12461,8 @@ R.Voice = (function(){
   async function speak(text, profile, opts){
     const o = opts || {};
     if(!available()) return 'unavailable';
-    const parts = chunks(text);
+    /* Metin KONUSMA icin donusturulur; ekranda gorunen degismez. */
+    const parts = chunks(o.raw ? text : speechText(text));
     if(!parts.length) return 'empty';
 
     /* Onceki konusma bitmediyse kesilir: iki ses ust uste binmemeli. */
@@ -12286,7 +12480,8 @@ R.Voice = (function(){
   return {
     available, load, voices, voiceCount, assign, profileFor, speak, cancel,
     readMs, holdMs, chunks, sentences, budgetMs,
-    PROFILES, PACE, PACE_ORDER, paceOf, LANG, CHUNK, MIN_HOLD,
+    score, quality, byURI, speechText, overrides,
+    PROFILES, PACE, PACE_ORDER, paceOf, LANG, CHUNK, MIN_HOLD, SPELL,
   };
 })();
 
@@ -12696,6 +12891,7 @@ R.Office = (function(){
       room3d:true,            // ofis ekrani: 3B oda mi, duz kat plani mi
       meetingPace:'normal',   // toplanti akis hizi: hizli | normal | yavas
       meetingVoice:false,     // toplantiyi sesli dinle (tercih kalicidir)
+      voices:{},              // agentId -> voiceURI (kullanicinin ses eslestirmesi)
       perAgent:{},            // agentId -> { provider, model }
       updatedAt:null,
       promptVersion:R.OFFICE_PROMPTS.version,
@@ -12888,6 +13084,106 @@ R.Office = (function(){
   }
 
   const BRIEFS = {
+
+    /* ---------- soru cozum kocu ----------
+       Kocun masasi COZULEN SORUDUR, deneme neti degil: ikisi ayni sey
+       degildir ve karistirilirsa "bu hafta 200 soru cozdum ama netim
+       dusuk" celiskisi kaybolur. Deneme Deniz'in masasinda kalir.
+
+       Kocun tuttugu tek ayrim su: "cozume baktim" cozmek degildir. Bir
+       konuda yirmi soru cozmek o konuyu bildigin anlamina gelmez; oran bu
+       ayrimdan cikar. */
+    koc(agent){
+      const sum = R.Solver.summary();
+      const topics = R.Solver.byTopic();
+      const daily = R.Solver.daily(7);
+      const haftalik = U.sum(daily.map(d => d.adet));
+      const sources = R.Sources.table();
+      const zorKaynak = sources.find(x => x.durum === 'zor');
+      const ladder = R.Sources.ladderWarning();
+
+      /* En dusuk oranli konu — yeterli kayit varsa. */
+      const MIN = 4;
+      const zayif = topics.filter(t => t.toplam >= MIN)[0] || null;
+      const guclu = topics.filter(t => t.toplam >= MIN).slice(-1)[0] || null;
+
+      const findings = [];
+      if(!sum.toplam){
+        findings.push({ tone:'muted',
+          text:'Henüz çözüm kaydı yok. Soru çöz ekranından bir soru çözdürünce '
+             + 'bu masa dolmaya başlar.' });
+      }else{
+        findings.push({ tone:haftalik >= 20 ? 'ok' : 'warn',
+          text:'Son 7 günde ' + haftalik + ' soru çözüldü; toplam ' + sum.toplam + ' kayıt var.' });
+      }
+      if(sum.cozumOrani != null){
+        findings.push({ tone:tone(sum.cozumOrani, 60, 40),
+          text:'Çözdüğün soruların %' + sum.cozumOrani + ' tanesini kendin çözdün; '
+             + 'gerisinde çözüme baktın ya da yanlış yaptın.' });
+      }
+      if(zayif && zayif.yuzde < 50){
+        findings.push({ tone:'danger',
+          text:zayif.topicName + ' konusunda ' + zayif.toplam + ' sorudan yalnız '
+             + zayif.cozulen + ' tanesini kendin çözdün (%' + zayif.yuzde + ').' });
+      }
+      if(guclu && guclu.yuzde >= 70 && (!zayif || guclu.topicId !== zayif.topicId)){
+        findings.push({ tone:'ok',
+          text:guclu.topicName + ' oturmuş görünüyor: %' + guclu.yuzde + ' kendi çözümün.' });
+      }
+      if(zorKaynak){
+        findings.push({ tone:'warn', text:R.Sources.sentence(zorKaynak.src.id) });
+      }
+      if(ladder){
+        findings.push({ tone:'warn', text:ladder.text });
+      }
+      if(sum.etiketsiz >= 5){
+        findings.push({ tone:'warn',
+          text:sum.etiketsiz + ' çözüm konuya bağlanmadı; o kayıtlar konu takibine girmiyor.' });
+      }
+
+      const suggestion = zayif && zayif.yuzde < 50
+        ? { text:zayif.topicName + ' konusundan çözüme bakmadan 5 soru dene; '
+              + 'bakarak çözmek bu konuyu kapatmıyor.',
+            route:'solve', label:'Soru çöze git' }
+        : (sum.toplam
+            ? { text:'Bugünün konusundan birkaç soru çöz ve kaynağını işaretle.',
+                route:'solve', label:'Soru çöze git' }
+            : { text:'İlk soruyu çözdür: konu ve zorluk kendiliğinden kayda geçer.',
+                route:'solve', label:'Soru çöze git' });
+
+      return {
+        agent:agent.id, name:agent.name, role:agent.role,
+        headline:sum.toplam
+          ? sum.toplam + ' soru · %' + (sum.cozumOrani == null ? '—' : sum.cozumOrani) + ' kendi çözümün'
+          : 'Henüz çözüm kaydı yok',
+        metrics:[
+          { label:'Son 7 gün', value:haftalik + ' soru', tone:haftalik >= 20 ? 'ok' : 'warn',
+            note:'toplam ' + sum.toplam },
+          { label:'Kendi çözdüğün', value:sum.cozumOrani == null ? '—' : '%' + sum.cozumOrani,
+            tone:sum.cozumOrani == null ? 'muted' : tone(sum.cozumOrani, 60, 40),
+            note:'"çözüme baktım" sayılmaz' },
+          { label:'Ortalama zorluk', value:sum.ortZorluk == null ? '—' : sum.ortZorluk,
+            tone:'muted', note:'1 kolay · 5 zor' },
+        ],
+        findings,
+        suggestion,
+        data:{
+          toplamSoru:sum.toplam,
+          sonYediGun:haftalik,
+          gunluk:daily,
+          cozumOrani:sum.cozumOrani,
+          ortalamaZorluk:sum.ortZorluk,
+          etiketsizKayit:sum.etiketsiz,
+          konuBasina:topics.slice(0, 8).map(t => ({
+            konu:t.topicName, toplam:t.toplam, kendiCozdugu:t.cozulen,
+            yuzde:t.yuzde, ortZorluk:t.zorluk })),
+          kaynaklar:sources.slice(0, 8).map(x => ({
+            kaynak:x.src.name, kademe:R.SOURCE_LEVELS[x.src.level].label,
+            soru:x.olcum.soru, oran:x.oran, durum:x.durum })),
+          genelOran:R.Sources.overallRate(),
+        },
+      };
+    },
 
     tyt(agent){ return branchBrief(agent, 'TYT'); },
     ayt(agent){ return branchBrief(agent, 'AYT'); },
@@ -13137,6 +13433,44 @@ R.Office = (function(){
     { id:'acik-yanlis', agent:'analist', tone:'warn', route:'cards',
       when(){ return C.openErrors().length >= 12; },
       text(){ return C.openErrors().length + ' açık yanlış var; kök neden yazılmadan defter işe yaramaz.'; } },
+
+    /* ---------- kocun masa notlari ----------
+       Ofisin sen kapisini acmadan calismasi bunlarla olur: koc, cozum
+       kayitlarina bakip senin sormadigin soruyu sorar. */
+
+    { id:'bakarak-cozum', agent:'koc', tone:'warn', route:'solve',
+      when(){
+        const s = R.Solver.summary();
+        return s.toplam >= 10 && s.cozumOrani != null && s.cozumOrani < 45;
+      },
+      text(){
+        const s = R.Solver.summary();
+        return 'Çözdüğün soruların yalnız %' + s.cozumOrani + ' tanesini kendin çözdün; '
+          + 'gerisinde çözüme baktın. Soru sayısı artıyor ama konu kapanmıyor.';
+      } },
+
+    { id:'zor-kaynak', agent:'koc', tone:'warn', route:'solve',
+      when(){
+        try{ return !!R.Sources.table().find(x => x.durum === 'zor'); }
+        catch(e){ return false; }
+      },
+      text(){
+        const row = R.Sources.table().find(x => x.durum === 'zor');
+        return R.Sources.sentence(row.src.id);
+      } },
+
+    { id:'merdiven', agent:'koc', tone:'danger', route:'solve',
+      when(){
+        try{ return !!R.Sources.ladderWarning(); }catch(e){ return false; }
+      },
+      text(){ return R.Sources.ladderWarning().text; } },
+
+    { id:'etiketsiz-cozum', agent:'koc', tone:'info', route:'solve',
+      when(){ return R.Solver.summary().etiketsiz >= 8; },
+      text(){
+        return R.Solver.summary().etiketsiz + ' çözüm konuya bağlanmadı; '
+          + 'o kayıtlar konu takibine hiç girmiyor.';
+      } },
 
     { id:'uyku', agent:'rehber', tone:'danger', route:'today',
       when(){
@@ -23620,11 +23954,12 @@ R.Screens.office = (function(){
   const ROOM_TURN = -26;
   /* Odadaki yerler: zeminin yüzdesi. Patron dipte ortada, uzmanlar iki sıra. */
   const ROOM_SPOTS = {
-    patron: { x:50, y:13 },
-    tyt:    { x:23, y:45 },
-    ayt:    { x:77, y:45 },
-    rehber: { x:23, y:78 },
-    analist:{ x:77, y:78 },
+    patron: { x:50, y:12 },
+    tyt:    { x:20, y:42 },
+    ayt:    { x:80, y:42 },
+    koc:    { x:50, y:56 },
+    rehber: { x:20, y:78 },
+    analist:{ x:80, y:78 },
   };
 
   /* Kamera açısı yeniden çizimler arasında korunur: kullanıcı odayı
@@ -23887,7 +24222,7 @@ R.Screens.office = (function(){
           ${Avatar(patron)}
           <div class="minw0">
             <b class="desk__name">Patron’un masası</b>
-            <span class="desk__role">Dört uzmanın raporunu birleştirir; günün tek işini o söyler</span>
+            <span class="desk__role">Uzmanların raporunu birleştirir; günün tek işini o söyler</span>
           </div>
           ${K.Badge({ label:O.mode() === 'llm' ? 'model bağlı' : 'kural motoru',
             tone:O.mode() === 'llm' ? 'ok' : 'info' })}
@@ -24065,6 +24400,65 @@ R.Screens.office = (function(){
     return live.models.length + ' model · ' + U.relativeDay(live.at.slice(0, 10)) + ' güncellendi.';
   }
 
+  /* ---------- sesler ----------
+
+     "Her ajanın kendine has sesi olsun" isteğinin tam karşılığı burası.
+     Otomatik dağıtım cihazdaki sesleri ajanlara paylaştırır; buradan
+     kullanıcı kendi eşleştirmesini yapabilir ve DİNLEYEREK seçebilir —
+     bir sesin nasıl olduğunu ad listesinden anlamak mümkün değil.
+
+     Cihazda iyi ses yoksa bunu saklamak yerine söyleriz: sentezleyiciyi
+     biz yazamayız, ama hangisinin kullanıldığını seçebilir ve durumu
+     dürüstçe bildirebiliriz. */
+
+  function voiceSection(){
+    if(!R.Voice.available()){
+      return K.Stack([
+        K.SectionTitle('Sesler'),
+        html`<p class="tiny dim">Bu tarayıcı konuşma sentezini desteklemiyor.</p>`,
+      ], 'sm');
+    }
+    const q = R.Voice.quality();
+    const list = R.Voice.voices();
+
+    return K.Stack([
+      K.SectionTitle('Sesler', K.Button({ label:'Sesleri tazele', icon:'refresh', size:'sm',
+        act:'office-voices' })),
+
+      when(!list.length, () => K.Notice({ tone:'warn', title:'Bu cihazda konuşma sesi bulunamadı.',
+        body:'Toplantı sessiz akar. Chrome ya da Edge’de Türkçe ses paketi kuruluysa '
+           + '“Sesleri tazele”ye bas; mobilde sistem dili ayarlarından Türkçe TTS kurulabilir.' })),
+
+      when(list.length && !q.turkish, () => K.Notice({ tone:'warn',
+        title:'Türkçe ses yok, yabancı bir sesle okunacak.',
+        body:'Türkçe metin yabancı bir sesle bozuk duyulur. Cihazına Türkçe konuşma '
+           + 'paketi kurarsan belirgin düzelir.' })),
+
+      when(list.length && q.turkish && q.level === 'dusuk', () => K.Notice({ tone:'info',
+        title:'Bu cihazdaki sesler temel seviyede.',
+        body:'Elde olan en iyi ses seçildi ama gömülü (robotik) bir motor. Chrome’da '
+           + '“Google Türkçe”, Edge’de “Natural/Neural” sesleri belirgin daha doğaldır.' })),
+
+      when(list.length, () => html`<p class="tiny dim">${list.length} ses bulundu;
+        en iyisi seçilip ajanlara dağıtıldı. Aşağıdan değiştirip dinleyebilirsin.</p>`),
+
+      when(list.length, () => html`<div class="stack-xs">${map(R.AGENTS, a => {
+        const prof = R.Voice.profileFor(a.id, R.AGENT_IDS);
+        const current = (R.Voice.overrides()[a.id]) || '';
+        return html`<div class="voicerow">
+          ${Avatar(a, 'sm')}
+          <span class="voicerow__name">${a.name}</span>
+          ${K.Select({ id:'voice-' + a.id, value:current, change:'office-voice',
+            data:{ 'data-agent':a.id },
+            options:[{ value:'', label:'otomatik — ' + (prof.name || 'ses yok') }]
+              .concat(list.map(v => ({ value:v.voiceURI || v.name, label:v.name }))) })}
+          ${K.IconButton({ icon:'play', size:'sm', aria:a.name + ' sesini dinle',
+            title:'Dinle', act:'office-voice-try', data:{ 'data-agent':a.id } })}
+        </div>`;
+      })}</div>`),
+    ], 'sm');
+  }
+
   function providerForm(providerId){
     const st = O.settings();
     const p = R.PROVIDERS[providerId];
@@ -24154,7 +24548,10 @@ R.Screens.office = (function(){
           K.Chip({ label:c.label, act:'office-rpd', data:{ 'data-rpd':c.value } })), { wrap:true })),
       ], 'sm')),
 
-      /* --- 5. ofis davranisi --- */
+      /* --- 5. sesler --- */
+      voiceSection(),
+
+      /* --- 6. ofis davranisi --- */
       K.Stack([
         K.SectionTitle('Ofis davranışı'),
         K.Checkbox({ label:'Model düşerse yedeğe geç (önerilir)', checked:st.fallback !== false,
@@ -24396,6 +24793,27 @@ R.Screens.office = (function(){
       await O.saveSettings({ autoBriefing:!!el.checked });
     },
 
+    async 'office-voices'(){
+      R.Voice.cancel();
+      await R.Voice.load(3000);
+      const form = document.getElementById('llm-form');
+      const sel = document.getElementById('llm-provider');
+      if(form && sel) form.innerHTML = String(providerForm(sel.value));
+      UI.toast(R.Voice.voiceCount() + ' ses bulundu');
+    },
+
+    /* Dinlemeden ses seçilmez: ad listesinden bir sesin nasıl olduğu
+       anlaşılmaz. */
+    async 'office-voice-try'(el){
+      const id = el.dataset.agent;
+      const agent = R.AGENT_BY_ID[id];
+      if(!agent) return;
+      R.Voice.cancel();
+      await R.Voice.speak(
+        agent.name + '. ' + agent.role + '. TYT kapanışın %62, bu hafta 18 soru çözdün.',
+        R.Voice.profileFor(id, R.AGENT_IDS), {});
+    },
+
     async 'office-notify'(){
       await R.App.askNotify();
       const box = document.getElementById('office-notify');
@@ -24584,6 +25002,18 @@ R.Screens.office = (function(){
       const box = document.getElementById('llm-key-warn');
       if(box) box.innerHTML = warn ? String(warn) : '';
     },
+    async 'office-voice'(el){
+      const id = el.dataset.agent;
+      const next = Object.assign({}, O.settings().voices || {});
+      if(el.value) next[id] = el.value; else delete next[id];
+      await O.saveSettings({ voices:next });
+      /* Seçtiğini hemen duy: sessiz bir kaydetme, seçimin işe yarayıp
+         yaramadığını gizler. */
+      const agent = R.AGENT_BY_ID[id];
+      R.Voice.cancel();
+      await R.Voice.speak(agent.name + '. Merhaba.', R.Voice.profileFor(id, R.AGENT_IDS), {});
+    },
+
     async 'office-model'(el){
       const custom = document.getElementById('llm-model-custom');
       if(custom) custom.value = '';
@@ -24604,7 +25034,7 @@ R.Screens.office = (function(){
       const m = O.mode();
       const open = O.openDecisions().length;
       return (m === 'llm' ? O.providerLabel() : 'kural motoru modu')
-        + ' · 5 ajan' + (open ? ' · ' + open + ' açık karar' : '');
+        + ' · ' + R.AGENTS.length + ' ajan' + (open ? ' · ' + open + ' açık karar' : '');
     },
     actions(){
       return String(K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }));
@@ -25009,7 +25439,7 @@ R.Screens.meeting = (function(){
           <b class="small">Nasıl işleyecek?</b>
           <ol class="meetplan__list">
             ${map(R.Office.ROUNDS.slice(0, maxRounds()), (r, i) =>
-              html`<li><b>${i+1}. ${r.title}</b> — dört uzman sırayla konuşur</li>`)}
+              html`<li><b>${i+1}. ${r.title}</b> — ${R.MEETING_ORDER.length} uzman sırayla konuşur</li>`)}
           </ol>
           <p class="tiny dim">Toplantıyı <b>sen</b> bitirirsin; istediğin turda “Bitir ve rapor al”a bas.
             Araya girip söz de alabilirsin. Konuşmalar sırayla akar: biri bitmeden

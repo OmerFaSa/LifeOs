@@ -414,7 +414,7 @@
       ['note-summary','daily-flow','motivation','risk']
         .forEach(k => expect(R.PROMPTS.kinds[k].ask.length).toBeGreaterThan(20));
       expect(R.Office.ROUNDS.length).toBeGreaterThan(2);
-      expect(R.AGENT_IDS.length).toBe(5);
+      expect(R.AGENT_IDS.length).toBe(6);
     });
   });
 

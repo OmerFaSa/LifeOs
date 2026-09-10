@@ -52,6 +52,7 @@ R.Office = (function(){
       room3d:true,            // ofis ekrani: 3B oda mi, duz kat plani mi
       meetingPace:'normal',   // toplanti akis hizi: hizli | normal | yavas
       meetingVoice:false,     // toplantiyi sesli dinle (tercih kalicidir)
+      voices:{},              // agentId -> voiceURI (kullanicinin ses eslestirmesi)
       perAgent:{},            // agentId -> { provider, model }
       updatedAt:null,
       promptVersion:R.OFFICE_PROMPTS.version,
@@ -244,6 +245,106 @@ R.Office = (function(){
   }
 
   const BRIEFS = {
+
+    /* ---------- soru cozum kocu ----------
+       Kocun masasi COZULEN SORUDUR, deneme neti degil: ikisi ayni sey
+       degildir ve karistirilirsa "bu hafta 200 soru cozdum ama netim
+       dusuk" celiskisi kaybolur. Deneme Deniz'in masasinda kalir.
+
+       Kocun tuttugu tek ayrim su: "cozume baktim" cozmek degildir. Bir
+       konuda yirmi soru cozmek o konuyu bildigin anlamina gelmez; oran bu
+       ayrimdan cikar. */
+    koc(agent){
+      const sum = R.Solver.summary();
+      const topics = R.Solver.byTopic();
+      const daily = R.Solver.daily(7);
+      const haftalik = U.sum(daily.map(d => d.adet));
+      const sources = R.Sources.table();
+      const zorKaynak = sources.find(x => x.durum === 'zor');
+      const ladder = R.Sources.ladderWarning();
+
+      /* En dusuk oranli konu — yeterli kayit varsa. */
+      const MIN = 4;
+      const zayif = topics.filter(t => t.toplam >= MIN)[0] || null;
+      const guclu = topics.filter(t => t.toplam >= MIN).slice(-1)[0] || null;
+
+      const findings = [];
+      if(!sum.toplam){
+        findings.push({ tone:'muted',
+          text:'Henüz çözüm kaydı yok. Soru çöz ekranından bir soru çözdürünce '
+             + 'bu masa dolmaya başlar.' });
+      }else{
+        findings.push({ tone:haftalik >= 20 ? 'ok' : 'warn',
+          text:'Son 7 günde ' + haftalik + ' soru çözüldü; toplam ' + sum.toplam + ' kayıt var.' });
+      }
+      if(sum.cozumOrani != null){
+        findings.push({ tone:tone(sum.cozumOrani, 60, 40),
+          text:'Çözdüğün soruların %' + sum.cozumOrani + ' tanesini kendin çözdün; '
+             + 'gerisinde çözüme baktın ya da yanlış yaptın.' });
+      }
+      if(zayif && zayif.yuzde < 50){
+        findings.push({ tone:'danger',
+          text:zayif.topicName + ' konusunda ' + zayif.toplam + ' sorudan yalnız '
+             + zayif.cozulen + ' tanesini kendin çözdün (%' + zayif.yuzde + ').' });
+      }
+      if(guclu && guclu.yuzde >= 70 && (!zayif || guclu.topicId !== zayif.topicId)){
+        findings.push({ tone:'ok',
+          text:guclu.topicName + ' oturmuş görünüyor: %' + guclu.yuzde + ' kendi çözümün.' });
+      }
+      if(zorKaynak){
+        findings.push({ tone:'warn', text:R.Sources.sentence(zorKaynak.src.id) });
+      }
+      if(ladder){
+        findings.push({ tone:'warn', text:ladder.text });
+      }
+      if(sum.etiketsiz >= 5){
+        findings.push({ tone:'warn',
+          text:sum.etiketsiz + ' çözüm konuya bağlanmadı; o kayıtlar konu takibine girmiyor.' });
+      }
+
+      const suggestion = zayif && zayif.yuzde < 50
+        ? { text:zayif.topicName + ' konusundan çözüme bakmadan 5 soru dene; '
+              + 'bakarak çözmek bu konuyu kapatmıyor.',
+            route:'solve', label:'Soru çöze git' }
+        : (sum.toplam
+            ? { text:'Bugünün konusundan birkaç soru çöz ve kaynağını işaretle.',
+                route:'solve', label:'Soru çöze git' }
+            : { text:'İlk soruyu çözdür: konu ve zorluk kendiliğinden kayda geçer.',
+                route:'solve', label:'Soru çöze git' });
+
+      return {
+        agent:agent.id, name:agent.name, role:agent.role,
+        headline:sum.toplam
+          ? sum.toplam + ' soru · %' + (sum.cozumOrani == null ? '—' : sum.cozumOrani) + ' kendi çözümün'
+          : 'Henüz çözüm kaydı yok',
+        metrics:[
+          { label:'Son 7 gün', value:haftalik + ' soru', tone:haftalik >= 20 ? 'ok' : 'warn',
+            note:'toplam ' + sum.toplam },
+          { label:'Kendi çözdüğün', value:sum.cozumOrani == null ? '—' : '%' + sum.cozumOrani,
+            tone:sum.cozumOrani == null ? 'muted' : tone(sum.cozumOrani, 60, 40),
+            note:'"çözüme baktım" sayılmaz' },
+          { label:'Ortalama zorluk', value:sum.ortZorluk == null ? '—' : sum.ortZorluk,
+            tone:'muted', note:'1 kolay · 5 zor' },
+        ],
+        findings,
+        suggestion,
+        data:{
+          toplamSoru:sum.toplam,
+          sonYediGun:haftalik,
+          gunluk:daily,
+          cozumOrani:sum.cozumOrani,
+          ortalamaZorluk:sum.ortZorluk,
+          etiketsizKayit:sum.etiketsiz,
+          konuBasina:topics.slice(0, 8).map(t => ({
+            konu:t.topicName, toplam:t.toplam, kendiCozdugu:t.cozulen,
+            yuzde:t.yuzde, ortZorluk:t.zorluk })),
+          kaynaklar:sources.slice(0, 8).map(x => ({
+            kaynak:x.src.name, kademe:R.SOURCE_LEVELS[x.src.level].label,
+            soru:x.olcum.soru, oran:x.oran, durum:x.durum })),
+          genelOran:R.Sources.overallRate(),
+        },
+      };
+    },
 
     tyt(agent){ return branchBrief(agent, 'TYT'); },
     ayt(agent){ return branchBrief(agent, 'AYT'); },
@@ -493,6 +594,44 @@ R.Office = (function(){
     { id:'acik-yanlis', agent:'analist', tone:'warn', route:'cards',
       when(){ return C.openErrors().length >= 12; },
       text(){ return C.openErrors().length + ' açık yanlış var; kök neden yazılmadan defter işe yaramaz.'; } },
+
+    /* ---------- kocun masa notlari ----------
+       Ofisin sen kapisini acmadan calismasi bunlarla olur: koc, cozum
+       kayitlarina bakip senin sormadigin soruyu sorar. */
+
+    { id:'bakarak-cozum', agent:'koc', tone:'warn', route:'solve',
+      when(){
+        const s = R.Solver.summary();
+        return s.toplam >= 10 && s.cozumOrani != null && s.cozumOrani < 45;
+      },
+      text(){
+        const s = R.Solver.summary();
+        return 'Çözdüğün soruların yalnız %' + s.cozumOrani + ' tanesini kendin çözdün; '
+          + 'gerisinde çözüme baktın. Soru sayısı artıyor ama konu kapanmıyor.';
+      } },
+
+    { id:'zor-kaynak', agent:'koc', tone:'warn', route:'solve',
+      when(){
+        try{ return !!R.Sources.table().find(x => x.durum === 'zor'); }
+        catch(e){ return false; }
+      },
+      text(){
+        const row = R.Sources.table().find(x => x.durum === 'zor');
+        return R.Sources.sentence(row.src.id);
+      } },
+
+    { id:'merdiven', agent:'koc', tone:'danger', route:'solve',
+      when(){
+        try{ return !!R.Sources.ladderWarning(); }catch(e){ return false; }
+      },
+      text(){ return R.Sources.ladderWarning().text; } },
+
+    { id:'etiketsiz-cozum', agent:'koc', tone:'info', route:'solve',
+      when(){ return R.Solver.summary().etiketsiz >= 8; },
+      text(){
+        return R.Solver.summary().etiketsiz + ' çözüm konuya bağlanmadı; '
+          + 'o kayıtlar konu takibine hiç girmiyor.';
+      } },
 
     { id:'uyku', agent:'rehber', tone:'danger', route:'today',
       when(){

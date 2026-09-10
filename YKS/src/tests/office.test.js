@@ -36,17 +36,19 @@
   /* ==================== ajan kaydi ==================== */
 
   describe('Ofis — ajan kaydı', () => {
-    it('beş ajan tanımlıdır', () => {
-      expect(R.AGENTS).toHaveLength(5);
-      expect(R.AGENT_IDS).toEqual(['patron', 'tyt', 'ayt', 'rehber', 'analist']);
+    it('altı ajan tanımlıdır', () => {
+      /* Ekip büyüdü: soru çözüm koçu (Kerem) katıldı. Kocun masası ÇÖZÜLEN
+         SORUDUR, deneme neti değil — ikisi ayrı masa. */
+      expect(R.AGENTS).toHaveLength(6);
+      expect(R.AGENT_IDS).toEqual(['patron', 'tyt', 'ayt', 'rehber', 'analist', 'koc']);
     });
 
     it('kimlikler benzersizdir', () => {
       const ids = {}, initials = {}, names = {};
       R.AGENTS.forEach(a => { ids[a.id] = 1; initials[a.initial] = 1; names[a.name] = 1; });
-      expect(Object.keys(ids)).toHaveLength(5);
-      expect(Object.keys(initials)).toHaveLength(5);
-      expect(Object.keys(names)).toHaveLength(5);
+      expect(Object.keys(ids)).toHaveLength(6);
+      expect(Object.keys(initials)).toHaveLength(6);
+      expect(Object.keys(names)).toHaveLength(6);
     });
 
     it('her ajanın istemi, görev alanı ve örnek soruları vardır', () => {
@@ -64,7 +66,7 @@
     it('yalnız bir lider vardır ve toplantı sırası uzmanlardan oluşur', () => {
       expect(R.AGENTS.filter(a => a.lead)).toHaveLength(1);
       expect(R.AGENTS.filter(a => a.lead)[0].id).toBe('patron');
-      expect(R.MEETING_ORDER).toHaveLength(4);
+      expect(R.MEETING_ORDER).toHaveLength(5);
       R.MEETING_ORDER.forEach(id => {
         expect(!!R.AGENT_BY_ID[id]).toBeTruthy();
         expect(R.AGENT_BY_ID[id].lead).toBeFalsy();
@@ -145,10 +147,10 @@
       expect(d.konuKapanisi.toplam > 0).toBeTruthy();
     });
 
-    it('patron kendi hesabını yapmaz, dört raporu birleştirir', () => {
+    it('patron kendi hesabını yapmaz, uzmanların raporunu birleştirir', () => {
       reset();
       const d = O.brief('patron').data;
-      expect(d.ekipRaporlari).toHaveLength(4);
+      expect(d.ekipRaporlari).toHaveLength(R.MEETING_ORDER.length);
       expect(d.kuralMotorununSectigiIs.baslik.length > 0).toBeTruthy();
       const names = d.ekipRaporlari.map(r => r.ajan);
       R.MEETING_ORDER.forEach(id => expect(names).toContain(R.AGENT_BY_ID[id].name));
@@ -174,10 +176,10 @@
       expect(O.brief('tyt') === a).toBeFalsy();
     });
 
-    it('snapshot beş masayı ve modu verir', () => {
+    it('snapshot bütün masaları ve modu verir', () => {
       reset();
       const s = O.snapshot();
-      expect(s.agents).toHaveLength(5);
+      expect(s.agents).toHaveLength(R.AGENTS.length);
       expect(s.mode).toBe('kural');
       expect(s.action.title.length > 0).toBeTruthy();
     });
@@ -254,15 +256,18 @@
   /* ==================== toplanti ==================== */
 
   describe('Ofis — toplantı', () => {
-    it('model yokken kural motoru moduyla altı tur üretir', async () => {
+    it('model yokken açılış, her uzman ve kapanış üretilir', async () => {
       reset();
+      /* Tur sayısı ekibe bağlıdır: açılış + her uzman + kapanış.
+         Sabit sayı yazmak, ekibe biri katıldığında testi yalancı yapardı. */
+      const beklenen = R.MEETING_ORDER.length + 2;
       const m = await O.meet();
-      expect(m.turns).toHaveLength(6);
+      expect(m.turns).toHaveLength(beklenen);
       expect(m.turns[0].agent).toBe('patron');
-      expect(m.turns[5].agent).toBe('patron');
-      expect(m.turns[5].closing).toBeTruthy();
+      expect(m.turns[beklenen - 1].agent).toBe('patron');
+      expect(m.turns[beklenen - 1].closing).toBeTruthy();
       expect(m.mode).toBe('kural');
-      expect(m.turns.map(t => t.agent).slice(1, 5)).toEqual(R.MEETING_ORDER);
+      expect(m.turns.map(t => t.agent).slice(1, -1)).toEqual(R.MEETING_ORDER);
     });
 
     it('karar kural motorundan gelir, ajanlar değiştiremez', async () => {
@@ -279,7 +284,7 @@
       reset();
       await withStubLLM('Kısa bir bulgu.', async calls => {
         const m = await O.meet();
-        expect(calls).toHaveLength(6);
+        expect(calls).toHaveLength(R.MEETING_ORDER.length + 2);
         expect(m.mode).toBe('llm');
         m.turns.forEach(t => expect(t.text).toBe('Kısa bir bulgu.'));
       });
@@ -303,7 +308,7 @@
       R.LLM.complete = async () => { throw Object.assign(new Error('sınır'), { code:'rate_limited' }); };
       try{
         const m = await O.meet();
-        expect(m.turns).toHaveLength(6);
+        expect(m.turns).toHaveLength(R.MEETING_ORDER.length + 2);
         expect(m.mode).toBe('kural');
         expect(m.turns[0].error.length > 0).toBeTruthy();
       }finally{
@@ -1488,8 +1493,8 @@
       reset();
       /* Test sayfasi ekranlari yuklemez; rota adlari acikca listelenir. */
       const ROUTES = ['today', 'week', 'plan', 'subjects', 'target', 'learn', 'exams',
-        'cards', 'quiz', 'progress', 'analytics', 'protocols', 'guide', 'profiles',
-        'office', 'team', 'meeting', 'topic'];
+        'cards', 'quiz', 'solve', 'progress', 'analytics', 'protocols', 'guide',
+        'profiles', 'office', 'team', 'meeting', 'topic'];
       O.WATCHERS.forEach(w => {
         expect(ROUTES).toContain(w.route);
         expect(!!R.AGENT_BY_ID[w.agent]).toBeTruthy();
@@ -2184,8 +2189,9 @@
 
     it('her ajanın kendi perdesi vardır', () => {
       const p = R.AGENT_IDS.map(id => R.Voice.PROFILES[id]);
+      /* Ekibe biri katıldığında sesi de tanımlanmalı, yoksa iki ajan aynı
+         sesle konuşur ve kimin konuştuğu duyulmaz. */
       p.forEach(x => expect(!!x).toBeTruthy());
-      /* Cihazda tek ses olsa bile ajanlar ayırt edilebilmeli. */
       const pitches = p.map(x => x.pitch);
       expect(Object.keys(pitches.reduce((a, v) => (a[v] = 1, a), {}))).toHaveLength(pitches.length);
     });
@@ -2288,6 +2294,91 @@
       expect(bos.patron).toBeNull();
       expect(R.Voice.profileFor('patron', ['patron'], []).pitch)
         .toBe(R.Voice.PROFILES.patron.pitch);
+    });
+
+
+    /* ---------- ses kalitesi ---------- */
+
+    it('sesler kaliteye göre sıralanır, robotik motorlar geriye düşer', () => {
+      /* Sentezleyiciyi biz yazamayız ama HANGİSİNİ kullandığımızı
+         seçebiliriz. İlk sürüm listeden sırayla alıyordu ve cihazda iyi
+         ses olsa bile kötüsüne denk gelebiliyordu. */
+      const google = { name:'Google türkçe', lang:'tr-TR', localService:false };
+      const espeak = { name:'espeak turkish', lang:'tr-TR', localService:true };
+      const neural = { name:'Microsoft Emel Natural', lang:'tr-TR', localService:false };
+      const ingilizce = { name:'Google US English', lang:'en-US', localService:false };
+
+      expect(R.Voice.score(neural) > R.Voice.score(google)).toBeTruthy();
+      expect(R.Voice.score(google) > R.Voice.score(espeak)).toBeTruthy();
+      /* Türkçe olmak her şeyden önemli: iyi bir İngilizce ses Türkçe
+         metni okuyamaz. */
+      expect(R.Voice.score(espeak) > R.Voice.score(ingilizce)).toBeTruthy();
+    });
+
+    it('perde aralığı dar tutulur — geniş kaydırma sesi metalik yapar', () => {
+      const p = R.AGENT_IDS.map(id => R.Voice.PROFILES[id].pitch);
+      const min = Math.min.apply(null, p), max = Math.max.apply(null, p);
+      expect(min >= 0.85).toBeTruthy();
+      expect(max <= 1.15).toBeTruthy();
+      /* Yine de hepsi ayrı olmalı. */
+      expect(Object.keys(p.reduce((a, v) => (a[v] = 1, a), {}))).toHaveLength(p.length);
+    });
+
+    /* ---------- okunuş ---------- */
+
+    it('ekranda doğru olan metin, kulakta doğru olacak şekilde çevrilir', () => {
+      const t = R.Voice.speechText;
+      /* Yüzde işareti Türkçede sayıdan ÖNCE okunur. */
+      expect(t('%78 kapanış')).toBe('yüzde 78 kapanış');
+      /* Kısaltmalar harf harf: "TYT" tek hece gibi "tit" diye okunuyordu. */
+      expect(t('TYT netin')).toContain('Te Ye Te');
+      /* Matematik yazımı. */
+      expect(t('x^2 + 1')).toContain('x kare');
+      expect(t('kök(3)')).toBe('kök 3');
+      expect(t('5/40')).toContain('bölü');
+      expect(t('a = b')).toBe('a eşittir b');
+      /* Binlik ayracı okunmasın. */
+      expect(t('1.500 soru')).toBe('1500 soru');
+    });
+
+    it('satır sonları duraklamaya çevrilir', () => {
+      /* Sentezleyici satır sonunu duraklama saymaz; noktalamaya çevrilir. */
+      expect(R.Voice.speechText('Bir\n\nİki')).toBe('Bir. İki');
+      expect(R.Voice.speechText('Bir\nİki')).toBe('Bir, İki');
+      expect(R.Voice.speechText('Bir.\n\nİki')).toBe('Bir. İki');
+    });
+
+    it('okunmayan işaretler temizlenir', () => {
+      expect(R.Voice.speechText('**kalın** ve `kod`')).toBe('kalın ve kod');
+      expect(R.Voice.speechText('bir — iki')).toBe('bir, iki');
+    });
+
+    it('boş metin boş kalır', () => {
+      expect(R.Voice.speechText('')).toBe('');
+      expect(R.Voice.speechText(null)).toBe('');
+    });
+
+    it('kullanıcı ajana ses atayabilir ve atama otomatiğin üstündedir', async () => {
+      reset();
+      const fake = [{ voiceURI:'a', name:'Ses A', lang:'tr-TR' },
+                    { voiceURI:'b', name:'Ses B', lang:'tr-TR' }];
+      await O.saveSettings({ voices:{ patron:'b' } });
+      /* Ses listesi açıkça verilir: modülün içine dışarıdan atama yapmak
+         çalışmaz (kapanış kendi voices()'ını çağırır) ve o yüzden bu
+         fonksiyonlar liste parametresi alır. */
+      expect(R.Voice.profileFor('patron', ['patron', 'tyt'], fake).voice.voiceURI).toBe('b');
+      expect(R.Voice.profileFor('patron', ['patron', 'tyt'], fake).chosen).toBeTruthy();
+      /* Atanmayan ajan otomatik dağıtımda kalır. */
+      expect(R.Voice.profileFor('tyt', ['patron', 'tyt'], fake).chosen).toBeFalsy();
+      await O.saveSettings({ voices:{} });
+    });
+
+    it('cihazdaki ses kalitesi dürüstçe raporlanır', () => {
+      expect(R.Voice.quality([{ name:'espeak turkish', lang:'tr-TR', localService:true }]).level)
+        .toBe('dusuk');
+      expect(R.Voice.quality([{ name:'Microsoft Emel Natural', lang:'tr-TR', localService:false }]).level)
+        .toBe('iyi');
+      expect(R.Voice.quality([]).level).toBe('yok');
     });
 
     it('akış hızı ve ses tercihi kalıcıdır', async () => {
@@ -2495,7 +2586,7 @@
       const out = await draw();
       expect(out).toContain('class="room3d"');
       const desks = out.match(/class="desk3d /g) || [];
-      expect(desks).toHaveLength(5);
+      expect(desks).toHaveLength(6);
       R.AGENT_IDS.forEach(id => {
         expect(out).toContain('data-act="office-desk" data-agent="' + id + '"');
       });
@@ -2506,7 +2597,7 @@
     it('her masanın odada bir yeri vardır', async () => {
       const out = await draw();
       const spots = out.match(/--x:\d+%; --y:\d+%/g) || [];
-      expect(spots).toHaveLength(5);
+      expect(spots).toHaveLength(6);
     });
 
     it('durum metni yalnız söylenecek bir şey varken çıkar', async () => {
@@ -2522,7 +2613,7 @@
       await O.saveSettings({ room3d:false });
       const out = String(await R.Screens.office.render());
       expect(out.indexOf('class="room3d"')).toBe(-1);
-      expect((out.match(/class="seat /g) || []).length).toBe(5);
+      expect((out.match(/class="seat /g) || []).length).toBe(6);
       expect(out).toContain('data-act="office-desk"');
       await O.saveSettings({ room3d:true });
     });

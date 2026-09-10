@@ -143,7 +143,7 @@ R.Screens.meeting = (function(){
           <b class="small">Nasıl işleyecek?</b>
           <ol class="meetplan__list">
             ${map(R.Office.ROUNDS.slice(0, maxRounds()), (r, i) =>
-              html`<li><b>${i+1}. ${r.title}</b> — dört uzman sırayla konuşur</li>`)}
+              html`<li><b>${i+1}. ${r.title}</b> — ${R.MEETING_ORDER.length} uzman sırayla konuşur</li>`)}
           </ol>
           <p class="tiny dim">Toplantıyı <b>sen</b> bitirirsin; istediğin turda “Bitir ve rapor al”a bas.
             Araya girip söz de alabilirsin. Konuşmalar sırayla akar: biri bitmeden

@@ -26,8 +26,8 @@ R.AGENTS = [
     maxSentences:5,
     temperature:0.3,
     system:
-      'Sen bir YKS çalışma ofisinin patronusun. Dört uzmanın var: TYT uzmanı, AYT uzmanı, '
-      + 'rehber ve analist. Onların raporlarını okur, çelişkileri çözer ve TEK bir karar çıkarırsın.\n'
+      'Sen bir YKS çalışma ofisinin patronusun. Beş uzmanın var: TYT uzmanı, AYT uzmanı, '
+      + 'rehber, analist ve soru çözüm koçu. Onların raporlarını okur, çelişkileri çözer ve TEK bir karar çıkarırsın.\n'
       + '- Hesap yapmazsın: bütün sayılar kural motorundan gelir, geldiği gibi kullanılır.\n'
       + '- Aynı anda birden fazla müdahale yazmazsın; bu haftanın tek işini söylersin.\n'
       + '- Uzmanlar çelişiyorsa hangisinin haklı olduğunu veriye dayanarak söylersin.\n'
@@ -168,6 +168,42 @@ R.AGENTS = [
       'Analiz borcum ne durumda?',
     ],
   },
+
+  {
+    id:'koc',
+    name:'Kerem',
+    role:'Soru koçu',
+    initial:'K',
+    tone:'accent',
+    desk:'Çözülen sorular: hangi konu, hangi yayın, nerede zorlanıyorsun.',
+    scope:'Soru çözümü tarafı: çözüm kayıtları, konu başına oran, kaynak zorluğu.',
+    reads:['cozulen_sorular', 'konu_basina_oran', 'kaynaklar', 'kaynak_zorlugu'],
+    route:'solve',
+    hint:'closure',
+    maxSentences:4,
+    temperature:0.4,
+    /* Koc COZULEN SORUYA bakar, denemeye degil: deneme neti Deniz'in masasi.
+       Ayrimi korumak onemli — ikisi ayni sey degildir ve karistirilirsa
+       "bu hafta 200 soru cozdum ama netim dusuk" celiskisi kaybolur. */
+    taboo:[{ re:/(deneme net|denemede\s+\d|\bmedyan\b)/i,
+      why:'Deneme netinden söz etti; orası Deniz’in masası, koç çözülen soruya bakar.' }],
+    system:
+      'Sen bir YKS ofisinde soru çözüm koçusun. Adayın ÇÖZDÜĞÜ SORULARA bakarsın: '
+      + 'hangi konudan kaç soru çözdü, kaçını kendi çözdü, hangi yayında zorlandı.\n'
+      + '- Deneme neti yorumlamazsın; o Deniz’in alanı. Sen soru çözümüne bakarsın.\n'
+      + '- "Çözüme baktım" ile "kendim çözdüm" arasındaki farkı önemsersin: bir '
+      + 'konuda 20 soru çözmek o konuyu bildiğin anlamına gelmez.\n'
+      + '- Kaynağın zorluğunu etiketinden değil adayın o kaynaktaki oranından '
+      + 'okursun: etikette "orta" yazan bir kitap adaya zor gelebilir.\n'
+      + '- Tek ölçümle karar vermezsin; az kayıtta "henüz yeterli soru yok" dersin.\n'
+      + '- Somut konuşursun: hangi konu, hangi yayın, kaç soru.',
+    ask:[
+      'Hangi konuda en çok zorlanıyorum?',
+      'Hangi yayın bana zor geliyor?',
+      'Bu hafta kaç soru çözdüm?',
+      'Çözüme bakmadan çözebildiğim konular hangileri?',
+    ],
+  },
 ];
 
 /* ---------- sohbet turleri ----------
@@ -227,6 +263,9 @@ R.ACTION_OWNER = {
   sleep:'rehber', minimum:'rehber', break:'rehber', review:'rehber', contract:'rehber',
   block:'rehber', blocks:'rehber', running:'rehber', anchor:'rehber', done:'rehber',
   watch:'tyt',
+  /* Soru cozumune dusen isler kocun alanina yazilir: guven skoru dogru
+     ajana islensin. */
+  solve:'koc', question:'koc', source:'koc',
 };
 
 R.AGENT_IDS = R.AGENTS.map(a => a.id);
@@ -234,7 +273,9 @@ R.AGENT_BY_ID = R.AGENTS.reduce((m, a) => { m[a.id] = a; return m; }, {});
 
 /* Toplantida konusma sirasi: once olcum, sonra branslar, sonra davranis.
    Patron acar ve kapatir; sirasi burada degil orkestratordedir. */
-R.MEETING_ORDER = ['analist', 'tyt', 'ayt', 'rehber'];
+/* Toplanti sirasi. Koc, uzmanlardan SONRA konusur: once konu ve net
+   tablosu masaya konur, sonra "peki gercekten cozebiliyor mu" sorusu. */
+R.MEETING_ORDER = ['analist', 'tyt', 'ayt', 'rehber', 'koc'];
 
 /* Ofis istemleri — tek kaynak, surumlu.
    Surum artinca onbellekteki brifingler gecersiz olur. */

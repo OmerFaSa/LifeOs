@@ -32,13 +32,23 @@ R.Voice = (function(){
 
   /* Ajan sesleri. Perde ve hiz, cihazda tek ses olsa bile ajanlari
      ayirt edilebilir kilar; ayri ses bulunursa ustune biner. */
+  /* Perde araligi KASITLI OLARAK dar. Ilk surumde 0.80-1.24 idi ve
+     "her ajanin kendi sesi olsun" istegini karsiliyor gibi gorunuyordu;
+     gercekte ses kalitesini bozan sey buydu: konusma sentezleyicileri
+     perdeyi ne kadar kaydirirsan o kadar metalik ses uretir. 1.24 perde
+     "farkli bir kisi" degil, "bozulmus ayni kisi" gibi duyuluyordu.
+
+     Ayrim once GERCEK SESLERDEN yapilir (cihazda kac ses varsa hepsi
+     dagitilir); perde yalnizca ince ayardir. Hiz de 1.0'in cok uzagina
+     gitmez: hizli konusma anlasilirligi, yavas konusma dogalligi bozar. */
   const PROFILES = {
-    patron: { pitch:0.80, rate:0.95 },
-    tyt:    { pitch:1.12, rate:1.03 },
-    ayt:    { pitch:0.92, rate:0.99 },
-    rehber: { pitch:1.24, rate:0.93 },
-    analist:{ pitch:1.00, rate:1.10 },
-    aday:   { pitch:1.05, rate:1.00 },
+    patron: { pitch:0.92, rate:0.97 },
+    tyt:    { pitch:1.06, rate:1.02 },
+    ayt:    { pitch:0.96, rate:1.00 },
+    rehber: { pitch:1.10, rate:0.96 },
+    analist:{ pitch:1.00, rate:1.05 },
+    koc:    { pitch:0.88, rate:1.03 },
+    aday:   { pitch:1.04, rate:1.00 },
   };
 
   /* Okuma hizi: kelime/saniye. Sesli degilken turlar arasindaki mola
@@ -130,12 +140,66 @@ R.Voice = (function(){
     return waiting;
   }
 
-  /* Turkce sesler once; hicbiri yoksa liste oldugu gibi kullanilir —
-     yabanci bir sesle Turkce okumak, hic okumamaktan iyidir. */
+  /* ---------- ses kalitesi ----------
+
+     Tarayicinin verdigi sesler ESIT DEGILDIR ve aradaki fark buyuktur:
+     Linux'ta eSpeak metalik ve robotik konusur, Chrome'un "Google turkce"
+     sesi ya da Edge'in "Natural/Neural" sesleri neredeyse insan gibidir.
+     Ilk surum listeden SIRAYLA aliyordu; cihazda iyi ses olsa bile
+     kotusune denk gelebiliyordu. "Ses kalitesi kotu" sikayetinin sebebi
+     buydu — sentezleyiciyi biz yazamayiz ama HANGISINI kullandigimizi
+     secebiliriz.
+
+     Puanlama isimlerden ve bayraklardan okunur; hicbiri kesin degildir,
+     bu yuzden puan sirasi bir TERCIH sirasidir, filtre degil. */
+  function score(v){
+    const name = String(v.name || '').toLowerCase();
+    const lang = String(v.lang || '');
+    let n = 0;
+    /* Turkce olmak her seyden onemli: iyi bir Ingilizce ses Turkce metni
+       okuyamaz. */
+    if(/^tr\b|^tr[-_]/i.test(lang)) n += 200;
+    /* Sinirsel/bulut sesler yerel gomulu seslerden belirgin iyidir. */
+    if(/natural|neural/.test(name)) n += 60;
+    if(/google/.test(name)) n += 45;
+    if(/microsoft/.test(name)) n += 25;
+    if(/online/.test(name)) n += 20;
+    if(v.localService === false) n += 30;
+    /* Bilinen robotik motorlar geriye atilir. */
+    if(/espeak|festival|pico|compact|klatt/.test(name)) n -= 80;
+    if(v.default) n += 3;
+    return n;
+  }
+
+  /* Turkce sesler once ve KALITE SIRASIYLA; hicbiri yoksa liste oldugu
+     gibi kullanilir — yabanci bir sesle Turkce okumak, hic okumamaktan
+     iyidir. */
   function voices(){
     const all = (cached && cached.length) ? cached : rawVoices();
     const tr = all.filter(v => /^tr\b|^tr[-_]/i.test(v.lang || ''));
-    return tr.length ? tr : all;
+    const use = tr.length ? tr : all;
+    return use.slice().sort((a, b) => score(b) - score(a));
+  }
+
+  /* Cihazdaki en iyi ses gercekten iyi mi? Ekran "bu cihazda ses kalitesi
+     dusuk" diyebilsin diye. */
+  function quality(list){
+    const use = Array.isArray(list) ? list.slice().sort((a, b) => score(b) - score(a)) : voices();
+    if(!use.length) return { level:'yok', voice:null };
+    const best = use[0];
+    const n = score(best);
+    return {
+      voice:best,
+      level:n >= 260 ? 'iyi' : n >= 200 ? 'orta' : 'dusuk',
+      turkish:/^tr\b|^tr[-_]/i.test(String(best.lang || '')),
+      count:use.length,
+    };
+  }
+
+  function byURI(uri, list){
+    if(!uri) return null;
+    const use = Array.isArray(list) ? list : voices();
+    return use.find(v => (v.voiceURI || v.name) === uri) || null;
   }
 
   /* ---------- ajan → ses dagitimi ----------
@@ -166,13 +230,23 @@ R.Voice = (function(){
   }
 
   /* Bir ajanin ses ayari: { voice, pitch, rate, name }. */
+  /* Kullanicinin ajan basina sectigi sesler. Ofis ayarlarinda durur ve
+     otomatik dagitimin USTUNDEDIR: "her ajanin kendine has sesi olsun"
+     isteginin tam karsiligi budur — cihazda hangi ses varsa kullanici
+     kendi eslestirmesini yapabilmeli. */
+  function overrides(){
+    try{ return (R.Office.settings().voices) || {}; }
+    catch(e){ return {}; }
+  }
+
   function profileFor(agentId, ids, list){
     const base = PROFILES[agentId] || PROFILES.aday;
-    const map = assign(ids, list);
-    const voice = map[agentId] || null;
+    const chosen = byURI(overrides()[agentId], list);
+    const voice = chosen || assign(ids, list)[agentId] || null;
     return {
       voice,
       name:voice ? voice.name : null,
+      chosen:!!chosen,
       pitch:base.pitch,
       rate:base.rate,
     };
@@ -181,6 +255,69 @@ R.Voice = (function(){
   /* Cihazda kac ayri ses var? Ekran "hepsi ayni sesle konusuyor" durumunu
      kullaniciya soyleyebilsin diye. */
   function voiceCount(){ return voices().length; }
+
+  /* ---------- metnin okunusa hazirlanmasi ----------
+
+     Ekranda dogru gorunen metin, sesli okundugunda yanlis duyulur:
+
+       "%78"        → sentezleyici "yuzde" demez, isareti ya atlar ya da
+                      "yuzde" yerine sayidan SONRA okur.
+       "TYT"        → tek hece gibi "tit" diye okunur; dogrusu harf harf.
+       "x^2"        → "x sapka iki" diye okunur.
+       "5/40"       → "bes bolu kirk" degil "bes kirk" diye gecer.
+       "1.500"      → bazi motorlar "bir nokta bes yuz" der.
+
+     Bunlar duzeltilmezse ses kalitesi degil, ANLASILIRLIK bozulur — ve
+     kullanicinin "kotu" dedigi seyin buyuk kismi budur. Metin yalniz
+     KONUSMA icin donusturulur; ekranda gorunen degismez. */
+
+  /* Harf harf okunmasi gereken kisaltmalar. Turkce harf adlariyla
+     yazilir, yoksa motor Ingilizce harf adi kullanir ("ti vay ti"). */
+  const SPELL = {
+    'TYT':'Te Ye Te', 'AYT':'A Ye Te', 'YKS':'Ye Ka Se', 'ÖSYM':'Ö Se Ye Me',
+    'YDT':'Ye De Te', 'MEB':'Me E Be', 'SRS':'Se Er Se',
+    'K/İ/Y/S/D':'Ka, İ, Ye, Se, De',
+  };
+
+  function speechText(text){
+    let t = String(text || '');
+    if(!t) return '';
+
+    /* Kisaltmalar — once, cunku sonraki adimlar harfleri bozabilir. */
+    Object.keys(SPELL).forEach(k => {
+      t = t.split(k).join(SPELL[k]);
+    });
+
+    /* Yuzde isareti Turkce'de sayidan ONCE okunur. */
+    t = t.replace(/%\s*(\d+(?:[.,]\d+)?)/g, 'yüzde $1');
+
+    /* Binlik ayraci noktasi okunmasin: 1.500 → 1500 */
+    t = t.replace(/(\d)\.(\d{3})(?!\d)/g, '$1$2');
+
+    /* Matematik yazimi. Ekranda "x^2" dogru, kulakta "x kare" dogru. */
+    t = t.replace(/\^2\b/g, ' kare').replace(/\^3\b/g, ' küp')
+         .replace(/\^(\d+)/g, ' üzeri $1');
+    t = t.replace(/\bkök\s*\(([^)]{1,12})\)/gi, 'kök $1');
+    t = t.replace(/(\d)\s*\/\s*(\d)/g, '$1 bölü $2');
+    t = t.replace(/\s*=\s*/g, ' eşittir ')
+         .replace(/\s*<=\s*/g, ' küçük eşittir ').replace(/\s*>=\s*/g, ' büyük eşittir ')
+         .replace(/\s*<\s*/g, ' küçüktür ').replace(/\s*>\s*/g, ' büyüktür ');
+
+    /* Okunmayan isaretler: madde imleri, yildizlar, uzun tireler. */
+    t = t.replace(/[*_`#|]/g, ' ').replace(/[—–]/g, ', ');
+
+    /* Cok satirli metin: bos satir bir duraklamadir. Sentezleyici satir
+       sonunu duraklama saymaz; noktalamaya cevrilir. */
+    t = t.replace(/\n{2,}/g, '. ').replace(/\n/g, ', ');
+
+    /* Ust uste birikmis noktalama ve bosluk. Noktalamadan ONCEKI bosluk da
+       silinir: "bir , iki" duraklamayi yanlis yere koyar. */
+    t = t.replace(/([.,;:!?])\s*(?=[.,;:])/g, '')
+         .replace(/\s+([.,;:!?])/g, '$1')
+         .replace(/\s{2,}/g, ' ')
+         .trim();
+    return t;
+  }
 
   /* ---------- konusma ---------- */
 
@@ -298,7 +435,8 @@ R.Voice = (function(){
   async function speak(text, profile, opts){
     const o = opts || {};
     if(!available()) return 'unavailable';
-    const parts = chunks(text);
+    /* Metin KONUSMA icin donusturulur; ekranda gorunen degismez. */
+    const parts = chunks(o.raw ? text : speechText(text));
     if(!parts.length) return 'empty';
 
     /* Onceki konusma bitmediyse kesilir: iki ses ust uste binmemeli. */
@@ -316,6 +454,7 @@ R.Voice = (function(){
   return {
     available, load, voices, voiceCount, assign, profileFor, speak, cancel,
     readMs, holdMs, chunks, sentences, budgetMs,
-    PROFILES, PACE, PACE_ORDER, paceOf, LANG, CHUNK, MIN_HOLD,
+    score, quality, byURI, speechText, overrides,
+    PROFILES, PACE, PACE_ORDER, paceOf, LANG, CHUNK, MIN_HOLD, SPELL,
   };
 })();

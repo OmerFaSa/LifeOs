@@ -171,11 +171,12 @@ R.Screens.office = (function(){
   const ROOM_TURN = -26;
   /* Odadaki yerler: zeminin yüzdesi. Patron dipte ortada, uzmanlar iki sıra. */
   const ROOM_SPOTS = {
-    patron: { x:50, y:13 },
-    tyt:    { x:23, y:45 },
-    ayt:    { x:77, y:45 },
-    rehber: { x:23, y:78 },
-    analist:{ x:77, y:78 },
+    patron: { x:50, y:12 },
+    tyt:    { x:20, y:42 },
+    ayt:    { x:80, y:42 },
+    koc:    { x:50, y:56 },
+    rehber: { x:20, y:78 },
+    analist:{ x:80, y:78 },
   };
 
   /* Kamera açısı yeniden çizimler arasında korunur: kullanıcı odayı
@@ -438,7 +439,7 @@ R.Screens.office = (function(){
           ${Avatar(patron)}
           <div class="minw0">
             <b class="desk__name">Patron’un masası</b>
-            <span class="desk__role">Dört uzmanın raporunu birleştirir; günün tek işini o söyler</span>
+            <span class="desk__role">Uzmanların raporunu birleştirir; günün tek işini o söyler</span>
           </div>
           ${K.Badge({ label:O.mode() === 'llm' ? 'model bağlı' : 'kural motoru',
             tone:O.mode() === 'llm' ? 'ok' : 'info' })}
@@ -616,6 +617,65 @@ R.Screens.office = (function(){
     return live.models.length + ' model · ' + U.relativeDay(live.at.slice(0, 10)) + ' güncellendi.';
   }
 
+  /* ---------- sesler ----------
+
+     "Her ajanın kendine has sesi olsun" isteğinin tam karşılığı burası.
+     Otomatik dağıtım cihazdaki sesleri ajanlara paylaştırır; buradan
+     kullanıcı kendi eşleştirmesini yapabilir ve DİNLEYEREK seçebilir —
+     bir sesin nasıl olduğunu ad listesinden anlamak mümkün değil.
+
+     Cihazda iyi ses yoksa bunu saklamak yerine söyleriz: sentezleyiciyi
+     biz yazamayız, ama hangisinin kullanıldığını seçebilir ve durumu
+     dürüstçe bildirebiliriz. */
+
+  function voiceSection(){
+    if(!R.Voice.available()){
+      return K.Stack([
+        K.SectionTitle('Sesler'),
+        html`<p class="tiny dim">Bu tarayıcı konuşma sentezini desteklemiyor.</p>`,
+      ], 'sm');
+    }
+    const q = R.Voice.quality();
+    const list = R.Voice.voices();
+
+    return K.Stack([
+      K.SectionTitle('Sesler', K.Button({ label:'Sesleri tazele', icon:'refresh', size:'sm',
+        act:'office-voices' })),
+
+      when(!list.length, () => K.Notice({ tone:'warn', title:'Bu cihazda konuşma sesi bulunamadı.',
+        body:'Toplantı sessiz akar. Chrome ya da Edge’de Türkçe ses paketi kuruluysa '
+           + '“Sesleri tazele”ye bas; mobilde sistem dili ayarlarından Türkçe TTS kurulabilir.' })),
+
+      when(list.length && !q.turkish, () => K.Notice({ tone:'warn',
+        title:'Türkçe ses yok, yabancı bir sesle okunacak.',
+        body:'Türkçe metin yabancı bir sesle bozuk duyulur. Cihazına Türkçe konuşma '
+           + 'paketi kurarsan belirgin düzelir.' })),
+
+      when(list.length && q.turkish && q.level === 'dusuk', () => K.Notice({ tone:'info',
+        title:'Bu cihazdaki sesler temel seviyede.',
+        body:'Elde olan en iyi ses seçildi ama gömülü (robotik) bir motor. Chrome’da '
+           + '“Google Türkçe”, Edge’de “Natural/Neural” sesleri belirgin daha doğaldır.' })),
+
+      when(list.length, () => html`<p class="tiny dim">${list.length} ses bulundu;
+        en iyisi seçilip ajanlara dağıtıldı. Aşağıdan değiştirip dinleyebilirsin.</p>`),
+
+      when(list.length, () => html`<div class="stack-xs">${map(R.AGENTS, a => {
+        const prof = R.Voice.profileFor(a.id, R.AGENT_IDS);
+        const current = (R.Voice.overrides()[a.id]) || '';
+        return html`<div class="voicerow">
+          ${Avatar(a, 'sm')}
+          <span class="voicerow__name">${a.name}</span>
+          ${K.Select({ id:'voice-' + a.id, value:current, change:'office-voice',
+            data:{ 'data-agent':a.id },
+            options:[{ value:'', label:'otomatik — ' + (prof.name || 'ses yok') }]
+              .concat(list.map(v => ({ value:v.voiceURI || v.name, label:v.name }))) })}
+          ${K.IconButton({ icon:'play', size:'sm', aria:a.name + ' sesini dinle',
+            title:'Dinle', act:'office-voice-try', data:{ 'data-agent':a.id } })}
+        </div>`;
+      })}</div>`),
+    ], 'sm');
+  }
+
   function providerForm(providerId){
     const st = O.settings();
     const p = R.PROVIDERS[providerId];
@@ -705,7 +765,10 @@ R.Screens.office = (function(){
           K.Chip({ label:c.label, act:'office-rpd', data:{ 'data-rpd':c.value } })), { wrap:true })),
       ], 'sm')),
 
-      /* --- 5. ofis davranisi --- */
+      /* --- 5. sesler --- */
+      voiceSection(),
+
+      /* --- 6. ofis davranisi --- */
       K.Stack([
         K.SectionTitle('Ofis davranışı'),
         K.Checkbox({ label:'Model düşerse yedeğe geç (önerilir)', checked:st.fallback !== false,
@@ -947,6 +1010,27 @@ R.Screens.office = (function(){
       await O.saveSettings({ autoBriefing:!!el.checked });
     },
 
+    async 'office-voices'(){
+      R.Voice.cancel();
+      await R.Voice.load(3000);
+      const form = document.getElementById('llm-form');
+      const sel = document.getElementById('llm-provider');
+      if(form && sel) form.innerHTML = String(providerForm(sel.value));
+      UI.toast(R.Voice.voiceCount() + ' ses bulundu');
+    },
+
+    /* Dinlemeden ses seçilmez: ad listesinden bir sesin nasıl olduğu
+       anlaşılmaz. */
+    async 'office-voice-try'(el){
+      const id = el.dataset.agent;
+      const agent = R.AGENT_BY_ID[id];
+      if(!agent) return;
+      R.Voice.cancel();
+      await R.Voice.speak(
+        agent.name + '. ' + agent.role + '. TYT kapanışın %62, bu hafta 18 soru çözdün.',
+        R.Voice.profileFor(id, R.AGENT_IDS), {});
+    },
+
     async 'office-notify'(){
       await R.App.askNotify();
       const box = document.getElementById('office-notify');
@@ -1135,6 +1219,18 @@ R.Screens.office = (function(){
       const box = document.getElementById('llm-key-warn');
       if(box) box.innerHTML = warn ? String(warn) : '';
     },
+    async 'office-voice'(el){
+      const id = el.dataset.agent;
+      const next = Object.assign({}, O.settings().voices || {});
+      if(el.value) next[id] = el.value; else delete next[id];
+      await O.saveSettings({ voices:next });
+      /* Seçtiğini hemen duy: sessiz bir kaydetme, seçimin işe yarayıp
+         yaramadığını gizler. */
+      const agent = R.AGENT_BY_ID[id];
+      R.Voice.cancel();
+      await R.Voice.speak(agent.name + '. Merhaba.', R.Voice.profileFor(id, R.AGENT_IDS), {});
+    },
+
     async 'office-model'(el){
       const custom = document.getElementById('llm-model-custom');
       if(custom) custom.value = '';
@@ -1155,7 +1251,7 @@ R.Screens.office = (function(){
       const m = O.mode();
       const open = O.openDecisions().length;
       return (m === 'llm' ? O.providerLabel() : 'kural motoru modu')
-        + ' · 5 ajan' + (open ? ' · ' + open + ' açık karar' : '');
+        + ' · ' + R.AGENTS.length + ' ajan' + (open ? ' · ' + open + ' açık karar' : '');
     },
     actions(){
       return String(K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }));

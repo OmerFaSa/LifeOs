@@ -1060,6 +1060,7 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .agentav--ayt    { background:var(--agent-ayt);     color:var(--agent-ink); }
 .agentav--rehber { background:var(--agent-rehber);  color:var(--agent-ink); }
 .agentav--analist{ background:var(--agent-analist); color:var(--agent-ink); }
+.agentav--koc    { background:var(--agent-koc);     color:var(--agent-ink); }
 
 .desks{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(272px, 1fr)); }
 .desk__head{ display:flex; align-items:center; gap:11px; }
@@ -1239,6 +1240,7 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .agentref--ayt    { color:var(--agent-ayt); }
 .agentref--rehber { color:var(--agent-rehber); }
 .agentref--analist{ color:var(--agent-analist); }
+.agentref--koc    { color:var(--agent-koc); }
 .agentref:hover{ border-bottom-style:solid; }
 
 /* Çapraz soru — Patron’un tur arasında sorduğu takip sorusu */
@@ -1349,6 +1351,7 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .seat--ayt    { --seat-color:var(--agent-ayt); }
 .seat--rehber { --seat-color:var(--agent-rehber); }
 .seat--analist{ --seat-color:var(--agent-analist); }
+.seat--koc    { --seat-color:var(--agent-koc); }
 
 .seat__body{ min-width:0; flex:1; }
 .seat__name{
@@ -1740,6 +1743,7 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .prop--ayt    { --seat-color:var(--agent-ayt); }
 .prop--rehber { --seat-color:var(--agent-rehber); }
 .prop--analist{ --seat-color:var(--agent-analist); }
+.prop--koc    { --seat-color:var(--agent-koc); }
 
 .prop__head{ display:flex; align-items:flex-start; gap:9px; }
 .prop__who{ min-width:0; flex:1; }
@@ -1967,4 +1971,12 @@ button.listitem.is-on{ background:var(--primary-soft); }
 }
 @media (max-width:520px){
   .qdiff{ grid-template-columns:1fr; }
+}
+
+/* Ses eşleştirme satırı: kim, hangi ses, dinle. */
+.voicerow{ display:flex; align-items:center; gap:8px; }
+.voicerow__name{ flex:none; min-width:64px; font-size:var(--fs-sm); font-weight:600; }
+.voicerow .select{ flex:1; min-width:0; }
+@media (max-width:520px){
+  .voicerow__name{ min-width:0; }
 }
