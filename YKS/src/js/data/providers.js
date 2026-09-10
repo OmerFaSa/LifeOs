@@ -46,8 +46,8 @@ R.PROVIDERS = {
     /* Yerlesik yetenegin kendi sinirlari vardir ve disaridan okunamaz;
        kota yoneticisi bu yuzden araya girmez. */
     models:[
-      { id:'default', label:'Varsayılan', strength:'denge' },
-      { id:'quick',   label:'Hızlı',      strength:'hız' },
+      { id:'default', label:'Varsayılan', strength:'denge', vision:false },
+      { id:'quick',   label:'Hızlı',      strength:'hız',   vision:false },
     ],
   },
 
@@ -105,7 +105,7 @@ R.PROVIDERS = {
     limits:{ rpm:30, rpd:1000 },
     models:[
       { id:'llama-3.3-70b-versatile', label:'Llama 3.3 70B', free:true, strength:'denge',
-        limits:{ rpm:30, rpd:1000,  tpm:12000 } },
+        vision:false, limits:{ rpm:30, rpd:1000,  tpm:12000 } },
       { id:'llama-3.1-8b-instant',    label:'Llama 3.1 8B',  free:true, strength:'hız',
         limits:{ rpm:30, rpd:14400, tpm:6000 } },
       { id:'openai/gpt-oss-120b',     label:'GPT-OSS 120B',  free:true, strength:'analiz',
@@ -139,19 +139,21 @@ R.PROVIDERS = {
     keyShape:'Google AI Studio anahtarları "AIza" (eski) ya da "AQ." (yeni) ile başlar.',
     note:'Ücretsiz katmanda günde 1000–1500 isteğe kadar hak vardır; dakikalık sınır '
        + 'modele göre 10 ile 30 istek arasındadır. Uzun toplantılar için uygun. '
-       + 'Yeni anahtarlar "AQ." ile başlar; ikisi de çalışır.',
+       + 'Yeni anahtarlar "AQ." ile başlar; ikisi de çalışır. '
+       + 'Soru fotoğrafı okuyabilen tek ücretsiz seçenek burasıdır.',
     checked:'2026-09 · ai.google.dev/gemini-api/docs/rate-limits',
     /* Model bilinmiyorsa buraya duser — dar tutulur, kota asilmasin. */
     limits:{ rpm:10, rpd:1000 },
     models:[
       { id:'gemini-2.5-flash',      label:'Gemini 2.5 Flash',      free:true, strength:'analiz',
-        limits:{ rpm:15, rpd:1500 } },
+        vision:true, limits:{ rpm:15, rpd:1500 } },
       { id:'gemini-2.5-flash-lite', label:'Gemini 2.5 Flash Lite', free:true, strength:'hız',
-        limits:{ rpm:30, rpd:1500 } },
+        vision:true, limits:{ rpm:30, rpd:1500 } },
       { id:'gemini-3-flash-preview', label:'Gemini 3 Flash',       free:true, strength:'denge',
-        limits:{ rpm:10, rpd:1500 } },
+        vision:true, limits:{ rpm:10, rpd:1500 } },
       /* Sinirlari dogrulanmadi: saglayici varsayilanina duser. */
-      { id:'gemini-3.1-flash-lite', label:'Gemini 3.1 Flash Lite', free:true, strength:'hız' },
+      { id:'gemini-3.1-flash-lite', label:'Gemini 3.1 Flash Lite', free:true, strength:'hız',
+        vision:true },
     ],
   },
 

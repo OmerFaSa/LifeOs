@@ -22,6 +22,7 @@ R.S = {
   sessions:[],     // sureli deneme oturumlari (soru bazli sure dahil)
   profiles:[],     // cihazdaki profiller (cok kullanicili kullanim)
   videoNotes:[],   // izlenen ders kaydi + zaman damgali notlar
+  solved:[],       // cozulen sorular: metin/fotograf, anlatim, konu, zorluk
   activities:[],   // kullanicinin kendi ekledigi/gizledigi mesgaleler
   mood:{},         // YYYY-MM-DD -> { energy, note } (gunde tek kayit)
   breaks:[],       // alinan molalar
@@ -990,7 +991,8 @@ R.Model = (function(){
     R.S.meta = (await R.Store.get('meta/backup')) || { lastBackupAt:null, schemaVersion:R.SCHEMA_VERSION };
 
     const [weeks, days, exams, errors, cards, reviews, decisions, protocols, prefs,
-           videoNotes, activities, mood, breaks, plan, calendar, sessions, profiles] = await Promise.all([
+           videoNotes, activities, mood, breaks, plan, calendar, sessions, profiles,
+           solved] = await Promise.all([
       R.Store.list('weeks'),
       R.Store.list('days'),
       R.Store.list('exams'),
@@ -1008,6 +1010,7 @@ R.Model = (function(){
       R.Store.list('calendar'),
       R.Store.list('sessions'),
       R.Store.list('profiles'),
+      R.Store.list('solved'),
     ]);
 
     weeks.forEach(w => { R.S.weeks[w.id] = normWeek(w); });
@@ -1018,6 +1021,9 @@ R.Model = (function(){
     reviews.forEach(r => { R.S.reviews[r.id] = r; });
     decisions.forEach(d => { R.S.decisions[d.id] = d; });
     R.S.protocols = protocols.map(normProtocol);
+    /* Cozulen sorular: en yeni once. */
+    R.S.solved = (solved || []).filter(x => x && x.id)
+      .sort((a, b) => (b.at || '').localeCompare(a.at || ''));
     R.S.prefs = (prefs && Array.isArray(prefs.rows) && prefs.rows.length === 24) ? prefs : defaultPrefs();
 
     R.S.videoNotes = videoNotes.map(normVideoNote)

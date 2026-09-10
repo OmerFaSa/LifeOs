@@ -22,6 +22,7 @@ R.App = (function(){
       { id:'exams', icon:'exam',  label:'Deneme' },
       { id:'cards', icon:'cards', label:'Tekrar' },
       { id:'quiz',  icon:'zap',   label:'Sınama' },
+      { id:'solve', icon:'search', label:'Soru çöz' },
     ]},
     { label:'Analiz', items:[
       { id:'progress',  icon:'chart',  label:'İlerleme' },

@@ -2511,6 +2511,76 @@ button.listitem.is-on{ background:var(--primary-soft); }
 @media (max-width:640px){
   .agenttab__name{ display:none; }
 }
+
+/* ==================== soru çözüm ====================
+   Ekranın işi çözüm üretmek değil, çözümü KAYDA bağlamak. Düzen bunu
+   söyler: önce soru kutusu, sonra çözüm, en altta "kayda geçir". */
+
+/* Fotoğraf bırakma alanı. Üç yol da aynı kapıya çıkar: tıkla, sürükle,
+   Ctrl+V ile yapıştır — telefonda çeken de bilgisayarda kırpan da girebilsin. */
+.qdrop{
+  position:relative;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px;
+  min-height:132px; padding:var(--sp-4);
+  border:2px dashed var(--border-strong);
+  border-radius:var(--r);
+  background:var(--surface-2);
+  color:var(--text-2);
+  text-align:center;
+  cursor:pointer;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.qdrop:hover, .qdrop.is-over{ border-color:var(--primary); background:var(--primary-soft); }
+.qdrop:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.qdrop.is-full{ padding:var(--sp-2); border-style:solid; background:var(--surface); }
+.qdrop__icon svg{ width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:1.6; color:var(--text-3); }
+.qdrop__img{
+  max-width:100%; max-height:340px;
+  border-radius:var(--r-sm);
+  display:block;
+}
+.qdrop__meta{ font-size:var(--fs-xs); color:var(--text-3); }
+
+/* Çözüm metni: satır sonları korunur, okuma satırı fazla uzamaz. */
+.qsolution{
+  font-size:var(--fs-base); line-height:1.62; color:var(--text);
+  max-width:68ch;
+  white-space:normal;
+}
+
+.qfollow{ margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); }
+.qfollow__q{ font-size:var(--fs-sm); color:var(--text-2); margin-bottom:5px; }
+.qfollow__a{ padding-left:10px; border-left:2px solid var(--primary); }
+
+.qmeta{ padding-top:var(--sp-3); border-top:1px solid var(--border); }
+
+/* Geçmiş satırı: sonuç noktası + konu + zorluk + tarih. */
+.qrow{
+  display:flex; align-items:center; gap:9px;
+  padding:7px 0;
+  border-bottom:1px solid var(--border);
+  font-size:var(--fs-sm);
+}
+.qrow:last-child{ border-bottom:0; }
+.qrow__dot{ width:8px; height:8px; border-radius:50%; flex:none; background:var(--text-3); }
+.qrow__dot--ok{ background:var(--primary); }
+.qrow__dot--warn{ background:var(--accent); }
+.qrow__dot--danger{ background:var(--danger); }
+.qrow__dot--info{ background:var(--info); }
+.qrow__topic{ display:block; line-height:1.25; }
+.qrow__text{
+  display:block; font-size:var(--fs-xs); color:var(--text-3);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+.qtopic{ display:flex; align-items:center; gap:10px; padding:5px 0; font-size:var(--fs-sm); }
+.qtopic .bar{ flex:1; min-width:60px; }
+
+@media (max-width:520px){
+  .qdrop{ min-height:104px; }
+  .qdrop__img{ max-height:240px; }
+}
 </style>
 <div id="app">
   <div class="boot">
@@ -3975,8 +4045,8 @@ R.PROVIDERS = {
     /* Yerlesik yetenegin kendi sinirlari vardir ve disaridan okunamaz;
        kota yoneticisi bu yuzden araya girmez. */
     models:[
-      { id:'default', label:'Varsayılan', strength:'denge' },
-      { id:'quick',   label:'Hızlı',      strength:'hız' },
+      { id:'default', label:'Varsayılan', strength:'denge', vision:false },
+      { id:'quick',   label:'Hızlı',      strength:'hız',   vision:false },
     ],
   },
 
@@ -4034,7 +4104,7 @@ R.PROVIDERS = {
     limits:{ rpm:30, rpd:1000 },
     models:[
       { id:'llama-3.3-70b-versatile', label:'Llama 3.3 70B', free:true, strength:'denge',
-        limits:{ rpm:30, rpd:1000,  tpm:12000 } },
+        vision:false, limits:{ rpm:30, rpd:1000,  tpm:12000 } },
       { id:'llama-3.1-8b-instant',    label:'Llama 3.1 8B',  free:true, strength:'hız',
         limits:{ rpm:30, rpd:14400, tpm:6000 } },
       { id:'openai/gpt-oss-120b',     label:'GPT-OSS 120B',  free:true, strength:'analiz',
@@ -4068,19 +4138,21 @@ R.PROVIDERS = {
     keyShape:'Google AI Studio anahtarları "AIza" (eski) ya da "AQ." (yeni) ile başlar.',
     note:'Ücretsiz katmanda günde 1000–1500 isteğe kadar hak vardır; dakikalık sınır '
        + 'modele göre 10 ile 30 istek arasındadır. Uzun toplantılar için uygun. '
-       + 'Yeni anahtarlar "AQ." ile başlar; ikisi de çalışır.',
+       + 'Yeni anahtarlar "AQ." ile başlar; ikisi de çalışır. '
+       + 'Soru fotoğrafı okuyabilen tek ücretsiz seçenek burasıdır.',
     checked:'2026-09 · ai.google.dev/gemini-api/docs/rate-limits',
     /* Model bilinmiyorsa buraya duser — dar tutulur, kota asilmasin. */
     limits:{ rpm:10, rpd:1000 },
     models:[
       { id:'gemini-2.5-flash',      label:'Gemini 2.5 Flash',      free:true, strength:'analiz',
-        limits:{ rpm:15, rpd:1500 } },
+        vision:true, limits:{ rpm:15, rpd:1500 } },
       { id:'gemini-2.5-flash-lite', label:'Gemini 2.5 Flash Lite', free:true, strength:'hız',
-        limits:{ rpm:30, rpd:1500 } },
+        vision:true, limits:{ rpm:30, rpd:1500 } },
       { id:'gemini-3-flash-preview', label:'Gemini 3 Flash',       free:true, strength:'denge',
-        limits:{ rpm:10, rpd:1500 } },
+        vision:true, limits:{ rpm:10, rpd:1500 } },
       /* Sinirlari dogrulanmadi: saglayici varsayilanina duser. */
-      { id:'gemini-3.1-flash-lite', label:'Gemini 3.1 Flash Lite', free:true, strength:'hız' },
+      { id:'gemini-3.1-flash-lite', label:'Gemini 3.1 Flash Lite', free:true, strength:'hız',
+        vision:true },
     ],
   },
 
@@ -4588,6 +4660,111 @@ R.OFFICE_PROMPTS = {
       + (vote && vote.kazanan ? 'oylamanın sonucunu da an, ' : '')
       + 'sonra yukarıdaki işi kendi cümlenle gerekçelendir. İşi DEĞİŞTİRME, '
       + 'yerine başka iş önerme. Konuşur gibi yaz, en fazla 4 cümle.';
+  },
+};
+
+/* ==== js/data/solver.js ==== */
+/* Soru cozucu — soruyu okur, cozer, anlatir ve olcer.
+
+   Bu dosya DEKLARATIFTIR: istemler, zorluk olcegi ve cikti sozlesmesi
+   burada durur. Kayit, dogrulama ve istatistik core/solver.js icindedir.
+
+   ILKE (ofisle ayni): model UYDURAMAZ, kural motoru dogrular.
+   Cozum metni modelden gelir — orada mecburuz, bir soruyu cozmek hesap
+   isidir — ama modelin bildirdigi ders/konu KAPALI KATALOGDAN secilir
+   (R.SUBJECTS), zorluk KAPALI OLCEKTEN gelir, ve ikisi de kural
+   motorunda dogrulanir. Uydurma konu adi kayda GIRMEZ.
+
+   Neden bu onemli: bu kayitlar konu takibini, risk siralamasini ve kaynak
+   zorlugunu besliyor. Uydurulmus tek bir konu adi, butun o hesabi sessizce
+   bozar. */
+
+window.R = window.R || {};
+
+/* Zorluk olcegi. Bes kademe: modelden gelen tahmin de, kullanicinin kendi
+   isareti de bu olcege oturur; ikisi ayni dilde konusmali ki karsilastirma
+   anlamli olsun. */
+R.DIFFICULTY = {
+  1:{ n:1, label:'Çok kolay', short:'ÇK', note:'Tanım/doğrudan uygulama' },
+  2:{ n:2, label:'Kolay',     short:'K',  note:'Tek adımlı' },
+  3:{ n:3, label:'Orta',      short:'O',  note:'İki-üç adım, standart kalıp' },
+  4:{ n:4, label:'Zor',       short:'Z',  note:'Çok adımlı ya da kurulum isteyen' },
+  5:{ n:5, label:'Çok zor',   short:'ÇZ', note:'Ayırt edici; sınavda az sayıda çıkar' },
+};
+R.DIFFICULTY_ORDER = [1, 2, 3, 4, 5];
+
+/* Sorunun cozulup cozulmedigi. "Bakmadan cozdum" ile "cozume baktim"
+   arasindaki fark, konu takibi icin en degerli bilgidir. */
+R.SOLVE_RESULTS = {
+  dogru:  { id:'dogru',  label:'Kendim çözdüm',      tone:'ok' },
+  zorla:  { id:'zorla',  label:'Zorlanarak çözdüm',  tone:'warn' },
+  yanlis: { id:'yanlis', label:'Yanlış yaptım',      tone:'danger' },
+  bos:    { id:'bos',    label:'Boş bıraktım',       tone:'danger' },
+  bakarak:{ id:'bakarak',label:'Çözüme baktım',      tone:'info' },
+};
+R.SOLVE_RESULT_ORDER = ['dogru', 'zorla', 'yanlis', 'bos', 'bakarak'];
+
+R.SOLVER = {
+  version:1,
+
+  /* Cozum metninin uzunluk butcesi. Bir cozum ofis yorumundan uzundur:
+     adimlarin hepsi yazilmali, yoksa "cozum anlatan" degil "cevap soyleyen"
+     bir sistem olur. */
+  budget:2200,
+
+  system:
+    'Sen bir YKS öğretmenisin. Sana bir soru veriliyor; onu ÇÖZÜP ANLATIYORSUN.\n'
+    + '- Önce soruyu kendi cümlenle bir satırda özetle: ne veriliyor, ne isteniyor.\n'
+    + '- Sonra çözümü ADIM ADIM yaz. Her adımda ne yaptığını ve NEDEN yaptığını söyle; '
+    + 'işlem satırı yeterli değildir, öğrenci adımı seçme sebebini öğrenmeli.\n'
+    + '- Sonucu açıkça yaz: "Cevap: …".\n'
+    + '- En sonda TUZAĞI söyle: bu soruda öğrenciler en çok nerede hata yapar.\n'
+    + '- Kısayol varsa onu da ver ama önce uzun yolu göster; sınavda hangisinin '
+    + 'ne zaman işe yaradığını söyle.\n'
+    + '- Soruyu okuyamıyorsan ya da eksikse UYDURMA: neyin eksik olduğunu söyle.\n'
+    + '- Sadece cevabı yazıp geçme. Anlatmak asıl iştir.\n'
+    + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin. Matematik ifadelerini düz '
+    + 'yazıyla yaz (x^2, kök(3), 1/2 gibi); LaTeX kullanma. Emoji yok.',
+
+  /* Cikti sozlesmesi: once ANLATIM, en sonda tek satirlik JSON.
+     Ayni desen oneri kutusunda da kullaniliyor (R.Proposals.splitAction):
+     ekranda konusma kalir, makine okunacak kisim ayrilir. */
+  tail(subjects){
+    return '\n\nEN SONA, ayrı bir satıra, SADECE şu JSON’u ekle (başka hiçbir şey yazma):\n'
+      + '{"ders":"…","konu":"…","zorluk":1-5,"cevap":"…","tuzak":"…"}\n'
+      + '- "ders" ve "konu" AŞAĞIDAKİ LİSTEDEN seçilir; listede yoksa "" bırak, uydurma.\n'
+      + '- "zorluk": 1 çok kolay, 3 orta, 5 çok zor.\n'
+      + '- "cevap": yalnız sonuç (şık harfi ya da değer).\n'
+      + '- "tuzak": en sık yapılan hata, tek cümle.\n\n'
+      + 'DERS VE KONU LİSTESİ:\n' + subjects;
+  },
+
+  /* Soru metinle geldiginde. */
+  ask(ctx){
+    const q = String(ctx.question || '').trim();
+    return 'SORU:\n' + q + '\n\n'
+      + (ctx.note ? 'ÖĞRENCİNİN NOTU: ' + ctx.note + '\n\n' : '')
+      + 'GÖREV: Bu soruyu çöz ve anlat.'
+      + R.SOLVER.tail(ctx.subjects);
+  },
+
+  /* Soru fotografla geldiginde. Gorsel ayri gonderilir; buradaki metin
+     yalnizca ne yapilacagini soyler. */
+  askImage(ctx){
+    return 'Sana bir soru fotoğrafı gönderildi.\n\n'
+      + (ctx.note ? 'ÖĞRENCİNİN NOTU: ' + ctx.note + '\n\n' : '')
+      + 'GÖREV: Önce fotoğraftaki soruyu OKU ve metnini aynen yaz ("Soru: …" diye). '
+      + 'Fotoğrafta birden çok soru varsa yalnız ilkini al. Okuyamadığın bir yer '
+      + 'varsa uydurma, "şu kısım okunmuyor" de. Sonra soruyu çöz ve anlat.'
+      + R.SOLVER.tail(ctx.subjects);
+  },
+
+  /* Takip sorusu: ogrenci cozumu anlamadiysa. Cozum baglamda durur. */
+  followUp(ctx){
+    return 'Az önce şu soruyu çözdün:\n' + ctx.question + '\n\n'
+      + 'ÖĞRENCİ SORUYOR: ' + ctx.follow + '\n\n'
+      + 'GÖREV: Yalnız sorulan yeri açıkla. Çözümün tamamını baştan yazma, '
+      + 'yeni bir soru çözme. Anlamadığı adımı başka bir yoldan anlat.';
   },
 };
 
@@ -5208,6 +5385,7 @@ R.S = {
   sessions:[],     // sureli deneme oturumlari (soru bazli sure dahil)
   profiles:[],     // cihazdaki profiller (cok kullanicili kullanim)
   videoNotes:[],   // izlenen ders kaydi + zaman damgali notlar
+  solved:[],       // cozulen sorular: metin/fotograf, anlatim, konu, zorluk
   activities:[],   // kullanicinin kendi ekledigi/gizledigi mesgaleler
   mood:{},         // YYYY-MM-DD -> { energy, note } (gunde tek kayit)
   breaks:[],       // alinan molalar
@@ -6176,7 +6354,8 @@ R.Model = (function(){
     R.S.meta = (await R.Store.get('meta/backup')) || { lastBackupAt:null, schemaVersion:R.SCHEMA_VERSION };
 
     const [weeks, days, exams, errors, cards, reviews, decisions, protocols, prefs,
-           videoNotes, activities, mood, breaks, plan, calendar, sessions, profiles] = await Promise.all([
+           videoNotes, activities, mood, breaks, plan, calendar, sessions, profiles,
+           solved] = await Promise.all([
       R.Store.list('weeks'),
       R.Store.list('days'),
       R.Store.list('exams'),
@@ -6194,6 +6373,7 @@ R.Model = (function(){
       R.Store.list('calendar'),
       R.Store.list('sessions'),
       R.Store.list('profiles'),
+      R.Store.list('solved'),
     ]);
 
     weeks.forEach(w => { R.S.weeks[w.id] = normWeek(w); });
@@ -6204,6 +6384,9 @@ R.Model = (function(){
     reviews.forEach(r => { R.S.reviews[r.id] = r; });
     decisions.forEach(d => { R.S.decisions[d.id] = d; });
     R.S.protocols = protocols.map(normProtocol);
+    /* Cozulen sorular: en yeni once. */
+    R.S.solved = (solved || []).filter(x => x && x.id)
+      .sort((a, b) => (b.at || '').localeCompare(a.at || ''));
     R.S.prefs = (prefs && Array.isArray(prefs.rows) && prefs.rows.length === 24) ? prefs : defaultPrefs();
 
     R.S.videoNotes = videoNotes.map(normVideoNote)
@@ -10426,6 +10609,49 @@ R.LLM = (function(){
     return best;   // hepsinin gunu bittiyse null → daily_quota
   }
 
+  /* Istekte gorsel var mi? Gorselli istek her ucte calismaz. */
+  function hasImages(messages){
+    return (messages || []).some(m => m && m.images && m.images.length);
+  }
+
+  /* Bir yapilandirma gorsel okuyabilir mi (cagri yapmadan)?
+     Katalogdaki `vision` bayragi ya da canli listeden gelen bilgi okunur;
+     bilinmiyorsa DENENIR — yanlis bir "hayir", calisan bir modeli
+     kullanicidan saklamak olurdu. */
+  function supportsVision(cfg){
+    const p = R.PROVIDERS[cfg && cfg.provider];
+    if(!p) return false;
+    if(p.kind === 'builtin') return false;
+    const m = modelsFor(p.id).find(x => x.id === cfg.model);
+    if(m && m.vision != null) return !!m.vision;
+    return true;
+  }
+
+  /* Gorsel okuyabilen ilk yapilandirmalar — cok modelli zincir kurmak icin. */
+  function visionChain(cfg){
+    const out = [];
+    const seen = {};
+    const push = c => {
+      if(!c || !c.provider || !ready(c) || !supportsVision(c)) return;
+      const k = c.provider + '|' + c.model;
+      if(seen[k]) return;
+      seen[k] = true;
+      out.push(c);
+    };
+    push(cfg);
+    /* Once secili saglayicinin diger modelleri, sonra gorseli bilinen
+       saglayicilar. */
+    if(cfg && cfg.provider){
+      modelsFor(cfg.provider).forEach(m =>
+        push({ provider:cfg.provider, model:m.id, endpoint:cfg.endpoint }));
+    }
+    R.PROVIDER_ORDER.forEach(id => {
+      if(id === (cfg && cfg.provider)) return;
+      modelsFor(id).forEach(m => push({ provider:id, model:m.id }));
+    });
+    return out;
+  }
+
   /* ---------- yerlesik yetenek ---------- */
 
   let sample = null;
@@ -10489,6 +10715,12 @@ R.LLM = (function(){
     if(/api[_ ]?key[_ ]?invalid|api key not valid|invalid api key|invalid_api_key|no auth credentials/.test(d)){
       return 'unauthorized';
     }
+    /* Gorseli olmayan bir model gorselli istek alinca bunu kendine ozgu
+       bicimlerde soyler; hepsi ayni sonuca cikar: baska model gerekli. */
+    if(/image|vision|multimodal|modalit|image_url|inline_data/.test(d)
+       && /not support|unsupported|invalid|cannot|does not/.test(d)){
+      return 'no_vision';
+    }
     if(/model.*(not found|not exist|does not exist|is not supported|decommission|deprecat)|no endpoints found|unknown model|invalid model/.test(d)){
       return 'bad_model';
     }
@@ -10524,6 +10756,9 @@ R.LLM = (function(){
     no_credit:'Bu hesapta kredi kalmamış. Ücretsiz bir model seç ya da başka sağlayıcı ekle.',
     bad_model:'Model bulunamadı. Ücretsiz model kimlikleri sık değişir: Ayarlar’da '
       + '“Modelleri yenile” ile sağlayıcının güncel listesini çek ve oradan seç.',
+    no_vision:'Bu model görsel okuyamıyor. Fotoğraflı soru için görsel destekleyen bir model '
+      + 'gerekir — Google AI Studio’nun Gemini modelleri ücretsiz katmanda bunu yapar. '
+      + 'Ya da soruyu metin olarak yazabilirsin.',
     rate_limited:'İstek sınırına takıldın. Birkaç dakika bekle ya da başka sağlayıcı dene.',
     server:'Sağlayıcı şu an yanıt vermiyor. Biraz sonra tekrar dene.',
     bad_request:'İstek reddedildi. Model kimliği ya da uç adresi hatalı olabilir.',
@@ -10548,7 +10783,10 @@ R.LLM = (function(){
   function errorText(code){ return ERRORS[code] || 'Model şu an yanıt veremedi.'; }
 
   /* Yeniden denenebilir hatalar: yedek modele gecmek anlamli olanlar. */
-  const RETRYABLE = ['rate_limited', 'server', 'bad_model', 'timeout', 'empty', 'thinking_only', 'too_long'];
+  /* no_vision yeniden denenebilir: zincirde gorsel okuyan bir model varsa
+     istek oraya duser. */
+  const RETRYABLE = ['rate_limited', 'server', 'bad_model', 'timeout', 'empty',
+    'thinking_only', 'too_long', 'no_vision'];
   /* Baglanti gelince kaldigi yerden devam edilebilecek hatalar. */
   const RESUMABLE = ['offline', 'network', 'server', 'timeout', 'local_cors'];
   function retryable(code){ return RETRYABLE.indexOf(code) >= 0; }
@@ -10735,6 +10973,7 @@ R.LLM = (function(){
 
   async function callBuiltin(req){
     if(!builtinReady()) throw fail('unavailable');
+    if(hasImages(req.messages)) throw fail('no_vision');
     const turns = [];
     if(req.system) turns.push({ role:'user', content:req.system });
     (req.messages || []).forEach(m => turns.push({ role:m.role, content:m.text }));
@@ -10750,6 +10989,20 @@ R.LLM = (function(){
 
   /* ---------- OpenAI uyumlu cagri ---------- */
 
+  /* Bir mesaja gorsel eklendiyse govde ARTIK duz metin degildir: OpenAI
+     uyumlu ucler icerigi parca dizisi olarak bekler. Gorsel yoksa eski
+     duz bicim korunur — bazi kucuk ucler dizi bicimini hic tanimiyor. */
+  function openaiContent(m){
+    if(!m.images || !m.images.length) return m.text;
+    const parts = [];
+    if(m.text) parts.push({ type:'text', text:m.text });
+    m.images.forEach(im => parts.push({
+      type:'image_url',
+      image_url:{ url:'data:' + im.mime + ';base64,' + im.data },
+    }));
+    return parts;
+  }
+
   function openaiBody(req, fix, stream){
     const messages = [];
     if(req.system){
@@ -10758,7 +11011,7 @@ R.LLM = (function(){
       if(fix.systemAsUser) messages.push({ role:'user', content:req.system });
       else messages.push({ role:'system', content:req.system });
     }
-    (req.messages || []).forEach(m => messages.push({ role:m.role, content:m.text }));
+    (req.messages || []).forEach(m => messages.push({ role:m.role, content:openaiContent(m) }));
 
     const body = { model:req.model, messages, stream:!!stream };
     const budget = req.maxTokens || DEFAULT_MAX_TOKENS;
@@ -10881,10 +11134,17 @@ R.LLM = (function(){
   }
 
   function geminiBody(req, fix){
-    const contents = (req.messages || []).map(m => ({
-      role:m.role === 'assistant' ? 'model' : 'user',
-      parts:[{ text:m.text }],
-    }));
+    const contents = (req.messages || []).map(m => {
+      const parts = [];
+      if(m.text) parts.push({ text:m.text });
+      (m.images || []).forEach(im => parts.push({
+        inline_data:{ mime_type:im.mime, data:im.data },
+      }));
+      return {
+        role:m.role === 'assistant' ? 'model' : 'user',
+        parts:parts.length ? parts : [{ text:'' }],
+      };
+    });
     const body = {
       contents,
       generationConfig:{
@@ -11058,7 +11318,12 @@ R.LLM = (function(){
     if(!live) return seed.slice();
     const byId = {};
     seed.forEach(m => { byId[m.id] = m; });
-    return live.models.map(m => Object.assign({}, m, byId[m.id] || {}, { id:m.id, free:m.free }));
+    return live.models.map(m => {
+      const out = Object.assign({}, m, byId[m.id] || {}, { id:m.id, free:m.free });
+      /* Gorsel bilgisi CANLI listeden gelir: tohum eskimis olabilir. */
+      if(m.vision !== undefined) out.vision = m.vision;
+      return out;
+    });
   }
 
   /* Ham listeyi kimlige gore duzenler: ucretsizler once, sonra alfabetik. */
@@ -11125,6 +11390,18 @@ R.LLM = (function(){
 
     const json = await fetchJson(url, authHeaders(provider, key), o.signal);
 
+    /* Model gorsel okuyabiliyor mu? OpenRouter bunu acikca bildirir;
+       Google'in flash aileleri gorsel alir. Bilinmiyorsa alan YAZILMAZ ve
+       "denenebilir" sayilir — yanlis bir "hayir", calisan bir modeli
+       kullanicidan saklamak olurdu. */
+    function visionFlag(row){
+      const a = row.architecture || {};
+      const mods = a.input_modalities || a.modality || '';
+      const text = Array.isArray(mods) ? mods.join(',') : String(mods);
+      if(text) return /image/i.test(text);
+      return undefined;
+    }
+
     let models = [];
     if(provider.kind === 'gemini'){
       /* Google 'models/gemini-…' seklinde tam ad doner; ustelik listede
@@ -11136,12 +11413,20 @@ R.LLM = (function(){
           id:String(m.name || '').replace(/^models\//, ''),
           label:m.displayName || null,
           free:true,
+          /* Gemini'nin flash ve pro aileleri gorsel alir. */
+          vision:/gemini/i.test(String(m.name || '')),
         }))
         .filter(m => m.id && !/embedding|aqa|imagen|veo|tts|image-generation/i.test(m.id));
     }else{
       models = (json.data || json.models || [])
-        .map(m => ({ id:String(m.id || m.name || ''), label:m.name && m.id !== m.name ? m.name : null,
-          free:freeFlag(provider.id, m) }))
+        .map(m => {
+          const row = { id:String(m.id || m.name || ''),
+            label:m.name && m.id !== m.name ? m.name : null,
+            free:freeFlag(provider.id, m) };
+          const v = visionFlag(m);
+          if(v !== undefined) row.vision = v;
+          return row;
+        })
         .filter(m => m.id);
     }
     if(!models.length) throw fail('empty');
@@ -11426,6 +11711,7 @@ R.LLM = (function(){
     errorText, retryable, resumable, offline, onceOnline, inSandbox, KEY_STORE,
     truncated, trimToSentence, joinContinuation, dropLastWord, stripThinking,
     endpointFor, normalizeOpenAI, normalizeGemini, classify,
+    hasImages, supportsVision, visionChain,
     DEFAULT_MAX_TOKENS,
   };
 })();
@@ -14013,6 +14299,372 @@ R.Office = (function(){
     load,
     /* sabitler */
     CHAT_MAX, MEETING_MAX, ROUNDS,
+  };
+})();
+
+/* ==== js/core/solver.js ==== */
+/* Soru cozucu motoru — soruyu modele goturur, ciktisini DENETLER, kaydeder.
+
+   Katmanlar:
+     prepareImage(file)  fotograf → kucultulmus base64 (tarayicida)
+     solve(istek)        model cagrisi → { text, meta }
+     parse(text)         anlatim ile makine kuyrugunu ayirir
+     verify(meta)        modelin bildirdigini KAPALI KATALOGA oturtur
+     save/list/remove    kayit
+
+   ILKE: model uydurabilir, kural motoru dogrular.
+   Cozum metni modelden gelir — bir soruyu cozmek hesap isidir ve orada
+   modele mecburuz. Ama modelin bildirdigi DERS ve KONU kapali katalogdan
+   (R.SUBJECTS) secilir, ZORLUK kapali olcekten gelir. Eslesmeyen deger
+   kayda girmez, bos kalir ve kullaniciya sorulur.
+
+   Neden: bu kayitlar konu takibini ve kaynak zorlugunu besliyor.
+   Uydurulmus tek bir konu adi butun o hesabi sessizce bozar. */
+
+window.R = window.R || {};
+
+R.Solver = (function(){
+  const U = R.U, S = R.S;
+
+  /* Fotograf gonderilmeden once kucultulur. Ham telefon fotografi 4-8 MB
+     eder; base64 bunu bir kat daha buyutur ve istek ya reddedilir ya da
+     dakikalik jeton sinirini tek basina doldurur. */
+  const MAX_EDGE = 1400;
+  const JPEG_Q = 0.82;
+  /* Kucultmeden sonra bile bu kadari asan gorsel gonderilmez. */
+  const MAX_BYTES = 3 * 1024 * 1024;
+
+  const MAX_RECORDS = 500;
+
+  /* ---------- kapali katalog ---------- */
+
+  /* Modele verilen ders/konu listesi. Kapali katalog olmadan model konu adi
+     UYDURUR ve kayit konu takibine baglanamaz. */
+  function catalogText(){
+    return R.SUBJECTS.map(s =>
+      s.name + ': ' + s.topics.map(t => t.name).join(' | ')
+    ).join('\n');
+  }
+
+  /* Modelin yazdigi ders/konu adini gercek kayda oturtur.
+     Once tam eslesme, sonra normalize edilmis eslesme, sonra icerme.
+     Hicbiri tutmazsa null — TAHMIN YURUTULMEZ. */
+  function matchTopic(dersAdi, konuAdi){
+    const d = U.norm(dersAdi || '');
+    const k = U.norm(konuAdi || '');
+    if(!k) return null;
+
+    const subjects = d
+      ? R.SUBJECTS.filter(s => U.norm(s.name) === d)
+          .concat(R.SUBJECTS.filter(s => U.norm(s.name) !== d && U.norm(s.name).indexOf(d) >= 0))
+      : R.SUBJECTS;
+    const pool = (subjects.length ? subjects : R.SUBJECTS);
+
+    let hit = null;
+    pool.some(s => s.topics.some(t => {
+      if(U.norm(t.name) === k){ hit = { subject:s, topic:t }; return true; }
+      return false;
+    }));
+    if(hit) return hit;
+
+    /* Icerme: "Sozcukte anlam" ile "Sozcukte anlam (esanlam)" eslesir.
+       Iki tarafli bakilir ama en KISA eslesme secilir; boylece genis bir
+       konu adi dar bir konuyu yutmaz. */
+    let best = null;
+    pool.forEach(s => s.topics.forEach(t => {
+      const n = U.norm(t.name);
+      if(n.length < 4 || k.length < 4) return;
+      if(n.indexOf(k) < 0 && k.indexOf(n) < 0) return;
+      if(!best || n.length < U.norm(best.topic.name).length) best = { subject:s, topic:t };
+    }));
+    return best;
+  }
+
+  /* ---------- cikti ayrimi ---------- */
+
+  /* Anlatim ile makine kuyrugunu ayirir. Kuyruk SON satirda, tek JSON
+     nesnesi olarak beklenir; model onu kod cercevesine alabilir. */
+  function parse(text){
+    const raw = String(text || '').trim();
+    if(!raw) return { text:'', meta:null };
+
+    /* Sondan geriye dogru ilk gecerli JSON nesnesi aranir. */
+    const fence = raw.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```\s*$/);
+    if(fence){
+      const meta = tryJson(fence[1]);
+      if(meta) return { text:raw.slice(0, fence.index).trim(), meta };
+    }
+    const start = raw.lastIndexOf('{');
+    if(start > 0){
+      const end = raw.lastIndexOf('}');
+      if(end > start){
+        const meta = tryJson(raw.slice(start, end + 1));
+        if(meta) return { text:raw.slice(0, start).trim(), meta };
+      }
+    }
+    return { text:raw, meta:null };
+  }
+
+  function tryJson(s){
+    try{
+      const o = JSON.parse(s);
+      return (o && typeof o === 'object' && !Array.isArray(o)) ? o : null;
+    }catch(e){ return null; }
+  }
+
+  /* Modelin bildirdigini kapali katalogla dogrular.
+     Donen nesnede yalnizca DOGRULANMIS alanlar bulunur. */
+  function verify(meta){
+    const m = meta || {};
+    const hit = matchTopic(m.ders, m.konu);
+    const zorluk = Number(m.zorluk);
+    return {
+      subjectId: hit ? hit.subject.id : null,
+      subjectName: hit ? hit.subject.name : '',
+      topicId: hit ? hit.topic.id : null,
+      topicName: hit ? hit.topic.name : '',
+      /* Model listede olmayan bir konu yazdiysa ham hâli saklanir ama
+         KAYDA baglanmaz: kullanici duzeltebilsin diye gosterilir. */
+      rawTopic: hit ? '' : String(m.konu || '').slice(0, 80),
+      difficulty: R.DIFFICULTY[zorluk] ? zorluk : null,
+      answer: String(m.cevap == null ? '' : m.cevap).slice(0, 80),
+      trap: String(m.tuzak == null ? '' : m.tuzak).slice(0, 240),
+      matched: !!hit,
+    };
+  }
+
+  /* ---------- fotograf ---------- */
+
+  function readFile(file){
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result);
+      fr.onerror = () => reject(Object.assign(new Error('dosya okunamadi'), { code:'file' }));
+      fr.readAsDataURL(file);
+    });
+  }
+
+  function loadImage(url){
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(Object.assign(new Error('görsel açılamadı'), { code:'image' }));
+      img.src = url;
+    });
+  }
+
+  /* Fotografi kucultup base64'e cevirir.
+     Donen: { mime, data, width, height, bytes, previewUrl } */
+  async function prepareImage(file){
+    if(!file) throw Object.assign(new Error('dosya yok'), { code:'file' });
+    if(!/^image\//.test(file.type || '')){
+      throw Object.assign(new Error('bu bir görsel değil'), { code:'not_image' });
+    }
+    const url = await readFile(file);
+    const img = await loadImage(url);
+
+    const edge = Math.max(img.width, img.height);
+    const scale = edge > MAX_EDGE ? MAX_EDGE / edge : 1;
+    const w = Math.max(1, Math.round(img.width * scale));
+    const h = Math.max(1, Math.round(img.height * scale));
+
+    let out;
+    try{
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      /* Beyaz zemin: seffaf PNG'ler JPEG'de siyaha donuyordu. */
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      out = canvas.toDataURL('image/jpeg', JPEG_Q);
+    }catch(e){
+      /* Tuval kullanilamiyorsa (cok eski tarayici) ham dosya gonderilir. */
+      out = url;
+    }
+
+    const comma = out.indexOf(',');
+    const head = out.slice(0, comma);
+    const data = out.slice(comma + 1);
+    const mime = (head.match(/^data:([^;]+)/) || [])[1] || 'image/jpeg';
+    const bytes = Math.round(data.length * 3 / 4);
+    if(bytes > MAX_BYTES){
+      throw Object.assign(new Error('görsel çok büyük'), { code:'too_big' });
+    }
+    return { mime, data, width:w, height:h, bytes, previewUrl:out };
+  }
+
+  /* ---------- cagri ---------- */
+
+  /* Gorselli istek icin gorsel okuyabilen bir zincir kurulur; metin
+     istegi icin ofisin normal zinciri yeter. */
+  function chainFor(withImage){
+    const cfg = R.Office.agentConfig('analist');
+    if(!withImage) return R.Office.chainFor('analist');
+    const chain = R.LLM.visionChain(cfg);
+    return chain;
+  }
+
+  function ready(withImage){ return chainFor(withImage).length > 0; }
+
+  /* req: { question, image, note, follow, previous } */
+  async function solve(req, opts){
+    const o = opts || {};
+    const r = req || {};
+    const withImage = !!r.image;
+    const chain = chainFor(withImage);
+
+    if(!chain.length){
+      throw Object.assign(new Error(withImage
+        ? 'Görsel okuyabilen bir model bağlı değil'
+        : 'Model bağlı değil'), { code:withImage ? 'no_vision' : 'unavailable' });
+    }
+    if(!withImage && !String(r.question || '').trim()){
+      throw Object.assign(new Error('soru yok'), { code:'empty' });
+    }
+
+    const subjects = catalogText();
+    let text;
+    const message = { role:'user' };
+
+    if(r.follow){
+      text = R.SOLVER.followUp({ question:r.question || '(fotoğraftaki soru)', follow:r.follow });
+    }else if(withImage){
+      text = R.SOLVER.askImage({ note:r.note, subjects });
+      message.images = [{ mime:r.image.mime, data:r.image.data }];
+    }else{
+      text = R.SOLVER.ask({ question:r.question, note:r.note, subjects });
+    }
+    message.text = text;
+
+    const history = (r.previous || []).slice(-2)
+      .map(m => ({ role:m.role === 'user' ? 'user' : 'assistant', text:m.text }));
+
+    const res = await R.LLM.complete(chain, {
+      system:R.SOLVER.system,
+      messages:history.concat([message]),
+      maxTokens:R.SOLVER.budget,
+      temperature:0.2,
+      signal:o.signal,
+      onText:o.onText ? ev => o.onText({ text:parse(ev.text).text, delta:ev.delta }) : undefined,
+    });
+
+    const split = parse(res.text);
+    return {
+      text:split.text || res.text,
+      meta:r.follow ? null : verify(split.meta),
+      raw:split.meta || null,
+      provider:res.provider, model:res.model, ms:res.ms,
+      fellBack:!!res.fellBack, truncated:!!res.truncated,
+    };
+  }
+
+  /* ---------- kayit ---------- */
+
+  function all(){ return (S.solved || []).slice(); }
+
+  function newRecord(fields){
+    return Object.assign({
+      id:U.uid('q'),
+      at:new Date().toISOString(),
+      question:'',        // soru metni (fotograftan okunduysa modelin yazdigi)
+      solution:'',        // anlatim
+      subjectId:null, topicId:null, topicName:'',
+      difficulty:null,    // 1-5, dogrulanmis
+      answer:'', trap:'',
+      result:null,        // R.SOLVE_RESULTS anahtari
+      sourceId:null,      // kaynak (yayin) kimligi — ikinci asamada baglanir
+      seconds:null,
+      fromImage:false,
+      model:'',
+    }, fields || {});
+  }
+
+  async function save(rec){
+    const record = Object.assign(newRecord(), rec);
+    S.solved = S.solved || [];
+    const i = S.solved.findIndex(x => x.id === record.id);
+    if(i >= 0) S.solved[i] = record; else S.solved.unshift(record);
+    if(S.solved.length > MAX_RECORDS) S.solved = S.solved.slice(0, MAX_RECORDS);
+    await R.Store.set('solved/' + record.id, record);
+    return record;
+  }
+
+  async function remove(id){
+    S.solved = (S.solved || []).filter(x => x.id !== id);
+    await R.Store.remove('solved/' + id);
+  }
+
+  async function load(){
+    const rows = await R.Store.list('solved');
+    S.solved = (rows || [])
+      .filter(x => x && x.id)
+      .sort((a, b) => (b.at || '').localeCompare(a.at || ''))
+      .slice(0, MAX_RECORDS);
+    return S.solved;
+  }
+
+  /* ---------- olcum ---------- */
+
+  /* Bir kayit "cozuldu" mu sayilir? Coozume bakmak cozmek degildir. */
+  function solvedOk(rec){
+    return rec.result === 'dogru' || rec.result === 'zorla';
+  }
+
+  /* Konu basina cozum tablosu: kac soru, kaci cozuldu, ortalama zorluk. */
+  function byTopic(){
+    const map = {};
+    all().forEach(r => {
+      if(!r.topicId) return;
+      const key = r.subjectId + '::' + r.topicId;
+      const row = map[key] || (map[key] = {
+        subjectId:r.subjectId, topicId:r.topicId, topicName:r.topicName,
+        toplam:0, cozulen:0, zorlukToplam:0, zorlukAdet:0,
+      });
+      row.toplam++;
+      if(solvedOk(r)) row.cozulen++;
+      if(r.difficulty){ row.zorlukToplam += r.difficulty; row.zorlukAdet++; }
+    });
+    return Object.keys(map).map(k => {
+      const row = map[k];
+      row.yuzde = row.toplam ? Math.round(100 * row.cozulen / row.toplam) : 0;
+      row.zorluk = row.zorlukAdet ? U.round(row.zorlukToplam / row.zorlukAdet, 1) : null;
+      return row;
+    }).sort((a, b) => a.yuzde - b.yuzde);
+  }
+
+  /* Gunluk cozum sayisi — son N gun. */
+  function daily(days){
+    const n = days || 14;
+    const out = [];
+    for(let i = n - 1; i >= 0; i--){
+      const iso = U.iso(U.addDays(U.today(), -i));
+      out.push({ date:iso, adet:all().filter(r => (r.at || '').slice(0, 10) === iso).length });
+    }
+    return out;
+  }
+
+  function summary(){
+    const list = all();
+    const withResult = list.filter(r => r.result);
+    const ok = withResult.filter(solvedOk).length;
+    const zor = list.filter(r => r.difficulty);
+    return {
+      toplam:list.length,
+      bugun:list.filter(r => (r.at || '').slice(0, 10) === U.todayISO()).length,
+      cozumOrani:withResult.length ? Math.round(100 * ok / withResult.length) : null,
+      ortZorluk:zor.length
+        ? U.round(zor.reduce((s, r) => s + r.difficulty, 0) / zor.length, 1) : null,
+      etiketsiz:list.filter(r => !r.topicId).length,
+    };
+  }
+
+  return {
+    catalogText, matchTopic, parse, verify,
+    prepareImage, solve, ready, chainFor,
+    all, newRecord, save, remove, load,
+    byTopic, daily, summary, solvedOk,
+    MAX_EDGE, MAX_BYTES, MAX_RECORDS,
   };
 })();
 
@@ -18465,6 +19117,456 @@ R.Screens.quiz = (function(){
     },
     actions(){ return ''; },
     render, afterRender, handle, change, onKey,
+  };
+})();
+
+/* ==== js/screens/solve.js ==== */
+/* Soru çözüm ekranı — soruyu yaz ya da fotoğrafla, çözümü adım adım al.
+
+   Yazım biçimi: STIL.md / DONUSTURME.md. String birleştirme yok,
+   etkileşim yalnız data-act / data-change ile bağlanır.
+
+   Ekranın işi çözüm ÜRETMEK değil, çözümü KAYDA bağlamak: her çözülen soru
+   bir konuya, bir zorluğa ve bir sonuca (kendim çözdüm / çözüme baktım)
+   oturur. Konu takibi ve kaynak zorluğu bu kayıtlardan beslenir. */
+
+window.R = window.R || {};
+R.Screens = R.Screens || {};
+
+R.Screens.solve = (function(){
+  const U = R.U, UI = R.UI, S = R.S;
+  const { html, raw, when, map, cls } = R.h;
+  const K = R.C;
+  const Q = R.Solver;
+
+  /* Ekran durumu — kaydedilmez, oturumda durur. */
+  let image = null;        // { mime, data, previewUrl, bytes, width, height }
+  let busy = false;
+  let result = null;       // { text, meta, model, provider }
+  let draft = null;        // kaydedilmeyi bekleyen kayıt
+  let controller = null;
+  let followBusy = false;
+  let follows = [];        // [{ q, a }]
+
+  /* ---------- parçalar ---------- */
+
+  function statCard(){
+    const s = Q.summary();
+    return K.Card({
+      title:'Çözüm kaydı', sub:'Her çözülen soru bir konuya ve bir zorluğa oturur',
+      body:html`${K.Cols(2, [
+        K.Stat({ label:'Toplam soru', value:s.toplam }),
+        K.Stat({ label:'Bugün', value:s.bugun }),
+        K.Stat({ label:'Kendi çözdüğün',
+          value:s.cozumOrani == null ? '—' : '%' + s.cozumOrani,
+          tone:s.cozumOrani == null ? 'muted' : s.cozumOrani >= 60 ? 'ok' : 'warn' }),
+        K.Stat({ label:'Ortalama zorluk',
+          value:s.ortZorluk == null ? '—' : s.ortZorluk }),
+      ])}
+      ${when(s.etiketsiz, () => html`<p class="tiny dim mt-8">
+        ${s.etiketsiz} kayıt konuya bağlanmadı — model konuyu listede bulamamış olabilir,
+        aşağıdan elle seçebilirsin.</p>`)}`,
+    });
+  }
+
+  /* Görsel okuyabilen bir model bağlı mı? Fotoğraf kutusu buna göre konuşur. */
+  function visionReady(){ return Q.ready(true); }
+
+  function inputCard(){
+    const canText = Q.ready(false);
+    const canImage = visionReady();
+
+    return K.Card({
+      title:'Soruyu ver', sub:'Fotoğrafını yapıştır ya da metnini yaz',
+      body:K.Stack([
+        when(!canText, () => K.Notice({ tone:'warn', title:'Model bağlı değil.',
+          body:html`Soru çözmek için bir model gerekiyor.
+            ${K.Button({ label:'Ofis ayarlarını aç', size:'sm', act:'go',
+              data:{ 'data-route':'office' } })}` })),
+
+        /* --- fotoğraf --- */
+        html`<div class="${cls('qdrop', image && 'is-full')}" id="q-drop"
+          data-act="q-pick" tabindex="0" role="button"
+          aria-label="Soru fotoğrafı seç">
+          ${when(image, () => html`
+            <img class="qdrop__img" src="${image.previewUrl}" alt="Seçilen soru fotoğrafı"/>
+            <span class="qdrop__meta">${image.width}×${image.height} ·
+              ${Math.round(image.bytes / 1024)} KB</span>`)}
+          ${when(!image, () => html`
+            <span class="qdrop__icon">${raw(UI.icon('exam'))}</span>
+            <b>Fotoğrafı buraya bırak</b>
+            <span class="tiny dim">ya da tıkla · Ctrl+V ile yapıştır</span>`)}
+        </div>
+        <input type="file" id="q-file" accept="image/*" class="sr-only"
+          data-change="q-file" aria-hidden="true" tabindex="-1"/>`,
+
+        when(image, () => K.Row([
+          K.Button({ label:'Fotoğrafı kaldır', size:'sm', tone:'ghost', act:'q-clear-image' }),
+        ], { wrap:true })),
+
+        when(image && !canImage, () => K.Notice({ tone:'warn',
+          title:'Bağlı model görsel okuyamıyor.',
+          body:'Fotoğraflı soru için görsel destekleyen bir model gerekir — Google AI Studio’nun '
+             + 'Gemini modelleri ücretsiz katmanda bunu yapar. Ofis → Ayarlar’dan bağlayabilirsin. '
+             + 'Ya da soruyu metin olarak yaz.' })),
+
+        /* --- metin --- */
+        K.Field({ label:'Soru metni', hint:image ? 'fotoğraf varken boş bırakabilirsin' : null,
+          input:K.Textarea({ id:'q-text', rows:4,
+            placeholder:'Soruyu buraya yazabilir ya da yapıştırabilirsin' }) }),
+
+        K.Field({ label:'Notun', hint:'isteğe bağlı — nerede takıldığını yazarsan oraya odaklanır',
+          input:K.Input({ id:'q-note', placeholder:'ör. ikinci adımı anlamadım' }) }),
+
+        K.Row([
+          K.Button({ label:busy ? 'Çözülüyor…' : 'Çöz ve anlat', icon:'zap', tone:'primary',
+            act:'q-solve', disabled:busy || !canText }),
+          when(busy, () => K.Button({ label:'İptal', size:'sm', tone:'ghost', act:'q-cancel' })),
+          when(result && !busy, () => K.Button({ label:'Yeni soru', size:'sm', act:'q-reset' })),
+        ], { wrap:true }),
+
+        html`<div id="q-out"></div>`,
+      ], 'sm'),
+    });
+  }
+
+  /* Çözüm metni — düz metin, satır sonları korunur. */
+  function solutionBody(text){
+    return html`<div class="qsolution">${U.esc(text).replace(/\n/g, '<br/>')}</div>`;
+  }
+
+  function resultCard(){
+    if(!result) return '';
+    const m = result.meta || {};
+    return K.Card({
+      class:'card--primary',
+      title:'Çözüm', sub:result.model ? result.provider + ' · ' + result.model : '',
+      badge:when(result.fellBack, () => K.Badge({ label:'yedek model', tone:'info' })),
+      body:html`
+        ${raw(solutionBody(result.text))}
+        ${when(result.truncated, () => html`<p class="tiny dim mt-8">
+          Yanıt uzunluk sınırına takıldı; son cümle eksik olabilir.</p>`)}
+
+        ${when(follows.length, () => html`<div class="mt-12">${map(follows, f => html`
+          <div class="qfollow">
+            <div class="qfollow__q"><b>Sen:</b> ${f.q}</div>
+            <div class="qfollow__a">${raw(solutionBody(f.a))}</div>
+          </div>`)}</div>`)}
+
+        <div class="mt-12">
+          ${K.Field({ label:'Anlamadığın yeri sor',
+            hint:'yalnız o adımı açıklar, çözümü baştan yazmaz',
+            input:K.Input({ id:'q-follow', placeholder:'ör. üçüncü adımda neden 2 ile çarptın?' }) })}
+          ${K.Button({ label:followBusy ? 'Yazıyor…' : 'Sor', size:'sm', act:'q-follow',
+            disabled:followBusy })}
+        </div>
+
+        <div class="qmeta mt-12">
+          ${K.SectionTitle('Kayda geçir')}
+          ${when(!m.matched && m.rawTopic, () => K.Notice({ tone:'warn',
+            body:'Model konuyu “' + m.rawTopic + '” diye yazdı ama bu ders listende yok. '
+               + 'Aşağıdan doğru konuyu seç — yanlış konu, konu takibini sessizce bozar.' }))}
+          ${saveForm(m)}
+        </div>`,
+    });
+  }
+
+  function topicOptions(){
+    return [{ value:'', label:'— konu seç —' }].concat(
+      R.SUBJECTS.reduce((acc, s) => acc.concat(
+        s.topics.map(t => ({ value:s.id + '::' + t.id, label:s.name + ' · ' + t.name }))), []));
+  }
+
+  function saveForm(m){
+    const ref = m.topicId ? m.subjectId + '::' + m.topicId : '';
+    return K.Stack([
+      K.Cols(2, [
+        K.Field({ label:'Ders – konu',
+          input:K.Select({ id:'q-topic', value:ref, options:topicOptions() }) }),
+        K.Field({ label:'Zorluk',
+          input:K.Select({ id:'q-diff', value:m.difficulty || 3,
+            options:R.DIFFICULTY_ORDER.map(n => ({ value:n,
+              label:n + ' — ' + R.DIFFICULTY[n].label })) }) }),
+      ]),
+      K.Field({ label:'Sen ne yaptın?',
+        hint:'“çözüme baktım” ile “kendim çözdüm” arasındaki fark, konu takibinin en değerli bilgisi',
+        input:K.Select({ id:'q-result', value:'bakarak',
+          options:R.SOLVE_RESULT_ORDER.map(id => ({ value:id, label:R.SOLVE_RESULTS[id].label })) }) }),
+      K.Cols(2, [
+        K.Field({ label:'Süre (sn)', hint:'isteğe bağlı',
+          input:K.Input({ id:'q-secs', type:'number', numeric:true, min:0 }) }),
+        K.Field({ label:'Cevap', input:K.Input({ id:'q-answer', value:m.answer || '' }) }),
+      ]),
+      when(m.trap, () => K.Notice({ tone:'info', title:'Tuzak:', body:m.trap })),
+      K.Row([
+        K.Button({ label:'Kaydet', icon:'check', tone:'primary', act:'q-save' }),
+        K.Button({ label:'Yanlış defterine de ekle', size:'sm', act:'q-save-error' }),
+      ], { wrap:true }),
+    ], 'sm');
+  }
+
+  /* ---------- geçmiş ---------- */
+
+  function historyCard(){
+    const list = Q.all().slice(0, 12);
+    if(!list.length){
+      return K.Card({ title:'Çözülen sorular',
+        body:K.Empty({ icon:'exam',
+          text:'Henüz kayıt yok. Bir soru çözdürdüğünde buraya düşer ve konu takibine bağlanır.' }) });
+    }
+    return K.Card({
+      title:'Çözülen sorular', sub:Q.all().length + ' kayıt',
+      body:html`<div class="stack-xs">${map(list, row => html`
+        <div class="qrow">
+          <span class="${'qrow__dot qrow__dot--' + (R.SOLVE_RESULTS[row.result] || {}).tone}"></span>
+          <span class="minw0">
+            <b class="qrow__topic">${row.topicName || 'konusuz'}</b>
+            <span class="qrow__text">${String(row.question || '').slice(0, 90)}</span>
+          </span>
+          ${when(row.difficulty, () => K.Badge({ label:R.DIFFICULTY[row.difficulty].short,
+            tone:row.difficulty >= 4 ? 'warn' : 'info' }))}
+          <span class="tiny dim">${U.relativeDay((row.at || '').slice(0, 10))}</span>
+          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Kaydı sil',
+            act:'q-del', data:{ 'data-id':row.id } })}
+        </div>`)}</div>`,
+    });
+  }
+
+  function topicCard(){
+    const rows = Q.byTopic().slice(0, 8);
+    if(!rows.length) return '';
+    return K.Card({
+      title:'Konu başına çözüm', sub:'En düşük oran üstte',
+      body:html`<div class="stack-xs">${map(rows, r => html`
+        <div class="qtopic">
+          <span class="minw0"><b>${r.topicName}</b>
+            <span class="tiny dim">${r.cozulen}/${r.toplam} soru${
+              r.zorluk ? ' · ort. zorluk ' + r.zorluk : ''}</span></span>
+          ${raw(String(K.Bar({ value:r.yuzde,
+            tone:r.yuzde >= 60 ? '' : r.yuzde >= 40 ? 'warn' : 'danger' })))}
+          <b class="num w-46 right">%${r.yuzde}</b>
+        </div>`)}</div>`,
+    });
+  }
+
+  /* ---------- ekran ---------- */
+
+  async function render(){
+    return String(K.Grid([
+      K.Span(8, K.Stack([ inputCard(), resultCard() ])),
+      K.Span(4, K.Stack([ statCard(), topicCard(), historyCard() ])),
+    ]));
+  }
+
+  /* Sürükle-bırak ve yapıştır: her ikisi de aynı yola çıkar. */
+  function afterRender(){
+    const drop = document.getElementById('q-drop');
+    if(drop && !drop.dataset.bound){
+      drop.dataset.bound = '1';
+      ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => {
+        e.preventDefault(); drop.classList.add('is-over');
+      }));
+      ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => {
+        e.preventDefault(); drop.classList.remove('is-over');
+      }));
+      drop.addEventListener('drop', e => {
+        const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if(f) useFile(f);
+      });
+      drop.addEventListener('keydown', e => {
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pickFile(); }
+      });
+    }
+    if(!document.body.dataset.qpaste){
+      document.body.dataset.qpaste = '1';
+      document.addEventListener('paste', e => {
+        if(S.route !== 'solve') return;
+        const items = (e.clipboardData && e.clipboardData.items) || [];
+        for(let i = 0; i < items.length; i++){
+          if(items[i].type && items[i].type.indexOf('image/') === 0){
+            const f = items[i].getAsFile();
+            if(f){ e.preventDefault(); useFile(f); return; }
+          }
+        }
+      });
+    }
+  }
+
+  function pickFile(){
+    const el = document.getElementById('q-file');
+    if(el) el.click();
+  }
+
+  async function useFile(file){
+    try{
+      image = await Q.prepareImage(file);
+      UI.toast('Fotoğraf hazır');
+    }catch(err){
+      const code = err && err.code;
+      UI.toast(code === 'too_big' ? 'Görsel çok büyük — daha küçük bir kırpma dene'
+        : code === 'not_image' ? 'Bu bir görsel değil'
+        : 'Görsel okunamadı');
+      image = null;
+    }
+    await R.App.render();
+  }
+
+  function out(node){
+    const el = document.getElementById('q-out');
+    if(el) el.innerHTML = String(node);
+  }
+
+  /* ---------- eylemler ---------- */
+
+  const handle = {
+    async 'q-pick'(){ pickFile(); },
+
+    async 'q-clear-image'(){ image = null; await R.App.render(); },
+
+    async 'q-reset'(){
+      image = null; result = null; draft = null; follows = [];
+      await R.App.render();
+    },
+
+    async 'q-cancel'(){
+      if(controller) controller.abort();
+      busy = false;
+      await R.App.render();
+    },
+
+    async 'q-solve'(){
+      if(busy) return;
+      const text = (document.getElementById('q-text') || {}).value || '';
+      const note = (document.getElementById('q-note') || {}).value || '';
+      if(!image && !text.trim()){
+        UI.toast('Önce soruyu yaz ya da fotoğrafını ekle');
+        return;
+      }
+      busy = true;
+      follows = [];
+      result = null;
+      controller = new AbortController();
+      await R.App.render();
+      out(K.Notice({ tone:'info', body:'Soru okunuyor ve çözülüyor…' }));
+
+      try{
+        const res = await Q.solve({ question:text, image, note }, {
+          signal:controller.signal,
+          onText(ev){
+            const el = document.getElementById('q-out');
+            if(el) el.innerHTML = String(solutionBody(ev.text));
+          },
+        });
+        result = res;
+        draft = null;
+        out('');
+      }catch(err){
+        const code = err && err.code;
+        out(K.Notice({ tone:'danger', title:'Çözülemedi.', body:R.LLM.errorText(code) }));
+      }finally{
+        busy = false;
+        await R.App.render();
+      }
+    },
+
+    async 'q-follow'(){
+      if(followBusy || !result) return;
+      const el = document.getElementById('q-follow');
+      const q = el ? el.value.trim() : '';
+      if(!q) return;
+      followBusy = true;
+      await R.App.render();
+      try{
+        const res = await Q.solve({
+          question:result.text.slice(0, 1200),
+          follow:q,
+          previous:[{ role:'assistant', text:result.text }],
+        }, {});
+        follows = follows.concat([{ q, a:res.text }]);
+      }catch(err){
+        UI.toast(R.LLM.errorText(err && err.code));
+      }finally{
+        followBusy = false;
+        await R.App.render();
+      }
+    },
+
+    async 'q-save'(){ await saveRecord(false); },
+    async 'q-save-error'(){ await saveRecord(true); },
+
+    async 'q-del'(el){
+      await Q.remove(el.dataset.id);
+      UI.toast('Kayıt silindi');
+      await R.App.render();
+    },
+  };
+
+  /* Kaydı kurar. Konu ve zorluk formdan okunur: model bir öneri verir,
+     son sözü kullanıcı söyler. */
+  async function saveRecord(alsoError){
+    if(!result) return;
+    const val = id => { const e = document.getElementById(id); return e ? String(e.value).trim() : ''; };
+    const ref = val('q-topic');
+    const [subjectId, topicId] = ref ? ref.split('::') : [null, null];
+    const subject = subjectId ? R.SUBJECTS.find(s => s.id === subjectId) : null;
+    const topic = subject ? subject.topics.find(t => t.id === topicId) : null;
+    const m = result.meta || {};
+
+    const rec = await Q.save({
+      question:(val('q-text') || m.questionText || result.text.slice(0, 300)),
+      solution:result.text,
+      subjectId:subjectId || null,
+      topicId:topicId || null,
+      topicName:topic ? topic.name : (m.rawTopic || ''),
+      difficulty:Number(val('q-diff')) || null,
+      answer:val('q-answer'),
+      trap:m.trap || '',
+      result:val('q-result') || null,
+      seconds:Number(val('q-secs')) || null,
+      fromImage:!!image,
+      model:result.model || '',
+    });
+
+    if(alsoError){
+      /* Yanlis defteri ayri bir kayittir ve kendi semasi vardir; cozum
+         kaydindan turetilir ama onun yerine gecmez. */
+      const err = {
+        id:U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
+        examId:null, examDate:(rec.at || '').slice(0, 10), publisher:'',
+        testName:rec.topicName || 'Soru çözümü', questionNo:'', status:'Yanlış',
+        tag:'K', seconds:rec.seconds,
+        rootCause:rec.trap || '',
+        principle:String(rec.solution || '').slice(0, 400),
+        similar:'', recipe:'',
+        topicRef:ref, subjectId:rec.subjectId, topicId:rec.topicId,
+        topic:rec.topicName || '',
+      };
+      await R.Model.saveError(err);
+    }
+
+    UI.toast(alsoError ? 'Kaydedildi ve yanlış defterine eklendi' : 'Kaydedildi');
+    result = null; image = null; follows = [];
+    await R.App.render();
+  }
+
+  const change = {
+    async 'q-file'(el){
+      const f = el.files && el.files[0];
+      if(f) await useFile(f);
+      el.value = '';
+    },
+  };
+
+  return {
+    id:'solve',
+    title:'Soru çöz',
+    subtitle(){
+      const s = Q.summary();
+      return s.toplam ? s.toplam + ' soru çözüldü'
+        + (s.cozumOrani == null ? '' : ' · %' + s.cozumOrani + ' kendi çözdüğün')
+        : 'Soruyu yaz ya da fotoğrafla, çözümü adım adım al';
+    },
+    render, afterRender, handle, change,
   };
 })();
 
@@ -23598,6 +24700,7 @@ R.App = (function(){
       { id:'exams', icon:'exam',  label:'Deneme' },
       { id:'cards', icon:'cards', label:'Tekrar' },
       { id:'quiz',  icon:'zap',   label:'Sınama' },
+      { id:'solve', icon:'search', label:'Soru çöz' },
     ]},
     { label:'Analiz', items:[
       { id:'progress',  icon:'chart',  label:'İlerleme' },

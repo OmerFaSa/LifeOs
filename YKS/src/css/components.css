@@ -1820,3 +1820,73 @@ button.listitem.is-on{ background:var(--primary-soft); }
 @media (max-width:640px){
   .agenttab__name{ display:none; }
 }
+
+/* ==================== soru çözüm ====================
+   Ekranın işi çözüm üretmek değil, çözümü KAYDA bağlamak. Düzen bunu
+   söyler: önce soru kutusu, sonra çözüm, en altta "kayda geçir". */
+
+/* Fotoğraf bırakma alanı. Üç yol da aynı kapıya çıkar: tıkla, sürükle,
+   Ctrl+V ile yapıştır — telefonda çeken de bilgisayarda kırpan da girebilsin. */
+.qdrop{
+  position:relative;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px;
+  min-height:132px; padding:var(--sp-4);
+  border:2px dashed var(--border-strong);
+  border-radius:var(--r);
+  background:var(--surface-2);
+  color:var(--text-2);
+  text-align:center;
+  cursor:pointer;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.qdrop:hover, .qdrop.is-over{ border-color:var(--primary); background:var(--primary-soft); }
+.qdrop:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.qdrop.is-full{ padding:var(--sp-2); border-style:solid; background:var(--surface); }
+.qdrop__icon svg{ width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:1.6; color:var(--text-3); }
+.qdrop__img{
+  max-width:100%; max-height:340px;
+  border-radius:var(--r-sm);
+  display:block;
+}
+.qdrop__meta{ font-size:var(--fs-xs); color:var(--text-3); }
+
+/* Çözüm metni: satır sonları korunur, okuma satırı fazla uzamaz. */
+.qsolution{
+  font-size:var(--fs-base); line-height:1.62; color:var(--text);
+  max-width:68ch;
+  white-space:normal;
+}
+
+.qfollow{ margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); }
+.qfollow__q{ font-size:var(--fs-sm); color:var(--text-2); margin-bottom:5px; }
+.qfollow__a{ padding-left:10px; border-left:2px solid var(--primary); }
+
+.qmeta{ padding-top:var(--sp-3); border-top:1px solid var(--border); }
+
+/* Geçmiş satırı: sonuç noktası + konu + zorluk + tarih. */
+.qrow{
+  display:flex; align-items:center; gap:9px;
+  padding:7px 0;
+  border-bottom:1px solid var(--border);
+  font-size:var(--fs-sm);
+}
+.qrow:last-child{ border-bottom:0; }
+.qrow__dot{ width:8px; height:8px; border-radius:50%; flex:none; background:var(--text-3); }
+.qrow__dot--ok{ background:var(--primary); }
+.qrow__dot--warn{ background:var(--accent); }
+.qrow__dot--danger{ background:var(--danger); }
+.qrow__dot--info{ background:var(--info); }
+.qrow__topic{ display:block; line-height:1.25; }
+.qrow__text{
+  display:block; font-size:var(--fs-xs); color:var(--text-3);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+.qtopic{ display:flex; align-items:center; gap:10px; padding:5px 0; font-size:var(--fs-sm); }
+.qtopic .bar{ flex:1; min-width:60px; }
+
+@media (max-width:520px){
+  .qdrop{ min-height:104px; }
+  .qdrop__img{ max-height:240px; }
+}

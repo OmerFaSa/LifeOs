@@ -222,6 +222,49 @@ R.LLM = (function(){
     return best;   // hepsinin gunu bittiyse null → daily_quota
   }
 
+  /* Istekte gorsel var mi? Gorselli istek her ucte calismaz. */
+  function hasImages(messages){
+    return (messages || []).some(m => m && m.images && m.images.length);
+  }
+
+  /* Bir yapilandirma gorsel okuyabilir mi (cagri yapmadan)?
+     Katalogdaki `vision` bayragi ya da canli listeden gelen bilgi okunur;
+     bilinmiyorsa DENENIR — yanlis bir "hayir", calisan bir modeli
+     kullanicidan saklamak olurdu. */
+  function supportsVision(cfg){
+    const p = R.PROVIDERS[cfg && cfg.provider];
+    if(!p) return false;
+    if(p.kind === 'builtin') return false;
+    const m = modelsFor(p.id).find(x => x.id === cfg.model);
+    if(m && m.vision != null) return !!m.vision;
+    return true;
+  }
+
+  /* Gorsel okuyabilen ilk yapilandirmalar — cok modelli zincir kurmak icin. */
+  function visionChain(cfg){
+    const out = [];
+    const seen = {};
+    const push = c => {
+      if(!c || !c.provider || !ready(c) || !supportsVision(c)) return;
+      const k = c.provider + '|' + c.model;
+      if(seen[k]) return;
+      seen[k] = true;
+      out.push(c);
+    };
+    push(cfg);
+    /* Once secili saglayicinin diger modelleri, sonra gorseli bilinen
+       saglayicilar. */
+    if(cfg && cfg.provider){
+      modelsFor(cfg.provider).forEach(m =>
+        push({ provider:cfg.provider, model:m.id, endpoint:cfg.endpoint }));
+    }
+    R.PROVIDER_ORDER.forEach(id => {
+      if(id === (cfg && cfg.provider)) return;
+      modelsFor(id).forEach(m => push({ provider:id, model:m.id }));
+    });
+    return out;
+  }
+
   /* ---------- yerlesik yetenek ---------- */
 
   let sample = null;
@@ -285,6 +328,12 @@ R.LLM = (function(){
     if(/api[_ ]?key[_ ]?invalid|api key not valid|invalid api key|invalid_api_key|no auth credentials/.test(d)){
       return 'unauthorized';
     }
+    /* Gorseli olmayan bir model gorselli istek alinca bunu kendine ozgu
+       bicimlerde soyler; hepsi ayni sonuca cikar: baska model gerekli. */
+    if(/image|vision|multimodal|modalit|image_url|inline_data/.test(d)
+       && /not support|unsupported|invalid|cannot|does not/.test(d)){
+      return 'no_vision';
+    }
     if(/model.*(not found|not exist|does not exist|is not supported|decommission|deprecat)|no endpoints found|unknown model|invalid model/.test(d)){
       return 'bad_model';
     }
@@ -320,6 +369,9 @@ R.LLM = (function(){
     no_credit:'Bu hesapta kredi kalmamış. Ücretsiz bir model seç ya da başka sağlayıcı ekle.',
     bad_model:'Model bulunamadı. Ücretsiz model kimlikleri sık değişir: Ayarlar’da '
       + '“Modelleri yenile” ile sağlayıcının güncel listesini çek ve oradan seç.',
+    no_vision:'Bu model görsel okuyamıyor. Fotoğraflı soru için görsel destekleyen bir model '
+      + 'gerekir — Google AI Studio’nun Gemini modelleri ücretsiz katmanda bunu yapar. '
+      + 'Ya da soruyu metin olarak yazabilirsin.',
     rate_limited:'İstek sınırına takıldın. Birkaç dakika bekle ya da başka sağlayıcı dene.',
     server:'Sağlayıcı şu an yanıt vermiyor. Biraz sonra tekrar dene.',
     bad_request:'İstek reddedildi. Model kimliği ya da uç adresi hatalı olabilir.',
@@ -344,7 +396,10 @@ R.LLM = (function(){
   function errorText(code){ return ERRORS[code] || 'Model şu an yanıt veremedi.'; }
 
   /* Yeniden denenebilir hatalar: yedek modele gecmek anlamli olanlar. */
-  const RETRYABLE = ['rate_limited', 'server', 'bad_model', 'timeout', 'empty', 'thinking_only', 'too_long'];
+  /* no_vision yeniden denenebilir: zincirde gorsel okuyan bir model varsa
+     istek oraya duser. */
+  const RETRYABLE = ['rate_limited', 'server', 'bad_model', 'timeout', 'empty',
+    'thinking_only', 'too_long', 'no_vision'];
   /* Baglanti gelince kaldigi yerden devam edilebilecek hatalar. */
   const RESUMABLE = ['offline', 'network', 'server', 'timeout', 'local_cors'];
   function retryable(code){ return RETRYABLE.indexOf(code) >= 0; }
@@ -531,6 +586,7 @@ R.LLM = (function(){
 
   async function callBuiltin(req){
     if(!builtinReady()) throw fail('unavailable');
+    if(hasImages(req.messages)) throw fail('no_vision');
     const turns = [];
     if(req.system) turns.push({ role:'user', content:req.system });
     (req.messages || []).forEach(m => turns.push({ role:m.role, content:m.text }));
@@ -546,6 +602,20 @@ R.LLM = (function(){
 
   /* ---------- OpenAI uyumlu cagri ---------- */
 
+  /* Bir mesaja gorsel eklendiyse govde ARTIK duz metin degildir: OpenAI
+     uyumlu ucler icerigi parca dizisi olarak bekler. Gorsel yoksa eski
+     duz bicim korunur — bazi kucuk ucler dizi bicimini hic tanimiyor. */
+  function openaiContent(m){
+    if(!m.images || !m.images.length) return m.text;
+    const parts = [];
+    if(m.text) parts.push({ type:'text', text:m.text });
+    m.images.forEach(im => parts.push({
+      type:'image_url',
+      image_url:{ url:'data:' + im.mime + ';base64,' + im.data },
+    }));
+    return parts;
+  }
+
   function openaiBody(req, fix, stream){
     const messages = [];
     if(req.system){
@@ -554,7 +624,7 @@ R.LLM = (function(){
       if(fix.systemAsUser) messages.push({ role:'user', content:req.system });
       else messages.push({ role:'system', content:req.system });
     }
-    (req.messages || []).forEach(m => messages.push({ role:m.role, content:m.text }));
+    (req.messages || []).forEach(m => messages.push({ role:m.role, content:openaiContent(m) }));
 
     const body = { model:req.model, messages, stream:!!stream };
     const budget = req.maxTokens || DEFAULT_MAX_TOKENS;
@@ -677,10 +747,17 @@ R.LLM = (function(){
   }
 
   function geminiBody(req, fix){
-    const contents = (req.messages || []).map(m => ({
-      role:m.role === 'assistant' ? 'model' : 'user',
-      parts:[{ text:m.text }],
-    }));
+    const contents = (req.messages || []).map(m => {
+      const parts = [];
+      if(m.text) parts.push({ text:m.text });
+      (m.images || []).forEach(im => parts.push({
+        inline_data:{ mime_type:im.mime, data:im.data },
+      }));
+      return {
+        role:m.role === 'assistant' ? 'model' : 'user',
+        parts:parts.length ? parts : [{ text:'' }],
+      };
+    });
     const body = {
       contents,
       generationConfig:{
@@ -854,7 +931,12 @@ R.LLM = (function(){
     if(!live) return seed.slice();
     const byId = {};
     seed.forEach(m => { byId[m.id] = m; });
-    return live.models.map(m => Object.assign({}, m, byId[m.id] || {}, { id:m.id, free:m.free }));
+    return live.models.map(m => {
+      const out = Object.assign({}, m, byId[m.id] || {}, { id:m.id, free:m.free });
+      /* Gorsel bilgisi CANLI listeden gelir: tohum eskimis olabilir. */
+      if(m.vision !== undefined) out.vision = m.vision;
+      return out;
+    });
   }
 
   /* Ham listeyi kimlige gore duzenler: ucretsizler once, sonra alfabetik. */
@@ -921,6 +1003,18 @@ R.LLM = (function(){
 
     const json = await fetchJson(url, authHeaders(provider, key), o.signal);
 
+    /* Model gorsel okuyabiliyor mu? OpenRouter bunu acikca bildirir;
+       Google'in flash aileleri gorsel alir. Bilinmiyorsa alan YAZILMAZ ve
+       "denenebilir" sayilir — yanlis bir "hayir", calisan bir modeli
+       kullanicidan saklamak olurdu. */
+    function visionFlag(row){
+      const a = row.architecture || {};
+      const mods = a.input_modalities || a.modality || '';
+      const text = Array.isArray(mods) ? mods.join(',') : String(mods);
+      if(text) return /image/i.test(text);
+      return undefined;
+    }
+
     let models = [];
     if(provider.kind === 'gemini'){
       /* Google 'models/gemini-…' seklinde tam ad doner; ustelik listede
@@ -932,12 +1026,20 @@ R.LLM = (function(){
           id:String(m.name || '').replace(/^models\//, ''),
           label:m.displayName || null,
           free:true,
+          /* Gemini'nin flash ve pro aileleri gorsel alir. */
+          vision:/gemini/i.test(String(m.name || '')),
         }))
         .filter(m => m.id && !/embedding|aqa|imagen|veo|tts|image-generation/i.test(m.id));
     }else{
       models = (json.data || json.models || [])
-        .map(m => ({ id:String(m.id || m.name || ''), label:m.name && m.id !== m.name ? m.name : null,
-          free:freeFlag(provider.id, m) }))
+        .map(m => {
+          const row = { id:String(m.id || m.name || ''),
+            label:m.name && m.id !== m.name ? m.name : null,
+            free:freeFlag(provider.id, m) };
+          const v = visionFlag(m);
+          if(v !== undefined) row.vision = v;
+          return row;
+        })
         .filter(m => m.id);
     }
     if(!models.length) throw fail('empty');
@@ -1222,6 +1324,7 @@ R.LLM = (function(){
     errorText, retryable, resumable, offline, onceOnline, inSandbox, KEY_STORE,
     truncated, trimToSentence, joinContinuation, dropLastWord, stripThinking,
     endpointFor, normalizeOpenAI, normalizeGemini, classify,
+    hasImages, supportsVision, visionChain,
     DEFAULT_MAX_TOKENS,
   };
 })();
