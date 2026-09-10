@@ -241,8 +241,86 @@ SP.Money = (function(){
     return { tone, text, basket:b, coverage:cov, stale };
   }
 
+  /* ------------------------------------------------------------- butce
+
+     Sedef tek basina butce yapmaz: diger uc kocun TALEBINI toplar. Talep
+     kural motorlarindan gelir, tahminden degil —
+
+       Nesrin  haftalik sepet maliyeti (gida fiyatlarindan)
+       Kerem   vadesi gecmis panellerin test ucreti
+       Baris   eksik ekipman
+
+     Fiyati bilinmeyen kalem SIFIR sayilmaz. "veri yok" olarak durur ve
+     toplama girmez; toplamin yaninda kac kalemin disarida kaldigi yazar.
+     Bilinmeyeni sifir sayan bir butce, gercek butceden hep kucuk cikar. */
+
+  function budget(profile){
+    const rows = [];
+    const b = basketTotal();
+
+    /* --- Nesrin: gida --- */
+    rows.push({
+      id:'gida', agent:'nutri', label:'Gıda',
+      detail:b.rows.length
+        ? b.rows.length + ' kalem haftalık sepet'
+        : 'Sepet boş — haftalık alışveriş girilmedi',
+      monthly:b.rows.length ? U.round(b.total * 4.33, 0) : null,
+      cert:!b.rows.length ? 'missing' : (b.estimate.pct >= 50 ? 'estimated' : 'measured'),
+      note:b.rows.length && b.estimate.pct
+        ? 'Hesabın %' + b.estimate.pct + '\'i tahmin fiyatıyla.' : null,
+      route:'basket',
+    });
+
+    /* --- Kerem: test --- */
+    const overdue = SP.Bio.overdue();
+    const testFee = SP.S.basket && SP.S.basket.testFee != null ? Number(SP.S.basket.testFee) : null;
+    rows.push({
+      id:'test', agent:'lab', label:'Test',
+      detail:overdue.length
+        ? overdue.length + ' panelin ölçüm borcu var'
+        : 'Vadesi geçmiş panel yok',
+      monthly:overdue.length && testFee != null ? U.round(overdue.length * testFee / 6, 0) : null,
+      cert:!overdue.length ? 'measured' : (testFee == null ? 'missing' : 'estimated'),
+      note:overdue.length && testFee == null
+        ? 'Panel ücreti girilmedi; bu kalem toplama katılmadı.'
+        : (overdue.length ? 'Altı ayda bir tekrarlanacak varsayımıyla aylığa bölündü.' : null),
+      route:'labs',
+    });
+
+    /* --- Baris: ekipman --- */
+    const owned = (SP.S.basket && SP.S.basket.equipment) || [];
+    const needed = [];
+    SP.EXERCISES.forEach(e => {
+      if(!e.equip || e.equip === 'yok') return;
+      if(needed.indexOf(e.equip) < 0 && owned.indexOf(e.equip) < 0) needed.push(e.equip);
+    });
+    rows.push({
+      id:'ekipman', agent:'move', label:'Ekipman',
+      detail:needed.length ? 'Eksik: ' + needed.join(', ') : 'Ek ekipman gerekmiyor',
+      monthly:needed.length ? null : 0,
+      cert:needed.length ? 'missing' : 'measured',
+      note:needed.length
+        ? 'Ekipman fiyatı sistemde tutulmaz. Vücut ağırlığı hareketleri ekipmansız çalışır.'
+        : null,
+      route:'move',
+    });
+
+    const known = rows.filter(r => r.monthly != null);
+    const unknown = rows.filter(r => r.monthly == null);
+    const total = U.round(U.sum(known.map(r => r.monthly)), 0);
+    const limit = SP.S.basket && SP.S.basket.monthlyLimit != null
+      ? Number(SP.S.basket.monthlyLimit) : null;
+
+    return {
+      rows, total, unknown:unknown.length,
+      limit, over:limit != null && total > limit,
+      pct:limit ? U.pct(total, limit) : null,
+      coverage:basketCoverage(profile),
+    };
+  }
+
   return {
-    priceOf, costOf, monthsSince, ageBand, estimateShare,
+    priceOf, costOf, monthsSince, ageBand, estimateShare, budget,
     basketRows, basketTotal, basketCoverage,
     substitutesFor, swapOpportunities, costPerNutrient, bulkOpportunities,
     status,

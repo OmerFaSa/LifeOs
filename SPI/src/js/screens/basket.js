@@ -17,6 +17,7 @@ SP.Screens.basket = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
+    { id:'butce', label:'Bütçe', icon:'target' },
     { id:'sepet', label:'Sepet', icon:'wallet' },
     { id:'ikame', label:'İkame', icon:'refresh' },
     { id:'fiyat', label:'Fiyat', icon:'list' },
@@ -253,10 +254,132 @@ SP.Screens.basket = (function(){
     });
   }
 
+  /* -------------------------------------------------------------- bütçe
+
+     Sedef'in sayfası. Bütçe tek başına üretilmez: diğer üç koçun talebi
+     toplanır (SP.Money.budget). Fiyatı bilinmeyen kalem sıfır sayılmaz —
+     "veri yok" olarak durur ve toplamın dışında kalır. */
+
+  function budgetView(){
+    const b = SP.Money.budget();
+    const st = SP.Money.status();
+
+    return html`
+      <section class="sect">
+        <div class="sect__h">
+          <div class="sect__ht">
+            <div class="sect__eyebrow">Sedef</div>
+            <h2>Aylık bütçe</h2>
+            <p>Bütçe diğer koçların talebinden çıkar: Nesrin gıdayı, Kerem testi,
+              Barış ekipmanı ister. Fiyatı bilinmeyen kalem toplama katılmaz.</p>
+          </div>
+          <div class="sect__actions">
+            ${K.Button({ label:'Sınır ve ücretler', icon:'sliders', size:'sm', act:'open-limits' })}
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="span-7"><div class="stack">
+            ${K.Card({
+              title:'Talep tablosu', hint:'budget-rank',
+              badge:K.Badge({ label:U.fmtNum(b.total) + ' TL / ay',
+                tone:b.over ? 'warn' : 'info' }),
+              body:html`${map(b.rows, r => html`
+                <div class="demand">
+                  <div class="demand__who">
+                    ${P.avatar(r.agent, 'sm')}
+                    <div class="minw0">
+                      <b class="small">${r.label}</b>
+                      <div class="tiny dim">${r.detail}</div>
+                    </div>
+                  </div>
+                  <div class="demand__cost num">
+                    ${r.monthly == null ? html`<span class="dim">veri yok</span>`
+                      : html`${U.fmtNum(r.monthly)}<small>TL</small>`}
+                  </div>
+                  <div class="demand__cert">${P.cert(r.cert)}</div>
+                  ${when(r.note, () => html`<p class="demand__note">${r.note}</p>`)}
+                </div>`)}`,
+              foot:html`
+                ${when(b.unknown, () => html`<span class="small">
+                  <b>${b.unknown}</b> kalem fiyatı bilinmediği için toplamın dışında.</span>`)}
+                ${when(!b.unknown, () => html`<span class="small dim">
+                  Bütün kalemlerin karşılığı hesaplandı.</span>`)}`,
+            })}
+
+            ${when(b.limit != null, () => K.Card({
+              title:'Aylık sınır',
+              body:html`${K.Meter({ label:'Kullanılan',
+                value:Math.min(100, b.pct || 0),
+                text:U.fmtNum(b.total) + ' / ' + U.fmtNum(b.limit) + ' TL',
+                tone:b.over ? 'danger' : '' })}
+                ${K.Notice({ tone:b.over ? 'warn' : 'ok', class:'mt-12',
+                  body:b.over
+                    ? 'Talep sınırın ' + U.fmtNum(b.total - b.limit) + ' TL üstünde. '
+                      + 'Sıralama gereği önce güvenlik ve tahlil korunur; kısıntı '
+                      + 'gıda kaleminde ikame ile yapılır.'
+                    : 'Talep aylık sınırın içinde.' })}` }))}
+          </div></div>
+
+          <div class="span-5"><div class="stack">
+            ${K.Card({ title:'Sedef\'in notu', hint:'budget-rank',
+              badge:K.Badge({ label:'kural motoru', tone:'muted', icon:false }),
+              body:html`<p class="small">${st.text}</p>`,
+              foot:K.Button({ label:'Sedef\'e sor', size:'sm',
+                act:'ask-agent', data:{ 'data-agent':'money' } }) })}
+
+            ${K.Card({ title:'Bütçenin yeri', hint:'budget-rank',
+              body:html`<p class="small">${SP.PRECEDENCE[5].note}</p>
+                <div class="mt-10">${K.Table({ tight:true, headers:['Sıra', 'Kural'],
+                  rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) })}</div>` })}
+
+            ${K.Card({ title:'Fiyatlar nereden geliyor?', hint:'price-estimate',
+              body:html`<p class="small muted">Fiyatlar internetten çekilmez —
+                bu uygulama çevrimdışı çalışır ve sağlık verisi dışarı çıkmaz.
+                Başlangıçta tohum fiyat listesi kullanılır ve açıkça «tahmin»
+                olarak işaretlenir. Fişten girdiğin her fiyat tohumun üstüne
+                yazılır ve «ölçüldü» olur.</p>`,
+              foot:K.Button({ label:'Fiyat gir', size:'sm',
+                act:'basket-tab', data:{ 'data-tab':'fiyat' } }) })}
+          </div></div>
+        </div>
+      </section>`;
+  }
+
+  function limitsSheet(){
+    const bk = S.basket || {};
+    UI.sheet({
+      title:'Sınır ve ücretler',
+      subtitle:'Girilmeyen alan «sınır yok» demektir, sıfır değil',
+      body:String(K.Stack([
+        K.Field({ label:'Haftalık sepet sınırı (TL)',
+          input:K.Input({ id:'lim-week', type:'number', numeric:true, step:'any',
+            value:bk.weeklyLimit == null ? '' : bk.weeklyLimit }) }),
+        K.Field({ label:'Aylık toplam sağlık bütçesi (TL)',
+          input:K.Input({ id:'lim-month', type:'number', numeric:true, step:'any',
+            value:bk.monthlyLimit == null ? '' : bk.monthlyLimit }) }),
+        K.Field({ label:'Tek panel test ücreti (TL)',
+          hint:'ölçüm borcu olan panellerin maliyeti bundan hesaplanır',
+          input:K.Input({ id:'lim-test', type:'number', numeric:true, step:'any',
+            value:bk.testFee == null ? '' : bk.testFee }) }),
+        K.Notice({ tone:'info', body:'Bu üç sayı yalnız bu cihazda tutulur ve '
+          + 'hiçbir modele gönderilmez.' }),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'save-limits' })}`),
+    });
+  }
+
   /* --------------------------------------------------------------- ekran */
 
   async function render(){
     const tab = S.ui.basketTab;
+    if(tab === 'butce'){
+      return String(html`
+        <div class="mb-20">${toolbar(tab)}</div>
+        ${budgetView()}
+        <div class="mt-24">${raw(UI.rail(['budget-rank', 'price-estimate', 'certainty']))}</div>`);
+    }
     if(tab === 'ikame'){
       return String(K.Grid([
         K.Span(12, toolbar(tab)),
@@ -286,6 +409,20 @@ SP.Screens.basket = (function(){
   }
 
   const handle = {
+    async 'open-limits'(){ limitsSheet(); },
+    async 'save-limits'(){
+      const num = id => {
+        const el = document.getElementById(id);
+        if(!el || String(el.value).trim() === '') return null;
+        const n = Number(String(el.value).replace(',', '.'));
+        return isFinite(n) ? n : null;
+      };
+      await M.saveBasket({ weeklyLimit:num('lim-week'), monthlyLimit:num('lim-month'),
+        testFee:num('lim-test') });
+      UI.closeSheet();
+      UI.toast('Kaydedildi');
+      SP.App.render();
+    },
     async 'basket-tab'(el){ S.ui.basketTab = el.dataset.tab; S.ui.foodPage = 1; SP.App.render(); },
     async 'open-add'(){ S.ui.foodPage = 1; addSheet(); },
     async 'add-page'(el){ S.ui.foodPage = Number(el.dataset.page); addSheet(); },
@@ -352,13 +489,41 @@ SP.Screens.basket = (function(){
 
   return {
     id:'basket',
-    title:'Sepet',
-    subtitle(){
-      const b = SP.Money.basketTotal();
-      if(!b.rows.length) return 'Sepet boş';
-      return U.fmtNum(Math.round(b.total)) + ' TL · %' + b.estimate.pct + ' tahmin';
+    title:'Finans',
+    headline(){
+      const b = SP.Money.budget();
+      if(!b.rows.filter(r => r.monthly).length) return 'Bütçe için henüz veri yok.';
+      if(b.over) return 'Talep aylık sınırın üstünde.';
+      if(b.limit != null) return 'Talep aylık sınırın içinde.';
+      return 'Aylık talep ' + U.fmtNum(b.total) + ' TL.';
     },
-    actions(){ return ''; },
+    lede(){
+      const b = SP.Money.budget();
+      const est = SP.Money.estimateShare();
+      const base = 'Bütçe tek başına üretilmez: Nesrin gıdayı, Kerem testi, '
+        + 'Barış ekipmanı ister; Sedef toplar.';
+      if(b.unknown) return base + ' Şu an ' + b.unknown + ' kalemin fiyatı bilinmiyor '
+        + 've toplamın dışında duruyor — sıfır sayılmadı.';
+      return base + (est.pct ? ' Hesabın %' + est.pct + '\u2019i tahmin fiyatıyla.' : '');
+    },
+    stats(){
+      const b = SP.Money.budget();
+      const w = SP.Money.basketTotal();
+      const out = [{ value:U.fmtNum(b.total), label:'aylık talep (TL)' }];
+      if(b.limit != null) out.push({ value:U.fmtNum(b.limit), label:'aylık sınır (TL)' });
+      if(w.rows.length) out.push({ value:U.fmtNum(Math.round(w.total)), label:'haftalık sepet (TL)' });
+      if(b.unknown) out.push({ value:b.unknown, label:'fiyatı yok' });
+      return out;
+    },
+    subtitle(){
+      const st = SP.Money.status();
+      return st.text;
+    },
+    actions(){
+      return String(html`${K.Button({ label:'Kalem ekle', icon:'plus', size:'sm', tone:'primary',
+        act:'open-add' })}
+        ${K.Button({ label:'Sınır ve ücretler', size:'sm', act:'open-limits' })}`);
+    },
     render, handle, change,
   };
 })();

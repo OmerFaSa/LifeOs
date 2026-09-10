@@ -206,26 +206,71 @@ haberin arkasına saklamaz:
 
 ---
 
-## 3. Ekranlar
+## 3. Bölümler
 
-Dört gezinme grubu, on üç ekran. Grup alana göre değil **iş türüne** göre
-ayrılır: günlük giriş, izleme, değerlendirme, sistem.
+Yedi bölüm, on üç sayfa. Bölüm alana göre değil, kullanıcının hayatındaki
+**işe** göre ayrılır ve sırası kasıtlıdır: önce ölçülen, sonra ölçüme göre
+karar verilen, sonra bunların bedeli, sonra günün kaydı, sonra danışma, en
+sonda ayar.
 
-| Grup | Ekranlar |
+| # | Bölüm | Sayfalar | Ne yapar |
+|---|---|---|---|
+| 01 | Testler | Testler | Kapsamlı bir hastane testi tek seferde girilir; sonuçlar tek düz listede durur |
+| 02 | Besin | Öğünler · Mutfak | Bazal metabolizma, hedef ve tahlile bağlı öğün önerisi |
+| 03 | Hareket | Hareket | Kardiyo, kuvvet, esneklik ve dinlenme ayrı alanlar |
+| 04 | Finans | Finans | Diğer koçların talebinden çıkan bütçe |
+| 05 | Günlük | Bugün · Ölçüm | Günün asgari kaydı |
+| 06 | Ofis | Masalar · Danışma · Toplantı · Analiz | Patron ve dört koç |
+| 07 | Ayarlar | Hane · Rehber | Profil, görünüm, veri, sınırlar |
+
+Yönlendirme kimlikleri (`labs`, `meals`, `move`, `basket`, …) değişmedi;
+değişen yalnızca kullanıcıya görünen gruplama. Böylece komut paleti, testler
+ve derin bağlantılar bozulmadan kaldı.
+
+### Testler organ bazlı değildir
+
+Önceki düzen ölçümleri on iki panele bölüyor, her paneli açılır bir kutuda
+tutuyordu. Kullanıcı elinde **tek bir rapor**la gelir; o rapor organa göre
+değil, tek seferde çıkar. Şimdi:
+
+- **Test gir** — bütün ölçümler tek formda, arama kutusuyla daraltılır.
+  Boş bırakılan satır yok sayılır, sıfır olarak kaydedilmez.
+- **Sonuçlar** — ölçülen her şey tek düz listede, önem sırasına göre
+  (kırmızı bayrak → referans dışı → hedef dışı → hedefte).
+- **Panel** artık bir yapı değil bir **süzgeçtir**: listeyi daraltır, bölmez.
+
+### Hareket alanlara ayrılır
+
+Kullanıcı gününü planlarken "hangi kalıbı çalışayım" diye değil, "kardiyo mu
+kuvvet mi, yoksa dinleneyim mi" diye düşünür. Sekmeler o soruyu karşılar:
+**Bugün · Kardiyo · Kuvvet · Esneklik · Dinlenme · İlerleme**. Hareket kalıbı
+(itme/çekme/çömelme/kalça/gövde/taşıma) kuvvetin içinde ikinci bir şerittir.
+
+Dinlenmenin kendi sayfası olması kasıtlıdır: antrenman programlarında
+dinlenme çoğu zaman "yapılmayan şey" olarak geçer ve görünmez olur — burada
+görünür, çünkü yük yönetiminin yarısı odur.
+
+### Koçlar birbiriyle konuşur
+
+Zincir kural motorlarında zaten vardı; bölümler onu **görünür** kılar:
+
+| Zincir | Nerede görünür |
 |---|---|
-| Günlük | Bugün · Günlük ölçüm |
-| İzleme | Tahliller · Öğünler · Mutfak · Hareket · Sepet |
-| Değerlendirme | Analiz · Ofis · Danışma · Toplantı |
-| Sistem | Hane · Rehber |
+| Kerem → Nesrin | Besin → Öneri: hangi ölçüm hangi besin hedefini ne kadar yükseltti |
+| Nesrin/Kerem/Barış → Sedef | Finans → Bütçe: üç koçun talebi tek tabloda |
+| Barış → Nesrin | Toparlanma düşükken esneklik ağır antrenmanın yerine geçer |
 
-Mobilde alt sekme çubuğu beş ekrandır (Bugün · Ölçüm · Öğün · Hareket · Ofis);
-kalanı kenar çubuğundan açılır.
+Bütçede fiyatı bilinmeyen kalem **sıfır sayılmaz**: «veri yok» olarak durur
+ve toplamın dışında kalır. Bilinmeyeni sıfır sayan bir bütçe gerçeğinden hep
+küçük çıkar.
 
-Ekran içi bölümleme hap biçimli alt sekmelerle yapılır. `Hareket` iki şerit
-taşır — bölüm (bugün · program · ilerleme) ve hareket kalıbı (Tümü · itiş ·
-çekiş · diz · kalça · taşıma · gövde · Dayanıklılık · Mobilite) — böylece
-antrenman tek uzun liste değil, net seçilebilir bölümler halinde durur.
-Ayrıntı: `src/STIL.md`.
+### Fiyat neden internetten gelmiyor?
+
+Uygulama çevrimdışı çalışır ve sağlık verisi cihazdan çıkmaz. Market taramak
+için dışarı çıkan her istek bu iki kuralı da bozar. Bunun yerine: başlangıçta
+açıkça «tahmin» etiketli bir tohum liste kullanılır, kullanıcının fişinden
+girdiği fiyat tohumun üstüne yazılır ve «ölçüldü» olur. Hesabın yüzde kaçının
+hâlâ tahmine dayandığı her ekranda yazar.
 
 Her ekran aynı sözleşmeyi uygular:
 

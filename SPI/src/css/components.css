@@ -289,9 +289,10 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   pointer-events:none;
   max-width:calc(100vw - 24px);
 }
-/* Mobilde alt gezinme çubuğunun üstünde durur; içeriği örtmez. */
-@media (max-width:1000px){
-  .toast-root{ bottom:calc(74px + env(safe-area-inset-bottom)); }
+/* Alt gezinme çubuğu kalktı; bildirim ekranın altında, güvenli alanın
+   üstünde durur. */
+@media (max-width:860px){
+  .toast-root{ bottom:calc(18px + env(safe-area-inset-bottom)); }
 }
 .toast{
   background:var(--text); color:var(--bg);
@@ -1315,3 +1316,223 @@ button.minrow:hover{ background:var(--surface-2); }
   .splitrow, .pricerow{ grid-template-columns:1fr auto; }
   .quick .input{ min-width:100%; }
 }
+
+/* ================= boşluk yardımcıları (site düzeni) ================= */
+.mt-20{ margin-top:20px; } .mt-24{ margin-top:24px; } .mt-32{ margin-top:32px; }
+.mb-16{ margin-bottom:16px; } .mb-20{ margin-bottom:20px; } .mb-24{ margin-bottom:24px; }
+
+/* ================= sonuç listesi =================
+
+   Ölçümler organa göre kutulanmaz; tek düz listede durur. Her satır bir
+   düğmedir ve ayrıntıyı açar. Sol kenardaki nokta durumu RENKLE değil,
+   yanındaki rozetle birlikte söyler: renk tek başına anlam taşımaz. */
+.reslist{
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  background:var(--surface);
+  overflow:hidden;
+}
+.resrow{
+  width:100%;
+  display:grid;
+  grid-template-columns:6px minmax(150px,1.5fr) 118px minmax(120px,1.2fr) 108px 96px;
+  align-items:center; gap:14px;
+  padding:11px 16px 11px 12px;
+  border:none; border-top:1px solid var(--border);
+  background:none; color:var(--text); text-align:left;
+  transition:background var(--dur) var(--ease);
+}
+.reslist .resrow:first-child{ border-top:none; }
+.resrow:hover{ background:var(--surface-hover); }
+
+.resrow__dot{ width:6px; height:22px; border-radius:3px; background:var(--surface-3); }
+.resrow__dot--ok{ background:var(--primary); }
+.resrow__dot--info{ background:var(--info); }
+.resrow__dot--warn{ background:var(--accent); }
+.resrow__dot--danger{ background:var(--danger); }
+
+.resrow__name{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+.resrow__name b{ font-size:var(--fs-base); font-weight:650; line-height:1.25; }
+.resrow__panel{ font-size:var(--fs-xs); color:var(--text-3); }
+.resrow__val{
+  font-family:var(--font-display); font-size:var(--fs-md); font-weight:700;
+  white-space:nowrap;
+}
+.resrow__val small{ font-size:var(--fs-xs); font-weight:600; color:var(--text-3); margin-left:3px; }
+.resrow__bar{ min-width:0; }
+.resrow__status{ justify-self:start; }
+.resrow__trend{ justify-self:end; white-space:nowrap; }
+
+@media (max-width:900px){
+  .resrow{ grid-template-columns:6px minmax(0,1fr) auto; row-gap:6px; }
+  .resrow__bar{ grid-column:2 / -1; }
+  .resrow__status{ grid-column:2; }
+  .resrow__trend{ grid-column:3; }
+}
+
+/* ================= kapsamlı test girişi =================
+
+   Tek formda bütün ölçümler. Panel seçimi yoktur; arama daraltır.
+   Dolu satır işaretlenir ki uzun listede ne yazıldığı görünsün. */
+.entryhead{
+  display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px;
+  padding:16px;
+  border:1px solid var(--border); border-radius:var(--r);
+  background:var(--surface);
+}
+.entrygrid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:8px;
+}
+.entryrow{
+  display:flex; align-items:center; gap:10px;
+  padding:8px 10px 8px 12px;
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface);
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.entryrow:focus-within{ border-color:var(--primary); box-shadow:0 0 0 3px var(--ring); }
+.entryrow.is-filled{ border-color:var(--primary); background:var(--primary-soft); }
+.entryrow__name{
+  flex:1; min-width:0;
+  font-size:var(--fs-sm); font-weight:600; line-height:1.25; color:var(--text-2);
+}
+.entryrow__unit{ display:block; font-size:10.5px; font-weight:600; color:var(--text-3); }
+.entryrow__in{
+  width:78px; flex:none;
+  border:none; background:none;
+  font-family:var(--font-display); font-size:var(--fs-md); font-weight:700;
+  color:var(--text); text-align:right;
+  padding:2px 0;
+}
+.entryrow__in:focus{ outline:none; }
+.entryrow__in::placeholder{ color:var(--text-3); font-weight:600; }
+
+/* Uzun formun kaydetme çubuğu içeriğin altına yapışır: yüzlerce satır
+   yazdıktan sonra kaydetmek için başa dönmek gerekmez. */
+.entrybar{
+  position:sticky; bottom:0;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  flex-wrap:wrap;
+  margin-top:16px; padding:12px 16px;
+  border:1px solid var(--border); border-radius:var(--r);
+  background:color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter:saturate(1.5) blur(10px);
+  box-shadow:var(--shadow);
+}
+
+@media (max-width:640px){
+  .entryhead{ grid-template-columns:1fr; }
+}
+
+/* ================= etiket bulutu ================= */
+.chips{ display:flex; flex-wrap:wrap; gap:6px; }
+.chip--muted{
+  display:inline-flex; align-items:center;
+  padding:3px 9px; border-radius:var(--r-pill);
+  background:var(--surface-2); color:var(--text-3);
+  font-size:var(--fs-xs); font-weight:600;
+}
+
+/* ================= enerji zinciri =================
+
+   Bazal metabolizmadan hedefe giden yol adım adım yazılır. Tek bir "hedef:
+   2100 kcal" satırı tartışılamaz; zincir tartışılabilir. */
+.chain{
+  display:flex; align-items:stretch; gap:10px; flex-wrap:wrap;
+}
+.chain__step{
+  flex:1 1 150px; min-width:0;
+  display:flex; flex-direction:column; gap:3px;
+  padding:12px 14px;
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface-2);
+}
+.chain__step--end{ background:var(--primary-soft); border-color:var(--primary); }
+.chain__label{
+  font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--text-3);
+}
+.chain__value{
+  font-family:var(--font-display); font-size:var(--fs-xl); font-weight:800;
+  letter-spacing:-.02em; line-height:1.1; color:var(--text);
+}
+.chain__value small{ font-size:var(--fs-xs); font-weight:700; color:var(--text-3); margin-left:3px; }
+.chain__note{ font-size:var(--fs-xs); color:var(--text-3); line-height:1.35; }
+.chain__op{
+  flex:0 0 auto; align-self:center;
+  font-family:var(--font-display); font-size:var(--fs-sm); font-weight:800;
+  color:var(--text-3);
+}
+@media (max-width:760px){
+  .chain{ flex-direction:column; }
+  .chain__op{ align-self:flex-start; padding-left:14px; }
+}
+
+/* ================= koçlar arası bağ =================
+
+   Bir tahlil bulgusunun bir beslenme hedefini nasıl değiştirdiği. Ok tek
+   yönlüdür: ölçüm hedefi değiştirir, hedef ölçümü değiştirmez. */
+.link{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center; gap:10px;
+  padding:12px 0;
+  border-top:1px solid var(--border);
+}
+.link:first-child{ border-top:none; padding-top:2px; }
+.link__from, .link__to{ display:flex; align-items:center; gap:7px; min-width:0; flex-wrap:wrap; }
+.link__arrow{ color:var(--text-3); font-size:var(--fs-md); }
+.link__why{
+  grid-column:1 / -1; margin:2px 0 0;
+  font-size:var(--fs-sm); color:var(--text-2); line-height:1.45;
+}
+@media (max-width:560px){
+  .link{ grid-template-columns:1fr; }
+  .link__arrow{ transform:rotate(90deg); justify-self:start; }
+}
+
+/* ================= gıda önerisi ================= */
+.sugg{ padding:14px 0; border-top:1px solid var(--border); }
+.sugg:first-child{ border-top:none; padding-top:2px; }
+.sugg__head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.sugg__foods{ display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:8px; }
+.suggfood{
+  display:flex; flex-direction:column; gap:3px; align-items:flex-start;
+  padding:9px 11px;
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--text); text-align:left;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.suggfood:hover{ border-color:var(--primary); background:var(--surface-hover); }
+.suggfood b{ font-size:var(--fs-sm); font-weight:650; }
+.suggfood .num{ font-size:var(--fs-xs); color:var(--text-2); font-weight:600; }
+.sugg__why{ margin:9px 0 0; font-size:var(--fs-xs); color:var(--text-3); line-height:1.45; }
+
+/* ================= bütçe talebi =================
+
+   Her satır bir koçun talebidir. Fiyatı bilinmeyen kalem boş bırakılmaz,
+   «veri yok» yazar: sıfır sayılan bir kalem bütçeyi olduğundan küçük
+   gösterir. */
+.demand{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  align-items:center; gap:12px;
+  padding:12px 0;
+  border-top:1px solid var(--border);
+}
+.demand:first-child{ border-top:none; padding-top:2px; }
+.demand__who{ display:flex; align-items:center; gap:9px; min-width:0; }
+.demand__cost{
+  font-family:var(--font-display); font-size:var(--fs-md); font-weight:700;
+  white-space:nowrap;
+}
+.demand__cost small{ font-size:var(--fs-xs); font-weight:600; color:var(--text-3); margin-left:3px; }
+.demand__note{
+  grid-column:1 / -1; margin:0;
+  font-size:var(--fs-xs); color:var(--text-3); line-height:1.45;
+}
+@media (max-width:520px){
+  .demand{ grid-template-columns:1fr auto; }
+  .demand__cert{ grid-column:2; justify-self:end; }
+}
+.minw0{ min-width:0; }

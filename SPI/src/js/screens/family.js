@@ -216,6 +216,19 @@ SP.Screens.family = (function(){
   return {
     id:'family',
     title:'Hane',
+    headline(){
+      const t = SP.Nutri.targets();
+      if(!t.ok) return 'Profil eksik.';
+      const list = M.householdList();
+      return list.length > 1 ? list.length + ' kişilik hane.' : 'Profil hazır.';
+    },
+    lede(){
+      const t = SP.Nutri.targets();
+      if(!t.ok) return 'Kilo, boy ve doğum yılı girilince bütün hedefler '
+        + 'kendiliğinden hesaplanır. Bu üçü olmadan hiçbir sayı tahmin edilmez.';
+      return 'Hedefler, görünüm ve hane üyeleri burada. Her profil kendi '
+        + 'temasını ve hedefini taşır.';
+    },
     subtitle(){
       const list = M.householdList();
       const t = SP.Nutri.targets();

@@ -16,16 +16,6 @@ SP.Screens.today = (function(){
 
   /* ---------------------------------------------------------- kartlar */
 
-  function nextCard(){
-    const n = SP.Calc.nextAction();
-    return K.NextUp({
-      icon:n.icon, label:n.label, hint:'next-action', calm:!!n.calm,
-      title:n.title, why:n.why,
-      action:n.calm ? null : K.Button({ label:n.action || 'Aç', tone:'primary', size:'sm',
-        act:'go', data:{ 'data-route':n.route } }),
-    });
-  }
-
   function minimumCard(){
     const m = SP.Calc.minimumDay();
     const streak = SP.Calc.streak();
@@ -141,7 +131,7 @@ SP.Screens.today = (function(){
           ${K.Meter({ label:'Haftalık sınır', value:Math.min(100, m.basket.pct || 0),
             text:U.fmtNum(Math.round(m.basket.total)) + ' / ' + U.fmtNum(m.basket.limit) + ' TL',
             tone:m.basket.over ? 'danger' : '' })}</div>`)}`,
-      foot:K.Button({ label:'Sepeti aç', size:'sm', act:'go', data:{ 'data-route':'basket' } }),
+      foot:K.Button({ label:'Finansı aç', size:'sm', act:'go', data:{ 'data-route':'basket' } }),
     });
   }
 
@@ -152,8 +142,6 @@ SP.Screens.today = (function(){
 
     return String(K.Grid([
       when(flags.length, () => K.Span(12, K.Stack(map(flags, P.flagCard), 'sm'))),
-
-      K.Span(12, nextCard()),
 
       K.Span(8, K.Stack([
         readinessCard(),
@@ -210,13 +198,43 @@ SP.Screens.today = (function(){
   return {
     id:'today',
     title:'Bugün',
+    headline(){
+      const n = SP.Calc.nextAction();
+      return n.calm ? 'Bugün için bekleyen bir hamle yok.' : n.title;
+    },
+    lede(){
+      const n = SP.Calc.nextAction();
+      const m = SP.Calc.minimumDay();
+      const base = n.calm
+        ? 'Asgari gün ' + m.done + '/' + m.total + '. Kötü günün alt sınırı bu; '
+          + 'onu tutturmak zinciri korur.'
+        : n.why;
+      return base;
+    },
+    stats(){
+      const m = SP.Calc.minimumDay();
+      const out = [
+        { value:m.done + '/' + m.total, label:'asgari gün' },
+        { value:SP.Calc.streak(), label:'gün seri' },
+      ];
+      const r = SP.Move.readiness();
+      if(r.ok) out.push({ value:r.score, unit:'/100', label:'toparlanma' });
+      const f = SP.Model.openFlags().filter(x => !x.ack).length;
+      if(f) out.push({ value:f, label:'kırmızı bayrak' });
+      return out;
+    },
     subtitle(){
       const n = SP.Calc.nextAction();
       return n.calm ? 'Sıradaki hamle yok' : n.label + ' · ' + n.title;
     },
+    /* Sıradaki hamle artık başlığın kendisi; düğmesi de hero'da durur.
+       Aynı cümleyi bir de kart olarak tekrarlamak sadelik değil gürültüdür. */
     actions(){
-      return String(K.Button({ label:'Ölçüm gir', size:'sm', icon:'pulse', class:'btn--screen',
-        act:'go', data:{ 'data-route':'vitals' } }));
+      const n = SP.Calc.nextAction();
+      return String(html`${when(!n.calm, () => K.Button({ label:n.action || 'Aç',
+        tone:'primary', size:'sm', icon:n.icon, act:'go', data:{ 'data-route':n.route } }))}
+        ${K.Button({ label:'Ölçüm gir', size:'sm', icon:'pulse',
+          act:'go', data:{ 'data-route':'vitals' } })}`);
     },
     render, handle,
   };

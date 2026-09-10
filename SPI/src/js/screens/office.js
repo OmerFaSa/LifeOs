@@ -252,6 +252,25 @@ SP.Screens.office = (function(){
   return {
     id:'office',
     title:'Ofis',
+    headline(){
+      const notes = SP.Office.notes();
+      const loud = notes.filter(n => n.tone === 'danger' || n.tone === 'warn').length;
+      if(!notes.length) return 'Masalar sessiz.';
+      if(loud) return loud + ' masada dikkat isteyen not var.';
+      return 'Masalarda ' + notes.length + ' not var.';
+    },
+    lede(){
+      return 'Patron ekibi yönetir; Kerem laboratuvara, Nesrin beslenmeye, '
+        + 'Barış harekete, Sedef ekonomiye bakar. Her not önce kural motorundan '
+        + 'çıkar — model varsa onu yeniden yazar, yerine geçmez.';
+    },
+    stats(){
+      const notes = SP.Office.notes();
+      const open = SP.Model.openDecisions().length;
+      const out = [{ value:notes.length, label:'masa notu' }];
+      if(open) out.push({ value:open, label:'karar takipte' });
+      return out;
+    },
     subtitle(){
       const n = SP.Office.notes();
       const open = SP.Model.openDecisions().length;

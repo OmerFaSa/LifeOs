@@ -38,7 +38,7 @@ SP.S = {
   workouts:[],        // antrenman kayitlari
   progress:{},        // exId -> { levelId, achievedAt }
 
-  basket:null,        // { items:[{foodId,kg}], weeklyLimit, updatedAt }
+  basket:null,        // { items, weeklyLimit, monthlyLimit, testFee, equipment, updatedAt }
   prices:{},          // foodId -> { tl, at, source }
 
   flags:[],           // kirmizi bayrak kayitlari
@@ -55,21 +55,25 @@ SP.S = {
 
   ui:{
     railOpen:false,
-    labTab:'panel',        // panel | trend | gecmis
+    labTab:'sonuc',        // sonuc | giris | gecmis | trend
     labPanel:'vital',      // acik panel id'si
+    labQuery:'',           // sonuc ve giris listesindeki arama
+    labFilter:'all',       // sonuc listesindeki panel suzgeci
+    labShowEmpty:false,    // olculmemis satirlar gorunsun mu
     labOpen:null,          // acik tahlil oturumu
     markerOpen:null,       // acik biyobelirtec ayrintisi
     mealDate:null,         // gorunen gun (null = bugun)
+    mealTab:'gunluk',      // gunluk | oneri | deger
     mealSlot:'kahvalti',
     foodQuery:'',
     foodCat:'all',
     foodPage:1,
     kitchenDish:null,      // mutfakta paylastirilan yemek
     kitchenGrams:1000,
-    moveTab:'bugun',       // bugun | program | ilerleme
-    movePattern:'all',     // program bolumundeki kalip seridinde secili olan
+    moveTab:'bugun',       // bugun | kardiyo | kuvvet | esneklik | dinlenme | ilerleme
+    movePattern:'all',     // kuvvet alanindaki kalip seridinde secili olan
     workoutOpen:null,
-    basketTab:'sepet',     // sepet | ikame | toplu
+    basketTab:'butce',     // butce | sepet | ikame | fiyat
     priceEdit:null,
     trendMarker:'weight',
     trendRange:90,
@@ -432,7 +436,11 @@ SP.Model = (function(){
   /* ------------------------------------------------------------------ sepet */
 
   function defaultBasket(){
-    return { items:[], weeklyLimit:null, updatedAt:null };
+    /* monthlyLimit, testFee ve equipment butce sayfasi icindir. Hepsi
+       null/bos baslar: girilmemis bir sinir "sinir yok" demektir, sifir
+       degil. */
+    return { items:[], weeklyLimit:null, monthlyLimit:null, testFee:null,
+      equipment:[], updatedAt:null };
   }
 
   async function saveBasket(patch){

@@ -207,6 +207,16 @@ SP.Screens.analytics = (function(){
   return {
     id:'analytics',
     title:'Analiz',
+    headline(){
+      const rows = SP.Calc.crossFindings(60).filter(r => r.ok && !r.weak);
+      if(!rows.length) return 'Belirgin bir bağ bulunamadı.';
+      return rows.length + ' belirgin bağ bulundu.';
+    },
+    lede(){
+      return 'Birlikte hareket eden iki ölçüm, birinin diğerine sebep olduğu '
+        + 'anlamına gelmez. Bağ en az ' + SP.Calc.MIN_PAIRS + ' eşleşen gün olduğunda '
+        + 'yazılır; altında hiç yazılmaz.';
+    },
     subtitle(){
       const rows = SP.Calc.crossFindings(60).filter(r => r.ok && !r.weak);
       return rows.length ? rows.length + ' belirgin bağ bulundu' : 'Belirgin bağ yok';

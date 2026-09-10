@@ -53,16 +53,16 @@ async function dismissSetup(page){
 
 async function walkScreens(page, base, target, errors){
   await page.goto(base + target, { waitUntil:'load' });
-  await page.waitForSelector('.shell', { timeout:15000 });
+  await page.waitForSelector('.site', { timeout:15000 });
   await dismissSetup(page);
 
   const routes = await page.evaluate(() =>
-    SP.App.NAV.reduce((acc, g) => acc.concat(g.items.map(i => i.id)), []));
+    SP.App.SECTIONS.reduce((acc, s) => acc.concat(s.views.map(v => v.route)), []));
 
   for(const r of routes){
     await page.evaluate(id => SP.App.go(id), r);
     await wait(160);
-    const title = await page.textContent('.topbar h1');
+    const title = await page.textContent('.hero__title');
     const size = await page.$eval('#main', el => el.innerHTML.length);
     if(!title) errors.push(target + ' · ' + r + ': başlık yok');
     if(size < 50) errors.push(target + ' · ' + r + ': ekran boş çizildi');
@@ -89,7 +89,7 @@ async function walkScreens(page, base, target, errors){
 /* Gercek kullanim akisi: profil → ogun → tahlil → hedefin degismesi. */
 async function walkFlows(page, base, errors){
   await page.goto(base + '/index.html', { waitUntil:'load' });
-  await page.waitForSelector('.shell', { timeout:15000 });
+  await page.waitForSelector('.site', { timeout:15000 });
   await dismissSetup(page);
 
   await page.evaluate(async () => {

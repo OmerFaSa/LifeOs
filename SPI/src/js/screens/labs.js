@@ -1,98 +1,229 @@
-/* Tahliller — Modül 1'in ekranı.
+/* Testler — Modül 1'in ekranı.
 
-   Üç sekme:
-     Paneller  ölçümlerin son durumu, referans aralığındaki yeri
-     Eğilim    bir ölçümün kendi geçmişindeki yönü
-     Geçmiş    girilen tahlil oturumları
+   Önceki düzen ölçümleri ORGANA göre kutuluyordu: on iki panel, her biri
+   açılır bir kutu, her kutunun içinde birkaç satır. Kullanıcı elinde tek
+   bir hastane raporuyla gelir; o rapor organa göre değil, tek seferde
+   çıkar. Panel panel gezinmek zorunda kalmak işi zorlaştırıyordu.
 
-   Giriş iki yoldan olur: raporu yapıştırmak (ayıklayıcı) ya da elle yazmak.
-   Ayıklayıcı emin olamadığı satırı atmaz; «eşleşmedi» olarak gösterir. */
+   Yeni düzen dört sayfadır:
+
+     Sonuçlar  bütün ölçümler TEK düz listede, önem sırasına göre
+     Test gir  kapsamlı bir hastane testinin tamamı tek formda
+     Geçmiş    girilen test oturumları
+     Eğilim    tek bir ölçümün kendi geçmişindeki yönü
+
+   Panel artık bir yapı değil, bir SÜZGEÇtir: listeyi daraltır, listeyi
+   bölmez. Girişte ise hiç yoktur — arama kutusu onun yerini alır. */
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
 
 SP.Screens.labs = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
-  const { html, raw, when, map } = SP.h;
+  const { html, raw, when, map, cls } = SP.h;
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'panel',  label:'Paneller', icon:'layers' },
-    { id:'trend',  label:'Eğilim',   icon:'chart' },
+    { id:'sonuc',  label:'Sonuçlar', icon:'layers' },
+    { id:'giris',  label:'Test gir', icon:'flask' },
     { id:'gecmis', label:'Geçmiş',   icon:'clock' },
+    { id:'trend',  label:'Eğilim',   icon:'chart' },
   ];
-
-  /* Sekme seridi ile o bolume ait eylem ayni satirda durur: deger eklemek
-     her bolumden tek dokunus uzakta kalir. */
-  function toolbar(tab){
-    const items = TABS.map(t => Object.assign({}, t,
-      t.id === 'gecmis' && S.labs.length ? { count:S.labs.length } : {}));
-    return K.Toolbar({
-      tabs:K.Subtabs({ items, value:tab, act:'lab-tab', aria:'Tahlil görünümü' }),
-      actions:html`${K.Button({ label:'Rapor yapıştır', icon:'flask', size:'sm', tone:'primary',
-        act:'open-paste' })}
-        ${K.Button({ label:'Elle gir', size:'sm', act:'open-manual' })}`,
-    });
-  }
 
   /* Yapistirma onizlemesi oturum boyunca burada durur; kaydedilene kadar
      hicbir sey depoya yazilmaz. */
   let preview = null;
 
-  /* ---------------------------------------------------------- paneller */
+  /* Girise yazilan ama henuz kaydedilmemis degerler. Sekme degistirip
+     geri donunce kaybolmasin diye ekranin disinda tutulur. */
+  let draft = { date:U.todayISO(), lab:'', values:{} };
 
-  function panelCard(panel){
-    const rows = SP.Bio.panelRows(panel.id);
-    const has = rows.filter(r => r.value != null).length;
-    const open = S.ui.labPanel === panel.id;
-    return K.Collapsible({
-      title:panel.name,
-      meta:has ? has + '/' + rows.length + ' ölçüldü' : 'hiç ölçülmedi',
-      act:'open-panel', data:{ 'data-id':panel.id }, open,
-      body:html`
-        <p class="small muted mt-2">${panel.note}</p>
-        <div class="mt-10">${map(rows, r => P.markerRow(r, {
-          trend:SP.Bio.trendOf(r.marker.id),
-          verdict:SP.Bio.trendVerdict(r.marker.id, SP.Bio.trendOf(r.marker.id)),
-        }))}</div>`,
+  function tabs(){
+    const items = TABS.map(t => {
+      if(t.id === 'gecmis' && S.labs.length) return Object.assign({}, t, { count:S.labs.length });
+      const n = Object.keys(draft.values).length;
+      if(t.id === 'giris' && n) return Object.assign({}, t, { count:n });
+      return t;
     });
+    return K.Subtabs({ items, value:S.ui.labTab, act:'lab-tab', aria:'Test görünümü' });
   }
 
-  function attentionCard(){
-    const rows = SP.Bio.attention().slice(0, 6);
-    if(!rows.length){
-      return K.Card({ title:'Dikkat isteyenler',
-        body:K.Notice({ tone:'ok', body:'Referans ya da hedef bandın dışında bir ölçüm yok.' }) });
+  /* ------------------------------------------------------------ süzgeç */
+
+  /* Ölçümü olan panel yoksa süzgeç çizilmez: boş bir süzgeç şeridi
+     kullanıcıya seçenek değil, iş verir. */
+  function panelFilter(){
+    const counts = {};
+    SP.BIOMARKERS.forEach(b => {
+      if(!M.latestOf(b.id)) return;
+      counts[b.panel] = (counts[b.panel] || 0) + 1;
+    });
+    const used = SP.PANELS.filter(p => counts[p.id]);
+    if(used.length < 2) return '';
+
+    const items = [{ id:'all', label:'Tümü', count:SP.Bio.summary().measured }]
+      .concat(used.map(p => ({ id:p.id, label:p.name.replace(/\s*paneli$/i, ''), count:counts[p.id] })));
+    return K.Subtabs({ items, value:S.ui.labFilter, act:'lab-filter', aria:'Panel süzgeci' });
+  }
+
+  /* ---------------------------------------------------------- sonuçlar */
+
+  /* Tek düz liste. Sıra: kırmızı bayrak → referans dışı → hedef dışı →
+     hedefte. İçinde arama yapılır, panele göre daraltılır. */
+  function resultRows(){
+    const q = (S.ui.labQuery || '').trim().toLocaleLowerCase('tr-TR');
+    const filter = S.ui.labFilter || 'all';
+    const rank = { danger:0, warn:1, info:2, ok:3, muted:4 };
+
+    return SP.BIOMARKERS
+      .map(b => {
+        const last = M.latestOf(b.id);
+        if(!last) return null;
+        return { marker:b, value:last.v, at:last.date, cert:last.cert,
+          status:SP.Bio.statusOf(b.id, last.v), ref:SP.Bio.refFor(b.id) };
+      })
+      .filter(Boolean)
+      .filter(r => filter === 'all' || r.marker.panel === filter)
+      .filter(r => !q || r.marker.name.toLocaleLowerCase('tr-TR').indexOf(q) >= 0
+        || (r.marker.aliases || []).some(a => a.toLocaleLowerCase('tr-TR').indexOf(q) >= 0))
+      .sort((a, b) => (rank[a.status.tone] ?? 9) - (rank[b.status.tone] ?? 9)
+        || a.marker.name.localeCompare(b.marker.name, 'tr'));
+  }
+
+  function resultsView(){
+    const rows = resultRows();
+    const total = SP.Bio.summary().measured;
+
+    if(!total){
+      return K.Card({ body:P.empty(
+        'Henüz hiç test girilmedi. Elindeki hastane raporunu yapıştırman yeterli.',
+        'Rapor yapıştır', 'open-paste') });
     }
-    return K.Card({
-      title:'Dikkat isteyenler', hint:'trend',
-      sub:'Önem sırasına göre',
-      body:K.Table({ tight:true,
-        headers:['Ölçüm', { label:'Değer', num:true }, 'Durum', 'Eğilim'],
-        rows:rows.map(a => [
-          html`<button class="linkbtn" data-act="open-marker" data-id="${a.marker.id}">${a.marker.name}</button>`,
-          html`<b class="num">${U.fmtNum(a.value)}</b> <span class="tiny dim">${a.marker.unit}</span>`,
-          K.Badge({ label:a.status.label, tone:a.status.tone }),
-          a.trend.ok
-            ? html`${raw(UI.trend(a.trend.dir))} <span class="small">${a.verdict.label}</span>`
-            : html`<span class="tiny dim">${a.trend.n}/${SP.Bio.MIN_POINTS} ölçüm</span>`,
-        ]) }),
-    });
+
+    const missing = SP.BIOMARKERS.filter(b => !M.latestOf(b.id));
+
+    return html`
+      <section class="sect">
+        <div class="sect__h">
+          <div class="sect__ht">
+            <div class="sect__eyebrow">Ölçülen</div>
+            <h2>Bütün sonuçlar</h2>
+            <p>Önem sırasına göre: önce bandın dışındakiler. Bir satıra tıklayınca
+              referans aralığı, hedef bandı ve beslenme bağı açılır.</p>
+          </div>
+          <div class="sect__actions">
+            ${K.Input({ id:'lab-q', value:S.ui.labQuery || '', placeholder:'Ölçüm ara…',
+              aria:'Ölçüm ara', change:'lab-query', debounce:200 })}
+          </div>
+        </div>
+
+        ${when(panelFilter(), () => html`<div class="mb-12">${raw(String(panelFilter()))}</div>`)}
+
+        ${when(!rows.length, () => K.Notice({ tone:'info',
+          body:'Bu süzgeçle eşleşen ölçüm yok.' }))}
+
+        ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
+          const tr = SP.Bio.trendOf(r.marker.id);
+          return html`
+            <button class="resrow" data-act="open-marker" data-id="${r.marker.id}">
+              <span class="resrow__dot resrow__dot--${r.status.tone}" aria-hidden="true"></span>
+              <span class="resrow__name">
+                <b>${r.marker.name}</b>
+                <span class="resrow__panel">${SP.PANEL_BY_ID[r.marker.panel]
+                  ? SP.PANEL_BY_ID[r.marker.panel].name.replace(/\s*paneli$/i, '') : ''}</span>
+              </span>
+              <span class="resrow__val num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
+              <span class="resrow__bar">${when(r.ref,
+                () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit)))}</span>
+              <span class="resrow__status">${K.Badge({ label:r.status.label, tone:r.status.tone })}</span>
+              <span class="resrow__trend tiny dim">${when(tr.ok,
+                () => html`${raw(UI.trend(tr.dir))}`)} ${r.at ? U.fmtShort(r.at) : ''}</span>
+            </button>`;
+        })}</div>`)}
+
+        ${when(missing.length, () => html`<div class="mt-16">${K.Collapsible({
+          title:'Hiç ölçülmemiş', meta:missing.length + ' ölçüm',
+          act:'toggle-empty', open:!!S.ui.labShowEmpty,
+          body:html`<p class="small muted mt-2">Bu ölçümler için hiç değer girilmedi.
+              Eksik veri sıfır sayılmaz; hesaplarda yok kabul edilir.</p>
+            <div class="chips mt-10">${map(missing, b => html`
+              <span class="chip chip--muted">${b.name}</span>`)}</div>` })}</div>`)}
+      </section>`;
   }
 
-  function overdueCard(){
-    const rows = SP.Bio.overdue();
-    if(!rows.length) return null;
-    return K.Card({ title:'Ölçüm borcu', sub:rows.length + ' panel',
-      body:html`<div class="list">${map(rows, r => html`
-        <div class="listitem"><div class="grow"><b class="small">${r.panel.name}</b>
-          <div class="tiny dim">${r.note}</div></div>
-          ${K.Badge({ label:r.days == null ? 'hiç' : r.days + ' gün', tone:'warn' })}</div>`)}</div>` });
+  /* ---------------------------------------------------------- test gir
+
+     Kapsamlı bir hastane testi tek formda girilir. Panel seçimi yoktur:
+     rapor elinde nasıl duruyorsa öyle, yukarıdan aşağı yazılır. Arama
+     kutusu uzun listeyi anında daraltır. */
+
+  function entryView(){
+    const q = (S.ui.labQuery || '').trim().toLocaleLowerCase('tr-TR');
+    const list = SP.BIOMARKERS.filter(b => !SP.DERIVED[b.id]).filter(b => !q
+      || b.name.toLocaleLowerCase('tr-TR').indexOf(q) >= 0
+      || (b.aliases || []).some(a => a.toLocaleLowerCase('tr-TR').indexOf(q) >= 0));
+
+    const filled = Object.keys(draft.values).length;
+
+    return html`
+      <section class="sect">
+        <div class="sect__h">
+          <div class="sect__ht">
+            <div class="sect__eyebrow">Giriş</div>
+            <h2>Kapsamlı test girişi</h2>
+            <p>Elindeki rapordaki bütün değerleri tek seferde yaz. Boş bıraktığın
+              satır yok sayılır — sıfır olarak kaydedilmez. Raporun metni varsa
+              yapıştırmak daha hızlıdır.</p>
+          </div>
+          <div class="sect__actions">
+            ${K.Button({ label:'Rapor yapıştır', icon:'flask', size:'sm', tone:'primary',
+              act:'open-paste' })}
+          </div>
+        </div>
+
+        <div class="entryhead">
+          ${K.Field({ label:'Test tarihi',
+            input:K.Input({ id:'entry-date', type:'date', value:draft.date, change:'entry-date' }) })}
+          ${K.Field({ label:'Laboratuvar', hint:'isteğe bağlı',
+            input:K.Input({ id:'entry-lab', value:draft.lab, placeholder:'Hangi laboratuvar?',
+              change:'entry-lab' }) })}
+          ${K.Field({ label:'Ölçüm ara',
+            input:K.Input({ id:'entry-q', value:S.ui.labQuery || '', placeholder:'ferritin, b12, tsh…',
+              change:'lab-query', debounce:200 }) })}
+        </div>
+
+        ${when(!list.length, () => K.Notice({ tone:'info', class:'mt-12',
+          body:'Bu adla bir ölçüm bulunamadı.' }))}
+
+        <div class="entrygrid mt-16">${map(list, b => {
+          const has = draft.values[b.id] != null;
+          const lastv = M.latestOf(b.id);
+          return html`
+            <label class="${cls('entryrow', has && 'is-filled')}">
+              <span class="entryrow__name">${b.name}
+                <span class="entryrow__unit">${b.unit}</span></span>
+              <input class="entryrow__in num" type="number" step="any" inputmode="decimal"
+                id="e-${b.id}" data-change="entry-val" data-id="${b.id}"
+                value="${has ? draft.values[b.id] : ''}"
+                placeholder="${lastv ? U.fmtNum(lastv.v) : '—'}"
+                aria-label="${b.name + ' (' + b.unit + ')'}"/>
+            </label>`;
+        })}</div>
+
+        <div class="entrybar">
+          <span class="small">${filled ? filled + ' değer yazıldı' : 'Henüz değer yazılmadı'}
+            ${when(filled, () => html`<span class="dim"> · kaydedilene kadar hiçbir şey yazılmaz</span>`)}</span>
+          <span class="row-sm">
+            ${when(filled, () => K.Button({ label:'Temizle', size:'sm', act:'entry-clear' }))}
+            ${K.Button({ label:'Testi kaydet', tone:'primary', act:'entry-save', disabled:!filled })}
+          </span>
+        </div>
+      </section>`;
   }
 
-  /* ------------------------------------------------------------- egilim */
+  /* ------------------------------------------------------------- eğilim */
 
-  function trendCard(){
+  function trendView(){
     const id = S.ui.trendMarker;
     const b = SP.BIO_BY_ID[id];
     const series = M.seriesOf(id);
@@ -104,30 +235,38 @@ SP.Screens.labs = (function(){
     const options = (measured.length ? measured : SP.BIOMARKERS)
       .map(x => ({ value:x.id, label:x.name }));
 
-    return K.Card({
-      title:'Bireysel eğilim', hint:'trend',
-      sub:b ? b.name : '',
-      actions:K.Select({ value:id, change:'pick-marker', options }),
-      body:html`
+    return html`
+      <section class="sect">
+        <div class="sect__h">
+          <div class="sect__ht">
+            <div class="sect__eyebrow">Tek ölçüm</div>
+            <h2>${b ? b.name : 'Eğilim'}</h2>
+            <p>Bir ölçüm başkasıyla değil, KENDİ geçmişiyle kıyaslanır.
+              Yön en az ${SP.Bio.MIN_POINTS} ölçümle söylenir.</p>
+          </div>
+          <div class="sect__actions">${K.Select({ value:id, change:'pick-marker', options })}</div>
+        </div>
+
         ${when(series.length < 2, () => K.Notice({ tone:'info',
           body:'Grafik için en az iki ölçüm gerekir. Şu an ' + series.length + ' var.' }))}
         ${when(series.length >= 2, () => html`
-          ${raw(UI.lineChart([{ data:series.map(s => s.v) }], {
-            labels:series.map(s => U.fmtShort(s.date)),
-            band:r && r.optimal ? r.optimal : (r ? r.ref : null),
-            height:200,
-          }))}
-          <div class="cols-3 mt-12">
-            ${K.Stat({ label:'Son değer', value:U.fmtNum(series[series.length - 1].v), unit:b.unit })}
-            ${K.Stat({ label:'Ölçüm sayısı', value:String(series.length) })}
-            ${K.Stat({ label:'90 günde', value:tr.ok ? (tr.pct > 0 ? '+' : '') + U.fmtNet(tr.pct) : '—', unit:'%' })}
-          </div>
-          ${K.Notice({ tone:vd.tone === 'muted' ? 'info' : vd.tone, class:'mt-12',
-            body:tr.ok ? vd.text : tr.note })}
-          ${when(r && r.ref, () => html`<div class="mt-12">
-            ${raw(UI.rangeBar(series[series.length - 1].v, r.ref, r.optimal, b.unit))}</div>`)}
-          <p class="small muted mt-10">${b.note}</p>`)}`,
-    });
+          ${K.Card({ body:html`
+            ${raw(UI.lineChart([{ data:series.map(s => s.v) }], {
+              labels:series.map(s => U.fmtShort(s.date)),
+              band:r && r.optimal ? r.optimal : (r ? r.ref : null),
+              height:220,
+            }))}
+            <div class="cols-3 mt-16">
+              ${K.Stat({ label:'Son değer', value:U.fmtNum(series[series.length - 1].v), unit:b.unit })}
+              ${K.Stat({ label:'Ölçüm sayısı', value:String(series.length) })}
+              ${K.Stat({ label:'90 günde', value:tr.ok ? (tr.pct > 0 ? '+' : '') + U.fmtNet(tr.pct) : '—', unit:'%' })}
+            </div>
+            ${K.Notice({ tone:vd.tone === 'muted' ? 'info' : vd.tone, class:'mt-16',
+              body:tr.ok ? vd.text : tr.note })}
+            ${when(r && r.ref, () => html`<div class="mt-16">
+              ${raw(UI.rangeBar(series[series.length - 1].v, r.ref, r.optimal, b.unit))}</div>`)}
+            <p class="small muted mt-10">${b.note}</p>` })}`)}
+      </section>`;
   }
 
   function markerSheetBody(id){
@@ -164,28 +303,36 @@ SP.Screens.labs = (function(){
     ]));
   }
 
-  /* -------------------------------------------------------------- gecmis */
+  /* -------------------------------------------------------------- geçmiş */
 
-  function historyCard(){
+  function historyView(){
     if(!S.labs.length){
-      return K.Card({ title:'Tahlil geçmişi',
-        body:P.empty('Henüz tahlil girilmedi.', 'Rapor yapıştır', 'open-paste') });
+      return html`<section class="sect">${K.Card({
+        body:P.empty('Henüz test girilmedi.', 'Rapor yapıştır', 'open-paste') })}</section>`;
     }
-    return K.Card({
-      title:'Tahlil geçmişi', sub:S.labs.length + ' oturum',
-      body:html`<div class="list">${map(S.labs.slice().reverse(), l => html`
-        <div class="listitem">
-          <div class="grow">
-            <b class="small">${U.fmtDate(l.date)}</b>
-            ${when(l.lab, () => html`<span class="tiny dim"> · ${l.lab}</span>`)}
-            <div class="tiny dim">${Object.keys(l.values).length} değer
-              · ${l.source === 'paste' ? 'yapıştırıldı' : 'elle girildi'}</div>
+    return html`
+      <section class="sect">
+        <div class="sect__h">
+          <div class="sect__ht">
+            <div class="sect__eyebrow">Kayıt</div>
+            <h2>Test geçmişi</h2>
+            <p>Her satır bir test oturumudur. Aynı güne ikinci kez girilen
+              değerler o oturumun üstüne yazılır.</p>
           </div>
-          ${K.Button({ label:'Aç', size:'sm', act:'open-lab', data:{ 'data-id':l.id } })}
-          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
-            act:'del-lab', data:{ 'data-id':l.id } })}
-        </div>`)}</div>`,
-    });
+        </div>
+        <div class="list">${map(S.labs.slice().reverse(), l => html`
+          <div class="listitem">
+            <div class="grow">
+              <b class="small">${U.fmtDate(l.date)}</b>
+              ${when(l.lab, () => html`<span class="tiny dim"> · ${l.lab}</span>`)}
+              <div class="tiny dim">${Object.keys(l.values).length} değer
+                · ${l.source === 'paste' ? 'yapıştırıldı' : 'elle girildi'}</div>
+            </div>
+            ${K.Button({ label:'Aç', size:'sm', act:'open-lab', data:{ 'data-id':l.id } })}
+            ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
+              act:'del-lab', data:{ 'data-id':l.id } })}
+          </div>`)}</div>
+      </section>`;
   }
 
   function labSheetBody(l){
@@ -207,14 +354,14 @@ SP.Screens.labs = (function(){
 
   function pasteSheet(){
     UI.sheet({
-      title:'Tahlil raporunu yapıştır',
+      title:'Test raporunu yapıştır',
       subtitle:'Metni olduğu gibi yapıştır — değerler ayıklanıp şemaya oturur',
       wide:true,
       body:String(K.Stack([
         K.Notice({ tone:'info', body:'Ayıklayıcı emin olamadığı satırı atmaz. '
           + 'Eşleşmeyen satırlar aşağıda listelenir; istersen elle bağlarsın.' }),
-        K.Field({ label:'Tahlil tarihi',
-          input:K.Input({ id:'paste-date', type:'date', value:U.todayISO() }) }),
+        K.Field({ label:'Test tarihi',
+          input:K.Input({ id:'paste-date', type:'date', value:draft.date }) }),
         K.Field({ label:'Laboratuvar (isteğe bağlı)',
           input:K.Input({ id:'paste-lab', placeholder:'Hangi laboratuvar?' }) }),
         K.Field({ label:'Rapor metni',
@@ -248,32 +395,12 @@ SP.Screens.labs = (function(){
           body:html`<ul class="bullets small muted mt-10">
             ${map(p.unmatched.slice(0, 40), x => html`<li>${x.line}</li>`)}</ul>
             <p class="small muted">Bu satırlarda bilinen bir ölçüm adı bulunamadı.
-              Değerleri elle girebilirsin.</p>` })),
+              Değerleri «Test gir» sayfasından elle yazabilirsin.</p>` })),
       ])),
       footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
         ${K.Button({ label:'Kaydet', tone:'primary', act:'save-paste',
           disabled:!p.rows.filter(r => !r.skip).length })}`),
       noFocus:true,
-    });
-  }
-
-  function manualSheet(){
-    const panel = SP.PANELS.find(x => x.id === (S.ui.labPanel || 'hemogram')) || SP.PANELS[2];
-    const markers = SP.BIOMARKERS.filter(b => b.panel === panel.id);
-    UI.sheet({
-      title:'Elle tahlil gir', subtitle:panel.name, wide:true,
-      body:String(K.Stack([
-        K.Field({ label:'Tarih', input:K.Input({ id:'man-date', type:'date', value:U.todayISO() }) }),
-        K.Field({ label:'Panel',
-          input:K.Select({ id:'man-panel', change:'pick-manual-panel', value:panel.id,
-            options:SP.PANELS.map(p => ({ value:p.id, label:p.name })) }) }),
-        html`<div class="grid-form">${map(markers, b => K.Field({
-          label:b.name + ' (' + b.unit + ')',
-          input:K.Input({ id:'man-' + b.id, type:'number', numeric:true, step:'any' }),
-        }))}</div>`,
-      ])),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'save-manual', data:{ 'data-panel':panel.id } })}`),
     });
   }
 
@@ -283,33 +410,22 @@ SP.Screens.labs = (function(){
     const tab = S.ui.labTab;
     const flags = M.openFlags();
 
-    const body = tab === 'trend' ? K.Span(12, trendCard())
-      : tab === 'gecmis' ? K.Span(12, historyCard())
-      : K.Span(8, K.Stack([attentionCard(), map(SP.PANELS, panelCard)]));
-
-    return String(K.Grid([
-      when(flags.length, () => K.Span(12, K.Stack(map(flags, P.flagCard), 'sm'))),
-      K.Span(12, toolbar(tab)),
-      body,
-      when(tab === 'panel', () => K.Span(4, K.Stack([
-        overdueCard(),
-        K.Card({ title:'Hesaplanan ölçümler', hint:'derived',
-          body:html`<ul class="bullets small muted">${map(Object.keys(SP.DERIVED), id => {
-            const b = SP.BIO_BY_ID[id];
-            return html`<li><b>${b.name}</b> — ${SP.DERIVED[id].note}</li>`;
-          })}</ul>` }),
-        K.Card({ title:'Sınır', body:html`<p class="small">${SP.CLINICAL.disclaimer}</p>` }),
-      ]))),
-      K.Span(12, raw(UI.rail(['ref-range', 'optimal-band', 'trend', 'red-flag', 'derived', 'lab-paste']))),
-    ]));
+    return String(html`
+      ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
+      <div class="mb-20">${tabs()}</div>
+      ${tab === 'giris' ? entryView()
+        : tab === 'gecmis' ? historyView()
+        : tab === 'trend' ? trendView()
+        : resultsView()}
+      ${when(tab === 'sonuc', () => html`<div class="mt-24">
+        ${P.clinicalNote()}</div>`)}
+      <div class="mt-24">${raw(UI.rail(['ref-range', 'optimal-band', 'trend', 'red-flag', 'derived', 'lab-paste']))}</div>`);
   }
 
   const handle = {
-    async 'lab-tab'(el){ S.ui.labTab = el.dataset.tab; SP.App.render(); },
-    async 'open-panel'(el){
-      S.ui.labPanel = S.ui.labPanel === el.dataset.id ? null : el.dataset.id;
-      SP.App.render();
-    },
+    async 'lab-tab'(el){ S.ui.labTab = el.dataset.tab; S.ui.labQuery = ''; SP.App.render(); },
+    async 'lab-filter'(el){ S.ui.labFilter = el.dataset.tab; SP.App.render(); },
+    async 'toggle-empty'(){ S.ui.labShowEmpty = !S.ui.labShowEmpty; SP.App.render(); },
     async 'open-marker'(el){
       const b = SP.BIO_BY_ID[el.dataset.id];
       UI.sheet({ title:b.name, subtitle:b.unit, wide:true,
@@ -326,15 +442,44 @@ SP.Screens.labs = (function(){
     async 'open-lab'(el){
       const l = S.labs.find(x => x.id === el.dataset.id);
       if(!l) return;
-      UI.sheet({ title:U.fmtDate(l.date), subtitle:l.lab || 'tahlil oturumu',
+      UI.sheet({ title:U.fmtDate(l.date), subtitle:l.lab || 'test oturumu',
         wide:true, body:labSheetBody(l), noFocus:true,
         footer:String(K.Button({ label:'Kapat', act:'sheet-close' })) });
     },
     async 'del-lab'(el){
       const id = el.dataset.id;
-      UI.confirmSheet('Tahlili sil', 'Bu oturumdaki bütün değerler silinir. Geri alınamaz.',
+      UI.confirmSheet('Testi sil', 'Bu oturumdaki bütün değerler silinir. Geri alınamaz.',
         async () => { await M.deleteLab(id); UI.closeSheet(); UI.toast('Silindi'); SP.App.render(); }, true);
     },
+
+    /* ---- kapsamlı giriş ---- */
+    async 'entry-clear'(){
+      draft.values = {};
+      UI.toast('Giriş temizlendi');
+      SP.App.render();
+    },
+    async 'entry-save'(){
+      const ids = Object.keys(draft.values);
+      if(!ids.length){ UI.toast('Hiç değer yazılmadı'); return; }
+      /* Ayni tarihte oturum varsa ustune yazilir; bir gunun testi tek kayittir. */
+      const existing = S.labs.find(l => l.date === draft.date);
+      const rec = existing || M.newLab(draft.date);
+      if(draft.lab) rec.lab = draft.lab;
+      ids.forEach(id => {
+        const b = SP.BIO_BY_ID[id];
+        if(!b) return;
+        rec.values[id] = { v:draft.values[id], cert:'measured', unit:b.unit };
+      });
+      await M.saveLab(rec);
+      draft = { date:U.todayISO(), lab:'', values:{} };
+      S.ui.labTab = 'sonuc';
+      const flags = M.openFlags().filter(f => !f.ack);
+      UI.toast(ids.length + ' değer kaydedildi'
+        + (flags.length ? ' · ' + flags.length + ' kırmızı bayrak' : ''));
+      SP.App.render();
+    },
+
+    /* ---- yapıştırma ---- */
     async 'open-paste'(){ pasteSheet(); },
     async 'run-paste'(){
       const text = (document.getElementById('paste-text') || {}).value || '';
@@ -362,47 +507,80 @@ SP.Screens.labs = (function(){
       await M.saveLab(rec);
       preview = null;
       UI.closeSheet();
+      S.ui.labTab = 'sonuc';
       const flags = M.openFlags().filter(f => !f.ack);
       UI.toast(n + ' değer kaydedildi' + (flags.length ? ' · ' + flags.length + ' kırmızı bayrak' : ''));
-      SP.App.render();
-    },
-    async 'open-manual'(){ manualSheet(); },
-    async 'save-manual'(el){
-      const panel = el.dataset.panel;
-      const date = (document.getElementById('man-date') || {}).value || U.todayISO();
-      /* Ayni tarihte oturum varsa ustune yazilir; bir gunun tahlili tek kayittir. */
-      const existing = S.labs.find(l => l.date === date);
-      const rec = existing || M.newLab(date);
-      let n = 0;
-      SP.BIOMARKERS.filter(b => b.panel === panel).forEach(b => {
-        const input = document.getElementById('man-' + b.id);
-        if(!input || input.value.trim() === '') return;
-        rec.values[b.id] = { v:Number(input.value.replace(',', '.')), cert:'measured', unit:b.unit };
-        n++;
-      });
-      if(!n){ UI.toast('Hiç değer girilmedi'); return; }
-      await M.saveLab(rec);
-      UI.closeSheet();
-      UI.toast(n + ' değer kaydedildi');
       SP.App.render();
     },
   };
 
   const change = {
     async 'pick-marker'(el){ S.ui.trendMarker = el.value; SP.App.render(); },
-    async 'pick-manual-panel'(el){ S.ui.labPanel = el.value; manualSheet(); },
+    async 'lab-query'(el){ S.ui.labQuery = el.value; SP.App.render(); },
+    async 'entry-date'(el){ draft.date = el.value || U.todayISO(); },
+    async 'entry-lab'(el){ draft.lab = el.value; },
+    /* Her tuşta yeniden çizmez: değer taslakta durur, sayaç kaydetmede
+       güncellenir. Uzun formda her hanede sayfayı çizmek yazmayı bozar. */
+    async 'entry-val'(el){
+      const id = el.dataset.id;
+      const raw0 = String(el.value || '').trim().replace(',', '.');
+      if(raw0 === ''){ delete draft.values[id]; }
+      else{
+        const n = Number(raw0);
+        if(!isFinite(n)) return;
+        draft.values[id] = n;
+      }
+      el.closest('.entryrow').classList.toggle('is-filled', draft.values[id] != null);
+      const bar = document.querySelector('.entrybar .small');
+      const n2 = Object.keys(draft.values).length;
+      if(bar) bar.textContent = n2 ? n2 + ' değer yazıldı' : 'Henüz değer yazılmadı';
+      const save = document.querySelector('[data-act="entry-save"]');
+      if(save) save.disabled = !n2;
+    },
   };
 
   return {
     id:'labs',
-    title:'Tahliller',
+    title:'Testler',
+
+    /* Başlık durumun kendisidir: ekranın adı zaten üstte yazıyor. */
+    headline(){
+      const f = M.openFlags().filter(x => !x.ack).length;
+      if(f) return f + ' kırmızı bayrak açık.';
+      const s = SP.Bio.summary();
+      if(!s.measured) return 'Henüz test girilmedi.';
+      if(s.out) return s.out + ' ölçüm referans aralığının dışında.';
+      if(s.offTarget) return s.offTarget + ' ölçüm hedef bandın dışında.';
+      return 'Ölçümlerin tamamı hedef bandın içinde.';
+    },
+    lede(){
+      const s = SP.Bio.summary();
+      if(!s.measured){
+        return 'Herhangi bir kapsamlı hastane testinin sonucunu tek seferde girebilirsin. '
+          + 'Raporun metnini yapıştırman yeterli; değerler kendiliğinden şemaya oturur.';
+      }
+      return s.measured + ' ölçüm kayıtlı. Değerler organa göre bölünmez; '
+        + 'tek listede, önem sırasına göre durur.';
+    },
+    stats(){
+      const s = SP.Bio.summary();
+      if(!s.measured) return [];
+      return [
+        { value:s.measured, label:'ölçüm' },
+        { value:s.out, label:'referans dışı' },
+        { value:s.offTarget, label:'hedef dışı' },
+        { value:S.labs.length, label:'test' },
+      ];
+    },
     subtitle(){
       const s = SP.Bio.summary();
-      const f = M.openFlags().length;
-      if(f) return f + ' kırmızı bayrak açık';
-      return s.measured + ' ölçüm · ' + s.out + ' referans dışı · ' + s.offTarget + ' hedef dışı';
+      return s.measured + ' ölçüm · ' + s.out + ' referans dışı';
     },
-    actions(){ return ''; },
+    actions(){
+      return String(html`${K.Button({ label:'Test gir', icon:'flask', tone:'primary', size:'sm',
+        act:'lab-tab', data:{ 'data-tab':'giris' } })}
+        ${K.Button({ label:'Rapor yapıştır', size:'sm', act:'open-paste' })}`);
+    },
     render, handle, change,
   };
 })();

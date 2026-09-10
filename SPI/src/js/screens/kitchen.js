@@ -152,6 +152,15 @@ SP.Screens.kitchen = (function(){
   return {
     id:'kitchen',
     title:'Mutfak',
+    headline(){
+      const list = SP.Model.householdList();
+      if(list.length < 2) return 'Tek tencere, tek porsiyon.';
+      return 'Tek tencere, ' + list.length + ' ayrı porsiyon.';
+    },
+    lede(){
+      return 'Aynı yemek herkese pişer; kimin tabağına ne kadar gireceği '
+        + 'hedeflerden hesaplanır. Herkese ayrı yemek pişirme zorunluluğu kalkar.';
+    },
     subtitle(){
       const f = SP.FOOD_BY_ID[S.ui.kitchenDish || 'kuru-fasulye-etli'];
       return (f ? f.name : '') + ' · ' + U.fmtNum(S.ui.kitchenGrams) + ' g';

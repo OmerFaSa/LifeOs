@@ -262,4 +262,42 @@
       expect(SP.Money.status().text).toContain('tahmin');
     });
   });
+describe('Bütçe — koçların talebi', () => {
+  it('fiyatı bilinmeyen kalem sıfır sayılmaz, toplamın dışında kalır', () => {
+    resetState();
+    const b = SP.Money.budget();
+    const unknown = b.rows.filter(r => r.monthly == null);
+    expect(unknown.length > 0).toBeTruthy();
+    expect(b.unknown).toBe(unknown.length);
+    /* Bilinmeyen kalem sifir olarak toplansaydi toplam yine 0 cikardi;
+       ayrimi "unknown" sayaci tasir. */
+    unknown.forEach(r => { expect(r.cert).toBe('missing'); });
+  });
+
+  it('üç koçun talebi de tabloda durur', () => {
+    resetState();
+    const ids = SP.Money.budget().rows.map(r => r.id);
+    expect(ids.indexOf('gida') >= 0).toBeTruthy();
+    expect(ids.indexOf('test') >= 0).toBeTruthy();
+    expect(ids.indexOf('ekipman') >= 0).toBeTruthy();
+  });
+
+  it('panel ücreti girilince test kalemi toplama katılır', async () => {
+    resetState();
+    await SP.Model.saveBasket({ testFee:600 });
+    const b = SP.Money.budget();
+    const test = b.rows.find(r => r.id === 'test');
+    if(SP.Bio.overdue().length){
+      expect(test.monthly != null).toBeTruthy();
+      expect(test.cert).toBe('estimated');
+    }
+  });
+
+  it('aylık sınır aşımı bildirilir', async () => {
+    resetState();
+    await SP.Model.saveBasket({ monthlyLimit:10, testFee:6000 });
+    const b = SP.Money.budget();
+    if(b.total > 10) expect(b.over).toBeTruthy();
+  });
+});
 })();

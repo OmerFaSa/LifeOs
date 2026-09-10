@@ -17,10 +17,10 @@ SP.Palette = (function(){
     const out = [];
 
     /* ekranlar */
-    (SP.App ? SP.App.NAV : []).forEach(group => {
-      group.items.forEach(it => {
-        out.push({ id:'go:' + it.id, kind:'Ekran', label:it.label, hint:group.label,
-          run:() => SP.App.go(it.id) });
+    (SP.App ? SP.App.SECTIONS : []).forEach(sec => {
+      sec.views.forEach(v => {
+        out.push({ id:'go:' + v.route, kind:'Sayfa', label:v.label, hint:sec.label,
+          run:() => SP.App.go(v.route) });
       });
     });
 

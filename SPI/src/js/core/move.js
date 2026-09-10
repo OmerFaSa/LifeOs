@@ -165,13 +165,22 @@ SP.Move = (function(){
 
   /* Bes haftada bir yuk indirme haftasi. Sayac ilk antrenmandan baslar. */
   function deloadWeek(dateISO){
-    if(!SP.S.workouts.length) return { due:false };
+    /* Hic seans yoksa dongu HENUZ BASLAMAMISTIR. Eksik alanla donmek
+       cagiran ekranlarda "undefined/undefined" gibi ciktilar uretiyordu;
+       eksik veri sifir sayilmaz ama sekli de bozmaz. */
+    if(!SP.S.workouts.length){
+      return { due:false, started:false, week:0, inCycle:0,
+        every:SP.LOAD_RULES.deload.everyWeeks,
+        factor:SP.LOAD_RULES.deload.factor,
+        note:'Henüz seans kaydı yok; indirme döngüsü başlamadı.' };
+    }
     const first = SP.S.workouts[0].date;
     const weeks = Math.floor(U.diffDays(first, dateISO || U.todayISO()) / 7);
     const every = SP.LOAD_RULES.deload.everyWeeks;
     const inCycle = weeks % every;
     return {
       due:inCycle === every - 1,
+      started:true,
       week:weeks + 1, inCycle:inCycle + 1, every,
       factor:SP.LOAD_RULES.deload.factor,
       note:SP.LOAD_RULES.deload.note,

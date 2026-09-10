@@ -65,7 +65,7 @@ SP.Store = (function(){
     }catch(e){
       health.local = 'error';
       report('local-write', e, isQuotaError(e)
-        ? 'Tarayıcı depolama alanı doldu. Rehber → Veri bölümünden yedek alıp eski kayıtları temizle.'
+        ? 'Tarayıcı depolama alanı doldu. Ayarlar → Rehber → Veri bölümünden yedek alıp eski kayıtları temizle.'
         : 'Değişiklik bu cihaza kaydedilemedi.');
       return false;
     }

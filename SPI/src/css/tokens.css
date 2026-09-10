@@ -90,6 +90,7 @@
   --fs-lg:18.5px;
   --fs-xl:24px;
   --fs-hero:30px;     /* yalnız KPI sayısı */
+  --fs-display:44px;  /* yalnız bölüm başlığı (hero) */
 
   /* ---- hareket: tek easing, iki süre ---- */
   --ease:cubic-bezier(.2,.7,.3,1);
@@ -104,8 +105,9 @@
 
   /* ---- düzen ---- */
   --sidebar-w:236px;
+  --nav-h:62px;
   --topbar-h:60px;
-  --content-max:1560px;
+  --content-max:1200px;
 
   /* ================= KOYU PALET — tek tanım =================
      Buradaki değerler yalnızca aşağıdaki iki blokta kullanılır. */

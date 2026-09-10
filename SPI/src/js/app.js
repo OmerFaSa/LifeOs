@@ -10,39 +10,71 @@ SP.App = (function(){
   const U = SP.U, M = SP.Model, UI = SP.UI, S = SP.S;
   const { html, raw, when, map, cls, attrs } = SP.h;
 
-  /* Dört gezinme grubu.
+  /* Yedi bölüm.
 
-     Önceki düzende her modülün kendi başlığı vardı ve tek öğelik gruplar
-     ("EKONOMİ → Sepet") başlık gürültüsünden başka bir şey üretmiyordu.
-     Şimdi gruplar İŞE göre ayrılıyor: her gün girilen şey, izlenen dört
-     modül, değerlendirme ve sistem.
+     Kullanıcı bu sistemi "tahlil mi hareket mi" diye değil, hayatının hangi
+     alanına baktığına göre açar. Bölümler o alanlardır ve sırası kasıtlıdır:
+     önce ölçülen (test), sonra ölçüme göre karar verilen (besin, hareket),
+     sonra bunların bedeli (finans), sonra günün kaydı, sonra danışma, en
+     sonda ayar.
 
-     `short` alanı mobil alt çubuk içindir: orada etiket tek satıra sığmalı. */
-  const NAV = [
-    { label:'Günlük', items:[
-      { id:'today',  icon:'today', label:'Bugün',        short:'Bugün' },
-      { id:'vitals', icon:'pulse', label:'Günlük ölçüm', short:'Ölçüm' },
-    ]},
-    { label:'İzleme', items:[
-      { id:'labs',    icon:'flask',    label:'Tahliller', short:'Tahlil' },
-      { id:'meals',   icon:'meal',     label:'Öğünler',   short:'Öğün' },
-      { id:'kitchen', icon:'leaf',     label:'Mutfak',    short:'Mutfak' },
-      { id:'move',    icon:'dumbbell', label:'Hareket',   short:'Hareket' },
-      { id:'basket',  icon:'wallet',   label:'Sepet',     short:'Sepet' },
-    ]},
-    { label:'Değerlendirme', items:[
-      { id:'analytics', icon:'chart', label:'Analiz',   short:'Analiz' },
-      { id:'office',    icon:'users', label:'Ofis',     short:'Ofis' },
-      { id:'team',      icon:'zap',   label:'Danışma',  short:'Danışma' },
-      { id:'meeting',   icon:'list',  label:'Toplantı', short:'Toplantı' },
-    ]},
-    { label:'Sistem', items:[
-      { id:'family', icon:'heart', label:'Hane',   short:'Hane' },
-      { id:'guide',  icon:'guide', label:'Rehber', short:'Rehber' },
-    ]},
+     `views` bir bölümün sayfalarıdır. Tek sayfalı bölümde sayfa şeridi
+     çizilmez: tek sekmelik bir sekme çubuğu gürültüden başka bir şey
+     değildir. */
+  const SECTIONS = [
+    { id:'testler', num:'01', icon:'flask', label:'Testler',
+      note:'Hastane testini gir, sonucu izle',
+      views:[{ route:'labs', label:'Testler', icon:'flask' }] },
+
+    { id:'besin', num:'02', icon:'meal', label:'Besin',
+      note:'Bazal metabolizma, hedef ve öğün önerisi',
+      views:[
+        { route:'meals',   label:'Öğünler', icon:'meal' },
+        { route:'kitchen', label:'Mutfak',  icon:'leaf' },
+      ] },
+
+    { id:'hareket', num:'03', icon:'dumbbell', label:'Hareket',
+      note:'Kardiyo, kuvvet, esneklik ve dinlenme',
+      views:[{ route:'move', label:'Hareket', icon:'dumbbell' }] },
+
+    { id:'finans', num:'04', icon:'wallet', label:'Finans',
+      note:'Bu işin bütçesi',
+      views:[{ route:'basket', label:'Finans', icon:'wallet' }] },
+
+    { id:'gunluk', num:'05', icon:'today', label:'Günlük',
+      note:'Günün asgari kaydı',
+      views:[
+        { route:'today',  label:'Bugün', icon:'today' },
+        { route:'vitals', label:'Ölçüm', icon:'pulse' },
+      ] },
+
+    { id:'ofis', num:'06', icon:'users', label:'Ofis',
+      note:'Patron ve dört koç',
+      views:[
+        { route:'office',    label:'Masalar',  icon:'users' },
+        { route:'team',      label:'Danışma',  icon:'zap' },
+        { route:'meeting',   label:'Toplantı', icon:'list' },
+        { route:'analytics', label:'Analiz',   icon:'chart' },
+      ] },
+
+    { id:'ayarlar', num:'07', icon:'sliders', label:'Ayarlar',
+      note:'Hane, görünüm, veri ve rehber',
+      views:[
+        { route:'family', label:'Hane',   icon:'heart' },
+        { route:'guide',  label:'Rehber', icon:'guide' },
+      ] },
   ];
 
-  const MOBILE_TABS = ['today', 'vitals', 'meals', 'move', 'office'];
+  /* Yönlendirme kimlikleri değişmedi; değişen yalnızca kullanıcıya görünen
+     gruplama. Bu sayede komut paleti, testler ve derin bağlantılar bozulmaz. */
+  const SECTION_OF = (function(){
+    const m = {};
+    SECTIONS.forEach(sec => sec.views.forEach(v => { m[v.route] = sec; }));
+    return m;
+  })();
+
+  function sectionOf(route){ return SECTION_OF[route] || SECTIONS[4]; }
+
 
   function screen(){ return SP.Screens[S.route] || SP.Screens.today; }
 
@@ -86,70 +118,142 @@ SP.App = (function(){
     catch(e){ console.error(e); return fallback || ''; }
   }
 
-  function sidebarHtml(){
-    const streak = safe(() => SP.Calc.streak(), 0);
-    const m = safe(() => SP.Calc.minimumDay(), { done:0, total:4 });
+  /* Bölümün rozeti: içindeki sayfaların bekleyen işlerinin toplamı.
+     Sesli olan (kırmızı) sessiz olanı yutar. */
+  function sectionBadge(sec){
+    let quiet = 0, loud = 0;
+    sec.views.forEach(v => {
+      const b = safe(() => badgeFor(v.route), null);
+      if(!b) return;
+      const n = b.text === '!' ? 1 : Number(b.text) || 1;
+      if(b.quiet) quiet += n; else loud += n;
+    });
+    if(loud) return { text:String(loud), quiet:false };
+    if(quiet) return { text:String(quiet), quiet:true };
+    return null;
+  }
 
+  /* ---------- üst gezinme ----------
+
+     Sabit sol menü yerine ince bir site çubuğu. Yedi bölüm tek satırda
+     durur; dar ekranda menüye iner. Sağdaki üç araç her yerde aynı yerde
+     kalır: arama, görünüm, ayarlar. */
+  function sitenavHtml(sc){
+    const active = sectionOf(sc.id);
     return html`
-      <nav class="${cls('sidebar', S.sidebarOpen && 'is-open')}" id="sidebar" aria-label="Ana gezinme">
-        <div class="sidebar__head">
-          <div class="sidebar__mark">S</div>
-          <div class="sidebar__title"><b>SPİ</b><span>${brandLine()}</span></div>
-        </div>
+      <header class="sitenav" role="banner">
+        <div class="wrapc sitenav__in">
+          <button class="brand" data-act="go" data-route="today" aria-label="Bugün ekranına git">
+            <span class="brand__mark" aria-hidden="true">S</span>
+            <span class="brand__text"><b>SPİ</b><span>${brandLine()}</span></span>
+          </button>
 
-        <div class="sidebar__scroll">${map(NAV, group => html`
-          <div class="navgroup" role="group" aria-label="${group.label}">
-            <div class="navgroup__label" aria-hidden="true">${group.label}</div>
-            ${map(group.items, it => {
-              const b = safe(() => badgeFor(it.id), null);
-              const on = S.route === it.id;
-              return html`<button class="${cls('navitem', on && 'is-active')}" data-act="go" data-route="${it.id}"
-                ${when(on, () => attrs({ 'aria-current':'page' }))}>
-                ${raw(UI.icon(it.icon))}<span>${it.label}</span>
-                ${when(b, () => html`<span class="${cls('navitem__badge', b.quiet && 'is-quiet')}"
-                  aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
-              </button>`;
-            })}
-          </div>`)}
-        </div>
+          <nav class="navlinks" aria-label="Bölümler">${map(SECTIONS, sec => {
+            const on = sec.id === active.id;
+            const b = sectionBadge(sec);
+            return html`<button class="${cls('navlink', on && 'is-active')}"
+              data-act="go" data-route="${sec.views[0].route}"
+              ${when(on, () => attrs({ 'aria-current':'page' }))}>
+              ${raw(UI.icon(sec.icon))}<span>${sec.label}</span>
+              ${when(b, () => html`<span class="${cls('navlink__badge', b.quiet && 'is-quiet')}"
+                aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
+            </button>`;
+          })}</nav>
 
-        <div class="sidebar__foot">
-          <div class="countdown"><b class="num">${streak}</b><span>gün · asgari gün serisi</span></div>
-          <div class="weekmeter">
-            <div class="weekmeter__row"><span>Bugün</span><span class="num">${m.done}/${m.total}</span></div>
-            ${SP.C.Bar({ value:U.pct(m.done, m.total), tone:'' })}
+          <div class="navtools">
+            ${SP.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
+            ${SP.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema ve palet',
+              act:'open-appearance', data:{ id:'appearance-btn' } })}
+            ${SP.C.IconButton({ icon:'gear', aria:'Ayarlar', act:'go', data:{ 'data-route':'family' } })}
+            <span class="navtools__sep" aria-hidden="true"></span>
+            ${SP.C.IconButton({ icon:'menu', aria:'Bölümler', act:'toggle-menu', class:'sitenav__menu' })}
+          </div>
+        </div>
+      </header>`;
+  }
+
+  /* Dar ekranda bölümler tam ekran menüye açılır. Alt sekme çubuğu bir
+     panel dilidir; site dilinde karşılığı budur. */
+  function navsheetHtml(sc){
+    const active = sectionOf(sc.id);
+    return html`
+      <div class="navsheet" role="dialog" aria-label="Bölümler">
+        <div class="navsheet__head">
+          <div class="brand">
+            <span class="brand__mark" aria-hidden="true">S</span>
+            <span class="brand__text"><b>SPİ</b><span>${brandLine()}</span></span>
+          </div>
+          ${SP.C.IconButton({ icon:'close', aria:'Kapat', act:'toggle-menu' })}
+        </div>
+        <div class="navsheet__body">
+          <div class="navsheet__grid">${map(SECTIONS, sec => html`
+            <button class="${cls('navsheet__item', sec.id === active.id && 'is-active')}"
+              data-act="go" data-route="${sec.views[0].route}">
+              ${raw(UI.icon(sec.icon))}
+              <b>${sec.label}</b>
+              <span>${sec.note}</span>
+            </button>`)}
           </div>
           ${storeHealthHtml()}
         </div>
-      </nav>`;
+      </div>`;
   }
 
-  function tabbarHtml(){
-    return html`<nav class="tabbar" aria-label="Hızlı gezinme">${map(MOBILE_TABS, id => {
-      const item = NAV.reduce((f, g) => f || g.items.find(i => i.id === id), null);
-      if(!item) return '';
-      const on = S.route === id;
-      return html`<button class="${cls('tabbar__item', on && 'is-active')}" data-act="go" data-route="${id}"
-        aria-label="${item.label}" ${when(on, () => attrs({ 'aria-current':'page' }))}>
-        ${raw(UI.icon(item.icon))}<span>${item.short || item.label}</span></button>`;
-    })}</nav>`;
-  }
+  /* ---------- hero ----------
 
-  function topbarHtml(sc){
-    const screenActions = safe(() => sc.actions ? sc.actions() : '');
+     Her bölüm bir cümleyle açılır. Panel dilinde ekranın adı yazardı
+     ("Tahliller") ve durumu okumak için aşağı bakmak gerekirdi; burada
+     BAŞLIK durumun kendisidir, alt satır ne yapılacağını söyler.
+
+     `headline` ve `lede` ekranın kendi sözleşmesindendir; vermeyen ekran
+     için başlık ve alt başlık kullanılır. */
+  function heroHtml(sc){
+    const sec = sectionOf(sc.id);
+    const headline = safe(() => sc.headline ? sc.headline() : '') || sc.title;
+    const lede = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
+    const stats = safe(() => sc.stats ? sc.stats() : [], []) || [];
+    const actions = safe(() => sc.actions ? sc.actions() : '');
+
     return html`
-      <header class="topbar" role="banner">
-        ${SP.C.IconButton({ icon:'menu', aria:'Menü', act:'toggle-sidebar', class:'topbar__menu' })}
-        <div class="topbar__titles"><h1>${sc.title}</h1><p>${raw(safe(() => sc.subtitle()))}</p></div>
-        <div class="topbar__actions">
-          ${raw(screenActions)}
-          ${when(screenActions, () => html`<span class="topbar__sep" aria-hidden="true"></span>`)}
-          ${SP.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
-          ${SP.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema ve palet',
-            act:'open-appearance', data:{ id:'appearance-btn' } })}
-          ${SP.C.IconButton({ icon:'gear', aria:'Rehber ve ayarlar', act:'go', data:{ 'data-route':'guide' } })}
+      <div class="hero">
+        <div class="wrapc hero__in">
+          <div class="hero__main">
+            <div class="hero__eyebrow">
+              <span class="hero__num">${sec.num}</span>
+              ${raw(UI.icon(sec.icon))}
+              <span>${sec.label}</span>
+            </div>
+            <h1 class="hero__title">${headline}</h1>
+            ${when(lede, () => html`<p class="hero__lede">${raw(lede)}</p>`)}
+            ${when(actions, () => html`<div class="hero__actions">${raw(actions)}</div>`)}
+          </div>
+          ${when(stats.length, () => html`<div class="hero__side">${map(stats, st => html`
+            <div class="herostat">
+              <span class="herostat__value">${st.value}${when(st.unit,
+                () => html`<small>${st.unit}</small>`)}</span>
+              <span class="herostat__label">${st.label}</span>
+            </div>`)}</div>`)}
         </div>
-      </header>`;
+      </div>`;
+  }
+
+  /* Bölümün sayfaları. Tek sayfalıysa çizilmez. */
+  function pagenavHtml(sc){
+    const sec = sectionOf(sc.id);
+    if(sec.views.length < 2) return '';
+    return html`
+      <nav class="pagenav" aria-label="${sec.label + ' sayfaları'}">
+        <div class="wrapc pagenav__in">${map(sec.views, v => {
+          const on = v.route === sc.id;
+          const b = safe(() => badgeFor(v.route), null);
+          return html`<button class="${cls('pagelink', on && 'is-active')}"
+            data-act="go" data-route="${v.route}"
+            ${when(on, () => attrs({ 'aria-current':'page' }))}>
+            ${raw(UI.icon(v.icon))}<span>${v.label}</span>
+            ${when(b, () => html`<span class="pagelink__count">${b.text}</span>`)}
+          </button>`;
+        })}</div>
+      </nav>`;
   }
 
   /* ------------------------------------------------------------- görünüm
@@ -321,15 +425,15 @@ SP.App = (function(){
 
       document.getElementById('app').innerHTML = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
-        <div class="shell">
-          ${safe(sidebarHtml)}
-          <div class="shell__body">
-            ${topbarHtml(sc)}
-            <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
+        <div class="site">
+          ${safe(() => sitenavHtml(sc))}
+          ${safe(() => heroHtml(sc))}
+          ${safe(() => pagenavHtml(sc))}
+          <div class="site__body">
+            <main class="wrapc content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
           </div>
         </div>
-        ${tabbarHtml()}
-        ${when(S.sidebarOpen, () => html`<div class="scrim" data-act="toggle-sidebar"></div>`)}`);
+        ${when(S.sidebarOpen, () => safe(() => navsheetHtml(sc)))}`);
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
@@ -369,7 +473,7 @@ SP.App = (function(){
   /* ---------------------------------------------------------- küresel eylemler */
   const globalHandle = {
     async go(el){ go(el.dataset.route); },
-    async 'toggle-sidebar'(){ S.sidebarOpen = !S.sidebarOpen; render(); },
+    async 'toggle-menu'(){ S.sidebarOpen = !S.sidebarOpen; render(); },
     async hint(el){
       if(UI.isHintOpen() && el.dataset.hint === UI._lastHint){ UI.closeHint(); UI._lastHint = null; return; }
       UI._lastHint = el.dataset.hint;
@@ -623,7 +727,7 @@ SP.App = (function(){
     }
   }
 
-  return { boot, render, go, applyTheme, NAV, THEMES, installManifest,
+  return { boot, render, go, applyTheme, SECTIONS, sectionOf, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen };
 })();
 

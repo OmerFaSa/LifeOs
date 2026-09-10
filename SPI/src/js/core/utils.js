@@ -138,9 +138,19 @@ SP.U = (function(){
     };
   }
 
+  /* Son n gunun ISO tarihleri, ESKIDEN YENIYE. Bir pencereyi gezerken
+     sirali olmasi onemli: ilk yarisi gecen hafta, ikinci yarisi bu hafta
+     gibi karsilastirmalar bu siraya dayanir. */
+  function lastDays(n, endISO){
+    const end = parse(endISO || todayISO());
+    const out = [];
+    for(let i = n - 1; i >= 0; i--) out.push(iso(addDays(end, -i)));
+    return out;
+  }
+
   return {
     MONTHS, MONTHS_SHORT, DAY_MS,
-    pad2, iso, parse, today, todayISO, addDays, diffDays, weekdayIndex,
+    pad2, iso, parse, today, todayISO, addDays, diffDays, weekdayIndex, lastDays,
     fmtDate, fmtShort, fmtRange, monthName, monthKey, relativeDay,
     median, round, clamp, sum, pct, fmtNet, fmtNum, fmtMin, fmtClock,
     esc, uid, slug, plural, norm, debounce,

@@ -360,6 +360,7 @@ SP.BIOMARKERS = [
 
 /* Hizli erisim tablolari — ekranlar ve ayristirici id ile arar. */
 SP.BIO_BY_ID = SP.BIOMARKERS.reduce(function(acc, b){ acc[b.id] = b; return acc; }, {});
+SP.PANEL_BY_ID = SP.PANELS.reduce(function(acc, p){ acc[p.id] = p; return acc; }, {});
 
 /* Turetilmis olcumlerin formulleri.
    Her biri girdi id'lerini ve hesabi tasir; girdi eksikse null doner ve

@@ -181,6 +181,25 @@ SP.Screens.vitals = (function(){
   return {
     id:'vitals',
     title:'Günlük ölçüm',
+    headline(){
+      const r = SP.Move.readiness(shownDate());
+      if(!r.ok) return 'Bugünün ölçümü girilmedi.';
+      return 'Toparlanma ' + r.band.label.toLocaleLowerCase('tr-TR') + '.';
+    },
+    lede(){
+      const r = SP.Move.readiness(shownDate());
+      if(!r.ok) return 'Uyku süresi tek başına bile anlamlı bir toparlanma skoru üretir. '
+        + 'Girilmeyen ölçüm sıfır sayılmaz; ağırlığı kalan girdilere dağıtılır.';
+      return r.band.order
+        + (r.missing.length ? ' Eksik girdi: ' + r.missing.join(', ') + '.' : '');
+    },
+    stats(){
+      const r = SP.Move.readiness(shownDate());
+      if(!r.ok) return [];
+      return [{ value:r.score, unit:'/100', label:'toparlanma' }]
+        .concat(r.parts.filter(p => p.score != null).slice(0, 3)
+          .map(p => ({ value:Math.round(p.score), label:p.label.toLocaleLowerCase('tr-TR') })));
+    },
     subtitle(){
       const d = shownDate();
       const r = SP.Move.readiness(d);

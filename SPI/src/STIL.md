@@ -93,42 +93,88 @@ Dikkat çekmek için animasyon yoktur: yanıp sönme, zıplama, sürekli döngü
 (iskelet ve açılış çubuğu dışında) kullanılmaz. Bir kırmızı bayrak yanıp
 sönerek değil, sayfanın en üstünde durarak dikkat çeker.
 
+## Düzen — panel değil site
+
+Önceki düzen bir yönetim panelinin diliyle konuşuyordu: solda sabit bir menü
+sütunu, üstte bir başlık çubuğu, altta üst üste yığılmış kartlar. O dil bir
+araç kutusuna yakışır; günde birkaç kez açılıp okunan kişisel bir sağlık
+sistemine değil.
+
+Kabuk üç parçadır:
+
+| Parça | Ne yapar |
+|---|---|
+| `sitenav` | İnce, yapışkan üst gezinme — yedi bölüm tek satırda |
+| `hero` | Bölümün açılış bandı: **durum tek cümlede** yazar |
+| `sect` | İçeriğin nefes alan bölümleri — kart yığını değil |
+
+**İçerik ortalanır ve genişliği sınırlıdır** (`--content-max` 1200px). Ekran
+büyüdükçe satırlar uzamaz, kenar boşluğu büyür. Uzun satır okunmaz.
+
+### Hero kuralı
+
+Panel dilinde başlıkta ekranın **adı** yazardı («Tahliller») ve durumu okumak
+için aşağı bakmak gerekirdi. Site dilinde başlık **durumun kendisidir**:
+
+```
+01 · TESTLER                     ← bölüm (eyebrow)
+1 ölçüm referans aralığının dışında.   ← durum (h1)
+12 ölçüm kayıtlı. Değerler organa göre bölünmez…  ← ne yapılacağı (lede)
+[Test gir] [Rapor yapıştır]      ← eylem
+                          12   1   6   2   ← özet sayılar (stats)
+```
+
+Ekran sözleşmesi bu üçünü isteğe bağlı olarak verir:
+
+```js
+{ id, title, headline?(), lede?(), stats?(), actions(), render(), handle, change }
+```
+
+`headline` yoksa `title`, `lede` yoksa `subtitle()` kullanılır. `stats`
+**en fazla dört** sayı döndürür — dördü de tek bakışta taranabilmeli.
+
+Aynı cümle bir ekranda iki kez görünmez: hero sıradaki hamleyi söylüyorsa
+gövdede onu tekrarlayan kart bulunmaz.
+
 ## Gezinme
 
-Dört gezinme grubu, on üç ekran. Grup **iş türüne** göre ayrılır, alana göre
-değil: kullanıcı «tahlil mi hareket mi» diye değil «girecek miyim, bakacak
-mıyım» diye düşünür.
+Yedi bölüm, on üç sayfa. Bölüm alana göre değil **işe** göre ayrılır.
 
-| Grup | Ekranlar |
+| # | Bölüm | Sayfalar |
+|---|---|---|
+| 01 | Testler | Testler |
+| 02 | Besin | Öğünler · Mutfak |
+| 03 | Hareket | Hareket |
+| 04 | Finans | Finans |
+| 05 | Günlük | Bugün · Ölçüm |
+| 06 | Ofis | Masalar · Danışma · Toplantı · Analiz |
+| 07 | Ayarlar | Hane · Rehber |
+
+Üst çubukta etkin bölümün altında ince bir çizgi durur — hap değil, site
+gezinmesi dili. 860px altında bölümler tam ekran menüye iner (`navsheet`);
+alt sekme çubuğu yoktur, o bir panel dilidir.
+
+`pagenav` bölümün sayfalarını gösterir ve **yalnız birden fazla sayfa varsa**
+çizilir: tek sekmelik bir sekme çubuğu gürültüden başka bir şey değildir.
+
+### Ekran içi sekmeler
+
+Ekranın kendi bölümleri hap biçimli `Subtabs`'tır: seçilen dolu, seçilmeyen
+boş. Alt çizgi kullanılmaz — dokunmatikte hedef alanı belirsizdir.
+
+| Ekran | Sekmeler |
 |---|---|
-| Günlük | Bugün · Günlük ölçüm |
-| İzleme | Tahliller · Öğünler · **Mutfak** · Hareket · Sepet |
-| Değerlendirme | Analiz · **Ofis** · Danışma · Toplantı |
-| Sistem | Hane · Rehber |
+| Testler | Sonuçlar · Test gir · Geçmiş · Eğilim |
+| Öğünler | Öğünler · Öneri · Besin değeri |
+| Hareket | Bugün · Kardiyo · Kuvvet · Esneklik · Dinlenme · İlerleme |
+| Finans | Bütçe · Sepet · İkame · Fiyat |
+| Analiz | Çapraz bağlar · Haftalık rapor · Seriler |
+| Rehber | Kullanım · Model · Veri · Sınırlar |
 
-Her ekranın bir de `short` etiketi vardır (Günlük ölçüm → Ölçüm). Uzun ad
-kenar çubuğunda, kısa ad mobil sekme çubuğunda görünür; etiket **hiçbir yerde
-sarmaz**. Mobil sekme çubuğu beş ekrandır: Bugün · Ölçüm · Öğün · Hareket · Ofis.
-
-### Alt sekmeler
-
-Alt sekme bir filtre değil **yer**dir: seçilen sekme hap biçiminde dolu görünür,
-seçilmeyen boş. Alt çizgi kullanılmaz — dokunmatikte hedef alanı belirsizdir.
-Sekmenin yanında sayı varsa (`subtab__count`) o sekmedeki kayıt sayısıdır.
-
-| Ekran | Alt sekmeler |
-|---|---|
-| Tahliller | paneller · eğilim · geçmiş |
-| Hareket | bugün · program · ilerleme |
-| Sepet | sepet · ikame · fiyat |
-| Analiz | çapraz bağlar · haftalık rapor · seriler |
-| Rehber | kullanım · model · veri · sınırlar |
-
-`Hareket` **iki** hap şeridi taşır: üstte bölüm (bugün/program/ilerleme), altta
-hareket kalıbı (Tümü · itiş · çekiş · diz · kalça · taşıma · gövde ·
-Dayanıklılık · Mobilite). İkinci şerit egzersiz listesini süzer; hangi kalıpta
-kaç hareket olduğu sekmenin üstünde yazar. Bu ayrım kasıtlıdır: antrenman
-ekranı tek uzun liste değil, net seçilebilir bölümlerdir.
+`Hareket` **iki** şerit taşır: üstte alan, kuvvetin içinde hareket kalıbı
+(itme · çekme · çömelme · kalça · gövde · taşıma). İkinci şerit yalnız
+kuvvette çizilir; kardiyoda ve esneklikte kalıp yoktur, orada şerit çizmek
+boş bir seçim sunmak olurdu.
 
 ### Görünüm paneli
 
@@ -137,12 +183,12 @@ içine gömülmez. Panel iki satırdır: üç tema düğmesi (Sistem · Açık �
 altında altı palet. Seçim profile yazılır ve anında uygulanır; `Escape`,
 dışarı tıklama ve pencere boyutu değişimi paneli kapatır.
 
-Üst çubuk tek satırdır ve şu sırayla okunur:
-ekran eylemi → ayraç → arama → palet → ayarlar. 620px altında ekran eylemi
-düğmesinin **etiketi** gizlenir, ikonu kalır; satır asla ikiye bölünmez.
+Üst çubuk tek satırdır ve şu sırayla okunur: marka → yedi bölüm → arama →
+palet → ayarlar → menü. Ekrana ait eylemler üst çubukta değil **hero'da**
+durur; bir eylem hangi sayfaya aitse orada görünür.
 
-`Mutfak` tek tencereyi hane hedeflerine göre paylaştırır; Öğünler ekranından
-açılır ama kendi gezinme yerine de sahiptir.
+`Mutfak` tek tencereyi hane hedeflerine göre paylaştırır; Besin bölümünün
+ikinci sayfasıdır.
 
 `Ofis` beş ajanlıdır: Patron ekibi yönetir, Kerem laboratuvara, Nesrin
 beslenmeye, Barış harekete, Sedef ekonomiye bakar. Ayrıntı için `src/OFIS.md`.
@@ -167,6 +213,10 @@ düzen: `C.Grid` `C.Span` `C.Stack` `C.Cols` `C.Row` `C.SectionTitle`
 - `C.PickCard` — seçilebilir kart (`on` niteliğiyle dolu görünür). Seans
   şablonu ve egzersiz seçimi bu kartlarla yapılır; onay kutusu kullanılmaz.
 
+Site düzenine ait sınıflar (bileşen değil, kabuk): `wrapc` (ortalayıcı),
+`sitenav` / `navlink` / `navtools`, `navsheet` (mobil bölüm menüsü),
+`hero` / `herostat`, `pagenav` / `pagelink`, `sect` / `sect__h`.
+
 SPİ'ye özel, veriye bağlı (`core/parts.js`):
 
 `P.cert` `P.markerRow` `P.flagCard` `P.avatar` `P.sourceBadge` `P.nutCell`
@@ -181,7 +231,11 @@ bayrak), `mealcard` / `mealitem` / `absorb` (öğün ve emilim), `foodrow` (besi
 arama), `splitrow` (hane paylaştırma), `pricerow` (fiyat), `minrow` (asgari gün),
 `readypart` (toparlanma bileşeni), `ladder` / `ladderstep` (ilerleme merdiveni),
 `kpi` (tek büyük sayı), `picks` / `pickcard` (seçim ızgarası), `appear`
-(görünüm paneli), `toolbar` (sekme + eylem satırı),
+(görünüm paneli), `toolbar` (sekme + eylem satırı), `reslist` / `resrow`
+(düz sonuç listesi), `entrygrid` / `entryrow` / `entrybar` (kapsamlı test
+girişi), `chain` (bazal metabolizmadan hedefe giden zincir), `link`
+(koçlar arası bağ), `sugg` / `suggfood` (gıda önerisi), `demand`
+(bütçe talebi),
 `quick` (hızlı giriş), `pasterow` (yapıştırılan tahlil), `nutgrid` / `nutcell`
 (besin öğesi ölçeri), `agentav` / `desk` / `note` (ofis masaları),
 `meetturn` (toplantı turu), `msg` (danışma sohbeti).

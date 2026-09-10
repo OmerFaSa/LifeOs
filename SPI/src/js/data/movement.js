@@ -100,6 +100,15 @@ SP.EXERCISES = [
       { id:'tempo',        name:'Tempo koşusu',            to:'haftada 1' },
     ] },
 
+  { id:'evde-sprint', name:'Evde sprint', kind:'cardio', pattern:null, met:8.0, equip:'yok',
+    cue:'Yerinde yüksek diz ya da kısa mekik koşusu. Yüksek şiddet kısa tutulur: '
+      + 'toparlanma düşükken bu hareket yapılmaz.',
+    levels:[
+      { id:'10-20', name:'10 sn yüksek / 50 sn yürüme × 6', to:'haftada 1' },
+      { id:'20-40', name:'20 sn yüksek / 40 sn yürüme × 8', to:'haftada 2' },
+      { id:'30-30', name:'30 sn yüksek / 30 sn yürüme × 10', to:'haftada 2' },
+    ] },
+
   /* --- mobilite --- */
   { id:'kalca-acma', name:'Kalça açma', kind:'mobility', pattern:null, met:2.5, equip:'yok',
     cue:'Masa başı çalışanın en çok ihtiyaç duyduğu hareket. Zorlamadan, nefesle.',
@@ -115,6 +124,30 @@ SP.EXERCISES = [
 ];
 
 SP.EX_BY_ID = SP.EXERCISES.reduce(function(acc, e){ acc[e.id] = e; return acc; }, {});
+
+/* ---------------------------------------------------------------- alanlar
+
+   Hareket ekrani egzersizleri KALIBA gore degil, kullanicinin gununu
+   planlarken dusundugu ALANA gore ayirir: "bugun kardiyo mu yapayim,
+   kuvvet mi?" Kalip (itme/cekme/comelme) bu alanlarin icinde bir
+   ayrintidir, ust duzey bir bolum degil.
+
+   Dinlenme de bir alandir. Antrenman programlarinda dinlenme cogu zaman
+   "yapilmayan sey" olarak gecer ve gorunmez olur; burada kendi sayfasi
+   vardir cunku yuk yonetiminin yarisi odur. */
+SP.AREAS = [
+  { id:'kardiyo', label:'Kardiyo', icon:'pulse', kind:'cardio',
+    note:'Yürüyüş, koşu ve evde sprint. Haftalık toplam süre %10\'dan hızlı artmaz.' },
+  { id:'kuvvet', label:'Kuvvet', icon:'dumbbell', kind:'strength',
+    note:'Vücut ağırlığıyla altı temel kalıp. İlerleme ağırlıkla değil, merdivenin '
+      + 'bir üst basamağıyla olur.' },
+  { id:'esneklik', label:'Esneklik', icon:'leaf', kind:'mobility',
+    note:'Mobilite akışları. Toparlanma düşükken ağır antrenmanın yerine geçer.' },
+  { id:'dinlenme', label:'Dinlenme', icon:'bed', kind:null,
+    note:'Yükün diğer yarısı. Boşluk günü değil, planın parçası.' },
+];
+
+SP.AREA_BY_ID = SP.AREAS.reduce(function(acc, a){ acc[a.id] = a; return acc; }, {});
 
 /* ---------------------------------------------------------------- toparlanma
 
@@ -189,6 +222,9 @@ SP.SESSION_TEMPLATES = [
     items:['kosu'], note:'Konuşma temposu. Nefes nefese kalınan gün bu gün değil.' },
   { id:'yuruyus-gunu', name:'Yürüyüş günü', kind:'cardio', minutes:40,
     items:['yuruyus'], note:'Aktif toparlanma. Ağır günün ertesi için.' },
+  { id:'sprint-gunu', name:'Sprint günü', kind:'cardio', minutes:20,
+    items:['evde-sprint'],
+    note:'Kısa ve yüksek şiddetli. Yalnız toparlanma yeşilken yapılır.' },
   { id:'mobilite', name:'Mobilite akışı', kind:'mobility', minutes:20,
     items:['kalca-acma', 'sirt-mobilite', 'ayak-bilegi'],
     note:'Toparlanma düşükken ağır antrenmanın yerine geçer.' },

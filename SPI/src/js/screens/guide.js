@@ -23,14 +23,14 @@ SP.Screens.guide = (function(){
 
   function howCard(){
     const rows = [
-      ['Öğün girmek', 'Öğünler ekranında tek satır yaz: «1 tabak etli kuru fasulye, 1 bardak ayran». '
+      ['Öğün girmek', 'Besin → Öğünler sayfasında tek satır yaz: «1 tabak etli kuru fasulye, 1 bardak ayran». '
         + 'Ev ölçüsü tanınır ve gramaj tahmin olarak işaretlenir.'],
-      ['Tahlil girmek', 'Tahliller → Rapor yapıştır. Laboratuvar metnini olduğu gibi yapıştır; '
+      ['Test girmek', 'Testler → Rapor yapıştır ya da Test gir. Laboratuvar metnini olduğu gibi yapıştır; '
         + 'eşleşen değerler listelenir, eşleşmeyen satırlar da gösterilir.'],
       ['Günlük ölçüm', 'Günlük ölçüm ekranında uyku, nabız ve hissettiğin hâl. '
         + 'Hepsi zorunlu değil: eksik girdi sıfır sayılmaz.'],
-      ['Antrenman', 'Hareket ekranı günün yük emrini verir. Emri toparlanma belirler, istek değil.'],
-      ['Sepet', 'Sepet ekranına haftalık alışverişi gir. Fiyatı kendi fişinden düzeltince '
+      ['Antrenman', 'Hareket bölümü kardiyo, kuvvet, esneklik ve dinlenme sayfalarına ayrılır; Bugün sayfası günün yük emrini verir. Emri toparlanma belirler, istek değil.'],
+      ['Bütçe', 'Finans → Sepet sayfasına haftalık alışverişi gir; Bütçe sayfası koçların talebini toplar. Fiyatı kendi fişinden düzeltince '
         + 'hesap tahminden ölçüme geçer.'],
       ['Ofis', 'Beş ajan kendi alanına bakar. Danışma ekranından birine doğrudan soru sorabilirsin.'],
     ];
@@ -181,7 +181,7 @@ SP.Screens.guide = (function(){
           rows:SP.RED_FLAGS.patterns.map(p => [html`<b>${p.label}</b>`,
             html`<span class="small">${p.detail}</span>`]) })}
         <p class="small muted mt-10">Tek ölçümle tetiklenen eşikler her biyobelirtecin kendi
-          tanımındadır ve Tahliller ekranında görülebilir. Bayrak
+          tanımındadır ve Testler bölümünde görülebilir. Bayrak
           ${SP.RED_FLAGS.window} gün açık kalır; kapansa da kayıtta durur.</p>`,
     });
   }

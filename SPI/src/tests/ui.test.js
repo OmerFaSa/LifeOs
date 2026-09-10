@@ -198,9 +198,51 @@
     });
 
     it('gezinmedeki her yol gerçek bir ekrana bağlanır', () => {
-      SP.App.NAV.forEach(g => g.items.forEach(it => {
-        expect(SP.Screens[it.id]).toBeTruthy();
+      SP.App.SECTIONS.forEach(sec => sec.views.forEach(v => {
+        expect(SP.Screens[v.route]).toBeTruthy();
       }));
+    });
+
+    it('yedi bölüm vardır ve her ekran tam bir bölüme aittir', () => {
+      expect(SP.App.SECTIONS.length).toBe(7);
+      const seen = {};
+      SP.App.SECTIONS.forEach(sec => {
+        expect(sec.views.length > 0).toBeTruthy();
+        sec.views.forEach(v => {
+          /* Bir ekran iki bolumde birden gorunemez: gezinme tek bir yer
+             gostermeli, yoksa etkin bolum belirsizlesir. */
+          expect(seen[v.route]).toBeFalsy();
+          seen[v.route] = sec.id;
+        });
+      });
+      ids.forEach(id => { expect(seen[id]).toBeTruthy(); });
+    });
+
+    it('hero başlığı ve ledesi metin döndürür', async () => {
+      for(const id of ids){
+        const sc = SP.Screens[id];
+        if(sc.headline) expect(typeof sc.headline()).toBe('string');
+        if(sc.lede) expect(typeof sc.lede()).toBe('string');
+        if(sc.stats){
+          const st = sc.stats();
+          expect(Array.isArray(st)).toBeTruthy();
+          /* Hero'da dortten fazla sayi okunmaz; dordu de gozle taranabilmeli. */
+          expect(st.length <= 4).toBeTruthy();
+          st.forEach(x => { expect(x.value != null).toBeTruthy();
+            expect(typeof x.label).toBe('string'); });
+        }
+      }
+    });
+
+    it('hareket alanlarının hepsi bir sekmeye karşılık gelir', () => {
+      expect(SP.AREAS.length).toBe(4);
+      SP.AREAS.forEach(a => {
+        expect(typeof a.label).toBe('string');
+        expect(typeof a.note).toBe('string');
+        if(a.kind) expect(SP.EXERCISES.some(e => e.kind === a.kind)).toBeTruthy();
+      });
+      /* Dinlenme bir egzersiz turu degildir; kendi sayfasi vardir. */
+      expect(SP.AREA_BY_ID.dinlenme.kind).toBe(null);
     });
 
     it('boş durumda hiçbir ekran çökmez', async () => {
@@ -252,8 +294,8 @@
   describe('Komut paleti', () => {
     it('bütün ekranlar palette bulunur', () => {
       const cmds = SP.Palette.commands();
-      SP.App.NAV.forEach(g => g.items.forEach(it => {
-        expect(cmds.some(c => c.id === 'go:' + it.id)).toBeTruthy();
+      SP.App.SECTIONS.forEach(sec => sec.views.forEach(v => {
+        expect(cmds.some(c => c.id === 'go:' + v.route)).toBeTruthy();
       }));
     });
 

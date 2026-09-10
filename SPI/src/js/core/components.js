@@ -183,6 +183,7 @@ SP.C = (function(){
         id:o.id, type:o.type || 'text', value:o.value == null ? null : o.value,
         placeholder:o.placeholder, min:o.min, max:o.max, step:o.step,
         disabled:o.disabled, 'aria-label':o.aria, 'data-change':o.change,
+        'data-debounce':o.debounce,
       }, o.data || {}))}/>`;
   }
 

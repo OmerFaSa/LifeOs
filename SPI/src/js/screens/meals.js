@@ -291,12 +291,228 @@ SP.Screens.meals = (function(){
 
   /* --------------------------------------------------------------- ekran */
 
+  /* ------------------------------------------------------------- öneri
+
+     Bu sayfa yeni bir kural icat etmez. Nesrin'in (beslenme) hedefi zaten
+     Kerem'in (laboratuvar) bulgusundan besleniyor: SP.Nutri.labAdjust bir
+     tahlil sonucu hedef bandın dışındaysa ilgili besin öğesinin hedefini
+     yükseltir. Burada o zincir GÖRÜNÜR hale gelir — hangi ölçüm, hangi
+     hedefi, ne kadar değiştirdi ve bunun karşılığı hangi yemektir.
+
+     Zincir: ölçüm → hedef çarpanı → eksik öğe → o öğeyi taşıyan gıda. */
+
+  const TABS = [
+    { id:'gunluk', label:'Öğünler',      icon:'meal' },
+    { id:'oneri',  label:'Öneri',        icon:'target' },
+    { id:'deger',  label:'Besin değeri', icon:'layers' },
+  ];
+
+  function tabs(){
+    const rows = M.mealsOf(shownDate());
+    const items = TABS.map(t => Object.assign({}, t,
+      t.id === 'gunluk' && rows.length ? { count:rows.length } : {}));
+    return K.Subtabs({ items, value:S.ui.mealTab || 'gunluk', act:'meal-tab',
+      aria:'Besin görünümü' });
+  }
+
+  /* Bazal metabolizma → hareket → hedef. Her adım ayrı yazılır ki
+     çıkan sayının nereden geldiği tartışılabilir olsun. */
+  function energyCard(){
+    const tg = SP.Nutri.targets();
+    const p = S.profile || {};
+    if(!tg.ok){
+      return K.Card({ title:'Günlük enerji',
+        body:K.Notice({ tone:'warn', title:'Hesaplanamıyor.',
+          body:'Profilde ' + tg.missing.join(', ') + ' eksik. Bu üçü olmadan bazal '
+             + 'metabolizma tahmin edilmez; uydurulmuş bir sayı yazılmaz.' }),
+        foot:K.Button({ label:'Profili tamamla', size:'sm', tone:'primary',
+          act:'go', data:{ 'data-route':'family' } }) });
+    }
+    /* Gosterilen carpan, HESAPTA kullanilan carpanin ta kendisidir.
+       Profilde hareket duzeyi secilmemisse motor varsayilana duser; kart
+       da o varsayilani yazar, yoksa zincir kendi sayisini yalanlar. */
+    const factor = SP.Nutri.activityFactor(p);
+    const act = SP.ACTIVITY_LEVELS.find(a => a.factor === factor && a.id === p.activity)
+      || SP.ACTIVITY_LEVELS.find(a => a.factor === factor);
+    const guessed = !SP.ACTIVITY_LEVELS.some(a => a.id === p.activity);
+    return K.Card({
+      title:'Günlük enerji', hint:'macro-target',
+      sub:'Bazal metabolizmadan hedefe',
+      badge:K.Badge({ label:tg.goal.label, tone:'info' }),
+      body:html`
+        <div class="chain">
+          <div class="chain__step">
+            <span class="chain__label">Bazal metabolizma</span>
+            <span class="chain__value num">${U.fmtNum(tg.bmr)}<small>kcal</small></span>
+            <span class="chain__note">Mifflin-St Jeor · kilo, boy, yaş ve cinsiyet</span>
+          </div>
+          <div class="chain__op">×${U.fmtNet(factor)}</div>
+          <div class="chain__step">
+            <span class="chain__label">Hareketle</span>
+            <span class="chain__value num">${U.fmtNum(tg.tdee)}<small>kcal</small></span>
+            <span class="chain__note">${act ? act.label : 'varsayılan'}${when(guessed,
+              () => html` <b>(profilde seçilmedi)</b>`)} — ${act ? act.note : ''}</span>
+          </div>
+          <div class="chain__op">${tg.goal.deficit === 0 ? '=' :
+            (tg.goal.deficit > 0 ? '+' : '−') + '%' + Math.abs(Math.round(tg.goal.deficit * 100))}</div>
+          <div class="chain__step chain__step--end">
+            <span class="chain__label">Hedef</span>
+            <span class="chain__value num">${U.fmtNum(tg.kcal)}<small>kcal</small></span>
+            <span class="chain__note">${tg.goal.note}</span>
+          </div>
+        </div>
+        <div class="cols-3 mt-16">
+          ${K.Stat({ label:'Protein', value:tg.protein.min + '–' + tg.protein.max, unit:'g' })}
+          ${K.Stat({ label:'Yağ', value:tg.fat.min + '–' + tg.fat.max, unit:'g' })}
+          ${K.Stat({ label:'Lif', value:String(tg.fiber), unit:'g' })}
+        </div>`,
+      foot:html`<span class="small dim">Hedef değiştirmek için Hane ekranındaki
+        amaç alanını değiştir.</span>`,
+    });
+  }
+
+  /* Koçlar arası bağ: Kerem'in bulgusu Nesrin'in hedefini değiştirdiyse
+     burada satır satır yazar. Değiştirmediyse bu kart hiç çizilmez —
+     olmayan bir bağ için boş kutu göstermek gürültüdür. */
+  function labLinkCard(){
+    const tg = SP.Nutri.targets();
+    const adj = tg.adjustments || {};
+    const ids = Object.keys(adj);
+    if(!ids.length){
+      return K.Card({ title:'Tahlil bağı', hint:'lab-linked-food',
+        body:K.Notice({ tone:'info',
+          body:SP.Bio.summary().measured
+            ? 'Şu an hiçbir tahlil sonucu beslenme hedefini değiştirmiyor. '
+              + 'Ölçümler hedef bandın içinde.'
+            : 'Henüz test girilmedi. Tahlil sonucu girildiğinde beslenme hedefi '
+              + 'kendiliğinden ona göre ayarlanır.' }),
+        foot:K.Button({ label:'Testler bölümüne git', size:'sm',
+          act:'go', data:{ 'data-route':'labs' } }) });
+    }
+    return K.Card({
+      title:'Tahlil bağı', hint:'lab-linked-food',
+      sub:'Laboratuvar bulgusu beslenme hedefini değiştirdi',
+      badge:K.Badge({ label:ids.length + ' hedef', tone:'warn' }),
+      body:html`${map(ids, id => {
+        const a = adj[id];
+        const n = SP.NUTRI_BY_ID[id];
+        const b = SP.BIO_BY_ID[a.marker];
+        const last = M.latestOf(a.marker);
+        return html`
+          <div class="link">
+            <div class="link__from">
+              ${P.avatar('lab', 'sm')}
+              <button class="linkbtn" data-act="open-marker-x" data-id="${a.marker}">
+                ${b ? b.name : a.marker}</button>
+              ${when(last, () => html`<b class="num small">${U.fmtNum(last.v)}
+                <span class="dim">${b ? b.unit : ''}</span></b>`)}
+            </div>
+            <div class="link__arrow" aria-hidden="true">→</div>
+            <div class="link__to">
+              ${P.avatar('nutri', 'sm')}
+              <b class="small">${n ? n.name : id}</b>
+              ${K.Badge({ label:'hedef ×' + U.fmtNet(a.mult),
+                tone:a.mult > 1 ? 'warn' : 'info' })}
+            </div>
+            <p class="link__why">${a.why}</p>
+          </div>`;
+      })}`,
+    });
+  }
+
+  /* Eksik öğeyi hangi yemek kapatır? Öneri gıda listesinden gelir,
+     modelden değil: kural motoru burada da otoritedir. */
+  function suggestCard(){
+    const g = SP.Nutri.gaps(7);
+    if(!g.ok){
+      return K.Card({ title:'Bugün ne yenmeli?',
+        body:K.Notice({ tone:'info',
+          body:'Öneri için en az birkaç günlük öğün kaydı gerekir. '
+            + 'Kayıt yoksa eksik hesaplanamaz — sıfır sayılmaz.' }),
+        foot:K.Button({ label:'Öğün ekle', size:'sm', tone:'primary',
+          act:'meal-tab', data:{ 'data-tab':'gunluk' } }) });
+    }
+    const under = g.rows.filter(r => r.kind === 'under').slice(0, 4);
+    if(!under.length){
+      return K.Card({ title:'Bugün ne yenmeli?',
+        body:K.Notice({ tone:'ok', body:'Son yedi günün ortalaması bütün besin '
+          + 'öğelerinde hedefi karşılıyor. Öneri üretilmedi.' }) });
+    }
+    return K.Card({
+      title:'Bugün ne yenmeli?', hint:'nutri-gap',
+      sub:'Son yedi günün en büyük eksikleri ve onları taşıyan gıdalar',
+      body:html`${map(under, r => html`
+        <div class="sugg">
+          <div class="sugg__head">
+            <b class="small">${r.nutrient.name}</b>
+            ${K.Badge({ label:'%' + Math.round(r.pct), tone:r.pct < 60 ? 'danger' : 'warn' })}
+            <span class="tiny dim">${U.fmtNum(U.round(r.gap, 1))} ${r.nutrient.unit} eksik</span>
+          </div>
+          <div class="sugg__foods">${map(SP.Nutri.sourcesFor(r.id, 4), sr => html`
+            <button class="suggfood" data-act="pick-food" data-id="${sr.food.id}">
+              <b>${sr.food.name}</b>
+              <span class="num">${U.fmtNum(U.round(sr.per100, 1))} ${r.nutrient.unit}
+                <span class="dim">/100 g</span></span>
+            </button>`)}</div>
+          ${when(r.why, () => html`<p class="sugg__why">${r.why}</p>`)}
+        </div>`)}`,
+      foot:html`<span class="small dim">Bir gıdaya dokunarak porsiyonuyla öğüne ekleyebilirsin.</span>`,
+    });
+  }
+
+  function adviceView(){
+    return html`
+      <section class="sect">
+        <div class="sect__h"><div class="sect__ht">
+          <div class="sect__eyebrow">Hedef</div>
+          <h2>Enerji ve öneri</h2>
+          <p>Bazal metabolizmadan hedefe, tahlil bulgusundan tabağa. Her adımın
+            gerekçesi yazar; hiçbir sayı kaynağı olmadan görünmez.</p>
+        </div></div>
+        <div class="grid">
+          <div class="span-7"><div class="stack">${[energyCard(), suggestCard()]}</div></div>
+          <div class="span-5"><div class="stack">${[labLinkCard(), P.clinicalNote()]}</div></div>
+        </div>
+      </section>`;
+  }
+
   async function render(){
-    return String(K.Grid([
-      K.Span(7, K.Stack([quickCard(), dayCard()])),
-      K.Span(5, K.Stack([targetCard(), gapCard(), microCard()])),
-      K.Span(12, raw(UI.rail(['portion', 'bioavailability', 'nutri-gap', 'lab-linked-food', 'macro-target']))),
-    ]));
+    const tab = S.ui.mealTab || 'gunluk';
+
+    if(tab === 'oneri'){
+      return String(html`
+        <div class="mb-20">${tabs()}</div>
+        ${adviceView()}
+        <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`);
+    }
+
+    if(tab === 'deger'){
+      return String(html`
+        <div class="mb-20">${tabs()}</div>
+        <section class="sect">
+          <div class="sect__h"><div class="sect__ht">
+            <div class="sect__eyebrow">Ölçü</div>
+            <h2>Besin değeri</h2>
+            <p>Alınan ve EMİLEN miktar ayrı yazılır. Emilim öğün içindeki
+              artıran ve bozan etkilerden hesaplanır.</p>
+          </div></div>
+          <div class="grid">
+            <div class="span-7"><div class="stack">${[microCard()]}</div></div>
+            <div class="span-5"><div class="stack">${[gapCard()]}</div></div>
+          </div>
+        </section>
+        <div class="mt-24">${raw(UI.rail(['bioavailability', 'nutri-gap']))}</div>`);
+    }
+
+    return String(html`
+      <div class="mb-20">${tabs()}</div>
+      <section class="sect">
+        <div class="grid">
+          <div class="span-7"><div class="stack">${[quickCard(), dayCard()]}</div></div>
+          <div class="span-5"><div class="stack">${[targetCard()]}</div></div>
+        </div>
+      </section>
+      <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`);
   }
 
   /* Metinden gelen kalemleri secili ogune yazar. */
@@ -312,6 +528,13 @@ SP.Screens.meals = (function(){
   }
 
   const handle = {
+    async 'meal-tab'(el){ S.ui.mealTab = el.dataset.tab; SP.App.render(); },
+    /* Tahlil bagindan olcume gitmek: Testler bolumu o olcumun egilimini acar. */
+    async 'open-marker-x'(el){
+      S.ui.trendMarker = el.dataset.id;
+      S.ui.labTab = 'trend';
+      SP.App.go('labs');
+    },
     async 'shift-day'(el){
       const n = Number(el.dataset.value);
       S.ui.mealDate = n === 0 ? null : U.iso(U.addDays(U.parse(shownDate()), n));
@@ -376,6 +599,38 @@ SP.Screens.meals = (function(){
   return {
     id:'meals',
     title:'Öğünler',
+    headline(){
+      const tg = SP.Nutri.targets();
+      if(!tg.ok) return 'Hedef için profil eksik.';
+      const t = SP.Nutri.dayTotals(shownDate());
+      if(t.empty) return 'Bugün hiç öğün girilmedi.';
+      const pct = U.pct(t.kcal, tg.kcal);
+      if(pct > 115) return 'Bugün hedefin üstündesin.';
+      if(pct >= 85) return 'Bugün hedefin içindesin.';
+      return 'Günün ' + Math.round(pct) + '%\u2019i tamam.';
+    },
+    lede(){
+      const tg = SP.Nutri.targets();
+      if(!tg.ok){
+        return 'Profilde ' + tg.missing.join(', ') + ' girilince bazal metabolizma ve '
+          + 'hedef hesaplanır. Eksik veriden sayı uydurulmaz.';
+      }
+      const adj = Object.keys(tg.adjustments || {}).length;
+      return tg.goal.label.toLocaleLowerCase('tr-TR') + ' hedefi için günde '
+        + U.fmtNum(tg.kcal) + ' kcal ve ' + tg.protein.min + ' g protein.'
+        + (adj ? ' ' + adj + ' hedef, tahlil sonucuna göre yükseltildi.' : '');
+    },
+    stats(){
+      const tg = SP.Nutri.targets();
+      if(!tg.ok) return [];
+      const t = SP.Nutri.dayTotals(shownDate());
+      return [
+        { value:U.fmtNum(tg.bmr), label:'bazal (kcal)' },
+        { value:U.fmtNum(tg.kcal), label:'hedef (kcal)' },
+        { value:t.empty ? '0' : U.fmtNum(Math.round(t.kcal)), label:'bugün alınan' },
+        { value:t.empty ? '0' : Math.round(t.protein), unit:'g', label:'protein' },
+      ];
+    },
     subtitle(){
       const t = SP.Nutri.dayTotals(shownDate());
       const tg = SP.Nutri.targets();
@@ -384,8 +639,9 @@ SP.Screens.meals = (function(){
         + (tg.ok ? ' / ' + tg.protein.min + ' g' : '');
     },
     actions(){
-      return String(K.Button({ label:'Mutfak', size:'sm', icon:'leaf', class:'btn--screen',
-        act:'go', data:{ 'data-route':'kitchen' } }));
+      return String(html`${K.Button({ label:'Öğün ekle', icon:'plus', size:'sm', tone:'primary',
+        act:'meal-tab', data:{ 'data-tab':'gunluk' } })}
+        ${K.Button({ label:'Öneriyi aç', size:'sm', act:'meal-tab', data:{ 'data-tab':'oneri' } })}`);
     },
     render, handle, change, guessSlot,
   };

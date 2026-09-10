@@ -1,16 +1,19 @@
 /* Hareket — Modül 3'ün ekranı.
 
-   Ekran üç bölüme ayrılır ve bölümler seçilebilir bir şerittir, ince bir alt
-   çizgi değil:
+   Ekran ALANLARA ayrılır. Kullanıcı gününü planlarken "bugün hangi kalıbı
+   çalışayım" diye değil, "kardiyo mu yapayım, kuvvet mi, yoksa dinleneyim
+   mi" diye düşünür. Sekmeler o soruyu karşılar:
 
-     Bugün     toparlanmaya göre günün yük emri ve seans kaydı
-     Program   hareket merdivenleri — kalıba göre ikinci bir şeritle ayrılır
-     İlerleme  yük eğrisi, akut/kronik oran, indirme haftası
+     Bugün      toparlanmaya göre günün yük emri ve seans kaydı
+     Kardiyo    yürüyüş, koşu, evde sprint
+     Kuvvet     vücut ağırlığıyla altı kalıp — kendi içinde ikinci şeritle ayrılır
+     Esneklik   mobilite akışları
+     Dinlenme   yükün diğer yarısı: indirme haftası, boş gün, uyku
+     İlerleme   yük eğrisi, akut/kronik oran
 
-   Program bölümünde hareketler KALIBA göre ayrılır (itme, çekme, çömelme,
-   kalça, gövde, taşıma, dayanıklılık, mobilite). Böylece "bugün ne
-   çalışacağım" sorusu tek dokunuşla cevaplanır ve haftada hangi kalıbın
-   eksik kaldığı gizlenmez.
+   Dinlenmenin kendi sayfası olması kasıtlıdır. Antrenman programlarında
+   dinlenme çoğu zaman "yapılmayan şey" olarak geçer ve görünmez olur;
+   burada görünür, çünkü yük yönetiminin yarısı odur.
 
    Ekranın kuralı: sistem yükü kendiliğinden azaltabilir ama asla
    kendiliğinden artıramaz. Artırma kararı hep kullanıcınındır. */
@@ -23,31 +26,29 @@ SP.Screens.move = (function(){
   const { html, raw, when, map, cls } = SP.h;
   const K = SP.C, P = SP.Parts;
 
-  const TABS = [
-    { id:'bugun',    label:'Bugün',    icon:'today' },
-    { id:'program',  label:'Program',  icon:'layers' },
-    { id:'ilerleme', label:'İlerleme', icon:'chart' },
-  ];
+  /* Sekmeler: iki genel görünüm ve arada dört faaliyet alanı. */
+  const TABS = [{ id:'bugun', label:'Bugün', icon:'today' }]
+    .concat(SP.AREAS.map(a => ({ id:a.id, label:a.label, icon:a.icon })))
+    .concat([{ id:'ilerleme', label:'İlerleme', icon:'chart' }]);
 
-  /* Program bölümünün ikinci şeridi. "Tümü" ilk sırada durur ki kullanıcı
-     kalıp seçmeye mecbur kalmasın. */
+  /* Kuvvet alanının ikinci şeridi: hareket kalıpları. Yalnız kuvvette
+     çizilir — kardiyoda ve esneklikte kalıp yoktur, orada şerit çizmek
+     boş bir seçim sunmak olurdu. */
   function patternTabs(){
     const rows = SP.Move.patternBalance();
     const byId = {};
     rows.forEach(r => { byId[r.pattern.id] = r.count; });
-    return [{ id:'all', label:'Tümü' }]
-      .concat(SP.PATTERNS.map(p => ({ id:p.id, label:p.label, count:byId[p.id] || null })))
-      .concat([
-        { id:'cardio',   label:'Dayanıklılık' },
-        { id:'mobility', label:'Mobilite' },
-      ]);
+    return [{ id:'all', label:'Tümü', count:SP.EXERCISES.filter(e => e.kind === 'strength').length }]
+      .concat(SP.PATTERNS.map(p => ({ id:p.id, label:p.label, count:byId[p.id] || null })));
   }
 
-  function exercisesFor(patternId){
-    if(patternId === 'cardio') return SP.EXERCISES.filter(e => e.kind === 'cardio');
-    if(patternId === 'mobility') return SP.EXERCISES.filter(e => e.kind === 'mobility');
-    if(!patternId || patternId === 'all') return SP.EXERCISES;
-    return SP.EXERCISES.filter(e => e.pattern === patternId);
+  function exercisesOfArea(areaId){
+    const area = SP.AREA_BY_ID[areaId];
+    if(!area || !area.kind) return [];
+    const list = SP.EXERCISES.filter(e => e.kind === area.kind);
+    if(areaId !== 'kuvvet') return list;
+    const pat = S.ui.movePattern || 'all';
+    return pat === 'all' ? list : list.filter(e => e.pattern === pat);
   }
 
   /* --------------------------------------------------------------- bugün */
@@ -206,6 +207,167 @@ SP.Screens.move = (function(){
     });
   }
 
+  /* ---------------------------------------------------------- alanlar */
+
+  /* Bir faaliyet alanının sayfası: alanın ne olduğu, o alandaki hareket
+     merdivenleri ve alana özel kural. */
+  function areaView(areaId){
+    const area = SP.AREA_BY_ID[areaId];
+    const list = exercisesOfArea(areaId);
+    const rx = SP.Move.prescription();
+
+    return html`
+      <section class="sect">
+        <div class="sect__h">
+          <div class="sect__ht">
+            <div class="sect__eyebrow">Alan</div>
+            <h2>${area.label}</h2>
+            <p>${area.note}</p>
+          </div>
+          <div class="sect__actions">
+            ${K.Button({ label:'Bu alandan seans ekle', icon:'plus', size:'sm', tone:'primary',
+              act:'start-area', data:{ 'data-area':areaId } })}
+          </div>
+        </div>
+
+        ${when(areaId === 'kuvvet', () => html`<div class="mb-16">
+          ${K.Subtabs({ items:patternTabs(), value:S.ui.movePattern || 'all',
+            act:'pick-pattern-tab', aria:'Hareket kalıbı' })}</div>`)}
+
+        ${when(areaId === 'kardiyo', () => html`<div class="mb-16">
+          ${cardioSummary()}</div>`)}
+
+        ${when(areaId === 'esneklik' && rx.kind !== 'full', () => html`<div class="mb-16">
+          ${K.Notice({ tone:'info', title:'Bugün için uygun:',
+            body:'Toparlanma ' + (rx.readiness.ok ? rx.readiness.band.label.toLocaleLowerCase('tr-TR')
+              : 'ölçülmedi') + '. Esneklik akışı ağır antrenmanın yerine geçebilir; '
+              + 'yük üretmez ama zinciri kırmaz.' })}</div>`)}
+
+        <div class="grid">
+          <div class="span-8"><div class="stack">${list.length
+            ? map(list, ladderCard)
+            : [K.Card({ body:K.Empty({ text:'Bu kalıpta tanımlı hareket yok.' }) })]}</div></div>
+          <div class="span-4"><div class="stack">
+            ${areaId === 'kuvvet' ? balanceCard() : ''}
+            ${K.Card({ title:'İlerleme kuralı', hint:'progression',
+              body:html`<p class="small muted">Bir üst basamak, mevcut basamakta son
+                ${SP.Move.ADVANCE_WINDOW} günde ${SP.Move.ADVANCE_SESSIONS} seans yapıldığında açılır.
+                Sistem basamak atlatmaz: aşırı yüklenmenin en yaygın sebebi budur.</p>` })}
+          </div></div>
+        </div>
+      </section>`;
+  }
+
+  /* Kardiyoda ölçü süredir: haftalık toplam dakika ve %10 kuralı. */
+  function cardioSummary(){
+    const ids = SP.EXERCISES.filter(e => e.kind === 'cardio').map(e => e.id);
+    const days = U.lastDays(14);
+    let thisWeek = 0, lastWeek = 0;
+    days.forEach((d, i) => {
+      const mins = M.workoutsOf(d).filter(w => (w.items || []).some(it => ids.indexOf(it.exId) >= 0))
+        .reduce((a, w) => a + (w.minutes || 0), 0);
+      if(i >= 7) thisWeek += mins; else lastWeek += mins;
+    });
+    const cap = Math.round(lastWeek * 1.1);
+    return K.Card({
+      title:'Haftalık kardiyo süresi', hint:'load',
+      badge:K.Badge({ label:thisWeek + ' dk', tone:lastWeek && thisWeek > cap ? 'warn' : 'info' }),
+      body:html`
+        <div class="cols-3">
+          ${K.Stat({ label:'Bu hafta', value:String(thisWeek), unit:'dk' })}
+          ${K.Stat({ label:'Geçen hafta', value:String(lastWeek), unit:'dk' })}
+          ${K.Stat({ label:'Bu haftanın tavanı', value:lastWeek ? String(cap) : '—', unit:'dk',
+            note:lastWeek ? '%10 kuralı' : 'geçen hafta veri yok' })}
+        </div>
+        ${K.Notice({ tone:lastWeek && thisWeek > cap ? 'warn' : 'info', class:'mt-12',
+          body:lastWeek
+            ? (thisWeek > cap
+              ? 'Bu hafta geçen haftanın %10 üstünü aştı. Süreyi artırmak yerine tempoyu koru.'
+              : SP.LOAD_RULES.weeklyGrowth.note)
+            : 'Geçen hafta kardiyo kaydı yok; tavan hesaplanmadı. Eksik veri sıfır sayılmaz.' })}`,
+    });
+  }
+
+  /* ---------------------------------------------------------- dinlenme
+
+     Dinlenme sayfası yeni bir kural icat etmez; var olan kuralların
+     dinlenmeye bakan yüzünü tek yerde toplar: toparlanma bandı, indirme
+     haftası, akut/kronik oran, uyku ve boş gün sayısı. */
+  function restView(){
+    const r = SP.Move.readiness();
+    const rx = SP.Move.prescription();
+    const dl = SP.Move.deloadWeek();
+    const a = SP.Move.acwr();
+    const days = U.lastDays(7);
+    const off = days.filter(d => !M.workoutsOf(d).length).length;
+    const sleepVals = days.map(d => (S.vitals[d] || {}).sleep).filter(v => v != null);
+    const avgSleep = sleepVals.length ? U.round(U.sum(sleepVals) / sleepVals.length, 1) : null;
+
+    return html`
+      <section class="sect">
+        <div class="sect__h">
+          <div class="sect__ht">
+            <div class="sect__eyebrow">Alan</div>
+            <h2>Dinlenme</h2>
+            <p>${SP.AREA_BY_ID.dinlenme.note} Kazanç antrenmanda değil, antrenmandan
+              sonraki toparlanmada oluşur.</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="span-8"><div class="stack">
+            ${K.Card({
+              title:'Bugün dinlenmeli misin?', hint:'recovery-order',
+              badge:K.Badge({ label:rx.kind === 'rest' ? 'evet' : rx.kind === 'full' ? 'hayır' : 'hafiflet',
+                tone:rx.kind === 'rest' ? 'danger' : rx.kind === 'full' ? 'ok' : 'warn' }),
+              body:html`
+                ${when(r.ok, () => html`<div class="row wrap" style="gap:18px">
+                  <div class="kpi"><span class="kpi__value">${r.score}</span>
+                    <span class="kpi__unit">/ 100 · ${r.band.label}</span></div>
+                  <div class="grow" style="min-width:180px">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
+                </div>`)}
+                ${K.Notice({ tone:r.ok ? (r.band.tone === 'ok' ? 'ok' : r.band.tone) : 'info',
+                  class:'mt-12', body:r.ok ? r.band.order : r.note })}
+                ${when(rx.kind === 'rest', () => K.Notice({ tone:'info', class:'mt-8',
+                  body:'Tam dinlenme günü de boş değildir: asgari gün geçerli — '
+                    + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş ve bir mobilite akışı.' }))}`,
+              foot:when(!r.ok, () => K.Button({ label:'Bugünün ölçümünü gir', size:'sm', tone:'primary',
+                act:'go', data:{ 'data-route':'vitals' } })),
+            })}
+
+            ${K.Card({
+              title:'İndirme haftası', hint:'deload',
+              badge:K.Badge({ label:!dl.started ? 'başlamadı'
+                : dl.due ? 'bu hafta' : dl.inCycle + '/' + dl.every,
+                tone:dl.due ? 'warn' : 'muted' }),
+              body:html`<p class="small">${dl.note}</p>
+                ${K.Notice({ tone:'info', class:'mt-10', body:SP.LOAD_RULES.deload.note })}`,
+            })}
+          </div></div>
+
+          <div class="span-4"><div class="stack">
+            ${K.Card({ title:'Son yedi gün',
+              body:html`
+                ${K.Stat({ label:'Boş gün', value:String(off), unit:'/ 7',
+                  note:off === 0 ? 'hiç boş gün yok' : off >= 5 ? 'çok az seans' : 'dengeli' })}
+                <div class="mt-12">${K.Stat({ label:'Ortalama uyku',
+                  value:avgSleep == null ? '—' : U.fmtNum(avgSleep), unit:'saat',
+                  note:avgSleep == null ? 'girilmedi' : sleepVals.length + ' gün girildi' })}</div>
+                <div class="mt-12">${K.Stat({ label:'Akut/kronik',
+                  value:a.ok ? U.fmtNet(a.ratio) : '—',
+                  tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
+                  note:a.ok ? a.zone : 'veri yetersiz' })}</div>` })}
+
+            ${K.Card({ title:'Dinlenme neden plandır?',
+              body:html`<p class="small muted">Yük eğrisi yalnız yapılan işi değil,
+                yapılmayanı da sayar. Üst üste boş geçen günler kondisyonu düşürür;
+                hiç boş geçmeyen haftalar akut/kronik oranı yükseltir. İkisi de
+                aynı ölçüde izlenir.</p>` })}
+          </div></div>
+        </div>
+      </section>`;
+  }
+
   /* ------------------------------------------------------------ ilerleme */
 
   function loadCard(){
@@ -226,8 +388,8 @@ SP.Screens.move = (function(){
           ${K.Stat({ label:'Akut/kronik', value:a.ok ? U.fmtNet(a.ratio) : '—',
             tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
             note:a.ok ? a.zone : 'veri yetersiz' })}
-          ${K.Stat({ label:'Döngü haftası', value:String(dl.week || 0),
-            note:dl.due ? 'indirme haftası' : dl.inCycle + '/' + dl.every })}
+          ${K.Stat({ label:'Döngü haftası', value:dl.started ? String(dl.week) : '—',
+            note:!dl.started ? 'başlamadı' : dl.due ? 'indirme haftası' : dl.inCycle + '/' + dl.every })}
         </div>
         ${K.Notice({ tone:a.ok ? a.tone : 'info', class:'mt-12', body:a.note })}
         ${when(g.ok, () => K.Notice({ tone:g.over ? 'warn' : 'info', class:'mt-8',
@@ -291,69 +453,72 @@ SP.Screens.move = (function(){
 
   /* --------------------------------------------------------------- ekran */
 
-  function toolbar(tab){
+  function tabs(tab){
     const done = M.workoutsOf(U.todayISO()).length;
     const items = TABS.map(t => Object.assign({}, t,
       t.id === 'bugun' && done ? { count:done } : {}));
-    return K.Toolbar({
-      tabs:K.Subtabs({ items, value:tab, act:'move-tab', aria:'Hareket görünümü' }),
-      actions:K.Button({ label:'Seans ekle', icon:'plus', size:'sm', tone:'primary',
-        act:'start-session', data:{ 'data-id':'' } }),
-    });
+    return K.Subtabs({ items, value:tab, act:'move-tab', aria:'Hareket görünümü' });
   }
 
   async function render(){
     const tab = S.ui.moveTab;
 
-    if(tab === 'program'){
-      const pat = S.ui.movePattern || 'all';
-      const list = exercisesFor(pat);
-      return String(K.Grid([
-        K.Span(12, toolbar(tab)),
-        K.Span(12, K.Subtabs({ items:patternTabs(), value:pat, act:'pick-pattern-tab',
-          aria:'Hareket kalıbı' })),
-        K.Span(8, K.Stack(list.length
-          ? map(list, ladderCard)
-          : [K.Card({ body:K.Empty({ text:'Bu kalıpta tanımlı hareket yok.' }) })])),
-        K.Span(4, K.Stack([balanceCard(),
-          K.Card({ title:'İlerleme kuralı', hint:'progression',
-            body:html`<p class="small muted">Bir üst basamak, mevcut basamakta son
-              ${SP.Move.ADVANCE_WINDOW} günde ${SP.Move.ADVANCE_SESSIONS} seans yapıldığında açılır.
-              Sistem basamak atlatmaz: aşırı yüklenmenin en yaygın sebebi budur.</p>` }),
-        ])),
-        K.Span(12, raw(UI.rail(['progression', 'load', 'deload']))),
-      ]));
+    if(SP.AREA_BY_ID[tab]){
+      return String(html`
+        <div class="mb-20">${tabs(tab)}</div>
+        ${tab === 'dinlenme' ? restView() : areaView(tab)}
+        <div class="mt-24">${raw(UI.rail(tab === 'dinlenme'
+          ? ['recovery-order', 'deload', 'load']
+          : ['progression', 'load', 'deload']))}</div>`);
     }
 
     if(tab === 'ilerleme'){
-      return String(K.Grid([
-        K.Span(12, toolbar(tab)),
-        K.Span(8, K.Stack([loadCard(), historyCard()])),
-        K.Span(4, K.Stack([balanceCard(),
-          K.Card({ title:'Yük nasıl hesaplanır?',
-            body:html`<p class="small muted">Seans yükü süre × zorluktur. Zorluk önce senin
-              bildirdiğin algılanan zorluktan (1–10), yoksa hareketlerin MET ortalamasından gelir.
-              İkisi de yoksa seans yük üretmez — uydurulmuş yük yazılmaz.</p>` }),
-        ])),
-        K.Span(12, raw(UI.rail(['load', 'deload', 'recovery-order']))),
-      ]));
+      return String(html`
+        <div class="mb-20">${tabs(tab)}</div>
+        <section class="sect">
+          <div class="sect__h"><div class="sect__ht">
+            <div class="sect__eyebrow">Ölçü</div>
+            <h2>İlerleme</h2>
+            <p>Yük eğrisi yalnız yapılan işi değil, yapılmayanı da sayar.</p>
+          </div></div>
+          <div class="grid">
+            <div class="span-8"><div class="stack">${[loadCard(), historyCard()]}</div></div>
+            <div class="span-4"><div class="stack">${[balanceCard(),
+              K.Card({ title:'Yük nasıl hesaplanır?',
+                body:html`<p class="small muted">Seans yükü süre × zorluktur. Zorluk önce senin
+                  bildirdiğin algılanan zorluktan (1–10), yoksa hareketlerin MET ortalamasından gelir.
+                  İkisi de yoksa seans yük üretmez — uydurulmuş yük yazılmaz.</p>` })]}</div></div>
+          </div>
+        </section>
+        <div class="mt-24">${raw(UI.rail(['load', 'deload', 'recovery-order']))}</div>`);
     }
 
-    return String(K.Grid([
-      K.Span(12, toolbar(tab)),
-      K.Span(8, K.Stack([orderCard(), pickSessionCard(), todaySessionsCard()])),
-      K.Span(4, K.Stack([readyCard(), balanceCard()])),
-      K.Span(12, raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))),
-    ]));
+    return String(html`
+      <div class="mb-20">${tabs('bugun')}</div>
+      <section class="sect">
+        <div class="grid">
+          <div class="span-8"><div class="stack">${[orderCard(), pickSessionCard(), todaySessionsCard()]}</div></div>
+          <div class="span-4"><div class="stack">${[readyCard(), balanceCard()]}</div></div>
+        </div>
+      </section>
+      <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`);
   }
 
   const handle = {
     async 'move-tab'(el){ S.ui.moveTab = el.dataset.tab; SP.App.render(); },
     async 'pick-pattern-tab'(el){ S.ui.movePattern = el.dataset.tab; SP.App.render(); },
     async 'pick-pattern'(el){
-      S.ui.moveTab = 'program';
+      S.ui.moveTab = 'kuvvet';
       S.ui.movePattern = el.dataset.id;
       SP.App.render();
+    },
+    /* Alandan seans: o alanın şablonu varsa onunla, yoksa serbest başlar. */
+    async 'start-area'(el){
+      const area = SP.AREA_BY_ID[el.dataset.area];
+      const tpl = area && area.kind
+        ? SP.SESSION_TEMPLATES.find(t => t.kind === area.kind) : null;
+      draft = M.newWorkout(U.todayISO(), tpl ? tpl.id : null);
+      sessionSheet(draft);
     },
     async 'start-session'(el){
       draft = M.newWorkout(U.todayISO(), el.dataset.id || null);
@@ -429,13 +594,43 @@ SP.Screens.move = (function(){
   return {
     id:'move',
     title:'Hareket',
+    headline(){
+      const rx = SP.Move.prescription();
+      if(!rx.readiness.ok) return 'Toparlanma ölçümü bekliyor.';
+      if(rx.kind === 'rest') return 'Bugün dinlenme günü.';
+      if(rx.kind === 'full') return 'Bugün tam yük yapılabilir.';
+      return 'Bugün yük hafifletilmeli.';
+    },
+    lede(){
+      const rx = SP.Move.prescription();
+      if(!rx.readiness.ok){
+        return 'Uyku ve nabız girilince günün yük emri hesaplanır. '
+          + 'Ölçüm olmadan yük körlemesine verilmez.';
+      }
+      return rx.readiness.band.order
+        + ' Kardiyo, kuvvet, esneklik ve dinlenme ayrı sayfalardır.';
+    },
+    stats(){
+      const rx = SP.Move.prescription();
+      const out = [];
+      if(rx.readiness.ok){
+        out.push({ value:rx.readiness.score, unit:'/100', label:'toparlanma' });
+        out.push({ value:'×' + U.fmtNet(rx.factor), label:'yük katsayısı' });
+      }
+      out.push({ value:SP.Move.loadWindow(7), label:'haftalık yük' });
+      const a = SP.Move.acwr();
+      if(a.ok) out.push({ value:U.fmtNet(a.ratio), label:'akut/kronik' });
+      return out;
+    },
     subtitle(){
       const rx = SP.Move.prescription();
       if(!rx.readiness.ok) return 'Ölçüm bekliyor';
-      return rx.readiness.band.label + ' · yük ×' + U.fmtNet(rx.factor)
-        + (rx.done ? ' · ' + rx.done + ' seans yapıldı' : '');
+      return rx.readiness.band.label + ' · yük ×' + U.fmtNet(rx.factor);
     },
-    actions(){ return ''; },
+    actions(){
+      return String(K.Button({ label:'Seans ekle', icon:'plus', size:'sm', tone:'primary',
+        act:'start-session', data:{ 'data-id':'' } }));
+    },
     render, handle,
   };
 })();
