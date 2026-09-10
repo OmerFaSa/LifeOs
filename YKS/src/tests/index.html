@@ -34,7 +34,10 @@
 </div>
 <div id="out" class="muted">Testler çalışıyor…</div>
 
-<!-- uygulama modulleri (ekranlar ve app.js yuklenmez: acilis tetiklenmesin) -->
+<!-- uygulama modulleri. app.js YUKLENMEZ: acilis tetiklenmesin.
+     Ekranlardan yalniz ofis ekrani yuklenir; kendisi bir IIFE'dir ve
+     yuklendiginde R.Screens.office'i tanimlamaktan baska bir sey yapmaz.
+     3B oda ve ayar sayfasi testleri bu yuzden gercek cizimi olcebiliyor. -->
 <!-- veri once, cekirdek sonra: index.html ile ayni sira -->
 <script src="../js/data/curriculum.js"></script>
 <script src="../js/data/subjects.js"></script>
@@ -68,6 +71,7 @@
 <script src="../js/core/proposals.js"></script>
 <script src="../js/core/palette.js"></script>
 <script src="../js/core/setup.js"></script>
+<script src="../js/screens/office.js"></script>
 
 <!-- test altyapisi ve paketler -->
 <script src="harness.js"></script>

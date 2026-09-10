@@ -50,6 +50,10 @@ R.UI = (function(){
     undo:'<path d="M4 11a8 8 0 111.7 5.3"/><path d="M4 5v6h6"/>',
     shield:'<path d="M12 3.5l7 2.6v5.4c0 4-2.9 7.4-7 8.9-4.1-1.5-7-4.9-7-8.9V6.1z"/>'
       + '<path d="M9 12.2l2.2 2.2L15.2 10"/>',
+    /* Ofis gorunumu: kat plani (izgara) ile 3B oda arasindaki gecis. */
+    cube:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/>',
+    grid:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/>'
+      + '<rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
   };
 
   function icon(name, cls){

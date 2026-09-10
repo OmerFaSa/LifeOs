@@ -1743,6 +1743,476 @@
     });
   });
 
+
+  /* ==================== API bağlantısı ====================
+     "API ekleme kısmı komple bozuk" şikâyetinin altında tek bir hata değil,
+     birbirinden bağımsız altı arıza vardı. Her biri burada kilitlenir:
+
+       1) Google Eylül 2026'da anahtar biçimini değiştirdi ("AQ."); ekran
+          yalnız "AIza" kabul ediyordu ve yeni anahtar alan herkes kapıda
+          kalıyordu.
+       2) Google anahtarı adres satırında gidiyordu; artık başlıkla gider.
+       3) Adres alanı olmayan sağlayıcıya, önceki sağlayıcının adresi
+          sızıyordu: Groq istekleri localhost'a gidiyordu.
+       4) Eksik yazılmış uç adresi (…/v1) tamamlanmıyor, 404 veriyordu.
+       5) Akıl yürüten modellerin iç sesi (<think>…</think>, reasoning)
+          "ajanın yanıtı" diye ekrana çiziliyordu — "yanlış yanıt" buydu.
+       6) Hata gövdesi okunmadan sınıflanıyordu: geçersiz anahtar
+          "istek reddedildi" diye görünüyordu. */
+
+  describe('Ofis — API bağlantısı', () => {
+    const realFetch = window.fetch;
+
+    /* Sahte ama BİÇİMİ gerçek bir Google "auth key". Parça parça kurulur;
+       bkz. aşağıdaki biçim testinin gerekçesi. */
+    const AQ_KEY = 'AQ.' + 'Ab8RN6IOenow' + 'Q8_ornek_anahtar_' + 'gercek_degildir';
+
+    function fresh(){
+      R.Quota.reset(); R.Quota.clearOverrides();
+      R.LLM.clearCatalog();
+      /* Sıra beklemesi testleri yavaşlatmasın. */
+      ['groq', 'gemini', 'openrouter'].forEach(id =>
+        R.Quota.setOverride(id, { rpm:60000, rpd:99999 }));
+    }
+    function done(){
+      window.fetch = realFetch;
+      ['groq', 'gemini', 'openrouter', 'custom'].forEach(id => R.LLM.setKey(id, ''));
+      R.LLM.clearCatalog();
+      R.Quota.reset(); R.Quota.clearOverrides();
+    }
+
+    /* Tek karelik düz JSON yanıtı; istekleri kaydeder. */
+    function jsonOnce(payload, sink, status){
+      return async (url, init) => {
+        if(sink) sink.push({ url:String(url), init });
+        return {
+          ok:status == null || status < 400, status:status || 200,
+          headers:{ get:() => 'application/json' },
+          json:async () => payload,
+          text:async () => JSON.stringify(payload),
+        };
+      };
+    }
+
+    /* ---------- 1. anahtar biçimi ---------- */
+
+    it('Google’ın yeni "AQ." anahtarı kabul edilir', () => {
+      /* Gerçek biçim: "AQ." + nokta, alt çizgi ve tire içerebilen uzun bir
+         gövde; "AIza" ile başlamaz. Gövde burada BİRLEŞTİRİLEREK üretilir:
+         kaynağa gerçeğe benzeyen bütün bir anahtar yazmak, depo tarafındaki
+         gizli tarayıcılarını boşuna tetikler ve o an geçerli bir anahtarın
+         yanlışlıkla depoya girmesini kolaylaştırır. */
+      const aq = AQ_KEY;
+      expect(aq.length > 40).toBeTruthy();
+      expect(R.LLM.keyProblem('gemini', aq)).toBeNull();
+      expect(R.LLM.keyOwner(aq)).toBe('gemini');
+    });
+
+    it('eski "AIza" anahtarı da kabul edilmeye devam eder', () => {
+      const old = 'AIzaSyD-0123456789abcdefghijklmnopqrstu';
+      expect(R.LLM.keyProblem('gemini', old)).toBeNull();
+      expect(R.LLM.keyOwner(old)).toBe('gemini');
+    });
+
+    it('başka sağlayıcının anahtarı kesin hatadır, tanımadığı biçim yalnız uyarıdır', () => {
+      const wrong = R.LLM.keyProblem('gemini', 'sk-or-v1-0123456789abcdef');
+      expect(wrong.level).toBe('wrong');
+      expect(wrong.owner).toBe('openrouter');
+      /* Hiçbir bilinen biçime uymayan anahtar engellenmez: sağlayıcılar
+         önek değiştirebilir ve geçerli anahtarı reddetmek en kötü arızadır. */
+      const soft = R.LLM.keyProblem('gemini', 'bilinmeyen-bicim-123456');
+      expect(soft.level).toBe('shape');
+    });
+
+    /* ---------- 2. Google anahtarı başlıkla gider ---------- */
+
+    it('Gemini anahtarı adres satırında değil başlıkta gider', async () => {
+      fresh();
+      R.LLM.setKey('gemini', AQ_KEY);
+      const calls = [];
+      window.fetch = jsonOnce({ candidates:[
+        { content:{ parts:[{ text:'Hazır.' }] }, finishReason:'STOP' } ] }, calls);
+
+      await R.LLM.chat({ provider:'gemini', model:'gemini-2.5-flash' },
+        { messages:[{ role:'user', text:'x' }] });
+
+      expect(calls[0].url.indexOf('key=')).toBe(-1);
+      expect(calls[0].init.headers['x-goog-api-key'])
+        .toBe(AQ_KEY);
+      /* Google Bearer kabul etmez; yanlış başlık gönderilmemeli. */
+      expect(calls[0].init.headers.Authorization).toBeUndefined();
+      done();
+    });
+
+    it('OpenAI uyumlu uçlarda anahtar Bearer olarak gider', async () => {
+      fresh();
+      R.LLM.setKey('groq', 'gsk_test123');
+      const calls = [];
+      window.fetch = jsonOnce({ choices:[
+        { message:{ content:'Hazır.' }, finish_reason:'stop' } ] }, calls);
+
+      await R.LLM.chat({ provider:'groq', model:'llama-3.1-8b-instant' },
+        { messages:[{ role:'user', text:'x' }] });
+
+      expect(calls[0].init.headers.Authorization).toBe('Bearer gsk_test123');
+      done();
+    });
+
+    /* ---------- 3. adres sızıntısı ---------- */
+
+    it('başka sağlayıcının adresi isteğe sızmaz', async () => {
+      fresh();
+      R.LLM.setKey('groq', 'gsk_test123');
+      const calls = [];
+      window.fetch = jsonOnce({ choices:[{ message:{ content:'Hazır.' } }] }, calls);
+
+      /* Ollama'dan Groq'a geçen kullanıcının ayarında localhost adresi
+         kalıyordu ve bütün Groq istekleri oraya gidiyordu. */
+      await R.LLM.chat(
+        { provider:'groq', model:'llama-3.1-8b-instant',
+          endpoint:'http://localhost:11434/v1/chat/completions' },
+        { messages:[{ role:'user', text:'x' }] });
+
+      expect(calls[0].url).toBe('https://api.groq.com/openai/v1/chat/completions');
+      done();
+    });
+
+    it('kendi adresini düzenleyebilen sağlayıcıda adres kullanılır', () => {
+      expect(R.LLM.endpointFor(R.PROVIDERS.ollama, { endpoint:'http://192.168.1.5:11434/v1' }))
+        .toBe('http://192.168.1.5:11434/v1/chat/completions');
+    });
+
+    /* ---------- 4. eksik adres tamamlanır ---------- */
+
+    it('eksik yazılmış uç adresi tamamlanır', () => {
+      const n = R.LLM.normalizeOpenAI;
+      expect(n('https://api.x.example/v1')).toBe('https://api.x.example/v1/chat/completions');
+      expect(n('https://api.x.example/v1/')).toBe('https://api.x.example/v1/chat/completions');
+      expect(n('localhost:11434')).toBe('http://localhost:11434/v1/chat/completions');
+      expect(n('https://api.x.example/v1/chat/completions'))
+        .toBe('https://api.x.example/v1/chat/completions');
+      expect(n('')).toBe('');
+      /* Sorgu dizesi korunur (Azure gibi uçlar sürümü orada taşır). */
+      expect(n('https://a.example/openai/v1?api-version=2026-01-01'))
+        .toBe('https://a.example/openai/v1/chat/completions?api-version=2026-01-01');
+    });
+
+    it('Gemini taban adresi /models ile biter', () => {
+      expect(R.LLM.normalizeGemini('https://generativelanguage.googleapis.com/v1beta'))
+        .toBe('https://generativelanguage.googleapis.com/v1beta/models');
+      expect(R.LLM.normalizeGemini('https://generativelanguage.googleapis.com/v1beta/models/'))
+        .toBe('https://generativelanguage.googleapis.com/v1beta/models');
+    });
+
+    /* ---------- 5. akıl yürütmenin iç sesi ---------- */
+
+    it('<think> bloğu ajanın yanıtına karışmaz', () => {
+      const t = R.LLM.stripThinking;
+      expect(t('<think>Önce medyana bakayım…</think>Türkçede net kaybın var.'))
+        .toBe('Türkçede net kaybın var.');
+      /* Kapanmamış açılış: sonrası henüz cevap değil. */
+      expect(t('Kısa cevap. <think>hmm, acaba')).toBe('Kısa cevap.');
+      /* Açılış hiç gelmediyse kapanışa kadarki her şey iç sestir. */
+      expect(t('düşünüyorum…</think>Cevap bu.')).toBe('Cevap bu.');
+      expect(t('Etiketi olmayan düz metin.')).toBe('Etiketi olmayan düz metin.');
+    });
+
+    it('yalnız düşünme döndüren model "boş yanıt" değil, ayrı bir hata verir', async () => {
+      fresh();
+      R.LLM.setKey('openrouter', 'sk-or-v1-test');
+      window.fetch = jsonOnce({ choices:[
+        { message:{ content:'<think>uzun uzun düşündüm ama yazmadım</think>' } } ] });
+
+      let code = null;
+      try{
+        await R.LLM.chat({ provider:'openrouter', model:'deepseek/deepseek-r1-0528:free' },
+          { messages:[{ role:'user', text:'x' }] });
+      }catch(err){ code = err.code; }
+      /* "Tekrar dene" yanlış tavsiyedir: aynı model aynı şeyi yapar.
+         Yedek modele geçilebilmesi için yeniden denenebilir sayılır. */
+      expect(code).toBe('thinking_only');
+      expect(R.LLM.retryable('thinking_only')).toBeTruthy();
+      expect(R.LLM.errorText('thinking_only').length > 40).toBeTruthy();
+      done();
+    });
+
+    it('ayrı reasoning alanı cevaba karışmaz', async () => {
+      fresh();
+      R.LLM.setKey('openrouter', 'sk-or-v1-test');
+      window.fetch = jsonOnce({ choices:[{ message:{
+        reasoning:'Kullanıcı TYT soruyor, önce medyana bakayım…',
+        content:'Türkçede net kaybın var.' } }] });
+
+      const res = await R.LLM.chat({ provider:'openrouter', model:'x/y:free' },
+        { messages:[{ role:'user', text:'x' }] });
+      expect(res.text).toBe('Türkçede net kaybın var.');
+      done();
+    });
+
+    /* ---------- 6. hata sınıflaması ---------- */
+
+    it('gövde okunmadan yapılan sınıflama kullanıcıyı yanlış yere göndermez', () => {
+      const c = R.LLM.classify;
+      /* Google geçersiz anahtarı 400 ile bildirir; "istek reddedildi" demek
+         anahtarı yenilemesi gereken kullanıcıya hiçbir şey söylemez. */
+      expect(c(400, 'API key not valid. Please pass a valid API key.')).toBe('unauthorized');
+      expect(c(401, 'ACCESS_TOKEN_TYPE_UNSUPPORTED')).toBe('key_type');
+      expect(c(400, 'The model `x/y:free` does not exist')).toBe('bad_model');
+      expect(c(404, '')).toBe('bad_model');
+      expect(c(429, 'Rate limit exceeded: free-models-per-day')).toBe('daily_quota');
+      expect(c(429, 'too many requests')).toBe('rate_limited');
+      expect(c(402, '')).toBe('no_credit');
+      expect(c(503, '')).toBe('server');
+    });
+
+    it('anahtar türü desteklenmiyorsa ne yapılacağı söylenir', () => {
+      const text = R.LLM.errorText('key_type');
+      expect(text).toContain('AI Studio');
+      expect(text.length > 60).toBeTruthy();
+    });
+
+    it('yerel sunucuya erişilemezse sebep CORS olarak söylenir', async () => {
+      fresh();
+      window.fetch = async () => { throw new TypeError('Failed to fetch'); };
+      let code = null;
+      try{
+        await R.LLM.chat({ provider:'ollama', model:'llama3.1:8b',
+          endpoint:'http://localhost:11434/v1/chat/completions' },
+          { messages:[{ role:'user', text:'x' }] });
+      }catch(err){ code = err.code; }
+      expect(code).toBe('local_cors');
+      expect(R.LLM.errorText('local_cors')).toContain('OLLAMA_ORIGINS');
+      done();
+    });
+
+    /* ---------- 7. parametre onarımı ---------- */
+
+    it('max_tokens kabul etmeyen uç için istek kendiliğinden düzeltilir', async () => {
+      fresh();
+      R.LLM.setKey('groq', 'gsk_test123');
+      const bodies = [];
+      let call = 0;
+      window.fetch = async (url, init) => {
+        bodies.push(JSON.parse(init.body));
+        call++;
+        if(call === 1) return {
+          ok:false, status:400,
+          headers:{ get:() => 'application/json' },
+          text:async () => JSON.stringify({ error:{ message:
+            "Unsupported parameter: 'max_tokens' is not supported. Use 'max_completion_tokens' instead." } }),
+        };
+        return {
+          ok:true, status:200,
+          headers:{ get:() => 'application/json' },
+          json:async () => ({ choices:[{ message:{ content:'Hazır.' } }] }),
+        };
+      };
+
+      const res = await R.LLM.chat({ provider:'groq', model:'yeni-model' },
+        { messages:[{ role:'user', text:'x' }] });
+      expect(res.text).toBe('Hazır.');
+      expect(bodies[0].max_tokens > 0).toBeTruthy();
+      expect(bodies[1].max_completion_tokens > 0).toBeTruthy();
+      expect(bodies[1].max_tokens).toBeUndefined();
+      done();
+    });
+
+    it('Gemini 3 ailesinde düşünme seviyesi gönderilir', async () => {
+      fresh();
+      R.LLM.setKey('gemini', AQ_KEY);
+      const calls = [];
+      window.fetch = jsonOnce({ candidates:[
+        { content:{ parts:[{ text:'Hazır.' }] }, finishReason:'STOP' } ] }, calls);
+
+      await R.LLM.chat({ provider:'gemini', model:'gemini-3-flash-preview' },
+        { messages:[{ role:'user', text:'x' }] });
+
+      const body = JSON.parse(calls[0].init.body);
+      /* 3.x thinkingBudget değil thinkingLevel bekler; yanlışı 400 verir. */
+      expect(body.generationConfig.thinkingConfig.thinkingLevel).toBe('low');
+      expect(body.generationConfig.thinkingConfig.thinkingBudget).toBeUndefined();
+      done();
+    });
+
+    /* ---------- 8. canlı model listesi ---------- */
+
+    it('Gemini listesinden sohbet edemeyen modeller ayıklanır', async () => {
+      fresh();
+      R.LLM.setKey('gemini', AQ_KEY);
+      window.fetch = jsonOnce({ models:[
+        { name:'models/gemini-2.5-flash', displayName:'Gemini 2.5 Flash',
+          supportedGenerationMethods:['generateContent', 'countTokens'] },
+        { name:'models/text-embedding-004', displayName:'Embedding',
+          supportedGenerationMethods:['embedContent'] },
+        { name:'models/gemini-3-flash-preview', displayName:'Gemini 3 Flash',
+          supportedGenerationMethods:['generateContent'] },
+      ] });
+
+      const res = await R.LLM.listModels({ provider:'gemini' });
+      const ids = res.models.map(m => m.id);
+      expect(ids).toContain('gemini-2.5-flash');
+      expect(ids).toContain('gemini-3-flash-preview');
+      expect(ids.indexOf('text-embedding-004')).toBe(-1);
+      done();
+    });
+
+    it('OpenRouter listesinden ücretli modeller ayıklanır ve liste saklanır', async () => {
+      fresh();
+      R.LLM.setKey('openrouter', 'sk-or-v1-test');
+      window.fetch = jsonOnce({ data:[
+        { id:'deepseek/deepseek-chat-v3-0324:free' },
+        { id:'openai/gpt-5', pricing:{ prompt:'0.00001', completion:'0.00003' } },
+        { id:'meta-llama/llama-4-scout:free' },
+      ] });
+
+      const res = await R.LLM.listModels({ provider:'openrouter' });
+      const ids = res.models.map(m => m.id);
+      expect(ids).toHaveLength(2);
+      expect(ids.indexOf('openai/gpt-5')).toBe(-1);
+
+      /* Liste tarayıcıda saklanır: ekran bir daha çekmeden canlı listeyi görür. */
+      window.fetch = realFetch;
+      expect(R.LLM.cachedModels('openrouter').models).toHaveLength(2);
+      expect(R.LLM.modelsFor('openrouter').map(m => m.id)).toContain('meta-llama/llama-4-scout:free');
+      done();
+    });
+
+    it('canlı liste katalogdaki okunabilir etiketi korur', async () => {
+      fresh();
+      R.LLM.setKey('groq', 'gsk_test123');
+      window.fetch = jsonOnce({ data:[
+        { id:'llama-3.3-70b-versatile' },
+        { id:'yepyeni-model' },
+      ] });
+      await R.LLM.listModels({ provider:'groq' });
+      window.fetch = realFetch;
+
+      const list = R.LLM.modelsFor('groq');
+      const known = list.find(m => m.id === 'llama-3.3-70b-versatile');
+      const fresh_ = list.find(m => m.id === 'yepyeni-model');
+      expect(known.label).toBe('Llama 3.3 70B');
+      /* Katalogda olmayan modelin etiketi yoktur; ekran kimliği gösterir. */
+      expect(!fresh_.label).toBeTruthy();
+      done();
+    });
+
+    it('model listesi çekmek günlük kotadan düşmez', async () => {
+      fresh();
+      R.Quota.clearOverrides();
+      R.LLM.setKey('groq', 'gsk_test123');
+      window.fetch = jsonOnce({ data:[{ id:'llama-3.1-8b-instant' }] });
+      const before = R.Quota.status({ provider:'groq', model:'llama-3.1-8b-instant' }).usedToday;
+      await R.LLM.listModels({ provider:'groq' });
+      const after = R.Quota.status({ provider:'groq', model:'llama-3.1-8b-instant' }).usedToday;
+      expect(after).toBe(before);
+      done();
+    });
+
+    /* ---------- 9. tanılama ---------- */
+
+    it('tanılama zincirin ilk kırılan halkasını gösterir', async () => {
+      fresh();
+      R.LLM.setKey('gemini', AQ_KEY);
+      window.fetch = jsonOnce({ models:[
+        { name:'models/gemini-2.5-flash', supportedGenerationMethods:['generateContent'] },
+      ] });
+
+      /* Seçili model listede yok: kullanıcıya "bağlanamadı" değil, tam
+         olarak hangi adımın kırıldığı söylenir. */
+      const res = await R.LLM.diagnose({ provider:'gemini', model:'gemini-2.0-flash' });
+      const step = res.steps.find(x => x.name === 'Seçili model');
+      expect(step.ok).toBeFalsy();
+      expect(step.code).toBe('bad_model');
+      expect(res.ok).toBeFalsy();
+      done();
+    });
+
+    it('anahtar gerekmeyen sağlayıcıda anahtar girilirse yine de kullanılır', async () => {
+      fresh();
+      R.LLM.setKey('custom', 'kendi-anahtarim');
+      const calls = [];
+      window.fetch = jsonOnce({ choices:[{ message:{ content:'Hazır.' } }] }, calls);
+
+      await R.LLM.chat({ provider:'custom', model:'yerel', endpoint:'https://uc.example/v1' },
+        { messages:[{ role:'user', text:'x' }] });
+
+      expect(calls[0].url).toBe('https://uc.example/v1/chat/completions');
+      expect(calls[0].init.headers.Authorization).toBe('Bearer kendi-anahtarim');
+      done();
+    });
+  });
+
+
+  /* ==================== 3B oda ====================
+     Ofis ekranı iki görünüm taşır: düz kat planı ve 3B oda. İkisi de AYNI
+     veriden çizilir ve ikisinde de masa bir <button>'dur — 3B görünüm bir
+     resim değil, aynı arayüzün başka bir çizimidir. */
+
+  describe('Ofis — 3B oda', () => {
+    async function draw(){
+      reset();
+      return String(await R.Screens.office.render());
+    }
+
+    it('varsayılan görünüm 3B odadır', async () => {
+      reset();
+      expect(O.settings().room3d).toBe(true);
+    });
+
+    it('odada beş masa vardır ve her masa tıklanabilir bir düğmedir', async () => {
+      const out = await draw();
+      expect(out).toContain('class="room3d"');
+      const desks = out.match(/class="desk3d /g) || [];
+      expect(desks).toHaveLength(5);
+      R.AGENT_IDS.forEach(id => {
+        expect(out).toContain('data-act="office-desk" data-agent="' + id + '"');
+      });
+      /* Kimlik rengi kat planıyla AYNI kaynaktan gelir. */
+      expect(out).toContain('seat--patron');
+    });
+
+    it('her masanın odada bir yeri vardır', async () => {
+      const out = await draw();
+      const spots = out.match(/--x:\d+%; --y:\d+%/g) || [];
+      expect(spots).toHaveLength(5);
+    });
+
+    it('durum metni yalnız söylenecek bir şey varken çıkar', async () => {
+      reset();
+      /* Kural motoru modunda hepsi aynı durumdadır: oda ad kartlarını
+         gereksiz metinle doldurmaz, ışık yeter. */
+      const quiet = String(await R.Screens.office.render());
+      expect(quiet.indexOf('desk3d__state')).toBe(-1);
+    });
+
+    it('kat planına geçilince oda kalkar, masalar kalır', async () => {
+      reset();
+      await O.saveSettings({ room3d:false });
+      const out = String(await R.Screens.office.render());
+      expect(out.indexOf('class="room3d"')).toBe(-1);
+      expect((out.match(/class="seat /g) || []).length).toBe(5);
+      expect(out).toContain('data-act="office-desk"');
+      await O.saveSettings({ room3d:true });
+    });
+
+    it('ekranın ürettiği her office- eylemi bir işleyiciye bağlıdır', async () => {
+      const out = await draw();
+      const acts = (out.match(/data-act="office-[a-z-]+"/g) || [])
+        .map(m => m.slice(10, -1));
+      expect(acts.length > 3).toBeTruthy();
+      acts.forEach(act => {
+        expect(typeof R.Screens.office.handle[act]).toBe('function');
+      });
+    });
+
+    it('ayarlar sayfasındaki eylemler de bağlıdır', () => {
+      ['office-models', 'office-diagnose', 'office-test', 'office-save', 'office-view', 'office-turn']
+        .forEach(act => expect(typeof R.Screens.office.handle[act]).toBe('function'));
+      ['office-provider', 'office-key', 'office-model']
+        .forEach(act => expect(typeof R.Screens.office.change[act]).toBe('function'));
+    });
+  });
+
   /* ==================== yukleme ==================== */
 
   describe('Ofis — kalıcılık', () => {

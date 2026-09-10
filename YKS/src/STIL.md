@@ -36,9 +36,11 @@ Metin `--text → --text-2 → --text-3` sırasıyla soluklaşır.
 verilir (`C.Badge` tone'a göre ikon ekler).
 
 Ofis ajanlarının beş kimlik rengi (`--agent-patron` … `--agent-analist`) bundan
-ayrıdır: durum değil **kimlik** taşırlar, yalnız avatarda kullanılırlar ve
-ajanın durumu her zaman ayrıca rozetle verilir. Beyaz harf üzerinde ölçülen
-kontrast 5,3–8,9:1'dir.
+ayrıdır: durum değil **kimlik** taşırlar. Avatarda, masanın kimlik şeridinde ve
+3B odadaki silüette görünürler (`--seat-color`); hepsi "bu masa kimin" sorusunun
+cevabıdır. Ajanın **durumu** her zaman ayrıca ışık ve metinle verilir — kimlik
+rengi hiçbir yerde durum anlamına gelmez. Beyaz harf üzerinde ölçülen kontrast
+5,3–8,9:1'dir.
 
 ## Tipografi
 
@@ -64,7 +66,9 @@ Tekrar eden boşluk/hizalama için `style=""` yerine yardımcı sınıf kullanı
 `gap-4/6/8/14` · `mt-2/4/5/6/8/10/12/14/16` · `mb-10/12` · `minw0` · `jc-end` ·
 `as-center` · `ml-auto` · `right` · adlandırılmış genişlikler (`mw-66`, `w-46` …).
 `style=""` yalnız **değere bağlı** yerlerde kalır: bar genişliği, iskelet satırı,
-etiket rengi. Denetimde bugün 4 tanesi var; hepsi bu üç durumdan biri.
+etiket rengi ve 3B ofis odasının konum/kamera değişkenleri (`--x`, `--y`,
+`--turn`) — sonuncusu sınıfa çevrilemez, çünkü değeri sürüklerken sürekli
+değişir. Denetimde bugün ekranlarda 7 tanesi var; hepsi bu dört durumdan biri.
 **Yarıçap iki seviye:** `--r-sm` 8px (kontrol) · `--r` 14px (kart, panel).
 **Gölge iki seviye:** `--shadow` (kart) · `--shadow-lg` (katman: sheet, palet, popover).
 **Perde:** `--scrim` — sheet, palet ve mobil kenar çubuğunun arkasındaki karartma;
@@ -88,9 +92,13 @@ Tanımlı hareketler bunlarla sınırlıdır:
 | `.toast` | 8px aşağıdan girer | `--dur` |
 | `.skeleton__row` | yükleniyor parıltısı (döngü) | 1.3s |
 | `.collapse__chev` | açılınca 180° döner | `--dur` |
+| `.room3d__scene` | kamera açısı değişince döner | `--dur-lg` |
 
 Dikkat çekmek için animasyon yoktur: yanıp sönme, zıplama, sürekli döngü
-(iskelet ve açılış çubuğu dışında) kullanılmaz.
+kullanılmaz. Üç istisna vardır ve üçü de **süren bir işi** gösterir, dikkat
+çekmeyi değil: iskelet parıltısı, açılış çubuğu, ve ofiste konuşmakta olan
+ajanın nabzı (`.seatlight--busy`, 3B odada `.desk3d__screen.is-busy`). Üçü de
+iş bitince durur; `prefers-reduced-motion` hepsini kapatır.
 
 ## Ekranlar
 
@@ -140,6 +148,7 @@ Ekrana özel yapılar CSS'te adlandırılır, bileşene çevrilmez:
 `runclock` (süreli deneme oturumu), `wizstep` / `levelbtn` (kurulum sihirbazı),
 `palettebtn` (palet seçici), `notedot` (profil notu), `msg--me` / `msg--coach` (koç),
 `agentav` / `desk` / `deskstate` / `finding` / `note` (ofis masaları),
+`floor` / `seat` (ofis kat planı), `room3d` / `desk3d` (ofisin 3B odası),
 `board` (ofis panosu), `keyrow` (API anahtarları),
 `meetbar` / `meetturn` / `agentref` / `reportrow` (toplantı, hitap ve rapor).
 

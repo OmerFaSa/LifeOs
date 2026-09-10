@@ -151,27 +151,127 @@ R.Screens.office = (function(){
     </button>`;
   }
 
+  /* ---------- 3B oda ----------
+     Kat planı ofisi bir mekân yaptı; 3B görünüm onu bir ODA yapar. Masalar
+     bir zeminin üstünde durur, Patron'un masası dipte karşıdadır, uzmanlar
+     iki sıra hâlinde önünde oturur. Kamera döndürülebilir.
+
+     Neden kütüphanesiz: uygulamanın hiçbir bağımlılığı yok ve tek dosyalık
+     bir HTML olarak yayımlanıyor. WebGL bunun için hem ağır hem gereksiz —
+     beş masalık bir oda CSS'in kendi 3B dönüşümleriyle çizilir ve düşük
+     donanımda da akıcı kalır.
+
+     Erişilebilirlik: her masa hâlâ bir <button>'dur, klavyeyle gezilir ve
+     ad etiketleri kameraya karşı DÖNDÜRÜLÜR (ters dönüşüm), böylece oda
+     hangi açıda olursa olsun yazı düz okunur. Hareketi azaltılmış tercihte
+     geçiş animasyonu kapanır. */
+
+  /* Kameranın zemine bakış açısı ve başlangıç dönüşü. */
+  const ROOM_TILT = 56;
+  const ROOM_TURN = -26;
+  /* Odadaki yerler: zeminin yüzdesi. Patron dipte ortada, uzmanlar iki sıra. */
+  const ROOM_SPOTS = {
+    patron: { x:50, y:13 },
+    tyt:    { x:23, y:45 },
+    ayt:    { x:77, y:45 },
+    rehber: { x:23, y:78 },
+    analist:{ x:77, y:78 },
+  };
+
+  /* Kamera açısı yeniden çizimler arasında korunur: kullanıcı odayı
+     çevirdikten sonra bir öneri onayladığında oda başa dönmemeli. */
+  let roomTurn = ROOM_TURN;
+
+  function desk3d(agent){
+    const st = deskStatus(agent);
+    const notes = O.notes(agent.id);
+    const open = S.ui.officeDesk === agent.id;
+    const busy = S.ui.officeBusy === agent.id;
+    const spot = ROOM_SPOTS[agent.id] || { x:50, y:50 };
+    /* Ad kartlari odada yan yana durur; hepsinde durum metni tasimak
+       masalari gorunmez ederdi. Metin YALNIZ soylenecek bir sey varken
+       cikar: her sey yolundayken isik yeter, kota dolunca ya da sira
+       olusunca yazi belirir. Sessiz arayuzun bedeli bilgi kaybi degildir —
+       masanin tam durumu title'da ve raporunda durur. */
+    const showState = busy || (st.tone !== 'ok' && st.tone !== 'muted');
+
+    return html`<button type="button"
+      class="${cls('desk3d', 'seat--' + agent.id, open && 'is-open', agent.lead && 'desk3d--lead')}"
+      style="--x:${spot.x}%; --y:${spot.y}%"
+      data-act="office-desk" data-agent="${agent.id}"
+      aria-expanded="${open ? 'true' : 'false'}">
+      <span class="desk3d__shadow" aria-hidden="true"></span>
+      <span class="desk3d__front" aria-hidden="true"></span>
+      <span class="desk3d__side" aria-hidden="true"></span>
+      <span class="desk3d__top" aria-hidden="true">
+        <i class="desk3d__paper"></i><i class="desk3d__paper desk3d__paper--b"></i>
+      </span>
+      <span class="${cls('desk3d__screen', busy && 'is-busy')}" aria-hidden="true"></span>
+      <span class="desk3d__chair" aria-hidden="true"></span>
+      <span class="desk3d__person" aria-hidden="true"><i></i></span>
+      <span class="desk3d__card" title="${agent.role} · ${busy ? 'konuşuyor' : st.text}">
+        <span class="desk3d__who">${Avatar(agent, 'sm')}</span>
+        <b class="desk3d__name">${agent.name}</b>
+        <i class="${cls('seatlight', busy ? 'seatlight--busy' : 'seatlight--' + st.tone)}"></i>
+        ${when(showState, () => html`<span class="desk3d__state">${busy ? 'konuşuyor…' : st.short}</span>`)}
+        ${when(notes.length, () => html`<span class="desk3d__count">${notes.length}</span>`)}
+      </span>
+    </button>`;
+  }
+
+  function room3d(){
+    const action = O.nextAction();
+    return html`
+      <div class="room3d" id="room3d">
+        <div class="room3d__scene" id="room3d-scene"
+          style="--turn:${roomTurn}deg; --tilt:${ROOM_TILT}deg">
+          <div class="room3d__floor" aria-hidden="true"></div>
+          <div class="room3d__rug" aria-hidden="true"></div>
+          <div class="room3d__wall room3d__wall--back" aria-hidden="true">
+            <span class="room3d__board">
+              <span class="room3d__board-label">Bu haftanın tek işi</span>
+              <b>${action.title}</b>
+            </span>
+          </div>
+          <div class="room3d__wall room3d__wall--left" aria-hidden="true"></div>
+          ${map(R.AGENTS, desk3d)}
+        </div>
+      </div>
+      <p class="tiny dim mt-8">Odayı sürükleyerek çevirebilirsin; masaya dokununca raporu açılır.</p>`;
+  }
+
   function floorPlan(){
     const specialists = R.AGENTS.filter(a => !a.lead);
     const waiting = R.Proposals.actionable().length;
+    const three = O.settings().room3d !== false;
 
     return html`
-      <div class="floor">
+      <div class="${cls('floor', three && 'floor--room')}">
         <div class="floor__head">
           <div class="minw0">
-            <div class="floor__title">${raw(UI.icon('users'))} Ofis kat planı</div>
+            <div class="floor__title">${raw(UI.icon(three ? 'cube' : 'users'))}
+              ${three ? 'Ofis' : 'Ofis kat planı'}</div>
             <div class="floor__meta">${O.mode() === 'llm' ? O.providerLabel() : 'kural motoru modu'}
               · masaya dokununca raporu açılır</div>
           </div>
           <div class="row wrap gap-6">
             ${when(waiting, () => K.Badge({ label:waiting + ' öneri bekliyor', tone:'warn' }))}
+            ${when(three, () => html`<span class="room3d__turn">
+              ${K.IconButton({ icon:'left', size:'sm', aria:'Odayı sola çevir',
+                title:'Odayı sola çevir', act:'office-turn', data:{ 'data-dir':'-1' } })}
+              ${K.IconButton({ icon:'right', size:'sm', aria:'Odayı sağa çevir',
+                title:'Odayı sağa çevir', act:'office-turn', data:{ 'data-dir':'1' } })}
+            </span>`)}
+            ${K.Button({ label:three ? 'Kat planı' : '3B görünüm', icon:three ? 'grid' : 'cube',
+              size:'sm', act:'office-view' })}
             ${K.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' })}
           </div>
         </div>
-        <div class="floor__room">
+        ${when(three, room3d)}
+        ${when(!three, () => html`<div class="floor__room">
           <div class="floor__lead">${seat(R.AGENT_BY_ID.patron)}</div>
           ${map(specialists, seat)}
-        </div>
+        </div>`)}
       </div>`;
   }
 
@@ -455,13 +555,15 @@ R.Screens.office = (function(){
 
   /* ---------- ayar sayfasi ---------- */
 
-  /* Anahtar bicimi saglayiciya gore bellidir; yanlis yapistirmayi kaydetmeden
-     once yakalamak icin uyarilir (engellenmez: bicim degisebilir). */
-  const KEY_SHAPES = {
-    openrouter:{ re:/^sk-or-/, hint:'OpenRouter anahtarları "sk-or-" ile başlar.' },
-    groq:      { re:/^gsk_/,   hint:'Groq anahtarları "gsk_" ile başlar.' },
-    gemini:    { re:/^AIza/,   hint:'Google AI Studio anahtarları "AIza" ile başlar.' },
-  };
+  /* Anahtar bicimi artik data/providers.js'te durur ve motor okur
+     (R.LLM.keyProblem). Ekran yalnizca sonucu cizer: bicim uyarisi
+     ENGELLEMEZ, ama anahtar acikca BASKA bir saglayiciya aitse kaydetmek
+     yalnizca 401 uretecegi icin durdurulur.
+
+     Eski denetim Google anahtarlarinin "AIza" ile basladigini varsayiyordu;
+     Google Eylul 2026'da yeni "AQ." anahtarlarina gecince o anahtari alan
+     herkes kapida kaliyordu. Bicim bilgisi tek yerde tutulunca boyle bir
+     degisiklik tek satirla karsilanir. */
 
   /* Bir anahtarin bugunku durumu — coklu anahtarda hangisinin dolduğu görünsün. */
   function keyUsage(providerId, model, index){
@@ -491,17 +593,40 @@ R.Screens.office = (function(){
   }
 
   function keyWarning(providerId, value){
-    const shape = KEY_SHAPES[providerId];
-    if(!shape || !value) return null;
-    if(shape.re.test(value)) return null;
-    return shape.hint + ' Yanlış sağlayıcının anahtarını yapıştırmış olabilirsin.';
+    const problem = R.LLM.keyProblem(providerId, value);
+    if(!problem) return null;
+    return K.Notice({ tone:problem.level === 'wrong' ? 'danger' : 'warn', body:problem.text });
+  }
+
+  /* ---------- model listesi ----------
+     Katalog eskir; ekranda gorunen liste once canli listedir (saglayicidan
+     cekilip tarayicida saklanir), o yoksa katalog tohumu. */
+
+  function modelOptions(providerId){
+    return R.LLM.modelsFor(providerId).map(m => ({
+      value:m.id,
+      label:(m.label || m.id) + (m.strength ? ' · ' + m.strength : ''),
+    }));
+  }
+
+  function catalogNote(providerId){
+    const live = R.LLM.cachedModels(providerId);
+    if(!live) return 'Liste uygulamayla birlikte gelen katalogdan; ücretsiz model kimlikleri '
+      + 'sık değişir. “Modelleri yenile” ile sağlayıcının güncel listesini çek.';
+    return live.models.length + ' model · ' + U.relativeDay(live.at.slice(0, 10)) + ' güncellendi.';
   }
 
   function providerForm(providerId){
     const st = O.settings();
     const p = R.PROVIDERS[providerId];
-    const models = p.models || [];
-    const current = providerId === st.provider ? st.model : (models[0] ? models[0].id : '');
+    const models = R.LLM.modelsFor(providerId);
+    const saved = providerId === st.provider ? st.model : '';
+    const inList = saved && models.some(m => m.id === saved);
+    const current = inList ? saved : (models[0] ? models[0].id : '');
+    /* Elle yazilmis model kimligi listede olmaz. Alan bos birakilirsa
+       kaydetme onu listenin ilk modeliyle degistiriyordu: kullanici
+       ayarlari acip kaydedince modeli sessizce kaybediyordu. */
+    const typed = saved && !inList ? saved : '';
     const keys = R.LLM.maskKeys(providerId);
     const lim = R.Quota.limitsFor({ provider:providerId, model:current });
     const over = R.Quota.getOverride(providerId);
@@ -509,9 +634,12 @@ R.Screens.office = (function(){
     return K.Stack([
       K.Notice({ tone:'info', body:p.note }),
 
-      /* --- 1. anahtarlar (birden cok olabilir) --- */
-      when(p.needsKey, () => K.Stack([
-        K.SectionTitle('1. API anahtarı'),
+      /* --- 1. anahtarlar (birden cok olabilir) ---
+         Anahtar istemeyen yerel/ozel uclarda da gosterilir: onlerinde vekil
+         olan kurulumlar anahtar bekler, alan gizlenince baglanmalarinin
+         yolu kalmiyordu. */
+      when(p.needsKey || p.keyOptional, () => K.Stack([
+        K.SectionTitle(p.needsKey ? '1. API anahtarı' : 'API anahtarı (gerekiyorsa)'),
         when(keys.length, () => html`<div class="stack-xs">${map(keys, (masked, i) => html`
           <div class="keyrow">
             <span class="keyrow__mask">${masked}</span>
@@ -541,16 +669,22 @@ R.Screens.office = (function(){
             placeholder:p.endpoint || 'http://localhost:11434/v1/chat/completions' }) }),
       ], 'sm')),
 
-      /* --- 3. model --- */
+      /* --- 3. model ---
+         Model kimlikleri saglayicilarda aylik doner ve eskiyen bir katalog
+         "model bulunamadi" duvarina cikar. Liste artik saglayicinin kendi
+         ucundan tazelenebilir; boylece katalogun eskimesi ariza olmaktan
+         cikip tek dugmeye iner. */
       K.Stack([
-        K.SectionTitle(p.needsKey ? '2. Model' : 'Model'),
+        K.SectionTitle((p.needsKey ? '2. ' : '') + 'Model',
+          K.Button({ label:'Modelleri yenile', icon:'refresh', size:'sm', act:'office-models' })),
+        html`<p class="tiny dim" id="llm-model-note">${catalogNote(providerId)}</p>`,
         when(models.length, () => K.Field({ label:'Listeden seç',
           input:K.Select({ id:'llm-model', value:current, change:'office-model',
-            options:models.map(m => ({ value:m.id,
-              label:m.label + (m.strength ? ' · ' + m.strength : '') })) }) })),
+            options:modelOptions(providerId) }) })),
         K.Field({ label:'Ya da model kimliğini elle yaz',
-          hint:'liste eskiyse doldur; boş bırakırsan yukarıdaki seçilir',
-          input:K.Input({ id:'llm-model-custom', placeholder:'ör. deepseek/deepseek-chat-v3-0324:free' }) }),
+          hint:'listede yoksa doldur; boş bırakırsan yukarıdaki seçilir',
+          input:K.Input({ id:'llm-model-custom', value:typed,
+            placeholder:'ör. deepseek/deepseek-chat-v3-0324:free' }) }),
       ], 'sm'),
 
       /* --- 4. istek siniri --- */
@@ -616,6 +750,7 @@ R.Screens.office = (function(){
           </div>` }),
       ])),
       footer:String(html`
+        ${K.Button({ label:'Tanıla', icon:'info', act:'office-diagnose' })}
         ${K.Button({ label:'Bağlantıyı dene', icon:'refresh', act:'office-test' })}
         ${K.Button({ label:'Kaydet', tone:'primary', act:'office-save' })}`),
     });
@@ -627,12 +762,17 @@ R.Screens.office = (function(){
     if(!provider || !R.PROVIDERS[provider]){ UI.toast('Sağlayıcı seçilmedi'); return null; }
     const p = R.PROVIDERS[provider];
     const val = id => { const el = document.getElementById(id); return el ? String(el.value).trim() : ''; };
+    const list = R.LLM.modelsFor(provider);
     const custom = val('llm-model-custom');
     const picked = val('llm-model');
-    const model = custom || picked || (p.models[0] ? p.models[0].id : '');
+    const model = custom || picked || (list[0] ? list[0].id : '');
+    /* Adres YALNIZCA kendi adresini duzenleyebilen saglayicilarda anlamlidir.
+       Eskiden adres alani olmayan bir saglayici secildiginde kayitli adres
+       geri veriliyordu: Ollama'dan Groq'a gecen kullanicinin istekleri
+       localhost'a gidiyor ve model "cagrilamiyor" oluyordu. */
+    const endpoint = p.editableEndpoint ? R.LLM.normalizeOpenAI(val('llm-endpoint')) : '';
     return {
-      provider, model,
-      endpoint:document.getElementById('llm-endpoint') ? val('llm-endpoint') : (O.settings().endpoint || ''),
+      provider, model, endpoint,
       key:val('llm-key'),
       rpm:val('llm-rpm'),
       rpd:val('llm-rpd'),
@@ -645,8 +785,12 @@ R.Screens.office = (function(){
     if(p.needsKey && !cfg.key && !R.LLM.getKeys(cfg.provider).length){
       return 'Bu sağlayıcı için API anahtarı gerekiyor. Ücretsiz anahtarı bağlantıdan alabilirsin.';
     }
+    /* Bicim uyarisi engellemez ama anahtar acikca BASKA bir saglayiciya
+       aitse kaydetmenin tek sonucu 401'dir: burada durdurulur. */
+    const problem = R.LLM.keyProblem(cfg.provider, cfg.key);
+    if(problem && problem.level === 'wrong') return problem.text;
     if(p.editableEndpoint && !cfg.endpoint){
-      return 'Özel uç için adres gerekiyor (OpenAI uyumlu /chat/completions).';
+      return 'Özel uç için adres gerekiyor (OpenAI uyumlu bir adres yeter: …/v1).';
     }
     if(!cfg.model) return 'Model seçilmedi. Listeden seç ya da model kimliğini elle yaz.';
     return null;
@@ -661,6 +805,25 @@ R.Screens.office = (function(){
   function testOutput(node){
     const out = document.getElementById('llm-test');
     if(out) out.innerHTML = String(node);
+  }
+
+  /* ---------- tanılama ----------
+     “Bağlanamadı” tek başına hiçbir şey öğretmez. Zincir sırayla bakar
+     (ortam → adres → anahtar → model listesi → seçili model → gerçek çağrı)
+     ve ilk kırılan halkayı gösterir: kullanıcı artık nereye bakacağını bilir. */
+
+  function diagList(res){
+    return K.Stack([
+      K.Notice({ tone:res.ok ? 'ok' : 'danger',
+        title:res.ok ? 'Her adım çalışıyor.' : 'Zincir burada kırılıyor:',
+        body:res.ok ? 'Bu yapılandırma ofiste kullanılabilir.'
+          : 'Aşağıdaki ilk kırmızı satır sorunun kendisidir; sonrakiler onun sonucudur.' }),
+      html`<div class="stack-xs mt-8">${map(res.steps, st => html`
+        <div class="finding">
+          <span class="${'finding__dot finding__dot--' + (st.ok ? 'ok' : 'danger')}"></span>
+          <span class="minw0"><b>${st.name}</b>${when(st.note, () => html` — ${st.note}`)}</span>
+        </div>`)}</div>`,
+    ], 'sm');
   }
 
   /* ---------- ekran ---------- */
@@ -688,9 +851,68 @@ R.Screens.office = (function(){
     ]));
   }
 
+  /* ---------- kamera ----------
+     Döndürme ekranı yeniden çizmez: tek bir CSS değişkeni değişir. Yeniden
+     çizim hem gereksiz (veri değişmiyor) hem de sürüklerken takılma yapardı. */
+
+  function applyTurn(deg){
+    roomTurn = ((deg % 360) + 360) % 360;
+    if(roomTurn > 180) roomTurn -= 360;
+    const scene = document.getElementById('room3d-scene');
+    if(scene) scene.style.setProperty('--turn', roomTurn + 'deg');
+  }
+
+  /* Odayı sürükleyerek çevirme. Dikey sürükleme sayfayı kaydırmaya kalır:
+     kullanıcı odanın üstünden geçerken sayfa kilitlenmemeli. */
+  function bindDrag(){
+    const stage = document.getElementById('room3d');
+    if(!stage || stage.dataset.bound) return;
+    stage.dataset.bound = '1';
+
+    let id = null, x0 = 0, base = 0, moved = false;
+
+    stage.addEventListener('pointerdown', e => {
+      if(e.button != null && e.button !== 0) return;
+      id = e.pointerId; x0 = e.clientX; base = roomTurn; moved = false;
+      stage.classList.add('is-dragging');
+    });
+    stage.addEventListener('pointermove', e => {
+      if(id !== e.pointerId) return;
+      const dx = e.clientX - x0;
+      if(!moved && Math.abs(dx) < 4) return;
+      if(!moved){ moved = true; try{ stage.setPointerCapture(id); }catch(err){} }
+      applyTurn(base + dx * 0.4);
+    });
+    const end = e => {
+      if(id !== e.pointerId) return;
+      /* Sürüklemeden sonra gelen tık masayı açmasın. */
+      if(moved) stage.dataset.dragged = '1';
+      id = null;
+      stage.classList.remove('is-dragging');
+    };
+    stage.addEventListener('pointerup', end);
+    stage.addEventListener('pointercancel', end);
+    stage.addEventListener('click', e => {
+      if(stage.dataset.dragged){ delete stage.dataset.dragged; e.stopPropagation(); e.preventDefault(); }
+    }, true);
+  }
+
+  function afterRender(){ bindDrag(); }
+
   /* ---------- eylemler ---------- */
 
   const handle = {
+    /* Görünüm tercihi kalıcıdır: kullanıcı 3B'yi kapattıysa her açılışta
+       geri gelmemeli. */
+    async 'office-view'(){
+      await O.saveSettings({ room3d:O.settings().room3d === false });
+      R.App.render();
+    },
+
+    async 'office-turn'(el){
+      applyTurn(roomTurn + Number(el.dataset.dir || 1) * 30);
+    },
+
     async 'office-desk'(el){
       const id = el.dataset.agent;
       S.ui.officeDesk = S.ui.officeDesk === id ? null : id;
@@ -742,6 +964,54 @@ R.Screens.office = (function(){
     async 'office-rpd'(el){
       const input = document.getElementById('llm-rpd');
       if(input) input.value = el.dataset.rpd;
+    },
+
+    /* Saglayicinin KENDI model listesini ceker. Sohbet istegi degildir:
+       gunluk kotadan dusmez. Eskiyen katalog artik ariza degil, tek dugme. */
+    async 'office-models'(el){
+      const sel = document.getElementById('llm-provider');
+      const provider = sel ? sel.value : '';
+      if(!R.PROVIDERS[provider]) return;
+
+      /* Anahtar henuz kaydedilmemis olabilir; alandaki anahtar once havuza
+         alinir, yoksa liste "anahtar yok" diye doner. */
+      const keyEl = document.getElementById('llm-key');
+      if(keyEl && keyEl.value.trim()) R.LLM.addKey(provider, keyEl.value.trim());
+      const endEl = document.getElementById('llm-endpoint');
+
+      const note = document.getElementById('llm-model-note');
+      if(note) note.textContent = 'Sağlayıcının listesi çekiliyor…';
+      el.disabled = true;
+      try{
+        const res = await R.LLM.listModels({ provider,
+          endpoint:endEl ? endEl.value.trim() : '' });
+        const form = document.getElementById('llm-form');
+        if(form) form.innerHTML = String(providerForm(provider));
+        UI.toast(res.models.length + ' model bulundu');
+      }catch(err){
+        const code = err && err.code;
+        if(note) note.textContent = catalogNote(provider);
+        testOutput(K.Notice({ tone:'danger', title:'Model listesi alınamadı.',
+          body:R.LLM.errorText(code) }));
+      }finally{
+        el.disabled = false;
+      }
+    },
+
+    async 'office-diagnose'(el){
+      const cfg = readForm();
+      if(!cfg) return;
+      /* Tanilama gercek anahtarla calisir; alandaki anahtar once havuza alinir. */
+      if(cfg.key) R.LLM.addKey(cfg.provider, cfg.key);
+      el.disabled = true;
+      testOutput(K.Notice({ tone:'info', body:'Zincir sınanıyor: ortam, adres, anahtar, '
+        + 'model listesi ve gerçek bir çağrı…' }));
+      try{
+        const res = await R.LLM.diagnose(cfg);
+        testOutput(diagList(res));
+      }finally{
+        el.disabled = false;
+      }
     },
 
     async 'office-test'(el){
@@ -863,7 +1133,7 @@ R.Screens.office = (function(){
       const sel = document.getElementById('llm-provider');
       const warn = keyWarning(sel ? sel.value : '', el.value.trim());
       const box = document.getElementById('llm-key-warn');
-      if(box) box.innerHTML = warn ? String(K.Notice({ tone:'warn', body:warn })) : '';
+      if(box) box.innerHTML = warn ? String(warn) : '';
     },
     async 'office-model'(el){
       const custom = document.getElementById('llm-model-custom');
@@ -890,6 +1160,6 @@ R.Screens.office = (function(){
     actions(){
       return String(K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }));
     },
-    render, handle, change, openSettings,
+    render, afterRender, handle, change, openSettings,
   };
 })();

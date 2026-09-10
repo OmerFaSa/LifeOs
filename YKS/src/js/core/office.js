@@ -21,6 +21,7 @@ R.Office = (function(){
   const CHAT_MAX = 30;        // ajan basina saklanan mesaj
   const MEETING_MAX = 20;     // saklanan toplanti kaydi
   const TURN_CONTEXT = 4;     // toplantida bir uzmana gosterilen onceki konusma
+  const FALLBACK_MODELS = 4;  // yedek zincirine giren en fazla model sayisi
 
   /* Token butceleri — tek yerde, cunku hepsi ayni hataya acikti.
      Turkce ekli bir dildir ve genis alfabesiyle ayni cumleyi Ingilizceden
@@ -48,6 +49,7 @@ R.Office = (function(){
       endpoint:'',
       fallback:true,          // ilk model dusunce sirayi dene
       autoBriefing:true,      // sabah gunun brifingini kendiliginden uret
+      room3d:true,            // ofis ekrani: 3B oda mi, duz kat plani mi
       perAgent:{},            // agentId -> { provider, model }
       updatedAt:null,
       promptVersion:R.OFFICE_PROMPTS.version,
@@ -81,8 +83,8 @@ R.Office = (function(){
   }
 
   function firstModel(providerId){
-    const p = R.PROVIDERS[providerId];
-    return (p && p.models && p.models.length) ? p.models[0].id : '';
+    const list = R.LLM.modelsFor(providerId);
+    return list.length ? list[0].id : '';
   }
 
   /* Yedek zinciri: ajanin yapilandirmasi → ofis varsayilani → ayni saglayicinin
@@ -105,8 +107,14 @@ R.Office = (function(){
 
     if(st.fallback){
       const main = agentConfig(agentId);
-      const p = R.PROVIDERS[main.provider];
-      if(p && p.models) p.models.forEach(m => push({ provider:p.id, model:m.id, endpoint:main.endpoint }));
+      /* Yedekler canli listeden gelir: katalog eskidiyse yedek de eskir ve
+         zincirin tamami ayni "model bulunamadi" hatasina duserdi.
+
+         Zincir KISA tutulur. Canli liste yirmiyi asabiliyor ve her deneme bir
+         gunluk hak yakiyor: yirmi yedek, tek bir yanit icin gunun kotasini
+         bitirir. Ilk birkac model calismiyorsa sorun modelde degildir. */
+      R.LLM.modelsFor(main.provider).slice(0, FALLBACK_MODELS)
+        .forEach(m => push({ provider:main.provider, model:m.id, endpoint:main.endpoint }));
       push({ provider:'builtin', model:'default' });
     }
     return chain;
@@ -122,7 +130,7 @@ R.Office = (function(){
     const p = R.PROVIDERS[cfg.provider];
     if(!p) return 'tanımsız';
     if(p.kind === 'builtin') return p.label;
-    const m = (p.models || []).find(x => x.id === cfg.model);
+    const m = R.LLM.modelsFor(p.id).find(x => x.id === cfg.model);
     return p.label + ' · ' + ((m && m.label) || cfg.model);
   }
 

@@ -49,6 +49,39 @@ bunlar yakalanır ve kullanıcıya düzeltme notu olarak gösterilir.
 | **Ekip sohbeti** | `team` | Seçilen ajanla konuşma; ajan yalnız kendi raporunu görür |
 | **Toplantı odası** | `meeting` | Tur tur ilerleyen canlı toplantı + rapor + tutanak arşivi |
 
+### Ofis ekranı iki görünüm taşır
+
+| Görünüm | Ne verir |
+|---|---|
+| **3B oda** (varsayılan) | Masalar bir zeminin üstünde durur, Patron dipte karşıdadır, uzmanlar iki sıra hâlinde önünde oturur. Oda sürüklenerek ya da başlıktaki oklarla çevrilir. |
+| **Kat planı** | Aynı beş masa, düz ızgarada. Dar ekranda ve hareket istemeyen kullanımda daha sakin. |
+
+Tercih kalıcıdır (`office/settings → room3d`), kamera açısı yeniden çizimler
+arasında korunur.
+
+3B oda bir resim değil, **aynı arayüzün başka bir çizimidir**: her masa yine bir
+`<button>`, yine `data-act="office-desk"`, yine klavyeyle gezilir. Ad kartları
+sahnenin **ters dönüşümünü** alır (`rotateZ(-turn) rotateX(-tilt)`), böylece oda
+hangi açıda olursa olsun yazı düz okunur.
+
+Kütüphane yok: uygulamanın hiçbir bağımlılığı yok ve tek dosyalık bir HTML
+olarak yayımlanıyor; beş masalık bir oda için WebGL hem ağır hem gereksizdir.
+Sahne tek bir CSS dönüşümüyle eğilir.
+
+İki tuzak vardı, ikisi de kilitlendi:
+
+- **Dekor imlece görünmezdir** (`pointer-events:none`). `preserve-3d` bağlamında
+  kardeşler tek bir derinlik değerine göre sıralanır ve zemin gibi büyük bir
+  düzlem, kendisiyle aynı düzlemde duran masa düğmelerini isabet testinde
+  örtüyordu: Patron'un ve bir uzmanın masası **hiç tıklanamıyordu**.
+- **Ad kartı masanın düzlemini kesmez.** Kestiğinde masa üstü yazının bir kısmını
+  boyuyor, adlar yarım görünüyordu; kart artık masanın ön kenarına çakılmış bir
+  tabela gibi dikilir ve hiçbir noktası masa düzleminin altına inmez.
+
+Durum metni ad kartında **yalnız söylenecek bir şey varken** çıkar: her şey
+yolundayken ışık yeter, kota dolunca ya da sıra oluşunca yazı belirir. Masanın
+tam durumu `title`'da ve raporunda durur.
+
 ## Toplantı akışı
 
 Toplantı tek turluk bir yoklama değil, **tur tur ilerleyen bir fikir
@@ -125,11 +158,49 @@ Ofis, tarayıcıdan doğrudan çağrılabilen ücretsiz uçları destekler
 | Yerleşik | gerekmez | — | — | Uygulama Claude içinde çalışıyorsa açıktır |
 | OpenRouter | `sk-or-…` | 20 | 50 · kredi yüklediysen 1000 | Ücretsiz modellerin çoğu burada |
 | Groq | `gsk_…` | 30 | 1000–14 400 | En hızlısı; toplantı için en akıcı |
-| Google AI Studio | `AIza…` | 15 (Flash-Lite 30) | 1500 | Günlük hakkı en geniş olan |
-| Özel uç | değişir | sen yazarsın | sen yazarsın | OpenAI uyumlu `/chat/completions` |
+| Google AI Studio | `AIza…` ya da `AQ.…` | 10–30 | 1000–1500 | Günlük hakkı en geniş olan |
+| Ollama · LM Studio | gerekmez | — | — | Kendi bilgisayarında; kota yok |
+| Özel uç | isteğe bağlı | sen yazarsın | sen yazarsın | OpenAI uyumlu bir adres yeter |
 
 Sayılar `data/providers.js` içinde `limits` alanında, kaynağı ve tarihi
 `checked` alanında durur. Hesabında farklıysa Ofis → Ayarlar'dan düzeltebilirsin.
+Bilinmeyen sınır **yazılmaz**: uydurma bir sayı, sayı olmamasından kötüdür —
+alan boşsa sağlayıcının dar varsayılanına düşülür.
+
+### Anahtar biçimi — engellemez, söyler
+
+Yanlış sağlayıcıya yapıştırılan anahtar en sık arızadır. Biçim bilgisi
+`data/providers.js` içinde `keyPattern` alanında durur ve motor okur
+(`LLM.keyProblem`). Üç sonuç vardır:
+
+- **Tanıdık biçim** → sessiz.
+- **Tanınmayan biçim** → yalnız uyarı, kayıt engellenmez. Sağlayıcılar önek
+  değiştirebiliyor; geçerli bir anahtarı reddetmek en kötü arıza olurdu.
+- **Başka sağlayıcının biçimi** → kaydetme durdurulur. Kaydetmenin tek sonucu
+  401 olurdu.
+
+Bunun bedeli ödendi: Google, Eylül 2026'da anahtar biçimini değiştirdi
+(yeni "auth key"ler `AQ.` ile başlar, eskileri `AIza`). Yalnız `AIza`'yı kabul
+eden sabit denetim, yeni anahtar alan **herkesi** kapıda durduruyordu. Artık
+ikisi de tanınır ve biçim tek yerde durur.
+
+### Google anahtarı başlıkla gider
+
+Gemini çağrısında anahtar `x-goog-api-key` **başlığıyla** gönderilir, adres
+satırındaki `?key=` ile değil: sorgu dizesi anahtarı tarayıcı geçmişine,
+`Referer` başlığına ve aradaki vekil günlüklerine düşürür.
+
+### Uç adresi sızmaz, eksik yazılan tamamlanır
+
+Adres **yalnızca** kendi adresini düzenleyebilen sağlayıcılarda (`editableEndpoint`)
+dikkate alınır; diğerlerinde katalogdaki resmî uç kullanılır. Eskiden ayar
+ekranı adres alanı olmayan bir sağlayıcı için de kayıtlı adresi geri veriyordu:
+Ollama'dan Groq'a geçen kullanıcının bütün istekleri `localhost:11434`'e gidiyor
+ve "model çağrılamıyor" oluyordu.
+
+Eksik yazılan adres tamamlanır: `…/v1` → `…/v1/chat/completions`,
+`localhost:11434` → `http://localhost:11434/v1/chat/completions`. Sorgu dizesi
+korunur.
 
 ### İstek sınırı hiç aşılmaz
 
@@ -148,9 +219,30 @@ yoktur: orası bir zamanlama sorunu değil düz bir sayımdır ve pay düşmek
 
 Sayaçlar sağlayıcı+model başına ayrıdır: Groq'ta sınıra takılmak Gemini'yi durdurmaz.
 
-**Model kimlikleri eskir.** Listedeki kimlikler sağlayıcılar tarafından
-değiştirilir; ayar sayfasındaki *"Model kimliğini elle yaz"* alanı bu yüzden
-vardır. Listeyi güncellemek için yalnızca `data/providers.js` düzenlenir.
+### Katalog eskir — ve bu artık arıza değil
+
+Ücretsiz model kimlikleri aylık döner: OpenRouter'ın `":free"` listesi sürekli
+değişir, Google 2.0 Flash'i Mart 2026'da emekli etti. Sabit bir katalog bu yüzden
+er geç "model bulunamadı" duvarına çıkar ve kullanıcının doğru kimliği bilmesinin
+hiçbir yolu olmaz.
+
+Bunun için `data/providers.js` artık tek kaynak değil **tohumdur**. Ayar
+sayfasındaki **"Modelleri yenile"** sağlayıcının kendi listesini çeker
+(`LLM.listModels`) ve tarayıcıda saklar (`localStorage['rota.llm.catalog']`):
+
+- OpenRouter/Groq/yerel uçlar: `GET …/v1/models`
+- Google: `GET …/v1beta/models` — yalnız `generateContent` destekleyenler kalır,
+  gömme (embedding) modelleri ayıklanır
+- OpenRouter'da ücretli modeller ayıklanır (kullanıcıyı 402'ye göndermesin)
+
+Liste çekmek bir **sohbet isteği değildir**: günlük kotadan düşmez. Canlı liste
+varken katalog yalnızca okunabilir etiketi verir ("Llama 3.3 70B · denge"),
+kimlik canlı listeden gelir. Yedek zinciri de canlı listeyi kullanır — yoksa
+katalog eskidiğinde zincirin tamamı aynı hataya düşerdi.
+
+Elle yazılmış model kimliği artık kaybolmuyor: liste dışı bir kimlik ayar
+sayfası yeniden açıldığında "elle yaz" alanında geri gelir. Eskiden boş
+görünüyor ve kaydetme onu listenin ilk modeliyle sessizce değiştiriyordu.
 
 ### Anahtar nerede durur
 
@@ -213,6 +305,58 @@ Kesilme yine de olursa üç kademe devreye girer:
 
 Devam isteği düşerse eldeki sağlam metin döner — hata gösterilmez.
 Bütçeler `core/office.js` içindeki `BUDGET` tablosunda tek yerde durur.
+
+### Akıl yürütmenin iç sesi cevaba karışmaz
+
+Akıl yürüten ücretsiz modeller (DeepSeek R1, Qwen3, birçok `":free"` uç) iç
+seslerini iki yoldan sızdırır: gövdeye `<think>…</think>` yazarlar ya da ayrı
+bir `reasoning` alanına koyarlar. Birincisi ekrana **"ajanın yanıtı" diye
+çiziliyordu** — kullanıcının gördüğü "yanlış yanıt"ın en sık sebebi buydu.
+
+`LLM.stripThinking` bunu akışta da ayıklar: kapanmamış bir `<think>` açılışından
+sonrası henüz cevap değildir, kesilir. Model **yalnızca** düşünme döndürdüyse
+sonuç "boş yanıt" değil ayrı bir hatadır (`thinking_only`) — çünkü "tekrar dene"
+yanlış tavsiyedir, aynı model aynı şeyi yapar. Hata yeniden denenebilir sayılır,
+böylece yedek zinciri akıl yürütmeyen bir modele geçer.
+
+### Hata gövdesi okunur
+
+HTTP kodu tek başına yetmez ve okumadan sınıflamak kullanıcıyı yanlış yere
+gönderir. Google geçersiz anahtarı **400** ile bildirir; "istek reddedildi"
+diyen bir mesaj, anahtarını yenilemesi gereken kullanıcıya hiçbir şey söylemez.
+`LLM.classify(status, gövde)` önce gövdeye bakar:
+
+| Gövdede geçen | Sonuç | Mesaj ne der |
+|---|---|---|
+| `API key not valid` | `unauthorized` | Anahtarı kontrol et ya da yenisini üret |
+| `ACCESS_TOKEN_TYPE_UNSUPPORTED` | `key_type` | Bu anahtar türü kabul edilmiyor; AI Studio'da yeni bir tane üret |
+| `model … does not exist` | `bad_model` | "Modelleri yenile" ile güncel listeden seç |
+| 429 + `per day` / `quota` | `daily_quota` | Günlük hak doldu, yarın sıfırlanır |
+| yerel adrese `TypeError` | `local_cors` | Sunucu açık mı; Ollama için `OLLAMA_ORIGINS="*"` |
+
+### Parametre onarımı
+
+Uçlar "OpenAI uyumlu" olsa da parametrelerde ayrışır: bazıları `max_tokens`
+yerine `max_completion_tokens` ister, bazısı `temperature` kabul etmez,
+Gemini 3 `thinkingBudget` yerine `thinkingLevel` bekler. Hepsi 400 döner ve
+kullanıcıya "istek reddedildi" diye görünürdü.
+
+400'ün gövdesi hangi alandan şikâyet ediyorsa o alan düzeltilir ve istek **bir
+kez** tekrarlanır. Düzeltme model başına hatırlanır, böylece ikinci istekten
+sonra fazladan tur olmaz.
+
+### Tanılama — zincirin ilk kırılan halkası
+
+"Bağlanamadı" tek başına hiçbir şey öğretmez: sorun anahtarda mı, model
+kimliğinde mi, adreste mi, ortamda mı? Ayar sayfasındaki **"Tanıla"**
+(`LLM.diagnose`) sırayla bakar ve her adımın sonucunu yazar:
+
+```
+Sağlayıcı → Ortam → Uç adresi → API anahtarı → Model listesi → Seçili model → Sohbet çağrısı
+```
+
+İlk kırmızı satır sorunun kendisidir; sonrakiler onun sonucudur. Model listesi
+adımı anahtarı da doğrular ve günlük kotadan düşmez.
 
 ## Ajan defteri — uydurmadan hatırlama
 
@@ -351,17 +495,17 @@ akademik metrik taşır.
 | `data/agents.js` | Beş ajanın kimliği, yetki alanı, tur soruları, istemleri (deklaratif) |
 | `data/actions.js` | Ajanların önerebileceği eylemlerin kapalı kataloğu (deklaratif) |
 | `core/proposals.js` | Öneri kutusu: doğrulama, önizleme, onay, uygulama, geri alma |
-| `data/providers.js` | Sağlayıcı, model ve istek sınırı kataloğu (deklaratif, sık değişir) |
+| `data/providers.js` | Sağlayıcı tohum kataloğu: uç, anahtar biçimi, model listesi, sınırlar (deklaratif, sık eskir) |
 | `data/rules.js` | Ev kuralları, yasak kalıplar, üslup, kart kuralları |
 | `core/quota.js` | İstek sınırı: aralık koyar, günü sayar, 429'u cezalandırır |
 | `core/journal.js` | Ajan defteri: doğrulanabilir gözlem, örüntü bulma, güven skoru |
-| `core/llm.js` | Taşıma: fetch, SSE akış, hata haritası, anahtar deposu, yedek zinciri |
+| `core/llm.js` | Taşıma: fetch, SSE akış, hata sınıflama, parametre onarımı, canlı model listesi, tanılama, anahtar deposu, yedek zinciri |
 | `core/tools.js` | Veri okuma katmanı + gizlilik süzgeci (`sanitize`) |
 | `core/office.js` | Brifingler, sohbet, gündem, turlu toplantı, rapor, karar takibi |
-| `screens/office.js` | Pano, masalar, günün kararı, kota, model ayarları |
+| `screens/office.js` | Pano, 3B oda / kat planı, masalar, günün kararı, kota, model ayarları ve tanılama |
 | `screens/team.js` | Ajanla sohbet |
 | `screens/meeting.js` | Canlı turlu toplantı + rapor + tutanak arşivi |
-| `tests/office.test.js` | 150 test: kayıt, brifing, yetki, gizlilik, gündem, tur, oylama, çapraz soru, defter, not, rapor, karar, kota, taşıma |
+| `tests/office.test.js` | Kayıt, brifing, yetki, gizlilik, gündem, tur, oylama, çapraz soru, defter, not, rapor, karar, kota, taşıma, API bağlantısı, 3B oda |
 | `tools/evalagents.js` | Model karşılaştırma: ajanları senaryolarda konuşturup makineyle puanlar |
 
 ## Yeni ajan eklemek
@@ -380,7 +524,7 @@ akademik metrik taşır.
 
 ```bash
 python devserver.py                       # http://localhost:4173
-node tools/runtests.js                    # 642 testin tamamı geçmeli (Playwright ile)
+node tools/runtests.js                    # 727 testin tamamı geçmeli (Playwright ile)
 python build.py                           # dist/rota.html
 python tools/audit.py                     # satır, concat, sınıf sayıları
 ```

@@ -5,7 +5,7 @@
 
    Uc bicim desteklenir:
      builtin  window.claude.use('sample')      — Artifact icinde, anahtarsiz
-     openai   POST /chat/completions (SSE)     — OpenRouter, Groq, ozel uc
+     openai   POST /chat/completions (SSE)     — OpenRouter, Groq, yerel, ozel uc
      gemini   POST /models/x:streamGenerateContent — Google AI Studio
 
    Anahtarlar 'rota.llm.keys' altinda, uygulama verisinden AYRI durur:
@@ -16,6 +16,7 @@ window.R = window.R || {};
 R.LLM = (function(){
 
   const KEY_STORE = 'rota.llm.keys';
+  const MODEL_STORE = 'rota.llm.catalog';
   const TIMEOUT_MS = 90000;
 
   /* Turkce ayni cumleyi Ingilizceden belirgin daha cok token'la yazar:
@@ -83,6 +84,34 @@ R.LLM = (function(){
     return prev + (/\s$/.test(prev) ? '' : ' ') + piece;
   }
 
+  /* ---------- akil yurutme cikardimi ----------
+
+     Akil yuruten ucretsiz modeller (DeepSeek R1, Qwen3, bircok ":free" uc)
+     ic seslerini iki yoldan sizdirir: ya govdeye <think>…</think> yazarlar
+     ya da ayri bir `reasoning` alanina koyarlar. Birincisi ekrana "ajanin
+     yaniti" diye ciziliyordu — kullanicinin gordugu "yanlis yanit"in en sik
+     sebebi buydu. Ic ses cevap degildir; ayiklanir.
+
+     Akista da ayiklanir: kapanmamis bir <think> acilisindan SONRASI henuz
+     cevap degildir, o yuzden kesilir. Boylece kullanici modelin dusunmesini
+     degil, bitmis cumleyi gorur. */
+  const THINK_PAIR = /<(think|thinking|reasoning|reflection)>[\s\S]*?<\/\1>/gi;
+  const THINK_OPEN = /<(?:think|thinking|reasoning|reflection)>/i;
+  const THINK_CLOSE = /^[\s\S]*?<\/(?:think|thinking|reasoning|reflection)>/i;
+
+  function stripThinking(text){
+    let s = String(text || '');
+    if(s.indexOf('<') < 0) return s.trim();
+    s = s.replace(THINK_PAIR, '');
+    /* Acilis etiketi gelmeden kapanis geldiyse (bazi ucler acilisi hic
+       gondermez) kapanisa kadarki her sey ic sestir. */
+    if(THINK_CLOSE.test(s) && !THINK_OPEN.test(s)) s = s.replace(THINK_CLOSE, '');
+    /* Kapanmamis acilis: sonrasi henuz cevap degil. */
+    const open = s.search(THINK_OPEN);
+    if(open >= 0) s = s.slice(0, open);
+    return s.trim();
+  }
+
   /* ---------- anahtar deposu ---------- */
 
   function readKeys(){
@@ -139,6 +168,45 @@ R.LLM = (function(){
   function maskKey(providerId){ return mask(getKey(providerId)); }
   function maskKeys(providerId){ return getKeys(providerId).map(mask); }
 
+  /* ---------- anahtar bicimi ----------
+
+     Bicim bilgisi data/providers.js'te durur; burada yalnizca okunur.
+     Uyari ENGELLEMEZ: saglayicilar oneki degistirebilir ve yanlis bir
+     uyari yuzunden gecerli anahtari reddetmek, en kotu ariza olurdu.
+     Tek kesin durum, anahtarin acikca BASKA bir saglayiciya ait olmasidir. */
+
+  /* Anahtar hangi saglayicinin bicimine uyuyor? Hicbirine uymuyorsa null. */
+  function keyOwner(value){
+    const v = String(value || '').trim();
+    if(!v) return null;
+    const ids = Object.keys(R.PROVIDERS);
+    for(let i = 0; i < ids.length; i++){
+      const p = R.PROVIDERS[ids[i]];
+      if(p.keyPattern && p.keyPattern.test(v)) return p.id;
+    }
+    return null;
+  }
+
+  /* { level:'wrong'|'shape', text } ya da null.
+     'wrong' — anahtar baska bir saglayiciya ait, kaydetmek anlamsiz.
+     'shape' — bilinen bicime uymuyor ama sahibi de belli degil: yalniz soylenir. */
+  function keyProblem(providerId, value){
+    const v = String(value || '').trim();
+    const p = R.PROVIDERS[providerId];
+    if(!v || !p) return null;
+    const owner = keyOwner(v);
+    if(owner && owner !== providerId){
+      return { level:'wrong', owner,
+        text:'Bu anahtar ' + R.PROVIDERS[owner].label + ' anahtarına benziyor, '
+           + p.label + ' anahtarına değil. Sağlayıcıyı değiştir ya da doğru anahtarı yapıştır.' };
+    }
+    if(p.keyPattern && !p.keyPattern.test(v)){
+      return { level:'shape',
+        text:(p.keyShape || '') + ' Yine de kaydedebilirsin: sağlayıcılar biçim değiştirebiliyor.' };
+    }
+    return null;
+  }
+
   /* Kotasi musait olan anahtari secer; hepsi doluysa en az bekleyeni.
      Donen index kota sayacinin anahtarina girer. */
   function pickKey(cfg){
@@ -185,7 +253,16 @@ R.LLM = (function(){
   function inSandbox(){
     return !!(window.claude && typeof window.claude.use === 'function');
   }
-  function networkCode(){ return inSandbox() ? 'sandboxed' : 'network'; }
+  function isLocal(url){
+    return /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0)(:|\/|$)/i.test(String(url || ''));
+  }
+  /* Baglanti hic kurulamadi. Sebep uce ayrilir cunku cozumleri farklidir:
+     kum havuzu (uygulamayi baska yerde ac), yerel sunucu (CORS'u ac),
+     duz ag (interneti kontrol et). */
+  function networkCode(endpoint){
+    if(isLocal(endpoint)) return 'local_cors';
+    return inSandbox() ? 'sandboxed' : 'network';
+  }
 
   function retryAfterSeconds(response){
     const raw = response.headers && response.headers.get('retry-after');
@@ -193,11 +270,34 @@ R.LLM = (function(){
     return Number.isFinite(n) && n > 0 ? Math.min(n, 300) : null;
   }
 
-  function codeForStatus(status){
+  /* HTTP kodu tek basina yetmez: Google gecersiz anahtari 400 ile,
+     OpenRouter bilinmeyen modeli 400 ile bildirir. Govde okunmadan
+     yapilan siniflama kullaniciyi yanlis yere bakmaya gonderiyordu —
+     "istek reddedildi" diyen bir mesaj, anahtari yenilemesi gereken
+     kullaniciya hicbir sey soylemez. Once govdeye bakilir. */
+  function classify(status, detail){
+    const d = String(detail || '').toLowerCase();
+
+    /* Google'in yeni "AQ." anahtarlari bazi hesaplarda Gemini API'ye
+       kapalidir ve bunu kendine ozgu bir kodla soyler. */
+    if(d.indexOf('access_token_type_unsupported') >= 0) return 'key_type';
+
+    if(/api[_ ]?key[_ ]?invalid|api key not valid|invalid api key|invalid_api_key|no auth credentials/.test(d)){
+      return 'unauthorized';
+    }
+    if(/model.*(not found|not exist|does not exist|is not supported|decommission|deprecat)|no endpoints found|unknown model|invalid model/.test(d)){
+      return 'bad_model';
+    }
+    if(status === 429 && /per day|daily|quota|resource[_ ]exhausted|free-models-per-day/.test(d)){
+      return 'daily_quota';
+    }
+    if(/insufficient|no credit|requires more credits|payment required/.test(d)) return 'no_credit';
+
     if(status === 401 || status === 403) return 'unauthorized';
     if(status === 402) return 'no_credit';
     if(status === 404) return 'bad_model';
     if(status === 408) return 'timeout';
+    if(status === 413) return 'too_long';
     if(status === 429) return 'rate_limited';
     if(status >= 500) return 'server';
     return 'bad_request';
@@ -215,15 +315,24 @@ R.LLM = (function(){
     no_model:'Model seçilmedi.',
     no_endpoint:'Özel uç için adres girilmedi.',
     unauthorized:'API anahtarı kabul edilmedi. Anahtarı kontrol et ya da yenisini üret.',
+    key_type:'Bu anahtar türü Gemini API’de kabul edilmiyor. Google AI Studio’da anahtarı '
+      + 'sil ve yeni bir tane üret; hesabın hâlâ eski “AIza…” anahtarı veriyorsa onu kullan.',
     no_credit:'Bu hesapta kredi kalmamış. Ücretsiz bir model seç ya da başka sağlayıcı ekle.',
-    bad_model:'Model bulunamadı. Model kimliği değişmiş olabilir; listeden başka bir model seç.',
+    bad_model:'Model bulunamadı. Ücretsiz model kimlikleri sık değişir: Ayarlar’da '
+      + '“Modelleri yenile” ile sağlayıcının güncel listesini çek ve oradan seç.',
     rate_limited:'İstek sınırına takıldın. Birkaç dakika bekle ya da başka sağlayıcı dene.',
     server:'Sağlayıcı şu an yanıt vermiyor. Biraz sonra tekrar dene.',
     bad_request:'İstek reddedildi. Model kimliği ya da uç adresi hatalı olabilir.',
+    too_long:'İstek bu model için fazla uzun. Daha kısa bir soru sor ya da geniş bağlamlı bir model seç.',
     network:'Bağlantı kurulamadı. İnternetini ve uç adresini kontrol et.',
+    local_cors:'Kendi bilgisayarındaki sunucuya erişilemedi. Sunucu açık mı, adres doğru mu, '
+      + 've tarayıcıdan erişime izin verdin mi? (Ollama için OLLAMA_ORIGINS="*" ile başlat.)',
     timeout:'Yanıt zaman aşımına uğradı. Daha hızlı bir model dene.',
     cancelled:'İptal edildi.',
     empty:'Model boş yanıt döndürdü. Tekrar dene.',
+    thinking_only:'Bu model yalnızca kendi düşünme metnini döndürdü, cevabı yazmadı. '
+      + 'Akıl yürüten modeller (R1, Qwen3 gibi) kısa yanıtlarda bunu sık yapar: '
+      + 'listeden akıl yürütmeyen bir model seç.',
     unavailable:'Yerleşik model bu ortamda kapalı. Ofis → Ayarlar’dan ücretsiz bir sağlayıcı bağla.',
     offline:'Bağlantı yok. Çevrimiçi olunca kaldığın yerden devam edersin; kural motoru bu sırada çalışmayı sürdürüyor.',
     daily_quota:'Bu modelin günlük ücretsiz hakkı doldu. Yarın sıfırlanır; o zamana kadar başka bir sağlayıcı kullanabilirsin.',
@@ -235,9 +344,9 @@ R.LLM = (function(){
   function errorText(code){ return ERRORS[code] || 'Model şu an yanıt veremedi.'; }
 
   /* Yeniden denenebilir hatalar: yedek modele gecmek anlamli olanlar. */
-  const RETRYABLE = ['rate_limited', 'server', 'bad_model', 'timeout', 'empty'];
+  const RETRYABLE = ['rate_limited', 'server', 'bad_model', 'timeout', 'empty', 'thinking_only', 'too_long'];
   /* Baglanti gelince kaldigi yerden devam edilebilecek hatalar. */
-  const RESUMABLE = ['offline', 'network', 'server', 'timeout'];
+  const RESUMABLE = ['offline', 'network', 'server', 'timeout', 'local_cors'];
   function retryable(code){ return RETRYABLE.indexOf(code) >= 0; }
   function resumable(code){ return RESUMABLE.indexOf(code) >= 0; }
 
@@ -247,6 +356,52 @@ R.LLM = (function(){
     const h = function(){ window.removeEventListener('online', h); fn(); };
     window.addEventListener('online', h);
     return function(){ window.removeEventListener('online', h); };
+  }
+
+  /* ---------- uc adresi ----------
+
+     Iki ayri ariza buradan cikiyordu:
+
+     1) SIZAN ADRES. Ayar ekrani, adres alani olmayan bir saglayici secildiginde
+        de eski adresi geri veriyordu; Ollama'dan Groq'a gecen kullanicinin
+        istekleri localhost:11434'e gidiyor ve "model cagrilamiyor" oluyordu.
+        Cozum burada: adres YALNIZCA kendi adresini duzenleyebilen
+        saglayicilarda dikkate alinir, digerlerinde katalogdaki resmî uc kullanilir.
+
+     2) EKSIK YOL. Kullanici genelde taban adresi yapistirir (…/v1) ya da yalniz
+        makine adini yazar (localhost:11434). Ikisi de 404 verirdi; tamamlanir. */
+
+  function normalizeOpenAI(url){
+    let u = String(url || '').trim().replace(/\s+/g, '');
+    if(!u) return '';
+    if(!/^https?:\/\//i.test(u)) u = 'http://' + u;      // "localhost:11434"
+    const q = u.indexOf('?');
+    const query = q >= 0 ? u.slice(q) : '';
+    u = (q >= 0 ? u.slice(0, q) : u).replace(/\/+$/, '');
+    if(/\/chat\/completions$/i.test(u)) return u + query;
+    if(/\/chat$/i.test(u)) return u + '/completions' + query;
+    if(/\/v\d+[a-z]*$/i.test(u)) return u + '/chat/completions' + query;
+    return u + '/v1/chat/completions' + query;
+  }
+
+  function normalizeGemini(url){
+    const u = String(url || '').trim().replace(/\/+$/, '');
+    if(!u) return '';
+    return /\/models$/i.test(u) ? u : u + '/models';
+  }
+
+  /* Bir cagrinin gercekten gidecegi adres. */
+  function endpointFor(provider, cfg){
+    const own = provider.editableEndpoint ? String((cfg && cfg.endpoint) || '').trim() : '';
+    const base = own || provider.endpoint || '';
+    return provider.kind === 'gemini' ? normalizeGemini(base) : normalizeOpenAI(base);
+  }
+
+  /* Anahtar hangi baslikla gider? Google'inki Bearer DEGILDIR. */
+  function authHeaders(provider, key){
+    if(!key) return {};
+    if(provider.auth === 'google') return { 'x-goog-api-key':key };
+    return { 'Authorization':'Bearer ' + key };
   }
 
   /* ---------- ortak yardimcilar ---------- */
@@ -324,8 +479,52 @@ R.LLM = (function(){
     try{
       const j = JSON.parse(body);
       const e = j.error || j;
-      return String(e.message || e.detail || e.type || '').slice(0, 240);
+      const msg = String(e.message || e.detail || e.type || '');
+      /* Hata kodu mesajda gecmiyorsa siniflama icin eklenir
+         (Google sebebi `status`/`reason` alaninda tasir). */
+      const extra = [e.status, e.reason, e.code].filter(x => typeof x === 'string').join(' ');
+      return (msg + (extra && msg.indexOf(extra) < 0 ? ' ' + extra : '')).slice(0, 240);
     }catch(e){ return body.slice(0, 240); }
+  }
+
+  /* ---------- parametre onarimi ----------
+
+     Ucler "OpenAI uyumlu" olsa da parametrelerde ayrisir: bazilari artik
+     max_tokens yerine max_completion_tokens ister, bazisi temperature
+     kabul etmez, Gemini 3 thinkingBudget yerine thinkingLevel bekler.
+     Bunlarin hepsi 400 doner ve kullaniciya "istek reddedildi" diye
+     gorunurdu.
+
+     Cozum: 400'un govdesi hangi alandan sikâyet ediyorsa o alan duzeltilir
+     ve istek BIR KEZ tekrarlanir. Duzeltme model basina hatirlanir, boylece
+     ikinci istekten sonra fazladan tur olmaz. */
+
+  const repairs = new Map();               // 'provider|model' -> { ... }
+  function repairKey(cfg){ return cfg.provider + '|' + cfg.model; }
+  function repairOf(cfg){ return repairs.get(repairKey(cfg)) || {}; }
+  function learnRepair(cfg, patch){
+    const next = Object.assign({}, repairOf(cfg), patch);
+    repairs.set(repairKey(cfg), next);
+    return next;
+  }
+
+  /* 400 govdesinden cikarilabilecek duzeltme; yoksa null. */
+  function repairFor(detail, current){
+    const d = String(detail || '').toLowerCase();
+    const now = current || {};
+    if(d.indexOf('max_completion_tokens') >= 0 && now.tokenField !== 'max_completion_tokens'){
+      return { tokenField:'max_completion_tokens' };
+    }
+    if(d.indexOf('temperature') >= 0 && !now.dropTemperature){
+      return { dropTemperature:true };
+    }
+    if(/thinking|thought/.test(d) && !now.dropThinking){
+      return { dropThinking:true };
+    }
+    if(/system_instruction|systeminstruction|'system'|"system"|system role/.test(d) && !now.systemAsUser){
+      return { systemAsUser:true };
+    }
+    return null;
   }
 
   /* ---------- yerlesik cagri ---------- */
@@ -347,20 +546,33 @@ R.LLM = (function(){
 
   /* ---------- OpenAI uyumlu cagri ---------- */
 
-  async function callOpenAI(req, provider){
-    const key = req.key;
-    if(!key) throw fail('no_key');
-    const endpoint = req.endpoint || provider.endpoint;
-    if(!endpoint) throw fail('no_endpoint');
-
+  function openaiBody(req, fix, stream){
     const messages = [];
-    if(req.system) messages.push({ role:'system', content:req.system });
+    if(req.system){
+      /* Bazi ucler 'system' rolunu reddeder; onarim ogrenildiyse ilk
+         kullanici mesajina katilir. */
+      if(fix.systemAsUser) messages.push({ role:'user', content:req.system });
+      else messages.push({ role:'system', content:req.system });
+    }
     (req.messages || []).forEach(m => messages.push({ role:m.role, content:m.text }));
 
-    const headers = {
-      'Content-Type':'application/json',
-      'Authorization':'Bearer ' + key,
-    };
+    const body = { model:req.model, messages, stream:!!stream };
+    const budget = req.maxTokens || DEFAULT_MAX_TOKENS;
+    if(fix.tokenField === 'max_completion_tokens') body.max_completion_tokens = budget;
+    else body.max_tokens = budget;
+    if(!fix.dropTemperature) body.temperature = req.temperature == null ? 0.4 : req.temperature;
+    return body;
+  }
+
+  async function callOpenAI(req, provider){
+    const key = req.key;
+    if(!key && provider.needsKey) throw fail('no_key');
+    const endpoint = req.endpoint;
+    if(!endpoint) throw fail('no_endpoint');
+
+    const headers = Object.assign(
+      { 'Content-Type':'application/json' },
+      authHeaders(provider, key));
     /* OpenRouter kaynak basligi bekler; tarayicidan gonderilmesi serbesttir. */
     if(provider.id === 'openrouter'){
       headers['HTTP-Referer'] = location.origin || 'https://rota.local';
@@ -368,41 +580,43 @@ R.LLM = (function(){
     }
 
     const stream = !!req.onText;
-    const guard = withTimeout(req.signal, req.timeout);
+    const cfgKey = { provider:provider.id, model:req.model };
+    let fix = repairOf(cfgKey);
     let response;
-    try{
-      response = await fetch(endpoint, {
-        method:'POST',
-        headers,
-        signal:guard.signal,
-        body:JSON.stringify({
-          model:req.model,
-          messages,
-          max_tokens:req.maxTokens || DEFAULT_MAX_TOKENS,
-          temperature:req.temperature == null ? 0.4 : req.temperature,
-          stream,
-        }),
-      });
-    }catch(e){
-      guard.done();
-      if(guard.timedOut()) throw fail('timeout');
-      if(req.signal && req.signal.aborted) throw fail('cancelled');
-      throw fail(networkCode(), e && e.message);
-    }
+    let guard;
 
-    if(!response.ok){
+    /* En fazla iki tur: ilk istek + ogrenilen tek duzeltme. */
+    for(let attempt = 0; attempt < 2; attempt++){
+      guard = withTimeout(req.signal, req.timeout);
+      try{
+        response = await fetch(endpoint, {
+          method:'POST', headers, signal:guard.signal,
+          body:JSON.stringify(openaiBody(req, fix, stream)),
+        });
+      }catch(e){
+        guard.done();
+        if(guard.timedOut()) throw fail('timeout');
+        if(req.signal && req.signal.aborted) throw fail('cancelled');
+        throw fail(networkCode(endpoint), e && e.message);
+      }
+
+      if(response.ok) break;
+
       const detail = await errorMessage(response);
-      const code = codeForStatus(response.status);
+      const code = classify(response.status, detail);
       guard.done();
       /* Saglayici bizim saydigimizdan daha siki davraniyor: pencereyi kapat. */
-      if(code === 'rate_limited'){
+      if(code === 'rate_limited' || code === 'daily_quota'){
         R.Quota.penalize({ provider:provider.id, model:req.model, keyId:req.keyId }, retryAfterSeconds(response));
       }
-      throw fail(code, detail);
+      const patch = response.status === 400 ? repairFor(detail, fix) : null;
+      if(!patch || attempt === 1) throw fail(code, detail);
+      fix = learnRepair(cfgKey, patch);
     }
 
     let text = '';
     let finish = '';
+    let reasoned = false;
     try{
       const ctype = response.headers.get('content-type') || '';
       if(stream && ctype.indexOf('event-stream') >= 0){
@@ -412,18 +626,23 @@ R.LLM = (function(){
           /* Bitis sebebi genelde SON karede, govdesi bos olarak gelir:
              delta kontrolunden ONCE okunmali, yoksa kesilme hic gorulmez. */
           if(ch.finish_reason) finish = String(ch.finish_reason);
-          const delta = (ch.delta && ch.delta.content) || ch.text;
+          const d = ch.delta || {};
+          /* Ayri akil yurutme akisi cevaba KARISMAZ; yalniz varligi not edilir. */
+          if(d.reasoning || d.reasoning_content) reasoned = true;
+          const delta = d.content || ch.text;
           if(!delta) return;
           text += delta;
-          req.onText({ text, delta });
+          req.onText({ text:stripThinking(text), delta });
         });
       }else{
         /* Akis istendigi hâlde duz JSON dondu — ayni govdeden okunur. */
         const json = await response.json();
         const ch = json.choices && json.choices[0];
+        const msg = (ch && ch.message) || {};
         if(ch && ch.finish_reason) finish = String(ch.finish_reason);
-        text = String((ch && ch.message && ch.message.content) || (ch && ch.text) || '');
-        if(req.onText && text) req.onText({ text, delta:text });
+        if(msg.reasoning || msg.reasoning_content) reasoned = true;
+        text = String(msg.content || (ch && ch.text) || '');
+        if(req.onText && text) req.onText({ text:stripThinking(text), delta:text });
       }
     }catch(e){
       if(guard.timedOut()) { guard.done(); throw fail('timeout'); }
@@ -433,27 +652,35 @@ R.LLM = (function(){
     }
     guard.done();
 
-    text = text.trim();
-    if(!text) throw fail('empty');
-    return { text, finish };
+    const shown = stripThinking(text);
+    if(!shown) throw fail(reasoned || text.trim() ? 'thinking_only' : 'empty');
+    return { text:shown, finish };
   }
 
   /* ---------- Gemini cagrisi ---------- */
 
-  async function callGemini(req, provider){
-    const key = req.key;
-    if(!key) throw fail('no_key');
-    const base = req.endpoint || provider.endpoint;
-    const stream = !!req.onText;
-    const path = base.replace(/\/$/, '') + '/' + encodeURIComponent(req.model) + ':'
-      + (stream ? 'streamGenerateContent?alt=sse&key=' : 'generateContent?key=')
-      + encodeURIComponent(key);
+  /* "Dusunme" cevapla ayni butceden yer: acik birakilirsa model butceyi
+     dusunerek harcar ve cevap YARIM ya da BOS doner. Ofis ajanlari kisa
+     konusur, dusunmeye ihtiyaclari yok — kapatilir.
 
+     Alan aileye gore degisir ve DESTEKLEMEYEN modele gonderilirse 400 verir:
+       2.5 flash / flash-lite  → thinkingConfig.thinkingBudget = 0
+       3.x                     → thinkingConfig.thinkingLevel  = 'low'
+     Tanimadigimiz bir model icin hicbir sey gonderilmez; yanlis tahmin
+     etmektense modele karismamak dogrudur. Yine de 400 gelirse parametre
+     onarimi alani tumden dusurur. */
+  function thinkingFor(model){
+    const m = String(model || '');
+    if(/^gemini-2\.5.*(flash|lite)/i.test(m)) return { thinkingBudget:0 };
+    if(/^gemini-3/i.test(m)) return { thinkingLevel:'low' };
+    return null;
+  }
+
+  function geminiBody(req, fix){
     const contents = (req.messages || []).map(m => ({
       role:m.role === 'assistant' ? 'model' : 'user',
       parts:[{ text:m.text }],
     }));
-
     const body = {
       contents,
       generationConfig:{
@@ -461,39 +688,61 @@ R.LLM = (function(){
         temperature:req.temperature == null ? 0.4 : req.temperature,
       },
     };
-    /* 2.5 ailesinde "dusunme" ayni butceden yer: acik birakilirsa model
-       butceyi dusunerek harcar ve cevap YARIM ya da bos doner. Ofis
-       ajanlari kisa konusur, dusunmeye ihtiyaclari yok — kapatilir.
-       Alan yalniz destekleyen modele gonderilir; digerleri 400 verir. */
-    if(/2\.5.*flash/i.test(String(req.model || ''))){
-      body.generationConfig.thinkingConfig = { thinkingBudget:0 };
+    const think = fix.dropThinking ? null : thinkingFor(req.model);
+    if(think) body.generationConfig.thinkingConfig = think;
+    if(req.system){
+      if(fix.systemAsUser) body.contents.unshift({ role:'user', parts:[{ text:req.system }] });
+      else body.systemInstruction = { parts:[{ text:req.system }] };
     }
-    if(req.system) body.systemInstruction = { parts:[{ text:req.system }] };
+    return body;
+  }
 
-    const guard = withTimeout(req.signal, req.timeout);
+  async function callGemini(req, provider){
+    const key = req.key;
+    if(!key) throw fail('no_key');
+    const base = req.endpoint;
+    if(!base) throw fail('no_endpoint');
+    const stream = !!req.onText;
+    /* Anahtar ARTIK adres satirinda gitmiyor: baslikla gider. Sorgu dizesi
+       tarayici gecmisine, Referer'a ve vekil gunluklerine dusuyordu; ayrica
+       yeni "AQ." anahtarlari nokta iceriyor ve kacislarla ugrasmak gereksiz. */
+    const path = base + '/' + encodeURIComponent(req.model) + ':'
+      + (stream ? 'streamGenerateContent?alt=sse' : 'generateContent');
+
+    const headers = Object.assign(
+      { 'Content-Type':'application/json' },
+      authHeaders(provider, key));
+
+    const cfgKey = { provider:provider.id, model:req.model };
+    let fix = repairOf(cfgKey);
     let response;
-    try{
-      response = await fetch(path, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        signal:guard.signal,
-        body:JSON.stringify(body),
-      });
-    }catch(e){
-      guard.done();
-      if(guard.timedOut()) throw fail('timeout');
-      if(req.signal && req.signal.aborted) throw fail('cancelled');
-      throw fail(networkCode(), e && e.message);
-    }
+    let guard;
 
-    if(!response.ok){
+    for(let attempt = 0; attempt < 2; attempt++){
+      guard = withTimeout(req.signal, req.timeout);
+      try{
+        response = await fetch(path, {
+          method:'POST', headers, signal:guard.signal,
+          body:JSON.stringify(geminiBody(req, fix)),
+        });
+      }catch(e){
+        guard.done();
+        if(guard.timedOut()) throw fail('timeout');
+        if(req.signal && req.signal.aborted) throw fail('cancelled');
+        throw fail(networkCode(path), e && e.message);
+      }
+
+      if(response.ok) break;
+
       const detail = await errorMessage(response);
-      const code = codeForStatus(response.status);
+      const code = classify(response.status, detail);
       guard.done();
-      if(code === 'rate_limited'){
+      if(code === 'rate_limited' || code === 'daily_quota'){
         R.Quota.penalize({ provider:provider.id, model:req.model, keyId:req.keyId }, retryAfterSeconds(response));
       }
-      throw fail(code, detail);
+      const patch = response.status === 400 ? repairFor(detail, fix) : null;
+      if(!patch || attempt === 1) throw fail(code, detail);
+      fix = learnRepair(cfgKey, patch);
     }
 
     function partsText(obj){
@@ -502,30 +751,49 @@ R.LLM = (function(){
       /* Dusunme parcalari metin degildir; cevaba karistirilmaz. */
       return (parts || []).filter(p => !p.thought).map(p => p.text || '').join('');
     }
+    function thoughtSeen(obj){
+      const cand = obj.candidates && obj.candidates[0];
+      const parts = (cand && cand.content && cand.content.parts) || [];
+      return parts.some(p => p.thought);
+    }
     function finishOf(obj){
       const cand = obj.candidates && obj.candidates[0];
       return (cand && cand.finishReason) ? String(cand.finishReason) : '';
     }
+    /* Icerik suzgeci yaniti tumden engelleyebilir; sebebi 'candidates'
+       yerine 'promptFeedback' altinda gelir. */
+    function blockedBy(obj){
+      const f = obj.promptFeedback;
+      return (f && f.blockReason) ? String(f.blockReason) : '';
+    }
 
     let text = '';
     let finish = '';
+    let thought = false;
+    let blocked = '';
     try{
       const ctype = response.headers.get('content-type') || '';
       if(stream && ctype.indexOf('event-stream') >= 0){
         await readSSE(response, obj => {
           const f = finishOf(obj);
           if(f) finish = f;
+          if(!blocked) blocked = blockedBy(obj);
+          if(thoughtSeen(obj)) thought = true;
           const delta = partsText(obj);
           if(!delta) return;
           text += delta;
-          req.onText({ text, delta });
+          req.onText({ text:stripThinking(text), delta });
         });
       }else{
         const json = await response.json();
         const list = Array.isArray(json) ? json : [json];
         text = list.map(partsText).join('');
-        list.forEach(o => { const f = finishOf(o); if(f) finish = f; });
-        if(req.onText && text) req.onText({ text, delta:text });
+        list.forEach(o => {
+          const f = finishOf(o); if(f) finish = f;
+          if(!blocked) blocked = blockedBy(o);
+          if(thoughtSeen(o)) thought = true;
+        });
+        if(req.onText && text) req.onText({ text:stripThinking(text), delta:text });
       }
     }catch(e){
       if(guard.timedOut()){ guard.done(); throw fail('timeout'); }
@@ -535,9 +803,154 @@ R.LLM = (function(){
     }
     guard.done();
 
-    text = text.trim();
-    if(!text) throw fail('empty');
-    return { text, finish };
+    const shown = stripThinking(text);
+    if(!shown){
+      if(blocked) throw fail('bad_request', 'içerik süzgeci engelledi: ' + blocked);
+      /* Butce dusunmeye gitti: bos yanit "tekrar dene" degil, model degistir
+         demektir — ayni model ayni sekilde davranir. */
+      if(thought || truncated(finish)) throw fail('thinking_only');
+      throw fail('empty');
+    }
+    return { text:shown, finish };
+  }
+
+  /* ---------- canli model listesi ----------
+
+     Ucretsiz model kimlikleri aylik doner ve katalog kacinilmaz olarak eskir;
+     eskidiginde kullanici "model bulunamadi" duvarina carpar ve dogru kimligi
+     bilmesinin hicbir yolu yoktur. Bu yuzden liste artik saglayicinin kendi
+     ucundan cekilebilir ve tarayicida saklanir.
+
+     Cagri bir SOHBET istegi degildir: gunluk kotadan dusmez, kota
+     yoneticisinden gecmez. */
+
+  function readCatalog(){
+    try{ return JSON.parse(localStorage.getItem(MODEL_STORE) || '{}'); }
+    catch(e){ return {}; }
+  }
+  function writeCatalog(all){
+    try{ localStorage.setItem(MODEL_STORE, JSON.stringify(all)); }catch(e){}
+  }
+  /* { models:[{id,label,free}], at } ya da null. */
+  function cachedModels(providerId){
+    const e = readCatalog()[providerId];
+    return (e && Array.isArray(e.models) && e.models.length) ? e : null;
+  }
+  function clearCatalog(providerId){
+    if(!providerId){ try{ localStorage.removeItem(MODEL_STORE); }catch(e){} return; }
+    const all = readCatalog();
+    delete all[providerId];
+    writeCatalog(all);
+  }
+
+  /* Ekranin gordugu liste: canli liste varsa O, yoksa katalog tohumu.
+     Tohumdaki etiket ve guc bilgisi canli kimlikle eslesirse korunur —
+     "Llama 3.3 70B · denge" okunakli, ham kimlik degildir. */
+  function modelsFor(providerId){
+    const p = R.PROVIDERS[providerId];
+    if(!p) return [];
+    const seed = p.models || [];
+    const live = cachedModels(providerId);
+    if(!live) return seed.slice();
+    const byId = {};
+    seed.forEach(m => { byId[m.id] = m; });
+    return live.models.map(m => Object.assign({}, m, byId[m.id] || {}, { id:m.id, free:m.free }));
+  }
+
+  /* Ham listeyi kimlige gore duzenler: ucretsizler once, sonra alfabetik. */
+  function sortModels(list){
+    return list.sort((a, b) => {
+      if(!!a.free !== !!b.free) return a.free ? -1 : 1;
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    });
+  }
+
+  /* Bir modelin ucretsiz olup olmadigi: OpenRouter fiyati sifir yazar ve
+     kimligi ":free" ile biter; digerlerinde fiyat bilgisi yoktur. */
+  function freeFlag(providerId, row){
+    if(/:free$/.test(String(row.id || ''))) return true;
+    const p = row.pricing;
+    if(p && (Number(p.prompt) === 0 && Number(p.completion) === 0)) return true;
+    return providerId !== 'openrouter';   // Groq, yerel ucler: hepsi ucretsiz
+  }
+
+  async function fetchJson(url, headers, signal){
+    const guard = withTimeout(signal, 25000);
+    let response;
+    try{
+      response = await fetch(url, { method:'GET', headers, signal:guard.signal });
+    }catch(e){
+      guard.done();
+      if(guard.timedOut()) throw fail('timeout');
+      if(signal && signal.aborted) throw fail('cancelled');
+      throw fail(networkCode(url), e && e.message);
+    }
+    if(!response.ok){
+      const detail = await errorMessage(response);
+      guard.done();
+      throw fail(classify(response.status, detail), detail);
+    }
+    try{
+      const json = await response.json();
+      guard.done();
+      return json;
+    }catch(e){
+      guard.done();
+      throw fail('server', e && e.message);
+    }
+  }
+
+  /* Saglayicinin guncel model listesini ceker ve saklar. */
+  async function listModels(cfg, opts){
+    const o = opts || {};
+    const provider = R.PROVIDERS[cfg && cfg.provider];
+    if(!provider) throw fail('no_provider');
+    if(provider.kind === 'builtin') return { models:(provider.models || []).slice(), at:null, live:false };
+    if(offline()) throw fail('offline');
+
+    const key = getKey(provider.id);
+    if(provider.needsKey && !key) throw fail('no_key');
+
+    /* Adres: ozel ucte model listesi chat adresinden turetilir. */
+    let url = provider.modelsUrl || '';
+    if(!url || provider.editableEndpoint){
+      const chat = endpointFor(provider, cfg);
+      if(!chat) throw fail('no_endpoint');
+      url = provider.kind === 'gemini' ? chat : chat.replace(/\/chat\/completions.*$/, '/models');
+    }
+
+    const json = await fetchJson(url, authHeaders(provider, key), o.signal);
+
+    let models = [];
+    if(provider.kind === 'gemini'){
+      /* Google 'models/gemini-…' seklinde tam ad doner; ustelik listede
+         gomme (embedding) ve baska yetenekler de vardir. Sohbet edemeyen
+         model listeye girerse kullanici onu secip 400 alir. */
+      models = (json.models || [])
+        .filter(m => (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0)
+        .map(m => ({
+          id:String(m.name || '').replace(/^models\//, ''),
+          label:m.displayName || null,
+          free:true,
+        }))
+        .filter(m => m.id && !/embedding|aqa|imagen|veo|tts|image-generation/i.test(m.id));
+    }else{
+      models = (json.data || json.models || [])
+        .map(m => ({ id:String(m.id || m.name || ''), label:m.name && m.id !== m.name ? m.name : null,
+          free:freeFlag(provider.id, m) }))
+        .filter(m => m.id);
+    }
+    if(!models.length) throw fail('empty');
+
+    /* Ucretsiz katmani olan saglayicida ucretli modeli listede tutmak
+       kullaniciyi 402'ye gonderir; ayiklanir. */
+    if(provider.id === 'openrouter') models = models.filter(m => m.free);
+
+    const entry = { models:sortModels(models), at:new Date().toISOString() };
+    const all = readCatalog();
+    all[provider.id] = entry;
+    writeCatalog(all);
+    return Object.assign({}, entry, { live:true });
   }
 
   /* ---------- kamu API ---------- */
@@ -551,6 +964,14 @@ R.LLM = (function(){
 
     /* Cevrimdisiyken hic deneme: kota harcanmaz, sebep dogru soylenir. */
     if(provider.kind !== 'builtin' && offline()) throw fail('offline');
+
+    const endpoint = provider.kind === 'builtin' ? '' : endpointFor(provider, cfg);
+    if(provider.kind !== 'builtin' && !endpoint) throw fail('no_endpoint');
+
+    /* Anahtar zorunlu olmayan ucte de anahtar GIRILDIYSE kullanilir:
+       kendi sunucusunun onunde vekil olan kullanici bunu bekler. */
+    const keyCount = getKeys(provider.id).length;
+    const wantsKey = provider.needsKey || (provider.keyOptional && keyCount > 0);
 
     const started = Date.now();
     const baseMessages = (req && req.messages) || [];
@@ -570,8 +991,8 @@ R.LLM = (function(){
       /* Cok anahtarli havuz: kotasi musait anahtar HER turda yeniden
          secilir — ilk anahtarin gunu devam isteginde dolmus olabilir. */
       picked = null;
-      if(provider.needsKey){
-        if(!getKeys(provider.id).length) throw fail('no_key');
+      if(wantsKey){
+        if(!keyCount) throw fail('no_key');
         picked = pickKey(cfg);
         /* Devam turunda kota bittiyse elde saglam bir metin var: onunla yetin. */
         if(!picked){
@@ -593,7 +1014,7 @@ R.LLM = (function(){
       const payload = Object.assign({}, req, {
         messages,
         model:cfg.model,
-        endpoint:cfg.endpoint,
+        endpoint,
         key:picked ? picked.key : null,
         keyId:picked ? picked.index : null,
         /* Akis kullaniciya kesintisiz gorunmeli: parca degil birikmis
@@ -616,7 +1037,8 @@ R.LLM = (function(){
       }catch(err){
         /* Istek hic gonderilemediyse gunluk hakki tuketmis sayma. */
         if(err && (err.code === 'cancelled' || err.code === 'sandboxed'
-                || err.code === 'no_key' || err.code === 'offline')){
+                || err.code === 'no_key' || err.code === 'offline'
+                || err.code === 'local_cors' || err.code === 'no_endpoint')){
           R.Quota.release(quotaCfg);
         }
         if(err && err.code === 'cancelled') throw err;
@@ -696,6 +1118,91 @@ R.LLM = (function(){
     return { ok:true, text:res.text.slice(0, 60), ms:Date.now() - started, model:res.model };
   }
 
+  /* ---------- tanilama ----------
+
+     "Bağlanamadı" tek basina hicbir sey ogretmez: sorun anahtarda mi,
+     model kimliginde mi, adreste mi, ortamda mi? Tanilama zinciri sirayla
+     bakar ve ILK kirilan halkayi soyler. Her adim kendi sonucunu tasir,
+     boylece ekran "anahtar tamam, model listesi geldi, sohbet 404 verdi"
+     diyebilir — kullanici artik nereye bakacagini bilir. */
+  async function diagnose(cfg, opts){
+    const o = opts || {};
+    const provider = R.PROVIDERS[cfg && cfg.provider];
+    const steps = [];
+    const add = (name, ok, note, code) => { steps.push({ name, ok, note:note || '', code:code || null }); return ok; };
+
+    if(!provider){ add('Sağlayıcı', false, errorText('no_provider'), 'no_provider'); return { ok:false, steps }; }
+    add('Sağlayıcı', true, provider.label);
+
+    if(provider.kind === 'builtin'){
+      const ready = builtinReady() || await initBuiltin();
+      add('Yerleşik yetenek', ready, ready ? 'açık' : errorText('unavailable'), ready ? null : 'unavailable');
+      return { ok:ready, steps };
+    }
+
+    /* 1. ortam */
+    if(offline()){ add('Ağ', false, errorText('offline'), 'offline'); return { ok:false, steps }; }
+    const endpoint = endpointFor(provider, cfg);
+    if(inSandbox() && !isLocal(endpoint)){
+      add('Ortam', false, errorText('sandboxed'), 'sandboxed');
+    }else{
+      add('Ortam', true, 'dış çağrılara açık');
+    }
+
+    /* 2. adres */
+    if(!endpoint){ add('Uç adresi', false, errorText('no_endpoint'), 'no_endpoint'); return { ok:false, steps }; }
+    add('Uç adresi', true, endpoint);
+
+    /* 3. anahtar (bicim) */
+    const keys = getKeys(provider.id);
+    if(provider.needsKey && !keys.length){
+      add('API anahtarı', false, errorText('no_key'), 'no_key');
+      return { ok:false, steps };
+    }
+    if(keys.length){
+      const problem = keyProblem(provider.id, keys[0]);
+      add('API anahtarı', !problem || problem.level !== 'wrong',
+        problem ? problem.text : keys.length + ' anahtar bağlı · biçim tanıdık',
+        problem && problem.level === 'wrong' ? 'unauthorized' : null);
+    }else{
+      add('API anahtarı', true, 'gerekmiyor');
+    }
+
+    /* 4. model listesi — anahtari da dogrular, kotadan dusmez */
+    let known = null;
+    try{
+      const res = await listModels(cfg, { signal:o.signal });
+      known = res.models.map(m => m.id);
+      add('Model listesi', true, res.models.length + ' model çekildi');
+    }catch(err){
+      const code = err && err.code;
+      add('Model listesi', false, errorText(code)
+        + (err && err.message && err.message !== code ? ' — ' + String(err.message).slice(0, 120) : ''), code);
+      /* Anahtar reddedildiyse ileriye bakmanin anlami yok. */
+      if(code === 'unauthorized' || code === 'key_type') return { ok:false, steps };
+    }
+
+    /* 5. secili model gercekten listede mi */
+    if(known && cfg.model){
+      const has = known.indexOf(cfg.model) >= 0;
+      add('Seçili model', has, has ? cfg.model
+        : cfg.model + ' bu listede yok. “Modelleri yenile” ile listeyi güncelle ve oradan seç.',
+        has ? null : 'bad_model');
+    }
+
+    /* 6. gercek cagri */
+    try{
+      const res = await test(cfg);
+      add('Sohbet çağrısı', true, res.ms + ' ms · yanıt: “' + res.text + '”');
+      return { ok:true, steps };
+    }catch(err){
+      const code = err && err.code;
+      add('Sohbet çağrısı', false, errorText(code)
+        + (err && err.message && err.message !== code ? ' — ' + String(err.message).slice(0, 120) : ''), code);
+      return { ok:false, steps };
+    }
+  }
+
   /* Bir yapilandirmanin kullanilabilir olup olmadigi (cagri yapmadan). */
   function ready(cfg){
     const provider = R.PROVIDERS[cfg && cfg.provider];
@@ -709,8 +1216,12 @@ R.LLM = (function(){
   return {
     initBuiltin, builtinReady,
     getKey, getKeys, setKey, addKey, removeKeyAt, clearKeys, maskKey, maskKeys, pickKey,
-    chat, complete, test, ready,
+    keyOwner, keyProblem,
+    chat, complete, test, ready, diagnose,
+    listModels, modelsFor, cachedModels, clearCatalog, MODEL_STORE,
     errorText, retryable, resumable, offline, onceOnline, inSandbox, KEY_STORE,
-    truncated, trimToSentence, joinContinuation, dropLastWord, DEFAULT_MAX_TOKENS,
+    truncated, trimToSentence, joinContinuation, dropLastWord, stripThinking,
+    endpointFor, normalizeOpenAI, normalizeGemini, classify,
+    DEFAULT_MAX_TOKENS,
   };
 })();

@@ -1397,6 +1397,310 @@ button.listitem.is-on{ background:var(--primary-soft); }
   .floor__room{ grid-template-columns:1fr; }
 }
 
+/* ==================== ofis: 3B oda ====================
+   Kat planı ofisi bir mekân yaptı; bu görünüm onu bir ODA yapar: masalar
+   bir zeminin üstünde durur, Patron dipte karşıda oturur, kamera dönebilir.
+
+   Kütüphane yok. Uygulamanın hiçbir bağımlılığı yok ve tek dosyalık bir
+   HTML olarak yayımlanıyor; beş masalık bir oda için WebGL hem ağır hem
+   gereksizdir. Sahne tek bir dönüşümle eğilir, her masa kendi kutusunu üç
+   yüzeyle kurar.
+
+   İki kural bu bölümü ayakta tutar:
+   1) Yazı hiçbir açıda eğilmez. Ad kartları sahnenin TERS dönüşümünü alır
+      (rotateZ(-turn) rotateX(-tilt)); oda çevrilirken etiketler kameraya
+      dönük kalır ve düz okunur.
+   2) Renk yalnız token'lardan gelir; her masanın kimlik rengi --seat-color
+      üzerinden, kat planındakiyle aynı yerden okunur. */
+
+.room3d{
+  position:relative;
+  /* Sol duvarin genisligi odanin DERINLIGI kadardir; yuzdeyle yazilamaz
+     (yuzde genisligi olcer), bu yuzden yukseklik tek degiskende durur. */
+  --room-h:430px;
+  height:var(--room-h);
+  perspective:1150px;
+  perspective-origin:50% 38%;
+  /* Yatay sürükleme odayı çevirir, dikey hareket sayfayı kaydırmaya kalır. */
+  touch-action:pan-y;
+  cursor:grab;
+}
+.room3d.is-dragging{ cursor:grabbing; }
+
+.room3d__scene{
+  position:absolute; inset:0;
+  transform-style:preserve-3d;
+  transform:translateY(2%) scale(var(--zoom, .84)) rotateX(var(--tilt, 56deg)) rotateZ(var(--turn, -26deg));
+  transition:transform var(--dur-lg) var(--ease);
+}
+.room3d.is-dragging .room3d__scene{ transition:none; }
+
+/* Dekor İMLECE GÖRÜNMEZDİR. Zorunlu: preserve-3d bağlamında kardeşler tek
+   bir derinlik değerine göre sıralanır ve zemin gibi BÜYÜK bir düzlem,
+   kendisiyle aynı düzlemde duran masa düğmelerinin bir kısmını isabet
+   testinde örtüyor — Patron'un ve bir uzmanın masası hiç tıklanamıyordu.
+   Dekor zaten aria-hidden; imleci de hiç görmemeli. */
+.room3d__floor, .room3d__rug, .room3d__wall, .room3d__board{ pointer-events:none; }
+
+/* Zemin: kat planındaki ızgaranın aynısı, artık gerçekten yerde. */
+.room3d__floor{
+  position:absolute; left:2%; top:2%; width:96%; height:96%;
+  border-radius:12px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  box-shadow:0 0 0 1px var(--surface), 0 18px 40px rgba(0,0,0,.16);
+}
+.room3d__floor::before{
+  content:'';
+  position:absolute; inset:0;
+  border-radius:12px;
+  background-image:
+    linear-gradient(var(--c-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-grid) 1px, transparent 1px);
+  background-size:38px 38px;
+  opacity:.5;
+}
+/* Toplantı halısı: odanın ortasını işaretler, masaların hizasını okutur. */
+.room3d__rug{
+  position:absolute; left:22%; top:38%; width:56%; height:36%;
+  border-radius:999px;
+  background:var(--primary-soft);
+  opacity:.5;
+  transform:translateZ(.4px);
+}
+
+/* Duvarlar: zeminin kenarından yukarı kalkan iki düzlem. */
+.room3d__wall{
+  position:absolute;
+  background:var(--surface-3);
+  border:1px solid var(--border);
+}
+.room3d__wall--back{
+  left:2%; top:2%; width:96%; height:120px;
+  transform-origin:50% 0%;
+  transform:rotateX(90deg);
+  border-radius:10px 10px 0 0;
+}
+.room3d__wall--left{
+  left:2%; top:2%; width:calc(var(--room-h) * .96); height:120px;
+  transform-origin:0% 0%;
+  transform:rotateZ(90deg) rotateX(90deg);
+  border-radius:10px 10px 0 0;
+  filter:brightness(.94);
+}
+
+/* Duvardaki pano: haftanın tek işi. Duvarın çocuğu olduğu için onunla
+   birlikte dikilir; yazısı duvarın düzleminde durur ve okunur. */
+/* Duvar üst kenarından katlanarak dikildiği için içeriği baş aşağı kalır:
+   pano kendi düzleminde 180° çevrilir ve yazı düz okunur. */
+.room3d__board{
+  position:absolute; left:50%; bottom:26px;
+  transform:translateX(-50%) rotateX(180deg);
+  min-width:200px; max-width:74%;
+  padding:9px 14px;
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  box-shadow:var(--shadow);
+  text-align:center;
+}
+.room3d__board-label{
+  display:block; font-size:var(--fs-xs); color:var(--text-3);
+  text-transform:uppercase; letter-spacing:.06em;
+}
+.room3d__board b{
+  display:block; margin-top:2px;
+  font-family:var(--font-display); font-size:var(--fs-sm); font-weight:700;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* ---------- masa ---------- */
+
+.desk3d{
+  position:absolute;
+  left:var(--x); top:var(--y);
+  width:126px; height:68px;
+  margin:-34px 0 0 -63px;
+  transform-style:preserve-3d;
+  background:none; border:0; padding:0;
+  cursor:pointer;
+}
+.desk3d--lead{ width:158px; margin-left:-79px; }
+.desk3d:focus-visible{ outline:none; }
+.desk3d:focus-visible .desk3d__top{ outline:2px solid var(--primary); outline-offset:3px; }
+
+/* Zemine düşen gölge: masayı gerçekten yerin üstüne oturtan şey budur. */
+.desk3d__shadow{
+  position:absolute; left:6px; right:6px; top:10px; bottom:-6px;
+  border-radius:999px;
+  background:rgba(0,0,0,.22);
+  filter:blur(7px);
+  transform:translateZ(.6px);
+}
+
+.desk3d__top{
+  position:absolute; inset:0;
+  border-radius:7px;
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-top:3px solid var(--seat-color, var(--border-strong));
+  transform:translateZ(30px);
+  transition:transform var(--dur) var(--ease);
+}
+/* İki kâğıt: masanın boş bir dikdörtgen değil, çalışılan bir masa olması. */
+.desk3d__paper{
+  position:absolute; left:12px; top:14px; width:26px; height:18px;
+  border-radius:2px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+}
+.desk3d__paper--b{ left:20px; top:26px; width:22px; height:14px; opacity:.8; }
+
+/* Kutunun iki görünen yüzü. */
+.desk3d__front{
+  position:absolute; left:0; right:0; bottom:0; height:30px;
+  transform-origin:50% 100%;
+  transform:rotateX(-90deg);
+  background:var(--surface-3);
+  border:1px solid var(--border);
+  border-radius:0 0 4px 4px;
+}
+.desk3d__side{
+  position:absolute; left:0; top:0; width:68px; height:30px;
+  transform-origin:0% 0%;
+  transform:rotateZ(90deg) rotateX(-90deg);
+  background:var(--surface-3);
+  border:1px solid var(--border);
+  filter:brightness(.93);
+}
+
+/* Ekran: masanın arka kenarında hafif geriye yatık durur. */
+.desk3d__screen{
+  position:absolute; left:50%; top:5px; width:52px; height:32px;
+  margin-left:-26px;
+  transform-origin:50% 100%;
+  transform:translateZ(30px) rotateX(-104deg);
+  border-radius:3px;
+  background:var(--seat-color, var(--primary));
+  border:1px solid var(--border-strong);
+  opacity:.85;
+}
+.desk3d__screen.is-busy{ animation:deskglow 1.4s var(--ease) infinite; }
+@keyframes deskglow{
+  0%,100%{ opacity:.55; }
+  50%    { opacity:1; }
+}
+
+/* Sandalye ve oturan: masanın ARKASINDA, kameraya dönük. Ofisi masalardan
+   ibaret bir kroki olmaktan çıkaran şey burası — masada biri oturuyor.
+
+   Silüet ajanın kimlik rengindedir (kat planındaki avatarla aynı renk,
+   aynı kaynaktan). Renk kimlik taşır, DURUM değil: durum her zaman ad
+   kartındaki ışıkla ve metniyle ayrıca verilir. */
+.desk3d__chair{
+  position:absolute; left:50%; top:-30px; width:36px; height:36px;
+  margin-left:-18px;
+  border-radius:50%;
+  background:var(--surface-3);
+  border:1px solid var(--border);
+  transform:translateZ(1px);
+}
+.desk3d__person{
+  position:absolute; left:50%; top:-12px;
+  width:30px; height:44px;
+  border-radius:15px 15px 4px 4px;
+  background:var(--seat-color, var(--text-3));
+  opacity:.92;
+  transform-origin:0% 0%;
+  transform:rotateZ(calc(-1 * var(--turn, -26deg))) rotateX(calc(-1 * var(--tilt, 56deg)))
+            translate(-50%, -100%);
+  transition:transform var(--dur-lg) var(--ease);
+}
+.room3d.is-dragging .desk3d__person{ transition:none; }
+.desk3d__person i{
+  position:absolute; left:50%; top:-14px;
+  width:19px; height:19px; margin-left:-9px;
+  border-radius:50%;
+  background:var(--seat-color, var(--text-3));
+  box-shadow:0 0 0 2px var(--surface);
+}
+
+/* ---------- ad kartı ----------
+   Sahnenin ters dönüşümünü alır: oda hangi açıda olursa olsun kameraya
+   dönük ve düz okunur kalır. */
+.desk3d__card{
+  position:absolute; left:50%; top:calc(100% + 24px);
+  display:flex; align-items:center; gap:6px;
+  padding:4px 10px 4px 7px;
+  border-radius:999px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  white-space:nowrap;
+  transform-origin:0% 0%;
+  /* Etiket, masanın ön kenarına çakılmış bir tabela gibi DİKİLİR.
+
+     Sıra önemli: translate(-50%,-100%) önce kartın alt-orta noktasını
+     çıpaya oturtur, ters dönüşüm onu kameraya çevirir, translateZ ise
+     masanın üstüne kaldırır. Böylece kartın HİÇBİR noktası masanın
+     düzleminin altına inmez — inseydi masa üstü yazının bir kısmını
+     boyardı ve adlar yarım görünürdü. */
+  transform:translateZ(38px) rotateZ(calc(-1 * var(--turn, -26deg))) rotateX(calc(-1 * var(--tilt, 56deg)))
+            translate(-50%, -100%);
+  transition:transform var(--dur-lg) var(--ease), border-color var(--dur) var(--ease);
+}
+.room3d.is-dragging .desk3d__card{ transition:none; }
+.desk3d__who{ flex:none; display:flex; }
+/* Ad kartı bir rozettir, kart değil: avatar da o ölçüye iner. */
+.desk3d__card .agentav{ width:20px; height:20px; font-size:10px; }
+.desk3d__name{
+  font-family:var(--font-display); font-size:var(--fs-xs); font-weight:700;
+  line-height:1.2;
+}
+.desk3d__state{
+  font-size:var(--fs-xs); color:var(--text-3);
+  max-width:110px; overflow:hidden; text-overflow:ellipsis;
+}
+.desk3d__count{
+  flex:none;
+  min-width:17px; height:17px; padding:0 4px;
+  border-radius:9px;
+  background:var(--danger); color:#fff;
+  font-size:10px; font-weight:700; line-height:17px; text-align:center;
+}
+
+/* Açık masa öne çıkar; üzerine gelince hafifçe kalkar. */
+.desk3d:hover .desk3d__top{ transform:translateZ(36px); }
+.desk3d.is-open .desk3d__top{
+  transform:translateZ(38px);
+  border-color:var(--seat-color, var(--primary));
+}
+.desk3d.is-open .desk3d__card{ border-color:var(--seat-color, var(--primary)); }
+
+/* 3B görünümde başlıktaki çevirme düğmeleri. */
+.room3d__turn{ display:flex; gap:4px; }
+
+/* Odanın kendi zemin ızgarası varken paneldeki ızgara gürültü yapar. */
+.floor--room::before{ opacity:.12; }
+
+@media (max-width:760px){
+  .room3d{ --room-h:340px; --zoom:.8; perspective:900px; }
+  .desk3d{ width:104px; margin-left:-52px; }
+  .desk3d--lead{ width:126px; margin-left:-63px; }
+  .desk3d__card{ padding:3px 8px 3px 5px; }
+  .desk3d__state{ max-width:76px; }
+}
+@media (max-width:520px){
+  .room3d{ --room-h:300px; --zoom:.72; }
+  .room3d__wall--left{ display:none; }
+}
+
+/* Hareketi azaltılmış tercihte kamera anında yerleşir, ekran yanıp sönmez. */
+@media (prefers-reduced-motion:reduce){
+  .room3d__scene, .desk3d__card{ transition:none; }
+  .desk3d__screen.is-busy{ animation:none; opacity:1; }
+}
+
 /* ==================== ofis: onay kutusu ====================
    Ajan sisteme dokunmayı önerir; ne değişeceği ONAYDAN ÖNCE önce/sonra
    olarak gösterilir. Onaysız hiçbir satır uygulanmaz. */
