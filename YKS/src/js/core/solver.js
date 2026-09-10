@@ -31,6 +31,12 @@ R.Solver = (function(){
 
   const MAX_RECORDS = 500;
 
+  /* Denetim ve sohbet butceleri. Denetim UCUZ olmali: ucretsiz katmanda her
+     cagri bir gunluk hak ve denetim her cozume bir tane daha ekliyor. */
+  const CHECK_BUDGET = 700;
+  const ARBITER_BUDGET = 1200;
+  const CHAT_BUDGET = 700;
+
   /* ---------- kapali katalog ---------- */
 
   /* Modele verilen ders/konu listesi. Kapali katalog olmadan model konu adi
@@ -126,6 +132,74 @@ R.Solver = (function(){
       trap: String(m.tuzak == null ? '' : m.tuzak).slice(0, 240),
       matched: !!hit,
     };
+  }
+
+  /* ---------- cevap karsilastirma ----------
+
+     Iki bagimsiz cozumun ayni cevaba cikip cikmadigini anlamak, gorunduğu
+     kadar basit degil: "C", "C sikki", "c)" ayni seydir; "2 ve 3" ile
+     "3, 2" ayni kumedir; "12" ile "12,0" ayni sayidir. Yanlis bir
+     "farkli cevap" karari, ogrenciyi olmayan bir hataya bakmaya gonderir —
+     bu yuzden karsilastirma ihtiyatlidir: emin olamadigi yerde FARKLI der,
+     ama once bicim farklarini eler. */
+
+  /* Sik harfi: "C", "c)", "C şıkkı", "cevap: C" → "c". Yoksa null.
+
+     Ilk surum "a-e disindaki her seyi bosluga cevir, tek harf ara" diyordu
+     ve Turkce kelimelerden HARF UYDURUYORDU: "cevap" icindeki a, "artar"
+     icindeki a, "2 ve 3" icindeki e sik harfi sanildi. Sonucu:
+     "artar" ile "azalir" ayni cevap sayildi ve "2 ve 3" ile "3, 2"
+     karsilastirilamaz oldu.
+
+     Artik yalnizca sik harfinin GERCEKTEN sik harfi oldugu uc kalip
+     taninir. Taninmayan bicim null doner ve karsilastirma sayilara duser —
+     uydurulmus bir harf, harf bulamamaktan cok daha kotudur. */
+  function optionLetter(text){
+    const t = U.norm(text || '').trim();
+    if(!t) return null;
+    /* 1) Cevabin TAMAMI tek harf: "c", "C)", "(c)", "c." */
+    let m = t.match(/^\(?\s*([a-e])\s*[)\].:\-]?\s*$/);
+    if(m) return m[1];
+    /* 2) "c sikki", "d secenegi" */
+    m = t.match(/(?:^|\s)([a-e])\s*[).]?\s*(?:sik|sikki|secenek|secenegi)\b/);
+    if(m) return m[1];
+    /* 3) "cevap: c", "yanit d" — sonda. */
+    m = t.match(/\b(?:cevap|yanit|dogru)\s*[:=\-]?\s*\(?([a-e])\)?\s*$/);
+    return m ? m[1] : null;
+  }
+
+  /* Metindeki sayilar. Turkce ondalik virgul ve binlik nokta taninir. */
+  function numbersOf(text){
+    const out = [];
+    const re = /-?\d{1,3}(?:\.\d{3})+(?:,\d+)?|-?\d+(?:[.,]\d+)?/g;
+    let m;
+    while((m = re.exec(String(text || ''))) !== null){
+      let t = m[0];
+      if(/^-?\d{1,3}(?:\.\d{3})+/.test(t)) t = t.replace(/\./g, '');
+      const n = Number(t.replace(',', '.'));
+      if(Number.isFinite(n)) out.push(n);
+    }
+    return out;
+  }
+
+  /* Iki cevap ayni mi? Sirasiyla: duz metin, sik harfi, sayi kumesi. */
+  function sameAnswer(a, b){
+    const na = U.norm(a || '').replace(/\s+/g, ' ').trim();
+    const nb = U.norm(b || '').replace(/\s+/g, ' ').trim();
+    if(!na || !nb) return false;
+    if(na === nb) return true;
+
+    const la = optionLetter(a), lb = optionLetter(b);
+    if(la && lb) return la === lb;
+    /* Biri sik harfi digeri degilse karsilastirilamaz. */
+    if(!!la !== !!lb) return false;
+
+    const xa = numbersOf(a), xb = numbersOf(b);
+    if(!xa.length || xa.length !== xb.length) return false;
+    const sa = xa.slice().sort((x, y) => x - y);
+    const sb = xb.slice().sort((x, y) => x - y);
+    /* Sira onemsiz ("2 ve 3" = "3, 2"); kucuk yuvarlama farki tolere edilir. */
+    return sa.every((v, i) => Math.abs(v - sb[i]) < 0.005);
   }
 
   /* ---------- fotograf ---------- */
@@ -254,6 +328,146 @@ R.Solver = (function(){
     };
   }
 
+  /* ---------- bagimsiz denetim ----------
+
+     "Modele kendi cozumunu kontrol ettir" ise yaramaz: ayni modele ayni
+     baglamda sorunca kendi hatasini onaylar. Ise yarayan tek yol soruyu
+     SIFIRDAN, ilk cozumu GORMEDEN yeniden cozdurmek — tercihen BASKA bir
+     modele.
+
+     BU BIR GARANTI DEGILDIR ve oyle sunulmamalidir: iki model ayni hatayi
+     da yapabilir. Sonuc "dogrulandi" degil, "iki bagimsiz cozum ayni cevaba
+     cikti" demektir. Ekran da boyle soyler. */
+
+  /* Denetim icin BASKA bir model secilir. Ayni model kalirsa denetim yine
+     yapilir ama bagimsizligi zayiftir; sonuc bunu bildirir. */
+  function checkChain(usedModel, withImage){
+    const base = chainFor(withImage);
+    const other = base.filter(c => c.model !== usedModel);
+    return { chain:other.length ? other : base, independent:other.length > 0 };
+  }
+
+  /* Soruyu bagimsiz olarak yeniden cozer ve YALNIZ cevabi dondurur. */
+  async function check(req, opts){
+    const o = opts || {};
+    const r = req || {};
+    const withImage = !!r.image;
+    const picked = checkChain(r.usedModel, withImage);
+    if(!picked.chain.length) throw Object.assign(new Error('model yok'), { code:'unavailable' });
+
+    const message = { role:'user', text:R.SOLVER.check({ question:r.question }) };
+    if(withImage) message.images = [{ mime:r.image.mime, data:r.image.data }];
+
+    const res = await R.LLM.complete(picked.chain, {
+      system:R.SOLVER.checkSystem,
+      messages:[message],
+      /* Denetim kisa: anlatim istenmiyor, sonuc isteniyor. Ucretsiz katmanda
+         her cagri bir gunluk hak; denetim ucuz olmali. */
+      maxTokens:CHECK_BUDGET,
+      temperature:0.1,
+      signal:o.signal,
+    });
+    const split = parse(res.text);
+    const meta = split.meta || {};
+    return {
+      answer:String(meta.cevap == null ? '' : meta.cevap).slice(0, 80),
+      sure:meta.emin !== false,
+      model:res.model, provider:res.provider,
+      independent:picked.independent,
+      text:split.text,
+    };
+  }
+
+  /* Iki cevap ayrildiginda hangisinin dogru oldugunu ve digerinin NEREDE
+     saptigini sorar. Ogrenciye asil ogreten kisim budur. */
+  async function arbitrate(req, opts){
+    const o = opts || {};
+    const r = req || {};
+    const withImage = !!r.image;
+    const chain = chainFor(withImage);
+    if(!chain.length) throw Object.assign(new Error('model yok'), { code:'unavailable' });
+
+    const message = { role:'user', text:R.SOLVER.arbiter({
+      question:r.question,
+      solutionA:String(r.solutionA || '').slice(0, 2500),
+      answerA:r.answerA, answerB:r.answerB,
+    }) };
+    if(withImage) message.images = [{ mime:r.image.mime, data:r.image.data }];
+
+    const res = await R.LLM.complete(chain, {
+      system:R.SOLVER.arbiterSystem,
+      messages:[message],
+      maxTokens:ARBITER_BUDGET,
+      temperature:0.1,
+      signal:o.signal,
+    });
+    const split = parse(res.text);
+    const meta = split.meta || {};
+    const which = String(meta.dogru || '').toUpperCase();
+    return {
+      text:split.text,
+      winner:which === 'A' ? 'A' : which === 'B' ? 'B'
+        : /HICBIRI|HİÇBİRİ/.test(which) ? 'hicbiri' : null,
+      answer:String(meta.dogruCevap == null ? '' : meta.dogruCevap).slice(0, 80),
+      step:String(meta.hataAdimi == null ? '' : meta.hataAdimi).slice(0, 240),
+      model:res.model,
+    };
+  }
+
+  /* Denetim turunun bir arada okunabilir sonucu.
+     durum: 'ayni' | 'ayrildi' | 'emin_degil' | 'yapilamadi' */
+  async function verifyRun(req, opts){
+    const o = opts || {};
+    const r = req || {};
+    let second;
+    try{
+      second = await check(r, o);
+    }catch(err){
+      return { durum:'yapilamadi', neden:err && err.code };
+    }
+    if(!second.answer){
+      return { durum:'emin_degil', second, neden:'empty' };
+    }
+    if(sameAnswer(r.answerA, second.answer)){
+      return { durum:'ayni', second };
+    }
+    let judge = null;
+    try{
+      judge = await arbitrate({
+        question:r.question, image:r.image,
+        solutionA:r.solutionA, answerA:r.answerA, answerB:second.answer,
+      }, o);
+    }catch(err){ /* hakem duserse ayrilik yine de bildirilir */ }
+    return { durum:'ayrildi', second, judge };
+  }
+
+  /* ---------- sohbet ----------
+     Cozum bittiginde is bitmez: ogrenci anlamadigini sorar ve konusma
+     devam eder. Gecmis her turda modele geri verilir. */
+  async function talk(req, opts){
+    const o = opts || {};
+    const r = req || {};
+    const chain = chainFor(false);
+    if(!chain.length) throw Object.assign(new Error('model yok'), { code:'unavailable' });
+    const q = String(r.follow || '').trim();
+    if(!q) throw Object.assign(new Error('bos soru'), { code:'empty' });
+
+    const history = (r.thread || []).slice(-6)
+      .map(m => ({ role:m.role === 'user' ? 'user' : 'assistant', text:m.text }));
+
+    const res = await R.LLM.complete(chain, {
+      system:R.SOLVER.chatSystem,
+      messages:history.length
+        ? history.concat([{ role:'user', text:q }])
+        : [{ role:'user', text:R.SOLVER.chat({ solution:String(r.solution || '').slice(0, 2500), follow:q }) }],
+      maxTokens:CHAT_BUDGET,
+      temperature:0.3,
+      signal:o.signal,
+      onText:o.onText,
+    });
+    return { text:res.text, model:res.model, provider:res.provider };
+  }
+
   /* ---------- kayit ---------- */
 
   function all(){ return (S.solved || []).slice(); }
@@ -274,6 +488,8 @@ R.Solver = (function(){
       seconds:null,
       fromImage:false,
       model:'',
+      checked:null,       // 'ayni' | 'ayrildi' | 'emin_degil' | 'yapilamadi'
+      checkNote:'',       // hakem hatanin nerede oldugunu soylediyse
     }, fields || {});
   }
 
@@ -358,6 +574,8 @@ R.Solver = (function(){
 
   return {
     catalogText, matchTopic, parse, verify,
+    sameAnswer, optionLetter, numbersOf,
+    check, arbitrate, verifyRun, talk,
     prepareImage, solve, ready, chainFor,
     all, newRecord, save, remove, load,
     byTopic, daily, summary, solvedOk,

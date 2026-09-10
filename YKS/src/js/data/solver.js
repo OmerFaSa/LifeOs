@@ -39,26 +39,105 @@ R.SOLVE_RESULTS = {
 R.SOLVE_RESULT_ORDER = ['dogru', 'zorla', 'yanlis', 'bos', 'bakarak'];
 
 R.SOLVER = {
-  version:1,
+  version:2,
 
   /* Cozum metninin uzunluk butcesi. Bir cozum ofis yorumundan uzundur:
      adimlarin hepsi yazilmali, yoksa "cozum anlatan" degil "cevap soyleyen"
      bir sistem olur. */
   budget:2200,
 
+  /* ---------- ogretmen ustubu ----------
+
+     Ilk surumde "adim adim yaz" demek yetmedi: model uc satirlik islem
+     dokuyor ve "adim adim yazdim" sayiyordu. Ogretmen ile cozum makinesi
+     arasindaki fark ADIM SAYISI degil, her adimda NEDEN'in soylenmesidir.
+
+     Bu yuzden istem artik adimin BICIMINI dayatiyor: her adim bir baslikla
+     baslar, once niye o adimin atildigi soylenir, sonra islem yapilir.
+     Bicim zorlamasi olmadan model en kisa yoldan cevaba kosuyor. */
   system:
-    'Sen bir YKS öğretmenisin. Sana bir soru veriliyor; onu ÇÖZÜP ANLATIYORSUN.\n'
-    + '- Önce soruyu kendi cümlenle bir satırda özetle: ne veriliyor, ne isteniyor.\n'
-    + '- Sonra çözümü ADIM ADIM yaz. Her adımda ne yaptığını ve NEDEN yaptığını söyle; '
-    + 'işlem satırı yeterli değildir, öğrenci adımı seçme sebebini öğrenmeli.\n'
-    + '- Sonucu açıkça yaz: "Cevap: …".\n'
-    + '- En sonda TUZAĞI söyle: bu soruda öğrenciler en çok nerede hata yapar.\n'
-    + '- Kısayol varsa onu da ver ama önce uzun yolu göster; sınavda hangisinin '
-    + 'ne zaman işe yaradığını söyle.\n'
+    'Sen deneyimli bir YKS öğretmenisin. Karşındaki öğrenci soruyu ÇÖZEMEDİ; '
+    + 'senin işin cevabı söylemek değil, onu çözebilir hâle getirmek.\n\n'
+    + 'ÇÖZÜMÜN BİÇİMİ — buna harfiyen uy:\n'
+    + '1) "Soru ne diyor?" — tek cümlede: ne veriliyor, ne isteniyor.\n'
+    + '2) "Nereden başlanır?" — bu soruyu görünce ilk hangi bilgi akla gelmeli, '
+    + 'neden o. Öğrencinin en çok takıldığı yer burasıdır.\n'
+    + '3) "Adım 1", "Adım 2", … — her adım kendi başlığıyla başlar ve İKİ parça '
+    + 'taşır: önce NEDEN bu adımı attığın (tek cümle), sonra işlemin kendisi. '
+    + 'Sadece işlem yazan bir adım eksiktir.\n'
+    + '4) "Cevap: …" — sonucu tek satırda, açıkça.\n'
+    + '5) "Kontrol" — sonucu soruya geri koyup tutup tutmadığına bak. Tutmuyorsa '
+    + 'bunu SÖYLE ve nerede hata yaptığını ara.\n'
+    + '6) "Tuzak" — bu soruda öğrenciler en çok nerede, neden hata yapar.\n'
+    + '7) "Kısayol" — varsa. Önce uzun yolu gösterdin; kısayolun ne zaman '
+    + 'güvenli olduğunu da söyle. Yoksa bu başlığı hiç yazma.\n\n'
+    + 'KURALLAR:\n'
+    + '- Bir adımı atlama. "Buradan görülüyor ki" diye geçme — öğrenci göremiyor, '
+    + 'zaten o yüzden soruyor.\n'
     + '- Soruyu okuyamıyorsan ya da eksikse UYDURMA: neyin eksik olduğunu söyle.\n'
-    + '- Sadece cevabı yazıp geçme. Anlatmak asıl iştir.\n'
-    + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin. Matematik ifadelerini düz '
-    + 'yazıyla yaz (x^2, kök(3), 1/2 gibi); LaTeX kullanma. Emoji yok.',
+    + '- Emin olmadığın bir yer varsa bunu açıkça yaz; sessizce tahmin etme.\n'
+    + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin. Başlıklar düz satır olarak '
+    + 'yazılır (yıldız, kare işareti yok). Matematik ifadelerini düz yazıyla yaz '
+    + '(x^2, kök(3), 1/2 gibi); LaTeX kullanma. Emoji yok.',
+
+  /* ---------- bagimsiz denetim ----------
+
+     Modelin kendi cozumunu "kontrol et" demek ise yaramaz: ayni modele ayni
+     baglamda sorunca kendi hatasini onaylar (dogrulama yanliligi). Ise
+     yarayan tek yol, soruyu SIFIRDAN, ilk cozumu GORMEDEN yeniden
+     cozdurmektir — tercihen BASKA bir modele.
+
+     Iki bagimsiz cozum ayni cevaba cikiyorsa guven artar. Cikmiyorsa
+     ortada bir hata vardir ve hangisinin hatali oldugunu bulmak icin ucuncu
+     bir tur (hakem) gerekir.
+
+     Bu bir GARANTI DEGILDIR: iki model ayni hatayi da yapabilir. Ekran bunu
+     "dogrulandi" diye degil, "iki bagimsiz cozum ayni cevaba cikti" diye
+     soylemelidir. */
+  checkSystem:
+    'Sen bir YKS öğretmenisin. Sana bir soru veriliyor. Onu KENDİ BAŞINA çöz.\n'
+    + '- Başka birinin çözümünü görmüyorsun; kendi yolundan git.\n'
+    + '- Kısa çalış: uzun anlatım isteyen yok, doğru sonuç isteniyor.\n'
+    + '- Sonuca ulaşamıyorsan ya da soru eksikse "emin değilim" de. Uydurma.',
+
+  check(ctx){
+    return (ctx.question ? 'SORU:\n' + ctx.question + '\n\n'
+      : 'Fotoğraftaki soruyu oku ve çöz.\n\n')
+      + 'GÖREV: Bu soruyu çöz. Kısa çalışabilirsin ama sonucu doğru bul.\n\n'
+      + 'EN SONA, ayrı bir satıra, SADECE şu JSON’u ekle:\n'
+      + '{"cevap":"…","emin":true}\n'
+      + '- "cevap": yalnız sonuç (şık harfi ya da değer). Emin değilsen yine yaz.\n'
+      + '- "emin": sonuçtan emin misin (true/false).';
+  },
+
+  /* ---------- hakem ----------
+     Iki cozum farkli cevaba ciktiginda hangisinin dogru oldugunu ve
+     digerinin TAM OLARAK NEREDE saptigini soyler. Ogrenciye asil ogreten
+     kisim burasidir: hatanin nerede oldugunu gormek, dogru cozumu
+     okumaktan daha degerlidir. */
+  arbiterSystem:
+    'Sen bir YKS öğretmenisin ve iki farklı çözüm önüne kondu. İkisi farklı '
+    + 'cevaba çıkıyor; en az biri hatalı.\n'
+    + '- Soruyu kendin de çöz, sonra karşılaştır.\n'
+    + '- Hatalı çözümde hatanın TAM OLARAK hangi adımda başladığını göster.\n'
+    + '- "Şurada hata var" demek yetmez: o adımda ne yapılması gerektiğini yaz.\n'
+    + '- İkisi de yanlışsa bunu söyle ve doğrusunu sen ver.\n'
+    + '- Emin olamıyorsan "karar veremiyorum" de; uydurma bir hakemlik en kötüsüdür.\n'
+    + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin, kısa. LaTeX ve emoji yok.',
+
+  arbiter(ctx){
+    return (ctx.question ? 'SORU:\n' + ctx.question + '\n\n'
+      : 'Soru fotoğrafta.\n\n')
+      + 'BİRİNCİ ÇÖZÜM (cevabı: ' + ctx.answerA + '):\n' + ctx.solutionA + '\n\n'
+      + 'İKİNCİ ÇÖZÜMÜN CEVABI: ' + ctx.answerB + '\n\n'
+      + 'GÖREV: Hangi cevap doğru? Yanlış olanda hata hangi adımda başlıyor ve '
+      + 'orada ne yapılmalıydı? Kısa yaz.\n\n'
+      + 'EN SONA, ayrı bir satıra, SADECE şu JSON’u ekle:\n'
+      + '{"dogru":"A|B|hicbiri","dogruCevap":"…","hataAdimi":"…"}\n'
+      + '- "dogru": A birinci çözüm, B ikinci cevap, "hicbiri" ikisi de yanlışsa.\n'
+      + '- "dogruCevap": senin bulduğun doğru sonuç.\n'
+      + '- "hataAdimi": hatanın başladığı adım, tek cümle. Karar veremiyorsan "".';
+  },
 
   /* Cikti sozlesmesi: once ANLATIM, en sonda tek satirlik JSON.
      Ayni desen oneri kutusunda da kullaniliyor (R.Proposals.splitAction):
@@ -93,11 +172,28 @@ R.SOLVER = {
       + R.SOLVER.tail(ctx.subjects);
   },
 
-  /* Takip sorusu: ogrenci cozumu anlamadiysa. Cozum baglamda durur. */
+  /* ---------- sohbet ----------
+     Cozum bittiginde is bitmez: ogrenci anlamadigini sormali ve konusma
+     DEVAM etmelidir. Tek seferlik "takip sorusu" yetmiyordu; artik bir
+     sohbet basligi var ve gecmis her turda modele geri veriliyor. */
+  chatSystem:
+    'Sen bir YKS öğretmenisin. Az önce bir soruyu çözüp anlattın; şimdi öğrenci '
+    + 'anlamadığı yeri soruyor.\n'
+    + '- Yalnız sorulan yeri açıkla. Çözümün tamamını baştan yazma.\n'
+    + '- Aynı anlatımı tekrarlama: anlamadıysa demek ki o yol tutmadı, BAŞKA bir '
+    + 'yoldan anlat (somut sayı ver, benzer basit bir örnek kur, şekil tarif et).\n'
+    + '- Öğrenci "anladım" derse yeni anlatım açma; kısa bir kontrol sorusu sor.\n'
+    + '- Konu dışına çıkma, yeni soru çözme.\n'
+    + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin, en fazla 5 cümle. '
+    + 'LaTeX ve emoji yok.',
+
+  chat(ctx){
+    return 'ÇÖZDÜĞÜN SORU VE ANLATIMIN:\n' + ctx.solution + '\n\n'
+      + 'ÖĞRENCİ SORUYOR: ' + ctx.follow;
+  },
+
+  /* Geriye donuk uyumluluk: eski cagiranlar icin. */
   followUp(ctx){
-    return 'Az önce şu soruyu çözdün:\n' + ctx.question + '\n\n'
-      + 'ÖĞRENCİ SORUYOR: ' + ctx.follow + '\n\n'
-      + 'GÖREV: Yalnız sorulan yeri açıkla. Çözümün tamamını baştan yazma, '
-      + 'yeni bir soru çözme. Anlamadığı adımı başka bir yoldan anlat.';
+    return R.SOLVER.chat({ solution:ctx.question, follow:ctx.follow });
   },
 };

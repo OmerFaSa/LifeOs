@@ -2595,6 +2595,70 @@ button.listitem.is-on{ background:var(--primary-soft); }
   display:block; font-size:var(--fs-xs); color:var(--text-3);
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
+
+/* ---------- soru çözüm: konu arama ----------
+   500 satırlık bir <select> içinde konu aramak, konuyu bilmekten zordu.
+   Yazarak ara, altta çıkanlardan seç. */
+.tpick{ position:relative; }
+.tpick__on{
+  display:flex; align-items:center; gap:8px;
+  margin-top:8px; padding:7px 10px;
+  border-radius:var(--r-sm);
+  background:var(--primary-soft);
+  font-size:var(--fs-sm);
+}
+.tpick__on svg{ width:15px; height:15px; flex:none; stroke:var(--primary); fill:none; stroke-width:2.2; }
+.tpick__on b{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.tsug{
+  margin-top:6px;
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.tsug--empty{ padding:9px 11px; font-size:var(--fs-sm); color:var(--text-3); }
+.tsug__row{
+  display:flex; align-items:baseline; gap:8px;
+  width:100%; padding:8px 11px;
+  border:0; border-bottom:1px solid var(--border);
+  background:none; text-align:left; cursor:pointer;
+  font-size:var(--fs-sm);
+}
+.tsug__row:last-child{ border-bottom:0; }
+.tsug__row:hover, .tsug__row:focus-visible{ background:var(--surface-2); }
+.tsug__row.is-on{ background:var(--primary-soft); }
+.tsug__row b{ flex:none; }
+.tsug__row span{ font-size:var(--fs-xs); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ---------- soru çözüm: sohbet ---------- */
+.qthread{ display:flex; flex-direction:column; gap:10px; }
+.qmsg{ padding:9px 12px; border-radius:var(--r-sm); }
+.qmsg--me{ background:var(--surface-2); border:1px dashed var(--border); }
+.qmsg--teacher{ background:var(--surface); border:1px solid var(--border); border-left:2px solid var(--primary); }
+.qmsg__who{
+  display:block; margin-bottom:3px;
+  font-size:var(--fs-xs); font-weight:700; color:var(--text-3);
+  text-transform:uppercase; letter-spacing:.05em;
+}
+.qmsg__body{ font-size:var(--fs-sm); line-height:1.55; }
+
+/* ---------- soru çözüm: denetim ayrılığı ---------- */
+.qdiff{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.qdiff__col{
+  padding:9px 11px;
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  background:var(--surface-2);
+}
+.qdiff__ans{
+  display:block; margin-top:3px;
+  font-family:var(--font-display); font-size:var(--fs-md); font-weight:700;
+}
+@media (max-width:520px){
+  .qdiff{ grid-template-columns:1fr; }
+}
 </style>
 <div id="app">
   <div class="boot">
@@ -4719,26 +4783,105 @@ R.SOLVE_RESULTS = {
 R.SOLVE_RESULT_ORDER = ['dogru', 'zorla', 'yanlis', 'bos', 'bakarak'];
 
 R.SOLVER = {
-  version:1,
+  version:2,
 
   /* Cozum metninin uzunluk butcesi. Bir cozum ofis yorumundan uzundur:
      adimlarin hepsi yazilmali, yoksa "cozum anlatan" degil "cevap soyleyen"
      bir sistem olur. */
   budget:2200,
 
+  /* ---------- ogretmen ustubu ----------
+
+     Ilk surumde "adim adim yaz" demek yetmedi: model uc satirlik islem
+     dokuyor ve "adim adim yazdim" sayiyordu. Ogretmen ile cozum makinesi
+     arasindaki fark ADIM SAYISI degil, her adimda NEDEN'in soylenmesidir.
+
+     Bu yuzden istem artik adimin BICIMINI dayatiyor: her adim bir baslikla
+     baslar, once niye o adimin atildigi soylenir, sonra islem yapilir.
+     Bicim zorlamasi olmadan model en kisa yoldan cevaba kosuyor. */
   system:
-    'Sen bir YKS öğretmenisin. Sana bir soru veriliyor; onu ÇÖZÜP ANLATIYORSUN.\n'
-    + '- Önce soruyu kendi cümlenle bir satırda özetle: ne veriliyor, ne isteniyor.\n'
-    + '- Sonra çözümü ADIM ADIM yaz. Her adımda ne yaptığını ve NEDEN yaptığını söyle; '
-    + 'işlem satırı yeterli değildir, öğrenci adımı seçme sebebini öğrenmeli.\n'
-    + '- Sonucu açıkça yaz: "Cevap: …".\n'
-    + '- En sonda TUZAĞI söyle: bu soruda öğrenciler en çok nerede hata yapar.\n'
-    + '- Kısayol varsa onu da ver ama önce uzun yolu göster; sınavda hangisinin '
-    + 'ne zaman işe yaradığını söyle.\n'
+    'Sen deneyimli bir YKS öğretmenisin. Karşındaki öğrenci soruyu ÇÖZEMEDİ; '
+    + 'senin işin cevabı söylemek değil, onu çözebilir hâle getirmek.\n\n'
+    + 'ÇÖZÜMÜN BİÇİMİ — buna harfiyen uy:\n'
+    + '1) "Soru ne diyor?" — tek cümlede: ne veriliyor, ne isteniyor.\n'
+    + '2) "Nereden başlanır?" — bu soruyu görünce ilk hangi bilgi akla gelmeli, '
+    + 'neden o. Öğrencinin en çok takıldığı yer burasıdır.\n'
+    + '3) "Adım 1", "Adım 2", … — her adım kendi başlığıyla başlar ve İKİ parça '
+    + 'taşır: önce NEDEN bu adımı attığın (tek cümle), sonra işlemin kendisi. '
+    + 'Sadece işlem yazan bir adım eksiktir.\n'
+    + '4) "Cevap: …" — sonucu tek satırda, açıkça.\n'
+    + '5) "Kontrol" — sonucu soruya geri koyup tutup tutmadığına bak. Tutmuyorsa '
+    + 'bunu SÖYLE ve nerede hata yaptığını ara.\n'
+    + '6) "Tuzak" — bu soruda öğrenciler en çok nerede, neden hata yapar.\n'
+    + '7) "Kısayol" — varsa. Önce uzun yolu gösterdin; kısayolun ne zaman '
+    + 'güvenli olduğunu da söyle. Yoksa bu başlığı hiç yazma.\n\n'
+    + 'KURALLAR:\n'
+    + '- Bir adımı atlama. "Buradan görülüyor ki" diye geçme — öğrenci göremiyor, '
+    + 'zaten o yüzden soruyor.\n'
     + '- Soruyu okuyamıyorsan ya da eksikse UYDURMA: neyin eksik olduğunu söyle.\n'
-    + '- Sadece cevabı yazıp geçme. Anlatmak asıl iştir.\n'
-    + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin. Matematik ifadelerini düz '
-    + 'yazıyla yaz (x^2, kök(3), 1/2 gibi); LaTeX kullanma. Emoji yok.',
+    + '- Emin olmadığın bir yer varsa bunu açıkça yaz; sessizce tahmin etme.\n'
+    + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin. Başlıklar düz satır olarak '
+    + 'yazılır (yıldız, kare işareti yok). Matematik ifadelerini düz yazıyla yaz '
+    + '(x^2, kök(3), 1/2 gibi); LaTeX kullanma. Emoji yok.',
+
+  /* ---------- bagimsiz denetim ----------
+
+     Modelin kendi cozumunu "kontrol et" demek ise yaramaz: ayni modele ayni
+     baglamda sorunca kendi hatasini onaylar (dogrulama yanliligi). Ise
+     yarayan tek yol, soruyu SIFIRDAN, ilk cozumu GORMEDEN yeniden
+     cozdurmektir — tercihen BASKA bir modele.
+
+     Iki bagimsiz cozum ayni cevaba cikiyorsa guven artar. Cikmiyorsa
+     ortada bir hata vardir ve hangisinin hatali oldugunu bulmak icin ucuncu
+     bir tur (hakem) gerekir.
+
+     Bu bir GARANTI DEGILDIR: iki model ayni hatayi da yapabilir. Ekran bunu
+     "dogrulandi" diye degil, "iki bagimsiz cozum ayni cevaba cikti" diye
+     soylemelidir. */
+  checkSystem:
+    'Sen bir YKS öğretmenisin. Sana bir soru veriliyor. Onu KENDİ BAŞINA çöz.\n'
+    + '- Başka birinin çözümünü görmüyorsun; kendi yolundan git.\n'
+    + '- Kısa çalış: uzun anlatım isteyen yok, doğru sonuç isteniyor.\n'
+    + '- Sonuca ulaşamıyorsan ya da soru eksikse "emin değilim" de. Uydurma.',
+
+  check(ctx){
+    return (ctx.question ? 'SORU:\n' + ctx.question + '\n\n'
+      : 'Fotoğraftaki soruyu oku ve çöz.\n\n')
+      + 'GÖREV: Bu soruyu çöz. Kısa çalışabilirsin ama sonucu doğru bul.\n\n'
+      + 'EN SONA, ayrı bir satıra, SADECE şu JSON’u ekle:\n'
+      + '{"cevap":"…","emin":true}\n'
+      + '- "cevap": yalnız sonuç (şık harfi ya da değer). Emin değilsen yine yaz.\n'
+      + '- "emin": sonuçtan emin misin (true/false).';
+  },
+
+  /* ---------- hakem ----------
+     Iki cozum farkli cevaba ciktiginda hangisinin dogru oldugunu ve
+     digerinin TAM OLARAK NEREDE saptigini soyler. Ogrenciye asil ogreten
+     kisim burasidir: hatanin nerede oldugunu gormek, dogru cozumu
+     okumaktan daha degerlidir. */
+  arbiterSystem:
+    'Sen bir YKS öğretmenisin ve iki farklı çözüm önüne kondu. İkisi farklı '
+    + 'cevaba çıkıyor; en az biri hatalı.\n'
+    + '- Soruyu kendin de çöz, sonra karşılaştır.\n'
+    + '- Hatalı çözümde hatanın TAM OLARAK hangi adımda başladığını göster.\n'
+    + '- "Şurada hata var" demek yetmez: o adımda ne yapılması gerektiğini yaz.\n'
+    + '- İkisi de yanlışsa bunu söyle ve doğrusunu sen ver.\n'
+    + '- Emin olamıyorsan "karar veremiyorum" de; uydurma bir hakemlik en kötüsüdür.\n'
+    + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin, kısa. LaTeX ve emoji yok.',
+
+  arbiter(ctx){
+    return (ctx.question ? 'SORU:\n' + ctx.question + '\n\n'
+      : 'Soru fotoğrafta.\n\n')
+      + 'BİRİNCİ ÇÖZÜM (cevabı: ' + ctx.answerA + '):\n' + ctx.solutionA + '\n\n'
+      + 'İKİNCİ ÇÖZÜMÜN CEVABI: ' + ctx.answerB + '\n\n'
+      + 'GÖREV: Hangi cevap doğru? Yanlış olanda hata hangi adımda başlıyor ve '
+      + 'orada ne yapılmalıydı? Kısa yaz.\n\n'
+      + 'EN SONA, ayrı bir satıra, SADECE şu JSON’u ekle:\n'
+      + '{"dogru":"A|B|hicbiri","dogruCevap":"…","hataAdimi":"…"}\n'
+      + '- "dogru": A birinci çözüm, B ikinci cevap, "hicbiri" ikisi de yanlışsa.\n'
+      + '- "dogruCevap": senin bulduğun doğru sonuç.\n'
+      + '- "hataAdimi": hatanın başladığı adım, tek cümle. Karar veremiyorsan "".';
+  },
 
   /* Cikti sozlesmesi: once ANLATIM, en sonda tek satirlik JSON.
      Ayni desen oneri kutusunda da kullaniliyor (R.Proposals.splitAction):
@@ -4773,12 +4916,29 @@ R.SOLVER = {
       + R.SOLVER.tail(ctx.subjects);
   },
 
-  /* Takip sorusu: ogrenci cozumu anlamadiysa. Cozum baglamda durur. */
+  /* ---------- sohbet ----------
+     Cozum bittiginde is bitmez: ogrenci anlamadigini sormali ve konusma
+     DEVAM etmelidir. Tek seferlik "takip sorusu" yetmiyordu; artik bir
+     sohbet basligi var ve gecmis her turda modele geri veriliyor. */
+  chatSystem:
+    'Sen bir YKS öğretmenisin. Az önce bir soruyu çözüp anlattın; şimdi öğrenci '
+    + 'anlamadığı yeri soruyor.\n'
+    + '- Yalnız sorulan yeri açıkla. Çözümün tamamını baştan yazma.\n'
+    + '- Aynı anlatımı tekrarlama: anlamadıysa demek ki o yol tutmadı, BAŞKA bir '
+    + 'yoldan anlat (somut sayı ver, benzer basit bir örnek kur, şekil tarif et).\n'
+    + '- Öğrenci "anladım" derse yeni anlatım açma; kısa bir kontrol sorusu sor.\n'
+    + '- Konu dışına çıkma, yeni soru çözme.\n'
+    + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin, en fazla 5 cümle. '
+    + 'LaTeX ve emoji yok.',
+
+  chat(ctx){
+    return 'ÇÖZDÜĞÜN SORU VE ANLATIMIN:\n' + ctx.solution + '\n\n'
+      + 'ÖĞRENCİ SORUYOR: ' + ctx.follow;
+  },
+
+  /* Geriye donuk uyumluluk: eski cagiranlar icin. */
   followUp(ctx){
-    return 'Az önce şu soruyu çözdün:\n' + ctx.question + '\n\n'
-      + 'ÖĞRENCİ SORUYOR: ' + ctx.follow + '\n\n'
-      + 'GÖREV: Yalnız sorulan yeri açıkla. Çözümün tamamını baştan yazma, '
-      + 'yeni bir soru çözme. Anlamadığı adımı başka bir yoldan anlat.';
+    return R.SOLVER.chat({ solution:ctx.question, follow:ctx.follow });
   },
 };
 
@@ -14427,6 +14587,12 @@ R.Solver = (function(){
 
   const MAX_RECORDS = 500;
 
+  /* Denetim ve sohbet butceleri. Denetim UCUZ olmali: ucretsiz katmanda her
+     cagri bir gunluk hak ve denetim her cozume bir tane daha ekliyor. */
+  const CHECK_BUDGET = 700;
+  const ARBITER_BUDGET = 1200;
+  const CHAT_BUDGET = 700;
+
   /* ---------- kapali katalog ---------- */
 
   /* Modele verilen ders/konu listesi. Kapali katalog olmadan model konu adi
@@ -14522,6 +14688,74 @@ R.Solver = (function(){
       trap: String(m.tuzak == null ? '' : m.tuzak).slice(0, 240),
       matched: !!hit,
     };
+  }
+
+  /* ---------- cevap karsilastirma ----------
+
+     Iki bagimsiz cozumun ayni cevaba cikip cikmadigini anlamak, gorunduğu
+     kadar basit degil: "C", "C sikki", "c)" ayni seydir; "2 ve 3" ile
+     "3, 2" ayni kumedir; "12" ile "12,0" ayni sayidir. Yanlis bir
+     "farkli cevap" karari, ogrenciyi olmayan bir hataya bakmaya gonderir —
+     bu yuzden karsilastirma ihtiyatlidir: emin olamadigi yerde FARKLI der,
+     ama once bicim farklarini eler. */
+
+  /* Sik harfi: "C", "c)", "C şıkkı", "cevap: C" → "c". Yoksa null.
+
+     Ilk surum "a-e disindaki her seyi bosluga cevir, tek harf ara" diyordu
+     ve Turkce kelimelerden HARF UYDURUYORDU: "cevap" icindeki a, "artar"
+     icindeki a, "2 ve 3" icindeki e sik harfi sanildi. Sonucu:
+     "artar" ile "azalir" ayni cevap sayildi ve "2 ve 3" ile "3, 2"
+     karsilastirilamaz oldu.
+
+     Artik yalnizca sik harfinin GERCEKTEN sik harfi oldugu uc kalip
+     taninir. Taninmayan bicim null doner ve karsilastirma sayilara duser —
+     uydurulmus bir harf, harf bulamamaktan cok daha kotudur. */
+  function optionLetter(text){
+    const t = U.norm(text || '').trim();
+    if(!t) return null;
+    /* 1) Cevabin TAMAMI tek harf: "c", "C)", "(c)", "c." */
+    let m = t.match(/^\(?\s*([a-e])\s*[)\].:\-]?\s*$/);
+    if(m) return m[1];
+    /* 2) "c sikki", "d secenegi" */
+    m = t.match(/(?:^|\s)([a-e])\s*[).]?\s*(?:sik|sikki|secenek|secenegi)\b/);
+    if(m) return m[1];
+    /* 3) "cevap: c", "yanit d" — sonda. */
+    m = t.match(/\b(?:cevap|yanit|dogru)\s*[:=\-]?\s*\(?([a-e])\)?\s*$/);
+    return m ? m[1] : null;
+  }
+
+  /* Metindeki sayilar. Turkce ondalik virgul ve binlik nokta taninir. */
+  function numbersOf(text){
+    const out = [];
+    const re = /-?\d{1,3}(?:\.\d{3})+(?:,\d+)?|-?\d+(?:[.,]\d+)?/g;
+    let m;
+    while((m = re.exec(String(text || ''))) !== null){
+      let t = m[0];
+      if(/^-?\d{1,3}(?:\.\d{3})+/.test(t)) t = t.replace(/\./g, '');
+      const n = Number(t.replace(',', '.'));
+      if(Number.isFinite(n)) out.push(n);
+    }
+    return out;
+  }
+
+  /* Iki cevap ayni mi? Sirasiyla: duz metin, sik harfi, sayi kumesi. */
+  function sameAnswer(a, b){
+    const na = U.norm(a || '').replace(/\s+/g, ' ').trim();
+    const nb = U.norm(b || '').replace(/\s+/g, ' ').trim();
+    if(!na || !nb) return false;
+    if(na === nb) return true;
+
+    const la = optionLetter(a), lb = optionLetter(b);
+    if(la && lb) return la === lb;
+    /* Biri sik harfi digeri degilse karsilastirilamaz. */
+    if(!!la !== !!lb) return false;
+
+    const xa = numbersOf(a), xb = numbersOf(b);
+    if(!xa.length || xa.length !== xb.length) return false;
+    const sa = xa.slice().sort((x, y) => x - y);
+    const sb = xb.slice().sort((x, y) => x - y);
+    /* Sira onemsiz ("2 ve 3" = "3, 2"); kucuk yuvarlama farki tolere edilir. */
+    return sa.every((v, i) => Math.abs(v - sb[i]) < 0.005);
   }
 
   /* ---------- fotograf ---------- */
@@ -14650,6 +14884,146 @@ R.Solver = (function(){
     };
   }
 
+  /* ---------- bagimsiz denetim ----------
+
+     "Modele kendi cozumunu kontrol ettir" ise yaramaz: ayni modele ayni
+     baglamda sorunca kendi hatasini onaylar. Ise yarayan tek yol soruyu
+     SIFIRDAN, ilk cozumu GORMEDEN yeniden cozdurmek — tercihen BASKA bir
+     modele.
+
+     BU BIR GARANTI DEGILDIR ve oyle sunulmamalidir: iki model ayni hatayi
+     da yapabilir. Sonuc "dogrulandi" degil, "iki bagimsiz cozum ayni cevaba
+     cikti" demektir. Ekran da boyle soyler. */
+
+  /* Denetim icin BASKA bir model secilir. Ayni model kalirsa denetim yine
+     yapilir ama bagimsizligi zayiftir; sonuc bunu bildirir. */
+  function checkChain(usedModel, withImage){
+    const base = chainFor(withImage);
+    const other = base.filter(c => c.model !== usedModel);
+    return { chain:other.length ? other : base, independent:other.length > 0 };
+  }
+
+  /* Soruyu bagimsiz olarak yeniden cozer ve YALNIZ cevabi dondurur. */
+  async function check(req, opts){
+    const o = opts || {};
+    const r = req || {};
+    const withImage = !!r.image;
+    const picked = checkChain(r.usedModel, withImage);
+    if(!picked.chain.length) throw Object.assign(new Error('model yok'), { code:'unavailable' });
+
+    const message = { role:'user', text:R.SOLVER.check({ question:r.question }) };
+    if(withImage) message.images = [{ mime:r.image.mime, data:r.image.data }];
+
+    const res = await R.LLM.complete(picked.chain, {
+      system:R.SOLVER.checkSystem,
+      messages:[message],
+      /* Denetim kisa: anlatim istenmiyor, sonuc isteniyor. Ucretsiz katmanda
+         her cagri bir gunluk hak; denetim ucuz olmali. */
+      maxTokens:CHECK_BUDGET,
+      temperature:0.1,
+      signal:o.signal,
+    });
+    const split = parse(res.text);
+    const meta = split.meta || {};
+    return {
+      answer:String(meta.cevap == null ? '' : meta.cevap).slice(0, 80),
+      sure:meta.emin !== false,
+      model:res.model, provider:res.provider,
+      independent:picked.independent,
+      text:split.text,
+    };
+  }
+
+  /* Iki cevap ayrildiginda hangisinin dogru oldugunu ve digerinin NEREDE
+     saptigini sorar. Ogrenciye asil ogreten kisim budur. */
+  async function arbitrate(req, opts){
+    const o = opts || {};
+    const r = req || {};
+    const withImage = !!r.image;
+    const chain = chainFor(withImage);
+    if(!chain.length) throw Object.assign(new Error('model yok'), { code:'unavailable' });
+
+    const message = { role:'user', text:R.SOLVER.arbiter({
+      question:r.question,
+      solutionA:String(r.solutionA || '').slice(0, 2500),
+      answerA:r.answerA, answerB:r.answerB,
+    }) };
+    if(withImage) message.images = [{ mime:r.image.mime, data:r.image.data }];
+
+    const res = await R.LLM.complete(chain, {
+      system:R.SOLVER.arbiterSystem,
+      messages:[message],
+      maxTokens:ARBITER_BUDGET,
+      temperature:0.1,
+      signal:o.signal,
+    });
+    const split = parse(res.text);
+    const meta = split.meta || {};
+    const which = String(meta.dogru || '').toUpperCase();
+    return {
+      text:split.text,
+      winner:which === 'A' ? 'A' : which === 'B' ? 'B'
+        : /HICBIRI|HİÇBİRİ/.test(which) ? 'hicbiri' : null,
+      answer:String(meta.dogruCevap == null ? '' : meta.dogruCevap).slice(0, 80),
+      step:String(meta.hataAdimi == null ? '' : meta.hataAdimi).slice(0, 240),
+      model:res.model,
+    };
+  }
+
+  /* Denetim turunun bir arada okunabilir sonucu.
+     durum: 'ayni' | 'ayrildi' | 'emin_degil' | 'yapilamadi' */
+  async function verifyRun(req, opts){
+    const o = opts || {};
+    const r = req || {};
+    let second;
+    try{
+      second = await check(r, o);
+    }catch(err){
+      return { durum:'yapilamadi', neden:err && err.code };
+    }
+    if(!second.answer){
+      return { durum:'emin_degil', second, neden:'empty' };
+    }
+    if(sameAnswer(r.answerA, second.answer)){
+      return { durum:'ayni', second };
+    }
+    let judge = null;
+    try{
+      judge = await arbitrate({
+        question:r.question, image:r.image,
+        solutionA:r.solutionA, answerA:r.answerA, answerB:second.answer,
+      }, o);
+    }catch(err){ /* hakem duserse ayrilik yine de bildirilir */ }
+    return { durum:'ayrildi', second, judge };
+  }
+
+  /* ---------- sohbet ----------
+     Cozum bittiginde is bitmez: ogrenci anlamadigini sorar ve konusma
+     devam eder. Gecmis her turda modele geri verilir. */
+  async function talk(req, opts){
+    const o = opts || {};
+    const r = req || {};
+    const chain = chainFor(false);
+    if(!chain.length) throw Object.assign(new Error('model yok'), { code:'unavailable' });
+    const q = String(r.follow || '').trim();
+    if(!q) throw Object.assign(new Error('bos soru'), { code:'empty' });
+
+    const history = (r.thread || []).slice(-6)
+      .map(m => ({ role:m.role === 'user' ? 'user' : 'assistant', text:m.text }));
+
+    const res = await R.LLM.complete(chain, {
+      system:R.SOLVER.chatSystem,
+      messages:history.length
+        ? history.concat([{ role:'user', text:q }])
+        : [{ role:'user', text:R.SOLVER.chat({ solution:String(r.solution || '').slice(0, 2500), follow:q }) }],
+      maxTokens:CHAT_BUDGET,
+      temperature:0.3,
+      signal:o.signal,
+      onText:o.onText,
+    });
+    return { text:res.text, model:res.model, provider:res.provider };
+  }
+
   /* ---------- kayit ---------- */
 
   function all(){ return (S.solved || []).slice(); }
@@ -14670,6 +15044,8 @@ R.Solver = (function(){
       seconds:null,
       fromImage:false,
       model:'',
+      checked:null,       // 'ayni' | 'ayrildi' | 'emin_degil' | 'yapilamadi'
+      checkNote:'',       // hakem hatanin nerede oldugunu soylediyse
     }, fields || {});
   }
 
@@ -14754,6 +15130,8 @@ R.Solver = (function(){
 
   return {
     catalogText, matchTopic, parse, verify,
+    sameAnswer, optionLetter, numbersOf,
+    check, arbitrate, verifyRun, talk,
     prepareImage, solve, ready, chainFor,
     all, newRecord, save, remove, load,
     byTopic, daily, summary, solvedOk,
@@ -19432,8 +19810,23 @@ R.Screens.solve = (function(){
   let draft = null;        // kaydedilmeyi bekleyen kayıt
   let controller = null;
   let followBusy = false;
-  let follows = [];        // [{ q, a }]
+  let thread = [];         // [{ role:'user'|'agent', text }] — çözümden sonraki sohbet
   let lastSource = '';     // arka arkaya aynı kitaptan çözmek yaygın
+  let check = null;        // bağımsız denetim sonucu
+  let checkBusy = false;
+  let topicRef = '';       // seçili ders::konu
+  let topicQuery = '';     // konu arama kutusuna yazılan
+
+  /* Denetime ve kayda giden soru metni: kullanıcı yazdıysa o, fotoğraftan
+     geldiyse modelin okuyup yazdığı ilk satırlar. */
+  function questionText(){
+    const el = document.getElementById('q-text');
+    const typed = el ? el.value.trim() : '';
+    if(typed) return typed;
+    if(!result) return '';
+    const m = result.text.match(/^\s*Soru[:\s][\s\S]{0,600}?(?=\n\s*\n)/);
+    return m ? m[0].trim() : result.text.slice(0, 600);
+  }
 
   function sourceNameOf(id){
     const s = id ? R.Sources.byId(id) : null;
@@ -19522,9 +19915,13 @@ R.Screens.solve = (function(){
     });
   }
 
-  /* Çözüm metni — düz metin, satır sonları korunur. */
+  /* Çözüm metni — düz metin, satır sonları korunur.
+
+     Sıra kritik: ÖNCE kaçır (metin modelden geliyor), SONRA raw işaretle.
+     Tersi ya da işaretlemeyi unutmak, eklediğimiz <br/> etiketlerinin
+     ekrana harfi harfine basılmasına yol açıyordu. */
   function solutionBody(text){
-    return html`<div class="qsolution">${U.esc(text).replace(/\n/g, '<br/>')}</div>`;
+    return html`<div class="qsolution">${raw(U.esc(text).replace(/\n/g, '<br/>'))}</div>`;
   }
 
   function resultCard(){
@@ -19539,18 +19936,25 @@ R.Screens.solve = (function(){
         ${when(result.truncated, () => html`<p class="tiny dim mt-8">
           Yanıt uzunluk sınırına takıldı; son cümle eksik olabilir.</p>`)}
 
-        ${when(follows.length, () => html`<div class="mt-12">${map(follows, f => html`
-          <div class="qfollow">
-            <div class="qfollow__q"><b>Sen:</b> ${f.q}</div>
-            <div class="qfollow__a">${raw(solutionBody(f.a))}</div>
+        ${checkCard()}
+
+        ${when(thread.length, () => html`<div class="qthread mt-12">${map(thread, m => html`
+          <div class="${cls('qmsg', 'qmsg--' + (m.role === 'user' ? 'me' : 'teacher'))}">
+            <span class="qmsg__who">${m.role === 'user' ? 'Sen' : 'Öğretmen'}</span>
+            <div class="qmsg__body">${raw(solutionBody(m.text))}</div>
           </div>`)}</div>`)}
 
         <div class="mt-12">
-          ${K.Field({ label:'Anlamadığın yeri sor',
-            hint:'yalnız o adımı açıklar, çözümü baştan yazmaz',
-            input:K.Input({ id:'q-follow', placeholder:'ör. üçüncü adımda neden 2 ile çarptın?' }) })}
-          ${K.Button({ label:followBusy ? 'Yazıyor…' : 'Sor', size:'sm', act:'q-follow',
-            disabled:followBusy })}
+          ${K.Field({ label:thread.length ? 'Konuşmaya devam et' : 'Anlamadığın yeri sor',
+            hint:'yalnız o adımı açıklar, çözümü baştan yazmaz — istediğin kadar sorabilirsin',
+            input:K.Input({ id:'q-follow',
+              placeholder:thread.length ? 'başka?' : 'ör. üçüncü adımda neden 2 ile çarptın?' }) })}
+          ${K.Row([
+            K.Button({ label:followBusy ? 'Yazıyor…' : 'Sor', size:'sm', tone:'primary',
+              act:'q-follow', disabled:followBusy }),
+            when(thread.length, () => K.Button({ label:'Sohbeti temizle', size:'sm', tone:'ghost',
+              act:'q-thread-clear' })),
+          ], { wrap:true })}
         </div>
 
         <div class="qmeta mt-12">
@@ -19563,23 +19967,169 @@ R.Screens.solve = (function(){
     });
   }
 
-  function topicOptions(){
-    return [{ value:'', label:'— konu seç —' }].concat(
-      R.SUBJECTS.reduce((acc, s) => acc.concat(
-        s.topics.map(t => ({ value:s.id + '::' + t.id, label:s.name + ' · ' + t.name }))), []));
+  /* ---------- bağımsız denetim ----------
+     Modelin kendi çözümünü "kontrol etmesi" işe yaramaz: aynı modele aynı
+     bağlamda sorunca kendi hatasını onaylar. Bu yüzden soru SIFIRDAN,
+     ilk çözüm görülmeden, tercihen BAŞKA bir modele yeniden çözdürülür.
+
+     Sonuç bir GARANTİ değildir ve öyle sunulmaz: iki model aynı hatayı da
+     yapabilir. Ekran "doğrulandı" demez, "iki bağımsız çözüm aynı cevaba
+     çıktı" der. */
+
+  function checkCard(){
+    if(checkBusy){
+      return K.Notice({ tone:'info', body:'Soru ikinci kez, bağımsız olarak çözülüyor…' });
+    }
+    if(!check){
+      return html`<div class="mt-10">
+        ${K.Button({ label:'Çözümü denetle', icon:'shield', size:'sm', act:'q-check' })}
+        <span class="tiny dim"> — soruyu başka bir modele sıfırdan çözdürür (1 istek)</span>
+      </div>`;
+    }
+    if(check.durum === 'yapilamadi'){
+      return K.Notice({ tone:'warn', title:'Denetim yapılamadı.',
+        body:R.LLM.errorText(check.neden) });
+    }
+    if(check.durum === 'emin_degil'){
+      return K.Notice({ tone:'warn', title:'Denetim sonuçsuz.',
+        body:'İkinci çözüm bir cevap üretemedi. Bu, çözümün yanlış olduğu anlamına '
+           + 'gelmez ama doğrulandığı anlamına da gelmez.' });
+    }
+    if(check.durum === 'ayni'){
+      return K.Notice({ tone:'ok', title:'İki bağımsız çözüm aynı cevaba çıktı.',
+        body:(check.second.independent
+            ? 'Soru ' + check.second.model + ' modeline sıfırdan çözdürüldü ve aynı sonuca ulaştı. '
+            : 'Soru aynı modele sıfırdan çözdürüldü ve aynı sonuca ulaştı — bağlamı '
+              + 'görmedi ama model aynı, bağımsızlığı zayıf. ')
+          + 'Bu bir garanti değildir: iki çözüm aynı hatayı da yapmış olabilir.' });
+    }
+    /* ayrildi */
+    const j = check.judge;
+    return K.Card({
+      title:'Dikkat: iki çözüm farklı cevaba çıktı',
+      badge:K.Badge({ label:'denetim', tone:'danger' }),
+      body:html`
+        <div class="qdiff">
+          <div class="qdiff__col">
+            <span class="mono-label">Yukarıdaki çözüm</span>
+            <b class="qdiff__ans">${(result && result.meta && result.meta.answer) || '—'}</b>
+          </div>
+          <div class="qdiff__col">
+            <span class="mono-label">Bağımsız çözüm${
+              when(check.second.model, () => ' · ' + check.second.model)}</span>
+            <b class="qdiff__ans">${check.second.answer}</b>
+          </div>
+        </div>
+        ${when(!j, () => K.Notice({ tone:'warn',
+          body:'Hangisinin doğru olduğuna karar verilemedi. Çözümü kendin kontrol et; '
+             + 'aşağıdan öğretmene sorabilirsin.' }))}
+        ${when(j, () => html`
+          ${K.Notice({ tone:j.winner === 'A' ? 'ok' : 'danger',
+            title:j.winner === 'A' ? 'Yukarıdaki çözüm doğru.'
+              : j.winner === 'B' ? 'Yukarıdaki çözüm HATALI.'
+              : j.winner === 'hicbiri' ? 'İkisi de hatalı.'
+              : 'Karar verilemedi.',
+            body:j.answer ? 'Doğru cevap: ' + j.answer : '' })}
+          ${when(j.step, () => K.Notice({ tone:'info', title:'Hata nerede başlıyor:', body:j.step }))}
+          ${when(j.text, () => html`<div class="mt-10">${raw(solutionBody(j.text))}</div>`)}`)}
+        <p class="tiny dim mt-10">Denetim yanılabilir. Hakem de bir modeldir ve
+          kesin hüküm vermez; sana gösterdiği yeri kendin kontrol et.</p>`,
+    });
+  }
+
+  /* ---------- konu seçici ----------
+
+     500 satırlık bir <select> içinde konu aramak, konuyu bilmekten daha
+     zordu. Artık YAZILARAK aranıyor: her harfte liste daralıyor ve
+     eşleşenler altta çıkıyor.
+
+     Model konuyu ZATEN seçmiş olarak geliyor (kapalı katalogdan); kutu
+     onun seçimiyle dolu açılır ve sen değiştirebilirsin. Yani sıra:
+     önce sistem tahmin eder, sonra sen düzeltirsin. */
+
+  const TOPIC_LIMIT = 8;
+
+  function allTopics(){
+    return R.SUBJECTS.reduce((acc, s) => acc.concat(
+      s.topics.map(t => ({
+        ref:s.id + '::' + t.id,
+        subject:s.name, topic:t.name,
+        label:s.name + ' · ' + t.name,
+        hay:U.norm(s.name + ' ' + t.name),
+      }))), []);
+  }
+
+  /* Arama: bütün kelimeler geçmeli (sıra önemsiz), böylece "mat üslü"
+     de "TYT Temel Matematik · Üslü sayılar"ı bulur. Türkçe harf farkı
+     eşleşmeyi bozmaz (U.norm). */
+  function searchTopics(q){
+    const words = U.norm(q || '').split(/\s+/).filter(Boolean);
+    if(!words.length) return [];
+    return allTopics()
+      .filter(t => words.every(w => t.hay.indexOf(w) >= 0))
+      /* Konu adında geçen, ders adında geçenden önce gelir. */
+      .sort((a, b) => {
+        const sa = words.every(w => U.norm(a.topic).indexOf(w) >= 0) ? 0 : 1;
+        const sb = words.every(w => U.norm(b.topic).indexOf(w) >= 0) ? 0 : 1;
+        return sa - sb || a.label.length - b.label.length;
+      })
+      .slice(0, TOPIC_LIMIT);
+  }
+
+  function topicLabel(ref){
+    const t = allTopics().find(x => x.ref === ref);
+    return t ? t.label : '';
+  }
+
+  /* Kutunun altındaki öneri listesi — ekranda tek yerden çizilir ki
+     yazarken tüm formu yeniden çizmek zorunda kalmayalım. */
+  function topicSuggestions(){
+    const q = topicQuery.trim();
+    if(!q) return '';
+    const rows = searchTopics(q);
+    if(!rows.length){
+      return String(html`<div class="tsug tsug--empty">Eşleşen konu yok.
+        Başka bir kelime dene ya da boş bırak.</div>`);
+    }
+    return String(html`<div class="tsug">${map(rows, t => html`
+      <button type="button" class="${cls('tsug__row', t.ref === topicRef && 'is-on')}"
+        data-act="q-topic-pick" data-ref="${t.ref}">
+        <b>${t.topic}</b><span class="dim">${t.subject}</span>
+      </button>`)}</div>`);
+  }
+
+  function topicPicker(m){
+    const guessed = m.topicId ? m.subjectId + '::' + m.topicId : '';
+    const current = topicRef || guessed;
+    const label = topicLabel(current);
+
+    return K.Stack([
+      html`<div class="tpick">
+        ${K.Field({ label:'Ders – konu',
+          hint:label ? 'sistemin seçtiği: ' + label + ' — değiştirmek için yaz'
+            : 'yazarak ara, aşağıdan seç',
+          input:K.Input({ id:'q-topic-q', value:topicQuery, change:'q-topic-q',
+            data:{ 'data-debounce':'140' },
+            placeholder:label || 'ör. üslü, paragraf, türev' }) })}
+        <input type="hidden" id="q-topic" value="${current}"/>
+        <div id="q-topic-sug">${raw(topicSuggestions())}</div>
+        ${when(current, () => html`<div class="tpick__on">
+          ${raw(UI.icon('check'))} <b>${label}</b>
+          ${K.Button({ label:'Kaldır', size:'sm', tone:'ghost', act:'q-topic-clear' })}
+        </div>`)}
+        ${when(!current, () => html`<p class="tiny dim">Konu seçilmezse kayıt konu
+          takibine bağlanmaz — sonradan da seçebilirsin.</p>`)}
+      </div>`,
+    ], 'sm');
   }
 
   function saveForm(m){
-    const ref = m.topicId ? m.subjectId + '::' + m.topicId : '';
     return K.Stack([
-      K.Cols(2, [
-        K.Field({ label:'Ders – konu',
-          input:K.Select({ id:'q-topic', value:ref, options:topicOptions() }) }),
-        K.Field({ label:'Zorluk',
-          input:K.Select({ id:'q-diff', value:m.difficulty || 3,
-            options:R.DIFFICULTY_ORDER.map(n => ({ value:n,
-              label:n + ' — ' + R.DIFFICULTY[n].label })) }) }),
-      ]),
+      topicPicker(m),
+      K.Field({ label:'Zorluk',
+        input:K.Select({ id:'q-diff', value:m.difficulty || 3,
+          options:R.DIFFICULTY_ORDER.map(n => ({ value:n,
+            label:n + ' — ' + R.DIFFICULTY[n].label })) }) }),
       K.Field({ label:'Sen ne yaptın?',
         hint:'“çözüme baktım” ile “kendim çözdüm” arasındaki fark, konu takibinin en değerli bilgisi',
         input:K.Select({ id:'q-result', value:'bakarak',
@@ -19806,7 +20356,8 @@ R.Screens.solve = (function(){
     async 'q-clear-image'(){ image = null; await R.App.render(); },
 
     async 'q-reset'(){
-      image = null; result = null; draft = null; follows = [];
+      image = null; result = null; draft = null;
+      thread = []; check = null; topicRef = ''; topicQuery = '';
       await R.App.render();
     },
 
@@ -19825,7 +20376,7 @@ R.Screens.solve = (function(){
         return;
       }
       busy = true;
-      follows = [];
+      thread = []; check = null; topicRef = ''; topicQuery = '';
       result = null;
       controller = new AbortController();
       await R.App.render();
@@ -19851,21 +20402,27 @@ R.Screens.solve = (function(){
       }
     },
 
+    /* Sohbet: çözüm bittiğinde iş bitmez. Geçmiş her turda modele geri
+       verilir, böylece "peki ya şu?" diye devam edebilirsin. */
     async 'q-follow'(){
       if(followBusy || !result) return;
       const el = document.getElementById('q-follow');
       const q = el ? el.value.trim() : '';
       if(!q) return;
       followBusy = true;
+      thread = thread.concat([{ role:'user', text:q }]);
       await R.App.render();
       try{
-        const res = await Q.solve({
-          question:result.text.slice(0, 1200),
+        const res = await Q.talk({
+          solution:result.text,
           follow:q,
-          previous:[{ role:'assistant', text:result.text }],
+          thread:thread.slice(0, -1).map(m => ({ role:m.role, text:m.text })),
         }, {});
-        follows = follows.concat([{ q, a:res.text }]);
+        thread = thread.concat([{ role:'agent', text:res.text }]);
       }catch(err){
+        /* Soru boşa gitmesin: cevap gelmediyse kullanıcının yazdığı da
+           geri alınır, yoksa sohbette cevapsız bir satır kalır. */
+        thread = thread.slice(0, -1);
         UI.toast(R.LLM.errorText(err && err.code));
       }finally{
         followBusy = false;
@@ -19873,8 +20430,50 @@ R.Screens.solve = (function(){
       }
     },
 
+    async 'q-thread-clear'(){
+      thread = [];
+      await R.App.render();
+    },
+
+    /* Bağımsız denetim: soru sıfırdan, ilk çözüm görülmeden, tercihen
+       BAŞKA bir modele çözdürülür. Ayrılık varsa hakem turu da çalışır. */
+    async 'q-check'(){
+      if(checkBusy || !result) return;
+      checkBusy = true;
+      await R.App.render();
+      try{
+        check = await Q.verifyRun({
+          question:questionText(),
+          image,
+          solutionA:result.text,
+          answerA:(result.meta && result.meta.answer) || '',
+          usedModel:result.model,
+        }, {});
+      }catch(err){
+        check = { durum:'yapilamadi', neden:err && err.code };
+      }finally{
+        checkBusy = false;
+        await R.App.render();
+      }
+    },
+
     async 'q-save'(){ await saveRecord(false); },
     async 'q-save-error'(){ await saveRecord(true); },
+
+    /* Konu seçici: yazarak ara, listeden seç. */
+    async 'q-topic-pick'(el){
+      topicRef = el.dataset.ref;
+      topicQuery = '';
+      await R.App.render();
+    },
+    async 'q-topic-clear'(){
+      topicRef = '';
+      topicQuery = '';
+      /* Modelin tahmini de kaldırılmalı, yoksa "kaldır" hiçbir şey yapmıyor
+         gibi görünür ve tahmin geri gelir. */
+      if(result && result.meta){ result.meta.topicId = null; result.meta.subjectId = null; }
+      await R.App.render();
+    },
 
     async 'q-src-new'(){ sourceSheet(null); },
     async 'q-src-edit'(el){ sourceSheet(el.dataset.id); },
@@ -19920,14 +20519,17 @@ R.Screens.solve = (function(){
   async function saveRecord(alsoError){
     if(!result) return;
     const val = id => { const e = document.getElementById(id); return e ? String(e.value).trim() : ''; };
-    const ref = val('q-topic');
+    /* Konu: senin seçimin varsa o, yoksa sistemin tahmini. */
+    const guess = (result.meta && result.meta.topicId)
+      ? result.meta.subjectId + '::' + result.meta.topicId : '';
+    const ref = topicRef || guess;
     const [subjectId, topicId] = ref ? ref.split('::') : [null, null];
     const subject = subjectId ? R.SUBJECTS.find(s => s.id === subjectId) : null;
     const topic = subject ? subject.topics.find(t => t.id === topicId) : null;
     const m = result.meta || {};
 
     const rec = await Q.save({
-      question:(val('q-text') || m.questionText || result.text.slice(0, 300)),
+      question:questionText(),
       solution:result.text,
       subjectId:subjectId || null,
       topicId:topicId || null,
@@ -19942,6 +20544,10 @@ R.Screens.solve = (function(){
       sourceId:val('q-source') || null,
       sourceName:sourceNameOf(val('q-source')),
       questionNo:val('q-no'),
+      /* Denetimin sonucu kayda geçer: sonradan "bu çözüme güvenilir mi?"
+         diye bakabilmek için. */
+      checked:check ? check.durum : null,
+      checkNote:check && check.judge ? check.judge.step : '',
     });
 
     /* Sonraki soru genelde AYNI kitaptan gelir: seçim hatırlanır. */
@@ -19965,11 +20571,20 @@ R.Screens.solve = (function(){
     }
 
     UI.toast(alsoError ? 'Kaydedildi ve yanlış defterine eklendi' : 'Kaydedildi');
-    result = null; image = null; follows = [];
+    result = null; image = null; thread = []; check = null;
+    topicRef = ''; topicQuery = '';
     await R.App.render();
   }
 
   const change = {
+    async 'q-topic-q'(el){
+      topicQuery = el.value;
+      /* Yazarken tüm ekranı yeniden çizmek imleci kaybettiriyordu:
+         yalnız öneri listesi değişir. */
+      const box = document.getElementById('q-topic-sug');
+      if(box) box.innerHTML = topicSuggestions();
+    },
+
     async 'q-file'(el){
       const f = el.files && el.files[0];
       if(f) await useFile(f);

@@ -23,8 +23,23 @@ R.Screens.solve = (function(){
   let draft = null;        // kaydedilmeyi bekleyen kayıt
   let controller = null;
   let followBusy = false;
-  let follows = [];        // [{ q, a }]
+  let thread = [];         // [{ role:'user'|'agent', text }] — çözümden sonraki sohbet
   let lastSource = '';     // arka arkaya aynı kitaptan çözmek yaygın
+  let check = null;        // bağımsız denetim sonucu
+  let checkBusy = false;
+  let topicRef = '';       // seçili ders::konu
+  let topicQuery = '';     // konu arama kutusuna yazılan
+
+  /* Denetime ve kayda giden soru metni: kullanıcı yazdıysa o, fotoğraftan
+     geldiyse modelin okuyup yazdığı ilk satırlar. */
+  function questionText(){
+    const el = document.getElementById('q-text');
+    const typed = el ? el.value.trim() : '';
+    if(typed) return typed;
+    if(!result) return '';
+    const m = result.text.match(/^\s*Soru[:\s][\s\S]{0,600}?(?=\n\s*\n)/);
+    return m ? m[0].trim() : result.text.slice(0, 600);
+  }
 
   function sourceNameOf(id){
     const s = id ? R.Sources.byId(id) : null;
@@ -113,9 +128,13 @@ R.Screens.solve = (function(){
     });
   }
 
-  /* Çözüm metni — düz metin, satır sonları korunur. */
+  /* Çözüm metni — düz metin, satır sonları korunur.
+
+     Sıra kritik: ÖNCE kaçır (metin modelden geliyor), SONRA raw işaretle.
+     Tersi ya da işaretlemeyi unutmak, eklediğimiz <br/> etiketlerinin
+     ekrana harfi harfine basılmasına yol açıyordu. */
   function solutionBody(text){
-    return html`<div class="qsolution">${U.esc(text).replace(/\n/g, '<br/>')}</div>`;
+    return html`<div class="qsolution">${raw(U.esc(text).replace(/\n/g, '<br/>'))}</div>`;
   }
 
   function resultCard(){
@@ -130,18 +149,25 @@ R.Screens.solve = (function(){
         ${when(result.truncated, () => html`<p class="tiny dim mt-8">
           Yanıt uzunluk sınırına takıldı; son cümle eksik olabilir.</p>`)}
 
-        ${when(follows.length, () => html`<div class="mt-12">${map(follows, f => html`
-          <div class="qfollow">
-            <div class="qfollow__q"><b>Sen:</b> ${f.q}</div>
-            <div class="qfollow__a">${raw(solutionBody(f.a))}</div>
+        ${checkCard()}
+
+        ${when(thread.length, () => html`<div class="qthread mt-12">${map(thread, m => html`
+          <div class="${cls('qmsg', 'qmsg--' + (m.role === 'user' ? 'me' : 'teacher'))}">
+            <span class="qmsg__who">${m.role === 'user' ? 'Sen' : 'Öğretmen'}</span>
+            <div class="qmsg__body">${raw(solutionBody(m.text))}</div>
           </div>`)}</div>`)}
 
         <div class="mt-12">
-          ${K.Field({ label:'Anlamadığın yeri sor',
-            hint:'yalnız o adımı açıklar, çözümü baştan yazmaz',
-            input:K.Input({ id:'q-follow', placeholder:'ör. üçüncü adımda neden 2 ile çarptın?' }) })}
-          ${K.Button({ label:followBusy ? 'Yazıyor…' : 'Sor', size:'sm', act:'q-follow',
-            disabled:followBusy })}
+          ${K.Field({ label:thread.length ? 'Konuşmaya devam et' : 'Anlamadığın yeri sor',
+            hint:'yalnız o adımı açıklar, çözümü baştan yazmaz — istediğin kadar sorabilirsin',
+            input:K.Input({ id:'q-follow',
+              placeholder:thread.length ? 'başka?' : 'ör. üçüncü adımda neden 2 ile çarptın?' }) })}
+          ${K.Row([
+            K.Button({ label:followBusy ? 'Yazıyor…' : 'Sor', size:'sm', tone:'primary',
+              act:'q-follow', disabled:followBusy }),
+            when(thread.length, () => K.Button({ label:'Sohbeti temizle', size:'sm', tone:'ghost',
+              act:'q-thread-clear' })),
+          ], { wrap:true })}
         </div>
 
         <div class="qmeta mt-12">
@@ -154,23 +180,169 @@ R.Screens.solve = (function(){
     });
   }
 
-  function topicOptions(){
-    return [{ value:'', label:'— konu seç —' }].concat(
-      R.SUBJECTS.reduce((acc, s) => acc.concat(
-        s.topics.map(t => ({ value:s.id + '::' + t.id, label:s.name + ' · ' + t.name }))), []));
+  /* ---------- bağımsız denetim ----------
+     Modelin kendi çözümünü "kontrol etmesi" işe yaramaz: aynı modele aynı
+     bağlamda sorunca kendi hatasını onaylar. Bu yüzden soru SIFIRDAN,
+     ilk çözüm görülmeden, tercihen BAŞKA bir modele yeniden çözdürülür.
+
+     Sonuç bir GARANTİ değildir ve öyle sunulmaz: iki model aynı hatayı da
+     yapabilir. Ekran "doğrulandı" demez, "iki bağımsız çözüm aynı cevaba
+     çıktı" der. */
+
+  function checkCard(){
+    if(checkBusy){
+      return K.Notice({ tone:'info', body:'Soru ikinci kez, bağımsız olarak çözülüyor…' });
+    }
+    if(!check){
+      return html`<div class="mt-10">
+        ${K.Button({ label:'Çözümü denetle', icon:'shield', size:'sm', act:'q-check' })}
+        <span class="tiny dim"> — soruyu başka bir modele sıfırdan çözdürür (1 istek)</span>
+      </div>`;
+    }
+    if(check.durum === 'yapilamadi'){
+      return K.Notice({ tone:'warn', title:'Denetim yapılamadı.',
+        body:R.LLM.errorText(check.neden) });
+    }
+    if(check.durum === 'emin_degil'){
+      return K.Notice({ tone:'warn', title:'Denetim sonuçsuz.',
+        body:'İkinci çözüm bir cevap üretemedi. Bu, çözümün yanlış olduğu anlamına '
+           + 'gelmez ama doğrulandığı anlamına da gelmez.' });
+    }
+    if(check.durum === 'ayni'){
+      return K.Notice({ tone:'ok', title:'İki bağımsız çözüm aynı cevaba çıktı.',
+        body:(check.second.independent
+            ? 'Soru ' + check.second.model + ' modeline sıfırdan çözdürüldü ve aynı sonuca ulaştı. '
+            : 'Soru aynı modele sıfırdan çözdürüldü ve aynı sonuca ulaştı — bağlamı '
+              + 'görmedi ama model aynı, bağımsızlığı zayıf. ')
+          + 'Bu bir garanti değildir: iki çözüm aynı hatayı da yapmış olabilir.' });
+    }
+    /* ayrildi */
+    const j = check.judge;
+    return K.Card({
+      title:'Dikkat: iki çözüm farklı cevaba çıktı',
+      badge:K.Badge({ label:'denetim', tone:'danger' }),
+      body:html`
+        <div class="qdiff">
+          <div class="qdiff__col">
+            <span class="mono-label">Yukarıdaki çözüm</span>
+            <b class="qdiff__ans">${(result && result.meta && result.meta.answer) || '—'}</b>
+          </div>
+          <div class="qdiff__col">
+            <span class="mono-label">Bağımsız çözüm${
+              when(check.second.model, () => ' · ' + check.second.model)}</span>
+            <b class="qdiff__ans">${check.second.answer}</b>
+          </div>
+        </div>
+        ${when(!j, () => K.Notice({ tone:'warn',
+          body:'Hangisinin doğru olduğuna karar verilemedi. Çözümü kendin kontrol et; '
+             + 'aşağıdan öğretmene sorabilirsin.' }))}
+        ${when(j, () => html`
+          ${K.Notice({ tone:j.winner === 'A' ? 'ok' : 'danger',
+            title:j.winner === 'A' ? 'Yukarıdaki çözüm doğru.'
+              : j.winner === 'B' ? 'Yukarıdaki çözüm HATALI.'
+              : j.winner === 'hicbiri' ? 'İkisi de hatalı.'
+              : 'Karar verilemedi.',
+            body:j.answer ? 'Doğru cevap: ' + j.answer : '' })}
+          ${when(j.step, () => K.Notice({ tone:'info', title:'Hata nerede başlıyor:', body:j.step }))}
+          ${when(j.text, () => html`<div class="mt-10">${raw(solutionBody(j.text))}</div>`)}`)}
+        <p class="tiny dim mt-10">Denetim yanılabilir. Hakem de bir modeldir ve
+          kesin hüküm vermez; sana gösterdiği yeri kendin kontrol et.</p>`,
+    });
+  }
+
+  /* ---------- konu seçici ----------
+
+     500 satırlık bir <select> içinde konu aramak, konuyu bilmekten daha
+     zordu. Artık YAZILARAK aranıyor: her harfte liste daralıyor ve
+     eşleşenler altta çıkıyor.
+
+     Model konuyu ZATEN seçmiş olarak geliyor (kapalı katalogdan); kutu
+     onun seçimiyle dolu açılır ve sen değiştirebilirsin. Yani sıra:
+     önce sistem tahmin eder, sonra sen düzeltirsin. */
+
+  const TOPIC_LIMIT = 8;
+
+  function allTopics(){
+    return R.SUBJECTS.reduce((acc, s) => acc.concat(
+      s.topics.map(t => ({
+        ref:s.id + '::' + t.id,
+        subject:s.name, topic:t.name,
+        label:s.name + ' · ' + t.name,
+        hay:U.norm(s.name + ' ' + t.name),
+      }))), []);
+  }
+
+  /* Arama: bütün kelimeler geçmeli (sıra önemsiz), böylece "mat üslü"
+     de "TYT Temel Matematik · Üslü sayılar"ı bulur. Türkçe harf farkı
+     eşleşmeyi bozmaz (U.norm). */
+  function searchTopics(q){
+    const words = U.norm(q || '').split(/\s+/).filter(Boolean);
+    if(!words.length) return [];
+    return allTopics()
+      .filter(t => words.every(w => t.hay.indexOf(w) >= 0))
+      /* Konu adında geçen, ders adında geçenden önce gelir. */
+      .sort((a, b) => {
+        const sa = words.every(w => U.norm(a.topic).indexOf(w) >= 0) ? 0 : 1;
+        const sb = words.every(w => U.norm(b.topic).indexOf(w) >= 0) ? 0 : 1;
+        return sa - sb || a.label.length - b.label.length;
+      })
+      .slice(0, TOPIC_LIMIT);
+  }
+
+  function topicLabel(ref){
+    const t = allTopics().find(x => x.ref === ref);
+    return t ? t.label : '';
+  }
+
+  /* Kutunun altındaki öneri listesi — ekranda tek yerden çizilir ki
+     yazarken tüm formu yeniden çizmek zorunda kalmayalım. */
+  function topicSuggestions(){
+    const q = topicQuery.trim();
+    if(!q) return '';
+    const rows = searchTopics(q);
+    if(!rows.length){
+      return String(html`<div class="tsug tsug--empty">Eşleşen konu yok.
+        Başka bir kelime dene ya da boş bırak.</div>`);
+    }
+    return String(html`<div class="tsug">${map(rows, t => html`
+      <button type="button" class="${cls('tsug__row', t.ref === topicRef && 'is-on')}"
+        data-act="q-topic-pick" data-ref="${t.ref}">
+        <b>${t.topic}</b><span class="dim">${t.subject}</span>
+      </button>`)}</div>`);
+  }
+
+  function topicPicker(m){
+    const guessed = m.topicId ? m.subjectId + '::' + m.topicId : '';
+    const current = topicRef || guessed;
+    const label = topicLabel(current);
+
+    return K.Stack([
+      html`<div class="tpick">
+        ${K.Field({ label:'Ders – konu',
+          hint:label ? 'sistemin seçtiği: ' + label + ' — değiştirmek için yaz'
+            : 'yazarak ara, aşağıdan seç',
+          input:K.Input({ id:'q-topic-q', value:topicQuery, change:'q-topic-q',
+            data:{ 'data-debounce':'140' },
+            placeholder:label || 'ör. üslü, paragraf, türev' }) })}
+        <input type="hidden" id="q-topic" value="${current}"/>
+        <div id="q-topic-sug">${raw(topicSuggestions())}</div>
+        ${when(current, () => html`<div class="tpick__on">
+          ${raw(UI.icon('check'))} <b>${label}</b>
+          ${K.Button({ label:'Kaldır', size:'sm', tone:'ghost', act:'q-topic-clear' })}
+        </div>`)}
+        ${when(!current, () => html`<p class="tiny dim">Konu seçilmezse kayıt konu
+          takibine bağlanmaz — sonradan da seçebilirsin.</p>`)}
+      </div>`,
+    ], 'sm');
   }
 
   function saveForm(m){
-    const ref = m.topicId ? m.subjectId + '::' + m.topicId : '';
     return K.Stack([
-      K.Cols(2, [
-        K.Field({ label:'Ders – konu',
-          input:K.Select({ id:'q-topic', value:ref, options:topicOptions() }) }),
-        K.Field({ label:'Zorluk',
-          input:K.Select({ id:'q-diff', value:m.difficulty || 3,
-            options:R.DIFFICULTY_ORDER.map(n => ({ value:n,
-              label:n + ' — ' + R.DIFFICULTY[n].label })) }) }),
-      ]),
+      topicPicker(m),
+      K.Field({ label:'Zorluk',
+        input:K.Select({ id:'q-diff', value:m.difficulty || 3,
+          options:R.DIFFICULTY_ORDER.map(n => ({ value:n,
+            label:n + ' — ' + R.DIFFICULTY[n].label })) }) }),
       K.Field({ label:'Sen ne yaptın?',
         hint:'“çözüme baktım” ile “kendim çözdüm” arasındaki fark, konu takibinin en değerli bilgisi',
         input:K.Select({ id:'q-result', value:'bakarak',
@@ -397,7 +569,8 @@ R.Screens.solve = (function(){
     async 'q-clear-image'(){ image = null; await R.App.render(); },
 
     async 'q-reset'(){
-      image = null; result = null; draft = null; follows = [];
+      image = null; result = null; draft = null;
+      thread = []; check = null; topicRef = ''; topicQuery = '';
       await R.App.render();
     },
 
@@ -416,7 +589,7 @@ R.Screens.solve = (function(){
         return;
       }
       busy = true;
-      follows = [];
+      thread = []; check = null; topicRef = ''; topicQuery = '';
       result = null;
       controller = new AbortController();
       await R.App.render();
@@ -442,21 +615,27 @@ R.Screens.solve = (function(){
       }
     },
 
+    /* Sohbet: çözüm bittiğinde iş bitmez. Geçmiş her turda modele geri
+       verilir, böylece "peki ya şu?" diye devam edebilirsin. */
     async 'q-follow'(){
       if(followBusy || !result) return;
       const el = document.getElementById('q-follow');
       const q = el ? el.value.trim() : '';
       if(!q) return;
       followBusy = true;
+      thread = thread.concat([{ role:'user', text:q }]);
       await R.App.render();
       try{
-        const res = await Q.solve({
-          question:result.text.slice(0, 1200),
+        const res = await Q.talk({
+          solution:result.text,
           follow:q,
-          previous:[{ role:'assistant', text:result.text }],
+          thread:thread.slice(0, -1).map(m => ({ role:m.role, text:m.text })),
         }, {});
-        follows = follows.concat([{ q, a:res.text }]);
+        thread = thread.concat([{ role:'agent', text:res.text }]);
       }catch(err){
+        /* Soru boşa gitmesin: cevap gelmediyse kullanıcının yazdığı da
+           geri alınır, yoksa sohbette cevapsız bir satır kalır. */
+        thread = thread.slice(0, -1);
         UI.toast(R.LLM.errorText(err && err.code));
       }finally{
         followBusy = false;
@@ -464,8 +643,50 @@ R.Screens.solve = (function(){
       }
     },
 
+    async 'q-thread-clear'(){
+      thread = [];
+      await R.App.render();
+    },
+
+    /* Bağımsız denetim: soru sıfırdan, ilk çözüm görülmeden, tercihen
+       BAŞKA bir modele çözdürülür. Ayrılık varsa hakem turu da çalışır. */
+    async 'q-check'(){
+      if(checkBusy || !result) return;
+      checkBusy = true;
+      await R.App.render();
+      try{
+        check = await Q.verifyRun({
+          question:questionText(),
+          image,
+          solutionA:result.text,
+          answerA:(result.meta && result.meta.answer) || '',
+          usedModel:result.model,
+        }, {});
+      }catch(err){
+        check = { durum:'yapilamadi', neden:err && err.code };
+      }finally{
+        checkBusy = false;
+        await R.App.render();
+      }
+    },
+
     async 'q-save'(){ await saveRecord(false); },
     async 'q-save-error'(){ await saveRecord(true); },
+
+    /* Konu seçici: yazarak ara, listeden seç. */
+    async 'q-topic-pick'(el){
+      topicRef = el.dataset.ref;
+      topicQuery = '';
+      await R.App.render();
+    },
+    async 'q-topic-clear'(){
+      topicRef = '';
+      topicQuery = '';
+      /* Modelin tahmini de kaldırılmalı, yoksa "kaldır" hiçbir şey yapmıyor
+         gibi görünür ve tahmin geri gelir. */
+      if(result && result.meta){ result.meta.topicId = null; result.meta.subjectId = null; }
+      await R.App.render();
+    },
 
     async 'q-src-new'(){ sourceSheet(null); },
     async 'q-src-edit'(el){ sourceSheet(el.dataset.id); },
@@ -511,14 +732,17 @@ R.Screens.solve = (function(){
   async function saveRecord(alsoError){
     if(!result) return;
     const val = id => { const e = document.getElementById(id); return e ? String(e.value).trim() : ''; };
-    const ref = val('q-topic');
+    /* Konu: senin seçimin varsa o, yoksa sistemin tahmini. */
+    const guess = (result.meta && result.meta.topicId)
+      ? result.meta.subjectId + '::' + result.meta.topicId : '';
+    const ref = topicRef || guess;
     const [subjectId, topicId] = ref ? ref.split('::') : [null, null];
     const subject = subjectId ? R.SUBJECTS.find(s => s.id === subjectId) : null;
     const topic = subject ? subject.topics.find(t => t.id === topicId) : null;
     const m = result.meta || {};
 
     const rec = await Q.save({
-      question:(val('q-text') || m.questionText || result.text.slice(0, 300)),
+      question:questionText(),
       solution:result.text,
       subjectId:subjectId || null,
       topicId:topicId || null,
@@ -533,6 +757,10 @@ R.Screens.solve = (function(){
       sourceId:val('q-source') || null,
       sourceName:sourceNameOf(val('q-source')),
       questionNo:val('q-no'),
+      /* Denetimin sonucu kayda geçer: sonradan "bu çözüme güvenilir mi?"
+         diye bakabilmek için. */
+      checked:check ? check.durum : null,
+      checkNote:check && check.judge ? check.judge.step : '',
     });
 
     /* Sonraki soru genelde AYNI kitaptan gelir: seçim hatırlanır. */
@@ -556,11 +784,20 @@ R.Screens.solve = (function(){
     }
 
     UI.toast(alsoError ? 'Kaydedildi ve yanlış defterine eklendi' : 'Kaydedildi');
-    result = null; image = null; follows = [];
+    result = null; image = null; thread = []; check = null;
+    topicRef = ''; topicQuery = '';
     await R.App.render();
   }
 
   const change = {
+    async 'q-topic-q'(el){
+      topicQuery = el.value;
+      /* Yazarken tüm ekranı yeniden çizmek imleci kaybettiriyordu:
+         yalnız öneri listesi değişir. */
+      const box = document.getElementById('q-topic-sug');
+      if(box) box.innerHTML = topicSuggestions();
+    },
+
     async 'q-file'(el){
       const f = el.files && el.files[0];
       if(f) await useFile(f);

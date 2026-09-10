@@ -504,4 +504,221 @@
     });
   });
 
+
+  /* ==================== cevap karşılaştırma ====================
+     İki bağımsız çözümün aynı cevaba çıkıp çıkmadığını anlamak göründüğü
+     kadar basit değil. Yanlış bir "farklı cevap" kararı, öğrenciyi
+     OLMAYAN bir hataya bakmaya gönderir — bu yüzden önce biçim farkları
+     elenir, emin olunamayan yerde FARKLI denir. */
+
+  describe('Çözücü — cevap karşılaştırma', () => {
+    it('şık harfi biçimden bağımsız eşleşir', () => {
+      expect(Q.sameAnswer('C', 'c)')).toBeTruthy();
+      expect(Q.sameAnswer('C şıkkı', 'cevap: C')).toBeTruthy();
+      expect(Q.sameAnswer('A', 'B')).toBeFalsy();
+    });
+
+    it('sayı kümesi sırasız eşleşir', () => {
+      expect(Q.sameAnswer('2 ve 3', '3, 2')).toBeTruthy();
+      expect(Q.sameAnswer('12', '12,0')).toBeTruthy();
+      expect(Q.sameAnswer('1.500', '1500')).toBeTruthy();
+      expect(Q.sameAnswer('2 ve 3', '2 ve 4')).toBeFalsy();
+      /* Sayı adedi farklıysa aynı değildir. */
+      expect(Q.sameAnswer('2 ve 3', '2')).toBeFalsy();
+    });
+
+    it('düz metin aynıysa eşleşir, Türkçe harf farkı bozmaz', () => {
+      expect(Q.sameAnswer('artar', 'ARTAR')).toBeTruthy();
+      expect(Q.sameAnswer('İkisi de', 'ikisi de')).toBeTruthy();
+      expect(Q.sameAnswer('artar', 'azalır')).toBeFalsy();
+    });
+
+    it('biri şık harfi diğeri değilse karşılaştırılamaz', () => {
+      /* "C" ile "5" aynı olabilir de olmayabilir de; emin olamadığımız
+         yerde FARKLI demek doğru olandır. */
+      expect(Q.sameAnswer('C', '5')).toBeFalsy();
+    });
+
+    it('boş cevap hiçbir şeyle eşleşmez', () => {
+      expect(Q.sameAnswer('', 'C')).toBeFalsy();
+      expect(Q.sameAnswer('C', '')).toBeFalsy();
+      expect(Q.sameAnswer(null, null)).toBeFalsy();
+    });
+
+    it('şık harfi ve sayı çıkarıcıları tek başına da doğru çalışır', () => {
+      expect(Q.optionLetter('D şıkkı')).toBe('d');
+      expect(Q.optionLetter('cevap 12')).toBeNull();
+      expect(Q.numbersOf('x = -3,5 ve y = 1.200')).toEqual([-3.5, 1200]);
+    });
+  });
+
+  /* ==================== bağımsız denetim ====================
+     "Modele kendi çözümünü kontrol ettir" işe yaramaz: aynı modele aynı
+     bağlamda sorunca kendi hatasını onaylar. Soru SIFIRDAN, ilk çözüm
+     GÖRÜLMEDEN, tercihen BAŞKA bir modele yeniden çözdürülür. */
+
+  describe('Çözücü — denetim turu', () => {
+    function withModels(fn, plan){
+      const realComplete = R.LLM.complete, realReady = R.LLM.ready;
+      const seen = [];
+      R.LLM.ready = () => true;
+      R.LLM.complete = async (chain, req) => {
+        seen.push({ system:req.system, chain });
+        return plan(req, seen.length);
+      };
+      return Promise.resolve(fn(seen)).finally(() => {
+        R.LLM.complete = realComplete; R.LLM.ready = realReady;
+      });
+    }
+
+    it('aynı cevaba çıkarsa "aynı" döner ve hakem hiç çağrılmaz', async () => {
+      await withModels(async seen => {
+        const r = await Q.verifyRun({ question:'x?', answerA:'2 ve 3', solutionA:'…' });
+        expect(r.durum).toBe('ayni');
+        /* Hakem turu boşuna kota harcamamalı. */
+        expect(seen).toHaveLength(1);
+      }, () => ({ text:'ok\n{"cevap":"3, 2","emin":true}', model:'B', provider:'s', ms:1 }));
+    });
+
+    it('cevaplar ayrılırsa hakem çağrılır ve hatanın yeri gösterilir', async () => {
+      await withModels(async seen => {
+        const r = await Q.verifyRun({ question:'x?', answerA:'2', solutionA:'birinci çözüm' });
+        expect(r.durum).toBe('ayrildi');
+        expect(r.second.answer).toBe('5');
+        expect(r.judge.winner).toBe('B');
+        expect(r.judge.answer).toBe('5');
+        expect(r.judge.step).toContain('Adım 2');
+        expect(seen).toHaveLength(2);
+        /* Hakem birinci çözümü GÖRÜR (karşılaştırabilmesi için), denetim
+           turu GÖRMEZ (bağımsız olması için). */
+        expect(seen[0].system.indexOf('KENDİ BAŞINA çöz') > 0).toBeTruthy();
+      }, (req, n) => n === 1
+        ? { text:'x\n{"cevap":"5","emin":true}', model:'B', provider:'s', ms:1 }
+        : { text:'İkinci doğru.\n{"dogru":"B","dogruCevap":"5","hataAdimi":"Adım 2 işaret hatası"}',
+            model:'C', provider:'s', ms:1 });
+    });
+
+    it('denetim cevap üretemezse "emin değil" denir — yanlış demez', async () => {
+      await withModels(async () => {
+        const r = await Q.verifyRun({ question:'x?', answerA:'2', solutionA:'…' });
+        /* Cevapsız bir denetim, çözümün yanlış olduğu anlamına GELMEZ. */
+        expect(r.durum).toBe('emin_degil');
+      }, () => ({ text:'bilemedim', model:'B', provider:'s', ms:1 }));
+    });
+
+    it('denetim çağrısı düşerse toplam sonuç "yapılamadı" olur', async () => {
+      const realComplete = R.LLM.complete, realReady = R.LLM.ready;
+      R.LLM.ready = () => true;
+      R.LLM.complete = async () => { throw Object.assign(new Error('x'), { code:'rate_limited' }); };
+      try{
+        const r = await Q.verifyRun({ question:'x?', answerA:'2', solutionA:'…' });
+        expect(r.durum).toBe('yapilamadi');
+        expect(r.neden).toBe('rate_limited');
+      }finally{
+        R.LLM.complete = realComplete; R.LLM.ready = realReady;
+      }
+    });
+
+    it('hakem düşse bile ayrılık bildirilir', async () => {
+      await withModels(async () => {
+        const r = await Q.verifyRun({ question:'x?', answerA:'2', solutionA:'…' });
+        expect(r.durum).toBe('ayrildi');
+        expect(r.judge).toBeNull();
+      }, (req, n) => {
+        if(n === 1) return { text:'x\n{"cevap":"5","emin":true}', model:'B', provider:'s', ms:1 };
+        throw Object.assign(new Error('x'), { code:'server' });
+      });
+    });
+
+    it('denetim bütçesi çözüm bütçesinden küçüktür', () => {
+      /* Ücretsiz katmanda her çağrı bir günlük hak; denetim ucuz olmalı. */
+      const realComplete = R.LLM.complete, realReady = R.LLM.ready;
+      R.LLM.ready = () => true;
+      let budget = null;
+      R.LLM.complete = async (chain, req) => {
+        budget = req.maxTokens;
+        return { text:'{"cevap":"1","emin":true}', model:'B', provider:'s', ms:1 };
+      };
+      return Q.check({ question:'x' }).then(() => {
+        expect(budget < R.SOLVER.budget).toBeTruthy();
+      }).finally(() => { R.LLM.complete = realComplete; R.LLM.ready = realReady; });
+    });
+  });
+
+  /* ==================== sohbet ==================== */
+
+  describe('Çözücü — çözümden sonra sohbet', () => {
+    it('geçmiş her turda modele geri verilir', async () => {
+      const realComplete = R.LLM.complete, realReady = R.LLM.ready;
+      R.LLM.ready = () => true;
+      let sent = null;
+      R.LLM.complete = async (chain, req) => { sent = req; return { text:'cevap', model:'A', provider:'s', ms:1 }; };
+      try{
+        await Q.talk({
+          solution:'çözüm metni',
+          follow:'peki ya ikinci adım?',
+          thread:[{ role:'user', text:'ilk adım?' }, { role:'agent', text:'şöyle' }],
+        });
+        /* Geçmiş + yeni soru: konuşma devam ediyor, tek seferlik değil. */
+        expect(sent.messages).toHaveLength(3);
+        expect(sent.messages[0].role).toBe('user');
+        expect(sent.messages[1].role).toBe('assistant');
+        expect(sent.messages[2].text).toBe('peki ya ikinci adım?');
+        expect(sent.system).toContain('BAŞKA bir');
+      }finally{
+        R.LLM.complete = realComplete; R.LLM.ready = realReady;
+      }
+    });
+
+    it('ilk turda çözüm bağlama konur', async () => {
+      const realComplete = R.LLM.complete, realReady = R.LLM.ready;
+      R.LLM.ready = () => true;
+      let sent = null;
+      R.LLM.complete = async (chain, req) => { sent = req; return { text:'x', model:'A', provider:'s', ms:1 }; };
+      try{
+        await Q.talk({ solution:'ÇÖZÜM BURADA', follow:'anlamadım' });
+        expect(sent.messages).toHaveLength(1);
+        expect(sent.messages[0].text).toContain('ÇÖZÜM BURADA');
+      }finally{
+        R.LLM.complete = realComplete; R.LLM.ready = realReady;
+      }
+    });
+
+    it('boş soru gönderilmez', async () => {
+      const realReady = R.LLM.ready;
+      R.LLM.ready = () => true;
+      let code = null;
+      try{ await Q.talk({ solution:'x', follow:'  ' }); }catch(e){ code = e.code; }
+      R.LLM.ready = realReady;
+      expect(code).toBe('empty');
+    });
+  });
+
+  /* ==================== öğretmen üslubu ==================== */
+
+  describe('Çözücü — öğretmen üslubu', () => {
+    it('istem adımın biçimini dayatır', () => {
+      /* "Adım adım yaz" demek yetmedi: model üç satır işlem döküp
+         "adım adım yazdım" sayıyordu. Öğretmen ile çözüm makinesi
+         arasındaki fark adım sayısı değil, her adımda NEDEN'dir. */
+      const sys = R.SOLVER.system;
+      expect(sys).toContain('NEDEN');
+      expect(sys).toContain('Kontrol');
+      expect(sys).toContain('Tuzak');
+      expect(sys).toContain('Nereden başlanır');
+      expect(sys).toContain('Buradan görülüyor ki');   // yasaklanan kalıp
+    });
+
+    it('denetim istemi ilk çözümü göstermez', () => {
+      const sys = R.SOLVER.checkSystem;
+      expect(sys).toContain('Başka birinin çözümünü görmüyorsun');
+    });
+
+    it('hakem istemi hatanın yerini ister', () => {
+      const p = R.SOLVER.arbiter({ question:'s', solutionA:'a', answerA:'1', answerB:'2' });
+      expect(p).toContain('hangi adımda');
+      expect(p).toContain('hataAdimi');
+    });
+  });
+
 })();
