@@ -15,7 +15,7 @@
 :root[data-palette="grafit"]{
   --bg:#F6F7F8; --surface:#FFFFFF; --surface-2:#EEF0F2; --surface-3:#E3E6E9;
   --sidebar:#FFFFFF; --sidebar-active:#E4E8EC;
-  --text:#191C1F; --text-2:#5C646C; --text-3:#6C757D;
+  --text:#191C1F; --text-2:#5C646C; --text-3:#666E76;  /* AA: 4.6:1 */
   --primary:#3D4E5C; --primary-hover:#31404C; --primary-soft:#E4E8EC; --primary-ink:#FFFFFF;
   --accent:#8A6A20; --accent-soft:#F5EEDD;
   --border:#E2E5E8; --border-strong:#C8CDD2;
@@ -118,7 +118,7 @@
 :root[data-palette="okyanus"]{
   --bg:#F5F8FA; --surface:#FFFFFF; --surface-2:#EAF0F5; --surface-3:#DFE8EF;
   --sidebar:#FFFFFF; --sidebar-active:#DFEAF3;
-  --text:#161E24; --text-2:#556570; --text-3:#65757F;
+  --text:#161E24; --text-2:#556570; --text-3:#62717B;  /* AA: 4.6:1 */
   --primary:#1F5D80; --primary-hover:#194E6B; --primary-soft:#DFEAF3; --primary-ink:#FFFFFF;
   --accent:#9A6714; --accent-soft:#F7EDDD;
   --border:#DEE6EC; --border-strong:#C1CDD6;
@@ -187,7 +187,6 @@
    1.x sürümlerinin varsayılanıydı; artık seçilebilir bir palet. */
 :root[data-palette="indigo"]{
   --bg:#F5F6F8; --surface:#FFFFFF; --surface-2:#F0F1F5; --surface-3:#E7E9EF;
-  --surface-hover:#F7F8FA;
   --sidebar:#FFFFFF; --sidebar-active:#E9EAF7;
   --text:#14161D; --text-2:#575D6C; --text-3:#6B7180;
   --primary:#3F3FA0; --primary-hover:#34348A; --primary-soft:#E9EAF7; --primary-ink:#FFFFFF;
@@ -203,7 +202,6 @@
 @media (prefers-color-scheme:dark){
   :root[data-palette="indigo"]:not([data-theme="light"]){
     --bg:#0D0F14; --surface:#15171D; --surface-2:#1B1E25; --surface-3:#23262F;
-    --surface-hover:#1A1D24;
     --sidebar:#111319; --sidebar-active:#242545;
     --text:#ECEEF4; --text-2:#A9AEBD; --text-3:#878C9C;
     --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-soft:#212244; --primary-ink:#0C0D14;
@@ -219,7 +217,6 @@
 }
 :root[data-palette="indigo"][data-theme="dark"]{
   --bg:#0D0F14; --surface:#15171D; --surface-2:#1B1E25; --surface-3:#23262F;
-  --surface-hover:#1A1D24;
   --sidebar:#111319; --sidebar-active:#242545;
   --text:#ECEEF4; --text-2:#A9AEBD; --text-3:#878C9C;
   --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-soft:#212244; --primary-ink:#0C0D14;
@@ -239,40 +236,54 @@
    Tek tasarım, yedi imza. Düzen, tipografi, boşluk ve bileşenler her
    bölümde AYNIDIR; değişen tek şey `--sec` — bölümün kendi rengi.
 
-   Renkler aynı doygunluk ailesinden seçildi: yan yana konduklarında
-   gökkuşağı değil, tek bir palet gibi okunurlar. Sağlık alanının doğal
-   tonları: adaçayı, klinik mavi, kehribar, kiremit, zeytin, erik, taş.
+   Renk iki parçadan gelir:
 
-   `--sec` yalnız dört yerde görünür — bölüm numarası, etkin sekme
-   çizgisi, bölüm başlığının üstündeki kısa çizgi ve bölüm imzası. Renk
-   içeriğe bulaşmaz; durum renkleri (ok/warn/danger) her bölümde aynıdır.
-   Aksi hâlde bir tahlil sonucunun rengi hangi bölümde olduğuna göre
-   değişirdi ve bu, sağlık verisinde kabul edilemez. */
+     --sec-base   bölümün kendi tonu (adaçayı, klinik mavi, kehribar…)
+     --sec        o tonun, SEÇİLİ PALETİN ana rengiyle harmanlanmışı
 
-:root{ --sec:var(--primary); --sec-soft:var(--primary-soft); }
+   Harmanlama kasıtlıdır. Sabit yedi renk, bordo ya da okyanus paleti
+   seçildiğinde o paletle kavga ediyordu: sayfa iki ayrı tasarımdan
+   yapılmış gibi duruyordu. Harmanlanan tonlar hem birbirinden ayrılır
+   hem de seçili paletin ailesinden olur.
 
-:root[data-section="gunluk"]  { --sec:#2F6B52; --sec-soft:#E4EDE8; }
-:root[data-section="testler"] { --sec:#2E5A73; --sec-soft:#E3EBEF; }
-:root[data-section="besin"]   { --sec:#8A5A18; --sec-soft:#F6EDE0; }
-:root[data-section="hareket"] { --sec:#9A4A2F; --sec-soft:#F7E8E2; }
-:root[data-section="finans"]  { --sec:#5E6B2A; --sec-soft:#EDEFE0; }
-:root[data-section="ofis"]    { --sec:#6B3F63; --sec-soft:#F0E7EF; }
-:root[data-section="ayarlar"] { --sec:#5A5750; --sec-soft:#EBE9E4; }
+   Oran %70/%30: bölüm kimliği baskın kalır, palet yalnız tonlar.
 
-/* Koyu temada aynı renkler açılır: koyu zeminde doygun ton okunmaz. */
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"])[data-section="gunluk"]  { --sec:#79C09C; --sec-soft:#1B2B23; }
-  :root:not([data-theme="light"])[data-section="testler"] { --sec:#84B2CC; --sec-soft:#182530; }
-  :root:not([data-theme="light"])[data-section="besin"]   { --sec:#D6A961; --sec-soft:#2B2415; }
-  :root:not([data-theme="light"])[data-section="hareket"] { --sec:#DF9376; --sec-soft:#2E1E17; }
-  :root:not([data-theme="light"])[data-section="finans"]  { --sec:#AFBF74; --sec-soft:#242817; }
-  :root:not([data-theme="light"])[data-section="ofis"]    { --sec:#C193BA; --sec-soft:#2A1E28; }
-  :root:not([data-theme="light"])[data-section="ayarlar"] { --sec:#AFAAA0; --sec-soft:#26241F; }
+   `--sec` yalnız beş yerde görünür — bölüm numarası, etkin sekme
+   çizgisi, bölüm başlığının üstündeki kısa çizgi, ana düğme ve bölüm
+   imzası. Renk içeriğe bulaşmaz; durum renkleri (ok/warn/danger) her
+   bölümde ve her palette aynıdır. Aksi hâlde bir tahlil sonucunun rengi
+   hangi bölümde olduğuna göre değişirdi ve bu, sağlık verisinde kabul
+   edilemez. */
+
+:root{
+  --sec-base:var(--primary);
+  --sec:color-mix(in oklab, var(--sec-base) 70%, var(--primary));
+  --sec-soft:color-mix(in oklab, var(--sec) 14%, var(--surface));
 }
-:root[data-theme="dark"][data-section="gunluk"]  { --sec:#79C09C; --sec-soft:#1B2B23; }
-:root[data-theme="dark"][data-section="testler"] { --sec:#84B2CC; --sec-soft:#182530; }
-:root[data-theme="dark"][data-section="besin"]   { --sec:#D6A961; --sec-soft:#2B2415; }
-:root[data-theme="dark"][data-section="hareket"] { --sec:#DF9376; --sec-soft:#2E1E17; }
-:root[data-theme="dark"][data-section="finans"]  { --sec:#AFBF74; --sec-soft:#242817; }
-:root[data-theme="dark"][data-section="ofis"]    { --sec:#C193BA; --sec-soft:#2A1E28; }
-:root[data-theme="dark"][data-section="ayarlar"] { --sec:#AFAAA0; --sec-soft:#26241F; }
+
+:root[data-section="gunluk"]  { --sec-base:#2F6B52; }
+:root[data-section="testler"] { --sec-base:#2E5A73; }
+:root[data-section="besin"]   { --sec-base:#8A5A18; }
+:root[data-section="hareket"] { --sec-base:#9A4A2F; }
+:root[data-section="finans"]  { --sec-base:#5E6B2A; }
+:root[data-section="ofis"]    { --sec-base:#6B3F63; }
+:root[data-section="ayarlar"] { --sec-base:#5A5750; }
+
+/* Koyu temada aynı yedi ton açılır: koyu zeminde doygun ton okunmaz.
+   Harmanlama kuralı aynı kalır, yalnız taban renk değişir. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"])[data-section="gunluk"]  { --sec-base:#79C09C; }
+  :root:not([data-theme="light"])[data-section="testler"] { --sec-base:#84B2CC; }
+  :root:not([data-theme="light"])[data-section="besin"]   { --sec-base:#D6A961; }
+  :root:not([data-theme="light"])[data-section="hareket"] { --sec-base:#DF9376; }
+  :root:not([data-theme="light"])[data-section="finans"]  { --sec-base:#AFBF74; }
+  :root:not([data-theme="light"])[data-section="ofis"]    { --sec-base:#C193BA; }
+  :root:not([data-theme="light"])[data-section="ayarlar"] { --sec-base:#AFAAA0; }
+}
+:root[data-theme="dark"][data-section="gunluk"]  { --sec-base:#79C09C; }
+:root[data-theme="dark"][data-section="testler"] { --sec-base:#84B2CC; }
+:root[data-theme="dark"][data-section="besin"]   { --sec-base:#D6A961; }
+:root[data-theme="dark"][data-section="hareket"] { --sec-base:#DF9376; }
+:root[data-theme="dark"][data-section="finans"]  { --sec-base:#AFBF74; }
+:root[data-theme="dark"][data-section="ofis"]    { --sec-base:#C193BA; }
+:root[data-theme="dark"][data-section="ayarlar"] { --sec-base:#AFAAA0; }

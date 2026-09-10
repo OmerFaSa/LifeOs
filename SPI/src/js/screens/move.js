@@ -64,12 +64,10 @@ SP.Screens.move = (function(){
       badge:K.Badge({ label:rx.factor >= 1 ? 'tam yük'
         : 'yükün %' + Math.round(rx.factor * 100) + '\u2019i', tone }),
       body:html`
-        ${when(r.ok, () => html`<div class="row wrap" style="gap:18px">
-          <div class="kpi">
-            <span class="kpi__value">${r.score}</span>
-            <span class="kpi__unit">/ 100 · ${r.band.label}</span>
-          </div>
-          <div class="grow" style="min-width:180px">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
+        ${when(r.ok, () => html`<div class="row wrap" style="gap:22px">
+          ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:118,
+            bands:SP.READINESS_BANDS.map(b => b.min).filter(m => m > 0) }))}
+          <p class="grow small" style="min-width:200px">${r.band.order}</p>
         </div>`)}
         ${map(rx.reasons, x => K.Notice({ tone:x.kind === 'muted' ? 'info' : x.kind, class:'mt-10',
           /* Skor yukarıda büyük yazıyor: bandın gerekçesi kısa hâliyle basılır,
@@ -149,14 +147,15 @@ SP.Screens.move = (function(){
       title:'Toparlanma', hint:'readiness',
       badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
       body:html`
-        <div class="kpi"><span class="kpi__value">${r.score}</span><span class="kpi__unit">/ 100</span></div>
-        <div class="mt-8">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
-        <div class="mt-12">${map(r.parts, p => html`
+        <div class="row wrap" style="gap:20px">
+        ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:112,
+          bands:SP.READINESS_BANDS.map(b => b.min).filter(m => m > 0) }))}
+        <div class="grow" style="min-width:170px">${map(r.parts, p => html`
           <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
             <span class="readypart__label">${p.label}</span>
             <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))}</span>
             <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
-          </div>`)}</div>`,
+          </div>`)}</div></div>`,
     });
   }
 

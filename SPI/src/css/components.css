@@ -230,15 +230,22 @@
 /* ---------- tablo ---------- */
 .tablewrap{ overflow-x:auto; margin:0 -4px; padding:0 4px; }
 table{ width:100%; border-collapse:collapse; font-size:var(--fs-base); }
-th, td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+th, td{ text-align:left; padding:11px 12px 11px 0; border-bottom:1px solid var(--border); vertical-align:top; }
+th:last-child, td:last-child{ padding-right:0; }
+/* Başlık satırı bir sınıflandırmadır, bir başlık değil: küçük, harf
+   aralıklı, sessiz. Altındaki çizgi gövdedekilerden bir ton koyu. */
 th{
-  font-size:var(--fs-xs); font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  font-size:10.5px; font-weight:600; letter-spacing:.11em; text-transform:uppercase;
   color:var(--text-3); white-space:nowrap;
+  padding-bottom:9px; border-bottom-color:var(--border-strong);
 }
 tbody tr:last-child td{ border-bottom:none; }
-tbody tr:hover{ background:var(--surface-2); }
+/* Zebra yok. Satır ayrımı çizgiyle yapılır; dolgulu satırlar tabloyu
+   bir elektronik tabloya çevirir. */
+tbody tr:hover td{ background:var(--surface-hover); }
 td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
-.table--tight th, .table--tight td{ padding:6px 8px; font-size:var(--fs-sm); }
+.table--tight th, .table--tight td{ padding:8px 10px 8px 0; font-size:var(--fs-sm); }
+.table--tight th:last-child, .table--tight td:last-child{ padding-right:0; }
 
 /* ---------- listeler ---------- */
 .list{ display:flex; flex-direction:column; }
@@ -264,11 +271,17 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .notice--ok{ background:var(--primary-soft); border-color:color-mix(in srgb, var(--primary) 32%, var(--border)); color:var(--text); }
 .notice__title{ font-weight:700; }
 
+/* Boş durum da tasarımın parçasıdır: jenerik bir ikon yerine bölümün
+   kendi imzası durur ve ekran boşken bile hangi bölümde olunduğu
+   bellidir. */
 .empty{
-  display:flex; flex-direction:column; align-items:center; gap:8px;
-  padding:34px 18px; text-align:center; color:var(--text-2);
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  padding:44px 18px 38px; text-align:center; color:var(--text-2);
 }
 .empty svg{ width:26px; height:26px; stroke:var(--text-3); fill:none; stroke-width:1.5; }
+.empty__motif{ color:var(--sec); opacity:.4; height:44px; }
+.empty__motif svg{ width:auto; height:100%; stroke-width:1.5; stroke:currentColor; }
+.empty p{ max-width:46ch; line-height:1.55; }
 
 /* ---------- alt sayfa / modal ---------- */
 .overlay{
@@ -368,25 +381,32 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 }
 
 /* ---------- grafik ---------- */
-.chart{ width:100%; display:block; }
-.chart text{ fill:var(--text-3); font-family:var(--font-body); font-size:10px; }
-.chart .axis{ stroke:var(--c-grid); stroke-width:1; }
-.chart .band{ fill:var(--c-band); }
-.chart .line{ fill:none; stroke:var(--primary); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
+/* Grafik oranını korur. Önceden `preserveAspectRatio="none"` ile
+   geriliyordu: çizgi kalınlıkları, noktalar ve yazılar yatayda ezilip
+   dikeyde inceliyordu — grafiğin kendisi doğruydu ama ucuz duruyordu. */
+.chart{ width:100%; height:auto; display:block; }
+.chart text{
+  fill:var(--text-3); font-family:var(--font-body); font-size:10px;
+  font-variant-numeric:tabular-nums;
+}
+/* Izgara yalnız yataydır ve çok soluktur: veriyi kafeslemek yerine
+   göze yükseklik duygusu verir. */
+.chart .axis{ stroke:var(--border); stroke-width:1; }
+.chart .band{ fill:var(--sec); opacity:.09; }
+.chart .line{
+  fill:none; stroke:var(--sec); stroke-width:2;
+  stroke-linejoin:round; stroke-linecap:round;
+}
 .chart .line--accent{ stroke:var(--accent); }
-.chart .area{ fill:var(--primary); opacity:.1; }
-.chart .area--accent{ fill:var(--accent); opacity:.1; }
-.chart .pt{ fill:var(--primary); }
+.chart .area{ fill:var(--sec); opacity:.09; }
+.chart .area--accent{ fill:var(--accent); opacity:.09; }
+.chart .pt{ fill:var(--sec); stroke:var(--surface); stroke-width:1.5; }
 .chart .pt--accent{ fill:var(--accent); }
-.chart .barfill{ fill:var(--primary); }
+.chart .barfill{ fill:var(--sec); }
 .chart .barfill--muted{ fill:var(--surface-3); }
 .legend{ display:flex; flex-wrap:wrap; gap:12px; margin-top:8px; font-size:var(--fs-xs); color:var(--text-2); }
 .legend__item{ display:flex; align-items:center; gap:6px; }
 .legend__swatch{ width:9px; height:9px; border-radius:3px; flex:none; }
-
-  position:absolute; top:-5px; bottom:-5px; width:3px; border-radius:2px;
-  background:var(--text);
-}
 
 .stackbar{ display:flex; height:24px; border-radius:var(--r-sm); overflow:hidden; background:var(--surface-3); }
 .stackbar__seg{ height:100%; }
@@ -1604,3 +1624,34 @@ button.minrow:hover{ background:var(--surface-2); }
 /* Taşma yoksa maske de gerekmez; `scroll-timeline` yok, bu yüzden ölçüyü
    şerit kendi genişliğinden anlayamaz. Maske zararsızdır: taşmayan
    şeritte son 28px zaten boştur. */
+
+/* ================= kadran =================
+
+   Toparlanma bir yüzde değil bir DURUMDUR; yatay bir çubuk onu «ne kadar
+   dolduruldu» gibi okutuyordu. Yay, bir ölçeğin üzerindeki ibre gibi
+   durur: sıfır ve yüz uçlarda, değer arada bir yerde.
+
+   Bant sınırları yayın üzerinde çentiklerle işaretlidir — skorun hangi
+   banda düştüğü renkten önce KONUMDAN okunur. */
+.gauge{ position:relative; aspect-ratio:1; flex:none; }
+.gauge svg{ width:100%; height:100%; display:block; overflow:visible; }
+.gauge__track{ stroke:var(--surface-3); }
+.gauge__band{ stroke:var(--border-strong); stroke-width:1.5; }
+.gauge__value{ stroke:var(--text-3); transition:stroke-dashoffset var(--dur-lg) var(--ease); }
+.gauge__value--ok{ stroke:var(--primary); }
+.gauge__value--warn{ stroke:var(--accent); }
+.gauge__value--danger{ stroke:var(--danger); }
+.gauge__value--info{ stroke:var(--info); }
+.gauge__center{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; pointer-events:none;
+}
+.gauge__num{
+  font-family:var(--font-display); font-size:34px; font-weight:600;
+  letter-spacing:-.035em; line-height:1; color:var(--text);
+}
+.gauge__label{
+  font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-3);
+}

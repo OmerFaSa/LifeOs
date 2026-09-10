@@ -46,6 +46,31 @@ Yüzeyler `--bg → --surface → --surface-2 → --surface-3` sırasıyla derin
 Metin `--text → --text-2 → --text-3` sırasıyla soluklaşır.
 `--surface-hover` yalnız fare üstündeyken, `--ring` yalnız odak halkasında.
 
+### Türetilen jetonlar
+
+Bir jeton yedi palette de elle yazılırsa biri mutlaka unutulur — nitekim
+unutulmuştu: `--ink`, `--rule` ve `--surface-hover` yalnız varsayılan
+palette tanımlıydı, diğer altı palette varsayılanın sıcak yeşil değerleri
+kalıyordu. Alt bant mavi bir palette yeşil, cetvel çizgisi soğuk bir
+zeminde bej duruyordu.
+
+Bunlar artık **türetilir**:
+
+| Jeton | Nereden |
+|---|---|
+| `--surface-hover` | `--surface` ile `--bg` arası bir adım |
+| `--ink` | `--primary` ile tonlanmış çok koyu renk (koyu temada zeminden bir kat koyu) |
+| `--ink-2` / `--ink-on` / `--ink-on-2` | `--ink` ve `--bg`'den |
+| `--rule` | `--border-strong` |
+| `--sec` | bölüm tonunun `--primary` ile %70/%30 harmanı |
+
+Yeni bir palet eklemek için yalnız temel renkleri yazmak yeterlidir;
+gerisi kendiliğinden doğru gelir.
+
+Yedi palet × iki tema × yedi bölüm kombinasyonu `tools/` altındaki kontrast
+denetimiyle ölçülür: metin, ikincil metin, bölüm rengi, düğme yazısı ve alt
+bant yazısı **her kombinasyonda AA** geçer.
+
 Koyu palet **tek yerde** tanımlanır: `--d-*` değişkenleri. `data-theme="dark"`
 ve `prefers-color-scheme:dark` bu tek kaynağı eşler. Bir rengin koyu karşılığı
 iki yere yazılmaz.
@@ -201,6 +226,16 @@ bölüm başlığının üstündeki kısa çizgi, ana düğme ve bölüm imzası
 aynıdır. Aksi hâlde bir tahlil sonucunun rengi hangi sayfada olduğuna göre
 değişirdi ve bu, sağlık verisinde kabul edilemez.
 
+### Filigran numara
+
+Hero'nun sağ üst köşesinde bölüm numarası, çok soluk ve çok büyük (150px,
+%6 opaklık). Bir yayının bölüm sayfalarındaki numara gibi: okunmak için
+değil, sayfaya ağırlık ve yer duygusu vermek için. İçerik genişliğinin sağ
+kenarına hizalanır; taşarak kesilmez.
+
+Sayfanın en üstünde de bölümün renginde 2px'lik bir şerit durur — hangi
+bölümde olunduğunu, gezinmeye bakmadan, kenardan söyler.
+
 ### Bölüm imzaları (motif)
 
 Her bölümün hero'sunda duran ince, tek renkli işaret. Süs değil: bölümün
@@ -209,6 +244,20 @@ olduğunu çevresel görüşle anlar.
 
 Hepsi aynı dille çizilir: 38px yükseklik, 1.5px çizgi, tek renk, dolgu yok.
 Farklı kalınlıkta ya da çok renkli bir imza, tek tasarım kuralını bozardı.
+
+**Boş durum da bu imzayı taşır.** Jenerik bir ikon yerine bölümün kendi
+işareti durur: ekran boşken bile hangi bölümde olunduğu bellidir ve boşluk
+tasarımın parçası olur, eksikliği değil.
+
+## Kadran
+
+Toparlanma skoru bir yüzde değil bir **durumdur**; yatay bir çubuk onu «ne
+kadar dolduruldu» gibi okutuyordu. Kadran, bir ölçeğin üzerindeki ibre gibi
+durur: sıfır ve yüz uçlarda, değer arada bir yerde.
+
+Bant sınırları (düşük/orta/yüksek) yayın üzerinde **çentiklerle** işaretlidir
+— skorun hangi banda düştüğü renkten önce **konumdan** okunur. Renk tek
+başına anlam taşımaz.
 
 ## Ölçüm cetveli — imza bileşen
 
@@ -371,6 +420,28 @@ Bundan çıkan iki kural:
   öğenin (sodyum) aşılması kırmızı işaretlenir; eksik kalmak hata değildir.
 - Yüzde her zaman çubuğun altında **sayıyla** yazılır. Çubuk tek başına
   ölçü bildirmez.
+
+## Zanaat detayları
+
+Bir arayüzü «yapılmış» değil «tasarlanmış» gösteren şeyler. Hiçbiri yeni
+bileşen eklemez; var olanların okunuşunu düzeltir.
+
+- **Optik boyut.** Serif değişken bir yazıdır: `opsz` ekseni büyük puntoda
+  ince ve zarif, küçük puntoda kalın ve okunur çizer. Hero başlığı 40,
+  kart başlığı 20 optik boyutta.
+- **Çizgili sıfır.** Bütün sayılarda `tnum` + `zero`. Bir ölçüm listesinde
+  `0` ile `O`'nun karışması kabul edilemez.
+- **Dengeli sarma.** Uzun cümlelerde `text-wrap:pretty` — son satırda tek
+  kelime kalmaz.
+- **Odak halkası** bölümün renginde, gövdeden 2px ayrık.
+- **Seçim rengi** de bölümden gelir.
+- **Kaydırma çubuğu** içeriğin parçası gibi durur, sistem eklentisi gibi
+  değil.
+- **Grafikler oranını korur.** Önceden esnetiliyordu: çizgi kalınlıkları
+  yatayda ezilip dikeyde inceliyordu — grafik doğruydu ama ucuz duruyordu.
+- **Sayfa geçişi** altı piksel yükselerek gelir. Geçişin kendisi görünmez;
+  görünen tek şey sayfanın «yerleşmiş» olmasıdır. `prefers-reduced-motion`
+  bunu kapatır.
 
 ## Durumlar
 

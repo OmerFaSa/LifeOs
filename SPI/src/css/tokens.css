@@ -22,9 +22,14 @@
   --surface:#FFFFFF;
   --surface-2:#F2EFE9;
   --surface-3:#E7E2D9;
-  --surface-hover:#FBF9F6;
   --sidebar:#FFFFFF;
   --sidebar-active:#E3EBE6;
+
+  /* Fare üstü yüzeyi TÜRETİLİR: yüzey ile zemin arasında bir adım.
+     Elle yazılsaydı yedi paletin her birinde ayrıca tanımlanması
+     gerekirdi ve biri unutulduğunda o palette sıcak/soğuk kayması
+     olurdu — nitekim oluyordu. */
+  --surface-hover:color-mix(in oklab, var(--surface) 58%, var(--bg));
 
   /* ---- metin ---- */
   --text:#191815;
@@ -47,18 +52,21 @@
   --info-soft:#E9EDF0;
 
   /* ---- mürekkep ----
-     Sayfayı sonlandıran koyu bant, marka işareti ve ölçüm cetvelinin
-     ana çizgisi bu renktedir. Saf siyah değil, KOYU ÇAM: klinik bir
-     kesinlik verir ama soğumaz. */
-  --ink:#13211B;
-  --ink-2:#1B2E26;
-  --ink-on:#F2F0EA;
-  --ink-on-2:#9BAFA5;
+     Sayfayı sonlandıran koyu bant ve marka işareti. Saf siyah değil:
+     paletin ANA RENGİYLE tonlanmış çok koyu bir renk. Böylece hangi
+     palet seçilirse seçilsin alt bant o paletin ailesinden olur —
+     sabit bir koyu yeşil, mavi bir palette yabancı duruyordu. */
+  --ink:color-mix(in oklab, var(--primary) 24%, #0C0C0A);
+  --ink-2:color-mix(in oklab, var(--ink) 84%, var(--text));
+  --ink-on:color-mix(in oklab, var(--bg) 88%, #FFFFFF);
+  --ink-on-2:color-mix(in oklab, var(--ink-on) 58%, var(--ink));
 
   /* ---- çizgi ---- */
   --border:#E7E2D9;
   --border-strong:#CDC6B8;
-  --rule:#D8D2C6;     /* ölçüm cetvelinin ince çizgileri */
+  /* Cetvelin ekseni kenarlıkla aynı aileden olmalı; ayrı bir sabit
+     renk yazmak paletler arasında kayma üretiyordu. */
+  --rule:var(--border-strong);
 
   /* ---- odak halkası: her temada görünür kalır ---- */
   --ring:color-mix(in srgb, var(--primary) 45%, transparent);
@@ -161,14 +169,9 @@
   --d-info:#8FADC2;
   --d-info-soft:#1A2126;
 
-  --d-ink:#0C1712;
-  --d-ink-2:#16241D;
-  --d-ink-on:#EDEBE4;
-  --d-ink-on-2:#8FA79A;
-
   --d-border:#2B2B25;
   --d-border-strong:#3B3B33;
-  --d-rule:#3A3A32;
+  --d-rule:var(--d-border-strong);
 
   --d-macro-protein:#7FBFA0;
   --d-macro-fat:#D6A961;
@@ -195,7 +198,6 @@
     --surface:var(--d-surface);
     --surface-2:var(--d-surface-2);
     --surface-3:var(--d-surface-3);
-    --surface-hover:var(--d-surface-hover);
     --sidebar:var(--d-sidebar);
     --sidebar-active:var(--d-sidebar-active);
     --text:var(--d-text);
@@ -214,8 +216,12 @@
     --border:var(--d-border);
     --border-strong:var(--d-border-strong);
     --rule:var(--d-rule);
-    --ink:var(--d-ink); --ink-2:var(--d-ink-2);
-    --ink-on:var(--d-ink-on); --ink-on-2:var(--d-ink-on-2);
+    /* Koyu temada mürekkep zeminden DAHA koyudur; ana renk açık
+       olduğu için ondan türetilemez. */
+    --ink:color-mix(in oklab, var(--bg) 74%, #000000);
+    --ink-2:color-mix(in oklab, var(--ink) 82%, var(--text));
+    --ink-on:var(--text);
+    --ink-on-2:var(--text-3);
     --macro-protein:var(--d-macro-protein);
     --macro-fat:var(--d-macro-fat);
     --macro-carb:var(--d-macro-carb);
@@ -238,7 +244,6 @@
   --surface:var(--d-surface);
   --surface-2:var(--d-surface-2);
   --surface-3:var(--d-surface-3);
-  --surface-hover:var(--d-surface-hover);
   --sidebar:var(--d-sidebar);
   --sidebar-active:var(--d-sidebar-active);
   --text:var(--d-text);
@@ -257,8 +262,10 @@
   --border:var(--d-border);
   --border-strong:var(--d-border-strong);
   --rule:var(--d-rule);
-  --ink:var(--d-ink); --ink-2:var(--d-ink-2);
-  --ink-on:var(--d-ink-on); --ink-on-2:var(--d-ink-on-2);
+  --ink:color-mix(in oklab, var(--bg) 74%, #000000);
+  --ink-2:color-mix(in oklab, var(--ink) 82%, var(--text));
+  --ink-on:var(--text);
+  --ink-on-2:var(--text-3);
   --macro-protein:var(--d-macro-protein);
   --macro-fat:var(--d-macro-fat);
   --macro-carb:var(--d-macro-carb);

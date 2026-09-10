@@ -383,6 +383,7 @@ src/
 tools/
   runtests.js           birim testleri (başsız tarayıcı)
   smoke.js              duman testi: gerçek uygulamayı gezer
+  palettecheck.js       7 palet × 2 tema × 7 bölüm kontrast denetimi (WCAG AA)
 build.py                tek dosyalık dağıtım üretir → dist/spi.html
 devserver.py            geliştirme sunucusu (önbelleksiz)
 ```

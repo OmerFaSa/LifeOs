@@ -181,6 +181,63 @@ SP.UI = (function(){
       + (map[dir] || map.flat) + '</span>';
   }
 
+  /* ---------- kadran ----------
+
+     Toparlanma skoru bir yuzde degil bir DURUMDUR; yatay bir cubuk onu
+     "ne kadar dolduruldu" gibi okutuyordu. Yay, bir olcegin uzerindeki
+     ibre gibi durur: sifir ve yuz uclarda, deger arada bir yerde.
+
+     Bantlar (dusuk/orta/yuksek) yayin arkasinda soluk cizgilerle
+     isaretlenir; skorun hangi banda dustugu renkten once KONUMDAN
+     okunur. Renk tek basina anlam tasimaz. */
+  function gauge(value, opts){
+    const o = opts || {};
+    const size = o.size || 132;
+    const max = o.max || 100;
+    const r = 54, cx = 60, cy = 60;
+    /* 240 derecelik yay: alt taraf acik kalir, ibre orada baslar ve biter. */
+    const START = 150, SWEEP = 240;
+    const pt = deg => {
+      const a = (deg * Math.PI) / 180;
+      return [(cx + r * Math.cos(a)).toFixed(2), (cy + r * Math.sin(a)).toFixed(2)];
+    };
+    const arc = (from, to, w, cls2, extra) => {
+      const [x1, y1] = pt(from), [x2, y2] = pt(to);
+      const large = (to - from) > 180 ? 1 : 0;
+      return '<path d="M' + x1 + ' ' + y1 + ' A' + r + ' ' + r + ' 0 ' + large + ' 1 '
+        + x2 + ' ' + y2 + '" class="' + cls2 + '" stroke-width="' + w + '" fill="none"'
+        + ' stroke-linecap="round"' + (extra || '') + '/>';
+    };
+
+    const has = value != null && isFinite(value);
+    const pct = has ? U.clamp(value / max, 0, 1) : 0;
+    let out = '<div class="gauge" style="width:' + size + 'px">';
+    out += '<svg viewBox="0 0 120 120" role="img" aria-label="'
+      + (has ? 'Skor ' + Math.round(value) + ' / ' + max : 'Skor yok') + '">';
+    out += arc(START, START + SWEEP, 7, 'gauge__track');
+    /* Bant sinirlari — kadranin uzerindeki centikler. */
+    (o.bands || []).forEach(b => {
+      const d = START + SWEEP * U.clamp(b / max, 0, 1);
+      const [ix, iy] = pt(d);
+      const inner = r - 9;
+      const a = (d * Math.PI) / 180;
+      const x0 = (cx + inner * Math.cos(a)).toFixed(2);
+      const y0 = (cy + inner * Math.sin(a)).toFixed(2);
+      out += '<line x1="' + x0 + '" y1="' + y0 + '" x2="' + ix + '" y2="' + iy
+        + '" class="gauge__band"/>';
+    });
+    if(has && pct > 0){
+      out += arc(START, START + SWEEP * pct, 7, 'gauge__value gauge__value--' + (o.tone || ''));
+    }
+    out += '</svg>';
+    out += '<div class="gauge__center">'
+      + '<span class="gauge__num num">' + (has ? Math.round(value) : '&mdash;') + '</span>'
+      + (o.label ? '<span class="gauge__label">' + esc(o.label) + '</span>' : '')
+      + '</div>';
+    out += '</div>';
+    return out;
+  }
+
   /* ---------- grafikler ---------- */
   /* Eksen adimini 1/2/5/10 ailesine oturtur ki etiketler yuvarlak sayi olsun. */
   function niceStep(raw){
@@ -206,7 +263,7 @@ SP.UI = (function(){
     const X = i => padL + (w-padL-padR) * (n <= 1 ? 0.5 : i/(n-1));
     const Y = v => h-padB - (h-padT-padB) * ((v-bottom)/((top-bottom)||1));
 
-    let svg = '<svg class="chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img">';
+    let svg = '<svg class="chart" viewBox="0 0 '+w+' '+h+'" role="img">';
     const ticks = 4;
     for(let i = 0; i <= ticks; i++){
       const v = bottom + (top-bottom)*i/ticks;
@@ -247,7 +304,7 @@ SP.UI = (function(){
     if(!rows.length) return '<p class="small dim">Veri yok.</p>';
     const top = o.max || 100;
     const bw = (w-padL-padR) / rows.length;
-    let svg = '<svg class="chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img">';
+    let svg = '<svg class="chart" viewBox="0 0 '+w+' '+h+'" role="img">';
     [0, 0.5, 1].forEach(f => {
       const y = padT + (h-padT-padB)*f;
       svg += '<line class="axis" x1="'+padL+'" x2="'+(w-padR)+'" y1="'+y+'" y2="'+y+'"/>';
@@ -372,8 +429,10 @@ SP.UI = (function(){
     const X = i => (w) * (i/(values.length-1));
     const Y = v => h - 3 - (h-6) * ((v-min)/((max-min)||1));
     const pts = values.map((v,i) => v == null ? null : [X(i), Y(v)]).filter(Boolean);
+    /* Kivilcim cizgisi kutusunu doldurmak icin gerilir; `non-scaling-stroke`
+       olmadan cizgi yatayda incelip dikeyde kalinlasiyordu. */
     return '<svg class="chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" style="height:26px">'
-      + '<path class="line'+(o.accent?' line--accent':'')+'" style="stroke-width:1.6" d="M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ')+'"/></svg>';
+      + '<path vector-effect="non-scaling-stroke" class="line'+(o.accent?' line--accent':'')+'" style="stroke-width:1.6" d="M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ')+'"/></svg>';
   }
 
   function stackBar(segments){
@@ -538,7 +597,7 @@ SP.UI = (function(){
   }
 
   return {
-    icon, trend, motif,
+    icon, trend, motif, gauge,
     lineChart, barChart, donut, sparkline, stackBar, heatmap, legend,
     rangeBar, macroSplit,
     hint, rail, openHint, closeHint, isHintOpen,

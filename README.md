@@ -47,6 +47,7 @@ SPİ ayrıca gerçek uygulamayı gezen bir duman testi taşır:
 
 ```bash
 node tools/smoke.js          # 12 ekranı gezer, akışları dener
+node tools/palettecheck.js   # bütün paletlerde kontrastı ölçer
 ```
 
 ## Klinik sınır

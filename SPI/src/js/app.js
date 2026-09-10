@@ -262,7 +262,7 @@ SP.App = (function(){
     const actions = safe(() => sc.actions ? sc.actions() : '');
 
     return html`
-      <div class="hero">
+      <div class="hero" data-num="${sec.num}">
         <div class="wrapc hero__in">
           <div class="hero__main">
             <div class="hero__eyebrow">

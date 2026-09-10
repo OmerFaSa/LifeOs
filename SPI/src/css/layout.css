@@ -142,7 +142,20 @@
 
    Sayfanın açılışı: bölüm imzası, tek cümlelik durum, ne yapılacağı ve
    özet sayılar. Zemin yok — tek ayırıcı ince çizgidir. */
-.hero{ border-bottom:1px solid var(--border); }
+/* Hero'nun sağ üst köşesinde bölüm numarası, çok soluk ve çok büyük.
+   Bir yayının bölüm sayfalarındaki numara gibi: okunmak için değil,
+   sayfaya ağırlık ve yer duygusu vermek için. */
+.hero{ position:relative; border-bottom:1px solid var(--border); overflow:hidden; }
+.hero::before{
+  content:attr(data-num);
+  position:absolute; top:-14px; right:max(32px, calc((100% - var(--content-max)) / 2 + 32px));
+  font-family:var(--font-serif); font-size:150px; font-weight:500;
+  line-height:1; letter-spacing:-.045em;
+  color:var(--sec); opacity:.06;
+  pointer-events:none; user-select:none;
+}
+@media (max-width:1060px){ .hero::before{ font-size:118px; top:-8px; right:20px; } }
+@media (max-width:560px){ .hero::before{ display:none; } }
 .hero__in{
   padding-block:46px 34px;
   display:grid;

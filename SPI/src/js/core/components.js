@@ -222,9 +222,17 @@ SP.C = (function(){
     </div>`;
   }
 
+  /* Boş durum, jenerik bir ikon yerine BÖLÜMÜN İMZASINI taşır: boş
+     ekran da tasarımın parçasıdır ve hangi bölümde olunduğunu söyler.
+     `icon` verilirse eski davranış korunur. */
   function Empty(o){
+    const sec = (SP.App && SP.App.sectionOf && SP.S)
+      ? SP.App.sectionOf(SP.S.route) : null;
+    const mark = o.icon ? icon(o.icon)
+      : (sec && SP.UI.motif ? '<div class="empty__motif">' + SP.UI.motif(sec.id) + '</div>'
+         : icon('list'));
     return html`<div class="empty">
-      ${icon(o.icon || 'list')}
+      ${raw(mark)}
       <p>${o.text}</p>
       ${when(o.action, o.action)}
     </div>`;
