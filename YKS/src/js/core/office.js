@@ -707,16 +707,31 @@ R.Office = (function(){
   /* Brifingi cumleye cevirir. Model bagli degilken ofis bu metinlerle calisir;
      icerik ayni kural motorundan geldigi icin dogruluk degismez, yalniz
      anlatim sadelesir. */
+  /* "Çünkü Kapanış %40" degil "çünkü kapanış %40". Cumle ortasina giren
+     hazir bulgu metninin bas harfi kucultulur; sayi ya da kisaltmayla
+     basliyorsa dokunulmaz (TYT, %40 boyle kalmali). */
+  function lowerFirst(text){
+    const t = String(text || '');
+    if(!t) return t;
+    const head = t.slice(0, 3);
+    if(/^[^a-zçğıöşü]{2,}/i.test(head) && head === head.toLocaleUpperCase('tr')) return t;
+    if(!/^[A-ZÇĞİÖŞÜ]/.test(t)) return t;
+    return t[0].toLocaleLowerCase('tr') + t.slice(1);
+  }
+
   function ruleText(agentId, kind, ctx){
     const b = brief(agentId);
     const lines = b.findings.slice(0, kind === 'turn' ? 2 : 3).map(f => f.text);
 
+    /* Kural motoru modunda cumleyi model degil bu fonksiyon kurar. Cumleler
+       sabit olmak zorunda ama SOGUK olmak zorunda degil: "Gundem: X." diye
+       baslayan bir acilis, toplanti degil form doldurmadir. */
     if(kind === 'opening'){
-      return 'Gündem: ' + ctx.topic + '. ' + ctx.why + ' Sırayla dinliyorum.';
+      return 'Bugün şunu konuşacağız: ' + ctx.topic + '. ' + ctx.why + ' Sizi dinliyorum.';
     }
     if(kind === 'closing'){
-      return 'Ekipten çıkan tabloya göre bu haftanın tek işi: ' + ctx.action.title + '. '
-        + (ctx.action.why || '') + ' Diğer başlıklar sıraya girer; aynı anda iki müdahale yapılmaz.';
+      return 'Konuştuklarımızdan çıkan tek iş şu: ' + ctx.action.title + '. '
+        + (ctx.action.why || '') + ' Gerisi sıraya girsin; aynı anda iki şeye birden girmiyoruz.';
     }
 
     /* Tur farkli sey soruyorsa cevap da farkli olmali. Model yokken ajanin
@@ -726,35 +741,74 @@ R.Office = (function(){
     let body;
     if(kind === 'turn' && round === 'fikir'){
       body = b.suggestion
-        ? b.suggestion.text + ' Gerekçe: ' + (lines[0] || b.headline)
-        : b.headline + '. Bu masadan çıkacak somut bir öneri yok.';
+        ? b.suggestion.text + ' Çünkü ' + lowerFirst(lines[0] || b.headline)
+        : b.headline + '. Benden çıkacak somut bir öneri yok.';
     }else if(kind === 'turn' && round === 'itiraz'){
       body = lines[1]
-        ? 'Buna itirazım şu: ' + lines[1]
-        : 'Kendi alanımdan itirazım yok; ' + (lines[0] || b.headline);
+        ? 'Bir itirazım var: ' + lowerFirst(lines[1])
+        : 'Benim itirazım yok. ' + (lines[0] || b.headline);
     }else if(kind === 'turn' && round === 'oylama'){
       /* Oy kural motoru modunda nextTurn icinde secilir; burada gerekce yazilir. */
-      body = b.suggestion ? 'Kendi alanımdaki en somut iş bu: ' + b.suggestion.text
+      body = b.suggestion ? 'Benim tarafımda en somut iş bu: ' + b.suggestion.text
         : (lines[0] || b.headline);
     }else if(kind === 'turn' && (round === 'sentez' || round === 'serbest')){
       body = b.suggestion
-        ? 'Bana düşen iş: ' + b.suggestion.text
-        : 'Ekleyecek bir şeyim yok.';
+        ? 'Bana düşen kısım şu: ' + b.suggestion.text
+        : 'Benim ekleyeceğim bir şey yok.';
     }else if(kind === 'answer'){
-      body = 'Masamdaki veriye göre: ' + (lines[0] || b.headline)
-        + (lines[1] ? ' ' + lines[1] : '');
+      body = (lines[0] || b.headline) + (lines[1] ? ' ' + lines[1] : '');
+    }else if(kind === 'turn'){
+      /* Toplanti turu KISA olmali: bes kisi sirayla uc bulgu okuyunca
+         toplanti okunmaz hâle geliyordu. Model bagli olan turlar da
+         iki cumleyle sinirli (ROUNDS[].sentences); burasi ayni sinirin
+         kural motorundaki karsiligi. */
+      body = lines.length
+        ? lines[0] + (b.suggestion ? ' ' + b.suggestion.text : '')
+        : b.headline + '. Bugün benden bildirilecek başka bir şey yok.';
     }else{
       body = lines.length
         ? lines.join(' ') + (b.suggestion ? ' ' + b.suggestion.text : '')
         : b.headline + '. Bu masada bugün ayrıca bildirilecek bir şey yok.';
     }
 
-    /* Soruya yanit verirken durustluk: model bagli degilken ajan soruyu
-       okuyamaz, yalnizca masasindaki tabloyu okur. Bunu saklamaz. */
+    /* ---------- model yokken sohbet ----------
+
+       Burasi kullanicinin "adam direkt masamdaki rapor diyor" dedigi yerdi:
+       model bagli degilken NE yazilirsa yazilsin ayni tablo donuyordu —
+       "merhaba"ya bile.
+
+       Kural motoru soruyu okuyamaz, bu dogru. Ama sohbetin TURUNU okuyabilir
+       (chatKind) ve bir selamlasmaya tablo okumak, cevap veremiyor olmaktan
+       daha kotudur. Kural motoru modunda ajan artik: selamlasmaya selamla
+       karsilik verir, konu sorusunda ve dert yanmada durumu durustce soyler,
+       yalnizca gercekten veri soruldugunda tabloyu aktarir.
+
+       Her uc durumda da modelin gerekli oldugu BIR KEZ soylenir; her
+       mesajda tekrarlamak sohbet degil uyari yagmurudur. */
     if(kind === 'chat'){
-      return 'Masamdaki rapor şunu söylüyor. ' + body
-        + ' Sorunun kendisini okuyabilmem için ofise bir model bağlaman gerekir;'
-        + ' şimdilik yalnız bu tabloyu aktarabiliyorum.';
+      const chat = (ctx && ctx.kind) || 'veri';
+      const first = !(ctx && ctx.told);
+
+      if(chat === 'selam'){
+        return 'Merhaba, buradayım.'
+          + (first ? ' Ama baştan söyleyeyim: ofise bir model bağlanmadığı için '
+              + 'yazdığını okuyamıyorum, sohbet edemiyorum. Bağlarsan konuşuruz.' : '')
+          + ' Şimdilik yalnız masamdaki tabloyu aktarabiliyorum.';
+      }
+      /* Konu ve hâl turlarinda tablonun TAMAMI degil tek satiri verilir:
+         "kisa ve sade" burada da gecerli. */
+      const tek = lines[0] || b.headline;
+      if(chat === 'konu'){
+        return 'Konuyu anlatmayı isterdim ama ofise bir model bağlı değil; ders anlatmak '
+          + 'için ona ihtiyacım var. Elimden gelen şu kadarı: ' + tek;
+      }
+      if(chat === 'hal'){
+        return 'Seni duyuyorum ama yazdığını okuyabilmem için ofise bir model bağlaman '
+          + 'gerekiyor. Masamdan görünen tek şey şu: ' + tek;
+      }
+      return body
+        + (first ? ' Sorunun kendisini okuyabilmem için ofise bir model bağlaman gerekir;'
+            + ' şimdilik yalnız bu tabloyu aktarabiliyorum.' : '');
     }
     return body;
   }
@@ -967,7 +1021,8 @@ R.Office = (function(){
 
     try{
       const res = await R.LLM.complete(chain, {
-        system:R.OFFICE_PROMPTS.system(agent, toneId()) + (catalog ? '\n\n' + catalog : ''),
+        system:R.OFFICE_PROMPTS.system(agent, toneId(), { sentences:o.sentences })
+          + (catalog ? '\n\n' + catalog : ''),
         messages:payload.messages,
         maxTokens:o.maxTokens || BUDGET.turn,
         temperature:agent.temperature,
@@ -993,9 +1048,15 @@ R.Office = (function(){
 
       /* Cikti kendi brifingine karsi denetlenir: uydurulmus sayi ve alan
          ihlali burada yakalanir. Patron'un brifingi dort raporu tasidigi
-         icin onun sayilari da kapsanir. */
+         icin onun sayilari da kapsanir.
+
+         Sayi denetimi kapatilabilir (checkNumbers:false): konu anlatirken
+         gecen bir sayi adayin verisi hakkinda bir iddia degildir. Ev
+         kurallari ve alan gardi bundan etkilenmez, her zaman calisir. */
       let ownBrief = null;
-      try{ ownBrief = brief(agentId); }catch(e){}
+      if(o.checkNumbers !== false){
+        try{ ownBrief = brief(agentId); }catch(e){}
+      }
       const checked = validate(said, { agentId, brief:ownBrief });
       return { agent:agentId, name:agent.name, role:agent.role, text:checked.text,
         warnings:checked.warnings, mode:'llm', model:res.model, provider:res.provider,
@@ -1032,6 +1093,62 @@ R.Office = (function(){
     await R.Store.remove('office/chat-' + agentId);
   }
 
+  /* ---------- sohbet turu ----------
+
+     Gelen mesaj once siniflanir; sinif neyin gonderilecegini belirler.
+     Siniflama KURAL MOTORUNDADIR: deterministiktir, testlenebilir ve model
+     bagli olmasa da calisir. Kaliplar data/agents.js icinde durur.
+
+     Sira kasitlidir:
+       1. selam — kisa bir selamlasma, icinde gercek soru yoksa.
+       2. hal   — dert yanma. VERI'den once gelir: "moralim bozuk, netlerim
+                  dusuyor" diyen birine once tablo okumak, sorulan soruya
+                  degil sorulmayan soruya cevap vermektir.
+       3. veri  — adayin kendi durumu (eski davranis).
+       4. konu  — ders sorusu.
+     Hicbiri tutmazsa 'veri': uygulama bir calisma sistemidir, varsayilan
+     soru adayin kendi durumudur. */
+  function chatKind(text){
+    const raw = String(text || '').trim();
+    if(!raw) return 'veri';
+    /* Turkce yerel ayariyla kucultulur: I → ı, İ → i. Kaliplar kucuk harf
+       yazilir ve "NABER" ile "naber" ayni sekilde taninir. */
+    const q = raw.toLocaleLowerCase('tr');
+    const K = R.CHAT_KINDS;
+    const veri = K.veri.test(q);
+    const konu = K.konu.test(q);
+
+    if(K.selam.test(q) && q.length <= K.selamMaxLength && !veri && !konu) return 'selam';
+    if(K.hal.test(q)) return 'hal';
+    if(veri) return 'veri';
+    if(konu) return 'konu';
+    return 'veri';
+  }
+
+  /* Sohbet turune gore ajanin eline ne verilecek?
+
+     Bunun tek bir dogru cevabi var ve eskiden yanlisti: selamlasmaya
+     RAPOR GONDERILMEZ. Gonderilirse model onu okur — istem ne derse desin,
+     bir modelin onune JSON koyup "bunu yorumla" demek, onu sesli okutmaktir. */
+  function chatPayload(agentId, kind){
+    if(kind === 'selam' || kind === 'hal') return null;
+    const b = brief(agentId);
+
+    /* Konu sorusunda ham tablo GONDERILMEZ, kural motorunun ayni veriden
+       urettigi iki satirlik ozet gonderilir.
+
+       Sebep dar butce degil bicim: JSON gormus bir model onu okur. Duz
+       cumle ise okunacak bir sey degil, bilinen bir seydir — ajan konuyu
+       anlatirken gerekirse ona deginir, gerekmezse hic dokunmaz. */
+    if(kind === 'konu'){
+      return {
+        ozet:b.headline,
+        aklindakiler:(b.findings || []).slice(0, 2).map(f => f.text),
+      };
+    }
+    return compactData(R.Tools.sanitize(b.data));
+  }
+
   /* Bir ajana soru sorar. Sohbetin son turlari baglama eklenir. */
   async function ask(agentId, question, opts){
     const agent = R.AGENT_BY_ID[agentId];
@@ -1040,17 +1157,33 @@ R.Office = (function(){
     if(!q) throw Object.assign(new Error('boş soru'), { code:'empty' });
 
     resetBriefs();
-    const data = compactData(R.Tools.sanitize(brief(agentId).data));
+    const kind = chatKind(q);
+    const data = chatPayload(agentId, kind);
     const history = chatOf(agentId).slice(-4)
       .map(m => ({ role:m.role === 'user' ? 'user' : 'assistant', text:m.text }));
 
     const messages = history.concat([
-      { role:'user', text:R.OFFICE_PROMPTS.chat(agent, data, q) },
+      { role:'user', text:R.OFFICE_PROMPTS.chat(agent, data, q, kind) },
     ]);
 
-    /* Sohbette ajan bir duzeltme onerebilir; oneri onaya duser. */
-    return speak(agentId, 'chat', { messages, ctx:{} },
-      Object.assign({}, opts, { allowAction:true }));
+    /* Sohbette ajan bir duzeltme onerebilir; oneri onaya duser.
+       Selamlasma ve dert yanma bunun disindadir: "merhaba"nin karsiligi
+       sistemde bir degisiklik onerisi olamaz.
+
+       Sayi sadakati de yalniz VERI turunda denetlenir. Konu anlatirken
+       gecen bir sayi ("TYT'de 40 soru var") adayin verisi hakkinda bir
+       iddia degildir; brifingde aranmasi yanlis uyari uretirdi. Ev
+       kurallari ve alan gardi her turda calismaya devam eder. */
+    /* "Model bagli degil" notu sohbet basina BIR KEZ verilir: her mesajda
+       tekrarlamak sohbet degil uyari yagmurudur. */
+    const told = chatOf(agentId).some(m => m.role !== 'user');
+
+    return speak(agentId, 'chat', { messages, ctx:{ kind, told } },
+      Object.assign({}, opts, {
+        allowAction:kind === 'veri',
+        checkNumbers:kind === 'veri',
+        sentences:kind === 'selam' ? 2 : agent.maxSentences + 1,
+      }));
   }
 
   /* Ajanin kendi alanini ozetlemesi (soru olmadan). */
@@ -1156,21 +1289,26 @@ R.Office = (function(){
      patlamasidir. Her turun AYRI bir sorusu vardir; boylece ajanlar ayni
      cumleyi tekrar etmez, tartisma derinlesir. */
 
+  /* Turlarin sorulari. Bunlar bir FORM DOLDURMA emri degil, masadaki
+     birine sorulan soru gibi yazilir: "TEK bulgu bildir, sayilari raporundan
+     al" diyen bir istem, cevabi da bir rapor satiri gibi getiriyordu.
+
+     `sentences` her turun uzunluk tavanidir. Toplanti sohbetten KISADIR:
+     bes kisi sirayla dort cumle kurunca toplanti okunmaz hâle geliyordu. */
   const ROUNDS = [
-    { key:'durum',  title:'Durum tespiti',
-      ask:'Kendi alanindan gundemle ilgili TEK bulgu bildir. Sayilari raporundan al.' },
-    { key:'fikir',  title:'Fikir turu',
-      ask:'Gundemi cozecek TEK somut fikir at. Baskasinin fikrini tekrarlama; '
-        + 'senden onceki fikirlerden farkli bir sey soyle.' },
-    { key:'itiraz', title:'İtiraz turu',
-      ask:'Masadaki fikirlerden hangisi kendi alaninda TUTMAZ, nedenini veriyle soyle. '
-        + 'Itirazin yoksa hangisini destekledigini ve neden oldugunu tek cumlede yaz.' },
-    { key:'oylama', title:'Oylama turu', vote:true,
-      ask:'Fikirlerden birini SEC. Yanitina o fikrin NUMARASIYLA basla, sonra tek cumlede '
-        + 'neden onu sectigini soyle. Kendi fikrini de secebilirsin ama gerekcen veriye dayanmali.' },
-    { key:'sentez', title:'Toparlama turu',
-      ask:'Konusulanlardan kendi alanina dusen tek isi soyle: sen ne yapacaksin, '
-        + 'aday senden ne bekleyecek.' },
+    { key:'durum',  title:'Durum tespiti', sentences:2,
+      ask:'Kendi alanında bu konuyla ilgili gördüğün tek şeyi söyle.' },
+    { key:'fikir',  title:'Fikir turu', sentences:2,
+      ask:'Ne yapılmasını öneriyorsun? Tek bir somut şey söyle — '
+        + 'senden öncekilerin söylediğini tekrarlama.' },
+    { key:'itiraz', title:'İtiraz turu', sentences:2,
+      ask:'Masadaki fikirlerden biri senin alanında tutmuyorsa söyle, nedenini de. '
+        + 'İtirazın yoksa hangisini desteklediğini bir cümlede söyle.' },
+    { key:'oylama', title:'Oylama turu', vote:true, sentences:2,
+      ask:'Fikirlerden birini seç. Cümleye o fikrin NUMARASIYLA başla, sonra tek '
+        + 'cümlede neden onu seçtiğini söyle. Kendi fikrini de seçebilirsin.' },
+    { key:'sentez', title:'Toparlama turu', sentences:2,
+      ask:'Bu işin sana düşen kısmı ne? Tek cümlede söyle.' },
   ];
 
   function roundDef(n){ return ROUNDS[Math.min(n, ROUNDS.length) - 1] || ROUNDS[ROUNDS.length - 1]; }
@@ -1370,7 +1508,8 @@ R.Office = (function(){
       ctx:{ topic:session.topic, round:def, options },
       /* Toplanti turunda da oneri cikabilir: ofisin masada aldigi karar
          kullanicinin onayina duser, kendiliginden uygulanmaz. */
-    }, Object.assign({}, o, { maxTokens:BUDGET.turn, allowAction:true }));
+    }, Object.assign({}, o, { maxTokens:BUDGET.turn, allowAction:true,
+      sentences:def.sentences }));
 
     turn.round = roundNo;
     turn.roundKey = def.key;
@@ -1746,7 +1885,7 @@ R.Office = (function(){
     validate, validateCards, generateCards, noteContext, parseJson,
     numbersIn, numberFidelity, scopeBreaches, supportedNumbers,
     /* sohbet */
-    ask, briefing, chatOf, pushChat, clearChat,
+    ask, briefing, chatOf, pushChat, clearChat, chatKind, chatPayload,
     /* toplanti — turlu canli oturum */
     agenda, agendaCandidates, openMeeting, nextTurn, userTurn, closeMeeting, speakerAt, roundDef,
     /* tartisma */

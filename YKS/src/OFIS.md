@@ -148,6 +148,88 @@ ekranındaki "Takipteki kararlar" kartından `yapıldı` ya da `devret` ile
 kapatılır. Kapanmayan karar bir sonraki toplantının açılışında Patron'un
 önüne düşer — ofisi gerçek yapan şey budur.
 
+## Ajanlar rapor okumaz, konuşur
+
+Şikâyet netti: *"merhaba yazıyorum, adam direkt masamdaki rapor diyor."*
+Sebep tek bir hata değil, **istemin kendisiydi**: her çağrıda ajanın önüne JSON
+rapor konup "bunu yorumla" deniyordu. Bir modelin önüne JSON koyup yorumlamasını
+istemek, ona onu **sesli okutmaktır**.
+
+### Gelen mesaj önce sınıflanır
+
+Sınıflama kural motorundadır (`Office.chatKind`), modelde değil: deterministik,
+testlenebilir ve model bağlı olmasa da çalışır. Kalıplar `data/agents.js`
+içinde `R.CHAT_KINDS` altında durur.
+
+| Tür | Ne zaman | Ajanın eline ne verilir |
+|---|---|---|
+| `selam` | Kısa selamlaşma, teşekkür, hâl hatır | **Hiçbir şey.** Rapor gönderilmez |
+| `hal` | Dert yanma ("moralim bozuk") | Hiçbir şey; önce insan gibi karşılık |
+| `konu` | Ders/konu sorusu | Kural motorunun **düz cümle** özeti (JSON değil) |
+| `veri` | Adayın kendi durumu | Masasındaki tam tablo (eski davranış) |
+
+Sıra kasıtlıdır: `hal` **`veri`den önce** gelir. "Moralim bozuk, netlerim de
+düşüyor" diyen birine önce tablo okumak, sorulan soruya değil sorulmayan soruya
+cevap vermektir. Hiçbiri tutmazsa `veri` — uygulama bir çalışma sistemidir.
+
+**Türkçe ve `\b` tuzağı:** JavaScript'te `\b` yalnız `[A-Za-z0-9_]` harflerini
+kelime sayar. `/nasıl çalış\b/` ifadesi *"nasıl çalışılır"* içinde **eşleşmez**,
+çünkü `ş` ile `ı` arasında ASCII açısından sınır yoktur. İlk yazımda tam olarak
+bu oldu ve bütün konu soruları `veri` olarak sınıflandı. Kalıplarda sonda sınır
+yoktur (ek gelir), baştaki sınır Türkçe harfleri de içeren açık bir sınıftır ve
+metin önce `toLocaleLowerCase('tr')` ile küçültülür.
+
+### Konu anlatmak serbesttir, adayın sayıları değil
+
+Ev kuralı şuydu: *"Veride karşılığı olmayan genel tavsiye verme."* Bu, "veri
+dışında hiçbir şey konuşma" diye okunuyordu ve ders anlatmayı da yasaklıyordu.
+Kuralın gerçek amacı **adayın durumu hakkındaki iddiaları** veriye bağlamak;
+ders bilgisi bunun dışındadır. Kural buna göre düzeltildi.
+
+Aynı ayrım denetimde de var: sayı sadakati (`numberFidelity`) yalnız `veri`
+turunda çalışır. Konu anlatırken geçen bir sayı ("TYT'de 40 soru var") adayın
+verisi hakkında bir iddia değildir; brifingde aranması yanlış uyarı üretirdi.
+Ev kuralları ve alan gardı her turda çalışmaya devam eder.
+
+Selamlaşma ayrıca **öneri kutusuna girmez**: "merhaba"nın karşılığı bir sistem
+değişikliği önerisi olamaz.
+
+### Konuşma kaydı — her isteme eklenir
+
+`R.OFFICE_PROMPTS.SPEECH` raporu ele veren kalıpları açıkça yasaklar; bir insan
+"raporuma göre" demez:
+
+> Rapor okumuyorsun, konuşuyorsun. Elindeki tablo arka plandır: ona bakarsın,
+> ondan konuşursun, ama onu aktarmazsın. Şu kalıpları ASLA kullanma:
+> "raporuma göre", "masamdaki rapor", "verilere göre", "JSON", alan adları.
+> Bir cümlede en fazla bir sayı.
+
+### Toplantı bir tutanak değil, bir konuşma
+
+Toplantı istemlerinde **sıra değişti**: önce odada ne olup bittiği (kimin ne
+dediği), sonra arka plandaki tablo. Tersi, ajana "önce raporunu oku" demek
+oluyordu ve toplantı beş kişinin sırayla tablo aktarmasına dönüyordu.
+
+Turlar da kısaldı: her turun kendi uzunluk tavanı var (`ROUNDS[].sentences`,
+**2 cümle**) ve bu tavan ajanın sohbet uzunluğunun yerine geçer. Beş kişi
+sırayla dört cümle kurunca toplantı okunmaz hâle geliyordu. Tur soruları da
+form doldurma emri değil, masadaki birine sorulan soru gibi yazılır:
+
+| Eski | Yeni |
+|---|---|
+| "Kendi alanindan gundemle ilgili TEK bulgu bildir. Sayilari raporundan al." | "Kendi alanında bu konuyla ilgili gördüğün tek şeyi söyle." |
+| "Konusulanlardan kendi alanina dusen tek isi soyle…" | "Bu işin sana düşen kısmı ne? Tek cümlede söyle." |
+
+### Model yokken de sohbet edilir
+
+Kural motoru soruyu **okuyamaz** — bu doğru ve saklanmaz. Ama sohbetin
+**türünü** okuyabilir, ve bir selamlaşmaya tablo okumak, cevap veremiyor
+olmaktan daha kötüdür. Model bağlı değilken ajan artık selamlaşmaya selamla
+karşılık verir, konu sorusunda ve dert yanmada durumu dürüstçe söyler, yalnız
+gerçekten veri sorulduğunda tabloyu aktarır. "Model bağlı değil" notu sohbet
+başına **bir kez** verilir; her mesajda tekrarlamak sohbet değil uyarı
+yağmurudur.
+
 ## Ücretsiz modeller
 
 Ofis, tarayıcıdan doğrudan çağrılabilen ücretsiz uçları destekler
@@ -492,7 +574,7 @@ akademik metrik taşır.
 
 | Dosya | Sorumluluk |
 |---|---|
-| `data/agents.js` | Beş ajanın kimliği, yetki alanı, tur soruları, istemleri (deklaratif) |
+| `data/agents.js` | Beş ajanın kimliği, yetki alanı, tur soruları, istemleri, sohbet türü kalıpları (deklaratif) |
 | `data/actions.js` | Ajanların önerebileceği eylemlerin kapalı kataloğu (deklaratif) |
 | `core/proposals.js` | Öneri kutusu: doğrulama, önizleme, onay, uygulama, geri alma |
 | `data/providers.js` | Sağlayıcı tohum kataloğu: uç, anahtar biçimi, model listesi, sınırlar (deklaratif, sık eskir) |
@@ -524,7 +606,7 @@ akademik metrik taşır.
 
 ```bash
 python devserver.py                       # http://localhost:4173
-node tools/runtests.js                    # 727 testin tamamı geçmeli (Playwright ile)
+node tools/runtests.js                    # 745 testin tamamı geçmeli (Playwright ile)
 python build.py                           # dist/rota.html
 python tools/audit.py                     # satır, concat, sınıf sayıları
 ```

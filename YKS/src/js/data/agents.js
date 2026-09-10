@@ -67,7 +67,9 @@ R.AGENTS = [
       'TYT’de en çok net kaybettiğim yer neresi?',
       'Türkçe netim neden oturmuyor?',
       'TYT matematikte hangi konuya dönmeliyim?',
-      'TYT kapanışım hedefe yetiyor mu?',
+      /* Konu sorulari da listede: ajanla ders konusabildigi kesfedilsin. */
+      'Paragrafta hız nasıl kazanılır?',
+      'Üslü sayılar nasıl çalışılır?',
     ],
   },
 
@@ -96,7 +98,8 @@ R.AGENTS = [
       'AYT’de hangi ders beni geride tutuyor?',
       'AYT matematiğe ne zaman ağırlık vermeliyim?',
       'Fizik netim neden dalgalanıyor?',
-      'AYT kapanışım hedefe yetiyor mu?',
+      'Limit konusunun mantığı nedir?',
+      'Türev sorularına nasıl yaklaşmalıyım?',
     ],
   },
 
@@ -131,6 +134,7 @@ R.AGENTS = [
       'Uykum çalışmamı nasıl etkiliyor?',
       'Sürekli aynı bloğu atlıyorum, ne yapmalıyım?',
       'Enerjim düşükken nasıl bir gün kurayım?',
+      'Moralim bozuk, ne yapayım?',
     ],
   },
 
@@ -166,6 +170,54 @@ R.AGENTS = [
   },
 ];
 
+/* ---------- sohbet turleri ----------
+
+   "Merhaba" yazan kullaniciya masasindaki tabloyu okuyan bir ajan, ekip
+   uyesi degil bir raporlama arayuzudur. Gelen mesaj once SINIFLANIR ve
+   sinifi neyin gonderilecegini belirler:
+
+     selam  — selamlasma, tesekkur, hâl hatir, dert yanma. Rapor GONDERILMEZ.
+     konu   — ders/konu sorusu. Ajan kendi uzmanligindan anlatir.
+     veri   — adayin kendi durumu. Yalniz rapordan konusulur (eski davranis).
+
+   Siniflama KURAL MOTORUNDADIR, modelde degil: deterministiktir, test
+   edilebilir ve model bagli olmasa da calisir. Kaliplar burada durur,
+   fonksiyon core/office.js icindedir (chatKind).
+
+   Sira onemlidir: 'veri' kaliplari once bakilir, cunku "TYT matematikte
+   hangi konuya donmeliyim" hem konu hem veri kelimesi tasir ve VERI
+   sorusudur — cevabi risk siralamasindan gelir. */
+R.CHAT_KINDS = {
+  /* TURKCE VE \b HAKKINDA.
+
+     JavaScript'te \b yalnizca [A-Za-z0-9_] harflerini "kelime" sayar. Turkce
+     eklerde bu sessizce bozulur: /nasıl çalış\b/ ifadesi "nasıl çalışılır"
+     icinde ESLESMEZ, cunku "ş" ile "ı" arasinda ASCII acisindan bir sinir
+     yoktur. Ilk yazimda tam olarak bu oldu ve butun konu sorulari 'veri'
+     olarak siniflandi.
+
+     Bu yuzden: SONDA sinir yok (ek gelir), BASTA sinir Turkce harfleri de
+     iceren acik bir sinif olarak yazilir. Metin once tr yerel ayariyla
+     kucuk harfe cevrilir (I → ı, İ → i), boylece kaliplar kucuk harf
+     yazilabilir. */
+
+  /* Adayin kendi durumu: bunlardan biri geciyorsa soru veriye bakar. */
+  veri:/(^|[^a-zçğıöşü0-9])(net|deneme|sıra|sıralama|puan|plan|program|kapanış|hedef|bugün|dün|bu hafta|geçen hafta|analiz|risk|kart|tekrar|borç|kaç|ne kadar|durumum|nasıl gidiyor|yetiyor mu|istatistik|ortalama|medyan|trend|uyku|verim)/i,
+
+  /* Ders/konu sorusu: ajanin kendi uzmanligi. */
+  konu:/(^|[^a-zçğıöşü0-9])(nasıl çalış|nasıl öğren|nasıl çözül|nasıl yapıl|ne demek|nedir|neye yara|anlat|açıkla|örnek ver|konu anlatım|püf|taktik|yöntem|mantığı|mantığın|formül|kural nedir|farkı ne|anlamıyorum|anlamadım|anlayamıyorum|zorlanıyorum|takıldım|kafam karış|çözemiyorum)/i,
+
+  /* Selamlasma ve sosyal tur. Yalniz KISA mesajlarda gecerlidir: uzun bir
+     mesaj "merhaba" ile baslasa da icinde gercek bir soru tasir. */
+  selam:/^\s*(selam|merhaba|meraba|mrb|slm|sa[,.! ]|aleyküm|günaydın|iyi akşamlar|iyi geceler|iyi günler|naber|ne haber|nasılsın|nasilsin|napıyorsun|hey|hi[,.! ]|hello|kanka|hocam|koç|reis|müsait misin|orada mısın|teşekkür|sağol|sağ ol|tşk|tsk|eyvallah|eyw|görüşürüz|hoşça kal|hoşçakal|bay bay|tamam|peki|ok[,.! ]|süper|harika|kimsin|sen kimsin|ne iş yaparsın)/i,
+
+  /* Dert yanma: soru degil, hâl bildirimi. Rapor dokmek en kotu karsiliktir. */
+  hal:/(^|[^a-zçğıöşü0-9])(moral|yorgun|yoruldum|sıkıldım|bunaldım|motivasyon|isteğim yok|canım istemiyor|kötü hissediyorum|stres|kaygı|panik|bıktım|yapamıyorum|pes ettim|umutsuz|ağlıyorum)/i,
+
+  /* Bu uzunlugun ustundeki mesaj artik selamlasma degildir. */
+  selamMaxLength:64,
+};
+
 /* Kural motorunun sectigi isin (Calc.nextAction) hangi ajanin alanina dustugu.
    Guven skoru bunun uzerinden hesaplanir: bir ajanin alanindaki kararlar
    ne siklikla uygulandi? 'second-check' derse gore degistigi icin
@@ -187,28 +239,85 @@ R.MEETING_ORDER = ['analist', 'tyt', 'ayt', 'rehber'];
 /* Ofis istemleri — tek kaynak, surumlu.
    Surum artinca onbellekteki brifingler gecersiz olur. */
 R.OFFICE_PROMPTS = {
-  version:1,
+  version:2,
 
   /* Her ajanin istemine eklenen ortak kurallar. Koc katmaniyla ayni ev kurallari
      kullanilir; iki yerde iki farkli doktrin olmaz. */
   houseRules(){ return R.PROMPTS.houseRules; },
 
-  /* Ajan istemi: kimlik + ev kurallari + yazim bicimi */
-  system(agent, tone){
+  /* ---------- konusma kaydi ----------
+
+     Ajanlar rapor okuyordu, konusmuyordu: "merhaba" yazan kullaniciya bile
+     masasindaki tabloyu aktariyorlardi. Sebep istemdeydi — her cagrida once
+     JSON rapor veriliyor, sonra "bunu yorumla" deniyordu; model de dogal
+     olarak raporu sesli okuyordu.
+
+     Rapor ARKA PLANDIR. Ajanin ona bakmasi, ondan konusmasi beklenir; onu
+     aktarmasi degil. Asagidaki kayit her cagriya eklenir ve raporu ele veren
+     kaliplari acikca yasaklar — bir insan "raporuma gore" demez. */
+  SPEECH:
+    'NASIL KONUŞURSUN:\n'
+    + '- Rapor okumuyorsun, konuşuyorsun. Elindeki tablo arka plandır: ona bakarsın, '
+    + 'ondan konuşursun, ama onu aktarmazsın.\n'
+    + '- Şu kalıpları ASLA kullanma: "raporuma göre", "masamdaki rapor", "verilere göre", '
+    + '"tabloya baktığımda", "JSON", alan adları (closure, medyan_son3 gibi).\n'
+    + '- Cümlelerin kısa ve düz olsun. Bir cümlede en fazla bir sayı; sayıyı ancak '
+    + 'söylediğin şeyi değiştiriyorsa söyle.\n'
+    + '- Karşındaki bir insan: soruyu cevapla, konuyu değiştirme, aynı şeyi tekrar etme.',
+
+  /* Ajan istemi: kimlik + ev kurallari + konusma kaydi + uzunluk.
+     opts.sentences verilirse ajanin varsayilan uzunlugunun yerine gecer;
+     toplanti turlari sohbetten kisadir. */
+  system(agent, tone, opts){
+    const o = opts || {};
+    const limit = o.sentences || agent.maxSentences;
     return agent.system + '\n\n'
       + 'OFİS KURALLARI:\n' + R.PROMPTS.houseRules.map(r => '- ' + r).join('\n') + '\n'
       + (tone ? R.PROMPTS.toneLine(tone) + '\n' : '')
+      + '\n' + R.OFFICE_PROMPTS.SPEECH + '\n'
       + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin. Başlık, madde işareti ve emoji yok. '
-      + 'En fazla ' + agent.maxSentences + ' cümle. Sayıları verildiği gibi kullan, yeniden hesaplama.';
+      + 'En fazla ' + limit + ' cümle. Sayıları verildiği gibi kullan, yeniden hesaplama.';
   },
 
-  /* Sohbet: ajan kendi brifingini okuyup soruyu yanitlar. */
-  chat(agent, brief, question){
-    return 'MASANDAKİ RAPOR (kural motoru hesapladı, JSON):\n'
+  /* ---------- sohbet ----------
+
+     Uc ayri tur vardir ve ucune ayni sekilde davranmak arizaydi:
+
+       selam  — selamlasma, tesekkur, hâl hatir, dert yanma.
+                Rapor GONDERILMEZ; gonderilirse model onu okur.
+       konu   — ders/konu sorusu. Ajanin kendi uzmanligindan anlatmasi beklenir;
+                bunun icin rapora ihtiyaci yoktur.
+       veri   — adayin kendi durumu. Eski davranis: yalniz rapordan konusur. */
+
+  chat(agent, brief, question, kind){
+    if(kind === 'selam'){
+      return 'Sana ofisten biri seslendi: "' + question + '"\n\n'
+        + 'GÖREV: İnsan gibi karşılık ver. Rapor okuma, sayı sayma, durum özeti geçme — '
+        + 'sana bir soru sorulmadı. En fazla 2 cümle; istersen sonunda kendi alanından '
+        + 'ne konuşabileceğinizi kısaca hatırlat.';
+    }
+    if(kind === 'hal'){
+      return 'Aday sana içini döktü: "' + question + '"\n\n'
+        + 'GÖREV: Önce insan gibi karşılık ver. Bu bir soru değil; rapor okuma, '
+        + 'sayı sayma, hemen çözüm dayatma. Anladığını göster, sonra istersen kendi '
+        + 'alanından tek bir küçük öneri sun. Klişe motivasyon cümlesi kurma, '
+        + 'abartılı övgü yapma. En fazla 3 cümle.';
+    }
+    if(kind === 'konu'){
+      return 'Aday sana kendi alanından bir KONU sordu: "' + question + '"\n\n'
+        + (brief ? 'AKLININ BİR KÖŞESİNDE DURAN (gerekmiyorsa hiç değinme):\n'
+            + [brief.ozet].concat(brief.aklindakiler || [])
+                .filter(Boolean).map(x => '- ' + x).join('\n') + '\n\n' : '')
+        + 'GÖREV: Uzmanı olduğun konuyu anlat. Bunun için tabloya ihtiyacın yok — '
+        + 'ders bilgisi senin işin, oradan konuş. Adayın KENDİ sayıları hakkında bir şey '
+        + 'söyleyeceksen yalnız yukarıda yazanları kullan, yeni sayı uydurma. '
+        + 'Alanının dışındaki bir konu sorulursa hangi arkadaşının baktığını söyle.';
+    }
+    return 'Aday sana sordu: "' + question + '"\n\n'
+      + 'MASANDAKİ TABLO (kural motoru hesapladı — arka plan, aktarma):\n'
       + JSON.stringify(brief, null, 1) + '\n\n'
-      + 'SORU: ' + question + '\n\n'
-      + 'Raporda karşılığı olmayan bir şey sorulursa "bu benim masamda yok" de ve '
-      + 'hangi arkadaşının baktığını söyle.';
+      + 'GÖREV: Soruyu cevapla. Tabloda karşılığı olmayan bir şey sorulursa '
+      + '"bende o bilgi yok" de ve hangi arkadaşının baktığını söyle.';
   },
 
   /* Gunluk brifing: Patron sabah tek cumleyle masalari ozetler. */
@@ -231,39 +340,45 @@ R.OFFICE_PROMPTS = {
      Onceki toplantinin karari kapanmadiysa Patron once onun hesabini sorar:
      ofisi gercek yapan sey verilen karari takip etmesidir. */
   opening(agenda, pending){
-    return 'GÜNDEM (kural motoru seçti): ' + agenda.topic + '\n'
-      + 'SEÇİLME NEDENİ: ' + agenda.why + '\n'
-      + 'VERİ:\n' + JSON.stringify(agenda.data, null, 1) + '\n\n'
+    return 'Ekibini masaya çağırdın. Konuşulacak konu: ' + agenda.topic + '\n'
+      + 'Neden bugün bu: ' + agenda.why + '\n\n'
+      + 'ELİNDEKİ TABLO (arka plan — okuma, ondan konuş):\n'
+      + JSON.stringify(agenda.data, null, 1) + '\n\n'
       + (pending
           ? 'GEÇEN TOPLANTIDA VERİLEN VE HENÜZ KAPANMAYAN KARAR: "' + pending.title + '"\n'
             + 'Önce bunun hesabını sor: yapıldı mı, yapılmadıysa neden. Tek cümle yeter.\n\n'
           : '')
-      + 'GÖREV: Toplantıyı aç. Gündemi tek cümlede koy, ekipten ne istediğini söyle. '
-      + 'Karar verme — kararı toplantı sonunda vereceksin. En fazla 3 cümle.';
+      + 'GÖREV: Toplantıyı aç. Konuyu tek cümlede koy, ekipten ne istediğini söyle. '
+      + 'Karar verme — kararı sonunda vereceksin. Konuşur gibi yaz, en fazla 3 cümle.';
   },
 
   /* Toplanti — uzman soz aliyor.
      round: o turun kendi sorusu (durum / fikir / itiraz / sentez / serbest).
      said: o ana kadar soylenenler.  memory: ajanin daha once kurdugu cumleler. */
   turn(agent, agenda, brief, said, round, memory, options){
-    const r = round || { title:'Tur', ask:'Kendi alanından tek bulgu bildir.' };
-    return 'GÜNDEM: ' + agenda.topic + '\n'
-      + 'TUR: ' + r.title + '\n\n'
+    const r = round || { title:'Tur', ask:'Kendi alanından tek bulgu söyle.' };
+    /* Sira onemli: once ODADA NE OLUP BITTIGI, sonra arka plandaki tablo.
+       Tersi, ajana "once raporunu oku" demek oluyordu ve toplanti bes kisinin
+       sirayla tablo aktarmasina donuyordu. */
+    return 'Bir toplantı masasındasın. Gündem: ' + agenda.topic + '\n'
+      + 'Sıra sende — tur: ' + r.title + '\n\n'
+      + (said && said.length
+          ? 'ŞU ANA KADAR KONUŞULANLAR:\n'
+            + said.map(s => s.name + ': ' + s.text).join('\n') + '\n\n'
+          : '')
       + (options && options.length
-          ? 'OYLANACAK FİKİRLER:\n'
+          ? 'MASAYA ATILAN FİKİRLER:\n'
             + options.map(o => o.n + '. ' + o.name + ': ' + o.text).join('\n') + '\n\n'
           : '')
-      + 'MASANDAKİ RAPOR (JSON):\n' + JSON.stringify(brief, null, 1) + '\n\n'
-      + (said && said.length
-          ? 'TOPLANTIDA ŞU ANA KADAR SÖYLENENLER:\n'
-            + said.map(s => s.name + ' (' + s.role + '): ' + s.text).join('\n') + '\n\n'
-          : '')
+      + 'ÖNÜNDEKİ TABLO (arka plan — okuma, ondan konuş):\n'
+      + JSON.stringify(brief, null, 1) + '\n\n'
       + (memory && memory.length
           ? 'DAHA ÖNCE SENİN SÖYLEDİKLERİN (tekrarlama, yenisini söyle):\n'
             + memory.map(t => '- ' + t).join('\n') + '\n\n'
           : '')
-      + 'GÖREV: ' + r.ask + ' Söylenenleri tekrarlama; katılmıyorsan nedenini veriyle söyle. '
-      + 'Alanın dışına çıkma. En fazla ' + agent.maxSentences + ' cümle.';
+      + 'GÖREV: ' + r.ask + '\n'
+      + 'Konuşur gibi yaz: kısa, düz, tek konu. Söylenene bağlan — birine katılıyor '
+      + 'ya da katılmıyorsan adıyla söyle. Alanın dışına çıkma.';
   },
 
   /* Toplanti — Patron celiskili masaya takip sorusu sorar.
@@ -278,20 +393,20 @@ R.OFFICE_PROMPTS = {
 
   /* Toplanti — capraz soruya yanit. */
   answer(agent, conflict, brief, said){
-    return 'PATRON SANA SORDU: ' + conflict.question + '\n\n'
-      + 'MASANDAKİ RAPOR (JSON):\n' + JSON.stringify(brief, null, 1) + '\n\n'
+    return 'Patron masada sana döndü ve sordu: "' + conflict.question + '"\n\n'
       + (said && said.length
-          ? 'TOPLANTIDA SÖYLENENLER:\n'
+          ? 'ŞU ANA KADAR KONUŞULANLAR:\n'
             + said.map(s => s.name + ': ' + s.text).join('\n') + '\n\n'
           : '')
-      + 'GÖREV: Soruya doğrudan yanıt ver. Savunma yapma, veriye bak: '
-      + 'çelişki gerçekse kabul et, değilse nedenini sayıyla göster. '
-      + 'En fazla ' + agent.maxSentences + ' cümle.';
+      + 'ÖNÜNDEKİ TABLO (arka plan — okuma, ondan konuş):\n'
+      + JSON.stringify(brief, null, 1) + '\n\n'
+      + 'GÖREV: Soruya doğrudan cevap ver. Savunmaya geçme: çelişki gerçekse kabul et, '
+      + 'değilse neden olmadığını söyle. Konuşur gibi, kısa.';
   },
 
   /* Toplanti — Patron kapatir. Eylem kural motorundan gelir, uydurulmaz. */
   closing(agenda, said, action, vote){
-    return 'GÜNDEM: ' + agenda.topic + '\n\n'
+    return 'Toplantıyı kapatma sırası sende. Konu: ' + agenda.topic + '\n\n'
       + 'EKİBİN SÖYLEDİKLERİ:\n'
       + said.map(s => s.name + ' (' + s.role + '): ' + s.text).join('\n') + '\n\n'
       + (vote && vote.kazanan
@@ -303,7 +418,7 @@ R.OFFICE_PROMPTS = {
       + (action.why ? ' — ' + action.why : '') + '\n\n'
       + 'GÖREV: Toplantıyı kapat. Ekipte çelişki varsa hangisinin haklı olduğunu söyle, '
       + (vote && vote.kazanan ? 'oylamanın sonucunu da an, ' : '')
-      + 'sonra yukarıdaki eylemi kendi cümlenle gerekçelendir. Eylemi DEĞİŞTİRME, '
-      + 'yerine başka iş önerme. En fazla 4 cümle.';
+      + 'sonra yukarıdaki işi kendi cümlenle gerekçelendir. İşi DEĞİŞTİRME, '
+      + 'yerine başka iş önerme. Konuşur gibi yaz, en fazla 4 cümle.';
   },
 };

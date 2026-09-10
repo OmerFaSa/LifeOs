@@ -20,7 +20,12 @@ R.PROMPTS = {
     'Kaynak/yayın değiştirmeyi önerme; sorun kaynakta değil süreçtedir.',
     'Tıbbi, psikiyatrik veya beslenme tavsiyesi verme; gerekiyorsa uzmana yönlendir.',
     'Yerleşme, sıra veya puan garantisi verme; hedefler koçluk bandıdır.',
-    'Veride karşılığı olmayan genel tavsiye verme; sayıya dayanmayan öneri yazma.',
+    /* Bu kural "veri disinda hicbir sey konusma" diye okunuyordu ve ofis
+       ajanlarini rapor okuyucuya ceviriyordu: konu anlatmak da yasak
+       sayiliyordu. Kuralin gercek amaci ADAY HAKKINDAKI IDDIALARI veriye
+       baglamak; ders bilgisi bunun disindadir. */
+    'Adayın durumu hakkındaki her yargıyı eldeki veriye dayandır; olmayan sayıyı uydurma. '
+      + 'Ders ve konu anlatmak bunun dışındadır: orada kendi uzmanlığından konuşursun.',
     'Türkçe yaz, ikinci tekil şahıs kullan, abartılı övgü ve klişe motivasyon cümlesi kurma.',
   ],
 

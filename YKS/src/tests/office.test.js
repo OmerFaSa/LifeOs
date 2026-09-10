@@ -292,7 +292,7 @@
         const tytCall = calls[2].req.messages[0].text;   // 0 açılış, 1 analist, 2 tyt
         expect(tytCall.indexOf('"alan": "TYT"') > 0 || tytCall.indexOf('"alan":"TYT"') > 0).toBeTruthy();
         expect(tytCall.indexOf('AYT Fizik')).toBe(-1);
-        expect(tytCall.indexOf('TOPLANTIDA ŞU ANA KADAR') > 0).toBeTruthy();
+        expect(tytCall.indexOf('ŞU ANA KADAR KONUŞULANLAR') > 0).toBeTruthy();
       });
     });
 
@@ -2142,6 +2142,180 @@
     });
   });
 
+
+
+  /* ==================== sohbet edilebilirlik ====================
+     Şikâyet neti: "merhaba yazıyorum, adam direkt masamdaki rapor diyor."
+     Sebep tek bir hata değil, istemin kendisiydi: her çağrıda ajanın önüne
+     JSON rapor konup "bunu yorumla" deniyordu — model de doğal olarak raporu
+     sesli okuyordu.
+
+     Çözüm: gelen mesaj önce SINIFLANIR (kural motorunda, deterministik) ve
+     sınıf neyin gönderileceğini belirler. Selamlaşmaya rapor gönderilmez;
+     gönderilirse model onu okur. */
+
+  describe('Ofis — sohbet edilebilirlik', () => {
+
+    it('selamlaşma selamlaşma olarak tanınır', () => {
+      ['merhaba', 'Selam', 'slm', 'günaydın', 'naber', 'nasılsın?', 'hey',
+       'teşekkürler', 'sağ ol', 'eyvallah', 'sen kimsin?']
+        .forEach(q => expect(O.chatKind(q)).toBe('selam'));
+    });
+
+    it('selamla başlayan ama içinde gerçek soru olan mesaj selamlaşma sayılmaz', () => {
+      /* Uzun mesaj bir hâl hatır sorusu değildir; içindeki soru cevaplanmalı. */
+      expect(O.chatKind('merhaba, TYT matematik netim neden düşüyor acaba bu hafta?'))
+        .toBe('veri');
+      expect(O.chatKind('selam, üslü sayılar nasıl çalışılır?')).toBe('konu');
+    });
+
+    it('ders sorusu konu turudur', () => {
+      ['üslü sayılar nasıl çalışılır', 'paragraf mantığı nedir',
+       'türev ne demek', 'bu konuyu anlamadım', 'çemberde açı konusunda takıldım',
+       'bir örnek ver']
+        .forEach(q => expect(O.chatKind(q)).toBe('konu'));
+    });
+
+    it('kendi durumu sorulduğunda veri turudur', () => {
+      ['TYT matematikte hangi konuya dönmeliyim?', 'netim kaç oldu',
+       'analiz borcum ne durumda', 'planım hedefime yetiyor mu', 'bu hafta nasıl gidiyor']
+        .forEach(q => expect(O.chatKind(q)).toBe('veri'));
+    });
+
+    it('dert yanma veri sorusundan önce gelir', () => {
+      /* "Moralim bozuk, netlerim düşüyor" diyen birine önce tablo okumak,
+         sorulan soruya değil sorulmayan soruya cevap vermektir. */
+      expect(O.chatKind('moralim çok bozuk')).toBe('hal');
+      expect(O.chatKind('moralim bozuk, netlerim de düşüyor')).toBe('hal');
+      expect(O.chatKind('çok yoruldum artık')).toBe('hal');
+    });
+
+    it('sınıflandırılamayan mesaj veri sayılır', () => {
+      /* Uygulama bir çalışma sistemi: varsayılan soru adayın kendi durumudur. */
+      expect(O.chatKind('şey')).toBe('veri');
+      expect(O.chatKind('')).toBe('veri');
+    });
+
+    /* ---------- ne gönderiliyor ---------- */
+
+    it('selamlaşmaya ve dert yanmaya RAPOR GÖNDERİLMEZ', () => {
+      reset();
+      /* Bu testin tamamı şu tek cümle içindir: bir modelin önüne JSON koyup
+         "yorumla" demek, ona onu sesli okutmaktır. */
+      expect(O.chatPayload('tyt', 'selam')).toBeNull();
+      expect(O.chatPayload('rehber', 'hal')).toBeNull();
+      expect(O.chatPayload('tyt', 'veri')).toBeTruthy();
+    });
+
+    it('konu turunda ham tablo değil, düz cümleden özet gider', () => {
+      reset();
+      /* JSON görmüş bir model onu okur; düz cümle okunacak bir şey değil,
+         bilinen bir şeydir. */
+      const konu = O.chatPayload('tyt', 'konu');
+      expect(typeof konu.ozet).toBe('string');
+      expect(Array.isArray(konu.aklindakiler)).toBeTruthy();
+      expect(JSON.stringify(konu).length < JSON.stringify(O.chatPayload('tyt', 'veri')).length)
+        .toBeTruthy();
+
+      /* İstemde tek bir süslü parantez bile geçmemeli. */
+      const p = R.OFFICE_PROMPTS.chat(R.AGENT_BY_ID.tyt, konu, 'türev nedir', 'konu');
+      expect(p.indexOf('{')).toBe(-1);
+    });
+
+    it('selamlaşma isteminde rapor da görev olarak "yorumla" da geçmez', () => {
+      const agent = R.AGENT_BY_ID.tyt;
+      const p = R.OFFICE_PROMPTS.chat(agent, null, 'merhaba', 'selam');
+      expect(p).toContain('merhaba');
+      expect(p.indexOf('MASANDAKİ')).toBe(-1);
+      expect(p.indexOf('{')).toBe(-1);          // hiç JSON yok
+      expect(p).toContain('Rapor okuma');
+    });
+
+    it('konu isteminde ders bilgisinin serbest olduğu açıkça söylenir', () => {
+      const agent = R.AGENT_BY_ID.tyt;
+      const p = R.OFFICE_PROMPTS.chat(agent, { ozet:'x', aklindakiler:[] },
+        'üslü sayılar nasıl çalışılır', 'konu');
+      expect(p).toContain('tabloya ihtiyacın yok');
+      /* Adayın kendi sayıları hâlâ korumalı. */
+      expect(p).toContain('uydurma');
+    });
+
+    it('selamlaşma sistemde değişiklik önermez ve sayı denetimine girmez', async () => {
+      reset();
+      await withStubLLM('Merhaba, buradayım.', async calls => {
+        await O.ask('tyt', 'merhaba');
+        const req = calls[0].req;
+        /* Öneri kataloğu istemde olmamalı: "merhaba"nın karşılığı bir
+           sistem değişikliği önerisi olamaz. */
+        expect(req.system.indexOf('EYLEM')).toBe(-1);
+      });
+    });
+
+    /* ---------- konuşma kaydı ---------- */
+
+    it('her istem raporu ele veren kalıpları yasaklar', () => {
+      const sys = R.OFFICE_PROMPTS.system(R.AGENT_BY_ID.tyt, 'dengeli');
+      expect(sys).toContain('raporuma göre');
+      expect(sys).toContain('Rapor okumuyorsun');
+    });
+
+    it('tur uzunluğu istemde ajanın varsayılanının yerine geçebilir', () => {
+      const agent = R.AGENT_BY_ID.tyt;
+      const uzun = R.OFFICE_PROMPTS.system(agent, 'dengeli');
+      const kisa = R.OFFICE_PROMPTS.system(agent, 'dengeli', { sentences:2 });
+      expect(uzun).toContain('En fazla ' + agent.maxSentences + ' cümle');
+      expect(kisa).toContain('En fazla 2 cümle');
+    });
+
+    it('toplantı turları sohbetten kısadır', () => {
+      /* Beş kişi sırayla dört cümle kurunca toplantı okunmaz hâle geliyordu. */
+      O.ROUNDS.forEach(r => {
+        expect(r.sentences <= 2).toBeTruthy();
+      });
+      expect(R.AGENT_BY_ID.tyt.maxSentences > 2).toBeTruthy();
+    });
+
+    it('toplantı isteminde önce konuşulanlar, sonra tablo gelir', () => {
+      const agent = R.AGENT_BY_ID.tyt;
+      const p = R.OFFICE_PROMPTS.turn(agent, { topic:'Gündem' }, { a:1 },
+        [{ name:'Deniz', role:'Analist', text:'bir bulgu' }], O.ROUNDS[0], null, null);
+      /* Tersi, ajana "önce raporunu oku" demek oluyordu. */
+      expect(p.indexOf('ŞU ANA KADAR KONUŞULANLAR') < p.indexOf('ÖNÜNDEKİ TABLO')).toBeTruthy();
+      expect(p).toContain('arka plan');
+      expect(p).toContain('Konuşur gibi yaz');
+    });
+
+    /* ---------- model yokken ---------- */
+
+    it('model bağlı değilken bile selamlaşmaya rapor okunmaz', async () => {
+      reset();
+      /* Kullanıcının gördüğü tam olarak buydu: model yokken NE yazılırsa
+         yazılsın aynı tablo dönüyordu. */
+      const res = await O.ask('tyt', 'merhaba');
+      expect(res.mode).toBe('kural');
+      expect(res.text.indexOf('Merhaba')).toBe(0);
+      expect(res.text.indexOf('Masamdaki rapor')).toBe(-1);
+      expect(res.text).toContain('model');
+    });
+
+    it('model bağlı değilken konu sorusunda durum dürüstçe söylenir', async () => {
+      reset();
+      const res = await O.ask('tyt', 'üslü sayılar nasıl çalışılır');
+      expect(res.mode).toBe('kural');
+      expect(res.text).toContain('model');
+      expect(res.text.indexOf('anlatmayı isterdim')).toBeGreaterThan(-1);
+    });
+
+    it('"model bağla" notu sohbet başına bir kez verilir', async () => {
+      reset();
+      const first = await O.ask('tyt', 'merhaba');
+      await O.pushChat('tyt', 'user', 'merhaba');
+      await O.pushChat('tyt', 'agent', first.text);
+      const second = await O.ask('tyt', 'selam');
+      /* Her mesajda tekrarlamak sohbet değil uyarı yağmurudur. */
+      expect(first.text.length > second.text.length).toBeTruthy();
+    });
+  });
 
   /* ==================== 3B oda ====================
      Ofis ekranı iki görünüm taşır: düz kat planı ve 3B oda. İkisi de AYNI
