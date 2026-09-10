@@ -95,8 +95,12 @@ R.Solver = (function(){
       const meta = tryJson(fence[1]);
       if(meta) return { text:raw.slice(0, fence.index).trim(), meta };
     }
+    /* start > 0 degil >= 0: yaniti TAMAMEN JSON olan bir denetim turu
+       ("{"cevap":"C","emin":true}") ayrilamiyor ve "denetim sonucsuz"
+       sayiliyordu. Cerceveli dal zaten 0'i dogru isliyordu; iki yol
+       ayni davranmali. */
     const start = raw.lastIndexOf('{');
-    if(start > 0){
+    if(start >= 0){
       const end = raw.lastIndexOf('}');
       if(end > start){
         const meta = tryJson(raw.slice(start, end + 1));
@@ -268,8 +272,10 @@ R.Solver = (function(){
   /* Gorselli istek icin gorsel okuyabilen bir zincir kurulur; metin
      istegi icin ofisin normal zinciri yeter. */
   function chainFor(withImage){
-    const cfg = R.Office.agentConfig('analist');
-    if(!withImage) return R.Office.chainFor('analist');
+    /* Soru cozumu artik kocun alani: ajan basina model ayari yapan
+       kullanicinin secimi dogru ajana dussun. */
+    const cfg = R.Office.agentConfig('koc');
+    if(!withImage) return R.Office.chainFor('koc');
     const chain = R.LLM.visionChain(cfg);
     return chain;
   }
@@ -419,6 +425,14 @@ R.Solver = (function(){
   async function verifyRun(req, opts){
     const o = opts || {};
     const r = req || {};
+
+    /* Ilk cozum bir cevap bildirmediyse karsilastiracak bir sey yoktur.
+       Eskiden bos cevap "farkli" sayiliyor, sahte bir ayrilik gosterilip
+       hakem turu bosuna kota harciyordu. */
+    if(!String(r.answerA || '').trim()){
+      return { durum:'emin_degil', neden:'no_first' };
+    }
+
     let second;
     try{
       second = await check(r, o);
@@ -429,7 +443,9 @@ R.Solver = (function(){
       return { durum:'emin_degil', second, neden:'empty' };
     }
     if(sameAnswer(r.answerA, second.answer)){
-      return { durum:'ayni', second };
+      /* Denetim "emin degilim" dediyse ayni cevap bile zayif kanittir;
+         ekran bunu guclu bir onay gibi gostermemeli. */
+      return { durum:'ayni', second, zayif:!second.sure };
     }
     let judge = null;
     try{
@@ -455,11 +471,19 @@ R.Solver = (function(){
     const history = (r.thread || []).slice(-6)
       .map(m => ({ role:m.role === 'user' ? 'user' : 'assistant', text:m.text }));
 
+    /* Cozum HER turda baglamda durur. Once yalniz ilk turda gonderiliyordu;
+       ikinci sorudan itibaren model, artik goremedigi bir cozum hakkindaki
+       soruyu yanitlamaya calisiyordu. */
+    const opening = { role:'user', text:R.SOLVER.chat({
+      solution:String(r.solution || '').slice(0, 2500), follow:q }) };
+
     const res = await R.LLM.complete(chain, {
       system:R.SOLVER.chatSystem,
       messages:history.length
-        ? history.concat([{ role:'user', text:q }])
-        : [{ role:'user', text:R.SOLVER.chat({ solution:String(r.solution || '').slice(0, 2500), follow:q }) }],
+        ? [{ role:'user', text:R.SOLVER.chat({
+              solution:String(r.solution || '').slice(0, 2500), follow:'(aşağıdaki konuşma bunun üzerine)' }) }]
+            .concat(history, [{ role:'user', text:q }])
+        : [opening],
       maxTokens:CHAT_BUDGET,
       temperature:0.3,
       signal:o.signal,

@@ -10934,7 +10934,14 @@ R.LLM = (function(){
     return true;
   }
 
-  /* Gorsel okuyabilen ilk yapilandirmalar — cok modelli zincir kurmak icin. */
+  /* Gorsel okuyabilen ilk yapilandirmalar — cok modelli zincir kurmak icin.
+
+     Zincir KISA tutulur (Office.chainFor ile ayni sebep): her deneme bir
+     gunluk hak yakiyor ve sinirsiz bir liste, tek bir fotograf icin gunun
+     kotasini bitirebilir. Ilk birkac gorsel modeli calismiyorsa sorun
+     modelde degildir. */
+  const VISION_CHAIN_MAX = 4;
+
   function visionChain(cfg){
     const out = [];
     const seen = {};
@@ -10956,7 +10963,7 @@ R.LLM = (function(){
       if(id === (cfg && cfg.provider)) return;
       modelsFor(id).forEach(m => push({ provider:id, model:m.id }));
     });
-    return out;
+    return out.slice(0, VISION_CHAIN_MAX);
   }
 
   /* ---------- yerlesik yetenek ---------- */
@@ -12325,8 +12332,12 @@ R.Voice = (function(){
          .replace(/\^(\d+)/g, ' üzeri $1');
     t = t.replace(/\bkök\s*\(([^)]{1,12})\)/gi, 'kök $1');
     t = t.replace(/(\d)\s*\/\s*(\d)/g, '$1 bölü $2');
-    t = t.replace(/\s*=\s*/g, ' eşittir ')
-         .replace(/\s*<=\s*/g, ' küçük eşittir ').replace(/\s*>=\s*/g, ' büyük eşittir ')
+    /* SIRA ONEMLI: cift karakterli isaretler once. Tersi, "=" kuralinin
+       "<=" icindeki esittiri yiyip "buyuktur esittir" uretmesine yol
+       aciyordu ve digger iki kural hic calismiyordu. */
+    t = t.replace(/\s*<=\s*/g, ' küçük eşittir ').replace(/\s*>=\s*/g, ' büyük eşittir ')
+         .replace(/\s*!=\s*/g, ' eşit değildir ')
+         .replace(/\s*=\s*/g, ' eşittir ')
          .replace(/\s*<\s*/g, ' küçüktür ').replace(/\s*>\s*/g, ' büyüktür ');
 
     /* Okunmayan isaretler: madde imleri, yildizlar, uzun tireler. */
@@ -14985,8 +14996,12 @@ R.Solver = (function(){
       const meta = tryJson(fence[1]);
       if(meta) return { text:raw.slice(0, fence.index).trim(), meta };
     }
+    /* start > 0 degil >= 0: yaniti TAMAMEN JSON olan bir denetim turu
+       ("{"cevap":"C","emin":true}") ayrilamiyor ve "denetim sonucsuz"
+       sayiliyordu. Cerceveli dal zaten 0'i dogru isliyordu; iki yol
+       ayni davranmali. */
     const start = raw.lastIndexOf('{');
-    if(start > 0){
+    if(start >= 0){
       const end = raw.lastIndexOf('}');
       if(end > start){
         const meta = tryJson(raw.slice(start, end + 1));
@@ -15158,8 +15173,10 @@ R.Solver = (function(){
   /* Gorselli istek icin gorsel okuyabilen bir zincir kurulur; metin
      istegi icin ofisin normal zinciri yeter. */
   function chainFor(withImage){
-    const cfg = R.Office.agentConfig('analist');
-    if(!withImage) return R.Office.chainFor('analist');
+    /* Soru cozumu artik kocun alani: ajan basina model ayari yapan
+       kullanicinin secimi dogru ajana dussun. */
+    const cfg = R.Office.agentConfig('koc');
+    if(!withImage) return R.Office.chainFor('koc');
     const chain = R.LLM.visionChain(cfg);
     return chain;
   }
@@ -15309,6 +15326,14 @@ R.Solver = (function(){
   async function verifyRun(req, opts){
     const o = opts || {};
     const r = req || {};
+
+    /* Ilk cozum bir cevap bildirmediyse karsilastiracak bir sey yoktur.
+       Eskiden bos cevap "farkli" sayiliyor, sahte bir ayrilik gosterilip
+       hakem turu bosuna kota harciyordu. */
+    if(!String(r.answerA || '').trim()){
+      return { durum:'emin_degil', neden:'no_first' };
+    }
+
     let second;
     try{
       second = await check(r, o);
@@ -15319,7 +15344,9 @@ R.Solver = (function(){
       return { durum:'emin_degil', second, neden:'empty' };
     }
     if(sameAnswer(r.answerA, second.answer)){
-      return { durum:'ayni', second };
+      /* Denetim "emin degilim" dediyse ayni cevap bile zayif kanittir;
+         ekran bunu guclu bir onay gibi gostermemeli. */
+      return { durum:'ayni', second, zayif:!second.sure };
     }
     let judge = null;
     try{
@@ -15345,11 +15372,19 @@ R.Solver = (function(){
     const history = (r.thread || []).slice(-6)
       .map(m => ({ role:m.role === 'user' ? 'user' : 'assistant', text:m.text }));
 
+    /* Cozum HER turda baglamda durur. Once yalniz ilk turda gonderiliyordu;
+       ikinci sorudan itibaren model, artik goremedigi bir cozum hakkindaki
+       soruyu yanitlamaya calisiyordu. */
+    const opening = { role:'user', text:R.SOLVER.chat({
+      solution:String(r.solution || '').slice(0, 2500), follow:q }) };
+
     const res = await R.LLM.complete(chain, {
       system:R.SOLVER.chatSystem,
       messages:history.length
-        ? history.concat([{ role:'user', text:q }])
-        : [{ role:'user', text:R.SOLVER.chat({ solution:String(r.solution || '').slice(0, 2500), follow:q }) }],
+        ? [{ role:'user', text:R.SOLVER.chat({
+              solution:String(r.solution || '').slice(0, 2500), follow:'(aşağıdaki konuşma bunun üzerine)' }) }]
+            .concat(history, [{ role:'user', text:q }])
+        : [opening],
       maxTokens:CHAT_BUDGET,
       temperature:0.3,
       signal:o.signal,
@@ -20141,7 +20176,6 @@ R.Screens.solve = (function(){
   let image = null;        // { mime, data, previewUrl, bytes, width, height }
   let busy = false;
   let result = null;       // { text, meta, model, provider }
-  let draft = null;        // kaydedilmeyi bekleyen kayıt
   let controller = null;
   let followBusy = false;
   let thread = [];         // [{ role:'user'|'agent', text }] — çözümden sonraki sohbet
@@ -20150,6 +20184,10 @@ R.Screens.solve = (function(){
   let checkBusy = false;
   let topicRef = '';       // seçili ders::konu
   let topicQuery = '';     // konu arama kutusuna yazılan
+  /* Hata EKRAN DURUMUNDA tutulur, DOM'a yazılmaz: #q-out'a yazılan uyarı,
+     hemen ardından gelen R.App.render() ile siliniyordu ve her başarısız
+     çözüm sessizce geçiyordu. */
+  let failure = null;      // { code }
 
   /* Denetime ve kayda giden soru metni: kullanıcı yazdıysa o, fotoğraftan
      geldiyse modelin okuyup yazdığı ilk satırlar. */
@@ -20244,6 +20282,9 @@ R.Screens.solve = (function(){
           when(result && !busy, () => K.Button({ label:'Yeni soru', size:'sm', act:'q-reset' })),
         ], { wrap:true }),
 
+        when(failure, () => K.Notice({ tone:'danger', title:'Çözülemedi.',
+          body:R.LLM.errorText(failure.code) })),
+
         html`<div id="q-out"></div>`,
       ], 'sm'),
     });
@@ -20326,8 +20367,10 @@ R.Screens.solve = (function(){
     }
     if(check.durum === 'emin_degil'){
       return K.Notice({ tone:'warn', title:'Denetim sonuçsuz.',
-        body:'İkinci çözüm bir cevap üretemedi. Bu, çözümün yanlış olduğu anlamına '
-           + 'gelmez ama doğrulandığı anlamına da gelmez.' });
+        body:check.neden === 'no_first'
+          ? 'Yukarıdaki çözüm net bir cevap bildirmedi, karşılaştıracak bir şey yok.'
+          : 'İkinci çözüm bir cevap üretemedi. Bu, çözümün yanlış olduğu anlamına '
+            + 'gelmez ama doğrulandığı anlamına da gelmez.' });
     }
     if(check.durum === 'ayni'){
       return K.Notice({ tone:'ok', title:'İki bağımsız çözüm aynı cevaba çıktı.',
@@ -20335,7 +20378,9 @@ R.Screens.solve = (function(){
             ? 'Soru ' + check.second.model + ' modeline sıfırdan çözdürüldü ve aynı sonuca ulaştı. '
             : 'Soru aynı modele sıfırdan çözdürüldü ve aynı sonuca ulaştı — bağlamı '
               + 'görmedi ama model aynı, bağımsızlığı zayıf. ')
-          + 'Bu bir garanti değildir: iki çözüm aynı hatayı da yapmış olabilir.' });
+          + 'Bu bir garanti değildir: iki çözüm aynı hatayı da yapmış olabilir.'
+          + (check.zayif ? ' Üstelik ikinci çözüm sonucundan emin olmadığını söyledi; '
+              + 'aynı cevaba çıkması zayıf bir kanıt.' : '') });
     }
     /* ayrildi */
     const j = check.judge;
@@ -20690,7 +20735,7 @@ R.Screens.solve = (function(){
     async 'q-clear-image'(){ image = null; await R.App.render(); },
 
     async 'q-reset'(){
-      image = null; result = null; draft = null;
+      image = null; result = null; failure = null;
       thread = []; check = null; topicRef = ''; topicQuery = '';
       await R.App.render();
     },
@@ -20711,7 +20756,7 @@ R.Screens.solve = (function(){
       }
       busy = true;
       thread = []; check = null; topicRef = ''; topicQuery = '';
-      result = null;
+      result = null; failure = null;
       controller = new AbortController();
       await R.App.render();
       out(K.Notice({ tone:'info', body:'Soru okunuyor ve çözülüyor…' }));
@@ -20725,11 +20770,10 @@ R.Screens.solve = (function(){
           },
         });
         result = res;
-        draft = null;
         out('');
       }catch(err){
-        const code = err && err.code;
-        out(K.Notice({ tone:'danger', title:'Çözülemedi.', body:R.LLM.errorText(code) }));
+        /* İptal bir hata değildir: kullanıcı zaten durdurdu. */
+        if(!err || err.code !== 'cancelled') failure = { code:err && err.code };
       }finally{
         busy = false;
         await R.App.render();
@@ -20823,12 +20867,17 @@ R.Screens.solve = (function(){
       const name = val('src-name');
       if(!name){ UI.toast('Kaynağın adı gerekiyor'); return; }
       const old = el.dataset.id ? R.Sources.byId(el.dataset.id) : null;
-      await R.Sources.save(Object.assign({}, old || {}, {
-        id:el.dataset.id || undefined,
+      /* `id:undefined` YAZILMAZ: Object.assign undefined degeri de kopyalar
+         ve newSource()'un urettigi kimligin ustune yazardi. Sonuc: her yeni
+         kaynak "sources/undefined" altina kaydediliyor, bir oncekini
+         siliyor ve yeniden acilista kimliksiz diye eleniyordu. */
+      const patch = Object.assign({}, old || {}, {
         name, level:val('src-level'), kind:val('src-kind'),
         subjectId:val('src-subject') || null,
         note:val('src-note'),
-      }));
+      });
+      if(el.dataset.id) patch.id = el.dataset.id;
+      await R.Sources.save(patch);
       UI.closeSheet();
       UI.toast('Kaynak kaydedildi');
       await R.App.render();
@@ -20905,7 +20954,7 @@ R.Screens.solve = (function(){
     }
 
     UI.toast(alsoError ? 'Kaydedildi ve yanlış defterine eklendi' : 'Kaydedildi');
-    result = null; image = null; thread = []; check = null;
+    result = null; image = null; thread = []; check = null; failure = null;
     topicRef = ''; topicQuery = '';
     await R.App.render();
   }

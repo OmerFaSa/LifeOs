@@ -655,15 +655,19 @@
       R.LLM.complete = async (chain, req) => { sent = req; return { text:'cevap', model:'A', provider:'s', ms:1 }; };
       try{
         await Q.talk({
-          solution:'çözüm metni',
+          solution:'ÇÖZÜM METNİ',
           follow:'peki ya ikinci adım?',
           thread:[{ role:'user', text:'ilk adım?' }, { role:'agent', text:'şöyle' }],
         });
-        /* Geçmiş + yeni soru: konuşma devam ediyor, tek seferlik değil. */
-        expect(sent.messages).toHaveLength(3);
-        expect(sent.messages[0].role).toBe('user');
-        expect(sent.messages[1].role).toBe('assistant');
-        expect(sent.messages[2].text).toBe('peki ya ikinci adım?');
+        /* Çözüm bağlamı + geçmiş + yeni soru. Çözüm HER turda gönderilir:
+           yalnız ilk turda gönderilince, ikinci sorudan itibaren model
+           artık göremediği bir çözüm hakkındaki soruyu yanıtlamaya
+           çalışıyordu. */
+        expect(sent.messages).toHaveLength(4);
+        expect(sent.messages[0].text).toContain('ÇÖZÜM METNİ');
+        expect(sent.messages[1].role).toBe('user');
+        expect(sent.messages[2].role).toBe('assistant');
+        expect(sent.messages[3].text).toBe('peki ya ikinci adım?');
         expect(sent.system).toContain('BAŞKA bir');
       }finally{
         R.LLM.complete = realComplete; R.LLM.ready = realReady;
@@ -718,6 +722,90 @@
       const p = R.SOLVER.arbiter({ question:'s', solutionA:'a', answerA:'1', answerB:'2' });
       expect(p).toContain('hangi adımda');
       expect(p).toContain('hataAdimi');
+    });
+  });
+
+
+  /* ==================== inceleme bulguları ====================
+     Kod incelemesinin yakaladığı sekiz hata. Her biri sessizce bozuyordu:
+     ekranda bir şey görünmüyor, veri kayboluyor ya da yanlış bir güven
+     mesajı veriliyordu. Buradaki testler onların geri gelmesini engeller. */
+
+  describe('Çözücü — inceleme bulguları', () => {
+
+    it('yalnızca JSON dönen yanıt ayrılabilir', () => {
+      /* Denetim turu kısa yazar ve bazen SADECE kuyruğu döndürür.
+         `start > 0` koşulu bunu ayıramıyor ve "denetim sonuçsuz" diyordu. */
+      const out = Q.parse('{"cevap":"C","emin":true}');
+      expect(out.meta.cevap).toBe('C');
+      expect(out.text).toBe('');
+    });
+
+    it('ilk çözüm cevap bildirmediyse sahte ayrılık üretilmez', async () => {
+      const realComplete = R.LLM.complete, realReady = R.LLM.ready;
+      R.LLM.ready = () => true;
+      let called = 0;
+      R.LLM.complete = async () => { called++; return { text:'{"cevap":"5"}', model:'B', provider:'s', ms:1 }; };
+      try{
+        const r = await Q.verifyRun({ question:'x', answerA:'', solutionA:'…' });
+        expect(r.durum).toBe('emin_degil');
+        expect(r.neden).toBe('no_first');
+        /* Karşılaştıracak bir şey yokken model hiç çağrılmamalı. */
+        expect(called).toBe(0);
+      }finally{
+        R.LLM.complete = realComplete; R.LLM.ready = realReady;
+      }
+    });
+
+    it('denetim "emin değilim" derse aynı cevap zayıf kanıt sayılır', async () => {
+      const realComplete = R.LLM.complete, realReady = R.LLM.ready;
+      R.LLM.ready = () => true;
+      R.LLM.complete = async () => ({ text:'{"cevap":"C","emin":false}', model:'B', provider:'s', ms:1 });
+      try{
+        const r = await Q.verifyRun({ question:'x', answerA:'C', solutionA:'…' });
+        expect(r.durum).toBe('ayni');
+        /* Emin olmayan bir doğrulayıcı güçlü onay değildir. */
+        expect(r.zayif).toBeTruthy();
+      }finally{
+        R.LLM.complete = realComplete; R.LLM.ready = realReady;
+      }
+    });
+
+    it('görsel zinciri sınırlıdır — tek fotoğraf günün kotasını bitirmesin', () => {
+      R.LLM.setKey('gemini', 'AQ.' + 'test_anahtar_ornegi');
+      R.LLM.setKey('openrouter', 'sk-or-v1-test');
+      const chain = R.LLM.visionChain({ provider:'gemini', model:'gemini-2.5-flash' });
+      expect(chain.length <= 4).toBeTruthy();
+      R.LLM.setKey('gemini', ''); R.LLM.setKey('openrouter', '');
+    });
+
+    it('karşılaştırma işaretleri doğru okunur', () => {
+      /* "=" kuralı önce çalışınca "<=" içindeki eşittiri yiyor ve
+         "büyüktür eşittir" çıkıyordu; çift karakterli işaretler önce. */
+      expect(R.Voice.speechText('net >= 30')).toBe('net büyük eşittir 30');
+      expect(R.Voice.speechText('x <= 5')).toBe('x küçük eşittir 5');
+      expect(R.Voice.speechText('a != b')).toBe('a eşit değildir b');
+      expect(R.Voice.speechText('a = b')).toBe('a eşittir b');
+      expect(R.Voice.speechText('a > b')).toBe('a büyüktür b');
+    });
+
+    it('yeni kaynak gerçek bir kimlikle kaydedilir', async () => {
+      resetState();
+      R.S.sources = [];
+      /* Object.assign undefined değeri de kopyalar: `id:undefined`
+         geçirmek newSource()'un ürettiği kimliğin üstüne yazıyordu ve
+         her yeni kaynak "sources/undefined" altına kaydedilip bir
+         öncekini siliyordu. */
+      const a = await R.Sources.save({ name:'Birinci' });
+      const b = await R.Sources.save({ name:'İkinci' });
+      expect(!!a.id).toBeTruthy();
+      expect(!!b.id).toBeTruthy();
+      expect(a.id === b.id).toBeFalsy();
+      expect(R.Sources.all()).toHaveLength(2);
+
+      /* Yeniden yüklendiğinde ikisi de duruyor mu? */
+      await R.Sources.load();
+      expect(R.Sources.all()).toHaveLength(2);
     });
   });
 

@@ -299,8 +299,12 @@ R.Voice = (function(){
          .replace(/\^(\d+)/g, ' üzeri $1');
     t = t.replace(/\bkök\s*\(([^)]{1,12})\)/gi, 'kök $1');
     t = t.replace(/(\d)\s*\/\s*(\d)/g, '$1 bölü $2');
-    t = t.replace(/\s*=\s*/g, ' eşittir ')
-         .replace(/\s*<=\s*/g, ' küçük eşittir ').replace(/\s*>=\s*/g, ' büyük eşittir ')
+    /* SIRA ONEMLI: cift karakterli isaretler once. Tersi, "=" kuralinin
+       "<=" icindeki esittiri yiyip "buyuktur esittir" uretmesine yol
+       aciyordu ve digger iki kural hic calismiyordu. */
+    t = t.replace(/\s*<=\s*/g, ' küçük eşittir ').replace(/\s*>=\s*/g, ' büyük eşittir ')
+         .replace(/\s*!=\s*/g, ' eşit değildir ')
+         .replace(/\s*=\s*/g, ' eşittir ')
          .replace(/\s*<\s*/g, ' küçüktür ').replace(/\s*>\s*/g, ' büyüktür ');
 
     /* Okunmayan isaretler: madde imleri, yildizlar, uzun tireler. */

@@ -20,7 +20,6 @@ R.Screens.solve = (function(){
   let image = null;        // { mime, data, previewUrl, bytes, width, height }
   let busy = false;
   let result = null;       // { text, meta, model, provider }
-  let draft = null;        // kaydedilmeyi bekleyen kayıt
   let controller = null;
   let followBusy = false;
   let thread = [];         // [{ role:'user'|'agent', text }] — çözümden sonraki sohbet
@@ -29,6 +28,10 @@ R.Screens.solve = (function(){
   let checkBusy = false;
   let topicRef = '';       // seçili ders::konu
   let topicQuery = '';     // konu arama kutusuna yazılan
+  /* Hata EKRAN DURUMUNDA tutulur, DOM'a yazılmaz: #q-out'a yazılan uyarı,
+     hemen ardından gelen R.App.render() ile siliniyordu ve her başarısız
+     çözüm sessizce geçiyordu. */
+  let failure = null;      // { code }
 
   /* Denetime ve kayda giden soru metni: kullanıcı yazdıysa o, fotoğraftan
      geldiyse modelin okuyup yazdığı ilk satırlar. */
@@ -123,6 +126,9 @@ R.Screens.solve = (function(){
           when(result && !busy, () => K.Button({ label:'Yeni soru', size:'sm', act:'q-reset' })),
         ], { wrap:true }),
 
+        when(failure, () => K.Notice({ tone:'danger', title:'Çözülemedi.',
+          body:R.LLM.errorText(failure.code) })),
+
         html`<div id="q-out"></div>`,
       ], 'sm'),
     });
@@ -205,8 +211,10 @@ R.Screens.solve = (function(){
     }
     if(check.durum === 'emin_degil'){
       return K.Notice({ tone:'warn', title:'Denetim sonuçsuz.',
-        body:'İkinci çözüm bir cevap üretemedi. Bu, çözümün yanlış olduğu anlamına '
-           + 'gelmez ama doğrulandığı anlamına da gelmez.' });
+        body:check.neden === 'no_first'
+          ? 'Yukarıdaki çözüm net bir cevap bildirmedi, karşılaştıracak bir şey yok.'
+          : 'İkinci çözüm bir cevap üretemedi. Bu, çözümün yanlış olduğu anlamına '
+            + 'gelmez ama doğrulandığı anlamına da gelmez.' });
     }
     if(check.durum === 'ayni'){
       return K.Notice({ tone:'ok', title:'İki bağımsız çözüm aynı cevaba çıktı.',
@@ -214,7 +222,9 @@ R.Screens.solve = (function(){
             ? 'Soru ' + check.second.model + ' modeline sıfırdan çözdürüldü ve aynı sonuca ulaştı. '
             : 'Soru aynı modele sıfırdan çözdürüldü ve aynı sonuca ulaştı — bağlamı '
               + 'görmedi ama model aynı, bağımsızlığı zayıf. ')
-          + 'Bu bir garanti değildir: iki çözüm aynı hatayı da yapmış olabilir.' });
+          + 'Bu bir garanti değildir: iki çözüm aynı hatayı da yapmış olabilir.'
+          + (check.zayif ? ' Üstelik ikinci çözüm sonucundan emin olmadığını söyledi; '
+              + 'aynı cevaba çıkması zayıf bir kanıt.' : '') });
     }
     /* ayrildi */
     const j = check.judge;
@@ -569,7 +579,7 @@ R.Screens.solve = (function(){
     async 'q-clear-image'(){ image = null; await R.App.render(); },
 
     async 'q-reset'(){
-      image = null; result = null; draft = null;
+      image = null; result = null; failure = null;
       thread = []; check = null; topicRef = ''; topicQuery = '';
       await R.App.render();
     },
@@ -590,7 +600,7 @@ R.Screens.solve = (function(){
       }
       busy = true;
       thread = []; check = null; topicRef = ''; topicQuery = '';
-      result = null;
+      result = null; failure = null;
       controller = new AbortController();
       await R.App.render();
       out(K.Notice({ tone:'info', body:'Soru okunuyor ve çözülüyor…' }));
@@ -604,11 +614,10 @@ R.Screens.solve = (function(){
           },
         });
         result = res;
-        draft = null;
         out('');
       }catch(err){
-        const code = err && err.code;
-        out(K.Notice({ tone:'danger', title:'Çözülemedi.', body:R.LLM.errorText(code) }));
+        /* İptal bir hata değildir: kullanıcı zaten durdurdu. */
+        if(!err || err.code !== 'cancelled') failure = { code:err && err.code };
       }finally{
         busy = false;
         await R.App.render();
@@ -702,12 +711,17 @@ R.Screens.solve = (function(){
       const name = val('src-name');
       if(!name){ UI.toast('Kaynağın adı gerekiyor'); return; }
       const old = el.dataset.id ? R.Sources.byId(el.dataset.id) : null;
-      await R.Sources.save(Object.assign({}, old || {}, {
-        id:el.dataset.id || undefined,
+      /* `id:undefined` YAZILMAZ: Object.assign undefined degeri de kopyalar
+         ve newSource()'un urettigi kimligin ustune yazardi. Sonuc: her yeni
+         kaynak "sources/undefined" altina kaydediliyor, bir oncekini
+         siliyor ve yeniden acilista kimliksiz diye eleniyordu. */
+      const patch = Object.assign({}, old || {}, {
         name, level:val('src-level'), kind:val('src-kind'),
         subjectId:val('src-subject') || null,
         note:val('src-note'),
-      }));
+      });
+      if(el.dataset.id) patch.id = el.dataset.id;
+      await R.Sources.save(patch);
       UI.closeSheet();
       UI.toast('Kaynak kaydedildi');
       await R.App.render();
@@ -784,7 +798,7 @@ R.Screens.solve = (function(){
     }
 
     UI.toast(alsoError ? 'Kaydedildi ve yanlış defterine eklendi' : 'Kaydedildi');
-    result = null; image = null; thread = []; check = null;
+    result = null; image = null; thread = []; check = null; failure = null;
     topicRef = ''; topicQuery = '';
     await R.App.render();
   }

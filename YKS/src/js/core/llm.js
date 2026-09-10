@@ -240,7 +240,14 @@ R.LLM = (function(){
     return true;
   }
 
-  /* Gorsel okuyabilen ilk yapilandirmalar — cok modelli zincir kurmak icin. */
+  /* Gorsel okuyabilen ilk yapilandirmalar — cok modelli zincir kurmak icin.
+
+     Zincir KISA tutulur (Office.chainFor ile ayni sebep): her deneme bir
+     gunluk hak yakiyor ve sinirsiz bir liste, tek bir fotograf icin gunun
+     kotasini bitirebilir. Ilk birkac gorsel modeli calismiyorsa sorun
+     modelde degildir. */
+  const VISION_CHAIN_MAX = 4;
+
   function visionChain(cfg){
     const out = [];
     const seen = {};
@@ -262,7 +269,7 @@ R.LLM = (function(){
       if(id === (cfg && cfg.provider)) return;
       modelsFor(id).forEach(m => push({ provider:id, model:m.id }));
     });
-    return out;
+    return out.slice(0, VISION_CHAIN_MAX);
   }
 
   /* ---------- yerlesik yetenek ---------- */

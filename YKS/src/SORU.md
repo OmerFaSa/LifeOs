@@ -100,6 +100,66 @@ bilgisidir: bir konuda 20 soru çözmek, o konuyu bildiğin anlamına gelmez.
 Takip istemi çözümü bağlamda tutar ve modelden **yalnız o adımı** açıklamasını
 ister — çözümü baştan yazmasını değil.
 
+## Çözümün denetimi — AI yanlış yaptığında
+
+Model yanılır. Sorun yanılması değil, **yanıldığını fark edemememiz**: çözüm
+adım adım, kendinden emin ve doğru görünür. Bu yüzden bir denetim turu var.
+
+### Neden "modele kendi çözümünü kontrol ettir" işe yaramaz
+
+Aynı modele aynı bağlamda "kontrol et" demek, ona kendi hatasını onaylatmaktır.
+İşe yarayan tek yol soruyu **sıfırdan, ilk çözümü görmeden**, tercihen **başka
+bir modele** yeniden çözdürmektir. `Solver.check` bunu yapar: denetim zinciri
+ilk kullanılan modeli listeden çıkarır.
+
+| Sonuç | Ne denir | Ne denmez |
+|---|---|---|
+| İki cevap aynı | "İki bağımsız çözüm aynı cevaba çıktı" | ~~"Doğrulandı"~~ |
+| İkinci çözüm emin değil | Aynı cevap bile **zayıf kanıt** sayılır | ~~güçlü onay~~ |
+| Cevaplar farklı | Hakem turu çalışır | — |
+| İkinci çözüm cevap üretemedi | "Denetim sonuçsuz" | ~~"çözüm yanlış"~~ |
+
+**Bu bir garanti değildir ve ekran öyle sunmaz:** iki model aynı hatayı da
+yapabilir. Kart bunu her seferinde açıkça yazar.
+
+### Hakem turu
+
+Cevaplar ayrıldığında üçüncü bir tur çalışır ve üç şey söyler: hangisi doğru,
+**hatanın tam olarak hangi adımda başladığı**, ve o adımda ne yapılması
+gerektiği. Öğrenciye asıl öğreten kısım budur — hatanın nerede olduğunu görmek,
+doğru çözümü okumaktan değerlidir.
+
+Hakem de bir modeldir ve kesin hüküm vermez; ekran bunu da söyler. Karar
+veremezse "karar veremiyorum" der — uydurma bir hakemlik en kötüsüdür.
+
+### Maliyet
+
+Denetim **isteğe bağlıdır** ve bir çağrı harcar (ücretsiz katmanda bir günlük
+hak). Cevaplar aynı çıkarsa hakem turu **hiç çalışmaz**. Denetim bütçesi çözüm
+bütçesinden küçüktür: anlatım istenmez, sonuç istenir.
+
+## Çözümden sonra sohbet
+
+Çözüm bittiğinde iş bitmez. "Üçüncü adımda neden 2 ile çarptın?" diye sorabilir
+ve **istediğin kadar devam edebilirsin**; geçmiş her turda modele geri verilir.
+
+İstem "aynı anlatımı tekrarlama" der: anlamadıysan o yol tutmadı demektir,
+başka bir yoldan anlatması istenir (somut sayı, benzer basit örnek, şekil
+tarifi). Çözüm metni **her turda** bağlamda durur — yalnız ilk turda
+gönderilirse model, ikinci sorudan itibaren artık göremediği bir çözüm
+hakkındaki soruyu yanıtlamaya çalışır.
+
+## Konu seçimi — önce sistem, sonra sen
+
+500 satırlık bir `<select>` içinde konu aramak, konuyu bilmekten zordu. Artık
+**yazarak** aranır: her harfte liste daralır, eşleşenler altta çıkar. Bütün
+kelimeler geçmeli (sıra önemsiz), yani "mat üslü" de bulur; Türkçe harf farkı
+eşleşmeyi bozmaz.
+
+Sıra kasıtlıdır: **önce sistem tahmin eder** (kapalı katalogdan), kutu onun
+seçimiyle açılır, **sonra sen değiştirirsin**. Model listede olmayan bir konu
+yazdıysa bu da gösterilir — neyi düzelttiğini bilmen için.
+
 ## Kaynak (yayın) zorluğu
 
 İki ayrı şey vardır ve karıştırılmamalıdır:
@@ -158,5 +218,5 @@ yazmaz — koşulsuz uyarı, okunmayan uyarıdır.
 ## Doğrulama
 
 ```bash
-node tools/runtests.js       # 805 testin tamamı geçmeli
+node tools/runtests.js       # 837 testin tamamı geçmeli
 ```

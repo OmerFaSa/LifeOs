@@ -1,6 +1,6 @@
-# Ofis — beş ajanlı çalışma ekibi
+# Ofis — altı ajanlı çalışma ekibi
 
-Rota'nın içinde beş küçük ajan çalışır. Hepsi aynı veriyi değil, **kendi
+Rota'nın içinde altı küçük ajan çalışır. Hepsi aynı veriyi değil, **kendi
 alanındaki** veriyi okur; birbirleriyle konuşur; sonunda **tek bir karar** çıkar.
 
 > Eskiden ayrı bir "AI koç" katmanı vardı; kaldırıldı. Koçluk işini artık bu
@@ -11,11 +11,12 @@ alanındaki** veriyi okur; birbirleriyle konuşur; sonunda **tek bir karar** ç�
 
 | Ajan | Rol | Neye bakar | Neye bakmaz |
 |---|---|---|---|
-| **Patron** | Ofis şefi | Dört uzmanın raporu, sıradaki hamle, karar kapısı | Kendi hesabını yapmaz |
+| **Patron** | Ofis şefi | Uzmanların raporu, sıradaki hamle, karar kapısı | Kendi hesabını yapmaz |
 | **Tuna** | TYT uzmanı | TYT kapanışı, TYT denemeleri, TYT net bandı | AYT'ye karışmaz |
 | **Yaman** | AYT uzmanı | AYT kapanışı, AYT denemeleri, alan dersleri | TYT'ye karışmaz |
 | **Rana** | Rehberlik | Uyku, enerji, plan tamamlama, sapma nedenleri | Net ve konu yorumlamaz |
 | **Deniz** | Analist | Denemeler, hata paretosu, risk sıralaması, borçlar | Tavsiye vermez, bulgu bildirir |
+| **Kerem** | Soru koçu | Çözülen sorular, konu başına oran, kaynak zorluğu | Deneme neti yorumlamaz |
 
 Yetki ayrımı kasıtlıdır: bir ajan alan dışına çıkarsa sahibine yönlendirir.
 Çelişkiyi Patron çözer.
@@ -109,7 +110,9 @@ Sayımı kural motoru yapar ve oyları **güven skoruyla ağırlıklandırır**:
 uydurma bir oy tabloyu bozar. Kural motoru modunda oy deterministiktir:
 sıradaki işin sahibi olan ajanın fikrine gider.
 
-Her turda dört uzman sırayla konuşur: `Deniz → Tuna → Yaman → Rana`.
+Her turda beş uzman sırayla konuşur: `Deniz → Tuna → Yaman → Rana → Kerem`.
+Koç en sonda konuşur: önce konu ve net tablosu masaya konur, sonra "peki
+gerçekten çözebiliyor mu" sorusu gelir.
 Patron açar; açık bir karar varsa **önce onun hesabını sorar**.
 
 **Toplantıyı sen bitirirsin.** İstediğin turda "Bitir ve rapor al"a basarsın;
@@ -635,7 +638,7 @@ akademik metrik taşır.
 | `core/llm.js` | Taşıma: fetch, SSE akış, hata sınıflama, parametre onarımı, canlı model listesi, tanılama, anahtar deposu, yedek zinciri |
 | `core/tools.js` | Veri okuma katmanı + gizlilik süzgeci (`sanitize`) |
 | `core/office.js` | Brifingler, sohbet, gündem, turlu toplantı, rapor, karar takibi |
-| `core/voice.js` | Ajan sesleri, konuşmanın bitişini bekleme, okuma ritmi (`holdMs`) |
+| `core/voice.js` | Ajan sesleri, ses kalitesi seçimi, okunuş dönüşümü (`speechText`), okuma ritmi (`holdMs`) |
 | `screens/office.js` | Pano, 3B oda / kat planı, masalar, günün kararı, kota, model ayarları ve tanılama |
 | `screens/team.js` | Ajanla sohbet |
 | `screens/meeting.js` | Canlı turlu toplantı + rapor + tutanak arşivi |
@@ -658,7 +661,7 @@ akademik metrik taşır.
 
 ```bash
 python devserver.py                       # http://localhost:4173
-node tools/runtests.js                    # 760 testin tamamı geçmeli (Playwright ile)
+node tools/runtests.js                    # 837 testin tamamı geçmeli (Playwright ile)
 python build.py                           # dist/rota.html
 python tools/audit.py                     # satır, concat, sınıf sayıları
 ```

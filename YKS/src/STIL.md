@@ -104,13 +104,13 @@ iş bitince durur; `prefers-reduced-motion` hepsini kapatır.
 
 ## Ekranlar
 
-Altı gezinme grubu, on yedi ekran:
+Altı gezinme grubu, on sekiz ekran:
 
 | Grup | Ekranlar |
 |---|---|
 | Günlük | Bugün · Hafta |
 | Plan | Program · Dersler · Hedef |
-| Kayıt | Öğrenme · Deneme · Tekrar · Sınama |
+| Kayıt | Öğrenme · Deneme · Tekrar · Sınama · **Soru çöz** |
 | Analiz | İlerleme · **Analiz** · Telafi |
 | Rehber | Rehber · **Profiller** |
 | Ofis | **Ofis** · Ekip sohbeti · Toplantı |
@@ -125,8 +125,8 @@ görünümü yalnız özet okur.
 
 Konu özeti (`topic`) gezinmede yer almaz; Dersler ekranından açılır.
 
-`Ofis` beş ajanlıdır: Patron ekibi yönetir, Tuna TYT'ye, Yaman AYT'ye, Rana
-rehberliğe, Deniz ölçüme bakar. Her ajan yalnız kendi brifingini görür; karar
+`Ofis` altı ajanlıdır: Patron ekibi yönetir, Tuna TYT'ye, Yaman AYT'ye, Rana
+rehberliğe, Deniz ölçüme, Kerem çözülen soruya bakar. Her ajan yalnız kendi brifingini görür; karar
 ve gündem kural motorundan gelir. Ayrıntı için `src/OFIS.md`.
 
 Günlük yolculuk tek zincirdir ve `Bugün` ekranındaki **Günün akışı** kartı bu
@@ -150,6 +150,8 @@ Ekrana özel yapılar CSS'te adlandırılır, bileşene çevrilmez:
 `runclock` (süreli deneme oturumu), `wizstep` / `levelbtn` (kurulum sihirbazı),
 `palettebtn` (palet seçici), `notedot` (profil notu), `msg--me` / `msg--coach` (koç),
 `agentav` / `desk` / `deskstate` / `finding` / `note` (ofis masaları),
+`qdrop` / `qsolution` / `qthread` / `tsug` / `srcrow` (soru çözüm),
+`voicerow` (ses eşleştirme),
 `floor` / `seat` (ofis kat planı), `room3d` / `desk3d` (ofisin 3B odası),
 `board` (ofis panosu), `keyrow` (API anahtarları),
 `meetbar` / `meetturn` / `agentref` / `reportrow` (toplantı, hitap ve rapor).
