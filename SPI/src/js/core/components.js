@@ -69,9 +69,17 @@ SP.C = (function(){
       </div>`;
   }
 
+  /* Doluluk seridi.
+
+     Ton ACIKCA verilir. Eskiden %60 altindaki her deger kendiliginden
+     kirmiziya boyaniyordu; ogle saatinde gunluk hedefin yarisinda olmak
+     bir hata degildir ve arayuzu bos yere alarma cevirir. Esige gore
+     renklendirme isteniyorsa `auto:true` ile acikca istenir. */
   function Bar(o){
     const pct = Math.max(0, Math.min(100, Number(o.value) || 0));
-    const tone = o.tone || (pct >= 85 ? '' : pct >= 60 ? 'warn' : 'danger');
+    const tone = o.tone != null && o.tone !== ''
+      ? o.tone
+      : (o.auto ? (pct >= 85 ? '' : pct >= 60 ? 'warn' : 'danger') : '');
     return html`<div class="${cls('bar', o.large && 'bar--lg')}">
       <div class="${cls('bar__fill', tone && 'bar__fill--'+tone)}" style="width:${pct}%"></div>
     </div>`;
@@ -102,11 +110,13 @@ SP.C = (function(){
 
   /* ---------- etkilesim ---------- */
 
+  /* Etiket ayri bir span icinde durur: dar ekranda yazi gizlenip ikon
+     kalabilsin diye. Ikonu olmayan dugmede etiket her zaman gorunur. */
   function Button(o){
     return html`<button
       class="${cls('btn', o.tone && 'btn--'+o.tone, o.size && 'btn--'+o.size, o.block && 'btn--block', o.class)}"
       ${attrs(Object.assign({ 'data-act':o.act, disabled:o.disabled, 'aria-label':o.aria, title:o.title }, o.data || {}))}
-    >${when(o.icon, () => icon(o.icon))}${o.label}</button>`;
+    >${when(o.icon, () => icon(o.icon))}<span class="btn__label">${o.label}</span></button>`;
   }
 
   function IconButton(o){
@@ -124,12 +134,39 @@ SP.C = (function(){
     </div>`;
   }
 
-  /* Ekran ici sekmeler: [{id,label}] + aktif id */
+  /* Ekran ici sekmeler: [{id, label, icon?, count?}] + aktif id.
+
+     Ince alt cizgi yerine secilebilir hap seridi: bir ekranin kac bolume
+     ayrildigi ve hangisinde oldugun tek bakista gorunur. Sayac verilirse
+     sekmenin sagina yazilir — hangi bolumde is bekledigi gizlenmez. */
   function Subtabs(o){
     return html`<div class="subtabs" role="tablist" ${attrs({ 'aria-label':o.aria })}>
       ${map(o.items, t => html`<button class="${cls('subtab', t.id === o.value && 'is-active')}"
         role="tab" aria-selected="${t.id === o.value ? 'true' : 'false'}"
-        ${attrs({ 'data-act':o.act, 'data-tab':t.id })}>${t.label}</button>`)}
+        ${attrs({ 'data-act':o.act, 'data-tab':t.id })}
+      >${when(t.icon, () => icon(t.icon))}${t.label}${when(t.count,
+        () => html`<span class="subtab__count">${t.count}</span>`)}</button>`)}
+    </div>`;
+  }
+
+  /* Secilebilir kart — "birden cogunu isaretle" durumlari icin.
+     Onay kutusu uzun listede kaybolur; kartin tamami dokunma hedefidir. */
+  function PickCard(o){
+    return html`<button class="${cls('pickcard', o.on && 'is-on')}"
+      ${attrs(Object.assign({ 'data-act':o.act, 'aria-pressed':o.on ? 'true' : 'false' }, o.data || {}))}>
+      <span class="pickcard__box" aria-hidden="true">&#10003;</span>
+      <span class="pickcard__body">
+        <span class="pickcard__name">${o.label}</span>
+        ${when(o.meta, () => html`<span class="pickcard__meta">${o.meta}</span>`)}
+      </span>
+    </button>`;
+  }
+
+  /* Ekran arac seridi: sekme seridi ile o bolume ait eylemi ayni satirda tutar. */
+  function Toolbar(o){
+    return html`<div class="toolbar">
+      <div class="toolbar__tabs">${o.tabs}</div>
+      ${when(o.actions, () => html`<div class="toolbar__actions">${o.actions}</div>`)}
     </div>`;
   }
 
@@ -261,6 +298,7 @@ SP.C = (function(){
 
   return {
     Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, NextUp, Table, Pager, paginate,
     Grid, Span, Stack, Cols, Row, SectionTitle,
   };

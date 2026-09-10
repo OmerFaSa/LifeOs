@@ -49,23 +49,27 @@ SP.Screens.today = (function(){
           <div class="mt-10">${K.Button({ label:'Bugünün ölçümünü gir', size:'sm', tone:'primary',
             act:'go', data:{ 'data-route':'vitals' } })}</div>` });
     }
+    /* Gerekcelerin tamami Hareket ekraninda durur; burada yalnizca bandin
+       emri gorunur. Ayni uyariyi iki ekranda tekrarlamak sadelik degil
+       gurultudur. */
     return K.Card({
       title:'Toparlanma', hint:'readiness',
-      sub:r.band.label,
-      badge:K.Badge({ label:r.score + '/100', tone:r.band.tone }),
+      badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
       body:html`
-        ${K.Meter({ label:'Skor', value:r.score, text:String(r.score), tone:r.band.tone })}
-        <div class="mt-10">${map(r.parts, p => html`
+        <div class="row wrap" style="gap:16px">
+          <div class="kpi"><span class="kpi__value">${r.score}</span><span class="kpi__unit">/ 100</span></div>
+          <div class="grow" style="min-width:160px">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
+        </div>
+        <div class="mt-12">${map(r.parts, p => html`
           <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
             <span class="readypart__label">${p.label}</span>
-            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(p.value)}</span>
+            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))}</span>
             <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
           </div>`)}</div>
-        ${when(r.missing.length, () => K.Notice({ tone:'info', class:'mt-10',
-          body:'Eksik girdi: ' + r.missing.join(', ') + '. Ağırlığı kalan girdilere dağıtıldı — '
-             + 'eksik veri sıfır sayılmaz.' }))}
-        ${map(rx.reasons, x => K.Notice({ tone:x.kind === 'muted' ? 'info' : x.kind, class:'mt-8', body:x.text }))}`,
-      foot:K.Button({ label:'Hareket ekranını aç', size:'sm', act:'go', data:{ 'data-route':'move' } }),
+        ${K.Notice({ tone:r.band.tone === 'ok' ? 'ok' : r.band.tone, class:'mt-12', body:r.band.order })}`,
+      foot:html`${K.Button({ label:'Hareket ekranını aç', size:'sm', act:'go', data:{ 'data-route':'move' } })}
+        ${when(r.missing.length, () => html`<span class="small dim">Eksik girdi:
+          ${r.missing.join(', ')} — ağırlığı kalanlara dağıtıldı.</span>`)}`,
     });
   }
 
@@ -89,8 +93,10 @@ SP.Screens.today = (function(){
 
     return K.Card({
       title:'Beslenme', sub:t.meals + ' öğün girildi',
+      /* Gün sürerken hedefin altında olmak bir hata değildir: yalnızca
+         hedefin belirgin ÜSTÜNE çıkmak uyarı tonuyla işaretlenir. */
       badge:K.Badge({ label:Math.round(t.kcal) + ' / ' + tg.kcal + ' kcal',
-        tone:t.kcal >= tg.kcal * 0.85 && t.kcal <= tg.kcal * 1.15 ? 'ok' : 'warn' }),
+        tone:t.kcal > tg.kcal * 1.15 ? 'warn' : 'info' }),
       body:html`
         ${raw(UI.macroSplit({ protein:t.protein * 4, fat:t.fat * 9, carb:t.carb * 4 }))}
         <div class="nutgrid mt-12">
@@ -98,7 +104,7 @@ SP.Screens.today = (function(){
           ${P.nutCell({ label:'Lif', got:t.fiber, target:tg.fiber, unit:'g' })}
           ${P.nutCell({ label:'Yağ', got:t.fat, target:tg.fat.min, unit:'g' })}
         </div>
-        ${map(t.notes.slice(0, 2), P.absorbNote)}`,
+        ${map(t.notes.slice(0, 1), P.absorbNote)}`,
       foot:K.Button({ label:'Öğünleri aç', size:'sm', act:'go', data:{ 'data-route':'meals' } }),
     });
   }
@@ -106,7 +112,7 @@ SP.Screens.today = (function(){
   function officeCard(){
     const d = U.todayISO();
     const b = S.officeBriefings[d];
-    const notes = SP.Office.notes().slice(0, 4);
+    const notes = SP.Office.notes().slice(0, 3);
     return K.Card({
       title:'Ofisten', hint:'office',
       sub:'Beş ajan · günün notu',
@@ -209,7 +215,7 @@ SP.Screens.today = (function(){
       return n.calm ? 'Sıradaki hamle yok' : n.label + ' · ' + n.title;
     },
     actions(){
-      return String(K.Button({ label:'Ölçüm gir', size:'sm', icon:'pulse',
+      return String(K.Button({ label:'Ölçüm gir', size:'sm', icon:'pulse', class:'btn--screen',
         act:'go', data:{ 'data-route':'vitals' } }));
     },
     render, handle,

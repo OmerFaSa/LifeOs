@@ -17,10 +17,23 @@ SP.Screens.labs = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'panel', label:'Paneller' },
-    { id:'trend', label:'Eğilim' },
-    { id:'gecmis', label:'Geçmiş' },
+    { id:'panel',  label:'Paneller', icon:'layers' },
+    { id:'trend',  label:'Eğilim',   icon:'chart' },
+    { id:'gecmis', label:'Geçmiş',   icon:'clock' },
   ];
+
+  /* Sekme seridi ile o bolume ait eylem ayni satirda durur: deger eklemek
+     her bolumden tek dokunus uzakta kalir. */
+  function toolbar(tab){
+    const items = TABS.map(t => Object.assign({}, t,
+      t.id === 'gecmis' && S.labs.length ? { count:S.labs.length } : {}));
+    return K.Toolbar({
+      tabs:K.Subtabs({ items, value:tab, act:'lab-tab', aria:'Tahlil görünümü' }),
+      actions:html`${K.Button({ label:'Rapor yapıştır', icon:'flask', size:'sm', tone:'primary',
+        act:'open-paste' })}
+        ${K.Button({ label:'Elle gir', size:'sm', act:'open-manual' })}`,
+    });
+  }
 
   /* Yapistirma onizlemesi oturum boyunca burada durur; kaydedilene kadar
      hicbir sey depoya yazilmaz. */
@@ -276,16 +289,9 @@ SP.Screens.labs = (function(){
 
     return String(K.Grid([
       when(flags.length, () => K.Span(12, K.Stack(map(flags, P.flagCard), 'sm'))),
-      K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'lab-tab', aria:'Tahlil görünümü' })),
+      K.Span(12, toolbar(tab)),
       body,
       when(tab === 'panel', () => K.Span(4, K.Stack([
-        K.Card({ title:'Değer ekle', hint:'lab-paste',
-          body:html`<p class="small muted">Rapor metnini yapıştırmak elle yazmaktan
-            hem hızlı hem daha az hatalıdır.</p>
-            <div class="row wrap mt-12">
-              ${K.Button({ label:'Rapor yapıştır', tone:'primary', size:'sm', act:'open-paste' })}
-              ${K.Button({ label:'Elle gir', size:'sm', act:'open-manual' })}
-            </div>` }),
         overdueCard(),
         K.Card({ title:'Hesaplanan ölçümler', hint:'derived',
           body:html`<ul class="bullets small muted">${map(Object.keys(SP.DERIVED), id => {
@@ -396,9 +402,7 @@ SP.Screens.labs = (function(){
       if(f) return f + ' kırmızı bayrak açık';
       return s.measured + ' ölçüm · ' + s.out + ' referans dışı · ' + s.offTarget + ' hedef dışı';
     },
-    actions(){
-      return String(K.Button({ label:'Rapor yapıştır', size:'sm', icon:'flask', act:'open-paste' }));
-    },
+    actions(){ return ''; },
     render, handle, change,
   };
 })();

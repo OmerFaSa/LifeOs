@@ -27,19 +27,21 @@
 
 window.SP = window.SP || {};
 
+/* Panel adlari ve notlari EKRANDA gorunur; bu yuzden duzgun Turkce yazilir.
+   Kod yorumlari ASCII kalabilir, kullaniciya giden metin kalamaz. */
 SP.PANELS = [
-  { id:'vital',      name:'Vital bulgular',     note:'Evde olculebilen gunluk degerler' },
-  { id:'body',       name:'Vucut olcumleri',    note:'Kilo, cevre ve bilesim' },
-  { id:'hemogram',   name:'Hemogram',           note:'Tam kan sayimi' },
-  { id:'iron',       name:'Demir paneli',       note:'Depo ve tasima kapasitesi' },
-  { id:'metabolic',  name:'Seker metabolizmasi',note:'Glukoz, insulin ve direnc' },
-  { id:'lipid',      name:'Lipid paneli',       note:'Kolesterol ve trigliserit' },
-  { id:'liver',      name:'Karaciger',          note:'Enzimler ve protein' },
-  { id:'kidney',     name:'Bobrek',             note:'Atik urunler ve suzme hizi' },
-  { id:'electro',    name:'Elektrolitler',      note:'Mineral dengesi' },
-  { id:'vitamin',    name:'Vitamin ve mineral', note:'Depo durumu' },
-  { id:'hormone',    name:'Hormonlar',          note:'Tiroid ve steroid' },
-  { id:'inflam',     name:'Inflamasyon',        note:'Sistemik yangi belirtecleri' },
+  { id:'vital',      name:'Vital bulgular',      note:'Evde ölçülebilen günlük değerler' },
+  { id:'body',       name:'Vücut ölçüleri',      note:'Kilo, çevre ve bileşim' },
+  { id:'hemogram',   name:'Hemogram',            note:'Tam kan sayımı' },
+  { id:'iron',       name:'Demir paneli',        note:'Depo ve taşıma kapasitesi' },
+  { id:'metabolic',  name:'Şeker metabolizması', note:'Glukoz, insülin ve direnç' },
+  { id:'lipid',      name:'Lipid paneli',        note:'Kolesterol ve trigliserit' },
+  { id:'liver',      name:'Karaciğer',           note:'Enzimler ve protein' },
+  { id:'kidney',     name:'Böbrek',              note:'Atık ürünler ve süzme hızı' },
+  { id:'electro',    name:'Elektrolitler',       note:'Mineral dengesi' },
+  { id:'vitamin',    name:'Vitamin ve mineral',  note:'Depo durumu' },
+  { id:'hormone',    name:'Hormonlar',           note:'Tiroit ve steroit' },
+  { id:'inflam',     name:'İnflamasyon',         note:'Sistemik yangı belirteçleri' },
 ];
 
 SP.BIOMARKERS = [

@@ -384,7 +384,7 @@ SP.Screens.meals = (function(){
         + (tg.ok ? ' / ' + tg.protein.min + ' g' : '');
     },
     actions(){
-      return String(K.Button({ label:'Mutfak', size:'sm', icon:'meal',
+      return String(K.Button({ label:'Mutfak', size:'sm', icon:'leaf', class:'btn--screen',
         act:'go', data:{ 'data-route':'kitchen' } }));
     },
     render, handle, change, guessSlot,

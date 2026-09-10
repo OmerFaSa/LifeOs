@@ -21,11 +21,24 @@ SP.Parts = (function(){
     return K.Badge({ label:c.label, tone:c.tone, icon:false });
   }
 
-  /* Bir biyobelirtec satiri: ad, deger, durum, referans cubugu ve gerekce. */
+  /* Bir biyobelirtec satiri: ad, deger, durum, referans cubugu ve gerekce.
+
+     Hic olculmemis satir TEK SATIRA iner. Bos bir olcum icin uc satir yer
+     ayirmak paneli sisirir ve olculmus degerleri gormeyi zorlastirir. */
   function markerRow(row, opts){
     const o = opts || {};
     const b = row.marker;
     const has = row.value != null;
+    if(!has){
+      return html`
+        <div class="markerrow markerrow--empty">
+          <div class="markerrow__head">
+            <span class="markerrow__name">${b.name}</span>
+            ${K.Badge({ label:'veri yok', tone:'muted', icon:false })}
+          </div>
+          <div class="markerrow__val num">—<small>${b.unit}</small></div>
+        </div>`;
+    }
     return html`
       <div class="${cls('markerrow', !has && 'markerrow--empty')}">
         <div class="markerrow__head">
@@ -77,18 +90,24 @@ SP.Parts = (function(){
       : K.Badge({ label:'kural motoru', tone:'muted', icon:false });
   }
 
-  /* Besin ogesi hucresi — hedefe gore doluluk. */
+  /* Besin ogesi hucresi — hedefe gore doluluk.
+
+     Serit NOTR renktedir. Gunun ortasinda hedefin yarisinda olmak bir hata
+     degildir; her eksigi kirmiziya boyamak arayuzu bos yere alarma cevirir
+     ve gercek uyarilari gormeyi zorlastirir. Yalnizca SINIR tipindeki bir
+     ogenin (sodyum) asilmasi kirmizi ile isaretlenir. */
   function nutCell(o){
     const pct = o.target ? U.pct(o.got, o.target) : null;
-    const tone = pct == null ? '' : o.limit
-      ? (pct > 100 ? 'danger' : '')
-      : (pct >= 100 ? '' : pct >= 70 ? 'warn' : 'danger');
+    const over = o.limit && pct != null && pct > 100;
     return html`
       <div class="nutcell">
         <div class="nutcell__label">${o.label}</div>
         <div class="nutcell__val num">${U.fmtNum(U.round(o.got, o.digits == null ? 0 : o.digits))}<small> / ${U.fmtNum(o.target)} ${o.unit || ''}</small></div>
-        ${K.Bar({ value:pct == null ? 0 : Math.min(100, pct), tone })}
-        ${when(o.note, () => html`<div class="tiny dim mt-2">${o.note}</div>`)}
+        ${K.Bar({ value:pct == null ? 0 : Math.min(100, pct), tone:over ? 'danger' : '' })}
+        <div class="nutcell__pct">
+          <span class="${over ? 'nutcell__over' : ''}">%${pct == null ? '—' : pct}</span>
+          ${when(o.note, () => html`<span class="dim">${o.note}</span>`)}
+        </div>
       </div>`;
   }
 

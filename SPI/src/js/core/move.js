@@ -207,21 +207,29 @@ SP.Move = (function(){
     let factor = r.ok ? r.band.factor : 1;
     const reasons = [];
 
+    /* Her gerekce kimliklidir: ekran skoru zaten buyuk yaziyorsa ayni cumleyi
+       ikinci kez basmasin diye 'readiness' gerekcesini eleyebilir. */
     if(r.ok){
-      reasons.push({ kind:r.band.tone, text:'Toparlanma ' + r.score + '/100 — ' + r.band.label + '. ' + r.band.order });
+      reasons.push({ id:'readiness', kind:r.band.tone,
+        text:'Toparlanma ' + r.score + '/100 — ' + r.band.label + '. ' + r.band.order,
+        short:r.band.order });
     }else{
-      reasons.push({ kind:'muted', text:r.note + ' Yük planlandığı gibi kabul edildi.' });
+      reasons.push({ id:'no-data', kind:'muted',
+        text:r.note + ' Yük planlandığı gibi kabul edildi.',
+        short:r.note });
     }
     if(r.override){
-      reasons.push({ kind:'danger', text:r.override.why });
+      reasons.push({ id:'override', kind:'danger', text:r.override.why, short:r.override.why });
     }
     if(a.ok && a.zone === 'high'){
       factor = Math.min(factor, 0.7);
-      reasons.push({ kind:'danger', text:'Akut/kronik yük oranı ' + U.fmtNet(a.ratio) + '. ' + a.note });
+      const t = 'Akut/kronik yük oranı ' + U.fmtNet(a.ratio) + '. ' + a.note;
+      reasons.push({ id:'acwr', kind:'danger', text:t, short:t });
     }
     if(dl.due){
       factor = Math.min(factor, dl.factor);
-      reasons.push({ kind:'warn', text:dl.week + '. hafta — yük indirme haftası. ' + dl.note });
+      const t = dl.week + '. hafta — yük indirme haftası. ' + dl.note;
+      reasons.push({ id:'deload', kind:'warn', text:t, short:t });
     }
 
     const kind = factor === 0 ? 'rest' : factor <= 0.6 ? 'light' : factor < 1 ? 'reduced' : 'full';

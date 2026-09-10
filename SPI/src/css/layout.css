@@ -1,6 +1,15 @@
-/* Uygulama kabugu: sabit kenar cubugu + tam genislikte icerik izgarasi. */
+/* Uygulama kabuğu: sabit kenar çubuğu + tam genişlikte içerik ızgarası.
 
-.shell__body{ min-width:0; }
+   Kabuk üç parçadır ve hiçbiri diğerinin yerini kaplamaz:
+     sidebar   gezinme, her zaman aynı yerde
+     topbar    ekranın adı, alt başlığı ve o ekrana ait eylemler
+     content   yalnız içerik
+
+   Üst çubuk TEK SATIRDIR ve dar ekranda da tek satır kalır: başlık kısalır,
+   eylemler ikonlaşır. Sarılan bir üst çubuk ekranın yüksekliğini oynatır ve
+   arayüzü amatörleştirir. */
+
+.shell__body{ min-width:0; display:flex; flex-direction:column; min-height:100vh; }
 
 .shell{
   display:grid;
@@ -8,7 +17,7 @@
   min-height:100vh;
 }
 
-/* ---------- kenar cubugu ---------- */
+/* ---------- kenar çubuğu ---------- */
 .sidebar{
   position:sticky; top:0; align-self:start;
   height:100vh;
@@ -19,40 +28,58 @@
 }
 .sidebar__head{
   display:flex; align-items:center; gap:10px;
-  padding:16px 18px 14px;
+  padding:16px 16px 12px;
+  min-width:0;
 }
 .sidebar__mark{
-  width:34px; height:34px; border-radius:var(--r-sm); flex:none;
+  width:32px; height:32px; border-radius:10px; flex:none;
   background:var(--primary); color:var(--primary-ink);
   display:grid; place-items:center;
-  font-family:var(--font-display); font-weight:800; font-size:16px;
+  font-family:var(--font-display); font-weight:800; font-size:15px;
+  letter-spacing:-.02em;
 }
-.sidebar__title{ display:flex; flex-direction:column; line-height:1.15; min-width:0; }
-.sidebar__title b{ font-family:var(--font-display); font-size:var(--fs-md); font-weight:800; }
-.sidebar__title span{ font-size:var(--fs-xs); color:var(--accent); font-weight:700; letter-spacing:.03em; }
+.sidebar__title{ display:flex; flex-direction:column; line-height:1.2; min-width:0; }
+.sidebar__title b{
+  font-family:var(--font-display); font-size:var(--fs-md); font-weight:800;
+  letter-spacing:-.01em;
+}
+/* Marka satırı profilden gelir ve uzayabilir: sarmaz, kısalır. */
+.sidebar__title span{
+  font-size:var(--fs-xs); color:var(--text-3); font-weight:600;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
 
-.sidebar__scroll{ flex:1; overflow-y:auto; padding:4px 10px 10px; }
-.navgroup{ margin-bottom:14px; }
+.sidebar__scroll{ flex:1; overflow-y:auto; padding:2px 10px 10px; }
+.navgroup{ margin-bottom:12px; }
 .navgroup__label{
-  font-size:var(--fs-xs); font-weight:700; letter-spacing:.08em; text-transform:uppercase;
-  color:var(--text-3); padding:6px 10px 5px;
+  font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--text-3); padding:8px 10px 4px; opacity:.85;
 }
 .navitem{
+  position:relative;
   width:100%;
   display:flex; align-items:center; gap:10px;
   padding:8px 10px; margin-bottom:1px;
-  border:none; background:none; border-radius:var(--r-sm);
-  color:var(--text-2); font-size:var(--fs-base); font-weight:600;
+  border:none; background:none; border-radius:10px;
+  color:var(--text-2); font-size:var(--fs-base); font-weight:550;
   text-align:left; line-height:1.3;
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
-.navitem svg{ width:18px; height:18px; flex:none; stroke:currentColor; fill:none; stroke-width:1.7; }
+.navitem svg{ width:17px; height:17px; flex:none; stroke:currentColor; fill:none; stroke-width:1.7; }
 .navitem:hover{ background:var(--surface-2); color:var(--text); }
-.navitem.is-active{ background:var(--sidebar-active); color:var(--primary); }
+.navitem.is-active{
+  background:var(--sidebar-active); color:var(--primary); font-weight:700;
+}
+/* Aktif öğenin sol kenarında ince bir işaret: renk tek başına anlam taşımaz. */
+.navitem.is-active::before{
+  content:''; position:absolute; left:-10px; top:8px; bottom:8px;
+  width:3px; border-radius:0 3px 3px 0; background:var(--primary);
+}
 .navitem__badge{
   margin-left:auto; flex:none;
-  min-width:20px; height:19px; padding:0 6px; border-radius:20px;
+  min-width:19px; height:18px; padding:0 6px; border-radius:var(--r-pill);
   background:var(--danger); color:#fff;
-  font-size:var(--fs-xs); font-weight:700;
+  font-size:10.5px; font-weight:700;
   display:grid; place-items:center;
 }
 .navitem__badge.is-quiet{ background:var(--surface-3); color:var(--text-2); }
@@ -60,33 +87,55 @@
 .sidebar__foot{
   border-top:1px solid var(--border);
   padding:12px 14px;
-  display:flex; flex-direction:column; gap:8px;
+  display:flex; flex-direction:column; gap:9px;
 }
 .countdown{ display:flex; align-items:baseline; gap:7px; }
-.countdown b{ font-family:var(--font-display); font-size:var(--fs-xl); font-weight:800; }
-.countdown span{ font-size:var(--fs-xs); color:var(--text-2); }
+.countdown b{
+  font-family:var(--font-display); font-size:var(--fs-lg); font-weight:800;
+  font-variant-numeric:tabular-nums; line-height:1;
+}
+.countdown span{ font-size:var(--fs-xs); color:var(--text-3); line-height:1.25; }
 .weekmeter{ display:flex; flex-direction:column; gap:5px; }
-.weekmeter__row{ display:flex; justify-content:space-between; font-size:var(--fs-xs); color:var(--text-2); }
+.weekmeter__row{
+  display:flex; justify-content:space-between; gap:8px;
+  font-size:var(--fs-xs); color:var(--text-3);
+}
 
-/* ---------- ust cubuk ---------- */
+/* ---------- üst çubuk ---------- */
 .topbar{
   position:sticky; top:0; z-index:var(--z-topbar);
   display:flex; align-items:center; gap:var(--sp-4);
   min-height:var(--topbar-h);
-  padding:10px 28px;
-  background:color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter:saturate(1.4) blur(10px);
+  padding:9px 26px;
+  background:color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter:saturate(1.5) blur(12px);
   border-bottom:1px solid var(--border);
 }
-.topbar__titles{ min-width:0; }
-.topbar__titles h1{ font-size:var(--fs-xl); font-weight:800; }
-.topbar__titles p{ font-size:var(--fs-sm); color:var(--text-2); margin-top:1px; }
-.topbar__actions{ margin-left:auto; display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.topbar__titles{ min-width:0; flex:1; }
+.topbar__titles h1{
+  font-size:var(--fs-xl); font-weight:800; letter-spacing:-.02em; line-height:1.15;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.topbar__titles p{
+  font-size:var(--fs-sm); color:var(--text-3); margin-top:2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.topbar__actions{
+  margin-left:auto; flex:none;
+  display:flex; align-items:center; gap:7px;
+  flex-wrap:nowrap;
+}
+/* İnce bir ayraç: ekran eylemleri ile kabuk eylemlerini ayırır. */
+.topbar__sep{
+  width:1px; align-self:stretch; margin:6px 2px;
+  background:var(--border); flex:none;
+}
 .topbar__menu{ display:none; }
 
-/* ---------- icerik ---------- */
+/* ---------- içerik ---------- */
 .content{
-  padding:22px 28px 60px;
+  flex:1;
+  padding:20px 26px 64px;
   max-width:var(--content-max);
   width:100%;
 }
@@ -94,7 +143,7 @@
 .grid{
   display:grid;
   grid-template-columns:repeat(12, minmax(0,1fr));
-  gap:16px;
+  gap:14px;
   align-items:start;
 }
 .span-2{ grid-column:span 2; }
@@ -108,7 +157,7 @@
 .span-10{ grid-column:span 10; }
 .span-12{ grid-column:span 12; }
 
-.stack{ display:flex; flex-direction:column; gap:16px; }
+.stack{ display:flex; flex-direction:column; gap:14px; }
 .stack-sm{ display:flex; flex-direction:column; gap:8px; }
 .stack-xs{ display:flex; flex-direction:column; gap:5px; }
 .row{ display:flex; align-items:center; gap:10px; }
@@ -122,9 +171,7 @@
 .cols-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
 .auto-fit{ display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:12px; }
 
-/* ---------- duyarli ---------- */
-/* Kenar rayi yalnizca gercekten yer varken sutun olur;
-   altinda icerigin altina yatay serit olarak akar. */
+/* ---------- duyarlı ---------- */
 @media (max-width:1400px){
   .span-3{ grid-column:span 4; }
   .span-5{ grid-column:span 6; }
@@ -133,9 +180,6 @@
   .span-2{ grid-column:span 12; }
   .span-6{ grid-column:span 7; }
   .span-4{ grid-column:span 5; }
-  /* Kenar rayinin dar ekran davranisi components.css'te durur: bu dosya
-     ondan ONCE yuklendigi icin buradaki kural temel .rail kuralinin
-     altinda kalir ve hic uygulanmazdi. */
 }
 @media (max-width:1120px){
   .span-2, .span-4, .span-6, .span-8{ grid-column:span 12; }
@@ -146,19 +190,29 @@
 @media (max-width:1000px){
   .shell{ grid-template-columns:minmax(0,1fr); }
   .sidebar{
-    position:fixed; top:0; left:0; bottom:0; width:min(86vw, 300px);
+    position:fixed; top:0; left:0; bottom:0; width:min(86vw, 296px);
     transform:translateX(-102%);
     transition:transform var(--dur-lg) var(--ease);
     box-shadow:var(--shadow-lg);
   }
   .sidebar.is-open{ transform:translateX(0); }
-  .topbar{ padding:10px 16px; }
+  .topbar{ padding:8px 14px; gap:10px; }
+  .topbar__titles h1{ font-size:var(--fs-lg); }
   .topbar__menu{ display:inline-flex; }
-  .content{ padding:16px 16px 96px; }
+  .content{ padding:14px 14px 92px; }
   .scrim{
     position:fixed; inset:0; background:var(--scrim);
     z-index:calc(var(--z-nav) - 1);
   }
+}
+/* Dar ekranda üst çubuk tek satır kalsın diye ekrana ait eylemin
+   YAZISI gizlenir, ikonu kalır. Düğme kaybolmaz, küçülür. */
+@media (max-width:620px){
+  .topbar__titles p{ display:none; }
+  .topbar .btn--screen .btn__label{ display:none; }
+  .topbar .btn--screen{ width:34px; padding:0; justify-content:center; }
+  .topbar .btn--screen svg{ margin:0; }
+  .topbar__sep{ display:none; }
 }
 @media (max-width:720px){
   .cols-3, .cols-4{ grid-template-columns:repeat(2,1fr); }
@@ -174,15 +228,21 @@
   .tabbar{
     position:fixed; left:0; right:0; bottom:0; z-index:var(--z-nav);
     display:flex; gap:2px;
-    padding:6px 6px calc(6px + env(safe-area-inset-bottom));
-    background:var(--surface); border-top:1px solid var(--border);
+    padding:5px 5px calc(5px + env(safe-area-inset-bottom));
+    background:color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter:saturate(1.5) blur(12px);
+    border-top:1px solid var(--border);
   }
   .tabbar__item{
-    flex:1; border:none; background:none; border-radius:var(--r-sm);
-    display:flex; flex-direction:column; align-items:center; gap:3px;
-    padding:6px 2px; color:var(--text-2);
+    flex:1; min-width:0; border:none; background:none; border-radius:11px;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:6px 2px; color:var(--text-3);
   }
   .tabbar__item svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.7; }
-  .tabbar__item span{ font-size:10.5px; font-weight:700; }
+  /* Etiket tek satır: sarılan etiket alt çubuğun yüksekliğini oynatır. */
+  .tabbar__item span{
+    font-size:10px; font-weight:700; line-height:1.2;
+    max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
   .tabbar__item.is-active{ color:var(--primary); background:var(--primary-soft); }
 }

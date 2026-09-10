@@ -67,6 +67,7 @@ SP.S = {
     kitchenDish:null,      // mutfakta paylastirilan yemek
     kitchenGrams:1000,
     moveTab:'bugun',       // bugun | program | ilerleme
+    movePattern:'all',     // program bolumundeki kalip seridinde secili olan
     workoutOpen:null,
     basketTab:'sepet',     // sepet | ikame | toplu
     priceEdit:null,

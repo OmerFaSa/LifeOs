@@ -84,13 +84,14 @@ SP.Screens.vitals = (function(){
       body:K.Notice({ tone:'info', body:r.note }) });
     return K.Card({
       title:'Toparlanma', hint:'readiness',
-      badge:K.Badge({ label:r.score + '/100', tone:r.band.tone }),
+      badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
       body:html`
-        ${K.Meter({ label:r.band.label, value:r.score, text:String(r.score), tone:r.band.tone })}
+        <div class="kpi"><span class="kpi__value">${r.score}</span><span class="kpi__unit">/ 100</span></div>
+        <div class="mt-8">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
         <div class="mt-10">${map(r.parts, p => html`
           <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
             <span class="readypart__label">${p.label}</span>
-            <span class="small dim">ağırlık %${Math.round(p.weight * 100)}</span>
+            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))} · ağırlık %${Math.round(p.weight * 100)}</span>
             <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
             <span class="readypart__note">${p.note}</span>
           </div>`)}</div>
