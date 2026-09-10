@@ -1,0 +1,188 @@
+/* Uygulama kabugu: sabit kenar cubugu + tam genislikte icerik izgarasi. */
+
+.shell__body{ min-width:0; }
+
+.shell{
+  display:grid;
+  grid-template-columns:var(--sidebar-w) minmax(0,1fr);
+  min-height:100vh;
+}
+
+/* ---------- kenar cubugu ---------- */
+.sidebar{
+  position:sticky; top:0; align-self:start;
+  height:100vh;
+  display:flex; flex-direction:column;
+  background:var(--sidebar);
+  border-right:1px solid var(--border);
+  z-index:var(--z-nav);
+}
+.sidebar__head{
+  display:flex; align-items:center; gap:10px;
+  padding:16px 18px 14px;
+}
+.sidebar__mark{
+  width:34px; height:34px; border-radius:var(--r-sm); flex:none;
+  background:var(--primary); color:var(--primary-ink);
+  display:grid; place-items:center;
+  font-family:var(--font-display); font-weight:800; font-size:16px;
+}
+.sidebar__title{ display:flex; flex-direction:column; line-height:1.15; min-width:0; }
+.sidebar__title b{ font-family:var(--font-display); font-size:var(--fs-md); font-weight:800; }
+.sidebar__title span{ font-size:var(--fs-xs); color:var(--accent); font-weight:700; letter-spacing:.03em; }
+
+.sidebar__scroll{ flex:1; overflow-y:auto; padding:4px 10px 10px; }
+.navgroup{ margin-bottom:14px; }
+.navgroup__label{
+  font-size:var(--fs-xs); font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text-3); padding:6px 10px 5px;
+}
+.navitem{
+  width:100%;
+  display:flex; align-items:center; gap:10px;
+  padding:8px 10px; margin-bottom:1px;
+  border:none; background:none; border-radius:var(--r-sm);
+  color:var(--text-2); font-size:var(--fs-base); font-weight:600;
+  text-align:left; line-height:1.3;
+}
+.navitem svg{ width:18px; height:18px; flex:none; stroke:currentColor; fill:none; stroke-width:1.7; }
+.navitem:hover{ background:var(--surface-2); color:var(--text); }
+.navitem.is-active{ background:var(--sidebar-active); color:var(--primary); }
+.navitem__badge{
+  margin-left:auto; flex:none;
+  min-width:20px; height:19px; padding:0 6px; border-radius:20px;
+  background:var(--danger); color:#fff;
+  font-size:var(--fs-xs); font-weight:700;
+  display:grid; place-items:center;
+}
+.navitem__badge.is-quiet{ background:var(--surface-3); color:var(--text-2); }
+
+.sidebar__foot{
+  border-top:1px solid var(--border);
+  padding:12px 14px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.countdown{ display:flex; align-items:baseline; gap:7px; }
+.countdown b{ font-family:var(--font-display); font-size:var(--fs-xl); font-weight:800; }
+.countdown span{ font-size:var(--fs-xs); color:var(--text-2); }
+.weekmeter{ display:flex; flex-direction:column; gap:5px; }
+.weekmeter__row{ display:flex; justify-content:space-between; font-size:var(--fs-xs); color:var(--text-2); }
+
+/* ---------- ust cubuk ---------- */
+.topbar{
+  position:sticky; top:0; z-index:var(--z-topbar);
+  display:flex; align-items:center; gap:var(--sp-4);
+  min-height:var(--topbar-h);
+  padding:10px 28px;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:saturate(1.4) blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.topbar__titles{ min-width:0; }
+.topbar__titles h1{ font-size:var(--fs-xl); font-weight:800; }
+.topbar__titles p{ font-size:var(--fs-sm); color:var(--text-2); margin-top:1px; }
+.topbar__actions{ margin-left:auto; display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.topbar__menu{ display:none; }
+
+/* ---------- icerik ---------- */
+.content{
+  padding:22px 28px 60px;
+  max-width:var(--content-max);
+  width:100%;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(12, minmax(0,1fr));
+  gap:16px;
+  align-items:start;
+}
+.span-2{ grid-column:span 2; }
+.span-3{ grid-column:span 3; }
+.span-4{ grid-column:span 4; }
+.span-5{ grid-column:span 5; }
+.span-6{ grid-column:span 6; }
+.span-7{ grid-column:span 7; }
+.span-8{ grid-column:span 8; }
+.span-9{ grid-column:span 9; }
+.span-10{ grid-column:span 10; }
+.span-12{ grid-column:span 12; }
+
+.stack{ display:flex; flex-direction:column; gap:16px; }
+.stack-sm{ display:flex; flex-direction:column; gap:8px; }
+.stack-xs{ display:flex; flex-direction:column; gap:5px; }
+.row{ display:flex; align-items:center; gap:10px; }
+.row-sm{ display:flex; align-items:center; gap:6px; }
+.row-top{ display:flex; align-items:flex-start; gap:10px; }
+.between{ justify-content:space-between; }
+.wrap{ flex-wrap:wrap; }
+.grow{ flex:1; min-width:0; }
+.cols-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.cols-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.cols-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.auto-fit{ display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:12px; }
+
+/* ---------- duyarli ---------- */
+/* Kenar rayi yalnizca gercekten yer varken sutun olur;
+   altinda icerigin altina yatay serit olarak akar. */
+@media (max-width:1400px){
+  .span-3{ grid-column:span 4; }
+  .span-5{ grid-column:span 6; }
+  .span-7{ grid-column:span 6; }
+  .span-9{ grid-column:span 8; }
+  .span-2{ grid-column:span 12; }
+  .span-6{ grid-column:span 7; }
+  .span-4{ grid-column:span 5; }
+  /* Kenar rayinin dar ekran davranisi components.css'te durur: bu dosya
+     ondan ONCE yuklendigi icin buradaki kural temel .rail kuralinin
+     altinda kalir ve hic uygulanmazdi. */
+}
+@media (max-width:1120px){
+  .span-2, .span-4, .span-6, .span-8{ grid-column:span 12; }
+  .span-3{ grid-column:span 6; }
+  .span-5, .span-7, .span-9, .span-10{ grid-column:span 12; }
+  .cols-4{ grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:1000px){
+  .shell{ grid-template-columns:minmax(0,1fr); }
+  .sidebar{
+    position:fixed; top:0; left:0; bottom:0; width:min(86vw, 300px);
+    transform:translateX(-102%);
+    transition:transform var(--dur-lg) var(--ease);
+    box-shadow:var(--shadow-lg);
+  }
+  .sidebar.is-open{ transform:translateX(0); }
+  .topbar{ padding:10px 16px; }
+  .topbar__menu{ display:inline-flex; }
+  .content{ padding:16px 16px 96px; }
+  .scrim{
+    position:fixed; inset:0; background:var(--scrim);
+    z-index:calc(var(--z-nav) - 1);
+  }
+}
+@media (max-width:720px){
+  .cols-3, .cols-4{ grid-template-columns:repeat(2,1fr); }
+  .span-3{ grid-column:span 12; }
+}
+@media (max-width:520px){
+  .cols-2, .cols-3, .cols-4{ grid-template-columns:1fr; }
+}
+
+/* ---------- mobil alt gezinme ---------- */
+.tabbar{ display:none; }
+@media (max-width:1000px){
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:var(--z-nav);
+    display:flex; gap:2px;
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+    background:var(--surface); border-top:1px solid var(--border);
+  }
+  .tabbar__item{
+    flex:1; border:none; background:none; border-radius:var(--r-sm);
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:6px 2px; color:var(--text-2);
+  }
+  .tabbar__item svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.7; }
+  .tabbar__item span{ font-size:10.5px; font-weight:700; }
+  .tabbar__item.is-active{ color:var(--primary); background:var(--primary-soft); }
+}
