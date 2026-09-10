@@ -2144,6 +2144,164 @@
 
 
 
+
+  /* ==================== ses ve okuma ritmi ====================
+     İki şikâyet aynı yere çıkıyordu: toplantı okunamayacak kadar hızlı
+     akıyor, ve sesli modda biri konuşurken diğeri araya giriyordu.
+     Kural tek: BİR KONUŞMA TESLİM EDİLMEDEN SIRADAKİ BAŞLAMAZ. */
+
+  describe('Ofis — ses ve okuma ritmi', () => {
+
+    it('okuma molası metnin uzunluğuna göre hesaplanır', () => {
+      const kisa = R.Voice.readMs('Tek cümle.', 'normal');
+      const uzun = R.Voice.readMs(new Array(60).fill('kelime').join(' '), 'normal');
+      /* Sabit bir bekleme, kısa ve uzun konuşmaya aynı süreyi verirdi. */
+      expect(uzun > kisa).toBeTruthy();
+    });
+
+    it('hız kademeleri gerçekten farklı sürelerdir', () => {
+      const t = new Array(30).fill('kelime').join(' ');
+      const h = R.Voice.readMs(t, 'hizli');
+      const n = R.Voice.readMs(t, 'normal');
+      const y = R.Voice.readMs(t, 'yavas');
+      expect(h < n).toBeTruthy();
+      expect(n < y).toBeTruthy();
+    });
+
+    it('okuma molasının tabanı ve tavanı vardır', () => {
+      /* Tek kelimelik bir konuşma göz açıp kapayana kadar geçmemeli… */
+      expect(R.Voice.readMs('Evet.', 'normal') >= R.Voice.PACE.normal.min).toBeTruthy();
+      /* …çok uzun bir konuşma da toplantıyı kilitlememeli. */
+      const cok = new Array(400).fill('kelime').join(' ');
+      expect(R.Voice.readMs(cok, 'normal') <= R.Voice.PACE.normal.max).toBeTruthy();
+      expect(R.Voice.readMs('', 'normal')).toBe(0);
+    });
+
+    it('bilinmeyen hız normale düşer', () => {
+      expect(R.Voice.paceOf('yok')).toBe(R.Voice.PACE.normal);
+      expect(R.Voice.readMs('bir iki üç', 'yok')).toBe(R.Voice.readMs('bir iki üç', 'normal'));
+    });
+
+    it('her ajanın kendi perdesi vardır', () => {
+      const p = R.AGENT_IDS.map(id => R.Voice.PROFILES[id]);
+      p.forEach(x => expect(!!x).toBeTruthy());
+      /* Cihazda tek ses olsa bile ajanlar ayırt edilebilmeli. */
+      const pitches = p.map(x => x.pitch);
+      expect(Object.keys(pitches.reduce((a, v) => (a[v] = 1, a), {}))).toHaveLength(pitches.length);
+    });
+
+    it('cümlelere ayırırken hiçbir karakter kaybolmaz', () => {
+      /* İlk yazımda regex, noktadan sonra rakam gelince ("1.500") o parçayı
+         DÜŞÜRÜYORDU. Kayıp bir cümle, bölünmüş bir sayıdan çok daha kötüdür. */
+      ['Hedef 1.500 soru. Tamam.',
+       'Bir. İki! Üç?',
+       'Noktasız bir metin',
+       'Üst üste noktalama var mı?! Evet.',
+       '3.14 sayısı pi demek. Bilinir.'].forEach(t => {
+        expect(R.Voice.sentences(t).join(' ').replace(/\s+/g, ' '))
+          .toBe(t.replace(/\s+/g, ' '));
+      });
+    });
+
+    it('metin kısa parçalara bölünür, cümle ortasından kesilmez', () => {
+      /* Chrome uzun metinlerde ~15 sn sonra sessizce duruyor ve onend hiç
+         gelmiyor; parçalar kısa tutulunca bu tuzak kapanır. */
+      const t = 'Birinci cümle burada. İkinci cümle de burada! Üçüncüsü de var?';
+      const parts = R.Voice.chunks(t);
+      expect(parts.length >= 1).toBeTruthy();
+      parts.forEach(x => expect(x.length <= R.Voice.CHUNK).toBeTruthy());
+      /* Hiçbir şey kaybolmamalı. */
+      const geri = parts.join(' ').replace(/\s+/g, ' ');
+      expect(geri).toBe(t.replace(/\s+/g, ' '));
+    });
+
+    it('tek uzun cümle de bölünür', () => {
+      const t = new Array(80).fill('kelime').join(' ') + '.';
+      const parts = R.Voice.chunks(t);
+      expect(parts.length > 1).toBeTruthy();
+      parts.forEach(x => expect(x.length <= R.Voice.CHUNK).toBeTruthy());
+    });
+
+    it('sayı içindeki nokta cümle sonu sayılmaz', () => {
+      const parts = R.Voice.chunks('Hedef 1.500 soru. Tamam.');
+      expect(parts[0]).toContain('1.500');
+    });
+
+    it('boş metin konuşma üretmez', () => {
+      expect(R.Voice.chunks('')).toHaveLength(0);
+      expect(R.Voice.chunks('   ')).toHaveLength(0);
+    });
+
+    it('emniyet süresi uzun metinde daha uzundur ve tavanı vardır', () => {
+      /* onend hiç gelmezse toplantı kilitlenmemeli. */
+      const kisa = R.Voice.budgetMs('kısa', 1);
+      const uzun = R.Voice.budgetMs(new Array(500).fill('kelime').join(' '), 1);
+      expect(uzun > kisa).toBeTruthy();
+      expect(uzun <= 45000).toBeTruthy();
+      /* Hızlı okunan metne daha az süre yeter. */
+      expect(R.Voice.budgetMs('bir metin', 2) < R.Voice.budgetMs('bir metin', 0.5)).toBeTruthy();
+    });
+
+    it('bir konuşma okunma süresinden az ekranda kalmaz', () => {
+      /* Değişmez kural. İki ayrı arızayı birden kapatır: model akışı
+         hızlıysa turlar göz açıp kapayana kadar geçiyordu, sesli modda
+         cihazda ses yoksa konuşma anında "bitmiş" dönüp toplantı 300 ms'de
+         bir tur atıyordu — sesli mod, şikâyet edilen hızlı akışın daha
+         beteri oluyordu. */
+      const t = new Array(24).fill('kelime').join(' ');
+      const tam = R.Voice.readMs(t, 'normal');
+
+      /* Hiç zaman geçmediyse tam okuma süresi beklenir. */
+      expect(R.Voice.holdMs(t, 'normal', 0)).toBe(tam);
+      /* Yarısı geçtiyse kalanı beklenir (yuvarlama payıyla). */
+      expect(Math.abs(R.Voice.holdMs(t, 'normal', tam / 2) - tam / 2) <= 1).toBeTruthy();
+      /* Süre dolduysa yalnız nefes aralığı kalır — sıfır değil. */
+      expect(R.Voice.holdMs(t, 'normal', tam + 5000)).toBe(R.Voice.MIN_HOLD);
+      /* Ses anında düşse bile (0 ms) tam süre beklenir. */
+      expect(R.Voice.holdMs(t, 'normal', 1) >= tam - 1).toBeTruthy();
+      /* Bozuk giriş kuralı bozmaz. */
+      expect(R.Voice.holdMs(t, 'normal', -999)).toBe(tam);
+      expect(R.Voice.holdMs('', 'normal', 0)).toBe(R.Voice.MIN_HOLD);
+    });
+
+    it('ses yoksa konuşma hemen çözülür — toplantı asılı kalmaz', async () => {
+      const real = window.speechSynthesis;
+      try{
+        Object.defineProperty(window, 'speechSynthesis', { value:undefined, configurable:true });
+        expect(R.Voice.available()).toBeFalsy();
+        const why = await R.Voice.speak('bir şey', null, {});
+        expect(why).toBe('unavailable');
+      }finally{
+        Object.defineProperty(window, 'speechSynthesis', { value:real, configurable:true });
+      }
+    });
+
+    it('ses dağıtımı ajanlara ayrı ses verir, ses biterse başa döner', () => {
+      const fake = [{ voiceURI:'a', name:'A', lang:'tr-TR' },
+                    { voiceURI:'b', name:'B', lang:'tr-TR' }];
+      const map = R.Voice.assign(['patron', 'tyt', 'ayt'], fake);
+      expect(map.patron.voiceURI).toBe('a');
+      expect(map.tyt.voiceURI).toBe('b');
+      expect(map.ayt.voiceURI).toBe('a');   // liste bitti, başa döndü
+      /* Ses hiç yoksa perde/hız ayrımı devreye girer, çökmez. */
+      const bos = R.Voice.assign(['patron'], []);
+      expect(bos.patron).toBeNull();
+      expect(R.Voice.profileFor('patron', ['patron'], []).pitch)
+        .toBe(R.Voice.PROFILES.patron.pitch);
+    });
+
+    it('akış hızı ve ses tercihi kalıcıdır', async () => {
+      reset();
+      expect(O.settings().meetingPace).toBe('normal');
+      await O.saveSettings({ meetingPace:'yavas', meetingVoice:true });
+      R.S.office = null;
+      await O.load();
+      expect(O.settings().meetingPace).toBe('yavas');
+      expect(R.S.ui.meetingVoice).toBe(true);
+      await O.saveSettings({ meetingVoice:false });
+    });
+  });
+
   /* ==================== sohbet edilebilirlik ====================
      Şikâyet neti: "merhaba yazıyorum, adam direkt masamdaki rapor diyor."
      Sebep tek bir hata değil, istemin kendisiydi: her çağrıda ajanın önüne

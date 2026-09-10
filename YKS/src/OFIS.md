@@ -220,6 +220,57 @@ form doldurma emri değil, masadaki birine sorulan soru gibi yazılır:
 | "Kendi alanindan gundemle ilgili TEK bulgu bildir. Sayilari raporundan al." | "Kendi alanında bu konuyla ilgili gördüğün tek şeyi söyle." |
 | "Konusulanlardan kendi alanina dusen tek isi soyle…" | "Bu işin sana düşen kısmı ne? Tek cümlede söyle." |
 
+### Ses ve okuma ritmi — biri bitmeden diğeri başlamaz
+
+Toplantı okunamayacak kadar hızlı akıyordu ve sesli modda konuşmalar üst üste
+biniyordu. İkisi de tek bir kurala bağlandı:
+
+> **Bir konuşma teslim edilmeden sıradaki başlamaz.**
+> Bir konuşma, okunması için gereken süreden az ekranda kalmaz.
+
+Teslim etmek sesli modda konuşmanın **gerçekten bitmesini** beklemektir
+(`Voice.speak` bir söz verir ve `onend` geldiğinde çözülür), sessiz modda ise
+metnin okunmasına yetecek kadar durmaktır. Bekleme döngünün içinde olduğu için
+**sonraki model çağrısı da gecikir** — ücretsiz katmanda bu bir kayıp değil
+kazançtır: kota kendiliğinden rahatlar.
+
+Okuma molası metnin uzunluğuna göre hesaplanır (`Voice.holdMs`) ve metnin
+**zaten ekranda geçirdiği süreyi düşer**: model akarken metin harf harf gelir ve
+kullanıcı o sırada okur. Kota kuyruğunda beklenen süre okuma sayılmaz (ekranda
+"sırada" yazıyordu), o yüzden düşülmez.
+
+| Hız | Kelime/sn | Taban–tavan |
+|---|---|---|
+| Hızlı | 4,2 | 0,5–5 sn |
+| Normal | 2,8 | 0,9–9 sn |
+| Yavaş | 1,8 | 1,4–14 sn |
+
+Tercih kalıcıdır (`office/settings → meetingPace`), toplantı başlamadan da
+seçilebilir.
+
+### Her ajanın kendi sesi
+
+Tarayıcının ses listesinden Türkçe sesler ayıklanır ve ajanlara **dağıtılır**;
+aynı ses ikinci kez kullanılmadan önce hepsi bir kez kullanılır. Cihazda tek
+Türkçe ses varsa perde ve hız ayrımı devreye girer — kimin konuştuğu bakmadan
+anlaşılmalıdır. Konuşan masanın yanında dalga işareti yanar ve ses bitince söner.
+
+Web Speech API'nin üç tuzağı `core/voice.js` içinde kapatılır:
+
+| Tuzak | Ne olurdu | Çözüm |
+|---|---|---|
+| `getVoices()` ilk çağrıda **boş** döner | İlk konuşma varsayılan sesle okunurdu | `voiceschanged` beklenir (zaman aşımıyla) |
+| Chrome uzun metinde ~15 sn sonra sessizce durur, `onend` hiç gelmez | Toplantı orada kilitlenirdi | Metin cümlelere bölünür; her parça kısa |
+| `onend` hiç gelmeyebilir (sekme arka planda, ses aygıtı düşer) | Aynı kilit | Parça uzunluğuna göre emniyet süresi |
+
+Dördüncü bir tuzak da testte yakalandı: **cihazda hiç ses yoksa** konuşma anında
+"bitmiş" dönüyor ve toplantı 300 ms'de bir tur atıyordu — yani sesli mod,
+şikâyet edilen hızlı akışın daha beteri oluyordu. `holdMs` kuralı bunu kapatır
+ve durum kullanıcıya bir kez söylenir.
+
+Ses yoksa ya da bozuksa hiçbir şey kırılmaz: `speak()` hemen çözülür, toplantı
+sessiz akmaya devam eder.
+
 ### Model yokken de sohbet edilir
 
 Kural motoru soruyu **okuyamaz** — bu doğru ve saklanmaz. Ama sohbetin
@@ -584,6 +635,7 @@ akademik metrik taşır.
 | `core/llm.js` | Taşıma: fetch, SSE akış, hata sınıflama, parametre onarımı, canlı model listesi, tanılama, anahtar deposu, yedek zinciri |
 | `core/tools.js` | Veri okuma katmanı + gizlilik süzgeci (`sanitize`) |
 | `core/office.js` | Brifingler, sohbet, gündem, turlu toplantı, rapor, karar takibi |
+| `core/voice.js` | Ajan sesleri, konuşmanın bitişini bekleme, okuma ritmi (`holdMs`) |
 | `screens/office.js` | Pano, 3B oda / kat planı, masalar, günün kararı, kota, model ayarları ve tanılama |
 | `screens/team.js` | Ajanla sohbet |
 | `screens/meeting.js` | Canlı turlu toplantı + rapor + tutanak arşivi |
@@ -606,7 +658,7 @@ akademik metrik taşır.
 
 ```bash
 python devserver.py                       # http://localhost:4173
-node tools/runtests.js                    # 745 testin tamamı geçmeli (Playwright ile)
+node tools/runtests.js                    # 760 testin tamamı geçmeli (Playwright ile)
 python build.py                           # dist/rota.html
 python tools/audit.py                     # satır, concat, sınıf sayıları
 ```

@@ -50,6 +50,8 @@ R.Office = (function(){
       fallback:true,          // ilk model dusunce sirayi dene
       autoBriefing:true,      // sabah gunun brifingini kendiliginden uret
       room3d:true,            // ofis ekrani: 3B oda mi, duz kat plani mi
+      meetingPace:'normal',   // toplanti akis hizi: hizli | normal | yavas
+      meetingVoice:false,     // toplantiyi sesli dinle (tercih kalicidir)
       perAgent:{},            // agentId -> { provider, model }
       updatedAt:null,
       promptVersion:R.OFFICE_PROMPTS.version,
@@ -1060,7 +1062,7 @@ R.Office = (function(){
       const checked = validate(said, { agentId, brief:ownBrief });
       return { agent:agentId, name:agent.name, role:agent.role, text:checked.text,
         warnings:checked.warnings, mode:'llm', model:res.model, provider:res.provider,
-        fellBack:!!res.fellBack, ms:res.ms,
+        fellBack:!!res.fellBack, ms:res.ms, waited:res.waited || 0,
         /* Devam istekleri de yetmediyse yanit kirpildi: ekran bunu soyler,
            kullanici eksik cumleyi sessizce okumaz. */
         truncated:!!res.truncated,
@@ -1852,6 +1854,9 @@ R.Office = (function(){
     ]);
 
     S.office = Object.assign(defaultSettings(), cfg || {});
+    /* Ses tercihi ayarlarda KALICI durur ama oturum boyunca S.ui'den okunur:
+       ekran her cizimde depoya gitmesin. Ikisi acilista esitlenir. */
+    S.ui.meetingVoice = !!S.office.meetingVoice;
 
     S.officeChats = {};
     (docs || []).forEach(d => {

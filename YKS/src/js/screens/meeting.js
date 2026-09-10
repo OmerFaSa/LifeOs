@@ -51,10 +51,10 @@ R.Screens.meeting = (function(){
     });
   }
 
-  function Turn(t){
+  function Turn(t, i){
     if(t.agent === 'aday'){
       return html`
-        <div class="meetturn meetturn--me">
+        <div class="meetturn meetturn--me" data-turn="${i}">
           <div class="meetturn__who"><b>Sen</b><span class="dim">söz aldın</span></div>
           <div class="meetturn__body">${raw(body(t.text))}</div>
         </div>`;
@@ -62,9 +62,10 @@ R.Screens.meeting = (function(){
     const agent = R.AGENT_BY_ID[t.agent] || R.AGENT_BY_ID.patron;
     return html`
       <div class="${cls('meetturn', t.closing && 'meetturn--closing',
-        t.roundKey === 'capraz' && 'meetturn--cross')}">
+        t.roundKey === 'capraz' && 'meetturn--cross')}" data-turn="${i}">
         <div class="meetturn__who">
           ${Avatar(agent)}<b>${agent.name}</b><span class="dim">${agent.role}</span>
+          <span class="meetturn__wave" aria-hidden="true"><i></i><i></i><i></i></span>
           ${when(t.roundTitle, () => html`<span class="meetturn__round">${t.roundTitle}</span>`)}
           ${when(t.vote, () => K.Badge({ label:t.vote + '. fikre oy', tone:'info' }))}
           ${when(t.closing, () => K.Badge({ label:'karar', tone:'ok' }))}
@@ -120,6 +121,12 @@ R.Screens.meeting = (function(){
 
         <div class="row wrap gap-6 mt-12">
           ${K.Button({ label:'Toplantıyı başlat', icon:'zap', tone:'primary', act:'meet-start' })}
+          ${K.Segmented({ aria:'Toplantı akış hızı', value:paceId(), act:'meet-pace',
+            items:R.Voice.PACE_ORDER.map(id => ({ value:id, label:R.Voice.PACE[id].label })) })}
+          ${when(voiceAvailable(), () => K.Button({
+            label:S.ui.meetingVoice ? 'Ses açık' : 'Sesli dinle',
+            icon:S.ui.meetingVoice ? 'pause' : 'play', size:'sm',
+            tone:S.ui.meetingVoice ? 'primary' : 'ghost', act:'meet-voice' }))}
           ${K.Button({ label:'Ofise dön', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'office' } })}
         </div>
 
@@ -139,7 +146,11 @@ R.Screens.meeting = (function(){
               html`<li><b>${i+1}. ${r.title}</b> — dört uzman sırayla konuşur</li>`)}
           </ol>
           <p class="tiny dim">Toplantıyı <b>sen</b> bitirirsin; istediğin turda “Bitir ve rapor al”a bas.
-            Araya girip söz de alabilirsin.
+            Araya girip söz de alabilirsin. Konuşmalar sırayla akar: biri bitmeden
+            diğeri başlamaz.
+            ${when(S.ui.meetingVoice && voiceAvailable(),
+              () => html`Ses açık — her ajanın kendi sesi var; sıradaki konuşma bir
+                öncekinin sesi bitmeden başlamaz.`)}
             ${when(roundMs > 0, () => html`Bir tur yaklaşık
               ${Math.round(roundMs/1000)} sn sürer — istekler kotayı aşmamak için sıraya alınır.`)}
             ${when(q && q.known, () => html`Bugünkü hak: ${q.usedToday}/${q.rpd} istek kullanıldı.`)}
@@ -161,8 +172,16 @@ R.Screens.meeting = (function(){
           ${when(running, () => html`<span class="meetbar__live"></span>`)}
           <b>${running ? 'Tur ' + round + '/' + maxRounds() : 'Toplantı duraklatıldı'}</b>
           <span class="dim">${session ? session.turns.length + ' konuşma' : ''}</span>
+          ${when(S.ui.meetingVoice && voiceAvailable(), () => html`<span class="dim">${
+            R.Voice.voiceCount() === 0 ? '· cihazda ses yok'
+              : R.Voice.voiceCount() > 1
+                ? '· ' + Math.min(R.Voice.voiceCount(), R.AGENT_IDS.length) + ' ayrı ses'
+                : '· tek ses (perde ile ayrılıyor)'}</span>`)}
         </div>
         <div class="row wrap gap-6">
+          ${when(!S.ui.meetingVoice, () => K.Segmented({
+            aria:'Toplantı akış hızı', value:paceId(), act:'meet-pace',
+            items:R.Voice.PACE_ORDER.map(id => ({ value:id, label:R.Voice.PACE[id].label })) }))}
           ${when(voiceAvailable(), () => K.Button({
             label:S.ui.meetingVoice ? 'Sesi kapat' : 'Sesli dinle',
             icon:S.ui.meetingVoice ? 'pause' : 'play', size:'sm',
@@ -388,36 +407,88 @@ R.Screens.meeting = (function(){
 
   function pause(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-  /* ---------- sesli toplanti ----------
-     Ders arasinda dinlenebilsin diye konusmalar okunur. Her ajanin sesi
-     perde ve hizla ayrilir; boylece kimin konustugu bakmadan anlasilir. */
+  /* ---------- sesli toplanti ve okuma ritmi ----------
 
-  function voiceAvailable(){ return typeof window.speechSynthesis !== 'undefined'; }
+     Iki ayri sikayet ayni yere cikiyordu: toplanti okunamayacak kadar hizli
+     akiyor, ve sesli modda biri konusurken digeri araya giriyordu.
 
-  const VOICE = {
-    patron: { pitch:0.85, rate:0.98 },
-    tyt:    { pitch:1.05, rate:1.04 },
-    ayt:    { pitch:0.95, rate:1.02 },
-    rehber: { pitch:1.15, rate:0.96 },
-    analist:{ pitch:1.0,  rate:1.08 },
-    aday:   { pitch:1.0,  rate:1.0 },
-  };
+     Cozum tek bir kural: BIR KONUSMA TESLIM EDILMEDEN SIRADAKI BASLAMAZ.
+     Teslim etmek sesli modda konusmanin gercekten bitmesini beklemek,
+     sessiz modda ise metnin okunmasina yetecek kadar durmaktir. Bekleme
+     dongunun icinde oldugu icin sonraki MODEL CAGRISI da gecikir — bu
+     ucretsiz katmanda bir kayip degil kazanctir: kota kendiliginden
+     rahatlar. */
 
-  function say(turn){
-    if(!S.ui.meetingVoice || !voiceAvailable() || !turn || !turn.text) return;
-    try{
-      const v = VOICE[turn.agent] || VOICE.aday;
-      const u = new SpeechSynthesisUtterance(
-        (turn.name ? turn.name + '. ' : '') + turn.text);
-      u.lang = 'tr-TR';
-      u.pitch = v.pitch;
-      u.rate = v.rate;
-      window.speechSynthesis.speak(u);
-    }catch(e){ /* ses yoksa toplanti aksamaz */ }
+  function voiceAvailable(){ return R.Voice.available(); }
+
+  /* Kim konusuyor: ekranda o konusmanin yaninda dalga isareti yanar. */
+  let speakingId = null;
+
+  function markSpeaking(index){
+    speakingId = (index == null || index < 0) ? null : index;
+    const live = document.getElementById('meet-turns');
+    if(!live) return;
+    live.querySelectorAll('.meetturn').forEach(el => {
+      el.classList.toggle('is-speaking',
+        speakingId != null && el.dataset.turn === String(speakingId));
+    });
+  }
+
+  /* Okunacak metin: "Tuna: ..." diye baslar ki kimin konustugu duyulsun. */
+  function voiceText(turn){
+    return (turn.name ? turn.name + '. ' : '') + turn.text;
   }
 
   function stopVoice(){
-    if(voiceAvailable()){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+    markSpeaking(null);
+    R.Voice.cancel();
+  }
+
+  function paceId(){ return O.settings().meetingPace || 'normal'; }
+
+
+
+  /* Bir konusmayi kullaniciya TESLIM eder ve ancak ondan sonra doner. */
+  async function deliver(turn){
+    if(!turn || !turn.text || stopAsked) return;
+
+    if(S.ui.meetingVoice && voiceAvailable()){
+      markSpeaking(session ? session.turns.indexOf(turn) : -1);
+      const basladi = Date.now();
+      const why = await R.Voice.speak(voiceText(turn),
+        R.Voice.profileFor(turn.agent, R.AGENT_IDS),
+        { signal:controller && controller.signal });
+      markSpeaking(null);
+      if(why === 'cancelled') return;
+
+      /* Ses SESSIZCE dusebilir: cihazda hic Turkce ses yoksa konusma
+         aninda "bitmis" doner ve toplanti 300 ms'de bir tur atmaya baslar —
+         yani sesli mod, sikayet edilen hizli akisin daha betersi olur.
+
+         Degismez kural: bir konusma, okunmasi icin gereken sureden AZ
+         ekranda kalmaz. Ses gercekten calistiysa zaten daha uzun surer ve
+         bu satir yalniz nefes araligini birakir. */
+      if(why === 'unavailable' || why === 'error') warnVoiceOnce();
+      await pause(R.Voice.holdMs(turn.text, paceId(), Date.now() - basladi));
+      return;
+    }
+    /* Okuma molasi, metnin ZATEN ekranda gecirdigi sureyi sayar.
+
+       Model akarken metin harf harf gelir ve kullanici o sirada okur; buna
+       bir de tam okuma suresi eklemek toplantiyi gereksiz yere durdururdu.
+       Kota kuyrugunda beklenen sure ise okuma degildir (ekranda "sirada"
+       yaziyordu), o yuzden dusulur. */
+    const gorunen = Math.max(0, (turn.ms || 0) - (turn.waited || 0));
+    await pause(R.Voice.holdMs(turn.text, paceId(), gorunen));
+  }
+
+  /* Ses acik ama cihazda calisan bir ses yok: kullanici bunu duyamaz,
+     soylenmesi gerekir. Toplanti basina bir kez. */
+  let voiceWarned = false;
+  function warnVoiceOnce(){
+    if(voiceWarned) return;
+    voiceWarned = true;
+    UI.toast('Bu cihazda çalışan bir konuşma sesi bulunamadı — toplantı sessiz akıyor');
   }
 
   async function loop(){
@@ -478,15 +549,15 @@ R.Screens.meeting = (function(){
       }
       stopWait();
       turnIndex++;
-      say(session.turns[session.turns.length - 1]);
       paint();
       setPending('');
       await R.App.render();
 
-      /* Model yokken kota bosluğu da yoktur: turlar goz acip kapayana kadar
-         akar ve okunmaz. Konusmanin okunabilir bir ritmi olsun diye kisa
-         bir duraklama konur. */
-      if(O.mode() !== 'llm' && running && !stopAsked) await pause(700);
+      /* Konusma teslim edilmeden siradaki tur baslamaz: sesli modda ses
+         bitene kadar, sessiz modda metin okunana kadar beklenir. Bekleme
+         dongunun icinde oldugu icin sonraki model cagrisi da gecikir ve
+         kota kendiliginden rahatlar. */
+      if(running && !stopAsked) await deliver(session.turns[session.turns.length - 1]);
 
       /* Tur bitti: kural motoru celiski bulduysa Patron takip sorusu sorar.
          Toplantiyi yoklamadan tartismaya cikaran adim budur. */
@@ -498,11 +569,10 @@ R.Screens.meeting = (function(){
             onWait(ms){ showWait('patron', ms); },
             async onTurn(turn){
               stopWait();
-              say(turn);
               paint();
               setPending('');
               await R.App.render();
-              if(O.mode() !== 'llm') await pause(700);
+              if(running && !stopAsked) await deliver(turn);
             },
           });
         }catch(err){
@@ -529,6 +599,7 @@ R.Screens.meeting = (function(){
     closed = null;
     stopAsked = false;
     turnIndex = 0;
+    voiceWarned = false;
     controller = new AbortController();
     running = true;
 
@@ -541,6 +612,9 @@ R.Screens.meeting = (function(){
       return;
     }
     await R.App.render();
+    /* Acilis da bir konusmadir: teslim edilmeden ilk uzman soz almasin.
+       Eskiden acilis ve ilk tur ard arda, ayni anda dusuyordu. */
+    await deliver(session.turns[session.turns.length - 1]);
     await loop();
   }
 
@@ -633,7 +707,22 @@ R.Screens.meeting = (function(){
 
     async 'meet-voice'(){
       S.ui.meetingVoice = !S.ui.meetingVoice;
-      if(!S.ui.meetingVoice) stopVoice();
+      if(S.ui.meetingVoice){
+        /* Ses listesi ilk cagrida bos gelebilir; acilirken yuklenir ki
+           ilk konusma da dogru sesle okunsun. */
+        await R.Voice.load();
+        R.Voice.assign(R.AGENT_IDS);
+      }else{
+        stopVoice();
+      }
+      await O.saveSettings({ meetingVoice:S.ui.meetingVoice });
+      await R.App.render();
+    },
+
+    /* Akis hizi kalicidir: her toplantida yeniden secilmesin. */
+    async 'meet-pace'(el){
+      const v = el.dataset.value;
+      if(R.Voice.PACE[v]) await O.saveSettings({ meetingPace:v });
       await R.App.render();
     },
 

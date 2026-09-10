@@ -93,11 +93,13 @@ Tanımlı hareketler bunlarla sınırlıdır:
 | `.skeleton__row` | yükleniyor parıltısı (döngü) | 1.3s |
 | `.collapse__chev` | açılınca 180° döner | `--dur` |
 | `.room3d__scene` | kamera açısı değişince döner | `--dur-lg` |
+| `.meetturn__wave` | sesli toplantıda konuşan masanın dalgası (döngü) | 1s |
 
 Dikkat çekmek için animasyon yoktur: yanıp sönme, zıplama, sürekli döngü
 kullanılmaz. Üç istisna vardır ve üçü de **süren bir işi** gösterir, dikkat
 çekmeyi değil: iskelet parıltısı, açılış çubuğu, ve ofiste konuşmakta olan
-ajanın nabzı (`.seatlight--busy`, 3B odada `.desk3d__screen.is-busy`). Üçü de
+ajanın nabzı (`.seatlight--busy`, 3B odada `.desk3d__screen.is-busy`,
+sesli toplantıda `.meetturn__wave`). Hepsi de
 iş bitince durur; `prefers-reduced-motion` hepsini kapatır.
 
 ## Ekranlar
