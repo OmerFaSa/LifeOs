@@ -73,10 +73,17 @@
 }
 .btn svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.9; flex:none; }
 .btn:hover{ background:var(--surface-2); border-color:var(--text-3); }
+/* Ana düğme BÖLÜMÜN rengindedir. Düğme bir durum değil bir eylemdir;
+   bölüm kimliğini taşıyabilir. Durum renkleri (hedefte / referans dışı /
+   kırmızı bayrak) buna karışmaz — onlar her bölümde aynı kalır, aksi
+   hâlde bir tahlil sonucunun rengi hangi sayfada olduğuna göre değişirdi. */
 .btn--primary{
-  background:var(--primary); border-color:var(--primary); color:var(--primary-ink);
+  background:var(--sec); border-color:var(--sec); color:var(--primary-ink);
 }
-.btn--primary:hover{ background:var(--primary-hover); border-color:var(--primary-hover); }
+.btn--primary:hover{
+  background:color-mix(in srgb, var(--sec) 86%, #000);
+  border-color:color-mix(in srgb, var(--sec) 86%, #000);
+}
 .btn--danger{ color:var(--danger); border-color:color-mix(in srgb, var(--danger) 45%, var(--border)); background:transparent; }
 .btn--danger:hover{ background:var(--danger-soft); }
 .btn--ghost{ border-color:transparent; background:transparent; color:var(--text-2); }
@@ -952,28 +959,60 @@ button.listitem.is-on{ background:var(--primary-soft); }
    Bir tahlil değerinin nerede durduğunu gösterir. Üç katman:
    referans aralığı (geniş, nötr) · hedef bant (dar, birincil) · değer (işaret).
    Renk tek başına anlam taşımaz: işaretin yanında daima sayı ve rozet durur. */
-.rangebar{
-  position:relative; height:22px; border-radius:var(--r-sm);
-  background:var(--surface-3); overflow:hidden;
+/* ================= ölçüm cetveli =================
+
+   Sistemin imza bileşeni. Bir ilerleme çubuğu değildir: dolu bir kutu
+   «ne kadar tamamlandı» der, burada sorulan o değil — «değer nerede
+   duruyor». Bu yüzden zemin boştur, referans aralığı ince bir bant,
+   hedef bandı bir alt çizgi, değer ise tek bir hassas ibredir. */
+.scale{ min-width:0; }
+.scale__axis{
+  position:relative; height:20px;
 }
-.rangebar__ref{
-  position:absolute; inset-block:0; background:var(--c-band);
-  border-radius:var(--r-sm);
+/* Ekseni taşıyan çizgi tam ortadan geçer. */
+.scale__axis::before{
+  content:''; position:absolute; left:0; right:0; top:50%;
+  height:1px; background:var(--rule); transform:translateY(-.5px);
 }
-.rangebar__opt{
-  position:absolute; inset-block:4px; background:var(--primary);
-  opacity:.28; border-radius:3px;
+.scale__ref{
+  position:absolute; top:50%; height:6px; transform:translateY(-3px);
+  background:var(--surface-3); border-radius:3px;
 }
-.rangebar__mark{
-  position:absolute; top:-2px; bottom:-2px; width:3px; border-radius:2px;
-  background:var(--primary); transform:translateX(-1.5px);
+.scale__opt{
+  position:absolute; top:50%; height:6px; transform:translateY(-3px);
+  background:var(--primary); opacity:.34; border-radius:3px;
+}
+/* Referans aralığının uçlarındaki çentikler: aralık renkle değil,
+   çizgiyle de okunur. */
+.scale__tick{
+  position:absolute; top:50%; width:1px; height:11px;
+  transform:translate(-.5px, -5.5px);
+  background:var(--border-strong);
+}
+/* İbre. Ölçüm dışarı taştığında incelmez, renk değiştirir ve uzar. */
+.scale__mark{
+  position:absolute; top:50%; width:2px; height:16px;
+  transform:translate(-1px, -8px);
+  background:var(--text); border-radius:1px;
   transition:left var(--dur-lg) var(--ease);
 }
-.rangebar__mark.is-out{ background:var(--danger); width:4px; }
-.rangebar__scale{
-  display:flex; justify-content:space-between; gap:8px;
-  font-size:var(--fs-xs); color:var(--text-3); margin-top:4px;
+.scale__mark::after{
+  content:''; position:absolute; left:50%; top:-4px;
+  width:5px; height:5px; border-radius:50%;
+  background:var(--text); transform:translateX(-2.5px);
 }
+.scale__mark.is-out{ background:var(--danger); height:20px; transform:translate(-1px, -10px); }
+.scale__mark.is-out::after{ background:var(--danger); }
+
+.scale__legend{
+  display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+  margin-top:5px;
+  font-size:11px; color:var(--text-3);
+}
+.scale__mid{ letter-spacing:.03em; }
+.scale__mid b{ font-weight:600; color:var(--text-2); }
+.scale__end{ font-variant-numeric:tabular-nums; }
+.scale--bare .scale__axis{ height:18px; }
 
 /* Eğilim oku — yön bildirir, iyi/kötü bildirmez. */
 .trendmark{ font-size:11px; line-height:1; }

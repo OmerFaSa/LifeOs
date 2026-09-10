@@ -85,6 +85,90 @@ SP.UI = (function(){
       + (cls ? ' class="'+cls+'"' : '') + '>' + p + '</svg>';
   }
 
+
+  /* ---------- bölüm imzaları ----------
+
+     Her bölümün hero'sunda duran ince, tek renkli işaret. Süs değil:
+     bölümün NE ÖLÇTÜĞÜNÜ soyutlar ve kullanıcı sayfayı okumadan hangi
+     bölümde olduğunu çevresel görüşle anlar.
+
+     Hepsi aynı dille çizilir: 34px yükseklik, 1.5px çizgi, tek renk,
+     dolgu yok. Farklı kalınlıkta ya da renkli bir imza, tek tasarım
+     kuralını bozardı. */
+  const MOTIFS = {
+    /* Günlük — bir günün yirmi dört çentiği, biri işaretli. */
+    gunluk:function(){
+      let d = '';
+      for(let i = 0; i < 24; i++){
+        const x = i * 11 + 1;
+        const h = i % 6 === 0 ? 22 : 12;
+        d += '<line x1="' + x + '" y1="' + (28 - h) + '" x2="' + x + '" y2="28"/>';
+      }
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" aria-hidden="true">' + d
+        + '<circle cx="133" cy="7" r="3.5" fill="currentColor" stroke="none"/></svg>';
+    },
+    /* Testler — bir ölçüm cetveli: referans aralığı ve içindeki değer. */
+    testler:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" aria-hidden="true">'
+        + '<line x1="2" y1="20" x2="263" y2="20"/>'
+        + '<line x1="2" y1="14" x2="2" y2="26"/><line x1="263" y1="14" x2="263" y2="26"/>'
+        + '<rect x="86" y="16" width="94" height="8" rx="4" fill="currentColor" stroke="none" opacity=".28"/>'
+        + '<line x1="118" y1="8" x2="118" y2="32" stroke-width="2.5"/></svg>';
+    },
+    /* Besin — bir tabakta üç makro dilimi. */
+    besin:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">'
+        + '<circle cx="17" cy="17" r="14"/>'
+        + '<path d="M17 3a14 14 0 0 1 12.1 21"/>'
+        + '<line x1="42" y1="11" x2="150" y2="11"/>'
+        + '<line x1="42" y1="20" x2="205" y2="20"/>'
+        + '<line x1="42" y1="29" x2="118" y2="29"/></svg>';
+    },
+    /* Hareket — bir efor eğrisi ve toparlanma. */
+    hareket:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        + '<path d="M2 26c14 0 18-16 30-16s16 16 30 16 18-20 30-20 16 20 30 20"/>'
+        + '<path d="M152 26h18" stroke-dasharray="1 6"/>'
+        + '<path d="M178 26c12 0 14-12 24-12s14 8 24 8 12-6 22-6h15" opacity=".55"/></svg>';
+    },
+    /* Finans — bir defter sütunu: kalemler ve toplam çizgisi. */
+    finans:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" aria-hidden="true">'
+        + '<line x1="2" y1="7" x2="120" y2="7"/><line x1="178" y1="7" x2="215" y2="7"/>'
+        + '<line x1="2" y1="16" x2="98" y2="16"/><line x1="178" y1="16" x2="228" y2="16"/>'
+        + '<line x1="2" y1="25" x2="134" y2="25"/><line x1="178" y1="25" x2="206" y2="25"/>'
+        + '<line x1="170" y1="31" x2="240" y2="31" stroke-width="2"/></svg>';
+    },
+    /* Ofis — patron ve dört koç. */
+    ofis:function(){
+      let d = '<circle cx="17" cy="17" r="9"/>';
+      for(let i = 0; i < 4; i++){
+        const x = 62 + i * 34;
+        d += '<circle cx="' + x + '" cy="17" r="6.5"/>'
+           + '<line x1="' + (x - 28) + '" y1="17" x2="' + (x - 8) + '" y2="17" opacity=".45"/>';
+      }
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">'
+        + d + '</svg>';
+    },
+    /* Ayarlar — üç sürgü. */
+    ayarlar:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" aria-hidden="true">'
+        + '<line x1="2" y1="7" x2="150" y2="7"/><circle cx="104" cy="7" r="4.5" fill="var(--bg)"/>'
+        + '<line x1="2" y1="17" x2="150" y2="17"/><circle cx="52" cy="17" r="4.5" fill="var(--bg)"/>'
+        + '<line x1="2" y1="27" x2="150" y2="27"/><circle cx="126" cy="27" r="4.5" fill="var(--bg)"/></svg>';
+    },
+  };
+
+  function motif(sectionId){
+    const fn = MOTIFS[sectionId];
+    return fn ? fn() : '';
+  }
+
   /* ---------- kucuk parcalar ----------
      Not: rozet/kart/tablo gibi bilesenler SP.C icinde tek yerde durur.
      Burada yalnizca SP.C'ye girmeyen, veriye bagli parcalar kalir. */
@@ -209,24 +293,39 @@ SP.UI = (function(){
     const axisLo = lo - span * 0.6;
     const axisHi = hi + span * 0.6;
     const p = v => U.clamp(100 * (v - axisLo) / (axisHi - axisLo), 0, 100);
+    const o = opts || {};
 
-    let out = '<div class="rangebar">';
-    out += '<div class="rangebar__ref" style="left:' + p(lo).toFixed(1) + '%;width:'
+    /* Cetvel bir ilerleme cubugu degil, bir OLCU ALETIDIR: dolu bir kutu
+       "ne kadar tamamlandi" der; burada sorulan o degil, "deger nerede
+       duruyor". Bu yuzden zemin bos, referans araligi ince bir bant,
+       hedef bandi bir alt cizgi, deger ise tek bir hassas ibredir. */
+    let out = '<div class="scale' + (o.bare ? ' scale--bare' : '') + '">';
+    out += '<div class="scale__axis">';
+    out += '<div class="scale__ref" style="left:' + p(lo).toFixed(1) + '%;width:'
       + (p(hi) - p(lo)).toFixed(1) + '%"></div>';
     if(optimal && optimal.length === 2){
-      out += '<div class="rangebar__opt" style="left:' + p(optimal[0]).toFixed(1) + '%;width:'
+      out += '<div class="scale__opt" style="left:' + p(optimal[0]).toFixed(1) + '%;width:'
         + Math.max(1.5, p(optimal[1]) - p(optimal[0])).toFixed(1) + '%"></div>';
     }
+    /* Referans araliginin iki ucunda birer centik: aralik nerede baslayip
+       nerede bittigi cizgiyle de okunur, yalniz renkle degil. */
+    out += '<i class="scale__tick" style="left:' + p(lo).toFixed(1) + '%"></i>';
+    out += '<i class="scale__tick" style="left:' + p(hi).toFixed(1) + '%"></i>';
     if(value != null && isFinite(value)){
       const outside = value < lo || value > hi;
-      out += '<div class="rangebar__mark' + (outside ? ' is-out' : '') + '" style="left:'
+      out += '<div class="scale__mark' + (outside ? ' is-out' : '') + '" style="left:'
         + p(value).toFixed(1) + '%"></div>';
     }
     out += '</div>';
-    if(opts && opts.bare) return out;
-    out += '<div class="rangebar__scale"><span class="num">' + U.fmtNum(lo) + '</span>'
-      + '<span class="dim">referans' + (optimal ? ' &middot; hedef ' + U.fmtNum(optimal[0]) + '&ndash;' + U.fmtNum(optimal[1]) : '') + '</span>'
-      + '<span class="num">' + U.fmtNum(hi) + (unit ? ' ' + esc(unit) : '') + '</span></div>';
+    if(o.bare){ out += '</div>'; return out; }
+    out += '<div class="scale__legend">'
+      + '<span class="scale__end num">' + U.fmtNum(lo) + '</span>'
+      + '<span class="scale__mid">referans'
+      + (optimal ? ' <b>&middot; hedef ' + U.fmtNum(optimal[0]) + '&ndash;' + U.fmtNum(optimal[1]) + '</b>' : '')
+      + '</span>'
+      + '<span class="scale__end num">' + U.fmtNum(hi) + (unit ? ' ' + esc(unit) : '') + '</span>'
+      + '</div>';
+    out += '</div>';
     return out;
   }
 
@@ -439,7 +538,7 @@ SP.UI = (function(){
   }
 
   return {
-    icon, trend,
+    icon, trend, motif,
     lineChart, barChart, donut, sparkline, stackBar, heatmap, legend,
     rangeBar, macroSplit,
     hint, rail, openHint, closeHint, isHintOpen,

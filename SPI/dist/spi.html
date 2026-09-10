@@ -55,9 +55,19 @@
   --info:#3A5468;          /* AA: beyaz üzerinde 8.0:1 */
   --info-soft:#E9EDF0;
 
+  /* ---- mürekkep ----
+     Sayfayı sonlandıran koyu bant, marka işareti ve ölçüm cetvelinin
+     ana çizgisi bu renktedir. Saf siyah değil, KOYU ÇAM: klinik bir
+     kesinlik verir ama soğumaz. */
+  --ink:#13211B;
+  --ink-2:#1B2E26;
+  --ink-on:#F2F0EA;
+  --ink-on-2:#9BAFA5;
+
   /* ---- çizgi ---- */
   --border:#E7E2D9;
   --border-strong:#CDC6B8;
+  --rule:#D8D2C6;     /* ölçüm cetvelinin ince çizgileri */
 
   /* ---- odak halkası: her temada görünür kalır ---- */
   --ring:color-mix(in srgb, var(--primary) 45%, transparent);
@@ -131,7 +141,7 @@
 
   /* ---- düzen ---- */
   --sidebar-w:236px;
-  --nav-h:62px;
+  --nav-h:47px;   /* yalnız numaralı bölüm şeridi yapışır */
   --topbar-h:60px;
   --content-max:1200px;
 
@@ -160,8 +170,14 @@
   --d-info:#8FADC2;
   --d-info-soft:#1A2126;
 
+  --d-ink:#0C1712;
+  --d-ink-2:#16241D;
+  --d-ink-on:#EDEBE4;
+  --d-ink-on-2:#8FA79A;
+
   --d-border:#2B2B25;
   --d-border-strong:#3B3B33;
+  --d-rule:#3A3A32;
 
   --d-macro-protein:#7FBFA0;
   --d-macro-fat:#D6A961;
@@ -206,6 +222,9 @@
     --info-soft:var(--d-info-soft);
     --border:var(--d-border);
     --border-strong:var(--d-border-strong);
+    --rule:var(--d-rule);
+    --ink:var(--d-ink); --ink-2:var(--d-ink-2);
+    --ink-on:var(--d-ink-on); --ink-on-2:var(--d-ink-on-2);
     --macro-protein:var(--d-macro-protein);
     --macro-fat:var(--d-macro-fat);
     --macro-carb:var(--d-macro-carb);
@@ -246,6 +265,9 @@
   --info-soft:var(--d-info-soft);
   --border:var(--d-border);
   --border-strong:var(--d-border-strong);
+  --rule:var(--d-rule);
+  --ink:var(--d-ink); --ink-2:var(--d-ink-2);
+  --ink-on:var(--d-ink-on); --ink-on-2:var(--d-ink-on-2);
   --macro-protein:var(--d-macro-protein);
   --macro-fat:var(--d-macro-fat);
   --macro-carb:var(--d-macro-carb);
@@ -510,6 +532,50 @@
   --scrim:rgba(0,0,0,.62);
 }
 
+
+/* ================= BÖLÜM KİMLİKLERİ =================
+
+   Tek tasarım, yedi imza. Düzen, tipografi, boşluk ve bileşenler her
+   bölümde AYNIDIR; değişen tek şey `--sec` — bölümün kendi rengi.
+
+   Renkler aynı doygunluk ailesinden seçildi: yan yana konduklarında
+   gökkuşağı değil, tek bir palet gibi okunurlar. Sağlık alanının doğal
+   tonları: adaçayı, klinik mavi, kehribar, kiremit, zeytin, erik, taş.
+
+   `--sec` yalnız dört yerde görünür — bölüm numarası, etkin sekme
+   çizgisi, bölüm başlığının üstündeki kısa çizgi ve bölüm imzası. Renk
+   içeriğe bulaşmaz; durum renkleri (ok/warn/danger) her bölümde aynıdır.
+   Aksi hâlde bir tahlil sonucunun rengi hangi bölümde olduğuna göre
+   değişirdi ve bu, sağlık verisinde kabul edilemez. */
+
+:root{ --sec:var(--primary); --sec-soft:var(--primary-soft); }
+
+:root[data-section="gunluk"]  { --sec:#2F6B52; --sec-soft:#E4EDE8; }
+:root[data-section="testler"] { --sec:#2E5A73; --sec-soft:#E3EBEF; }
+:root[data-section="besin"]   { --sec:#8A5A18; --sec-soft:#F6EDE0; }
+:root[data-section="hareket"] { --sec:#9A4A2F; --sec-soft:#F7E8E2; }
+:root[data-section="finans"]  { --sec:#5E6B2A; --sec-soft:#EDEFE0; }
+:root[data-section="ofis"]    { --sec:#6B3F63; --sec-soft:#F0E7EF; }
+:root[data-section="ayarlar"] { --sec:#5A5750; --sec-soft:#EBE9E4; }
+
+/* Koyu temada aynı renkler açılır: koyu zeminde doygun ton okunmaz. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"])[data-section="gunluk"]  { --sec:#79C09C; --sec-soft:#1B2B23; }
+  :root:not([data-theme="light"])[data-section="testler"] { --sec:#84B2CC; --sec-soft:#182530; }
+  :root:not([data-theme="light"])[data-section="besin"]   { --sec:#D6A961; --sec-soft:#2B2415; }
+  :root:not([data-theme="light"])[data-section="hareket"] { --sec:#DF9376; --sec-soft:#2E1E17; }
+  :root:not([data-theme="light"])[data-section="finans"]  { --sec:#AFBF74; --sec-soft:#242817; }
+  :root:not([data-theme="light"])[data-section="ofis"]    { --sec:#C193BA; --sec-soft:#2A1E28; }
+  :root:not([data-theme="light"])[data-section="ayarlar"] { --sec:#AFAAA0; --sec-soft:#26241F; }
+}
+:root[data-theme="dark"][data-section="gunluk"]  { --sec:#79C09C; --sec-soft:#1B2B23; }
+:root[data-theme="dark"][data-section="testler"] { --sec:#84B2CC; --sec-soft:#182530; }
+:root[data-theme="dark"][data-section="besin"]   { --sec:#D6A961; --sec-soft:#2B2415; }
+:root[data-theme="dark"][data-section="hareket"] { --sec:#DF9376; --sec-soft:#2E1E17; }
+:root[data-theme="dark"][data-section="finans"]  { --sec:#AFBF74; --sec-soft:#242817; }
+:root[data-theme="dark"][data-section="ofis"]    { --sec:#C193BA; --sec-soft:#2A1E28; }
+:root[data-theme="dark"][data-section="ayarlar"] { --sec:#AFAAA0; --sec-soft:#26241F; }
+
 /* ==== css/base.css ==== */
 /* Sifirlama, tipografi ve erisilebilirlik temelleri (WCAG 2.2 AA hedefi). */
 
@@ -671,173 +737,200 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
   padding-inline:32px;
 }
 
-/* ---------- üst gezinme ---------- */
-.sitenav{
-  position:sticky; top:0; z-index:var(--z-nav);
-  background:color-mix(in srgb, var(--bg) 86%, transparent);
-  backdrop-filter:saturate(1.4) blur(14px);
-  border-bottom:1px solid var(--border);
-}
-.sitenav__in{
-  height:var(--nav-h);
-  display:flex; align-items:center; gap:28px;
+/* ---------- künye: kimlik satırı ----------
+
+   Bu satır YAPIŞMAZ. Okurken kimliğe ihtiyaç yoktur, gezinmeye vardır;
+   kimlik satırının kaymasına izin vermek sabit çubuğu yarı yüksekliğe
+   indirir ve içeriğe yer açar. */
+.masthead{ background:var(--bg); }
+.masthead__in{
+  height:64px;
+  display:flex; align-items:center; gap:20px;
 }
 
 .brand{
-  display:flex; align-items:center; gap:10px;
+  display:flex; align-items:center; gap:11px;
   border:none; background:none; padding:0;
   min-width:0; flex:none;
 }
 .brand__mark{
-  width:28px; height:28px; border-radius:50%; flex:none;
-  background:var(--primary); color:var(--primary-ink);
+  width:30px; height:30px; border-radius:50%; flex:none;
+  background:var(--ink); color:var(--ink-on);
   display:grid; place-items:center;
-  font-family:var(--font-serif); font-weight:500; font-size:14px;
+  font-family:var(--font-serif); font-weight:500; font-size:15px;
   letter-spacing:0; line-height:1;
 }
-.brand__text{ display:flex; flex-direction:column; line-height:1.15; min-width:0; text-align:left; }
+.brand__text{ display:flex; flex-direction:column; line-height:1.1; min-width:0; text-align:left; }
 .brand__text b{
-  font-family:var(--font-serif); font-size:17px; font-weight:500;
-  letter-spacing:.01em; color:var(--text); line-height:1.1;
+  font-family:var(--font-serif); font-size:19px; font-weight:500;
+  letter-spacing:.015em; color:var(--text);
 }
 .brand__text span{
-  font-size:10px; font-weight:500; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--text-3);
+  font-size:10px; font-weight:500; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--text-3); margin-top:2px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 
-/* Yedi bölüm. Etiketler tek satırdır ve asla sarmaz. */
-.navlinks{
+/* Tarih künyenin ortasında durur — bir gazetenin tarih satırı gibi. */
+.masthead__date{
   flex:1; min-width:0;
-  display:flex; align-items:center; gap:2px;
+  display:flex; align-items:baseline; justify-content:center; gap:9px;
+  white-space:nowrap; overflow:hidden;
+}
+.masthead__day{
+  font-family:var(--font-serif); font-size:14px; color:var(--text-2);
+}
+.masthead__wd{
+  font-size:10px; font-weight:500; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--text-3);
+}
+
+.navtools{ display:flex; align-items:center; gap:2px; flex:none; }
+.navtools__sep{ width:1px; height:20px; background:var(--border); margin:0 4px; flex:none; }
+.sitenav__menu{ display:none; }
+
+/* ---------- künye: numaralı bölüm şeridi ----------
+
+   Yapışan tek parça budur. Numara süs değil: yedi bölümün SIRASI
+   anlamlıdır (önce yazılan, sonra okunan) ve numara o sırayı görünür
+   kılar. */
+.sitenav{
+  position:sticky; top:0; z-index:var(--z-nav);
+  background:color-mix(in srgb, var(--bg) 96%, transparent);
+  backdrop-filter:saturate(1.3) blur(16px);
+  border-block:1px solid var(--border);
+}
+.navlinks{
+  display:flex; align-items:stretch; gap:0;
   overflow-x:auto; scrollbar-width:none;
 }
 .navlinks::-webkit-scrollbar{ display:none; }
 
-/* Gezinmede İKON YOK. Yedi ikon + yedi etiket + dört araç ikonu aynı
-   satırda yarışınca çubuk kalabalıklaşıyor ve hiçbiri okunmuyordu.
-   Metin tek başına daha net ve daha sakin. */
 .navlink{
   position:relative;
   flex:0 0 auto;
-  display:inline-flex; align-items:center; gap:6px;
-  padding:8px 13px;
+  display:inline-flex; align-items:baseline; gap:8px;
+  padding:13px 22px 13px 0;
+  margin-right:6px;
   border:none; background:none;
-  color:var(--text-2); font-size:13px; font-weight:500;
-  letter-spacing:.005em; white-space:nowrap;
+  color:var(--text-3);
   transition:color var(--dur) var(--ease);
 }
 .navlink svg{ display:none; }
-.navlink:hover{ color:var(--text); }
-.navlink.is-active{ color:var(--text); font-weight:600; }
-/* Etkin bölüm altındaki çizgi — hap değil, site gezinmesi dili. */
+.navlink__num{
+  font-family:var(--font-display); font-size:10px; font-weight:600;
+  letter-spacing:.06em; font-variant-numeric:tabular-nums;
+  color:var(--text-3); opacity:.7;
+}
+.navlink__label{
+  font-size:13.5px; font-weight:500; letter-spacing:.005em; white-space:nowrap;
+}
+.navlink:hover{ color:var(--text-2); }
+.navlink:hover .navlink__num{ opacity:1; }
+.navlink.is-active{ color:var(--text); }
+.navlink.is-active .navlink__label{ font-weight:600; }
+.navlink.is-active .navlink__num{ color:var(--primary); opacity:1; }
+/* Etkin bölümün altındaki çizgi numarayı da kapsar. */
 .navlink.is-active::after{
-  content:''; position:absolute; left:13px; right:13px; bottom:-11px; height:1.5px;
+  content:''; position:absolute; left:0; right:22px; bottom:-1px; height:2px;
   background:var(--primary);
 }
 .navlink__badge{
-  min-width:16px; height:16px; padding:0 4px; border-radius:var(--r-pill);
+  align-self:center;
+  min-width:16px; height:16px; padding:0 5px; border-radius:var(--r-pill);
   background:var(--danger); color:#fff;
-  font-size:10px; font-weight:800; line-height:16px; text-align:center;
+  font-size:10px; font-weight:700; line-height:16px; text-align:center;
 }
 .navlink__badge.is-quiet{ background:var(--surface-3); color:var(--text-2); }
 
-.navtools{ display:flex; align-items:center; gap:4px; flex:none; }
-.navtools__sep{
-  width:1px; height:20px; background:var(--border); margin:0 4px; flex:none;
-}
-.sitenav__menu{ display:none; }
+/* ---------- hero ----------
 
-/* ---------- hero ---------- */
-/* Hero'nun zemini yok. Renkli bir bant koymak dikkati başlıktan alır ve
-   arayüzü bir açılış sayfasına benzetir; burada tek ayırıcı ince bir
-   çizgidir. */
+   Sayfanın açılışı: bölüm imzası, tek cümlelik durum, ne yapılacağı ve
+   özet sayılar. Zemin yok — tek ayırıcı ince çizgidir. */
 .hero{ border-bottom:1px solid var(--border); }
 .hero__in{
-  padding-block:44px 30px;
+  padding-block:46px 34px;
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
-  align-items:end; gap:20px 56px;
+  align-items:end; gap:24px 56px;
 }
 .hero__main{ min-width:0; }
 
-/* Bölüm satırı: numara, ince çizgi, ad. İkon yok — hero'da ikon
-   başlığın ağırlığını böler. */
+/* Bölüm imzası: numara, ince çizgi, ad. Numara bölümün kendi renginde. */
 .hero__eyebrow{
-  display:flex; align-items:center; gap:10px;
+  display:flex; align-items:center; gap:11px;
   font-family:var(--font-body);
-  font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  font-size:10.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
   color:var(--text-3);
-  margin-bottom:18px;
+  margin-bottom:20px;
 }
 .hero__eyebrow svg{ display:none; }
 .hero__num{
-  color:var(--text-3); font-variant-numeric:tabular-nums; font-weight:600;
+  color:var(--sec); font-variant-numeric:tabular-nums; font-weight:700;
+  font-size:11px;
 }
 .hero__num::after{
   content:''; display:inline-block; vertical-align:middle;
-  width:22px; height:1px; background:var(--border-strong); margin:0 0 2px 10px;
+  width:26px; height:1.5px; background:var(--sec); margin:0 0 3px 11px;
+  opacity:.55;
 }
 
-/* Başlık serif. Tek büyük sayı gibi durmasın diye ağırlığı orta,
-   satır arası rahat, harf aralığı hafif sıkı. */
 .hero__title{
   font-family:var(--font-serif);
-  font-size:var(--fs-display); font-weight:500; line-height:1.12;
+  font-size:var(--fs-display); font-weight:500; line-height:1.1;
   letter-spacing:-.018em; color:var(--text);
   margin:0;
   text-wrap:balance;
 }
-/* Ledenin satır uzunluğu sınırlıdır: hero geniştir, cümle değil. */
 .hero__lede{
-  margin:14px 0 0;
-  max-width:54ch;
-  font-size:15.5px; line-height:1.6; color:var(--text-2);
+  margin:16px 0 0;
+  max-width:52ch;
+  font-size:15.5px; line-height:1.62; color:var(--text-2);
 }
-.hero__actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:22px; }
+.hero__actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:24px; }
 
-/* Sağdaki sayı bloğu. Kart değil: aralarında ince dikey çizgi var,
-   çerçeve yok. Rakamlar aynı taban çizgisinde hizalanır. */
-.hero__side{
-  display:flex; align-items:flex-end;
-  padding-bottom:4px;
-}
-.herostat{
-  min-width:72px; padding:0 20px;
-  border-left:1px solid var(--border);
-}
+/* Özet sayılar. Kart değil: aralarında ince dikey çizgi var. */
+.hero__side{ display:flex; align-items:flex-end; padding-bottom:4px; }
+.herostat{ min-width:74px; padding:0 20px; border-left:1px solid var(--border); }
 .herostat:first-child{ border-left:none; padding-left:0; }
 .herostat:last-child{ padding-right:0; }
 .herostat__value{
   display:block;
-  font-family:var(--font-display); font-size:27px; font-weight:700;
-  letter-spacing:-.025em; line-height:1;
+  font-family:var(--font-display); font-size:28px; font-weight:600;
+  letter-spacing:-.03em; line-height:1;
   color:var(--text); font-variant-numeric:tabular-nums;
 }
-.herostat__value small{ font-size:13px; font-weight:600; color:var(--text-3); margin-left:2px; }
+.herostat__value small{ font-size:13px; font-weight:500; color:var(--text-3); margin-left:2px; }
 .herostat__label{
-  display:block; margin-top:9px;
-  font-size:10.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
-  color:var(--text-3);
-  white-space:nowrap;
+  display:block; margin-top:10px;
+  font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-3); white-space:nowrap;
 }
 
-/* ---------- bölüm sekmeleri (hero altı) ---------- */
+/* Bölüm imzası — her bölümün kendine ait ince işareti. Sayfayı
+   süslemez; hangi bölümde olunduğunu çevresel görüşle bildirir.
+   Sayıların altında, sağ sütunda durur: metin solda, sayı sağda,
+   imza sayının altında — kompozisyon böylece dengelenir. */
+.hero__motif{
+  grid-column:2; justify-self:end;
+  height:38px; margin-top:22px;
+  color:var(--sec); opacity:.55;
+}
+.hero__motif svg{ height:100%; width:auto; display:block; }
+
+/* ---------- sayfa sekmeleri ---------- */
 .pagenav{
   position:sticky; top:var(--nav-h); z-index:calc(var(--z-nav) - 1);
-  background:color-mix(in srgb, var(--bg) 90%, transparent);
-  backdrop-filter:saturate(1.3) blur(10px);
+  background:color-mix(in srgb, var(--bg) 96%, transparent);
+  backdrop-filter:saturate(1.3) blur(14px);
   border-bottom:1px solid var(--border);
 }
-.pagenav__in{
-  display:flex; align-items:center; gap:2px;
-  overflow-x:auto; scrollbar-width:none;
-}
+.pagenav__in{ display:flex; align-items:center; gap:2px; overflow-x:auto; scrollbar-width:none; }
 .pagenav__in::-webkit-scrollbar{ display:none; }
 .pagelink{
   position:relative; flex:0 0 auto;
   display:inline-flex; align-items:center; gap:7px;
-  padding:12px 13px;
+  padding:12px 14px;
   border:none; background:none;
   color:var(--text-3); font-size:13px; font-weight:500;
   white-space:nowrap;
@@ -847,45 +940,86 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .pagelink:hover{ color:var(--text-2); }
 .pagelink.is-active{ color:var(--text); font-weight:600; }
 .pagelink.is-active::after{
-  content:''; position:absolute; left:13px; right:13px; bottom:-1px; height:1.5px;
-  background:var(--text);
+  content:''; position:absolute; left:14px; right:14px; bottom:-1px; height:1.5px;
+  background:var(--sec);
 }
 .pagelink__count{
-  font-size:10.5px; font-weight:700; color:var(--text-3);
+  font-size:10.5px; font-weight:600; color:var(--text-3);
   background:var(--surface-2); border-radius:var(--r-pill); padding:1px 6px;
 }
 
 /* ---------- içerik ---------- */
-.content{
-  padding-block:34px 96px;
-}
+.content{ padding-block:40px 88px; }
 
-/* Bölüm: başlık + gövde. Kartın içine kart konmaz; ayrım boşlukla yapılır. */
-.sect{ margin-bottom:52px; }
+.sect{ margin-bottom:56px; }
 .sect:last-child{ margin-bottom:0; }
 .sect__h{
+  position:relative;
   display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
   flex-wrap:wrap;
-  margin-bottom:20px;
+  padding-top:16px;
+  margin-bottom:22px;
+}
+/* Bölüm başlığının üstünde bölümün renginde kısa bir çizgi. */
+.sect__h::before{
+  content:''; position:absolute; top:0; left:0; width:34px; height:2px;
+  background:var(--sec);
 }
 .sect__ht{ min-width:0; }
-/* Bölüm üstü etiketi kaldırıldı: «ALAN», «ÖLÇÜLEN», «GİRİŞ» gibi
-   etiketler bilgi taşımıyor, yalnız gürültü üretiyordu. */
 .sect__eyebrow{ display:none; }
 .sect__h h2{
   font-family:var(--font-serif);
-  font-size:23px; font-weight:500; letter-spacing:-.012em; line-height:1.25;
+  font-size:24px; font-weight:500; letter-spacing:-.012em; line-height:1.24;
   margin:0; color:var(--text);
 }
-.sect__h p{ margin:7px 0 0; font-size:var(--fs-base); line-height:1.55;
+.sect__h p{ margin:8px 0 0; font-size:var(--fs-base); line-height:1.55;
   color:var(--text-2); max-width:62ch; }
 .sect__actions{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+
+/* ---------- alt bant ----------
+
+   Sayfayı sonlandırır ve sistemin iki değişmez cümlesini her ekranda bir
+   kez söyler. Bunları kart olarak içeriğin ortasına koymak her seferinde
+   okumayı bölüyordu. */
+.sitefoot{
+  margin-top:auto;
+  background:var(--ink); color:var(--ink-on);
+}
+.sitefoot__in{
+  padding-block:36px 40px;
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);
+  gap:28px 56px; align-items:start;
+}
+.sitefoot__brand{ display:flex; align-items:flex-start; gap:12px; }
+.sitefoot__brand .brand__mark{
+  background:transparent; color:var(--ink-on);
+  border:1px solid color-mix(in srgb, var(--ink-on) 34%, transparent);
+}
+.sitefoot__brand b{
+  display:block;
+  font-family:var(--font-serif); font-size:17px; font-weight:500;
+  color:var(--ink-on); line-height:1.25;
+}
+.sitefoot__brand span{
+  display:block; margin-top:4px;
+  font-size:11.5px; color:var(--ink-on-2); line-height:1.45;
+}
+.sitefoot__notes{ display:grid; gap:14px; }
+.sitefoot__notes p{
+  margin:0; font-size:12.5px; line-height:1.6; color:var(--ink-on-2);
+  max-width:62ch;
+}
+.sitefoot__k{
+  display:inline-block; margin-right:8px;
+  font-size:9.5px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-on);
+}
 
 /* ---------- ızgara yardımcıları ---------- */
 .grid{
   display:grid;
   grid-template-columns:repeat(12, minmax(0,1fr));
-  gap:16px;
+  gap:18px;
   align-items:start;
 }
 .span-2{ grid-column:span 2; }
@@ -899,7 +1033,7 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .span-10{ grid-column:span 10; }
 .span-12{ grid-column:span 12; }
 
-.stack{ display:flex; flex-direction:column; gap:16px; }
+.stack{ display:flex; flex-direction:column; gap:18px; }
 .stack-sm{ display:flex; flex-direction:column; gap:8px; }
 .stack-xs{ display:flex; flex-direction:column; gap:5px; }
 .row{ display:flex; align-items:center; gap:10px; }
@@ -913,35 +1047,34 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .cols-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
 .auto-fit{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:14px; }
 
-/* ---------- duyarlı ----------
-
-   İçerik zaten ortalanıp sınırlandığı için geniş ekranda kırılma yoktur;
-   kırılmalar yalnızca daralırken gerekir. */
+/* ---------- duyarlı ---------- */
 @media (max-width:1060px){
   .span-2, .span-3, .span-4, .span-5{ grid-column:span 6; }
-  .span-7, .span-8, .span-9, .span-10{ grid-column:span 12; }
-  .span-6{ grid-column:span 12; }
+  .span-6, .span-7, .span-8, .span-9, .span-10{ grid-column:span 12; }
   .cols-4{ grid-template-columns:repeat(2,1fr); }
   :root{ --fs-display:35px; }
   .hero__in{ grid-template-columns:minmax(0,1fr); gap:26px; }
   .hero__side{ align-items:flex-start; }
-  .herostat:first-child{ padding-left:0; }
+  .hero__motif{ grid-column:1; justify-self:start; margin-top:4px; }
+  .sitefoot__in{ grid-template-columns:minmax(0,1fr); }
 }
 
 @media (max-width:860px){
   .wrapc{ padding-inline:20px; }
-  .hero__in{ padding-block:32px 24px; gap:22px; }
+  .masthead__in{ height:58px; gap:14px; }
+  .masthead__date{ display:none; }
+  .hero__in{ padding-block:32px 26px; gap:22px; }
+  .hero__motif{ height:28px; margin-top:20px; }
   .herostat{ padding:0 16px; }
-  .herostat__value{ font-size:23px; }
-  .sect__h h2{ font-size:21px; }
+  .herostat__value{ font-size:24px; }
   :root{ --fs-display:31px; }
   .hero__lede{ font-size:15px; }
-
-  /* Bölüm bağlantıları menüye taşınır; üst çubuk tek satır kalır. */
+  .sect__h h2{ font-size:21px; }
   .navlinks{ display:none; }
+  .sitenav{ display:none; }
   .sitenav__menu{ display:inline-flex; }
-  .content{ padding-block:26px 80px; }
-  .sect{ margin-bottom:36px; }
+  .content{ padding-block:28px 72px; }
+  .sect{ margin-bottom:40px; }
 }
 
 @media (max-width:720px){
@@ -951,50 +1084,55 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 
 @media (max-width:560px){
   .wrapc{ padding-inline:16px; }
-  :root{ --fs-display:28px; }
+  :root{ --fs-display:27px; }
   .cols-2, .cols-3, .cols-4{ grid-template-columns:1fr; }
   .brand__text span{ display:none; }
-  .hero__in{ padding-block:26px 20px; }
+  .hero__in{ padding-block:26px 22px; }
   .hero__side{ flex-wrap:wrap; row-gap:18px; }
   .herostat{ padding:0 14px; }
   .herostat__value{ font-size:21px; }
-  .sect__h h2{ font-size:20px; }
+  .sitefoot__in{ padding-block:28px 32px; }
 }
 
-/* ---------- mobil bölüm menüsü ----------
-
-   Alt sekme çubuğu bir uygulama panelinin dilidir. Yerine sitelerin
-   kullandığı tam ekran menü geldi: yedi bölüm, iki sütun, tek dokunuş. */
+/* ---------- mobil bölüm menüsü ---------- */
 .navsheet{
   position:fixed; inset:0; z-index:var(--z-overlay);
-  background:var(--surface);
+  background:var(--bg);
   display:flex; flex-direction:column;
   animation:navsheet-in var(--dur-lg) var(--ease);
 }
 @keyframes navsheet-in{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
 .navsheet__head{
-  height:var(--nav-h); flex:none;
+  height:64px; flex:none;
   display:flex; align-items:center; justify-content:space-between; gap:12px;
   padding-inline:20px;
   border-bottom:1px solid var(--border);
 }
-.navsheet__body{ flex:1; overflow-y:auto; padding:20px; }
-.navsheet__grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.navsheet__body{ flex:1; overflow-y:auto; padding:8px 20px 24px; }
+.navsheet__grid{ display:grid; gap:0; }
 .navsheet__item{
-  display:flex; flex-direction:column; align-items:flex-start; gap:9px;
-  padding:16px 14px;
-  border:1px solid var(--border); border-radius:var(--r);
-  background:var(--surface); color:var(--text);
+  position:relative;
+  display:grid; grid-template-columns:34px 1fr; align-items:baseline;
+  gap:4px 12px;
+  padding:18px 4px;
+  border:none; border-bottom:1px solid var(--border);
+  background:none; color:var(--text);
   text-align:left;
 }
-.navsheet__item svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.7; color:var(--text-3); }
-.navsheet__item b{ font-size:var(--fs-base); font-weight:700; }
-.navsheet__item span{ font-size:var(--fs-xs); color:var(--text-3); line-height:1.35; }
-.navsheet__item.is-active{
-  border-color:var(--primary);
-  background:var(--primary-soft);
+.navsheet__item svg{ display:none; }
+.navsheet__item::before{
+  content:attr(data-num);
+  font-family:var(--font-display); font-size:11px; font-weight:600;
+  letter-spacing:.06em; color:var(--text-3); font-variant-numeric:tabular-nums;
 }
-.navsheet__item.is-active svg{ color:var(--primary); }
+.navsheet__item b{
+  font-family:var(--font-serif); font-size:21px; font-weight:500; letter-spacing:-.01em;
+}
+.navsheet__item span{
+  grid-column:2; font-size:13px; color:var(--text-3); line-height:1.4;
+}
+.navsheet__item.is-active b{ color:var(--sec); }
+.navsheet__item.is-active::before{ color:var(--sec); }
 
 @media (prefers-reduced-motion:reduce){
   .navsheet{ animation:none; }
@@ -1076,10 +1214,17 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 }
 .btn svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.9; flex:none; }
 .btn:hover{ background:var(--surface-2); border-color:var(--text-3); }
+/* Ana düğme BÖLÜMÜN rengindedir. Düğme bir durum değil bir eylemdir;
+   bölüm kimliğini taşıyabilir. Durum renkleri (hedefte / referans dışı /
+   kırmızı bayrak) buna karışmaz — onlar her bölümde aynı kalır, aksi
+   hâlde bir tahlil sonucunun rengi hangi sayfada olduğuna göre değişirdi. */
 .btn--primary{
-  background:var(--primary); border-color:var(--primary); color:var(--primary-ink);
+  background:var(--sec); border-color:var(--sec); color:var(--primary-ink);
 }
-.btn--primary:hover{ background:var(--primary-hover); border-color:var(--primary-hover); }
+.btn--primary:hover{
+  background:color-mix(in srgb, var(--sec) 86%, #000);
+  border-color:color-mix(in srgb, var(--sec) 86%, #000);
+}
 .btn--danger{ color:var(--danger); border-color:color-mix(in srgb, var(--danger) 45%, var(--border)); background:transparent; }
 .btn--danger:hover{ background:var(--danger-soft); }
 .btn--ghost{ border-color:transparent; background:transparent; color:var(--text-2); }
@@ -1955,28 +2100,60 @@ button.listitem.is-on{ background:var(--primary-soft); }
    Bir tahlil değerinin nerede durduğunu gösterir. Üç katman:
    referans aralığı (geniş, nötr) · hedef bant (dar, birincil) · değer (işaret).
    Renk tek başına anlam taşımaz: işaretin yanında daima sayı ve rozet durur. */
-.rangebar{
-  position:relative; height:22px; border-radius:var(--r-sm);
-  background:var(--surface-3); overflow:hidden;
+/* ================= ölçüm cetveli =================
+
+   Sistemin imza bileşeni. Bir ilerleme çubuğu değildir: dolu bir kutu
+   «ne kadar tamamlandı» der, burada sorulan o değil — «değer nerede
+   duruyor». Bu yüzden zemin boştur, referans aralığı ince bir bant,
+   hedef bandı bir alt çizgi, değer ise tek bir hassas ibredir. */
+.scale{ min-width:0; }
+.scale__axis{
+  position:relative; height:20px;
 }
-.rangebar__ref{
-  position:absolute; inset-block:0; background:var(--c-band);
-  border-radius:var(--r-sm);
+/* Ekseni taşıyan çizgi tam ortadan geçer. */
+.scale__axis::before{
+  content:''; position:absolute; left:0; right:0; top:50%;
+  height:1px; background:var(--rule); transform:translateY(-.5px);
 }
-.rangebar__opt{
-  position:absolute; inset-block:4px; background:var(--primary);
-  opacity:.28; border-radius:3px;
+.scale__ref{
+  position:absolute; top:50%; height:6px; transform:translateY(-3px);
+  background:var(--surface-3); border-radius:3px;
 }
-.rangebar__mark{
-  position:absolute; top:-2px; bottom:-2px; width:3px; border-radius:2px;
-  background:var(--primary); transform:translateX(-1.5px);
+.scale__opt{
+  position:absolute; top:50%; height:6px; transform:translateY(-3px);
+  background:var(--primary); opacity:.34; border-radius:3px;
+}
+/* Referans aralığının uçlarındaki çentikler: aralık renkle değil,
+   çizgiyle de okunur. */
+.scale__tick{
+  position:absolute; top:50%; width:1px; height:11px;
+  transform:translate(-.5px, -5.5px);
+  background:var(--border-strong);
+}
+/* İbre. Ölçüm dışarı taştığında incelmez, renk değiştirir ve uzar. */
+.scale__mark{
+  position:absolute; top:50%; width:2px; height:16px;
+  transform:translate(-1px, -8px);
+  background:var(--text); border-radius:1px;
   transition:left var(--dur-lg) var(--ease);
 }
-.rangebar__mark.is-out{ background:var(--danger); width:4px; }
-.rangebar__scale{
-  display:flex; justify-content:space-between; gap:8px;
-  font-size:var(--fs-xs); color:var(--text-3); margin-top:4px;
+.scale__mark::after{
+  content:''; position:absolute; left:50%; top:-4px;
+  width:5px; height:5px; border-radius:50%;
+  background:var(--text); transform:translateX(-2.5px);
 }
+.scale__mark.is-out{ background:var(--danger); height:20px; transform:translate(-1px, -10px); }
+.scale__mark.is-out::after{ background:var(--danger); }
+
+.scale__legend{
+  display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+  margin-top:5px;
+  font-size:11px; color:var(--text-3);
+}
+.scale__mid{ letter-spacing:.03em; }
+.scale__mid b{ font-weight:600; color:var(--text-2); }
+.scale__end{ font-variant-numeric:tabular-nums; }
+.scale--bare .scale__axis{ height:18px; }
 
 /* Eğilim oku — yön bildirir, iyi/kötü bildirmez. */
 .trendmark{ font-size:11px; line-height:1; }
@@ -7989,6 +8166,90 @@ SP.UI = (function(){
       + (cls ? ' class="'+cls+'"' : '') + '>' + p + '</svg>';
   }
 
+
+  /* ---------- bölüm imzaları ----------
+
+     Her bölümün hero'sunda duran ince, tek renkli işaret. Süs değil:
+     bölümün NE ÖLÇTÜĞÜNÜ soyutlar ve kullanıcı sayfayı okumadan hangi
+     bölümde olduğunu çevresel görüşle anlar.
+
+     Hepsi aynı dille çizilir: 34px yükseklik, 1.5px çizgi, tek renk,
+     dolgu yok. Farklı kalınlıkta ya da renkli bir imza, tek tasarım
+     kuralını bozardı. */
+  const MOTIFS = {
+    /* Günlük — bir günün yirmi dört çentiği, biri işaretli. */
+    gunluk:function(){
+      let d = '';
+      for(let i = 0; i < 24; i++){
+        const x = i * 11 + 1;
+        const h = i % 6 === 0 ? 22 : 12;
+        d += '<line x1="' + x + '" y1="' + (28 - h) + '" x2="' + x + '" y2="28"/>';
+      }
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" aria-hidden="true">' + d
+        + '<circle cx="133" cy="7" r="3.5" fill="currentColor" stroke="none"/></svg>';
+    },
+    /* Testler — bir ölçüm cetveli: referans aralığı ve içindeki değer. */
+    testler:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" aria-hidden="true">'
+        + '<line x1="2" y1="20" x2="263" y2="20"/>'
+        + '<line x1="2" y1="14" x2="2" y2="26"/><line x1="263" y1="14" x2="263" y2="26"/>'
+        + '<rect x="86" y="16" width="94" height="8" rx="4" fill="currentColor" stroke="none" opacity=".28"/>'
+        + '<line x1="118" y1="8" x2="118" y2="32" stroke-width="2.5"/></svg>';
+    },
+    /* Besin — bir tabakta üç makro dilimi. */
+    besin:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">'
+        + '<circle cx="17" cy="17" r="14"/>'
+        + '<path d="M17 3a14 14 0 0 1 12.1 21"/>'
+        + '<line x1="42" y1="11" x2="150" y2="11"/>'
+        + '<line x1="42" y1="20" x2="205" y2="20"/>'
+        + '<line x1="42" y1="29" x2="118" y2="29"/></svg>';
+    },
+    /* Hareket — bir efor eğrisi ve toparlanma. */
+    hareket:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        + '<path d="M2 26c14 0 18-16 30-16s16 16 30 16 18-20 30-20 16 20 30 20"/>'
+        + '<path d="M152 26h18" stroke-dasharray="1 6"/>'
+        + '<path d="M178 26c12 0 14-12 24-12s14 8 24 8 12-6 22-6h15" opacity=".55"/></svg>';
+    },
+    /* Finans — bir defter sütunu: kalemler ve toplam çizgisi. */
+    finans:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" aria-hidden="true">'
+        + '<line x1="2" y1="7" x2="120" y2="7"/><line x1="178" y1="7" x2="215" y2="7"/>'
+        + '<line x1="2" y1="16" x2="98" y2="16"/><line x1="178" y1="16" x2="228" y2="16"/>'
+        + '<line x1="2" y1="25" x2="134" y2="25"/><line x1="178" y1="25" x2="206" y2="25"/>'
+        + '<line x1="170" y1="31" x2="240" y2="31" stroke-width="2"/></svg>';
+    },
+    /* Ofis — patron ve dört koç. */
+    ofis:function(){
+      let d = '<circle cx="17" cy="17" r="9"/>';
+      for(let i = 0; i < 4; i++){
+        const x = 62 + i * 34;
+        d += '<circle cx="' + x + '" cy="17" r="6.5"/>'
+           + '<line x1="' + (x - 28) + '" y1="17" x2="' + (x - 8) + '" y2="17" opacity=".45"/>';
+      }
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">'
+        + d + '</svg>';
+    },
+    /* Ayarlar — üç sürgü. */
+    ayarlar:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" aria-hidden="true">'
+        + '<line x1="2" y1="7" x2="150" y2="7"/><circle cx="104" cy="7" r="4.5" fill="var(--bg)"/>'
+        + '<line x1="2" y1="17" x2="150" y2="17"/><circle cx="52" cy="17" r="4.5" fill="var(--bg)"/>'
+        + '<line x1="2" y1="27" x2="150" y2="27"/><circle cx="126" cy="27" r="4.5" fill="var(--bg)"/></svg>';
+    },
+  };
+
+  function motif(sectionId){
+    const fn = MOTIFS[sectionId];
+    return fn ? fn() : '';
+  }
+
   /* ---------- kucuk parcalar ----------
      Not: rozet/kart/tablo gibi bilesenler SP.C icinde tek yerde durur.
      Burada yalnizca SP.C'ye girmeyen, veriye bagli parcalar kalir. */
@@ -8113,24 +8374,39 @@ SP.UI = (function(){
     const axisLo = lo - span * 0.6;
     const axisHi = hi + span * 0.6;
     const p = v => U.clamp(100 * (v - axisLo) / (axisHi - axisLo), 0, 100);
+    const o = opts || {};
 
-    let out = '<div class="rangebar">';
-    out += '<div class="rangebar__ref" style="left:' + p(lo).toFixed(1) + '%;width:'
+    /* Cetvel bir ilerleme cubugu degil, bir OLCU ALETIDIR: dolu bir kutu
+       "ne kadar tamamlandi" der; burada sorulan o degil, "deger nerede
+       duruyor". Bu yuzden zemin bos, referans araligi ince bir bant,
+       hedef bandi bir alt cizgi, deger ise tek bir hassas ibredir. */
+    let out = '<div class="scale' + (o.bare ? ' scale--bare' : '') + '">';
+    out += '<div class="scale__axis">';
+    out += '<div class="scale__ref" style="left:' + p(lo).toFixed(1) + '%;width:'
       + (p(hi) - p(lo)).toFixed(1) + '%"></div>';
     if(optimal && optimal.length === 2){
-      out += '<div class="rangebar__opt" style="left:' + p(optimal[0]).toFixed(1) + '%;width:'
+      out += '<div class="scale__opt" style="left:' + p(optimal[0]).toFixed(1) + '%;width:'
         + Math.max(1.5, p(optimal[1]) - p(optimal[0])).toFixed(1) + '%"></div>';
     }
+    /* Referans araliginin iki ucunda birer centik: aralik nerede baslayip
+       nerede bittigi cizgiyle de okunur, yalniz renkle degil. */
+    out += '<i class="scale__tick" style="left:' + p(lo).toFixed(1) + '%"></i>';
+    out += '<i class="scale__tick" style="left:' + p(hi).toFixed(1) + '%"></i>';
     if(value != null && isFinite(value)){
       const outside = value < lo || value > hi;
-      out += '<div class="rangebar__mark' + (outside ? ' is-out' : '') + '" style="left:'
+      out += '<div class="scale__mark' + (outside ? ' is-out' : '') + '" style="left:'
         + p(value).toFixed(1) + '%"></div>';
     }
     out += '</div>';
-    if(opts && opts.bare) return out;
-    out += '<div class="rangebar__scale"><span class="num">' + U.fmtNum(lo) + '</span>'
-      + '<span class="dim">referans' + (optimal ? ' &middot; hedef ' + U.fmtNum(optimal[0]) + '&ndash;' + U.fmtNum(optimal[1]) : '') + '</span>'
-      + '<span class="num">' + U.fmtNum(hi) + (unit ? ' ' + esc(unit) : '') + '</span></div>';
+    if(o.bare){ out += '</div>'; return out; }
+    out += '<div class="scale__legend">'
+      + '<span class="scale__end num">' + U.fmtNum(lo) + '</span>'
+      + '<span class="scale__mid">referans'
+      + (optimal ? ' <b>&middot; hedef ' + U.fmtNum(optimal[0]) + '&ndash;' + U.fmtNum(optimal[1]) + '</b>' : '')
+      + '</span>'
+      + '<span class="scale__end num">' + U.fmtNum(hi) + (unit ? ' ' + esc(unit) : '') + '</span>'
+      + '</div>';
+    out += '</div>';
     return out;
   }
 
@@ -8343,7 +8619,7 @@ SP.UI = (function(){
   }
 
   return {
-    icon, trend,
+    icon, trend, motif,
     lineChart, barChart, donut, sparkline, stackBar, heatmap, legend,
     rangeBar, macroSplit,
     hint, rail, openHint, closeHint, isHintOpen,
@@ -15241,38 +15517,89 @@ SP.App = (function(){
      Sabit sol menü yerine ince bir site çubuğu. Yedi bölüm tek satırda
      durur; dar ekranda menüye iner. Sağdaki üç araç her yerde aynı yerde
      kalır: arama, görünüm, ayarlar. */
-  function sitenavHtml(sc){
-    const active = sectionOf(sc.id);
+  /* ---------- künye ----------
+
+     Uygulama çubuğu değil KÜNYE. İki satır:
+
+       1. kimlik · tarih · araçlar   — sayfayla birlikte yukarı kayar
+       2. numaralı bölümler          — kaydırınca üstte yapışır
+
+     İlk satırın kaymasına izin vermek kasıtlıdır: okurken kimliğe
+     ihtiyaç yoktur, gezinmeye vardır. Böylece sabit kalan çubuk yarı
+     yüksekliğe iner ve içerik nefes alır. */
+  function mastheadHtml(sc){
+    const now = new Date();
+    const gun = now.toLocaleDateString('tr-TR', { weekday:'long' });
     return html`
-      <header class="sitenav" role="banner">
-        <div class="wrapc sitenav__in">
-          <button class="brand" data-act="go" data-route="today" aria-label="Bugün ekranına git">
+      <div class="masthead">
+        <div class="wrapc masthead__in">
+          <button class="brand" data-act="go" data-route="today" aria-label="Günlük bölümüne git">
             <span class="brand__mark" aria-hidden="true">S</span>
             <span class="brand__text"><b>SPİ</b><span>${brandLine()}</span></span>
           </button>
 
-          <nav class="navlinks" aria-label="Bölümler">${map(SECTIONS, sec => {
-            const on = sec.id === active.id;
-            const b = sectionBadge(sec);
-            return html`<button class="${cls('navlink', on && 'is-active')}"
-              data-act="go" data-route="${sec.views[0].route}"
-              ${when(on, () => attrs({ 'aria-current':'page' }))}>
-              ${raw(UI.icon(sec.icon))}<span>${sec.label}</span>
-              ${when(b, () => html`<span class="${cls('navlink__badge', b.quiet && 'is-quiet')}"
-                aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
-            </button>`;
-          })}</nav>
+          <div class="masthead__date">
+            <span class="masthead__day">${U.fmtDate(U.todayISO())}</span>
+            <span class="masthead__wd">${gun}</span>
+          </div>
 
           <div class="navtools">
             ${SP.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
             ${SP.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema ve palet',
               act:'open-appearance', data:{ id:'appearance-btn' } })}
-            ${SP.C.IconButton({ icon:'gear', aria:'Ayarlar', act:'go', data:{ 'data-route':'family' } })}
-            <span class="navtools__sep" aria-hidden="true"></span>
+            ${SP.C.IconButton({ icon:'sliders', aria:'Ayarlar', act:'go', data:{ 'data-route':'family' } })}
             ${SP.C.IconButton({ icon:'menu', aria:'Bölümler', act:'toggle-menu', class:'sitenav__menu' })}
           </div>
         </div>
-      </header>`;
+      </div>`;
+  }
+
+  /* Numaralı bölüm şeridi. Numara bir süs değil: yedi bölümün SIRASI
+     anlamlıdır (önce yazılan, sonra okunan) ve numara o sırayı görünür
+     kılar. */
+  function sitenavHtml(sc){
+    const active = sectionOf(sc.id);
+    return html`
+      <nav class="sitenav" aria-label="Bölümler">
+        <div class="wrapc navlinks">${map(SECTIONS, sec => {
+          const on = sec.id === active.id;
+          const b = sectionBadge(sec);
+          return html`<button class="${cls('navlink', on && 'is-active')}"
+            data-act="go" data-route="${sec.views[0].route}"
+            ${when(on, () => attrs({ 'aria-current':'page' }))}>
+            <span class="navlink__num" aria-hidden="true">${sec.num}</span>
+            <span class="navlink__label">${sec.label}</span>
+            ${when(b, () => html`<span class="${cls('navlink__badge', b.quiet && 'is-quiet')}"
+              aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
+          </button>`;
+        })}</div>
+      </nav>`;
+  }
+
+  /* ---------- alt bant ----------
+
+     Her sayfa bir yerde biter. Koyu bant hem sayfayı sonlandırır hem de
+     sistemin iki değişmez cümlesini —klinik sınır ve mahremiyet— her
+     ekranda bir kez söyler. Bunları kart olarak sayfanın ortasına koymak
+     her seferinde içeriği bölüyordu. */
+  function footerHtml(){
+    return html`
+      <footer class="sitefoot">
+        <div class="wrapc sitefoot__in">
+          <div class="sitefoot__brand">
+            <span class="brand__mark" aria-hidden="true">S</span>
+            <div>
+              <b>Sağlık Performans İzleyicisi</b>
+              <span>Kişisel ve aile odaklı sağlık sistemi</span>
+            </div>
+          </div>
+          <div class="sitefoot__notes">
+            <p><span class="sitefoot__k">Sınır</span> ${SP.CLINICAL.disclaimer}</p>
+            <p><span class="sitefoot__k">Mahremiyet</span> Veriler bu cihazda tutulur.
+              Ad ve doğum yılı hiçbir modele gönderilmez.</p>
+          </div>
+        </div>
+      </footer>`;
   }
 
   /* Dar ekranda bölümler tam ekran menüye açılır. Alt sekme çubuğu bir
@@ -15291,8 +15618,7 @@ SP.App = (function(){
         <div class="navsheet__body">
           <div class="navsheet__grid">${map(SECTIONS, sec => html`
             <button class="${cls('navsheet__item', sec.id === active.id && 'is-active')}"
-              data-act="go" data-route="${sec.views[0].route}">
-              ${raw(UI.icon(sec.icon))}
+              data-act="go" data-route="${sec.views[0].route}" data-num="${sec.num}">
               <b>${sec.label}</b>
               <span>${sec.note}</span>
             </button>`)}
@@ -15336,6 +15662,7 @@ SP.App = (function(){
                 () => html`<small>${st.unit}</small>`)}</span>
               <span class="herostat__label">${st.label}</span>
             </div>`)}</div>`)}
+          <div class="hero__motif" aria-hidden="true">${raw(UI.motif(sec.id))}</div>
         </div>
       </div>`;
   }
@@ -15529,12 +15856,14 @@ SP.App = (function(){
       document.getElementById('app').innerHTML = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
         <div class="site">
+          ${safe(() => mastheadHtml(sc))}
           ${safe(() => sitenavHtml(sc))}
           ${safe(() => heroHtml(sc))}
           ${safe(() => pagenavHtml(sc))}
           <div class="site__body">
             <main class="wrapc content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
           </div>
+          ${safe(footerHtml)}
         </div>
         ${when(S.sidebarOpen, () => safe(() => navsheetHtml(sc)))}`);
 
@@ -15554,9 +15883,18 @@ SP.App = (function(){
     }
   }
 
+  /* Bölümün rengi kökte durur: CSS `--sec` jetonunu buradan okur.
+     Yeniden çizimde değil YÖNLENDIRMEDE yazılır ki her karede DOM'a
+     dokunulmasın. */
+  function applySection(route){
+    const sec = sectionOf(route);
+    document.documentElement.setAttribute('data-section', sec.id);
+  }
+
   function go(route){
     S.route = route;
     S.sidebarOpen = false;
+    applySection(route);
     window.scrollTo(0, 0);
     render();
   }
@@ -15806,6 +16144,7 @@ SP.App = (function(){
       wireStoreErrors();
       await M.loadAll();
       applyTheme();
+      applySection(S.route);
       await render();
       installManifest();
 
@@ -15830,7 +16169,7 @@ SP.App = (function(){
     }
   }
 
-  return { boot, render, go, applyTheme, SECTIONS, sectionOf, THEMES, installManifest,
+  return { boot, render, go, applyTheme, applySection, SECTIONS, sectionOf, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen };
 })();
 

@@ -135,38 +135,89 @@ SP.App = (function(){
      Sabit sol menü yerine ince bir site çubuğu. Yedi bölüm tek satırda
      durur; dar ekranda menüye iner. Sağdaki üç araç her yerde aynı yerde
      kalır: arama, görünüm, ayarlar. */
-  function sitenavHtml(sc){
-    const active = sectionOf(sc.id);
+  /* ---------- künye ----------
+
+     Uygulama çubuğu değil KÜNYE. İki satır:
+
+       1. kimlik · tarih · araçlar   — sayfayla birlikte yukarı kayar
+       2. numaralı bölümler          — kaydırınca üstte yapışır
+
+     İlk satırın kaymasına izin vermek kasıtlıdır: okurken kimliğe
+     ihtiyaç yoktur, gezinmeye vardır. Böylece sabit kalan çubuk yarı
+     yüksekliğe iner ve içerik nefes alır. */
+  function mastheadHtml(sc){
+    const now = new Date();
+    const gun = now.toLocaleDateString('tr-TR', { weekday:'long' });
     return html`
-      <header class="sitenav" role="banner">
-        <div class="wrapc sitenav__in">
-          <button class="brand" data-act="go" data-route="today" aria-label="Bugün ekranına git">
+      <div class="masthead">
+        <div class="wrapc masthead__in">
+          <button class="brand" data-act="go" data-route="today" aria-label="Günlük bölümüne git">
             <span class="brand__mark" aria-hidden="true">S</span>
             <span class="brand__text"><b>SPİ</b><span>${brandLine()}</span></span>
           </button>
 
-          <nav class="navlinks" aria-label="Bölümler">${map(SECTIONS, sec => {
-            const on = sec.id === active.id;
-            const b = sectionBadge(sec);
-            return html`<button class="${cls('navlink', on && 'is-active')}"
-              data-act="go" data-route="${sec.views[0].route}"
-              ${when(on, () => attrs({ 'aria-current':'page' }))}>
-              ${raw(UI.icon(sec.icon))}<span>${sec.label}</span>
-              ${when(b, () => html`<span class="${cls('navlink__badge', b.quiet && 'is-quiet')}"
-                aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
-            </button>`;
-          })}</nav>
+          <div class="masthead__date">
+            <span class="masthead__day">${U.fmtDate(U.todayISO())}</span>
+            <span class="masthead__wd">${gun}</span>
+          </div>
 
           <div class="navtools">
             ${SP.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
             ${SP.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema ve palet',
               act:'open-appearance', data:{ id:'appearance-btn' } })}
-            ${SP.C.IconButton({ icon:'gear', aria:'Ayarlar', act:'go', data:{ 'data-route':'family' } })}
-            <span class="navtools__sep" aria-hidden="true"></span>
+            ${SP.C.IconButton({ icon:'sliders', aria:'Ayarlar', act:'go', data:{ 'data-route':'family' } })}
             ${SP.C.IconButton({ icon:'menu', aria:'Bölümler', act:'toggle-menu', class:'sitenav__menu' })}
           </div>
         </div>
-      </header>`;
+      </div>`;
+  }
+
+  /* Numaralı bölüm şeridi. Numara bir süs değil: yedi bölümün SIRASI
+     anlamlıdır (önce yazılan, sonra okunan) ve numara o sırayı görünür
+     kılar. */
+  function sitenavHtml(sc){
+    const active = sectionOf(sc.id);
+    return html`
+      <nav class="sitenav" aria-label="Bölümler">
+        <div class="wrapc navlinks">${map(SECTIONS, sec => {
+          const on = sec.id === active.id;
+          const b = sectionBadge(sec);
+          return html`<button class="${cls('navlink', on && 'is-active')}"
+            data-act="go" data-route="${sec.views[0].route}"
+            ${when(on, () => attrs({ 'aria-current':'page' }))}>
+            <span class="navlink__num" aria-hidden="true">${sec.num}</span>
+            <span class="navlink__label">${sec.label}</span>
+            ${when(b, () => html`<span class="${cls('navlink__badge', b.quiet && 'is-quiet')}"
+              aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
+          </button>`;
+        })}</div>
+      </nav>`;
+  }
+
+  /* ---------- alt bant ----------
+
+     Her sayfa bir yerde biter. Koyu bant hem sayfayı sonlandırır hem de
+     sistemin iki değişmez cümlesini —klinik sınır ve mahremiyet— her
+     ekranda bir kez söyler. Bunları kart olarak sayfanın ortasına koymak
+     her seferinde içeriği bölüyordu. */
+  function footerHtml(){
+    return html`
+      <footer class="sitefoot">
+        <div class="wrapc sitefoot__in">
+          <div class="sitefoot__brand">
+            <span class="brand__mark" aria-hidden="true">S</span>
+            <div>
+              <b>Sağlık Performans İzleyicisi</b>
+              <span>Kişisel ve aile odaklı sağlık sistemi</span>
+            </div>
+          </div>
+          <div class="sitefoot__notes">
+            <p><span class="sitefoot__k">Sınır</span> ${SP.CLINICAL.disclaimer}</p>
+            <p><span class="sitefoot__k">Mahremiyet</span> Veriler bu cihazda tutulur.
+              Ad ve doğum yılı hiçbir modele gönderilmez.</p>
+          </div>
+        </div>
+      </footer>`;
   }
 
   /* Dar ekranda bölümler tam ekran menüye açılır. Alt sekme çubuğu bir
@@ -185,8 +236,7 @@ SP.App = (function(){
         <div class="navsheet__body">
           <div class="navsheet__grid">${map(SECTIONS, sec => html`
             <button class="${cls('navsheet__item', sec.id === active.id && 'is-active')}"
-              data-act="go" data-route="${sec.views[0].route}">
-              ${raw(UI.icon(sec.icon))}
+              data-act="go" data-route="${sec.views[0].route}" data-num="${sec.num}">
               <b>${sec.label}</b>
               <span>${sec.note}</span>
             </button>`)}
@@ -230,6 +280,7 @@ SP.App = (function(){
                 () => html`<small>${st.unit}</small>`)}</span>
               <span class="herostat__label">${st.label}</span>
             </div>`)}</div>`)}
+          <div class="hero__motif" aria-hidden="true">${raw(UI.motif(sec.id))}</div>
         </div>
       </div>`;
   }
@@ -423,12 +474,14 @@ SP.App = (function(){
       document.getElementById('app').innerHTML = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
         <div class="site">
+          ${safe(() => mastheadHtml(sc))}
           ${safe(() => sitenavHtml(sc))}
           ${safe(() => heroHtml(sc))}
           ${safe(() => pagenavHtml(sc))}
           <div class="site__body">
             <main class="wrapc content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
           </div>
+          ${safe(footerHtml)}
         </div>
         ${when(S.sidebarOpen, () => safe(() => navsheetHtml(sc)))}`);
 
@@ -448,9 +501,18 @@ SP.App = (function(){
     }
   }
 
+  /* Bölümün rengi kökte durur: CSS `--sec` jetonunu buradan okur.
+     Yeniden çizimde değil YÖNLENDIRMEDE yazılır ki her karede DOM'a
+     dokunulmasın. */
+  function applySection(route){
+    const sec = sectionOf(route);
+    document.documentElement.setAttribute('data-section', sec.id);
+  }
+
   function go(route){
     S.route = route;
     S.sidebarOpen = false;
+    applySection(route);
     window.scrollTo(0, 0);
     render();
   }
@@ -700,6 +762,7 @@ SP.App = (function(){
       wireStoreErrors();
       await M.loadAll();
       applyTheme();
+      applySection(S.route);
       await render();
       installManifest();
 
@@ -724,7 +787,7 @@ SP.App = (function(){
     }
   }
 
-  return { boot, render, go, applyTheme, SECTIONS, sectionOf, THEMES, installManifest,
+  return { boot, render, go, applyTheme, applySection, SECTIONS, sectionOf, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen };
 })();
 

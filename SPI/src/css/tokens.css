@@ -46,9 +46,19 @@
   --info:#3A5468;          /* AA: beyaz üzerinde 8.0:1 */
   --info-soft:#E9EDF0;
 
+  /* ---- mürekkep ----
+     Sayfayı sonlandıran koyu bant, marka işareti ve ölçüm cetvelinin
+     ana çizgisi bu renktedir. Saf siyah değil, KOYU ÇAM: klinik bir
+     kesinlik verir ama soğumaz. */
+  --ink:#13211B;
+  --ink-2:#1B2E26;
+  --ink-on:#F2F0EA;
+  --ink-on-2:#9BAFA5;
+
   /* ---- çizgi ---- */
   --border:#E7E2D9;
   --border-strong:#CDC6B8;
+  --rule:#D8D2C6;     /* ölçüm cetvelinin ince çizgileri */
 
   /* ---- odak halkası: her temada görünür kalır ---- */
   --ring:color-mix(in srgb, var(--primary) 45%, transparent);
@@ -122,7 +132,7 @@
 
   /* ---- düzen ---- */
   --sidebar-w:236px;
-  --nav-h:62px;
+  --nav-h:47px;   /* yalnız numaralı bölüm şeridi yapışır */
   --topbar-h:60px;
   --content-max:1200px;
 
@@ -151,8 +161,14 @@
   --d-info:#8FADC2;
   --d-info-soft:#1A2126;
 
+  --d-ink:#0C1712;
+  --d-ink-2:#16241D;
+  --d-ink-on:#EDEBE4;
+  --d-ink-on-2:#8FA79A;
+
   --d-border:#2B2B25;
   --d-border-strong:#3B3B33;
+  --d-rule:#3A3A32;
 
   --d-macro-protein:#7FBFA0;
   --d-macro-fat:#D6A961;
@@ -197,6 +213,9 @@
     --info-soft:var(--d-info-soft);
     --border:var(--d-border);
     --border-strong:var(--d-border-strong);
+    --rule:var(--d-rule);
+    --ink:var(--d-ink); --ink-2:var(--d-ink-2);
+    --ink-on:var(--d-ink-on); --ink-on-2:var(--d-ink-on-2);
     --macro-protein:var(--d-macro-protein);
     --macro-fat:var(--d-macro-fat);
     --macro-carb:var(--d-macro-carb);
@@ -237,6 +256,9 @@
   --info-soft:var(--d-info-soft);
   --border:var(--d-border);
   --border-strong:var(--d-border-strong);
+  --rule:var(--d-rule);
+  --ink:var(--d-ink); --ink-2:var(--d-ink-2);
+  --ink-on:var(--d-ink-on); --ink-on-2:var(--d-ink-on-2);
   --macro-protein:var(--d-macro-protein);
   --macro-fat:var(--d-macro-fat);
   --macro-carb:var(--d-macro-carb);

@@ -113,7 +113,7 @@
       const r = SP.Bio.refFor('ferritin');
       const row = { marker:SP.BIO_BY_ID.ferritin, value:80, cert:'measured',
         status:SP.Bio.statusOf('ferritin', 80), ref:r.ref, optimal:r.optimal, at:'2026-01-01' };
-      expect(String(P.markerRow(row, {}))).toContain('rangebar');
+      expect(String(P.markerRow(row, {}))).toContain('scale__axis');
     });
 
     it('ajan avatarı kimlik sınıfını taşır', () => {
@@ -134,7 +134,7 @@
   describe('UI — görseller', () => {
     it('referans çubuğu değer aralığın içindeyken taşma işareti koymaz', () => {
       const out = SP.UI.rangeBar(80, [30, 400], [80, 250], 'ng/mL');
-      expect(out).toContain('rangebar__mark');
+      expect(out).toContain('scale__mark');
       expect(out.indexOf('is-out') < 0).toBeTruthy();
     });
 
@@ -149,8 +149,8 @@
 
     it('değer yoksa yalnızca aralık çizilir', () => {
       const out = SP.UI.rangeBar(null, [30, 400]);
-      expect(out).toContain('rangebar__ref');
-      expect(out.indexOf('rangebar__mark') < 0).toBeTruthy();
+      expect(out).toContain('scale__ref');
+      expect(out.indexOf('scale__mark') < 0).toBeTruthy();
     });
 
     it('makro şeridi üç dilim çizer', () => {

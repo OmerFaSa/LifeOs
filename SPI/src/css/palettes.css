@@ -232,3 +232,47 @@
   --c-grid:#242832; --c-band:#242545;
   --scrim:rgba(0,0,0,.62);
 }
+
+
+/* ================= BÖLÜM KİMLİKLERİ =================
+
+   Tek tasarım, yedi imza. Düzen, tipografi, boşluk ve bileşenler her
+   bölümde AYNIDIR; değişen tek şey `--sec` — bölümün kendi rengi.
+
+   Renkler aynı doygunluk ailesinden seçildi: yan yana konduklarında
+   gökkuşağı değil, tek bir palet gibi okunurlar. Sağlık alanının doğal
+   tonları: adaçayı, klinik mavi, kehribar, kiremit, zeytin, erik, taş.
+
+   `--sec` yalnız dört yerde görünür — bölüm numarası, etkin sekme
+   çizgisi, bölüm başlığının üstündeki kısa çizgi ve bölüm imzası. Renk
+   içeriğe bulaşmaz; durum renkleri (ok/warn/danger) her bölümde aynıdır.
+   Aksi hâlde bir tahlil sonucunun rengi hangi bölümde olduğuna göre
+   değişirdi ve bu, sağlık verisinde kabul edilemez. */
+
+:root{ --sec:var(--primary); --sec-soft:var(--primary-soft); }
+
+:root[data-section="gunluk"]  { --sec:#2F6B52; --sec-soft:#E4EDE8; }
+:root[data-section="testler"] { --sec:#2E5A73; --sec-soft:#E3EBEF; }
+:root[data-section="besin"]   { --sec:#8A5A18; --sec-soft:#F6EDE0; }
+:root[data-section="hareket"] { --sec:#9A4A2F; --sec-soft:#F7E8E2; }
+:root[data-section="finans"]  { --sec:#5E6B2A; --sec-soft:#EDEFE0; }
+:root[data-section="ofis"]    { --sec:#6B3F63; --sec-soft:#F0E7EF; }
+:root[data-section="ayarlar"] { --sec:#5A5750; --sec-soft:#EBE9E4; }
+
+/* Koyu temada aynı renkler açılır: koyu zeminde doygun ton okunmaz. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"])[data-section="gunluk"]  { --sec:#79C09C; --sec-soft:#1B2B23; }
+  :root:not([data-theme="light"])[data-section="testler"] { --sec:#84B2CC; --sec-soft:#182530; }
+  :root:not([data-theme="light"])[data-section="besin"]   { --sec:#D6A961; --sec-soft:#2B2415; }
+  :root:not([data-theme="light"])[data-section="hareket"] { --sec:#DF9376; --sec-soft:#2E1E17; }
+  :root:not([data-theme="light"])[data-section="finans"]  { --sec:#AFBF74; --sec-soft:#242817; }
+  :root:not([data-theme="light"])[data-section="ofis"]    { --sec:#C193BA; --sec-soft:#2A1E28; }
+  :root:not([data-theme="light"])[data-section="ayarlar"] { --sec:#AFAAA0; --sec-soft:#26241F; }
+}
+:root[data-theme="dark"][data-section="gunluk"]  { --sec:#79C09C; --sec-soft:#1B2B23; }
+:root[data-theme="dark"][data-section="testler"] { --sec:#84B2CC; --sec-soft:#182530; }
+:root[data-theme="dark"][data-section="besin"]   { --sec:#D6A961; --sec-soft:#2B2415; }
+:root[data-theme="dark"][data-section="hareket"] { --sec:#DF9376; --sec-soft:#2E1E17; }
+:root[data-theme="dark"][data-section="finans"]  { --sec:#AFBF74; --sec-soft:#242817; }
+:root[data-theme="dark"][data-section="ofis"]    { --sec:#C193BA; --sec-soft:#2A1E28; }
+:root[data-theme="dark"][data-section="ayarlar"] { --sec:#AFAAA0; --sec-soft:#26241F; }

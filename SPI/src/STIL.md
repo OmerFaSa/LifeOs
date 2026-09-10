@@ -37,6 +37,11 @@ Dört anlam rengi, gerisi nötr.
 | Tehlike | `--danger` | Kırmızı bayrak, referans dışı, yıkıcı işlem |
 | Bilgi | `--info` | Nötr açıklama, kesinlik etiketi |
 
+**Mürekkep** (`--ink`) saf siyah değil, koyu çamdır: klinik bir kesinlik
+verir ama soğumaz. Marka işaretinde, alt bantta ve ölçüm cetvelinin
+ibresinde kullanılır. Her sayfada en az bir koyu öge bulunması kasıtlıdır —
+baştan sona açık bir sayfanın ağırlık merkezi olmaz.
+
 Yüzeyler `--bg → --surface → --surface-2 → --surface-3` sırasıyla derinleşir.
 Metin `--text → --text-2 → --text-3` sırasıyla soluklaşır.
 `--surface-hover` yalnız fare üstündeyken, `--ring` yalnız odak halkasında.
@@ -118,48 +123,111 @@ Dikkat çekmek için animasyon yoktur: yanıp sönme, zıplama, sürekli döngü
 (iskelet ve açılış çubuğu dışında) kullanılmaz. Bir kırmızı bayrak yanıp
 sönerek değil, sayfanın en üstünde durarak dikkat çeker.
 
-## Düzen — panel değil site
+## Düzen — bir sağlık defteri
 
-Önceki düzen bir yönetim panelinin diliyle konuşuyordu: solda sabit bir menü
-sütunu, üstte bir başlık çubuğu, altta üst üste yığılmış kartlar. O dil bir
-araç kutusuna yakışır; günde birkaç kez açılıp okunan kişisel bir sağlık
-sistemine değil.
+Tasarımın fikri şudur: bu bir yönetim paneli değil, **tutulan bir kayıt
+defteri**. Sistemin bütün doktrini dürüst ölçüm üzerine kurulu — kesinlik
+etiketleri, eksik verinin sıfır sayılmaması, kural motorunun otoritesi.
+Görsel dil de bunu söylemeli: klinik bir hassasiyet, ama soğumayan bir
+sıcaklık.
 
-Kabuk üç parçadır:
+Kabuk dört parçadır:
 
-| Parça | Ne yapar |
-|---|---|
-| `sitenav` | İnce, yapışkan üst gezinme — yedi bölüm tek satırda |
-| `hero` | Bölümün açılış bandı: **durum tek cümlede** yazar |
-| `sect` | İçeriğin nefes alan bölümleri — kart yığını değil |
+| Parça | Ne yapar | Yapışır mı |
+|---|---|---|
+| `masthead` | Kimlik · tarih · araçlar | Hayır — okurken kimliğe ihtiyaç yok |
+| `sitenav` | Numaralı yedi bölüm | **Evet** |
+| `hero` | Bölüm imzası, durum, eylem, özet sayılar | Hayır |
+| `sitefoot` | Koyu bant: klinik sınır ve mahremiyet | Hayır |
+
+Kimlik satırının kaymasına izin vermek kasıtlıdır: sabit kalan çubuk böylece
+yarı yüksekliğe iner ve içerik nefes alır.
+
+**Alt bant her sayfayı sonlandırır.** Sistemin iki değişmez cümlesini
+(klinik sınır, mahremiyet) her ekranda bir kez söyler. Bunları kart olarak
+içeriğin ortasına koymak her seferinde okumayı bölüyordu.
 
 **İçerik ortalanır ve genişliği sınırlıdır** (`--content-max` 1200px). Ekran
-büyüdükçe satırlar uzamaz, kenar boşluğu büyür. Uzun satır okunmaz.
+büyüdükçe satırlar uzamaz, kenar boşluğu büyür.
 
 ### Hero kuralı
 
 Panel dilinde başlıkta ekranın **adı** yazardı («Tahliller») ve durumu okumak
-için aşağı bakmak gerekirdi. Site dilinde başlık **durumun kendisidir**:
+için aşağı bakmak gerekirdi. Burada başlık **durumun kendisidir**:
 
 ```
-01 · TESTLER                     ← bölüm (eyebrow)
-1 ölçüm referans aralığının dışında.   ← durum (h1)
-12 ölçüm kayıtlı. Değerler organa göre bölünmez…  ← ne yapılacağı (lede)
-[Test gir] [Rapor yapıştır]      ← eylem
-                          12   1   6   2   ← özet sayılar (stats)
+02 ——— TESTLER                        ← bölüm imzası (kendi renginde)
+1 ölçüm referans aralığının dışında.   ← durum (serif, display)
+11 ölçüm kayıtlı. Değerler organa…     ← ne yapılacağı (lede)
+[Test gir] [Rapor yapıştır]            ← eylem
+                    11  1  5  1        ← özet sayılar
+                    ╌╌╌╌╌╌╌╌╌          ← bölüm imzası (motif)
 ```
 
-Ekran sözleşmesi bu üçünü isteğe bağlı olarak verir:
+Ekran sözleşmesi:
 
 ```js
 { id, title, headline?(), lede?(), stats?(), actions(), render(), handle, change }
 ```
 
 `headline` yoksa `title`, `lede` yoksa `subtitle()` kullanılır. `stats`
-**en fazla dört** sayı döndürür — dördü de tek bakışta taranabilmeli.
+**en fazla dört** sayı döndürür.
 
 Aynı cümle bir ekranda iki kez görünmez: hero sıradaki hamleyi söylüyorsa
 gövdede onu tekrarlayan kart bulunmaz.
+
+## Bölüm kimlikleri — tek tasarım, yedi imza
+
+Düzen, tipografi, boşluk ve bileşenler **her bölümde aynıdır**. Değişen tek
+şey `--sec`: bölümün kendi rengi.
+
+| # | Bölüm | Renk | İmza |
+|---|---|---|---|
+| 01 | Günlük | Adaçayı | Bir günün yirmi dört çentiği |
+| 02 | Testler | Klinik mavi | Ölçüm cetveli ve ibresi |
+| 03 | Besin | Kehribar | Tabak ve üç makro dilimi |
+| 04 | Hareket | Kiremit | Efor eğrisi ve toparlanma |
+| 05 | Finans | Zeytin | Defter sütunu ve toplam çizgisi |
+| 06 | Ofis | Erik | Patron ve dört koç |
+| 07 | Ayarlar | Taş | Üç sürgü |
+
+Renkler aynı doygunluk ailesinden seçildi: yan yana konduklarında gökkuşağı
+değil, tek bir palet gibi okunurlar.
+
+`--sec` yalnız **beş** yerde görünür: bölüm numarası, etkin sekme çizgisi,
+bölüm başlığının üstündeki kısa çizgi, ana düğme ve bölüm imzası.
+
+**Durum renkleri buna karışmaz.** `ok` / `warn` / `danger` her bölümde
+aynıdır. Aksi hâlde bir tahlil sonucunun rengi hangi sayfada olduğuna göre
+değişirdi ve bu, sağlık verisinde kabul edilemez.
+
+### Bölüm imzaları (motif)
+
+Her bölümün hero'sunda duran ince, tek renkli işaret. Süs değil: bölümün
+**ne ölçtüğünü** soyutlar ve kullanıcı sayfayı okumadan hangi bölümde
+olduğunu çevresel görüşle anlar.
+
+Hepsi aynı dille çizilir: 38px yükseklik, 1.5px çizgi, tek renk, dolgu yok.
+Farklı kalınlıkta ya da çok renkli bir imza, tek tasarım kuralını bozardı.
+
+## Ölçüm cetveli — imza bileşen
+
+Sistemin en ayırt edici parçası. **Bir ilerleme çubuğu değildir:** dolu bir
+kutu «ne kadar tamamlandı» der; burada sorulan o değil — «değer nerede
+duruyor».
+
+Bu yüzden:
+
+- Zemin **boş**tur, eksen tek bir hairline'dır.
+- Referans aralığı ince bir bant, hedef bandı onun üstünde bir alt çizgi.
+- Aralığın iki ucunda **çentik** vardır: aralık renkle değil, çizgiyle de
+  okunur.
+- Değer tek bir **ibre**dir — üstünde küçük bir nokta taşıyan hassas bir
+  çizgi. Dışarı taştığında incelmez; uzar ve renk değiştirir.
+
+Uzun listelerde `{ bare:true }` ile yalnız eksen çizilir; sayı satırı satıra
+tıklayınca açılan kâğıtta durur. On beş satırın altında «30 · referans ·
+hedef 80–250 · 400 ng/mL» yazmak satırı okunmaz hâle getiriyordu.
 
 ## Gezinme
 
@@ -179,15 +247,13 @@ Yedi bölüm, on iki sayfa. Bölüm alana göre değil **işe** göre ayrılır.
 ölçüm» (giriş) diye iki ayrı ekran vardı; ikisi de aynı günü anlatıyor,
 kullanıcı hangisine gireceğini düşünmek zorunda kalıyordu. Şimdi tek sayfa,
 üç sekme — ve **Giriş varsayılan sekmedir**: bu sayfaya girmenin sebebi çoğu
-zaman okumak değil yazmaktır. Özet, yazılanın sonucudur; sonuç girdiden önce
-gelmez.
+zaman okumak değil yazmaktır.
 
-Üst çubukta etkin bölümün altında ince bir çizgi durur — hap değil, site
-gezinmesi dili. 860px altında bölümler tam ekran menüye iner (`navsheet`);
-alt sekme çubuğu yoktur, o bir panel dilidir.
+Gezinmedeki **numara süs değildir**: yedi bölümün sırası anlamlıdır (önce
+yazılan, sonra okunan) ve numara o sırayı görünür kılar.
 
-`pagenav` bölümün sayfalarını gösterir ve **yalnız birden fazla sayfa varsa**
-çizilir: tek sekmelik bir sekme çubuğu gürültüden başka bir şey değildir.
+860px altında bölümler tam ekran bir **içindekiler** sayfasına iner:
+numaralı, serif, tek sütun. Alt sekme çubuğu yoktur — o bir panel dilidir.
 
 ### Ekran içi sekmeler
 
@@ -264,7 +330,7 @@ SPİ'ye özel, veriye bağlı (`core/parts.js`):
 girmez.
 
 Ekrana özel yapılar CSS'te adlandırılır, bileşene çevrilmez:
-`rangebar` (referans aralığı), `markerrow` (ölçüm satırı), `flagcard` (kırmızı
+`scale` (ölçüm cetveli — imza bileşen), `markerrow` (ölçüm satırı), `flagcard` (kırmızı
 bayrak), `mealcard` / `mealitem` / `absorb` (öğün ve emilim), `foodrow` (besin
 arama), `splitrow` (hane paylaştırma), `pricerow` (fiyat), `minrow` (asgari gün),
 `readypart` (toparlanma bileşeni), `ladder` / `ladderstep` (ilerleme merdiveni),
