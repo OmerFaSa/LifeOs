@@ -363,6 +363,7 @@ src/
       rules.js          ev kuralları: klinik sınır, kırmızı bayrak, öncelik
       agents.js         beş ajan, gündem türleri
       hints.js          ⓘ açıklamaları
+      build.js          derleme damgası — build.py her derlemede yeniden yazar
       palettes.js       yedi renk paleti
       designs.js        beş düzen — iskelet seçimi, mantık yok
     core/
@@ -386,7 +387,7 @@ src/
       setup.js          ilk kurulum
     screens/            12 ekran
     app.js              kabuk: gezinme, görünüm paneli, olay dağıtımı, açılış
-  tests/                445 test, 11 paket
+  tests/                446 test, 11 paket
 tools/
   runtests.js           birim testleri (başsız tarayıcı)
   smoke.js              duman testi: gerçek uygulamayı gezer

@@ -338,6 +338,17 @@
     });
   });
 
+  describe('Veri — derleme damgası', () => {
+    /* Ekrandaki sayfanın hangi derleme olduğunu söyleyen tek şey bu.
+       Olmadığında bir hata düzeltildikten sonra kullanıcı hâlâ eski
+       davranışı görebiliyor ve bunu anlamanın yolu olmuyor. */
+    it('damga vardır ve kimlik taşır', () => {
+      expect(SP.BUILD).toBeTruthy();
+      expect(typeof SP.BUILD.id).toBe('string');
+      expect(SP.BUILD.id.length > 2).toBeTruthy();
+    });
+  });
+
   describe('Veri — düzenler', () => {
     it('varsayılan düzen listede', () => {
       expect(SP.DESIGN_BY_ID[SP.DEFAULT_DESIGN]).toBeTruthy();

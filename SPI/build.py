@@ -130,10 +130,46 @@ def inline_js(html: str, minify: bool):
     return html, ["<script>\n" + "\n\n".join(blocks) + "\n</script>"], files
 
 
+def stamp() -> str:
+    """Derleme damgasini src/js/data/build.js icine yazar ve kimligi doner.
+
+    Ekrandaki sayfanin hangi derleme oldugunu soyleyen tek sey budur.
+    Tarayici eski bir js dosyasini onbellekten verdiginde arayuz ayni
+    gorunur ama davranis eskidir; damga olmadan bunu anlamanin yolu yok.
+    """
+    import subprocess
+    from datetime import datetime, timezone
+
+    def git(*args):
+        try:
+            return subprocess.run(["git"] + list(args), cwd=ROOT,
+                                  capture_output=True, text=True, timeout=5).stdout.strip()
+        except Exception:
+            return ""
+
+    sha = git("rev-parse", "--short", "HEAD") or "surumsuz"
+    # Calisma kopyasinda kaydedilmemis degisiklik varsa damga bunu SOYLER:
+    # "bu derleme bir commit'e karsilik gelmiyor" demek durustur.
+    kirli = bool(git("status", "--porcelain", "--", "src", "build.py"))
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+
+    body = (
+        "/* DERLEME DAMGASI — bu dosyayi elle duzenleme.\n"
+        "   build.py her derlemede yeniden yazar. */\n\n"
+        "window.SP = window.SP || {};\n\n"
+        "SP.BUILD = { id:'%s', at:'%s', dirty:%s };\n"
+        % (sha, now, "true" if kirli else "false")
+    )
+    (SRC / "js" / "data" / "build.js").write_text(body, encoding="utf-8")
+    return sha
+
+
 def build(minify: bool = False) -> None:
     for name in REQUIRED:
         if not (SRC / name).exists():
             sys.exit(f"HATA: src/{name} yok")
+
+    damga = stamp()
 
     html = read("index.html")
     title_match = re.search(r"<title>(.*?)</title>", html, re.S)
@@ -172,6 +208,7 @@ def build(minify: bool = False) -> None:
     mode = "minify" if minify else "okunabilir"
     print(f"OK   {out_path}  [{mode}]")
     print(f"     {len(js_files)} js modulu, {output.count(chr(10))+1} satir, {size_kb:,.0f} KB")
+    print(f"     damga {damga}")
 
 
 if __name__ == "__main__":

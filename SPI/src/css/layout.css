@@ -568,3 +568,23 @@
   font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
   color:var(--text-3);
 }
+
+/* Derleme damgası — hangi sürümün ekranda olduğunu söyler. Alt bandın
+   en sessiz satırı: aranınca bulunur, okunurken rahatsız etmez. */
+.sitefoot__build{
+  margin:0; font-size:11px; color:var(--ink-on-2);
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+/* Sürüm kimliği git'ten gelir ve KÜÇÜK harflidir; büyük harfe çevirmek
+   onu tanınmaz kılar. Bu yüzden .mono-label kullanılmaz. */
+.sitefoot__sha{
+  font-family:ui-monospace, 'SFMono-Regular', 'Courier New', monospace;
+  font-size:11px; letter-spacing:.02em; color:var(--ink-on);
+}
+.sitefoot__reload{
+  border:1px solid color-mix(in srgb, var(--ink-on) 30%, transparent);
+  background:none; color:var(--ink-on-2);
+  border-radius:var(--r-pill); padding:1px 9px; font-size:10.5px;
+  transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.sitefoot__reload:hover{ color:var(--ink-on); border-color:var(--ink-on); }

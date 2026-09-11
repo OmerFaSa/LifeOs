@@ -1390,6 +1390,26 @@ table td, table th{
   color:var(--text-3);
 }
 
+/* Derleme damgası — hangi sürümün ekranda olduğunu söyler. Alt bandın
+   en sessiz satırı: aranınca bulunur, okunurken rahatsız etmez. */
+.sitefoot__build{
+  margin:0; font-size:11px; color:var(--ink-on-2);
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+/* Sürüm kimliği git'ten gelir ve KÜÇÜK harflidir; büyük harfe çevirmek
+   onu tanınmaz kılar. Bu yüzden .mono-label kullanılmaz. */
+.sitefoot__sha{
+  font-family:ui-monospace, 'SFMono-Regular', 'Courier New', monospace;
+  font-size:11px; letter-spacing:.02em; color:var(--ink-on);
+}
+.sitefoot__reload{
+  border:1px solid color-mix(in srgb, var(--ink-on) 30%, transparent);
+  background:none; color:var(--ink-on-2);
+  border-radius:var(--r-pill); padding:1px 9px; font-size:10.5px;
+  transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.sitefoot__reload:hover{ color:var(--ink-on); border-color:var(--ink-on); }
+
 /* ==== css/components.css ==== */
 /* Bilesen stilleri.
 
@@ -3883,6 +3903,14 @@ body.is-dragging .drop.is-over{
 
 <!-- veri once, cekirdek sonra, ekranlar en son: bagimlilik siralamasi budur -->
 <script>
+/* ==== js/data/build.js ==== */
+/* DERLEME DAMGASI — bu dosyayi elle duzenleme.
+   build.py her derlemede yeniden yazar. */
+
+window.SP = window.SP || {};
+
+SP.BUILD = { id:'dc370a4', at:'2026-09-11 15:23', dirty:true };
+
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
 
@@ -18324,9 +18352,35 @@ SP.App = (function(){
             <p><span class="sitefoot__k">Sınır</span> ${SP.CLINICAL.disclaimer}</p>
             <p><span class="sitefoot__k">Mahremiyet</span> Veriler bu cihazda tutulur.
               Ad ve doğum yılı hiçbir modele gönderilmez.</p>
+            ${raw(buildStampHtml())}
           </div>
         </div>
       </footer>`;
+  }
+
+  /* ---------- derleme damgası ----------
+
+     Ekrandaki sayfanın HANGİ derleme olduğunu söyler. Küçük bir ayrıntı
+     gibi görünür ama olmadığında pahalıya patlıyor: bir hata
+     düzeltildikten sonra kullanıcı hâlâ eski davranışı görebiliyor ve
+     bunu anlamanın hiçbir yolu olmuyor. Tarayıcı eski bir js dosyasını
+     önbellekten verdiğinde arayüz aynı görünür, davranış eskidir.
+
+     Yanındaki düğme tarayıcıyı önbelleği atlamaya zorlar: adres bir
+     kerelik damgayla yeniden yüklenir. */
+  function buildStampHtml(){
+    const b = SP.BUILD || {};
+    if(!b.id) return '';
+    return String(html`<p class="sitefoot__build">
+      <span class="sitefoot__k">Derleme</span>
+      <span class="sitefoot__sha"${when(b.dirty, () => attrs({
+        title:'Bu derleme kaydedilmemiş yerel değişiklik içeriyor; '
+          + 'bir commit\'e birebir karşılık gelmez.' }))}>${b.id}${when(b.dirty,
+        () => html`<span aria-label="yerel değişiklikli">+</span>`)}</span>
+      ${when(b.at, () => html`<span class="dim"> · ${b.at}</span>`)}
+      <button class="sitefoot__reload" data-act="hard-reload"
+        title="Tarayıcının önbelleğini atlayarak yeniden yükler">tazele</button>
+    </p>`);
   }
 
   /* Dar ekranda bölümler tam ekran menüye açılır. Alt sekme çubuğu bir
@@ -18761,6 +18815,14 @@ SP.App = (function(){
     async 'cmdk-run'(el){ SP.Palette.runById(el.dataset.id); },
     async 'sheet-close'(){ UI.closeSheet(); },
     async reload(){ location.reload(); },
+    /* Sert yenileme: adrese bir kerelik damga eklenir, böylece tarayıcı
+       sayfayı ve bağlı dosyaları önbellekten değil sunucudan ister.
+       `location.reload()` bunu garanti etmez. */
+    async 'hard-reload'(){
+      const u = new URL(location.href);
+      u.searchParams.set('tazele', String(Date.now()));
+      location.replace(u.toString());
+    },
     async 'setup-save'(){ await SP.Setup.save(); },
     async 'setup-skip'(){ SP.Setup.skip(); },
     /* Herhangi bir ekrandan bir ajana soru sormak için. */

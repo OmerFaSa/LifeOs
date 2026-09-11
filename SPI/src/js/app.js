@@ -215,9 +215,35 @@ SP.App = (function(){
             <p><span class="sitefoot__k">Sınır</span> ${SP.CLINICAL.disclaimer}</p>
             <p><span class="sitefoot__k">Mahremiyet</span> Veriler bu cihazda tutulur.
               Ad ve doğum yılı hiçbir modele gönderilmez.</p>
+            ${raw(buildStampHtml())}
           </div>
         </div>
       </footer>`;
+  }
+
+  /* ---------- derleme damgası ----------
+
+     Ekrandaki sayfanın HANGİ derleme olduğunu söyler. Küçük bir ayrıntı
+     gibi görünür ama olmadığında pahalıya patlıyor: bir hata
+     düzeltildikten sonra kullanıcı hâlâ eski davranışı görebiliyor ve
+     bunu anlamanın hiçbir yolu olmuyor. Tarayıcı eski bir js dosyasını
+     önbellekten verdiğinde arayüz aynı görünür, davranış eskidir.
+
+     Yanındaki düğme tarayıcıyı önbelleği atlamaya zorlar: adres bir
+     kerelik damgayla yeniden yüklenir. */
+  function buildStampHtml(){
+    const b = SP.BUILD || {};
+    if(!b.id) return '';
+    return String(html`<p class="sitefoot__build">
+      <span class="sitefoot__k">Derleme</span>
+      <span class="sitefoot__sha"${when(b.dirty, () => attrs({
+        title:'Bu derleme kaydedilmemiş yerel değişiklik içeriyor; '
+          + 'bir commit\'e birebir karşılık gelmez.' }))}>${b.id}${when(b.dirty,
+        () => html`<span aria-label="yerel değişiklikli">+</span>`)}</span>
+      ${when(b.at, () => html`<span class="dim"> · ${b.at}</span>`)}
+      <button class="sitefoot__reload" data-act="hard-reload"
+        title="Tarayıcının önbelleğini atlayarak yeniden yükler">tazele</button>
+    </p>`);
   }
 
   /* Dar ekranda bölümler tam ekran menüye açılır. Alt sekme çubuğu bir
@@ -652,6 +678,14 @@ SP.App = (function(){
     async 'cmdk-run'(el){ SP.Palette.runById(el.dataset.id); },
     async 'sheet-close'(){ UI.closeSheet(); },
     async reload(){ location.reload(); },
+    /* Sert yenileme: adrese bir kerelik damga eklenir, böylece tarayıcı
+       sayfayı ve bağlı dosyaları önbellekten değil sunucudan ister.
+       `location.reload()` bunu garanti etmez. */
+    async 'hard-reload'(){
+      const u = new URL(location.href);
+      u.searchParams.set('tazele', String(Date.now()));
+      location.replace(u.toString());
+    },
     async 'setup-save'(){ await SP.Setup.save(); },
     async 'setup-skip'(){ SP.Setup.skip(); },
     /* Herhangi bir ekrandan bir ajana soru sormak için. */
