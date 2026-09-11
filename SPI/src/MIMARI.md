@@ -344,6 +344,7 @@ src/
   MIMARI.md             bu belge
   YOLHARITASI.md        sonraki iki plan: veri girişi ve tasarım
   SAGLIK.md             Modül 1 planı: türetme, birlikte okuma, taban çizgi
+  DURUM.md              ölçülmüş durum raporu ve öncelik sırası
   OFIS.md               beş ajanın çalışma düzeni
   STIL.md               tasarım sistemi
   css/
