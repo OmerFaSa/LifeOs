@@ -70,6 +70,16 @@ SP.Office = (function(){
       /* Kerem'in brifingine ORUNTULER de girer: tek olcum yaniltir.
          Model bunlari uretmez, yalnizca brifingde gorup cumleye doker. */
       patterns:SP.Bio.patterns().map(p2 => ({ id:p2.id, title:p2.title, text:p2.text })),
+      /* Kerem bir degisimin SEBEBINI arayabilmeli: ne kullanildigini ve
+         kanin ac karnina alinip alinmadigini bilmeden yorum eksiktir. */
+      meds:SP.Meds.activeList().map(r => ({
+        name:r.name || SP.Meds.kindOf(r).name,
+        kind:SP.Meds.kindOf(r).name,
+        since:r.startDate,
+        affects:SP.Meds.kindOf(r).affects.map(a => a.id),
+      })),
+      fasting:SP.S.labs.length
+        ? (SP.S.labs[SP.S.labs.length - 1].fasting || 'unknown') : null,
       overdue:SP.Bio.overdue().map(o => ({ panel:o.panel.name, days:o.days, note:o.note })),
       lastLab:SP.S.labs.length ? SP.S.labs[SP.S.labs.length - 1].date : null,
     };
@@ -193,6 +203,16 @@ SP.Office = (function(){
          once o yazilir. */
       if(d.patterns && d.patterns.length){
         lines.push(d.patterns[0].title + '.');
+      }
+      /* Tok olcum bir uyaridir, dipnot degil: sirali cumlelerin
+         basinda durur. */
+      if(d.fasting === 'no'){
+        lines.push('Son oturum tok karnına alınmış; açlık glukozu, insülin ve '
+          + 'trigliserit yorumlanmadı.');
+      }
+      if(d.meds && d.meds.length){
+        lines.push('Kullanılanlar: ' + d.meds.map(m => m.name).join(', ')
+          + '. Bir ölçümdeki değişim bunlardan biriyle aynı yönde olabilir.');
       }
       if(d.overdue.length){
         const pn = d.overdue[0].panel;
@@ -388,6 +408,15 @@ SP.Office = (function(){
     });
     if(eski.length > 3){
       add('lab', 'gap', (eski.length - 3) + ' panel daha yarım yıldan uzun süredir tazelenmedi.');
+    }
+
+    /* Etkin bir ilac varsa Kerem'in masasinda tek satirlik hatirlatma
+       durur: olcum yorumlanirken bu hesaba katilmali. */
+    const ilaclar = SP.Meds.activeList();
+    if(ilaclar.length){
+      add('lab', 'info', ilaclar.length + ' ilaç/takviye etkin: '
+        + ilaclar.slice(0, 3).map(r => r.name || SP.Meds.kindOf(r).name).join(', ')
+        + (ilaclar.length > 3 ? ' ve ' + (ilaclar.length - 3) + ' tanesi daha' : '') + '.');
     }
 
     const g = SP.Nutri.gaps(7);

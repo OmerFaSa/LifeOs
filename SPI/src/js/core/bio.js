@@ -269,6 +269,64 @@ SP.Bio = (function(){
     return out;
   }
 
+  /* ======================================================== aclik kurali
+
+     Bazi olcumler yalnizca AC KARNINA alinan kandan yorumlanir. Sistem
+     bunu sormuyordu ve hepsini acmis gibi yorumluyordu: tok karnina
+     alinmis bir trigliserit «referans ustu» diye isaretlenip beslenme
+     hedefini degistirebiliyordu.
+
+     Bu bir olcum hatasi degil BAGLAM EKSIKLIGI. Cozumu de bir sayi
+     degil bir alan: «ac / tok / bilinmiyor».
+
+     Uc durum, uc davranis:
+       yes      normal yorumlanir
+       no       durum etiketi HIC BASILMAZ; «tok olcum» yazar
+       unknown  yorumlanir ama bunu SOYLER — sessizce varsaymaz */
+
+  const FASTING_MARKERS = {
+    glucose:'Açlık glukozu tanım gereği aç karnına ölçülür.',
+    insulin:'Açlık insülini tanım gereği aç karnına ölçülür.',
+    trig:'Trigliserit yemekten sonra saatlerce yüksek kalır.',
+    homa:'Açlık glukozu ve insülininden hesaplanır.',
+    tg_hdl:'Trigliseritten hesaplanır.',
+    tyg:'Trigliserit ve açlık glukozundan hesaplanır.',
+    ldl:'Friedewald formülü trigliserite dayanır.',
+  };
+
+  function needsFasting(markerId){ return !!FASTING_MARKERS[markerId]; }
+
+  /* Bir olcumun hangi oturumdan geldigini bulup o oturumun aclik
+     durumunu dondurur. Oturum yoksa 'unknown'. */
+  function fastingOf(markerId){
+    const labs = SP.S.labs || [];
+    for(let i = labs.length - 1; i >= 0; i--){
+      const c = labs[i].values && labs[i].values[markerId];
+      if(c && c.v != null) return labs[i].fasting || 'unknown';
+    }
+    return 'unknown';
+  }
+
+  /* Ekranlarin sordugu tek soru: bu olcum yorumlanabilir mi? */
+  function interpretable(markerId, fastingState){
+    if(!needsFasting(markerId)) return { ok:true, state:'na' };
+    const st = fastingState || fastingOf(markerId);
+    if(st === 'no'){
+      return { ok:false, state:'no',
+        label:'tok ölçüm',
+        note:'Bu değer tok karnına alınmış. ' + FASTING_MARKERS[markerId]
+          + ' Tok ölçümde durum etiketi basılmaz; sayı doğru olabilir ama '
+          + 'gösterdiği şey değildir.' };
+    }
+    if(st === 'unknown'){
+      return { ok:true, state:'unknown',
+        label:'açlık bilinmiyor',
+        note:'Bu oturumda açlık durumu kaydedilmemiş. ' + FASTING_MARKERS[markerId]
+          + ' Değer aç karnına alınmış varsayılarak yorumlandı.' };
+    }
+    return { ok:true, state:'yes' };
+  }
+
   /* ==================================================== kisisel taban cizgi
 
      Referans araligi NUFUSUN, hedef bandi SISTEMIN; ikisi de senin
@@ -458,6 +516,7 @@ SP.Bio = (function(){
 
   return {
     STATUS, MIN_POINTS, BASELINE_MIN,
+    FASTING_MARKERS, needsFasting, fastingOf, interpretable,
     refFor, statusOf, statusNote,
     trendOf, trendVerdict,
     baselineOf, meaningfulChange,

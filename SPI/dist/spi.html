@@ -2950,7 +2950,7 @@ button.minrow:hover{ background:var(--surface-2); }
 .cmprow{
   width:100%;
   display:grid;
-  grid-template-columns:3px minmax(130px,1.3fr) minmax(160px,1.1fr) 112px 100px 92px;
+  grid-template-columns:3px minmax(120px,1.2fr) minmax(150px,1fr) 104px minmax(120px,.8fr) 96px;
   align-items:center; gap:14px;
   padding:13px 10px 13px 0;
   border:none; border-bottom:1px solid var(--border);
@@ -2979,7 +2979,9 @@ button.minrow:hover{ background:var(--surface-2); }
 .cmprow__delta.is-ok{ color:var(--primary); }
 .cmprow__delta.is-danger{ color:var(--danger); }
 .cmprow__delta.is-info{ color:var(--info); }
-.cmprow__note{ white-space:nowrap; }
+/* «beklenen — gürültü sayılır» gibi iki parçalı not kırpılmaz: yer
+   yetmezse sarar. Kırpılan bir not yanlış okunur. */
+.cmprow__note{ min-width:0; line-height:1.4; }
 .cmprow__status{ justify-self:end; }
 
 /* Kart ya da kenar çubuğu yüzünden daralan kutuda satır iki kata iner. */
@@ -3386,6 +3388,25 @@ body.is-dragging .drop.is-over{
   #print-root table{ break-inside:auto; }
   #print-root tr{ break-inside:avoid; }
   @page{ margin:14mm; }
+}
+
+/* ================= ilaç ve takviye listesi =================
+
+   Kayıt bir kart değil bir satır: on tane yan yana durabilmeli. Etkin
+   olanlar tam renkte, bırakılanlar sessiz. */
+.medlist{ border-top:1px solid var(--border); }
+.medrow{
+  display:flex; align-items:flex-start; gap:16px;
+  padding:14px 0; border-bottom:1px solid var(--border);
+}
+.medrow__ana{ min-width:0; flex:1; }
+.medrow__ana > b{ font-size:14.5px; font-weight:600; letter-spacing:-.005em; }
+.medrow__ey{ display:flex; align-items:center; gap:6px; flex:none; flex-wrap:wrap; }
+.medrow.is-past{ color:var(--text-3); }
+.medrow.is-past > .medrow__ana > b{ color:var(--text-2); font-weight:500; }
+@container satir (max-width:560px){
+  .medrow{ flex-direction:column; gap:10px; }
+  .medrow__ey{ width:100%; }
 }
 
 /* ==== css/designs.css ==== */
@@ -3974,7 +3995,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'7fcc4c4', at:'2026-09-11 17:11', dirty:true };
+SP.BUILD = { id:'ee4c76f', at:'2026-09-11 17:22', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -6017,6 +6038,151 @@ SP.DEFAULT_DESIGN = 'defter';
 
 SP.DESIGN_BY_ID = SP.DESIGNS.reduce((m, d) => { m[d.id] = d; return m; }, {});
 
+/* ==== js/data/meds.js ==== */
+/* ILAC VE TAKVIYE TURLERI — Modul 1'in eksik parcasi.
+
+   Sistem «doz onermez» kuralini dogru uyguluyordu ama NE KULLANILDIGINI
+   da kaydetmiyordu. Oysa bir hap olcumu degistirir: demir takviyesi
+   ferritini yukseltir, statin LDL'yi dusurur, mide ilaci B12 emilimini
+   bozar.
+
+   Bu olmadan kisisel taban cizgi motoru «ferritin gercekten yukseldi»
+   diyor — SEBEBINI BILMEDEN. Kullanici uc aydir demir hapi iciyorsa bu
+   bir basari degil, beklenen bir sonuctur. Kayit olmadan sistem ikisini
+   ayiramaz ve yanlis cesaret verir.
+
+   ─────────────────────────────────────────────────────────────────
+
+   UC DEGISMEZ:
+
+   1. Sistem SERBEST METINDEN tahmin etmez. Kullanici bir TUR secer;
+      etki eslemesi o turden gelir. «Ferrosanol» yazan bir kutudan
+      demir cikarimi yapmak, uydurmaktir.
+
+   2. Sistem DOZ ONERMEZ, BASLATMAZ, KESTIRMEZ. Yalnizca «bu olcumu
+      etkileyen bir sey kullaniyorsun» der. Ilac kararlari hekimindir.
+
+   3. Etki yonu TAHMIN DEGIL BEKLENTIDIR. «Yukselir» demek «yukselecek»
+      demek degil; olculen degisim beklenen yonde ise sistem bunu
+      SOYLER, degilse susar. Hicbir sayi bu tablodan uretilmez.
+
+   `affects` icindeki `dir` degeri olcumun BEKLENEN yonudur:
+     'up'    kullanildiginda olcum yukselir
+     'down'  kullanildiginda olcum duser */
+
+window.SP = window.SP || {};
+
+SP.MED_KINDS = [
+  /* ---------------------------------------------------------- takviye */
+  { id:'demir', name:'Demir takviyesi', group:'takviye',
+    affects:[{ id:'ferritin', dir:'up' }, { id:'hgb', dir:'up' },
+             { id:'tsat', dir:'up' }, { id:'iron_s', dir:'up' }],
+    note:'Demir deposunu doğrudan yükseltir. Ferritindeki artış çoğu zaman '
+      + 'beslenmenin değil takviyenin sonucudur.' },
+
+  { id:'b12', name:'B12 takviyesi', group:'takviye',
+    affects:[{ id:'b12', dir:'up' }],
+    note:'Kan B12 değerini hızla yükseltir; depo dolması daha uzun sürer.' },
+
+  { id:'dvit', name:'D vitamini', group:'takviye',
+    affects:[{ id:'vitd', dir:'up' }, { id:'ca', dir:'up' },
+             { id:'ca_corr', dir:'up' }],
+    note:'25-OH D değerini yükseltir ve kalsiyum emilimini artırır.' },
+
+  { id:'folat', name:'Folik asit', group:'takviye',
+    affects:[{ id:'folate', dir:'up' }, { id:'mcv', dir:'down' }],
+    note:'Folat düzeyini yükseltir; büyümüş eritrositleri küçültebilir.' },
+
+  { id:'magnezyum', name:'Magnezyum', group:'takviye',
+    affects:[{ id:'mg', dir:'up' }],
+    note:'Serum magnezyumu deponun küçük bir kısmını gösterir; değişim sınırlı kalabilir.' },
+
+  { id:'cinko', name:'Çinko', group:'takviye',
+    affects:[{ id:'zinc', dir:'up' }],
+    note:'Uzun süre yüksek dozda kullanıldığında bakır emilimini bozar.' },
+
+  { id:'omega3', name:'Omega-3 (balık yağı)', group:'takviye',
+    affects:[{ id:'trig', dir:'down' }, { id:'tg_hdl', dir:'down' }],
+    note:'Trigliseriti düşürür; LDL üzerindeki etkisi değişkendir.' },
+
+  { id:'kreatin', name:'Kreatin', group:'takviye',
+    affects:[{ id:'creat', dir:'up' }, { id:'egfr', dir:'down' }],
+    note:'Kan kreatinini yükseltir ve eGFR\'yi olduğundan düşük gösterir. '
+      + 'Bu bir böbrek bulgusu değildir — kreatin kullanırken eGFR yorumlanmaz.' },
+
+  { id:'protein-tozu', name:'Protein tozu', group:'takviye',
+    affects:[{ id:'urea', dir:'up' }, { id:'creat', dir:'up' }],
+    note:'Yüksek protein alımı üre ve kreatinini bir miktar yükseltebilir.' },
+
+  { id:'multivitamin', name:'Multivitamin', group:'takviye',
+    affects:[{ id:'b12', dir:'up' }, { id:'folate', dir:'up' },
+             { id:'vitd', dir:'up' }, { id:'zinc', dir:'up' }],
+    note:'İçeriği markaya göre değişir; birden çok ölçümü aynı anda etkileyebilir.' },
+
+  /* ------------------------------------------------------------ ilaç */
+  { id:'statin', name:'Statin (kolesterol ilacı)', group:'ilac',
+    affects:[{ id:'ldl', dir:'down' }, { id:'chol', dir:'down' },
+             { id:'nonhdl', dir:'down' }, { id:'alt', dir:'up' }],
+    note:'LDL\'yi belirgin düşürür. Karaciğer enzimlerinde hafif yükselme olağandır.' },
+
+  { id:'ppi', name:'Mide koruyucu (PPİ)', group:'ilac',
+    affects:[{ id:'b12', dir:'down' }, { id:'mg', dir:'down' },
+             { id:'ferritin', dir:'down' }],
+    note:'Mide asidini düşürür; B12, magnezyum ve demir emilimini bozar. '
+      + 'Uzun kullanımda bu üç değer sebepsiz düşmüş gibi görünür.' },
+
+  { id:'metformin', name:'Metformin', group:'ilac',
+    affects:[{ id:'glucose', dir:'down' }, { id:'hba1c', dir:'down' },
+             { id:'eag', dir:'down' }, { id:'b12', dir:'down' }],
+    note:'Şekeri düşürür; uzun kullanımda B12 emilimini de bozar.' },
+
+  { id:'levotiroksin', name:'Tiroit hormonu (levotiroksin)', group:'ilac',
+    affects:[{ id:'tsh', dir:'down' }, { id:'ft4', dir:'up' }, { id:'ft3', dir:'up' }],
+    note:'TSH\'yi düşürür, serbest T4\'ü yükseltir. Doz değişince altı hafta '
+      + 'geçmeden ölçüm oturmaz.' },
+
+  { id:'kortikosteroid', name:'Kortizon (steroit)', group:'ilac',
+    affects:[{ id:'glucose', dir:'up' }, { id:'wbc', dir:'up' },
+             { id:'cortisol', dir:'up' }],
+    note:'Kan şekerini ve lökositi yükseltir. Kısa kullanımda bile ölçümü etkiler.' },
+
+  { id:'dogum-kontrol', name:'Doğum kontrol hapı', group:'ilac',
+    affects:[{ id:'ferritin', dir:'up' }, { id:'trig', dir:'up' },
+             { id:'hdl', dir:'up' }],
+    note:'Adet kanamasını azalttığı için demir deposunu yükseltebilir; '
+      + 'lipid tablosunu da değiştirir.' },
+
+  { id:'tansiyon', name:'Tansiyon ilacı', group:'ilac',
+    affects:[{ id:'sbp', dir:'down' }, { id:'dbp', dir:'down' },
+             { id:'k', dir:'up' }],
+    note:'Tansiyonu düşürür. Bazı türleri potasyumu yükseltir.' },
+
+  /* Eslemesi olmayan secim: sistem hicbir olcume dokunmaz ama kayit durur. */
+  { id:'diger', name:'Diğer', group:'diger', affects:[],
+    note:'Bu tür için sistemde tanımlı bir ölçüm etkisi yok. Kayıt durur, '
+      + 'hekim çıktısında görünür; hiçbir ölçüm yorumu değişmez.' },
+];
+
+SP.MED_BY_ID = SP.MED_KINDS.reduce(function(acc, m){ acc[m.id] = m; return acc; }, {});
+
+SP.MED_GROUPS = [
+  { id:'takviye', name:'Takviye' },
+  { id:'ilac',    name:'İlaç' },
+  { id:'diger',   name:'Diğer' },
+];
+
+/* Hangi olcumu hangi turler etkiler? Ters indeks — ekranlar ve kural
+   motoru bir olcumden yola cikar. */
+SP.MED_AFFECTING = (function(){
+  const m = {};
+  SP.MED_KINDS.forEach(function(k){
+    k.affects.forEach(function(a){
+      (m[a.id] = m[a.id] || []).push({ kind:k, dir:a.dir });
+    });
+  });
+  return m;
+})();
+
 /* ==== js/data/providers.js ==== */
 /* Model saglayicilari — ofis ajanlarinin kullandigi ucretsiz LLM uclari.
 
@@ -6731,6 +6897,7 @@ SP.S = {
   vitals:{},          // YYYY-MM-DD -> gunluk olcum kaydi
   meals:{},           // YYYY-MM-DD -> ogun dizisi
   workouts:[],        // antrenman kayitlari
+  meds:[],            // ilac ve takviye kayitlari, en yeni ustte
   progress:{},        // exId -> { levelId, achievedAt }
 
   basket:null,        // { items, weeklyLimit, monthlyLimit, testFee, equipment, updatedAt }
@@ -6794,6 +6961,11 @@ SP.Model = (function(){
   /* Bos nesne ve diziler depolama katmanindan geri gelmeyebilir; okunan her
      belge kullanilmadan once eksik kaplari tamamlanir. */
   function normLab(doc){
+    /* Eski kayıtlarda açlık alanı yoktu: «bilinmiyor» sayılır, «aç»
+       değil. Olmayan bir bilgiyi varmış gibi doldurmak, eksik veriyi
+       sıfır saymakla aynı hatadır. */
+    if(doc && doc.fasting == null) doc.fasting = 'unknown';
+    if(doc && doc.time == null) doc.time = '';
     if(!doc) return doc;
     doc.values = doc.values || {};
     doc.source = doc.source || 'manual';
@@ -6938,7 +7110,62 @@ SP.Model = (function(){
 
   function newLab(dateISO){
     return { id:U.uid('lab'), date:dateISO || U.todayISO(), source:'manual',
-      lab:'', values:{}, note:'', createdAt:new Date().toISOString() };
+      lab:'', values:{}, note:'',
+      /* AÇLIK DURUMU. Açlık glukozu, insülin, trigliserit ve onlardan
+         türeyen TyG ile TG/HDL yalnız aç karnına alınan kandan
+         yorumlanır. Sistem bunu sormuyordu ve hepsini açmış gibi
+         yorumluyordu: tok karnına alınmış bir trigliserit «referans
+         üstü» işaretlenip beslenme hedefini değiştirebiliyordu. */
+      fasting:'unknown',      // yes | no | unknown
+      time:'',                // 'HH:MM' — isteğe bağlı
+      createdAt:new Date().toISOString() };
+  }
+
+  /* ------------------------------------------------------- ilaç ve takviye
+
+     Sistem doz önermez, başlatmaz, kestirmez. Yalnızca NE KULLANILDIĞINI
+     kaydeder ki bir ölçümdeki değişimin sebebi aranabilsin. */
+
+  function newMed(){
+    return { id:U.uid('med'), kindId:'diger', name:'', dose:'',
+      startDate:U.todayISO(), endDate:null, note:'',
+      createdAt:new Date().toISOString() };
+  }
+
+  function normMed(rec){
+    rec.kindId = SP.MED_BY_ID[rec.kindId] ? rec.kindId : 'diger';
+    rec.name = String(rec.name || '').trim();
+    rec.dose = String(rec.dose || '').trim();
+    rec.note = String(rec.note || '').trim();
+    if(!rec.startDate) rec.startDate = U.todayISO();
+    if(rec.endDate === '') rec.endDate = null;
+    /* Bitiş başlangıçtan önce olamaz; olursa bitiş yok sayılır. */
+    if(rec.endDate && rec.endDate < rec.startDate) rec.endDate = null;
+    return rec;
+  }
+
+  async function saveMed(rec){
+    normMed(rec);
+    SP.S.meds = SP.S.meds || [];
+    const i = SP.S.meds.findIndex(m => m.id === rec.id);
+    if(i >= 0) SP.S.meds[i] = rec; else SP.S.meds.push(rec);
+    SP.S.meds.sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
+    await SP.Store.set('meds/' + rec.id, rec);
+    return rec;
+  }
+
+  async function deleteMed(id){
+    SP.S.meds = (SP.S.meds || []).filter(m => m.id !== id);
+    await SP.Store.remove('meds/' + id);
+  }
+
+  /* Bırakmak silmek değildir: bırakılmış bir ilaç geçmiş bir ölçümü
+     hâlâ açıklıyor. Bitiş tarihi yazılır, kayıt durur. */
+  async function stopMed(id, dateISO){
+    const rec = (SP.S.meds || []).find(m => m.id === id);
+    if(!rec) return null;
+    rec.endDate = dateISO || U.todayISO();
+    return saveMed(rec);
   }
 
   /* Turetilmis olcumleri hesaplayip oturuma yazar.
@@ -7363,6 +7590,9 @@ SP.Model = (function(){
     S.workouts = ((await SP.Store.list('workouts')) || []).map(normWorkout)
       .sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
 
+    S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
+      .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
+
     S.progress = (await SP.Store.get('progress')) || {};
     S.basket = Object.assign(defaultBasket(), await SP.Store.get('basket'));
     S.prices = (await SP.Store.get('prices')) || {};
@@ -7389,6 +7619,8 @@ SP.Model = (function(){
     mealsOf, newMeal, saveMeals, addMeal, deleteMeal,
     /* antrenman */
     newWorkout, saveWorkout, deleteWorkout, workoutsOf,
+    /* ilac ve takviye */
+    newMed, saveMed, deleteMed, stopMed,
     currentLevel, levelIndex, advanceLevel, setLevel,
     /* ekonomi */
     defaultBasket, saveBasket, setBasketItem, setPrice,
@@ -7672,6 +7904,64 @@ SP.Bio = (function(){
     return out;
   }
 
+  /* ======================================================== aclik kurali
+
+     Bazi olcumler yalnizca AC KARNINA alinan kandan yorumlanir. Sistem
+     bunu sormuyordu ve hepsini acmis gibi yorumluyordu: tok karnina
+     alinmis bir trigliserit «referans ustu» diye isaretlenip beslenme
+     hedefini degistirebiliyordu.
+
+     Bu bir olcum hatasi degil BAGLAM EKSIKLIGI. Cozumu de bir sayi
+     degil bir alan: «ac / tok / bilinmiyor».
+
+     Uc durum, uc davranis:
+       yes      normal yorumlanir
+       no       durum etiketi HIC BASILMAZ; «tok olcum» yazar
+       unknown  yorumlanir ama bunu SOYLER — sessizce varsaymaz */
+
+  const FASTING_MARKERS = {
+    glucose:'Açlık glukozu tanım gereği aç karnına ölçülür.',
+    insulin:'Açlık insülini tanım gereği aç karnına ölçülür.',
+    trig:'Trigliserit yemekten sonra saatlerce yüksek kalır.',
+    homa:'Açlık glukozu ve insülininden hesaplanır.',
+    tg_hdl:'Trigliseritten hesaplanır.',
+    tyg:'Trigliserit ve açlık glukozundan hesaplanır.',
+    ldl:'Friedewald formülü trigliserite dayanır.',
+  };
+
+  function needsFasting(markerId){ return !!FASTING_MARKERS[markerId]; }
+
+  /* Bir olcumun hangi oturumdan geldigini bulup o oturumun aclik
+     durumunu dondurur. Oturum yoksa 'unknown'. */
+  function fastingOf(markerId){
+    const labs = SP.S.labs || [];
+    for(let i = labs.length - 1; i >= 0; i--){
+      const c = labs[i].values && labs[i].values[markerId];
+      if(c && c.v != null) return labs[i].fasting || 'unknown';
+    }
+    return 'unknown';
+  }
+
+  /* Ekranlarin sordugu tek soru: bu olcum yorumlanabilir mi? */
+  function interpretable(markerId, fastingState){
+    if(!needsFasting(markerId)) return { ok:true, state:'na' };
+    const st = fastingState || fastingOf(markerId);
+    if(st === 'no'){
+      return { ok:false, state:'no',
+        label:'tok ölçüm',
+        note:'Bu değer tok karnına alınmış. ' + FASTING_MARKERS[markerId]
+          + ' Tok ölçümde durum etiketi basılmaz; sayı doğru olabilir ama '
+          + 'gösterdiği şey değildir.' };
+    }
+    if(st === 'unknown'){
+      return { ok:true, state:'unknown',
+        label:'açlık bilinmiyor',
+        note:'Bu oturumda açlık durumu kaydedilmemiş. ' + FASTING_MARKERS[markerId]
+          + ' Değer aç karnına alınmış varsayılarak yorumlandı.' };
+    }
+    return { ok:true, state:'yes' };
+  }
+
   /* ==================================================== kisisel taban cizgi
 
      Referans araligi NUFUSUN, hedef bandi SISTEMIN; ikisi de senin
@@ -7861,6 +8151,7 @@ SP.Bio = (function(){
 
   return {
     STATUS, MIN_POINTS, BASELINE_MIN,
+    FASTING_MARKERS, needsFasting, fastingOf, interpretable,
     refFor, statusOf, statusNote,
     trendOf, trendVerdict,
     baselineOf, meaningfulChange,
@@ -8677,6 +8968,163 @@ SP.Move = (function(){
     progressionCheck, patternBalance, loadSeries,
     ADVANCE_SESSIONS, ADVANCE_WINDOW,
   };
+})();
+
+/* ==== js/core/meds.js ==== */
+/* ILAC VE TAKVIYE KURAL MOTORU.
+
+   Tek isi var: bir olcumdeki degisimin SEBEBINI aramak. Sistem
+   «ferritin gercekten yukseldi» diyebiliyordu ama neden yukseldigini
+   bilmiyordu; uc aydir demir hapi icen biri icin bu bir basari degil,
+   beklenen bir sonuctur.
+
+   Bu modul hicbir sayi uretmez ve hicbir doz onermez. Yalnizca su iki
+   cumleyi kurar:
+
+     «Bu olcumu etkileyen bir sey kullaniyorsun.»
+     «Bu degisim, baslattigin seyin beklenen yonunde.»
+
+   Ikincisi kritik: beklenen yonde bir degisim HABER DEGILDIR. Sistem
+   onu «basari» diye sunmaz, «beklenen» diye isaretler. Ters yonde bir
+   degisim ise haberdir ve oyle yazilir. */
+
+window.SP = window.SP || {};
+
+SP.Meds = (function(){
+  const U = SP.U;
+
+  /* Bir kayit o tarihte etkin mi? Bitis yoksa hala kullaniliyor demektir. */
+  function activeOn(rec, dateISO){
+    if(!rec || !rec.startDate) return false;
+    if(rec.startDate > dateISO) return false;
+    if(rec.endDate && rec.endDate < dateISO) return false;
+    return true;
+  }
+
+  function all(){ return (SP.S.meds || []).slice(); }
+
+  function activeList(dateISO){
+    const d = dateISO || U.todayISO();
+    return all().filter(r => activeOn(r, d));
+  }
+
+  function kindOf(rec){
+    return SP.MED_BY_ID[rec && rec.kindId] || SP.MED_BY_ID.diger;
+  }
+
+  /* Bu olcumu, verilen tarihte etkileyen kayitlar. */
+  function affecting(markerId, dateISO){
+    const d = dateISO || U.todayISO();
+    const out = [];
+    all().forEach(rec => {
+      if(!activeOn(rec, d)) return;
+      const k = kindOf(rec);
+      const a = k.affects.find(x => x.id === markerId);
+      if(a) out.push({ rec, kind:k, dir:a.dir });
+    });
+    return out;
+  }
+
+  /* Iki tarih ARASINDA baslayan ya da biten kayitlar — karsilastirma
+     ekraninin «bu degisim neye denk geliyor» sorusu bundan cevaplanir. */
+  function changedBetween(markerId, fromISO, toISO){
+    const out = [];
+    all().forEach(rec => {
+      const k = kindOf(rec);
+      const a = k.affects.find(x => x.id === markerId);
+      if(!a) return;
+      if(rec.startDate && rec.startDate > fromISO && rec.startDate <= toISO)
+        out.push({ rec, kind:k, dir:a.dir, event:'start' });
+      else if(rec.endDate && rec.endDate > fromISO && rec.endDate <= toISO)
+        out.push({ rec, kind:k, dir:a.dir, event:'stop' });
+    });
+    return out;
+  }
+
+  /* Olculen degisim, baslatilan seyin beklenen yonunde mi?
+
+     Donen `verdict`:
+       'expected'    degisim beklenen yonde — HABER DEGIL
+       'contrary'    beklenenin tersine — haber
+       'none'        eslesen bir kayit yok */
+  function explainChange(markerId, fromISO, toISO, diff){
+    const olaylar = changedBetween(markerId, fromISO, toISO);
+    if(!olaylar.length) return { verdict:'none', events:[] };
+
+    /* Birakilan bir sey, beklenen yonun TERSINI uretir. */
+    const beklenen = olaylar.map(o => {
+      const yon = o.event === 'stop'
+        ? (o.dir === 'up' ? 'down' : 'up')
+        : o.dir;
+      return Object.assign({}, o, { beklenenYon:yon });
+    });
+
+    const gozlenen = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
+    const uyan = beklenen.filter(o => o.beklenenYon === gozlenen);
+
+    return {
+      verdict:uyan.length ? 'expected' : 'contrary',
+      events:beklenen,
+      matching:uyan,
+      observed:gozlenen,
+    };
+  }
+
+  /* Ekranlarin dogrudan bastigi cumle. */
+  function changeNote(markerId, fromISO, toISO, diff){
+    const e = explainChange(markerId, fromISO, toISO, diff);
+    if(e.verdict === 'none') return null;
+    const adlar = (e.matching.length ? e.matching : e.events)
+      .map(o => o.kind.name + (o.event === 'stop' ? ' (bırakıldı)' : ''));
+    const liste = adlar.join(', ');
+    if(e.verdict === 'expected'){
+      return { tone:'info', expected:true,
+        text:'Bu değişim iki ölçüm arasında başlayan ' + liste + ' ile aynı yönde. '
+          + 'Beklenen bir sonuç; beslenmenin ya da yaşam düzeninin başarısı '
+          + 'olarak okunmamalı.' };
+    }
+    return { tone:'warn', expected:false,
+      text:liste + ' bu ölçümü ters yönde değiştirmesi beklenirdi; ölçülen değişim '
+        + 'beklenenin tersine. Bu bir bulgudur.' };
+  }
+
+  /* Etkin kullanimlarin olcum sayfasindaki uyarisi. */
+  function markerNote(markerId, dateISO){
+    const et = affecting(markerId, dateISO);
+    if(!et.length) return null;
+    const adlar = et.map(o => o.kind.name).join(', ');
+    const yonler = [...new Set(et.map(o => o.dir))];
+    const yon = yonler.length === 1
+      ? (yonler[0] === 'up' ? 'yükseltmesi' : 'düşürmesi')
+      : 'değiştirmesi';
+    return {
+      tone:'info',
+      title:'Bu ölçümü etkileyen bir şey kullanıyorsun',
+      text:adlar + ' bu ölçümü ' + yon + ' beklenir. Değeri yorumlarken bu '
+        + 'hesaba katılmalı; sistem doz önermez, yalnızca hatırlatır.',
+      kinds:et.map(o => o.kind.id),
+    };
+  }
+
+  /* Kreatin gibi bazi kayitlar bir olcumu YORUMLANAMAZ kilar: olcum
+     dogru, ama gosterdigi sey degil. Bunlari ayri isaretleriz. */
+  const BOZAN = {
+    egfr:['kreatin'],
+    creat:['kreatin'],
+  };
+
+  function distorts(markerId, dateISO){
+    const liste = BOZAN[markerId];
+    if(!liste) return null;
+    const et = affecting(markerId, dateISO).filter(o => liste.indexOf(o.kind.id) >= 0);
+    if(!et.length) return null;
+    return { kinds:et.map(o => o.kind.name),
+      text:et.map(o => o.kind.name).join(', ') + ' kullanırken bu ölçüm böbrek '
+        + 'fonksiyonunu göstermez; kas kütlesinden gelen kreatin değeri yükseltir.' };
+  }
+
+  return { activeOn, all, activeList, kindOf, affecting, changedBetween,
+    explainChange, changeNote, markerNote, distorts, BOZAN };
 })();
 
 /* ==== js/core/money.js ==== */
@@ -12443,6 +12891,16 @@ SP.Office = (function(){
       /* Kerem'in brifingine ORUNTULER de girer: tek olcum yaniltir.
          Model bunlari uretmez, yalnizca brifingde gorup cumleye doker. */
       patterns:SP.Bio.patterns().map(p2 => ({ id:p2.id, title:p2.title, text:p2.text })),
+      /* Kerem bir degisimin SEBEBINI arayabilmeli: ne kullanildigini ve
+         kanin ac karnina alinip alinmadigini bilmeden yorum eksiktir. */
+      meds:SP.Meds.activeList().map(r => ({
+        name:r.name || SP.Meds.kindOf(r).name,
+        kind:SP.Meds.kindOf(r).name,
+        since:r.startDate,
+        affects:SP.Meds.kindOf(r).affects.map(a => a.id),
+      })),
+      fasting:SP.S.labs.length
+        ? (SP.S.labs[SP.S.labs.length - 1].fasting || 'unknown') : null,
       overdue:SP.Bio.overdue().map(o => ({ panel:o.panel.name, days:o.days, note:o.note })),
       lastLab:SP.S.labs.length ? SP.S.labs[SP.S.labs.length - 1].date : null,
     };
@@ -12566,6 +13024,16 @@ SP.Office = (function(){
          once o yazilir. */
       if(d.patterns && d.patterns.length){
         lines.push(d.patterns[0].title + '.');
+      }
+      /* Tok olcum bir uyaridir, dipnot degil: sirali cumlelerin
+         basinda durur. */
+      if(d.fasting === 'no'){
+        lines.push('Son oturum tok karnına alınmış; açlık glukozu, insülin ve '
+          + 'trigliserit yorumlanmadı.');
+      }
+      if(d.meds && d.meds.length){
+        lines.push('Kullanılanlar: ' + d.meds.map(m => m.name).join(', ')
+          + '. Bir ölçümdeki değişim bunlardan biriyle aynı yönde olabilir.');
       }
       if(d.overdue.length){
         const pn = d.overdue[0].panel;
@@ -12761,6 +13229,15 @@ SP.Office = (function(){
     });
     if(eski.length > 3){
       add('lab', 'gap', (eski.length - 3) + ' panel daha yarım yıldan uzun süredir tazelenmedi.');
+    }
+
+    /* Etkin bir ilac varsa Kerem'in masasinda tek satirlik hatirlatma
+       durur: olcum yorumlanirken bu hesaba katilmali. */
+    const ilaclar = SP.Meds.activeList();
+    if(ilaclar.length){
+      add('lab', 'info', ilaclar.length + ' ilaç/takviye etkin: '
+        + ilaclar.slice(0, 3).map(r => r.name || SP.Meds.kindOf(r).name).join(', ')
+        + (ilaclar.length > 3 ? ' ve ' + (ilaclar.length - 3) + ' tanesi daha' : '') + '.');
     }
 
     const g = SP.Nutri.gaps(7);
@@ -13667,6 +14144,7 @@ SP.Screens.labs = (function(){
     { id:'giris',  label:'Test gir',     icon:'flask' },
     { id:'gecmis', label:'Geçmiş',       icon:'clock' },
     { id:'kiyas',  label:'Karşılaştır',  icon:'chart' },
+    { id:'ilac',   label:'İlaç',         icon:'flask' },
     { id:'trend',  label:'Eğilim',       icon:'chart' },
   ];
 
@@ -13676,11 +14154,18 @@ SP.Screens.labs = (function(){
 
   /* Girise yazilan ama henuz kaydedilmemis degerler. Sekme degistirip
      geri donunce kaybolmasin diye ekranin disinda tutulur. */
-  let draft = { date:U.todayISO(), lab:'', values:{} };
+  let draft = { date:U.todayISO(), lab:'', values:{}, fasting:'unknown', time:'' };
+
+  /* Alt sayfadaki ilaç kaydı — kaydedilene kadar depoya hiçbir şey yazılmaz. */
+  let medDraft = null;
 
   function tabs(){
     const items = TABS.map(t => {
       if(t.id === 'gecmis' && S.labs.length) return Object.assign({}, t, { count:S.labs.length });
+      if(t.id === 'ilac'){
+        const n = SP.Meds.activeList().length;
+        if(n) return Object.assign({}, t, { count:n });
+      }
       if(t.id === 'kiyas' && S.labs.length >= 2){
         /* Rozette oturum sayısı değil GERÇEK DEĞİŞİM sayısı durur:
            sekmenin orada olması haber değil, orada iş olması haber. */
@@ -13774,6 +14259,10 @@ SP.Screens.labs = (function(){
             body:'Bu süzgeçle eşleşen ölçüm yok.' }))}
           ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
             const tr = SP.Bio.trendOf(r.marker.id);
+            /* Tok karnına alınmış bir ölçüme durum etiketi basılmaz:
+               sayı doğru olabilir ama gösterdiği şey değildir. */
+            const yorum = SP.Bio.interpretable(r.marker.id);
+            const ilac = SP.Meds.affecting(r.marker.id, r.at).length > 0;
             return html`
               <button class="resrow" data-act="open-marker" data-id="${r.marker.id}">
                 <span class="resrow__dot resrow__dot--${r.status.tone}" aria-hidden="true"></span>
@@ -13785,7 +14274,11 @@ SP.Screens.labs = (function(){
                 <span class="resrow__val num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
                 <span class="resrow__bar">${when(r.ref,
                   () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit, { bare:true })))}</span>
-                <span class="resrow__status">${K.Badge({ label:r.status.label, tone:r.status.tone })}</span>
+                <span class="resrow__status">${when(yorum.ok,
+                  () => K.Badge({ label:r.status.label, tone:r.status.tone }),
+                  () => K.Badge({ label:yorum.label, tone:'muted', icon:false }))}
+                  ${when(ilac, () => html`<span class="resrow__ilac"
+                    title="Bu ölçümü etkileyen bir şey kullanıyorsun">℞</span>`)}</span>
                 <span class="resrow__trend tiny dim">${when(tr.ok,
                   () => html`${raw(UI.trend(tr.dir))}`)} ${r.at ? U.fmtShort(r.at) : ''}</span>
               </button>`;
@@ -13864,13 +14357,33 @@ SP.Screens.labs = (function(){
         note:'Aynı tarihe ikinci kez girilen değerler o oturumun üstüne yazılır.',
         action:K.Button({ label:'Rapor yapıştır', icon:'flask', tone:'primary',
           act:'open-paste' }),
-        body:html`<div class="pair">
-          ${K.Field({ label:'Test tarihi',
-            input:K.Input({ id:'entry-date', type:'date', value:draft.date, change:'entry-date' }) })}
-          ${K.Field({ label:'Laboratuvar', hint:'isteğe bağlı',
-            input:K.Input({ id:'entry-lab', value:draft.lab, placeholder:'Hangi laboratuvar?',
-              change:'entry-lab' }) })}
-        </div>`,
+        body:html`
+          <div class="pair">
+            ${K.Field({ label:'Test tarihi',
+              input:K.Input({ id:'entry-date', type:'date', value:draft.date, change:'entry-date' }) })}
+            ${K.Field({ label:'Laboratuvar', hint:'isteğe bağlı',
+              input:K.Input({ id:'entry-lab', value:draft.lab, placeholder:'Hangi laboratuvar?',
+                change:'entry-lab' }) })}
+          </div>
+          <div class="pair mt-12">
+            ${K.Field({ label:'Kan aç karnına mı alındı?',
+              hint:'glukoz, insülin ve trigliserit buna bağlı',
+              input:K.Select({ id:'entry-fasting', value:draft.fasting, change:'entry-fasting',
+                options:[
+                  { value:'unknown', label:'Bilmiyorum' },
+                  { value:'yes', label:'Evet — aç karnına' },
+                  { value:'no', label:'Hayır — tok' }] }) })}
+            ${K.Field({ label:'Saat', hint:'isteğe bağlı',
+              input:K.Input({ id:'entry-time', type:'time', value:draft.time,
+                change:'entry-time' }) })}
+          </div>
+          ${when(draft.fasting === 'no', () => K.Notice({ tone:'warn', class:'mt-10',
+            title:'Tok ölçüm:', body:'Açlık glukozu, insülin, trigliserit ve onlardan '
+              + 'hesaplanan TyG, TG/HDL ve LDL için durum etiketi basılmayacak. '
+              + 'Sayılar kaydedilir; yorum yapılmaz.' }))}
+          ${when(draft.fasting === 'unknown', () => K.Notice({ tone:'info', class:'mt-10',
+            body:'Bilinmiyorsa değerler aç karnına alınmış varsayılır ve bu ölçüm '
+              + 'sayfasında açıkça yazılır. Sistem sessizce varsaymaz.' }))}`,
       }),
 
       K.Entry({
@@ -13970,6 +14483,9 @@ SP.Screens.labs = (function(){
       ? SP.Bio.meaningfulChange(id, series[series.length - 2].v, last.v)
       : null;
     const pats = SP.Bio.patterns().filter(p2 => p2.markers.indexOf(id) >= 0);
+    const yorum = SP.Bio.interpretable(id);
+    const ilacNotu = SP.Meds.markerNote(id, last ? last.date : null);
+    const bozan = SP.Meds.distorts(id, last ? last.date : null);
 
     return String(K.Stack([
       when(last, () => html`<div class="markerrow">
@@ -13987,6 +14503,18 @@ SP.Screens.labs = (function(){
         ['Eğilim', tr.ok ? vd.text : tr.note],
         ['Ölçüm sayısı', String(series.length)],
       ] }),
+      /* İLAÇ VE AÇLIK — değeri yorumlamadan önce okunması gerekenler.
+         Kişisel taban çizginin üstünde durur çünkü «gerçekten değişti»
+         demeden önce «neden değişti» sorulmalı. */
+      when(ilacNotu, () => K.Notice({ tone:ilacNotu.tone, title:ilacNotu.title + ':',
+        body:ilacNotu.text })),
+      when(bozan, () => K.Notice({ tone:'warn', title:'Bu ölçüm şu an yorumlanmaz:',
+        body:bozan.text })),
+      when(yorum.state === 'no' || yorum.state === 'unknown', () => K.Notice({
+        tone:yorum.state === 'no' ? 'warn' : 'info',
+        title:yorum.state === 'no' ? 'Tok ölçüm:' : 'Açlık durumu bilinmiyor:',
+        body:yorum.note })),
+
       /* KİŞİSEL TABAN ÇİZGİ. Referans aralığı nüfusun, hedef bandı
          sistemin; bu ikisi de senin değil. Üç ölçümden sonra kendi
          ortalaman ve saçılman çıkar ve bir değişimin gerçek mi gürültü
@@ -14048,6 +14576,8 @@ SP.Screens.labs = (function(){
     const pats = SP.Bio.patterns(p2);
     const flags = M.openFlags();
     const ov = SP.Bio.overdue();
+    const ilaclar = SP.Meds.activeList();
+    const acDurum = last ? (last.fasting || 'unknown') : 'unknown';
 
     const hucre = (b, cell) => {
       if(!cell || cell.v == null) return null;
@@ -14097,7 +14627,21 @@ SP.Screens.labs = (function(){
 
       ${when(last, () => html`<p class="printdoc__meta">Son test oturumu:
         <b>${U.fmtDate(last.date)}</b>${when(last.lab, () => html` · ${last.lab}`)} ·
+        açlık: <b>${FASTING_LABEL[acDurum] || acDurum}</b> ·
         ${S.labs.length} oturum kayıtlı</p>`)}
+      ${when(acDurum === 'no', () => html`<p class="printdoc__limit">
+        <b>Son oturum tok karnına alınmıştır.</b> Açlık glukozu, insülin,
+        trigliserit ve bunlardan hesaplanan değerler bu tabloda durum etiketi
+        taşımaz.</p>`)}
+
+      ${when(ilaclar.length, () => html`
+        <h3 class="printdoc__h">Kullanılan ilaç ve takviyeler</h3>
+        <div class="tabloKap">${K.Table({ tight:true,
+          headers:['Ad', 'Tür', 'Doz', 'Başlangıç'],
+          rows:ilaclar.map(r => [r.name || SP.Meds.kindOf(r).name,
+            SP.Meds.kindOf(r).name, r.dose || '—', U.fmtDate(r.startDate)]) })}</div>
+        <p class="printdoc__note">Bu liste kullanıcının kendi girdisidir; sistem doz
+          önermez ve ilaç kararı vermez. Ölçüm yorumlarında bu kayıtlar hesaba katılır.</p>`)}
 
       ${when(flags.length, () => html`
         <h3 class="printdoc__h">Açık kırmızı bayraklar</h3>
@@ -14127,6 +14671,99 @@ SP.Screens.labs = (function(){
         Değerler kullanıcının kendi girdiği laboratuvar sonuçlarıdır; sistem
         ölçüm yapmaz. Teşhis ve tedavide karar hekimindir.</p>
     </div>`);
+  }
+
+  /* ------------------------------------------------------ ilaç ve takviye
+
+     Sistem doz önermez, başlatmaz, kestirmez. Yalnızca ne kullanıldığını
+     kaydeder ki bir ölçümdeki değişimin sebebi aranabilsin.
+
+     Serbest metinden tür tahmin edilmez: kullanıcı bir tür seçer ve etki
+     eşlemesi o türden gelir. «Ferrosanol» yazan bir kutudan demir çıkarımı
+     yapmak, uydurmaktır. */
+
+  function medsView(){
+    const hepsi = SP.Meds.all();
+    const etkin = SP.Meds.activeList();
+    const gecmis = hepsi.filter(r => etkin.indexOf(r) < 0);
+
+    const satir = (rec, aktif) => {
+      const k = SP.Meds.kindOf(rec);
+      const olcumler = k.affects
+        .map(a => SP.BIO_BY_ID[a.id] ? SP.BIO_BY_ID[a.id].name : null)
+        .filter(Boolean);
+      return html`<div class="${cls('medrow', !aktif && 'is-past')}">
+        <div class="medrow__ana">
+          <b>${rec.name || k.name}</b>
+          ${when(rec.name, () => html`<span class="tiny dim"> · ${k.name}</span>`)}
+          ${when(rec.dose, () => html`<span class="tiny dim"> · ${rec.dose}</span>`)}
+          <div class="tiny dim">${U.fmtDate(rec.startDate)}
+            ${rec.endDate ? '→ ' + U.fmtDate(rec.endDate) : '→ sürüyor'}</div>
+          ${when(olcumler.length, () => html`<div class="chips mt-6">${map(olcumler, n => html`
+            <span class="chip chip--muted tiny">${n}</span>`)}</div>`)}
+          ${when(rec.note, () => html`<p class="tiny dim mt-6">${rec.note}</p>`)}
+        </div>
+        <div class="medrow__ey">
+          ${when(aktif, () => K.Button({ label:'Bıraktım', size:'sm',
+            act:'stop-med', data:{ 'data-id':rec.id } }))}
+          ${K.Button({ label:'Düzelt', size:'sm', act:'edit-med', data:{ 'data-id':rec.id } })}
+          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
+            act:'del-med', data:{ 'data-id':rec.id } })}
+        </div>
+      </div>`;
+    };
+
+    return K.Ledger([
+      K.Entry({
+        label:'Kullandıkların', meta:etkin.length + ' etkin',
+        note:'Bir hap ölçümü değiştirir: demir takviyesi ferritini yükseltir, '
+          + 'statin LDL\'yi düşürür, mide ilacı B12 emilimini bozar. Kayıt '
+          + 'olmadan sistem «değişti» der ama sebebini bilemez.',
+        action:K.Button({ label:'Ekle', tone:'primary', act:'add-med' }),
+        body:html`
+          ${when(!etkin.length, () => P.empty('Şu an kullandığın bir şey kayıtlı değil.'))}
+          ${when(etkin.length, () => html`<div class="medlist">${map(etkin, r => satir(r, true))}</div>`)}`,
+      }),
+
+      when(gecmis.length, () => K.Entry({
+        label:'Bıraktıkların', meta:gecmis.length + ' kayıt',
+        note:'Bırakmak silmek değildir: bırakılmış bir ilaç geçmiş bir ölçümü '
+          + 'hâlâ açıklar. Karşılaştırma ekranı bu kayıtları da okur.',
+        body:html`<div class="medlist">${map(gecmis, r => satir(r, false))}</div>`,
+      })),
+
+      K.Entry({
+        label:'Sınır', meta:'ne yapar, ne yapmaz',
+        body:K.Notice({ tone:'warn', title:'Sistem doz önermez.',
+          body:'Burada tutulan kayıt yalnızca ÖLÇÜM YORUMU içindir: bir değerdeki '
+            + 'değişimin sebebini aramak için. Sistem ilaç başlatmaz, kestirmez, '
+            + 'dozunu değiştirmez ve bunları önermez. İlaç kararları hekimindir.' }),
+      }),
+    ]);
+  }
+
+  function medSheetBody(rec){
+    const k = SP.Meds.kindOf(rec);
+    return String(K.Stack([
+      K.Field({ label:'Tür', hint:'etki eşlemesi buradan gelir',
+        input:K.Select({ id:'md-kind', value:rec.kindId, change:'md-kind',
+          options:SP.MED_GROUPS.reduce((acc, g) => acc.concat(
+            SP.MED_KINDS.filter(x => x.group === g.id)
+              .map(x => ({ value:x.id, label:g.name + ' — ' + x.name }))), []) }) }),
+      K.Notice({ tone:'info', class:'mt-0', body:k.note }),
+      K.Field({ label:'Adı', hint:'kutunun üstündeki ad — isteğe bağlı',
+        input:K.Input({ id:'md-name', value:rec.name, placeholder:k.name }) }),
+      K.Field({ label:'Doz', hint:'kendi notun; sistem doz önermez',
+        input:K.Input({ id:'md-dose', value:rec.dose, placeholder:'örn. günde 1×' }) }),
+      html`<div class="cols-2">
+        ${K.Field({ label:'Başlangıç',
+          input:K.Input({ id:'md-start', type:'date', value:rec.startDate }) })}
+        ${K.Field({ label:'Bitiş', hint:'sürüyorsa boş',
+          input:K.Input({ id:'md-end', type:'date', value:rec.endDate || '' }) })}
+      </div>`,
+      K.Field({ label:'Not',
+        input:K.Input({ id:'md-note', value:rec.note, placeholder:'Neden başlandı?' }) }),
+    ]));
   }
 
   /* -------------------------------------------------------- karşılaştırma
@@ -14176,6 +14813,13 @@ SP.Screens.labs = (function(){
         row.kind = 'diff';
         row.change = SP.Bio.meaningfulChange(m.id, va, vb);
         row.statusTo = SP.Bio.statusOf(m.id, vb);
+        /* Açlık kuralı burada da geçerli: tok karnına alınmış bir
+           ölçüme durum etiketi basılmaz. Kural bir ekrana özgü olamaz. */
+        row.interp = SP.Bio.interpretable(m.id, recB.fasting || 'unknown');
+        /* İki ölçüm arasında başlayan bir ilaç bu değişimi açıklıyor
+           olabilir. Beklenen yöndeki bir değişim HABER DEĞİLDİR ve
+           «başarı» diye sunulmamalıdır. */
+        row.medNote = SP.Meds.changeNote(m.id, recA.date, recB.date, vb - va);
       }
       out.push(row);
     });
@@ -14219,6 +14863,7 @@ SP.Screens.labs = (function(){
 
     const rows = compareRows(recA, recB);
     const gercek = rows.filter(r => r.kind === 'diff' && r.change && r.change.meaningful);
+    const aciklanan = gercek.filter(r => r.medNote && r.medNote.expected);
     const gun = U.diffDays(recA.date, recB.date);
 
     return K.Ledger([
@@ -14239,7 +14884,16 @@ SP.Screens.labs = (function(){
               <span class="sidestat__k">iki oturum arası</span></div>
             <div class="sidestat"><span class="sidestat__v">${gercek.length}</span>
               <span class="sidestat__k">gerçek değişim</span></div>
+            ${when(aciklanan.length, () => html`<div class="sidestat">
+              <span class="sidestat__v">${aciklanan.length}</span>
+              <span class="sidestat__k">ilaçla açıklanıyor</span></div>`)}
           </div>
+          ${when(aciklanan.length, () => K.Notice({ tone:'info', class:'mb-16',
+            title:'Bu değişimlerin bir kısmının sebebi belli:',
+            body:aciklanan.length + ' ölçümdeki değişim, iki oturum arasında '
+              + 'başlayan bir ilaç ya da takviyenin beklenen yönünde. Beklenen bir '
+              + 'sonuç haber değildir; beslenmenin ya da yaşam düzeninin başarısı '
+              + 'olarak okunmamalı.' }))}
           ${when(!rows.length, () => P.empty('İki oturumda da ortak ölçüm yok.'))}
           ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
             const c = r.change;
@@ -14268,11 +14922,14 @@ SP.Screens.labs = (function(){
               <span class="${cls('cmprow__delta', 'is-' + ton)}">${ok}
                 ${(c.diff > 0 ? '+' : '') + U.fmtNum(c.diff)}${when(c.pct != null,
                   () => html` <span class="tiny">%${U.fmtNum(Math.round(Math.abs(c.pct)))}</span>`)}</span>
-              <span class="cmprow__note tiny dim">${c.ok
+              <span class="cmprow__note tiny dim">${r.medNote
+                ? (r.medNote.expected ? 'beklenen — ' : 'ters yönde — ')
+                : ''}${c.ok
                 ? (c.meaningful ? 'gerçek değişim' : 'gürültü sayılır')
                 : 'eşik yok'}</span>
-              <span class="cmprow__status">${K.Badge({ label:r.statusTo.label,
-                tone:r.statusTo.tone })}</span>
+              <span class="cmprow__status">${when(!r.interp || r.interp.ok,
+                () => K.Badge({ label:r.statusTo.label, tone:r.statusTo.tone }),
+                () => K.Badge({ label:r.interp.label, tone:'muted', icon:false }))}</span>
             </button>`;
           })}</div>`)}`,
       }),
@@ -14320,6 +14977,8 @@ SP.Screens.labs = (function(){
     })]);
   }
 
+  const FASTING_LABEL = { yes:'aç karnına', no:'tok', unknown:'bilinmiyor' };
+
   function labSheetBody(l){
     const rows = Object.keys(l.values).map(id => {
       const b = SP.BIO_BY_ID[id];
@@ -14329,7 +14988,16 @@ SP.Screens.labs = (function(){
       return [b.name, html`<b class="num">${U.fmtNum(cell.v)}</b> <span class="tiny dim">${b.unit}</span>`,
         K.Badge({ label:st.label, tone:st.tone }), P.cert(cell.cert)];
     }).filter(Boolean);
+    const ac = l.fasting || 'unknown';
     return String(K.Stack([
+      K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
+        ['Tarih', U.fmtDate(l.date) + (l.time ? ' · ' + l.time : '')],
+        ['Laboratuvar', l.lab || '—'],
+        ['Açlık durumu', FASTING_LABEL[ac] || ac],
+      ] }),
+      when(ac === 'no', () => K.Notice({ tone:'warn', title:'Tok ölçüm:',
+        body:'Bu oturumdaki açlık glukozu, insülin, trigliserit ve onlardan '
+          + 'hesaplanan değerler yorumlanmaz.' })),
       K.Table({ tight:true, headers:['Ölçüm', { label:'Değer', num:true }, 'Durum', 'Kaynak'], rows }),
       when(l.note, () => html`<p class="small">${l.note}</p>`),
     ]));
@@ -14409,6 +15077,7 @@ SP.Screens.labs = (function(){
       ${tab === 'giris' ? entryView()
         : tab === 'gecmis' ? historyView()
         : tab === 'kiyas' ? compareView()
+        : tab === 'ilac' ? medsView()
         : tab === 'trend' ? trendView()
         : resultsView()}
       ${when(tab === 'sonuc', () => html`<div class="mt-24">
@@ -14427,6 +15096,58 @@ SP.Screens.labs = (function(){
         footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
           ${K.Button({ label:'Eğilimi aç', tone:'primary', act:'goto-trend', data:{ 'data-id':b.id } })}`) });
     },
+    /* ---- ilaç ve takviye ---- */
+    async 'add-med'(){
+      const rec = M.newMed();
+      UI.sheet({ title:'İlaç ya da takviye ekle',
+        subtitle:'sistem doz önermez, yalnızca kaydeder', wide:true,
+        body:medSheetBody(rec),
+        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+          ${K.Button({ label:'Kaydet', tone:'primary', act:'save-med',
+            data:{ 'data-id':rec.id } })}`) });
+      medDraft = rec;
+    },
+    async 'edit-med'(el){
+      const rec = SP.Meds.all().find(x => x.id === el.dataset.id);
+      if(!rec) return;
+      medDraft = JSON.parse(JSON.stringify(rec));
+      UI.sheet({ title:'Kaydı düzelt', subtitle:SP.Meds.kindOf(rec).name, wide:true,
+        body:medSheetBody(medDraft),
+        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+          ${K.Button({ label:'Kaydet', tone:'primary', act:'save-med',
+            data:{ 'data-id':rec.id } })}`) });
+    },
+    async 'save-med'(el){
+      const v = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+      const rec = medDraft && medDraft.id === el.dataset.id ? medDraft : M.newMed();
+      rec.kindId = v('md-kind') || 'diger';
+      rec.name = v('md-name');
+      rec.dose = v('md-dose');
+      rec.startDate = v('md-start') || U.todayISO();
+      rec.endDate = v('md-end') || null;
+      rec.note = v('md-note');
+      await M.saveMed(rec);
+      medDraft = null;
+      UI.closeSheet();
+      UI.toast((rec.name || SP.Meds.kindOf(rec).name) + ' kaydedildi');
+      SP.App.render();
+    },
+    async 'stop-med'(el){
+      await M.stopMed(el.dataset.id, U.todayISO());
+      UI.toast('Bugün bırakıldı olarak işaretlendi');
+      SP.App.render();
+    },
+    /* Onay kâğıdı yerine geri alma — silmek bir tuşla geri gelir. */
+    async 'del-med'(el){
+      const rec = SP.Meds.all().find(x => x.id === el.dataset.id);
+      if(!rec) return;
+      const kopya = JSON.parse(JSON.stringify(rec));
+      await M.deleteMed(rec.id);
+      S.ui.undo = { restore:() => M.saveMed(kopya) };
+      UI.toast((kopya.name || SP.Meds.kindOf(kopya).name) + ' silindi', { undo:true });
+      SP.App.render();
+    },
+
     async 'open-doctor'(){
       UI.sheet({ title:'Hekime götürülecek özet',
         subtitle:'tek sayfa · yazdırılabilir', wide:true,
@@ -14474,13 +15195,15 @@ SP.Screens.labs = (function(){
       const existing = S.labs.find(l => l.date === draft.date);
       const rec = existing || M.newLab(draft.date);
       if(draft.lab) rec.lab = draft.lab;
+      rec.fasting = draft.fasting || 'unknown';
+      rec.time = draft.time || '';
       ids.forEach(id => {
         const b = SP.BIO_BY_ID[id];
         if(!b) return;
         rec.values[id] = { v:draft.values[id], cert:'measured', unit:b.unit };
       });
       await M.saveLab(rec);
-      draft = { date:U.todayISO(), lab:'', values:{} };
+      draft = { date:U.todayISO(), lab:'', values:{}, fasting:'unknown', time:'' };
       S.ui.labTab = 'sonuc';
       const flags = M.openFlags().filter(f => !f.ack);
       UI.toast(ids.length + ' değer kaydedildi'
@@ -14524,6 +15247,19 @@ SP.Screens.labs = (function(){
   };
 
   const change = {
+    /* Tür değişince o türün etki açıklaması da değişmeli: kullanıcı
+       neyin eşleneceğini seçtiği anda görsün. */
+    async 'md-kind'(){
+      if(!medDraft) return;
+      const e = document.getElementById('md-kind');
+      if(e) medDraft.kindId = e.value;
+      const kutu = document.querySelector('.sheet .notice--info');
+      if(kutu){
+        const g = kutu.querySelector('.notice__body') || kutu;
+        g.textContent = SP.Meds.kindOf(medDraft).note;
+      }
+    },
+
     /* Karşılaştırılacak iki oturum. Seçim anında uygulanır; onay
        düğmesi beklemez — bir görünüm tercihinin karşılığı görülerek
        anlaşılır. */
@@ -14548,6 +15284,8 @@ SP.Screens.labs = (function(){
     async 'pick-marker'(el){ S.ui.trendMarker = el.value; SP.App.render(); },
     async 'lab-query'(el){ S.ui.labQuery = el.value; SP.App.render(); },
     async 'entry-date'(el){ draft.date = el.value || U.todayISO(); },
+    async 'entry-fasting'(el){ draft.fasting = el.value || 'unknown'; SP.App.render(); },
+    async 'entry-time'(el){ draft.time = el.value || ''; },
     async 'entry-lab'(el){ draft.lab = el.value; },
     /* Her tuşta yeniden çizmez: değer taslakta durur, sayaç kaydetmede
        güncellenir. Uzun formda her hanede sayfayı çizmek yazmayı bozar. */

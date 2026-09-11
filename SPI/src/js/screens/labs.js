@@ -28,6 +28,7 @@ SP.Screens.labs = (function(){
     { id:'giris',  label:'Test gir',     icon:'flask' },
     { id:'gecmis', label:'Geçmiş',       icon:'clock' },
     { id:'kiyas',  label:'Karşılaştır',  icon:'chart' },
+    { id:'ilac',   label:'İlaç',         icon:'flask' },
     { id:'trend',  label:'Eğilim',       icon:'chart' },
   ];
 
@@ -37,11 +38,18 @@ SP.Screens.labs = (function(){
 
   /* Girise yazilan ama henuz kaydedilmemis degerler. Sekme degistirip
      geri donunce kaybolmasin diye ekranin disinda tutulur. */
-  let draft = { date:U.todayISO(), lab:'', values:{} };
+  let draft = { date:U.todayISO(), lab:'', values:{}, fasting:'unknown', time:'' };
+
+  /* Alt sayfadaki ilaç kaydı — kaydedilene kadar depoya hiçbir şey yazılmaz. */
+  let medDraft = null;
 
   function tabs(){
     const items = TABS.map(t => {
       if(t.id === 'gecmis' && S.labs.length) return Object.assign({}, t, { count:S.labs.length });
+      if(t.id === 'ilac'){
+        const n = SP.Meds.activeList().length;
+        if(n) return Object.assign({}, t, { count:n });
+      }
       if(t.id === 'kiyas' && S.labs.length >= 2){
         /* Rozette oturum sayısı değil GERÇEK DEĞİŞİM sayısı durur:
            sekmenin orada olması haber değil, orada iş olması haber. */
@@ -135,6 +143,10 @@ SP.Screens.labs = (function(){
             body:'Bu süzgeçle eşleşen ölçüm yok.' }))}
           ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
             const tr = SP.Bio.trendOf(r.marker.id);
+            /* Tok karnına alınmış bir ölçüme durum etiketi basılmaz:
+               sayı doğru olabilir ama gösterdiği şey değildir. */
+            const yorum = SP.Bio.interpretable(r.marker.id);
+            const ilac = SP.Meds.affecting(r.marker.id, r.at).length > 0;
             return html`
               <button class="resrow" data-act="open-marker" data-id="${r.marker.id}">
                 <span class="resrow__dot resrow__dot--${r.status.tone}" aria-hidden="true"></span>
@@ -146,7 +158,11 @@ SP.Screens.labs = (function(){
                 <span class="resrow__val num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
                 <span class="resrow__bar">${when(r.ref,
                   () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit, { bare:true })))}</span>
-                <span class="resrow__status">${K.Badge({ label:r.status.label, tone:r.status.tone })}</span>
+                <span class="resrow__status">${when(yorum.ok,
+                  () => K.Badge({ label:r.status.label, tone:r.status.tone }),
+                  () => K.Badge({ label:yorum.label, tone:'muted', icon:false }))}
+                  ${when(ilac, () => html`<span class="resrow__ilac"
+                    title="Bu ölçümü etkileyen bir şey kullanıyorsun">℞</span>`)}</span>
                 <span class="resrow__trend tiny dim">${when(tr.ok,
                   () => html`${raw(UI.trend(tr.dir))}`)} ${r.at ? U.fmtShort(r.at) : ''}</span>
               </button>`;
@@ -225,13 +241,33 @@ SP.Screens.labs = (function(){
         note:'Aynı tarihe ikinci kez girilen değerler o oturumun üstüne yazılır.',
         action:K.Button({ label:'Rapor yapıştır', icon:'flask', tone:'primary',
           act:'open-paste' }),
-        body:html`<div class="pair">
-          ${K.Field({ label:'Test tarihi',
-            input:K.Input({ id:'entry-date', type:'date', value:draft.date, change:'entry-date' }) })}
-          ${K.Field({ label:'Laboratuvar', hint:'isteğe bağlı',
-            input:K.Input({ id:'entry-lab', value:draft.lab, placeholder:'Hangi laboratuvar?',
-              change:'entry-lab' }) })}
-        </div>`,
+        body:html`
+          <div class="pair">
+            ${K.Field({ label:'Test tarihi',
+              input:K.Input({ id:'entry-date', type:'date', value:draft.date, change:'entry-date' }) })}
+            ${K.Field({ label:'Laboratuvar', hint:'isteğe bağlı',
+              input:K.Input({ id:'entry-lab', value:draft.lab, placeholder:'Hangi laboratuvar?',
+                change:'entry-lab' }) })}
+          </div>
+          <div class="pair mt-12">
+            ${K.Field({ label:'Kan aç karnına mı alındı?',
+              hint:'glukoz, insülin ve trigliserit buna bağlı',
+              input:K.Select({ id:'entry-fasting', value:draft.fasting, change:'entry-fasting',
+                options:[
+                  { value:'unknown', label:'Bilmiyorum' },
+                  { value:'yes', label:'Evet — aç karnına' },
+                  { value:'no', label:'Hayır — tok' }] }) })}
+            ${K.Field({ label:'Saat', hint:'isteğe bağlı',
+              input:K.Input({ id:'entry-time', type:'time', value:draft.time,
+                change:'entry-time' }) })}
+          </div>
+          ${when(draft.fasting === 'no', () => K.Notice({ tone:'warn', class:'mt-10',
+            title:'Tok ölçüm:', body:'Açlık glukozu, insülin, trigliserit ve onlardan '
+              + 'hesaplanan TyG, TG/HDL ve LDL için durum etiketi basılmayacak. '
+              + 'Sayılar kaydedilir; yorum yapılmaz.' }))}
+          ${when(draft.fasting === 'unknown', () => K.Notice({ tone:'info', class:'mt-10',
+            body:'Bilinmiyorsa değerler aç karnına alınmış varsayılır ve bu ölçüm '
+              + 'sayfasında açıkça yazılır. Sistem sessizce varsaymaz.' }))}`,
       }),
 
       K.Entry({
@@ -331,6 +367,9 @@ SP.Screens.labs = (function(){
       ? SP.Bio.meaningfulChange(id, series[series.length - 2].v, last.v)
       : null;
     const pats = SP.Bio.patterns().filter(p2 => p2.markers.indexOf(id) >= 0);
+    const yorum = SP.Bio.interpretable(id);
+    const ilacNotu = SP.Meds.markerNote(id, last ? last.date : null);
+    const bozan = SP.Meds.distorts(id, last ? last.date : null);
 
     return String(K.Stack([
       when(last, () => html`<div class="markerrow">
@@ -348,6 +387,18 @@ SP.Screens.labs = (function(){
         ['Eğilim', tr.ok ? vd.text : tr.note],
         ['Ölçüm sayısı', String(series.length)],
       ] }),
+      /* İLAÇ VE AÇLIK — değeri yorumlamadan önce okunması gerekenler.
+         Kişisel taban çizginin üstünde durur çünkü «gerçekten değişti»
+         demeden önce «neden değişti» sorulmalı. */
+      when(ilacNotu, () => K.Notice({ tone:ilacNotu.tone, title:ilacNotu.title + ':',
+        body:ilacNotu.text })),
+      when(bozan, () => K.Notice({ tone:'warn', title:'Bu ölçüm şu an yorumlanmaz:',
+        body:bozan.text })),
+      when(yorum.state === 'no' || yorum.state === 'unknown', () => K.Notice({
+        tone:yorum.state === 'no' ? 'warn' : 'info',
+        title:yorum.state === 'no' ? 'Tok ölçüm:' : 'Açlık durumu bilinmiyor:',
+        body:yorum.note })),
+
       /* KİŞİSEL TABAN ÇİZGİ. Referans aralığı nüfusun, hedef bandı
          sistemin; bu ikisi de senin değil. Üç ölçümden sonra kendi
          ortalaman ve saçılman çıkar ve bir değişimin gerçek mi gürültü
@@ -409,6 +460,8 @@ SP.Screens.labs = (function(){
     const pats = SP.Bio.patterns(p2);
     const flags = M.openFlags();
     const ov = SP.Bio.overdue();
+    const ilaclar = SP.Meds.activeList();
+    const acDurum = last ? (last.fasting || 'unknown') : 'unknown';
 
     const hucre = (b, cell) => {
       if(!cell || cell.v == null) return null;
@@ -458,7 +511,21 @@ SP.Screens.labs = (function(){
 
       ${when(last, () => html`<p class="printdoc__meta">Son test oturumu:
         <b>${U.fmtDate(last.date)}</b>${when(last.lab, () => html` · ${last.lab}`)} ·
+        açlık: <b>${FASTING_LABEL[acDurum] || acDurum}</b> ·
         ${S.labs.length} oturum kayıtlı</p>`)}
+      ${when(acDurum === 'no', () => html`<p class="printdoc__limit">
+        <b>Son oturum tok karnına alınmıştır.</b> Açlık glukozu, insülin,
+        trigliserit ve bunlardan hesaplanan değerler bu tabloda durum etiketi
+        taşımaz.</p>`)}
+
+      ${when(ilaclar.length, () => html`
+        <h3 class="printdoc__h">Kullanılan ilaç ve takviyeler</h3>
+        <div class="tabloKap">${K.Table({ tight:true,
+          headers:['Ad', 'Tür', 'Doz', 'Başlangıç'],
+          rows:ilaclar.map(r => [r.name || SP.Meds.kindOf(r).name,
+            SP.Meds.kindOf(r).name, r.dose || '—', U.fmtDate(r.startDate)]) })}</div>
+        <p class="printdoc__note">Bu liste kullanıcının kendi girdisidir; sistem doz
+          önermez ve ilaç kararı vermez. Ölçüm yorumlarında bu kayıtlar hesaba katılır.</p>`)}
 
       ${when(flags.length, () => html`
         <h3 class="printdoc__h">Açık kırmızı bayraklar</h3>
@@ -488,6 +555,99 @@ SP.Screens.labs = (function(){
         Değerler kullanıcının kendi girdiği laboratuvar sonuçlarıdır; sistem
         ölçüm yapmaz. Teşhis ve tedavide karar hekimindir.</p>
     </div>`);
+  }
+
+  /* ------------------------------------------------------ ilaç ve takviye
+
+     Sistem doz önermez, başlatmaz, kestirmez. Yalnızca ne kullanıldığını
+     kaydeder ki bir ölçümdeki değişimin sebebi aranabilsin.
+
+     Serbest metinden tür tahmin edilmez: kullanıcı bir tür seçer ve etki
+     eşlemesi o türden gelir. «Ferrosanol» yazan bir kutudan demir çıkarımı
+     yapmak, uydurmaktır. */
+
+  function medsView(){
+    const hepsi = SP.Meds.all();
+    const etkin = SP.Meds.activeList();
+    const gecmis = hepsi.filter(r => etkin.indexOf(r) < 0);
+
+    const satir = (rec, aktif) => {
+      const k = SP.Meds.kindOf(rec);
+      const olcumler = k.affects
+        .map(a => SP.BIO_BY_ID[a.id] ? SP.BIO_BY_ID[a.id].name : null)
+        .filter(Boolean);
+      return html`<div class="${cls('medrow', !aktif && 'is-past')}">
+        <div class="medrow__ana">
+          <b>${rec.name || k.name}</b>
+          ${when(rec.name, () => html`<span class="tiny dim"> · ${k.name}</span>`)}
+          ${when(rec.dose, () => html`<span class="tiny dim"> · ${rec.dose}</span>`)}
+          <div class="tiny dim">${U.fmtDate(rec.startDate)}
+            ${rec.endDate ? '→ ' + U.fmtDate(rec.endDate) : '→ sürüyor'}</div>
+          ${when(olcumler.length, () => html`<div class="chips mt-6">${map(olcumler, n => html`
+            <span class="chip chip--muted tiny">${n}</span>`)}</div>`)}
+          ${when(rec.note, () => html`<p class="tiny dim mt-6">${rec.note}</p>`)}
+        </div>
+        <div class="medrow__ey">
+          ${when(aktif, () => K.Button({ label:'Bıraktım', size:'sm',
+            act:'stop-med', data:{ 'data-id':rec.id } }))}
+          ${K.Button({ label:'Düzelt', size:'sm', act:'edit-med', data:{ 'data-id':rec.id } })}
+          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
+            act:'del-med', data:{ 'data-id':rec.id } })}
+        </div>
+      </div>`;
+    };
+
+    return K.Ledger([
+      K.Entry({
+        label:'Kullandıkların', meta:etkin.length + ' etkin',
+        note:'Bir hap ölçümü değiştirir: demir takviyesi ferritini yükseltir, '
+          + 'statin LDL\'yi düşürür, mide ilacı B12 emilimini bozar. Kayıt '
+          + 'olmadan sistem «değişti» der ama sebebini bilemez.',
+        action:K.Button({ label:'Ekle', tone:'primary', act:'add-med' }),
+        body:html`
+          ${when(!etkin.length, () => P.empty('Şu an kullandığın bir şey kayıtlı değil.'))}
+          ${when(etkin.length, () => html`<div class="medlist">${map(etkin, r => satir(r, true))}</div>`)}`,
+      }),
+
+      when(gecmis.length, () => K.Entry({
+        label:'Bıraktıkların', meta:gecmis.length + ' kayıt',
+        note:'Bırakmak silmek değildir: bırakılmış bir ilaç geçmiş bir ölçümü '
+          + 'hâlâ açıklar. Karşılaştırma ekranı bu kayıtları da okur.',
+        body:html`<div class="medlist">${map(gecmis, r => satir(r, false))}</div>`,
+      })),
+
+      K.Entry({
+        label:'Sınır', meta:'ne yapar, ne yapmaz',
+        body:K.Notice({ tone:'warn', title:'Sistem doz önermez.',
+          body:'Burada tutulan kayıt yalnızca ÖLÇÜM YORUMU içindir: bir değerdeki '
+            + 'değişimin sebebini aramak için. Sistem ilaç başlatmaz, kestirmez, '
+            + 'dozunu değiştirmez ve bunları önermez. İlaç kararları hekimindir.' }),
+      }),
+    ]);
+  }
+
+  function medSheetBody(rec){
+    const k = SP.Meds.kindOf(rec);
+    return String(K.Stack([
+      K.Field({ label:'Tür', hint:'etki eşlemesi buradan gelir',
+        input:K.Select({ id:'md-kind', value:rec.kindId, change:'md-kind',
+          options:SP.MED_GROUPS.reduce((acc, g) => acc.concat(
+            SP.MED_KINDS.filter(x => x.group === g.id)
+              .map(x => ({ value:x.id, label:g.name + ' — ' + x.name }))), []) }) }),
+      K.Notice({ tone:'info', class:'mt-0', body:k.note }),
+      K.Field({ label:'Adı', hint:'kutunun üstündeki ad — isteğe bağlı',
+        input:K.Input({ id:'md-name', value:rec.name, placeholder:k.name }) }),
+      K.Field({ label:'Doz', hint:'kendi notun; sistem doz önermez',
+        input:K.Input({ id:'md-dose', value:rec.dose, placeholder:'örn. günde 1×' }) }),
+      html`<div class="cols-2">
+        ${K.Field({ label:'Başlangıç',
+          input:K.Input({ id:'md-start', type:'date', value:rec.startDate }) })}
+        ${K.Field({ label:'Bitiş', hint:'sürüyorsa boş',
+          input:K.Input({ id:'md-end', type:'date', value:rec.endDate || '' }) })}
+      </div>`,
+      K.Field({ label:'Not',
+        input:K.Input({ id:'md-note', value:rec.note, placeholder:'Neden başlandı?' }) }),
+    ]));
   }
 
   /* -------------------------------------------------------- karşılaştırma
@@ -537,6 +697,13 @@ SP.Screens.labs = (function(){
         row.kind = 'diff';
         row.change = SP.Bio.meaningfulChange(m.id, va, vb);
         row.statusTo = SP.Bio.statusOf(m.id, vb);
+        /* Açlık kuralı burada da geçerli: tok karnına alınmış bir
+           ölçüme durum etiketi basılmaz. Kural bir ekrana özgü olamaz. */
+        row.interp = SP.Bio.interpretable(m.id, recB.fasting || 'unknown');
+        /* İki ölçüm arasında başlayan bir ilaç bu değişimi açıklıyor
+           olabilir. Beklenen yöndeki bir değişim HABER DEĞİLDİR ve
+           «başarı» diye sunulmamalıdır. */
+        row.medNote = SP.Meds.changeNote(m.id, recA.date, recB.date, vb - va);
       }
       out.push(row);
     });
@@ -580,6 +747,7 @@ SP.Screens.labs = (function(){
 
     const rows = compareRows(recA, recB);
     const gercek = rows.filter(r => r.kind === 'diff' && r.change && r.change.meaningful);
+    const aciklanan = gercek.filter(r => r.medNote && r.medNote.expected);
     const gun = U.diffDays(recA.date, recB.date);
 
     return K.Ledger([
@@ -600,7 +768,16 @@ SP.Screens.labs = (function(){
               <span class="sidestat__k">iki oturum arası</span></div>
             <div class="sidestat"><span class="sidestat__v">${gercek.length}</span>
               <span class="sidestat__k">gerçek değişim</span></div>
+            ${when(aciklanan.length, () => html`<div class="sidestat">
+              <span class="sidestat__v">${aciklanan.length}</span>
+              <span class="sidestat__k">ilaçla açıklanıyor</span></div>`)}
           </div>
+          ${when(aciklanan.length, () => K.Notice({ tone:'info', class:'mb-16',
+            title:'Bu değişimlerin bir kısmının sebebi belli:',
+            body:aciklanan.length + ' ölçümdeki değişim, iki oturum arasında '
+              + 'başlayan bir ilaç ya da takviyenin beklenen yönünde. Beklenen bir '
+              + 'sonuç haber değildir; beslenmenin ya da yaşam düzeninin başarısı '
+              + 'olarak okunmamalı.' }))}
           ${when(!rows.length, () => P.empty('İki oturumda da ortak ölçüm yok.'))}
           ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
             const c = r.change;
@@ -629,11 +806,14 @@ SP.Screens.labs = (function(){
               <span class="${cls('cmprow__delta', 'is-' + ton)}">${ok}
                 ${(c.diff > 0 ? '+' : '') + U.fmtNum(c.diff)}${when(c.pct != null,
                   () => html` <span class="tiny">%${U.fmtNum(Math.round(Math.abs(c.pct)))}</span>`)}</span>
-              <span class="cmprow__note tiny dim">${c.ok
+              <span class="cmprow__note tiny dim">${r.medNote
+                ? (r.medNote.expected ? 'beklenen — ' : 'ters yönde — ')
+                : ''}${c.ok
                 ? (c.meaningful ? 'gerçek değişim' : 'gürültü sayılır')
                 : 'eşik yok'}</span>
-              <span class="cmprow__status">${K.Badge({ label:r.statusTo.label,
-                tone:r.statusTo.tone })}</span>
+              <span class="cmprow__status">${when(!r.interp || r.interp.ok,
+                () => K.Badge({ label:r.statusTo.label, tone:r.statusTo.tone }),
+                () => K.Badge({ label:r.interp.label, tone:'muted', icon:false }))}</span>
             </button>`;
           })}</div>`)}`,
       }),
@@ -681,6 +861,8 @@ SP.Screens.labs = (function(){
     })]);
   }
 
+  const FASTING_LABEL = { yes:'aç karnına', no:'tok', unknown:'bilinmiyor' };
+
   function labSheetBody(l){
     const rows = Object.keys(l.values).map(id => {
       const b = SP.BIO_BY_ID[id];
@@ -690,7 +872,16 @@ SP.Screens.labs = (function(){
       return [b.name, html`<b class="num">${U.fmtNum(cell.v)}</b> <span class="tiny dim">${b.unit}</span>`,
         K.Badge({ label:st.label, tone:st.tone }), P.cert(cell.cert)];
     }).filter(Boolean);
+    const ac = l.fasting || 'unknown';
     return String(K.Stack([
+      K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
+        ['Tarih', U.fmtDate(l.date) + (l.time ? ' · ' + l.time : '')],
+        ['Laboratuvar', l.lab || '—'],
+        ['Açlık durumu', FASTING_LABEL[ac] || ac],
+      ] }),
+      when(ac === 'no', () => K.Notice({ tone:'warn', title:'Tok ölçüm:',
+        body:'Bu oturumdaki açlık glukozu, insülin, trigliserit ve onlardan '
+          + 'hesaplanan değerler yorumlanmaz.' })),
       K.Table({ tight:true, headers:['Ölçüm', { label:'Değer', num:true }, 'Durum', 'Kaynak'], rows }),
       when(l.note, () => html`<p class="small">${l.note}</p>`),
     ]));
@@ -770,6 +961,7 @@ SP.Screens.labs = (function(){
       ${tab === 'giris' ? entryView()
         : tab === 'gecmis' ? historyView()
         : tab === 'kiyas' ? compareView()
+        : tab === 'ilac' ? medsView()
         : tab === 'trend' ? trendView()
         : resultsView()}
       ${when(tab === 'sonuc', () => html`<div class="mt-24">
@@ -788,6 +980,58 @@ SP.Screens.labs = (function(){
         footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
           ${K.Button({ label:'Eğilimi aç', tone:'primary', act:'goto-trend', data:{ 'data-id':b.id } })}`) });
     },
+    /* ---- ilaç ve takviye ---- */
+    async 'add-med'(){
+      const rec = M.newMed();
+      UI.sheet({ title:'İlaç ya da takviye ekle',
+        subtitle:'sistem doz önermez, yalnızca kaydeder', wide:true,
+        body:medSheetBody(rec),
+        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+          ${K.Button({ label:'Kaydet', tone:'primary', act:'save-med',
+            data:{ 'data-id':rec.id } })}`) });
+      medDraft = rec;
+    },
+    async 'edit-med'(el){
+      const rec = SP.Meds.all().find(x => x.id === el.dataset.id);
+      if(!rec) return;
+      medDraft = JSON.parse(JSON.stringify(rec));
+      UI.sheet({ title:'Kaydı düzelt', subtitle:SP.Meds.kindOf(rec).name, wide:true,
+        body:medSheetBody(medDraft),
+        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+          ${K.Button({ label:'Kaydet', tone:'primary', act:'save-med',
+            data:{ 'data-id':rec.id } })}`) });
+    },
+    async 'save-med'(el){
+      const v = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+      const rec = medDraft && medDraft.id === el.dataset.id ? medDraft : M.newMed();
+      rec.kindId = v('md-kind') || 'diger';
+      rec.name = v('md-name');
+      rec.dose = v('md-dose');
+      rec.startDate = v('md-start') || U.todayISO();
+      rec.endDate = v('md-end') || null;
+      rec.note = v('md-note');
+      await M.saveMed(rec);
+      medDraft = null;
+      UI.closeSheet();
+      UI.toast((rec.name || SP.Meds.kindOf(rec).name) + ' kaydedildi');
+      SP.App.render();
+    },
+    async 'stop-med'(el){
+      await M.stopMed(el.dataset.id, U.todayISO());
+      UI.toast('Bugün bırakıldı olarak işaretlendi');
+      SP.App.render();
+    },
+    /* Onay kâğıdı yerine geri alma — silmek bir tuşla geri gelir. */
+    async 'del-med'(el){
+      const rec = SP.Meds.all().find(x => x.id === el.dataset.id);
+      if(!rec) return;
+      const kopya = JSON.parse(JSON.stringify(rec));
+      await M.deleteMed(rec.id);
+      S.ui.undo = { restore:() => M.saveMed(kopya) };
+      UI.toast((kopya.name || SP.Meds.kindOf(kopya).name) + ' silindi', { undo:true });
+      SP.App.render();
+    },
+
     async 'open-doctor'(){
       UI.sheet({ title:'Hekime götürülecek özet',
         subtitle:'tek sayfa · yazdırılabilir', wide:true,
@@ -835,13 +1079,15 @@ SP.Screens.labs = (function(){
       const existing = S.labs.find(l => l.date === draft.date);
       const rec = existing || M.newLab(draft.date);
       if(draft.lab) rec.lab = draft.lab;
+      rec.fasting = draft.fasting || 'unknown';
+      rec.time = draft.time || '';
       ids.forEach(id => {
         const b = SP.BIO_BY_ID[id];
         if(!b) return;
         rec.values[id] = { v:draft.values[id], cert:'measured', unit:b.unit };
       });
       await M.saveLab(rec);
-      draft = { date:U.todayISO(), lab:'', values:{} };
+      draft = { date:U.todayISO(), lab:'', values:{}, fasting:'unknown', time:'' };
       S.ui.labTab = 'sonuc';
       const flags = M.openFlags().filter(f => !f.ack);
       UI.toast(ids.length + ' değer kaydedildi'
@@ -885,6 +1131,19 @@ SP.Screens.labs = (function(){
   };
 
   const change = {
+    /* Tür değişince o türün etki açıklaması da değişmeli: kullanıcı
+       neyin eşleneceğini seçtiği anda görsün. */
+    async 'md-kind'(){
+      if(!medDraft) return;
+      const e = document.getElementById('md-kind');
+      if(e) medDraft.kindId = e.value;
+      const kutu = document.querySelector('.sheet .notice--info');
+      if(kutu){
+        const g = kutu.querySelector('.notice__body') || kutu;
+        g.textContent = SP.Meds.kindOf(medDraft).note;
+      }
+    },
+
     /* Karşılaştırılacak iki oturum. Seçim anında uygulanır; onay
        düğmesi beklemez — bir görünüm tercihinin karşılığı görülerek
        anlaşılır. */
@@ -909,6 +1168,8 @@ SP.Screens.labs = (function(){
     async 'pick-marker'(el){ S.ui.trendMarker = el.value; SP.App.render(); },
     async 'lab-query'(el){ S.ui.labQuery = el.value; SP.App.render(); },
     async 'entry-date'(el){ draft.date = el.value || U.todayISO(); },
+    async 'entry-fasting'(el){ draft.fasting = el.value || 'unknown'; SP.App.render(); },
+    async 'entry-time'(el){ draft.time = el.value || ''; },
     async 'entry-lab'(el){ draft.lab = el.value; },
     /* Her tuşta yeniden çizmez: değer taslakta durur, sayaç kaydetmede
        güncellenir. Uzun formda her hanede sayfayı çizmek yazmayı bozar. */

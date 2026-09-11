@@ -384,6 +384,115 @@
     });
   });
 
+  describe('Modül 1 — açlık kuralı', () => {
+    it('tok ölçümde durum etiketi basılmaz', () => {
+      expect(SP.Bio.interpretable('trig', 'no').ok).toBe(false);
+      expect(SP.Bio.interpretable('glucose', 'no').ok).toBe(false);
+      expect(SP.Bio.interpretable('tyg', 'no').ok).toBe(false);
+    });
+
+    /* Aclik gerektirmeyen olcumler bu kuraldan etkilenmez. */
+    it('açlık gerektirmeyen ölçüm her durumda yorumlanır', () => {
+      expect(SP.Bio.interpretable('ferritin', 'no').ok).toBe(true);
+      expect(SP.Bio.interpretable('tsh', 'no').ok).toBe(true);
+    });
+
+    /* Sistem sessizce varsaymaz: bilinmiyorsa yorumlar ama soyler. */
+    it('bilinmiyorsa yorumlanır ama bu yazılır', () => {
+      const r = SP.Bio.interpretable('glucose', 'unknown');
+      expect(r.ok).toBe(true);
+      expect(r.state).toBe('unknown');
+      expect(r.note.length > 30).toBeTruthy();
+    });
+
+    it('eski kayıtlarda açlık «bilinmiyor» sayılır, «aç» değil', () => {
+      const rec = SP.Model.newLab('2026-01-01');
+      delete rec.fasting;
+      SP.Model.normLab ? SP.Model.normLab(rec) : null;
+      expect(SP.Model.newLab('2026-01-01').fasting).toBe('unknown');
+    });
+  });
+
+  describe('Modül 1 — ilaç ve takviye', () => {
+    function ilacEkle(kindId, start, end){
+      SP.S.meds = SP.S.meds || [];
+      SP.S.meds.push({ id:'m-' + kindId + '-' + start, kindId, name:'', dose:'',
+        startDate:start, endDate:end || null, note:'' });
+    }
+
+    it('etkin kayıt tarihe göre belirlenir', () => {
+      resetState(); SP.S.meds = [];
+      ilacEkle('demir', '2026-01-01', '2026-03-01');
+      expect(SP.Meds.activeList('2026-02-01').length).toBe(1);
+      expect(SP.Meds.activeList('2026-04-01').length).toBe(0);
+      expect(SP.Meds.activeList('2025-12-01').length).toBe(0);
+    });
+
+    it('bir ölçümü hangi kaydın etkilediği bulunur', () => {
+      resetState(); SP.S.meds = [];
+      ilacEkle('demir', '2026-01-01');
+      expect(SP.Meds.affecting('ferritin', '2026-02-01').length).toBe(1);
+      expect(SP.Meds.affecting('tsh', '2026-02-01').length).toBe(0);
+    });
+
+    /* Asil is bu: beklenen yondeki bir degisim HABER DEGILDIR. */
+    it('beklenen yöndeki değişim «beklenen» diye işaretlenir', () => {
+      resetState(); SP.S.meds = [];
+      ilacEkle('demir', '2026-02-01');
+      const n = SP.Meds.changeNote('ferritin', '2026-01-01', '2026-03-01', +25);
+      expect(n).toBeTruthy();
+      expect(n.expected).toBe(true);
+    });
+
+    it('ters yöndeki değişim bulgu sayılır', () => {
+      resetState(); SP.S.meds = [];
+      ilacEkle('demir', '2026-02-01');
+      const n = SP.Meds.changeNote('ferritin', '2026-01-01', '2026-03-01', -25);
+      expect(n.expected).toBe(false);
+      expect(n.tone).toBe('warn');
+    });
+
+    /* Birakmak beklenen yonu TERSINE cevirir. */
+    it('bırakılan bir ilacın beklenen yönü tersine döner', () => {
+      resetState(); SP.S.meds = [];
+      ilacEkle('demir', '2025-06-01', '2026-02-01');
+      const n = SP.Meds.changeNote('ferritin', '2026-01-01', '2026-03-01', -25);
+      expect(n.expected).toBe(true);
+    });
+
+    it('aralık dışında başlayan kayıt değişimi açıklamaz', () => {
+      resetState(); SP.S.meds = [];
+      ilacEkle('demir', '2024-01-01');
+      expect(SP.Meds.changeNote('ferritin', '2026-01-01', '2026-03-01', +25)).toBe(null);
+    });
+
+    /* Kreatin eGFR'yi BOZAR: olcum dogru, gosterdigi sey degil. */
+    it('kreatin kullanırken eGFR yorumlanmaz', () => {
+      resetState(); SP.S.meds = [];
+      ilacEkle('kreatin', '2026-01-01');
+      expect(SP.Meds.distorts('egfr', '2026-02-01')).toBeTruthy();
+      expect(SP.Meds.distorts('tsh', '2026-02-01')).toBe(null);
+    });
+
+    it('«diğer» türü hiçbir ölçüme dokunmaz', () => {
+      resetState(); SP.S.meds = [];
+      ilacEkle('diger', '2026-01-01');
+      expect(SP.MED_BY_ID.diger.affects.length).toBe(0);
+      expect(SP.Meds.markerNote('ferritin', '2026-02-01')).toBe(null);
+    });
+
+    it('her türün adı, açıklaması ve geçerli ölçüm kimlikleri var', () => {
+      SP.MED_KINDS.forEach(k => {
+        expect(k.name.length > 2).toBeTruthy();
+        expect(k.note.length > 20).toBeTruthy();
+        k.affects.forEach(a => {
+          expect(SP.BIO_BY_ID[a.id]).toBeTruthy();
+          expect(a.dir === 'up' || a.dir === 'down').toBeTruthy();
+        });
+      });
+    });
+  });
+
   describe('Modül 1 — birlikte okuma', () => {
     it('örüntü girdisi eksikse hiç çalışmaz', () => {
       resetState();

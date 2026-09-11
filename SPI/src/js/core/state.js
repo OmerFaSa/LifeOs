@@ -36,6 +36,7 @@ SP.S = {
   vitals:{},          // YYYY-MM-DD -> gunluk olcum kaydi
   meals:{},           // YYYY-MM-DD -> ogun dizisi
   workouts:[],        // antrenman kayitlari
+  meds:[],            // ilac ve takviye kayitlari, en yeni ustte
   progress:{},        // exId -> { levelId, achievedAt }
 
   basket:null,        // { items, weeklyLimit, monthlyLimit, testFee, equipment, updatedAt }
@@ -99,6 +100,11 @@ SP.Model = (function(){
   /* Bos nesne ve diziler depolama katmanindan geri gelmeyebilir; okunan her
      belge kullanilmadan once eksik kaplari tamamlanir. */
   function normLab(doc){
+    /* Eski kayıtlarda açlık alanı yoktu: «bilinmiyor» sayılır, «aç»
+       değil. Olmayan bir bilgiyi varmış gibi doldurmak, eksik veriyi
+       sıfır saymakla aynı hatadır. */
+    if(doc && doc.fasting == null) doc.fasting = 'unknown';
+    if(doc && doc.time == null) doc.time = '';
     if(!doc) return doc;
     doc.values = doc.values || {};
     doc.source = doc.source || 'manual';
@@ -243,7 +249,62 @@ SP.Model = (function(){
 
   function newLab(dateISO){
     return { id:U.uid('lab'), date:dateISO || U.todayISO(), source:'manual',
-      lab:'', values:{}, note:'', createdAt:new Date().toISOString() };
+      lab:'', values:{}, note:'',
+      /* AÇLIK DURUMU. Açlık glukozu, insülin, trigliserit ve onlardan
+         türeyen TyG ile TG/HDL yalnız aç karnına alınan kandan
+         yorumlanır. Sistem bunu sormuyordu ve hepsini açmış gibi
+         yorumluyordu: tok karnına alınmış bir trigliserit «referans
+         üstü» işaretlenip beslenme hedefini değiştirebiliyordu. */
+      fasting:'unknown',      // yes | no | unknown
+      time:'',                // 'HH:MM' — isteğe bağlı
+      createdAt:new Date().toISOString() };
+  }
+
+  /* ------------------------------------------------------- ilaç ve takviye
+
+     Sistem doz önermez, başlatmaz, kestirmez. Yalnızca NE KULLANILDIĞINI
+     kaydeder ki bir ölçümdeki değişimin sebebi aranabilsin. */
+
+  function newMed(){
+    return { id:U.uid('med'), kindId:'diger', name:'', dose:'',
+      startDate:U.todayISO(), endDate:null, note:'',
+      createdAt:new Date().toISOString() };
+  }
+
+  function normMed(rec){
+    rec.kindId = SP.MED_BY_ID[rec.kindId] ? rec.kindId : 'diger';
+    rec.name = String(rec.name || '').trim();
+    rec.dose = String(rec.dose || '').trim();
+    rec.note = String(rec.note || '').trim();
+    if(!rec.startDate) rec.startDate = U.todayISO();
+    if(rec.endDate === '') rec.endDate = null;
+    /* Bitiş başlangıçtan önce olamaz; olursa bitiş yok sayılır. */
+    if(rec.endDate && rec.endDate < rec.startDate) rec.endDate = null;
+    return rec;
+  }
+
+  async function saveMed(rec){
+    normMed(rec);
+    SP.S.meds = SP.S.meds || [];
+    const i = SP.S.meds.findIndex(m => m.id === rec.id);
+    if(i >= 0) SP.S.meds[i] = rec; else SP.S.meds.push(rec);
+    SP.S.meds.sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
+    await SP.Store.set('meds/' + rec.id, rec);
+    return rec;
+  }
+
+  async function deleteMed(id){
+    SP.S.meds = (SP.S.meds || []).filter(m => m.id !== id);
+    await SP.Store.remove('meds/' + id);
+  }
+
+  /* Bırakmak silmek değildir: bırakılmış bir ilaç geçmiş bir ölçümü
+     hâlâ açıklıyor. Bitiş tarihi yazılır, kayıt durur. */
+  async function stopMed(id, dateISO){
+    const rec = (SP.S.meds || []).find(m => m.id === id);
+    if(!rec) return null;
+    rec.endDate = dateISO || U.todayISO();
+    return saveMed(rec);
   }
 
   /* Turetilmis olcumleri hesaplayip oturuma yazar.
@@ -668,6 +729,9 @@ SP.Model = (function(){
     S.workouts = ((await SP.Store.list('workouts')) || []).map(normWorkout)
       .sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
 
+    S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
+      .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
+
     S.progress = (await SP.Store.get('progress')) || {};
     S.basket = Object.assign(defaultBasket(), await SP.Store.get('basket'));
     S.prices = (await SP.Store.get('prices')) || {};
@@ -694,6 +758,8 @@ SP.Model = (function(){
     mealsOf, newMeal, saveMeals, addMeal, deleteMeal,
     /* antrenman */
     newWorkout, saveWorkout, deleteWorkout, workoutsOf,
+    /* ilac ve takviye */
+    newMed, saveMed, deleteMed, stopMed,
     currentLevel, levelIndex, advanceLevel, setLevel,
     /* ekonomi */
     defaultBasket, saveBasket, setBasketItem, setPrice,
