@@ -60,6 +60,50 @@ gördüğünü tam olarak görebilmelidir; görmediği bir şeye dayanarak konu�
 
 ---
 
+## Masalar arası devir
+
+Doktrinin merkezinde **«her ajan yalnızca kendi alanına bakar»** durur. Ama
+bir masanın BULGUSU başka bir masanın İŞİ olabilir: ferritin düşükse bu
+Kerem'in ölçümü, Nesrin'in hedefidir. Patron'un tek işi o devri görmek ve
+sıraya koymaktır.
+
+```js
+SP.Office.handoffs()          // { id, from, to, finding, ask, tone, route, ui, cta }
+SP.Office.handoffsFor('lab')  // { out:[…], in:[…] } — bir masanın kendi defteri
+```
+
+Yedi kaynak, hepsi kural motorundan:
+
+| Devir | Kaynak |
+|---|---|
+| Kerem → Nesrin | Bandın altındaki ölçüm, hangi besin öğesinin hedefini açar |
+| Nesrin → Kerem | Kapanmayan açık, hiç ölçülmemiş bir biyobelirteçle doğrulanabiliyor |
+| Nesrin → Sedef | Sepet açığı ile beslenme açığı aynı besin öğesinde buluşuyor |
+| Kerem → Barış | Açık kırmızı bayrak varken yük tavanı konur |
+| Barış → Nesrin | Yük artarken protein hedefin altında |
+| Barış → Kerem | Toparlanma skoru üretilemiyor: HRV ve nabız hiç girilmemiş |
+| Patron | Çapraz bulgu iki AYRI masaya aitse, birine devredilir |
+
+Üç kural devri dürüst tutar:
+
+1. **Devir bir tavsiye değildir.** «Şu ölçüldü, şu masaya düşüyor» der; dozu,
+   planı, fiyatı devredilen masa söyler.
+2. **Ölçülmemiş bir şey devredilemez.** Tahmin devir üretmez.
+3. **Her satır tıklanabilir.** Bulgunun düştüğü ekranı, doğru sekmesi ve
+   doğru satırı açık halde açar. Yoksa devir bir cümleden ibaret kalır.
+
+Aynı masaya aynı cümleyle giden üç ölçüm üç satır yazmaz: bilgi aynı, satır
+tek — masa notlarındaki toplama kuralının devir defteri tarafı.
+
+### Renk ayrımı
+
+Masanın sol kenarındaki kimlik şeridi **bir durum değil bir imzadır**: masanın
+kime ait olduğunu söyler. Durum renkleri (kırmızı/sarı/yeşil) kimlik şeridinde
+asla kullanılmaz; aciliyet yalnızca devir okuna dokunur. İki renk sistemi aynı
+yüzeyde karışmaz — karışırsa ofis okunamaz hale gelir.
+
+---
+
 ## Çıktı denetimi
 
 Model çıktısı basılmadan önce ev kurallarına karşı denetlenir

@@ -1,10 +1,10 @@
 # SPİ — Durum ve öncelik raporu
 
-Tarih: 11 Eylül 2026 · Derleme: `b390072` · 42 commit
+Tarih: 11 Eylül 2026 · Derleme: `be3a773` · 49 commit
 
 Bu belge **ne kaldığını** söyler. `YOLHARITASI.md` ve `SAGLIK.md` planları
-anlatır; bu belge o planların önüne geçen üç bulguyu ve işlerin hangi
-sırayla yapılacağını anlatır.
+anlatır; bu belge o planların önüne geçen bulguları, yapılanı ve işlerin
+hangi sırayla yapılacağını anlatır.
 
 Yazılı raporun tasarlanmış hâli bir Artifact olarak da duruyor.
 
@@ -19,97 +19,126 @@ depolama ayak izi uygulamayı gerçek tarayıcıda koşarak ölçüldü.
 
 ## 1. Ölçülen gerçekler
 
+Bir önceki raporun en büyük bulgusu yazı tipi bağımlılığıydı: CDN yanıt
+vermediğinde ilk çizim **12.931 ms**'ye çıkıyordu. Yazı tipleri gömüldü
+(altı alt küme woff2, 92 KB) ve ölçüm tekrarlandı:
+
+| Ölçüm | Önce | Şimdi |
+|---|---|---|
+| İlk çizim — ağ var | 342 ms | **84 ms** |
+| İlk çizim — CDN yanıt vermiyor | **12.931 ms** | **80 ms** |
+| Tek dosya (`dist/spi.html`), ağ yok | — | 212 ms |
+
+Ağın olması ile olmaması arasındaki fark artık **4 ms**. «Hiçbir ekran ağı
+beklemez» cümlesi ilk kez ölçümle doğru.
+
 | Ölçüm | Sonuç | Yorum |
 |---|---|---|
-| İlk çizim — yazı tipi CDN'i kapalı | **342 ms** | Uygulamanın gerçek hızı |
-| İlk çizim — CDN yanıt vermiyor | **12.931 ms** | 38 kat fark, tamamı ağdan |
 | Ekranlar arası geçiş | ~125 ms | On iki ekranda aynı; hız sorunu yok |
 | Bir yıllık gerçekçi veri | 366 KB | Yerel kotanın %7'si |
 | Beş yıllık veri (öngörü) | 1,8 MB | **Depolama on yıl sorun değil** |
-| Tek dosya dağıtım | 806 KB | Bir defa iniyor; kabul edilebilir |
+| Tek dosya dağıtım | 1,04 MB | Bir defa iniyor; yazı tipleri içinde |
 
 Bir yıllık veri = günlük vital + 3 öğün + haftalık antrenman + 3 ayda bir
 tahlil.
 
+### Envanter
+
+| Ölçü | Sayı |
+|---|---|
+| JavaScript modülü | 50 dosya · 17.760 satır |
+| CSS | 7 dosya · 4.362 satır |
+| Test | 12 dosya · **505 test** |
+| Otomatik denetim | 6 koşum (`runtests`, `smoke`, `ledgercheck`, `palettecheck`, `designcheck`, `tasarimcheck`) |
+
 ---
 
-## 2. Yol haritasında olmayan üç bulgu
+## 2. Yol haritasında olmayan üç bulgu — üçü de kapandı
 
-Bunlar «şunu da ekleyelim» maddeleri değil: ikisi sistemin ürettiği
-**yorumu bozuyor**, biri kendi doktrinini çürütüyor.
+Bunlar «şunu da ekleyelim» maddeleri değildi: ikisi sistemin ürettiği
+**yorumu bozuyordu**, biri kendi doktrinini çürütüyordu.
 
-### 2.1 · İlaç ve takviye kaydı hiç yok
+### 2.1 · İlaç ve takviye kaydı hiç yoktu — **kapandı**
 
 Sistem «doz önermez» kuralını doğru uyguluyor ama **ne kullanıldığını da
-kaydetmiyor.** Oysa bir hap ölçümü değiştirir: demir takviyesi ferritini
-yükseltir, statin LDL'yi düşürür, mide ilacı B12 emilimini bozar.
+kaydetmiyordu.** Kişisel taban çizgi motoru «ferritin gerçekten yükseldi»
+diyordu — sebebini bilmeden.
 
-Bugün kişisel taban çizgi motoru «ferritin gerçekten yükseldi» diyor —
-**sebebini bilmeden.** Kullanıcı üç aydır demir hapı içiyorsa bu bir başarı
-değil, beklenen bir sonuçtur. Kayıt olmadan sistem ikisini ayıramaz ve
-yanlış cesaret verir.
+On sekiz ilaç/takviye türü, her biri hangi ölçümü hangi yönde bozduğuyla
+birlikte (`data/meds.js`) ve bir ters indeks (`MED_AFFECTING`) eklendi.
+Kural: **beklenen yöndeki bir değişim haber değildir.** Demir hapı
+içerken ferritinin yükselmesi bir başarı değil, bir sonuçtur.
 
-### 2.2 · Açlık durumu kaydedilmiyor
+### 2.2 · Açlık durumu kaydedilmiyordu — **kapandı**
 
-Açlık glukozu, açlık insülini, trigliserit ve onlardan türeyen **TyG ile
-TG/HDL** yalnız aç karnına alınan kandan yorumlanır. Sistem şu an bunu
-sormuyor ve hepsini açmış gibi yorumluyor.
+Açlık glukozu, insülini, trigliserit ve onlardan türeyen TyG ile TG/HDL
+yalnız aç karnına alınan kandan yorumlanır. Oturuma «aç / tok /
+bilinmiyor» alanı ve saat eklendi; `Bio.interpretable` tok karnına
+alınmış bir ölçümü yorumdan çıkarır.
 
-Tok karnına alınmış bir trigliserit «referans üstü» diye işaretlenip
-beslenme hedefini değiştirebiliyor. Bu bir ölçüm hatası değil **bağlam
-eksikliği**; çözümü bir alan: «aç / tok / bilinmiyor».
+### 2.3 · «Sıfır bağımlılık» tipografide tutmuyordu — **kapandı**
 
-### 2.3 · «Sıfır bağımlılık» iddiası tipografide tutmuyor
-
-Çalışma zamanı bağımlılığı gerçekten yok — ama üç yazı ailesi Google
-Fonts'tan iniyor ve bu istek açılışı kilitliyor (ölçüm yukarıda).
-
-Bu bir hız sorunundan fazlası: sistem çevrimdışı çalıştığını söylüyor,
-kötü bağlantıda ise ya bekletiyor ya yanlış yazı tipiyle açılıyor.
+Üç yazı ailesi Google Fonts'tan iniyordu. Karakter alt kümelemesiyle
+(kaynaktan taranan 167 karakter) ve Newsreader'ın `opsz` ekseni 24'e
+sabitlenerek 392 KB → **92 KB**; base64 olarak `fonts.css` içine gömüldü.
+Ölçüm yukarıda.
 
 ---
 
-## 3. Dalga 1 — Güven
+## 3. Dalga 1 — Güven · **tamam**
 
-Tek ölçüt: *kullanıcı üç hafta sonra hâlâ açıyor mu?* Hiçbiri yeni yetenek
-eklemiyor; var olanı güvenilir kılıyor.
-
-| # | İş | Büyüklük |
+| # | İş | Durum |
 |---|---|---|
-| 1.1 | Yazı tiplerini uygulamaya göm (woff2, ~300 KB) | Orta |
-| 1.2 | İlaç ve takviye kaydı — eğilimde başlangıç çizgisi, karşılaştırmada uyarı | Büyük |
-| 1.3 | Oturuma açlık durumu ve saat | Küçük |
-| 1.4 | Kurulum ekranı — ilk izlenim, hiç tasarlanmadı | Orta |
-| 1.5 | Telefonda alt gezinme | Orta |
-| 1.6 | Bekleme durumları | Küçük |
+| 1.1 | Yazı tiplerini uygulamaya göm | ✓ 92 KB, 12.931 → 80 ms |
+| 1.2 | İlaç ve takviye kaydı | ✓ 18 tür, ters indeks, «beklenen değişim haber değil» |
+| 1.3 | Oturuma açlık durumu ve saat | ✓ `interpretable` yorumu kısıtlar |
+| 1.4 | Kurulum ekranı | ✓ üç kural + alan başına «neden» |
+| 1.5 | Telefonda alt gezinme | ✓ 860px altında beş yuva |
+| 1.6 | Bekleme durumları | ✓ `busy/idle` + şerit, iskelet metinleri |
 
-## 4. Dalga 2 — Sürtünme
+## 4. Dalga 2 — Sürtünme · **tamam**
 
-Sistemin en büyük riski teknik değil **davranışsal**. Her madde günde beş
-kez birkaç saniye kazandırıyor.
-
-| # | İş | Büyüklük |
+| # | İş | Durum |
 |---|---|---|
-| 2.1 | Satır içi düzenleme | Orta |
-| 2.2 | Komut paletiyle veri girişi (`ferritin 26`) — ayrıştırıcılar zaten var | Orta |
-| 2.3 | Günlükte zaman kaydırıcı | Küçük |
-| 2.4 | Besin etiketi fotoğrafı → yeni gıda | Orta |
-| 2.5 | Sabitlenen ölçümler | Küçük |
-| 2.6 | Klavye gezinme (`j`/`k`) | Küçük |
+| 2.1 | Satır içi düzenleme | ✓ sonuç listesinde |
+| 2.2 | Komut paletiyle veri girişi | ✓ `SP.Quick` — vital · hareket · tahlil · öğün |
+| 2.3 | Günlükte zaman kaydırıcı | ✓ 14 günlük şerit |
+| 2.4 | Besin etiketi fotoğrafı → gıda | ✓ `extract.fromFoodLabel`, eksik alanları bildirir |
+| 2.5 | Sabitlenen ölçümler | ✓ en fazla beş |
+| 2.6 | Klavye gezinme | ✓ `j`/`k` + Enter |
 
-## 5. Dalga 3 — Derinlik
+## 5. Dalga 3 — Derinlik · **tamam**
 
-Yalnız sistem düzenli kullanılmaya başladıysa anlamlı; veri yoksa
-gösterecek şeyleri olmaz.
-
-| # | İş | Büyüklük |
+| # | İş | Durum |
 |---|---|---|
-| 3.1 | Şikâyet ve semptom günlüğü | Orta |
-| 3.2 | Adet döngüsü — kadın profilinde demir yorumu buna bağlı | Orta |
-| 3.3 | Panel görünümü | Orta |
-| 3.4 | Grafik kalitesi | Orta |
-| 3.5 | Ofis masa düzeni ve ajan derinliği — en özgün fikir, en jenerik tasarım | Büyük |
-| 3.6 | Tablet aralığı ve alt sayfa tasarımı | Orta |
+| 3.1 | Şikâyet ve semptom günlüğü | ✓ 18 semptom, payda **girilen gün** |
+| 3.2 | Âdet döngüsü | ✓ iki dönemden ölçülür, tekinde varsayılan olduğu SÖYLENİR |
+| 3.3 | Panel görünümü | ✓ panel sekmesi, borç ve tazelik |
+| 3.4 | Grafik kalitesi | ✓ son nokta vurgulu, uç etiketi, adlandırılmış hedef bandı |
+| 3.5 | Ofis derinliği | ✓ **masalar arası devir** — aşağıda |
+| 3.6 | Tablet aralığı ve alt sayfa | ✓ odak tuzağı, kaydırma kilidi, kayan şerit gölgesi |
+
+### 3.5 neden ayrı yazılıyor
+
+Ofis sistemin **en özgün fikri, en jenerik tasarımıydı**: beş ayrı rapor
+yan yana duruyordu, aralarındaki ilişki görünmüyordu. Oysa doktrinin
+merkezinde o ilişki var.
+
+`SP.Office.handoffs()` yedi kaynaktan devir çıkarır — bandın altındaki
+ölçüm → beslenme hedefi, kapanmayan açık → hiç ölçülmemiş biyobelirteç,
+sepet açığı → ikame, kırmızı bayrak → yük tavanı, artan yük → protein,
+eksik vital → toparlanma skoru, çapraz bulgu → iki masa.
+
+Üç kural devri dürüst tutar:
+
+1. **Devir bir tavsiye değildir.** «Şu ölçüldü, şu masaya düşüyor» der;
+   dozu, planı, fiyatı devredilen masa söyler.
+2. **Ölçülmemiş bir şey devredilemez.** Tahmin devir üretmez.
+3. **Her satır tıklanabilir.** Bulgunun düştüğü ekranı, doğru sekmesi ve
+   doğru satırı açık halde açar. Yoksa devir bir cümleden ibaret kalır.
+
+Patron dört uzmanın yanına dizilmez, üstüne konur; kendi defteri kendi
+işi değil **trafiğin kendisidir**.
 
 ---
 
@@ -128,28 +157,36 @@ unutulmadı, **reddedildi**.
 
 ---
 
-## 7. Borçlar
+## 7. Borçlar — sıradaki iş budur
 
-| Borç | Ölçü | Ne zaman sorun olur |
-|---|---|---|
-| `labs.js` | 977 satır | Sağlık Faz 4'te. Bölünmeli: sonuç · giriş · karşılaştırma · çıktı |
-| `meals.js`, `llm.js` | 748 / 737 | Aynı sınıra yaklaşıyorlar |
-| Ekran okuyucu bildirimleri | 1 `aria-live` | Erişilebilirlik denetimi hiç yapılmadı |
-| API anahtarları düz metin | localStorage | Aile içinde kabul; **genele açılırken mutlaka** |
-| `tasarim/` 20 örnek | 20 dosya | Dördü sisteme girdi; gerisi referans, güncellenmiyor |
+Üç dalga bitti; geriye kalan **bakım borcu**, yeni yetenek değil.
+
+| # | Borç | Ölçü | Ne zaman sorun olur |
+|---|---|---|---|
+| B1 | `labs.js` | **1.434 satır** | Şimdi. Dört sekme tek dosyada: sonuç · giriş · karşılaştırma · çıktı |
+| B2 | Erişilebilirlik denetimi | 4 `aria-live`, otomatik denetim **yok** | Altı koşumdan hiçbiri a11y bakmıyor; yedinci koşum yazılmalı |
+| B3 | `office.js` (çekirdek) | 816 satır | B1'den sonra; brifing üretimi ile devir motoru ayrışmalı |
+| B4 | `llm.js`, `meals.js` | 737 / 749 | Aynı sınıra yaklaşıyorlar |
+| B5 | API anahtarları düz metin | localStorage | Aile içinde kabul; **genele açılırken mutlaka** |
+| B6 | `tasarim/` 20 örnek | 20 dosya | Dördü sisteme girdi; gerisi referans, güncellenmiyor |
+
+Sıra önerisi: **B2 → B1 → B3**. Erişilebilirlik denetimi önce gelir çünkü
+bölme işleminden sonra yazılırsa neyi bozduğunu söyleyemez.
 
 ---
 
 ## 8. «Bitti» ne demek
 
-Bitiş çizgisi bir özellik listesi değil. Üç cümle, üçü de bugün tam doğru
-değil:
+Bitiş çizgisi bir özellik listesi değildi. Üç cümleydi; üçü de artık
+ölçümle doğru:
 
-1. **Hiçbir ekran ağı beklemez.** Bugün yazı tipi bekliyor → 1.1
-2. **Bir günün verisini telefonda bir dakikada girebilirsin.** Bugün alt
-   sayfalar ve hamburger menü bunu uzatıyor → 1.5, 2.1, 2.2
-3. **Sistem bir sayının neden değiştiğini söyleyebilir.** Bugün
-   değiştiğini söyleyebiliyor, nedenini değil → 1.2, 1.3, 3.1
+1. **Hiçbir ekran ağı beklemez.** Ağ var/yok farkı 4 ms. ✓
+2. **Bir günün verisini telefonda bir dakikada girebilirsin.** Alt
+   gezinme, komut paletinden giriş, satır içi düzenleme, 14 günlük
+   şerit. ✓
+3. **Sistem bir sayının neden değiştiğini söyleyebilir.** İlaç kaydı,
+   açlık durumu, semptom günlüğü ve döngü; «beklenen değişim haber
+   değildir» kuralı. ✓
 
-Üçü sağlandığında sistem dokuz ay boyunca her gün açılmayı hak eder. O
-noktaya kadar geri kalan her madde **iyileştirmedir**, gereklilik değil.
+Üçü sağlandı. Bundan sonrası **iyileştirmedir**, gereklilik değil — ve
+iyileştirmenin ilk adımı yeni ekran değil, yukarıdaki borç listesidir.

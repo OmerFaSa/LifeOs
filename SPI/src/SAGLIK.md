@@ -26,12 +26,14 @@ Buradaki hiçbir madde şunları değiştirmez:
 
 ## Bugünkü durum
 
-52 ölçüm, 12 panel, 3 türetilmiş indeks (HOMA-IR, Non-HDL, TSAT),
+58 ölçüm, 12 panel, 11 türetilmiş indeks (HOMA-IR, Non-HDL, TSAT, LDL,
+eGFR ve diğerleri),
 durum/hedef bandı ayrımı, eğilim, kırmızı bayrak, panel tazeliği,
 rapor yapıştırma ve belge okuma.
 
-Eksik olan: **birlikte okuma**. Her ölçüm tek başına doğru
-değerlendiriliyor ama ölçümler birbirini açıklamıyor.
+Eksik olan **birlikte okumaydı**: her ölçüm tek başına doğru
+değerlendiriliyor ama ölçümler birbirini açıklamıyordu. Faz 5 bunu
+kapattı — ilaç, semptom ve döngü artık yorumun içinde.
 
 ---
 
@@ -121,9 +123,46 @@ Bir değişim ölçüm gürültüsünden büyük değilse «değişti» denmez.
 - ✅ Yazdırma perdesi (`@media print`): kâğıda yalnız bu blok basılır,
   arayüzün hiçbir parçası görünmez.
 
-### Faz 4 — Sıradaki
+### Faz 4 — **YAPILDI**
 
-- ⬜ Sabitlenen ölçümler (önemsediğin 3–5 ölçüm her görünümün üstünde)
-- ⬜ Oturuma açlık durumu ve saat bilgisi (glukoz, insülin ve
-  trigliserit yalnız açken yorumlanır)
-- ⬜ Panel görünümü: bir paneli bir bütün olarak okuma
+- ✅ Sabitlenen ölçümler — en fazla beş; sabitlenen satır her görünümün
+  üstünde durur.
+- ✅ Oturuma açlık durumu ve saat. `Bio.interpretable` tok karnına
+  alınmış bir glukozu, insülini ya da trigliseriti **yorumdan çıkarır**;
+  ölçüm silinmez, yorumu yazılmaz. Bağlamı bilinmeyen bir sayıyı
+  yorumlamak, bilmediğini bilmemektir.
+- ✅ Panel görünümü — bir paneli bütün olarak okuma, panel borcu ve
+  tazeliği.
+
+### Faz 5 — İlaç, semptom ve döngü — **YAPILDI**
+
+Bu üç madde plandaki «birlikte okuma» eksiğinin asıl karşılığıydı.
+
+- ✅ **İlaç ve takviye kaydı** (`data/meds.js`, `core/meds.js`). On sekiz
+  tür, her biri hangi ölçümü hangi yönde bozduğuyla birlikte. Kural:
+  **beklenen yöndeki bir değişim haber değildir.** Demir hapı içerken
+  ferritinin yükselmesi bir başarı değil, bir sonuçtur; sistem ikisini
+  karıştırırsa yanlış cesaret verir.
+- ✅ **Semptom günlüğü** (`data/symptoms.js`, `core/symptom.js`). On sekiz
+  yapılı şikâyet, dört grup, 1–3 şiddet ve her şikâyetin hangi ölçümle
+  birlikte okunacağı. Serbest metin bir not aranamaz, sayılamaz, eğilime
+  dönmez; yapılı semptom hekim çıktısına girer.
+
+  Payda pencere değil **girilen gün** sayısıdır: otuz günün beşinde giriş
+  varsa «30 günde 3 gün» yanıltır, «giriş yapılan 5 günün 3'ü» doğrudur.
+  İşaretlenmemiş gün «şikâyet yok» değil **«girilmemiş»** demektir —
+  eksik veri sıfır sayılmaz kuralının semptom tarafı.
+- ✅ **Âdet döngüsü**. İki dönemden ortalama uzunluk ÖLÇÜLÜR; tek dönemde
+  28 günlük varsayılan kullanılır ve bu açıkça söylenir. Kanamaya yakın
+  alınan ferritin ve hemoglobine not düşülür: o dönemde demir deposu
+  olduğundan düşük okunur. Kadın profilinde demir yorumu buna bağlıdır.
+
+### Faz 6 — Sıradaki
+
+Yeni yetenek değil, **bakım borcu**. `DURUM.md` §7'deki sıra geçerli:
+
+- ⬜ B1 · `labs.js` 1.434 satır — dört sekme tek dosyada; bölünmeli.
+- ⬜ B2 · Erişilebilirlik denetimi — altı otomatik koşumdan hiçbiri a11y
+  bakmıyor. Bölmeden ÖNCE yazılmalı ki neyi bozduğunu söyleyebilsin.
+- ⬜ B3 · `core/office.js` 816 satır — brifing üretimi ile devir motoru
+  ayrışmalı.

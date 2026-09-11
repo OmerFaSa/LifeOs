@@ -354,6 +354,7 @@ src/
     layout.css          kabuk ve ızgara (varsayılan «defter» düzeni)
     components.css      bileşenler + SPİ'ye özel yapılar
     designs.css         seçilebilir düzenler: odak, kraft, katmanlı, harita
+    fonts.css           gömülü woff2 (base64) — üç aile, 92 KB, ağ isteği yok
   js/
     data/               referans tabloları — mantık yok, yalnızca veri
       biomarkers.js     58 biyobelirteç, 12 panel, 11 türetilmiş indeks
@@ -367,6 +368,8 @@ src/
       build.js          derleme damgası — build.py her derlemede yeniden yazar
       palettes.js       yedi renk paleti
       designs.js        beş düzen — iskelet seçimi, mantık yok
+      meds.js           18 ilaç/takviye türü, hangi ölçümü hangi yönde bozar
+      symptoms.js       18 yapılı semptom, dört grup, ölçüm bağları
     core/
       utils.js h.js     tarih/sayı yardımcıları · şablon katmanı
       store.js          kalıcı depolama (bulut → yerel düşüş)
@@ -382,13 +385,16 @@ src/
       ui.js             ikon, grafik, referans çubuğu, katman
       components.js     bileşen sözlüğü (uygulamadan bağımsız)
       parts.js          SPİ'ye özel, veriye bağlı parçalar
-      office.js         beş ajanlı ofis
+      meds.js           ilaç yorumu: beklenen yöndeki değişim haber değildir
+      symptom.js        semptom penceresi (payda: girilen gün) ve âdet döngüsü
+      quickentry.js     komut paletinden veri girişi — vital · hareket · tahlil · öğün
+      office.js         beş ajanlı ofis + masalar arası devir motoru
       llm.js quota.js   model çağrısı ve kota yönetimi
       palette.js        komut paleti
       setup.js          ilk kurulum
     screens/            12 ekran
     app.js              kabuk: gezinme, görünüm paneli, olay dağıtımı, açılış
-  tests/                446 test, 11 paket
+  tests/                505 test, 12 paket
 tools/
   runtests.js           birim testleri (başsız tarayıcı)
   smoke.js              duman testi: gerçek uygulamayı gezer
