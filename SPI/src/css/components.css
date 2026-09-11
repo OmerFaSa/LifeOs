@@ -1464,6 +1464,60 @@ button.minrow:hover{ background:var(--surface-2); }
   .resrow__status{ grid-column:2; }
   .resrow__trend{ grid-column:3; }
 }
+/* ================= karşılaştırma satırı =================
+
+   İki oturum arasındaki fark. Satırın işi tek bir şeyi görünür kılmak:
+   hangi farkın GERÇEK olduğu. Gerçek değişimin solunda bölüm renginde
+   bir şerit durur; gürültü sayılan satır sessizdir. */
+.cmprow{
+  width:100%;
+  display:grid;
+  grid-template-columns:3px minmax(130px,1.3fr) minmax(160px,1.1fr) 112px 100px 92px;
+  align-items:center; gap:14px;
+  padding:13px 10px 13px 0;
+  border:none; border-bottom:1px solid var(--border);
+  background:none; color:var(--text); text-align:left;
+  transition:background var(--dur) var(--ease);
+}
+.cmprow::before{ content:''; display:block; width:3px; height:26px; border-radius:2px;
+  background:transparent; }
+.cmprow.is-real::before{ background:var(--sec); }
+.cmprow:hover{ background:var(--surface-hover); }
+.cmprow--none{ color:var(--text-3); }
+.cmprow__name b{ display:block; font-size:14.5px; font-weight:550; line-height:1.3; }
+.cmprow__name span{ display:block; }
+/* Uzun birimler (mL/dk/1,73m²) kesilmesin: satır dar kalırsa değer
+   alt satıra iner, kırpılmaz. Kırpılan bir birim yanlış okunur. */
+.cmprow__val{ font-family:var(--font-display); font-size:14px; color:var(--text-2);
+  min-width:0; overflow-wrap:anywhere; }
+.cmprow__val b{ font-size:17px; font-weight:600; color:var(--text); }
+.cmprow__val small{ font-size:11px; color:var(--text-3); margin-left:3px; }
+.cmprow__arrow{ color:var(--text-3); margin:0 4px; }
+.cmprow__delta{
+  font-family:var(--font-display); font-size:13.5px; font-weight:600;
+  white-space:nowrap; font-variant-numeric:tabular-nums;
+}
+.cmprow__delta.is-muted{ color:var(--text-3); font-weight:500; }
+.cmprow__delta.is-ok{ color:var(--primary); }
+.cmprow__delta.is-danger{ color:var(--danger); }
+.cmprow__delta.is-info{ color:var(--info); }
+.cmprow__note{ white-space:nowrap; }
+.cmprow__status{ justify-self:end; }
+
+/* Kart ya da kenar çubuğu yüzünden daralan kutuda satır iki kata iner. */
+@media (max-width:900px){
+  .cmprow{ grid-template-columns:3px minmax(0,1fr) auto; row-gap:5px; }
+  .cmprow__val{ grid-column:2 / -1; }
+  .cmprow__note{ grid-column:2; }
+  .cmprow__status{ grid-column:3; justify-self:end; }
+}
+@container satir (max-width:700px){
+  .cmprow{ grid-template-columns:3px minmax(0,1fr) auto; row-gap:5px; }
+  .cmprow__val{ grid-column:2 / -1; }
+  .cmprow__note{ grid-column:2; }
+  .cmprow__status{ grid-column:3; justify-self:end; }
+}
+
 @container satir (max-width:700px){
   .resrow{ grid-template-columns:6px minmax(0,1fr) auto; row-gap:6px; }
   .resrow__bar{ grid-column:2 / -1; }
@@ -1796,3 +1850,62 @@ body.is-dragging .drop.is-over{
 
 /* Defter kipindeki katlanır bölüm: kutu yok, yalnız satır. */
 .collapse--bare .collapse__btn{ padding-inline:0; }
+
+/* ================= hekim çıktısı =================
+
+   Sistemin dışarıya verdiği tek belge. Ekranda okunur, kâğıda basılır.
+   Basılı hâlde arayüzün hiçbir parçası görünmez: yalnız bu blok. */
+.printdoc{ font-size:13px; line-height:1.55; color:var(--text); }
+.printdoc__head{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:20px;
+  flex-wrap:wrap;
+  padding-bottom:12px; border-bottom:2px solid var(--ink);
+}
+.printdoc__title{
+  display:block; font-family:var(--font-serif); font-size:22px; font-weight:500;
+  letter-spacing:-.01em;
+}
+.printdoc__sub{ display:block; font-size:11.5px; color:var(--text-3); margin-top:2px; }
+.printdoc__who{ text-align:right; font-size:12px; color:var(--text-2); }
+.printdoc__who b{ display:block; font-size:14px; color:var(--text); }
+.printdoc__who span{ display:block; }
+
+/* Sayfanın ilk cümlesi ne OLMADIĞIDIR. */
+.printdoc__limit{
+  margin-top:12px; padding:10px 12px;
+  border:1px solid var(--border-strong); border-left:3px solid var(--danger);
+  font-size:12.5px; line-height:1.5;
+}
+.printdoc__key{
+  margin-top:8px; padding:8px 12px;
+  background:var(--surface-2); font-size:11.5px; line-height:1.5; color:var(--text-2);
+}
+.printdoc__meta{ margin-top:10px; font-size:12.5px; color:var(--text-2); }
+.printdoc__h{
+  margin:18px 0 8px; font-family:var(--font-body);
+  font-size:11px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--text-3);
+  padding-bottom:4px; border-bottom:1px solid var(--border);
+}
+.printdoc__list{ margin:0; padding-left:1.1em; font-size:12.5px; }
+.printdoc__list li{ margin:4px 0; }
+.printdoc__note{ font-size:12px; color:var(--text-2); }
+.printdoc__foot{
+  margin-top:20px; padding-top:10px; border-top:1px solid var(--border);
+  font-size:11px; color:var(--text-3); line-height:1.5;
+}
+
+@media print{
+  /* Perde: her şey gizlenir, yalnız belge basılır. `display:none`
+     yerine `visibility` kullanılır ki blok kendi konumunu kaybetmesin. */
+  body *{ visibility:hidden !important; }
+  #print-root, #print-root *{ visibility:visible !important; }
+  #print-root{
+    position:absolute !important; left:0; top:0; width:100%;
+    padding:0; margin:0; font-size:11.5px;
+  }
+  #print-root .printdoc__h{ break-after:avoid; }
+  #print-root table{ break-inside:auto; }
+  #print-root tr{ break-inside:avoid; }
+  @page{ margin:14mm; }
+}

@@ -343,6 +343,7 @@ src/
   index.html            yükleme sırası: veri → çekirdek → ekranlar
   MIMARI.md             bu belge
   YOLHARITASI.md        sonraki iki plan: veri girişi ve tasarım
+  SAGLIK.md             Modül 1 planı: türetme, birlikte okuma, taban çizgi
   OFIS.md               beş ajanın çalışma düzeni
   STIL.md               tasarım sistemi
   css/
@@ -354,7 +355,7 @@ src/
     designs.css         seçilebilir düzenler: odak, kraft, katmanlı, harita
   js/
     data/               referans tabloları — mantık yok, yalnızca veri
-      biomarkers.js     52 biyobelirteç, 12 panel, 3 türetilmiş ölçüm
+      biomarkers.js     58 biyobelirteç, 12 panel, 11 türetilmiş indeks
       nutrients.js      15 besin öğesi, RDA, emilim etkileri
       foods.js          61 gıda, ev ölçüleri, mikro besin profilleri
       prices.js         seed fiyat endeksi, 10 ikame, toplu alım
@@ -385,7 +386,7 @@ src/
       setup.js          ilk kurulum
     screens/            12 ekran
     app.js              kabuk: gezinme, görünüm paneli, olay dağıtımı, açılış
-  tests/                425 test, 11 paket
+  tests/                445 test, 11 paket
 tools/
   runtests.js           birim testleri (başsız tarayıcı)
   smoke.js              duman testi: gerçek uygulamayı gezer

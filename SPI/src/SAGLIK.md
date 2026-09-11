@@ -96,12 +96,34 @@ Bir değişim ölçüm gürültüsünden büyük değilse «değişti» denmez.
 - ✅ Örüntü okuma (İz B) — kural motorunda, modelsiz
 - ✅ Kişisel taban çizgi ve anlamlı değişim eşiği (İz C)
 
-### Faz 2 — Karşılaştırma ve ölçüm sayfası
+### Faz 2 — Karşılaştırma ve ölçüm sayfası — **YAPILDI**
 
-- ⬜ İki oturum arası fark görünümü
-- ⬜ Ölçüm sayfası: eğilim, taban çizgi, örüntü, ilgili besin
+- ✅ **Karşılaştır** sekmesi: iki oturum seç, farkı gör. Varsayılan son
+  iki oturum. Satırlar önce gerçek değişimler, sonra gürültü, sonra
+  eksikler diye sıralanır; sekmedeki rozet oturum sayısını değil
+  **gerçek değişim sayısını** gösterir.
+- ✅ Fark yazmak kolaydır; zor olan hangi farkın gerçek olduğunu
+  söylemektir. Her satır kişisel saçılmaya göre işaretlenir:
+  «gerçek değişim» · «gürültü sayılır» · «eşik yok». Üçten az kaydı
+  olan ölçümde sistem sessizce «gerçek» demez.
+- ✅ Eksik veri sıfır sayılmaz: bir oturumda olmayan ölçüm için fark
+  hesaplanmaz, «ilk kez ölçüldü» ya da «bu kez ölçülmedi» yazar.
+- ✅ Ölçüm sayfasına kişisel taban çizgi ve örüntüler eklendi.
 
-### Faz 3 — Hekim çıktısı ve sabitleme
+### Faz 3 — Hekim çıktısı — **YAPILDI**
 
-- ⬜ Yazdırılabilir özet (SINIR kuralı çıktının üstünde yazar)
-- ⬜ Sabitlenen ölçümler
+- ✅ Tek sayfalık, yazdırılabilir özet. İki şeyi aynı anda yapar:
+  hekimin işine yarayacak kadar eksiksiz olmak ve **ne olmadığını en
+  üstte söylemek**. Sayfanın ilk satırı klinik sınırdır.
+- ✅ İkinci satır **kesinlik anahtarı**dır: hangi sayının ölçüldüğü,
+  hangisinin hesaplandığı yazmazsa hekim hesaplanmış bir LDL'yi
+  ölçülmüş sanar. Tablodaki her satır kendi kesinliğini taşır.
+- ✅ Yazdırma perdesi (`@media print`): kâğıda yalnız bu blok basılır,
+  arayüzün hiçbir parçası görünmez.
+
+### Faz 4 — Sıradaki
+
+- ⬜ Sabitlenen ölçümler (önemsediğin 3–5 ölçüm her görünümün üstünde)
+- ⬜ Oturuma açlık durumu ve saat bilgisi (glukoz, insülin ve
+  trigliserit yalnız açken yorumlanır)
+- ⬜ Panel görünümü: bir paneli bir bütün olarak okuma

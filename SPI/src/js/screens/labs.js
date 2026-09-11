@@ -24,10 +24,11 @@ SP.Screens.labs = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'sonuc',  label:'Sonuçlar', icon:'layers' },
-    { id:'giris',  label:'Test gir', icon:'flask' },
-    { id:'gecmis', label:'Geçmiş',   icon:'clock' },
-    { id:'trend',  label:'Eğilim',   icon:'chart' },
+    { id:'sonuc',  label:'Sonuçlar',     icon:'layers' },
+    { id:'giris',  label:'Test gir',     icon:'flask' },
+    { id:'gecmis', label:'Geçmiş',       icon:'clock' },
+    { id:'kiyas',  label:'Karşılaştır',  icon:'chart' },
+    { id:'trend',  label:'Eğilim',       icon:'chart' },
   ];
 
   /* Yapistirma onizlemesi oturum boyunca burada durur; kaydedilene kadar
@@ -41,6 +42,14 @@ SP.Screens.labs = (function(){
   function tabs(){
     const items = TABS.map(t => {
       if(t.id === 'gecmis' && S.labs.length) return Object.assign({}, t, { count:S.labs.length });
+      if(t.id === 'kiyas' && S.labs.length >= 2){
+        /* Rozette oturum sayısı değil GERÇEK DEĞİŞİM sayısı durur:
+           sekmenin orada olması haber değil, orada iş olması haber. */
+        const b2 = S.labs[S.labs.length - 1], a2 = S.labs[S.labs.length - 2];
+        const n = compareRows(a2, b2)
+          .filter(r => r.kind === 'diff' && r.change && r.change.meaningful).length;
+        if(n) return Object.assign({}, t, { count:n });
+      }
       const n = Object.keys(draft.values).length;
       if(t.id === 'giris' && n) return Object.assign({}, t, { count:n });
       return t;
@@ -118,7 +127,8 @@ SP.Screens.labs = (function(){
         action:html`${K.Input({ id:'lab-q', value:S.ui.labQuery || '',
           placeholder:'Ölçüm ara…', aria:'Ölçüm ara', change:'lab-query', debounce:200 })}
           ${K.Button({ label:'Test gir', tone:'primary', act:'lab-tab',
-            data:{ 'data-tab':'giris' } })}`,
+            data:{ 'data-tab':'giris' } })}
+          ${K.Button({ label:'Hekime götür', act:'open-doctor' })}`,
         body:html`
           ${when(panelFilter(), () => raw(String(panelFilter())))}
           ${when(!rows.length, () => K.Notice({ tone:'info',
@@ -378,6 +388,270 @@ SP.Screens.labs = (function(){
     ]));
   }
 
+  /* ------------------------------------------------------- hekim çıktısı
+
+     Tek sayfalık, yazdırılabilir özet. Bu sistemin dışarıya verdiği tek
+     belgedir ve iki şeyi aynı anda yapmak zorundadır: hekimin işine
+     yarayacak kadar eksiksiz olmak ve ne OLMADIĞINI en üstte söylemek.
+
+     Bu yüzden sayfanın ilk satırı klinik sınırdır. İkinci satır
+     kesinlik anahtarıdır: hangi sayının ölçüldüğü, hangisinin
+     hesaplandığı yazmazsa hekim hesaplanmış bir LDL'yi ölçülmüş sanar.
+
+     Yazdırma perdesi: `@media print` kuralları sayfanın geri kalanını
+     gizler, yalnız bu blok basılır. */
+
+  function doctorBody(){
+    const p2 = S.profile || {};
+    const yas = M.ageOf(p2);
+    const last = S.labs.length ? S.labs[S.labs.length - 1] : null;
+    const rows = SP.Bio.attention(p2);
+    const pats = SP.Bio.patterns(p2);
+    const flags = M.openFlags();
+    const ov = SP.Bio.overdue();
+
+    const hucre = (b, cell) => {
+      if(!cell || cell.v == null) return null;
+      const st = SP.Bio.statusOf(b.id, cell.v, p2);
+      const r = SP.Bio.refFor(b.id, p2);
+      return [b.name,
+        U.fmtNum(cell.v) + ' ' + b.unit,
+        r && r.ref ? U.fmtNum(r.ref[0]) + '–' + U.fmtNum(r.ref[1]) : '—',
+        st.label,
+        SP.CERTAINTY[cell.cert] ? SP.CERTAINTY[cell.cert].label : cell.cert];
+    };
+
+    /* Bandın dışındakiler önce; sonra ölçülen geri kalan her şey.
+       Hekim tabloyu baştan sona okur, ekranı süzgeçlemez. */
+    const disinda = [], icinde = [];
+    SP.BIOMARKERS.forEach(b => {
+      const cell = M.latestOf(b.id);
+      const sat = hucre(b, cell);
+      if(!sat) return;
+      const st = SP.Bio.statusOf(b.id, cell.v, p2);
+      (st.id === 'ok' ? icinde : disinda).push(sat);
+    });
+
+    return String(html`<div id="print-root" class="printdoc">
+      <div class="printdoc__head">
+        <div>
+          <b class="printdoc__title">Sağlık kayıt özeti</b>
+          <span class="printdoc__sub">${U.fmtDate(U.todayISO())} tarihinde hazırlandı</span>
+        </div>
+        <div class="printdoc__who">
+          ${when(p2.name, () => html`<b>${p2.name}</b>`)}
+          <span>${yas != null ? yas + ' yaş' : 'yaş girilmemiş'} ·
+            ${p2.sex === 'female' ? 'kadın' : 'erkek'}</span>
+          ${when(p2.heightCm && p2.weightKg,
+            () => html`<span>${U.fmtNum(p2.heightCm)} cm · ${U.fmtNum(p2.weightKg)} kg</span>`)}
+        </div>
+      </div>
+
+      <p class="printdoc__limit"><b>Bu bir hekim raporu değildir.</b>
+        ${SP.CLINICAL.disclaimer}</p>
+
+      <p class="printdoc__key"><b>Kesinlik anahtarı —</b>
+        <b>ölçüldü:</b> laboratuvar ölçtü ·
+        <b>hesaplandı:</b> başka ölçümlerden formülle türetildi (formül ilgili
+        satırda tanımlıdır) · <b>tahmin:</b> ev ölçüsünden kestirildi.
+        Hesaplanan bir değer ölçülmüş gibi okunmamalıdır.</p>
+
+      ${when(last, () => html`<p class="printdoc__meta">Son test oturumu:
+        <b>${U.fmtDate(last.date)}</b>${when(last.lab, () => html` · ${last.lab}`)} ·
+        ${S.labs.length} oturum kayıtlı</p>`)}
+
+      ${when(flags.length, () => html`
+        <h3 class="printdoc__h">Açık kırmızı bayraklar</h3>
+        <ul class="printdoc__list">${map(flags, f => html`
+          <li><b>${f.label}</b> — ${f.detail}</li>`)}</ul>`)}
+
+      ${when(disinda.length, () => html`
+        <h3 class="printdoc__h">Referans ya da hedef bandının dışındakiler</h3>
+        ${K.Table({ tight:true,
+          headers:['Ölçüm', 'Değer', 'Referans', 'Durum', 'Kesinlik'], rows:disinda })}`)}
+
+      ${when(pats.length, () => html`
+        <h3 class="printdoc__h">Birlikte okunması gerekenler</h3>
+        <ul class="printdoc__list">${map(pats, pt => html`
+          <li><b>${pt.title}.</b> ${pt.text}</li>`)}</ul>`)}
+
+      ${when(icinde.length, () => html`
+        <h3 class="printdoc__h">Bandın içindeki ölçümler</h3>
+        ${K.Table({ tight:true,
+          headers:['Ölçüm', 'Değer', 'Referans', 'Durum', 'Kesinlik'], rows:icinde })}`)}
+
+      ${when(ov.length, () => html`
+        <h3 class="printdoc__h">Ölçülmemiş ya da tazelenmemiş paneller</h3>
+        <p class="printdoc__note">${ov.map(o => o.panel.name).join(' · ')}</p>`)}
+
+      <p class="printdoc__foot">Bu özet kişisel bir izleme sisteminden alınmıştır.
+        Değerler kullanıcının kendi girdiği laboratuvar sonuçlarıdır; sistem
+        ölçüm yapmaz. Teşhis ve tedavide karar hekimindir.</p>
+    </div>`);
+  }
+
+  /* -------------------------------------------------------- karşılaştırma
+
+     İki test oturumu seç, aradaki farkı gör. Bir sağlık kaydının en çok
+     sorulan sorusu budur: «geçen sefere göre ne değişti?»
+
+     Fark yazmak kolaydır; ZOR OLAN hangi farkın gerçek olduğunu
+     söylemektir. Her satır kişisel saçılmaya göre işaretlenir: eşiğin
+     altında kalan fark «değişti» diye sunulmaz, «gürültü» der. Ölçüm
+     sayısı üçün altındaysa eşik hesaplanamaz ve bu da yazılır — sessizce
+     «gerçek» demez. */
+
+  function comparePick(){
+    const list = S.labs.slice().reverse();
+    const opts = list.map(l => ({ value:l.id,
+      label:U.fmtDate(l.date) + (l.lab ? ' · ' + l.lab : '')
+        + ' (' + Object.keys(l.values).length + ' değer)' }));
+    return { list, opts };
+  }
+
+  function compareIds(){
+    const { list } = comparePick();
+    /* Varsayılan: en son iki oturum. Kullanıcı değiştirene kadar en çok
+       sorulan karşılaştırma budur. */
+    const a = S.ui.cmpA && list.some(l => l.id === S.ui.cmpA)
+      ? S.ui.cmpA : (list[1] ? list[1].id : null);
+    const b = S.ui.cmpB && list.some(l => l.id === S.ui.cmpB)
+      ? S.ui.cmpB : (list[0] ? list[0].id : null);
+    return { a, b };
+  }
+
+  function compareRows(recA, recB){
+    const out = [];
+    SP.BIOMARKERS.forEach(m => {
+      const ca = recA.values[m.id], cb = recB.values[m.id];
+      const va = ca && ca.v != null ? Number(ca.v) : null;
+      const vb = cb && cb.v != null ? Number(cb.v) : null;
+      if(va == null && vb == null) return;
+      const row = { marker:m, from:va, to:vb,
+        certFrom:ca ? ca.cert : null, certTo:cb ? cb.cert : null };
+      if(va == null || vb == null){
+        /* Eksik veri sıfır sayılmaz: fark hesaplanmaz, «yeni» ya da
+           «bu kez ölçülmedi» denir. */
+        row.kind = va == null ? 'new' : 'gone';
+      }else{
+        row.kind = 'diff';
+        row.change = SP.Bio.meaningfulChange(m.id, va, vb);
+        row.statusTo = SP.Bio.statusOf(m.id, vb);
+      }
+      out.push(row);
+    });
+    /* Önce gerçek değişimler, sonra gürültü, sonra eksikler. */
+    const rank = r => r.kind !== 'diff' ? 2
+      : (r.change && r.change.meaningful ? 0 : 1);
+    return out.sort((x, y) => {
+      const d = rank(x) - rank(y);
+      if(d) return d;
+      const ax = x.change && x.change.ratio || 0;
+      const ay = y.change && y.change.ratio || 0;
+      return ay - ax;
+    });
+  }
+
+  function compareView(){
+    if(S.labs.length < 2){
+      return K.Ledger([K.Entry({
+        label:'Karşılaştır', meta:S.labs.length + ' oturum',
+        note:'Karşılaştırma için en az iki test oturumu gerekir. '
+          + 'Tek oturumla «ne değişti» sorusunun cevabı yoktur.',
+        action:K.Button({ label:'Rapor yapıştır', tone:'primary', act:'open-paste' }),
+        body:P.empty('En az iki test oturumu gerekir.'),
+      })]);
+    }
+
+    const { opts } = comparePick();
+    const { a, b } = compareIds();
+    const recA = S.labs.find(l => l.id === a);
+    const recB = S.labs.find(l => l.id === b);
+    if(!recA || !recB || recA.id === recB.id){
+      return K.Ledger([K.Entry({ label:'Karşılaştır',
+        note:'İki farklı oturum seç.',
+        body:html`<div class="cols-2">
+          ${K.Field({ label:'Önceki', input:K.Select({ id:'cmp-a', change:'cmp-pick',
+            value:a, options:opts }) })}
+          ${K.Field({ label:'Sonraki', input:K.Select({ id:'cmp-b', change:'cmp-pick',
+            value:b, options:opts }) })}
+        </div>` })]);
+    }
+
+    const rows = compareRows(recA, recB);
+    const gercek = rows.filter(r => r.kind === 'diff' && r.change && r.change.meaningful);
+    const gun = U.diffDays(recA.date, recB.date);
+
+    return K.Ledger([
+      K.Entry({
+        label:'Karşılaştır',
+        meta:U.fmtDate(recA.date) + ' → ' + U.fmtDate(recB.date),
+        note:'Fark yazmak kolaydır; zor olan hangi farkın gerçek olduğunu '
+          + 'söylemektir. Her satır kendi saçılmana göre işaretlenir.',
+        action:html`<div class="stack-sm">
+          ${K.Field({ label:'Önceki', input:K.Select({ id:'cmp-a', change:'cmp-pick',
+            value:a, options:opts }) })}
+          ${K.Field({ label:'Sonraki', input:K.Select({ id:'cmp-b', change:'cmp-pick',
+            value:b, options:opts }) })}
+        </div>`,
+        body:html`
+          <div class="pair mb-16">
+            <div class="sidestat"><span class="sidestat__v">${gun}<small>gün</small></span>
+              <span class="sidestat__k">iki oturum arası</span></div>
+            <div class="sidestat"><span class="sidestat__v">${gercek.length}</span>
+              <span class="sidestat__k">gerçek değişim</span></div>
+          </div>
+          ${when(!rows.length, () => P.empty('İki oturumda da ortak ölçüm yok.'))}
+          ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
+            const c = r.change;
+            const isim = r.marker.name;
+            if(r.kind !== 'diff'){
+              return html`<div class="cmprow cmprow--none">
+                <span class="cmprow__name"><b>${isim}</b></span>
+                <span class="cmprow__val num">${r.kind === 'new'
+                  ? U.fmtNum(r.to) + ' ' + r.marker.unit : U.fmtNum(r.from) + ' ' + r.marker.unit}</span>
+                <span class="cmprow__note tiny dim">${r.kind === 'new'
+                  ? 'ilk kez ölçüldü' : 'bu kez ölçülmedi'}</span>
+              </div>`;
+            }
+            const ton = !c.ok ? 'muted'
+              : !c.meaningful ? 'muted'
+              : c.good === false ? 'danger' : c.good === true ? 'ok' : 'info';
+            const ok = c.dir === 'up' ? '▲' : c.dir === 'down' ? '▼' : '–';
+            return html`<button class="${cls('cmprow', c.meaningful && 'is-real')}"
+              data-act="open-marker" data-id="${r.marker.id}">
+              <span class="cmprow__name"><b>${isim}</b>
+                <span class="tiny dim">${SP.PANEL_BY_ID[r.marker.panel]
+                  ? SP.PANEL_BY_ID[r.marker.panel].name : ''}</span></span>
+              <span class="cmprow__val num">${U.fmtNum(r.from)}
+                <span class="cmprow__arrow" aria-hidden="true">→</span>
+                <b>${U.fmtNum(r.to)}</b><small>${r.marker.unit}</small></span>
+              <span class="${cls('cmprow__delta', 'is-' + ton)}">${ok}
+                ${(c.diff > 0 ? '+' : '') + U.fmtNum(c.diff)}${when(c.pct != null,
+                  () => html` <span class="tiny">%${U.fmtNum(Math.round(Math.abs(c.pct)))}</span>`)}</span>
+              <span class="cmprow__note tiny dim">${c.ok
+                ? (c.meaningful ? 'gerçek değişim' : 'gürültü sayılır')
+                : 'eşik yok'}</span>
+              <span class="cmprow__status">${K.Badge({ label:r.statusTo.label,
+                tone:r.statusTo.tone })}</span>
+            </button>`;
+          })}</div>`)}`,
+      }),
+
+      K.Entry({
+        label:'Nasıl okunur', meta:'eşik',
+        note:'Kendi ölçümlerinin saçılması eşiktir.',
+        body:K.Notice({ tone:'info',
+          body:'Bir ölçümün en az ' + SP.Bio.BASELINE_MIN + ' kaydı varsa kendi '
+            + 'ortalaması ve saçılması hesaplanır. İki oturum arasındaki fark bu '
+            + 'saçılmadan küçükse «gürültü sayılır» yazar: laboratuvarın hata payı '
+            + 've günden güne dalgalanma o kadarını zaten üretir. Üçten az kaydı '
+            + 'olan ölçümde eşik hesaplanamaz ve «eşik yok» yazar — sistem '
+            + 'sessizce «gerçek» demez.' }),
+      }),
+    ]);
+  }
+
   /* -------------------------------------------------------------- geçmiş */
 
   function historyView(){
@@ -495,6 +769,7 @@ SP.Screens.labs = (function(){
       <div class="mb-20">${tabs()}</div>
       ${tab === 'giris' ? entryView()
         : tab === 'gecmis' ? historyView()
+        : tab === 'kiyas' ? compareView()
         : tab === 'trend' ? trendView()
         : resultsView()}
       ${when(tab === 'sonuc', () => html`<div class="mt-24">
@@ -513,6 +788,14 @@ SP.Screens.labs = (function(){
         footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
           ${K.Button({ label:'Eğilimi aç', tone:'primary', act:'goto-trend', data:{ 'data-id':b.id } })}`) });
     },
+    async 'open-doctor'(){
+      UI.sheet({ title:'Hekime götürülecek özet',
+        subtitle:'tek sayfa · yazdırılabilir', wide:true,
+        body:doctorBody(), noFocus:true,
+        footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
+          ${K.Button({ label:'Yazdır', tone:'primary', act:'print-doctor' })}`) });
+    },
+    async 'print-doctor'(){ window.print(); },
     async 'goto-trend'(el){
       S.ui.trendMarker = el.dataset.id;
       S.ui.labTab = 'trend';
@@ -602,6 +885,16 @@ SP.Screens.labs = (function(){
   };
 
   const change = {
+    /* Karşılaştırılacak iki oturum. Seçim anında uygulanır; onay
+       düğmesi beklemez — bir görünüm tercihinin karşılığı görülerek
+       anlaşılır. */
+    async 'cmp-pick'(){
+      const val = id => { const el = document.getElementById(id); return el ? el.value : null; };
+      S.ui.cmpA = val('cmp-a');
+      S.ui.cmpB = val('cmp-b');
+      SP.App.render();
+    },
+
     /* Dosya hem tiklayarak hem surukleyerek gelir; ikisi de buraya duser. */
     async 'lab-file'(el){
       const file = el.files && el.files[0];

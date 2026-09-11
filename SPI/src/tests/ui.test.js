@@ -310,6 +310,47 @@
     });
   });
 
+  describe('Testler — karşılaştırma ve hekim çıktısı', () => {
+    async function ikiOturum(){
+      resetState();
+      SP.S.profile = Object.assign(SP.Model.defaultProfile(),
+        { name:'Test', birthYear:1990, sex:'male', heightCm:178, weightKg:74 });
+      [20, 24, 28, 60].forEach((v, i) =>
+        pushLab('2026-0' + (i + 1) + '-01', { ferritin:v, hgb:13.5, mcv:85 }));
+      SP.S.ui.labTab = 'kiyas';
+      return String(await SP.Screens.labs.render());
+    }
+
+    it('karşılaştırma görünümü çizilir ve iki oturumu seçtirir', async () => {
+      const out = await ikiOturum();
+      expect(out.indexOf('cmp-a') > 0).toBeTruthy();
+      expect(out.indexOf('cmp-b') > 0).toBeTruthy();
+      expect(out.indexOf('cmprow') > 0).toBeTruthy();
+    });
+
+    /* Farkı yazmak kolay; asıl iş hangi farkın gerçek olduğunu
+       söylemek. Ekran bu iki sözcüğü kullanmıyorsa iş yapılmamış
+       demektir. */
+    it('gerçek değişim ile gürültü ayrı ayrı yazılır', async () => {
+      const out = await ikiOturum();
+      expect(out.indexOf('gerçek değişim') > 0).toBeTruthy();
+      expect(out.indexOf('gürültü sayılır') > 0).toBeTruthy();
+    });
+
+    it('tek oturumla karşılaştırma yapılmaz', async () => {
+      resetState();
+      pushLab('2026-01-01', { ferritin:20 });
+      SP.S.ui.labTab = 'kiyas';
+      const out = String(await SP.Screens.labs.render());
+      expect(out.indexOf('en az iki test oturumu') > 0).toBeTruthy();
+    });
+
+    it('hekim çıktısı eylemi var', () => {
+      expect(typeof SP.Screens.labs.handle['open-doctor']).toBe('function');
+      expect(typeof SP.Screens.labs.handle['print-doctor']).toBe('function');
+    });
+  });
+
   describe('Düzen seçimi', () => {
     it('varsayılan düzende kök niteliği yazılmaz', () => {
       resetState();
