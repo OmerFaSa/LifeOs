@@ -287,5 +287,143 @@
       const rec = SP.Test.makeLab('2026-01-01', { iron_s:100, tibc:0 });
       expect(rec.values.tsat).toBeUndefined();
     });
+
+    /* --------------------------------------------- yeni türetilmiş ölçümler */
+
+    it('LDL Friedewald ile hesaplanır', () => {
+      const rec = SP.Test.makeLab('2026-01-01', { chol:200, hdl:50, trig:150 });
+      expect(rec.values.ldl.v).toBe(120);          /* 200 − 50 − 30 */
+      expect(rec.values.ldl.cert).toBe('derived');
+    });
+
+    /* Friedewald trigliserit 400 üstünde geçersizdir. Geçersiz bir
+       formülü uygulamak, hesaplamamaktan kötüdür. */
+    it('trigliserit 400 üstündeyken LDL hesaplanmaz', () => {
+      const rec = SP.Test.makeLab('2026-01-01', { chol:260, hdl:40, trig:450 });
+      expect(rec.values.ldl).toBeUndefined();
+    });
+
+    /* Bu sistemin en temel kuralı: ölçülenin üzerine tahmin yazılmaz. */
+    it('laboratuvarın ölçtüğü LDL hesaplananın üstüne geçer', () => {
+      const rec = SP.Test.makeLab('2026-01-01', { chol:200, hdl:50, trig:150, ldl:133 });
+      expect(rec.values.ldl.v).toBe(133);
+      expect(rec.values.ldl.cert).toBe('measured');
+    });
+
+    it('eGFR yaş ve cinsiyetten hesaplanır', () => {
+      SP.S.profile = Object.assign(SP.Model.defaultProfile(),
+        { birthYear:new Date().getFullYear() - 40, sex:'male' });
+      const rec = SP.Test.makeLab('2026-01-01', { creat:1.0 });
+      expect(rec.values.egfr.v > 80 && rec.values.egfr.v < 110).toBeTruthy();
+    });
+
+    it('yaş bilinmiyorsa eGFR hiç yazılmaz', () => {
+      SP.S.profile = Object.assign(SP.Model.defaultProfile(), { birthYear:null });
+      const rec = SP.Test.makeLab('2026-01-01', { creat:1.0 });
+      expect(rec.values.egfr).toBeUndefined();
+    });
+
+    it('TG/HDL, eAG, De Ritis ve düzeltilmiş kalsiyum hesaplanır', () => {
+      const rec = SP.Test.makeLab('2026-01-01',
+        { trig:150, hdl:50, hba1c:6, ast:30, alt:30, ca:9, alb:3.5 });
+      expect(rec.values.tg_hdl.v).toBe(3);
+      expect(rec.values.eag.v).toBe(125.5);        /* 28,7 × 6 − 46,7 */
+      expect(rec.values.deritis.v).toBe(1);
+      expect(rec.values.ca_corr.v).toBe(9.4);      /* 9 + 0,8 × 0,5 */
+    });
+  });
+
+  describe('Modül 1 — kişisel taban çizgi', () => {
+    it('üç ölçümden azında taban çizgi hesaplanmaz', () => {
+      resetState();
+      SP.Test.pushLab('2026-01-01', { ferritin:30 });
+      SP.Test.pushLab('2026-02-01', { ferritin:34 });
+      const b = SP.Bio.baselineOf('ferritin');
+      expect(b.ok).toBe(false);
+      expect(b.n).toBe(2);
+    });
+
+    it('ortalama ve saçılma hesaplanır', () => {
+      resetState();
+      [10, 20, 30].forEach((v, i) =>
+        SP.Test.pushLab('2026-0' + (i + 1) + '-01', { ferritin:v }));
+      const b = SP.Bio.baselineOf('ferritin');
+      expect(b.ok).toBe(true);
+      expect(b.mean).toBe(20);
+      expect(b.sd).toBe(10);                       /* örnek SS (n−1) */
+    });
+
+    /* Asıl iş bu: her oynama "değişti" değildir. */
+    it('saçılmanın altındaki değişim gürültü sayılır', () => {
+      resetState();
+      [10, 20, 30].forEach((v, i) =>
+        SP.Test.pushLab('2026-0' + (i + 1) + '-01', { ferritin:v }));
+      const c = SP.Bio.meaningfulChange('ferritin', 20, 25);
+      expect(c.ok).toBe(true);
+      expect(c.meaningful).toBe(false);
+    });
+
+    it('saçılmanın üstündeki değişim gerçek sayılır', () => {
+      resetState();
+      [10, 20, 30].forEach((v, i) =>
+        SP.Test.pushLab('2026-0' + (i + 1) + '-01', { ferritin:v }));
+      const c = SP.Bio.meaningfulChange('ferritin', 20, 45);
+      expect(c.meaningful).toBe(true);
+    });
+
+    /* Yön iyi mi kötü mü, ölçümün hangi yönde iyi olduğundan gelir.
+       Bandın ortası iyi olan ölçümlerde (ferritin gibi) böyle bir yön
+       yoktur ve sistem uydurmaz. */
+    it('değişimin iyi yönde olup olmadığı ölçümün yönünden gelir', () => {
+      resetState();
+      [20, 24, 28].forEach((v, i) =>
+        SP.Test.pushLab('2026-0' + (i + 1) + '-01', { vitd:v, ferritin:v }));
+      expect(SP.Bio.meaningfulChange('vitd', 24, 40).good).toBe(true);
+      expect(SP.Bio.meaningfulChange('vitd', 24, 10).good).toBe(false);
+      expect(SP.Bio.meaningfulChange('ferritin', 24, 40).good).toBe(null);
+    });
+  });
+
+  describe('Modül 1 — birlikte okuma', () => {
+    it('örüntü girdisi eksikse hiç çalışmaz', () => {
+      resetState();
+      SP.Test.pushLab('2026-01-01', { ferritin:15 });   /* MCV yok */
+      const ids = SP.Bio.patterns().map(p => p.id);
+      expect(ids.indexOf('demir-eksikligi')).toBe(-1);
+    });
+
+    it('düşük ferritin ve küçük MCV demir eksikliği örüntüsü verir', () => {
+      resetState();
+      SP.Test.pushLab('2026-01-01', { ferritin:15, mcv:78 });
+      const ids = SP.Bio.patterns().map(p => p.id);
+      expect(ids.indexOf('demir-eksikligi') >= 0).toBeTruthy();
+    });
+
+    /* Ferritin akut faz proteinidir: CRP yüksekken demir deposunu
+       olduğundan yüksek gösterir. Bu uyarı olmadan "normal ferritin"
+       yanlış güven verir. */
+    it('CRP yüksekken ferritin uyarısı çıkar', () => {
+      resetState();
+      SP.Test.pushLab('2026-01-01', { ferritin:120, crp:9 });
+      const ids = SP.Bio.patterns().map(p => p.id);
+      expect(ids.indexOf('ferritin-crp') >= 0).toBeTruthy();
+    });
+
+    it('örüntü metni sayıları yerine koyar ve hangi ölçümden geldiğini söyler', () => {
+      resetState();
+      SP.Test.pushLab('2026-01-01', { ferritin:15, mcv:78 });
+      const p = SP.Bio.patterns().find(x => x.id === 'demir-eksikligi');
+      expect(p.text.indexOf('{') < 0).toBeTruthy();
+      expect(p.markers.indexOf('mcv') >= 0).toBeTruthy();
+    });
+
+    it('her örüntünün başlığı, metni ve girdileri var', () => {
+      SP.Bio.PATTERNS.forEach(p => {
+        expect(p.title.length > 8).toBeTruthy();
+        expect(p.text.length > 40).toBeTruthy();
+        expect(p.needs.length > 0).toBeTruthy();
+        p.needs.forEach(id => expect(SP.BIO_BY_ID[id]).toBeTruthy());
+      });
+    });
   });
 })();

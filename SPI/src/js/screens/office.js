@@ -14,6 +14,12 @@ SP.Screens.office = (function(){
   const { html, raw, when, map } = SP.h;
   const K = SP.C, P = SP.Parts;
 
+  /* Masalar yan yana durur; biri uzarsa hizalama bozulur ve sayfa o
+     ajanin boyuna gore uzar. Masada en fazla dort not gosterilir,
+     gerisi rapora iner. Not URETIMI de ayrica toplandi (core/office.js):
+     on iki ayri "hic olculmemis" notu tek satira indi. */
+  const DESK_NOTES = 4;
+
   /* Masa satirlari: her ajanin kendi kural motoru cumlesi. */
   function deskCard(agent){
     const open = S.ui.officeDesk === agent.id;
@@ -36,9 +42,13 @@ SP.Screens.office = (function(){
             : K.Badge({ label:'kural motoru', tone:'muted', icon:false })}
         </div>
         <p class="desk__line">${line}</p>
-        ${when(notes.length, () => html`<div class="notes mt-10">${map(notes, n => html`
-          <div class="note note--${n.tone}"><span class="note__dot"></span>
-            <span class="small">${n.text}</span></div>`)}</div>`)}
+        ${when(notes.length, () => html`<div class="notes mt-10">
+          ${map(notes.slice(0, DESK_NOTES), n => html`
+            <div class="note note--${n.tone}"><span class="note__dot"></span>
+              <span class="small">${n.text}</span></div>`)}
+          ${when(notes.length > DESK_NOTES, () => html`<p class="tiny dim mt-6">
+            ${notes.length - DESK_NOTES} not daha — raporu aç.</p>`)}
+        </div>`)}
         ${when(open, () => html`<div class="desk__open">
           ${deskDetail(agent, b)}
         </div>`)}

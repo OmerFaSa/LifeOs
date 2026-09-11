@@ -185,6 +185,16 @@ SP.BIOMARKERS = [
     note:'Insulin direnci endeksi. Aclik glukozu ve insulin girildiginde kendiliginden hesaplanir.' },
 
   /* ------------------------------------------------------------------ lipid */
+  { id:'eag', name:'Ortalama glukoz (eAG)', unit:'mg/dL', panel:'metabolic', dir:'low',
+    ref:[70, 154], optimal:[70, 114], red:{ above:240 },
+    derived:'eag', aliases:['eag','ortalama glukoz','tahmini ortalama glukoz'],
+    note:'HbA1c\'nin gündelik dildeki karşılığı: son üç ayın ortalama kan şekeri. Tek bir ölçüm değil, ortalamadır.' },
+
+  { id:'tyg', name:'TyG indeksi', unit:'', panel:'metabolic', dir:'low',
+    ref:[7, 9.5], optimal:[7, 8.5], red:{ above:10 },
+    derived:'tyg', aliases:['tyg','trigliserit glukoz indeksi'],
+    note:'Açlık insülini ölçülmediğinde insülin direncinin yerini tutar. Trigliserit ve açlık glukozundan hesaplanır.' },
+
   { id:'chol', name:'Total kolesterol', unit:'mg/dL', panel:'lipid', dir:'low',
     ref:[120, 200], optimal:[140, 190], red:{ above:320 },
     aliases:['total kolesterol','kolesterol','cholesterol'],
@@ -208,6 +218,11 @@ SP.BIOMARKERS = [
     nutrients:['omega3'],
     aliases:['trigliserit','trigliserid','tg','triglyceride'],
     note:'Sivi sekere ve rafine karbonhidrata en hizli tepki veren degerdir.' },
+
+  { id:'tg_hdl', name:'Trigliserit / HDL', unit:'oran', panel:'lipid', dir:'low',
+    ref:[0, 3.5], optimal:[0, 2], red:{ above:6 },
+    derived:'tg_hdl', aliases:['tg/hdl','trigliserit hdl orani'],
+    note:'İnsülin direncinin en ucuz göstergesi. 2 altı iyi, 3 üstü dikkat ister. Aç karnına alınan kandan hesaplanır.' },
 
   { id:'nonhdl', name:'Non-HDL kolesterol', unit:'mg/dL', panel:'lipid', dir:'low',
     ref:[0, 160], optimal:[60, 130], red:{ above:220 },
@@ -241,6 +256,16 @@ SP.BIOMARKERS = [
     note:'Uzun vadeli protein durumunun aynasi.' },
 
   /* ----------------------------------------------------------------- bobrek */
+  { id:'deritis', name:'AST / ALT (De Ritis)', unit:'oran', panel:'liver', dir:'mid',
+    ref:[0.4, 2], optimal:[0.7, 1.3], red:{ above:3 },
+    derived:'deritis', aliases:['ast/alt','de ritis','deritis'],
+    note:'İki enzimin oranı, tek başına değerlerinden fazlasını söyler. 1 altı ve 2 üstü farklı yönleri gösterir.' },
+
+  { id:'fib4', name:'FIB-4 indeksi', unit:'', panel:'liver', dir:'low',
+    ref:[0, 2.67], optimal:[0, 1.3], red:{ above:3.25 },
+    derived:'fib4', aliases:['fib4','fib-4'],
+    note:'Karaciğer sertliği için tarama indeksi. Yaş, AST, ALT ve trombositten hesaplanır; tanı değil tarama aracıdır.' },
+
   { id:'creat', name:'Kreatinin', unit:'mg/dL', panel:'kidney', dir:'mid',
     ref:{ male:[0.7, 1.3], female:[0.6, 1.1] },
     optimal:{ male:[0.8, 1.15], female:[0.65, 1.0] },
@@ -282,6 +307,11 @@ SP.BIOMARKERS = [
     nutrients:['calcium','vitd'],
     aliases:['kalsiyum','ca'],
     note:'D vitamini ile birlikte okunur; tek basina yanilticidir.' },
+
+  { id:'ca_corr', name:'Düzeltilmiş kalsiyum', unit:'mg/dL', panel:'electro', dir:'mid',
+    ref:[8.6, 10.2], optimal:[8.8, 10], red:{ below:7.5, above:11.5 },
+    derived:'ca_corr', aliases:['duzeltilmis kalsiyum','corrected calcium'],
+    note:'Kalsiyumun yarısı albümine bağlı taşınır; albümin düşükken ölçülen kalsiyum olduğundan düşük okunur. Bu satır o sapmayı düzeltir.' },
 
   { id:'mg', name:'Magnezyum', unit:'mg/dL', panel:'electro', dir:'mid',
     ref:[1.7, 2.4], optimal:[2.0, 2.4], red:{ below:1.2 },
@@ -363,8 +393,18 @@ SP.BIO_BY_ID = SP.BIOMARKERS.reduce(function(acc, b){ acc[b.id] = b; return acc;
 SP.PANEL_BY_ID = SP.PANELS.reduce(function(acc, p){ acc[p.id] = p; return acc; }, {});
 
 /* Turetilmis olcumlerin formulleri.
+
    Her biri girdi id'lerini ve hesabi tasir; girdi eksikse null doner ve
-   olcum hic yazilmaz — tahmin uretilmez. */
+   olcum hic yazilmaz — tahmin uretilmez.
+
+   Uc alan:
+     inputs    gerekli olcum id'leri; biri eksikse hesap yapilmaz
+     needs     profil alanlari ('age', 'sex'); eksikse hesap yapilmaz
+     calc      (degerler, baglam) -> sayi | null
+     measured  true ise bu olcum ELLE de girilebilir ve olculen deger
+               hesaplanana ustun gelir (LDL ve eGFR boyledir)
+
+   Formuller ekranda yazar: 'note' alani kullaniciya gosterilir. */
 SP.DERIVED = {
   homa:{
     inputs:['glucose', 'insulin'],
@@ -381,5 +421,78 @@ SP.DERIVED = {
     inputs:['iron_s', 'tibc'],
     calc:function(v){ return v.tibc ? (100 * v.iron_s / v.tibc) : null; },
     note:'Serum demir ÷ demir bağlama kapasitesi × 100',
+  },
+
+  /* LDL — Friedewald. Trigliserit 400 mg/dL ustunde formul GECERSIZDIR;
+     orada hesap yapilmaz. Gecersiz bir formulu uygulamak,
+     hesaplamamaktan kotudur. Laboratuvar dogrudan olctuyse o kazanir. */
+  ldl:{
+    inputs:['chol', 'hdl', 'trig'],
+    measured:true,
+    calc:function(v){
+      if(v.trig >= 400) return null;
+      return v.chol - v.hdl - (v.trig / 5);
+    },
+    note:'Friedewald: Total kolesterol − HDL − Trigliserit ÷ 5 '
+      + '(yalnız trigliserit 400 mg/dL altındayken geçerlidir)',
+  },
+
+  /* eGFR — CKD-EPI 2021, irk katsayisi YOK (2021 revizyonu onu kaldirdi). */
+  egfr:{
+    inputs:['creat'],
+    needs:['age', 'sex'],
+    measured:true,
+    calc:function(v, ctx){
+      const kadin = ctx.sex === 'female';
+      const k = kadin ? 0.7 : 0.9;
+      const a = v.creat <= k ? (kadin ? -0.241 : -0.302) : -1.200;
+      let e = 142 * Math.pow(v.creat / k, a) * Math.pow(0.9938, ctx.age);
+      if(kadin) e *= 1.012;
+      return e;
+    },
+    note:'CKD-EPI 2021 — kreatinin, yaş ve cinsiyetten hesaplanır',
+  },
+
+  tg_hdl:{
+    inputs:['trig', 'hdl'],
+    calc:function(v){ return v.hdl ? v.trig / v.hdl : null; },
+    note:'Trigliserit ÷ HDL',
+  },
+
+  tyg:{
+    inputs:['trig', 'glucose'],
+    calc:function(v){
+      const x = (v.trig * v.glucose) / 2;
+      return x > 0 ? Math.log(x) : null;
+    },
+    note:'ln(Trigliserit × Açlık glukozu ÷ 2)',
+  },
+
+  eag:{
+    inputs:['hba1c'],
+    calc:function(v){ return 28.7 * v.hba1c - 46.7; },
+    note:'28,7 × HbA1c − 46,7',
+  },
+
+  deritis:{
+    inputs:['ast', 'alt'],
+    calc:function(v){ return v.alt ? v.ast / v.alt : null; },
+    note:'AST ÷ ALT',
+  },
+
+  fib4:{
+    inputs:['ast', 'alt', 'plt'],
+    needs:['age'],
+    calc:function(v, ctx){
+      if(!v.plt || v.alt <= 0) return null;
+      return (ctx.age * v.ast) / (v.plt * Math.sqrt(v.alt));
+    },
+    note:'(Yaş × AST) ÷ (Trombosit × √ALT)',
+  },
+
+  ca_corr:{
+    inputs:['ca', 'alb'],
+    calc:function(v){ return v.ca + 0.8 * (4 - v.alb); },
+    note:'Kalsiyum + 0,8 × (4 − Albümin)',
   },
 };

@@ -2176,7 +2176,12 @@ button.listitem.is-on{ background:var(--primary-soft); }
 /* Masalar defter satırının tam genişliğinde durur. Sütun alt sınırı
    geniştir: ajan adı, rolü ve rozeti aynı satıra sığmadığında üst üste
    biniyordu. */
-.desks{ display:grid; gap:0 28px; grid-template-columns:repeat(auto-fill, minmax(330px, 1fr)); }
+/* Masalar sutun sutun AKAR, satir satir dizilmez. Izgarada her satir en
+   uzun masa kadar yer kaplıyor: bir ajanın notu uzayınca yanındaki
+   masanın altında kocaman bir delik kalıyor ve sayfa o masanın boyuna
+   göre uzuyordu. Sütun akışında masalar boşluk bırakmadan diziliyor. */
+.desks{ columns:330px; column-gap:28px; }
+.desks > .desk{ break-inside:avoid; margin-bottom:4px; }
 .desk__head{ display:flex; align-items:flex-start; gap:11px; flex-wrap:wrap; }
 .desk__head > div{ min-width:0; flex:1 1 140px; }
 .desk__head .badge{ flex:none; }
@@ -3953,6 +3958,16 @@ SP.BIOMARKERS = [
     note:'Insulin direnci endeksi. Aclik glukozu ve insulin girildiginde kendiliginden hesaplanir.' },
 
   /* ------------------------------------------------------------------ lipid */
+  { id:'eag', name:'Ortalama glukoz (eAG)', unit:'mg/dL', panel:'metabolic', dir:'low',
+    ref:[70, 154], optimal:[70, 114], red:{ above:240 },
+    derived:'eag', aliases:['eag','ortalama glukoz','tahmini ortalama glukoz'],
+    note:'HbA1c\'nin gündelik dildeki karşılığı: son üç ayın ortalama kan şekeri. Tek bir ölçüm değil, ortalamadır.' },
+
+  { id:'tyg', name:'TyG indeksi', unit:'', panel:'metabolic', dir:'low',
+    ref:[7, 9.5], optimal:[7, 8.5], red:{ above:10 },
+    derived:'tyg', aliases:['tyg','trigliserit glukoz indeksi'],
+    note:'Açlık insülini ölçülmediğinde insülin direncinin yerini tutar. Trigliserit ve açlık glukozundan hesaplanır.' },
+
   { id:'chol', name:'Total kolesterol', unit:'mg/dL', panel:'lipid', dir:'low',
     ref:[120, 200], optimal:[140, 190], red:{ above:320 },
     aliases:['total kolesterol','kolesterol','cholesterol'],
@@ -3976,6 +3991,11 @@ SP.BIOMARKERS = [
     nutrients:['omega3'],
     aliases:['trigliserit','trigliserid','tg','triglyceride'],
     note:'Sivi sekere ve rafine karbonhidrata en hizli tepki veren degerdir.' },
+
+  { id:'tg_hdl', name:'Trigliserit / HDL', unit:'oran', panel:'lipid', dir:'low',
+    ref:[0, 3.5], optimal:[0, 2], red:{ above:6 },
+    derived:'tg_hdl', aliases:['tg/hdl','trigliserit hdl orani'],
+    note:'İnsülin direncinin en ucuz göstergesi. 2 altı iyi, 3 üstü dikkat ister. Aç karnına alınan kandan hesaplanır.' },
 
   { id:'nonhdl', name:'Non-HDL kolesterol', unit:'mg/dL', panel:'lipid', dir:'low',
     ref:[0, 160], optimal:[60, 130], red:{ above:220 },
@@ -4009,6 +4029,16 @@ SP.BIOMARKERS = [
     note:'Uzun vadeli protein durumunun aynasi.' },
 
   /* ----------------------------------------------------------------- bobrek */
+  { id:'deritis', name:'AST / ALT (De Ritis)', unit:'oran', panel:'liver', dir:'mid',
+    ref:[0.4, 2], optimal:[0.7, 1.3], red:{ above:3 },
+    derived:'deritis', aliases:['ast/alt','de ritis','deritis'],
+    note:'İki enzimin oranı, tek başına değerlerinden fazlasını söyler. 1 altı ve 2 üstü farklı yönleri gösterir.' },
+
+  { id:'fib4', name:'FIB-4 indeksi', unit:'', panel:'liver', dir:'low',
+    ref:[0, 2.67], optimal:[0, 1.3], red:{ above:3.25 },
+    derived:'fib4', aliases:['fib4','fib-4'],
+    note:'Karaciğer sertliği için tarama indeksi. Yaş, AST, ALT ve trombositten hesaplanır; tanı değil tarama aracıdır.' },
+
   { id:'creat', name:'Kreatinin', unit:'mg/dL', panel:'kidney', dir:'mid',
     ref:{ male:[0.7, 1.3], female:[0.6, 1.1] },
     optimal:{ male:[0.8, 1.15], female:[0.65, 1.0] },
@@ -4050,6 +4080,11 @@ SP.BIOMARKERS = [
     nutrients:['calcium','vitd'],
     aliases:['kalsiyum','ca'],
     note:'D vitamini ile birlikte okunur; tek basina yanilticidir.' },
+
+  { id:'ca_corr', name:'Düzeltilmiş kalsiyum', unit:'mg/dL', panel:'electro', dir:'mid',
+    ref:[8.6, 10.2], optimal:[8.8, 10], red:{ below:7.5, above:11.5 },
+    derived:'ca_corr', aliases:['duzeltilmis kalsiyum','corrected calcium'],
+    note:'Kalsiyumun yarısı albümine bağlı taşınır; albümin düşükken ölçülen kalsiyum olduğundan düşük okunur. Bu satır o sapmayı düzeltir.' },
 
   { id:'mg', name:'Magnezyum', unit:'mg/dL', panel:'electro', dir:'mid',
     ref:[1.7, 2.4], optimal:[2.0, 2.4], red:{ below:1.2 },
@@ -4131,8 +4166,18 @@ SP.BIO_BY_ID = SP.BIOMARKERS.reduce(function(acc, b){ acc[b.id] = b; return acc;
 SP.PANEL_BY_ID = SP.PANELS.reduce(function(acc, p){ acc[p.id] = p; return acc; }, {});
 
 /* Turetilmis olcumlerin formulleri.
+
    Her biri girdi id'lerini ve hesabi tasir; girdi eksikse null doner ve
-   olcum hic yazilmaz — tahmin uretilmez. */
+   olcum hic yazilmaz — tahmin uretilmez.
+
+   Uc alan:
+     inputs    gerekli olcum id'leri; biri eksikse hesap yapilmaz
+     needs     profil alanlari ('age', 'sex'); eksikse hesap yapilmaz
+     calc      (degerler, baglam) -> sayi | null
+     measured  true ise bu olcum ELLE de girilebilir ve olculen deger
+               hesaplanana ustun gelir (LDL ve eGFR boyledir)
+
+   Formuller ekranda yazar: 'note' alani kullaniciya gosterilir. */
 SP.DERIVED = {
   homa:{
     inputs:['glucose', 'insulin'],
@@ -4149,6 +4194,79 @@ SP.DERIVED = {
     inputs:['iron_s', 'tibc'],
     calc:function(v){ return v.tibc ? (100 * v.iron_s / v.tibc) : null; },
     note:'Serum demir ÷ demir bağlama kapasitesi × 100',
+  },
+
+  /* LDL — Friedewald. Trigliserit 400 mg/dL ustunde formul GECERSIZDIR;
+     orada hesap yapilmaz. Gecersiz bir formulu uygulamak,
+     hesaplamamaktan kotudur. Laboratuvar dogrudan olctuyse o kazanir. */
+  ldl:{
+    inputs:['chol', 'hdl', 'trig'],
+    measured:true,
+    calc:function(v){
+      if(v.trig >= 400) return null;
+      return v.chol - v.hdl - (v.trig / 5);
+    },
+    note:'Friedewald: Total kolesterol − HDL − Trigliserit ÷ 5 '
+      + '(yalnız trigliserit 400 mg/dL altındayken geçerlidir)',
+  },
+
+  /* eGFR — CKD-EPI 2021, irk katsayisi YOK (2021 revizyonu onu kaldirdi). */
+  egfr:{
+    inputs:['creat'],
+    needs:['age', 'sex'],
+    measured:true,
+    calc:function(v, ctx){
+      const kadin = ctx.sex === 'female';
+      const k = kadin ? 0.7 : 0.9;
+      const a = v.creat <= k ? (kadin ? -0.241 : -0.302) : -1.200;
+      let e = 142 * Math.pow(v.creat / k, a) * Math.pow(0.9938, ctx.age);
+      if(kadin) e *= 1.012;
+      return e;
+    },
+    note:'CKD-EPI 2021 — kreatinin, yaş ve cinsiyetten hesaplanır',
+  },
+
+  tg_hdl:{
+    inputs:['trig', 'hdl'],
+    calc:function(v){ return v.hdl ? v.trig / v.hdl : null; },
+    note:'Trigliserit ÷ HDL',
+  },
+
+  tyg:{
+    inputs:['trig', 'glucose'],
+    calc:function(v){
+      const x = (v.trig * v.glucose) / 2;
+      return x > 0 ? Math.log(x) : null;
+    },
+    note:'ln(Trigliserit × Açlık glukozu ÷ 2)',
+  },
+
+  eag:{
+    inputs:['hba1c'],
+    calc:function(v){ return 28.7 * v.hba1c - 46.7; },
+    note:'28,7 × HbA1c − 46,7',
+  },
+
+  deritis:{
+    inputs:['ast', 'alt'],
+    calc:function(v){ return v.alt ? v.ast / v.alt : null; },
+    note:'AST ÷ ALT',
+  },
+
+  fib4:{
+    inputs:['ast', 'alt', 'plt'],
+    needs:['age'],
+    calc:function(v, ctx){
+      if(!v.plt || v.alt <= 0) return null;
+      return (ctx.age * v.ast) / (v.plt * Math.sqrt(v.alt));
+    },
+    note:'(Yaş × AST) ÷ (Trombosit × √ALT)',
+  },
+
+  ca_corr:{
+    inputs:['ca', 'alb'],
+    calc:function(v){ return v.ca + 0.8 * (4 - v.alb); },
+    note:'Kalsiyum + 0,8 × (4 − Albümin)',
   },
 };
 
@@ -6617,11 +6735,30 @@ SP.Model = (function(){
       lab:'', values:{}, note:'', createdAt:new Date().toISOString() };
   }
 
-  /* Turetilmis olcumleri hesaplayip oturuma yazar. Girdi eksikse olcum
-     hic yazilmaz — tahmin uretilmez. */
+  /* Turetilmis olcumleri hesaplayip oturuma yazar.
+
+     Uc kural:
+       1. Girdi eksikse olcum HIC yazilmaz — tahmin uretilmez.
+       2. Formul gecersizse (ornegin Friedewald trigliserit 400 ustunde)
+          hesap yapilmaz. Gecersiz formulu uygulamak, hesaplamamaktan
+          kotudur.
+       3. OLCULEN, HESAPLANANA USTUN GELIR. LDL ve eGFR hem laboratuvarda
+          olculebilir hem hesaplanabilir; laboratuvar olctuyse hesap onun
+          uzerine yazmaz. Bir olcumun uzerine tahmin yazmak, bu sistemin
+          en temel kuralinin ihlalidir. */
   function applyDerived(rec){
+    const prof = SP.S.profile || {};
+    const ctx = { age:ageOf(prof), sex:prof.sex || 'male' };
+
     Object.keys(SP.DERIVED).forEach(id => {
       const def = SP.DERIVED[id];
+
+      const mevcut = rec.values[id];
+      if(def.measured && mevcut && mevcut.cert === 'measured') return;
+
+      const eksikBaglam = (def.needs || []).some(k => ctx[k] == null);
+      if(eksikBaglam){ if(!def.measured || !mevcut) delete rec.values[id]; return; }
+
       const vals = {};
       const ok = def.inputs.every(k => {
         const cell = rec.values[k];
@@ -6629,9 +6766,13 @@ SP.Model = (function(){
         vals[k] = Number(cell.v);
         return true;
       });
-      if(!ok){ delete rec.values[id]; return; }
-      const out = def.calc(vals);
-      if(out == null || !isFinite(out)){ delete rec.values[id]; return; }
+      if(!ok){ if(!def.measured || !mevcut) delete rec.values[id]; return; }
+
+      const out = def.calc(vals, ctx);
+      if(out == null || !isFinite(out)){
+        if(!def.measured || !mevcut) delete rec.values[id];
+        return;
+      }
       rec.values[id] = { v:U.round(out, 2), cert:'derived' };
     });
     return rec;
@@ -7325,10 +7466,199 @@ SP.Bio = (function(){
     return out;
   }
 
+  /* ==================================================== kisisel taban cizgi
+
+     Referans araligi NUFUSUN, hedef bandi SISTEMIN; ikisi de senin
+     degil. Uc ve uzeri olcumu olan bir belirtec icin kendi ortalaman ve
+     sacilman hesaplanir.
+
+     Bunun tek bir isi var: bir degisimin GERCEK mi yoksa olcum gurultusu
+     mu oldugunu soylemek. Iki tahlil arasindaki her oynama "degisti"
+     degildir; laboratuvarin kendi hata payi ve gunden gune biyolojik
+     dalgalanma vardir. Sacilmanin altinda kalan fark "degisti" diye
+     yazilmaz.
+
+     Esik olarak 1 standart sapma kullanilir ve bu ekranda yazar. Daha
+     kati bir esik (2 SD) az olcumle neredeyse hicbir degisimi anlamli
+     bulmazdi; daha gevsek bir esik gurultuyu haber diye sunardi. */
+
+  const BASELINE_MIN = 3;
+
+  function baselineOf(markerId){
+    const pts = SP.Model.seriesOf(markerId);
+    if(pts.length < BASELINE_MIN){
+      return { ok:false, n:pts.length,
+        note:'Kişisel taban çizgi için en az ' + BASELINE_MIN + ' ölçüm gerekir; '
+          + pts.length + ' var.' };
+    }
+    const ys = pts.map(p => p.v);
+    const n = ys.length;
+    const mean = U.sum(ys) / n;
+    /* Ornek standart sapmasi (n-1): elimizdeki noktalar butun olcumlerin
+       tamami degil, onlardan bir ornek. */
+    const varyans = ys.reduce((a, y) => a + (y - mean) * (y - mean), 0) / (n - 1);
+    const sd = Math.sqrt(varyans);
+    return {
+      ok:true, n, mean:U.round(mean, 2), sd:U.round(sd, 2),
+      min:Math.min.apply(null, ys), max:Math.max.apply(null, ys),
+      low:U.round(mean - sd, 2), high:U.round(mean + sd, 2),
+      last:ys[n - 1],
+    };
+  }
+
+  /* Bir degisim gurultuden buyuk mu? */
+  function meaningfulChange(markerId, from, to){
+    const b = SP.BIO_BY_ID[markerId];
+    const base = baselineOf(markerId);
+    const diff = to - from;
+    const out = { diff:U.round(diff, 2), dir:diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat' };
+    out.pct = from ? U.round(100 * diff / Math.abs(from), 1) : null;
+
+    if(!base.ok){
+      return Object.assign(out, { ok:false, meaningful:null,
+        note:'Anlamlı değişim eşiği için en az ' + BASELINE_MIN + ' ölçüm gerekir.' });
+    }
+    if(base.sd === 0){
+      return Object.assign(out, { ok:true, sd:0, meaningful:diff !== 0,
+        note:'Önceki bütün ölçümler aynıydı.' });
+    }
+    const kat = Math.abs(diff) / base.sd;
+    const anlamli = kat >= 1;
+    const yon = diff > 0 ? 'arttı' : 'azaldı';
+    const iyi = b && (b.dir === 'low' ? diff < 0 : b.dir === 'high' ? diff > 0 : null);
+    return Object.assign(out, {
+      ok:true, sd:base.sd, ratio:U.round(kat, 2), meaningful:anlamli, good:iyi,
+      note:anlamli
+        ? 'Kendi saçılmanın ' + U.fmtNum(U.round(kat, 1)) + ' katı — gerçek bir değişim.'
+        : 'Kendi saçılmanın altında kaldı; ölçüm gürültüsünden ayırt edilemez.',
+      yon,
+    });
+  }
+
+  /* ======================================================== birlikte okuma
+
+     Tek olcum yaniltir, oruntu yaniltmaz. Bu kurallar HESAP YAPMAZ:
+     var olan degerleri yan yana koyup ne anlama geldiklerini soyler.
+     Hicbiri tani degildir; hepsi "su iki sayi birlikte okunmali" der.
+
+     Model bu listeye dokunmaz. Her kuralin girdisi eksikse kural hic
+     calismaz — eksik veri "normal" sayilmaz. */
+
+  const PATTERNS = [
+    {
+      id:'ferritin-crp',
+      needs:['ferritin', 'crp'],
+      test:function(v){ return v.crp >= 5; },
+      tone:'warn',
+      title:'Ferritin bu tabloda demir deposunu olduğundan yüksek gösterir',
+      text:'Ferritin aynı zamanda bir akut faz proteinidir: yangı varken '
+        + 'yükselir. hs-CRP {crp} mg/L iken ferritin {ferritin} ng/mL değeri '
+        + 'demir deposunun gerçek ölçüsü sayılmaz — «normal ferritin» demir '
+        + 'eksikliğini dışlamaz.',
+    },
+    {
+      id:'demir-eksikligi',
+      needs:['ferritin', 'mcv'],
+      test:function(v){ return v.ferritin < 30 && v.mcv < 82; },
+      tone:'warn',
+      title:'Demir eksikliği örüntüsü',
+      text:'Ferritin {ferritin} ng/mL ile düşük ve MCV {mcv} fL ile küçük — '
+        + 'ikisi birlikte demir eksikliğinin klasik örüntüsüdür. Tek başına '
+        + 'düşük ferritinden daha güçlü bir bulgudur.',
+    },
+    {
+      id:'tsh-tek-basina',
+      needs:['tsh'],
+      absent:['ft4'],
+      test:function(v){ return v.tsh < 0.5 || v.tsh > 4; },
+      tone:'info',
+      title:'TSH tek başına tiroit durumunu söylemez',
+      text:'TSH {tsh} mIU/L bandın dışında ama serbest T4 ölçülmemiş. '
+        + 'TSH hipofizin isteğidir, tiroidin ürettiği hormon değildir; '
+        + 'ikisi birlikte okunur.',
+    },
+    {
+      id:'seker-uclusu',
+      needs:['glucose', 'hba1c'],
+      test:function(v){ return (v.glucose >= 100) !== (v.hba1c >= 5.7); },
+      tone:'info',
+      title:'Açlık glukozu ile HbA1c aynı şeyi söylemiyor',
+      text:'Açlık glukozu {glucose} mg/dL, HbA1c %{hba1c}. Biri bandın '
+        + 'içinde diğeri dışında; biri o anı, diğeri son üç ayı ölçer. '
+        + 'Tek bir günün kanı yanıltabilir, ortalama yanıltmaz.',
+    },
+    {
+      id:'kreatinin-egfr',
+      needs:['creat', 'egfr'],
+      test:function(v){ return v.creat > 1.2 && v.egfr >= 60; },
+      tone:'info',
+      title:'Yüksek kreatinin, normal süzme hızı',
+      text:'Kreatinin {creat} mg/dL yüksek ama eGFR {egfr} normal sınırda. '
+        + 'Kreatinin kas kütlesinden ve sıvı durumundan etkilenir; kas '
+        + 'kütlesi fazla olanda ya da susuz kalındığında yüksek çıkar.',
+    },
+    {
+      id:'karaciger-yag',
+      needs:['deritis', 'alt'],
+      test:function(v){ return v.deritis < 1 && v.alt > 40; },
+      tone:'info',
+      title:'ALT yüksek ve AST/ALT oranı 1 altında',
+      text:'ALT {alt} U/L yüksek, AST/ALT oranı {deritis}. Bu ikisi '
+        + 'birlikte en sık yağlanmayla giden karaciğer tablosunda görülür. '
+        + 'Tek başına hiçbiri tanı değildir.',
+    },
+    {
+      id:'b12-folat',
+      needs:['b12', 'mcv'],
+      test:function(v){ return v.b12 < 300 && v.mcv > 96; },
+      tone:'warn',
+      title:'B12 düşük ve MCV büyük',
+      text:'B12 {b12} pg/mL sınırda düşük ve MCV {mcv} fL büyük. İkisi '
+        + 'birlikte B12 eksikliğinin kan tablosuna yansımış hâlidir.',
+    },
+    {
+      id:'d-vitamini-kalsiyum',
+      needs:['vitd', 'ca_corr'],
+      test:function(v){ return v.vitd < 20 && v.ca_corr < 9; },
+      tone:'info',
+      title:'D vitamini düşükken kalsiyum da alt sınırda',
+      text:'D vitamini {vitd} ng/mL ile eksik, düzeltilmiş kalsiyum '
+        + '{ca_corr} mg/dL ile alt sınırda. D vitamini kalsiyum emilimini '
+        + 'düzenler; ikisi birlikte okunur.',
+    },
+  ];
+
+  /* Son oturumdaki degerlere gore calisan oruntuler. */
+  function patterns(profile){
+    const out = [];
+    PATTERNS.forEach(pt => {
+      const v = {};
+      const varMi = pt.needs.every(id => {
+        const cell = SP.Model.latestOf(id);
+        if(!cell || cell.v == null) return false;
+        v[id] = Number(cell.v);
+        return true;
+      });
+      if(!varMi) return;
+      if((pt.absent || []).some(id => SP.Model.latestOf(id))) return;
+      let gecer = false;
+      try{ gecer = !!pt.test(v); }catch(e){ gecer = false; }
+      if(!gecer) return;
+
+      const metin = pt.text.replace(/\{(\w+)\}/g, (m, k) =>
+        v[k] == null ? m : U.fmtNum(v[k]));
+      out.push({ id:pt.id, tone:pt.tone, title:pt.title, text:metin,
+        markers:pt.needs.slice() });
+    });
+    return out;
+  }
+
   return {
-    STATUS, MIN_POINTS,
+    STATUS, MIN_POINTS, BASELINE_MIN,
     refFor, statusOf, statusNote,
     trendOf, trendVerdict,
+    baselineOf, meaningfulChange,
+    PATTERNS, patterns,
     panelRows, summary, attention, overdue,
   };
 })();
@@ -11904,6 +12234,9 @@ SP.Office = (function(){
       agent:'lab', summary:sum,
       flags:SP.Model.openFlags().map(f => ({ id:f.id, label:f.label, detail:f.detail, ack:!!f.ack })),
       attention:att,
+      /* Kerem'in brifingine ORUNTULER de girer: tek olcum yaniltir.
+         Model bunlari uretmez, yalnizca brifingde gorup cumleye doker. */
+      patterns:SP.Bio.patterns().map(p2 => ({ id:p2.id, title:p2.title, text:p2.text })),
       overdue:SP.Bio.overdue().map(o => ({ panel:o.panel.name, days:o.days, note:o.note })),
       lastLab:SP.S.labs.length ? SP.S.labs[SP.S.labs.length - 1].date : null,
     };
@@ -12022,6 +12355,11 @@ SP.Office = (function(){
         const a = d.attention[0];
         lines.push('En çok dikkat isteyen: ' + a.marker + ' ' + U.fmtNum(a.value) + ' ' + a.unit
           + ' (' + a.statusLabel + '). ' + (a.verdict || ''));
+      }
+      /* Bir oruntu, tek bir olcumun durumundan daha cok sey soyler:
+         once o yazilir. */
+      if(d.patterns && d.patterns.length){
+        lines.push(d.patterns[0].title + '.');
       }
       if(d.overdue.length){
         const pn = d.overdue[0].panel;
@@ -12190,12 +12528,34 @@ SP.Office = (function(){
     };
 
     SP.Model.openFlags().forEach(f => add('lab', 'flag', f.label + ' — ' + f.detail));
+
     /* Panel adi zaten "Demir paneli" gibi olabilir; "paneli" iki kez yazilmaz. */
-    SP.Bio.overdue().forEach(o => {
-      const name = o.panel.name;
-      const label = /paneli$/i.test(name) ? name : name + ' paneli';
-      add('lab', 'gap', label + ' ' + o.note.toLocaleLowerCase('tr-TR'));
+    const panelAdi = p2 => /paneli$/i.test(p2.name) ? p2.name : p2.name + ' paneli';
+
+    /* Bos bir sistemde on iki panelin hicbiri olculmemis olur. Her birine
+       ayri bir not birakmak ayni cumleyi on iki kez yazmaktir: Kerem'in
+       masasi sayfanin dibine kadar uzuyor, digerlerinin yanina
+       hizalanamiyordu. Bilgi ayni, satir tek. Tazelenmeyen paneller ise
+       kendi tarihlerini tasidiklari icin ayri satir hak eder — onlar da
+       ucten sonra sayiya doner. */
+    const ov = SP.Bio.overdue();
+    const hic = ov.filter(o => o.days === null);
+    const eski = ov.filter(o => o.days !== null).sort((a, b) => b.days - a.days);
+
+    if(hic.length){
+      const adlar = hic.map(o => panelAdi(o.panel));
+      const bas = adlar.slice(0, 3).join(', ');
+      add('lab', 'gap', hic.length === 1
+        ? bas + ' hiç ölçülmemiş.'
+        : hic.length + ' panel hiç ölçülmemiş: ' + bas
+          + (adlar.length > 3 ? ' ve ' + (adlar.length - 3) + ' tanesi daha' : '') + '.');
+    }
+    eski.slice(0, 3).forEach(o => {
+      add('lab', 'gap', panelAdi(o.panel) + ' ' + o.note.toLocaleLowerCase('tr-TR'));
     });
+    if(eski.length > 3){
+      add('lab', 'gap', (eski.length - 3) + ' panel daha yarım yıldan uzun süredir tazelenmedi.');
+    }
 
     const g = SP.Nutri.gaps(7);
     if(g.ok) g.rows.slice(0, 2).forEach(r => {
@@ -13180,6 +13540,7 @@ SP.Screens.labs = (function(){
     const missing = SP.BIOMARKERS.filter(b => !M.latestOf(b.id));
     const s = SP.Bio.summary();
     const last = S.labs.length ? S.labs[S.labs.length - 1] : null;
+    const pats = SP.Bio.patterns();
 
     return K.Ledger([
       K.Entry({
@@ -13214,6 +13575,22 @@ SP.Screens.labs = (function(){
               </button>`;
           })}</div>`)}`,
       }),
+
+      /* BİRLİKTE OKUMA. Tek ölçüm yanıltır, örüntü yanıltmaz. Bu blok
+         hiçbir yeni sayı üretmez: var olan değerleri yan yana koyup ne
+         anlama geldiklerini söyler ve hangi ölçümlerden geldiğini yazar.
+         Örüntü yoksa blok hiç çizilmez — boş bir başlık iş yaratır. */
+      when(pats.length, () => K.Entry({
+        label:'Birlikte okuma', meta:pats.length + ' örüntü',
+        note:'Bu satırlar yeni bir ölçüm değil; var olan ölçümlerin '
+          + 'birbirine ne söylediği. Hiçbiri teşhis değildir.',
+        body:html`<div class="stack">${map(pats, pt => K.Notice({
+          tone:pt.tone, title:pt.title,
+          body:html`${pt.text}
+            <div class="chips mt-8">${map(pt.markers, id => html`
+              <button class="chip" data-act="open-marker" data-id="${id}">
+                ${SP.BIO_BY_ID[id] ? SP.BIO_BY_ID[id].name : id}</button>`)}</div>` }))}</div>`,
+      })),
 
       K.Entry({
         label:'Dağılım', meta:'durum sayımı',
@@ -13253,7 +13630,13 @@ SP.Screens.labs = (function(){
 
   function entryView(){
     const q = (S.ui.labQuery || '').trim().toLocaleLowerCase('tr-TR');
-    const list = SP.BIOMARKERS.filter(b => !SP.DERIVED[b.id]).filter(b => !q
+    /* Yalnız hesaplanan ölçümler forma girilmez — onları elle yazmak
+       formülü ezmek olurdu. Ama LDL ve eGFR hem laboratuvarda ölçülür
+       hem hesaplanır; onlar formda durur ve girilen değer hesabı ezer. */
+    const list = SP.BIOMARKERS.filter(b => {
+      const d = SP.DERIVED[b.id];
+      return !d || d.measured;
+    }).filter(b => !q
       || b.name.toLocaleLowerCase('tr-TR').indexOf(q) >= 0
       || (b.aliases || []).some(a => a.toLocaleLowerCase('tr-TR').indexOf(q) >= 0));
 
@@ -13365,6 +13748,12 @@ SP.Screens.labs = (function(){
     const tr = SP.Bio.trendOf(id);
     const vd = SP.Bio.trendVerdict(id, tr);
     const last = series.length ? series[series.length - 1] : null;
+    const base = SP.Bio.baselineOf(id);
+    /* Son iki ölçüm arasındaki fark gürültüden büyük mü? */
+    const chg = series.length >= 2
+      ? SP.Bio.meaningfulChange(id, series[series.length - 2].v, last.v)
+      : null;
+    const pats = SP.Bio.patterns().filter(p2 => p2.markers.indexOf(id) >= 0);
 
     return String(K.Stack([
       when(last, () => html`<div class="markerrow">
@@ -13382,6 +13771,36 @@ SP.Screens.labs = (function(){
         ['Eğilim', tr.ok ? vd.text : tr.note],
         ['Ölçüm sayısı', String(series.length)],
       ] }),
+      /* KİŞİSEL TABAN ÇİZGİ. Referans aralığı nüfusun, hedef bandı
+         sistemin; bu ikisi de senin değil. Üç ölçümden sonra kendi
+         ortalaman ve saçılman çıkar ve bir değişimin gerçek mi gürültü
+         mü olduğu söylenebilir. */
+      when(base.ok, () => K.Card({
+        title:'Kendi taban çizgin', sub:base.n + ' ölçümün ortalaması',
+        body:html`
+          ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
+            ['Ortalaman', U.fmtNum(base.mean) + ' ' + b.unit],
+            ['Saçılman (± 1 SS)', U.fmtNum(base.low) + ' – ' + U.fmtNum(base.high) + ' ' + b.unit],
+            ['En düşük / en yüksek', U.fmtNum(base.min) + ' – ' + U.fmtNum(base.max) + ' ' + b.unit],
+          ] })}
+          ${when(chg && chg.ok, () => K.Notice({
+            tone:chg.meaningful ? (chg.good === false ? 'warn' : 'info') : 'info',
+            title:chg.meaningful ? 'Son değişim gerçek:' : 'Son değişim gürültü sayılır:',
+            body:'Önceki ölçüme göre ' + (chg.diff > 0 ? '+' : '') + U.fmtNum(chg.diff)
+              + ' ' + b.unit + '. ' + chg.note }))}
+          <p class="small muted mt-8">Bir değişim kendi saçılmandan küçükse
+            «değişti» denmez: laboratuvarın hata payı ve günden güne
+            dalgalanma o kadarını zaten üretir.</p>`,
+      })),
+      when(!base.ok && series.length, () => K.Notice({ tone:'info',
+        title:'Kişisel taban çizgi yok:', body:base.note })),
+
+      when(pats.length, () => K.Card({
+        title:'Bu ölçüm yalnız okunmaz',
+        body:html`<div class="stack-sm">${map(pats, pt => K.Notice({
+          tone:pt.tone, title:pt.title, body:pt.text }))}</div>`,
+      })),
+
       when(b.nutrients && b.nutrients.length, () => K.Notice({ tone:'info',
         title:'Beslenme bağı:',
         body:b.nutrients.map(n => SP.NUTRI_BY_ID[n] ? SP.NUTRI_BY_ID[n].name : n).join(', ')
@@ -16045,6 +16464,12 @@ SP.Screens.office = (function(){
   const { html, raw, when, map } = SP.h;
   const K = SP.C, P = SP.Parts;
 
+  /* Masalar yan yana durur; biri uzarsa hizalama bozulur ve sayfa o
+     ajanin boyuna gore uzar. Masada en fazla dort not gosterilir,
+     gerisi rapora iner. Not URETIMI de ayrica toplandi (core/office.js):
+     on iki ayri "hic olculmemis" notu tek satira indi. */
+  const DESK_NOTES = 4;
+
   /* Masa satirlari: her ajanin kendi kural motoru cumlesi. */
   function deskCard(agent){
     const open = S.ui.officeDesk === agent.id;
@@ -16067,9 +16492,13 @@ SP.Screens.office = (function(){
             : K.Badge({ label:'kural motoru', tone:'muted', icon:false })}
         </div>
         <p class="desk__line">${line}</p>
-        ${when(notes.length, () => html`<div class="notes mt-10">${map(notes, n => html`
-          <div class="note note--${n.tone}"><span class="note__dot"></span>
-            <span class="small">${n.text}</span></div>`)}</div>`)}
+        ${when(notes.length, () => html`<div class="notes mt-10">
+          ${map(notes.slice(0, DESK_NOTES), n => html`
+            <div class="note note--${n.tone}"><span class="note__dot"></span>
+              <span class="small">${n.text}</span></div>`)}
+          ${when(notes.length > DESK_NOTES, () => html`<p class="tiny dim mt-6">
+            ${notes.length - DESK_NOTES} not daha — raporu aç.</p>`)}
+        </div>`)}
         ${when(open, () => html`<div class="desk__open">
           ${deskDetail(agent, b)}
         </div>`)}

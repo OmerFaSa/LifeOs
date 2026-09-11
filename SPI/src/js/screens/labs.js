@@ -107,6 +107,7 @@ SP.Screens.labs = (function(){
     const missing = SP.BIOMARKERS.filter(b => !M.latestOf(b.id));
     const s = SP.Bio.summary();
     const last = S.labs.length ? S.labs[S.labs.length - 1] : null;
+    const pats = SP.Bio.patterns();
 
     return K.Ledger([
       K.Entry({
@@ -141,6 +142,22 @@ SP.Screens.labs = (function(){
               </button>`;
           })}</div>`)}`,
       }),
+
+      /* BİRLİKTE OKUMA. Tek ölçüm yanıltır, örüntü yanıltmaz. Bu blok
+         hiçbir yeni sayı üretmez: var olan değerleri yan yana koyup ne
+         anlama geldiklerini söyler ve hangi ölçümlerden geldiğini yazar.
+         Örüntü yoksa blok hiç çizilmez — boş bir başlık iş yaratır. */
+      when(pats.length, () => K.Entry({
+        label:'Birlikte okuma', meta:pats.length + ' örüntü',
+        note:'Bu satırlar yeni bir ölçüm değil; var olan ölçümlerin '
+          + 'birbirine ne söylediği. Hiçbiri teşhis değildir.',
+        body:html`<div class="stack">${map(pats, pt => K.Notice({
+          tone:pt.tone, title:pt.title,
+          body:html`${pt.text}
+            <div class="chips mt-8">${map(pt.markers, id => html`
+              <button class="chip" data-act="open-marker" data-id="${id}">
+                ${SP.BIO_BY_ID[id] ? SP.BIO_BY_ID[id].name : id}</button>`)}</div>` }))}</div>`,
+      })),
 
       K.Entry({
         label:'Dağılım', meta:'durum sayımı',
@@ -180,7 +197,13 @@ SP.Screens.labs = (function(){
 
   function entryView(){
     const q = (S.ui.labQuery || '').trim().toLocaleLowerCase('tr-TR');
-    const list = SP.BIOMARKERS.filter(b => !SP.DERIVED[b.id]).filter(b => !q
+    /* Yalnız hesaplanan ölçümler forma girilmez — onları elle yazmak
+       formülü ezmek olurdu. Ama LDL ve eGFR hem laboratuvarda ölçülür
+       hem hesaplanır; onlar formda durur ve girilen değer hesabı ezer. */
+    const list = SP.BIOMARKERS.filter(b => {
+      const d = SP.DERIVED[b.id];
+      return !d || d.measured;
+    }).filter(b => !q
       || b.name.toLocaleLowerCase('tr-TR').indexOf(q) >= 0
       || (b.aliases || []).some(a => a.toLocaleLowerCase('tr-TR').indexOf(q) >= 0));
 
@@ -292,6 +315,12 @@ SP.Screens.labs = (function(){
     const tr = SP.Bio.trendOf(id);
     const vd = SP.Bio.trendVerdict(id, tr);
     const last = series.length ? series[series.length - 1] : null;
+    const base = SP.Bio.baselineOf(id);
+    /* Son iki ölçüm arasındaki fark gürültüden büyük mü? */
+    const chg = series.length >= 2
+      ? SP.Bio.meaningfulChange(id, series[series.length - 2].v, last.v)
+      : null;
+    const pats = SP.Bio.patterns().filter(p2 => p2.markers.indexOf(id) >= 0);
 
     return String(K.Stack([
       when(last, () => html`<div class="markerrow">
@@ -309,6 +338,36 @@ SP.Screens.labs = (function(){
         ['Eğilim', tr.ok ? vd.text : tr.note],
         ['Ölçüm sayısı', String(series.length)],
       ] }),
+      /* KİŞİSEL TABAN ÇİZGİ. Referans aralığı nüfusun, hedef bandı
+         sistemin; bu ikisi de senin değil. Üç ölçümden sonra kendi
+         ortalaman ve saçılman çıkar ve bir değişimin gerçek mi gürültü
+         mü olduğu söylenebilir. */
+      when(base.ok, () => K.Card({
+        title:'Kendi taban çizgin', sub:base.n + ' ölçümün ortalaması',
+        body:html`
+          ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
+            ['Ortalaman', U.fmtNum(base.mean) + ' ' + b.unit],
+            ['Saçılman (± 1 SS)', U.fmtNum(base.low) + ' – ' + U.fmtNum(base.high) + ' ' + b.unit],
+            ['En düşük / en yüksek', U.fmtNum(base.min) + ' – ' + U.fmtNum(base.max) + ' ' + b.unit],
+          ] })}
+          ${when(chg && chg.ok, () => K.Notice({
+            tone:chg.meaningful ? (chg.good === false ? 'warn' : 'info') : 'info',
+            title:chg.meaningful ? 'Son değişim gerçek:' : 'Son değişim gürültü sayılır:',
+            body:'Önceki ölçüme göre ' + (chg.diff > 0 ? '+' : '') + U.fmtNum(chg.diff)
+              + ' ' + b.unit + '. ' + chg.note }))}
+          <p class="small muted mt-8">Bir değişim kendi saçılmandan küçükse
+            «değişti» denmez: laboratuvarın hata payı ve günden güne
+            dalgalanma o kadarını zaten üretir.</p>`,
+      })),
+      when(!base.ok && series.length, () => K.Notice({ tone:'info',
+        title:'Kişisel taban çizgi yok:', body:base.note })),
+
+      when(pats.length, () => K.Card({
+        title:'Bu ölçüm yalnız okunmaz',
+        body:html`<div class="stack-sm">${map(pats, pt => K.Notice({
+          tone:pt.tone, title:pt.title, body:pt.text }))}</div>`,
+      })),
+
       when(b.nutrients && b.nutrients.length, () => K.Notice({ tone:'info',
         title:'Beslenme bağı:',
         body:b.nutrients.map(n => SP.NUTRI_BY_ID[n] ? SP.NUTRI_BY_ID[n].name : n).join(', ')

@@ -269,10 +269,199 @@ SP.Bio = (function(){
     return out;
   }
 
+  /* ==================================================== kisisel taban cizgi
+
+     Referans araligi NUFUSUN, hedef bandi SISTEMIN; ikisi de senin
+     degil. Uc ve uzeri olcumu olan bir belirtec icin kendi ortalaman ve
+     sacilman hesaplanir.
+
+     Bunun tek bir isi var: bir degisimin GERCEK mi yoksa olcum gurultusu
+     mu oldugunu soylemek. Iki tahlil arasindaki her oynama "degisti"
+     degildir; laboratuvarin kendi hata payi ve gunden gune biyolojik
+     dalgalanma vardir. Sacilmanin altinda kalan fark "degisti" diye
+     yazilmaz.
+
+     Esik olarak 1 standart sapma kullanilir ve bu ekranda yazar. Daha
+     kati bir esik (2 SD) az olcumle neredeyse hicbir degisimi anlamli
+     bulmazdi; daha gevsek bir esik gurultuyu haber diye sunardi. */
+
+  const BASELINE_MIN = 3;
+
+  function baselineOf(markerId){
+    const pts = SP.Model.seriesOf(markerId);
+    if(pts.length < BASELINE_MIN){
+      return { ok:false, n:pts.length,
+        note:'Kişisel taban çizgi için en az ' + BASELINE_MIN + ' ölçüm gerekir; '
+          + pts.length + ' var.' };
+    }
+    const ys = pts.map(p => p.v);
+    const n = ys.length;
+    const mean = U.sum(ys) / n;
+    /* Ornek standart sapmasi (n-1): elimizdeki noktalar butun olcumlerin
+       tamami degil, onlardan bir ornek. */
+    const varyans = ys.reduce((a, y) => a + (y - mean) * (y - mean), 0) / (n - 1);
+    const sd = Math.sqrt(varyans);
+    return {
+      ok:true, n, mean:U.round(mean, 2), sd:U.round(sd, 2),
+      min:Math.min.apply(null, ys), max:Math.max.apply(null, ys),
+      low:U.round(mean - sd, 2), high:U.round(mean + sd, 2),
+      last:ys[n - 1],
+    };
+  }
+
+  /* Bir degisim gurultuden buyuk mu? */
+  function meaningfulChange(markerId, from, to){
+    const b = SP.BIO_BY_ID[markerId];
+    const base = baselineOf(markerId);
+    const diff = to - from;
+    const out = { diff:U.round(diff, 2), dir:diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat' };
+    out.pct = from ? U.round(100 * diff / Math.abs(from), 1) : null;
+
+    if(!base.ok){
+      return Object.assign(out, { ok:false, meaningful:null,
+        note:'Anlamlı değişim eşiği için en az ' + BASELINE_MIN + ' ölçüm gerekir.' });
+    }
+    if(base.sd === 0){
+      return Object.assign(out, { ok:true, sd:0, meaningful:diff !== 0,
+        note:'Önceki bütün ölçümler aynıydı.' });
+    }
+    const kat = Math.abs(diff) / base.sd;
+    const anlamli = kat >= 1;
+    const yon = diff > 0 ? 'arttı' : 'azaldı';
+    const iyi = b && (b.dir === 'low' ? diff < 0 : b.dir === 'high' ? diff > 0 : null);
+    return Object.assign(out, {
+      ok:true, sd:base.sd, ratio:U.round(kat, 2), meaningful:anlamli, good:iyi,
+      note:anlamli
+        ? 'Kendi saçılmanın ' + U.fmtNum(U.round(kat, 1)) + ' katı — gerçek bir değişim.'
+        : 'Kendi saçılmanın altında kaldı; ölçüm gürültüsünden ayırt edilemez.',
+      yon,
+    });
+  }
+
+  /* ======================================================== birlikte okuma
+
+     Tek olcum yaniltir, oruntu yaniltmaz. Bu kurallar HESAP YAPMAZ:
+     var olan degerleri yan yana koyup ne anlama geldiklerini soyler.
+     Hicbiri tani degildir; hepsi "su iki sayi birlikte okunmali" der.
+
+     Model bu listeye dokunmaz. Her kuralin girdisi eksikse kural hic
+     calismaz — eksik veri "normal" sayilmaz. */
+
+  const PATTERNS = [
+    {
+      id:'ferritin-crp',
+      needs:['ferritin', 'crp'],
+      test:function(v){ return v.crp >= 5; },
+      tone:'warn',
+      title:'Ferritin bu tabloda demir deposunu olduğundan yüksek gösterir',
+      text:'Ferritin aynı zamanda bir akut faz proteinidir: yangı varken '
+        + 'yükselir. hs-CRP {crp} mg/L iken ferritin {ferritin} ng/mL değeri '
+        + 'demir deposunun gerçek ölçüsü sayılmaz — «normal ferritin» demir '
+        + 'eksikliğini dışlamaz.',
+    },
+    {
+      id:'demir-eksikligi',
+      needs:['ferritin', 'mcv'],
+      test:function(v){ return v.ferritin < 30 && v.mcv < 82; },
+      tone:'warn',
+      title:'Demir eksikliği örüntüsü',
+      text:'Ferritin {ferritin} ng/mL ile düşük ve MCV {mcv} fL ile küçük — '
+        + 'ikisi birlikte demir eksikliğinin klasik örüntüsüdür. Tek başına '
+        + 'düşük ferritinden daha güçlü bir bulgudur.',
+    },
+    {
+      id:'tsh-tek-basina',
+      needs:['tsh'],
+      absent:['ft4'],
+      test:function(v){ return v.tsh < 0.5 || v.tsh > 4; },
+      tone:'info',
+      title:'TSH tek başına tiroit durumunu söylemez',
+      text:'TSH {tsh} mIU/L bandın dışında ama serbest T4 ölçülmemiş. '
+        + 'TSH hipofizin isteğidir, tiroidin ürettiği hormon değildir; '
+        + 'ikisi birlikte okunur.',
+    },
+    {
+      id:'seker-uclusu',
+      needs:['glucose', 'hba1c'],
+      test:function(v){ return (v.glucose >= 100) !== (v.hba1c >= 5.7); },
+      tone:'info',
+      title:'Açlık glukozu ile HbA1c aynı şeyi söylemiyor',
+      text:'Açlık glukozu {glucose} mg/dL, HbA1c %{hba1c}. Biri bandın '
+        + 'içinde diğeri dışında; biri o anı, diğeri son üç ayı ölçer. '
+        + 'Tek bir günün kanı yanıltabilir, ortalama yanıltmaz.',
+    },
+    {
+      id:'kreatinin-egfr',
+      needs:['creat', 'egfr'],
+      test:function(v){ return v.creat > 1.2 && v.egfr >= 60; },
+      tone:'info',
+      title:'Yüksek kreatinin, normal süzme hızı',
+      text:'Kreatinin {creat} mg/dL yüksek ama eGFR {egfr} normal sınırda. '
+        + 'Kreatinin kas kütlesinden ve sıvı durumundan etkilenir; kas '
+        + 'kütlesi fazla olanda ya da susuz kalındığında yüksek çıkar.',
+    },
+    {
+      id:'karaciger-yag',
+      needs:['deritis', 'alt'],
+      test:function(v){ return v.deritis < 1 && v.alt > 40; },
+      tone:'info',
+      title:'ALT yüksek ve AST/ALT oranı 1 altında',
+      text:'ALT {alt} U/L yüksek, AST/ALT oranı {deritis}. Bu ikisi '
+        + 'birlikte en sık yağlanmayla giden karaciğer tablosunda görülür. '
+        + 'Tek başına hiçbiri tanı değildir.',
+    },
+    {
+      id:'b12-folat',
+      needs:['b12', 'mcv'],
+      test:function(v){ return v.b12 < 300 && v.mcv > 96; },
+      tone:'warn',
+      title:'B12 düşük ve MCV büyük',
+      text:'B12 {b12} pg/mL sınırda düşük ve MCV {mcv} fL büyük. İkisi '
+        + 'birlikte B12 eksikliğinin kan tablosuna yansımış hâlidir.',
+    },
+    {
+      id:'d-vitamini-kalsiyum',
+      needs:['vitd', 'ca_corr'],
+      test:function(v){ return v.vitd < 20 && v.ca_corr < 9; },
+      tone:'info',
+      title:'D vitamini düşükken kalsiyum da alt sınırda',
+      text:'D vitamini {vitd} ng/mL ile eksik, düzeltilmiş kalsiyum '
+        + '{ca_corr} mg/dL ile alt sınırda. D vitamini kalsiyum emilimini '
+        + 'düzenler; ikisi birlikte okunur.',
+    },
+  ];
+
+  /* Son oturumdaki degerlere gore calisan oruntuler. */
+  function patterns(profile){
+    const out = [];
+    PATTERNS.forEach(pt => {
+      const v = {};
+      const varMi = pt.needs.every(id => {
+        const cell = SP.Model.latestOf(id);
+        if(!cell || cell.v == null) return false;
+        v[id] = Number(cell.v);
+        return true;
+      });
+      if(!varMi) return;
+      if((pt.absent || []).some(id => SP.Model.latestOf(id))) return;
+      let gecer = false;
+      try{ gecer = !!pt.test(v); }catch(e){ gecer = false; }
+      if(!gecer) return;
+
+      const metin = pt.text.replace(/\{(\w+)\}/g, (m, k) =>
+        v[k] == null ? m : U.fmtNum(v[k]));
+      out.push({ id:pt.id, tone:pt.tone, title:pt.title, text:metin,
+        markers:pt.needs.slice() });
+    });
+    return out;
+  }
+
   return {
-    STATUS, MIN_POINTS,
+    STATUS, MIN_POINTS, BASELINE_MIN,
     refFor, statusOf, statusNote,
     trendOf, trendVerdict,
+    baselineOf, meaningfulChange,
+    PATTERNS, patterns,
     panelRows, summary, attention, overdue,
   };
 })();

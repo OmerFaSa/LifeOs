@@ -246,11 +246,30 @@ SP.Model = (function(){
       lab:'', values:{}, note:'', createdAt:new Date().toISOString() };
   }
 
-  /* Turetilmis olcumleri hesaplayip oturuma yazar. Girdi eksikse olcum
-     hic yazilmaz — tahmin uretilmez. */
+  /* Turetilmis olcumleri hesaplayip oturuma yazar.
+
+     Uc kural:
+       1. Girdi eksikse olcum HIC yazilmaz — tahmin uretilmez.
+       2. Formul gecersizse (ornegin Friedewald trigliserit 400 ustunde)
+          hesap yapilmaz. Gecersiz formulu uygulamak, hesaplamamaktan
+          kotudur.
+       3. OLCULEN, HESAPLANANA USTUN GELIR. LDL ve eGFR hem laboratuvarda
+          olculebilir hem hesaplanabilir; laboratuvar olctuyse hesap onun
+          uzerine yazmaz. Bir olcumun uzerine tahmin yazmak, bu sistemin
+          en temel kuralinin ihlalidir. */
   function applyDerived(rec){
+    const prof = SP.S.profile || {};
+    const ctx = { age:ageOf(prof), sex:prof.sex || 'male' };
+
     Object.keys(SP.DERIVED).forEach(id => {
       const def = SP.DERIVED[id];
+
+      const mevcut = rec.values[id];
+      if(def.measured && mevcut && mevcut.cert === 'measured') return;
+
+      const eksikBaglam = (def.needs || []).some(k => ctx[k] == null);
+      if(eksikBaglam){ if(!def.measured || !mevcut) delete rec.values[id]; return; }
+
       const vals = {};
       const ok = def.inputs.every(k => {
         const cell = rec.values[k];
@@ -258,9 +277,13 @@ SP.Model = (function(){
         vals[k] = Number(cell.v);
         return true;
       });
-      if(!ok){ delete rec.values[id]; return; }
-      const out = def.calc(vals);
-      if(out == null || !isFinite(out)){ delete rec.values[id]; return; }
+      if(!ok){ if(!def.measured || !mevcut) delete rec.values[id]; return; }
+
+      const out = def.calc(vals, ctx);
+      if(out == null || !isFinite(out)){
+        if(!def.measured || !mevcut) delete rec.values[id];
+        return;
+      }
       rec.values[id] = { v:U.round(out, 2), cert:'derived' };
     });
     return rec;

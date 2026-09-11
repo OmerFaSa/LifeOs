@@ -783,7 +783,12 @@ button.listitem.is-on{ background:var(--primary-soft); }
 /* Masalar defter satırının tam genişliğinde durur. Sütun alt sınırı
    geniştir: ajan adı, rolü ve rozeti aynı satıra sığmadığında üst üste
    biniyordu. */
-.desks{ display:grid; gap:0 28px; grid-template-columns:repeat(auto-fill, minmax(330px, 1fr)); }
+/* Masalar sutun sutun AKAR, satir satir dizilmez. Izgarada her satir en
+   uzun masa kadar yer kaplıyor: bir ajanın notu uzayınca yanındaki
+   masanın altında kocaman bir delik kalıyor ve sayfa o masanın boyuna
+   göre uzuyordu. Sütun akışında masalar boşluk bırakmadan diziliyor. */
+.desks{ columns:330px; column-gap:28px; }
+.desks > .desk{ break-inside:avoid; margin-bottom:4px; }
 .desk__head{ display:flex; align-items:flex-start; gap:11px; flex-wrap:wrap; }
 .desk__head > div{ min-width:0; flex:1 1 140px; }
 .desk__head .badge{ flex:none; }

@@ -67,6 +67,9 @@ SP.Office = (function(){
       agent:'lab', summary:sum,
       flags:SP.Model.openFlags().map(f => ({ id:f.id, label:f.label, detail:f.detail, ack:!!f.ack })),
       attention:att,
+      /* Kerem'in brifingine ORUNTULER de girer: tek olcum yaniltir.
+         Model bunlari uretmez, yalnizca brifingde gorup cumleye doker. */
+      patterns:SP.Bio.patterns().map(p2 => ({ id:p2.id, title:p2.title, text:p2.text })),
       overdue:SP.Bio.overdue().map(o => ({ panel:o.panel.name, days:o.days, note:o.note })),
       lastLab:SP.S.labs.length ? SP.S.labs[SP.S.labs.length - 1].date : null,
     };
@@ -185,6 +188,11 @@ SP.Office = (function(){
         const a = d.attention[0];
         lines.push('En çok dikkat isteyen: ' + a.marker + ' ' + U.fmtNum(a.value) + ' ' + a.unit
           + ' (' + a.statusLabel + '). ' + (a.verdict || ''));
+      }
+      /* Bir oruntu, tek bir olcumun durumundan daha cok sey soyler:
+         once o yazilir. */
+      if(d.patterns && d.patterns.length){
+        lines.push(d.patterns[0].title + '.');
       }
       if(d.overdue.length){
         const pn = d.overdue[0].panel;
@@ -353,12 +361,34 @@ SP.Office = (function(){
     };
 
     SP.Model.openFlags().forEach(f => add('lab', 'flag', f.label + ' — ' + f.detail));
+
     /* Panel adi zaten "Demir paneli" gibi olabilir; "paneli" iki kez yazilmaz. */
-    SP.Bio.overdue().forEach(o => {
-      const name = o.panel.name;
-      const label = /paneli$/i.test(name) ? name : name + ' paneli';
-      add('lab', 'gap', label + ' ' + o.note.toLocaleLowerCase('tr-TR'));
+    const panelAdi = p2 => /paneli$/i.test(p2.name) ? p2.name : p2.name + ' paneli';
+
+    /* Bos bir sistemde on iki panelin hicbiri olculmemis olur. Her birine
+       ayri bir not birakmak ayni cumleyi on iki kez yazmaktir: Kerem'in
+       masasi sayfanin dibine kadar uzuyor, digerlerinin yanina
+       hizalanamiyordu. Bilgi ayni, satir tek. Tazelenmeyen paneller ise
+       kendi tarihlerini tasidiklari icin ayri satir hak eder — onlar da
+       ucten sonra sayiya doner. */
+    const ov = SP.Bio.overdue();
+    const hic = ov.filter(o => o.days === null);
+    const eski = ov.filter(o => o.days !== null).sort((a, b) => b.days - a.days);
+
+    if(hic.length){
+      const adlar = hic.map(o => panelAdi(o.panel));
+      const bas = adlar.slice(0, 3).join(', ');
+      add('lab', 'gap', hic.length === 1
+        ? bas + ' hiç ölçülmemiş.'
+        : hic.length + ' panel hiç ölçülmemiş: ' + bas
+          + (adlar.length > 3 ? ' ve ' + (adlar.length - 3) + ' tanesi daha' : '') + '.');
+    }
+    eski.slice(0, 3).forEach(o => {
+      add('lab', 'gap', panelAdi(o.panel) + ' ' + o.note.toLocaleLowerCase('tr-TR'));
     });
+    if(eski.length > 3){
+      add('lab', 'gap', (eski.length - 3) + ' panel daha yarım yıldan uzun süredir tazelenmedi.');
+    }
 
     const g = SP.Nutri.gaps(7);
     if(g.ok) g.rows.slice(0, 2).forEach(r => {
