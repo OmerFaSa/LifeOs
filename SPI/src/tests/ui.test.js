@@ -325,6 +325,28 @@
       expect(document.documentElement.getAttribute('data-design')).toBe('harita');
     });
 
+    /* Ayarlar ekranındaki liste ANINDA uygulanmalı. Uygulamayınca
+       kullanıcı listeden seçiyor, ekranda hiçbir şey değişmiyor ve
+       düzenin çalışmadığını sanıyor — nitekim öyle oldu. */
+    it('ayarlar ekranı görünüm değişikliğini anında uygular', async () => {
+      resetState();
+      SP.S.profile = SP.Model.defaultProfile();
+      expect(typeof SP.Screens.family.change['set-look']).toBe('function');
+    });
+
+    it('görünüm listeleri anında uygulanmak üzere bağlanmış', async () => {
+      resetState();
+      SP.S.profile = SP.Model.defaultProfile();
+      const markup = String(await SP.Screens.family.render());
+      ['pref-theme', 'pref-palette', 'pref-design'].forEach(id => {
+        const i = markup.indexOf('id="' + id + '"');
+        expect(i > 0).toBeTruthy();
+        /* aynı etiketin içinde değişiklik kancası duruyor mu? */
+        const tag = markup.slice(markup.lastIndexOf('<', i), markup.indexOf('>', i));
+        expect(tag.indexOf('data-change="set-look"') > 0).toBeTruthy();
+      });
+    });
+
     /* Depodan bozuk bir değer gelirse uygulama düzensiz kalmaz,
        varsayılana döner. */
     it('tanınmayan düzen varsayılana düşer', () => {

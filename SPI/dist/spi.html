@@ -16716,26 +16716,39 @@ SP.Screens.family = (function(){
     });
   }
 
+  /* Görünüm tercihleri ANINDA uygulanır, «Kaydet»i beklemez.
+
+     Beklemesi hataydı: kullanıcı listeden «Harita»yı seçiyor, ekranda
+     hiçbir şey değişmiyor ve düzenin çalışmadığını sanıyordu. Bir
+     görünüm tercihinin karşılığı ancak görülerek anlaşılır; onay
+     düğmesinin arkasına saklanamaz.
+
+     Kaydet düğmesi yalnız hane sayısı için kalır. */
   function prefCard(){
     const p = S.prefs || M.defaultPrefs();
+    const design = S.profile.design || SP.DEFAULT_DESIGN;
     return K.Card({
       title:'Görünüm ve hane ayarı',
       body:html`
         <div class="grid-form">
           ${K.Field({ label:'Tema',
-            input:K.Select({ id:'pref-theme', value:S.profile.theme, options:[
+            input:K.Select({ id:'pref-theme', change:'set-look', value:S.profile.theme, options:[
               { value:'system', label:'Sistem' }, { value:'light', label:'Açık' },
               { value:'dark', label:'Koyu' }] }) })}
           ${K.Field({ label:'Palet',
-            input:K.Select({ id:'pref-palette', value:S.profile.palette || SP.DEFAULT_PALETTE,
+            input:K.Select({ id:'pref-palette', change:'set-look',
+              value:S.profile.palette || SP.DEFAULT_PALETTE,
               options:SP.PALETTES.map(x => ({ value:x.id, label:x.name })) }) })}
-          ${K.Field({ label:'Düzen', hint:SP.DESIGN_BY_ID[S.profile.design || SP.DEFAULT_DESIGN].note,
-            input:K.Select({ id:'pref-design', value:S.profile.design || SP.DEFAULT_DESIGN,
+          ${K.Field({ label:'Düzen', hint:SP.DESIGN_BY_ID[design].note,
+            input:K.Select({ id:'pref-design', change:'set-look', value:design,
               options:SP.DESIGNS.map(x => ({ value:x.id, label:x.name })) }) })}
           ${K.Field({ label:'Hanedeki kişi sayısı', hint:'sepet hesabı için',
             input:K.Input({ id:'pref-size', type:'number', numeric:true, min:1, max:20,
               value:p.householdSize || 1 }) })}
-        </div>`,
+        </div>
+        ${K.Notice({ tone:'info', class:'mt-10',
+          body:'Tema, palet ve düzen seçildiği anda uygulanır. «Kaydet» yalnız '
+            + 'hanedeki kişi sayısı için.' })}`,
       foot:K.Button({ label:'Kaydet', size:'sm', tone:'primary', act:'save-prefs' }),
     });
   }
@@ -16745,6 +16758,24 @@ SP.Screens.family = (function(){
       ${K.Ledger(() => [profileCard(), targetCard(), householdCard(), prefCard()])}
       <div class="mt-24">${raw(UI.rail(['profiles', 'macro-target', 'lab-linked-food', 'privacy']))}</div>`);
   }
+
+  /* Üç görünüm listesi de tek bir değişiklik işlevine bağlanır: hangisi
+     değiştiyse o okunur, profile yazılır ve kök hemen güncellenir. */
+  const change = {
+    async 'set-look'(){
+      const val = id => { const el = document.getElementById(id); return el ? el.value : null; };
+      const patch = {};
+      const theme = val('pref-theme');
+      const palette = val('pref-palette');
+      const design = val('pref-design');
+      if(theme) patch.theme = theme;
+      if(palette) patch.palette = palette;
+      if(design && SP.DESIGN_BY_ID[design]) patch.design = design;
+      await M.saveProfile(patch);
+      SP.App.applyTheme();
+      SP.App.render();
+    },
+  };
 
   const handle = {
     async 'save-profile'(){
@@ -16767,13 +16798,8 @@ SP.Screens.family = (function(){
       SP.App.render();
     },
     async 'save-prefs'(){
-      const theme = (document.getElementById('pref-theme') || {}).value;
-      const palette = (document.getElementById('pref-palette') || {}).value;
-      const design = (document.getElementById('pref-design') || {}).value;
       const size = (document.getElementById('pref-size') || {}).value;
-      await M.saveProfile({ theme, palette, design });
       await M.savePrefs({ householdSize:Math.max(1, Number(size) || 1) });
-      SP.App.applyTheme();
       UI.toast('Kaydedildi');
       SP.App.render();
     },
@@ -16847,7 +16873,7 @@ SP.Screens.family = (function(){
       return list.length + ' profil · ' + (t.ok ? 'hedefler hazır' : 'profil eksik');
     },
     actions(){ return ''; },
-    render, handle,
+    render, handle, change,
   };
 })();
 
