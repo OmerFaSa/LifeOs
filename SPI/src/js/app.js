@@ -514,6 +514,23 @@ SP.App = (function(){
     }
   }
 
+  /* SECILI SEKME GORUNUR KALIR. Serit yatayda kayabildigi icin yeniden
+     cizimden sonra etkin sekme gorus alaninin disinda kalabiliyordu:
+     kullanici hangi bolumde oldugunu goremiyordu. Kaydirma YALNIZCA
+     serit icinde olur, sayfa yerinden oynamaz. */
+  function revealActiveTab(){
+    document.querySelectorAll('.subtabs').forEach(strip => {
+      if(strip.scrollWidth <= strip.clientWidth + 1) return;
+      const act = strip.querySelector('.subtab.is-active');
+      if(!act) return;
+      const sol = act.offsetLeft, sag = sol + act.offsetWidth;
+      if(sol < strip.scrollLeft) strip.scrollLeft = Math.max(0, sol - 12);
+      else if(sag > strip.scrollLeft + strip.clientWidth){
+        strip.scrollLeft = sag - strip.clientWidth + 12;
+      }
+    });
+  }
+
   let rendering = false;
   let queued = null;
 
@@ -597,6 +614,7 @@ SP.App = (function(){
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
+      revealActiveTab();
       if(sc.afterRender) sc.afterRender();
     }catch(err){
       console.error('Render hatası:', err);

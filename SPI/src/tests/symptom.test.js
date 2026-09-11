@@ -287,3 +287,66 @@
     });
   });
 })();
+
+/* Dalga 3.6 — alt sayfa ve kayan şerit.
+
+   Bir kipli pencerede Tab'ın arkadaki sayfaya çıkabilmesi bir hata değil,
+   bir yanıltmadır: görünmeyen bir düğmeye basılabiliyor demektir. */
+(function(){
+  const { describe, it, expect } = SP.Test;
+
+  describe('Alt sayfa — odak ve kaydırma', () => {
+    it('gerekçe satırı gövdenin başında durur', () => {
+      SP.UI.sheet({ title:'Sınama', note:'Bu form neden doldurulur.',
+        body:'<input id="sn-a"/>', noFocus:true });
+      const n = document.querySelector('#sheet .sheet__note');
+      expect(Boolean(n)).toBeTruthy();
+      expect(n.textContent.indexOf('neden') >= 0).toBeTruthy();
+      SP.UI.closeSheet();
+    });
+
+    it('açıkken arkadaki sayfa kaymaz, kapanınca eski haline döner', () => {
+      const once = document.body.style.overflow;
+      SP.UI.sheet({ title:'Sınama', body:'<input id="sn-b"/>', noFocus:true });
+      expect(document.body.style.overflow).toBe('hidden');
+      SP.UI.closeSheet();
+      expect(document.body.style.overflow).toBe(once);
+    });
+
+    it('odak alt sayfanın içinde hapsolur', () => {
+      SP.UI.sheet({ title:'Sınama',
+        body:'<input id="sn-c"/><input id="sn-d"/>', noFocus:true });
+      const el = document.getElementById('sheet');
+      const list = Array.prototype.filter.call(
+        el.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]),'
+          + ' select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+        n => n.offsetParent !== null);
+      /* Kapat düğmesi + iki alan: en az üç durak. */
+      expect(list.length >= 3).toBeTruthy();
+      const son = list[list.length - 1];
+      son.focus();
+      el.dispatchEvent(new KeyboardEvent('keydown', { key:'Tab', bubbles:true }));
+      expect(el.contains(document.activeElement)).toBeTruthy();
+      SP.UI.closeSheet();
+    });
+
+    it('kapanınca odak açan ögeye döner', () => {
+      const b = document.createElement('button');
+      b.id = 'sn-opener'; b.textContent = 'aç';
+      document.body.appendChild(b);
+      b.focus();
+      SP.UI.sheet({ title:'Sınama', body:'<input id="sn-e"/>', noFocus:true });
+      SP.UI.closeSheet();
+      expect(document.activeElement.id).toBe('sn-opener');
+      b.remove();
+    });
+
+    it('ikinci alt sayfa birincinin kaydırma kilidini bırakmaz', () => {
+      SP.UI.sheet({ title:'Bir', body:'<input id="sn-f"/>', noFocus:true });
+      SP.UI.sheet({ title:'İki', body:'<input id="sn-g"/>', noFocus:true });
+      expect(document.body.style.overflow).toBe('hidden');
+      SP.UI.closeSheet();
+      expect(document.body.style.overflow).toBe('');
+    });
+  });
+})();

@@ -325,6 +325,10 @@ SP.Screens.office = (function(){
     async 'add-decision'(){
       UI.sheet({
         title:'Karar ekle',
+        subtitle:'takibe alınır, kapanana kadar gündemde durur',
+        note:'Karar bir niyet değil bir DENEYDİR: neyi değiştirdiğini ve hangi '
+          + 'bulguya dayandığını yazarsan, kapanırken sonucunu ölçüyle '
+          + 'karşılaştırabilirsin.',
         body:String(K.Stack([
           K.Field({ label:'Karar', input:K.Input({ id:'dec-title',
             placeholder:'Örnek: iki hafta boyunca çayı öğünden bir saat sonraya al' }) }),
@@ -348,6 +352,9 @@ SP.Screens.office = (function(){
       const id = el.dataset.id;
       UI.sheet({
         title:'Kararı kapat',
+        subtitle:'sonucu ölçüyle yaz',
+        note:'"İyi geldi" bir sonuç değildir. Hangi ölçüm ne kadar değişti? '
+          + 'Değişmediyse bu da bir sonuçtur ve yazılması gerekir.',
         body:String(K.Field({ label:'Sonuç', input:K.Textarea({ id:'dec-out', rows:3,
           placeholder:'Ne değişti? Ölçümle, hisle değil.' }) })),
         footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}

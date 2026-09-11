@@ -1836,6 +1836,12 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .sheet__head h3{ font-size:var(--fs-lg); }
 .sheet__head p{ font-size:var(--fs-sm); color:var(--text-2); margin-top:2px; }
 .sheet__body{ padding:18px; overflow-y:auto; display:flex; flex-direction:column; gap:14px; }
+/* Formun NEDEN doldurulacagi formun kendisinden once gelir. Bir alan
+   listesi ne ise yaradigini soylemez; bu satir soyler. */
+.sheet__note{
+  font-size:var(--fs-sm); color:var(--text-2); line-height:1.5;
+  padding-left:11px; border-left:2px solid var(--border-strong);
+}
 .sheet__foot{
   padding:14px 18px; border-top:1px solid var(--border);
   display:flex; gap:8px; justify-content:flex-end;
@@ -1876,12 +1882,29 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   display:inline-flex; gap:2px;
   max-width:100%;
   padding:4px;
-  background:var(--surface-2);
   border:1px solid var(--border);
   border-radius:var(--r-pill);
   overflow-x:auto;
   scrollbar-width:none;
   -webkit-overflow-scrolling:touch;
+
+  /* KAYAN ŞERİT KENDİNİ SÖYLER. Tablet genişliğinde yedi sekmelik bir
+     şerit kelimenin ortasından kesiliyor ve kaydırılabildiğine dair
+     hiçbir işaret vermiyordu: kullanıcı orada başka sekme olduğunu
+     bilmiyordu.
+
+     İki katman örtü (`local` — içerikle birlikte kayar), iki katman
+     gölge (`scroll` — kutuya sabit). Şerit bir uca dayandığında örtü
+     gölgenin üstüne gelir ve gölge kaybolur. Saf CSS: hangi uçta
+     olduğunu tarayıcı bilir, JavaScript'e sormaya gerek yok. */
+  background:
+    linear-gradient(to right, var(--surface-2) 40%, transparent) left / 26px 100% no-repeat local,
+    linear-gradient(to left,  var(--surface-2) 40%, transparent) right / 26px 100% no-repeat local,
+    linear-gradient(to right, color-mix(in srgb, var(--text) 17%, transparent), transparent)
+      left / 16px 100% no-repeat scroll,
+    linear-gradient(to left,  color-mix(in srgb, var(--text) 17%, transparent), transparent)
+      right / 16px 100% no-repeat scroll,
+    var(--surface-2);
 }
 .subtabs::-webkit-scrollbar{ display:none; }
 .subtab{
@@ -4375,7 +4398,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'4d56018', at:'2026-09-11 18:31', dirty:true };
+SP.BUILD = { id:'8deeabd', at:'2026-09-11 18:40', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -12090,8 +12113,20 @@ SP.UI = (function(){
   function isHintOpen(){ return !!document.getElementById('popover'); }
 
   /* ---------- alt sayfa ---------- */
+  /* Alt sayfa ODAGI HAPSEDER. Once etmiyordu: Tab ile arkadaki sayfaya
+     cikilabiliyor, gorunmeyen bir dugmeye basilabiliyordu — bir kipli
+     pencere icin bu bir hata degil, bir yaniltmadir. Kapaninca odak
+     acan ogeye geri doner ki klavyeyle calisan kullanici yerini
+     kaybetmesin. */
+  const ODAKLANABILIR = 'a[href], button:not([disabled]), input:not([disabled]),'
+    + ' select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  let sheetOpener = null;
+  let sheetScroll = '';
+
   function sheet(opts){
     closeSheet();
+    sheetOpener = document.activeElement;
     const root = document.getElementById('overlay-root');
     const el = document.createElement('div');
     el.className = 'overlay';
@@ -12103,17 +12138,44 @@ SP.UI = (function(){
           <div><h3>${opts.title}</h3>${when(opts.subtitle, () => html`<p>${opts.subtitle}</p>`)}</div>
           ${SP.C.IconButton({ icon:'close', plain:true, aria:'Kapat', act:'sheet-close' })}
         </div>
-        <div class="sheet__body">${raw(opts.body)}</div>
+        <div class="sheet__body">
+          ${when(opts.note, () => html`<p class="sheet__note">${opts.note}</p>`)}
+          ${raw(opts.body)}</div>
         ${when(opts.footer, () => html`<div class="sheet__foot">${raw(opts.footer)}</div>`)}
       </div>`);
     el.addEventListener('mousedown', e => { if(e.target === el) closeSheet(); });
+
+    /* Tab dongusu alt sayfanin icinde kalir. */
+    el.addEventListener('keydown', e => {
+      if(e.key !== 'Tab') return;
+      const list = Array.prototype.filter.call(
+        el.querySelectorAll(ODAKLANABILIR), n => n.offsetParent !== null);
+      if(!list.length) return;
+      const ilk = list[0], son = list[list.length - 1];
+      if(e.shiftKey && document.activeElement === ilk){ e.preventDefault(); son.focus(); }
+      else if(!e.shiftKey && document.activeElement === son){ e.preventDefault(); ilk.focus(); }
+    });
+
     root.appendChild(el);
-    const first = el.querySelector('input, textarea, select');
+
+    /* Arkadaki sayfa KAYMAZ: alt sayfa acikken tekerlek arkayi
+       kaydiriyordu ve kapaninca baska bir yerde kaliniyordu. */
+    sheetScroll = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const first = el.querySelector('input, textarea, select')
+      || el.querySelector(ODAKLANABILIR);
     if(first && !opts.noFocus) setTimeout(()=>first.focus(), 40);
   }
   function closeSheet(){
     const el = document.getElementById('sheet');
-    if(el) el.remove();
+    if(!el) return;
+    el.remove();
+    document.body.style.overflow = sheetScroll;
+    if(sheetOpener && document.contains(sheetOpener)){
+      try{ sheetOpener.focus(); }catch(e){ /* odak geri verilemedi */ }
+    }
+    sheetOpener = null;
   }
   function isSheetOpen(){ return !!document.getElementById('sheet'); }
 
@@ -16978,6 +17040,9 @@ SP.Screens.labs = (function(){
     async 'add-med'(){
       const rec = M.newMed();
       UI.sheet({ title:'İlaç ya da takviye ekle',
+        note:'Bir ilaç bir ölçümü BOZABİLİR. Kayıtlıysa sistem beklenen yöndeki '
+          + 'değişimi haber saymaz; kayıtlı değilse o değişimi sana gerçek bir '
+          + 'bulgu diye gösterir.',
         subtitle:'sistem doz önermez, yalnızca kaydeder', wide:true,
         body:medSheetBody(rec),
         footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
@@ -20065,6 +20130,10 @@ SP.Screens.office = (function(){
     async 'add-decision'(){
       UI.sheet({
         title:'Karar ekle',
+        subtitle:'takibe alınır, kapanana kadar gündemde durur',
+        note:'Karar bir niyet değil bir DENEYDİR: neyi değiştirdiğini ve hangi '
+          + 'bulguya dayandığını yazarsan, kapanırken sonucunu ölçüyle '
+          + 'karşılaştırabilirsin.',
         body:String(K.Stack([
           K.Field({ label:'Karar', input:K.Input({ id:'dec-title',
             placeholder:'Örnek: iki hafta boyunca çayı öğünden bir saat sonraya al' }) }),
@@ -20088,6 +20157,9 @@ SP.Screens.office = (function(){
       const id = el.dataset.id;
       UI.sheet({
         title:'Kararı kapat',
+        subtitle:'sonucu ölçüyle yaz',
+        note:'"İyi geldi" bir sonuç değildir. Hangi ölçüm ne kadar değişti? '
+          + 'Değişmediyse bu da bir sonuçtur ve yazılması gerekir.',
         body:String(K.Field({ label:'Sonuç', input:K.Textarea({ id:'dec-out', rows:3,
           placeholder:'Ne değişti? Ölçümle, hisle değil.' }) })),
         footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
@@ -21623,6 +21695,23 @@ SP.App = (function(){
     }
   }
 
+  /* SECILI SEKME GORUNUR KALIR. Serit yatayda kayabildigi icin yeniden
+     cizimden sonra etkin sekme gorus alaninin disinda kalabiliyordu:
+     kullanici hangi bolumde oldugunu goremiyordu. Kaydirma YALNIZCA
+     serit icinde olur, sayfa yerinden oynamaz. */
+  function revealActiveTab(){
+    document.querySelectorAll('.subtabs').forEach(strip => {
+      if(strip.scrollWidth <= strip.clientWidth + 1) return;
+      const act = strip.querySelector('.subtab.is-active');
+      if(!act) return;
+      const sol = act.offsetLeft, sag = sol + act.offsetWidth;
+      if(sol < strip.scrollLeft) strip.scrollLeft = Math.max(0, sol - 12);
+      else if(sag > strip.scrollLeft + strip.clientWidth){
+        strip.scrollLeft = sag - strip.clientWidth + 12;
+      }
+    });
+  }
+
   let rendering = false;
   let queued = null;
 
@@ -21706,6 +21795,7 @@ SP.App = (function(){
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
+      revealActiveTab();
       if(sc.afterRender) sc.afterRender();
     }catch(err){
       console.error('Render hatası:', err);

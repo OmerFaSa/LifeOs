@@ -1146,6 +1146,9 @@ SP.Screens.labs = (function(){
     async 'add-med'(){
       const rec = M.newMed();
       UI.sheet({ title:'İlaç ya da takviye ekle',
+        note:'Bir ilaç bir ölçümü BOZABİLİR. Kayıtlıysa sistem beklenen yöndeki '
+          + 'değişimi haber saymaz; kayıtlı değilse o değişimi sana gerçek bir '
+          + 'bulgu diye gösterir.',
         subtitle:'sistem doz önermez, yalnızca kaydeder', wide:true,
         body:medSheetBody(rec),
         footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
