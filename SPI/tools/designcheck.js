@@ -28,6 +28,16 @@ const PORT = Number(args.find(a => /^\d+$/.test(a))) || 4291;
 const SHOTDIR = process.env.SHOT_DIR || path.join(ROOT, '.shots');
 
 const WIDTHS = [[1280, 'masaüstü'], [980, 'tablet'], [430, 'telefon']];
+
+/* WCAG kontrastı — «metin görünüyor mu» sorusu göz kararına bırakılmaz. */
+function lum(c){
+  const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
+  return .2126 * f(c[0]) + .7152 * f(c[1]) + .0722 * f(c[2]);
+}
+function ratio(a, b){
+  const l1 = lum(a), l2 = lum(b);
+  return (Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05);
+}
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 async function waitForServer(url){
@@ -47,7 +57,9 @@ async function waitForServer(url){
     await waitForServer(base + '/index.html');
     const browser = await chromium.launch({
       executablePath:process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
-    const page = await browser.newPage();
+    /* Görünüm geçişi (View Transitions) kapalı: açıkken tam sayfa
+       görüntüsü eski kareyi yarı saydam yakalıyor ve ölçüm yanılıyor. */
+    const page = await browser.newPage({ reducedMotion:'reduce' });
 
     const errs = [];
     /* Kaynak yükleme hataları burada denetlenmez: çevrimdışı ortamda yazı
@@ -84,6 +96,46 @@ async function waitForServer(url){
       const attr = await page.evaluate(() => document.documentElement.getAttribute('data-design'));
       const beklenen = design === 'defter' ? null : design;
       if(attr !== beklenen) problems.push(design + ': kökte data-design "' + attr + '"');
+
+      /* Jetonlar ÇÖZÜLÜYOR mu? Bir düzen `--bg`yi `--surface-2`den,
+         `--surface-2`yi de `--bg`den türetirse CSS özel değişken
+         DÖNGÜSÜ oluşur ve zincirdeki her değer geçersiz olur; ekran
+         sessizce zeminsiz kalır ve metin görünmez olur.
+
+         Jetonun METNİNE bakmak yanıltıcı: ölçülen şey BOYANMIŞ
+         renktir. Zemin saydam kalıyorsa ya da metinle zemin arasında
+         kontrast yoksa bir yerde zincir kopmuştur. */
+      const boya = await page.evaluate(() => {
+        /* Hesaplanmış renk her zaman `rgb()` olarak gelmez: `color-mix(in
+           oklab, …)` Chromium'da `oklab(…)` diye serileşir ve sayıları
+           0–1 aralığındadır. Doğrudan ayrıştırmak sessizce yanlış ölçüm
+           üretir; o yüzden renk tuvale boyanıp gerçek sRGB değeri
+           okunur. */
+        const cv = document.createElement('canvas'); cv.width = cv.height = 1;
+        const cx = cv.getContext('2d', { willReadFrequently:true });
+        const toRgb = v => {
+          cx.clearRect(0, 0, 1, 1);
+          cx.fillStyle = '#000';
+          cx.fillStyle = v;
+          cx.fillRect(0, 0, 1, 1);
+          const d = cx.getImageData(0, 0, 1, 1).data;
+          return [d[0], d[1], d[2], d[3] / 255];
+        };
+        const site = document.querySelector('.site');
+        const main = document.getElementById('main');
+        const foot = document.querySelector('.sitefoot');
+        return {
+          siteBg:toRgb(getComputedStyle(site).backgroundColor),
+          footBg:foot ? toRgb(getComputedStyle(foot).backgroundColor) : [0, 0, 0, 1],
+          text:toRgb(getComputedStyle(main || document.body).color),
+        };
+      });
+      const saydam = c => c[3] < 0.9;
+      if(saydam(boya.siteBg)) problems.push(design + ': kabuk zemini saydam — jeton döngüsü?');
+      if(saydam(boya.footBg)) problems.push(design + ': alt bant zemini saydam — jeton döngüsü?');
+      const kontrast = ratio(boya.text.slice(0, 3), boya.siteBg.slice(0, 3));
+      if(kontrast < 4.5)
+        problems.push(design + ': metin/zemin kontrastı ' + kontrast.toFixed(2) + ' < 4.5');
 
       for(const [w, adi] of WIDTHS){
         await page.setViewportSize({ width:w, height:900 });

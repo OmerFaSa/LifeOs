@@ -152,7 +152,7 @@
 :root[data-palette="orman"]{
   --bg:#F7F8F6; --surface:#FFFFFF; --surface-2:#EFF2ED; --surface-3:#E5EAE4;
   --sidebar:#FFFFFF; --sidebar-active:#E4EDE8;
-  --text:#18201B; --text-2:#5A665E; --text-3:#69756D;
+  --text:#18201B; --text-2:#5A665E; --text-3:#646F67;  /* AA: 4.9:1 */
   --primary:#2F6B4F; --primary-hover:#26583F; --primary-ink:#FFFFFF;
   --accent:#9A6714;
   --border:#E1E6E1; --border-strong:#C9D2CB;

@@ -29,15 +29,22 @@ async function measure(p){
   return p.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     const g = n => cs.getPropertyValue(n).trim();
-    const px = s => { const d=document.createElement('div'); d.style.color=s;
-      document.body.appendChild(d); const c=getComputedStyle(d).color;
-      d.remove(); return (c.match(/\d+/g)||[0,0,0]).slice(0,3).map(Number); };
+    /* Renk tuvale boyanip gercek sRGB degeri okunur. Hesaplanmis renk
+       her zaman `rgb()` olarak gelmez: `color-mix(in oklab, …)`
+       Chromium'da `oklab(…)` diye serilesir ve sayilari 0–1
+       araligindadir. Metni dogrudan ayristirmak sessizce yanlis olcum
+       uretir — nitekim uretiyordu. */
+    const cv = document.createElement('canvas'); cv.width = cv.height = 1;
+    const cx = cv.getContext('2d', { willReadFrequently:true });
+    const px = v => { cx.clearRect(0,0,1,1); cx.fillStyle='#000'; cx.fillStyle=v;
+      cx.fillRect(0,0,1,1); const d=cx.getImageData(0,0,1,1).data;
+      return [d[0], d[1], d[2]]; };
     const foot = document.querySelector('.sitefoot');
     const fb = foot ? getComputedStyle(foot).backgroundColor : 'rgb(0,0,0)';
     return { sec:px(g('--sec')), bg:px(g('--bg')), surf:px(g('--surface')),
       text:px(g('--text')), text2:px(g('--text-2')), text3:px(g('--text-3')),
       rule:px(g('--rule')),
-      footBg:(fb.match(/\d+/g)||[0,0,0]).slice(0,3).map(Number),
+      footBg:px(fb),
       footFg:px(g('--ink-on')), footFg2:px(g('--ink-on-2')),
       primInk:px(g('--primary-ink')) };
   });
@@ -55,6 +62,10 @@ function checksOf(m){
     ['alt bant yazısı', ratio(m.footFg, m.footBg), 4.5],
     ['alt bant ikincil', ratio(m.footFg2, m.footBg), 4.5],
     ['cetvel çizgisi/yüzey', ratio(m.rule, m.surf), 1.25],
+    /* Metin merdiveni SIRALI kalmali: ikincil metin, ucunculden her
+       zaman guclu olmali. Bir duzen jetonlari yeniden turetirken bu
+       siranin bozulmasi kolaydir ve gozle fark edilmez. */
+    ['metin merdiveni sırası', ratio(m.text2, m.bg) / ratio(m.text3, m.bg), 1.0],
   ];
 }
 

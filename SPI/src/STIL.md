@@ -409,10 +409,10 @@ yazıldığını.
 | Düzen | İskelet |
 |---|---|
 | **Defter** (varsayılan) | Solda künye sütunu, kutusuz satırlar, ince çizgiler |
-| **Odak** | Hero'nun ilk özet sayısı sayfanın en büyük nesnesi olur; gerisi geri çekilir |
-| **Kraft** | Kâğıt dokusu, daktilo künyesi, kesikli cetveller, defterin kenar çizgisi |
-| **Katmanlı** | Yedi bölüm sol kenar çubuğuna iner; künye sütunu bir panele döner |
-| **Harita** | Defter satırları noktalı tuval üstünde düğüm kartlara döner |
+| **Odak** | Sayfa 880 px'e daralır ve ortalanır; başlık 74 px, ilk özet sayı serifle 188 px'e kadar. Kutu, gölge ve yuvarlak köşe tamamen kalkar; gezinme numarasız fısıldar |
+| **Kraft** | Gövde, sayı ve etiketlerin hepsi **tek aralıklı** olur (yalnız başlıklar serif kalır). Kâğıt dokusu, kesikli cetveller, etkin bölüm `[köşeli parantez]` içinde, düğmelerde sert kayma gölgesi |
+| **Katmanlı** | Yedi bölüm **koyu** sol kenar çubuğuna iner, çalışma alanı temiz yüzeye oturur; künye sütunu bölüm renginde bir şeritle panele döner |
+| **Harita** | Sayfa 1380 px'e açılır, gövde noktalı tuval olur, defter satırları gölgeli düğüm kartlara döner; gezinme tuvalin üstünde yüzen haplar |
 
 Kurallar:
 
@@ -428,6 +428,15 @@ Kurallar:
    bir yazı tipi indirmez; sistemin kendi tek aralıklı yazısını kullanır.
 5. Varsayılan düzen köke **hiçbir şey yazmaz** (`data-design` kaldırılır),
    böylece `designs.css` yalnız bir seçim yapıldığında devreye girer.
+6. **Bir jeton kendi türevine dayanamaz.** `--bg`yi `--surface-2`den,
+   `--surface-2`yi de `--bg`den türetmek CSS özel değişken DÖNGÜSÜ kurar
+   ve zincirdeki her değer geçersiz olur — ekran sessizce zeminsiz kalır,
+   metin görünmez olur. Kraft'ta tam olarak bu oldu: koyu temada kâğıt
+   paletinde kontrast 1.00'e düştü. Kural: bir düzenin türettiği her renk,
+   o düzenin **yeniden tanımlamadığı** jetonlara dayanmalıdır.
+7. **Metin merdiveni sıralı kalır.** `--text-2` her zaman `--text-3`ten
+   güçlüdür; bir düzen jetonları yeniden türetirken bu sıra bozulabilir ve
+   gözle fark edilmez. `palettecheck.js` bunu ölçer.
 
 Denetim: `tools/designcheck.js` beş düzeni on iki ekran ve üç genişlikte
 gezer, `tools/palettecheck.js` ise dört düzeni yedi palet ve iki temada
