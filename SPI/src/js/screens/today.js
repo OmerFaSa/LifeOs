@@ -66,8 +66,11 @@ SP.Screens.today = (function(){
           input:K.Segmented({ act:'set-soreness', value:v.soreness == null ? '' : String(v.soreness),
             items:SORENESS, block:true, aria:'Günün hissi' }) })}</div>
         <div class="mt-12">${K.Field({ label:'Not',
-          input:K.Textarea({ id:'v-note', rows:2, value:v.note || '',
-            placeholder:'Hastalık, ilaç değişikliği, olağandışı bir gün…' }) })}</div>`,
+          input:html`<div class="withmic">
+            ${K.Textarea({ id:'v-note', rows:2, value:v.note || '',
+              placeholder:'Hastalık, ilaç değişikliği, olağandışı bir gün…' })}
+            ${K.Mic({ target:'v-note' })}
+          </div>` })}</div>`,
       foot:html`${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}
         <span class="small dim">Kaydettiğinde toparlanma skoru ve kırmızı bayraklar yeniden hesaplanır.</span>`,
     });
@@ -154,6 +157,7 @@ SP.Screens.today = (function(){
       sub:'Tek satır yaz, Enter\'a bas',
       body:html`
         <div class="quick">
+          ${K.Mic({ target:'quick-meal' })}
           ${K.Input({ id:'quick-meal', placeholder:'1 tabak etli kuru fasulye, 1 bardak ayran',
             aria:'Öğün metni' })}
           ${K.Button({ label:'Öğüne ekle', tone:'primary', act:'quick-meal' })}

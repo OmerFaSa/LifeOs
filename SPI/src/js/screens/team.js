@@ -59,7 +59,8 @@ SP.Screens.team = (function(){
         </div>`,
       foot:html`
         <div class="quick">
-          ${K.Input({ id:'chat-text', placeholder:'Sorunu yaz…', aria:'Soru' })}
+          ${K.Mic({ target:'chat-text' })}
+          ${K.Input({ id:'chat-text', placeholder:'Sorunu yaz ya da mikrofona söyle…', aria:'Soru' })}
           ${K.Button({ label:'Gönder', tone:'primary', act:'send-chat', disabled:busy })}
         </div>`,
     });

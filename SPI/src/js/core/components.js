@@ -170,6 +170,40 @@ SP.C = (function(){
     </div>`;
   }
 
+  /* ---------- dikte ve dosya ----------
+
+     Ikisi de KOSULLUDUR: tarayici ses tanimayi desteklemiyorsa mikrofon
+     dugmesi hic cizilmez, dosya alani her zaman cizilir cunku metin
+     dosyasi modelsiz de okunur. Calismayan bir dugme gostermek
+     kullaniciya secenek degil, hayal kirikligi verir. */
+  function Mic(o){
+    if(!SP.Voice || !SP.Voice.supported()) return raw('');
+    const on = SP.Voice.isActive() && SP.Voice.activeTarget() === o.target;
+    return html`<button type="button"
+      class="${cls('mic', on && 'is-on', o.size === 'sm' && 'mic--sm')}"
+      data-act="dictate" data-target="${o.target}"
+      aria-label="${on ? 'Dinlemeyi durdur' : 'Sesle yaz'}"
+      aria-pressed="${on ? 'true' : 'false'}"
+      title="${on ? 'Dinliyor — durdurmak için tıkla' : 'Sesle yaz'}">
+      ${raw(SP.UI.icon('mic'))}
+      ${when(on, () => html`<span class="mic__pulse" aria-hidden="true"></span>`)}
+    </button>`;
+  }
+
+  /* Dosya birakma alani. Tiklayinca dosya secici acilir, uzerine
+     birakinca da alir. Iki yol da ayni eylemi tetikler. */
+  function Drop(o){
+    return html`<label class="drop" data-drop="${o.act}">
+      <input type="file" class="drop__input" accept="${o.accept || ''}"
+        data-change="${o.act}" ${when(o.id, () => attrs({ id:o.id }))}/>
+      <span class="drop__icon" aria-hidden="true">${raw(SP.UI.icon(o.icon || 'upload'))}</span>
+      <span class="drop__text">
+        <b>${o.label}</b>
+        <span>${o.hint || 'Dosyayı buraya bırak ya da seçmek için tıkla'}</span>
+      </span>
+    </label>`;
+  }
+
   function Field(o){
     return html`<label class="field">
       <span>${o.label}${when(o.hint, () => html` <span class="hint-text">${o.hint}</span>`)}</span>
@@ -309,6 +343,7 @@ SP.C = (function(){
     Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, NextUp, Table, Pager, paginate,
+    Mic, Drop,
     Grid, Span, Stack, Cols, Row, SectionTitle,
   };
 })();

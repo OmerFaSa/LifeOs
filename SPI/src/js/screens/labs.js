@@ -358,15 +358,23 @@ SP.Screens.labs = (function(){
       subtitle:'Metni olduğu gibi yapıştır — değerler ayıklanıp şemaya oturur',
       wide:true,
       body:String(K.Stack([
+        K.Drop({ act:'lab-file', label:'Rapor dosyası ya da fotoğrafı',
+          icon:'file', accept:'.txt,.csv,.md,image/*',
+          hint:'Metin dosyası modelsiz okunur · fotoğraf için model gerekir' }),
         K.Notice({ tone:'info', body:'Ayıklayıcı emin olamadığı satırı atmaz. '
           + 'Eşleşmeyen satırlar aşağıda listelenir; istersen elle bağlarsın.' }),
-        K.Field({ label:'Test tarihi',
-          input:K.Input({ id:'paste-date', type:'date', value:draft.date }) }),
-        K.Field({ label:'Laboratuvar (isteğe bağlı)',
-          input:K.Input({ id:'paste-lab', placeholder:'Hangi laboratuvar?' }) }),
+        html`<div class="cols-2">
+          ${K.Field({ label:'Test tarihi',
+            input:K.Input({ id:'paste-date', type:'date', value:draft.date }) })}
+          ${K.Field({ label:'Laboratuvar (isteğe bağlı)',
+            input:K.Input({ id:'paste-lab', placeholder:'Hangi laboratuvar?' }) })}
+        </div>`,
         K.Field({ label:'Rapor metni',
-          input:K.Textarea({ id:'paste-text', rows:10,
-            placeholder:'Hemoglobin      14,2   g/dL    13.5 - 17.5\nFerritin        28     ng/mL   30 - 400\n…' }) }),
+          input:html`<div class="withmic">
+            ${K.Textarea({ id:'paste-text', rows:9,
+              placeholder:'Hemoglobin      14,2   g/dL    13.5 - 17.5\nFerritin        28     ng/mL   30 - 400\n…' })}
+            ${K.Mic({ target:'paste-text' })}
+          </div>` }),
       ])),
       footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
         ${K.Button({ label:'Ayıkla', tone:'primary', act:'run-paste' })}`),
@@ -446,10 +454,17 @@ SP.Screens.labs = (function(){
         wide:true, body:labSheetBody(l), noFocus:true,
         footer:String(K.Button({ label:'Kapat', act:'sheet-close' })) });
     },
+    /* Onay kagidi yerine GERI ALMA: silinen oturum bellekte tutulur ve
+       bildirimdeki dugmeyle geri yazilir. Daha hizli ve daha nazik. */
     async 'del-lab'(el){
       const id = el.dataset.id;
-      UI.confirmSheet('Testi sil', 'Bu oturumdaki bütün değerler silinir. Geri alınamaz.',
-        async () => { await M.deleteLab(id); UI.closeSheet(); UI.toast('Silindi'); SP.App.render(); }, true);
+      const rec = S.labs.find(x => x.id === id);
+      if(!rec) return;
+      const copy = JSON.parse(JSON.stringify(rec));
+      await M.deleteLab(id);
+      S.ui.undo = { restore:() => M.saveLab(copy) };
+      UI.toast(U.fmtDate(copy.date) + ' testi silindi', { undo:true });
+      SP.App.render();
     },
 
     /* ---- kapsamlı giriş ---- */
@@ -515,6 +530,17 @@ SP.Screens.labs = (function(){
   };
 
   const change = {
+    /* Dosya hem tiklayarak hem surukleyerek gelir; ikisi de buraya duser. */
+    async 'lab-file'(el){
+      const file = el.files && el.files[0];
+      if(!file) return;
+      UI.toast('Okunuyor…');
+      preview = await SP.Extract.fromLabFile(file);
+      preview.date = (document.getElementById('paste-date') || {}).value || U.todayISO();
+      preview.lab = (document.getElementById('paste-lab') || {}).value || '';
+      if(!preview.rows.length){ UI.toast(preview.note); return; }
+      previewSheet();
+    },
     async 'pick-marker'(el){ S.ui.trendMarker = el.value; SP.App.render(); },
     async 'lab-query'(el){ S.ui.labQuery = el.value; SP.App.render(); },
     async 'entry-date'(el){ draft.date = el.value || U.todayISO(); },

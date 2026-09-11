@@ -55,6 +55,7 @@ SP.S = {
 
   ui:{
     railOpen:false,
+    undo:null,             // son yikici islemin geri alma kaydi
     dayTab:'giris',        // giris | ozet | gecmis
     labTab:'sonuc',        // sonuc | giris | gecmis | trend
     labPanel:'vital',      // acik panel id'si

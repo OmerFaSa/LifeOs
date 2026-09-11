@@ -186,6 +186,32 @@ table td, table th{
 }
 .content{ animation:content-in var(--dur-lg) var(--ease); }
 
+/* ---------- görünüm geçişi ----------
+
+   Tarayıcı destekliyorsa bölümler arası geçiş tarayıcının kendi
+   katmanında yapılır: eski sayfa söner, yeni sayfa hafifçe yükselerek
+   gelir. Künye ve gezinme geçişe KATILMAZ — yerinde duran bir çerçeve
+   sayfanın değiştiğini daha net anlatır, her şeyin birden kaybolması
+   ise yön duygusunu siler. */
+::view-transition-old(root){ animation:vt-out 160ms var(--ease) both; }
+::view-transition-new(root){ animation:vt-in 240ms var(--ease) both; }
+@keyframes vt-out{ to{ opacity:0; } }
+@keyframes vt-in{ from{ opacity:0; transform:translateY(8px); } }
+
+/* Düğmeye basınca hafif çöker: dokunmanın karşılığı görünür olur. */
+.btn:active, .subtab:active, .navlink:active, .pagelink:active,
+.iconbtn:active, .mic:active{ transform:translateY(.5px) scale(.985); }
+
+/* Kart, fare üstündeyken kenarlığını belirginleştirir — gölge değil.
+   Yalnız TIKLANABILIR kartlarda; okunacak bir kart fareye tepki vermez. */
+.pickcard, .resrow, .suggfood, .navsheet__item, .listitem button{
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease),
+             transform var(--dur) var(--ease);
+}
+
 @media (prefers-reduced-motion:reduce){
   .content{ animation:none; }
+  ::view-transition-old(root), ::view-transition-new(root){ animation:none; }
+  .btn:active, .subtab:active, .navlink:active, .pagelink:active,
+  .iconbtn:active, .mic:active{ transform:none; }
 }

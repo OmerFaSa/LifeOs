@@ -371,6 +371,8 @@ src/
       money.js          Modül 4 kural motoru
       calc.js           orkestratör: sıradaki hamle, çapraz çıkarım
       parse.js          serbest metin ayrıştırıcıları
+      voice.js          ses ile dikte (tarayıcının konuşma motoru)
+      extract.js        belge, fotoğraf ve fiş çıkarma — ekranlar modeli tanımaz
       ui.js             ikon, grafik, referans çubuğu, katman
       components.js     bileşen sözlüğü (uygulamadan bağımsız)
       parts.js          SPİ'ye özel, veriye bağlı parçalar
@@ -380,7 +382,7 @@ src/
       setup.js          ilk kurulum
     screens/            12 ekran
     app.js              kabuk: gezinme, görünüm paneli, olay dağıtımı, açılış
-  tests/                401 test, 10 paket
+  tests/                416 test, 11 paket
 tools/
   runtests.js           birim testleri (başsız tarayıcı)
   smoke.js              duman testi: gerçek uygulamayı gezer
@@ -397,7 +399,7 @@ derleyici, ne paket. Playwright yalnızca test betikleri için gerekir.
 ```bash
 python devserver.py          # http://localhost:4183
 python build.py              # dist/spi.html üretir
-node tools/runtests.js       # 401 birim testi
+node tools/runtests.js       # 416 birim testi
 node tools/smoke.js          # gerçek uygulamayı gez
 ```
 
@@ -420,12 +422,15 @@ girişini kolaylaştırma (belge, fotoğraf, dikte) ve tasarımı derinleştirme
 
 **Henüz olmayan ve bilinçli olarak ertelenen:**
 
-- **Fotoğraf ve ses girişi.** Görüntüden yemek tanıma ve sesli mesaj, bir
-  görüntü modeli gerektirir. Metin ayrıştırıcı aynı işi bağımlılıksız yapar;
-  görüntü katmanı bunun üzerine eklenir.
-- **Canlı market fiyatı.** Uygulama çevrimdışıdır ve hiçbir siteyi taramaz.
-  Fiyat kullanıcının fişinden gelir. Bu bir eksiklik değil, «uydurulmuş sayı
-  gösterilmez» kuralının fiyat tarafındaki sonucudur.
+- **Canlı market fiyatı.** Uygulama hiçbir siteyi taramaz. Fiyat
+  kullanıcının fişinden gelir — artık fişin fotoğrafından da okunabiliyor.
+  Bu bir eksiklik değil, «uydurulmuş sayı gösterilmez» kuralının fiyat
+  tarafındaki sonucudur.
+- **Sesli cevap (TTS).** Koçlarla ses yoluyla konuşmak dikte ile çözüldü:
+  ses metne çevrilir, metin koça yazılır, koç yazıyla cevap verir. Sesli
+  cevap kesinlik katmaz, bedel katar.
+- **PDF okuma.** PDF'in metnini doğrudan çıkarmak bir kitaplık gerektirir;
+  uygulama bağımlılıksızdır. Raporun ekran görüntüsü ya da metni işe yarar.
 - **Giyilebilir cihaz API'si.** HRV, nabız ve uyku elle girilir. Skor
   hesabı zaten eksik girdiye dayanıklıdır; cihaz bağlandığında yalnızca
   giriş kanalı değişir, hesap değişmez.

@@ -64,6 +64,12 @@ SP.UI = (function(){
     pill:'<rect x="2.8" y="8.6" width="18.4" height="6.8" rx="3.4" transform="rotate(-45 12 12)"/><path d="M8.5 8.5l7 7"/>',
     fire:'<path d="M12 3.5c3.5 3.4 5.5 6 5.5 8.9a5.5 5.5 0 11-11 0c0-1.5.6-2.9 1.7-4.2.4 1.2 1 2 1.9 2.4C10.5 8.4 11 5.9 12 3.5z"/>',
     bed:'<path d="M3 19v-8M3 13h18v6M7.5 10.5h3.5a2 2 0 012 2v.5"/><path d="M3 19h18"/>',
+    mic:'<rect x="9" y="2.5" width="6" height="11" rx="3"/>'
+      + '<path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/>',
+    camera:'<path d="M3.5 8.5A1.5 1.5 0 015 7h2.2l1.2-2h7.2l1.2 2H19a1.5 1.5 0 011.5 1.5v9A1.5 1.5 0 0119 19H5a1.5 1.5 0 01-1.5-1.5z"/>'
+      + '<circle cx="12" cy="12.5" r="3.4"/>',
+    file:'<path d="M7 3.5h7l5 5V19a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 016 19V5a1.5 1.5 0 011-1.5z"/>'
+      + '<path d="M13.5 3.5V9H19"/>',
 
     /* --- gorunum --- */
     sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8'
@@ -575,14 +581,30 @@ SP.UI = (function(){
   }
   function isSheetOpen(){ return !!document.getElementById('sheet'); }
 
-  function toast(text){
+  /* Bildirim. `undo` verilirse bildirimin icinde bir "geri al" dugmesi
+     cikar ve bildirim daha uzun durur: kullanicinin okuyup karar vermesi
+     icin 1,5 saniye yetmez. */
+  function toast(text, opts){
+    const o = opts || {};
     const root = document.getElementById('toast-root');
     const el = document.createElement('div');
-    el.className = 'toast';
-    el.textContent = text;
+    el.className = 'toast' + (o.undo ? ' toast--undo' : '');
+    const span = document.createElement('span');
+    span.textContent = text;
+    el.appendChild(span);
+    if(o.undo){
+      const btn = document.createElement('button');
+      btn.className = 'toast__undo';
+      btn.textContent = 'Geri al';
+      btn.setAttribute('data-act', 'undo');
+      btn.addEventListener('click', () => { el.remove(); });
+      el.appendChild(btn);
+    }
     root.appendChild(el);
-    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, 1500);
-    setTimeout(() => el.remove(), 1800);
+    const life = o.undo ? 6000 : 1500;
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, life);
+    setTimeout(() => el.remove(), life + 300);
+    return el;
   }
 
   function confirmSheet(title, message, onConfirm, danger){

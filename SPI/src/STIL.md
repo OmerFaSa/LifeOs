@@ -347,7 +347,7 @@ Genel (uygulamadan bağımsız, `core/components.js`):
 
 `C.Card` `C.Collapsible` `C.Stat` `C.Bar` `C.Meter` `C.Badge` `C.Chip`
 `C.Button` `C.IconButton` `C.Segmented` `C.Subtabs` `C.PickCard` `C.Toolbar`
-`C.Field` `C.Input` `C.Textarea` `C.Select` `C.Checkbox` `C.Notice` `C.Empty`
+`C.Mic` `C.Drop` `C.Field` `C.Input` `C.Textarea` `C.Select` `C.Checkbox` `C.Notice` `C.Empty`
 `C.Skeleton` `C.NextUp` `C.Table` `C.Pager` (+ `C.paginate`)
 düzen: `C.Grid` `C.Span` `C.Stack` `C.Cols` `C.Row` `C.SectionTitle`
 
@@ -358,6 +358,12 @@ düzen: `C.Grid` `C.Span` `C.Stack` `C.Cols` `C.Row` `C.SectionTitle`
 - `C.Toolbar` — alt sekme şeridi ile ekran eylemlerini aynı satırda tutar.
   Ekranların `actions()` gövdesi bu yüzden çoğu yerde boştur: eylem üst
   çubukta değil, ait olduğu sekmenin yanındadır.
+- `C.Mic` — dikte anahtarı. Tarayıcı ses tanımayı desteklemiyorsa **hiç
+  çizilmez**: çalışmayan bir düğme kullanıcıya seçenek değil, hayal
+  kırıklığı verir. Dinlerken çevresinde yavaş bir halka genişler.
+- `C.Drop` — dosya bırakma alanı. Hem tıklanır hem üzerine bırakılır.
+  Sürükleme başlayınca sayfadaki **tek** bırakma alanı belirginleşir;
+  kullanıcı küçük bir kutuya nişan almak zorunda kalmaz.
 - `C.PickCard` — seçilebilir kart (`on` niteliğiyle dolu görünür). Seans
   şablonu ve egzersiz seçimi bu kartlarla yapılır; onay kutusu kullanılmaz.
 
@@ -439,6 +445,12 @@ bileşen eklemez; var olanların okunuşunu düzeltir.
   değil.
 - **Grafikler oranını korur.** Önceden esnetiliyordu: çizgi kalınlıkları
   yatayda ezilip dikeyde inceliyordu — grafik doğruydu ama ucuz duruyordu.
+- **Görünüm geçişi.** Bölüm değişiminde tarayıcının `startViewTransition`
+  katmanı kullanılır: eski sayfa söner, yeni sayfa hafifçe yükselerek gelir.
+  Yalnız **yol değişiminde** çalışır — her küçük yeniden çizimde geçiş
+  üretmek arayüzü sarhoş gösterir.
+- **Basma durumu.** Düğmeye basınca yarım piksel çöker; dokunmanın
+  karşılığı görünür olur.
 - **Sayfa geçişi** altı piksel yükselerek gelir. Geçişin kendisi görünmez;
   görünen tek şey sayfanın «yerleşmiş» olmasıdır. `prefers-reduced-motion`
   bunu kapatır.

@@ -37,15 +37,96 @@ SP.Screens.meals = (function(){
         <div class="quick">
           ${K.Select({ id:'meal-slot', value:S.ui.mealSlot,
             options:SP.MEAL_SLOTS.map(s => ({ value:s.id, label:s.label })), change:'pick-slot' })}
+          ${K.Mic({ target:'meal-text' })}
           ${K.Input({ id:'meal-text', placeholder:'1 tabak etli kuru fasulye, 2 dilim ekmek, 1 bardak ayran',
             aria:'Öğün metni' })}
           ${K.Button({ label:'Ekle', tone:'primary', act:'add-meal' })}
           <span class="quick__hint">Ev ölçüsü tanınır: tabak · kase · dilim · bardak · avuç · kaşık.
             Tarttıysan «150 g tavuk göğsü» yaz.</span>
         </div>`,
-      foot:K.Button({ label:'Besin ara', size:'sm', act:'open-search' }),
+      foot:html`${K.Button({ label:'Besin ara', size:'sm', act:'open-search' })}
+        ${K.Button({ label:'Fotoğraftan ekle', size:'sm', icon:'camera', act:'open-photo' })}`,
     });
   }
+
+  /* ---------------------------------------------------------- fotograf
+
+     Fotograf tek basina zayif bir kaynaktir: porsiyon buyuklugu
+     fotograftan guvenilir cikmaz. Bu yuzden UC KISA NOT sorulur.
+     Serbest bir "not" alani degil uc alan -- tahmini guclendiren sey
+     tam olarak bu uc bilgidir ve sorulmadan verilmez. */
+
+  let photoFile = null;
+
+  const AMOUNTS = [
+    { value:'tamamı',   label:'Tamamı' },
+    { value:'yarısı',   label:'Yarısı' },
+    { value:'çeyreği',  label:'Çeyreği' },
+    { value:'iki tabak',label:'İki tabak' },
+  ];
+
+  function photoSheet(){
+    UI.sheet({
+      title:'Fotoğraftan öğün', subtitle:'Üç kısa not tahmini belirgin ölçüde güçlendirir',
+      wide:true,
+      body:String(K.Stack([
+        when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
+          title:'Model bağlı değil.',
+          body:'Fotoğraftan öğün okumak için Ayarlar → Rehber → Model bölümünden '
+            + 'görüntü destekleyen bir sağlayıcı seç. Öğünü tek satır yazarak '
+            + 'modelsiz de girebilirsin.' })),
+        K.Drop({ act:'meal-photo', label:'Yemek fotoğrafı', icon:'camera',
+          accept:'image/*', hint:'Fotoğrafı buraya bırak ya da seçmek için tıkla' }),
+        html`<div id="photo-name" class="small dim">${photoFile ? photoFile.name : ''}</div>`,
+        html`<div class="cols-2">
+          ${K.Field({ label:'Ne kadarı yendi?',
+            input:K.Select({ id:'ph-amount', options:AMOUNTS }) })}
+          ${K.Field({ label:'Kabın ölçüsü', hint:'isteğe bağlı',
+            input:K.Input({ id:'ph-vessel', placeholder:'24 cm tabak, çay bardağı…' }) })}
+        </div>`,
+        K.Field({ label:'Gizli malzeme', hint:'fotoğrafta görünmeyen şeyler',
+          input:html`<div class="withmic">
+            ${K.Input({ id:'ph-extra', placeholder:'zeytinyağlı, şekerli, tereyağında kavrulmuş…' })}
+            ${K.Mic({ target:'ph-extra' })}
+          </div>` }),
+        K.Notice({ tone:'info', body:'Fotoğraftan gelen gramaj her zaman «tahmin» '
+          + 'olarak işaretlenir. Tartıp düzeltirsen «ölçüldü» olur.' }),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Oku', tone:'primary', act:'run-photo',
+          disabled:!photoFile || !SP.Extract.modelReady() })}`),
+      noFocus:true,
+    });
+  }
+
+  function photoPreviewSheet(res){
+    UI.sheet({
+      title:'Fotoğraftan okunanlar', subtitle:res.note, wide:true,
+      body:String(K.Stack([
+        when(res.items.length, () => html`<div>${map(res.items, (it, i) => {
+          const f = SP.FOOD_BY_ID[it.foodId];
+          return html`<div class="pasterow">
+            ${K.Checkbox({ label:'', checked:!it.skip, act:'toggle-photo-row', data:{ 'data-i':i } })}
+            <span><b class="small">${f ? f.name : it.foodId}</b>
+              ${P.cert('estimated')}</span>
+            <span class="pasterow__val num">${it.g} g</span>
+            <span class="pasterow__src">fotoğraftan tahmin</span>
+          </div>`;
+        })}</div>`),
+        when(!res.items.length, () => K.Notice({ tone:'warn', body:res.note })),
+        when(res.unmatched.length, () => K.Notice({ tone:'info',
+          title:'Eşleşmeyenler:',
+          body:res.unmatched.map(x => x.line).join(' · ')
+            + ' — bunlar gıda listemizde yok, kaydedilmedi.' })),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Öğüne ekle', tone:'primary', act:'save-photo',
+          disabled:!res.items.filter(x => !x.skip).length })}`),
+      noFocus:true,
+    });
+  }
+
+  let photoRes = null;
 
   /* ---------------------------------------------------------- ogunler */
 
@@ -528,6 +609,35 @@ SP.Screens.meals = (function(){
   }
 
   const handle = {
+    async 'open-photo'(){ photoFile = null; photoRes = null; photoSheet(); },
+    async 'run-photo'(){
+      if(!photoFile) return;
+      const hints = {
+        amount:(document.getElementById('ph-amount') || {}).value || '',
+        vessel:(document.getElementById('ph-vessel') || {}).value || '',
+        extra:(document.getElementById('ph-extra') || {}).value || '',
+      };
+      UI.toast('Fotoğraf okunuyor…');
+      photoRes = await SP.Extract.fromMealPhoto(photoFile, hints);
+      photoPreviewSheet(photoRes);
+    },
+    async 'toggle-photo-row'(el){
+      const i = Number(el.dataset.i);
+      if(!photoRes || !photoRes.items[i]) return;
+      photoRes.items[i].skip = !el.checked;
+      photoPreviewSheet(photoRes);
+    },
+    async 'save-photo'(){
+      if(!photoRes) return;
+      const items = photoRes.items.filter(x => !x.skip);
+      if(!items.length) return;
+      await pushItems(items.map(i => ({ foodId:i.foodId, g:i.g, cert:'estimated',
+        portion:'fotoğraf' })), 'fotoğraftan');
+      photoRes = null; photoFile = null;
+      UI.closeSheet();
+      UI.toast(items.length + ' gıda eklendi · tahmin');
+      SP.App.render();
+    },
     async 'meal-tab'(el){ S.ui.mealTab = el.dataset.tab; SP.App.render(); },
     /* Tahlil bagindan olcume gitmek: Testler bolumu o olcumun egilimini acar. */
     async 'open-marker-x'(el){
@@ -591,6 +701,13 @@ SP.Screens.meals = (function(){
   };
 
   const change = {
+    async 'meal-photo'(el){
+      photoFile = (el.files && el.files[0]) || null;
+      const n = document.getElementById('photo-name');
+      if(n) n.textContent = photoFile ? photoFile.name : '';
+      const run = document.querySelector('[data-act="run-photo"]');
+      if(run) run.disabled = !photoFile || !SP.Extract.modelReady();
+    },
     async 'pick-slot'(el){ S.ui.mealSlot = el.value; },
     async 'food-query'(el){ S.ui.foodQuery = el.value; S.ui.foodPage = 1; searchSheet(); },
     async 'food-cat'(el){ S.ui.foodCat = el.value; S.ui.foodPage = 1; searchSheet(); },

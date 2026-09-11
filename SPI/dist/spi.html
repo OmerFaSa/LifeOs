@@ -783,8 +783,34 @@ table td, table th{
 }
 .content{ animation:content-in var(--dur-lg) var(--ease); }
 
+/* ---------- görünüm geçişi ----------
+
+   Tarayıcı destekliyorsa bölümler arası geçiş tarayıcının kendi
+   katmanında yapılır: eski sayfa söner, yeni sayfa hafifçe yükselerek
+   gelir. Künye ve gezinme geçişe KATILMAZ — yerinde duran bir çerçeve
+   sayfanın değiştiğini daha net anlatır, her şeyin birden kaybolması
+   ise yön duygusunu siler. */
+::view-transition-old(root){ animation:vt-out 160ms var(--ease) both; }
+::view-transition-new(root){ animation:vt-in 240ms var(--ease) both; }
+@keyframes vt-out{ to{ opacity:0; } }
+@keyframes vt-in{ from{ opacity:0; transform:translateY(8px); } }
+
+/* Düğmeye basınca hafif çöker: dokunmanın karşılığı görünür olur. */
+.btn:active, .subtab:active, .navlink:active, .pagelink:active,
+.iconbtn:active, .mic:active{ transform:translateY(.5px) scale(.985); }
+
+/* Kart, fare üstündeyken kenarlığını belirginleştirir — gölge değil.
+   Yalnız TIKLANABILIR kartlarda; okunacak bir kart fareye tepki vermez. */
+.pickcard, .resrow, .suggfood, .navsheet__item, .listitem button{
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease),
+             transform var(--dur) var(--ease);
+}
+
 @media (prefers-reduced-motion:reduce){
   .content{ animation:none; }
+  ::view-transition-old(root), ::view-transition-new(root){ animation:none; }
+  .btn:active, .subtab:active, .navlink:active, .pagelink:active,
+  .iconbtn:active, .mic:active{ transform:none; }
 }
 
 /* ==== css/layout.css ==== */
@@ -2894,6 +2920,94 @@ button.minrow:hover{ background:var(--surface-2); }
   font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
   color:var(--text-3);
 }
+
+/* ================= dikte (mikrofon) =================
+
+   Bir ANAHTAR düğmedir: açıkken basınca kapanır. Dinlerken çevresinde
+   yavaş bir halka genişler — «çalışıyor» demenin en sessiz yolu. */
+.mic{
+  flex:none;
+  width:38px; height:38px; border-radius:50%;
+  display:inline-grid; place-items:center;
+  position:relative;
+  border:1px solid var(--border-strong);
+  background:var(--surface); color:var(--text-2);
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease),
+             border-color var(--dur) var(--ease);
+}
+.mic svg{ width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:1.8; }
+.mic:hover{ color:var(--text); border-color:var(--text-3); }
+.mic--sm{ width:32px; height:32px; }
+.mic--sm svg{ width:15px; height:15px; }
+.mic.is-on{
+  background:var(--sec); border-color:var(--sec); color:var(--primary-ink);
+}
+.mic__pulse{
+  position:absolute; inset:-4px; border-radius:50%;
+  border:2px solid var(--sec);
+  animation:mic-pulse 1.6s var(--ease) infinite;
+  pointer-events:none;
+}
+@keyframes mic-pulse{
+  0%{ transform:scale(.9); opacity:.7; }
+  100%{ transform:scale(1.35); opacity:0; }
+}
+@media (prefers-reduced-motion:reduce){ .mic__pulse{ animation:none; opacity:.5; } }
+
+/* Metin alanının yanındaki mikrofon: alan büyür, düğme sabit kalır. */
+.withmic{ display:flex; align-items:flex-start; gap:8px; }
+.withmic > :first-child{ flex:1; min-width:0; }
+
+/* ================= dosya bırakma alanı =================
+
+   Hem tıklanır hem üzerine bırakılır. Sürükleme başladığında sayfadaki
+   TEK bırakma alanı belirginleşir; kullanıcı küçük bir kutuya nişan
+   almak zorunda kalmaz, dosyayı sayfanın herhangi bir yerine bırakır. */
+.drop{
+  position:relative; display:flex; align-items:center; gap:14px;
+  padding:18px 20px;
+  border:1.5px dashed var(--border-strong); border-radius:var(--r);
+  background:var(--surface-hover);
+  cursor:pointer;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.drop:hover{ border-color:var(--sec); background:var(--surface); }
+.drop__input{
+  position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;
+}
+.drop__icon{
+  flex:none; width:40px; height:40px; border-radius:50%;
+  display:grid; place-items:center;
+  background:var(--sec-soft); color:var(--sec);
+}
+.drop__icon svg{ width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.7; }
+.drop__text{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+.drop__text b{ font-size:var(--fs-base); font-weight:600; }
+.drop__text span{ font-size:var(--fs-sm); color:var(--text-3); line-height:1.4; }
+
+/* Sürükleme sırasında: sayfa sakinleşir, hedef belirginleşir. */
+body.is-dragging .drop{
+  border-color:var(--sec); background:var(--sec-soft);
+}
+body.is-dragging .drop.is-over{
+  border-style:solid;
+  box-shadow:0 0 0 4px var(--sec-soft);
+}
+
+/* ================= geri alma bildirimi ================= */
+.toast--undo{ display:flex; align-items:center; gap:14px; padding-right:8px; }
+.toast__undo{
+  flex:none;
+  border:none; background:none;
+  color:var(--bg); opacity:.85;
+  font-size:var(--fs-sm); font-weight:700; letter-spacing:.02em;
+  text-decoration:underline; text-underline-offset:3px;
+  padding:4px 8px;
+  pointer-events:auto;
+}
+.toast__undo:hover{ opacity:1; }
+.toast-root{ pointer-events:none; }
+.toast{ pointer-events:auto; }
 </style>
 <div id="app">
   <div class="boot">
@@ -5526,6 +5640,7 @@ SP.S = {
 
   ui:{
     railOpen:false,
+    undo:null,             // son yikici islemin geri alma kaydi
     dayTab:'giris',        // giris | ozet | gecmis
     labTab:'sonuc',        // sonuc | giris | gecmis | trend
     labPanel:'vital',      // acik panel id'si
@@ -8227,6 +8342,470 @@ SP.Parse = (function(){
     convert, toLabRecord, ALIAS_INDEX, FOOD_ALIAS, WORD_NUM };
 })();
 
+/* ==== js/core/voice.js ==== */
+/* Ses ile dikte.
+
+   Bu katman KONUSMA degil DIKTE yapar: ses metne cevrilir, metin var olan
+   alana yazilir ve oradan sonra her sey yazarak girmisin gibi isler. Yeni
+   bir ayristirici, yeni bir kesinlik etiketi, yeni bir kayit yolu yoktur.
+
+   Bu kasitlidir. "Bir tabak etli kuru fasulye, bir bardak ayran" cumlesini
+   coktan ayristirabiliyoruz (SP.Parse.parseMeal). Sesin yapmasi gereken tek
+   is o cumleyi klavye yerine uretmek. Sesli cevap (TTS) yoktur: kesinlik
+   katmaz, bedel katar.
+
+   Tarayicinin kendi konusma motoru kullanilir. Desteklenmeyen tarayicida
+   katman sessizce yok olur -- mikrofon dugmesi hic cizilmez, elle giris
+   yolu zaten her yerde durur. */
+
+window.SP = window.SP || {};
+
+SP.Voice = (function(){
+
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+
+  /* Ayni anda tek bir oturum. Iki alan birden dinlerse hangi alana
+     yazildigi belirsizlesir. */
+  let active = null;
+
+  function supported(){ return !!Rec; }
+
+  /* Dikte oturumu.
+
+     `opts.onText(text, final)` her tanima adiminda cagrilir; `final`
+     false iken metin henuz degisebilir (ara sonuc), true olunca sabitlenir.
+     Cagiran taraf ara sonuclari da yazar ki kullanici konusurken
+     yazildigini gorsun. */
+  function start(opts){
+    const o = opts || {};
+    if(!Rec){ if(o.onError) o.onError('unsupported'); return null; }
+    stop();
+
+    let rec;
+    try{ rec = new Rec(); }
+    catch(e){ if(o.onError) o.onError('unsupported'); return null; }
+
+    rec.lang = o.lang || 'tr-TR';
+    rec.continuous = o.continuous !== false;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    /* Oturum boyunca sabitlenmis metin burada birikir; ara sonuc bunun
+       ustune eklenir ama birikime yazilmaz. */
+    let settled = '';
+
+    rec.onresult = ev => {
+      let interim = '';
+      for(let i = ev.resultIndex; i < ev.results.length; i++){
+        const piece = ev.results[i][0].transcript;
+        if(ev.results[i].isFinal) settled += piece;
+        else interim += piece;
+      }
+      const text = (settled + interim).replace(/\s+/g, ' ').trim();
+      if(o.onText) o.onText(text, !interim);
+    };
+
+    rec.onerror = ev => {
+      const code = ev && ev.error ? ev.error : 'error';
+      /* "no-speech" bir hata degil, sessizliktir: kullaniciya hata
+         gostermek yerine oturumu sessizce bitiririz. */
+      if(code !== 'no-speech' && code !== 'aborted' && o.onError) o.onError(code);
+    };
+
+    rec.onend = () => {
+      const was = active;
+      active = null;
+      if(was && o.onEnd) o.onEnd(settled.replace(/\s+/g, ' ').trim());
+    };
+
+    try{ rec.start(); }
+    catch(e){ if(o.onError) o.onError('start'); return null; }
+
+    active = { rec, target:o.target || null };
+    return active;
+  }
+
+  function stop(){
+    if(!active) return;
+    const a = active;
+    active = null;
+    try{ a.rec.stop(); }catch(e){}
+  }
+
+  function isActive(){ return !!active; }
+  function activeTarget(){ return active ? active.target : null; }
+
+  /* Bir metin alanina baglanan dikte.
+
+     Alandaki mevcut metin KORUNUR: dikte onun sonuna eklenir. Kullanici
+     yarim yazip sonra konusmaya baslayabilsin diye. */
+  function dictateInto(el, opts){
+    const o = opts || {};
+    if(!el) return null;
+    const base = el.value ? el.value.replace(/\s+$/, '') + ' ' : '';
+
+    return start({
+      target:el.id || null,
+      lang:o.lang,
+      onText(text){
+        el.value = base + text;
+        /* Uzun metinde imlec sonda kalsin ki kullanici yazilani gorsun. */
+        try{ el.selectionStart = el.selectionEnd = el.value.length; }catch(e){}
+        if(o.onText) o.onText(el.value);
+      },
+      onEnd(final){
+        if(o.onEnd) o.onEnd(base + final);
+      },
+      onError:o.onError,
+    });
+  }
+
+  const MESSAGES = {
+    unsupported:'Bu tarayıcı ses tanımayı desteklemiyor. Chrome ya da Edge dene.',
+    'not-allowed':'Mikrofon izni verilmedi.',
+    'service-not-allowed':'Mikrofon izni verilmedi.',
+    'audio-capture':'Mikrofon bulunamadı.',
+    network:'Ses tanıma için bağlantı gerekiyor.',
+    start:'Mikrofon başlatılamadı.',
+  };
+  function message(code){ return MESSAGES[code] || 'Ses tanıma çalışmadı.'; }
+
+  return { supported, start, stop, isActive, activeTarget, dictateInto, message };
+})();
+
+/* ==== js/core/extract.js ==== */
+/* Belge ve fotograftan veri cikarma.
+
+   Ekranlar modeli TANIMAZ. Hepsi bu modulden gecer; saglayici degisince,
+   model kapaliyken ya da cevrimdisiyken ekranlara dokunulmaz.
+
+   Uc degismez:
+
+     1. Uygulama modelsiz calismaya devam eder. Metin dosyasi ve
+        yapistirilan metin modelsiz ayristirilir; model yalnizca metin
+        ayristiricinin cozemedigi yerde devreye girer.
+
+     2. Model dogrudan depoya YAZMAZ. Cikan her sonuc, tahlil
+        yapistirmadaki "ayiklandi -> gozden gecir -> kaydet" adimina
+        baglanir. Kullanici gormeden hicbir sey kaydedilmez.
+
+     3. Model uydurma kimlik dondurmez. Cikti bizim tablolarimiza
+        (SP.BIOMARKERS, SP.FOODS) eslenir; eslesmeyen satir atilmaz,
+        "eslesmedi" olarak gosterilir.
+
+   Kesinlik eslemesi yeni etiket icat etmez:
+
+     tahlil belgesi -> olculdu   (laboratuvar olctu, biz okuduk)
+     market fisi    -> olculdu   (fiyat fiste yazili)
+     yemek fotografi-> tahmin    (porsiyonu model tahmin ediyor)
+
+   MAHREMIYET DIKISI: disari cikan her istek `send()` icinden gecer.
+   Sistem su an aile ici kullanildigi icin arindirma yapilmiyor; genele
+   acilirken PDF'ten kimlik alanlarini kesme ve fotograftan EXIF silme
+   adimi TEK BIR YERE, oraya takilir. */
+
+window.SP = window.SP || {};
+
+SP.Extract = (function(){
+  const U = SP.U;
+
+  const MAX_BYTES = 8 * 1024 * 1024;   /* 8 MB: buyuk dosya modele gitmez */
+
+  function isImage(file){ return /^image\//.test(file.type); }
+  function isPdf(file){ return file.type === 'application/pdf' || /\.pdf$/i.test(file.name); }
+  function isText(file){
+    return /^text\//.test(file.type)
+      || /\.(txt|csv|md|json)$/i.test(file.name)
+      || file.type === 'application/json';
+  }
+
+  function readText(file){
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(String(fr.result || ''));
+      fr.onerror = () => reject(new Error('Dosya okunamadı.'));
+      fr.readAsText(file, 'utf-8');
+    });
+  }
+
+  function readDataUrl(file){
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(String(fr.result || ''));
+      fr.onerror = () => reject(new Error('Dosya okunamadı.'));
+      fr.readAsDataURL(file);
+    });
+  }
+
+  /* data:image/png;base64,XXXX  ->  { mime, b64 } */
+  function splitDataUrl(url){
+    const m = /^data:([^;,]+)(?:;base64)?,(.*)$/.exec(url || '');
+    if(!m) return null;
+    return { mime:m[1], b64:m[2] };
+  }
+
+  function modelReady(){
+    try{
+      const s = SP.Office.settings();
+      return SP.LLM.ready({ provider:s.provider, model:s.model });
+    }catch(e){ return false; }
+  }
+
+  /* ---------------------------------------------------------- gonderim
+
+     Disari cikan TEK nokta. Arindirma buraya takilacak. */
+  async function send(req){
+    const s = SP.Office.settings();
+    return SP.LLM.chat(Object.assign({
+      provider:s.provider,
+      model:s.model,
+      temperature:0,
+      maxTokens:2000,
+    }, req));
+  }
+
+  /* Modelin JSON dondurmesi istenir ama dondurmeyebilir; metnin icindeki
+     ilk JSON blogu ayiklanir. Bulunamazsa hata degil BOS sonuc doner:
+     kullanici elle girmeye devam eder. */
+  function parseJson(text){
+    if(!text) return null;
+    const fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(text);
+    const body = fenced ? fenced[1] : text;
+    const start = body.search(/[[{]/);
+    if(start < 0) return null;
+    const end = Math.max(body.lastIndexOf(']'), body.lastIndexOf('}'));
+    if(end <= start) return null;
+    try{ return JSON.parse(body.slice(start, end + 1)); }
+    catch(e){ return null; }
+  }
+
+  /* ------------------------------------------------------------ tahlil
+
+     Once METIN ayristiricisi denenir (modelsiz, aninda, bedava). Yalniz
+     o hicbir sey bulamazsa ve elimizde bir goruntu varsa model devreye
+     girer. Bu sira kasitlidir: calisan bir ayristiriciyi varken modele
+     para ve saniye harcamak dogru degil. */
+  const LAB_PROMPT =
+    'Asagidaki tahlil raporundan olcum adi, degeri ve birimini cikar. '
+    + 'Yalniz JSON dizisi dondur, baska hicbir sey yazma. Bicim: '
+    + '[{"ad":"Ferritin","deger":26,"birim":"ng/mL"}]. '
+    + 'Emin olmadigin satiri ATLA. Deger okunamiyorsa o satiri hic yazma. '
+    + 'Tarihi, hasta bilgisini ve yorumu dondurme.';
+
+  async function fromLabFile(file){
+    if(!file) return empty('Dosya seçilmedi.');
+    if(file.size > MAX_BYTES) return empty('Dosya çok büyük (en fazla 8 MB).');
+
+    /* 1. Metin dosyasi: dogrudan ayristirici. */
+    if(isText(file)){
+      const text = await readText(file);
+      const res = SP.Parse.parseLab(text);
+      res.source = 'file';
+      return res;
+    }
+
+    /* 2. Goruntu ya da PDF: model gerekir. */
+    if(!isImage(file) && !isPdf(file)){
+      return empty('Bu dosya türü okunamıyor. PDF, görüntü ya da metin dosyası ver.');
+    }
+    if(!modelReady()){
+      return empty('Görüntü ve PDF okumak için Ayarlar → Rehber → Model bölümünden '
+        + 'bir model bağlaman gerekiyor. Rapor metnini yapıştırarak modelsiz de girebilirsin.');
+    }
+    if(isPdf(file)){
+      return empty('PDF doğrudan okunamıyor. Raporun ekran görüntüsünü ver ya da '
+        + 'metnini yapıştır.');
+    }
+
+    const parts = splitDataUrl(await readDataUrl(file));
+    if(!parts) return empty('Görüntü okunamadı.');
+
+    let out;
+    try{
+      out = await send({
+        system:'Sen bir tahlil raporu okuyucususun. Yalniz JSON dondurursun.',
+        messages:[{ role:'user', text:LAB_PROMPT, images:[parts] }],
+      });
+    }catch(e){
+      return empty('Model yanıt vermedi: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
+    }
+
+    const rows = parseJson(out && out.text);
+    if(!Array.isArray(rows) || !rows.length){
+      return empty('Görüntüden ölçüm çıkarılamadı. Rapor metnini yapıştırmayı dene.');
+    }
+
+    /* Model satirlarini BIZIM ayristiricimiza geri veriyoruz: takma ad
+       eslemesi, birim cevirimi ve esiklerin hepsi orada tanimli. Boylece
+       modelin ciktisi da ayni denetimden geciyor. */
+    const text = rows
+      .map(r => [r.ad, r.deger, r.birim].filter(x => x != null && x !== '').join(' '))
+      .join('\n');
+    const res = SP.Parse.parseLab(text);
+    res.source = 'photo';
+    res.note = res.note + ' · görüntüden okundu';
+    return res;
+  }
+
+  /* ------------------------------------------------------------- ogun
+
+     Fotograf tek basina zayif bir kaynaktir: porsiyon buyuklugu
+     fotograftan guvenilir cikmaz. Bu yuzden uc kisa not sorulur --
+     ne kadari yendi, kabin olcusu, gizli malzeme. Tahmini guclendiren
+     sey bu uc bilgidir ve sorulmadan verilmez. */
+  function mealPrompt(hints){
+    const names = SP.FOODS.map(f => f.id + '=' + f.name).join(', ');
+    let p = 'Fotograftaki yemegi asagidaki listeden SEC ve gram olarak tahmin et. '
+      + 'Yalniz JSON dizisi dondur: [{"id":"pilav","gram":180}]. '
+      + 'Listede olmayan bir sey icin id yerine ad yaz: [{"ad":"lahmacun","gram":120}]. '
+      + 'Emin olmadigin seyi yazma.\n\nListe: ' + names;
+    const h = [];
+    if(hints && hints.amount) h.push('Tabagin ' + hints.amount + ' kadari yendi.');
+    if(hints && hints.vessel) h.push('Kabin olcusu: ' + hints.vessel + '.');
+    if(hints && hints.extra)  h.push('Ek bilgi: ' + hints.extra + '.');
+    if(h.length) p += '\n\nKullanicinin notu: ' + h.join(' ');
+    return p;
+  }
+
+  async function fromMealPhoto(file, hints){
+    if(!file) return { ok:false, items:[], unmatched:[], note:'Fotoğraf seçilmedi.' };
+    if(file.size > MAX_BYTES){
+      return { ok:false, items:[], unmatched:[], note:'Fotoğraf çok büyük (en fazla 8 MB).' };
+    }
+    if(!isImage(file)){
+      return { ok:false, items:[], unmatched:[], note:'Bu bir görüntü dosyası değil.' };
+    }
+    if(!modelReady()){
+      return { ok:false, items:[], unmatched:[],
+        note:'Fotoğraftan öğün okumak için bir model bağlaman gerekiyor. '
+          + 'Öğünü tek satır yazarak modelsiz de girebilirsin.' };
+    }
+
+    const parts = splitDataUrl(await readDataUrl(file));
+    if(!parts) return { ok:false, items:[], unmatched:[], note:'Fotoğraf okunamadı.' };
+
+    let out;
+    try{
+      out = await send({
+        system:'Sen bir yemek fotografi okuyucususun. Yalniz JSON dondurursun.',
+        messages:[{ role:'user', text:mealPrompt(hints), images:[parts] }],
+      });
+    }catch(e){
+      return { ok:false, items:[], unmatched:[],
+        note:'Model yanıt vermedi: ' + (e && e.message ? e.message : 'bilinmeyen hata') };
+    }
+
+    const rows = parseJson(out && out.text);
+    if(!Array.isArray(rows) || !rows.length){
+      return { ok:false, items:[], unmatched:[],
+        note:'Fotoğraftan yemek çıkarılamadı. Öğünü yazarak girebilirsin.' };
+    }
+
+    /* Kimlik eslemesi: model uydurursa oraya DUSMEZ, "eslesmedi" olur. */
+    const items = [], unmatched = [];
+    rows.forEach(r => {
+      const g = Number(r.gram);
+      if(!isFinite(g) || g <= 0){ unmatched.push({ line:String(r.ad || r.id || '') }); return; }
+      let food = r.id ? SP.FOOD_BY_ID[r.id] : null;
+      if(!food && r.ad){
+        const q = U.norm(String(r.ad));
+        food = SP.FOODS.find(f => U.norm(f.name) === q)
+          || SP.FOODS.find(f => (f.aliases || []).some(a => U.norm(a) === q));
+      }
+      if(!food){ unmatched.push({ line:String(r.ad || r.id || '') + ' · ' + g + ' g' }); return; }
+      /* Fotograftan gelen gramaj her zaman TAHMINDIR. Kullanici tartip
+         duzeltirse "olculdu" olur; bu zaten var olan davranis. */
+      items.push({ foodId:food.id, g:Math.round(g), cert:'estimated', portion:'fotoğraf' });
+    });
+
+    return {
+      ok:items.length > 0, items, unmatched,
+      note:items.length
+        ? items.length + ' gıda tanındı · gramaj tahmin'
+        : 'Tanınan gıda listemizde yok.',
+    };
+  }
+
+  /* -------------------------------------------------------------- fis
+
+     Market fisi fiyat tablosunun curumesini cozer: tohum tahminler
+     kullanicinin gercek fiyatiyla degisir ve "olculdu" olur. */
+  const RECEIPT_PROMPT =
+    'Asagidaki market fisinden urun adi ve KILOGRAM BASINA fiyati cikar. '
+    + 'Yalniz JSON dizisi dondur: [{"ad":"kuru fasulye","tlKg":120}]. '
+    + 'Fis toplam fiyat ve agirlik veriyorsa kilogram fiyatini hesapla. '
+    + 'Emin olmadigin satiri atla. Toplam, kdv ve kasa satirlarini yazma.';
+
+  async function fromReceipt(file){
+    if(!file) return { ok:false, rows:[], unmatched:[], note:'Dosya seçilmedi.' };
+    if(file.size > MAX_BYTES){
+      return { ok:false, rows:[], unmatched:[], note:'Dosya çok büyük (en fazla 8 MB).' };
+    }
+
+    let userText = null;
+    if(isText(file)) userText = await readText(file);
+    else if(!isImage(file)){
+      return { ok:false, rows:[], unmatched:[],
+        note:'Fiş için görüntü ya da metin dosyası ver.' };
+    }
+    if(!modelReady()){
+      return { ok:false, rows:[], unmatched:[],
+        note:'Fiş okumak için bir model bağlaman gerekiyor. Fiyatları Finans → Fiyat '
+          + 'sayfasından elle de girebilirsin.' };
+    }
+
+    const msg = { role:'user', text:RECEIPT_PROMPT + (userText ? '\n\n' + userText : '') };
+    if(!userText){
+      const parts = splitDataUrl(await readDataUrl(file));
+      if(!parts) return { ok:false, rows:[], unmatched:[], note:'Görüntü okunamadı.' };
+      msg.images = [parts];
+    }
+
+    let out;
+    try{
+      out = await send({ system:'Sen bir market fisi okuyucususun. Yalniz JSON dondurursun.',
+        messages:[msg] });
+    }catch(e){
+      return { ok:false, rows:[], unmatched:[],
+        note:'Model yanıt vermedi: ' + (e && e.message ? e.message : 'bilinmeyen hata') };
+    }
+
+    const parsed = parseJson(out && out.text);
+    if(!Array.isArray(parsed) || !parsed.length){
+      return { ok:false, rows:[], unmatched:[], note:'Fişten fiyat çıkarılamadı.' };
+    }
+
+    const rows = [], unmatched = [];
+    parsed.forEach(r => {
+      const tl = Number(r.tlKg);
+      if(!isFinite(tl) || tl <= 0){ unmatched.push({ line:String(r.ad || '') }); return; }
+      const q = U.norm(String(r.ad || ''));
+      const food = SP.FOODS.find(f => U.norm(f.name) === q)
+        || SP.FOODS.find(f => (f.aliases || []).some(a => U.norm(a) === q))
+        || SP.FOODS.find(f => U.norm(f.name).indexOf(q) >= 0 && q.length >= 4);
+      if(!food){ unmatched.push({ line:String(r.ad || '') + ' · ' + tl + ' TL/kg' }); return; }
+      rows.push({ food, tl:Math.round(tl * 100) / 100, skip:false });
+    });
+
+    return {
+      ok:rows.length > 0, rows, unmatched,
+      note:rows.length ? rows.length + ' ürün eşleşti' : 'Eşleşen ürün yok.',
+    };
+  }
+
+  function empty(note){
+    return { rows:[], unmatched:[], note, date:U.todayISO(), lab:'' };
+  }
+
+  return {
+    supported:modelReady, modelReady,
+    isImage, isPdf, isText,
+    readText, readDataUrl,
+    fromLabFile, fromMealPhoto, fromReceipt,
+    parseJson, send, MAX_BYTES,
+  };
+})();
+
 /* ==== js/core/ui.js ==== */
 /* Arayuz parcalari: ikonlar, olcum gorselleri, grafikler, alt sayfa ve bildirimler. */
 
@@ -8294,6 +8873,12 @@ SP.UI = (function(){
     pill:'<rect x="2.8" y="8.6" width="18.4" height="6.8" rx="3.4" transform="rotate(-45 12 12)"/><path d="M8.5 8.5l7 7"/>',
     fire:'<path d="M12 3.5c3.5 3.4 5.5 6 5.5 8.9a5.5 5.5 0 11-11 0c0-1.5.6-2.9 1.7-4.2.4 1.2 1 2 1.9 2.4C10.5 8.4 11 5.9 12 3.5z"/>',
     bed:'<path d="M3 19v-8M3 13h18v6M7.5 10.5h3.5a2 2 0 012 2v.5"/><path d="M3 19h18"/>',
+    mic:'<rect x="9" y="2.5" width="6" height="11" rx="3"/>'
+      + '<path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/>',
+    camera:'<path d="M3.5 8.5A1.5 1.5 0 015 7h2.2l1.2-2h7.2l1.2 2H19a1.5 1.5 0 011.5 1.5v9A1.5 1.5 0 0119 19H5a1.5 1.5 0 01-1.5-1.5z"/>'
+      + '<circle cx="12" cy="12.5" r="3.4"/>',
+    file:'<path d="M7 3.5h7l5 5V19a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 016 19V5a1.5 1.5 0 011-1.5z"/>'
+      + '<path d="M13.5 3.5V9H19"/>',
 
     /* --- gorunum --- */
     sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8'
@@ -8805,14 +9390,30 @@ SP.UI = (function(){
   }
   function isSheetOpen(){ return !!document.getElementById('sheet'); }
 
-  function toast(text){
+  /* Bildirim. `undo` verilirse bildirimin icinde bir "geri al" dugmesi
+     cikar ve bildirim daha uzun durur: kullanicinin okuyup karar vermesi
+     icin 1,5 saniye yetmez. */
+  function toast(text, opts){
+    const o = opts || {};
     const root = document.getElementById('toast-root');
     const el = document.createElement('div');
-    el.className = 'toast';
-    el.textContent = text;
+    el.className = 'toast' + (o.undo ? ' toast--undo' : '');
+    const span = document.createElement('span');
+    span.textContent = text;
+    el.appendChild(span);
+    if(o.undo){
+      const btn = document.createElement('button');
+      btn.className = 'toast__undo';
+      btn.textContent = 'Geri al';
+      btn.setAttribute('data-act', 'undo');
+      btn.addEventListener('click', () => { el.remove(); });
+      el.appendChild(btn);
+    }
     root.appendChild(el);
-    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, 1500);
-    setTimeout(() => el.remove(), 1800);
+    const life = o.undo ? 6000 : 1500;
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, life);
+    setTimeout(() => el.remove(), life + 300);
+    return el;
   }
 
   function confirmSheet(title, message, onConfirm, danger){
@@ -9008,6 +9609,40 @@ SP.C = (function(){
     </div>`;
   }
 
+  /* ---------- dikte ve dosya ----------
+
+     Ikisi de KOSULLUDUR: tarayici ses tanimayi desteklemiyorsa mikrofon
+     dugmesi hic cizilmez, dosya alani her zaman cizilir cunku metin
+     dosyasi modelsiz de okunur. Calismayan bir dugme gostermek
+     kullaniciya secenek degil, hayal kirikligi verir. */
+  function Mic(o){
+    if(!SP.Voice || !SP.Voice.supported()) return raw('');
+    const on = SP.Voice.isActive() && SP.Voice.activeTarget() === o.target;
+    return html`<button type="button"
+      class="${cls('mic', on && 'is-on', o.size === 'sm' && 'mic--sm')}"
+      data-act="dictate" data-target="${o.target}"
+      aria-label="${on ? 'Dinlemeyi durdur' : 'Sesle yaz'}"
+      aria-pressed="${on ? 'true' : 'false'}"
+      title="${on ? 'Dinliyor — durdurmak için tıkla' : 'Sesle yaz'}">
+      ${raw(SP.UI.icon('mic'))}
+      ${when(on, () => html`<span class="mic__pulse" aria-hidden="true"></span>`)}
+    </button>`;
+  }
+
+  /* Dosya birakma alani. Tiklayinca dosya secici acilir, uzerine
+     birakinca da alir. Iki yol da ayni eylemi tetikler. */
+  function Drop(o){
+    return html`<label class="drop" data-drop="${o.act}">
+      <input type="file" class="drop__input" accept="${o.accept || ''}"
+        data-change="${o.act}" ${when(o.id, () => attrs({ id:o.id }))}/>
+      <span class="drop__icon" aria-hidden="true">${raw(SP.UI.icon(o.icon || 'upload'))}</span>
+      <span class="drop__text">
+        <b>${o.label}</b>
+        <span>${o.hint || 'Dosyayı buraya bırak ya da seçmek için tıkla'}</span>
+      </span>
+    </label>`;
+  }
+
   function Field(o){
     return html`<label class="field">
       <span>${o.label}${when(o.hint, () => html` <span class="hint-text">${o.hint}</span>`)}</span>
@@ -9147,6 +9782,7 @@ SP.C = (function(){
     Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, NextUp, Table, Pager, paginate,
+    Mic, Drop,
     Grid, Span, Stack, Cols, Row, SectionTitle,
   };
 })();
@@ -9806,6 +10442,8 @@ SP.LLM = (function(){
     timeout:'Yanıt zaman aşımına uğradı. Daha hızlı bir model dene.',
     cancelled:'İptal edildi.',
     empty:'Model boş yanıt döndürdü. Tekrar dene.',
+    no_vision:'Yerleşik model görüntü okuyamıyor. Ayarlar → Rehber → Model '
+      + 'bölümünden görüntü destekleyen bir sağlayıcı seç.',
     unavailable:'Yerleşik model bu ortamda kapalı. Ofis → Ayarlar’dan ücretsiz bir sağlayıcı bağla.',
     offline:'Bağlantı yok. Çevrimiçi olunca kaldığın yerden devam edersin; kural motoru bu sırada çalışmayı sürdürüyor.',
     daily_quota:'Bu modelin günlük ücretsiz hakkı doldu. Yarın sıfırlanır; o zamana kadar başka bir sağlayıcı kullanabilirsin.',
@@ -9916,7 +10554,12 @@ SP.LLM = (function(){
     if(!builtinReady()) throw fail('unavailable');
     const turns = [];
     if(req.system) turns.push({ role:'user', content:req.system });
-    (req.messages || []).forEach(m => turns.push({ role:m.role, content:m.text }));
+    (req.messages || []).forEach(m => {
+      /* Yerlesik saglayici goruntu almaz. Sessizce dusurmek yerine
+         cagirana bildiririz: ekran "model goruntu okuyamiyor" der. */
+      if(m.images && m.images.length) throw fail('no_vision');
+      turns.push({ role:m.role, content:m.text });
+    });
     const res = await sample(turns.length === 1 ? turns[0].content : turns, {
       modelTier:req.model === 'quick' ? 'quick' : 'default',
       signal:req.signal,
@@ -9937,7 +10580,21 @@ SP.LLM = (function(){
 
     const messages = [];
     if(req.system) messages.push({ role:'system', content:req.system });
-    (req.messages || []).forEach(m => messages.push({ role:m.role, content:m.text }));
+    /* Goruntu tasiyan mesaj, OpenAI uyumlu icerik dizisine cevrilir.
+       Goruntu yoksa duz metin kalir: eski saglayicilar dizi bicimini
+       kabul etmeyebilir, gereksiz yere riske girilmez. */
+    (req.messages || []).forEach(m => {
+      if(m.images && m.images.length){
+        const content = [{ type:'text', text:m.text || '' }];
+        m.images.forEach(img => {
+          const url = img.url || ('data:' + (img.mime || 'image/jpeg') + ';base64,' + img.b64);
+          content.push({ type:'image_url', image_url:{ url } });
+        });
+        messages.push({ role:m.role, content });
+      }else{
+        messages.push({ role:m.role, content:m.text });
+      }
+    });
 
     const headers = {
       'Content-Type':'application/json',
@@ -11158,8 +11815,11 @@ SP.Screens.today = (function(){
           input:K.Segmented({ act:'set-soreness', value:v.soreness == null ? '' : String(v.soreness),
             items:SORENESS, block:true, aria:'Günün hissi' }) })}</div>
         <div class="mt-12">${K.Field({ label:'Not',
-          input:K.Textarea({ id:'v-note', rows:2, value:v.note || '',
-            placeholder:'Hastalık, ilaç değişikliği, olağandışı bir gün…' }) })}</div>`,
+          input:html`<div class="withmic">
+            ${K.Textarea({ id:'v-note', rows:2, value:v.note || '',
+              placeholder:'Hastalık, ilaç değişikliği, olağandışı bir gün…' })}
+            ${K.Mic({ target:'v-note' })}
+          </div>` })}</div>`,
       foot:html`${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}
         <span class="small dim">Kaydettiğinde toparlanma skoru ve kırmızı bayraklar yeniden hesaplanır.</span>`,
     });
@@ -11246,6 +11906,7 @@ SP.Screens.today = (function(){
       sub:'Tek satır yaz, Enter\'a bas',
       body:html`
         <div class="quick">
+          ${K.Mic({ target:'quick-meal' })}
           ${K.Input({ id:'quick-meal', placeholder:'1 tabak etli kuru fasulye, 1 bardak ayran',
             aria:'Öğün metni' })}
           ${K.Button({ label:'Öğüne ekle', tone:'primary', act:'quick-meal' })}
@@ -11929,15 +12590,23 @@ SP.Screens.labs = (function(){
       subtitle:'Metni olduğu gibi yapıştır — değerler ayıklanıp şemaya oturur',
       wide:true,
       body:String(K.Stack([
+        K.Drop({ act:'lab-file', label:'Rapor dosyası ya da fotoğrafı',
+          icon:'file', accept:'.txt,.csv,.md,image/*',
+          hint:'Metin dosyası modelsiz okunur · fotoğraf için model gerekir' }),
         K.Notice({ tone:'info', body:'Ayıklayıcı emin olamadığı satırı atmaz. '
           + 'Eşleşmeyen satırlar aşağıda listelenir; istersen elle bağlarsın.' }),
-        K.Field({ label:'Test tarihi',
-          input:K.Input({ id:'paste-date', type:'date', value:draft.date }) }),
-        K.Field({ label:'Laboratuvar (isteğe bağlı)',
-          input:K.Input({ id:'paste-lab', placeholder:'Hangi laboratuvar?' }) }),
+        html`<div class="cols-2">
+          ${K.Field({ label:'Test tarihi',
+            input:K.Input({ id:'paste-date', type:'date', value:draft.date }) })}
+          ${K.Field({ label:'Laboratuvar (isteğe bağlı)',
+            input:K.Input({ id:'paste-lab', placeholder:'Hangi laboratuvar?' }) })}
+        </div>`,
         K.Field({ label:'Rapor metni',
-          input:K.Textarea({ id:'paste-text', rows:10,
-            placeholder:'Hemoglobin      14,2   g/dL    13.5 - 17.5\nFerritin        28     ng/mL   30 - 400\n…' }) }),
+          input:html`<div class="withmic">
+            ${K.Textarea({ id:'paste-text', rows:9,
+              placeholder:'Hemoglobin      14,2   g/dL    13.5 - 17.5\nFerritin        28     ng/mL   30 - 400\n…' })}
+            ${K.Mic({ target:'paste-text' })}
+          </div>` }),
       ])),
       footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
         ${K.Button({ label:'Ayıkla', tone:'primary', act:'run-paste' })}`),
@@ -12017,10 +12686,17 @@ SP.Screens.labs = (function(){
         wide:true, body:labSheetBody(l), noFocus:true,
         footer:String(K.Button({ label:'Kapat', act:'sheet-close' })) });
     },
+    /* Onay kagidi yerine GERI ALMA: silinen oturum bellekte tutulur ve
+       bildirimdeki dugmeyle geri yazilir. Daha hizli ve daha nazik. */
     async 'del-lab'(el){
       const id = el.dataset.id;
-      UI.confirmSheet('Testi sil', 'Bu oturumdaki bütün değerler silinir. Geri alınamaz.',
-        async () => { await M.deleteLab(id); UI.closeSheet(); UI.toast('Silindi'); SP.App.render(); }, true);
+      const rec = S.labs.find(x => x.id === id);
+      if(!rec) return;
+      const copy = JSON.parse(JSON.stringify(rec));
+      await M.deleteLab(id);
+      S.ui.undo = { restore:() => M.saveLab(copy) };
+      UI.toast(U.fmtDate(copy.date) + ' testi silindi', { undo:true });
+      SP.App.render();
     },
 
     /* ---- kapsamlı giriş ---- */
@@ -12086,6 +12762,17 @@ SP.Screens.labs = (function(){
   };
 
   const change = {
+    /* Dosya hem tiklayarak hem surukleyerek gelir; ikisi de buraya duser. */
+    async 'lab-file'(el){
+      const file = el.files && el.files[0];
+      if(!file) return;
+      UI.toast('Okunuyor…');
+      preview = await SP.Extract.fromLabFile(file);
+      preview.date = (document.getElementById('paste-date') || {}).value || U.todayISO();
+      preview.lab = (document.getElementById('paste-lab') || {}).value || '';
+      if(!preview.rows.length){ UI.toast(preview.note); return; }
+      previewSheet();
+    },
     async 'pick-marker'(el){ S.ui.trendMarker = el.value; SP.App.render(); },
     async 'lab-query'(el){ S.ui.labQuery = el.value; SP.App.render(); },
     async 'entry-date'(el){ draft.date = el.value || U.todayISO(); },
@@ -12196,15 +12883,96 @@ SP.Screens.meals = (function(){
         <div class="quick">
           ${K.Select({ id:'meal-slot', value:S.ui.mealSlot,
             options:SP.MEAL_SLOTS.map(s => ({ value:s.id, label:s.label })), change:'pick-slot' })}
+          ${K.Mic({ target:'meal-text' })}
           ${K.Input({ id:'meal-text', placeholder:'1 tabak etli kuru fasulye, 2 dilim ekmek, 1 bardak ayran',
             aria:'Öğün metni' })}
           ${K.Button({ label:'Ekle', tone:'primary', act:'add-meal' })}
           <span class="quick__hint">Ev ölçüsü tanınır: tabak · kase · dilim · bardak · avuç · kaşık.
             Tarttıysan «150 g tavuk göğsü» yaz.</span>
         </div>`,
-      foot:K.Button({ label:'Besin ara', size:'sm', act:'open-search' }),
+      foot:html`${K.Button({ label:'Besin ara', size:'sm', act:'open-search' })}
+        ${K.Button({ label:'Fotoğraftan ekle', size:'sm', icon:'camera', act:'open-photo' })}`,
     });
   }
+
+  /* ---------------------------------------------------------- fotograf
+
+     Fotograf tek basina zayif bir kaynaktir: porsiyon buyuklugu
+     fotograftan guvenilir cikmaz. Bu yuzden UC KISA NOT sorulur.
+     Serbest bir "not" alani degil uc alan -- tahmini guclendiren sey
+     tam olarak bu uc bilgidir ve sorulmadan verilmez. */
+
+  let photoFile = null;
+
+  const AMOUNTS = [
+    { value:'tamamı',   label:'Tamamı' },
+    { value:'yarısı',   label:'Yarısı' },
+    { value:'çeyreği',  label:'Çeyreği' },
+    { value:'iki tabak',label:'İki tabak' },
+  ];
+
+  function photoSheet(){
+    UI.sheet({
+      title:'Fotoğraftan öğün', subtitle:'Üç kısa not tahmini belirgin ölçüde güçlendirir',
+      wide:true,
+      body:String(K.Stack([
+        when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
+          title:'Model bağlı değil.',
+          body:'Fotoğraftan öğün okumak için Ayarlar → Rehber → Model bölümünden '
+            + 'görüntü destekleyen bir sağlayıcı seç. Öğünü tek satır yazarak '
+            + 'modelsiz de girebilirsin.' })),
+        K.Drop({ act:'meal-photo', label:'Yemek fotoğrafı', icon:'camera',
+          accept:'image/*', hint:'Fotoğrafı buraya bırak ya da seçmek için tıkla' }),
+        html`<div id="photo-name" class="small dim">${photoFile ? photoFile.name : ''}</div>`,
+        html`<div class="cols-2">
+          ${K.Field({ label:'Ne kadarı yendi?',
+            input:K.Select({ id:'ph-amount', options:AMOUNTS }) })}
+          ${K.Field({ label:'Kabın ölçüsü', hint:'isteğe bağlı',
+            input:K.Input({ id:'ph-vessel', placeholder:'24 cm tabak, çay bardağı…' }) })}
+        </div>`,
+        K.Field({ label:'Gizli malzeme', hint:'fotoğrafta görünmeyen şeyler',
+          input:html`<div class="withmic">
+            ${K.Input({ id:'ph-extra', placeholder:'zeytinyağlı, şekerli, tereyağında kavrulmuş…' })}
+            ${K.Mic({ target:'ph-extra' })}
+          </div>` }),
+        K.Notice({ tone:'info', body:'Fotoğraftan gelen gramaj her zaman «tahmin» '
+          + 'olarak işaretlenir. Tartıp düzeltirsen «ölçüldü» olur.' }),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Oku', tone:'primary', act:'run-photo',
+          disabled:!photoFile || !SP.Extract.modelReady() })}`),
+      noFocus:true,
+    });
+  }
+
+  function photoPreviewSheet(res){
+    UI.sheet({
+      title:'Fotoğraftan okunanlar', subtitle:res.note, wide:true,
+      body:String(K.Stack([
+        when(res.items.length, () => html`<div>${map(res.items, (it, i) => {
+          const f = SP.FOOD_BY_ID[it.foodId];
+          return html`<div class="pasterow">
+            ${K.Checkbox({ label:'', checked:!it.skip, act:'toggle-photo-row', data:{ 'data-i':i } })}
+            <span><b class="small">${f ? f.name : it.foodId}</b>
+              ${P.cert('estimated')}</span>
+            <span class="pasterow__val num">${it.g} g</span>
+            <span class="pasterow__src">fotoğraftan tahmin</span>
+          </div>`;
+        })}</div>`),
+        when(!res.items.length, () => K.Notice({ tone:'warn', body:res.note })),
+        when(res.unmatched.length, () => K.Notice({ tone:'info',
+          title:'Eşleşmeyenler:',
+          body:res.unmatched.map(x => x.line).join(' · ')
+            + ' — bunlar gıda listemizde yok, kaydedilmedi.' })),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Öğüne ekle', tone:'primary', act:'save-photo',
+          disabled:!res.items.filter(x => !x.skip).length })}`),
+      noFocus:true,
+    });
+  }
+
+  let photoRes = null;
 
   /* ---------------------------------------------------------- ogunler */
 
@@ -12687,6 +13455,35 @@ SP.Screens.meals = (function(){
   }
 
   const handle = {
+    async 'open-photo'(){ photoFile = null; photoRes = null; photoSheet(); },
+    async 'run-photo'(){
+      if(!photoFile) return;
+      const hints = {
+        amount:(document.getElementById('ph-amount') || {}).value || '',
+        vessel:(document.getElementById('ph-vessel') || {}).value || '',
+        extra:(document.getElementById('ph-extra') || {}).value || '',
+      };
+      UI.toast('Fotoğraf okunuyor…');
+      photoRes = await SP.Extract.fromMealPhoto(photoFile, hints);
+      photoPreviewSheet(photoRes);
+    },
+    async 'toggle-photo-row'(el){
+      const i = Number(el.dataset.i);
+      if(!photoRes || !photoRes.items[i]) return;
+      photoRes.items[i].skip = !el.checked;
+      photoPreviewSheet(photoRes);
+    },
+    async 'save-photo'(){
+      if(!photoRes) return;
+      const items = photoRes.items.filter(x => !x.skip);
+      if(!items.length) return;
+      await pushItems(items.map(i => ({ foodId:i.foodId, g:i.g, cert:'estimated',
+        portion:'fotoğraf' })), 'fotoğraftan');
+      photoRes = null; photoFile = null;
+      UI.closeSheet();
+      UI.toast(items.length + ' gıda eklendi · tahmin');
+      SP.App.render();
+    },
     async 'meal-tab'(el){ S.ui.mealTab = el.dataset.tab; SP.App.render(); },
     /* Tahlil bagindan olcume gitmek: Testler bolumu o olcumun egilimini acar. */
     async 'open-marker-x'(el){
@@ -12750,6 +13547,13 @@ SP.Screens.meals = (function(){
   };
 
   const change = {
+    async 'meal-photo'(el){
+      photoFile = (el.files && el.files[0]) || null;
+      const n = document.getElementById('photo-name');
+      if(n) n.textContent = photoFile ? photoFile.name : '';
+      const run = document.querySelector('[data-act="run-photo"]');
+      if(run) run.disabled = !photoFile || !SP.Extract.modelReady();
+    },
     async 'pick-slot'(el){ S.ui.mealSlot = el.value; },
     async 'food-query'(el){ S.ui.foodQuery = el.value; S.ui.foodPage = 1; searchSheet(); },
     async 'food-cat'(el){ S.ui.foodCat = el.value; S.ui.foodPage = 1; searchSheet(); },
@@ -13991,6 +14795,64 @@ SP.Screens.basket = (function(){
     });
   }
 
+  /* ---------------------------------------------------------------- fiş
+
+     Fiş okuma, fiyat tablosunun çürümesini çözer: tohum tahminler
+     kullanıcının gerçek fiyatıyla değişir ve «ölçüldü» olur. Sistem
+     market taramaz; fiyat hep kullanıcının elindeki belgeden gelir. */
+
+  let receiptFile = null;
+  let receiptRes = null;
+
+  function receiptSheet(){
+    UI.sheet({
+      title:'Fiş oku', subtitle:'Fiyatlar tahminden ölçüme geçer',
+      wide:true,
+      body:String(K.Stack([
+        when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
+          title:'Model bağlı değil.',
+          body:'Fiş okumak için Ayarlar → Rehber → Model bölümünden bir sağlayıcı '
+            + 'seç. Fiyatları Fiyat sayfasından elle de girebilirsin.' })),
+        K.Drop({ act:'receipt-file', label:'Fiş fotoğrafı ya da metni',
+          icon:'file', accept:'image/*,.txt,.csv',
+          hint:'Fişi buraya bırak ya da seçmek için tıkla' }),
+        html`<div id="receipt-name" class="small dim">${receiptFile ? receiptFile.name : ''}</div>`,
+        K.Notice({ tone:'info', body:'Okunan fiyat kilogram başınadır. Fişte toplam '
+          + 'fiyat ve ağırlık varsa kilogram fiyatı hesaplanır.' }),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Oku', tone:'primary', act:'run-receipt',
+          disabled:!receiptFile || !SP.Extract.modelReady() })}`),
+      noFocus:true,
+    });
+  }
+
+  function receiptPreviewSheet(res){
+    UI.sheet({
+      title:'Fişten okunanlar', subtitle:res.note, wide:true,
+      body:String(K.Stack([
+        when(res.rows.length, () => html`<div>${map(res.rows, (r, i) => html`
+          <div class="${r.skip ? 'pasterow pasterow--off' : 'pasterow'}">
+            ${K.Checkbox({ label:'', checked:!r.skip, act:'toggle-receipt-row',
+              data:{ 'data-i':i } })}
+            <span><b class="small">${r.food.name}</b>
+              ${when(SP.Money.priceOf(r.food.id).cert === 'estimated',
+                () => html` <span class="tiny dim">tahmini eziyor</span>`)}</span>
+            <span class="pasterow__val num">${U.fmtNum(r.tl)} TL/kg</span>
+            <span class="pasterow__src">fişten</span>
+          </div>`)}</div>`),
+        when(!res.rows.length, () => K.Notice({ tone:'warn', body:res.note })),
+        when(res.unmatched.length, () => K.Notice({ tone:'info', title:'Eşleşmeyenler:',
+          body:res.unmatched.map(x => x.line).join(' · ')
+            + ' — bu ürünler gıda listemizde yok.' })),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Fiyatları kaydet', tone:'primary', act:'save-receipt',
+          disabled:!res.rows.filter(r => !r.skip).length })}`),
+      noFocus:true,
+    });
+  }
+
   /* --------------------------------------------------------------- ekran */
 
   async function render(){
@@ -14030,6 +14892,29 @@ SP.Screens.basket = (function(){
   }
 
   const handle = {
+    async 'open-receipt'(){ receiptFile = null; receiptRes = null; receiptSheet(); },
+    async 'run-receipt'(){
+      if(!receiptFile) return;
+      UI.toast('Fiş okunuyor…');
+      receiptRes = await SP.Extract.fromReceipt(receiptFile);
+      receiptPreviewSheet(receiptRes);
+    },
+    async 'toggle-receipt-row'(el){
+      const i = Number(el.dataset.i);
+      if(!receiptRes || !receiptRes.rows[i]) return;
+      receiptRes.rows[i].skip = !el.checked;
+      receiptPreviewSheet(receiptRes);
+    },
+    async 'save-receipt'(){
+      if(!receiptRes) return;
+      const rows = receiptRes.rows.filter(r => !r.skip);
+      if(!rows.length) return;
+      for(const r of rows) await M.setPrice(r.food.id, r.tl);
+      receiptRes = null; receiptFile = null;
+      UI.closeSheet();
+      UI.toast(rows.length + ' fiyat kaydedildi · ölçüldü');
+      SP.App.render();
+    },
     async 'open-limits'(){ limitsSheet(); },
     async 'save-limits'(){
       const num = id => {
@@ -14098,6 +14983,13 @@ SP.Screens.basket = (function(){
   };
 
   const change = {
+    async 'receipt-file'(el){
+      receiptFile = (el.files && el.files[0]) || null;
+      const n = document.getElementById('receipt-name');
+      if(n) n.textContent = receiptFile ? receiptFile.name : '';
+      const run = document.querySelector('[data-act="run-receipt"]');
+      if(run) run.disabled = !receiptFile || !SP.Extract.modelReady();
+    },
     async 'set-price'(el){
       const v = String(el.value).trim();
       await M.setPrice(el.dataset.id, v === '' ? null : Number(v.replace(',', '.')));
@@ -14143,6 +15035,7 @@ SP.Screens.basket = (function(){
     actions(){
       return String(html`${K.Button({ label:'Kalem ekle', icon:'plus', size:'sm', tone:'primary',
         act:'open-add' })}
+        ${K.Button({ label:'Fiş oku', size:'sm', icon:'camera', act:'open-receipt' })}
         ${K.Button({ label:'Sınır ve ücretler', size:'sm', act:'open-limits' })}`);
     },
     render, handle, change,
@@ -14727,7 +15620,8 @@ SP.Screens.team = (function(){
         </div>`,
       foot:html`
         <div class="quick">
-          ${K.Input({ id:'chat-text', placeholder:'Sorunu yaz…', aria:'Soru' })}
+          ${K.Mic({ target:'chat-text' })}
+          ${K.Input({ id:'chat-text', placeholder:'Sorunu yaz ya da mikrofona söyle…', aria:'Soru' })}
           ${K.Button({ label:'Gönder', tone:'primary', act:'send-chat', disabled:busy })}
         </div>`,
     });
@@ -16052,6 +16946,29 @@ SP.App = (function(){
     return queued;
   }
 
+  /* Gorunum gecisi.
+
+     Tarayici destekliyorsa DOM degisimi `startViewTransition` icinde
+     yapilir: eski ve yeni sayfa arasinda tarayici kendi yumusak gecisini
+     uretir. Desteklemiyorsa degisim aninda olur -- gecis bir susleme
+     degil, akiskanlik; olmamasi isleyisi bozmaz.
+
+     Yalniz YOL degisiminde calisir. Her kucuk yeniden cizimde (bir alan
+     yazarken, bir onay kutusu tiklarken) gecis uretmek arayuzu yavas
+     ve sarhos gosterir. */
+  let lastRoute = null;
+
+  function withTransition(fn){
+    const changed = lastRoute !== null && lastRoute !== S.route;
+    lastRoute = S.route;
+    const ok = changed
+      && typeof document.startViewTransition === 'function'
+      && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(!ok) return fn();
+    try{ return document.startViewTransition(fn).updateCallbackDone; }
+    catch(e){ return fn(); }
+  }
+
   async function doRender(){
     if(rendering) return;
     rendering = true;
@@ -16068,7 +16985,7 @@ SP.App = (function(){
         body = errorPanel(err);
       }
 
-      document.getElementById('app').innerHTML = String(html`
+      const markup = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
         <div class="site">
           ${safe(() => mastheadHtml(sc))}
@@ -16082,13 +16999,15 @@ SP.App = (function(){
         </div>
         ${when(S.sidebarOpen, () => safe(() => navsheetHtml(sc)))}`);
 
+      await withTransition(() => { document.getElementById('app').innerHTML = markup; });
+
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
       if(sc.afterRender) sc.afterRender();
     }catch(err){
       console.error('Render hatası:', err);
-      document.getElementById('app').innerHTML = String(html`<div class="content">
+      const markup = String(html`<div class="content">
         ${SP.C.Notice({ tone:'danger', title:'Ekran çizilirken bir hata oluştu.',
           body:html`${err && err.message ? err.message : String(err)}
             <div class="mt-8">${SP.C.Button({ label:'Yeniden yükle', size:'sm', act:'reload' })}</div>` })}
@@ -16144,6 +17063,39 @@ SP.App = (function(){
       el.setAttribute('aria-expanded', S.ui.railOpen ? 'true' : 'false');
       if(body) body.hidden = !S.ui.railOpen;
     },
+    /* ---- dikte ----
+       Mikrofon dugmesi bir ANAHTARDIR: acikken basinca kapanir. Metin
+       alana canli yazilir; kullanici konustugunu gorur. */
+    async dictate(el){
+      const id = el.dataset.target;
+      const field = document.getElementById(id);
+      if(!field){ UI.toast('Yazılacak alan bulunamadı'); return; }
+
+      if(SP.Voice.isActive() && SP.Voice.activeTarget() === id){
+        SP.Voice.stop();
+        el.classList.remove('is-on');
+        el.setAttribute('aria-pressed', 'false');
+        return;
+      }
+
+      const started = SP.Voice.dictateInto(field, {
+        onEnd(){
+          el.classList.remove('is-on');
+          el.setAttribute('aria-pressed', 'false');
+        },
+        onError(code){
+          el.classList.remove('is-on');
+          el.setAttribute('aria-pressed', 'false');
+          UI.toast(SP.Voice.message(code));
+        },
+      });
+      if(started){
+        el.classList.add('is-on');
+        el.setAttribute('aria-pressed', 'true');
+        field.focus({ preventScroll:true });
+      }
+    },
+
     async 'open-palette'(){ SP.Palette.open(); },
     async 'open-appearance'(el){
       if(isAppearanceOpen()){ closeAppearance(); return; }
@@ -16200,6 +17152,16 @@ SP.App = (function(){
           ${K.Button({ label:'Rehbere git', tone:'primary', act:'go', data:{ 'data-route':'guide' } })}`),
         noFocus:true,
       });
+    },
+    /* ---- geri alma ----
+       Son yikici islemin anlik gorüntüsü burada durur. Onay kagidi
+       korumanin agir yolu; geri alma hem daha nazik hem daha hizli. */
+    async undo(){
+      const u = S.ui.undo;
+      S.ui.undo = null;
+      if(!u || !u.restore) return;
+      try{ await u.restore(); UI.toast('Geri alındı'); render(); }
+      catch(e){ console.error(e); UI.toast('Geri alınamadı'); }
     },
     async 'confirm-yes'(){
       const fn = UI._confirm;
@@ -16279,6 +17241,50 @@ SP.App = (function(){
 
     const sc = screen();
     if(sc.onKey) sc.onKey(e);
+  });
+
+  /* ---------------------------------------------------------- sürükle-bırak
+
+     Dosya sayfanın herhangi bir yerine bırakılabilir; en yakın bırakma
+     alanına değil, EKRANIN tanımladığı alana gider. Kullanıcı dosyayı
+     küçük bir kutuya nişan almak zorunda kalmaz. */
+  let dragDepth = 0;
+
+  function dropTarget(){
+    return document.querySelector('[data-drop]');
+  }
+
+  document.addEventListener('dragenter', e => {
+    if(!e.dataTransfer || Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') < 0) return;
+    dragDepth++;
+    const t = dropTarget();
+    if(t) t.classList.add('is-over');
+    document.body.classList.add('is-dragging');
+  });
+  document.addEventListener('dragover', e => {
+    if(document.body.classList.contains('is-dragging')) e.preventDefault();
+  });
+  document.addEventListener('dragleave', () => {
+    dragDepth = Math.max(0, dragDepth - 1);
+    if(dragDepth === 0) clearDrag();
+  });
+  function clearDrag(){
+    dragDepth = 0;
+    document.body.classList.remove('is-dragging');
+    const t = dropTarget();
+    if(t) t.classList.remove('is-over');
+  }
+  document.addEventListener('drop', async e => {
+    const t = dropTarget();
+    if(!t) return;
+    e.preventDefault();
+    clearDrag();
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if(!file) return;
+    const act = t.getAttribute('data-drop');
+    const sc = screen();
+    const fn = (sc.change && sc.change[act]) || globalChange[act];
+    if(fn) await fn({ files:[file], value:'' }, e);
   });
 
   /* Açık katmanları dışarıya tıklayınca kapat. */
@@ -16376,7 +17382,7 @@ SP.App = (function(){
       if(SP.Setup.needed()) setTimeout(() => SP.Setup.open(), 400);
     }catch(err){
       console.error('Açılış hatası:', err);
-      document.getElementById('app').innerHTML = String(html`<div class="content">
+      const markup = String(html`<div class="content">
         ${SP.C.Notice({ tone:'danger', title:'Uygulama başlatılamadı.',
           body:html`${err && err.message ? err.message : String(err)}
             <div class="mt-8">${SP.C.Button({ label:'Yeniden dene', size:'sm', act:'reload' })}</div>` })}

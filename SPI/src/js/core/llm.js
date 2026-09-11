@@ -224,6 +224,8 @@ SP.LLM = (function(){
     timeout:'Yanıt zaman aşımına uğradı. Daha hızlı bir model dene.',
     cancelled:'İptal edildi.',
     empty:'Model boş yanıt döndürdü. Tekrar dene.',
+    no_vision:'Yerleşik model görüntü okuyamıyor. Ayarlar → Rehber → Model '
+      + 'bölümünden görüntü destekleyen bir sağlayıcı seç.',
     unavailable:'Yerleşik model bu ortamda kapalı. Ofis → Ayarlar’dan ücretsiz bir sağlayıcı bağla.',
     offline:'Bağlantı yok. Çevrimiçi olunca kaldığın yerden devam edersin; kural motoru bu sırada çalışmayı sürdürüyor.',
     daily_quota:'Bu modelin günlük ücretsiz hakkı doldu. Yarın sıfırlanır; o zamana kadar başka bir sağlayıcı kullanabilirsin.',
@@ -334,7 +336,12 @@ SP.LLM = (function(){
     if(!builtinReady()) throw fail('unavailable');
     const turns = [];
     if(req.system) turns.push({ role:'user', content:req.system });
-    (req.messages || []).forEach(m => turns.push({ role:m.role, content:m.text }));
+    (req.messages || []).forEach(m => {
+      /* Yerlesik saglayici goruntu almaz. Sessizce dusurmek yerine
+         cagirana bildiririz: ekran "model goruntu okuyamiyor" der. */
+      if(m.images && m.images.length) throw fail('no_vision');
+      turns.push({ role:m.role, content:m.text });
+    });
     const res = await sample(turns.length === 1 ? turns[0].content : turns, {
       modelTier:req.model === 'quick' ? 'quick' : 'default',
       signal:req.signal,
@@ -355,7 +362,21 @@ SP.LLM = (function(){
 
     const messages = [];
     if(req.system) messages.push({ role:'system', content:req.system });
-    (req.messages || []).forEach(m => messages.push({ role:m.role, content:m.text }));
+    /* Goruntu tasiyan mesaj, OpenAI uyumlu icerik dizisine cevrilir.
+       Goruntu yoksa duz metin kalir: eski saglayicilar dizi bicimini
+       kabul etmeyebilir, gereksiz yere riske girilmez. */
+    (req.messages || []).forEach(m => {
+      if(m.images && m.images.length){
+        const content = [{ type:'text', text:m.text || '' }];
+        m.images.forEach(img => {
+          const url = img.url || ('data:' + (img.mime || 'image/jpeg') + ';base64,' + img.b64);
+          content.push({ type:'image_url', image_url:{ url } });
+        });
+        messages.push({ role:m.role, content });
+      }else{
+        messages.push({ role:m.role, content:m.text });
+      }
+    });
 
     const headers = {
       'Content-Type':'application/json',

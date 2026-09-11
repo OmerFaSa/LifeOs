@@ -366,6 +366,64 @@ SP.Screens.basket = (function(){
     });
   }
 
+  /* ---------------------------------------------------------------- fiş
+
+     Fiş okuma, fiyat tablosunun çürümesini çözer: tohum tahminler
+     kullanıcının gerçek fiyatıyla değişir ve «ölçüldü» olur. Sistem
+     market taramaz; fiyat hep kullanıcının elindeki belgeden gelir. */
+
+  let receiptFile = null;
+  let receiptRes = null;
+
+  function receiptSheet(){
+    UI.sheet({
+      title:'Fiş oku', subtitle:'Fiyatlar tahminden ölçüme geçer',
+      wide:true,
+      body:String(K.Stack([
+        when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
+          title:'Model bağlı değil.',
+          body:'Fiş okumak için Ayarlar → Rehber → Model bölümünden bir sağlayıcı '
+            + 'seç. Fiyatları Fiyat sayfasından elle de girebilirsin.' })),
+        K.Drop({ act:'receipt-file', label:'Fiş fotoğrafı ya da metni',
+          icon:'file', accept:'image/*,.txt,.csv',
+          hint:'Fişi buraya bırak ya da seçmek için tıkla' }),
+        html`<div id="receipt-name" class="small dim">${receiptFile ? receiptFile.name : ''}</div>`,
+        K.Notice({ tone:'info', body:'Okunan fiyat kilogram başınadır. Fişte toplam '
+          + 'fiyat ve ağırlık varsa kilogram fiyatı hesaplanır.' }),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Oku', tone:'primary', act:'run-receipt',
+          disabled:!receiptFile || !SP.Extract.modelReady() })}`),
+      noFocus:true,
+    });
+  }
+
+  function receiptPreviewSheet(res){
+    UI.sheet({
+      title:'Fişten okunanlar', subtitle:res.note, wide:true,
+      body:String(K.Stack([
+        when(res.rows.length, () => html`<div>${map(res.rows, (r, i) => html`
+          <div class="${r.skip ? 'pasterow pasterow--off' : 'pasterow'}">
+            ${K.Checkbox({ label:'', checked:!r.skip, act:'toggle-receipt-row',
+              data:{ 'data-i':i } })}
+            <span><b class="small">${r.food.name}</b>
+              ${when(SP.Money.priceOf(r.food.id).cert === 'estimated',
+                () => html` <span class="tiny dim">tahmini eziyor</span>`)}</span>
+            <span class="pasterow__val num">${U.fmtNum(r.tl)} TL/kg</span>
+            <span class="pasterow__src">fişten</span>
+          </div>`)}</div>`),
+        when(!res.rows.length, () => K.Notice({ tone:'warn', body:res.note })),
+        when(res.unmatched.length, () => K.Notice({ tone:'info', title:'Eşleşmeyenler:',
+          body:res.unmatched.map(x => x.line).join(' · ')
+            + ' — bu ürünler gıda listemizde yok.' })),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Fiyatları kaydet', tone:'primary', act:'save-receipt',
+          disabled:!res.rows.filter(r => !r.skip).length })}`),
+      noFocus:true,
+    });
+  }
+
   /* --------------------------------------------------------------- ekran */
 
   async function render(){
@@ -405,6 +463,29 @@ SP.Screens.basket = (function(){
   }
 
   const handle = {
+    async 'open-receipt'(){ receiptFile = null; receiptRes = null; receiptSheet(); },
+    async 'run-receipt'(){
+      if(!receiptFile) return;
+      UI.toast('Fiş okunuyor…');
+      receiptRes = await SP.Extract.fromReceipt(receiptFile);
+      receiptPreviewSheet(receiptRes);
+    },
+    async 'toggle-receipt-row'(el){
+      const i = Number(el.dataset.i);
+      if(!receiptRes || !receiptRes.rows[i]) return;
+      receiptRes.rows[i].skip = !el.checked;
+      receiptPreviewSheet(receiptRes);
+    },
+    async 'save-receipt'(){
+      if(!receiptRes) return;
+      const rows = receiptRes.rows.filter(r => !r.skip);
+      if(!rows.length) return;
+      for(const r of rows) await M.setPrice(r.food.id, r.tl);
+      receiptRes = null; receiptFile = null;
+      UI.closeSheet();
+      UI.toast(rows.length + ' fiyat kaydedildi · ölçüldü');
+      SP.App.render();
+    },
     async 'open-limits'(){ limitsSheet(); },
     async 'save-limits'(){
       const num = id => {
@@ -473,6 +554,13 @@ SP.Screens.basket = (function(){
   };
 
   const change = {
+    async 'receipt-file'(el){
+      receiptFile = (el.files && el.files[0]) || null;
+      const n = document.getElementById('receipt-name');
+      if(n) n.textContent = receiptFile ? receiptFile.name : '';
+      const run = document.querySelector('[data-act="run-receipt"]');
+      if(run) run.disabled = !receiptFile || !SP.Extract.modelReady();
+    },
     async 'set-price'(el){
       const v = String(el.value).trim();
       await M.setPrice(el.dataset.id, v === '' ? null : Number(v.replace(',', '.')));
@@ -518,6 +606,7 @@ SP.Screens.basket = (function(){
     actions(){
       return String(html`${K.Button({ label:'Kalem ekle', icon:'plus', size:'sm', tone:'primary',
         act:'open-add' })}
+        ${K.Button({ label:'Fiş oku', size:'sm', icon:'camera', act:'open-receipt' })}
         ${K.Button({ label:'Sınır ve ücretler', size:'sm', act:'open-limits' })}`);
     },
     render, handle, change,

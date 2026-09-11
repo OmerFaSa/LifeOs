@@ -67,36 +67,39 @@ yeniden yazım olmasın diye yeri boş duruyor.
 
 ## Fazlar
 
-### Faz 1 — Belge girişi
+### Faz 1 — Belge girişi — **YAPILDI**
 
-En yüksek değer, en düşük risk. Değerler `ölçüldü` kaldığı için sistemin
-kesinlik doktrinine hiç dokunmaz.
+- ✅ `SP.Extract` modülü ve adaptörleri (`core/extract.js`)
+- ✅ Tahlil dosyası → ölçümler. Metin dosyası **modelsiz** okunuyor;
+  görüntü için model gerekiyor. Model çıktısı da bizim `parseLab`
+  ayrıştırıcımızdan geçiyor — takma ad eşlemesi, birim çevirimi ve
+  eşikler orada tanımlı.
+- ✅ Market fişi → fiyatlar. Tohum tahminler kullanıcının gerçek
+  fiyatıyla değişiyor ve «ölçüldü» oluyor.
+- ⬜ Besin etiketi → yeni gıda kaydı
 
-- `SP.Extract` iskeleti ve belge adaptörü
-- **Tahlil PDF / fotoğrafı → ölçümler.** `parseLab` zaten var; model yalnız
-  ayrıştırıcının çözemediği düzenlerde devreye girer, önce o denenir.
-- **Market fişi → fiyatlar.** Bunun ayrı bir önemi var: tohum fiyat listesi
-  enflasyonla çürüyor ve bugün bunu yalnız «tahmin» etiketiyle dürüstçe
-  itiraf edebiliyoruz. Fiş okuma, itirafı çözüme çevirir.
-- **Besin etiketi → yeni gıda kaydı.** 61 gıdalık tablo hanenin gerçek
-  alışverişini kapsamıyor; kullanıcı kendi ürününü ekleyebilmeli.
+**PDF notu:** PDF'in metnini doğrudan çıkarmak bir kitaplık gerektiriyor;
+uygulama bağımlılıksız. Şimdilik raporun ekran görüntüsü ya da metni
+kullanılıyor ve kullanıcıya bu açıkça söyleniyor.
 
-### Faz 2 — Fotoğrafla öğün
+### Faz 2 — Fotoğrafla öğün — **YAPILDI**
 
-- Fotoğraf **+ üç kısa not**: ne kadarı yendi, kabın ölçüsü, gizli malzeme
+- ✅ Fotoğraf **+ üç kısa not**: ne kadarı yendi, kabın ölçüsü, gizli malzeme
   («zeytinyağlı», «şekerli»). Serbest metin değil, üç alan — çünkü tahmini
   güçlendiren şey bu üç bilgidir ve sorulmadan verilmez.
-- Çıktı `SP.FOODS` kimliklerine eşlenir, porsiyon gram olarak tahmin edilir
-- `tahmin` etiketli, düzeltme ekranı zorunlu
+- ✅ Çıktı `SP.FOODS` kimliklerine eşleniyor; eşleşmeyen satır atılmıyor,
+  «eşleşmedi» olarak gösteriliyor
+- ✅ `tahmin` etiketli, düzeltme ekranı zorunlu — bir test bunu koruyor
 
-### Faz 3 — Ses (dikte)
+### Faz 3 — Ses (dikte) — **YAPILDI**
 
 Burada elimizde hazır bir avantaj var: **ses → metin → zaten yazdığımız
 `parseMeal`**. Yeni ayrıştırıcı gerekmiyor. «Bir tabak etli kuru fasulye,
 bir bardak ayran» dendiğinde klavyeyle yazılan yolun aynısı çalışır.
 
-- Öğün girişi, antrenman girişi ve **koç sohbeti** aynı dikte mekanizmasını
-  kullanır. Koçlarla «sesli sohbet» bir konuşma değil dikte'dir: ses metne
+- ✅ Öğün girişi, günlük notu, tahlil metni, koç sohbeti ve fotoğraf
+  notu — hepsi aynı mikrofon düğmesini kullanıyor. Tarayıcı desteklemiyorsa
+  düğme hiç çizilmiyor. Koçlarla «sesli sohbet» bir konuşma değil dikte'dir: ses metne
   çevrilir, metin koça yazılır, koç yazıyla cevap verir. Sesli cevap (TTS)
   yoktur — kesinlik katmaz, bedel katar.
 - Mahremiyet kısıtı kalktığı için tarayıcının kendi konuşma API'siyle
@@ -105,8 +108,9 @@ bir bardak ayran» dendiğinde klavyeyle yazılan yolun aynısı çalışır.
 
 ### Faz 4 — Sürükle-bırak ve her yerden giriş
 
-- Sayfanın herhangi bir yerine bırakılan PDF/fotoğraf doğru çıkarıcıya gider
-- Komut paleti veri girişi kabul eder: `ferritin 26`, `45 dk yürüyüş`
+- ✅ Sayfanın herhangi bir yerine bırakılan dosya, ekranın tanımladığı
+  bırakma alanına gidiyor. Kullanıcı küçük bir kutuya nişan almıyor.
+- ⬜ Komut paleti veri girişi kabul eder: `ferritin 26`, `45 dk yürüyüş`
 
 ---
 
@@ -139,9 +143,9 @@ sütun. Bölüm kimliği yalnız renkte değil, düzende de olsun.
 **A · Kart hiyerarşisi.** Ana kart / yardımcı kart ayrımı. Şu an on beş kart
 eşit ağırlıkta bağırıyor; hangisinin önce okunacağı belli değil.
 
-**C · Geri alma.** Silme ve kaydetmeden sonra «geri al» sunan bildirim.
-Bugün yıkıcı işlemler onay kâğıdıyla korunuyor; geri alma hem daha nazik
-hem daha hızlı.
+**C · Geri alma — YAPILDI.** Test silmek artık onay kâğıdı açmıyor: siliniyor
+ve bildirimde altı saniye duran bir «geri al» düğmesi çıkıyor. Onay kâğıdı
+korumanın ağır yolu.
 
 ## Faz 2 — Giriş yüzeyleri
 

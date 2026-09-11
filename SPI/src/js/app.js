@@ -455,6 +455,29 @@ SP.App = (function(){
     return queued;
   }
 
+  /* Gorunum gecisi.
+
+     Tarayici destekliyorsa DOM degisimi `startViewTransition` icinde
+     yapilir: eski ve yeni sayfa arasinda tarayici kendi yumusak gecisini
+     uretir. Desteklemiyorsa degisim aninda olur -- gecis bir susleme
+     degil, akiskanlik; olmamasi isleyisi bozmaz.
+
+     Yalniz YOL degisiminde calisir. Her kucuk yeniden cizimde (bir alan
+     yazarken, bir onay kutusu tiklarken) gecis uretmek arayuzu yavas
+     ve sarhos gosterir. */
+  let lastRoute = null;
+
+  function withTransition(fn){
+    const changed = lastRoute !== null && lastRoute !== S.route;
+    lastRoute = S.route;
+    const ok = changed
+      && typeof document.startViewTransition === 'function'
+      && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(!ok) return fn();
+    try{ return document.startViewTransition(fn).updateCallbackDone; }
+    catch(e){ return fn(); }
+  }
+
   async function doRender(){
     if(rendering) return;
     rendering = true;
@@ -471,7 +494,7 @@ SP.App = (function(){
         body = errorPanel(err);
       }
 
-      document.getElementById('app').innerHTML = String(html`
+      const markup = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
         <div class="site">
           ${safe(() => mastheadHtml(sc))}
@@ -485,13 +508,15 @@ SP.App = (function(){
         </div>
         ${when(S.sidebarOpen, () => safe(() => navsheetHtml(sc)))}`);
 
+      await withTransition(() => { document.getElementById('app').innerHTML = markup; });
+
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
       if(sc.afterRender) sc.afterRender();
     }catch(err){
       console.error('Render hatası:', err);
-      document.getElementById('app').innerHTML = String(html`<div class="content">
+      const markup = String(html`<div class="content">
         ${SP.C.Notice({ tone:'danger', title:'Ekran çizilirken bir hata oluştu.',
           body:html`${err && err.message ? err.message : String(err)}
             <div class="mt-8">${SP.C.Button({ label:'Yeniden yükle', size:'sm', act:'reload' })}</div>` })}
@@ -547,6 +572,39 @@ SP.App = (function(){
       el.setAttribute('aria-expanded', S.ui.railOpen ? 'true' : 'false');
       if(body) body.hidden = !S.ui.railOpen;
     },
+    /* ---- dikte ----
+       Mikrofon dugmesi bir ANAHTARDIR: acikken basinca kapanir. Metin
+       alana canli yazilir; kullanici konustugunu gorur. */
+    async dictate(el){
+      const id = el.dataset.target;
+      const field = document.getElementById(id);
+      if(!field){ UI.toast('Yazılacak alan bulunamadı'); return; }
+
+      if(SP.Voice.isActive() && SP.Voice.activeTarget() === id){
+        SP.Voice.stop();
+        el.classList.remove('is-on');
+        el.setAttribute('aria-pressed', 'false');
+        return;
+      }
+
+      const started = SP.Voice.dictateInto(field, {
+        onEnd(){
+          el.classList.remove('is-on');
+          el.setAttribute('aria-pressed', 'false');
+        },
+        onError(code){
+          el.classList.remove('is-on');
+          el.setAttribute('aria-pressed', 'false');
+          UI.toast(SP.Voice.message(code));
+        },
+      });
+      if(started){
+        el.classList.add('is-on');
+        el.setAttribute('aria-pressed', 'true');
+        field.focus({ preventScroll:true });
+      }
+    },
+
     async 'open-palette'(){ SP.Palette.open(); },
     async 'open-appearance'(el){
       if(isAppearanceOpen()){ closeAppearance(); return; }
@@ -603,6 +661,16 @@ SP.App = (function(){
           ${K.Button({ label:'Rehbere git', tone:'primary', act:'go', data:{ 'data-route':'guide' } })}`),
         noFocus:true,
       });
+    },
+    /* ---- geri alma ----
+       Son yikici islemin anlik gorüntüsü burada durur. Onay kagidi
+       korumanin agir yolu; geri alma hem daha nazik hem daha hizli. */
+    async undo(){
+      const u = S.ui.undo;
+      S.ui.undo = null;
+      if(!u || !u.restore) return;
+      try{ await u.restore(); UI.toast('Geri alındı'); render(); }
+      catch(e){ console.error(e); UI.toast('Geri alınamadı'); }
     },
     async 'confirm-yes'(){
       const fn = UI._confirm;
@@ -682,6 +750,50 @@ SP.App = (function(){
 
     const sc = screen();
     if(sc.onKey) sc.onKey(e);
+  });
+
+  /* ---------------------------------------------------------- sürükle-bırak
+
+     Dosya sayfanın herhangi bir yerine bırakılabilir; en yakın bırakma
+     alanına değil, EKRANIN tanımladığı alana gider. Kullanıcı dosyayı
+     küçük bir kutuya nişan almak zorunda kalmaz. */
+  let dragDepth = 0;
+
+  function dropTarget(){
+    return document.querySelector('[data-drop]');
+  }
+
+  document.addEventListener('dragenter', e => {
+    if(!e.dataTransfer || Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') < 0) return;
+    dragDepth++;
+    const t = dropTarget();
+    if(t) t.classList.add('is-over');
+    document.body.classList.add('is-dragging');
+  });
+  document.addEventListener('dragover', e => {
+    if(document.body.classList.contains('is-dragging')) e.preventDefault();
+  });
+  document.addEventListener('dragleave', () => {
+    dragDepth = Math.max(0, dragDepth - 1);
+    if(dragDepth === 0) clearDrag();
+  });
+  function clearDrag(){
+    dragDepth = 0;
+    document.body.classList.remove('is-dragging');
+    const t = dropTarget();
+    if(t) t.classList.remove('is-over');
+  }
+  document.addEventListener('drop', async e => {
+    const t = dropTarget();
+    if(!t) return;
+    e.preventDefault();
+    clearDrag();
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if(!file) return;
+    const act = t.getAttribute('data-drop');
+    const sc = screen();
+    const fn = (sc.change && sc.change[act]) || globalChange[act];
+    if(fn) await fn({ files:[file], value:'' }, e);
   });
 
   /* Açık katmanları dışarıya tıklayınca kapat. */
@@ -779,7 +891,7 @@ SP.App = (function(){
       if(SP.Setup.needed()) setTimeout(() => SP.Setup.open(), 400);
     }catch(err){
       console.error('Açılış hatası:', err);
-      document.getElementById('app').innerHTML = String(html`<div class="content">
+      const markup = String(html`<div class="content">
         ${SP.C.Notice({ tone:'danger', title:'Uygulama başlatılamadı.',
           body:html`${err && err.message ? err.message : String(err)}
             <div class="mt-8">${SP.C.Button({ label:'Yeniden dene', size:'sm', act:'reload' })}</div>` })}
