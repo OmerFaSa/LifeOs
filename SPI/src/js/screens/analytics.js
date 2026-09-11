@@ -167,31 +167,28 @@ SP.Screens.analytics = (function(){
 
   async function render(){
     const tab = S.ui.analyticsTab;
-    const tabs = K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'an-tab', aria:'Analiz görünümü' }));
+    const head = html`<div class="mb-8">${K.Subtabs({ items:TABS, value:tab,
+      act:'an-tab', aria:'Analiz görünümü' })}</div>`;
 
     if(tab === 'hafta'){
-      return String(K.Grid([tabs,
-        K.Span(8, reportCard()),
-        K.Span(4, K.Stack([disciplineCard(),
-          K.Card({ title:'Raporun mantığı',
-            body:html`<p class="small muted">Sayılar kural motorundan gelir; Patron ajan yalnızca
-              cümleye çevirir. Çelişki varsa öncelik sırası uygulanır ve hangi kuralın
-              kazandığı yazılır.</p>
-              ${K.Table({ tight:true, headers:['Sıra', 'Kural'],
-                rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) })}` }),
-        ])),
-        K.Span(12, raw(UI.rail(['grounding', 'decision', 'minimum-day']))),
-      ]));
+      return String(html`${head}
+        ${K.Ledger(() => [reportCard(), disciplineCard(),
+          K.Entry({ label:'Raporun mantığı', meta:'sayı nereden gelir',
+            note:'Sayılar kural motorundan gelir; Patron ajan yalnızca cümleye çevirir. '
+              + 'Çelişki varsa öncelik sırası uygulanır ve hangi kuralın kazandığı yazılır.',
+            body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
+              rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
+        ])}
+        <div class="mt-24">${raw(UI.rail(['grounding', 'decision', 'minimum-day']))}</div>`);
     }
     if(tab === 'seri'){
-      return String(K.Grid([tabs, K.Span(12, seriesCard()),
-        K.Span(12, raw(UI.rail(['trend', 'ref-range', 'certainty'])))]));
+      return String(html`${head}
+        ${K.Ledger(() => [seriesCard()])}
+        <div class="mt-24">${raw(UI.rail(['trend', 'ref-range', 'certainty']))}</div>`);
     }
-    return String(K.Grid([tabs,
-      K.Span(7, crossCard()),
-      K.Span(5, pairCard()),
-      K.Span(12, raw(UI.rail(['trend', 'certainty', 'grounding']))),
-    ]));
+    return String(html`${head}
+      ${K.Ledger(() => [crossCard(), pairCard()])}
+      <div class="mt-24">${raw(UI.rail(['correlation', 'trend', 'certainty']))}</div>`);
   }
 
   const handle = {

@@ -63,6 +63,12 @@ Bunlar artık **türetilir**:
 | `--ink-2` / `--ink-on` / `--ink-on-2` | `--ink` ve `--bg`'den |
 | `--rule` | `--border-strong` |
 | `--sec` | bölüm tonunun `--primary` ile %70/%30 harmanı |
+| `--primary-soft` · `--accent-soft` · `--danger-soft` · `--info-soft` | rengin kendi `--surface`'ine karışmış hâli |
+
+Yumuşak zeminlerin türetilmesi ikinci bir palet hatasını kapattı: `--danger`
+beş palette, `--info` dördünde tanımlı değildi ve varsayılan paletin soğuk
+gri-mavisi miras alınıyordu. Bordo temada bilgi kutuları sıcak bir sayfada
+yabancı bir beyaz gibi duruyordu.
 
 Yeni bir palet eklemek için yalnız temel renkleri yazmak yeterlidir;
 gerisi kendiliğinden doğru gelir.
@@ -200,6 +206,68 @@ Ekran sözleşmesi:
 
 Aynı cümle bir ekranda iki kez görünmez: hero sıradaki hamleyi söylüyorsa
 gövdede onu tekrarlayan kart bulunmaz.
+
+## Defter düzeni — ana düzen birimi
+
+**Kart, yönetim panelinin dilidir.** Her şey eşit ağırlıkta beyaz bir
+dikdörtgene konur, on beş dikdörtgen yan yana dizilir ve sayfa bir tepsiye
+döner. Günde birkaç kez açılıp aylarca okunacak bir sistemde bu dil yorar:
+hiçbir şey öne çıkmaz ve göz dinlenecek yer bulamaz.
+
+Yerine defter satırı geldi — kitapların, defterlerin ve teknik belgelerin
+yüzyıllardır kullandığı düzen:
+
+```
+KÜNYE SÜTUNU          İÇERİK
+(196px)               (kalan genişlik)
+
+SONUÇLAR              Ferritin      26 ng/mL   ──●──   referans altı
+9 ölçüm · 20 Ağustos  ────────────────────────────────────────────
+                      B12 vitamini  288 pg/mL  ──●──   hedefin altı
+Önem sırasına göre…   ────────────────────────────────────────────
+[Ölçüm ara…]          HDL kolesterol 44 mg/dL  ──●──   hedefin altı
+[Test gir]
+──────────────────────────────────────────────────────────────────
+DAĞILIM               …
+```
+
+| Parça | Ne taşır |
+|---|---|
+| `lrow__label` | Bölümün adı — küçük, harf aralıklı, büyük harf |
+| `lrow__meta` | Ölçü: kaç kayıt, hangi tarih |
+| `lrow__note` | Neden böyle — gerekçe cümlesi |
+| `lrow__act` | O bölümün eylemi |
+| `lrow__main` | İçeriğin kendisi, çerçevesiz |
+
+**Künye sütunu yapışır.** Yüz satırlık bir listeyi kaydırırken hangi
+bölümde olduğunu unutmayasın diye.
+
+`lrow--wide` künyeyi üste alır, içeriği tam genişliğe yayar: bir grafiğin
+ya da uzun bir cetvelin künye sütunu kadar daralması saçmadır.
+
+### Kutu nerede kalır?
+
+Kutu yalnız **seçilebilir** ya da **yüzen** şeylerde: seçim kartı
+(`pickcard`), alt sayfa (`sheet`), uyarı (`notice`), kırmızı bayrak
+(`flagcard`), ofis masası (`desk`). **Okunacak bir şey kutuya konmaz.**
+
+### Defter kipi
+
+`C.Ledger` bir **işlev** alırsa, o işlev çalışırken `C.Card` ve
+`C.Collapsible` kendilerini kutu olarak değil defter satırı olarak çizer:
+
+```js
+K.Ledger(() => [ totalCard(), itemsCard(), coverageCard() ])
+```
+
+Böylece ekranlar tek satırlık bir değişiklikle defter düzenine geçti ve
+iki ayrı bileşen sözlüğü taşımak gerekmedi.
+
+**`box:true` bu kipten kaçıştır.** Bir kartın gövdesinin içinde duran
+kartlar (ofis masaları) satıra dönüşmemeli: onlar okunacak bir bölüm değil,
+yan yana dizilen nesnelerdir. Bunu unutmak sessizce bozuk düzen üretir —
+`tools/ledgercheck.js` on iki ekranın bütün sekmelerinde iç içe satır,
+dönüştürülmemiş kart ve yatay taşma arar.
 
 ## Bölüm kimlikleri — tek tasarım, yedi imza
 
@@ -364,6 +432,8 @@ düzen: `C.Grid` `C.Span` `C.Stack` `C.Cols` `C.Row` `C.SectionTitle`
 - `C.Drop` — dosya bırakma alanı. Hem tıklanır hem üzerine bırakılır.
   Sürükleme başlayınca sayfadaki **tek** bırakma alanı belirginleşir;
   kullanıcı küçük bir kutuya nişan almak zorunda kalmaz.
+- `C.Entry` / `C.Ledger` — defter satırı ve kabı. Sistemin **ana düzen
+  birimi**; ayrıntı yukarıda.
 - `C.PickCard` — seçilebilir kart (`on` niteliğiyle dolu görünür). Seans
   şablonu ve egzersiz seçimi bu kartlarla yapılır; onay kutusu kullanılmaz.
 
@@ -400,6 +470,9 @@ girişi), `chain` (bazal metabolizmadan hedefe giden zincir), `link`
 `meetturn` (toplantı turu), `msg` (danışma sohbeti).
 
 ## Kart kuralı
+
+Kart artık ana düzen birimi **değildir** — defter satırı odur. Kart yalnız
+seçilebilir ya da yüzen şeylerde kalır.
 
 **Kart bir kutu değil, bir yüzeydir.** Gölge kaldırıldı: on beş kartın yan
 yana gölge düşürdüğü bir sayfa kâğıt yığını gibi durur ve ucuzlar. Derinlik

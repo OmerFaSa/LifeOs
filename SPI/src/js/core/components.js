@@ -19,7 +19,33 @@ SP.C = (function(){
   /* ---------- yapisal ---------- */
 
   /* Card: tek kart stili. Vurgu icin renkli kenarlik yerine rozet kullanilir. */
+  /* Defter kipi.
+
+     `Ledger` bir islev alirsa, o islev calisirken bu bayrak aciktir ve
+     `Card` kendini KUTU olarak degil DEFTER SATIRI olarak cizer. Boylece
+     ekranlar tek satirlik bir degisiklikle defter duzenine gecer ve iki
+     ayri bilesen sozlugu tasimak gerekmez.
+
+     Bayrak yalnizca senkron cagri boyunca aciktir; render sonrasi
+     kapanir. */
+  let ledgerMode = false;
+
   function Card(o){
+    /* `box:true` defter kipinden KACISTIR. Bir kartin govdesinin icinde
+       duran kartlar (ofis masalari, ogun kartlari) defter satirina
+       donusmemeli: onlar okunacak bir bolum degil, yan yana dizilen
+       nesnelerdir. */
+    if(ledgerMode && !o.box){
+      const meta = [o.sub, o.badge ? null : null].filter(Boolean).join(' · ');
+      return Entry({
+        label:o.title, hint:o.hint,
+        meta:o.sub || null,
+        note:o.note || null,
+        wide:o.wide,
+        action:o.actions || o.foot || null,
+        body:html`${o.body}${when(o.badge && o.foot, () => html`<div class="mt-8">${o.badge}</div>`)}`,
+      });
+    }
     const head = (o.title || o.sub || o.badge || o.actions) ? html`
       <div class="card__head">
         <div>
@@ -40,8 +66,24 @@ SP.C = (function(){
 
   /* Katlanir kart: uzun referans metinleri varsayilan olarak kapali tutar. */
   function Collapsible(o){
+    /* Defter kipinde katlanir bolum de kutu cizmez: satirin govdesine
+       cerceve olmadan yerlesir. */
+    if(ledgerMode && !o.box){
+      return Entry({
+        label:o.title, meta:o.meta || null,
+        body:html`<div class="collapse--bare">
+          <button class="collapse__btn" data-act="${o.act}" ${attrs(o.data || {})}
+                  aria-expanded="${o.open ? 'true' : 'false'}">
+            <span class="row-sm"><b class="collapse__title">${o.title}</b>
+              ${when(o.meta, () => html`<span class="tiny dim">${o.meta}</span>`)}</span>
+            <span class="${cls('collapse__chev', o.open && 'is-open')}">${icon('down')}</span>
+          </button>
+          ${when(o.open, o.body)}
+        </div>`,
+      });
+    }
     return html`
-      <section class="card">
+      <section class="${cls('card', o.class)}">
         <button class="collapse__btn" data-act="${o.act}" ${attrs(o.data || {})}
                 aria-expanded="${o.open ? 'true' : 'false'}">
           <span class="row-sm"><h3 class="collapse__title">${o.title}</h3>${when(o.meta, () => html`<span class="tiny dim">${o.meta}</span>`)}</span>
@@ -168,6 +210,53 @@ SP.C = (function(){
       <div class="toolbar__tabs">${o.tabs}</div>
       ${when(o.actions, () => html`<div class="toolbar__actions">${o.actions}</div>`)}
     </div>`;
+  }
+
+  /* ---------- defter satiri ----------
+
+     Sistemin ana duzen birimi. Kart DEGILDIR ve bilincli olarak kutu
+     cizmez.
+
+     Kart dili bir yonetim panelinin dilidir: her sey esit agirlikta beyaz
+     bir dikdortgene konur, on bes dikdortgen yan yana dizilir ve sayfa
+     bir tepsiye doner. Gunde birkac kez acilip aylarca okunacak bir
+     sistemde bu dil yorar.
+
+     Defter satiri bunun yerine kitaplarin, defterlerin ve teknik
+     belgelerin yuzyillardir kullandigi duzeni kurar:
+
+       solda  dar bir kunye sutunu -- bolum adi, olcu, eylem
+       sagda  icerigin kendisi, tam genislikte akan
+       arada  ince bir cizgi
+
+     Kutu yalnizca SECILEBILIR ya da YUZEN seylerde kalir: secim karti,
+     alt sayfa, uyari. Okunacak bir sey kutuya konmaz.
+
+     Kunye sutunu uzun icerikte YAPISIR: yuz satirlik bir listeyi
+     kaydirirken hangi bolumde oldugunu unutmayasin diye. */
+  function Entry(o){
+    return html`
+      <section class="${cls('lrow', o.wide && 'lrow--wide', o.class)}"
+        ${when(o.hint, () => attrs({ 'data-hint':o.hint }))}>
+        <div class="lrow__side">
+          <div class="lrow__label">${o.label}${raw(SP.UI.hint(o.hint || ''))}</div>
+          ${when(o.meta, () => html`<div class="lrow__meta">${o.meta}</div>`)}
+          ${when(o.note, () => html`<p class="lrow__note">${o.note}</p>`)}
+          ${when(o.action, () => html`<div class="lrow__act">${o.action}</div>`)}
+        </div>
+        <div class="lrow__main">${o.body}</div>
+      </section>`;
+  }
+
+  /* Defter: satirlarin kabi. Ilk satirin ust cizgisi yoktur -- hero'nun
+     alt cizgisi zaten oradadir ve iki cizgi ust uste gelmez. */
+  function Ledger(rows){
+    if(typeof rows === 'function'){
+      ledgerMode = true;
+      try{ rows = rows(); }
+      finally{ ledgerMode = false; }
+    }
+    return html`<div class="ledger">${rows}</div>`;
   }
 
   /* ---------- dikte ve dosya ----------
@@ -341,6 +430,7 @@ SP.C = (function(){
 
   return {
     Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Entry, Ledger,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, NextUp, Table, Pager, paginate,
     Mic, Drop,

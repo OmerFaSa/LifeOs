@@ -221,33 +221,32 @@ SP.Screens.guide = (function(){
 
   async function render(){
     const tab = S.ui.guideTab;
-    const tabs = K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'guide-tab', aria:'Rehber görünümü' }));
+    const head = html`<div class="mb-8">${K.Subtabs({ items:TABS, value:tab,
+      act:'guide-tab', aria:'Rehber görünümü' })}</div>`;
 
     if(tab === 'model'){
-      return String(K.Grid([tabs, K.Span(7, modelCard()), K.Span(5, quotaCard()),
-        K.Span(12, raw(UI.rail(['no-model', 'grounding', 'privacy'])))]));
+      return String(html`${head}
+        ${K.Ledger(() => [modelCard(), quotaCard()])}
+        <div class="mt-24">${raw(UI.rail(['no-model', 'grounding', 'privacy']))}</div>`);
     }
     if(tab === 'veri'){
-      return String(K.Grid([tabs, K.Span(7, dataCard()), K.Span(5, storageCard()),
-        K.Span(12, raw(UI.rail(['backup', 'privacy', 'profiles'])))]));
+      return String(html`${head}
+        ${K.Ledger(() => [dataCard(), storageCard()])}
+        <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`);
     }
     if(tab === 'sinir'){
-      return String(K.Grid([tabs,
-        K.Span(7, K.Stack([clinicalCard(), redFlagCard()])),
-        K.Span(5, K.Stack([privacyCard(), groundingCard()])),
-        K.Span(12, raw(UI.rail(['red-flag', 'grounding', 'privacy', 'certainty'])))]));
+      return String(html`${head}
+        ${K.Ledger(() => [clinicalCard(), redFlagCard(), privacyCard(), groundingCard()])}
+        <div class="mt-24">${raw(UI.rail(['red-flag', 'grounding', 'privacy', 'certainty']))}</div>`);
     }
-    return String(K.Grid([tabs,
-      K.Span(7, K.Stack([howCard(), moduleCard()])),
-      K.Span(5, K.Stack([precedenceCard(),
-        K.Card({ title:'Asgari gün', hint:'minimum-day',
+    return String(html`${head}
+      ${K.Ledger(() => [howCard(), moduleCard(), precedenceCard(),
+        K.Entry({ label:'Asgari gün', hint:'minimum-day', meta:'kötü günün alt sınırı',
           body:html`<ul class="bullets small muted">
             <li>${SP.MINIMUM_DAY.protein}</li><li>${SP.MINIMUM_DAY.water}</li>
-            <li>${SP.MINIMUM_DAY.move}</li><li>${SP.MINIMUM_DAY.sleep}</li></ul>
-            <p class="small mt-8">${SP.MINIMUM_DAY.note}</p>` }),
-      ])),
-      K.Span(12, raw(UI.rail(['next-action', 'minimum-day', 'certainty', 'office']))),
-    ]));
+            <li>${SP.MINIMUM_DAY.move}</li><li>${SP.MINIMUM_DAY.sleep}</li></ul>` }),
+      ])}
+      <div class="mt-24">${raw(UI.rail(['minimum-day', 'next-action', 'certainty']))}</div>`);
   }
 
   const handle = {

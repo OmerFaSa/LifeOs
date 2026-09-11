@@ -107,19 +107,17 @@ SP.Screens.meeting = (function(){
 
   async function render(){
     const open = S.officeMeetings.find(m => m.id === S.ui.meetingOpen);
-    return String(K.Grid([
-      K.Span(7, K.Stack([agendaCard(), liveCard(), open ? minutesCard(open) : null])),
-      K.Span(5, K.Stack([
-        historyCard(),
-        K.Card({ title:'Çelişki nasıl çözülür?', hint:'office',
-          body:html`<p class="small muted">Üstteki sıra alttakini her zaman yener.
-            Bu tartışmaya açık değildir; Patron da buna uyar.</p>
-            <div class="mt-10">${K.Table({ tight:true, headers:['Sıra', 'Kural', 'Neden'],
-              rows:SP.PRECEDENCE.map(p => [String(p.rank), html`<b>${p.label}</b>`,
-                html`<span class="small">${p.note}</span>`]) })}</div>` }),
-      ])),
-      K.Span(12, raw(UI.rail(['office', 'grounding', 'decision', 'no-model']))),
-    ]));
+    return String(html`
+      ${K.Ledger(() => [
+        agendaCard(), liveCard(), open ? minutesCard(open) : null, historyCard(),
+        K.Entry({ label:'Çelişki nasıl çözülür?', hint:'office', meta:'öncelik sırası',
+          note:'Üstteki sıra alttakini her zaman yener. Bu tartışmaya açık değildir; '
+            + 'Patron da buna uyar.',
+          body:K.Table({ tight:true, headers:['Sıra', 'Kural', 'Neden'],
+            rows:SP.PRECEDENCE.map(p => [String(p.rank), html`<b>${p.label}</b>`,
+              html`<span class="small">${p.note}</span>`]) }) }),
+      ])}
+      <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'decision', 'no-model']))}</div>`);
   }
 
   const handle = {

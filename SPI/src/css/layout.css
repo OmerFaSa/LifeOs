@@ -445,3 +445,111 @@
 @media (prefers-reduced-motion:reduce){
   .navsheet{ animation:none; }
 }
+
+/* ================= DEFTER DÜZENİ =================
+
+   Sistemin ana düzen birimi. Kart değil.
+
+   Kart dili bir yönetim panelinin dilidir: her şey eşit ağırlıkta beyaz
+   bir dikdörtgene konur, on beş dikdörtgen yan yana dizilir ve sayfa bir
+   tepsiye döner. Günde birkaç kez açılıp aylarca okunacak bir sistemde
+   bu dil yorar — çünkü hiçbir şey öne çıkmaz ve göz dinlenecek yer
+   bulamaz.
+
+   Defter satırı bunun yerine kitapların, defterlerin ve teknik belgelerin
+   yüzyıllardır kullandığı düzeni kurar: solda dar bir künye sütunu,
+   sağda içeriğin kendisi, arada ince bir çizgi.
+
+   Kutu yalnız SEÇİLEBİLİR ya da YÜZEN şeylerde kalır. Okunacak bir şey
+   kutuya konmaz. */
+
+.ledger{ display:flex; flex-direction:column; }
+
+.lrow{
+  display:grid;
+  grid-template-columns:var(--gutter) minmax(0,1fr);
+  gap:0 var(--gutter-gap);
+  padding-block:38px;
+  border-top:1px solid var(--border);
+}
+/* İlk satırın üst çizgisi yoktur: hero'nun alt çizgisi zaten oradadır ve
+   iki çizgi üst üste gelmez. */
+.ledger > .lrow:first-child{ border-top:none; padding-top:30px; }
+.ledger > .lrow:last-child{ padding-bottom:8px; }
+
+/* Künye sütunu uzun içerikte YAPIŞIR: yüz satırlık bir listeyi
+   kaydırırken hangi bölümde olduğunu unutmayasın diye. */
+.lrow__side{
+  position:sticky;
+  top:calc(var(--nav-h) + 26px);
+  align-self:start;
+  min-width:0;
+}
+.lrow__label{
+  display:flex; align-items:center; gap:6px;
+  font-size:11px; font-weight:600; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--text);
+  line-height:1.4;
+}
+.lrow__meta{
+  margin-top:7px;
+  font-size:var(--fs-sm); color:var(--text-3);
+  font-variant-numeric:tabular-nums;
+  line-height:1.5;
+}
+.lrow__note{
+  margin:12px 0 0;
+  font-size:var(--fs-sm); line-height:1.6; color:var(--text-2);
+  max-width:34ch;
+}
+.lrow__act{ margin-top:16px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.lrow__act .btn{ width:100%; justify-content:center; }
+
+.lrow__main{ min-width:0; }
+/* Defter satırının içinde ARDIŞIK bloklar arasında da ritim olsun. */
+.lrow__main > * + *{ margin-top:20px; }
+
+/* Geniş satır: künye üstte, içerik tam genişlikte. Bir grafiğin ya da
+   uzun bir cetvelin künye sütunu kadar daralması saçmadır. */
+.lrow--wide{ grid-template-columns:minmax(0,1fr); gap:18px; }
+.lrow--wide .lrow__side{
+  position:static;
+  display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+}
+.lrow--wide .lrow__meta{ margin-top:0; }
+.lrow--wide .lrow__note{ flex-basis:100%; margin-top:0; max-width:70ch; }
+.lrow--wide .lrow__act{ margin-top:0; margin-left:auto; flex-direction:row; }
+.lrow--wide .lrow__act .btn{ width:auto; }
+
+@media (max-width:900px){
+  .lrow{
+    grid-template-columns:minmax(0,1fr);
+    gap:16px;
+    padding-block:30px;
+  }
+  .lrow__side{
+    position:static;
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+  }
+  .lrow__meta{ margin-top:0; }
+  .lrow__note{ flex-basis:100%; margin-top:0; max-width:none; }
+  .lrow__act{ margin-top:0; margin-left:auto; flex-direction:row; }
+  .lrow__act .btn{ width:auto; }
+}
+
+/* İki sütunlu içerik — defterin içinde, kart olmadan. */
+.pair{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:28px 40px; }
+.pair > *{ min-width:0; }
+
+/* Künye sütununun içindeki mini ölçü listesi. */
+.sidestat{ display:flex; flex-direction:column; gap:2px; margin-top:14px; }
+.sidestat__v{
+  font-family:var(--font-display); font-size:22px; font-weight:600;
+  letter-spacing:-.025em; line-height:1; color:var(--text);
+  font-variant-numeric:tabular-nums;
+}
+.sidestat__v small{ font-size:12px; font-weight:500; color:var(--text-3); margin-left:2px; }
+.sidestat__k{
+  font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-3);
+}

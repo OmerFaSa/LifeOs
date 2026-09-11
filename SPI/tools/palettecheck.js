@@ -76,7 +76,7 @@ function ratio(a,b){ const l1=lum(a),l2=lum(b); return (Math.max(l1,l2)+.05)/(Ma
           if(r < min) bad.push(`${theme}/${pal}/${route}  ${name}  ${r.toFixed(2)} < ${min}`);
         });
       }
-      if(theme === 'light' && pal !== 'kagit') continue;
+      /* Her palet icin bir ekran goruntusu birak. */
       await p.evaluate(id => SP.App.go(id), 'labs');
       await wait(250);
       await p.screenshot({ path:`${OUT}/${theme}-${pal}.png` });

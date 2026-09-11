@@ -780,10 +780,18 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .agentav--move  { background:var(--agent-move);   color:var(--agent-ink); }
 .agentav--money { background:var(--agent-money);  color:var(--agent-ink); }
 
-.desks{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(272px, 1fr)); }
-.desk__head{ display:flex; align-items:center; gap:11px; }
-.desk__name{ display:block; font-family:var(--font-display); font-size:var(--fs-md); line-height:1.25; }
-.desk__role{ display:block; font-size:var(--fs-xs); color:var(--text-3); }
+/* Masalar defter satırının tam genişliğinde durur. Sütun alt sınırı
+   geniştir: ajan adı, rolü ve rozeti aynı satıra sığmadığında üst üste
+   biniyordu. */
+.desks{ display:grid; gap:0 28px; grid-template-columns:repeat(auto-fill, minmax(330px, 1fr)); }
+.desk__head{ display:flex; align-items:flex-start; gap:11px; flex-wrap:wrap; }
+.desk__head > div{ min-width:0; flex:1 1 140px; }
+.desk__head .badge{ flex:none; }
+.desk__name{
+  display:block; font-family:var(--font-serif); font-size:19px; font-weight:500;
+  line-height:1.2; letter-spacing:-.005em;
+}
+.desk__role{ display:block; font-size:var(--fs-xs); color:var(--text-3); margin-top:2px; }
 .desk__line{ margin-top:10px; font-size:var(--fs-sm); color:var(--text-2); line-height:1.45; }
 .desk__open{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
 
@@ -1176,9 +1184,11 @@ button.minrow:hover{ background:var(--surface-2); }
   background:var(--surface-3); color:var(--text-3);
 }
 .ladderstep.is-done{ opacity:.6; }
-.ladderstep.is-done .ladderstep__no{ background:var(--primary); color:var(--primary-ink); }
-.ladderstep.is-current{ background:var(--primary-soft); font-weight:600; }
-.ladderstep.is-current .ladderstep__no{ background:var(--primary); color:var(--primary-ink); }
+/* Merdivendeki basamak bir DURUM değil bir KONUMdur; o yüzden bölümün
+   rengini alır, durum renklerini değil. */
+.ladderstep.is-done .ladderstep__no{ background:var(--sec); color:var(--primary-ink); }
+.ladderstep.is-current{ background:var(--sec-soft); font-weight:600; }
+.ladderstep.is-current .ladderstep__no{ background:var(--sec); color:var(--primary-ink); }
 .ladderstep__to{ margin-left:auto; color:var(--text-3); font-size:var(--fs-xs); white-space:nowrap; }
 
 /* ---------- hızlı giriş çubuğu ----------
@@ -1743,3 +1753,29 @@ body.is-dragging .drop.is-over{
 .toast__undo:hover{ opacity:1; }
 .toast-root{ pointer-events:none; }
 .toast{ pointer-events:auto; }
+
+/* ================= hareket merdiveni bloğu =================
+
+   Kart değil: ince çizgiyle ayrılan bir blok. On bir hareket on bir
+   beyaz kutuya konduğunda sayfa bir tepsiye dönüyordu. */
+.ladders{ display:flex; flex-direction:column; }
+.ladderblk{
+  padding-block:20px;
+  border-top:1px solid var(--border);
+}
+.ladders > .ladderblk:first-child{ border-top:none; padding-top:4px; }
+.ladderblk__head{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  margin-bottom:6px;
+}
+.ladderblk__name{
+  font-family:var(--font-serif); font-size:18px; font-weight:500;
+  letter-spacing:-.004em; margin-right:8px;
+}
+.ladderblk__foot{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  flex-wrap:wrap; margin-top:12px;
+}
+
+/* Defter kipindeki katlanır bölüm: kutu yok, yalnız satır. */
+.collapse--bare .collapse__btn{ padding-inline:0; }

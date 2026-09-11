@@ -53,72 +53,68 @@ SP.Screens.move = (function(){
 
   /* --------------------------------------------------------------- bugün */
 
-  function orderCard(){
+  function orderEntry(){
     const rx = SP.Move.prescription();
-    const tone = rx.kind === 'rest' ? 'danger' : rx.kind === 'full' ? 'ok' : 'warn';
     const r = rx.readiness;
-
-    return K.Card({
-      title:'Günün yük emri', hint:'recovery-order',
-      sub:'Toparlanma belirler, istek değil',
-      badge:K.Badge({ label:rx.factor >= 1 ? 'tam yük'
-        : 'yükün %' + Math.round(rx.factor * 100) + '\u2019i', tone }),
+    return K.Entry({
+      label:'Günün yük emri', hint:'recovery-order',
+      meta:rx.factor >= 1 ? 'tam yük' : 'yükün %' + Math.round(rx.factor * 100) + '\u2019i',
+      note:'Emri toparlanma belirler, istek değil. Sistem yükü kendiliğinden '
+        + 'azaltabilir ama asla kendiliğinden artıramaz.',
+      action:when(!r.ok, () => K.Button({ label:'Veri gir', tone:'primary',
+        act:'go', data:{ 'data-route':'today' } })),
       body:html`
-        ${when(r.ok, () => html`<div class="row wrap" style="gap:22px">
-          ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:118,
-            bands:SP.READINESS_BANDS.map(b => b.min).filter(m => m > 0) }))}
-          <p class="grow small" style="min-width:200px">${r.band.order}</p>
+        ${when(r.ok, () => html`<div class="row wrap" style="gap:26px">
+          ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:122,
+            bands:SP.READINESS_BANDS.map(b => b.min).filter(x => x > 0) }))}
+          <p class="grow small" style="min-width:210px">${r.band.order}</p>
         </div>`)}
-        ${map(rx.reasons, x => K.Notice({ tone:x.kind === 'muted' ? 'info' : x.kind, class:'mt-10',
-          /* Skor yukarıda büyük yazıyor: bandın gerekçesi kısa hâliyle basılır,
-             aynı cümle iki kez görünmez. */
+        ${map(rx.reasons, x => K.Notice({ tone:x.kind === 'muted' ? 'info' : x.kind,
           body:(r.ok && x.id === 'readiness') ? x.short : x.text }))}
-        ${when(rx.kind === 'rest', () => K.Notice({ tone:'info', class:'mt-8',
+        ${when(rx.kind === 'rest', () => K.Notice({ tone:'info',
           body:'Bu bir geri adım değil, planın parçası. Asgari gün yine geçerli: '
             + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş.' }))}`,
     });
   }
 
-  /* Seans seçimi — şablonlar seçilebilir kart olarak durur.
-     Bir düğme satırı hangi seansın önerildiğini gizler; kart hem öneriyi
-     hem içeriğini gösterir. */
-  function pickSessionCard(){
+  function pickSessionEntry(){
     const rx = SP.Move.prescription();
     const suggested = rx.suggest.map(t => t.id);
-    return K.Card({
-      title:'Seans seç', sub:'Öneri toparlanma bandından gelir; istediğini seçebilirsin',
-      body:html`
-        <div class="picks">${map(SP.SESSION_TEMPLATES, t => html`
-          <button class="${cls('pickcard', suggested[0] === t.id && 'is-on')}"
-            data-act="start-session" data-id="${t.id}">
-            <span class="pickcard__box" aria-hidden="true">${suggested[0] === t.id ? '★' : ''}</span>
-            <span class="pickcard__body">
-              <span class="pickcard__name">${t.name}
-                ${when(suggested.indexOf(t.id) >= 0, () => html`<span class="tiny dim"> · önerilen</span>`)}</span>
-              <span class="pickcard__meta">${t.minutes} dk · ${t.items.length} hareket — ${t.note}</span>
-            </span>
-          </button>`)}
-          <button class="pickcard" data-act="start-session" data-id="">
-            <span class="pickcard__box" aria-hidden="true"></span>
-            <span class="pickcard__body">
-              <span class="pickcard__name">Serbest seans</span>
-              <span class="pickcard__meta">Hareketleri kendin seç</span>
-            </span>
-          </button>
-        </div>`,
+    return K.Entry({
+      label:'Seans seç',
+      meta:SP.SESSION_TEMPLATES.length + ' şablon',
+      note:'Öneri toparlanma bandından gelir; istediğini seçebilirsin.',
+      body:html`<div class="picks">${map(SP.SESSION_TEMPLATES, t => html`
+        <button class="${cls('pickcard', suggested[0] === t.id && 'is-on')}"
+          data-act="start-session" data-id="${t.id}">
+          <span class="pickcard__box" aria-hidden="true">${suggested[0] === t.id ? '★' : ''}</span>
+          <span class="pickcard__body">
+            <span class="pickcard__name">${t.name}
+              ${when(suggested.indexOf(t.id) >= 0, () => html`<span class="tiny dim"> · önerilen</span>`)}</span>
+            <span class="pickcard__meta">${t.minutes} dk · ${t.items.length} hareket — ${t.note}</span>
+          </span>
+        </button>`)}
+        <button class="pickcard" data-act="start-session" data-id="">
+          <span class="pickcard__box" aria-hidden="true"></span>
+          <span class="pickcard__body">
+            <span class="pickcard__name">Serbest seans</span>
+            <span class="pickcard__meta">Hareketleri kendin seç</span>
+          </span>
+        </button>
+      </div>`,
     });
   }
 
-  function todaySessionsCard(){
+  function todaySessionsEntry(){
     const d = U.todayISO();
     const rows = M.workoutsOf(d);
     if(!rows.length){
-      return K.Card({ title:'Bugünün seansları',
-        body:K.Empty({ text:'Bugün henüz seans kaydı yok. Yukarıdan bir seans seç.' }) });
+      return K.Entry({ label:'Bugünün seansları', meta:'kayıt yok',
+        body:P.empty('Bugün henüz seans kaydı yok. Yukarıdan bir seans seç.') });
     }
-    return K.Card({
-      title:'Bugünün seansları', sub:rows.length + ' seans',
-      badge:K.Badge({ label:U.sum(rows.map(SP.Move.sessionLoad)) + ' yük', tone:'info' }),
+    return K.Entry({
+      label:'Bugünün seansları',
+      meta:rows.length + ' seans · ' + U.sum(rows.map(SP.Move.sessionLoad)) + ' yük',
       body:html`<div class="list">${map(rows, w => html`
         <div class="listitem">
           <div class="grow">
@@ -135,43 +131,35 @@ SP.Screens.move = (function(){
     });
   }
 
-  function readyCard(){
-    const r = SP.Move.readiness();
-    if(!r.ok){
-      return K.Card({ title:'Toparlanma', hint:'readiness',
-        body:html`${K.Notice({ tone:'info', body:r.note })}`,
-        foot:K.Button({ label:'Ölçüm gir', size:'sm', tone:'primary',
-          act:'go', data:{ 'data-route':'today' } }) });
-    }
-    return K.Card({
-      title:'Toparlanma', hint:'readiness',
-      badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
-      body:html`
-        <div class="row wrap" style="gap:20px">
-        ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:112,
-          bands:SP.READINESS_BANDS.map(b => b.min).filter(m => m > 0) }))}
-        <div class="grow" style="min-width:170px">${map(r.parts, p => html`
-          <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
-            <span class="readypart__label">${p.label}</span>
-            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))}</span>
-            <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
-          </div>`)}</div></div>`,
-    });
+  function balanceBody(){
+    const rows = SP.Move.patternBalance();
+    return html`${map(rows, r => html`
+      <button class="${cls('minrow', !r.missing && 'is-done')}" style="width:100%"
+        data-act="pick-pattern" data-id="${r.pattern.id}">
+        <span class="minrow__mark">${r.missing ? '' : '✓'}</span>
+        <span class="minrow__label"><b>${r.pattern.label}</b>
+          <span class="tiny dim"> · ${r.pattern.note}</span></span>
+        <span class="minrow__detail num">${r.count}</span>
+      </button>`)}`;
   }
 
-  /* ------------------------------------------------------------- program */
-
-  function ladderCard(ex){
-    const p = SP.Move.progressionCheck(ex.id);
+  /* Merdiven artık kart değil: ince çizgiyle ayrılan bir blok. */
+  function ladderBlock(ex){
+    const pr = SP.Move.progressionCheck(ex.id);
     const cur = M.levelIndex(ex.id);
     const pattern = SP.PATTERNS.find(x => x.id === ex.pattern);
-    return K.Card({
-      title:ex.name,
-      sub:(pattern ? pattern.label : ex.kind === 'cardio' ? 'Dayanıklılık' : 'Mobilite')
-        + ' · ' + (ex.equip === 'yok' ? 'ekipmansız' : ex.equip),
-      badge:p.ready ? K.Badge({ label:'üst basamak açık', tone:'ok' })
-        : K.Badge({ label:p.sessions + '/' + p.needed + ' seans', tone:'muted' }),
-      body:html`
+    return html`
+      <div class="ladderblk">
+        <div class="ladderblk__head">
+          <div class="minw0">
+            <b class="ladderblk__name">${ex.name}</b>
+            <span class="tiny dim">${pattern ? pattern.label
+              : ex.kind === 'cardio' ? 'Dayanıklılık' : 'Mobilite'}
+              · ${ex.equip === 'yok' ? 'ekipmansız' : ex.equip}</span>
+          </div>
+          ${pr.ready ? K.Badge({ label:'üst basamak açık', tone:'ok' })
+            : K.Badge({ label:pr.sessions + '/' + pr.needed + ' seans', tone:'muted' })}
+        </div>
         <p class="small muted">${ex.cue}</p>
         <div class="ladder">${map(ex.levels, (l, i) => html`
           <div class="${cls('ladderstep', i < cur && 'is-done', i === cur && 'is-current')}">
@@ -179,32 +167,15 @@ SP.Screens.move = (function(){
             <span>${l.name}</span>
             <span class="ladderstep__to">${l.to}</span>
           </div>`)}</div>
-        <p class="small mt-10">${p.note}</p>`,
-      foot:html`
-        ${when(p.ready, () => K.Button({ label:'Üst basamağa geç', size:'sm', tone:'primary',
-          act:'advance', data:{ 'data-id':ex.id } }))}
-        ${K.Button({ label:'Basamağı seç', size:'sm', act:'pick-level', data:{ 'data-id':ex.id } })}`,
-    });
-  }
-
-  function balanceCard(){
-    const rows = SP.Move.patternBalance();
-    const missing = rows.filter(r => r.missing).length;
-    return K.Card({
-      title:'Haftalık kalıp dengesi',
-      sub:'Her kalıp haftada en az bir kez',
-      badge:missing ? K.Badge({ label:missing + ' eksik', tone:'warn' })
-        : K.Badge({ label:'dengeli', tone:'ok' }),
-      body:html`${map(rows, r => html`
-        <button class="${cls('minrow', !r.missing && 'is-done')}" style="width:100%"
-          data-act="pick-pattern" data-id="${r.pattern.id}">
-          <span class="minrow__mark">${r.missing ? '' : '✓'}</span>
-          <span class="minrow__label"><b>${r.pattern.label}</b>
-            <span class="tiny dim"> · ${r.pattern.note}</span></span>
-          <span class="minrow__detail num">${r.count}</span>
-        </button>`)}`,
-      foot:html`<span class="small dim">Bir kalıba dokunarak o kalıbın hareketlerini aç.</span>`,
-    });
+        <div class="ladderblk__foot">
+          <span class="small dim">${pr.note}</span>
+          <span class="row-sm">
+            ${when(pr.ready, () => K.Button({ label:'Üst basamağa geç', size:'sm', tone:'primary',
+              act:'advance', data:{ 'data-id':ex.id } }))}
+            ${K.Button({ label:'Basamak seç', size:'sm', act:'pick-level', data:{ 'data-id':ex.id } })}
+          </span>
+        </div>
+      </div>`;
   }
 
   /* ---------------------------------------------------------- alanlar */
@@ -216,50 +187,48 @@ SP.Screens.move = (function(){
     const list = exercisesOfArea(areaId);
     const rx = SP.Move.prescription();
 
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Alan</div>
-            <h2>${area.label}</h2>
-            <p>${area.note}</p>
-          </div>
-          <div class="sect__actions">
-            ${K.Button({ label:'Bu alandan seans ekle', icon:'plus', size:'sm', tone:'primary',
-              act:'start-area', data:{ 'data-area':areaId } })}
-          </div>
-        </div>
+    return K.Ledger([
+      when(areaId === 'kardiyo', () => K.Entry({
+        label:'Haftalık süre', hint:'load', meta:'%10 kuralı',
+        note:area.note, body:cardioBody(),
+      })),
 
-        ${when(areaId === 'kuvvet', () => html`<div class="mb-16">
-          ${K.Subtabs({ items:patternTabs(), value:S.ui.movePattern || 'all',
-            act:'pick-pattern-tab', aria:'Hareket kalıbı' })}</div>`)}
+      when(areaId === 'esneklik' && rx.kind !== 'full', () => K.Entry({
+        label:'Bugün için', meta:'toparlanma bandı',
+        body:K.Notice({ tone:'info',
+          body:'Toparlanma ' + (rx.readiness.ok ? rx.readiness.band.label.toLocaleLowerCase('tr-TR')
+            : 'ölçülmedi') + '. Esneklik akışı ağır antrenmanın yerine geçebilir; '
+            + 'yük üretmez ama zinciri kırmaz.' }),
+      })),
 
-        ${when(areaId === 'kardiyo', () => html`<div class="mb-16">
-          ${cardioSummary()}</div>`)}
+      K.Entry({
+        label:area.label,
+        meta:list.length + ' hareket',
+        note:area.note,
+        action:K.Button({ label:'Seans ekle', icon:'plus', tone:'primary',
+          act:'start-area', data:{ 'data-area':areaId } }),
+        body:html`
+          ${when(areaId === 'kuvvet', () => K.Subtabs({ items:patternTabs(),
+            value:S.ui.movePattern || 'all', act:'pick-pattern-tab', aria:'Hareket kalıbı' }))}
+          ${when(!list.length, () => P.empty('Bu kalıpta tanımlı hareket yok.'))}
+          <div class="ladders">${map(list, ladderBlock)}</div>`,
+      }),
 
-        ${when(areaId === 'esneklik' && rx.kind !== 'full', () => html`<div class="mb-16">
-          ${K.Notice({ tone:'info', title:'Bugün için uygun:',
-            body:'Toparlanma ' + (rx.readiness.ok ? rx.readiness.band.label.toLocaleLowerCase('tr-TR')
-              : 'ölçülmedi') + '. Esneklik akışı ağır antrenmanın yerine geçebilir; '
-              + 'yük üretmez ama zinciri kırmaz.' })}</div>`)}
+      when(areaId === 'kuvvet', () => K.Entry({
+        label:'Kalıp dengesi', meta:'haftalık', body:balanceBody(),
+      })),
 
-        <div class="grid">
-          <div class="span-8"><div class="stack">${list.length
-            ? map(list, ladderCard)
-            : [K.Card({ body:K.Empty({ text:'Bu kalıpta tanımlı hareket yok.' }) })]}</div></div>
-          <div class="span-4"><div class="stack">
-            ${areaId === 'kuvvet' ? balanceCard() : ''}
-            ${K.Card({ title:'İlerleme kuralı', hint:'progression',
-              body:html`<p class="small muted">Bir üst basamak, mevcut basamakta son
-                ${SP.Move.ADVANCE_WINDOW} günde ${SP.Move.ADVANCE_SESSIONS} seans yapıldığında açılır.
-                Sistem basamak atlatmaz: aşırı yüklenmenin en yaygın sebebi budur.</p>` })}
-          </div></div>
-        </div>
-      </section>`;
+      K.Entry({
+        label:'İlerleme kuralı', hint:'progression',
+        meta:SP.Move.ADVANCE_SESSIONS + ' seans / ' + SP.Move.ADVANCE_WINDOW + ' gün',
+        body:html`<p class="small muted">Bir üst basamak, mevcut basamakta son
+          ${SP.Move.ADVANCE_WINDOW} günde ${SP.Move.ADVANCE_SESSIONS} seans yapıldığında açılır.
+          Sistem basamak atlatmaz: aşırı yüklenmenin en yaygın sebebi budur.</p>`,
+      }),
+    ]);
   }
 
-  /* Kardiyoda ölçü süredir: haftalık toplam dakika ve %10 kuralı. */
-  function cardioSummary(){
+  function cardioBody(){
     const ids = SP.EXERCISES.filter(e => e.kind === 'cardio').map(e => e.id);
     const days = U.lastDays(14);
     let thisWeek = 0, lastWeek = 0;
@@ -269,23 +238,19 @@ SP.Screens.move = (function(){
       if(i >= 7) thisWeek += mins; else lastWeek += mins;
     });
     const cap = Math.round(lastWeek * 1.1);
-    return K.Card({
-      title:'Haftalık kardiyo süresi', hint:'load',
-      badge:K.Badge({ label:thisWeek + ' dk', tone:lastWeek && thisWeek > cap ? 'warn' : 'info' }),
-      body:html`
-        <div class="cols-3">
-          ${K.Stat({ label:'Bu hafta', value:String(thisWeek), unit:'dk' })}
-          ${K.Stat({ label:'Geçen hafta', value:String(lastWeek), unit:'dk' })}
-          ${K.Stat({ label:'Bu haftanın tavanı', value:lastWeek ? String(cap) : '—', unit:'dk',
-            note:lastWeek ? '%10 kuralı' : 'geçen hafta veri yok' })}
-        </div>
-        ${K.Notice({ tone:lastWeek && thisWeek > cap ? 'warn' : 'info', class:'mt-12',
-          body:lastWeek
-            ? (thisWeek > cap
-              ? 'Bu hafta geçen haftanın %10 üstünü aştı. Süreyi artırmak yerine tempoyu koru.'
-              : SP.LOAD_RULES.weeklyGrowth.note)
-            : 'Geçen hafta kardiyo kaydı yok; tavan hesaplanmadı. Eksik veri sıfır sayılmaz.' })}`,
-    });
+    return html`
+      <div class="cols-3">
+        ${K.Stat({ label:'Bu hafta', value:String(thisWeek), unit:'dk' })}
+        ${K.Stat({ label:'Geçen hafta', value:String(lastWeek), unit:'dk' })}
+        ${K.Stat({ label:'Bu haftanın tavanı', value:lastWeek ? String(cap) : '—', unit:'dk',
+          note:lastWeek ? '%10 kuralı' : 'geçen hafta veri yok' })}
+      </div>
+      ${K.Notice({ tone:lastWeek && thisWeek > cap ? 'warn' : 'info',
+        body:lastWeek
+          ? (thisWeek > cap
+            ? 'Bu hafta geçen haftanın %10 üstünü aştı. Süreyi artırmak yerine tempoyu koru.'
+            : SP.LOAD_RULES.weeklyGrowth.note)
+          : 'Geçen hafta kardiyo kaydı yok; tavan hesaplanmadı. Eksik veri sıfır sayılmaz.' })}`;
   }
 
   /* ---------------------------------------------------------- dinlenme
@@ -303,112 +268,87 @@ SP.Screens.move = (function(){
     const sleepVals = days.map(d => (S.vitals[d] || {}).sleep).filter(v => v != null);
     const avgSleep = sleepVals.length ? U.round(U.sum(sleepVals) / sleepVals.length, 1) : null;
 
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Alan</div>
-            <h2>Dinlenme</h2>
-            <p>${SP.AREA_BY_ID.dinlenme.note} Kazanç antrenmanda değil, antrenmandan
-              sonraki toparlanmada oluşur.</p>
-          </div>
-        </div>
+    return K.Ledger([
+      K.Entry({
+        label:'Bugün dinlenmeli misin?', hint:'recovery-order',
+        meta:rx.kind === 'rest' ? 'evet' : rx.kind === 'full' ? 'hayır' : 'hafiflet',
+        note:SP.AREA_BY_ID.dinlenme.note + ' Kazanç antrenmanda değil, antrenmandan '
+          + 'sonraki toparlanmada oluşur.',
+        action:when(!r.ok, () => K.Button({ label:'Veri gir', tone:'primary',
+          act:'go', data:{ 'data-route':'today' } })),
+        body:html`
+          ${when(r.ok, () => html`<div class="row wrap" style="gap:26px">
+            ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:122,
+              bands:SP.READINESS_BANDS.map(b => b.min).filter(x => x > 0) }))}
+            <p class="grow small" style="min-width:210px">${r.band.order}</p>
+          </div>`)}
+          ${when(!r.ok, () => K.Notice({ tone:'info', body:r.note }))}
+          ${when(rx.kind === 'rest', () => K.Notice({ tone:'info',
+            body:'Tam dinlenme günü de boş değildir: asgari gün geçerli — '
+              + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş ve bir mobilite akışı.' }))}`,
+      }),
 
-        <div class="grid">
-          <div class="span-8"><div class="stack">
-            ${K.Card({
-              title:'Bugün dinlenmeli misin?', hint:'recovery-order',
-              badge:K.Badge({ label:rx.kind === 'rest' ? 'evet' : rx.kind === 'full' ? 'hayır' : 'hafiflet',
-                tone:rx.kind === 'rest' ? 'danger' : rx.kind === 'full' ? 'ok' : 'warn' }),
-              body:html`
-                ${when(r.ok, () => html`<div class="row wrap" style="gap:18px">
-                  <div class="kpi"><span class="kpi__value">${r.score}</span>
-                    <span class="kpi__unit">/ 100 · ${r.band.label}</span></div>
-                  <div class="grow" style="min-width:180px">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
-                </div>`)}
-                ${K.Notice({ tone:r.ok ? (r.band.tone === 'ok' ? 'ok' : r.band.tone) : 'info',
-                  class:'mt-12', body:r.ok ? r.band.order : r.note })}
-                ${when(rx.kind === 'rest', () => K.Notice({ tone:'info', class:'mt-8',
-                  body:'Tam dinlenme günü de boş değildir: asgari gün geçerli — '
-                    + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş ve bir mobilite akışı.' }))}`,
-              foot:when(!r.ok, () => K.Button({ label:'Bugünün ölçümünü gir', size:'sm', tone:'primary',
-                act:'go', data:{ 'data-route':'today' } })),
-            })}
+      K.Entry({
+        label:'İndirme haftası', hint:'deload',
+        meta:!dl.started ? 'başlamadı' : dl.due ? 'bu hafta' : dl.inCycle + '/' + dl.every,
+        note:SP.LOAD_RULES.deload.note,
+        body:html`<p class="small">${dl.note}</p>`,
+      }),
 
-            ${K.Card({
-              title:'İndirme haftası', hint:'deload',
-              badge:K.Badge({ label:!dl.started ? 'başlamadı'
-                : dl.due ? 'bu hafta' : dl.inCycle + '/' + dl.every,
-                tone:dl.due ? 'warn' : 'muted' }),
-              body:html`<p class="small">${dl.note}</p>
-                ${K.Notice({ tone:'info', class:'mt-10', body:SP.LOAD_RULES.deload.note })}`,
-            })}
-          </div></div>
-
-          <div class="span-4"><div class="stack">
-            ${K.Card({ title:'Son yedi gün',
-              body:html`
-                ${K.Stat({ label:'Boş gün', value:String(off), unit:'/ 7',
-                  note:off === 0 ? 'hiç boş gün yok' : off >= 5 ? 'çok az seans' : 'dengeli' })}
-                <div class="mt-12">${K.Stat({ label:'Ortalama uyku',
-                  value:avgSleep == null ? '—' : U.fmtNum(avgSleep), unit:'saat',
-                  note:avgSleep == null ? 'girilmedi' : sleepVals.length + ' gün girildi' })}</div>
-                <div class="mt-12">${K.Stat({ label:'Son hafta / son ay',
-                  value:a.ok ? U.fmtNet(a.ratio) : '—',
-                  tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
-                  note:a.ok ? (a.zone === 'ok' ? 'alıştığın bandın içinde'
-                    : a.zone === 'high' ? 'alıştığından ağır' : 'alıştığından hafif')
-                    : 'veri yetersiz' })}</div>` })}
-
-            ${K.Card({ title:'Dinlenme neden plandır?',
-              body:html`<p class="small muted">Yük eğrisi yalnız yapılan işi değil,
-                yapılmayanı da sayar. Üst üste boş geçen günler kondisyonu düşürür;
-                hiç boş geçmeyen haftalar son haftayı son aya göre şişirir. İkisi de
-                aynı ölçüde izlenir.</p>` })}
-          </div></div>
-        </div>
-      </section>`;
-  }
-
-  /* ------------------------------------------------------------ ilerleme */
-
-  function loadCard(){
-    const series = SP.Move.loadSeries(30);
-    const a = SP.Move.acwr();
-    const g = SP.Move.weeklyGrowth();
-    const dl = SP.Move.deloadWeek();
-    const top = Math.max(100, Math.max.apply(null, series.map(s => s.value)) * 1.1);
-
-    return K.Card({
-      title:'Yük eğrisi', hint:'load',
-      sub:'Son 30 gün',
-      body:html`
-        ${raw(UI.barChart(series.map(s => ({ label:U.fmtShort(s.date), value:s.value })),
-          { max:top, height:160, goodAt:0 }))}
-        <div class="cols-3 mt-12">
-          ${K.Stat({ label:'Bu hafta', value:U.fmtNum(SP.Move.loadWindow(7)), unit:'yük' })}
+      K.Entry({
+        label:'Son yedi gün', meta:off + ' boş gün',
+        note:'Yük eğrisi yalnız yapılan işi değil, yapılmayanı da sayar. Üst üste '
+          + 'boş geçen günler kondisyonu düşürür; hiç boş geçmeyen haftalar son '
+          + 'haftayı son aya göre şişirir. İkisi de aynı ölçüde izlenir.',
+        body:html`<div class="cols-3">
+          ${K.Stat({ label:'Boş gün', value:String(off), unit:'/ 7',
+            note:off === 0 ? 'hiç boş gün yok' : off >= 5 ? 'çok az seans' : 'dengeli' })}
+          ${K.Stat({ label:'Ortalama uyku',
+            value:avgSleep == null ? '—' : U.fmtNum(avgSleep), unit:'saat',
+            note:avgSleep == null ? 'girilmedi' : sleepVals.length + ' gün girildi' })}
           ${K.Stat({ label:'Son hafta / son ay', value:a.ok ? U.fmtNet(a.ratio) : '—',
             tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
             note:a.ok ? (a.zone === 'ok' ? 'normal' : a.zone === 'high' ? 'ağır' : 'hafif')
               : 'veri yetersiz' })}
-          ${K.Stat({ label:'Döngü haftası', value:dl.started ? String(dl.week) : '—',
-            note:!dl.started ? 'başlamadı' : dl.due ? 'indirme haftası' : dl.inCycle + '/' + dl.every })}
-        </div>
-        ${K.Notice({ tone:a.ok ? a.tone : 'info', class:'mt-12', body:a.note })}
-        ${when(g.ok, () => K.Notice({ tone:g.over ? 'warn' : 'info', class:'mt-8',
-          body:'Geçen haftaya göre değişim %' + Math.round(g.growth * 100) + '. ' + g.note }))}
-        ${when(dl.due, () => K.Notice({ tone:'warn', class:'mt-8', body:dl.note }))}`,
-    });
+        </div>`,
+      }),
+    ]);
   }
 
-  function historyCard(){
+  /* ------------------------------------------------------------ ilerleme */
+
+  function loadBody(){
+    const series = SP.Move.loadSeries(30);
+    const a = SP.Move.acwr();
+    const g = SP.Move.weeklyGrowth();
+    const dl = SP.Move.deloadWeek();
+    const top = Math.max(100, Math.max.apply(null, series.map(s2 => s2.value)) * 1.1);
+
+    return html`
+      ${raw(UI.barChart(series.map(s2 => ({ label:U.fmtShort(s2.date), value:s2.value })),
+        { max:top, height:170, goodAt:0 }))}
+      <div class="cols-3">
+        ${K.Stat({ label:'Bu hafta', value:U.fmtNum(SP.Move.loadWindow(7)), unit:'yük' })}
+        ${K.Stat({ label:'Son hafta / son ay', value:a.ok ? U.fmtNet(a.ratio) : '—',
+          tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
+          note:a.ok ? (a.zone === 'ok' ? 'normal' : a.zone === 'high' ? 'ağır' : 'hafif')
+            : 'veri yetersiz' })}
+        ${K.Stat({ label:'Döngü haftası', value:dl.started ? String(dl.week) : '—',
+          note:!dl.started ? 'başlamadı' : dl.due ? 'indirme haftası' : dl.inCycle + '/' + dl.every })}
+      </div>
+      ${K.Notice({ tone:a.ok ? a.tone : 'info', body:a.note })}
+      ${when(g.ok, () => K.Notice({ tone:g.over ? 'warn' : 'info',
+        body:'Geçen haftaya göre değişim %' + Math.round(g.growth * 100) + '. ' + g.note }))}
+      ${when(dl.due, () => K.Notice({ tone:'warn', body:dl.note }))}`;
+  }
+
+  function historyBody(){
     const rows = S.workouts.slice(-20).reverse();
-    if(!rows.length) return null;
-    return K.Card({ title:'Seans geçmişi', sub:S.workouts.length + ' kayıt',
-      body:K.Table({ tight:true,
-        headers:['Tarih', 'Seans', { label:'Dakika', num:true }, { label:'Yük', num:true }],
-        rows:rows.map(w => [U.fmtShort(w.date), w.name, String(w.minutes),
-          String(SP.Move.sessionLoad(w))]) }) });
+    if(!rows.length) return P.empty('Henüz seans kaydı yok.');
+    return K.Table({ tight:true,
+      headers:['Tarih', 'Seans', { label:'Dakika', num:true }, { label:'Yük', num:true }],
+      rows:rows.map(w => [U.fmtShort(w.date), w.name, String(w.minutes),
+        String(SP.Move.sessionLoad(w))]) });
   }
 
   /* -------------------------------------------------------------- sheet'ler */
@@ -465,10 +405,10 @@ SP.Screens.move = (function(){
 
   async function render(){
     const tab = S.ui.moveTab;
+    const head = html`<div class="mb-8">${tabs(tab)}</div>`;
 
     if(SP.AREA_BY_ID[tab]){
-      return String(html`
-        <div class="mb-20">${tabs(tab)}</div>
+      return String(html`${head}
         ${tab === 'dinlenme' ? restView() : areaView(tab)}
         <div class="mt-24">${raw(UI.rail(tab === 'dinlenme'
           ? ['recovery-order', 'deload', 'load']
@@ -476,35 +416,25 @@ SP.Screens.move = (function(){
     }
 
     if(tab === 'ilerleme'){
-      return String(html`
-        <div class="mb-20">${tabs(tab)}</div>
-        <section class="sect">
-          <div class="sect__h"><div class="sect__ht">
-            <div class="sect__eyebrow">Ölçü</div>
-            <h2>İlerleme</h2>
-            <p>Yük eğrisi yalnız yapılan işi değil, yapılmayanı da sayar.</p>
-          </div></div>
-          <div class="grid">
-            <div class="span-8"><div class="stack">${[loadCard(), historyCard()]}</div></div>
-            <div class="span-4"><div class="stack">${[balanceCard(),
-              K.Card({ title:'Yük nasıl hesaplanır?',
-                body:html`<p class="small muted">Seans yükü süre × zorluktur. Zorluk önce senin
-                  bildirdiğin algılanan zorluktan (1–10), yoksa hareketlerin MET ortalamasından gelir.
-                  İkisi de yoksa seans yük üretmez — uydurulmuş yük yazılmaz.</p>` })]}</div></div>
-          </div>
-        </section>
-        <div class="mt-24">${raw(UI.rail(['load', 'deload', 'recovery-order']))}</div>`);
+      return String(html`${head}${K.Ledger([
+        K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
+          note:'Seans yükü süre × zorluktur. Zorluk önce senin bildirdiğin algılanan '
+            + 'zorluktan, yoksa hareketlerin MET ortalamasından gelir. İkisi de yoksa '
+            + 'seans yük üretmez — uydurulmuş yük yazılmaz.',
+          body:loadBody() }),
+        K.Entry({ label:'Kalıp dengesi', meta:'her kalıp haftada en az bir kez',
+          body:balanceBody() }),
+        K.Entry({ label:'Seans geçmişi', meta:S.workouts.length + ' kayıt',
+          body:historyBody() }),
+      ])}
+      <div class="mt-24">${raw(UI.rail(['load', 'deload', 'recovery-order']))}</div>`);
     }
 
-    return String(html`
-      <div class="mb-20">${tabs('bugun')}</div>
-      <section class="sect">
-        <div class="grid">
-          <div class="span-8"><div class="stack">${[orderCard(), pickSessionCard(), todaySessionsCard()]}</div></div>
-          <div class="span-4"><div class="stack">${[readyCard(), balanceCard()]}</div></div>
-        </div>
-      </section>
-      <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`);
+    return String(html`${head}${K.Ledger([
+      orderEntry(), pickSessionEntry(), todaySessionsEntry(),
+      K.Entry({ label:'Kalıp dengesi', meta:'haftalık', body:balanceBody() }),
+    ])}
+    <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`);
   }
 
   const handle = {

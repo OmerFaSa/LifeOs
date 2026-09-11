@@ -95,60 +95,81 @@ SP.Screens.labs = (function(){
     const total = SP.Bio.summary().measured;
 
     if(!total){
-      return K.Card({ body:P.empty(
-        'Henüz hiç test girilmedi. Elindeki hastane raporunu yapıştırman yeterli.',
-        'Rapor yapıştır', 'open-paste') });
+      return K.Ledger([K.Entry({
+        label:'Sonuçlar', meta:'kayıt yok',
+        note:'Elindeki hastane raporunu yapıştır ya da dosyasını bırak; '
+          + 'değerler kendiliğinden şemaya oturur.',
+        action:K.Button({ label:'Rapor yapıştır', tone:'primary', act:'open-paste' }),
+        body:P.empty('Henüz hiç test girilmedi.'),
+      })]);
     }
 
     const missing = SP.BIOMARKERS.filter(b => !M.latestOf(b.id));
+    const s = SP.Bio.summary();
+    const last = S.labs.length ? S.labs[S.labs.length - 1] : null;
 
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Ölçülen</div>
-            <h2>Bütün sonuçlar</h2>
-            <p>Önem sırasına göre: önce bandın dışındakiler. Bir satıra tıklayınca
-              referans aralığı, hedef bandı ve beslenme bağı açılır.</p>
+    return K.Ledger([
+      K.Entry({
+        label:'Sonuçlar',
+        meta:total + ' ölçüm' + (last ? ' · ' + U.fmtDate(last.date) : ''),
+        note:'Önem sırasına göre: önce bandın dışındakiler. Bir satıra '
+          + 'tıklayınca referans aralığı, hedef bandı ve beslenme bağı açılır.',
+        action:html`${K.Input({ id:'lab-q', value:S.ui.labQuery || '',
+          placeholder:'Ölçüm ara…', aria:'Ölçüm ara', change:'lab-query', debounce:200 })}
+          ${K.Button({ label:'Test gir', tone:'primary', act:'lab-tab',
+            data:{ 'data-tab':'giris' } })}`,
+        body:html`
+          ${when(panelFilter(), () => raw(String(panelFilter())))}
+          ${when(!rows.length, () => K.Notice({ tone:'info',
+            body:'Bu süzgeçle eşleşen ölçüm yok.' }))}
+          ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
+            const tr = SP.Bio.trendOf(r.marker.id);
+            return html`
+              <button class="resrow" data-act="open-marker" data-id="${r.marker.id}">
+                <span class="resrow__dot resrow__dot--${r.status.tone}" aria-hidden="true"></span>
+                <span class="resrow__name">
+                  <b>${r.marker.name}</b>
+                  <span class="resrow__panel">${SP.PANEL_BY_ID[r.marker.panel]
+                    ? SP.PANEL_BY_ID[r.marker.panel].name.replace(/\s*paneli$/i, '') : ''}</span>
+                </span>
+                <span class="resrow__val num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
+                <span class="resrow__bar">${when(r.ref,
+                  () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit, { bare:true })))}</span>
+                <span class="resrow__status">${K.Badge({ label:r.status.label, tone:r.status.tone })}</span>
+                <span class="resrow__trend tiny dim">${when(tr.ok,
+                  () => html`${raw(UI.trend(tr.dir))}`)} ${r.at ? U.fmtShort(r.at) : ''}</span>
+              </button>`;
+          })}</div>`)}`,
+      }),
+
+      K.Entry({
+        label:'Dağılım', meta:'durum sayımı',
+        note:'Referans aralığı laboratuvarın normal saydığı yer; hedef bandı '
+          + 'ise bu sistemin istediği daha dar yer. İkisi aynı şey değildir.',
+        body:html`<div class="pair">
+          <div>
+            <div class="sidestat"><span class="sidestat__v">${s.measured}</span>
+              <span class="sidestat__k">ölçüldü</span></div>
+            <div class="sidestat"><span class="sidestat__v">${s.out}</span>
+              <span class="sidestat__k">referans dışı</span></div>
           </div>
-          <div class="sect__actions">
-            ${K.Input({ id:'lab-q', value:S.ui.labQuery || '', placeholder:'Ölçüm ara…',
-              aria:'Ölçüm ara', change:'lab-query', debounce:200 })}
+          <div>
+            <div class="sidestat"><span class="sidestat__v">${s.offTarget}</span>
+              <span class="sidestat__k">hedef dışı</span></div>
+            <div class="sidestat"><span class="sidestat__v">${S.labs.length}</span>
+              <span class="sidestat__k">test oturumu</span></div>
           </div>
-        </div>
+        </div>`,
+      }),
 
-        ${when(panelFilter(), () => html`<div class="mb-12">${raw(String(panelFilter()))}</div>`)}
-
-        ${when(!rows.length, () => K.Notice({ tone:'info',
-          body:'Bu süzgeçle eşleşen ölçüm yok.' }))}
-
-        ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
-          const tr = SP.Bio.trendOf(r.marker.id);
-          return html`
-            <button class="resrow" data-act="open-marker" data-id="${r.marker.id}">
-              <span class="resrow__dot resrow__dot--${r.status.tone}" aria-hidden="true"></span>
-              <span class="resrow__name">
-                <b>${r.marker.name}</b>
-                <span class="resrow__panel">${SP.PANEL_BY_ID[r.marker.panel]
-                  ? SP.PANEL_BY_ID[r.marker.panel].name.replace(/\s*paneli$/i, '') : ''}</span>
-              </span>
-              <span class="resrow__val num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
-              <span class="resrow__bar">${when(r.ref,
-                () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit, { bare:true })))}</span>
-              <span class="resrow__status">${K.Badge({ label:r.status.label, tone:r.status.tone })}</span>
-              <span class="resrow__trend tiny dim">${when(tr.ok,
-                () => html`${raw(UI.trend(tr.dir))}`)} ${r.at ? U.fmtShort(r.at) : ''}</span>
-            </button>`;
-        })}</div>`)}
-
-        ${when(missing.length, () => html`<div class="mt-16">${K.Collapsible({
-          title:'Hiç ölçülmemiş', meta:missing.length + ' ölçüm',
-          act:'toggle-empty', open:!!S.ui.labShowEmpty,
-          body:html`<p class="small muted mt-2">Bu ölçümler için hiç değer girilmedi.
-              Eksik veri sıfır sayılmaz; hesaplarda yok kabul edilir.</p>
-            <div class="chips mt-10">${map(missing, b => html`
-              <span class="chip chip--muted">${b.name}</span>`)}</div>` })}</div>`)}
-      </section>`;
+      when(missing.length, () => K.Entry({
+        label:'Ölçülmemiş', meta:missing.length + ' ölçüm',
+        note:'Bu ölçümler için hiç değer girilmedi. Eksik veri sıfır sayılmaz; '
+          + 'hesaplarda yok kabul edilir.',
+        body:html`<div class="chips">${map(missing, b => html`
+          <span class="chip chip--muted">${b.name}</span>`)}</div>`,
+      })),
+    ]);
   }
 
   /* ---------------------------------------------------------- test gir
@@ -165,60 +186,54 @@ SP.Screens.labs = (function(){
 
     const filled = Object.keys(draft.values).length;
 
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Giriş</div>
-            <h2>Kapsamlı test girişi</h2>
-            <p>Elindeki rapordaki bütün değerleri tek seferde yaz. Boş bıraktığın
-              satır yok sayılır — sıfır olarak kaydedilmez. Raporun metni varsa
-              yapıştırmak daha hızlıdır.</p>
-          </div>
-          <div class="sect__actions">
-            ${K.Button({ label:'Rapor yapıştır', icon:'flask', size:'sm', tone:'primary',
-              act:'open-paste' })}
-          </div>
-        </div>
-
-        <div class="entryhead">
+    return K.Ledger([
+      K.Entry({
+        label:'Oturum', meta:'tarih ve laboratuvar',
+        note:'Aynı tarihe ikinci kez girilen değerler o oturumun üstüne yazılır.',
+        action:K.Button({ label:'Rapor yapıştır', icon:'flask', tone:'primary',
+          act:'open-paste' }),
+        body:html`<div class="pair">
           ${K.Field({ label:'Test tarihi',
             input:K.Input({ id:'entry-date', type:'date', value:draft.date, change:'entry-date' }) })}
           ${K.Field({ label:'Laboratuvar', hint:'isteğe bağlı',
             input:K.Input({ id:'entry-lab', value:draft.lab, placeholder:'Hangi laboratuvar?',
               change:'entry-lab' }) })}
-          ${K.Field({ label:'Ölçüm ara',
-            input:K.Input({ id:'entry-q', value:S.ui.labQuery || '', placeholder:'ferritin, b12, tsh…',
-              change:'lab-query', debounce:200 }) })}
-        </div>
+        </div>`,
+      }),
 
-        ${when(!list.length, () => K.Notice({ tone:'info', class:'mt-12',
-          body:'Bu adla bir ölçüm bulunamadı.' }))}
-
-        <div class="entrygrid mt-16">${map(list, b => {
-          const has = draft.values[b.id] != null;
-          const lastv = M.latestOf(b.id);
-          return html`
-            <label class="${cls('entryrow', has && 'is-filled')}">
-              <span class="entryrow__name">${b.name}
-                <span class="entryrow__unit">${b.unit}</span></span>
-              <input class="entryrow__in num" type="number" step="any" inputmode="decimal"
-                id="e-${b.id}" data-change="entry-val" data-id="${b.id}"
-                value="${has ? draft.values[b.id] : ''}"
-                placeholder="${lastv ? U.fmtNum(lastv.v) : '—'}"
-                aria-label="${b.name + ' (' + b.unit + ')'}"/>
-            </label>`;
-        })}</div>
-
-        <div class="entrybar">
-          <span class="small">${filled ? filled + ' değer yazıldı' : 'Henüz değer yazılmadı'}
-            ${when(filled, () => html`<span class="dim"> · kaydedilene kadar hiçbir şey yazılmaz</span>`)}</span>
-          <span class="row-sm">
-            ${when(filled, () => K.Button({ label:'Temizle', size:'sm', act:'entry-clear' }))}
-            ${K.Button({ label:'Testi kaydet', tone:'primary', act:'entry-save', disabled:!filled })}
-          </span>
-        </div>
-      </section>`;
+      K.Entry({
+        label:'Değerler', meta:list.length + ' satır',
+        note:'Elindeki rapordaki bütün değerleri tek seferde yaz. Boş bıraktığın '
+          + 'satır yok sayılır — sıfır olarak kaydedilmez.',
+        action:K.Input({ id:'entry-q', value:S.ui.labQuery || '',
+          placeholder:'Ölçüm ara…', change:'lab-query', debounce:200 }),
+        body:html`
+          ${when(!list.length, () => K.Notice({ tone:'info',
+            body:'Bu adla bir ölçüm bulunamadı.' }))}
+          <div class="entrygrid">${map(list, b => {
+            const has = draft.values[b.id] != null;
+            const lastv = M.latestOf(b.id);
+            return html`
+              <label class="${cls('entryrow', has && 'is-filled')}">
+                <span class="entryrow__name">${b.name}
+                  <span class="entryrow__unit">${b.unit}</span></span>
+                <input class="entryrow__in num" type="number" step="any" inputmode="decimal"
+                  id="e-${b.id}" data-change="entry-val" data-id="${b.id}"
+                  value="${has ? draft.values[b.id] : ''}"
+                  placeholder="${lastv ? U.fmtNum(lastv.v) : '—'}"
+                  aria-label="${b.name + ' (' + b.unit + ')'}"/>
+              </label>`;
+          })}</div>
+          <div class="entrybar">
+            <span class="small">${filled ? filled + ' değer yazıldı' : 'Henüz değer yazılmadı'}
+              ${when(filled, () => html`<span class="dim"> · kaydedilene kadar hiçbir şey yazılmaz</span>`)}</span>
+            <span class="row-sm">
+              ${when(filled, () => K.Button({ label:'Temizle', size:'sm', act:'entry-clear' }))}
+              ${K.Button({ label:'Testi kaydet', tone:'primary', act:'entry-save', disabled:!filled })}
+            </span>
+          </div>`,
+      }),
+    ]);
   }
 
   /* ------------------------------------------------------------- eğilim */
@@ -235,38 +250,39 @@ SP.Screens.labs = (function(){
     const options = (measured.length ? measured : SP.BIOMARKERS)
       .map(x => ({ value:x.id, label:x.name }));
 
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Tek ölçüm</div>
-            <h2>${b ? b.name : 'Eğilim'}</h2>
-            <p>Bir ölçüm başkasıyla değil, KENDİ geçmişiyle kıyaslanır.
-              Yön en az ${SP.Bio.MIN_POINTS} ölçümle söylenir.</p>
-          </div>
-          <div class="sect__actions">${K.Select({ value:id, change:'pick-marker', options })}</div>
-        </div>
-
-        ${when(series.length < 2, () => K.Notice({ tone:'info',
-          body:'Grafik için en az iki ölçüm gerekir. Şu an ' + series.length + ' var.' }))}
-        ${when(series.length >= 2, () => html`
-          ${K.Card({ body:html`
-            ${raw(UI.lineChart([{ data:series.map(s => s.v) }], {
-              labels:series.map(s => U.fmtShort(s.date)),
+    return K.Ledger([
+      K.Entry({
+        wide:true,
+        label:b ? b.name : 'Eğilim',
+        meta:series.length + ' ölçüm',
+        note:'Bir ölçüm başkasıyla değil, KENDİ geçmişiyle kıyaslanır. '
+          + 'Yön en az ' + SP.Bio.MIN_POINTS + ' ölçümle söylenir.',
+        action:K.Select({ value:id, change:'pick-marker', options }),
+        body:html`
+          ${when(series.length < 2, () => K.Notice({ tone:'info',
+            body:'Grafik için en az iki ölçüm gerekir. Şu an ' + series.length + ' var.' }))}
+          ${when(series.length >= 2, () => html`
+            ${raw(UI.lineChart([{ data:series.map(s2 => s2.v) }], {
+              labels:series.map(s2 => U.fmtShort(s2.date)),
               band:r && r.optimal ? r.optimal : (r ? r.ref : null),
-              height:220,
+              height:230,
             }))}
-            <div class="cols-3 mt-16">
-              ${K.Stat({ label:'Son değer', value:U.fmtNum(series[series.length - 1].v), unit:b.unit })}
-              ${K.Stat({ label:'Ölçüm sayısı', value:String(series.length) })}
-              ${K.Stat({ label:'90 günde', value:tr.ok ? (tr.pct > 0 ? '+' : '') + U.fmtNet(tr.pct) : '—', unit:'%' })}
+            <div class="pair">
+              <div>
+                <div class="sidestat"><span class="sidestat__v">${U.fmtNum(series[series.length - 1].v)}<small>${b.unit}</small></span>
+                  <span class="sidestat__k">son değer</span></div>
+              </div>
+              <div>
+                <div class="sidestat"><span class="sidestat__v">${tr.ok ? (tr.pct > 0 ? '+' : '') + U.fmtNet(tr.pct) : '—'}<small>%</small></span>
+                  <span class="sidestat__k">90 günde</span></div>
+              </div>
             </div>
-            ${K.Notice({ tone:vd.tone === 'muted' ? 'info' : vd.tone, class:'mt-16',
+            ${K.Notice({ tone:vd.tone === 'muted' ? 'info' : vd.tone,
               body:tr.ok ? vd.text : tr.note })}
-            ${when(r && r.ref, () => html`<div class="mt-16">
-              ${raw(UI.rangeBar(series[series.length - 1].v, r.ref, r.optimal, b.unit))}</div>`)}
-            <p class="small muted mt-10">${b.note}</p>` })}`)}
-      </section>`;
+            ${when(r && r.ref, () => raw(UI.rangeBar(series[series.length - 1].v, r.ref, r.optimal, b.unit)))}
+            <p class="small muted">${b.note}</p>`)}`,
+      }),
+    ]);
   }
 
   function markerSheetBody(id){
@@ -307,32 +323,29 @@ SP.Screens.labs = (function(){
 
   function historyView(){
     if(!S.labs.length){
-      return html`<section class="sect">${K.Card({
-        body:P.empty('Henüz test girilmedi.', 'Rapor yapıştır', 'open-paste') })}</section>`;
+      return K.Ledger([K.Entry({
+        label:'Geçmiş', meta:'kayıt yok',
+        action:K.Button({ label:'Rapor yapıştır', tone:'primary', act:'open-paste' }),
+        body:P.empty('Henüz test girilmedi.'),
+      })]);
     }
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Kayıt</div>
-            <h2>Test geçmişi</h2>
-            <p>Her satır bir test oturumudur. Aynı güne ikinci kez girilen
-              değerler o oturumun üstüne yazılır.</p>
+    return K.Ledger([K.Entry({
+      label:'Geçmiş', meta:S.labs.length + ' oturum',
+      note:'Her satır bir test oturumudur. Aynı güne ikinci kez girilen '
+        + 'değerler o oturumun üstüne yazılır.',
+      body:html`<div class="list">${map(S.labs.slice().reverse(), l => html`
+        <div class="listitem">
+          <div class="grow">
+            <b class="small">${U.fmtDate(l.date)}</b>
+            ${when(l.lab, () => html`<span class="tiny dim"> · ${l.lab}</span>`)}
+            <div class="tiny dim">${Object.keys(l.values).length} değer
+              · ${l.source === 'paste' ? 'yapıştırıldı' : 'elle girildi'}</div>
           </div>
-        </div>
-        <div class="list">${map(S.labs.slice().reverse(), l => html`
-          <div class="listitem">
-            <div class="grow">
-              <b class="small">${U.fmtDate(l.date)}</b>
-              ${when(l.lab, () => html`<span class="tiny dim"> · ${l.lab}</span>`)}
-              <div class="tiny dim">${Object.keys(l.values).length} değer
-                · ${l.source === 'paste' ? 'yapıştırıldı' : 'elle girildi'}</div>
-            </div>
-            ${K.Button({ label:'Aç', size:'sm', act:'open-lab', data:{ 'data-id':l.id } })}
-            ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
-              act:'del-lab', data:{ 'data-id':l.id } })}
-          </div>`)}</div>
-      </section>`;
+          ${K.Button({ label:'Aç', size:'sm', act:'open-lab', data:{ 'data-id':l.id } })}
+          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
+            act:'del-lab', data:{ 'data-id':l.id } })}
+        </div>`)}</div>`,
+    })]);
   }
 
   function labSheetBody(l){

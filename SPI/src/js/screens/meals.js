@@ -29,10 +29,14 @@ SP.Screens.meals = (function(){
 
   /* ---------------------------------------------------------- giris */
 
-  function quickCard(){
-    return K.Card({
-      title:'Öğün ekle', hint:'portion',
-      sub:'Yaz, Enter\'a bas',
+  function quickEntry(){
+    return K.Entry({
+      label:'Öğün ekle', hint:'portion',
+      meta:'tek satır, tek Enter',
+      note:'Ev ölçüsü tanınır: tabak · kase · dilim · bardak · avuç · kaşık. '
+        + 'Tarttıysan «150 g tavuk göğsü» yaz.',
+      action:html`${K.Button({ label:'Besin ara', act:'open-search' })}
+        ${K.Button({ label:'Fotoğraftan', icon:'camera', act:'open-photo' })}`,
       body:html`
         <div class="quick">
           ${K.Select({ id:'meal-slot', value:S.ui.mealSlot,
@@ -41,11 +45,7 @@ SP.Screens.meals = (function(){
           ${K.Input({ id:'meal-text', placeholder:'1 tabak etli kuru fasulye, 2 dilim ekmek, 1 bardak ayran',
             aria:'Öğün metni' })}
           ${K.Button({ label:'Ekle', tone:'primary', act:'add-meal' })}
-          <span class="quick__hint">Ev ölçüsü tanınır: tabak · kase · dilim · bardak · avuç · kaşık.
-            Tarttıysan «150 g tavuk göğsü» yaz.</span>
         </div>`,
-      foot:html`${K.Button({ label:'Besin ara', size:'sm', act:'open-search' })}
-        ${K.Button({ label:'Fotoğraftan ekle', size:'sm', icon:'camera', act:'open-photo' })}`,
     });
   }
 
@@ -559,41 +559,24 @@ SP.Screens.meals = (function(){
 
   async function render(){
     const tab = S.ui.mealTab || 'gunluk';
+    const head = html`<div class="mb-8">${tabs()}</div>`;
 
     if(tab === 'oneri'){
-      return String(html`
-        <div class="mb-20">${tabs()}</div>
-        ${adviceView()}
-        <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`);
+      return String(html`${head}${K.Ledger(() => [
+        energyCard(), labLinkCard(), suggestCard(),
+      ])}
+      <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`);
     }
 
     if(tab === 'deger'){
-      return String(html`
-        <div class="mb-20">${tabs()}</div>
-        <section class="sect">
-          <div class="sect__h"><div class="sect__ht">
-            <div class="sect__eyebrow">Ölçü</div>
-            <h2>Besin değeri</h2>
-            <p>Alınan ve EMİLEN miktar ayrı yazılır. Emilim öğün içindeki
-              artıran ve bozan etkilerden hesaplanır.</p>
-          </div></div>
-          <div class="grid">
-            <div class="span-7"><div class="stack">${[microCard()]}</div></div>
-            <div class="span-5"><div class="stack">${[gapCard()]}</div></div>
-          </div>
-        </section>
-        <div class="mt-24">${raw(UI.rail(['bioavailability', 'nutri-gap']))}</div>`);
+      return String(html`${head}${K.Ledger(() => [microCard(), gapCard()])}
+      <div class="mt-24">${raw(UI.rail(['bioavailability', 'nutri-gap']))}</div>`);
     }
 
-    return String(html`
-      <div class="mb-20">${tabs()}</div>
-      <section class="sect">
-        <div class="grid">
-          <div class="span-7"><div class="stack">${[quickCard(), dayCard()]}</div></div>
-          <div class="span-5"><div class="stack">${[targetCard()]}</div></div>
-        </div>
-      </section>
-      <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`);
+    return String(html`${head}${K.Ledger(() => [
+      quickEntry(), dayCard(), targetCard(),
+    ])}
+    <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`);
   }
 
   /* Metinden gelen kalemleri secili ogune yazar. */

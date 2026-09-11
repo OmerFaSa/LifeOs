@@ -51,14 +51,26 @@
      kimlik taşımaz. */
   --primary:#1F4E3D;       /* AA: beyaz üzerinde 8.9:1 */
   --primary-hover:#173E30;
-  --primary-soft:#E4EBE7;
   --primary-ink:#FFFFFF;
   --accent:#8A5A18;        /* AA: beyaz üzerinde 5.7:1 */
-  --accent-soft:#F6EDE0;
+
+  /* Durum renkleri PALETE GÖRE DEĞİŞMEZ. Bir tahlil sonucunun rengi
+     hangi tema seçildiğine göre değişemez — sağlık verisinde bu kabul
+     edilemez. */
   --danger:#9B3327;        /* AA: beyaz üzerinde 6.6:1 */
-  --danger-soft:#F8E7E3;
   --info:#3A5468;          /* AA: beyaz üzerinde 8.0:1 */
-  --info-soft:#E9EDF0;
+
+  /* ---- yumuşak zeminler: TÜRETİLİR ----
+
+     Bir uyarı kutusunun zemini, rengin KENDİ yüzeyine karışmış hâlidir.
+     Elle yazıldığında her palette ayrıca tanımlanması gerekiyordu ve
+     unutuluyordu: bordo temada bilgi kutuları varsayılan paletin soğuk
+     gri-mavisini alıyor, sıcak bir sayfada yabancı bir beyaz gibi
+     duruyordu. Türetince her palet kendi doğru tonunu alıyor. */
+  --primary-soft:color-mix(in oklab, var(--primary) 13%, var(--surface));
+  --accent-soft:color-mix(in oklab, var(--accent) 13%, var(--surface));
+  --danger-soft:color-mix(in oklab, var(--danger) 12%, var(--surface));
+  --info-soft:color-mix(in oklab, var(--info) 11%, var(--surface));
 
   /* ---- mürekkep ----
      Sayfayı sonlandıran koyu bant ve marka işareti. Saf siyah değil:
@@ -151,7 +163,12 @@
   --sidebar-w:236px;
   --nav-h:47px;   /* yalnız numaralı bölüm şeridi yapışır */
   --topbar-h:60px;
-  --content-max:1200px;
+  --content-max:1180px;
+
+  /* Defter düzeninin künye sütunu. Ölçü sabittir: sayfadan sayfaya
+     kayan bir sol sütun, defter hissini bozar. */
+  --gutter:196px;
+  --gutter-gap:52px;
 
   /* ================= KOYU PALET — tek tanım =================
      Buradaki değerler yalnızca aşağıdaki iki blokta kullanılır. */
@@ -169,14 +186,10 @@
 
   --d-primary:#7FBFA0;
   --d-primary-hover:#95CFB2;
-  --d-primary-soft:#1B2B23;
   --d-primary-ink:#0E1611;
   --d-accent:#D6A961;
-  --d-accent-soft:#2B2415;
   --d-danger:#E28C7C;
-  --d-danger-soft:#2E1B17;
   --d-info:#8FADC2;
-  --d-info-soft:#1A2126;
 
   --d-border:#2B2B25;
   --d-border-strong:#3B3B33;
@@ -214,14 +227,10 @@
     --text-3:var(--d-text-3);
     --primary:var(--d-primary);
     --primary-hover:var(--d-primary-hover);
-    --primary-soft:var(--d-primary-soft);
     --primary-ink:var(--d-primary-ink);
     --accent:var(--d-accent);
-    --accent-soft:var(--d-accent-soft);
     --danger:var(--d-danger);
-    --danger-soft:var(--d-danger-soft);
     --info:var(--d-info);
-    --info-soft:var(--d-info-soft);
     --border:var(--d-border);
     --border-strong:var(--d-border-strong);
     --rule:var(--d-rule);
@@ -260,14 +269,10 @@
   --text-3:var(--d-text-3);
   --primary:var(--d-primary);
   --primary-hover:var(--d-primary-hover);
-  --primary-soft:var(--d-primary-soft);
   --primary-ink:var(--d-primary-ink);
   --accent:var(--d-accent);
-  --accent-soft:var(--d-accent-soft);
   --danger:var(--d-danger);
-  --danger-soft:var(--d-danger-soft);
   --info:var(--d-info);
-  --info-soft:var(--d-info-soft);
   --border:var(--d-border);
   --border-strong:var(--d-border-strong);
   --rule:var(--d-rule);
@@ -322,8 +327,8 @@
   --bg:#F6F7F8; --surface:#FFFFFF; --surface-2:#EEF0F2; --surface-3:#E3E6E9;
   --sidebar:#FFFFFF; --sidebar-active:#E4E8EC;
   --text:#191C1F; --text-2:#5C646C; --text-3:#666E76;  /* AA: 4.6:1 */
-  --primary:#3D4E5C; --primary-hover:#31404C; --primary-soft:#E4E8EC; --primary-ink:#FFFFFF;
-  --accent:#8A6A20; --accent-soft:#F5EEDD;
+  --primary:#3D4E5C; --primary-hover:#31404C; --primary-ink:#FFFFFF;
+  --accent:#8A6A20;
   --border:#E2E5E8; --border-strong:#C8CDD2;
   --macro-protein:#3D4E5C; --c-band:#E1E6EA;
   --scrim:rgba(16,19,22,.5);
@@ -333,8 +338,8 @@
     --bg:#111315; --surface:#191C1F; --surface-2:#202428; --surface-3:#272C31;
     --sidebar:#141719; --sidebar-active:#242C33;
     --text:#EDEFF1; --text-2:#AAB2B9; --text-3:#8A939B;
-    --primary:#8FA9BD; --primary-hover:#A3BACD; --primary-soft:#1E272E; --primary-ink:#0D1114;
-    --accent:#D6AE68; --accent-soft:#2C2618;
+    --primary:#8FA9BD; --primary-hover:#A3BACD; --primary-ink:#0D1114;
+    --accent:#D6AE68;
     --border:#2F343A; --border-strong:#3E454C;
     --macro-protein:#8FA9BD; --c-band:#232C33;
     --scrim:rgba(0,0,0,.62);
@@ -344,8 +349,8 @@
   --bg:#111315; --surface:#191C1F; --surface-2:#202428; --surface-3:#272C31;
   --sidebar:#141719; --sidebar-active:#242C33;
   --text:#EDEFF1; --text-2:#AAB2B9; --text-3:#8A939B;
-  --primary:#8FA9BD; --primary-hover:#A3BACD; --primary-soft:#1E272E; --primary-ink:#0D1114;
-  --accent:#D6AE68; --accent-soft:#2C2618;
+  --primary:#8FA9BD; --primary-hover:#A3BACD; --primary-ink:#0D1114;
+  --accent:#D6AE68;
   --border:#2F343A; --border-strong:#3E454C;
   --macro-protein:#8FA9BD; --c-band:#232C33;
   --scrim:rgba(0,0,0,.62);
@@ -356,9 +361,9 @@
   --bg:#F9F7F7; --surface:#FFFFFF; --surface-2:#F2EDEE; --surface-3:#E8E1E2;
   --sidebar:#FFFFFF; --sidebar-active:#F0E3E5;
   --text:#1F1A1B; --text-2:#655A5C; --text-3:#75696B;
-  --primary:#7D2E3E; --primary-hover:#6A2634; --primary-soft:#F3E4E7; --primary-ink:#FFFFFF;
-  --accent:#8A6320; --accent-soft:#F6EEDE;
-  --info:#3F566E; --info-soft:#E7EBF0;
+  --primary:#7D2E3E; --primary-hover:#6A2634; --primary-ink:#FFFFFF;
+  --accent:#8A6320;
+  --info:#3F566E;
   --border:#E7E0E1; --border-strong:#D0C5C7;
   --macro-protein:#7D2E3E; --c-band:#EFE0E3;
   --scrim:rgba(26,18,20,.5);
@@ -368,8 +373,8 @@
     --bg:#151112; --surface:#1E1819; --surface-2:#261F21; --surface-3:#2E2528;
     --sidebar:#181314; --sidebar-active:#332227;
     --text:#F2EDEE; --text-2:#B7A9AC; --text-3:#968A8C;
-    --primary:#DE8D9D; --primary-hover:#E9A2B0; --primary-soft:#2E1D22; --primary-ink:#150E10;
-    --accent:#D9AE6A; --accent-soft:#2C2417;
+    --primary:#DE8D9D; --primary-hover:#E9A2B0; --primary-ink:#150E10;
+    --accent:#D9AE6A;
     --border:#362C2E; --border-strong:#473A3D;
     --macro-protein:#DE8D9D; --c-band:#2E2025;
     --scrim:rgba(0,0,0,.64);
@@ -379,8 +384,8 @@
   --bg:#151112; --surface:#1E1819; --surface-2:#261F21; --surface-3:#2E2528;
   --sidebar:#181314; --sidebar-active:#332227;
   --text:#F2EDEE; --text-2:#B7A9AC; --text-3:#968A8C;
-  --primary:#DE8D9D; --primary-hover:#E9A2B0; --primary-soft:#2E1D22; --primary-ink:#150E10;
-  --accent:#D9AE6A; --accent-soft:#2C2417;
+  --primary:#DE8D9D; --primary-hover:#E9A2B0; --primary-ink:#150E10;
+  --accent:#D9AE6A;
   --border:#362C2E; --border-strong:#473A3D;
   --macro-protein:#DE8D9D; --c-band:#2E2025;
   --scrim:rgba(0,0,0,.64);
@@ -391,8 +396,8 @@
   --bg:#F8F7FA; --surface:#FFFFFF; --surface-2:#EFEDF4; --surface-3:#E5E2EE;
   --sidebar:#FFFFFF; --sidebar-active:#E8E4F3;
   --text:#1B1922; --text-2:#5D5870; --text-3:#6E6880;
-  --primary:#54408F; --primary-hover:#463579; --primary-soft:#E8E4F3; --primary-ink:#FFFFFF;
-  --accent:#8A6320; --accent-soft:#F6EEDE;
+  --primary:#54408F; --primary-hover:#463579; --primary-ink:#FFFFFF;
+  --accent:#8A6320;
   --border:#E4E1EC; --border-strong:#C9C4D8;
   --macro-protein:#54408F; --c-band:#E3DEF2;
   --scrim:rgba(18,16,26,.5);
@@ -402,8 +407,8 @@
     --bg:#121118; --surface:#1A1822; --surface-2:#211E2B; --surface-3:#292535;
     --sidebar:#151320; --sidebar-active:#2A2440;
     --text:#EFEDF5; --text-2:#ABA5BC; --text-3:#8C869C;
-    --primary:#A99BE0; --primary-hover:#BBAEEC; --primary-soft:#231E38; --primary-ink:#100E18;
-    --accent:#D6AE68; --accent-soft:#2C2618;
+    --primary:#A99BE0; --primary-hover:#BBAEEC; --primary-ink:#100E18;
+    --accent:#D6AE68;
     --border:#302B3E; --border-strong:#413A52;
     --macro-protein:#A99BE0; --c-band:#262039;
     --scrim:rgba(0,0,0,.64);
@@ -413,8 +418,8 @@
   --bg:#121118; --surface:#1A1822; --surface-2:#211E2B; --surface-3:#292535;
   --sidebar:#151320; --sidebar-active:#2A2440;
   --text:#EFEDF5; --text-2:#ABA5BC; --text-3:#8C869C;
-  --primary:#A99BE0; --primary-hover:#BBAEEC; --primary-soft:#231E38; --primary-ink:#100E18;
-  --accent:#D6AE68; --accent-soft:#2C2618;
+  --primary:#A99BE0; --primary-hover:#BBAEEC; --primary-ink:#100E18;
+  --accent:#D6AE68;
   --border:#302B3E; --border-strong:#413A52;
   --macro-protein:#A99BE0; --c-band:#262039;
   --scrim:rgba(0,0,0,.64);
@@ -425,8 +430,8 @@
   --bg:#F5F8FA; --surface:#FFFFFF; --surface-2:#EAF0F5; --surface-3:#DFE8EF;
   --sidebar:#FFFFFF; --sidebar-active:#DFEAF3;
   --text:#161E24; --text-2:#556570; --text-3:#62717B;  /* AA: 4.6:1 */
-  --primary:#1F5D80; --primary-hover:#194E6B; --primary-soft:#DFEAF3; --primary-ink:#FFFFFF;
-  --accent:#9A6714; --accent-soft:#F7EDDD;
+  --primary:#1F5D80; --primary-hover:#194E6B; --primary-ink:#FFFFFF;
+  --accent:#9A6714;
   --border:#DEE6EC; --border-strong:#C1CDD6;
   --macro-protein:#1F5D80; --c-band:#DAE7F0;
   --scrim:rgba(12,20,26,.5);
@@ -436,8 +441,8 @@
     --bg:#0F1418; --surface:#171D22; --surface-2:#1E252B; --surface-3:#252D34;
     --sidebar:#121820; --sidebar-active:#1E2F3C;
     --text:#ECF1F5; --text-2:#A6B4BE; --text-3:#87949E;
-    --primary:#7CB8DA; --primary-hover:#93C7E5; --primary-soft:#152833; --primary-ink:#0B1116;
-    --accent:#D6AE68; --accent-soft:#2C2618;
+    --primary:#7CB8DA; --primary-hover:#93C7E5; --primary-ink:#0B1116;
+    --accent:#D6AE68;
     --border:#2C343B; --border-strong:#3B454D;
     --macro-protein:#7CB8DA; --c-band:#1B2C37;
     --scrim:rgba(0,0,0,.62);
@@ -447,8 +452,8 @@
   --bg:#0F1418; --surface:#171D22; --surface-2:#1E252B; --surface-3:#252D34;
   --sidebar:#121820; --sidebar-active:#1E2F3C;
   --text:#ECF1F5; --text-2:#A6B4BE; --text-3:#87949E;
-  --primary:#7CB8DA; --primary-hover:#93C7E5; --primary-soft:#152833; --primary-ink:#0B1116;
-  --accent:#D6AE68; --accent-soft:#2C2618;
+  --primary:#7CB8DA; --primary-hover:#93C7E5; --primary-ink:#0B1116;
+  --accent:#D6AE68;
   --border:#2C343B; --border-strong:#3B454D;
   --macro-protein:#7CB8DA; --c-band:#1B2C37;
   --scrim:rgba(0,0,0,.62);
@@ -459,8 +464,8 @@
   --bg:#F7F8F6; --surface:#FFFFFF; --surface-2:#EFF2ED; --surface-3:#E5EAE4;
   --sidebar:#FFFFFF; --sidebar-active:#E4EDE8;
   --text:#18201B; --text-2:#5A665E; --text-3:#69756D;
-  --primary:#2F6B4F; --primary-hover:#26583F; --primary-soft:#E4EDE8; --primary-ink:#FFFFFF;
-  --accent:#9A6714; --accent-soft:#F7EDDD;
+  --primary:#2F6B4F; --primary-hover:#26583F; --primary-ink:#FFFFFF;
+  --accent:#9A6714;
   --border:#E1E6E1; --border-strong:#C9D2CB;
   --macro-protein:#2F6B4F; --c-band:#DCE8E1;
   --scrim:rgba(15,20,17,.5);
@@ -470,8 +475,8 @@
     --bg:#111412; --surface:#191D1A; --surface-2:#20241F; --surface-3:#272C26;
     --sidebar:#141815; --sidebar-active:#22302A;
     --text:#EDF2EE; --text-2:#AAB5AD; --text-3:#8B968D;
-    --primary:#7FBE9A; --primary-hover:#93CDAB; --primary-soft:#1E2C24; --primary-ink:#0D1210;
-    --accent:#DDAE68; --accent-soft:#2E2618;
+    --primary:#7FBE9A; --primary-hover:#93CDAB; --primary-ink:#0D1210;
+    --accent:#DDAE68;
     --border:#2C332E; --border-strong:#3F4941;
     --macro-protein:#7FBE9A; --c-band:#25342C;
     --scrim:rgba(0,0,0,.62);
@@ -481,8 +486,8 @@
   --bg:#111412; --surface:#191D1A; --surface-2:#20241F; --surface-3:#272C26;
   --sidebar:#141815; --sidebar-active:#22302A;
   --text:#EDF2EE; --text-2:#AAB5AD; --text-3:#8B968D;
-  --primary:#7FBE9A; --primary-hover:#93CDAB; --primary-soft:#1E2C24; --primary-ink:#0D1210;
-  --accent:#DDAE68; --accent-soft:#2E2618;
+  --primary:#7FBE9A; --primary-hover:#93CDAB; --primary-ink:#0D1210;
+  --accent:#DDAE68;
   --border:#2C332E; --border-strong:#3F4941;
   --macro-protein:#7FBE9A; --c-band:#25342C;
   --scrim:rgba(0,0,0,.62);
@@ -495,10 +500,10 @@
   --bg:#F5F6F8; --surface:#FFFFFF; --surface-2:#F0F1F5; --surface-3:#E7E9EF;
   --sidebar:#FFFFFF; --sidebar-active:#E9EAF7;
   --text:#14161D; --text-2:#575D6C; --text-3:#6B7180;
-  --primary:#3F3FA0; --primary-hover:#34348A; --primary-soft:#E9EAF7; --primary-ink:#FFFFFF;
-  --accent:#96640F; --accent-soft:#F8EFDE;
-  --danger:#A63838; --danger-soft:#FAE7E7;
-  --info:#3A5871; --info-soft:#E8EDF2;
+  --primary:#3F3FA0; --primary-hover:#34348A; --primary-ink:#FFFFFF;
+  --accent:#96640F;
+  --danger:#A63838;
+  --info:#3A5871;
   --border:#E4E6EC; --border-strong:#CBCFDA;
   --macro-protein:#3F3FA0; --macro-fat:#96640F; --macro-carb:#3A5871;
   --agent-patron:#3F3FA0; --agent-move:#2C6B52;
@@ -510,10 +515,10 @@
     --bg:#0D0F14; --surface:#15171D; --surface-2:#1B1E25; --surface-3:#23262F;
     --sidebar:#111319; --sidebar-active:#242545;
     --text:#ECEEF4; --text-2:#A9AEBD; --text-3:#878C9C;
-    --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-soft:#212244; --primary-ink:#0C0D14;
-    --accent:#E0B46E; --accent-soft:#2C2517;
-    --danger:#EA8C8C; --danger-soft:#2E1C1C;
-    --info:#8DAECA; --info-soft:#182129;
+    --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-ink:#0C0D14;
+    --accent:#E0B46E;
+    --danger:#EA8C8C;
+    --info:#8DAECA;
     --border:#252932; --border-strong:#343945;
     --macro-protein:#9EA0EE; --macro-fat:#E0B46E; --macro-carb:#8DAECA;
     --agent-patron:#9EA0EE; --agent-move:#8FD0B0;
@@ -525,10 +530,10 @@
   --bg:#0D0F14; --surface:#15171D; --surface-2:#1B1E25; --surface-3:#23262F;
   --sidebar:#111319; --sidebar-active:#242545;
   --text:#ECEEF4; --text-2:#A9AEBD; --text-3:#878C9C;
-  --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-soft:#212244; --primary-ink:#0C0D14;
-  --accent:#E0B46E; --accent-soft:#2C2517;
-  --danger:#EA8C8C; --danger-soft:#2E1C1C;
-  --info:#8DAECA; --info-soft:#182129;
+  --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-ink:#0C0D14;
+  --accent:#E0B46E;
+  --danger:#EA8C8C;
+  --info:#8DAECA;
   --border:#252932; --border-strong:#343945;
   --macro-protein:#9EA0EE; --macro-fat:#E0B46E; --macro-carb:#8DAECA;
   --agent-patron:#9EA0EE; --agent-move:#8FD0B0;
@@ -1260,6 +1265,114 @@ table td, table th{
 
 @media (prefers-reduced-motion:reduce){
   .navsheet{ animation:none; }
+}
+
+/* ================= DEFTER DÜZENİ =================
+
+   Sistemin ana düzen birimi. Kart değil.
+
+   Kart dili bir yönetim panelinin dilidir: her şey eşit ağırlıkta beyaz
+   bir dikdörtgene konur, on beş dikdörtgen yan yana dizilir ve sayfa bir
+   tepsiye döner. Günde birkaç kez açılıp aylarca okunacak bir sistemde
+   bu dil yorar — çünkü hiçbir şey öne çıkmaz ve göz dinlenecek yer
+   bulamaz.
+
+   Defter satırı bunun yerine kitapların, defterlerin ve teknik belgelerin
+   yüzyıllardır kullandığı düzeni kurar: solda dar bir künye sütunu,
+   sağda içeriğin kendisi, arada ince bir çizgi.
+
+   Kutu yalnız SEÇİLEBİLİR ya da YÜZEN şeylerde kalır. Okunacak bir şey
+   kutuya konmaz. */
+
+.ledger{ display:flex; flex-direction:column; }
+
+.lrow{
+  display:grid;
+  grid-template-columns:var(--gutter) minmax(0,1fr);
+  gap:0 var(--gutter-gap);
+  padding-block:38px;
+  border-top:1px solid var(--border);
+}
+/* İlk satırın üst çizgisi yoktur: hero'nun alt çizgisi zaten oradadır ve
+   iki çizgi üst üste gelmez. */
+.ledger > .lrow:first-child{ border-top:none; padding-top:30px; }
+.ledger > .lrow:last-child{ padding-bottom:8px; }
+
+/* Künye sütunu uzun içerikte YAPIŞIR: yüz satırlık bir listeyi
+   kaydırırken hangi bölümde olduğunu unutmayasın diye. */
+.lrow__side{
+  position:sticky;
+  top:calc(var(--nav-h) + 26px);
+  align-self:start;
+  min-width:0;
+}
+.lrow__label{
+  display:flex; align-items:center; gap:6px;
+  font-size:11px; font-weight:600; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--text);
+  line-height:1.4;
+}
+.lrow__meta{
+  margin-top:7px;
+  font-size:var(--fs-sm); color:var(--text-3);
+  font-variant-numeric:tabular-nums;
+  line-height:1.5;
+}
+.lrow__note{
+  margin:12px 0 0;
+  font-size:var(--fs-sm); line-height:1.6; color:var(--text-2);
+  max-width:34ch;
+}
+.lrow__act{ margin-top:16px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.lrow__act .btn{ width:100%; justify-content:center; }
+
+.lrow__main{ min-width:0; }
+/* Defter satırının içinde ARDIŞIK bloklar arasında da ritim olsun. */
+.lrow__main > * + *{ margin-top:20px; }
+
+/* Geniş satır: künye üstte, içerik tam genişlikte. Bir grafiğin ya da
+   uzun bir cetvelin künye sütunu kadar daralması saçmadır. */
+.lrow--wide{ grid-template-columns:minmax(0,1fr); gap:18px; }
+.lrow--wide .lrow__side{
+  position:static;
+  display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+}
+.lrow--wide .lrow__meta{ margin-top:0; }
+.lrow--wide .lrow__note{ flex-basis:100%; margin-top:0; max-width:70ch; }
+.lrow--wide .lrow__act{ margin-top:0; margin-left:auto; flex-direction:row; }
+.lrow--wide .lrow__act .btn{ width:auto; }
+
+@media (max-width:900px){
+  .lrow{
+    grid-template-columns:minmax(0,1fr);
+    gap:16px;
+    padding-block:30px;
+  }
+  .lrow__side{
+    position:static;
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+  }
+  .lrow__meta{ margin-top:0; }
+  .lrow__note{ flex-basis:100%; margin-top:0; max-width:none; }
+  .lrow__act{ margin-top:0; margin-left:auto; flex-direction:row; }
+  .lrow__act .btn{ width:auto; }
+}
+
+/* İki sütunlu içerik — defterin içinde, kart olmadan. */
+.pair{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:28px 40px; }
+.pair > *{ min-width:0; }
+
+/* Künye sütununun içindeki mini ölçü listesi. */
+.sidestat{ display:flex; flex-direction:column; gap:2px; margin-top:14px; }
+.sidestat__v{
+  font-family:var(--font-display); font-size:22px; font-weight:600;
+  letter-spacing:-.025em; line-height:1; color:var(--text);
+  font-variant-numeric:tabular-nums;
+}
+.sidestat__v small{ font-size:12px; font-weight:500; color:var(--text-3); margin-left:2px; }
+.sidestat__k{
+  font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-3);
 }
 
 /* ==== css/components.css ==== */
@@ -2045,10 +2158,18 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .agentav--move  { background:var(--agent-move);   color:var(--agent-ink); }
 .agentav--money { background:var(--agent-money);  color:var(--agent-ink); }
 
-.desks{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(272px, 1fr)); }
-.desk__head{ display:flex; align-items:center; gap:11px; }
-.desk__name{ display:block; font-family:var(--font-display); font-size:var(--fs-md); line-height:1.25; }
-.desk__role{ display:block; font-size:var(--fs-xs); color:var(--text-3); }
+/* Masalar defter satırının tam genişliğinde durur. Sütun alt sınırı
+   geniştir: ajan adı, rolü ve rozeti aynı satıra sığmadığında üst üste
+   biniyordu. */
+.desks{ display:grid; gap:0 28px; grid-template-columns:repeat(auto-fill, minmax(330px, 1fr)); }
+.desk__head{ display:flex; align-items:flex-start; gap:11px; flex-wrap:wrap; }
+.desk__head > div{ min-width:0; flex:1 1 140px; }
+.desk__head .badge{ flex:none; }
+.desk__name{
+  display:block; font-family:var(--font-serif); font-size:19px; font-weight:500;
+  line-height:1.2; letter-spacing:-.005em;
+}
+.desk__role{ display:block; font-size:var(--fs-xs); color:var(--text-3); margin-top:2px; }
 .desk__line{ margin-top:10px; font-size:var(--fs-sm); color:var(--text-2); line-height:1.45; }
 .desk__open{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
 
@@ -2441,9 +2562,11 @@ button.minrow:hover{ background:var(--surface-2); }
   background:var(--surface-3); color:var(--text-3);
 }
 .ladderstep.is-done{ opacity:.6; }
-.ladderstep.is-done .ladderstep__no{ background:var(--primary); color:var(--primary-ink); }
-.ladderstep.is-current{ background:var(--primary-soft); font-weight:600; }
-.ladderstep.is-current .ladderstep__no{ background:var(--primary); color:var(--primary-ink); }
+/* Merdivendeki basamak bir DURUM değil bir KONUMdur; o yüzden bölümün
+   rengini alır, durum renklerini değil. */
+.ladderstep.is-done .ladderstep__no{ background:var(--sec); color:var(--primary-ink); }
+.ladderstep.is-current{ background:var(--sec-soft); font-weight:600; }
+.ladderstep.is-current .ladderstep__no{ background:var(--sec); color:var(--primary-ink); }
 .ladderstep__to{ margin-left:auto; color:var(--text-3); font-size:var(--fs-xs); white-space:nowrap; }
 
 /* ---------- hızlı giriş çubuğu ----------
@@ -3008,6 +3131,32 @@ body.is-dragging .drop.is-over{
 .toast__undo:hover{ opacity:1; }
 .toast-root{ pointer-events:none; }
 .toast{ pointer-events:auto; }
+
+/* ================= hareket merdiveni bloğu =================
+
+   Kart değil: ince çizgiyle ayrılan bir blok. On bir hareket on bir
+   beyaz kutuya konduğunda sayfa bir tepsiye dönüyordu. */
+.ladders{ display:flex; flex-direction:column; }
+.ladderblk{
+  padding-block:20px;
+  border-top:1px solid var(--border);
+}
+.ladders > .ladderblk:first-child{ border-top:none; padding-top:4px; }
+.ladderblk__head{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  margin-bottom:6px;
+}
+.ladderblk__name{
+  font-family:var(--font-serif); font-size:18px; font-weight:500;
+  letter-spacing:-.004em; margin-right:8px;
+}
+.ladderblk__foot{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  flex-wrap:wrap; margin-top:12px;
+}
+
+/* Defter kipindeki katlanır bölüm: kutu yok, yalnız satır. */
+.collapse--bare .collapse__btn{ padding-inline:0; }
 </style>
 <div id="app">
   <div class="boot">
@@ -9458,7 +9607,33 @@ SP.C = (function(){
   /* ---------- yapisal ---------- */
 
   /* Card: tek kart stili. Vurgu icin renkli kenarlik yerine rozet kullanilir. */
+  /* Defter kipi.
+
+     `Ledger` bir islev alirsa, o islev calisirken bu bayrak aciktir ve
+     `Card` kendini KUTU olarak degil DEFTER SATIRI olarak cizer. Boylece
+     ekranlar tek satirlik bir degisiklikle defter duzenine gecer ve iki
+     ayri bilesen sozlugu tasimak gerekmez.
+
+     Bayrak yalnizca senkron cagri boyunca aciktir; render sonrasi
+     kapanir. */
+  let ledgerMode = false;
+
   function Card(o){
+    /* `box:true` defter kipinden KACISTIR. Bir kartin govdesinin icinde
+       duran kartlar (ofis masalari, ogun kartlari) defter satirina
+       donusmemeli: onlar okunacak bir bolum degil, yan yana dizilen
+       nesnelerdir. */
+    if(ledgerMode && !o.box){
+      const meta = [o.sub, o.badge ? null : null].filter(Boolean).join(' · ');
+      return Entry({
+        label:o.title, hint:o.hint,
+        meta:o.sub || null,
+        note:o.note || null,
+        wide:o.wide,
+        action:o.actions || o.foot || null,
+        body:html`${o.body}${when(o.badge && o.foot, () => html`<div class="mt-8">${o.badge}</div>`)}`,
+      });
+    }
     const head = (o.title || o.sub || o.badge || o.actions) ? html`
       <div class="card__head">
         <div>
@@ -9479,8 +9654,24 @@ SP.C = (function(){
 
   /* Katlanir kart: uzun referans metinleri varsayilan olarak kapali tutar. */
   function Collapsible(o){
+    /* Defter kipinde katlanir bolum de kutu cizmez: satirin govdesine
+       cerceve olmadan yerlesir. */
+    if(ledgerMode && !o.box){
+      return Entry({
+        label:o.title, meta:o.meta || null,
+        body:html`<div class="collapse--bare">
+          <button class="collapse__btn" data-act="${o.act}" ${attrs(o.data || {})}
+                  aria-expanded="${o.open ? 'true' : 'false'}">
+            <span class="row-sm"><b class="collapse__title">${o.title}</b>
+              ${when(o.meta, () => html`<span class="tiny dim">${o.meta}</span>`)}</span>
+            <span class="${cls('collapse__chev', o.open && 'is-open')}">${icon('down')}</span>
+          </button>
+          ${when(o.open, o.body)}
+        </div>`,
+      });
+    }
     return html`
-      <section class="card">
+      <section class="${cls('card', o.class)}">
         <button class="collapse__btn" data-act="${o.act}" ${attrs(o.data || {})}
                 aria-expanded="${o.open ? 'true' : 'false'}">
           <span class="row-sm"><h3 class="collapse__title">${o.title}</h3>${when(o.meta, () => html`<span class="tiny dim">${o.meta}</span>`)}</span>
@@ -9607,6 +9798,53 @@ SP.C = (function(){
       <div class="toolbar__tabs">${o.tabs}</div>
       ${when(o.actions, () => html`<div class="toolbar__actions">${o.actions}</div>`)}
     </div>`;
+  }
+
+  /* ---------- defter satiri ----------
+
+     Sistemin ana duzen birimi. Kart DEGILDIR ve bilincli olarak kutu
+     cizmez.
+
+     Kart dili bir yonetim panelinin dilidir: her sey esit agirlikta beyaz
+     bir dikdortgene konur, on bes dikdortgen yan yana dizilir ve sayfa
+     bir tepsiye doner. Gunde birkac kez acilip aylarca okunacak bir
+     sistemde bu dil yorar.
+
+     Defter satiri bunun yerine kitaplarin, defterlerin ve teknik
+     belgelerin yuzyillardir kullandigi duzeni kurar:
+
+       solda  dar bir kunye sutunu -- bolum adi, olcu, eylem
+       sagda  icerigin kendisi, tam genislikte akan
+       arada  ince bir cizgi
+
+     Kutu yalnizca SECILEBILIR ya da YUZEN seylerde kalir: secim karti,
+     alt sayfa, uyari. Okunacak bir sey kutuya konmaz.
+
+     Kunye sutunu uzun icerikte YAPISIR: yuz satirlik bir listeyi
+     kaydirirken hangi bolumde oldugunu unutmayasin diye. */
+  function Entry(o){
+    return html`
+      <section class="${cls('lrow', o.wide && 'lrow--wide', o.class)}"
+        ${when(o.hint, () => attrs({ 'data-hint':o.hint }))}>
+        <div class="lrow__side">
+          <div class="lrow__label">${o.label}${raw(SP.UI.hint(o.hint || ''))}</div>
+          ${when(o.meta, () => html`<div class="lrow__meta">${o.meta}</div>`)}
+          ${when(o.note, () => html`<p class="lrow__note">${o.note}</p>`)}
+          ${when(o.action, () => html`<div class="lrow__act">${o.action}</div>`)}
+        </div>
+        <div class="lrow__main">${o.body}</div>
+      </section>`;
+  }
+
+  /* Defter: satirlarin kabi. Ilk satirin ust cizgisi yoktur -- hero'nun
+     alt cizgisi zaten oradadir ve iki cizgi ust uste gelmez. */
+  function Ledger(rows){
+    if(typeof rows === 'function'){
+      ledgerMode = true;
+      try{ rows = rows(); }
+      finally{ ledgerMode = false; }
+    }
+    return html`<div class="ledger">${rows}</div>`;
   }
 
   /* ---------- dikte ve dosya ----------
@@ -9780,6 +10018,7 @@ SP.C = (function(){
 
   return {
     Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Entry, Ledger,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, NextUp, Table, Pager, paginate,
     Mic, Drop,
@@ -9925,8 +10164,11 @@ SP.Parts = (function(){
   }
 
   /* Bos ekran yerine tek net eylem. */
+  /* Eylem ISTEGE BAGLI. Etiketsiz cagrildiginda bos bir dugme cizmek
+     -- ki oluyordu -- bos ekrani daha da bos gosterir. */
   function empty(text, label, act, data){
-    return K.Empty({ text, action:K.Button({ label, size:'sm', tone:'primary', act, data }) });
+    return K.Empty({ text,
+      action:label ? K.Button({ label, size:'sm', tone:'primary', act, data }) : null });
   }
 
   return { cert, markerRow, flagCard, avatar, sourceBadge, nutCell, minRow,
@@ -11795,87 +12037,101 @@ SP.Screens.today = (function(){
     { value:5, label:'5 · zinde' },
   ];
 
-  function formCard(){
+  function formEntry(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
-    return K.Card({
-      title:U.fmtDate(d) + ' ölçümleri',
-      sub:'Boş bıraktığın alan sıfır sayılmaz',
-      actions:K.Segmented({ act:'shift-day', value:'', aria:'Gün değiştir', items:[
-        { value:'-1', label:'‹ önceki' }, { value:'0', label:'bugün' }, { value:'1', label:'sonraki ›' },
-      ] }),
+    return K.Entry({
+      label:'Günün ölçümü',
+      meta:U.fmtDate(d),
+      note:'Boş bıraktığın alan sıfır sayılmaz — hesaba hiç girmez. Uyku '
+        + 'süresini yazman bile anlamlı bir sonuç üretir.',
+      action:html`${K.Segmented({ act:'shift-day', value:'', aria:'Gün değiştir', items:[
+          { value:'-1', label:'‹' }, { value:'0', label:'bugün' }, { value:'1', label:'›' },
+        ] })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}`,
       body:html`
-        <div class="grid-form mt-4">${map(FIELDS, f => K.Field({
+        <div class="grid-form">${map(FIELDS, f => K.Field({
           label:f.label,
           input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
             min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
         }))}</div>
-        <div class="mt-12">${K.Field({ label:'Bugün nasıl hissediyorsun?',
+        ${K.Field({ label:'Bugün nasıl hissediyorsun?',
           hint:'cihazın göremediği tek girdi',
           input:K.Segmented({ act:'set-soreness', value:v.soreness == null ? '' : String(v.soreness),
-            items:SORENESS, block:true, aria:'Günün hissi' }) })}</div>
-        <div class="mt-12">${K.Field({ label:'Not',
+            items:SORENESS, block:true, aria:'Günün hissi' }) })}
+        ${K.Field({ label:'Not',
           input:html`<div class="withmic">
             ${K.Textarea({ id:'v-note', rows:2, value:v.note || '',
               placeholder:'Hastalık, ilaç değişikliği, olağandışı bir gün…' })}
             ${K.Mic({ target:'v-note' })}
-          </div>` })}</div>`,
-      foot:html`${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}
-        <span class="small dim">Kaydettiğinde toparlanma skoru ve kırmızı bayraklar yeniden hesaplanır.</span>`,
+          </div>` })}`,
     });
   }
 
-  /* Girilen degerin referans araligindaki yeri hemen gorunur. */
-  function statusCard(){
+  function quickEntry(){
+    return K.Entry({
+      label:'Öğün ekle', hint:'portion',
+      meta:'tek satır, tek Enter',
+      note:'Ev ölçüsünden gelen gramaj «tahmin» olarak işaretlenir. '
+        + 'Tarttıysan «150 g tavuk» yaz, «ölçüldü» olur.',
+      action:K.Button({ label:'Bütün öğünler', act:'go', data:{ 'data-route':'meals' } }),
+      body:html`
+        <div class="quick">
+          ${K.Mic({ target:'quick-meal' })}
+          ${K.Input({ id:'quick-meal', placeholder:'1 tabak etli kuru fasulye, 1 bardak ayran',
+            aria:'Öğün metni' })}
+          ${K.Button({ label:'Öğüne ekle', tone:'primary', act:'quick-meal' })}
+        </div>`,
+    });
+  }
+
+  function statusEntry(){
     const d = shownDate();
     const v = M.vitalsOf(d);
-    if(!v) return null;
+    if(!v) return '';
     const rows = FIELDS.filter(f => f.marker && v[f.id] != null).map(f => {
       const b = SP.BIO_BY_ID[f.marker];
       const r = SP.Bio.refFor(f.marker);
       return { marker:b, value:v[f.id], at:d, cert:'measured',
         status:SP.Bio.statusOf(f.marker, v[f.id]), ref:r.ref, optimal:r.optimal };
     });
-    if(!rows.length) return null;
-    return K.Card({ title:'Girilen değerler nerede duruyor?', hint:'ref-range',
-      body:html`${map(rows, r => P.markerRow(r, {}))}` });
-  }
-
-  function readinessCard(){
-    const r = SP.Move.readiness(shownDate());
-    if(!r.ok) return K.Card({ title:'Toparlanma', hint:'readiness',
-      body:K.Notice({ tone:'info', body:r.note }) });
-    return K.Card({
-      title:'Toparlanma', hint:'readiness',
-      badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
-      body:html`
-        <div class="kpi"><span class="kpi__value">${r.score}</span><span class="kpi__unit">/ 100</span></div>
-        <div class="mt-8">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
-        <div class="mt-10">${map(r.parts, p => html`
-          <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
-            <span class="readypart__label">${p.label}</span>
-            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))} · ağırlık %${Math.round(p.weight * 100)}</span>
-            <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
-            <span class="readypart__note">${p.note}</span>
-          </div>`)}</div>
-        ${K.Notice({ tone:r.band.tone === 'ok' ? 'ok' : r.band.tone, class:'mt-10', body:r.band.order })}`,
+    if(!rows.length) return '';
+    return K.Entry({
+      label:'Girilen değerler', hint:'ref-range',
+      meta:rows.length + ' ölçüm',
+      note:'Referans aralığı laboratuvarın normal saydığı yer; hedef bandı '
+        + 'bu sistemin istediği daha dar yer.',
+      body:html`${map(rows, r => P.markerRow(r, {}))}`,
     });
   }
 
-  function baselineCard(){
+  function whyEntry(){
+    return K.Entry({
+      label:'Neden bunlar?',
+      meta:'toparlanmanın girdileri',
+      body:html`<ul class="bullets small muted">
+        ${map(SP.READINESS_INPUTS, i => html`<li><b>${i.label}</b> — ${i.note}</li>`)}
+      </ul>`,
+    });
+  }
+
+  function baselineEntry(){
     const rows = [['hrv', 'HRV'], ['rhr', 'İstirahat nabzı'], ['sleep', 'Uyku'], ['weight', 'Kilo']]
       .map(([key, label]) => {
         const b = SP.Move.baseline(key);
         return [label, b ? html`<b class="num">${U.fmtNet(b.mean)}</b>` : html`<span class="dim">—</span>`,
           b ? b.n + ' gün' : 'en az 3 gün gerekir'];
       });
-    return K.Card({ title:'Kişisel taban çizgin', sub:'Son 30 gün, bugün hariç',
-      body:html`${K.Table({ tight:true, headers:['Ölçüm', { label:'Ortalama', num:true }, 'Kapsam'], rows })}
-        <p class="small muted mt-10">HRV ve nabız mutlak değil kişisel ölçektir: kendi ortalamana göre
-          okunur, başkasınınkiyle karşılaştırılmaz.</p>` });
+    return K.Entry({
+      label:'Taban çizgin',
+      meta:'son 30 gün, bugün hariç',
+      note:'HRV ve nabız mutlak değil kişisel ölçektir: kendi ortalamana göre '
+        + 'okunur, başkasınınkiyle karşılaştırılmaz.',
+      body:K.Table({ tight:true, headers:['Ölçüm', { label:'Ortalama', num:true }, 'Kapsam'], rows }),
+    });
   }
 
-  function historyCard(){
+  function historyEntry(){
     const days = [];
     for(let i = 13; i >= 0; i--) days.push(U.iso(U.addDays(U.today(), -i)));
     const rows = days.filter(d => S.vitals[d]).reverse().map(d => {
@@ -11889,165 +12145,137 @@ SP.Screens.today = (function(){
         r.ok ? K.Badge({ label:String(r.score), tone:r.band.tone }) : html`<span class="dim">—</span>`,
       ];
     });
-    if(!rows.length) return null;
-    return K.Card({ title:'Son iki hafta',
+    if(!rows.length){
+      return K.Entry({ label:'Son iki hafta', meta:'kayıt yok',
+        body:P.empty('Bu aralıkta ölçüm girilmemiş.') });
+    }
+    return K.Entry({
+      label:'Son iki hafta', meta:rows.length + ' gün',
       body:K.Table({ tight:true,
         headers:['Gün', { label:'Uyku', num:true }, { label:'Nabız', num:true },
           { label:'HRV', num:true }, 'Toparlanma'],
-        rows }) });
-  }
-
-
-  /* Öğün girişi de günlük veridir: aynı sayfada, aynı sekmede durur.
-     Kullanıcı günün verisini yazarken öğün için başka ekrana gitmez. */
-  function quickCard(){
-    return K.Card({
-      title:'Öğün ekle', hint:'portion',
-      sub:'Tek satır yaz, Enter\'a bas',
-      body:html`
-        <div class="quick">
-          ${K.Mic({ target:'quick-meal' })}
-          ${K.Input({ id:'quick-meal', placeholder:'1 tabak etli kuru fasulye, 1 bardak ayran',
-            aria:'Öğün metni' })}
-          ${K.Button({ label:'Öğüne ekle', tone:'primary', act:'quick-meal' })}
-          <span class="quick__hint">Ev ölçüsünden gelen gramaj «tahmin» olarak işaretlenir.
-            Tarttıysan «150 g tavuk» yaz, «ölçüldü» olur.</span>
-        </div>`,
-      foot:K.Button({ label:'Bütün öğünleri aç', size:'sm', act:'go', data:{ 'data-route':'meals' } }),
+        rows }),
     });
   }
 
-  function whyCard(){
-    return K.Card({ title:'Bu ölçümler ne işe yarıyor?',
-      body:html`<ul class="bullets small muted">
-        ${map(SP.READINESS_INPUTS, i => html`<li><b>${i.label}</b> — ${i.note}</li>`)}
-      </ul>
-      <p class="small muted mt-10">Hiçbiri zorunlu değil. Girmediğin ölçüm sıfır
-        sayılmaz; ağırlığı girdiklerine dağıtılır.</p>` });
-  }
+  /* ---------------------------------------------------------- kartlar */  /* ---------------------------------------------------------- kartlar */
 
-  /* ---------------------------------------------------------- kartlar */
-
-  function minimumCard(){
+  function minimumEntry(){
     const m = SP.Calc.minimumDay();
     const streak = SP.Calc.streak();
-    return K.Card({
-      title:'Asgari gün', hint:'minimum-day',
-      sub:'Kötü günün alt sınırı',
-      badge:K.Badge({ label:m.done + '/' + m.total, tone:m.complete ? 'ok' : 'warn' }),
-      body:html`
-        <div class="mt-2">${map(m.rows, P.minRow)}</div>
-        <p class="small muted mt-10">${m.note}</p>`,
-      foot:html`<span class="small">Davranış serisi <b class="num">${streak}</b> gün</span>`,
+    return K.Entry({
+      label:'Asgari gün', hint:'minimum-day',
+      meta:m.done + ' / ' + m.total + ' · seri ' + streak + ' gün',
+      note:m.note,
+      body:html`<div class="mt-2">${map(m.rows, P.minRow)}</div>`,
     });
   }
 
-  function readinessCard(){
+  function readinessEntry(){
     const rx = SP.Move.prescription();
     const r = rx.readiness;
     if(!r.ok){
-      return K.Card({ title:'Toparlanma', hint:'readiness',
-        body:html`${K.Notice({ tone:'info', body:r.note })}
-          <div class="mt-10">${K.Button({ label:'Bugünün ölçümünü gir', size:'sm', tone:'primary',
-            act:'go', data:{ 'data-route':'today' } })}</div>` });
+      return K.Entry({
+        label:'Toparlanma', hint:'readiness', meta:'ölçüm bekliyor',
+        note:r.note,
+        action:K.Button({ label:'Veri gir', tone:'primary',
+          act:'day-tab', data:{ 'data-tab':'giris' } }),
+        body:P.empty('Bugünün ölçümü girilmedi.'),
+      });
     }
-    /* Gerekcelerin tamami Hareket ekraninda durur; burada yalnizca bandin
-       emri gorunur. Ayni uyariyi iki ekranda tekrarlamak sadelik degil
-       gurultudur. */
-    return K.Card({
-      title:'Toparlanma', hint:'readiness',
-      badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
+    return K.Entry({
+      label:'Toparlanma', hint:'readiness',
+      meta:r.band.label,
+      note:r.missing.length
+        ? 'Girilmeyen: ' + r.missing.join(', ') + ' — ağırlığı kalanlara dağıtıldı.'
+        : null,
+      action:K.Button({ label:'Hareketi aç', act:'go', data:{ 'data-route':'move' } }),
       body:html`
-        <div class="row wrap" style="gap:22px">
-          ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:124,
-            bands:SP.READINESS_BANDS.map(b => b.min).filter(m => m > 0) }))}
-          <div class="grow" style="min-width:180px">${map(r.parts, p => html`
-          <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
-            <span class="readypart__label">${p.label}</span>
-            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))}</span>
-            <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
-          </div>`)}</div>
+        <div class="row wrap" style="gap:26px">
+          ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:126,
+            bands:SP.READINESS_BANDS.map(b => b.min).filter(x => x > 0) }))}
+          <div class="grow" style="min-width:210px">${map(r.parts, p => html`
+            <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
+              <span class="readypart__label">${p.label}</span>
+              <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))}</span>
+              <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
+            </div>`)}</div>
         </div>
-        ${K.Notice({ tone:r.band.tone === 'ok' ? 'ok' : r.band.tone, class:'mt-14', body:r.band.order })}`,
-      foot:html`${K.Button({ label:'Hareket ekranını aç', size:'sm', act:'go', data:{ 'data-route':'move' } })}
-        ${when(r.missing.length, () => html`<span class="small dim">Eksik girdi:
-          ${r.missing.join(', ')} — ağırlığı kalanlara dağıtıldı.</span>`)}`,
+        ${K.Notice({ tone:r.band.tone === 'ok' ? 'ok' : r.band.tone, body:r.band.order })}`,
     });
   }
 
-  function nutritionCard(){
+  function nutritionEntry(){
     const d = U.todayISO();
     const t = SP.Nutri.dayTotals(d);
     const tg = SP.Nutri.targets();
 
     if(!tg.ok){
-      return K.Card({ title:'Beslenme',
-        body:K.Notice({ tone:'warn', title:'Hedef hesaplanamıyor.',
-          body:'Profilde ' + tg.missing.join(', ') + ' eksik. Bu üçü olmadan '
-             + 'kalori ve protein hedefi tahmin edilmez.' }),
-        foot:K.Button({ label:'Profili tamamla', size:'sm', tone:'primary',
-          act:'go', data:{ 'data-route':'family' } }) });
+      return K.Entry({
+        label:'Beslenme', meta:'hedef yok',
+        note:'Profilde ' + tg.missing.join(', ') + ' eksik. Bu üçü olmadan kalori ve '
+          + 'protein hedefi tahmin edilmez.',
+        action:K.Button({ label:'Profili tamamla', tone:'primary',
+          act:'go', data:{ 'data-route':'family' } }),
+        body:P.empty('Hedef hesaplanamıyor.'),
+      });
     }
     if(t.empty){
-      return K.Card({ title:'Beslenme', sub:'Hedef ' + U.fmtNum(tg.kcal) + ' kcal',
-        body:P.empty('Bugün hiç öğün girilmedi.', 'Öğün ekle', 'go', { 'data-route':'meals' }) });
+      return K.Entry({
+        label:'Beslenme', meta:'hedef ' + U.fmtNum(tg.kcal) + ' kcal',
+        action:K.Button({ label:'Öğün ekle', tone:'primary',
+          act:'go', data:{ 'data-route':'meals' } }),
+        body:P.empty('Bugün hiç öğün girilmedi.'),
+      });
     }
-
-    return K.Card({
-      title:'Beslenme', sub:t.meals + ' öğün girildi',
-      /* Gün sürerken hedefin altında olmak bir hata değildir: yalnızca
-         hedefin belirgin ÜSTÜNE çıkmak uyarı tonuyla işaretlenir. */
-      badge:K.Badge({ label:Math.round(t.kcal) + ' / ' + tg.kcal + ' kcal',
-        tone:t.kcal > tg.kcal * 1.15 ? 'warn' : 'info' }),
+    return K.Entry({
+      label:'Beslenme',
+      meta:t.meals + ' öğün · ' + Math.round(t.kcal) + ' / ' + tg.kcal + ' kcal',
+      action:K.Button({ label:'Öğünleri aç', act:'go', data:{ 'data-route':'meals' } }),
       body:html`
         ${raw(UI.macroSplit({ protein:t.protein * 4, fat:t.fat * 9, carb:t.carb * 4 }))}
-        <div class="nutgrid mt-12">
+        <div class="nutgrid">
           ${P.nutCell({ label:'Protein', got:t.protein, target:tg.protein.min, unit:'g' })}
           ${P.nutCell({ label:'Lif', got:t.fiber, target:tg.fiber, unit:'g' })}
           ${P.nutCell({ label:'Yağ', got:t.fat, target:tg.fat.min, unit:'g' })}
         </div>
         ${map(t.notes.slice(0, 1), P.absorbNote)}`,
-      foot:K.Button({ label:'Öğünleri aç', size:'sm', act:'go', data:{ 'data-route':'meals' } }),
     });
   }
 
-  function officeCard(){
+  function officeEntry(){
     const d = U.todayISO();
     const b = S.officeBriefings[d];
     const notes = SP.Office.notes().slice(0, 3);
-    return K.Card({
-      title:'Ofisten', hint:'office',
-      sub:'Beş ajan · günün notu',
-      badge:b ? P.sourceBadge(b.source) : null,
+    return K.Entry({
+      label:'Ofisten', hint:'office',
+      meta:'beş ajan · günün notu',
+      action:html`${K.Button({ label:'Ofisi aç', act:'go', data:{ 'data-route':'office' } })}
+        ${K.Button({ label:'Tazele', act:'refresh-briefing' })}`,
       body:html`
         ${when(b, () => html`<p class="small">${b.text}</p>`)}
         ${when(!b, () => html`<p class="small dim">Günün brifingi henüz üretilmedi.</p>`)}
-        ${when(notes.length, () => html`<div class="notes mt-12">${map(notes, n => html`
+        ${when(notes.length, () => html`<div class="notes">${map(notes, n => html`
           <div class="note note--${n.tone}">
             ${P.avatar(n.agent, 'sm')}
             <div><b class="tiny">${n.name}</b> <span class="small">${n.text}</span></div>
           </div>`)}</div>`)}`,
-      foot:html`${K.Button({ label:'Ofisi aç', size:'sm', act:'go', data:{ 'data-route':'office' } })}
-        ${K.Button({ label:'Brifingi tazele', size:'sm', act:'refresh-briefing' })}`,
     });
   }
 
-  function moneyCard(){
+  function moneyEntry(){
     const m = SP.Money.status();
-    return K.Card({
-      title:'Bütçe', hint:'budget-rank',
-      badge:K.Badge({ label:m.tone === 'ok' ? 'uyumlu' : m.tone === 'muted' ? 'boş' : 'gözden geçir',
-        tone:m.tone }),
+    return K.Entry({
+      label:'Bütçe', hint:'budget-rank',
+      meta:m.tone === 'ok' ? 'uyumlu' : m.tone === 'muted' ? 'boş' : 'gözden geçir',
+      action:K.Button({ label:'Finansı aç', act:'go', data:{ 'data-route':'basket' } }),
       body:html`<p class="small">${m.text}</p>
-        ${when(m.basket.limit != null && m.basket.rows.length, () => html`<div class="mt-10">
-          ${K.Meter({ label:'Haftalık sınır', value:Math.min(100, m.basket.pct || 0),
+        ${when(m.basket.limit != null && m.basket.rows.length,
+          () => K.Meter({ label:'Haftalık sınır', value:Math.min(100, m.basket.pct || 0),
             text:U.fmtNum(Math.round(m.basket.total)) + ' / ' + U.fmtNum(m.basket.limit) + ' TL',
-            tone:m.basket.over ? 'danger' : '' })}</div>`)}`,
-      foot:K.Button({ label:'Finansı aç', size:'sm', act:'go', data:{ 'data-route':'basket' } }),
+            tone:m.basket.over ? 'danger' : '' }))}`,
     });
   }
-
-  /* ------------------------------------------------------------- ekran */
 
   const TABS = [
     { id:'giris',  label:'Giriş',  icon:'pulse' },
@@ -12068,51 +12296,26 @@ SP.Screens.today = (function(){
     const tab = S.ui.dayTab || 'giris';
     const flags = M.openFlags();
 
-    /* Kirmizi bayrak her sekmede en ustte durur: sayfanin hangi
-       bolumunde olursan ol gorunmeden gecilmez. */
     const head = html`
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
-      <div class="mb-20">${tabs()}</div>`;
+      <div class="mb-8">${tabs()}</div>`;
 
     if(tab === 'ozet'){
-      return String(html`
-        ${head}
-        <section class="sect">
-          <div class="grid">
-            <div class="span-8"><div class="stack">${[
-              readinessCard(), nutritionCard(), officeCard(),
-            ]}</div></div>
-            <div class="span-4"><div class="stack">${[
-              minimumCard(), moneyCard(),
-            ]}</div></div>
-          </div>
-        </section>
-        <div class="mt-24">${raw(UI.rail(['next-action', 'minimum-day', 'readiness', 'certainty']))}</div>`);
+      return String(html`${head}${K.Ledger([
+        readinessEntry(), nutritionEntry(), minimumEntry(), officeEntry(), moneyEntry(),
+      ])}
+      <div class="mt-24">${raw(UI.rail(['next-action', 'minimum-day', 'readiness', 'certainty']))}</div>`);
     }
 
     if(tab === 'gecmis'){
-      return String(html`
-        ${head}
-        <section class="sect">
-          <div class="grid">
-            <div class="span-7"><div class="stack">${[historyCard()
-              || K.Card({ body:K.Empty({ text:'Son iki haftada kayıt yok.' }) })]}</div></div>
-            <div class="span-5"><div class="stack">${[baselineCard()]}</div></div>
-          </div>
-        </section>
-        <div class="mt-24">${raw(UI.rail(['readiness', 'certainty']))}</div>`);
+      return String(html`${head}${K.Ledger([historyEntry(), baselineEntry()])}
+      <div class="mt-24">${raw(UI.rail(['readiness', 'certainty']))}</div>`);
     }
 
-    /* ---- giriş (varsayılan) ---- */
-    return String(html`
-      ${head}
-      <section class="sect">
-        <div class="grid">
-          <div class="span-7"><div class="stack">${[formCard(), quickCard(), statusCard()]}</div></div>
-          <div class="span-5"><div class="stack">${[whyCard()]}</div></div>
-        </div>
-      </section>
-      <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'certainty']))}</div>`);
+    return String(html`${head}${K.Ledger([
+      formEntry(), quickEntry(), statusEntry(), whyEntry(),
+    ])}
+    <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'certainty']))}</div>`);
   }
 
   const handle = {
@@ -12327,60 +12530,81 @@ SP.Screens.labs = (function(){
     const total = SP.Bio.summary().measured;
 
     if(!total){
-      return K.Card({ body:P.empty(
-        'Henüz hiç test girilmedi. Elindeki hastane raporunu yapıştırman yeterli.',
-        'Rapor yapıştır', 'open-paste') });
+      return K.Ledger([K.Entry({
+        label:'Sonuçlar', meta:'kayıt yok',
+        note:'Elindeki hastane raporunu yapıştır ya da dosyasını bırak; '
+          + 'değerler kendiliğinden şemaya oturur.',
+        action:K.Button({ label:'Rapor yapıştır', tone:'primary', act:'open-paste' }),
+        body:P.empty('Henüz hiç test girilmedi.'),
+      })]);
     }
 
     const missing = SP.BIOMARKERS.filter(b => !M.latestOf(b.id));
+    const s = SP.Bio.summary();
+    const last = S.labs.length ? S.labs[S.labs.length - 1] : null;
 
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Ölçülen</div>
-            <h2>Bütün sonuçlar</h2>
-            <p>Önem sırasına göre: önce bandın dışındakiler. Bir satıra tıklayınca
-              referans aralığı, hedef bandı ve beslenme bağı açılır.</p>
+    return K.Ledger([
+      K.Entry({
+        label:'Sonuçlar',
+        meta:total + ' ölçüm' + (last ? ' · ' + U.fmtDate(last.date) : ''),
+        note:'Önem sırasına göre: önce bandın dışındakiler. Bir satıra '
+          + 'tıklayınca referans aralığı, hedef bandı ve beslenme bağı açılır.',
+        action:html`${K.Input({ id:'lab-q', value:S.ui.labQuery || '',
+          placeholder:'Ölçüm ara…', aria:'Ölçüm ara', change:'lab-query', debounce:200 })}
+          ${K.Button({ label:'Test gir', tone:'primary', act:'lab-tab',
+            data:{ 'data-tab':'giris' } })}`,
+        body:html`
+          ${when(panelFilter(), () => raw(String(panelFilter())))}
+          ${when(!rows.length, () => K.Notice({ tone:'info',
+            body:'Bu süzgeçle eşleşen ölçüm yok.' }))}
+          ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
+            const tr = SP.Bio.trendOf(r.marker.id);
+            return html`
+              <button class="resrow" data-act="open-marker" data-id="${r.marker.id}">
+                <span class="resrow__dot resrow__dot--${r.status.tone}" aria-hidden="true"></span>
+                <span class="resrow__name">
+                  <b>${r.marker.name}</b>
+                  <span class="resrow__panel">${SP.PANEL_BY_ID[r.marker.panel]
+                    ? SP.PANEL_BY_ID[r.marker.panel].name.replace(/\s*paneli$/i, '') : ''}</span>
+                </span>
+                <span class="resrow__val num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
+                <span class="resrow__bar">${when(r.ref,
+                  () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit, { bare:true })))}</span>
+                <span class="resrow__status">${K.Badge({ label:r.status.label, tone:r.status.tone })}</span>
+                <span class="resrow__trend tiny dim">${when(tr.ok,
+                  () => html`${raw(UI.trend(tr.dir))}`)} ${r.at ? U.fmtShort(r.at) : ''}</span>
+              </button>`;
+          })}</div>`)}`,
+      }),
+
+      K.Entry({
+        label:'Dağılım', meta:'durum sayımı',
+        note:'Referans aralığı laboratuvarın normal saydığı yer; hedef bandı '
+          + 'ise bu sistemin istediği daha dar yer. İkisi aynı şey değildir.',
+        body:html`<div class="pair">
+          <div>
+            <div class="sidestat"><span class="sidestat__v">${s.measured}</span>
+              <span class="sidestat__k">ölçüldü</span></div>
+            <div class="sidestat"><span class="sidestat__v">${s.out}</span>
+              <span class="sidestat__k">referans dışı</span></div>
           </div>
-          <div class="sect__actions">
-            ${K.Input({ id:'lab-q', value:S.ui.labQuery || '', placeholder:'Ölçüm ara…',
-              aria:'Ölçüm ara', change:'lab-query', debounce:200 })}
+          <div>
+            <div class="sidestat"><span class="sidestat__v">${s.offTarget}</span>
+              <span class="sidestat__k">hedef dışı</span></div>
+            <div class="sidestat"><span class="sidestat__v">${S.labs.length}</span>
+              <span class="sidestat__k">test oturumu</span></div>
           </div>
-        </div>
+        </div>`,
+      }),
 
-        ${when(panelFilter(), () => html`<div class="mb-12">${raw(String(panelFilter()))}</div>`)}
-
-        ${when(!rows.length, () => K.Notice({ tone:'info',
-          body:'Bu süzgeçle eşleşen ölçüm yok.' }))}
-
-        ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
-          const tr = SP.Bio.trendOf(r.marker.id);
-          return html`
-            <button class="resrow" data-act="open-marker" data-id="${r.marker.id}">
-              <span class="resrow__dot resrow__dot--${r.status.tone}" aria-hidden="true"></span>
-              <span class="resrow__name">
-                <b>${r.marker.name}</b>
-                <span class="resrow__panel">${SP.PANEL_BY_ID[r.marker.panel]
-                  ? SP.PANEL_BY_ID[r.marker.panel].name.replace(/\s*paneli$/i, '') : ''}</span>
-              </span>
-              <span class="resrow__val num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
-              <span class="resrow__bar">${when(r.ref,
-                () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit, { bare:true })))}</span>
-              <span class="resrow__status">${K.Badge({ label:r.status.label, tone:r.status.tone })}</span>
-              <span class="resrow__trend tiny dim">${when(tr.ok,
-                () => html`${raw(UI.trend(tr.dir))}`)} ${r.at ? U.fmtShort(r.at) : ''}</span>
-            </button>`;
-        })}</div>`)}
-
-        ${when(missing.length, () => html`<div class="mt-16">${K.Collapsible({
-          title:'Hiç ölçülmemiş', meta:missing.length + ' ölçüm',
-          act:'toggle-empty', open:!!S.ui.labShowEmpty,
-          body:html`<p class="small muted mt-2">Bu ölçümler için hiç değer girilmedi.
-              Eksik veri sıfır sayılmaz; hesaplarda yok kabul edilir.</p>
-            <div class="chips mt-10">${map(missing, b => html`
-              <span class="chip chip--muted">${b.name}</span>`)}</div>` })}</div>`)}
-      </section>`;
+      when(missing.length, () => K.Entry({
+        label:'Ölçülmemiş', meta:missing.length + ' ölçüm',
+        note:'Bu ölçümler için hiç değer girilmedi. Eksik veri sıfır sayılmaz; '
+          + 'hesaplarda yok kabul edilir.',
+        body:html`<div class="chips">${map(missing, b => html`
+          <span class="chip chip--muted">${b.name}</span>`)}</div>`,
+      })),
+    ]);
   }
 
   /* ---------------------------------------------------------- test gir
@@ -12397,60 +12621,54 @@ SP.Screens.labs = (function(){
 
     const filled = Object.keys(draft.values).length;
 
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Giriş</div>
-            <h2>Kapsamlı test girişi</h2>
-            <p>Elindeki rapordaki bütün değerleri tek seferde yaz. Boş bıraktığın
-              satır yok sayılır — sıfır olarak kaydedilmez. Raporun metni varsa
-              yapıştırmak daha hızlıdır.</p>
-          </div>
-          <div class="sect__actions">
-            ${K.Button({ label:'Rapor yapıştır', icon:'flask', size:'sm', tone:'primary',
-              act:'open-paste' })}
-          </div>
-        </div>
-
-        <div class="entryhead">
+    return K.Ledger([
+      K.Entry({
+        label:'Oturum', meta:'tarih ve laboratuvar',
+        note:'Aynı tarihe ikinci kez girilen değerler o oturumun üstüne yazılır.',
+        action:K.Button({ label:'Rapor yapıştır', icon:'flask', tone:'primary',
+          act:'open-paste' }),
+        body:html`<div class="pair">
           ${K.Field({ label:'Test tarihi',
             input:K.Input({ id:'entry-date', type:'date', value:draft.date, change:'entry-date' }) })}
           ${K.Field({ label:'Laboratuvar', hint:'isteğe bağlı',
             input:K.Input({ id:'entry-lab', value:draft.lab, placeholder:'Hangi laboratuvar?',
               change:'entry-lab' }) })}
-          ${K.Field({ label:'Ölçüm ara',
-            input:K.Input({ id:'entry-q', value:S.ui.labQuery || '', placeholder:'ferritin, b12, tsh…',
-              change:'lab-query', debounce:200 }) })}
-        </div>
+        </div>`,
+      }),
 
-        ${when(!list.length, () => K.Notice({ tone:'info', class:'mt-12',
-          body:'Bu adla bir ölçüm bulunamadı.' }))}
-
-        <div class="entrygrid mt-16">${map(list, b => {
-          const has = draft.values[b.id] != null;
-          const lastv = M.latestOf(b.id);
-          return html`
-            <label class="${cls('entryrow', has && 'is-filled')}">
-              <span class="entryrow__name">${b.name}
-                <span class="entryrow__unit">${b.unit}</span></span>
-              <input class="entryrow__in num" type="number" step="any" inputmode="decimal"
-                id="e-${b.id}" data-change="entry-val" data-id="${b.id}"
-                value="${has ? draft.values[b.id] : ''}"
-                placeholder="${lastv ? U.fmtNum(lastv.v) : '—'}"
-                aria-label="${b.name + ' (' + b.unit + ')'}"/>
-            </label>`;
-        })}</div>
-
-        <div class="entrybar">
-          <span class="small">${filled ? filled + ' değer yazıldı' : 'Henüz değer yazılmadı'}
-            ${when(filled, () => html`<span class="dim"> · kaydedilene kadar hiçbir şey yazılmaz</span>`)}</span>
-          <span class="row-sm">
-            ${when(filled, () => K.Button({ label:'Temizle', size:'sm', act:'entry-clear' }))}
-            ${K.Button({ label:'Testi kaydet', tone:'primary', act:'entry-save', disabled:!filled })}
-          </span>
-        </div>
-      </section>`;
+      K.Entry({
+        label:'Değerler', meta:list.length + ' satır',
+        note:'Elindeki rapordaki bütün değerleri tek seferde yaz. Boş bıraktığın '
+          + 'satır yok sayılır — sıfır olarak kaydedilmez.',
+        action:K.Input({ id:'entry-q', value:S.ui.labQuery || '',
+          placeholder:'Ölçüm ara…', change:'lab-query', debounce:200 }),
+        body:html`
+          ${when(!list.length, () => K.Notice({ tone:'info',
+            body:'Bu adla bir ölçüm bulunamadı.' }))}
+          <div class="entrygrid">${map(list, b => {
+            const has = draft.values[b.id] != null;
+            const lastv = M.latestOf(b.id);
+            return html`
+              <label class="${cls('entryrow', has && 'is-filled')}">
+                <span class="entryrow__name">${b.name}
+                  <span class="entryrow__unit">${b.unit}</span></span>
+                <input class="entryrow__in num" type="number" step="any" inputmode="decimal"
+                  id="e-${b.id}" data-change="entry-val" data-id="${b.id}"
+                  value="${has ? draft.values[b.id] : ''}"
+                  placeholder="${lastv ? U.fmtNum(lastv.v) : '—'}"
+                  aria-label="${b.name + ' (' + b.unit + ')'}"/>
+              </label>`;
+          })}</div>
+          <div class="entrybar">
+            <span class="small">${filled ? filled + ' değer yazıldı' : 'Henüz değer yazılmadı'}
+              ${when(filled, () => html`<span class="dim"> · kaydedilene kadar hiçbir şey yazılmaz</span>`)}</span>
+            <span class="row-sm">
+              ${when(filled, () => K.Button({ label:'Temizle', size:'sm', act:'entry-clear' }))}
+              ${K.Button({ label:'Testi kaydet', tone:'primary', act:'entry-save', disabled:!filled })}
+            </span>
+          </div>`,
+      }),
+    ]);
   }
 
   /* ------------------------------------------------------------- eğilim */
@@ -12467,38 +12685,39 @@ SP.Screens.labs = (function(){
     const options = (measured.length ? measured : SP.BIOMARKERS)
       .map(x => ({ value:x.id, label:x.name }));
 
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Tek ölçüm</div>
-            <h2>${b ? b.name : 'Eğilim'}</h2>
-            <p>Bir ölçüm başkasıyla değil, KENDİ geçmişiyle kıyaslanır.
-              Yön en az ${SP.Bio.MIN_POINTS} ölçümle söylenir.</p>
-          </div>
-          <div class="sect__actions">${K.Select({ value:id, change:'pick-marker', options })}</div>
-        </div>
-
-        ${when(series.length < 2, () => K.Notice({ tone:'info',
-          body:'Grafik için en az iki ölçüm gerekir. Şu an ' + series.length + ' var.' }))}
-        ${when(series.length >= 2, () => html`
-          ${K.Card({ body:html`
-            ${raw(UI.lineChart([{ data:series.map(s => s.v) }], {
-              labels:series.map(s => U.fmtShort(s.date)),
+    return K.Ledger([
+      K.Entry({
+        wide:true,
+        label:b ? b.name : 'Eğilim',
+        meta:series.length + ' ölçüm',
+        note:'Bir ölçüm başkasıyla değil, KENDİ geçmişiyle kıyaslanır. '
+          + 'Yön en az ' + SP.Bio.MIN_POINTS + ' ölçümle söylenir.',
+        action:K.Select({ value:id, change:'pick-marker', options }),
+        body:html`
+          ${when(series.length < 2, () => K.Notice({ tone:'info',
+            body:'Grafik için en az iki ölçüm gerekir. Şu an ' + series.length + ' var.' }))}
+          ${when(series.length >= 2, () => html`
+            ${raw(UI.lineChart([{ data:series.map(s2 => s2.v) }], {
+              labels:series.map(s2 => U.fmtShort(s2.date)),
               band:r && r.optimal ? r.optimal : (r ? r.ref : null),
-              height:220,
+              height:230,
             }))}
-            <div class="cols-3 mt-16">
-              ${K.Stat({ label:'Son değer', value:U.fmtNum(series[series.length - 1].v), unit:b.unit })}
-              ${K.Stat({ label:'Ölçüm sayısı', value:String(series.length) })}
-              ${K.Stat({ label:'90 günde', value:tr.ok ? (tr.pct > 0 ? '+' : '') + U.fmtNet(tr.pct) : '—', unit:'%' })}
+            <div class="pair">
+              <div>
+                <div class="sidestat"><span class="sidestat__v">${U.fmtNum(series[series.length - 1].v)}<small>${b.unit}</small></span>
+                  <span class="sidestat__k">son değer</span></div>
+              </div>
+              <div>
+                <div class="sidestat"><span class="sidestat__v">${tr.ok ? (tr.pct > 0 ? '+' : '') + U.fmtNet(tr.pct) : '—'}<small>%</small></span>
+                  <span class="sidestat__k">90 günde</span></div>
+              </div>
             </div>
-            ${K.Notice({ tone:vd.tone === 'muted' ? 'info' : vd.tone, class:'mt-16',
+            ${K.Notice({ tone:vd.tone === 'muted' ? 'info' : vd.tone,
               body:tr.ok ? vd.text : tr.note })}
-            ${when(r && r.ref, () => html`<div class="mt-16">
-              ${raw(UI.rangeBar(series[series.length - 1].v, r.ref, r.optimal, b.unit))}</div>`)}
-            <p class="small muted mt-10">${b.note}</p>` })}`)}
-      </section>`;
+            ${when(r && r.ref, () => raw(UI.rangeBar(series[series.length - 1].v, r.ref, r.optimal, b.unit)))}
+            <p class="small muted">${b.note}</p>`)}`,
+      }),
+    ]);
   }
 
   function markerSheetBody(id){
@@ -12539,32 +12758,29 @@ SP.Screens.labs = (function(){
 
   function historyView(){
     if(!S.labs.length){
-      return html`<section class="sect">${K.Card({
-        body:P.empty('Henüz test girilmedi.', 'Rapor yapıştır', 'open-paste') })}</section>`;
+      return K.Ledger([K.Entry({
+        label:'Geçmiş', meta:'kayıt yok',
+        action:K.Button({ label:'Rapor yapıştır', tone:'primary', act:'open-paste' }),
+        body:P.empty('Henüz test girilmedi.'),
+      })]);
     }
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Kayıt</div>
-            <h2>Test geçmişi</h2>
-            <p>Her satır bir test oturumudur. Aynı güne ikinci kez girilen
-              değerler o oturumun üstüne yazılır.</p>
+    return K.Ledger([K.Entry({
+      label:'Geçmiş', meta:S.labs.length + ' oturum',
+      note:'Her satır bir test oturumudur. Aynı güne ikinci kez girilen '
+        + 'değerler o oturumun üstüne yazılır.',
+      body:html`<div class="list">${map(S.labs.slice().reverse(), l => html`
+        <div class="listitem">
+          <div class="grow">
+            <b class="small">${U.fmtDate(l.date)}</b>
+            ${when(l.lab, () => html`<span class="tiny dim"> · ${l.lab}</span>`)}
+            <div class="tiny dim">${Object.keys(l.values).length} değer
+              · ${l.source === 'paste' ? 'yapıştırıldı' : 'elle girildi'}</div>
           </div>
-        </div>
-        <div class="list">${map(S.labs.slice().reverse(), l => html`
-          <div class="listitem">
-            <div class="grow">
-              <b class="small">${U.fmtDate(l.date)}</b>
-              ${when(l.lab, () => html`<span class="tiny dim"> · ${l.lab}</span>`)}
-              <div class="tiny dim">${Object.keys(l.values).length} değer
-                · ${l.source === 'paste' ? 'yapıştırıldı' : 'elle girildi'}</div>
-            </div>
-            ${K.Button({ label:'Aç', size:'sm', act:'open-lab', data:{ 'data-id':l.id } })}
-            ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
-              act:'del-lab', data:{ 'data-id':l.id } })}
-          </div>`)}</div>
-      </section>`;
+          ${K.Button({ label:'Aç', size:'sm', act:'open-lab', data:{ 'data-id':l.id } })}
+          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
+            act:'del-lab', data:{ 'data-id':l.id } })}
+        </div>`)}</div>`,
+    })]);
   }
 
   function labSheetBody(l){
@@ -12875,10 +13091,14 @@ SP.Screens.meals = (function(){
 
   /* ---------------------------------------------------------- giris */
 
-  function quickCard(){
-    return K.Card({
-      title:'Öğün ekle', hint:'portion',
-      sub:'Yaz, Enter\'a bas',
+  function quickEntry(){
+    return K.Entry({
+      label:'Öğün ekle', hint:'portion',
+      meta:'tek satır, tek Enter',
+      note:'Ev ölçüsü tanınır: tabak · kase · dilim · bardak · avuç · kaşık. '
+        + 'Tarttıysan «150 g tavuk göğsü» yaz.',
+      action:html`${K.Button({ label:'Besin ara', act:'open-search' })}
+        ${K.Button({ label:'Fotoğraftan', icon:'camera', act:'open-photo' })}`,
       body:html`
         <div class="quick">
           ${K.Select({ id:'meal-slot', value:S.ui.mealSlot,
@@ -12887,11 +13107,7 @@ SP.Screens.meals = (function(){
           ${K.Input({ id:'meal-text', placeholder:'1 tabak etli kuru fasulye, 2 dilim ekmek, 1 bardak ayran',
             aria:'Öğün metni' })}
           ${K.Button({ label:'Ekle', tone:'primary', act:'add-meal' })}
-          <span class="quick__hint">Ev ölçüsü tanınır: tabak · kase · dilim · bardak · avuç · kaşık.
-            Tarttıysan «150 g tavuk göğsü» yaz.</span>
         </div>`,
-      foot:html`${K.Button({ label:'Besin ara', size:'sm', act:'open-search' })}
-        ${K.Button({ label:'Fotoğraftan ekle', size:'sm', icon:'camera', act:'open-photo' })}`,
     });
   }
 
@@ -13405,41 +13621,24 @@ SP.Screens.meals = (function(){
 
   async function render(){
     const tab = S.ui.mealTab || 'gunluk';
+    const head = html`<div class="mb-8">${tabs()}</div>`;
 
     if(tab === 'oneri'){
-      return String(html`
-        <div class="mb-20">${tabs()}</div>
-        ${adviceView()}
-        <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`);
+      return String(html`${head}${K.Ledger(() => [
+        energyCard(), labLinkCard(), suggestCard(),
+      ])}
+      <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`);
     }
 
     if(tab === 'deger'){
-      return String(html`
-        <div class="mb-20">${tabs()}</div>
-        <section class="sect">
-          <div class="sect__h"><div class="sect__ht">
-            <div class="sect__eyebrow">Ölçü</div>
-            <h2>Besin değeri</h2>
-            <p>Alınan ve EMİLEN miktar ayrı yazılır. Emilim öğün içindeki
-              artıran ve bozan etkilerden hesaplanır.</p>
-          </div></div>
-          <div class="grid">
-            <div class="span-7"><div class="stack">${[microCard()]}</div></div>
-            <div class="span-5"><div class="stack">${[gapCard()]}</div></div>
-          </div>
-        </section>
-        <div class="mt-24">${raw(UI.rail(['bioavailability', 'nutri-gap']))}</div>`);
+      return String(html`${head}${K.Ledger(() => [microCard(), gapCard()])}
+      <div class="mt-24">${raw(UI.rail(['bioavailability', 'nutri-gap']))}</div>`);
     }
 
-    return String(html`
-      <div class="mb-20">${tabs()}</div>
-      <section class="sect">
-        <div class="grid">
-          <div class="span-7"><div class="stack">${[quickCard(), dayCard()]}</div></div>
-          <div class="span-5"><div class="stack">${[targetCard()]}</div></div>
-        </div>
-      </section>
-      <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`);
+    return String(html`${head}${K.Ledger(() => [
+      quickEntry(), dayCard(), targetCard(),
+    ])}
+    <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`);
   }
 
   /* Metinden gelen kalemleri secili ogune yazar. */
@@ -13744,11 +13943,9 @@ SP.Screens.kitchen = (function(){
   }
 
   async function render(){
-    return String(K.Grid([
-      K.Span(7, K.Stack([setupCard(), splitCard()])),
-      K.Span(5, K.Stack([memberCard(), dishInfoCard()])),
-      K.Span(12, raw(UI.rail(['household', 'portion', 'profiles']))),
-    ]));
+    return String(html`
+      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), dishInfoCard()])}
+      <div class="mt-24">${raw(UI.rail(['household', 'portion', 'profiles']))}</div>`);
   }
 
   const handle = {};
@@ -13839,72 +14036,68 @@ SP.Screens.move = (function(){
 
   /* --------------------------------------------------------------- bugün */
 
-  function orderCard(){
+  function orderEntry(){
     const rx = SP.Move.prescription();
-    const tone = rx.kind === 'rest' ? 'danger' : rx.kind === 'full' ? 'ok' : 'warn';
     const r = rx.readiness;
-
-    return K.Card({
-      title:'Günün yük emri', hint:'recovery-order',
-      sub:'Toparlanma belirler, istek değil',
-      badge:K.Badge({ label:rx.factor >= 1 ? 'tam yük'
-        : 'yükün %' + Math.round(rx.factor * 100) + '\u2019i', tone }),
+    return K.Entry({
+      label:'Günün yük emri', hint:'recovery-order',
+      meta:rx.factor >= 1 ? 'tam yük' : 'yükün %' + Math.round(rx.factor * 100) + '\u2019i',
+      note:'Emri toparlanma belirler, istek değil. Sistem yükü kendiliğinden '
+        + 'azaltabilir ama asla kendiliğinden artıramaz.',
+      action:when(!r.ok, () => K.Button({ label:'Veri gir', tone:'primary',
+        act:'go', data:{ 'data-route':'today' } })),
       body:html`
-        ${when(r.ok, () => html`<div class="row wrap" style="gap:22px">
-          ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:118,
-            bands:SP.READINESS_BANDS.map(b => b.min).filter(m => m > 0) }))}
-          <p class="grow small" style="min-width:200px">${r.band.order}</p>
+        ${when(r.ok, () => html`<div class="row wrap" style="gap:26px">
+          ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:122,
+            bands:SP.READINESS_BANDS.map(b => b.min).filter(x => x > 0) }))}
+          <p class="grow small" style="min-width:210px">${r.band.order}</p>
         </div>`)}
-        ${map(rx.reasons, x => K.Notice({ tone:x.kind === 'muted' ? 'info' : x.kind, class:'mt-10',
-          /* Skor yukarıda büyük yazıyor: bandın gerekçesi kısa hâliyle basılır,
-             aynı cümle iki kez görünmez. */
+        ${map(rx.reasons, x => K.Notice({ tone:x.kind === 'muted' ? 'info' : x.kind,
           body:(r.ok && x.id === 'readiness') ? x.short : x.text }))}
-        ${when(rx.kind === 'rest', () => K.Notice({ tone:'info', class:'mt-8',
+        ${when(rx.kind === 'rest', () => K.Notice({ tone:'info',
           body:'Bu bir geri adım değil, planın parçası. Asgari gün yine geçerli: '
             + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş.' }))}`,
     });
   }
 
-  /* Seans seçimi — şablonlar seçilebilir kart olarak durur.
-     Bir düğme satırı hangi seansın önerildiğini gizler; kart hem öneriyi
-     hem içeriğini gösterir. */
-  function pickSessionCard(){
+  function pickSessionEntry(){
     const rx = SP.Move.prescription();
     const suggested = rx.suggest.map(t => t.id);
-    return K.Card({
-      title:'Seans seç', sub:'Öneri toparlanma bandından gelir; istediğini seçebilirsin',
-      body:html`
-        <div class="picks">${map(SP.SESSION_TEMPLATES, t => html`
-          <button class="${cls('pickcard', suggested[0] === t.id && 'is-on')}"
-            data-act="start-session" data-id="${t.id}">
-            <span class="pickcard__box" aria-hidden="true">${suggested[0] === t.id ? '★' : ''}</span>
-            <span class="pickcard__body">
-              <span class="pickcard__name">${t.name}
-                ${when(suggested.indexOf(t.id) >= 0, () => html`<span class="tiny dim"> · önerilen</span>`)}</span>
-              <span class="pickcard__meta">${t.minutes} dk · ${t.items.length} hareket — ${t.note}</span>
-            </span>
-          </button>`)}
-          <button class="pickcard" data-act="start-session" data-id="">
-            <span class="pickcard__box" aria-hidden="true"></span>
-            <span class="pickcard__body">
-              <span class="pickcard__name">Serbest seans</span>
-              <span class="pickcard__meta">Hareketleri kendin seç</span>
-            </span>
-          </button>
-        </div>`,
+    return K.Entry({
+      label:'Seans seç',
+      meta:SP.SESSION_TEMPLATES.length + ' şablon',
+      note:'Öneri toparlanma bandından gelir; istediğini seçebilirsin.',
+      body:html`<div class="picks">${map(SP.SESSION_TEMPLATES, t => html`
+        <button class="${cls('pickcard', suggested[0] === t.id && 'is-on')}"
+          data-act="start-session" data-id="${t.id}">
+          <span class="pickcard__box" aria-hidden="true">${suggested[0] === t.id ? '★' : ''}</span>
+          <span class="pickcard__body">
+            <span class="pickcard__name">${t.name}
+              ${when(suggested.indexOf(t.id) >= 0, () => html`<span class="tiny dim"> · önerilen</span>`)}</span>
+            <span class="pickcard__meta">${t.minutes} dk · ${t.items.length} hareket — ${t.note}</span>
+          </span>
+        </button>`)}
+        <button class="pickcard" data-act="start-session" data-id="">
+          <span class="pickcard__box" aria-hidden="true"></span>
+          <span class="pickcard__body">
+            <span class="pickcard__name">Serbest seans</span>
+            <span class="pickcard__meta">Hareketleri kendin seç</span>
+          </span>
+        </button>
+      </div>`,
     });
   }
 
-  function todaySessionsCard(){
+  function todaySessionsEntry(){
     const d = U.todayISO();
     const rows = M.workoutsOf(d);
     if(!rows.length){
-      return K.Card({ title:'Bugünün seansları',
-        body:K.Empty({ text:'Bugün henüz seans kaydı yok. Yukarıdan bir seans seç.' }) });
+      return K.Entry({ label:'Bugünün seansları', meta:'kayıt yok',
+        body:P.empty('Bugün henüz seans kaydı yok. Yukarıdan bir seans seç.') });
     }
-    return K.Card({
-      title:'Bugünün seansları', sub:rows.length + ' seans',
-      badge:K.Badge({ label:U.sum(rows.map(SP.Move.sessionLoad)) + ' yük', tone:'info' }),
+    return K.Entry({
+      label:'Bugünün seansları',
+      meta:rows.length + ' seans · ' + U.sum(rows.map(SP.Move.sessionLoad)) + ' yük',
       body:html`<div class="list">${map(rows, w => html`
         <div class="listitem">
           <div class="grow">
@@ -13921,43 +14114,35 @@ SP.Screens.move = (function(){
     });
   }
 
-  function readyCard(){
-    const r = SP.Move.readiness();
-    if(!r.ok){
-      return K.Card({ title:'Toparlanma', hint:'readiness',
-        body:html`${K.Notice({ tone:'info', body:r.note })}`,
-        foot:K.Button({ label:'Ölçüm gir', size:'sm', tone:'primary',
-          act:'go', data:{ 'data-route':'today' } }) });
-    }
-    return K.Card({
-      title:'Toparlanma', hint:'readiness',
-      badge:K.Badge({ label:r.band.label, tone:r.band.tone }),
-      body:html`
-        <div class="row wrap" style="gap:20px">
-        ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:112,
-          bands:SP.READINESS_BANDS.map(b => b.min).filter(m => m > 0) }))}
-        <div class="grow" style="min-width:170px">${map(r.parts, p => html`
-          <div class="${p.score == null ? 'readypart readypart--off' : 'readypart'}">
-            <span class="readypart__label">${p.label}</span>
-            <span class="small dim">${p.score == null ? 'girilmedi' : U.fmtNum(U.round(p.value, 1))}</span>
-            <span class="readypart__score num">${p.score == null ? '—' : Math.round(p.score)}</span>
-          </div>`)}</div></div>`,
-    });
+  function balanceBody(){
+    const rows = SP.Move.patternBalance();
+    return html`${map(rows, r => html`
+      <button class="${cls('minrow', !r.missing && 'is-done')}" style="width:100%"
+        data-act="pick-pattern" data-id="${r.pattern.id}">
+        <span class="minrow__mark">${r.missing ? '' : '✓'}</span>
+        <span class="minrow__label"><b>${r.pattern.label}</b>
+          <span class="tiny dim"> · ${r.pattern.note}</span></span>
+        <span class="minrow__detail num">${r.count}</span>
+      </button>`)}`;
   }
 
-  /* ------------------------------------------------------------- program */
-
-  function ladderCard(ex){
-    const p = SP.Move.progressionCheck(ex.id);
+  /* Merdiven artık kart değil: ince çizgiyle ayrılan bir blok. */
+  function ladderBlock(ex){
+    const pr = SP.Move.progressionCheck(ex.id);
     const cur = M.levelIndex(ex.id);
     const pattern = SP.PATTERNS.find(x => x.id === ex.pattern);
-    return K.Card({
-      title:ex.name,
-      sub:(pattern ? pattern.label : ex.kind === 'cardio' ? 'Dayanıklılık' : 'Mobilite')
-        + ' · ' + (ex.equip === 'yok' ? 'ekipmansız' : ex.equip),
-      badge:p.ready ? K.Badge({ label:'üst basamak açık', tone:'ok' })
-        : K.Badge({ label:p.sessions + '/' + p.needed + ' seans', tone:'muted' }),
-      body:html`
+    return html`
+      <div class="ladderblk">
+        <div class="ladderblk__head">
+          <div class="minw0">
+            <b class="ladderblk__name">${ex.name}</b>
+            <span class="tiny dim">${pattern ? pattern.label
+              : ex.kind === 'cardio' ? 'Dayanıklılık' : 'Mobilite'}
+              · ${ex.equip === 'yok' ? 'ekipmansız' : ex.equip}</span>
+          </div>
+          ${pr.ready ? K.Badge({ label:'üst basamak açık', tone:'ok' })
+            : K.Badge({ label:pr.sessions + '/' + pr.needed + ' seans', tone:'muted' })}
+        </div>
         <p class="small muted">${ex.cue}</p>
         <div class="ladder">${map(ex.levels, (l, i) => html`
           <div class="${cls('ladderstep', i < cur && 'is-done', i === cur && 'is-current')}">
@@ -13965,32 +14150,15 @@ SP.Screens.move = (function(){
             <span>${l.name}</span>
             <span class="ladderstep__to">${l.to}</span>
           </div>`)}</div>
-        <p class="small mt-10">${p.note}</p>`,
-      foot:html`
-        ${when(p.ready, () => K.Button({ label:'Üst basamağa geç', size:'sm', tone:'primary',
-          act:'advance', data:{ 'data-id':ex.id } }))}
-        ${K.Button({ label:'Basamağı seç', size:'sm', act:'pick-level', data:{ 'data-id':ex.id } })}`,
-    });
-  }
-
-  function balanceCard(){
-    const rows = SP.Move.patternBalance();
-    const missing = rows.filter(r => r.missing).length;
-    return K.Card({
-      title:'Haftalık kalıp dengesi',
-      sub:'Her kalıp haftada en az bir kez',
-      badge:missing ? K.Badge({ label:missing + ' eksik', tone:'warn' })
-        : K.Badge({ label:'dengeli', tone:'ok' }),
-      body:html`${map(rows, r => html`
-        <button class="${cls('minrow', !r.missing && 'is-done')}" style="width:100%"
-          data-act="pick-pattern" data-id="${r.pattern.id}">
-          <span class="minrow__mark">${r.missing ? '' : '✓'}</span>
-          <span class="minrow__label"><b>${r.pattern.label}</b>
-            <span class="tiny dim"> · ${r.pattern.note}</span></span>
-          <span class="minrow__detail num">${r.count}</span>
-        </button>`)}`,
-      foot:html`<span class="small dim">Bir kalıba dokunarak o kalıbın hareketlerini aç.</span>`,
-    });
+        <div class="ladderblk__foot">
+          <span class="small dim">${pr.note}</span>
+          <span class="row-sm">
+            ${when(pr.ready, () => K.Button({ label:'Üst basamağa geç', size:'sm', tone:'primary',
+              act:'advance', data:{ 'data-id':ex.id } }))}
+            ${K.Button({ label:'Basamak seç', size:'sm', act:'pick-level', data:{ 'data-id':ex.id } })}
+          </span>
+        </div>
+      </div>`;
   }
 
   /* ---------------------------------------------------------- alanlar */
@@ -14002,50 +14170,48 @@ SP.Screens.move = (function(){
     const list = exercisesOfArea(areaId);
     const rx = SP.Move.prescription();
 
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Alan</div>
-            <h2>${area.label}</h2>
-            <p>${area.note}</p>
-          </div>
-          <div class="sect__actions">
-            ${K.Button({ label:'Bu alandan seans ekle', icon:'plus', size:'sm', tone:'primary',
-              act:'start-area', data:{ 'data-area':areaId } })}
-          </div>
-        </div>
+    return K.Ledger([
+      when(areaId === 'kardiyo', () => K.Entry({
+        label:'Haftalık süre', hint:'load', meta:'%10 kuralı',
+        note:area.note, body:cardioBody(),
+      })),
 
-        ${when(areaId === 'kuvvet', () => html`<div class="mb-16">
-          ${K.Subtabs({ items:patternTabs(), value:S.ui.movePattern || 'all',
-            act:'pick-pattern-tab', aria:'Hareket kalıbı' })}</div>`)}
+      when(areaId === 'esneklik' && rx.kind !== 'full', () => K.Entry({
+        label:'Bugün için', meta:'toparlanma bandı',
+        body:K.Notice({ tone:'info',
+          body:'Toparlanma ' + (rx.readiness.ok ? rx.readiness.band.label.toLocaleLowerCase('tr-TR')
+            : 'ölçülmedi') + '. Esneklik akışı ağır antrenmanın yerine geçebilir; '
+            + 'yük üretmez ama zinciri kırmaz.' }),
+      })),
 
-        ${when(areaId === 'kardiyo', () => html`<div class="mb-16">
-          ${cardioSummary()}</div>`)}
+      K.Entry({
+        label:area.label,
+        meta:list.length + ' hareket',
+        note:area.note,
+        action:K.Button({ label:'Seans ekle', icon:'plus', tone:'primary',
+          act:'start-area', data:{ 'data-area':areaId } }),
+        body:html`
+          ${when(areaId === 'kuvvet', () => K.Subtabs({ items:patternTabs(),
+            value:S.ui.movePattern || 'all', act:'pick-pattern-tab', aria:'Hareket kalıbı' }))}
+          ${when(!list.length, () => P.empty('Bu kalıpta tanımlı hareket yok.'))}
+          <div class="ladders">${map(list, ladderBlock)}</div>`,
+      }),
 
-        ${when(areaId === 'esneklik' && rx.kind !== 'full', () => html`<div class="mb-16">
-          ${K.Notice({ tone:'info', title:'Bugün için uygun:',
-            body:'Toparlanma ' + (rx.readiness.ok ? rx.readiness.band.label.toLocaleLowerCase('tr-TR')
-              : 'ölçülmedi') + '. Esneklik akışı ağır antrenmanın yerine geçebilir; '
-              + 'yük üretmez ama zinciri kırmaz.' })}</div>`)}
+      when(areaId === 'kuvvet', () => K.Entry({
+        label:'Kalıp dengesi', meta:'haftalık', body:balanceBody(),
+      })),
 
-        <div class="grid">
-          <div class="span-8"><div class="stack">${list.length
-            ? map(list, ladderCard)
-            : [K.Card({ body:K.Empty({ text:'Bu kalıpta tanımlı hareket yok.' }) })]}</div></div>
-          <div class="span-4"><div class="stack">
-            ${areaId === 'kuvvet' ? balanceCard() : ''}
-            ${K.Card({ title:'İlerleme kuralı', hint:'progression',
-              body:html`<p class="small muted">Bir üst basamak, mevcut basamakta son
-                ${SP.Move.ADVANCE_WINDOW} günde ${SP.Move.ADVANCE_SESSIONS} seans yapıldığında açılır.
-                Sistem basamak atlatmaz: aşırı yüklenmenin en yaygın sebebi budur.</p>` })}
-          </div></div>
-        </div>
-      </section>`;
+      K.Entry({
+        label:'İlerleme kuralı', hint:'progression',
+        meta:SP.Move.ADVANCE_SESSIONS + ' seans / ' + SP.Move.ADVANCE_WINDOW + ' gün',
+        body:html`<p class="small muted">Bir üst basamak, mevcut basamakta son
+          ${SP.Move.ADVANCE_WINDOW} günde ${SP.Move.ADVANCE_SESSIONS} seans yapıldığında açılır.
+          Sistem basamak atlatmaz: aşırı yüklenmenin en yaygın sebebi budur.</p>`,
+      }),
+    ]);
   }
 
-  /* Kardiyoda ölçü süredir: haftalık toplam dakika ve %10 kuralı. */
-  function cardioSummary(){
+  function cardioBody(){
     const ids = SP.EXERCISES.filter(e => e.kind === 'cardio').map(e => e.id);
     const days = U.lastDays(14);
     let thisWeek = 0, lastWeek = 0;
@@ -14055,23 +14221,19 @@ SP.Screens.move = (function(){
       if(i >= 7) thisWeek += mins; else lastWeek += mins;
     });
     const cap = Math.round(lastWeek * 1.1);
-    return K.Card({
-      title:'Haftalık kardiyo süresi', hint:'load',
-      badge:K.Badge({ label:thisWeek + ' dk', tone:lastWeek && thisWeek > cap ? 'warn' : 'info' }),
-      body:html`
-        <div class="cols-3">
-          ${K.Stat({ label:'Bu hafta', value:String(thisWeek), unit:'dk' })}
-          ${K.Stat({ label:'Geçen hafta', value:String(lastWeek), unit:'dk' })}
-          ${K.Stat({ label:'Bu haftanın tavanı', value:lastWeek ? String(cap) : '—', unit:'dk',
-            note:lastWeek ? '%10 kuralı' : 'geçen hafta veri yok' })}
-        </div>
-        ${K.Notice({ tone:lastWeek && thisWeek > cap ? 'warn' : 'info', class:'mt-12',
-          body:lastWeek
-            ? (thisWeek > cap
-              ? 'Bu hafta geçen haftanın %10 üstünü aştı. Süreyi artırmak yerine tempoyu koru.'
-              : SP.LOAD_RULES.weeklyGrowth.note)
-            : 'Geçen hafta kardiyo kaydı yok; tavan hesaplanmadı. Eksik veri sıfır sayılmaz.' })}`,
-    });
+    return html`
+      <div class="cols-3">
+        ${K.Stat({ label:'Bu hafta', value:String(thisWeek), unit:'dk' })}
+        ${K.Stat({ label:'Geçen hafta', value:String(lastWeek), unit:'dk' })}
+        ${K.Stat({ label:'Bu haftanın tavanı', value:lastWeek ? String(cap) : '—', unit:'dk',
+          note:lastWeek ? '%10 kuralı' : 'geçen hafta veri yok' })}
+      </div>
+      ${K.Notice({ tone:lastWeek && thisWeek > cap ? 'warn' : 'info',
+        body:lastWeek
+          ? (thisWeek > cap
+            ? 'Bu hafta geçen haftanın %10 üstünü aştı. Süreyi artırmak yerine tempoyu koru.'
+            : SP.LOAD_RULES.weeklyGrowth.note)
+          : 'Geçen hafta kardiyo kaydı yok; tavan hesaplanmadı. Eksik veri sıfır sayılmaz.' })}`;
   }
 
   /* ---------------------------------------------------------- dinlenme
@@ -14089,112 +14251,87 @@ SP.Screens.move = (function(){
     const sleepVals = days.map(d => (S.vitals[d] || {}).sleep).filter(v => v != null);
     const avgSleep = sleepVals.length ? U.round(U.sum(sleepVals) / sleepVals.length, 1) : null;
 
-    return html`
-      <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Alan</div>
-            <h2>Dinlenme</h2>
-            <p>${SP.AREA_BY_ID.dinlenme.note} Kazanç antrenmanda değil, antrenmandan
-              sonraki toparlanmada oluşur.</p>
-          </div>
-        </div>
+    return K.Ledger([
+      K.Entry({
+        label:'Bugün dinlenmeli misin?', hint:'recovery-order',
+        meta:rx.kind === 'rest' ? 'evet' : rx.kind === 'full' ? 'hayır' : 'hafiflet',
+        note:SP.AREA_BY_ID.dinlenme.note + ' Kazanç antrenmanda değil, antrenmandan '
+          + 'sonraki toparlanmada oluşur.',
+        action:when(!r.ok, () => K.Button({ label:'Veri gir', tone:'primary',
+          act:'go', data:{ 'data-route':'today' } })),
+        body:html`
+          ${when(r.ok, () => html`<div class="row wrap" style="gap:26px">
+            ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:122,
+              bands:SP.READINESS_BANDS.map(b => b.min).filter(x => x > 0) }))}
+            <p class="grow small" style="min-width:210px">${r.band.order}</p>
+          </div>`)}
+          ${when(!r.ok, () => K.Notice({ tone:'info', body:r.note }))}
+          ${when(rx.kind === 'rest', () => K.Notice({ tone:'info',
+            body:'Tam dinlenme günü de boş değildir: asgari gün geçerli — '
+              + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş ve bir mobilite akışı.' }))}`,
+      }),
 
-        <div class="grid">
-          <div class="span-8"><div class="stack">
-            ${K.Card({
-              title:'Bugün dinlenmeli misin?', hint:'recovery-order',
-              badge:K.Badge({ label:rx.kind === 'rest' ? 'evet' : rx.kind === 'full' ? 'hayır' : 'hafiflet',
-                tone:rx.kind === 'rest' ? 'danger' : rx.kind === 'full' ? 'ok' : 'warn' }),
-              body:html`
-                ${when(r.ok, () => html`<div class="row wrap" style="gap:18px">
-                  <div class="kpi"><span class="kpi__value">${r.score}</span>
-                    <span class="kpi__unit">/ 100 · ${r.band.label}</span></div>
-                  <div class="grow" style="min-width:180px">${K.Bar({ value:r.score, tone:r.band.tone })}</div>
-                </div>`)}
-                ${K.Notice({ tone:r.ok ? (r.band.tone === 'ok' ? 'ok' : r.band.tone) : 'info',
-                  class:'mt-12', body:r.ok ? r.band.order : r.note })}
-                ${when(rx.kind === 'rest', () => K.Notice({ tone:'info', class:'mt-8',
-                  body:'Tam dinlenme günü de boş değildir: asgari gün geçerli — '
-                    + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş ve bir mobilite akışı.' }))}`,
-              foot:when(!r.ok, () => K.Button({ label:'Bugünün ölçümünü gir', size:'sm', tone:'primary',
-                act:'go', data:{ 'data-route':'today' } })),
-            })}
+      K.Entry({
+        label:'İndirme haftası', hint:'deload',
+        meta:!dl.started ? 'başlamadı' : dl.due ? 'bu hafta' : dl.inCycle + '/' + dl.every,
+        note:SP.LOAD_RULES.deload.note,
+        body:html`<p class="small">${dl.note}</p>`,
+      }),
 
-            ${K.Card({
-              title:'İndirme haftası', hint:'deload',
-              badge:K.Badge({ label:!dl.started ? 'başlamadı'
-                : dl.due ? 'bu hafta' : dl.inCycle + '/' + dl.every,
-                tone:dl.due ? 'warn' : 'muted' }),
-              body:html`<p class="small">${dl.note}</p>
-                ${K.Notice({ tone:'info', class:'mt-10', body:SP.LOAD_RULES.deload.note })}`,
-            })}
-          </div></div>
-
-          <div class="span-4"><div class="stack">
-            ${K.Card({ title:'Son yedi gün',
-              body:html`
-                ${K.Stat({ label:'Boş gün', value:String(off), unit:'/ 7',
-                  note:off === 0 ? 'hiç boş gün yok' : off >= 5 ? 'çok az seans' : 'dengeli' })}
-                <div class="mt-12">${K.Stat({ label:'Ortalama uyku',
-                  value:avgSleep == null ? '—' : U.fmtNum(avgSleep), unit:'saat',
-                  note:avgSleep == null ? 'girilmedi' : sleepVals.length + ' gün girildi' })}</div>
-                <div class="mt-12">${K.Stat({ label:'Son hafta / son ay',
-                  value:a.ok ? U.fmtNet(a.ratio) : '—',
-                  tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
-                  note:a.ok ? (a.zone === 'ok' ? 'alıştığın bandın içinde'
-                    : a.zone === 'high' ? 'alıştığından ağır' : 'alıştığından hafif')
-                    : 'veri yetersiz' })}</div>` })}
-
-            ${K.Card({ title:'Dinlenme neden plandır?',
-              body:html`<p class="small muted">Yük eğrisi yalnız yapılan işi değil,
-                yapılmayanı da sayar. Üst üste boş geçen günler kondisyonu düşürür;
-                hiç boş geçmeyen haftalar son haftayı son aya göre şişirir. İkisi de
-                aynı ölçüde izlenir.</p>` })}
-          </div></div>
-        </div>
-      </section>`;
-  }
-
-  /* ------------------------------------------------------------ ilerleme */
-
-  function loadCard(){
-    const series = SP.Move.loadSeries(30);
-    const a = SP.Move.acwr();
-    const g = SP.Move.weeklyGrowth();
-    const dl = SP.Move.deloadWeek();
-    const top = Math.max(100, Math.max.apply(null, series.map(s => s.value)) * 1.1);
-
-    return K.Card({
-      title:'Yük eğrisi', hint:'load',
-      sub:'Son 30 gün',
-      body:html`
-        ${raw(UI.barChart(series.map(s => ({ label:U.fmtShort(s.date), value:s.value })),
-          { max:top, height:160, goodAt:0 }))}
-        <div class="cols-3 mt-12">
-          ${K.Stat({ label:'Bu hafta', value:U.fmtNum(SP.Move.loadWindow(7)), unit:'yük' })}
+      K.Entry({
+        label:'Son yedi gün', meta:off + ' boş gün',
+        note:'Yük eğrisi yalnız yapılan işi değil, yapılmayanı da sayar. Üst üste '
+          + 'boş geçen günler kondisyonu düşürür; hiç boş geçmeyen haftalar son '
+          + 'haftayı son aya göre şişirir. İkisi de aynı ölçüde izlenir.',
+        body:html`<div class="cols-3">
+          ${K.Stat({ label:'Boş gün', value:String(off), unit:'/ 7',
+            note:off === 0 ? 'hiç boş gün yok' : off >= 5 ? 'çok az seans' : 'dengeli' })}
+          ${K.Stat({ label:'Ortalama uyku',
+            value:avgSleep == null ? '—' : U.fmtNum(avgSleep), unit:'saat',
+            note:avgSleep == null ? 'girilmedi' : sleepVals.length + ' gün girildi' })}
           ${K.Stat({ label:'Son hafta / son ay', value:a.ok ? U.fmtNet(a.ratio) : '—',
             tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
             note:a.ok ? (a.zone === 'ok' ? 'normal' : a.zone === 'high' ? 'ağır' : 'hafif')
               : 'veri yetersiz' })}
-          ${K.Stat({ label:'Döngü haftası', value:dl.started ? String(dl.week) : '—',
-            note:!dl.started ? 'başlamadı' : dl.due ? 'indirme haftası' : dl.inCycle + '/' + dl.every })}
-        </div>
-        ${K.Notice({ tone:a.ok ? a.tone : 'info', class:'mt-12', body:a.note })}
-        ${when(g.ok, () => K.Notice({ tone:g.over ? 'warn' : 'info', class:'mt-8',
-          body:'Geçen haftaya göre değişim %' + Math.round(g.growth * 100) + '. ' + g.note }))}
-        ${when(dl.due, () => K.Notice({ tone:'warn', class:'mt-8', body:dl.note }))}`,
-    });
+        </div>`,
+      }),
+    ]);
   }
 
-  function historyCard(){
+  /* ------------------------------------------------------------ ilerleme */
+
+  function loadBody(){
+    const series = SP.Move.loadSeries(30);
+    const a = SP.Move.acwr();
+    const g = SP.Move.weeklyGrowth();
+    const dl = SP.Move.deloadWeek();
+    const top = Math.max(100, Math.max.apply(null, series.map(s2 => s2.value)) * 1.1);
+
+    return html`
+      ${raw(UI.barChart(series.map(s2 => ({ label:U.fmtShort(s2.date), value:s2.value })),
+        { max:top, height:170, goodAt:0 }))}
+      <div class="cols-3">
+        ${K.Stat({ label:'Bu hafta', value:U.fmtNum(SP.Move.loadWindow(7)), unit:'yük' })}
+        ${K.Stat({ label:'Son hafta / son ay', value:a.ok ? U.fmtNet(a.ratio) : '—',
+          tone:a.ok ? (a.zone === 'ok' ? 'ok' : a.zone === 'high' ? 'danger' : 'warn') : null,
+          note:a.ok ? (a.zone === 'ok' ? 'normal' : a.zone === 'high' ? 'ağır' : 'hafif')
+            : 'veri yetersiz' })}
+        ${K.Stat({ label:'Döngü haftası', value:dl.started ? String(dl.week) : '—',
+          note:!dl.started ? 'başlamadı' : dl.due ? 'indirme haftası' : dl.inCycle + '/' + dl.every })}
+      </div>
+      ${K.Notice({ tone:a.ok ? a.tone : 'info', body:a.note })}
+      ${when(g.ok, () => K.Notice({ tone:g.over ? 'warn' : 'info',
+        body:'Geçen haftaya göre değişim %' + Math.round(g.growth * 100) + '. ' + g.note }))}
+      ${when(dl.due, () => K.Notice({ tone:'warn', body:dl.note }))}`;
+  }
+
+  function historyBody(){
     const rows = S.workouts.slice(-20).reverse();
-    if(!rows.length) return null;
-    return K.Card({ title:'Seans geçmişi', sub:S.workouts.length + ' kayıt',
-      body:K.Table({ tight:true,
-        headers:['Tarih', 'Seans', { label:'Dakika', num:true }, { label:'Yük', num:true }],
-        rows:rows.map(w => [U.fmtShort(w.date), w.name, String(w.minutes),
-          String(SP.Move.sessionLoad(w))]) }) });
+    if(!rows.length) return P.empty('Henüz seans kaydı yok.');
+    return K.Table({ tight:true,
+      headers:['Tarih', 'Seans', { label:'Dakika', num:true }, { label:'Yük', num:true }],
+      rows:rows.map(w => [U.fmtShort(w.date), w.name, String(w.minutes),
+        String(SP.Move.sessionLoad(w))]) });
   }
 
   /* -------------------------------------------------------------- sheet'ler */
@@ -14251,10 +14388,10 @@ SP.Screens.move = (function(){
 
   async function render(){
     const tab = S.ui.moveTab;
+    const head = html`<div class="mb-8">${tabs(tab)}</div>`;
 
     if(SP.AREA_BY_ID[tab]){
-      return String(html`
-        <div class="mb-20">${tabs(tab)}</div>
+      return String(html`${head}
         ${tab === 'dinlenme' ? restView() : areaView(tab)}
         <div class="mt-24">${raw(UI.rail(tab === 'dinlenme'
           ? ['recovery-order', 'deload', 'load']
@@ -14262,35 +14399,25 @@ SP.Screens.move = (function(){
     }
 
     if(tab === 'ilerleme'){
-      return String(html`
-        <div class="mb-20">${tabs(tab)}</div>
-        <section class="sect">
-          <div class="sect__h"><div class="sect__ht">
-            <div class="sect__eyebrow">Ölçü</div>
-            <h2>İlerleme</h2>
-            <p>Yük eğrisi yalnız yapılan işi değil, yapılmayanı da sayar.</p>
-          </div></div>
-          <div class="grid">
-            <div class="span-8"><div class="stack">${[loadCard(), historyCard()]}</div></div>
-            <div class="span-4"><div class="stack">${[balanceCard(),
-              K.Card({ title:'Yük nasıl hesaplanır?',
-                body:html`<p class="small muted">Seans yükü süre × zorluktur. Zorluk önce senin
-                  bildirdiğin algılanan zorluktan (1–10), yoksa hareketlerin MET ortalamasından gelir.
-                  İkisi de yoksa seans yük üretmez — uydurulmuş yük yazılmaz.</p>` })]}</div></div>
-          </div>
-        </section>
-        <div class="mt-24">${raw(UI.rail(['load', 'deload', 'recovery-order']))}</div>`);
+      return String(html`${head}${K.Ledger([
+        K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
+          note:'Seans yükü süre × zorluktur. Zorluk önce senin bildirdiğin algılanan '
+            + 'zorluktan, yoksa hareketlerin MET ortalamasından gelir. İkisi de yoksa '
+            + 'seans yük üretmez — uydurulmuş yük yazılmaz.',
+          body:loadBody() }),
+        K.Entry({ label:'Kalıp dengesi', meta:'her kalıp haftada en az bir kez',
+          body:balanceBody() }),
+        K.Entry({ label:'Seans geçmişi', meta:S.workouts.length + ' kayıt',
+          body:historyBody() }),
+      ])}
+      <div class="mt-24">${raw(UI.rail(['load', 'deload', 'recovery-order']))}</div>`);
     }
 
-    return String(html`
-      <div class="mb-20">${tabs('bugun')}</div>
-      <section class="sect">
-        <div class="grid">
-          <div class="span-8"><div class="stack">${[orderCard(), pickSessionCard(), todaySessionsCard()]}</div></div>
-          <div class="span-4"><div class="stack">${[readyCard(), balanceCard()]}</div></div>
-        </div>
-      </section>
-      <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`);
+    return String(html`${head}${K.Ledger([
+      orderEntry(), pickSessionEntry(), todaySessionsEntry(),
+      K.Entry({ label:'Kalıp dengesi', meta:'haftalık', body:balanceBody() }),
+    ])}
+    <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`);
   }
 
   const handle = {
@@ -14859,36 +14986,31 @@ SP.Screens.basket = (function(){
     const tab = S.ui.basketTab;
     if(tab === 'butce'){
       return String(html`
-        <div class="mb-20">${toolbar(tab)}</div>
+        <div class="mb-8">${toolbar(tab)}</div>
         ${budgetView()}
         <div class="mt-24">${raw(UI.rail(['budget-rank', 'price-estimate', 'certainty']))}</div>`);
     }
     if(tab === 'ikame'){
-      return String(K.Grid([
-        K.Span(12, toolbar(tab)),
-        K.Span(8, K.Stack([swapCard(), bulkCard()])),
-        K.Span(4, K.Stack([
-          K.Card({ title:'Bütçenin yeri', hint:'budget-rank',
-            body:html`<p class="small">${SP.PRECEDENCE[5].note}</p>
-              <div class="mt-10">${K.Table({ tight:true, headers:['Sıra', 'Kural'],
-                rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label] ) })}</div>` }),
-        ])),
-        K.Span(12, raw(UI.rail(['substitute', 'bulk', 'budget-rank']))),
-      ]));
+      return String(html`
+        <div class="mb-8">${toolbar(tab)}</div>
+        ${K.Ledger(() => [swapCard(), bulkCard(),
+          K.Entry({ label:'Bütçenin yeri', hint:'budget-rank', meta:'öncelik sırası',
+            note:SP.PRECEDENCE[5].note,
+            body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
+              rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
+        ])}
+        <div class="mt-24">${raw(UI.rail(['substitute', 'bulk', 'budget-rank']))}</div>`);
     }
     if(tab === 'fiyat'){
-      return String(K.Grid([
-        K.Span(12, toolbar(tab)),
-        K.Span(12, priceCard()),
-        K.Span(12, raw(UI.rail(['price-estimate', 'certainty']))),
-      ]));
+      return String(html`
+        <div class="mb-8">${toolbar(tab)}</div>
+        ${K.Ledger(() => [priceCard()])}
+        <div class="mt-24">${raw(UI.rail(['price-estimate', 'certainty']))}</div>`);
     }
-    return String(K.Grid([
-      K.Span(12, toolbar(tab)),
-      K.Span(7, K.Stack([totalCard(), itemsCard()])),
-      K.Span(5, K.Stack([coverageCard()])),
-      K.Span(12, raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))),
-    ]));
+    return String(html`
+      <div class="mb-8">${toolbar(tab)}</div>
+      ${K.Ledger(() => [totalCard(), itemsCard(), coverageCard()])}
+      <div class="mt-24">${raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))}</div>`);
   }
 
   const handle = {
@@ -15212,31 +15334,28 @@ SP.Screens.analytics = (function(){
 
   async function render(){
     const tab = S.ui.analyticsTab;
-    const tabs = K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'an-tab', aria:'Analiz görünümü' }));
+    const head = html`<div class="mb-8">${K.Subtabs({ items:TABS, value:tab,
+      act:'an-tab', aria:'Analiz görünümü' })}</div>`;
 
     if(tab === 'hafta'){
-      return String(K.Grid([tabs,
-        K.Span(8, reportCard()),
-        K.Span(4, K.Stack([disciplineCard(),
-          K.Card({ title:'Raporun mantığı',
-            body:html`<p class="small muted">Sayılar kural motorundan gelir; Patron ajan yalnızca
-              cümleye çevirir. Çelişki varsa öncelik sırası uygulanır ve hangi kuralın
-              kazandığı yazılır.</p>
-              ${K.Table({ tight:true, headers:['Sıra', 'Kural'],
-                rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) })}` }),
-        ])),
-        K.Span(12, raw(UI.rail(['grounding', 'decision', 'minimum-day']))),
-      ]));
+      return String(html`${head}
+        ${K.Ledger(() => [reportCard(), disciplineCard(),
+          K.Entry({ label:'Raporun mantığı', meta:'sayı nereden gelir',
+            note:'Sayılar kural motorundan gelir; Patron ajan yalnızca cümleye çevirir. '
+              + 'Çelişki varsa öncelik sırası uygulanır ve hangi kuralın kazandığı yazılır.',
+            body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
+              rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
+        ])}
+        <div class="mt-24">${raw(UI.rail(['grounding', 'decision', 'minimum-day']))}</div>`);
     }
     if(tab === 'seri'){
-      return String(K.Grid([tabs, K.Span(12, seriesCard()),
-        K.Span(12, raw(UI.rail(['trend', 'ref-range', 'certainty'])))]));
+      return String(html`${head}
+        ${K.Ledger(() => [seriesCard()])}
+        <div class="mt-24">${raw(UI.rail(['trend', 'ref-range', 'certainty']))}</div>`);
     }
-    return String(K.Grid([tabs,
-      K.Span(7, crossCard()),
-      K.Span(5, pairCard()),
-      K.Span(12, raw(UI.rail(['trend', 'certainty', 'grounding']))),
-    ]));
+    return String(html`${head}
+      ${K.Ledger(() => [crossCard(), pairCard()])}
+      <div class="mt-24">${raw(UI.rail(['correlation', 'trend', 'certainty']))}</div>`);
   }
 
   const handle = {
@@ -15296,7 +15415,7 @@ SP.Screens.office = (function(){
     const notes = SP.Office.notes().filter(n => n.agent === agent.id);
 
     return K.Card({
-      class:'desk',
+      box:true, class:'desk',
       body:html`
         <div class="desk__head">
           ${P.avatar(agent.id)}
@@ -15459,17 +15578,20 @@ SP.Screens.office = (function(){
 
   async function render(){
     const flags = SP.Model.openFlags();
-    return String(K.Grid([
-      when(flags.length, () => K.Span(12, K.Stack(map(flags, P.flagCard), 'sm'))),
-      K.Span(12, briefingCard()),
-      K.Span(8, html`<div class="desks">${map(SP.AGENTS, deskCard)}</div>`),
-      K.Span(4, K.Stack([agendaCard(), decisionCard(),
-        K.Card({ title:'Yetki ayrımı', hint:'office',
+    return String(html`
+      ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
+      ${K.Ledger(() => [
+        briefingCard(),
+        K.Entry({ wide:true, label:'Masalar', meta:SP.AGENTS.length + ' ajan',
+          note:'Her ajan yalnız kendi alanına bakar. Yetki dışına çıkmaz; '
+            + 'çıkarsa çıktısı basılmaz.',
+          body:html`<div class="desks">${map(SP.AGENTS, deskCard)}</div>` }),
+        agendaCard(), decisionCard(),
+        K.Entry({ label:'Yetki ayrımı', hint:'office', meta:'kim neye bakar',
           body:html`<ul class="bullets small muted">${map(SP.AGENTS, a => html`
             <li><b>${a.name}</b> — ${a.scope}</li>`)}</ul>` }),
-      ])),
-      K.Span(12, raw(UI.rail(['office', 'grounding', 'no-model', 'privacy', 'decision']))),
-    ]));
+      ])}
+      <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'no-model', 'privacy', 'decision']))}</div>`);
   }
 
   const handle = {
@@ -15677,12 +15799,10 @@ SP.Screens.team = (function(){
   }
 
   async function render(){
-    return String(K.Grid([
-      K.Span(12, tabsCard()),
-      K.Span(8, K.Stack([chatCard(), briefCard()])),
-      K.Span(4, K.Stack([scopeCard(), suggestCard()])),
-      K.Span(12, raw(UI.rail(['office', 'grounding', 'no-model', 'privacy']))),
-    ]));
+    return String(html`
+      <div class="mb-8">${tabsCard()}</div>
+      ${K.Ledger(() => [chatCard(), scopeCard(), suggestCard(), briefCard()])}
+      <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'no-model', 'privacy']))}</div>`);
   }
 
   async function send(text){
@@ -15837,19 +15957,17 @@ SP.Screens.meeting = (function(){
 
   async function render(){
     const open = S.officeMeetings.find(m => m.id === S.ui.meetingOpen);
-    return String(K.Grid([
-      K.Span(7, K.Stack([agendaCard(), liveCard(), open ? minutesCard(open) : null])),
-      K.Span(5, K.Stack([
-        historyCard(),
-        K.Card({ title:'Çelişki nasıl çözülür?', hint:'office',
-          body:html`<p class="small muted">Üstteki sıra alttakini her zaman yener.
-            Bu tartışmaya açık değildir; Patron da buna uyar.</p>
-            <div class="mt-10">${K.Table({ tight:true, headers:['Sıra', 'Kural', 'Neden'],
-              rows:SP.PRECEDENCE.map(p => [String(p.rank), html`<b>${p.label}</b>`,
-                html`<span class="small">${p.note}</span>`]) })}</div>` }),
-      ])),
-      K.Span(12, raw(UI.rail(['office', 'grounding', 'decision', 'no-model']))),
-    ]));
+    return String(html`
+      ${K.Ledger(() => [
+        agendaCard(), liveCard(), open ? minutesCard(open) : null, historyCard(),
+        K.Entry({ label:'Çelişki nasıl çözülür?', hint:'office', meta:'öncelik sırası',
+          note:'Üstteki sıra alttakini her zaman yener. Bu tartışmaya açık değildir; '
+            + 'Patron da buna uyar.',
+          body:K.Table({ tight:true, headers:['Sıra', 'Kural', 'Neden'],
+            rows:SP.PRECEDENCE.map(p => [String(p.rank), html`<b>${p.label}</b>`,
+              html`<span class="small">${p.note}</span>`]) }) }),
+      ])}
+      <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'decision', 'no-model']))}</div>`);
   }
 
   const handle = {
@@ -16037,11 +16155,9 @@ SP.Screens.family = (function(){
   }
 
   async function render(){
-    return String(K.Grid([
-      K.Span(7, K.Stack([profileCard(), targetCard()])),
-      K.Span(5, K.Stack([householdCard(), prefCard()])),
-      K.Span(12, raw(UI.rail(['profiles', 'macro-target', 'lab-linked-food', 'privacy']))),
-    ]));
+    return String(html`
+      ${K.Ledger(() => [profileCard(), targetCard(), householdCard(), prefCard()])}
+      <div class="mt-24">${raw(UI.rail(['profiles', 'macro-target', 'lab-linked-food', 'privacy']))}</div>`);
   }
 
   const handle = {
@@ -16372,33 +16488,32 @@ SP.Screens.guide = (function(){
 
   async function render(){
     const tab = S.ui.guideTab;
-    const tabs = K.Span(12, K.Subtabs({ items:TABS, value:tab, act:'guide-tab', aria:'Rehber görünümü' }));
+    const head = html`<div class="mb-8">${K.Subtabs({ items:TABS, value:tab,
+      act:'guide-tab', aria:'Rehber görünümü' })}</div>`;
 
     if(tab === 'model'){
-      return String(K.Grid([tabs, K.Span(7, modelCard()), K.Span(5, quotaCard()),
-        K.Span(12, raw(UI.rail(['no-model', 'grounding', 'privacy'])))]));
+      return String(html`${head}
+        ${K.Ledger(() => [modelCard(), quotaCard()])}
+        <div class="mt-24">${raw(UI.rail(['no-model', 'grounding', 'privacy']))}</div>`);
     }
     if(tab === 'veri'){
-      return String(K.Grid([tabs, K.Span(7, dataCard()), K.Span(5, storageCard()),
-        K.Span(12, raw(UI.rail(['backup', 'privacy', 'profiles'])))]));
+      return String(html`${head}
+        ${K.Ledger(() => [dataCard(), storageCard()])}
+        <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`);
     }
     if(tab === 'sinir'){
-      return String(K.Grid([tabs,
-        K.Span(7, K.Stack([clinicalCard(), redFlagCard()])),
-        K.Span(5, K.Stack([privacyCard(), groundingCard()])),
-        K.Span(12, raw(UI.rail(['red-flag', 'grounding', 'privacy', 'certainty'])))]));
+      return String(html`${head}
+        ${K.Ledger(() => [clinicalCard(), redFlagCard(), privacyCard(), groundingCard()])}
+        <div class="mt-24">${raw(UI.rail(['red-flag', 'grounding', 'privacy', 'certainty']))}</div>`);
     }
-    return String(K.Grid([tabs,
-      K.Span(7, K.Stack([howCard(), moduleCard()])),
-      K.Span(5, K.Stack([precedenceCard(),
-        K.Card({ title:'Asgari gün', hint:'minimum-day',
+    return String(html`${head}
+      ${K.Ledger(() => [howCard(), moduleCard(), precedenceCard(),
+        K.Entry({ label:'Asgari gün', hint:'minimum-day', meta:'kötü günün alt sınırı',
           body:html`<ul class="bullets small muted">
             <li>${SP.MINIMUM_DAY.protein}</li><li>${SP.MINIMUM_DAY.water}</li>
-            <li>${SP.MINIMUM_DAY.move}</li><li>${SP.MINIMUM_DAY.sleep}</li></ul>
-            <p class="small mt-8">${SP.MINIMUM_DAY.note}</p>` }),
-      ])),
-      K.Span(12, raw(UI.rail(['next-action', 'minimum-day', 'certainty', 'office']))),
-    ]));
+            <li>${SP.MINIMUM_DAY.move}</li><li>${SP.MINIMUM_DAY.sleep}</li></ul>` }),
+      ])}
+      <div class="mt-24">${raw(UI.rail(['minimum-day', 'next-action', 'certainty']))}</div>`);
   }
 
   const handle = {

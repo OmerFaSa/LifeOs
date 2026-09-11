@@ -128,11 +128,9 @@ SP.Screens.family = (function(){
   }
 
   async function render(){
-    return String(K.Grid([
-      K.Span(7, K.Stack([profileCard(), targetCard()])),
-      K.Span(5, K.Stack([householdCard(), prefCard()])),
-      K.Span(12, raw(UI.rail(['profiles', 'macro-target', 'lab-linked-food', 'privacy']))),
-    ]));
+    return String(html`
+      ${K.Ledger(() => [profileCard(), targetCard(), householdCard(), prefCard()])}
+      <div class="mt-24">${raw(UI.rail(['profiles', 'macro-target', 'lab-linked-food', 'privacy']))}</div>`);
   }
 
   const handle = {

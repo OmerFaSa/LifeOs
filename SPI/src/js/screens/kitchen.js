@@ -131,11 +131,9 @@ SP.Screens.kitchen = (function(){
   }
 
   async function render(){
-    return String(K.Grid([
-      K.Span(7, K.Stack([setupCard(), splitCard()])),
-      K.Span(5, K.Stack([memberCard(), dishInfoCard()])),
-      K.Span(12, raw(UI.rail(['household', 'portion', 'profiles']))),
-    ]));
+    return String(html`
+      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), dishInfoCard()])}
+      <div class="mt-24">${raw(UI.rail(['household', 'portion', 'profiles']))}</div>`);
   }
 
   const handle = {};

@@ -22,7 +22,7 @@ SP.Screens.office = (function(){
     const notes = SP.Office.notes().filter(n => n.agent === agent.id);
 
     return K.Card({
-      class:'desk',
+      box:true, class:'desk',
       body:html`
         <div class="desk__head">
           ${P.avatar(agent.id)}
@@ -185,17 +185,20 @@ SP.Screens.office = (function(){
 
   async function render(){
     const flags = SP.Model.openFlags();
-    return String(K.Grid([
-      when(flags.length, () => K.Span(12, K.Stack(map(flags, P.flagCard), 'sm'))),
-      K.Span(12, briefingCard()),
-      K.Span(8, html`<div class="desks">${map(SP.AGENTS, deskCard)}</div>`),
-      K.Span(4, K.Stack([agendaCard(), decisionCard(),
-        K.Card({ title:'Yetki ayrımı', hint:'office',
+    return String(html`
+      ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
+      ${K.Ledger(() => [
+        briefingCard(),
+        K.Entry({ wide:true, label:'Masalar', meta:SP.AGENTS.length + ' ajan',
+          note:'Her ajan yalnız kendi alanına bakar. Yetki dışına çıkmaz; '
+            + 'çıkarsa çıktısı basılmaz.',
+          body:html`<div class="desks">${map(SP.AGENTS, deskCard)}</div>` }),
+        agendaCard(), decisionCard(),
+        K.Entry({ label:'Yetki ayrımı', hint:'office', meta:'kim neye bakar',
           body:html`<ul class="bullets small muted">${map(SP.AGENTS, a => html`
             <li><b>${a.name}</b> — ${a.scope}</li>`)}</ul>` }),
-      ])),
-      K.Span(12, raw(UI.rail(['office', 'grounding', 'no-model', 'privacy', 'decision']))),
-    ]));
+      ])}
+      <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'no-model', 'privacy', 'decision']))}</div>`);
   }
 
   const handle = {

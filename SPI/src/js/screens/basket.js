@@ -430,36 +430,31 @@ SP.Screens.basket = (function(){
     const tab = S.ui.basketTab;
     if(tab === 'butce'){
       return String(html`
-        <div class="mb-20">${toolbar(tab)}</div>
+        <div class="mb-8">${toolbar(tab)}</div>
         ${budgetView()}
         <div class="mt-24">${raw(UI.rail(['budget-rank', 'price-estimate', 'certainty']))}</div>`);
     }
     if(tab === 'ikame'){
-      return String(K.Grid([
-        K.Span(12, toolbar(tab)),
-        K.Span(8, K.Stack([swapCard(), bulkCard()])),
-        K.Span(4, K.Stack([
-          K.Card({ title:'Bütçenin yeri', hint:'budget-rank',
-            body:html`<p class="small">${SP.PRECEDENCE[5].note}</p>
-              <div class="mt-10">${K.Table({ tight:true, headers:['Sıra', 'Kural'],
-                rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label] ) })}</div>` }),
-        ])),
-        K.Span(12, raw(UI.rail(['substitute', 'bulk', 'budget-rank']))),
-      ]));
+      return String(html`
+        <div class="mb-8">${toolbar(tab)}</div>
+        ${K.Ledger(() => [swapCard(), bulkCard(),
+          K.Entry({ label:'Bütçenin yeri', hint:'budget-rank', meta:'öncelik sırası',
+            note:SP.PRECEDENCE[5].note,
+            body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
+              rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
+        ])}
+        <div class="mt-24">${raw(UI.rail(['substitute', 'bulk', 'budget-rank']))}</div>`);
     }
     if(tab === 'fiyat'){
-      return String(K.Grid([
-        K.Span(12, toolbar(tab)),
-        K.Span(12, priceCard()),
-        K.Span(12, raw(UI.rail(['price-estimate', 'certainty']))),
-      ]));
+      return String(html`
+        <div class="mb-8">${toolbar(tab)}</div>
+        ${K.Ledger(() => [priceCard()])}
+        <div class="mt-24">${raw(UI.rail(['price-estimate', 'certainty']))}</div>`);
     }
-    return String(K.Grid([
-      K.Span(12, toolbar(tab)),
-      K.Span(7, K.Stack([totalCard(), itemsCard()])),
-      K.Span(5, K.Stack([coverageCard()])),
-      K.Span(12, raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))),
-    ]));
+    return String(html`
+      <div class="mb-8">${toolbar(tab)}</div>
+      ${K.Ledger(() => [totalCard(), itemsCard(), coverageCard()])}
+      <div class="mt-24">${raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))}</div>`);
   }
 
   const handle = {

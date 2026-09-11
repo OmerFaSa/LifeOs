@@ -116,12 +116,10 @@ SP.Screens.team = (function(){
   }
 
   async function render(){
-    return String(K.Grid([
-      K.Span(12, tabsCard()),
-      K.Span(8, K.Stack([chatCard(), briefCard()])),
-      K.Span(4, K.Stack([scopeCard(), suggestCard()])),
-      K.Span(12, raw(UI.rail(['office', 'grounding', 'no-model', 'privacy']))),
-    ]));
+    return String(html`
+      <div class="mb-8">${tabsCard()}</div>
+      ${K.Ledger(() => [chatCard(), scopeCard(), suggestCard(), briefCard()])}
+      <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'no-model', 'privacy']))}</div>`);
   }
 
   async function send(text){

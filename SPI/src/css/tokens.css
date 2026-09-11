@@ -42,14 +42,26 @@
      kimlik taşımaz. */
   --primary:#1F4E3D;       /* AA: beyaz üzerinde 8.9:1 */
   --primary-hover:#173E30;
-  --primary-soft:#E4EBE7;
   --primary-ink:#FFFFFF;
   --accent:#8A5A18;        /* AA: beyaz üzerinde 5.7:1 */
-  --accent-soft:#F6EDE0;
+
+  /* Durum renkleri PALETE GÖRE DEĞİŞMEZ. Bir tahlil sonucunun rengi
+     hangi tema seçildiğine göre değişemez — sağlık verisinde bu kabul
+     edilemez. */
   --danger:#9B3327;        /* AA: beyaz üzerinde 6.6:1 */
-  --danger-soft:#F8E7E3;
   --info:#3A5468;          /* AA: beyaz üzerinde 8.0:1 */
-  --info-soft:#E9EDF0;
+
+  /* ---- yumuşak zeminler: TÜRETİLİR ----
+
+     Bir uyarı kutusunun zemini, rengin KENDİ yüzeyine karışmış hâlidir.
+     Elle yazıldığında her palette ayrıca tanımlanması gerekiyordu ve
+     unutuluyordu: bordo temada bilgi kutuları varsayılan paletin soğuk
+     gri-mavisini alıyor, sıcak bir sayfada yabancı bir beyaz gibi
+     duruyordu. Türetince her palet kendi doğru tonunu alıyor. */
+  --primary-soft:color-mix(in oklab, var(--primary) 13%, var(--surface));
+  --accent-soft:color-mix(in oklab, var(--accent) 13%, var(--surface));
+  --danger-soft:color-mix(in oklab, var(--danger) 12%, var(--surface));
+  --info-soft:color-mix(in oklab, var(--info) 11%, var(--surface));
 
   /* ---- mürekkep ----
      Sayfayı sonlandıran koyu bant ve marka işareti. Saf siyah değil:
@@ -142,7 +154,12 @@
   --sidebar-w:236px;
   --nav-h:47px;   /* yalnız numaralı bölüm şeridi yapışır */
   --topbar-h:60px;
-  --content-max:1200px;
+  --content-max:1180px;
+
+  /* Defter düzeninin künye sütunu. Ölçü sabittir: sayfadan sayfaya
+     kayan bir sol sütun, defter hissini bozar. */
+  --gutter:196px;
+  --gutter-gap:52px;
 
   /* ================= KOYU PALET — tek tanım =================
      Buradaki değerler yalnızca aşağıdaki iki blokta kullanılır. */
@@ -160,14 +177,10 @@
 
   --d-primary:#7FBFA0;
   --d-primary-hover:#95CFB2;
-  --d-primary-soft:#1B2B23;
   --d-primary-ink:#0E1611;
   --d-accent:#D6A961;
-  --d-accent-soft:#2B2415;
   --d-danger:#E28C7C;
-  --d-danger-soft:#2E1B17;
   --d-info:#8FADC2;
-  --d-info-soft:#1A2126;
 
   --d-border:#2B2B25;
   --d-border-strong:#3B3B33;
@@ -205,14 +218,10 @@
     --text-3:var(--d-text-3);
     --primary:var(--d-primary);
     --primary-hover:var(--d-primary-hover);
-    --primary-soft:var(--d-primary-soft);
     --primary-ink:var(--d-primary-ink);
     --accent:var(--d-accent);
-    --accent-soft:var(--d-accent-soft);
     --danger:var(--d-danger);
-    --danger-soft:var(--d-danger-soft);
     --info:var(--d-info);
-    --info-soft:var(--d-info-soft);
     --border:var(--d-border);
     --border-strong:var(--d-border-strong);
     --rule:var(--d-rule);
@@ -251,14 +260,10 @@
   --text-3:var(--d-text-3);
   --primary:var(--d-primary);
   --primary-hover:var(--d-primary-hover);
-  --primary-soft:var(--d-primary-soft);
   --primary-ink:var(--d-primary-ink);
   --accent:var(--d-accent);
-  --accent-soft:var(--d-accent-soft);
   --danger:var(--d-danger);
-  --danger-soft:var(--d-danger-soft);
   --info:var(--d-info);
-  --info-soft:var(--d-info-soft);
   --border:var(--d-border);
   --border-strong:var(--d-border-strong);
   --rule:var(--d-rule);

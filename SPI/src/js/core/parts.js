@@ -135,8 +135,11 @@ SP.Parts = (function(){
   }
 
   /* Bos ekran yerine tek net eylem. */
+  /* Eylem ISTEGE BAGLI. Etiketsiz cagrildiginda bos bir dugme cizmek
+     -- ki oluyordu -- bos ekrani daha da bos gosterir. */
   function empty(text, label, act, data){
-    return K.Empty({ text, action:K.Button({ label, size:'sm', tone:'primary', act, data }) });
+    return K.Empty({ text,
+      action:label ? K.Button({ label, size:'sm', tone:'primary', act, data }) : null });
   }
 
   return { cert, markerRow, flagCard, avatar, sourceBadge, nutCell, minRow,
