@@ -82,6 +82,69 @@ SP.Screens.today = (function(){
     </div>`;
   }
 
+  /* SEMPTOM GİRİŞİ. Günlükte serbest metin bir not vardı, yapı yoktu.
+     Serbest metin aranamaz, sayılamaz, eğilime dönmez.
+
+     Şiddet üç basamak: daha ince bir ölçek kullanıcıdan olmayan bir
+     kesinlik ister ve günlük giriş yükünü artırır.
+
+     «Şikâyet yok» ile «girilmemiş» ayrı şeylerdir: işaretlemeden
+     kaydeden bir gün ikincisidir ve sistem bunu karıştırmaz. */
+  function symptomEntry(){
+    const d = shownDate();
+    const secili = SP.Symptom.ofDay(d);
+    const v = M.vitalsOf(d);
+    const kadin = (S.profile || {}).sex === 'female';
+    const w = SP.Symptom.window(30);
+
+    return K.Entry({
+      label:'Bugün bir şikâyetin var mı?',
+      meta:Object.keys(secili).length
+        ? Object.keys(secili).length + ' işaretli'
+        : (v && v.symptomsLogged ? 'şikâyet yok' : 'girilmedi'),
+      note:'Kan değeri deponun bir kısmını gösterir; kramp ve uyku şikâyeti '
+        + 'değerden önemli olabilir. İşaretlediklerin ilgili ölçümün yanında '
+        + 've hekim çıktısında görünür.',
+      action:html`${K.Button({ label:'Şikâyetim yok', size:'sm', act:'no-symptoms' })}`,
+      body:html`
+        ${map(SP.SYMPTOM_GROUPS, g => html`
+          <div class="symgrp">
+            <div class="symgrp__h">${g.name}</div>
+            <div class="symgrp__list">${map(
+              SP.SYMPTOMS.filter(x => x.group === g.id), sx => {
+                const sev = secili[sx.id];
+                return html`<button
+                  class="${cls('symbtn', sev && 'is-on', sev && 'sev-' + sev)}"
+                  data-act="cycle-symptom" data-id="${sx.id}"
+                  aria-pressed="${sev ? 'true' : 'false'}"
+                  title="${sx.hint}">
+                  <span>${sx.name}</span>
+                  ${when(sev, () => html`<span class="symbtn__s">${
+                    (SP.SYMPTOM_SEVERITY.find(z => z.value === sev) || {}).label}</span>`)}
+                </button>`;
+              })}</div>
+          </div>`)}
+        <p class="tiny dim mt-8">Bir şikâyete tıklayınca şiddeti artar:
+          hafif → orta → şiddetli → kapalı.</p>
+
+        ${when(kadin, () => html`<div class="mt-16">
+          ${K.Field({ label:'Adet kanaması', hint:'ferritin ve hemoglobin yorumu buna bağlı',
+            input:K.Checkbox({ id:'v-period', label:'Bugün kanama var',
+              checked:!!(v && v.period), act:'toggle-period' }) })}
+        </div>`)}
+
+        ${when(w.ok && w.rows.length, () => html`<div class="mt-16">
+          ${K.Table({ tight:true, headers:['Son 30 gün', 'Gün', 'Ortalama şiddet'],
+            rows:w.rows.slice(0, 5).map(r => [r.symptom.name,
+              r.days + ' / ' + w.loggedDays,
+              (SP.SYMPTOM_SEVERITY.find(z => z.value === Math.round(r.avgSeverity))
+                || { label:'—' }).label]) })}
+          <p class="tiny dim mt-6">Payda girilen gün sayısıdır, otuz değil:
+            işaretlenmemiş bir gün «şikâyet yok» sayılmaz.</p>
+        </div>`)}`,
+    });
+  }
+
   function formEntry(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
@@ -356,7 +419,7 @@ SP.Screens.today = (function(){
     }
 
     return String(html`${head}${K.Ledger([
-      formEntry(), quickEntry(), statusEntry(), whyEntry(),
+      formEntry(), symptomEntry(), quickEntry(), statusEntry(), whyEntry(),
     ])}
     <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'certainty']))}</div>`);
   }
@@ -367,6 +430,27 @@ SP.Screens.today = (function(){
       const n = Number(el.dataset.value);
       S.ui.mealDate = n === 0 ? null : U.iso(U.addDays(U.parse(shownDate()), n));
       if(S.ui.mealDate === U.todayISO()) S.ui.mealDate = null;
+      SP.App.render();
+    },
+    /* Şiddet tek düğmeden döner: hafif → orta → şiddetli → kapalı.
+       Ayrı bir seçici koymak günlük giriş yükünü artırırdı. */
+    async 'cycle-symptom'(el){
+      const d = shownDate();
+      const simdi = SP.Symptom.ofDay(d)[el.dataset.id] || 0;
+      const sonraki = simdi >= 3 ? 0 : simdi + 1;
+      await SP.Symptom.setSymptom(d, el.dataset.id, sonraki);
+      await M.saveVitals(d, { symptomsLogged:true });
+      SP.App.render();
+    },
+    async 'no-symptoms'(){
+      const d = shownDate();
+      await M.saveVitals(d, { symptoms:{}, symptomsLogged:true });
+      UI.toast('Bugün şikâyet yok olarak kaydedildi');
+      SP.App.render();
+    },
+    async 'toggle-period'(el){
+      const d = shownDate();
+      await M.saveVitals(d, { period:!!el.checked });
       SP.App.render();
     },
     async 'open-day'(el){

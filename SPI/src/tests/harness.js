@@ -159,6 +159,8 @@ SP.Test = (function(){
     S.profiles = [];
     S.prefs = SP.Model.defaultPrefs();
     S.labs = []; S.vitals = {}; S.meals = {}; S.workouts = []; S.progress = {};
+    S.meds = []; S.foods = [];
+    if(SP.Model.mountFoods) SP.Model.mountFoods();
     S.basket = SP.Model.defaultBasket();
     S.prices = {}; S.flags = []; S.decisions = [];
     S.office = null; S.officeChats = {}; S.officeMeetings = []; S.officeBriefings = {}; S.journal = {};
@@ -170,6 +172,8 @@ SP.Test = (function(){
       kitchenDish:null, kitchenGrams:1000,
       moveTab:'bugun', movePattern:'all', workoutOpen:null,
       basketTab:'sepet', priceEdit:null,
+      labQuery:'', labFilter:'all', labShowEmpty:false, dayTab:'giris',
+      mealTab:'gunluk',
       trendMarker:'weight', trendRange:90, analyticsTab:'capraz',
       officeAgent:'patron', officeDesk:null, officePerAgent:false,
       meetingAgenda:0, meetingOpen:null, guideTab:'kullanim',

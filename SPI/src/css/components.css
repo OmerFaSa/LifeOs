@@ -391,8 +391,23 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 }
 /* Izgara yalnız yataydır ve çok soluktur: veriyi kafeslemek yerine
    göze yükseklik duygusu verir. */
-.chart .axis{ stroke:var(--border); stroke-width:1; }
-.chart .band{ fill:var(--sec); opacity:.09; }
+/* Izgara GERİ ÇEKİLİR, taban çizgisi öne çıkar: veri okunur, ızgara
+   değil. */
+.chart .axis{ stroke:var(--border); stroke-width:1; opacity:.7; }
+.chart .axis--base{ stroke:var(--border-strong); opacity:1; }
+.chart .band{ fill:var(--sec); opacity:.1; }
+/* Hedef bandı ADLANDIRILIR: renkli bir dikdörtgen «bu ne?» diye
+   sordurtuyordu. */
+.chart .bandlbl{
+  font-size:9.5px; font-weight:600; letter-spacing:.06em;
+  fill:var(--sec); opacity:.85;
+}
+/* Son değer doğrudan yazılır — okunacak tek sayı odur. */
+.chart .endlbl{
+  font-family:var(--font-display); font-size:15px; font-weight:700;
+  fill:var(--text); font-variant-numeric:tabular-nums;
+}
+.chart .endunit{ font-size:9.5px; font-weight:600; fill:var(--text-3); }
 .chart .line{
   fill:none; stroke:var(--sec); stroke-width:2;
   stroke-linejoin:round; stroke-linecap:round;
@@ -400,7 +415,11 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .chart .line--accent{ stroke:var(--accent); }
 .chart .area{ fill:var(--sec); opacity:.09; }
 .chart .area--accent{ fill:var(--accent); opacity:.09; }
-.chart .pt{ fill:var(--sec); stroke:var(--surface); stroke-width:1.5; }
+/* Yüzey halkası: üst üste binen iki nokta birbirine karışmaz. */
+.chart .pt{ fill:var(--sec); stroke:var(--surface); stroke-width:2; }
+/* Son nokta «şu an neredeyim» demektir; vurgulu durur. */
+.chart .pt--last{ stroke-width:2.5; }
+.chart circle{ cursor:default; }
 .chart .pt--accent{ fill:var(--accent); }
 .chart .barfill{ fill:var(--sec); }
 .chart .barfill--muted{ fill:var(--surface-3); }
@@ -834,6 +853,80 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .desk__role{ display:block; font-size:var(--fs-xs); color:var(--text-3); margin-top:2px; }
 .desk__line{ margin-top:10px; font-size:var(--fs-sm); color:var(--text-2); line-height:1.45; }
 .desk__open{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+
+/* Masanin kimlik seridi. Renk BIR DURUM DEGIL, bir imzadir: masanin
+   kime ait oldugunu soyler. Durum renkleri (kirmizi/sari/yesil) bu
+   seritte asla kullanilmaz — o ayrim bozulursa ofis okunamaz hale
+   gelir. Serit sol kenarda durur ve masa kapaliyken de gorunur. */
+.desk{ position:relative; }
+.desk::before{
+  content:''; position:absolute; inset:0 auto 0 0;
+  width:3px; border-radius:3px 0 0 3px;
+  background:var(--surface-3);
+}
+.desk--patron::before{ background:var(--agent-patron); }
+.desk--lab::before   { background:var(--agent-lab); }
+.desk--nutri::before { background:var(--agent-nutri); }
+.desk--move::before  { background:var(--agent-move); }
+.desk--money::before { background:var(--agent-money); }
+
+/* Patron tek basina durur: esitlerin yaninda degil, ustunde. */
+.desks--solo{ columns:auto; }
+.desks--solo > .desk{ margin-bottom:0; }
+
+/* Masanin devir defteri — tek satirlik, masanin boyunu uzatmaz. */
+.deskflow{ margin-top:10px; display:flex; flex-direction:column; gap:2px; }
+.deskflow__row{
+  display:flex; align-items:baseline; gap:7px;
+  width:100%; min-width:0; text-align:left;
+  background:none; border:0; padding:3px 0; cursor:pointer;
+  font:inherit; font-size:var(--fs-xs); color:var(--text-3);
+  border-radius:4px;
+}
+.deskflow__row:hover .deskflow__what{ color:var(--text); text-decoration:underline; }
+.deskflow__row:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.deskflow__dir{ flex:none; font-weight:700; color:var(--text-3); }
+.deskflow__pair{ display:flex; align-items:center; gap:4px; flex:none; }
+.deskflow__pair .agentav{ width:18px; height:18px; font-size:9px; }
+.deskflow__dir--in{ opacity:.6; }
+.deskflow__what{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ---- masalar arasi devir -------------------------------------------
+
+   Ofisin en ozgun fikri buradadir: bes ayri rapor degil, aralarindaki
+   TRAFIK. Satir iki avatarla baslar (kimden kime), iki cumleyle devam
+   eder (ne olculdu / ne isteniyor) ve tiklanabilir biter. */
+.handoffs{ display:flex; flex-direction:column; gap:1px; }
+.handoff{
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:14px;
+  align-items:start; width:100%; text-align:left;
+  padding:13px 2px; background:none; border:0; cursor:pointer;
+  font:inherit; color:inherit;
+  border-top:1px solid var(--border);
+}
+.handoffs > .handoff:first-child{ border-top:0; }
+.handoff:hover{ background:var(--surface-2); }
+.handoff:focus-visible{ outline:2px solid var(--primary); outline-offset:-2px; }
+.handoff__chain{ display:flex; align-items:center; gap:5px; padding-top:1px; }
+.handoff__arrow{ font-size:var(--fs-sm); color:var(--text-3); font-weight:700; }
+.handoff__body{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+.handoff__find{ font-size:var(--fs-sm); color:var(--text); line-height:1.45; }
+.handoff__ask{ font-size:var(--fs-sm); color:var(--text-2); line-height:1.45; }
+.handoff__cta{
+  font-size:var(--fs-xs); color:var(--text-3); margin-top:2px;
+  font-family:var(--font-display); letter-spacing:.02em;
+}
+.handoff:hover .handoff__cta{ color:var(--primary); }
+/* Ton yalnizca ACILIYETI soyler ve yalnizca OKA dokunur; kimlik rengi
+   avatarda durur. Iki renk sistemi ayni yuzeyde birbirine karismaz. */
+.handoff--danger .handoff__arrow{ color:var(--danger); }
+.handoff--warn   .handoff__arrow{ color:var(--accent); }
+
+/* Dar kutuda zincir ustte, cumleler altta: 26px'lik iki avatar ile
+   metin ayni satira sigmiyordu. Olcu kutudan gelir, ekrandan degil. */
+@container satir (max-width:520px){
+  .handoff{ grid-template-columns:minmax(0,1fr); gap:8px; }
+}
 
 .deskstats{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; margin-top:12px; }
 .deskstat{
@@ -2094,3 +2187,75 @@ body.is-dragging .drop.is-over{
 .inlineedit{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .inlineedit .input{ max-width:150px; }
 .inlineedit__u{ font-size:13px; color:var(--text-3); }
+
+/* ================= semptom girişi =================
+
+   Günlükte serbest metin bir not vardı, yapı yoktu. Serbest metin
+   aranamaz, sayılamaz, eğilime dönmez.
+
+   Şiddet tek düğmeden döner (hafif → orta → şiddetli → kapalı): ayrı
+   bir seçici günlük giriş yükünü artırırdı. Renk tek başına anlam
+   taşımaz — şiddet düğmenin içinde yazıyla da durur. */
+.symgrp + .symgrp{ margin-top:14px; }
+.symgrp__h{
+  font-size:10px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--text-3); margin-bottom:7px;
+}
+.symgrp__list{ display:flex; flex-wrap:wrap; gap:6px; }
+.symbtn{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:6px 12px; border-radius:var(--r-pill);
+  border:1px solid var(--border); background:var(--surface);
+  color:var(--text-2); font-size:13px; font-weight:500;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease),
+             color var(--dur) var(--ease);
+}
+.symbtn:hover{ border-color:var(--border-strong); color:var(--text); }
+.symbtn__s{
+  font-size:10.5px; font-weight:700; letter-spacing:.03em;
+  padding:1px 6px; border-radius:var(--r-pill);
+  background:color-mix(in srgb, currentColor 14%, transparent);
+}
+.symbtn.is-on{ color:var(--text); font-weight:600; }
+.symbtn.sev-1{ border-color:color-mix(in srgb, var(--info) 40%, var(--border));
+  background:var(--info-soft); }
+.symbtn.sev-2{ border-color:color-mix(in srgb, var(--accent) 45%, var(--border));
+  background:var(--accent-soft); }
+.symbtn.sev-3{ border-color:color-mix(in srgb, var(--danger) 45%, var(--border));
+  background:var(--danger-soft); }
+
+/* ================= panel görünümü =================
+
+   Tek liste doğru karardı; ama hekim «lipid paneline» bakar. Panel bir
+   sayfa değil bir kart: tek listenin YANINDA ikinci bir görünüm. */
+.panelgrid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:16px;
+  align-items:start;
+}
+.panelcard{
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface); padding:14px 16px;
+  display:flex; flex-direction:column; gap:8px;
+}
+/* Bandın dışında ölçüm varsa panelin solunda bir şerit: hangi panele
+   bakılacağı tek bakışta okunur. */
+.panelcard.has-out{ border-left:3px solid var(--accent); }
+.panelcard__h{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.panelcard__h b{ font-size:14.5px; font-weight:600; letter-spacing:-.005em; }
+.panelcard__rows{ display:flex; flex-direction:column; border-top:1px solid var(--border); }
+.panelrow{
+  display:grid; grid-template-columns:minmax(0,1fr) auto auto;
+  gap:10px; align-items:center;
+  padding:7px 0; border:none; border-bottom:1px solid var(--border);
+  background:none; color:var(--text); text-align:left;
+  transition:background var(--dur) var(--ease);
+}
+.panelrow:last-child{ border-bottom:none; }
+.panelrow:hover{ background:var(--surface-hover); }
+.panelrow__n{ font-size:13px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.panelrow__v{ font-family:var(--font-display); font-size:14px; font-weight:600; white-space:nowrap; }
+.panelrow__v small{ font-size:10.5px; color:var(--text-3); margin-left:2px; }
+.panelcard__f{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+@container satir (max-width:620px){
+  .panelgrid{ grid-template-columns:minmax(0,1fr); }
+}

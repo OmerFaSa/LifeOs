@@ -254,56 +254,109 @@ SP.UI = (function(){
     return step * mag;
   }
 
+  /* ÇİZGİ GRAFİĞİ — sistemin en çok bakılan görseli.
+
+     Beş şey eklendi ve hepsinin bir gerekçesi var:
+
+       · SON NOKTA vurgulu ve DOĞRUDAN ETİKETLİ. Bir sağlık grafiğinde
+         okunacak tek sayı «şu an neredeyim»dir; onu eksene bakarak
+         tahmin ettirmek gereksiz iş. Her noktaya sayı yazmak ise
+         grafiği tabloya çevirir — yalnızca sonuncusu yazılır.
+       · HEDEF BANDI ADLANDIRILDI. Renkli bir dikdörtgen «bu ne?» diye
+         sordurtuyordu.
+       · IZGARA GERİ ÇEKİLDİ, taban çizgisi öne çıktı.
+       · HER NOKTANIN kendi başlığı var: fareyle üstüne gelince tarih ve
+         değer okunur. Kitaplık gerekmiyor — SVG `<title>` yeter.
+       · NOKTALAR YÜZEY HALKASI taşır: üst üste binen iki nokta
+         birbirine karışmaz. */
   function lineChart(series, opts){
     const o = opts || {};
-    const w = 640, h = o.height || 190, padL = 34, padR = 14, padT = 14, padB = 26;
-    const all = series.reduce((acc,s) => acc.concat(s.data.filter(v => v != null)), []);
+    const w = 640, h = o.height || 190;
+    const padL = 36, padT = 16, padB = 28;
+    /* Son noktanın etiketi için sağda yer ayrılır; yoksa sayı grafiğin
+       dışına taşar ve kırpılır. */
+    const padR = o.endLabel === false ? 16 : 62;
+
+    const all = series.reduce((acc, s2) => acc.concat(s2.data.filter(v => v != null)), []);
     if(!all.length) return '<p class="small dim">Grafik için henüz veri yok.</p>';
 
     const maxV = Math.max.apply(null, all), minV = Math.min.apply(null, all);
-    const pad = Math.max(2, (maxV-minV)*0.2);
-    const step = niceStep((maxV+pad - Math.max(0, minV-pad)) / 4);
-    const top = o.max != null ? o.max : Math.ceil((maxV+pad) / step) * step;
-    const bottom = o.min != null ? o.min : Math.max(0, Math.floor((minV-pad) / step) * step);
-    const n = Math.max.apply(null, series.map(s => s.data.length));
-    const X = i => padL + (w-padL-padR) * (n <= 1 ? 0.5 : i/(n-1));
-    const Y = v => h-padB - (h-padT-padB) * ((v-bottom)/((top-bottom)||1));
+    const pad = Math.max(2, (maxV - minV) * 0.2);
+    const step = niceStep((maxV + pad - Math.max(0, minV - pad)) / 4);
+    const top = o.max != null ? o.max : Math.ceil((maxV + pad) / step) * step;
+    const bottom = o.min != null ? o.min : Math.max(0, Math.floor((minV - pad) / step) * step);
+    const n = Math.max.apply(null, series.map(s2 => s2.data.length));
+    const X = i => padL + (w - padL - padR) * (n <= 1 ? 0.5 : i / (n - 1));
+    const Y = v => h - padB - (h - padT - padB) * ((v - bottom) / ((top - bottom) || 1));
 
-    let svg = '<svg class="chart" viewBox="0 0 '+w+' '+h+'" role="img">';
-    const ticks = 4;
-    for(let i = 0; i <= ticks; i++){
-      const v = bottom + (top-bottom)*i/ticks;
-      const y = Y(v);
-      svg += '<line class="axis" x1="'+padL+'" x2="'+(w-padR)+'" y1="'+y+'" y2="'+y+'"/>';
-      svg += '<text x="'+(padL-6)+'" y="'+(y+3)+'" text-anchor="end">'+Math.round(v)+'</text>';
-    }
+    let svg = '<svg class="chart" viewBox="0 0 ' + w + ' ' + h + '" role="img"'
+      + (o.title ? ' aria-label="' + U.esc(o.title) + '"' : '') + '>';
+
+    /* Hedef bandı çizgilerin ALTINDA durur ve adı yazılır. */
     if(o.band){
       const y1 = Y(o.band[1]), y2 = Y(o.band[0]);
-      svg += '<rect class="band" x="'+padL+'" y="'+y1+'" width="'+(w-padL-padR)+'" height="'+Math.max(0,y2-y1)+'" opacity=".5"/>';
-    }
-    series.forEach(s => {
-      const pts = s.data.map((v,i) => v == null ? null : [X(i), Y(v)]).filter(Boolean);
-      if(!pts.length) return;
-      const d = 'M' + pts.map(p => p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ');
-      if(pts.length > 1 && o.area !== false){
-        svg += '<path class="area'+(s.accent?' area--accent':'')+'" d="'+d+' L '+pts[pts.length-1][0].toFixed(1)+' '+(h-padB)+' L '+pts[0][0].toFixed(1)+' '+(h-padB)+' Z"/>';
+      const yh = Math.max(0, y2 - y1);
+      svg += '<rect class="band" x="' + padL + '" y="' + y1 + '" width="'
+        + (w - padL - padR) + '" height="' + yh + '"/>';
+      if(yh > 14){
+        svg += '<text class="bandlbl" x="' + (w - padR - 6) + '" y="' + (y1 + 11)
+          + '" text-anchor="end">' + U.esc(o.bandLabel || 'hedef bandı') + '</text>';
       }
-      svg += '<path class="line'+(s.accent?' line--accent':'')+'" d="'+d+'"/>';
-      pts.forEach((p,i) => {
-        const last = i === pts.length-1;
-        svg += '<circle class="pt'+(s.accent?' pt--accent':'')+'" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(last?4:2.6)+'"/>';
+    }
+
+    const ticks = 4;
+    for(let i = 0; i <= ticks; i++){
+      const v = bottom + (top - bottom) * i / ticks;
+      const y = Y(v);
+      svg += '<line class="' + (i === 0 ? 'axis axis--base' : 'axis') + '" x1="' + padL
+        + '" x2="' + (w - padR) + '" y1="' + y + '" y2="' + y + '"/>';
+      svg += '<text x="' + (padL - 6) + '" y="' + (y + 3) + '" text-anchor="end">'
+        + U.fmtNum(Math.round(v * 10) / 10) + '</text>';
+    }
+
+    series.forEach(s2 => {
+      const pts = s2.data.map((v, i) => v == null ? null : [X(i), Y(v), v, i]).filter(Boolean);
+      if(!pts.length) return;
+      const d = 'M' + pts.map(p2 => p2[0].toFixed(1) + ' ' + p2[1].toFixed(1)).join(' L ');
+      if(pts.length > 1 && o.area !== false){
+        svg += '<path class="area' + (s2.accent ? ' area--accent' : '') + '" d="' + d
+          + ' L ' + pts[pts.length - 1][0].toFixed(1) + ' ' + (h - padB)
+          + ' L ' + pts[0][0].toFixed(1) + ' ' + (h - padB) + ' Z"/>';
+      }
+      svg += '<path class="line' + (s2.accent ? ' line--accent' : '') + '" d="' + d + '"/>';
+
+      pts.forEach((p2, i) => {
+        const sonNokta = i === pts.length - 1;
+        const etiket = (o.labels && o.labels[p2[3]]) ? o.labels[p2[3]] + ' · ' : '';
+        svg += '<circle class="pt' + (s2.accent ? ' pt--accent' : '')
+          + (sonNokta ? ' pt--last' : '') + '" cx="' + p2[0].toFixed(1) + '" cy="'
+          + p2[1].toFixed(1) + '" r="' + (sonNokta ? 5 : 3) + '">'
+          + '<title>' + U.esc(etiket + U.fmtNum(p2[2]) + (o.unit ? ' ' + o.unit : ''))
+          + '</title></circle>';
       });
+
+      /* Son değer doğrudan yazılır: okunacak tek sayı odur. */
+      if(o.endLabel !== false){
+        const sp = pts[pts.length - 1];
+        svg += '<text class="endlbl" x="' + (sp[0] + 10).toFixed(1) + '" y="'
+          + (sp[1] + 4).toFixed(1) + '">' + U.esc(U.fmtNum(sp[2])) + '</text>';
+        if(o.unit){
+          svg += '<text class="endunit" x="' + (sp[0] + 10).toFixed(1) + '" y="'
+            + (sp[1] + 17).toFixed(1) + '">' + U.esc(o.unit) + '</text>';
+        }
+      }
     });
+
     if(o.labels){
-      o.labels.forEach((lb,i) => {
+      o.labels.forEach((lb, i) => {
         if(n > 8 && i % 2) return;
-        svg += '<text x="'+X(i)+'" y="'+(h-8)+'" text-anchor="middle">'+U.esc(lb)+'</text>';
+        svg += '<text x="' + X(i) + '" y="' + (h - 8) + '" text-anchor="middle">'
+          + U.esc(lb) + '</text>';
       });
     }
     svg += '</svg>';
     return svg;
   }
-
   function barChart(rows, opts){
     const o = opts || {};
     const w = 640, h = o.height || 150, padL = 30, padR = 10, padT = 12, padB = 26;

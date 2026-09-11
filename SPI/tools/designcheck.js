@@ -91,8 +91,10 @@ async function waitForServer(url){
       await SP.Model.saveProfile({ name:'Ömer', birthYear:1998, sex:'male',
         heightCm:178, weightKg:74, activity:'moderate', goal:'health' });
       const r = SP.Model.newLab('2026-08-20');
-      Object.entries({ hemoglobin:13.8, ferritin:26, b12:288, hdl:44, ldl:128,
-                       tsh:2.6, crp:1.2, glukoz:92 })
+      /* Bir ölçüm BİLEREK bandın altında: masalar arası devir satırı
+         ancak böyle çizilir, çizilmeyen satırın taşması da görülmez. */
+      Object.entries({ hemoglobin:13.8, ferritin:14, b12:288, hdl:44, ldl:128,
+                       tsh:2.6, crp:1.2, glukoz:92, vitd:16 })
         .forEach(([k, v]) => {
           const bb = SP.BIO_BY_ID[k];
           if(bb) r.values[k] = { v, cert:'measured', unit:bb.unit };

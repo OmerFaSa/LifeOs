@@ -28,6 +28,7 @@ SP.Screens.labs = (function(){
     { id:'giris',  label:'Test gir',     icon:'flask' },
     { id:'gecmis', label:'Geçmiş',       icon:'clock' },
     { id:'kiyas',  label:'Karşılaştır',  icon:'chart' },
+    { id:'panel',  label:'Paneller',     icon:'layers' },
     { id:'ilac',   label:'İlaç',         icon:'flask' },
     { id:'trend',  label:'Eğilim',       icon:'chart' },
   ];
@@ -349,6 +350,8 @@ SP.Screens.labs = (function(){
             ${raw(UI.lineChart([{ data:series.map(s2 => s2.v) }], {
               labels:series.map(s2 => U.fmtShort(s2.date)),
               band:r && r.optimal ? r.optimal : (r ? r.ref : null),
+              bandLabel:r && r.optimal ? 'hedef bandı' : 'referans aralığı',
+              unit:b.unit, title:b.name + ' eğilimi',
               height:230,
             }))}
             <div class="pair">
@@ -385,6 +388,8 @@ SP.Screens.labs = (function(){
     const yorum = SP.Bio.interpretable(id);
     const ilacNotu = SP.Meds.markerNote(id, last ? last.date : null);
     const bozan = SP.Meds.distorts(id, last ? last.date : null);
+    const semptom = SP.Symptom.forMarker(id, 30);
+    const dongu = SP.Symptom.cycleNote(id, last ? last.date : null);
 
     return String(K.Stack([
       when(last, () => html`<div class="markerrow">
@@ -421,6 +426,24 @@ SP.Screens.labs = (function(){
         <p class="small muted mt-8">Yanlış okunmuş ya da yanlış yazılmış bir
           değeri buradan düzeltirsin; aynı oturuma yazılır, yeni oturum açılmaz.</p>`,
       })),
+
+      /* SEMPTOM VE DÖNGÜ — sayının yanında okunması gerekenler.
+         «Ferritin 18» tek başına bir sayıdır; «ferritin 18 ve son otuz
+         günün on ikisinde yorgunluk» bir tablodur. */
+      when(semptom.ok, () => K.Card({
+        title:'Bu ölçümle birlikte okunan şikâyetler',
+        sub:'son ' + semptom.windowDays + ' günün ' + semptom.loggedDays + ' günü girildi',
+        body:html`${K.Table({ tight:true, headers:['Şikâyet', 'Gün', 'Şiddet'],
+          rows:semptom.rows.map(r => [r.symptom.name,
+            r.days + ' / ' + semptom.loggedDays,
+            (SP.SYMPTOM_SEVERITY.find(z => z.value === Math.round(r.avgSeverity))
+              || { label:'—' }).label]) })}
+          <p class="small muted mt-8">Şikâyet bir bulgudur, tanı değildir.
+            Payda girilen gün sayısıdır: işaretlenmemiş bir gün «şikâyet yok»
+            sayılmaz.</p>`,
+      })),
+      when(dongu, () => K.Notice({ tone:dongu.tone, title:dongu.title + ':',
+        body:dongu.text })),
 
       /* İLAÇ VE AÇLIK — değeri yorumlamadan önce okunması gerekenler.
          Kişisel taban çizginin üstünde durur çünkü «gerçekten değişti»
@@ -497,6 +520,8 @@ SP.Screens.labs = (function(){
     const ov = SP.Bio.overdue();
     const ilaclar = SP.Meds.activeList();
     const acDurum = last ? (last.fasting || 'unknown') : 'unknown';
+    const semptomOzet = SP.Symptom.window(30);
+    const donguOzet = SP.Symptom.cycle();
 
     const hucre = (b, cell) => {
       if(!cell || cell.v == null) return null;
@@ -562,6 +587,26 @@ SP.Screens.labs = (function(){
         <p class="printdoc__note">Bu liste kullanıcının kendi girdisidir; sistem doz
           önermez ve ilaç kararı vermez. Ölçüm yorumlarında bu kayıtlar hesaba katılır.</p>`)}
 
+      ${when(semptomOzet.ok && semptomOzet.rows.length, () => html`
+        <h3 class="printdoc__h">Son 30 günün şikâyetleri</h3>
+        <div class="tabloKap">${K.Table({ tight:true,
+          headers:['Şikâyet', 'Kaç gün', 'Ortalama şiddet'],
+          rows:semptomOzet.rows.map(r => [r.symptom.name,
+            r.days + ' / ' + semptomOzet.loggedDays + ' gün',
+            (SP.SYMPTOM_SEVERITY.find(z => z.value === Math.round(r.avgSeverity))
+              || { label:'—' }).label]) })}</div>
+        <p class="printdoc__note">Payda, günlüğe giriş yapılan gün sayısıdır.
+          İşaretlenmemiş bir gün «şikâyet yok» sayılmaz.</p>`)}
+
+      ${when(donguOzet && donguOzet.ok, () => html`
+        <h3 class="printdoc__h">Adet döngüsü</h3>
+        <p class="printdoc__note">Son kanama başlangıcı
+          <b>${U.fmtDate(donguOzet.last.start)}</b> · döngünün
+          <b>${donguOzet.dayOfCycle}.</b> günü · ortalama uzunluk
+          <b>${donguOzet.length} gün</b>${when(!donguOzet.measured,
+            () => html` <i>(varsayılan — ölçülmedi)</i>`)}.
+          Ferritin ve hemoglobin yorumunda bu bilgi hesaba katılmıştır.</p>`)}
+
       ${when(flags.length, () => html`
         <h3 class="printdoc__h">Açık kırmızı bayraklar</h3>
         <ul class="printdoc__list">${map(flags, f => html`
@@ -590,6 +635,85 @@ SP.Screens.labs = (function(){
         Değerler kullanıcının kendi girdiği laboratuvar sonuçlarıdır; sistem
         ölçüm yapmaz. Teşhis ve tedavide karar hekimindir.</p>
     </div>`);
+  }
+
+  /* ---------------------------------------------------------- paneller
+
+     Tek liste doğru karardı: organ organ bölünmüş sayfalar okumayı
+     zorlaştırıyordu. Ama HEKİM «lipid paneline» bakar, tek tek
+     değerlere değil — ve bir panelin bütünü, parçalarının toplamından
+     fazlasını söyler.
+
+     Burada panel bir SAYFA değil bir SATIR: tek listenin yanında ikinci
+     bir görünüm, onun yerine geçen bir bölünme değil. */
+
+  function panelView(){
+    const p2 = S.profile;
+    const paneller = SP.PANELS.map(pan => {
+      const rows = SP.Bio.panelRows(pan.id, p2)
+        .filter(r => r.value != null);
+      const tum = SP.BIOMARKERS.filter(b => b.panel === pan.id);
+      const disinda = rows.filter(r => r.status && r.status.id !== 'ok');
+      const tarihler = rows.map(r => r.at).filter(Boolean).sort();
+      return { pan, rows, total:tum.length, out:disinda,
+        last:tarihler.length ? tarihler[tarihler.length - 1] : null };
+    });
+
+    const dolu = paneller.filter(x => x.rows.length);
+    const bos = paneller.filter(x => !x.rows.length);
+
+    if(!dolu.length){
+      return K.Ledger([K.Entry({
+        label:'Paneller', meta:'kayıt yok',
+        note:'Bir panelin bütünü, parçalarının toplamından fazlasını söyler. '
+          + 'Test girince paneller burada bir arada okunur.',
+        action:K.Button({ label:'Rapor yapıştır', tone:'primary', act:'open-paste' }),
+        body:P.empty('Henüz test girilmedi.'),
+      })]);
+    }
+
+    return K.Ledger([
+      K.Entry({
+        label:'Paneller', meta:dolu.length + ' panelde ölçüm var',
+        note:'Tek liste önem sırasına göre okunur; panel görünümü bir organı '
+          + 'ya da bir sistemi bir arada okumak içindir. İkisi birbirinin '
+          + 'yerine geçmez.',
+        body:html`<div class="panelgrid">${map(dolu, x => html`
+          <div class="${cls('panelcard', x.out.length && 'has-out')}">
+            <div class="panelcard__h">
+              <b>${x.pan.name}</b>
+              <span class="tiny dim">${x.rows.length} / ${x.total} ölçüm</span>
+            </div>
+            <p class="tiny dim">${x.pan.note}</p>
+            <div class="panelcard__rows">${map(x.rows, r => {
+              const yorum = SP.Bio.interpretable(r.marker.id);
+              return html`<button class="panelrow" data-act="open-marker"
+                data-id="${r.marker.id}">
+                <span class="panelrow__n">${r.marker.name}</span>
+                <span class="panelrow__v num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
+                <span class="panelrow__s">${when(yorum.ok,
+                  () => K.Badge({ label:r.status.label, tone:r.status.tone }),
+                  () => K.Badge({ label:yorum.label, tone:'muted', icon:false }))}</span>
+              </button>`;
+            })}</div>
+            <div class="panelcard__f">
+              ${when(x.last, () => html`<span class="tiny dim">${U.fmtDate(x.last)}</span>`)}
+              ${when(x.out.length, () => K.Badge({ label:x.out.length + ' bandın dışında',
+                tone:'warn' }))}
+              ${when(x.rows.length < x.total, () => html`<span class="tiny dim">${
+                x.total - x.rows.length} ölçüm eksik</span>`)}
+            </div>
+          </div>`)}</div>`,
+      }),
+
+      when(bos.length, () => K.Entry({
+        label:'Hiç ölçülmemiş paneller', meta:bos.length + ' panel',
+        note:'Bu panellerin hiçbir ölçümü girilmemiş. Eksik veri sıfır sayılmaz; '
+          + 'hesaplarda yok kabul edilir.',
+        body:html`<div class="chips">${map(bos, x => html`
+          <span class="chip chip--muted">${x.pan.name}</span>`)}</div>`,
+      })),
+    ]);
   }
 
   /* ------------------------------------------------------ ilaç ve takviye
@@ -996,6 +1120,7 @@ SP.Screens.labs = (function(){
       ${tab === 'giris' ? entryView()
         : tab === 'gecmis' ? historyView()
         : tab === 'kiyas' ? compareView()
+        : tab === 'panel' ? panelView()
         : tab === 'ilac' ? medsView()
         : tab === 'trend' ? trendView()
         : resultsView()}

@@ -80,6 +80,19 @@ SP.Office = (function(){
       })),
       fasting:SP.S.labs.length
         ? (SP.S.labs[SP.S.labs.length - 1].fasting || 'unknown') : null,
+      /* Kan degeri deponun bir kismini gosterir; sikayet degerden
+         onemli olabilir. Kerem ikisini birlikte gorur. */
+      symptoms:(function(){
+        const w = SP.Symptom.window(30);
+        return w.ok ? w.rows.slice(0, 5).map(r => ({
+          name:r.symptom.name, days:r.days, of:w.loggedDays,
+          severity:r.avgSeverity, markers:r.symptom.markers })) : [];
+      })(),
+      cycle:(function(){
+        const c = SP.Symptom.cycle();
+        return c.ok ? { day:c.dayOfCycle, length:c.length, measured:c.measured,
+          phase:c.phase } : null;
+      })(),
       overdue:SP.Bio.overdue().map(o => ({ panel:o.panel.name, days:o.days, note:o.note })),
       lastLab:SP.S.labs.length ? SP.S.labs[SP.S.labs.length - 1].date : null,
     };
@@ -209,6 +222,11 @@ SP.Office = (function(){
       if(d.fasting === 'no'){
         lines.push('Son oturum tok karnına alınmış; açlık glukozu, insülin ve '
           + 'trigliserit yorumlanmadı.');
+      }
+      if(d.symptoms && d.symptoms.length){
+        const en = d.symptoms[0];
+        lines.push('Son 30 günün ' + en.of + ' gününde giriş var; en sık '
+          + en.name.toLocaleLowerCase('tr-TR') + ' (' + en.days + ' gün).');
       }
       if(d.meds && d.meds.length){
         lines.push('Kullanılanlar: ' + d.meds.map(m => m.name).join(', ')
@@ -451,6 +469,212 @@ SP.Office = (function(){
     return out;
   }
 
+  /* ---------------------------------------------------- koclar arasi devir
+
+     Doktrinin merkezinde "her ajan yalnizca kendi alanina bakar" durur.
+     Ama bir masanin BULGUSU baska bir masanin ISI olabilir: ferritin
+     dusukse bu Kerem'in olcumu, Nesrin'in hedefidir. Patron'un tek isi
+     o devri gormek ve siraya koymaktir.
+
+     Devir bir tavsiye degildir. "Su olculdu, su masaya dusuyor" der;
+     dozu, plani, fiyati soylemez — onlari devredilen masa soyler.
+     Olculmemis bir sey devredilemez: tahmin devir uretmez. */
+
+  /* Capraz bulgudaki seri hangi masanin isi? */
+  const METRIC_OWNER = {
+    sleep:'move', hrv:'lab', load:'move', readiness:'move',
+    protein:'nutri', sodium:'nutri', kcal:'nutri',
+    sbp:'lab', weight:'lab',
+  };
+
+  /* Bir besin ogesini hangi olcumler dogrular? (biyobelirtec tablosunun
+     tersi indeksi — elle yazilmaz, veriden cikar.) */
+  let MARKER_FOR_NUTRIENT = null;
+  function markersForNutrient(id){
+    if(!MARKER_FOR_NUTRIENT){
+      MARKER_FOR_NUTRIENT = {};
+      SP.BIOMARKERS.forEach(b => {
+        (b.nutrients || []).forEach(n => {
+          (MARKER_FOR_NUTRIENT[n] || (MARKER_FOR_NUTRIENT[n] = [])).push(b);
+        });
+      });
+    }
+    return MARKER_FOR_NUTRIENT[id] || [];
+  }
+
+  /* Olcum bandin ALTINDA mi? Yon bilgisi markerin kendisinden gelir;
+     "kotu" demek yeterli degil, hangi yone kotu oldugu gerekir. */
+  function belowBand(b, st, v){
+    if(st.id === 'low' || st.id === 'belowOpt') return true;
+    if(st.id === 'red' && b.red && b.red.below != null && v <= b.red.below) return true;
+    return false;
+  }
+
+  function handoffs(){
+    const out = [];
+    const seen = {};
+    const push = h => {
+      if(seen[h.id]) return;
+      const a = SP.AGENT_BY_ID[h.from], b = SP.AGENT_BY_ID[h.to];
+      if(!a || !b || a.id === b.id) return;
+      seen[h.id] = true;
+      out.push(Object.assign({ tone:'info', via:'patron' }, h, {
+        fromName:a.name, fromRole:a.role, toName:b.name, toRole:b.role,
+      }));
+    };
+
+    /* --- Kerem -> Nesrin: bandin altindaki olcum, hangi besin ogesinin
+           hedefini aciyor? Nesrin'in tablosunda o acik zaten varsa devir
+           uyari tonuna cikar: iki masa ayni seyi soyluyor demektir. */
+    const gapRows = (function(){ try { return SP.Nutri.gaps(7).rows || []; } catch(e){ return []; } })();
+    const gapById = {};
+    gapRows.forEach(g => { gapById[g.id] = g; });
+
+    /* Ucu bandin altinda olcum ayni masaya ayni cumleyle gidiyorsa uc
+       satir yazilmaz: bilgi ayni, satir tek. Ayni toplama kurali masa
+       notlarinda da gecerli — devir defteri de uzamaz. */
+    const dusuk = SP.Bio.attention().slice(0, 8).filter(a =>
+      a.marker.nutrients && a.marker.nutrients.length
+      && belowBand(a.marker, a.status, a.value));
+
+    const nutAd = n => SP.NUTRI_BY_ID[n] ? SP.NUTRI_BY_ID[n].name : n;
+    const olcumAd = a => a.marker.name + ' ' + U.fmtNum(a.value) + ' ' + a.marker.unit;
+    const sonTarih = list => U.fmtDate(list.map(a => a.at).sort()[list.length - 1]);
+
+    const acikli = dusuk.filter(a => a.marker.nutrients.some(n => gapById[n]));
+    const aciksiz = dusuk.filter(a => !a.marker.nutrients.some(n => gapById[n]));
+
+    if(acikli.length){
+      const gaps = [];
+      acikli.forEach(a => a.marker.nutrients.forEach(n => {
+        if(gapById[n] && gaps.indexOf(n) < 0) gaps.push(n);
+      }));
+      push({
+        id:'lab-nutri-acik', from:'lab', to:'nutri', tone:'warn',
+        finding:(acikli.length === 1 ? olcumAd(acikli[0]) + ' bandın altında'
+          : acikli.length + ' ölçüm bandın altında: ' + acikli.map(olcumAd).join(', '))
+          + ' (ölçüldü, ' + sonTarih(acikli) + ').',
+        ask:'Aynı besin öğesi tabloda da açık: '
+          + gaps.map(n => nutAd(n) + ' %' + gapById[n].pct).join(', ')
+          + '. İki masa aynı şeyi söylüyor.',
+        route:'meals', ui:{ mealTab:'deger' }, cta:'Besin değeri tablosu',
+      });
+    }
+    if(aciksiz.length){
+      const hedefler = [];
+      aciksiz.forEach(a => a.marker.nutrients.forEach(n => {
+        if(hedefler.indexOf(n) < 0) hedefler.push(n);
+      }));
+      push({
+        id:'lab-nutri-band', from:'lab', to:'nutri', tone:'info',
+        finding:(aciksiz.length === 1 ? olcumAd(aciksiz[0]) + ' bandın altında'
+          : aciksiz.length + ' ölçüm bandın altında: ' + aciksiz.map(olcumAd).join(', '))
+          + ' (ölçüldü, ' + sonTarih(aciksiz) + ').',
+        ask:hedefler.map(nutAd).join(', ') + ' hedefini bu ölçümler belirler. '
+          + 'Tabloda açık görünmüyor: alım tutuyorsa sorun emilimde olabilir.',
+        route:'meals', ui:{ mealTab:'deger' }, cta:'Besin değeri tablosu',
+      });
+    }
+
+    /* --- Nesrin -> Kerem: uzun suredir kapanmayan bir acik, hic
+           olculmemis bir olcumle dogrulanabiliyorsa devir Kerem'e duser.
+           Burasi doktrinin en keskin yeri: acik TAHMIN, olcum DEGIL. */
+    gapRows.filter(g => g.kind === 'under' && g.pct < 80).slice(0, 6).forEach(g => {
+      const cands = markersForNutrient(g.id).filter(b => !SP.Model.latestOf(b.id));
+      if(!cands.length) return;
+      const m = cands[0];
+      push({
+        id:'nutri-lab-' + g.id, from:'nutri', to:'lab', tone:'warn',
+        finding:g.nutrient.name + ' alımı hedefin %' + g.pct + '\'i (7 günlük ortalama — hesaplandı).',
+        ask:m.name + ' hiç ölçülmemiş. Açığın gerçek olup olmadığını yalnızca ölçüm söyler.',
+        route:'labs', ui:{ labTab:'sonuc', labShowEmpty:true, labFilter:m.panel, markerOpen:m.id },
+        cta:m.name + ' satırı',
+      });
+    });
+
+    /* --- Nesrin -> Sedef: sepet acigi ile beslenme acigi ayni besin
+           ogesinde bulusuyorsa, is artik fiyat isidir. */
+    const mst = (function(){ try { return SP.Money.status(); } catch(e){ return null; } })();
+    if(mst && mst.coverage && mst.coverage.ok){
+      mst.coverage.gaps.filter(id => gapById[id]).slice(0, 3).forEach(id => {
+        const n = SP.NUTRI_BY_ID[id];
+        push({
+          id:'nutri-money-' + id, from:'nutri', to:'money', tone:'warn',
+          finding:(n ? n.name : id) + ' hedefin %' + gapById[id].pct + '\'inde ve sepet de karşılamıyor.',
+          ask:'Açığı kapatan en ucuz kaynağı Sedef bulur; hedef inmez, yolu değişir.',
+          route:'basket', ui:{ basketTab:'ikame' }, cta:'İkame tablosu',
+        });
+      });
+    }
+
+    /* --- Kerem -> Barış: acik kirmizi bayrak varken yuk tavani konur.
+           Bu devir tartisilmaz; bayrak kapanana kadar gecerlidir. */
+    const flags = SP.Model.openFlags();
+    if(flags.length){
+      push({
+        id:'lab-move-flag', from:'lab', to:'move', tone:'danger',
+        finding:flags.length + ' açık kırmızı bayrak: ' + flags.map(f => f.label).join(', ') + '.',
+        ask:'Bayrak kapanana kadar yük artırılmaz. Program durmaz, tavan konur.',
+        route:'move', ui:{ moveTab:'bugun' }, cta:'Bugünün reçetesi',
+      });
+    }
+
+    /* --- Barış -> Nesrin: yuk artarken protein hedefin altindaysa,
+           toparlanmayi engelleyen sey antrenman degil masadir. */
+    const growth = (function(){ try { return SP.Move.weeklyGrowth(); } catch(e){ return null; } })();
+    const prot = gapById.protein;
+    if(prot && growth && growth.ok && growth.growth > 0){
+      push({
+        id:'move-nutri-protein', from:'move', to:'nutri', tone:'warn',
+        finding:'Haftalık yük %' + Math.round(growth.growth * 100) + ' arttı (hesaplandı).',
+        ask:'Protein hedefin %' + prot.pct + '\'inde. Artan yükün karşılığı masada yok.',
+        route:'meals', ui:{ mealTab:'oneri' }, cta:'Öneri tablosu',
+      });
+    }
+
+    /* --- Barış -> Kerem: toparlanma skoru cikmiyorsa sebep programda
+           degil, eksik olcumdedir. */
+    const need = ['hrv', 'rhr'].filter(id => !SP.Model.latestOf(id));
+    if(need.length === 2){
+      push({
+        id:'move-lab-vital', from:'move', to:'lab', tone:'info',
+        finding:'Toparlanma skoru üretilemiyor: HRV ve istirahat nabzı hiç girilmemiş.',
+        ask:'İkisi de evde ölçülür. Ölçüm gelmeden yük reçetesi tahmine düşer.',
+        route:'labs', ui:{ labTab:'giris', labFilter:'vital' }, cta:'Vital girişi',
+      });
+    }
+
+    /* --- Patron'un kendi masasi: capraz bulgular. Iki seri iki ayri
+           masaya aitse bulgu tek basina kimseye ait degildir; Patron
+           onu birine devreder. Zayif birliktelik devir uretmez. */
+    (function(){
+      let cross = [];
+      try { cross = SP.Calc.crossFindings(); } catch(e){ return; }
+      cross.filter(c => c.ok && !c.weak).slice(0, 6).forEach(c => {
+        const from = METRIC_OWNER[c.link.a], to = METRIC_OWNER[c.link.b];
+        if(!from || !to || from === to) return;
+        push({
+          id:'cross-' + c.link.id, from, to, tone:c.tone === 'warn' ? 'warn' : 'info',
+          finding:c.link.title + ' — ' + c.text,
+          ask:'Birliktelik iki masayı da ilgilendiriyor; karar ' + (SP.AGENT_BY_ID[to] || {}).name + '\'de.',
+          route:'analytics', ui:{ analyticsTab:'capraz' }, cta:'Çapraz bağ tablosu',
+        });
+      });
+    })();
+
+    const RANK = { danger:0, warn:1, info:2 };
+    return out.sort((a, b) => (RANK[a.tone] - RANK[b.tone]));
+  }
+
+  /* Bir masanin devir defteri: buradan cikanlar ve buraya dusenler. */
+  function handoffsFor(agentId){
+    const all = handoffs();
+    return {
+      out:all.filter(h => h.from === agentId),
+      in:all.filter(h => h.to === agentId),
+    };
+  }
+
   /* -------------------------------------------------------------- gundem
 
      Puanlama kural motorundan gelir; model gundem secmez. */
@@ -586,7 +810,7 @@ SP.Office = (function(){
     defaults, settings, saveSettings, cfgFor, ready,
     brief, labBrief, nutriBrief, moveBrief, moneyBrief, patronBrief,
     ruleText, systemPrompt, validate, ask,
-    notes, agendaCandidates, dailyBriefing, runMeeting,
+    notes, handoffs, handoffsFor, agendaCandidates, dailyBriefing, runMeeting,
     send, clearChat, load,
   };
 })();

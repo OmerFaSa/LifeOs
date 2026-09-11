@@ -494,7 +494,12 @@ SP.Model = (function(){
 
   function defaultVitals(dateISO){
     return { date:dateISO, sbp:null, dbp:null, rhr:null, hrv:null, spo2:null, temp:null,
-      sleep:null, weight:null, waist:null, bodyfat:null, soreness:null, water:0, note:'' };
+      sleep:null, weight:null, waist:null, bodyfat:null, soreness:null, water:0, note:'',
+      /* Semptomlar: id -> şiddet (1-3). Boş nesne «şikâyet yok» demek
+         DEĞİL «girilmemiş» demektir; ikisini ayırmak için ayrı bayrak. */
+      symptoms:{}, symptomsLogged:false,
+      /* Adet kanaması günü. Ferritin ve hemoglobin yorumu buna bağlı. */
+      period:false };
   }
 
   function vitalsOf(dateISO){

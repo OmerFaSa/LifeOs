@@ -20,6 +20,72 @@ SP.Screens.office = (function(){
      on iki ayri "hic olculmemis" notu tek satira indi. */
   const DESK_NOTES = 4;
 
+  /* Patron digerlerinin yanina dizilmez. Dort uzman birbirinin esiti,
+     Patron degil: o dordunun raporunu okur. Kat planinda da oyle
+     dursun — esitleri yan yana, ustu ustte. */
+  const COACHES = SP.AGENTS.filter(a => a.id !== 'patron');
+
+  /* Devir defteri de uzamaz: gerisi masalarin kendi satirlarinda durur. */
+  const HANDOFF_MAX = 6;
+
+  /* Devir satiri — iki masa arasindaki bag. Tiklanabilir olmasi sus
+     degil: bulgunun DUSTUGU yere gitmeden devir tamamlanmaz. */
+  function handoffRow(h){
+    return html`
+      <button type="button" class="handoff handoff--${h.tone}" data-act="handoff" data-id="${h.id}">
+        <span class="handoff__chain" aria-hidden="true">
+          ${P.avatar(h.from, 'sm')}
+          <span class="handoff__arrow">→</span>
+          ${P.avatar(h.to, 'sm')}
+        </span>
+        <span class="handoff__body">
+          <span class="handoff__find">
+            <b class="agentref agentref--${h.from}">${h.fromName}</b> ${h.finding}</span>
+          <span class="handoff__ask">
+            <b class="agentref agentref--${h.to}">${h.toName}</b> ${h.ask}</span>
+          <span class="handoff__cta">${h.cta} →</span>
+        </span>
+      </button>`;
+  }
+
+  /* Masanin kendi devir defteri — tek satir, sayiyla. Masayi uzatmaz.
+
+     Patron bir istisnadir: hicbir devrin ucunda durmaz ama HEPSININ
+     ustunde durur. Onun defteri kendi isi degil, TRAFIGIN kendisidir. */
+  function deskFlow(agentId){
+    if(agentId === 'patron'){
+      const all = SP.Office.handoffs();
+      if(!all.length) return raw('');
+      return html`<div class="deskflow">
+        ${map(all.slice(0, 4), h => html`
+          <button type="button" class="deskflow__row" data-act="handoff" data-id="${h.id}">
+            <span class="deskflow__pair" aria-hidden="true">
+              ${P.avatar(h.from, 'sm')}<span class="deskflow__dir">→</span>${P.avatar(h.to, 'sm')}
+            </span>
+            <span class="deskflow__what">${h.cta}</span>
+          </button>`)}
+        ${when(all.length > 4, () => html`<p class="tiny dim">
+          ${all.length - 4} devir daha.</p>`)}
+      </div>`;
+    }
+    const f = SP.Office.handoffsFor(agentId);
+    if(!f.out.length && !f.in.length) return raw('');
+    return html`<div class="deskflow">
+      ${map(f.out.slice(0, 2), h => html`
+        <button type="button" class="deskflow__row" data-act="handoff" data-id="${h.id}">
+          <span class="deskflow__dir">→</span>
+          <span class="agentref agentref--${h.to}">${h.toName}</span>
+          <span class="deskflow__what">${h.cta}</span>
+        </button>`)}
+      ${map(f.in.slice(0, 2), h => html`
+        <button type="button" class="deskflow__row" data-act="handoff" data-id="${h.id}">
+          <span class="deskflow__dir deskflow__dir--in">←</span>
+          <span class="agentref agentref--${h.from}">${h.fromName}</span>
+          <span class="deskflow__what">${h.cta}</span>
+        </button>`)}
+    </div>`;
+  }
+
   /* Masa satirlari: her ajanin kendi kural motoru cumlesi. */
   function deskCard(agent){
     const open = S.ui.officeDesk === agent.id;
@@ -28,7 +94,7 @@ SP.Screens.office = (function(){
     const notes = SP.Office.notes().filter(n => n.agent === agent.id);
 
     return K.Card({
-      box:true, class:'desk',
+      box:true, class:'desk desk--' + agent.id,
       body:html`
         <div class="desk__head">
           ${P.avatar(agent.id)}
@@ -49,6 +115,7 @@ SP.Screens.office = (function(){
           ${when(notes.length > DESK_NOTES, () => html`<p class="tiny dim mt-6">
             ${notes.length - DESK_NOTES} not daha — raporu aç.</p>`)}
         </div>`)}
+        ${deskFlow(agent.id)}
         ${when(open, () => html`<div class="desk__open">
           ${deskDetail(agent, b)}
         </div>`)}
@@ -176,6 +243,25 @@ SP.Screens.office = (function(){
     });
   }
 
+  /* Devir defteri — Patron'un asil isi. Ofisin en ozgun fikri burada
+     gorunur hale gelir: bes ayri rapor degil, aralarindaki TRAFIK. */
+  function handoffEntry(){
+    const rows = SP.Office.handoffs();
+    const loud = rows.filter(h => h.tone === 'danger' || h.tone === 'warn').length;
+    return K.Entry({
+      wide:true, label:'Masalar arası devir', hint:'office',
+      meta:rows.length ? rows.length + ' bağ' + (loud ? ' · ' + loud + ' acil' : '') : 'bağ yok',
+      note:'Bir masanın bulgusu başka bir masanın işi olabilir. Devri Patron görür, '
+        + 'kararı devredilen masa verir. Satıra bas: bulgunun düştüğü yere gider.',
+      body:rows.length
+        ? html`<div class="handoffs">${map(rows.slice(0, HANDOFF_MAX), handoffRow)}</div>
+            ${when(rows.length > HANDOFF_MAX, () => html`<p class="tiny dim mt-8">
+              ${rows.length - HANDOFF_MAX} bağ daha — masaları aç.</p>`)}`
+        : K.Empty({ text:'Masalar arasında devredilecek ölçülmüş bir bulgu yok. '
+            + 'Devir tahminden çıkmaz.' }),
+    });
+  }
+
   function agendaCard(){
     const rows = SP.Office.agendaCandidates().slice(0, 5);
     return K.Card({
@@ -199,10 +285,15 @@ SP.Screens.office = (function(){
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${K.Ledger(() => [
         briefingCard(),
-        K.Entry({ wide:true, label:'Masalar', meta:SP.AGENTS.length + ' ajan',
-          note:'Her ajan yalnız kendi alanına bakar. Yetki dışına çıkmaz; '
+        K.Entry({ wide:true, label:'Patron masası', hint:'office', meta:'orkestrasyon',
+          note:'Patron kendi hesabını yapmaz. Dört masanın raporunu okur, çelişkiyi '
+            + 'sıraya koyar, kararı gerekçesiyle yazar.',
+          body:html`<div class="desks desks--solo">${deskCard(SP.AGENT_BY_ID.patron)}</div>` }),
+        handoffEntry(),
+        K.Entry({ wide:true, label:'Dört uzman masası', meta:COACHES.length + ' ajan',
+          note:'Her uzman yalnız kendi alanına bakar. Yetki dışına çıkmaz; '
             + 'çıkarsa çıktısı basılmaz.',
-          body:html`<div class="desks">${map(SP.AGENTS, deskCard)}</div>` }),
+          body:html`<div class="desks">${map(COACHES, deskCard)}</div>` }),
         agendaCard(), decisionCard(),
         K.Entry({ label:'Yetki ayrımı', hint:'office', meta:'kim neye bakar',
           body:html`<ul class="bullets small muted">${map(SP.AGENTS, a => html`
@@ -212,6 +303,16 @@ SP.Screens.office = (function(){
   }
 
   const handle = {
+    /* Devri tamamlayan hareket: bulgunun DUSTUGU ekrani, dogru sekmesi
+       ve dogru satiri acik halde ac. Yoksa devir bir cumleden ibaret
+       kalir. */
+    async handoff(el){
+      const h = SP.Office.handoffs().find(x => x.id === el.dataset.id);
+      if(!h) return;
+      if(h.ui) Object.assign(S.ui, h.ui);
+      UI.toast(h.fromName + ' → ' + h.toName);
+      SP.App.go(h.route);
+    },
     async 'toggle-desk'(el){
       S.ui.officeDesk = S.ui.officeDesk === el.dataset.id ? null : el.dataset.id;
       SP.App.render();
@@ -268,26 +369,38 @@ SP.Screens.office = (function(){
     headline(){
       const notes = SP.Office.notes();
       const loud = notes.filter(n => n.tone === 'danger' || n.tone === 'warn').length;
-      if(!notes.length) return 'Masalar sessiz.';
-      if(loud) return loud + ' masada dikkat isteyen not var.';
+      const hand = SP.Office.handoffs();
+      const urgent = hand.filter(h => h.tone === 'danger');
+      if(urgent.length) return urgent[0].fromName + ' masasından ' + urgent[0].toName
+        + ' masasına düşen bir iş var.';
+      if(!notes.length && !hand.length) return 'Masalar sessiz.';
+      if(loud) return loud + ' masada dikkat isteyen not var'
+        + (hand.length ? ' · ' + hand.length + ' devir bekliyor' : '') + '.';
+      if(!notes.length) return hand.length + ' masalar arası bağ var.';
       return 'Masalarda ' + notes.length + ' not var.';
     },
     lede(){
       return 'Patron ekibi yönetir; Kerem laboratuvara, Nesrin beslenmeye, '
         + 'Barış harekete, Sedef ekonomiye bakar. Her not önce kural motorundan '
-        + 'çıkar — model varsa onu yeniden yazar, yerine geçmez.';
+        + 'çıkar — model varsa onu yeniden yazar, yerine geçmez. Bir masanın '
+        + 'bulgusu başka bir masanın işiyse devir satırı onu taşır.';
     },
     stats(){
       const notes = SP.Office.notes();
       const open = SP.Model.openDecisions().length;
+      const hand = SP.Office.handoffs().length;
       const out = [{ value:notes.length, label:'masa notu' }];
+      if(hand) out.push({ value:hand, label:'masalar arası devir' });
       if(open) out.push({ value:open, label:'karar takipte' });
       return out;
     },
     subtitle(){
       const n = SP.Office.notes();
       const open = SP.Model.openDecisions().length;
-      return n.length + ' masa notu' + (open ? ' · ' + open + ' karar takipte' : '');
+      const hand = SP.Office.handoffs().length;
+      return n.length + ' masa notu'
+        + (hand ? ' · ' + hand + ' devir' : '')
+        + (open ? ' · ' + open + ' karar takipte' : '');
     },
     actions(){
       return String(K.Button({ label:'Toplantı', size:'sm', icon:'users', class:'btn--screen',

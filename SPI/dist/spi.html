@@ -1920,8 +1920,23 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 }
 /* Izgara yalnız yataydır ve çok soluktur: veriyi kafeslemek yerine
    göze yükseklik duygusu verir. */
-.chart .axis{ stroke:var(--border); stroke-width:1; }
-.chart .band{ fill:var(--sec); opacity:.09; }
+/* Izgara GERİ ÇEKİLİR, taban çizgisi öne çıkar: veri okunur, ızgara
+   değil. */
+.chart .axis{ stroke:var(--border); stroke-width:1; opacity:.7; }
+.chart .axis--base{ stroke:var(--border-strong); opacity:1; }
+.chart .band{ fill:var(--sec); opacity:.1; }
+/* Hedef bandı ADLANDIRILIR: renkli bir dikdörtgen «bu ne?» diye
+   sordurtuyordu. */
+.chart .bandlbl{
+  font-size:9.5px; font-weight:600; letter-spacing:.06em;
+  fill:var(--sec); opacity:.85;
+}
+/* Son değer doğrudan yazılır — okunacak tek sayı odur. */
+.chart .endlbl{
+  font-family:var(--font-display); font-size:15px; font-weight:700;
+  fill:var(--text); font-variant-numeric:tabular-nums;
+}
+.chart .endunit{ font-size:9.5px; font-weight:600; fill:var(--text-3); }
 .chart .line{
   fill:none; stroke:var(--sec); stroke-width:2;
   stroke-linejoin:round; stroke-linecap:round;
@@ -1929,7 +1944,11 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .chart .line--accent{ stroke:var(--accent); }
 .chart .area{ fill:var(--sec); opacity:.09; }
 .chart .area--accent{ fill:var(--accent); opacity:.09; }
-.chart .pt{ fill:var(--sec); stroke:var(--surface); stroke-width:1.5; }
+/* Yüzey halkası: üst üste binen iki nokta birbirine karışmaz. */
+.chart .pt{ fill:var(--sec); stroke:var(--surface); stroke-width:2; }
+/* Son nokta «şu an neredeyim» demektir; vurgulu durur. */
+.chart .pt--last{ stroke-width:2.5; }
+.chart circle{ cursor:default; }
 .chart .pt--accent{ fill:var(--accent); }
 .chart .barfill{ fill:var(--sec); }
 .chart .barfill--muted{ fill:var(--surface-3); }
@@ -2363,6 +2382,80 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .desk__role{ display:block; font-size:var(--fs-xs); color:var(--text-3); margin-top:2px; }
 .desk__line{ margin-top:10px; font-size:var(--fs-sm); color:var(--text-2); line-height:1.45; }
 .desk__open{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+
+/* Masanin kimlik seridi. Renk BIR DURUM DEGIL, bir imzadir: masanin
+   kime ait oldugunu soyler. Durum renkleri (kirmizi/sari/yesil) bu
+   seritte asla kullanilmaz — o ayrim bozulursa ofis okunamaz hale
+   gelir. Serit sol kenarda durur ve masa kapaliyken de gorunur. */
+.desk{ position:relative; }
+.desk::before{
+  content:''; position:absolute; inset:0 auto 0 0;
+  width:3px; border-radius:3px 0 0 3px;
+  background:var(--surface-3);
+}
+.desk--patron::before{ background:var(--agent-patron); }
+.desk--lab::before   { background:var(--agent-lab); }
+.desk--nutri::before { background:var(--agent-nutri); }
+.desk--move::before  { background:var(--agent-move); }
+.desk--money::before { background:var(--agent-money); }
+
+/* Patron tek basina durur: esitlerin yaninda degil, ustunde. */
+.desks--solo{ columns:auto; }
+.desks--solo > .desk{ margin-bottom:0; }
+
+/* Masanin devir defteri — tek satirlik, masanin boyunu uzatmaz. */
+.deskflow{ margin-top:10px; display:flex; flex-direction:column; gap:2px; }
+.deskflow__row{
+  display:flex; align-items:baseline; gap:7px;
+  width:100%; min-width:0; text-align:left;
+  background:none; border:0; padding:3px 0; cursor:pointer;
+  font:inherit; font-size:var(--fs-xs); color:var(--text-3);
+  border-radius:4px;
+}
+.deskflow__row:hover .deskflow__what{ color:var(--text); text-decoration:underline; }
+.deskflow__row:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.deskflow__dir{ flex:none; font-weight:700; color:var(--text-3); }
+.deskflow__pair{ display:flex; align-items:center; gap:4px; flex:none; }
+.deskflow__pair .agentav{ width:18px; height:18px; font-size:9px; }
+.deskflow__dir--in{ opacity:.6; }
+.deskflow__what{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ---- masalar arasi devir -------------------------------------------
+
+   Ofisin en ozgun fikri buradadir: bes ayri rapor degil, aralarindaki
+   TRAFIK. Satir iki avatarla baslar (kimden kime), iki cumleyle devam
+   eder (ne olculdu / ne isteniyor) ve tiklanabilir biter. */
+.handoffs{ display:flex; flex-direction:column; gap:1px; }
+.handoff{
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:14px;
+  align-items:start; width:100%; text-align:left;
+  padding:13px 2px; background:none; border:0; cursor:pointer;
+  font:inherit; color:inherit;
+  border-top:1px solid var(--border);
+}
+.handoffs > .handoff:first-child{ border-top:0; }
+.handoff:hover{ background:var(--surface-2); }
+.handoff:focus-visible{ outline:2px solid var(--primary); outline-offset:-2px; }
+.handoff__chain{ display:flex; align-items:center; gap:5px; padding-top:1px; }
+.handoff__arrow{ font-size:var(--fs-sm); color:var(--text-3); font-weight:700; }
+.handoff__body{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+.handoff__find{ font-size:var(--fs-sm); color:var(--text); line-height:1.45; }
+.handoff__ask{ font-size:var(--fs-sm); color:var(--text-2); line-height:1.45; }
+.handoff__cta{
+  font-size:var(--fs-xs); color:var(--text-3); margin-top:2px;
+  font-family:var(--font-display); letter-spacing:.02em;
+}
+.handoff:hover .handoff__cta{ color:var(--primary); }
+/* Ton yalnizca ACILIYETI soyler ve yalnizca OKA dokunur; kimlik rengi
+   avatarda durur. Iki renk sistemi ayni yuzeyde birbirine karismaz. */
+.handoff--danger .handoff__arrow{ color:var(--danger); }
+.handoff--warn   .handoff__arrow{ color:var(--accent); }
+
+/* Dar kutuda zincir ustte, cumleler altta: 26px'lik iki avatar ile
+   metin ayni satira sigmiyordu. Olcu kutudan gelir, ekrandan degil. */
+@container satir (max-width:520px){
+  .handoff{ grid-template-columns:minmax(0,1fr); gap:8px; }
+}
 
 .deskstats{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; margin-top:12px; }
 .deskstat{
@@ -3624,6 +3717,78 @@ body.is-dragging .drop.is-over{
 .inlineedit .input{ max-width:150px; }
 .inlineedit__u{ font-size:13px; color:var(--text-3); }
 
+/* ================= semptom girişi =================
+
+   Günlükte serbest metin bir not vardı, yapı yoktu. Serbest metin
+   aranamaz, sayılamaz, eğilime dönmez.
+
+   Şiddet tek düğmeden döner (hafif → orta → şiddetli → kapalı): ayrı
+   bir seçici günlük giriş yükünü artırırdı. Renk tek başına anlam
+   taşımaz — şiddet düğmenin içinde yazıyla da durur. */
+.symgrp + .symgrp{ margin-top:14px; }
+.symgrp__h{
+  font-size:10px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--text-3); margin-bottom:7px;
+}
+.symgrp__list{ display:flex; flex-wrap:wrap; gap:6px; }
+.symbtn{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:6px 12px; border-radius:var(--r-pill);
+  border:1px solid var(--border); background:var(--surface);
+  color:var(--text-2); font-size:13px; font-weight:500;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease),
+             color var(--dur) var(--ease);
+}
+.symbtn:hover{ border-color:var(--border-strong); color:var(--text); }
+.symbtn__s{
+  font-size:10.5px; font-weight:700; letter-spacing:.03em;
+  padding:1px 6px; border-radius:var(--r-pill);
+  background:color-mix(in srgb, currentColor 14%, transparent);
+}
+.symbtn.is-on{ color:var(--text); font-weight:600; }
+.symbtn.sev-1{ border-color:color-mix(in srgb, var(--info) 40%, var(--border));
+  background:var(--info-soft); }
+.symbtn.sev-2{ border-color:color-mix(in srgb, var(--accent) 45%, var(--border));
+  background:var(--accent-soft); }
+.symbtn.sev-3{ border-color:color-mix(in srgb, var(--danger) 45%, var(--border));
+  background:var(--danger-soft); }
+
+/* ================= panel görünümü =================
+
+   Tek liste doğru karardı; ama hekim «lipid paneline» bakar. Panel bir
+   sayfa değil bir kart: tek listenin YANINDA ikinci bir görünüm. */
+.panelgrid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:16px;
+  align-items:start;
+}
+.panelcard{
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface); padding:14px 16px;
+  display:flex; flex-direction:column; gap:8px;
+}
+/* Bandın dışında ölçüm varsa panelin solunda bir şerit: hangi panele
+   bakılacağı tek bakışta okunur. */
+.panelcard.has-out{ border-left:3px solid var(--accent); }
+.panelcard__h{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.panelcard__h b{ font-size:14.5px; font-weight:600; letter-spacing:-.005em; }
+.panelcard__rows{ display:flex; flex-direction:column; border-top:1px solid var(--border); }
+.panelrow{
+  display:grid; grid-template-columns:minmax(0,1fr) auto auto;
+  gap:10px; align-items:center;
+  padding:7px 0; border:none; border-bottom:1px solid var(--border);
+  background:none; color:var(--text); text-align:left;
+  transition:background var(--dur) var(--ease);
+}
+.panelrow:last-child{ border-bottom:none; }
+.panelrow:hover{ background:var(--surface-hover); }
+.panelrow__n{ font-size:13px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.panelrow__v{ font-family:var(--font-display); font-size:14px; font-weight:600; white-space:nowrap; }
+.panelrow__v small{ font-size:10.5px; color:var(--text-3); margin-left:2px; }
+.panelcard__f{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+@container satir (max-width:620px){
+  .panelgrid{ grid-template-columns:minmax(0,1fr); }
+}
+
 /* ==== css/designs.css ==== */
 /* DÜZENLER — dört seçilebilir tasarım dili.
 
@@ -4210,7 +4375,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'46bdd8a', at:'2026-09-11 17:49', dirty:true };
+SP.BUILD = { id:'4d56018', at:'2026-09-11 18:31', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -6398,6 +6563,124 @@ SP.MED_AFFECTING = (function(){
   return m;
 })();
 
+/* ==== js/data/symptoms.js ==== */
+/* SEMPTOM SOZLUGU — gunun tarif edilebilir hali.
+
+   Gunlukte serbest metin bir not vardi, YAPI YOKTU. Oysa hekim
+   ciktisinin en cok isine yarayacak bolum budur ve sistemin kendi veri
+   sozlugunde su cumle zaten yazili:
+
+     «Ferritin kan degeri deponun yalnizca %1'ini gosterir;
+      kramp ve uyku sikayeti degerden onemlidir.»
+
+   Serbest metin arama yapilamaz, sayilamaz, egilime donmez. Yapili
+   semptom uc sey kazandirir:
+
+     1. Hekim ciktisinda «son 30 gunde 12 gun bas agrisi» yazar.
+     2. Bir olcumle BIRLIKTE okunabilir: dusuk ferritin + yorgunluk.
+     3. Bir ilac baslangicindan SONRA artan sikayet gorunur olur.
+
+   ─────────────────────────────────────────────────────────────────
+
+   DEGISMEZLER:
+
+   · Sistem TESHIS KOYMAZ. Bir semptom bir bulgudur, bir hastalik degil.
+     Sozlukteki `hint` alani «su olcumle birlikte okunur» der, «su
+     hastaliktir» demez.
+   · Semptom yoklugu VERI DEGILDIR. Isaretlenmemis bir gun «sikayet
+     yok» demek degil «girilmemis» demektir — eksik veri sifir
+     sayilmaz kuralinin semptom tarafi.
+   · Siddet KULLANICININDIR. 1-3 arasi bir sayi; sistem bunu baska bir
+     olcumden turetmez. */
+
+window.SP = window.SP || {};
+
+SP.SYMPTOM_GROUPS = [
+  { id:'genel',   name:'Genel' },
+  { id:'sindirim', name:'Sindirim' },
+  { id:'kas',     name:'Kas ve eklem' },
+  { id:'zihin',   name:'Zihin ve uyku' },
+];
+
+SP.SYMPTOMS = [
+  { id:'yorgunluk', name:'Olağandışı yorgunluk', group:'genel',
+    markers:['ferritin', 'hgb', 'tsh', 'vitd', 'b12'],
+    hint:'Demir deposu, tiroit ve B12 ile birlikte okunur.' },
+  { id:'bas-agrisi', name:'Baş ağrısı', group:'genel',
+    markers:['sbp', 'dbp', 'hgb'],
+    hint:'Tansiyon ve hemoglobin ile birlikte okunur.' },
+  { id:'bas-donmesi', name:'Baş dönmesi', group:'genel',
+    markers:['hgb', 'ferritin', 'sbp'],
+    hint:'Ayağa kalkarken oluyorsa tansiyonla birlikte okunur.' },
+  { id:'carpinti', name:'Çarpıntı', group:'genel',
+    markers:['tsh', 'ft4', 'hgb', 'rhr'],
+    hint:'Tiroit ve hemoglobin ile birlikte okunur.' },
+  { id:'nefes-darligi', name:'Nefes darlığı', group:'genel',
+    markers:['hgb', 'spo2'],
+    hint:'Hemoglobin ve oksijen satürasyonu ile birlikte okunur.' },
+  { id:'sogua-hassasiyet', name:'Üşüme', group:'genel',
+    markers:['tsh', 'ft4', 'ferritin'],
+    hint:'Tiroit ve demir deposu ile birlikte okunur.' },
+  { id:'sac-dokulmesi', name:'Saç dökülmesi', group:'genel',
+    markers:['ferritin', 'tsh', 'zinc', 'vitd'],
+    hint:'Ferritin, tiroit ve çinko ile birlikte okunur.' },
+
+  { id:'sisme', name:'Şişkinlik', group:'sindirim',
+    markers:['crp'],
+    hint:'Öğün kayıtlarıyla birlikte okunur.' },
+  { id:'mide-yanmasi', name:'Mide yanması', group:'sindirim',
+    markers:['b12', 'ferritin'],
+    hint:'Mide koruyucu kullanımı B12 ve demir emilimini etkiler.' },
+  { id:'kabizlik', name:'Kabızlık', group:'sindirim',
+    markers:['tsh', 'mg'],
+    hint:'Tiroit, lif alımı ve magnezyum ile birlikte okunur.' },
+  { id:'ishal', name:'İshal', group:'sindirim',
+    markers:['crp', 'alb'],
+    hint:'Süreklilik kazanırsa inflamasyon belirteçleriyle okunur.' },
+
+  { id:'kramp', name:'Kas krampı', group:'kas',
+    markers:['mg', 'k', 'ca_corr', 'ferritin'],
+    hint:'Magnezyum, potasyum ve kalsiyum ile birlikte okunur.' },
+  { id:'eklem-agrisi', name:'Eklem ağrısı', group:'kas',
+    markers:['crp', 'esr', 'uric', 'vitd'],
+    hint:'İnflamasyon belirteçleri ve ürik asit ile birlikte okunur.' },
+  { id:'kas-agrisi', name:'Kas ağrısı', group:'kas',
+    markers:['vitd', 'crp'],
+    hint:'Antrenman yükü ve D vitamini ile birlikte okunur.' },
+  { id:'guc-kaybi', name:'Güç kaybı', group:'kas',
+    markers:['ferritin', 'vitd', 'testo'],
+    hint:'Antrenman kayıtlarıyla birlikte okunur.' },
+
+  { id:'uykusuzluk', name:'Uykuya dalamama', group:'zihin',
+    markers:['cortisol', 'mg', 'tsh'],
+    hint:'Uyku süresi kaydı ve kortizol ile birlikte okunur.' },
+  { id:'dikkat', name:'Dikkat dağınıklığı', group:'zihin',
+    markers:['b12', 'ferritin', 'vitd', 'tsh'],
+    hint:'B12, demir ve tiroit ile birlikte okunur.' },
+  { id:'moral', name:'Moral düşüklüğü', group:'zihin',
+    markers:['vitd', 'b12', 'tsh'],
+    hint:'D vitamini ve tiroit ile birlikte okunur. Sürekliyse hekime.' },
+];
+
+SP.SYMPTOM_BY_ID = SP.SYMPTOMS.reduce(function(acc, s){ acc[s.id] = s; return acc; }, {});
+
+/* Siddet: uc basamak yeter. Daha ince bir olcek kullanicidan olmayan
+   bir kesinlik ister ve gunluk giris yukunu artirir. */
+SP.SYMPTOM_SEVERITY = [
+  { value:1, label:'hafif' },
+  { value:2, label:'orta' },
+  { value:3, label:'şiddetli' },
+];
+
+/* Hangi olcumu hangi semptomlar ilgilendirir? Ters indeks. */
+SP.SYMPTOM_FOR_MARKER = (function(){
+  const m = {};
+  SP.SYMPTOMS.forEach(function(s){
+    (s.markers || []).forEach(function(id){ (m[id] = m[id] || []).push(s); });
+  });
+  return m;
+})();
+
 /* ==== js/data/providers.js ==== */
 /* Model saglayicilari — ofis ajanlarinin kullandigi ucretsiz LLM uclari.
 
@@ -7570,7 +7853,12 @@ SP.Model = (function(){
 
   function defaultVitals(dateISO){
     return { date:dateISO, sbp:null, dbp:null, rhr:null, hrv:null, spo2:null, temp:null,
-      sleep:null, weight:null, waist:null, bodyfat:null, soreness:null, water:0, note:'' };
+      sleep:null, weight:null, waist:null, bodyfat:null, soreness:null, water:0, note:'',
+      /* Semptomlar: id -> şiddet (1-3). Boş nesne «şikâyet yok» demek
+         DEĞİL «girilmemiş» demektir; ikisini ayırmak için ayrı bayrak. */
+      symptoms:{}, symptomsLogged:false,
+      /* Adet kanaması günü. Ferritin ve hemoglobin yorumu buna bağlı. */
+      period:false };
   }
 
   function vitalsOf(dateISO){
@@ -9440,6 +9728,196 @@ SP.Meds = (function(){
     explainChange, changeNote, markerNote, distorts, BOZAN };
 })();
 
+/* ==== js/core/symptom.js ==== */
+/* SEMPTOM VE DONGU KURAL MOTORU.
+
+   Iki isi var ve ikisi de AYNI SORUYA hizmet eder: bir olcumun
+   yaninda okunmasi gereken baska ne var?
+
+   1. SEMPTOM. Gunluge isaretlenen sikayetler sayilir, egilime donur ve
+      ilgili olcumle birlikte okunur. «Ferritin 18» tek basina bir
+      sayidir; «ferritin 18 ve son otuz gunun on ikisinde yorgunluk»
+      bir tablodur.
+
+   2. ADET DONGUSU. Hane sistemi kadin profilleri tasiyacak. Ferritin ve
+      hemoglobin yorumu donguye baglidir: kanama doneminde alinan bir
+      kan, deponun gercek halini gostermez. Cinsiyete gore referans
+      araligi vardi; DONGU BAGLAMI yoktu.
+
+   ─────────────────────────────────────────────────────────────────
+
+   DEGISMEZLER:
+
+   · Semptom yoklugu VERI DEGILDIR. Isaretlenmemis bir gun «sikayet
+     yok» demek degil «girilmemis» demektir.
+   · Sistem TESHIS KOYMAZ. «Su olcumle birlikte okunur» der.
+   · Dongu tahmini bir TAHMINDIR ve oyle etiketlenir: ortalama
+     uzunluktan hesaplanir, olculmez. */
+
+window.SP = window.SP || {};
+
+SP.Symptom = (function(){
+  const U = SP.U;
+
+  /* ------------------------------------------------------------ semptom */
+
+  function ofDay(dateISO){
+    const v = SP.Model.vitalsOf(dateISO);
+    return (v && v.symptoms) || {};
+  }
+
+  async function setSymptom(dateISO, id, severity){
+    if(!SP.SYMPTOM_BY_ID[id]) return null;
+    const v = SP.Model.vitalsOf(dateISO) || SP.Model.defaultVitals(dateISO);
+    const s = Object.assign({}, v.symptoms || {});
+    if(!severity) delete s[id];
+    else s[id] = Math.max(1, Math.min(3, Number(severity) || 1));
+    return SP.Model.saveVitals(dateISO, { symptoms:s });
+  }
+
+  /* Son N gunde hangi sikayet kac gun isaretlendi?
+
+     `days` PAYDA DEGILDIR: yalnizca veri girilmis gunler sayilir.
+     Otuz gunun besinde giris varsa «30 gunde 3 gun» demek yaniltir;
+     «giris yapilan 5 gunun 3'u» dogrudur. */
+  function window_(days){
+    const n = days || 30;
+    const bugun = U.today();
+    const sayim = {}, siddet = {};
+    let girilenGun = 0;
+
+    for(let i = 0; i < n; i++){
+      const d = U.iso(U.addDays(bugun, -i));
+      const v = SP.Model.vitalsOf(d);
+      if(!v) continue;
+      const s = v.symptoms || {};
+      const idler = Object.keys(s);
+      /* Gunluge dokunulmus mu? Semptom alani VARSA o gun sayilir —
+         bos birakilmis bir gun «sikayet yok» demek degildir. */
+      if(v.symptomsLogged || idler.length) girilenGun++;
+      idler.forEach(id => {
+        sayim[id] = (sayim[id] || 0) + 1;
+        siddet[id] = (siddet[id] || 0) + (Number(s[id]) || 1);
+      });
+    }
+
+    const rows = Object.keys(sayim).map(id => ({
+      symptom:SP.SYMPTOM_BY_ID[id],
+      id, days:sayim[id],
+      avgSeverity:U.round(siddet[id] / sayim[id], 1),
+      pct:girilenGun ? Math.round(100 * sayim[id] / girilenGun) : null,
+    })).filter(r => r.symptom).sort((a, b) => b.days - a.days);
+
+    return { ok:girilenGun > 0, loggedDays:girilenGun, windowDays:n, rows };
+  }
+
+  /* Bir olcumun yaninda okunacak sikayetler. */
+  function forMarker(markerId, days){
+    const w = window_(days || 30);
+    if(!w.ok) return { ok:false, rows:[], note:'Semptom kaydı yok.' };
+    const ilgili = (SP.SYMPTOM_FOR_MARKER[markerId] || []).map(s => s.id);
+    const rows = w.rows.filter(r => ilgili.indexOf(r.id) >= 0);
+    return { ok:rows.length > 0, rows, loggedDays:w.loggedDays, windowDays:w.windowDays };
+  }
+
+  /* ------------------------------------------------------------- dongu */
+
+  const CYCLE_DEFAULT = 28;
+
+  function periods(){
+    /* Kanama gunleri gunlukte isaretlenir; her kesintisiz dizi bir
+       donemdir. Baslangic tarihleri dongu uzunlugunu verir. */
+    const gunler = Object.keys(SP.S.vitals || {})
+      .filter(d => SP.S.vitals[d] && SP.S.vitals[d].period)
+      .sort();
+    const donemler = [];
+    gunler.forEach(d => {
+      const son = donemler[donemler.length - 1];
+      if(son && U.diffDays(son.end, d) <= 1){ son.end = d; son.days++; return; }
+      donemler.push({ start:d, end:d, days:1 });
+    });
+    return donemler;
+  }
+
+  function cycle(){
+    const p = SP.S.profile || {};
+    if(p.sex !== 'female') return { ok:false, na:true };
+
+    const d = periods();
+    if(!d.length){
+      return { ok:false, n:0,
+        note:'Kanama günü işaretlenmemiş. Günlükte işaretlersen ferritin ve '
+          + 'hemoglobin yorumu döngüyü hesaba katar.' };
+    }
+
+    const son = d[d.length - 1];
+    const gecen = U.diffDays(son.start, U.todayISO());
+
+    /* Ortalama uzunluk en az iki donem ister; yoksa varsayilan
+       kullanilir ve bu ACIKCA soylenir. */
+    let uzunluk = CYCLE_DEFAULT, olculdu = false;
+    if(d.length >= 2){
+      const farklar = [];
+      for(let i = 1; i < d.length; i++) farklar.push(U.diffDays(d[i - 1].start, d[i].start));
+      const gecerli = farklar.filter(x => x >= 15 && x <= 60);
+      if(gecerli.length){
+        uzunluk = Math.round(U.sum(gecerli) / gecerli.length);
+        olculdu = true;
+      }
+    }
+
+    const faz = gecen <= (son.days || 5) ? 'kanama'
+      : gecen < uzunluk - 14 ? 'foliküler'
+      : gecen < uzunluk - 10 ? 'ovulasyon'
+      : 'luteal';
+
+    return {
+      ok:true, n:d.length, last:son, dayOfCycle:gecen + 1,
+      length:uzunluk, measured:olculdu, phase:faz,
+      nextExpected:U.iso(U.addDays(U.parse(son.start), uzunluk)),
+      note:olculdu
+        ? d.length + ' dönemden hesaplanan ortalama: ' + uzunluk + ' gün.'
+        : 'Ortalama uzunluk için en az iki dönem gerekir; ' + CYCLE_DEFAULT
+          + ' günlük varsayılan kullanıldı.',
+    };
+  }
+
+  /* Kanama doneminde ya da hemen sonrasinda alinan bir kan, demir
+     deposunun gercek halini gostermez. */
+  const CYCLE_SENSITIVE = ['ferritin', 'hgb', 'hct', 'iron_s', 'tsat'];
+
+  function cycleNote(markerId, dateISO){
+    if(CYCLE_SENSITIVE.indexOf(markerId) < 0) return null;
+    const p = SP.S.profile || {};
+    if(p.sex !== 'female') return null;
+
+    const d = periods();
+    if(!d.length) return null;
+    const t = dateISO || U.todayISO();
+
+    /* Olcum hangi donemin icinde ya da yakinindaydi? */
+    for(let i = d.length - 1; i >= 0; i--){
+      const don = d[i];
+      if(t < don.start) continue;
+      const fark = U.diffDays(don.end, t);
+      if(fark < 0) continue;
+      if(fark <= 7){
+        return { tone:'info',
+          title:'Bu ölçüm döngünün kanama dönemine yakın',
+          text:'Kanama ' + U.fmtDate(don.start) + ' tarihinde başlamış; ölçüm '
+            + (fark === 0 ? 'aynı dönemde' : fark + ' gün sonra') + ' alınmış. '
+            + 'Bu dönemde ve hemen sonrasında demir deposu ve hemoglobin '
+            + 'olduğundan düşük okunabilir.' };
+      }
+      break;
+    }
+    return null;
+  }
+
+  return { ofDay, setSymptom, window:window_, forMarker,
+    periods, cycle, cycleNote, CYCLE_SENSITIVE, CYCLE_DEFAULT };
+})();
+
 /* ==== js/core/money.js ==== */
 /* Modul 4'un kural motoru — fiyat, sepet ve esdeger ikame.
 
@@ -11259,56 +11737,109 @@ SP.UI = (function(){
     return step * mag;
   }
 
+  /* ÇİZGİ GRAFİĞİ — sistemin en çok bakılan görseli.
+
+     Beş şey eklendi ve hepsinin bir gerekçesi var:
+
+       · SON NOKTA vurgulu ve DOĞRUDAN ETİKETLİ. Bir sağlık grafiğinde
+         okunacak tek sayı «şu an neredeyim»dir; onu eksene bakarak
+         tahmin ettirmek gereksiz iş. Her noktaya sayı yazmak ise
+         grafiği tabloya çevirir — yalnızca sonuncusu yazılır.
+       · HEDEF BANDI ADLANDIRILDI. Renkli bir dikdörtgen «bu ne?» diye
+         sordurtuyordu.
+       · IZGARA GERİ ÇEKİLDİ, taban çizgisi öne çıktı.
+       · HER NOKTANIN kendi başlığı var: fareyle üstüne gelince tarih ve
+         değer okunur. Kitaplık gerekmiyor — SVG `<title>` yeter.
+       · NOKTALAR YÜZEY HALKASI taşır: üst üste binen iki nokta
+         birbirine karışmaz. */
   function lineChart(series, opts){
     const o = opts || {};
-    const w = 640, h = o.height || 190, padL = 34, padR = 14, padT = 14, padB = 26;
-    const all = series.reduce((acc,s) => acc.concat(s.data.filter(v => v != null)), []);
+    const w = 640, h = o.height || 190;
+    const padL = 36, padT = 16, padB = 28;
+    /* Son noktanın etiketi için sağda yer ayrılır; yoksa sayı grafiğin
+       dışına taşar ve kırpılır. */
+    const padR = o.endLabel === false ? 16 : 62;
+
+    const all = series.reduce((acc, s2) => acc.concat(s2.data.filter(v => v != null)), []);
     if(!all.length) return '<p class="small dim">Grafik için henüz veri yok.</p>';
 
     const maxV = Math.max.apply(null, all), minV = Math.min.apply(null, all);
-    const pad = Math.max(2, (maxV-minV)*0.2);
-    const step = niceStep((maxV+pad - Math.max(0, minV-pad)) / 4);
-    const top = o.max != null ? o.max : Math.ceil((maxV+pad) / step) * step;
-    const bottom = o.min != null ? o.min : Math.max(0, Math.floor((minV-pad) / step) * step);
-    const n = Math.max.apply(null, series.map(s => s.data.length));
-    const X = i => padL + (w-padL-padR) * (n <= 1 ? 0.5 : i/(n-1));
-    const Y = v => h-padB - (h-padT-padB) * ((v-bottom)/((top-bottom)||1));
+    const pad = Math.max(2, (maxV - minV) * 0.2);
+    const step = niceStep((maxV + pad - Math.max(0, minV - pad)) / 4);
+    const top = o.max != null ? o.max : Math.ceil((maxV + pad) / step) * step;
+    const bottom = o.min != null ? o.min : Math.max(0, Math.floor((minV - pad) / step) * step);
+    const n = Math.max.apply(null, series.map(s2 => s2.data.length));
+    const X = i => padL + (w - padL - padR) * (n <= 1 ? 0.5 : i / (n - 1));
+    const Y = v => h - padB - (h - padT - padB) * ((v - bottom) / ((top - bottom) || 1));
 
-    let svg = '<svg class="chart" viewBox="0 0 '+w+' '+h+'" role="img">';
-    const ticks = 4;
-    for(let i = 0; i <= ticks; i++){
-      const v = bottom + (top-bottom)*i/ticks;
-      const y = Y(v);
-      svg += '<line class="axis" x1="'+padL+'" x2="'+(w-padR)+'" y1="'+y+'" y2="'+y+'"/>';
-      svg += '<text x="'+(padL-6)+'" y="'+(y+3)+'" text-anchor="end">'+Math.round(v)+'</text>';
-    }
+    let svg = '<svg class="chart" viewBox="0 0 ' + w + ' ' + h + '" role="img"'
+      + (o.title ? ' aria-label="' + U.esc(o.title) + '"' : '') + '>';
+
+    /* Hedef bandı çizgilerin ALTINDA durur ve adı yazılır. */
     if(o.band){
       const y1 = Y(o.band[1]), y2 = Y(o.band[0]);
-      svg += '<rect class="band" x="'+padL+'" y="'+y1+'" width="'+(w-padL-padR)+'" height="'+Math.max(0,y2-y1)+'" opacity=".5"/>';
-    }
-    series.forEach(s => {
-      const pts = s.data.map((v,i) => v == null ? null : [X(i), Y(v)]).filter(Boolean);
-      if(!pts.length) return;
-      const d = 'M' + pts.map(p => p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ');
-      if(pts.length > 1 && o.area !== false){
-        svg += '<path class="area'+(s.accent?' area--accent':'')+'" d="'+d+' L '+pts[pts.length-1][0].toFixed(1)+' '+(h-padB)+' L '+pts[0][0].toFixed(1)+' '+(h-padB)+' Z"/>';
+      const yh = Math.max(0, y2 - y1);
+      svg += '<rect class="band" x="' + padL + '" y="' + y1 + '" width="'
+        + (w - padL - padR) + '" height="' + yh + '"/>';
+      if(yh > 14){
+        svg += '<text class="bandlbl" x="' + (w - padR - 6) + '" y="' + (y1 + 11)
+          + '" text-anchor="end">' + U.esc(o.bandLabel || 'hedef bandı') + '</text>';
       }
-      svg += '<path class="line'+(s.accent?' line--accent':'')+'" d="'+d+'"/>';
-      pts.forEach((p,i) => {
-        const last = i === pts.length-1;
-        svg += '<circle class="pt'+(s.accent?' pt--accent':'')+'" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(last?4:2.6)+'"/>';
+    }
+
+    const ticks = 4;
+    for(let i = 0; i <= ticks; i++){
+      const v = bottom + (top - bottom) * i / ticks;
+      const y = Y(v);
+      svg += '<line class="' + (i === 0 ? 'axis axis--base' : 'axis') + '" x1="' + padL
+        + '" x2="' + (w - padR) + '" y1="' + y + '" y2="' + y + '"/>';
+      svg += '<text x="' + (padL - 6) + '" y="' + (y + 3) + '" text-anchor="end">'
+        + U.fmtNum(Math.round(v * 10) / 10) + '</text>';
+    }
+
+    series.forEach(s2 => {
+      const pts = s2.data.map((v, i) => v == null ? null : [X(i), Y(v), v, i]).filter(Boolean);
+      if(!pts.length) return;
+      const d = 'M' + pts.map(p2 => p2[0].toFixed(1) + ' ' + p2[1].toFixed(1)).join(' L ');
+      if(pts.length > 1 && o.area !== false){
+        svg += '<path class="area' + (s2.accent ? ' area--accent' : '') + '" d="' + d
+          + ' L ' + pts[pts.length - 1][0].toFixed(1) + ' ' + (h - padB)
+          + ' L ' + pts[0][0].toFixed(1) + ' ' + (h - padB) + ' Z"/>';
+      }
+      svg += '<path class="line' + (s2.accent ? ' line--accent' : '') + '" d="' + d + '"/>';
+
+      pts.forEach((p2, i) => {
+        const sonNokta = i === pts.length - 1;
+        const etiket = (o.labels && o.labels[p2[3]]) ? o.labels[p2[3]] + ' · ' : '';
+        svg += '<circle class="pt' + (s2.accent ? ' pt--accent' : '')
+          + (sonNokta ? ' pt--last' : '') + '" cx="' + p2[0].toFixed(1) + '" cy="'
+          + p2[1].toFixed(1) + '" r="' + (sonNokta ? 5 : 3) + '">'
+          + '<title>' + U.esc(etiket + U.fmtNum(p2[2]) + (o.unit ? ' ' + o.unit : ''))
+          + '</title></circle>';
       });
+
+      /* Son değer doğrudan yazılır: okunacak tek sayı odur. */
+      if(o.endLabel !== false){
+        const sp = pts[pts.length - 1];
+        svg += '<text class="endlbl" x="' + (sp[0] + 10).toFixed(1) + '" y="'
+          + (sp[1] + 4).toFixed(1) + '">' + U.esc(U.fmtNum(sp[2])) + '</text>';
+        if(o.unit){
+          svg += '<text class="endunit" x="' + (sp[0] + 10).toFixed(1) + '" y="'
+            + (sp[1] + 17).toFixed(1) + '">' + U.esc(o.unit) + '</text>';
+        }
+      }
     });
+
     if(o.labels){
-      o.labels.forEach((lb,i) => {
+      o.labels.forEach((lb, i) => {
         if(n > 8 && i % 2) return;
-        svg += '<text x="'+X(i)+'" y="'+(h-8)+'" text-anchor="middle">'+U.esc(lb)+'</text>';
+        svg += '<text x="' + X(i) + '" y="' + (h - 8) + '" text-anchor="middle">'
+          + U.esc(lb) + '</text>';
       });
     }
     svg += '</svg>';
     return svg;
   }
-
   function barChart(rows, opts){
     const o = opts || {};
     const w = 640, h = o.height || 150, padL = 30, padR = 10, padT = 12, padB = 26;
@@ -13396,6 +13927,19 @@ SP.Office = (function(){
       })),
       fasting:SP.S.labs.length
         ? (SP.S.labs[SP.S.labs.length - 1].fasting || 'unknown') : null,
+      /* Kan degeri deponun bir kismini gosterir; sikayet degerden
+         onemli olabilir. Kerem ikisini birlikte gorur. */
+      symptoms:(function(){
+        const w = SP.Symptom.window(30);
+        return w.ok ? w.rows.slice(0, 5).map(r => ({
+          name:r.symptom.name, days:r.days, of:w.loggedDays,
+          severity:r.avgSeverity, markers:r.symptom.markers })) : [];
+      })(),
+      cycle:(function(){
+        const c = SP.Symptom.cycle();
+        return c.ok ? { day:c.dayOfCycle, length:c.length, measured:c.measured,
+          phase:c.phase } : null;
+      })(),
       overdue:SP.Bio.overdue().map(o => ({ panel:o.panel.name, days:o.days, note:o.note })),
       lastLab:SP.S.labs.length ? SP.S.labs[SP.S.labs.length - 1].date : null,
     };
@@ -13525,6 +14069,11 @@ SP.Office = (function(){
       if(d.fasting === 'no'){
         lines.push('Son oturum tok karnına alınmış; açlık glukozu, insülin ve '
           + 'trigliserit yorumlanmadı.');
+      }
+      if(d.symptoms && d.symptoms.length){
+        const en = d.symptoms[0];
+        lines.push('Son 30 günün ' + en.of + ' gününde giriş var; en sık '
+          + en.name.toLocaleLowerCase('tr-TR') + ' (' + en.days + ' gün).');
       }
       if(d.meds && d.meds.length){
         lines.push('Kullanılanlar: ' + d.meds.map(m => m.name).join(', ')
@@ -13767,6 +14316,212 @@ SP.Office = (function(){
     return out;
   }
 
+  /* ---------------------------------------------------- koclar arasi devir
+
+     Doktrinin merkezinde "her ajan yalnizca kendi alanina bakar" durur.
+     Ama bir masanin BULGUSU baska bir masanin ISI olabilir: ferritin
+     dusukse bu Kerem'in olcumu, Nesrin'in hedefidir. Patron'un tek isi
+     o devri gormek ve siraya koymaktir.
+
+     Devir bir tavsiye degildir. "Su olculdu, su masaya dusuyor" der;
+     dozu, plani, fiyati soylemez — onlari devredilen masa soyler.
+     Olculmemis bir sey devredilemez: tahmin devir uretmez. */
+
+  /* Capraz bulgudaki seri hangi masanin isi? */
+  const METRIC_OWNER = {
+    sleep:'move', hrv:'lab', load:'move', readiness:'move',
+    protein:'nutri', sodium:'nutri', kcal:'nutri',
+    sbp:'lab', weight:'lab',
+  };
+
+  /* Bir besin ogesini hangi olcumler dogrular? (biyobelirtec tablosunun
+     tersi indeksi — elle yazilmaz, veriden cikar.) */
+  let MARKER_FOR_NUTRIENT = null;
+  function markersForNutrient(id){
+    if(!MARKER_FOR_NUTRIENT){
+      MARKER_FOR_NUTRIENT = {};
+      SP.BIOMARKERS.forEach(b => {
+        (b.nutrients || []).forEach(n => {
+          (MARKER_FOR_NUTRIENT[n] || (MARKER_FOR_NUTRIENT[n] = [])).push(b);
+        });
+      });
+    }
+    return MARKER_FOR_NUTRIENT[id] || [];
+  }
+
+  /* Olcum bandin ALTINDA mi? Yon bilgisi markerin kendisinden gelir;
+     "kotu" demek yeterli degil, hangi yone kotu oldugu gerekir. */
+  function belowBand(b, st, v){
+    if(st.id === 'low' || st.id === 'belowOpt') return true;
+    if(st.id === 'red' && b.red && b.red.below != null && v <= b.red.below) return true;
+    return false;
+  }
+
+  function handoffs(){
+    const out = [];
+    const seen = {};
+    const push = h => {
+      if(seen[h.id]) return;
+      const a = SP.AGENT_BY_ID[h.from], b = SP.AGENT_BY_ID[h.to];
+      if(!a || !b || a.id === b.id) return;
+      seen[h.id] = true;
+      out.push(Object.assign({ tone:'info', via:'patron' }, h, {
+        fromName:a.name, fromRole:a.role, toName:b.name, toRole:b.role,
+      }));
+    };
+
+    /* --- Kerem -> Nesrin: bandin altindaki olcum, hangi besin ogesinin
+           hedefini aciyor? Nesrin'in tablosunda o acik zaten varsa devir
+           uyari tonuna cikar: iki masa ayni seyi soyluyor demektir. */
+    const gapRows = (function(){ try { return SP.Nutri.gaps(7).rows || []; } catch(e){ return []; } })();
+    const gapById = {};
+    gapRows.forEach(g => { gapById[g.id] = g; });
+
+    /* Ucu bandin altinda olcum ayni masaya ayni cumleyle gidiyorsa uc
+       satir yazilmaz: bilgi ayni, satir tek. Ayni toplama kurali masa
+       notlarinda da gecerli — devir defteri de uzamaz. */
+    const dusuk = SP.Bio.attention().slice(0, 8).filter(a =>
+      a.marker.nutrients && a.marker.nutrients.length
+      && belowBand(a.marker, a.status, a.value));
+
+    const nutAd = n => SP.NUTRI_BY_ID[n] ? SP.NUTRI_BY_ID[n].name : n;
+    const olcumAd = a => a.marker.name + ' ' + U.fmtNum(a.value) + ' ' + a.marker.unit;
+    const sonTarih = list => U.fmtDate(list.map(a => a.at).sort()[list.length - 1]);
+
+    const acikli = dusuk.filter(a => a.marker.nutrients.some(n => gapById[n]));
+    const aciksiz = dusuk.filter(a => !a.marker.nutrients.some(n => gapById[n]));
+
+    if(acikli.length){
+      const gaps = [];
+      acikli.forEach(a => a.marker.nutrients.forEach(n => {
+        if(gapById[n] && gaps.indexOf(n) < 0) gaps.push(n);
+      }));
+      push({
+        id:'lab-nutri-acik', from:'lab', to:'nutri', tone:'warn',
+        finding:(acikli.length === 1 ? olcumAd(acikli[0]) + ' bandın altında'
+          : acikli.length + ' ölçüm bandın altında: ' + acikli.map(olcumAd).join(', '))
+          + ' (ölçüldü, ' + sonTarih(acikli) + ').',
+        ask:'Aynı besin öğesi tabloda da açık: '
+          + gaps.map(n => nutAd(n) + ' %' + gapById[n].pct).join(', ')
+          + '. İki masa aynı şeyi söylüyor.',
+        route:'meals', ui:{ mealTab:'deger' }, cta:'Besin değeri tablosu',
+      });
+    }
+    if(aciksiz.length){
+      const hedefler = [];
+      aciksiz.forEach(a => a.marker.nutrients.forEach(n => {
+        if(hedefler.indexOf(n) < 0) hedefler.push(n);
+      }));
+      push({
+        id:'lab-nutri-band', from:'lab', to:'nutri', tone:'info',
+        finding:(aciksiz.length === 1 ? olcumAd(aciksiz[0]) + ' bandın altında'
+          : aciksiz.length + ' ölçüm bandın altında: ' + aciksiz.map(olcumAd).join(', '))
+          + ' (ölçüldü, ' + sonTarih(aciksiz) + ').',
+        ask:hedefler.map(nutAd).join(', ') + ' hedefini bu ölçümler belirler. '
+          + 'Tabloda açık görünmüyor: alım tutuyorsa sorun emilimde olabilir.',
+        route:'meals', ui:{ mealTab:'deger' }, cta:'Besin değeri tablosu',
+      });
+    }
+
+    /* --- Nesrin -> Kerem: uzun suredir kapanmayan bir acik, hic
+           olculmemis bir olcumle dogrulanabiliyorsa devir Kerem'e duser.
+           Burasi doktrinin en keskin yeri: acik TAHMIN, olcum DEGIL. */
+    gapRows.filter(g => g.kind === 'under' && g.pct < 80).slice(0, 6).forEach(g => {
+      const cands = markersForNutrient(g.id).filter(b => !SP.Model.latestOf(b.id));
+      if(!cands.length) return;
+      const m = cands[0];
+      push({
+        id:'nutri-lab-' + g.id, from:'nutri', to:'lab', tone:'warn',
+        finding:g.nutrient.name + ' alımı hedefin %' + g.pct + '\'i (7 günlük ortalama — hesaplandı).',
+        ask:m.name + ' hiç ölçülmemiş. Açığın gerçek olup olmadığını yalnızca ölçüm söyler.',
+        route:'labs', ui:{ labTab:'sonuc', labShowEmpty:true, labFilter:m.panel, markerOpen:m.id },
+        cta:m.name + ' satırı',
+      });
+    });
+
+    /* --- Nesrin -> Sedef: sepet acigi ile beslenme acigi ayni besin
+           ogesinde bulusuyorsa, is artik fiyat isidir. */
+    const mst = (function(){ try { return SP.Money.status(); } catch(e){ return null; } })();
+    if(mst && mst.coverage && mst.coverage.ok){
+      mst.coverage.gaps.filter(id => gapById[id]).slice(0, 3).forEach(id => {
+        const n = SP.NUTRI_BY_ID[id];
+        push({
+          id:'nutri-money-' + id, from:'nutri', to:'money', tone:'warn',
+          finding:(n ? n.name : id) + ' hedefin %' + gapById[id].pct + '\'inde ve sepet de karşılamıyor.',
+          ask:'Açığı kapatan en ucuz kaynağı Sedef bulur; hedef inmez, yolu değişir.',
+          route:'basket', ui:{ basketTab:'ikame' }, cta:'İkame tablosu',
+        });
+      });
+    }
+
+    /* --- Kerem -> Barış: acik kirmizi bayrak varken yuk tavani konur.
+           Bu devir tartisilmaz; bayrak kapanana kadar gecerlidir. */
+    const flags = SP.Model.openFlags();
+    if(flags.length){
+      push({
+        id:'lab-move-flag', from:'lab', to:'move', tone:'danger',
+        finding:flags.length + ' açık kırmızı bayrak: ' + flags.map(f => f.label).join(', ') + '.',
+        ask:'Bayrak kapanana kadar yük artırılmaz. Program durmaz, tavan konur.',
+        route:'move', ui:{ moveTab:'bugun' }, cta:'Bugünün reçetesi',
+      });
+    }
+
+    /* --- Barış -> Nesrin: yuk artarken protein hedefin altindaysa,
+           toparlanmayi engelleyen sey antrenman degil masadir. */
+    const growth = (function(){ try { return SP.Move.weeklyGrowth(); } catch(e){ return null; } })();
+    const prot = gapById.protein;
+    if(prot && growth && growth.ok && growth.growth > 0){
+      push({
+        id:'move-nutri-protein', from:'move', to:'nutri', tone:'warn',
+        finding:'Haftalık yük %' + Math.round(growth.growth * 100) + ' arttı (hesaplandı).',
+        ask:'Protein hedefin %' + prot.pct + '\'inde. Artan yükün karşılığı masada yok.',
+        route:'meals', ui:{ mealTab:'oneri' }, cta:'Öneri tablosu',
+      });
+    }
+
+    /* --- Barış -> Kerem: toparlanma skoru cikmiyorsa sebep programda
+           degil, eksik olcumdedir. */
+    const need = ['hrv', 'rhr'].filter(id => !SP.Model.latestOf(id));
+    if(need.length === 2){
+      push({
+        id:'move-lab-vital', from:'move', to:'lab', tone:'info',
+        finding:'Toparlanma skoru üretilemiyor: HRV ve istirahat nabzı hiç girilmemiş.',
+        ask:'İkisi de evde ölçülür. Ölçüm gelmeden yük reçetesi tahmine düşer.',
+        route:'labs', ui:{ labTab:'giris', labFilter:'vital' }, cta:'Vital girişi',
+      });
+    }
+
+    /* --- Patron'un kendi masasi: capraz bulgular. Iki seri iki ayri
+           masaya aitse bulgu tek basina kimseye ait degildir; Patron
+           onu birine devreder. Zayif birliktelik devir uretmez. */
+    (function(){
+      let cross = [];
+      try { cross = SP.Calc.crossFindings(); } catch(e){ return; }
+      cross.filter(c => c.ok && !c.weak).slice(0, 6).forEach(c => {
+        const from = METRIC_OWNER[c.link.a], to = METRIC_OWNER[c.link.b];
+        if(!from || !to || from === to) return;
+        push({
+          id:'cross-' + c.link.id, from, to, tone:c.tone === 'warn' ? 'warn' : 'info',
+          finding:c.link.title + ' — ' + c.text,
+          ask:'Birliktelik iki masayı da ilgilendiriyor; karar ' + (SP.AGENT_BY_ID[to] || {}).name + '\'de.',
+          route:'analytics', ui:{ analyticsTab:'capraz' }, cta:'Çapraz bağ tablosu',
+        });
+      });
+    })();
+
+    const RANK = { danger:0, warn:1, info:2 };
+    return out.sort((a, b) => (RANK[a.tone] - RANK[b.tone]));
+  }
+
+  /* Bir masanin devir defteri: buradan cikanlar ve buraya dusenler. */
+  function handoffsFor(agentId){
+    const all = handoffs();
+    return {
+      out:all.filter(h => h.from === agentId),
+      in:all.filter(h => h.to === agentId),
+    };
+  }
+
   /* -------------------------------------------------------------- gundem
 
      Puanlama kural motorundan gelir; model gundem secmez. */
@@ -13902,7 +14657,7 @@ SP.Office = (function(){
     defaults, settings, saveSettings, cfgFor, ready,
     brief, labBrief, nutriBrief, moveBrief, moneyBrief, patronBrief,
     ruleText, systemPrompt, validate, ask,
-    notes, agendaCandidates, dailyBriefing, runMeeting,
+    notes, handoffs, handoffsFor, agendaCandidates, dailyBriefing, runMeeting,
     send, clearChat, load,
   };
 })();
@@ -14597,6 +15352,69 @@ SP.Screens.today = (function(){
     </div>`;
   }
 
+  /* SEMPTOM GİRİŞİ. Günlükte serbest metin bir not vardı, yapı yoktu.
+     Serbest metin aranamaz, sayılamaz, eğilime dönmez.
+
+     Şiddet üç basamak: daha ince bir ölçek kullanıcıdan olmayan bir
+     kesinlik ister ve günlük giriş yükünü artırır.
+
+     «Şikâyet yok» ile «girilmemiş» ayrı şeylerdir: işaretlemeden
+     kaydeden bir gün ikincisidir ve sistem bunu karıştırmaz. */
+  function symptomEntry(){
+    const d = shownDate();
+    const secili = SP.Symptom.ofDay(d);
+    const v = M.vitalsOf(d);
+    const kadin = (S.profile || {}).sex === 'female';
+    const w = SP.Symptom.window(30);
+
+    return K.Entry({
+      label:'Bugün bir şikâyetin var mı?',
+      meta:Object.keys(secili).length
+        ? Object.keys(secili).length + ' işaretli'
+        : (v && v.symptomsLogged ? 'şikâyet yok' : 'girilmedi'),
+      note:'Kan değeri deponun bir kısmını gösterir; kramp ve uyku şikâyeti '
+        + 'değerden önemli olabilir. İşaretlediklerin ilgili ölçümün yanında '
+        + 've hekim çıktısında görünür.',
+      action:html`${K.Button({ label:'Şikâyetim yok', size:'sm', act:'no-symptoms' })}`,
+      body:html`
+        ${map(SP.SYMPTOM_GROUPS, g => html`
+          <div class="symgrp">
+            <div class="symgrp__h">${g.name}</div>
+            <div class="symgrp__list">${map(
+              SP.SYMPTOMS.filter(x => x.group === g.id), sx => {
+                const sev = secili[sx.id];
+                return html`<button
+                  class="${cls('symbtn', sev && 'is-on', sev && 'sev-' + sev)}"
+                  data-act="cycle-symptom" data-id="${sx.id}"
+                  aria-pressed="${sev ? 'true' : 'false'}"
+                  title="${sx.hint}">
+                  <span>${sx.name}</span>
+                  ${when(sev, () => html`<span class="symbtn__s">${
+                    (SP.SYMPTOM_SEVERITY.find(z => z.value === sev) || {}).label}</span>`)}
+                </button>`;
+              })}</div>
+          </div>`)}
+        <p class="tiny dim mt-8">Bir şikâyete tıklayınca şiddeti artar:
+          hafif → orta → şiddetli → kapalı.</p>
+
+        ${when(kadin, () => html`<div class="mt-16">
+          ${K.Field({ label:'Adet kanaması', hint:'ferritin ve hemoglobin yorumu buna bağlı',
+            input:K.Checkbox({ id:'v-period', label:'Bugün kanama var',
+              checked:!!(v && v.period), act:'toggle-period' }) })}
+        </div>`)}
+
+        ${when(w.ok && w.rows.length, () => html`<div class="mt-16">
+          ${K.Table({ tight:true, headers:['Son 30 gün', 'Gün', 'Ortalama şiddet'],
+            rows:w.rows.slice(0, 5).map(r => [r.symptom.name,
+              r.days + ' / ' + w.loggedDays,
+              (SP.SYMPTOM_SEVERITY.find(z => z.value === Math.round(r.avgSeverity))
+                || { label:'—' }).label]) })}
+          <p class="tiny dim mt-6">Payda girilen gün sayısıdır, otuz değil:
+            işaretlenmemiş bir gün «şikâyet yok» sayılmaz.</p>
+        </div>`)}`,
+    });
+  }
+
   function formEntry(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
@@ -14871,7 +15689,7 @@ SP.Screens.today = (function(){
     }
 
     return String(html`${head}${K.Ledger([
-      formEntry(), quickEntry(), statusEntry(), whyEntry(),
+      formEntry(), symptomEntry(), quickEntry(), statusEntry(), whyEntry(),
     ])}
     <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'certainty']))}</div>`);
   }
@@ -14882,6 +15700,27 @@ SP.Screens.today = (function(){
       const n = Number(el.dataset.value);
       S.ui.mealDate = n === 0 ? null : U.iso(U.addDays(U.parse(shownDate()), n));
       if(S.ui.mealDate === U.todayISO()) S.ui.mealDate = null;
+      SP.App.render();
+    },
+    /* Şiddet tek düğmeden döner: hafif → orta → şiddetli → kapalı.
+       Ayrı bir seçici koymak günlük giriş yükünü artırırdı. */
+    async 'cycle-symptom'(el){
+      const d = shownDate();
+      const simdi = SP.Symptom.ofDay(d)[el.dataset.id] || 0;
+      const sonraki = simdi >= 3 ? 0 : simdi + 1;
+      await SP.Symptom.setSymptom(d, el.dataset.id, sonraki);
+      await M.saveVitals(d, { symptomsLogged:true });
+      SP.App.render();
+    },
+    async 'no-symptoms'(){
+      const d = shownDate();
+      await M.saveVitals(d, { symptoms:{}, symptomsLogged:true });
+      UI.toast('Bugün şikâyet yok olarak kaydedildi');
+      SP.App.render();
+    },
+    async 'toggle-period'(el){
+      const d = shownDate();
+      await M.saveVitals(d, { period:!!el.checked });
       SP.App.render();
     },
     async 'open-day'(el){
@@ -15021,6 +15860,7 @@ SP.Screens.labs = (function(){
     { id:'giris',  label:'Test gir',     icon:'flask' },
     { id:'gecmis', label:'Geçmiş',       icon:'clock' },
     { id:'kiyas',  label:'Karşılaştır',  icon:'chart' },
+    { id:'panel',  label:'Paneller',     icon:'layers' },
     { id:'ilac',   label:'İlaç',         icon:'flask' },
     { id:'trend',  label:'Eğilim',       icon:'chart' },
   ];
@@ -15342,6 +16182,8 @@ SP.Screens.labs = (function(){
             ${raw(UI.lineChart([{ data:series.map(s2 => s2.v) }], {
               labels:series.map(s2 => U.fmtShort(s2.date)),
               band:r && r.optimal ? r.optimal : (r ? r.ref : null),
+              bandLabel:r && r.optimal ? 'hedef bandı' : 'referans aralığı',
+              unit:b.unit, title:b.name + ' eğilimi',
               height:230,
             }))}
             <div class="pair">
@@ -15378,6 +16220,8 @@ SP.Screens.labs = (function(){
     const yorum = SP.Bio.interpretable(id);
     const ilacNotu = SP.Meds.markerNote(id, last ? last.date : null);
     const bozan = SP.Meds.distorts(id, last ? last.date : null);
+    const semptom = SP.Symptom.forMarker(id, 30);
+    const dongu = SP.Symptom.cycleNote(id, last ? last.date : null);
 
     return String(K.Stack([
       when(last, () => html`<div class="markerrow">
@@ -15414,6 +16258,24 @@ SP.Screens.labs = (function(){
         <p class="small muted mt-8">Yanlış okunmuş ya da yanlış yazılmış bir
           değeri buradan düzeltirsin; aynı oturuma yazılır, yeni oturum açılmaz.</p>`,
       })),
+
+      /* SEMPTOM VE DÖNGÜ — sayının yanında okunması gerekenler.
+         «Ferritin 18» tek başına bir sayıdır; «ferritin 18 ve son otuz
+         günün on ikisinde yorgunluk» bir tablodur. */
+      when(semptom.ok, () => K.Card({
+        title:'Bu ölçümle birlikte okunan şikâyetler',
+        sub:'son ' + semptom.windowDays + ' günün ' + semptom.loggedDays + ' günü girildi',
+        body:html`${K.Table({ tight:true, headers:['Şikâyet', 'Gün', 'Şiddet'],
+          rows:semptom.rows.map(r => [r.symptom.name,
+            r.days + ' / ' + semptom.loggedDays,
+            (SP.SYMPTOM_SEVERITY.find(z => z.value === Math.round(r.avgSeverity))
+              || { label:'—' }).label]) })}
+          <p class="small muted mt-8">Şikâyet bir bulgudur, tanı değildir.
+            Payda girilen gün sayısıdır: işaretlenmemiş bir gün «şikâyet yok»
+            sayılmaz.</p>`,
+      })),
+      when(dongu, () => K.Notice({ tone:dongu.tone, title:dongu.title + ':',
+        body:dongu.text })),
 
       /* İLAÇ VE AÇLIK — değeri yorumlamadan önce okunması gerekenler.
          Kişisel taban çizginin üstünde durur çünkü «gerçekten değişti»
@@ -15490,6 +16352,8 @@ SP.Screens.labs = (function(){
     const ov = SP.Bio.overdue();
     const ilaclar = SP.Meds.activeList();
     const acDurum = last ? (last.fasting || 'unknown') : 'unknown';
+    const semptomOzet = SP.Symptom.window(30);
+    const donguOzet = SP.Symptom.cycle();
 
     const hucre = (b, cell) => {
       if(!cell || cell.v == null) return null;
@@ -15555,6 +16419,26 @@ SP.Screens.labs = (function(){
         <p class="printdoc__note">Bu liste kullanıcının kendi girdisidir; sistem doz
           önermez ve ilaç kararı vermez. Ölçüm yorumlarında bu kayıtlar hesaba katılır.</p>`)}
 
+      ${when(semptomOzet.ok && semptomOzet.rows.length, () => html`
+        <h3 class="printdoc__h">Son 30 günün şikâyetleri</h3>
+        <div class="tabloKap">${K.Table({ tight:true,
+          headers:['Şikâyet', 'Kaç gün', 'Ortalama şiddet'],
+          rows:semptomOzet.rows.map(r => [r.symptom.name,
+            r.days + ' / ' + semptomOzet.loggedDays + ' gün',
+            (SP.SYMPTOM_SEVERITY.find(z => z.value === Math.round(r.avgSeverity))
+              || { label:'—' }).label]) })}</div>
+        <p class="printdoc__note">Payda, günlüğe giriş yapılan gün sayısıdır.
+          İşaretlenmemiş bir gün «şikâyet yok» sayılmaz.</p>`)}
+
+      ${when(donguOzet && donguOzet.ok, () => html`
+        <h3 class="printdoc__h">Adet döngüsü</h3>
+        <p class="printdoc__note">Son kanama başlangıcı
+          <b>${U.fmtDate(donguOzet.last.start)}</b> · döngünün
+          <b>${donguOzet.dayOfCycle}.</b> günü · ortalama uzunluk
+          <b>${donguOzet.length} gün</b>${when(!donguOzet.measured,
+            () => html` <i>(varsayılan — ölçülmedi)</i>`)}.
+          Ferritin ve hemoglobin yorumunda bu bilgi hesaba katılmıştır.</p>`)}
+
       ${when(flags.length, () => html`
         <h3 class="printdoc__h">Açık kırmızı bayraklar</h3>
         <ul class="printdoc__list">${map(flags, f => html`
@@ -15583,6 +16467,85 @@ SP.Screens.labs = (function(){
         Değerler kullanıcının kendi girdiği laboratuvar sonuçlarıdır; sistem
         ölçüm yapmaz. Teşhis ve tedavide karar hekimindir.</p>
     </div>`);
+  }
+
+  /* ---------------------------------------------------------- paneller
+
+     Tek liste doğru karardı: organ organ bölünmüş sayfalar okumayı
+     zorlaştırıyordu. Ama HEKİM «lipid paneline» bakar, tek tek
+     değerlere değil — ve bir panelin bütünü, parçalarının toplamından
+     fazlasını söyler.
+
+     Burada panel bir SAYFA değil bir SATIR: tek listenin yanında ikinci
+     bir görünüm, onun yerine geçen bir bölünme değil. */
+
+  function panelView(){
+    const p2 = S.profile;
+    const paneller = SP.PANELS.map(pan => {
+      const rows = SP.Bio.panelRows(pan.id, p2)
+        .filter(r => r.value != null);
+      const tum = SP.BIOMARKERS.filter(b => b.panel === pan.id);
+      const disinda = rows.filter(r => r.status && r.status.id !== 'ok');
+      const tarihler = rows.map(r => r.at).filter(Boolean).sort();
+      return { pan, rows, total:tum.length, out:disinda,
+        last:tarihler.length ? tarihler[tarihler.length - 1] : null };
+    });
+
+    const dolu = paneller.filter(x => x.rows.length);
+    const bos = paneller.filter(x => !x.rows.length);
+
+    if(!dolu.length){
+      return K.Ledger([K.Entry({
+        label:'Paneller', meta:'kayıt yok',
+        note:'Bir panelin bütünü, parçalarının toplamından fazlasını söyler. '
+          + 'Test girince paneller burada bir arada okunur.',
+        action:K.Button({ label:'Rapor yapıştır', tone:'primary', act:'open-paste' }),
+        body:P.empty('Henüz test girilmedi.'),
+      })]);
+    }
+
+    return K.Ledger([
+      K.Entry({
+        label:'Paneller', meta:dolu.length + ' panelde ölçüm var',
+        note:'Tek liste önem sırasına göre okunur; panel görünümü bir organı '
+          + 'ya da bir sistemi bir arada okumak içindir. İkisi birbirinin '
+          + 'yerine geçmez.',
+        body:html`<div class="panelgrid">${map(dolu, x => html`
+          <div class="${cls('panelcard', x.out.length && 'has-out')}">
+            <div class="panelcard__h">
+              <b>${x.pan.name}</b>
+              <span class="tiny dim">${x.rows.length} / ${x.total} ölçüm</span>
+            </div>
+            <p class="tiny dim">${x.pan.note}</p>
+            <div class="panelcard__rows">${map(x.rows, r => {
+              const yorum = SP.Bio.interpretable(r.marker.id);
+              return html`<button class="panelrow" data-act="open-marker"
+                data-id="${r.marker.id}">
+                <span class="panelrow__n">${r.marker.name}</span>
+                <span class="panelrow__v num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
+                <span class="panelrow__s">${when(yorum.ok,
+                  () => K.Badge({ label:r.status.label, tone:r.status.tone }),
+                  () => K.Badge({ label:yorum.label, tone:'muted', icon:false }))}</span>
+              </button>`;
+            })}</div>
+            <div class="panelcard__f">
+              ${when(x.last, () => html`<span class="tiny dim">${U.fmtDate(x.last)}</span>`)}
+              ${when(x.out.length, () => K.Badge({ label:x.out.length + ' bandın dışında',
+                tone:'warn' }))}
+              ${when(x.rows.length < x.total, () => html`<span class="tiny dim">${
+                x.total - x.rows.length} ölçüm eksik</span>`)}
+            </div>
+          </div>`)}</div>`,
+      }),
+
+      when(bos.length, () => K.Entry({
+        label:'Hiç ölçülmemiş paneller', meta:bos.length + ' panel',
+        note:'Bu panellerin hiçbir ölçümü girilmemiş. Eksik veri sıfır sayılmaz; '
+          + 'hesaplarda yok kabul edilir.',
+        body:html`<div class="chips">${map(bos, x => html`
+          <span class="chip chip--muted">${x.pan.name}</span>`)}</div>`,
+      })),
+    ]);
   }
 
   /* ------------------------------------------------------ ilaç ve takviye
@@ -15989,6 +16952,7 @@ SP.Screens.labs = (function(){
       ${tab === 'giris' ? entryView()
         : tab === 'gecmis' ? historyView()
         : tab === 'kiyas' ? compareView()
+        : tab === 'panel' ? panelView()
         : tab === 'ilac' ? medsView()
         : tab === 'trend' ? trendView()
         : resultsView()}
@@ -18796,6 +19760,72 @@ SP.Screens.office = (function(){
      on iki ayri "hic olculmemis" notu tek satira indi. */
   const DESK_NOTES = 4;
 
+  /* Patron digerlerinin yanina dizilmez. Dort uzman birbirinin esiti,
+     Patron degil: o dordunun raporunu okur. Kat planinda da oyle
+     dursun — esitleri yan yana, ustu ustte. */
+  const COACHES = SP.AGENTS.filter(a => a.id !== 'patron');
+
+  /* Devir defteri de uzamaz: gerisi masalarin kendi satirlarinda durur. */
+  const HANDOFF_MAX = 6;
+
+  /* Devir satiri — iki masa arasindaki bag. Tiklanabilir olmasi sus
+     degil: bulgunun DUSTUGU yere gitmeden devir tamamlanmaz. */
+  function handoffRow(h){
+    return html`
+      <button type="button" class="handoff handoff--${h.tone}" data-act="handoff" data-id="${h.id}">
+        <span class="handoff__chain" aria-hidden="true">
+          ${P.avatar(h.from, 'sm')}
+          <span class="handoff__arrow">→</span>
+          ${P.avatar(h.to, 'sm')}
+        </span>
+        <span class="handoff__body">
+          <span class="handoff__find">
+            <b class="agentref agentref--${h.from}">${h.fromName}</b> ${h.finding}</span>
+          <span class="handoff__ask">
+            <b class="agentref agentref--${h.to}">${h.toName}</b> ${h.ask}</span>
+          <span class="handoff__cta">${h.cta} →</span>
+        </span>
+      </button>`;
+  }
+
+  /* Masanin kendi devir defteri — tek satir, sayiyla. Masayi uzatmaz.
+
+     Patron bir istisnadir: hicbir devrin ucunda durmaz ama HEPSININ
+     ustunde durur. Onun defteri kendi isi degil, TRAFIGIN kendisidir. */
+  function deskFlow(agentId){
+    if(agentId === 'patron'){
+      const all = SP.Office.handoffs();
+      if(!all.length) return raw('');
+      return html`<div class="deskflow">
+        ${map(all.slice(0, 4), h => html`
+          <button type="button" class="deskflow__row" data-act="handoff" data-id="${h.id}">
+            <span class="deskflow__pair" aria-hidden="true">
+              ${P.avatar(h.from, 'sm')}<span class="deskflow__dir">→</span>${P.avatar(h.to, 'sm')}
+            </span>
+            <span class="deskflow__what">${h.cta}</span>
+          </button>`)}
+        ${when(all.length > 4, () => html`<p class="tiny dim">
+          ${all.length - 4} devir daha.</p>`)}
+      </div>`;
+    }
+    const f = SP.Office.handoffsFor(agentId);
+    if(!f.out.length && !f.in.length) return raw('');
+    return html`<div class="deskflow">
+      ${map(f.out.slice(0, 2), h => html`
+        <button type="button" class="deskflow__row" data-act="handoff" data-id="${h.id}">
+          <span class="deskflow__dir">→</span>
+          <span class="agentref agentref--${h.to}">${h.toName}</span>
+          <span class="deskflow__what">${h.cta}</span>
+        </button>`)}
+      ${map(f.in.slice(0, 2), h => html`
+        <button type="button" class="deskflow__row" data-act="handoff" data-id="${h.id}">
+          <span class="deskflow__dir deskflow__dir--in">←</span>
+          <span class="agentref agentref--${h.from}">${h.fromName}</span>
+          <span class="deskflow__what">${h.cta}</span>
+        </button>`)}
+    </div>`;
+  }
+
   /* Masa satirlari: her ajanin kendi kural motoru cumlesi. */
   function deskCard(agent){
     const open = S.ui.officeDesk === agent.id;
@@ -18804,7 +19834,7 @@ SP.Screens.office = (function(){
     const notes = SP.Office.notes().filter(n => n.agent === agent.id);
 
     return K.Card({
-      box:true, class:'desk',
+      box:true, class:'desk desk--' + agent.id,
       body:html`
         <div class="desk__head">
           ${P.avatar(agent.id)}
@@ -18825,6 +19855,7 @@ SP.Screens.office = (function(){
           ${when(notes.length > DESK_NOTES, () => html`<p class="tiny dim mt-6">
             ${notes.length - DESK_NOTES} not daha — raporu aç.</p>`)}
         </div>`)}
+        ${deskFlow(agent.id)}
         ${when(open, () => html`<div class="desk__open">
           ${deskDetail(agent, b)}
         </div>`)}
@@ -18952,6 +19983,25 @@ SP.Screens.office = (function(){
     });
   }
 
+  /* Devir defteri — Patron'un asil isi. Ofisin en ozgun fikri burada
+     gorunur hale gelir: bes ayri rapor degil, aralarindaki TRAFIK. */
+  function handoffEntry(){
+    const rows = SP.Office.handoffs();
+    const loud = rows.filter(h => h.tone === 'danger' || h.tone === 'warn').length;
+    return K.Entry({
+      wide:true, label:'Masalar arası devir', hint:'office',
+      meta:rows.length ? rows.length + ' bağ' + (loud ? ' · ' + loud + ' acil' : '') : 'bağ yok',
+      note:'Bir masanın bulgusu başka bir masanın işi olabilir. Devri Patron görür, '
+        + 'kararı devredilen masa verir. Satıra bas: bulgunun düştüğü yere gider.',
+      body:rows.length
+        ? html`<div class="handoffs">${map(rows.slice(0, HANDOFF_MAX), handoffRow)}</div>
+            ${when(rows.length > HANDOFF_MAX, () => html`<p class="tiny dim mt-8">
+              ${rows.length - HANDOFF_MAX} bağ daha — masaları aç.</p>`)}`
+        : K.Empty({ text:'Masalar arasında devredilecek ölçülmüş bir bulgu yok. '
+            + 'Devir tahminden çıkmaz.' }),
+    });
+  }
+
   function agendaCard(){
     const rows = SP.Office.agendaCandidates().slice(0, 5);
     return K.Card({
@@ -18975,10 +20025,15 @@ SP.Screens.office = (function(){
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${K.Ledger(() => [
         briefingCard(),
-        K.Entry({ wide:true, label:'Masalar', meta:SP.AGENTS.length + ' ajan',
-          note:'Her ajan yalnız kendi alanına bakar. Yetki dışına çıkmaz; '
+        K.Entry({ wide:true, label:'Patron masası', hint:'office', meta:'orkestrasyon',
+          note:'Patron kendi hesabını yapmaz. Dört masanın raporunu okur, çelişkiyi '
+            + 'sıraya koyar, kararı gerekçesiyle yazar.',
+          body:html`<div class="desks desks--solo">${deskCard(SP.AGENT_BY_ID.patron)}</div>` }),
+        handoffEntry(),
+        K.Entry({ wide:true, label:'Dört uzman masası', meta:COACHES.length + ' ajan',
+          note:'Her uzman yalnız kendi alanına bakar. Yetki dışına çıkmaz; '
             + 'çıkarsa çıktısı basılmaz.',
-          body:html`<div class="desks">${map(SP.AGENTS, deskCard)}</div>` }),
+          body:html`<div class="desks">${map(COACHES, deskCard)}</div>` }),
         agendaCard(), decisionCard(),
         K.Entry({ label:'Yetki ayrımı', hint:'office', meta:'kim neye bakar',
           body:html`<ul class="bullets small muted">${map(SP.AGENTS, a => html`
@@ -18988,6 +20043,16 @@ SP.Screens.office = (function(){
   }
 
   const handle = {
+    /* Devri tamamlayan hareket: bulgunun DUSTUGU ekrani, dogru sekmesi
+       ve dogru satiri acik halde ac. Yoksa devir bir cumleden ibaret
+       kalir. */
+    async handoff(el){
+      const h = SP.Office.handoffs().find(x => x.id === el.dataset.id);
+      if(!h) return;
+      if(h.ui) Object.assign(S.ui, h.ui);
+      UI.toast(h.fromName + ' → ' + h.toName);
+      SP.App.go(h.route);
+    },
     async 'toggle-desk'(el){
       S.ui.officeDesk = S.ui.officeDesk === el.dataset.id ? null : el.dataset.id;
       SP.App.render();
@@ -19044,26 +20109,38 @@ SP.Screens.office = (function(){
     headline(){
       const notes = SP.Office.notes();
       const loud = notes.filter(n => n.tone === 'danger' || n.tone === 'warn').length;
-      if(!notes.length) return 'Masalar sessiz.';
-      if(loud) return loud + ' masada dikkat isteyen not var.';
+      const hand = SP.Office.handoffs();
+      const urgent = hand.filter(h => h.tone === 'danger');
+      if(urgent.length) return urgent[0].fromName + ' masasından ' + urgent[0].toName
+        + ' masasına düşen bir iş var.';
+      if(!notes.length && !hand.length) return 'Masalar sessiz.';
+      if(loud) return loud + ' masada dikkat isteyen not var'
+        + (hand.length ? ' · ' + hand.length + ' devir bekliyor' : '') + '.';
+      if(!notes.length) return hand.length + ' masalar arası bağ var.';
       return 'Masalarda ' + notes.length + ' not var.';
     },
     lede(){
       return 'Patron ekibi yönetir; Kerem laboratuvara, Nesrin beslenmeye, '
         + 'Barış harekete, Sedef ekonomiye bakar. Her not önce kural motorundan '
-        + 'çıkar — model varsa onu yeniden yazar, yerine geçmez.';
+        + 'çıkar — model varsa onu yeniden yazar, yerine geçmez. Bir masanın '
+        + 'bulgusu başka bir masanın işiyse devir satırı onu taşır.';
     },
     stats(){
       const notes = SP.Office.notes();
       const open = SP.Model.openDecisions().length;
+      const hand = SP.Office.handoffs().length;
       const out = [{ value:notes.length, label:'masa notu' }];
+      if(hand) out.push({ value:hand, label:'masalar arası devir' });
       if(open) out.push({ value:open, label:'karar takipte' });
       return out;
     },
     subtitle(){
       const n = SP.Office.notes();
       const open = SP.Model.openDecisions().length;
-      return n.length + ' masa notu' + (open ? ' · ' + open + ' karar takipte' : '');
+      const hand = SP.Office.handoffs().length;
+      return n.length + ' masa notu'
+        + (hand ? ' · ' + hand + ' devir' : '')
+        + (open ? ' · ' + open + ' karar takipte' : '');
     },
     actions(){
       return String(K.Button({ label:'Toplantı', size:'sm', icon:'users', class:'btn--screen',
