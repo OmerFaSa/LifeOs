@@ -2,3 +2,9 @@ __pycache__/
 *.pyc
 .DS_Store
 node_modules/
+
+# Tek kullanimlik denetim betikleri. Kalici olmasi gereken bir kosum
+# tools/ altina yazilir; buraya dusen her sey atilabilir olmalidir.
+.tmpaudit/
+.tmpshot/
+.shots/
