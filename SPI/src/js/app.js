@@ -658,6 +658,9 @@ SP.App = (function(){
   }
 
   function go(route){
+    /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
+       acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
+    if(SP.Talk && SP.Talk.isActive()) SP.Talk.stop();
     S.route = route;
     S.sidebarOpen = false;
     applySection(route);
@@ -877,7 +880,15 @@ SP.App = (function(){
       if(SP.Palette.isOpen()) SP.Palette.close(); else SP.Palette.open();
       return;
     }
+    /* Sesli sohbette BOSLUK sozu keser. Sesle kesilemiyor (ajan
+       konusurken mikrofon kapali olmak zorunda — bkz. core/talk.js),
+       bu yuzden kesme dokunmayla olur ve en yakin tus bosluktur.
+       Bir alana yaziyorken bosluk elbette bosluktur. */
+    if(e.key === ' ' && SP.Talk && SP.Talk.isActive() && !typingInField(e)){
+      if(SP.Talk.kes()){ e.preventDefault(); return; }
+    }
     if(e.key === 'Escape'){
+      if(SP.Talk && SP.Talk.isActive()){ SP.Talk.stop(); render(); return; }
       if(SP.Palette.isOpen()){ SP.Palette.close(); return; }
       if(isAppearanceOpen()){ closeAppearance(); return; }
       if(UI.isHintOpen()){ UI.closeHint(); return; }

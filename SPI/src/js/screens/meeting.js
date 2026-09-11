@@ -43,10 +43,10 @@ SP.Screens.meeting = (function(){
     });
   }
 
-  function turnBlock(t, closing){
+  function turnBlock(t, closing, calanMi){
     const a = SP.AGENT_BY_ID[t.agent];
     return html`
-      <div class="${cls('meetturn', closing && 'meetturn--closing')}">
+      <div class="${cls('meetturn', closing && 'meetturn--closing', calanMi && 'is-calan')}">
         <div class="meetturn__who">
           ${P.avatar(t.agent, 'sm')}
           <b>${t.name}</b>
@@ -70,21 +70,64 @@ SP.Screens.meeting = (function(){
     });
   }
 
+  /* ---- tutanagi DINLE -------------------------------------------
+
+     Toplanti zaten sirayla konusan bes karakter. Sessiz bir tiyatro
+     gibi okunuyordu; dinlenebilir olmasi icin yeni bir sey icat
+     etmeye gerek yok, var olan turlari sesle oynatmak yeter.
+
+     Her ajan kendi sesiyle konusur (core/speak.js → KIMLIK): kimin
+     konustugu duyulmadan anlasilir. */
+  let calan = null;      /* { id, i } — hangi tutanak, kacinci tur */
+
+  function oynatmaDurumu(recId){
+    return calan && calan.id === recId ? calan : null;
+  }
+
+  async function tutanakOynat(rec){
+    const parcalar = rec.turns
+      .map(t => ({ agent:t.agent, text:t.text, name:t.name }))
+      .concat([{ agent:'patron', name:'Patron', text:rec.closing }]);
+
+    calan = { id:rec.id, i:0 };
+    SP.App.render();
+    try{
+      await SP.Speak.sequence(parcalar, {
+        arasiMs:320,   /* turlar arasi nefes: iki ajan birbirine girmesin */
+        onPart(p, i){
+          if(!calan || calan.id !== rec.id) return;
+          calan.i = i;
+          SP.App.render();
+        },
+      });
+    }finally{
+      calan = null;
+      SP.App.render();
+    }
+  }
+
   function minutesCard(rec){
+    const oyn = oynatmaDurumu(rec.id);
     return K.Card({
       title:'Tutanak', sub:rec.agenda.label + ' · ' + U.fmtDate(rec.date),
       badge:P.sourceBadge(rec.source),
       body:html`
         <p class="small dim">${rec.agenda.detail}</p>
         <div class="meet mt-12">
-          ${map(rec.turns, t => turnBlock(t, false))}
-          ${turnBlock({ agent:'patron', name:'Patron', text:rec.closing, source:rec.source }, true)}
+          ${map(rec.turns, (t, i) => turnBlock(t, false, oyn && oyn.i === i))}
+          ${turnBlock({ agent:'patron', name:'Patron', text:rec.closing, source:rec.source },
+            true, oyn && oyn.i === rec.turns.length)}
         </div>
         ${when(rec.decision && !rec.decision.calm, () => K.Notice({ tone:'info', class:'mt-12',
           title:'Kural motorunun kararı:',
           body:rec.decision.title + ' — ' + rec.decision.why }))}`,
-      foot:html`${K.Button({ label:'Kararı takibe al', size:'sm', tone:'primary',
-        act:'track-decision', data:{ 'data-id':rec.id } })}`,
+      foot:html`
+        ${when(SP.Speak.supported() && !oyn, () => K.Button({ label:'Tutanağı dinle',
+          size:'sm', icon:'mic', act:'play-minutes', data:{ 'data-id':rec.id } }))}
+        ${when(oyn, () => html`${K.Button({ label:'Durdur', size:'sm', act:'stop-minutes' })}
+          <span class="tiny dim">${oyn.i + 1} / ${rec.turns.length + 1} tur</span>`)}
+        ${K.Button({ label:'Kararı takibe al', size:'sm', tone:'primary',
+          act:'track-decision', data:{ 'data-id':rec.id } })}`,
     });
   }
 
@@ -145,6 +188,12 @@ SP.Screens.meeting = (function(){
         SP.App.render();
       }
     },
+    async 'play-minutes'(el){
+      const rec = S.officeMeetings.find(m => m.id === el.dataset.id);
+      if(rec) await tutanakOynat(rec);
+    },
+    async 'stop-minutes'(){ SP.Speak.stop(); calan = null; SP.App.render(); },
+
     async 'open-minutes'(el){
       S.ui.meetingOpen = S.ui.meetingOpen === el.dataset.id ? null : el.dataset.id;
       SP.App.render();

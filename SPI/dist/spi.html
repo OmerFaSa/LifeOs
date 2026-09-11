@@ -1847,6 +1847,64 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   display:flex; gap:8px; justify-content:flex-end;
 }
 
+/* Tutanak dinlenirken O ANKİ tur işaretlenir: gözle kulak aynı yerde
+   olsun diye. İşaret bir durum değil bir KONUM bildirir, bu yüzden
+   durum renklerinden birini kullanmaz. */
+.meetturn.is-calan{
+  background:var(--surface-2);
+  box-shadow:inset 3px 0 0 var(--sec);
+}
+
+/* Devir düğmesi: ajan «bu Nesrin'in alanında» dediğinde oraya GİDEN
+   bir yol. Cümlenin altında durur, cümlenin yerine geçmez. */
+.devirdug{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  margin-top:9px; padding-top:9px; border-top:1px solid var(--border);
+}
+
+/* ---- sesli sohbet ---------------------------------------------------
+
+   Panelin tek isi ŞU AN SIRA KİMDE sorusunu cevaplamak. Üç durum var
+   ve üçü de bir bakışta ayrılmalı: renk tek başına yetmez, ışığın
+   davranışı da farklıdır — dinlerken nabız gibi atar, düşünürken
+   söner, konuşurken sabit durur. */
+.ses{
+  display:flex; flex-direction:column; gap:9px;
+  padding:14px 15px; border-radius:var(--r-sm);
+  background:var(--surface-2); min-width:0;
+}
+.ses__hal{ display:flex; align-items:center; gap:11px; min-width:0; }
+.ses__isik{
+  width:11px; height:11px; border-radius:50%; flex:none;
+  background:var(--text-3);
+}
+.ses__t{ display:block; font-size:var(--fs-md); font-weight:650; letter-spacing:-.005em; }
+.ses__a{ display:block; font-size:var(--fs-xs); color:var(--text-3); margin-top:1px; }
+.ses__metin{
+  margin:0; font-size:var(--fs-sm); color:var(--text-2); line-height:1.5;
+  min-height:1.5em; overflow-wrap:anywhere;
+}
+.ses__metin:empty::before{ content:'…'; color:var(--text-3); }
+
+.ses[data-durum="dinliyor"] .ses__isik{
+  background:var(--primary); animation:sesnabiz 1.5s var(--ease) infinite;
+}
+.ses[data-durum="düşünüyor"] .ses__isik{
+  background:var(--accent); animation:sessonuk 1.1s var(--ease) infinite;
+}
+.ses[data-durum="konuşuyor"] .ses__isik{
+  background:var(--sec);
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--sec) 22%, transparent);
+}
+@keyframes sesnabiz{
+  0%,100%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--primary) 45%, transparent); }
+  60%{ box-shadow:0 0 0 7px color-mix(in srgb, var(--primary) 0%, transparent); }
+}
+@keyframes sessonuk{ 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+@media (prefers-reduced-motion:reduce){
+  .ses__isik{ animation:none !important; }
+}
+
 /* ---------- bildirim balonu ---------- */
 .toast-root{
   position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
@@ -4398,7 +4456,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'f6a6b40', at:'2026-09-11 19:21', dirty:true };
+SP.BUILD = { id:'9de4282', at:'2026-09-11 20:43', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -11164,6 +11222,444 @@ SP.Voice = (function(){
   return { supported, start, stop, isActive, activeTarget, dictateInto, message };
 })();
 
+/* ==== js/core/speak.js ==== */
+/* SESLİ CEVAP — ajanın kendi sesi.
+
+   Bu katman bir karar değişikliğidir ve gerekçesi yazılı kalmalı.
+
+   Önceki karar: «Sesli cevap (TTS) yoktur: kesinlik katmaz, bedel
+   katar.» O gerekçe bir SAYIYI sesli okumak içindi ve hâlâ doğrudur —
+   bir ferritin değerini duymak, okumaktan daha kesin yapmaz.
+
+   Yeni gerekçe farklı: ses OKUMAMAK için değil, SIRA ALMAK için var.
+   Elin doluyken, yürürken, mutfaktayken Patron'a bir şey sorup cevabı
+   duymak; cevap bitince mikrofonun kendiliğinden açılması. Kesinlik
+   değil SÜREKLİLİK kazandırıyor.
+
+   ─────────────────────────────────────────────────────────────────
+
+   DEĞİŞMEZ: ses, ekrandaki metinden BAŞKA bir şey söylemez.
+
+   Konuşulan metin, kural motorundan geçmiş ve ekrana basılmış metnin
+   ta kendisidir. Burada yeniden yazma, özetleme, "sesli için
+   kısaltma" yoktur. Olsaydı duyduğun cümle ile gördüğün cümle
+   ayrışırdı ve hangisinin doğru olduğu belirsizleşirdi.
+
+   Yapılan tek şey TELAFFUZ hazırlığıdır: «%40» yazısını «yüzde 40»
+   diye okutmak anlamı değiştirmez, yalnızca duyulur kılar.
+
+   Desteklenmeyen tarayıcıda katman sessizce yok olur; hiçbir düğme
+   çizilmez, yazılı akış olduğu gibi durur. */
+
+window.SP = window.SP || {};
+
+SP.Speak = (function(){
+
+  const API = window.speechSynthesis || null;
+  const Utter = window.SpeechSynthesisUtterance || null;
+
+  function supported(){ return !!(API && Utter); }
+
+  /* ---------------------------------------------------------- sesler
+
+     Tarayıcı ses listesini GEÇ yükler: ilk çağrıda boş dönebilir ve
+     `voiceschanged` olayıyla dolar. Bu yüzden liste her istendiğinde
+     yeniden okunur, önbelleğe alınmaz. */
+  function voices(){
+    if(!supported()) return [];
+    try{ return API.getVoices() || []; }catch(e){ return []; }
+  }
+
+  function turkishVoices(){
+    return voices().filter(v => /^tr([-_]|$)/i.test(v.lang || ''));
+  }
+
+  /* Türkçe ses yoksa katman yine çalışır ama bunu SÖYLER: yabancı bir
+     sesle okunan Türkçe anlaşılmaz olabilir ve kullanıcı sebebini
+     bilmelidir. */
+  function ready(){
+    return supported() && voices().length > 0;
+  }
+  function hasTurkish(){ return turkishVoices().length > 0; }
+
+  /* ------------------------------------------------- ajan ses kimliği
+
+     Beş ajanın sesi birbirinden AYRILMALI: toplantıyı dinlerken kimin
+     konuştuğu duyulmadan anlaşılmalı.
+
+     Tarayıcıda genelde bir ya da iki Türkçe ses bulunur — beş ayrı ses
+     bulunmaz. Bu yüzden kimlik yalnız sese değil, KONUŞMA BİÇİMİNE de
+     yazılır: hız ve perde. Tek sesle bile beş karakter ayrışır.
+
+     Değerler karakterden çıkar, rastgele değil:
+       Patron  — yavaş ve alçak: kararı o veriyor, acelesi yok
+       Kerem   — nötr: ölçüm okuyor, yorum katmıyor
+       Nesrin  — biraz daha canlı: mutfakta anlatıyor
+       Barış   — hızlı: antrenman veriyor
+       Sedef   — ölçülü: para konuşuyor, abartmıyor */
+  const KIMLIK = {
+    patron:{ rate:0.94, pitch:0.92 },
+    lab:   { rate:1.00, pitch:1.00 },
+    nutri: { rate:1.02, pitch:1.08 },
+    move:  { rate:1.10, pitch:1.04 },
+    money: { rate:0.98, pitch:0.96 },
+  };
+
+  /* Ses ataması KARARLI olmalı: aynı ajan her seferinde aynı sesle
+     konuşur. Liste sırası tarayıcıya göre değişebildiği için ajanın
+     kendi sırası kullanılır, ses listesinin sırası değil. */
+  function voiceFor(agentId){
+    const tr = turkishVoices();
+    const havuz = tr.length ? tr : voices();
+    if(!havuz.length) return null;
+    const sira = SP.AGENTS.findIndex(a => a.id === agentId);
+    return havuz[(sira < 0 ? 0 : sira) % havuz.length];
+  }
+
+  function styleFor(agentId){
+    return KIMLIK[agentId] || { rate:1, pitch:1 };
+  }
+
+  /* ------------------------------------------------------- telaffuz
+
+     Anlam değişmez, yalnızca duyulur hale gelir. Her kural bir
+     okunuş sorununu çözer; süs kural yoktur. */
+  function konusulacak(text){
+    let s = String(text == null ? '' : text);
+
+    s = s.replace(/\*\*/g, '').replace(/[*_`#]/g, '');   /* işaretleme okunmaz */
+    s = s.replace(/%\s*(\d)/g, 'yüzde $1');              /* %40 → yüzde 40 */
+    s = s.replace(/(\d)\s*%/g, '$1 yüzde');              /* 40% → 40 yüzde */
+    s = s.replace(/([A-Za-zµ])\/([A-Za-z])/g, '$1 $2');  /* ng/mL → ng mL */
+    s = s.replace(/[·•]/g, ', ');                        /* ayraç → duraklama */
+    s = s.replace(/\s[—–]\s/g, ', ');                    /* uzun tire → duraklama */
+    s = s.replace(/→/g, ', ');
+    /* Ayraç kendi boşluğunu getirdiği için önündeki boşluk artık
+       fazladır: «A · B» → «A , B» diye okunuyordu. */
+    s = s.replace(/\s+([,.;:])/g, '$1');
+    s = s.replace(/\s+/g, ' ').trim();
+    return s;
+  }
+
+  /* --------------------------------------------------------- söyleme */
+
+  let simdiki = null;      /* { utter, agentId, iptal } */
+
+  /* Bir cümleyi söyler ve BİTİNCE çözülen bir söz döndürür.
+
+     Sözün bitmesi sıra alma döngüsünün tek tetikleyicisidir: mikrofon
+     ancak ajan sustuğunda açılır. Bu yüzden hata durumunda bile söz
+     MUTLAKA çözülür — çözülmezse döngü sessizce ölür ve kullanıcı
+     mikrofonun neden açılmadığını anlamaz. */
+  function say(text, opts){
+    const o = opts || {};
+    const metin = konusulacak(text);
+    if(!supported() || !metin) return Promise.resolve({ ok:false, reason:'bos' });
+
+    stop();
+
+    return new Promise(resolve => {
+      let bitti = false;
+      const bitir = sonuc => { if(bitti) return; bitti = true; simdiki = null; resolve(sonuc); };
+
+      let u;
+      try{ u = new Utter(metin); }
+      catch(e){ return bitir({ ok:false, reason:'utter' }); }
+
+      const ses = o.voice || voiceFor(o.agent);
+      const stil = styleFor(o.agent);
+      if(ses){ u.voice = ses; u.lang = ses.lang; }
+      else u.lang = o.lang || 'tr-TR';
+      u.rate = o.rate != null ? o.rate : stil.rate;
+      u.pitch = o.pitch != null ? o.pitch : stil.pitch;
+      u.volume = o.volume != null ? o.volume : 1;
+
+      u.onend = () => bitir({ ok:true });
+      u.onerror = ev => bitir({ ok:false,
+        reason:(ev && ev.error) || 'error',
+        /* Kullanıcı kestiyse bu bir hata değil, bir karardır. */
+        iptal:!!(ev && (ev.error === 'interrupted' || ev.error === 'canceled')) });
+
+      simdiki = { utter:u, agentId:o.agent || null };
+      if(o.onStart) o.onStart();
+
+      try{ API.speak(u); }
+      catch(e){ bitir({ ok:false, reason:'speak' }); }
+    });
+  }
+
+  /* Sırayla söyler. Bir cümle iptal edilirse kalanlar SÖYLENMEZ:
+     kullanıcı sözü kestiyse sırayı da kesmiştir. */
+  async function sequence(parcalar, opts){
+    const o = opts || {};
+    for(let i = 0; i < parcalar.length; i++){
+      const p = parcalar[i];
+      if(o.onPart) o.onPart(p, i);
+      const r = await say(p.text, Object.assign({}, o, { agent:p.agent }));
+      if(!r.ok && r.iptal) return { ok:false, kesildi:true, kalan:parcalar.length - i };
+      if(o.arasiMs) await new Promise(res => setTimeout(res, o.arasiMs));
+    }
+    return { ok:true, kesildi:false, kalan:0 };
+  }
+
+  function stop(){
+    if(!supported()) return;
+    try{ API.cancel(); }catch(e){}
+    simdiki = null;
+  }
+
+  function isSpeaking(){
+    if(!supported()) return false;
+    try{ return API.speaking || API.pending; }catch(e){ return false; }
+  }
+  function speakingAgent(){ return simdiki ? simdiki.agentId : null; }
+
+  /* Ses listesi geç yüklendiğinde haber ver: mikrofon düğmesi ilk
+     çizimde gizli kalıp sonra görünmesin diye ekran tazelenir. */
+  function onVoicesReady(fn){
+    if(!supported()) return;
+    if(voices().length){ fn(); return; }
+    const el = () => { API.removeEventListener('voiceschanged', el); fn(); };
+    try{ API.addEventListener('voiceschanged', el); }catch(e){}
+  }
+
+  return {
+    supported, ready, hasTurkish, voices, turkishVoices,
+    voiceFor, styleFor, konusulacak,
+    say, sequence, stop, isSpeaking, speakingAgent, onVoicesReady,
+    KIMLIK,
+  };
+})();
+
+/* ==== js/core/talk.js ==== */
+/* SESLİ SOHBET — sıra alma döngüsü.
+
+   Dikte ile sohbet arasındaki fark düğmedir. Dikte: mikrofona
+   söylersin, alana yazılır, sen «Gönder»e basarsın, cevabı okursun.
+   Sohbet: sen susarsın, sıra ajana geçer, o konuşur, susar, sıra
+   sana döner. Arada düğme yoktur.
+
+   Döngü dört durumdan geçer ve her zaman bu sırayla:
+
+     dinliyor → düşünüyor → konuşuyor → dinliyor …
+
+   ─────────────────────────────────────────────────────────────────
+
+   AKUSTİK GERİ BESLEME — bu katmanın en önemli kısıtı
+
+   Ajan konuşurken mikrofon AÇIK KALAMAZ. Kalırsa tanıyıcı ajanın
+   kendi sesini duyar, metne çevirir ve ajan kendi cümlesine cevap
+   vermeye başlar. Tarayıcının konuşma tanıma katmanında yankı
+   engelleme yoktur.
+
+   Bunun doğrudan sonucu: SESLE SÖZ KESİLEMEZ. «Dur» diye bağırmak
+   çalışmaz, çünkü o anda seni duyan kimse yok.
+
+   Söz kesme bu yüzden DOKUNMAYLA olur: bir düğme ya da boşluk tuşu.
+   Ajan susar, mikrofon hemen açılır. Bu bir eksiklik değil, kısıtın
+   dürüst karşılığıdır — sesle kesilebiliyormuş gibi yapmak, bağırıp
+   cevap alamamaktan daha kötüdür.
+
+   ─────────────────────────────────────────────────────────────────
+
+   DEĞİŞMEZ: ses ikinci bir yol açmaz.
+
+   Sesli sohbet `SP.Office.send()` üzerinden geçer — yazarak sorduğun
+   soruyla tamamen aynı yol. Aynı brifing, aynı ev kuralları denetimi,
+   aynı kayıt. Ses yalnızca GİRİŞ ve ÇIKIŞ biçimidir; ayrı bir
+   ayrıştırıcı, ayrı bir istem, ayrı bir kayıt yolu yoktur.
+
+   Model kapalıyken de çalışır: kural motorunun cümlesi seslendirilir. */
+
+window.SP = window.SP || {};
+
+SP.Talk = (function(){
+
+  /* Kullanıcı sustu mu? Tanıyıcı bunu kendi söylemiyor; son metin
+     değişiminden bu yana geçen süreyle karar veriyoruz.
+
+     1.400 ms bilerek uzun: cümle ortasında düşünmek için bir saniye
+     yetmiyor, iki saniye ise sohbeti ağırlaştırıyor. */
+  const SESSIZLIK_MS = 1400;
+
+  /* Ajan sustuktan sonra mikrofonu açmadan önceki bekleme. Sıfır
+     olursa tarayıcı bazen konuşmanın son hecesini mikrofona
+     düşürüyor. */
+  const SIRA_GECIS_MS = 260;
+
+  let oturum = null;
+
+  function bosOturum(agentId, o){
+    return {
+      agentId,
+      durum:'kapalı',        // kapalı | dinliyor | düşünüyor | konuşuyor
+      metin:'',              // o anki duyulan metin (ara sonuç dahil)
+      hata:null,
+      sonCevap:null,
+      sessizlikSaat:null,
+      onChange:o.onChange || function(){},
+      onTurn:o.onTurn || function(){},
+      kapandi:false,
+    };
+  }
+
+  function durumaGec(yeni, ek){
+    if(!oturum) return;
+    oturum.durum = yeni;
+    if(ek) Object.assign(oturum, ek);
+    try{ oturum.onChange(snapshot()); }catch(e){}
+  }
+
+  function snapshot(){
+    if(!oturum) return { acik:false, durum:'kapalı', agentId:null, metin:'', hata:null };
+    return {
+      acik:!oturum.kapandi,
+      durum:oturum.durum,
+      agentId:oturum.agentId,
+      metin:oturum.metin,
+      hata:oturum.hata,
+    };
+  }
+
+  function supported(){
+    return SP.Voice.supported();
+  }
+  /* Ses çıkışı olmadan da sohbet kurulabilir: sıra yine geçer, cevap
+     yalnızca yazıyla görünür. Kullanıcıya bu SÖYLENİR. */
+  function sesliCevapVar(){ return SP.Speak.supported(); }
+
+  /* ------------------------------------------------------ dinleme turu */
+
+  function sessizlikSay(){
+    if(!oturum) return;
+    clearTimeout(oturum.sessizlikSaat);
+    oturum.sessizlikSaat = setTimeout(() => {
+      if(!oturum || oturum.durum !== 'dinliyor') return;
+      SP.Voice.stop();          /* onEnd tetiklenir, tur orada kapanır */
+    }, SESSIZLIK_MS);
+  }
+
+  function dinle(){
+    if(!oturum || oturum.kapandi) return;
+    durumaGec('dinliyor', { metin:'', hata:null });
+
+    SP.Voice.start({
+      continuous:true,
+      onText(text){
+        if(!oturum || oturum.durum !== 'dinliyor') return;
+        oturum.metin = text;
+        try{ oturum.onChange(snapshot()); }catch(e){}
+        sessizlikSay();
+      },
+      onEnd(final){
+        if(!oturum || oturum.kapandi) return;
+        clearTimeout(oturum.sessizlikSaat);
+        const soru = (final || oturum.metin || '').trim();
+        if(!soru){
+          /* Hiç konuşulmadı: döngü ölmez, yeniden dinler. */
+          setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, SIRA_GECIS_MS);
+          return;
+        }
+        cevapla(soru);
+      },
+      onError(code){
+        if(!oturum || oturum.kapandi) return;
+        clearTimeout(oturum.sessizlikSaat);
+        /* İzin sorunları döngüyü bitirir; geçici hatalar bitirmez. */
+        if(code === 'not-allowed' || code === 'service-not-allowed' || code === 'unsupported'){
+          durumaGec('kapalı', { hata:SP.Voice.message(code) });
+          stop();
+          return;
+        }
+        durumaGec('dinliyor', { hata:SP.Voice.message(code) });
+        setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, 500);
+      },
+    });
+  }
+
+  /* ------------------------------------------------------- cevap turu */
+
+  async function cevapla(soru){
+    if(!oturum || oturum.kapandi) return;
+    const agentId = oturum.agentId;
+    durumaGec('düşünüyor', { metin:soru });
+    try{ oturum.onTurn({ role:'user', text:soru }); }catch(e){}
+
+    let res;
+    try{
+      /* Yazarak sorulan soruyla AYNI yol: aynı brifing, aynı denetim,
+         aynı kayıt. */
+      res = await SP.Office.send(agentId, soru);
+    }catch(e){
+      res = { text:'Cevap üretilemedi.', source:'rules', error:String(e && e.message || e) };
+    }
+    if(!oturum || oturum.kapandi) return;
+
+    oturum.sonCevap = res;
+    try{ oturum.onTurn({ role:'agent', text:res.text, source:res.source }); }catch(e){}
+
+    if(!sesliCevapVar()){
+      /* Ses çıkışı yok: sıra yine geçer, cevap yazıyla okunur. */
+      setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, SIRA_GECIS_MS);
+      return;
+    }
+
+    durumaGec('konuşuyor');
+    const sonuc = await SP.Speak.say(res.text, { agent:agentId });
+    if(!oturum || oturum.kapandi) return;
+
+    /* Söz kesildiyse mikrofon HEMEN açılır: kullanıcı kesmişse
+       söyleyecek bir şeyi var demektir. */
+    const bekle = sonuc.iptal ? 0 : SIRA_GECIS_MS;
+    setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, bekle);
+  }
+
+  /* ----------------------------------------------------------- denetim */
+
+  function start(agentId, opts){
+    const o = opts || {};
+    if(!supported()) return { ok:false, reason:'unsupported',
+      message:SP.Voice.message('unsupported') };
+    stop();
+    oturum = bosOturum(agentId || 'patron', o);
+    durumaGec('dinliyor');
+    dinle();
+    return { ok:true };
+  }
+
+  /* Sözü kes: ajan susar, sıra hemen sana döner.
+
+     Sesle değil DOKUNMAYLA çalışır — sebebi dosyanın başında. */
+  function kes(){
+    if(!oturum || oturum.kapandi) return false;
+    if(oturum.durum !== 'konuşuyor') return false;
+    SP.Speak.stop();
+    return true;
+  }
+
+  function stop(){
+    const o = oturum;
+    oturum = null;
+    if(!o) return;
+    o.kapandi = true;
+    clearTimeout(o.sessizlikSaat);
+    try{ SP.Voice.stop(); }catch(e){}
+    try{ SP.Speak.stop(); }catch(e){}
+    o.durum = 'kapalı';
+    try{ o.onChange({ acik:false, durum:'kapalı', agentId:o.agentId, metin:'', hata:o.hata }); }catch(e){}
+  }
+
+  function isActive(){ return !!(oturum && !oturum.kapandi); }
+  function durum(){ return snapshot(); }
+  function agent(){ return oturum ? oturum.agentId : null; }
+
+  return {
+    supported, sesliCevapVar,
+    start, stop, kes, isActive, durum, agent,
+    SESSIZLIK_MS, SIRA_GECIS_MS,
+  };
+})();
+
 /* ==== js/core/extract.js ==== */
 /* Belge ve fotograftan veri cikarma.
 
@@ -14366,6 +14862,31 @@ SP.Office = (function(){
 
   /* Ajan yaniti. Model yoksa ya da cagri basarisiz olursa kural motorunun
      cumlesi doner — ofis hicbir kosulda sessiz kalmaz. */
+  /* Sohbetin kac turu modele tasinir?
+
+     Bu sayi bir performans ayari degil bir SOHBET karari. Sifir olsaydi
+     (uzun sure oyleydi) "peki neden?" sorusu anlamsiz kalirdi: ajan
+     neyin nedenini sordugunu bilemezdi. Cok buyuk olsaydi eski bir
+     olcum yeni brifingle celisirdi — brifing HER turda tazelenir, sohbet
+     gecmisi tazelenmez.
+
+     Dort alisveris: bir konuyu acip kapatmaya yeter, eskimeye yetmez. */
+  const HAFIZA_TUR = 8;
+
+  /* Gecmisi modelin anlayacagi bicime cevirir.
+
+     KURAL: modele, kullanicinin GORDUGU metin gonderilir. Bir cevap ev
+     kurallarina takilip yerine kural motorunun cumlesi basildiysa,
+     modele de o cumle gider — model kendi bastirilmis cumlesini
+     hatirlayip ustune kurmasin diye. */
+  function historyFor(agentId, extra){
+    const list = (extra && extra.length ? extra : (SP.S.officeChats[agentId] || []));
+    return list.slice(-HAFIZA_TUR).map(m => ({
+      role:m.role === 'user' ? 'user' : 'assistant',
+      text:String(m.text || ''),
+    })).filter(m => m.text);
+  }
+
   async function ask(agentId, question, opts){
     const o = opts || {};
     const b = o.brief || brief(agentId);
@@ -14374,10 +14895,14 @@ SP.Office = (function(){
     const cfg = cfgFor(agentId);
     if(!SP.LLM.ready(cfg)) return fallback;
 
+    /* Gecmis acikca kapatilabilir: toplantida her ajan gundeme TEK
+       basina cevap verir, sohbet gecmisi oraya karismaz. */
+    const gecmis = o.history === false ? [] : historyFor(agentId, o.history);
+
     try{
       const res = await SP.LLM.chat(cfg, {
         system:systemPrompt(agentId, b),
-        messages:[{ role:'user', text:question || 'Durumu özetle.' }],
+        messages:gecmis.concat([{ role:'user', text:question || 'Durumu özetle.' }]),
         temperature:settings().temperature,
         maxTokens:o.maxTokens || 600,
       });
@@ -14763,7 +15288,9 @@ SP.Office = (function(){
       const res = await ask(id,
         'Gündem: ' + agenda.label + ' — ' + agenda.detail + '\n'
         + 'Kendi alanından bu gündeme ne söylüyorsun? Alanın dışına çıkma. En fazla 3 cümle.',
-        { brief:b, maxTokens:400 });
+        /* Toplanti sohbet degil: her uzman gundeme tek basina cevap
+           verir, danisma ekranindaki sohbet gecmisi buraya karismaz. */
+        { brief:b, maxTokens:400, history:false });
       const turn = { agent:id, name:SP.AGENT_BY_ID[id].name, text:res.text, source:res.source };
       turns.push(turn);
       if(onTurn) onTurn(turn);
@@ -14776,7 +15303,7 @@ SP.Office = (function(){
       + turns.map(t => '- ' + t.name + ': ' + t.text).join('\n') + '\n\n'
       + 'Çelişki varsa öncelik sırasına göre çöz (kırmızı bayrak > güvenlik > laboratuvar > '
       + 'beslenme > antrenman > bütçe) ve TEK bir karar yaz. Kararı gerekçelendir.',
-      { brief:pb, maxTokens:500 });
+      { brief:pb, maxTokens:500, history:false });
 
     const rec = {
       id:U.uid('mt'), at:new Date().toISOString(), date:U.todayISO(),
@@ -14793,8 +15320,11 @@ SP.Office = (function(){
 
   async function send(agentId, text){
     const list = SP.S.officeChats[agentId] || (SP.S.officeChats[agentId] = []);
+    /* Gecmis, soru listeye YAZILMADAN once alinir. Sonra alinsaydi soru
+       hem gecmiste hem son mesajda yer alir, modele iki kez giderdi. */
+    const gecmis = historyFor(agentId);
     list.push({ role:'user', text, at:new Date().toISOString() });
-    const res = await ask(agentId, text);
+    const res = await ask(agentId, text, { history:gecmis.length ? gecmis : false });
     list.push({ role:'agent', text:res.text, source:res.source, at:new Date().toISOString(),
       blocked:res.blocked || null, error:res.error || null });
     await SP.Store.set('chats/' + agentId, { agentId, messages:list });
@@ -14826,7 +15356,7 @@ SP.Office = (function(){
   return {
     defaults, settings, saveSettings, cfgFor, ready,
     brief, labBrief, nutriBrief, moveBrief, moneyBrief, patronBrief,
-    ruleText, systemPrompt, validate, ask,
+    ruleText, systemPrompt, validate, ask, historyFor, HAFIZA_TUR,
     notes, handoffs, handoffsFor, agendaCandidates, dailyBriefing, runMeeting,
     send, clearChat, load,
   };
@@ -20349,6 +20879,76 @@ SP.Screens.team = (function(){
 
   let busy = false;
 
+  /* Sesli sohbetin o anki hali. Ekran bunu YENIDEN CIZMEZ, yalnizca
+     panelin icini gunceller: her tur yeniden cizim yapilsa mikrofon
+     dugmesi DOM'dan gider ve tarayici oturumu keser. */
+  let sesli = { acik:false, durum:'kapalı', metin:'', hata:null };
+
+  const DURUM_METNI = {
+    'dinliyor':  { t:'Dinliyorum', a:'Sustuğunda sıra ona geçecek' },
+    'düşünüyor': { t:'Düşünüyor',  a:'Brifingi okuyor ve cümleyi kuruyor' },
+    'konuşuyor': { t:'Konuşuyor',  a:'Kesmek için Kes\'e bas ya da boşluk tuşu' },
+    'kapalı':    { t:'Kapalı',     a:'' },
+  };
+
+  /* Sesli sohbet paneli — sohbet kartinin ustunde durur.
+
+     Ses TANIMA olmadan bu kip hic cizilmez: olmayan bir yetenegin
+     dugmesini gostermek, basip bir sey olmamasindan kotudur. */
+  function voiceCard(){
+    if(!SP.Talk.supported()) return '';
+    const a = current();
+    const d = DURUM_METNI[sesli.durum] || DURUM_METNI['kapalı'];
+    const sessizCevap = !SP.Talk.sesliCevapVar();
+    const yabanci = SP.Speak.supported() && !SP.Speak.hasTurkish();
+
+    return K.Card({
+      class:'sescard',
+      title:'Sesli sohbet', sub:a.name + ' ile sıra sırayla',
+      badge:sesli.acik ? K.Badge({ label:'açık', tone:'info' })
+        : K.Badge({ label:'kapalı', tone:'muted', icon:false }),
+      body:html`
+        <div class="ses" id="ses-panel" data-durum="${sesli.durum}">
+          <div class="ses__hal">
+            <span class="ses__isik" aria-hidden="true"></span>
+            <div class="minw0">
+              <b class="ses__t">${d.t}</b>
+              <span class="ses__a">${d.a}</span>
+            </div>
+          </div>
+          <p class="ses__metin" id="ses-metin">${sesli.metin || ''}</p>
+        </div>
+        ${when(sesli.hata, () => K.Notice({ tone:'warn', class:'mt-10', body:sesli.hata }))}
+        ${when(!sesli.acik && sessizCevap, () => K.Notice({ tone:'info', class:'mt-10',
+          body:'Bu tarayıcıda sesli cevap yok. Sıra yine geçer; cevabı okursun.' }))}
+        ${when(!sesli.acik && yabanci, () => K.Notice({ tone:'info', class:'mt-10',
+          body:'Cihazda Türkçe ses bulunamadı. Cevap yabancı bir sesle okunur; '
+             + 'anlaşılmazsa sesli sohbeti kapat.' }))}`,
+      foot:html`
+        ${when(!sesli.acik, () => K.Button({ label:'Sesli sohbeti başlat', tone:'primary',
+          icon:'mic', act:'talk-start' }))}
+        ${when(sesli.acik, () => html`
+          ${K.Button({ label:'Bitir', act:'talk-stop' })}
+          ${K.Button({ label:'Kes', act:'talk-cut',
+            disabled:sesli.durum !== 'konuşuyor' })}`)}`,
+    });
+  }
+
+  /* Panelin icini YERINDE gunceller. Tam cizim yapilsa mikrofon
+     oturumu kopardi. */
+  function panelTazele(st){
+    sesli = { acik:st.acik, durum:st.durum, metin:st.metin, hata:st.hata };
+    const p = document.getElementById('ses-panel');
+    if(!p){ SP.App.render(); return; }
+    p.setAttribute('data-durum', st.durum);
+    const d = DURUM_METNI[st.durum] || DURUM_METNI['kapalı'];
+    const t = p.querySelector('.ses__t'), a2 = p.querySelector('.ses__a');
+    const m = document.getElementById('ses-metin');
+    if(t) t.textContent = d.t;
+    if(a2) a2.textContent = d.a;
+    if(m) m.textContent = st.metin || '';
+  }
+
   function current(){
     return SP.AGENT_BY_ID[S.ui.officeAgent] || SP.AGENT_BY_ID.patron;
   }
@@ -20362,14 +20962,36 @@ SP.Screens.team = (function(){
       </button>`)}</div>`;
   }
 
-  function chatCard(){
-    const a = current();
+  /* Sohbet govdesi ayri durur: sesli turda kart yeniden CIZILMEDEN
+     yalnizca bu blok degistirilir (tam cizim mikrofonu koparir). */
+  /* Ajan «bu benim alanimda degil» dediginde bunu SOYLEMEKLE kalmasin,
+     BAGLASIN. Replik zaten sozlukte yaziliydi (agents.js → redirect)
+     ama bir dugmesi yoktu: kullanici sohbeti kapatip sekme degistirip
+     soruyu yeniden yazmak zorundaydi.
+
+     Hedef, cevabin icinde gecen ajan ADINDAN bulunur — ajanin kendi
+     `redirect` repligi zaten o adi tasir. Ad gecmiyorsa dugme
+     cizilmez: olmayan bir devri uydurmayiz. */
+  function devirHedefi(a, text){
+    if(!text) return null;
+    const t = String(text).toLocaleLowerCase('tr-TR');
+    for(const x of SP.AGENTS){
+      if(x.id === a.id || x.id === 'patron') continue;
+      const ad = x.name.toLocaleLowerCase('tr-TR');
+      if(t.indexOf(ad) >= 0) return x;
+    }
+    return null;
+  }
+
+  /* Devredilen soru, kullanicinin EN SON sordugu sorudur. */
+  function sonSoru(a){
+    const list = (S.officeChats[a.id] || []).filter(m => m.role === 'user');
+    return list.length ? list[list.length - 1].text : '';
+  }
+
+  function chatBody(a){
     const msgs = S.officeChats[a.id] || [];
-    return K.Card({
-      title:a.name, sub:a.role,
-      badge:SP.Office.ready(a.id) ? K.Badge({ label:'model açık', tone:'info' })
-        : K.Badge({ label:'kural motoru', tone:'muted', icon:false }),
-      body:html`
+    return html`
         <div class="chat">
           <div class="msg msg--agent">
             ${P.avatar(a.id, 'sm')}
@@ -20380,6 +21002,14 @@ SP.Screens.team = (function(){
               ${when(m.role !== 'user', () => P.avatar(a.id, 'sm'))}
               <div class="msg__body">
                 <p class="small">${m.text}</p>
+                ${when(m.role !== 'user' && devirHedefi(a, m.text), () => {
+                  const h = devirHedefi(a, m.text);
+                  return html`<div class="devirdug">
+                    <span class="tiny dim">Bu soru ${h.name}'in alanında.</span>
+                    ${K.Button({ label:h.name + '\'e geç', size:'sm', tone:'primary',
+                      act:'devret', data:{ 'data-id':h.id, 'data-q':sonSoru(a) } })}
+                  </div>`;
+                })}
                 ${when(m.role !== 'user', () => html`<div class="row-sm mt-4">
                   ${P.sourceBadge(m.source)}
                   ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
@@ -20391,7 +21021,16 @@ SP.Screens.team = (function(){
             <div class="msg__body">${K.Skeleton({ rows:2,
               label:a.name + ' düşünüyor',
               hint:'brifingi okuyor ve cümleyi kuruyor' })}</div></div>`)}
-        </div>`,
+        </div>`;
+  }
+
+  function chatCard(){
+    const a = current();
+    return K.Card({
+      title:a.name, sub:a.role,
+      badge:SP.Office.ready(a.id) ? K.Badge({ label:'model açık', tone:'info' })
+        : K.Badge({ label:'kural motoru', tone:'muted', icon:false }),
+      body:chatBody(a),
       foot:html`
         <div class="quick">
           ${K.Mic({ target:'chat-text' })}
@@ -20453,8 +21092,19 @@ SP.Screens.team = (function(){
   async function render(){
     return String(html`
       <div class="mb-8">${tabsCard()}</div>
-      ${K.Ledger(() => [chatCard(), scopeCard(), suggestCard(), briefCard()])}
+      ${K.Ledger(() => [voiceCard(), chatCard(), scopeCard(), suggestCard(), briefCard()]
+        .filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'no-model', 'privacy']))}</div>`);
+  }
+
+  /* Sohbet balonlarini yerinde tazeler. Tam cizim mikrofonu kopardigi
+     icin sesli turda tam cizim kullanilamaz. */
+  function sohbetTazele(){
+    const kap = document.querySelector('.chat');
+    if(!kap){ SP.App.render(); return; }
+    kap.outerHTML = String(chatBody(current()));
+    const yeni = document.querySelector('.chat');
+    if(yeni) yeni.scrollTop = yeni.scrollHeight;
   }
 
   async function send(text){
@@ -20470,7 +21120,28 @@ SP.Screens.team = (function(){
   }
 
   const handle = {
-    async 'pick-agent'(el){ S.ui.officeAgent = el.dataset.id; SP.App.render(); },
+    async 'pick-agent'(el){
+      /* Ajan degisirse sesli oturum biter: Kerem'e baslayip Nesrin'den
+         cevap almak sohbeti degil karisikligi buyutur. */
+      if(SP.Talk.isActive()) SP.Talk.stop();
+      S.ui.officeAgent = el.dataset.id;
+      SP.App.render();
+    },
+
+    async 'talk-start'(){
+      const r = SP.Talk.start(current().id, {
+        onChange:panelTazele,
+        /* Her tur bittiginde sohbet listesi buyudu: kartin icini
+           tazele ama mikrofon oturumunu koparma. */
+        onTurn(){ sohbetTazele(); },
+      });
+      if(!r.ok){ UI.toast(r.message || 'Sesli sohbet başlatılamadı'); return; }
+      sesli.acik = true;
+      SP.App.render();
+    },
+    async 'talk-stop'(){ SP.Talk.stop(); sesli.acik = false; SP.App.render(); },
+    async 'talk-cut'(){ if(!SP.Talk.kes()) UI.toast('Şu an konuşmuyor'); },
+
     async 'toggle-brief'(){ S.ui.briefOpen = !S.ui.briefOpen; SP.App.render(); },
     async 'send-chat'(){
       const el = document.getElementById('chat-text');
@@ -20480,6 +21151,16 @@ SP.Screens.team = (function(){
       await send(text);
     },
     async 'quick-ask'(el){ await send(el.dataset.q); },
+
+    /* Devir: hedef ajana gec ve AYNI soruyu ona sor. Kullanici soruyu
+       ikinci kez yazmaz — devrin sonu bu. */
+    async devret(el){
+      if(SP.Talk.isActive()) SP.Talk.stop();
+      const hedef = el.dataset.id, soru = el.dataset.q || '';
+      S.ui.officeAgent = hedef;
+      SP.App.render();
+      if(soru) await send(soru);
+    },
     async 'clear-chat'(){
       await SP.Office.clearChat(current().id);
       UI.toast('Sohbet temizlendi');
@@ -20545,10 +21226,10 @@ SP.Screens.meeting = (function(){
     });
   }
 
-  function turnBlock(t, closing){
+  function turnBlock(t, closing, calanMi){
     const a = SP.AGENT_BY_ID[t.agent];
     return html`
-      <div class="${cls('meetturn', closing && 'meetturn--closing')}">
+      <div class="${cls('meetturn', closing && 'meetturn--closing', calanMi && 'is-calan')}">
         <div class="meetturn__who">
           ${P.avatar(t.agent, 'sm')}
           <b>${t.name}</b>
@@ -20572,21 +21253,64 @@ SP.Screens.meeting = (function(){
     });
   }
 
+  /* ---- tutanagi DINLE -------------------------------------------
+
+     Toplanti zaten sirayla konusan bes karakter. Sessiz bir tiyatro
+     gibi okunuyordu; dinlenebilir olmasi icin yeni bir sey icat
+     etmeye gerek yok, var olan turlari sesle oynatmak yeter.
+
+     Her ajan kendi sesiyle konusur (core/speak.js → KIMLIK): kimin
+     konustugu duyulmadan anlasilir. */
+  let calan = null;      /* { id, i } — hangi tutanak, kacinci tur */
+
+  function oynatmaDurumu(recId){
+    return calan && calan.id === recId ? calan : null;
+  }
+
+  async function tutanakOynat(rec){
+    const parcalar = rec.turns
+      .map(t => ({ agent:t.agent, text:t.text, name:t.name }))
+      .concat([{ agent:'patron', name:'Patron', text:rec.closing }]);
+
+    calan = { id:rec.id, i:0 };
+    SP.App.render();
+    try{
+      await SP.Speak.sequence(parcalar, {
+        arasiMs:320,   /* turlar arasi nefes: iki ajan birbirine girmesin */
+        onPart(p, i){
+          if(!calan || calan.id !== rec.id) return;
+          calan.i = i;
+          SP.App.render();
+        },
+      });
+    }finally{
+      calan = null;
+      SP.App.render();
+    }
+  }
+
   function minutesCard(rec){
+    const oyn = oynatmaDurumu(rec.id);
     return K.Card({
       title:'Tutanak', sub:rec.agenda.label + ' · ' + U.fmtDate(rec.date),
       badge:P.sourceBadge(rec.source),
       body:html`
         <p class="small dim">${rec.agenda.detail}</p>
         <div class="meet mt-12">
-          ${map(rec.turns, t => turnBlock(t, false))}
-          ${turnBlock({ agent:'patron', name:'Patron', text:rec.closing, source:rec.source }, true)}
+          ${map(rec.turns, (t, i) => turnBlock(t, false, oyn && oyn.i === i))}
+          ${turnBlock({ agent:'patron', name:'Patron', text:rec.closing, source:rec.source },
+            true, oyn && oyn.i === rec.turns.length)}
         </div>
         ${when(rec.decision && !rec.decision.calm, () => K.Notice({ tone:'info', class:'mt-12',
           title:'Kural motorunun kararı:',
           body:rec.decision.title + ' — ' + rec.decision.why }))}`,
-      foot:html`${K.Button({ label:'Kararı takibe al', size:'sm', tone:'primary',
-        act:'track-decision', data:{ 'data-id':rec.id } })}`,
+      foot:html`
+        ${when(SP.Speak.supported() && !oyn, () => K.Button({ label:'Tutanağı dinle',
+          size:'sm', icon:'mic', act:'play-minutes', data:{ 'data-id':rec.id } }))}
+        ${when(oyn, () => html`${K.Button({ label:'Durdur', size:'sm', act:'stop-minutes' })}
+          <span class="tiny dim">${oyn.i + 1} / ${rec.turns.length + 1} tur</span>`)}
+        ${K.Button({ label:'Kararı takibe al', size:'sm', tone:'primary',
+          act:'track-decision', data:{ 'data-id':rec.id } })}`,
     });
   }
 
@@ -20647,6 +21371,12 @@ SP.Screens.meeting = (function(){
         SP.App.render();
       }
     },
+    async 'play-minutes'(el){
+      const rec = S.officeMeetings.find(m => m.id === el.dataset.id);
+      if(rec) await tutanakOynat(rec);
+    },
+    async 'stop-minutes'(){ SP.Speak.stop(); calan = null; SP.App.render(); },
+
     async 'open-minutes'(el){
       S.ui.meetingOpen = S.ui.meetingOpen === el.dataset.id ? null : el.dataset.id;
       SP.App.render();
@@ -21947,6 +22677,9 @@ SP.App = (function(){
   }
 
   function go(route){
+    /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
+       acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
+    if(SP.Talk && SP.Talk.isActive()) SP.Talk.stop();
     S.route = route;
     S.sidebarOpen = false;
     applySection(route);
@@ -22166,7 +22899,15 @@ SP.App = (function(){
       if(SP.Palette.isOpen()) SP.Palette.close(); else SP.Palette.open();
       return;
     }
+    /* Sesli sohbette BOSLUK sozu keser. Sesle kesilemiyor (ajan
+       konusurken mikrofon kapali olmak zorunda — bkz. core/talk.js),
+       bu yuzden kesme dokunmayla olur ve en yakin tus bosluktur.
+       Bir alana yaziyorken bosluk elbette bosluktur. */
+    if(e.key === ' ' && SP.Talk && SP.Talk.isActive() && !typingInField(e)){
+      if(SP.Talk.kes()){ e.preventDefault(); return; }
+    }
     if(e.key === 'Escape'){
+      if(SP.Talk && SP.Talk.isActive()){ SP.Talk.stop(); render(); return; }
       if(SP.Palette.isOpen()){ SP.Palette.close(); return; }
       if(isAppearanceOpen()){ closeAppearance(); return; }
       if(UI.isHintOpen()){ UI.closeHint(); return; }

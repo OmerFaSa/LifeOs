@@ -359,6 +359,31 @@ SP.Office = (function(){
 
   /* Ajan yaniti. Model yoksa ya da cagri basarisiz olursa kural motorunun
      cumlesi doner — ofis hicbir kosulda sessiz kalmaz. */
+  /* Sohbetin kac turu modele tasinir?
+
+     Bu sayi bir performans ayari degil bir SOHBET karari. Sifir olsaydi
+     (uzun sure oyleydi) "peki neden?" sorusu anlamsiz kalirdi: ajan
+     neyin nedenini sordugunu bilemezdi. Cok buyuk olsaydi eski bir
+     olcum yeni brifingle celisirdi — brifing HER turda tazelenir, sohbet
+     gecmisi tazelenmez.
+
+     Dort alisveris: bir konuyu acip kapatmaya yeter, eskimeye yetmez. */
+  const HAFIZA_TUR = 8;
+
+  /* Gecmisi modelin anlayacagi bicime cevirir.
+
+     KURAL: modele, kullanicinin GORDUGU metin gonderilir. Bir cevap ev
+     kurallarina takilip yerine kural motorunun cumlesi basildiysa,
+     modele de o cumle gider — model kendi bastirilmis cumlesini
+     hatirlayip ustune kurmasin diye. */
+  function historyFor(agentId, extra){
+    const list = (extra && extra.length ? extra : (SP.S.officeChats[agentId] || []));
+    return list.slice(-HAFIZA_TUR).map(m => ({
+      role:m.role === 'user' ? 'user' : 'assistant',
+      text:String(m.text || ''),
+    })).filter(m => m.text);
+  }
+
   async function ask(agentId, question, opts){
     const o = opts || {};
     const b = o.brief || brief(agentId);
@@ -367,10 +392,14 @@ SP.Office = (function(){
     const cfg = cfgFor(agentId);
     if(!SP.LLM.ready(cfg)) return fallback;
 
+    /* Gecmis acikca kapatilabilir: toplantida her ajan gundeme TEK
+       basina cevap verir, sohbet gecmisi oraya karismaz. */
+    const gecmis = o.history === false ? [] : historyFor(agentId, o.history);
+
     try{
       const res = await SP.LLM.chat(cfg, {
         system:systemPrompt(agentId, b),
-        messages:[{ role:'user', text:question || 'Durumu özetle.' }],
+        messages:gecmis.concat([{ role:'user', text:question || 'Durumu özetle.' }]),
         temperature:settings().temperature,
         maxTokens:o.maxTokens || 600,
       });
@@ -756,7 +785,9 @@ SP.Office = (function(){
       const res = await ask(id,
         'Gündem: ' + agenda.label + ' — ' + agenda.detail + '\n'
         + 'Kendi alanından bu gündeme ne söylüyorsun? Alanın dışına çıkma. En fazla 3 cümle.',
-        { brief:b, maxTokens:400 });
+        /* Toplanti sohbet degil: her uzman gundeme tek basina cevap
+           verir, danisma ekranindaki sohbet gecmisi buraya karismaz. */
+        { brief:b, maxTokens:400, history:false });
       const turn = { agent:id, name:SP.AGENT_BY_ID[id].name, text:res.text, source:res.source };
       turns.push(turn);
       if(onTurn) onTurn(turn);
@@ -769,7 +800,7 @@ SP.Office = (function(){
       + turns.map(t => '- ' + t.name + ': ' + t.text).join('\n') + '\n\n'
       + 'Çelişki varsa öncelik sırasına göre çöz (kırmızı bayrak > güvenlik > laboratuvar > '
       + 'beslenme > antrenman > bütçe) ve TEK bir karar yaz. Kararı gerekçelendir.',
-      { brief:pb, maxTokens:500 });
+      { brief:pb, maxTokens:500, history:false });
 
     const rec = {
       id:U.uid('mt'), at:new Date().toISOString(), date:U.todayISO(),
@@ -786,8 +817,11 @@ SP.Office = (function(){
 
   async function send(agentId, text){
     const list = SP.S.officeChats[agentId] || (SP.S.officeChats[agentId] = []);
+    /* Gecmis, soru listeye YAZILMADAN once alinir. Sonra alinsaydi soru
+       hem gecmiste hem son mesajda yer alir, modele iki kez giderdi. */
+    const gecmis = historyFor(agentId);
     list.push({ role:'user', text, at:new Date().toISOString() });
-    const res = await ask(agentId, text);
+    const res = await ask(agentId, text, { history:gecmis.length ? gecmis : false });
     list.push({ role:'agent', text:res.text, source:res.source, at:new Date().toISOString(),
       blocked:res.blocked || null, error:res.error || null });
     await SP.Store.set('chats/' + agentId, { agentId, messages:list });
@@ -819,7 +853,7 @@ SP.Office = (function(){
   return {
     defaults, settings, saveSettings, cfgFor, ready,
     brief, labBrief, nutriBrief, moveBrief, moneyBrief, patronBrief,
-    ruleText, systemPrompt, validate, ask,
+    ruleText, systemPrompt, validate, ask, historyFor, HAFIZA_TUR,
     notes, handoffs, handoffsFor, agendaCandidates, dailyBriefing, runMeeting,
     send, clearChat, load,
   };
