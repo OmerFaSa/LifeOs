@@ -251,6 +251,11 @@ SP.Calc = (function(){
   ];
 
   function crossFindings(days){
+    const n = days || 60;
+    return SP.Memo.of('calc.cross:' + n, () => crossFindingsHam(n));
+  }
+
+  function crossFindingsHam(days){
     return LINKS.map(link => {
       const pairs = pairsFor(link.a, link.b, days || 60);
       const c = correlate(pairs);

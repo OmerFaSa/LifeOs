@@ -350,3 +350,105 @@
     });
   });
 })();
+
+/* Kare önbelleği — aynı hesabı bir karede iki kez yapma.
+
+   En kritik test: önbellek KARE DIŞINDA hiçbir şey saklamamalı.
+   Saklarsa sistem eski sayıyı gösterir; bu sistemde bir sayının
+   yanlış olması, geç gelmesinden çok daha kötüdür. */
+(function(){
+  const { describe, it, expect, resetState, withToday, pushLab } = SP.Test;
+
+  describe('Kare önbelleği', () => {
+    it('kapalıyken hiçbir şey saklamaz', () => {
+      SP.Memo.bitir();
+      let n = 0;
+      const uret = () => { n++; return { n }; };
+      SP.Memo.of('sinama', uret);
+      SP.Memo.of('sinama', uret);
+      SP.Memo.of('sinama', uret);
+      expect(n).toBe(3);
+      expect(SP.Memo.boyut()).toBe(0);
+    });
+
+    it('açıkken aynı anahtar bir kez hesaplanır', () => {
+      SP.Memo.baslat();
+      let n = 0;
+      const uret = () => { n++; return { n }; };
+      const a = SP.Memo.of('sinama', uret);
+      const b = SP.Memo.of('sinama', uret);
+      expect(n).toBe(1);
+      /* Aynı NESNE dönmeli: kopya dönerse hesap kaçmış demektir. */
+      expect(a === b).toBeTruthy();
+      SP.Memo.bitir();
+    });
+
+    it('farklı anahtarlar karışmaz', () => {
+      SP.Memo.baslat();
+      expect(SP.Memo.of('a', () => 1)).toBe(1);
+      expect(SP.Memo.of('b', () => 2)).toBe(2);
+      expect(SP.Memo.boyut()).toBe(2);
+      SP.Memo.bitir();
+    });
+
+    it('kare bitince önbellek boşalır', () => {
+      SP.Memo.baslat();
+      SP.Memo.of('a', () => 1);
+      expect(SP.Memo.boyut()).toBe(1);
+      SP.Memo.bitir();
+      expect(SP.Memo.boyut()).toBe(0);
+      expect(SP.Memo.acikMi()).toBeFalsy();
+    });
+
+    it('kare içinde bile veri değişirse ESKİ sayı verilmez — çünkü kare içinde veri değişmez', () => {
+      /* Bu testin işi sözleşmeyi yazıya dökmek: önbellek bir karede
+         yaşar, kare içinde depoya yazılmaz. Kare kapanınca yeni
+         ölçüm görünür. */
+      resetState();
+      withToday('2026-03-01', () => {
+        SP.Memo.baslat();
+        const once = SP.Bio.summary().measured;
+        pushLab('2026-03-01', { ferritin:30, vitd:40 });
+        expect(SP.Bio.summary().measured).toBe(once);   // kare içinde donuk
+        SP.Memo.bitir();
+        expect(SP.Bio.summary().measured > once).toBeTruthy(); // kare sonrası taze
+      });
+    });
+
+    it('argümanlı çağrı önbelleğe girmez', () => {
+      resetState();
+      withToday('2026-03-01', () => {
+        pushLab('2026-03-01', { ferritin:9 });
+        SP.Memo.baslat();
+        SP.Bio.attention();
+        const n = SP.Memo.boyut();
+        SP.Bio.attention(SP.S.profile);   // profil verilirse taze hesap
+        expect(SP.Memo.boyut()).toBe(n);
+        SP.Memo.bitir();
+      });
+    });
+
+    it('önbellekli fonksiyonların sonucu aynı değerleri taşır', () => {
+      resetState();
+      withToday('2026-03-01', () => {
+        pushLab('2026-03-01', { ferritin:9, vitd:11 });
+        const tazeler = {
+          attention:SP.Bio.attention().length,
+          overdue:SP.Bio.overdue().length,
+          summary:SP.Bio.summary().measured,
+          notes:SP.Office.notes().length,
+          handoffs:SP.Office.handoffs().length,
+          cross:SP.Calc.crossFindings().length,
+        };
+        SP.Memo.baslat();
+        expect(SP.Bio.attention().length).toBe(tazeler.attention);
+        expect(SP.Bio.overdue().length).toBe(tazeler.overdue);
+        expect(SP.Bio.summary().measured).toBe(tazeler.summary);
+        expect(SP.Office.notes().length).toBe(tazeler.notes);
+        expect(SP.Office.handoffs().length).toBe(tazeler.handoffs);
+        expect(SP.Calc.crossFindings().length).toBe(tazeler.cross);
+        SP.Memo.bitir();
+      });
+    });
+  });
+})();

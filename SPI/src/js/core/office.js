@@ -390,7 +390,13 @@ SP.Office = (function(){
 
      Not bir tavsiye degil BULGU'dur: kosul saglandiginda kendiliginden
      birakilir, kosul gectiginde kendiliginden kalkar. Kullanici silmez. */
+  /* Her masa notların TAMAMINI üretip kendi satırlarını süzüyordu:
+     beş masa, dokuz üretim. Kare önbelleği bunu bire indirir. */
   function notes(){
+    return SP.Memo.of('office.notes', notesHam);
+  }
+
+  function notesHam(){
     const out = [];
     const add = (agent, kind, text) => {
       const k = SP.NOTE_KINDS.find(x => x.id === kind) || SP.NOTE_KINDS[4];
@@ -511,6 +517,10 @@ SP.Office = (function(){
   }
 
   function handoffs(){
+    return SP.Memo.of('office.handoffs', handoffsHam);
+  }
+
+  function handoffsHam(){
     const out = [];
     const seen = {};
     const push = h => {

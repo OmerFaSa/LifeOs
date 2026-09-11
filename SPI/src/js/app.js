@@ -581,6 +581,10 @@ SP.App = (function(){
   async function doRender(){
     if(rendering) return;
     rendering = true;
+    /* Kare önbelleği yalnız bu çizim boyunca açık kalır: aynı hesap
+       bir karede iki kez yapılmaz, kareler arasında ise hiçbir şey
+       taşınmaz. Bkz. core/memo.js. */
+    SP.Memo.baslat();
     try{
       const sc = screen();
       const main = document.getElementById('main');
@@ -617,13 +621,23 @@ SP.App = (function(){
       revealActiveTab();
       if(sc.afterRender) sc.afterRender();
     }catch(err){
+      /* Kabuğun kendisi çizilemedi. Ekranın kendi hatası bir üstteki
+         yakalayıcıda ele alınır; buraya düşmek künye, hero ya da alt
+         bilginin çökmesi demektir.
+
+         Bu blok daha önce hata panelini ÜRETİP atıyordu: değişken
+         kuruluyor ama DOM'a hiç yazılmıyordu. Sonuç, kullanıcının bir
+         bölüme basıp eski ekranda kalması ve hiçbir şey görmemesiydi
+         — sessiz çökme, en kötü çökmedir. */
       console.error('Render hatası:', err);
-      const markup = String(html`<div class="content">
+      const govde = document.getElementById('app');
+      if(govde) govde.innerHTML = String(html`<div class="wrapc content">
         ${SP.C.Notice({ tone:'danger', title:'Ekran çizilirken bir hata oluştu.',
           body:html`${err && err.message ? err.message : String(err)}
             <div class="mt-8">${SP.C.Button({ label:'Yeniden yükle', size:'sm', act:'reload' })}</div>` })}
       </div>`);
     }finally{
+      SP.Memo.bitir();
       rendering = false;
     }
   }

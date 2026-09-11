@@ -211,6 +211,11 @@ SP.Bio = (function(){
 
   /* Butun belirteclerin durum sayimi — Bugun ekranindaki ozet kart. */
   function summary(profile){
+    if(profile) return summaryHam(profile);
+    return SP.Memo.of('bio.summary', () => summaryHam());
+  }
+
+  function summaryHam(profile){
     const rows = SP.BIOMARKERS.map(b => {
       const last = SP.Model.latestOf(b.id);
       return { id:b.id, value:last ? last.v : null, status:statusOf(b.id, last ? last.v : null, profile) };
@@ -229,7 +234,15 @@ SP.Bio = (function(){
 
   /* Dikkat isteyen belirtecler — onem sirasina gore.
      Sira: kritik → referans disi → kotulesen egilim → hedef disi. */
+  /* Ofiste tek çizimde on iki kez isteniyordu; hesap aynı, sonuç
+     aynı. Kare önbelleği yalnız argümansız çağrıyı saklar —
+     başka bir profille sorulduğunda taze hesaplanır. */
   function attention(profile){
+    if(profile) return attentionHam(profile);
+    return SP.Memo.of('bio.attention', () => attentionHam());
+  }
+
+  function attentionHam(profile){
     const out = [];
     SP.BIOMARKERS.forEach(b => {
       const last = SP.Model.latestOf(b.id);
@@ -253,6 +266,10 @@ SP.Bio = (function(){
   /* Olcum borcu — hic olculmemis ya da uzun suredir tazelenmemis paneller.
      Vital olcumler gunluk, laboratuvar panelleri 180 gunde bir beklenir. */
   function overdue(){
+    return SP.Memo.of('bio.overdue', overdueHam);
+  }
+
+  function overdueHam(){
     const out = [];
     SP.PANELS.forEach(p => {
       if(p.id === 'vital' || p.id === 'body') return;
@@ -491,6 +508,11 @@ SP.Bio = (function(){
 
   /* Son oturumdaki degerlere gore calisan oruntuler. */
   function patterns(profile){
+    if(profile) return patternsHam(profile);
+    return SP.Memo.of('bio.patterns', () => patternsHam());
+  }
+
+  function patternsHam(profile){
     const out = [];
     PATTERNS.forEach(pt => {
       const v = {};
