@@ -1,0 +1,165 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>20 · Harita</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{font:14px/1.5 'IBM Plex Sans',system-ui,sans-serif;color:#182027;background:#EFEEE9;
+-webkit-font-smoothing:antialiased}
+/* sayfa değil tuval: kartlar uzayda durur, aralarında bağ çizgileri var */
+.canvas{position:relative;min-height:100vh;
+background-image:radial-gradient(#D3D1C8 1px,transparent 1px);background-size:22px 22px}
+.bar{position:relative;z-index:3;display:flex;align-items:center;gap:14px;
+padding:12px 20px;background:rgba(255,255,255,.86);backdrop-filter:blur(8px);
+border-bottom:1px solid #DAD8CF}
+.lg{font-weight:600;letter-spacing:-.01em}
+.bar .m{color:#7B8288;font-size:12.5px;font-family:'IBM Plex Mono',monospace}
+.bar nav{margin-left:auto;display:flex;gap:3px;flex-wrap:wrap}
+.bar nav a{font-size:12.5px;color:#5E666D;text-decoration:none;padding:5px 10px;border-radius:5px}
+.bar nav a.on{background:#182027;color:#fff}
+.zoom{display:flex;gap:0;border:1px solid #D2D0C7;border-radius:6px;overflow:hidden;background:#fff}
+.zoom b{padding:4px 9px;font-size:12px;font-weight:500;font-family:'IBM Plex Mono',monospace;
+border-right:1px solid #E6E4DB}
+.zoom b:last-child{border:0;color:#7B8288;font-weight:400}
+
+/* tuval sığmazsa kaydırılır — düğümlerin uzaydaki yeri bozulmaz */
+.scroll{overflow-x:auto;padding:0 20px}
+.plane{position:relative;width:1180px;height:672px;margin:0 auto}
+.wire{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.node{position:absolute;z-index:2;background:#fff;border:1px solid #D6D4CB;border-radius:10px;
+box-shadow:0 2px 0 rgba(24,32,39,.05),0 10px 26px rgba(24,32,39,.07)}
+.node .hd{display:flex;align-items:center;gap:7px;padding:9px 13px;border-bottom:1px solid #EDEBE3;
+font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7B8288;
+font-family:'IBM Plex Mono',monospace}
+.node .hd i{width:7px;height:7px;border-radius:2px;background:#9AA0A6}
+.node .bd{padding:13px}
+
+/* 1 — durum kartı, en büyüğü */
+#n1{left:0;top:46px;width:390px}
+#n1 .hd i{background:#C8452E}
+#n1 h1{font-size:22px;font-weight:400;letter-spacing:-.02em;line-height:1.28;margin-bottom:9px}
+#n1 p{color:#5E666D;font-size:13.5px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}
+.chip{border:1px solid #E2E0D7;border-radius:6px;padding:5px 9px;font-size:12px;background:#FAF9F5}
+.chip b{font-family:'IBM Plex Mono',monospace;font-weight:500}
+.chip span{color:#7B8288}
+
+/* 2 — tahlil düğümü */
+#n2{left:436px;top:0;width:352px}
+#n2 .hd i{background:#C8452E}
+.lab{display:flex;align-items:baseline;gap:9px;padding:6px 0;border-bottom:1px dotted #E6E4DB;font-size:13px}
+.lab:last-child{border:0}
+.lab .nm{flex:1}
+.lab .v{font-family:'IBM Plex Mono',monospace;font-weight:500;font-variant-numeric:tabular-nums}
+.lab .v u{text-decoration:none;font-size:11px;color:#9AA0A6;margin-left:3px}
+.lab .tg{font-size:11px;padding:2px 6px;border-radius:4px;background:#F0EEE6;color:#6E757B;white-space:nowrap}
+.lab.bad{background:#FDF3F1;margin:0 -13px;padding:6px 13px}
+.lab.bad .tg{background:#C8452E;color:#fff}
+.lab.warn .tg{background:#F5E9CE;color:#7A5E17}
+.lab.ok .tg{background:#E2F0E6;color:#2C6B42}
+
+/* 3 — toparlanma */
+#n3{left:836px;top:96px;width:290px}
+#n3 .hd i{background:#2C6B42}
+.gauge{display:flex;align-items:center;gap:15px}
+.gauge .n{font-size:44px;font-weight:300;letter-spacing:-.04em;line-height:1;
+font-family:'IBM Plex Mono',monospace}
+.gauge .n u{text-decoration:none;font-size:13px;color:#9AA0A6}
+.gauge p{font-size:12.5px;color:#5E666D}
+.trk{height:5px;background:#EDEBE3;border-radius:3px;margin-top:13px;overflow:hidden}
+.trk i{display:block;height:100%;width:85%;background:#2C6B42;border-radius:3px}
+.mini{display:flex;gap:16px;margin-top:12px;font-size:12px;color:#7B8288}
+.mini b{display:block;color:#182027;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:14px}
+.mini b.off{color:#A9AEB3;font-weight:400;font-size:12.5px}
+
+/* 4 — beslenme */
+#n4{left:404px;top:376px;width:330px}
+#n4 .hd i{background:#B4761E}
+.big{font-size:40px;font-weight:300;letter-spacing:-.04em;font-family:'IBM Plex Mono',monospace;line-height:1}
+.big u{text-decoration:none;font-size:13px;color:#9AA0A6;letter-spacing:0}
+.eq{font-size:12.5px;color:#5E666D;margin-top:8px;font-family:'IBM Plex Mono',monospace}
+.kvr{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-top:1px solid #EDEBE3;margin-top:2px}
+.kvr b{font-family:'IBM Plex Mono',monospace;font-weight:500}
+
+/* 5 — hareket */
+#n5{left:820px;top:414px;width:268px}
+#n5 .hd i{background:#2E5E8C}
+.bars{display:flex;align-items:flex-end;gap:5px;height:56px;margin-bottom:10px}
+.bars i{flex:1;background:#D8D6CD;border-radius:2px 2px 0 0}
+.bars i.hi{background:#2E5E8C}
+.note{font-size:12.5px;color:#5E666D}
+
+/* 6 — küçük not düğümü */
+#n6{left:52px;top:392px;width:300px;background:#FFF9E3;border-color:#E9DCA8}
+#n6 .hd{border-color:#EFE3B6}#n6 .hd i{background:#B4761E}
+#n6 .bd{font-size:13px;color:#4E4423;line-height:1.55}
+#n6 .who{font-size:11.5px;color:#8B7A3E;margin-top:8px;font-family:'IBM Plex Mono',monospace}
+
+.ft{position:relative;z-index:2;text-align:center;color:#8A9096;font-size:12px;
+font-family:'IBM Plex Mono',monospace;padding:0 20px 28px}
+</style></head><body><div class="canvas">
+
+<div class="bar"><span class="lg">SPİ</span><span class="m">11.09 · tuval görünümü</span>
+  <div class="zoom"><b>100%</b><b>sığdır</b></div>
+  <nav><a class="on">Günlük</a><a>Testler</a><a>Besin</a><a>Hareket</a><a>Finans</a><a>Ofis</a><a>Ayarlar</a></nav>
+</div>
+
+<div class="scroll"><div class="plane">
+<svg class="wire" viewBox="0 0 1180 672" preserveAspectRatio="none" aria-hidden="true">
+  <g fill="none" stroke="#BDBBB1" stroke-width="1.4" stroke-dasharray="5 4">
+    <path d="M390 181 C 413 181, 413 117, 436 117"/>
+    <path d="M788 117 C 812 117, 812 184, 836 184"/>
+    <path d="M612 235 C 612 305, 569 306, 569 376"/>
+    <path d="M734 493 C 777 493, 777 497, 820 497"/>
+    <path d="M352 476 C 378 476, 378 493, 404 493"/>
+  </g>
+  <g fill="#BDBBB1"><circle cx="436" cy="117" r="3.2"/><circle cx="836" cy="184" r="3.2"/>
+    <circle cx="569" cy="376" r="3.2"/><circle cx="820" cy="497" r="3.2"/><circle cx="404" cy="493" r="3.2"/></g>
+</svg>
+
+<div class="node" id="n1"><div class="hd"><i></i>Durum</div><div class="bd">
+  <h1>Bir ölçüm referans aralığının dışında.</h1>
+  <p>Düğümler arasındaki çizgiler nedeni gösterir: düşük ferritin beslenme hedefini, beslenme de hareket planını değiştirir.</p>
+  <div class="chips">
+    <span class="chip"><b>12</b> <span>ölçüm</span></span>
+    <span class="chip"><b>1</b> <span>aralık dışı</span></span>
+    <span class="chip"><b>5</b> <span>bugün okundu</span></span>
+    <span class="chip"><b>2</b> <span>hedef dışı</span></span>
+  </div></div></div>
+
+<div class="node" id="n2"><div class="hd"><i></i>Tahlil · 5 sonuç</div><div class="bd">
+  <div class="lab bad"><span class="nm">Ferritin</span><span class="v">26<u>ng/mL</u></span><span class="tg">referans altı</span></div>
+  <div class="lab warn"><span class="nm">B12 vitamini</span><span class="v">288<u>pg/mL</u></span><span class="tg">hedef altı</span></div>
+  <div class="lab warn"><span class="nm">HDL kolesterol</span><span class="v">44<u>mg/dL</u></span><span class="tg">hedef altı</span></div>
+  <div class="lab warn"><span class="nm">LDL kolesterol</span><span class="v">128<u>mg/dL</u></span><span class="tg">hedef üstü</span></div>
+  <div class="lab ok"><span class="nm">TSH</span><span class="v">2,6<u>mIU/L</u></span><span class="tg">hedefte</span></div>
+</div></div>
+
+<div class="node" id="n3"><div class="hd"><i></i>Toparlanma</div><div class="bd">
+  <div class="gauge"><div class="n">85<u>/100</u></div><p>Yüksek.<br>Ağır gün için uygun.</p></div>
+  <div class="trk"><i></i></div>
+  <div class="mini"><span>Uyku<b>7,2 sa</b></span><span>Nabız<b>58</b></span><span>HRV<b class="off">girilmedi</b></span></div>
+</div></div>
+
+<div class="node" id="n4"><div class="hd"><i></i>Beslenme hedefi</div><div class="bd">
+  <div class="big">2.285<u> kcal</u></div>
+  <div class="eq">1.632 × 1,40 = 2.285</div>
+  <div style="margin-top:10px">
+    <div class="kvr"><span>Protein</span><b>98–131 g</b></div>
+    <div class="kvr"><span>Demir hedefi</span><b>× 1,60</b></div>
+    <div class="kvr"><span>Bugün girilen</span><b>1.480 kcal</b></div>
+  </div></div></div>
+
+<div class="node" id="n5"><div class="hd"><i></i>Hareket · son 7 gün</div><div class="bd">
+  <div class="bars"><i style="height:44%"></i><i style="height:70%"></i><i style="height:22%"></i>
+    <i style="height:86%"></i><i style="height:34%"></i><i style="height:60%"></i><i class="hi" style="height:100%"></i></div>
+  <p class="note">Bugün ağır gün uygun: 45 dk tempolu yürüyüş + vücut ağırlığı.</p>
+</div></div>
+
+<div class="node" id="n6"><div class="hd"><i></i>Koç notu</div><div class="bd">
+  Ferritin düşükken demir emilimini çay ve kahve bozuyor. Öğünle birlikte değil, iki saat sonra.
+  <div class="who">— Kerem, laboratuvar koçu · kural motoru</div>
+</div></div>
+</div></div>
+
+<p class="ft">Eksik veri sıfır sayılmaz · Tahmin, ölçüm gibi gösterilmez · Karar hekimindir</p>
+</div></body></html>

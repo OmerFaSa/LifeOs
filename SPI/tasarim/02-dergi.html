@@ -1,0 +1,66 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>02 · Dergi</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1A1714;--mut:#7A7168;--line:#E2DCD3;--bg:#FBF8F3;--acc:#B0442C}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.65 Inter,sans-serif}
+.w{max-width:1120px;margin:0 auto;padding:0 40px}
+header{padding:26px 0 18px;border-bottom:3px double var(--ink)}
+.hr{display:flex;align-items:flex-end;gap:24px}
+.lg{font-family:Fraunces,serif;font-size:38px;font-weight:300;letter-spacing:-.02em;line-height:1}
+.iss{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);padding-bottom:6px}
+.dt{margin-left:auto;font-family:Fraunces,serif;font-size:15px;color:var(--mut);padding-bottom:4px}
+nav{display:flex;flex-wrap:wrap;gap:10px 28px;padding:12px 0;border-bottom:1px solid var(--line);font-size:12px;
+letter-spacing:.14em;text-transform:uppercase}
+nav a{color:var(--mut);text-decoration:none}nav a.on{color:var(--acc);font-weight:600}
+.lead{display:grid;grid-template-columns:1.6fr 1fr;gap:56px;padding:46px 0 40px;border-bottom:1px solid var(--line)}
+h1{font-family:Fraunces,serif;font-size:52px;font-weight:300;line-height:1.02;letter-spacing:-.03em}
+h1 em{font-style:italic;color:var(--acc)}
+.lead p{margin-top:20px;font-size:17px;color:#4A423B;max-width:40ch}
+.drop::first-letter{font-family:Fraunces,serif;font-size:64px;float:left;line-height:.8;
+padding:6px 10px 0 0;color:var(--acc);font-weight:300}
+.fig{border-left:1px solid var(--line);padding-left:28px}
+.fig dt{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-top:16px}
+.fig dd{font-family:Fraunces,serif;font-size:36px;font-weight:300;line-height:1;margin:4px 0 0}
+.fig dt:first-child{margin-top:0}
+.body{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;padding:40px 0 70px}
+h2{font-family:Fraunces,serif;font-size:13px;font-weight:700;letter-spacing:.12em;
+text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:14px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row b{font-family:Fraunces,serif;font-weight:500}
+.row .st{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.st.bad{color:var(--acc);font-weight:600}
+.pull{font-family:Fraunces,serif;font-size:22px;font-weight:300;line-height:1.35;
+color:#4A423B;padding:18px 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);margin-top:18px}
+@media(max-width:900px){.lead,.body{grid-template-columns:1fr;gap:28px}h1{font-size:36px}}
+</style></head><body><div class="w">
+<header><div class="hr"><span class="lg">SPİ</span><span class="iss">Sayı 84 · Kişisel Sağlık</span>
+<span class="dt">11 Eylül 2026, Cuma</span></div></header>
+<nav><a class="on">Günlük</a><a>Testler</a><a>Besin</a><a>Hareket</a><a>Finans</a><a>Ofis</a><a>Ayarlar</a></nav>
+<section class="lead"><div>
+<h1>Bir ölçüm referans aralığının <em>dışında</em>.</h1>
+<p class="drop">On iki ölçüm kayıtlı. Değerler organa göre bölünmez; tek listede, önem sırasına göre durur. Ferritin referans aralığının altında kaldı ve demir hedefi bu yüzden yükseltildi.</p>
+</div><dl class="fig"><dt>Ölçüm</dt><dd>12</dd><dt>Referans dışı</dt><dd>1</dd>
+<dt>Hedef dışı</dt><dd>5</dd><dt>Toparlanma</dt><dd>85</dd></dl></section>
+<div class="body">
+<div><h2>Tahlil</h2>
+<div class="row"><span>Ferritin</span><span><b>26</b> <span class="st bad">ref. altı</span></span></div>
+<div class="row"><span>B12 vitamini</span><span><b>288</b> <span class="st">hedef altı</span></span></div>
+<div class="row"><span>HDL</span><span><b>44</b> <span class="st">hedef altı</span></span></div>
+<div class="row"><span>LDL</span><span><b>128</b> <span class="st">hedef üstü</span></span></div>
+<div class="row"><span>TSH</span><span><b>2,6</b> <span class="st">hedefte</span></span></div>
+<p class="pull">Referans aralığı laboratuvarın normal saydığı yer; hedef bandı bu sistemin istediği daha dar yer.</p></div>
+<div><h2>Toparlanma</h2>
+<div class="row"><span>Skor</span><b>85 / 100</b></div>
+<div class="row"><span>Uyku</span><b>7,2 sa</b></div>
+<div class="row"><span>Nabız</span><b>58</b></div>
+<div class="row"><span>HRV</span><span class="st">girilmedi</span></div>
+<p class="pull">Eksik girdi sıfır sayılmaz; ağırlığı kalan girdilere dağıtılır.</p></div>
+<div><h2>Beslenme</h2>
+<div class="row"><span>Kalori hedefi</span><b>2.285</b></div>
+<div class="row"><span>Protein</span><b>98–131 g</b></div>
+<div class="row"><span>Lif</span><b>32 g</b></div>
+<div class="row"><span>Bugün</span><span class="st">kayıt yok</span></div>
+<p class="pull">Demir hedefi tahlil sonucuna göre ×1,60 yükseltildi.</p></div>
+</div></div></body></html>

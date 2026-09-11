@@ -1,0 +1,99 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>18 · Dairesel</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{font:15px/1.55 Outfit,system-ui,sans-serif;background:#080B14;color:#E8EAF0;
+-webkit-font-smoothing:antialiased}
+.w{max-width:1080px;margin:0 auto;padding:0 26px 90px}
+header{display:flex;align-items:center;gap:14px;padding:26px 0 0}
+.lg{font-size:16px;font-weight:600;letter-spacing:.03em}
+.sub{color:#5A6480;font-size:13px}
+/* gezinme daire etrafında değil, üstte ince halka rozetleri */
+nav{margin-left:auto;display:flex;gap:7px}
+nav a{width:34px;height:34px;border-radius:50%;border:1px solid #1E2740;display:grid;place-items:center;
+font-size:11.5px;color:#5A6480;text-decoration:none}
+nav a.on{border-color:#4ADE9B;color:#4ADE9B}
+nav a span{display:none}
+
+/* merkez: veri bir daire etrafında dizilir */
+.orb{position:relative;width:min(560px,100% - 120px);aspect-ratio:1;margin:64px auto 0}
+@media(max-width:560px){.node{width:92px}.node .v{font-size:17px}.orb{width:min(560px,100% - 104px)}}
+.orb svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.core{position:absolute;inset:26%;border-radius:50%;display:grid;place-content:center;text-align:center;
+background:radial-gradient(circle at 50% 35%,#12203A,#0A0F1C);border:1px solid #1B2740}
+.core .n{font-size:60px;font-weight:200;letter-spacing:-.045em;line-height:1}
+.core .n u{text-decoration:none;font-size:16px;color:#5A6480;letter-spacing:0}
+.core .k{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:#5A6480;margin-top:8px}
+.core .t{font-size:13px;color:#4ADE9B;margin-top:5px}
+
+/* ölçümler daire üstünde konumlanır */
+.node{position:absolute;transform:translate(-50%,-50%);text-align:center;width:108px}
+.node .b{width:11px;height:11px;border-radius:50%;background:#2E3C5C;margin:0 auto 7px;
+box-shadow:0 0 0 4px rgba(46,60,92,.25)}
+.node .nm{font-size:12px;color:#7E8AA8}
+.node .v{font-size:20px;font-weight:400;font-variant-numeric:tabular-nums;margin-top:1px}
+.node .v u{text-decoration:none;font-size:11px;color:#5A6480;margin-left:2px}
+.node.bad .b{background:#FF6B5B;box-shadow:0 0 0 4px rgba(255,107,91,.18)}
+.node.bad .v{color:#FF6B5B}
+.node.warn .b{background:#F2C14E;box-shadow:0 0 0 4px rgba(242,193,78,.15)}
+.node.ok .b{background:#4ADE9B;box-shadow:0 0 0 4px rgba(74,222,155,.15)}
+
+h1{text-align:center;font-size:clamp(21px,3.2vw,29px);font-weight:300;letter-spacing:-.02em;
+margin:46px auto 8px;max-width:22ch;line-height:1.3}
+.lede{text-align:center;color:#5A6480;max-width:46ch;margin:0 auto;font-size:14px}
+
+/* alt: dört yarım halka göstergesi */
+.ring4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:54px}
+@media(max-width:720px){.ring4{grid-template-columns:repeat(2,1fr)}}
+.rc{text-align:center;padding:20px 10px;border:1px solid #141C2E;border-radius:18px;background:#0B111E}
+.rc svg{width:74px;height:74px}
+.rc .lbl{font-size:12px;color:#5A6480;margin-top:8px}
+.rc .val{font-size:17px;font-weight:500;margin-top:2px;font-variant-numeric:tabular-nums}
+.rc .val.off{color:#3C4762;font-weight:300;font-size:14px}
+.ft{text-align:center;color:#3C4762;font-size:12px;margin-top:56px}
+</style></head><body><div class="w">
+
+<header><span class="lg">SPİ</span><span class="sub">11 Eylül · 12 ölçüm kayıtlı</span>
+<nav><a class="on">Gü</a><a>Te</a><a>Be</a><a>Ha</a><a>Fi</a><a>Of</a><a>Ay</a></nav></header>
+
+<h1>Bir ölçüm referans aralığının dışında.</h1>
+<p class="lede">Merkezde bugünün toparlanması; çeperde beş tahlil sonucu. Uzaklık değil, renk konuşur.</p>
+
+<div class="orb">
+  <svg viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="43" fill="none" stroke="#141C2E" stroke-width=".5"/>
+    <circle cx="50" cy="50" r="43" fill="none" stroke="#4ADE9B" stroke-width=".9"
+      stroke-dasharray="229.7" stroke-dashoffset="34.5" stroke-linecap="round"
+      transform="rotate(-90 50 50)" opacity=".85"/>
+    <circle cx="50" cy="50" r="30.5" fill="none" stroke="#111826" stroke-width=".4" stroke-dasharray="1 3"/>
+  </svg>
+  <div class="core"><div class="n">85<u> /100</u></div><div class="k">Toparlanma</div><div class="t">yüksek</div></div>
+
+  <div class="node bad"  style="left:50%;top:-4%"><div class="b"></div><div class="nm">Ferritin</div><div class="v">26<u>ng/mL</u></div></div>
+  <div class="node warn" style="left:101%;top:30%"><div class="b"></div><div class="nm">B12</div><div class="v">288<u>pg/mL</u></div></div>
+  <div class="node warn" style="left:81%;top:91%"><div class="b"></div><div class="nm">HDL</div><div class="v">44<u>mg/dL</u></div></div>
+  <div class="node warn" style="left:19%;top:91%"><div class="b"></div><div class="nm">LDL</div><div class="v">128<u>mg/dL</u></div></div>
+  <div class="node ok"   style="left:-1%;top:30%"><div class="b"></div><div class="nm">TSH</div><div class="v">2,6<u>mIU/L</u></div></div>
+</div>
+
+<div class="ring4">
+  <div class="rc"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5" fill="none" stroke="#141C2E" stroke-width="3"/>
+    <circle cx="18" cy="18" r="15.5" fill="none" stroke="#5B8DEF" stroke-width="3" stroke-linecap="round"
+      stroke-dasharray="97.4" stroke-dashoffset="24" transform="rotate(-90 18 18)"/></svg>
+    <div class="lbl">Uyku</div><div class="val">7,2 sa</div></div>
+  <div class="rc"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5" fill="none" stroke="#141C2E" stroke-width="3"/>
+    <circle cx="18" cy="18" r="15.5" fill="none" stroke="#4ADE9B" stroke-width="3" stroke-linecap="round"
+      stroke-dasharray="97.4" stroke-dashoffset="34" transform="rotate(-90 18 18)"/></svg>
+    <div class="lbl">İstirahat nabzı</div><div class="val">58</div></div>
+  <div class="rc"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5" fill="none" stroke="#141C2E" stroke-width="3"
+      stroke-dasharray="2 3"/></svg>
+    <div class="lbl">HRV</div><div class="val off">girilmedi</div></div>
+  <div class="rc"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5" fill="none" stroke="#141C2E" stroke-width="3"/>
+    <circle cx="18" cy="18" r="15.5" fill="none" stroke="#F2C14E" stroke-width="3" stroke-linecap="round"
+      stroke-dasharray="97.4" stroke-dashoffset="34.1" transform="rotate(-90 18 18)"/></svg>
+    <div class="lbl">Beslenme · 2.285 kcal</div><div class="val">1.480 girildi</div></div>
+</div>
+
+<p class="ft">Eksik veri sıfır sayılmaz · Tahmin, ölçüm gibi gösterilmez · Karar hekimindir</p>
+</div></body></html>

@@ -1,0 +1,60 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>06 · Zaman Çizgisi</title>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1D2321;--mut:#6F7C78;--line:#DDE5E2;--bg:#F6F9F7;--acc:#3E7C63;--bad:#A8443A;--warn:#8C6420}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 Inter,sans-serif}
+.w{max-width:840px;margin:0 auto;padding:0 28px 80px}
+header{padding:26px 0 16px;display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line)}
+.lg{font-family:Spectral,serif;font-size:26px;font-weight:600}
+.mut{color:var(--mut)}
+nav{display:flex;gap:18px;padding:12px 0;font-size:13px;border-bottom:1px solid var(--line);overflow:auto}
+nav a{color:var(--mut);text-decoration:none;white-space:nowrap}nav a.on{color:var(--acc);font-weight:600}
+h1{font-family:Spectral,serif;font-size:32px;font-weight:300;line-height:1.2;margin:30px 0 8px}
+.tl{position:relative;margin-top:36px;padding-left:132px}
+.tl::before{content:'';position:absolute;left:96px;top:6px;bottom:0;width:1px;background:var(--line)}
+.ev{position:relative;padding-bottom:30px}
+.ev__t{position:absolute;left:-132px;width:84px;text-align:right;font-size:12px;color:var(--mut);
+font-variant-numeric:tabular-nums;line-height:1.35;padding-top:2px}
+.ev__t b{display:block;font-family:Spectral,serif;font-size:15px;color:var(--ink);font-weight:600}
+.ev::before{content:'';position:absolute;left:-37px;top:7px;width:9px;height:9px;border-radius:50%;
+background:var(--bg);border:2px solid var(--acc)}
+.ev--bad::before{border-color:var(--bad)}
+.ev--now::before{background:var(--acc);box-shadow:0 0 0 4px rgba(62,124,99,.16)}
+.ev h2{font-size:15px;font-weight:600;margin-bottom:3px}
+.ev p{font-size:14px;color:var(--mut);max-width:56ch}
+.chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:3px;
+background:#E9F0EC;color:var(--acc);margin-left:8px;vertical-align:1px}
+.chip--bad{background:#F7E9E7;color:var(--bad)}.chip--warn{background:#F6EFE1;color:var(--warn)}
+.vals{margin-top:10px;border-left:2px solid var(--line);padding-left:14px}
+.vals div{display:flex;justify-content:space-between;max-width:330px;padding:3px 0;font-size:14px}
+.vals b{font-variant-numeric:tabular-nums}
+.big{font-family:Spectral,serif;font-size:40px;font-weight:300;line-height:1}
+</style></head><body><div class="w">
+<header><span class="lg">SPİ</span><span class="mut">kişisel sağlık günlüğü</span>
+<span class="mut" style="margin-left:auto;font-size:13px">11 Eylül 2026</span></header>
+<nav><a class="on">Günlük</a><a>Testler</a><a>Besin</a><a>Hareket</a><a>Finans</a><a>Ofis</a><a>Ayarlar</a></nav>
+<h1>Her şey bir zaman çizgisinde.</h1>
+<p class="mut">Ölçümler, öğünler ve seanslar ayrı ekranlarda değil; olduğu sırayla tek bir akışta.</p>
+<div class="tl">
+<div class="ev ev--now"><div class="ev__t"><b>Bugün</b>11 Eylül<br>14:02</div>
+<h2>Toparlanma hesaplandı<span class="chip">85/100 yüksek</span></h2>
+<p>Ağır gün için uygun. Planlanan yükü uygula, ilerleme denemesi bugün yapılır.</p>
+<div class="vals"><div><span class="mut">Uyku</span><b>7,2 sa</b></div>
+<div><span class="mut">İstirahat nabzı</span><b>58</b></div>
+<div><span class="mut">HRV</span><b class="mut">girilmedi</b></div></div></div>
+<div class="ev"><div class="ev__t"><b>Bugün</b>08:40</div>
+<h2>Asgari gün açık<span class="chip chip--warn">0/4</span></h2>
+<p>Protein, su, yürüyüş ve uyku. Kötü bir gün bunu yapıp bitirdiğinde kayıp yoktur.</p></div>
+<div class="ev ev--bad"><div class="ev__t"><b>20 Ağu</b>3 hafta önce</div>
+<h2>Tahlil girildi<span class="chip chip--bad">1 referans dışı</span></h2>
+<p>Merkez Lab · 12 değer. Ferritin referans aralığının altında kaldı; demir hedefi ×1,60 yükseltildi.</p>
+<div class="vals"><div><span class="mut">Ferritin</span><b>26 ng/mL</b></div>
+<div><span class="mut">B12 vitamini</span><b>288 pg/mL</b></div>
+<div><span class="mut">HDL / LDL</span><b>44 / 128 mg/dL</b></div>
+<div><span class="mut">TSH</span><b>2,6 mIU/L</b></div></div></div>
+<div class="ev"><div class="ev__t"><b>10 Mar</b>6 ay önce</div>
+<h2>İlk tahlil</h2>
+<p>Ferritin 18 ng/mL. Altı ayda 18 → 26; yön istenen tarafta ama hedef bandın hâlâ altında.</p></div>
+</div></div></body></html>

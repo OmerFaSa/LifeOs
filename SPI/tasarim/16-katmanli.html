@@ -1,0 +1,82 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>16 · Katmanlı</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#181C22;--mut:#79838F;--line:#E4E8ED;--bg:#F1F3F6;--side:#1B2027;--acc:#3A7D6B;--bad:#C24B3C;--warn:#B37A1C}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 Figtree,sans-serif;height:100vh;overflow:hidden}
+.app{display:grid;grid-template-columns:212px 1fr 340px;height:100vh}
+aside{background:var(--side);color:#C7D0DA;padding:18px 0;display:flex;flex-direction:column}
+.lg{padding:0 20px 20px;font-size:18px;font-weight:700;color:#fff;letter-spacing:-.02em}
+aside a{display:flex;align-items:center;gap:10px;padding:9px 20px;color:#98A4B2;text-decoration:none;font-size:13.5px}
+aside a.on{background:rgba(255,255,255,.09);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--acc)}
+aside .k{padding:16px 20px 6px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5E6A78}
+aside .ft{margin-top:auto;padding:14px 20px;font-size:11.5px;color:#5E6A78;border-top:1px solid rgba(255,255,255,.07)}
+main{overflow:auto;padding:0}
+.mh{position:sticky;top:0;background:rgba(241,243,246,.92);backdrop-filter:blur(10px);
+padding:20px 28px 14px;border-bottom:1px solid var(--line);z-index:2}
+.mh h1{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.mh p{color:var(--mut);font-size:13.5px;margin-top:3px}
+.tabs{display:flex;gap:2px;margin-top:14px}
+.tabs a{padding:6px 12px;border-radius:7px;font-size:13px;color:var(--mut);text-decoration:none}
+.tabs a.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.list{padding:8px 16px 30px}
+.it{display:grid;grid-template-columns:4px 1fr 110px 120px;gap:14px;align-items:center;
+padding:13px 12px;border-radius:10px;cursor:pointer}
+.it:hover{background:#fff}
+.it.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.it .d{width:4px;height:26px;border-radius:2px;background:var(--line)}
+.it.b .d{background:var(--bad)}.it.w .d{background:var(--warn)}.it.o .d{background:var(--acc)}
+.it .nm b{display:block;font-weight:600}
+.it .nm span{font-size:12px;color:var(--mut)}
+.it .v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.it .v small{font-size:11px;color:var(--mut);font-weight:400}
+.it .s{font-size:12px;color:var(--mut);text-align:right}
+.it.b .s{color:var(--bad);font-weight:600}
+.det{background:#fff;border-left:1px solid var(--line);overflow:auto;padding:24px}
+.det .k{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.det h2{font-size:24px;font-weight:700;letter-spacing:-.02em;margin:6px 0 2px}
+.det .u{color:var(--mut);font-size:13px}
+.big{font-size:46px;font-weight:700;letter-spacing:-.035em;margin:18px 0 4px}
+.bar{height:8px;background:#EEF1F4;border-radius:4px;position:relative;margin:16px 0 8px}
+.bar i{position:absolute;inset-block:0;background:#D4DBE2;border-radius:4px}
+.bar u{position:absolute;top:-4px;bottom:-4px;width:3px;border-radius:2px;background:var(--bad)}
+.sc{display:flex;justify-content:space-between;font-size:11px;color:var(--mut)}
+.kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.kv span{color:var(--mut)}.kv b{font-variant-numeric:tabular-nums}
+.nt{margin-top:18px;padding:12px 14px;background:#F7F9FA;border-radius:10px;font-size:13px;color:var(--mut);line-height:1.5}
+@media(max-width:1100px){.app{grid-template-columns:1fr}aside,.det{display:none}}
+</style></head><body><div class="app">
+<aside><div class="lg">SPİ</div>
+<div class="k">Bölümler</div>
+<a>◐ Günlük</a><a class="on">⚗ Testler</a><a>◑ Besin</a><a>⟡ Hareket</a><a>◈ Finans</a><a>⊞ Ofis</a><a>⚙ Ayarlar</a>
+<div class="ft">Ömer · 84285<br>11 Eylül 2026</div></aside>
+<main><div class="mh"><h1>1 ölçüm referans aralığının dışında.</h1>
+<p>12 ölçüm kayıtlı · 2 test oturumu · son giriş 20 Ağustos</p>
+<div class="tabs"><a class="on">Sonuçlar</a><a>Test gir</a><a>Geçmiş</a><a>Eğilim</a></div></div>
+<div class="list">
+<div class="it b on"><span class="d"></span><span class="nm"><b>Ferritin</b><span>Demir paneli</span></span>
+<span class="v">26<small> ng/mL</small></span><span class="s">referans altı</span></div>
+<div class="it w"><span class="d"></span><span class="nm"><b>B12 vitamini</b><span>Vitamin ve mineral</span></span>
+<span class="v">288<small> pg/mL</small></span><span class="s">hedef altı</span></div>
+<div class="it w"><span class="d"></span><span class="nm"><b>HDL kolesterol</b><span>Lipid paneli</span></span>
+<span class="v">44<small> mg/dL</small></span><span class="s">hedef altı</span></div>
+<div class="it w"><span class="d"></span><span class="nm"><b>LDL kolesterol</b><span>Lipid paneli</span></span>
+<span class="v">128<small> mg/dL</small></span><span class="s">hedef üstü</span></div>
+<div class="it o"><span class="d"></span><span class="nm"><b>TSH</b><span>Hormonlar</span></span>
+<span class="v">2,6<small> mIU/L</small></span><span class="s">hedefte</span></div>
+<div class="it o"><span class="d"></span><span class="nm"><b>Hemoglobin</b><span>Hemogram</span></span>
+<span class="v">13,8<small> g/dL</small></span><span class="s">hedefte</span></div>
+</div></main>
+<div class="det"><div class="k">Demir paneli</div><h2>Ferritin</h2><div class="u">ng/mL · 20 Ağustos 2026</div>
+<div class="big">26</div>
+<div class="bar"><i style="left:24%;width:52%"></i><u style="left:16%"></u></div>
+<div class="sc"><span>30</span><span>referans · hedef 80–250</span><span>400</span></div>
+<div style="margin-top:22px">
+<div class="kv"><span>Referans aralığı</span><b>30 – 400</b></div>
+<div class="kv"><span>Hedef bandı</span><b>80 – 250</b></div>
+<div class="kv"><span>Önceki ölçüm</span><b>18 · 10 Mart</b></div>
+<div class="kv"><span>Altı aylık değişim</span><b>+44%</b></div></div>
+<div class="nt"><b style="color:var(--ink)">Beslenme bağı.</b> Ferritin referans aralığının altında olduğu için demir hedefi ×1,60 yükseltildi. Ölçüm banda dönerse hedef kendiliğinden geri çekilir.</div>
+<div class="nt">Demir deposu boşalmış. Yön istenen tarafta ama değer hâlâ bandın altında.</div></div>
+</div></body></html>

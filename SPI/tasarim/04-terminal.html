@@ -1,0 +1,71 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>04 · Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0E0C;--fg:#C8D5C8;--dim:#5E6E5E;--grn:#6FCF7F;--amb:#D9A441;--red:#E06C5A;--line:#1C231C}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--fg);font:13px/1.6 'JetBrains Mono',monospace;padding:0}
+.w{max-width:1000px;margin:0 auto;padding:0 22px}
+.bar{border-bottom:1px solid var(--line);padding:10px 0;display:flex;gap:16px;align-items:center}
+.bar b{color:var(--grn)}
+.bar .r{margin-left:auto;color:var(--dim)}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{white-space:nowrap}
+.tabs a{padding:8px 14px;color:var(--dim);text-decoration:none;border-right:1px solid var(--line)}
+.tabs a.on{color:var(--bg);background:var(--grn);font-weight:700}
+.blk{padding:22px 0;border-bottom:1px solid var(--line)}
+.pmt{color:var(--grn)}.pmt::before{content:'$ '}
+h1{font-size:19px;font-weight:700;margin:12px 0 6px;letter-spacing:-.01em}
+.mut{color:var(--dim)}
+.tbl{margin-top:14px}
+.tr{display:grid;grid-template-columns:170px 90px 1fr 130px;gap:12px;padding:5px 0}
+.tr.hd{color:var(--dim);border-bottom:1px solid var(--line);padding-bottom:7px;margin-bottom:6px}
+.tr .v{text-align:right}
+.g{color:var(--grn)}.a{color:var(--amb)}.r{color:var(--red)}
+.gauge{letter-spacing:-1px}
+.box{border:1px solid var(--line);padding:14px 16px;margin-top:14px}
+.box h2{font-size:12px;color:var(--grn);font-weight:700;margin-bottom:10px}
+.kv{display:flex;justify-content:space-between;padding:3px 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cur{display:inline-block;width:8px;height:15px;background:var(--grn);vertical-align:-3px;animation:bl 1.1s steps(2) infinite}
+@keyframes bl{50%{opacity:0}}
+@media(max-width:760px){.two{grid-template-columns:1fr}.tr{grid-template-columns:1fr auto}.tr>:nth-child(3){display:none}}
+</style></head><body><div class="w">
+<div class="bar"><b>spi</b><span class="mut">v2.0 · ömer</span><span class="r">2026-09-11 14:02</span></div>
+<div class="tabs"><a class="on">01 gunluk</a><a>02 testler</a><a>03 besin</a><a>04 hareket</a><a>05 finans</a><a>06 ofis</a><a>07 ayarlar</a></div>
+<div class="blk"><div class="pmt">spi testler --ozet</div>
+<h1>1 olcum referans araliginin disinda.</h1>
+<p class="mut">12 olcum kayitli · 2 test oturumu · son giris 2026-08-20</p>
+<div class="tbl">
+<div class="tr hd"><span>OLCUM</span><span class="v">DEGER</span><span>ARALIK</span><span>DURUM</span></div>
+<div class="tr"><span>ferritin</span><span class="v">26 ng/mL</span>
+<span class="gauge mut">├<span class="r">▮</span>▭▭▭▭▬▬▬▬▭▭▭┤</span><span class="r">REFERANS_ALTI</span></div>
+<div class="tr"><span>b12</span><span class="v">288 pg/mL</span>
+<span class="gauge mut">├▭▭<span class="a">▮</span>▭▬▬▬▬▬▭▭▭┤</span><span class="a">HEDEF_ALTI</span></div>
+<div class="tr"><span>hdl</span><span class="v">44 mg/dL</span>
+<span class="gauge mut">├▭▭<span class="a">▮</span>▬▬▬▬▬▭▭▭▭┤</span><span class="a">HEDEF_ALTI</span></div>
+<div class="tr"><span>ldl</span><span class="v">128 mg/dL</span>
+<span class="gauge mut">├▭▭▭▬▬▬▬<span class="a">▮</span>▭▭▭▭┤</span><span class="a">HEDEF_USTU</span></div>
+<div class="tr"><span>tsh</span><span class="v">2,6 mIU/L</span>
+<span class="gauge mut">├▭▭▭▬▬<span class="g">▮</span>▬▬▭▭▭▭┤</span><span class="g">HEDEFTE</span></div>
+</div>
+<p class="mut" style="margin-top:12px"># referans araligi = laboratuvarin normali · hedef bandi = sistemin istedigi</p>
+</div>
+<div class="blk"><div class="pmt">spi gunluk --bugun</div>
+<div class="two">
+<div class="box"><h2>TOPARLANMA</h2>
+<div class="kv"><span class="mut">skor</span><b class="g">85/100 YUKSEK</b></div>
+<div class="kv"><span class="mut">uyku</span><span>7.2 sa</span></div>
+<div class="kv"><span class="mut">nabiz</span><span>58 atim/dk</span></div>
+<div class="kv"><span class="mut">hrv</span><span class="mut">null</span></div>
+<p class="mut" style="margin-top:9px"># null degerler sifir sayilmaz</p></div>
+<div class="box"><h2>BESLENME</h2>
+<div class="kv"><span class="mut">kalori</span><span>2285 kcal</span></div>
+<div class="kv"><span class="mut">protein</span><span>98-131 g</span></div>
+<div class="kv"><span class="mut">lif</span><span>32 g</span></div>
+<div class="kv"><span class="mut">bugun</span><span class="mut">kayit yok</span></div>
+<p class="mut" style="margin-top:9px"># demir hedefi x1.60 (ferritin)</p></div>
+</div>
+<div class="pmt" style="margin-top:18px">veri gir <span class="cur"></span></div>
+</div></div></body></html>

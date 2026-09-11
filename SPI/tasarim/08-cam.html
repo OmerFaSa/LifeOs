@@ -1,0 +1,73 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>08 · Cam</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--fg:#EAF0F5;--mut:#96A6B8;--acc:#5DD6C0;--bad:#FF7B72;--warn:#FFC978}
+*{box-sizing:border-box;margin:0}
+body{min-height:100vh;color:var(--fg);font:15px/1.6 Outfit,sans-serif;
+background:#080D14;position:relative;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:-20%;z-index:0;
+background:radial-gradient(50% 40% at 18% 12%,rgba(93,214,192,.22),transparent 60%),
+radial-gradient(45% 40% at 82% 8%,rgba(120,130,255,.20),transparent 60%),
+radial-gradient(60% 50% at 60% 95%,rgba(255,123,114,.14),transparent 60%);filter:blur(40px)}
+.w{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:22px 26px 70px}
+.gl{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10);
+border-radius:20px;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px 20px}
+.lg{font-size:19px;font-weight:600;letter-spacing:-.01em}
+nav{display:flex;flex-wrap:wrap;gap:4px;margin-left:14px}
+nav a{padding:7px 13px;border-radius:999px;font-size:13px;color:var(--mut);text-decoration:none}
+nav a.on{background:rgba(255,255,255,.12);color:#fff;font-weight:500}
+.dt{margin-left:auto;font-size:13px;color:var(--mut)}
+h1{font-size:42px;font-weight:300;letter-spacing:-.02em;line-height:1.1;margin:36px 0 10px}
+h1 b{font-weight:600;background:linear-gradient(90deg,var(--acc),#8FB8FF);
+-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{color:var(--mut);max-width:56ch}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:32px}
+.p{padding:22px 24px}
+.k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:16px}
+.r{display:grid;grid-template-columns:1fr 92px 1fr 110px;gap:14px;align-items:center;
+padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.r:last-child{border:0}
+.r .v{font-size:19px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.r .v small{font-size:11px;color:var(--mut);font-weight:400;margin-left:3px}
+.tr{height:4px;border-radius:3px;background:rgba(255,255,255,.10);position:relative}
+.tr i{position:absolute;inset-block:0;border-radius:3px;background:rgba(255,255,255,.22)}
+.tr u{position:absolute;top:-4px;bottom:-4px;width:2px;border-radius:2px;background:var(--fg)}
+.tr u.b{background:var(--bad);box-shadow:0 0 8px var(--bad)}
+.st{font-size:12px;text-align:right}.st.b{color:var(--bad)}.st.w{color:var(--warn)}.st.o{color:var(--acc)}
+.dial{width:132px;height:132px;margin:6px auto 12px;border-radius:50%;
+background:conic-gradient(var(--acc) 0 85%,rgba(255,255,255,.10) 0);
+display:grid;place-items:center;position:relative}
+.dial::after{content:'';position:absolute;inset:13px;border-radius:50%;background:#0B1119}
+.dial b{position:relative;z-index:1;font-size:38px;font-weight:300}
+.mini{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:14px}
+.mini:last-child{border:0}.mini span{color:var(--mut)}
+@media(max-width:860px){.grid{grid-template-columns:1fr}h1{font-size:30px}
+.r{grid-template-columns:1fr auto}.r>:nth-child(3){display:none}}
+</style></head><body><div class="w">
+<header class="gl"><span class="lg">SPİ</span>
+<nav><a class="on">Günlük</a><a>Testler</a><a>Besin</a><a>Hareket</a><a>Finans</a><a>Ofis</a></nav>
+<span class="dt">11 Eylül 2026</span></header>
+<h1>1 ölçüm referans aralığının <b>dışında</b>.</h1>
+<p class="lede">12 ölçüm kayıtlı. Değerler organa göre bölünmez; tek listede, önem sırasına göre durur.</p>
+<div class="grid">
+<div class="gl p"><div class="k">Tahlil sonuçları · 20 Ağustos</div>
+<div class="r"><span>Ferritin</span><span class="v">26<small>ng/mL</small></span>
+<span class="tr"><i style="left:24%;width:52%"></i><u class="b" style="left:16%"></u></span><span class="st b">referans altı</span></div>
+<div class="r"><span>B12 vitamini</span><span class="v">288<small>pg/mL</small></span>
+<span class="tr"><i style="left:24%;width:52%"></i><u style="left:32%"></u></span><span class="st w">hedef altı</span></div>
+<div class="r"><span>HDL kolesterol</span><span class="v">44<small>mg/dL</small></span>
+<span class="tr"><i style="left:24%;width:52%"></i><u style="left:30%"></u></span><span class="st w">hedef altı</span></div>
+<div class="r"><span>LDL kolesterol</span><span class="v">128<small>mg/dL</small></span>
+<span class="tr"><i style="left:24%;width:52%"></i><u style="left:70%"></u></span><span class="st w">hedef üstü</span></div>
+<div class="r"><span>TSH</span><span class="v">2,6<small>mIU/L</small></span>
+<span class="tr"><i style="left:24%;width:52%"></i><u style="left:52%"></u></span><span class="st o">hedefte</span></div></div>
+<div style="display:grid;gap:16px">
+<div class="gl p" style="text-align:center"><div class="k">Toparlanma</div>
+<div class="dial"><b>85</b></div><p style="color:var(--mut);font-size:13px">Yüksek · ağır gün için uygun</p></div>
+<div class="gl p"><div class="k">Beslenme</div>
+<div class="mini"><span>Kalori</span><b>2.285 kcal</b></div>
+<div class="mini"><span>Protein</span><b>98–131 g</b></div>
+<div class="mini"><span>Demir hedefi</span><b style="color:var(--acc)">×1,60</b></div></div>
+</div></div></div></body></html>

@@ -1,0 +1,66 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>10 · Mobil Uygulama</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#151A1F;--mut:#7B8794;--line:#E8ECF0;--bg:#F3F5F8;--acc:#1E6F5C;--bad:#C8493C;--warn:#B07A1E}
+*{box-sizing:border-box;margin:0}
+body{background:#DCE1E7;color:var(--ink);font:15px/1.5 'DM Sans',sans-serif;
+min-height:100vh;display:grid;place-items:center;padding:24px}
+.ph{width:392px;max-width:100%;height:820px;background:var(--bg);border-radius:44px;
+box-shadow:0 30px 70px rgba(20,30,40,.28);overflow:hidden;display:flex;flex-direction:column;
+border:11px solid #10151A;position:relative}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:126px;height:26px;
+background:#10151A;border-radius:0 0 16px 16px;z-index:5}
+.sb{display:flex;justify-content:space-between;padding:12px 24px 4px;font-size:12px;font-weight:700}
+.hd{padding:6px 22px 14px;background:var(--bg)}
+.hd .k{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)}
+.hd h1{font-size:25px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-top:6px}
+.scr{flex:1;overflow:auto;padding:0 22px 20px}
+.card{background:#fff;border-radius:20px;padding:18px;margin-bottom:12px}
+.card h2{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);margin-bottom:12px}
+.dial{display:flex;align-items:center;gap:16px}
+.ring{width:76px;height:76px;border-radius:50%;flex:none;display:grid;place-items:center;position:relative;
+background:conic-gradient(var(--acc) 0 85%,#E6EBEF 0)}
+.ring::after{content:'';position:absolute;inset:9px;border-radius:50%;background:#fff}
+.ring b{position:relative;z-index:1;font-size:24px;font-weight:700}
+.r{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.r:last-child{border:0}.r .nm{flex:1;font-size:14px;font-weight:500}
+.r .v{font-weight:700;font-variant-numeric:tabular-nums}
+.r .v small{font-size:11px;color:var(--mut);font-weight:400}
+.tag{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:8px}
+.tag.b{background:#FBE9E7;color:var(--bad)}.tag.w{background:#FAF1E0;color:var(--warn)}
+.tag.o{background:#E4F1ED;color:var(--acc)}
+.fab{position:absolute;right:22px;bottom:96px;width:56px;height:56px;border-radius:50%;
+background:var(--acc);color:#fff;display:grid;place-items:center;font-size:28px;font-weight:300;
+box-shadow:0 10px 24px rgba(30,111,92,.4);z-index:4}
+.tb{display:flex;background:#fff;border-top:1px solid var(--line);padding:8px 6px 22px}
+.tb a{flex:1;text-align:center;color:var(--mut);text-decoration:none;font-size:10px;font-weight:600}
+.tb a b{display:block;font-size:19px;font-weight:400;margin-bottom:2px}
+.tb a.on{color:var(--acc)}
+.strip{display:flex;gap:6px;margin-bottom:14px;overflow:auto;padding-bottom:2px}
+.strip span{flex:none;padding:6px 13px;border-radius:999px;background:#fff;font-size:12.5px;font-weight:600;color:var(--mut)}
+.strip span.on{background:var(--ink);color:#fff}
+</style></head><body>
+<div class="ph"><div class="notch"></div>
+<div class="sb"><span>14:02</span><span>▮▮▮ ⌁ ▮</span></div>
+<div class="hd"><div class="k">02 · Testler</div><h1>1 ölçüm referans aralığının dışında.</h1></div>
+<div class="scr">
+<div class="strip"><span class="on">Tümü 12</span><span>Demir 1</span><span>Lipid 2</span><span>Vitamin 1</span><span>Hormon 1</span></div>
+<div class="card"><h2>Toparlanma</h2><div class="dial"><div class="ring"><b>85</b></div>
+<div><div style="font-weight:700">Yüksek</div>
+<div style="color:var(--mut);font-size:13px;margin-top:3px">Ağır gün için uygun. Planlanan yükü uygula.</div></div></div></div>
+<div class="card"><h2>Tahlil sonuçları</h2>
+<div class="r"><span class="nm">Ferritin</span><span class="v">26 <small>ng/mL</small></span><span class="tag b">ref. altı</span></div>
+<div class="r"><span class="nm">B12 vitamini</span><span class="v">288 <small>pg/mL</small></span><span class="tag w">hedef altı</span></div>
+<div class="r"><span class="nm">HDL kolesterol</span><span class="v">44 <small>mg/dL</small></span><span class="tag w">hedef altı</span></div>
+<div class="r"><span class="nm">LDL kolesterol</span><span class="v">128 <small>mg/dL</small></span><span class="tag w">hedef üstü</span></div>
+<div class="r"><span class="nm">TSH</span><span class="v">2,6 <small>mIU/L</small></span><span class="tag o">hedefte</span></div></div>
+<div class="card"><h2>Beslenme</h2>
+<div class="r"><span class="nm">Kalori hedefi</span><span class="v">2.285</span></div>
+<div class="r"><span class="nm">Protein</span><span class="v">98–131 g</span></div>
+<div class="r"><span class="nm">Demir hedefi</span><span class="v" style="color:var(--acc)">×1,60</span></div></div>
+</div>
+<div class="fab">+</div>
+<nav class="tb"><a class="on"><b>◐</b>Günlük</a><a><b>⚗</b>Testler</a><a><b>◑</b>Besin</a>
+<a><b>⟡</b>Hareket</a><a><b>⊞</b>Ofis</a></nav>
+</div></body></html>

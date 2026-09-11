@@ -1,0 +1,111 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>19 · Kağıt Fiş</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#3A3A38;font:13px/1.62 'Roboto Mono',monospace;color:#1A1A18;
+-webkit-font-smoothing:antialiased;padding:34px 14px 70px;
+background-image:radial-gradient(circle at 30% 10%,#454543,#2C2C2A 70%)}
+/* tek dar sütun — yazarkasa fişi. Kenarları testere dişli. */
+.fis{width:372px;max-width:100%;margin:0 auto;background:#FBFAF4;padding:26px 26px 30px;
+box-shadow:0 22px 50px rgba(0,0,0,.45);position:relative}
+.fis::before,.fis::after{content:'';position:absolute;left:0;right:0;height:9px;
+background:repeating-linear-gradient(-45deg,#FBFAF4 0 7px,transparent 7px 14px)}
+.fis::before{top:-8px;transform:scaleY(-1)}
+.fis::after{bottom:-8px}
+h1,h2,h3{font-weight:400}
+.hd{text-align:center;padding-bottom:14px}
+.hd .lg{font-size:19px;font-weight:700;letter-spacing:.34em;margin-left:.34em}
+.hd .s{font-size:11px;letter-spacing:.1em;color:#6A6A62;margin-top:4px}
+.hd .d{font-size:11px;color:#6A6A62;margin-top:10px}
+.sep{border-top:1px dashed #B9B7AC;margin:13px 0}
+.sep.solid{border-top:1px solid #1A1A18;border-style:solid}
+/* gezinme fiş üstünde bir "kasa menüsü" gibi */
+.menu{display:flex;flex-wrap:wrap;gap:0 10px;justify-content:center;font-size:11px;color:#8A887E}
+.menu b{color:#1A1A18;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.ttl{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#6A6A62;margin:16px 0 8px}
+.msg{font-size:14px;line-height:1.5;text-align:center;padding:6px 0 2px}
+.msg b{font-weight:700}
+/* satırlar nokta liderli — fiş dizgisi */
+.li{display:flex;flex-wrap:wrap;align-items:baseline;gap:0;padding:3px 0}
+.li .n{white-space:nowrap}
+.li .dt{flex:1;border-bottom:1px dotted #C4C2B6;margin:0 6px;transform:translateY(-3px)}
+.li .v{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
+.li .fl{width:100%;text-align:right;font-size:10.5px;letter-spacing:.08em;color:#6A6A62;
+text-transform:uppercase;margin-top:-2px}
+.li.bad .n,.li.bad .v{font-weight:700}
+.li.bad .fl{color:#1A1A18;font-weight:700}
+.tot{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;font-weight:700;padding:5px 0}
+.tot .v{font-variant-numeric:tabular-nums}
+.blk{text-align:center;padding:10px 0 4px}
+.blk .big{font-size:44px;font-weight:300;letter-spacing:-.03em;line-height:1}
+.blk .big u{text-decoration:none;font-size:13px;color:#6A6A62;letter-spacing:0}
+.blk .cap{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#6A6A62;margin-top:6px}
+.bar{margin:14px 0 4px;height:26px;display:flex;gap:1.5px;align-items:flex-end;justify-content:center}
+.bar i{width:2px;background:#1A1A18;display:block}
+.bc{text-align:center;font-size:10px;letter-spacing:.3em;color:#6A6A62}
+.fin{text-align:center;font-size:10.5px;color:#6A6A62;line-height:1.7;margin-top:12px}
+</style></head><body>
+<div class="fis">
+  <div class="hd">
+    <div class="lg">SPİ</div>
+    <div class="s">KİŞİSEL SAĞLIK DEFTERİ</div>
+    <div class="d">11.09.2026 · 09:14 · FİŞ NO 0412</div>
+  </div>
+  <div class="sep solid"></div>
+  <div class="menu">
+    <b>Günlük</b><span>Testler</span><span>Besin</span><span>Hareket</span>
+    <span>Finans</span><span>Ofis</span><span>Ayarlar</span>
+  </div>
+  <div class="sep"></div>
+
+  <p class="msg"><b>Bir ölçüm referans<br>aralığının dışında.</b></p>
+  <div class="li"><span class="n">Kayıtlı ölçüm</span><i class="dt"></i><span class="v">12</span></div>
+  <div class="li"><span class="n">Aralık dışı</span><i class="dt"></i><span class="v">1</span></div>
+  <div class="li"><span class="n">Bugün okunan</span><i class="dt"></i><span class="v">5</span></div>
+  <div class="li"><span class="n">Hedef dışı</span><i class="dt"></i><span class="v">2</span></div>
+
+  <div class="sep"></div>
+  <div class="ttl">Tahlil</div>
+  <div class="li bad"><span class="n">FERRITIN</span><i class="dt"></i><span class="v">26 ng/mL</span>
+    <span class="fl">** referans altı **</span></div>
+  <div class="li"><span class="n">B12 VITAMINI</span><i class="dt"></i><span class="v">288 pg/mL</span>
+    <span class="fl">hedef altı</span></div>
+  <div class="li"><span class="n">HDL KOLESTEROL</span><i class="dt"></i><span class="v">44 mg/dL</span>
+    <span class="fl">hedef altı</span></div>
+  <div class="li"><span class="n">LDL KOLESTEROL</span><i class="dt"></i><span class="v">128 mg/dL</span>
+    <span class="fl">hedef üstü</span></div>
+  <div class="li"><span class="n">TSH</span><i class="dt"></i><span class="v">2,6 mIU/L</span>
+    <span class="fl">hedefte</span></div>
+
+  <div class="sep"></div>
+  <div class="ttl">Toparlanma</div>
+  <div class="blk"><div class="big">85<u> / 100</u></div><div class="cap">Yüksek · ağır güne uygun</div></div>
+  <div class="li"><span class="n">Uyku</span><i class="dt"></i><span class="v">7,2 sa</span></div>
+  <div class="li"><span class="n">İstirahat nabzı</span><i class="dt"></i><span class="v">58</span></div>
+  <div class="li"><span class="n">HRV</span><i class="dt"></i><span class="v">— girilmedi</span></div>
+
+  <div class="sep"></div>
+  <div class="ttl">Beslenme</div>
+  <div class="li"><span class="n">Bazal (BMR)</span><i class="dt"></i><span class="v">1.632 kcal</span></div>
+  <div class="li"><span class="n">Hareket katsayısı</span><i class="dt"></i><span class="v">× 1,40</span></div>
+  <div class="li"><span class="n">Protein</span><i class="dt"></i><span class="v">98–131 g</span></div>
+  <div class="li"><span class="n">Demir hedefi</span><i class="dt"></i><span class="v">× 1,60</span></div>
+  <div class="sep solid"></div>
+  <div class="tot"><span>GÜNLÜK HEDEF</span><span class="v">2.285 kcal</span></div>
+  <div class="sep solid"></div>
+
+  <div class="bar">
+    <i style="height:18px"></i><i style="height:26px"></i><i style="height:9px"></i><i style="height:22px"></i>
+    <i style="height:14px"></i><i style="height:26px"></i><i style="height:11px"></i><i style="height:20px"></i>
+    <i style="height:26px"></i><i style="height:8px"></i><i style="height:17px"></i><i style="height:24px"></i>
+    <i style="height:12px"></i><i style="height:26px"></i><i style="height:19px"></i><i style="height:9px"></i>
+    <i style="height:23px"></i><i style="height:15px"></i><i style="height:26px"></i><i style="height:10px"></i>
+    <i style="height:21px"></i><i style="height:26px"></i><i style="height:13px"></i><i style="height:18px"></i>
+  </div>
+  <div class="bc">S P I · 0 4 1 2 · 2 6 0 9 1 1</div>
+
+  <p class="fin">EKSİK VERİ SIFIR SAYILMAZ<br>TAHMİN, ÖLÇÜM GİBİ GÖSTERİLMEZ<br>
+    TEŞHİS VE TEDAVİDE KARAR HEKİMİNDİR</p>
+</div>
+</body></html>

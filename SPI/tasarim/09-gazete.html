@@ -1,0 +1,67 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>09 · Gazete</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#16130F;--mut:#6B6257;--line:#C9C1B4;--pap:#FCFAF4}
+*{box-sizing:border-box;margin:0}
+body{background:var(--pap);color:var(--ink);font:14.5px/1.52 'Source Serif 4',Georgia,serif}
+.w{max-width:1180px;margin:0 auto;padding:0 26px 60px}
+.name{font-family:'Playfair Display',serif;font-size:66px;font-weight:900;text-align:center;
+letter-spacing:-.02em;padding:18px 0 6px;border-bottom:1px solid var(--ink)}
+.slug{display:flex;justify-content:space-between;font-size:10.5px;letter-spacing:.2em;
+text-transform:uppercase;padding:6px 0;border-bottom:3px double var(--ink);color:var(--mut)}
+nav{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 24px;padding:8px 0;border-bottom:1px solid var(--ink);
+font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+nav a{color:var(--mut);text-decoration:none}nav a.on{color:var(--ink);font-weight:600}
+.lead{text-align:center;padding:26px 0 18px;border-bottom:1px solid var(--line)}
+.lead h1{font-family:'Playfair Display',serif;font-size:52px;font-weight:700;line-height:1.05;
+letter-spacing:-.02em;max-width:22ch;margin:0 auto}
+.lead .dek{font-size:16px;color:var(--mut);margin-top:12px;font-style:italic}
+.cols{column-count:4;column-gap:26px;column-rule:1px solid var(--line);padding-top:22px}
+.art{break-inside:avoid;margin-bottom:22px}
+.art h2{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;line-height:1.2;
+padding-bottom:5px;border-bottom:1px solid var(--ink);margin-bottom:8px}
+.art p{font-size:13.5px;text-align:justify;hyphens:auto}
+.art p+p{text-indent:1.1em}
+.kicker{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);margin-bottom:4px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}
+.tbl td{padding:4px 0;border-bottom:1px dotted var(--line)}
+.tbl td:last-child{text-align:right;font-weight:600}
+.tbl tr:last-child td{border:0}
+.stat{text-align:center;border:1px solid var(--ink);padding:10px;margin:8px 0}
+.stat b{display:block;font-family:'Playfair Display',serif;font-size:38px;line-height:1;font-weight:700}
+.stat span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.rule{border-top:3px double var(--ink);margin:4px 0 10px}
+@media(max-width:1000px){.cols{column-count:2}.name{font-size:40px}.lead h1{font-size:32px}}
+@media(max-width:620px){.cols{column-count:1}}
+</style></head><body><div class="w">
+<div class="name">SPİ</div>
+<div class="slug"><span>Kişisel Sağlık Sistemi</span><span>11 Eylül 2026 · Cuma</span><span>Kayıt No 84285</span></div>
+<nav><a class="on">Günlük</a><a>Testler</a><a>Besin</a><a>Hareket</a><a>Finans</a><a>Ofis</a><a>Ayarlar</a></nav>
+<div class="lead"><h1>Bir ölçüm referans aralığının dışında</h1>
+<p class="dek">On iki ölçüm kayıtlı; değerler organa göre bölünmüyor, tek listede önem sırasına göre duruyor</p></div>
+<div class="cols">
+<div class="art"><div class="kicker">Manşet</div><h2>Ferritin altı ayda yükseldi ama hedefin altında</h2>
+<p>Mart ayında 18 ng/mL ölçülen ferritin, ağustos tahlilinde 26 ng/mL'ye çıktı. Yön istenen tarafta; ancak değer hâlâ laboratuvarın referans aralığının altında duruyor.</p>
+<p>Bu bulgu beslenme hedefini doğrudan değiştirdi: demir hedefi 1,60 katına yükseltildi. Hedefi yükselten kural, ölçüm bandın içine döndüğünde kendiliğinden geri çekilecek.</p></div>
+<div class="art"><div class="kicker">Tablo</div><h2>Tahlil sonuçları</h2>
+<div class="rule"></div>
+<table class="tbl"><tr><td>Ferritin</td><td>26 ng/mL</td></tr>
+<tr><td>B12 vitamini</td><td>288 pg/mL</td></tr><tr><td>HDL kolesterol</td><td>44 mg/dL</td></tr>
+<tr><td>LDL kolesterol</td><td>128 mg/dL</td></tr><tr><td>TSH</td><td>2,6 mIU/L</td></tr></table>
+<p style="font-size:12px;color:var(--mut)">Referans aralığı laboratuvarın normal saydığı yer; hedef bandı bu sistemin istediği daha dar yer.</p></div>
+<div class="art"><div class="kicker">Günün ölçüsü</div><h2>Toparlanma yüksek</h2>
+<div class="stat"><b>85</b><span>yüz üzerinden</span></div>
+<p>Uyku 7,2 saat, istirahat nabzı 58. HRV girilmedi; eksik girdi sıfır sayılmadı, ağırlığı kalan girdilere dağıtıldı.</p>
+<p>Bugün ağır gün için uygun. Planlanan yük uygulanır, ilerleme denemesi bugün yapılır.</p></div>
+<div class="art"><div class="kicker">İkinci sayfa</div><h2>Beslenme hedefi belirlendi</h2>
+<div class="stat"><b>2.285</b><span>kalori · gün</span></div>
+<p>Bazal metabolizma 1.798 kcal, hareket düzeyiyle 2.787, yağ kaybetme hedefiyle yüzde on sekiz düşürüldü.</p>
+<table class="tbl"><tr><td>Protein</td><td>98–131 g</td></tr><tr><td>Yağ</td><td>70–98 g</td></tr>
+<tr><td>Lif</td><td>32 g</td></tr></table></div>
+<div class="art"><div class="kicker">Uyarı</div><h2>Hemogram paneli hiç ölçülmedi</h2>
+<p>Kırk dokuz ölçüm için hiç değer girilmedi. Eksik veri sıfır sayılmaz; hesaplarda yok kabul edilir ve bu durum her ekranda açıkça yazar.</p></div>
+<div class="art"><div class="kicker">Künye</div><h2>Sınır</h2>
+<p>SPİ bir hekim ya da tıp merkezi değildir. Buradaki her çıktı «yaşam kalitesi ve zindelik rehberliği» statüsündedir. Teşhis ve tedavide karar hekimindir.</p>
+<p style="font-size:12px;color:var(--mut)">Veriler bu cihazda tutulur. Ad ve doğum yılı hiçbir modele gönderilmez.</p></div>
+</div></div></body></html>

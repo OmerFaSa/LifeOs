@@ -1,0 +1,60 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>15 · Minimal Mono</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1C1C1C;--m1:#767676;--m2:#A8A8A8;--line:#E8E8E8;--bg:#FCFCFC}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.6 'Inter Tight',sans-serif;-webkit-font-smoothing:antialiased}
+.w{max-width:620px;margin:0 auto;padding:0 24px 100px}
+header{display:flex;align-items:baseline;gap:10px;padding:40px 0 0}
+.lg{font-size:14px;font-weight:600;letter-spacing:.02em}
+.m{color:var(--m2);font-size:13px}
+header .r{margin-left:auto;color:var(--m2);font-size:13px}
+nav{display:flex;gap:16px;padding:22px 0 0;font-size:13px;flex-wrap:wrap}
+nav a{color:var(--m2);text-decoration:none}nav a.on{color:var(--ink)}
+h1{font-size:22px;font-weight:400;letter-spacing:-.015em;line-height:1.35;margin:44px 0 10px;max-width:26ch}
+.lede{color:var(--m1);max-width:44ch;font-size:14px}
+section{margin-top:50px}
+h2{font-size:12px;font-weight:500;color:var(--m2);margin-bottom:2px}
+.r{display:flex;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.r:first-of-type{border-top:1px solid var(--line)}
+.r .nm{flex:1}
+.r .v{font-variant-numeric:tabular-nums;font-weight:500}
+.r .v small{color:var(--m2);font-weight:400;font-size:12px;margin-left:3px}
+.r .s{color:var(--m1);font-size:12.5px;width:96px;text-align:right}
+.r.out .nm{font-weight:500}
+.r.out .s{color:var(--ink)}
+.r.out::before{content:'';width:3px;height:3px;border-radius:50%;background:var(--ink);
+margin-left:-11px;margin-right:8px;align-self:center}
+.kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);color:var(--m1)}
+.kv:first-of-type{border-top:1px solid var(--line)}
+.kv b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+.n{font-size:52px;font-weight:300;letter-spacing:-.04em;line-height:1;margin:16px 0 6px}
+.n small{font-size:16px;color:var(--m2);letter-spacing:0}
+.ft{margin-top:70px;padding-top:18px;border-top:1px solid var(--line);color:var(--m2);font-size:12.5px}
+</style></head><body><div class="w">
+<header><span class="lg">SPİ</span><span class="m">kişisel sağlık</span><span class="r">11 Eylül</span></header>
+<nav><a class="on">Günlük</a><a>Testler</a><a>Besin</a><a>Hareket</a><a>Finans</a><a>Ofis</a><a>Ayarlar</a></nav>
+<h1>Bir ölçüm referans aralığının dışında.</h1>
+<p class="lede">On iki ölçüm kayıtlı. Değerler organa göre bölünmez; tek listede, önem sırasına göre durur.</p>
+<section><h2>Tahlil</h2>
+<div class="r out"><span class="nm">Ferritin</span><span class="v">26<small>ng/mL</small></span><span class="s">referans altı</span></div>
+<div class="r"><span class="nm">B12 vitamini</span><span class="v">288<small>pg/mL</small></span><span class="s">hedef altı</span></div>
+<div class="r"><span class="nm">HDL kolesterol</span><span class="v">44<small>mg/dL</small></span><span class="s">hedef altı</span></div>
+<div class="r"><span class="nm">LDL kolesterol</span><span class="v">128<small>mg/dL</small></span><span class="s">hedef üstü</span></div>
+<div class="r"><span class="nm">TSH</span><span class="v">2,6<small>mIU/L</small></span><span class="s">hedefte</span></div>
+</section>
+<section><h2>Toparlanma</h2><div class="n">85<small> / 100</small></div>
+<p class="lede">Yüksek. Ağır gün için uygun; planlanan yükü uygula.</p>
+<div style="margin-top:18px">
+<div class="kv"><span>Uyku</span><b>7,2 sa</b></div>
+<div class="kv"><span>İstirahat nabzı</span><b>58</b></div>
+<div class="kv"><span>HRV</span><b style="color:var(--m2);font-weight:400">girilmedi</b></div></div>
+</section>
+<section><h2>Beslenme</h2>
+<div class="kv"><span>Kalori hedefi</span><b>2.285 kcal</b></div>
+<div class="kv"><span>Protein</span><b>98–131 g</b></div>
+<div class="kv"><span>Demir hedefi</span><b>×1,60</b></div>
+</section>
+<p class="ft">Eksik veri sıfır sayılmaz. Tahmin, ölçüm gibi gösterilmez. Teşhis ve tedavide karar hekimindir.</p>
+</div></body></html>

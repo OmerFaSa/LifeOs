@@ -1,0 +1,108 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>01 · Klinik Rapor</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0F1720;--mut:#5A6B7A;--line:#D8E0E7;--bg:#F4F7F9;--pap:#fff;
+--acc:#0B5FA5;--warn:#9A6400;--bad:#B0281E;--ok:#146B4A}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 'IBM Plex Sans',sans-serif}
+.wrap{max-width:1060px;margin:0 auto;padding:0 28px}
+.mast{background:var(--pap);border-bottom:2px solid var(--ink)}
+.mast__in{display:flex;align-items:baseline;gap:18px;padding:14px 0}
+.logo{font-weight:700;font-size:17px;letter-spacing:.02em}
+.mast__id{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mut);letter-spacing:.06em}
+.mast__date{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mut)}
+nav{background:var(--pap);border-bottom:1px solid var(--line)}
+nav ul{display:flex;list-style:none;padding:0;gap:0}
+nav a{display:block;padding:9px 14px;color:var(--mut);text-decoration:none;font-size:13px;
+border-bottom:2px solid transparent}
+nav a.on{color:var(--ink);font-weight:600;border-bottom-color:var(--acc)}
+.hd{background:var(--pap);border-bottom:1px solid var(--line);padding:22px 0}
+.hd__k{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--acc);letter-spacing:.1em;margin-bottom:8px}
+h1{font-size:23px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
+.hd p{color:var(--mut);max-width:62ch;font-size:13px}
+.sum{display:flex;gap:0;margin-top:18px;border:1px solid var(--line);background:var(--bg)}
+.sum div{flex:1;padding:11px 14px;border-right:1px solid var(--line)}
+.sum div:last-child{border:0}
+.sum b{display:block;font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600}
+.sum span{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+main{padding:26px 0 60px}
+.sec{background:var(--pap);border:1px solid var(--line);margin-bottom:18px}
+.sec__h{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#EDF2F6;
+border-bottom:1px solid var(--line)}
+.sec__h b{font-size:12px;text-transform:uppercase;letter-spacing:.09em}
+.sec__h span{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 16px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;
+color:var(--mut);border-bottom:1px solid var(--line);font-weight:600}
+td{padding:10px 16px;border-bottom:1px solid #EEF3F6}
+tr:last-child td{border:0}
+td.n{font-family:'IBM Plex Mono',monospace;text-align:right;font-weight:500}
+.fl{display:inline-block;padding:1px 7px;font-size:11px;font-family:'IBM Plex Mono',monospace;
+border:1px solid currentColor}
+.fl.bad{color:var(--bad)}.fl.warn{color:var(--warn)}.fl.ok{color:var(--ok)}
+.rng{position:relative;height:6px;background:#E7EDF2;width:120px;display:inline-block;vertical-align:middle}
+.rng i{position:absolute;top:0;bottom:0;background:#C3D3E0}
+.rng u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+.rng u.bad{background:var(--bad)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.kv{padding:12px 16px;border-bottom:1px solid #EEF3F6;display:flex;justify-content:space-between;font-size:13px}
+.kv:last-child{border:0}.kv b{font-family:'IBM Plex Mono',monospace}
+.note{padding:12px 16px;font-size:12px;color:var(--mut);background:#FAFCFD;border-top:1px solid var(--line)}
+@media(max-width:760px){.two{grid-template-columns:1fr}nav ul{overflow:auto}}
+/* telefonda tablo dar: yardımcı sütunlar düşer, ölçüm-değer-durum kalır */
+@media(max-width:720px){th:nth-child(2),td:nth-child(2),th:nth-child(4),td:nth-child(4){display:none}
+th,td{padding-left:12px;padding-right:12px}}
+</style></head><body>
+<header class="mast"><div class="wrap mast__in">
+<span class="logo">SPİ</span><span class="mast__id">KAYIT NO 84285 · ÖMER</span>
+<span class="mast__date">11 EYL 2026</span></div></header>
+<nav><div class="wrap"><ul>
+<li><a class="on" href="#">01 Günlük</a></li><li><a href="#">02 Testler</a></li>
+<li><a href="#">03 Besin</a></li><li><a href="#">04 Hareket</a></li>
+<li><a href="#">05 Finans</a></li><li><a href="#">06 Ofis</a></li><li><a href="#">07 Ayarlar</a></li>
+</ul></div></nav>
+<div class="hd"><div class="wrap">
+<div class="hd__k">BÖLÜM 02 — TESTLER</div>
+<h1>1 ölçüm referans aralığının dışında.</h1>
+<p>12 ölçüm kayıtlı. Değerler organa göre bölünmez; tek listede, önem sırasına göre durur.</p>
+<div class="sum"><div><b>12</b><span>ölçüm</span></div><div><b>1</b><span>referans dışı</span></div>
+<div><b>5</b><span>hedef dışı</span></div><div><b>2</b><span>test</span></div></div>
+</div></div>
+<main class="wrap">
+<section class="sec"><div class="sec__h"><b>Tahlil sonuçları</b><span>20 AĞU 2026 · MERKEZ LAB</span></div>
+<table><thead><tr><th>Ölçüm</th><th>Panel</th><th style="text-align:right">Değer</th><th>Aralık</th><th>Durum</th></tr></thead><tbody>
+<tr><td>Ferritin</td><td>Demir</td><td class="n">26 ng/mL</td>
+<td><span class="rng"><i style="left:22%;width:56%"></i><u class="bad" style="left:18%"></u></span></td>
+<td><span class="fl bad">REFERANS ALTI</span></td></tr>
+<tr><td>B12 vitamini</td><td>Vitamin</td><td class="n">288 pg/mL</td>
+<td><span class="rng"><i style="left:22%;width:56%"></i><u style="left:31%"></u></span></td>
+<td><span class="fl warn">HEDEF ALTI</span></td></tr>
+<tr><td>HDL kolesterol</td><td>Lipid</td><td class="n">44 mg/dL</td>
+<td><span class="rng"><i style="left:22%;width:56%"></i><u style="left:29%"></u></span></td>
+<td><span class="fl warn">HEDEF ALTI</span></td></tr>
+<tr><td>LDL kolesterol</td><td>Lipid</td><td class="n">128 mg/dL</td>
+<td><span class="rng"><i style="left:22%;width:56%"></i><u style="left:68%"></u></span></td>
+<td><span class="fl warn">HEDEF ÜSTÜ</span></td></tr>
+<tr><td>TSH</td><td>Hormon</td><td class="n">2,6 mIU/L</td>
+<td><span class="rng"><i style="left:22%;width:56%"></i><u style="left:52%"></u></span></td>
+<td><span class="fl ok">HEDEFTE</span></td></tr>
+</tbody></table>
+<div class="note">Referans aralığı laboratuvarın normal saydığı yer; hedef bandı bu sistemin istediği daha dar yer. İkisi aynı şey değildir.</div>
+</section>
+<div class="two">
+<section class="sec"><div class="sec__h"><b>Toparlanma</b><span>11 EYL</span></div>
+<div class="kv"><span>Skor</span><b>85 / 100 · YÜKSEK</b></div>
+<div class="kv"><span>Uyku</span><b>7,2 sa</b></div>
+<div class="kv"><span>İstirahat nabzı</span><b>58 atım/dk</b></div>
+<div class="kv"><span>HRV</span><b style="color:var(--mut)">girilmedi</b></div>
+<div class="note">Eksik girdi sıfır sayılmaz; ağırlığı kalan girdilere dağıtılır.</div></section>
+<section class="sec"><div class="sec__h"><b>Beslenme</b><span>HEDEF</span></div>
+<div class="kv"><span>Kalori</span><b>2.285 kcal</b></div>
+<div class="kv"><span>Protein</span><b>98–131 g</b></div>
+<div class="kv"><span>Lif</span><b>32 g</b></div>
+<div class="kv"><span>Bugün alınan</span><b style="color:var(--mut)">kayıt yok</b></div>
+<div class="note">Ferritin referans altı olduğu için demir hedefi ×1,60 yükseltildi.</div></section>
+</div>
+</main></body></html>

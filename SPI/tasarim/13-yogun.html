@@ -1,0 +1,103 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>13 · Veri Yoğun</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0E1116;--mut:#6E7A88;--line:#DCE2E8;--bg:#F7F9FB;--hd:#EDF1F5;--acc:#1B5FA8;--bad:#C0392B;--warn:#9A6800;--ok:#15794F}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:12.5px/1.4 Inter,sans-serif}
+.bar{display:flex;align-items:center;gap:0;background:var(--ink);color:#fff;padding:0 12px;height:34px}
+.bar b{font-size:13px;font-weight:700;margin-right:18px}
+.bar a{padding:0 12px;height:34px;display:flex;align-items:center;color:#A9B6C4;text-decoration:none;font-size:12px}
+.bar a.on{background:#1D2530;color:#fff;font-weight:600}
+.bar .r{margin-left:auto;color:#8A99A9;font-variant-numeric:tabular-nums}
+.sub{display:flex;gap:0;background:var(--hd);border-bottom:1px solid var(--line);height:30px;align-items:center;padding:0 12px}
+.sub span{padding:0 10px;color:var(--mut);border-right:1px solid var(--line);height:30px;display:flex;align-items:center}
+.sub span.on{color:var(--ink);font-weight:600;background:#fff}
+.grid{display:grid;grid-template-columns:1fr 280px 300px;gap:1px;background:var(--line);height:calc(100vh - 64px)}
+.pane{background:#fff;overflow:auto}
+.ph{position:sticky;top:0;background:var(--hd);border-bottom:1px solid var(--line);
+padding:5px 10px;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);z-index:1}
+table{width:100%;border-collapse:collapse}
+th{position:sticky;top:26px;background:#fff;text-align:left;padding:5px 10px;font-size:10px;
+font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);border-bottom:1px solid var(--line)}
+td{padding:4px 10px;border-bottom:1px solid #F0F3F6;font-variant-numeric:tabular-nums}
+tr:hover td{background:#F3F8FD}
+td.n{text-align:right;font-weight:600}
+.st{font-size:10.5px;font-weight:700}
+.st.b{color:var(--bad)}.st.w{color:var(--warn)}.st.o{color:var(--ok)}
+.mini{height:7px;background:#EEF2F6;position:relative;width:90px;display:inline-block;vertical-align:middle}
+.mini i{position:absolute;inset-block:0;background:#CFDBE6}
+.mini u{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
+.mini u.b{background:var(--bad)}
+.kv{display:flex;justify-content:space-between;padding:4px 10px;border-bottom:1px solid #F0F3F6}
+.kv span{color:var(--mut)}.kv b{font-variant-numeric:tabular-nums}
+.spark{display:flex;align-items:flex-end;gap:2px;height:40px;padding:8px 10px}
+.spark i{flex:1;background:#C9D8E6}
+.spark i.h{background:var(--acc)}
+.big{padding:10px;text-align:center;border-bottom:1px solid var(--line)}
+.big b{display:block;font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.big span{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut)}
+.msg{padding:8px 10px;border-bottom:1px solid #F0F3F6;font-size:12px}
+.msg b{display:block;font-size:10.5px;color:var(--acc);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px}
+@media(max-width:1000px){.grid{grid-template-columns:1fr;height:auto}}
+</style></head><body>
+<div class="bar"><b>SPİ</b><a class="on">GÜNLÜK</a><a>TESTLER</a><a>BESİN</a><a>HAREKET</a><a>FİNANS</a><a>OFİS</a><a>AYARLAR</a>
+<span class="r">ÖMER · 84285 · 11.09.2026 14:02</span></div>
+<div class="sub"><span class="on">Sonuçlar</span><span>Test gir</span><span>Geçmiş</span><span>Eğilim</span>
+<span style="border:0;margin-left:auto;color:var(--bad);font-weight:700">1 REFERANS DIŞI</span></div>
+<div class="grid">
+<div class="pane"><div class="ph">Tahlil sonuçları · 12 ölçüm · önem sırasına göre</div>
+<table><thead><tr><th>Ölçüm</th><th>Panel</th><th style="text-align:right">Değer</th><th>Birim</th>
+<th>Aralık</th><th>Durum</th><th style="text-align:right">Tarih</th></tr></thead><tbody>
+<tr><td>Ferritin</td><td>Demir</td><td class="n">26</td><td>ng/mL</td>
+<td><span class="mini"><i style="left:24%;width:52%"></i><u class="b" style="left:16%"></u></span></td>
+<td class="st b">REF. ALTI</td><td class="n">20.08</td></tr>
+<tr><td>B12 vitamini</td><td>Vitamin</td><td class="n">288</td><td>pg/mL</td>
+<td><span class="mini"><i style="left:24%;width:52%"></i><u style="left:32%"></u></span></td>
+<td class="st w">HEDEF ALTI</td><td class="n">20.08</td></tr>
+<tr><td>HDL kolesterol</td><td>Lipid</td><td class="n">44</td><td>mg/dL</td>
+<td><span class="mini"><i style="left:24%;width:52%"></i><u style="left:30%"></u></span></td>
+<td class="st w">HEDEF ALTI</td><td class="n">20.08</td></tr>
+<tr><td>LDL kolesterol</td><td>Lipid</td><td class="n">128</td><td>mg/dL</td>
+<td><span class="mini"><i style="left:24%;width:52%"></i><u style="left:70%"></u></span></td>
+<td class="st w">HEDEF ÜSTÜ</td><td class="n">20.08</td></tr>
+<tr><td>TSH</td><td>Hormon</td><td class="n">2,6</td><td>mIU/L</td>
+<td><span class="mini"><i style="left:24%;width:52%"></i><u style="left:52%"></u></span></td>
+<td class="st o">HEDEFTE</td><td class="n">20.08</td></tr>
+<tr><td>Hemoglobin</td><td>Hemogram</td><td class="n">13,8</td><td>g/dL</td>
+<td><span class="mini"><i style="left:24%;width:52%"></i><u style="left:44%"></u></span></td>
+<td class="st o">HEDEFTE</td><td class="n">20.08</td></tr>
+<tr><td>İstirahat nabzı</td><td>Vital</td><td class="n">58</td><td>atım/dk</td>
+<td><span class="mini"><i style="left:24%;width:52%"></i><u style="left:40%"></u></span></td>
+<td class="st o">HEDEFTE</td><td class="n">11.09</td></tr>
+<tr><td>Uyku süresi</td><td>Vital</td><td class="n">7,2</td><td>saat</td>
+<td><span class="mini"><i style="left:24%;width:52%"></i><u style="left:46%"></u></span></td>
+<td class="st o">HEDEFTE</td><td class="n">11.09</td></tr>
+<tr><td>Kilo</td><td>Vücut</td><td class="n">82,0</td><td>kg</td>
+<td><span class="mini"><i style="left:24%;width:52%"></i><u style="left:50%"></u></span></td>
+<td class="st o">HEDEFTE</td><td class="n">11.09</td></tr>
+<tr><td>hs-CRP</td><td>İnflamasyon</td><td class="n">1,8</td><td>mg/L</td>
+<td><span class="mini"><i style="left:24%;width:52%"></i><u style="left:58%"></u></span></td>
+<td class="st w">HEDEF ÜSTÜ</td><td class="n">20.08</td></tr>
+</tbody></table></div>
+<div class="pane"><div class="ph">Toparlanma</div>
+<div class="big"><b>85</b><span>/ 100 · yüksek</span></div>
+<div class="kv"><span>Uyku</span><b>7,2 sa · 100</b></div>
+<div class="kv"><span>HRV</span><b style="color:var(--mut)">—</b></div>
+<div class="kv"><span>İstirahat nabzı</span><b style="color:var(--mut)">—</b></div>
+<div class="kv"><span>Ağrı ve enerji</span><b>3 · 50</b></div>
+<div class="ph">Yük · son 14 gün</div>
+<div class="spark"><i style="height:30%"></i><i style="height:55%"></i><i style="height:20%"></i>
+<i style="height:70%"></i><i style="height:45%"></i><i style="height:80%"></i><i style="height:35%"></i>
+<i style="height:60%"></i><i style="height:25%"></i><i style="height:72%"></i><i style="height:50%"></i>
+<i class="h" style="height:38%"></i><i class="h" style="height:66%"></i><i class="h" style="height:44%"></i></div>
+<div class="kv"><span>Bu hafta</span><b>412 yük</b></div>
+<div class="kv"><span>Hafta / ay</span><b>1,08 normal</b></div></div>
+<div class="pane"><div class="ph">Ofis · kural motoru</div>
+<div class="msg"><b>Kerem · laboratuvar</b>12 ölçüm girildi. 1 tanesi referans aralığının dışında, 5 tanesi hedef bandın dışında. En çok dikkat isteyen: Ferritin 26 ng/mL.</div>
+<div class="msg"><b>Nesrin · beslenme</b>Günlük hedef 2.285 kcal, protein 98–131 g. Laboratuvara göre 3 hedef yükseltildi: demir ×1,60, B12 ×1,40, lif ×1,15.</div>
+<div class="msg"><b>Barış · hareket</b>Toparlanma 85/100 yüksek. Ağır gün için uygun; planlanan yükü uygula.</div>
+<div class="msg"><b>Sedef · ekonomi</b>Sepet boş. Haftalık alışverişi girince maliyet ve besin kapsaması hesaplanır.</div>
+<div class="ph">Sınır</div>
+<div class="msg" style="color:var(--mut)">SPİ bir hekim değildir. Teşhis ve tedavide karar hekimindir.</div></div>
+</div></body></html>
