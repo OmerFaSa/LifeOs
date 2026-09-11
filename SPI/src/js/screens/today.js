@@ -20,7 +20,7 @@ SP.Screens = SP.Screens || {};
 
 SP.Screens.today = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
-  const { html, raw, when, map } = SP.h;
+  const { html, raw, when, map, cls } = SP.h;
   const K = SP.C, P = SP.Parts;
 
   function shownDate(){ return S.ui.mealDate || U.todayISO(); }
@@ -46,6 +46,42 @@ SP.Screens.today = (function(){
     { value:5, label:'5 · zinde' },
   ];
 
+  /* ZAMAN KAYDIRICI. Günler arasında gezinmek için üç düğme vardı:
+     «‹ · bugün · ›». Geçmiş bir günü doldurmak zahmetliydi — on gün
+     geriye gitmek on tıklamaydı.
+
+     Şerit son on dört günü GÖSTERİR: her günün altında o gün veri
+     girilip girilmediğini söyleyen bir nokta durur. Böylece «hangi
+     günler eksik» sorusu tıklamadan cevaplanır. */
+  const SERIT_GUN = 14;
+
+  function dayNav(d){
+    const bugun = U.todayISO();
+    const gunler = [];
+    for(let i = SERIT_GUN - 1; i >= 0; i--){
+      const t = U.iso(U.addDays(U.parse(bugun), -i));
+      const v = M.vitalsOf(t);
+      /* Dolu sayılmak için tek alan yeter: sistem «eksik gün» demez,
+         «hiç girilmemiş gün» der. */
+      const dolu = !!(v && FIELDS.some(f => v[f.id] != null));
+      gunler.push({ date:t, dolu, bugun:t === bugun, secili:t === d });
+    }
+    return html`<div class="daynav">
+      <div class="daynav__strip" role="group" aria-label="Gün seç">
+        ${map(gunler, g => html`<button
+          class="${cls('daybtn', g.secili && 'is-on', g.bugun && 'is-today')}"
+          data-act="open-day" data-date="${g.date}"
+          aria-pressed="${g.secili ? 'true' : 'false'}"
+          title="${U.fmtDate(g.date) + (g.dolu ? ' · veri var' : ' · veri yok')}">
+          <span class="daybtn__d">${U.parse(g.date).getDate()}</span>
+          <span class="${cls('daybtn__dot', g.dolu && 'is-full')}" aria-hidden="true"></span>
+        </button>`)}
+      </div>
+      ${when(d !== bugun, () => K.Button({ label:'Bugüne dön', size:'sm',
+        act:'open-day', data:{ 'data-date':bugun } }))}
+    </div>`;
+  }
+
   function formEntry(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
@@ -54,9 +90,7 @@ SP.Screens.today = (function(){
       meta:U.fmtDate(d),
       note:'Boş bıraktığın alan sıfır sayılmaz — hesaba hiç girmez. Uyku '
         + 'süresini yazman bile anlamlı bir sonuç üretir.',
-      action:html`${K.Segmented({ act:'shift-day', value:'', aria:'Gün değiştir', items:[
-          { value:'-1', label:'‹' }, { value:'0', label:'bugün' }, { value:'1', label:'›' },
-        ] })}
+      action:html`${dayNav(d)}
         ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}`,
       body:html`
         <div class="grid-form">${map(FIELDS, f => K.Field({

@@ -58,15 +58,91 @@ SP.Palette = (function(){
   }
 
   function iconFor(kind){
-    return ({ 'Ekran':'layers', 'Eylem':'zap', 'Ölçüm':'flask', 'Ajan':'users' })[kind] || 'list';
+    return ({ 'Ekran':'layers', 'Eylem':'zap', 'Ölçüm':'flask', 'Ajan':'users',
+      'Hızlı giriş':'plus' })[kind] || 'list';
+  }
+
+  /* HIZLI GIRIS. Yazilan satir bir veriye benziyorsa listenin BASINDA
+     onizleme olarak durur: «ferritin 26» yazip Enter'a basmak, bolume
+     gidip sekme secip alan bulup kaydetmenin yerine gecer.
+
+     Hicbir sey dogrudan kaydedilmez: onizleme secilince alt sayfa acilir
+     ve kullanici gordukten sonra onaylar. Yanlis anlasilmis bir satirin
+     sessizce depoya yazilmasi, elle girmekten kotudur. */
+  function quickCommand(){
+    const t = query.trim();
+    if(t.length < 3) return null;
+    let p;
+    try{ p = SP.Quick.parse(t); }catch(e){ p = null; }
+    if(!p) return null;
+    return {
+      id:'quick:' + p.kind,
+      kind:'Hızlı giriş',
+      label:p.label,
+      hint:p.hint,
+      quick:p,
+      run:() => confirmQuick(p),
+    };
+  }
+
+  /* Onizleme: ne anlasildigi, nereye yazilacagi ve hangi kesinlikle. */
+  function confirmQuick(p){
+    const K = SP.C;
+    const { html, map, when } = SP.h;
+    const hedef = { vital:'Günlük ölçüm', move:'Antrenman kaydı',
+      lab:'Tahlil oturumu', meal:'Öğün' }[p.kind];
+
+    const satirlar = p.kind === 'lab'
+      ? p.data.rows.map(r => [r.marker.name, U.fmtNum(r.value) + ' ' + r.marker.unit, 'ölçüldü'])
+      : p.kind === 'meal'
+        ? p.data.items.map(i => [i.food.name, U.fmtNum(i.grams) + ' g',
+            i.cert === 'measured' ? 'ölçüldü' : 'tahmin'])
+        : p.kind === 'vital'
+          ? [[p.data.field.label, U.fmtNum(p.data.value) + ' ' + p.data.field.unit, 'ölçüldü']]
+          : [[p.data.exercise ? p.data.exercise.name : 'Serbest seans',
+              p.data.minutes + ' dk', 'ölçüldü']];
+
+    SP.UI.sheet({
+      title:'Bunu mu demek istedin?', subtitle:hedef, wide:true,
+      body:String(SP.C.Stack([
+        K.Table({ tight:true, headers:['Ne', 'Değer', 'Kesinlik'], rows:satirlar }),
+        when(p.kind === 'meal' && p.data.unmatched && p.data.unmatched.length,
+          () => K.Notice({ tone:'warn', title:'Eşleşmeyen:',
+            body:p.data.unmatched.join(', ') + ' — bunlar kaydedilmeyecek. '
+              + 'Eşleşmeyen satır atılmaz, söylenir.' })),
+        K.Field({ label:'Tarih',
+          input:K.Input({ id:'qe-date', type:'date', value:U.todayISO() }) }),
+        K.Notice({ tone:'info',
+          body:'Bu satır yorumlandı, kaydedilmedi. Onaylayınca yazılır ve '
+            + 'düzeltmek için ilgili bölüme gidebilirsin.' }),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'quick-save' })}`),
+    });
+    pendingQuick = p;
+  }
+
+  let pendingQuick = null;
+
+  async function saveQuick(){
+    if(!pendingQuick) return;
+    const el = document.getElementById('qe-date');
+    const r = await SP.Quick.apply(pendingQuick, { date:(el && el.value) || U.todayISO() });
+    pendingQuick = null;
+    SP.UI.closeSheet();
+    SP.UI.toast(r.text);
+    if(r.route) SP.App.go(r.route); else SP.App.render();
   }
 
   function filtered(){
     const q = U.norm(query);
     const all = commands();
+    const hizli = quickCommand();
     if(!q) return all.slice(0, 30);
-    return all.filter(c => U.norm(c.label + ' ' + c.kind + ' ' + (c.hint || '')).indexOf(q) >= 0)
+    const liste = all.filter(c => U.norm(c.label + ' ' + c.kind + ' ' + (c.hint || '')).indexOf(q) >= 0)
       .slice(0, 30);
+    /* Hızlı giriş her zaman EN ÜSTTE: Enter'a basan onu bekler. */
+    return hizli ? [hizli].concat(liste) : liste;
   }
 
   function draw(){
@@ -83,7 +159,7 @@ SP.Palette = (function(){
     index = Math.max(0, Math.min(index, rows.length - 1));
 
     el.innerHTML = '<div class="cmdk__box" role="dialog" aria-modal="true" aria-label="Komut paleti">'
-      + '<input class="cmdk__input" id="cmdk-input" placeholder="Ara: ferritin, öğün, toplantı…" '
+      + '<input class="cmdk__input" id="cmdk-input" placeholder="Ara ya da yaz: ferritin 26 · 45 dk yürüyüş · uyku 7,2" '
       + 'value="' + U.esc(query) + '" aria-label="Komut ara"/>'
       + '<div class="cmdk__list" role="listbox">'
       + (rows.length ? rows.map((c, i) =>
@@ -96,7 +172,8 @@ SP.Palette = (function(){
           + '<span class="cmdk__hintrow">' + U.esc(c.hint || '') + '</span></button>').join('')
         : '<p class="cmdk__empty">Eşleşen komut yok.</p>')
       + '</div>'
-      + '<div class="cmdk__foot"><span>↑↓ gez · Enter aç · Esc kapat</span></div>'
+      + '<div class="cmdk__foot"><span>↑↓ gez · Enter aç · Esc kapat</span>'
+      + '<span class="cmdk__tip">Veri de yazabilirsin: «ferritin 26»</span></div>'
       + '</div>';
 
     const input = document.getElementById('cmdk-input');
@@ -148,11 +225,15 @@ SP.Palette = (function(){
         ['Esc', 'Sırayla: palet → ipucu → alt sayfa → kenar çubuğu'],
         ['↑ ↓', 'Palette gez'],
         ['Enter', 'Seçili komutu çalıştır'],
+        ['j / k', 'Listede satır satır gez'],
+        ['Enter', 'Odaktaki satırı aç'],
+        ['ferritin 26', 'Palete veri de yazabilirsin'],
       ] })),
       footer:String(SP.C.Button({ label:'Kapat', act:'sheet-close' })),
       noFocus:true,
     });
   }
 
-  return { open:openPalette, close, isOpen, runById, showShortcuts, commands };
+  return { open:openPalette, close, isOpen, runById, showShortcuts, commands,
+    quickCommand, saveQuick };
 })();

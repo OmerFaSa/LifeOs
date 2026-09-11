@@ -720,6 +720,7 @@ SP.App = (function(){
       render();
     },
     async 'cmdk-run'(el){ SP.Palette.runById(el.dataset.id); },
+    async 'quick-save'(){ await SP.Palette.saveQuick(); },
     async 'sheet-close'(){ UI.closeSheet(); },
     async reload(){ location.reload(); },
     /* Sert yenileme: adrese bir kerelik damga eklenir, böylece tarayıcı
@@ -855,9 +856,47 @@ SP.App = (function(){
     if(typingInField(e) || SP.Palette.isOpen() || UI.isSheetOpen()) return;
     if(e.key === '?'){ e.preventDefault(); SP.Palette.showShortcuts(); return; }
 
+    /* LİSTEDE KLAVYE GEZİNME. `j`/`k` ile satır satır, Enter ile aç.
+       Masaüstünde toplu giriş için: on beş ölçümü tek tek açmak on beş
+       kez fareye uzanmak demekti.
+
+       Gezilebilir satır ekrana ait değildir, ORTAKTIR: `[data-act]`
+       taşıyan ve listede duran her düğme. Böylece her ekran ayrıca
+       yazmak zorunda kalmaz. */
+    if(e.key === 'j' || e.key === 'k' || e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+      const asagi = e.key === 'j' || e.key === 'ArrowDown';
+      if(moveRowFocus(asagi ? 1 : -1)){ e.preventDefault(); return; }
+    }
+    if(e.key === 'Enter'){
+      const el = document.activeElement;
+      if(el && el.matches && el.matches(ROW_SELECTOR)){ e.preventDefault(); el.click(); return; }
+    }
+
     const sc = screen();
     if(sc.onKey) sc.onKey(e);
   });
+
+  /* Gezilebilir satırlar: sonuç listesi, karşılaştırma, geçmiş, öğün ve
+     hareket listeleri. Hepsi düğme olduğu için odaklanabilirler. */
+  const ROW_SELECTOR = '.reslist .resrow, .reslist .cmprow, .list .listitem[data-act],'
+    + ' .medlist .medrow [data-act="edit-med"], .ledger [data-act="open-marker"],'
+    + ' [data-act="open-lab"], [data-act="open-day"]';
+
+  function moveRowFocus(delta){
+    const rows = Array.from(document.querySelectorAll(ROW_SELECTOR))
+      .filter(el => el.offsetParent !== null);
+    if(!rows.length) return false;
+    const simdi = rows.indexOf(document.activeElement);
+    /* Hiçbiri odakta değilse aşağı ilk satıra, yukarı sonuncuya gider. */
+    const hedef = simdi < 0
+      ? (delta > 0 ? 0 : rows.length - 1)
+      : Math.max(0, Math.min(rows.length - 1, simdi + delta));
+    const el = rows[hedef];
+    if(!el) return false;
+    el.focus({ preventScroll:true });
+    el.scrollIntoView({ block:'nearest', behavior:'auto' });
+    return true;
+  }
 
   /* ---------------------------------------------------------- sürükle-bırak
 

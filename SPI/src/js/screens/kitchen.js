@@ -130,15 +130,157 @@ SP.Screens.kitchen = (function(){
     });
   }
 
+  /* ==================================================== kendi gıdaların
+
+     79 gıdalık tablo Türk mutfağını kapsıyor ama MARKET RAFINI
+     kapsamıyor. Etiket okuma, kullanıcının kendi listesini büyütmesinin
+     tek pratik yolu — ve kesinliği «ölçüldü»dür, çünkü üretici beyanı
+     ambalajda yazılı. Yemek fotoğrafından gelen gramaj tahmindir;
+     etiketten gelen besin değeri değildir.
+
+     Eklenen gıda `SP.FOODS` listesine katılır: ayrıştırıcı, sepet ve
+     öğün hesabı hiçbir şey bilmeden onu da görür. */
+
+  function customCard(){
+    const liste = (S.foods || []);
+    return K.Card({
+      title:'Kendi gıdaların', sub:liste.length + ' kayıt',
+      body:html`
+        <p class="small muted">Sistemin tablosunda olmayan bir ürünü ekle:
+          ambalajın besin değerleri tablosunu fotoğrafla ya da değerleri elle yaz.
+          Eklenen gıda öğün girişinde, sepette ve hesaplarda görünür.</p>
+        ${when(!liste.length, () => P.empty('Henüz kendi gıdan yok.'))}
+        ${when(liste.length, () => html`<div class="list mt-10">${map(liste, f => html`
+          <div class="listitem">
+            <div class="grow minw0">
+              <b class="small">${f.name}</b>
+              <div class="tiny dim">100 g · ${U.fmtNum(f.kcal)} kcal ·
+                P ${U.fmtNum(f.p)} · Y ${U.fmtNum(f.f)} · K ${U.fmtNum(f.c)}</div>
+            </div>
+            ${K.Button({ label:'Düzelt', size:'sm', act:'edit-food',
+              data:{ 'data-id':f.id } })}
+            ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
+              act:'del-food', data:{ 'data-id':f.id } })}
+          </div>`)}</div>`)}`,
+      foot:html`${K.Button({ label:'Etiketten oku', icon:'camera', tone:'primary',
+          act:'open-label' })}
+        ${K.Button({ label:'Elle ekle', act:'add-food' })}`,
+    });
+  }
+
+  function foodSheetBody(rec, okundu){
+    const alan = (id, label, hint) => K.Field({ label, hint,
+      input:K.Input({ id:'fd-' + id, type:'number', numeric:true, step:'any',
+        value:rec[id] == null ? '' : rec[id] }) });
+    return String(K.Stack([
+      when(okundu, () => K.Notice({ tone:okundu.ok ? 'ok' : 'warn',
+        title:okundu.ok ? 'Etiket okundu:' : 'Eksik alan var:', body:okundu.note })),
+      K.Field({ label:'Ad', input:K.Input({ id:'fd-name', value:rec.name,
+        placeholder:'Ürünün adı' }) }),
+      html`<p class="small muted">Bütün değerler <b>100 gram</b> içindir.</p>`,
+      html`<div class="grid-form">
+        ${alan('kcal', 'Kalori (kcal)')}
+        ${alan('p', 'Protein (g)')}
+        ${alan('f', 'Yağ (g)')}
+        ${alan('sat', 'Doymuş yağ (g)', 'isteğe bağlı')}
+        ${alan('c', 'Karbonhidrat (g)')}
+        ${alan('sugar', 'Şeker (g)', 'isteğe bağlı')}
+        ${alan('fib', 'Lif (g)', 'isteğe bağlı')}
+      </div>`,
+      K.Notice({ tone:'info',
+        body:'Boş bıraktığın alan sıfır sayılmaz; o besin öğesi bu gıda için '
+          + 'hesaba hiç girmez. Kalori, protein, yağ ve karbonhidrat zorunludur.' }),
+    ]));
+  }
+
   async function render(){
     return String(html`
-      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), dishInfoCard()])}
+      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), customCard(), dishInfoCard()])}
       <div class="mt-24">${raw(UI.rail(['household', 'portion', 'profiles']))}</div>`);
   }
 
-  const handle = {};
+  /* Alt sayfadaki gıda taslağı — kaydedilene kadar depoya hiçbir şey yazılmaz. */
+  let foodDraft = null;
+  let labelFile = null;
+
+  function openFoodSheet(rec, okundu){
+    foodDraft = rec;
+    UI.sheet({ title:rec.name || 'Yeni gıda', subtitle:'100 gram için', wide:true,
+      body:foodSheetBody(rec, okundu),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'save-food' })}`) });
+  }
+
+  const handle = {
+    async 'add-food'(){ openFoodSheet(M.newFood(), null); },
+
+    async 'edit-food'(el){
+      const f = (S.foods || []).find(x => x.id === el.dataset.id);
+      if(!f) return;
+      openFoodSheet(JSON.parse(JSON.stringify(f)), null);
+    },
+
+    async 'open-label'(){
+      labelFile = null;
+      UI.sheet({ title:'Besin etiketi', subtitle:'ambalajın tablosunu fotoğrafla',
+        wide:true,
+        body:String(K.Stack([
+          K.Drop({ act:'label-file', label:'Etiket fotoğrafı', icon:'camera',
+            accept:'image/*' }),
+          html`<div id="label-name" class="small dim"></div>`,
+          K.Notice({ tone:'info',
+            body:'Tablodaki değerler okunur ve sana gösterilir; onaylamadan '
+              + 'hiçbir şey kaydedilmez. Etikette olmayan bir alan uydurulmaz, '
+              + 'boş bırakılır.' }),
+        ])),
+        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+          ${K.Button({ label:'Oku', tone:'primary', act:'run-label' })}`) });
+    },
+
+    async 'run-label'(){
+      if(!labelFile){ UI.toast('Önce bir fotoğraf seç'); return; }
+      const r = await UI.withBusy('Etiket okunuyor',
+        'değerler «ölçüldü» sayılacak: üretici beyanı',
+        () => SP.Extract.fromFoodLabel(labelFile));
+      if(!r.food){ UI.toast(r.note); return; }
+      const rec = M.newFood();
+      Object.keys(r.food).forEach(k => { if(r.food[k] != null) rec[k] = r.food[k]; });
+      openFoodSheet(rec, r);
+    },
+
+    async 'save-food'(){
+      const v = id => { const e = document.getElementById('fd-' + id); return e ? e.value.trim() : ''; };
+      const n = x => x === '' ? null : Number(String(x).replace(',', '.'));
+      const rec = foodDraft || M.newFood();
+      rec.name = v('name');
+      ['kcal', 'p', 'f', 'sat', 'c', 'sugar', 'fib'].forEach(k => { rec[k] = n(v(k)); });
+      if(!rec.name){ UI.toast('Ad gerekli'); return; }
+      const eksik = ['kcal', 'p', 'f', 'c'].filter(k => rec[k] == null);
+      if(eksik.length){ UI.toast('Kalori, protein, yağ ve karbonhidrat zorunlu'); return; }
+      await M.saveFood(rec);
+      foodDraft = null;
+      UI.closeSheet();
+      UI.toast(rec.name + ' eklendi — öğün girişinde de görünür');
+      SP.App.render();
+    },
+
+    async 'del-food'(el){
+      const f = (S.foods || []).find(x => x.id === el.dataset.id);
+      if(!f) return;
+      const kopya = JSON.parse(JSON.stringify(f));
+      await M.deleteFood(f.id);
+      S.ui.undo = { restore:() => M.saveFood(kopya) };
+      UI.toast(kopya.name + ' silindi', { undo:true });
+      SP.App.render();
+    },
+  };
 
   const change = {
+    async 'label-file'(el){
+      labelFile = (el.files && el.files[0]) || null;
+      const g = document.getElementById('label-name');
+      if(g) g.textContent = labelFile ? labelFile.name : '';
+    },
     async 'pick-dish'(el){ S.ui.kitchenDish = el.value; SP.App.render(); },
     async 'set-grams'(el){
       const v = Number(el.value);

@@ -310,6 +310,114 @@
     });
   });
 
+  describe('Dalga 2 — sabitleme ve kendi gıdaların', () => {
+    it('sabitlenen ölçüm profile yazılır ve geri alınır', async () => {
+      resetState();
+      SP.S.profile = SP.Model.defaultProfile();
+      expect(SP.Model.isPinned('ferritin')).toBe(false);
+      await SP.Model.togglePin('ferritin');
+      expect(SP.Model.isPinned('ferritin')).toBe(true);
+      await SP.Model.togglePin('ferritin');
+      expect(SP.Model.isPinned('ferritin')).toBe(false);
+    });
+
+    /* Sinir bilinclidir: bestien fazlasi «sabitleme» olmaktan cikar. */
+    it('sabitleme sayısı sınırlıdır', async () => {
+      resetState();
+      SP.S.profile = SP.Model.defaultProfile();
+      const ids = ['ferritin', 'hgb', 'hdl', 'ldl', 'tsh', 'crp'];
+      for(const id of ids.slice(0, SP.Model.PIN_MAX)) await SP.Model.togglePin(id);
+      const r = await SP.Model.togglePin(ids[SP.Model.PIN_MAX]);
+      expect(r.ok).toBe(false);
+      expect(r.full).toBe(true);
+    });
+
+    it('olmayan ölçüm sabitlenmez', async () => {
+      resetState();
+      SP.S.profile = SP.Model.defaultProfile();
+      const r = await SP.Model.togglePin('yokboyle');
+      expect(r.ok).toBe(false);
+    });
+
+    /* Kullanicinin ekledigi gida ayristiriciya da gorunmeli: yoksa
+       «kendi gidan» yalnizca bir liste olur, sisteme katilmaz. */
+    it('eklenen gıda ayrıştırıcıda da bulunur', async () => {
+      resetState();
+      const f = SP.Model.newFood();
+      f.name = 'Zeytinyağlı Pirinç Patlağı';
+      f.kcal = 380; f.p = 7; f.f = 3; f.c = 80;
+      await SP.Model.saveFood(f);
+      expect(SP.FOOD_BY_ID[f.id]).toBeTruthy();
+      const r = SP.Parse.parseMeal('100 g zeytinyağlı pirinç patlağı');
+      expect(r.items.length > 0).toBeTruthy();
+      expect(r.items[0].food.id).toBe(f.id);
+      await SP.Model.deleteFood(f.id);
+      expect(SP.FOOD_BY_ID[f.id]).toBeUndefined();
+    });
+
+    it('kullanıcı gıdasının kimliği yerleşik gıdayı ezemez', () => {
+      const f = SP.Model.newFood();
+      expect(f.id.indexOf('u-')).toBe(0);
+      expect(SP.FOODS.filter(x => !x.custom).some(x => x.id === f.id)).toBe(false);
+    });
+  });
+
+  describe('Hızlı giriş — komut paletinden veri', () => {
+    it('ölçüm satırı tahlile gider', () => {
+      const p = SP.Quick.parse('ferritin 26');
+      expect(p.kind).toBe('lab');
+      expect(p.data.rows[0].marker.id).toBe('ferritin');
+      expect(p.data.rows[0].value).toBe(26);
+    });
+
+    it('süre içeren satır antrenmana gider', () => {
+      const p = SP.Quick.parse('45 dk yürüyüş');
+      expect(p.kind).toBe('move');
+      expect(p.data.minutes).toBe(45);
+    });
+
+    it('saat dakikaya çevrilir', () => {
+      expect(SP.Quick.parse('1 saat koşu').data.minutes).toBe(60);
+    });
+
+    it('günlük ölçüm alanı tahlilden önce denenir', () => {
+      const p = SP.Quick.parse('uyku 7,2');
+      expect(p.kind).toBe('vital');
+      expect(p.data.field.id).toBe('sleep');
+      expect(p.data.value).toBe(7.2);
+    });
+
+    it('öğün satırı öğüne gider', () => {
+      const p = SP.Quick.parse('2 yumurta');
+      expect(p.kind).toBe('meal');
+      expect(p.data.items.length > 0).toBeTruthy();
+    });
+
+    /* Anlasilmayan satir uydurulmaz: yaklasik bir eslesme «buldum» diye
+       sunulmaz. */
+    it('anlaşılmayan satır null döner', () => {
+      expect(SP.Quick.parse('bugün hava çok güzel')).toBe(null);
+      expect(SP.Quick.parse('a')).toBe(null);
+    });
+
+    /* Aralik disi bir deger kabul edilmez: «uyku 900» bir yazim
+       hatasidir, olcum degil. */
+    it('makul aralığın dışındaki günlük değer kabul edilmez', () => {
+      const p = SP.Quick.parse('uyku 900');
+      expect(!p || p.kind !== 'vital').toBeTruthy();
+    });
+
+    it('kelime sınırına saygı duyar', () => {
+      /* «su» ararken «sut» eşleşmemeli. */
+      const p = SP.Quick.parse('sut 200');
+      expect(!p || p.kind !== 'vital' || p.data.field.id !== 'water').toBeTruthy();
+    });
+
+    it('palet hızlı girişi en üste koyar', () => {
+      expect(typeof SP.Palette.quickCommand).toBe('function');
+    });
+  });
+
   describe('Testler — karşılaştırma ve hekim çıktısı', () => {
     async function ikiOturum(){
       resetState();

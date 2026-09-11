@@ -321,11 +321,106 @@ SP.Extract = (function(){
     return { rows:[], unmatched:[], note, date:U.todayISO(), lab:'' };
   }
 
+  /* ============================================ besin etiketi fotografi
+
+     79 gidalik tablo Turk mutfagini kapsiyor ama MARKET RAFINI
+     kapsamiyor. Etiket okuma, kullanicinin kendi listesini buyutmesinin
+     tek pratik yolu.
+
+     Kesinlik burada `olculdu`dur ve bu dogrudur: uretici beyani
+     ambalajda YAZILI. Yemek fotografindan gelen gramaj tahmindir,
+     etiketten gelen besin degeri degildir.
+
+     Model yalniz OKUR. Etikette olmayan bir alan uydurulmaz: `null`
+     doner ve o alan bos kalir — sifir yazilmaz. */
+
+  function labelPrompt(){
+    return 'Bu bir gida ambalajinin BESIN DEGERLERI TABLOSU fotografi. '
+      + 'Tablodaki degerleri oku ve JSON dondur. Yalniz JSON, baska hicbir sey.\n\n'
+      + 'Bicim:\n'
+      + '{"name":"urun adi","per":100,'
+      + '"kcal":0,"protein":0,"fat":0,"satfat":0,"carb":0,"sugar":0,"fiber":0,'
+      + '"sodium":null,"calcium":null,"iron":null}\n\n'
+      + 'KURALLAR:\n'
+      + '- "per" tabloda hangi miktar icin verildigini soyler (cogu zaman 100).\n'
+      + '- Tabloda OLMAYAN bir alani UYDURMA: null yaz.\n'
+      + '- Sodyum mg cinsinden. Tuz (g) yaziyorsa sodyum = tuz * 400 (mg).\n'
+      + '- Urun adini ambalajin onundeki addan al; yoksa null.';
+  }
+
+  function labelNum(x){
+    if(x == null) return null;
+    const n = Number(String(x).replace(',', '.'));
+    return isFinite(n) && n >= 0 ? n : null;
+  }
+
+  async function fromFoodLabel(file){
+    const bos = { ok:false, food:null, missing:[], note:'' };
+    if(!file) return Object.assign({}, bos, { note:'Fotoğraf seçilmedi.' });
+    if(file.size > MAX_BYTES)
+      return Object.assign({}, bos, { note:'Fotoğraf çok büyük (en fazla 8 MB).' });
+    if(!isImage(file))
+      return Object.assign({}, bos, { note:'Bu bir görüntü dosyası değil.' });
+    if(!modelReady())
+      return Object.assign({}, bos, {
+        note:'Etiket okumak için bir model bağlaman gerekiyor. Gıdayı elle de '
+          + 'ekleyebilirsin — besin değerlerini ambalajdan yazman yeterli.' });
+
+    const parts = splitDataUrl(await readDataUrl(file));
+    if(!parts) return Object.assign({}, bos, { note:'Fotoğraf okunamadı.' });
+
+    let out;
+    try{
+      out = await send({
+        system:'Sen bir besin degerleri tablosu okuyucususun. Yalniz JSON dondurursun.',
+        messages:[{ role:'user', text:labelPrompt(), images:[parts] }],
+      });
+    }catch(e){
+      return Object.assign({}, bos, {
+        note:'Model yanıt vermedi: ' + (e && e.message ? e.message : 'bilinmeyen hata') });
+    }
+
+    const j = parseJson(out && out.text);
+    const d = Array.isArray(j) ? j[0] : j;
+    if(!d || typeof d !== 'object')
+      return Object.assign({}, bos, { note:'Etikette okunabilir bir tablo bulunamadı.' });
+
+    /* Oranlama: tablo 100 g icin degilse 100'e cevrilir. */
+    const per = labelNum(d.per) || 100;
+    const k = per > 0 ? 100 / per : 1;
+    const o = v => { const n = labelNum(v); return n == null ? null : Math.round(n * k * 100) / 100; };
+
+    const gida = {
+      name:String(d.name || '').trim(),
+      kcal:o(d.kcal), p:o(d.protein), f:o(d.fat), sat:o(d.satfat),
+      c:o(d.carb), sugar:o(d.sugar), fib:o(d.fiber),
+      micro:{},
+    };
+    [['sodium', 'sodium'], ['calcium', 'calcium'], ['iron', 'iron']].forEach(pair => {
+      const v = o(d[pair[0]]);
+      if(v != null) gida.micro[pair[1]] = v;
+    });
+
+    /* Kalori, protein, yag ve karbonhidrat olmadan bir gida kaydi
+       hesaba giremez: eksik alan SIFIR SAYILMAZ, eksik yazilir. */
+    const eksik = [];
+    ['kcal', 'p', 'f', 'c'].forEach(a => { if(gida[a] == null) eksik.push(a); });
+
+    return {
+      ok:eksik.length === 0,
+      food:gida,
+      missing:eksik,
+      note:eksik.length
+        ? 'Etiketten okunamayan zorunlu alan var; elle tamamlaman gerekiyor.'
+        : 'Etiket okundu. Değerler «ölçüldü» sayılır: üretici beyanı ambalajda yazılı.',
+    };
+  }
+
   return {
     supported:modelReady, modelReady,
     isImage, isPdf, isText,
     readText, readDataUrl,
-    fromLabFile, fromMealPhoto, fromReceipt,
+    fromLabFile, fromMealPhoto, fromReceipt, fromFoodLabel,
     parseJson, send, MAX_BYTES,
   };
 })();

@@ -174,16 +174,25 @@ SP.Parse = (function(){
     'bes':5, 'beş':5, 'alti':6, 'altı':6, 'yedi':7, 'sekiz':8, 'dokuz':9, 'on':10,
   };
 
-  const FOOD_ALIAS = (function(){
+  /* Gida takma adlari ACILISTA kurulur ama SABIT DEGILDIR: kullanici
+     kendi gidasini ekleyince tablo yeniden kurulur, yoksa yeni gida
+     ayristiriciya gorunmez olurdu. */
+  let FOOD_ALIAS = [];
+  let PORTION_ALIAS = [];
+
+  function buildFoodAlias(){
     const rows = [];
     SP.FOODS.forEach(f => {
       const names = [f.name].concat(f.aliases || []);
-      names.forEach(n => rows.push({ id:f.id, alias:U.norm(n), len:U.norm(n).length }));
+      names.forEach(n => {
+        const a = U.norm(n);
+        if(a) rows.push({ id:f.id, alias:a, len:a.length });
+      });
     });
     return rows.sort((a, b) => b.len - a.len);
-  })();
+  }
 
-  const PORTION_ALIAS = (function(){
+  function buildPortionAlias(){
     /* Butun gidalarin ev olculeri tek tabloda; "tabak", "kase", "dilim" gibi
        sozcukler gidaya gore farkli gram tasir. */
     const rows = [];
@@ -195,7 +204,14 @@ SP.Parse = (function(){
       });
     });
     return rows;
-  })();
+  }
+
+  /* Kullanici bir gida ekleyince cagrilir: tablolar yeniden kurulur. */
+  function rebuildFoodIndex(){
+    FOOD_ALIAS = buildFoodAlias();
+    PORTION_ALIAS = buildPortionAlias();
+  }
+  rebuildFoodIndex();
 
   function matchFood(chunk){
     const n = U.norm(chunk);
@@ -300,5 +316,6 @@ SP.Parse = (function(){
   }
 
   return { num, parseLab, parseMeal, matchMarker, matchFood, matchPortion,
-    convert, toLabRecord, ALIAS_INDEX, FOOD_ALIAS, WORD_NUM };
+    convert, toLabRecord, ALIAS_INDEX, WORD_NUM, rebuildFoodIndex,
+    get FOOD_ALIAS(){ return FOOD_ALIAS; } };
 })();

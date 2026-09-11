@@ -1392,7 +1392,8 @@ table td, table th{
   font-size:var(--fs-sm); line-height:1.6; color:var(--text-2);
   max-width:34ch;
 }
-.lrow__act{ margin-top:16px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.lrow__act{ margin-top:16px; display:flex; flex-direction:column; align-items:flex-start;
+  gap:8px; min-width:0; max-width:100%; }
 .lrow__act .btn{ width:100%; justify-content:center; }
 
 /* Defter satırının içeriği KENDİ kutusunun enini bilir.
@@ -2982,7 +2983,7 @@ button.minrow:hover{ background:var(--surface-2); }
 .resrow{
   width:100%;
   display:grid;
-  grid-template-columns:3px minmax(150px,1.4fr) 128px minmax(110px,1fr) 104px 78px;
+  grid-template-columns:3px minmax(150px,1.4fr) 128px minmax(110px,1fr) 14px 104px 78px;
   align-items:center; gap:16px;
   padding:14px 10px 14px 0;
   border:none; border-bottom:1px solid var(--border);
@@ -3006,6 +3007,14 @@ button.minrow:hover{ background:var(--surface-2); }
 }
 .resrow__val small{ font-size:11.5px; font-weight:500; color:var(--text-3); margin-left:4px; }
 .resrow__bar{ min-width:0; }
+/* Sabitlenen ölçümün işareti: bölüm renginde küçük bir nokta. Rozet
+   değil — rozet bir durum söyler, bu bir TERCİH söyler. */
+.resrow__pin{ justify-self:center; width:14px; }
+.resrow__pinned{ color:var(--sec); font-size:9px; line-height:1; }
+.resrow__ilac{
+  margin-left:6px; font-size:12px; color:var(--text-3);
+  font-family:var(--font-serif);
+}
 .resrow__status{ justify-self:start; }
 /* Listede rozetler yan yana on beş kez tekrarlanır; orada çerçeveli ve
    ikonlu bir rozet gürültü üretir. Satır içindeki rozet düz metne iner. */
@@ -3024,6 +3033,7 @@ button.minrow:hover{ background:var(--surface-2); }
 @media (max-width:900px){
   .resrow{ grid-template-columns:6px minmax(0,1fr) auto; row-gap:6px; }
   .resrow__bar{ grid-column:2 / -1; }
+  .resrow__pin{ display:none; }
   .resrow__status{ grid-column:2; }
   .resrow__trend{ grid-column:3; }
 }
@@ -3086,6 +3096,7 @@ button.minrow:hover{ background:var(--surface-2); }
 @container satir (max-width:700px){
   .resrow{ grid-template-columns:6px minmax(0,1fr) auto; row-gap:6px; }
   .resrow__bar{ grid-column:2 / -1; }
+  .resrow__pin{ display:none; }
   .resrow__status{ grid-column:2; }
   .resrow__trend{ grid-column:3; }
 }
@@ -3566,6 +3577,52 @@ body.is-dragging .drop.is-over{
   .setup__rule{ grid-template-columns:minmax(0,1fr); gap:3px; }
   .setup__form{ grid-template-columns:minmax(0,1fr); }
 }
+
+/* ================= gün şeridi =================
+
+   Günler arasında gezinmek için üç düğme vardı; on gün geriye gitmek
+   on tıklamaydı. Şerit son on dört günü gösterir ve her günün altındaki
+   nokta o gün veri girilip girilmediğini söyler: «hangi günler eksik»
+   sorusu tıklamadan cevaplanır. */
+/* Şerit kendi kabına sığar ve içinde kayar. `min-width:0` olmadan esnek
+   bir kapta 14 düğme kabı GENİŞLETİYOR ve sayfayı yatay kaydırıyordu:
+   kaydırılabilir olması, taşmasını engellemez. */
+.daynav{ display:flex; flex-direction:column; gap:8px; align-items:flex-start;
+  min-width:0; max-width:100%; }
+.daynav__strip{
+  display:flex; gap:2px; min-width:0; max-width:100%;
+  overflow-x:auto; scrollbar-width:none;
+  padding:2px; border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface-2);
+}
+.daynav__strip::-webkit-scrollbar{ display:none; }
+.daybtn{
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  min-width:28px; padding:5px 3px 4px;
+  border:none; background:none; border-radius:5px;
+  color:var(--text-3);
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.daybtn:hover{ background:var(--surface); color:var(--text-2); }
+.daybtn__d{
+  font-family:var(--font-display); font-size:11.5px; font-weight:600;
+  font-variant-numeric:tabular-nums; line-height:1;
+}
+.daybtn__dot{
+  width:4px; height:4px; border-radius:50%;
+  background:transparent; border:1px solid var(--border-strong);
+}
+.daybtn__dot.is-full{ background:var(--primary); border-color:var(--primary); }
+.daybtn.is-today .daybtn__d{ color:var(--text); }
+.daybtn.is-on{ background:var(--surface); color:var(--text); box-shadow:0 1px 2px rgba(16,18,27,.08); }
+.daybtn.is-on .daybtn__d{ font-weight:700; }
+
+/* ---------- satır içi düzeltme ----------
+   Bir sayıyı düzeltmek için alt sayfa açıp forma gidip aramak üç
+   dokunuştu. Değer ölçümün kendi sayfasında düzeltilir. */
+.inlineedit{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.inlineedit .input{ max-width:150px; }
+.inlineedit__u{ font-size:13px; color:var(--text-3); }
 
 /* ==== css/designs.css ==== */
 /* DÜZENLER — dört seçilebilir tasarım dili.
@@ -4153,7 +4210,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'86117b4', at:'2026-09-11 17:31', dirty:true };
+SP.BUILD = { id:'46bdd8a', at:'2026-09-11 17:49', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -7056,6 +7113,7 @@ SP.S = {
   meals:{},           // YYYY-MM-DD -> ogun dizisi
   workouts:[],        // antrenman kayitlari
   meds:[],            // ilac ve takviye kayitlari, en yeni ustte
+  foods:[],           // kullanicinin ekledigi gidalar (SP.FOODS'a katilir)
   progress:{},        // exId -> { levelId, achievedAt }
 
   basket:null,        // { items, weeklyLimit, monthlyLimit, testFee, equipment, updatedAt }
@@ -7168,6 +7226,9 @@ SP.Model = (function(){
       theme:'system',
       palette:SP.DEFAULT_PALETTE,
       design:SP.DEFAULT_DESIGN,
+      /* Sabitlenen ölçümler. 58 ölçümde her seferinde aynı üçünü
+         aramak sürtünmedir; sabitlenenler listenin başında durur. */
+      pinned:[],
       createdAt:new Date().toISOString(),
     };
   }
@@ -7277,6 +7338,93 @@ SP.Model = (function(){
       fasting:'unknown',      // yes | no | unknown
       time:'',                // 'HH:MM' — isteğe bağlı
       createdAt:new Date().toISOString() };
+  }
+
+  /* ------------------------------------------------------ kendi gıdaların
+
+     79 gıdalık tablo Türk mutfağını kapsıyor ama MARKET RAFINI
+     kapsamıyor. Kullanıcının eklediği gıdalar `SP.FOODS` listesine
+     KATILIR: ayrıştırıcı, sepet ve öğün hesabı hiçbir şey bilmeden
+     onları da görür.
+
+     Kimlik çakışması olmaz: kullanıcı gıdalarının kimliği `u-` ile
+     başlar ve yerleşik bir gıdayı ezemez. */
+
+  function newFood(){
+    return { id:'u-' + U.uid('f').slice(2), name:'', cat:'diger',
+      kcal:null, p:null, f:null, sat:null, c:null, sugar:null, fib:null,
+      micro:{}, flags:[], portions:[], aliases:[], custom:true,
+      createdAt:new Date().toISOString() };
+  }
+
+  function normFood(rec){
+    rec.name = String(rec.name || '').trim();
+    rec.micro = rec.micro || {};
+    rec.flags = rec.flags || [];
+    rec.portions = rec.portions || [];
+    /* Takma adlar aramayı besler: ad değişince onlar da tazelenir. */
+    const ad = U.norm(rec.name);
+    rec.aliases = [...new Set((rec.aliases || []).concat(ad ? [ad] : []))];
+    rec.custom = true;
+    return rec;
+  }
+
+  /* Yerleşik tabloya EKLEME: ekranlar ve ayrıştırıcı tek bir liste görür. */
+  function mountFoods(){
+    const kullanici = SP.S.foods || [];
+    const yerlesik = SP.FOODS.filter(f => !f.custom);
+    SP.FOODS.length = 0;
+    yerlesik.concat(kullanici).forEach(f => SP.FOODS.push(f));
+    SP.FOOD_BY_ID = SP.FOODS.reduce((acc, f) => { acc[f.id] = f; return acc; }, {});
+    if(SP.Parse && SP.Parse.rebuildFoodIndex) SP.Parse.rebuildFoodIndex();
+  }
+
+  async function saveFood(rec){
+    normFood(rec);
+    SP.S.foods = SP.S.foods || [];
+    const i = SP.S.foods.findIndex(f => f.id === rec.id);
+    if(i >= 0) SP.S.foods[i] = rec; else SP.S.foods.push(rec);
+    await SP.Store.set('foods/' + rec.id, rec);
+    mountFoods();
+    return rec;
+  }
+
+  async function deleteFood(id){
+    SP.S.foods = (SP.S.foods || []).filter(f => f.id !== id);
+    await SP.Store.remove('foods/' + id);
+    mountFoods();
+  }
+
+  /* --------------------------------------------------------- sabitleme
+
+     Önemsediğin ölçümler listenin başında dursun. Sınır bilinçlidir:
+     beşten fazlası «sabitleme» olmaktan çıkar, ikinci bir liste olur. */
+
+  const PIN_MAX = 5;
+
+  function pinnedIds(){
+    const p = SP.S.profile;
+    return ((p && p.pinned) || []).filter(id => SP.BIO_BY_ID[id]);
+  }
+
+  function isPinned(id){ return pinnedIds().indexOf(id) >= 0; }
+
+  async function togglePin(id){
+    if(!SP.BIO_BY_ID[id]) return { ok:false, note:'Böyle bir ölçüm yok.' };
+    const liste = pinnedIds();
+    const i = liste.indexOf(id);
+    if(i >= 0){
+      liste.splice(i, 1);
+      await saveProfile({ pinned:liste });
+      return { ok:true, pinned:false };
+    }
+    if(liste.length >= PIN_MAX){
+      return { ok:false, full:true,
+        note:'En fazla ' + PIN_MAX + ' ölçüm sabitlenebilir. Birini kaldır.' };
+    }
+    liste.push(id);
+    await saveProfile({ pinned:liste });
+    return { ok:true, pinned:true };
   }
 
   /* ------------------------------------------------------- ilaç ve takviye
@@ -7748,6 +7896,9 @@ SP.Model = (function(){
     S.workouts = ((await SP.Store.list('workouts')) || []).map(normWorkout)
       .sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
 
+    S.foods = ((await SP.Store.list('foods')) || []).map(normFood);
+    mountFoods();
+
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
 
@@ -7779,6 +7930,10 @@ SP.Model = (function(){
     newWorkout, saveWorkout, deleteWorkout, workoutsOf,
     /* ilac ve takviye */
     newMed, saveMed, deleteMed, stopMed,
+    /* sabitleme */
+    pinnedIds, isPinned, togglePin, PIN_MAX,
+    /* kendi gidalarin */
+    newFood, saveFood, deleteFood, mountFoods,
     currentLevel, levelIndex, advanceLevel, setLevel,
     /* ekonomi */
     defaultBasket, saveBasket, setBasketItem, setPrice,
@@ -10142,16 +10297,25 @@ SP.Parse = (function(){
     'bes':5, 'beş':5, 'alti':6, 'altı':6, 'yedi':7, 'sekiz':8, 'dokuz':9, 'on':10,
   };
 
-  const FOOD_ALIAS = (function(){
+  /* Gida takma adlari ACILISTA kurulur ama SABIT DEGILDIR: kullanici
+     kendi gidasini ekleyince tablo yeniden kurulur, yoksa yeni gida
+     ayristiriciya gorunmez olurdu. */
+  let FOOD_ALIAS = [];
+  let PORTION_ALIAS = [];
+
+  function buildFoodAlias(){
     const rows = [];
     SP.FOODS.forEach(f => {
       const names = [f.name].concat(f.aliases || []);
-      names.forEach(n => rows.push({ id:f.id, alias:U.norm(n), len:U.norm(n).length }));
+      names.forEach(n => {
+        const a = U.norm(n);
+        if(a) rows.push({ id:f.id, alias:a, len:a.length });
+      });
     });
     return rows.sort((a, b) => b.len - a.len);
-  })();
+  }
 
-  const PORTION_ALIAS = (function(){
+  function buildPortionAlias(){
     /* Butun gidalarin ev olculeri tek tabloda; "tabak", "kase", "dilim" gibi
        sozcukler gidaya gore farkli gram tasir. */
     const rows = [];
@@ -10163,7 +10327,14 @@ SP.Parse = (function(){
       });
     });
     return rows;
-  })();
+  }
+
+  /* Kullanici bir gida ekleyince cagrilir: tablolar yeniden kurulur. */
+  function rebuildFoodIndex(){
+    FOOD_ALIAS = buildFoodAlias();
+    PORTION_ALIAS = buildPortionAlias();
+  }
+  rebuildFoodIndex();
 
   function matchFood(chunk){
     const n = U.norm(chunk);
@@ -10268,7 +10439,8 @@ SP.Parse = (function(){
   }
 
   return { num, parseLab, parseMeal, matchMarker, matchFood, matchPortion,
-    convert, toLabRecord, ALIAS_INDEX, FOOD_ALIAS, WORD_NUM };
+    convert, toLabRecord, ALIAS_INDEX, WORD_NUM, rebuildFoodIndex,
+    get FOOD_ALIAS(){ return FOOD_ALIAS; } };
 })();
 
 /* ==== js/core/voice.js ==== */
@@ -10726,11 +10898,106 @@ SP.Extract = (function(){
     return { rows:[], unmatched:[], note, date:U.todayISO(), lab:'' };
   }
 
+  /* ============================================ besin etiketi fotografi
+
+     79 gidalik tablo Turk mutfagini kapsiyor ama MARKET RAFINI
+     kapsamiyor. Etiket okuma, kullanicinin kendi listesini buyutmesinin
+     tek pratik yolu.
+
+     Kesinlik burada `olculdu`dur ve bu dogrudur: uretici beyani
+     ambalajda YAZILI. Yemek fotografindan gelen gramaj tahmindir,
+     etiketten gelen besin degeri degildir.
+
+     Model yalniz OKUR. Etikette olmayan bir alan uydurulmaz: `null`
+     doner ve o alan bos kalir — sifir yazilmaz. */
+
+  function labelPrompt(){
+    return 'Bu bir gida ambalajinin BESIN DEGERLERI TABLOSU fotografi. '
+      + 'Tablodaki degerleri oku ve JSON dondur. Yalniz JSON, baska hicbir sey.\n\n'
+      + 'Bicim:\n'
+      + '{"name":"urun adi","per":100,'
+      + '"kcal":0,"protein":0,"fat":0,"satfat":0,"carb":0,"sugar":0,"fiber":0,'
+      + '"sodium":null,"calcium":null,"iron":null}\n\n'
+      + 'KURALLAR:\n'
+      + '- "per" tabloda hangi miktar icin verildigini soyler (cogu zaman 100).\n'
+      + '- Tabloda OLMAYAN bir alani UYDURMA: null yaz.\n'
+      + '- Sodyum mg cinsinden. Tuz (g) yaziyorsa sodyum = tuz * 400 (mg).\n'
+      + '- Urun adini ambalajin onundeki addan al; yoksa null.';
+  }
+
+  function labelNum(x){
+    if(x == null) return null;
+    const n = Number(String(x).replace(',', '.'));
+    return isFinite(n) && n >= 0 ? n : null;
+  }
+
+  async function fromFoodLabel(file){
+    const bos = { ok:false, food:null, missing:[], note:'' };
+    if(!file) return Object.assign({}, bos, { note:'Fotoğraf seçilmedi.' });
+    if(file.size > MAX_BYTES)
+      return Object.assign({}, bos, { note:'Fotoğraf çok büyük (en fazla 8 MB).' });
+    if(!isImage(file))
+      return Object.assign({}, bos, { note:'Bu bir görüntü dosyası değil.' });
+    if(!modelReady())
+      return Object.assign({}, bos, {
+        note:'Etiket okumak için bir model bağlaman gerekiyor. Gıdayı elle de '
+          + 'ekleyebilirsin — besin değerlerini ambalajdan yazman yeterli.' });
+
+    const parts = splitDataUrl(await readDataUrl(file));
+    if(!parts) return Object.assign({}, bos, { note:'Fotoğraf okunamadı.' });
+
+    let out;
+    try{
+      out = await send({
+        system:'Sen bir besin degerleri tablosu okuyucususun. Yalniz JSON dondurursun.',
+        messages:[{ role:'user', text:labelPrompt(), images:[parts] }],
+      });
+    }catch(e){
+      return Object.assign({}, bos, {
+        note:'Model yanıt vermedi: ' + (e && e.message ? e.message : 'bilinmeyen hata') });
+    }
+
+    const j = parseJson(out && out.text);
+    const d = Array.isArray(j) ? j[0] : j;
+    if(!d || typeof d !== 'object')
+      return Object.assign({}, bos, { note:'Etikette okunabilir bir tablo bulunamadı.' });
+
+    /* Oranlama: tablo 100 g icin degilse 100'e cevrilir. */
+    const per = labelNum(d.per) || 100;
+    const k = per > 0 ? 100 / per : 1;
+    const o = v => { const n = labelNum(v); return n == null ? null : Math.round(n * k * 100) / 100; };
+
+    const gida = {
+      name:String(d.name || '').trim(),
+      kcal:o(d.kcal), p:o(d.protein), f:o(d.fat), sat:o(d.satfat),
+      c:o(d.carb), sugar:o(d.sugar), fib:o(d.fiber),
+      micro:{},
+    };
+    [['sodium', 'sodium'], ['calcium', 'calcium'], ['iron', 'iron']].forEach(pair => {
+      const v = o(d[pair[0]]);
+      if(v != null) gida.micro[pair[1]] = v;
+    });
+
+    /* Kalori, protein, yag ve karbonhidrat olmadan bir gida kaydi
+       hesaba giremez: eksik alan SIFIR SAYILMAZ, eksik yazilir. */
+    const eksik = [];
+    ['kcal', 'p', 'f', 'c'].forEach(a => { if(gida[a] == null) eksik.push(a); });
+
+    return {
+      ok:eksik.length === 0,
+      food:gida,
+      missing:eksik,
+      note:eksik.length
+        ? 'Etiketten okunamayan zorunlu alan var; elle tamamlaman gerekiyor.'
+        : 'Etiket okundu. Değerler «ölçüldü» sayılır: üretici beyanı ambalajda yazılı.',
+    };
+  }
+
   return {
     supported:modelReady, modelReady,
     isImage, isPdf, isText,
     readText, readDataUrl,
-    fromLabFile, fromMealPhoto, fromReceipt,
+    fromLabFile, fromMealPhoto, fromReceipt, fromFoodLabel,
     parseJson, send, MAX_BYTES,
   };
 })();
@@ -13640,6 +13907,210 @@ SP.Office = (function(){
   };
 })();
 
+/* ==== js/core/quickentry.js ==== */
+/* HIZLI GIRIS — komut paletine yazilan tek satirin veriye donusmesi.
+
+   `ferritin 26`  ·  `45 dk yuruyus`  ·  `uyku 7,2`  ·  `2 yumurta 1 cay`
+
+   Bu modul YENI BIR AYRISTIRICI DEGILDIR. Sistemin zaten yazilmis
+   ayristiricilarini (parseLab, parseMeal) ve olcum sozlugunu kullanir;
+   tek isi bir satirin HANGI ayristiriciya gidecegine karar vermek.
+
+   Neden onemli: gunde bes kez birkac saniye, dokuz ay boyunca. Bir
+   olcumu girmek icin bolume gitmek, sekme secmek, alan bulmak ve
+   kaydetmek gerekiyordu. Simdi Ctrl+K ve bir satir.
+
+   ─────────────────────────────────────────────────────────────────
+
+   IKI DEGISMEZ:
+
+   1. HICBIR SEY DOGRUDAN KAYDEDILMEZ. Palet bir ONIZLEME dondurur;
+      kaydetme kullanicinin onayiyla olur. Yanlis anlasilmis bir satirin
+      sessizce depoya yazilmasi, elle girmekten kotudur.
+
+   2. ANLASILMAYAN SATIR UYDURULMAZ. Eslesme yoksa `null` doner ve palet
+      o satiri komut olarak gostermez. Yaklasik bir eslesme «buldum»
+      diye sunulmaz. */
+
+window.SP = window.SP || {};
+
+SP.Quick = (function(){
+  const U = SP.U;
+
+  /* Gunluk olcum alanlari — bunlar tahlil degil, gunun kaydidir ve
+     ayri bir yere yazilir. */
+  const VITAL_FIELDS = {
+    sleep:{ id:'sleep', label:'Uyku', unit:'saat', min:0, max:20,
+      aliases:['uyku', 'uyudum', 'sleep'] },
+    rhr:{ id:'rhr', label:'İstirahat nabzı', unit:'atım/dk', min:25, max:200,
+      aliases:['nabiz', 'istirahat nabzi', 'rhr'] },
+    hrv:{ id:'hrv', label:'HRV', unit:'ms', min:1, max:300,
+      aliases:['hrv', 'rmssd'] },
+    weight:{ id:'weight', label:'Kilo', unit:'kg', min:20, max:300,
+      aliases:['kilo', 'agirlik', 'weight'] },
+    water:{ id:'water', label:'Su', unit:'ml', min:0, max:10000,
+      aliases:['su', 'water'] },
+    mood:{ id:'mood', label:'Enerji', unit:'/5', min:1, max:5,
+      aliases:['enerji', 'mod', 'ruh hali'] },
+  };
+
+  /* Sure birimleri — «45 dk yuruyus» ve «1 saat kosu» ayni sey. */
+  const SURE_RE = /(\d+(?:[.,]\d+)?)\s*(dk|dakika|dakka|sa|saat|s)\b/i;
+
+  function sayi(x){
+    if(x == null) return null;
+    const n = Number(String(x).replace(',', '.'));
+    return isFinite(n) ? n : null;
+  }
+
+  /* ------------------------------------------------------------ gunluk */
+
+  function parseVital(text){
+    const n = U.norm(text);
+    for(const key of Object.keys(VITAL_FIELDS)){
+      const f = VITAL_FIELDS[key];
+      for(const a of f.aliases){
+        const at = n.indexOf(U.norm(a));
+        if(at < 0) continue;
+        /* Kelime siniri: «su» ararken «sut» eslesmemeli. */
+        const once = at === 0 ? ' ' : n[at - 1];
+        const sonra = n[at + a.length] || ' ';
+        if(/[a-z0-9]/.test(once) || /[a-z0-9]/.test(sonra)) continue;
+        const kuyruk = text.slice(Math.min(text.length, at + a.length));
+        const m = kuyruk.match(/(\d+(?:[.,]\d+)?)/);
+        if(!m) continue;
+        const v = sayi(m[1]);
+        if(v == null || v < f.min || v > f.max) continue;
+        return { field:f, value:v };
+      }
+    }
+    return null;
+  }
+
+  /* ------------------------------------------------------------ hareket */
+
+  function parseMove(text){
+    const m = String(text).match(SURE_RE);
+    if(!m) return null;
+    let dk = sayi(m[1]);
+    if(dk == null) return null;
+    if(/^s(a|aat)?$/i.test(m[2])) dk = dk * 60;
+    if(dk <= 0 || dk > 600) return null;
+
+    /* Hangi hareket? Ad gecmiyorsa serbest seans olur — sure yine de
+       kaydedilebilir ve yuk hesabina girer. */
+    const n = U.norm(text);
+    let ex = null;
+    (SP.EXERCISES || []).forEach(e => {
+      if(ex) return;
+      const ad = U.norm(e.name);
+      if(ad.length >= 3 && n.indexOf(ad) >= 0) ex = e;
+    });
+    return { minutes:Math.round(dk), exercise:ex };
+  }
+
+  /* ------------------------------------------------------------ tahlil */
+
+  function parseLabLine(text){
+    const r = SP.Parse.parseLab(text);
+    if(!r.rows.length) return null;
+    return { rows:r.rows };
+  }
+
+  /* ------------------------------------------------------------- ogun */
+
+  function parseMealLine(text){
+    const r = SP.Parse.parseMeal(text);
+    if(!r.items.length) return null;
+    return { items:r.items, unmatched:r.unmatched };
+  }
+
+  /* ============================================================ karar
+
+     Sira onemlidir: en OZGUL olan once denenir. «uyku 7,2» hem gunluk
+     alanidir hem de bir gidaya benzeyebilir; gunluk once bakilir.
+
+     «45 dk yuruyus» once hareket olarak denenir cunku icinde sure
+     birimi var; tahlil ve ogun ayristiricilari sure birimi tanimaz. */
+  function parse(text){
+    const t = String(text || '').trim();
+    if(t.length < 2) return null;
+
+    const v = parseVital(t);
+    if(v) return { kind:'vital', data:v, label:v.field.label + ' ' + U.fmtNum(v.value)
+      + ' ' + v.field.unit, hint:'Günlük ölçüm' };
+
+    const mv = parseMove(t);
+    if(mv) return { kind:'move', data:mv,
+      label:(mv.exercise ? mv.exercise.name : 'Serbest seans') + ' · ' + mv.minutes + ' dk',
+      hint:'Antrenman' };
+
+    const lb = parseLabLine(t);
+    if(lb) return { kind:'lab', data:lb,
+      label:lb.rows.map(r => r.marker.name + ' ' + U.fmtNum(r.value)).join(', '),
+      hint:lb.rows.length + ' ölçüm' };
+
+    const ml = parseMealLine(t);
+    if(ml) return { kind:'meal', data:ml,
+      label:ml.items.map(i => i.food.name).join(', '),
+      hint:ml.items.length + ' gıda' };
+
+    return null;
+  }
+
+  /* ========================================================== uygulama
+
+     Onaylanan bir onizlemeyi depoya yazar. Palet bunu DOGRUDAN
+     cagirmaz: once kullaniciya gosterir. */
+  async function apply(parsed, opts){
+    const o = opts || {};
+    const tarih = o.date || U.todayISO();
+
+    if(parsed.kind === 'vital'){
+      const patch = {};
+      patch[parsed.data.field.id] = parsed.data.value;
+      await SP.Model.saveVitals(tarih, patch);
+      return { ok:true, text:parsed.data.field.label + ' kaydedildi', route:'today' };
+    }
+
+    if(parsed.kind === 'move'){
+      const w = SP.Model.newWorkout(tarih);
+      w.minutes = parsed.data.minutes;
+      if(parsed.data.exercise){
+        w.name = parsed.data.exercise.name;
+        w.kind = parsed.data.exercise.kind || 'strength';
+        w.items = [{ exId:parsed.data.exercise.id, levelId:null, sets:null,
+          reps:null, minutes:parsed.data.minutes }];
+      }
+      await SP.Model.saveWorkout(w);
+      return { ok:true, text:'Seans kaydedildi', route:'move' };
+    }
+
+    if(parsed.kind === 'lab'){
+      /* Ayni gune ikinci bir oturum acilmaz; var olanin ustune yazilir. */
+      const mevcut = (SP.S.labs || []).find(l => l.date === tarih);
+      const rec = mevcut || SP.Model.newLab(tarih);
+      parsed.data.rows.forEach(r => {
+        rec.values[r.marker.id] = { v:r.value, cert:'measured', unit:r.marker.unit };
+      });
+      await SP.Model.saveLab(rec);
+      return { ok:true, text:parsed.data.rows.length + ' ölçüm kaydedildi', route:'labs' };
+    }
+
+    if(parsed.kind === 'meal'){
+      const meal = SP.Model.newMeal(o.slot || 'ara');
+      meal.items = parsed.data.items.map(i => ({ foodId:i.food.id, g:i.grams,
+        cert:i.cert || 'estimated' }));
+      await SP.Model.addMeal(tarih, meal);
+      return { ok:true, text:'Öğün eklendi', route:'meals' };
+    }
+
+    return { ok:false, text:'Anlaşılmadı' };
+  }
+
+  return { parse, apply, parseVital, parseMove, VITAL_FIELDS };
+})();
+
 /* ==== js/core/palette.js ==== */
 /* Komut paleti — Ctrl+K.
 
@@ -13701,15 +14172,91 @@ SP.Palette = (function(){
   }
 
   function iconFor(kind){
-    return ({ 'Ekran':'layers', 'Eylem':'zap', 'Ölçüm':'flask', 'Ajan':'users' })[kind] || 'list';
+    return ({ 'Ekran':'layers', 'Eylem':'zap', 'Ölçüm':'flask', 'Ajan':'users',
+      'Hızlı giriş':'plus' })[kind] || 'list';
+  }
+
+  /* HIZLI GIRIS. Yazilan satir bir veriye benziyorsa listenin BASINDA
+     onizleme olarak durur: «ferritin 26» yazip Enter'a basmak, bolume
+     gidip sekme secip alan bulup kaydetmenin yerine gecer.
+
+     Hicbir sey dogrudan kaydedilmez: onizleme secilince alt sayfa acilir
+     ve kullanici gordukten sonra onaylar. Yanlis anlasilmis bir satirin
+     sessizce depoya yazilmasi, elle girmekten kotudur. */
+  function quickCommand(){
+    const t = query.trim();
+    if(t.length < 3) return null;
+    let p;
+    try{ p = SP.Quick.parse(t); }catch(e){ p = null; }
+    if(!p) return null;
+    return {
+      id:'quick:' + p.kind,
+      kind:'Hızlı giriş',
+      label:p.label,
+      hint:p.hint,
+      quick:p,
+      run:() => confirmQuick(p),
+    };
+  }
+
+  /* Onizleme: ne anlasildigi, nereye yazilacagi ve hangi kesinlikle. */
+  function confirmQuick(p){
+    const K = SP.C;
+    const { html, map, when } = SP.h;
+    const hedef = { vital:'Günlük ölçüm', move:'Antrenman kaydı',
+      lab:'Tahlil oturumu', meal:'Öğün' }[p.kind];
+
+    const satirlar = p.kind === 'lab'
+      ? p.data.rows.map(r => [r.marker.name, U.fmtNum(r.value) + ' ' + r.marker.unit, 'ölçüldü'])
+      : p.kind === 'meal'
+        ? p.data.items.map(i => [i.food.name, U.fmtNum(i.grams) + ' g',
+            i.cert === 'measured' ? 'ölçüldü' : 'tahmin'])
+        : p.kind === 'vital'
+          ? [[p.data.field.label, U.fmtNum(p.data.value) + ' ' + p.data.field.unit, 'ölçüldü']]
+          : [[p.data.exercise ? p.data.exercise.name : 'Serbest seans',
+              p.data.minutes + ' dk', 'ölçüldü']];
+
+    SP.UI.sheet({
+      title:'Bunu mu demek istedin?', subtitle:hedef, wide:true,
+      body:String(SP.C.Stack([
+        K.Table({ tight:true, headers:['Ne', 'Değer', 'Kesinlik'], rows:satirlar }),
+        when(p.kind === 'meal' && p.data.unmatched && p.data.unmatched.length,
+          () => K.Notice({ tone:'warn', title:'Eşleşmeyen:',
+            body:p.data.unmatched.join(', ') + ' — bunlar kaydedilmeyecek. '
+              + 'Eşleşmeyen satır atılmaz, söylenir.' })),
+        K.Field({ label:'Tarih',
+          input:K.Input({ id:'qe-date', type:'date', value:U.todayISO() }) }),
+        K.Notice({ tone:'info',
+          body:'Bu satır yorumlandı, kaydedilmedi. Onaylayınca yazılır ve '
+            + 'düzeltmek için ilgili bölüme gidebilirsin.' }),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'quick-save' })}`),
+    });
+    pendingQuick = p;
+  }
+
+  let pendingQuick = null;
+
+  async function saveQuick(){
+    if(!pendingQuick) return;
+    const el = document.getElementById('qe-date');
+    const r = await SP.Quick.apply(pendingQuick, { date:(el && el.value) || U.todayISO() });
+    pendingQuick = null;
+    SP.UI.closeSheet();
+    SP.UI.toast(r.text);
+    if(r.route) SP.App.go(r.route); else SP.App.render();
   }
 
   function filtered(){
     const q = U.norm(query);
     const all = commands();
+    const hizli = quickCommand();
     if(!q) return all.slice(0, 30);
-    return all.filter(c => U.norm(c.label + ' ' + c.kind + ' ' + (c.hint || '')).indexOf(q) >= 0)
+    const liste = all.filter(c => U.norm(c.label + ' ' + c.kind + ' ' + (c.hint || '')).indexOf(q) >= 0)
       .slice(0, 30);
+    /* Hızlı giriş her zaman EN ÜSTTE: Enter'a basan onu bekler. */
+    return hizli ? [hizli].concat(liste) : liste;
   }
 
   function draw(){
@@ -13726,7 +14273,7 @@ SP.Palette = (function(){
     index = Math.max(0, Math.min(index, rows.length - 1));
 
     el.innerHTML = '<div class="cmdk__box" role="dialog" aria-modal="true" aria-label="Komut paleti">'
-      + '<input class="cmdk__input" id="cmdk-input" placeholder="Ara: ferritin, öğün, toplantı…" '
+      + '<input class="cmdk__input" id="cmdk-input" placeholder="Ara ya da yaz: ferritin 26 · 45 dk yürüyüş · uyku 7,2" '
       + 'value="' + U.esc(query) + '" aria-label="Komut ara"/>'
       + '<div class="cmdk__list" role="listbox">'
       + (rows.length ? rows.map((c, i) =>
@@ -13739,7 +14286,8 @@ SP.Palette = (function(){
           + '<span class="cmdk__hintrow">' + U.esc(c.hint || '') + '</span></button>').join('')
         : '<p class="cmdk__empty">Eşleşen komut yok.</p>')
       + '</div>'
-      + '<div class="cmdk__foot"><span>↑↓ gez · Enter aç · Esc kapat</span></div>'
+      + '<div class="cmdk__foot"><span>↑↓ gez · Enter aç · Esc kapat</span>'
+      + '<span class="cmdk__tip">Veri de yazabilirsin: «ferritin 26»</span></div>'
       + '</div>';
 
     const input = document.getElementById('cmdk-input');
@@ -13791,13 +14339,17 @@ SP.Palette = (function(){
         ['Esc', 'Sırayla: palet → ipucu → alt sayfa → kenar çubuğu'],
         ['↑ ↓', 'Palette gez'],
         ['Enter', 'Seçili komutu çalıştır'],
+        ['j / k', 'Listede satır satır gez'],
+        ['Enter', 'Odaktaki satırı aç'],
+        ['ferritin 26', 'Palete veri de yazabilirsin'],
       ] })),
       footer:String(SP.C.Button({ label:'Kapat', act:'sheet-close' })),
       noFocus:true,
     });
   }
 
-  return { open:openPalette, close, isOpen, runById, showShortcuts, commands };
+  return { open:openPalette, close, isOpen, runById, showShortcuts, commands,
+    quickCommand, saveQuick };
 })();
 
 /* ==== js/core/setup.js ==== */
@@ -13983,7 +14535,7 @@ SP.Screens = SP.Screens || {};
 
 SP.Screens.today = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
-  const { html, raw, when, map } = SP.h;
+  const { html, raw, when, map, cls } = SP.h;
   const K = SP.C, P = SP.Parts;
 
   function shownDate(){ return S.ui.mealDate || U.todayISO(); }
@@ -14009,6 +14561,42 @@ SP.Screens.today = (function(){
     { value:5, label:'5 · zinde' },
   ];
 
+  /* ZAMAN KAYDIRICI. Günler arasında gezinmek için üç düğme vardı:
+     «‹ · bugün · ›». Geçmiş bir günü doldurmak zahmetliydi — on gün
+     geriye gitmek on tıklamaydı.
+
+     Şerit son on dört günü GÖSTERİR: her günün altında o gün veri
+     girilip girilmediğini söyleyen bir nokta durur. Böylece «hangi
+     günler eksik» sorusu tıklamadan cevaplanır. */
+  const SERIT_GUN = 14;
+
+  function dayNav(d){
+    const bugun = U.todayISO();
+    const gunler = [];
+    for(let i = SERIT_GUN - 1; i >= 0; i--){
+      const t = U.iso(U.addDays(U.parse(bugun), -i));
+      const v = M.vitalsOf(t);
+      /* Dolu sayılmak için tek alan yeter: sistem «eksik gün» demez,
+         «hiç girilmemiş gün» der. */
+      const dolu = !!(v && FIELDS.some(f => v[f.id] != null));
+      gunler.push({ date:t, dolu, bugun:t === bugun, secili:t === d });
+    }
+    return html`<div class="daynav">
+      <div class="daynav__strip" role="group" aria-label="Gün seç">
+        ${map(gunler, g => html`<button
+          class="${cls('daybtn', g.secili && 'is-on', g.bugun && 'is-today')}"
+          data-act="open-day" data-date="${g.date}"
+          aria-pressed="${g.secili ? 'true' : 'false'}"
+          title="${U.fmtDate(g.date) + (g.dolu ? ' · veri var' : ' · veri yok')}">
+          <span class="daybtn__d">${U.parse(g.date).getDate()}</span>
+          <span class="${cls('daybtn__dot', g.dolu && 'is-full')}" aria-hidden="true"></span>
+        </button>`)}
+      </div>
+      ${when(d !== bugun, () => K.Button({ label:'Bugüne dön', size:'sm',
+        act:'open-day', data:{ 'data-date':bugun } }))}
+    </div>`;
+  }
+
   function formEntry(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
@@ -14017,9 +14605,7 @@ SP.Screens.today = (function(){
       meta:U.fmtDate(d),
       note:'Boş bıraktığın alan sıfır sayılmaz — hesaba hiç girmez. Uyku '
         + 'süresini yazman bile anlamlı bir sonuç üretir.',
-      action:html`${K.Segmented({ act:'shift-day', value:'', aria:'Gün değiştir', items:[
-          { value:'-1', label:'‹' }, { value:'0', label:'bugün' }, { value:'1', label:'›' },
-        ] })}
+      action:html`${dayNav(d)}
         ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}`,
       body:html`
         <div class="grid-form">${map(FIELDS, f => K.Field({
@@ -14516,6 +15102,18 @@ SP.Screens.labs = (function(){
 
   function resultsView(){
     const rows = resultRows();
+    /* Sabitlenenler listenin BAŞINDA durur. 58 ölçümde her seferinde
+       aynı üçünü aramak sürtünmedir. */
+    const pinli = M.pinnedIds();
+    if(pinli.length){
+      rows.sort((a, b) => {
+        const ai = pinli.indexOf(a.marker.id), bi = pinli.indexOf(b.marker.id);
+        if(ai >= 0 && bi >= 0) return ai - bi;
+        if(ai >= 0) return -1;
+        if(bi >= 0) return 1;
+        return 0;
+      });
+    }
     const total = SP.Bio.summary().measured;
 
     if(!total){
@@ -14565,6 +15163,9 @@ SP.Screens.labs = (function(){
                 <span class="resrow__val num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
                 <span class="resrow__bar">${when(r.ref,
                   () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit, { bare:true })))}</span>
+                <span class="resrow__pin">${when(M.isPinned(r.marker.id),
+                  () => html`<span class="resrow__pinned" title="Sabitlendi"
+                    aria-label="Sabitlendi">●</span>`)}</span>
                 <span class="resrow__status">${when(yorum.ok,
                   () => K.Badge({ label:r.status.label, tone:r.status.tone }),
                   () => K.Badge({ label:yorum.label, tone:'muted', icon:false }))}
@@ -14794,6 +15395,26 @@ SP.Screens.labs = (function(){
         ['Eğilim', tr.ok ? vd.text : tr.note],
         ['Ölçüm sayısı', String(series.length)],
       ] }),
+      /* SATIR İÇİ DÜZELTME. Bir sayıyı düzeltmek için alt sayfa açıp
+         forma gidip aramak üç dokunuştu. Değer burada, ölçümün kendi
+         sayfasında düzeltilir ve aynı oturuma yazılır.
+
+         Kesinlik DEĞİŞMEZ: elle düzeltilen değer «ölçüldü» kalır —
+         kullanıcı raporundan okuyup düzeltiyor. Hesaplanan bir ölçüm
+         elle düzeltilemez; formülü ezmek olurdu. */
+      when(last && !b.derived, () => K.Card({
+        title:'Değeri düzelt', sub:U.fmtDate(last.date) + ' oturumu',
+        body:html`<div class="inlineedit">
+          ${K.Input({ id:'ie-val', type:'number', numeric:true, step:'any',
+            value:last.v, aria:b.name + ' değeri' })}
+          <span class="inlineedit__u">${b.unit}</span>
+          ${K.Button({ label:'Kaydet', size:'sm', tone:'primary',
+            act:'save-inline', data:{ 'data-id':id, 'data-date':last.date } })}
+        </div>
+        <p class="small muted mt-8">Yanlış okunmuş ya da yanlış yazılmış bir
+          değeri buradan düzeltirsin; aynı oturuma yazılır, yeni oturum açılmaz.</p>`,
+      })),
+
       /* İLAÇ VE AÇLIK — değeri yorumlamadan önce okunması gerekenler.
          Kişisel taban çizginin üstünde durur çünkü «gerçekten değişti»
          demeden önce «neden değişti» sorulmalı. */
@@ -15385,6 +16006,8 @@ SP.Screens.labs = (function(){
       UI.sheet({ title:b.name, subtitle:b.unit, wide:true,
         body:markerSheetBody(b.id), noFocus:true,
         footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
+          ${K.Button({ label:M.isPinned(b.id) ? 'Sabitlemeyi kaldır' : 'Sabitle',
+            act:'toggle-pin', data:{ 'data-id':b.id } })}
           ${K.Button({ label:'Eğilimi aç', tone:'primary', act:'goto-trend', data:{ 'data-id':b.id } })}`) });
     },
     /* ---- ilaç ve takviye ---- */
@@ -15447,6 +16070,37 @@ SP.Screens.labs = (function(){
           ${K.Button({ label:'Yazdır', tone:'primary', act:'print-doctor' })}`) });
     },
     async 'print-doctor'(){ window.print(); },
+    async 'save-inline'(el){
+      const alan = document.getElementById('ie-val');
+      if(!alan) return;
+      const v = Number(String(alan.value).replace(',', '.'));
+      if(!isFinite(v)){ UI.toast('Sayı okunamadı'); return; }
+      const rec = S.labs.find(l => l.date === el.dataset.date);
+      const b = SP.BIO_BY_ID[el.dataset.id];
+      if(!rec || !b){ UI.toast('Oturum bulunamadı'); return; }
+      const eski = rec.values[b.id] ? rec.values[b.id].v : null;
+      if(eski === v){ UI.closeSheet(); return; }
+      rec.values[b.id] = { v, cert:'measured', unit:b.unit };
+      await M.saveLab(rec);
+      /* Geri alma: yanlış düzeltilen bir değer tek tuşla geri gelir. */
+      S.ui.undo = { restore:async () => {
+        if(eski == null) delete rec.values[b.id];
+        else rec.values[b.id] = { v:eski, cert:'measured', unit:b.unit };
+        await M.saveLab(rec);
+      } };
+      UI.closeSheet();
+      UI.toast(b.name + ' ' + U.fmtNum(v) + ' ' + b.unit + ' olarak düzeltildi',
+        { undo:true });
+      SP.App.render();
+    },
+    async 'toggle-pin'(el){
+      const r = await M.togglePin(el.dataset.id);
+      if(!r.ok){ UI.toast(r.note); return; }
+      const b = SP.BIO_BY_ID[el.dataset.id];
+      UI.toast(b.name + (r.pinned ? ' sabitlendi' : ' sabitlemeden çıkarıldı'));
+      UI.closeSheet();
+      SP.App.render();
+    },
     async 'goto-trend'(el){
       S.ui.trendMarker = el.dataset.id;
       S.ui.labTab = 'trend';
@@ -16528,15 +17182,157 @@ SP.Screens.kitchen = (function(){
     });
   }
 
+  /* ==================================================== kendi gıdaların
+
+     79 gıdalık tablo Türk mutfağını kapsıyor ama MARKET RAFINI
+     kapsamıyor. Etiket okuma, kullanıcının kendi listesini büyütmesinin
+     tek pratik yolu — ve kesinliği «ölçüldü»dür, çünkü üretici beyanı
+     ambalajda yazılı. Yemek fotoğrafından gelen gramaj tahmindir;
+     etiketten gelen besin değeri değildir.
+
+     Eklenen gıda `SP.FOODS` listesine katılır: ayrıştırıcı, sepet ve
+     öğün hesabı hiçbir şey bilmeden onu da görür. */
+
+  function customCard(){
+    const liste = (S.foods || []);
+    return K.Card({
+      title:'Kendi gıdaların', sub:liste.length + ' kayıt',
+      body:html`
+        <p class="small muted">Sistemin tablosunda olmayan bir ürünü ekle:
+          ambalajın besin değerleri tablosunu fotoğrafla ya da değerleri elle yaz.
+          Eklenen gıda öğün girişinde, sepette ve hesaplarda görünür.</p>
+        ${when(!liste.length, () => P.empty('Henüz kendi gıdan yok.'))}
+        ${when(liste.length, () => html`<div class="list mt-10">${map(liste, f => html`
+          <div class="listitem">
+            <div class="grow minw0">
+              <b class="small">${f.name}</b>
+              <div class="tiny dim">100 g · ${U.fmtNum(f.kcal)} kcal ·
+                P ${U.fmtNum(f.p)} · Y ${U.fmtNum(f.f)} · K ${U.fmtNum(f.c)}</div>
+            </div>
+            ${K.Button({ label:'Düzelt', size:'sm', act:'edit-food',
+              data:{ 'data-id':f.id } })}
+            ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
+              act:'del-food', data:{ 'data-id':f.id } })}
+          </div>`)}</div>`)}`,
+      foot:html`${K.Button({ label:'Etiketten oku', icon:'camera', tone:'primary',
+          act:'open-label' })}
+        ${K.Button({ label:'Elle ekle', act:'add-food' })}`,
+    });
+  }
+
+  function foodSheetBody(rec, okundu){
+    const alan = (id, label, hint) => K.Field({ label, hint,
+      input:K.Input({ id:'fd-' + id, type:'number', numeric:true, step:'any',
+        value:rec[id] == null ? '' : rec[id] }) });
+    return String(K.Stack([
+      when(okundu, () => K.Notice({ tone:okundu.ok ? 'ok' : 'warn',
+        title:okundu.ok ? 'Etiket okundu:' : 'Eksik alan var:', body:okundu.note })),
+      K.Field({ label:'Ad', input:K.Input({ id:'fd-name', value:rec.name,
+        placeholder:'Ürünün adı' }) }),
+      html`<p class="small muted">Bütün değerler <b>100 gram</b> içindir.</p>`,
+      html`<div class="grid-form">
+        ${alan('kcal', 'Kalori (kcal)')}
+        ${alan('p', 'Protein (g)')}
+        ${alan('f', 'Yağ (g)')}
+        ${alan('sat', 'Doymuş yağ (g)', 'isteğe bağlı')}
+        ${alan('c', 'Karbonhidrat (g)')}
+        ${alan('sugar', 'Şeker (g)', 'isteğe bağlı')}
+        ${alan('fib', 'Lif (g)', 'isteğe bağlı')}
+      </div>`,
+      K.Notice({ tone:'info',
+        body:'Boş bıraktığın alan sıfır sayılmaz; o besin öğesi bu gıda için '
+          + 'hesaba hiç girmez. Kalori, protein, yağ ve karbonhidrat zorunludur.' }),
+    ]));
+  }
+
   async function render(){
     return String(html`
-      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), dishInfoCard()])}
+      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), customCard(), dishInfoCard()])}
       <div class="mt-24">${raw(UI.rail(['household', 'portion', 'profiles']))}</div>`);
   }
 
-  const handle = {};
+  /* Alt sayfadaki gıda taslağı — kaydedilene kadar depoya hiçbir şey yazılmaz. */
+  let foodDraft = null;
+  let labelFile = null;
+
+  function openFoodSheet(rec, okundu){
+    foodDraft = rec;
+    UI.sheet({ title:rec.name || 'Yeni gıda', subtitle:'100 gram için', wide:true,
+      body:foodSheetBody(rec, okundu),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'save-food' })}`) });
+  }
+
+  const handle = {
+    async 'add-food'(){ openFoodSheet(M.newFood(), null); },
+
+    async 'edit-food'(el){
+      const f = (S.foods || []).find(x => x.id === el.dataset.id);
+      if(!f) return;
+      openFoodSheet(JSON.parse(JSON.stringify(f)), null);
+    },
+
+    async 'open-label'(){
+      labelFile = null;
+      UI.sheet({ title:'Besin etiketi', subtitle:'ambalajın tablosunu fotoğrafla',
+        wide:true,
+        body:String(K.Stack([
+          K.Drop({ act:'label-file', label:'Etiket fotoğrafı', icon:'camera',
+            accept:'image/*' }),
+          html`<div id="label-name" class="small dim"></div>`,
+          K.Notice({ tone:'info',
+            body:'Tablodaki değerler okunur ve sana gösterilir; onaylamadan '
+              + 'hiçbir şey kaydedilmez. Etikette olmayan bir alan uydurulmaz, '
+              + 'boş bırakılır.' }),
+        ])),
+        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+          ${K.Button({ label:'Oku', tone:'primary', act:'run-label' })}`) });
+    },
+
+    async 'run-label'(){
+      if(!labelFile){ UI.toast('Önce bir fotoğraf seç'); return; }
+      const r = await UI.withBusy('Etiket okunuyor',
+        'değerler «ölçüldü» sayılacak: üretici beyanı',
+        () => SP.Extract.fromFoodLabel(labelFile));
+      if(!r.food){ UI.toast(r.note); return; }
+      const rec = M.newFood();
+      Object.keys(r.food).forEach(k => { if(r.food[k] != null) rec[k] = r.food[k]; });
+      openFoodSheet(rec, r);
+    },
+
+    async 'save-food'(){
+      const v = id => { const e = document.getElementById('fd-' + id); return e ? e.value.trim() : ''; };
+      const n = x => x === '' ? null : Number(String(x).replace(',', '.'));
+      const rec = foodDraft || M.newFood();
+      rec.name = v('name');
+      ['kcal', 'p', 'f', 'sat', 'c', 'sugar', 'fib'].forEach(k => { rec[k] = n(v(k)); });
+      if(!rec.name){ UI.toast('Ad gerekli'); return; }
+      const eksik = ['kcal', 'p', 'f', 'c'].filter(k => rec[k] == null);
+      if(eksik.length){ UI.toast('Kalori, protein, yağ ve karbonhidrat zorunlu'); return; }
+      await M.saveFood(rec);
+      foodDraft = null;
+      UI.closeSheet();
+      UI.toast(rec.name + ' eklendi — öğün girişinde de görünür');
+      SP.App.render();
+    },
+
+    async 'del-food'(el){
+      const f = (S.foods || []).find(x => x.id === el.dataset.id);
+      if(!f) return;
+      const kopya = JSON.parse(JSON.stringify(f));
+      await M.deleteFood(f.id);
+      S.ui.undo = { restore:() => M.saveFood(kopya) };
+      UI.toast(kopya.name + ' silindi', { undo:true });
+      SP.App.render();
+    },
+  };
 
   const change = {
+    async 'label-file'(el){
+      labelFile = (el.files && el.files[0]) || null;
+      const g = document.getElementById('label-name');
+      if(g) g.textContent = labelFile ? labelFile.name : '';
+    },
     async 'pick-dish'(el){ S.ui.kitchenDish = el.value; SP.App.render(); },
     async 'set-grams'(el){
       const v = Number(el.value);
@@ -19956,6 +20752,7 @@ SP.App = (function(){
       render();
     },
     async 'cmdk-run'(el){ SP.Palette.runById(el.dataset.id); },
+    async 'quick-save'(){ await SP.Palette.saveQuick(); },
     async 'sheet-close'(){ UI.closeSheet(); },
     async reload(){ location.reload(); },
     /* Sert yenileme: adrese bir kerelik damga eklenir, böylece tarayıcı
@@ -20091,9 +20888,47 @@ SP.App = (function(){
     if(typingInField(e) || SP.Palette.isOpen() || UI.isSheetOpen()) return;
     if(e.key === '?'){ e.preventDefault(); SP.Palette.showShortcuts(); return; }
 
+    /* LİSTEDE KLAVYE GEZİNME. `j`/`k` ile satır satır, Enter ile aç.
+       Masaüstünde toplu giriş için: on beş ölçümü tek tek açmak on beş
+       kez fareye uzanmak demekti.
+
+       Gezilebilir satır ekrana ait değildir, ORTAKTIR: `[data-act]`
+       taşıyan ve listede duran her düğme. Böylece her ekran ayrıca
+       yazmak zorunda kalmaz. */
+    if(e.key === 'j' || e.key === 'k' || e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+      const asagi = e.key === 'j' || e.key === 'ArrowDown';
+      if(moveRowFocus(asagi ? 1 : -1)){ e.preventDefault(); return; }
+    }
+    if(e.key === 'Enter'){
+      const el = document.activeElement;
+      if(el && el.matches && el.matches(ROW_SELECTOR)){ e.preventDefault(); el.click(); return; }
+    }
+
     const sc = screen();
     if(sc.onKey) sc.onKey(e);
   });
+
+  /* Gezilebilir satırlar: sonuç listesi, karşılaştırma, geçmiş, öğün ve
+     hareket listeleri. Hepsi düğme olduğu için odaklanabilirler. */
+  const ROW_SELECTOR = '.reslist .resrow, .reslist .cmprow, .list .listitem[data-act],'
+    + ' .medlist .medrow [data-act="edit-med"], .ledger [data-act="open-marker"],'
+    + ' [data-act="open-lab"], [data-act="open-day"]';
+
+  function moveRowFocus(delta){
+    const rows = Array.from(document.querySelectorAll(ROW_SELECTOR))
+      .filter(el => el.offsetParent !== null);
+    if(!rows.length) return false;
+    const simdi = rows.indexOf(document.activeElement);
+    /* Hiçbiri odakta değilse aşağı ilk satıra, yukarı sonuncuya gider. */
+    const hedef = simdi < 0
+      ? (delta > 0 ? 0 : rows.length - 1)
+      : Math.max(0, Math.min(rows.length - 1, simdi + delta));
+    const el = rows[hedef];
+    if(!el) return false;
+    el.focus({ preventScroll:true });
+    el.scrollIntoView({ block:'nearest', behavior:'auto' });
+    return true;
+  }
 
   /* ---------------------------------------------------------- sürükle-bırak
 

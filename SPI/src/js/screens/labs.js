@@ -109,6 +109,18 @@ SP.Screens.labs = (function(){
 
   function resultsView(){
     const rows = resultRows();
+    /* Sabitlenenler listenin BAŞINDA durur. 58 ölçümde her seferinde
+       aynı üçünü aramak sürtünmedir. */
+    const pinli = M.pinnedIds();
+    if(pinli.length){
+      rows.sort((a, b) => {
+        const ai = pinli.indexOf(a.marker.id), bi = pinli.indexOf(b.marker.id);
+        if(ai >= 0 && bi >= 0) return ai - bi;
+        if(ai >= 0) return -1;
+        if(bi >= 0) return 1;
+        return 0;
+      });
+    }
     const total = SP.Bio.summary().measured;
 
     if(!total){
@@ -158,6 +170,9 @@ SP.Screens.labs = (function(){
                 <span class="resrow__val num">${U.fmtNum(r.value)}<small>${r.marker.unit}</small></span>
                 <span class="resrow__bar">${when(r.ref,
                   () => raw(UI.rangeBar(r.value, r.ref.ref, r.ref.optimal, r.marker.unit, { bare:true })))}</span>
+                <span class="resrow__pin">${when(M.isPinned(r.marker.id),
+                  () => html`<span class="resrow__pinned" title="Sabitlendi"
+                    aria-label="Sabitlendi">●</span>`)}</span>
                 <span class="resrow__status">${when(yorum.ok,
                   () => K.Badge({ label:r.status.label, tone:r.status.tone }),
                   () => K.Badge({ label:yorum.label, tone:'muted', icon:false }))}
@@ -387,6 +402,26 @@ SP.Screens.labs = (function(){
         ['Eğilim', tr.ok ? vd.text : tr.note],
         ['Ölçüm sayısı', String(series.length)],
       ] }),
+      /* SATIR İÇİ DÜZELTME. Bir sayıyı düzeltmek için alt sayfa açıp
+         forma gidip aramak üç dokunuştu. Değer burada, ölçümün kendi
+         sayfasında düzeltilir ve aynı oturuma yazılır.
+
+         Kesinlik DEĞİŞMEZ: elle düzeltilen değer «ölçüldü» kalır —
+         kullanıcı raporundan okuyup düzeltiyor. Hesaplanan bir ölçüm
+         elle düzeltilemez; formülü ezmek olurdu. */
+      when(last && !b.derived, () => K.Card({
+        title:'Değeri düzelt', sub:U.fmtDate(last.date) + ' oturumu',
+        body:html`<div class="inlineedit">
+          ${K.Input({ id:'ie-val', type:'number', numeric:true, step:'any',
+            value:last.v, aria:b.name + ' değeri' })}
+          <span class="inlineedit__u">${b.unit}</span>
+          ${K.Button({ label:'Kaydet', size:'sm', tone:'primary',
+            act:'save-inline', data:{ 'data-id':id, 'data-date':last.date } })}
+        </div>
+        <p class="small muted mt-8">Yanlış okunmuş ya da yanlış yazılmış bir
+          değeri buradan düzeltirsin; aynı oturuma yazılır, yeni oturum açılmaz.</p>`,
+      })),
+
       /* İLAÇ VE AÇLIK — değeri yorumlamadan önce okunması gerekenler.
          Kişisel taban çizginin üstünde durur çünkü «gerçekten değişti»
          demeden önce «neden değişti» sorulmalı. */
@@ -978,6 +1013,8 @@ SP.Screens.labs = (function(){
       UI.sheet({ title:b.name, subtitle:b.unit, wide:true,
         body:markerSheetBody(b.id), noFocus:true,
         footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
+          ${K.Button({ label:M.isPinned(b.id) ? 'Sabitlemeyi kaldır' : 'Sabitle',
+            act:'toggle-pin', data:{ 'data-id':b.id } })}
           ${K.Button({ label:'Eğilimi aç', tone:'primary', act:'goto-trend', data:{ 'data-id':b.id } })}`) });
     },
     /* ---- ilaç ve takviye ---- */
@@ -1040,6 +1077,37 @@ SP.Screens.labs = (function(){
           ${K.Button({ label:'Yazdır', tone:'primary', act:'print-doctor' })}`) });
     },
     async 'print-doctor'(){ window.print(); },
+    async 'save-inline'(el){
+      const alan = document.getElementById('ie-val');
+      if(!alan) return;
+      const v = Number(String(alan.value).replace(',', '.'));
+      if(!isFinite(v)){ UI.toast('Sayı okunamadı'); return; }
+      const rec = S.labs.find(l => l.date === el.dataset.date);
+      const b = SP.BIO_BY_ID[el.dataset.id];
+      if(!rec || !b){ UI.toast('Oturum bulunamadı'); return; }
+      const eski = rec.values[b.id] ? rec.values[b.id].v : null;
+      if(eski === v){ UI.closeSheet(); return; }
+      rec.values[b.id] = { v, cert:'measured', unit:b.unit };
+      await M.saveLab(rec);
+      /* Geri alma: yanlış düzeltilen bir değer tek tuşla geri gelir. */
+      S.ui.undo = { restore:async () => {
+        if(eski == null) delete rec.values[b.id];
+        else rec.values[b.id] = { v:eski, cert:'measured', unit:b.unit };
+        await M.saveLab(rec);
+      } };
+      UI.closeSheet();
+      UI.toast(b.name + ' ' + U.fmtNum(v) + ' ' + b.unit + ' olarak düzeltildi',
+        { undo:true });
+      SP.App.render();
+    },
+    async 'toggle-pin'(el){
+      const r = await M.togglePin(el.dataset.id);
+      if(!r.ok){ UI.toast(r.note); return; }
+      const b = SP.BIO_BY_ID[el.dataset.id];
+      UI.toast(b.name + (r.pinned ? ' sabitlendi' : ' sabitlemeden çıkarıldı'));
+      UI.closeSheet();
+      SP.App.render();
+    },
     async 'goto-trend'(el){
       S.ui.trendMarker = el.dataset.id;
       S.ui.labTab = 'trend';

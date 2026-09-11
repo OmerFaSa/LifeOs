@@ -37,6 +37,7 @@ SP.S = {
   meals:{},           // YYYY-MM-DD -> ogun dizisi
   workouts:[],        // antrenman kayitlari
   meds:[],            // ilac ve takviye kayitlari, en yeni ustte
+  foods:[],           // kullanicinin ekledigi gidalar (SP.FOODS'a katilir)
   progress:{},        // exId -> { levelId, achievedAt }
 
   basket:null,        // { items, weeklyLimit, monthlyLimit, testFee, equipment, updatedAt }
@@ -149,6 +150,9 @@ SP.Model = (function(){
       theme:'system',
       palette:SP.DEFAULT_PALETTE,
       design:SP.DEFAULT_DESIGN,
+      /* Sabitlenen ölçümler. 58 ölçümde her seferinde aynı üçünü
+         aramak sürtünmedir; sabitlenenler listenin başında durur. */
+      pinned:[],
       createdAt:new Date().toISOString(),
     };
   }
@@ -258,6 +262,93 @@ SP.Model = (function(){
       fasting:'unknown',      // yes | no | unknown
       time:'',                // 'HH:MM' — isteğe bağlı
       createdAt:new Date().toISOString() };
+  }
+
+  /* ------------------------------------------------------ kendi gıdaların
+
+     79 gıdalık tablo Türk mutfağını kapsıyor ama MARKET RAFINI
+     kapsamıyor. Kullanıcının eklediği gıdalar `SP.FOODS` listesine
+     KATILIR: ayrıştırıcı, sepet ve öğün hesabı hiçbir şey bilmeden
+     onları da görür.
+
+     Kimlik çakışması olmaz: kullanıcı gıdalarının kimliği `u-` ile
+     başlar ve yerleşik bir gıdayı ezemez. */
+
+  function newFood(){
+    return { id:'u-' + U.uid('f').slice(2), name:'', cat:'diger',
+      kcal:null, p:null, f:null, sat:null, c:null, sugar:null, fib:null,
+      micro:{}, flags:[], portions:[], aliases:[], custom:true,
+      createdAt:new Date().toISOString() };
+  }
+
+  function normFood(rec){
+    rec.name = String(rec.name || '').trim();
+    rec.micro = rec.micro || {};
+    rec.flags = rec.flags || [];
+    rec.portions = rec.portions || [];
+    /* Takma adlar aramayı besler: ad değişince onlar da tazelenir. */
+    const ad = U.norm(rec.name);
+    rec.aliases = [...new Set((rec.aliases || []).concat(ad ? [ad] : []))];
+    rec.custom = true;
+    return rec;
+  }
+
+  /* Yerleşik tabloya EKLEME: ekranlar ve ayrıştırıcı tek bir liste görür. */
+  function mountFoods(){
+    const kullanici = SP.S.foods || [];
+    const yerlesik = SP.FOODS.filter(f => !f.custom);
+    SP.FOODS.length = 0;
+    yerlesik.concat(kullanici).forEach(f => SP.FOODS.push(f));
+    SP.FOOD_BY_ID = SP.FOODS.reduce((acc, f) => { acc[f.id] = f; return acc; }, {});
+    if(SP.Parse && SP.Parse.rebuildFoodIndex) SP.Parse.rebuildFoodIndex();
+  }
+
+  async function saveFood(rec){
+    normFood(rec);
+    SP.S.foods = SP.S.foods || [];
+    const i = SP.S.foods.findIndex(f => f.id === rec.id);
+    if(i >= 0) SP.S.foods[i] = rec; else SP.S.foods.push(rec);
+    await SP.Store.set('foods/' + rec.id, rec);
+    mountFoods();
+    return rec;
+  }
+
+  async function deleteFood(id){
+    SP.S.foods = (SP.S.foods || []).filter(f => f.id !== id);
+    await SP.Store.remove('foods/' + id);
+    mountFoods();
+  }
+
+  /* --------------------------------------------------------- sabitleme
+
+     Önemsediğin ölçümler listenin başında dursun. Sınır bilinçlidir:
+     beşten fazlası «sabitleme» olmaktan çıkar, ikinci bir liste olur. */
+
+  const PIN_MAX = 5;
+
+  function pinnedIds(){
+    const p = SP.S.profile;
+    return ((p && p.pinned) || []).filter(id => SP.BIO_BY_ID[id]);
+  }
+
+  function isPinned(id){ return pinnedIds().indexOf(id) >= 0; }
+
+  async function togglePin(id){
+    if(!SP.BIO_BY_ID[id]) return { ok:false, note:'Böyle bir ölçüm yok.' };
+    const liste = pinnedIds();
+    const i = liste.indexOf(id);
+    if(i >= 0){
+      liste.splice(i, 1);
+      await saveProfile({ pinned:liste });
+      return { ok:true, pinned:false };
+    }
+    if(liste.length >= PIN_MAX){
+      return { ok:false, full:true,
+        note:'En fazla ' + PIN_MAX + ' ölçüm sabitlenebilir. Birini kaldır.' };
+    }
+    liste.push(id);
+    await saveProfile({ pinned:liste });
+    return { ok:true, pinned:true };
   }
 
   /* ------------------------------------------------------- ilaç ve takviye
@@ -729,6 +820,9 @@ SP.Model = (function(){
     S.workouts = ((await SP.Store.list('workouts')) || []).map(normWorkout)
       .sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
 
+    S.foods = ((await SP.Store.list('foods')) || []).map(normFood);
+    mountFoods();
+
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
 
@@ -760,6 +854,10 @@ SP.Model = (function(){
     newWorkout, saveWorkout, deleteWorkout, workoutsOf,
     /* ilac ve takviye */
     newMed, saveMed, deleteMed, stopMed,
+    /* sabitleme */
+    pinnedIds, isPinned, togglePin, PIN_MAX,
+    /* kendi gidalarin */
+    newFood, saveFood, deleteFood, mountFoods,
     currentLevel, levelIndex, advanceLevel, setLevel,
     /* ekonomi */
     defaultBasket, saveBasket, setBasketItem, setPrice,
