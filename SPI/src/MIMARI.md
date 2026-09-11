@@ -361,7 +361,7 @@ src/
       nutrients.js      15 besin öğesi, RDA, emilim etkileri
       foods.js          61 gıda, ev ölçüleri, mikro besin profilleri
       prices.js         seed fiyat endeksi, 10 ikame, toplu alım
-      movement.js       11 hareket merdiveni, toparlanma ve yük kuralları
+      movement.js       12 hareket · 40 basamak, 6 kalıp, 6 şablon, yük kuralları
       rules.js          ev kuralları: klinik sınır, kırmızı bayrak, öncelik
       agents.js         beş ajan, gündem türleri
       hints.js          ⓘ açıklamaları
@@ -389,12 +389,13 @@ src/
       symptom.js        semptom penceresi (payda: girilen gün) ve âdet döngüsü
       quickentry.js     komut paletinden veri girişi — vital · hareket · tahlil · öğün
       office.js         beş ajanlı ofis + masalar arası devir motoru
+      memo.js           kare önbelleği: bir çizimde aynı hesap iki kez yapılmaz
       llm.js quota.js   model çağrısı ve kota yönetimi
       palette.js        komut paleti
       setup.js          ilk kurulum
     screens/            12 ekran
     app.js              kabuk: gezinme, görünüm paneli, olay dağıtımı, açılış
-  tests/                505 test, 12 paket
+  tests/                512 test, 12 paket
 tools/
   runtests.js           birim testleri (başsız tarayıcı)
   smoke.js              duman testi: gerçek uygulamayı gezer
@@ -403,6 +404,9 @@ tools/
   designcheck.js        5 düzen × 2 tema × 6 genişlik: taşma, kırpılan içerik,
                         kontrast, künye hizası, açılan katmanlar
   tasarimcheck.js       tasarim/ klasöründeki 20 örneğin çizilme denetimi
+  a11ycheck.js          erişilebilirlik: adsız düğme, etiketsiz alan, başlık
+                        atlaması, 24px altı dokunma hedefi, yer imleri, kiplilik
+  loadcheck.js          beş yıllık veriyle on iki ekranın çizim süresi
 build.py                tek dosyalık dağıtım üretir → dist/spi.html
 devserver.py            geliştirme sunucusu (önbelleksiz)
 ```

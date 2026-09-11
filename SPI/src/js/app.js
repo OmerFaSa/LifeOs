@@ -619,6 +619,13 @@ SP.App = (function(){
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
       revealActiveTab();
+      /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
+         `inert` onunla birlikte silinir ve arka plan yeniden okunur
+         hale gelir. Cizimden sonra geri konur. */
+      if(UI.isSheetOpen()){
+        const kabuk = document.querySelector('.site');
+        if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
+      }
       if(sc.afterRender) sc.afterRender();
     }catch(err){
       /* Kabuğun kendisi çizilemedi. Ekranın kendi hatası bir üstteki

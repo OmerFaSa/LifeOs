@@ -4398,7 +4398,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'5c2c5ba', at:'2026-09-11 19:12', dirty:true };
+SP.BUILD = { id:'f6a6b40', at:'2026-09-11 19:21', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -12252,6 +12252,13 @@ SP.UI = (function(){
     sheetScroll = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
+    /* ...ve arkadaki sayfa OKUNMAZ. Odagi hapsetmek yalnizca klavyeyi
+       durdurur; ekran okuyucunun sanal imleci alt sayfayi hic gormeden
+       arkadaki tabloyu okumaya devam edebiliyordu. `inert` ikisini
+       birden keser: odak da, erisilebilirlik agaci da. */
+    const kabuk = document.querySelector('.site');
+    if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
+
     const first = el.querySelector('input, textarea, select')
       || el.querySelector(ODAKLANABILIR);
     if(first && !opts.noFocus) setTimeout(()=>first.focus(), 40);
@@ -12261,6 +12268,8 @@ SP.UI = (function(){
     if(!el) return;
     el.remove();
     document.body.style.overflow = sheetScroll;
+    const kabuk = document.querySelector('.site');
+    if(kabuk){ kabuk.removeAttribute('inert'); kabuk.removeAttribute('aria-hidden'); }
     if(sheetOpener && document.contains(sheetOpener)){
       try{ sheetOpener.focus(); }catch(e){ /* odak geri verilemedi */ }
     }
@@ -21899,6 +21908,13 @@ SP.App = (function(){
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
       revealActiveTab();
+      /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
+         `inert` onunla birlikte silinir ve arka plan yeniden okunur
+         hale gelir. Cizimden sonra geri konur. */
+      if(UI.isSheetOpen()){
+        const kabuk = document.querySelector('.site');
+        if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
+      }
       if(sc.afterRender) sc.afterRender();
     }catch(err){
       /* Kabuğun kendisi çizilemedi. Ekranın kendi hatası bir üstteki

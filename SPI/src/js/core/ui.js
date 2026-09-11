@@ -657,6 +657,13 @@ SP.UI = (function(){
     sheetScroll = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
+    /* ...ve arkadaki sayfa OKUNMAZ. Odagi hapsetmek yalnizca klavyeyi
+       durdurur; ekran okuyucunun sanal imleci alt sayfayi hic gormeden
+       arkadaki tabloyu okumaya devam edebiliyordu. `inert` ikisini
+       birden keser: odak da, erisilebilirlik agaci da. */
+    const kabuk = document.querySelector('.site');
+    if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
+
     const first = el.querySelector('input, textarea, select')
       || el.querySelector(ODAKLANABILIR);
     if(first && !opts.noFocus) setTimeout(()=>first.focus(), 40);
@@ -666,6 +673,8 @@ SP.UI = (function(){
     if(!el) return;
     el.remove();
     document.body.style.overflow = sheetScroll;
+    const kabuk = document.querySelector('.site');
+    if(kabuk){ kabuk.removeAttribute('inert'); kabuk.removeAttribute('aria-hidden'); }
     if(sheetOpener && document.contains(sheetOpener)){
       try{ sheetOpener.focus(); }catch(e){ /* odak geri verilemedi */ }
     }
