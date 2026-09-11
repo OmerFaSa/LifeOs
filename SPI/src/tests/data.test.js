@@ -338,6 +338,33 @@
     });
   });
 
+  describe('Veri — düzenler', () => {
+    it('varsayılan düzen listede', () => {
+      expect(SP.DESIGN_BY_ID[SP.DEFAULT_DESIGN]).toBeTruthy();
+    });
+
+    it('her düzenin adı, açıklaması ve minyatürü var', () => {
+      SP.DESIGNS.forEach(d => {
+        expect(typeof d.id).toBe('string');
+        expect(d.name.length > 2).toBeTruthy();
+        expect(d.note.length > 12).toBeTruthy();
+        expect(typeof d.swatch).toBe('string');
+      });
+    });
+
+    it('düzen kimlikleri benzersiz', () => {
+      const ids = SP.DESIGNS.map(d => d.id);
+      expect(new Set(ids).size).toBe(ids.length);
+    });
+
+    /* Düzen bir CSS seçimidir; iş kurallarına dokunamaz. Bu test
+       düzenlerin veri katmanına sızmadığını korur. */
+    it('düzen listesi durum rengi ya da eşik taşımaz', () => {
+      const metin = JSON.stringify(SP.DESIGNS);
+      expect(/#[0-9a-fA-F]{3,6}/.test(metin)).toBe(false);
+    });
+  });
+
   describe('Veri — ipuçları', () => {
     it('her ipucunun başlığı ve açıklaması var', () => {
       Object.keys(SP.HINTS).forEach(k => {

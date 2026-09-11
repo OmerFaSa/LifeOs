@@ -142,6 +142,7 @@ SP.Model = (function(){
       conditions:[],          // kullanicinin bildirdigi durumlar (serbest metin)
       theme:'system',
       palette:SP.DEFAULT_PALETTE,
+      design:SP.DEFAULT_DESIGN,
       createdAt:new Date().toISOString(),
     };
   }

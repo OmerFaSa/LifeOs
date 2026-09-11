@@ -60,6 +60,28 @@ node tools/tasarimcheck.js
 Yazı tipleri Google Fonts'tan gelir; internet yoksa örnekler sistem yazı
 tipine düşer, düzen bozulmaz.
 
+## Sisteme giren dörtlü
+
+Bu yirmiden **dördü** seçildi ve sisteme girdi. Artık örnek değiller;
+üst çubuktaki palet düğmesinden ya da Ayarlar → Hane'den seçilebilen
+gerçek düzenler:
+
+| Bu klasörde | Sistemdeki adı | Ne değişiyor |
+|---|---|---|
+| 11 Odak | **Odak** | Hero'nun ilk sayısı sayfanın en büyük nesnesi olur |
+| 12 Kraft | **Kraft** | Kâğıt dokusu, daktilo künyesi, kesikli cetveller |
+| 16 Katmanlı | **Katmanlı** | Yedi bölüm sol kenar çubuğuna iner |
+| 20 Harita | **Harita** | Defter satırları noktalı tuvalde düğüm kartlara döner |
+
+Sistemdeki hâlleri buradaki örneklerden **daha ileri**: yedi palet ve
+karanlık temanın altında çalışıyorlar, kontrastları ölçülüyor
+(`tools/palettecheck.js`) ve on iki ekranın üçünde de taşma denetiminden
+geçiyorlar (`tools/designcheck.js`). Buradaki dosyalar ilk taslak olarak
+duruyor.
+
+Beşincisi varsayılan **Defter** düzenidir ve bu klasörde karşılığı yoktur —
+sistemin kendi dili odur.
+
 ## Seçtikten sonra
 
 Seçilen dil sistemin tamamına uygulanır: kabuk, on iki ekran, yedi bölüm

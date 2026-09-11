@@ -394,10 +394,44 @@ boş bir seçim sunmak olurdu.
 
 ### Görünüm paneli
 
-Tema ve palet üst çubuktaki palet düğmesinden açılır (`.appear`), ekranın
-içine gömülmez. Panel iki satırdır: üç tema düğmesi (Sistem · Açık · Koyu),
-altında altı palet. Seçim profile yazılır ve anında uygulanır; `Escape`,
-dışarı tıklama ve pencere boyutu değişimi paneli kapatır.
+Tema, palet ve düzen üst çubuktaki palet düğmesinden açılır (`.appear`),
+ekranın içine gömülmez. Panel üç satırdır: üç tema düğmesi (Sistem · Açık ·
+Koyu), yedi palet, beş düzen. Seçim profile yazılır ve anında uygulanır;
+`Escape`, dışarı tıklama ve pencere boyutu değişimi paneli kapatır. Aynı üç
+tercih Ayarlar → Hane ekranından da seçilebilir.
+
+## Düzenler — seçilebilir tasarım dilleri
+
+Palet **rengi** değiştirir; düzen **iskeleti** değiştirir: gezinmenin nerede
+durduğunu, bir satırın kutu mu çizgi mi olduğunu, neyin büyük neyin küçük
+yazıldığını.
+
+| Düzen | İskelet |
+|---|---|
+| **Defter** (varsayılan) | Solda künye sütunu, kutusuz satırlar, ince çizgiler |
+| **Odak** | Hero'nun ilk özet sayısı sayfanın en büyük nesnesi olur; gerisi geri çekilir |
+| **Kraft** | Kâğıt dokusu, daktilo künyesi, kesikli cetveller, defterin kenar çizgisi |
+| **Katmanlı** | Yedi bölüm sol kenar çubuğuna iner; künye sütunu bir panele döner |
+| **Harita** | Defter satırları noktalı tuval üstünde düğüm kartlara döner |
+
+Kurallar:
+
+1. **Beşi de aynı DOM üzerinde çalışır.** Ekranlar hangi düzenin seçili
+   olduğunu bilmez ve bilmemelidir; yoksa her ekran beş kez yazılırdı.
+   Düzen yalnız `:root[data-design]` altındaki CSS'tir (`css/designs.css`).
+2. **Ham renk yazılmaz.** Dördü de yedi palet ve karanlık tema altında
+   çalışmak zorunda; renk her zaman jetondan türetilir.
+3. **Durum renkleri düzenden düzene geçmez.** Bir tahlil sonucunun rengi
+   hangi düzen seçildiğine göre değişemez. Kesinlik etiketleri
+   (ölçüldü/tahmin) de hiçbir düzende gizlenmez.
+4. **Bir düzen seçimi ağ isteği doğurmaz.** Kraft'ın daktilo künyesi yeni
+   bir yazı tipi indirmez; sistemin kendi tek aralıklı yazısını kullanır.
+5. Varsayılan düzen köke **hiçbir şey yazmaz** (`data-design` kaldırılır),
+   böylece `designs.css` yalnız bir seçim yapıldığında devreye girer.
+
+Denetim: `tools/designcheck.js` beş düzeni on iki ekran ve üç genişlikte
+gezer, `tools/palettecheck.js` ise dört düzeni yedi palet ve iki temada
+kontrast için ölçer.
 
 Üst çubuk tek satırdır ve şu sırayla okunur: marka → yedi bölüm → arama →
 palet → ayarlar → menü. Ekrana ait eylemler üst çubukta değil **hero'da**

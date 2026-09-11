@@ -1,4 +1,4 @@
-/* Palet denetimi — yedi palet x iki tema x yedi bolum.
+/* Palet denetimi — yedi palet x iki tema x yedi bolum x bes duzen.
 
    Bir rengin okunup okunmadigi goz kararina birakilmaz. Bu betik her
    kombinasyonda WCAG AA kontrast oranini olcer ve gecemeyeni yazar:
@@ -22,6 +22,41 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 function lum(c){ const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);};
   return .2126*f(c[0])+.7152*f(c[1])+.0722*f(c[2]); }
 function ratio(a,b){ const l1=lum(a),l2=lum(b); return (Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05); }
+
+/* Olcum ve denetim listesi TEK YERDE: ekran, palet ve duzen donguleri
+   ayni tanimi kullansin, biri guncellenip digeri unutulmasin diye. */
+async function measure(p){
+  return p.evaluate(() => {
+    const cs = getComputedStyle(document.documentElement);
+    const g = n => cs.getPropertyValue(n).trim();
+    const px = s => { const d=document.createElement('div'); d.style.color=s;
+      document.body.appendChild(d); const c=getComputedStyle(d).color;
+      d.remove(); return (c.match(/\d+/g)||[0,0,0]).slice(0,3).map(Number); };
+    const foot = document.querySelector('.sitefoot');
+    const fb = foot ? getComputedStyle(foot).backgroundColor : 'rgb(0,0,0)';
+    return { sec:px(g('--sec')), bg:px(g('--bg')), surf:px(g('--surface')),
+      text:px(g('--text')), text2:px(g('--text-2')), text3:px(g('--text-3')),
+      rule:px(g('--rule')),
+      footBg:(fb.match(/\d+/g)||[0,0,0]).slice(0,3).map(Number),
+      footFg:px(g('--ink-on')), footFg2:px(g('--ink-on-2')),
+      primInk:px(g('--primary-ink')) };
+  });
+}
+
+function checksOf(m){
+  return [
+    ['metin/zemin', ratio(m.text, m.bg), 4.5],
+    ['ikincil/zemin', ratio(m.text2, m.bg), 4.5],
+    ['ucuncul/zemin', ratio(m.text3, m.bg), 4.5],
+    ['metin/yuzey', ratio(m.text, m.surf), 4.5],
+    ['ucuncul/yuzey', ratio(m.text3, m.surf), 4.5],
+    ['bölüm rengi/zemin', ratio(m.sec, m.bg), 3.0],
+    ['düğme yazısı/bölüm rengi', ratio(m.primInk, m.sec), 4.5],
+    ['alt bant yazısı', ratio(m.footFg, m.footBg), 4.5],
+    ['alt bant ikincil', ratio(m.footFg2, m.footBg), 4.5],
+    ['cetvel çizgisi/yüzey', ratio(m.rule, m.surf), 1.25],
+  ];
+}
 
 (async () => {
   await wait(1200);
@@ -49,33 +84,34 @@ function ratio(a,b){ const l1=lum(a),l2=lum(b); return (Math.max(l1,l2)+.05)/(Ma
       for(const route of secs){
         await p.evaluate(id => SP.App.go(id), route);
         await wait(180);
-        const m = await p.evaluate(() => {
-          const cs = getComputedStyle(document.documentElement);
-          const g = n => cs.getPropertyValue(n).trim();
-          const px = s => { const d=document.createElement('div'); d.style.color=s;
-            document.body.appendChild(d); const c=getComputedStyle(d).color;
-            d.remove(); return (c.match(/\d+/g)||[0,0,0]).slice(0,3).map(Number); };
-          const foot = document.querySelector('.sitefoot');
-          const fb = foot ? getComputedStyle(foot).backgroundColor : 'rgb(0,0,0)';
-          return { sec:px(g('--sec')), bg:px(g('--bg')), surf:px(g('--surface')),
-            text:px(g('--text')), text3:px(g('--text-3')), rule:px(g('--rule')),
-            footBg:(fb.match(/\d+/g)||[0,0,0]).slice(0,3).map(Number),
-            footFg:px(g('--ink-on')), footFg2:px(g('--ink-on-2')),
-            primInk:px(g('--primary-ink')) };
-        });
-        const checks = [
-          ['metin/zemin', ratio(m.text, m.bg), 4.5],
-          ['ikincil/zemin', ratio(m.text3, m.bg), 4.5],
-          ['bölüm rengi/zemin', ratio(m.sec, m.bg), 3.0],
-          ['düğme yazısı/bölüm rengi', ratio(m.primInk, m.sec), 4.5],
-          ['alt bant yazısı', ratio(m.footFg, m.footBg), 4.5],
-          ['alt bant ikincil', ratio(m.footFg2, m.footBg), 4.5],
-          ['cetvel çizgisi/yüzey', ratio(m.rule, m.surf), 1.25],
-        ];
-        checks.forEach(([name, r, min]) => {
+        const m = await measure(p);
+        checksOf(m).forEach(([name, r, min]) => {
           if(r < min) bad.push(`${theme}/${pal}/${route}  ${name}  ${r.toFixed(2)} < ${min}`);
         });
       }
+      /* DUZENLER. Bazi duzenler jeton yeniden tanimliyor (ornegin kraft
+         kagit rengini turetiyor); o yuzden kontrast varsayilan duzende
+         gectigi icin diger dortte de gecmis sayilmaz. Tek temsilci ekran
+         yeter: olculen sey ekranin icerigi degil, kokteki jetonlar. */
+      for(const design of ['odak', 'kraft', 'katmanli', 'harita']){
+        await p.evaluate(async d => {
+          await SP.Model.saveProfile({ design:d });
+          SP.App.applyTheme();
+          await SP.App.render();
+        }, design);
+        await p.evaluate(id => SP.App.go(id), 'labs');
+        await wait(220);
+        const m = await measure(p);
+        checksOf(m).forEach(([name, r, min]) => {
+          if(r < min) bad.push(`${theme}/${pal}/${design}  ${name}  ${r.toFixed(2)} < ${min}`);
+        });
+      }
+      await p.evaluate(async () => {
+        await SP.Model.saveProfile({ design:SP.DEFAULT_DESIGN });
+        SP.App.applyTheme();
+        await SP.App.render();
+      });
+
       /* Her palet icin bir ekran goruntusu birak. */
       await p.evaluate(id => SP.App.go(id), 'labs');
       await wait(250);

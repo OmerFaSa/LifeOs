@@ -119,6 +119,9 @@ SP.Screens.family = (function(){
           ${K.Field({ label:'Palet',
             input:K.Select({ id:'pref-palette', value:S.profile.palette || SP.DEFAULT_PALETTE,
               options:SP.PALETTES.map(x => ({ value:x.id, label:x.name })) }) })}
+          ${K.Field({ label:'Düzen', hint:SP.DESIGN_BY_ID[S.profile.design || SP.DEFAULT_DESIGN].note,
+            input:K.Select({ id:'pref-design', value:S.profile.design || SP.DEFAULT_DESIGN,
+              options:SP.DESIGNS.map(x => ({ value:x.id, label:x.name })) }) })}
           ${K.Field({ label:'Hanedeki kişi sayısı', hint:'sepet hesabı için',
             input:K.Input({ id:'pref-size', type:'number', numeric:true, min:1, max:20,
               value:p.householdSize || 1 }) })}
@@ -156,8 +159,9 @@ SP.Screens.family = (function(){
     async 'save-prefs'(){
       const theme = (document.getElementById('pref-theme') || {}).value;
       const palette = (document.getElementById('pref-palette') || {}).value;
+      const design = (document.getElementById('pref-design') || {}).value;
       const size = (document.getElementById('pref-size') || {}).value;
-      await M.saveProfile({ theme, palette });
+      await M.saveProfile({ theme, palette, design });
       await M.savePrefs({ householdSize:Math.max(1, Number(size) || 1) });
       SP.App.applyTheme();
       UI.toast('Kaydedildi');

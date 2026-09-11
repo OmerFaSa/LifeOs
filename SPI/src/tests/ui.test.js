@@ -310,6 +310,31 @@
     });
   });
 
+  describe('Düzen seçimi', () => {
+    it('varsayılan düzende kök niteliği yazılmaz', () => {
+      resetState();
+      SP.S.profile = SP.Model.defaultProfile();
+      SP.App.applyTheme();
+      expect(document.documentElement.getAttribute('data-design')).toBe(null);
+    });
+
+    it('seçilen düzen köke yazılır', () => {
+      resetState();
+      SP.S.profile = Object.assign(SP.Model.defaultProfile(), { design:'harita' });
+      SP.App.applyTheme();
+      expect(document.documentElement.getAttribute('data-design')).toBe('harita');
+    });
+
+    /* Depodan bozuk bir değer gelirse uygulama düzensiz kalmaz,
+       varsayılana döner. */
+    it('tanınmayan düzen varsayılana düşer', () => {
+      resetState();
+      SP.S.profile = Object.assign(SP.Model.defaultProfile(), { design:'yokboyle' });
+      SP.App.applyTheme();
+      expect(document.documentElement.getAttribute('data-design')).toBe(null);
+    });
+  });
+
   describe('Kurulum', () => {
     it('boş profilde kurulum gerekir', () => {
       resetState();

@@ -321,6 +321,7 @@ SP.App = (function(){
     const p = S.profile || {};
     const theme = p.theme || 'system';
     const palette = p.palette || SP.DEFAULT_PALETTE;
+    const design = p.design || SP.DEFAULT_DESIGN;
     return String(html`
       <div class="appear" id="appearance" role="dialog" aria-label="Görünüm">
         <div class="appear__label">Tema</div>
@@ -342,8 +343,21 @@ SP.App = (function(){
           </button>`)}
         </div>
 
-        <p class="appear__note">Tema ve palet bu profile kaydedilir.
-          «Sistem» seçiliyken cihazın açık/koyu tercihi izlenir.</p>
+        <div class="appear__label">Düzen</div>
+        <div class="appear__designs">${map(SP.DESIGNS, d => html`
+          <button class="${cls('desbtn', d.id === design && 'is-on')}"
+            data-act="set-design" data-design="${d.id}" title="${d.note}"
+            aria-pressed="${d.id === design ? 'true' : 'false'}">
+            <span class="${'desbtn__mini desbtn__mini--' + d.swatch}" aria-hidden="true"
+              >${raw('<i></i>'.repeat(d.swatch === 'nodes' ? 4 : 5))}</span>
+            <span class="desbtn__name">${d.name}</span>
+          </button>`)}
+        </div>
+
+        <p class="appear__note">Tema, palet ve düzen bu profile kaydedilir.
+          «Sistem» seçiliyken cihazın açık/koyu tercihi izlenir. Düzen yalnız
+          iskeleti değiştirir: durum renkleri ve kesinlik etiketleri
+          hiçbir düzende değişmez.</p>
       </div>`);
   }
 
@@ -552,6 +566,12 @@ SP.App = (function(){
     const p = (S.profile && S.profile.palette) || SP.DEFAULT_PALETTE;
     if(p === SP.DEFAULT_PALETTE) root.removeAttribute('data-palette');
     else root.setAttribute('data-palette', p);
+
+    /* Düzen de kökte durur. Varsayılan «defter» hiçbir şey yazmaz:
+       designs.css yalnız data-design varken devreye girsin diye. */
+    const d = (S.profile && S.profile.design) || SP.DEFAULT_DESIGN;
+    if(d === SP.DEFAULT_DESIGN || !SP.DESIGN_BY_ID[d]) root.removeAttribute('data-design');
+    else root.setAttribute('data-design', d);
   }
 
   /* ---------------------------------------------------------- küresel eylemler */
@@ -619,6 +639,15 @@ SP.App = (function(){
       await M.saveProfile({ palette:el.dataset.palette });
       applyTheme();
       refreshAppearance();
+    },
+    /* Düzen değişince sayfa YENİDEN ÇİZİLİR: kimi düzen kabuğun
+       ızgarasını değiştiriyor ve yapışkan sütunların yeni ölçüyle
+       yerleşmesi gerekiyor. */
+    async 'set-design'(el){
+      await M.saveProfile({ design:el.dataset.design });
+      applyTheme();
+      refreshAppearance();
+      render();
     },
     async 'cmdk-run'(el){ SP.Palette.runById(el.dataset.id); },
     async 'sheet-close'(){ UI.closeSheet(); },
