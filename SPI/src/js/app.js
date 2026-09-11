@@ -221,6 +221,49 @@ SP.App = (function(){
       </footer>`;
   }
 
+  /* ---------- telefonda alt gezinme ----------
+
+     Telefonda HER ŞEY hamburger menüden geçiyordu. Veri girişinin çoğu
+     telefonda yapılacak; en çok kullanılan yollar başparmağın altında
+     olmalı, iki dokunuş arkasında değil.
+
+     Beş yuva: dört yol + menü. Yedi bölümün hepsi buraya sığmaz ve
+     sığdırmaya çalışmak beşini de okunmaz yapardı; menü yuvası tam
+     listeyi açar.
+
+     Yalnız 860 pikselin altında çizilir. */
+  const TABBAR = [
+    { route:'today', label:'Günlük',  icon:'pulse' },
+    { route:'meals', label:'Öğün',    icon:'meal' },
+    { route:'labs',  label:'Testler', icon:'flask' },
+    { route:'move',  label:'Hareket', icon:'dumbbell' },
+  ];
+
+  function tabbarHtml(sc){
+    const aktif = sectionOf(sc.id);
+    return html`
+      <nav class="tabbar" aria-label="Hızlı gezinme">
+        ${map(TABBAR, t => {
+          const sec = sectionOf(t.route);
+          const on = sec.id === aktif.id;
+          const b = safe(() => badgeFor(t.route), null);
+          return html`<button class="${cls('tabbtn', on && 'is-active')}"
+            data-act="go" data-route="${t.route}"
+            ${when(on, () => attrs({ 'aria-current':'page' }))}>
+            <span class="tabbtn__ic" aria-hidden="true">${raw(UI.icon(t.icon))}</span>
+            <span class="tabbtn__t">${t.label}</span>
+            ${when(b, () => html`<span class="${cls('tabbtn__b', b.quiet && 'is-quiet')}"
+              aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
+          </button>`;
+        })}
+        <button class="${cls('tabbtn', S.sidebarOpen && 'is-active')}" data-act="toggle-menu"
+          aria-label="Bütün bölümler">
+          <span class="tabbtn__ic" aria-hidden="true">${raw(UI.icon('menu'))}</span>
+          <span class="tabbtn__t">Menü</span>
+        </button>
+      </nav>`;
+  }
+
   /* ---------- derleme damgası ----------
 
      Ekrandaki sayfanın HANGİ derleme olduğunu söyler. Küçük bir ayrıntı
@@ -545,6 +588,7 @@ SP.App = (function(){
             <main class="wrapc content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
           </div>
           ${safe(footerHtml)}
+          ${safe(() => tabbarHtml(sc))}
         </div>
         ${when(S.sidebarOpen, () => safe(() => navsheetHtml(sc)))}`);
 

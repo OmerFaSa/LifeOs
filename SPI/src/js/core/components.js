@@ -362,10 +362,36 @@ SP.C = (function(){
   }
 
   /* Yukleniyor: spinner degil iskelet */
+  /* BEKLEME. Model çağrısı saniyeler sürüyor ve iskelet ekran
+     tasarlanmamıştı: kullanıcı donduğunu sanıyordu.
+
+     İki şey eklendi. Birincisi: iskelet artık NE BEKLENDİĞİNİ söyler —
+     boş gri çubuklar «bir şey oluyor» der, «ne olduğunu» değil.
+     İkincisi: bir ışık şeridi sayfanın donmadığını gösterir; hareketi
+     azaltılmış tercihinde şerit durur, metin kalır. */
   function Skeleton(o){
-    const n = o && o.rows ? o.rows : 3;
-    return html`<div class="skeleton" aria-busy="true" aria-live="polite">
-      ${map(Array.from({ length:n }), (_, i) => html`<div class="skeleton__row" style="width:${[92, 74, 84, 62][i % 4]}%"></div>`)}
+    const c = o || {};
+    const n = c.rows || 3;
+    return html`<div class="${cls('skeleton', c.label && 'skeleton--labeled')}"
+      aria-busy="true" aria-live="polite">
+      ${when(c.label, () => html`<div class="skeleton__label">
+        <span class="skeleton__spin" aria-hidden="true"></span>
+        <span>${c.label}</span>
+        ${when(c.hint, () => html`<span class="skeleton__hint">${c.hint}</span>`)}
+      </div>`)}
+      ${map(Array.from({ length:n }), (_, i) => html`<div class="skeleton__row"
+        style="width:${[92, 74, 84, 62][i % 4]}%"></div>`)}
+    </div>`;
+  }
+
+  /* Kısa işlemler için tek satırlık şerit — iskelet çizmeye değmeyen
+     yerlerde (düğmenin altında, alt sayfanın başında) kullanılır. */
+  function Busy(o){
+    const c = typeof o === 'string' ? { label:o } : (o || {});
+    return html`<div class="busy" role="status" aria-live="polite">
+      <span class="busy__spin" aria-hidden="true"></span>
+      <span class="busy__t">${c.label || 'İşleniyor…'}</span>
+      ${when(c.hint, () => html`<span class="busy__hint">${c.hint}</span>`)}
     </div>`;
   }
 
@@ -432,7 +458,7 @@ SP.C = (function(){
     Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     Entry, Ledger,
     PickCard, Toolbar,
-    Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, NextUp, Table, Pager, paginate,
+    Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, Busy, NextUp, Table, Pager, paginate,
     Mic, Drop,
     Grid, Span, Stack, Cols, Row, SectionTitle,
   };

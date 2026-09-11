@@ -1158,8 +1158,8 @@ SP.Screens.labs = (function(){
     async 'lab-file'(el){
       const file = el.files && el.files[0];
       if(!file) return;
-      UI.toast('Okunuyor…');
-      preview = await SP.Extract.fromLabFile(file);
+      preview = await UI.withBusy('Rapor okunuyor', file.name,
+        () => SP.Extract.fromLabFile(file));
       preview.date = (document.getElementById('paste-date') || {}).value || U.todayISO();
       preview.lab = (document.getElementById('paste-lab') || {}).value || '';
       if(!preview.rows.length){ UI.toast(preview.note); return; }

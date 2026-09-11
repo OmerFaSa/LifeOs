@@ -320,10 +320,10 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   pointer-events:none;
   max-width:calc(100vw - 24px);
 }
-/* Alt gezinme çubuğu kalktı; bildirim ekranın altında, güvenli alanın
-   üstünde durur. */
+/* Telefonda alt gezinme çubuğu var: bildirim onun ÜSTÜNDE durur,
+   altında kalıp görünmez olmaz. */
 @media (max-width:860px){
-  .toast-root{ bottom:calc(18px + env(safe-area-inset-bottom)); }
+  .toast-root{ bottom:calc(16px + 56px + env(safe-area-inset-bottom, 0px)); }
 }
 .toast{
   background:var(--text); color:var(--bg);
@@ -652,6 +652,41 @@ kbd{
 @keyframes skeleton{ from{ background-position:100% 50%; } to{ background-position:0 50%; } }
 @media (prefers-reduced-motion:reduce){
   .skeleton__row{ animation:none; background:var(--surface-2); }
+}
+
+/* Ne beklendiğini söyleyen başlık. Boş gri çubuklar «bir şey oluyor»
+   der, «ne olduğunu» değil. */
+.skeleton--labeled{ gap:12px; }
+.skeleton__label{
+  display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+  font-size:13px; font-weight:550; color:var(--text-2);
+}
+.skeleton__hint{ font-size:var(--fs-xs); color:var(--text-3); font-weight:400; }
+
+/* ---------- tek satırlık bekleme şeridi ----------
+   İskelet çizmeye değmeyen yerlerde: düğmenin altında, alt sayfanın
+   başında. İşin sürdüğünü söyler ve ne olduğunu yazar. */
+.busy{
+  display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+  padding:10px 13px; border-radius:var(--r-sm);
+  background:var(--surface-2); border:1px solid var(--border);
+  font-size:13px; color:var(--text-2);
+}
+.busy__t{ font-weight:550; color:var(--text); }
+.busy__hint{ font-size:var(--fs-xs); color:var(--text-3); }
+
+.skeleton__spin, .busy__spin{
+  width:13px; height:13px; flex:none; border-radius:50%;
+  border:2px solid color-mix(in srgb, var(--text-3) 40%, transparent);
+  border-top-color:var(--primary);
+  animation:spin .82s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce){
+  /* Hareket durur, bilgi kalır: dönen halka dolu bir noktaya iner. */
+  .skeleton__spin, .busy__spin{
+    animation:none; border-color:var(--primary); background:var(--primary);
+  }
 }
 
 .hint-text{ font-size:var(--fs-xs); color:var(--text-3); font-weight:400; }
@@ -1929,4 +1964,77 @@ body.is-dragging .drop.is-over{
 @container satir (max-width:560px){
   .medrow{ flex-direction:column; gap:10px; }
   .medrow__ey{ width:100%; }
+}
+
+/* ---------- bekleme şeridi ----------
+   Sayfanın en üstünde, işin sonuna kadar duran tek satır. Bildirim iki
+   saniyede kayboluyordu ve kullanıcı donduğunu sanıyordu. */
+.busybar{
+  position:fixed; top:0; left:50%; transform:translateX(-50%);
+  z-index:var(--z-toast);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  max-width:min(560px, calc(100vw - 24px));
+  margin-top:12px; padding:9px 16px;
+  border-radius:var(--r-pill);
+  background:var(--ink); color:var(--ink-on);
+  box-shadow:var(--shadow-lg);
+  font-size:13px;
+  animation:busybar-in var(--dur-lg) var(--ease);
+}
+@keyframes busybar-in{ from{ opacity:0; transform:translate(-50%,-8px); } to{ opacity:1; transform:translate(-50%,0); } }
+.busybar__t{ font-weight:600; }
+.busybar__hint{ font-size:var(--fs-xs); color:var(--ink-on-2); }
+.busybar__spin{
+  width:13px; height:13px; flex:none; border-radius:50%;
+  border:2px solid color-mix(in srgb, var(--ink-on) 32%, transparent);
+  border-top-color:var(--ink-on);
+  animation:spin .82s linear infinite;
+}
+@media (prefers-reduced-motion:reduce){
+  .busybar{ animation:none; }
+  .busybar__spin{ animation:none; border-color:var(--ink-on); background:var(--ink-on); }
+}
+
+/* ================= ilk kurulum =================
+
+   Sisteme giren herkesin gördüğü ilk şey. Üç bölümü var ve üçü de bir
+   şey anlatır: sistem ne yapar (ve ne yapmaz), beş alan neden sorulur,
+   bu beş alan neyi açar. */
+.setup{ display:flex; flex-direction:column; gap:26px; }
+
+.setup__kicker{
+  margin:0 0 6px; font-size:10px; font-weight:700; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--text-3);
+}
+.setup__h{
+  margin:0; font-family:var(--font-serif); font-size:clamp(23px,3.4vw,31px);
+  font-weight:500; letter-spacing:-.018em; line-height:1.12; text-wrap:balance;
+  max-width:20ch;
+}
+.setup__lede{ margin:13px 0 0; max-width:56ch; font-size:15px; line-height:1.6; color:var(--text-2); }
+
+/* Üç değişmez. Kutu değil satır: okunacak bir şey kutuya konmaz. */
+.setup__rules{ display:grid; gap:0; border-top:1px solid var(--border); }
+.setup__rule{
+  display:grid; grid-template-columns:minmax(160px,.8fr) minmax(0,1.6fr);
+  gap:4px 22px; padding:13px 0; border-bottom:1px solid var(--border);
+}
+.setup__rule b{ font-size:13.5px; font-weight:600; letter-spacing:-.005em; }
+.setup__rule span{ font-size:13px; color:var(--text-2); line-height:1.55; }
+
+.setup__form{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:16px 20px;
+}
+
+.setup__unlock{
+  padding:18px 20px; border-radius:var(--r-sm);
+  background:var(--primary-soft); border:1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+}
+.setup__list{ margin:0; padding-left:1.1em; font-size:13.5px; line-height:1.6; }
+.setup__list li{ margin:5px 0; color:var(--text-2); }
+.setup__list b{ color:var(--text); font-weight:600; }
+
+@media (max-width:640px){
+  .setup__rule{ grid-template-columns:minmax(0,1fr); gap:3px; }
+  .setup__form{ grid-template-columns:minmax(0,1fr); }
 }

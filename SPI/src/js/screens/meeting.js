@@ -64,7 +64,8 @@ SP.Screens.meeting = (function(){
       body:html`<div class="meet">
         ${map(live.turns, t => turnBlock(t, false))}
         ${when(running, () => html`<div class="meetturn is-live">
-          ${K.Skeleton({ rows:2 })}</div>`)}
+          ${K.Skeleton({ rows:2, label:'Sıradaki konuşuyor',
+            hint:'her ajan yalnız kendi alanından konuşur' })}</div>`)}
       </div>`,
     });
   }

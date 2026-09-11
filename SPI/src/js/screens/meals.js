@@ -600,8 +600,9 @@ SP.Screens.meals = (function(){
         vessel:(document.getElementById('ph-vessel') || {}).value || '',
         extra:(document.getElementById('ph-extra') || {}).value || '',
       };
-      UI.toast('Fotoğraf okunuyor…');
-      photoRes = await SP.Extract.fromMealPhoto(photoFile, hints);
+      photoRes = await UI.withBusy('Fotoğraf okunuyor',
+        'gramaj tahmin edilecek, ölçüm değil',
+        () => SP.Extract.fromMealPhoto(photoFile, hints));
       photoPreviewSheet(photoRes);
     },
     async 'toggle-photo-row'(el){

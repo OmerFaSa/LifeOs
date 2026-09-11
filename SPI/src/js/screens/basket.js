@@ -461,8 +461,9 @@ SP.Screens.basket = (function(){
     async 'open-receipt'(){ receiptFile = null; receiptRes = null; receiptSheet(); },
     async 'run-receipt'(){
       if(!receiptFile) return;
-      UI.toast('Fiş okunuyor…');
-      receiptRes = await SP.Extract.fromReceipt(receiptFile);
+      receiptRes = await UI.withBusy('Fiş okunuyor',
+        'fiyatlar «ölçüldü» olarak kaydedilecek',
+        () => SP.Extract.fromReceipt(receiptFile));
       receiptPreviewSheet(receiptRes);
     },
     async 'toggle-receipt-row'(el){

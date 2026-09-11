@@ -1475,6 +1475,56 @@ table td, table th{
 }
 .sitefoot__reload:hover{ color:var(--ink-on); border-color:var(--ink-on); }
 
+/* ================= telefonda alt gezinme =================
+
+   Telefonda her şey hamburger menüden geçiyordu. Veri girişinin çoğu
+   telefonda yapılacak; en çok kullanılan dört yol başparmağın altında
+   durur, beşinci yuva tam listeyi açar.
+
+   Yalnız 860 pikselin altında çizilir. */
+.tabbar{ display:none; }
+
+@media (max-width:860px){
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:var(--z-nav);
+    display:grid; grid-template-columns:repeat(5, 1fr);
+    background:color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter:saturate(1.3) blur(16px);
+    border-top:1px solid var(--border);
+    /* Ekranın alt kenarındaki sistem çubuğu düğmeleri yutmasın. */
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+  }
+  .tabbtn{
+    position:relative;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; padding:9px 2px 8px;
+    border:none; background:none; color:var(--text-3);
+    min-height:56px;
+    transition:color var(--dur) var(--ease);
+  }
+  .tabbtn__ic{ display:block; line-height:0; }
+  .tabbtn__ic svg{ width:21px; height:21px; stroke:currentColor; fill:none; stroke-width:1.7; }
+  .tabbtn__t{ font-size:10.5px; font-weight:550; letter-spacing:.01em; }
+  .tabbtn.is-active{ color:var(--sec); }
+  .tabbtn.is-active .tabbtn__t{ font-weight:650; }
+  /* Etkin yuvanın üstünde bölüm renginde kısa bir çizgi: hangi
+     bölümde olunduğu renkle değil KONUMLA da söylenir. */
+  .tabbtn.is-active::before{
+    content:''; position:absolute; top:0; left:22%; right:22%; height:2px;
+    background:var(--sec);
+  }
+  .tabbtn__b{
+    position:absolute; top:5px; left:calc(50% + 9px);
+    min-width:15px; height:15px; padding:0 4px; border-radius:var(--r-pill);
+    background:var(--danger); color:#fff;
+    font-size:9.5px; font-weight:700; line-height:15px; text-align:center;
+  }
+  .tabbtn__b.is-quiet{ background:var(--surface-3); color:var(--text-2); }
+
+  /* Alt bandın ve içeriğin sonu çubuğun altında kalmasın. */
+  .sitefoot__in{ padding-bottom:calc(40px + 56px + env(safe-area-inset-bottom, 0px)); }
+}
+
 /* ==== css/components.css ==== */
 /* Bilesen stilleri.
 
@@ -1798,10 +1848,10 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   pointer-events:none;
   max-width:calc(100vw - 24px);
 }
-/* Alt gezinme çubuğu kalktı; bildirim ekranın altında, güvenli alanın
-   üstünde durur. */
+/* Telefonda alt gezinme çubuğu var: bildirim onun ÜSTÜNDE durur,
+   altında kalıp görünmez olmaz. */
 @media (max-width:860px){
-  .toast-root{ bottom:calc(18px + env(safe-area-inset-bottom)); }
+  .toast-root{ bottom:calc(16px + 56px + env(safe-area-inset-bottom, 0px)); }
 }
 .toast{
   background:var(--text); color:var(--bg);
@@ -2130,6 +2180,41 @@ kbd{
 @keyframes skeleton{ from{ background-position:100% 50%; } to{ background-position:0 50%; } }
 @media (prefers-reduced-motion:reduce){
   .skeleton__row{ animation:none; background:var(--surface-2); }
+}
+
+/* Ne beklendiğini söyleyen başlık. Boş gri çubuklar «bir şey oluyor»
+   der, «ne olduğunu» değil. */
+.skeleton--labeled{ gap:12px; }
+.skeleton__label{
+  display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+  font-size:13px; font-weight:550; color:var(--text-2);
+}
+.skeleton__hint{ font-size:var(--fs-xs); color:var(--text-3); font-weight:400; }
+
+/* ---------- tek satırlık bekleme şeridi ----------
+   İskelet çizmeye değmeyen yerlerde: düğmenin altında, alt sayfanın
+   başında. İşin sürdüğünü söyler ve ne olduğunu yazar. */
+.busy{
+  display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+  padding:10px 13px; border-radius:var(--r-sm);
+  background:var(--surface-2); border:1px solid var(--border);
+  font-size:13px; color:var(--text-2);
+}
+.busy__t{ font-weight:550; color:var(--text); }
+.busy__hint{ font-size:var(--fs-xs); color:var(--text-3); }
+
+.skeleton__spin, .busy__spin{
+  width:13px; height:13px; flex:none; border-radius:50%;
+  border:2px solid color-mix(in srgb, var(--text-3) 40%, transparent);
+  border-top-color:var(--primary);
+  animation:spin .82s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce){
+  /* Hareket durur, bilgi kalır: dönen halka dolu bir noktaya iner. */
+  .skeleton__spin, .busy__spin{
+    animation:none; border-color:var(--primary); background:var(--primary);
+  }
 }
 
 .hint-text{ font-size:var(--fs-xs); color:var(--text-3); font-weight:400; }
@@ -3409,6 +3494,79 @@ body.is-dragging .drop.is-over{
   .medrow__ey{ width:100%; }
 }
 
+/* ---------- bekleme şeridi ----------
+   Sayfanın en üstünde, işin sonuna kadar duran tek satır. Bildirim iki
+   saniyede kayboluyordu ve kullanıcı donduğunu sanıyordu. */
+.busybar{
+  position:fixed; top:0; left:50%; transform:translateX(-50%);
+  z-index:var(--z-toast);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  max-width:min(560px, calc(100vw - 24px));
+  margin-top:12px; padding:9px 16px;
+  border-radius:var(--r-pill);
+  background:var(--ink); color:var(--ink-on);
+  box-shadow:var(--shadow-lg);
+  font-size:13px;
+  animation:busybar-in var(--dur-lg) var(--ease);
+}
+@keyframes busybar-in{ from{ opacity:0; transform:translate(-50%,-8px); } to{ opacity:1; transform:translate(-50%,0); } }
+.busybar__t{ font-weight:600; }
+.busybar__hint{ font-size:var(--fs-xs); color:var(--ink-on-2); }
+.busybar__spin{
+  width:13px; height:13px; flex:none; border-radius:50%;
+  border:2px solid color-mix(in srgb, var(--ink-on) 32%, transparent);
+  border-top-color:var(--ink-on);
+  animation:spin .82s linear infinite;
+}
+@media (prefers-reduced-motion:reduce){
+  .busybar{ animation:none; }
+  .busybar__spin{ animation:none; border-color:var(--ink-on); background:var(--ink-on); }
+}
+
+/* ================= ilk kurulum =================
+
+   Sisteme giren herkesin gördüğü ilk şey. Üç bölümü var ve üçü de bir
+   şey anlatır: sistem ne yapar (ve ne yapmaz), beş alan neden sorulur,
+   bu beş alan neyi açar. */
+.setup{ display:flex; flex-direction:column; gap:26px; }
+
+.setup__kicker{
+  margin:0 0 6px; font-size:10px; font-weight:700; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--text-3);
+}
+.setup__h{
+  margin:0; font-family:var(--font-serif); font-size:clamp(23px,3.4vw,31px);
+  font-weight:500; letter-spacing:-.018em; line-height:1.12; text-wrap:balance;
+  max-width:20ch;
+}
+.setup__lede{ margin:13px 0 0; max-width:56ch; font-size:15px; line-height:1.6; color:var(--text-2); }
+
+/* Üç değişmez. Kutu değil satır: okunacak bir şey kutuya konmaz. */
+.setup__rules{ display:grid; gap:0; border-top:1px solid var(--border); }
+.setup__rule{
+  display:grid; grid-template-columns:minmax(160px,.8fr) minmax(0,1.6fr);
+  gap:4px 22px; padding:13px 0; border-bottom:1px solid var(--border);
+}
+.setup__rule b{ font-size:13.5px; font-weight:600; letter-spacing:-.005em; }
+.setup__rule span{ font-size:13px; color:var(--text-2); line-height:1.55; }
+
+.setup__form{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:16px 20px;
+}
+
+.setup__unlock{
+  padding:18px 20px; border-radius:var(--r-sm);
+  background:var(--primary-soft); border:1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+}
+.setup__list{ margin:0; padding-left:1.1em; font-size:13.5px; line-height:1.6; }
+.setup__list li{ margin:5px 0; color:var(--text-2); }
+.setup__list b{ color:var(--text); font-weight:600; }
+
+@media (max-width:640px){
+  .setup__rule{ grid-template-columns:minmax(0,1fr); gap:3px; }
+  .setup__form{ grid-template-columns:minmax(0,1fr); }
+}
+
 /* ==== css/designs.css ==== */
 /* DÜZENLER — dört seçilebilir tasarım dili.
 
@@ -3995,7 +4153,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'ee4c76f', at:'2026-09-11 17:22', dirty:true };
+SP.BUILD = { id:'86117b4', at:'2026-09-11 17:31', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -11164,6 +11322,49 @@ SP.UI = (function(){
   /* Bildirim. `undo` verilirse bildirimin icinde bir "geri al" dugmesi
      cikar ve bildirim daha uzun durur: kullanicinin okuyup karar vermesi
      icin 1,5 saniye yetmez. */
+  /* ---------------------------------------------------------- bekleme
+
+     Model cagrisi saniyeler suruyor ve geri bildirim tek bir bildirimdi:
+     iki saniye sonra kayboluyor, kullanici donduğunu saniyordu.
+
+     Bu serit isin SONUNA KADAR durur ve ne beklendigini yazar. Sayfanin
+     en ustunde, icerigin akisini bozmadan. */
+
+  let busyCount = 0;
+
+  function busy(label, hint){
+    busyCount++;
+    const root = document.getElementById('overlay-root');
+    let el = document.getElementById('busybar');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'busybar';
+      el.className = 'busybar';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      root.appendChild(el);
+    }
+    el.innerHTML = '<span class="busybar__spin" aria-hidden="true"></span>'
+      + '<span class="busybar__t">' + SP.U.esc(label || 'İşleniyor…') + '</span>'
+      + (hint ? '<span class="busybar__hint">' + SP.U.esc(hint) + '</span>' : '');
+    return el;
+  }
+
+  /* Ic ice cagrilarda erken kapanmasin: sayac sifirlaninca kalkar. */
+  function idle(){
+    busyCount = Math.max(0, busyCount - 1);
+    if(busyCount) return;
+    const el = document.getElementById('busybar');
+    if(el) el.remove();
+  }
+
+  /* Bir isi serit acikken kosturur ve her durumda kapatir. */
+  async function withBusy(label, hint, fn){
+    busy(label, hint);
+    try{ return await fn(); }
+    finally{ idle(); }
+  }
+
   function toast(text, opts){
     const o = opts || {};
     const root = document.getElementById('toast-root');
@@ -11204,6 +11405,7 @@ SP.UI = (function(){
     rangeBar, macroSplit,
     hint, rail, openHint, closeHint, isHintOpen,
     sheet, closeSheet, isSheetOpen, toast, confirmSheet,
+    busy, idle, withBusy,
   };
 })();
 
@@ -11572,10 +11774,36 @@ SP.C = (function(){
   }
 
   /* Yukleniyor: spinner degil iskelet */
+  /* BEKLEME. Model çağrısı saniyeler sürüyor ve iskelet ekran
+     tasarlanmamıştı: kullanıcı donduğunu sanıyordu.
+
+     İki şey eklendi. Birincisi: iskelet artık NE BEKLENDİĞİNİ söyler —
+     boş gri çubuklar «bir şey oluyor» der, «ne olduğunu» değil.
+     İkincisi: bir ışık şeridi sayfanın donmadığını gösterir; hareketi
+     azaltılmış tercihinde şerit durur, metin kalır. */
   function Skeleton(o){
-    const n = o && o.rows ? o.rows : 3;
-    return html`<div class="skeleton" aria-busy="true" aria-live="polite">
-      ${map(Array.from({ length:n }), (_, i) => html`<div class="skeleton__row" style="width:${[92, 74, 84, 62][i % 4]}%"></div>`)}
+    const c = o || {};
+    const n = c.rows || 3;
+    return html`<div class="${cls('skeleton', c.label && 'skeleton--labeled')}"
+      aria-busy="true" aria-live="polite">
+      ${when(c.label, () => html`<div class="skeleton__label">
+        <span class="skeleton__spin" aria-hidden="true"></span>
+        <span>${c.label}</span>
+        ${when(c.hint, () => html`<span class="skeleton__hint">${c.hint}</span>`)}
+      </div>`)}
+      ${map(Array.from({ length:n }), (_, i) => html`<div class="skeleton__row"
+        style="width:${[92, 74, 84, 62][i % 4]}%"></div>`)}
+    </div>`;
+  }
+
+  /* Kısa işlemler için tek satırlık şerit — iskelet çizmeye değmeyen
+     yerlerde (düğmenin altında, alt sayfanın başında) kullanılır. */
+  function Busy(o){
+    const c = typeof o === 'string' ? { label:o } : (o || {});
+    return html`<div class="busy" role="status" aria-live="polite">
+      <span class="busy__spin" aria-hidden="true"></span>
+      <span class="busy__t">${c.label || 'İşleniyor…'}</span>
+      ${when(c.hint, () => html`<span class="busy__hint">${c.hint}</span>`)}
     </div>`;
   }
 
@@ -11642,7 +11870,7 @@ SP.C = (function(){
     Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     Entry, Ledger,
     PickCard, Toolbar,
-    Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, NextUp, Table, Pager, paginate,
+    Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, Busy, NextUp, Table, Pager, paginate,
     Mic, Drop,
     Grid, Span, Stack, Cols, Row, SectionTitle,
   };
@@ -13596,34 +13824,97 @@ SP.Setup = (function(){
     return !p.name || !p.birthYear || !p.heightCm || !p.weightKg;
   }
 
+  /* ------------------------------------------------------------- açılış
+
+     Sisteme giren herkesin gördüğü İLK ŞEY ve uzun süre hiç tasarlanmadı:
+     beş alanlık bir alt sayfaydı. İlk izlenim bir kez oluşur ve sistemin
+     en zayıf ekranı, en güçlü ekranından önce geliyordu.
+
+     Şimdi üç bölümü var ve üçü de bir şey ANLATIYOR:
+
+       1. Sistem ne yapar — ve daha önemlisi NE YAPMAZ.
+       2. Beş alan — neden bu beşi sorulduğu her alanın yanında yazıyor.
+       3. Bu beş alan neyi AÇAR — soru bedelsiz değil, karşılığı görünür.
+
+     Hiçbir adım zorunlu değil: atlanınca ekranlar boş kalmaz, «profil
+     eksik» diyen ve nereye gidileceğini söyleyen kartlar görünür. */
+
+  function acilirYil(){
+    const y = new Date().getFullYear();
+    return { min:y - 110, max:y - 5 };
+  }
+
   function open(){
     const p = SP.S.profile || {};
+    const yil = acilirYil();
+
     SP.UI.sheet({
-      title:'SPİ — ilk kurulum',
-      subtitle:'Beş alan yeter; gerisi sonra',
-      wide:true,
-      body:String(K.Stack([
-        K.Notice({ tone:'info', body:'Bu beş alan olmadan kalori ve protein hedefi hesaplanmaz. '
-          + 'Sistem eksik veriyi tahmin etmez, boş bırakır ve nedenini söyler.' }),
-        html`<div class="grid-form">
-          ${K.Field({ label:'Ad', input:K.Input({ id:'su-name', value:p.name || '',
-            placeholder:'Sana nasıl seslenelim?' }) })}
-          ${K.Field({ label:'Doğum yılı', input:K.Input({ id:'su-birth', type:'number',
-            numeric:true, min:1900, max:2026, value:p.birthYear || '' }) })}
-          ${K.Field({ label:'Cinsiyet', input:K.Select({ id:'su-sex', value:p.sex || 'male',
-            options:[{ value:'male', label:'Erkek' }, { value:'female', label:'Kadın' }] }) })}
-          ${K.Field({ label:'Boy (cm)', input:K.Input({ id:'su-height', type:'number',
-            numeric:true, min:80, max:230, value:p.heightCm || '' }) })}
-          ${K.Field({ label:'Kilo (kg)', input:K.Input({ id:'su-weight', type:'number',
-            numeric:true, step:'0.1', min:20, max:250, value:p.weightKg || '' }) })}
-          ${K.Field({ label:'Hareket düzeyi', input:K.Select({ id:'su-activity',
-            value:p.activity || 'moderate',
-            options:SP.ACTIVITY_LEVELS.map(a => ({ value:a.id, label:a.label })) }) })}
-          ${K.Field({ label:'Hedef', input:K.Select({ id:'su-goal', value:p.goal || 'health',
-            options:SP.GOALS.map(g => ({ value:g.id, label:g.label })) }) })}
-        </div>`,
-        K.Notice({ tone:'warn', title:'Sınır:', body:SP.CLINICAL.disclaimer }),
-      ])),
+      title:'SPİ', subtitle:'kişisel ve aile odaklı sağlık sistemi',
+      wide:true, noClose:true,
+      body:String(html`<div class="setup">
+
+        <div class="setup__hero">
+          <p class="setup__kicker">İlk kurulum</p>
+          <h2 class="setup__h">Beş alan yeter. Gerisi zamanla dolar.</h2>
+          <p class="setup__lede">Bu sistem senin girdiğin veriyi okur ve ondan
+            hesap yapar. Ölçüm yapmaz, teşhis koymaz, ilaç önermez — ve bilmediği
+            hiçbir şeyi tahmin etmez.</p>
+        </div>
+
+        <div class="setup__rules">
+          <div class="setup__rule">
+            <b>Eksik veri sıfır sayılmaz.</b>
+            <span>Boş bıraktığın alan hesaba «0» diye girmez; o hesap hiç yapılmaz
+              ve nedeni yazar.</span>
+          </div>
+          <div class="setup__rule">
+            <b>Tahmin, ölçüm gibi gösterilmez.</b>
+            <span>Her sayının yanında nereden geldiği durur: ölçüldü, hesaplandı,
+              tahmin.</span>
+          </div>
+          <div class="setup__rule">
+            <b>Veriler bu cihazda kalır.</b>
+            <span>Ad ve doğum yılı hiçbir modele gönderilmez.</span>
+          </div>
+        </div>
+
+        <div class="setup__form">
+          ${K.Field({ label:'Ad', hint:'yalnızca sana seslenmek için — modele gitmez',
+            input:K.Input({ id:'su-name', value:p.name || '',
+              placeholder:'Sana nasıl seslenelim?' }) })}
+          ${K.Field({ label:'Doğum yılı', hint:'referans aralıkları yaşa göre değişir',
+            input:K.Input({ id:'su-birth', type:'number', numeric:true,
+              min:yil.min, max:yil.max, value:p.birthYear || '',
+              placeholder:String(yil.max - 25) }) })}
+          ${K.Field({ label:'Cinsiyet', hint:'ferritin ve hemoglobin aralıkları buna bağlı',
+            input:K.Select({ id:'su-sex', value:p.sex || 'male',
+              options:[{ value:'male', label:'Erkek' }, { value:'female', label:'Kadın' }] }) })}
+          ${K.Field({ label:'Boy (cm)', hint:'bazal metabolizma hesabına girer',
+            input:K.Input({ id:'su-height', type:'number', numeric:true,
+              min:80, max:230, value:p.heightCm || '', placeholder:'178' }) })}
+          ${K.Field({ label:'Kilo (kg)', hint:'ilk günün ölçümü olarak da kaydedilir',
+            input:K.Input({ id:'su-weight', type:'number', numeric:true, step:'0.1',
+              min:20, max:250, value:p.weightKg || '', placeholder:'74' }) })}
+          ${K.Field({ label:'Hareket düzeyi', hint:'kalori hedefinin çarpanı',
+            input:K.Select({ id:'su-activity', value:p.activity || 'moderate',
+              options:SP.ACTIVITY_LEVELS.map(a => ({ value:a.id, label:a.label })) }) })}
+          ${K.Field({ label:'Hedef', hint:'sonradan değiştirilebilir',
+            input:K.Select({ id:'su-goal', value:p.goal || 'health',
+              options:SP.GOALS.map(g => ({ value:g.id, label:g.label })) }) })}
+        </div>
+
+        <div class="setup__unlock">
+          <p class="setup__kicker">Bu beş alan neyi açar</p>
+          <ul class="setup__list">
+            <li><b>Kalori ve protein hedefi</b> — bazal metabolizmandan hesaplanır</li>
+            <li><b>Yaşa ve cinsiyete göre referans aralıkları</b> — 58 ölçüm için</li>
+            <li><b>eGFR ve FIB-4</b> — yaş olmadan hesaplanamayan indeksler</li>
+            <li><b>Toparlanma skoru</b> — ilk günün kilosu taban çizgi olur</li>
+          </ul>
+        </div>
+
+        ${K.Notice({ tone:'warn', title:'Sınır:', body:SP.CLINICAL.disclaimer })}
+      </div>`),
       footer:String(html`${K.Button({ label:'Şimdilik atla', act:'setup-skip' })}
         ${K.Button({ label:'Başla', tone:'primary', act:'setup-save' })}`),
     });
@@ -15274,8 +15565,8 @@ SP.Screens.labs = (function(){
     async 'lab-file'(el){
       const file = el.files && el.files[0];
       if(!file) return;
-      UI.toast('Okunuyor…');
-      preview = await SP.Extract.fromLabFile(file);
+      preview = await UI.withBusy('Rapor okunuyor', file.name,
+        () => SP.Extract.fromLabFile(file));
       preview.date = (document.getElementById('paste-date') || {}).value || U.todayISO();
       preview.lab = (document.getElementById('paste-lab') || {}).value || '';
       if(!preview.rows.length){ UI.toast(preview.note); return; }
@@ -15956,8 +16247,9 @@ SP.Screens.meals = (function(){
         vessel:(document.getElementById('ph-vessel') || {}).value || '',
         extra:(document.getElementById('ph-extra') || {}).value || '',
       };
-      UI.toast('Fotoğraf okunuyor…');
-      photoRes = await SP.Extract.fromMealPhoto(photoFile, hints);
+      photoRes = await UI.withBusy('Fotoğraf okunuyor',
+        'gramaj tahmin edilecek, ölçüm değil',
+        () => SP.Extract.fromMealPhoto(photoFile, hints));
       photoPreviewSheet(photoRes);
     },
     async 'toggle-photo-row'(el){
@@ -17311,8 +17603,9 @@ SP.Screens.basket = (function(){
     async 'open-receipt'(){ receiptFile = null; receiptRes = null; receiptSheet(); },
     async 'run-receipt'(){
       if(!receiptFile) return;
-      UI.toast('Fiş okunuyor…');
-      receiptRes = await SP.Extract.fromReceipt(receiptFile);
+      receiptRes = await UI.withBusy('Fiş okunuyor',
+        'fiyatlar «ölçüldü» olarak kaydedilecek',
+        () => SP.Extract.fromReceipt(receiptFile));
       receiptPreviewSheet(receiptRes);
     },
     async 'toggle-receipt-row'(el){
@@ -18042,7 +18335,9 @@ SP.Screens.team = (function(){
               </div>
             </div>`)}
           ${when(busy, () => html`<div class="msg msg--agent">${P.avatar(a.id, 'sm')}
-            <div class="msg__body">${K.Skeleton({ rows:2 })}</div></div>`)}
+            <div class="msg__body">${K.Skeleton({ rows:2,
+              label:a.name + ' düşünüyor',
+              hint:'brifingi okuyor ve cümleyi kuruyor' })}</div></div>`)}
         </div>`,
       foot:html`
         <div class="quick">
@@ -18218,7 +18513,8 @@ SP.Screens.meeting = (function(){
       body:html`<div class="meet">
         ${map(live.turns, t => turnBlock(t, false))}
         ${when(running, () => html`<div class="meetturn is-live">
-          ${K.Skeleton({ rows:2 })}</div>`)}
+          ${K.Skeleton({ rows:2, label:'Sıradaki konuşuyor',
+            hint:'her ajan yalnız kendi alanından konuşur' })}</div>`)}
       </div>`,
     });
   }
@@ -19161,6 +19457,49 @@ SP.App = (function(){
       </footer>`;
   }
 
+  /* ---------- telefonda alt gezinme ----------
+
+     Telefonda HER ŞEY hamburger menüden geçiyordu. Veri girişinin çoğu
+     telefonda yapılacak; en çok kullanılan yollar başparmağın altında
+     olmalı, iki dokunuş arkasında değil.
+
+     Beş yuva: dört yol + menü. Yedi bölümün hepsi buraya sığmaz ve
+     sığdırmaya çalışmak beşini de okunmaz yapardı; menü yuvası tam
+     listeyi açar.
+
+     Yalnız 860 pikselin altında çizilir. */
+  const TABBAR = [
+    { route:'today', label:'Günlük',  icon:'pulse' },
+    { route:'meals', label:'Öğün',    icon:'meal' },
+    { route:'labs',  label:'Testler', icon:'flask' },
+    { route:'move',  label:'Hareket', icon:'dumbbell' },
+  ];
+
+  function tabbarHtml(sc){
+    const aktif = sectionOf(sc.id);
+    return html`
+      <nav class="tabbar" aria-label="Hızlı gezinme">
+        ${map(TABBAR, t => {
+          const sec = sectionOf(t.route);
+          const on = sec.id === aktif.id;
+          const b = safe(() => badgeFor(t.route), null);
+          return html`<button class="${cls('tabbtn', on && 'is-active')}"
+            data-act="go" data-route="${t.route}"
+            ${when(on, () => attrs({ 'aria-current':'page' }))}>
+            <span class="tabbtn__ic" aria-hidden="true">${raw(UI.icon(t.icon))}</span>
+            <span class="tabbtn__t">${t.label}</span>
+            ${when(b, () => html`<span class="${cls('tabbtn__b', b.quiet && 'is-quiet')}"
+              aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
+          </button>`;
+        })}
+        <button class="${cls('tabbtn', S.sidebarOpen && 'is-active')}" data-act="toggle-menu"
+          aria-label="Bütün bölümler">
+          <span class="tabbtn__ic" aria-hidden="true">${raw(UI.icon('menu'))}</span>
+          <span class="tabbtn__t">Menü</span>
+        </button>
+      </nav>`;
+  }
+
   /* ---------- derleme damgası ----------
 
      Ekrandaki sayfanın HANGİ derleme olduğunu söyler. Küçük bir ayrıntı
@@ -19485,6 +19824,7 @@ SP.App = (function(){
             <main class="wrapc content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
           </div>
           ${safe(footerHtml)}
+          ${safe(() => tabbarHtml(sc))}
         </div>
         ${when(S.sidebarOpen, () => safe(() => navsheetHtml(sc)))}`);
 

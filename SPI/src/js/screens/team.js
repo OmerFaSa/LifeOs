@@ -55,7 +55,9 @@ SP.Screens.team = (function(){
               </div>
             </div>`)}
           ${when(busy, () => html`<div class="msg msg--agent">${P.avatar(a.id, 'sm')}
-            <div class="msg__body">${K.Skeleton({ rows:2 })}</div></div>`)}
+            <div class="msg__body">${K.Skeleton({ rows:2,
+              label:a.name + ' düşünüyor',
+              hint:'brifingi okuyor ve cümleyi kuruyor' })}</div></div>`)}
         </div>`,
       foot:html`
         <div class="quick">

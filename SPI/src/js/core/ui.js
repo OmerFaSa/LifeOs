@@ -584,6 +584,49 @@ SP.UI = (function(){
   /* Bildirim. `undo` verilirse bildirimin icinde bir "geri al" dugmesi
      cikar ve bildirim daha uzun durur: kullanicinin okuyup karar vermesi
      icin 1,5 saniye yetmez. */
+  /* ---------------------------------------------------------- bekleme
+
+     Model cagrisi saniyeler suruyor ve geri bildirim tek bir bildirimdi:
+     iki saniye sonra kayboluyor, kullanici donduğunu saniyordu.
+
+     Bu serit isin SONUNA KADAR durur ve ne beklendigini yazar. Sayfanin
+     en ustunde, icerigin akisini bozmadan. */
+
+  let busyCount = 0;
+
+  function busy(label, hint){
+    busyCount++;
+    const root = document.getElementById('overlay-root');
+    let el = document.getElementById('busybar');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'busybar';
+      el.className = 'busybar';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      root.appendChild(el);
+    }
+    el.innerHTML = '<span class="busybar__spin" aria-hidden="true"></span>'
+      + '<span class="busybar__t">' + SP.U.esc(label || 'İşleniyor…') + '</span>'
+      + (hint ? '<span class="busybar__hint">' + SP.U.esc(hint) + '</span>' : '');
+    return el;
+  }
+
+  /* Ic ice cagrilarda erken kapanmasin: sayac sifirlaninca kalkar. */
+  function idle(){
+    busyCount = Math.max(0, busyCount - 1);
+    if(busyCount) return;
+    const el = document.getElementById('busybar');
+    if(el) el.remove();
+  }
+
+  /* Bir isi serit acikken kosturur ve her durumda kapatir. */
+  async function withBusy(label, hint, fn){
+    busy(label, hint);
+    try{ return await fn(); }
+    finally{ idle(); }
+  }
+
   function toast(text, opts){
     const o = opts || {};
     const root = document.getElementById('toast-root');
@@ -624,5 +667,6 @@ SP.UI = (function(){
     rangeBar, macroSplit,
     hint, rail, openHint, closeHint, isHintOpen,
     sheet, closeSheet, isSheetOpen, toast, confirmSheet,
+    busy, idle, withBusy,
   };
 })();
