@@ -385,13 +385,14 @@ src/
       setup.js          ilk kurulum
     screens/            12 ekran
     app.js              kabuk: gezinme, görünüm paneli, olay dağıtımı, açılış
-  tests/                423 test, 11 paket
+  tests/                425 test, 11 paket
 tools/
   runtests.js           birim testleri (başsız tarayıcı)
   smoke.js              duman testi: gerçek uygulamayı gezer
   palettecheck.js       7 palet × 2 tema × (7 bölüm + 4 düzen) kontrast (WCAG AA)
   ledgercheck.js        defter düzeni denetimi: iç içe satır, kutu kart, taşma
-  designcheck.js        5 düzen × 12 ekran × 3 genişlik: taşma ve çizilme
+  designcheck.js        5 düzen × 2 tema × 6 genişlik: taşma, kırpılan içerik,
+                        kontrast, künye hizası, açılan katmanlar
   tasarimcheck.js       tasarim/ klasöründeki 20 örneğin çizilme denetimi
 build.py                tek dosyalık dağıtım üretir → dist/spi.html
 devserver.py            geliştirme sunucusu (önbelleksiz)

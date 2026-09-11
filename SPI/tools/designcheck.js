@@ -27,7 +27,14 @@ const SHOT = args.includes('--shot');
 const PORT = Number(args.find(a => /^\d+$/.test(a))) || 4291;
 const SHOTDIR = process.env.SHOT_DIR || path.join(ROOT, '.shots');
 
-const WIDTHS = [[1280, 'masaüstü'], [980, 'tablet'], [430, 'telefon']];
+/* Genişlikler: her düzenin kendi eşikleri var, aralarda kalan ölçüler
+   en çok hata çıkan yerler. Tam ekran listesi yalnız iki ölçüde gezilir;
+   aradakiler temsilci ekranlarla taranır ki koşum süresi dürüst kalsın. */
+const WIDTHS = [
+  [1440, 'geniş', false], [1280, 'masaüstü', true], [1100, 'dar masaüstü', false],
+  [980, 'tablet', false], [760, 'küçük tablet', false], [430, 'telefon', true],
+];
+const AZ_ROTA = ['today', 'labs', 'move', 'office', 'family'];
 
 /* WCAG kontrastı — «metin görünüyor mu» sorusu göz kararına bırakılmaz. */
 function lum(c){
@@ -78,18 +85,37 @@ async function waitForServer(url){
     if(skip) await skip.click();
     await wait(300);
 
+    /* VERİ TOHUMLA. Boş bir uygulama düzen hatalarını gizler: liste
+       yoksa taşma da yoktur. Denetim ancak dolu ekranlarda anlamlı. */
+    await page.evaluate(async () => {
+      await SP.Model.saveProfile({ name:'Ömer', birthYear:1998, sex:'male',
+        heightCm:178, weightKg:74, activity:'moderate', goal:'health' });
+      const r = SP.Model.newLab('2026-08-20');
+      Object.entries({ hemoglobin:13.8, ferritin:26, b12:288, hdl:44, ldl:128,
+                       tsh:2.6, crp:1.2, glukoz:92 })
+        .forEach(([k, v]) => {
+          const bb = SP.BIO_BY_ID[k];
+          if(bb) r.values[k] = { v, cert:'measured', unit:bb.unit };
+        });
+      await SP.Model.saveLab(r);
+      await SP.Model.saveVitals(SP.U.todayISO(), { sleep:7.2, rhr:58, weight:74, mood:4 });
+    });
+    await wait(300);
+
     const designs = await page.evaluate(() => SP.DESIGNS.map(d => d.id));
     const routes = await page.evaluate(() =>
       SP.App.SECTIONS.reduce((a, s) => a.concat(s.views.map(v => v.route)), []));
 
     if(SHOT) fs.mkdirSync(SHOTDIR, { recursive:true });
 
+    const temalar = (process.env.TEMA || 'light,dark').split(',');
+    for(const tema of temalar){
     for(const design of designs){
-      await page.evaluate(async d => {
-        await SP.Model.saveProfile({ design:d });
+      await page.evaluate(async ([d, t]) => {
+        await SP.Model.saveProfile({ design:d, theme:t });
         SP.App.applyTheme();
         await SP.App.render();
-      }, design);
+      }, [design, tema]);
       await wait(250);
 
       /* kök gerçekten yazıldı mı? */
@@ -137,46 +163,82 @@ async function waitForServer(url){
       if(kontrast < 4.5)
         problems.push(design + ': metin/zemin kontrastı ' + kontrast.toFixed(2) + ' < 4.5');
 
-      for(const [w, adi] of WIDTHS){
+      for(const [w, adi, tamListe] of WIDTHS){
         await page.setViewportSize({ width:w, height:900 });
-        for(const route of routes){
+        for(const route of (tamListe ? routes : AZ_ROTA)){
           await page.evaluate(r => SP.App.go(r), route);
           await wait(170);
 
           const r = await page.evaluate(() => {
             const d = document.documentElement;
-            const over = [];
+            const ad = el => (typeof el.className === 'string' && el.className)
+              ? el.tagName.toLowerCase() + '.' + el.className.trim().split(/\s+/)[0]
+              : el.tagName.toLowerCase();
+            const over = [], kirpik = [];
+
             for(const el of document.querySelectorAll('.site *')){
               const b = el.getBoundingClientRect();
               if(b.width === 0 && b.height === 0) continue;
+              const cs = getComputedStyle(el);
+
+              /* KIRPILAN İÇERİK. Yatay taşmayı yutan bir kap, sorunu
+                 çözmez — gizler. `hidden`/`clip` bir kapta içerik
+                 sığmıyorsa kullanıcı o veriyi HİÇ göremez ve kaydırarak
+                 da ulaşamaz. `auto`/`scroll` sorun değil: kaydırılabilir. */
+              const ox = cs.overflowX, oy = cs.overflowY;
+              if((ox === 'hidden' || ox === 'clip') && el.scrollWidth > el.clientWidth + 2)
+                kirpik.push(ad(el) + ' (' + el.scrollWidth + '>' + el.clientWidth + ')');
+              if((oy === 'hidden' || oy === 'clip') && el.scrollHeight > el.clientHeight + 2
+                 && cs.position !== 'fixed')
+                kirpik.push(ad(el) + ' ↕(' + el.scrollHeight + '>' + el.clientHeight + ')');
+
               if(b.right <= d.clientWidth + 2 && b.left >= -2) continue;
               let p = el.parentElement, kapali = false;
               while(p){
                 const ov = getComputedStyle(p).overflowX;
-                if(ov === 'auto' || ov === 'scroll' || ov === 'hidden'){ kapali = true; break; }
+                if(ov === 'auto' || ov === 'scroll' || ov === 'hidden' || ov === 'clip'){
+                  kapali = true; break;
+                }
                 p = p.parentElement;
               }
-              if(!kapali) over.push(el.className || el.tagName.toLowerCase());
+              if(!kapali) over.push(ad(el));
             }
+
+            /* Üst çubuk araçları sağ uçta durur. Bir düzen aradaki
+               esneyen ögeyi gizlediğinde araçlar markanın dibine
+               yığılıyor ve künye bozuk görünüyor. */
+            const bar = document.querySelector('.masthead__in');
+            const tools = document.querySelector('.navtools');
+            let aracBosluk = 0;
+            if(bar && tools)
+              aracBosluk = Math.round(bar.getBoundingClientRect().right
+                - tools.getBoundingClientRect().right);
+
             const main = document.getElementById('main');
             return {
               scrollW:d.scrollWidth, clientW:d.clientWidth,
               text:(main && main.innerText || '').trim().length,
               over:[...new Set(over)].slice(0, 4),
+              kirpik:[...new Set(kirpik)].slice(0, 4),
+              aracBosluk,
             };
           });
 
-          const yer = design + '/' + route + ' @' + adi;
+          const yer = tema + '/' + design + '/' + route + ' @' + adi;
           if(r.scrollW > r.clientW + 2)
             problems.push(yer + ': yatay taşma ' + r.scrollW + '>' + r.clientW
               + (r.over.length ? ' — ' + r.over.join(', ') : ''));
           else if(r.over.length)
             problems.push(yer + ': kaba sığmayan öge — ' + r.over.join(', '));
           if(r.text < 60) problems.push(yer + ': gövde boş (' + r.text + ' karakter)');
+          if(r.kirpik.length)
+            problems.push(yer + ': içerik kırpılıyor — ' + r.kirpik.join(', '));
+          if(r.aracBosluk > 40)
+            problems.push(yer + ': künye araçları sağ uca yaslanmamış (' + r.aracBosluk + 'px açık)');
         }
       }
 
-      if(SHOT){
+      if(SHOT && tema === 'light'){
         await page.setViewportSize({ width:1280, height:900 });
         await page.evaluate(() => SP.App.go('today'));
         await wait(400);
@@ -186,6 +248,43 @@ async function waitForServer(url){
         await wait(1100);
         await page.screenshot({ path:path.join(SHOTDIR, design + '.png'), fullPage:true });
       }
+
+      /* AÇILAN KATMANLAR. Görünüm kâğıdı, komut paleti ve alt sayfa
+         kabuğun dışında çizilir; bir düzenin ızgarası ya da yazı ölçüsü
+         onları ekrandan taşırabilir. Boş ekranda görünmeyen bir hata. */
+      await page.setViewportSize({ width:1280, height:900 });
+      await page.evaluate(() => SP.App.go('today'));
+      await wait(200);
+      const katmanlar = [
+        ['görünüm kâğıdı', () => document.querySelector('[data-act="open-appearance"]').click(),
+          '#appearance', () => SP.App.closeAppearance()],
+        ['komut paleti', () => SP.Palette.open(), '.cmdk__box', () => SP.Palette.close()],
+      ];
+      for(const [ad, ac, sec, kapat] of katmanlar){
+        await page.evaluate(f => eval('(' + f + ')')(), ac.toString());
+        await wait(320);
+        const kt = await page.evaluate(s2 => {
+          const el = document.querySelector(s2);
+          if(!el) return { yok:true };
+          const b = el.getBoundingClientRect();
+          return { yok:false, l:Math.round(b.left), r:Math.round(b.right),
+            t:Math.round(b.top), bt:Math.round(b.bottom),
+            w:window.innerWidth, h:window.innerHeight,
+            tas:el.scrollHeight > el.clientHeight + 2 };
+        }, sec);
+        if(kt.yok) problems.push(tema + '/' + design + ': ' + ad + ' açılmadı');
+        else{
+          if(kt.l < -2 || kt.r > kt.w + 2 || kt.t < -2)
+            problems.push(tema + '/' + design + ': ' + ad + ' ekran dışına taşıyor ('
+              + kt.l + '…' + kt.r + ' / ' + kt.w + ')');
+          if(kt.bt > kt.h + 2)
+            problems.push(tema + '/' + design + ': ' + ad + ' ekranın altından taşıyor ('
+              + kt.bt + ' > ' + kt.h + ')');
+        }
+        await page.evaluate(f => eval('(' + f + ')')(), kapat.toString());
+        await wait(180);
+      }
+    }
     }
 
     if(errs.length) problems.push('konsol — ' + [...new Set(errs)].slice(0, 3).join(' | '));

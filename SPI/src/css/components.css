@@ -1448,7 +1448,18 @@ button.minrow:hover{ background:var(--surface-2); }
 .resrow__status .badge svg{ display:none; }
 .resrow__trend{ justify-self:end; white-space:nowrap; }
 
+/* Dar kalıp iki yoldan tetiklenir: pencere daraldığında ve —asıl
+   önemlisi— satırın KENDİ kutusu daraldığında. İkincisi olmadan
+   «Katmanlı» ve «Harita» düzenlerinde masaüstü kalıbı 570 piksellik bir
+   kutuya sığmaya çalışıyor ve taşıyordu. Altı sütunun asgari eni
+   ~663 px; eşik oraya göre seçildi. */
 @media (max-width:900px){
+  .resrow{ grid-template-columns:6px minmax(0,1fr) auto; row-gap:6px; }
+  .resrow__bar{ grid-column:2 / -1; }
+  .resrow__status{ grid-column:2; }
+  .resrow__trend{ grid-column:3; }
+}
+@container satir (max-width:700px){
   .resrow{ grid-template-columns:6px minmax(0,1fr) auto; row-gap:6px; }
   .resrow__bar{ grid-column:2 / -1; }
   .resrow__status{ grid-column:2; }

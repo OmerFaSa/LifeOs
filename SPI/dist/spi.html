@@ -901,7 +901,11 @@ table td, table th{
   color:var(--text-3);
 }
 
-.navtools{ display:flex; align-items:center; gap:2px; flex:none; }
+/* Araçlar HER ZAMAN sağ uçta durur. Aradaki tarih esneyen ögedir ve
+   dar ekranda (ya da «Odak» düzeninde) gizleniyor; o zaman itecek bir
+   şey kalmadığı için araçlar markanın dibine yığılıyordu. `auto` kenar
+   boşluğu bunu esneyen ögeye bağlı olmaktan çıkarır. */
+.navtools{ display:flex; align-items:center; gap:2px; flex:none; margin-left:auto; }
 .navtools__sep{ width:1px; height:20px; background:var(--border); margin:0 4px; flex:none; }
 .sitenav__menu{ display:none; }
 
@@ -1326,7 +1330,18 @@ table td, table th{
 .lrow__act{ margin-top:16px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
 .lrow__act .btn{ width:100%; justify-content:center; }
 
-.lrow__main{ min-width:0; }
+/* Defter satırının içeriği KENDİ kutusunun enini bilir.
+
+   Bileşenler duyarlı kurallarını pencere genişliğine göre uyguluyordu;
+   oysa asıl soru «pencere kaç piksel» değil «bu satıra kaç piksel
+   kaldı». İkisi «Katmanlı» düzeninde ayrışıyor (raf 228 px alıyor) ve
+   «Harita» düzeninde büsbütün ayrışıyor (satır bir karta giriyor):
+   masaüstü genişliğinde bir pencerede satır 570 px'lik bir kutuda
+   duruyor ama hâlâ masaüstü kalıbını kullanıyor, taşıyordu.
+
+   `container-type:inline-size` güvenlidir: bu kutunun eni ızgara
+   parçasından gelir, içeriğinden değil. */
+.lrow__main{ min-width:0; container-type:inline-size; container-name:satir; }
 /* Defter satırının içinde ARDIŞIK bloklar arasında da ritim olsun. */
 .lrow__main > * + *{ margin-top:20px; }
 
@@ -2826,7 +2841,18 @@ button.minrow:hover{ background:var(--surface-2); }
 .resrow__status .badge svg{ display:none; }
 .resrow__trend{ justify-self:end; white-space:nowrap; }
 
+/* Dar kalıp iki yoldan tetiklenir: pencere daraldığında ve —asıl
+   önemlisi— satırın KENDİ kutusu daraldığında. İkincisi olmadan
+   «Katmanlı» ve «Harita» düzenlerinde masaüstü kalıbı 570 piksellik bir
+   kutuya sığmaya çalışıyor ve taşıyordu. Altı sütunun asgari eni
+   ~663 px; eşik oraya göre seçildi. */
 @media (max-width:900px){
+  .resrow{ grid-template-columns:6px minmax(0,1fr) auto; row-gap:6px; }
+  .resrow__bar{ grid-column:2 / -1; }
+  .resrow__status{ grid-column:2; }
+  .resrow__trend{ grid-column:3; }
+}
+@container satir (max-width:700px){
   .resrow{ grid-template-columns:6px minmax(0,1fr) auto; row-gap:6px; }
   .resrow__bar{ grid-column:2 / -1; }
   .resrow__status{ grid-column:2; }
@@ -3290,11 +3316,22 @@ body.is-dragging .drop.is-over{
 :root[data-design="odak"] .lrow__act .btn{ width:auto; }
 :root[data-design="odak"] .lrow__main > * + *{ margin-top:30px; }
 
-/* Kutu dili tamamen kalkar. */
+/* Kutu dili kalkar ama AYRIM kalkmaz.
+
+   Kutuyu tamamen kaldırmak ofis masaları gibi yan yana duran kartları
+   birbirine karıştırıyordu: beş ajanın notu tek bir metin yığınına
+   dönüyor, hangisinin nerede bittiği anlaşılmıyordu. Kutunun yerini
+   ince bir çizgi alır — bu zaten sistemin defter dilidir. */
 :root[data-design="odak"] .card{
-  border:none; background:none; padding:0; box-shadow:none;
+  border:none; border-top:1px solid var(--border);
+  background:none; padding:16px 0 0; box-shadow:none;
 }
 :root[data-design="odak"] .card--flat{ background:none; }
+/* Defter satırının ilk kartı kendi çizgisini çizmez: satırın üst
+   çizgisi zaten oradadır ve iki çizgi üst üste gelmez. */
+:root[data-design="odak"] .lrow__main > .card:first-child{
+  border-top:none; padding-top:0;
+}
 :root[data-design="odak"] .btn{ border-radius:2px; }
 :root[data-design="odak"] .seg{ border-radius:0; background:none; border:none; padding:0; gap:18px; }
 :root[data-design="odak"] .seg button{ border-radius:0; padding:5px 0; font-weight:500; }
@@ -3450,7 +3487,11 @@ body.is-dragging .drop.is-over{
 :root[data-design="katmanli"] .pagenav,
 :root[data-design="katmanli"] .masthead{ background:var(--surface); }
 
-@media (min-width:901px){
+/* Rafın eşiği 1100 px'dir, 900 değil. 980 px'lik bir ekranda 228 px'lik
+   raf içeriğe ~720 px bırakıyor; ekranlar ise kendi duyarlı kurallarını
+   PENCERE genişliğine göre uyguladığı için masaüstü düzeninde kalıp
+   taşıyordu. Raf, ancak kendisine yer kalınca çizilir. */
+@media (min-width:1100px){
   :root[data-design="katmanli"]{
     --rail-w:228px;
     --nav-h:0px;              /* üstte yapışan şerit kalmadı */
@@ -3587,11 +3628,19 @@ body.is-dragging .drop.is-over{
 :root[data-design="harita"] .navlink.is-active .navlink__num{ color:var(--ink-on); opacity:.72; }
 :root[data-design="harita"] .navlink.is-active::after{ display:none; }
 
+/* Kart içeriği kendi enini bilir (layout.css'teki `satir` kapsayıcısı),
+   yani tablo benzeri satırlar kartın içinde kendiliğinden dar kalıba
+   geçer.
+
+   Akış ızgara değil SÜTUNDUR. Izgarada her satır en uzun kartı kadar
+   yer kaplıyor ve kısa kartın altında koca bir delik kalıyordu; tuval
+   deliklerle dolunca harita olmaktan çıkıyor. Çok sütunlu akışta
+   kartlar boşluk bırakmadan diziliyor ve geniş satırlar `column-span`
+   ile bütün tuvali kaplayabiliyor. */
 :root[data-design="harita"] .ledger{
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(352px, 1fr));
-  gap:20px;
-  align-items:start;
+  display:block;
+  columns:420px;
+  column-gap:20px;
 }
 
 /* Satır artık kart: ızgara değil blok, çizgi değil çerçeve. */
@@ -3607,7 +3656,11 @@ body.is-dragging .drop.is-over{
   overflow:hidden;
   transition:box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
-:root[data-design="harita"] .lrow--wide{ grid-column:1 / -1; }
+:root[data-design="harita"] .lrow{
+  break-inside:avoid;
+  margin-bottom:20px;
+}
+:root[data-design="harita"] .lrow--wide{ column-span:all; }
 :root[data-design="harita"] .lrow:hover{
   border-color:color-mix(in oklab, var(--sec) 36%, var(--border));
   box-shadow:0 2px 4px rgba(16,18,27,.06), 0 14px 32px rgba(16,18,27,.10);
@@ -3632,7 +3685,9 @@ body.is-dragging .drop.is-over{
 :root[data-design="harita"] .lrow__note{ margin-top:9px; max-width:none; font-size:12.75px; }
 :root[data-design="harita"] .lrow__act{ margin-top:12px; flex-direction:row; flex-wrap:wrap; }
 :root[data-design="harita"] .lrow__act .btn{ width:auto; }
-:root[data-design="harita"] .lrow__main{ padding:18px; }
+/* Emniyet kemeri: bir satır yine de sığmazsa kırpılmaz, kaydırılır.
+   Kaybolan veriyle kaydırılabilir veri aynı şey değildir. */
+:root[data-design="harita"] .lrow__main{ padding:18px; overflow-x:auto; }
 :root[data-design="harita"] .lrow__main > * + *{ margin-top:16px; }
 
 /* Kartın içindeki kart çerçevesiz olur: iki çerçeve iç içe çizilmez. */
@@ -3648,7 +3703,7 @@ body.is-dragging .drop.is-over{
 :root[data-design="harita"] .hero::before{ opacity:.05; }
 
 @media (max-width:720px){
-  :root[data-design="harita"] .ledger{ grid-template-columns:minmax(0,1fr); }
+  :root[data-design="harita"] .ledger{ columns:1; }
 }
 
 

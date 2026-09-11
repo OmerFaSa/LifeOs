@@ -434,13 +434,27 @@ Kurallar:
    metin görünmez olur. Kraft'ta tam olarak bu oldu: koyu temada kâğıt
    paletinde kontrast 1.00'e düştü. Kural: bir düzenin türettiği her renk,
    o düzenin **yeniden tanımlamadığı** jetonlara dayanmalıdır.
-7. **Metin merdiveni sıralı kalır.** `--text-2` her zaman `--text-3`ten
+7. **Bileşenler PENCEREYE değil KENDİ KUTULARINA göre daralır.**
+   Duyarlı kurallar `@media` ile pencere genişliğine bağlandığında
+   düzenler bozuluyor: «Katmanlı» raf için 228 px alıyor, «Harita»
+   satırı bir karta sokuyor. Masaüstü genişliğinde bir pencerede satır
+   570 piksellik bir kutuda duruyor ama hâlâ masaüstü kalıbını
+   kullanıyor ve taşıyordu. Defter satırının içeriği bu yüzden bir
+   kapsayıcıdır (`.lrow__main`, adı `satir`) ve tablo benzeri bileşenler
+   dar kalıplarını `@container satir (max-width: …)` ile açar. Pencere
+   sorgusu yanında **durur**, yerine geçmez: kapsayıcısı olmayan bir
+   yerde kullanılan bileşen yine de daralabilsin diye.
+8. **Metin merdiveni sıralı kalır.** `--text-2` her zaman `--text-3`ten
    güçlüdür; bir düzen jetonları yeniden türetirken bu sıra bozulabilir ve
    gözle fark edilmez. `palettecheck.js` bunu ölçer.
 
-Denetim: `tools/designcheck.js` beş düzeni on iki ekran ve üç genişlikte
-gezer, `tools/palettecheck.js` ise dört düzeni yedi palet ve iki temada
-kontrast için ölçer.
+Denetim: `tools/designcheck.js` beş düzeni **iki temada, altı genişlikte**
+ve on iki ekranda gezer; taşmayı, **kırpılan içeriği** (bir kap taşmayı
+yutuyorsa veri hiç görünmez ve kaydırarak da ulaşılamaz), boyanmış
+zeminin kontrastını, künye araçlarının hizasını ve açılan katmanları
+(görünüm kâğıdı, komut paleti) denetler. Ekranları **dolu veriyle** gezer:
+boş bir uygulama düzen hatalarını gizler. `tools/palettecheck.js` ise
+dört düzeni yedi palet ve iki temada kontrast için ölçer.
 
 Üst çubuk tek satırdır ve şu sırayla okunur: marka → yedi bölüm → arama →
 palet → ayarlar → menü. Ekrana ait eylemler üst çubukta değil **hero'da**

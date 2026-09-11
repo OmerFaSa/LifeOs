@@ -128,11 +128,22 @@
 :root[data-design="odak"] .lrow__act .btn{ width:auto; }
 :root[data-design="odak"] .lrow__main > * + *{ margin-top:30px; }
 
-/* Kutu dili tamamen kalkar. */
+/* Kutu dili kalkar ama AYRIM kalkmaz.
+
+   Kutuyu tamamen kaldırmak ofis masaları gibi yan yana duran kartları
+   birbirine karıştırıyordu: beş ajanın notu tek bir metin yığınına
+   dönüyor, hangisinin nerede bittiği anlaşılmıyordu. Kutunun yerini
+   ince bir çizgi alır — bu zaten sistemin defter dilidir. */
 :root[data-design="odak"] .card{
-  border:none; background:none; padding:0; box-shadow:none;
+  border:none; border-top:1px solid var(--border);
+  background:none; padding:16px 0 0; box-shadow:none;
 }
 :root[data-design="odak"] .card--flat{ background:none; }
+/* Defter satırının ilk kartı kendi çizgisini çizmez: satırın üst
+   çizgisi zaten oradadır ve iki çizgi üst üste gelmez. */
+:root[data-design="odak"] .lrow__main > .card:first-child{
+  border-top:none; padding-top:0;
+}
 :root[data-design="odak"] .btn{ border-radius:2px; }
 :root[data-design="odak"] .seg{ border-radius:0; background:none; border:none; padding:0; gap:18px; }
 :root[data-design="odak"] .seg button{ border-radius:0; padding:5px 0; font-weight:500; }
@@ -288,7 +299,11 @@
 :root[data-design="katmanli"] .pagenav,
 :root[data-design="katmanli"] .masthead{ background:var(--surface); }
 
-@media (min-width:901px){
+/* Rafın eşiği 1100 px'dir, 900 değil. 980 px'lik bir ekranda 228 px'lik
+   raf içeriğe ~720 px bırakıyor; ekranlar ise kendi duyarlı kurallarını
+   PENCERE genişliğine göre uyguladığı için masaüstü düzeninde kalıp
+   taşıyordu. Raf, ancak kendisine yer kalınca çizilir. */
+@media (min-width:1100px){
   :root[data-design="katmanli"]{
     --rail-w:228px;
     --nav-h:0px;              /* üstte yapışan şerit kalmadı */
@@ -425,11 +440,19 @@
 :root[data-design="harita"] .navlink.is-active .navlink__num{ color:var(--ink-on); opacity:.72; }
 :root[data-design="harita"] .navlink.is-active::after{ display:none; }
 
+/* Kart içeriği kendi enini bilir (layout.css'teki `satir` kapsayıcısı),
+   yani tablo benzeri satırlar kartın içinde kendiliğinden dar kalıba
+   geçer.
+
+   Akış ızgara değil SÜTUNDUR. Izgarada her satır en uzun kartı kadar
+   yer kaplıyor ve kısa kartın altında koca bir delik kalıyordu; tuval
+   deliklerle dolunca harita olmaktan çıkıyor. Çok sütunlu akışta
+   kartlar boşluk bırakmadan diziliyor ve geniş satırlar `column-span`
+   ile bütün tuvali kaplayabiliyor. */
 :root[data-design="harita"] .ledger{
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(352px, 1fr));
-  gap:20px;
-  align-items:start;
+  display:block;
+  columns:420px;
+  column-gap:20px;
 }
 
 /* Satır artık kart: ızgara değil blok, çizgi değil çerçeve. */
@@ -445,7 +468,11 @@
   overflow:hidden;
   transition:box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
-:root[data-design="harita"] .lrow--wide{ grid-column:1 / -1; }
+:root[data-design="harita"] .lrow{
+  break-inside:avoid;
+  margin-bottom:20px;
+}
+:root[data-design="harita"] .lrow--wide{ column-span:all; }
 :root[data-design="harita"] .lrow:hover{
   border-color:color-mix(in oklab, var(--sec) 36%, var(--border));
   box-shadow:0 2px 4px rgba(16,18,27,.06), 0 14px 32px rgba(16,18,27,.10);
@@ -470,7 +497,9 @@
 :root[data-design="harita"] .lrow__note{ margin-top:9px; max-width:none; font-size:12.75px; }
 :root[data-design="harita"] .lrow__act{ margin-top:12px; flex-direction:row; flex-wrap:wrap; }
 :root[data-design="harita"] .lrow__act .btn{ width:auto; }
-:root[data-design="harita"] .lrow__main{ padding:18px; }
+/* Emniyet kemeri: bir satır yine de sığmazsa kırpılmaz, kaydırılır.
+   Kaybolan veriyle kaydırılabilir veri aynı şey değildir. */
+:root[data-design="harita"] .lrow__main{ padding:18px; overflow-x:auto; }
 :root[data-design="harita"] .lrow__main > * + *{ margin-top:16px; }
 
 /* Kartın içindeki kart çerçevesiz olur: iki çerçeve iç içe çizilmez. */
@@ -486,7 +515,7 @@
 :root[data-design="harita"] .hero::before{ opacity:.05; }
 
 @media (max-width:720px){
-  :root[data-design="harita"] .ledger{ grid-template-columns:minmax(0,1fr); }
+  :root[data-design="harita"] .ledger{ columns:1; }
 }
 
 

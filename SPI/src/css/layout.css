@@ -80,7 +80,11 @@
   color:var(--text-3);
 }
 
-.navtools{ display:flex; align-items:center; gap:2px; flex:none; }
+/* Araçlar HER ZAMAN sağ uçta durur. Aradaki tarih esneyen ögedir ve
+   dar ekranda (ya da «Odak» düzeninde) gizleniyor; o zaman itecek bir
+   şey kalmadığı için araçlar markanın dibine yığılıyordu. `auto` kenar
+   boşluğu bunu esneyen ögeye bağlı olmaktan çıkarır. */
+.navtools{ display:flex; align-items:center; gap:2px; flex:none; margin-left:auto; }
 .navtools__sep{ width:1px; height:20px; background:var(--border); margin:0 4px; flex:none; }
 .sitenav__menu{ display:none; }
 
@@ -505,7 +509,18 @@
 .lrow__act{ margin-top:16px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
 .lrow__act .btn{ width:100%; justify-content:center; }
 
-.lrow__main{ min-width:0; }
+/* Defter satırının içeriği KENDİ kutusunun enini bilir.
+
+   Bileşenler duyarlı kurallarını pencere genişliğine göre uyguluyordu;
+   oysa asıl soru «pencere kaç piksel» değil «bu satıra kaç piksel
+   kaldı». İkisi «Katmanlı» düzeninde ayrışıyor (raf 228 px alıyor) ve
+   «Harita» düzeninde büsbütün ayrışıyor (satır bir karta giriyor):
+   masaüstü genişliğinde bir pencerede satır 570 px'lik bir kutuda
+   duruyor ama hâlâ masaüstü kalıbını kullanıyor, taşıyordu.
+
+   `container-type:inline-size` güvenlidir: bu kutunun eni ızgara
+   parçasından gelir, içeriğinden değil. */
+.lrow__main{ min-width:0; container-type:inline-size; container-name:satir; }
 /* Defter satırının içinde ARDIŞIK bloklar arasında da ritim olsun. */
 .lrow__main > * + *{ margin-top:20px; }
 
