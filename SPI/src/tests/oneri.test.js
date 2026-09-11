@@ -265,3 +265,213 @@
     });
   });
 })();
+
+/* Hareket ayrıştırma — insanlar isim değil FİİL konuşur.
+
+   En kritik test: tabloda duran bir hareket, cümlede geçtiği hâliyle
+   bulunmalı. Bulunmazsa süre kaydedilir ama hareket kaybolur ve seans
+   kalıp dengesine, MET değerine, ilerleme merdivenine hiç girmez. */
+(function(){
+  const { describe, it, expect } = SP.Test;
+
+  describe('Hareket — takma ad eşleşmesi', () => {
+    const bekle = (cumle, exId) => {
+      const m = SP.Quick.parseMove(cumle);
+      expect(Boolean(m)).toBeTruthy();
+      expect(m.exercise && m.exercise.id).toBe(exId);
+    };
+
+    it('çekimli fiil tabloyla eşleşir', () => {
+      bekle('45 dakika yürüdüm', 'yuruyus');
+      bekle('30 dk koştum', 'kosu');
+      bekle('20 dakika yüzdüm', 'yuzme');
+      bekle('15 dk ip atladım', 'ip-atlama');
+      bekle('40 dakika bisiklete bindim', 'bisiklet');
+      bekle('10 dk merdiven çıktım', 'merdiven');
+    });
+
+    it('özgül ad genel addan ÖNCE denenir', () => {
+      /* «tempolu yürüyüş» hem «yürüyüş» hem kendisiyle eşleşebilir;
+         uzun olan kazanmalı. */
+      bekle('1 saat tempolu yürüyüş', 'yuruyus');
+    });
+
+    it('genel «esnedim» özgül bir rutine bağlanmaz', () => {
+      /* Kullanıcının yapmadığı bir rutini kaydetmek, hiç kaydetmemekten
+         kötüdür. */
+      bekle('12 dakika esnedim', 'yoga');
+    });
+
+    it('tanınmayan hareket SÜREYİ kaybettirmez', () => {
+      const m = SP.Quick.parseMove('35 dakika bilmemne yaptım');
+      expect(m.minutes).toBe(35);
+      expect(m.exercise).toBeNull();
+    });
+
+    it('saat dakikaya çevrilir', () => {
+      expect(SP.Quick.parseMove('1 saat yürüdüm').minutes).toBe(60);
+      expect(SP.Quick.parseMove('1,5 saat koştum').minutes).toBe(90);
+    });
+
+    it('her hareketin takma adı vardır', () => {
+      SP.EXERCISES.forEach(e => {
+        expect(Array.isArray(e.aliases) && e.aliases.length > 0).toBeTruthy();
+      });
+    });
+
+    it('takma ad indeksi uzundan kısaya sıralıdır', () => {
+      const boy = SP.EX_ALIASES.map(x => x.alias.length);
+      for(let i = 1; i < boy.length; i++) expect(boy[i] <= boy[i - 1]).toBeTruthy();
+    });
+
+    it('iki hareket aynı takma adı paylaşmaz', () => {
+      const gorulen = {};
+      SP.EXERCISES.forEach(e => (e.aliases || []).forEach(a => {
+        const k = SP.U.norm(a);
+        expect(gorulen[k] === undefined || gorulen[k] === e.id).toBeTruthy();
+        gorulen[k] = e.id;
+      }));
+    });
+
+    it('üç alan da kapsanır', () => {
+      ['cardio', 'strength', 'mobility'].forEach(k => {
+        expect(SP.EXERCISES.filter(e => e.kind === k).length >= 5).toBeTruthy();
+      });
+    });
+  });
+})();
+
+/* Öğün girişinde gram kaybı — sessiz veri kaybının en kötü biçimi.
+
+   Ayrıştırıcı gramı `g` alanında üretir. Uzun süre `i.grams` okunuyordu
+   ve böyle bir alan yok: komut paletinden girilen HER öğün gramsız
+   kaydediliyordu. Öğün listede görünüyor ama kalorisi, makrosu ve mikro
+   besini sıfır — yani ekranda var, hesapta yok. */
+(function(){
+  const { describe, it, expect, resetState, withTodayAsync } = SP.Test;
+
+  describe('Öğün — gram kaybı', () => {
+    it('ayrıştırıcı gramı `g` alanında verir', () => {
+      const r = SP.Parse.parseMeal('200 gram tavuk');
+      expect(r.items.length > 0).toBeTruthy();
+      expect(typeof r.items[0].g).toBe('number');
+      expect(r.items[0].grams).toBe(undefined);
+    });
+
+    it('hızlı giriş öğünü GRAMLA yazar', async () => {
+      resetState();
+      await withTodayAsync('2026-03-01', async () => {
+        const p = SP.Quick.parse('iki yumurta');
+        expect(p.kind).toBe('meal');
+        await SP.Quick.apply(p, { date:'2026-03-01', slot:'kahvalti' });
+        const ogunler = SP.Model.mealsOf('2026-03-01');
+        expect(ogunler.length).toBe(1);
+        ogunler[0].items.forEach(it => {
+          expect(typeof it.g).toBe('number');
+          expect(it.g > 0).toBeTruthy();
+        });
+      });
+    });
+
+    it('öneri kutusu öğünü GRAMLA yazar', async () => {
+      resetState();
+      await withTodayAsync('2026-03-01', async () => {
+        const r = SP.Proposals.fromText('bir kase yoğurt');
+        expect(r.oneriler.length).toBe(1);
+        const p = await SP.Proposals.propose(r.oneriler[0]);
+        const res = await SP.Proposals.approve(p.id);
+        expect(res.ok).toBeTruthy();
+        SP.Model.mealsOf('2026-03-01')[0].items.forEach(it => {
+          expect(it.g > 0).toBeTruthy();
+        });
+      });
+    });
+
+    it('gramsız öğün önerisi DOĞRULAMADAN geçemez', () => {
+      resetState();
+      const c = SP.Proposals.check({ action:'ogun-ekle',
+        params:{ items:[{ foodId:'yumurta', g:undefined }], date:'2026-03-01' } });
+      expect(c.ok).toBeFalsy();
+    });
+
+    it('kaydedilen öğün kalori üretir', async () => {
+      resetState();
+      await withTodayAsync('2026-03-01', async () => {
+        const p = SP.Quick.parse('200 gram tavuk');
+        await SP.Quick.apply(p, { date:'2026-03-01', slot:'ogle' });
+        const t = SP.Nutri.dayTotals('2026-03-01');
+        /* Gram kaybolsaydı burası sıfır kalırdı. */
+        expect(t.kcal > 0).toBeTruthy();
+      });
+    });
+  });
+})();
+
+/* Biyobelirteç → besin bağı.
+
+   Kerem'in bulgusundan Nesrin'in hedefine giden devir bu bağdan çıkar.
+   58 ölçümün 42'sinde bağ yoktu ve «unutuldu mu, bilerek mi» sorusu
+   cevapsızdı. Artık her ölçüm ya bir bağ taşır ya da NEDEN taşımadığını
+   yazar; boş bırakılan bir alan kalmaz. */
+(function(){
+  const { describe, it, expect, resetState, withToday, pushLab } = SP.Test;
+
+  describe('Ölçüm — besin bağı', () => {
+    it('her ölçüm ya bağ taşır ya gerekçe', () => {
+      const eksik = SP.BIOMARKERS.filter(b =>
+        (!b.nutrients || !b.nutrients.length) && !b.nutrientWhy);
+      expect(eksik.map(b => b.id)).toEqual([]);
+    });
+
+    it('bağlanan her besin öğesi sözlükte vardır', () => {
+      SP.BIOMARKERS.forEach(b => (b.nutrients || []).forEach(n => {
+        expect(Boolean(SP.NUTRI_BY_ID[n])).toBeTruthy();
+      }));
+    });
+
+    it('gerekçe yazan ölçümün bağı BOŞTUR — ikisi bir arada olmaz', () => {
+      SP.BIOMARKERS.forEach(b => {
+        if(b.nutrientWhy) expect((b.nutrients || []).length).toBe(0);
+      });
+    });
+
+    it('türetilmiş ORAN ve İNDEKSler bağı girdilerinden alır', () => {
+      /* Ayrım kılı kırk yarmak değil: bir ORAN (TG/HDL) ya da bir
+         İNDEKS (HOMA-IR, TyG) kendi başına ölçülebilen bir madde
+         değildir — bağını girdilerinden alır, ikinci kez sayılmaz.
+         Buna karşılık LDL ve TSAT türetilmiş ama GERÇEK birer
+         büyüklüktür ve kendi besin kaldıraçları vardır. */
+      const oranVeIndeks = ['homa', 'tyg', 'tg_hdl', 'deritis', 'fib4', 'eag',
+        'nonhdl', 'egfr', 'ca_corr'];
+      oranVeIndeks.forEach(id => {
+        const b = SP.BIO_BY_ID[id];
+        if(!b) return;
+        expect((b.nutrients || []).length).toBe(0);
+        expect(typeof b.nutrientWhy).toBe('string');
+      });
+    });
+
+    it('türetilmiş ama gerçek büyüklükler kendi bağını taşır', () => {
+      ['ldl', 'tsat'].forEach(id => {
+        const b = SP.BIO_BY_ID[id];
+        if(!b) return;
+        expect((b.nutrients || []).length > 0).toBeTruthy();
+      });
+    });
+
+    it('kapsam en az kırk ölçüme çıktı', () => {
+      const bagli = SP.BIOMARKERS.filter(b => b.nutrients && b.nutrients.length);
+      expect(bagli.length >= 40).toBeTruthy();
+    });
+
+    it('devir motoru artık daha çok ölçümden bulgu üretebilir', () => {
+      resetState();
+      withToday('2026-03-01', () => {
+        /* Tiroid ölçümü düşükse iyot/selenyum hedefi Nesrin'e düşer. */
+        pushLab('2026-03-01', { ft4:0.5 });
+        const h = SP.Office.handoffs().filter(x => x.from === 'lab' && x.to === 'nutri');
+        expect(h.length > 0).toBeTruthy();
+      });
+    });
+  });
+})();

@@ -26,6 +26,7 @@ SP.PATTERNS = [
    asiri yuklenmenin en yaygin sebebi budur. */
 SP.EXERCISES = [
   { id:'sinav', name:'Şınav', kind:'strength', pattern:'push', met:5.0, equip:'yok',
+    aliases:['şınav','sınav','push up','pushup','şınav çektim','şınav yaptım'],
     cue:'Gövde tek parça, dirsekler 45 derece, göğüs yere yaklaşır.',
     levels:[
       { id:'duvar',  name:'Duvar şınavı',     to:'3×15' },
@@ -37,6 +38,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'barfiks', name:'Barfiks', kind:'strength', pattern:'pull', met:6.0, equip:'bar',
+    aliases:['barfiks','pull up','pullup','barfiks çektim','mekik barı'],
     cue:'Omuzlar kulaktan uzak, çene barın üstüne. Sallanma yok.',
     levels:[
       { id:'asili',   name:'Barda asılı kalma', to:'3×30 sn' },
@@ -47,6 +49,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'squat', name:'Squat', kind:'strength', pattern:'squat', met:5.5, equip:'yok',
+    aliases:['squat','çömelme','skuat','squat yaptım'],
     cue:'Topuklar yerde, dizler ayak ucu yönünde, kalça diz hizasının altına iner.',
     levels:[
       { id:'sandalye', name:'Sandalyeye oturup kalkma', to:'3×15' },
@@ -57,6 +60,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'kalca-koprusu', name:'Kalça köprüsü', kind:'strength', pattern:'hinge', met:4.0, equip:'yok',
+    aliases:['kalça köprüsü','köprü','glute bridge','hip thrust'],
     cue:'Kalça sıkılarak kaldırılır, bel değil kalça çalışır.',
     levels:[
       { id:'ciftbacak', name:'Çift bacak köprü',   to:'3×20' },
@@ -66,6 +70,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'plank', name:'Plank', kind:'strength', pattern:'core', met:3.5, equip:'yok',
+    aliases:['plank','tahta','plank yaptım','kalıp'],
     cue:'Kalça çökmez, bel çukurlaşmaz. Süre değil hizalanma önemlidir.',
     levels:[
       { id:'diz',   name:'Diz üstü plank', to:'3×30 sn' },
@@ -75,6 +80,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'firmer-tasima', name:'Çiftçi taşıması', kind:'strength', pattern:'carry', met:4.5, equip:'ağırlık',
+    aliases:['çiftçi taşıması','farmer walk','ağırlık taşıdım','taşıma'],
     cue:'Omuzlar geride, gövde dik, adımlar kısa. Market poşetiyle de yapılır.',
     levels:[
       { id:'hafif', name:'Hafif yük 30 sn', to:'3×30 sn' },
@@ -84,6 +90,7 @@ SP.EXERCISES = [
 
   /* --- dayaniklilik --- */
   { id:'yuruyus', name:'Tempolu yürüyüş', kind:'cardio', pattern:null, met:3.8, equip:'yok',
+    aliases:['yürüyüş','yürüdüm','yürüdük','yürüme','yürüyüş yaptım','tempolu yürüyüş','tempolu yürüdüm','gezdim','adım attım'],
     cue:'Konuşabildiğin ama şarkı söyleyemediğin tempo.',
     levels:[
       { id:'20', name:'20 dakika', to:'her gün' },
@@ -92,6 +99,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'kosu', name:'Koşu', kind:'cardio', pattern:null, met:9.0, equip:'yok',
+    aliases:['koşu','koştum','koşuya çıktım','jogging','koşu yaptım','tempo koşusu'],
     cue:'Haftalık toplam mesafe %10\'dan fazla artmaz.',
     levels:[
       { id:'yuruyus-kosu', name:'Yürü-koş (1 dk / 2 dk)', to:'20 dakika' },
@@ -101,6 +109,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'evde-sprint', name:'Evde sprint', kind:'cardio', pattern:null, met:8.0, equip:'yok',
+    aliases:['sprint','sprint attım','hiit','interval','yüksek diz','mekik koşusu'],
     cue:'Yerinde yüksek diz ya da kısa mekik koşusu. Yüksek şiddet kısa tutulur: '
       + 'toparlanma düşükken bu hareket yapılmaz.',
     levels:[
@@ -111,19 +120,111 @@ SP.EXERCISES = [
 
   /* --- mobilite --- */
   { id:'kalca-acma', name:'Kalça açma', kind:'mobility', pattern:null, met:2.5, equip:'yok',
+    aliases:['kalça açma','kalça esnetme','kalça esnettim'],
     cue:'Masa başı çalışanın en çok ihtiyaç duyduğu hareket. Zorlamadan, nefesle.',
     levels:[{ id:'temel', name:'Temel akış', to:'günde 8 dk' }] },
 
   { id:'sirt-mobilite', name:'Sırt ve omuz mobilitesi', kind:'mobility', pattern:null, met:2.5, equip:'yok',
+    aliases:['sırt mobilitesi','omuz mobilitesi','sırt esnetme','omuz açma'],
     cue:'Kürek kemikleri arasında açılma hissedilir.',
     levels:[{ id:'temel', name:'Temel akış', to:'günde 8 dk' }] },
 
   { id:'ayak-bilegi', name:'Ayak bileği mobilitesi', kind:'mobility', pattern:null, met:2.2, equip:'yok',
+    aliases:['ayak bileği mobilitesi','ayak bileği esnetme','bilek açma'],
     cue:'Squat derinliğini kısıtlayan en yaygın sebep burasıdır.',
     levels:[{ id:'temel', name:'Temel akış', to:'günde 5 dk' }] },
+
+  { id:'bisiklet', name:'Bisiklet', kind:'cardio', pattern:null, met:7.0, equip:'bisiklet',
+    aliases:['bisiklet','bisiklete bindim','bisiklet sürdüm','pedal çevirdim','spinning'],
+    cue:'Sele yüksekliği doğruysa diz bacağın en alt noktasında hafif bükülü kalır.',
+    levels:[
+      { id:'20', name:'20 dakika düz tempo', to:'haftada 3' },
+      { id:'45', name:'45 dakika düz tempo', to:'haftada 3' },
+      { id:'tepe', name:'Tepe/direnç aralıkları', to:'haftada 1' },
+    ] },
+
+  { id:'yuzme', name:'Yüzme', kind:'cardio', pattern:null, met:6.5, equip:'havuz',
+    aliases:['yüzme','yüzdüm','havuza gittim','kulaç attım','serbest stil'],
+    cue:'Eklem yükü en düşük kardiyo. Omuz ağrısı varsa kurbağalama tercih edilir.',
+    levels:[
+      { id:'400', name:'400 m kesintili',  to:'haftada 2' },
+      { id:'800', name:'800 m kesintisiz', to:'haftada 2' },
+      { id:'1500', name:'1.500 m',         to:'haftada 2' },
+    ] },
+
+  { id:'ip-atlama', name:'İp atlama', kind:'cardio', pattern:null, met:11.0, equip:'ip',
+    aliases:['ip atlama','ip atladım','jump rope','ip çalıştım'],
+    cue:'Yüksek şiddet ve yüksek darbe. Diz ya da ayak bileği şikâyetinde yapılmaz.',
+    levels:[
+      { id:'30x6', name:'30 sn × 6 tur', to:'haftada 2' },
+      { id:'60x5', name:'60 sn × 5 tur', to:'haftada 2' },
+      { id:'cift', name:'Çift tur atlama', to:'haftada 1' },
+    ] },
+
+  { id:'merdiven', name:'Merdiven', kind:'cardio', pattern:null, met:8.0, equip:'yok',
+    aliases:['merdiven','merdiven çıktım','basamak','merdiven tırmandım'],
+    cue:'Günlük hayatın içine giren en kolay yük. Asansör yerine merdiven.',
+    levels:[
+      { id:'5kat',  name:'5 kat kesintisiz',  to:'her gün' },
+      { id:'10kat', name:'10 kat kesintisiz', to:'her gün' },
+      { id:'tekrar', name:'10 kat × 3 tur',   to:'haftada 2' },
+    ] },
+
+  { id:'kurek-cekis', name:'Kürek çekişi', kind:'strength', pattern:'pull', met:5.0, equip:'lastik',
+    aliases:['kürek','kürek çektim','row','tek kol çekiş','lastikle çekiş'],
+    cue:'Kürek kemiği önce geri, sonra kol çeker. Omuz kulağa doğru yükselmez.',
+    levels:[
+      { id:'lastik', name:'Lastikle oturarak kürek', to:'3×15' },
+      { id:'tek',    name:'Tek kol dambıl kürek',    to:'3×12' },
+      { id:'masa',   name:'Masa altı ters şınav',    to:'3×10' },
+      { id:'egik',   name:'Eğik bar kürek',          to:'3×8'  },
+    ] },
+
+  { id:'omuz-pres', name:'Omuz presi', kind:'strength', pattern:'push', met:5.0, equip:'ağırlık',
+    aliases:['omuz presi','omuz bastım','shoulder press','baş üstü pres','pres'],
+    cue:'Bel çukurlaşmadan, kaburga aşağıda. Kollar kulak hizasına gelir.',
+    levels:[
+      { id:'lastik', name:'Lastikle pres',   to:'3×15' },
+      { id:'dambil', name:'Dambılla pres',   to:'3×12' },
+      { id:'tek',    name:'Tek kol pres',    to:'3×10' },
+      { id:'pike',   name:'Pike şınav',      to:'3×8'  },
+    ] },
+
+  { id:'yoga', name:'Yoga akışı', kind:'mobility', pattern:null, met:3.0, equip:'mat',
+    /* Genel «esnedim» buraya duser, ozgul bir harekete degil: kullanicinin
+       yapmadigi bir rutini kaydetmek, hic kaydetmemekten kotudur. */
+    aliases:['yoga','yoga yaptım','esneme akışı','selamlama','esnedim','esneme','esnedik'],
+    cue:'Nefes hareketi yönetir. Ağrı sınırında durulur, zorlanmaz.',
+    levels:[
+      { id:'kisa',  name:'Kısa akış (10 dk)',  to:'her gün' },
+      { id:'orta',  name:'Orta akış (25 dk)',  to:'haftada 4' },
+      { id:'uzun',  name:'Uzun akış (45 dk)',  to:'haftada 2' },
+    ] },
+
+  { id:'nefes', name:'Nefes çalışması', kind:'mobility', pattern:null, met:1.5, equip:'yok',
+    aliases:['nefes','nefes çalıştım','nefes egzersizi','diyafram','meditasyon'],
+    cue:'Toparlanmanın en ucuz aracı. Burundan al, uzun ver; verme alma\'dan uzun olur.',
+    levels:[{ id:'temel', name:'4-6 nefes, 5 dakika', to:'günde 1' }] },
 ];
 
 SP.EX_BY_ID = SP.EXERCISES.reduce(function(acc, e){ acc[e.id] = e; return acc; }, {});
+
+/* Takma ad indeksi. Ayristirici uzun once ISIM ariyordu ama insanlar
+   FIIL konusuyor: «45 dakika yurudum» tabloda «Tempolu yuruyus» diye
+   duran hareketle eslesmiyordu ve seans «Serbest seans» olarak
+   kaydediliyordu — sure dogru, hareket kayip.
+
+   Liste UZUNDAN KISAYA sirali: «tempolu yuruyus» once denenir, «yuruyus»
+   sonra. Kisa olan once denenseydi ozgul ad hic eslesmezdi. */
+SP.EX_ALIASES = (function(){
+  var out = [];
+  SP.EXERCISES.forEach(function(e){
+    (e.aliases || []).concat([e.name]).forEach(function(a){
+      out.push({ alias:a, ex:e });
+    });
+  });
+  return out.sort(function(a, b){ return b.alias.length - a.alias.length; });
+})();
 
 /* ---------------------------------------------------------------- alanlar
 

@@ -280,7 +280,7 @@ SP.Proposals = (function(){
     if(parsed.kind === 'lab') return { action:'olcum-gir',
       params:{ rows:parsed.data.rows.map(r => ({ markerId:r.marker.id, value:r.value })), date } };
     if(parsed.kind === 'meal') return { action:'ogun-ekle',
-      params:{ items:parsed.data.items.map(i => ({ foodId:i.food.id, g:i.grams, cert:i.cert })),
+      params:{ items:parsed.data.items.map(i => ({ foodId:i.food.id, g:i.g, cert:i.cert })),
         slot:slot || 'ara', date } };
     return null;
   }

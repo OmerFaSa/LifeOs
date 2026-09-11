@@ -87,14 +87,25 @@ SP.Quick = (function(){
     if(/^s(a|aat)?$/i.test(m[2])) dk = dk * 60;
     if(dk <= 0 || dk > 600) return null;
 
-    /* Hangi hareket? Ad gecmiyorsa serbest seans olur — sure yine de
-       kaydedilebilir ve yuk hesabina girer. */
+    /* Hangi hareket?
+
+       Once yalnizca TAM AD araniyordu ve bu sessiz bir kayiptı: tabloda
+       «Tempolu yuruyus» diye duran hareket, «45 dakika yurudum» cumlesiyle
+       eslesmiyordu. Sure dogru kaydediliyor, hareket «serbest seans»
+       oluyordu — yani yuk hesabina giriyor ama kalip dengesine, MET
+       degerine ve ilerleme merdivenine girmiyordu.
+
+       Insanlar isim degil FIIL konusur. Artik takma ad indeksi kullanilir
+       ve UZUNDAN KISAYA denenir: «tempolu yuruyus» once, «yuruyus» sonra.
+       Kisa olan once denenseydi ozgul ad hic eslesmezdi.
+
+       Ad gecmiyorsa yine serbest seans olur: sure kaybolmaz. */
     const n = U.norm(text);
     let ex = null;
-    (SP.EXERCISES || []).forEach(e => {
-      if(ex) return;
-      const ad = U.norm(e.name);
-      if(ad.length >= 3 && n.indexOf(ad) >= 0) ex = e;
+    (SP.EX_ALIASES || []).some(x => {
+      const a = U.norm(x.alias);
+      if(a.length >= 3 && n.indexOf(a) >= 0){ ex = x.ex; return true; }
+      return false;
     });
     return { minutes:Math.round(dk), exercise:ex };
   }
@@ -189,7 +200,11 @@ SP.Quick = (function(){
 
     if(parsed.kind === 'meal'){
       const meal = SP.Model.newMeal(o.slot || 'ara');
-      meal.items = parsed.data.items.map(i => ({ foodId:i.food.id, g:i.grams,
+      /* Ayristirici gram degerini `g` alaninda uretir. Burada `i.grams`
+         okunuyordu ve boyle bir alan yok: komut paletinden girilen HER
+         ogun gramsiz kaydediliyordu. Sessiz bir kayipti — ogun listede
+         gorunuyor ama kalorisi, makrosu ve mikro besini sifir. */
+      meal.items = parsed.data.items.map(i => ({ foodId:i.food.id, g:i.g,
         cert:i.cert || 'estimated' }));
       await SP.Model.addMeal(tarih, meal);
       return { ok:true, text:'Öğün eklendi', route:'meals' };

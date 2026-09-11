@@ -4491,7 +4491,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'912aea2', at:'2026-09-11 20:52', dirty:true };
+SP.BUILD = { id:'0cc0686', at:'2026-09-11 21:10', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -4546,54 +4546,64 @@ SP.BIOMARKERS = [
   { id:'sbp', name:'Sistolik tansiyon', unit:'mmHg', panel:'vital', dir:'mid',
     ref:[90, 130], optimal:[105, 120], red:{ below:85, above:180 }, daily:true,
     aliases:['sistolik','buyuk tansiyon','sbp','systolic'],
+    nutrients:['sodium','potassium','magnesium'],
     note:'Kalbin kasilma anindaki basinc. Tek olcum karar vermez; 7 gunluk ortalama okunur.' },
 
   { id:'dbp', name:'Diyastolik tansiyon', unit:'mmHg', panel:'vital', dir:'mid',
     ref:[60, 85], optimal:[65, 80], red:{ below:50, above:110 }, daily:true,
     aliases:['diyastolik','kucuk tansiyon','dbp','diastolic'],
+    nutrients:['sodium','potassium','magnesium'],
     note:'Kalbin gevseme anindaki basinc.' },
 
   { id:'rhr', name:'İstirahat nabzı', unit:'atım/dk', panel:'vital', dir:'low',
     ref:[45, 85], optimal:[48, 62], red:{ below:38, above:110 }, daily:true,
     aliases:['istirahat nabzi','dinlenme nabzi','rhr','resting heart rate','nabiz'],
+    nutrients:['iron'],
     note:'Sabah yataktan kalkmadan olculur. Yukselmesi yorgunluk ya da hastalik habercisidir.' },
 
   { id:'hrv', name:'Kalp atım değişkenliği', unit:'ms', panel:'vital', dir:'high',
     ref:[20, 120], optimal:[55, 120], red:{}, daily:true,
     aliases:['hrv','rmssd','kalp atim degiskenligi'],
+    nutrients:['magnesium','omega3'],
     note:'Otonom sinir sisteminin toparlanma isareti. Kisiye ozeldir; baskasiyla karsilastirilmaz.' },
 
   { id:'spo2', name:'Oksijen satürasyonu', unit:'%', panel:'vital', dir:'high',
     ref:[94, 100], optimal:[96, 100], red:{ below:90 }, daily:true,
     aliases:['spo2','oksijen saturasyonu','satürasyon','oksijen'],
+    nutrients:['iron'],
     note:'Parmak probu ile olculur. %90 altinda beklemeden hekime basvurulur.' },
 
   { id:'temp', name:'Vücut sıcaklığı', unit:'°C', panel:'vital', dir:'mid',
     ref:[36.1, 37.2], optimal:[36.3, 36.9], red:{ below:35, above:38.5 }, daily:true,
     aliases:['ates','vucut sicakligi','temp','sicaklik'],
+    nutrients:[], nutrientWhy:'Vücut sıcaklığını bir besin öğesi belirlemez; enfeksiyon ve döngü belirler.',
     note:'38,5 uzerinde antrenman yapilmaz; sistem o gun yuku sifirlar.' },
 
   { id:'sleep', name:'Uyku süresi', unit:'saat', panel:'vital', dir:'mid',
     ref:[6, 9.5], optimal:[7, 8.5], red:{}, daily:true,
     aliases:['uyku','uyku suresi','sleep'],
+    nutrients:['magnesium'],
     note:'Toparlanmanin tek en guclu belirleyicisi. Yediginden de antrenmanindan da onceliklidir.' },
 
   /* ------------------------------------------------------------------ vucut */
   { id:'weight', name:'Kilo', unit:'kg', panel:'body', dir:'mid',
     ref:[35, 200], optimal:null, red:{}, daily:true, personal:true,
     aliases:['kilo','agirlik','weight'],
+    nutrients:[], nutrientWhy:'Kiloyu tek bir besin öğesi değil enerji dengesi belirler; makro hedefleri zaten ayrı durur.',
     note:'Hedef bant kisiye gore hesaplanir; tek bir "dogru kilo" yoktur.' },
 
   { id:'waist', name:'Bel çevresi', unit:'cm', panel:'body', dir:'low',
     ref:{ male:[70, 102], female:[62, 88] },
     optimal:{ male:[75, 94], female:[65, 80] },
     red:{}, aliases:['bel','bel cevresi','waist'],
+    nutrients:[], nutrientWhy:'Bel çevresi enerji dengesi ve dağılımın sonucudur, tek bir öğenin değil.',
     note:'Ic yag icin kilodan daha iyi bir gostergedir. Gobek deligi hizasindan olculur.' },
 
   { id:'bodyfat', name:'Vücut yağ oranı', unit:'%', panel:'body', dir:'low',
     ref:{ male:[6, 30], female:[14, 40] },
     optimal:{ male:[10, 18], female:[20, 28] },
     red:{}, aliases:['yag orani','vucut yag','body fat','bodyfat'],
+    nutrients:[], nutrientWhy:'Yağ oranı enerji dengesinin sonucudur; tek bir besin öğesine bağlanamaz.',
     note:'Biyoempedans tartilari gunluk suya gore sapar; haftalik ortalama okunur.' },
 
   /* --------------------------------------------------------------- hemogram */
@@ -4610,6 +4620,7 @@ SP.BIOMARKERS = [
     optimal:{ male:[43, 50], female:[38, 44] },
     red:{ below:28, above:57 },
     aliases:['hematokrit','hct'],
+    nutrients:['iron','b12','folate'],
     note:'Kanin hucre orani. Susuz kalindiginda yapay olarak yukselir.' },
 
   { id:'mcv', name:'MCV', unit:'fL', panel:'hemogram', dir:'mid',
@@ -4621,16 +4632,19 @@ SP.BIOMARKERS = [
   { id:'rdw', name:'RDW', unit:'%', panel:'hemogram', dir:'low',
     ref:[11.5, 15], optimal:[11.5, 13.5], red:{},
     aliases:['rdw'],
+    nutrients:['iron','b12','folate'],
     note:'Alyuvar boyutlarindaki dagilim. Erken demir eksikliginde ferritinden once yukselebilir.' },
 
   { id:'wbc', name:'Lökosit', unit:'10³/µL', panel:'hemogram', dir:'mid',
     ref:[4.0, 10.5], optimal:[4.5, 8.5], red:{ below:2.5, above:20 },
     aliases:['lokosit','wbc','beyaz kure','akyuvar'],
+    nutrients:['zinc','protein'],
     note:'Bagisiklik hucreleri. Ani yukselisler enfeksiyon isaretidir.' },
 
   { id:'plt', name:'Trombosit', unit:'10³/µL', panel:'hemogram', dir:'mid',
     ref:[150, 400], optimal:[180, 350], red:{ below:80, above:700 },
     aliases:['trombosit','plt','platelet'],
+    nutrients:['b12','folate'],
     note:'Pihtilasma hucreleri.' },
 
   /* ------------------------------------------------------------------ demir */
@@ -4652,48 +4666,57 @@ SP.BIOMARKERS = [
   { id:'tibc', name:'Demir bağlama kapasitesi', unit:'µg/dL', panel:'iron', dir:'mid',
     ref:[250, 450], optimal:[280, 400], red:{},
     aliases:['tibc','demir baglama','total demir baglama kapasitesi'],
+    nutrients:['iron'],
     note:'Depo bosaldikca yukselir.' },
 
   { id:'tsat', name:'Transferrin satürasyonu', unit:'%', panel:'iron', dir:'mid',
     ref:[20, 50], optimal:[25, 45], red:{ below:10, above:60 },
     derived:'tsat', aliases:['transferrin saturasyonu','tsat'],
+    nutrients:['iron','vitc'],
     note:'Serum demirin baglama kapasitesine orani. Serum demir ve TIBC girildiginde kendiliginden hesaplanir.' },
 
   /* -------------------------------------------------------------- metabolik */
   { id:'glucose', name:'Açlık glukozu', unit:'mg/dL', panel:'metabolic', dir:'mid',
     ref:[70, 99], optimal:[75, 90], red:{ below:54, above:126 },
     aliases:['aclik glukozu','glukoz','aclik kan sekeri','glikoz','glucose','akş'],
+    nutrients:['fiber','magnesium'],
     note:'126 ve uzeri tek basina taniya yeter degil ama hekim gorusmesi gerektirir.' },
 
   { id:'hba1c', name:'HbA1c', unit:'%', panel:'metabolic', dir:'low',
     ref:[4.0, 5.6], optimal:[4.6, 5.3], red:{ above:6.5 },
     aliases:['hba1c','a1c','glikozillenmis hemoglobin'],
+    nutrients:['fiber','magnesium'],
     note:'Son 3 ayin ortalama kan sekeri. Tek gunun kacamagi bunu degistirmez, aliskanlik degistirir.' },
 
   { id:'insulin', name:'Açlık insülini', unit:'µIU/mL', panel:'metabolic', dir:'low',
     ref:[2.6, 24.9], optimal:[2.6, 8], red:{ above:30 },
     aliases:['insulin','aclik insulini','insülin'],
+    nutrients:['fiber','magnesium'],
     note:'Referans araligi genistir; hedef bant cok daha dardir.' },
 
   { id:'homa', name:'HOMA-IR', unit:'', panel:'metabolic', dir:'low',
     ref:[0, 2.5], optimal:[0.5, 1.8], red:{ above:5 },
     derived:'homa', aliases:['homa','homa-ir','insulin direnci'],
+    nutrients:[], nutrientWhy:'Türetilmiş indeks: bağı girdilerinden (glukoz, insülin) gelir; ikinci kez sayılmaz.',
     note:'Insulin direnci endeksi. Aclik glukozu ve insulin girildiginde kendiliginden hesaplanir.' },
 
   /* ------------------------------------------------------------------ lipid */
   { id:'eag', name:'Ortalama glukoz (eAG)', unit:'mg/dL', panel:'metabolic', dir:'low',
     ref:[70, 154], optimal:[70, 114], red:{ above:240 },
     derived:'eag', aliases:['eag','ortalama glukoz','tahmini ortalama glukoz'],
+    nutrients:[], nutrientWhy:'Türetilmiş indeks: bağı HbA1c\'den gelir.',
     note:'HbA1c\'nin gündelik dildeki karşılığı: son üç ayın ortalama kan şekeri. Tek bir ölçüm değil, ortalamadır.' },
 
   { id:'tyg', name:'TyG indeksi', unit:'', panel:'metabolic', dir:'low',
     ref:[7, 9.5], optimal:[7, 8.5], red:{ above:10 },
     derived:'tyg', aliases:['tyg','trigliserit glukoz indeksi'],
+    nutrients:[], nutrientWhy:'Türetilmiş indeks: bağı trigliserit ve glukozdan gelir.',
     note:'Açlık insülini ölçülmediğinde insülin direncinin yerini tutar. Trigliserit ve açlık glukozundan hesaplanır.' },
 
   { id:'chol', name:'Total kolesterol', unit:'mg/dL', panel:'lipid', dir:'low',
     ref:[120, 200], optimal:[140, 190], red:{ above:320 },
     aliases:['total kolesterol','kolesterol','cholesterol'],
+    nutrients:['fiber','omega3'],
     note:'Tek basina zayif bir gostergedir; LDL ve trigliseritle birlikte okunur.' },
 
   { id:'ldl', name:'LDL kolesterol', unit:'mg/dL', panel:'lipid', dir:'low',
@@ -4707,6 +4730,7 @@ SP.BIOMARKERS = [
     optimal:{ male:[50, 80], female:[60, 90] },
     red:{ below:25 },
     aliases:['hdl','hdl kolesterol','iyi kolesterol'],
+    nutrients:['omega3'],
     note:'Duzenli hareketle yukselen tek lipid degeridir.' },
 
   { id:'trig', name:'Trigliserit', unit:'mg/dL', panel:'lipid', dir:'low',
@@ -4718,11 +4742,13 @@ SP.BIOMARKERS = [
   { id:'tg_hdl', name:'Trigliserit / HDL', unit:'oran', panel:'lipid', dir:'low',
     ref:[0, 3.5], optimal:[0, 2], red:{ above:6 },
     derived:'tg_hdl', aliases:['tg/hdl','trigliserit hdl orani'],
+    nutrients:[], nutrientWhy:'Türetilmiş oran: bağı trigliserit ve HDL\'den gelir.',
     note:'İnsülin direncinin en ucuz göstergesi. 2 altı iyi, 3 üstü dikkat ister. Aç karnına alınan kandan hesaplanır.' },
 
   { id:'nonhdl', name:'Non-HDL kolesterol', unit:'mg/dL', panel:'lipid', dir:'low',
     ref:[0, 160], optimal:[60, 130], red:{ above:220 },
     derived:'nonhdl', aliases:['non-hdl','non hdl'],
+    nutrients:[], nutrientWhy:'Türetilmiş değer: bağı kolesterol ve HDL\'den gelir.',
     note:'Total kolesterolden HDL cikarilir. Riski LDL\'den daha iyi ozetler.' },
 
   /* -------------------------------------------------------------- karaciger */
@@ -4731,11 +4757,13 @@ SP.BIOMARKERS = [
     optimal:{ male:[10, 30], female:[8, 25] },
     red:{ above:120 },
     aliases:['alt','sgpt','alanin aminotransferaz'],
+    nutrients:['omega3','fiber'],
     note:'Karaciger hucre enzimi. Yagli karacigerde sessizce yukselir.' },
 
   { id:'ast', name:'AST', unit:'U/L', panel:'liver', dir:'low',
     ref:[0, 40], optimal:[10, 30], red:{ above:120 },
     aliases:['ast','sgot','aspartat aminotransferaz'],
+    nutrients:['omega3','fiber'],
     note:'Agir antrenmandan sonra gecici yukselir; olcum antrenmansiz gunde yapilir.' },
 
   { id:'ggt', name:'GGT', unit:'U/L', panel:'liver', dir:'low',
@@ -4743,6 +4771,7 @@ SP.BIOMARKERS = [
     optimal:{ male:[8, 30], female:[6, 25] },
     red:{ above:200 },
     aliases:['ggt','gama gt','gamma gt'],
+    nutrients:['omega3','fiber'],
     note:'Alkol ve yagli karaciger icin duyarli belirtec.' },
 
   { id:'alb', name:'Albümin', unit:'g/dL', panel:'liver', dir:'mid',
@@ -4755,11 +4784,13 @@ SP.BIOMARKERS = [
   { id:'deritis', name:'AST / ALT (De Ritis)', unit:'oran', panel:'liver', dir:'mid',
     ref:[0.4, 2], optimal:[0.7, 1.3], red:{ above:3 },
     derived:'deritis', aliases:['ast/alt','de ritis','deritis'],
+    nutrients:[], nutrientWhy:'Türetilmiş oran: bağı AST ve ALT\'den gelir.',
     note:'İki enzimin oranı, tek başına değerlerinden fazlasını söyler. 1 altı ve 2 üstü farklı yönleri gösterir.' },
 
   { id:'fib4', name:'FIB-4 indeksi', unit:'', panel:'liver', dir:'low',
     ref:[0, 2.67], optimal:[0, 1.3], red:{ above:3.25 },
     derived:'fib4', aliases:['fib4','fib-4'],
+    nutrients:[], nutrientWhy:'Türetilmiş indeks: bağı yaş, ALT, AST ve trombositten gelir.',
     note:'Karaciğer sertliği için tarama indeksi. Yaş, AST, ALT ve trombositten hesaplanır; tanı değil tarama aracıdır.' },
 
   { id:'creat', name:'Kreatinin', unit:'mg/dL', panel:'kidney', dir:'mid',
@@ -4767,11 +4798,13 @@ SP.BIOMARKERS = [
     optimal:{ male:[0.8, 1.15], female:[0.65, 1.0] },
     red:{ above:2 },
     aliases:['kreatinin','creatinine','krea'],
+    nutrients:['protein'],
     note:'Kas kutlesi yuksek olanlarda dogal olarak yuksektir; eGFR ile birlikte okunur.' },
 
   { id:'urea', name:'Üre', unit:'mg/dL', panel:'kidney', dir:'mid',
     ref:[16, 48], optimal:[20, 40], red:{ above:100 },
     aliases:['ure','üre','bun','urea'],
+    nutrients:['protein'],
     note:'Susuz kalindiginda ve cok yuksek proteinde yukselir.' },
 
   { id:'uric', name:'Ürik asit', unit:'mg/dL', panel:'kidney', dir:'low',
@@ -4779,17 +4812,20 @@ SP.BIOMARKERS = [
     optimal:{ male:[3.5, 6.0], female:[2.6, 5.0] },
     red:{ above:10 },
     aliases:['urik asit','ürik asit','uric acid'],
+    nutrients:[], nutrientWhy:'Ürik asit pürin alımıyla ilişkilidir; sistem pürin takibi yapmaz, bu yüzden bağ kurulmaz.',
     note:'Fruktoz ve alkol dogrudan yukseltir.' },
 
   { id:'egfr', name:'eGFR', unit:'mL/dk/1,73m²', panel:'kidney', dir:'high',
     ref:[60, 130], optimal:[85, 130], red:{ below:45 },
     aliases:['egfr','gfr','suzme hizi'],
+    nutrients:[], nutrientWhy:'Türetilmiş değer: bağı kreatininden gelir.',
     note:'Bobrek suzme hizi tahmini. 60 altinda hekim degerlendirmesi gerekir.' },
 
   /* ------------------------------------------------------------ elektrolit */
   { id:'na', name:'Sodyum', unit:'mmol/L', panel:'electro', dir:'mid',
     ref:[136, 145], optimal:[138, 143], red:{ below:130, above:150 },
     aliases:['sodyum','na'],
+    nutrients:['sodium'],
     note:'Cok dar bir aralikta tutulur; sapmasi her zaman anlamlidir.' },
 
   { id:'k', name:'Potasyum', unit:'mmol/L', panel:'electro', dir:'mid',
@@ -4807,6 +4843,7 @@ SP.BIOMARKERS = [
   { id:'ca_corr', name:'Düzeltilmiş kalsiyum', unit:'mg/dL', panel:'electro', dir:'mid',
     ref:[8.6, 10.2], optimal:[8.8, 10], red:{ below:7.5, above:11.5 },
     derived:'ca_corr', aliases:['duzeltilmis kalsiyum','corrected calcium'],
+    nutrients:[], nutrientWhy:'Türetilmiş değer: bağı kalsiyum ve albüminden gelir.',
     note:'Kalsiyumun yarısı albümine bağlı taşınır; albümin düşükken ölçülen kalsiyum olduğundan düşük okunur. Bu satır o sapmayı düzeltir.' },
 
   { id:'mg', name:'Magnezyum', unit:'mg/dL', panel:'electro', dir:'mid',
@@ -4818,7 +4855,10 @@ SP.BIOMARKERS = [
   /* --------------------------------------------------------------- vitamin */
   { id:'vitd', name:'25-OH D vitamini', unit:'ng/mL', panel:'vitamin', dir:'high',
     ref:[30, 100], optimal:[40, 70], red:{ below:10, above:120 },
-    nutrients:['vitd','fat'],
+    /* «fat» bir BESIN OGESI degil bir EMILIM FAKTORU: besin sozlugunde
+       karsiligi yok ve burada aranirsa tanimsiz doner. D vitamininin
+       yagla birlikte emildigi zaten ABSORB_FACTORS tarafinda yazili. */
+    nutrients:['vitd'],
     aliases:['d vitamini','25-oh d','vitamin d','25 oh vitamin d','d3'],
     note:'Yagda cozunur: yagli bir ogunle alinmazsa emilimi dusuk kalir.' },
 
@@ -4850,11 +4890,13 @@ SP.BIOMARKERS = [
   { id:'ft4', name:'Serbest T4', unit:'ng/dL', panel:'hormone', dir:'mid',
     ref:[0.8, 1.8], optimal:[1.0, 1.6], red:{},
     aliases:['serbest t4','ft4','st4','free t4'],
+    nutrients:['iodine','selenium'],
     note:'TSH ile birlikte okunur; tek basina yorumlanmaz.' },
 
   { id:'ft3', name:'Serbest T3', unit:'pg/mL', panel:'hormone', dir:'mid',
     ref:[2.3, 4.2], optimal:[2.8, 4.0], red:{},
     aliases:['serbest t3','ft3','st3','free t3'],
+    nutrients:['iodine','selenium'],
     note:'Uzun sureli kalori kisitlamasinda dusme egilimi gosterir.' },
 
   { id:'testo', name:'Total testosteron', unit:'ng/dL', panel:'hormone', dir:'high',
@@ -4862,11 +4904,13 @@ SP.BIOMARKERS = [
     optimal:{ male:[500, 900], female:[25, 60] },
     red:{}, sexOnly:null,
     aliases:['testosteron','total testosteron','testosterone'],
+    nutrients:['zinc','vitd'],
     note:'Sabah 8-10 arasi olculur; gun icinde belirgin duser.' },
 
   { id:'cortisol', name:'Kortizol (sabah)', unit:'µg/dL', panel:'hormone', dir:'mid',
     ref:[6, 23], optimal:[9, 18], red:{ above:35 },
     aliases:['kortizol','cortisol'],
+    nutrients:[], nutrientWhy:'Kortizolü uyku, yük ve stres belirler; beslenme tarafında güvenilir bir kaldıraç yoktur.',
     note:'Uykusuzluk ve asiri antrenman yukseltir. Olcum sabah ac karnina yapilir.' },
 
   /* ----------------------------------------------------------- inflamasyon */
@@ -4881,6 +4925,7 @@ SP.BIOMARKERS = [
     optimal:{ male:[0, 10], female:[0, 12] },
     red:{ above:60 },
     aliases:['sedim','sedimantasyon','esr'],
+    nutrients:['omega3'],
     note:'CRP\'den yavas hareket eder; ikisi birlikte okunur.' },
 ];
 
@@ -5462,13 +5507,6 @@ SP.FOODS = [
     portions:[{ label:'1 dilim', g:25 }],
     aliases:['kasar','kaşar','kasar peyniri'] },
 
-  { id:'sut', name:'Süt (tam yağlı)', cat:'sut',
-    kcal:61, p:3.2, f:3.3, sat:1.9, c:4.8, fib:0,
-    micro:{ iron:0, calcium:113, magnesium:10, zinc:0.4, potassium:143, b12:0.5, folate:5,
-            vitc:0, vitd:0.1, omega3:0.02, selenium:2, iodine:20, sodium:43 },
-    ironType:'nonheme', flags:['calcium'],
-    portions:[{ label:'1 bardak', g:200 }],
-    aliases:['sut','süt'] },
 
   /* -------------------------------------------------------------- bakliyat */
   { id:'kirmizi-mercimek', name:'Kırmızı mercimek (pişmiş)', cat:'bakliyat',
@@ -5725,6 +5763,141 @@ SP.FOODS = [
     ironType:'nonheme', flags:[],
     portions:[{ label:'1 yemek kaşığı', g:21 }],
     aliases:['bal','honey'] },
+
+  /* ------------------------------------------- disarida yenen / sokak
+     Bu bolum bilerek eklendi: tablo ev mutfagini kapsiyordu ama
+     disarida yenen ogunu kapsamiyordu ve kullanici «lahmacun yedim»
+     dediginde sistem HICBIR SEY anlamiyordu. Anlasilmayan ogun,
+     girilmemis ogun demektir. */
+  { id:'lahmacun', name:'Lahmacun', cat:'yemek',
+    kcal:239, p:10.4, f:7.8, sat:2.4, c:32.0, fib:2.1,
+    micro:{ iron:2.2, calcium:48, magnesium:30, zinc:1.3, potassium:220, b12:0.4, folate:34,
+            vitc:6, vitd:0.1, omega3:0.03, selenium:12, iodine:3, sodium:520 },
+    ironType:'heme', flags:[],
+    portions:[{ label:'1 adet', g:130 }, { label:'yarım', g:65 }],
+    aliases:['lahmacun','lahmacun yedim'] },
+
+  { id:'iskender', name:'İskender kebap', cat:'yemek',
+    kcal:214, p:13.5, f:12.8, sat:5.6, c:11.4, fib:0.9,
+    micro:{ iron:2.0, calcium:78, magnesium:26, zinc:2.6, potassium:280, b12:1.6, folate:14,
+            vitc:3, vitd:0.2, omega3:0.05, selenium:16, iodine:6, sodium:610 },
+    ironType:'heme', flags:[],
+    portions:[{ label:'1 porsiyon', g:280 }, { label:'yarım porsiyon', g:140 }],
+    aliases:['iskender','iskender kebap','kebap','döner'] },
+
+  { id:'cig-kofte', name:'Çiğ köfte (etsiz)', cat:'yemek',
+    kcal:178, p:5.2, f:3.1, sat:0.5, c:32.6, fib:4.4,
+    micro:{ iron:2.4, calcium:30, magnesium:58, zinc:1.2, potassium:300, b12:0, folate:36,
+            vitc:14, vitd:0, omega3:0.05, selenium:5, iodine:1, sodium:480 },
+    ironType:'nonheme', flags:['phytate'],
+    portions:[{ label:'1 porsiyon', g:150 }, { label:'1 dürüm', g:200 }],
+    aliases:['çiğ köfte','cig kofte','çiğköfte'] },
+
+  { id:'pide-kiymali', name:'Kıymalı pide', cat:'yemek',
+    kcal:248, p:11.2, f:9.4, sat:3.6, c:30.2, fib:1.8,
+    micro:{ iron:2.1, calcium:62, magnesium:28, zinc:1.8, potassium:210, b12:0.8, folate:30,
+            vitc:2, vitd:0.1, omega3:0.03, selenium:14, iodine:4, sodium:560 },
+    ironType:'heme', flags:[],
+    portions:[{ label:'1 dilim', g:90 }, { label:'1 pide', g:320 }],
+    aliases:['pide','kıymalı pide','kiymali pide'] },
+
+  { id:'tost', name:'Kaşarlı tost', cat:'yemek',
+    kcal:295, p:13.8, f:14.2, sat:7.8, c:28.4, fib:1.6,
+    micro:{ iron:1.4, calcium:290, magnesium:24, zinc:1.6, potassium:150, b12:0.9, folate:22,
+            vitc:0, vitd:0.3, omega3:0.02, selenium:15, iodine:14, sodium:680 },
+    ironType:'nonheme', flags:[],
+    portions:[{ label:'1 adet', g:120 }],
+    aliases:['tost','kaşarlı tost','sandviç'] },
+
+  { id:'simit', name:'Simit', cat:'tahil',
+    kcal:307, p:9.1, f:5.4, sat:1.0, c:54.6, fib:2.6,
+    micro:{ iron:2.6, calcium:44, magnesium:34, zinc:1.4, potassium:150, b12:0, folate:42,
+            vitc:0, vitd:0, omega3:0.04, selenium:18, iodine:2, sodium:430 },
+    ironType:'nonheme', flags:['phytate'],
+    portions:[{ label:'1 adet', g:100 }, { label:'yarım', g:50 }],
+    aliases:['simit','gevrek'] },
+
+  { id:'borek', name:'Peynirli börek', cat:'yemek',
+    kcal:296, p:9.4, f:16.8, sat:6.2, c:26.8, fib:1.2,
+    micro:{ iron:1.3, calcium:180, magnesium:20, zinc:1.1, potassium:120, b12:0.5, folate:26,
+            vitc:0, vitd:0.4, omega3:0.03, selenium:12, iodine:12, sodium:590 },
+    ironType:'nonheme', flags:[],
+    portions:[{ label:'1 dilim', g:110 }],
+    aliases:['börek','borek','peynirli börek','su böreği'] },
+
+  /* --------------------------------------------------- takviye ve toz
+     Takviye bir GIDA olarak girilir; ilac kaydiyla karistirilmaz.
+     Ilac kaydi «neyi kullaniyorsun» sorusunun cevabidir ve olcumu
+     bozar; burasi «bugun ne aldin» sorusunun cevabidir ve makroya
+     girer. Ikisi ayri sorulardir. */
+  { id:'protein-tozu', name:'Protein tozu (whey)', cat:'kuruyemis',
+    kcal:377, p:78.0, f:5.5, sat:2.8, c:7.2, fib:0.8,
+    micro:{ iron:1.0, calcium:480, magnesium:80, zinc:2.4, potassium:520, b12:1.2, folate:20,
+            vitc:0, vitd:0.6, omega3:0.02, selenium:20, iodine:10, sodium:290 },
+    ironType:'nonheme', flags:[],
+    portions:[{ label:'1 ölçek', g:30 }, { label:'2 ölçek', g:60 }],
+    aliases:['protein tozu','whey','protein shake','protein içtim'] },
+
+  /* ------------------------------------------------------ kuru meyve */
+  { id:'kuru-uzum', name:'Kuru üzüm', cat:'meyve',
+    kcal:299, p:3.1, f:0.5, sat:0.1, c:79.2, fib:3.7,
+    micro:{ iron:1.9, calcium:50, magnesium:32, zinc:0.2, potassium:749, b12:0, folate:5,
+            vitc:2, vitd:0, omega3:0.01, selenium:1, iodine:1, sodium:11 },
+    ironType:'nonheme', flags:['phytate'],
+    portions:[{ label:'1 avuç', g:30 }, { label:'1 çay kaşığı', g:8 }],
+    aliases:['kuru üzüm','üzüm kurusu','kuruüzüm'] },
+
+
+  { id:'hurma', name:'Hurma', cat:'meyve',
+    kcal:277, p:1.8, f:0.2, sat:0.0, c:75.0, fib:6.7,
+    micro:{ iron:0.9, calcium:64, magnesium:54, zinc:0.4, potassium:696, b12:0, folate:15,
+            vitc:0, vitd:0, omega3:0.01, selenium:3, iodine:1, sodium:2 },
+    ironType:'nonheme', flags:[],
+    portions:[{ label:'1 adet', g:24 }, { label:'3 adet', g:72 }],
+    aliases:['hurma','tarih'] },
+
+  /* --------------------------------------------------------- kahvalti */
+
+  { id:'tahin-pekmez', name:'Tahin pekmez', cat:'tatli',
+    kcal:490, p:9.2, f:26.4, sat:3.8, c:54.0, fib:4.2,
+    micro:{ iron:6.8, calcium:320, magnesium:180, zinc:3.6, potassium:520, b12:0, folate:38,
+            vitc:0, vitd:0, omega3:0.15, selenium:12, iodine:2, sodium:26 },
+    ironType:'nonheme', flags:['phytate'],
+    portions:[{ label:'1 yemek kaşığı', g:22 }],
+    aliases:['tahin pekmez','tahin','pekmez'] },
+
+  { id:'zeytin-siyah', name:'Siyah zeytin', cat:'yag',
+    kcal:115, p:0.8, f:10.7, sat:1.4, c:6.3, fib:3.2,
+    micro:{ iron:3.3, calcium:88, magnesium:4, zinc:0.2, potassium:8, b12:0, folate:0,
+            vitc:0, vitd:0, omega3:0.06, selenium:1, iodine:1, sodium:735 },
+    ironType:'nonheme', flags:[],
+    portions:[{ label:'5 adet', g:20 }, { label:'10 adet', g:40 }],
+    aliases:['zeytin','siyah zeytin'] },
+
+  /* ------------------------------------------------------------ icecek */
+  { id:'turk-kahvesi', name:'Türk kahvesi', cat:'icecek',
+    kcal:9, p:0.3, f:0.1, sat:0.0, c:1.6, fib:0.2,
+    micro:{ iron:0.1, calcium:4, magnesium:6, zinc:0.0, potassium:60, b12:0, folate:0,
+            vitc:0, vitd:0, omega3:0, selenium:0, iodine:0, sodium:2 },
+    ironType:'nonheme', flags:['tannin'],
+    portions:[{ label:'1 fincan', g:70 }],
+    aliases:['türk kahvesi','kahve','türk kahvesi içtim'] },
+
+  { id:'sut', name:'Süt (tam yağlı)', cat:'sut',
+    kcal:61, p:3.2, f:3.3, sat:1.9, c:4.8, fib:0,
+    micro:{ iron:0, calcium:113, magnesium:10, zinc:0.4, potassium:143, b12:0.5, folate:5,
+            vitc:0, vitd:0.1, omega3:0.02, selenium:2, iodine:20, sodium:43 },
+    ironType:'nonheme', flags:['calcium'],
+    portions:[{ label:'1 bardak', g:200 }],
+    aliases:['sut','süt'] },
+
+  { id:'kefir', name:'Kefir', cat:'sut',
+    kcal:56, p:3.3, f:2.0, sat:1.2, c:5.4, fib:0,
+    micro:{ iron:0.1, calcium:120, magnesium:12, zinc:0.4, potassium:160, b12:0.3, folate:8,
+            vitc:0.9, vitd:0.1, omega3:0.02, selenium:2, iodine:15, sodium:40 },
+    ironType:'nonheme', flags:['calcium'],
+    portions:[{ label:'1 bardak', g:200 }],
+    aliases:['kefir'] },
 ];
 
 SP.FOOD_BY_ID = SP.FOODS.reduce(function(acc, f){ acc[f.id] = f; return acc; }, {});
@@ -5891,6 +6064,7 @@ SP.PATTERNS = [
    asiri yuklenmenin en yaygin sebebi budur. */
 SP.EXERCISES = [
   { id:'sinav', name:'Şınav', kind:'strength', pattern:'push', met:5.0, equip:'yok',
+    aliases:['şınav','sınav','push up','pushup','şınav çektim','şınav yaptım'],
     cue:'Gövde tek parça, dirsekler 45 derece, göğüs yere yaklaşır.',
     levels:[
       { id:'duvar',  name:'Duvar şınavı',     to:'3×15' },
@@ -5902,6 +6076,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'barfiks', name:'Barfiks', kind:'strength', pattern:'pull', met:6.0, equip:'bar',
+    aliases:['barfiks','pull up','pullup','barfiks çektim','mekik barı'],
     cue:'Omuzlar kulaktan uzak, çene barın üstüne. Sallanma yok.',
     levels:[
       { id:'asili',   name:'Barda asılı kalma', to:'3×30 sn' },
@@ -5912,6 +6087,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'squat', name:'Squat', kind:'strength', pattern:'squat', met:5.5, equip:'yok',
+    aliases:['squat','çömelme','skuat','squat yaptım'],
     cue:'Topuklar yerde, dizler ayak ucu yönünde, kalça diz hizasının altına iner.',
     levels:[
       { id:'sandalye', name:'Sandalyeye oturup kalkma', to:'3×15' },
@@ -5922,6 +6098,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'kalca-koprusu', name:'Kalça köprüsü', kind:'strength', pattern:'hinge', met:4.0, equip:'yok',
+    aliases:['kalça köprüsü','köprü','glute bridge','hip thrust'],
     cue:'Kalça sıkılarak kaldırılır, bel değil kalça çalışır.',
     levels:[
       { id:'ciftbacak', name:'Çift bacak köprü',   to:'3×20' },
@@ -5931,6 +6108,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'plank', name:'Plank', kind:'strength', pattern:'core', met:3.5, equip:'yok',
+    aliases:['plank','tahta','plank yaptım','kalıp'],
     cue:'Kalça çökmez, bel çukurlaşmaz. Süre değil hizalanma önemlidir.',
     levels:[
       { id:'diz',   name:'Diz üstü plank', to:'3×30 sn' },
@@ -5940,6 +6118,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'firmer-tasima', name:'Çiftçi taşıması', kind:'strength', pattern:'carry', met:4.5, equip:'ağırlık',
+    aliases:['çiftçi taşıması','farmer walk','ağırlık taşıdım','taşıma'],
     cue:'Omuzlar geride, gövde dik, adımlar kısa. Market poşetiyle de yapılır.',
     levels:[
       { id:'hafif', name:'Hafif yük 30 sn', to:'3×30 sn' },
@@ -5949,6 +6128,7 @@ SP.EXERCISES = [
 
   /* --- dayaniklilik --- */
   { id:'yuruyus', name:'Tempolu yürüyüş', kind:'cardio', pattern:null, met:3.8, equip:'yok',
+    aliases:['yürüyüş','yürüdüm','yürüdük','yürüme','yürüyüş yaptım','tempolu yürüyüş','tempolu yürüdüm','gezdim','adım attım'],
     cue:'Konuşabildiğin ama şarkı söyleyemediğin tempo.',
     levels:[
       { id:'20', name:'20 dakika', to:'her gün' },
@@ -5957,6 +6137,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'kosu', name:'Koşu', kind:'cardio', pattern:null, met:9.0, equip:'yok',
+    aliases:['koşu','koştum','koşuya çıktım','jogging','koşu yaptım','tempo koşusu'],
     cue:'Haftalık toplam mesafe %10\'dan fazla artmaz.',
     levels:[
       { id:'yuruyus-kosu', name:'Yürü-koş (1 dk / 2 dk)', to:'20 dakika' },
@@ -5966,6 +6147,7 @@ SP.EXERCISES = [
     ] },
 
   { id:'evde-sprint', name:'Evde sprint', kind:'cardio', pattern:null, met:8.0, equip:'yok',
+    aliases:['sprint','sprint attım','hiit','interval','yüksek diz','mekik koşusu'],
     cue:'Yerinde yüksek diz ya da kısa mekik koşusu. Yüksek şiddet kısa tutulur: '
       + 'toparlanma düşükken bu hareket yapılmaz.',
     levels:[
@@ -5976,19 +6158,111 @@ SP.EXERCISES = [
 
   /* --- mobilite --- */
   { id:'kalca-acma', name:'Kalça açma', kind:'mobility', pattern:null, met:2.5, equip:'yok',
+    aliases:['kalça açma','kalça esnetme','kalça esnettim'],
     cue:'Masa başı çalışanın en çok ihtiyaç duyduğu hareket. Zorlamadan, nefesle.',
     levels:[{ id:'temel', name:'Temel akış', to:'günde 8 dk' }] },
 
   { id:'sirt-mobilite', name:'Sırt ve omuz mobilitesi', kind:'mobility', pattern:null, met:2.5, equip:'yok',
+    aliases:['sırt mobilitesi','omuz mobilitesi','sırt esnetme','omuz açma'],
     cue:'Kürek kemikleri arasında açılma hissedilir.',
     levels:[{ id:'temel', name:'Temel akış', to:'günde 8 dk' }] },
 
   { id:'ayak-bilegi', name:'Ayak bileği mobilitesi', kind:'mobility', pattern:null, met:2.2, equip:'yok',
+    aliases:['ayak bileği mobilitesi','ayak bileği esnetme','bilek açma'],
     cue:'Squat derinliğini kısıtlayan en yaygın sebep burasıdır.',
     levels:[{ id:'temel', name:'Temel akış', to:'günde 5 dk' }] },
+
+  { id:'bisiklet', name:'Bisiklet', kind:'cardio', pattern:null, met:7.0, equip:'bisiklet',
+    aliases:['bisiklet','bisiklete bindim','bisiklet sürdüm','pedal çevirdim','spinning'],
+    cue:'Sele yüksekliği doğruysa diz bacağın en alt noktasında hafif bükülü kalır.',
+    levels:[
+      { id:'20', name:'20 dakika düz tempo', to:'haftada 3' },
+      { id:'45', name:'45 dakika düz tempo', to:'haftada 3' },
+      { id:'tepe', name:'Tepe/direnç aralıkları', to:'haftada 1' },
+    ] },
+
+  { id:'yuzme', name:'Yüzme', kind:'cardio', pattern:null, met:6.5, equip:'havuz',
+    aliases:['yüzme','yüzdüm','havuza gittim','kulaç attım','serbest stil'],
+    cue:'Eklem yükü en düşük kardiyo. Omuz ağrısı varsa kurbağalama tercih edilir.',
+    levels:[
+      { id:'400', name:'400 m kesintili',  to:'haftada 2' },
+      { id:'800', name:'800 m kesintisiz', to:'haftada 2' },
+      { id:'1500', name:'1.500 m',         to:'haftada 2' },
+    ] },
+
+  { id:'ip-atlama', name:'İp atlama', kind:'cardio', pattern:null, met:11.0, equip:'ip',
+    aliases:['ip atlama','ip atladım','jump rope','ip çalıştım'],
+    cue:'Yüksek şiddet ve yüksek darbe. Diz ya da ayak bileği şikâyetinde yapılmaz.',
+    levels:[
+      { id:'30x6', name:'30 sn × 6 tur', to:'haftada 2' },
+      { id:'60x5', name:'60 sn × 5 tur', to:'haftada 2' },
+      { id:'cift', name:'Çift tur atlama', to:'haftada 1' },
+    ] },
+
+  { id:'merdiven', name:'Merdiven', kind:'cardio', pattern:null, met:8.0, equip:'yok',
+    aliases:['merdiven','merdiven çıktım','basamak','merdiven tırmandım'],
+    cue:'Günlük hayatın içine giren en kolay yük. Asansör yerine merdiven.',
+    levels:[
+      { id:'5kat',  name:'5 kat kesintisiz',  to:'her gün' },
+      { id:'10kat', name:'10 kat kesintisiz', to:'her gün' },
+      { id:'tekrar', name:'10 kat × 3 tur',   to:'haftada 2' },
+    ] },
+
+  { id:'kurek-cekis', name:'Kürek çekişi', kind:'strength', pattern:'pull', met:5.0, equip:'lastik',
+    aliases:['kürek','kürek çektim','row','tek kol çekiş','lastikle çekiş'],
+    cue:'Kürek kemiği önce geri, sonra kol çeker. Omuz kulağa doğru yükselmez.',
+    levels:[
+      { id:'lastik', name:'Lastikle oturarak kürek', to:'3×15' },
+      { id:'tek',    name:'Tek kol dambıl kürek',    to:'3×12' },
+      { id:'masa',   name:'Masa altı ters şınav',    to:'3×10' },
+      { id:'egik',   name:'Eğik bar kürek',          to:'3×8'  },
+    ] },
+
+  { id:'omuz-pres', name:'Omuz presi', kind:'strength', pattern:'push', met:5.0, equip:'ağırlık',
+    aliases:['omuz presi','omuz bastım','shoulder press','baş üstü pres','pres'],
+    cue:'Bel çukurlaşmadan, kaburga aşağıda. Kollar kulak hizasına gelir.',
+    levels:[
+      { id:'lastik', name:'Lastikle pres',   to:'3×15' },
+      { id:'dambil', name:'Dambılla pres',   to:'3×12' },
+      { id:'tek',    name:'Tek kol pres',    to:'3×10' },
+      { id:'pike',   name:'Pike şınav',      to:'3×8'  },
+    ] },
+
+  { id:'yoga', name:'Yoga akışı', kind:'mobility', pattern:null, met:3.0, equip:'mat',
+    /* Genel «esnedim» buraya duser, ozgul bir harekete degil: kullanicinin
+       yapmadigi bir rutini kaydetmek, hic kaydetmemekten kotudur. */
+    aliases:['yoga','yoga yaptım','esneme akışı','selamlama','esnedim','esneme','esnedik'],
+    cue:'Nefes hareketi yönetir. Ağrı sınırında durulur, zorlanmaz.',
+    levels:[
+      { id:'kisa',  name:'Kısa akış (10 dk)',  to:'her gün' },
+      { id:'orta',  name:'Orta akış (25 dk)',  to:'haftada 4' },
+      { id:'uzun',  name:'Uzun akış (45 dk)',  to:'haftada 2' },
+    ] },
+
+  { id:'nefes', name:'Nefes çalışması', kind:'mobility', pattern:null, met:1.5, equip:'yok',
+    aliases:['nefes','nefes çalıştım','nefes egzersizi','diyafram','meditasyon'],
+    cue:'Toparlanmanın en ucuz aracı. Burundan al, uzun ver; verme alma\'dan uzun olur.',
+    levels:[{ id:'temel', name:'4-6 nefes, 5 dakika', to:'günde 1' }] },
 ];
 
 SP.EX_BY_ID = SP.EXERCISES.reduce(function(acc, e){ acc[e.id] = e; return acc; }, {});
+
+/* Takma ad indeksi. Ayristirici uzun once ISIM ariyordu ama insanlar
+   FIIL konusuyor: «45 dakika yurudum» tabloda «Tempolu yuruyus» diye
+   duran hareketle eslesmiyordu ve seans «Serbest seans» olarak
+   kaydediliyordu — sure dogru, hareket kayip.
+
+   Liste UZUNDAN KISAYA sirali: «tempolu yuruyus» once denenir, «yuruyus»
+   sonra. Kisa olan once denenseydi ozgul ad hic eslesmezdi. */
+SP.EX_ALIASES = (function(){
+  var out = [];
+  SP.EXERCISES.forEach(function(e){
+    (e.aliases || []).concat([e.name]).forEach(function(a){
+      out.push({ alias:a, ex:e });
+    });
+  });
+  return out.sort(function(a, b){ return b.alias.length - a.alias.length; });
+})();
 
 /* ---------------------------------------------------------------- alanlar
 
@@ -15596,14 +15870,25 @@ SP.Quick = (function(){
     if(/^s(a|aat)?$/i.test(m[2])) dk = dk * 60;
     if(dk <= 0 || dk > 600) return null;
 
-    /* Hangi hareket? Ad gecmiyorsa serbest seans olur — sure yine de
-       kaydedilebilir ve yuk hesabina girer. */
+    /* Hangi hareket?
+
+       Once yalnizca TAM AD araniyordu ve bu sessiz bir kayiptı: tabloda
+       «Tempolu yuruyus» diye duran hareket, «45 dakika yurudum» cumlesiyle
+       eslesmiyordu. Sure dogru kaydediliyor, hareket «serbest seans»
+       oluyordu — yani yuk hesabina giriyor ama kalip dengesine, MET
+       degerine ve ilerleme merdivenine girmiyordu.
+
+       Insanlar isim degil FIIL konusur. Artik takma ad indeksi kullanilir
+       ve UZUNDAN KISAYA denenir: «tempolu yuruyus» once, «yuruyus» sonra.
+       Kisa olan once denenseydi ozgul ad hic eslesmezdi.
+
+       Ad gecmiyorsa yine serbest seans olur: sure kaybolmaz. */
     const n = U.norm(text);
     let ex = null;
-    (SP.EXERCISES || []).forEach(e => {
-      if(ex) return;
-      const ad = U.norm(e.name);
-      if(ad.length >= 3 && n.indexOf(ad) >= 0) ex = e;
+    (SP.EX_ALIASES || []).some(x => {
+      const a = U.norm(x.alias);
+      if(a.length >= 3 && n.indexOf(a) >= 0){ ex = x.ex; return true; }
+      return false;
     });
     return { minutes:Math.round(dk), exercise:ex };
   }
@@ -15698,7 +15983,11 @@ SP.Quick = (function(){
 
     if(parsed.kind === 'meal'){
       const meal = SP.Model.newMeal(o.slot || 'ara');
-      meal.items = parsed.data.items.map(i => ({ foodId:i.food.id, g:i.grams,
+      /* Ayristirici gram degerini `g` alaninda uretir. Burada `i.grams`
+         okunuyordu ve boyle bir alan yok: komut paletinden girilen HER
+         ogun gramsiz kaydediliyordu. Sessiz bir kayipti — ogun listede
+         gorunuyor ama kalorisi, makrosu ve mikro besini sifir. */
+      meal.items = parsed.data.items.map(i => ({ foodId:i.food.id, g:i.g,
         cert:i.cert || 'estimated' }));
       await SP.Model.addMeal(tarih, meal);
       return { ok:true, text:'Öğün eklendi', route:'meals' };
@@ -15993,7 +16282,7 @@ SP.Proposals = (function(){
     if(parsed.kind === 'lab') return { action:'olcum-gir',
       params:{ rows:parsed.data.rows.map(r => ({ markerId:r.marker.id, value:r.value })), date } };
     if(parsed.kind === 'meal') return { action:'ogun-ekle',
-      params:{ items:parsed.data.items.map(i => ({ foodId:i.food.id, g:i.grams, cert:i.cert })),
+      params:{ items:parsed.data.items.map(i => ({ foodId:i.food.id, g:i.g, cert:i.cert })),
         slot:slot || 'ara', date } };
     return null;
   }
