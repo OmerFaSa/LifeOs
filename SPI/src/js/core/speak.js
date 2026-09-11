@@ -116,51 +116,154 @@ SP.Speak = (function(){
     return s;
   }
 
-  /* --------------------------------------------------------- söyleme */
+  /* --------------------------------------------------------- söyleme
 
-  let simdiki = null;      /* { utter, agentId, iptal } */
+     Web Speech API'nin iki tuzağı buraya yazılı. İkisi de AYS'nin ses
+     katmanında zor yoldan öğrenilmiş ve aynısı burada da geçerli:
+
+     a) UZUN METİN SESSİZCE KESİLİR. Chrome yaklaşık 15 saniye sonra
+        konuşmayı durdurur ve `onend` hiç gelmez. Dört cümlelik bir
+        ajan cevabı tam olarak bu sınıra girer. Metin cümlelere
+        bölünüp parça parça okunur; her parça kısadır.
+
+     b) `onend` HİÇ GELMEYEBİLİR — sekme arka plana atılır, ses aygıtı
+        düşer. Burası kritik: sıra alma döngüsü konuşmanın bitmesini
+        BEKLİYOR. Söz çözülmezse mikrofon bir daha açılmaz ve kullanıcı
+        neden cevap alamadığını anlamaz. Her parçaya uzunluğuna göre
+        bir emniyet süresi konur; süre dolarsa konuşma bitmiş sayılır.
+
+     Sonuç: `say()` HİÇBİR KOŞULDA asılı kalmaz. */
+
+  const PARCA = 180;                 /* bir parçanın en fazla uzunluğu */
+  const DUR = '.!?…:;';              /* cümle sonu sayılan noktalama */
+
+  /* Cümlelere böler. «14,5 ng/mL» gibi sayıların içindeki nokta cümle
+     sonu sayılmaz: noktalamadan sonra boşluk ya da metin sonu aranır. */
+  function cumleler(s){
+    const out = [];
+    let bas = 0;
+    for(let i = 0; i < s.length; i++){
+      if(DUR.indexOf(s[i]) < 0) continue;
+      let j = i;
+      while(j + 1 < s.length && DUR.indexOf(s[j + 1]) >= 0) j++;
+      const sonraki = s[j + 1];
+      if(sonraki === undefined || /\s/.test(sonraki)){
+        const p = s.slice(bas, j + 1).trim();
+        if(p) out.push(p);
+        bas = j + 1;
+      }
+      i = j;
+    }
+    const kuyruk = s.slice(bas).trim();
+    if(kuyruk) out.push(kuyruk);
+    return out;
+  }
+
+  /* Cümleleri PARCA sınırına kadar birleştirir; tek başına uzun olan
+     cümle kelime sınırından bölünür. */
+  function parcala(text){
+    const s = String(text || '').trim();
+    if(!s) return [];
+    const out = [];
+    const liste = cumleler(s).length ? cumleler(s) : [s];
+    let tampon = '';
+    liste.forEach(ham => {
+      let p = ham.trim();
+      if(!p) return;
+      while(p.length > PARCA){
+        const kes = p.lastIndexOf(' ', PARCA);
+        const at = kes > PARCA * 0.5 ? kes : PARCA;
+        if(tampon){ out.push(tampon); tampon = ''; }
+        out.push(p.slice(0, at).trim());
+        p = p.slice(at).trim();
+      }
+      if((tampon + ' ' + p).trim().length > PARCA){ out.push(tampon); tampon = p; }
+      else tampon = (tampon ? tampon + ' ' : '') + p;
+    });
+    if(tampon) out.push(tampon);
+    return out.filter(Boolean);
+  }
+
+  /* Emniyet süresi. Yavaş bir sesin saniyede ~10 karakter okuduğu
+     varsayılır; üstüne üç saniye pay konur ve 45 saniyede tavanlanır. */
+  function emniyetMs(text, rate){
+    const r = Math.max(0.5, Number(rate) || 1);
+    return Math.min(45000, 3000 + (String(text).length / (10 * r)) * 1000);
+  }
+
+  let simdiki = null;      /* { agentId, iptal } */
+
+  function parcaSoyle(metin, ayar){
+    return new Promise(resolve => {
+      let bitti = false, saat = null;
+      const bitir = neden => {
+        if(bitti) return;
+        bitti = true;
+        clearTimeout(saat);
+        resolve(neden);
+      };
+
+      let u;
+      try{ u = new Utter(metin); }
+      catch(e){ return bitir('hata'); }
+
+      if(ayar.voice){ u.voice = ayar.voice; u.lang = ayar.voice.lang; }
+      else u.lang = ayar.lang || 'tr-TR';
+      u.rate = ayar.rate;
+      u.pitch = ayar.pitch;
+      u.volume = ayar.volume;
+
+      u.onend = () => bitir('bitti');
+      u.onerror = ev => {
+        const kod = (ev && ev.error) || 'hata';
+        bitir(kod === 'interrupted' || kod === 'canceled' ? 'iptal' : 'hata');
+      };
+
+      /* `onend` hiç gelmezse burası gelir; çağıran asılı kalmaz. */
+      saat = setTimeout(() => bitir('zamanasimi'), emniyetMs(metin, u.rate));
+
+      try{ API.speak(u); }
+      catch(e){ bitir('hata'); }
+    });
+  }
 
   /* Bir cümleyi söyler ve BİTİNCE çözülen bir söz döndürür.
 
      Sözün bitmesi sıra alma döngüsünün tek tetikleyicisidir: mikrofon
-     ancak ajan sustuğunda açılır. Bu yüzden hata durumunda bile söz
-     MUTLAKA çözülür — çözülmezse döngü sessizce ölür ve kullanıcı
-     mikrofonun neden açılmadığını anlamaz. */
-  function say(text, opts){
+     ancak ajan sustuğunda açılır. Bu yüzden hata, iptal ya da zaman
+     aşımı — hepsinde söz MUTLAKA çözülür. */
+  async function say(text, opts){
     const o = opts || {};
     const metin = konusulacak(text);
-    if(!supported() || !metin) return Promise.resolve({ ok:false, reason:'bos' });
+    if(!supported() || !metin) return { ok:false, reason:'bos' };
+
+    const parcalar = parcala(metin);
+    if(!parcalar.length) return { ok:false, reason:'bos' };
 
     stop();
 
-    return new Promise(resolve => {
-      let bitti = false;
-      const bitir = sonuc => { if(bitti) return; bitti = true; simdiki = null; resolve(sonuc); };
+    const stil = styleFor(o.agent);
+    const ayar = {
+      voice:o.voice || voiceFor(o.agent),
+      lang:o.lang,
+      rate:o.rate != null ? o.rate : stil.rate,
+      pitch:o.pitch != null ? o.pitch : stil.pitch,
+      volume:o.volume != null ? o.volume : 1,
+    };
 
-      let u;
-      try{ u = new Utter(metin); }
-      catch(e){ return bitir({ ok:false, reason:'utter' }); }
+    simdiki = { agentId:o.agent || null };
+    if(o.onStart) o.onStart();
 
-      const ses = o.voice || voiceFor(o.agent);
-      const stil = styleFor(o.agent);
-      if(ses){ u.voice = ses; u.lang = ses.lang; }
-      else u.lang = o.lang || 'tr-TR';
-      u.rate = o.rate != null ? o.rate : stil.rate;
-      u.pitch = o.pitch != null ? o.pitch : stil.pitch;
-      u.volume = o.volume != null ? o.volume : 1;
-
-      u.onend = () => bitir({ ok:true });
-      u.onerror = ev => bitir({ ok:false,
-        reason:(ev && ev.error) || 'error',
-        /* Kullanıcı kestiyse bu bir hata değil, bir karardır. */
-        iptal:!!(ev && (ev.error === 'interrupted' || ev.error === 'canceled')) });
-
-      simdiki = { utter:u, agentId:o.agent || null };
-      if(o.onStart) o.onStart();
-
-      try{ API.speak(u); }
-      catch(e){ bitir({ ok:false, reason:'speak' }); }
-    });
+    let zamanasimi = false;
+    for(let i = 0; i < parcalar.length; i++){
+      if(!simdiki) return { ok:false, reason:'iptal', iptal:true };
+      const neden = await parcaSoyle(parcalar[i], ayar);
+      if(neden === 'iptal'){ simdiki = null; return { ok:false, reason:'iptal', iptal:true }; }
+      if(neden === 'hata'){ simdiki = null; return { ok:false, reason:'hata' }; }
+      if(neden === 'zamanasimi') zamanasimi = true;
+    }
+    simdiki = null;
+    return { ok:true, zamanasimi };
   }
 
   /* Sırayla söyler. Bir cümle iptal edilirse kalanlar SÖYLENMEZ:
@@ -202,6 +305,7 @@ SP.Speak = (function(){
     supported, ready, hasTurkish, voices, turkishVoices,
     voiceFor, styleFor, konusulacak,
     say, sequence, stop, isSpeaking, speakingAgent, onVoicesReady,
-    KIMLIK,
+    parcala, cumleler, emniyetMs,
+    KIMLIK, PARCA,
   };
 })();

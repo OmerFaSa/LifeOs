@@ -318,6 +318,41 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   display:flex; gap:8px; justify-content:flex-end;
 }
 
+/* ---- öneri kutusu --------------------------------------------------
+
+   Bir öneri bir KAYIT DEĞİL, bir teklifitir. Bu yüzden sohbet balonu
+   gibi değil, bir form gibi durur: ne değişeceği önce/sonra olarak
+   yazılır ve iki düğme bekler. Onaysız hiçbir şey yazılmaz. */
+.oneriler{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+.oneri{
+  border:1px solid var(--border-strong); border-radius:var(--r-sm);
+  background:var(--surface); padding:12px 14px;
+}
+.oneri--applied{ border-color:var(--border); background:var(--surface-2); }
+.oneri--rejected,.oneri--undone{ opacity:.6; }
+.oneri--stale{ border-left:3px solid var(--accent); }
+.oneri__bas{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.oneri__ne{ font-size:var(--fs-sm); font-weight:650; letter-spacing:-.005em; }
+.oneri__hata{ margin:8px 0 0; font-size:var(--fs-sm); color:var(--accent); }
+.oneri__satirlar{ display:flex; flex-direction:column; gap:4px; margin-top:9px; }
+.oneri__satir{
+  display:grid; grid-template-columns:minmax(0,1fr) auto 14px auto;
+  gap:4px 9px; align-items:baseline; font-size:var(--fs-sm);
+}
+.oneri__alan{ color:var(--text-2); min-width:0; overflow-wrap:anywhere; }
+.oneri__once{ color:var(--text-3); font-family:var(--font-display);
+  font-variant-numeric:tabular-nums; white-space:nowrap; }
+.oneri__ok{ color:var(--text-3); text-align:center; }
+.oneri__sonra{ color:var(--text); font-weight:650; font-family:var(--font-display);
+  font-variant-numeric:tabular-nums; white-space:nowrap; }
+.oneri__dug{ display:flex; gap:7px; flex-wrap:wrap; margin-top:11px; }
+.oneri__dug:empty{ display:none; }
+@container satir (max-width:460px){
+  .oneri__satir{ grid-template-columns:minmax(0,1fr); }
+  .oneri__ok{ display:none; }
+  .oneri__once::after{ content:' →'; color:var(--text-3); }
+}
+
 /* Tutanak dinlenirken O ANKİ tur işaretlenir: gözle kulak aynı yerde
    olsun diye. İşaret bir durum değil bir KONUM bildirir, bu yüzden
    durum renklerinden birini kullanmaz. */

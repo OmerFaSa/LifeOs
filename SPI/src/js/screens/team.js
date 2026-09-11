@@ -158,6 +158,7 @@ SP.Screens.team = (function(){
             <div class="msg__body">${K.Skeleton({ rows:2,
               label:a.name + ' düşünüyor',
               hint:'brifingi okuyor ve cümleyi kuruyor' })}</div></div>`)}
+          ${oneriBlogu()}
         </div>`;
   }
 
@@ -171,7 +172,7 @@ SP.Screens.team = (function(){
       foot:html`
         <div class="quick">
           ${K.Mic({ target:'chat-text' })}
-          ${K.Input({ id:'chat-text', placeholder:'Sorunu yaz ya da mikrofona söyle…', aria:'Soru' })}
+          ${K.Input({ id:'chat-text', placeholder:'Sorunu sor ya da verini söyle — «uyku 7 saat ve 45 dk yürüdüm»', aria:'Soru' })}
           ${K.Button({ label:'Gönder', tone:'primary', act:'send-chat', disabled:busy })}
         </div>`,
     });
@@ -244,12 +245,82 @@ SP.Screens.team = (function(){
     if(yeni) yeni.scrollTop = yeni.scrollHeight;
   }
 
+  /* ---- oneri kutusu ------------------------------------------------
+
+     Cumlede VERI varsa once kural motoru cozer; model hic cagrilmaz.
+     «uyku 7 saat ve 45 dakika yurudum» iki oneri uretir, ikisi de
+     ayri ayri onaylanir.
+
+     Onaysiz hicbir sey yazilmaz — bkz. core/proposals.js. */
+  function oneriKarti(p){
+    const pv = SP.Proposals.preview(p);
+    const e = SP.Proposals.eylem(p.action);
+    return html`
+      <div class="oneri oneri--${p.status}">
+        <div class="oneri__bas">
+          <b class="oneri__ne">${e ? e.label : p.action}</b>
+          ${when(p.kaynak === 'model', () => K.Badge({ label:'ajan önerdi', tone:'info' }))}
+          ${when(p.status === 'applied', () => K.Badge({ label:'kaydedildi', tone:'ok' }))}
+          ${when(p.status === 'rejected', () => K.Badge({ label:'vazgeçildi', tone:'muted' }))}
+          ${when(p.status === 'undone', () => K.Badge({ label:'geri alındı', tone:'muted' }))}
+          ${when(p.status === 'stale', () => K.Badge({ label:'geçersizleşti', tone:'warn' }))}
+        </div>
+        ${when(!pv.ok, () => html`<p class="oneri__hata">${pv.why}</p>`)}
+        ${when(pv.ok, () => html`<div class="oneri__satirlar">
+          ${map(pv.rows, r => html`<div class="oneri__satir">
+            <span class="oneri__alan">${r.alan}</span>
+            <span class="oneri__once">${r.once}</span>
+            <span class="oneri__ok" aria-hidden="true">→</span>
+            <span class="oneri__sonra">${r.sonra}</span>
+          </div>`)}
+        </div>`)}
+        <div class="oneri__dug">
+          ${when(p.status === 'pending' && pv.ok, () => html`
+            ${K.Button({ label:'Kaydet', size:'sm', tone:'primary',
+              act:'oneri-onay', data:{ 'data-id':p.id } })}
+            ${K.Button({ label:'Vazgeç', size:'sm', act:'oneri-ret', data:{ 'data-id':p.id } })}`)}
+          ${when(p.status === 'applied', () => K.Button({ label:'Geri al', size:'sm',
+            act:'oneri-geri', data:{ 'data-id':p.id } }))}
+        </div>
+      </div>`;
+  }
+
+  function oneriBlogu(){
+    const liste = SP.Proposals.all().filter(p =>
+      p.status === 'pending' || p.status === 'applied' || p.status === 'stale');
+    if(!liste.length) return raw('');
+    return html`<div class="oneriler">${map(liste.slice(0, 6), oneriKarti)}</div>`;
+  }
+
   async function send(text){
-    if(busy || !text.trim()) return;
+    const t = String(text || '').trim();
+    if(busy || !t) return;
     busy = true;
     SP.App.render();
     try{
-      await SP.Office.send(current().id, text.trim());
+      const a = current();
+      /* 1) Kural motoru: cumlede veri var mi? Model gerekmez. */
+      const r = SP.Proposals.fromText(t);
+
+      if(r.oneriler.length){
+        /* Kullanicinin soyledigi sohbete girer — ne dedigi kayitli kalir. */
+        const list = S.officeChats[a.id] || (S.officeChats[a.id] = []);
+        list.push({ role:'user', text:t, at:new Date().toISOString() });
+
+        for(const o of r.oneriler) await SP.Proposals.propose(o);
+
+        const ne = r.oneriler.length === 1 ? 'Bir kayıt' : r.oneriler.length + ' kayıt';
+        const kuyruk = r.anlasilmayan.length
+          ? ' Şunu çözemedim: «' + r.anlasilmayan.join('», «') + '».'
+          : '';
+        list.push({ role:'agent', source:'rules', at:new Date().toISOString(),
+          text:ne + ' hazırladım, onayına bakıyor. Kaydet dersen yazarım.' + kuyruk });
+        await SP.Store.set('chats/' + a.id, { agentId:a.id, messages:list });
+        return;
+      }
+
+      /* 2) Veri yok: normal sohbet. */
+      await SP.Office.send(a.id, t);
     }finally{
       busy = false;
       SP.App.render();
@@ -288,6 +359,21 @@ SP.Screens.team = (function(){
       await send(text);
     },
     async 'quick-ask'(el){ await send(el.dataset.q); },
+
+    async 'oneri-onay'(el){
+      const r = await SP.Proposals.approve(el.dataset.id);
+      UI.toast(r.ok ? 'Kaydedildi' : (r.why || 'Kaydedilemedi'));
+      SP.App.render();
+    },
+    async 'oneri-ret'(el){
+      await SP.Proposals.reject(el.dataset.id);
+      SP.App.render();
+    },
+    async 'oneri-geri'(el){
+      const r = await SP.Proposals.undo(el.dataset.id);
+      UI.toast(r.ok ? 'Geri alındı' : (r.why || 'Geri alınamadı'));
+      SP.App.render();
+    },
 
     /* Devir: hedef ajana gec ve AYNI soruyu ona sor. Kullanici soruyu
        ikinci kez yazmaz — devrin sonu bu. */

@@ -37,6 +37,7 @@ SP.S = {
   meals:{},           // YYYY-MM-DD -> ogun dizisi
   workouts:[],        // antrenman kayitlari
   meds:[],            // ilac ve takviye kayitlari, en yeni ustte
+  proposals:[],       // ofisin onerileri — onaysiz hicbiri uygulanmaz
   foods:[],           // kullanicinin ekledigi gidalar (SP.FOODS'a katilir)
   progress:{},        // exId -> { levelId, achievedAt }
 
@@ -827,6 +828,10 @@ SP.Model = (function(){
 
     S.foods = ((await SP.Store.list('foods')) || []).map(normFood);
     mountFoods();
+
+    /* Oneri kutusu: bekleyen bir oneri acilista gorunur kalmali,
+       yoksa kullanici onayladigini sanip onaylamamis olur. */
+    if(SP.Proposals) await SP.Proposals.load();
 
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);

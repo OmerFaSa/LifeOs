@@ -1847,6 +1847,41 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   display:flex; gap:8px; justify-content:flex-end;
 }
 
+/* ---- öneri kutusu --------------------------------------------------
+
+   Bir öneri bir KAYIT DEĞİL, bir teklifitir. Bu yüzden sohbet balonu
+   gibi değil, bir form gibi durur: ne değişeceği önce/sonra olarak
+   yazılır ve iki düğme bekler. Onaysız hiçbir şey yazılmaz. */
+.oneriler{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+.oneri{
+  border:1px solid var(--border-strong); border-radius:var(--r-sm);
+  background:var(--surface); padding:12px 14px;
+}
+.oneri--applied{ border-color:var(--border); background:var(--surface-2); }
+.oneri--rejected,.oneri--undone{ opacity:.6; }
+.oneri--stale{ border-left:3px solid var(--accent); }
+.oneri__bas{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.oneri__ne{ font-size:var(--fs-sm); font-weight:650; letter-spacing:-.005em; }
+.oneri__hata{ margin:8px 0 0; font-size:var(--fs-sm); color:var(--accent); }
+.oneri__satirlar{ display:flex; flex-direction:column; gap:4px; margin-top:9px; }
+.oneri__satir{
+  display:grid; grid-template-columns:minmax(0,1fr) auto 14px auto;
+  gap:4px 9px; align-items:baseline; font-size:var(--fs-sm);
+}
+.oneri__alan{ color:var(--text-2); min-width:0; overflow-wrap:anywhere; }
+.oneri__once{ color:var(--text-3); font-family:var(--font-display);
+  font-variant-numeric:tabular-nums; white-space:nowrap; }
+.oneri__ok{ color:var(--text-3); text-align:center; }
+.oneri__sonra{ color:var(--text); font-weight:650; font-family:var(--font-display);
+  font-variant-numeric:tabular-nums; white-space:nowrap; }
+.oneri__dug{ display:flex; gap:7px; flex-wrap:wrap; margin-top:11px; }
+.oneri__dug:empty{ display:none; }
+@container satir (max-width:460px){
+  .oneri__satir{ grid-template-columns:minmax(0,1fr); }
+  .oneri__ok{ display:none; }
+  .oneri__once::after{ content:' →'; color:var(--text-3); }
+}
+
 /* Tutanak dinlenirken O ANKİ tur işaretlenir: gözle kulak aynı yerde
    olsun diye. İşaret bir durum değil bir KONUM bildirir, bu yüzden
    durum renklerinden birini kullanmaz. */
@@ -4456,7 +4491,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'9de4282', at:'2026-09-11 20:43', dirty:true };
+SP.BUILD = { id:'912aea2', at:'2026-09-11 20:52', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -7539,6 +7574,7 @@ SP.S = {
   meals:{},           // YYYY-MM-DD -> ogun dizisi
   workouts:[],        // antrenman kayitlari
   meds:[],            // ilac ve takviye kayitlari, en yeni ustte
+  proposals:[],       // ofisin onerileri — onaysiz hicbiri uygulanmaz
   foods:[],           // kullanicinin ekledigi gidalar (SP.FOODS'a katilir)
   progress:{},        // exId -> { levelId, achievedAt }
 
@@ -8329,6 +8365,10 @@ SP.Model = (function(){
 
     S.foods = ((await SP.Store.list('foods')) || []).map(normFood);
     mountFoods();
+
+    /* Oneri kutusu: bekleyen bir oneri acilista gorunur kalmali,
+       yoksa kullanici onayladigini sanip onaylamamis olur. */
+    if(SP.Proposals) await SP.Proposals.load();
 
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
@@ -11341,51 +11381,154 @@ SP.Speak = (function(){
     return s;
   }
 
-  /* --------------------------------------------------------- söyleme */
+  /* --------------------------------------------------------- söyleme
 
-  let simdiki = null;      /* { utter, agentId, iptal } */
+     Web Speech API'nin iki tuzağı buraya yazılı. İkisi de AYS'nin ses
+     katmanında zor yoldan öğrenilmiş ve aynısı burada da geçerli:
+
+     a) UZUN METİN SESSİZCE KESİLİR. Chrome yaklaşık 15 saniye sonra
+        konuşmayı durdurur ve `onend` hiç gelmez. Dört cümlelik bir
+        ajan cevabı tam olarak bu sınıra girer. Metin cümlelere
+        bölünüp parça parça okunur; her parça kısadır.
+
+     b) `onend` HİÇ GELMEYEBİLİR — sekme arka plana atılır, ses aygıtı
+        düşer. Burası kritik: sıra alma döngüsü konuşmanın bitmesini
+        BEKLİYOR. Söz çözülmezse mikrofon bir daha açılmaz ve kullanıcı
+        neden cevap alamadığını anlamaz. Her parçaya uzunluğuna göre
+        bir emniyet süresi konur; süre dolarsa konuşma bitmiş sayılır.
+
+     Sonuç: `say()` HİÇBİR KOŞULDA asılı kalmaz. */
+
+  const PARCA = 180;                 /* bir parçanın en fazla uzunluğu */
+  const DUR = '.!?…:;';              /* cümle sonu sayılan noktalama */
+
+  /* Cümlelere böler. «14,5 ng/mL» gibi sayıların içindeki nokta cümle
+     sonu sayılmaz: noktalamadan sonra boşluk ya da metin sonu aranır. */
+  function cumleler(s){
+    const out = [];
+    let bas = 0;
+    for(let i = 0; i < s.length; i++){
+      if(DUR.indexOf(s[i]) < 0) continue;
+      let j = i;
+      while(j + 1 < s.length && DUR.indexOf(s[j + 1]) >= 0) j++;
+      const sonraki = s[j + 1];
+      if(sonraki === undefined || /\s/.test(sonraki)){
+        const p = s.slice(bas, j + 1).trim();
+        if(p) out.push(p);
+        bas = j + 1;
+      }
+      i = j;
+    }
+    const kuyruk = s.slice(bas).trim();
+    if(kuyruk) out.push(kuyruk);
+    return out;
+  }
+
+  /* Cümleleri PARCA sınırına kadar birleştirir; tek başına uzun olan
+     cümle kelime sınırından bölünür. */
+  function parcala(text){
+    const s = String(text || '').trim();
+    if(!s) return [];
+    const out = [];
+    const liste = cumleler(s).length ? cumleler(s) : [s];
+    let tampon = '';
+    liste.forEach(ham => {
+      let p = ham.trim();
+      if(!p) return;
+      while(p.length > PARCA){
+        const kes = p.lastIndexOf(' ', PARCA);
+        const at = kes > PARCA * 0.5 ? kes : PARCA;
+        if(tampon){ out.push(tampon); tampon = ''; }
+        out.push(p.slice(0, at).trim());
+        p = p.slice(at).trim();
+      }
+      if((tampon + ' ' + p).trim().length > PARCA){ out.push(tampon); tampon = p; }
+      else tampon = (tampon ? tampon + ' ' : '') + p;
+    });
+    if(tampon) out.push(tampon);
+    return out.filter(Boolean);
+  }
+
+  /* Emniyet süresi. Yavaş bir sesin saniyede ~10 karakter okuduğu
+     varsayılır; üstüne üç saniye pay konur ve 45 saniyede tavanlanır. */
+  function emniyetMs(text, rate){
+    const r = Math.max(0.5, Number(rate) || 1);
+    return Math.min(45000, 3000 + (String(text).length / (10 * r)) * 1000);
+  }
+
+  let simdiki = null;      /* { agentId, iptal } */
+
+  function parcaSoyle(metin, ayar){
+    return new Promise(resolve => {
+      let bitti = false, saat = null;
+      const bitir = neden => {
+        if(bitti) return;
+        bitti = true;
+        clearTimeout(saat);
+        resolve(neden);
+      };
+
+      let u;
+      try{ u = new Utter(metin); }
+      catch(e){ return bitir('hata'); }
+
+      if(ayar.voice){ u.voice = ayar.voice; u.lang = ayar.voice.lang; }
+      else u.lang = ayar.lang || 'tr-TR';
+      u.rate = ayar.rate;
+      u.pitch = ayar.pitch;
+      u.volume = ayar.volume;
+
+      u.onend = () => bitir('bitti');
+      u.onerror = ev => {
+        const kod = (ev && ev.error) || 'hata';
+        bitir(kod === 'interrupted' || kod === 'canceled' ? 'iptal' : 'hata');
+      };
+
+      /* `onend` hiç gelmezse burası gelir; çağıran asılı kalmaz. */
+      saat = setTimeout(() => bitir('zamanasimi'), emniyetMs(metin, u.rate));
+
+      try{ API.speak(u); }
+      catch(e){ bitir('hata'); }
+    });
+  }
 
   /* Bir cümleyi söyler ve BİTİNCE çözülen bir söz döndürür.
 
      Sözün bitmesi sıra alma döngüsünün tek tetikleyicisidir: mikrofon
-     ancak ajan sustuğunda açılır. Bu yüzden hata durumunda bile söz
-     MUTLAKA çözülür — çözülmezse döngü sessizce ölür ve kullanıcı
-     mikrofonun neden açılmadığını anlamaz. */
-  function say(text, opts){
+     ancak ajan sustuğunda açılır. Bu yüzden hata, iptal ya da zaman
+     aşımı — hepsinde söz MUTLAKA çözülür. */
+  async function say(text, opts){
     const o = opts || {};
     const metin = konusulacak(text);
-    if(!supported() || !metin) return Promise.resolve({ ok:false, reason:'bos' });
+    if(!supported() || !metin) return { ok:false, reason:'bos' };
+
+    const parcalar = parcala(metin);
+    if(!parcalar.length) return { ok:false, reason:'bos' };
 
     stop();
 
-    return new Promise(resolve => {
-      let bitti = false;
-      const bitir = sonuc => { if(bitti) return; bitti = true; simdiki = null; resolve(sonuc); };
+    const stil = styleFor(o.agent);
+    const ayar = {
+      voice:o.voice || voiceFor(o.agent),
+      lang:o.lang,
+      rate:o.rate != null ? o.rate : stil.rate,
+      pitch:o.pitch != null ? o.pitch : stil.pitch,
+      volume:o.volume != null ? o.volume : 1,
+    };
 
-      let u;
-      try{ u = new Utter(metin); }
-      catch(e){ return bitir({ ok:false, reason:'utter' }); }
+    simdiki = { agentId:o.agent || null };
+    if(o.onStart) o.onStart();
 
-      const ses = o.voice || voiceFor(o.agent);
-      const stil = styleFor(o.agent);
-      if(ses){ u.voice = ses; u.lang = ses.lang; }
-      else u.lang = o.lang || 'tr-TR';
-      u.rate = o.rate != null ? o.rate : stil.rate;
-      u.pitch = o.pitch != null ? o.pitch : stil.pitch;
-      u.volume = o.volume != null ? o.volume : 1;
-
-      u.onend = () => bitir({ ok:true });
-      u.onerror = ev => bitir({ ok:false,
-        reason:(ev && ev.error) || 'error',
-        /* Kullanıcı kestiyse bu bir hata değil, bir karardır. */
-        iptal:!!(ev && (ev.error === 'interrupted' || ev.error === 'canceled')) });
-
-      simdiki = { utter:u, agentId:o.agent || null };
-      if(o.onStart) o.onStart();
-
-      try{ API.speak(u); }
-      catch(e){ bitir({ ok:false, reason:'speak' }); }
-    });
+    let zamanasimi = false;
+    for(let i = 0; i < parcalar.length; i++){
+      if(!simdiki) return { ok:false, reason:'iptal', iptal:true };
+      const neden = await parcaSoyle(parcalar[i], ayar);
+      if(neden === 'iptal'){ simdiki = null; return { ok:false, reason:'iptal', iptal:true }; }
+      if(neden === 'hata'){ simdiki = null; return { ok:false, reason:'hata' }; }
+      if(neden === 'zamanasimi') zamanasimi = true;
+    }
+    simdiki = null;
+    return { ok:true, zamanasimi };
   }
 
   /* Sırayla söyler. Bir cümle iptal edilirse kalanlar SÖYLENMEZ:
@@ -11427,7 +11570,8 @@ SP.Speak = (function(){
     supported, ready, hasTurkish, voices, turkishVoices,
     voiceFor, styleFor, konusulacak,
     say, sequence, stop, isSpeaking, speakingAgent, onVoicesReady,
-    KIMLIK,
+    parcala, cumleler, emniyetMs,
+    KIMLIK, PARCA,
   };
 })();
 
@@ -15564,6 +15708,443 @@ SP.Quick = (function(){
   }
 
   return { parse, apply, parseVital, parseMove, VITAL_FIELDS };
+})();
+
+/* ==== js/core/proposals.js ==== */
+/* ÖNERİ KUTUSU — ofisin sisteme dokunabildiği tek kapı.
+
+   Ofis bugüne kadar yalnızca OKUYORDU. Artık yazabilir, ama tek bir
+   yoldan:
+
+     ajan önerir → kural motoru DOĞRULAR → sen ONAYLARSIN
+                 → motor uygular → geri alınabilir
+
+   Onaysız hiçbir şey değişmez. Bu dosyada «otomatik uygula» diye bir
+   yol YOKTUR ve olmamalıdır: ofisin değeri önerisinde, yetkisinde
+   değil. Sağlık verisinde yanlış bir kayıt, eksik bir kayıttan
+   kötüdür — çünkü eksik kayıt kendini belli eder, yanlış kayıt etmez.
+
+   ─────────────────────────────────────────────────────────────────
+
+   İKİ KAYNAK, TEK KAPI
+
+   `fromText()`   Kural motoru. Cümleyi kendisi çözer; model gerekmez,
+                  çevrimdışı çalışır, kota harcamaz. ÖNCE bu denenir.
+
+   `fromModel()`  Ajanın önerisi. KAPALI katalogdan bir eylem ve yapısal
+                  parametre. Serbest metin eyleme dönüşmez; parametreler
+                  gerçek veriye karşı doğrulanır, uydurulan düşer.
+
+   Doğrulama (`check`) kaynağı ne olursa olsun her zaman çalışır ve HER
+   ÇAĞRIDA yeniden çalışır: bekleyen bir öneri, arada veri değiştiği
+   için geçersizleşmiş olabilir.
+
+   ─────────────────────────────────────────────────────────────────
+
+   BİLEŞİK CÜMLE
+
+   «İki yumurta yedim ve kırk beş dakika yürüdüm» tek bir olgu değil
+   ikidir. Eski hızlı giriş cümlede tek şey anlıyordu ve ikincisi
+   sessizce düşüyordu — sessizce düşen veri, alınmamış veriden kötüdür.
+   Cümle önce yan cümlelere bölünür, her biri ayrı önerilir.
+
+   Uygulama sırası kasıtlıdır: önce anlık görüntü alınır (geri alma),
+   sonra değişiklik yazılır. Böylece geri alma her zaman mümkündür. */
+
+window.SP = window.SP || {};
+
+SP.Proposals = (function(){
+  const U = SP.U, M = SP.Model;
+
+  const MAX = 40;                    /* saklanan öneri */
+  const STORE = 'office/proposals';
+
+  function fail(why){ return { ok:false, why }; }
+  function pass(ctx){ return { ok:true, ctx:ctx || {} }; }
+
+  /* ==================== eylem kataloğu ====================
+
+     Her eylemin dört işlevi vardır ve dördü de ayrılır:
+       check   : uygulanabilir mi — hayırsa NEDEN (kullanıcıya gösterilir)
+       preview : ne değişecek — önce/sonra satırları
+       apply   : değişikliği yazar, geri alma anlık görüntüsünü DÖNDÜRÜR
+       revert  : o anlık görüntüden geri alır */
+
+  const KATALOG = {
+
+    /* ---------------------------------------------------- vital yaz */
+    'vital-yaz':{
+      label:'Günlük ölçüm',
+      alanlar:['field', 'value', 'date'],
+      check(p){
+        const f = SP.Quick.VITAL_FIELDS[p.field];
+        if(!f) return fail('Böyle bir günlük ölçüm alanı yok.');
+        const v = Number(p.value);
+        if(!isFinite(v)) return fail('Değer sayı değil.');
+        if(f.min != null && v < f.min) return fail(f.label + ' için ' + v + ' çok düşük.');
+        if(f.max != null && v > f.max) return fail(f.label + ' için ' + v + ' çok yüksek.');
+        return pass({ f, v });
+      },
+      preview(p, ctx){
+        const eski = M.vitalsOf(p.date);
+        const oncekiDeger = eski ? eski[ctx.f.id] : null;
+        return [{ alan:ctx.f.label,
+          once:oncekiDeger == null ? 'girilmemiş' : U.fmtNum(oncekiDeger) + ' ' + ctx.f.unit,
+          sonra:U.fmtNum(ctx.v) + ' ' + ctx.f.unit }];
+      },
+      async apply(p, ctx){
+        const eski = M.vitalsOf(p.date);
+        const geri = { date:p.date, field:ctx.f.id,
+          value:eski ? eski[ctx.f.id] : null };
+        const patch = {};
+        patch[ctx.f.id] = ctx.v;
+        await M.saveVitals(p.date, patch);
+        return geri;
+      },
+      async revert(geri){
+        const patch = {};
+        patch[geri.field] = geri.value;
+        await M.saveVitals(geri.date, patch);
+      },
+    },
+
+    /* ----------------------------------------------------- öğün ekle */
+    'ogun-ekle':{
+      label:'Öğün',
+      alanlar:['items', 'slot', 'date'],
+      check(p){
+        if(!Array.isArray(p.items) || !p.items.length) return fail('Gıda yok.');
+        const cozulen = [], eksik = [];
+        p.items.forEach(it => {
+          const f = SP.FOOD_BY_ID[it.foodId];
+          if(!f){ eksik.push(it.foodId); return; }
+          const g = Number(it.g);
+          if(!isFinite(g) || g <= 0){ eksik.push(f.name + ' (miktar yok)'); return; }
+          cozulen.push({ food:f, g:Math.round(g), cert:it.cert || 'estimated' });
+        });
+        if(!cozulen.length) return fail('Hiçbir gıda tanınmadı: ' + eksik.join(', '));
+        return pass({ cozulen, eksik });
+      },
+      preview(p, ctx){
+        return ctx.cozulen.map(x => ({
+          alan:x.food.name, once:'—', sonra:U.fmtNum(x.g) + ' g' }));
+      },
+      async apply(p, ctx){
+        const meal = M.newMeal(p.slot || 'ara');
+        meal.items = ctx.cozulen.map(x => ({ foodId:x.food.id, g:x.g, cert:x.cert }));
+        await M.addMeal(p.date, meal);
+        return { date:p.date, mealId:meal.id };
+      },
+      async revert(geri){
+        if(M.deleteMeal) await M.deleteMeal(geri.date, geri.mealId);
+      },
+    },
+
+    /* ---------------------------------------------------- seans ekle */
+    'seans-ekle':{
+      label:'Antrenman',
+      alanlar:['minutes', 'exerciseId', 'date'],
+      check(p){
+        const dk = Number(p.minutes);
+        if(!isFinite(dk) || dk <= 0) return fail('Süre yok.');
+        if(dk > 600) return fail(dk + ' dakika bir seans için fazla; yanlış anlaşılmış olabilir.');
+        const ex = p.exerciseId ? SP.EX_BY_ID[p.exerciseId] : null;
+        if(p.exerciseId && !ex) return fail('Bu hareket sistemde yok.');
+        return pass({ dk:Math.round(dk), ex });
+      },
+      preview(p, ctx){
+        return [{ alan:ctx.ex ? ctx.ex.name : 'Serbest seans',
+          once:'—', sonra:ctx.dk + ' dakika' }];
+      },
+      async apply(p, ctx){
+        const w = M.newWorkout(p.date);
+        w.minutes = ctx.dk;
+        if(ctx.ex){
+          w.name = ctx.ex.name;
+          w.kind = ctx.ex.kind || 'strength';
+          w.items = [{ exId:ctx.ex.id, levelId:null, sets:null, reps:null, minutes:ctx.dk }];
+        }
+        await M.saveWorkout(w);
+        return { workoutId:w.id };
+      },
+      async revert(geri){
+        if(M.deleteWorkout) await M.deleteWorkout(geri.workoutId);
+      },
+    },
+
+    /* --------------------------------------------------- ölçüm gir */
+    'olcum-gir':{
+      label:'Tahlil ölçümü',
+      alanlar:['rows', 'date'],
+      check(p){
+        if(!Array.isArray(p.rows) || !p.rows.length) return fail('Ölçüm yok.');
+        const cozulen = [], eksik = [];
+        p.rows.forEach(r => {
+          const b = SP.BIO_BY_ID[r.markerId];
+          if(!b){ eksik.push(r.markerId); return; }
+          const v = Number(r.value);
+          if(!isFinite(v)){ eksik.push(b.name); return; }
+          cozulen.push({ b, v });
+        });
+        if(!cozulen.length) return fail('Hiçbir ölçüm tanınmadı: ' + eksik.join(', '));
+        return pass({ cozulen, eksik });
+      },
+      preview(p, ctx){
+        return ctx.cozulen.map(x => {
+          const son = M.latestOf(x.b.id);
+          return { alan:x.b.name,
+            once:son ? U.fmtNum(son.v) + ' ' + x.b.unit + ' · ' + U.fmtDate(son.date) : 'ölçülmemiş',
+            sonra:U.fmtNum(x.v) + ' ' + x.b.unit };
+        });
+      },
+      async apply(p, ctx){
+        const mevcut = (SP.S.labs || []).find(l => l.date === p.date);
+        const rec = mevcut || M.newLab(p.date);
+        /* Geri alma icin YALNIZ dokundugumuz alanlarin eski hali. */
+        const geri = { labId:rec.id, yeniMi:!mevcut, eski:{} };
+        ctx.cozulen.forEach(x => {
+          geri.eski[x.b.id] = rec.values[x.b.id] ? Object.assign({}, rec.values[x.b.id]) : null;
+          rec.values[x.b.id] = { v:x.v, cert:'measured', unit:x.b.unit };
+        });
+        await M.saveLab(rec);
+        return geri;
+      },
+      async revert(geri){
+        const rec = (SP.S.labs || []).find(l => l.id === geri.labId);
+        if(!rec) return;
+        if(geri.yeniMi && M.deleteLab){ await M.deleteLab(rec.id); return; }
+        Object.keys(geri.eski).forEach(id => {
+          if(geri.eski[id]) rec.values[id] = geri.eski[id];
+          else delete rec.values[id];
+        });
+        await M.saveLab(rec);
+      },
+    },
+
+    /* ----------------------------------------------- semptom işaretle */
+    'semptom-isaretle':{
+      label:'Şikâyet',
+      alanlar:['symptomId', 'severity', 'date'],
+      check(p){
+        const s = SP.SYMPTOM_BY_ID[p.symptomId];
+        if(!s) return fail('Böyle bir şikâyet sözlükte yok.');
+        const sd = Number(p.severity);
+        if(!isFinite(sd) || sd < 1 || sd > 3) return fail('Şiddet 1 ile 3 arasında olmalı.');
+        return pass({ s, sd:Math.round(sd) });
+      },
+      preview(p, ctx){
+        const onceki = SP.Symptom.ofDay(p.date)[ctx.s.id];
+        return [{ alan:ctx.s.name,
+          once:onceki ? 'şiddet ' + onceki : 'işaretlenmemiş',
+          sonra:'şiddet ' + ctx.sd }];
+      },
+      async apply(p, ctx){
+        const onceki = SP.Symptom.ofDay(p.date)[ctx.s.id] || 0;
+        await SP.Symptom.setSymptom(p.date, ctx.s.id, ctx.sd);
+        return { date:p.date, symptomId:ctx.s.id, onceki };
+      },
+      async revert(geri){
+        await SP.Symptom.setSymptom(geri.date, geri.symptomId, geri.onceki);
+      },
+    },
+  };
+
+  function eylem(id){ return KATALOG[id] || null; }
+  function katalogIdleri(){ return Object.keys(KATALOG); }
+
+  /* ==================== doğrulama ve önizleme ==================== */
+
+  function check(p){
+    const e = eylem(p && p.action);
+    if(!e) return fail('Bilinmeyen eylem: ' + (p && p.action));
+    try{ return e.check(p.params || {}); }
+    catch(err){ return fail('Doğrulanamadı: ' + (err && err.message || err)); }
+  }
+
+  function preview(p){
+    const c = check(p);
+    if(!c.ok) return { ok:false, why:c.why, rows:[] };
+    try{ return { ok:true, rows:eylem(p.action).preview(p.params || {}, c.ctx) || [] }; }
+    catch(err){ return { ok:false, why:'Önizlenemedi.', rows:[] }; }
+  }
+
+  /* ==================== kural motoru kaynağı ====================
+
+     Bileşik cümle yan cümlelere bölünür. Ayraçlar dilin kendi
+     bağlaçlarıdır; virgül de ayraçtır ama SAYININ İÇİNDEKİ virgül
+     değildir — «7,2 saat uyudum» tek parçadır. */
+  const AYRAC = /\s+(?:ve|ayrıca|bir de|sonra|artı)\s+|[;]|,(?!\d)/gi;
+
+  function yanCumleler(text){
+    return String(text || '')
+      .split(AYRAC)
+      .map(x => String(x || '').trim())
+      .filter(x => x.length > 1);
+  }
+
+  /* Hızlı giriş ayrıştırıcısının çıktısını katalog eylemine çevirir. */
+  function quickToAction(parsed, date, slot){
+    if(!parsed) return null;
+    if(parsed.kind === 'vital') return { action:'vital-yaz',
+      params:{ field:parsed.data.field.id, value:parsed.data.value, date } };
+    if(parsed.kind === 'move') return { action:'seans-ekle',
+      params:{ minutes:parsed.data.minutes,
+        exerciseId:parsed.data.exercise ? parsed.data.exercise.id : null, date } };
+    if(parsed.kind === 'lab') return { action:'olcum-gir',
+      params:{ rows:parsed.data.rows.map(r => ({ markerId:r.marker.id, value:r.value })), date } };
+    if(parsed.kind === 'meal') return { action:'ogun-ekle',
+      params:{ items:parsed.data.items.map(i => ({ foodId:i.food.id, g:i.grams, cert:i.cert })),
+        slot:slot || 'ara', date } };
+    return null;
+  }
+
+  /* Serbest cümleden öneri üretir — MODEL GEREKMEZ.
+
+     Dönen her satır bir öneri adayıdır; `anlasilmayan` ise kural
+     motorunun çözemediği yan cümleleri taşır. Bunlar sessizce
+     düşmez: kullanıcıya gösterilir ve istenirse modele sorulur. */
+  function fromText(text, opts){
+    const o = opts || {};
+    const date = o.date || U.todayISO();
+    const parcalar = yanCumleler(text);
+    const oneriler = [], anlasilmayan = [];
+
+    parcalar.forEach(p => {
+      let parsed = null;
+      try{ parsed = SP.Quick.parse(p); }catch(e){ parsed = null; }
+      const a = quickToAction(parsed, date, o.slot);
+      if(a) oneriler.push(Object.assign(a, { kaynak:'rules', metin:p }));
+      else anlasilmayan.push(p);
+    });
+
+    /* Tek parça hiç anlaşılmadıysa cümlenin TAMAMINI bir kez dene:
+       bölme yanlış yerden olmuş olabilir. */
+    if(!oneriler.length && parcalar.length > 1){
+      let parsed = null;
+      try{ parsed = SP.Quick.parse(text); }catch(e){ parsed = null; }
+      const a = quickToAction(parsed, date, o.slot);
+      if(a) return { oneriler:[Object.assign(a, { kaynak:'rules', metin:String(text).trim() })],
+        anlasilmayan:[] };
+    }
+
+    return { oneriler, anlasilmayan };
+  }
+
+  /* ==================== model kaynağı ====================
+
+     Model SERBEST METİN değil, kapalı katalogdan bir eylem döndürür.
+     Katalog dışı bir eylem, var olmayan bir gıda kimliği ya da
+     uydurulmuş bir ölçüm `check` tarafından düşürülür ve kullanıcıya
+     hiç gösterilmez. */
+  function fromModel(raw, opts){
+    const o = opts || {};
+    const date = o.date || U.todayISO();
+    let veri = raw;
+    if(typeof raw === 'string'){
+      try{ veri = JSON.parse(raw); }catch(e){ return { oneriler:[], hata:'JSON çözülemedi.' }; }
+    }
+    const liste = Array.isArray(veri) ? veri : (veri && veri.actions) || [];
+    const oneriler = [], dusen = [];
+
+    liste.forEach(x => {
+      if(!x || !eylem(x.action)){ dusen.push({ x, why:'Katalog dışı eylem.' }); return; }
+      const p = { action:x.action,
+        params:Object.assign({ date }, x.params || {}),
+        kaynak:'model', metin:x.metin || '' };
+      const c = check(p);
+      if(!c.ok){ dusen.push({ x, why:c.why }); return; }
+      oneriler.push(p);
+    });
+    return { oneriler, dusen };
+  }
+
+  /* Modele verilecek katalog tarifi. Eylem adları ve alanları
+     buradan çıkar — elle yazılmaz, katalog değişirse tarif de değişir. */
+  function catalogPrompt(){
+    return Object.keys(KATALOG).map(id => {
+      const e = KATALOG[id];
+      return '- ' + id + ' (' + e.label + '): ' + e.alanlar.join(', ');
+    }).join('\n');
+  }
+
+  /* ==================== kayıt ve yaşam döngüsü ==================== */
+
+  function liste(){ return SP.S.proposals || (SP.S.proposals = []); }
+  function pending(){ return liste().filter(p => p.status === 'pending'); }
+  function all(){ return liste(); }
+
+  async function propose(p){
+    const kayit = Object.assign({
+      id:U.uid('pr'), at:new Date().toISOString(), status:'pending',
+    }, p);
+    liste().unshift(kayit);
+    if(liste().length > MAX) liste().length = MAX;
+    await save();
+    return kayit;
+  }
+
+  async function approve(id){
+    const p = liste().find(x => x.id === id);
+    if(!p || p.status !== 'pending') return { ok:false, why:'Öneri bulunamadı.' };
+    const c = check(p);
+    /* Bekleyen bir oneri arada gecersizlesmis olabilir: veri degismistir. */
+    if(!c.ok){
+      p.status = 'stale'; p.why = c.why;
+      await save();
+      return { ok:false, why:c.why };
+    }
+    try{
+      p.undo = await eylem(p.action).apply(p.params, c.ctx);
+      p.status = 'applied';
+      p.appliedAt = new Date().toISOString();
+      await save();
+      return { ok:true, proposal:p };
+    }catch(err){
+      p.status = 'failed'; p.why = String(err && err.message || err);
+      await save();
+      return { ok:false, why:p.why };
+    }
+  }
+
+  async function reject(id){
+    const p = liste().find(x => x.id === id);
+    if(!p) return { ok:false };
+    p.status = 'rejected';
+    await save();
+    return { ok:true };
+  }
+
+  async function undo(id){
+    const p = liste().find(x => x.id === id);
+    if(!p || p.status !== 'applied' || !p.undo) return { ok:false, why:'Geri alınacak bir şey yok.' };
+    try{
+      await eylem(p.action).revert(p.undo);
+      p.status = 'undone';
+      await save();
+      return { ok:true };
+    }catch(err){
+      return { ok:false, why:String(err && err.message || err) };
+    }
+  }
+
+  async function clearResolved(){
+    SP.S.proposals = liste().filter(p => p.status === 'pending');
+    await save();
+  }
+
+  async function save(){ await SP.Store.set(STORE, liste()); }
+  async function load(){
+    SP.S.proposals = (await SP.Store.get(STORE)) || [];
+    return SP.S.proposals;
+  }
+
+  return {
+    KATALOG, eylem, katalogIdleri, catalogPrompt,
+    check, preview,
+    fromText, fromModel, yanCumleler, quickToAction,
+    propose, approve, reject, undo, clearResolved,
+    pending, all, load, save, MAX,
+  };
 })();
 
 /* ==== js/core/palette.js ==== */
@@ -21021,6 +21602,7 @@ SP.Screens.team = (function(){
             <div class="msg__body">${K.Skeleton({ rows:2,
               label:a.name + ' düşünüyor',
               hint:'brifingi okuyor ve cümleyi kuruyor' })}</div></div>`)}
+          ${oneriBlogu()}
         </div>`;
   }
 
@@ -21034,7 +21616,7 @@ SP.Screens.team = (function(){
       foot:html`
         <div class="quick">
           ${K.Mic({ target:'chat-text' })}
-          ${K.Input({ id:'chat-text', placeholder:'Sorunu yaz ya da mikrofona söyle…', aria:'Soru' })}
+          ${K.Input({ id:'chat-text', placeholder:'Sorunu sor ya da verini söyle — «uyku 7 saat ve 45 dk yürüdüm»', aria:'Soru' })}
           ${K.Button({ label:'Gönder', tone:'primary', act:'send-chat', disabled:busy })}
         </div>`,
     });
@@ -21107,12 +21689,82 @@ SP.Screens.team = (function(){
     if(yeni) yeni.scrollTop = yeni.scrollHeight;
   }
 
+  /* ---- oneri kutusu ------------------------------------------------
+
+     Cumlede VERI varsa once kural motoru cozer; model hic cagrilmaz.
+     «uyku 7 saat ve 45 dakika yurudum» iki oneri uretir, ikisi de
+     ayri ayri onaylanir.
+
+     Onaysiz hicbir sey yazilmaz — bkz. core/proposals.js. */
+  function oneriKarti(p){
+    const pv = SP.Proposals.preview(p);
+    const e = SP.Proposals.eylem(p.action);
+    return html`
+      <div class="oneri oneri--${p.status}">
+        <div class="oneri__bas">
+          <b class="oneri__ne">${e ? e.label : p.action}</b>
+          ${when(p.kaynak === 'model', () => K.Badge({ label:'ajan önerdi', tone:'info' }))}
+          ${when(p.status === 'applied', () => K.Badge({ label:'kaydedildi', tone:'ok' }))}
+          ${when(p.status === 'rejected', () => K.Badge({ label:'vazgeçildi', tone:'muted' }))}
+          ${when(p.status === 'undone', () => K.Badge({ label:'geri alındı', tone:'muted' }))}
+          ${when(p.status === 'stale', () => K.Badge({ label:'geçersizleşti', tone:'warn' }))}
+        </div>
+        ${when(!pv.ok, () => html`<p class="oneri__hata">${pv.why}</p>`)}
+        ${when(pv.ok, () => html`<div class="oneri__satirlar">
+          ${map(pv.rows, r => html`<div class="oneri__satir">
+            <span class="oneri__alan">${r.alan}</span>
+            <span class="oneri__once">${r.once}</span>
+            <span class="oneri__ok" aria-hidden="true">→</span>
+            <span class="oneri__sonra">${r.sonra}</span>
+          </div>`)}
+        </div>`)}
+        <div class="oneri__dug">
+          ${when(p.status === 'pending' && pv.ok, () => html`
+            ${K.Button({ label:'Kaydet', size:'sm', tone:'primary',
+              act:'oneri-onay', data:{ 'data-id':p.id } })}
+            ${K.Button({ label:'Vazgeç', size:'sm', act:'oneri-ret', data:{ 'data-id':p.id } })}`)}
+          ${when(p.status === 'applied', () => K.Button({ label:'Geri al', size:'sm',
+            act:'oneri-geri', data:{ 'data-id':p.id } }))}
+        </div>
+      </div>`;
+  }
+
+  function oneriBlogu(){
+    const liste = SP.Proposals.all().filter(p =>
+      p.status === 'pending' || p.status === 'applied' || p.status === 'stale');
+    if(!liste.length) return raw('');
+    return html`<div class="oneriler">${map(liste.slice(0, 6), oneriKarti)}</div>`;
+  }
+
   async function send(text){
-    if(busy || !text.trim()) return;
+    const t = String(text || '').trim();
+    if(busy || !t) return;
     busy = true;
     SP.App.render();
     try{
-      await SP.Office.send(current().id, text.trim());
+      const a = current();
+      /* 1) Kural motoru: cumlede veri var mi? Model gerekmez. */
+      const r = SP.Proposals.fromText(t);
+
+      if(r.oneriler.length){
+        /* Kullanicinin soyledigi sohbete girer — ne dedigi kayitli kalir. */
+        const list = S.officeChats[a.id] || (S.officeChats[a.id] = []);
+        list.push({ role:'user', text:t, at:new Date().toISOString() });
+
+        for(const o of r.oneriler) await SP.Proposals.propose(o);
+
+        const ne = r.oneriler.length === 1 ? 'Bir kayıt' : r.oneriler.length + ' kayıt';
+        const kuyruk = r.anlasilmayan.length
+          ? ' Şunu çözemedim: «' + r.anlasilmayan.join('», «') + '».'
+          : '';
+        list.push({ role:'agent', source:'rules', at:new Date().toISOString(),
+          text:ne + ' hazırladım, onayına bakıyor. Kaydet dersen yazarım.' + kuyruk });
+        await SP.Store.set('chats/' + a.id, { agentId:a.id, messages:list });
+        return;
+      }
+
+      /* 2) Veri yok: normal sohbet. */
+      await SP.Office.send(a.id, t);
     }finally{
       busy = false;
       SP.App.render();
@@ -21151,6 +21803,21 @@ SP.Screens.team = (function(){
       await send(text);
     },
     async 'quick-ask'(el){ await send(el.dataset.q); },
+
+    async 'oneri-onay'(el){
+      const r = await SP.Proposals.approve(el.dataset.id);
+      UI.toast(r.ok ? 'Kaydedildi' : (r.why || 'Kaydedilemedi'));
+      SP.App.render();
+    },
+    async 'oneri-ret'(el){
+      await SP.Proposals.reject(el.dataset.id);
+      SP.App.render();
+    },
+    async 'oneri-geri'(el){
+      const r = await SP.Proposals.undo(el.dataset.id);
+      UI.toast(r.ok ? 'Geri alındı' : (r.why || 'Geri alınamadı'));
+      SP.App.render();
+    },
 
     /* Devir: hedef ajana gec ve AYNI soruyu ona sor. Kullanici soruyu
        ikinci kez yazmaz — devrin sonu bu. */

@@ -31,6 +31,61 @@
     });
   });
 
+  describe('Ses — uzun metin bölünmesi', () => {
+    it('cümle sonundan böler', () => {
+      const p = SP.Speak.cumleler('Bir cümle. İkinci cümle! Üçüncü?');
+      expect(p).toEqual(['Bir cümle.', 'İkinci cümle!', 'Üçüncü?']);
+    });
+
+    it('sayının içindeki nokta cümle sonu sayılmaz', () => {
+      /* «13.5 ng» ortadan bölünürse ölçüm iki parçaya ayrılıp yanlış
+         okunur. Noktalamadan sonra boşluk aranır. */
+      const p = SP.Speak.cumleler('Ferritin 13.5 ng mL ve devamı var.');
+      expect(p).toHaveLength(1);
+    });
+
+    it('uzun metin parçalara iner ve hiçbir parça sınırı aşmaz', () => {
+      const uzun = new Array(40).fill('Bu oldukça uzun bir cümle parçasıdır.').join(' ');
+      const p = SP.Speak.parcala(uzun);
+      expect(p.length > 1).toBeTruthy();
+      p.forEach(x => expect(x.length <= SP.Speak.PARCA).toBeTruthy());
+    });
+
+    it('bölünen parçalar metnin tamamını taşır', () => {
+      const metin = 'Birinci cümle burada. İkinci cümle şurada. Üçüncü cümle orada.';
+      const birlesik = SP.Speak.parcala(metin).join(' ');
+      /* Kelime kaybı olmamalı: ses eksik cümle okumaz. */
+      expect(birlesik.replace(/\s+/g, ' ')).toBe(metin);
+    });
+
+    it('boşluksuz tek uzun kelime bile bölünür', () => {
+      const p = SP.Speak.parcala('a'.repeat(500));
+      expect(p.length > 1).toBeTruthy();
+    });
+
+    it('emniyet süresi uzunlukla artar ve tavanlanır', () => {
+      /* onend hiç gelmezse sıra alma döngüsü bu süreyle kurtulur. */
+      const kisa = SP.Speak.emniyetMs('kısa', 1);
+      const uzun = SP.Speak.emniyetMs('x'.repeat(2000), 1);
+      expect(uzun > kisa).toBeTruthy();
+      expect(SP.Speak.emniyetMs('x'.repeat(999999), 1) <= 45000).toBeTruthy();
+      /* Hızlı okuma daha kısa süre ister. Ölçü GERÇEK parça boyuyla
+         yapılır: 1.000 karakterde iki değer de tavana çarpar ve
+         karşılaştırma anlamsızlaşır — parçalar zaten PARCA sınırının
+         altındadır. */
+      const boy = 'x'.repeat(SP.Speak.PARCA);
+      expect(SP.Speak.emniyetMs(boy, 2) < SP.Speak.emniyetMs(boy, 1)).toBeTruthy();
+      /* Bir parçanın en kötü süresi yarım dakikayı geçmemeli: geçerse
+         mikrofon çok uzun kapalı kalır. */
+      expect(SP.Speak.emniyetMs(boy, 1) < 30000).toBeTruthy();
+    });
+
+    it('boş metin parça üretmez', () => {
+      expect(SP.Speak.parcala('')).toHaveLength(0);
+      expect(SP.Speak.parcala('   ')).toHaveLength(0);
+    });
+  });
+
   describe('Ses — ajan kimliği', () => {
     it('beş ajanın hepsinin bir konuşma biçimi var', () => {
       SP.AGENTS.forEach(a => {
