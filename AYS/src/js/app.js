@@ -7,33 +7,47 @@ R.App = (function(){
   const { html, raw, when, map, cls, attrs } = R.h;
 
   /* Birincil gezinme 5 grup. Ikincil seviyeler ekran ici alt-sekme olarak durur. */
+  /* BOLUMLER — numarali ust serit.
+
+     Sol panel kaldirildi. Numara bir sus degil: alti bolumun SIRASI
+     anlamlidir (once gunu gir, sonra plani gor, sonra kaydi tut,
+     sonra analize bak) ve numara o sirayi gorunur kilar.
+
+     SPI ile ayni kabuk: kunye + numarali serit + hero. Iki uygulama
+     yan yana acildiginda ayni sistemden geldikleri anlasilmalidir. */
   const NAV = [
-    { label:'Günlük', items:[
+    { id:'gunluk', num:'01', icon:'today', label:'Günlük',
+      note:'Bugünü gir, haftayı gör', items:[
       { id:'today', icon:'today', label:'Bugün' },
       { id:'week',  icon:'week',  label:'Hafta' },
     ]},
-    { label:'Plan', items:[
+    { id:'plan', num:'02', icon:'map', label:'Plan',
+      note:'Program, dersler ve hedef', items:[
       { id:'plan',     icon:'map',    label:'Program' },
       { id:'subjects', icon:'book',   label:'Dersler' },
       { id:'target',   icon:'target', label:'Hedef' },
     ]},
-    { label:'Kayıt', items:[
+    { id:'kayit', num:'03', icon:'play', label:'Kayıt',
+      note:'Öğrenme, deneme, tekrar ve soru', items:[
       { id:'learn', icon:'play',  label:'Öğrenme' },
       { id:'exams', icon:'exam',  label:'Deneme' },
       { id:'cards', icon:'cards', label:'Tekrar' },
       { id:'quiz',  icon:'zap',   label:'Sınama' },
       { id:'solve', icon:'search', label:'Soru çöz' },
     ]},
-    { label:'Analiz', items:[
+    { id:'analiz', num:'04', icon:'chart', label:'Analiz',
+      note:'İlerleme, analiz ve telafi', items:[
       { id:'progress',  icon:'chart',  label:'İlerleme' },
       { id:'analytics', icon:'search', label:'Analiz' },
       { id:'protocols', icon:'shield', label:'Telafi' },
     ]},
-    { label:'Rehber', items:[
+    { id:'rehber', num:'05', icon:'guide', label:'Rehber',
+      note:'Kullanım ve profiller', items:[
       { id:'guide', icon:'guide', label:'Rehber' },
       { id:'profiles', icon:'shield', label:'Profiller' },
     ]},
-    { label:'Ofis', items:[
+    { id:'ofis', num:'06', icon:'zap', label:'Ofis',
+      note:'Patron ve beş koç', items:[
       { id:'office',  icon:'guide', label:'Ofis' },
       { id:'team',    icon:'zap',   label:'Ekip sohbeti' },
       { id:'meeting', icon:'list',  label:'Toplantı' },
@@ -76,71 +90,331 @@ R.App = (function(){
     return 'kişisel çalışma sistemi';
   }
 
-  function sidebarHtml(){
+  /* Bir ekran hangi bolumde? */
+  function bolumOf(route){
+    return NAV.find(g => g.items.some(i => i.id === route)) || NAV[0];
+  }
+
+  /* Bolumun rozeti: icindeki sayfalarin rozetlerinin toplami. */
+  function bolumBadge(sec){
+    let sessiz = 0, yuksek = 0;
+    sec.items.forEach(it => {
+      const b = safe(() => badgeFor(it.id), null);
+      if(!b) return;
+      const n = Number(String(b.text).replace(/\D/g, '')) || 1;
+      if(b.quiet) sessiz += n; else yuksek += n;
+    });
+    if(yuksek) return { text:String(yuksek), quiet:false };
+    if(sessiz) return { text:String(sessiz), quiet:true };
+    return null;
+  }
+
+  /* ---------- kunye ----------
+
+     Uygulama cubugu degil KUNYE. Iki satir:
+
+       1. kimlik · tarih · araclar   — sayfayla birlikte yukari kayar
+       2. numarali bolumler          — kaydirinca ustte yapisir
+
+     Ilk satirin kaymasina izin vermek kasitlidir: okurken kimlige
+     ihtiyac yoktur, gezinmeye vardir. */
+  function mastheadHtml(){
+    const now = new Date();
+    const gun = now.toLocaleDateString('tr-TR', { weekday:'long' });
+    return html`
+      <div class="masthead">
+        <div class="wrapc masthead__in">
+          <button class="brand" data-act="go" data-route="today" aria-label="Bugün bölümüne git">
+            <span class="brand__mark" aria-hidden="true">R</span>
+            <span class="brand__text"><b>Rota</b><span>${brandLine()}</span></span>
+          </button>
+
+          <div class="masthead__date">
+            <span class="masthead__day">${U.fmtDate(U.todayISO())}</span>
+            <span class="masthead__wd">${gun}</span>
+          </div>
+
+          <div class="navtools">
+            ${R.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
+            ${R.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema, palet ve düzen',
+              act:'open-appearance', data:{ id:'appearance-btn' } })}
+            ${R.C.IconButton({ icon:'gear', aria:'Rehber ve ayarlar', act:'go', data:{ 'data-route':'guide' } })}
+            ${R.C.IconButton({ icon:'menu', aria:'Bölümler', act:'toggle-sidebar', class:'sitenav__menu' })}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function sitenavHtml(sc){
+    const aktif = bolumOf(sc.id);
+    return html`
+      <nav class="sitenav" aria-label="Bölümler">
+        <div class="wrapc navlinks">${map(NAV, sec => {
+          const on = sec.id === aktif.id;
+          const b = bolumBadge(sec);
+          return html`<button class="${cls('navlink', on && 'is-active')}"
+            data-act="go" data-route="${sec.items[0].id}"
+            ${when(on, () => attrs({ 'aria-current':'page' }))}>
+            <span class="navlink__num" aria-hidden="true">${sec.num}</span>
+            <span class="navlink__label">${sec.label}</span>
+            ${when(b, () => html`<span class="${cls('navlink__badge', b.quiet && 'is-quiet')}"
+              aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
+          </button>`;
+        })}</div>
+      </nav>`;
+  }
+
+  /* Hero — bolum numarasi, baslik ve ozet. Eski ust cubugun yerini
+     alir ama ondan farkli bir sey yapar: cubuk gezinmeydi, hero
+     SAYFANIN KENDISIDIR. */
+  function heroHtml(sc){
+    const sec = bolumOf(sc.id);
+    const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
+    const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
+    const eylem = safe(() => sc.actions ? sc.actions() : '');
     const cur = M.currentWeek();
-    const progress = M.programProgress();
-    const daysLeft = U.diffDays(U.todayISO(), R.PLAN.examTytISO);
+    const kalan = U.diffDays(U.todayISO(), R.PLAN.examTytISO);
 
     return html`
-      <nav class="${cls('sidebar', S.sidebarOpen && 'is-open')}" id="sidebar" aria-label="Ana gezinme">
-        <div class="sidebar__head">
-          <div class="sidebar__mark">R</div>
-          <div class="sidebar__title"><b>Rota</b><span>${brandLine()}</span></div>
-        </div>
-
-        <div class="sidebar__scroll">${map(NAV, group => html`
-          <div class="navgroup" role="group" aria-label="${group.label}">
-            <div class="navgroup__label" aria-hidden="true">${group.label}</div>
-            ${map(group.items, it => {
-              const b = badgeFor(it.id);
-              const on = S.route === it.id;
-              return html`<button class="${cls('navitem', on && 'is-active')}" data-act="go" data-route="${it.id}"
-                ${when(on, () => attrs({ 'aria-current':'page' }))}>
-                ${raw(UI.icon(it.icon))}<span>${it.label}</span>
-                ${when(b, () => html`<span class="${cls('navitem__badge', b.quiet && 'is-quiet')}"
-                  aria-label="${b.text+' bekleyen'}">${b.text}</span>`)}
-              </button>`;
-            })}
-          </div>`)}
-        </div>
-
-        <div class="sidebar__foot">
-          <div class="countdown"><b class="num">${daysLeft}</b><span>gün · TYT (tahmin)</span></div>
-          <div class="weekmeter">
-            <div class="weekmeter__row"><span>Hafta ${cur}/${R.PLAN.totalWeeks}</span>
-              <span class="num">%${progress}</span></div>
-            ${R.C.Bar({ value:progress, tone:'' })}
+      <div class="hero" data-num="${sec.num}">
+        <div class="wrapc hero__in">
+          <div class="hero__main">
+            <div class="hero__eyebrow">
+              <span class="hero__num">${sec.num}</span>
+              ${raw(UI.icon(sec.icon))}
+              <span>${sec.label}</span>
+            </div>
+            <h1 class="hero__title">${baslik}</h1>
+            ${when(ozet, () => html`<p class="hero__lede">${raw(ozet)}</p>`)}
+            ${when(eylem, () => html`<div class="hero__actions">${raw(eylem)}</div>`)}
           </div>
-          ${storeHealthHtml()}
+          <div class="hero__side">
+            <div class="herostat">
+              <span class="herostat__value">${kalan}<small>gün</small></span>
+              <span class="herostat__label">TYT (tahmini)</span>
+            </div>
+            <div class="herostat">
+              <span class="herostat__value">${cur}<small>/${R.PLAN.totalWeeks}</small></span>
+              <span class="herostat__label">hafta</span>
+            </div>
+          </div>
+          <div class="hero__motif" aria-hidden="true">${raw(UI.motif(sec.id))}</div>
         </div>
+      </div>`;
+  }
+
+  /* Bolumun sayfalari. Tek sayfaliysa cizilmez — tek sekmeli bir
+     serit secim degil gurultu olur. */
+  function pagenavHtml(sc){
+    const sec = bolumOf(sc.id);
+    if(sec.items.length < 2) return '';
+    return html`
+      <nav class="pagenav" aria-label="${sec.label + ' sayfaları'}">
+        <div class="wrapc pagenav__in">${map(sec.items, v => {
+          const on = v.id === sc.id;
+          const b = safe(() => badgeFor(v.id), null);
+          return html`<button class="${cls('pagelink', on && 'is-active')}"
+            data-act="go" data-route="${v.id}"
+            ${when(on, () => attrs({ 'aria-current':'page' }))}>
+            ${raw(UI.icon(v.icon))}<span>${v.label}</span>
+            ${when(b, () => html`<span class="${cls('pagelink__badge', b.quiet && 'is-quiet')}">${b.text}</span>`)}
+          </button>`;
+        })}</div>
       </nav>`;
+  }
+
+  /* Dar ekranda tam bolum listesi — kunyedeki menu dugmesi acar. */
+  function navsheetHtml(sc){
+    const aktif = bolumOf(sc.id);
+    return html`
+      <div class="navsheet" role="dialog" aria-label="Bölümler">
+        <div class="navsheet__panel">
+          <div class="navsheet__head">
+            <b>Bölümler</b>
+            ${R.C.IconButton({ icon:'close', plain:true, aria:'Kapat', act:'toggle-sidebar' })}
+          </div>
+          <div class="navsheet__list">${map(NAV, sec => html`
+            <div class="navsheet__sec">
+              <div class="navsheet__num">${sec.num}</div>
+              <div class="minw0">
+                <b>${sec.label}</b>
+                <span class="tiny dim">${sec.note}</span>
+                <div class="navsheet__views">${map(sec.items, v => html`
+                  <button class="${cls('navsheet__view', v.id === sc.id && 'is-active')}"
+                    data-act="go" data-route="${v.id}">${v.label}</button>`)}</div>
+              </div>
+            </div>`)}
+          </div>
+          <div class="navsheet__foot">${raw(storeHealthHtml())}</div>
+        </div>
+      </div>`;
+  }
+
+  /* Alt bant — sayfayi sonlandirir ve sistemin degismez cumlesini
+     her ekranda bir kez soyler. */
+  function footerHtml(){
+    const progress = M.programProgress();
+    const cur = M.currentWeek();
+    return html`
+      <footer class="sitefoot">
+        <div class="wrapc sitefoot__in">
+          <div class="sitefoot__brand">
+            <span class="brand__mark" aria-hidden="true">R</span>
+            <div>
+              <b>Rota</b>
+              <span>Kişisel çalışma sistemi</span>
+            </div>
+          </div>
+          <div class="sitefoot__notes">
+            <p><span class="sitefoot__k">Hafta</span> ${cur}/${R.PLAN.totalWeeks} · program %${progress}</p>
+            <p><span class="sitefoot__k">Mahremiyet</span> Veriler bu cihazda tutulur.
+              Ad ve şehir hiçbir modele gönderilmez.</p>
+            ${raw(buildStampHtml())}
+          </div>
+        </div>
+      </footer>`;
   }
 
   function tabbarHtml(){
     return html`<nav class="tabbar" aria-label="Hızlı gezinme">${map(MOBILE_TABS, id => {
-      const item = NAV.reduce((f, g) => f || g.items.find(i => i.id === id), null);
+      const item = NAV.reduce((f, g) => f || g.items.find(i => i.id === id), null)
+        || { label:id, icon:'right' };
       const on = S.route === id;
-      return html`<button class="${cls('tabbar__item', on && 'is-active')}" data-act="go" data-route="${id}"
+      const b = safe(() => badgeFor(id), null);
+      return html`<button class="${cls('tabbtn', on && 'is-active')}" data-act="go" data-route="${id}"
         aria-label="${item.label}" ${when(on, () => attrs({ 'aria-current':'page' }))}>
-        ${raw(UI.icon(item.icon))}<span>${item.label}</span></button>`;
+        <span class="tabbtn__ic">${raw(UI.icon(item.icon))}</span>
+        <span class="tabbtn__t">${item.label}</span>
+        ${when(b, () => html`<span class="${cls('tabbtn__b', b.quiet && 'is-quiet')}"
+          aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}</button>`;
     })}</nav>`;
+  }
+
+  /* ---------- derleme damgası ----------
+
+     Ekrandaki sayfanın HANGİ derleme olduğunu söyler. Küçük bir ayrıntı
+     gibi görünür ama olmadığında pahalıya patlıyor: bir hata
+     düzeltildikten sonra kullanıcı hâlâ eski davranışı görebiliyor ve
+     bunu anlamanın hiçbir yolu olmuyor. Tarayıcı eski bir js dosyasını
+     önbellekten verdiğinde arayüz aynı görünür, davranış eskidir.
+
+     Yanındaki düğme tarayıcıyı önbelleği atlamaya zorlar: adres bir
+     kerelik damgayla yeniden yüklenir. */
+  function buildStampHtml(){
+    const b = R.BUILD || {};
+    if(!b.id) return '';
+    return String(html`<p class="sitefoot__build">
+      <span class="sitefoot__k">Derleme</span>
+      <span class="sitefoot__sha"${when(b.dirty, () => attrs({
+        title:'Bu derleme kaydedilmemiş yerel değişiklik içeriyor; '
+          + 'bir commit\'e birebir karşılık gelmez.' }))}>${b.id}${when(b.dirty,
+        () => html`<span aria-label="yerel değişiklikli">+</span>`)}</span>
+      ${when(b.at, () => html`<span class="dim"> · ${b.at}</span>`)}
+      <button class="sitefoot__reload" data-act="hard-reload"
+        title="Tarayıcının önbelleğini atlayarak yeniden yükler">tazele</button>
+    </p>`);
+  }
+
+  /* ------------------------------------------------------------- görünüm
+
+     Tema ve palet üst çubuktan tek dokunuşla değişir. Ayarların dördüncü
+     sekmesine gömülü bir tercih, hiç kullanılmayan bir tercihtir.
+
+     Seçim profile yazılır; yani cihaz değil KİŞİ hatırlanır ve hane
+     profilleri arasında geçerken herkesin kendi görünümü gelir. */
+  const THEMES = [
+    { id:'system', icon:'monitor', label:'Sistem' },
+    { id:'light',  icon:'sun',     label:'Açık' },
+    { id:'dark',   icon:'moon2',   label:'Koyu' },
+  ];
+
+  function appearanceHtml(){
+    const p = S.profile || {};
+    const theme = p.theme || 'system';
+    const palette = p.palette || R.DEFAULT_PALETTE;
+    const design = p.design || R.DEFAULT_DESIGN;
+    return String(html`
+      <div class="appear" id="appearance" role="dialog" aria-label="Görünüm">
+        <div class="appear__label">Tema</div>
+        <div class="appear__themes">${map(THEMES, t => html`
+          <button class="${cls('themebtn', t.id === theme && 'is-on')}"
+            data-act="set-theme" data-theme="${t.id}"
+            aria-pressed="${t.id === theme ? 'true' : 'false'}">
+            ${raw(UI.icon(t.icon))}<span>${t.label}</span>
+          </button>`)}
+        </div>
+
+        <div class="appear__label">Palet</div>
+        <div class="appear__palettes">${map(R.PALETTES, pal => html`
+          <button class="${cls('palbtn', pal.id === palette && 'is-on')}"
+            data-act="set-palette" data-palette="${pal.id}" title="${pal.note}"
+            aria-pressed="${pal.id === palette ? 'true' : 'false'}">
+            <span class="palbtn__dot" style="background:${pal.swatch[0]}"></span>
+            <span>${pal.name}</span>
+          </button>`)}
+        </div>
+
+        <div class="appear__label">Düzen</div>
+        <div class="appear__designs">${map(R.DESIGNS, d => html`
+          <button class="${cls('desbtn', d.id === design && 'is-on')}"
+            data-act="set-design" data-design="${d.id}" title="${d.note}"
+            aria-pressed="${d.id === design ? 'true' : 'false'}">
+            <span class="${'desbtn__mini desbtn__mini--' + d.swatch}" aria-hidden="true"
+              >${raw('<i></i>'.repeat(d.swatch === 'nodes' ? 4 : 5))}</span>
+            <span class="desbtn__name">${d.name}</span>
+          </button>`)}
+        </div>
+
+        <p class="appear__note">Tema, palet ve düzen bu profile kaydedilir.
+          «Sistem» seçiliyken cihazın açık/koyu tercihi izlenir. Düzen yalnız
+          iskeleti değiştirir: durum renkleri ve kesinlik etiketleri
+          hiçbir düzende değişmez.</p>
+      </div>`);
+  }
+
+  function openAppearance(anchor){
+    closeAppearance();
+    const root = document.getElementById('overlay-root');
+    const el = document.createElement('div');
+    el.innerHTML = appearanceHtml();
+    const panel = el.firstElementChild;
+    root.appendChild(panel);
+
+    /* Çapaya göre konumla; ekranın dışına taşarsa içeri çek. */
+    const r = anchor.getBoundingClientRect();
+    const w = panel.offsetWidth;
+    let left = r.right - w;
+    left = Math.max(12, Math.min(left, window.innerWidth - w - 12));
+    let top = r.bottom + 8;
+    if(top + panel.offsetHeight > window.innerHeight - 12){
+      top = Math.max(12, r.top - panel.offsetHeight - 8);
+    }
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+  }
+  function closeAppearance(){
+    const el = document.getElementById('appearance');
+    if(el) el.remove();
+  }
+  function isAppearanceOpen(){ return !!document.getElementById('appearance'); }
+
+  /* Paneli yerinde tazele: tema değişince sayfa yeniden çizilmez, yalnızca
+     kök nitelikleri ve panelin işaretli düğmesi değişir. Böylece açık panel
+     kapanmaz ve seçimin etkisi anında görülür. */
+  function refreshAppearance(){
+    const el = document.getElementById('appearance');
+    if(!el) return;
+    const left = el.style.left, top = el.style.top;
+    const wrap = document.createElement('div');
+    wrap.innerHTML = appearanceHtml();
+    const next = wrap.firstElementChild;
+    next.style.left = left; next.style.top = top;
+    el.replaceWith(next);
   }
 
   function safe(fn, fallback){
     try{ return fn(); }
     catch(e){ console.error(e); return fallback || ''; }
-  }
-
-  function topbarHtml(sc){
-    return html`
-      <header class="topbar" role="banner">
-        ${R.C.IconButton({ icon:'menu', aria:'Menü', act:'toggle-sidebar', class:'topbar__menu' })}
-        <div class="topbar__titles"><h1>${sc.title}</h1><p>${raw(safe(() => sc.subtitle()))}</p></div>
-        <div class="topbar__actions">${raw(safe(() => sc.actions ? sc.actions() : ''))}
-          ${R.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
-          ${R.C.IconButton({ icon:'gear', aria:'Rehber ve ayarlar', act:'go', data:{ 'data-route':'guide' } })}
-        </div>
-      </header>`;
   }
 
   function errorPanel(err){
@@ -159,7 +433,23 @@ R.App = (function(){
   const FOCUS_ATTRS = ['data-change','data-act','data-block','data-field','data-i','data-date','data-t','name'];
   function focusSnapshot(){
     const el = document.activeElement;
-    if(!el || !/^(input|textarea|select)$/i.test(el.tagName)) return null;
+    if(!el || el === document.body) return null;
+
+    /* ODAK YALNIZ FORM ALANLARINDA KORUNUYORDU.
+
+       Bir düğmeye basmak çoğu zaman yeniden çizim tetikler; düğme form
+       alanı olmadığı için anlık görüntü alınmıyor, çizimden sonra odak
+       `<body>`ye düşüyordu. Sonuç: klavyeyle çalışan biri her eylemden
+       sonra sayfanın başına dönüyor ve listede bulunduğu yeri kaybediyor.
+
+       Artık odaklanabilir her öge işaretlenir. Ögenin kendisi bulunamazsa
+       (liste değiştiyse) odak içerik alanına döner — sayfanın başına
+       değil. `icerikte` bunu söyler. */
+    const odaklanabilir = /^(input|textarea|select|button|a)$/i.test(el.tagName)
+      || el.getAttribute('role') === 'button'
+      || el.hasAttribute('tabindex');
+    if(!odaklanabilir) return null;
+    const icerikte = !!(el.closest && el.closest('#main'));
     let selector = null;
     if(el.id){
       selector = '#'+el.id.replace(/([^\w-])/g, '\\$1');
@@ -169,8 +459,8 @@ R.App = (function(){
         .filter(Boolean);
       if(parts.length) selector = el.tagName.toLowerCase()+parts.join('');
     }
-    if(!selector) return null;
-    const snap = { selector };
+    if(!selector) return icerikte ? { selector:null, icerikte:true } : null;
+    const snap = { selector, icerikte };
     try{
       if(el.selectionStart != null){ snap.start = el.selectionStart; snap.end = el.selectionEnd; }
     }catch(e){ /* number/date girdilerinde secim okunamaz */ }
@@ -178,9 +468,23 @@ R.App = (function(){
   }
   function restoreFocus(snap){
     if(!snap) return;
+    const icerige = () => {
+      if(!snap.icerikte) return;
+      const main = document.getElementById('main');
+      if(main){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    };
+    if(!snap.selector){ icerige(); return; }
+    /* ARAMA İÇERİK ALANIYLA SINIRLANIR.
+
+       Seçici niteliklerden türetilir (`button[data-act="..."]`) ve tek
+       başına benzersiz değildir: aynı eylem künyede, hero'da ya da alt
+       sayfada da bulunabilir. `document.querySelector` belge sırasında
+       İLK eşleşeni döndürdüğü için odak bambaşka bir düğmeye taşınıyordu.
+       Anlık görüntü içerikte alındıysa arama da orada yapılır. */
+    const kok = snap.icerikte ? (document.getElementById('main') || document) : document;
     let el;
-    try{ el = document.querySelector(snap.selector); }catch(e){ return; }
-    if(!el) return;
+    try{ el = kok.querySelector(snap.selector); }catch(e){ icerige(); return; }
+    if(!el){ icerige(); return; }
     el.focus({ preventScroll:true });
     if(snap.start != null){
       try{ el.setSelectionRange(snap.start, snap.end); }catch(e){}
@@ -228,19 +532,32 @@ R.App = (function(){
 
       document.getElementById('app').innerHTML = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
-        <div class="shell">
-          ${safe(sidebarHtml)}
-          <div class="shell__body">
-            ${topbarHtml(sc)}
-            <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
+        <div class="site">
+          ${safe(mastheadHtml)}
+          ${safe(() => sitenavHtml(sc))}
+          ${safe(() => heroHtml(sc))}
+          ${safe(() => pagenavHtml(sc))}
+          <div class="site__body">
+            <main class="wrapc content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
           </div>
+          ${safe(footerHtml)}
+          ${tabbarHtml()}
         </div>
-        ${tabbarHtml()}
-        ${when(S.sidebarOpen, () => html`<div class="scrim" data-act="toggle-sidebar"></div>`)}`);
+        ${when(S.sidebarOpen, () => safe(() => navsheetHtml(sc)))}`);
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
+      /* Odağı ancak YÖNLENDİRMEDEN sonra taşı: sıradan bir yeniden
+         çizimde taşımak, yazan kullanıcının imlecini alandan koparırdı. */
+      if(rotaDegisti){ rotaDegisti = false; rotayaOdaklan(sc); }
+      /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
+         `inert` onunla birlikte silinir ve arka plan yeniden okunur
+         hale gelir. Cizimden sonra geri konur. */
+      if(R.UI.isSheetOpen()){
+        const kabuk = document.querySelector('.site');
+        if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
+      }
       if(sc.afterRender) sc.afterRender();
     }catch(err){
       console.error('Render hatası:', err);
@@ -267,15 +584,64 @@ R.App = (function(){
     return true;
   }
 
+  /* Bolumun rengi KOKTE durur: CSS `--sec` jetonunu oradan okur.
+
+     palettes.css yedi bolum imzasi tasiyordu ama kimse `data-section`
+     yazmiyordu: alti bolumun altisi da ana rengi kullaniyordu, yani
+     «tek tasarim, alti imza» kurali yaziliydi ama calismiyordu.
+
+     Yeniden cizimde degil YONLENDIRMEDE yazilir ki her karede DOM'a
+     dokunulmasin. */
+  function applySection(route){
+    document.documentElement.setAttribute('data-section', bolumOf(route).id);
+  }
+
   function go(route){
     /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
     if(R.Talk && R.Talk.isActive()) R.Talk.stop();
     S.route = route;
+    rotaDegisti = true;
+    applySection(route);
     S.sidebarOpen = false;
     if(route !== 'exams') S.ui.examOpen = S.ui.examOpen;
     window.scrollTo(0,0);
     render();
+  }
+
+
+  /* ---------- yönlendirme duyurusu ve odak ----------
+
+     EKRAN DEĞİŞİNCE EKRAN OKUYUCU HİÇBİR ŞEY SÖYLEMİYORDU.
+
+     Tek sayfalık bir uygulamada gezinme, tarayıcının sayfa yüklemesi
+     değildir: adres değişmez, başlık okunmaz, odak yerinde kalır. Fareyle
+     çalışan biri yeni ekranı görür; klavye ya da ekran okuyucuyla çalışan
+     biri için HİÇBİR ŞEY olmamıştır — odak hâlâ bastığı bağlantıdadır ve
+     altındaki içeriğin değiştiğinden haberi yoktur.
+
+     İki şey yapılır ve yalnız YÖNLENDİRMEDE yapılır:
+
+       · gelinen ekranın adı görünmez bir canlı alana yazılır
+       · odak `<main>`'e taşınır (zaten `tabindex="-1"` taşır)
+
+     Her çizimde yapılsaydı, bir alana yazarken odak elden giderdi. */
+  let rotaDegisti = false;
+
+  function duyur(metin){
+    const el = document.getElementById('rota-duyuru');
+    if(!el || !metin) return;
+    /* Aynı metin üst üste yazılırsa okuyucu ikinciyi seslendirmez;
+       önce boşaltmak duyurunun her seferinde duyulmasını sağlar. */
+    el.textContent = '';
+    setTimeout(() => { el.textContent = metin; }, 30);
+  }
+
+  function rotayaOdaklan(sc){
+    const main = document.getElementById('main');
+    if(main){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    const ad = (sc && sc.title) || '';
+    if(ad) duyur(ad + ' ekranı açıldı');
   }
 
   function applyTheme(){
@@ -292,8 +658,11 @@ R.App = (function(){
     /* Duzen ISKELETI degistirir: gezinmenin nerede durdugunu, kartin
        kutu mu cizgi mi oldugunu. Varsayilan olan hicbir sey YAZMAZ —
        varsayilanin bedeli sifir olmalidir. */
+    /* TANIMSIZ DUZEN VARSAYILANA DUSER. Eski profillerde artik olmayan
+       bir duzen adi kayitli olabilir ('panel'); onu koke yazmak, hicbir
+       kurali olmayan bir nitelik birakir ve hata ayiklarken yaniltir. */
     const d = (S.profile && S.profile.design) || R.DEFAULT_DESIGN;
-    if(d === R.DEFAULT_DESIGN) root.removeAttribute('data-design');
+    if(d === R.DEFAULT_DESIGN || !R.DESIGN_BY_ID[d]) root.removeAttribute('data-design');
     else root.setAttribute('data-design', d);
   }
 
@@ -320,6 +689,36 @@ R.App = (function(){
       if(body) body.hidden = !S.ui.railOpen;
     },
     async 'open-palette'(){ R.Palette.open(); },
+    async 'open-appearance'(el){
+      if(isAppearanceOpen()){ closeAppearance(); return; }
+      openAppearance(el);
+    },
+    async 'set-theme'(el){
+      S.profile.theme = el.dataset.theme;
+      await M.saveProfile();
+      applyTheme(); refreshAppearance();
+    },
+    async 'set-palette'(el){
+      S.profile.palette = el.dataset.palette;
+      await M.saveProfile();
+      applyTheme(); refreshAppearance();
+    },
+    /* Duzen degisince sayfa YENIDEN CIZILIR: kimi duzen kabugun
+       izgarasini degistiriyor ve yapiskan sutunlarin yeni olcuyle
+       yerlesmesi gerekiyor. */
+    async 'set-design'(el){
+      S.profile.design = el.dataset.design;
+      await M.saveProfile();
+      applyTheme(); refreshAppearance(); render();
+    },
+    /* Sert yenileme: adrese bir kerelik damga eklenir, boylece tarayici
+       sayfayi ve bagli dosyalari onbellekten degil sunucudan ister.
+       `location.reload()` bunu garanti etmez. */
+    async 'hard-reload'(){
+      const u = new URL(location.href);
+      u.searchParams.set('tazele', String(Date.now()));
+      location.replace(u.toString());
+    },
     async 'setup-open'(){ R.Setup.open(); },
     async 'setup-save'(){ await R.Setup.save(); },
     async 'setup-quick'(el){ R.Setup.quick(el.dataset.start); },
@@ -488,6 +887,25 @@ R.App = (function(){
     catch(err){ console.error('Eylem hatası ('+act+'):', err); UI.toast('Bir şeyler ters gitti'); }
   });
 
+  /* KLAVYE, FARENIN IKIZIDIR.
+
+     Tiklama `[data-act]` tasiyan her ogeden devralinir; klavye
+     devralmiyordu. Sonuc: bir satirin tamami tiklanabilir oldugunda
+     (haftanin gunu, konu satiri, oneri rozeti) o eylem yalnizca fareyle
+     yapilabiliyordu — klavyeyle calisan biri icin o eylem YOKTU.
+
+     Yerel dugme ve baglantilar zaten Enter/Bosluk'u kendileri isler;
+     burada yalnizca `role="button"` ile dugme gibi davranan ogeler
+     ele alinir. Bosluk sayfayi kaydirmasin diye varsayilan durdurulur. */
+  document.addEventListener('keydown', e => {
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    const el = e.target.closest('[data-act][role="button"]');
+    if(!el) return;
+    if(/^(button|a|input|select|textarea)$/i.test(e.target.tagName)) return;
+    e.preventDefault();
+    el.click();
+  });
+
   async function runChange(el, e){
     const sc = screen();
     const fn = (sc.change && sc.change[el.dataset.change]) || globalChange[el.dataset.change];
@@ -534,6 +952,7 @@ R.App = (function(){
       if(R.Talk && R.Talk.isActive()){ R.Talk.stop(); render(); return; }
       if(R.Palette.isOpen()){ R.Palette.close(); return; }
       if(R.Palette.isFocusOpen()){ R.Palette.closeFocus(); return; }
+      if(isAppearanceOpen()){ closeAppearance(); return; }
       if(UI.isHintOpen()){ UI.closeHint(); return; }
       if(UI.isSheetOpen()){ UI.closeSheet(); return; }
       if(S.sidebarOpen){ S.sidebarOpen = false; render(); return; }
@@ -551,12 +970,24 @@ R.App = (function(){
     if(sc.onKey) sc.onKey(e);
   });
 
-  /* Balonu disariya tiklayinca kapat */
+  /* Yuzen panelleri disariya tiklayinca kapat: ipucu balonu ve gorunum
+     paneli. Ikisi de capaya gore konumlanir, ikisi de disari tiklamayla
+     kapanmali — biri kapanip digeri kalirsa kullanici hangisinin "acik"
+     oldugunu bilemez. */
   document.addEventListener('mousedown', e => {
-    if(!UI.isHintOpen()) return;
-    if(e.target.closest('#popover') || e.target.closest('[data-act="hint"]')) return;
-    UI.closeHint();
+    if(UI.isHintOpen()
+      && !e.target.closest('#popover') && !e.target.closest('[data-act="hint"]')){
+      UI.closeHint();
+    }
+    if(isAppearanceOpen()
+      && !e.target.closest('#appearance') && !e.target.closest('[data-act="open-appearance"]')){
+      closeAppearance();
+    }
   });
+
+  /* Pencere boyutu degisince panelin capasi kayar; yeniden konumlamak
+     yerine kapatmak daha durust: kullanici nereye tikladigini bilir. */
+  window.addEventListener('resize', () => { if(isAppearanceOpen()) closeAppearance(); });
 
   /* ---------- depolama sagligi ---------- */
   let lastErrorToastAt = 0;
@@ -681,6 +1112,7 @@ R.App = (function(){
       wireStoreErrors();
       await M.loadAll();
       applyTheme();
+      applySection(S.route);
       await render();
 
       // AI koc yetenegi acilisi bloklamaz; hazir olunca panelleri gostermek icin yeniden ciz.

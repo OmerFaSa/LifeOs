@@ -15,11 +15,11 @@
 :root[data-palette="grafit"]{
   --bg:#F6F7F8; --surface:#FFFFFF; --surface-2:#EEF0F2; --surface-3:#E3E6E9;
   --sidebar:#FFFFFF; --sidebar-active:#E4E8EC;
-  --text:#191C1F; --text-2:#5C646C; --text-3:#6C757D;
-  --primary:#3D4E5C; --primary-hover:#31404C; --primary-soft:#E4E8EC; --primary-ink:#FFFFFF;
-  --accent:#8A6A20; --accent-soft:#F5EEDD;
+  --text:#191C1F; --text-2:#5C646C; --text-3:#666E76;  /* AA: 4.6:1 */
+  --primary:#3D4E5C; --primary-hover:#31404C; --primary-ink:#FFFFFF;
+  --accent:#8A6A20;
   --border:#E2E5E8; --border-strong:#C8CDD2;
-  --c-k:#3D4E5C; --c-band:#E1E6EA;
+  --macro-protein:#3D4E5C; --c-band:#E1E6EA;
   --scrim:rgba(16,19,22,.5);
 }
 @media (prefers-color-scheme:dark){
@@ -27,10 +27,10 @@
     --bg:#111315; --surface:#191C1F; --surface-2:#202428; --surface-3:#272C31;
     --sidebar:#141719; --sidebar-active:#242C33;
     --text:#EDEFF1; --text-2:#AAB2B9; --text-3:#8A939B;
-    --primary:#8FA9BD; --primary-hover:#A3BACD; --primary-soft:#1E272E; --primary-ink:#0D1114;
-    --accent:#D6AE68; --accent-soft:#2C2618;
+    --primary:#8FA9BD; --primary-hover:#A3BACD; --primary-ink:#0D1114;
+    --accent:#D6AE68;
     --border:#2F343A; --border-strong:#3E454C;
-    --c-k:#8FA9BD; --c-band:#232C33;
+    --macro-protein:#8FA9BD; --c-band:#232C33;
     --scrim:rgba(0,0,0,.62);
   }
 }
@@ -38,10 +38,10 @@
   --bg:#111315; --surface:#191C1F; --surface-2:#202428; --surface-3:#272C31;
   --sidebar:#141719; --sidebar-active:#242C33;
   --text:#EDEFF1; --text-2:#AAB2B9; --text-3:#8A939B;
-  --primary:#8FA9BD; --primary-hover:#A3BACD; --primary-soft:#1E272E; --primary-ink:#0D1114;
-  --accent:#D6AE68; --accent-soft:#2C2618;
+  --primary:#8FA9BD; --primary-hover:#A3BACD; --primary-ink:#0D1114;
+  --accent:#D6AE68;
   --border:#2F343A; --border-strong:#3E454C;
-  --c-k:#8FA9BD; --c-band:#232C33;
+  --macro-protein:#8FA9BD; --c-band:#232C33;
   --scrim:rgba(0,0,0,.62);
 }
 
@@ -50,11 +50,11 @@
   --bg:#F9F7F7; --surface:#FFFFFF; --surface-2:#F2EDEE; --surface-3:#E8E1E2;
   --sidebar:#FFFFFF; --sidebar-active:#F0E3E5;
   --text:#1F1A1B; --text-2:#655A5C; --text-3:#75696B;
-  --primary:#7D2E3E; --primary-hover:#6A2634; --primary-soft:#F3E4E7; --primary-ink:#FFFFFF;
-  --accent:#8A6320; --accent-soft:#F6EEDE;
-  --info:#3F566E; --info-soft:#E7EBF0;
+  --primary:#7D2E3E; --primary-hover:#6A2634; --primary-ink:#FFFFFF;
+  --accent:#8A6320;
+  --info:#3F566E;
   --border:#E7E0E1; --border-strong:#D0C5C7;
-  --c-k:#7D2E3E; --c-band:#EFE0E3;
+  --macro-protein:#7D2E3E; --c-band:#EFE0E3;
   --scrim:rgba(26,18,20,.5);
 }
 @media (prefers-color-scheme:dark){
@@ -62,10 +62,10 @@
     --bg:#151112; --surface:#1E1819; --surface-2:#261F21; --surface-3:#2E2528;
     --sidebar:#181314; --sidebar-active:#332227;
     --text:#F2EDEE; --text-2:#B7A9AC; --text-3:#968A8C;
-    --primary:#DE8D9D; --primary-hover:#E9A2B0; --primary-soft:#2E1D22; --primary-ink:#150E10;
-    --accent:#D9AE6A; --accent-soft:#2C2417;
+    --primary:#DE8D9D; --primary-hover:#E9A2B0; --primary-ink:#150E10;
+    --accent:#D9AE6A;
     --border:#362C2E; --border-strong:#473A3D;
-    --c-k:#DE8D9D; --c-band:#2E2025;
+    --macro-protein:#DE8D9D; --c-band:#2E2025;
     --scrim:rgba(0,0,0,.64);
   }
 }
@@ -73,10 +73,10 @@
   --bg:#151112; --surface:#1E1819; --surface-2:#261F21; --surface-3:#2E2528;
   --sidebar:#181314; --sidebar-active:#332227;
   --text:#F2EDEE; --text-2:#B7A9AC; --text-3:#968A8C;
-  --primary:#DE8D9D; --primary-hover:#E9A2B0; --primary-soft:#2E1D22; --primary-ink:#150E10;
-  --accent:#D9AE6A; --accent-soft:#2C2417;
+  --primary:#DE8D9D; --primary-hover:#E9A2B0; --primary-ink:#150E10;
+  --accent:#D9AE6A;
   --border:#362C2E; --border-strong:#473A3D;
-  --c-k:#DE8D9D; --c-band:#2E2025;
+  --macro-protein:#DE8D9D; --c-band:#2E2025;
   --scrim:rgba(0,0,0,.64);
 }
 
@@ -85,10 +85,10 @@
   --bg:#F8F7FA; --surface:#FFFFFF; --surface-2:#EFEDF4; --surface-3:#E5E2EE;
   --sidebar:#FFFFFF; --sidebar-active:#E8E4F3;
   --text:#1B1922; --text-2:#5D5870; --text-3:#6E6880;
-  --primary:#54408F; --primary-hover:#463579; --primary-soft:#E8E4F3; --primary-ink:#FFFFFF;
-  --accent:#8A6320; --accent-soft:#F6EEDE;
+  --primary:#54408F; --primary-hover:#463579; --primary-ink:#FFFFFF;
+  --accent:#8A6320;
   --border:#E4E1EC; --border-strong:#C9C4D8;
-  --c-k:#54408F; --c-band:#E3DEF2;
+  --macro-protein:#54408F; --c-band:#E3DEF2;
   --scrim:rgba(18,16,26,.5);
 }
 @media (prefers-color-scheme:dark){
@@ -96,10 +96,10 @@
     --bg:#121118; --surface:#1A1822; --surface-2:#211E2B; --surface-3:#292535;
     --sidebar:#151320; --sidebar-active:#2A2440;
     --text:#EFEDF5; --text-2:#ABA5BC; --text-3:#8C869C;
-    --primary:#A99BE0; --primary-hover:#BBAEEC; --primary-soft:#231E38; --primary-ink:#100E18;
-    --accent:#D6AE68; --accent-soft:#2C2618;
+    --primary:#A99BE0; --primary-hover:#BBAEEC; --primary-ink:#100E18;
+    --accent:#D6AE68;
     --border:#302B3E; --border-strong:#413A52;
-    --c-k:#A99BE0; --c-band:#262039;
+    --macro-protein:#A99BE0; --c-band:#262039;
     --scrim:rgba(0,0,0,.64);
   }
 }
@@ -107,10 +107,10 @@
   --bg:#121118; --surface:#1A1822; --surface-2:#211E2B; --surface-3:#292535;
   --sidebar:#151320; --sidebar-active:#2A2440;
   --text:#EFEDF5; --text-2:#ABA5BC; --text-3:#8C869C;
-  --primary:#A99BE0; --primary-hover:#BBAEEC; --primary-soft:#231E38; --primary-ink:#100E18;
-  --accent:#D6AE68; --accent-soft:#2C2618;
+  --primary:#A99BE0; --primary-hover:#BBAEEC; --primary-ink:#100E18;
+  --accent:#D6AE68;
   --border:#302B3E; --border-strong:#413A52;
-  --c-k:#A99BE0; --c-band:#262039;
+  --macro-protein:#A99BE0; --c-band:#262039;
   --scrim:rgba(0,0,0,.64);
 }
 
@@ -118,11 +118,11 @@
 :root[data-palette="okyanus"]{
   --bg:#F5F8FA; --surface:#FFFFFF; --surface-2:#EAF0F5; --surface-3:#DFE8EF;
   --sidebar:#FFFFFF; --sidebar-active:#DFEAF3;
-  --text:#161E24; --text-2:#556570; --text-3:#65757F;
-  --primary:#1F5D80; --primary-hover:#194E6B; --primary-soft:#DFEAF3; --primary-ink:#FFFFFF;
-  --accent:#9A6714; --accent-soft:#F7EDDD;
+  --text:#161E24; --text-2:#556570; --text-3:#62717B;  /* AA: 4.6:1 */
+  --primary:#1F5D80; --primary-hover:#194E6B; --primary-ink:#FFFFFF;
+  --accent:#9A6714;
   --border:#DEE6EC; --border-strong:#C1CDD6;
-  --c-k:#1F5D80; --c-band:#DAE7F0;
+  --macro-protein:#1F5D80; --c-band:#DAE7F0;
   --scrim:rgba(12,20,26,.5);
 }
 @media (prefers-color-scheme:dark){
@@ -130,10 +130,10 @@
     --bg:#0F1418; --surface:#171D22; --surface-2:#1E252B; --surface-3:#252D34;
     --sidebar:#121820; --sidebar-active:#1E2F3C;
     --text:#ECF1F5; --text-2:#A6B4BE; --text-3:#87949E;
-    --primary:#7CB8DA; --primary-hover:#93C7E5; --primary-soft:#152833; --primary-ink:#0B1116;
-    --accent:#D6AE68; --accent-soft:#2C2618;
+    --primary:#7CB8DA; --primary-hover:#93C7E5; --primary-ink:#0B1116;
+    --accent:#D6AE68;
     --border:#2C343B; --border-strong:#3B454D;
-    --c-k:#7CB8DA; --c-band:#1B2C37;
+    --macro-protein:#7CB8DA; --c-band:#1B2C37;
     --scrim:rgba(0,0,0,.62);
   }
 }
@@ -141,10 +141,10 @@
   --bg:#0F1418; --surface:#171D22; --surface-2:#1E252B; --surface-3:#252D34;
   --sidebar:#121820; --sidebar-active:#1E2F3C;
   --text:#ECF1F5; --text-2:#A6B4BE; --text-3:#87949E;
-  --primary:#7CB8DA; --primary-hover:#93C7E5; --primary-soft:#152833; --primary-ink:#0B1116;
-  --accent:#D6AE68; --accent-soft:#2C2618;
+  --primary:#7CB8DA; --primary-hover:#93C7E5; --primary-ink:#0B1116;
+  --accent:#D6AE68;
   --border:#2C343B; --border-strong:#3B454D;
-  --c-k:#7CB8DA; --c-band:#1B2C37;
+  --macro-protein:#7CB8DA; --c-band:#1B2C37;
   --scrim:rgba(0,0,0,.62);
 }
 
@@ -152,11 +152,11 @@
 :root[data-palette="orman"]{
   --bg:#F7F8F6; --surface:#FFFFFF; --surface-2:#EFF2ED; --surface-3:#E5EAE4;
   --sidebar:#FFFFFF; --sidebar-active:#E4EDE8;
-  --text:#18201B; --text-2:#5A665E; --text-3:#69756D;
-  --primary:#2F6B4F; --primary-hover:#26583F; --primary-soft:#E4EDE8; --primary-ink:#FFFFFF;
-  --accent:#9A6714; --accent-soft:#F7EDDD;
+  --text:#18201B; --text-2:#5A665E; --text-3:#646F67;  /* AA: 4.9:1 */
+  --primary:#2F6B4F; --primary-hover:#26583F; --primary-ink:#FFFFFF;
+  --accent:#9A6714;
   --border:#E1E6E1; --border-strong:#C9D2CB;
-  --c-k:#2F6B4F; --c-band:#DCE8E1;
+  --macro-protein:#2F6B4F; --c-band:#DCE8E1;
   --scrim:rgba(15,20,17,.5);
 }
 @media (prefers-color-scheme:dark){
@@ -164,10 +164,10 @@
     --bg:#111412; --surface:#191D1A; --surface-2:#20241F; --surface-3:#272C26;
     --sidebar:#141815; --sidebar-active:#22302A;
     --text:#EDF2EE; --text-2:#AAB5AD; --text-3:#8B968D;
-    --primary:#7FBE9A; --primary-hover:#93CDAB; --primary-soft:#1E2C24; --primary-ink:#0D1210;
-    --accent:#DDAE68; --accent-soft:#2E2618;
+    --primary:#7FBE9A; --primary-hover:#93CDAB; --primary-ink:#0D1210;
+    --accent:#DDAE68;
     --border:#2C332E; --border-strong:#3F4941;
-    --c-k:#7FBE9A; --c-band:#25342C;
+    --macro-protein:#7FBE9A; --c-band:#25342C;
     --scrim:rgba(0,0,0,.62);
   }
 }
@@ -175,9 +175,112 @@
   --bg:#111412; --surface:#191D1A; --surface-2:#20241F; --surface-3:#272C26;
   --sidebar:#141815; --sidebar-active:#22302A;
   --text:#EDF2EE; --text-2:#AAB5AD; --text-3:#8B968D;
-  --primary:#7FBE9A; --primary-hover:#93CDAB; --primary-soft:#1E2C24; --primary-ink:#0D1210;
-  --accent:#DDAE68; --accent-soft:#2E2618;
+  --primary:#7FBE9A; --primary-hover:#93CDAB; --primary-ink:#0D1210;
+  --accent:#DDAE68;
   --border:#2C332E; --border-strong:#3F4941;
-  --c-k:#7FBE9A; --c-band:#25342C;
+  --macro-protein:#7FBE9A; --c-band:#25342C;
   --scrim:rgba(0,0,0,.62);
 }
+
+/* ==================== İNDİGO — soğuk mor-mavi ====================
+
+   1.x sürümlerinin varsayılanıydı; artık seçilebilir bir palet. */
+:root[data-palette="indigo"]{
+  --bg:#F5F6F8; --surface:#FFFFFF; --surface-2:#F0F1F5; --surface-3:#E7E9EF;
+  --sidebar:#FFFFFF; --sidebar-active:#E9EAF7;
+  --text:#14161D; --text-2:#575D6C; --text-3:#6B7180;
+  --primary:#3F3FA0; --primary-hover:#34348A; --primary-ink:#FFFFFF;
+  --accent:#96640F;
+  --danger:#A63838;
+  --info:#3A5871;
+  --border:#E4E6EC; --border-strong:#CBCFDA;
+  --macro-protein:#3F3FA0; --macro-fat:#96640F; --macro-carb:#3A5871;
+  --agent-patron:#3F3FA0; --agent-rehber:#2C6B52;
+  --c-grid:#E4E6EC; --c-band:#E0E1F3;
+  --scrim:rgba(16,18,27,.5);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-palette="indigo"]:not([data-theme="light"]){
+    --bg:#0D0F14; --surface:#15171D; --surface-2:#1B1E25; --surface-3:#23262F;
+    --sidebar:#111319; --sidebar-active:#242545;
+    --text:#ECEEF4; --text-2:#A9AEBD; --text-3:#878C9C;
+    --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-ink:#0C0D14;
+    --accent:#E0B46E;
+    --danger:#EA8C8C;
+    --info:#8DAECA;
+    --border:#252932; --border-strong:#343945;
+    --macro-protein:#9EA0EE; --macro-fat:#E0B46E; --macro-carb:#8DAECA;
+    --agent-patron:#9EA0EE; --agent-rehber:#8FD0B0;
+    --c-grid:#242832; --c-band:#242545;
+    --scrim:rgba(0,0,0,.62);
+  }
+}
+:root[data-palette="indigo"][data-theme="dark"]{
+  --bg:#0D0F14; --surface:#15171D; --surface-2:#1B1E25; --surface-3:#23262F;
+  --sidebar:#111319; --sidebar-active:#242545;
+  --text:#ECEEF4; --text-2:#A9AEBD; --text-3:#878C9C;
+  --primary:#9EA0EE; --primary-hover:#B2B4F5; --primary-ink:#0C0D14;
+  --accent:#E0B46E;
+  --danger:#EA8C8C;
+  --info:#8DAECA;
+  --border:#252932; --border-strong:#343945;
+  --macro-protein:#9EA0EE; --macro-fat:#E0B46E; --macro-carb:#8DAECA;
+  --agent-patron:#9EA0EE; --agent-rehber:#8FD0B0;
+  --c-grid:#242832; --c-band:#242545;
+  --scrim:rgba(0,0,0,.62);
+}
+
+
+/* ================= BÖLÜM KİMLİKLERİ =================
+
+   Tek tasarım, altı imza. Düzen, tipografi, boşluk ve bileşenler her
+   bölümde AYNIDIR; değişen tek şey `--sec` — bölümün kendi rengi.
+
+   Renk iki parçadan gelir:
+
+     --sec-base   bölümün kendi tonu (adaçayı, klinik mavi, kehribar…)
+     --sec        o tonun, SEÇİLİ PALETİN ana rengiyle harmanlanmışı
+
+   Harmanlama kasıtlıdır. Sabit yedi renk, bordo ya da okyanus paleti
+   seçildiğinde o paletle kavga ediyordu: sayfa iki ayrı tasarımdan
+   yapılmış gibi duruyordu. Harmanlanan tonlar hem birbirinden ayrılır
+   hem de seçili paletin ailesinden olur.
+
+   Oran %70/%30: bölüm kimliği baskın kalır, palet yalnız tonlar.
+
+   `--sec` yalnız beş yerde görünür — bölüm numarası, etkin sekme
+   çizgisi, bölüm başlığının üstündeki kısa çizgi, ana düğme ve bölüm
+   imzası. Renk içeriğe bulaşmaz; durum renkleri (ok/warn/danger) her
+   bölümde ve her palette aynıdır. Aksi hâlde bir tahlil sonucunun rengi
+   hangi bölümde olduğuna göre değişirdi ve bu, sağlık verisinde kabul
+   edilemez. */
+
+:root{
+  --sec-base:var(--primary);
+  --sec:color-mix(in oklab, var(--sec-base) 70%, var(--primary));
+  --sec-soft:color-mix(in oklab, var(--sec) 14%, var(--surface));
+}
+
+:root[data-section="gunluk"]  { --sec-base:#2F6B52; }
+:root[data-section="plan"] { --sec-base:#2E5A73; }
+:root[data-section="kayit"]   { --sec-base:#8A5A18; }
+:root[data-section="analiz"] { --sec-base:#9A4A2F; }
+:root[data-section="rehber"]  { --sec-base:#5E6B2A; }
+:root[data-section="ofis"]    { --sec-base:#6B3F63; }
+
+/* Koyu temada aynı yedi ton açılır: koyu zeminde doygun ton okunmaz.
+   Harmanlama kuralı aynı kalır, yalnız taban renk değişir. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"])[data-section="gunluk"]  { --sec-base:#79C09C; }
+  :root:not([data-theme="light"])[data-section="plan"] { --sec-base:#84B2CC; }
+  :root:not([data-theme="light"])[data-section="kayit"]   { --sec-base:#D6A961; }
+  :root:not([data-theme="light"])[data-section="analiz"] { --sec-base:#DF9376; }
+  :root:not([data-theme="light"])[data-section="rehber"]  { --sec-base:#AFBF74; }
+  :root:not([data-theme="light"])[data-section="ofis"]    { --sec-base:#C193BA; }
+}
+:root[data-theme="dark"][data-section="gunluk"]  { --sec-base:#79C09C; }
+:root[data-theme="dark"][data-section="plan"] { --sec-base:#84B2CC; }
+:root[data-theme="dark"][data-section="kayit"]   { --sec-base:#D6A961; }
+:root[data-theme="dark"][data-section="analiz"] { --sec-base:#DF9376; }
+:root[data-theme="dark"][data-section="rehber"]  { --sec-base:#AFBF74; }
+:root[data-theme="dark"][data-section="ofis"]    { --sec-base:#C193BA; }

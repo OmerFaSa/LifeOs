@@ -171,15 +171,70 @@
       resetState();
       expect(A.capacityReality().ok).toBeFalsy();
     });
-    it('dikkat dağılması ortalaması hesaplanır', async function(){
+    /* Bölünme ortalaması: SAYACIN AÇILDIĞI günlerden hesaplanır.
+
+       Gün kaydı doğduğunda `distractions` 0 olur; yani "bugün hiç
+       bölünmedim" ile "bugün sayacı hiç açmadım" aynı sayıya bakar.
+       Bütün günleri ortalamaya katmak, kullanıcının vermediği veriden
+       «odak sorunu görünmüyor» tesellisi üretiyordu. */
+    it('sayacın açıldığı günlerden ortalama üretir', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        resetState();
+        for(const [iso, n] of [['2026-09-13', 6], ['2026-09-14', 4], ['2026-09-15', 2]]){
+          const d = await M.ensureDay(iso);
+          d.distractions = n; d.distractionsTracked = true;
+          await M.saveDay(iso);
+        }
+        const t = A.distractionTrend(3);
+        expect(t.ok).toBeTruthy();
+        expect(t.avg).toBe(4);
+        expect(t.sayilan).toBe(3);
+      });
+    });
+    it('sayaç açılmamış günü ortalamaya katmaz', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        resetState();
+        /* Üç gün sayaç kullanıldı, iki gün kayıt var ama sayaç hiç
+           açılmadı. Ortalama yalnızca üç günden gelmeli — beş günden
+           gelseydi 4 yerine 2.4 çıkar ve tavsiye tersine dönerdi. */
+        for(const [iso, n] of [['2026-09-11', 6], ['2026-09-12', 4], ['2026-09-13', 2]]){
+          const d = await M.ensureDay(iso);
+          d.distractions = n; d.distractionsTracked = true;
+          await M.saveDay(iso);
+        }
+        for(const iso of ['2026-09-14', '2026-09-15']) await M.ensureDay(iso);
+        const t = A.distractionTrend(5);
+        expect(t.ok).toBeTruthy();
+        expect(t.avg).toBe(4);
+        expect(t.sayilan).toBe(3);
+        expect(t.gunKaydi).toBe(5);
+        expect(t.kapsam).toContain('3/5');
+      });
+    });
+    it('tek günlük kapsamda ortalama üretmez', async function(){
       await withTodayAsync('2026-09-15', async () => {
         resetState();
         const d = await M.ensureDay('2026-09-15');
-        d.distractions = 6;
+        d.distractions = 6; d.distractionsTracked = true;
         await M.saveDay('2026-09-15');
         const t = A.distractionTrend(3);
+        expect(t.ok).toBeFalsy();
+        expect(t.why).toContain('en az 3 gün');
+      });
+    });
+    it('eski kayıtta sıfırdan büyük sayı elle üretilmiş sayılır', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        resetState();
+        /* v5 öncesi günlerde bayrak yok; sıfırdan büyük bir sayı ancak
+           kullanıcı sayaca bastıysa oluşur, o yüzden sayılır. */
+        for(const [iso, n] of [['2026-09-13', 3], ['2026-09-14', 3], ['2026-09-15', 3]]){
+          const d = await M.ensureDay(iso);
+          d.distractions = n;
+          await M.saveDay(iso);
+        }
+        const t = A.distractionTrend(3);
         expect(t.ok).toBeTruthy();
-        expect(t.avg).toBeGreaterThan(0);
+        expect(t.sayilan).toBe(3);
       });
     });
   });
@@ -582,9 +637,9 @@
 
   /* ==================== şema ==================== */
 
-  describe('Şema v4', function(){
-    it('sürüm 4', function(){
-      expect(R.SCHEMA_VERSION).toBe(4);
+  describe('Şema v5', function(){
+    it('sürüm 5', function(){
+      expect(R.SCHEMA_VERSION).toBe(5);
     });
     it('yeni koleksiyonlar durumda tanımlı', function(){
       resetState();
@@ -600,6 +655,104 @@
         expect(d.badDay).toBeFalsy();
         expect(d.distractions).toBe(0);
       });
+    });
+  });
+
+  /* ==================== boş sayısının kesinliği ====================
+
+     Bu bloğun tamamı tek bir kuralı korur: GİRİLMEMİŞ BİR ALAN SIFIR
+     DEĞİLDİR. Kural bozulduğunda görünür bir hata çıkmaz — sayı orada
+     durur, makul görünür ve üzerine tavsiye üretilir. Testin işi budur. */
+  describe('Boş sayısının kesinliği', function(){
+    it('elle yazılan sayı ölçüldü sayılır', function(){
+      expect(M.blankCertainty(30, 5, '5', 40)).toEqual({ blank:5, blankCert:'measured' });
+    });
+    it('yazılan sıfır da ölçüldü sayılır', function(){
+      /* Kullanıcı gerçekten "0" yazdıysa bu bir ölçümdür; türetilmez. */
+      expect(M.blankCertainty(20, 20, '0', 40)).toEqual({ blank:0, blankCert:'measured' });
+    });
+    it('boş bırakılan alan soru sayısından türetilir', function(){
+      expect(M.blankCertainty(30, 5, '', 40)).toEqual({ blank:5, blankCert:'derived' });
+    });
+    it('soru sayısı bilinmiyorsa veri yok kalır — sıfır yazılmaz', function(){
+      expect(M.blankCertainty(30, 5, '', null)).toEqual({ blank:null, blankCert:'missing' });
+    });
+    it('doğru+yanlış soru sayısını aşarsa negatif üretmez', function(){
+      /* Tutarsız giriş: sessizce kırpmak yerine bilinmiyor denir. */
+      expect(M.blankCertainty(30, 15, '', 40)).toEqual({ blank:null, blankCert:'missing' });
+    });
+    it('tam dolu testte türetilen boş sıfırdır', function(){
+      expect(M.blankCertainty(35, 5, '', 40)).toEqual({ blank:0, blankCert:'derived' });
+    });
+
+    it('bir testi bile eksik olan deneme ortalamaya girmez', function(){
+      const tam = { tests:[{ blank:3, blankCert:'measured' }, { blank:1, blankCert:'derived' }] };
+      const eksik = { tests:[{ blank:3, blankCert:'measured' }, { blank:null, blankCert:'missing' }] };
+      expect(M.blankKnown(tam)).toBeTruthy();
+      expect(M.blankKnown(eksik)).toBeFalsy();
+      expect(M.blankKnown({ tests:[] })).toBeFalsy();
+    });
+
+    it('boş sayısı bilinmeyen denemeler ortalamadan dışlanır ve sayılır', function(){
+      resetState();
+      const yap = (net, bosVar) => ({
+        id:U.uid('e'), date:'2026-09-1' + (S.exams.length + 1),
+        type:'Tam TYT', templateId:'tyt-full', family:'TYT', kind:'full',
+        tests:[{ name:'Türkçe', correct:net, wrong:0,
+          blank:bosVar ? 2 : null, blankCert:bosVar ? 'measured' : 'missing' }],
+      });
+      S.exams = [yap(30, true), yap(28, true), yap(26, true), yap(20, false)];
+      const r = R.Analytics.blankStrategy('TYT');
+      expect(r.ok).toBeTruthy();
+      expect(r.sayilan).toBe(3);
+      expect(r.disarida).toBe(1);
+      expect(r.kapsam).toContain('dışarıda kaldı');
+    });
+
+    it('bilinen deneme sayısı üçün altındaysa ortalama üretilmez', function(){
+      resetState();
+      S.exams = [1,2,3,4].map(i => ({
+        id:'e'+i, date:'2026-09-0'+i, type:'Tam TYT', templateId:'tyt-full',
+        family:'TYT', kind:'full',
+        tests:[{ name:'Türkçe', correct:20, wrong:0, blank:null, blankCert:'missing' }],
+      }));
+      const r = R.Analytics.blankStrategy('TYT');
+      expect(r.ok).toBeFalsy();
+      expect(r.why).toContain('doldurulmamış');
+    });
+
+    it('göç eski kayıttaki uydurma sıfırı onarır', async function(){
+      resetState();
+      S.meta = { lastBackupAt:null, schemaVersion:4 };
+      /* v5 öncesi kayıt: 30 doğru + 5 yanlış ama "boş" 0 yazılmış.
+         Türkçe 40 soruluk; gerçek boş 5 olmalı. */
+      S.exams = [{ id:'eski', date:'2026-09-01', type:'Tam TYT',
+        family:'TYT', kind:'full',
+        tests:[{ name:'Türkçe', correct:30, wrong:5, blank:0 }] }];
+      await M.migrate();
+      expect(S.exams[0].tests[0].blank).toBe(5);
+      expect(S.exams[0].tests[0].blankCert).toBe('derived');
+    });
+
+    it('göç elle yazılmış sayıya dokunmaz', async function(){
+      resetState();
+      S.meta = { lastBackupAt:null, schemaVersion:4 };
+      S.exams = [{ id:'eski2', date:'2026-09-01', type:'Tam TYT',
+        family:'TYT', kind:'full',
+        tests:[{ name:'Türkçe', correct:30, wrong:5, blank:5 }] }];
+      await M.migrate();
+      expect(S.exams[0].tests[0].blank).toBe(5);
+      expect(S.exams[0].tests[0].blankCert).toBe('measured');
+    });
+
+    it('iki kesinlik sözlüğü ayrı ve dolu', function(){
+      /* R.PROVENANCE bir referans tablosunun KAYNAĞINI, R.CERTAINTY bir
+         sayının NASIL ELDE EDİLDİĞİNİ söyler. Karıştırılırsa HKM
+         katmanı gelen veriyi denetleyemez. */
+      expect(Object.keys(R.CERTAINTY).sort())
+        .toEqual(['derived', 'estimated', 'measured', 'missing']);
+      expect(R.PROVENANCE.official).toBeTruthy();
+      expect(R.CERTAINTY.official).toBeFalsy();
     });
   });
 })();

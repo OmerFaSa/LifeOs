@@ -53,14 +53,31 @@ R.Analytics = (function(){
     };
   }
 
-  /* ---------- boş bırakma stratejisi ---------- */
+  /* ---------- boş bırakma stratejisi ----------
+
+     BOŞ SAYISI BİLİNMEYEN DENEME ORTALAMAYA GİRMEZ. Eskiden girerdi:
+     `t.blank || 0` yazılmamış her alanı sıfır sayıyor, ortalama
+     olduğundan küçük çıkıyor ve tavsiye tersine dönebiliyordu —
+     "ortalamadan az boş bıraktın, daha çok soruya gir" cümlesi
+     kullanıcının hiç vermediği bir sayıdan üretiliyordu.
+
+     Kaç denemenin dışarıda kaldığı sonuçta YAZILIR: bir ortalamanın
+     kaç ölçümden geldiğini bilmeden ona güvenilmez. */
   function blankStrategy(family){
-    const list = C().fullExams(family || 'TYT');
-    if(list.length < 3) return { ok:false, why:'En az 3 tam deneme gerekir.' };
+    const hepsi = C().fullExams(family || 'TYT');
+    const list = hepsi.filter(M.blankKnown);
+    const disarida = hepsi.length - list.length;
+    if(list.length < 3){
+      return { ok:false, disarida,
+        why:disarida
+          ? 'Boş sayısı bilinen en az 3 tam deneme gerekir; '
+            + disarida + ' denemede boş alanı doldurulmamış.'
+          : 'En az 3 tam deneme gerekir.' };
+    }
 
     const points = list.map(e => ({
       date:e.date,
-      blank:U.sum((e.tests || []).map(t => t.blank || 0)),
+      blank:U.sum((e.tests || []).map(t => Number(t.blank) || 0)),
       wrong:U.sum((e.tests || []).map(t => t.wrong || 0)),
       net:U.round(M.examNet(e), 2),
     }));
@@ -73,6 +90,11 @@ R.Analytics = (function(){
 
     return {
       ok:true, points, avgBlank, best, worst, dir,
+      sayilan:list.length, disarida,
+      kapsam:disarida
+        ? list.length + ' denemeden hesaplandı; ' + disarida
+          + ' denemede boş alanı doldurulmadığı için dışarıda kaldı.'
+        : list.length + ' denemeden hesaplandı.',
       note:dir === 'less'
         ? 'En iyi denemende ortalamadan az boş bıraktın. Daha çok soruya girmek sana net kazandırıyor.'
         : dir === 'more'
@@ -345,25 +367,55 @@ R.Analytics = (function(){
     };
   }
 
-  /* ---------- dikkat dağılması ---------- */
+  /* ---------- dikkat dağılması ----------
+
+     SAYAÇ AÇILMAMIŞ GÜN ORTALAMAYA GİRMEZ.
+
+     `distractions` gün kaydı doğduğunda 0 olarak başlar, yani "bugün hiç
+     bölünmedim" ile "bugün sayacı hiç açmadım" aynı sayıya bakıyordu.
+     Ortalama bütün günler üzerinden alınınca sayacın kullanılmadığı her
+     gün ortalamayı aşağı çekiyor ve sonuç hep aynı cümleye varıyordu:
+     «Bölünme düşük; odak sorunu görünmüyor.» Kullanıcının vermediği bir
+     veriden üretilmiş bir teselli.
+
+     Artık yalnızca sayacın kullanıldığı günler sayılır. Bir gün iki yolla
+     sayılabilir: bayrağı varsa (v5 sonrası) ya da sayısı sıfırdan
+     büyükse (eski kayıtlar — sıfırdan büyük bir sayı elle üretilmiştir).
+
+     Üç günden az kapsamda ortalama üretilmez: iki günlük bir örnekten
+     «günde ortalama 6 bölünme» cümlesi kurmak, ölçmeden konuşmaktır. */
   function distractionTrend(days){
     const n = days || 14;
     const rows = [];
+    let gunKaydi = 0;
     for(let i = n - 1; i >= 0; i--){
       const iso = U.iso(U.addDays(U.today(), -i));
       const d = S.days[iso];
       if(!d) continue;
-      rows.push({ date:iso, count:d.distractions || 0 });
+      gunKaydi++;
+      const sayildi = d.distractionsTracked === true || Number(d.distractions) > 0;
+      if(!sayildi) continue;
+      rows.push({ date:iso, count:Number(d.distractions) || 0 });
     }
-    if(!rows.length) return { ok:false, why:'Gün kaydı yok.' };
+    if(!gunKaydi) return { ok:false, why:'Gün kaydı yok.' };
+    if(rows.length < 3){
+      return { ok:false, sayilan:rows.length, gunKaydi,
+        why:'Bölünme sayacı son ' + n + ' günde yalnızca ' + rows.length
+          + ' gün kullanıldı. Ortalama üretmek için en az 3 gün gerekir.' };
+    }
+
     const avg = U.round(U.sum(rows.map(r => r.count)) / rows.length, 1);
     return {
-      ok:true, rows, avg,
+      ok:true, rows, avg, sayilan:rows.length, gunKaydi,
+      kapsam:rows.length + '/' + gunKaydi + ' günde sayaç kullanıldı; '
+        + 'ortalama yalnızca o günlerden hesaplandı.',
       note:avg >= 5
-        ? 'Günde ortalama ' + avg + ' bölünme. Telefonu başka odaya koymak tek en etkili müdahale.'
+        ? 'Sayacın açık olduğu günlerde ortalama ' + avg + ' bölünme. '
+          + 'Telefonu başka odaya koymak tek en etkili müdahale.'
         : avg >= 2
-        ? 'Günde ortalama ' + avg + ' bölünme. Blok başında bildirimleri kapatmak yeterli olabilir.'
-        : 'Bölünme düşük; odak sorunu görünmüyor.',
+        ? 'Sayacın açık olduğu günlerde ortalama ' + avg + ' bölünme. '
+          + 'Blok başında bildirimleri kapatmak yeterli olabilir.'
+        : 'Sayacın açık olduğu günlerde bölünme düşük.',
     };
   }
 

@@ -28,7 +28,7 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const ROOT = path.resolve(__dirname, '..');
-const PORT = Number(process.argv[2]) || 4291;
+const PORT = Number(process.argv[2]) || 4292;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 /* Kabul edilen, gerekçeli eksikler. Kapandıkça buradan silinir. */
@@ -55,26 +55,17 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
     await page.goto(base + '/src/index.html', { waitUntil:'load' });
     await page.waitForSelector('.site', { timeout:15000 });
     await wait(600);
-    const skip = await page.$('[data-act="setup-skip"]');
-    if(skip) await skip.click();
-    await wait(300);
-
-    /* VERİ TOHUMLA: boş ekranda denetlenecek bir denetim yoktur. */
+    /* KURULUM ALT SAYFASI KAPANIR: açıkken sayfa `inert` olur ve
+       denetlenecek hiçbir öge görünür sayılmaz. */
     await page.evaluate(async () => {
-      await SP.Model.saveProfile({ name:'Ömer', birthYear:1998, sex:'female',
-        heightCm:170, weightKg:64, activity:'moderate', goal:'health' });
-      const r = SP.Model.newLab('2026-08-20');
-      Object.entries({ hemoglobin:11.8, ferritin:14, b12:288, hdl:44, ldl:128,
-        chol:210, trig:140, tsh:2.6, crp:1.2, glukoz:92, vitd:16, creat:0.8 })
-        .forEach(([k, v]) => {
-          const bb = SP.BIO_BY_ID[k];
-          if(bb) r.values[k] = { v, cert:'measured', unit:bb.unit };
-        });
-      await SP.Model.saveLab(r);
-      for(let i = 0; i < 8; i++){
-        const d = SP.U.iso(SP.U.addDays(SP.U.today(), -i));
-        await SP.Model.saveVitals(d, { sleep:7, rhr:58, weight:64, mood:4, hrv:48 });
-      }
+      R.S.profile.setupDone = true;
+      R.S.profile.name = R.S.profile.name || 'Ömer';
+      await R.Model.saveProfile();
+      try{ R.UI.closeSheet(); }catch(e){}
+      document.querySelectorAll('#sheet,.overlay,.sheet,.sheet-backdrop').forEach(n => n.remove());
+      document.querySelectorAll('.site').forEach(n => {
+        n.removeAttribute('inert'); n.removeAttribute('aria-hidden'); });
+      await R.App.render();
     });
     await wait(300);
 
@@ -103,10 +94,10 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
 
     /* ---- her ekran ---- */
     const routes = await page.evaluate(() =>
-      SP.App.SECTIONS.reduce((a, s) => a.concat(s.views.map(v => v.route)), []));
+      R.App.NAV.reduce((a, g) => a.concat(g.items.map(v => v.id)), []));
 
     for(const route of routes){
-      await page.evaluate(async r => { await SP.App.go(r); }, route);
+      await page.evaluate(async r => { await R.App.go(r); }, route);
       await wait(380);
       const r = await page.evaluate(() => {
         const out = { adsiz:[], etiketsiz:[], baslik:[], kucuk:[], imgAlt:[],
@@ -224,10 +215,10 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
     if(!duyuruVar) problems.push('yönlendirme duyurusu için canlı alan yok (#rota-duyuru)');
 
     if(duyuruVar && routes.length > 1){
-      await page.evaluate(async r => { await SP.App.go(r); }, routes[0]);
+      await page.evaluate(async r => { await R.App.go(r); }, routes[0]);
       await wait(300);
       await page.evaluate(() => { document.getElementById('rota-duyuru').textContent = ''; });
-      await page.evaluate(async r => { await SP.App.go(r); }, routes[1]);
+      await page.evaluate(async r => { await R.App.go(r); }, routes[1]);
       await wait(420);
       const sonuc = await page.evaluate(() => ({
         duyuru:(document.getElementById('rota-duyuru').textContent || '').trim(),
@@ -251,7 +242,7 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
       !!(document.activeElement && document.activeElement.closest
          && document.activeElement.closest('#main')));
     if(odakOnce){
-      await page.evaluate(async () => { await SP.App.render(); });
+      await page.evaluate(async () => { await R.App.render(); });
       await wait(320);
       const odakSonra = await page.evaluate(() =>
         !!(document.activeElement && document.activeElement.closest
@@ -259,29 +250,54 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
       if(!odakSonra) problems.push('yeniden çizimde odak içerik alanının dışına düşüyor');
     }
 
-    /* ---- alt sayfa kipliliği ---- */
-    await page.evaluate(async () => { await SP.App.go('office'); });
+    /* ---- alt sayfa kipliliği ----
+
+       Alt sayfa bir dugmeye basarak degil, DOGRUDAN acilir: hangi
+       ekranda hangi dugmenin alt sayfa actigi zamanla degisir ve
+       denetim o degisiklikte sessizce hicbir sey olcmez hale gelir.
+       Olculen sey `UI.sheet`'in kendisidir. */
+    await page.evaluate(async () => { await R.App.go('today'); });
     await wait(400);
-    const ac = await page.$('[data-act="add-decision"]');
-    if(ac){
-      await ac.click();
-      await wait(400);
-      const m = await page.evaluate(() => {
-        const el = document.getElementById('sheet');
-        const site = document.querySelector('.site');
-        return {
-          rol:!!(el && el.querySelector('[role=dialog]')),
-          odakIcerde:!!(el && el.contains(document.activeElement)),
-          arkaGizli:!!(site && (site.hasAttribute('inert') ||
-            site.getAttribute('aria-hidden') === 'true')),
-        };
-      });
-      if(!m.rol) problems.push('alt sayfada role="dialog" yok');
-      if(!m.odakIcerde) problems.push('alt sayfa açılınca odak içeri girmiyor');
-      if(!m.arkaGizli) problems.push('alt sayfa açıkken arka plan inert/aria-hidden değil');
-      await page.keyboard.press('Escape');
-      await wait(250);
-    }
+    await page.evaluate(() => {
+      document.querySelector('#main button, #main a[href]')?.focus();
+      R.UI.sheet({ title:'Denetim', body:'<input id="dn-a"><button>Tamam</button>' });
+    });
+    await wait(400);
+    const m = await page.evaluate(() => {
+      const el = document.getElementById('sheet');
+      const site = document.querySelector('.site');
+      return {
+        rol:!!(el && el.querySelector('[role=dialog]')),
+        odakIcerde:!!(el && el.contains(document.activeElement)),
+        arkaGizli:!!(site && (site.hasAttribute('inert') ||
+          site.getAttribute('aria-hidden') === 'true')),
+        kaydirmaKilidi:document.body.style.overflow === 'hidden',
+      };
+    });
+    if(!m.rol) problems.push('alt sayfada role="dialog" yok');
+    if(!m.odakIcerde) problems.push('alt sayfa açılınca odak içeri girmiyor');
+    if(!m.arkaGizli) problems.push('alt sayfa açıkken arka plan inert/aria-hidden değil');
+    if(!m.kaydirmaKilidi) problems.push('alt sayfa açıkken arka plan kaydırması kilitli değil');
+
+    /* Tab dongusu iceride kalmali: son ogeden sonra basa doner. */
+    await page.evaluate(() => {
+      const el = document.getElementById('sheet');
+      const list = el.querySelectorAll('a[href], button, input, textarea, select');
+      list[list.length - 1].focus();
+    });
+    await page.keyboard.press('Tab');
+    await wait(120);
+    const icerde = await page.evaluate(() =>
+      !!document.getElementById('sheet')?.contains(document.activeElement));
+    if(!icerde) problems.push('alt sayfada Tab döngüsü dışarı çıkıyor');
+
+    /* Kapaninca odak acan ogeye donmeli. */
+    await page.evaluate(() => R.UI.closeSheet());
+    await wait(200);
+    const geriDondu = await page.evaluate(() =>
+      !!document.querySelector('.site')?.contains(document.activeElement));
+    if(!geriDondu) problems.push('alt sayfa kapanınca odak sayfaya dönmüyor');
+
   }catch(err){
     console.error('Koşum hatası:', err && err.message ? err.message : err);
     await browser.close(); srv.kill();

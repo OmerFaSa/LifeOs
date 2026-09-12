@@ -129,7 +129,7 @@ R.Screens.progress = (function(){
       <div class="stack-xs">
         <div class="row between"><span class="mono-label">${fam} · ${GATE_STATUS[status]}</span>
           <b class="num">${value == null ? '—' : U.fmtNet(value)}</b></div>
-        ${raw(UI.gauge(value, band, safe, ''))}
+        ${raw(UI.rangeBar(value, band, safe, '', { bare:true }))}
       </div>`;
 
     const choice = decision

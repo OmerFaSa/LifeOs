@@ -1468,11 +1468,23 @@ table td, table th{
   font-family:ui-monospace, 'SFMono-Regular', 'Courier New', monospace;
   font-size:11px; letter-spacing:.02em; color:var(--ink-on);
 }
+/* DOKUNMA ALANI GORSEL BOYUTTAN BUYUK OLABILIR.
+
+   Bu dugme kunyenin icinde bir hap kadar yer kaplamali: 50x17. Ama
+   WCAG'in asgari dokunma hedefi 24x24 ve parmak pikseli gormez,
+   alani hisseder. Gorunmez bir ::after ile alan buyutulur; hap oldugu
+   yerde kalir. */
 .sitefoot__reload{
+  position:relative;
   border:1px solid color-mix(in srgb, var(--ink-on) 30%, transparent);
   background:none; color:var(--ink-on-2);
   border-radius:var(--r-pill); padding:1px 9px; font-size:10.5px;
   transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.sitefoot__reload::after{
+  content:''; position:absolute; left:0; right:0;
+  top:50%; transform:translateY(-50%);
+  height:24px; min-height:24px;
 }
 .sitefoot__reload:hover{ color:var(--ink-on); border-color:var(--ink-on); }
 
@@ -2133,7 +2145,12 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .step__body p{ font-size:var(--fs-sm); color:var(--text-2); }
 
 /* ---------- ipucu (ⓘ) ve balon ---------- */
+/* İpucu düğmesi bir başlığın yanında bir nokta kadar yer kaplar; 16×16
+   görsel boyut kasıtlıdır. Dokunma alanı ayrı bir meseledir ve parmak
+   pikseli görmez: görünmez bir ::after alanı 24×24'e çıkarır. Halka
+   olduğu yerde kalır. */
 .hint{
+  position:relative;
   width:16px; height:16px; flex:none;
   border:1px solid var(--border-strong); background:none;
   border-radius:50%; padding:0;
@@ -2141,6 +2158,11 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   color:var(--text-3);
   display:inline-grid; place-items:center;
   vertical-align:middle; margin-left:5px;
+}
+.hint::after{
+  content:''; position:absolute;
+  left:50%; top:50%; transform:translate(-50%,-50%);
+  width:24px; height:24px; border-radius:50%;
 }
 .hint:hover{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); }
 
@@ -2411,7 +2433,10 @@ kbd{
 .input--cell{ width:62px; }
 .input--mins{ width:66px; }
 .exam-net{ font-family:var(--font-display); font-weight:800; font-size:var(--fs-lg); }
-.exam-net--lg{ font-size:var(--fs-2xl); }
+/* `--fs-2xl` hiç tanımlanmamış bir jetondu: bu satır yıllardır hiçbir
+   şey yapmıyor, büyük net skoru devralınan puntoyla çiziliyordu.
+   Ölçeğin gerçek büyük adımı `--fs-hero`. */
+.exam-net--lg{ font-size:var(--fs-hero); }
 .exam-row__net{ width:54px; flex:none; text-align:center; }
 .mb-10{ margin-bottom:10px; }
 .input--search{ max-width:280px; }
@@ -4526,6 +4551,9 @@ body.is-dragging .drop.is-over{
 
 <div id="overlay-root"></div>
 <div id="toast-root" class="toast-root" role="status" aria-live="polite"></div>
+<!-- Yonlendirme duyurusu: ekran degisince ekran okuyucu nereye gelindigini
+     soyler. Gorunmez; yalnizca yardimci teknoloji okur. -->
+<div id="rota-duyuru" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- veri once, cekirdek sonra, ekranlar en son: bagimlilik siralamasi budur -->
 <script>
@@ -4535,7 +4563,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'774dd69', at:'2026-09-12 05:58', dirty:true };
+SP.BUILD = { id:'16060ec', at:'2026-09-12 11:14', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -7644,15 +7672,47 @@ SP.Store = (function(){
       || /quota|storage.*full/i.test(e.message || '');
   }
 
+  /* ---------- ayrıştırılmış kopya ----------
+
+     HER YAZMA TÜM DEPOYU AYRIŞTIRIYORDU. `lSet` önce `localAll()` ile
+     bütün kaydı JSON'dan çözüyor, tek anahtarı değiştirip yeniden
+     serileştiriyordu; yani bir ölçüm girmenin maliyeti, o güne kadar
+     girilmiş HER ŞEYİN boyutuyla büyüyordu.
+
+     Ölçüldü: 50 kayıtta yazma başına 0,17 ms, 1000 kayıtta 5,00 ms —
+     yirmi dokuz kat. Dokuz aylık kullanımda (günde ~10 kayıt) her
+     dokunuş fark edilir bir gecikmeye dönüşürdü.
+
+     Çözüm ayrıştırılmış kopyayı bellekte tutmaktır. Serileştirme
+     KALIR — yazma yine anında diske iner, ertelenmez. Ertelenen bir
+     yazma, sekmesini kapatan kullanıcının verisini kaybeder ve burası
+     verinin kaybolabileceği tek yerdir; hız için o riski almayız.
+
+     Kopya BAŞKA BİR SEKME yazdığında geçersizleşir: `storage` olayı
+     yalnızca diğer sekmelerde tetiklenir, tam da bize gereken şey. */
+  let kopya = null;
+
   function localAll(){
-    try{ return JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}'); }
-    catch(e){
+    if(kopya) return kopya;
+    try{
+      kopya = JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}');
+      return kopya;
+    }catch(e){
       report('local-read', e, 'Yerel kayıt okunamadı; veriler geçici olarak bellekte tutuluyor.');
       health.local = 'error';
-      return {};
+      kopya = {};
+      return kopya;
     }
   }
+
+  /* Başka sekme yazdıysa bellekteki kopya eskimiştir. */
+  try{
+    window.addEventListener('storage', e => {
+      if(!e || e.key === null || e.key === LOCAL_KEY) kopya = null;
+    });
+  }catch(e){ /* olay bağlanamadıysa kopya yalnız bu sekmede yaşar */ }
   function localWrite(all){
+    kopya = all;
     try{
       localStorage.setItem(LOCAL_KEY, JSON.stringify(all));
       if(health.local === 'error'){ health.local = 'ok'; }
@@ -7680,6 +7740,17 @@ SP.Store = (function(){
     delete all[path];
     localWrite(all);
   }
+  /* Birden çok yolu TEK yazmayla kaydeder.
+
+     Bulut listesi geldiğinde her satır ayrı ayrı `lSet` ile yazılıyordu:
+     yüz kayıtlık bir koleksiyon, yüz kez tam serileştirme demekti. */
+  function lSetMany(pairs){
+    if(!pairs.length) return true;
+    const all = localAll();
+    pairs.forEach(([path, data]) => { all[path] = data; });
+    return localWrite(all);
+  }
+
   function lList(prefix){
     const all = localAll();
     const p = prefix.endsWith('/') ? prefix : prefix + '/';
@@ -7763,7 +7834,7 @@ SP.Store = (function(){
         const snap = await db.collection(collection).get();
         health.cloud = 'ok';
         const rows = snap.docs.map(d => Object.assign({ id:d.id }, d.data()));
-        rows.forEach(r => lSet(collection+'/'+r.id, r));
+        lSetMany(rows.map(r => [collection+'/'+r.id, r]));
         if(rows.length) return rows;
         return lList(collection);
       }catch(e){
@@ -7819,6 +7890,7 @@ SP.Store = (function(){
 
   async function clear(){
     const all = localAll();
+    kopya = {};
     try{ localStorage.removeItem(LOCAL_KEY); }catch(e){}
     if(db){
       for(const k of Object.keys(all)){
@@ -13475,7 +13547,8 @@ SP.C = (function(){
   function Chip(o){
     if(typeof o === 'string') o = { label:o };
     return html`<span class="${cls('chip', o.act && 'chip--tap', o.on && 'chip--on')}"
-      ${when(o.act, () => attrs(Object.assign({ 'data-act':o.act }, o.data || {})))}>${o.label}</span>`;
+      ${when(o.act, () => attrs(Object.assign(
+        { 'data-act':o.act, role:'button', tabindex:'0' }, o.data || {})))}>${o.label}</span>`;
   }
 
   /* ---------- etkilesim ---------- */
@@ -13561,17 +13634,23 @@ SP.C = (function(){
      alt sayfa, uyari. Okunacak bir sey kutuya konmaz.
 
      Kunye sutunu uzun icerikte YAPISIR: yuz satirlik bir listeyi
-     kaydirirken hangi bolumde oldugunu unutmayasin diye. */
+     kaydirirken hangi bolumde oldugunu unutmayasin diye.
+
+     KUNYEYE KOYACAK BIR SEY YOKSA SUTUN HIC ACILMAZ. Bos bir kunye
+     sutunu 196 piksellik bir bosluk birakir ve icerigi saga sikistirir;
+     kunyesi olmayan sey GENIS satirdir. */
   function Entry(o){
     return html`
       <section class="${cls('lrow', o.wide && 'lrow--wide', o.class)}"
+        ${when(o.id, () => attrs({ id:o.id }))}
         ${when(o.hint, () => attrs({ 'data-hint':o.hint }))}>
+        ${when(o.label || o.meta || o.note || o.action, () => html`
         <div class="lrow__side">
-          <div class="lrow__label">${o.label}${raw(SP.UI.hint(o.hint || ''))}</div>
+          ${when(o.label, () => html`<div class="lrow__label">${o.label}${raw(SP.UI.hint(o.hint || ''))}</div>`)}
           ${when(o.meta, () => html`<div class="lrow__meta">${o.meta}</div>`)}
           ${when(o.note, () => html`<p class="lrow__note">${o.note}</p>`)}
           ${when(o.action, () => html`<div class="lrow__act">${o.action}</div>`)}
-        </div>
+        </div>`)}
         <div class="lrow__main">${o.body}</div>
       </section>`;
   }
@@ -13638,15 +13717,23 @@ SP.C = (function(){
       }, o.data || {}))}/>`;
   }
 
+  /* `class` ve `aria` SESSIZCE DUSUYORDU: iki cagri yeri
+     `class:'composer__input'` geciyor ve o sinif hicbir zaman yazilmiyordu,
+     bu yuzden sohbet kutusu satiri doldurmuyordu. Yer tutucu da etiket
+     yerine gecmez — ekran okuyucu yalnizca "metin alani" der. */
   function Textarea(o){
-    return html`<textarea class="textarea"
-      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder, 'data-change':o.change }, o.data || {}))}
+    return html`<textarea class="${cls('textarea', o.class)}"
+      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder,
+        'aria-label':o.aria, 'data-change':o.change }, o.data || {}))}
     >${o.value || ''}</textarea>`;
   }
 
+  /* `aria` alani `Input`'ta vardi, `Select`'te yoktu: etiketsiz bir
+     secici ekran okuyucuda yalnizca "acilir liste" diye anilir. */
   function Select(o){
     return html`<select class="${cls('select', o.size === 'sm' && 'input--sm')}"
-      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'data-change':o.change }, o.data || {}))}>
+      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'aria-label':o.aria,
+        'data-change':o.change }, o.data || {}))}>
       ${map(o.options, op => {
         const v = op.value != null ? op.value : op;
         const l = op.label != null ? op.label : op;
@@ -16562,8 +16649,11 @@ SP.Palette = (function(){
      Ayni kapi: onaysiz hicbir sey yazilmaz, her kayit geri alinabilir. */
   let bekleyen = null;     /* { oneriler, anlasilmayan, metin } */
 
-  function quickCommand(){
-    const t = query.trim();
+  /* `q` verilmezse paletin o anki sorgusu kullanilir. Disaridan verilmesi
+     bu islevi paleti acmadan denenebilir yapar ve AYS'nin ayni isi yapan
+     `veriKomutu(q)` bicimiyle eslestirir. */
+  function quickCommand(q){
+    const t = String(q == null ? query : q).trim();
     if(t.length < 3) return null;
     let r;
     try{ r = SP.Proposals.fromText(t); }catch(e){ return null; }
@@ -19010,7 +19100,7 @@ SP.Screens.meals = (function(){
         ${K.Button({ label:'Fotoğraftan', icon:'camera', act:'open-photo' })}`,
       body:html`
         <div class="quick">
-          ${K.Select({ id:'meal-slot', value:S.ui.mealSlot,
+          ${K.Select({ id:'meal-slot', value:S.ui.mealSlot, aria:'Öğün yuvası',
             options:SP.MEAL_SLOTS.map(s => ({ value:s.id, label:s.label })), change:'pick-slot' })}
           ${K.Mic({ target:'meal-text' })}
           ${K.Input({ id:'meal-text', placeholder:'1 tabak etli kuru fasulye, 2 dilim ekmek, 1 bardak ayran',
@@ -23594,7 +23684,23 @@ SP.App = (function(){
   const FOCUS_ATTRS = ['data-change', 'data-act', 'data-id', 'data-i', 'data-date', 'name'];
   function focusSnapshot(){
     const el = document.activeElement;
-    if(!el || !/^(input|textarea|select)$/i.test(el.tagName)) return null;
+    if(!el || el === document.body) return null;
+
+    /* ODAK YALNIZ FORM ALANLARINDA KORUNUYORDU.
+
+       Bir düğmeye basmak çoğu zaman yeniden çizim tetikler; düğme form
+       alanı olmadığı için anlık görüntü alınmıyor, çizimden sonra odak
+       `<body>`ye düşüyordu. Sonuç: klavyeyle çalışan biri her eylemden
+       sonra sayfanın başına dönüyor ve listede bulunduğu yeri kaybediyor.
+
+       Artık odaklanabilir her öge işaretlenir. Ögenin kendisi bulunamazsa
+       (liste değiştiyse) odak içerik alanına döner — sayfanın başına
+       değil. `icerikte` bunu söyler. */
+    const odaklanabilir = /^(input|textarea|select|button|a)$/i.test(el.tagName)
+      || el.getAttribute('role') === 'button'
+      || el.hasAttribute('tabindex');
+    if(!odaklanabilir) return null;
+    const icerikte = !!(el.closest && el.closest('#main'));
     let selector = null;
     if(el.id){
       selector = '#' + el.id.replace(/([^\w-])/g, '\\$1');
@@ -23604,8 +23710,8 @@ SP.App = (function(){
         .filter(Boolean);
       if(parts.length) selector = el.tagName.toLowerCase() + parts.join('');
     }
-    if(!selector) return null;
-    const snap = { selector };
+    if(!selector) return icerikte ? { selector:null, icerikte:true } : null;
+    const snap = { selector, icerikte };
     try{
       if(el.selectionStart != null){ snap.start = el.selectionStart; snap.end = el.selectionEnd; }
     }catch(e){ /* sayı ve tarih girdilerinde seçim okunamaz */ }
@@ -23613,9 +23719,23 @@ SP.App = (function(){
   }
   function restoreFocus(snap){
     if(!snap) return;
+    const icerige = () => {
+      if(!snap.icerikte) return;
+      const main = document.getElementById('main');
+      if(main){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    };
+    if(!snap.selector){ icerige(); return; }
+    /* ARAMA İÇERİK ALANIYLA SINIRLANIR.
+
+       Seçici niteliklerden türetilir (`button[data-act="..."]`) ve tek
+       başına benzersiz değildir: aynı eylem künyede, hero'da ya da alt
+       sayfada da bulunabilir. `document.querySelector` belge sırasında
+       İLK eşleşeni döndürdüğü için odak bambaşka bir düğmeye taşınıyordu.
+       Anlık görüntü içerikte alındıysa arama da orada yapılır. */
+    const kok = snap.icerikte ? (document.getElementById('main') || document) : document;
     let el;
-    try{ el = document.querySelector(snap.selector); }catch(e){ return; }
-    if(!el) return;
+    try{ el = kok.querySelector(snap.selector); }catch(e){ icerige(); return; }
+    if(!el){ icerige(); return; }
     el.focus({ preventScroll:true });
     if(snap.start != null){
       try{ el.setSelectionRange(snap.start, snap.end); }catch(e){}
@@ -23727,6 +23847,9 @@ SP.App = (function(){
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
       revealActiveTab();
+      /* Odağı ancak YÖNLENDİRMEDEN sonra taşı: sıradan bir yeniden
+         çizimde taşımak, yazan kullanıcının imlecini alandan koparırdı. */
+      if(rotaDegisti){ rotaDegisti = false; rotayaOdaklan(sc); }
       /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
          `inert` onunla birlikte silinir ve arka plan yeniden okunur
          hale gelir. Cizimden sonra geri konur. */
@@ -23771,9 +23894,45 @@ SP.App = (function(){
     if(SP.Talk && SP.Talk.isActive()) SP.Talk.stop();
     S.route = route;
     S.sidebarOpen = false;
+    rotaDegisti = true;
     applySection(route);
     window.scrollTo(0, 0);
     render();
+  }
+
+
+  /* ---------- yönlendirme duyurusu ve odak ----------
+
+     EKRAN DEĞİŞİNCE EKRAN OKUYUCU HİÇBİR ŞEY SÖYLEMİYORDU.
+
+     Tek sayfalık bir uygulamada gezinme, tarayıcının sayfa yüklemesi
+     değildir: adres değişmez, başlık okunmaz, odak yerinde kalır. Fareyle
+     çalışan biri yeni ekranı görür; klavye ya da ekran okuyucuyla çalışan
+     biri için HİÇBİR ŞEY olmamıştır — odak hâlâ bastığı bağlantıdadır ve
+     altındaki içeriğin değiştiğinden haberi yoktur.
+
+     İki şey yapılır ve yalnız YÖNLENDİRMEDE yapılır:
+
+       · gelinen ekranın adı görünmez bir canlı alana yazılır
+       · odak `<main>`'e taşınır (zaten `tabindex="-1"` taşır)
+
+     Her çizimde yapılsaydı, bir alana yazarken odak elden giderdi. */
+  let rotaDegisti = false;
+
+  function duyur(metin){
+    const el = document.getElementById('rota-duyuru');
+    if(!el || !metin) return;
+    /* Aynı metin üst üste yazılırsa okuyucu ikinciyi seslendirmez;
+       önce boşaltmak duyurunun her seferinde duyulmasını sağlar. */
+    el.textContent = '';
+    setTimeout(() => { el.textContent = metin; }, 30);
+  }
+
+  function rotayaOdaklan(sc){
+    const main = document.getElementById('main');
+    if(main){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    const ad = (sc && sc.title) || '';
+    if(ad) duyur(ad + ' ekranı açıldı');
   }
 
   function applyTheme(){

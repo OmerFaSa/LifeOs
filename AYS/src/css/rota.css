@@ -1,0 +1,1507 @@
+/* ROTA'YA ÖZGÜ BİLEŞENLER.
+
+   Diğer altı CSS dosyası (tokens · palettes · base · layout · components
+   · designs) SPİ ile BİREBİR AYNIDIR ve elle düzenlenmez: ikisi tek
+   tasarımın iki uygulamasıdır, ortak dosyada ayrışma olursa iki
+   uygulama sessizce birbirinden uzaklaşır.
+
+   Burada yalnız SPİ'de KARŞILIĞI OLMAYAN şeyler durur — AYS'nin kendi
+   nesneleri: üç boyutlu ofis, kat planı, haftanın ızgarası, sınama
+   kartı, soru çözüm defteri, program zaman çizgisi.
+
+   Dosyanın kuralı ortak dosyalarınkiyle aynıdır:
+
+     · yalnız tokens.css değişkenleri kullanılır, ham renk yazılmaz
+     · OKUNACAK bir şey kutuya konmaz — kıl çizgi ayırmaya yeter
+     · kutu yalnız SEÇİLEBİLİR ya da YÜZEN şeylerde kalır
+
+   Kutunun kaldığı yerler ve sebepleri:
+
+     .daycol      haftanın günü — dokununca o günün defteri açılır
+     .seat/.floor kat planı — birer nesne, okunacak metin değil
+     .room3d__*   üç boyutlu oda — sahnenin kendisi
+     .desk3d__*   masalar — dokunulacak nesneler
+     .qdrop       fotoğraf bırakma alanı — hedefin sınırı görünmeli
+     .qmsg--*     sohbet balonu — kimin konuştuğunu zemin söyler
+     .choice      şık — seçilecek
+     .palettebtn  palet düğmesi — seçilecek
+     .levelbtn    seviye düğmesi — seçilecek
+     .play        video çerçevesi — iframe engellenirse alan çökmesin
+*/
+
+/* ═══════════════════════════════════════════════════════ defter şeridi
+
+   `C.Span(n, …)` artık genişlik taşımaz; defterde her satır tam
+   genişliktedir. Şerit yalnız bir kap: içindeki satırlar deftere akar. */
+
+.lband{ display:flex; flex-direction:column; }
+
+/* Şerit içindeki yığın kendi boşluğunu vermez: satır aralığını satırın
+   kendi padding'i kurar. İkisi birden verilince ritim iki katına çıkıyor
+   ve sayfa kopuk görünüyordu. */
+.lband > .stack,
+.lband > .stack-sm{ gap:0; }
+
+/* Kıl çizgi HER satırın üstündedir; yalnız defterin ilk satırında yoktur
+   — hero'nun alt çizgisi zaten oradadır ve iki çizgi üst üste gelmez.
+   İlk satır iki kat derinde olabilir (defter → şerit → yığın) ve her
+   ekran `Grid` kullanmaz; dört kök de yazılır. */
+.ledger > .lband:first-child > .lrow:first-child,
+.ledger > .lband:first-child > .stack:first-child > .lrow:first-child,
+.ledger > .lrow:first-child,
+.content > .stack > .lrow:first-child,
+.content > .lrow:first-child{ border-top:none; padding-top:30px; }
+
+/* Hap şeridi içeriği kadar geniştir. Dikey bir esnek kapta `inline-flex`
+   bloklaşır ve şerit sayfayı baştan sona kaplar; yedi sekmelik bir hap
+   şeridi 1100 piksele yayıldığında hap olmaktan çıkıp araç çubuğu olur. */
+.content .subtabs{ align-self:flex-start; }
+
+/* Ölçüm dizisi doğrudan deftere konduğunda kendi satırı olur: üstünde
+   kıl çizgi, altında ve üstünde satır nefesi. */
+.ledger > .lband > [class*="cols-"],
+.ledger > [class*="cols-"]{ padding-block:26px; border-top:1px solid var(--border); }
+.ledger > .lband:first-child > [class*="cols-"]:first-child{ border-top:none; }
+
+/* Ölçüm kutusu da kutu olmaktan çıkar: dört beyaz dikdörtgen yerine dört
+   sütun ve aralarında kıl çizgi. Kâğıtta bir tablo böyle ayrılır. */
+.ledger .stat,
+.content > .stack .stat{
+  background:transparent; border:none; border-radius:0; box-shadow:none; padding:0;
+}
+[class*="cols-"] > .stat{ padding-left:18px; border-left:1px solid var(--border); }
+[class*="cols-"] > .stat:first-child{ padding-left:0; border-left:none; }
+
+@media (max-width:700px){
+  [class*="cols-"] > .stat{
+    padding-left:0; border-left:none;
+    padding-top:14px; border-top:1px solid var(--border);
+  }
+  [class*="cols-"] > .stat:first-child{ padding-top:0; border-top:none; }
+}
+
+
+.tag-k{ color:var(--c-k); }
+
+.tag-i{ color:var(--c-i); }
+
+.tag-y{ color:var(--c-y); }
+
+.tag-s{ color:var(--c-s); }
+
+.tag-d{ color:var(--c-d); }
+
+.tagdot{ width:8px; height:8px; border-radius:3px; flex:none; display:inline-block; }
+
+tbody tr:hover{ background:var(--surface-2); }
+
+/* ---------- blok karti (Bugun) ---------- */
+/* Günün blokları bir LİSTEDİR, kart destesi değil. Kutu gidince durum
+   bilgisi kenarlıkta değil solundaki ince şeritte durur; renk tek başına
+   anlam taşımadığı için metin de yerinde kalır. */
+.block{
+  background:transparent;
+  border:none;
+  border-top:1px solid var(--border);
+  border-left:3px solid transparent;
+  border-radius:0;
+  box-shadow:none;
+  padding:14px 0 14px 13px;
+  display:flex; flex-direction:column; gap:9px;
+}
+.stack > .block:first-child,
+.stack-sm > .block:first-child{ border-top:none; }
+
+.block.is-done{ border-left-color:var(--primary); background:transparent; }
+
+.block.is-partial{ border-left-color:var(--accent); }
+
+.block.is-skipped{ opacity:.7; }
+
+.block.is-running{ border-left-color:var(--primary); box-shadow:none;
+  background:color-mix(in oklab, var(--primary) 6%, transparent); }
+
+.block__slot{ font-size:var(--fs-xs); font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); }
+
+.block__timer{
+  font-family:var(--font-display); font-variant-numeric:tabular-nums;
+  font-size:var(--fs-lg); font-weight:800;
+}
+
+.flashcard__side{ font-size:var(--fs-xs); font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-3); }
+
+.flashcard__hint{ font-size:var(--fs-sm); color:var(--text-3); }
+
+.gauge__safe{ position:absolute; inset-block:0; border-right:2px dashed var(--primary); }
+
+.gauge__mark{
+  position:absolute; top:-5px; bottom:-5px; width:3px; border-radius:2px;
+  background:var(--text);
+}
+
+.gauge__mark.is-low{ background:var(--danger); }
+
+.gauge__scale{ display:flex; justify-content:space-between; font-size:var(--fs-xs); color:var(--text-3); margin-top:4px; }
+
+/* ---------- haftalik takvim izgarasi ---------- */
+.weekgrid{
+  display:grid;
+  grid-template-columns:repeat(7, minmax(0,1fr));
+  gap:8px;
+}
+
+@media (max-width:480px){ .weekgrid{ grid-template-columns:1fr; } }
+
+/* Haftanın günü SEÇİLEBİLİR: dokununca o günün defteri açılır. Kutu
+   kalır ama gölgesiz — yan yana yedi gölge bir tepsi görüntüsü verir. */
+.daycol{
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface); box-shadow:none; padding:10px;
+  display:flex; flex-direction:column; gap:6px;
+  min-height:120px;
+}
+
+.daycol.is-today{ border-color:var(--primary); box-shadow:0 0 0 2px var(--primary-soft); }
+
+.daycol.is-past{ background:var(--surface-2); }
+
+.daycol__head{ display:flex; justify-content:space-between; align-items:baseline; }
+
+.daycol__name{ font-size:var(--fs-xs); font-weight:700; color:var(--text-2); }
+
+.daycol__date{ font-size:var(--fs-xs); color:var(--text-3); font-variant-numeric:tabular-nums; }
+
+.daycol__block{
+  font-size:var(--fs-xs); line-height:1.3;
+  padding:5px 6px; border-radius:var(--r-sm);
+  background:var(--surface-2); border-left:2px solid var(--border-strong);
+}
+
+.daycol__block.is-done{ border-left-color:var(--primary); color:var(--text-2); }
+
+.daycol__block.is-skipped{ border-left-color:var(--danger); opacity:.65; text-decoration:line-through; }
+
+/* ---------- konu satiri (Dersler) ---------- */
+.topicrow{
+  display:grid;
+  grid-template-columns:26px minmax(0,1fr) auto;
+  gap:10px; align-items:center;
+  padding:9px 8px; border-radius:var(--r-sm);
+  border-bottom:1px solid var(--border);
+}
+
+.topicrow:hover{ background:var(--surface-2); }
+
+.topicrow__order{
+  width:24px; height:24px; border-radius:var(--r-sm); flex:none;
+  display:grid; place-items:center;
+  background:var(--surface-3); color:var(--text-2);
+  font-size:var(--fs-xs); font-weight:700; font-variant-numeric:tabular-nums;
+}
+
+.topicrow__name{ font-weight:600; }
+
+.topicrow__meta{ font-size:var(--fs-xs); color:var(--text-3); }
+
+.topicrow.is-closed .topicrow__order{ background:var(--primary); color:var(--primary-ink); }
+
+.topicrow.is-active .topicrow__order{ background:var(--accent); color:#fff; }
+
+.statedot{ width:9px; height:9px; border-radius:50%; flex:none; display:inline-block; }
+
+.state-not_started{ background:var(--surface-3); }
+
+.state-learning{ background:var(--info); }
+
+.state-practicing{ background:var(--accent); }
+
+.state-provisional{ background:color-mix(in srgb, var(--primary) 55%, var(--surface)); }
+
+.state-closed{ background:var(--primary); }
+
+.state-reopened{ background:var(--danger); }
+
+/* konu gruplari ve frekans etiketi */
+.topicgroup{ margin-bottom:6px; }
+
+.topicgroup__head{
+  display:flex; justify-content:space-between; align-items:baseline;
+  font-size:var(--fs-xs); font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--text-3); padding:10px 8px 4px;
+}
+
+.freq{ font-weight:700; }
+
+.freq--high{ color:var(--primary); }
+
+.freq--mid{ color:var(--text-3); }
+
+.freq--low{ color:var(--text-3); opacity:.7; }
+
+/* ---------- zaman cizgisi (plan) ---------- */
+.timeline{ display:flex; flex-direction:column; }
+
+.tlmonth{ margin-bottom:18px; }
+
+.tlmonth__head{
+  display:flex; align-items:baseline; gap:10px;
+  padding-bottom:6px; margin-bottom:8px;
+  border-bottom:1px solid var(--border);
+}
+
+.tlmonth__head h2{ font-size:var(--fs-md); }
+
+.tlweek{
+  display:grid; grid-template-columns:76px minmax(0,1fr) 132px;
+  gap:14px; align-items:start;
+  padding:11px 8px; border-radius:var(--r-sm);
+}
+
+.tlweek:hover{ background:var(--surface-2); }
+
+.tlweek.is-current{ background:var(--primary-soft); }
+
+.tlweek.is-past{ opacity:.72; }
+
+.tlweek__no{ font-family:var(--font-display); font-weight:800; font-size:var(--fs-md); }
+
+.tlweek__dates{ font-size:var(--fs-xs); color:var(--text-3); font-variant-numeric:tabular-nums; }
+
+/* ---------- tercih listesi ---------- */
+.pref{
+  display:grid; grid-template-columns:34px minmax(0,1fr) auto; gap:10px; align-items:center;
+  padding:7px 8px; border-radius:var(--r-sm); border-bottom:1px solid var(--border);
+}
+
+.pref__no{
+  width:28px; height:24px; border-radius:6px; display:grid; place-items:center;
+  font-size:var(--fs-xs); font-weight:700; font-variant-numeric:tabular-nums;
+}
+
+.pref--aggressive .pref__no{ background:var(--accent-soft); color:var(--accent); }
+
+.pref--realistic .pref__no{ background:var(--primary-soft); color:var(--primary); }
+
+.pref--safe .pref__no{ background:var(--info-soft); color:var(--info); }
+
+.chat__empty{
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  padding:34px 16px; text-align:center; color:var(--text-3); font-size:var(--fs-sm);
+}
+
+.chat__empty svg{ width:24px; height:24px; stroke:var(--text-3); fill:none; stroke-width:1.5; }
+
+.msg--coach{ align-self:flex-start; }
+
+.msg--coach .msg__body{ border-bottom-left-radius:5px; }
+
+.msg__warn{
+  margin-top:6px; font-size:var(--fs-xs); color:var(--accent);
+  display:flex; gap:5px; align-items:flex-start;
+}
+
+.msg__warn svg{ width:13px; height:13px; flex:none; margin-top:2px; stroke:currentColor; fill:none; stroke-width:2; }
+
+.composer{ display:flex; gap:8px; align-items:flex-end; }
+
+.composer__input{ flex:1; min-height:52px; }
+
+.coachnote{ font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:var(--fs-sm); line-height:1.5; }
+
+/* ---------- odak modu ---------- */
+.focusmode{
+  position:fixed; inset:0; z-index:var(--z-toast);
+  background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:26px; padding:24px; text-align:center;
+}
+
+.focusmode__slot{ font-size:var(--fs-xs); font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-3); }
+
+.focusmode__topic{ font-family:var(--font-display); font-size:clamp(20px, 4vw, 30px); font-weight:700; max-width:24ch; }
+
+.focusmode__clock{
+  font-family:var(--font-display); font-weight:800;
+  font-size:clamp(64px, 17vw, 132px); line-height:1;
+  font-variant-numeric:tabular-nums; letter-spacing:-0.02em;
+}
+
+.focusmode__target{ font-size:var(--fs-md); color:var(--text-2); }
+
+.focusmode__ring{ width:min(340px, 78vw); }
+
+.focusmode__actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+
+.focusmode__esc{ position:absolute; top:18px; right:18px; }
+
+.ladder__row{
+  display:grid; grid-template-columns:120px minmax(0,1fr); gap:12px;
+  padding:8px 0; border-bottom:1px solid var(--border); font-size:var(--fs-sm);
+}
+
+.ladder__row:last-child{ border-bottom:none; }
+
+.ladder__level{ font-weight:700; }
+
+/* ---------- öğrenme: oynatıcı ve not editörü ---------- */
+.notedot{
+  width:30px; height:30px; flex:none; border-radius:9px;
+  display:grid; place-items:center;
+  background:var(--surface-3); color:var(--text-2);
+}
+
+.notedot svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.9; }
+
+.notedot.is-done{ background:var(--primary-soft); color:var(--primary); }
+
+/* 16:9 oran; iframe engellenirse alan cokmesin diye arka plan verilir. */
+.player{
+  position:relative; width:100%; aspect-ratio:16/9;
+  border-radius:var(--r); overflow:hidden;
+  background:var(--surface-3); border:1px solid var(--border);
+}
+
+.player__frame{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+
+.noteform{
+  display:grid; gap:10px;
+  grid-template-columns:110px 130px minmax(0,1fr) auto;
+  align-items:end;
+}
+
+@media (max-width:820px){ .noteform{ grid-template-columns:1fr 1fr; } .noteform > :nth-child(3){ grid-column:1 / -1; } }
+
+.seglist{ display:flex; flex-direction:column; }
+
+.seg-row{
+  display:flex; align-items:flex-start; gap:12px;
+  padding:10px 4px; border-bottom:1px solid var(--border);
+}
+
+.seg-row:last-child{ border-bottom:none; }
+
+.seg-row__ts{
+  flex:none; min-width:52px; padding:3px 7px; border-radius:var(--r-sm);
+  background:var(--surface-2); color:var(--text-2);
+  font-size:var(--fs-xs); font-weight:700; text-decoration:none;
+}
+
+.seg-row__ts:hover{ background:var(--primary-soft); color:var(--primary); }
+
+/* ---------- sınama ---------- */
+/* Sınama kartı OKUNACAK bir sorudur, seçilecek bir nesne değil: kutu
+   yerine kâğıdın üstünde duran bir alan. Üstünde ve altında kıl çizgi,
+   arasında nefes. */
+.quizcard{
+  border:none; border-block:1px solid var(--border); border-radius:0;
+  background:transparent; padding:38px 0; min-height:210px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:14px; text-align:center;
+}
+
+.quizcard__src{ font-size:var(--fs-xs); font-weight:700; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--text-3); }
+
+.quizcard__prompt{ font-family:var(--font-display); font-size:var(--fs-lg);
+  font-weight:700; line-height:1.4; max-width:46ch; }
+
+.quizcard__hint{ font-size:var(--fs-sm); color:var(--text-3); }
+
+.quizcard__answer{
+  width:100%; max-width:52ch; padding:14px 16px; border-radius:var(--r);
+  background:var(--primary-soft); text-align:left;
+  animation:content-in var(--dur) var(--ease);
+}
+
+.quizcard__answer p{ font-size:var(--fs-base); line-height:1.55; margin-top:4px; }
+
+/* ---------- risk listesi ---------- */
+/* Rozet konu adının ALTINA iner. Üç sütunlu düzende "Yüksek risk" rozeti
+   yerin çoğunu alıyor, dar kolonda konu adı dört harfe kırpılıyordu
+   ("Paragrafta konu ve ana düşünce" → "Para…"). */
+.riskrow{ display:grid; grid-template-columns:44px minmax(0,1fr);
+  grid-template-areas:'score text' 'score badge'; gap:3px 10px;
+  align-items:center; padding:9px 6px; border-bottom:1px solid var(--border); }
+
+.riskrow__score{ grid-area:score; }
+
+.riskrow__text{ grid-area:text; min-width:0; }
+
+.riskrow .badge{ grid-area:badge; justify-self:start; }
+
+.riskrow:last-child{ border-bottom:none; }
+
+.riskrow:hover{ background:var(--surface-2); }
+
+.riskrow__score{ width:40px; height:34px; border-radius:var(--r-sm); display:grid; place-items:center;
+  font-family:var(--font-display); font-weight:800; font-size:var(--fs-sm);
+  font-variant-numeric:tabular-nums; background:var(--surface-3); color:var(--text-2); }
+
+.riskrow__score.is-high{ background:var(--danger-soft); color:var(--danger); }
+
+.riskrow__score.is-mid{ background:var(--accent-soft); color:var(--accent); }
+
+.riskrow__score.is-low{ background:var(--primary-soft); color:var(--primary); }
+
+/* ---------- tahmini sıra ---------- */
+.estimate{ display:flex; flex-direction:column; gap:4px; align-items:center; text-align:center;
+  padding:14px 10px; }
+
+.estimate__rank{ font-family:var(--font-display); font-weight:800;
+  font-size:var(--fs-display);   /* --fs-3xl hiç tanımlı değildi */
+  font-variant-numeric:tabular-nums; line-height:1.05; }
+
+.estimate__band{ font-size:var(--fs-sm); color:var(--text-2); font-variant-numeric:tabular-nums; }
+
+.estimate__scale{ width:100%; margin-top:10px; }
+
+/* ---------- günün akışı ---------- */
+.flowstep{ display:grid; grid-template-columns:28px minmax(0,1fr) auto; gap:11px;
+  align-items:center; padding:10px 6px; border-bottom:1px solid var(--border); }
+
+.flowstep:last-child{ border-bottom:none; }
+
+.flowstep__dot{ width:26px; height:26px; border-radius:50%; display:grid; place-items:center;
+  background:var(--surface-3); color:var(--text-3); }
+
+.flowstep__dot svg{ width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; }
+
+.flowstep.is-done .flowstep__dot{ background:var(--primary); color:var(--primary-ink); }
+
+.flowstep.is-done .flowstep__title{ color:var(--text-3); }
+
+.flowstep__title{ font-weight:600; font-size:var(--fs-sm); }
+
+.flowstep__why{ font-size:var(--fs-xs); color:var(--text-3); }
+
+/* ---------- enerji ve ödül ---------- */
+.energy{ display:flex; gap:6px; }
+
+.energy button{ flex:1; border:1px solid var(--border-strong); background:var(--surface);
+  border-radius:var(--r-sm); padding:8px 4px; display:flex; flex-direction:column;
+  align-items:center; gap:2px; }
+
+.energy button b{ font-family:var(--font-display); font-size:var(--fs-md); }
+
+.energy button span{ font-size:var(--fs-xs); color:var(--text-3); }
+
+.energy button.is-on{ background:var(--primary-soft); border-color:var(--primary); color:var(--primary); }
+
+.energy button.is-on span{ color:var(--primary); }
+
+.reward{ display:flex; flex-wrap:wrap; gap:6px; }
+
+.reward__item{ display:inline-flex; align-items:center; gap:5px; padding:4px 10px;
+  border-radius:20px; background:var(--primary-soft); color:var(--primary);
+  font-size:var(--fs-xs); font-weight:700; }
+
+.reward__item svg{ width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2.2; }
+
+.reward__item.is-off{ background:var(--surface-3); color:var(--text-3); }
+
+/* ---------- palet seçici ---------- */
+.palettes{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:8px; }
+
+.palettebtn{
+  display:flex; flex-direction:column; gap:3px; align-items:flex-start;
+  padding:10px 12px; border-radius:var(--r-sm);
+  border:1px solid var(--border-strong); background:var(--surface);
+  text-align:left;
+}
+
+.palettebtn:hover{ background:var(--surface-2); }
+
+.palettebtn.is-on{ border-color:var(--primary); background:var(--primary-soft); }
+
+.palettebtn b{ font-size:var(--fs-sm); }
+
+.palettebtn__dots{ display:flex; gap:4px; margin-bottom:3px; }
+
+.palettebtn__dots span{ width:16px; height:16px; border-radius:5px; border:1px solid var(--border); }
+
+.palettes__label{ display:block; margin-top:var(--sp-4); margin-bottom:var(--sp-2); }
+
+/* ---------- otomasyon önerileri ---------- */
+.autolist{ display:flex; flex-direction:column; }
+
+.autorow{
+  display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:11px;
+  align-items:center; padding:10px 4px; border-bottom:1px solid var(--border);
+}
+
+.autorow:last-child{ border-bottom:none; }
+
+.autorow__icon{
+  width:28px; height:28px; border-radius:9px; display:grid; place-items:center;
+  background:var(--primary-soft); color:var(--primary);
+}
+
+.autorow__icon svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.9; }
+
+/* ---------- kurulum sihirbazı ---------- */
+.wizsteps{ display:flex; gap:6px; }
+
+.wizsteps .wizstep{
+  height:4px; flex:1; border-radius:3px; background:var(--surface-3);
+  transition:background var(--dur) var(--ease);
+}
+
+.wizsteps .wizstep.is-done{ background:color-mix(in srgb, var(--primary) 45%, var(--surface-3)); }
+
+.wizsteps .wizstep.is-on{ background:var(--primary); }
+
+.levelpick{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:8px; }
+
+.levelbtn{
+  display:flex; flex-direction:column; gap:3px; align-items:flex-start; text-align:left;
+  padding:12px 14px; border-radius:var(--r-sm);
+  border:1px solid var(--border-strong); background:var(--surface);
+}
+
+.levelbtn:hover{ background:var(--surface-2); }
+
+.levelbtn.is-on{ border-color:var(--primary); background:var(--primary-soft); }
+
+.levelbtn b{ font-size:var(--fs-base); }
+
+/* ---------- süreli deneme oturumu ---------- */
+.runclock{
+  font-family:var(--font-display); font-weight:800;
+  font-size:var(--fs-hero); line-height:1.05;   /* --fs-2xl hiç tanımlı değildi */
+  font-variant-numeric:tabular-nums; letter-spacing:-0.02em;
+}
+
+.runclock--sm{ font-size:var(--fs-xl); color:var(--text-2); }
+
+.runclock.is-low{ color:var(--danger); }
+
+.runtest{
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  width:100%; text-align:left; padding:9px 11px; border-radius:var(--r-sm);
+  border:1px solid var(--border); background:var(--surface);
+}
+
+.runtest:hover{ background:var(--surface-2); }
+
+.runtest.is-on{ border-color:var(--primary); background:var(--primary-soft); }
+
+.runtest.is-done{ opacity:.65; }
+
+/* ---------- çoktan seçmeli şıklar ---------- */
+.choices{ display:grid; gap:8px; }
+
+.choice{
+  display:grid; grid-template-columns:30px minmax(0,1fr); gap:11px; align-items:center;
+  padding:12px 14px; border-radius:var(--r-sm);
+  border:1px solid var(--border-strong); background:var(--surface);
+  text-align:left; font-size:var(--fs-base); line-height:1.45;
+}
+
+.choice:hover:not(:disabled){ background:var(--surface-2); border-color:var(--primary); }
+
+.choice__key{
+  width:26px; height:26px; border-radius:50%; display:grid; place-items:center;
+  background:var(--surface-3); color:var(--text-2);
+  font-size:var(--fs-xs); font-weight:700;
+}
+
+.choice__text{ flex:1; min-width:0; }
+
+.choice.is-correct{ border-color:var(--primary); background:var(--primary-soft); }
+
+.choice.is-correct .choice__key{ background:var(--primary); color:var(--primary-ink); }
+
+.choice.is-wrong{ border-color:var(--danger); background:var(--danger-soft); }
+
+.choice.is-wrong .choice__key{ background:var(--danger); color:#fff; }
+
+.choice.is-off{ opacity:.5; }
+
+.choice:disabled{ cursor:default; }
+
+.agentav--tyt    { background:var(--agent-tyt);     color:var(--agent-ink); }
+
+.agentav--ayt    { background:var(--agent-ayt);     color:var(--agent-ink); }
+
+.agentav--rehber { background:var(--agent-rehber);  color:var(--agent-ink); }
+
+.agentav--analist{ background:var(--agent-analist); color:var(--agent-ink); }
+
+.agentav--koc    { background:var(--agent-koc);     color:var(--agent-ink); }
+
+/* Sesli toplanti: KONUSAN kim, bakinca belli olsun. Dalga yalnizca o
+   konusma okunurken gorunur ve ses bitince kaybolur — dikkat cekmek icin
+   degil, sirayi gostermek icin. */
+.meetturn__wave{ display:none; align-items:flex-end; gap:2px; height:12px; }
+
+.meetturn.is-speaking{ border-color:var(--primary); background:var(--primary-soft); }
+
+.meetturn.is-speaking .meetturn__wave{ display:flex; }
+
+.meetturn__wave i{
+  width:3px; height:4px; border-radius:2px;
+  background:var(--primary);
+  animation:meetwave 1s var(--ease) infinite;
+}
+
+.meetturn__wave i:nth-child(2){ animation-delay:.16s; }
+
+.meetturn__wave i:nth-child(3){ animation-delay:.32s; }
+
+@keyframes meetwave{
+  0%,100%{ height:4px; opacity:.55; }
+  50%    { height:12px; opacity:1; }
+}
+
+.agentref--tyt    { color:var(--agent-tyt); }
+
+.agentref--ayt    { color:var(--agent-ayt); }
+
+.agentref--rehber { color:var(--agent-rehber); }
+
+.agentref--analist{ color:var(--agent-analist); }
+
+.agentref--koc    { color:var(--agent-koc); }
+
+/* ==================== ofis: kat planı ====================
+   Ofisi "panel" olmaktan çıkaran şey mekân hissidir: masalar bir zemin
+   üzerinde durur, herkesin ışığı yanar, kimin meşgul olduğu bakınca
+   anlaşılır. Renk yalnız token'lardan gelir; her ajanın kimlik rengi
+   masasının üst şeridinde tekrarlanır. */
+
+.floor{
+  position:relative;
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:var(--sp-4);
+  background:
+    linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+  box-shadow:inset 0 1px 0 var(--surface), var(--shadow);
+  overflow:hidden;
+}
+
+/* Zeminin dokusu: ince ızgara, içeriğin okunmasını engellemeyecek kadar soluk. */
+.floor::before{
+  content:'';
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(var(--c-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-grid) 1px, transparent 1px);
+  background-size:34px 34px;
+  opacity:.34;
+  pointer-events:none;
+}
+
+.floor > *{ position:relative; }
+
+.floor__head{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:var(--sp-3); flex-wrap:wrap; margin-bottom:var(--sp-4);
+}
+
+.floor__title{
+  font-family:var(--font-display); font-size:var(--fs-md); font-weight:700;
+  display:flex; align-items:center; gap:8px;
+}
+
+.floor__title svg{
+  width:18px; height:18px; flex:none;
+  stroke:currentColor; fill:none; stroke-width:1.8; color:var(--text-3);
+}
+
+.floor__meta{ font-size:var(--fs-xs); color:var(--text-3); }
+
+/* Masalar ikişerli dizilir; ekran gerçekten genişse dördü bir sırada.
+   auto-fit denendi ve 3+1 gibi dengesiz sıralar ürettiği için bırakıldı:
+   uzman sayısı dört, sıra ya ikili ya dörtlü olmalı. */
+.floor__room{
+  display:grid; gap:var(--sp-3);
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width:1500px){
+  .floor__room{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
+}
+
+/* Patron masası öndedir: tüm sırayı kaplar, diğerleri karşısına dizilir. */
+.floor__lead{ grid-column:1 / -1; }
+
+.seat{
+  position:relative;
+  display:flex; align-items:center; gap:10px;
+  padding:11px 12px 12px;
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  text-align:left; width:100%;
+  cursor:pointer;
+  transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+             border-color var(--dur) var(--ease);
+}
+
+/* Masanın üst kenarı ajanın kimlik rengidir — kim nerede oturuyor, bakınca belli. */
+.seat::before{
+  content:'';
+  position:absolute; left:12px; right:12px; top:0; height:3px;
+  border-radius:0 0 3px 3px;
+  background:var(--seat-color, var(--border-strong));
+}
+
+.seat:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-lg);
+  border-color:var(--border-strong);
+}
+
+.seat:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+.seat.is-open{ border-color:var(--seat-color, var(--primary)); }
+
+.seat--patron { --seat-color:var(--agent-patron); }
+
+.seat--tyt    { --seat-color:var(--agent-tyt); }
+
+.seat--ayt    { --seat-color:var(--agent-ayt); }
+
+.seat--rehber { --seat-color:var(--agent-rehber); }
+
+.seat--analist{ --seat-color:var(--agent-analist); }
+
+.seat--koc    { --seat-color:var(--agent-koc); }
+
+.seat__body{ min-width:0; flex:1; }
+
+.seat__name{
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--font-display); font-size:var(--fs-sm); font-weight:700;
+  line-height:1.3;
+}
+
+.seat__role{
+  display:block; font-size:var(--fs-xs); color:var(--text-3);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+.seat__state{
+  display:flex; align-items:center; gap:6px;
+  margin-top:6px; font-size:var(--fs-xs); color:var(--text-3);
+}
+
+/* Durum metni masayı büyütmesin: taşarsa kırpılır, masalar aynı boyda kalır. */
+.seat__state span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* Patron masası öndedir: daha geniş, avatarı büyük, günün işini de taşır. */
+.floor__lead .seat{ padding:14px 15px; gap:13px; }
+
+.floor__lead .agentav{ width:42px; height:42px; font-size:var(--fs-md); }
+
+.floor__lead .seat__name{ font-size:var(--fs-md); }
+
+.seat__task{
+  display:block; margin-top:7px; padding-top:7px;
+  border-top:1px dashed var(--border);
+  font-size:var(--fs-xs); color:var(--text-2);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+.seat__task b{ color:var(--text); font-weight:600; }
+
+/* Durum ışığı: boşta sabit, çalışırken nabız atar. */
+.seatlight{
+  width:8px; height:8px; border-radius:50%; flex:none;
+  background:var(--text-3);
+  box-shadow:0 0 0 3px transparent;
+}
+
+.seatlight--ok{ background:var(--agent-rehber); box-shadow:0 0 0 3px var(--surface-2); }
+
+.seatlight--warn{ background:var(--accent); }
+
+.seatlight--danger{ background:var(--danger); }
+
+.seatlight--busy{ background:var(--primary); animation:seatpulse 1.4s var(--ease) infinite; }
+
+@keyframes seatpulse{
+  0%,100%{ box-shadow:0 0 0 0 var(--primary-soft); }
+  50%    { box-shadow:0 0 0 5px transparent; }
+}
+
+/* Masadaki iş yükü: kaç not bekliyor. Sayı değil ağırlık gösterir. */
+/* İş yükü şeridi Patron'un geniş masasında satır boyunca uzamasın. */
+.seat__load{ display:flex; gap:3px; margin-top:7px; max-width:190px; }
+
+.seat__load i{
+  height:3px; flex:1; border-radius:2px; background:var(--surface-3);
+}
+
+.seat__load i.is-on{ background:var(--seat-color, var(--primary)); }
+
+.seat__count{
+  position:absolute; top:9px; right:10px;
+  min-width:17px; height:17px; padding:0 4px;
+  border-radius:9px;
+  background:var(--danger); color:#fff;
+  font-size:10px; font-weight:700; line-height:17px; text-align:center;
+}
+
+/* ==================== ofis: 3B oda ====================
+   Kat planı ofisi bir mekân yaptı; bu görünüm onu bir ODA yapar: masalar
+   bir zeminin üstünde durur, Patron dipte karşıda oturur, kamera dönebilir.
+
+   Kütüphane yok. Uygulamanın hiçbir bağımlılığı yok ve tek dosyalık bir
+   HTML olarak yayımlanıyor; beş masalık bir oda için WebGL hem ağır hem
+   gereksizdir. Sahne tek bir dönüşümle eğilir, her masa kendi kutusunu üç
+   yüzeyle kurar.
+
+   İki kural bu bölümü ayakta tutar:
+   1) Yazı hiçbir açıda eğilmez. Ad kartları sahnenin TERS dönüşümünü alır
+      (rotateZ(-turn) rotateX(-tilt)); oda çevrilirken etiketler kameraya
+      dönük kalır ve düz okunur.
+   2) Renk yalnız token'lardan gelir; her masanın kimlik rengi --seat-color
+      üzerinden, kat planındakiyle aynı yerden okunur. */
+
+.room3d{
+  position:relative;
+  /* Sol duvarin genisligi odanin DERINLIGI kadardir; yuzdeyle yazilamaz
+     (yuzde genisligi olcer), bu yuzden yukseklik tek degiskende durur. */
+  --room-h:430px;
+  height:var(--room-h);
+  perspective:1150px;
+  perspective-origin:50% 38%;
+  /* Yatay sürükleme odayı çevirir, dikey hareket sayfayı kaydırmaya kalır. */
+  touch-action:pan-y;
+  cursor:grab;
+}
+
+.room3d.is-dragging{ cursor:grabbing; }
+
+.room3d__scene{
+  position:absolute; inset:0;
+  transform-style:preserve-3d;
+  transform:translateY(2%) scale(var(--zoom, .84)) rotateX(var(--tilt, 56deg)) rotateZ(var(--turn, -26deg));
+  transition:transform var(--dur-lg) var(--ease);
+}
+
+.room3d.is-dragging .room3d__scene{ transition:none; }
+
+/* Dekor İMLECE GÖRÜNMEZDİR. Zorunlu: preserve-3d bağlamında kardeşler tek
+   bir derinlik değerine göre sıralanır ve zemin gibi BÜYÜK bir düzlem,
+   kendisiyle aynı düzlemde duran masa düğmelerinin bir kısmını isabet
+   testinde örtüyor — Patron'un ve bir uzmanın masası hiç tıklanamıyordu.
+   Dekor zaten aria-hidden; imleci de hiç görmemeli. */
+.room3d__floor, .room3d__rug, .room3d__wall, .room3d__board{ pointer-events:none; }
+
+/* Zemin: kat planındaki ızgaranın aynısı, artık gerçekten yerde. */
+.room3d__floor{
+  position:absolute; left:2%; top:2%; width:96%; height:96%;
+  border-radius:12px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  box-shadow:0 0 0 1px var(--surface), 0 18px 40px rgba(0,0,0,.16);
+}
+
+.room3d__floor::before{
+  content:'';
+  position:absolute; inset:0;
+  border-radius:12px;
+  background-image:
+    linear-gradient(var(--c-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-grid) 1px, transparent 1px);
+  background-size:38px 38px;
+  opacity:.5;
+}
+
+/* Toplantı halısı: odanın ortasını işaretler, masaların hizasını okutur. */
+.room3d__rug{
+  position:absolute; left:22%; top:38%; width:56%; height:36%;
+  border-radius:999px;
+  background:var(--primary-soft);
+  opacity:.5;
+  transform:translateZ(.4px);
+}
+
+/* Duvarlar: zeminin kenarından yukarı kalkan iki düzlem. */
+.room3d__wall{
+  position:absolute;
+  background:var(--surface-3);
+  border:1px solid var(--border);
+}
+
+.room3d__wall--back{
+  left:2%; top:2%; width:96%; height:120px;
+  transform-origin:50% 0%;
+  transform:rotateX(90deg);
+  border-radius:10px 10px 0 0;
+}
+
+.room3d__wall--left{
+  left:2%; top:2%; width:calc(var(--room-h) * .96); height:120px;
+  transform-origin:0% 0%;
+  transform:rotateZ(90deg) rotateX(90deg);
+  border-radius:10px 10px 0 0;
+  filter:brightness(.94);
+}
+
+/* Duvardaki pano: haftanın tek işi. Duvarın çocuğu olduğu için onunla
+   birlikte dikilir; yazısı duvarın düzleminde durur ve okunur. */
+/* Duvar üst kenarından katlanarak dikildiği için içeriği baş aşağı kalır:
+   pano kendi düzleminde 180° çevrilir ve yazı düz okunur. */
+.room3d__board{
+  position:absolute; left:50%; bottom:26px;
+  transform:translateX(-50%) rotateX(180deg);
+  min-width:200px; max-width:74%;
+  padding:9px 14px;
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  box-shadow:var(--shadow);
+  text-align:center;
+}
+
+.room3d__board-label{
+  display:block; font-size:var(--fs-xs); color:var(--text-3);
+  text-transform:uppercase; letter-spacing:.06em;
+}
+
+.room3d__board b{
+  display:block; margin-top:2px;
+  font-family:var(--font-display); font-size:var(--fs-sm); font-weight:700;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* ---------- masa ---------- */
+
+.desk3d{
+  position:absolute;
+  left:var(--x); top:var(--y);
+  width:126px; height:68px;
+  margin:-34px 0 0 -63px;
+  transform-style:preserve-3d;
+  background:none; border:0; padding:0;
+  cursor:pointer;
+}
+
+.desk3d--lead{ width:158px; margin-left:-79px; }
+
+.desk3d:focus-visible{ outline:none; }
+
+.desk3d:focus-visible .desk3d__top{ outline:2px solid var(--primary); outline-offset:3px; }
+
+/* Zemine düşen gölge: masayı gerçekten yerin üstüne oturtan şey budur. */
+.desk3d__shadow{
+  position:absolute; left:6px; right:6px; top:10px; bottom:-6px;
+  border-radius:999px;
+  background:rgba(0,0,0,.22);
+  filter:blur(7px);
+  transform:translateZ(.6px);
+}
+
+.desk3d__top{
+  position:absolute; inset:0;
+  border-radius:7px;
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-top:3px solid var(--seat-color, var(--border-strong));
+  transform:translateZ(30px);
+  transition:transform var(--dur) var(--ease);
+}
+
+/* İki kâğıt: masanın boş bir dikdörtgen değil, çalışılan bir masa olması. */
+.desk3d__paper{
+  position:absolute; left:12px; top:14px; width:26px; height:18px;
+  border-radius:2px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+}
+
+.desk3d__paper--b{ left:20px; top:26px; width:22px; height:14px; opacity:.8; }
+
+/* Kutunun iki görünen yüzü. */
+.desk3d__front{
+  position:absolute; left:0; right:0; bottom:0; height:30px;
+  transform-origin:50% 100%;
+  transform:rotateX(-90deg);
+  background:var(--surface-3);
+  border:1px solid var(--border);
+  border-radius:0 0 4px 4px;
+}
+
+.desk3d__side{
+  position:absolute; left:0; top:0; width:68px; height:30px;
+  transform-origin:0% 0%;
+  transform:rotateZ(90deg) rotateX(-90deg);
+  background:var(--surface-3);
+  border:1px solid var(--border);
+  filter:brightness(.93);
+}
+
+/* Ekran: masanın arka kenarında hafif geriye yatık durur. */
+.desk3d__screen{
+  position:absolute; left:50%; top:5px; width:52px; height:32px;
+  margin-left:-26px;
+  transform-origin:50% 100%;
+  transform:translateZ(30px) rotateX(-104deg);
+  border-radius:3px;
+  background:var(--seat-color, var(--primary));
+  border:1px solid var(--border-strong);
+  opacity:.85;
+}
+
+.desk3d__screen.is-busy{ animation:deskglow 1.4s var(--ease) infinite; }
+
+@keyframes deskglow{
+  0%,100%{ opacity:.55; }
+  50%    { opacity:1; }
+}
+
+/* Sandalye ve oturan: masanın ARKASINDA, kameraya dönük. Ofisi masalardan
+   ibaret bir kroki olmaktan çıkaran şey burası — masada biri oturuyor.
+
+   Silüet ajanın kimlik rengindedir (kat planındaki avatarla aynı renk,
+   aynı kaynaktan). Renk kimlik taşır, DURUM değil: durum her zaman ad
+   kartındaki ışıkla ve metniyle ayrıca verilir. */
+.desk3d__chair{
+  position:absolute; left:50%; top:-30px; width:36px; height:36px;
+  margin-left:-18px;
+  border-radius:50%;
+  background:var(--surface-3);
+  border:1px solid var(--border);
+  transform:translateZ(1px);
+}
+
+.desk3d__person{
+  position:absolute; left:50%; top:-12px;
+  width:30px; height:44px;
+  border-radius:15px 15px 4px 4px;
+  background:var(--seat-color, var(--text-3));
+  opacity:.92;
+  transform-origin:0% 0%;
+  transform:rotateZ(calc(-1 * var(--turn, -26deg))) rotateX(calc(-1 * var(--tilt, 56deg)))
+            translate(-50%, -100%);
+  transition:transform var(--dur-lg) var(--ease);
+}
+
+.room3d.is-dragging .desk3d__person{ transition:none; }
+
+.desk3d__person i{
+  position:absolute; left:50%; top:-14px;
+  width:19px; height:19px; margin-left:-9px;
+  border-radius:50%;
+  background:var(--seat-color, var(--text-3));
+  box-shadow:0 0 0 2px var(--surface);
+}
+
+/* ---------- ad kartı ----------
+   Sahnenin ters dönüşümünü alır: oda hangi açıda olursa olsun kameraya
+   dönük ve düz okunur kalır. */
+.desk3d__card{
+  position:absolute; left:50%; top:calc(100% + 24px);
+  display:flex; align-items:center; gap:6px;
+  padding:4px 10px 4px 7px;
+  border-radius:999px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  white-space:nowrap;
+  transform-origin:0% 0%;
+  /* Etiket, masanın ön kenarına çakılmış bir tabela gibi DİKİLİR.
+
+     Sıra önemli: translate(-50%,-100%) önce kartın alt-orta noktasını
+     çıpaya oturtur, ters dönüşüm onu kameraya çevirir, translateZ ise
+     masanın üstüne kaldırır. Böylece kartın HİÇBİR noktası masanın
+     düzleminin altına inmez — inseydi masa üstü yazının bir kısmını
+     boyardı ve adlar yarım görünürdü. */
+  transform:translateZ(38px) rotateZ(calc(-1 * var(--turn, -26deg))) rotateX(calc(-1 * var(--tilt, 56deg)))
+            translate(-50%, -100%);
+  transition:transform var(--dur-lg) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.room3d.is-dragging .desk3d__card{ transition:none; }
+
+.desk3d__who{ flex:none; display:flex; }
+
+/* Ad kartı bir rozettir, kart değil: avatar da o ölçüye iner. */
+.desk3d__card .agentav{ width:20px; height:20px; font-size:10px; }
+
+.desk3d__name{
+  font-family:var(--font-display); font-size:var(--fs-xs); font-weight:700;
+  line-height:1.2;
+}
+
+.desk3d__state{
+  font-size:var(--fs-xs); color:var(--text-3);
+  max-width:110px; overflow:hidden; text-overflow:ellipsis;
+}
+
+.desk3d__count{
+  flex:none;
+  min-width:17px; height:17px; padding:0 4px;
+  border-radius:9px;
+  background:var(--danger); color:#fff;
+  font-size:10px; font-weight:700; line-height:17px; text-align:center;
+}
+
+/* Açık masa öne çıkar; üzerine gelince hafifçe kalkar. */
+.desk3d:hover .desk3d__top{ transform:translateZ(36px); }
+
+.desk3d.is-open .desk3d__top{
+  transform:translateZ(38px);
+  border-color:var(--seat-color, var(--primary));
+}
+
+.desk3d.is-open .desk3d__card{ border-color:var(--seat-color, var(--primary)); }
+
+/* 3B görünümde başlıktaki çevirme düğmeleri. */
+.room3d__turn{ display:flex; gap:4px; }
+
+/* Odanın kendi zemin ızgarası varken paneldeki ızgara gürültü yapar. */
+.floor--room::before{ opacity:.12; }
+
+/* ==================== ofis: onay kutusu ====================
+   Ajan sisteme dokunmayı önerir; ne değişeceği ONAYDAN ÖNCE önce/sonra
+   olarak gösterilir. Onaysız hiçbir satır uygulanmaz. */
+
+.props{ display:grid; gap:10px; }
+
+/* Öneri satırı: solunda öneren koçun rengi, üstünde kıl çizgi. */
+.prop{
+  border:none;
+  border-top:1px solid var(--border);
+  border-left:3px solid var(--seat-color, var(--primary));
+  border-radius:0;
+  background:transparent;
+  padding:12px 0 12px 13px;
+}
+.props > .prop:first-child{ border-top:none; }
+
+.prop--patron { --seat-color:var(--agent-patron); }
+
+.prop--tyt    { --seat-color:var(--agent-tyt); }
+
+.prop--ayt    { --seat-color:var(--agent-ayt); }
+
+.prop--rehber { --seat-color:var(--agent-rehber); }
+
+.prop--analist{ --seat-color:var(--agent-analist); }
+
+.prop--koc    { --seat-color:var(--agent-koc); }
+
+.prop__head{ display:flex; align-items:flex-start; gap:9px; }
+
+.prop__who{ min-width:0; flex:1; }
+
+.prop__title{
+  display:block; font-family:var(--font-display);
+  font-size:var(--fs-sm); font-weight:700; line-height:1.3;
+}
+
+.prop__by{ display:block; font-size:var(--fs-xs); color:var(--text-3); margin-top:1px; }
+
+.prop__why{
+  margin-top:8px; font-size:var(--fs-sm); color:var(--text-2); line-height:1.45;
+}
+
+/* Önce → sonra: değişimin tamamı tek bakışta okunur. */
+/* Önce → sonra tablosu: çerçeve değil, satır arası çizgi ayırır. */
+.diff{
+  margin-top:10px; border:none; border-top:1px solid var(--border);
+  border-radius:0; background:transparent; overflow:hidden;
+}
+
+.diff__row{
+  display:grid; grid-template-columns:minmax(84px, 1fr) 1.2fr 16px 1.2fr;
+  align-items:center; gap:8px;
+  padding:7px 10px; font-size:var(--fs-xs);
+}
+
+.diff__row + .diff__row{ border-top:1px solid var(--border); }
+
+.diff__label{ color:var(--text-3); }
+
+/* Eski değer oka yaslanır: değişim tek satırda "şu → bu" diye okunur. */
+.diff__before{ color:var(--text-3); min-width:0; overflow-wrap:anywhere; text-align:right; }
+
+.diff__arrow{ color:var(--text-3); text-align:center; }
+
+.diff__after{ color:var(--text); font-weight:600; min-width:0; overflow-wrap:anywhere; }
+
+.prop__acts{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+
+/* Uygulanmış öneriler — geri alınabilir olduğu görünsün. */
+.prop--done{ border-left-color:var(--border-strong); background:var(--surface-2); }
+
+.prop--done .prop__title{ color:var(--text-2); }
+
+/* ---------- deneme hacmi: dönem listesi ----------
+   Dar kolonda dört sütunlu tablo taşıyordu; dönem üstte, ölçümler altında. */
+.vollist{ display:block; }
+
+.volrow{ padding:9px 0; border-bottom:1px solid var(--border); }
+
+.volrow:last-child{ border-bottom:none; }
+
+.volrow__head{ display:flex; align-items:center; gap:8px; justify-content:space-between; }
+
+.volrow__period{ font-size:var(--fs-sm); font-weight:600; color:var(--text-2); }
+
+.volrow.is-now .volrow__period{ color:var(--text); font-weight:700; }
+
+.volrow__cells{ display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+
+.volpill{
+  display:inline-flex; align-items:baseline; gap:4px;
+  padding:2px 8px; border-radius:20px;
+  font-size:var(--fs-xs); line-height:1.6;
+  background:var(--surface-2); border:1px solid var(--border); color:var(--text-2);
+}
+
+.volpill b{ color:var(--text-3); font-weight:700; }
+
+.volpill.is-ok{ background:var(--primary-soft); border-color:transparent; color:var(--primary); }
+
+.volpill.is-ok b{ color:var(--primary); }
+
+.volpill--off{ opacity:.65; }
+
+/* ---------- tekrar takvimi ----------
+   Açıklama tek satıra sığmıyordu ve yarıda kesiliyordu. */
+.srslist{ display:grid; gap:9px; }
+
+.srsrow{ display:grid; gap:2px; }
+
+.srsrow + .srsrow{ padding-top:9px; border-top:1px solid var(--border); }
+
+.srsrow__day{
+  font-size:var(--fs-xs); font-weight:700; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--primary);
+}
+
+.srsrow__detail{ font-size:var(--fs-sm); color:var(--text-3); line-height:1.45; }
+
+/* ==================== soru çözüm ====================
+   Ekranın işi çözüm üretmek değil, çözümü KAYDA bağlamak. Düzen bunu
+   söyler: önce soru kutusu, sonra çözüm, en altta "kayda geçir". */
+
+/* Fotoğraf bırakma alanı. Üç yol da aynı kapıya çıkar: tıkla, sürükle,
+   Ctrl+V ile yapıştır — telefonda çeken de bilgisayarda kırpan da girebilsin. */
+.qdrop{
+  position:relative;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px;
+  min-height:132px; padding:var(--sp-4);
+  border:2px dashed var(--border-strong);
+  border-radius:var(--r);
+  background:var(--surface-2);
+  color:var(--text-2);
+  text-align:center;
+  cursor:pointer;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+
+.qdrop:hover, .qdrop.is-over{ border-color:var(--primary); background:var(--primary-soft); }
+
+.qdrop:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+.qdrop.is-full{ padding:var(--sp-2); border-style:solid; background:var(--surface); }
+
+.qdrop__icon svg{ width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:1.6; color:var(--text-3); }
+
+.qdrop__img{
+  max-width:100%; max-height:340px;
+  border-radius:var(--r-sm);
+  display:block;
+}
+
+.qdrop__meta{ font-size:var(--fs-xs); color:var(--text-3); }
+
+/* Çözüm metni: satır sonları korunur, okuma satırı fazla uzamaz. */
+.qsolution{
+  font-size:var(--fs-base); line-height:1.62; color:var(--text);
+  max-width:68ch;
+  white-space:normal;
+}
+
+.qfollow{ margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); }
+
+.qfollow__q{ font-size:var(--fs-sm); color:var(--text-2); margin-bottom:5px; }
+
+.qfollow__a{ padding-left:10px; border-left:2px solid var(--primary); }
+
+.qmeta{ padding-top:var(--sp-3); border-top:1px solid var(--border); }
+
+/* Geçmiş satırı: sonuç noktası + konu + zorluk + tarih. */
+.qrow{
+  display:flex; align-items:center; gap:9px;
+  padding:7px 0;
+  border-bottom:1px solid var(--border);
+  font-size:var(--fs-sm);
+}
+
+.qrow:last-child{ border-bottom:0; }
+
+.qrow__dot{ width:8px; height:8px; border-radius:50%; flex:none; background:var(--text-3); }
+
+.qrow__dot--ok{ background:var(--primary); }
+
+.qrow__dot--warn{ background:var(--accent); }
+
+.qrow__dot--danger{ background:var(--danger); }
+
+.qrow__dot--info{ background:var(--info); }
+
+.qrow__topic{ display:block; line-height:1.25; }
+
+.qrow__text{
+  display:block; font-size:var(--fs-xs); color:var(--text-3);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+.qtopic{ display:flex; align-items:center; gap:10px; padding:5px 0; font-size:var(--fs-sm); }
+
+.qtopic .bar{ flex:1; min-width:60px; }
+
+/* Kaynak satırı: ad + kademe + ölçülen zorluk rozeti. */
+.srcrow{
+  display:flex; align-items:center; gap:9px;
+  padding:7px 0;
+  border-bottom:1px solid var(--border);
+  font-size:var(--fs-sm);
+}
+
+.srcrow:last-child{ border-bottom:0; }
+
+.srcrow__name{ display:block; line-height:1.25; }
+
+.srcrow__meta{
+  display:block; font-size:var(--fs-xs); color:var(--text-3);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* ---------- soru çözüm: konu arama ----------
+   500 satırlık bir <select> içinde konu aramak, konuyu bilmekten zordu.
+   Yazarak ara, altta çıkanlardan seç. */
+.tpick{ position:relative; }
+
+.tpick__on{
+  display:flex; align-items:center; gap:8px;
+  margin-top:8px; padding:7px 10px;
+  border-radius:var(--r-sm);
+  background:var(--primary-soft);
+  font-size:var(--fs-sm);
+}
+
+.tpick__on svg{ width:15px; height:15px; flex:none; stroke:var(--primary); fill:none; stroke-width:2.2; }
+
+.tpick__on b{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.tsug{
+  margin-top:6px;
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.tsug--empty{ padding:9px 11px; font-size:var(--fs-sm); color:var(--text-3); }
+
+.tsug__row{
+  display:flex; align-items:baseline; gap:8px;
+  width:100%; padding:8px 11px;
+  border:0; border-bottom:1px solid var(--border);
+  background:none; text-align:left; cursor:pointer;
+  font-size:var(--fs-sm);
+}
+
+.tsug__row:last-child{ border-bottom:0; }
+
+.tsug__row:hover, .tsug__row:focus-visible{ background:var(--surface-2); }
+
+.tsug__row.is-on{ background:var(--primary-soft); }
+
+.tsug__row b{ flex:none; }
+
+.tsug__row span{ font-size:var(--fs-xs); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ---------- soru çözüm: sohbet ---------- */
+.qthread{ display:flex; flex-direction:column; gap:10px; }
+
+.qmsg{ padding:9px 12px; border-radius:var(--r-sm); }
+
+.qmsg--me{ background:var(--surface-2); border:1px dashed var(--border); }
+
+.qmsg--teacher{ background:var(--surface); border:1px solid var(--border); border-left:2px solid var(--primary); }
+
+.qmsg__who{
+  display:block; margin-bottom:3px;
+  font-size:var(--fs-xs); font-weight:700; color:var(--text-3);
+  text-transform:uppercase; letter-spacing:.05em;
+}
+
+.qmsg__body{ font-size:var(--fs-sm); line-height:1.55; }
+
+/* ---------- soru çözüm: denetim ayrılığı ---------- */
+.qdiff{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+
+.qdiff__col{
+  padding:9px 0 9px 13px;
+  border:none; border-left:1px solid var(--border);
+  border-radius:0; background:transparent;
+}
+.qdiff > .qdiff__col:first-child{ padding-left:0; border-left:none; }
+
+.qdiff__ans{
+  display:block; margin-top:3px;
+  font-family:var(--font-display); font-size:var(--fs-md); font-weight:700;
+}
+
+/* Ses eşleştirme satırı: kim, hangi ses, dinle. */
+.voicerow{ display:flex; align-items:center; gap:8px; }
+
+.voicerow__name{ flex:none; min-width:64px; font-size:var(--fs-sm); font-weight:600; }
+
+.voicerow .select{ flex:1; min-width:0; }
+
+/* Düzen örneği — seçenek düğmesindeki küçük şema.
+
+   Palet düğmesi iki renk noktası gösterir; düzen düğmesi RENK değil
+   YAPI gösterir: çizgiler nerede, kutu var mı, sütun kaç tane. */
+.dsgn{
+  width:26px; height:20px; flex:none; border-radius:3px;
+  border:1px solid var(--border-strong); background:var(--surface);
+  position:relative; overflow:hidden;
+}
+
+.dsgn::before,.dsgn::after{ content:''; position:absolute; background:var(--text-3); }
+
+/* panel — solda kenar çubuğu, sağda kart */
+.dsgn--panel::before{ inset:0 auto 0 0; width:7px; background:var(--surface-3); }
+
+.dsgn--panel::after{ inset:5px 4px auto 11px; height:9px; border-radius:2px;
+  background:var(--border-strong); }
+
+/* odak — ince şerit, tek geniş sütun */
+.dsgn--focus::before{ inset:0 auto 0 0; width:3px; background:var(--surface-3); }
+
+.dsgn--focus::after{ inset:4px 5px auto 7px; height:3px; background:var(--text-3); }
+
+/* kraft — yatay çizgiler, kâğıt */
+.dsgn--paper{ background:#EFE7D8; border-color:#B9A98C; }
+
+.dsgn--paper::before{ inset:5px 4px auto 4px; height:1px; background:#8A7A5C; }
+
+.dsgn--paper::after{ inset:10px 8px auto 4px; height:1px; background:#8A7A5C; }
+
+/* katmanlı — koyu şerit */
+.dsgn--layers::before{ inset:0 auto 0 0; width:8px; background:#171922; }
+
+.dsgn--layers::after{ inset:5px 3px auto 12px; height:9px; border-radius:2px;
+  background:var(--border-strong); }
+
+/* harita — iki sütun */
+.dsgn--map::before{ inset:4px auto 4px 4px; width:7px; border-radius:2px;
+  background:var(--border-strong); }
+
+.dsgn--map::after{ inset:4px 4px 8px auto; width:7px; border-radius:2px;
+  background:var(--border-strong); }

@@ -85,7 +85,8 @@ R.Screens.analytics = (function(){
           K.Stat({ label:'En iyi deneme', value:U.fmtNet(b.best.net), note:b.best.blank+' boş' }),
           K.Stat({ label:'En düşük', value:U.fmtNet(b.worst.net), note:b.worst.blank+' boş' }),
         ])}
-        <div class="mt-12">${K.Notice({ tone:b.dir === 'same' ? 'info' : 'ok', body:b.note })}</div>`,
+        <div class="mt-12">${K.Notice({ tone:b.dir === 'same' ? 'info' : 'ok', body:b.note })}</div>
+        <p class="tiny dim mt-8">${b.kapsam}</p>`,
     });
   }
 
@@ -172,7 +173,7 @@ R.Screens.analytics = (function(){
         K.Card({
           title:'Tahmini sıra zaman içinde', hint:'estimate',
           sub:'Her noktada son 3 denemenin medyanı — tek fotoğraf değil film',
-          badge:raw(UI.certainty('estimate')),
+          badge:raw(UI.provenance('estimate')),
           body:html`
             ${raw(UI.lineChart([{ data:series }], { labels, height:210 }))}
             ${K.Cols(3, [
@@ -346,7 +347,8 @@ R.Screens.analytics = (function(){
           body:dist.ok
             ? html`${raw(UI.barChart(dist.rows.map(r => ({ label:U.fmtShort(r.date).split(' ')[0], value:r.count })),
                 { goodAt:0 }))}
-              <div class="mt-12">${K.Notice({ tone:dist.avg >= 5 ? 'warn' : 'info', body:dist.note })}</div>`
+              <div class="mt-12">${K.Notice({ tone:dist.avg >= 5 ? 'warn' : 'info', body:dist.note })}</div>
+              <p class="tiny dim mt-8">${dist.kapsam}</p>`
             : K.Empty({ icon:'warn', text:dist.why }) }),
       ])),
     ]);
@@ -356,7 +358,10 @@ R.Screens.analytics = (function(){
     speed:speedTab, value:valueTab, habits:habitsTab };
 
   async function render(){
-    const tab = S.ui.analyticsTab || 'compare';
+    /* Kayitli sekme adi artik yoksa ilk sekmeye duser. Eskimis bir deger
+       ('overview') seritte HICBIR sekmeyi secili gostermiyor, govdede ise
+       karsilastirmayi ciziyordu: ekran nerede oldugunu yanlis soyluyordu. */
+    const tab = TABS.some(t => t.id === S.ui.analyticsTab) ? S.ui.analyticsTab : TABS[0].id;
     return String(K.Stack([
       K.Subtabs({ items:TABS, value:tab, act:'analytics-tab', aria:'Analiz bölümleri' }),
       (BODIES[tab] || compareTab)(),
@@ -376,7 +381,7 @@ R.Screens.analytics = (function(){
     id:'analytics',
     title:'Analiz',
     subtitle(){
-      const tab = TABS.find(t => t.id === (S.ui.analyticsTab || 'compare'));
+      const tab = TABS.find(t => t.id === S.ui.analyticsTab) || TABS[0];
       return (tab ? tab.label : 'Analiz') + ' · türetilmiş okumalar';
     },
     actions(){ return ''; },

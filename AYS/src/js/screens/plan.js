@@ -20,7 +20,7 @@ R.Screens.plan = (function(){
 
     return html`
       <div class="${['tlweek', isCurrent && 'is-current', isPast && 'is-past'].filter(Boolean).join(' ')}"
-           data-act="open-week" data-n="${n}">
+           data-act="open-week" data-n="${n}" role="button" tabindex="0">
         <div><div class="tlweek__no">H${n}</div>
           <div class="tlweek__dates">${U.fmtRange(M.weekStart(n), M.weekEnd(n))}</div></div>
         <div class="minw0">
@@ -33,7 +33,7 @@ R.Screens.plan = (function(){
         <div class="tlweek__right right">
           <div class="num small strong">${c.q} soru</div>
           ${comp != null
-            ? html`<div class="mt-5">${K.Bar({ value:comp })}</div>
+            ? html`<div class="mt-5">${K.Bar({ value:comp, auto:true })}</div>
                    <div class="tiny dim">%${comp} tamamlandı</div>`
             : html`<div class="tiny dim">planlandı</div>`}
         </div>
@@ -74,7 +74,7 @@ R.Screens.plan = (function(){
     for(let n = from; n <= to; n++){ weeks.push(n); totalQ += M.curriculumFor(n).q; }
     return html`
       <div class="tlmonth">
-        <div class="tlmonth__head"><h3>${phase.label}</h3>
+        <div class="tlmonth__head"><h2>${phase.label}</h2>
           <span class="small muted">${phase.theme}</span>
           <span class="tiny dim ml-auto">H${from}${to > from ? '–H'+to : ''} · ${U.fmtNum(totalQ)} soru</span></div>
         ${map(weeks, WeekRow)}

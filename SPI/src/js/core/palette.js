@@ -79,8 +79,11 @@ SP.Palette = (function(){
      Ayni kapi: onaysiz hicbir sey yazilmaz, her kayit geri alinabilir. */
   let bekleyen = null;     /* { oneriler, anlasilmayan, metin } */
 
-  function quickCommand(){
-    const t = query.trim();
+  /* `q` verilmezse paletin o anki sorgusu kullanilir. Disaridan verilmesi
+     bu islevi paleti acmadan denenebilir yapar ve AYS'nin ayni isi yapan
+     `veriKomutu(q)` bicimiyle eslestirir. */
+  function quickCommand(q){
+    const t = String(q == null ? query : q).trim();
     if(t.length < 3) return null;
     let r;
     try{ r = SP.Proposals.fromText(t); }catch(e){ return null; }

@@ -212,6 +212,20 @@
       expect(html).toContain('railcard');
       expect(html).toContain('Aralıklı tekrar');
     });
+    /* SEKME ŞERİDİ NEREDE OLDUĞUNU DOĞRU SÖYLEMELİ.
+
+       `S.ui.analyticsTab` varsayılanı 'overview' idi; o adda bir sekme
+       kalmamıştı. Şeritte hiçbir sekme seçili görünmüyor, gövdede ise
+       karşılaştırma çiziliyordu — ekran nerede olduğunu yanlış söylüyordu.
+       Bu test adı tek tek bilmez; her sekmeli ekranda TAM BİR sekmenin
+       seçili olmasını ister, böylece aynı hata başka ekranda da yakalanır. */
+    it('sekmeli ekranlarda tam bir sekme seçilidir', async function(){
+      for(const route of ['analytics','guide']){
+        const out = await R.Screens[route].render();
+        const say = (String(out).match(/aria-selected="true"/g) || []).length;
+        if(say !== 1) throw new Error(route+' ekranında seçili sekme sayısı: '+say);
+      }
+    });
     it('ekranlarda kullanılan tüm ipucu anahtarları tanımlı', function(){
       // ekran modulleri UI.hint('x') ve UI.rail([...]) ile cagirir
       const used = ['next-action','anchor','minimum-day','timer','streak','skip-reason',

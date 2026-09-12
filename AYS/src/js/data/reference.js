@@ -327,9 +327,39 @@ R.EXAM_TEMPLATES = [
 R.SKIP_REASONS = ['Süre yoktu','Beklenenden zordu','Sağlık / enerji','Kaynak yoktu','Plan gerçekçi değildi','Diğer'];
 
 /* Kesinlik etiketleri (bolum 1) */
-R.CERTAINTY = {
+/* KAYNAK (provenance) — bir REFERANS TABLOSUNUN nereden geldigi.
+
+   Bu sozluk "sayi ne kadar kesin" sorusunu degil, "bu esik hangi
+   belgeye dayaniyor" sorusunu cevaplar: ÖSYM'nin resmi tablosu mu,
+   gecen yilin verisi mi, bizim planlama varsayimimiz mi.
+
+   Adi eskiden R.CERTAINTY idi ve bu bir karisiklik uretiyordu: kardes
+   uygulamalarda ayni ad OLCUM KESINLIGINI tasir (asagida). Ikisi farkli
+   sorulardir ve ayni ekranda yan yana durabilirler — bir sirali tahmini
+   hem "2026 referansi" (kaynak) hem "hesaplandi" (kesinlik) olabilir. */
+R.PROVENANCE = {
   official:{ label:'Resmî', tone:'info', detail:'ÖSYM / YÖK belgesine dayanır.' },
   ref2026:{ label:'2026 referansı', tone:'muted', detail:'Geçmiş yıl verisidir.' },
   estimate:{ label:'Tahmin', tone:'warn', detail:'2027 için planlama varsayımıdır.' },
   coaching:{ label:'Koçluk hedefi', tone:'ok', detail:'Performans yönetimi önerisidir; yerleşme garantisi değildir.' },
+};
+
+/* KESINLIK — bir SAYININ nasil elde edildigi.
+
+   SPI'deki SP.CERTAINTY ile BIREBIR ayni dort etiket. Ayni olmasi
+   kasitlidir: HKM katmani uc modulden gelen veriyi bu etikete gore
+   denetleyecek ve "veri yok" alani asla 0 olarak yorumlamayacak.
+
+   Son satir en onemlisi. Girilmemis bir alan sifir DEGILDIR:
+   girilmemis bos sayisini 0 saymak, kullaniciya vermedigi bir bilgiyi
+   geri okutur ve uzerine tavsiye uretir. */
+R.CERTAINTY = {
+  measured:{ label:'ölçüldü', tone:'ok',
+    detail:'Kullanıcının girdiği ya da zamanlayıcının tuttuğu ham veri.' },
+  estimated:{ label:'tahmin', tone:'warn',
+    detail:'Öznel değerlendirme ya da planlama varsayımı. Düzeltilebilir.' },
+  derived:{ label:'hesaplandı', tone:'info',
+    detail:'İki ölçülmüş değerden formülle üretildi.' },
+  missing:{ label:'veri yok', tone:'muted',
+    detail:'Hiç girilmemiş. Sıfır sayılmaz, ortalamaya girmez.' },
 };

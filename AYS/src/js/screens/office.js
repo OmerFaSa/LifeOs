@@ -59,7 +59,8 @@ R.Screens.office = (function(){
     const worst = b.findings.some(f => f.tone === 'danger') ? 'danger'
       : b.findings.some(f => f.tone === 'warn') ? 'warn' : 'ok';
 
-    return K.Card({
+    /* Masa SEÇİLEBİLİR: dokununca raporu açılır. Kutu kalır. */
+    return K.Box({
       class:'desk',
       body:html`
         <div class="desk__head">
@@ -432,7 +433,8 @@ R.Screens.office = (function(){
     const action = O.nextAction();
     const patron = R.AGENT_BY_ID.patron;
 
-    return K.Card({
+    /* Patron'un masası da seçilebilir; ekibin en üstünde duran kutu. */
+    return K.Box({
       class:'card--primary',
       body:html`
         <div class="desk__head">

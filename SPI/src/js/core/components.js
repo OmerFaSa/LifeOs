@@ -147,7 +147,8 @@ SP.C = (function(){
   function Chip(o){
     if(typeof o === 'string') o = { label:o };
     return html`<span class="${cls('chip', o.act && 'chip--tap', o.on && 'chip--on')}"
-      ${when(o.act, () => attrs(Object.assign({ 'data-act':o.act }, o.data || {})))}>${o.label}</span>`;
+      ${when(o.act, () => attrs(Object.assign(
+        { 'data-act':o.act, role:'button', tabindex:'0' }, o.data || {})))}>${o.label}</span>`;
   }
 
   /* ---------- etkilesim ---------- */
@@ -233,17 +234,23 @@ SP.C = (function(){
      alt sayfa, uyari. Okunacak bir sey kutuya konmaz.
 
      Kunye sutunu uzun icerikte YAPISIR: yuz satirlik bir listeyi
-     kaydirirken hangi bolumde oldugunu unutmayasin diye. */
+     kaydirirken hangi bolumde oldugunu unutmayasin diye.
+
+     KUNYEYE KOYACAK BIR SEY YOKSA SUTUN HIC ACILMAZ. Bos bir kunye
+     sutunu 196 piksellik bir bosluk birakir ve icerigi saga sikistirir;
+     kunyesi olmayan sey GENIS satirdir. */
   function Entry(o){
     return html`
       <section class="${cls('lrow', o.wide && 'lrow--wide', o.class)}"
+        ${when(o.id, () => attrs({ id:o.id }))}
         ${when(o.hint, () => attrs({ 'data-hint':o.hint }))}>
+        ${when(o.label || o.meta || o.note || o.action, () => html`
         <div class="lrow__side">
-          <div class="lrow__label">${o.label}${raw(SP.UI.hint(o.hint || ''))}</div>
+          ${when(o.label, () => html`<div class="lrow__label">${o.label}${raw(SP.UI.hint(o.hint || ''))}</div>`)}
           ${when(o.meta, () => html`<div class="lrow__meta">${o.meta}</div>`)}
           ${when(o.note, () => html`<p class="lrow__note">${o.note}</p>`)}
           ${when(o.action, () => html`<div class="lrow__act">${o.action}</div>`)}
-        </div>
+        </div>`)}
         <div class="lrow__main">${o.body}</div>
       </section>`;
   }
@@ -310,15 +317,23 @@ SP.C = (function(){
       }, o.data || {}))}/>`;
   }
 
+  /* `class` ve `aria` SESSIZCE DUSUYORDU: iki cagri yeri
+     `class:'composer__input'` geciyor ve o sinif hicbir zaman yazilmiyordu,
+     bu yuzden sohbet kutusu satiri doldurmuyordu. Yer tutucu da etiket
+     yerine gecmez — ekran okuyucu yalnizca "metin alani" der. */
   function Textarea(o){
-    return html`<textarea class="textarea"
-      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder, 'data-change':o.change }, o.data || {}))}
+    return html`<textarea class="${cls('textarea', o.class)}"
+      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder,
+        'aria-label':o.aria, 'data-change':o.change }, o.data || {}))}
     >${o.value || ''}</textarea>`;
   }
 
+  /* `aria` alani `Input`'ta vardi, `Select`'te yoktu: etiketsiz bir
+     secici ekran okuyucuda yalnizca "acilir liste" diye anilir. */
   function Select(o){
     return html`<select class="${cls('select', o.size === 'sm' && 'input--sm')}"
-      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'data-change':o.change }, o.data || {}))}>
+      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'aria-label':o.aria,
+        'data-change':o.change }, o.data || {}))}>
       ${map(o.options, op => {
         const v = op.value != null ? op.value : op;
         const l = op.label != null ? op.label : op;

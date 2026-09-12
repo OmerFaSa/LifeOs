@@ -211,8 +211,8 @@
   });
 
   describe('Şema göçü', function(){
-    it('şema sürümü 4', function(){
-      expect(R.SCHEMA_VERSION).toBe(4);
+    it('şema sürümü 5', function(){
+      expect(R.SCHEMA_VERSION).toBe(5);
     });
     it('eski sürümden yükseltir, veriyi silmez', async function(){
       resetState();

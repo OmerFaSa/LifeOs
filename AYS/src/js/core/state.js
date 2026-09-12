@@ -59,7 +59,7 @@ R.S = {
     droppedOpen:false,
     topicOpen:null,      // konu ozeti sayfasi
     topicSubject:null,
-    analyticsTab:'overview',
+    analyticsTab:'compare',   // TABS'taki ilk sekme; adi degisirse burasi da degisir
     compareA:null, compareB:null,
     sessionId:null,      // calisan deneme oturumu
     noteTag:'not',
@@ -399,6 +399,51 @@ R.Model = (function(){
   }
 
   /* ---------- deneme ---------- */
+
+  /* BOS SAYISI UYDURULMAZ.
+
+     Giris formunda "boş" alani bos birakildiginda `Number('')||0` onu
+     SIFIR yapiyordu ve kayit, kullanicinin hic vermedigi bir bilgiyle
+     dolduruluyordu. Uzerine de tavsiye uretiliyordu: `blankStrategy`
+     bu uydurma sifirlari ortalamaya katip "daha cok soruya girmek sana
+     net kazandiriyor" diyebiliyordu.
+
+     Uc durum ve uc etiket:
+
+       olculdu     kullanici alani doldurdu
+       hesaplandi  doldurmadi ama testin soru sayisi biliniyor:
+                   bos = soru - dogru - yanlis
+       veri yok    ikisi de yok; sayi NULL kalir, ortalamaya girmez
+
+     Dorduncu bir durum daha var ve sessizce yutulmaz: dogru+yanlis
+     testin soru sayisini ASIYORSA giris tutarsizdir. O zaman bos
+     turetilmez (negatif bir sayi uretmek yerine) ve `blankCert` "veri
+     yok" olur; ekran bunu rozetle soyler. */
+  function blankCertainty(correct, wrong, raw, q){
+    const yazildi = raw != null && String(raw).trim() !== '';
+    if(yazildi){
+      const n = Number(raw);
+      if(isFinite(n) && n >= 0) return { blank:Math.round(n), blankCert:'measured' };
+    }
+    const c = Number(correct) || 0, w = Number(wrong) || 0;
+    const toplam = Number(q);
+    if(isFinite(toplam) && toplam > 0){
+      const kalan = toplam - c - w;
+      if(kalan >= 0) return { blank:kalan, blankCert:'derived' };
+    }
+    return { blank:null, blankCert:'missing' };
+  }
+
+  /* Bir denemenin bos sayisi ORTALAMAYA GIREBILIR mi: ancak her testin
+     bos sayisi biliniyorsa. Bir tanesi bile eksikse deneme disarida
+     kalir — eksik olani sifir sayip toplami kucultmek, tam tersi bir
+     sonuca goturur. */
+  function blankKnown(exam){
+    const tests = (exam && exam.tests) || [];
+    if(!tests.length) return false;
+    return tests.every(t => t.blank != null && t.blankCert !== 'missing');
+  }
+
   function examNet(exam){
     return (exam.tests || []).reduce((s,t)=> s + (Number(t.correct||0) - Number(t.wrong||0)/4), 0);
   }
@@ -954,10 +999,21 @@ R.Model = (function(){
   }
 
   /* ---------- dikkat dagilmasi ---------- */
+  /* Sayacin O GUN KULLANILDIGI ayrica isaretlenir.
+
+     `distractions` gun kaydi dogdugunda 0 olarak baslar; yani "bugun hic
+     bolunmedim" ile "bugun sayaci hic acmadim" ayni sayiya bakiyordu.
+     Ortalama butun gunler uzerinden alininca, sayaci kullanmadigin her
+     gun ortalamayi asagi cekiyor ve sistem "odak sorunu gorunmuyor"
+     diyordu — kullanicinin vermedigi bir veriden uretilmis bir teselli.
+
+     Bayrak yalnizca ILERI dogru calisir: eski gunlerde yok ve olmasi da
+     gerekmez, `distractionTrend` onlari zaten disarida birakir. */
   async function addDistraction(dateISO){
     const iso = dateISO || U.todayISO();
     const day = await ensureDay(iso);
     day.distractions = (day.distractions || 0) + 1;
+    day.distractionsTracked = true;
     await saveDay(iso);
     return day.distractions;
   }
@@ -980,6 +1036,45 @@ R.Model = (function(){
     // v2 → v3: ogrenme akisi varliklari (videoNotes, activities, mood, breaks).
     // v3 → v4: takvim istisnalari, sureli oturumlar, profiller, kotu gun alanlari.
     // Goc yikici degildir; yeni koleksiyonlar bos baslar, ilk yazmada olusur.
+
+    // v4 → v5: UYDURMA SIFIRLARIN ONARIMI.
+    //
+    // v5'ten once "boş" alani bos birakildiginda kayda 0 yaziliyordu.
+    // O sifirlar kullanicinin verdigi bir bilgi degil, formun urettigi
+    // bir dolgudur ve `blankStrategy` onlari ortalamaya katiyordu.
+    //
+    // Onarim yalnizca KENDINI ELE VEREN sifirlara dokunur: testin soru
+    // sayisi biliniyorsa ve dogru+yanlis o sayidan azsa, gercek bos
+    // sayisi sifir OLAMAZ. Boyle bir kayit yeniden turetilir.
+    // Sifirdan buyuk her deger elle yazilmis sayilir ve korunur; soru
+    // sayisi bilinmeyen test "veri yok" olur.
+    if(from < 5){
+      /* Sablon once kimlikle, yoksa ADIYLA bulunur: v5'ten once elle
+         girilen denemeler `templateId` tasimiyordu, yalnizca `type`. */
+      const sablonTest = (exam, i) => {
+        const t = R.EXAM_TEMPLATES.find(x => x.id === exam.templateId)
+          || R.EXAM_TEMPLATES.find(x => x.name === exam.type);
+        return (t && t.tests[i]) ? t.tests[i].q : null;
+      };
+      for(const exam of R.S.exams){
+        let degisti = false;
+        (exam.tests || []).forEach((t, i) => {
+          if(t.blankCert) return;                       // zaten etiketli
+          const q = sablonTest(exam, i);
+          const c = Number(t.correct) || 0, w = Number(t.wrong) || 0;
+          if(Number(t.blank) > 0){ t.blankCert = 'measured'; degisti = true; return; }
+          if(isFinite(q) && q > 0 && c + w < q){
+            t.blank = q - c - w; t.blankCert = 'derived'; degisti = true; return;
+          }
+          if(isFinite(q) && q > 0 && c + w === q){      // gercekten sifir bos
+            t.blank = 0; t.blankCert = 'derived'; degisti = true; return;
+          }
+          t.blank = null; t.blankCert = 'missing'; degisti = true;
+        });
+        if(degisti) await R.Store.set('exams/' + exam.id, exam);
+      }
+    }
+
     R.S.meta = R.S.meta || {};
     R.S.meta.schemaVersion = R.SCHEMA_VERSION;
     R.S.meta.migratedAt = new Date().toISOString();
@@ -1066,7 +1161,7 @@ R.Model = (function(){
     defaultWeek, ensureWeek, saveWeek,
     defaultDay, ensureDay, saveDay, dayOf,
     ensureTopics, topicState, setTopicState,
-    examNet, testNet, saveExam, deleteExam,
+    examNet, testNet, saveExam, deleteExam, blankCertainty, blankKnown,
     saveError, deleteError,
     newCard, saveCard, deleteCard, schedule, prioritizedDue,
     saveReview, saveDecision,

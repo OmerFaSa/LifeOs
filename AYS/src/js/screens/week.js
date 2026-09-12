@@ -36,7 +36,7 @@ R.Screens.week = (function(){
 
     return html`
       <div class="${['daycol', iso === today && 'is-today', iso < today && 'is-past'].filter(Boolean).join(' ')}"
-           data-act="open-day" data-date="${iso}">
+           data-act="open-day" data-date="${iso}" role="button" tabindex="0">
         <div class="daycol__head"><span class="daycol__name">${wd.short}</span>
           <span class="daycol__date">${U.fmtShort(iso)}</span></div>
         ${blocks}

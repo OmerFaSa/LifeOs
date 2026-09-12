@@ -114,7 +114,7 @@ R.Screens.guide = (function(){
     return K.Grid([
       K.Span(8, K.Card({
         title:'2027 kritik işlemler', sub:'Sıra / panik takvimi',
-        badge:raw(UI.certainty('estimate')),
+        badge:raw(UI.provenance('estimate')),
         body:html`<div class="list">${map(R.OFFICIAL_CALENDAR, r => html`
           <div class="listitem">
             <div class="mw-150"><b class="small">${r.when}</b>
@@ -417,7 +417,7 @@ R.Screens.guide = (function(){
   };
 
   async function render(){
-    const tab = S.ui.guideTab || 'analysis';
+    const tab = TABS.some(t => t.id === S.ui.guideTab) ? S.ui.guideTab : TABS[0].id;
     const body = (TAB_BODY[tab] || analysisTab)();
     return String(K.Stack([
       K.Subtabs({ items:TABS, value:tab, act:'guide-tab', aria:'Rehber bölümleri' }),
@@ -567,7 +567,7 @@ R.Screens.guide = (function(){
     id:'guide',
     title:'Rehber',
     subtitle(){
-      const tab = TABS.find(t => t.id === (S.ui.guideTab || 'analysis'));
+      const tab = TABS.find(t => t.id === S.ui.guideTab) || TABS[0];
       return tab ? tab.label + ' · protokoller ve ayarlar' : 'Protokoller, kontrol listeleri ve ayarlar';
     },
     actions(){ return ''; },

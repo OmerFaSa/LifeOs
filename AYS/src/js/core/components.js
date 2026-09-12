@@ -19,7 +19,38 @@ R.C = (function(){
   /* ---------- yapisal ---------- */
 
   /* Card: tek kart stili. Vurgu icin renkli kenarlik yerine rozet kullanilir. */
+  /* AYS'DE DEFTER KIPI HER ZAMAN ACIKTIR.
+
+     SPI'de ekranlarin cogu dogrudan `Entry` cagirir ve `Card` gercekten
+     kutu isteyen yerlerde kalir; orada bayragi `Ledger(fn)` acar.
+
+     AYS'de ise on dokuz ekranin 181 cagrisinin hepsi `Card`. Kosullu bir
+     bayrak burada hicbir sey kazandirmaz, yalnizca "bu cagri hangi
+     kipte?" diye sorulacak 181 yer uretir. Bu yuzden AYS'de donusum
+     KOSULSUZDUR: `Card` defter satiri cizer, kutu isteyen `box:true`
+     ya da `Box` der.
+
+     Gorunen sonuc SPI ile aynidir; sozlesme farklidir ve bilerek
+     farklidir. Ayrinti: src/BOZUKLUK.md. */
   function Card(o){
+    /* `box:true` defter kipinden KACISTIR. Bir kartin govdesinin icinde
+       duran kartlar (ofis masalari, secim kartlari) defter satirina
+       donusmemeli: onlar okunacak bir bolum degil, yan yana dizilen
+       nesnelerdir. */
+    if(!o.box && !o.flat){
+      /* BASLIKSIZ KART KUNYE SUTUNU ACMAZ. Acsaydi 196 piksellik bos bir
+         sol sutun kalir, icerik saga sikisirdi. Basligi olmayan sey
+         genis satirdir. */
+      return Entry({
+        label:o.title, hint:o.hint,
+        meta:o.badge || null,
+        note:o.sub || o.note || null,
+        wide:o.wide || !o.title,
+        action:o.actions || null,
+        id:o.id, class:o.class,
+        body:html`${o.body}${when(o.foot, () => html`<div class="card__foot">${o.foot}</div>`)}`,
+      });
+    }
     const head = (o.title || o.sub || o.badge || o.actions) ? html`
       <div class="card__head">
         <div>
@@ -38,10 +69,33 @@ R.C = (function(){
       </section>`;
   }
 
+  /* Box: KUTU, adiyla. Yalniz secilebilir ya da yuzen seyler icin:
+     masa karti, secim karti, alt sayfa. Okunacak bir sey kutuya konmaz.
+     `flat` kutuyu golgesiz ve zeminli yapar. */
+  function Box(o){
+    return Card(Object.assign({}, o, { box:true, flat:o.flat }));
+  }
+
   /* Katlanir kart: uzun referans metinleri varsayilan olarak kapali tutar. */
   function Collapsible(o){
+    /* Defter kipinde katlanir bolum de kutu cizmez: satirin govdesine
+       cerceve olmadan yerlesir. */
+    if(!o.box){
+      return Entry({
+        label:o.title, meta:o.meta || null,
+        body:html`<div class="collapse--bare">
+          <button class="collapse__btn" data-act="${o.act}" ${attrs(o.data || {})}
+                  aria-expanded="${o.open ? 'true' : 'false'}">
+            <span class="row-sm"><b class="collapse__title">${o.title}</b>
+              ${when(o.meta, () => html`<span class="tiny dim">${o.meta}</span>`)}</span>
+            <span class="${cls('collapse__chev', o.open && 'is-open')}">${icon('down')}</span>
+          </button>
+          ${when(o.open, o.body)}
+        </div>`,
+      });
+    }
     return html`
-      <section class="card">
+      <section class="${cls('card', o.class)}">
         <button class="collapse__btn" data-act="${o.act}" ${attrs(o.data || {})}
                 aria-expanded="${o.open ? 'true' : 'false'}">
           <span class="row-sm"><h3 class="collapse__title">${o.title}</h3>${when(o.meta, () => html`<span class="tiny dim">${o.meta}</span>`)}</span>
@@ -69,9 +123,17 @@ R.C = (function(){
       </div>`;
   }
 
+  /* Doluluk seridi.
+
+     Ton ACIKCA verilir. Eskiden %60 altindaki her deger kendiliginden
+     kirmiziya boyaniyordu; ogle saatinde gunluk hedefin yarisinda olmak
+     bir hata degildir ve arayuzu bos yere alarma cevirir. Esige gore
+     renklendirme isteniyorsa `auto:true` ile acikca istenir. */
   function Bar(o){
     const pct = Math.max(0, Math.min(100, Number(o.value) || 0));
-    const tone = o.tone || (pct >= 85 ? '' : pct >= 60 ? 'warn' : 'danger');
+    const tone = o.tone != null && o.tone !== ''
+      ? o.tone
+      : (o.auto ? (pct >= 85 ? '' : pct >= 60 ? 'warn' : 'danger') : '');
     return html`<div class="${cls('bar', o.large && 'bar--lg')}">
       <div class="${cls('bar__fill', tone && 'bar__fill--'+tone)}" style="width:${pct}%"></div>
     </div>`;
@@ -97,16 +159,19 @@ R.C = (function(){
   function Chip(o){
     if(typeof o === 'string') o = { label:o };
     return html`<span class="${cls('chip', o.act && 'chip--tap', o.on && 'chip--on')}"
-      ${when(o.act, () => attrs(Object.assign({ 'data-act':o.act }, o.data || {})))}>${o.label}</span>`;
+      ${when(o.act, () => attrs(Object.assign(
+        { 'data-act':o.act, role:'button', tabindex:'0' }, o.data || {})))}>${o.label}</span>`;
   }
 
   /* ---------- etkilesim ---------- */
 
+  /* Etiket ayri bir span icinde durur: dar ekranda yazi gizlenip ikon
+     kalabilsin diye. Ikonu olmayan dugmede etiket her zaman gorunur. */
   function Button(o){
     return html`<button
       class="${cls('btn', o.tone && 'btn--'+o.tone, o.size && 'btn--'+o.size, o.block && 'btn--block', o.class)}"
       ${attrs(Object.assign({ 'data-act':o.act, disabled:o.disabled, 'aria-label':o.aria, title:o.title }, o.data || {}))}
-    >${when(o.icon, () => icon(o.icon))}${o.label}</button>`;
+    >${when(o.icon, () => icon(o.icon))}<span class="btn__label">${o.label}</span></button>`;
   }
 
   function IconButton(o){
@@ -124,13 +189,125 @@ R.C = (function(){
     </div>`;
   }
 
-  /* Ekran ici sekmeler: [{id,label}] + aktif id */
+  /* Ekran ici sekmeler: [{id, label, icon?, count?}] + aktif id.
+
+     Ince alt cizgi yerine secilebilir hap seridi: bir ekranin kac bolume
+     ayrildigi ve hangisinde oldugun tek bakista gorunur. Sayac verilirse
+     sekmenin sagina yazilir — hangi bolumde is bekledigi gizlenmez. */
   function Subtabs(o){
     return html`<div class="subtabs" role="tablist" ${attrs({ 'aria-label':o.aria })}>
       ${map(o.items, t => html`<button class="${cls('subtab', t.id === o.value && 'is-active')}"
         role="tab" aria-selected="${t.id === o.value ? 'true' : 'false'}"
-        ${attrs({ 'data-act':o.act, 'data-tab':t.id })}>${t.label}</button>`)}
+        ${attrs({ 'data-act':o.act, 'data-tab':t.id })}
+      >${when(t.icon, () => icon(t.icon))}${t.label}${when(t.count,
+        () => html`<span class="subtab__count">${t.count}</span>`)}</button>`)}
     </div>`;
+  }
+
+  /* Secilebilir kart — "birden cogunu isaretle" durumlari icin.
+     Onay kutusu uzun listede kaybolur; kartin tamami dokunma hedefidir. */
+  function PickCard(o){
+    return html`<button class="${cls('pickcard', o.on && 'is-on')}"
+      ${attrs(Object.assign({ 'data-act':o.act, 'aria-pressed':o.on ? 'true' : 'false' }, o.data || {}))}>
+      <span class="pickcard__box" aria-hidden="true">&#10003;</span>
+      <span class="pickcard__body">
+        <span class="pickcard__name">${o.label}</span>
+        ${when(o.meta, () => html`<span class="pickcard__meta">${o.meta}</span>`)}
+      </span>
+    </button>`;
+  }
+
+  /* Ekran arac seridi: sekme seridi ile o bolume ait eylemi ayni satirda tutar. */
+  function Toolbar(o){
+    return html`<div class="toolbar">
+      <div class="toolbar__tabs">${o.tabs}</div>
+      ${when(o.actions, () => html`<div class="toolbar__actions">${o.actions}</div>`)}
+    </div>`;
+  }
+
+  /* ---------- defter satiri ----------
+
+     Sistemin ana duzen birimi. Kart DEGILDIR ve bilincli olarak kutu
+     cizmez.
+
+     Kart dili bir yonetim panelinin dilidir: her sey esit agirlikta beyaz
+     bir dikdortgene konur, on bes dikdortgen yan yana dizilir ve sayfa
+     bir tepsiye doner. Gunde birkac kez acilip aylarca okunacak bir
+     sistemde bu dil yorar.
+
+     Defter satiri bunun yerine kitaplarin, defterlerin ve teknik
+     belgelerin yuzyillardir kullandigi duzeni kurar:
+
+       solda  dar bir kunye sutunu -- bolum adi, olcu, eylem
+       sagda  icerigin kendisi, tam genislikte akan
+       arada  ince bir cizgi
+
+     Kutu yalnizca SECILEBILIR ya da YUZEN seylerde kalir: secim karti,
+     alt sayfa, uyari. Okunacak bir sey kutuya konmaz.
+
+     Kunye sutunu uzun icerikte YAPISIR: yuz satirlik bir listeyi
+     kaydirirken hangi bolumde oldugunu unutmayasin diye.
+
+     KUNYEYE KOYACAK BIR SEY YOKSA SUTUN HIC ACILMAZ. Bos bir kunye
+     sutunu 196 piksellik bir bosluk birakir ve icerigi saga sikistirir;
+     kunyesi olmayan sey GENIS satirdir. */
+  function Entry(o){
+    return html`
+      <section class="${cls('lrow', o.wide && 'lrow--wide', o.class)}"
+        ${when(o.id, () => attrs({ id:o.id }))}
+        ${when(o.hint, () => attrs({ 'data-hint':o.hint }))}>
+        ${when(o.label || o.meta || o.note || o.action, () => html`
+        <div class="lrow__side">
+          ${when(o.label, () => html`<div class="lrow__label">${o.label}${raw(R.UI.hint(o.hint || ''))}</div>`)}
+          ${when(o.meta, () => html`<div class="lrow__meta">${o.meta}</div>`)}
+          ${when(o.note, () => html`<p class="lrow__note">${o.note}</p>`)}
+          ${when(o.action, () => html`<div class="lrow__act">${o.action}</div>`)}
+        </div>`)}
+        <div class="lrow__main">${o.body}</div>
+      </section>`;
+  }
+
+  /* Defter: satirlarin kabi. Ilk satirin ust cizgisi yoktur -- hero'nun
+     alt cizgisi zaten oradadir ve iki cizgi ust uste gelmez. */
+  function Ledger(rows){
+    /* SPI'de burasi bir kip bayragi acar; AYS'de donusum kosulsuz
+       oldugu icin islev yalnizca cagrilir. */
+    if(typeof rows === 'function') rows = rows();
+    return html`<div class="ledger">${rows}</div>`;
+  }
+
+  /* ---------- dikte ve dosya ----------
+
+     Ikisi de KOSULLUDUR: tarayici ses tanimayi desteklemiyorsa mikrofon
+     dugmesi hic cizilmez, dosya alani her zaman cizilir cunku metin
+     dosyasi modelsiz de okunur. Calismayan bir dugme gostermek
+     kullaniciya secenek degil, hayal kirikligi verir. */
+  function Mic(o){
+    if(!R.Voice || !R.Voice.supported()) return raw('');
+    const on = R.Voice.isActive() && R.Voice.activeTarget() === o.target;
+    return html`<button type="button"
+      class="${cls('mic', on && 'is-on', o.size === 'sm' && 'mic--sm')}"
+      data-act="dictate" data-target="${o.target}"
+      aria-label="${on ? 'Dinlemeyi durdur' : 'Sesle yaz'}"
+      aria-pressed="${on ? 'true' : 'false'}"
+      title="${on ? 'Dinliyor — durdurmak için tıkla' : 'Sesle yaz'}">
+      ${raw(R.UI.icon('mic'))}
+      ${when(on, () => html`<span class="mic__pulse" aria-hidden="true"></span>`)}
+    </button>`;
+  }
+
+  /* Dosya birakma alani. Tiklayinca dosya secici acilir, uzerine
+     birakinca da alir. Iki yol da ayni eylemi tetikler. */
+  function Drop(o){
+    return html`<label class="drop" data-drop="${o.act}">
+      <input type="file" class="drop__input" accept="${o.accept || ''}"
+        data-change="${o.act}" ${when(o.id, () => attrs({ id:o.id }))}/>
+      <span class="drop__icon" aria-hidden="true">${raw(R.UI.icon(o.icon || 'upload'))}</span>
+      <span class="drop__text">
+        <b>${o.label}</b>
+        <span>${o.hint || 'Dosyayı buraya bırak ya da seçmek için tıkla'}</span>
+      </span>
+    </label>`;
   }
 
   function Field(o){
@@ -146,18 +323,27 @@ R.C = (function(){
         id:o.id, type:o.type || 'text', value:o.value == null ? null : o.value,
         placeholder:o.placeholder, min:o.min, max:o.max, step:o.step,
         disabled:o.disabled, 'aria-label':o.aria, 'data-change':o.change,
+        'data-debounce':o.debounce,
       }, o.data || {}))}/>`;
   }
 
+  /* `class` ve `aria` SESSIZCE DUSUYORDU: iki cagri yeri
+     `class:'composer__input'` geciyor ve o sinif hicbir zaman yazilmiyordu,
+     bu yuzden sohbet kutusu satiri doldurmuyordu. Yer tutucu da etiket
+     yerine gecmez — ekran okuyucu yalnizca "metin alani" der. */
   function Textarea(o){
-    return html`<textarea class="textarea"
-      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder, 'data-change':o.change }, o.data || {}))}
+    return html`<textarea class="${cls('textarea', o.class)}"
+      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder,
+        'aria-label':o.aria, 'data-change':o.change }, o.data || {}))}
     >${o.value || ''}</textarea>`;
   }
 
+  /* `aria` alani `Input`'ta vardi, `Select`'te yoktu: etiketsiz bir
+     secici ekran okuyucuda yalnizca "acilir liste" diye anilir. */
   function Select(o){
     return html`<select class="${cls('select', o.size === 'sm' && 'input--sm')}"
-      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'data-change':o.change }, o.data || {}))}>
+      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'aria-label':o.aria,
+        'data-change':o.change }, o.data || {}))}>
       ${map(o.options, op => {
         const v = op.value != null ? op.value : op;
         const l = op.label != null ? op.label : op;
@@ -184,19 +370,53 @@ R.C = (function(){
     </div>`;
   }
 
+  /* Boş durum, jenerik bir ikon yerine BÖLÜMÜN İMZASINI taşır: boş
+     ekran da tasarımın parçasıdır ve hangi bölümde olunduğunu söyler.
+     `icon` verilirse eski davranış korunur. */
   function Empty(o){
+    const sec = (R.App && R.App.sectionOf && R.S)
+      ? R.App.sectionOf(R.S.route) : null;
+    const mark = o.icon ? icon(o.icon)
+      : (sec && R.UI.motif ? '<div class="empty__motif">' + R.UI.motif(sec.id) + '</div>'
+         : icon('list'));
     return html`<div class="empty">
-      ${icon(o.icon || 'list')}
+      ${raw(mark)}
       <p>${o.text}</p>
       ${when(o.action, o.action)}
     </div>`;
   }
 
   /* Yukleniyor: spinner degil iskelet */
+  /* BEKLEME. Model çağrısı saniyeler sürüyor ve iskelet ekran
+     tasarlanmamıştı: kullanıcı donduğunu sanıyordu.
+
+     İki şey eklendi. Birincisi: iskelet artık NE BEKLENDİĞİNİ söyler —
+     boş gri çubuklar «bir şey oluyor» der, «ne olduğunu» değil.
+     İkincisi: bir ışık şeridi sayfanın donmadığını gösterir; hareketi
+     azaltılmış tercihinde şerit durur, metin kalır. */
   function Skeleton(o){
-    const n = o && o.rows ? o.rows : 3;
-    return html`<div class="skeleton" aria-busy="true" aria-live="polite">
-      ${map(Array.from({ length:n }), (_, i) => html`<div class="skeleton__row" style="width:${[92, 74, 84, 62][i % 4]}%"></div>`)}
+    const c = o || {};
+    const n = c.rows || 3;
+    return html`<div class="${cls('skeleton', c.label && 'skeleton--labeled')}"
+      aria-busy="true" aria-live="polite">
+      ${when(c.label, () => html`<div class="skeleton__label">
+        <span class="skeleton__spin" aria-hidden="true"></span>
+        <span>${c.label}</span>
+        ${when(c.hint, () => html`<span class="skeleton__hint">${c.hint}</span>`)}
+      </div>`)}
+      ${map(Array.from({ length:n }), (_, i) => html`<div class="skeleton__row"
+        style="width:${[92, 74, 84, 62][i % 4]}%"></div>`)}
+    </div>`;
+  }
+
+  /* Kısa işlemler için tek satırlık şerit — iskelet çizmeye değmeyen
+     yerlerde (düğmenin altında, alt sayfanın başında) kullanılır. */
+  function Busy(o){
+    const c = typeof o === 'string' ? { label:o } : (o || {});
+    return html`<div class="busy" role="status" aria-live="polite">
+      <span class="busy__spin" aria-hidden="true"></span>
+      <span class="busy__t">${c.label || 'İşleniyor…'}</span>
+      ${when(c.hint, () => html`<span class="busy__hint">${c.hint}</span>`)}
     </div>`;
   }
 
@@ -252,16 +472,30 @@ R.C = (function(){
 
   /* ---------- duzen ---------- */
 
-  const Grid = body => html`<div class="grid">${body}</div>`;
-  const Span = (n, body) => html`<div class="span-${n}">${body}</div>`;
+  /* IZGARA DEGIL, DEFTER.
+
+     SPI'de `Grid`/`Span` hala on iki sutunluk bir izgara cizer, cunku
+     orada birkac ekranin gercekten yan yana sutuna ihtiyaci var.
+
+     AYS'de on dokuz ekranin hepsi Grid/Span ile yaziliydi ve sonuc uc
+     sutun yan yana kart diziliyordu. Defter tek sutundur: satirlar alt
+     alta akar. Ekranlar Grid/Span yazmaya devam eder — degisen tek sey
+     ne cizdikleridir, boylece hicbir ekrana dokunmak gerekmedi. */
+  const Grid = body => html`<div class="ledger">${body}</div>`;
+  /* Sutun genisligi artik anlamsiz; `data-span` korunur ki bir satirin
+     hangi genislikte tasarlandigi gerekirse gene bilinsin. */
+  const Span = (n, body) => html`<div class="lband" data-span="${n}">${body}</div>`;
   const Stack = (body, gap) => html`<div class="${cls('stack', gap === 'sm' && 'stack-sm', gap === 'xs' && 'stack-xs')}">${body}</div>`;
   const Cols = (n, body) => html`<div class="cols-${n}">${body}</div>`;
   const Row = (body, o) => html`<div class="${cls('row', o && o.between && 'between', o && o.wrap && 'wrap', o && o.sm && 'row-sm')}">${body}</div>`;
   const SectionTitle = (title, right) => html`<div class="section-title"><h2>${title}</h2>${when(right, right)}</div>`;
 
   return {
-    Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
-    Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, NextUp, Table, Pager, paginate,
+    Card, Box, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Entry, Ledger,
+    PickCard, Toolbar,
+    Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, Busy, NextUp, Table, Pager, paginate,
+    Mic, Drop,
     Grid, Span, Stack, Cols, Row, SectionTitle,
   };
 })();

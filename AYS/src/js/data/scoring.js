@@ -6,7 +6,7 @@
    farklı yıllarda farklı puana ve sıraya karşılık gelir. Buradaki katsayılar
    ve sıra tablosu, son yılların açıklanmış sonuçlarından çıkarılmış
    KOÇLUK BANDI'dır. Tek sayı olarak sunulmaz; her zaman bir aralık ve
-   kesinlik etiketiyle gösterilir (bkz. R.CERTAINTY).
+   kesinlik etiketiyle gösterilir (bkz. R.PROVENANCE).
 
    Kural motoru bu tabloyu okur; LLM okumaz ve sıra vaadi veremez
    (R.PROMPTS.forbidden → 'rank-promise'). */
