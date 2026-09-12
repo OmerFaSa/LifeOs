@@ -384,7 +384,19 @@ R.Screens.guide = (function(){
               </button>`)}</div>
 
             <p class="tiny dim mt-10">Koyu mod saf siyah üzerine saf beyaz kullanmaz;
-              her palet iki temada da WCAG AA kontrastına göre ayarlanmıştır.</p>` }),
+              her palet iki temada da WCAG AA kontrastına göre ayarlanmıştır.</p>
+
+            <span class="mono-label palettes__label">Düzen</span>
+            <p class="tiny dim" style="margin:-2px 0 8px">Palet RENGİ değiştirir,
+              düzen İSKELETİ: gezinmenin nerede durduğunu, kartın kutu mu çizgi mi
+              olduğunu. Durum renkleri ve kaynak etiketleri hiçbir düzende değişmez.</p>
+            <div class="palettes">${map(R.DESIGNS, d => html`
+              <button class="${(S.profile.design || R.DEFAULT_DESIGN) === d.id ? 'palettebtn is-on' : 'palettebtn'}"
+                data-act="set-design" data-design="${d.id}"
+                aria-pressed="${(S.profile.design || R.DEFAULT_DESIGN) === d.id ? 'true' : 'false'}">
+                <span class="dsgn dsgn--${d.swatch}" aria-hidden="true"></span>
+                <b>${d.name}</b><span class="tiny dim">${d.note}</span>
+              </button>`)}</div>` }),
       ])),
       K.Span(6, K.Stack([
         dataCard(),
@@ -447,6 +459,14 @@ R.Screens.guide = (function(){
     },
     async 'set-palette'(el){
       S.profile.palette = el.dataset.palette;
+      await M.saveProfile();
+      R.App.applyTheme();
+      R.App.render();
+    },
+    /* Duzen ANINDA uygulanir: uzak bir «Kaydet» dugmesini beklemek,
+       secimin ise yaramadigi izlenimi veriyordu. */
+    async 'set-design'(el){
+      S.profile.design = el.dataset.design;
       await M.saveProfile();
       R.App.applyTheme();
       R.App.render();

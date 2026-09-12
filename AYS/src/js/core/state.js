@@ -542,6 +542,7 @@ R.Model = (function(){
       previouslyPlaced:false,
       theme:'system',
       palette:R.DEFAULT_PALETTE,
+      design:R.DEFAULT_DESIGN,
       level:'orta',
       weakSubjects:[],
       coachTone:'dengeli',

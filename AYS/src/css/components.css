@@ -1980,3 +1980,34 @@ button.listitem.is-on{ background:var(--primary-soft); }
 @media (max-width:520px){
   .voicerow__name{ min-width:0; }
 }
+
+/* Düzen örneği — seçenek düğmesindeki küçük şema.
+
+   Palet düğmesi iki renk noktası gösterir; düzen düğmesi RENK değil
+   YAPI gösterir: çizgiler nerede, kutu var mı, sütun kaç tane. */
+.dsgn{
+  width:26px; height:20px; flex:none; border-radius:3px;
+  border:1px solid var(--border-strong); background:var(--surface);
+  position:relative; overflow:hidden;
+}
+.dsgn::before,.dsgn::after{ content:''; position:absolute; background:var(--text-3); }
+/* panel — solda kenar çubuğu, sağda kart */
+.dsgn--panel::before{ inset:0 auto 0 0; width:7px; background:var(--surface-3); }
+.dsgn--panel::after{ inset:5px 4px auto 11px; height:9px; border-radius:2px;
+  background:var(--border-strong); }
+/* odak — ince şerit, tek geniş sütun */
+.dsgn--focus::before{ inset:0 auto 0 0; width:3px; background:var(--surface-3); }
+.dsgn--focus::after{ inset:4px 5px auto 7px; height:3px; background:var(--text-3); }
+/* kraft — yatay çizgiler, kâğıt */
+.dsgn--paper{ background:#EFE7D8; border-color:#B9A98C; }
+.dsgn--paper::before{ inset:5px 4px auto 4px; height:1px; background:#8A7A5C; }
+.dsgn--paper::after{ inset:10px 8px auto 4px; height:1px; background:#8A7A5C; }
+/* katmanlı — koyu şerit */
+.dsgn--layers::before{ inset:0 auto 0 0; width:8px; background:#171922; }
+.dsgn--layers::after{ inset:5px 3px auto 12px; height:9px; border-radius:2px;
+  background:var(--border-strong); }
+/* harita — iki sütun */
+.dsgn--map::before{ inset:4px auto 4px 4px; width:7px; border-radius:2px;
+  background:var(--border-strong); }
+.dsgn--map::after{ inset:4px 4px 8px auto; width:7px; border-radius:2px;
+  background:var(--border-strong); }

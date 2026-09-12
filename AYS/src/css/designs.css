@@ -1,0 +1,150 @@
+/* DÜZEN DİLLERİ — AYS kabuğuna yazılmış hâli.
+
+   Varsayılan «panel» hiçbir şey yazmaz: kök `data-design` niteliği
+   taşımaz ve aşağıdaki hiçbir kural devreye girmez. Bu kasıtlıdır —
+   varsayılan düzenin bedeli sıfır olmalıdır.
+
+   ─────────────────────────────────────────────────────────────────
+
+   DEĞİŞMEZLER (hiçbir düzen bunları bozmaz):
+
+     · Durum renkleri. «Geride», «riskli», «hedefte» her düzende aynı
+       renktedir. Düzen bir üsluptur, bir anlam katmanı değildir.
+     · Kaynak ve kesinlik etiketleri. Hiçbir düzen «model» rozetini ya
+       da «tahmin» etiketini gizlemez.
+     · Okunabilirlik. Kontrast denetimi bütün düzenlerde koşar.
+
+   BİR TUZAK: bir jeton kendi türevinden türetilemez. `--bg` değerini
+   `--surface-2`den, `--surface-2` değerini `--bg`den türetmek CSS özel
+   değişken DÖNGÜSÜ yaratır ve zincirdeki her değer geçersiz olur;
+   ekran sessizce zeminsiz kalır. Aşağıda her düzen kendi KÖK rengini
+   tanımlar ve türevleri ondan çıkarır. */
+
+/* ══════════════════════════════════════════════════════ ODAK
+
+   Tek sütun. Kenar çubuğu ince bir şeride iner — gezinme kaybolmaz
+   ama yer kaplamaz. Başlık büyür, kart kenarlıkları kalkar: ekranda
+   yalnız İÇERİK kalır. */
+:root[data-design="odak"]{
+  --sidebar-w:62px;
+  --fs-xl:30px;
+  --r:4px;
+  --r-sm:3px;
+  --shadow:none;
+  --shadow-lg:0 18px 50px rgba(22,24,34,.14);
+}
+:root[data-design="odak"] .sidebar__title,
+:root[data-design="odak"] .navgroup__label,
+:root[data-design="odak"] .navitem span,
+:root[data-design="odak"] .sidebar__foot{ display:none; }
+:root[data-design="odak"] .sidebar__head{ justify-content:center; padding:14px 0; }
+:root[data-design="odak"] .navitem{ justify-content:center; padding:10px 0; }
+:root[data-design="odak"] .navitem__badge{ display:none; }
+:root[data-design="odak"] .content{ max-width:820px; margin-inline:auto; }
+:root[data-design="odak"] .topbar__titles h1{
+  font-size:34px; letter-spacing:-.03em; line-height:1.08;
+}
+:root[data-design="odak"] .card{
+  border:none; border-top:1px solid var(--border);
+  border-radius:0; box-shadow:none; background:transparent;
+  padding-inline:0;
+}
+:root[data-design="odak"] .card:first-child{ border-top:none; }
+
+/* ══════════════════════════════════════════════════════ KRAFT
+
+   Daktilo harfleri ve tek mürekkep. Kâğıdın rengi TEK bir jetondan
+   çıkar (`--kraft-kagit`); yüzeyler ondan türetilir, birbirinden
+   değil — döngü buradan doğardı. */
+:root[data-design="kraft"]{
+  --kraft-kagit:#EFE7D8;
+  --bg:var(--kraft-kagit);
+  --surface:color-mix(in srgb, var(--kraft-kagit) 92%, #fff);
+  --surface-2:color-mix(in srgb, var(--kraft-kagit) 84%, #000 3%);
+  --surface-3:color-mix(in srgb, var(--kraft-kagit) 74%, #000 6%);
+  --sidebar:color-mix(in srgb, var(--kraft-kagit) 88%, #000 2%);
+  --sidebar-active:color-mix(in srgb, var(--kraft-kagit) 70%, #000 8%);
+  --border:color-mix(in srgb, var(--kraft-kagit) 60%, #000 22%);
+  --border-strong:color-mix(in srgb, var(--kraft-kagit) 40%, #000 40%);
+  --font-display:ui-monospace,'SFMono-Regular','Menlo','Courier New',monospace;
+  --font-body:ui-monospace,'SFMono-Regular','Menlo','Courier New',monospace;
+  --r:2px; --r-sm:2px;
+  --shadow:none;
+  --shadow-lg:0 10px 26px rgba(60,44,20,.20);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-design="kraft"]:not([data-theme="light"]){ --kraft-kagit:#2A2419; }
+}
+:root[data-design="kraft"][data-theme="dark"]{ --kraft-kagit:#2A2419; }
+:root[data-design="kraft"] .card,
+:root[data-design="kraft"] .sidebar{ border-radius:0; }
+:root[data-design="kraft"] .topbar__titles h1{ letter-spacing:-.01em; }
+:root[data-design="kraft"] .navitem{ text-transform:lowercase; letter-spacing:.01em; }
+
+/* ══════════════════════════════════════════════════════ KATMANLI
+
+   Koyu kenar çubuğu, açık çalışma alanı. AYS'nin kabuğu buna zaten
+   uygun: iki katman baştan ayrı duruyor, düzen yalnız aradaki farkı
+   belirginleştiriyor. Yalnız geniş ekranda: dar ekranda kenar çubuğu
+   zaten kapanıyor ve koyu şerit anlamsız kalırdı. */
+@media (min-width:900px){
+  :root[data-design="katmanli"] .sidebar{
+    background:var(--ink, #171922);
+    border-right-color:transparent;
+  }
+  :root[data-design="katmanli"] .sidebar__title b,
+  :root[data-design="katmanli"] .countdown b{ color:#F3F2EE; }
+  :root[data-design="katmanli"] .sidebar__title span,
+  :root[data-design="katmanli"] .navgroup__label,
+  :root[data-design="katmanli"] .countdown span,
+  :root[data-design="katmanli"] .weekmeter__row{ color:#9FA3B0; }
+  :root[data-design="katmanli"] .navitem{ color:#C9CCD6; }
+  :root[data-design="katmanli"] .navitem:hover{
+    background:rgba(255,255,255,.07); color:#fff;
+  }
+  :root[data-design="katmanli"] .navitem.is-active{
+    background:rgba(255,255,255,.13); color:#fff;
+  }
+  :root[data-design="katmanli"] .sidebar__head,
+  :root[data-design="katmanli"] .sidebar__foot{ border-color:rgba(255,255,255,.12); }
+  :root[data-design="katmanli"] .navitem__badge.is-quiet{
+    background:rgba(255,255,255,.16); color:#E6E8EF;
+  }
+}
+:root[data-design="katmanli"]{ --r:10px; }
+:root[data-design="katmanli"] .card{ box-shadow:var(--shadow-lg); border-color:transparent; }
+
+/* ══════════════════════════════════════════════════════ HARİTA
+
+   Kartlar akan sütunlarda, noktalı zemin. Bir liste değil bir masa
+   üstü: yan yana duran notlar.
+
+   `columns` kullanılır, ızgara değil — ızgarada her satır en uzun
+   kart kadar yer kaplar ve yanında delik kalır. */
+:root[data-design="harita"]{
+  --r:10px;
+  --harita-nokta:color-mix(in srgb, var(--text) 12%, transparent);
+}
+:root[data-design="harita"] .content{
+  background-image:radial-gradient(var(--harita-nokta) 1px, transparent 1px);
+  background-size:22px 22px;
+}
+@media (min-width:1000px){
+  :root[data-design="harita"] .content > .grid,
+  :root[data-design="harita"] .content > .stack{
+    columns:380px; column-gap:20px;
+  }
+  :root[data-design="harita"] .content > .grid > *,
+  :root[data-design="harita"] .content > .stack > *{
+    break-inside:avoid; margin-bottom:16px;
+  }
+}
+:root[data-design="harita"] .card{
+  box-shadow:0 2px 10px rgba(22,24,34,.07);
+  border-color:color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+/* Azaltılmış hareket: hiçbir düzen animasyon eklemez ama emin olalım. */
+@media (prefers-reduced-motion:reduce){
+  :root[data-design] *{ animation:none !important; transition:none !important; }
+}

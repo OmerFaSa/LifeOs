@@ -285,6 +285,13 @@ R.App = (function(){
     const p = (S.profile && S.profile.palette) || R.DEFAULT_PALETTE;
     if(p === R.DEFAULT_PALETTE) root.removeAttribute('data-palette');
     else root.setAttribute('data-palette', p);
+
+    /* Duzen ISKELETI degistirir: gezinmenin nerede durdugunu, kartin
+       kutu mu cizgi mi oldugunu. Varsayilan olan hicbir sey YAZMAZ —
+       varsayilanin bedeli sifir olmalidir. */
+    const d = (S.profile && S.profile.design) || R.DEFAULT_DESIGN;
+    if(d === R.DEFAULT_DESIGN) root.removeAttribute('data-design');
+    else root.setAttribute('data-design', d);
   }
 
   /* ---------- kuresel eylemler ---------- */
