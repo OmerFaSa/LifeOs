@@ -163,6 +163,7 @@ R.Screens.team = (function(){
 
         html`<div class="composer">
           ${K.Textarea({ id:'team-input', rows:2, class:'composer__input',
+            aria:agent.name + '’a soru yaz',
             placeholder:agent.name + '’a sor…' })}
           ${K.Button({ label:'Sor', icon:'zap', tone:'primary', act:'team-send' })}
         </div>`,

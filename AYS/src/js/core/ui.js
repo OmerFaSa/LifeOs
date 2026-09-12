@@ -330,8 +330,21 @@ R.UI = (function(){
   function isHintOpen(){ return !!document.getElementById('popover'); }
 
   /* ---------- alt sayfa ---------- */
+  /* ---------- alt sayfa ---------- */
+  /* Alt sayfa ODAGI HAPSEDER. Once etmiyordu: Tab ile arkadaki sayfaya
+     cikilabiliyor, gorunmeyen bir dugmeye basilabiliyordu — bir kipli
+     pencere icin bu bir hata degil, bir yaniltmadir. Kapaninca odak
+     acan ogeye geri doner ki klavyeyle calisan kullanici yerini
+     kaybetmesin. */
+  const ODAKLANABILIR = 'a[href], button:not([disabled]), input:not([disabled]),'
+    + ' select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  let sheetOpener = null;
+  let sheetScroll = '';
+
   function sheet(opts){
     closeSheet();
+    sheetOpener = document.activeElement;
     const root = document.getElementById('overlay-root');
     const el = document.createElement('div');
     el.className = 'overlay';
@@ -343,17 +356,53 @@ R.UI = (function(){
           <div><h3>${opts.title}</h3>${when(opts.subtitle, () => html`<p>${opts.subtitle}</p>`)}</div>
           ${R.C.IconButton({ icon:'close', plain:true, aria:'Kapat', act:'sheet-close' })}
         </div>
-        <div class="sheet__body">${raw(opts.body)}</div>
+        <div class="sheet__body">
+          ${when(opts.note, () => html`<p class="sheet__note">${opts.note}</p>`)}
+          ${raw(opts.body)}</div>
         ${when(opts.footer, () => html`<div class="sheet__foot">${raw(opts.footer)}</div>`)}
       </div>`);
     el.addEventListener('mousedown', e => { if(e.target === el) closeSheet(); });
+
+    /* Tab dongusu alt sayfanin icinde kalir. */
+    el.addEventListener('keydown', e => {
+      if(e.key !== 'Tab') return;
+      const list = Array.prototype.filter.call(
+        el.querySelectorAll(ODAKLANABILIR), n => n.offsetParent !== null);
+      if(!list.length) return;
+      const ilk = list[0], son = list[list.length - 1];
+      if(e.shiftKey && document.activeElement === ilk){ e.preventDefault(); son.focus(); }
+      else if(!e.shiftKey && document.activeElement === son){ e.preventDefault(); ilk.focus(); }
+    });
+
     root.appendChild(el);
-    const first = el.querySelector('input, textarea, select');
+
+    /* Arkadaki sayfa KAYMAZ: alt sayfa acikken tekerlek arkayi
+       kaydiriyordu ve kapaninca baska bir yerde kaliniyordu. */
+    sheetScroll = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    /* ...ve arkadaki sayfa OKUNMAZ. Odagi hapsetmek yalnizca klavyeyi
+       durdurur; ekran okuyucunun sanal imleci alt sayfayi hic gormeden
+       arkadaki tabloyu okumaya devam edebiliyordu. `inert` ikisini
+       birden keser: odak da, erisilebilirlik agaci da. */
+    const kabuk = document.querySelector('.site');
+    if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
+
+    const first = el.querySelector('input, textarea, select')
+      || el.querySelector(ODAKLANABILIR);
     if(first && !opts.noFocus) setTimeout(()=>first.focus(), 40);
   }
   function closeSheet(){
     const el = document.getElementById('sheet');
-    if(el) el.remove();
+    if(!el) return;
+    el.remove();
+    document.body.style.overflow = sheetScroll;
+    const kabuk = document.querySelector('.site');
+    if(kabuk){ kabuk.removeAttribute('inert'); kabuk.removeAttribute('aria-hidden'); }
+    if(sheetOpener && document.contains(sheetOpener)){
+      try{ sheetOpener.focus(); }catch(e){ /* odak geri verilemedi */ }
+    }
+    sheetOpener = null;
   }
   function isSheetOpen(){ return !!document.getElementById('sheet'); }
 

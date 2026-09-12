@@ -50,7 +50,8 @@ R.Screens.subjects = (function(){
     const info = checkInfo(st);
 
     return html`
-      <div class="topicrow${mod}" data-act="topic-open" data-subject="${subject.id}" data-topic="${topic.id}">
+      <div class="topicrow${mod}" data-act="topic-open" data-subject="${subject.id}" data-topic="${topic.id}"
+           role="button" tabindex="0">
         <span class="topicrow__order">${topic.order}</span>
         <div class="minw0">
           <div class="topicrow__name">${topic.name}</div>
@@ -209,7 +210,8 @@ R.Screens.subjects = (function(){
         act:'ask-agent', data:{ 'data-agent':'analist' } }),
       body:html`
         ${map(list, r => html`
-          <div class="riskrow" data-act="open-topic" data-subject="${r.subjectId}" data-topic="${r.topicId}">
+          <div class="riskrow" data-act="open-topic" data-subject="${r.subjectId}" data-topic="${r.topicId}"
+               role="button" tabindex="0">
             <span class="riskrow__score is-${r.band}">${r.score}</span>
             <div class="riskrow__text">
               <div class="small strong">${r.topicName}</div>

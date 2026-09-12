@@ -89,7 +89,7 @@ R.C = (function(){
       <section class="card">
         <button class="collapse__btn" data-act="${o.act}" ${attrs(o.data || {})}
                 aria-expanded="${o.open ? 'true' : 'false'}">
-          <span class="row-sm"><h3 class="collapse__title">${o.title}</h3>${when(o.meta, () => html`<span class="tiny dim">${o.meta}</span>`)}</span>
+          <span class="row-sm"><h2 class="collapse__title">${o.title}</h2>${when(o.meta, () => html`<span class="tiny dim">${o.meta}</span>`)}</span>
           <span class="${cls('collapse__chev', o.open && 'is-open')}">${icon('down')}</span>
         </button>
         ${when(o.open, o.body)}
@@ -156,7 +156,8 @@ R.C = (function(){
   function Chip(o){
     if(typeof o === 'string') o = { label:o };
     return html`<span class="${cls('chip', o.act && 'chip--tap', o.on && 'chip--on')}"
-      ${when(o.act, () => attrs(Object.assign({ 'data-act':o.act }, o.data || {})))}>${o.label}</span>`;
+      ${when(o.act, () => attrs(Object.assign(
+        { 'data-act':o.act, role:'button', tabindex:'0' }, o.data || {})))}>${o.label}</span>`;
   }
 
   /* ---------- etkilesim ---------- */
@@ -210,9 +211,14 @@ R.C = (function(){
       }, o.data || {}))}/>`;
   }
 
+  /* `class` ve `aria` SESSIZCE DUSUYORDU: iki cagri yeri
+     `class:'composer__input'` geciyor ve o sinif hicbir zaman yazilmiyordu,
+     bu yuzden sohbet kutusu satiri doldurmuyordu. Yer tutucu da etiket
+     yerine gecmez — ekran okuyucu yalnizca "metin alani" der. */
   function Textarea(o){
-    return html`<textarea class="textarea"
-      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder, 'data-change':o.change }, o.data || {}))}
+    return html`<textarea class="${cls('textarea', o.class)}"
+      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder,
+        'aria-label':o.aria, 'data-change':o.change }, o.data || {}))}
     >${o.value || ''}</textarea>`;
   }
 

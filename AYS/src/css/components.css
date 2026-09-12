@@ -267,6 +267,12 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .sheet__head h3{ font-size:var(--fs-lg); }
 .sheet__head p{ font-size:var(--fs-sm); color:var(--text-2); margin-top:2px; }
 .sheet__body{ padding:18px; overflow-y:auto; display:flex; flex-direction:column; gap:14px; }
+/* Alt sayfanın açıklama satırı: ne yapılacağını değil, NEDEN
+   yapıldığını söyler. Gövdenin üstünde, kenarında ince bir çizgiyle. */
+.sheet__note{
+  font-size:var(--fs-sm); color:var(--text-2); line-height:1.5;
+  padding-left:11px; border-left:2px solid var(--border-strong);
+}
 .sheet__foot{
   padding:14px 18px; border-top:1px solid var(--border);
   display:flex; gap:8px; justify-content:flex-end;
@@ -457,7 +463,7 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   padding-bottom:6px; margin-bottom:8px;
   border-bottom:1px solid var(--border);
 }
-.tlmonth__head h3{ font-size:var(--fs-md); }
+.tlmonth__head h2{ font-size:var(--fs-md); }
 .tlweek{
   display:grid; grid-template-columns:76px minmax(0,1fr) 132px;
   gap:14px; align-items:start;

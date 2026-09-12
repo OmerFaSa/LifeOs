@@ -44,10 +44,12 @@ button{ cursor:pointer; }
 a{ color:var(--primary); text-decoration-thickness:1px; text-underline-offset:2px; }
 a:hover{ color:var(--primary-hover); }
 
-:focus-visible{
-  outline:2px solid var(--primary);
+/* Odak halkası bölümün renginde ve gövdeden ayrık. Tarayıcı
+   varsayılanı kalın ve kutu biçimlidir; burada ince ve boşluklu. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible{
+  outline:2px solid var(--sec);
   outline-offset:2px;
-  border-radius:4px;
+  border-radius:var(--r-sm);
 }
 
 ::selection{ background:var(--primary); color:var(--primary-ink); }

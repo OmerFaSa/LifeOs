@@ -389,6 +389,13 @@ R.App = (function(){
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
+      /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
+         `inert` onunla birlikte silinir ve arka plan yeniden okunur
+         hale gelir. Cizimden sonra geri konur. */
+      if(R.UI.isSheetOpen()){
+        const kabuk = document.querySelector('.site');
+        if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
+      }
       if(sc.afterRender) sc.afterRender();
     }catch(err){
       console.error('Render hatası:', err);
@@ -415,11 +422,24 @@ R.App = (function(){
     return true;
   }
 
+  /* Bolumun rengi KOKTE durur: CSS `--sec` jetonunu oradan okur.
+
+     palettes.css yedi bolum imzasi tasiyordu ama kimse `data-section`
+     yazmiyordu: alti bolumun altisi da ana rengi kullaniyordu, yani
+     «tek tasarim, alti imza» kurali yaziliydi ama calismiyordu.
+
+     Yeniden cizimde degil YONLENDIRMEDE yazilir ki her karede DOM'a
+     dokunulmasin. */
+  function applySection(route){
+    document.documentElement.setAttribute('data-section', bolumOf(route).id);
+  }
+
   function go(route){
     /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
     if(R.Talk && R.Talk.isActive()) R.Talk.stop();
     S.route = route;
+    applySection(route);
     S.sidebarOpen = false;
     if(route !== 'exams') S.ui.examOpen = S.ui.examOpen;
     window.scrollTo(0,0);
@@ -636,6 +656,25 @@ R.App = (function(){
     catch(err){ console.error('Eylem hatası ('+act+'):', err); UI.toast('Bir şeyler ters gitti'); }
   });
 
+  /* KLAVYE, FARENIN IKIZIDIR.
+
+     Tiklama `[data-act]` tasiyan her ogeden devralinir; klavye
+     devralmiyordu. Sonuc: bir satirin tamami tiklanabilir oldugunda
+     (haftanin gunu, konu satiri, oneri rozeti) o eylem yalnizca fareyle
+     yapilabiliyordu — klavyeyle calisan biri icin o eylem YOKTU.
+
+     Yerel dugme ve baglantilar zaten Enter/Bosluk'u kendileri isler;
+     burada yalnizca `role="button"` ile dugme gibi davranan ogeler
+     ele alinir. Bosluk sayfayi kaydirmasin diye varsayilan durdurulur. */
+  document.addEventListener('keydown', e => {
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    const el = e.target.closest('[data-act][role="button"]');
+    if(!el) return;
+    if(/^(button|a|input|select|textarea)$/i.test(e.target.tagName)) return;
+    e.preventDefault();
+    el.click();
+  });
+
   async function runChange(el, e){
     const sc = screen();
     const fn = (sc.change && sc.change[el.dataset.change]) || globalChange[el.dataset.change];
@@ -829,6 +868,7 @@ R.App = (function(){
       wireStoreErrors();
       await M.loadAll();
       applyTheme();
+      applySection(S.route);
       await render();
 
       // AI koc yetenegi acilisi bloklamaz; hazir olunca panelleri gostermek icin yeniden ciz.
