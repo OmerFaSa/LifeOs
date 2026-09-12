@@ -23,8 +23,12 @@
 /* ══════════════════════════════════════════════════════ ODAK
 
    Tek sütun. Kenar çubuğu ince bir şeride iner — gezinme kaybolmaz
-   ama yer kaplamaz. Başlık büyür, kart kenarlıkları kalkar: ekranda
-   yalnız İÇERİK kalır. */
+   ama yer kaplamaz. Başlık iyice büyür ve künye sütunu KAPANIR:
+   ekranda yalnız içerik kalır.
+
+   Varsayılan artık defter dilinde olduğu için «kutuyu kaldır» kuralı
+   buradan çıkarıldı; kutu zaten yok. Odak'ın işi farklılaşmak, aynı
+   şeyi ikinci kez söylemek değil. */
 :root[data-design="odak"]{
   --sidebar-w:62px;
   --fs-xl:30px;
@@ -42,14 +46,13 @@
 :root[data-design="odak"] .navitem__badge{ display:none; }
 :root[data-design="odak"] .content{ max-width:820px; margin-inline:auto; }
 :root[data-design="odak"] .topbar__titles h1{
-  font-size:34px; letter-spacing:-.03em; line-height:1.08;
+  font-size:44px; letter-spacing:-.03em; line-height:1.04;
 }
-:root[data-design="odak"] .card{
-  border:none; border-top:1px solid var(--border);
-  border-radius:0; box-shadow:none; background:transparent;
-  padding-inline:0;
-}
-:root[data-design="odak"] .card:first-child{ border-top:none; }
+:root[data-design="odak"] .topbar__titles p{ font-size:var(--fs-md); }
+/* Künye sütunu kapanır: tek sütunda başlık gövdenin üstüne geçer. */
+:root[data-design="odak"] .card{ display:block !important; }
+:root[data-design="odak"] .card__head{ margin-bottom:10px; }
+:root[data-design="odak"] .card__head h3{ letter-spacing:.13em; }
 
 /* ══════════════════════════════════════════════════════ KRAFT
 
@@ -78,6 +81,9 @@
 :root[data-design="kraft"][data-theme="dark"]{ --kraft-kagit:#2A2419; }
 :root[data-design="kraft"] .card,
 :root[data-design="kraft"] .sidebar{ border-radius:0; }
+/* Künye etiketi daktiloda büyük harf yerine küçük harf okunur. */
+:root[data-design="kraft"] .card__head h3{ text-transform:none; letter-spacing:.06em; }
+:root[data-design="kraft"] .topbar__titles h1{ font-size:30px; }
 :root[data-design="kraft"] .topbar__titles h1{ letter-spacing:-.01em; }
 :root[data-design="kraft"] .navitem{ text-transform:lowercase; letter-spacing:.01em; }
 
@@ -112,7 +118,17 @@
   }
 }
 :root[data-design="katmanli"]{ --r:10px; }
-:root[data-design="katmanli"] .card{ box-shadow:var(--shadow-lg); border-color:transparent; }
+/* Katmanlı kartı KUTUYA geri döndürür: iki katman fikri kenar
+   çubuğuyla kalmaz, içerik de kendi yüzeyinde durur. Beş düzenin
+   varsayılandan en çok ayrılanı budur. */
+:root[data-design="katmanli"] .card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:20px 22px;
+  box-shadow:var(--shadow);
+}
+:root[data-design="katmanli"] .stack > .card:first-child{ border-top:1px solid var(--border); }
 
 /* ══════════════════════════════════════════════════════ HARİTA
 
@@ -140,8 +156,12 @@
   }
 }
 :root[data-design="harita"] .card{
+  display:block;                       /* akan sütunda künye sütunu olmaz */
+  background:var(--surface);
+  border:1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius:var(--r);
+  padding:16px 18px;
   box-shadow:0 2px 10px rgba(22,24,34,.07);
-  border-color:color-mix(in srgb, var(--border) 70%, transparent);
 }
 
 /* Azaltılmış hareket: hiçbir düzen animasyon eklemez ama emin olalım. */

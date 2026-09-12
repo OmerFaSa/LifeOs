@@ -37,8 +37,9 @@ ARALIK = {
 }
 
 AILELER = [
-    ("Manrope", "manrope", "500 800", "normal"),
-    ("Inter",   "inter",   "400 700", "normal"),
+    ("Newsreader", "newsreader", "300 600", "normal"),
+    ("Manrope",    "manrope",    "500 800", "normal"),
+    ("Inter",      "inter",      "400 700", "normal"),
 ]
 
 

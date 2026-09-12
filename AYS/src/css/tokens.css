@@ -6,17 +6,20 @@
 
 :root{
   /* ---- yüzeyler ---- */
-  --bg:#F7F8FA;
+  /* KAGIT ZEMIN — SPI ile ayni. Soguk gri bir panel degil, isinmis
+     bir kagit: iki uygulama yan yana acildiginda ayni masadan
+     geldikleri anlasilmalidir. */
+  --bg:#F7F5F1;
   --surface:#FFFFFF;
-  --surface-2:#EEF0F5;
-  --surface-3:#E3E7EF;
+  --surface-2:#F2EFE9;
+  --surface-3:#E7E2D9;
   --sidebar:#FFFFFF;
-  --sidebar-active:#E5E7F5;
+  --sidebar-active:#EDEAE2;
 
   /* ---- metin ---- */
-  --text:#181A22;
-  --text-2:#585E6E;   /* AA: #F7F8FA üzerinde 6.4:1 */
-  --text-3:#686E7E;   /* AA: 4.6:1 — küçük ikincil metin */
+  --text:#191815;
+  --text-2:#54524C;   /* AA: --bg üzerinde 7.1:1 */
+  --text-3:#6E6B63;   /* AA: 4.9:1 — küçük ikincil metin */
 
   /* ---- anlam renkleri (dört tane; gerisi nötr) ---- */
   --primary:#3D3F8F;
@@ -62,15 +65,26 @@
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
   --sp-6:24px; --sp-8:32px; --sp-10:40px;
 
-  /* ---- tipografi: 2 aile, 6 adım ---- */
+  /* ---- tipografi: UC aile, kesin roller ----
+
+     serif    yalniz BASLIK. Paragraf tasimaz.
+     display  yalniz SAYI ve kart basligi. Tabular rakamlar hizalanir.
+     body     geri kalan her sey.
+
+     Kural: serif hicbir yerde sayi tasimaz, display hicbir yerde
+     paragraf tasimaz. Karistirildiginda ikisi de amatorlesir.
+     SPI ile ayni uc aile ve ayni olcek. */
+  --font-serif:'Newsreader', Georgia, 'Times New Roman', serif;
   --font-display:'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body:'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --fs-xs:11.5px;
-  --fs-sm:13px;
-  --fs-base:14.5px;
-  --fs-md:16px;
-  --fs-lg:20px;
-  --fs-xl:28px;
+  --fs-sm:12.75px;
+  --fs-base:14px;
+  --fs-md:15.5px;
+  --fs-lg:19px;
+  --fs-xl:24px;
+  --fs-hero:30px;     /* yalniz KPI sayisi */
+  --fs-display:40px;  /* yalniz bolum basligi (hero) */
 
   /* ---- hareket: tek easing, iki süre ---- */
   --ease:cubic-bezier(.2,.7,.3,1);
@@ -86,22 +100,29 @@
   /* ---- düzen ---- */
   --sidebar-w:238px;
   --topbar-h:62px;
-  --content-max:1680px;
+  --content-max:1180px;
+
+  /* Defter duzeninin kunye sutunu. Olcu sabittir: sayfadan sayfaya
+     kayan bir sol sutun, defter hissini bozar. SPI ile ayni. */
+  --gutter:196px;
+  --gutter-gap:52px;
 }
 
 /* Koyu mod: saf siyah/beyaz yok; aynı token adları yeniden tanımlanır. */
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#111218;
-    --surface:#191B22;
-    --surface-2:#20222B;
-    --surface-3:#272A34;
-    --sidebar:#141620;
-    --sidebar-active:#252740;
+    /* Koyu tarafta da SPI ile ayni: soguk mavi-gri degil, isinmis
+       koyu kagit. Iki uygulama ayni masadan gelir. */
+    --bg:#12120F;
+    --surface:#1A1A16;
+    --surface-2:#21211C;
+    --surface-3:#2A2A24;
+    --sidebar:#161612;
+    --sidebar-active:#2A2A24;
 
-    --text:#EDEEF5;
-    --text-2:#ADB1C0;
-    --text-3:#8B8FA0;
+    --text:#EFEDE7;
+    --text-2:#ACA89E;
+    --text-3:#8B877D;
 
     --primary:#9A9CE8;
     --primary-hover:#AEB0F0;
@@ -114,8 +135,8 @@
     --info:#89AAC6;
     --info-soft:#1A232A;
 
-    --border:#2C2E3A;
-    --border-strong:#3E4152;
+    --border:#2B2B25;
+    --border-strong:#3B3B33;
 
     --c-k:#9A9CE8; --c-i:#DDAE68; --c-y:#89AAC6; --c-s:#E58585; --c-d:#8FD0B0;
     --agent-patron:#9A9CE8;
@@ -136,16 +157,16 @@
 }
 
 :root[data-theme="dark"]{
-  --bg:#111218;
-  --surface:#191B22;
-  --surface-2:#20222B;
-  --surface-3:#272A34;
-  --sidebar:#141620;
-  --sidebar-active:#252740;
+  --bg:#12120F;
+  --surface:#1A1A16;
+  --surface-2:#21211C;
+  --surface-3:#2A2A24;
+  --sidebar:#161612;
+  --sidebar-active:#2A2A24;
 
-  --text:#EDEEF5;
-  --text-2:#ADB1C0;
-  --text-3:#8B8FA0;
+  --text:#EFEDE7;
+  --text-2:#ACA89E;
+  --text-3:#8B877D;
 
   --primary:#9A9CE8;
   --primary-hover:#AEB0F0;
@@ -158,8 +179,8 @@
   --info:#89AAC6;
   --info-soft:#1A232A;
 
-  --border:#2C2E3A;
-  --border-strong:#3E4152;
+  --border:#2B2B25;
+  --border-strong:#3B3B33;
 
   --c-k:#9A9CE8; --c-i:#DDAE68; --c-y:#89AAC6; --c-s:#E58585; --c-d:#8FD0B0;
   --agent-patron:#9A9CE8;

@@ -21,6 +21,7 @@ R.SUBJECTS = [
   {
     id:'tyt-turkce',
     name:'TYT Türkçe',
+    aliases:['türkçe','turkce','tyt türkçe','paragraf','dil bilgisi','türkçeden'],
     exam:'TYT', questions:40, priority:'core',
     weight:'TYT ağırlığında %13',
     targetBand:'27–33 net',
@@ -59,6 +60,7 @@ R.SUBJECTS = [
   {
     id:'tyt-matematik',
     name:'TYT Temel Matematik',
+    aliases:['tyt matematik','temel matematik','tyt mat','matematikten','matematik','mat'],
     exam:'TYT', questions:40, priority:'core',
     weight:'TYT ağırlığında %13 · 30 matematik + 10 geometri',
     targetBand:'22–30 net',
@@ -112,6 +114,7 @@ R.SUBJECTS = [
   {
     id:'tyt-fen',
     name:'TYT Fen Bilimleri',
+    aliases:['tyt fen','fen bilimleri','fen','fenden'],
     exam:'TYT', questions:20, priority:'core',
     weight:'Fizik 7 · Kimya 7 · Biyoloji 6 (2026 referansı)',
     targetBand:'8–14 net',
@@ -155,6 +158,7 @@ R.SUBJECTS = [
   {
     id:'tyt-sosyal',
     name:'TYT Sosyal Bilimler',
+    aliases:['tyt sosyal','sosyal bilimler','sosyal','tarih','coğrafya','felsefe','din'],
     exam:'TYT', questions:20, priority:'support',
     weight:'Tarih 5 · Coğrafya 5 · Felsefe 5 · Din/ek Felsefe 5',
     targetBand:'10–14 net (destek testi)',
@@ -202,6 +206,7 @@ R.SUBJECTS = [
   {
     id:'ayt-matematik',
     name:'AYT Matematik',
+    aliases:['ayt matematik','ayt mat','ileri matematik'],
     exam:'AYT', questions:40, priority:'core',
     weight:'SAY puanında %30 — en büyük tek ağırlık',
     targetBand:'12–20 net',
@@ -242,6 +247,7 @@ R.SUBJECTS = [
   {
     id:'ayt-fizik',
     name:'AYT Fizik',
+    aliases:['fizik','ayt fizik','fizikten'],
     exam:'AYT', questions:14, priority:'core',
     weight:'SAY puanında %10',
     targetBand:'4–8 net (minimum rota 4–6, ana rota 6–8)',
@@ -277,6 +283,7 @@ R.SUBJECTS = [
   {
     id:'ayt-kimya',
     name:'AYT Kimya',
+    aliases:['kimya','ayt kimya','kimyadan'],
     exam:'AYT', questions:13, priority:'core',
     weight:'SAY puanında %10',
     targetBand:'5–8 net',
@@ -307,6 +314,7 @@ R.SUBJECTS = [
   {
     id:'ayt-biyoloji',
     name:'AYT Biyoloji',
+    aliases:['biyoloji','ayt biyoloji','biyo','biyolojiden'],
     exam:'AYT', questions:13, priority:'core',
     weight:'SAY puanında %10',
     targetBand:'8–11 net',
@@ -352,3 +360,20 @@ R.TOPIC_STATES = {
 
 /* Kapanis kurali (bolum 2.2): ilk konu testi ≥%75 VE 7 gun sonraki test ≥%70 */
 R.CLOSURE_RULE = { first:75, second:70, gapDays:7 };
+
+
+/* Takma ad indeksi — konusurken ders adi soylenir, kimlik degil.
+
+   «matematikten 40 soru cozdum» cumlesinde ders «tyt-matematik» diye
+   gecmez. Liste UZUNDAN KISAYA sirali: «tyt matematik» once denenir,
+   «matematik» sonra. Kisa olan once denenseydi ozgul ad hic
+   eslesmezdi ve AYT matematigi TYT'ye yazilirdi. */
+R.SUBJECT_ALIASES = (function(){
+  var out = [];
+  R.SUBJECTS.forEach(function(x){
+    (x.aliases || []).concat([x.name]).forEach(function(a){
+      out.push({ alias:a, subject:x });
+    });
+  });
+  return out.sort(function(a, b){ return b.alias.length - a.alias.length; });
+})();

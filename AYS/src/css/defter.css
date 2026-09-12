@@ -1,0 +1,148 @@
+/* DEFTER DİLİ — SPİ'nin görünümü, AYS'nin kabuğunda.
+
+   İstek açıktı: iki uygulama panel düzeyinde birbirinden farklı
+   görünmesin, ama soldaki menü kalsın. Bu dosya tam olarak bunu
+   yapar — sol kenar çubuğuna dokunmaz, SAĞDAKİ HER ŞEYİ SPİ'nin
+   defter diline çevirir.
+
+   Üç şey değişiyor ve üçü de SPİ'den birebir alınmıştır:
+
+   1. BAŞLIK SERİF OLUR. Ekran adı 24 px kalın sans değil, 34 px
+      ince Newsreader olur. Bu tek değişiklik iki uygulamayı aynı
+      masadan gelmiş gibi gösteren şeyin yarısıdır.
+
+   2. KART KUTU OLMAKTAN ÇIKAR, SATIR OLUR. Kenarlık, gölge ve köşe
+      yuvarlaması gider; yerine üstte tek bir kıl çizgi gelir.
+      Kartların bir kutuda durması gerektiği fikri bir alışkanlıktır,
+      bir gereklilik değil: kıl çizgi ayırmaya yeter ve sayfayı
+      kalabalık göstermez.
+
+   3. BAŞLIK SOLA, İÇERİK SAĞA. Kart başlığı 196 piksellik sabit bir
+      künye sütununda durur, gövde onun sağında. Ölçü sabittir:
+      sayfadan sayfaya kayan bir sol sütun defter hissini bozar.
+
+   Dar ekranda künye sütunu kapanır ve başlık gövdenin üstüne geçer —
+   telefonda iki sütun okunmaz.
+
+   ─────────────────────────────────────────────────────────────────
+
+   BU DOSYA SON YÜKLENİR: components.css'teki kart kuralını bilerek
+   ezer. Ayrı dosyada durmasının sebebi budur — hangi kuralın neyi
+   ezdiği tek bir yerde görünsün. */
+
+/* ---------------------------------------------------------- künye */
+
+.topbar{
+  /* Perde ve bulanıklık gider: defterde üst çubuk yüzmez, durur. */
+  background:var(--bg);
+  backdrop-filter:none;
+  border-bottom:1px solid var(--border-strong);
+  padding-block:22px 18px;
+  align-items:flex-end;
+  min-height:0;
+}
+.topbar__titles h1{
+  font-family:var(--font-serif);
+  font-size:34px; font-weight:400; letter-spacing:-.022em; line-height:1.08;
+  margin:0;
+}
+.topbar__titles p{
+  font-size:var(--fs-base); line-height:1.55; color:var(--text-2);
+  margin-top:9px; max-width:62ch;
+}
+
+/* --------------------------------------------------------- içerik */
+
+.content{ padding:0 30px 72px; }
+.content > .grid,
+.content > .stack{ padding-top:4px; }
+
+/* ---------------------------------------------------- kart → satır */
+
+.card{
+  background:transparent;
+  border:none;
+  border-top:1px solid var(--border);
+  border-radius:0;
+  box-shadow:none;
+  padding:26px 0 24px;
+}
+/* İlk satırın üst çizgisi yoktur: künyenin alt çizgisi zaten oradadır
+   ve iki çizgi üst üste gelmez. */
+.stack > .card:first-child,
+.grid > [class*="span-"] > .stack > .card:first-child,
+.grid > [class*="span-"] > .card:first-child{ border-top:none; }
+
+.card--flat{ background:var(--surface-2); border-radius:var(--r-sm);
+  padding:16px 18px; border-top:none; }
+.card--pad-sm{ padding:18px 0 16px; }
+
+/* Kart başlığı künye sütununa geçer. Izgara iki sütunludur ve ölçü
+   sabittir; içerik sütunu kalanı alır.
+
+   ÖLÇÜ EKRANDAN DEĞİL KUTUDAN GELİR. İlk sürümde ekran genişliğine
+   bakılıyordu ve dar bir sütunda (span-3, span-4) duran kart da iki
+   sütuna bölünüyordu: 196 piksellik künye + içerik, 250 piksellik bir
+   kutuya sığmıyor ve sayfa yatayda taşıyordu.
+
+   Kapsayıcı sorgusu doğru soruyu sorar: «bu kart kaç piksel genişlikte
+   bir yerde duruyor?» Dar sütundaki kart tek sütun kalır, geniş
+   olandaki defter satırına döner. */
+.grid > [class*="span-"],
+.content > .stack{ container-type:inline-size; container-name:kutu; }
+
+@container kutu (min-width:640px){
+  .card{
+    display:grid;
+    grid-template-columns:var(--gutter) minmax(0,1fr);
+    gap:0 var(--gutter-gap);
+    align-items:start;
+  }
+  .card > .card__head{ grid-column:1; margin:0; padding:0; border:none; }
+  .card > *:not(.card__head){ grid-column:2; }
+  /* Gövdedeki ardışık bloklar üst üste binmesin. */
+  .card > *:not(.card__head) ~ *:not(.card__head){ margin-top:14px; }
+  .card__head .card__actions,
+  .card__head > .row{ margin-top:8px; }
+}
+
+.card__head{
+  display:flex; flex-direction:column; align-items:flex-start; gap:4px;
+  border:none; padding:0; margin-bottom:12px;
+}
+.card__head h3{
+  font-family:var(--font-body);
+  font-size:var(--fs-xs); font-weight:700;
+  letter-spacing:.11em; text-transform:uppercase;
+  color:var(--text-3);
+  line-height:1.35;
+}
+.card__head p{
+  font-size:var(--fs-xs); color:var(--text-3); line-height:1.5;
+  margin:0; max-width:26ch;
+}
+/* --------------------------------------------------------- sayılar */
+
+.num,
+.countdown b,
+.stat__value,
+.kpi__value{
+  font-family:var(--font-display);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;
+}
+
+/* --------------------------------------------------- kenar çubuğu
+
+   Sol menü İSTENDİĞİ GİBİ DURUYOR. Yalnızca kâğıt zeminiyle uyumlu
+   hâle getirildi: aynı hairline, aynı sıcaklık. */
+.sidebar{ border-right:1px solid var(--border); }
+.sidebar__title b{ font-family:var(--font-serif); font-weight:500; letter-spacing:-.01em; }
+
+/* ------------------------------------------------------- dar ekran */
+
+@media (max-width:1059px){
+  .content{ padding-inline:20px; }
+  .topbar{ padding-inline:20px; }
+  .topbar__titles h1{ font-size:27px; }
+}
