@@ -10,3 +10,7 @@ node_modules
 .tmpshot/
 .shots/
 .tmp*
+
+# HKM: yerel token ve yerel ambar depoya girmez.
+HKM/config.json
+HKM/db/*.db
