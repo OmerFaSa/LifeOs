@@ -56,18 +56,72 @@
   });
 
   describe('Bileşenler', function(){
-    it('Card başlık ve gövdeyi sarar', function(){
+    /* Card artık kutu değil defter satırı çizer. Testler bunu kilitler:
+       başlık künye sütununa gider, gövde içerik sütununa. */
+    it('Card başlığı künyeye, gövdeyi içerik sütununa koyar', function(){
       const out = String(C.Card({ title:'Başlık', body:html`<p>gövde</p>` }));
-      expect(out).toContain('card__head');
+      expect(out).toContain('lrow__label');
+      expect(out).toContain('lrow__main');
       expect(out).toContain('Başlık');
       expect(out).toContain('<p>gövde</p>');
     });
-    it('Card başlıksız da çalışır', function(){
-      const out = String(C.Card({ body:'x' }));
+    it('Card kutu çizmez', function(){
+      const out = String(C.Card({ title:'Başlık', body:'x' }));
       expect(out.indexOf('card__head')).toBe(-1);
+      expect(out.indexOf('class="card')).toBe(-1);
+    });
+    /* Başlıksız kart künye sütunu AÇMAZ. Açsaydı 196 piksellik boş bir
+       sol sütun kalır, içerik sağa sıkışırdı. */
+    it('Card başlıksızken geniş satır olur', function(){
+      const out = String(C.Card({ body:'x' }));
+      expect(out.indexOf('lrow__side')).toBe(-1);
+      expect(out).toContain('lrow--wide');
+    });
+    it('Card alt bilgiyi içerik sütununda tutar', function(){
+      const out = String(C.Card({ title:'B', body:'x', foot:'alt' }));
+      expect(out.indexOf('card__foot')).toBeGreaterThan(out.indexOf('lrow__main'));
+    });
+    /* Kutu yalnız seçilebilir/yüzen şeylerde kalır. */
+    it('flat kart kutu olarak kalır', function(){
+      const out = String(C.Card({ flat:true, title:'B', body:'x' }));
+      expect(out).toContain('card--flat');
+      expect(out).toContain('card__head');
+    });
+    it('Box kutu çizer, düz istenmedikçe gölgeli kalır', function(){
+      const out = String(C.Box({ body:'x' }));
+      expect(out).toContain('class="card"');
+      expect(out.indexOf('card--flat')).toBe(-1);
+    });
+    it('Box flat ile zeminli kutu olur', function(){
+      expect(String(C.Box({ flat:true, body:'x' }))).toContain('card--flat');
+    });
+    /* Izgara defter olur: on iki sütunluk kart dizisi değil, tek sütun. */
+    it('Grid defter kabı çizer', function(){
+      expect(String(C.Grid('x'))).toContain('class="ledger"');
+    });
+    it('Span genişlik sınıfı yazmaz', function(){
+      const out = String(C.Span(6, 'x'));
+      expect(out).toContain('lband');
+      expect(out.indexOf('span-6')).toBe(-1);
     });
     it('Card başlığı kaçırır', function(){
       expect(String(C.Card({ title:'<script>', body:'' })).indexOf('<script>')).toBe(-1);
+    });
+    /* Serit rengi KENDILIGINDEN gelmez. Bu uc test, %60'in altindaki her
+       seridi kirmiziya boyayan eski davranisin geri gelmesini engeller. */
+    it('Bar varsayılan olarak renksizdir', function(){
+      expect(String(C.Bar({ value:33 })).indexOf('bar__fill--')).toBe(-1);
+    });
+    it('Bar boş ton geçildiğinde de renksiz kalır', function(){
+      expect(String(C.Bar({ value:10, tone:'' })).indexOf('bar__fill--')).toBe(-1);
+    });
+    it('Bar auto ile eşik rengi alır', function(){
+      expect(String(C.Bar({ value:33, auto:true }))).toContain('bar__fill--danger');
+      expect(String(C.Bar({ value:70, auto:true }))).toContain('bar__fill--warn');
+      expect(String(C.Bar({ value:90, auto:true })).indexOf('bar__fill--')).toBe(-1);
+    });
+    it('Bar açık ton her zaman kazanır', function(){
+      expect(String(C.Bar({ value:95, tone:'danger', auto:true }))).toContain('bar__fill--danger');
     });
     it('Stat tone modifierı uygular', function(){
       expect(String(C.Stat({ label:'x', value:1, tone:'ok' }))).toContain('stat--ok');

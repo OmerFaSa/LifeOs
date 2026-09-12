@@ -356,7 +356,10 @@ R.Screens.analytics = (function(){
     speed:speedTab, value:valueTab, habits:habitsTab };
 
   async function render(){
-    const tab = S.ui.analyticsTab || 'compare';
+    /* Kayitli sekme adi artik yoksa ilk sekmeye duser. Eskimis bir deger
+       ('overview') seritte HICBIR sekmeyi secili gostermiyor, govdede ise
+       karsilastirmayi ciziyordu: ekran nerede oldugunu yanlis soyluyordu. */
+    const tab = TABS.some(t => t.id === S.ui.analyticsTab) ? S.ui.analyticsTab : TABS[0].id;
     return String(K.Stack([
       K.Subtabs({ items:TABS, value:tab, act:'analytics-tab', aria:'Analiz bölümleri' }),
       (BODIES[tab] || compareTab)(),
@@ -376,7 +379,7 @@ R.Screens.analytics = (function(){
     id:'analytics',
     title:'Analiz',
     subtitle(){
-      const tab = TABS.find(t => t.id === (S.ui.analyticsTab || 'compare'));
+      const tab = TABS.find(t => t.id === S.ui.analyticsTab) || TABS[0];
       return (tab ? tab.label : 'Analiz') + ' · türetilmiş okumalar';
     },
     actions(){ return ''; },

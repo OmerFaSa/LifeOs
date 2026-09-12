@@ -33,7 +33,7 @@ R.Screens.plan = (function(){
         <div class="tlweek__right right">
           <div class="num small strong">${c.q} soru</div>
           ${comp != null
-            ? html`<div class="mt-5">${K.Bar({ value:comp })}</div>
+            ? html`<div class="mt-5">${K.Bar({ value:comp, auto:true })}</div>
                    <div class="tiny dim">%${comp} tamamlandı</div>`
             : html`<div class="tiny dim">planlandı</div>`}
         </div>

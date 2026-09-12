@@ -59,7 +59,7 @@ R.S = {
     droppedOpen:false,
     topicOpen:null,      // konu ozeti sayfasi
     topicSubject:null,
-    analyticsTab:'overview',
+    analyticsTab:'compare',   // TABS'taki ilk sekme; adi degisirse burasi da degisir
     compareA:null, compareB:null,
     sessionId:null,      // calisan deneme oturumu
     noteTag:'not',

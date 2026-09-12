@@ -18,8 +18,53 @@ R.C = (function(){
 
   /* ---------- yapisal ---------- */
 
-  /* Card: tek kart stili. Vurgu icin renkli kenarlik yerine rozet kullanilir. */
+  /* Card: DEFTER SATIRI. Adi tarihsel; cizdigi sey kutu degildir.
+
+     Kart dili bir yonetim panelinin dilidir: her sey esit agirlikta beyaz
+     bir dikdortgene konur, on bes dikdortgen yan yana dizilir ve sayfa bir
+     tepsiye doner. Gunde birkac kez acilip aylarca okunacak bir sistemde
+     bu dil yorar. SPI bu yuzden kutuyu birakti; AYS de birakiyor.
+
+       solda  dar bir kunye sutunu -- bolum adi, olcu, eylem
+       sagda  icerigin kendisi, tam genislikte akan
+       arada  ince bir cizgi
+
+     BASLIKSIZ KART KUNYE SUTUNU ACMAZ. Acsaydi 196 piksellik bos bir sol
+     sutun kalir, icerik saga sikisirdi -- ekranda gorulen tam olarak
+     buydu. Basligi olmayan sey genis satirdir.
+
+     Kutu yalnizca SECILEBILIR ya da YUZEN seylerde kalir (flat): secim
+     karti, alt sayfa, uyari. Okunacak bir sey kutuya konmaz. */
   function Card(o){
+    if(o.flat) return Box(o);
+
+    const label = o.title
+      ? html`<div class="lrow__label">${o.title}${when(o.hint, () => raw(R.UI.hint(o.hint)))}</div>`
+      : '';
+    const side = (o.title || o.sub || o.badge || o.actions) ? html`
+      <div class="lrow__side">
+        ${label}
+        ${when(o.badge, () => html`<div class="lrow__meta">${o.badge}</div>`)}
+        ${when(o.sub, () => html`<p class="lrow__note">${o.sub}</p>`)}
+        ${when(o.actions, () => html`<div class="lrow__act">${o.actions}</div>`)}
+      </div>` : '';
+
+    return html`
+      <section class="${cls('lrow', (o.wide || !o.title) && 'lrow--wide', o.class)}"
+               ${when(o.id, () => attrs({ id:o.id }))}>
+        ${side}
+        <div class="lrow__main">
+          ${o.body}
+          ${when(o.foot, () => html`<div class="card__foot">${o.foot}</div>`)}
+        </div>
+      </section>`;
+  }
+
+  /* Box: kutu. Yalnizca SECILEBILIR ya da YUZEN seyler icin: masa karti,
+     secim karti, alt sayfa. Okunacak bir sey kutuya konmaz.
+     `flat` kutuyu golgesiz ve zeminli yapar -- bir listenin icindeki
+     kutucuk sayfadan degil, listeden yukselir. */
+  function Box(o){
     const head = (o.title || o.sub || o.badge || o.actions) ? html`
       <div class="card__head">
         <div>
@@ -69,9 +114,23 @@ R.C = (function(){
       </div>`;
   }
 
+  /* Serit.
+
+     RENK KENDILIGINDEN GELMEZ, ISTENIR. Onceki surumde ton yuzdeden
+     turetiliyordu: %60'in altindaki her serit KIRMIZI oluyordu. Gunun
+     akisinda 1/3'te olmak bir basarisizlik degildir -- sabahin dokuzunda
+     kirmizi bir serit kullaniciya yanlis bir sey soyluyordu.
+
+     Dahasi `tone:''` gecen on cagri yok sayiliyordu, cunku bos dize
+     yanlis degerdir ve `||` onu yutar: cagiran «renk olmasin» diyemiyordu.
+
+     Artik esik renklendirmesi `auto:true` ile ISTENIR ve yalnizca gercek
+     bir hedefe karsi olculen yerlerde kullanilir. */
   function Bar(o){
     const pct = Math.max(0, Math.min(100, Number(o.value) || 0));
-    const tone = o.tone || (pct >= 85 ? '' : pct >= 60 ? 'warn' : 'danger');
+    const tone = o.tone != null && o.tone !== ''
+      ? o.tone
+      : (o.auto ? (pct >= 85 ? '' : pct >= 60 ? 'warn' : 'danger') : '');
     return html`<div class="${cls('bar', o.large && 'bar--lg')}">
       <div class="${cls('bar__fill', tone && 'bar__fill--'+tone)}" style="width:${pct}%"></div>
     </div>`;
@@ -129,7 +188,9 @@ R.C = (function(){
     return html`<div class="subtabs" role="tablist" ${attrs({ 'aria-label':o.aria })}>
       ${map(o.items, t => html`<button class="${cls('subtab', t.id === o.value && 'is-active')}"
         role="tab" aria-selected="${t.id === o.value ? 'true' : 'false'}"
-        ${attrs({ 'data-act':o.act, 'data-tab':t.id })}>${t.label}</button>`)}
+        ${attrs({ 'data-act':o.act, 'data-tab':t.id })}
+      >${when(t.icon, () => icon(t.icon))}${t.label}${when(t.count,
+        () => html`<span class="subtab__count">${t.count}</span>`)}</button>`)}
     </div>`;
   }
 
@@ -252,15 +313,21 @@ R.C = (function(){
 
   /* ---------- duzen ---------- */
 
-  const Grid = body => html`<div class="grid">${body}</div>`;
-  const Span = (n, body) => html`<div class="span-${n}">${body}</div>`;
+  /* Izgara DEGIL, DEFTER. On iki sutunluk bir izgara uc sutun yan yana
+     kart dizer; defter tek sutundur ve satirlar alt alta akar. Ekranlar
+     Grid/Span yazmaya devam eder -- degisen tek sey ne cizdikleridir,
+     boylece on dokuz ekranin hicbirine dokunmak gerekmedi. */
+  const Grid = body => html`<div class="ledger">${body}</div>`;
+  /* Sutun genisligi artik anlamsiz; korunur ki ekranlar degismesin ve
+     dar bir seride (span-3, span-4) duran icerik gerekirse gene bilinsin. */
+  const Span = (n, body) => html`<div class="lband" data-span="${n}">${body}</div>`;
   const Stack = (body, gap) => html`<div class="${cls('stack', gap === 'sm' && 'stack-sm', gap === 'xs' && 'stack-xs')}">${body}</div>`;
   const Cols = (n, body) => html`<div class="cols-${n}">${body}</div>`;
   const Row = (body, o) => html`<div class="${cls('row', o && o.between && 'between', o && o.wrap && 'wrap', o && o.sm && 'row-sm')}">${body}</div>`;
   const SectionTitle = (title, right) => html`<div class="section-title"><h2>${title}</h2>${when(right, right)}</div>`;
 
   return {
-    Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Card, Box, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, NextUp, Table, Pager, paginate,
     Grid, Span, Stack, Cols, Row, SectionTitle,
   };
