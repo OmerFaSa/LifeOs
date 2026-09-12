@@ -205,6 +205,51 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
       });
     }
 
+
+    /* ---- yönlendirme duyurusu ve odak ----
+
+       Tek sayfalık bir uygulamada gezinme tarayıcının sayfa yüklemesi
+       değildir: adres değişmez, başlık okunmaz, odak yerinde kalır.
+       Ekran okuyucuyla çalışan biri için hiçbir şey olmamış olur. */
+    const duyuruVar = await page.evaluate(() => !!document.getElementById('rota-duyuru'));
+    if(!duyuruVar) problems.push('yönlendirme duyurusu için canlı alan yok (#rota-duyuru)');
+
+    if(duyuruVar && routes.length > 1){
+      await page.evaluate(async r => { await R.App.go(r); }, routes[0]);
+      await wait(300);
+      await page.evaluate(() => { document.getElementById('rota-duyuru').textContent = ''; });
+      await page.evaluate(async r => { await R.App.go(r); }, routes[1]);
+      await wait(420);
+      const sonuc = await page.evaluate(() => ({
+        duyuru:(document.getElementById('rota-duyuru').textContent || '').trim(),
+        odakMain:document.activeElement && document.activeElement.id === 'main',
+      }));
+      if(!sonuc.duyuru) problems.push('ekran değişince duyuru yapılmıyor');
+      if(!sonuc.odakMain) problems.push('ekran değişince odak içeriğe taşınmıyor');
+    }
+
+
+    /* ---- yeniden çizimde odak ----
+
+       Bir düğmeye basmak çoğu zaman yeniden çizim tetikler. Odak
+       korunmazsa `<body>`ye düşer ve bir sonraki Tab kullanıcıyı
+       sayfanın başına götürür: listede bulunduğu yer kaybolur. */
+    await page.evaluate(() => {
+      const d = document.querySelector('#main button, #main a[href], #main [role="button"]');
+      if(d) d.focus();
+    });
+    const odakOnce = await page.evaluate(() =>
+      !!(document.activeElement && document.activeElement.closest
+         && document.activeElement.closest('#main')));
+    if(odakOnce){
+      await page.evaluate(async () => { await R.App.render(); });
+      await wait(320);
+      const odakSonra = await page.evaluate(() =>
+        !!(document.activeElement && document.activeElement.closest
+           && document.activeElement.closest('#main')));
+      if(!odakSonra) problems.push('yeniden çizimde odak içerik alanının dışına düşüyor');
+    }
+
     /* ---- alt sayfa kipliliği ----
 
        Alt sayfa bir dugmeye basarak degil, DOGRUDAN acilir: hangi

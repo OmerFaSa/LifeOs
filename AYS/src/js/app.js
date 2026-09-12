@@ -433,7 +433,23 @@ R.App = (function(){
   const FOCUS_ATTRS = ['data-change','data-act','data-block','data-field','data-i','data-date','data-t','name'];
   function focusSnapshot(){
     const el = document.activeElement;
-    if(!el || !/^(input|textarea|select)$/i.test(el.tagName)) return null;
+    if(!el || el === document.body) return null;
+
+    /* ODAK YALNIZ FORM ALANLARINDA KORUNUYORDU.
+
+       Bir düğmeye basmak çoğu zaman yeniden çizim tetikler; düğme form
+       alanı olmadığı için anlık görüntü alınmıyor, çizimden sonra odak
+       `<body>`ye düşüyordu. Sonuç: klavyeyle çalışan biri her eylemden
+       sonra sayfanın başına dönüyor ve listede bulunduğu yeri kaybediyor.
+
+       Artık odaklanabilir her öge işaretlenir. Ögenin kendisi bulunamazsa
+       (liste değiştiyse) odak içerik alanına döner — sayfanın başına
+       değil. `icerikte` bunu söyler. */
+    const odaklanabilir = /^(input|textarea|select|button|a)$/i.test(el.tagName)
+      || el.getAttribute('role') === 'button'
+      || el.hasAttribute('tabindex');
+    if(!odaklanabilir) return null;
+    const icerikte = !!(el.closest && el.closest('#main'));
     let selector = null;
     if(el.id){
       selector = '#'+el.id.replace(/([^\w-])/g, '\\$1');
@@ -443,8 +459,8 @@ R.App = (function(){
         .filter(Boolean);
       if(parts.length) selector = el.tagName.toLowerCase()+parts.join('');
     }
-    if(!selector) return null;
-    const snap = { selector };
+    if(!selector) return icerikte ? { selector:null, icerikte:true } : null;
+    const snap = { selector, icerikte };
     try{
       if(el.selectionStart != null){ snap.start = el.selectionStart; snap.end = el.selectionEnd; }
     }catch(e){ /* number/date girdilerinde secim okunamaz */ }
@@ -452,9 +468,23 @@ R.App = (function(){
   }
   function restoreFocus(snap){
     if(!snap) return;
+    const icerige = () => {
+      if(!snap.icerikte) return;
+      const main = document.getElementById('main');
+      if(main){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    };
+    if(!snap.selector){ icerige(); return; }
+    /* ARAMA İÇERİK ALANIYLA SINIRLANIR.
+
+       Seçici niteliklerden türetilir (`button[data-act="..."]`) ve tek
+       başına benzersiz değildir: aynı eylem künyede, hero'da ya da alt
+       sayfada da bulunabilir. `document.querySelector` belge sırasında
+       İLK eşleşeni döndürdüğü için odak bambaşka bir düğmeye taşınıyordu.
+       Anlık görüntü içerikte alındıysa arama da orada yapılır. */
+    const kok = snap.icerikte ? (document.getElementById('main') || document) : document;
     let el;
-    try{ el = document.querySelector(snap.selector); }catch(e){ return; }
-    if(!el) return;
+    try{ el = kok.querySelector(snap.selector); }catch(e){ icerige(); return; }
+    if(!el){ icerige(); return; }
     el.focus({ preventScroll:true });
     if(snap.start != null){
       try{ el.setSelectionRange(snap.start, snap.end); }catch(e){}
@@ -518,6 +548,9 @@ R.App = (function(){
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
+      /* Odağı ancak YÖNLENDİRMEDEN sonra taşı: sıradan bir yeniden
+         çizimde taşımak, yazan kullanıcının imlecini alandan koparırdı. */
+      if(rotaDegisti){ rotaDegisti = false; rotayaOdaklan(sc); }
       /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
          `inert` onunla birlikte silinir ve arka plan yeniden okunur
          hale gelir. Cizimden sonra geri konur. */
@@ -568,11 +601,47 @@ R.App = (function(){
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
     if(R.Talk && R.Talk.isActive()) R.Talk.stop();
     S.route = route;
+    rotaDegisti = true;
     applySection(route);
     S.sidebarOpen = false;
     if(route !== 'exams') S.ui.examOpen = S.ui.examOpen;
     window.scrollTo(0,0);
     render();
+  }
+
+
+  /* ---------- yönlendirme duyurusu ve odak ----------
+
+     EKRAN DEĞİŞİNCE EKRAN OKUYUCU HİÇBİR ŞEY SÖYLEMİYORDU.
+
+     Tek sayfalık bir uygulamada gezinme, tarayıcının sayfa yüklemesi
+     değildir: adres değişmez, başlık okunmaz, odak yerinde kalır. Fareyle
+     çalışan biri yeni ekranı görür; klavye ya da ekran okuyucuyla çalışan
+     biri için HİÇBİR ŞEY olmamıştır — odak hâlâ bastığı bağlantıdadır ve
+     altındaki içeriğin değiştiğinden haberi yoktur.
+
+     İki şey yapılır ve yalnız YÖNLENDİRMEDE yapılır:
+
+       · gelinen ekranın adı görünmez bir canlı alana yazılır
+       · odak `<main>`'e taşınır (zaten `tabindex="-1"` taşır)
+
+     Her çizimde yapılsaydı, bir alana yazarken odak elden giderdi. */
+  let rotaDegisti = false;
+
+  function duyur(metin){
+    const el = document.getElementById('rota-duyuru');
+    if(!el || !metin) return;
+    /* Aynı metin üst üste yazılırsa okuyucu ikinciyi seslendirmez;
+       önce boşaltmak duyurunun her seferinde duyulmasını sağlar. */
+    el.textContent = '';
+    setTimeout(() => { el.textContent = metin; }, 30);
+  }
+
+  function rotayaOdaklan(sc){
+    const main = document.getElementById('main');
+    if(main){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    const ad = (sc && sc.title) || '';
+    if(ad) duyur(ad + ' ekranı açıldı');
   }
 
   function applyTheme(){

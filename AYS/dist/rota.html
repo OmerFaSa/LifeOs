@@ -6093,6 +6093,9 @@ tbody tr:hover{ background:var(--surface-2); }
 
 <div id="overlay-root"></div>
 <div id="toast-root" class="toast-root" role="status" aria-live="polite"></div>
+<!-- Yonlendirme duyurusu: ekran degisince ekran okuyucu nereye gelindigini
+     soyler. Gorunmez; yalnizca yardimci teknoloji okur. -->
+<div id="rota-duyuru" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- Derleme damgasi: build.py her derlemede yeniden yazar. -->
 <script>
@@ -6102,7 +6105,7 @@ tbody tr:hover{ background:var(--surface-2); }
 
 window.R = window.R || {};
 
-R.BUILD = { id:'ee520d0', at:'2026-09-12 08:46', dirty:true };
+R.BUILD = { id:'16060ec', at:'2026-09-12 11:14', dirty:true };
 
 /* ==== js/data/curriculum.js ==== */
 /* 40 haftalik uygulama plani — "Hemsirelik Hedefi" belgesinin 4. bolumu.
@@ -6938,11 +6941,41 @@ R.EXAM_TEMPLATES = [
 R.SKIP_REASONS = ['Süre yoktu','Beklenenden zordu','Sağlık / enerji','Kaynak yoktu','Plan gerçekçi değildi','Diğer'];
 
 /* Kesinlik etiketleri (bolum 1) */
-R.CERTAINTY = {
+/* KAYNAK (provenance) — bir REFERANS TABLOSUNUN nereden geldigi.
+
+   Bu sozluk "sayi ne kadar kesin" sorusunu degil, "bu esik hangi
+   belgeye dayaniyor" sorusunu cevaplar: ÖSYM'nin resmi tablosu mu,
+   gecen yilin verisi mi, bizim planlama varsayimimiz mi.
+
+   Adi eskiden R.CERTAINTY idi ve bu bir karisiklik uretiyordu: kardes
+   uygulamalarda ayni ad OLCUM KESINLIGINI tasir (asagida). Ikisi farkli
+   sorulardir ve ayni ekranda yan yana durabilirler — bir sirali tahmini
+   hem "2026 referansi" (kaynak) hem "hesaplandi" (kesinlik) olabilir. */
+R.PROVENANCE = {
   official:{ label:'Resmî', tone:'info', detail:'ÖSYM / YÖK belgesine dayanır.' },
   ref2026:{ label:'2026 referansı', tone:'muted', detail:'Geçmiş yıl verisidir.' },
   estimate:{ label:'Tahmin', tone:'warn', detail:'2027 için planlama varsayımıdır.' },
   coaching:{ label:'Koçluk hedefi', tone:'ok', detail:'Performans yönetimi önerisidir; yerleşme garantisi değildir.' },
+};
+
+/* KESINLIK — bir SAYININ nasil elde edildigi.
+
+   SPI'deki SP.CERTAINTY ile BIREBIR ayni dort etiket. Ayni olmasi
+   kasitlidir: HKM katmani uc modulden gelen veriyi bu etikete gore
+   denetleyecek ve "veri yok" alani asla 0 olarak yorumlamayacak.
+
+   Son satir en onemlisi. Girilmemis bir alan sifir DEGILDIR:
+   girilmemis bos sayisini 0 saymak, kullaniciya vermedigi bir bilgiyi
+   geri okutur ve uzerine tavsiye uretir. */
+R.CERTAINTY = {
+  measured:{ label:'ölçüldü', tone:'ok',
+    detail:'Kullanıcının girdiği ya da zamanlayıcının tuttuğu ham veri.' },
+  estimated:{ label:'tahmin', tone:'warn',
+    detail:'Öznel değerlendirme ya da planlama varsayımı. Düzeltilebilir.' },
+  derived:{ label:'hesaplandı', tone:'info',
+    detail:'İki ölçülmüş değerden formülle üretildi.' },
+  missing:{ label:'veri yok', tone:'muted',
+    detail:'Hiç girilmemiş. Sıfır sayılmaz, ortalamaya girmez.' },
 };
 
 /* ==== js/data/activities.js ==== */
@@ -7062,7 +7095,7 @@ R.BREAK_RULE = {
    farklı yıllarda farklı puana ve sıraya karşılık gelir. Buradaki katsayılar
    ve sıra tablosu, son yılların açıklanmış sonuçlarından çıkarılmış
    KOÇLUK BANDI'dır. Tek sayı olarak sunulmaz; her zaman bir aralık ve
-   kesinlik etiketiyle gösterilir (bkz. R.CERTAINTY).
+   kesinlik etiketiyle gösterilir (bkz. R.PROVENANCE).
 
    Kural motoru bu tabloyu okur; LLM okumaz ve sıra vaadi veremez
    (R.PROMPTS.forbidden → 'rank-promise'). */
@@ -8975,7 +9008,7 @@ R.h = (function(){
 
 window.R = window.R || {};
 
-R.SCHEMA_VERSION = 4;
+R.SCHEMA_VERSION = 5;
 
 R.Store = (function(){
   /* Cok kullanicili kullanim: her profil kendi anahtarinda durur.
@@ -9629,6 +9662,51 @@ R.Model = (function(){
   }
 
   /* ---------- deneme ---------- */
+
+  /* BOS SAYISI UYDURULMAZ.
+
+     Giris formunda "boş" alani bos birakildiginda `Number('')||0` onu
+     SIFIR yapiyordu ve kayit, kullanicinin hic vermedigi bir bilgiyle
+     dolduruluyordu. Uzerine de tavsiye uretiliyordu: `blankStrategy`
+     bu uydurma sifirlari ortalamaya katip "daha cok soruya girmek sana
+     net kazandiriyor" diyebiliyordu.
+
+     Uc durum ve uc etiket:
+
+       olculdu     kullanici alani doldurdu
+       hesaplandi  doldurmadi ama testin soru sayisi biliniyor:
+                   bos = soru - dogru - yanlis
+       veri yok    ikisi de yok; sayi NULL kalir, ortalamaya girmez
+
+     Dorduncu bir durum daha var ve sessizce yutulmaz: dogru+yanlis
+     testin soru sayisini ASIYORSA giris tutarsizdir. O zaman bos
+     turetilmez (negatif bir sayi uretmek yerine) ve `blankCert` "veri
+     yok" olur; ekran bunu rozetle soyler. */
+  function blankCertainty(correct, wrong, raw, q){
+    const yazildi = raw != null && String(raw).trim() !== '';
+    if(yazildi){
+      const n = Number(raw);
+      if(isFinite(n) && n >= 0) return { blank:Math.round(n), blankCert:'measured' };
+    }
+    const c = Number(correct) || 0, w = Number(wrong) || 0;
+    const toplam = Number(q);
+    if(isFinite(toplam) && toplam > 0){
+      const kalan = toplam - c - w;
+      if(kalan >= 0) return { blank:kalan, blankCert:'derived' };
+    }
+    return { blank:null, blankCert:'missing' };
+  }
+
+  /* Bir denemenin bos sayisi ORTALAMAYA GIREBILIR mi: ancak her testin
+     bos sayisi biliniyorsa. Bir tanesi bile eksikse deneme disarida
+     kalir — eksik olani sifir sayip toplami kucultmek, tam tersi bir
+     sonuca goturur. */
+  function blankKnown(exam){
+    const tests = (exam && exam.tests) || [];
+    if(!tests.length) return false;
+    return tests.every(t => t.blank != null && t.blankCert !== 'missing');
+  }
+
   function examNet(exam){
     return (exam.tests || []).reduce((s,t)=> s + (Number(t.correct||0) - Number(t.wrong||0)/4), 0);
   }
@@ -10184,10 +10262,21 @@ R.Model = (function(){
   }
 
   /* ---------- dikkat dagilmasi ---------- */
+  /* Sayacin O GUN KULLANILDIGI ayrica isaretlenir.
+
+     `distractions` gun kaydi dogdugunda 0 olarak baslar; yani "bugun hic
+     bolunmedim" ile "bugun sayaci hic acmadim" ayni sayiya bakiyordu.
+     Ortalama butun gunler uzerinden alininca, sayaci kullanmadigin her
+     gun ortalamayi asagi cekiyor ve sistem "odak sorunu gorunmuyor"
+     diyordu — kullanicinin vermedigi bir veriden uretilmis bir teselli.
+
+     Bayrak yalnizca ILERI dogru calisir: eski gunlerde yok ve olmasi da
+     gerekmez, `distractionTrend` onlari zaten disarida birakir. */
   async function addDistraction(dateISO){
     const iso = dateISO || U.todayISO();
     const day = await ensureDay(iso);
     day.distractions = (day.distractions || 0) + 1;
+    day.distractionsTracked = true;
     await saveDay(iso);
     return day.distractions;
   }
@@ -10210,6 +10299,45 @@ R.Model = (function(){
     // v2 → v3: ogrenme akisi varliklari (videoNotes, activities, mood, breaks).
     // v3 → v4: takvim istisnalari, sureli oturumlar, profiller, kotu gun alanlari.
     // Goc yikici degildir; yeni koleksiyonlar bos baslar, ilk yazmada olusur.
+
+    // v4 → v5: UYDURMA SIFIRLARIN ONARIMI.
+    //
+    // v5'ten once "boş" alani bos birakildiginda kayda 0 yaziliyordu.
+    // O sifirlar kullanicinin verdigi bir bilgi degil, formun urettigi
+    // bir dolgudur ve `blankStrategy` onlari ortalamaya katiyordu.
+    //
+    // Onarim yalnizca KENDINI ELE VEREN sifirlara dokunur: testin soru
+    // sayisi biliniyorsa ve dogru+yanlis o sayidan azsa, gercek bos
+    // sayisi sifir OLAMAZ. Boyle bir kayit yeniden turetilir.
+    // Sifirdan buyuk her deger elle yazilmis sayilir ve korunur; soru
+    // sayisi bilinmeyen test "veri yok" olur.
+    if(from < 5){
+      /* Sablon once kimlikle, yoksa ADIYLA bulunur: v5'ten once elle
+         girilen denemeler `templateId` tasimiyordu, yalnizca `type`. */
+      const sablonTest = (exam, i) => {
+        const t = R.EXAM_TEMPLATES.find(x => x.id === exam.templateId)
+          || R.EXAM_TEMPLATES.find(x => x.name === exam.type);
+        return (t && t.tests[i]) ? t.tests[i].q : null;
+      };
+      for(const exam of R.S.exams){
+        let degisti = false;
+        (exam.tests || []).forEach((t, i) => {
+          if(t.blankCert) return;                       // zaten etiketli
+          const q = sablonTest(exam, i);
+          const c = Number(t.correct) || 0, w = Number(t.wrong) || 0;
+          if(Number(t.blank) > 0){ t.blankCert = 'measured'; degisti = true; return; }
+          if(isFinite(q) && q > 0 && c + w < q){
+            t.blank = q - c - w; t.blankCert = 'derived'; degisti = true; return;
+          }
+          if(isFinite(q) && q > 0 && c + w === q){      // gercekten sifir bos
+            t.blank = 0; t.blankCert = 'derived'; degisti = true; return;
+          }
+          t.blank = null; t.blankCert = 'missing'; degisti = true;
+        });
+        if(degisti) await R.Store.set('exams/' + exam.id, exam);
+      }
+    }
+
     R.S.meta = R.S.meta || {};
     R.S.meta.schemaVersion = R.SCHEMA_VERSION;
     R.S.meta.migratedAt = new Date().toISOString();
@@ -10296,7 +10424,7 @@ R.Model = (function(){
     defaultWeek, ensureWeek, saveWeek,
     defaultDay, ensureDay, saveDay, dayOf,
     ensureTopics, topicState, setTopicState,
-    examNet, testNet, saveExam, deleteExam,
+    examNet, testNet, saveExam, deleteExam, blankCertainty, blankKnown,
     saveError, deleteError,
     newCard, saveCard, deleteCard, schedule, prioritizedDue,
     saveReview, saveDecision,
@@ -11689,14 +11817,31 @@ R.Analytics = (function(){
     };
   }
 
-  /* ---------- boş bırakma stratejisi ---------- */
+  /* ---------- boş bırakma stratejisi ----------
+
+     BOŞ SAYISI BİLİNMEYEN DENEME ORTALAMAYA GİRMEZ. Eskiden girerdi:
+     `t.blank || 0` yazılmamış her alanı sıfır sayıyor, ortalama
+     olduğundan küçük çıkıyor ve tavsiye tersine dönebiliyordu —
+     "ortalamadan az boş bıraktın, daha çok soruya gir" cümlesi
+     kullanıcının hiç vermediği bir sayıdan üretiliyordu.
+
+     Kaç denemenin dışarıda kaldığı sonuçta YAZILIR: bir ortalamanın
+     kaç ölçümden geldiğini bilmeden ona güvenilmez. */
   function blankStrategy(family){
-    const list = C().fullExams(family || 'TYT');
-    if(list.length < 3) return { ok:false, why:'En az 3 tam deneme gerekir.' };
+    const hepsi = C().fullExams(family || 'TYT');
+    const list = hepsi.filter(M.blankKnown);
+    const disarida = hepsi.length - list.length;
+    if(list.length < 3){
+      return { ok:false, disarida,
+        why:disarida
+          ? 'Boş sayısı bilinen en az 3 tam deneme gerekir; '
+            + disarida + ' denemede boş alanı doldurulmamış.'
+          : 'En az 3 tam deneme gerekir.' };
+    }
 
     const points = list.map(e => ({
       date:e.date,
-      blank:U.sum((e.tests || []).map(t => t.blank || 0)),
+      blank:U.sum((e.tests || []).map(t => Number(t.blank) || 0)),
       wrong:U.sum((e.tests || []).map(t => t.wrong || 0)),
       net:U.round(M.examNet(e), 2),
     }));
@@ -11709,6 +11854,11 @@ R.Analytics = (function(){
 
     return {
       ok:true, points, avgBlank, best, worst, dir,
+      sayilan:list.length, disarida,
+      kapsam:disarida
+        ? list.length + ' denemeden hesaplandı; ' + disarida
+          + ' denemede boş alanı doldurulmadığı için dışarıda kaldı.'
+        : list.length + ' denemeden hesaplandı.',
       note:dir === 'less'
         ? 'En iyi denemende ortalamadan az boş bıraktın. Daha çok soruya girmek sana net kazandırıyor.'
         : dir === 'more'
@@ -11981,25 +12131,55 @@ R.Analytics = (function(){
     };
   }
 
-  /* ---------- dikkat dağılması ---------- */
+  /* ---------- dikkat dağılması ----------
+
+     SAYAÇ AÇILMAMIŞ GÜN ORTALAMAYA GİRMEZ.
+
+     `distractions` gün kaydı doğduğunda 0 olarak başlar, yani "bugün hiç
+     bölünmedim" ile "bugün sayacı hiç açmadım" aynı sayıya bakıyordu.
+     Ortalama bütün günler üzerinden alınınca sayacın kullanılmadığı her
+     gün ortalamayı aşağı çekiyor ve sonuç hep aynı cümleye varıyordu:
+     «Bölünme düşük; odak sorunu görünmüyor.» Kullanıcının vermediği bir
+     veriden üretilmiş bir teselli.
+
+     Artık yalnızca sayacın kullanıldığı günler sayılır. Bir gün iki yolla
+     sayılabilir: bayrağı varsa (v5 sonrası) ya da sayısı sıfırdan
+     büyükse (eski kayıtlar — sıfırdan büyük bir sayı elle üretilmiştir).
+
+     Üç günden az kapsamda ortalama üretilmez: iki günlük bir örnekten
+     «günde ortalama 6 bölünme» cümlesi kurmak, ölçmeden konuşmaktır. */
   function distractionTrend(days){
     const n = days || 14;
     const rows = [];
+    let gunKaydi = 0;
     for(let i = n - 1; i >= 0; i--){
       const iso = U.iso(U.addDays(U.today(), -i));
       const d = S.days[iso];
       if(!d) continue;
-      rows.push({ date:iso, count:d.distractions || 0 });
+      gunKaydi++;
+      const sayildi = d.distractionsTracked === true || Number(d.distractions) > 0;
+      if(!sayildi) continue;
+      rows.push({ date:iso, count:Number(d.distractions) || 0 });
     }
-    if(!rows.length) return { ok:false, why:'Gün kaydı yok.' };
+    if(!gunKaydi) return { ok:false, why:'Gün kaydı yok.' };
+    if(rows.length < 3){
+      return { ok:false, sayilan:rows.length, gunKaydi,
+        why:'Bölünme sayacı son ' + n + ' günde yalnızca ' + rows.length
+          + ' gün kullanıldı. Ortalama üretmek için en az 3 gün gerekir.' };
+    }
+
     const avg = U.round(U.sum(rows.map(r => r.count)) / rows.length, 1);
     return {
-      ok:true, rows, avg,
+      ok:true, rows, avg, sayilan:rows.length, gunKaydi,
+      kapsam:rows.length + '/' + gunKaydi + ' günde sayaç kullanıldı; '
+        + 'ortalama yalnızca o günlerden hesaplandı.',
       note:avg >= 5
-        ? 'Günde ortalama ' + avg + ' bölünme. Telefonu başka odaya koymak tek en etkili müdahale.'
+        ? 'Sayacın açık olduğu günlerde ortalama ' + avg + ' bölünme. '
+          + 'Telefonu başka odaya koymak tek en etkili müdahale.'
         : avg >= 2
-        ? 'Günde ortalama ' + avg + ' bölünme. Blok başında bildirimleri kapatmak yeterli olabilir.'
-        : 'Bölünme düşük; odak sorunu görünmüyor.',
+        ? 'Sayacın açık olduğu günlerde ortalama ' + avg + ' bölünme. '
+          + 'Blok başında bildirimleri kapatmak yeterli olabilir.'
+        : 'Sayacın açık olduğu günlerde bölünme düşük.',
     };
   }
 
@@ -12206,8 +12386,18 @@ R.UI = (function(){
     return '<span class="tagdot" style="background:'+(t ? t.color : 'var(--text-3)')+'"></span>';
   }
 
+  /* Iki ayri rozet, iki ayri soru: `provenance` bir referans tablosunun
+     nereden geldigini, `certainty` bir sayinin nasil elde edildigini
+     soyler. Ayni ekranda yan yana durabilirler. */
+  function provenance(key){
+    const c = R.PROVENANCE[key];
+    if(!c) return '';
+    return String(R.C.Badge({ label:c.label, tone:c.tone }));
+  }
+
   function certainty(key){
     const c = R.CERTAINTY[key];
+    if(!c) return '';
     return String(R.C.Badge({ label:c.label, tone:c.tone }));
   }
 
@@ -12815,7 +13005,7 @@ R.UI = (function(){
 
   return {
     icon, trend, motif, gauge,
-    tagDot, certainty, paretoBars,
+    tagDot, certainty, provenance, paretoBars,
     lineChart, barChart, donut, sparkline, stackBar, heatmap, legend,
     rangeBar, macroSplit,
     hint, rail, openHint, closeHint, isHintOpen,
@@ -13894,11 +14084,16 @@ R.ExamRun = (function(){
     const sum = summary();
     const tests = run.tests.map((t, i) => {
       const sc = (scores && scores[i]) || {};
+      const c = Number(sc.correct) || 0, w = Number(sc.wrong) || 0;
+      /* Giris formundaki kuralin aynisi: bos birakilan "boş" alani sifir
+         sayilmaz, testin soru sayisindan turetilir. */
+      const bos = R.Model.blankCertainty(c, w, sc.blank, t.q);
       return {
         name:t.name,
-        correct:Number(sc.correct) || 0,
-        wrong:Number(sc.wrong) || 0,
-        blank:Number(sc.blank) || 0,
+        correct:c,
+        wrong:w,
+        blank:bos.blank,
+        blankCert:bos.blankCert,
         minutes:Math.round(sum.perTest[i].seconds / 60),
       };
     });
@@ -21694,7 +21889,7 @@ R.Palette = (function(){
   function isFocusOpen(){ return !!document.getElementById('focusmode'); }
 
   return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock,
-    veriKaydet, veriKomutu };
+    veriKaydet, veriKomutu, commands };
 })();
 
 /* ==== js/core/setup.js ==== */
@@ -23793,16 +23988,28 @@ R.Screens.exams = (function(){
       const publisher = document.getElementById('ex-pub').value.trim();
       const duration = Number(document.getElementById('ex-dur').value) || tmpl.duration;
       const rows = Array.prototype.slice.call(document.querySelectorAll('#ex-tests [data-test-row]'));
-      const tests = rows.map(r => {
+      const tests = rows.map((r, i) => {
         const g = sel => r.querySelector('[data-t="'+sel+'"]').value;
-        const c = Number(g('c'))||0, w = Number(g('w'))||0, b = Number(g('b'))||0;
-        return { name:g('name')||'Test', correct:c, wrong:w, blank:b, minutes:null };
-      }).filter(t => t.correct || t.wrong || t.blank);
+        const ham = { c:g('c'), w:g('w'), b:g('b') };
+        /* HIC DOKUNULMAMIS SATIR ATILIR. Once bu bakilir: bos bir satirin
+           "boş" sayisini soru sayisindan turetmek, girilmemis bir testi
+           "kirk soru bos birakildi" diye kaydederdi. */
+        const dolu = ['c','w','b'].some(k => String(ham[k]).trim() !== '');
+        if(!dolu) return null;
+        const c = Number(ham.c)||0, w = Number(ham.w)||0;
+        /* "boş" alani BOS BIRAKILDIYSA sifir yazilmaz: sablonun soru
+           sayisindan turetilir, o da yoksa bilinmiyor kalir. */
+        const q = (tmpl && tmpl.tests[i]) ? tmpl.tests[i].q : null;
+        const bos = M.blankCertainty(c, w, ham.b, q);
+        return { name:g('name')||'Test', correct:c, wrong:w,
+          blank:bos.blank, blankCert:bos.blankCert, minutes:null };
+      }).filter(Boolean);
 
       if(!tests.length){ UI.toast('En az bir test doldurulmalı'); return; }
 
       const exam = {
-        id:U.uid('e'), date, type:tmpl.name, family:tmpl.family, kind:tmpl.kind,
+        id:U.uid('e'), date, type:tmpl.name, templateId:tmpl.id,
+        family:tmpl.family, kind:tmpl.kind,
         publisher, duration, tests, protocol:{},
         createdAt:new Date().toISOString(), analysisCompletedAt:null,
       };
@@ -26923,7 +27130,7 @@ R.Screens.target = (function(){
     if(!est.ok){
       return K.Card({
         title:'Tahmini sıra', hint:'rank', sub:'Kural motorunun ürettiği bant',
-        badge:raw(UI.certainty('estimate')),
+        badge:raw(UI.provenance('estimate')),
         body:K.Empty({ icon:'target', text:est.why,
           action:K.Button({ label:'Deneme ekle', size:'sm', tone:'primary',
             act:'go', data:{ 'data-route':'exams' } }) }),
@@ -26938,7 +27145,7 @@ R.Screens.target = (function(){
     return K.Card({
       title:'Tahmini sıra', hint:'rank',
       sub:est.samples+' tam denemenin medyanından · '+(est.kind === 'SAY' ? 'SAY' : 'yalnız TYT'),
-      badge:raw(UI.certainty('estimate')),
+      badge:raw(UI.provenance('estimate')),
       body:html`
         <div class="estimate">
           <div class="estimate__rank">${U.fmtNum(est.rankBest)} – ${U.fmtNum(est.rankWorst)}</div>
@@ -26983,7 +27190,7 @@ R.Screens.target = (function(){
     const p = S.profile;
     return K.Card({
       title:'OBP katkısı', hint:'obp', sub:'Diploma notu × 5, ardından × katsayı',
-      badge:raw(UI.certainty('estimate')),
+      badge:raw(UI.provenance('estimate')),
       body:html`
         ${K.Cols(2, [
           K.Field({ label:'Diploma notu',
@@ -27041,7 +27248,7 @@ R.Screens.target = (function(){
   function certaintyLegend(){
     return K.Span(12, html`<div class="row wrap gap-6">
       <span class="mono-label as-center">Kesinlik</span>
-      ${map(Object.keys(R.CERTAINTY), k => K.Badge({ label:R.CERTAINTY[k].label, tone:R.CERTAINTY[k].tone }))}
+      ${map(Object.keys(R.PROVENANCE), k => K.Badge({ label:R.PROVENANCE[k].label, tone:R.PROVENANCE[k].tone }))}
       ${raw(UI.hint('certainty'))}</div>`);
   }
 
@@ -27057,7 +27264,7 @@ R.Screens.target = (function(){
           title:'Hedef katmanları', hint:'tiers',
           sub:p.program+' — 2026 taban başarı sırası '+U.fmtNum(R.PROGRAM.refRank)
             + ' ('+R.PROGRAM.refQuota+'/'+R.PROGRAM.refQuota+' doluluk)',
-          badge:raw(UI.certainty('ref2026')),
+          badge:raw(UI.provenance('ref2026')),
           body:html`${tierTable()}
             <p class="tiny dim mt-10">Puan yerine başarı sırası izlenir; standartlaştırma nedeniyle
               aynı net ve puan farklı yıllarda farklı sıraya dönüşebilir.</p>`,
@@ -27065,7 +27272,7 @@ R.Screens.target = (function(){
         K.Card({
           title:'Net matrisi', hint:'net-matrix',
           sub:'Hedef bant ile son 4 tam denemenin test bazlı medyanı',
-          badge:raw(UI.certainty('coaching')),
+          badge:raw(UI.provenance('coaching')),
           body:netMatrix(),
         }),
         prefsCard(),
@@ -27079,7 +27286,7 @@ R.Screens.target = (function(){
         ]),
         obpCard(),
         K.Card({
-          title:'2026 sıra referansları', badge:raw(UI.certainty('ref2026')),
+          title:'2026 sıra referansları', badge:raw(UI.provenance('ref2026')),
           body:html`
             ${K.Table({ tight:true, headers:['Program', { label:'Taban sıra', num:true }],
               rows:R.RANK_REFS.map(r => [r.uni,
@@ -27547,7 +27754,8 @@ R.Screens.analytics = (function(){
           K.Stat({ label:'En iyi deneme', value:U.fmtNet(b.best.net), note:b.best.blank+' boş' }),
           K.Stat({ label:'En düşük', value:U.fmtNet(b.worst.net), note:b.worst.blank+' boş' }),
         ])}
-        <div class="mt-12">${K.Notice({ tone:b.dir === 'same' ? 'info' : 'ok', body:b.note })}</div>`,
+        <div class="mt-12">${K.Notice({ tone:b.dir === 'same' ? 'info' : 'ok', body:b.note })}</div>
+        <p class="tiny dim mt-8">${b.kapsam}</p>`,
     });
   }
 
@@ -27634,7 +27842,7 @@ R.Screens.analytics = (function(){
         K.Card({
           title:'Tahmini sıra zaman içinde', hint:'estimate',
           sub:'Her noktada son 3 denemenin medyanı — tek fotoğraf değil film',
-          badge:raw(UI.certainty('estimate')),
+          badge:raw(UI.provenance('estimate')),
           body:html`
             ${raw(UI.lineChart([{ data:series }], { labels, height:210 }))}
             ${K.Cols(3, [
@@ -27808,7 +28016,8 @@ R.Screens.analytics = (function(){
           body:dist.ok
             ? html`${raw(UI.barChart(dist.rows.map(r => ({ label:U.fmtShort(r.date).split(' ')[0], value:r.count })),
                 { goodAt:0 }))}
-              <div class="mt-12">${K.Notice({ tone:dist.avg >= 5 ? 'warn' : 'info', body:dist.note })}</div>`
+              <div class="mt-12">${K.Notice({ tone:dist.avg >= 5 ? 'warn' : 'info', body:dist.note })}</div>
+              <p class="tiny dim mt-8">${dist.kapsam}</p>`
             : K.Empty({ icon:'warn', text:dist.why }) }),
       ])),
     ]);
@@ -28155,7 +28364,7 @@ R.Screens.guide = (function(){
     return K.Grid([
       K.Span(8, K.Card({
         title:'2027 kritik işlemler', sub:'Sıra / panik takvimi',
-        badge:raw(UI.certainty('estimate')),
+        badge:raw(UI.provenance('estimate')),
         body:html`<div class="list">${map(R.OFFICIAL_CALENDAR, r => html`
           <div class="listitem">
             <div class="mw-150"><b class="small">${r.when}</b>
@@ -31804,7 +32013,23 @@ R.App = (function(){
   const FOCUS_ATTRS = ['data-change','data-act','data-block','data-field','data-i','data-date','data-t','name'];
   function focusSnapshot(){
     const el = document.activeElement;
-    if(!el || !/^(input|textarea|select)$/i.test(el.tagName)) return null;
+    if(!el || el === document.body) return null;
+
+    /* ODAK YALNIZ FORM ALANLARINDA KORUNUYORDU.
+
+       Bir düğmeye basmak çoğu zaman yeniden çizim tetikler; düğme form
+       alanı olmadığı için anlık görüntü alınmıyor, çizimden sonra odak
+       `<body>`ye düşüyordu. Sonuç: klavyeyle çalışan biri her eylemden
+       sonra sayfanın başına dönüyor ve listede bulunduğu yeri kaybediyor.
+
+       Artık odaklanabilir her öge işaretlenir. Ögenin kendisi bulunamazsa
+       (liste değiştiyse) odak içerik alanına döner — sayfanın başına
+       değil. `icerikte` bunu söyler. */
+    const odaklanabilir = /^(input|textarea|select|button|a)$/i.test(el.tagName)
+      || el.getAttribute('role') === 'button'
+      || el.hasAttribute('tabindex');
+    if(!odaklanabilir) return null;
+    const icerikte = !!(el.closest && el.closest('#main'));
     let selector = null;
     if(el.id){
       selector = '#'+el.id.replace(/([^\w-])/g, '\\$1');
@@ -31814,8 +32039,8 @@ R.App = (function(){
         .filter(Boolean);
       if(parts.length) selector = el.tagName.toLowerCase()+parts.join('');
     }
-    if(!selector) return null;
-    const snap = { selector };
+    if(!selector) return icerikte ? { selector:null, icerikte:true } : null;
+    const snap = { selector, icerikte };
     try{
       if(el.selectionStart != null){ snap.start = el.selectionStart; snap.end = el.selectionEnd; }
     }catch(e){ /* number/date girdilerinde secim okunamaz */ }
@@ -31823,9 +32048,23 @@ R.App = (function(){
   }
   function restoreFocus(snap){
     if(!snap) return;
+    const icerige = () => {
+      if(!snap.icerikte) return;
+      const main = document.getElementById('main');
+      if(main){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    };
+    if(!snap.selector){ icerige(); return; }
+    /* ARAMA İÇERİK ALANIYLA SINIRLANIR.
+
+       Seçici niteliklerden türetilir (`button[data-act="..."]`) ve tek
+       başına benzersiz değildir: aynı eylem künyede, hero'da ya da alt
+       sayfada da bulunabilir. `document.querySelector` belge sırasında
+       İLK eşleşeni döndürdüğü için odak bambaşka bir düğmeye taşınıyordu.
+       Anlık görüntü içerikte alındıysa arama da orada yapılır. */
+    const kok = snap.icerikte ? (document.getElementById('main') || document) : document;
     let el;
-    try{ el = document.querySelector(snap.selector); }catch(e){ return; }
-    if(!el) return;
+    try{ el = kok.querySelector(snap.selector); }catch(e){ icerige(); return; }
+    if(!el){ icerige(); return; }
     el.focus({ preventScroll:true });
     if(snap.start != null){
       try{ el.setSelectionRange(snap.start, snap.end); }catch(e){}
@@ -31889,6 +32128,9 @@ R.App = (function(){
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
+      /* Odağı ancak YÖNLENDİRMEDEN sonra taşı: sıradan bir yeniden
+         çizimde taşımak, yazan kullanıcının imlecini alandan koparırdı. */
+      if(rotaDegisti){ rotaDegisti = false; rotayaOdaklan(sc); }
       /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
          `inert` onunla birlikte silinir ve arka plan yeniden okunur
          hale gelir. Cizimden sonra geri konur. */
@@ -31939,11 +32181,47 @@ R.App = (function(){
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
     if(R.Talk && R.Talk.isActive()) R.Talk.stop();
     S.route = route;
+    rotaDegisti = true;
     applySection(route);
     S.sidebarOpen = false;
     if(route !== 'exams') S.ui.examOpen = S.ui.examOpen;
     window.scrollTo(0,0);
     render();
+  }
+
+
+  /* ---------- yönlendirme duyurusu ve odak ----------
+
+     EKRAN DEĞİŞİNCE EKRAN OKUYUCU HİÇBİR ŞEY SÖYLEMİYORDU.
+
+     Tek sayfalık bir uygulamada gezinme, tarayıcının sayfa yüklemesi
+     değildir: adres değişmez, başlık okunmaz, odak yerinde kalır. Fareyle
+     çalışan biri yeni ekranı görür; klavye ya da ekran okuyucuyla çalışan
+     biri için HİÇBİR ŞEY olmamıştır — odak hâlâ bastığı bağlantıdadır ve
+     altındaki içeriğin değiştiğinden haberi yoktur.
+
+     İki şey yapılır ve yalnız YÖNLENDİRMEDE yapılır:
+
+       · gelinen ekranın adı görünmez bir canlı alana yazılır
+       · odak `<main>`'e taşınır (zaten `tabindex="-1"` taşır)
+
+     Her çizimde yapılsaydı, bir alana yazarken odak elden giderdi. */
+  let rotaDegisti = false;
+
+  function duyur(metin){
+    const el = document.getElementById('rota-duyuru');
+    if(!el || !metin) return;
+    /* Aynı metin üst üste yazılırsa okuyucu ikinciyi seslendirmez;
+       önce boşaltmak duyurunun her seferinde duyulmasını sağlar. */
+    el.textContent = '';
+    setTimeout(() => { el.textContent = metin; }, 30);
+  }
+
+  function rotayaOdaklan(sc){
+    const main = document.getElementById('main');
+    if(main){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    const ad = (sc && sc.title) || '';
+    if(ad) duyur(ad + ' ekranı açıldı');
   }
 
   function applyTheme(){
