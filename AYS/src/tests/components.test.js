@@ -74,8 +74,10 @@
        sol sütun kalır, içerik sağa sıkışırdı. */
     it('Card başlıksızken geniş satır olur', function(){
       const out = String(C.Card({ body:'x' }));
-      expect(out.indexOf('lrow__side')).toBe(-1);
       expect(out).toContain('lrow--wide');
+      /* Künye sütunu açılmaz: geniş satırda künye içeriğin ÜSTÜNDE ve
+         satır içi durur, 196 piksellik boş bir sol sütun bırakmaz. */
+      expect(out.indexOf('lrow__label')).toBe(-1);
     });
     it('Card alt bilgiyi içerik sütununda tutar', function(){
       const out = String(C.Card({ title:'B', body:'x', foot:'alt' }));

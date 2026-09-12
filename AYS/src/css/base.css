@@ -44,12 +44,10 @@ button{ cursor:pointer; }
 a{ color:var(--primary); text-decoration-thickness:1px; text-underline-offset:2px; }
 a:hover{ color:var(--primary-hover); }
 
-/* Odak halkası bölümün renginde ve gövdeden ayrık. Tarayıcı
-   varsayılanı kalın ve kutu biçimlidir; burada ince ve boşluklu. */
-:where(a, button, input, select, textarea, [tabindex]):focus-visible{
-  outline:2px solid var(--sec);
+:focus-visible{
+  outline:2px solid var(--primary);
   outline-offset:2px;
-  border-radius:var(--r-sm);
+  border-radius:4px;
 }
 
 ::selection{ background:var(--primary); color:var(--primary-ink); }
@@ -124,3 +122,96 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 .boot__bar span{ display:block; width:40%; height:100%; background:var(--primary); animation:boot-slide 1.1s ease-in-out infinite; }
 @keyframes boot-slide{ 0%{transform:translateX(-100%);} 100%{transform:translateX(350%);} }
 .boot__text{ font-size:var(--fs-sm); }
+
+
+/* ================= zanaat detayları =================
+
+   Bu blok yeni bir bileşen eklemez; var olanların okunuşunu düzeltir.
+   Bir arayüzü "yapılmış" değil "tasarlanmış" gösteren şey bunlardır. */
+
+/* Değişken serif'in optik boyutu: büyük puntoda ince ve zarif, küçük
+   puntoda kalın ve okunur çizilir. Sabit bir kesim her iki boyutta da
+   ödün verir. */
+.hero__title, .sect__h h2, .card__head h3, .brand__text b, .navsheet__item b{
+  font-optical-sizing:auto;
+  font-variation-settings:'opsz' 40;
+}
+.card__head h3, .brand__text b{ font-variation-settings:'opsz' 20; }
+
+/* Sayılar: tabular genişlik + çizgili sıfır. Bir ölçüm listesinde 0 ile
+   O'nun karışması kabul edilemez. */
+.num, .herostat__value, .kpi__value, .resrow__val, .entryrow__in,
+table td, table th{
+  font-variant-numeric:tabular-nums slashed-zero;
+  font-feature-settings:'tnum' 1, 'zero' 1;
+}
+
+/* Uzun cümleler dengeli sarar: son satırda tek kelime kalmaz. */
+.hero__lede, .sect__h p, .card__head p{ text-wrap:pretty; }
+
+/* Odak halkası bölümün renginde ve gövdeden ayrık. Tarayıcı
+   varsayılanı kalın ve kutu biçimlidir; burada ince ve boşluklu. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible{
+  outline:2px solid var(--sec);
+  outline-offset:2px;
+  border-radius:var(--r-sm);
+}
+
+/* Seçim rengi de bölümden gelir. */
+::selection{ background:var(--sec-soft); color:var(--text); }
+
+/* Kaydırma çubuğu içeriğin bir parçası gibi durur, sistem eklentisi
+   gibi değil. */
+* { scrollbar-width:thin; scrollbar-color:var(--border-strong) transparent; }
+*::-webkit-scrollbar{ width:10px; height:10px; }
+*::-webkit-scrollbar-track{ background:transparent; }
+*::-webkit-scrollbar-thumb{
+  background:var(--border-strong); border-radius:10px;
+  border:3px solid var(--bg);
+}
+*::-webkit-scrollbar-thumb:hover{ background:var(--text-3); }
+
+/* Sayfanın en üstünde bölümün renginde çok ince bir şerit. Hangi
+   bölümde olunduğunu, gezinmeye bakmadan, kenardan söyler. */
+.site::before{
+  content:''; position:fixed; top:0; left:0; right:0; height:2px;
+  background:var(--sec); z-index:calc(var(--z-nav) + 1);
+}
+
+/* Sayfa değişiminde içerik altı piksel yükselerek gelir. Geçişin
+   kendisi görünmez; görünen tek şey, sayfanın "yerleşmiş" olmasıdır. */
+@keyframes content-in{
+  from{ opacity:0; transform:translateY(6px); }
+  to{ opacity:1; transform:none; }
+}
+.content{ animation:content-in var(--dur-lg) var(--ease); }
+
+/* ---------- görünüm geçişi ----------
+
+   Tarayıcı destekliyorsa bölümler arası geçiş tarayıcının kendi
+   katmanında yapılır: eski sayfa söner, yeni sayfa hafifçe yükselerek
+   gelir. Künye ve gezinme geçişe KATILMAZ — yerinde duran bir çerçeve
+   sayfanın değiştiğini daha net anlatır, her şeyin birden kaybolması
+   ise yön duygusunu siler. */
+::view-transition-old(root){ animation:vt-out 160ms var(--ease) both; }
+::view-transition-new(root){ animation:vt-in 240ms var(--ease) both; }
+@keyframes vt-out{ to{ opacity:0; } }
+@keyframes vt-in{ from{ opacity:0; transform:translateY(8px); } }
+
+/* Düğmeye basınca hafif çöker: dokunmanın karşılığı görünür olur. */
+.btn:active, .subtab:active, .navlink:active, .pagelink:active,
+.iconbtn:active, .mic:active{ transform:translateY(.5px) scale(.985); }
+
+/* Kart, fare üstündeyken kenarlığını belirginleştirir — gölge değil.
+   Yalnız TIKLANABILIR kartlarda; okunacak bir kart fareye tepki vermez. */
+.pickcard, .resrow, .suggfood, .navsheet__item, .listitem button{
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease),
+             transform var(--dur) var(--ease);
+}
+
+@media (prefers-reduced-motion:reduce){
+  .content{ animation:none; }
+  ::view-transition-old(root), ::view-transition-new(root){ animation:none; }
+  .btn:active, .subtab:active, .navlink:active, .pagelink:active,
+  .iconbtn:active, .mic:active{ transform:none; }
+}

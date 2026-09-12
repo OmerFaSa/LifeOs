@@ -109,7 +109,7 @@
      Makro renkleri gibi davranır: kimlik taşır, durum değil. Palete göre
      değişmez — bir serinin rengi tema seçimiyle kayarsa iki hafta önceki
      grafikle bugünküyü karşılaştırmak imkânsızlaşır.
-     k:konu  i:işlem/süre  y:yanlış-analiz  s:sınav  d:deneme */
+     k:konu  i:işlem  y:yorum/kök  s:süre  d:dikkat */
   --c-k:#1F4E3D;
   --c-i:#8A5A18;
   --c-y:#3A5468;

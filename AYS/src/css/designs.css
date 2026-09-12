@@ -1,141 +1,565 @@
-/* DÜZEN DİLLERİ — AYS kabuğuna yazılmış hâli.
+/* DÜZENLER — dört seçilebilir tasarım dili.
 
-   Varsayılan «panel» hiçbir şey yazmaz: kök `data-design` niteliği
-   taşımaz ve aşağıdaki hiçbir kural devreye girmez. Bu kasıtlıdır —
-   varsayılan düzenin bedeli sıfır olmalıdır.
+   Bir düzen bir renk değişikliği değildir. Dördü de şunların hepsine
+   dokunur: yazı ailesi, ölçek, gezinmenin biçimi, hero'nun ağırlığı,
+   satırın kutu mu çizgi mi olduğu, köşe yarıçapı, gölge, zemin.
+   Kullanıcı düzeni değiştirdiğinde farkı görmüyorsa o düzen yok
+   demektir.
 
-   ─────────────────────────────────────────────────────────────────
+   Kural 1: bu dosya yalnız `:root[data-design="…"]` altında yazar.
+   Seçili düzen yoksa (varsayılan «defter») burada hiçbir şey uygulanmaz.
 
-   DEĞİŞMEZLER (hiçbir düzen bunları bozmaz):
+   Kural 2: ham renk yazılmaz. Dördü de yedi palet ve karanlık tema
+   altında çalışmak zorunda; renk her zaman jetondan türetilir.
 
-     · Durum renkleri. «Geride», «riskli», «hedefte» her düzende aynı
-       renktedir. Düzen bir üsluptur, bir anlam katmanı değildir.
-     · Kaynak ve kesinlik etiketleri. Hiçbir düzen «model» rozetini ya
-       da «tahmin» etiketini gizlemez.
-     · Okunabilirlik. Kontrast denetimi bütün düzenlerde koşar.
+   Kural 3: durum renkleri (--danger/--accent/--primary) hiçbir düzende
+   yeniden tanımlanmaz. Bir tahlil sonucunun rengi düzene göre değişemez.
 
-   BİR TUZAK: bir jeton kendi türevinden türetilemez. `--bg` değerini
-   `--surface-2`den, `--surface-2` değerini `--bg`den türetmek CSS özel
-   değişken DÖNGÜSÜ yaratır ve zincirdeki her değer geçersiz olur;
-   ekran sessizce zeminsiz kalır. Aşağıda her düzen kendi KÖK rengini
-   tanımlar ve türevleri ondan çıkarır. */
+   Kural 4: bir düzen seçimi ağ isteği doğurmaz. Yeni yazı tipi
+   indirilmez; yalnız yüklü üç aile ve sistemin tek aralıklı yazısı
+   kullanılır. */
 
-/* ══════════════════════════════════════════════════════ ODAK
 
-   Tek sütun, dar ölçü, büyük başlık. Numaralı şerit kalır ama
-   incelir; künye tarihi düşer. Ekranda yalnız içerik kalır. */
+/* ════════════════════════════════════════════════════════════════
+   ODAK — sayfada tek bir şey bağırır
+
+   Fikir: her ekranın bir baş aktörü vardır ve gerisi ona hizmet eder.
+   Bu düzen sayfayı DARALTIR (tek sütun, 880 piksel), başlığı ve ilk
+   özet sayıyı büyütür, başka ne varsa küçültüp susturur. Kutu yok,
+   gölge yok, yuvarlak köşe yok — yalnız tipografi ve boşluk.
+   ════════════════════════════════════════════════════════════════ */
+
 :root[data-design="odak"]{
   --content-max:880px;
-  --gutter:0px;
-  --gutter-gap:0px;
   --fs-display:74px;
-  --r:2px; --r-sm:2px;
+  --fs-base:14.5px;
+  --fs-sm:12px;
+  --gutter:0px;            /* künye sütunu kalkar: tek sütun kalır */
+  --gutter-gap:0px;
+  --r:0px; --r-sm:0px; --r-pill:0px;
   --shadow:none;
+  --surface:var(--bg);     /* yüzey yok: her şey aynı kâğıdın üstünde */
+  --surface-2:color-mix(in oklab, var(--bg) 92%, var(--text));
 }
-:root[data-design="odak"] .masthead__date{ display:none; }
-:root[data-design="odak"] .hero__side{ display:none; }
-:root[data-design="odak"] .hero__title{ font-size:var(--fs-display); line-height:1.02; }
+
+/* Gezinme fısıldar: numara yok, çizgi yok, yalnız ad. */
+:root[data-design="odak"] .sitenav{ border-block:none; background:transparent; backdrop-filter:none; }
+:root[data-design="odak"] .navlinks{ justify-content:center; }
 :root[data-design="odak"] .navlink__num{ display:none; }
-/* Künye sütunu kapanır: tek sütunda başlık gövdenin üstüne geçer. */
-:root[data-design="odak"] .card{ display:block !important; }
-:root[data-design="odak"] .card__head{ margin-bottom:10px; }
-:root[data-design="odak"] .card__head h3{ letter-spacing:.13em; }
+:root[data-design="odak"] .navlink{ padding:16px 0; margin-right:26px; }
+:root[data-design="odak"] .navlink:last-child{ margin-right:0; }
+:root[data-design="odak"] .navlink__label{ font-size:12.5px; letter-spacing:.04em; }
+:root[data-design="odak"] .navlink.is-active::after{
+  left:50%; right:auto; width:4px; height:4px; bottom:8px;
+  border-radius:50%; transform:translateX(-50%);
+}
+:root[data-design="odak"] .masthead__in{ height:72px; }
+:root[data-design="odak"] .masthead__date{ display:none; }
 
-/* ══════════════════════════════════════════════════════ KRAFT
+/* Hero: sayfanın yarısı. Başlık serifle çok büyük, altında tek cümle. */
+:root[data-design="odak"] .hero{ border-bottom:none; }
+:root[data-design="odak"] .hero::before{ display:none; }
+:root[data-design="odak"] .hero__in{
+  grid-template-columns:minmax(0,1fr);
+  padding-block:72px 0;
+  gap:0;
+}
+:root[data-design="odak"] .hero__eyebrow{ margin-bottom:30px; justify-content:center; }
+:root[data-design="odak"] .hero__main{ text-align:center; }
+:root[data-design="odak"] .hero__title{
+  letter-spacing:-.04em; line-height:1.02; max-width:none;
+}
+:root[data-design="odak"] .hero__lede{
+  margin:26px auto 0; max-width:44ch; font-size:16px; color:var(--text-3);
+}
+:root[data-design="odak"] .hero__actions{ justify-content:center; margin-top:34px; }
 
-   Daktilo harfleri ve tek mürekkep.
+/* Özet sayılar: ilki devasa ve ortada, diğerleri altında minicik. */
+:root[data-design="odak"] .hero__side{
+  grid-column:1;
+  display:flex; justify-content:center; flex-wrap:wrap;
+  padding:58px 0 0; margin-top:44px;
+  border-top:1px solid var(--border);
+}
+:root[data-design="odak"] .herostat{ border-left:none; padding:0 30px; text-align:center; }
+:root[data-design="odak"] .herostat:first-child{
+  flex-basis:100%; padding:0 0 34px;
+}
+:root[data-design="odak"] .herostat:first-child .herostat__value{
+  font-family:var(--font-serif);
+  font-size:clamp(96px, 17vw, 188px); font-weight:400;
+  letter-spacing:-.055em; line-height:.82;
+}
+:root[data-design="odak"] .herostat:first-child .herostat__value small{
+  font-size:26px; letter-spacing:0; margin-left:8px;
+}
+:root[data-design="odak"] .herostat:first-child .herostat__label{
+  margin-top:22px; font-size:11px; letter-spacing:.28em; color:var(--text-2);
+}
+:root[data-design="odak"] .herostat:not(:first-child) .herostat__value{
+  font-size:17px; font-weight:600; color:var(--text-2);
+}
+:root[data-design="odak"] .herostat:not(:first-child) .herostat__label{
+  margin-top:6px; font-size:9px; letter-spacing:.16em;
+}
+:root[data-design="odak"] .hero__motif{
+  grid-column:1; justify-self:center; margin-top:40px; height:26px; opacity:.3;
+}
 
-   TÜRETME YÖNÜ ÖNEMLİ. İlk sürüm `--bg` değerini doğrudan kâğıt
-   rengine eşitliyordu ve metin renkleri paletten geldiği için
-   gezinme kontrastı 3,82'ye düşüyordu — AA sınırının altı.
+/* Gövde: künye sütunu üste çıkar, satır tek sütun olur, aralar açılır. */
+:root[data-design="odak"] .content{ padding-block:20px 110px; }
+:root[data-design="odak"] .lrow{
+  grid-template-columns:minmax(0,1fr);
+  gap:20px; padding-block:64px;
+}
+:root[data-design="odak"] .ledger > .lrow:first-child{ padding-top:56px; }
+:root[data-design="odak"] .lrow__side{
+  position:static;
+  display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+}
+:root[data-design="odak"] .lrow__label{
+  font-size:10px; letter-spacing:.3em; color:var(--text-3); font-weight:600;
+}
+:root[data-design="odak"] .lrow__meta{ margin-top:0; font-size:12px; }
+:root[data-design="odak"] .lrow__note{ margin-top:0; max-width:60ch; flex-basis:100%; }
+:root[data-design="odak"] .lrow__act{
+  margin-top:0; margin-left:auto; flex-direction:row;
+}
+:root[data-design="odak"] .lrow__act .btn{ width:auto; }
+:root[data-design="odak"] .lrow__main > * + *{ margin-top:30px; }
 
-   Doğrusu: kâğıt `--surface`e KARIŞTIRILIR. Yüzey neredeyse beyaz
-   ve metin jetonları ona göre ayarlı; karışım kâğıdın rengini verir
-   ama okunabilirliği bozmaz. Aynı türetme SPİ'de de böyle. */
+/* Kutu dili kalkar ama AYRIM kalkmaz.
+
+   Kutuyu tamamen kaldırmak ofis masaları gibi yan yana duran kartları
+   birbirine karıştırıyordu: beş ajanın notu tek bir metin yığınına
+   dönüyor, hangisinin nerede bittiği anlaşılmıyordu. Kutunun yerini
+   ince bir çizgi alır — bu zaten sistemin defter dilidir. */
+:root[data-design="odak"] .card{
+  border:none; border-top:1px solid var(--border);
+  background:none; padding:16px 0 0; box-shadow:none;
+}
+:root[data-design="odak"] .card--flat{ background:none; }
+/* Defter satırının ilk kartı kendi çizgisini çizmez: satırın üst
+   çizgisi zaten oradadır ve iki çizgi üst üste gelmez. */
+:root[data-design="odak"] .lrow__main > .card:first-child{
+  border-top:none; padding-top:0;
+}
+:root[data-design="odak"] .btn{ border-radius:2px; }
+:root[data-design="odak"] .seg{ border-radius:0; background:none; border:none; padding:0; gap:18px; }
+:root[data-design="odak"] .seg button{ border-radius:0; padding:5px 0; font-weight:500; }
+:root[data-design="odak"] .seg button.is-on{
+  background:none; box-shadow:inset 0 -2px 0 var(--sec);
+}
+:root[data-design="odak"] .sect__h h2{ font-size:30px; }
+
+@media (max-width:860px){
+  :root[data-design="odak"]{ --fs-display:38px; }
+  :root[data-design="odak"] .hero__in{ padding-block:44px 0; }
+  :root[data-design="odak"] .hero__side{ padding-top:38px; margin-top:32px; }
+  :root[data-design="odak"] .lrow{ padding-block:40px; }
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   KRAFT — daktilo edilmiş kâğıt
+
+   Fikir: ekranda bir yazılım değil, doldurulmuş bir kâğıt dursun.
+   Bu yüzden değişen şey renk değil YAZI: gövde, sayı ve etiketlerin
+   hepsi tek aralıklı olur. Sadece başlıklar seriflerini korur — daktilo
+   metninin üstündeki matbu başlık gibi.
+
+   Yeni yazı tipi indirilmez: sistemin kendi tek aralıklı ailesi
+   kullanılır. Bir düzen seçimi ağ isteği doğurmamalıdır.
+   ════════════════════════════════════════════════════════════════ */
+
 :root[data-design="kraft"]{
+  --font-mono:ui-monospace, 'SFMono-Regular', 'Menlo', 'Courier New', monospace;
+  --font-body:var(--font-mono);
+  --font-display:var(--font-mono);
+  --fs-base:13px;
+  --fs-sm:11.5px;
+  --fs-xs:10.5px;
+  --r:0px; --r-sm:0px; --r-pill:0px;
+  --shadow:none;
+  --gutter:172px;
+  /* Kâğıt: sıcak, doygunluğu düşük, hafif koyu.
+
+     Hepsi TEK bir hedef renkten (`--kraft-kagit`) ve kraft'ın kendi
+     yeniden tanımlamadığı jetonlardan (`--surface-3`, `--border-strong`)
+     türer. Bu zorunluluktur: bir jeton kendi türevine dayanırsa CSS
+     özel değişken DÖNGÜSÜ oluşur ve zincirdeki her değer geçersiz olur.
+     Nitekim oluyordu — koyu temada kâğıt paletinde `--bg` çözülemediği
+     için metin zeminle aynı renge düşüyordu (kontrast 1.00). Karanlıkta
+     yalnız hedef renk ile yüzey değişir, gerisi kendiliğinden gelir. */
   --kraft-kagit:#EFE1C2;
+  --surface:color-mix(in oklab, var(--surface-3) 14%, #FFFDF6);
   --bg:color-mix(in oklab, var(--surface) 84%, var(--kraft-kagit));
   --surface-2:color-mix(in oklab, var(--surface) 56%, var(--kraft-kagit));
-  --surface-3:color-mix(in oklab, var(--surface) 38%, var(--kraft-kagit));
-  --sidebar:color-mix(in oklab, var(--surface) 80%, var(--kraft-kagit));
-  --font-display:ui-monospace,'SFMono-Regular','Menlo','Courier New',monospace;
-  --font-body:ui-monospace,'SFMono-Regular','Menlo','Courier New',monospace;
-  --r:2px; --r-sm:2px;
-  --shadow:none;
-  --shadow-lg:0 10px 26px rgba(60,44,20,.20);
+  --border:color-mix(in oklab, var(--border-strong) 74%, var(--kraft-kagit));
 }
 @media (prefers-color-scheme:dark){
-  :root[data-design="kraft"]:not([data-theme="light"]){ --kraft-kagit:#0D0B05; }
-}
-:root[data-design="kraft"][data-theme="dark"]{ --kraft-kagit:#0D0B05; }
-
-:root[data-design="kraft"] .card,
-:root[data-design="kraft"] .sitenav{ border-radius:0; }
-:root[data-design="kraft"] .brand__text b{ font-family:var(--font-serif); }
-:root[data-design="kraft"] .navlink__label{ font-size:12.5px; letter-spacing:0; }
-/* Künye etiketi daktiloda büyük harf yerine küçük harf okunur. */
-:root[data-design="kraft"] .card__head h3{ text-transform:none; letter-spacing:.06em; }
-:root[data-design="kraft"] .hero__title{ font-size:30px; }
-
-/* ══════════════════════════════════════════════════════ KATMANLI
-
-   Kart KUTUYA geri döner ve numaralı şerit koyu bir banda oturur:
-   iki katman — gezinme üstte koyu, içerik altta açık. Beş düzenin
-   varsayılandan en çok ayrılanı budur. */
-:root[data-design="katmanli"]{ --r:10px; }
-@media (min-width:900px){
-  :root[data-design="katmanli"] .sitenav{
-    background:#171922; border-bottom-color:transparent;
+  :root[data-design="kraft"]:not([data-theme="light"]){
+    --kraft-kagit:#0D0B05;
+    --surface:color-mix(in oklab, var(--surface-3) 30%, #1F1A12);
   }
-  :root[data-design="katmanli"] .navlink{ color:#C9CCD6; }
-  :root[data-design="katmanli"] .navlink__num{ color:#7E8494; }
-  :root[data-design="katmanli"] .navlink:hover{ color:#fff; }
-  :root[data-design="katmanli"] .navlink.is-active{ color:#fff; }
 }
-:root[data-design="katmanli"] .card{
-  background:var(--surface);
+:root[data-design="kraft"][data-theme="dark"]{
+  --kraft-kagit:#0D0B05;
+  --surface:color-mix(in oklab, var(--surface-3) 30%, #1F1A12);
+}
+
+/* Doku KABUĞA çizilir: `.site` zemini gövdeyi tamamen örttüğü için
+   dokuyu gövdeye koymak onu görünmez kılıyordu. İki katman lif; üçüncü
+   bir katman moiré üretiyor. Doku sayfayla birlikte kayar — `fixed`
+   verilseydi kâğıt yerinde durur, yazı üstünden akardı. */
+:root[data-design="kraft"] .site{
+  background-color:var(--bg);
+  background-image:
+    repeating-linear-gradient(104deg,
+      color-mix(in srgb, var(--text) 4%, transparent) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(31deg,
+      color-mix(in srgb, var(--text) 2.6%, transparent) 0 1px, transparent 1px 7px);
+}
+
+/* Başlıklar matbu kalır; okunacak uzun metnin dışındaki her şey daktilo. */
+:root[data-design="kraft"] .hero__title,
+:root[data-design="kraft"] .sect__h h2,
+:root[data-design="kraft"] .brand__text b{ font-family:var(--font-serif); }
+
+/* Gezinme: köşeli parantez içinde etkin bölüm — terminal değil, daktilo. */
+:root[data-design="kraft"] .sitenav{
+  border-block:1px solid var(--border-strong);
+  background:color-mix(in srgb, var(--bg) 94%, transparent);
+  backdrop-filter:none;
+}
+:root[data-design="kraft"] .navlink__label{ font-size:12.5px; letter-spacing:0; }
+:root[data-design="kraft"] .navlink.is-active::after{ display:none; }
+:root[data-design="kraft"] .navlink.is-active .navlink__label::before{ content:'['; margin-right:3px; }
+:root[data-design="kraft"] .navlink.is-active .navlink__label::after{ content:']'; margin-left:3px; }
+:root[data-design="kraft"] .hero{ border-bottom:1px dashed var(--border-strong); }
+:root[data-design="kraft"] .hero::before{ opacity:.09; }
+:root[data-design="kraft"] .hero__lede{ font-size:13.5px; line-height:1.75; }
+
+/* Künye sütunu: solda kısa bir tırnak, altında daktilo satırı. */
+:root[data-design="kraft"] .lrow{ border-top-style:dashed; }
+:root[data-design="kraft"] .lrow__label{
+  font-size:11px; font-weight:700; letter-spacing:.05em;
+}
+:root[data-design="kraft"] .lrow__label::before{
+  content:''; width:14px; height:1px; background:var(--sec); flex:none; margin-right:2px;
+}
+/* Defterin kenar çizgisi: künye ile içeriğin arasında, bölümün renginde
+   soluk bir dikey çizgi. Okul defterinin marj çizgisinin karşılığı. */
+@media (min-width:901px){
+  :root[data-design="kraft"] .lrow{ position:relative; }
+  :root[data-design="kraft"] .lrow::before{
+    content:''; position:absolute; top:0; bottom:0;
+    left:calc(var(--gutter) + var(--gutter-gap) / 2);
+    width:1px; background:var(--sec); opacity:.24;
+  }
+  :root[data-design="kraft"] .lrow--wide::before{ display:none; }
+}
+
+/* Kutular kâğıda iğnelenmiş fişler: gölge değil, sert bir kayma. */
+:root[data-design="kraft"] .card{
+  border:1px solid var(--border-strong);
+  box-shadow:3px 3px 0 color-mix(in srgb, var(--text) 9%, transparent);
+}
+:root[data-design="kraft"] .btn{
+  border:1px solid var(--border-strong);
+  box-shadow:2px 2px 0 color-mix(in srgb, var(--text) 12%, transparent);
+  font-weight:700; letter-spacing:.02em;
+}
+:root[data-design="kraft"] .btn:active{ box-shadow:none; transform:translate(2px, 2px); }
+:root[data-design="kraft"] .input, :root[data-design="kraft"] .select,
+:root[data-design="kraft"] .textarea{ border-color:var(--border-strong); }
+:root[data-design="kraft"] .seg{ border-color:var(--border-strong); }
+:root[data-design="kraft"] .seg button.is-on{ box-shadow:2px 2px 0 color-mix(in srgb, var(--text) 10%, transparent); }
+:root[data-design="kraft"] .table td{ border-bottom-style:dashed; }
+
+
+/* ════════════════════════════════════════════════════════════════
+   KATMANLI — solda koyu raf, sağda çalışma yüzeyi
+
+   Fikir: yatay şerit gazetenin dilidir, dikey raf bir masaüstü
+   yazılımının. Raf KOYU olur ve çalışma alanı temiz yüzeye oturur;
+   ikisi arasındaki ton farkı «burası menü, şurası iş» ayrımını tek
+   bakışta kurar.
+
+   Raf yalnız 900 pikselin üstünde çizilir; altında layout.css'in mobil
+   menüsü geçerlidir.
+   ════════════════════════════════════════════════════════════════ */
+
+:root[data-design="katmanli"]{
+  --r:8px; --r-sm:6px;
+}
+/* Çalışma yüzeyi kâğıt değil beyaz: işin yapıldığı yer öne çıksın. */
+:root[data-design="katmanli"] .site__body,
+:root[data-design="katmanli"] .hero,
+:root[data-design="katmanli"] .pagenav,
+:root[data-design="katmanli"] .masthead{ background:var(--surface); }
+
+/* Rafın eşiği 1100 px'dir, 900 değil. 980 px'lik bir ekranda 228 px'lik
+   raf içeriğe ~720 px bırakıyor; ekranlar ise kendi duyarlı kurallarını
+   PENCERE genişliğine göre uyguladığı için masaüstü düzeninde kalıp
+   taşıyordu. Raf, ancak kendisine yer kalınca çizilir. */
+@media (min-width:1100px){
+  :root[data-design="katmanli"]{
+    --rail-w:228px;
+    --nav-h:0px;              /* üstte yapışan şerit kalmadı */
+    --content-max:1060px;
+  }
+  :root[data-design="katmanli"] .site{
+    display:grid;
+    grid-template-columns:var(--rail-w) minmax(0,1fr);
+    grid-template-rows:auto auto auto 1fr auto;
+  }
+
+  /* Raf hücrenin TAMAMINI kaplar (zemin sayfanın sonuna kadar iner),
+     içindeki liste yapışır. Rafa 100vh verip yapıştırmak uzun
+     sayfalarda rafın bitip zeminin kesildiği bir sınır üretiyordu. */
+  :root[data-design="katmanli"] .sitenav{
+    grid-column:1; grid-row:1 / -1;
+    position:static; align-self:stretch;
+    border:none;
+    background:var(--ink); color:var(--ink-on);
+    backdrop-filter:none;
+  }
+  :root[data-design="katmanli"] .navlinks{
+    position:sticky; top:0;
+    max-height:100vh; overflow-y:auto;
+    display:flex; flex-direction:column; align-items:stretch;
+    max-width:none; padding:20px 12px 28px; gap:2px;
+  }
+  /* Rafın başlığı listenin ilk ögesidir: kaydırmayla birlikte hareket
+     eder, mutlak konumlu bir etiket gibi zeminle çakışmaz. */
+  :root[data-design="katmanli"] .navlinks::before{
+    content:'SPİ · Bölümler';
+    padding:10px 12px 18px;
+    font-size:10px; font-weight:700; letter-spacing:.2em; text-transform:uppercase;
+    color:color-mix(in srgb, var(--ink-on) 52%, var(--ink));
+  }
+  :root[data-design="katmanli"] .navlink{
+    display:grid; grid-template-columns:24px minmax(0,1fr) auto;
+    align-items:center; gap:10px;
+    padding:11px 12px; margin:0;
+    border-radius:var(--r-sm);
+    text-align:left;
+    color:color-mix(in srgb, var(--ink-on) 74%, var(--ink));
+  }
+  :root[data-design="katmanli"] .navlink__num{
+    color:color-mix(in srgb, var(--ink-on) 48%, var(--ink)); opacity:1;
+  }
+  :root[data-design="katmanli"] .navlink__label{ white-space:normal; font-size:13.5px; }
+  :root[data-design="katmanli"] .navlink:hover{
+    background:color-mix(in srgb, var(--ink-on) 9%, transparent);
+    color:var(--ink-on);
+  }
+  :root[data-design="katmanli"] .navlink.is-active{
+    background:color-mix(in srgb, var(--ink-on) 15%, transparent);
+    color:var(--ink-on);
+  }
+  :root[data-design="katmanli"] .navlink.is-active .navlink__num{ color:var(--ink-on); }
+  :root[data-design="katmanli"] .navlink.is-active::after{ display:none; }
+  :root[data-design="katmanli"] .navlink__badge.is-quiet{
+    background:color-mix(in srgb, var(--ink-on) 20%, transparent); color:var(--ink-on);
+  }
+
+  :root[data-design="katmanli"] .masthead,
+  :root[data-design="katmanli"] .hero,
+  :root[data-design="katmanli"] .pagenav,
+  :root[data-design="katmanli"] .site__body,
+  :root[data-design="katmanli"] .sitefoot{ grid-column:2; }
+  :root[data-design="katmanli"] .masthead{ grid-row:1; border-bottom:1px solid var(--border); }
+  :root[data-design="katmanli"] .hero{ grid-row:2; }
+  :root[data-design="katmanli"] .pagenav{ grid-row:3; top:0; background:var(--surface); }
+  :root[data-design="katmanli"] .site__body{ grid-row:4; }
+  :root[data-design="katmanli"] .sitefoot{ grid-row:5; }
+
+  /* Marka rafta yazılı; künyede tekrar edilmez. */
+  :root[data-design="katmanli"] .masthead .brand__text{ display:none; }
+  :root[data-design="katmanli"] .masthead__date{ justify-content:flex-start; }
+  :root[data-design="katmanli"] .wrapc{ padding-inline:36px; }
+  :root[data-design="katmanli"] .hero__in{ padding-block:34px 26px; }
+  :root[data-design="katmanli"] .hero::before{ font-size:108px; }
+
+  /* Defter satırının künye sütunu bir panele döner: soldaki dolu şerit
+     «bu blok burada başlıyor» der, liste/ayrıntı ilişkisi okunur olur. */
+  :root[data-design="katmanli"] .lrow{ gap:0 32px; padding-block:28px; }
+  :root[data-design="katmanli"] .lrow__side{
+    top:24px;
+    border-left:2px solid var(--sec);
+    padding-left:14px;
+  }
+  :root[data-design="katmanli"] .lrow--wide .lrow__side{
+    border-left:none; padding-left:0;
+    border-top:2px solid var(--sec); padding-top:12px;
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   HARİTA — noktalı tuval üstünde düğüm kartlar
+
+   Fikir: defter satırı okumak için iyidir ama ilişkiyi göstermez.
+   Haritada her satır kendi kartına çekilir, kartlar noktalı bir
+   tuvale dizilir, her kartın tepesinde bölümün renginde bir künye
+   şeridi durur. Sayfa daha geniştir; tuvalin yayılacak yeri olur.
+
+   Geniş satırlar (grafik, uzun cetvel) tuvalin tamamını kaplar —
+   daralan bir grafik saçmadır.
+   ════════════════════════════════════════════════════════════════ */
+
+:root[data-design="harita"]{
+  --content-max:1380px;
+  --r:14px; --r-sm:9px;
+  --gutter-gap:0px;
+}
+
+/* Tuval: nokta ızgarası. Rengini kenarlıktan alır, yani her palette ve
+   karanlık temada kendi doğru tonunu bulur. */
+:root[data-design="harita"] .site__body{
+  background-color:color-mix(in oklab, var(--bg) 88%, var(--surface-3));
+  background-image:radial-gradient(var(--border-strong) 1.2px, transparent 1.2px);
+  background-size:24px 24px;
+  background-position:-1px -1px;
+  border-top:1px solid var(--border);
+}
+:root[data-design="harita"] .content{ padding-block:32px 80px; }
+
+/* Gezinme tuvalin üstünde yüzen haplar. */
+:root[data-design="harita"] .navlinks{ gap:4px; padding-block:7px; }
+:root[data-design="harita"] .navlink{
+  padding:8px 14px; margin:0; border-radius:var(--r-pill);
+  align-items:center;
+}
+:root[data-design="harita"] .navlink:hover{ background:var(--surface-hover); }
+:root[data-design="harita"] .navlink.is-active{
+  background:var(--ink); color:var(--ink-on);
+}
+:root[data-design="harita"] .navlink.is-active .navlink__num{ color:var(--ink-on); opacity:.72; }
+:root[data-design="harita"] .navlink.is-active::after{ display:none; }
+
+/* Kart içeriği kendi enini bilir (layout.css'teki `satir` kapsayıcısı),
+   yani tablo benzeri satırlar kartın içinde kendiliğinden dar kalıba
+   geçer.
+
+   Akış ızgara değil SÜTUNDUR. Izgarada her satır en uzun kartı kadar
+   yer kaplıyor ve kısa kartın altında koca bir delik kalıyordu; tuval
+   deliklerle dolunca harita olmaktan çıkıyor. Çok sütunlu akışta
+   kartlar boşluk bırakmadan diziliyor ve geniş satırlar `column-span`
+   ile bütün tuvali kaplayabiliyor. */
+:root[data-design="harita"] .ledger{
+  display:block;
+  columns:420px;
+  column-gap:20px;
+}
+
+/* Satır artık kart: ızgara değil blok, çizgi değil çerçeve. */
+:root[data-design="harita"] .lrow,
+:root[data-design="harita"] .ledger > .lrow:first-child,
+:root[data-design="harita"] .ledger > .lrow:last-child{
+  display:block;
+  padding:0;
   border:1px solid var(--border);
   border-radius:var(--r);
-  padding:20px 22px;
-  box-shadow:var(--shadow);
-}
-:root[data-design="katmanli"] .stack > .card:first-child{ border-top:1px solid var(--border); }
-
-/* ══════════════════════════════════════════════════════ HARİTA
-
-   Kartlar akan sütunlarda, noktalı zemin. Bir liste değil bir masa
-   üstü: yan yana duran notlar.
-
-   `columns` kullanılır, ızgara değil — ızgarada her satır en uzun
-   kart kadar yer kaplar ve yanında delik kalır. */
-:root[data-design="harita"]{
-  --r:10px;
-  --harita-nokta:color-mix(in srgb, var(--text) 12%, transparent);
-}
-:root[data-design="harita"] .content{
-  background-image:radial-gradient(var(--harita-nokta) 1px, transparent 1px);
-  background-size:22px 22px;
-}
-@media (min-width:1000px){
-  :root[data-design="harita"] .content > .grid,
-  :root[data-design="harita"] .content > .stack{
-    columns:380px; column-gap:20px;
-  }
-  :root[data-design="harita"] .content > .grid > *,
-  :root[data-design="harita"] .content > .stack > *{
-    break-inside:avoid; margin-bottom:16px;
-  }
-}
-:root[data-design="harita"] .card{
-  display:block;                       /* akan sütunda künye sütunu olmaz */
   background:var(--surface);
-  border:1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  border-radius:var(--r);
-  padding:16px 18px;
-  box-shadow:0 2px 10px rgba(22,24,34,.07);
+  box-shadow:0 1px 2px rgba(16,18,27,.05), 0 8px 22px rgba(16,18,27,.06);
+  overflow:hidden;
+  transition:box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+:root[data-design="harita"] .lrow{
+  break-inside:avoid;
+  margin-bottom:20px;
+}
+:root[data-design="harita"] .lrow--wide{ column-span:all; }
+:root[data-design="harita"] .lrow:hover{
+  border-color:color-mix(in oklab, var(--sec) 36%, var(--border));
+  box-shadow:0 2px 4px rgba(16,18,27,.06), 0 14px 32px rgba(16,18,27,.10);
+}
+@media (prefers-reduced-motion:reduce){
+  :root[data-design="harita"] .lrow{ transition:none; }
 }
 
-/* Azaltılmış hareket: hiçbir düzen animasyon eklemez ama emin olalım. */
-@media (prefers-reduced-motion:reduce){
-  :root[data-design] *{ animation:none !important; transition:none !important; }
+/* Kart başlığı: bölüm renginde bir düğüm işareti ve künye. */
+:root[data-design="harita"] .lrow__side{
+  position:static; display:block;
+  padding:13px 18px 12px;
+  border-bottom:1px solid var(--border);
+  background:color-mix(in oklab, var(--sec) 8%, var(--surface));
 }
+:root[data-design="harita"] .lrow__label{ font-size:10.5px; letter-spacing:.15em; }
+:root[data-design="harita"] .lrow__label::before{
+  content:''; width:7px; height:7px; border-radius:2px;
+  background:var(--sec); flex:none;
+}
+:root[data-design="harita"] .lrow__meta{ margin-top:5px; font-size:12px; }
+:root[data-design="harita"] .lrow__note{ margin-top:9px; max-width:none; font-size:12.75px; }
+:root[data-design="harita"] .lrow__act{ margin-top:12px; flex-direction:row; flex-wrap:wrap; }
+:root[data-design="harita"] .lrow__act .btn{ width:auto; }
+/* Emniyet kemeri: bir satır yine de sığmazsa kırpılmaz, kaydırılır.
+   Kaybolan veriyle kaydırılabilir veri aynı şey değildir. */
+:root[data-design="harita"] .lrow__main{ padding:18px; overflow-x:auto; }
+:root[data-design="harita"] .lrow__main > * + *{ margin-top:16px; }
+
+/* Kartın içindeki kart çerçevesiz olur: iki çerçeve iç içe çizilmez. */
+:root[data-design="harita"] .lrow .card{
+  border-color:transparent; box-shadow:none; background:var(--surface-2);
+}
+
+/* Dar kartta blok sekme çubuğu: düğmeler sıkışıp iki satıra kırılmasın,
+   gerekiyorsa çubuğun kendisi alt satıra sarsın. */
+:root[data-design="harita"] .seg--block{ flex-wrap:wrap; }
+:root[data-design="harita"] .seg--block button{ flex:1 1 auto; white-space:nowrap; }
+
+:root[data-design="harita"] .hero::before{ opacity:.05; }
+
+@media (max-width:720px){
+  :root[data-design="harita"] .ledger{ columns:1; }
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   Görünüm kâğıdındaki düzen düğmeleri — her düzen kendi minyatürünü
+   çizer. Ad yeterli değil: «Katmanlı»nın ne demek olduğu ancak
+   görülünce anlaşılır.
+   ──────────────────────────────────────────────────────────────── */
+.desbtn{
+  display:flex; flex-direction:column; align-items:stretch; gap:7px;
+  padding:8px; border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--text-2); text-align:left;
+  transition:border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.desbtn:hover{ border-color:var(--border-strong); color:var(--text); }
+.desbtn.is-on{ border-color:var(--primary); color:var(--text); }
+.desbtn__name{ font-size:11.5px; font-weight:600; }
+.desbtn__mini{
+  height:34px; border-radius:2px; background:var(--surface-2);
+  display:grid; gap:2px; padding:4px; overflow:hidden;
+}
+.desbtn__mini i{ display:block; background:var(--text-3); opacity:.5; border-radius:1px; }
+
+/* defter: künye sütunu + içerik */
+.desbtn__mini--lines{ grid-template-columns:9px 1fr; align-content:start; gap:3px 5px; }
+.desbtn__mini--lines i:nth-child(odd){ height:3px; }
+.desbtn__mini--lines i:nth-child(even){ height:3px; opacity:.28; }
+
+/* odak: tek büyük blok + iki ince satır */
+.desbtn__mini--single{ grid-template-rows:1fr auto auto; }
+.desbtn__mini--single i:first-child{ opacity:.72; border-radius:2px; }
+.desbtn__mini--single i:not(:first-child){ height:2px; opacity:.28; }
+
+/* kraft: kesikli satırlar */
+.desbtn__mini--paper i{
+  height:3px; background:none; opacity:.55;
+  border-top:2px dashed var(--text-3);
+}
+
+/* katmanlı: solda koyu raf */
+.desbtn__mini--rail{ grid-template-columns:10px 1fr; gap:3px 4px; align-content:start; }
+.desbtn__mini--rail i:first-child{ grid-row:1 / span 4; opacity:.8; border-radius:2px; }
+.desbtn__mini--rail i:not(:first-child){ height:3px; opacity:.3; }
+
+/* harita: dört küçük kutu */
+.desbtn__mini--nodes{ grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:3px; }
+.desbtn__mini--nodes i{ opacity:.42; border-radius:2px; }

@@ -233,7 +233,7 @@
 
 /* ================= BÖLÜM KİMLİKLERİ =================
 
-   Tek tasarım, yedi imza. Düzen, tipografi, boşluk ve bileşenler her
+   Tek tasarım, altı imza. Düzen, tipografi, boşluk ve bileşenler her
    bölümde AYNIDIR; değişen tek şey `--sec` — bölümün kendi rengi.
 
    Renk iki parçadan gelir:
@@ -261,28 +261,26 @@
   --sec-soft:color-mix(in oklab, var(--sec) 14%, var(--surface));
 }
 
-/* AYS'nin altı bölümü. Tonlar SPİ'nin yedi imzasından gelir; aynı
-   aileden, aynı doygunlukta, aynı harmanlama kuralıyla. */
-:root[data-section="gunluk"] { --sec-base:#2F6B52; }
-:root[data-section="plan"]   { --sec-base:#2E5A73; }
-:root[data-section="kayit"]  { --sec-base:#8A5A18; }
+:root[data-section="gunluk"]  { --sec-base:#2F6B52; }
+:root[data-section="plan"] { --sec-base:#2E5A73; }
+:root[data-section="kayit"]   { --sec-base:#8A5A18; }
 :root[data-section="analiz"] { --sec-base:#9A4A2F; }
-:root[data-section="rehber"] { --sec-base:#5E6B2A; }
-:root[data-section="ofis"]   { --sec-base:#6B3F63; }
+:root[data-section="rehber"]  { --sec-base:#5E6B2A; }
+:root[data-section="ofis"]    { --sec-base:#6B3F63; }
 
 /* Koyu temada aynı yedi ton açılır: koyu zeminde doygun ton okunmaz.
    Harmanlama kuralı aynı kalır, yalnız taban renk değişir. */
 @media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"])[data-section="gunluk"] { --sec-base:#79C09C; }
-  :root:not([data-theme="light"])[data-section="plan"]   { --sec-base:#84B2CC; }
-  :root:not([data-theme="light"])[data-section="kayit"]  { --sec-base:#D6A961; }
+  :root:not([data-theme="light"])[data-section="gunluk"]  { --sec-base:#79C09C; }
+  :root:not([data-theme="light"])[data-section="plan"] { --sec-base:#84B2CC; }
+  :root:not([data-theme="light"])[data-section="kayit"]   { --sec-base:#D6A961; }
   :root:not([data-theme="light"])[data-section="analiz"] { --sec-base:#DF9376; }
-  :root:not([data-theme="light"])[data-section="rehber"] { --sec-base:#AFBF74; }
-  :root:not([data-theme="light"])[data-section="ofis"]   { --sec-base:#C193BA; }
+  :root:not([data-theme="light"])[data-section="rehber"]  { --sec-base:#AFBF74; }
+  :root:not([data-theme="light"])[data-section="ofis"]    { --sec-base:#C193BA; }
 }
-:root[data-theme="dark"][data-section="gunluk"] { --sec-base:#79C09C; }
-:root[data-theme="dark"][data-section="plan"]   { --sec-base:#84B2CC; }
-:root[data-theme="dark"][data-section="kayit"]  { --sec-base:#D6A961; }
+:root[data-theme="dark"][data-section="gunluk"]  { --sec-base:#79C09C; }
+:root[data-theme="dark"][data-section="plan"] { --sec-base:#84B2CC; }
+:root[data-theme="dark"][data-section="kayit"]   { --sec-base:#D6A961; }
 :root[data-theme="dark"][data-section="analiz"] { --sec-base:#DF9376; }
-:root[data-theme="dark"][data-section="rehber"] { --sec-base:#AFBF74; }
-:root[data-theme="dark"][data-section="ofis"]   { --sec-base:#C193BA; }
+:root[data-theme="dark"][data-section="rehber"]  { --sec-base:#AFBF74; }
+:root[data-theme="dark"][data-section="ofis"]    { --sec-base:#C193BA; }

@@ -882,7 +882,10 @@ kbd{
 .input--cell{ width:62px; }
 .input--mins{ width:66px; }
 .exam-net{ font-family:var(--font-display); font-weight:800; font-size:var(--fs-lg); }
-.exam-net--lg{ font-size:var(--fs-2xl); }
+/* `--fs-2xl` hiç tanımlanmamış bir jetondu: bu satır yıllardır hiçbir
+   şey yapmıyor, büyük net skoru devralınan puntoyla çiziliyordu.
+   Ölçeğin gerçek büyük adımı `--fs-hero`. */
+.exam-net--lg{ font-size:var(--fs-hero); }
 .exam-row__net{ width:54px; flex:none; text-align:center; }
 .mb-10{ margin-bottom:10px; }
 .input--search{ max-width:280px; }
