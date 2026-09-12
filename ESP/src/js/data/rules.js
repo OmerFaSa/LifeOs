@@ -9,7 +9,7 @@
      PEDAGOGIC  ogretim siniri. Sistem sertifika vermez, yetenek yargisi kurmaz.
      GROUNDING  halusinasyon engeli. Model serbest sayi uretmez.
      PRIVACY    veri mahremiyeti. Ham ses ve tam metin disari cikmaz.
-     PRECEDENCE alti disiplin ayni anda zaman isterse sira budur.
+     PRECEDENCE yedi disiplin ayni anda zaman isterse sira budur.
 
    SPI'nin `CLINICAL` sinirinin ESP karsiligi `PEDAGOGIC`'tir: orada sistem
    hekim degildir, burada ogretmen degildir. Ikisi de ayni seyi soyler —
@@ -135,7 +135,7 @@ ESP.PRIVACY = {
 
 /* --------------------------------------------------- celiski cozum sirasi
 
-   Alti disiplin ayni anda zaman ister. Sinirli olan kaynak ZAMANDIR,
+   Yedi disiplin ayni anda zaman ister. Sinirli olan kaynak ZAMANDIR,
    dogruluk degil — bu yuzden sira "hangisi daha dogru" degil "hangisi
    beklerse digerlerini cokertir" sorusuna gore dizilir.
 
@@ -188,7 +188,7 @@ ESP.CERTAINTY = {
 
 /* ------------------------------------------------------------- disiplinler
 
-   Alti disiplin tek yerde tanimlidir. Ekranlar, ajanlar ve EHS hesabi
+   Yedi disiplin tek yerde tanimlidir. Ekranlar, ajanlar ve EHS hesabi
    buradan okur; bir disiplinin adi ya da agirligi degisecekse burada degisir.
 
    `weight` EHS'deki D_i katsayisidir: butun disiplinler esit degildir, ama
@@ -213,6 +213,10 @@ ESP.DISCIPLINES = [
   { id:'writing', label:'Yazı',         short:'Yazı',    weight:1.0, agent:'montaigne',
     unit:'dakika', route:'writing',
     note:'Taslak üretimi ve revizyon. Hacmi kelime, kalitesi okunabilirlik ölçer.' },
+  { id:'history', label:'Tarih',        short:'Tarih',   weight:1.1, agent:'herodot',
+    unit:'dakika', route:'history',
+    note:'Kronoloji, nedensellik ve kaynak eleştirisi. Olay sayısı iskelet, '
+       + 'zincir ve kaynak ettir.' },
 ];
 
 ESP.DISCIPLINE_BY_ID = ESP.DISCIPLINES.reduce(function(m, d){ m[d.id] = d; return m; }, {});
@@ -234,6 +238,8 @@ ESP.FOCUS = [
     note:'Eşit skorlu iki iş çıkarsa enstrüman önce gelir.' },
   { id:'writing',  label:'Yazı ağırlıklı',
     note:'Eşit skorlu iki iş çıkarsa taslak önce gelir.' },
+  { id:'history',  label:'Tarih ağırlıklı',
+    note:'Eşit skorlu iki iş çıkarsa kronoloji ve kaynak önce gelir.' },
 ];
 
 /* ----------------------------------------------------------- masa notlari

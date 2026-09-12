@@ -58,6 +58,22 @@ ESP.Planner = (function(){
       });
     }
 
+    /* Tarih destesi ayri olculur: dil retansiyonu iyiyken tarih kartlari
+       cokmus olabilir ve tersi. Iki desteyi tek ortalamada toplamak, coken
+       desteyi saglam olanin arkasina gizler. */
+    const rh = ESP.SRS.retention(ESP.HISTORY_DECK, todayISO);
+    if(rh.cert !== 'missing' && rh.n >= RETENTION_MIN_CARDS && rh.value < RETENTION_FLOOR){
+      out.push({
+        id:'retention-history', disc:'history', agent:'herodot',
+        label:'Tarih kartları tabanın altında',
+        detail:'Tarih destesinin hatırlanma olasılığı ortalaması %'
+             + Math.round(rh.value * 100) + ' (' + rh.n + ' karttan). '
+             + 'Kronolojiye yeni olay eklemek bu tabanı daha da düşürür.',
+        route:'history', tab:'calisma',
+        metric:{ value:rh.value, cert:rh.cert },
+      });
+    }
+
     ESP.Acoustic.plateaus(todayISO).forEach(p => {
       out.push({
         id:'plateau:' + p.piece.id, disc:'music', agent:'maestro',
@@ -90,6 +106,28 @@ ESP.Planner = (function(){
     const geciken = kartlar.filter(c => ESP.SRS.overdueDays(c, today) > 0);
     return { due:kartlar, overdue:geciken,
       maxDays:geciken.reduce((m, c) => Math.max(m, ESP.SRS.overdueDays(c, today)), 0) };
+  }
+
+  /* Vadesi gecmis kartlarin hangi desteden geldigi. Iki deste ayni motoru
+     paylasir ama ayri ekranda calisilir; "42 kart gecikti" deyip yanlis
+     ekrani acmak, dogru sayiyi yanlis ise cevirir. */
+  function overdueDeck(todayISO){
+    const o = overdue(todayISO);
+    const kaynak = o.overdue.length ? o.overdue : o.due;
+    const sayac = {};
+    kaynak.forEach(c => {
+      const deste = c.lang === ESP.HISTORY_DECK ? 'history' : 'lang';
+      sayac[deste] = (sayac[deste] || 0) + 1;
+    });
+    const en = Object.keys(sayac).sort((a, b) => sayac[b] - sayac[a])[0] || 'lang';
+    return {
+      due:o.due, overdue:o.overdue, maxDays:o.maxDays,
+      byDeck:sayac, deck:en,
+      route:en === 'history' ? 'history' : 'lang',
+      tab:en === 'history' ? 'calisma' : 'calis',
+      agent:en === 'history' ? 'herodot' : 'polyglot',
+      disc:en === 'history' ? 'history' : 'lang',
+    };
   }
 
   /* ------------------------------------------------------------ 4 · sentez */
@@ -139,23 +177,25 @@ ESP.Planner = (function(){
     }
 
     /* 3 — vadesi gecmis kartlar */
-    const o = overdue(today);
+    const o = overdueDeck(today);
+    const desteAdi = o.deck === 'history' ? 'tarih' : 'dil';
     if(o.overdue.length){
       return {
-        rank:3, id:'srs-overdue', agent:'polyglot', disc:'lang',
+        rank:3, id:'srs-overdue', agent:o.agent, disc:o.disc,
         title:o.overdue.length + ' kartın vadesi geçti',
-        detail:'En çok geciken kart ' + o.maxDays + ' gündür bekliyor. '
+        detail:'En çok geciken kart ' + o.maxDays + ' gündür bekliyor; '
+             + 'çoğunluk ' + desteAdi + ' destesinde. '
              + 'Unutma eğrisi beklemez; geciken her gün kartı bir adım geriye atar.',
-        route:'lang', tab:'calis',
+        route:o.route, tab:o.tab,
         why:'Vadesi geçmiş tekrar: gecikme kartı geriye atar.',
       };
     }
     if(o.due.length){
       return {
-        rank:3, id:'srs-due', agent:'polyglot', disc:'lang',
+        rank:3, id:'srs-due', agent:o.agent, disc:o.disc,
         title:o.due.length + ' kart bugün vadeli',
-        detail:'Bugünün tekrarı henüz yapılmadı.',
-        route:'lang', tab:'calis',
+        detail:'Bugünün tekrarı henüz yapılmadı (' + desteAdi + ' destesi).',
+        route:o.route, tab:o.tab,
         why:'Vadesi gelmiş tekrar: günü geçirmeden kapanır.',
       };
     }
@@ -193,16 +233,22 @@ ESP.Planner = (function(){
     const aday = denge.rows.filter(r => r.cert === 'missing')[0] || denge.rows[0];
     if(aday){
       const d = aday.disc;
+      /* Genisleme yonu merdivenden gelir: "bir sey calis" degil "su kapiyi
+         gec". Kapi olculemiyorsa istenen sey calismak degil OLCMEKTIR. */
+      const kapi = ESP.Curriculum ? ESP.Curriculum.nextGate(d.id) : null;
+      const taban = aday.cert === 'missing'
+        ? 'Son ' + BALANCE_WINDOW + ' günde hiç girilmemiş.'
+        : 'Son ' + BALANCE_WINDOW + ' günde ' + U.fmtMin(aday.minutes) + '.';
       return {
         rank:5, id:'expand:' + d.id, agent:d.agent, disc:d.id,
-        title:d.label + ' bu hafta en az çalışılan alan',
-        detail:aday.cert === 'missing'
-          ? 'Son ' + BALANCE_WINDOW + ' günde hiç girilmemiş. Temel sağlam; '
-            + 'genişleme sırası burada.'
-          : 'Son ' + BALANCE_WINDOW + ' günde ' + U.fmtMin(aday.minutes) + '. '
-            + 'Temel sağlam; genişleme sırası burada.',
+        title:kapi ? (d.label + ' — ' + kapi.title)
+          : (d.label + ' bu hafta en az çalışılan alan'),
+        detail:taban + ' Temel sağlam; genişleme sırası burada.'
+          + (kapi ? ' ' + kapi.why : ''),
         route:d.route, tab:null,
-        why:'Yeni içerik: temel sağlamken genişleme sistemin asıl amacıdır.',
+        why:kapi && kapi.action === 'measure'
+          ? 'Yeni içerik: bu kapı henüz ölçülmedi, istenen şey çalışmak değil ölçmek.'
+          : 'Yeni içerik: temel sağlamken genişleme sistemin asıl amacıdır.',
       };
     }
 
@@ -346,6 +392,25 @@ ESP.Planner = (function(){
         route:'writing' });
     }
 
+    /* Tarih ↔ okuma: kronoloji doluyor ama kaynak elestirisi yok.
+       Kaynaksiz kronoloji bir liste; liste tarih degildir. */
+    const th = ESP.Chrono ? ESP.Chrono.status() : null;
+    if(th && th.cert !== 'missing' && th.events >= 20 && !th.sources.total){
+      out.push({ id:'events-no-sources', from:'herodot', to:'aristoteles',
+        text:th.events + ' olay girilmiş ama hiçbir kaynak değerlendirilmemiş. '
+           + 'Kaynaksız kronoloji bir liste; liste tarih değildir.',
+        route:'history' });
+    }
+
+    /* Tarih ↔ felsefe: nedensellik zinciri kuruluyor ama tez yok.
+       Ikisi ayni kasi calistirir: oncul-sonuc ayrimi. */
+    if(th && th.chains.total >= 3 && !(S.args || []).length){
+      out.push({ id:'chains-no-args', from:'herodot', to:'socrates',
+        text:th.chains.total + ' neden zinciri kurulmuş ama hiç tez yazılmamış. '
+           + 'İkisi aynı ayrımı kullanıyor: öncül ile sonuç.',
+        route:'symposium' });
+    }
+
     /* SRS ↔ seri: kart birikiyor ve gunluk kayit da kopmus. */
     const o = overdue(today);
     const seri = ESP.Model.streak();
@@ -361,7 +426,7 @@ ESP.Planner = (function(){
 
   return {
     RETENTION_FLOOR, RETENTION_MIN_CARDS, DEADLINE_DAYS, BALANCE_WINDOW,
-    blockedCore, deadlines, overdue, synthesisGap,
+    blockedCore, deadlines, overdue, overdueDeck, synthesisGap,
     nextAction, balance, weeklyRoute, crossFindings,
   };
 })();

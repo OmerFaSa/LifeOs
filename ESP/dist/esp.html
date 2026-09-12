@@ -4577,7 +4577,7 @@ body.is-dragging .drop.is-over{
    Durum renkleri (ok/warn/danger) buna KARISMAZ. */
 :root[data-section="gunluk"]  { --sec-base:#2F6B52; }  /* adaçayı */
 :root[data-section="dil"]     { --sec-base:#2F5A8A; }  /* mürekkep mavisi */
-:root[data-section="felsefe"] { --sec-base:#6B3F63; }  /* erik */
+:root[data-section="dusunce"] { --sec-base:#6B3F63; }  /* erik */
 :root[data-section="ses"]     { --sec-base:#9A4A2F; }  /* kiremit */
 :root[data-section="okuma"]   { --sec-base:#8A5A18; }  /* kehribar */
 :root[data-section="yazi"]    { --sec-base:#5E6B2A; }  /* zeytin */
@@ -4589,7 +4589,7 @@ body.is-dragging .drop.is-over{
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"])[data-section="gunluk"]  { --sec-base:#79C09C; }
   :root:not([data-theme="light"])[data-section="dil"]     { --sec-base:#86AEDC; }
-  :root:not([data-theme="light"])[data-section="felsefe"] { --sec-base:#C193BA; }
+  :root:not([data-theme="light"])[data-section="dusunce"] { --sec-base:#C193BA; }
   :root:not([data-theme="light"])[data-section="ses"]     { --sec-base:#DF9376; }
   :root:not([data-theme="light"])[data-section="okuma"]   { --sec-base:#D6A961; }
   :root:not([data-theme="light"])[data-section="yazi"]    { --sec-base:#AFBF74; }
@@ -4598,7 +4598,7 @@ body.is-dragging .drop.is-over{
 }
 :root[data-theme="dark"][data-section="gunluk"]  { --sec-base:#79C09C; }
 :root[data-theme="dark"][data-section="dil"]     { --sec-base:#86AEDC; }
-:root[data-theme="dark"][data-section="felsefe"] { --sec-base:#C193BA; }
+:root[data-theme="dark"][data-section="dusunce"] { --sec-base:#C193BA; }
 :root[data-theme="dark"][data-section="ses"]     { --sec-base:#DF9376; }
 :root[data-theme="dark"][data-section="okuma"]   { --sec-base:#D6A961; }
 :root[data-theme="dark"][data-section="yazi"]    { --sec-base:#AFBF74; }
@@ -4617,6 +4617,8 @@ body.is-dragging .drop.is-over{
   --agent-diction:#7A4A5E;
   --agent-reading:#8A5A18;
   --agent-writing:#4F5C24;
+  --agent-history:#5A4632;
+  --agent-memory:#3F5F63;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -4626,6 +4628,8 @@ body.is-dragging .drop.is-over{
     --agent-diction:#D39BB4;
     --agent-reading:#D6A961;
     --agent-writing:#AFBF74;
+    --agent-history:#C9A484;
+    --agent-memory:#8FBAC0;
   }
 }
 :root[data-theme="dark"]{
@@ -4635,6 +4639,8 @@ body.is-dragging .drop.is-over{
   --agent-diction:#D39BB4;
   --agent-reading:#D6A961;
   --agent-writing:#AFBF74;
+  --agent-history:#C9A484;
+  --agent-memory:#8FBAC0;
 }
 
 /* ===================================================== ekrana ozel yapilar
@@ -4824,6 +4830,8 @@ body.is-dragging .drop.is-over{
 .desk--demosthenes{ --desk-ink:var(--agent-diction); }
 .desk--aristoteles{ --desk-ink:var(--agent-reading); }
 .desk--montaigne{ --desk-ink:var(--agent-writing); }
+.desk--herodot{ --desk-ink:var(--agent-history); }
+.desk--mnemosyne{ --desk-ink:var(--agent-memory); }
 .desk--patron{ --desk-ink:var(--agent-patron); }
 .desk[class*="desk--"]{ border-left:3px solid var(--desk-ink, var(--border)); }
 
@@ -4914,6 +4922,129 @@ body.is-dragging .drop.is-over{
 @media (prefers-reduced-motion:reduce){
   .daycell, .srscard__reveal, .metro__step, .handoff{ transition:none; }
 }
+
+
+/* ===================================================== kronoloji (tarih)
+
+   Zaman seridi bir GRAFIK degildir ve oyle cizilmez. Yillar arasindaki
+   mesafeyi piksele cevirmek burada yaniltici olurdu: MO 3200 ile 1923
+   arasini olcege koymak, son iki yuzyili bir cizgiye sikistirir ve
+   kullanicinin en cok calistigi donemi gorunmez yapar.
+
+   Bunun yerine donemler ESIT genislikte kutulardir ve her kutu kendi olay
+   sayisini tasir. Olcek yil degil ILGIDIR. */
+.erastrip{
+  display:grid; gap:var(--sp-2);
+  grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+}
+.eracell{
+  display:flex; flex-direction:column; gap:2px; align-items:flex-start;
+  padding:var(--sp-3); text-align:left; font:inherit; cursor:pointer;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border); border-radius:var(--radius);
+}
+.eracell:hover{ background:var(--surface-hover); }
+.eracell.is-active{ border-color:var(--sec); box-shadow:inset 0 0 0 1px var(--sec); }
+.eracell.is-empty{ opacity:.62; border-style:dashed; }
+.eracell__label{ font-weight:600; font-size:var(--fs-sm); }
+.eracell__span{ font-size:var(--fs-xs); color:var(--text-3); }
+.eracell__n{ margin-top:var(--sp-1); font-size:var(--fs-lg); color:var(--text-2); }
+.eranote{ margin-top:var(--sp-3); padding-top:var(--sp-3); border-top:1px solid var(--rule); }
+.eranote p{ margin:0 0 var(--sp-2); }
+
+.evrow{
+  display:flex; gap:var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.evrow__year{
+  flex:0 0 7ch; text-align:right; color:var(--text-2);
+  font-variant-numeric:tabular-nums; font-size:var(--fs-sm);
+}
+.evrow__body{ flex:1 1 auto; min-width:0; }
+.evrow__body p{ margin:2px 0 0; }
+.evrow__meta{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+  margin-top:var(--sp-2);
+}
+
+.contemp{
+  margin-top:var(--sp-3); padding:var(--sp-3);
+  background:var(--surface-2, var(--surface)); border-radius:var(--radius);
+}
+.contemp__list{ list-style:none; margin:var(--sp-2) 0 var(--sp-3); padding:0; }
+.contemp__list li{
+  display:flex; gap:var(--sp-3); align-items:baseline;
+  padding:2px 0; font-size:var(--fs-sm);
+}
+.contemp__list .num{ flex:0 0 7ch; text-align:right; color:var(--text-3); }
+
+.srcrow{ padding:var(--sp-3) 0; border-bottom:1px solid var(--rule); }
+.srcrow__head{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2); }
+
+.critique{ margin-top:var(--sp-3); display:grid; gap:var(--sp-3); }
+.critique__q label{ display:block; }
+.critique__q p{ margin:0 0 var(--sp-1); }
+
+/* Zincir: halkalar arasindaki sira GORSEL olarak da bir siradir, bu yuzden
+   sol kenardaki cizgi kesintisizdir. Halkanin turu solda yazar; renk
+   TASIMAZ — tur bir durum degil bir siniftir. */
+.chain{ list-style:none; margin:var(--sp-3) 0 0; padding:0 0 0 var(--sp-3);
+  border-left:2px solid var(--rule); }
+.chain__link{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2); align-items:baseline;
+  padding:var(--sp-2) 0;
+}
+.chain__kind{
+  flex:0 0 auto; font-size:var(--fs-xs); text-transform:uppercase;
+  letter-spacing:.05em; color:var(--text-3);
+}
+.chain__text{ flex:1 1 18ch; min-width:0; }
+
+/* ========================================================= merdiven
+
+   Kademe kutusu bir ROZET degildir: parlamaz, altin kenar tasimaz, kutlama
+   yapmaz. Bir konum gosterir, o kadar. */
+.ladders{
+  display:grid; gap:var(--sp-3);
+  grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+}
+.ladcard{
+  display:flex; flex-direction:column; gap:var(--sp-2); align-items:stretch;
+  padding:var(--sp-3); text-align:left; font:inherit; cursor:pointer;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border); border-radius:var(--radius);
+}
+.ladcard:hover{ background:var(--surface-hover); }
+.ladcard.is-active{ border-color:var(--sec); box-shadow:inset 0 0 0 1px var(--sec); }
+.ladcard__head{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--sp-2); }
+.ladcard__rank{ font-size:var(--fs-sm); color:var(--text-3); letter-spacing:.08em; }
+.ladcard__level{ font-size:var(--fs-sm); color:var(--text-2); }
+.ladcard__bar{ display:block; height:4px; background:var(--rule); border-radius:2px; overflow:hidden; }
+.ladcard__fill{ display:block; height:100%; background:var(--sec); }
+.ladcard__meta{ font-size:var(--fs-xs); color:var(--text-3); }
+
+/* Kapi listesi. Uc durum, uc isaret: gecildi (✓), kaldi (·), olculemedi (?).
+   Ucuncu isaret bu sistemin en onemli isaretidir ve silinmemelidir. */
+.gates{ list-style:none; margin:0; padding:0; }
+.gate{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2); align-items:baseline;
+  padding:var(--sp-2) 0; border-bottom:1px solid var(--rule);
+}
+.gate__mark{ flex:0 0 1.4em; text-align:center; color:var(--text-3); }
+.gate--pass .gate__mark{ color:var(--ok, var(--text-2)); }
+.gate--unknown{ opacity:.78; }
+.gate__label{ flex:1 1 14ch; min-width:0; }
+.gate__why{ flex:1 1 14ch; min-width:0; font-size:var(--fs-sm); color:var(--text-3); }
+
+.studylist{ margin:0; padding-left:1.1em; }
+.studylist li{ margin:2px 0; }
+
+.step__cols{ display:grid; gap:var(--sp-4); grid-template-columns:1fr; }
+@media (min-width:760px){
+  .step__cols{ grid-template-columns:1fr 1fr; }
+}
+.step--done .lrow__label{ opacity:.7; }
+.step--ahead .step__cols{ opacity:.72; }
 </style>
 <div id="app">
   <div class="boot">
@@ -4934,7 +5065,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'9b02fbd', at:'2026-09-12 18:23', dirty:true };
+SP.BUILD = { id:'567ae55', at:'2026-09-12 19:10', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -4948,7 +5079,7 @@ SP.BUILD = { id:'9b02fbd', at:'2026-09-12 18:23', dirty:true };
      PEDAGOGIC  ogretim siniri. Sistem sertifika vermez, yetenek yargisi kurmaz.
      GROUNDING  halusinasyon engeli. Model serbest sayi uretmez.
      PRIVACY    veri mahremiyeti. Ham ses ve tam metin disari cikmaz.
-     PRECEDENCE alti disiplin ayni anda zaman isterse sira budur.
+     PRECEDENCE yedi disiplin ayni anda zaman isterse sira budur.
 
    SPI'nin `CLINICAL` sinirinin ESP karsiligi `PEDAGOGIC`'tir: orada sistem
    hekim degildir, burada ogretmen degildir. Ikisi de ayni seyi soyler —
@@ -5074,7 +5205,7 @@ ESP.PRIVACY = {
 
 /* --------------------------------------------------- celiski cozum sirasi
 
-   Alti disiplin ayni anda zaman ister. Sinirli olan kaynak ZAMANDIR,
+   Yedi disiplin ayni anda zaman ister. Sinirli olan kaynak ZAMANDIR,
    dogruluk degil — bu yuzden sira "hangisi daha dogru" degil "hangisi
    beklerse digerlerini cokertir" sorusuna gore dizilir.
 
@@ -5127,7 +5258,7 @@ ESP.CERTAINTY = {
 
 /* ------------------------------------------------------------- disiplinler
 
-   Alti disiplin tek yerde tanimlidir. Ekranlar, ajanlar ve EHS hesabi
+   Yedi disiplin tek yerde tanimlidir. Ekranlar, ajanlar ve EHS hesabi
    buradan okur; bir disiplinin adi ya da agirligi degisecekse burada degisir.
 
    `weight` EHS'deki D_i katsayisidir: butun disiplinler esit degildir, ama
@@ -5152,6 +5283,10 @@ ESP.DISCIPLINES = [
   { id:'writing', label:'Yazı',         short:'Yazı',    weight:1.0, agent:'montaigne',
     unit:'dakika', route:'writing',
     note:'Taslak üretimi ve revizyon. Hacmi kelime, kalitesi okunabilirlik ölçer.' },
+  { id:'history', label:'Tarih',        short:'Tarih',   weight:1.1, agent:'herodot',
+    unit:'dakika', route:'history',
+    note:'Kronoloji, nedensellik ve kaynak eleştirisi. Olay sayısı iskelet, '
+       + 'zincir ve kaynak ettir.' },
 ];
 
 ESP.DISCIPLINE_BY_ID = ESP.DISCIPLINES.reduce(function(m, d){ m[d.id] = d; return m; }, {});
@@ -5173,6 +5308,8 @@ ESP.FOCUS = [
     note:'Eşit skorlu iki iş çıkarsa enstrüman önce gelir.' },
   { id:'writing',  label:'Yazı ağırlıklı',
     note:'Eşit skorlu iki iş çıkarsa taslak önce gelir.' },
+  { id:'history',  label:'Tarih ağırlıklı',
+    note:'Eşit skorlu iki iş çıkarsa kronoloji ve kaynak önce gelir.' },
 ];
 
 /* ----------------------------------------------------------- masa notlari
@@ -5191,7 +5328,7 @@ ESP.NOTE_TYPES = [
 ];
 
 /* ==== js/data/agents.js ==== */
-/* Ofis kadrosu — yedi ajan: alti uzman + Patron.
+/* Ofis kadrosu — dokuz ajan: yedi uzman, bir koc ve Patron.
 
    Orijinal spesifikasyonun en buyuk eksigi buydu: alti uzman vardi ama biri
    celiskiyi cozmuyor, gundemi secmiyor, haftalik raporu yazmiyordu. AYS ve
@@ -5208,7 +5345,7 @@ ESP.NOTE_TYPES = [
    soyler. Ajan hesap yapmaz: sayilar oradan gelir, ajan yalnizca cumleye
    cevirir.
 
-   Ad secimi: alti uzmanin adi kendi disiplininin tarihinden gelir. Bu bir
+   Ad secimi: uzmanlarin adi kendi disiplininin tarihinden gelir. Bu bir
    sus degil — kullanici "diksiyon ajani" degil "Demosthenes" der ve hangi
    masaya gittigini hatirlar. */
 
@@ -5218,10 +5355,11 @@ ESP.AGENTS = [
   { id:'patron', name:'Patron', role:'Baş danışman',
     color:'var(--agent-patron)', initial:'P',
     title:'Orkestrasyon',
-    scope:'Altı uzmanın raporu, çelişkilerin çözümü, haftalık rota ve sıradaki tek iş.',
+    scope:'Yedi uzmanın ve bir koçun raporu, çelişkilerin çözümü, haftalık rota, '
+        + 'merdivendeki kademe ve sıradaki tek iş.',
     notScope:'Kendi hesabını yapmaz. Skor üretmez, uzmanların skorunu kullanır.',
     brief:'patronBrief',
-    opening:'Altı masadan gelen raporu okudum. Çelişki varsa sıraya koyar, '
+    opening:'Sekiz masadan gelen raporu okudum. Çelişki varsa sıraya koyar, '
           + 'kararı gerekçesiyle söylerim.',
     redirect:'Bu soru bir uzmanın alanında; ona bağlıyorum.' },
 
@@ -5295,7 +5433,39 @@ ESP.AGENTS = [
           + 'uzunluk, tekrar, akış.',
     redirect:'Tezin doğruluğu Socrates\'in alanında; ona bağlıyorum.',
     owns:['writing'] },
+
+  { id:'herodot', name:'Herodot', role:'Tarih ve kaynak eleştirisi',
+    color:'var(--agent-history)', initial:'H',
+    title:'Disiplin 7',
+    scope:'Kronoloji kapsamı (dönem, bölge, alan), yüzyıl boşlukları, nedensellik '
+        + 'zincirlerinin dengesi, kaynakların birincil–ikincil dağılımı ve '
+        + 'eleştiri derinliği.',
+    notScope:'Bir olayın «doğru» yorumunu dayatmaz, güncel siyaset konuşmaz, '
+           + 'dil ya da müzik alanına girmez.',
+    brief:'historyBrief',
+    opening:'Kaç olay bildiğin değil, kaçını kaynağıyla açıklayabildiğin sayılır. '
+          + 'Zincirlerine ve kaynaklarına bakıyorum.',
+    redirect:'Bu bir argüman sorusu; Socrates\'e bağlıyorum.',
+    owns:['history'] },
+
+  { id:'mnemosyne', name:'Mnemosyne', short:'Mnemosyne', role:'Hafıza ve tekrar koçu',
+    color:'var(--agent-memory)', initial:'Ω',
+    title:'Koç',
+    scope:'Bütün destelerin aralıklı tekrar durumu, vadesi geçen kartlar, '
+        + 'unutma eğrisi ve merdivendeki sıradaki kapı.',
+    notScope:'İçeriğe karışmaz: bir kartın doğru olup olmadığını tartışmaz, '
+           + 'hangi kelimenin öğrenileceğine karar vermez.',
+    brief:'coachBrief',
+    opening:'Öğrendiğin şey değil, tuttuğun şey sermayedir. Vadesi geçen '
+          + 'kartlarına ve kapılarına bakıyorum.',
+    redirect:'İçerik sorusu ilgili masanın; ona bağlıyorum.',
+    owns:['curriculum'] },
 ];
+
+/* Koc masalari: bir disiplinin degil BIR ISIN sahibi olan ajanlar.
+   Mnemosyne hicbir disiplinin icerigine karismaz; butun disiplinlerin
+   ayni sorusuna bakar — «tuttun mu?» */
+ESP.COACH_IDS = ['mnemosyne'];
 
 ESP.AGENT_BY_ID = ESP.AGENTS.reduce(function(m, a){ m[a.id] = a; return m; }, {});
 
@@ -5314,8 +5484,13 @@ ESP.AGENDA_TYPES = [
     lead:'Okunan çok, bağlanan az. Not yığını sermaye değildir.' },
   { id:'deadline', label:'Yaklaşan hedef',
     lead:'Takvimde tarihi olan bir hedef var; plan ona göre daralıyor.' },
+  { id:'gate', label:'Kapıda bekleyen kademe',
+    lead:'Bir disiplinde merdivenin bir sonraki kapısına çok az kaldı ya da '
+       + 'kapı ölçülemiyor.' },
+  { id:'coverage', label:'Tarihte kör nokta',
+    lead:'Kronolojide kapsanmayan dönem, bölge ya da alan var.' },
   { id:'review', label:'Haftalık gözden geçirme',
-    lead:'Tıkanma yok. Altı masanın raporunu okuyup sıradaki haftayı kuruyoruz.' },
+    lead:'Tıkanma yok. Yedi masanın raporunu okuyup sıradaki haftayı kuruyoruz.' },
 ];
 
 /* ==== js/data/canon.js ==== */
@@ -5864,6 +6039,827 @@ ESP.ARTICULATION_ERRORS = [
 ];
 
 ESP.ERROR_BY_ID = ESP.ARTICULATION_ERRORS.reduce(function(m, e){ m[e.id] = e; return m; }, {});
+
+/* ==== js/data/history.js ==== */
+/* Tarih verisi — kronoloji iskeleti, kaynak turleri ve tarih yazimi okullari.
+
+   Tarih ogrenmenin iki yaygin bicimi vardir ve ikisi de eksiktir: tarih
+   SIRALAMASI ezberlemek (1453, 1789, 1923...) ve tarih HIKAYESI dinlemek.
+   Ilki baglamsiz, ikincisi denetimsizdir.
+
+   ESP'nin tarihi ucuncu bicimdir: bir olay, bir DONEME ve bir NEDEN
+   zincirine baglanir; zincirin her halkasi bir KAYNAGA dayanir; kaynagin
+   kendisi elestirilir. Ezber yalnizca iskelettir — iskeletsiz beden
+   duramaz, ama iskelet tek basina beden degildir.
+
+   Buradaki olay listesi bir MUFREDAT DEGIL bir TOHUMDUR: kullanici kendi
+   olaylarini ekler. Tohumun isi bos bir zaman seridini kullanilabilir
+   yapmaktir; bir tarihcinin kanonu olmak degil.
+
+   Yil gosterimi: negatif yil MO demektir (-753 = MO 753). Tek bir sayi
+   kullanmak karsilastirmayi aritmetige indirger; "MO 5. yuzyil" ile
+   "5. yuzyil"i siralamak boylece hatasiz olur. */
+
+window.ESP = window.ESP || {};
+
+/* ------------------------------------------------------------------ donemler
+
+   Donem sinirlari TARTISMALIDIR ve oyle gosterilir. "Ortacag 476'da basladi"
+   demek bir kararidir, bir olcum degil. `disputed` alani bunu ekranda
+   gorunur kilar: kullanici sinirin kendisinin bir yorum oldugunu bilmeli. */
+ESP.ERAS = [
+  { id:'tarihoncesi', label:'Tarih öncesi', from:-3000000, to:-3200,
+    note:'Yazıdan önce. Kaynak: arkeoloji, antropoloji — yazılı tanık yok.',
+    disputed:'Bitiş, yazının bulunuşuna bağlanır; yazı her yerde aynı anda çıkmadı.' },
+  { id:'ilkcag', label:'İlk Çağ', from:-3200, to:476,
+    note:'Yazının bulunuşundan Batı Roma\'nın yıkılışına.',
+    disputed:'476 Batı\'ya özgü bir tarihtir; Doğu Roma 1453\'e kadar sürdü.' },
+  { id:'ortacag', label:'Orta Çağ', from:476, to:1453,
+    note:'Feodalite, üç büyük dinin kurumsallaşması, İslam biliminin yükselişi.',
+    disputed:'«Karanlık çağ» adlandırması 19. yy Avrupa merkezli bir yargıdır.' },
+  { id:'yenicag', label:'Yeni Çağ', from:1453, to:1789,
+    note:'Coğrafi keşifler, Rönesans, Reform, mutlak monarşiler, bilim devrimi.',
+    disputed:'1453 mü 1492 mi tartışmalıdır; ikisi de Avrupa merkezlidir.' },
+  { id:'yakincag', label:'Yakın Çağ', from:1789, to:1945,
+    note:'Devrimler, sanayileşme, ulus-devlet, sömürgecilik, iki dünya savaşı.',
+    disputed:'Bitişi 1914, 1918 ya da 1945 sayılabilir; her biri ayrı bir tez.' },
+  { id:'cagdas', label:'Çağdaş', from:1945, to:9999,
+    note:'Soğuk Savaş, dekolonizasyon, bilgi çağı.',
+    disputed:'Yaşanan dönemin tarihi yazılamaz denir; belge açılmamıştır.' },
+];
+
+ESP.ERA_BY_ID = ESP.ERAS.reduce(function(m, e){ m[e.id] = e; return m; }, {});
+
+/* Bir yilin hangi doneme dustugu. Donemler ortusmez; ilk eslesen doner. */
+ESP.eraOf = function(year){
+  if(typeof year !== 'number' || !isFinite(year)) return null;
+  for(let i = 0; i < ESP.ERAS.length; i++){
+    const e = ESP.ERAS[i];
+    if(year >= e.from && year <= e.to) return e;
+  }
+  return null;
+};
+
+/* Yuzyil. Dikkat: MO yuzyil hesabi farklidir ve "sifirinci yuzyil" yoktur.
+   MS 1-100 => 1. yuzyil; MO 100-1 => MO 1. yuzyil. */
+ESP.centuryOf = function(year){
+  if(typeof year !== 'number' || !isFinite(year) || year === 0) return null;
+  return year > 0 ? Math.ceil(year / 100) : -Math.ceil(-year / 100);
+};
+
+ESP.centuryLabel = function(c){
+  if(c == null) return '—';
+  return c > 0 ? c + '. yüzyıl' : 'MÖ ' + (-c) + '. yüzyıl';
+};
+
+ESP.yearLabel = function(y){
+  if(typeof y !== 'number' || !isFinite(y)) return '—';
+  return y < 0 ? 'MÖ ' + (-y) : String(y);
+};
+
+/* ------------------------------------------------------------------ alanlar
+
+   Bir olayin turu. Sayma degil DENGE icin var: yalnizca savas tarihi
+   calisan biri "tarih biliyor" sayilmaz; ekonomik ve dusunsel olaylar
+   gorunmedikce nedensellik hep askeri kalir. */
+ESP.EVENT_KINDS = [
+  { id:'siyasi',    label:'Siyasi',    note:'Devlet, iktidar, savaş, antlaşma.' },
+  { id:'ekonomik',  label:'Ekonomik',  note:'Ticaret, üretim, kriz, teknoloji.' },
+  { id:'dusunsel',  label:'Düşünsel',  note:'Felsefe, bilim, din, sanat.' },
+  { id:'toplumsal', label:'Toplumsal', note:'Nüfus, sınıf, şehir, salgın, göç.' },
+];
+
+ESP.EVENT_KIND_BY_ID = ESP.EVENT_KINDS.reduce(function(m, k){ m[k.id] = k; return m; }, {});
+
+/* Bolgeler — "dunya tarihi" derken yalnizca Avrupa'ya bakmamak icin. */
+ESP.REGIONS = [
+  { id:'anadolu',  label:'Anadolu ve Türk dünyası' },
+  { id:'avrupa',   label:'Avrupa' },
+  { id:'ortadogu', label:'Orta Doğu' },
+  { id:'asya',     label:'Asya' },
+  { id:'afrika',   label:'Afrika' },
+  { id:'amerika',  label:'Amerika' },
+  { id:'dunya',    label:'Küresel' },
+];
+
+/* --------------------------------------------------------------- tohum olaylar
+
+   Seksen kadar donum noktasi. Her biri bir DONEME, bir ALANA ve bir
+   BOLGEYE baglidir; boylece "18. yuzyilda Asya'da ne oluyordu" sorusu
+   cevaplanabilir hale gelir.
+
+   `why` alani olayin NEDEN donum noktasi sayildigini soyler. Bir olayin
+   onemi kendiliginden gorunmez; gorunur yapmak verinin isidir. */
+ESP.SEED_EVENTS = [
+  { year:-3200, title:'Çivi yazısının bulunuşu', region:'ortadogu', kind:'dusunsel',
+    why:'Bellek kişiden çıkıp kuruma geçti: tarih burada başlar.' },
+  { year:-2500, title:'Giza piramitleri', region:'afrika', kind:'siyasi',
+    why:'Merkezî devletin artı ürünü seferber edebildiğinin kanıtı.' },
+  { year:-1750, title:'Hammurabi kanunları', region:'ortadogu', kind:'siyasi',
+    why:'Yazılı hukuk: iktidar keyfîlikten kurala geçmeye zorlanıyor.' },
+  { year:-1274, title:'Kadeş Savaşı ve antlaşması', region:'ortadogu', kind:'siyasi',
+    why:'Bilinen ilk yazılı barış antlaşması.' },
+  { year:-753, title:'Roma\'nın kuruluşu (efsanevi)', region:'avrupa', kind:'siyasi',
+    why:'Efsane ile tarihin ayrıldığı yer: tarih sayılan her tarih ölçülmüş değildir.' },
+  { year:-563, title:'Buddha', region:'asya', kind:'dusunsel',
+    why:'Hint düşüncesinde kurumsal dine karşı bireysel kurtuluş.' },
+  { year:-551, title:'Konfüçyüs', region:'asya', kind:'dusunsel',
+    why:'Çin devlet geleneğinin ahlakî temeli.' },
+  { year:-508, title:'Atina demokrasisi', region:'avrupa', kind:'siyasi',
+    why:'Yurttaşın yönetime doğrudan katılımı — sınırlı ama ilk.' },
+  { year:-490, title:'Pers Savaşları', region:'avrupa', kind:'siyasi',
+    why:'«Doğu–Batı» ayrımının tarih yazımındaki ilk kurgusu.' },
+  { year:-399, title:'Sokrates\'in ölümü', region:'avrupa', kind:'dusunsel',
+    why:'Düşünce ile şehir arasındaki gerilimin kalıcı simgesi.' },
+  { year:-331, title:'Büyük İskender ve Helenizm', region:'asya', kind:'siyasi',
+    why:'Kültürlerin karışması: fetih bir düşünce taşıyıcısı olabiliyor.' },
+  { year:-221, title:'Çin\'in birleşmesi (Qin)', region:'asya', kind:'siyasi',
+    why:'Standart yazı, ölçü ve para: devletin teknik altyapısı.' },
+  { year:-146, title:'Kartaca\'nın yıkılışı', region:'afrika', kind:'siyasi',
+    why:'Akdeniz ticaret rekabetinin askerî çözümü.' },
+  { year:-44, title:'Caesar suikastı', region:'avrupa', kind:'siyasi',
+    why:'Cumhuriyetten imparatorluğa geçişin kırılma anı.' },
+  { year:313, title:'Milano Fermanı', region:'avrupa', kind:'dusunsel',
+    why:'Hristiyanlığın yasaklıdan devlet ortağına dönüşü.' },
+  { year:395, title:'Roma\'nın ikiye ayrılması', region:'avrupa', kind:'siyasi',
+    why:'Doğu ve Batı\'nın bin yıllık ayrı yollarının başlangıcı.' },
+  { year:476, title:'Batı Roma\'nın yıkılışı', region:'avrupa', kind:'siyasi',
+    why:'Dönem sınırı olarak seçilmiş tarih — bir yorumun sayıya dönüşmesi.' },
+  { year:622, title:'Hicret', region:'ortadogu', kind:'dusunsel',
+    why:'Bir takvimin başlangıcı: zaman ölçüsü de bir tarihsel karardır.' },
+  { year:751, title:'Talas Savaşı', region:'asya', kind:'ekonomik',
+    why:'Kâğıdın Çin\'den batıya geçişi — bilgi taşıma maliyeti düşüyor.' },
+  { year:800, title:'Charlemagne\'ın taç giymesi', region:'avrupa', kind:'siyasi',
+    why:'Batı\'da imparatorluk fikrinin dinî meşruiyetle dirilişi.' },
+  { year:1071, title:'Malazgirt', region:'anadolu', kind:'siyasi',
+    why:'Anadolu\'nun Türkleşme sürecinin açılışı.' },
+  { year:1095, title:'Haçlı Seferleri başlıyor', region:'ortadogu', kind:'siyasi',
+    why:'İki uygarlığın uzun ve çift yönlü teması.' },
+  { year:1206, title:'Moğol İmparatorluğu', region:'asya', kind:'siyasi',
+    why:'Avrasya\'yı tek bir ticaret ve salgın ağına bağladı.' },
+  { year:1215, title:'Magna Carta', region:'avrupa', kind:'siyasi',
+    why:'İktidarın sınırlanabileceği fikrinin yazılı ilk örneği.' },
+  { year:1299, title:'Osmanlı Beyliği', region:'anadolu', kind:'siyasi',
+    why:'Altı yüzyıl sürecek bir devlet geleneğinin başlangıcı.' },
+  { year:1347, title:'Kara Veba', region:'avrupa', kind:'toplumsal',
+    why:'Nüfusun üçte biri: emek kıtlaşınca feodal bağ çözülüyor.' },
+  { year:1377, title:'İbn Haldûn, Mukaddime', region:'afrika', kind:'dusunsel',
+    why:'Tarihin kendisini bir bilim olarak kuran ilk deneme.' },
+  { year:1453, title:'İstanbul\'un fethi', region:'anadolu', kind:'siyasi',
+    why:'Orta Çağ\'ın sonu sayılan tarih; ticaret yolları yeniden çiziliyor.' },
+  { year:1455, title:'Matbaa (Gutenberg)', region:'avrupa', kind:'ekonomik',
+    why:'Kopyalama maliyeti çöküyor: fikir yayılımı sınıf atlıyor.' },
+  { year:1492, title:'Amerika\'ya varış', region:'amerika', kind:'ekonomik',
+    why:'Kıtalar arası biyolojik ve ekonomik takas — ve yıkım.' },
+  { year:1517, title:'Reform', region:'avrupa', kind:'dusunsel',
+    why:'Dinî otoritenin bölünmesi; okuryazarlık bir siyasi güç oluyor.' },
+  { year:1543, title:'Kopernik', region:'avrupa', kind:'dusunsel',
+    why:'İnsanın evrendeki merkez konumunu kaybetmesi.' },
+  { year:1571, title:'İnebahtı', region:'avrupa', kind:'siyasi',
+    why:'Akdeniz\'de deniz gücü dengesinin dönüm noktası.' },
+  { year:1648, title:'Vestfalya Barışı', region:'avrupa', kind:'siyasi',
+    why:'Egemen devlet sisteminin doğuşu — bugünkü dünya haritasının mantığı.' },
+  { year:1687, title:'Newton, Principia', region:'avrupa', kind:'dusunsel',
+    why:'Doğanın matematikle yazılabileceği iddiasının kanıtı.' },
+  { year:1699, title:'Karlofça', region:'anadolu', kind:'siyasi',
+    why:'Osmanlı\'nın ilk büyük toprak kaybı: yön değişiyor.' },
+  { year:1760, title:'Sanayi Devrimi başlıyor', region:'avrupa', kind:'ekonomik',
+    why:'Enerji kaynağı kas ve rüzgârdan kömüre geçiyor.' },
+  { year:1776, title:'Amerikan Bağımsızlık Bildirgesi', region:'amerika', kind:'siyasi',
+    why:'Haklar teorisinin devlet kuran bir metne dönüşmesi.' },
+  { year:1789, title:'Fransız Devrimi', region:'avrupa', kind:'siyasi',
+    why:'Egemenliğin hanedandan ulusa geçişi.' },
+  { year:1839, title:'Tanzimat Fermanı', region:'anadolu', kind:'siyasi',
+    why:'Osmanlı\'da hukuk devleti ve eşit yurttaşlık girişimi.' },
+  { year:1848, title:'Halkların baharı', region:'avrupa', kind:'toplumsal',
+    why:'Ulusçuluk ve işçi hareketinin aynı anda sahneye çıkışı.' },
+  { year:1859, title:'Darwin, Türlerin Kökeni', region:'avrupa', kind:'dusunsel',
+    why:'İnsanın doğa içindeki yerinin yeniden tanımlanması.' },
+  { year:1869, title:'Süveyş Kanalı', region:'afrika', kind:'ekonomik',
+    why:'Mesafe kısalınca sömürge yönetimi ucuzluyor.' },
+  { year:1876, title:'I. Meşrutiyet', region:'anadolu', kind:'siyasi',
+    why:'Osmanlı\'da anayasa ve meclis denemesi.' },
+  { year:1884, title:'Berlin Konferansı', region:'afrika', kind:'siyasi',
+    why:'Bir kıtanın masa başında paylaşılması.' },
+  { year:1908, title:'II. Meşrutiyet', region:'anadolu', kind:'siyasi',
+    why:'Siyasi partiler ve basın hayatının açılışı.' },
+  { year:1914, title:'I. Dünya Savaşı', region:'dunya', kind:'siyasi',
+    why:'İmparatorluklar çağının sonu.' },
+  { year:1917, title:'Rus Devrimi', region:'avrupa', kind:'siyasi',
+    why:'Kapitalizme alternatif bir devlet modelinin kuruluşu.' },
+  { year:1918, title:'İspanyol gribi', region:'dunya', kind:'toplumsal',
+    why:'Savaştan çok insan öldüren salgın — tarih yazımında uzun süre görünmedi.' },
+  { year:1919, title:'Kurtuluş Savaşı başlıyor', region:'anadolu', kind:'siyasi',
+    why:'İşgale karşı örgütlü direniş ve yeni bir meşruiyet kaynağı.' },
+  { year:1923, title:'Cumhuriyet\'in ilanı', region:'anadolu', kind:'siyasi',
+    why:'Egemenliğin kaynağının hanedandan millete geçişi.' },
+  { year:1929, title:'Büyük Buhran', region:'dunya', kind:'ekonomik',
+    why:'Piyasanın kendi kendini düzelttiği inancının kırılması.' },
+  { year:1939, title:'II. Dünya Savaşı', region:'dunya', kind:'siyasi',
+    why:'Sanayi kapasitesinin yok etmeye koşulması.' },
+  { year:1945, title:'Atom bombası ve BM', region:'dunya', kind:'siyasi',
+    why:'İnsanlığın kendini yok edebilme eşiği ve buna karşı kurulan düzen.' },
+  { year:1948, title:'İnsan Hakları Evrensel Bildirgesi', region:'dunya', kind:'dusunsel',
+    why:'Devletin yurttaşına karşı da sınırlanabileceği iddiası.' },
+  { year:1948, title:'İsrail\'in kuruluşu', region:'ortadogu', kind:'siyasi',
+    why:'Orta Doğu\'nun bugünkü sorunlarının merkezindeki kırılma.' },
+  { year:1949, title:'Çin Halk Cumhuriyeti', region:'asya', kind:'siyasi',
+    why:'Dünya nüfusunun beşte birinin yeni bir yola girmesi.' },
+  { year:1960, title:'Afrika\'nın bağımsızlık yılı', region:'afrika', kind:'siyasi',
+    why:'On yedi devletin aynı yıl kurulması: dekolonizasyon.' },
+  { year:1969, title:'Ay\'a iniş', region:'dunya', kind:'dusunsel',
+    why:'Teknolojik kapasitenin ve Soğuk Savaş rekabetinin zirvesi.' },
+  { year:1973, title:'Petrol krizi', region:'dunya', kind:'ekonomik',
+    why:'Enerji bağımlılığının siyasi silaha dönüşmesi.' },
+  { year:1989, title:'Berlin Duvarı\'nın yıkılışı', region:'avrupa', kind:'siyasi',
+    why:'İki kutuplu dünyanın sonu.' },
+  { year:1991, title:'SSCB\'nin dağılması', region:'asya', kind:'siyasi',
+    why:'On beş yeni devlet ve yeni bir güç boşluğu.' },
+  { year:1991, title:'World Wide Web', region:'dunya', kind:'ekonomik',
+    why:'Bilgi dağıtım maliyetinin ikinci kez çökmesi (ilki matbaa).' },
+  { year:2008, title:'Küresel finans krizi', region:'dunya', kind:'ekonomik',
+    why:'Finansallaşmanın sınırları ve kurtarma tartışması.' },
+];
+
+/* ------------------------------------------------------- kaynak elestirisi
+
+   Tarih ogrenmenin en cok atlanan kismi budur: bir bilgi nereden geliyor?
+   Her madde bir SORUDUR, bir kural degil — cevabi kullanici verir, sistem
+   yalnizca sormayi birakmaz. */
+ESP.SOURCE_KINDS = [
+  { id:'primary', label:'Birincil', note:'Olayın tanığı ya da dönemin kendi belgesi: '
+    + 'ferman, mektup, gazete, kitabe, arkeolojik buluntu.' },
+  { id:'secondary', label:'İkincil', note:'Sonradan yazılmış inceleme: '
+    + 'tarih kitabı, makale, tez.' },
+  { id:'tertiary', label:'Üçüncül', note:'Derleme: ansiklopedi, ders kitabı, ' 
+    + 'popüler özet. Başlangıç için iyi, kanıt için zayıf.' },
+];
+
+ESP.SOURCE_CRITIQUE = [
+  { id:'kim', q:'Bu kaynağı kim yazdı ve olayla ilişkisi neydi?',
+    note:'Tanık mı, duyan mı, çıkarı olan mı?' },
+  { id:'ne-zaman', q:'Olaydan ne kadar sonra yazıldı?',
+    note:'Arada geçen süre belleği ve niyeti değiştirir.' },
+  { id:'kime', q:'Kime yazıldı?',
+    note:'Bir padişaha yazılan zafername ile özel mektup aynı şeyi söylemez.' },
+  { id:'cikar', q:'Yazarın bu anlatıdan kazancı ne?',
+    note:'Meşrulaştırma, aklama, suçlama — hepsi bir çıkar biçimidir.' },
+  { id:'ic-tutarlilik', q:'Metin kendi içinde tutarlı mı?',
+    note:'Aynı olayı iki yerde farklı anlatıyor mu?' },
+  { id:'dis-tutarlilik', q:'Bağımsız bir kaynak bunu doğruluyor mu?',
+    note:'Tek kaynağa dayanan bir iddia bir tezdir, bir olgu değil.' },
+  { id:'suskunluk', q:'Kaynağın söylemediği ne?',
+    note:'Suskunluk kanıt değildir — ama sistematik suskunluk bir sorudur.' },
+  { id:'dil', q:'Hangi dilde ve hangi çeviriden okuyorsun?',
+    note:'Çeviri bir yorumdur; anahtar kavramlarda aslına bakılır.' },
+];
+
+/* ---------------------------------------------------------- tarih yazimi okullari
+
+   Ayni olay, farkli okulda farkli bir hikayedir. Bunu gormek "tarih
+   ogrenmek" ile "tarihsel dusunmek" arasindaki fark. */
+ESP.HISTORIOGRAPHY = [
+  { id:'olaysal', label:'Olaysal / siyasi tarih',
+    note:'Savaşlar, antlaşmalar, hükümdarlar. En eski ve en yaygın biçim.',
+    asks:'Ne oldu, kim yaptı, ne zaman?' },
+  { id:'annales', label:'Annales okulu',
+    note:'Uzun süre (longue durée), coğrafya, gündelik hayat. Olay yüzeydeki dalgadır.',
+    asks:'Yüzyıllarca değişmeyen ne vardı?' },
+  { id:'marksist', label:'Marksist tarih',
+    note:'Üretim ilişkileri ve sınıf mücadelesi belirleyicidir.',
+    asks:'Bu değişimden kim kazandı, kim kaybetti?' },
+  { id:'kultureI', label:'Kültürel tarih',
+    note:'Anlam, temsil, zihniyet. İnsanlar dünyayı nasıl kurguluyordu?',
+    asks:'Dönemin insanı ne düşünüyordu, neye gülüyordu?' },
+  { id:'mikro', label:'Mikro tarih',
+    note:'Tek bir köy, tek bir yargılama, tek bir hayat üzerinden bütünü okumak.',
+    asks:'Küçük bir vaka büyük yapıyı nasıl ele veriyor?' },
+  { id:'kuresel', label:'Küresel / bağlantı tarihi',
+    note:'Ulus birimini bırakır; ağ, ticaret ve dolaşımı izler.',
+    asks:'Bu olay başka kıtayla nasıl bağlantılıydı?' },
+  { id:'sozlu', label:'Sözlü tarih',
+    note:'Yazılı belge bırakmamış olanların tanıklığı.',
+    asks:'Belgede sesi olmayan kimdi?' },
+  { id:'toplumsalcinsiyet', label:'Toplumsal cinsiyet tarihi',
+    note:'Kaynakların erkek merkezli oluşunu bir veri sayar.',
+    asks:'Kadınlar bu anlatının neresinde ve neden görünmüyor?' },
+];
+
+ESP.SCHOOL_BY_ID = ESP.HISTORIOGRAPHY.reduce(function(m, s){ m[s.id] = s; return m; }, {});
+
+/* ------------------------------------------------------------- nedensellik
+
+   Bir zincir kurarken kullanilan halka turleri. Ayrim onemlidir: uzun
+   vadeli KOSUL ile ani TETIKLEYICI ayni sey degildir ve karistirmak
+   tarihin en yaygin hatasidir ("savas suikastla cikti"). */
+ESP.CAUSE_KINDS = [
+  { id:'yapisal', label:'Yapısal koşul',
+    note:'Yıllarca süren zemin: nüfus, iklim, ekonomi, teknoloji.' },
+  { id:'kurumsal', label:'Kurumsal neden',
+    note:'Hukuk, ordu, vergi düzeni gibi kurumların hâli.' },
+  { id:'konjonktur', label:'Konjonktür',
+    note:'Kısa dönemli durum: kıtlık, savaş yorgunluğu, kriz.' },
+  { id:'tetikleyici', label:'Tetikleyici',
+    note:'Ateşi yakan kıvılcım. Tek başına açıklamaz.' },
+  { id:'fail', label:'Fail kararı',
+    note:'Bir kişinin ya da grubun alabileceği başka kararlar da vardı.' },
+  { id:'tesaduf', label:'Tesadüf',
+    note:'Hava, hastalık, zamanlama. Tarihte vardır ve silinmemelidir.' },
+];
+
+/* Anakronizm tuzaklari — "bugunun gozuyle okumak". */
+ESP.ANACHRONISMS = [
+  { id:'ulus', label:'Ulus-devlet okuması',
+    note:'1500\'de «Türkiye» ya da «Almanya» yoktu; hanedan ve din vardı.' },
+  { id:'ahlak', label:'Bugünün ahlakıyla yargılama',
+    note:'Geçmişi yargılamak açıklamanın yerine geçemez. Açıkla, sonra yargıla.' },
+  { id:'kacinilmaz', label:'Kaçınılmazlık yanılgısı',
+    note:'Olan şey olmak zorunda değildi. Sonucu bilmek nedeni değiştirmez.' },
+  { id:'kahraman', label:'Büyük adam indirgemesi',
+    note:'Tek kişi bir yüzyılı açıklamaz; koşullar olmadan karar iş görmez.' },
+  { id:'geri', label:'Geriye dönük proje',
+    note:'«Zaten hep buna doğru gidiyordu» demek, kaynağı değil sonucu okumaktır.' },
+];
+
+/* Tarih calisma bicimleri — koçun reçete yazarken kullandığı egzersizler. */
+ESP.HISTORY_DRILLS = [
+  { id:'serit', label:'Boş şerit', level:1,
+    task:'On olayı tarihsiz karıştır, doğru sıraya diz. Yanlışları not et.' },
+  { id:'yuzyil', label:'Yüzyıl eşlemesi', level:1,
+    task:'Bir olayın yüzyılını, MÖ/MS ayrımını ve dönemini söyle.' },
+  { id:'esanli', label:'Eşzamanlılık', level:2,
+    task:'Bir olay seç: aynı yüzyılda başka üç bölgede ne oluyordu?' },
+  { id:'zincir', label:'Neden zinciri', level:2,
+    task:'Bir olaya iki yapısal koşul, bir konjonktür ve bir tetikleyici yaz.' },
+  { id:'karsi', label:'Karşı-olgusal', level:4,
+    task:'«Bu olmasaydı ne olurdu?» — ama yalnızca kaynakla savunulabilen kadarını yaz.' },
+  { id:'kaynak', label:'Kaynak eleştirisi', level:3,
+    task:'Bir birincil kaynak al, sekiz soruyu sırayla cevapla.' },
+  { id:'ikiokul', label:'İki okul', level:4,
+    task:'Aynı olayı iki tarih yazımı okulunun sorusuyla yeniden yaz.' },
+  { id:'anakronizm', label:'Anakronizm avı', level:4,
+    task:'Okuduğun bir metinde beş anakronizm tuzağından hangileri var?' },
+  { id:'harita', label:'Harita üzerinde', level:2,
+    task:'Olayı haritada göster; coğrafya nedenin neresinde?' },
+  { id:'mikro', label:'Mikro vaka', level:5,
+    task:'Tek bir kişinin ya da köyün hikâyesinden dönemin yapısını çıkar.' },
+];
+
+/* Tarih SRS kartlarinin destesi. Dil kartlariyla ayni motor, ayri deste:
+   retansiyon ayri olculur (bkz. curriculum «history.retention»). */
+ESP.HISTORY_DECK = 'history';
+
+/* ==== js/data/curriculum.js ==== */
+/* Mufredat merdiveni — sifirdan ustatliga.
+
+   ESP'nin ilk surumu bir OLCUM sistemiydi: ne kadar calistigini sayardi.
+   Olcum tek basina bir yol gostermez; "bugun 40 dakika gitar calistim"
+   cumlesi kisiyi ilerletmez, yalnizca kaydeder. Merdiven bu eksigi kapatir:
+   her disiplin icin ALTI kademe, her kademede OLCULEBILIR kapilar ve o
+   kademede ne calisilacaginin listesi.
+
+   Uc kural bu dosyanin tamamini yonetir:
+
+   1. KAPI OLCULEBILIR OLMAK ZORUNDADIR. "Fransizcayi iyi anliyor" bir kapi
+      degildir; "son 30 gunde 300+ aktif kart ve retansiyon >= 0.75" bir
+      kapidir. Olculemeyen bir kapi, kullanicinin kendine soyledigi bir
+      hikayedir — sistem hikaye tutmaz.
+
+   2. KADEME KISIYE DEGIL URETIME VERILIR. ESP.PEDAGOGIC.level burada da
+      gecerlidir: "Kalfa'sin" denmez, "son 30 gunun olculmus uretimi Kalfa
+      kapilarini karsiliyor" denir. Uretim durursa kademe de durur.
+
+   3. OLCULEMEYEN KAPI GECILMIS SAYILMAZ — AMA KALMIS DA SAYILMAZ. Veri
+      yoksa kapi 'missing' durumundadir ve kullaniciya "once bunu olc"
+      denir. Sifir varsaymak, sistemin en pahali hatasidir.
+
+   Kademe adlari lonca geleneginden gelir (cirak-kalfa-usta). Sebep suslu
+   degil: bu adlar bir SUREC anlatir, bir yetenek yargisi degil. "B2" ya da
+   "ileri seviye" kisiyi etiketler; "kalfa" nerede durdugunu soyler. */
+
+window.ESP = window.ESP || {};
+
+/* Alti kademe. `rank` 0'dan baslar: hic dokunmamis bir disiplin de bir
+   yerdedir — yokluk da bir konumdur ve gorunur olmalidir. */
+ESP.LEVELS = [
+  { rank:0, id:'temas',  label:'Temas',  short:'0',
+    note:'Henüz ölçülmüş üretim yok. Sistem burada yargı kurmaz; ilk ölçümü ister.' },
+  { rank:1, id:'acemi',  label:'Acemi',  short:'I',
+    note:'Alet tanındı. Düzenlilik henüz yok, ama ilk ölçümler girildi.' },
+  { rank:2, id:'cirak',  label:'Çırak',  short:'II',
+    note:'Düzen kuruldu. Temel tekrar eder, hacim birikir, terk edilmiyor.' },
+  { rank:3, id:'kalfa',  label:'Kalfa',  short:'III',
+    note:'Üretim başladı. Artık yalnız tüketmiyor; kendi eserini çıkarıyor.' },
+  { rank:4, id:'usta',   label:'Usta',   short:'IV',
+    note:'Derinlik ve bağ. Alanın içinde kendi yargısını kurabiliyor.' },
+  { rank:5, id:'ustat',  label:'Üstat',  short:'V',
+    note:'Aktarım. Öğretebiliyor, özgün iş üretiyor, alanı başka alana bağlıyor.' },
+];
+
+ESP.LEVEL_BY_RANK = ESP.LEVELS.reduce(function(m, l){ m[l.rank] = l; return m; }, {});
+ESP.LEVEL_BY_ID = ESP.LEVELS.reduce(function(m, l){ m[l.id] = l; return m; }, {});
+
+/* Merdivenler.
+
+   `gates[].metric` core/curriculum.js icindeki OLCU KAYDINDAN okunur; orada
+   karsiligi olmayan bir metrik adi yazmak sessiz bir hataya degil, acik bir
+   teste dusmeye yol acar (tests/curriculum.test.js her metrik adini denetler).
+
+   `min` esiktir; `max` varsa ustune cikmak da kapiyi kapatir (ornegin yazi
+   okunabilirliginde cok kisa cumle de bir sorundur).
+
+   `study` o kademede NE calisilacagini soyler — merdivenin asil degeri
+   buradadir. `proof` kademenin kapanis isidir: bir kapiyi sayiyla degil
+   bitmis bir isle kapatirsin. */
+ESP.LADDERS = {
+
+  /* ------------------------------------------------------------------ dil */
+  lang:{
+    disc:'lang', coach:'polyglot',
+    aim:'Anlamaktan üretmeye, üretmekten düşünmeye.',
+    levels:[
+      { rank:1, title:'Ses ve ilk 500 kelime',
+        study:['Alfabe ve ses uyumu', 'Günlük 10 yeni kart', 'Günde 10 dk shadowing',
+               'Sayılar, saat, yön, temel fiiller'],
+        gates:[
+          { metric:'lang.cards', min:100, label:'100 kart destede' },
+          { metric:'lang.days14', min:5, label:'Son 14 günün 5\'inde çalışıldı' },
+        ],
+        proof:'Kendini üç cümleyle tanıtan bir kayıt.' },
+
+      { rank:2, title:'Kalıptan cümleye',
+        study:['Zaman kipleri', 'Günlük 20 kart tekrarı', 'Basit diyalog üretimi',
+               'Haftada bir 5 dakikalık dinleme günlüğü'],
+        gates:[
+          { metric:'lang.cards', min:400, label:'400 kart' },
+          { metric:'lang.retention', min:0.70, label:'Retansiyon ≥ %70' },
+          { metric:'lang.minutes30', min:600, label:'30 günde 600 dakika' },
+        ],
+        proof:'Sözlüğe bakmadan yazılmış 150 kelimelik bir metin.' },
+
+      { rank:3, title:'i+1 üretim',
+        study:['Kendi alanında okuma', 'Gölge okuma yerine ÖZET anlatma',
+               'Yazılı üretimde hata günlüğü', 'Deyim ve eşdizim (collocation)'],
+        gates:[
+          { metric:'lang.cards', min:1200, label:'1200 kart' },
+          { metric:'lang.retention', min:0.78, label:'Retansiyon ≥ %78' },
+          { metric:'lang.minutes30', min:900, label:'30 günde 900 dakika' },
+          { metric:'lang.streakDays', min:10, label:'10 günlük zincir' },
+        ],
+        proof:'Bir makaleyi hedef dilde özetleyip kendi itirazını yazmak.' },
+
+      { rank:4, title:'Düşünce dili',
+        study:['Primer metni hedef dilde okuma', 'Tartışma ve savunma',
+               'Üslup farkları: gazete / akademik / konuşma'],
+        gates:[
+          { metric:'lang.cards', min:2500, label:'2500 kart' },
+          { metric:'lang.retention', min:0.82, label:'Retansiyon ≥ %82' },
+          { metric:'lang.minutes30', min:1200, label:'30 günde 1200 dakika' },
+        ],
+        proof:'Hedef dilde 800 kelimelik özgün bir deneme.' },
+
+      { rank:5, title:'Aktarım',
+        study:['Çeviri ve geri çeviri', 'İkinci dile geçiş', 'Başkasına öğretme'],
+        gates:[
+          { metric:'lang.cards', min:4000, label:'4000 kart' },
+          { metric:'lang.retention', min:0.85, label:'Retansiyon ≥ %85' },
+          { metric:'lang.langs', min:2, label:'İki dil aktif' },
+        ],
+        proof:'Bir metni çevirip geri çevirerek kayıp analizini yazmak.' },
+    ],
+  },
+
+  /* -------------------------------------------------------------- felsefe */
+  philo:{
+    disc:'philo', coach:'socrates',
+    aim:'Okumaktan argüman kurmaya, argümandan kendi konumuna.',
+    levels:[
+      { rank:1, title:'Soruyu tanımak',
+        study:['Felsefenin dört ana sorusu', 'Sokratik diyalog okuma',
+               'Kavram sözlüğü kurma'],
+        gates:[
+          { metric:'philo.concepts', min:5, label:'5 kavram not edildi' },
+          { metric:'philo.minutes30', min:180, label:'30 günde 180 dakika' },
+        ],
+        proof:'Bir kavramı kendi cümlenle tanımlamak.' },
+
+      { rank:2, title:'İlk tez',
+        study:['Öncül–sonuç ayrımı', 'Safsata kataloğu', 'Primer metin okuma'],
+        gates:[
+          { metric:'philo.args', min:3, label:'3 tez yazıldı' },
+          { metric:'philo.primaryBooks', min:1, label:'1 primer metin' },
+        ],
+        proof:'Bir teze kendi itirazını yazıp cevaplamak.' },
+
+      { rank:3, title:'İtirazla yaşamak',
+        study:['Karşıt konumu en güçlü hâliyle kurma', 'Düşünce deneyleri',
+               'Kavramlar arası bağ'],
+        gates:[
+          { metric:'philo.closedArgs', min:5, label:'5 tez kapatıldı' },
+          { metric:'philo.primaryBooks', min:3, label:'3 primer metin' },
+          { metric:'philo.minutes30', min:400, label:'30 günde 400 dakika' },
+        ],
+        proof:'Kendi tezini çürüten bir itirazı kabul edip tezi düzeltmek.' },
+
+      { rank:4, title:'Gelenekler arası',
+        study:['İki geleneği karşılaştırma', 'Tarihsel bağlam',
+               'Kendi konumunu bir geleneğe yerleştirme'],
+        gates:[
+          { metric:'philo.closedArgs', min:12, label:'12 tez kapatıldı' },
+          { metric:'philo.traditions', min:3, label:'3 gelenek okundu' },
+        ],
+        proof:'İki geleneği aynı soru üzerinden karşılaştıran bir metin.' },
+
+      { rank:5, title:'Kendi sorusu',
+        study:['Özgün soru üretme', 'Sistematik konum kurma', 'Yazarak savunma'],
+        gates:[
+          { metric:'philo.closedArgs', min:25, label:'25 tez kapatıldı' },
+          { metric:'philo.traditions', min:5, label:'5 gelenek' },
+        ],
+        proof:'Kimsenin sormadığı bir soruyu kurup savunmak.' },
+    ],
+  },
+
+  /* ----------------------------------------------------------------- müzik */
+  music:{
+    disc:'music', coach:'maestro',
+    aim:'Temiz çalmaktan müzik yapmaya.',
+    levels:[
+      { rank:1, title:'El ve ses',
+        study:['Duruş ve pena tutuşu', 'Açık akorlar', 'Metronomla dörtlük vuruş'],
+        gates:[
+          { metric:'music.pieces', min:1, label:'1 parça/teknik kaydı' },
+          { metric:'music.minutes30', min:240, label:'30 günde 240 dakika' },
+        ],
+        proof:'Bir akor geçişini 60 BPM\'de temiz çalmak.' },
+
+      { rank:2, title:'Temiz tempo',
+        study:['Barre akorlar', 'Pentatonik kalıp 1', 'Ritim kalıpları'],
+        gates:[
+          { metric:'music.cleanBpm', min:80, label:'Temiz eşik ≥ 80 BPM' },
+          { metric:'music.pieces', min:3, label:'3 parça/teknik' },
+          { metric:'music.minutes30', min:450, label:'30 günde 450 dakika' },
+        ],
+        proof:'Bir parçayı baştan sona duraksamadan çalmak.' },
+
+      { rank:3, title:'Repertuar',
+        study:['Beş pentatonik kalıp', 'Modlar', 'Kulakla akor bulma'],
+        gates:[
+          { metric:'music.cleanBpm', min:110, label:'Temiz eşik ≥ 110 BPM' },
+          { metric:'music.pieces', min:8, label:'8 parça/teknik' },
+          { metric:'music.noPlateau', min:1, label:'14+ gündür tıkanan teknik yok' },
+        ],
+        proof:'Üç parçalık bir seti hatasız çalmak.' },
+
+      { rank:4, title:'Müzikalite',
+        study:['Doğaçlama', 'Armoni analizi', 'Dinamik ve tını'],
+        gates:[
+          { metric:'music.cleanBpm', min:140, label:'Temiz eşik ≥ 140 BPM' },
+          { metric:'music.pieces', min:15, label:'15 parça/teknik' },
+          { metric:'music.minutes30', min:900, label:'30 günde 900 dakika' },
+        ],
+        proof:'Bir akor dizisi üzerine 12 ölçü doğaçlama.' },
+
+      { rank:5, title:'Kendi sesi',
+        study:['Beste', 'Düzenleme', 'Kayıt ve prodüksiyon'],
+        gates:[
+          { metric:'music.cleanBpm', min:160, label:'Temiz eşik ≥ 160 BPM' },
+          { metric:'music.pieces', min:25, label:'25 parça/teknik' },
+        ],
+        proof:'Kendi bestenin kaydı.' },
+    ],
+  },
+
+  /* -------------------------------------------------------------- diksiyon */
+  diction:{
+    disc:'diction', coach:'demosthenes',
+    aim:'Anlaşılır olmaktan ikna ediciye.',
+    levels:[
+      { rank:1, title:'Nefes',
+        study:['Diyafram nefesi', 'Tekerleme (kolay grup)', 'Kendi kaydını dinleme'],
+        gates:[
+          { metric:'diction.recordings', min:3, label:'3 ölçülmüş kayıt' },
+          { metric:'diction.minutes30', min:120, label:'30 günde 120 dakika' },
+        ],
+        proof:'Bir paragrafı nefesi kesilmeden okumak.' },
+
+      { rank:2, title:'Artikülasyon',
+        study:['Ünsüz netliği', 'Tekerleme (orta grup)', 'Hız değil netlik'],
+        gates:[
+          { metric:'diction.recordings', min:10, label:'10 kayıt' },
+          { metric:'diction.errorRate', max:0.08, label:'Hata oranı ≤ %8' },
+        ],
+        proof:'Zor bir tekerlemeyi üç kez üst üste temiz söylemek.' },
+
+      { rank:3, title:'Vurgu ve tempo',
+        study:['Cümle vurgusu', 'Duraklama', 'WPM ölçümü ve bant'],
+        gates:[
+          { metric:'diction.wpm', min:120, label:'WPM ≥ 120' },
+          { metric:'diction.recordings', min:25, label:'25 kayıt' },
+        ],
+        proof:'İki dakikalık hazırlıksız konuşma kaydı.' },
+
+      { rank:4, title:'Hitabet',
+        study:['Retorik figürler', 'Dinleyiciyle bağ', 'Soru-cevap yönetimi'],
+        gates:[
+          { metric:'diction.wpm', min:140, label:'WPM ≥ 140' },
+          { metric:'diction.errorRate', max:0.05, label:'Hata oranı ≤ %5' },
+          { metric:'diction.minutes30', min:400, label:'30 günde 400 dakika' },
+        ],
+        proof:'On dakikalık bir sunumun kaydı.' },
+
+      { rank:5, title:'Sahne',
+        study:['Uzun konuşma mimarisi', 'Doğaçlama cevap', 'Ses ekonomisi'],
+        gates:[
+          { metric:'diction.recordings', min:60, label:'60 kayıt' },
+          { metric:'diction.errorRate', max:0.03, label:'Hata oranı ≤ %3' },
+        ],
+        proof:'Yarım saatlik bir konuşmayı notsuz vermek.' },
+    ],
+  },
+
+  /* ---------------------------------------------------------------- okuma */
+  reading:{
+    disc:'reading', coach:'aristoteles',
+    aim:'Sayfa saymaktan bağ kurmaya.',
+    levels:[
+      { rank:1, title:'Düzenli okuma',
+        study:['Günde 20 dakika', 'Okurken altını çizme', 'Kaynak kaydı'],
+        gates:[
+          { metric:'reading.books', min:1, label:'1 kaynak kaydı' },
+          { metric:'reading.minutes30', min:300, label:'30 günde 300 dakika' },
+        ],
+        proof:'Bir kitabı bitirip üç cümleyle özetlemek.' },
+
+      { rank:2, title:'Atomik not',
+        study:['Tek fikir = tek not', 'Kendi cümlenle yazma', 'Kavram etiketi'],
+        gates:[
+          { metric:'reading.notes', min:30, label:'30 atomik not' },
+          { metric:'reading.books', min:3, label:'3 kaynak' },
+        ],
+        proof:'Bir bölümü on nota ayırmak.' },
+
+      { rank:3, title:'Bağ',
+        study:['Not–not bağı', 'Çelişen iki yazarı yan yana koyma',
+               'Bağlanmamış not avı'],
+        gates:[
+          { metric:'reading.notes', min:100, label:'100 not' },
+          { metric:'reading.linkedRatio', min:0.40, label:'Notların %40\'ı bağlı' },
+        ],
+        proof:'Farklı iki kitaptan iki notu gerekçeli bağlamak.' },
+
+      { rank:4, title:'Sentopik okuma',
+        study:['Tek soru, çok yazar', 'Kavram matrisi', 'Karşıtlık haritası'],
+        gates:[
+          { metric:'reading.syntopic', min:1.5, label:'Sentopik katsayı ≥ 1.5' },
+          { metric:'reading.authors', min:8, label:'8 farklı yazar' },
+          { metric:'reading.notes', min:250, label:'250 not' },
+        ],
+        proof:'Bir soruyu beş yazar üzerinden karşılaştıran bir harita.' },
+
+      { rank:5, title:'Kendi kütüphanesi',
+        study:['Kanon kurma', 'Okuma listesi tasarımı', 'Başkasına okuma planı'],
+        gates:[
+          { metric:'reading.syntopic', min:2.5, label:'Sentopik katsayı ≥ 2.5' },
+          { metric:'reading.authors', min:20, label:'20 yazar' },
+        ],
+        proof:'Kendi kanonunu gerekçeleriyle yazmak.' },
+    ],
+  },
+
+  /* ----------------------------------------------------------------- yazı */
+  writing:{
+    disc:'writing', coach:'montaigne',
+    aim:'Yazabilmekten düşünebilmeye.',
+    levels:[
+      { rank:1, title:'Sayfayı doldurmak',
+        study:['Günde 200 kelime', 'Düzeltmeden yazma', 'Günlük tutma'],
+        gates:[
+          { metric:'writing.drafts', min:3, label:'3 taslak' },
+          { metric:'writing.words30', min:1500, label:'30 günde 1500 kelime' },
+        ],
+        proof:'Tek oturuşta bitmiş 500 kelimelik bir metin.' },
+
+      { rank:2, title:'Revizyon',
+        study:['İkinci taslak', 'Gereksiz kelime avı', 'Cümle uzunluğu dengesi'],
+        gates:[
+          { metric:'writing.drafts', min:8, label:'8 taslak' },
+          { metric:'writing.revisionRatio', min:1.0, label:'Taslak başına ≥ 1 revizyon' },
+        ],
+        proof:'Bir metni yarı uzunluğa indirip güçlendirmek.' },
+
+      { rank:3, title:'Yapı',
+        study:['Giriş–gelişme–sonuç mimarisi', 'Paragraf işlevi', 'Okunabilirlik ölçümü'],
+        gates:[
+          { metric:'writing.words30', min:6000, label:'30 günde 6000 kelime' },
+          { metric:'writing.readability', min:45, label:'Ateşman ≥ 45' },
+          { metric:'writing.drafts', min:20, label:'20 taslak' },
+        ],
+        proof:'Bir argümanı 1500 kelimede eksiksiz kurmak.' },
+
+      { rank:4, title:'Üslup',
+        study:['Ritim ve uzunluk değişimi', 'Somut ayrıntı', 'Kendi tekrarlarını görmek'],
+        gates:[
+          { metric:'writing.words30', min:12000, label:'30 günde 12000 kelime' },
+          { metric:'writing.revisionRatio', min:2.0, label:'Taslak başına ≥ 2 revizyon' },
+        ],
+        proof:'Aynı fikri üç ayrı üslupta yazmak.' },
+
+      { rank:5, title:'Eser',
+        study:['Uzun biçim', 'Bölüm mimarisi', 'Kendi editörün olmak'],
+        gates:[
+          { metric:'writing.drafts', min:60, label:'60 taslak' },
+          { metric:'writing.words30', min:20000, label:'30 günde 20000 kelime' },
+        ],
+        proof:'Bölümlü, bitirilmiş uzun bir metin.' },
+    ],
+  },
+
+  /* ---------------------------------------------------------------- tarih */
+  history:{
+    disc:'history', coach:'herodot',
+    aim:'Tarih bilmekten tarihsel düşünmeye.',
+    levels:[
+      { rank:1, title:'İskelet kronoloji',
+        study:['Büyük dönemler ve sınırları', 'Yüzyıl mantığı',
+               'On dönüm noktası ezberi'],
+        gates:[
+          { metric:'history.events', min:20, label:'20 olay kronolojide' },
+          { metric:'history.minutes30', min:180, label:'30 günde 180 dakika' },
+        ],
+        proof:'Boş bir zaman şeridine on olayı doğru yerleştirmek.' },
+
+      { rank:2, title:'Bağlam',
+        study:['Aynı anda dünyanın başka yerinde ne oluyordu',
+               'Neden–sonuç zinciri', 'Dönem içi süreklilik ve kırılma'],
+        gates:[
+          { metric:'history.events', min:60, label:'60 olay' },
+          { metric:'history.eras', min:4, label:'4 dönem kapsandı' },
+          { metric:'history.retention', min:0.70, label:'Tarih kartları retansiyonu ≥ %70' },
+        ],
+        proof:'Bir olayın üç nedenini ve iki sonucunu kaynakla yazmak.' },
+
+      { rank:3, title:'Kaynak eleştirisi',
+        study:['Birincil–ikincil ayrımı', 'Yazarın konumu ve çıkarı',
+               'İç ve dış tutarlılık', 'Suskunluk kanıtı değildir'],
+        gates:[
+          { metric:'history.sources', min:15, label:'15 kaynak değerlendirildi' },
+          { metric:'history.primaryRatio', min:0.30, label:'Kaynakların %30\'u birincil' },
+          { metric:'history.causal', min:10, label:'10 nedensellik zinciri' },
+        ],
+        proof:'Bir birincil kaynağı eleştirip taraflılığını göstermek.' },
+
+      { rank:4, title:'Tarih yazımı',
+        study:['Tarih yazımı okulları', 'Anakronizm avı',
+               'Karşı-olgusal düşünme', 'Uzun süre (longue durée)'],
+        gates:[
+          { metric:'history.schools', min:4, label:'4 tarih yazımı okulu' },
+          { metric:'history.events', min:150, label:'150 olay' },
+          { metric:'history.retention', min:0.78, label:'Retansiyon ≥ %78' },
+        ],
+        proof:'Aynı olayı iki okulun gözünden yazmak.' },
+
+      { rank:5, title:'Kendi yorumu',
+        study:['Özgün tez', 'Karşılaştırmalı tarih', 'Kaynak temelli anlatı'],
+        gates:[
+          { metric:'history.causal', min:40, label:'40 nedensellik zinciri' },
+          { metric:'history.sources', min:60, label:'60 kaynak' },
+          { metric:'history.primaryRatio', min:0.40, label:'Birincil oran ≥ %40' },
+        ],
+        proof:'Kaynaklara dayanan özgün bir tarih yazısı.' },
+    ],
+  },
+};
+
+/* Seviye tespit sinavi — "sifirdan" baslamayan kullanicilar icin.
+
+   Bir merdiven yalnizca en alttan basliyorsa, on yildir gitar calan birini
+   "Temas" diye karsilar ve sistem gulunc olur. Tespit sinavi kademeyi
+   ATLATMAZ; yalnizca "hangi kapilari zaten gecmis olabilirsin" diye sorar
+   ve cevabi TAHMIN etiketiyle isaretler. Olculmus veri geldikce tahmin
+   kendiliginden yerini olcume birakir. */
+ESP.PLACEMENT = {
+  note:'Bu sınav bir seviye VERMEZ. Verdiği şey bir başlangıç tahminidir ve '
+     + '«tahmin» etiketiyle durur. İlk ölçümler geldiğinde tahmin silinir.',
+  questions:[
+    { id:'years', label:'Bu alanla kaç yıldır uğraşıyorsun?',
+      options:[
+        { value:0, label:'Hiç' }, { value:1, label:'1 yıldan az' },
+        { value:2, label:'1–3 yıl' }, { value:3, label:'3–7 yıl' },
+        { value:4, label:'7 yıldan fazla' },
+      ] },
+    { id:'output', label:'Bu alanda başkasının gördüğü bir şey ürettin mi?',
+      options:[
+        { value:0, label:'Hayır' }, { value:2, label:'Birkaç kez' },
+        { value:3, label:'Düzenli' }, { value:4, label:'Bununla iş yapıyorum' },
+      ] },
+    { id:'teach', label:'Bu alanı birine öğrettin mi?',
+      options:[
+        { value:0, label:'Hayır' }, { value:1, label:'Arkadaşa anlattım' },
+        { value:3, label:'Düzenli ders verdim' },
+      ] },
+  ],
+};
 
 /* ==== js/data/hints.js ==== */
 /* Aciklama metinleri tek yerde.
@@ -6842,6 +7838,10 @@ ESP.S = {
   drafts:[],           // yazi taslaklari
   goals:[],            // zamana bagli hedefler
 
+  events:[],           // kronolojiye yerlestirilmis tarih olaylari
+  sources:[],          // elestirilmis tarih kaynaklari
+  chains:[],           // nedensellik zincirleri
+
   office:null,         // ofis ayarlari (saglayici, model, ajan basina secim)
   officeChats:{},      // agentId -> mesajlar
   officeMeetings:[],   // toplanti tutanaklari
@@ -6877,6 +7877,14 @@ ESP.S = {
     writeTab:'taslaklar',   // taslaklar | olcum
     draftOpen:null,
     analyticsTab:'radar',   // radar | seriler | rapor
+    histTab:'serit',        // serit | olaylar | kaynaklar | zincir | calisma
+    eventOpen:null,
+    sourceOpen:null,
+    chainOpen:null,
+    histEra:'all',
+    histQuery:'',
+    curDisc:null,           // mufredat ekraninda acik disiplin
+    ladderTab:'ozet',       // ozet | yol | tespit
     officeAgent:'patron',
     officeDesk:null,
     officePerAgent:false,
@@ -7465,6 +8473,191 @@ ESP.Model = (function(){
       .sort((a, b) => a.date < b.date ? -1 : 1);
   }
 
+  /* ----------------------------------------------------------------- tarih
+
+     Uc kayit turu ve aralarindaki sira:
+
+       events   bir olay — yil, donem, alan, bolge
+       sources  bir kaynak ve o kaynaga sorulan sekiz soru
+       chains   bir olayin neden zinciri; halkalari kaynaga baglanir
+
+     Ayrim kasitlidir: bir olayi BILMEK (event) ile onu ACIKLAYABILMEK
+     (chain) ve aciklamayi KANITLAYABILMEK (source) ayri islerdir. Tarih
+     ogrenmenin cokme noktasi ucunu tek sey sanmaktir. */
+
+  function newEvent(patch){
+    const e = Object.assign({
+      id:U.uid('ev'),
+      title:'', year:null, era:null,
+      kind:'siyasi',              // ESP.EVENT_KINDS
+      region:'dunya',             // ESP.REGIONS
+      why:'', note:'',
+      sourceIds:[],
+      createdAt:new Date().toISOString(),
+    }, patch || {});
+    /* Donem yildan TURETILIR, kullanicidan sorulmaz: ayni yil iki donemde
+       olamaz ve elle girilen donem zamanla yanlis kalir. */
+    if(typeof e.year === 'number' && isFinite(e.year)){
+      const d = ESP.eraOf(e.year);
+      e.era = d ? d.id : null;
+    }else{
+      e.year = null;
+      e.era = null;
+    }
+    return e;
+  }
+
+  function normEvent(doc){
+    const e = obj(doc);
+    return Object.assign(newEvent(), e, {
+      sourceIds:arr(e.sourceIds),
+      year:typeof e.year === 'number' && isFinite(e.year) ? e.year : null,
+      era:(typeof e.year === 'number' && isFinite(e.year))
+        ? ((ESP.eraOf(e.year) || {}).id || null) : null,
+    });
+  }
+
+  async function saveEvent(rec){
+    const e = normEvent(rec);
+    if(!String(e.title || '').trim()) return { ok:false, error:'Olayın adı boş olamaz.' };
+    if(e.year == null) return { ok:false, error:'Yıl girilmeden olay kronolojiye giremez.' };
+    const i = S.events.findIndex(x => x.id === e.id);
+    if(i >= 0) S.events[i] = e; else S.events.push(e);
+    S.events.sort((a, b) => (a.year || 0) - (b.year || 0));
+    await ESP.Store.set('events/' + e.id, e);
+    return { ok:true, event:e };
+  }
+
+  async function deleteEvent(id){
+    S.events = S.events.filter(e => e.id !== id);
+    /* Zincirlerin bu olaya isaret eden halkalari da kalkar. */
+    const etkilenen = S.chains.filter(c => c.eventId === id);
+    for(const c of etkilenen){ await deleteChain(c.id); }
+    await ESP.Store.remove('events/' + id);
+  }
+
+  function newSource(patch){
+    return Object.assign({
+      id:U.uid('src'),
+      title:'', author:'', year:null,
+      kind:'secondary',            // ESP.SOURCE_KINDS
+      school:null,                 // ESP.HISTORIOGRAPHY
+      answers:{},                  // ESP.SOURCE_CRITIQUE id -> cevap metni
+      verdict:'',                  // kullanicinin kendi hukmu
+      createdAt:new Date().toISOString(),
+    }, patch || {});
+  }
+
+  function normSource(doc){
+    const s = obj(doc);
+    return Object.assign(newSource(), s, { answers:obj(s.answers) });
+  }
+
+  /* Kaynak elestirisinin ne kadari yapilmis. Cevapsiz soru SIFIR degil
+     EKSIKTIR: yuzde degil "8 sorudan 3'u" biciminde gosterilir. */
+  function critiqueDepth(src){
+    const a = obj(src && src.answers);
+    const cevapli = (ESP.SOURCE_CRITIQUE || [])
+      .filter(q => String(a[q.id] || '').trim()).length;
+    return { answered:cevapli, total:(ESP.SOURCE_CRITIQUE || []).length };
+  }
+
+  async function saveSource(rec){
+    const s = normSource(rec);
+    if(!String(s.title || '').trim()) return { ok:false, error:'Kaynağın adı boş olamaz.' };
+    const i = S.sources.findIndex(x => x.id === s.id);
+    if(i >= 0) S.sources[i] = s; else S.sources.unshift(s);
+    await ESP.Store.set('sources/' + s.id, s);
+    return { ok:true, source:s };
+  }
+
+  async function deleteSource(id){
+    S.sources = S.sources.filter(s => s.id !== id);
+    for(const e of S.events.filter(e => (e.sourceIds || []).indexOf(id) >= 0)){
+      e.sourceIds = e.sourceIds.filter(x => x !== id);
+      await ESP.Store.set('events/' + e.id, e);
+    }
+    for(const c of S.chains){
+      const once = (c.links || []).length;
+      c.links = (c.links || []).map(l => l.sourceId === id
+        ? Object.assign({}, l, { sourceId:null }) : l);
+      if(once) await ESP.Store.set('chains/' + c.id, c);
+    }
+    await ESP.Store.remove('sources/' + id);
+  }
+
+  function newChain(patch){
+    return Object.assign({
+      id:U.uid('ch'),
+      eventId:null, question:'',
+      links:[],                    // [{ id, kind, text, sourceId }]
+      school:null,
+      note:'',
+      createdAt:new Date().toISOString(),
+      updatedAt:new Date().toISOString(),
+    }, patch || {});
+  }
+
+  function normChain(doc){
+    const c = obj(doc);
+    return Object.assign(newChain(), c, {
+      links:arr(c.links).map(l => ({
+        id:l.id || U.uid('l'), kind:l.kind || 'yapisal',
+        text:l.text || '', sourceId:l.sourceId || null,
+      })),
+    });
+  }
+
+  /* Bir zincir "tamam" sayilmaz — yalnizca DENGELI ya da dengesiz olur.
+     Yalnizca tetikleyiciden olusan bir zincir tarihin en yaygin hatasidir
+     ("savas suikastla cikti"); sistem bunu yargilamaz, gosterir. */
+  function chainBalance(chain){
+    const l = arr(chain && chain.links);
+    const turler = {};
+    l.forEach(x => { turler[x.kind] = (turler[x.kind] || 0) + 1; });
+    const yapisal = (turler.yapisal || 0) + (turler.kurumsal || 0);
+    const kaynakli = l.filter(x => x.sourceId).length;
+    return {
+      links:l.length, kinds:turler,
+      structural:yapisal,
+      sourced:kaynakli,
+      balanced:l.length >= 3 && yapisal >= 1,
+      why:!l.length ? 'Zincirde halka yok.'
+        : (yapisal ? null : 'Zincirde yapısal ya da kurumsal bir koşul yok: '
+            + 'yalnızca kıvılcım var, zemin yok.'),
+    };
+  }
+
+  async function saveChain(rec){
+    const c = normChain(rec);
+    if(!c.eventId) return { ok:false, error:'Zincir bir olaya bağlanmadan kaydedilmez.' };
+    c.updatedAt = new Date().toISOString();
+    const i = S.chains.findIndex(x => x.id === c.id);
+    if(i >= 0) S.chains[i] = c; else S.chains.unshift(c);
+    await ESP.Store.set('chains/' + c.id, c);
+    return { ok:true, chain:c };
+  }
+
+  async function deleteChain(id){
+    S.chains = S.chains.filter(c => c.id !== id);
+    await ESP.Store.remove('chains/' + id);
+  }
+
+  /* Tohum olaylari kronolojiye tasir. Ayni baslik ve yil ikinci kez
+     eklenmez: tohum iki kez basilirsa kronoloji sisirilir ve "150 olay"
+     kapisi emeksiz acilirdi. */
+  async function seedEvents(list){
+    const kaynak = list || ESP.SEED_EVENTS || [];
+    let eklenen = 0, atlanan = 0;
+    for(const t of kaynak){
+      const var_ = S.events.some(e => e.year === t.year && U.norm(e.title) === U.norm(t.title));
+      if(var_){ atlanan++; continue; }
+      const res = await saveEvent(newEvent(t));
+      if(res.ok) eklenen++;
+    }
+    return { added:eklenen, skipped:atlanan };
+  }
+
   /* --------------------------------------------------------------- karar */
 
   async function saveDecision(row){
@@ -7560,6 +8753,11 @@ ESP.Model = (function(){
     S.goals = ((await ESP.Store.list('goals')) || []).map(g => Object.assign(newGoal(), g));
     S.decisions = ((await ESP.Store.list('decisions')) || []);
 
+    S.events = ((await ESP.Store.list('events')) || []).map(normEvent)
+      .sort((a, b) => (a.year || 0) - (b.year || 0));
+    S.sources = ((await ESP.Store.list('sources')) || []).map(normSource);
+    S.chains = ((await ESP.Store.list('chains')) || []).map(normChain);
+
     S.storeHealth = ESP.Store.health();
     S.ready = true;
   }
@@ -7584,6 +8782,10 @@ ESP.Model = (function(){
     newRecording, saveRecording, deleteRecording,
     /* yazi */
     newDraft, saveDraft, deleteDraft,
+    /* tarih */
+    newEvent, saveEvent, deleteEvent, seedEvents,
+    newSource, saveSource, deleteSource, critiqueDepth,
+    newChain, saveChain, deleteChain, chainBalance,
     /* hedef ve karar */
     newGoal, saveGoal, deleteGoal, openGoals,
     saveDecision, closeDecision, openDecisions,
@@ -8522,6 +9724,775 @@ ESP.Acoustic = (function(){
   };
 })();
 
+/* ==== js/core/curriculum.js ==== */
+/* Mufredat motoru — kademeyi OLCUMDEN uretir, kullanicidan sormaz.
+
+   data/curriculum.js merdiveni tanimlar; bu dosya merdivenin kapilarini
+   gercek veriyle karsilastirir. Iki katmanin ayri durmasi kasitlidir:
+   esikler bir VERIDIR ve degismesi kod degisikligi gerektirmemelidir.
+
+   Uc kavram:
+
+     OLCU (metric)   kural motorunun urettigi tek sayi, kesinlik etiketiyle.
+     KAPI  (gate)    bir olcunun bir esigi gecip gecmedigi.
+     KADEME (level)  butun kapilari gecilmis en yuksek basamak.
+
+   Kademe hesabi MERDIVENDIR, puan degil: 3. kademenin kapilarini gecmis
+   ama 2. kademede bir kapiyi atlamis biri 2. kademededir. Sebep pedagojik:
+   atlanan kapi ileride her zaman geri gelir ve ustune kurulan her sey
+   cover. Sistem bunu simdi soyler, alti ay sonra degil.
+
+   En onemli kural: OLCULEMEYEN KAPI GECILMIS SAYILMAZ AMA KALINMIS DA
+   SAYILMAZ. Degeri `missing` olan kapi ucuncu bir durumdur ('unknown') ve
+   kullaniciya "once bunu olc" der. `Number(x) || 0` yazmak burada butun
+   merdiveni yalan yapardi. */
+
+window.ESP = window.ESP || {};
+
+ESP.Curriculum = (function(){
+  const U = ESP.U, S = ESP.S;
+
+  const MISSING = { value:null, cert:'missing' };
+  function m(value, cert){ return { value:value, cert:cert || 'measured' }; }
+
+  function days(n){ return U.lastDays(n); }
+
+  /* Bir disiplinin son N gunde toplam dakikasi. Hic gun girilmemisse
+     'missing' doner — sifir degil. */
+  function minutes(discId, n){
+    let toplam = 0, girilen = 0;
+    days(n).forEach(function(d){
+      const v = ESP.Model.minutesOf(d, discId);
+      if(v == null) return;
+      toplam += v; girilen++;
+    });
+    return girilen ? m(toplam, 'measured') : MISSING;
+  }
+
+  /* Son N gunun kacinda bu disipline dokunuldu. */
+  function activeDays(discId, n){
+    let girilen = 0, dokunulan = 0;
+    days(n).forEach(function(d){
+      const gun = ESP.Model.dayOf(d);
+      if(!gun || !ESP.Model.dayHasEntry(gun)) return;
+      girilen++;
+      const v = ESP.Model.minutesOf(d, discId);
+      if(v != null && v > 0) dokunulan++;
+    });
+    return girilen ? m(dokunulan, 'measured') : MISSING;
+  }
+
+  function count(list){
+    const a = Array.isArray(list) ? list : [];
+    return m(a.length, 'measured');
+  }
+
+  /* Bos koleksiyon SIFIRDIR, veri yoklugu degil: kullanici hic kart
+     eklemediyse "sifir kart" dogru bir olcumdur. Ayrim sudur — bir GUNUN
+     dakikasi girilmemis olabilir (veri yok), ama destedeki kart sayisi her
+     zaman bilinir. */
+
+  /* ------------------------------------------------------------- olcu kaydi
+
+     Her metrik adi burada bir fonksiyona baglidir. Merdivende gecen ama
+     burada karsiligi olmayan bir ad, tests/curriculum.test.js icinde
+     hataya duser — sessizce 'veri yok' gorunup kapiyi sonsuza dek acik
+     birakmaz. */
+  const METRICS = {
+
+    /* -------- dil */
+    /* Tarih destesi dil kapisini ACMAZ: iki deste ayni motoru paylasir ama
+       ayri seyler olcer. Karistirmak, tarih ezberleyerek "C1" gorunmeye
+       yol acardi. */
+    'lang.cards':       function(){
+      return m((S.cards || []).filter(function(c){
+        return c.lang !== ESP.HISTORY_DECK; }).length);
+    },
+    'lang.langs':       function(){
+      const l = (S.profile && S.profile.langs) || [];
+      return l.length ? m(l.length, 'measured') : MISSING;
+    },
+    'lang.retention':   function(){
+      const r = ESP.SRS.retention((S.profile && S.profile.langs && S.profile.langs[0]) || 'en');
+      if(r.cert === 'missing' || r.n < ESP.Planner.RETENTION_MIN_CARDS) return MISSING;
+      return m(r.value, r.cert);
+    },
+    'lang.minutes30':   function(){ return minutes('lang', 30); },
+    'lang.days14':      function(){ return activeDays('lang', 14); },
+    'lang.streakDays':  function(){
+      const s = ESP.Model.streak();
+      return m(typeof s === 'number' ? s : (s && s.days) || 0, 'measured');
+    },
+
+    /* -------- felsefe */
+    'philo.args':       function(){ return count(S.args); },
+    'philo.closedArgs': function(){
+      return m((S.args || []).filter(function(a){ return a.status === 'closed'; }).length);
+    },
+    'philo.concepts':   function(){
+      const set = {};
+      (S.notes || []).forEach(function(n){ (n.concepts || []).forEach(function(c){ set[c] = 1; }); });
+      (S.args || []).forEach(function(a){ (a.concepts || []).forEach(function(c){ set[c] = 1; }); });
+      return m(Object.keys(set).length);
+    },
+    'philo.primaryBooks':function(){
+      return m((S.books || []).filter(function(b){ return b.kind === 'primary'; }).length);
+    },
+    'philo.traditions': function(){ return m(traditionsRead().length); },
+    'philo.minutes30':  function(){ return minutes('philo', 30); },
+
+    /* -------- muzik */
+    'music.pieces':     function(){ return count(S.pieces); },
+    'music.cleanBpm':   function(){
+      const olculen = (S.pieces || []).map(function(p){ return p.cleanBpm; })
+        .filter(function(b){ return typeof b === 'number' && b > 0; });
+      if(!olculen.length) return MISSING;          // hic temiz esik olculmedi
+      return m(Math.max.apply(null, olculen), 'measured');
+    },
+    'music.minutes30':  function(){ return minutes('music', 30); },
+    /* Plato YOKLUGU bir kapidir: 1 = tikanma yok, 0 = var. */
+    'music.noPlateau':  function(){
+      if(!(S.pieces || []).length) return MISSING;
+      const p = ESP.Acoustic.plateaus();
+      return m(p.length ? 0 : 1, 'derived');
+    },
+
+    /* -------- diksiyon */
+    'diction.recordings':function(){ return count(S.recordings); },
+    'diction.minutes30': function(){ return minutes('diction', 30); },
+    'diction.wpm':       function(){
+      const w = ESP.Acoustic.wpmOf ? ESP.Acoustic.wpmOf() : null;
+      if(!w || w.value == null) return MISSING;
+      return m(w.value, w.cert || 'derived');
+    },
+    'diction.errorRate': function(){
+      const e = ESP.Acoustic.errorRateOf ? ESP.Acoustic.errorRateOf() : null;
+      if(!e || e.value == null) return MISSING;
+      return m(e.value, e.cert || 'estimated');
+    },
+
+    /* -------- okuma */
+    'reading.notes':    function(){ return count(S.notes); },
+    'reading.books':    function(){ return count(S.books); },
+    'reading.authors':  function(){
+      const set = {};
+      (S.books || []).forEach(function(b){
+        const a = U.norm(b.author || '');
+        if(a) set[a] = 1;
+      });
+      return m(Object.keys(set).length);
+    },
+    'reading.linkedRatio':function(){
+      const n = (S.notes || []).length;
+      if(!n) return MISSING;
+      const bagli = S.notes.filter(function(x){ return (x.links || []).length > 0; }).length;
+      return m(bagli / n, 'derived');
+    },
+    'reading.syntopic': function(){
+      const s = ESP.Intellect.syntopic();
+      return s.value == null ? MISSING : m(s.value, s.cert);
+    },
+    'reading.minutes30':function(){ return minutes('reading', 30); },
+
+    /* -------- yazi */
+    'writing.drafts':   function(){ return count(S.drafts); },
+    'writing.words30':  function(){
+      const w = ESP.Intellect.wordsWritten(30);
+      return w.value == null ? MISSING : m(w.value, w.cert);
+    },
+    'writing.revisionRatio':function(){
+      const r = ESP.Intellect.draftRatio();
+      return r.value == null ? MISSING : m(r.value, r.cert);
+    },
+    'writing.readability':function(){
+      /* En son taslagin degil, taslaklarin ORTALAMASI: tek iyi metin bir
+         kademe acmaz. */
+      const metinli = (S.drafts || []).filter(function(d){ return (d.text || '').trim(); });
+      if(!metinli.length) return MISSING;
+      const skorlar = metinli.map(function(d){ return ESP.Intellect.readability(d.text).value; })
+        .filter(function(x){ return x != null; });
+      if(!skorlar.length) return MISSING;
+      return m(skorlar.reduce(function(a, b){ return a + b; }, 0) / skorlar.length, 'derived');
+    },
+    'writing.minutes30':function(){ return minutes('writing', 30); },
+
+    /* -------- tarih */
+    'history.events':   function(){ return count(S.events); },
+    'history.eras':     function(){
+      const set = {};
+      (S.events || []).forEach(function(e){ if(e.era) set[e.era] = 1; });
+      return m(Object.keys(set).length);
+    },
+    'history.sources':  function(){ return count(S.sources); },
+    'history.primaryRatio':function(){
+      const t = (S.sources || []).length;
+      if(!t) return MISSING;
+      const p = S.sources.filter(function(x){ return x.kind === 'primary'; }).length;
+      return m(p / t, 'derived');
+    },
+    'history.causal':   function(){ return count(S.chains); },
+    'history.schools':  function(){
+      const set = {};
+      (S.sources || []).forEach(function(s){ if(s.school) set[s.school] = 1; });
+      (S.chains || []).forEach(function(c){ if(c.school) set[c.school] = 1; });
+      return m(Object.keys(set).length);
+    },
+    'history.retention':function(){
+      const r = ESP.SRS.retention('history');
+      if(r.cert === 'missing' || r.n < ESP.Planner.RETENTION_MIN_CARDS) return MISSING;
+      return m(r.value, r.cert);
+    },
+    'history.minutes30':function(){ return minutes('history', 30); },
+  };
+
+  /* Okunan geleneklerin listesi: kaynagin yazari kanonda geciyorsa
+     gelenegi oradan gelir. Kanonda olmayan yazar sayilmaz — uydurmak
+     yerine eksik birakmak yeglenir. */
+  function traditionsRead(){
+    const set = {};
+    (S.books || []).forEach(function(b){
+      const yazar = U.norm(b.author || '');
+      if(!yazar) return;
+      (ESP.CANON || []).forEach(function(c){
+        if(U.norm(c.author) === yazar && c.tradition) set[c.tradition] = 1;
+      });
+    });
+    return Object.keys(set);
+  }
+
+  function metricNames(){ return Object.keys(METRICS); }
+
+  /* Tek bir olcuyu okur. Bilinmeyen ad sessizce 'veri yok' dondurmez:
+     bu bir programci hatasidir ve gorunur olmalidir. */
+  function measure(name){
+    const fn = METRICS[name];
+    if(!fn) return { value:null, cert:'missing', unknown:true, metric:name };
+    let r;
+    try{ r = fn(); }catch(e){ r = MISSING; }
+    return { value:r.value, cert:r.cert, metric:name };
+  }
+
+  /* --------------------------------------------------------------- kapilar */
+
+  /* Bir kapinin durumu: 'pass' | 'fail' | 'unknown'.
+     Ucuncu durum sistemin durustlugudur. */
+  function gateStatus(gate){
+    const o = measure(gate.metric);
+    if(o.value == null){
+      return { gate:gate, status:'unknown', value:null, cert:'missing',
+        label:gate.label, why:'Bu kapı için henüz ölçüm yok.' };
+    }
+    let gecti = true;
+    if(gate.min != null && o.value < gate.min) gecti = false;
+    if(gate.max != null && o.value > gate.max) gecti = false;
+    return { gate:gate, status:gecti ? 'pass' : 'fail', value:o.value, cert:o.cert,
+      label:gate.label,
+      why:gecti ? null : (gate.max != null
+        ? 'Ölçülen ' + fmt(o.value) + ', üst sınır ' + fmt(gate.max) + '.'
+        : 'Ölçülen ' + fmt(o.value) + ', eşik ' + fmt(gate.min) + '.') };
+  }
+
+  function fmt(n){
+    if(n == null) return '—';
+    if(n < 1 && n > 0) return '%' + Math.round(n * 100);
+    return Math.round(n * 100) / 100 + '';
+  }
+
+  function ladder(discId){ return ESP.LADDERS[discId] || null; }
+
+  function stepOf(discId, rank){
+    const l = ladder(discId);
+    if(!l) return null;
+    return l.levels.filter(function(x){ return x.rank === rank; })[0] || null;
+  }
+
+  /* Bir basamagin butun kapilari. */
+  function stepStatus(discId, rank){
+    const step = stepOf(discId, rank);
+    if(!step) return null;
+    const kapilar = step.gates.map(gateStatus);
+    const gecen = kapilar.filter(function(g){ return g.status === 'pass'; }).length;
+    const bilinmeyen = kapilar.filter(function(g){ return g.status === 'unknown'; }).length;
+    return {
+      rank:rank, step:step, gates:kapilar,
+      passed:gecen, total:kapilar.length, unknown:bilinmeyen,
+      complete:gecen === kapilar.length,
+      /* Yuzde ilerleme: bilinmeyen kapi ilerleme SAYILMAZ. */
+      pct:kapilar.length ? Math.round(100 * gecen / kapilar.length) : 0,
+    };
+  }
+
+  /* Kademe: butun kapilari gecilmis en yuksek ARDISIK basamak.
+
+     Ardisiklik sarti onemlidir — 1. kademeyi atlayip 3'u gecmek diye bir
+     sey yoktur; atlanan kapi ileride cokme uretir. */
+  function levelOf(discId){
+    const l = ladder(discId);
+    if(!l) return null;
+    const basamaklar = l.levels.map(function(x){ return stepStatus(discId, x.rank); });
+    let rank = 0, engel = null;
+    for(let i = 0; i < basamaklar.length; i++){
+      if(basamaklar[i].complete){ rank = basamaklar[i].rank; continue; }
+      engel = basamaklar[i];
+      break;
+    }
+    const seviye = ESP.LEVEL_BY_RANK[rank];
+    /* Kademenin kendisi bir OLCUMDUR ve kesinligi vardir:
+
+         rank 0    'veri yok'  — «Temas» kademesinin tanimi zaten budur:
+                   henuz olculmus uretim yok. Sifirinci basamagi 'hesaplandi'
+                   diye etiketlemek, olculmemis bir seyi olculmus gostermek olur.
+         unknown   'tahmin'    — bir ust basamakta olculemeyen kapi var;
+                   kademe dogru olabilir ama kanitlanmis degil.
+         digeri    'hesaplandi' */
+    const cert = rank === 0 ? 'missing'
+      : (engel && engel.unknown ? 'estimated' : 'derived');
+    return {
+      disc:discId, rank:rank, level:seviye, cert:cert,
+      next:engel, steps:basamaklar, ladder:l,
+      /* Merdivenin tamaminda nerede duruyor (0-100). */
+      mastery:masteryPct(basamaklar),
+    };
+  }
+
+  /* Ustatlik yuzdesi: gecilmis basamaklar tam, icinde bulunulan basamak
+     kismi sayilir. Bes basamak esit agirliktadir — ustteki basamaklar
+     daha zordur ama yuzdeyi egmek ilerlemeyi anlasilmaz yapar. */
+  function masteryPct(basamaklar){
+    const n = basamaklar.length;
+    if(!n) return 0;
+    let toplam = 0;
+    for(let i = 0; i < n; i++){
+      if(basamaklar[i].complete){ toplam += 1; continue; }
+      toplam += basamaklar[i].pct / 100;
+      break;
+    }
+    return Math.round(100 * toplam / n);
+  }
+
+  /* Butun disiplinlerin kademesi — analiz ekrani ve Patron brifingi icin. */
+  function all(){
+    return Object.keys(ESP.LADDERS).map(function(id){ return levelOf(id); });
+  }
+
+  /* Sistemin genel kademesi: disiplinlerin ORTALAMASI degil, EN DUSUGU ile
+     ortalamanin arasi. Sebep: her seyi ihmal edip tek disiplinde ustat olan
+     biri "ustat" degildir; ama tek zayif disiplin de butun emegi silmez. */
+  function overall(){
+    const hepsi = all().filter(Boolean);
+    if(!hepsi.length) return { rank:0, level:ESP.LEVEL_BY_RANK[0], cert:'missing' };
+    const ranks = hepsi.map(function(x){ return x.rank; });
+    const ort = ranks.reduce(function(a, b){ return a + b; }, 0) / ranks.length;
+    const min = Math.min.apply(null, ranks);
+    const rank = Math.floor((ort + min) / 2);
+    const olculen = hepsi.filter(function(x){ return x.cert !== 'missing'; }).length;
+    return {
+      rank:rank, level:ESP.LEVEL_BY_RANK[rank],
+      cert:olculen ? 'derived' : 'missing',
+      measuredDisciplines:olculen, disciplines:hepsi.length,
+      mastery:Math.round(hepsi.reduce(function(a, x){ return a + x.mastery; }, 0) / hepsi.length),
+    };
+  }
+
+  /* Siradaki kapi — "ne yapayim" sorusunun mufredat cevabi.
+
+     Once OLCULEBILIR ve eksik olan kapi gelir; hicbiri yoksa olculemeyen
+     kapi gelir ve istenen sey "calis" degil "olc"tur. */
+  function nextGate(discId){
+    const lv = levelOf(discId);
+    if(!lv || !lv.next) return null;
+    const eksik = lv.next.gates.filter(function(g){ return g.status === 'fail'; });
+    const bilinmeyen = lv.next.gates.filter(function(g){ return g.status === 'unknown'; });
+    /* OLCULEMEYEN KAPI ONCE GELIR. Bunun sebebi bir tercih degil bir mantik:
+       olculmemis bir kapi varken calismaya devam etmek, kapinin acilip
+       acilmadigini asla ogretmez. Ustelik bu sistemde "olcmek" cogu zaman
+       isin kendisidir — retansiyonu olcmek kart cevaplamak, temiz BPM'i
+       olcmek metronomla calmaktir. Once olc demek, once calis demenin
+       durust halidir. */
+    const hedef = bilinmeyen[0] || eksik[0];
+    if(!hedef) return null;
+    return {
+      disc:discId, rank:lv.next.rank, step:lv.next.step, gate:hedef,
+      action:hedef.status === 'unknown' ? 'measure' : 'work',
+      title:hedef.status === 'unknown'
+        ? hedef.label + ' — önce bunu ölç'
+        : hedef.label,
+      why:hedef.why || 'Bu kapı için henüz ölçüm yok.',
+    };
+  }
+
+  /* Yol haritasi: bulundugun yerden tepeye kadar ne kaldigi.
+     Yalnizca listeler — sure TAHMIN ETMEZ. "Uc ayda ustat olursun" cumlesi
+     ESP.PEDAGOGIC.never icindeki garanti yasagina girer. */
+  function roadmap(discId){
+    const lv = levelOf(discId);
+    if(!lv) return null;
+    return {
+      disc:discId, current:lv.rank, mastery:lv.mastery,
+      steps:lv.steps.map(function(s){
+        return {
+          rank:s.rank, title:s.step.title, study:s.step.study, proof:s.step.proof,
+          state:s.rank <= lv.rank ? 'done' : (s.rank === lv.rank + 1 ? 'current' : 'ahead'),
+          pct:s.pct, gates:s.gates, unknown:s.unknown,
+        };
+      }),
+    };
+  }
+
+  /* --------------------------------------------------- seviye tespit sinavi
+
+     Cevaplar bir kademe VERMEZ, bir TAHMIN uretir. Tahmin hicbir kapiyi
+     acmaz; yalnizca ekranda "buradan baslayabilirsin" der ve etiketi
+     daima 'tahmin'dir. Olculmus kademe tahmini her zaman yener. */
+  function placement(answers){
+    const a = answers || {};
+    const toplam = ESP.PLACEMENT.questions.reduce(function(sum, q){
+      const v = Number(a[q.id]);
+      return sum + (isFinite(v) ? v : 0);
+    }, 0);
+    /* Uc sorunun toplami en fazla 11; besi asmayan bir kademeye esleriz. */
+    const rank = Math.max(0, Math.min(5, Math.round(toplam / 2.2)));
+    return {
+      rank:rank, level:ESP.LEVEL_BY_RANK[rank], cert:'estimated',
+      note:ESP.PLACEMENT.note,
+      answered:ESP.PLACEMENT.questions.filter(function(q){ return a[q.id] != null; }).length,
+      total:ESP.PLACEMENT.questions.length,
+    };
+  }
+
+  /* Kademeyi CUMLEYE cevirir — ESP.PEDAGOGIC.level bicimiyle.
+     Ajanlar bu cumleyi oldugu gibi kullanir; kendileri kademe yazmaz. */
+  function sentence(discId){
+    const lv = levelOf(discId);
+    const d = ESP.DISCIPLINE_BY_ID[discId];
+    if(!lv || !d) return '';
+    if(lv.rank === 0){
+      return d.label + ': henüz ölçülmüş üretim yok. Kademe kişiye değil '
+        + 'üretime verilir; ilk ölçüm girildiğinde merdiven başlar.';
+    }
+    return d.label + ': son 30 günün ölçülmüş üretimi «' + lv.level.label
+      + '» kapılarını karşılıyor'
+      + (lv.cert === 'estimated' ? ' (bir üst basamakta ölçülmemiş kapı var)' : '')
+      + '. Bu bir sınav sonucu değildir.';
+  }
+
+  return {
+    METRICS, metricNames, measure,
+    gateStatus, stepOf, stepStatus,
+    levelOf, all, overall, masteryPct,
+    nextGate, roadmap, placement, sentence,
+    ladder, traditionsRead,
+  };
+})();
+
+/* ==== js/core/chrono.js ==== */
+/* Kronoloji motoru — tarih masasinin butun sayilari.
+
+   Tarihte "ne kadar biliyorum" sorusunun kotu cevabi olay sayisidir. Yuz
+   olay ezberleyip hepsini ayni yuzyildan bilen biri tarih bilmez; bes
+   olayi nedenleriyle ve kaynagiyla bilen biri daha ileridedir.
+
+   Bu yuzden buradaki olcum uc eksenlidir:
+
+     KAPSAM   donem, bolge ve alan dagilimi — nerede kor nokta var?
+     DERINLIK nedensellik zinciri ve kaynak elestirisi — ne kadar acikliyor?
+     TUTMA    SRS retansiyonu — ogrenilen duruyor mu?
+
+   Ucu ayri olcullur ve ASLA tek bir puana toplanmaz. Tek puan, hangi
+   eksenin zayif oldugunu gizler; gizlenen eksen calisilmaz.
+
+   Doktrin burada da aynidir: bos bir kronoloji "sifir kapsam" degil "veri
+   yok"tur. Hicbir olay girmemis birine "kapsamin %0" demek, olcmedigi bir
+   seyi olcmus gibi yapmaktir. */
+
+window.ESP = window.ESP || {};
+
+ESP.Chrono = (function(){
+  const U = ESP.U, S = ESP.S;
+
+  const MISSING = { value:null, cert:'missing' };
+
+  function events(){ return S.events || []; }
+  function sources(){ return S.sources || []; }
+  function chains(){ return S.chains || []; }
+
+  /* --------------------------------------------------------------- kapsam */
+
+  /* Bir boyutun dagilimi: donem, bolge ya da alan.
+     Bos kronolojide dagilim yoktur — sifirlarla dolu bir tablo degil. */
+  function spread(dim){
+    const list = events();
+    if(!list.length) return { cert:'missing', buckets:[], covered:0, total:0, empty:[] };
+
+    const tanim = dim === 'era' ? ESP.ERAS
+      : dim === 'region' ? ESP.REGIONS
+      : ESP.EVENT_KINDS;
+
+    const sayac = {};
+    list.forEach(function(e){
+      const k = dim === 'era' ? e.era : (dim === 'region' ? e.region : e.kind);
+      if(k) sayac[k] = (sayac[k] || 0) + 1;
+    });
+
+    const kovalar = tanim.map(function(t){
+      return { id:t.id, label:t.label, n:sayac[t.id] || 0,
+        pct:Math.round(100 * (sayac[t.id] || 0) / list.length) };
+    });
+
+    return {
+      cert:'derived',
+      buckets:kovalar,
+      covered:kovalar.filter(function(b){ return b.n > 0; }).length,
+      total:tanim.length,
+      empty:kovalar.filter(function(b){ return b.n === 0; }),
+    };
+  }
+
+  /* Kronolojideki yuzyil bosluklari.
+
+     En dusuk ve en yuksek yil arasinda HIC olay girilmemis yuzyillar. Bos
+     yuzyil bir eksiklik degildir — her yuzyilda donum noktasi olmasi
+     gerekmez — ama arka arkaya UC bos yuzyil bir kor noktadir ve gorunur
+     olmali. */
+  function centuryGaps(minRun){
+    const list = events().filter(function(e){ return typeof e.year === 'number'; });
+    if(list.length < 2) return { cert:'missing', gaps:[], spanFrom:null, spanTo:null };
+
+    const yuzyillar = {};
+    list.forEach(function(e){ yuzyillar[ESP.centuryOf(e.year)] = 1; });
+
+    const yillar = list.map(function(e){ return e.year; });
+    const bas = ESP.centuryOf(Math.min.apply(null, yillar));
+    const son = ESP.centuryOf(Math.max.apply(null, yillar));
+
+    const esik = minRun || 3;
+    const bosluklar = [];
+    let dizi = [];
+    for(let c = bas; c <= son; c++){
+      if(c === 0) continue;                       // sifirinci yuzyil yoktur
+      if(yuzyillar[c]){
+        if(dizi.length >= esik) bosluklar.push({ from:dizi[0], to:dizi[dizi.length - 1],
+          length:dizi.length });
+        dizi = [];
+      }else{
+        dizi.push(c);
+      }
+    }
+    if(dizi.length >= esik) bosluklar.push({ from:dizi[0], to:dizi[dizi.length - 1],
+      length:dizi.length });
+
+    return { cert:'derived', gaps:bosluklar, spanFrom:bas, spanTo:son };
+  }
+
+  /* Esanli olaylar: verilen yilin ±50 yilinda baska bolgelerde ne oldu.
+     Tarihin en ogretici sorusu budur ve cevabi veriden gelir. */
+  function contemporaries(year, span){
+    if(typeof year !== 'number') return [];
+    const yaricap = span || 50;
+    return events().filter(function(e){
+      return typeof e.year === 'number' && Math.abs(e.year - year) <= yaricap;
+    }).sort(function(a, b){ return a.year - b.year; });
+  }
+
+  /* --------------------------------------------------------------- derinlik */
+
+  /* Kaynak dengesi. Birincil oran bir KALITE degil bir KOMPOZISYON olcusudur:
+     %100 birincil de saglikli degildir (baglam ikincil kaynaktan gelir). */
+  function sourceBalance(){
+    const list = sources();
+    if(!list.length) return { cert:'missing', total:0, primary:0, ratio:null,
+      byKind:{}, note:'Henüz kaynak değerlendirilmedi.' };
+
+    const tur = {};
+    list.forEach(function(s){ tur[s.kind] = (tur[s.kind] || 0) + 1; });
+    const birincil = tur.primary || 0;
+    const oran = birincil / list.length;
+
+    return {
+      cert:'derived', total:list.length, primary:birincil, ratio:oran, byKind:tur,
+      note:oran < 0.2 ? 'Neredeyse hepsi ikincil: başkasının okumasını okuyorsun.'
+        : (oran > 0.85 ? 'Neredeyse hepsi birincil: bağlamı verecek inceleme az.'
+          : null),
+    };
+  }
+
+  /* Kaynak elestirisinin ortalama derinligi — sekiz sorudan kaci cevaplanmis. */
+  function critiqueDepth(){
+    const list = sources();
+    if(!list.length) return MISSING;
+    const toplam = list.reduce(function(a, s){
+      return a + ESP.Model.critiqueDepth(s).answered;
+    }, 0);
+    return { value:toplam / list.length, cert:'derived',
+      total:(ESP.SOURCE_CRITIQUE || []).length };
+  }
+
+  /* Kaynaksiz kalmis iddialar: bir zincir halkasi kaynaga baglanmamissa.
+     Bu bir hata degil bir ACIKTIR ve masaya not olarak duser. */
+  function unsourcedLinks(){
+    const out = [];
+    chains().forEach(function(c){
+      (c.links || []).forEach(function(l){
+        if(!l.sourceId) out.push({ chain:c, link:l });
+      });
+    });
+    return out;
+  }
+
+  /* Dengesiz zincirler: yalnizca tetikleyiciden ibaret aciklamalar. */
+  function unbalancedChains(){
+    return chains().filter(function(c){
+      const b = ESP.Model.chainBalance(c);
+      return c.links && c.links.length && !b.balanced;
+    });
+  }
+
+  /* Bir olayin aciklanma durumu. */
+  function explained(eventId){
+    const c = chains().filter(function(x){ return x.eventId === eventId; });
+    if(!c.length) return { state:'none', chains:0, sourced:0 };
+    const kaynakli = c.reduce(function(a, x){
+      return a + ESP.Model.chainBalance(x).sourced; }, 0);
+    const dengeli = c.some(function(x){ return ESP.Model.chainBalance(x).balanced; });
+    return { state:dengeli ? 'balanced' : 'thin', chains:c.length, sourced:kaynakli };
+  }
+
+  /* ----------------------------------------------------------------- tutma */
+
+  function retention(){
+    const r = ESP.SRS.retention(ESP.HISTORY_DECK);
+    if(r.cert === 'missing' || r.n < ESP.Planner.RETENTION_MIN_CARDS){
+      return { value:null, cert:'missing', n:r.n, total:r.total };
+    }
+    return r;
+  }
+
+  /* Bir olaydan SRS karti uretir. Tarih karti iki yonludur ama ESP'de bir
+     kart tek yonludur: "olay -> yil" ve "yil -> olay" ayri kartlardir,
+     cunku ikisi ayri hatirlama isidir ve biri bilinirken oteki
+     bilinmeyebilir. */
+  function cardsFor(ev){
+    if(!ev || typeof ev.year !== 'number') return [];
+    const etiket = ESP.yearLabel(ev.year);
+    return [
+      { front:ev.title, back:etiket, lang:ESP.HISTORY_DECK,
+        context:ev.why || '', tags:['history', ev.era].filter(Boolean) },
+      { front:etiket + ' — bu yıl ne oldu?', back:ev.title, lang:ESP.HISTORY_DECK,
+        context:ev.why || '', tags:['history', ev.era].filter(Boolean) },
+    ];
+  }
+
+  /* -------------------------------------------------------------- durum */
+
+  /* Tarih masasinin brifingi. Ajanin gordugu tek sey budur. */
+  function status(){
+    const list = events();
+    const donem = spread('era'), bolge = spread('region'), alan = spread('kind');
+    const bosluk = centuryGaps();
+    const kaynak = sourceBalance();
+    const derin = critiqueDepth();
+    const r = retention();
+
+    return {
+      events:list.length,
+      firstYear:list.length ? Math.min.apply(null, list.map(function(e){ return e.year; })) : null,
+      lastYear:list.length ? Math.max.apply(null, list.map(function(e){ return e.year; })) : null,
+      eras:{ covered:donem.covered, total:donem.total, empty:donem.empty.map(function(b){ return b.label; }) },
+      regions:{ covered:bolge.covered, total:bolge.total, empty:bolge.empty.map(function(b){ return b.label; }) },
+      kinds:{ covered:alan.covered, total:alan.total, empty:alan.empty.map(function(b){ return b.label; }) },
+      gaps:bosluk.gaps,
+      sources:{ total:kaynak.total, primary:kaynak.primary, ratio:kaynak.ratio,
+        note:kaynak.note, depth:derin.value, depthOf:derin.total },
+      chains:{ total:chains().length,
+        unbalanced:unbalancedChains().length,
+        unsourced:unsourcedLinks().length },
+      retention:{ value:r.value, cert:r.cert, n:r.n },
+      cert:list.length ? 'derived' : 'missing',
+    };
+  }
+
+  /* Masa notlari — kosul saglandiginda kendiliginden duser. */
+  function findings(){
+    const out = [];
+    const st = status();
+    if(!st.events){
+      out.push({ tone:'info', label:'Boş kronoloji',
+        text:'Zaman şeridinde hiç olay yok. Tohum listesi ' 
+          + (ESP.SEED_EVENTS || []).length + ' dönüm noktası taşıyor.' });
+      return out;
+    }
+    if(st.eras.empty.length){
+      out.push({ tone:'info', label:'Kapsanmayan dönem',
+        text:st.eras.empty.join(', ') + ' dönemlerinden hiç olay yok.' });
+    }
+    if(st.kinds.empty.length){
+      out.push({ tone:'info', label:'Tek yönlü tarih',
+        text:st.kinds.empty.join(', ') + ' alanından olay girilmemiş: '
+          + 'nedensellik bu eksende kör kalır.' });
+    }
+    st.gaps.forEach(function(g){
+      out.push({ tone:'info', label:'Yüzyıl boşluğu',
+        text:ESP.centuryLabel(g.from) + ' – ' + ESP.centuryLabel(g.to)
+          + ' arası ' + g.length + ' yüzyıl boş.' });
+    });
+    if(st.chains.unbalanced){
+      out.push({ tone:'warn', label:'Dengesiz açıklama',
+        text:st.chains.unbalanced + ' zincirde yalnızca kıvılcım var, yapısal koşul yok.' });
+    }
+    if(st.chains.unsourced){
+      out.push({ tone:'warn', label:'Kaynaksız iddia',
+        text:st.chains.unsourced + ' halka hiçbir kaynağa bağlı değil.' });
+    }
+    if(st.sources.note){
+      out.push({ tone:'info', label:'Kaynak dengesi', text:st.sources.note });
+    }
+    if(st.retention.cert !== 'missing' && st.retention.value < ESP.Planner.RETENTION_FLOOR){
+      out.push({ tone:'danger', label:'Tarih kartları geriliyor',
+        text:'Retansiyon %' + Math.round(st.retention.value * 100)
+          + ' — yeni olay eklemeden önce tekrar.' });
+    }
+    return out;
+  }
+
+  /* Bugunun tarih egzersizi. Kademe merdivenden gelir; egzersiz o kademeye
+     ait olanlardan secilir. Secim MODELE birakilmaz. */
+  function drill(){
+    const lv = ESP.Curriculum.levelOf('history');
+    const rank = Math.max(1, (lv && lv.rank) || 1);
+    const uygun = (ESP.HISTORY_DRILLS || []).filter(function(d){ return d.level <= rank + 1; });
+    if(!uygun.length) return null;
+    const st = status();
+
+    /* Once acigi kapatan egzersiz: dengesiz zincir varsa zincir, kaynak
+       sigsa kaynak elestirisi. Rastgele secim en son care. */
+    if(st.chains.unbalanced) return pick(uygun, 'zincir');
+    if(st.sources.total && st.sources.depth != null && st.sources.depth < 4) return pick(uygun, 'kaynak');
+    if(st.kinds.empty.length) return pick(uygun, 'esanli');
+    if(st.gaps.length) return pick(uygun, 'serit');
+
+    const gun = U.todayISO();
+    const i = Math.abs(hash(gun)) % uygun.length;
+    return uygun[i];
+  }
+
+  function pick(list, id){
+    return list.filter(function(d){ return d.id === id; })[0] || list[0];
+  }
+
+  function hash(s){
+    let h = 0;
+    for(let i = 0; i < s.length; i++){ h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+    return h;
+  }
+
+  return {
+    spread, centuryGaps, contemporaries,
+    sourceBalance, critiqueDepth, unsourcedLinks, unbalancedChains, explained,
+    retention, cardsFor,
+    status, findings, drill,
+  };
+})();
+
 /* ==== js/core/planner.js ==== */
 /* Planlayici — siradaki tek is, haftalik rota ve capraz bulgular.
 
@@ -8583,6 +10554,22 @@ ESP.Planner = (function(){
       });
     }
 
+    /* Tarih destesi ayri olculur: dil retansiyonu iyiyken tarih kartlari
+       cokmus olabilir ve tersi. Iki desteyi tek ortalamada toplamak, coken
+       desteyi saglam olanin arkasina gizler. */
+    const rh = ESP.SRS.retention(ESP.HISTORY_DECK, todayISO);
+    if(rh.cert !== 'missing' && rh.n >= RETENTION_MIN_CARDS && rh.value < RETENTION_FLOOR){
+      out.push({
+        id:'retention-history', disc:'history', agent:'herodot',
+        label:'Tarih kartları tabanın altında',
+        detail:'Tarih destesinin hatırlanma olasılığı ortalaması %'
+             + Math.round(rh.value * 100) + ' (' + rh.n + ' karttan). '
+             + 'Kronolojiye yeni olay eklemek bu tabanı daha da düşürür.',
+        route:'history', tab:'calisma',
+        metric:{ value:rh.value, cert:rh.cert },
+      });
+    }
+
     ESP.Acoustic.plateaus(todayISO).forEach(p => {
       out.push({
         id:'plateau:' + p.piece.id, disc:'music', agent:'maestro',
@@ -8615,6 +10602,28 @@ ESP.Planner = (function(){
     const geciken = kartlar.filter(c => ESP.SRS.overdueDays(c, today) > 0);
     return { due:kartlar, overdue:geciken,
       maxDays:geciken.reduce((m, c) => Math.max(m, ESP.SRS.overdueDays(c, today)), 0) };
+  }
+
+  /* Vadesi gecmis kartlarin hangi desteden geldigi. Iki deste ayni motoru
+     paylasir ama ayri ekranda calisilir; "42 kart gecikti" deyip yanlis
+     ekrani acmak, dogru sayiyi yanlis ise cevirir. */
+  function overdueDeck(todayISO){
+    const o = overdue(todayISO);
+    const kaynak = o.overdue.length ? o.overdue : o.due;
+    const sayac = {};
+    kaynak.forEach(c => {
+      const deste = c.lang === ESP.HISTORY_DECK ? 'history' : 'lang';
+      sayac[deste] = (sayac[deste] || 0) + 1;
+    });
+    const en = Object.keys(sayac).sort((a, b) => sayac[b] - sayac[a])[0] || 'lang';
+    return {
+      due:o.due, overdue:o.overdue, maxDays:o.maxDays,
+      byDeck:sayac, deck:en,
+      route:en === 'history' ? 'history' : 'lang',
+      tab:en === 'history' ? 'calisma' : 'calis',
+      agent:en === 'history' ? 'herodot' : 'polyglot',
+      disc:en === 'history' ? 'history' : 'lang',
+    };
   }
 
   /* ------------------------------------------------------------ 4 · sentez */
@@ -8664,23 +10673,25 @@ ESP.Planner = (function(){
     }
 
     /* 3 — vadesi gecmis kartlar */
-    const o = overdue(today);
+    const o = overdueDeck(today);
+    const desteAdi = o.deck === 'history' ? 'tarih' : 'dil';
     if(o.overdue.length){
       return {
-        rank:3, id:'srs-overdue', agent:'polyglot', disc:'lang',
+        rank:3, id:'srs-overdue', agent:o.agent, disc:o.disc,
         title:o.overdue.length + ' kartın vadesi geçti',
-        detail:'En çok geciken kart ' + o.maxDays + ' gündür bekliyor. '
+        detail:'En çok geciken kart ' + o.maxDays + ' gündür bekliyor; '
+             + 'çoğunluk ' + desteAdi + ' destesinde. '
              + 'Unutma eğrisi beklemez; geciken her gün kartı bir adım geriye atar.',
-        route:'lang', tab:'calis',
+        route:o.route, tab:o.tab,
         why:'Vadesi geçmiş tekrar: gecikme kartı geriye atar.',
       };
     }
     if(o.due.length){
       return {
-        rank:3, id:'srs-due', agent:'polyglot', disc:'lang',
+        rank:3, id:'srs-due', agent:o.agent, disc:o.disc,
         title:o.due.length + ' kart bugün vadeli',
-        detail:'Bugünün tekrarı henüz yapılmadı.',
-        route:'lang', tab:'calis',
+        detail:'Bugünün tekrarı henüz yapılmadı (' + desteAdi + ' destesi).',
+        route:o.route, tab:o.tab,
         why:'Vadesi gelmiş tekrar: günü geçirmeden kapanır.',
       };
     }
@@ -8718,16 +10729,22 @@ ESP.Planner = (function(){
     const aday = denge.rows.filter(r => r.cert === 'missing')[0] || denge.rows[0];
     if(aday){
       const d = aday.disc;
+      /* Genisleme yonu merdivenden gelir: "bir sey calis" degil "su kapiyi
+         gec". Kapi olculemiyorsa istenen sey calismak degil OLCMEKTIR. */
+      const kapi = ESP.Curriculum ? ESP.Curriculum.nextGate(d.id) : null;
+      const taban = aday.cert === 'missing'
+        ? 'Son ' + BALANCE_WINDOW + ' günde hiç girilmemiş.'
+        : 'Son ' + BALANCE_WINDOW + ' günde ' + U.fmtMin(aday.minutes) + '.';
       return {
         rank:5, id:'expand:' + d.id, agent:d.agent, disc:d.id,
-        title:d.label + ' bu hafta en az çalışılan alan',
-        detail:aday.cert === 'missing'
-          ? 'Son ' + BALANCE_WINDOW + ' günde hiç girilmemiş. Temel sağlam; '
-            + 'genişleme sırası burada.'
-          : 'Son ' + BALANCE_WINDOW + ' günde ' + U.fmtMin(aday.minutes) + '. '
-            + 'Temel sağlam; genişleme sırası burada.',
+        title:kapi ? (d.label + ' — ' + kapi.title)
+          : (d.label + ' bu hafta en az çalışılan alan'),
+        detail:taban + ' Temel sağlam; genişleme sırası burada.'
+          + (kapi ? ' ' + kapi.why : ''),
         route:d.route, tab:null,
-        why:'Yeni içerik: temel sağlamken genişleme sistemin asıl amacıdır.',
+        why:kapi && kapi.action === 'measure'
+          ? 'Yeni içerik: bu kapı henüz ölçülmedi, istenen şey çalışmak değil ölçmek.'
+          : 'Yeni içerik: temel sağlamken genişleme sistemin asıl amacıdır.',
       };
     }
 
@@ -8871,6 +10888,25 @@ ESP.Planner = (function(){
         route:'writing' });
     }
 
+    /* Tarih ↔ okuma: kronoloji doluyor ama kaynak elestirisi yok.
+       Kaynaksiz kronoloji bir liste; liste tarih degildir. */
+    const th = ESP.Chrono ? ESP.Chrono.status() : null;
+    if(th && th.cert !== 'missing' && th.events >= 20 && !th.sources.total){
+      out.push({ id:'events-no-sources', from:'herodot', to:'aristoteles',
+        text:th.events + ' olay girilmiş ama hiçbir kaynak değerlendirilmemiş. '
+           + 'Kaynaksız kronoloji bir liste; liste tarih değildir.',
+        route:'history' });
+    }
+
+    /* Tarih ↔ felsefe: nedensellik zinciri kuruluyor ama tez yok.
+       Ikisi ayni kasi calistirir: oncul-sonuc ayrimi. */
+    if(th && th.chains.total >= 3 && !(S.args || []).length){
+      out.push({ id:'chains-no-args', from:'herodot', to:'socrates',
+        text:th.chains.total + ' neden zinciri kurulmuş ama hiç tez yazılmamış. '
+           + 'İkisi aynı ayrımı kullanıyor: öncül ile sonuç.',
+        route:'symposium' });
+    }
+
     /* SRS ↔ seri: kart birikiyor ve gunluk kayit da kopmus. */
     const o = overdue(today);
     const seri = ESP.Model.streak();
@@ -8886,7 +10922,7 @@ ESP.Planner = (function(){
 
   return {
     RETENTION_FLOOR, RETENTION_MIN_CARDS, DEADLINE_DAYS, BALANCE_WINDOW,
-    blockedCore, deadlines, overdue, synthesisGap,
+    blockedCore, deadlines, overdue, overdueDeck, synthesisGap,
     nextAction, balance, weeklyRoute, crossFindings,
   };
 })();
@@ -12418,6 +14454,54 @@ ESP.Office = (function(){
     };
   }
 
+  /* Tarih masasi. Uc eksen ayri durur ve tek puana toplanmaz: hangi
+     eksenin zayif oldugunu gizleyen bir sayi, o ekseni calistirmaz. */
+  function historyBrief(){
+    const st = ESP.Chrono.status();
+    const h = ESP.Intellect.hoursOf('history', 14);
+    const lv = ESP.Curriculum.levelOf('history');
+    return {
+      agent:'herodot',
+      events:{ value:st.events, cert:st.cert,
+        firstYear:st.firstYear, lastYear:st.lastYear },
+      coverage:{ eras:st.eras, regions:st.regions, kinds:st.kinds, gaps:st.gaps.length },
+      sources:st.sources,
+      chains:st.chains,
+      retention:st.retention,
+      level:{ rank:lv ? lv.rank : 0, label:lv ? lv.level.label : null,
+        cert:lv ? lv.cert : 'missing' },
+      practice:{ minutes:h.minutes, enteredDays:h.enteredDays, windowDays:h.windowDays,
+        cert:h.cert },
+    };
+  }
+
+  /* Koc masasi. Icerige HIC bakmaz: yalnizca «tuttun mu» ve «siradaki kapi
+     hangisi» sorularina bakar. Bu ayrim sayesinde koc, bir disiplinin
+     uzmaniyla asla celismez — ayni seyi olcmuyorlar. */
+  function coachBrief(){
+    const ov = ESP.Curriculum.overall();
+    const d = ESP.SRS.deckStatus();
+    const kapilar = ESP.DISCIPLINES.map(x => {
+      const g = ESP.Curriculum.nextGate(x.id);
+      const lv = ESP.Curriculum.levelOf(x.id);
+      return {
+        disc:x.id, label:x.label,
+        rank:lv ? lv.rank : 0, mastery:lv ? lv.mastery : 0, cert:lv ? lv.cert : 'missing',
+        gate:g ? { label:g.gate.label, action:g.action, rank:g.rank } : null,
+      };
+    });
+    return {
+      agent:'mnemosyne',
+      overall:{ rank:ov.rank, label:ov.level ? ov.level.label : null,
+        mastery:ov.mastery, cert:ov.cert },
+      due:{ value:d.due, overdue:d.overdue, maxOverdueDays:d.maxOverdueDays, cert:'measured' },
+      retention:{ value:d.retention.value, cert:d.retention.cert, n:d.retention.n },
+      gates:kapilar,
+      /* Olculemeyen kapi ayri sayilir: "calis" ile "olc" ayri islerdir. */
+      unmeasured:kapilar.filter(k => k.gate && k.gate.action === 'measure').length,
+    };
+  }
+
   function patronBrief(){
     const next = ESP.Planner.nextAction();
     const ehs = ESP.Intellect.ehs(14);
@@ -12426,6 +14510,7 @@ ESP.Office = (function(){
       agent:'patron',
       lang:langBrief(), philo:philoBrief(), music:musicBrief(),
       diction:dictionBrief(), reading:readingBrief(), writing:writingBrief(),
+      history:historyBrief(), coach:coachBrief(),
       ehs:{ value:ehs.value, cert:ehs.cert, windowDays:ehs.windowDays,
         enteredDays:ehs.enteredDays, untouched:ehs.untouched },
       balance:{ cert:denge.cert, skewed:denge.skewed,
@@ -12434,6 +14519,11 @@ ESP.Office = (function(){
       streak:ESP.Model.streak(),
       cross:ESP.Planner.crossFindings().map(c => ({ id:c.id, from:c.from, to:c.to, text:c.text })),
       next:{ rank:next.rank, title:next.title, why:next.why, agent:next.agent },
+      level:(function(){
+        const ov = ESP.Curriculum.overall();
+        return { rank:ov.rank, label:ov.level ? ov.level.label : null,
+          mastery:ov.mastery, cert:ov.cert };
+      })(),
       openDecisions:ESP.Model.openDecisions().length,
     };
   }
@@ -12441,6 +14531,7 @@ ESP.Office = (function(){
   const BRIEFS = {
     polyglot:langBrief, socrates:philoBrief, maestro:musicBrief,
     demosthenes:dictionBrief, aristoteles:readingBrief, montaigne:writingBrief,
+    herodot:historyBrief, mnemosyne:coachBrief,
     patron:patronBrief,
   };
 
@@ -12533,6 +14624,43 @@ ESP.Office = (function(){
       if(brf.readability.cert !== 'missing'){
         cumle.push('Son taslağın okunabilirliği ' + brf.readability.value + ' (' + brf.readability.band + '), cümle başına ' + U.fmtNum(brf.readability.wordsPerSentence) + ' kelime.');
       }
+      return cumle.join(' ');
+    }
+
+    if(agentId === 'herodot'){
+      if(brf.events.cert === 'missing'){
+        return 'Kronoloji boş. Tohum listesinde ' + (ESP.SEED_EVENTS || []).length
+          + ' dönüm noktası hazır; şeridi doldurmak oradan başlayabilir.';
+      }
+      cumle.push(brf.events.value + ' olay var (' + ESP.yearLabel(brf.events.firstYear)
+        + ' – ' + ESP.yearLabel(brf.events.lastYear) + ').');
+      cumle.push(brf.coverage.eras.covered + '/' + brf.coverage.eras.total + ' dönem, '
+        + brf.coverage.kinds.covered + '/' + brf.coverage.kinds.total + ' alan kapsandı.');
+      if(brf.chains.total){
+        cumle.push(brf.chains.total + ' neden zinciri var'
+          + (brf.chains.unbalanced ? ', ' + brf.chains.unbalanced + ' tanesinde yapısal koşul yok' : '')
+          + (brf.chains.unsourced ? '; ' + brf.chains.unsourced + ' halka kaynaksız' : '') + '.');
+      }else{
+        cumle.push('Hiçbir olay neden zinciriyle açıklanmamış: liste var, tarih yok.');
+      }
+      if(brf.sources.total){
+        cumle.push(brf.sources.total + ' kaynağın ' + brf.sources.primary + ' tanesi birincil.');
+      }
+      return cumle.join(' ');
+    }
+
+    if(agentId === 'mnemosyne'){
+      if(brf.overall.cert === 'missing'){
+        return 'Hiçbir disiplinde ölçülmüş üretim yok. Merdiven ilk ölçümle başlar; '
+          + 'kademe kişiye değil üretime verilir.';
+      }
+      cumle.push('Ölçülmüş üretim genel olarak «' + brf.overall.label + '» kademesinde '
+        + '(merdivenin %' + brf.overall.mastery + '\'i).');
+      if(brf.due.overdue) cumle.push(brf.due.overdue + ' kartın vadesi geçti.');
+      if(brf.unmeasured) cumle.push(brf.unmeasured + ' kapı ölçülemiyor: '
+        + 'orada istenen şey çalışmak değil ölçmek.');
+      const yakin = (brf.gates || []).filter(g => g.gate && g.gate.action === 'work')[0];
+      if(yakin) cumle.push(yakin.label + ' tarafında sıradaki kapı: ' + yakin.gate.label + '.');
       return cumle.join(' ');
     }
 
@@ -12809,6 +14937,27 @@ ESP.Office = (function(){
         + U.fmtNum(Math.round(dr.value * 10) / 10) + ' revizyon düşüyor.', 'writing');
     }
 
+    /* --- tarih --- */
+    ESP.Chrono.findings().forEach(f => {
+      const tur = f.tone === 'danger' ? 'blocked' : (f.tone === 'warn' ? 'overdue' : 'info');
+      add('herodot', tur, f.text, 'history');
+    });
+
+    /* --- koc --- */
+    ESP.DISCIPLINES.forEach(x => {
+      const g = ESP.Curriculum.nextGate(x.id);
+      if(g && g.action === 'measure'){
+        add('mnemosyne', 'info', x.label + ': «' + g.gate.label + '» kapısı ölçülemiyor. '
+          + 'İstenen şey çalışmak değil ölçmek.', x.route);
+      }
+    });
+    (function(){
+      const ov = ESP.Curriculum.overall();
+      if(ov.cert !== 'missing' && ov.mastery >= 100){
+        add('mnemosyne', 'win', 'Bütün merdivenlerin kapıları geçilmiş görünüyor.', 'analytics');
+      }
+    })();
+
     /* --- patron --- */
     const denge = ESP.Planner.balance(7);
     if(denge.skewed){
@@ -12888,6 +15037,17 @@ ESP.Office = (function(){
 
     const ss = ESP.Intellect.syntopic();
     if(ss.total - ss.linked >= 3) add('synthesis', 50, (ss.total - ss.linked) + ' bağsız not.');
+
+    const kapi = ESP.DISCIPLINES
+      .map(x => ESP.Curriculum.nextGate(x.id))
+      .filter(g => g && g.action === 'measure');
+    if(kapi.length) add('gate', 55, kapi.length + ' kapı ölçülemiyor.');
+
+    const tarih = ESP.Chrono.status();
+    if(tarih.cert !== 'missing'
+       && (tarih.kinds.empty.length || tarih.eras.empty.length)){
+      add('coverage', 45, (tarih.eras.empty.concat(tarih.kinds.empty))[0] + ' boş.');
+    }
 
     add('review', 10, 'Haftalık gözden geçirme.');
     return out.sort((a, b) => b.score - a.score);
@@ -12978,6 +15138,7 @@ ESP.Office = (function(){
   return {
     defaults, settings, saveSettings, cfgFor, ready,
     brief, langBrief, philoBrief, musicBrief, dictionBrief, readingBrief,
+    historyBrief, coachBrief,
     writingBrief, patronBrief,
     ruleText, systemPrompt, validate, ask, historyFor, HAFIZA_TUR,
     notes, handoffs, handoffsFor, agendaCandidates, dailyBriefing, runMeeting,
@@ -14645,6 +16806,1009 @@ ESP.Screens.symposium = (function(){
       ];
     },
     subtitle(){ return (S.args || []).length + ' tez'; },
+    actions(){ return ''; },
+    render, handle, change,
+  };
+})();
+
+/* ==== js/screens/history.js ==== */
+/* Kronoloji — tarih masası.
+
+   Beş sekme: Şerit · Olaylar · Kaynaklar · Zincir · Çalışma.
+
+   Ekranın taşıdığı tek iddia şudur: tarih bir liste değildir. Bu yüzden
+   sekmeler bir SIRA anlatır — olayı yerleştir, kaynağını eleştir, nedenini
+   kur, tekrarla. Sıranın tersi de mümkündür ama ekran sırayı önerir.
+
+   Boş bir kronoloji «%0 kapsam» diye çizilmez: ölçülmemiş bir şeyi ölçülmüş
+   gibi göstermek, bu depodaki en pahalı hatanın ta kendisi. Boşken ekran
+   yalnızca tohumu önerir. */
+
+window.ESP = window.ESP || {};
+ESP.Screens = ESP.Screens || {};
+
+ESP.Screens.history = (function(){
+  const U = ESP.U, M = ESP.Model, S = ESP.S;
+  const { html, raw, when, map, cls } = ESP.h;
+  const K = ESP.C;
+
+  const TABS = [
+    { id:'serit',     label:'Şerit' },
+    { id:'olaylar',   label:'Olaylar' },
+    { id:'kaynaklar', label:'Kaynaklar' },
+    { id:'zincir',    label:'Zincir' },
+    { id:'calisma',   label:'Çalışma' },
+  ];
+
+  function evs(){ return S.events || []; }
+  function srcs(){ return S.sources || []; }
+  function chs(){ return S.chains || []; }
+  function eventOf(id){ return evs().filter(e => e.id === id)[0] || null; }
+  function sourceOf(id){ return srcs().filter(s => s.id === id)[0] || null; }
+
+  function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+  function num(id){
+    const v = val(id);
+    if(v === '') return null;
+    const n = Number(v.replace(',', '.'));
+    return isFinite(n) ? n : null;
+  }
+
+  /* ------------------------------------------------------------------ şerit */
+
+  function seritRows(){
+    const st = ESP.Chrono.status();
+    const rows = [];
+
+    if(!evs().length){
+      rows.push(K.Entry({
+        label:'BOŞ ŞERİT', hint:'chrono',
+        meta:'olay yok',
+        note:'Kronoloji boşken kapsam ölçülmez. Sıfır kapsam ile ölçülmemiş '
+           + 'kapsam aynı şey değildir.',
+        body:html`
+          ${K.Empty({ text:'Zaman şeridinde hiç olay yok.' })}
+          ${K.Notice({ tone:'info',
+            body:'Tohum listesi ' + (ESP.SEED_EVENTS || []).length + ' dönüm noktası '
+              + 'taşıyor. Tohum bir müfredat değil bir iskelettir: kendi olaylarını '
+              + 'eklemek için bir zemin.' })}
+          ${K.Button({ label:'Tohumu yükle', tone:'primary', act:'seed', class:'mt-10' })}`,
+      }));
+      return rows;
+    }
+
+    /* Dönem şeridi — her dönem kendi olay sayısıyla. */
+    const donem = ESP.Chrono.spread('era');
+    rows.push(K.Entry({
+      label:'DÖNEMLER', hint:'era',
+      meta:st.eras.covered + '/' + st.eras.total + ' kapsandı',
+      note:'Dönem sınırları tartışmalıdır ve öyle gösterilir: bir sınır bir '
+         + 'ölçüm değil bir karardır.',
+      wide:true,
+      body:html`<div class="erastrip">${map(donem.buckets, b => {
+        const e = ESP.ERA_BY_ID[b.id];
+        return html`
+          <button class="${cls('eracell', b.n === 0 && 'is-empty',
+              S.ui.histEra === b.id && 'is-active')}"
+            data-act="pick-era" data-id="${b.id}"
+            aria-pressed="${S.ui.histEra === b.id ? 'true' : 'false'}">
+            <span class="eracell__label">${b.label}</span>
+            <span class="eracell__span">${ESP.yearLabel(e.from)} – ${ESP.yearLabel(e.to)}</span>
+            <span class="eracell__n num">${b.n}</span>
+          </button>`;
+      })}</div>
+      ${when(S.ui.histEra !== 'all', () => {
+        const e = ESP.ERA_BY_ID[S.ui.histEra];
+        return e ? html`<div class="eranote">
+            <p>${e.note}</p>
+            <p class="small muted"><b>Tartışmalı:</b> ${e.disputed}</p>
+            ${K.Button({ label:'Süzgeci kaldır', size:'sm', act:'pick-era',
+              data:{ 'data-id':'all' } })}
+          </div>` : '';
+      })}`,
+    }));
+
+    /* Yüzyıl boşlukları. */
+    rows.push(K.Entry({
+      label:'YÜZYIL BOŞLUKLARI', hint:'gap',
+      meta:st.gaps.length ? st.gaps.length + ' boşluk' : 'yok',
+      note:'Üst üste üç yüzyıl boş kaldığında kör nokta sayılır. Her yüzyılda '
+         + 'dönüm noktası olmak zorunda değil — ama üç yüzyıl sessizlik bir sorudur.',
+      body:st.gaps.length
+        ? K.Table({ tight:true, headers:['Aralık', { label:'Yüzyıl', num:true }],
+            rows:st.gaps.map(g => [
+              ESP.centuryLabel(g.from) + ' – ' + ESP.centuryLabel(g.to),
+              String(g.length),
+            ]) })
+        : K.Empty({ text:'Kapsanan aralıkta üç yüzyıldan uzun boşluk yok.' }),
+    }));
+
+    /* Dağılım: alan ve bölge. */
+    rows.push(K.Entry({
+      label:'DAĞILIM', hint:'coverage',
+      meta:st.kinds.covered + '/' + st.kinds.total + ' alan',
+      note:'Yalnızca savaş ve antlaşma girilirse nedensellik hep askerî kalır. '
+         + 'Ekonomik ve düşünsel olaylar zinciri değiştirir.',
+      wide:true,
+      body:html`
+        <div class="cols-2">
+          <div>
+            ${K.SectionTitle('Alan')}
+            ${map(ESP.Chrono.spread('kind').buckets, b => K.Meter({
+              label:b.label, value:b.pct, text:b.n + ' olay',
+              tone:b.n === 0 ? 'warn' : null }))}
+          </div>
+          <div>
+            ${K.SectionTitle('Bölge')}
+            ${map(ESP.Chrono.spread('region').buckets, b => K.Meter({
+              label:b.label, value:b.pct, text:b.n + ' olay',
+              tone:b.n === 0 ? 'warn' : null }))}
+          </div>
+        </div>`,
+    }));
+
+    return rows;
+  }
+
+  /* ---------------------------------------------------------------- olaylar */
+
+  function filteredEvents(){
+    const q = U.norm(S.ui.histQuery || '');
+    return evs()
+      .filter(e => S.ui.histEra === 'all' || !S.ui.histEra || e.era === S.ui.histEra)
+      .filter(e => !q || U.norm(e.title).indexOf(q) >= 0);
+  }
+
+  function olayRows(){
+    const list = filteredEvents();
+    const rows = [];
+
+    rows.push(K.Entry({
+      label:'OLAY EKLE', hint:'event',
+      meta:'yıl zorunlu',
+      note:'Dönem yıldan türetilir, sorulmaz: aynı yıl iki döneme düşemez ve '
+         + 'elle girilen dönem zamanla yanlış kalır.',
+      body:html`
+        <div class="cols-2">
+          ${K.Field({ label:'Olay',
+            input:K.Input({ id:'ev-title', placeholder:'Malazgirt Savaşı',
+              aria:'Olayın adı' }) })}
+          ${K.Field({ label:'Yıl', hint:'MÖ için eksi yaz: -753',
+            input:K.Input({ id:'ev-year', type:'number', numeric:true,
+              placeholder:'1071', aria:'Olayın yılı' }) })}
+        </div>
+        <div class="cols-2 mt-10">
+          ${K.Field({ label:'Alan',
+            input:K.Select({ id:'ev-kind', value:'siyasi', aria:'Olayın alanı',
+              options:ESP.EVENT_KINDS.map(k => ({ value:k.id, label:k.label })) }) })}
+          ${K.Field({ label:'Bölge',
+            input:K.Select({ id:'ev-region', value:'anadolu', aria:'Olayın bölgesi',
+              options:ESP.REGIONS.map(r => ({ value:r.id, label:r.label })) }) })}
+        </div>
+        ${K.Field({ label:'Neden dönüm noktası?', class:'mt-10',
+          input:K.Input({ id:'ev-why', aria:'Olayın önemi',
+            placeholder:'Anadolu\'nun Türkleşme sürecinin açılışı.' }) })}
+        ${K.Button({ label:'Olayı ekle', tone:'primary', act:'add-event', class:'mt-10' })}`,
+    }));
+
+    if(!list.length){
+      rows.push(K.Entry({ label:'OLAYLAR', meta:'yok',
+        body:K.Empty({ text:'Süzgece uyan olay yok.' }) }));
+      return rows;
+    }
+
+    rows.push(K.Entry({
+      label:'OLAYLAR',
+      meta:list.length + ' olay',
+      action:K.Input({ id:'ev-q', value:S.ui.histQuery || '', size:'sm',
+        placeholder:'Olay ara…', change:'hist-query', aria:'Olay ara' }),
+      wide:true,
+      body:html`${map(list, e => {
+        const a = ESP.Chrono.explained(e.id);
+        const era = ESP.ERA_BY_ID[e.era];
+        return html`
+          <div class="evrow">
+            <span class="evrow__year num">${ESP.yearLabel(e.year)}</span>
+            <div class="evrow__body">
+              <b>${e.title}</b>
+              ${when(e.why, () => html`<p class="small muted">${e.why}</p>`)}
+              <div class="evrow__meta">
+                ${when(era, () => K.Badge({ label:era.label, tone:'muted', icon:false }))}
+                ${K.Badge({ label:(ESP.EVENT_KIND_BY_ID[e.kind] || {}).label || e.kind,
+                  tone:'muted', icon:false })}
+                ${K.Badge({ label:a.state === 'balanced' ? 'dengeli zincir'
+                    : (a.state === 'thin' ? 'zayıf zincir' : 'zincirsiz'),
+                  tone:a.state === 'balanced' ? 'ok' : (a.state === 'thin' ? 'warn' : 'muted') })}
+                ${K.Button({ label:'Eşzamanlı', size:'sm', act:'contemp',
+                  data:{ 'data-id':e.id } })}
+                ${K.Button({ label:'Zincir kur', size:'sm', act:'new-chain',
+                  data:{ 'data-id':e.id } })}
+                ${K.Button({ label:'Karta çevir', size:'sm', act:'to-cards',
+                  data:{ 'data-id':e.id } })}
+                ${K.Button({ label:'Sil', size:'sm', act:'del-event',
+                  data:{ 'data-id':e.id } })}
+              </div>
+              ${when(S.ui.eventOpen === e.id, () => esZamanli(e))}
+            </div>
+          </div>`;
+      })}`,
+    }));
+
+    return rows;
+  }
+
+  function esZamanli(e){
+    const list = ESP.Chrono.contemporaries(e.year, 50).filter(x => x.id !== e.id);
+    return html`<div class="contemp">
+      <p class="small"><b>${ESP.yearLabel(e.year)} ± 50 yıl</b> — tarihin en öğretici sorusu:
+        aynı anda başka yerde ne oluyordu?</p>
+      ${list.length
+        ? html`<ul class="contemp__list">${map(list, x => html`<li>
+            <span class="num">${ESP.yearLabel(x.year)}</span>
+            <span>${x.title}</span>
+            <em class="tiny dim">${(ESP.REGIONS.filter(r => r.id === x.region)[0] || {}).label || ''}</em>
+          </li>`)}</ul>`
+        : K.Empty({ text:'Bu aralıkta başka olay girilmemiş.' })}
+      ${K.Button({ label:'Kapat', size:'sm', act:'contemp', data:{ 'data-id':'' } })}
+    </div>`;
+  }
+
+  /* -------------------------------------------------------------- kaynaklar */
+
+  function kaynakRows(){
+    const b = ESP.Chrono.sourceBalance();
+    const rows = [];
+
+    rows.push(K.Entry({
+      label:'KAYNAK EKLE', hint:'source',
+      meta:'birincil / ikincil',
+      note:'Tek kaynağa dayanan bir iddia bir tezdir, bir olgu değil.',
+      body:html`
+        <div class="cols-2">
+          ${K.Field({ label:'Kaynak',
+            input:K.Input({ id:'sr-title', placeholder:'Tevârîh-i Âl-i Osman',
+              aria:'Kaynağın adı' }) })}
+          ${K.Field({ label:'Yazar',
+            input:K.Input({ id:'sr-author', placeholder:'Âşıkpaşazâde', aria:'Yazar' }) })}
+        </div>
+        <div class="cols-3 mt-10">
+          ${K.Field({ label:'Tür',
+            input:K.Select({ id:'sr-kind', value:'secondary', aria:'Kaynağın türü',
+              options:ESP.SOURCE_KINDS.map(k => ({ value:k.id, label:k.label })) }) })}
+          ${K.Field({ label:'Yıl',
+            input:K.Input({ id:'sr-year', type:'number', numeric:true, aria:'Kaynağın yılı' }) })}
+          ${K.Field({ label:'Tarih yazımı okulu',
+            input:K.Select({ id:'sr-school', value:'', aria:'Tarih yazımı okulu',
+              options:[{ value:'', label:'(belirsiz)' }]
+                .concat(ESP.HISTORIOGRAPHY.map(h => ({ value:h.id, label:h.label }))) }) })}
+        </div>
+        ${K.Button({ label:'Kaynağı ekle', tone:'primary', act:'add-source', class:'mt-10' })}`,
+    }));
+
+    rows.push(K.Entry({
+      label:'DENGE', hint:'balance',
+      meta:b.cert === 'missing' ? 'veri yok'
+        : b.primary + '/' + b.total + ' birincil',
+      note:'Birincil oran bir kalite değil bir kompozisyon ölçüsüdür: %100 '
+         + 'birincil de sağlıklı değildir, bağlamı ikincil kaynak verir.',
+      body:b.cert === 'missing'
+        ? K.Empty({ text:'Henüz kaynak değerlendirilmedi.' })
+        : html`
+          ${K.Meter({ label:'Birincil oran', value:Math.round(b.ratio * 100),
+            text:'%' + Math.round(b.ratio * 100) })}
+          ${when(b.note, () => K.Notice({ tone:'info', body:b.note }))}`,
+    }));
+
+    if(srcs().length){
+      rows.push(K.Entry({
+        label:'KAYNAKLAR', meta:srcs().length + ' kaynak', wide:true,
+        body:html`${map(srcs(), s => {
+          const d = M.critiqueDepth(s);
+          const okul = ESP.SCHOOL_BY_ID[s.school];
+          return html`
+            <div class="srcrow">
+              <div class="srcrow__head">
+                <b>${s.title}</b>
+                <span class="tiny dim">${s.author || '—'}${s.year ? ' · ' + ESP.yearLabel(s.year) : ''}</span>
+                ${K.Badge({ label:(ESP.SOURCE_KINDS.filter(k => k.id === s.kind)[0] || {}).label || s.kind,
+                  tone:s.kind === 'primary' ? 'info' : 'muted', icon:false })}
+                ${when(okul, () => K.Badge({ label:okul.label, tone:'muted', icon:false }))}
+                ${K.Badge({ label:d.answered + '/' + d.total + ' soru',
+                  tone:d.answered === d.total ? 'ok' : (d.answered ? 'warn' : 'muted') })}
+                ${K.Button({ label:S.ui.sourceOpen === s.id ? 'Kapat' : 'Eleştir',
+                  size:'sm', act:'open-source', data:{ 'data-id':s.id } })}
+                ${K.Button({ label:'Sil', size:'sm', act:'del-source', data:{ 'data-id':s.id } })}
+              </div>
+              ${when(S.ui.sourceOpen === s.id, () => critiqueForm(s))}
+            </div>`;
+        })}`,
+      }));
+    }
+
+    return rows;
+  }
+
+  function critiqueForm(s){
+    return html`<div class="critique">
+      ${map(ESP.SOURCE_CRITIQUE, q => html`
+        <div class="critique__q">
+          <label for="cq-${q.id}"><b>${q.q}</b></label>
+          <p class="tiny dim">${q.note}</p>
+          ${K.Textarea({ id:'cq-' + q.id, rows:2, value:(s.answers || {})[q.id] || '',
+            aria:q.q })}
+        </div>`)}
+      ${K.Button({ label:'Eleştiriyi kaydet', tone:'primary', size:'sm',
+        act:'save-critique', data:{ 'data-id':s.id } })}
+    </div>`;
+  }
+
+  /* ----------------------------------------------------------------- zincir */
+
+  function zincirRows(){
+    const rows = [];
+    const acik = S.ui.chainOpen ? chs().filter(c => c.id === S.ui.chainOpen)[0] : null;
+
+    rows.push(K.Entry({
+      label:'NEDEN ZİNCİRİ', hint:'causal',
+      meta:chs().length + ' zincir',
+      note:'Yapısal koşul ile tetikleyici aynı şey değildir. Yalnızca kıvılcımdan '
+         + 'kurulan bir açıklama, tarihin en yaygın hatasıdır.',
+      body:evs().length
+        ? html`
+          <div class="row wrap">
+            ${K.Select({ id:'ch-event', aria:'Zincirin olayı',
+              options:evs().map(e => ({ value:e.id,
+                label:ESP.yearLabel(e.year) + ' — ' + e.title })) })}
+            ${K.Input({ id:'ch-q', placeholder:'Soru: bu neden oldu?',
+              aria:'Zincirin sorusu' })}
+            ${K.Button({ label:'Zincir aç', tone:'primary', act:'add-chain' })}
+          </div>`
+        : K.Empty({ text:'Önce bir olay ekle: zincir olaysız kurulmaz.' }),
+    }));
+
+    chs().forEach(c => {
+      const e = eventOf(c.eventId);
+      const b = M.chainBalance(c);
+      rows.push(K.Entry({
+        label:(e ? ESP.yearLabel(e.year) : '—'),
+        meta:b.links + ' halka',
+        note:c.question || (e ? e.title : ''),
+        action:html`${K.Button({ label:acik && acik.id === c.id ? 'Kapat' : 'Aç', size:'sm',
+            act:'open-chain', data:{ 'data-id':c.id } })}
+          ${K.Button({ label:'Sil', size:'sm', act:'del-chain', data:{ 'data-id':c.id } })}`,
+        wide:true,
+        body:html`
+          <div class="row wrap">
+            ${K.Badge({ label:b.balanced ? 'dengeli' : 'dengesiz',
+              tone:b.balanced ? 'ok' : 'warn' })}
+            ${K.Badge({ label:b.sourced + '/' + b.links + ' kaynaklı',
+              tone:b.sourced === b.links && b.links ? 'ok' : 'muted' })}
+          </div>
+          ${when(b.why, () => K.Notice({ tone:'warn', body:b.why }))}
+          ${when(c.links.length, () => html`<ul class="chain">${map(c.links, l => {
+            const src = sourceOf(l.sourceId);
+            const kind = ESP.CAUSE_KINDS.filter(k => k.id === l.kind)[0] || {};
+            return html`<li class="${cls('chain__link', 'chain__link--' + l.kind)}">
+              <span class="chain__kind">${kind.label || l.kind}</span>
+              <span class="chain__text">${l.text}</span>
+              <span class="tiny dim">${src ? src.title : 'kaynaksız'}</span>
+              ${K.Button({ label:'Kaldır', size:'sm', act:'del-link',
+                data:{ 'data-c':c.id, 'data-l':l.id } })}
+            </li>`;
+          })}</ul>`)}
+          ${when(acik && acik.id === c.id, () => html`
+            <div class="linkform mt-10">
+              ${K.Select({ id:'cl-kind', value:'yapisal', aria:'Halkanın türü',
+                options:ESP.CAUSE_KINDS.map(k => ({ value:k.id, label:k.label })) })}
+              ${K.Input({ id:'cl-text', placeholder:'Halka: ne, neden?',
+                aria:'Halkanın metni' })}
+              ${K.Select({ id:'cl-src', value:'', aria:'Halkanın kaynağı',
+                options:[{ value:'', label:'Kaynaksız' }]
+                  .concat(srcs().map(s => ({ value:s.id, label:s.title }))) })}
+              ${K.Button({ label:'Halka ekle', tone:'primary', size:'sm',
+                act:'add-link', data:{ 'data-id':c.id } })}
+            </div>`)}`,
+      }));
+    });
+
+    return rows;
+  }
+
+  /* ---------------------------------------------------------------- çalışma */
+
+  function calismaRows(){
+    const rows = [];
+    const drill = ESP.Chrono.drill();
+    const r = ESP.Chrono.retention();
+    const due = ESP.SRS.dueCards().filter(c => c.lang === ESP.HISTORY_DECK);
+
+    rows.push(K.Entry({
+      label:'BUGÜNÜN EGZERSİZİ', hint:'drill',
+      meta:drill ? 'kademe ' + drill.level : '—',
+      note:'Egzersizi kural motoru seçer, model değil: açığı olan eksen önce gelir.',
+      body:drill
+        ? K.NextUp({ icon:'zap', label:drill.label, title:drill.task,
+            why:'Bu egzersiz, ölçülen açığa göre seçildi.' })
+        : K.Empty({ text:'Egzersiz listesi boş.' }),
+    }));
+
+    rows.push(K.Entry({
+      label:'TARİH DESTESİ', hint:'srs',
+      meta:due.length ? due.length + ' kart vadeli' : 'vadesi gelen yok',
+      note:'Tarih destesi dil destesinden AYRI ölçülür: birinin iyi olması '
+         + 'ötekinin çöküşünü gizlememeli.',
+      body:html`
+        ${r.cert === 'missing'
+          ? K.Notice({ tone:'info', body:'Retansiyon henüz ölçülemedi: taban için '
+              + 'en az ' + ESP.Planner.RETENTION_MIN_CARDS + ' cevaplanmış kart gerekir.' })
+          : K.Meter({ label:'Retansiyon', value:Math.round(r.value * 100),
+              text:'%' + Math.round(r.value * 100),
+              tone:r.value < ESP.Planner.RETENTION_FLOOR ? 'danger' : 'ok',
+              note:r.n + ' karttan hesaplandı' })}
+        ${when(due.length, () => K.Button({ label:'Tekrara başla', tone:'primary',
+          act:'go-cards', class:'mt-10' }))}`,
+    }));
+
+    rows.push(K.Entry({
+      label:'ANAKRONİZM TUZAKLARI', hint:'anachronism',
+      meta:ESP.ANACHRONISMS.length + ' tuzak',
+      note:'Bugünün gözüyle okumak, tarihin en sessiz hatasıdır: yanlış cevap '
+         + 'vermez, yanlış soru sordurur.',
+      body:K.Table({ tight:true, headers:['Tuzak', 'Ne yapar'],
+        rows:ESP.ANACHRONISMS.map(a => [a.label, a.note]) }),
+    }));
+
+    rows.push(K.Entry({
+      label:'TARİH YAZIMI OKULLARI', hint:'school',
+      meta:ESP.HISTORIOGRAPHY.length + ' okul',
+      note:'Aynı olay, farklı okulda farklı bir hikâyedir. Bunu görmek, tarih '
+         + 'bilmek ile tarihsel düşünmek arasındaki fark.',
+      wide:true,
+      body:K.Table({ tight:true, headers:['Okul', 'Neye bakar', 'Sorusu'],
+        rows:ESP.HISTORIOGRAPHY.map(h => [h.label, h.note, h.asks]) }),
+    }));
+
+    rows.push(K.Entry({
+      label:'EGZERSİZ KATALOĞU',
+      meta:ESP.HISTORY_DRILLS.length + ' egzersiz',
+      wide:true,
+      body:K.Table({ tight:true,
+        headers:[{ label:'Kademe', num:true }, 'Egzersiz', 'Ne yapılır'],
+        rows:ESP.HISTORY_DRILLS.slice().sort((a, b) => a.level - b.level)
+          .map(d => [String(d.level), d.label, d.task]) }),
+    }));
+
+    return rows;
+  }
+
+  /* ----------------------------------------------------------------- çizim */
+
+  function render(){
+    const tab = S.ui.histTab || 'serit';
+    const rows = tab === 'serit' ? seritRows()
+      : tab === 'olaylar' ? olayRows()
+      : tab === 'kaynaklar' ? kaynakRows()
+      : tab === 'zincir' ? zincirRows()
+      : calismaRows();
+
+    return K.Grid(html`
+      ${K.Span(12, K.Toolbar({
+        tabs:K.Subtabs({ value:tab, act:'pick-tab', aria:'Kronoloji bölümleri',
+          items:TABS.map(t => ({ id:t.id, label:t.label })) }),
+        actions:when(evs().length, () => K.Button({ label:'Tohumu yükle', size:'sm',
+          act:'seed' })),
+      }))}
+      ${K.Span(12, K.Ledger(() => rows))}`);
+  }
+
+  /* ----------------------------------------------------------------- eylem */
+
+  const handle = {
+    async 'pick-tab'(el){ S.ui.histTab = el.dataset.tab; ESP.App.render(); },
+    async 'pick-era'(el){
+      S.ui.histEra = el.dataset.id === S.ui.histEra ? 'all' : el.dataset.id;
+      ESP.App.render();
+    },
+
+    async 'seed'(){
+      const res = await M.seedEvents();
+      ESP.Memo.bitir();
+      ESP.UI.toast(res.added + ' olay eklendi'
+        + (res.skipped ? ', ' + res.skipped + ' tanesi zaten vardı' : ''));
+      ESP.App.render();
+    },
+
+    async 'add-event'(){
+      const res = await M.saveEvent(M.newEvent({
+        title:val('ev-title'), year:num('ev-year'),
+        kind:val('ev-kind') || 'siyasi', region:val('ev-region') || 'dunya',
+        why:val('ev-why'),
+      }));
+      if(!res.ok){ ESP.UI.toast(res.error); return; }
+      ESP.Memo.bitir();
+      ESP.UI.toast('Olay kronolojiye girdi');
+      ESP.App.render();
+    },
+
+    async 'del-event'(el){
+      const id = el.dataset.id;
+      const e = eventOf(id);
+      ESP.UI.confirmSheet('Olay silinsin mi?',
+        (e ? '«' + e.title + '» ' : '') + 've bu olaya bağlı neden zincirleri kalkar.',
+        async () => {
+          await M.deleteEvent(id);
+          ESP.Memo.bitir();
+          ESP.App.render();
+        }, true);
+    },
+
+    async 'contemp'(el){
+      S.ui.eventOpen = el.dataset.id || null;
+      ESP.App.render();
+    },
+
+    /* Bir olaydan iki kart cikar: "olay -> yil" ve "yil -> olay".
+       Ikisi ayri hatirlama isidir; biri bilinirken oteki bilinmeyebilir. */
+    async 'to-cards'(el){
+      const e = eventOf(el.dataset.id);
+      if(!e) return;
+      const kartlar = ESP.Chrono.cardsFor(e);
+      let eklenen = 0;
+      for(const k of kartlar){
+        const var_ = (S.cards || []).some(c => c.lang === ESP.HISTORY_DECK
+          && U.norm(c.front) === U.norm(k.front));
+        if(var_) continue;
+        await M.saveCard(M.newCard(k));
+        eklenen++;
+      }
+      ESP.Memo.bitir();
+      ESP.UI.toast(eklenen ? eklenen + ' kart eklendi' : 'Kartlar zaten vardı');
+      ESP.App.render();
+    },
+
+    async 'go-cards'(){
+      S.ui.langDeck = ESP.HISTORY_DECK;
+      S.ui.langTab = 'calis';
+      ESP.App.go('lang');
+    },
+
+    async 'add-source'(){
+      const res = await M.saveSource(M.newSource({
+        title:val('sr-title'), author:val('sr-author'), year:num('sr-year'),
+        kind:val('sr-kind') || 'secondary', school:val('sr-school') || null,
+      }));
+      if(!res.ok){ ESP.UI.toast(res.error); return; }
+      ESP.Memo.bitir();
+      ESP.App.render();
+    },
+
+    async 'open-source'(el){
+      S.ui.sourceOpen = S.ui.sourceOpen === el.dataset.id ? null : el.dataset.id;
+      ESP.App.render();
+    },
+
+    async 'save-critique'(el){
+      const s = sourceOf(el.dataset.id);
+      if(!s) return;
+      const cevaplar = {};
+      ESP.SOURCE_CRITIQUE.forEach(q => {
+        const v = val('cq-' + q.id);
+        if(v) cevaplar[q.id] = v;
+      });
+      await M.saveSource(Object.assign({}, s, { answers:cevaplar }));
+      ESP.Memo.bitir();
+      ESP.UI.toast('Eleştiri kaydedildi');
+      ESP.App.render();
+    },
+
+    async 'del-source'(el){
+      await M.deleteSource(el.dataset.id);
+      ESP.Memo.bitir();
+      ESP.App.render();
+    },
+
+    async 'add-chain'(){
+      const res = await M.saveChain(M.newChain({
+        eventId:val('ch-event'), question:val('ch-q'),
+      }));
+      if(!res.ok){ ESP.UI.toast(res.error); return; }
+      S.ui.chainOpen = res.chain.id;
+      ESP.Memo.bitir();
+      ESP.App.render();
+    },
+
+    async 'new-chain'(el){
+      const res = await M.saveChain(M.newChain({ eventId:el.dataset.id }));
+      if(!res.ok){ ESP.UI.toast(res.error); return; }
+      S.ui.chainOpen = res.chain.id;
+      S.ui.histTab = 'zincir';
+      ESP.Memo.bitir();
+      ESP.App.render();
+    },
+
+    async 'open-chain'(el){
+      S.ui.chainOpen = S.ui.chainOpen === el.dataset.id ? null : el.dataset.id;
+      ESP.App.render();
+    },
+
+    async 'add-link'(el){
+      const c = chs().filter(x => x.id === el.dataset.id)[0];
+      if(!c) return;
+      const metin = val('cl-text');
+      if(!metin){ ESP.UI.toast('Halkanın metni boş olamaz'); return; }
+      const links = (c.links || []).concat([{
+        id:U.uid('l'), kind:val('cl-kind') || 'yapisal', text:metin,
+        sourceId:val('cl-src') || null,
+      }]);
+      await M.saveChain(Object.assign({}, c, { links }));
+      ESP.Memo.bitir();
+      ESP.App.render();
+    },
+
+    async 'del-link'(el){
+      const c = chs().filter(x => x.id === el.dataset.c)[0];
+      if(!c) return;
+      await M.saveChain(Object.assign({}, c,
+        { links:(c.links || []).filter(l => l.id !== el.dataset.l) }));
+      ESP.Memo.bitir();
+      ESP.App.render();
+    },
+
+    async 'del-chain'(el){
+      await M.deleteChain(el.dataset.id);
+      ESP.Memo.bitir();
+      ESP.App.render();
+    },
+  };
+
+  const change = {
+    async 'hist-query'(el){ S.ui.histQuery = el.value; ESP.App.render(); },
+  };
+
+  return {
+    id:'history',
+    title:'Kronoloji',
+    headline(){
+      const st = ESP.Chrono.status();
+      if(st.cert === 'missing') return 'Zaman şeridi boş.';
+      if(st.chains.unbalanced) return st.chains.unbalanced + ' zincirde yapısal koşul yok.';
+      if(!st.chains.total) return st.events + ' olay var, hiçbiri zincirle açıklanmamış.';
+      if(st.kinds.empty.length) return st.kinds.empty.join(', ') + ' alanından olay yok.';
+      return st.events + ' olay, ' + st.chains.total + ' zincir.';
+    },
+    lede(){
+      return 'Kaç olay bildiğin değil, kaçını kaynağıyla açıklayabildiğin sayılır. '
+           + 'Kronoloji iskelet, zincir ve kaynak ettir.';
+    },
+    stats(){
+      const st = ESP.Chrono.status();
+      return [
+        { value:String(st.events), label:'olay' },
+        { value:st.eras.covered + '/' + st.eras.total, label:'dönem' },
+        { value:String(st.chains.total), label:'zincir' },
+        { value:st.sources.total ? st.sources.primary + '/' + st.sources.total : '—',
+          label:'birincil kaynak' },
+      ];
+    },
+    subtitle(){
+      const st = ESP.Chrono.status();
+      return st.cert === 'missing' ? 'boş şerit'
+        : ESP.yearLabel(st.firstYear) + ' – ' + ESP.yearLabel(st.lastYear);
+    },
+    actions(){ return ''; },
+    render, handle, change,
+  };
+})();
+
+/* ==== js/screens/ladder.js ==== */
+/* Merdiven — sıfırdan üstatlığa yedi disiplinin kademesi.
+
+   Bu ekran bir «puan tablosu» değildir ve öyle çizilmemelidir. Taşıdığı tek
+   cümle şudur: şu an nerede duruyorsun, bir sonraki kapı hangisi ve o kapıyı
+   açan ölçüm ne?
+
+   Üç şey bilinçli olarak YOKTUR:
+
+     Süre tahmini.  «Üç ayda usta olursun» ESP.PEDAGOGIC.never içindeki
+                    garanti yasağına girer.
+     Rozet.         Kademe bir ödül değil bir konumdur; üretim dururken
+                    kademe de durur.
+     Tek puan.      Yedi disiplin tek sayıya toplanmaz — toplanan sayı,
+                    hangi disiplinin çöktüğünü gizler.
+
+   Ölçülemeyen kapı üçüncü bir renkle durur: ne geçilmiş ne kalınmış.
+   Orada istenen şey çalışmak değil ÖLÇMEKTİR. */
+
+window.ESP = window.ESP || {};
+ESP.Screens = ESP.Screens || {};
+
+ESP.Screens.ladder = (function(){
+  const U = ESP.U, S = ESP.S;
+  const { html, raw, when, map, cls } = ESP.h;
+  const K = ESP.C;
+  const C = () => ESP.Curriculum;
+
+  function discOf(id){ return ESP.DISCIPLINE_BY_ID[id]; }
+
+  function toneOfGate(g){
+    return g.status === 'pass' ? 'ok' : (g.status === 'fail' ? 'warn' : 'muted');
+  }
+
+  function gateLine(g){
+    return html`
+      <li class="${cls('gate', 'gate--' + g.status)}">
+        <span class="gate__mark" aria-hidden="true">${g.status === 'pass' ? '✓'
+          : (g.status === 'fail' ? '·' : '?')}</span>
+        <span class="gate__label">${g.label}</span>
+        <span class="gate__why">${g.status === 'pass' ? 'geçildi' : (g.why || '')}</span>
+        ${K.Badge({ label:(ESP.CERTAINTY[g.cert] || ESP.CERTAINTY.missing).label,
+          tone:toneOfGate(g), icon:false })}
+      </li>`;
+  }
+
+  /* ------------------------------------------------------------ genel bakış */
+
+  function ozetRows(){
+    const ov = C().overall();
+    const hepsi = C().all().filter(Boolean);
+    const rows = [];
+
+    rows.push(K.Entry({
+      label:'GENEL KADEME', hint:'level',
+      meta:ov.cert === 'missing' ? 'veri yok' : ov.level.label,
+      note:'Genel kademe disiplinlerin ortalaması değildir: ortalama ile en '
+         + 'düşüğün arasıdır. Tek disiplinde üstat olup ötekileri bırakmak '
+         + 'üstatlık sayılmaz; tek zayıf disiplin de bütün emeği silmez.',
+      body:ov.cert === 'missing'
+        ? K.Notice({ tone:'info', body:'Hiçbir disiplinde ölçülmüş üretim yok. '
+            + 'Merdiven ilk ölçümle başlar.' })
+        : html`
+          ${K.NextUp({ icon:'chart', label:'Ölçülmüş üretim', title:ov.level.label,
+            why:ov.level.note })}
+          ${K.Meter({ label:'Merdivenin tamamı', value:ov.mastery,
+            text:'%' + ov.mastery,
+            note:ov.measuredDisciplines + '/' + ov.disciplines
+              + ' disiplinde ölçülmüş üretim var' })}
+          <p class="small muted mt-8">${ESP.PEDAGOGIC.level}</p>`,
+    }));
+
+    rows.push(K.Entry({
+      label:'DİSİPLİNLER',
+      meta:hepsi.length + ' merdiven',
+      note:'Kademe ardışıktır: alttaki kapı atlanarak üsttekine geçilmez. '
+         + 'Atlanan kapı ileride her zaman geri gelir.',
+      wide:true,
+      body:html`<div class="ladders">${map(hepsi, lv => {
+        const d = discOf(lv.disc);
+        if(!d) return '';
+        return html`
+          <button class="${cls('ladcard', 'ladcard--' + lv.disc,
+              S.ui.curDisc === lv.disc && 'is-active')}"
+            data-act="pick-disc" data-id="${lv.disc}"
+            aria-pressed="${S.ui.curDisc === lv.disc ? 'true' : 'false'}">
+            <span class="ladcard__head">
+              <b>${d.label}</b>
+              <span class="ladcard__rank num">${lv.level.short}</span>
+            </span>
+            <span class="ladcard__level">${lv.level.label}</span>
+            <span class="ladcard__bar" aria-hidden="true">
+              <span class="ladcard__fill" style="width:${lv.mastery}%"></span>
+            </span>
+            <span class="ladcard__meta">%${lv.mastery} · ${
+              (ESP.CERTAINTY[lv.cert] || ESP.CERTAINTY.missing).label}</span>
+          </button>`;
+      })}</div>`,
+    }));
+
+    /* Ölçülemeyen kapılar tek listede: bunlar "çalış" değil "ölç" işleridir. */
+    const olcum = ESP.DISCIPLINES.map(d => C().nextGate(d.id))
+      .filter(g => g && g.action === 'measure');
+    rows.push(K.Entry({
+      label:'ÖLÇÜLEMEYEN KAPILAR', hint:'unknown-gate',
+      meta:olcum.length ? olcum.length + ' kapı' : 'yok',
+      note:'Ölçülemeyen kapı geçilmiş sayılmaz ama kalınmış da sayılmaz. '
+         + 'Sıfır varsaymak, sistemin en pahalı hatasıdır.',
+      body:olcum.length
+        ? K.Table({ tight:true, headers:['Disiplin', 'Kapı', ''],
+            rows:olcum.map(g => [
+              (discOf(g.disc) || {}).label || g.disc,
+              g.gate.label,
+              K.Button({ label:'Ölçmeye git', size:'sm', act:'go',
+                data:{ 'data-route':(discOf(g.disc) || {}).route || 'today' } }),
+            ]) })
+        : K.Empty({ text:'Bir sonraki kapıların hepsi ölçülebiliyor.' }),
+    }));
+
+    return rows;
+  }
+
+  /* ------------------------------------------------------- tek disiplin yolu */
+
+  function yolRows(discId){
+    const d = discOf(discId);
+    const yol = C().roadmap(discId);
+    const lv = C().levelOf(discId);
+    const kapi = C().nextGate(discId);
+    const lad = C().ladder(discId);
+    if(!d || !yol || !lad) return [K.Entry({ label:'YOL', body:K.Empty({ text:'Merdiven yok.' }) })];
+
+    const rows = [];
+
+    rows.push(K.Entry({
+      label:d.label.toLocaleUpperCase('tr-TR'), hint:'ladder',
+      meta:lv.level.label,
+      note:lad.aim,
+      action:K.Button({ label:'Masaya git', size:'sm', act:'go',
+        data:{ 'data-route':d.route } }),
+      body:html`
+        ${K.Meter({ label:'Merdiven', value:lv.mastery, text:'%' + lv.mastery })}
+        <p class="rulesay mt-10">${C().sentence(discId)}</p>
+        ${when(kapi, () => K.NextUp({
+          icon:kapi.action === 'measure' ? 'info' : 'zap',
+          label:kapi.action === 'measure' ? 'Önce ölç' : 'Sıradaki kapı',
+          title:kapi.title, why:kapi.why }))}`,
+    }));
+
+    yol.steps.forEach(st => {
+      rows.push(K.Entry({
+        label:'KADEME ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short,
+        meta:st.state === 'done' ? 'geçildi'
+          : (st.state === 'current' ? '%' + st.pct : 'ileride'),
+        note:st.title,
+        wide:true,
+        class:'step step--' + st.state,
+        body:html`
+          <div class="step__cols">
+            <div>
+              ${K.SectionTitle('Ne çalışılır')}
+              <ul class="studylist">${map(st.study, x => html`<li>${x}</li>`)}</ul>
+              <p class="small muted mt-8"><b>Kapanış işi:</b> ${st.proof}</p>
+            </div>
+            <div>
+              ${K.SectionTitle('Kapılar')}
+              <ul class="gates">${map(st.gates, gateLine)}</ul>
+              ${when(st.unknown, () => K.Notice({ tone:'info',
+                body:st.unknown + ' kapı ölçülemiyor: burada istenen şey '
+                  + 'çalışmak değil ölçmek.' }))}
+            </div>
+          </div>`,
+      }));
+    });
+
+    return rows;
+  }
+
+  /* ------------------------------------------------------ seviye tespit sınavı */
+
+  function tespitRows(){
+    const cevaplar = (S.prefs && S.prefs.placement) || {};
+    const disc = S.ui.curDisc || 'lang';
+    const mevcut = cevaplar[disc] || {};
+    const tahmin = C().placement(mevcut);
+    const lv = C().levelOf(disc);
+
+    return [
+      K.Entry({
+        label:'SEVİYE TESPİTİ', hint:'placement',
+        meta:(discOf(disc) || {}).label || disc,
+        note:ESP.PLACEMENT.note,
+        body:html`
+          ${K.Field({ label:'Disiplin',
+            input:K.Select({ id:'pl-disc', value:disc, change:'pick-disc-sel',
+              aria:'Tespit yapılacak disiplin',
+              options:ESP.DISCIPLINES.map(x => ({ value:x.id, label:x.label })) }) })}
+          ${map(ESP.PLACEMENT.questions, q => K.Field({ label:q.label, class:'mt-10',
+            input:K.Select({ id:'pl-' + q.id,
+              value:mevcut[q.id] != null ? String(mevcut[q.id]) : '',
+              aria:q.label,
+              options:[{ value:'', label:'(cevapsız)' }]
+                .concat(q.options.map(o => ({ value:String(o.value), label:o.label }))) }) }))}
+          ${K.Button({ label:'Tahmini kaydet', tone:'primary', act:'save-placement',
+            class:'mt-10', data:{ 'data-id':disc } })}`,
+      }),
+
+      K.Entry({
+        label:'SONUÇ',
+        meta:tahmin.answered + '/' + tahmin.total + ' cevap',
+        note:'Tahmin hiçbir kapıyı açmaz. Ölçülmüş kademe tahmini her zaman yener.',
+        body:html`
+          <div class="row wrap">
+            ${K.Badge({ label:'tahmin: ' + tahmin.level.label, tone:'warn' })}
+            ${K.Badge({ label:'ölçülen: ' + (lv && lv.cert !== 'missing'
+              ? lv.level.label : 'veri yok'),
+              tone:lv && lv.cert !== 'missing' ? 'ok' : 'muted' })}
+          </div>
+          <p class="small muted mt-8">${tahmin.level.note}</p>`,
+      }),
+    ];
+  }
+
+  /* ----------------------------------------------------------------- çizim */
+
+  const TABS = [
+    { id:'ozet',   label:'Genel' },
+    { id:'yol',    label:'Yol' },
+    { id:'tespit', label:'Seviye tespiti' },
+  ];
+
+  function render(){
+    const tab = S.ui.ladderTab || 'ozet';
+    const disc = S.ui.curDisc || 'lang';
+    const rows = tab === 'ozet' ? ozetRows()
+      : tab === 'yol' ? yolRows(disc)
+      : tespitRows();
+
+    return K.Grid(html`
+      ${K.Span(12, K.Toolbar({
+        tabs:K.Subtabs({ value:tab, act:'pick-tab', aria:'Merdiven bölümleri',
+          items:TABS.map(t => ({ id:t.id, label:t.label })) }),
+        actions:when(tab !== 'ozet', () => K.Select({ id:'lad-disc', value:disc,
+          change:'pick-disc-sel', aria:'Disiplin seç',
+          options:ESP.DISCIPLINES.map(x => ({ value:x.id, label:x.label })) })),
+      }))}
+      ${K.Span(12, K.Ledger(() => rows))}`);
+  }
+
+  const handle = {
+    async 'pick-tab'(el){ S.ui.ladderTab = el.dataset.tab; ESP.App.render(); },
+
+    async 'pick-disc'(el){
+      S.ui.curDisc = el.dataset.id;
+      S.ui.ladderTab = 'yol';
+      ESP.App.render();
+    },
+
+    async 'save-placement'(el){
+      const disc = el.dataset.id;
+      const cevaplar = {};
+      ESP.PLACEMENT.questions.forEach(q => {
+        const node = document.getElementById('pl-' + q.id);
+        const v = node ? node.value : '';
+        if(v !== '') cevaplar[q.id] = Number(v);
+      });
+      const prefs = Object.assign({}, S.prefs || {});
+      prefs.placement = Object.assign({}, prefs.placement || {});
+      prefs.placement[disc] = cevaplar;
+      await ESP.Model.savePrefs(prefs);
+      ESP.UI.toast('Tahmin kaydedildi — hiçbir kapı açılmadı');
+      ESP.App.render();
+    },
+  };
+
+  const change = {
+    async 'pick-disc-sel'(el){ S.ui.curDisc = el.value; ESP.App.render(); },
+  };
+
+  return {
+    id:'ladder',
+    title:'Merdiven',
+    headline(){
+      const ov = C().overall();
+      if(ov.cert === 'missing') return 'Merdiven henüz başlamadı.';
+      const olc = ESP.DISCIPLINES.map(d => C().nextGate(d.id))
+        .filter(g => g && g.action === 'measure').length;
+      if(olc) return olc + ' kapı ölçülemiyor.';
+      return 'Ölçülmüş üretim «' + ov.level.label + '» kademesinde.';
+    },
+    lede(){
+      return 'Kademe kişiye değil ÜRETİME verilir. Ölçüm dururken kademe de '
+           + 'durur; bu bir sınav sonucu değildir.';
+    },
+    stats(){
+      const ov = C().overall();
+      const hepsi = C().all().filter(Boolean);
+      return [
+        { value:ov.cert === 'missing' ? '—' : ov.level.short, label:'genel kademe' },
+        { value:ov.cert === 'missing' ? '—' : String(ov.mastery), unit:'%', label:'merdiven' },
+        { value:String(hepsi.filter(x => x.rank > 0).length), label:'başlamış disiplin' },
+        { value:String(ESP.DISCIPLINES.map(d => C().nextGate(d.id))
+          .filter(g => g && g.action === 'measure').length), label:'ölçülemeyen kapı' },
+      ];
+    },
+    subtitle(){
+      const ov = C().overall();
+      return ov.cert === 'missing' ? 'ölçüm yok' : ov.level.label;
+    },
     actions(){ return ''; },
     render, handle, change,
   };
@@ -17366,15 +20530,25 @@ ESP.App = (function(){
   const SECTIONS = [
     { id:'gunluk', num:'01', icon:'pulse', label:'Günlük',
       note:'Günün pratiğini gir, karşılığını gör',
-      views:[{ route:'today', label:'Bugün', icon:'pulse' }] },
+      views:[
+        { route:'today',  label:'Bugün',    icon:'pulse' },
+        { route:'ladder', label:'Merdiven', icon:'chart' },
+      ] },
 
     { id:'dil', num:'02', icon:'cards', label:'Dil',
       note:'Kelime, aralıklı tekrar ve shadowing',
       views:[{ route:'lang', label:'Dil Stüdyosu', icon:'cards' }] },
 
-    { id:'felsefe', num:'03', icon:'socratic', label:'Felsefe',
-      note:'Tez, itiraz ve safsata denetimi',
-      views:[{ route:'symposium', label:'Sempozyum', icon:'socratic' }] },
+    /* Felsefe ile tarih ayni bolumde durur ve bu bir yerlestirme kolayligi
+       degil bir iddiadir: ikisi de ayni kasi calistirir — oncul ile sonucu
+       ayirmak. Dokuzuncu bir serit telefonda okunmuyordu; bu birlestirme
+       hem duzeni hem sayfayi kurtardi. */
+    { id:'dusunce', num:'03', icon:'socratic', label:'Düşünce',
+      note:'Tez, itiraz, kronoloji ve kaynak eleştirisi',
+      views:[
+        { route:'symposium', label:'Sempozyum', icon:'socratic' },
+        { route:'history',   label:'Kronoloji', icon:'book' },
+      ] },
 
     { id:'ses', num:'04', icon:'wave', label:'Ses',
       note:'Gitar metronomu ve diksiyon',

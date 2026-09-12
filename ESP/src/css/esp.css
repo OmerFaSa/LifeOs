@@ -33,7 +33,7 @@
    Durum renkleri (ok/warn/danger) buna KARISMAZ. */
 :root[data-section="gunluk"]  { --sec-base:#2F6B52; }  /* adaçayı */
 :root[data-section="dil"]     { --sec-base:#2F5A8A; }  /* mürekkep mavisi */
-:root[data-section="felsefe"] { --sec-base:#6B3F63; }  /* erik */
+:root[data-section="dusunce"] { --sec-base:#6B3F63; }  /* erik */
 :root[data-section="ses"]     { --sec-base:#9A4A2F; }  /* kiremit */
 :root[data-section="okuma"]   { --sec-base:#8A5A18; }  /* kehribar */
 :root[data-section="yazi"]    { --sec-base:#5E6B2A; }  /* zeytin */
@@ -45,7 +45,7 @@
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"])[data-section="gunluk"]  { --sec-base:#79C09C; }
   :root:not([data-theme="light"])[data-section="dil"]     { --sec-base:#86AEDC; }
-  :root:not([data-theme="light"])[data-section="felsefe"] { --sec-base:#C193BA; }
+  :root:not([data-theme="light"])[data-section="dusunce"] { --sec-base:#C193BA; }
   :root:not([data-theme="light"])[data-section="ses"]     { --sec-base:#DF9376; }
   :root:not([data-theme="light"])[data-section="okuma"]   { --sec-base:#D6A961; }
   :root:not([data-theme="light"])[data-section="yazi"]    { --sec-base:#AFBF74; }
@@ -54,7 +54,7 @@
 }
 :root[data-theme="dark"][data-section="gunluk"]  { --sec-base:#79C09C; }
 :root[data-theme="dark"][data-section="dil"]     { --sec-base:#86AEDC; }
-:root[data-theme="dark"][data-section="felsefe"] { --sec-base:#C193BA; }
+:root[data-theme="dark"][data-section="dusunce"] { --sec-base:#C193BA; }
 :root[data-theme="dark"][data-section="ses"]     { --sec-base:#DF9376; }
 :root[data-theme="dark"][data-section="okuma"]   { --sec-base:#D6A961; }
 :root[data-theme="dark"][data-section="yazi"]    { --sec-base:#AFBF74; }
@@ -73,6 +73,8 @@
   --agent-diction:#7A4A5E;
   --agent-reading:#8A5A18;
   --agent-writing:#4F5C24;
+  --agent-history:#5A4632;
+  --agent-memory:#3F5F63;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -82,6 +84,8 @@
     --agent-diction:#D39BB4;
     --agent-reading:#D6A961;
     --agent-writing:#AFBF74;
+    --agent-history:#C9A484;
+    --agent-memory:#8FBAC0;
   }
 }
 :root[data-theme="dark"]{
@@ -91,6 +95,8 @@
   --agent-diction:#D39BB4;
   --agent-reading:#D6A961;
   --agent-writing:#AFBF74;
+  --agent-history:#C9A484;
+  --agent-memory:#8FBAC0;
 }
 
 /* ===================================================== ekrana ozel yapilar
@@ -280,6 +286,8 @@
 .desk--demosthenes{ --desk-ink:var(--agent-diction); }
 .desk--aristoteles{ --desk-ink:var(--agent-reading); }
 .desk--montaigne{ --desk-ink:var(--agent-writing); }
+.desk--herodot{ --desk-ink:var(--agent-history); }
+.desk--mnemosyne{ --desk-ink:var(--agent-memory); }
 .desk--patron{ --desk-ink:var(--agent-patron); }
 .desk[class*="desk--"]{ border-left:3px solid var(--desk-ink, var(--border)); }
 
@@ -370,3 +378,126 @@
 @media (prefers-reduced-motion:reduce){
   .daycell, .srscard__reveal, .metro__step, .handoff{ transition:none; }
 }
+
+
+/* ===================================================== kronoloji (tarih)
+
+   Zaman seridi bir GRAFIK degildir ve oyle cizilmez. Yillar arasindaki
+   mesafeyi piksele cevirmek burada yaniltici olurdu: MO 3200 ile 1923
+   arasini olcege koymak, son iki yuzyili bir cizgiye sikistirir ve
+   kullanicinin en cok calistigi donemi gorunmez yapar.
+
+   Bunun yerine donemler ESIT genislikte kutulardir ve her kutu kendi olay
+   sayisini tasir. Olcek yil degil ILGIDIR. */
+.erastrip{
+  display:grid; gap:var(--sp-2);
+  grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+}
+.eracell{
+  display:flex; flex-direction:column; gap:2px; align-items:flex-start;
+  padding:var(--sp-3); text-align:left; font:inherit; cursor:pointer;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border); border-radius:var(--radius);
+}
+.eracell:hover{ background:var(--surface-hover); }
+.eracell.is-active{ border-color:var(--sec); box-shadow:inset 0 0 0 1px var(--sec); }
+.eracell.is-empty{ opacity:.62; border-style:dashed; }
+.eracell__label{ font-weight:600; font-size:var(--fs-sm); }
+.eracell__span{ font-size:var(--fs-xs); color:var(--text-3); }
+.eracell__n{ margin-top:var(--sp-1); font-size:var(--fs-lg); color:var(--text-2); }
+.eranote{ margin-top:var(--sp-3); padding-top:var(--sp-3); border-top:1px solid var(--rule); }
+.eranote p{ margin:0 0 var(--sp-2); }
+
+.evrow{
+  display:flex; gap:var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.evrow__year{
+  flex:0 0 7ch; text-align:right; color:var(--text-2);
+  font-variant-numeric:tabular-nums; font-size:var(--fs-sm);
+}
+.evrow__body{ flex:1 1 auto; min-width:0; }
+.evrow__body p{ margin:2px 0 0; }
+.evrow__meta{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+  margin-top:var(--sp-2);
+}
+
+.contemp{
+  margin-top:var(--sp-3); padding:var(--sp-3);
+  background:var(--surface-2, var(--surface)); border-radius:var(--radius);
+}
+.contemp__list{ list-style:none; margin:var(--sp-2) 0 var(--sp-3); padding:0; }
+.contemp__list li{
+  display:flex; gap:var(--sp-3); align-items:baseline;
+  padding:2px 0; font-size:var(--fs-sm);
+}
+.contemp__list .num{ flex:0 0 7ch; text-align:right; color:var(--text-3); }
+
+.srcrow{ padding:var(--sp-3) 0; border-bottom:1px solid var(--rule); }
+.srcrow__head{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2); }
+
+.critique{ margin-top:var(--sp-3); display:grid; gap:var(--sp-3); }
+.critique__q label{ display:block; }
+.critique__q p{ margin:0 0 var(--sp-1); }
+
+/* Zincir: halkalar arasindaki sira GORSEL olarak da bir siradir, bu yuzden
+   sol kenardaki cizgi kesintisizdir. Halkanin turu solda yazar; renk
+   TASIMAZ — tur bir durum degil bir siniftir. */
+.chain{ list-style:none; margin:var(--sp-3) 0 0; padding:0 0 0 var(--sp-3);
+  border-left:2px solid var(--rule); }
+.chain__link{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2); align-items:baseline;
+  padding:var(--sp-2) 0;
+}
+.chain__kind{
+  flex:0 0 auto; font-size:var(--fs-xs); text-transform:uppercase;
+  letter-spacing:.05em; color:var(--text-3);
+}
+.chain__text{ flex:1 1 18ch; min-width:0; }
+
+/* ========================================================= merdiven
+
+   Kademe kutusu bir ROZET degildir: parlamaz, altin kenar tasimaz, kutlama
+   yapmaz. Bir konum gosterir, o kadar. */
+.ladders{
+  display:grid; gap:var(--sp-3);
+  grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+}
+.ladcard{
+  display:flex; flex-direction:column; gap:var(--sp-2); align-items:stretch;
+  padding:var(--sp-3); text-align:left; font:inherit; cursor:pointer;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border); border-radius:var(--radius);
+}
+.ladcard:hover{ background:var(--surface-hover); }
+.ladcard.is-active{ border-color:var(--sec); box-shadow:inset 0 0 0 1px var(--sec); }
+.ladcard__head{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--sp-2); }
+.ladcard__rank{ font-size:var(--fs-sm); color:var(--text-3); letter-spacing:.08em; }
+.ladcard__level{ font-size:var(--fs-sm); color:var(--text-2); }
+.ladcard__bar{ display:block; height:4px; background:var(--rule); border-radius:2px; overflow:hidden; }
+.ladcard__fill{ display:block; height:100%; background:var(--sec); }
+.ladcard__meta{ font-size:var(--fs-xs); color:var(--text-3); }
+
+/* Kapi listesi. Uc durum, uc isaret: gecildi (✓), kaldi (·), olculemedi (?).
+   Ucuncu isaret bu sistemin en onemli isaretidir ve silinmemelidir. */
+.gates{ list-style:none; margin:0; padding:0; }
+.gate{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2); align-items:baseline;
+  padding:var(--sp-2) 0; border-bottom:1px solid var(--rule);
+}
+.gate__mark{ flex:0 0 1.4em; text-align:center; color:var(--text-3); }
+.gate--pass .gate__mark{ color:var(--ok, var(--text-2)); }
+.gate--unknown{ opacity:.78; }
+.gate__label{ flex:1 1 14ch; min-width:0; }
+.gate__why{ flex:1 1 14ch; min-width:0; font-size:var(--fs-sm); color:var(--text-3); }
+
+.studylist{ margin:0; padding-left:1.1em; }
+.studylist li{ margin:2px 0; }
+
+.step__cols{ display:grid; gap:var(--sp-4); grid-template-columns:1fr; }
+@media (min-width:760px){
+  .step__cols{ grid-template-columns:1fr 1fr; }
+}
+.step--done .lrow__label{ opacity:.7; }
+.step--ahead .step__cols{ opacity:.72; }

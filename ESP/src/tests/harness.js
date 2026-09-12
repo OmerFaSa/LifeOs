@@ -158,6 +158,7 @@ ESP.Test = (function(){
     S.prefs = ESP.Model.defaultPrefs();
     S.days = {}; S.cards = []; S.args = []; S.notes = []; S.books = [];
     S.pieces = []; S.recordings = []; S.drafts = []; S.goals = [];
+    S.events = []; S.sources = []; S.chains = [];
     S.office = null; S.officeChats = {}; S.officeMeetings = [];
     S.officeBriefings = {}; S.journal = {};
     S.decisions = [];
@@ -172,6 +173,8 @@ ESP.Test = (function(){
       readTab:'notlar', noteQuery:'', noteOpen:null, conceptFilter:null,
       writeTab:'taslaklar', draftOpen:null,
       analyticsTab:'radar',
+      histTab:'serit', eventOpen:null, sourceOpen:null, chainOpen:null,
+      histEra:'all', histQuery:'', curDisc:null, ladderTab:'ozet',
       officeAgent:'patron', officeDesk:null, officePerAgent:false,
       meetingAgenda:0, meetingOpen:null, guideTab:'kullanim',
       profileOpen:null, quickOpen:false,
@@ -247,6 +250,30 @@ ESP.Test = (function(){
     return p;
   }
 
+  /* Tarih: pushEvent(1071, 'Malazgirt', { kind:'siyasi', region:'anadolu' }) */
+  function pushEvent(year, title, patch){
+    const e = ESP.Model.newEvent(Object.assign({ year, title }, patch || {}));
+    ESP.S.events.push(e);
+    ESP.S.events.sort((a, b) => (a.year || 0) - (b.year || 0));
+    return e;
+  }
+
+  function pushSource(title, kind, patch){
+    const s = ESP.Model.newSource(Object.assign({ title, kind:kind || 'secondary' },
+      patch || {}));
+    ESP.S.sources.push(s);
+    return s;
+  }
+
+  /* Zincir: pushChain(eventId, [{ kind:'yapisal', text:'...' }]) */
+  function pushChain(eventId, links, patch){
+    const c = ESP.Model.newChain(Object.assign({ eventId,
+      links:(links || []).map((l, i) => Object.assign({ id:'l' + i, kind:'yapisal',
+        text:'', sourceId:null }, l)) }, patch || {}));
+    ESP.S.chains.push(c);
+    return c;
+  }
+
   /* Arguman */
   function pushArgument(thesis, objections){
     const a = ESP.Model.newArgument({ thesis,
@@ -258,5 +285,6 @@ ESP.Test = (function(){
   return { describe, it, expect, run, mockStore, resetState, testProfile,
     withToday, withTodayAsync,
     pushSession, pushCard, pushBook, pushNote, pushPiece, pushArgument,
+    pushEvent, pushSource, pushChain,
     suites, realStore };
 })();

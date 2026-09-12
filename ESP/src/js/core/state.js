@@ -48,6 +48,10 @@ ESP.S = {
   drafts:[],           // yazi taslaklari
   goals:[],            // zamana bagli hedefler
 
+  events:[],           // kronolojiye yerlestirilmis tarih olaylari
+  sources:[],          // elestirilmis tarih kaynaklari
+  chains:[],           // nedensellik zincirleri
+
   office:null,         // ofis ayarlari (saglayici, model, ajan basina secim)
   officeChats:{},      // agentId -> mesajlar
   officeMeetings:[],   // toplanti tutanaklari
@@ -83,6 +87,14 @@ ESP.S = {
     writeTab:'taslaklar',   // taslaklar | olcum
     draftOpen:null,
     analyticsTab:'radar',   // radar | seriler | rapor
+    histTab:'serit',        // serit | olaylar | kaynaklar | zincir | calisma
+    eventOpen:null,
+    sourceOpen:null,
+    chainOpen:null,
+    histEra:'all',
+    histQuery:'',
+    curDisc:null,           // mufredat ekraninda acik disiplin
+    ladderTab:'ozet',       // ozet | yol | tespit
     officeAgent:'patron',
     officeDesk:null,
     officePerAgent:false,
@@ -671,6 +683,191 @@ ESP.Model = (function(){
       .sort((a, b) => a.date < b.date ? -1 : 1);
   }
 
+  /* ----------------------------------------------------------------- tarih
+
+     Uc kayit turu ve aralarindaki sira:
+
+       events   bir olay — yil, donem, alan, bolge
+       sources  bir kaynak ve o kaynaga sorulan sekiz soru
+       chains   bir olayin neden zinciri; halkalari kaynaga baglanir
+
+     Ayrim kasitlidir: bir olayi BILMEK (event) ile onu ACIKLAYABILMEK
+     (chain) ve aciklamayi KANITLAYABILMEK (source) ayri islerdir. Tarih
+     ogrenmenin cokme noktasi ucunu tek sey sanmaktir. */
+
+  function newEvent(patch){
+    const e = Object.assign({
+      id:U.uid('ev'),
+      title:'', year:null, era:null,
+      kind:'siyasi',              // ESP.EVENT_KINDS
+      region:'dunya',             // ESP.REGIONS
+      why:'', note:'',
+      sourceIds:[],
+      createdAt:new Date().toISOString(),
+    }, patch || {});
+    /* Donem yildan TURETILIR, kullanicidan sorulmaz: ayni yil iki donemde
+       olamaz ve elle girilen donem zamanla yanlis kalir. */
+    if(typeof e.year === 'number' && isFinite(e.year)){
+      const d = ESP.eraOf(e.year);
+      e.era = d ? d.id : null;
+    }else{
+      e.year = null;
+      e.era = null;
+    }
+    return e;
+  }
+
+  function normEvent(doc){
+    const e = obj(doc);
+    return Object.assign(newEvent(), e, {
+      sourceIds:arr(e.sourceIds),
+      year:typeof e.year === 'number' && isFinite(e.year) ? e.year : null,
+      era:(typeof e.year === 'number' && isFinite(e.year))
+        ? ((ESP.eraOf(e.year) || {}).id || null) : null,
+    });
+  }
+
+  async function saveEvent(rec){
+    const e = normEvent(rec);
+    if(!String(e.title || '').trim()) return { ok:false, error:'Olayın adı boş olamaz.' };
+    if(e.year == null) return { ok:false, error:'Yıl girilmeden olay kronolojiye giremez.' };
+    const i = S.events.findIndex(x => x.id === e.id);
+    if(i >= 0) S.events[i] = e; else S.events.push(e);
+    S.events.sort((a, b) => (a.year || 0) - (b.year || 0));
+    await ESP.Store.set('events/' + e.id, e);
+    return { ok:true, event:e };
+  }
+
+  async function deleteEvent(id){
+    S.events = S.events.filter(e => e.id !== id);
+    /* Zincirlerin bu olaya isaret eden halkalari da kalkar. */
+    const etkilenen = S.chains.filter(c => c.eventId === id);
+    for(const c of etkilenen){ await deleteChain(c.id); }
+    await ESP.Store.remove('events/' + id);
+  }
+
+  function newSource(patch){
+    return Object.assign({
+      id:U.uid('src'),
+      title:'', author:'', year:null,
+      kind:'secondary',            // ESP.SOURCE_KINDS
+      school:null,                 // ESP.HISTORIOGRAPHY
+      answers:{},                  // ESP.SOURCE_CRITIQUE id -> cevap metni
+      verdict:'',                  // kullanicinin kendi hukmu
+      createdAt:new Date().toISOString(),
+    }, patch || {});
+  }
+
+  function normSource(doc){
+    const s = obj(doc);
+    return Object.assign(newSource(), s, { answers:obj(s.answers) });
+  }
+
+  /* Kaynak elestirisinin ne kadari yapilmis. Cevapsiz soru SIFIR degil
+     EKSIKTIR: yuzde degil "8 sorudan 3'u" biciminde gosterilir. */
+  function critiqueDepth(src){
+    const a = obj(src && src.answers);
+    const cevapli = (ESP.SOURCE_CRITIQUE || [])
+      .filter(q => String(a[q.id] || '').trim()).length;
+    return { answered:cevapli, total:(ESP.SOURCE_CRITIQUE || []).length };
+  }
+
+  async function saveSource(rec){
+    const s = normSource(rec);
+    if(!String(s.title || '').trim()) return { ok:false, error:'Kaynağın adı boş olamaz.' };
+    const i = S.sources.findIndex(x => x.id === s.id);
+    if(i >= 0) S.sources[i] = s; else S.sources.unshift(s);
+    await ESP.Store.set('sources/' + s.id, s);
+    return { ok:true, source:s };
+  }
+
+  async function deleteSource(id){
+    S.sources = S.sources.filter(s => s.id !== id);
+    for(const e of S.events.filter(e => (e.sourceIds || []).indexOf(id) >= 0)){
+      e.sourceIds = e.sourceIds.filter(x => x !== id);
+      await ESP.Store.set('events/' + e.id, e);
+    }
+    for(const c of S.chains){
+      const once = (c.links || []).length;
+      c.links = (c.links || []).map(l => l.sourceId === id
+        ? Object.assign({}, l, { sourceId:null }) : l);
+      if(once) await ESP.Store.set('chains/' + c.id, c);
+    }
+    await ESP.Store.remove('sources/' + id);
+  }
+
+  function newChain(patch){
+    return Object.assign({
+      id:U.uid('ch'),
+      eventId:null, question:'',
+      links:[],                    // [{ id, kind, text, sourceId }]
+      school:null,
+      note:'',
+      createdAt:new Date().toISOString(),
+      updatedAt:new Date().toISOString(),
+    }, patch || {});
+  }
+
+  function normChain(doc){
+    const c = obj(doc);
+    return Object.assign(newChain(), c, {
+      links:arr(c.links).map(l => ({
+        id:l.id || U.uid('l'), kind:l.kind || 'yapisal',
+        text:l.text || '', sourceId:l.sourceId || null,
+      })),
+    });
+  }
+
+  /* Bir zincir "tamam" sayilmaz — yalnizca DENGELI ya da dengesiz olur.
+     Yalnizca tetikleyiciden olusan bir zincir tarihin en yaygin hatasidir
+     ("savas suikastla cikti"); sistem bunu yargilamaz, gosterir. */
+  function chainBalance(chain){
+    const l = arr(chain && chain.links);
+    const turler = {};
+    l.forEach(x => { turler[x.kind] = (turler[x.kind] || 0) + 1; });
+    const yapisal = (turler.yapisal || 0) + (turler.kurumsal || 0);
+    const kaynakli = l.filter(x => x.sourceId).length;
+    return {
+      links:l.length, kinds:turler,
+      structural:yapisal,
+      sourced:kaynakli,
+      balanced:l.length >= 3 && yapisal >= 1,
+      why:!l.length ? 'Zincirde halka yok.'
+        : (yapisal ? null : 'Zincirde yapısal ya da kurumsal bir koşul yok: '
+            + 'yalnızca kıvılcım var, zemin yok.'),
+    };
+  }
+
+  async function saveChain(rec){
+    const c = normChain(rec);
+    if(!c.eventId) return { ok:false, error:'Zincir bir olaya bağlanmadan kaydedilmez.' };
+    c.updatedAt = new Date().toISOString();
+    const i = S.chains.findIndex(x => x.id === c.id);
+    if(i >= 0) S.chains[i] = c; else S.chains.unshift(c);
+    await ESP.Store.set('chains/' + c.id, c);
+    return { ok:true, chain:c };
+  }
+
+  async function deleteChain(id){
+    S.chains = S.chains.filter(c => c.id !== id);
+    await ESP.Store.remove('chains/' + id);
+  }
+
+  /* Tohum olaylari kronolojiye tasir. Ayni baslik ve yil ikinci kez
+     eklenmez: tohum iki kez basilirsa kronoloji sisirilir ve "150 olay"
+     kapisi emeksiz acilirdi. */
+  async function seedEvents(list){
+    const kaynak = list || ESP.SEED_EVENTS || [];
+    let eklenen = 0, atlanan = 0;
+    for(const t of kaynak){
+      const var_ = S.events.some(e => e.year === t.year && U.norm(e.title) === U.norm(t.title));
+      if(var_){ atlanan++; continue; }
+      const res = await saveEvent(newEvent(t));
+      if(res.ok) eklenen++;
+    }
+    return { added:eklenen, skipped:atlanan };
+  }
+
   /* --------------------------------------------------------------- karar */
 
   async function saveDecision(row){
@@ -766,6 +963,11 @@ ESP.Model = (function(){
     S.goals = ((await ESP.Store.list('goals')) || []).map(g => Object.assign(newGoal(), g));
     S.decisions = ((await ESP.Store.list('decisions')) || []);
 
+    S.events = ((await ESP.Store.list('events')) || []).map(normEvent)
+      .sort((a, b) => (a.year || 0) - (b.year || 0));
+    S.sources = ((await ESP.Store.list('sources')) || []).map(normSource);
+    S.chains = ((await ESP.Store.list('chains')) || []).map(normChain);
+
     S.storeHealth = ESP.Store.health();
     S.ready = true;
   }
@@ -790,6 +992,10 @@ ESP.Model = (function(){
     newRecording, saveRecording, deleteRecording,
     /* yazi */
     newDraft, saveDraft, deleteDraft,
+    /* tarih */
+    newEvent, saveEvent, deleteEvent, seedEvents,
+    newSource, saveSource, deleteSource, critiqueDepth,
+    newChain, saveChain, deleteChain, chainBalance,
     /* hedef ve karar */
     newGoal, saveGoal, deleteGoal, openGoals,
     saveDecision, closeDecision, openDecisions,

@@ -29,15 +29,25 @@ ESP.App = (function(){
   const SECTIONS = [
     { id:'gunluk', num:'01', icon:'pulse', label:'Günlük',
       note:'Günün pratiğini gir, karşılığını gör',
-      views:[{ route:'today', label:'Bugün', icon:'pulse' }] },
+      views:[
+        { route:'today',  label:'Bugün',    icon:'pulse' },
+        { route:'ladder', label:'Merdiven', icon:'chart' },
+      ] },
 
     { id:'dil', num:'02', icon:'cards', label:'Dil',
       note:'Kelime, aralıklı tekrar ve shadowing',
       views:[{ route:'lang', label:'Dil Stüdyosu', icon:'cards' }] },
 
-    { id:'felsefe', num:'03', icon:'socratic', label:'Felsefe',
-      note:'Tez, itiraz ve safsata denetimi',
-      views:[{ route:'symposium', label:'Sempozyum', icon:'socratic' }] },
+    /* Felsefe ile tarih ayni bolumde durur ve bu bir yerlestirme kolayligi
+       degil bir iddiadir: ikisi de ayni kasi calistirir — oncul ile sonucu
+       ayirmak. Dokuzuncu bir serit telefonda okunmuyordu; bu birlestirme
+       hem duzeni hem sayfayi kurtardi. */
+    { id:'dusunce', num:'03', icon:'socratic', label:'Düşünce',
+      note:'Tez, itiraz, kronoloji ve kaynak eleştirisi',
+      views:[
+        { route:'symposium', label:'Sempozyum', icon:'socratic' },
+        { route:'history',   label:'Kronoloji', icon:'book' },
+      ] },
 
     { id:'ses', num:'04', icon:'wave', label:'Ses',
       note:'Gitar metronomu ve diksiyon',

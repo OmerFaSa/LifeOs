@@ -170,6 +170,54 @@ ESP.Office = (function(){
     };
   }
 
+  /* Tarih masasi. Uc eksen ayri durur ve tek puana toplanmaz: hangi
+     eksenin zayif oldugunu gizleyen bir sayi, o ekseni calistirmaz. */
+  function historyBrief(){
+    const st = ESP.Chrono.status();
+    const h = ESP.Intellect.hoursOf('history', 14);
+    const lv = ESP.Curriculum.levelOf('history');
+    return {
+      agent:'herodot',
+      events:{ value:st.events, cert:st.cert,
+        firstYear:st.firstYear, lastYear:st.lastYear },
+      coverage:{ eras:st.eras, regions:st.regions, kinds:st.kinds, gaps:st.gaps.length },
+      sources:st.sources,
+      chains:st.chains,
+      retention:st.retention,
+      level:{ rank:lv ? lv.rank : 0, label:lv ? lv.level.label : null,
+        cert:lv ? lv.cert : 'missing' },
+      practice:{ minutes:h.minutes, enteredDays:h.enteredDays, windowDays:h.windowDays,
+        cert:h.cert },
+    };
+  }
+
+  /* Koc masasi. Icerige HIC bakmaz: yalnizca «tuttun mu» ve «siradaki kapi
+     hangisi» sorularina bakar. Bu ayrim sayesinde koc, bir disiplinin
+     uzmaniyla asla celismez — ayni seyi olcmuyorlar. */
+  function coachBrief(){
+    const ov = ESP.Curriculum.overall();
+    const d = ESP.SRS.deckStatus();
+    const kapilar = ESP.DISCIPLINES.map(x => {
+      const g = ESP.Curriculum.nextGate(x.id);
+      const lv = ESP.Curriculum.levelOf(x.id);
+      return {
+        disc:x.id, label:x.label,
+        rank:lv ? lv.rank : 0, mastery:lv ? lv.mastery : 0, cert:lv ? lv.cert : 'missing',
+        gate:g ? { label:g.gate.label, action:g.action, rank:g.rank } : null,
+      };
+    });
+    return {
+      agent:'mnemosyne',
+      overall:{ rank:ov.rank, label:ov.level ? ov.level.label : null,
+        mastery:ov.mastery, cert:ov.cert },
+      due:{ value:d.due, overdue:d.overdue, maxOverdueDays:d.maxOverdueDays, cert:'measured' },
+      retention:{ value:d.retention.value, cert:d.retention.cert, n:d.retention.n },
+      gates:kapilar,
+      /* Olculemeyen kapi ayri sayilir: "calis" ile "olc" ayri islerdir. */
+      unmeasured:kapilar.filter(k => k.gate && k.gate.action === 'measure').length,
+    };
+  }
+
   function patronBrief(){
     const next = ESP.Planner.nextAction();
     const ehs = ESP.Intellect.ehs(14);
@@ -178,6 +226,7 @@ ESP.Office = (function(){
       agent:'patron',
       lang:langBrief(), philo:philoBrief(), music:musicBrief(),
       diction:dictionBrief(), reading:readingBrief(), writing:writingBrief(),
+      history:historyBrief(), coach:coachBrief(),
       ehs:{ value:ehs.value, cert:ehs.cert, windowDays:ehs.windowDays,
         enteredDays:ehs.enteredDays, untouched:ehs.untouched },
       balance:{ cert:denge.cert, skewed:denge.skewed,
@@ -186,6 +235,11 @@ ESP.Office = (function(){
       streak:ESP.Model.streak(),
       cross:ESP.Planner.crossFindings().map(c => ({ id:c.id, from:c.from, to:c.to, text:c.text })),
       next:{ rank:next.rank, title:next.title, why:next.why, agent:next.agent },
+      level:(function(){
+        const ov = ESP.Curriculum.overall();
+        return { rank:ov.rank, label:ov.level ? ov.level.label : null,
+          mastery:ov.mastery, cert:ov.cert };
+      })(),
       openDecisions:ESP.Model.openDecisions().length,
     };
   }
@@ -193,6 +247,7 @@ ESP.Office = (function(){
   const BRIEFS = {
     polyglot:langBrief, socrates:philoBrief, maestro:musicBrief,
     demosthenes:dictionBrief, aristoteles:readingBrief, montaigne:writingBrief,
+    herodot:historyBrief, mnemosyne:coachBrief,
     patron:patronBrief,
   };
 
@@ -285,6 +340,43 @@ ESP.Office = (function(){
       if(brf.readability.cert !== 'missing'){
         cumle.push('Son taslağın okunabilirliği ' + brf.readability.value + ' (' + brf.readability.band + '), cümle başına ' + U.fmtNum(brf.readability.wordsPerSentence) + ' kelime.');
       }
+      return cumle.join(' ');
+    }
+
+    if(agentId === 'herodot'){
+      if(brf.events.cert === 'missing'){
+        return 'Kronoloji boş. Tohum listesinde ' + (ESP.SEED_EVENTS || []).length
+          + ' dönüm noktası hazır; şeridi doldurmak oradan başlayabilir.';
+      }
+      cumle.push(brf.events.value + ' olay var (' + ESP.yearLabel(brf.events.firstYear)
+        + ' – ' + ESP.yearLabel(brf.events.lastYear) + ').');
+      cumle.push(brf.coverage.eras.covered + '/' + brf.coverage.eras.total + ' dönem, '
+        + brf.coverage.kinds.covered + '/' + brf.coverage.kinds.total + ' alan kapsandı.');
+      if(brf.chains.total){
+        cumle.push(brf.chains.total + ' neden zinciri var'
+          + (brf.chains.unbalanced ? ', ' + brf.chains.unbalanced + ' tanesinde yapısal koşul yok' : '')
+          + (brf.chains.unsourced ? '; ' + brf.chains.unsourced + ' halka kaynaksız' : '') + '.');
+      }else{
+        cumle.push('Hiçbir olay neden zinciriyle açıklanmamış: liste var, tarih yok.');
+      }
+      if(brf.sources.total){
+        cumle.push(brf.sources.total + ' kaynağın ' + brf.sources.primary + ' tanesi birincil.');
+      }
+      return cumle.join(' ');
+    }
+
+    if(agentId === 'mnemosyne'){
+      if(brf.overall.cert === 'missing'){
+        return 'Hiçbir disiplinde ölçülmüş üretim yok. Merdiven ilk ölçümle başlar; '
+          + 'kademe kişiye değil üretime verilir.';
+      }
+      cumle.push('Ölçülmüş üretim genel olarak «' + brf.overall.label + '» kademesinde '
+        + '(merdivenin %' + brf.overall.mastery + '\'i).');
+      if(brf.due.overdue) cumle.push(brf.due.overdue + ' kartın vadesi geçti.');
+      if(brf.unmeasured) cumle.push(brf.unmeasured + ' kapı ölçülemiyor: '
+        + 'orada istenen şey çalışmak değil ölçmek.');
+      const yakin = (brf.gates || []).filter(g => g.gate && g.gate.action === 'work')[0];
+      if(yakin) cumle.push(yakin.label + ' tarafında sıradaki kapı: ' + yakin.gate.label + '.');
       return cumle.join(' ');
     }
 
@@ -561,6 +653,27 @@ ESP.Office = (function(){
         + U.fmtNum(Math.round(dr.value * 10) / 10) + ' revizyon düşüyor.', 'writing');
     }
 
+    /* --- tarih --- */
+    ESP.Chrono.findings().forEach(f => {
+      const tur = f.tone === 'danger' ? 'blocked' : (f.tone === 'warn' ? 'overdue' : 'info');
+      add('herodot', tur, f.text, 'history');
+    });
+
+    /* --- koc --- */
+    ESP.DISCIPLINES.forEach(x => {
+      const g = ESP.Curriculum.nextGate(x.id);
+      if(g && g.action === 'measure'){
+        add('mnemosyne', 'info', x.label + ': «' + g.gate.label + '» kapısı ölçülemiyor. '
+          + 'İstenen şey çalışmak değil ölçmek.', x.route);
+      }
+    });
+    (function(){
+      const ov = ESP.Curriculum.overall();
+      if(ov.cert !== 'missing' && ov.mastery >= 100){
+        add('mnemosyne', 'win', 'Bütün merdivenlerin kapıları geçilmiş görünüyor.', 'analytics');
+      }
+    })();
+
     /* --- patron --- */
     const denge = ESP.Planner.balance(7);
     if(denge.skewed){
@@ -640,6 +753,17 @@ ESP.Office = (function(){
 
     const ss = ESP.Intellect.syntopic();
     if(ss.total - ss.linked >= 3) add('synthesis', 50, (ss.total - ss.linked) + ' bağsız not.');
+
+    const kapi = ESP.DISCIPLINES
+      .map(x => ESP.Curriculum.nextGate(x.id))
+      .filter(g => g && g.action === 'measure');
+    if(kapi.length) add('gate', 55, kapi.length + ' kapı ölçülemiyor.');
+
+    const tarih = ESP.Chrono.status();
+    if(tarih.cert !== 'missing'
+       && (tarih.kinds.empty.length || tarih.eras.empty.length)){
+      add('coverage', 45, (tarih.eras.empty.concat(tarih.kinds.empty))[0] + ' boş.');
+    }
 
     add('review', 10, 'Haftalık gözden geçirme.');
     return out.sort((a, b) => b.score - a.score);
@@ -730,6 +854,7 @@ ESP.Office = (function(){
   return {
     defaults, settings, saveSettings, cfgFor, ready,
     brief, langBrief, philoBrief, musicBrief, dictionBrief, readingBrief,
+    historyBrief, coachBrief,
     writingBrief, patronBrief,
     ruleText, systemPrompt, validate, ask, historyFor, HAFIZA_TUR,
     notes, handoffs, handoffsFor, agendaCandidates, dailyBriefing, runMeeting,

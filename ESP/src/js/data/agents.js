@@ -1,4 +1,4 @@
-/* Ofis kadrosu — yedi ajan: alti uzman + Patron.
+/* Ofis kadrosu — dokuz ajan: yedi uzman, bir koc ve Patron.
 
    Orijinal spesifikasyonun en buyuk eksigi buydu: alti uzman vardi ama biri
    celiskiyi cozmuyor, gundemi secmiyor, haftalik raporu yazmiyordu. AYS ve
@@ -15,7 +15,7 @@
    soyler. Ajan hesap yapmaz: sayilar oradan gelir, ajan yalnizca cumleye
    cevirir.
 
-   Ad secimi: alti uzmanin adi kendi disiplininin tarihinden gelir. Bu bir
+   Ad secimi: uzmanlarin adi kendi disiplininin tarihinden gelir. Bu bir
    sus degil — kullanici "diksiyon ajani" degil "Demosthenes" der ve hangi
    masaya gittigini hatirlar. */
 
@@ -25,10 +25,11 @@ ESP.AGENTS = [
   { id:'patron', name:'Patron', role:'Baş danışman',
     color:'var(--agent-patron)', initial:'P',
     title:'Orkestrasyon',
-    scope:'Altı uzmanın raporu, çelişkilerin çözümü, haftalık rota ve sıradaki tek iş.',
+    scope:'Yedi uzmanın ve bir koçun raporu, çelişkilerin çözümü, haftalık rota, '
+        + 'merdivendeki kademe ve sıradaki tek iş.',
     notScope:'Kendi hesabını yapmaz. Skor üretmez, uzmanların skorunu kullanır.',
     brief:'patronBrief',
-    opening:'Altı masadan gelen raporu okudum. Çelişki varsa sıraya koyar, '
+    opening:'Sekiz masadan gelen raporu okudum. Çelişki varsa sıraya koyar, '
           + 'kararı gerekçesiyle söylerim.',
     redirect:'Bu soru bir uzmanın alanında; ona bağlıyorum.' },
 
@@ -102,7 +103,39 @@ ESP.AGENTS = [
           + 'uzunluk, tekrar, akış.',
     redirect:'Tezin doğruluğu Socrates\'in alanında; ona bağlıyorum.',
     owns:['writing'] },
+
+  { id:'herodot', name:'Herodot', role:'Tarih ve kaynak eleştirisi',
+    color:'var(--agent-history)', initial:'H',
+    title:'Disiplin 7',
+    scope:'Kronoloji kapsamı (dönem, bölge, alan), yüzyıl boşlukları, nedensellik '
+        + 'zincirlerinin dengesi, kaynakların birincil–ikincil dağılımı ve '
+        + 'eleştiri derinliği.',
+    notScope:'Bir olayın «doğru» yorumunu dayatmaz, güncel siyaset konuşmaz, '
+           + 'dil ya da müzik alanına girmez.',
+    brief:'historyBrief',
+    opening:'Kaç olay bildiğin değil, kaçını kaynağıyla açıklayabildiğin sayılır. '
+          + 'Zincirlerine ve kaynaklarına bakıyorum.',
+    redirect:'Bu bir argüman sorusu; Socrates\'e bağlıyorum.',
+    owns:['history'] },
+
+  { id:'mnemosyne', name:'Mnemosyne', short:'Mnemosyne', role:'Hafıza ve tekrar koçu',
+    color:'var(--agent-memory)', initial:'Ω',
+    title:'Koç',
+    scope:'Bütün destelerin aralıklı tekrar durumu, vadesi geçen kartlar, '
+        + 'unutma eğrisi ve merdivendeki sıradaki kapı.',
+    notScope:'İçeriğe karışmaz: bir kartın doğru olup olmadığını tartışmaz, '
+           + 'hangi kelimenin öğrenileceğine karar vermez.',
+    brief:'coachBrief',
+    opening:'Öğrendiğin şey değil, tuttuğun şey sermayedir. Vadesi geçen '
+          + 'kartlarına ve kapılarına bakıyorum.',
+    redirect:'İçerik sorusu ilgili masanın; ona bağlıyorum.',
+    owns:['curriculum'] },
 ];
+
+/* Koc masalari: bir disiplinin degil BIR ISIN sahibi olan ajanlar.
+   Mnemosyne hicbir disiplinin icerigine karismaz; butun disiplinlerin
+   ayni sorusuna bakar — «tuttun mu?» */
+ESP.COACH_IDS = ['mnemosyne'];
 
 ESP.AGENT_BY_ID = ESP.AGENTS.reduce(function(m, a){ m[a.id] = a; return m; }, {});
 
@@ -121,6 +154,11 @@ ESP.AGENDA_TYPES = [
     lead:'Okunan çok, bağlanan az. Not yığını sermaye değildir.' },
   { id:'deadline', label:'Yaklaşan hedef',
     lead:'Takvimde tarihi olan bir hedef var; plan ona göre daralıyor.' },
+  { id:'gate', label:'Kapıda bekleyen kademe',
+    lead:'Bir disiplinde merdivenin bir sonraki kapısına çok az kaldı ya da '
+       + 'kapı ölçülemiyor.' },
+  { id:'coverage', label:'Tarihte kör nokta',
+    lead:'Kronolojide kapsanmayan dönem, bölge ya da alan var.' },
   { id:'review', label:'Haftalık gözden geçirme',
-    lead:'Tıkanma yok. Altı masanın raporunu okuyup sıradaki haftayı kuruyoruz.' },
+    lead:'Tıkanma yok. Yedi masanın raporunu okuyup sıradaki haftayı kuruyoruz.' },
 ];
