@@ -81,7 +81,7 @@ function checksOf(m){
     R.S.profile.setupDone = true;
     await R.Model.saveProfile();
     try{ R.UI.closeSheet(); }catch(e){}
-    document.querySelectorAll('.sheet,.sheet-backdrop').forEach(n => n.remove());
+    document.querySelectorAll('#sheet,.overlay,.sheet,.sheet-backdrop').forEach(n => n.remove());
     document.querySelectorAll('.site').forEach(n => {
       n.removeAttribute('inert'); n.removeAttribute('aria-hidden'); });
     await R.App.render();
