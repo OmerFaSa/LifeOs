@@ -523,16 +523,28 @@ R.Screens.exams = (function(){
       const publisher = document.getElementById('ex-pub').value.trim();
       const duration = Number(document.getElementById('ex-dur').value) || tmpl.duration;
       const rows = Array.prototype.slice.call(document.querySelectorAll('#ex-tests [data-test-row]'));
-      const tests = rows.map(r => {
+      const tests = rows.map((r, i) => {
         const g = sel => r.querySelector('[data-t="'+sel+'"]').value;
-        const c = Number(g('c'))||0, w = Number(g('w'))||0, b = Number(g('b'))||0;
-        return { name:g('name')||'Test', correct:c, wrong:w, blank:b, minutes:null };
-      }).filter(t => t.correct || t.wrong || t.blank);
+        const ham = { c:g('c'), w:g('w'), b:g('b') };
+        /* HIC DOKUNULMAMIS SATIR ATILIR. Once bu bakilir: bos bir satirin
+           "boş" sayisini soru sayisindan turetmek, girilmemis bir testi
+           "kirk soru bos birakildi" diye kaydederdi. */
+        const dolu = ['c','w','b'].some(k => String(ham[k]).trim() !== '');
+        if(!dolu) return null;
+        const c = Number(ham.c)||0, w = Number(ham.w)||0;
+        /* "boş" alani BOS BIRAKILDIYSA sifir yazilmaz: sablonun soru
+           sayisindan turetilir, o da yoksa bilinmiyor kalir. */
+        const q = (tmpl && tmpl.tests[i]) ? tmpl.tests[i].q : null;
+        const bos = M.blankCertainty(c, w, ham.b, q);
+        return { name:g('name')||'Test', correct:c, wrong:w,
+          blank:bos.blank, blankCert:bos.blankCert, minutes:null };
+      }).filter(Boolean);
 
       if(!tests.length){ UI.toast('En az bir test doldurulmalı'); return; }
 
       const exam = {
-        id:U.uid('e'), date, type:tmpl.name, family:tmpl.family, kind:tmpl.kind,
+        id:U.uid('e'), date, type:tmpl.name, templateId:tmpl.id,
+        family:tmpl.family, kind:tmpl.kind,
         publisher, duration, tests, protocol:{},
         createdAt:new Date().toISOString(), analysisCompletedAt:null,
       };

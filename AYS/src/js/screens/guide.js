@@ -114,7 +114,7 @@ R.Screens.guide = (function(){
     return K.Grid([
       K.Span(8, K.Card({
         title:'2027 kritik işlemler', sub:'Sıra / panik takvimi',
-        badge:raw(UI.certainty('estimate')),
+        badge:raw(UI.provenance('estimate')),
         body:html`<div class="list">${map(R.OFFICIAL_CALENDAR, r => html`
           <div class="listitem">
             <div class="mw-150"><b class="small">${r.when}</b>

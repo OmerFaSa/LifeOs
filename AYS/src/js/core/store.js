@@ -5,7 +5,7 @@
 
 window.R = window.R || {};
 
-R.SCHEMA_VERSION = 4;
+R.SCHEMA_VERSION = 5;
 
 R.Store = (function(){
   /* Cok kullanicili kullanim: her profil kendi anahtarinda durur.

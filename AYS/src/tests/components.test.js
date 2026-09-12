@@ -197,8 +197,8 @@
       expect(typeof R.UI.rail).toBe('function');
     });
     it('certainty rozeti etiketi taşır', function(){
-      const key = Object.keys(R.CERTAINTY)[0];
-      expect(R.UI.certainty(key)).toContain(R.CERTAINTY[key].label);
+      const key = Object.keys(R.PROVENANCE)[0];
+      expect(R.UI.provenance(key)).toContain(R.PROVENANCE[key].label);
     });
     it('tagDot bilinmeyen etikette de çizer', function(){
       expect(R.UI.tagDot('YOK')).toContain('tagdot');

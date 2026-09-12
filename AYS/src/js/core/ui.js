@@ -193,8 +193,18 @@ R.UI = (function(){
     return '<span class="tagdot" style="background:'+(t ? t.color : 'var(--text-3)')+'"></span>';
   }
 
+  /* Iki ayri rozet, iki ayri soru: `provenance` bir referans tablosunun
+     nereden geldigini, `certainty` bir sayinin nasil elde edildigini
+     soyler. Ayni ekranda yan yana durabilirler. */
+  function provenance(key){
+    const c = R.PROVENANCE[key];
+    if(!c) return '';
+    return String(R.C.Badge({ label:c.label, tone:c.tone }));
+  }
+
   function certainty(key){
     const c = R.CERTAINTY[key];
+    if(!c) return '';
     return String(R.C.Badge({ label:c.label, tone:c.tone }));
   }
 
@@ -802,7 +812,7 @@ R.UI = (function(){
 
   return {
     icon, trend, motif, gauge,
-    tagDot, certainty, paretoBars,
+    tagDot, certainty, provenance, paretoBars,
     lineChart, barChart, donut, sparkline, stackBar, heatmap, legend,
     rangeBar, macroSplit,
     hint, rail, openHint, closeHint, isHintOpen,

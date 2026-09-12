@@ -65,7 +65,7 @@ R.Screens.target = (function(){
     if(!est.ok){
       return K.Card({
         title:'Tahmini sıra', hint:'rank', sub:'Kural motorunun ürettiği bant',
-        badge:raw(UI.certainty('estimate')),
+        badge:raw(UI.provenance('estimate')),
         body:K.Empty({ icon:'target', text:est.why,
           action:K.Button({ label:'Deneme ekle', size:'sm', tone:'primary',
             act:'go', data:{ 'data-route':'exams' } }) }),
@@ -80,7 +80,7 @@ R.Screens.target = (function(){
     return K.Card({
       title:'Tahmini sıra', hint:'rank',
       sub:est.samples+' tam denemenin medyanından · '+(est.kind === 'SAY' ? 'SAY' : 'yalnız TYT'),
-      badge:raw(UI.certainty('estimate')),
+      badge:raw(UI.provenance('estimate')),
       body:html`
         <div class="estimate">
           <div class="estimate__rank">${U.fmtNum(est.rankBest)} – ${U.fmtNum(est.rankWorst)}</div>
@@ -125,7 +125,7 @@ R.Screens.target = (function(){
     const p = S.profile;
     return K.Card({
       title:'OBP katkısı', hint:'obp', sub:'Diploma notu × 5, ardından × katsayı',
-      badge:raw(UI.certainty('estimate')),
+      badge:raw(UI.provenance('estimate')),
       body:html`
         ${K.Cols(2, [
           K.Field({ label:'Diploma notu',
@@ -183,7 +183,7 @@ R.Screens.target = (function(){
   function certaintyLegend(){
     return K.Span(12, html`<div class="row wrap gap-6">
       <span class="mono-label as-center">Kesinlik</span>
-      ${map(Object.keys(R.CERTAINTY), k => K.Badge({ label:R.CERTAINTY[k].label, tone:R.CERTAINTY[k].tone }))}
+      ${map(Object.keys(R.PROVENANCE), k => K.Badge({ label:R.PROVENANCE[k].label, tone:R.PROVENANCE[k].tone }))}
       ${raw(UI.hint('certainty'))}</div>`);
   }
 
@@ -199,7 +199,7 @@ R.Screens.target = (function(){
           title:'Hedef katmanları', hint:'tiers',
           sub:p.program+' — 2026 taban başarı sırası '+U.fmtNum(R.PROGRAM.refRank)
             + ' ('+R.PROGRAM.refQuota+'/'+R.PROGRAM.refQuota+' doluluk)',
-          badge:raw(UI.certainty('ref2026')),
+          badge:raw(UI.provenance('ref2026')),
           body:html`${tierTable()}
             <p class="tiny dim mt-10">Puan yerine başarı sırası izlenir; standartlaştırma nedeniyle
               aynı net ve puan farklı yıllarda farklı sıraya dönüşebilir.</p>`,
@@ -207,7 +207,7 @@ R.Screens.target = (function(){
         K.Card({
           title:'Net matrisi', hint:'net-matrix',
           sub:'Hedef bant ile son 4 tam denemenin test bazlı medyanı',
-          badge:raw(UI.certainty('coaching')),
+          badge:raw(UI.provenance('coaching')),
           body:netMatrix(),
         }),
         prefsCard(),
@@ -221,7 +221,7 @@ R.Screens.target = (function(){
         ]),
         obpCard(),
         K.Card({
-          title:'2026 sıra referansları', badge:raw(UI.certainty('ref2026')),
+          title:'2026 sıra referansları', badge:raw(UI.provenance('ref2026')),
           body:html`
             ${K.Table({ tight:true, headers:['Program', { label:'Taban sıra', num:true }],
               rows:R.RANK_REFS.map(r => [r.uni,

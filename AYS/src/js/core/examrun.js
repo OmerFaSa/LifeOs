@@ -187,11 +187,16 @@ R.ExamRun = (function(){
     const sum = summary();
     const tests = run.tests.map((t, i) => {
       const sc = (scores && scores[i]) || {};
+      const c = Number(sc.correct) || 0, w = Number(sc.wrong) || 0;
+      /* Giris formundaki kuralin aynisi: bos birakilan "boş" alani sifir
+         sayilmaz, testin soru sayisindan turetilir. */
+      const bos = R.Model.blankCertainty(c, w, sc.blank, t.q);
       return {
         name:t.name,
-        correct:Number(sc.correct) || 0,
-        wrong:Number(sc.wrong) || 0,
-        blank:Number(sc.blank) || 0,
+        correct:c,
+        wrong:w,
+        blank:bos.blank,
+        blankCert:bos.blankCert,
         minutes:Math.round(sum.perTest[i].seconds / 60),
       };
     });
