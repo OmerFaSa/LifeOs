@@ -30,32 +30,10 @@
    ezer. Ayrı dosyada durmasının sebebi budur — hangi kuralın neyi
    ezdiği tek bir yerde görünsün. */
 
-/* ---------------------------------------------------------- künye */
-
-.topbar{
-  /* Perde ve bulanıklık gider: defterde üst çubuk yüzmez, durur. */
-  background:var(--bg);
-  backdrop-filter:none;
-  border-bottom:1px solid var(--border-strong);
-  padding-block:22px 18px;
-  align-items:flex-end;
-  min-height:0;
-}
-.topbar__titles h1{
-  font-family:var(--font-serif);
-  font-size:34px; font-weight:400; letter-spacing:-.022em; line-height:1.08;
-  margin:0;
-}
-.topbar__titles p{
-  font-size:var(--fs-base); line-height:1.55; color:var(--text-2);
-  margin-top:9px; max-width:62ch;
-}
-
-/* --------------------------------------------------------- içerik */
-
-.content{ padding:0 30px 72px; }
-.content > .grid,
-.content > .stack{ padding-top:4px; }
+/* Künye, numaralı şerit ve hero artık SPİ'nin layout.css'inden
+   birebir geliyor — bu dosyada tekrar edilmez. Burada yalnız KART
+   dönüşümü kaldı: AYS'nin ekranları `C.Card` kullanır, SPİ'ninkiler
+   `C.Entry`. İkisi aynı görünmeli. */
 
 /* ---------------------------------------------------- kart → satır */
 
@@ -132,17 +110,6 @@
   letter-spacing:-.02em;
 }
 
-/* --------------------------------------------------- kenar çubuğu
-
-   Sol menü İSTENDİĞİ GİBİ DURUYOR. Yalnızca kâğıt zeminiyle uyumlu
-   hâle getirildi: aynı hairline, aynı sıcaklık. */
-.sidebar{ border-right:1px solid var(--border); }
-.sidebar__title b{ font-family:var(--font-serif); font-weight:500; letter-spacing:-.01em; }
-
 /* ------------------------------------------------------- dar ekran */
 
-@media (max-width:1059px){
-  .content{ padding-inline:20px; }
-  .topbar{ padding-inline:20px; }
-  .topbar__titles h1{ font-size:27px; }
-}
+
