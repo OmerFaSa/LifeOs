@@ -1,4 +1,4 @@
-/* Arayuz parcalari: ikonlar, rozetler, grafikler, alt sayfa ve bildirimler. */
+/* Arayuz parcalari: ikonlar, olcum gorselleri, grafikler, alt sayfa ve bildirimler. */
 
 window.R = window.R || {};
 
@@ -50,10 +50,42 @@ R.UI = (function(){
     undo:'<path d="M4 11a8 8 0 111.7 5.3"/><path d="M4 5v6h6"/>',
     shield:'<path d="M12 3.5l7 2.6v5.4c0 4-2.9 7.4-7 8.9-4.1-1.5-7-4.9-7-8.9V6.1z"/>'
       + '<path d="M9 12.2l2.2 2.2L15.2 10"/>',
-    /* Ofis gorunumu: kat plani (izgara) ile 3B oda arasindaki gecis. */
-    cube:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/>',
-    grid:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/>'
-      + '<rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
+
+    /* --- saglik alani --- */
+    heart:'<path d="M12 20.5C7 17 3.5 13.9 3.5 10.2A4.7 4.7 0 0112 7.6a4.7 4.7 0 018.5 2.6c0 3.7-3.5 6.8-8.5 10.3z"/>',
+    pulse:'<path d="M2.5 12.5h4l2-5 3.5 10 2.5-6 1.5 3h5.5"/>',
+    drop:'<path d="M12 3.2c3.4 4 5.5 6.6 5.5 9.1a5.5 5.5 0 11-11 0c0-2.5 2.1-5.1 5.5-9.1z"/>',
+    flask:'<path d="M9.5 3.5h5M10.5 3.5v6L5.4 18a2 2 0 001.7 3h9.8a2 2 0 001.7-3l-5.1-8.5v-6"/><path d="M7.6 14.5h8.8"/>',
+    meal:'<path d="M6 3.5v7a2.5 2.5 0 005 0v-7M8.5 10.5V21"/><path d="M17 3.5c-1.4 1.4-2 3.2-2 5.5 0 1.7.7 2.8 2 3.2V21"/>',
+    leaf:'<path d="M4.5 19.5C3 14 6.5 5.5 19.5 4.5c1 12-7 15.5-12.5 14"/><path d="M9 15c2.2-3.4 5-5.6 8.5-7"/>',
+    dumbbell:'<path d="M3 9.5v5M6.5 7v10M17.5 7v10M21 9.5v5M6.5 12h11"/>',
+    wallet:'<path d="M3.5 7.5A2 2 0 015.5 5.5h12A1.5 1.5 0 0119 7v.5"/><rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M16 13.5v.01"/>',
+    scale:'<path d="M12 3.5a8.5 8.5 0 018.5 8.5v7a1.5 1.5 0 01-1.5 1.5H5A1.5 1.5 0 013.5 19v-7A8.5 8.5 0 0112 3.5z"/><path d="M12 11.5l3-3.5"/>',
+    pill:'<rect x="2.8" y="8.6" width="18.4" height="6.8" rx="3.4" transform="rotate(-45 12 12)"/><path d="M8.5 8.5l7 7"/>',
+    fire:'<path d="M12 3.5c3.5 3.4 5.5 6 5.5 8.9a5.5 5.5 0 11-11 0c0-1.5.6-2.9 1.7-4.2.4 1.2 1 2 1.9 2.4C10.5 8.4 11 5.9 12 3.5z"/>',
+    bed:'<path d="M3 19v-8M3 13h18v6M7.5 10.5h3.5a2 2 0 012 2v.5"/><path d="M3 19h18"/>',
+    mic:'<rect x="9" y="2.5" width="6" height="11" rx="3"/>'
+      + '<path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/>',
+    camera:'<path d="M3.5 8.5A1.5 1.5 0 015 7h2.2l1.2-2h7.2l1.2 2H19a1.5 1.5 0 011.5 1.5v9A1.5 1.5 0 0119 19H5a1.5 1.5 0 01-1.5-1.5z"/>'
+      + '<circle cx="12" cy="12.5" r="3.4"/>',
+    file:'<path d="M7 3.5h7l5 5V19a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 016 19V5a1.5 1.5 0 011-1.5z"/>'
+      + '<path d="M13.5 3.5V9H19"/>',
+
+    /* --- gorunum --- */
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8'
+      + 'M2 12h2.5M19.5 12H22M4.2 19.8L6 18M18 6l1.8-1.8"/>',
+    moon2:'<path d="M20.5 14.8A8.6 8.6 0 019.2 3.5a8.6 8.6 0 1011.3 11.3z"/>',
+    monitor:'<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8.5 21h7M12 17v4"/>',
+    palette:'<path d="M12 3.5a8.5 8.5 0 000 17c1.2 0 1.9-.8 1.9-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2'
+      + ' 0-1 .8-1.8 1.9-1.8h1.4a4.3 4.3 0 004.3-4.3c0-3.9-3.8-6.7-8.5-6.7z"/>'
+      + '<circle cx="7.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"/>'
+      + '<circle cx="10.5" cy="7" r="1.1" fill="currentColor" stroke="none"/>'
+      + '<circle cx="15" cy="7.8" r="1.1" fill="currentColor" stroke="none"/>',
+    sliders:'<path d="M4 7h10M18 7h2M4 12h4M12 12h8M4 17h9M17 17h3"/>'
+      + '<circle cx="16" cy="7" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="15" cy="17" r="2"/>',
+    /* AYS'ye özgü iki ikon: üç boyutlu ofis ve kat planı. */
+    cube:'<path d="M12 3 3 7.5v9L12 21l9-4.5v-9L12 3Z"/><path d="M3 7.5 12 12l9-4.5"/><path d="M12 12v9"/>',
+    grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
   };
 
   function icon(name, cls){
@@ -62,16 +94,192 @@ R.UI = (function(){
       + (cls ? ' class="'+cls+'"' : '') + '>' + p + '</svg>';
   }
 
-  /* ---------- kucuk parcalar ----------
-     Not: rozet/kart/tablo gibi bilesenler artik R.C icinde tek yerde durur.
-     Burada yalnizca R.C'ye girmeyen, veriye bagli iki kucuk parca kalir. */
+
+  /* ---------- bölüm imzaları ----------
+
+     Her bölümün hero'sunda duran ince, tek renkli işaret. Süs değil:
+     bölümün NE ÖLÇTÜĞÜNÜ soyutlar ve kullanıcı sayfayı okumadan hangi
+     bölümde olduğunu çevresel görüşle anlar.
+
+     Hepsi aynı dille çizilir: 34px yükseklik, 1.5px çizgi, tek renk,
+     dolgu yok. Farklı kalınlıkta ya da renkli bir imza, tek tasarım
+     kuralını bozardı. */
+  const MOTIFS = {
+    /* Günlük — bir günün yirmi dört çentiği, biri işaretli. */
+    gunluk:function(){
+      let d = '';
+      for(let i = 0; i < 24; i++){
+        const x = i * 11 + 1;
+        const h = i % 6 === 0 ? 22 : 12;
+        d += '<line x1="' + x + '" y1="' + (28 - h) + '" x2="' + x + '" y2="28"/>';
+      }
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" aria-hidden="true">' + d
+        + '<circle cx="133" cy="7" r="3.5" fill="currentColor" stroke="none"/></svg>';
+    },
+    /* Plan — kırk haftalık şerit; faz sınırları uzun çentik, bugün işaretli. */
+    plan:function(){
+      let d = '';
+      for(let i = 0; i < 40; i++){
+        const x = i * 6.6 + 3;
+        const uzun = i % 8 === 0;
+        d += '<line x1="' + x.toFixed(1) + '" y1="' + (uzun ? 8 : 14) + '" x2="'
+          + x.toFixed(1) + '" y2="26"/>';
+      }
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" aria-hidden="true">' + d
+        + '<circle cx="16" cy="5" r="3.5" fill="currentColor" stroke="none"/></svg>';
+    },
+    /* Kayıt — video, not, kart: üç adım ve aralarındaki akış. */
+    kayit:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        + '<rect x="2" y="8" width="40" height="18" rx="3"/>'
+        + '<path d="M18 13l10 4-10 4z" fill="currentColor" stroke="none"/>'
+        + '<path d="M50 17h18" stroke-dasharray="1 6"/>'
+        + '<line x1="78" y1="11" x2="168" y2="11"/>'
+        + '<line x1="78" y1="17" x2="150" y2="17"/>'
+        + '<line x1="78" y1="23" x2="162" y2="23"/>'
+        + '<path d="M178 17h18" stroke-dasharray="1 6"/>'
+        + '<rect x="206" y="6" width="42" height="22" rx="3"/>'
+        + '<rect x="212" y="12" width="42" height="22" rx="3" opacity=".45"/></svg>';
+    },
+    /* Analiz — net eğrisi ve medyan bandı. */
+    analiz:function(){
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        + '<rect x="2" y="13" width="261" height="9" rx="4" fill="currentColor"'
+        + ' stroke="none" opacity=".16"/>'
+        + '<path d="M2 27c22 0 26-13 48-13s26 9 48 9 26-16 48-16 26 11 48 11 26-6 48-6"/>'
+        + '<circle cx="254" cy="12" r="3.5" fill="currentColor" stroke="none"/></svg>';
+    },
+    /* Rehber — numaralı bir protokol: yedi adım, sırayla. */
+    rehber:function(){
+      let d = '';
+      for(let i = 0; i < 7; i++){
+        const y = 5 + i * 4;
+        d += '<line x1="16" y1="' + y + '" x2="' + (60 + i * 28) + '" y2="' + y + '"/>';
+      }
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5"'
+        + ' stroke-linecap="round" aria-hidden="true">'
+        + '<line x1="6" y1="3" x2="6" y2="31" stroke-width="2"/>' + d + '</svg>';
+    },
+    /* Ofis — patron ve beş koç. */
+    ofis:function(){
+      let d = '<circle cx="17" cy="17" r="9"/>';
+      for(let i = 0; i < 5; i++){
+        const x = 58 + i * 41;
+        d += '<circle cx="' + x + '" cy="17" r="6.5"/>'
+           + '<line x1="' + (x - 33) + '" y1="17" x2="' + (x - 9) + '" y2="17" opacity=".45"/>';
+      }
+      return '<svg viewBox="0 0 265 34" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">'
+        + d + '</svg>';
+    },
+  };
+
+  function motif(sectionId){
+    const fn = MOTIFS[sectionId];
+    return fn ? fn() : '';
+  }
+
+  /* ---------- AYS'ye özgü parçalar ----------
+
+     Hata etiketi noktası ve kesinlik rozeti SPİ'de yoktur: SPİ tahlil
+     kesinliğini, AYS yanlış türünü işaretler. İkisi de veriye bağlı
+     olduğu için R.C'ye değil buraya düşer. */
+
   function tagDot(tag){
     const t = R.ERROR_TAGS[tag];
     return '<span class="tagdot" style="background:'+(t ? t.color : 'var(--text-3)')+'"></span>';
   }
+
   function certainty(key){
     const c = R.CERTAINTY[key];
     return String(R.C.Badge({ label:c.label, tone:c.tone }));
+  }
+
+  /* Pareto: hangi hata türü kaç yanlışa mal oluyor. Sıralı çubuklar,
+     her birinin yanında etiketi ve sayısı. */
+  function paretoBars(rows){
+    if(!rows.length || !rows.some(r => r.count)) return '<p class="small dim">Henüz hata kaydı yok.</p>';
+    const max = Math.max.apply(null, rows.map(r => r.count)) || 1;
+    return '<div class="stack-sm">' + rows.map(r => {
+      const t = R.ERROR_TAGS[r.tag];
+      return '<div class="row" style="gap:10px">'
+        + '<span class="chip" style="min-width:34px;justify-content:center">'+r.tag+'</span>'
+        + '<div class="grow"><div class="meter__top"><span class="small">'+U.esc(t.name)+'</span><b class="num small">'+r.count+' · %'+r.pct+'</b></div>'
+        + '<div class="bar"><div class="bar__fill" style="width:'+U.pct(r.count,max)+'%;background:'+t.color+'"></div></div></div>'
+        + '</div>';
+    }).join('') + '</div>';
+  }
+
+  /* ---------- kucuk parcalar ----------
+     Not: rozet/kart/tablo gibi bilesenler R.C icinde tek yerde durur.
+     Burada yalnizca R.C'ye girmeyen, veriye bagli parcalar kalir. */
+
+  /* Olcumun yonunu tek bakista veren ok. Yon iyi/kotu demek degildir;
+     iyi/kotu yorumu daima kural motorundan (Calc) gelir. */
+  function trend(dir){
+    const map = { up:'&#9650;', down:'&#9660;', flat:'&#8212;' };
+    return '<span class="trendmark trendmark--'+(dir||'flat')+'" aria-hidden="true">'
+      + (map[dir] || map.flat) + '</span>';
+  }
+
+  /* ---------- kadran ----------
+
+     Toparlanma skoru bir yuzde degil bir DURUMDUR; yatay bir cubuk onu
+     "ne kadar dolduruldu" gibi okutuyordu. Yay, bir olcegin uzerindeki
+     ibre gibi durur: sifir ve yuz uclarda, deger arada bir yerde.
+
+     Bantlar (dusuk/orta/yuksek) yayin arkasinda soluk cizgilerle
+     isaretlenir; skorun hangi banda dustugu renkten once KONUMDAN
+     okunur. Renk tek basina anlam tasimaz. */
+  function gauge(value, opts){
+    const o = opts || {};
+    const size = o.size || 132;
+    const max = o.max || 100;
+    const r = 54, cx = 60, cy = 60;
+    /* 240 derecelik yay: alt taraf acik kalir, ibre orada baslar ve biter. */
+    const START = 150, SWEEP = 240;
+    const pt = deg => {
+      const a = (deg * Math.PI) / 180;
+      return [(cx + r * Math.cos(a)).toFixed(2), (cy + r * Math.sin(a)).toFixed(2)];
+    };
+    const arc = (from, to, w, cls2, extra) => {
+      const [x1, y1] = pt(from), [x2, y2] = pt(to);
+      const large = (to - from) > 180 ? 1 : 0;
+      return '<path d="M' + x1 + ' ' + y1 + ' A' + r + ' ' + r + ' 0 ' + large + ' 1 '
+        + x2 + ' ' + y2 + '" class="' + cls2 + '" stroke-width="' + w + '" fill="none"'
+        + ' stroke-linecap="round"' + (extra || '') + '/>';
+    };
+
+    const has = value != null && isFinite(value);
+    const pct = has ? U.clamp(value / max, 0, 1) : 0;
+    let out = '<div class="gauge" style="width:' + size + 'px">';
+    out += '<svg viewBox="0 0 120 120" role="img" aria-label="'
+      + (has ? 'Skor ' + Math.round(value) + ' / ' + max : 'Skor yok') + '">';
+    out += arc(START, START + SWEEP, 7, 'gauge__track');
+    /* Bant sinirlari — kadranin uzerindeki centikler. */
+    (o.bands || []).forEach(b => {
+      const d = START + SWEEP * U.clamp(b / max, 0, 1);
+      const [ix, iy] = pt(d);
+      const inner = r - 9;
+      const a = (d * Math.PI) / 180;
+      const x0 = (cx + inner * Math.cos(a)).toFixed(2);
+      const y0 = (cy + inner * Math.sin(a)).toFixed(2);
+      out += '<line x1="' + x0 + '" y1="' + y0 + '" x2="' + ix + '" y2="' + iy
+        + '" class="gauge__band"/>';
+    });
+    if(has && pct > 0){
+      out += arc(START, START + SWEEP * pct, 7, 'gauge__value gauge__value--' + (o.tone || ''));
+    }
+    out += '</svg>';
+    out += '<div class="gauge__center">'
+      + '<span class="gauge__num num">' + (has ? Math.round(value) : '&mdash;') + '</span>'
+      + (o.label ? '<span class="gauge__label">' + esc(o.label) + '</span>' : '')
+      + '</div>';
+    out += '</div>';
+    return out;
   }
 
   /* ---------- grafikler ---------- */
@@ -84,63 +292,116 @@ R.UI = (function(){
     return step * mag;
   }
 
+  /* ÇİZGİ GRAFİĞİ — sistemin en çok bakılan görseli.
+
+     Beş şey eklendi ve hepsinin bir gerekçesi var:
+
+       · SON NOKTA vurgulu ve DOĞRUDAN ETİKETLİ. Bir sağlık grafiğinde
+         okunacak tek sayı «şu an neredeyim»dir; onu eksene bakarak
+         tahmin ettirmek gereksiz iş. Her noktaya sayı yazmak ise
+         grafiği tabloya çevirir — yalnızca sonuncusu yazılır.
+       · HEDEF BANDI ADLANDIRILDI. Renkli bir dikdörtgen «bu ne?» diye
+         sordurtuyordu.
+       · IZGARA GERİ ÇEKİLDİ, taban çizgisi öne çıktı.
+       · HER NOKTANIN kendi başlığı var: fareyle üstüne gelince tarih ve
+         değer okunur. Kitaplık gerekmiyor — SVG `<title>` yeter.
+       · NOKTALAR YÜZEY HALKASI taşır: üst üste binen iki nokta
+         birbirine karışmaz. */
   function lineChart(series, opts){
     const o = opts || {};
-    const w = 640, h = o.height || 190, padL = 34, padR = 14, padT = 14, padB = 26;
-    const all = series.reduce((acc,s) => acc.concat(s.data.filter(v => v != null)), []);
+    const w = 640, h = o.height || 190;
+    const padL = 36, padT = 16, padB = 28;
+    /* Son noktanın etiketi için sağda yer ayrılır; yoksa sayı grafiğin
+       dışına taşar ve kırpılır. */
+    const padR = o.endLabel === false ? 16 : 62;
+
+    const all = series.reduce((acc, s2) => acc.concat(s2.data.filter(v => v != null)), []);
     if(!all.length) return '<p class="small dim">Grafik için henüz veri yok.</p>';
 
     const maxV = Math.max.apply(null, all), minV = Math.min.apply(null, all);
-    const pad = Math.max(2, (maxV-minV)*0.2);
-    const step = niceStep((maxV+pad - Math.max(0, minV-pad)) / 4);
-    const top = o.max != null ? o.max : Math.ceil((maxV+pad) / step) * step;
-    const bottom = o.min != null ? o.min : Math.max(0, Math.floor((minV-pad) / step) * step);
-    const n = Math.max.apply(null, series.map(s => s.data.length));
-    const X = i => padL + (w-padL-padR) * (n <= 1 ? 0.5 : i/(n-1));
-    const Y = v => h-padB - (h-padT-padB) * ((v-bottom)/((top-bottom)||1));
+    const pad = Math.max(2, (maxV - minV) * 0.2);
+    const step = niceStep((maxV + pad - Math.max(0, minV - pad)) / 4);
+    const top = o.max != null ? o.max : Math.ceil((maxV + pad) / step) * step;
+    const bottom = o.min != null ? o.min : Math.max(0, Math.floor((minV - pad) / step) * step);
+    const n = Math.max.apply(null, series.map(s2 => s2.data.length));
+    const X = i => padL + (w - padL - padR) * (n <= 1 ? 0.5 : i / (n - 1));
+    const Y = v => h - padB - (h - padT - padB) * ((v - bottom) / ((top - bottom) || 1));
 
-    let svg = '<svg class="chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img">';
-    const ticks = 4;
-    for(let i = 0; i <= ticks; i++){
-      const v = bottom + (top-bottom)*i/ticks;
-      const y = Y(v);
-      svg += '<line class="axis" x1="'+padL+'" x2="'+(w-padR)+'" y1="'+y+'" y2="'+y+'"/>';
-      svg += '<text x="'+(padL-6)+'" y="'+(y+3)+'" text-anchor="end">'+Math.round(v)+'</text>';
-    }
+    let svg = '<svg class="chart" viewBox="0 0 ' + w + ' ' + h + '" role="img"'
+      + (o.title ? ' aria-label="' + U.esc(o.title) + '"' : '') + '>';
+
+    /* Hedef bandı çizgilerin ALTINDA durur ve adı yazılır. */
     if(o.band){
       const y1 = Y(o.band[1]), y2 = Y(o.band[0]);
-      svg += '<rect class="band" x="'+padL+'" y="'+y1+'" width="'+(w-padL-padR)+'" height="'+Math.max(0,y2-y1)+'" opacity=".5"/>';
-    }
-    series.forEach(s => {
-      const pts = s.data.map((v,i) => v == null ? null : [X(i), Y(v)]).filter(Boolean);
-      if(!pts.length) return;
-      const d = 'M' + pts.map(p => p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ');
-      if(pts.length > 1 && o.area !== false){
-        svg += '<path class="area'+(s.accent?' area--accent':'')+'" d="'+d+' L '+pts[pts.length-1][0].toFixed(1)+' '+(h-padB)+' L '+pts[0][0].toFixed(1)+' '+(h-padB)+' Z"/>';
+      const yh = Math.max(0, y2 - y1);
+      svg += '<rect class="band" x="' + padL + '" y="' + y1 + '" width="'
+        + (w - padL - padR) + '" height="' + yh + '"/>';
+      if(yh > 14){
+        svg += '<text class="bandlbl" x="' + (w - padR - 6) + '" y="' + (y1 + 11)
+          + '" text-anchor="end">' + U.esc(o.bandLabel || 'hedef bandı') + '</text>';
       }
-      svg += '<path class="line'+(s.accent?' line--accent':'')+'" d="'+d+'"/>';
-      pts.forEach((p,i) => {
-        const last = i === pts.length-1;
-        svg += '<circle class="pt'+(s.accent?' pt--accent':'')+'" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(last?4:2.6)+'"/>';
+    }
+
+    const ticks = 4;
+    for(let i = 0; i <= ticks; i++){
+      const v = bottom + (top - bottom) * i / ticks;
+      const y = Y(v);
+      svg += '<line class="' + (i === 0 ? 'axis axis--base' : 'axis') + '" x1="' + padL
+        + '" x2="' + (w - padR) + '" y1="' + y + '" y2="' + y + '"/>';
+      svg += '<text x="' + (padL - 6) + '" y="' + (y + 3) + '" text-anchor="end">'
+        + U.fmtNum(Math.round(v * 10) / 10) + '</text>';
+    }
+
+    series.forEach(s2 => {
+      const pts = s2.data.map((v, i) => v == null ? null : [X(i), Y(v), v, i]).filter(Boolean);
+      if(!pts.length) return;
+      const d = 'M' + pts.map(p2 => p2[0].toFixed(1) + ' ' + p2[1].toFixed(1)).join(' L ');
+      if(pts.length > 1 && o.area !== false){
+        svg += '<path class="area' + (s2.accent ? ' area--accent' : '') + '" d="' + d
+          + ' L ' + pts[pts.length - 1][0].toFixed(1) + ' ' + (h - padB)
+          + ' L ' + pts[0][0].toFixed(1) + ' ' + (h - padB) + ' Z"/>';
+      }
+      svg += '<path class="line' + (s2.accent ? ' line--accent' : '') + '" d="' + d + '"/>';
+
+      pts.forEach((p2, i) => {
+        const sonNokta = i === pts.length - 1;
+        const etiket = (o.labels && o.labels[p2[3]]) ? o.labels[p2[3]] + ' · ' : '';
+        svg += '<circle class="pt' + (s2.accent ? ' pt--accent' : '')
+          + (sonNokta ? ' pt--last' : '') + '" cx="' + p2[0].toFixed(1) + '" cy="'
+          + p2[1].toFixed(1) + '" r="' + (sonNokta ? 5 : 3) + '">'
+          + '<title>' + U.esc(etiket + U.fmtNum(p2[2]) + (o.unit ? ' ' + o.unit : ''))
+          + '</title></circle>';
       });
+
+      /* Son değer doğrudan yazılır: okunacak tek sayı odur. */
+      if(o.endLabel !== false){
+        const sp = pts[pts.length - 1];
+        svg += '<text class="endlbl" x="' + (sp[0] + 10).toFixed(1) + '" y="'
+          + (sp[1] + 4).toFixed(1) + '">' + U.esc(U.fmtNum(sp[2])) + '</text>';
+        if(o.unit){
+          svg += '<text class="endunit" x="' + (sp[0] + 10).toFixed(1) + '" y="'
+            + (sp[1] + 17).toFixed(1) + '">' + U.esc(o.unit) + '</text>';
+        }
+      }
     });
+
     if(o.labels){
-      o.labels.forEach((lb,i) => {
+      o.labels.forEach((lb, i) => {
         if(n > 8 && i % 2) return;
-        svg += '<text x="'+X(i)+'" y="'+(h-8)+'" text-anchor="middle">'+U.esc(lb)+'</text>';
+        svg += '<text x="' + X(i) + '" y="' + (h - 8) + '" text-anchor="middle">'
+          + U.esc(lb) + '</text>';
       });
     }
     svg += '</svg>';
     return svg;
   }
-
   function barChart(rows, opts){
     const o = opts || {};
     const w = 640, h = o.height || 150, padL = 30, padR = 10, padT = 12, padB = 26;
     if(!rows.length) return '<p class="small dim">Veri yok.</p>';
     const top = o.max || 100;
     const bw = (w-padL-padR) / rows.length;
-    let svg = '<svg class="chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img">';
+    let svg = '<svg class="chart" viewBox="0 0 '+w+' '+h+'" role="img">';
     [0, 0.5, 1].forEach(f => {
       const y = padT + (h-padT-padB)*f;
       svg += '<line class="axis" x1="'+padL+'" x2="'+(w-padR)+'" y1="'+y+'" y2="'+y+'"/>';
@@ -164,17 +425,81 @@ R.UI = (function(){
     return svg;
   }
 
-  function paretoBars(rows){
-    if(!rows.length || !rows.some(r => r.count)) return '<p class="small dim">Henüz hata kaydı yok.</p>';
-    const max = Math.max.apply(null, rows.map(r => r.count)) || 1;
-    return '<div class="stack-sm">' + rows.map(r => {
-      const t = R.ERROR_TAGS[r.tag];
-      return '<div class="row" style="gap:10px">'
-        + '<span class="chip" style="min-width:34px;justify-content:center">'+r.tag+'</span>'
-        + '<div class="grow"><div class="meter__top"><span class="small">'+U.esc(t.name)+'</span><b class="num small">'+r.count+' · %'+r.pct+'</b></div>'
-        + '<div class="bar"><div class="bar__fill" style="width:'+U.pct(r.count,max)+'%;background:'+t.color+'"></div></div></div>'
-        + '</div>';
-    }).join('') + '</div>';
+  /* Referans araligi cubugu — bir tahlil degerinin nerede durdugunu gosterir.
+     Uc bolge vardir: laboratuvar referans araligi (genis, notr), hedef bant
+     (dar, birincil renk) ve degerin kendisi (isaret). Renk tek basina anlam
+     tasimaz: isaretin yaninda daima sayi ve durum rozeti bulunur.
+
+       ref     [low, high]  laboratuvarin referans araligi
+       optimal [low, high]  kisisel hedef bant (varsa)
+       value   olculen deger  */
+  /* `opts.bare` verilirse yalnizca cubuk cizilir, altindaki sayi satiri
+     cizilmez. Uzun bir listede her satirin altinda "30 · referans · hedef
+     80-250 · 400 ng/mL" yazmak satiri okunmaz hale getiriyordu; o ayrinti
+     satira tiklayinca acilan kagitta zaten tam haliyle duruyor. */
+  function rangeBar(value, ref, optimal, unit, opts){
+    if(!ref || ref.length !== 2) return '';
+    const lo = Number(ref[0]), hi = Number(ref[1]);
+    const span = hi - lo;
+    if(!isFinite(span) || span <= 0) return '';
+    /* Eksen referans araligindan %60 daha genis cizilir ki disari tasan
+       degerler de cubugun icinde kalsin ve ne kadar tastigi gorunsun. */
+    const axisLo = lo - span * 0.6;
+    const axisHi = hi + span * 0.6;
+    const p = v => U.clamp(100 * (v - axisLo) / (axisHi - axisLo), 0, 100);
+    const o = opts || {};
+
+    /* Cetvel bir ilerleme cubugu degil, bir OLCU ALETIDIR: dolu bir kutu
+       "ne kadar tamamlandi" der; burada sorulan o degil, "deger nerede
+       duruyor". Bu yuzden zemin bos, referans araligi ince bir bant,
+       hedef bandi bir alt cizgi, deger ise tek bir hassas ibredir. */
+    let out = '<div class="scale' + (o.bare ? ' scale--bare' : '') + '">';
+    out += '<div class="scale__axis">';
+    out += '<div class="scale__ref" style="left:' + p(lo).toFixed(1) + '%;width:'
+      + (p(hi) - p(lo)).toFixed(1) + '%"></div>';
+    if(optimal && optimal.length === 2){
+      out += '<div class="scale__opt" style="left:' + p(optimal[0]).toFixed(1) + '%;width:'
+        + Math.max(1.5, p(optimal[1]) - p(optimal[0])).toFixed(1) + '%"></div>';
+    }
+    /* Referans araliginin iki ucunda birer centik: aralik nerede baslayip
+       nerede bittigi cizgiyle de okunur, yalniz renkle degil. */
+    out += '<i class="scale__tick" style="left:' + p(lo).toFixed(1) + '%"></i>';
+    out += '<i class="scale__tick" style="left:' + p(hi).toFixed(1) + '%"></i>';
+    if(value != null && isFinite(value)){
+      const outside = value < lo || value > hi;
+      out += '<div class="scale__mark' + (outside ? ' is-out' : '') + '" style="left:'
+        + p(value).toFixed(1) + '%"></div>';
+    }
+    out += '</div>';
+    if(o.bare){ out += '</div>'; return out; }
+    out += '<div class="scale__legend">'
+      + '<span class="scale__end num">' + U.fmtNum(lo) + '</span>'
+      + '<span class="scale__mid">referans'
+      + (optimal ? ' <b>&middot; hedef ' + U.fmtNum(optimal[0]) + '&ndash;' + U.fmtNum(optimal[1]) + '</b>' : '')
+      + '</span>'
+      + '<span class="scale__end num">' + U.fmtNum(hi) + (unit ? ' ' + esc(unit) : '') + '</span>'
+      + '</div>';
+    out += '</div>';
+    return out;
+  }
+
+  /* Makro dagilimi — protein/yag/karbonhidrat oranini tek seritte verir.
+     Segment renkleri kimliktir (hangi makro), durum degil.
+
+     Girdi KALORI cinsindendir ama efsanede YUZDE yazar: "Protein 384" gibi
+     bir sayi okuyucuya hicbir sey soylemez, "Protein %28" soyler. */
+  function macroSplit(macros){
+    const p = Math.max(0, macros.protein || 0);
+    const f = Math.max(0, macros.fat || 0);
+    const c = Math.max(0, macros.carb || 0);
+    const total = p + f + c;
+    if(!total) return '<p class="small dim">Makro dağılımı için öğün gerekir.</p>';
+    const seg = (label, v, color) => ({ label:label + ' %' + Math.round(100 * v / total), value:v, color });
+    return stackBar([
+      seg('Protein', p, 'var(--macro-protein)'),
+      seg('Yağ', f, 'var(--macro-fat)'),
+      seg('Karbonhidrat', c, 'var(--macro-carb)'),
+    ]);
   }
 
   function donut(pct, label, size){
@@ -192,18 +517,6 @@ R.UI = (function(){
       + '</div></div></div>';
   }
 
-  function gauge(value, band, safeBand, unit){
-    const hi = Math.max(band[1], safeBand ? safeBand[1] : band[1], value || 0) * 1.18;
-    const p = v => U.clamp(100*v/hi, 0, 100);
-    let html = '<div class="gauge">';
-    html += '<div class="gauge__band" style="left:'+p(band[0])+'%;width:'+(p(band[1])-p(band[0]))+'%"></div>';
-    if(safeBand) html += '<div class="gauge__safe" style="left:0;width:'+p(safeBand[0])+'%"></div>';
-    if(value != null) html += '<div class="gauge__mark'+(value < band[0] ? ' is-low' : '')+'" style="left:'+p(value)+'%"></div>';
-    html += '</div>';
-    html += '<div class="gauge__scale"><span>0</span><span>gözlenen '+band[0]+'–'+band[1]+(safeBand ? ' · güvenli '+safeBand[0]+'–'+safeBand[1] : '')+'</span><span>'+Math.round(hi)+unit+'</span></div>';
-    return html;
-  }
-
   function sparkline(values, opts){
     const o = opts || {};
     const vals = values.filter(v => v != null);
@@ -213,8 +526,10 @@ R.UI = (function(){
     const X = i => (w) * (i/(values.length-1));
     const Y = v => h - 3 - (h-6) * ((v-min)/((max-min)||1));
     const pts = values.map((v,i) => v == null ? null : [X(i), Y(v)]).filter(Boolean);
+    /* Kivilcim cizgisi kutusunu doldurmak icin gerilir; `non-scaling-stroke`
+       olmadan cizgi yatayda incelip dikeyde kalinlasiyordu. */
     return '<svg class="chart" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" style="height:26px">'
-      + '<path class="line'+(o.accent?' line--accent':'')+'" style="stroke-width:1.6" d="M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ')+'"/></svg>';
+      + '<path vector-effect="non-scaling-stroke" class="line'+(o.accent?' line--accent':'')+'" style="stroke-width:1.6" d="M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ')+'"/></svg>';
   }
 
   function stackBar(segments){
@@ -330,7 +645,6 @@ R.UI = (function(){
   function isHintOpen(){ return !!document.getElementById('popover'); }
 
   /* ---------- alt sayfa ---------- */
-  /* ---------- alt sayfa ---------- */
   /* Alt sayfa ODAGI HAPSEDER. Once etmiyordu: Tab ile arkadaki sayfaya
      cikilabiliyor, gorunmeyen bir dugmeye basilabiliyordu — bir kipli
      pencere icin bu bir hata degil, bir yaniltmadir. Kapaninca odak
@@ -406,14 +720,73 @@ R.UI = (function(){
   }
   function isSheetOpen(){ return !!document.getElementById('sheet'); }
 
-  function toast(text){
+  /* Bildirim. `undo` verilirse bildirimin icinde bir "geri al" dugmesi
+     cikar ve bildirim daha uzun durur: kullanicinin okuyup karar vermesi
+     icin 1,5 saniye yetmez. */
+  /* ---------------------------------------------------------- bekleme
+
+     Model cagrisi saniyeler suruyor ve geri bildirim tek bir bildirimdi:
+     iki saniye sonra kayboluyor, kullanici donduğunu saniyordu.
+
+     Bu serit isin SONUNA KADAR durur ve ne beklendigini yazar. Sayfanin
+     en ustunde, icerigin akisini bozmadan. */
+
+  let busyCount = 0;
+
+  function busy(label, hint){
+    busyCount++;
+    const root = document.getElementById('overlay-root');
+    let el = document.getElementById('busybar');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'busybar';
+      el.className = 'busybar';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      root.appendChild(el);
+    }
+    el.innerHTML = '<span class="busybar__spin" aria-hidden="true"></span>'
+      + '<span class="busybar__t">' + R.U.esc(label || 'İşleniyor…') + '</span>'
+      + (hint ? '<span class="busybar__hint">' + R.U.esc(hint) + '</span>' : '');
+    return el;
+  }
+
+  /* Ic ice cagrilarda erken kapanmasin: sayac sifirlaninca kalkar. */
+  function idle(){
+    busyCount = Math.max(0, busyCount - 1);
+    if(busyCount) return;
+    const el = document.getElementById('busybar');
+    if(el) el.remove();
+  }
+
+  /* Bir isi serit acikken kosturur ve her durumda kapatir. */
+  async function withBusy(label, hint, fn){
+    busy(label, hint);
+    try{ return await fn(); }
+    finally{ idle(); }
+  }
+
+  function toast(text, opts){
+    const o = opts || {};
     const root = document.getElementById('toast-root');
     const el = document.createElement('div');
-    el.className = 'toast';
-    el.textContent = text;
+    el.className = 'toast' + (o.undo ? ' toast--undo' : '');
+    const span = document.createElement('span');
+    span.textContent = text;
+    el.appendChild(span);
+    if(o.undo){
+      const btn = document.createElement('button');
+      btn.className = 'toast__undo';
+      btn.textContent = 'Geri al';
+      btn.setAttribute('data-act', 'undo');
+      btn.addEventListener('click', () => { el.remove(); });
+      el.appendChild(btn);
+    }
     root.appendChild(el);
-    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, 1500);
-    setTimeout(() => el.remove(), 1800);
+    const life = o.undo ? 6000 : 1500;
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, life);
+    setTimeout(() => el.remove(), life + 300);
+    return el;
   }
 
   function confirmSheet(title, message, onConfirm, danger){
@@ -428,9 +801,12 @@ R.UI = (function(){
   }
 
   return {
-    icon, tagDot, certainty,
-    lineChart, barChart, paretoBars, donut, gauge, sparkline, stackBar, heatmap, legend,
+    icon, trend, motif, gauge,
+    tagDot, certainty, paretoBars,
+    lineChart, barChart, donut, sparkline, stackBar, heatmap, legend,
+    rangeBar, macroSplit,
     hint, rail, openHint, closeHint, isHintOpen,
     sheet, closeSheet, isSheetOpen, toast, confirmSheet,
+    busy, idle, withBusy,
   };
 })();

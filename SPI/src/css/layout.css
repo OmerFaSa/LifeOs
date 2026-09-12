@@ -582,11 +582,23 @@
   font-family:ui-monospace, 'SFMono-Regular', 'Courier New', monospace;
   font-size:11px; letter-spacing:.02em; color:var(--ink-on);
 }
+/* DOKUNMA ALANI GORSEL BOYUTTAN BUYUK OLABILIR.
+
+   Bu dugme kunyenin icinde bir hap kadar yer kaplamali: 50x17. Ama
+   WCAG'in asgari dokunma hedefi 24x24 ve parmak pikseli gormez,
+   alani hisseder. Gorunmez bir ::after ile alan buyutulur; hap oldugu
+   yerde kalir. */
 .sitefoot__reload{
+  position:relative;
   border:1px solid color-mix(in srgb, var(--ink-on) 30%, transparent);
   background:none; color:var(--ink-on-2);
   border-radius:var(--r-pill); padding:1px 9px; font-size:10.5px;
   transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.sitefoot__reload::after{
+  content:''; position:absolute; left:0; right:0;
+  top:50%; transform:translateY(-50%);
+  height:24px; min-height:24px;
 }
 .sitefoot__reload:hover{ color:var(--ink-on); border-color:var(--ink-on); }
 

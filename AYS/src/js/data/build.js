@@ -1,6 +1,6 @@
 /* DERLEME DAMGASI — bu dosyayi elle duzenleme.
    build.py her derlemede yeniden yazar. */
 
-window.SP = window.SP || {};
+window.R = window.R || {};
 
-SP.BUILD = { id:'ee520d0', at:'2026-09-12 08:46', dirty:true };
+R.BUILD = { id:'ee520d0', at:'2026-09-12 08:46', dirty:true };

@@ -1468,11 +1468,23 @@ table td, table th{
   font-family:ui-monospace, 'SFMono-Regular', 'Courier New', monospace;
   font-size:11px; letter-spacing:.02em; color:var(--ink-on);
 }
+/* DOKUNMA ALANI GORSEL BOYUTTAN BUYUK OLABILIR.
+
+   Bu dugme kunyenin icinde bir hap kadar yer kaplamali: 50x17. Ama
+   WCAG'in asgari dokunma hedefi 24x24 ve parmak pikseli gormez,
+   alani hisseder. Gorunmez bir ::after ile alan buyutulur; hap oldugu
+   yerde kalir. */
 .sitefoot__reload{
+  position:relative;
   border:1px solid color-mix(in srgb, var(--ink-on) 30%, transparent);
   background:none; color:var(--ink-on-2);
   border-radius:var(--r-pill); padding:1px 9px; font-size:10.5px;
   transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.sitefoot__reload::after{
+  content:''; position:absolute; left:0; right:0;
+  top:50%; transform:translateY(-50%);
+  height:24px; min-height:24px;
 }
 .sitefoot__reload:hover{ color:var(--ink-on); border-color:var(--ink-on); }
 
@@ -2133,7 +2145,12 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .step__body p{ font-size:var(--fs-sm); color:var(--text-2); }
 
 /* ---------- ipucu (ⓘ) ve balon ---------- */
+/* İpucu düğmesi bir başlığın yanında bir nokta kadar yer kaplar; 16×16
+   görsel boyut kasıtlıdır. Dokunma alanı ayrı bir meseledir ve parmak
+   pikseli görmez: görünmez bir ::after alanı 24×24'e çıkarır. Halka
+   olduğu yerde kalır. */
 .hint{
+  position:relative;
   width:16px; height:16px; flex:none;
   border:1px solid var(--border-strong); background:none;
   border-radius:50%; padding:0;
@@ -2141,6 +2158,11 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   color:var(--text-3);
   display:inline-grid; place-items:center;
   vertical-align:middle; margin-left:5px;
+}
+.hint::after{
+  content:''; position:absolute;
+  left:50%; top:50%; transform:translate(-50%,-50%);
+  width:24px; height:24px; border-radius:50%;
 }
 .hint:hover{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); }
 
@@ -2411,7 +2433,10 @@ kbd{
 .input--cell{ width:62px; }
 .input--mins{ width:66px; }
 .exam-net{ font-family:var(--font-display); font-weight:800; font-size:var(--fs-lg); }
-.exam-net--lg{ font-size:var(--fs-2xl); }
+/* `--fs-2xl` hiç tanımlanmamış bir jetondu: bu satır yıllardır hiçbir
+   şey yapmıyor, büyük net skoru devralınan puntoyla çiziliyordu.
+   Ölçeğin gerçek büyük adımı `--fs-hero`. */
+.exam-net--lg{ font-size:var(--fs-hero); }
 .exam-row__net{ width:54px; flex:none; text-align:center; }
 .mb-10{ margin-bottom:10px; }
 .input--search{ max-width:280px; }
@@ -4535,7 +4560,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'774dd69', at:'2026-09-12 05:58', dirty:true };
+SP.BUILD = { id:'ee520d0', at:'2026-09-12 08:46', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -13475,7 +13500,8 @@ SP.C = (function(){
   function Chip(o){
     if(typeof o === 'string') o = { label:o };
     return html`<span class="${cls('chip', o.act && 'chip--tap', o.on && 'chip--on')}"
-      ${when(o.act, () => attrs(Object.assign({ 'data-act':o.act }, o.data || {})))}>${o.label}</span>`;
+      ${when(o.act, () => attrs(Object.assign(
+        { 'data-act':o.act, role:'button', tabindex:'0' }, o.data || {})))}>${o.label}</span>`;
   }
 
   /* ---------- etkilesim ---------- */
@@ -13561,17 +13587,23 @@ SP.C = (function(){
      alt sayfa, uyari. Okunacak bir sey kutuya konmaz.
 
      Kunye sutunu uzun icerikte YAPISIR: yuz satirlik bir listeyi
-     kaydirirken hangi bolumde oldugunu unutmayasin diye. */
+     kaydirirken hangi bolumde oldugunu unutmayasin diye.
+
+     KUNYEYE KOYACAK BIR SEY YOKSA SUTUN HIC ACILMAZ. Bos bir kunye
+     sutunu 196 piksellik bir bosluk birakir ve icerigi saga sikistirir;
+     kunyesi olmayan sey GENIS satirdir. */
   function Entry(o){
     return html`
       <section class="${cls('lrow', o.wide && 'lrow--wide', o.class)}"
+        ${when(o.id, () => attrs({ id:o.id }))}
         ${when(o.hint, () => attrs({ 'data-hint':o.hint }))}>
+        ${when(o.label || o.meta || o.note || o.action, () => html`
         <div class="lrow__side">
-          <div class="lrow__label">${o.label}${raw(SP.UI.hint(o.hint || ''))}</div>
+          ${when(o.label, () => html`<div class="lrow__label">${o.label}${raw(SP.UI.hint(o.hint || ''))}</div>`)}
           ${when(o.meta, () => html`<div class="lrow__meta">${o.meta}</div>`)}
           ${when(o.note, () => html`<p class="lrow__note">${o.note}</p>`)}
           ${when(o.action, () => html`<div class="lrow__act">${o.action}</div>`)}
-        </div>
+        </div>`)}
         <div class="lrow__main">${o.body}</div>
       </section>`;
   }
@@ -13638,15 +13670,23 @@ SP.C = (function(){
       }, o.data || {}))}/>`;
   }
 
+  /* `class` ve `aria` SESSIZCE DUSUYORDU: iki cagri yeri
+     `class:'composer__input'` geciyor ve o sinif hicbir zaman yazilmiyordu,
+     bu yuzden sohbet kutusu satiri doldurmuyordu. Yer tutucu da etiket
+     yerine gecmez — ekran okuyucu yalnizca "metin alani" der. */
   function Textarea(o){
-    return html`<textarea class="textarea"
-      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder, 'data-change':o.change }, o.data || {}))}
+    return html`<textarea class="${cls('textarea', o.class)}"
+      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder,
+        'aria-label':o.aria, 'data-change':o.change }, o.data || {}))}
     >${o.value || ''}</textarea>`;
   }
 
+  /* `aria` alani `Input`'ta vardi, `Select`'te yoktu: etiketsiz bir
+     secici ekran okuyucuda yalnizca "acilir liste" diye anilir. */
   function Select(o){
     return html`<select class="${cls('select', o.size === 'sm' && 'input--sm')}"
-      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'data-change':o.change }, o.data || {}))}>
+      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'aria-label':o.aria,
+        'data-change':o.change }, o.data || {}))}>
       ${map(o.options, op => {
         const v = op.value != null ? op.value : op;
         const l = op.label != null ? op.label : op;
@@ -19010,7 +19050,7 @@ SP.Screens.meals = (function(){
         ${K.Button({ label:'Fotoğraftan', icon:'camera', act:'open-photo' })}`,
       body:html`
         <div class="quick">
-          ${K.Select({ id:'meal-slot', value:S.ui.mealSlot,
+          ${K.Select({ id:'meal-slot', value:S.ui.mealSlot, aria:'Öğün yuvası',
             options:SP.MEAL_SLOTS.map(s => ({ value:s.id, label:s.label })), change:'pick-slot' })}
           ${K.Mic({ target:'meal-text' })}
           ${K.Input({ id:'meal-text', placeholder:'1 tabak etli kuru fasulye, 2 dilim ekmek, 1 bardak ayran',

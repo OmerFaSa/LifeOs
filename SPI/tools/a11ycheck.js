@@ -33,12 +33,10 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 
 /* Kabul edilen, gerekçeli eksikler. Kapandıkça buradan silinir. */
 const IZIN = [
-  /* Ölçüyü küçültmeden dokunma alanını büyütmek gerekiyor; görsel
-     boyut bilerek küçük (satırın içinde bir nokta kadar yer kaplar). */
-  { tur:'kucuk', desen:/\bhint\b/,            not:'ⓘ düğmesi 16×16 — dokunma alanı ::after ile büyütülecek' },
-  { tur:'kucuk', desen:/sitefoot__reload/,    not:'künye tazele bağlantısı 50×17' },
+  /* Tarayıcının kendi onay kutusu; boyutunu işletim sistemi verir ve
+     büyütmek için yerel denetimi bırakıp kendi kutumuzu çizmek gerekir.
+     Dokunma alanı çevresindeki etiketle zaten büyüktür. */
   { tur:'kucuk', desen:/INPUT 1[0-9]×1[0-9]/, not:'onay kutusu yerel denetim boyutu' },
-  { tur:'etiketsiz', desen:/meal-slot/,       not:'öğün yuvası seçici — aria-label eklenecek' },
 ];
 const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(metin));
 
@@ -149,13 +147,48 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
             out.baslik.push('h' + onceki + ' → h' + n + ': "' + metin(h).slice(0, 30) + '"');
           onceki = n;
         });
+        /* DOKUNMA HEDEFI GORSEL KUTUYLA AYNI DEGILDIR.
+
+           Ilk surum `getBoundingClientRect()` olcuyordu; oysa gorsel
+           olarak kucuk kalmasi gereken bir dugmenin dokunma alani
+           gorunmez bir `::after` ile buyutulebilir ve dogru cozum de
+           budur. O olcum, dogru sekilde duzeltilmis bir dugmeyi hala
+           "kucuk" diye bildiriyor ve borc defterinde sahte bir satir
+           tutmaya zorluyordu.
+
+           Ikinci surum `elementFromPoint` ile tarayiciya soruyordu; o da
+           yanlisti: alt bant sayfanin dibinde, gorunen alanin disinda
+           kaliyor ve `elementFromPoint` null donuyordu. Gorunmeyen her
+           dugme "kucuk" sayiliyordu.
+
+           Dogru olcum sahte ogenin KUTUSUNU okumaktir: konumlandirilmis
+           bir ::before/::after, ogenin isabet alanini kendi olcusune
+           kadar buyutur. Kaydirma konumundan bagimsizdir. */
+        const sahteKutu = (el, hangi) => {
+          const cs = getComputedStyle(el, hangi);
+          if(!cs || cs.content === 'none' || cs.position === 'static') return null;
+          const w = parseFloat(cs.width), h = parseFloat(cs.height);
+          if(!isFinite(w) || !isFinite(h)) return null;
+          return { w, h };
+        };
+        const etkinOlcu = el => {
+          const b = el.getBoundingClientRect();
+          let w = b.width, h = b.height;
+          ['::before', '::after'].forEach(x => {
+            const k = sahteKutu(el, x);
+            if(!k) return;
+            w = Math.max(w, k.w); h = Math.max(h, k.h);
+          });
+          return { w, h };
+        };
         document.querySelectorAll('button, a[href], [role="button"], input[type=checkbox], input[type=radio]')
           .forEach(el => {
             if(!gorunur(el)) return;
+            const e = etkinOlcu(el);
+            if(e.w >= 24 && e.h >= 24) return;
             const b = el.getBoundingClientRect();
-            if(b.width < 24 || b.height < 24)
-              out.kucuk.push((el.className || el.tagName) + ' ' +
-                Math.round(b.width) + '×' + Math.round(b.height));
+            out.kucuk.push((el.className || el.tagName) + ' ' +
+              Math.round(b.width) + '×' + Math.round(b.height));
           });
         document.querySelectorAll('img').forEach(el => {
           if(el.getAttribute('alt') === null) out.imgAlt.push(String(el.src).slice(-40));

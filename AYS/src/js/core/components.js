@@ -338,9 +338,12 @@ R.C = (function(){
     >${o.value || ''}</textarea>`;
   }
 
+  /* `aria` alani `Input`'ta vardi, `Select`'te yoktu: etiketsiz bir
+     secici ekran okuyucuda yalnizca "acilir liste" diye anilir. */
   function Select(o){
     return html`<select class="${cls('select', o.size === 'sm' && 'input--sm')}"
-      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'data-change':o.change }, o.data || {}))}>
+      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'aria-label':o.aria,
+        'data-change':o.change }, o.data || {}))}>
       ${map(o.options, op => {
         const v = op.value != null ? op.value : op;
         const l = op.label != null ? op.label : op;

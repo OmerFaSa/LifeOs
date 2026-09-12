@@ -208,3 +208,87 @@ aramak zorunda kalmasın.
 Kural motoru, çözücü ve planlayıcı tek satır almadı. Bu turda
 değişenlerin hepsi sunum katmanındadır; tek istisna `Bar`'ın ton
 mantığı ve eskimiş sekme varsayılanıdır, ikisi de arayüz kararıdır.
+
+---
+
+# İkinci tur: arayüz komple silindi, sıfırdan kuruldu
+
+Yukarıdaki on bulgu tek tek kapatıldı ama istek daha sertti: *"tasarımı
+komple sil, sıfırdan SPİ'nin aynısını yap."* Yapılan tam olarak budur.
+
+## Ne silindi
+
+AYS'nin `tokens.css`, `palettes.css`, `base.css`, `layout.css`,
+`components.css`, `designs.css` dosyaları silindi ve SPİ'ninkiler
+konuldu. `defter.css` — SPİ'de karşılığı olmayan bir uydurmaydı —
+tamamen kalktı. `components.js`, `ui.js` ve `designs.js` de SPİ
+sürümüne geçti.
+
+Körlemesine silinmedi: önce ölçüldü. AYS'nin `components.css`'indeki
+818 kuralın **437'si zaten SPİ'de vardı** (ortak soy), **381'i AYS'ye
+özgüydü**. O 381 kural `rota.css`'e taşındı.
+
+## `rota.css` nedir
+
+AYS'nin SPİ'de karşılığı olmayan nesneleri: üç boyutlu ofis, kat planı,
+haftanın ızgarası, sınama kartı, soru çözüm defteri, program zaman
+çizgisi. Kuralı ortak dosyalarınkiyle aynıdır ve kutunun kaldığı her
+yer dosyanın başlığında gerekçesiyle yazılıdır.
+
+Taşınırken altı kural defter diline çevrildi, çünkü okunacak şeydiler:
+gün bloğu, sınama kartı, öneri satırı, önce→sonra tablosu, cevap sütunu.
+
+## Ne kazanıldı
+
+| | Önce | Sonra |
+|---|---|---|
+| `designs.css` | 141 satırlık taslak | SPİ'nin 565 satırı, beş gerçek tasarım dili |
+| Görünüm paneli | **yok** — tema/palet rehber ekranından | künyede tek dokunuş: 3 tema × 7 palet × 5 düzen |
+| Bölüm imzası | **yok** | hero'da altı bölümün altı çizimi |
+| Derleme damgası | **yok** | künyede sürüm + önbellek atlayan tazele düğmesi |
+| Bileşen seti | 30 | 37 (Entry, Ledger, PickCard, Toolbar, Mic, Drop, Busy) |
+| Sekme rozetleri | yok | var |
+
+## Yolda çıkan gerçek hatalar
+
+**`--fs-2xl` ve `--fs-3xl` hiç tanımlanmamış jetonlardı.** İki
+uygulamanın tarihinde de yoklar. Üç öge bu yüzden hep devralınan
+puntoyla çiziliyordu: süreli deneme sayacı, tahmini sıra ve büyük net
+skoru. Sonuncusu SPİ'de de kırıktı.
+
+**Künye sütunu içine koyacak bir şey olmasa da açılıyordu.** Başlıksız
+satır 196 piksellik boş bir sol sütun bırakıyordu. İki uygulamada da
+koşullu yapıldı.
+
+**`Entry` `id` almıyordu.** AYS'nin panel hedefleri (`#pane-flow` gibi)
+bu yüzden kayboluyordu.
+
+**`Select` `aria` almıyordu** — `Input` alıyordu. Etiketsiz bir seçici
+ekran okuyucuda yalnızca "açılır liste" diye anılır.
+
+**Kopyalanan `components.css` SPİ'nin beş ajanına yazılıydı**
+(lab/nutri/move/money). AYS'nin altı koçuna eşlendi; eksik olan altıncı
+(koç) üç yere de eklendi.
+
+## Erişilebilirlik borcu dörtten bire indi
+
+`::after` ile dokunma alanı büyütülen iki düğme (ⓘ ipucu 16×16, künye
+tazele 50×17) gerçekten düzeltildi; öğün yuvası seçicisine etiket
+eklendi. Kalan tek borç tarayıcının kendi onay kutusu — boyutunu
+işletim sistemi verir.
+
+## Denetleyicinin iki hatası daha
+
+**Dokunma hedefi ölçümü iki kez yanlıştı.** İlk sürüm görsel kutuyu
+ölçüyordu; oysa doğru çözüm görünmez bir `::after` ile alanı
+büyütmektir ve o ölçüm doğru düzeltilmiş bir düğmeyi hâlâ "küçük" diye
+bildiriyor, borç defterinde sahte bir satır tutmaya zorluyordu. İkinci
+sürüm `elementFromPoint` ile tarayıcıya soruyordu; o da yanlıştı —
+künye sayfanın dibinde, görünen alanın dışında kalıyor ve
+`elementFromPoint` null dönüyordu, yani **görünmeyen her düğme "küçük"
+sayılıyordu**. Doğru ölçüm sahte ögenin kutusunu okumaktır; kaydırma
+konumundan bağımsızdır.
+
+Bu oturumda beşinci ve altıncı denetleyici hatası. Sayıyı burada tutmak
+kasıtlı: bir denetleyicinin yanlış susması ya da yanlış bağırması,
+denetlediği hatadan pahalıdır.

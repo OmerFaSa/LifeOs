@@ -604,7 +604,12 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .step__body p{ font-size:var(--fs-sm); color:var(--text-2); }
 
 /* ---------- ipucu (ⓘ) ve balon ---------- */
+/* İpucu düğmesi bir başlığın yanında bir nokta kadar yer kaplar; 16×16
+   görsel boyut kasıtlıdır. Dokunma alanı ayrı bir meseledir ve parmak
+   pikseli görmez: görünmez bir ::after alanı 24×24'e çıkarır. Halka
+   olduğu yerde kalır. */
 .hint{
+  position:relative;
   width:16px; height:16px; flex:none;
   border:1px solid var(--border-strong); background:none;
   border-radius:50%; padding:0;
@@ -612,6 +617,11 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   color:var(--text-3);
   display:inline-grid; place-items:center;
   vertical-align:middle; margin-left:5px;
+}
+.hint::after{
+  content:''; position:absolute;
+  left:50%; top:50%; transform:translate(-50%,-50%);
+  width:24px; height:24px; border-radius:50%;
 }
 .hint:hover{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); }
 

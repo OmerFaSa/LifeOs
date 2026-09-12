@@ -39,7 +39,7 @@ SP.Screens.meals = (function(){
         ${K.Button({ label:'Fotoğraftan', icon:'camera', act:'open-photo' })}`,
       body:html`
         <div class="quick">
-          ${K.Select({ id:'meal-slot', value:S.ui.mealSlot,
+          ${K.Select({ id:'meal-slot', value:S.ui.mealSlot, aria:'Öğün yuvası',
             options:SP.MEAL_SLOTS.map(s => ({ value:s.id, label:s.label })), change:'pick-slot' })}
           ${K.Mic({ target:'meal-text' })}
           ${K.Input({ id:'meal-text', placeholder:'1 tabak etli kuru fasulye, 2 dilim ekmek, 1 bardak ayran',
