@@ -4909,7 +4909,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'bc4457b', at:'2026-09-12 13:12', dirty:true };
+SP.BUILD = { id:'e50ec01', at:'2026-09-12 13:23', dirty:false };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -10844,15 +10844,24 @@ ESP.C = (function(){
       }, o.data || {}))}/>`;
   }
 
+  /* `class` ve `aria` KABUL EDILIR.
+
+     Bunlar eskiden sessizce dusuruluyordu: cagiran `class:'composer__input'`
+     geciyor, hicbir yere yazilmiyordu; `aria` da oyle ve sonucunda her
+     textarea "etiketsiz alan" olarak denetimden dusuyordu. Bir bilesen
+     kabul etmedigi bir alani SESSIZCE YUTMAMALI — yutarsa hata gorunmez
+     olur ve cagiran tarafta aranir. */
   function Textarea(o){
-    return html`<textarea class="textarea"
-      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder, 'data-change':o.change }, o.data || {}))}
+    return html`<textarea class="${cls('textarea', o.class)}"
+      ${attrs(Object.assign({ id:o.id, rows:o.rows || 3, placeholder:o.placeholder,
+        'aria-label':o.aria, 'data-change':o.change }, o.data || {}))}
     >${o.value || ''}</textarea>`;
   }
 
   function Select(o){
-    return html`<select class="${cls('select', o.size === 'sm' && 'input--sm')}"
-      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'data-change':o.change }, o.data || {}))}>
+    return html`<select class="${cls('select', o.size === 'sm' && 'input--sm', o.class)}"
+      ${attrs(Object.assign({ id:o.id, disabled:o.disabled, 'aria-label':o.aria,
+        'data-change':o.change }, o.data || {}))}>
       ${map(o.options, op => {
         const v = op.value != null ? op.value : op;
         const l = op.label != null ? op.label : op;
@@ -13832,7 +13841,7 @@ ESP.Screens.lang = (function(){
       note:'Vadesi yakın olan üstte. «Aktif» işareti kartın üretimde '
          + 'kullanıldığını söyler; tanımak ile kullanmak ayrı şeylerdir.',
       action:html`${K.Input({ id:'card-q', value:S.ui.cardQuery || '',
-        placeholder:'Kart ara…', change:'card-query', size:'sm' })}`,
+        placeholder:'Kart ara…', change:'card-query', size:'sm', aria:'Kart ara' })}`,
       wide:true,
       body:hepsi.length
         ? K.Table({ tight:true,
@@ -13860,10 +13869,11 @@ ESP.Screens.lang = (function(){
         note:'Üç ayraç tanınır: tire, eşittir, iki nokta. Tanınmayan satır '
            + 'atılmaz — sana geri gösterilir ve elle bağlarsın.',
         body:html`
-          ${K.Textarea({ id:'vocab-text', rows:6,
+          ${K.Textarea({ id:'vocab-text', rows:6, aria:'Kelime listesi',
             placeholder:'nevertheless – yine de\nto grasp = kavramak\nmake a point: bir noktaya değinmek' })}
           <div class="row mt-10">
             ${K.Select({ id:'vocab-lang', value:aktifDil(), change:'pick-lang',
+              aria:'Kartların dili',
               options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) })}
             ${K.Button({ label:'Çöz', tone:'primary', act:'parse-vocab' })}
           </div>
@@ -14001,6 +14011,7 @@ ESP.Screens.lang = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'calis' ? { count:d.due || null } : {})) }),
         actions:K.Select({ value:aktifDil(), change:'deck-lang', size:'sm',
+          aria:'Çalışılan dil',
           options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }),
       }))}
       ${K.Span(12, K.Ledger(() => rows))}`);
@@ -14194,18 +14205,19 @@ ESP.Screens.symposium = (function(){
 
         <div class="argcols mt-12">
           <div class="argcol">
-            <h4 class="argcol__h">Destek</h4>
+            <p class="argcol__h">Destek</p>
             ${(a.supports || []).length
               ? html`<ul class="argcol__list">${map(a.supports, s => html`<li>${s}</li>`)}</ul>`
               : html`<p class="small muted">Henüz destek yazılmadı.</p>`}
             <div class="row mt-8">
-              ${K.Input({ id:'sup-' + a.id, placeholder:'Destek ekle…', size:'sm' })}
+              ${K.Input({ id:'sup-' + a.id, placeholder:'Destek ekle…', size:'sm',
+                aria:'Destek ekle' })}
               ${K.Button({ label:'Ekle', size:'sm', act:'add-support', data:{ 'data-id':a.id } })}
             </div>
           </div>
 
           <div class="argcol">
-            <h4 class="argcol__h">İtiraz</h4>
+            <p class="argcol__h">İtiraz</p>
             ${(a.objections || []).length
               ? html`<ul class="argcol__list">${map(a.objections, o => html`
                   <li class="${o.answered ? 'is-answered' : ''}">
@@ -14213,7 +14225,8 @@ ESP.Screens.symposium = (function(){
                     ${o.answered
                       ? html`<em class="argcol__ans">${o.answer}</em>`
                       : html`<div class="row mt-4">
-                          ${K.Input({ id:'ans-' + o.id, placeholder:'Cevabın…', size:'sm' })}
+                          ${K.Input({ id:'ans-' + o.id, placeholder:'Cevabın…', size:'sm',
+                            aria:'İtiraza cevabın' })}
                           ${K.Button({ label:'Cevapla', size:'sm', act:'answer-obj',
                             data:{ 'data-id':a.id, 'data-obj':o.id } })}
                         </div>`}
@@ -14221,7 +14234,8 @@ ESP.Screens.symposium = (function(){
               : html`<p class="small muted">İtiraz yok. En güçlü karşı tezi sen yazmazsan
                   tez sınanmamış kalır.</p>`}
             <div class="row mt-8">
-              ${K.Input({ id:'obj-' + a.id, placeholder:'İtiraz ekle…', size:'sm' })}
+              ${K.Input({ id:'obj-' + a.id, placeholder:'İtiraz ekle…', size:'sm',
+                aria:'İtiraz ekle' })}
               ${K.Button({ label:'Ekle', size:'sm', act:'add-obj', data:{ 'data-id':a.id } })}
             </div>
           </div>
@@ -14274,7 +14288,7 @@ ESP.Screens.symposium = (function(){
         note:'Uzun deneme gerekmez. «X doğrudur çünkü Y. Ama Z olabilir.» yazarsan '
            + 'tez, destek ve itiraz ayrıştırılır — anlaşılmayan cümle atılmaz, sorulur.',
         body:html`
-          ${K.Textarea({ id:'arg-text', rows:4,
+          ${K.Textarea({ id:'arg-text', rows:4, aria:'Tez metni',
             placeholder:'Özgürlük yalnızca seçenek çokluğu değildir çünkü seçenekleri '
               + 'değerlendirecek ölçüt de gerekir. Ama ölçütü kim koyar?' })}
           <div class="row mt-10">
@@ -14338,7 +14352,7 @@ ESP.Screens.symposium = (function(){
            + 'ikiye katlıyordu; listeden seçmek bunu kapatır.',
         body:html`
           <div class="row wrap">
-            ${K.Select({ id:'canon-pick',
+            ${K.Select({ id:'canon-pick', aria:'Kanondan eser seç',
               options:ESP.CANON.map(c => ({ value:c.id,
                 label:c.author + ' — ' + c.title })) })}
             ${K.Button({ label:'Ekle', tone:'primary', act:'add-canon' })}
@@ -14658,6 +14672,7 @@ ESP.Screens.studio = (function(){
               ${K.Button({ label:S.ui.metronomeOn ? 'Durdur' : 'Başlat',
                 tone:S.ui.metronomeOn ? '' : 'primary', act:'metro-toggle' })}
               ${K.Select({ id:'metro-sig', value:S.ui.metroSig || '4/4', change:'metro-sig',
+                aria:'Ölçü türü',
                 options:ESP.TIME_SIGNATURES.map(t => ({ value:t.id, label:t.label })) })}
             </div>
           </div>
@@ -14676,7 +14691,7 @@ ESP.Screens.studio = (function(){
           ? html`
             <div class="row wrap">
               ${K.Select({ id:'att-piece', value:acik ? acik.id : parcalar[0].id,
-                change:'pick-piece',
+                change:'pick-piece', aria:'Tekrarın yazılacağı parça',
                 options:parcalar.map(p => ({ value:p.id, label:p.name })) })}
               ${K.Button({ label:'Temiz tekrar', tone:'primary', act:'log-clean' })}
               ${K.Button({ label:'Hatalı tekrar', act:'log-dirty' })}
@@ -14732,8 +14747,8 @@ ESP.Screens.studio = (function(){
         ${K.Button({ label:'Ekle', tone:'primary', act:'add-piece', class:'mt-10' })}
         <p class="small muted mt-10">Hazır teknikler:</p>
         <div class="row wrap mt-4">
-          ${map(ESP.TECHNIQUES, t => K.Chip({ label:t.label, act:'add-technique',
-            data:{ 'data-id':t.id } }))}
+          ${map(ESP.TECHNIQUES, t => K.Button({ label:t.label, size:'sm',
+            act:'add-technique', data:{ 'data-id':t.id } }))}
         </div>`,
     }));
 
@@ -14756,6 +14771,7 @@ ESP.Screens.studio = (function(){
         body:html`
           <div class="row wrap">
             ${K.Select({ id:'tw-pick', value:secili.id, change:'pick-twister',
+              aria:'Çalışma metni',
               options:ESP.TONGUE_TWISTERS.map(t => ({ value:t.id,
                 label:'D' + t.level + ' · ' + t.text.slice(0, 40) + '…' })) })}
           </div>
@@ -14782,8 +14798,8 @@ ESP.Screens.studio = (function(){
                 placeholder:'2' }) })}
           </div>
           <div class="row wrap mt-10">
-            ${map(ESP.ARTICULATION_ERRORS, e => K.Chip({ label:e.label,
-              on:(S.ui.errTags || []).indexOf(e.id) >= 0,
+            ${map(ESP.ARTICULATION_ERRORS, e => K.Button({ label:e.label, size:'sm',
+              tone:(S.ui.errTags || []).indexOf(e.id) >= 0 ? 'primary' : '',
               act:'toggle-err', data:{ 'data-id':e.id } }))}
           </div>
           ${K.Button({ label:'Ölçümü kaydet', tone:'primary', act:'add-recording', class:'mt-10' })}`,
@@ -15120,10 +15136,10 @@ ESP.Screens.library = (function(){
         meta:'tek fikir, tek cümle',
         note:'Kitap özeti değil. İki fikir taşıyan not bağlanamaz; bölerek yaz.',
         body:html`
-          ${K.Textarea({ id:'note-text', rows:3,
+          ${K.Textarea({ id:'note-text', rows:3, aria:'Atomik not metni',
             placeholder:'Özgürlük, seçenek çokluğu değil seçebilme kapasitesidir.' })}
           <div class="row wrap mt-10">
-            ${K.Select({ id:'note-book', value:'',
+            ${K.Select({ id:'note-book', value:'', aria:'Notun kaynağı',
               options:[{ value:'', label:'Kaynak seç (isteğe bağlı)' }]
                 .concat((S.books || []).map(b => ({ value:b.id, label:b.author + ' — ' + b.title }))) })}
             ${K.Button({ label:'Notu ekle', tone:'primary', act:'add-note' })}
@@ -15144,7 +15160,7 @@ ESP.Screens.library = (function(){
       label:'NOTLAR',
       meta:hepsi.length + ' not' + (kavram ? ' · ' + (ESP.CONCEPT_BY_ID[kavram] || {}).label : ''),
       action:html`${K.Input({ id:'note-q', value:S.ui.noteQuery || '',
-          placeholder:'Not ara…', change:'note-query', size:'sm' })}
+          placeholder:'Not ara…', change:'note-query', size:'sm', aria:'Not ara' })}
         ${when(kavram, () => K.Button({ label:'Süzgeci kaldır', size:'sm', act:'clear-concept' }))}`,
       wide:true,
       body:html`${map(hepsi, n => {
@@ -15154,8 +15170,8 @@ ESP.Screens.library = (function(){
             <p class="noterow__text">${n.text}</p>
             <div class="noterow__meta">
               ${when(kitap, () => html`<span class="tiny dim">${kitap.author} · ${kitap.title}</span>`)}
-              ${map(n.concepts, c => K.Chip({ label:(ESP.CONCEPT_BY_ID[c] || {}).label || c,
-                act:'filter-concept', data:{ 'data-id':c } }))}
+              ${map(n.concepts, c => K.Button({ size:'sm', act:'filter-concept',
+                label:(ESP.CONCEPT_BY_ID[c] || {}).label || c, data:{ 'data-id':c } }))}
               <span class="tiny dim">${(n.links || []).length} bağ</span>
               ${K.Button({ label:'Bağla', size:'sm', act:'open-link', data:{ 'data-id':n.id } })}
               ${K.Button({ label:'Sil', size:'sm', act:'del-note', data:{ 'data-id':n.id } })}
@@ -15186,9 +15202,10 @@ ESP.Screens.library = (function(){
     }
     return html`
       <div class="linkform">
-        ${K.Select({ id:'link-to', options:adaylar.map(x => ({ value:x.id,
-          label:x.text.slice(0, 60) })) })}
-        ${K.Input({ id:'link-why', placeholder:'Neden bağlı? (bir cümle)' })}
+        ${K.Select({ id:'link-to', aria:'Bağlanacak not',
+          options:adaylar.map(x => ({ value:x.id, label:x.text.slice(0, 60) })) })}
+        ${K.Input({ id:'link-why', placeholder:'Neden bağlı? (bir cümle)',
+          aria:'Bağın gerekçesi' })}
         ${K.Button({ label:'Bağla', tone:'primary', size:'sm', act:'do-link',
           data:{ 'data-id':n.id } })}
         ${K.Button({ label:'Vazgeç', size:'sm', act:'close-link' })}
@@ -15901,7 +15918,10 @@ ESP.Screens.office = (function(){
           note:'Her ajan yalnızca kendi alanına bakar. Alan dışı bir soru gelirse '
              + 'sahibine yönlendirir, cevap uydurmaz.',
           wide:true,
-          body:html`<div class="desks">${map(uzmanlar, deskCard)}</div>`,
+          /* Masa kartlarinin basligi h3'tur; araya bir h2 girmezse baslik
+             sirasi h1'den h3'e atlar ve ekran okuyucu bir seviye kaybeder. */
+          body:html`${K.SectionTitle('Uzman masaları')}
+            <div class="desks">${map(uzmanlar, deskCard)}</div>`,
         }),
 
         K.Entry({
@@ -16064,7 +16084,7 @@ ESP.Screens.team = (function(){
             </div>
             <div class="composer mt-10">
               ${K.Textarea({ id:'chat-input', rows:2, class:'composer__input',
-                placeholder:'Sorunu yaz…' })}
+                aria:'Ajana sorun', placeholder:'Sorunu yaz…' })}
               ${K.Mic({ target:'chat-input' })}
               ${K.Button({ label:'Gönder', tone:'primary', act:'send-chat' })}
             </div>`,
@@ -16420,6 +16440,7 @@ ESP.Screens.analytics = (function(){
           : pencere + ' günün ' + ehs.enteredDays + '\'inden hesaplandı. '
             + 'Girilmemiş gün toplama girmez.',
         action:K.Select({ value:String(pencere), change:'radar-window', size:'sm',
+          aria:'Ölçüm penceresi',
           options:[{ value:'7', label:'7 gün' }, { value:'14', label:'14 gün' },
             { value:'30', label:'30 gün' }] }),
         wide:true,
@@ -16502,6 +16523,7 @@ ESP.Screens.analytics = (function(){
         note:'Girilmemiş gün grafikte boşluktur, sıfır değildir. '
            + 'Ortalama yalnızca kayıtlı günlerden hesaplanır.',
         action:K.Select({ value:disipl, change:'series-disc', size:'sm',
+          aria:'Disiplin süzgeci',
           options:[{ value:'all', label:'Tümü' }]
             .concat(ESP.DISCIPLINES.map(d => ({ value:d.id, label:d.short }))) }),
         wide:true,
@@ -16770,7 +16792,8 @@ ESP.Screens.profile = (function(){
                     data:{ 'data-id':x.id } })}`)}`,
               ]) })}
             <div class="row mt-10">
-              ${K.Input({ id:'pf-new', placeholder:'Yeni profil adı' })}
+              ${K.Input({ id:'pf-new', placeholder:'Yeni profil adı',
+                aria:'Yeni profil adı' })}
               ${K.Button({ label:'Ekle', act:'add-profile' })}
             </div>`,
         }),
