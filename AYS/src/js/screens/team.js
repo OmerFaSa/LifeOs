@@ -64,6 +64,65 @@ R.Screens.team = (function(){
     });
   }
 
+  /* ---- sesli sohbet ------------------------------------------------
+
+     Ekran bunu yeniden CIZMEZ, yalnizca panelin icini gunceller: her
+     turda tam cizim yapilsa mikrofon dugmesi DOM'dan gider ve
+     tarayici oturumu keser. */
+  let sesli = { acik:false, durum:'kapalı', metin:'', hata:null };
+
+  const DURUM_METNI = {
+    'dinliyor':  { t:'Dinliyorum', a:'Sustuğunda sıra ona geçecek' },
+    'düşünüyor': { t:'Düşünüyor',  a:'Raporuna bakıyor ve cümleyi kuruyor' },
+    'konuşuyor': { t:'Konuşuyor',  a:'Kesmek için Kes\'e bas ya da boşluk tuşu' },
+    'kapalı':    { t:'Kapalı',     a:'' },
+  };
+
+  function voiceCard(){
+    if(!R.Talk.supported()) return null;
+    const agent = current();
+    const d = DURUM_METNI[sesli.durum] || DURUM_METNI['kapalı'];
+    return K.Card({
+      title:'Sesli sohbet', sub:agent.name + ' ile sıra sırayla',
+      body:html`
+        <div class="ses" id="ses-panel" data-durum="${sesli.durum}">
+          <div class="ses__hal">
+            <span class="ses__isik" aria-hidden="true"></span>
+            <div class="minw0">
+              <b class="ses__t">${d.t}</b>
+              <span class="ses__a">${d.a}</span>
+            </div>
+          </div>
+          <p class="ses__metin" id="ses-metin">${sesli.metin || ''}</p>
+        </div>
+        ${when(sesli.hata, () => K.Notice({ tone:'warn', class:'mt-10', body:sesli.hata }))}
+        ${when(!sesli.acik && !R.Talk.sesliCevapVar(), () => K.Notice({ tone:'info', class:'mt-10',
+          body:'Bu tarayıcıda sesli cevap yok. Sıra yine geçer; cevabı okursun.' }))}
+        <div class="row mt-10">
+          ${when(!sesli.acik, () => K.Button({ label:'Sesli sohbeti başlat', tone:'primary',
+            icon:'mic', act:'talk-start' }))}
+          ${when(sesli.acik, () => html`
+            ${K.Button({ label:'Bitir', act:'talk-stop' })}
+            ${K.Button({ label:'Kes', act:'talk-cut',
+              disabled:sesli.durum !== 'konuşuyor' })}`)}
+        </div>`,
+    });
+  }
+
+  /* Panelin icini YERINDE gunceller — tam cizim mikrofonu koparir. */
+  function panelTazele(st){
+    sesli = { acik:st.acik, durum:st.durum, metin:st.metin, hata:st.hata };
+    const p = document.getElementById('ses-panel');
+    if(!p){ R.App.render(); return; }
+    p.setAttribute('data-durum', st.durum);
+    const d = DURUM_METNI[st.durum] || DURUM_METNI['kapalı'];
+    const t = p.querySelector('.ses__t'), a2 = p.querySelector('.ses__a');
+    const m = document.getElementById('ses-metin');
+    if(t) t.textContent = d.t;
+    if(a2) a2.textContent = d.a;
+    if(m) m.textContent = st.metin || '';
+  }
+
   async function render(){
     O.resetBriefs();
     const agent = current();
@@ -110,6 +169,10 @@ R.Screens.team = (function(){
       ])),
 
       K.Span(4, K.Stack([
+        /* Ses tanima yoksa voiceCard() null doner: olmayan bir
+           yetenegin dugmesini gostermek, basip bir sey olmamasindan
+           kotudur. */
+        voiceCard(),
         K.Card({
           title:'Masasındaki rapor', sub:'Kural motoru hesapladı; ajan bunu yorumlar',
           actions:K.Button({ label:'Brifing', icon:'refresh', size:'sm', act:'team-brief' }),
@@ -131,7 +194,7 @@ R.Screens.team = (function(){
             </button>`)}</div>`,
         }),
         raw(UI.rail([agent.hint, 'ai-coach'])),
-      ])),
+      ].filter(Boolean))),
     ]));
   }
 
@@ -200,9 +263,30 @@ R.Screens.team = (function(){
       const id = el.dataset.value;
       if(!R.AGENT_BY_ID[id]) return;
       if(busy && controller) controller.abort();
+      /* Koc degisirse sesli oturum biter: birine baslayip digerinden
+         cevap almak sohbeti degil karisikligi buyutur. */
+      if(R.Talk.isActive()){ R.Talk.stop(); sesli.acik = false; }
       S.ui.officeAgent = id;
       R.App.render();
     },
+    async 'talk-start'(){
+      const r = R.Talk.start(current().id, {
+        onChange:panelTazele,
+        /* Ekranin KENDI gonderme yolu: ses ikinci bir kapi acmaz. */
+        async gonder(soru){
+          await run('ask', soru);
+          const liste = O.chatOf(current().id);
+          const son = liste[liste.length - 1];
+          return son && son.role === 'agent' ? son.text : '';
+        },
+      });
+      if(!r.ok){ UI.toast(r.message || 'Sesli sohbet başlatılamadı'); return; }
+      sesli.acik = true;
+      R.App.render();
+    },
+    async 'talk-stop'(){ R.Talk.stop(); sesli.acik = false; R.App.render(); },
+    async 'talk-cut'(){ if(!R.Talk.kes()) UI.toast('Şu an konuşmuyor'); },
+
     async 'team-send'(){
       const el = document.getElementById('team-input');
       const q = el ? el.value.trim() : '';

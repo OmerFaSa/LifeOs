@@ -2753,6 +2753,44 @@ button.listitem.is-on{ background:var(--primary-soft); }
 .dsgn--map::after{ inset:4px 4px 8px auto; width:7px; border-radius:2px;
   background:var(--border-strong); }
 
+/* ---- sesli sohbet ---------------------------------------------------
+
+   Panelin tek işi ŞU AN SIRA KİMDE sorusunu cevaplamak. Üç durum bir
+   bakışta ayrılmalı: renk tek başına yetmez, ışığın DAVRANIŞI da
+   farklıdır — dinlerken nabız gibi atar, düşünürken söner, konuşurken
+   sabit durur. */
+.ses{
+  display:flex; flex-direction:column; gap:9px;
+  padding:14px 15px; border-radius:var(--r-sm);
+  background:var(--surface-2); min-width:0;
+}
+.ses__hal{ display:flex; align-items:center; gap:11px; min-width:0; }
+.ses__isik{ width:11px; height:11px; border-radius:50%; flex:none; background:var(--text-3); }
+.ses__t{ display:block; font-size:var(--fs-md); font-weight:700; letter-spacing:-.005em; }
+.ses__a{ display:block; font-size:var(--fs-xs); color:var(--text-3); margin-top:1px; }
+.ses__metin{
+  margin:0; font-size:var(--fs-sm); color:var(--text-2); line-height:1.5;
+  min-height:1.5em; overflow-wrap:anywhere;
+}
+.ses__metin:empty::before{ content:'…'; color:var(--text-3); }
+
+.ses[data-durum="dinliyor"] .ses__isik{
+  background:var(--primary); animation:sesnabiz 1.5s ease infinite;
+}
+.ses[data-durum="düşünüyor"] .ses__isik{
+  background:var(--accent); animation:sessonuk 1.1s ease infinite;
+}
+.ses[data-durum="konuşuyor"] .ses__isik{
+  background:var(--primary);
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+@keyframes sesnabiz{
+  0%,100%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--primary) 45%, transparent); }
+  60%{ box-shadow:0 0 0 7px color-mix(in srgb, var(--primary) 0%, transparent); }
+}
+@keyframes sessonuk{ 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+@media (prefers-reduced-motion:reduce){ .ses__isik{ animation:none !important; } }
+
 /* ==== css/designs.css ==== */
 /* DÜZEN DİLLERİ — AYS kabuğuna yazılmış hâli.
 
@@ -12778,6 +12816,330 @@ R.Voice = (function(){
     score, quality, byURI, speechText, overrides,
     PROFILES, PACE, PACE_ORDER, paceOf, LANG, CHUNK, MIN_HOLD, SPELL,
   };
+})();
+
+/* ==== js/core/listen.js ==== */
+/* SES TANIMA — dikte katmanı.
+
+   AYS'de ses tanıma vardı ama tek bir ekranın içine gömülüydü
+   (`learn.js` → sesli not) ve tek atışlıktı: konuşursun, biter,
+   metin alana düşer. Sıra alma döngüsü bunu kullanamazdı çünkü
+   döngünün bilmesi gereken şey «kullanıcı SUSTU mu?» sorusudur ve
+   tek atışlık tanıma bunu söylemez.
+
+   Bu katman tanımayı ekrandan ayırır ve iki şey ekler:
+
+     · ARA SONUÇ. Konuşurken yazılanı görürsün; sözün metne
+       döndüğünü beklemeden anlarsın.
+     · SÜREKLİ OTURUM. Tanıma cümle bitince kapanmaz; sessizliği
+       döngü ölçer (bkz. core/talk.js).
+
+   Desteklenmeyen tarayıcıda katman sessizce yok olur: düğme
+   çizilmez, elle giriş yolu zaten her yerde durur. */
+
+window.R = window.R || {};
+
+R.Listen = (function(){
+
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+
+  /* Aynı anda tek oturum: iki alan birden dinlerse hangisine
+     yazıldığı belirsizleşir. */
+  let aktif = null;
+
+  function supported(){ return !!Rec; }
+
+  function start(opts){
+    const o = opts || {};
+    if(!Rec){ if(o.onError) o.onError('unsupported'); return null; }
+    stop();
+
+    let rec;
+    try{ rec = new Rec(); }
+    catch(e){ if(o.onError) o.onError('unsupported'); return null; }
+
+    rec.lang = o.lang || 'tr-TR';
+    rec.continuous = o.continuous !== false;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    /* Sabitlenmiş metin burada birikir; ara sonuç bunun üstüne
+       eklenir ama birikime YAZILMAZ — yoksa aynı söz iki kez geçer. */
+    let sabit = '';
+
+    rec.onresult = ev => {
+      let ara = '';
+      for(let i = ev.resultIndex; i < ev.results.length; i++){
+        const p = ev.results[i][0].transcript;
+        if(ev.results[i].isFinal) sabit += p;
+        else ara += p;
+      }
+      const metin = (sabit + ara).replace(/\s+/g, ' ').trim();
+      if(o.onText) o.onText(metin, !ara);
+    };
+
+    rec.onerror = ev => {
+      const kod = (ev && ev.error) || 'error';
+      /* «no-speech» bir hata değil, sessizliktir. */
+      if(kod !== 'no-speech' && kod !== 'aborted' && o.onError) o.onError(kod);
+    };
+
+    rec.onend = () => {
+      const vardi = aktif;
+      aktif = null;
+      if(vardi && o.onEnd) o.onEnd(sabit.replace(/\s+/g, ' ').trim());
+    };
+
+    try{ rec.start(); }
+    catch(e){ if(o.onError) o.onError('start'); return null; }
+
+    aktif = { rec, target:o.target || null };
+    return aktif;
+  }
+
+  function stop(){
+    if(!aktif) return;
+    const a = aktif;
+    aktif = null;
+    try{ a.rec.stop(); }catch(e){}
+  }
+
+  function isActive(){ return !!aktif; }
+
+  /* Bir metin alanına bağlanan dikte. Alandaki mevcut metin KORUNUR:
+     yarım yazıp sonra konuşmaya başlayabilirsin. */
+  function dictateInto(el, opts){
+    const o = opts || {};
+    if(!el) return null;
+    const taban = el.value ? el.value.replace(/\s+$/, '') + ' ' : '';
+    return start({
+      target:el.id || null,
+      lang:o.lang,
+      onText(metin){
+        el.value = taban + metin;
+        try{ el.selectionStart = el.selectionEnd = el.value.length; }catch(e){}
+        if(o.onText) o.onText(el.value);
+      },
+      onEnd(son){ if(o.onEnd) o.onEnd(taban + son); },
+      onError:o.onError,
+    });
+  }
+
+  const MESAJ = {
+    unsupported:'Bu tarayıcı ses tanımayı desteklemiyor. Chrome ya da Edge dene.',
+    'not-allowed':'Mikrofon izni verilmedi.',
+    'service-not-allowed':'Mikrofon izni verilmedi.',
+    'audio-capture':'Mikrofon bulunamadı.',
+    network:'Ses tanıma için bağlantı gerekiyor.',
+    start:'Mikrofon başlatılamadı.',
+  };
+  function message(kod){ return MESAJ[kod] || 'Ses tanıma çalışmadı.'; }
+
+  return { supported, start, stop, isActive, dictateInto, message };
+})();
+
+/* ==== js/core/talk.js ==== */
+/* SESLİ SOHBET — sıra alma döngüsü.
+
+   Dikte ile sohbet arasındaki fark düğmedir. Dikte: mikrofona
+   söylersin, alana yazılır, «Sor»a basarsın, cevabı okursun. Sohbet:
+   sen susarsın, sıra koça geçer, o konuşur, susar, sıra sana döner.
+   Arada düğme yoktur.
+
+   Döngü dört durumdan geçer ve her zaman bu sırayla:
+
+     dinliyor → düşünüyor → konuşuyor → dinliyor …
+
+   ─────────────────────────────────────────────────────────────────
+
+   AKUSTİK GERİ BESLEME — bu katmanın en önemli kısıtı
+
+   Koç konuşurken mikrofon AÇIK KALAMAZ. Kalırsa tanıyıcı koçun kendi
+   sesini duyar, metne çevirir ve koç kendi cümlesine cevap vermeye
+   başlar. Tarayıcının konuşma tanıma katmanında yankı engelleme
+   yoktur.
+
+   Doğrudan sonucu: SESLE SÖZ KESİLEMEZ. «Dur» diye bağırmak çalışmaz,
+   çünkü o anda seni duyan kimse yok. Söz kesme dokunmayla olur: bir
+   düğme ya da boşluk tuşu. Bu bir eksiklik değil, kısıtın dürüst
+   karşılığıdır.
+
+   ─────────────────────────────────────────────────────────────────
+
+   DEĞİŞMEZ: ses ikinci bir yol açmaz.
+
+   Sesli sohbet ekranın kendi gönderme yolundan geçer — yazarak
+   sorduğun soruyla tamamen aynı yol: aynı brifing, aynı ev kuralları
+   denetimi, aynı kayıt. Ses yalnızca GİRİŞ ve ÇIKIŞ biçimidir.
+
+   R.Voice.speak() konuşmanın bittiğini haber verir ve üç tuzağı
+   (uzun metin kesilmesi, gelmeyen onend, iptal) zaten kapatır;
+   döngü onu bekleyerek ilerler. */
+
+window.R = window.R || {};
+
+R.Talk = (function(){
+
+  /* Kullanıcı sustu mu? Tanıyıcı bunu söylemiyor; son metin
+     değişiminden bu yana geçen süreyle karar veriyoruz.
+
+     1.400 ms bilerek uzun: cümle ortasında düşünmek için bir saniye
+     yetmiyor, iki saniye ise sohbeti ağırlaştırıyor. */
+  const SESSIZLIK_MS = 1400;
+
+  /* Koç sustuktan sonra mikrofonu açmadan önceki bekleme. Sıfır
+     olursa tarayıcı bazen son heceyi mikrofona düşürüyor. */
+  const SIRA_GECIS_MS = 260;
+
+  let oturum = null;
+
+  function snapshot(){
+    if(!oturum) return { acik:false, durum:'kapalı', agentId:null, metin:'', hata:null };
+    return { acik:!oturum.kapandi, durum:oturum.durum, agentId:oturum.agentId,
+      metin:oturum.metin, hata:oturum.hata };
+  }
+
+  function durumaGec(yeni, ek){
+    if(!oturum) return;
+    oturum.durum = yeni;
+    if(ek) Object.assign(oturum, ek);
+    try{ oturum.onChange(snapshot()); }catch(e){}
+  }
+
+  function supported(){ return R.Listen && R.Listen.supported(); }
+  /* Ses çıkışı olmadan da sohbet kurulabilir: sıra yine geçer, cevap
+     yalnızca yazıyla görünür. Kullanıcıya bu SÖYLENİR. */
+  function sesliCevapVar(){ return !!(R.Voice && R.Voice.available && R.Voice.available()); }
+
+  /* ------------------------------------------------------ dinleme turu */
+
+  function sessizlikSay(){
+    if(!oturum) return;
+    clearTimeout(oturum.saat);
+    oturum.saat = setTimeout(() => {
+      if(!oturum || oturum.durum !== 'dinliyor') return;
+      R.Listen.stop();          /* onEnd tetiklenir, tur orada kapanır */
+    }, SESSIZLIK_MS);
+  }
+
+  function dinle(){
+    if(!oturum || oturum.kapandi) return;
+    durumaGec('dinliyor', { metin:'', hata:null });
+
+    R.Listen.start({
+      continuous:true,
+      onText(metin){
+        if(!oturum || oturum.durum !== 'dinliyor') return;
+        oturum.metin = metin;
+        try{ oturum.onChange(snapshot()); }catch(e){}
+        sessizlikSay();
+      },
+      onEnd(son){
+        if(!oturum || oturum.kapandi) return;
+        clearTimeout(oturum.saat);
+        const soru = (son || oturum.metin || '').trim();
+        if(!soru){
+          /* Hiç konuşulmadı: döngü ölmez, yeniden dinler. */
+          setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, SIRA_GECIS_MS);
+          return;
+        }
+        cevapla(soru);
+      },
+      onError(kod){
+        if(!oturum || oturum.kapandi) return;
+        clearTimeout(oturum.saat);
+        /* İzin sorunları döngüyü bitirir; geçici hatalar bitirmez. */
+        if(kod === 'not-allowed' || kod === 'service-not-allowed' || kod === 'unsupported'){
+          durumaGec('kapalı', { hata:R.Listen.message(kod) });
+          stop();
+          return;
+        }
+        durumaGec('dinliyor', { hata:R.Listen.message(kod) });
+        setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, 500);
+      },
+    });
+  }
+
+  /* ------------------------------------------------------- cevap turu */
+
+  async function cevapla(soru){
+    if(!oturum || oturum.kapandi) return;
+    const agentId = oturum.agentId;
+    durumaGec('düşünüyor', { metin:soru });
+
+    let cevap = '';
+    try{
+      /* Ekranın kendi gönderme yolu — ses ikinci bir kapı açmaz. */
+      cevap = await oturum.gonder(soru);
+    }catch(e){
+      cevap = 'Cevap üretilemedi.';
+    }
+    if(!oturum || oturum.kapandi) return;
+
+    if(!sesliCevapVar() || !cevap){
+      setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, SIRA_GECIS_MS);
+      return;
+    }
+
+    durumaGec('konuşuyor');
+    let neden = 'end';
+    try{
+      neden = await R.Voice.speak(cevap, R.Voice.profileFor(agentId));
+    }catch(e){ neden = 'error'; }
+    if(!oturum || oturum.kapandi) return;
+
+    /* Söz kesildiyse mikrofon HEMEN açılır: kesmişse söyleyecek bir
+       şeyi var demektir. */
+    const bekle = neden === 'cancelled' ? 0 : SIRA_GECIS_MS;
+    setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, bekle);
+  }
+
+  /* ----------------------------------------------------------- denetim */
+
+  /* `opts.gonder(soru)` ekranın kendi gönderme yoludur ve koçun
+     CEVAP METNİNİ döndürmelidir. Döngü bu metni seslendirir. */
+  function start(agentId, opts){
+    const o = opts || {};
+    if(!supported()) return { ok:false, reason:'unsupported',
+      message:R.Listen ? R.Listen.message('unsupported') : 'Ses tanıma yok.' };
+    if(typeof o.gonder !== 'function') return { ok:false, reason:'no-send' };
+    stop();
+    oturum = {
+      agentId:agentId || 'patron', durum:'kapalı', metin:'', hata:null,
+      saat:null, kapandi:false,
+      gonder:o.gonder,
+      onChange:o.onChange || function(){},
+    };
+    durumaGec('dinliyor');
+    dinle();
+    return { ok:true };
+  }
+
+  /* Sözü kes: koç susar, sıra hemen sana döner.
+     Sesle değil DOKUNMAYLA — sebebi dosyanın başında. */
+  function kes(){
+    if(!oturum || oturum.kapandi) return false;
+    if(oturum.durum !== 'konuşuyor') return false;
+    try{ R.Voice.cancel(); }catch(e){}
+    return true;
+  }
+
+  function stop(){
+    const o = oturum;
+    oturum = null;
+    if(!o) return;
+    o.kapandi = true;
+    clearTimeout(o.saat);
+    try{ R.Listen.stop(); }catch(e){}
+    try{ R.Voice.cancel(); }catch(e){}
+    try{ o.onChange({ acik:false, durum:'kapalı', agentId:o.agentId, metin:'', hata:o.hata }); }catch(e){}
+  }
+
+  function isActive(){ return !!(oturum && !oturum.kapandi); }
+  function durum(){ return snapshot(); }
+
+  return { supported, sesliCevapVar, start, stop, kes, isActive, durum,
+    SESSIZLIK_MS, SIRA_GECIS_MS };
 })();
 
 /* ==== js/core/journal.js ==== */
@@ -25463,6 +25825,65 @@ R.Screens.team = (function(){
     });
   }
 
+  /* ---- sesli sohbet ------------------------------------------------
+
+     Ekran bunu yeniden CIZMEZ, yalnizca panelin icini gunceller: her
+     turda tam cizim yapilsa mikrofon dugmesi DOM'dan gider ve
+     tarayici oturumu keser. */
+  let sesli = { acik:false, durum:'kapalı', metin:'', hata:null };
+
+  const DURUM_METNI = {
+    'dinliyor':  { t:'Dinliyorum', a:'Sustuğunda sıra ona geçecek' },
+    'düşünüyor': { t:'Düşünüyor',  a:'Raporuna bakıyor ve cümleyi kuruyor' },
+    'konuşuyor': { t:'Konuşuyor',  a:'Kesmek için Kes\'e bas ya da boşluk tuşu' },
+    'kapalı':    { t:'Kapalı',     a:'' },
+  };
+
+  function voiceCard(){
+    if(!R.Talk.supported()) return null;
+    const agent = current();
+    const d = DURUM_METNI[sesli.durum] || DURUM_METNI['kapalı'];
+    return K.Card({
+      title:'Sesli sohbet', sub:agent.name + ' ile sıra sırayla',
+      body:html`
+        <div class="ses" id="ses-panel" data-durum="${sesli.durum}">
+          <div class="ses__hal">
+            <span class="ses__isik" aria-hidden="true"></span>
+            <div class="minw0">
+              <b class="ses__t">${d.t}</b>
+              <span class="ses__a">${d.a}</span>
+            </div>
+          </div>
+          <p class="ses__metin" id="ses-metin">${sesli.metin || ''}</p>
+        </div>
+        ${when(sesli.hata, () => K.Notice({ tone:'warn', class:'mt-10', body:sesli.hata }))}
+        ${when(!sesli.acik && !R.Talk.sesliCevapVar(), () => K.Notice({ tone:'info', class:'mt-10',
+          body:'Bu tarayıcıda sesli cevap yok. Sıra yine geçer; cevabı okursun.' }))}
+        <div class="row mt-10">
+          ${when(!sesli.acik, () => K.Button({ label:'Sesli sohbeti başlat', tone:'primary',
+            icon:'mic', act:'talk-start' }))}
+          ${when(sesli.acik, () => html`
+            ${K.Button({ label:'Bitir', act:'talk-stop' })}
+            ${K.Button({ label:'Kes', act:'talk-cut',
+              disabled:sesli.durum !== 'konuşuyor' })}`)}
+        </div>`,
+    });
+  }
+
+  /* Panelin icini YERINDE gunceller — tam cizim mikrofonu koparir. */
+  function panelTazele(st){
+    sesli = { acik:st.acik, durum:st.durum, metin:st.metin, hata:st.hata };
+    const p = document.getElementById('ses-panel');
+    if(!p){ R.App.render(); return; }
+    p.setAttribute('data-durum', st.durum);
+    const d = DURUM_METNI[st.durum] || DURUM_METNI['kapalı'];
+    const t = p.querySelector('.ses__t'), a2 = p.querySelector('.ses__a');
+    const m = document.getElementById('ses-metin');
+    if(t) t.textContent = d.t;
+    if(a2) a2.textContent = d.a;
+    if(m) m.textContent = st.metin || '';
+  }
+
   async function render(){
     O.resetBriefs();
     const agent = current();
@@ -25509,6 +25930,10 @@ R.Screens.team = (function(){
       ])),
 
       K.Span(4, K.Stack([
+        /* Ses tanima yoksa voiceCard() null doner: olmayan bir
+           yetenegin dugmesini gostermek, basip bir sey olmamasindan
+           kotudur. */
+        voiceCard(),
         K.Card({
           title:'Masasındaki rapor', sub:'Kural motoru hesapladı; ajan bunu yorumlar',
           actions:K.Button({ label:'Brifing', icon:'refresh', size:'sm', act:'team-brief' }),
@@ -25530,7 +25955,7 @@ R.Screens.team = (function(){
             </button>`)}</div>`,
         }),
         raw(UI.rail([agent.hint, 'ai-coach'])),
-      ])),
+      ].filter(Boolean))),
     ]));
   }
 
@@ -25599,9 +26024,30 @@ R.Screens.team = (function(){
       const id = el.dataset.value;
       if(!R.AGENT_BY_ID[id]) return;
       if(busy && controller) controller.abort();
+      /* Koc degisirse sesli oturum biter: birine baslayip digerinden
+         cevap almak sohbeti degil karisikligi buyutur. */
+      if(R.Talk.isActive()){ R.Talk.stop(); sesli.acik = false; }
       S.ui.officeAgent = id;
       R.App.render();
     },
+    async 'talk-start'(){
+      const r = R.Talk.start(current().id, {
+        onChange:panelTazele,
+        /* Ekranin KENDI gonderme yolu: ses ikinci bir kapi acmaz. */
+        async gonder(soru){
+          await run('ask', soru);
+          const liste = O.chatOf(current().id);
+          const son = liste[liste.length - 1];
+          return son && son.role === 'agent' ? son.text : '';
+        },
+      });
+      if(!r.ok){ UI.toast(r.message || 'Sesli sohbet başlatılamadı'); return; }
+      sesli.acik = true;
+      R.App.render();
+    },
+    async 'talk-stop'(){ R.Talk.stop(); sesli.acik = false; R.App.render(); },
+    async 'talk-cut'(){ if(!R.Talk.kes()) UI.toast('Şu an konuşmuyor'); },
+
     async 'team-send'(){
       const el = document.getElementById('team-input');
       const q = el ? el.value.trim() : '';
@@ -26764,6 +27210,9 @@ R.App = (function(){
   }
 
   function go(route){
+    /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
+       acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
+    if(R.Talk && R.Talk.isActive()) R.Talk.stop();
     S.route = route;
     S.sidebarOpen = false;
     if(route !== 'exams') S.ui.examOpen = S.ui.examOpen;
@@ -27014,7 +27463,15 @@ R.App = (function(){
       if(R.Palette.isOpen()) R.Palette.close(); else R.Palette.open();
       return;
     }
+    /* Sesli sohbette BOSLUK sozu keser. Sesle kesilemiyor (koc
+       konusurken mikrofon kapali olmak zorunda — bkz. core/talk.js),
+       bu yuzden kesme dokunmayla olur ve en yakin tus bosluktur.
+       Bir alana yaziyorken bosluk elbette bosluktur. */
+    if(e.key === ' ' && R.Talk && R.Talk.isActive() && !typingInField(e)){
+      if(R.Talk.kes()){ e.preventDefault(); return; }
+    }
     if(e.key === 'Escape'){
+      if(R.Talk && R.Talk.isActive()){ R.Talk.stop(); render(); return; }
       if(R.Palette.isOpen()){ R.Palette.close(); return; }
       if(R.Palette.isFocusOpen()){ R.Palette.closeFocus(); return; }
       if(UI.isHintOpen()){ UI.closeHint(); return; }

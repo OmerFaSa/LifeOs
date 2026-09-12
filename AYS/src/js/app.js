@@ -268,6 +268,9 @@ R.App = (function(){
   }
 
   function go(route){
+    /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
+       acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
+    if(R.Talk && R.Talk.isActive()) R.Talk.stop();
     S.route = route;
     S.sidebarOpen = false;
     if(route !== 'exams') S.ui.examOpen = S.ui.examOpen;
@@ -518,7 +521,15 @@ R.App = (function(){
       if(R.Palette.isOpen()) R.Palette.close(); else R.Palette.open();
       return;
     }
+    /* Sesli sohbette BOSLUK sozu keser. Sesle kesilemiyor (koc
+       konusurken mikrofon kapali olmak zorunda — bkz. core/talk.js),
+       bu yuzden kesme dokunmayla olur ve en yakin tus bosluktur.
+       Bir alana yaziyorken bosluk elbette bosluktur. */
+    if(e.key === ' ' && R.Talk && R.Talk.isActive() && !typingInField(e)){
+      if(R.Talk.kes()){ e.preventDefault(); return; }
+    }
     if(e.key === 'Escape'){
+      if(R.Talk && R.Talk.isActive()){ R.Talk.stop(); render(); return; }
       if(R.Palette.isOpen()){ R.Palette.close(); return; }
       if(R.Palette.isFocusOpen()){ R.Palette.closeFocus(); return; }
       if(UI.isHintOpen()){ UI.closeHint(); return; }
