@@ -478,5 +478,5 @@ R.Palette = (function(){
   function isFocusOpen(){ return !!document.getElementById('focusmode'); }
 
   return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock,
-    veriKaydet, veriKomutu };
+    veriKaydet, veriKomutu, commands };
 })();
