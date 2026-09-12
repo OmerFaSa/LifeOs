@@ -21,8 +21,81 @@ ESP.Screens.studio = (function(){
   const TABS = [
     { id:'muzik',    label:'Müzik' },
     { id:'diksiyon', label:'Diksiyon' },
+    { id:'kulak',    label:'Kulak' },
     { id:'ilerleme', label:'İlerleme' },
   ];
+
+  /* ------------------------------------------------------------------ kulak
+
+     Metronom parmakları eğitir, kulak eğitmez. Hızlı çalan ama duymayan
+     biri repertuarını genişletemez: her yeni parçayı sıfırdan ezberler.
+
+     Buradaki hiçbir egzersiz bir yetenek testi değildir — «mutlak kulak»
+     diye bir kapı yok ve bilerek yok (ESP.PEDAGOGIC §talent). Ölçülen tek
+     şey, deneme başına isabet. */
+  function earRows(){
+    const eskiyen = (S.pieces || []).filter(p => {
+      if(p.kind !== 'piece') return false;
+      const son = (p.attempts || []).slice(-1)[0];
+      if(!son) return false;
+      return U.diffDays(son.date, U.todayISO()) > ESP.REPERTOIRE_STALE_DAYS;
+    });
+
+    return [
+      K.Entry({
+        label:'KULAK EGZERSİZLERİ', hint:'ear',
+        meta:ESP.EAR_DRILLS.length + ' egzersiz',
+        note:'Ölçülen şey yetenek değil isabet: yirmi denemede kaç doğru. '
+           + 'Sistem sesini dinlemez; sayıyı sen girersin.',
+        wide:true,
+        body:K.Table({ tight:true,
+          headers:[{ label:'Kademe', num:true }, 'Egzersiz', 'Ne yapılır', 'Ne ölçülür'],
+          rows:ESP.EAR_DRILLS.map(d => [String(d.level), d.label, d.task, d.measures]) }),
+      }),
+
+      K.Entry({
+        label:'ARALIKLAR', hint:'interval',
+        meta:ESP.INTERVALS.length + ' aralık',
+        note:'Kanca (hook) bir ezber kolaylığıdır, kural değil: kendi kancanı '
+           + 'bulursan daha iyi tutar.',
+        wide:true,
+        body:K.Table({ tight:true,
+          headers:['Aralık', { label:'Yarım ses', num:true }, 'Kanca'],
+          rows:ESP.INTERVALS.map(i => [i.label, String(i.semitones), i.hook]) }),
+      }),
+
+      K.Entry({
+        label:'CAGED', hint:'caged',
+        meta:'beş şekil',
+        note:'Bir sır değil bir harita: aynı akorun klavyede beş yerde nasıl '
+           + 'kurulduğunu gösterir.',
+        body:K.Table({ tight:true, headers:['Şekil', 'Kök', 'Not'],
+          rows:ESP.CAGED.map(c => [c.shape, c.root, c.note]) }),
+      }),
+
+      K.Entry({
+        label:'DEŞİFRE', hint:'sight-reading',
+        meta:ESP.SIGHT_READING.length + ' kademe',
+        note:'Okumak çalmaktan ayrı bir beceridir ve ayrı çalışılır.',
+        body:K.Table({ tight:true, headers:[{ label:'Kademe', num:true }, 'Ne', 'Nasıl'],
+          rows:ESP.SIGHT_READING.map(s => [String(s.level), s.label, s.task]) }),
+      }),
+
+      K.Entry({
+        label:'REPERTUAR BAKIMI', hint:'repertoire',
+        meta:eskiyen.length ? eskiyen.length + ' bakımsız' : 'güncel',
+        note:'«Bitti» diye bir hâl yoktur: ' + ESP.REPERTOIRE_STALE_DAYS
+           + ' günden uzun süredir çalınmayan parça çalınabilir ama garanti değil.',
+        body:eskiyen.length
+          ? K.Table({ tight:true, headers:['Parça', 'Son çalınma'],
+              rows:eskiyen.map(p => {
+                const son = (p.attempts || []).slice(-1)[0];
+                return [p.name, son ? son.date : '—'];
+              }) })
+          : K.Empty({ text:'Bakımsız parça yok ya da henüz deneme kaydı girilmedi.' }),
+      }),
+    ];
+  }
 
   /* --------------------------------------------------------------- metronom
 
@@ -345,6 +418,7 @@ ESP.Screens.studio = (function(){
   function render(){
     const tab = S.ui.studioTab || 'muzik';
     const rows = tab === 'diksiyon' ? dictionRows()
+      : tab === 'kulak' ? earRows()
       : tab === 'ilerleme' ? progressRows()
       : musicRows();
 
@@ -357,7 +431,8 @@ ESP.Screens.studio = (function(){
            recetesini yazar. Ikisini birden gostermek, otuz dakikalik bir
            gunu altmis dakikalik bir recete ile karsilamak olurdu. */
         const disc = S.ui.studioTab === 'diksiyon' ? 'diction' : 'music';
-        return (S.ui.studioTab === 'ilerleme' ? [] : [ESP.Parts.coach(disc)]).concat(rows);
+        const sessiz = S.ui.studioTab === 'ilerleme' || S.ui.studioTab === 'kulak';
+        return (sessiz ? [] : [ESP.Parts.coach(disc)]).concat(rows);
       }))}`);
   }
 

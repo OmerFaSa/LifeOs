@@ -60,6 +60,7 @@ async function walkScreens(page, base, target, errors){
   const routes = await page.evaluate(() =>
     ESP.App.SECTIONS.reduce((acc, s) => acc.concat(s.views.map(v => v.route)), []));
 
+  let sekme = 0;
   for(const r of routes){
     await page.evaluate(id => ESP.App.go(id), r);
     await wait(160);
@@ -75,6 +76,38 @@ async function walkScreens(page, base, target, errors){
         errors.push(target + ' · ' + r + ': hata paneli — ' + txt.trim().slice(0, 120));
       }
     }
+
+    /* SEKMELER DE GEZILIR. Ekranin acilmasi, ikinci sekmesinin cizildigini
+       soylemez: cogu ekranda icerigin yarisi ilk sekmede degil. Sekmeleri
+       gezmeyen bir duman testi, kirik bir sekmeye "temiz" der. */
+    const tabs = await page.$$eval('.subtabs .subtab',
+      els => els.map(e => e.getAttribute('data-tab')).filter(Boolean));
+    for(const t of tabs){
+      const btn = await page.$('.subtabs .subtab[data-tab="' + t + '"]');
+      if(!btn) continue;
+      await btn.click();
+      await wait(140);
+      const boyut = await page.$eval('#main', el => el.innerHTML.length);
+      if(boyut < 50) errors.push(target + ' · ' + r + '/' + t + ': sekme boş çizildi');
+      const hata = await page.$('.notice--danger');
+      if(hata){
+        const txt = (await hata.textContent()) || '';
+        if(/çizilemedi|başlatılamadı/.test(txt)){
+          errors.push(target + ' · ' + r + '/' + t + ': hata paneli — '
+            + txt.trim().slice(0, 120));
+        }
+      }
+      sekme++;
+    }
+
+    /* Ipucu anahtari eksikse UI.hint('') doner ve dugme HIC cizilmez:
+       sessiz bir kayip. Cizilen her `data-hint` anahtarinin karsiligi
+       olmali; olmayan anahtar burada gorunur olur. */
+    const eksikIpucu = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('[data-hint]'))
+        .map(e => e.getAttribute('data-hint'))
+        .filter(k => k && !ESP.HINTS[k]));
+    eksikIpucu.forEach(k => errors.push(target + ' · ' + r + ': ipucu yok — ' + k));
   }
 
   /* Komut paleti her yerden acilmali. */
@@ -84,7 +117,7 @@ async function walkScreens(page, base, target, errors){
   await page.keyboard.press('Escape');
   await wait(150);
 
-  console.log('  ' + target + ' → ' + routes.length + ' ekran gezildi');
+  console.log('  ' + target + ' → ' + routes.length + ' ekran, ' + sekme + ' sekme gezildi');
 }
 
 /* Gercek kullanim akisi: profil → oturum → kart → cevap → siradaki is. */

@@ -1,21 +1,29 @@
-# Ofis — yedi ajanlı entelektüel ekip
+# Ofis — dokuz ajanlı entelektüel ekip
 
-ESP'nin içinde yedi küçük ajan çalışır: altı uzman ve bir orkestratör. Hepsi
-aynı veriyi değil, **kendi alanındaki** veriyi okur; birbirleriyle konuşur;
-sonunda **tek bir karar** çıkar.
+ESP'nin içinde dokuz küçük ajan çalışır: **yedi uzman**, **bir koç** ve bir
+orkestratör. Hepsi aynı veriyi değil, **kendi alanındaki** veriyi okur;
+birbirleriyle konuşur; sonunda **tek bir karar** çıkar.
 
 | Ajan | Rol | Neye bakar | Neye bakmaz |
 |---|---|---|---|
-| **Patron** | Baş danışman | Altı uzmanın raporu, çelişkinin çözümü, haftalık rota | Kendi hesabını yapmaz |
+| **Patron** | Baş danışman | Yedi uzman ve bir koçun raporu, çelişkinin çözümü, haftalık rota, kademe | Kendi hesabını yapmaz |
 | **Polyglot Mentor** | Yabancı dil | Aktif kelime, SRS retansiyonu, shadowing süresi, i+1 üretim | Felsefi tez, müzik teorisi, üslup |
 | **Socrates** | Felsefe ve diyalektik | Argüman tutarlılığı, safsata bulguları, açık tezler, primer metin | Dil hatası, gitar tekniği |
 | **Maestro** | Müzik ve gitar | Temiz BPM eşiği, akor/mod deşifresi, tıkanılan geçişler, repertuar | Diksiyon, dil grameri |
 | **Demosthenes** | Diksiyon ve hitabet | Artikülasyon, nefes, vurgu, konuşma hızı | Argüman analizi, gitar |
 | **Aristoteles** | Derin okuma | Atomik not, kavram bağlantı matrisi, sentez katsayısı | Konuşma pratiği, yazı üslubu |
 | **Montaigne** | Yazı ve üslup | Kelime üretimi, cümle uzunluğu, tekrar, taslak–revizyon | Kaynak doğrulama, tezin doğruluğu |
+| **Herodot** | Tarih ve kaynak eleştirisi | Kronoloji kapsamı, yüzyıl boşlukları, neden zincirlerinin dengesi, birincil–ikincil oranı | Bir olayın «doğru» yorumunu dayatmaz, güncel siyaset konuşmaz |
+| **Mnemosyne** | Hafıza ve tekrar **koçu** | Bütün destelerin tekrar durumu, merdivendeki sıradaki kapı | İçeriğe karışmaz: bir kartın doğruluğunu tartışmaz |
 
 Yetki ayrımı kasıtlıdır: bir ajan alan dışına çıkan bir soru görürse sahibine
 yönlendirir, **cevap uydurmaz**. Çelişkiyi Patron çözer.
+
+**Koç masası neden ayrı bir tür?** Mnemosyne bir disiplinin değil bir **işin**
+sahibidir: bütün disiplinlere aynı soruyu sorar — «tuttun mu?». İçeriğe hiç
+bakmadığı için hiçbir uzmanla çelişemez; aynı şeyi ölçmüyorlar. Reçeteyi de o
+yazmaz: reçeteyi `core/coach.js` üretir, Mnemosyne yalnızca okur. Ajanın kural
+motorunun çıktısını okuması, tersi değil — ofisin bütün mimarisi bu yönde.
 
 Ad seçimi bir süs değildir: kullanıcı «diksiyon ajanı» demez, «Demosthenes»
 der ve hangi masaya gittiğini hatırlar.

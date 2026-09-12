@@ -95,6 +95,7 @@ ESP.S = {
     histQuery:'',
     curDisc:null,           // mufredat ekraninda acik disiplin
     ladderTab:'ozet',       // ozet | yol | tespit
+    expField:'all',         // dusunce deneyi alan suzgeci
     officeAgent:'patron',
     officeDesk:null,
     officePerAgent:false,

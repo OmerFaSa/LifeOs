@@ -21,6 +21,7 @@ ESP.Screens.lang = (function(){
     { id:'calis',    label:'Çalış' },
     { id:'kartlar',  label:'Kartlar' },
     { id:'ekle',     label:'Ekle' },
+    { id:'gramer',   label:'Dilbilgisi' },
     { id:'ilerleme', label:'İlerleme' },
   ];
 
@@ -307,6 +308,82 @@ ESP.Screens.lang = (function(){
     ];
   }
 
+  /* -------------------------------------------------------------- dilbilgisi
+
+     Kelime ezberi bir dili taşımaz: dört bin kart bilen biri koşul cümlesi
+     kuramıyorsa üretemez. Bu sekme ikinci ekseni tutar.
+
+     Buradaki işaretler ÖLÇÜM DEĞİL BEYANDIR ve öyle etiketlenir: kullanıcı
+     «bunu üretebiliyorum» der, sistem doğrulayamaz. Beyanı ölçüm gibi
+     göstermek, retansiyon sayısını uydurmakla aynı şey olurdu. */
+
+  function grammarMarks(){
+    return ((S.prefs && S.prefs.grammar) || {})[aktifDil()] || {};
+  }
+
+  function grammarRows(){
+    const d = ESP.SRS.deckStatus(aktifDil());
+    const bant = ESP.cefrOf(d.active, d.retention.value);
+    const isaret = grammarMarks();
+    const bantlar = ESP.CEFR.map(b => b.label);
+    const hataKartlari = (S.cards || []).filter(c => (c.tags || []).indexOf('hata') >= 0);
+
+    const rows = [
+      K.Entry({
+        label:'İKİ EKSEN', hint:'grammar',
+        meta:bant.band ? bant.band.label : 'bant yok',
+        note:'Soldaki eksen kelime (ölçülür), sağdaki işlev (beyan edilir). '
+           + 'İkisi ayrı durur çünkü biri ölçüm, öteki beyandır.',
+        body:html`
+          ${K.Notice({ tone:'info', body:bant.text || bant.why })}
+          <p class="small muted mt-8">${ESP.AVOIDANCE_NOTE}</p>`,
+      }),
+    ];
+
+    bantlar.forEach(b => {
+      const konular = ESP.GRAMMAR_BY_BAND[b] || [];
+      if(!konular.length) return;
+      const kac = konular.filter(t => isaret[t.id]).length;
+      rows.push(K.Entry({
+        label:b,
+        meta:kac + '/' + konular.length + ' beyan',
+        note:(ESP.CEFR.filter(x => x.label === b)[0] || {}).can || '',
+        wide:true,
+        body:html`${map(konular, t => html`
+          <div class="${cls('gramrow', isaret[t.id] && 'is-on')}">
+            ${K.Checkbox({ label:t.label, checked:!!isaret[t.id],
+              act:'mark-topic', data:{ 'data-id':t.id } })}
+            <span class="gramrow__can">${t.can}</span>
+            <span class="gramrow__trap"><b>Tuzak:</b> ${t.trap}</span>
+            ${when(isaret[t.id], () => ESP.Parts.cert('estimated'))}
+          </div>`)}`,
+      }));
+    });
+
+    rows.push(K.Entry({
+      label:'HATA GÜNLÜĞÜ', hint:'error-log',
+      meta:hataKartlari.length + ' kart',
+      note:'Bir hatayı adlandırmak onu bir daha görmenin tek yolu: '
+         + '«bir şeyler yanlıştı» tekrar eder, «edat eşleşmesi» tekrar etmez.',
+      wide:true,
+      body:html`
+        <div class="cols-3">
+          ${K.Field({ label:'Hata türü',
+            input:K.Select({ id:'er-kind', value:'dizim', aria:'Hata türü',
+              options:ESP.PRODUCTION_ERRORS.map(e => ({ value:e.id, label:e.label })) }) })}
+          ${K.Field({ label:'Yanlış hâli',
+            input:K.Input({ id:'er-wrong', aria:'Yanlış hâli' }) })}
+          ${K.Field({ label:'Doğrusu',
+            input:K.Input({ id:'er-right', aria:'Doğru hâli' }) })}
+        </div>
+        ${K.Button({ label:'Karta çevir', tone:'primary', act:'add-error', class:'mt-10' })}
+        ${K.Table({ tight:true, headers:['Tür', 'Ne olur'],
+          rows:ESP.PRODUCTION_ERRORS.map(e => [e.label, e.note]) })}`,
+    }));
+
+    return rows;
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
@@ -314,6 +391,7 @@ ESP.Screens.lang = (function(){
     const d = ESP.SRS.deckStatus(aktifDil());
     const rows = tab === 'kartlar' ? cardRows()
       : tab === 'ekle' ? addRows()
+      : tab === 'gramer' ? grammarRows()
       : tab === 'ilerleme' ? progressRows()
       : reviewRows();
 
@@ -331,6 +409,36 @@ ESP.Screens.lang = (function(){
 
   const handle = {
     async 'lang-tab'(el){ S.ui.langTab = el.dataset.tab; ESP.App.render(); },
+
+    /* Beyan bir olcum degildir: prefs icinde durur, deste sayilarina
+       karismaz ve hicbir kapiyi acmaz. */
+    async 'mark-topic'(el){
+      const dil = aktifDil(), id = el.dataset.id;
+      const prefs = Object.assign({}, S.prefs || {});
+      prefs.grammar = Object.assign({}, prefs.grammar || {});
+      prefs.grammar[dil] = Object.assign({}, prefs.grammar[dil] || {});
+      if(prefs.grammar[dil][id]) delete prefs.grammar[dil][id];
+      else prefs.grammar[dil][id] = true;
+      await M.savePrefs(prefs);
+      ESP.App.render();
+    },
+
+    /* Hata karti iki yonlu degildir: yalnizca "yanlis -> dogru". Ters yonu
+       sormak, yanlis hali ezberletmek olurdu. */
+    async 'add-error'(){
+      const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+      const yanlis = g('er-wrong'), dogru = g('er-right');
+      if(!yanlis || !dogru){ ESP.UI.toast('İki alan da gerekir'); return; }
+      const tur = ESP.ERROR_BY_ID_LANG[g('er-kind')] || ESP.PRODUCTION_ERRORS[0];
+      await M.saveCard(M.newCard({
+        front:yanlis + '  →  ?', back:dogru, lang:aktifDil(),
+        context:tur.label + ' — ' + tur.note,
+        tags:['hata', tur.id],
+      }));
+      ESP.Memo.bitir();
+      ESP.UI.toast('Hata kartı eklendi');
+      ESP.App.render();
+    },
     async 'tab-ekle'(){ S.ui.langTab = 'ekle'; ESP.App.render(); },
 
     async 'start-review'(){ S.ui.reviewQueue = queueStart(); ESP.App.render(); },

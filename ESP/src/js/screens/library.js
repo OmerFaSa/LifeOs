@@ -21,7 +21,63 @@ ESP.Screens.library = (function(){
     { id:'notlar',    label:'Notlar' },
     { id:'matris',    label:'Matris' },
     { id:'kaynaklar', label:'Kaynaklar' },
+    { id:'yontem',    label:'Yöntem' },
   ];
+
+  /* ----------------------------------------------------------------- yöntem
+
+     «Okudum» cümlesi ölçülebilir bir şey söylemez: göz gezdirmek de
+     okumaktır, bir bölümü üç kez dönüp çıkarmak da. Bu sekme ikisini ayıran
+     dili tutar. */
+  function methodRows(){
+    return [
+      K.Entry({
+        label:'DÖRT DÜZEY', hint:'reading-level',
+        meta:ESP.READING_LEVELS.length + ' düzey',
+        note:'Hangi düzeyde okuduğunu bilmek, ne kadar okuduğunu bilmekten '
+           + 'daha çok şey söyler.',
+        wide:true,
+        body:K.Table({ tight:true,
+          headers:[{ label:'#', num:true }, 'Düzey', 'Sorusu', 'Not'],
+          rows:ESP.READING_LEVELS.map(l => [String(l.rank), l.label, l.q, l.note]) }),
+      }),
+
+      K.Entry({
+        label:'ANALİTİK OKUMANIN DÖRT SORUSU', hint:'analytic',
+        meta:'kitap bitince',
+        note:'Cevaplanmayan soru, okunmamış bir bölüm kadar eksiktir.',
+        wide:true,
+        body:html`${map(ESP.ANALYTIC_QUESTIONS, q => html`
+          <div class="toolrow">
+            <b>${q.q}</b>
+            <span class="tiny dim">${q.note}</span>
+          </div>`)}`,
+      }),
+
+      K.Entry({
+        label:'OKUMA PROTOKOLÜ', hint:'protocol',
+        meta:ESP.READING_PROTOCOL.length + ' adım',
+        note:'Not yazmak için okumayı durdurmak, okumayı da notu da bozar.',
+        body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Adım', 'Ne yapılır'],
+          rows:ESP.READING_PROTOCOL.map(p => [String(p.step), p.label, p.do]) }),
+      }),
+
+      K.Entry({
+        label:'NOT ŞABLONLARI', hint:'note-template',
+        meta:ESP.NOTE_TEMPLATES.length + ' şablon',
+        note:'Şablonsuz not, sonradan ne için alındığı anlaşılmayan nottur.',
+        wide:true,
+        body:K.Table({ tight:true, headers:['Şablon', 'Biçim', 'Ne zaman'],
+          rows:ESP.NOTE_TEMPLATES.map(t => [t.label, t.form, t.use]) }),
+      }),
+
+      K.Entry({
+        label:'BIRAKMA İZNİ', hint:'abandon',
+        meta:'kural',
+        body:K.Notice({ tone:'info', body:ESP.ABANDON_RULE }),
+      }),
+    ];
+  }
 
   function bookOf(id){ return (S.books || []).find(b => b.id === id); }
 
@@ -257,6 +313,7 @@ ESP.Screens.library = (function(){
     const tab = S.ui.readTab || 'notlar';
     const rows = tab === 'matris' ? matrixRows()
       : tab === 'kaynaklar' ? bookRows()
+      : tab === 'yontem' ? methodRows()
       : noteRows();
 
     return K.Grid(html`

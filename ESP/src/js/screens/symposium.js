@@ -24,7 +24,58 @@ ESP.Screens.symposium = (function(){
     { id:'kapali',   label:'Kapalı' },
     { id:'ekle',     label:'Ekle' },
     { id:'metinler', label:'Metinler' },
+    { id:'deneyler', label:'Deneyler' },
   ];
+
+  /* --------------------------------------------------------------- deneyler
+
+     Bir tez yazmak ile bir tezi SINAMAK ayrı işlerdir. Düşünce deneyi
+     sınamanın en ucuz aracıdır: laboratuvar gerektirmez, yalnızca dürüstlük
+     ister.
+
+     Deneylerin «doğru cevabı» yazılmadı ve bu bilinçli: cevabı veren bir
+     liste, deneyi bir bilgi yarışması sorusuna çevirir. Yazılan tek şey,
+     deneyin hangi AYRIMI zorladığı. */
+  function experimentRows(){
+    const alan = S.ui.expField || 'all';
+    const list = (ESP.EXPERIMENTS || [])
+      .filter(x => alan === 'all' || x.field === alan);
+
+    return [
+      K.Entry({
+        label:'DÜŞÜNCE DENEYLERİ', hint:'experiment',
+        meta:list.length + ' deney',
+        note:'Deney bir tezi sınar. Tezini sarsmayan bir deney seçmek, '
+           + 'sınamadan geçmiş saymaktır.',
+        action:K.Select({ id:'exp-field', value:alan, change:'exp-field',
+          aria:'Alan süzgeci',
+          options:[{ value:'all', label:'Bütün alanlar' }]
+            .concat(ESP.EXPERIMENT_FIELDS.map(f => ({ value:f.id, label:f.label }))) }),
+        wide:true,
+        body:html`${map(list, x => html`
+          <div class="exprow">
+            <div class="exprow__head">
+              <b>${x.label}</b>
+              ${K.Badge({ label:(ESP.EXPERIMENT_FIELDS.filter(f => f.id === x.field)[0]
+                || {}).label || x.field, tone:'muted', icon:false })}
+              ${K.Button({ label:'Tez yap', size:'sm', act:'exp-to-thesis',
+                data:{ 'data-id':x.id } })}
+            </div>
+            <p>${x.setup}</p>
+            <p class="small muted"><b>Zorladığı ayrım:</b> ${x.tests}</p>
+          </div>`)}`,
+      }),
+
+      K.Entry({
+        label:'ARGÜMAN ALIŞTIRMALARI', hint:'argument-drill',
+        meta:ESP.ARGUMENT_DRILLS.length + ' alıştırma',
+        note:'Safsata denetimi metinde desen arar; bunlar egzersizdir.',
+        wide:true,
+        body:K.Table({ tight:true, headers:['Alıştırma', 'Ne yapılır', 'Neden'],
+          rows:ESP.ARGUMENT_DRILLS.map(d => [d.label, d.task, d.note]) }),
+      }),
+    ];
+  }
 
   /* ---------------------------------------------------------------- tez kartı */
 
@@ -227,6 +278,7 @@ ESP.Screens.symposium = (function(){
     const rows = tab === 'kapali' ? closedRows()
       : tab === 'ekle' ? addRows()
       : tab === 'metinler' ? textRows()
+      : tab === 'deneyler' ? experimentRows()
       : openRows();
 
     return K.Grid(html`
@@ -243,6 +295,25 @@ ESP.Screens.symposium = (function(){
   const handle = {
     async 'philo-tab'(el){ S.ui.philoTab = el.dataset.tab; ESP.App.render(); },
     async 'tab-ekle'(){ S.ui.philoTab = 'ekle'; ESP.App.render(); },
+
+    /* Deneyi teze çevirmek: deneyin kurgusu tezin YERINE geçmez, tezi
+       kullanıcı yazar. Sistem yalnızca boş tezi açar ve deneyi bağlam
+       olarak taşır — cevabı uydurmak, argümanı kullanıcının elinden
+       almak olurdu. */
+    async 'exp-to-thesis'(el){
+      const x = (ESP.EXPERIMENTS || []).filter(e => e.id === el.dataset.id)[0];
+      if(!x) return;
+      const a = await M.saveArgument(M.newArgument({
+        thesis:'',
+        objections:[{ id:U.uid('o'), text:x.setup, answered:false, answer:'' }],
+        concepts:[],
+      }));
+      S.ui.argOpen = a.id;
+      S.ui.philoTab = 'acik';
+      ESP.Memo.bitir();
+      ESP.UI.toast('Deney bir itiraz olarak açıldı — tezi sen yaz');
+      ESP.App.render();
+    },
 
     async 'parse-arg'(){
       const res = ESP.Parse.parseArgument(val('arg-text'));
@@ -389,7 +460,9 @@ ESP.Screens.symposium = (function(){
     },
   };
 
-  const change = {};
+  const change = {
+    async 'exp-field'(el){ S.ui.expField = el.value; ESP.App.render(); },
+  };
 
   return {
     id:'symposium',

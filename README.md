@@ -6,7 +6,7 @@ Tek kişinin gündelik hayatını yöneten üç bağımsız sistem.
 |---|---|---|---|
 | [`AYS/`](AYS/) | **Akademik Yol Sistemi** | Sınav hazırlığı, çalışma düzeni, deneme analizi | [`AYS/src/OFIS.md`](AYS/src/OFIS.md) |
 | [`SPI/`](SPI/) | **Sağlık Performans İzleyicisi** | Sağlık, beslenme, hareket, sağlık ekonomisi | [`SPI/src/MIMARI.md`](SPI/src/MIMARI.md) |
-| [`ESP/`](ESP/) | **Entelektüel Seviye Planlayıcı** | Dil, felsefe, müzik, diksiyon, okuma, yazı | [`ESP/src/MIMARI.md`](ESP/src/MIMARI.md) |
+| [`ESP/`](ESP/) | **Entelektüel Seviye Planlayıcı** | Dil, felsefe, müzik, diksiyon, okuma, yazı, tarih | [`ESP/src/MIMARI.md`](ESP/src/MIMARI.md) |
 
 Yanlarında dördüncü, **isteğe bağlı** bir katman durur:
 
@@ -22,7 +22,7 @@ o kapalıyken hiçbiri bozulmaz.
 - **Doktrin.** Kural motoru otoritedir: sayıyı hesap üretir, dil modeli yalnızca
   cümleye çevirir. Model kapalıysa sistem kapanmaz.
 - **Ofis.** Bir ekip: dikey uzmanlar ve bir orkestratör (SPİ'de beş, ESP'de
-  yedi ajan). Her ajan yalnız kendi alanına bakar, çelişkiyi patron çözer.
+  dokuz ajan). Her ajan yalnız kendi alanına bakar, çelişkiyi patron çözer.
 - **Tasarım dili.** Aynı jetonlar, aynı kart/düğme/tablo dili, aynı altı palet
   ve iki tema.
 - **Bağımlılıksızlık.** Ne çerçeve, ne derleyici, ne paket. Tarayıcıda düz
@@ -63,7 +63,12 @@ node tools/ledgercheck.js    # defter düzenini denetler (yalnız SPİ)
 ```
 
 Bir denetim geçtiğinde de **sayı gösterir**: hiçbir şey ölçmeyen bir betik de
-«geçti» yazar. ESP'nin son koşumu: 151 birim testi, 1848 kontrast ölçümü.
+«geçti» yazar. ESP'nin son koşumu: 245 birim testi, 14 ekran ve 48 sekmelik
+duman testi, 1848 kontrast ölçümü.
+
+ESP ayrıca bir **merdiven** taşır: yedi disiplinin her birinde sıfırdan
+üstatlığa beş kademe, her kademede ölçülebilir kapılar ve o kapıya çalışan
+somut bir günlük reçete. Kademe kişiye değil ÜRETİME verilir.
 
 HKM bir tarayıcı uygulaması değil bir arka plan servisidir; kendi komutları
 vardır (yalnızca Python standart kütüphanesi):

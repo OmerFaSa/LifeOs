@@ -545,3 +545,28 @@
   .rx__kind{ flex:0 0 100%; }
   .evrow__year{ flex:0 0 5ch; }
 }
+
+/* Dilbilgisi satırı: beyan ile ölçümü aynı satırda ama ayrı işaretle
+   gösterir. İşaret kutusu kullanıcının BEYANIDIR; yanındaki «tahmin»
+   rozeti bunu her seferinde tekrar söyler. */
+.gramrow{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2) var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.gramrow:last-child{ border-bottom:0; }
+.gramrow__can{ flex:1 1 22ch; min-width:0; font-size:var(--fs-sm); }
+.gramrow__trap{ flex:1 1 22ch; min-width:0; font-size:var(--fs-sm); color:var(--text-3); }
+
+/* Araç satırı: bir listeyi tabloya sokmadan okunur kılar. Tablo üç
+   sütundan sonra telefonda yatay kayar; bu satır sarar. */
+.toolrow{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2) var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.toolrow:last-child{ border-bottom:0; }
+.toolrow__mid{ flex:1 1 24ch; min-width:0; font-size:var(--fs-sm); color:var(--text-2); }
+
+.exprow{ padding:var(--sp-3) 0; border-bottom:1px solid var(--rule); }
+.exprow:last-child{ border-bottom:0; }
+.exprow__head{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2); }
+.exprow p{ margin:var(--sp-2) 0 0; }

@@ -5089,6 +5089,31 @@ body.is-dragging .drop.is-over{
   .rx__kind{ flex:0 0 100%; }
   .evrow__year{ flex:0 0 5ch; }
 }
+
+/* Dilbilgisi satırı: beyan ile ölçümü aynı satırda ama ayrı işaretle
+   gösterir. İşaret kutusu kullanıcının BEYANIDIR; yanındaki «tahmin»
+   rozeti bunu her seferinde tekrar söyler. */
+.gramrow{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2) var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.gramrow:last-child{ border-bottom:0; }
+.gramrow__can{ flex:1 1 22ch; min-width:0; font-size:var(--fs-sm); }
+.gramrow__trap{ flex:1 1 22ch; min-width:0; font-size:var(--fs-sm); color:var(--text-3); }
+
+/* Araç satırı: bir listeyi tabloya sokmadan okunur kılar. Tablo üç
+   sütundan sonra telefonda yatay kayar; bu satır sarar. */
+.toolrow{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2) var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.toolrow:last-child{ border-bottom:0; }
+.toolrow__mid{ flex:1 1 24ch; min-width:0; font-size:var(--fs-sm); color:var(--text-2); }
+
+.exprow{ padding:var(--sp-3) 0; border-bottom:1px solid var(--rule); }
+.exprow:last-child{ border-bottom:0; }
+.exprow__head{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2); }
+.exprow p{ margin:var(--sp-2) 0 0; }
 </style>
 <div id="app">
   <div class="boot">
@@ -5109,7 +5134,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'3189445', at:'2026-09-12 19:19', dirty:true };
+SP.BUILD = { id:'d7724a7', at:'2026-09-12 19:35', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -5846,6 +5871,108 @@ ESP.SEED_CARDS = {
   ],
 };
 
+/* ==== js/data/grammar.js ==== */
+/* Dilbilgisi haritası ve hata taksonomisi.
+
+   Kelime ezberi bir dili taşımaz: dört bin kart bilen biri, koşullu cümle
+   kuramıyorsa üretemez. Bu dosya kelimenin yanındaki ikinci ekseni tutar.
+
+   İki liste var ve ikisi de bilerek KISADIR:
+
+     TOPICS  dilbilgisi konuları, CEFR bandına bağlı. Bir dil kursunun
+             müfredatı değil; «bu bandı geçmiş biri bunu üretebiliyor
+             olmalı» listesi.
+     ERRORS  üretim hatalarının taksonomisi. Hata günlüğü tutmanın değeri,
+             hatayı ADLANDIRABILMEKTEN gelir: adı olmayan hata tekrar eder.
+
+   Konular dilden BAĞIMSIZ tutuldu ve bu bir eksiklik değil bir karar:
+   «koşul kipi» sekiz dilde de vardır, karşılığı her dilde başkadır.
+   Sistem karşılığı öğretmez — hangi işlevi üretebildiğini sorar. Dilin
+   kendi kurallarını öğretmeye kalkmak, ESP'nin öğretmen olmama sınırını
+   (ESP.PEDAGOGIC) ilk ihlal edecek yer olurdu. */
+
+window.ESP = window.ESP || {};
+
+ESP.GRAMMAR_TOPICS = [
+  { id:'siralama', band:'A1', label:'Sözcük sırası',
+    can:'Özne, nesne ve yüklemi doğru sırayla dizebiliyorum.',
+    trap:'Ana dilinin sırasını hedef dile taşımak.' },
+  { id:'sayi', band:'A1', label:'Sayı ve belirlilik',
+    can:'Tekil–çoğul ve belirli–belirsiz ayrımını kurabiliyorum.',
+    trap:'Türkçede belirsiz tanımlık olmadığı için atlanması.' },
+  { id:'simdiki', band:'A1', label:'Şimdiki ve geniş zaman',
+    can:'Alışkanlık ile şu an olanı ayırabiliyorum.',
+    trap:'İkisini tek kalıpla karşılamak.' },
+  { id:'gecmis', band:'A2', label:'Geçmiş zamanlar',
+    can:'Bitmiş eylem ile süregelen geçmişi ayırabiliyorum.',
+    trap:'Görünüş (aspect) ile zamanı karıştırmak.' },
+  { id:'gelecek', band:'A2', label:'Gelecek ve niyet',
+    can:'Plan, tahmin ve söz vermeyi ayrı kalıplarla söyleyebiliyorum.',
+    trap:'Hepsini tek gelecek kipine yıkmak.' },
+  { id:'edat', band:'A2', label:'Edatlar ve durum ekleri',
+    can:'Yer, yön ve zaman ilişkilerini doğru edatla kurabiliyorum.',
+    trap:'Sözlükten birebir karşılık almak; edat eşleşmesi dile özgüdür.' },
+  { id:'kiplik', band:'B1', label:'Kiplik (modality)',
+    can:'Gereklilik, olasılık ve izni ayırt edebiliyorum.',
+    trap:'«-meli» ile «-ebilir» arasındaki farkı silmek.' },
+  { id:'baglac', band:'B1', label:'Bağlaçlar ve cümle bağlama',
+    can:'İki cümleyi neden, karşıtlık ve koşulla bağlayabiliyorum.',
+    trap:'Her şeyi «ve» ile bağlayıp anlamı düzleştirmek.' },
+  { id:'yantumce', band:'B1', label:'Yan cümle',
+    can:'İsim, sıfat ve zarf işlevli yan cümle kurabiliyorum.',
+    trap:'Uzun cümle kurmak ile karmaşık cümle kurmayı karıştırmak.' },
+  { id:'kosul', band:'B2', label:'Koşul cümleleri',
+    can:'Gerçek, olası ve gerçekdışı koşulu ayrı kurabiliyorum.',
+    trap:'Gerçekdışı koşulda zaman kaydırmasını atlamak.' },
+  { id:'edilgen', band:'B2', label:'Edilgen ve fail gizleme',
+    can:'Faili gizlemenin anlamı nasıl değiştirdiğini kullanabiliyorum.',
+    trap:'Edilgeni yalnızca «resmî üslup» sanmak.' },
+  { id:'dolayli', band:'B2', label:'Dolaylı anlatım',
+    can:'Başkasının sözünü zaman ve kişi kaydırarak aktarabiliyorum.',
+    trap:'Kaynağa mesafe koyan kiplikleri düşürmek.' },
+  { id:'uslup', band:'C1', label:'Kayıt ve üslup (register)',
+    can:'Resmî, günlük ve akademik kaydı bilerek değiştirebiliyorum.',
+    trap:'Tek üslupta akıcı olup ötekinde tökezlemek.' },
+  { id:'deyim', band:'C1', label:'Deyim ve eşdizim',
+    can:'Kelimeleri birlikte kullanıldıkları öbeklerle üretebiliyorum.',
+    trap:'Doğru kelimeleri yanlış eşdizimle birleştirmek.' },
+  { id:'ima', band:'C2', label:'İma, ironi ve ton',
+    can:'Söylenmeyeni söyletebiliyor, tonu bilerek kurabiliyorum.',
+    trap:'Şaka ile hakareti ayıran ince tonu kaçırmak.' },
+];
+
+ESP.GRAMMAR_BY_BAND = (function(){
+  const m = {};
+  ESP.GRAMMAR_TOPICS.forEach(function(t){
+    (m[t.band] = m[t.band] || []).push(t);
+  });
+  return m;
+})();
+
+/* Üretim hatalarının taksonomisi.
+
+   Hata günlüğünde bir hatayı ADLANDIRMAK, onu bir daha görmenin tek yolu:
+   «bir şeyler yanlıştı» tekrar eder, «edat eşleşmesi» tekrar etmez. */
+ESP.PRODUCTION_ERRORS = [
+  { id:'dizim', label:'Dizim', note:'Sözcük sırası ana dilin sırası oldu.' },
+  { id:'eslesme', label:'Eşdizim', note:'Kelimeler doğru, birlikte kullanılmıyorlar.' },
+  { id:'kip', label:'Kip/zaman', note:'Zaman ya da görünüş yanlış seçildi.' },
+  { id:'edat', label:'Edat', note:'Sözlük karşılığı alındı, dilin eşleşmesi atlandı.' },
+  { id:'kayit', label:'Kayıt', note:'Üslup ortama uymadı: konuşma dili resmî metne girdi.' },
+  { id:'aktarim', label:'Aktarım', note:'Ana dilden birebir çeviri yapıldı.' },
+  { id:'telaffuz', label:'Telaffuz', note:'Yazılışı doğru, sesi anlaşılmadı.' },
+  { id:'atlama', label:'Atlama', note:'Bilinen yapıdan kaçınıldı; hata değil ama kayıp.' },
+];
+
+ESP.ERROR_BY_ID_LANG = ESP.PRODUCTION_ERRORS.reduce(function(m, e){
+  m[e.id] = e; return m;
+}, {});
+
+/* Kaçınma (avoidance) en sinsi hatadır ve tek satırla anlatılır. */
+ESP.AVOIDANCE_NOTE = 'Bilmediğin yapıdan kaçınmak hata üretmez — bu yüzden '
+  + 'ölçüme de girmez. Hata günlüğünde «atlama» satırı bunun içindir: '
+  + 'kurmadığın cümle, yapamadığın cümledir.';
+
 /* ==== js/data/guitar_tabs.js ==== */
 /* Gitar referansi — gamlar, akor ilerleyisleri ve teknikler. YALNIZCA VERI.
 
@@ -6084,6 +6211,391 @@ ESP.ARTICULATION_ERRORS = [
 
 ESP.ERROR_BY_ID = ESP.ARTICULATION_ERRORS.reduce(function(m, e){ m[e.id] = e; return m; }, {});
 
+/* ==== js/data/rhetoric.js ==== */
+/* Yazı araçları — retorik figürler, revizyon listesi, yapı kalıpları.
+
+   Bu dosya ESP'nin estetik otorite iddia etmeme sınırının (ESP.PEDAGOGIC
+   §aesthetic) tam kenarında durur ve o yüzden dikkatle yazıldı: burada
+   hiçbir madde «iyi yazı böyle olur» demez. Hepsi ARAÇ tanımıdır —
+   aracın ne yaptığı söylenir, kullanılıp kullanılmayacağı yazarındır.
+
+   Revizyon listesi de bir kalite ölçütü değil bir GEÇİŞ listesidir:
+   maddeleri işaretlemek metni iyi yapmaz, yalnızca hangi geçişlerin
+   yapıldığını kaydeder. */
+
+window.ESP = window.ESP || {};
+
+ESP.RHETORIC = [
+  { id:'uclu', label:'Üçleme', what:'Üç öğeyi sıralamak.',
+    why:'Üç, eksiksiz görünen en kısa listedir.',
+    ex:'Geldim, gördüm, yendim.' },
+  { id:'karsitlik', label:'Karşıtlık (antitez)', what:'İki zıt öğeyi simetrik kurmak.',
+    why:'Fark, benzer yapıda daha keskin duyulur.',
+    ex:'Az söyledi, çok anlattı.' },
+  { id:'tekrar', label:'Baş yinelemesi', what:'Ardışık cümleleri aynı sözle açmak.',
+    why:'Ritim kurar ve vurguyu taşır.',
+    ex:'Biz çalıştık. Biz bekledik. Biz sustuk.' },
+  { id:'soru', label:'Sözde soru', what:'Cevabı beklenmeyen soru sormak.',
+    why:'Okuru cevabı kendi kurmaya çağırır.',
+    ex:'Bunu kim ister ki?' },
+  { id:'eksiltme', label:'Eksiltme', what:'Bilinen öğeyi düşürmek.',
+    why:'Hız kazandırır; okur boşluğu kendi doldurur.',
+    ex:'Kimi gitti, kimi kaldı.' },
+  { id:'benzetme', label:'Benzetme', what:'Bilinmeyeni bilinene bağlamak.',
+    why:'Yeni kavram tanıdık bir zemine oturur.',
+    ex:'Bellek, üstü sürekli yazılan bir tahtadır.' },
+  { id:'eğretileme', label:'Eğretileme (metafor)', what:'Benzetmeyi «gibi»siz kurmak.',
+    why:'İki alanı üst üste bindirir; daha güçlü, daha riskli.',
+    ex:'Bu tartışma bir bataklık.' },
+  { id:'abartma', label:'Abartma', what:'Ölçüyü bilerek aşmak.',
+    why:'Duyguyu görünür kılar; sık kullanılırsa güven kaybettirir.',
+    ex:'Bin kere söyledim.' },
+  { id:'hafifletme', label:'Hafifletme (litotes)', what:'Olumsuzu olumsuzlayarak söylemek.',
+    why:'Ölçülü bir vurgu kurar.',
+    ex:'Hiç fena değil.' },
+  { id:'siralama', label:'Yığma', what:'Bağlaçsız uzun sıralama.',
+    why:'Bolluk ya da yorgunluk hissi verir.',
+    ex:'Kitaplar, notlar, fişler, kartlar, listeler.' },
+  { id:'ara', label:'Ara söz', what:'Cümlenin ortasına açıklama sokmak.',
+    why:'İkinci bir sesi duyurur; aşırısı cümleyi boğar.',
+    ex:'Bu fikir — kendisi de yeni değil — yine tartışılıyor.' },
+  { id:'kisilestirme', label:'Kişileştirme', what:'Cansıza eylem yüklemek.',
+    why:'Soyut bir süreci failli hale getirir.',
+    ex:'Piyasa korktu.' },
+  { id:'dereceleme', label:'Dereceleme', what:'Artan ya da azalan sırayla dizmek.',
+    why:'Yönü hissettirir; sonu vurgular.',
+    ex:'Şaşırdı, ürktü, kaçtı.' },
+  { id:'tanim', label:'Yeniden tanımlama', what:'Tartışmalı kelimeyi baştan tanımlamak.',
+    why:'Tartışmanın zeminini kurar — ve kurduğunu görünür yapar.',
+    ex:'Özgürlükten kastım seçenek çokluğu değil.' },
+  { id:'itiraf', label:'Önden kabul', what:'Karşı tarafın haklı yanını önce vermek.',
+    why:'Güven kazandırır; itirazı erken karşılar.',
+    ex:'Bu eleştiri büyük ölçüde doğru. Ama...' },
+  { id:'kiyas', label:'Kıyas', what:'İki durumu aynı ölçüte vurmak.',
+    why:'Tutarlılık talebi kurar.',
+    ex:'Aynı kuralı ötekine de uygulayacak mıyız?' },
+];
+
+/* Revizyon geçişleri. Sıra önemlidir: yapı düzelmeden cümle cilalamak,
+   silinecek paragrafı güzelleştirmektir. */
+ESP.REVISION_PASSES = [
+  { id:'yapi', order:1, label:'Yapı geçişi',
+    ask:'Her paragraf bir iş yapıyor mu? Yapmayan paragraf hangisi?',
+    note:'Önce burası. Yapı düzelmeden cümle cilalamak, silinecek paragrafı '
+       + 'güzelleştirmektir.' },
+  { id:'iddia', order:2, label:'İddia geçişi',
+    ask:'Metnin tek cümlelik iddiası ne? Metin onu mu savunuyor?',
+    note:'İddiayı yazının dışına, kenara yaz. Metinde bulamıyorsan okur da bulamaz.' },
+  { id:'kanit', order:3, label:'Kanıt geçişi',
+    ask:'Her iddianın arkasında bir örnek, sayı ya da alıntı var mı?',
+    note:'Kanıtsız iddia bir görüştür; görüş olduğunu söylemek de bir çözümdür.' },
+  { id:'kisalt', order:4, label:'Kısaltma geçişi',
+    ask:'Hangi kelime çıkarılsa anlam değişmez?',
+    note:'Hedef yüzde yirmi. Kısalan metin hızlanmaz, netleşir.' },
+  { id:'cumle', order:5, label:'Cümle geçişi',
+    ask:'Uzun cümleler bölünebilir mi? Art arda kaç uzun cümle var?',
+    note:'Okunabilirlik ölçümü bu geçişten SONRA alınır.' },
+  { id:'tekrar', order:6, label:'Tekrar geçişi',
+    ask:'Aynı kelime üç paragrafta kaç kez geçiyor?',
+    note:'Bilerek yapılan tekrar figürdür; farkında olunmayan tekrar gürültü.' },
+  { id:'sesli', order:7, label:'Sesli okuma',
+    ask:'Nerede nefesin kesiliyor?',
+    note:'Kulağın gözden daha iyi bulduğu tek şey ritimdir.' },
+];
+
+/* Yapı kalıpları — metnin iskeleti. Bir kalıp seçmek yaratıcılığı
+   sınırlamaz; boş sayfayı sınırlar. */
+ESP.STRUCTURES = [
+  { id:'tez', label:'Tez–karşı tez–sentez',
+    shape:['İddia', 'En güçlü itiraz', 'İkisini de kapsayan konum'],
+    when:'Tartışmalı bir konuda konum kurarken.' },
+  { id:'sorun', label:'Sorun–çözüm',
+    shape:['Sorun neden sorun', 'Denenmiş çözümler', 'Önerilen çözüm', 'Bedeli'],
+    when:'Bir öneriyi savunurken.' },
+  { id:'anlati', label:'Anlatı',
+    shape:['Durum', 'Kırılma', 'Sonuç', 'Çıkarılan şey'],
+    when:'Deneyimden fikre giderken.' },
+  { id:'karsilastirma', label:'Karşılaştırma',
+    shape:['Ortak ölçüt', 'A', 'B', 'Fark neden önemli'],
+    when:'İki konumu ya da iki dönemi yan yana koyarken.' },
+  { id:'tanimdan', label:'Tanımdan yürüyüş',
+    shape:['Kelimenin yaygın kullanımı', 'Sorunu', 'Yeni tanım', 'Sonuçları'],
+    when:'Kavram tartışmasında.' },
+  { id:'liste', label:'Numaralı sav',
+    shape:['Kısa giriş', '3–7 madde', 'Maddeleri bağlayan sonuç'],
+    when:'Çok sayıda bağımsız gerekçe varken.' },
+];
+
+/* ==== js/data/eartraining.js ==== */
+/* Kulak eğitimi ve deşifre — müziğin ikinci ekseni.
+
+   Metronom parmakları eğitir, kulak eğitmez. Bir müzisyenin ilerlemesinde
+   BPM bir yerden sonra yanıltıcıdır: hızlı çalan ama duymayan biri
+   repertuarını genişletemez, çünkü her yeni parçayı sıfırdan ezberler.
+
+   Buradaki egzersizlerin hiçbiri bir yetenek testi değildir. «Mutlak kulak»
+   diye bir kapı yoktur ve bilerek yoktur: ESP.PEDAGOGIC yetenek yargısını
+   yasaklar. Ölçülen tek şey, bir aralığı ya da akoru İSABETLE
+   adlandırabilme oranıdır. */
+
+window.ESP = window.ESP || {};
+
+ESP.INTERVALS = [
+  { id:'u2', semitones:2,  label:'Büyük 2\'li',  hook:'Bir kış gecesi' },
+  { id:'k3', semitones:3,  label:'Küçük 3\'lü',  hook:'Ağıt havası' },
+  { id:'b3', semitones:4,  label:'Büyük 3\'lü',  hook:'Neşeli açılış' },
+  { id:'t4', semitones:5,  label:'Tam 4\'lü',    hook:'Marş başlangıcı' },
+  { id:'a4', semitones:6,  label:'Artık 4\'lü',  hook:'Gergin, çözülmemiş' },
+  { id:'t5', semitones:7,  label:'Tam 5\'li',    hook:'Açık, boş, güçlü' },
+  { id:'k6', semitones:8,  label:'Küçük 6\'lı',  hook:'Hüzünlü yükseliş' },
+  { id:'b6', semitones:9,  label:'Büyük 6\'lı',  hook:'Özlemli' },
+  { id:'k7', semitones:10, label:'Küçük 7\'li',  hook:'Blues rengi' },
+  { id:'b7', semitones:11, label:'Büyük 7\'li',  hook:'Parlak gerilim' },
+  { id:'ok', semitones:12, label:'Oktav',        hook:'Aynı ses, başka yer' },
+];
+
+ESP.INTERVAL_BY_ID = ESP.INTERVALS.reduce(function(m, i){ m[i.id] = i; return m; }, {});
+
+ESP.EAR_DRILLS = [
+  { id:'aralik-tani', level:1, label:'Aralık tanıma',
+    task:'İki sesi çal, aralığı söyle, sonra doğrula. Yirmi deneme, isabeti yaz.',
+    measures:'İsabet oranı — yetenek değil, deneme başına doğru sayısı.' },
+  { id:'akor-turu', level:2, label:'Akor türü',
+    task:'Majör, minör, artık, eksik: türü duy, sonra bak.',
+    measures:'Dört tür arasında isabet.' },
+  { id:'derece', level:3, label:'Derece duyma',
+    task:'Bir tonalite kur, rastgele bir derece çal, kaçıncı derece olduğunu söyle.',
+    measures:'Yedi derece arasında isabet.' },
+  { id:'ritim-yaz', level:2, label:'Ritim yazımı',
+    task:'Dört ölçülük bir ritmi dinle, nota değerleriyle yaz.',
+    measures:'Doğru yazılan ölçü sayısı.' },
+  { id:'melodi-yaz', level:3, label:'Melodi yazımı',
+    task:'Sekiz notalık bir melodiyi dinleyip yaz; sonra çalarak doğrula.',
+    measures:'Doğru nota sayısı.' },
+  { id:'akor-dizi', level:4, label:'Akor dizisi çıkarma',
+    task:'Bir şarkının akorlarını kulakla bul; tabla bakmadan.',
+    measures:'Doğru bulunan akor oranı.' },
+  { id:'transkripsiyon', level:5, label:'Transkripsiyon',
+    task:'Bir soloyu nota nota çıkar; ölçü ölçü yavaşlatarak çalış.',
+    measures:'Çıkarılan ölçü sayısı.' },
+];
+
+/* CAGED — klavyeyi beş şekle bölen sistem. Bir «sır» değil bir haritadır:
+   aynı akorun beş yerde nasıl kurulduğunu gösterir. */
+ESP.CAGED = [
+  { id:'c', shape:'C', root:'5. tel', note:'Açık C şeklinin kaydırılmış hâli.' },
+  { id:'a', shape:'A', root:'5. tel', note:'Barre A; en sık kullanılan ikinci şekil.' },
+  { id:'g', shape:'G', root:'6. tel', note:'Geniş açılım; parmak esnekliği ister.' },
+  { id:'e', shape:'E', root:'6. tel', note:'Barre E; rock ve blues\'un temel şekli.' },
+  { id:'d', shape:'D', root:'4. tel', note:'İnce tellerde; üst kayıtta işe yarar.' },
+];
+
+/* Deşifre (prima vista) kademeleri. Okumak çalmaktan ayrı bir beceridir
+   ve ayrı çalışılır. */
+ESP.SIGHT_READING = [
+  { level:1, label:'Ritim okuma', task:'Yalnız ritmi, tek seste, metronomla oku.' },
+  { level:2, label:'Tek oktav', task:'Bir oktav içindeki melodileri duraksamadan oku.' },
+  { level:3, label:'Pozisyon değişimi', task:'Pozisyon değiştiren melodileri oku.' },
+  { level:4, label:'Akor sembolü', task:'Akor sembollerinden eşlik kur.' },
+  { level:5, label:'Çok sesli', task:'İki sesli yazıyı aynı anda oku.' },
+];
+
+/* Repertuar durumu — bir parçanın hayatındaki üç hâl.
+   «Bitti» diye bir hâl yoktur: bakımsız kalan parça geri gider. */
+ESP.REPERTOIRE_STATES = [
+  { id:'ogreniliyor', label:'Öğreniliyor', note:'Henüz baştan sona çalınamıyor.' },
+  { id:'taze', label:'Taze', note:'Son iki haftada çalındı, akılda.' },
+  { id:'bakimsiz', label:'Bakımsız', note:'Otuz günden uzun süredir çalınmadı; '
+    + 'çalınabilir ama garanti değil.' },
+];
+
+ESP.REPERTOIRE_STALE_DAYS = 30;
+
+/* ==== js/data/reading_method.js ==== */
+/* Okuma yöntemi — dört düzey, not şablonları, okuma protokolü.
+
+   «Okudum» cümlesi ölçülebilir bir şey söylemez: göz gezdirmek de okumaktır,
+   bir bölümü üç kez dönüp çıkarmak da. Bu dosya ikisini ayıran dili tutar.
+
+   Dört düzey Mortimer Adler'in ayrımından gelir ve burada bir OTORITE
+   olarak değil bir ÖLÇEK olarak kullanılır: hangi düzeyde okuduğunu bilmek,
+   ne kadar okuduğunu bilmekten daha çok şey söyler. */
+
+window.ESP = window.ESP || {};
+
+ESP.READING_LEVELS = [
+  { id:'temel', rank:1, label:'Temel okuma',
+    q:'Cümle ne diyor?',
+    note:'Dili çözmek. Yabancı dilde okurken çoğu zaman buradadır.' },
+  { id:'gozden', rank:2, label:'Gözden geçirme',
+    q:'Bu kitap ne hakkında ve okumaya değer mi?',
+    note:'İçindekiler, giriş, sonuç, rastgele iki paragraf. On beş dakika. '
+       + 'Kitabı bırakma kararı burada verilir — yarısında değil.' },
+  { id:'analitik', rank:3, label:'Analitik okuma',
+    q:'Yazar ne iddia ediyor, nasıl savunuyor, nerede haklı?',
+    note:'Tek kitabı sonuna kadar anlamak. Atomik notların çoğu buradan çıkar.' },
+  { id:'sentopik', rank:4, label:'Sentopik okuma',
+    q:'Bu soruya farklı yazarlar ne diyor?',
+    note:'Kitap değil SORU merkezdedir. En zor ve en verimli düzey.' },
+];
+
+/* Analitik okumanın dört sorusu. Bir kitabı bitirdikten sonra cevaplanmayan
+   soru, okunmamış bir bölüm kadar eksiktir. */
+ESP.ANALYTIC_QUESTIONS = [
+  { id:'ne', q:'Kitap bir bütün olarak ne hakkında?',
+    note:'Tek cümlede söyleyemiyorsan henüz bitmemiştir.' },
+  { id:'nasil', q:'Ayrıntıda ne söyleniyor ve nasıl?',
+    note:'Ana savı ve onu taşıyan iskeleti çıkar.' },
+  { id:'dogru', q:'Kitap doğru mu — tamamı mı, bir kısmı mı?',
+    note:'Anlamadan katılmak da karşı çıkmak da okuma değildir.' },
+  { id:'ne-olmus', q:'Ne olmuş yani?',
+    note:'Doğruysa senin için ne değişiyor? Değişmiyorsa neden okudun?' },
+];
+
+/* Not şablonları. Her biri bir SORUYA cevap verir; şablonsuz not, sonradan
+   ne için alındığı anlaşılmayan nottur. */
+ESP.NOTE_TEMPLATES = [
+  { id:'iddia', label:'İddia notu', form:'<yazar> şunu savunuyor: …',
+    use:'Bir tezi kaydetmek.' },
+  { id:'kanit', label:'Kanıt notu', form:'Bu iddianın dayanağı: …',
+    use:'Bir iddiayı taşıyan veriyi ayrı tutmak.' },
+  { id:'itiraz', label:'İtiraz notu', form:'Buna şöyle itiraz edilebilir: …',
+    use:'Kendi karşı çıkışını kaydetmek.' },
+  { id:'tanim', label:'Tanım notu', form:'<kavram> burada şu anlamda: …',
+    use:'Kavramın bu metindeki kullanımını sabitlemek.' },
+  { id:'baglanti', label:'Bağlantı notu', form:'Bu, <başka yazar>ın şu fikriyle …',
+    use:'Sentopik bağın ham hâli.' },
+  { id:'soru', label:'Soru notu', form:'Bu beni şunu sormaya götürüyor: …',
+    use:'Cevabı henüz olmayan iyi soruyu kaybetmemek.' },
+  { id:'alinti', label:'Alıntı notu', form:'«…» (s. …)',
+    use:'Kelimesi önemli olan yerler. Az kullanılır: alıntı yığını not değildir.' },
+];
+
+/* Okuma protokolü — bir oturumun şekli. */
+ESP.READING_PROTOCOL = [
+  { step:1, label:'Amaç', do:'Bu oturumda hangi soruyu kovalıyorsun? Bir cümle yaz.' },
+  { step:2, label:'Süre', do:'Zamanlayıcıyı kur. Telefon başka odada.' },
+  { step:3, label:'İşaretle', do:'Okurken yalnızca işaretle; not yazmak için durma.' },
+  { step:4, label:'Çıkar', do:'Oturum sonunda işaretlerinden 3–5 atomik not çıkar.' },
+  { step:5, label:'Bağla', do:'Her yeni notu en az bir eski notla bağlamayı dene. '
+    + 'Bağ bulamıyorsan zorlama — uydurulmuş bağ, matrisi görünür ama '
+    + 'anlamsız yapar.' },
+];
+
+/* Kitabı bırakma izni. Bu maddenin varlığı kasıtlı: bitirme zorunluluğu,
+   okuma saatinin en büyük düşmanıdır. */
+ESP.ABANDON_RULE = 'Bir kitabı bırakmak bir başarısızlık değildir. Gözden '
+  + 'geçirme düzeyinde verilen «bu kitap şu an bana gerekmiyor» kararı, '
+  + 'yarısında sıkılıp suçluluk duymaktan daha iyidir. Bırakılan kitap '
+  + 'kayıtta kalır; bir gün geri dönülür.';
+
+/* ==== js/data/experiments.js ==== */
+/* Düşünce deneyleri ve mantık alıştırmaları — felsefenin ikinci ekseni.
+
+   Bir tez yazmak ile bir tezi SINAMAK ayrı işlerdir. Düşünce deneyi
+   sınamanın en ucuz aracıdır: laboratuvar gerektirmez, yalnızca dürüstlük
+   ister.
+
+   Buradaki deneylerin hiçbirinin «doğru cevabı» yazılmadı ve bu bilinçli:
+   cevabı veren bir liste, deneyi bir bilgi yarışması sorusuna çevirir.
+   Yazılan tek şey, deneyin HANGİ AYRIMI zorladığıdır. */
+
+window.ESP = window.ESP || {};
+
+ESP.EXPERIMENTS = [
+  { id:'tramvay', label:'Tramvay problemi', field:'etik',
+    setup:'Beş kişiye doğru giden tramvayı bir makasla çevirirsen bir kişi ölür. '
+        + 'Çevirir misin? Ya çevirmek yerine birini itmek gerekseydi?',
+    tests:'Sonuççuluk ile eylemin kendisi arasındaki ayrım.' },
+  { id:'gemi', label:'Theseus\'un gemisi', field:'kimlik',
+    setup:'Geminin bütün tahtaları tek tek değiştirildi. Aynı gemi mi? '
+        + 'Eski tahtalardan ikinci bir gemi kurulursa hangisi asıl?',
+    tests:'Özdeşliğin süreklilik mi yapı mı olduğu.' },
+  { id:'oda', label:'Çin odası', field:'zihin',
+    setup:'Çince bilmeyen biri, kurallara bakarak Çince cevaplar üretiyor. '
+        + 'Anlıyor mu?',
+    tests:'Sembol işleme ile anlama arasındaki fark.' },
+  { id:'mary', label:'Mary\'nin odası', field:'zihin',
+    setup:'Renk hakkındaki her fiziksel olguyu bilen Mary siyah-beyaz bir odada '
+        + 'yaşadı. İlk kez kırmızı gördüğünde yeni bir şey öğrenir mi?',
+    tests:'Fiziksel bilgi ile deneyimin aynı şey olup olmadığı.' },
+  { id:'peçe', label:'Cehalet peçesi', field:'siyaset',
+    setup:'Toplumun kurallarını, kim olacağını bilmeden seçeceksin. '
+        + 'Hangi kuralları koyardın?',
+    tests:'Adalet ile kişisel çıkar arasındaki ayrım.' },
+  { id:'zeno', label:'Aşil ve kaplumbağa', field:'mantik',
+    setup:'Aşil, önde başlayan kaplumbağanın bulunduğu yere vardığında '
+        + 'kaplumbağa biraz ilerlemiştir. Nasıl geçer?',
+    tests:'Sonsuz bölünebilirlik ile hareketin bağdaşması.' },
+  { id:'yiğit', label:'Yığın (sorites)', field:'mantik',
+    setup:'Bir kum tanesi yığın değil. Bir tane eklemek yığın yapmaz. '
+        + 'O hâlde hiçbir şey yığın değil mi?',
+    tests:'Belirsiz sınırlı kavramların mantığı.' },
+  { id:'beyin', label:'Fıçıdaki beyin', field:'bilgi',
+    setup:'Bütün algıların bir makine tarafından üretiliyor olabilir. '
+        + 'Bunu nasıl çürütürsün?',
+    tests:'Bilginin temeli ve şüphenin sınırı.' },
+  { id:'kelebek', label:'Zhuangzi\'nin kelebeği', field:'bilgi',
+    setup:'Rüyasında kelebek olduğunu gören adam mı, yoksa şimdi adam olduğunu '
+        + 'gören kelebek mi?',
+    tests:'Uyanıklık ölçütünün kendisi.' },
+  { id:'ebedi', label:'Bengi dönüş', field:'etik',
+    setup:'Bu hayatı, aynı ayrıntılarla sonsuz kez yeniden yaşayacaksın. '
+        + 'Bu haber sevindirir mi, ezer mi?',
+    tests:'Hayatın kendisini onaylayıp onaylamadığın.' },
+  { id:'utopya', label:'Deneyim makinesi', field:'deger',
+    setup:'İstediğin her deneyimi yaşatan bir makineye bağlanabilirsin; '
+        + 'gerçek olmadığını bilmeyeceksin. Bağlanır mısın?',
+    tests:'Hazzın mı yoksa gerçeklikle temasın mı değerli olduğu.' },
+  { id:'ikizdunya', label:'İkiz Dünya', field:'dil',
+    setup:'Her şeyi aynı ama sudaki maddesi farklı bir gezegende «su» kelimesi '
+        + 'aynı şeyi mi gösterir?',
+    tests:'Anlamın kafanın içinde mi dünyada mı olduğu.' },
+  { id:'kutup', label:'Kütüphaneci', field:'mantik',
+    setup:'Kendini içermeyen bütün kümelerin kümesi kendini içerir mi?',
+    tests:'Kendine gönderme yapan tanımların çelişkisi.' },
+  { id:'gyges', label:'Gyges\'in yüzüğü', field:'etik',
+    setup:'Görünmez olsan ve asla yakalanmayacağını bilsen, adil davranır mıydın?',
+    tests:'Adaletin içsel mi yoksa yaptırıma bağlı mı olduğu.' },
+  { id:'ata', label:'Atalarımızın borcu', field:'siyaset',
+    setup:'Doğmamış kuşaklara karşı bir yükümlülüğün var mı? Onlar henüz yok.',
+    tests:'Hakkın var olmayan taraflara genişleyip genişlemediği.' },
+];
+
+ESP.EXPERIMENT_FIELDS = [
+  { id:'etik',     label:'Etik' },
+  { id:'zihin',    label:'Zihin felsefesi' },
+  { id:'bilgi',    label:'Bilgi kuramı' },
+  { id:'mantik',   label:'Mantık' },
+  { id:'siyaset',  label:'Siyaset felsefesi' },
+  { id:'dil',      label:'Dil felsefesi' },
+  { id:'kimlik',   label:'Kimlik' },
+  { id:'deger',    label:'Değer' },
+];
+
+/* Argüman kurma alıştırmaları. Safsata listesi core/intellect.js içinde
+   DESEN olarak durur (metinde arar); buradakiler EGZERSIZDIR. */
+ESP.ARGUMENT_DRILLS = [
+  { id:'steelman', label:'Çelik adam',
+    task:'Katılmadığın bir görüşü, savunucusunun kabul edeceği güçte yaz.',
+    note:'Karşı tarafı zayıf kurmak tartışmayı kazandırır, doğruyu kaybettirir.' },
+  { id:'oncul', label:'Öncül ayıklama',
+    task:'Bir paragraftaki gizli öncülü bul: söylenmeyen ama gerekli olan varsayım.',
+    note:'Çoğu tartışma öncülde biter, sonuçta değil.' },
+  { id:'tersine', label:'Tersine çevirme',
+    task:'Kendi tezini çürüten tek bir örnek bul. Bulamıyorsan tez fazla geniştir.',
+    note:'Yanlışlanamayan tez bir iddia değil bir inançtır.' },
+  { id:'sinir', label:'Sınır çizme',
+    task:'Tezin hangi durumda geçersiz olduğunu yaz.',
+    note:'Sınırı olmayan tez her şeyi açıklar, yani hiçbir şeyi.' },
+  { id:'cevir', label:'Kendi diline çevirme',
+    task:'Okuduğun bir argümanı, metne bakmadan kendi kelimelerinle yaz.',
+    note:'Çeviremiyorsan anlamamışsındır; bu bir kusur değil bir ölçüdür.' },
+  { id:'zincirle', label:'Zincirleme',
+    task:'İddianı üç adımda sonuca bağla; her adımı ayrı cümle yap.',
+    note:'Atlanan adım genellikle en tartışmalı olandır.' },
+];
+
 /* ==== js/data/history.js ==== */
 /* Tarih verisi — kronoloji iskeleti, kaynak turleri ve tarih yazimi okullari.
 
@@ -6112,19 +6624,19 @@ window.ESP = window.ESP || {};
    demek bir kararidir, bir olcum degil. `disputed` alani bunu ekranda
    gorunur kilar: kullanici sinirin kendisinin bir yorum oldugunu bilmeli. */
 ESP.ERAS = [
-  { id:'tarihoncesi', label:'Tarih öncesi', from:-3000000, to:-3200,
+  { id:'tarihoncesi', label:'Tarih öncesi', from:-3000000, to:-3201,
     note:'Yazıdan önce. Kaynak: arkeoloji, antropoloji — yazılı tanık yok.',
     disputed:'Bitiş, yazının bulunuşuna bağlanır; yazı her yerde aynı anda çıkmadı.' },
-  { id:'ilkcag', label:'İlk Çağ', from:-3200, to:476,
+  { id:'ilkcag', label:'İlk Çağ', from:-3200, to:475,
     note:'Yazının bulunuşundan Batı Roma\'nın yıkılışına.',
     disputed:'476 Batı\'ya özgü bir tarihtir; Doğu Roma 1453\'e kadar sürdü.' },
-  { id:'ortacag', label:'Orta Çağ', from:476, to:1453,
+  { id:'ortacag', label:'Orta Çağ', from:476, to:1452,
     note:'Feodalite, üç büyük dinin kurumsallaşması, İslam biliminin yükselişi.',
     disputed:'«Karanlık çağ» adlandırması 19. yy Avrupa merkezli bir yargıdır.' },
-  { id:'yenicag', label:'Yeni Çağ', from:1453, to:1789,
+  { id:'yenicag', label:'Yeni Çağ', from:1453, to:1788,
     note:'Coğrafi keşifler, Rönesans, Reform, mutlak monarşiler, bilim devrimi.',
     disputed:'1453 mü 1492 mi tartışmalıdır; ikisi de Avrupa merkezlidir.' },
-  { id:'yakincag', label:'Yakın Çağ', from:1789, to:1945,
+  { id:'yakincag', label:'Yakın Çağ', from:1789, to:1944,
     note:'Devrimler, sanayileşme, ulus-devlet, sömürgecilik, iki dünya savaşı.',
     disputed:'Bitişi 1914, 1918 ya da 1945 sayılabilir; her biri ayrı bir tez.' },
   { id:'cagdas', label:'Çağdaş', from:1945, to:9999,
@@ -6132,6 +6644,15 @@ ESP.ERAS = [
     disputed:'Yaşanan dönemin tarihi yazılamaz denir; belge açılmamıştır.' },
 ];
 
+/* Sinirlar ORTUSMEZ ve bu bir ayrinti degil: 476 hem Ilk Cag'in sonu hem
+   Orta Cag'in basi yazilsaydi, `eraOf(476)` iki dogru cevabi olan bir soru
+   olurdu ve listedeki siraya gore rastgele birini dondururdu. Donem bir
+   olcum degil bir karardir — ama karar TEK olmalidir.
+
+   Sonuc olarak sinir yili bir sonraki donemin ilk yilidir: 476 Orta Cag'a,
+   1453 Yeni Cag'a, 1789 Yakin Cag'a, 1945 Cagdas'a dusser. Fetih ve Devrim
+   gibi olaylar boylece "bitirdikleri" degil "baslattiklari" donemde durur —
+   tarih yazimindaki yaygin tercih de budur. */
 ESP.ERA_BY_ID = ESP.ERAS.reduce(function(m, e){ m[e.id] = e; return m; }, {});
 
 /* Bir yilin hangi doneme dustugu. Donemler ortusmez; ilk eslesen doner. */
@@ -7353,6 +7874,86 @@ ESP.HINTS = {
     more:'Üstteki alttakini her zaman yener. Ama yenilen uzmanın işi bitmez: yeni parça yerine mevcut repertuarda ilerleme önerir. «Hiçbir şey yapma» demek değildir.' },
   'ehs':{ t:'Entelektüel hacim', b:'EHS = Σ (disiplin ağırlığı × ölçülen saat × kalite katsayısı).',
     more:'H_i yalnızca ölçülen pratik saatidir; «veri yok» günler toplama girmez. Bu yüzden EHS bir hedef değil bir hacim ölçüsüdür: iki haftada bir bakılır, her gün değil.' },
+  /* --- merdiven ve koç --- */
+  'level':{ t:'Kademe', b:'Ölçülmüş üretimin merdivende karşıladığı basamak.',
+    more:'Kademe kişiye değil ÜRETİME verilir: «Kalfa\'sın» denmez, «son 30 günün ölçülmüş üretimi Kalfa kapılarını karşılıyor» denir. Üretim durursa kademe de durur. Genel kademe disiplinlerin ortalaması değildir; ortalama ile en düşüğün arasıdır.' },
+  'ladder':{ t:'Merdiven', b:'Bir disiplinin sıfırdan üstatlığa beş basamağı ve her basamağın ölçülebilir kapıları.',
+    more:'Merdiven ardışıktır: alttaki kapı atlanarak üsttekine geçilmez. Sebebi pedagojik — atlanan kapı ileride geri gelir ve üstüne kurulan her şeyi çökertir. Süre tahmini yoktur: «üç ayda usta olursun» sonuç garantisi yasağına girer.' },
+  'unknown-gate':{ t:'Ölçülemeyen kapı', b:'Ne geçilmiş ne kalınmış: o kapı için henüz ölçüm yok.',
+    more:'Üçüncü durum sistemin dürüstlüğüdür. Ölçülmemiş bir kapıyı «kalındı» saymak da «geçildi» saymak da yalan olurdu. Burada istenen şey çalışmak değil ölçmek — ve bu sistemde ölçmek çoğu zaman işin kendisidir: retansiyonu ölçmek kart cevaplamak, temiz BPM\'i ölçmek metronomla çalmaktır.' },
+  'placement':{ t:'Seviye tespiti', b:'Sıfırdan başlamayanlar için bir başlangıç TAHMİNİ.',
+    more:'Sınav bir kademe VERMEZ ve hiçbir kapıyı açmaz. Verdiği şey «tahmin» etiketiyle durur; ilk ölçümler geldiğinde ölçülmüş kademe tahmini her zaman yener.' },
+  'coach':{ t:'Koç reçetesi', b:'Üç bölümlük somut seans: ısınma, asıl iş, zorlanma.',
+    more:'Tavsiye «dil çalışmalısın» der ve kararı sana bırakır; reçete «on kartı bağlam cümlesiyle karta çevir, on dakika» der ve kararı bitirir. Asıl iş, merdivende açık olan kapıya çalışır. Toplam süre profildeki günlük tabandan taşmaz: taşan reçete okunmaz.' },
+  'drill':{ t:'Egzersiz', b:'Kural motorunun seçtiği tek bir yapılabilir iş.',
+    more:'Seçimi model yapmaz: açığı olan eksen önce gelir. Bir egzersiz «işlendi» diye işaretlenmez, gün kaydına oturum olarak yazılır — ayrı bir tamamlandı bayrağı, yapılmamış işi yapılmış göstermenin en kolay yoluydu.' },
+
+  /* --- tarih --- */
+  'chrono':{ t:'Kronoloji', b:'Olayların zaman şeridi: tarihin iskeleti.',
+    more:'Boş bir kronoloji «%0 kapsam» değil «veri yok»tur. Üç eksen ayrı ölçülür ve tek puana toplanmaz: kapsam (dönem, bölge, alan), derinlik (zincir ve kaynak), tutma (SRS retansiyonu). Tek puan, hangi eksenin zayıf olduğunu gizler.' },
+  'era':{ t:'Dönem', b:'Büyük tarihsel bölümler ve tartışmalı sınırları.',
+    more:'«Orta Çağ 476\'da başladı» demek bir ölçüm değil bir karardır — üstelik Batı\'ya özgü bir karar. Ekranda her dönemin yanında sınırının neden tartışmalı olduğu yazar.' },
+  'gap':{ t:'Yüzyıl boşluğu', b:'Kronolojide üst üste üç yüzyıldan uzun boş aralık.',
+    more:'Her yüzyılda dönüm noktası olmak zorunda değil; bu yüzden iki yüzyıllık boşluk bulgu sayılmaz. Üç yüzyıl sessizlik ise bir sorudur: orada bir şey olmadı mı, yoksa oraya bakmadın mı?' },
+  'coverage':{ t:'Kapsam', b:'Olayların dönem, bölge ve alana dağılımı.',
+    more:'Yalnızca savaş ve antlaşma girilirse nedensellik hep askerî kalır. Ekonomik, düşünsel ve toplumsal olaylar zinciri değiştirir — kapsam bu yüzden sayı değil DENGE ölçer.' },
+  'event':{ t:'Olay', b:'Kronolojiye yerleştirilmiş tek bir dönüm noktası.',
+    more:'Dönem yıldan türetilir, sorulmaz: aynı yıl iki döneme düşemez ve elle girilen dönem zamanla yanlış kalır. MÖ yıllar eksi yazılır (-753) çünkü sıralama aritmetikle yapılır.' },
+  'source':{ t:'Kaynak', b:'Bir iddianın dayandığı belge ya da inceleme.',
+    more:'Birincil kaynak dönemin kendi belgesidir, ikincil sonradan yazılmış incelemedir. Tek kaynağa dayanan bir iddia bir tezdir, bir olgu değil.' },
+  'balance':{ t:'Kaynak dengesi', b:'Birincil ve ikincil kaynakların oranı.',
+    more:'Bu bir kalite değil bir KOMPOZİSYON ölçüsüdür: %100 birincil de sağlıklı değildir, çünkü bağlamı ikincil kaynak verir. Neredeyse hepsi ikincilse başkasının okumasını okuyorsun demektir.' },
+  'causal':{ t:'Neden zinciri', b:'Bir olayı yapısal koşul, konjonktür ve tetikleyiciyle açıklama.',
+    more:'Tarihin en yaygın hatası kıvılcımı neden sanmaktır: «savaş suikastla çıktı». Yalnızca tetikleyiciden kurulan zincir «dengesiz» işaretlenir — bu bir yargı değil bir gözlemdir; zemini sen eklersin.' },
+  'anachronism':{ t:'Anakronizm', b:'Geçmişi bugünün kavramlarıyla okumak.',
+    more:'En sessiz hatadır: yanlış cevap vermez, yanlış soru sordurur. 1500\'de «Türkiye» ya da «Almanya» yoktu; hanedan ve din vardı. Kaçınılmazlık yanılgısı da buraya girer: olan şey olmak zorunda değildi.' },
+  'school':{ t:'Tarih yazımı okulu', b:'Aynı olaya farklı soru soran gelenekler.',
+    more:'Olaysal tarih «ne oldu» diye sorar, Annales «yüzyıllarca değişmeyen ne vardı», Marksist tarih «kim kazandı», mikro tarih «küçük bir vaka büyük yapıyı nasıl ele veriyor». Bunu görmek, tarih bilmek ile tarihsel düşünmek arasındaki farktır.' },
+
+  /* --- dil (ikinci eksen) --- */
+  'grammar':{ t:'Dilbilgisi ekseni', b:'Kelime ölçülür, işlev beyan edilir.',
+    more:'Dört bin kart bilen biri koşul cümlesi kuramıyorsa üretemez. Buradaki işaretler ölçüm değil BEYANDIR ve «tahmin» etiketiyle durur: sistem doğrulayamaz. Beyanı ölçüm gibi göstermek, retansiyon sayısını uydurmakla aynı şey olurdu.' },
+  'error-log':{ t:'Hata günlüğü', b:'Üretim hatalarını adlandırıp karta çevirme.',
+    more:'Bir hatayı adlandırmak onu bir daha görmenin tek yolu: «bir şeyler yanlıştı» tekrar eder, «edat eşleşmesi» tekrar etmez. En sinsi satır «atlama»dır: bilmediğin yapıdan kaçınmak hata üretmez, bu yüzden ölçüme de girmez — ama kurmadığın cümle yapamadığın cümledir.' },
+
+  /* --- yazı araçları --- */
+  'revision':{ t:'Revizyon geçişi', b:'Metnin üzerinden geçilen sıralı turlar.',
+    more:'Sıra önemlidir: yapı düzelmeden cümle cilalamak, silinecek paragrafı güzelleştirmektir. Okunabilirlik ölçümü cümle geçişinden SONRA alınır. İşaretlemek metni iyi yapmaz; hangi geçişin yapıldığını kaydeder.' },
+  'structure':{ t:'Yapı kalıbı', b:'Metnin iskeleti: tez–karşı tez, sorun–çözüm, anlatı…',
+    more:'Kalıp seçmek yaratıcılığı sınırlamaz; boş sayfayı sınırlar. Kalıbı bırakmak da serbesttir — ama bilerek bırakmak, hiç seçmemekten başka bir şeydir.' },
+  'rhetoric':{ t:'Retorik figür', b:'Dilin bilinen araçları ve ne işe yaradıkları.',
+    more:'Hiçbiri «iyi yazı böyle olur» demez: araç tanımıdır, kullanmak yazarın kararı. Bilerek yapılan tekrar figürdür, farkında olunmayan tekrar gürültü.' },
+
+  /* --- okuma yöntemi --- */
+  'reading-level':{ t:'Okuma düzeyi', b:'Temel, gözden geçirme, analitik, sentopik.',
+    more:'«Okudum» ölçülebilir bir şey söylemez: göz gezdirmek de okumaktır, bir bölümü üç kez dönüp çıkarmak da. Hangi düzeyde okuduğunu bilmek, ne kadar okuduğunu bilmekten daha çok şey söyler.' },
+  'analytic':{ t:'Analitik okumanın soruları', b:'Ne hakkında, ne söylüyor, doğru mu, ne olmuş yani?',
+    more:'Bir kitabı bitirdikten sonra cevaplanmayan soru, okunmamış bir bölüm kadar eksiktir. Anlamadan katılmak da karşı çıkmak da okuma değildir.' },
+  'protocol':{ t:'Okuma protokolü', b:'Bir okuma oturumunun beş adımı.',
+    more:'Not yazmak için okumayı durdurmak, okumayı da notu da bozar: okurken yalnızca işaretle, notları oturum sonunda çıkar. Bağ bulamıyorsan zorlama — uydurulmuş bağ matrisi görünür ama anlamsız yapar.' },
+  'note-template':{ t:'Not şablonu', b:'Her notun cevapladığı soruyu belli eden kalıp.',
+    more:'Şablonsuz not, sonradan ne için alındığı anlaşılmayan nottur. Alıntı şablonu en az kullanılanıdır: alıntı yığını not değildir.' },
+  'abandon':{ t:'Bırakma izni', b:'Bir kitabı bırakmak başarısızlık değildir.',
+    more:'Bitirme zorunluluğu okuma saatinin en büyük düşmanıdır. Gözden geçirme düzeyinde verilen «bu kitap şu an bana gerekmiyor» kararı, yarısında sıkılıp suçluluk duymaktan iyidir. Bırakılan kitap kayıtta kalır.' },
+
+  /* --- felsefe (ikinci eksen) --- */
+  'experiment':{ t:'Düşünce deneyi', b:'Bir tezi laboratuvarsız sınamanın yolu.',
+    more:'Deneylerin «doğru cevabı» yazılmaz: cevabı veren bir liste, deneyi bilgi yarışması sorusuna çevirir. Yazılan tek şey deneyin hangi AYRIMI zorladığıdır. Tezini sarsmayan bir deney seçmek, sınamadan geçmiş saymaktır.' },
+  'argument-drill':{ t:'Argüman alıştırması', b:'Tez kurma ve sınama egzersizleri.',
+    more:'Çelik adam kuralı en önemlisidir: karşı tarafı zayıf kurmak tartışmayı kazandırır, doğruyu kaybettirir. Yanlışlanamayan tez bir iddia değil bir inançtır.' },
+
+  /* --- müzik (ikinci eksen) --- */
+  'ear':{ t:'Kulak eğitimi', b:'Duyduğunu adlandırabilme: aralık, akor, derece.',
+    more:'Metronom parmakları eğitir, kulak eğitmez. Hızlı çalan ama duymayan biri her yeni parçayı sıfırdan ezberler. Burada «mutlak kulak» diye bir kapı yoktur ve bilerek yoktur: ölçülen tek şey deneme başına isabettir, yetenek değil.' },
+  'interval':{ t:'Aralık', b:'İki ses arasındaki mesafe ve onu hatırlatan kanca.',
+    more:'Kanca bir ezber kolaylığıdır, kural değil: kendi kancanı bulursan daha iyi tutar.' },
+  'caged':{ t:'CAGED', b:'Aynı akorun klavyede beş farklı şekli.',
+    more:'Bir sır değil bir harita. Beş şekil birbirine bağlandığında klavyenin tamamı tek bir sistem olarak okunur.' },
+  'sight-reading':{ t:'Deşifre', b:'Notayı ilk görüşte çalabilme.',
+    more:'Okumak çalmaktan ayrı bir beceridir ve ayrı çalışılır: repertuarı ezberden çalan biri deşifrede başlangıç düzeyinde olabilir. Bu bir çelişki değil, iki ayrı ölçüdür.' },
+  'repertoire':{ t:'Repertuar bakımı', b:'Çalınmayan parça geri gider.',
+    more:'«Bitti» diye bir hâl yoktur. Otuz günden uzun süredir çalınmayan parça bakımsızdır: çalınabilir ama garanti değil. Repertuar genişletmek kadar korumak da bir iştir.' },
+
 };
 
 /* ==== js/data/palettes.js ==== */
@@ -8299,6 +8900,7 @@ ESP.S = {
     histQuery:'',
     curDisc:null,           // mufredat ekraninda acik disiplin
     ladderTab:'ozet',       // ozet | yol | tespit
+    expField:'all',         // dusunce deneyi alan suzgeci
     officeAgent:'patron',
     officeDesk:null,
     officePerAgent:false,
@@ -16705,6 +17307,7 @@ ESP.Screens.lang = (function(){
     { id:'calis',    label:'Çalış' },
     { id:'kartlar',  label:'Kartlar' },
     { id:'ekle',     label:'Ekle' },
+    { id:'gramer',   label:'Dilbilgisi' },
     { id:'ilerleme', label:'İlerleme' },
   ];
 
@@ -16991,6 +17594,82 @@ ESP.Screens.lang = (function(){
     ];
   }
 
+  /* -------------------------------------------------------------- dilbilgisi
+
+     Kelime ezberi bir dili taşımaz: dört bin kart bilen biri koşul cümlesi
+     kuramıyorsa üretemez. Bu sekme ikinci ekseni tutar.
+
+     Buradaki işaretler ÖLÇÜM DEĞİL BEYANDIR ve öyle etiketlenir: kullanıcı
+     «bunu üretebiliyorum» der, sistem doğrulayamaz. Beyanı ölçüm gibi
+     göstermek, retansiyon sayısını uydurmakla aynı şey olurdu. */
+
+  function grammarMarks(){
+    return ((S.prefs && S.prefs.grammar) || {})[aktifDil()] || {};
+  }
+
+  function grammarRows(){
+    const d = ESP.SRS.deckStatus(aktifDil());
+    const bant = ESP.cefrOf(d.active, d.retention.value);
+    const isaret = grammarMarks();
+    const bantlar = ESP.CEFR.map(b => b.label);
+    const hataKartlari = (S.cards || []).filter(c => (c.tags || []).indexOf('hata') >= 0);
+
+    const rows = [
+      K.Entry({
+        label:'İKİ EKSEN', hint:'grammar',
+        meta:bant.band ? bant.band.label : 'bant yok',
+        note:'Soldaki eksen kelime (ölçülür), sağdaki işlev (beyan edilir). '
+           + 'İkisi ayrı durur çünkü biri ölçüm, öteki beyandır.',
+        body:html`
+          ${K.Notice({ tone:'info', body:bant.text || bant.why })}
+          <p class="small muted mt-8">${ESP.AVOIDANCE_NOTE}</p>`,
+      }),
+    ];
+
+    bantlar.forEach(b => {
+      const konular = ESP.GRAMMAR_BY_BAND[b] || [];
+      if(!konular.length) return;
+      const kac = konular.filter(t => isaret[t.id]).length;
+      rows.push(K.Entry({
+        label:b,
+        meta:kac + '/' + konular.length + ' beyan',
+        note:(ESP.CEFR.filter(x => x.label === b)[0] || {}).can || '',
+        wide:true,
+        body:html`${map(konular, t => html`
+          <div class="${cls('gramrow', isaret[t.id] && 'is-on')}">
+            ${K.Checkbox({ label:t.label, checked:!!isaret[t.id],
+              act:'mark-topic', data:{ 'data-id':t.id } })}
+            <span class="gramrow__can">${t.can}</span>
+            <span class="gramrow__trap"><b>Tuzak:</b> ${t.trap}</span>
+            ${when(isaret[t.id], () => ESP.Parts.cert('estimated'))}
+          </div>`)}`,
+      }));
+    });
+
+    rows.push(K.Entry({
+      label:'HATA GÜNLÜĞÜ', hint:'error-log',
+      meta:hataKartlari.length + ' kart',
+      note:'Bir hatayı adlandırmak onu bir daha görmenin tek yolu: '
+         + '«bir şeyler yanlıştı» tekrar eder, «edat eşleşmesi» tekrar etmez.',
+      wide:true,
+      body:html`
+        <div class="cols-3">
+          ${K.Field({ label:'Hata türü',
+            input:K.Select({ id:'er-kind', value:'dizim', aria:'Hata türü',
+              options:ESP.PRODUCTION_ERRORS.map(e => ({ value:e.id, label:e.label })) }) })}
+          ${K.Field({ label:'Yanlış hâli',
+            input:K.Input({ id:'er-wrong', aria:'Yanlış hâli' }) })}
+          ${K.Field({ label:'Doğrusu',
+            input:K.Input({ id:'er-right', aria:'Doğru hâli' }) })}
+        </div>
+        ${K.Button({ label:'Karta çevir', tone:'primary', act:'add-error', class:'mt-10' })}
+        ${K.Table({ tight:true, headers:['Tür', 'Ne olur'],
+          rows:ESP.PRODUCTION_ERRORS.map(e => [e.label, e.note]) })}`,
+    }));
+
+    return rows;
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
@@ -16998,6 +17677,7 @@ ESP.Screens.lang = (function(){
     const d = ESP.SRS.deckStatus(aktifDil());
     const rows = tab === 'kartlar' ? cardRows()
       : tab === 'ekle' ? addRows()
+      : tab === 'gramer' ? grammarRows()
       : tab === 'ilerleme' ? progressRows()
       : reviewRows();
 
@@ -17015,6 +17695,36 @@ ESP.Screens.lang = (function(){
 
   const handle = {
     async 'lang-tab'(el){ S.ui.langTab = el.dataset.tab; ESP.App.render(); },
+
+    /* Beyan bir olcum degildir: prefs icinde durur, deste sayilarina
+       karismaz ve hicbir kapiyi acmaz. */
+    async 'mark-topic'(el){
+      const dil = aktifDil(), id = el.dataset.id;
+      const prefs = Object.assign({}, S.prefs || {});
+      prefs.grammar = Object.assign({}, prefs.grammar || {});
+      prefs.grammar[dil] = Object.assign({}, prefs.grammar[dil] || {});
+      if(prefs.grammar[dil][id]) delete prefs.grammar[dil][id];
+      else prefs.grammar[dil][id] = true;
+      await M.savePrefs(prefs);
+      ESP.App.render();
+    },
+
+    /* Hata karti iki yonlu degildir: yalnizca "yanlis -> dogru". Ters yonu
+       sormak, yanlis hali ezberletmek olurdu. */
+    async 'add-error'(){
+      const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+      const yanlis = g('er-wrong'), dogru = g('er-right');
+      if(!yanlis || !dogru){ ESP.UI.toast('İki alan da gerekir'); return; }
+      const tur = ESP.ERROR_BY_ID_LANG[g('er-kind')] || ESP.PRODUCTION_ERRORS[0];
+      await M.saveCard(M.newCard({
+        front:yanlis + '  →  ?', back:dogru, lang:aktifDil(),
+        context:tur.label + ' — ' + tur.note,
+        tags:['hata', tur.id],
+      }));
+      ESP.Memo.bitir();
+      ESP.UI.toast('Hata kartı eklendi');
+      ESP.App.render();
+    },
     async 'tab-ekle'(){ S.ui.langTab = 'ekle'; ESP.App.render(); },
 
     async 'start-review'(){ S.ui.reviewQueue = queueStart(); ESP.App.render(); },
@@ -17170,7 +17880,58 @@ ESP.Screens.symposium = (function(){
     { id:'kapali',   label:'Kapalı' },
     { id:'ekle',     label:'Ekle' },
     { id:'metinler', label:'Metinler' },
+    { id:'deneyler', label:'Deneyler' },
   ];
+
+  /* --------------------------------------------------------------- deneyler
+
+     Bir tez yazmak ile bir tezi SINAMAK ayrı işlerdir. Düşünce deneyi
+     sınamanın en ucuz aracıdır: laboratuvar gerektirmez, yalnızca dürüstlük
+     ister.
+
+     Deneylerin «doğru cevabı» yazılmadı ve bu bilinçli: cevabı veren bir
+     liste, deneyi bir bilgi yarışması sorusuna çevirir. Yazılan tek şey,
+     deneyin hangi AYRIMI zorladığı. */
+  function experimentRows(){
+    const alan = S.ui.expField || 'all';
+    const list = (ESP.EXPERIMENTS || [])
+      .filter(x => alan === 'all' || x.field === alan);
+
+    return [
+      K.Entry({
+        label:'DÜŞÜNCE DENEYLERİ', hint:'experiment',
+        meta:list.length + ' deney',
+        note:'Deney bir tezi sınar. Tezini sarsmayan bir deney seçmek, '
+           + 'sınamadan geçmiş saymaktır.',
+        action:K.Select({ id:'exp-field', value:alan, change:'exp-field',
+          aria:'Alan süzgeci',
+          options:[{ value:'all', label:'Bütün alanlar' }]
+            .concat(ESP.EXPERIMENT_FIELDS.map(f => ({ value:f.id, label:f.label }))) }),
+        wide:true,
+        body:html`${map(list, x => html`
+          <div class="exprow">
+            <div class="exprow__head">
+              <b>${x.label}</b>
+              ${K.Badge({ label:(ESP.EXPERIMENT_FIELDS.filter(f => f.id === x.field)[0]
+                || {}).label || x.field, tone:'muted', icon:false })}
+              ${K.Button({ label:'Tez yap', size:'sm', act:'exp-to-thesis',
+                data:{ 'data-id':x.id } })}
+            </div>
+            <p>${x.setup}</p>
+            <p class="small muted"><b>Zorladığı ayrım:</b> ${x.tests}</p>
+          </div>`)}`,
+      }),
+
+      K.Entry({
+        label:'ARGÜMAN ALIŞTIRMALARI', hint:'argument-drill',
+        meta:ESP.ARGUMENT_DRILLS.length + ' alıştırma',
+        note:'Safsata denetimi metinde desen arar; bunlar egzersizdir.',
+        wide:true,
+        body:K.Table({ tight:true, headers:['Alıştırma', 'Ne yapılır', 'Neden'],
+          rows:ESP.ARGUMENT_DRILLS.map(d => [d.label, d.task, d.note]) }),
+      }),
+    ];
+  }
 
   /* ---------------------------------------------------------------- tez kartı */
 
@@ -17373,6 +18134,7 @@ ESP.Screens.symposium = (function(){
     const rows = tab === 'kapali' ? closedRows()
       : tab === 'ekle' ? addRows()
       : tab === 'metinler' ? textRows()
+      : tab === 'deneyler' ? experimentRows()
       : openRows();
 
     return K.Grid(html`
@@ -17389,6 +18151,25 @@ ESP.Screens.symposium = (function(){
   const handle = {
     async 'philo-tab'(el){ S.ui.philoTab = el.dataset.tab; ESP.App.render(); },
     async 'tab-ekle'(){ S.ui.philoTab = 'ekle'; ESP.App.render(); },
+
+    /* Deneyi teze çevirmek: deneyin kurgusu tezin YERINE geçmez, tezi
+       kullanıcı yazar. Sistem yalnızca boş tezi açar ve deneyi bağlam
+       olarak taşır — cevabı uydurmak, argümanı kullanıcının elinden
+       almak olurdu. */
+    async 'exp-to-thesis'(el){
+      const x = (ESP.EXPERIMENTS || []).filter(e => e.id === el.dataset.id)[0];
+      if(!x) return;
+      const a = await M.saveArgument(M.newArgument({
+        thesis:'',
+        objections:[{ id:U.uid('o'), text:x.setup, answered:false, answer:'' }],
+        concepts:[],
+      }));
+      S.ui.argOpen = a.id;
+      S.ui.philoTab = 'acik';
+      ESP.Memo.bitir();
+      ESP.UI.toast('Deney bir itiraz olarak açıldı — tezi sen yaz');
+      ESP.App.render();
+    },
 
     async 'parse-arg'(){
       const res = ESP.Parse.parseArgument(val('arg-text'));
@@ -17535,7 +18316,9 @@ ESP.Screens.symposium = (function(){
     },
   };
 
-  const change = {};
+  const change = {
+    async 'exp-field'(el){ S.ui.expField = el.value; ESP.App.render(); },
+  };
 
   return {
     id:'symposium',
@@ -18598,8 +19381,81 @@ ESP.Screens.studio = (function(){
   const TABS = [
     { id:'muzik',    label:'Müzik' },
     { id:'diksiyon', label:'Diksiyon' },
+    { id:'kulak',    label:'Kulak' },
     { id:'ilerleme', label:'İlerleme' },
   ];
+
+  /* ------------------------------------------------------------------ kulak
+
+     Metronom parmakları eğitir, kulak eğitmez. Hızlı çalan ama duymayan
+     biri repertuarını genişletemez: her yeni parçayı sıfırdan ezberler.
+
+     Buradaki hiçbir egzersiz bir yetenek testi değildir — «mutlak kulak»
+     diye bir kapı yok ve bilerek yok (ESP.PEDAGOGIC §talent). Ölçülen tek
+     şey, deneme başına isabet. */
+  function earRows(){
+    const eskiyen = (S.pieces || []).filter(p => {
+      if(p.kind !== 'piece') return false;
+      const son = (p.attempts || []).slice(-1)[0];
+      if(!son) return false;
+      return U.diffDays(son.date, U.todayISO()) > ESP.REPERTOIRE_STALE_DAYS;
+    });
+
+    return [
+      K.Entry({
+        label:'KULAK EGZERSİZLERİ', hint:'ear',
+        meta:ESP.EAR_DRILLS.length + ' egzersiz',
+        note:'Ölçülen şey yetenek değil isabet: yirmi denemede kaç doğru. '
+           + 'Sistem sesini dinlemez; sayıyı sen girersin.',
+        wide:true,
+        body:K.Table({ tight:true,
+          headers:[{ label:'Kademe', num:true }, 'Egzersiz', 'Ne yapılır', 'Ne ölçülür'],
+          rows:ESP.EAR_DRILLS.map(d => [String(d.level), d.label, d.task, d.measures]) }),
+      }),
+
+      K.Entry({
+        label:'ARALIKLAR', hint:'interval',
+        meta:ESP.INTERVALS.length + ' aralık',
+        note:'Kanca (hook) bir ezber kolaylığıdır, kural değil: kendi kancanı '
+           + 'bulursan daha iyi tutar.',
+        wide:true,
+        body:K.Table({ tight:true,
+          headers:['Aralık', { label:'Yarım ses', num:true }, 'Kanca'],
+          rows:ESP.INTERVALS.map(i => [i.label, String(i.semitones), i.hook]) }),
+      }),
+
+      K.Entry({
+        label:'CAGED', hint:'caged',
+        meta:'beş şekil',
+        note:'Bir sır değil bir harita: aynı akorun klavyede beş yerde nasıl '
+           + 'kurulduğunu gösterir.',
+        body:K.Table({ tight:true, headers:['Şekil', 'Kök', 'Not'],
+          rows:ESP.CAGED.map(c => [c.shape, c.root, c.note]) }),
+      }),
+
+      K.Entry({
+        label:'DEŞİFRE', hint:'sight-reading',
+        meta:ESP.SIGHT_READING.length + ' kademe',
+        note:'Okumak çalmaktan ayrı bir beceridir ve ayrı çalışılır.',
+        body:K.Table({ tight:true, headers:[{ label:'Kademe', num:true }, 'Ne', 'Nasıl'],
+          rows:ESP.SIGHT_READING.map(s => [String(s.level), s.label, s.task]) }),
+      }),
+
+      K.Entry({
+        label:'REPERTUAR BAKIMI', hint:'repertoire',
+        meta:eskiyen.length ? eskiyen.length + ' bakımsız' : 'güncel',
+        note:'«Bitti» diye bir hâl yoktur: ' + ESP.REPERTOIRE_STALE_DAYS
+           + ' günden uzun süredir çalınmayan parça çalınabilir ama garanti değil.',
+        body:eskiyen.length
+          ? K.Table({ tight:true, headers:['Parça', 'Son çalınma'],
+              rows:eskiyen.map(p => {
+                const son = (p.attempts || []).slice(-1)[0];
+                return [p.name, son ? son.date : '—'];
+              }) })
+          : K.Empty({ text:'Bakımsız parça yok ya da henüz deneme kaydı girilmedi.' }),
+      }),
+    ];
+  }
 
   /* --------------------------------------------------------------- metronom
 
@@ -18922,6 +19778,7 @@ ESP.Screens.studio = (function(){
   function render(){
     const tab = S.ui.studioTab || 'muzik';
     const rows = tab === 'diksiyon' ? dictionRows()
+      : tab === 'kulak' ? earRows()
       : tab === 'ilerleme' ? progressRows()
       : musicRows();
 
@@ -18934,7 +19791,8 @@ ESP.Screens.studio = (function(){
            recetesini yazar. Ikisini birden gostermek, otuz dakikalik bir
            gunu altmis dakikalik bir recete ile karsilamak olurdu. */
         const disc = S.ui.studioTab === 'diksiyon' ? 'diction' : 'music';
-        return (S.ui.studioTab === 'ilerleme' ? [] : [ESP.Parts.coach(disc)]).concat(rows);
+        const sessiz = S.ui.studioTab === 'ilerleme' || S.ui.studioTab === 'kulak';
+        return (sessiz ? [] : [ESP.Parts.coach(disc)]).concat(rows);
       }))}`);
   }
 
@@ -19122,7 +19980,63 @@ ESP.Screens.library = (function(){
     { id:'notlar',    label:'Notlar' },
     { id:'matris',    label:'Matris' },
     { id:'kaynaklar', label:'Kaynaklar' },
+    { id:'yontem',    label:'Yöntem' },
   ];
+
+  /* ----------------------------------------------------------------- yöntem
+
+     «Okudum» cümlesi ölçülebilir bir şey söylemez: göz gezdirmek de
+     okumaktır, bir bölümü üç kez dönüp çıkarmak da. Bu sekme ikisini ayıran
+     dili tutar. */
+  function methodRows(){
+    return [
+      K.Entry({
+        label:'DÖRT DÜZEY', hint:'reading-level',
+        meta:ESP.READING_LEVELS.length + ' düzey',
+        note:'Hangi düzeyde okuduğunu bilmek, ne kadar okuduğunu bilmekten '
+           + 'daha çok şey söyler.',
+        wide:true,
+        body:K.Table({ tight:true,
+          headers:[{ label:'#', num:true }, 'Düzey', 'Sorusu', 'Not'],
+          rows:ESP.READING_LEVELS.map(l => [String(l.rank), l.label, l.q, l.note]) }),
+      }),
+
+      K.Entry({
+        label:'ANALİTİK OKUMANIN DÖRT SORUSU', hint:'analytic',
+        meta:'kitap bitince',
+        note:'Cevaplanmayan soru, okunmamış bir bölüm kadar eksiktir.',
+        wide:true,
+        body:html`${map(ESP.ANALYTIC_QUESTIONS, q => html`
+          <div class="toolrow">
+            <b>${q.q}</b>
+            <span class="tiny dim">${q.note}</span>
+          </div>`)}`,
+      }),
+
+      K.Entry({
+        label:'OKUMA PROTOKOLÜ', hint:'protocol',
+        meta:ESP.READING_PROTOCOL.length + ' adım',
+        note:'Not yazmak için okumayı durdurmak, okumayı da notu da bozar.',
+        body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Adım', 'Ne yapılır'],
+          rows:ESP.READING_PROTOCOL.map(p => [String(p.step), p.label, p.do]) }),
+      }),
+
+      K.Entry({
+        label:'NOT ŞABLONLARI', hint:'note-template',
+        meta:ESP.NOTE_TEMPLATES.length + ' şablon',
+        note:'Şablonsuz not, sonradan ne için alındığı anlaşılmayan nottur.',
+        wide:true,
+        body:K.Table({ tight:true, headers:['Şablon', 'Biçim', 'Ne zaman'],
+          rows:ESP.NOTE_TEMPLATES.map(t => [t.label, t.form, t.use]) }),
+      }),
+
+      K.Entry({
+        label:'BIRAKMA İZNİ', hint:'abandon',
+        meta:'kural',
+        body:K.Notice({ tone:'info', body:ESP.ABANDON_RULE }),
+      }),
+    ];
+  }
 
   function bookOf(id){ return (S.books || []).find(b => b.id === id); }
 
@@ -19358,6 +20272,7 @@ ESP.Screens.library = (function(){
     const tab = S.ui.readTab || 'notlar';
     const rows = tab === 'matris' ? matrixRows()
       : tab === 'kaynaklar' ? bookRows()
+      : tab === 'yontem' ? methodRows()
       : noteRows();
 
     return K.Grid(html`
@@ -19508,7 +20423,56 @@ ESP.Screens.writing = (function(){
   const TABS = [
     { id:'taslaklar', label:'Taslaklar' },
     { id:'olcum',     label:'Ölçüm' },
+    { id:'araclar',   label:'Araçlar' },
   ];
+
+  /* ---------------------------------------------------------------- araçlar
+
+     Burada hiçbir madde «iyi yazı böyle olur» demez ve bu, ESP'nin estetik
+     otorite iddia etmeme sınırının (ESP.PEDAGOGIC §aesthetic) tam kenarı.
+     Hepsi ARAÇ tanımıdır: aracın ne yaptığı söylenir, kullanılıp
+     kullanılmayacağı yazarındır.
+
+     Revizyon listesi de bir kalite ölçütü değil bir GEÇİŞ listesidir:
+     işaretlemek metni iyi yapmaz, hangi geçişin yapıldığını kaydeder. */
+  function toolRows(){
+    const K2 = ESP.C;
+    return [
+      K2.Entry({
+        label:'REVİZYON GEÇİŞLERİ', hint:'revision',
+        meta:ESP.REVISION_PASSES.length + ' geçiş',
+        note:'Sıra önemlidir: yapı düzelmeden cümle cilalamak, silinecek '
+           + 'paragrafı güzelleştirmektir.',
+        wide:true,
+        body:K2.Table({ tight:true,
+          headers:[{ label:'#', num:true }, 'Geçiş', 'Sorusu', 'Not'],
+          rows:ESP.REVISION_PASSES.slice().sort((a, b) => a.order - b.order)
+            .map(r => [String(r.order), r.label, r.ask, r.note]) }),
+      }),
+
+      K2.Entry({
+        label:'YAPI KALIPLARI', hint:'structure',
+        meta:ESP.STRUCTURES.length + ' kalıp',
+        note:'Kalıp seçmek yaratıcılığı sınırlamaz; boş sayfayı sınırlar.',
+        wide:true,
+        body:html`${map(ESP.STRUCTURES, st => html`
+          <div class="toolrow">
+            <b>${st.label}</b>
+            <span class="toolrow__mid">${st.shape.join('  →  ')}</span>
+            <span class="tiny dim">${st.when}</span>
+          </div>`)}`,
+      }),
+
+      K2.Entry({
+        label:'RETORİK FİGÜRLER', hint:'rhetoric',
+        meta:ESP.RHETORIC.length + ' figür',
+        note:'Bilerek yapılan tekrar figürdür; farkında olunmayan tekrar gürültü.',
+        wide:true,
+        body:K2.Table({ tight:true, headers:['Figür', 'Ne yapar', 'Neden işe yarar', 'Örnek'],
+          rows:ESP.RHETORIC.map(r => [r.label, r.what, r.why, r.ex]) }),
+      }),
+    ];
+  }
 
   function acikTaslak(){
     const id = S.ui.draftOpen;
@@ -19681,7 +20645,9 @@ ESP.Screens.writing = (function(){
 
   function render(){
     const tab = S.ui.writeTab || 'taslaklar';
-    const rows = tab === 'olcum' ? measureRows() : draftRows();
+    const rows = tab === 'olcum' ? measureRows()
+      : tab === 'araclar' ? toolRows()
+      : draftRows();
 
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({

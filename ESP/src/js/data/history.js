@@ -25,19 +25,19 @@ window.ESP = window.ESP || {};
    demek bir kararidir, bir olcum degil. `disputed` alani bunu ekranda
    gorunur kilar: kullanici sinirin kendisinin bir yorum oldugunu bilmeli. */
 ESP.ERAS = [
-  { id:'tarihoncesi', label:'Tarih öncesi', from:-3000000, to:-3200,
+  { id:'tarihoncesi', label:'Tarih öncesi', from:-3000000, to:-3201,
     note:'Yazıdan önce. Kaynak: arkeoloji, antropoloji — yazılı tanık yok.',
     disputed:'Bitiş, yazının bulunuşuna bağlanır; yazı her yerde aynı anda çıkmadı.' },
-  { id:'ilkcag', label:'İlk Çağ', from:-3200, to:476,
+  { id:'ilkcag', label:'İlk Çağ', from:-3200, to:475,
     note:'Yazının bulunuşundan Batı Roma\'nın yıkılışına.',
     disputed:'476 Batı\'ya özgü bir tarihtir; Doğu Roma 1453\'e kadar sürdü.' },
-  { id:'ortacag', label:'Orta Çağ', from:476, to:1453,
+  { id:'ortacag', label:'Orta Çağ', from:476, to:1452,
     note:'Feodalite, üç büyük dinin kurumsallaşması, İslam biliminin yükselişi.',
     disputed:'«Karanlık çağ» adlandırması 19. yy Avrupa merkezli bir yargıdır.' },
-  { id:'yenicag', label:'Yeni Çağ', from:1453, to:1789,
+  { id:'yenicag', label:'Yeni Çağ', from:1453, to:1788,
     note:'Coğrafi keşifler, Rönesans, Reform, mutlak monarşiler, bilim devrimi.',
     disputed:'1453 mü 1492 mi tartışmalıdır; ikisi de Avrupa merkezlidir.' },
-  { id:'yakincag', label:'Yakın Çağ', from:1789, to:1945,
+  { id:'yakincag', label:'Yakın Çağ', from:1789, to:1944,
     note:'Devrimler, sanayileşme, ulus-devlet, sömürgecilik, iki dünya savaşı.',
     disputed:'Bitişi 1914, 1918 ya da 1945 sayılabilir; her biri ayrı bir tez.' },
   { id:'cagdas', label:'Çağdaş', from:1945, to:9999,
@@ -45,6 +45,15 @@ ESP.ERAS = [
     disputed:'Yaşanan dönemin tarihi yazılamaz denir; belge açılmamıştır.' },
 ];
 
+/* Sinirlar ORTUSMEZ ve bu bir ayrinti degil: 476 hem Ilk Cag'in sonu hem
+   Orta Cag'in basi yazilsaydi, `eraOf(476)` iki dogru cevabi olan bir soru
+   olurdu ve listedeki siraya gore rastgele birini dondururdu. Donem bir
+   olcum degil bir karardir — ama karar TEK olmalidir.
+
+   Sonuc olarak sinir yili bir sonraki donemin ilk yilidir: 476 Orta Cag'a,
+   1453 Yeni Cag'a, 1789 Yakin Cag'a, 1945 Cagdas'a dusser. Fetih ve Devrim
+   gibi olaylar boylece "bitirdikleri" degil "baslattiklari" donemde durur —
+   tarih yazimindaki yaygin tercih de budur. */
 ESP.ERA_BY_ID = ESP.ERAS.reduce(function(m, e){ m[e.id] = e; return m; }, {});
 
 /* Bir yilin hangi doneme dustugu. Donemler ortusmez; ilk eslesen doner. */

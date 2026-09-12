@@ -21,7 +21,56 @@ ESP.Screens.writing = (function(){
   const TABS = [
     { id:'taslaklar', label:'Taslaklar' },
     { id:'olcum',     label:'Ölçüm' },
+    { id:'araclar',   label:'Araçlar' },
   ];
+
+  /* ---------------------------------------------------------------- araçlar
+
+     Burada hiçbir madde «iyi yazı böyle olur» demez ve bu, ESP'nin estetik
+     otorite iddia etmeme sınırının (ESP.PEDAGOGIC §aesthetic) tam kenarı.
+     Hepsi ARAÇ tanımıdır: aracın ne yaptığı söylenir, kullanılıp
+     kullanılmayacağı yazarındır.
+
+     Revizyon listesi de bir kalite ölçütü değil bir GEÇİŞ listesidir:
+     işaretlemek metni iyi yapmaz, hangi geçişin yapıldığını kaydeder. */
+  function toolRows(){
+    const K2 = ESP.C;
+    return [
+      K2.Entry({
+        label:'REVİZYON GEÇİŞLERİ', hint:'revision',
+        meta:ESP.REVISION_PASSES.length + ' geçiş',
+        note:'Sıra önemlidir: yapı düzelmeden cümle cilalamak, silinecek '
+           + 'paragrafı güzelleştirmektir.',
+        wide:true,
+        body:K2.Table({ tight:true,
+          headers:[{ label:'#', num:true }, 'Geçiş', 'Sorusu', 'Not'],
+          rows:ESP.REVISION_PASSES.slice().sort((a, b) => a.order - b.order)
+            .map(r => [String(r.order), r.label, r.ask, r.note]) }),
+      }),
+
+      K2.Entry({
+        label:'YAPI KALIPLARI', hint:'structure',
+        meta:ESP.STRUCTURES.length + ' kalıp',
+        note:'Kalıp seçmek yaratıcılığı sınırlamaz; boş sayfayı sınırlar.',
+        wide:true,
+        body:html`${map(ESP.STRUCTURES, st => html`
+          <div class="toolrow">
+            <b>${st.label}</b>
+            <span class="toolrow__mid">${st.shape.join('  →  ')}</span>
+            <span class="tiny dim">${st.when}</span>
+          </div>`)}`,
+      }),
+
+      K2.Entry({
+        label:'RETORİK FİGÜRLER', hint:'rhetoric',
+        meta:ESP.RHETORIC.length + ' figür',
+        note:'Bilerek yapılan tekrar figürdür; farkında olunmayan tekrar gürültü.',
+        wide:true,
+        body:K2.Table({ tight:true, headers:['Figür', 'Ne yapar', 'Neden işe yarar', 'Örnek'],
+          rows:ESP.RHETORIC.map(r => [r.label, r.what, r.why, r.ex]) }),
+      }),
+    ];
+  }
 
   function acikTaslak(){
     const id = S.ui.draftOpen;
@@ -194,7 +243,9 @@ ESP.Screens.writing = (function(){
 
   function render(){
     const tab = S.ui.writeTab || 'taslaklar';
-    const rows = tab === 'olcum' ? measureRows() : draftRows();
+    const rows = tab === 'olcum' ? measureRows()
+      : tab === 'araclar' ? toolRows()
+      : draftRows();
 
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({

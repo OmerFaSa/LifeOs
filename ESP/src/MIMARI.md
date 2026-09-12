@@ -111,12 +111,48 @@ birlikte durur.
 | 3 | Müzik / Gitar | **Maestro** | `core/acoustic.js` (metronom) | `data/guitar_tabs.js` | Stüdyo |
 | 4 | Diksiyon | **Demosthenes** | `core/acoustic.js` (artikülasyon) | `data/phonetics.js` | Stüdyo |
 | 5 | Derin Okuma | **Aristoteles** | `core/intellect.js` (sentopik) | `data/canon.js` | Kütüphane |
-| 6 | Yazı | **Montaigne** | `core/intellect.js` (okunabilirlik) | — | Yazı Laboratuvarı |
-| 7 | **Orkestrasyon** | **Patron** | `core/planner.js` | `data/rules.js`, `data/agents.js` | Ofis, Analiz |
+| 6 | Yazı | **Montaigne** | `core/intellect.js` (okunabilirlik) | `data/rhetoric.js` | Yazı Laboratuvarı |
+| 7 | Tarih | **Herodot** | `core/chrono.js` | `data/history.js` | Kronoloji |
+| — | **Hafıza koçu** | **Mnemosyne** | `core/curriculum.js`, `core/coach.js` | `data/curriculum.js`, `data/drills.js` | Merdiven |
+| — | **Orkestrasyon** | **Patron** | `core/planner.js` | `data/rules.js`, `data/agents.js` | Ofis, Analiz |
 
 `core/acoustic.js`'in **iki ajan tarafından paylaşılması kasıtlıdır**: ikisi de
 aynı ham girdiyi (zamanlama ve tekrar) farklı eşiklerle okur. Kod tekrarı
 yerine tek bir sinyal işleme katmanı.
+
+### Modül 0 — Merdiven ve koç (`core/curriculum.js`, `core/coach.js`)
+
+İlk sürüm bir **ölçüm** sistemiydi: ne kadar çalıştığını sayardı. Ölçüm tek
+başına yol göstermez — «bugün 40 dakika gitar çalıştım» cümlesi kişiyi
+ilerletmez, yalnızca kaydeder. Merdiven bu eksiği kapatır.
+
+**Kademe.** Yedi disiplinin her birinde beş basamak (Acemi → Çırak → Kalfa →
+Usta → Üstat) ve her basamakta **ölçülebilir kapılar**. Eşikler koda değil
+`data/curriculum.js` içine yazılır: kullanıcı kendi tabanını değiştirebilmeli.
+
+Üç kural merdiveni tutar:
+
+1. **Kapı ölçülebilir olmak zorundadır.** «Fransızcayı iyi anlıyor» bir kapı
+   değildir; «300+ aktif kart ve retansiyon ≥ 0,75» bir kapıdır. Ölçülemeyen
+   kapı, kullanıcının kendine anlattığı bir hikâyedir.
+2. **Merdiven ardışıktır.** 3. kademenin kapılarını geçmiş ama 2. kademede bir
+   kapıyı atlamış biri 2. kademededir. Atlanan kapı ileride geri gelir ve
+   üstüne kurulan her şeyi çökertir.
+3. **Ölçülemeyen kapı geçilmiş sayılmaz — ama kalınmış da sayılmaz.** Üçüncü
+   bir durum (`unknown`) vardır ve sistemin dürüstlüğü odur.
+
+Kademenin kesinliği de yazılır: 0. basamak `veri yok`, bir üst basamakta
+ölçülemeyen kapı varsa `tahmin`, aksi hâlde `hesaplandı`.
+
+**Reçete.** `core/coach.js` üç bölümlü bir seans yazar — ısınma · asıl iş ·
+zorlanma. Asıl iş, merdivende açık olan kapıya çalışır (`data/drills.js`
+içindeki her egzersiz bir kapıyı hedefler). Zorlanma yalnızca **bir** üst
+kademeden gelir; iki üst kademe bir egzersiz değil bir hayal kırıklığıdır.
+
+Reçetenin toplamı profildeki günlük tabandan taşmaz ve gün içinde değişmez
+(tohum günün tarihidir) — yoksa kullanıcı yenileyip hoşuna gideni seçerdi.
+Bir egzersiz «işlendi» bayrağıyla değil, **gün kaydına oturum yazılarak**
+kapanır: ayrı bir bayrak, yapılmamış işi yapılmış göstermenin en kolay yolu.
 
 ### Modül 1 — Aralıklı tekrar (`core/srs.js`)
 
@@ -200,6 +236,35 @@ Diksiyon tarafında WPM için **hem süre hem kelime sayısı ölçülmüş olma
 biri eksikse hesap yapılmaz — «tahmini WPM» diye bir şey yoktur. Hata oranı
 daima «tahmin» etiketi taşır: sistem sesi dinlemedi.
 
+### Modül 3.5 — Kronoloji (`core/chrono.js`)
+
+Tarih öğrenmenin iki yaygın biçimi de eksiktir: tarih **sıralaması**
+ezberlemek (bağlamsız) ve tarih **hikâyesi** dinlemek (denetimsiz). ESP'nin
+tarihi üçüncü biçimdir: bir olay bir **döneme** ve bir **neden zincirine**
+bağlanır; zincirin her halkası bir **kaynağa** dayanır; kaynak eleştirilir.
+
+Üç eksen ayrı ölçülür ve **asla tek puana toplanmaz**:
+
+| Eksen | Ne sorar | Nerede |
+|---|---|---|
+| Kapsam | Hangi dönem, bölge, alan kör nokta? | `spread()`, `centuryGaps()` |
+| Derinlik | Kaç olay kaynağıyla açıklanmış? | `sourceBalance()`, `unbalancedChains()` |
+| Tutma | Öğrenilen duruyor mu? | `retention()` — ayrı deste |
+
+Tek puan, hangi eksenin zayıf olduğunu gizler; gizlenen eksen çalışılmaz.
+
+İki karar özellikle önemlidir:
+
+- **Yalnızca tetikleyiciden kurulan zincir «dengesiz» işaretlenir.** «Savaş
+  suikastla çıktı» tarihin en yaygın hatasıdır. Sistem yargılamaz, gösterir.
+- **Tarih destesi dil destesinden ayrıdır.** İkisi aynı SRS motorunu kullanır
+  ama ayrı ölçülür: birinin iyi olması ötekinin çöküşünü gizlememeli.
+  Planlayıcı hangi destenin geciktiğini bilir ve doğru ekranı açar.
+
+Dönem sınırları **örtüşmez** ve bu bir ayrıntı değil: 476 hem İlk Çağ'ın sonu
+hem Orta Çağ'ın başı yazılsaydı `eraOf(476)` iki doğru cevabı olan bir soru
+olurdu. Dönem bir ölçüm değil bir karardır — ama karar tek olmalıdır.
+
 ### Modül 4 — Orkestrasyon (`core/planner.js`)
 
 **Sıradaki iş** tek bir öncelik gösterir. Sıra `ESP.PRECEDENCE` ile aynıdır ve
@@ -234,16 +299,21 @@ Sekiz bölüm, on iki sayfa. Bölüm alana göre değil kullanıcının o gün y
 **işe** göre ayrılır ve sırası kasıtlıdır: önce günün kaydı, sonra altı
 disiplinin kendi tezgâhı, sonra danışma, en sonda ayar.
 
-| # | Bölüm | Sayfalar |
-|---|---|---|
-| 01 | **Günlük** | Bugün |
-| 02 | Dil | Dil Stüdyosu |
-| 03 | Felsefe | Sempozyum |
-| 04 | Ses | Stüdyo |
-| 05 | Okuma | Kütüphane |
-| 06 | Yazı | Yazı Laboratuvarı |
-| 07 | Ofis | Masalar · Danışma · Toplantı · Analiz |
-| 08 | Ayarlar | Profil · Rehber |
+| # | Bölüm | Sayfalar | Sekmeler |
+|---|---|---|---|
+| 01 | **Günlük** | Bugün · Merdiven | reçete, ölçüm, geçmiş / genel, yol, seviye tespiti |
+| 02 | Dil | Dil Stüdyosu | çalış, kartlar, ekle, **dilbilgisi**, ilerleme |
+| 03 | Düşünce | Sempozyum · **Kronoloji** | açık, kapalı, ekle, metinler, **deneyler** / şerit, olaylar, kaynaklar, zincir, çalışma |
+| 04 | Ses | Stüdyo | müzik, diksiyon, **kulak**, ilerleme |
+| 05 | Okuma | Kütüphane | notlar, matris, kaynaklar, **yöntem** |
+| 06 | Yazı | Yazı Laboratuvarı | taslaklar, ölçüm, **araçlar** |
+| 07 | Ofis | Masalar · Danışma · Toplantı · Analiz | — |
+| 08 | Ayarlar | Profil · Rehber | — |
+
+**Felsefe ile tarih neden aynı bölümde?** Bu bir yerleştirme kolaylığı değil
+bir iddia: ikisi de aynı kası çalıştırır — öncül ile sonucu ayırmak. Ayrıca
+dokuz numaralı bir şerit telefonda okunmuyordu; birleştirme hem düzeni hem
+sayfayı kurtardı.
 
 **Spesifikasyondan bilinçli sapma:** spec «Analiz»i ayrı bir gezinme grubu
 sayıyor; burada Ofis'in dördüncü sayfası. Sebep: analiz bir alan değil bir
@@ -383,11 +453,16 @@ node tools/palettecheck.js   # kontrast
 
 | Ölçüm | Sonuç |
 |---|---|
-| Birim testi | **151/151** geçiyor |
-| Duman testi | temiz — 12 ekran, kaynak + `dist/esp.html` |
+| Birim testi | **245/245** geçiyor |
+| Duman testi | temiz — 14 ekran, **48 sekme**, kaynak + `dist/esp.html` |
 | Erişilebilirlik | temiz (4 bilinen eksik izin listesinde) |
 | Kontrast | **1848 ölçüm**, hepsi AA — en dar pay 4,52 (asgari 4,5) |
-| Tek dosya dağıtım | 872 KB, 45 js modülü |
+| Tek dosya dağıtım | ~1,1 MB, 58 js modülü |
+
+Duman testi artık **sekmeleri de gezer**: ekranın açılması ikinci sekmesinin
+çizildiğini söylemez ve çoğu ekranda içeriğin yarısı ilk sekmede değil.
+Aynı geçişte her `data-hint` anahtarının karşılığı olup olmadığı da denetlenir
+— karşılığı olmayan ipucu düğmesi hiç çizilmez, yani sessizce kaybolur.
 
 ---
 

@@ -174,7 +174,7 @@ ESP.Test = (function(){
       writeTab:'taslaklar', draftOpen:null,
       analyticsTab:'radar',
       histTab:'serit', eventOpen:null, sourceOpen:null, chainOpen:null,
-      histEra:'all', histQuery:'', curDisc:null, ladderTab:'ozet',
+      histEra:'all', histQuery:'', curDisc:null, ladderTab:'ozet', expField:'all',
       officeAgent:'patron', officeDesk:null, officePerAgent:false,
       meetingAgenda:0, meetingOpen:null, guideTab:'kullanim',
       profileOpen:null, quickOpen:false,
