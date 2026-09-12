@@ -1,0 +1,641 @@
+/* Uygulama kabuğu — panel değil SİTE düzeni.
+
+   Önceki düzen bir yönetim panelinin diliyle konuşuyordu: solda sabit bir
+   menü sütunu, üstte bir başlık çubuğu, altta üst üste yığılmış kartlar.
+   O dil bir araç kutusuna yakışır; günde birkaç kez açılıp okunan kişisel
+   bir sağlık sistemine değil.
+
+   Yeni düzen üç parçadır:
+
+     sitenav   ince, yapışkan üst gezinme — yedi bölüm, tek satır
+     hero      her bölümün açılış bandı: ne olduğu tek cümlede yazar
+     sect      içeriğin nefes alan bölümleri, kart yığını değil
+
+   Kural: içerik ORTALANIR ve genişliği sınırlıdır (--content-max). Ekran
+   büyüdükçe satırlar uzamaz, kenar boşluğu büyür. Uzun satır okunmaz. */
+
+/* ---------- kabuk ---------- */
+.site{
+  min-height:100vh;
+  display:flex; flex-direction:column;
+  background:var(--bg);
+}
+.site__body{ flex:1; min-width:0; }
+
+/* Ortalayıcı: her bant kendi zeminini tam genişlikte boyar, içeriğini
+   ortada tutar. Böylece hero'nun zemini kenara kadar gider ama yazısı
+   içerikle aynı hizada başlar. */
+.wrapc{
+  width:100%;
+  max-width:var(--content-max);
+  margin-inline:auto;
+  padding-inline:32px;
+}
+
+/* ---------- künye: kimlik satırı ----------
+
+   Bu satır YAPIŞMAZ. Okurken kimliğe ihtiyaç yoktur, gezinmeye vardır;
+   kimlik satırının kaymasına izin vermek sabit çubuğu yarı yüksekliğe
+   indirir ve içeriğe yer açar. */
+.masthead{ background:var(--bg); }
+.masthead__in{
+  height:64px;
+  display:flex; align-items:center; gap:20px;
+}
+
+.brand{
+  display:flex; align-items:center; gap:11px;
+  border:none; background:none; padding:0;
+  min-width:0; flex:none;
+}
+.brand__mark{
+  width:30px; height:30px; border-radius:50%; flex:none;
+  background:var(--ink); color:var(--ink-on);
+  display:grid; place-items:center;
+  font-family:var(--font-serif); font-weight:500; font-size:15px;
+  letter-spacing:0; line-height:1;
+}
+.brand__text{ display:flex; flex-direction:column; line-height:1.1; min-width:0; text-align:left; }
+.brand__text b{
+  font-family:var(--font-serif); font-size:19px; font-weight:500;
+  letter-spacing:.015em; color:var(--text);
+}
+.brand__text span{
+  font-size:10px; font-weight:500; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--text-3); margin-top:2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* Tarih künyenin ortasında durur — bir gazetenin tarih satırı gibi. */
+.masthead__date{
+  flex:1; min-width:0;
+  display:flex; align-items:baseline; justify-content:center; gap:9px;
+  white-space:nowrap; overflow:hidden;
+}
+.masthead__day{
+  font-family:var(--font-serif); font-size:14px; color:var(--text-2);
+}
+.masthead__wd{
+  font-size:10px; font-weight:500; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--text-3);
+}
+
+/* Araçlar HER ZAMAN sağ uçta durur. Aradaki tarih esneyen ögedir ve
+   dar ekranda (ya da «Odak» düzeninde) gizleniyor; o zaman itecek bir
+   şey kalmadığı için araçlar markanın dibine yığılıyordu. `auto` kenar
+   boşluğu bunu esneyen ögeye bağlı olmaktan çıkarır. */
+.navtools{ display:flex; align-items:center; gap:2px; flex:none; margin-left:auto; }
+.navtools__sep{ width:1px; height:20px; background:var(--border); margin:0 4px; flex:none; }
+.sitenav__menu{ display:none; }
+
+/* ---------- künye: numaralı bölüm şeridi ----------
+
+   Yapışan tek parça budur. Numara süs değil: yedi bölümün SIRASI
+   anlamlıdır (önce yazılan, sonra okunan) ve numara o sırayı görünür
+   kılar. */
+.sitenav{
+  position:sticky; top:0; z-index:var(--z-nav);
+  background:color-mix(in srgb, var(--bg) 96%, transparent);
+  backdrop-filter:saturate(1.3) blur(16px);
+  border-block:1px solid var(--border);
+}
+.navlinks{
+  display:flex; align-items:stretch; gap:0;
+  overflow-x:auto; scrollbar-width:none;
+}
+.navlinks::-webkit-scrollbar{ display:none; }
+
+.navlink{
+  position:relative;
+  flex:0 0 auto;
+  display:inline-flex; align-items:baseline; gap:8px;
+  padding:13px 22px 13px 0;
+  margin-right:6px;
+  border:none; background:none;
+  color:var(--text-3);
+  transition:color var(--dur) var(--ease);
+}
+.navlink svg{ display:none; }
+.navlink__num{
+  font-family:var(--font-display); font-size:10px; font-weight:600;
+  letter-spacing:.06em; font-variant-numeric:tabular-nums;
+  color:var(--text-3); opacity:.7;
+}
+.navlink__label{
+  font-size:13.5px; font-weight:500; letter-spacing:.005em; white-space:nowrap;
+}
+.navlink:hover{ color:var(--text-2); }
+.navlink:hover .navlink__num{ opacity:1; }
+.navlink.is-active{ color:var(--text); }
+.navlink.is-active .navlink__label{ font-weight:600; }
+.navlink.is-active .navlink__num{ color:var(--primary); opacity:1; }
+/* Etkin bölümün altındaki çizgi numarayı da kapsar. */
+.navlink.is-active::after{
+  content:''; position:absolute; left:0; right:22px; bottom:-1px; height:2px;
+  background:var(--primary);
+}
+.navlink__badge{
+  align-self:center;
+  min-width:16px; height:16px; padding:0 5px; border-radius:var(--r-pill);
+  background:var(--danger); color:#fff;
+  font-size:10px; font-weight:700; line-height:16px; text-align:center;
+}
+.navlink__badge.is-quiet{ background:var(--surface-3); color:var(--text-2); }
+
+/* ---------- hero ----------
+
+   Sayfanın açılışı: bölüm imzası, tek cümlelik durum, ne yapılacağı ve
+   özet sayılar. Zemin yok — tek ayırıcı ince çizgidir. */
+/* Hero'nun sağ üst köşesinde bölüm numarası, çok soluk ve çok büyük.
+   Bir yayının bölüm sayfalarındaki numara gibi: okunmak için değil,
+   sayfaya ağırlık ve yer duygusu vermek için. */
+.hero{ position:relative; border-bottom:1px solid var(--border); overflow:hidden; }
+.hero::before{
+  content:attr(data-num);
+  position:absolute; top:-14px; right:max(32px, calc((100% - var(--content-max)) / 2 + 32px));
+  font-family:var(--font-serif); font-size:150px; font-weight:500;
+  line-height:1; letter-spacing:-.045em;
+  color:var(--sec); opacity:.06;
+  pointer-events:none; user-select:none;
+}
+@media (max-width:1060px){ .hero::before{ font-size:118px; top:-8px; right:20px; } }
+@media (max-width:560px){ .hero::before{ display:none; } }
+.hero__in{
+  padding-block:46px 34px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end; gap:24px 56px;
+}
+.hero__main{ min-width:0; }
+
+/* Bölüm imzası: numara, ince çizgi, ad. Numara bölümün kendi renginde. */
+.hero__eyebrow{
+  display:flex; align-items:center; gap:11px;
+  font-family:var(--font-body);
+  font-size:10.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--text-3);
+  margin-bottom:20px;
+}
+.hero__eyebrow svg{ display:none; }
+.hero__num{
+  color:var(--sec); font-variant-numeric:tabular-nums; font-weight:700;
+  font-size:11px;
+}
+.hero__num::after{
+  content:''; display:inline-block; vertical-align:middle;
+  width:26px; height:1.5px; background:var(--sec); margin:0 0 3px 11px;
+  opacity:.55;
+}
+
+.hero__title{
+  font-family:var(--font-serif);
+  font-size:var(--fs-display); font-weight:500; line-height:1.1;
+  letter-spacing:-.018em; color:var(--text);
+  margin:0;
+  text-wrap:balance;
+}
+.hero__lede{
+  margin:16px 0 0;
+  max-width:52ch;
+  font-size:15.5px; line-height:1.62; color:var(--text-2);
+}
+.hero__actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:24px; }
+
+/* Özet sayılar. Kart değil: aralarında ince dikey çizgi var. */
+.hero__side{ display:flex; align-items:flex-end; padding-bottom:4px; }
+.herostat{ min-width:74px; padding:0 20px; border-left:1px solid var(--border); }
+.herostat:first-child{ border-left:none; padding-left:0; }
+.herostat:last-child{ padding-right:0; }
+.herostat__value{
+  display:block;
+  font-family:var(--font-display); font-size:28px; font-weight:600;
+  letter-spacing:-.03em; line-height:1;
+  color:var(--text); font-variant-numeric:tabular-nums;
+}
+.herostat__value small{ font-size:13px; font-weight:500; color:var(--text-3); margin-left:2px; }
+.herostat__label{
+  display:block; margin-top:10px;
+  font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-3); white-space:nowrap;
+}
+
+/* Bölüm imzası — her bölümün kendine ait ince işareti. Sayfayı
+   süslemez; hangi bölümde olunduğunu çevresel görüşle bildirir.
+   Sayıların altında, sağ sütunda durur: metin solda, sayı sağda,
+   imza sayının altında — kompozisyon böylece dengelenir. */
+.hero__motif{
+  grid-column:2; justify-self:end;
+  height:38px; margin-top:22px;
+  color:var(--sec); opacity:.55;
+}
+.hero__motif svg{ height:100%; width:auto; display:block; }
+
+/* ---------- sayfa sekmeleri ---------- */
+.pagenav{
+  position:sticky; top:var(--nav-h); z-index:calc(var(--z-nav) - 1);
+  background:color-mix(in srgb, var(--bg) 96%, transparent);
+  backdrop-filter:saturate(1.3) blur(14px);
+  border-bottom:1px solid var(--border);
+}
+.pagenav__in{ display:flex; align-items:center; gap:2px; overflow-x:auto; scrollbar-width:none; }
+.pagenav__in::-webkit-scrollbar{ display:none; }
+.pagelink{
+  position:relative; flex:0 0 auto;
+  display:inline-flex; align-items:center; gap:7px;
+  padding:12px 14px;
+  border:none; background:none;
+  color:var(--text-3); font-size:13px; font-weight:500;
+  white-space:nowrap;
+  transition:color var(--dur) var(--ease);
+}
+.pagelink svg{ display:none; }
+.pagelink:hover{ color:var(--text-2); }
+.pagelink.is-active{ color:var(--text); font-weight:600; }
+.pagelink.is-active::after{
+  content:''; position:absolute; left:14px; right:14px; bottom:-1px; height:1.5px;
+  background:var(--sec);
+}
+.pagelink__count{
+  font-size:10.5px; font-weight:600; color:var(--text-3);
+  background:var(--surface-2); border-radius:var(--r-pill); padding:1px 6px;
+}
+
+/* ---------- içerik ---------- */
+.content{ padding-block:40px 88px; }
+
+.sect{ margin-bottom:56px; }
+.sect:last-child{ margin-bottom:0; }
+.sect__h{
+  position:relative;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+  flex-wrap:wrap;
+  padding-top:16px;
+  margin-bottom:22px;
+}
+/* Bölüm başlığının üstünde bölümün renginde kısa bir çizgi. */
+.sect__h::before{
+  content:''; position:absolute; top:0; left:0; width:34px; height:2px;
+  background:var(--sec);
+}
+.sect__ht{ min-width:0; }
+.sect__eyebrow{ display:none; }
+.sect__h h2{
+  font-family:var(--font-serif);
+  font-size:24px; font-weight:500; letter-spacing:-.012em; line-height:1.24;
+  margin:0; color:var(--text);
+}
+.sect__h p{ margin:8px 0 0; font-size:var(--fs-base); line-height:1.55;
+  color:var(--text-2); max-width:62ch; }
+.sect__actions{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+
+/* ---------- alt bant ----------
+
+   Sayfayı sonlandırır ve sistemin iki değişmez cümlesini her ekranda bir
+   kez söyler. Bunları kart olarak içeriğin ortasına koymak her seferinde
+   okumayı bölüyordu. */
+.sitefoot{
+  margin-top:auto;
+  background:var(--ink); color:var(--ink-on);
+}
+.sitefoot__in{
+  padding-block:36px 40px;
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);
+  gap:28px 56px; align-items:start;
+}
+.sitefoot__brand{ display:flex; align-items:flex-start; gap:12px; }
+.sitefoot__brand .brand__mark{
+  background:transparent; color:var(--ink-on);
+  border:1px solid color-mix(in srgb, var(--ink-on) 34%, transparent);
+}
+.sitefoot__brand b{
+  display:block;
+  font-family:var(--font-serif); font-size:17px; font-weight:500;
+  color:var(--ink-on); line-height:1.25;
+}
+.sitefoot__brand span{
+  display:block; margin-top:4px;
+  font-size:11.5px; color:var(--ink-on-2); line-height:1.45;
+}
+.sitefoot__notes{ display:grid; gap:14px; }
+.sitefoot__notes p{
+  margin:0; font-size:12.5px; line-height:1.6; color:var(--ink-on-2);
+  max-width:62ch;
+}
+.sitefoot__k{
+  display:inline-block; margin-right:8px;
+  font-size:9.5px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-on);
+}
+
+/* ---------- ızgara yardımcıları ---------- */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(12, minmax(0,1fr));
+  gap:18px;
+  align-items:start;
+}
+.span-2{ grid-column:span 2; }
+.span-3{ grid-column:span 3; }
+.span-4{ grid-column:span 4; }
+.span-5{ grid-column:span 5; }
+.span-6{ grid-column:span 6; }
+.span-7{ grid-column:span 7; }
+.span-8{ grid-column:span 8; }
+.span-9{ grid-column:span 9; }
+.span-10{ grid-column:span 10; }
+.span-12{ grid-column:span 12; }
+
+.stack{ display:flex; flex-direction:column; gap:18px; }
+.stack-sm{ display:flex; flex-direction:column; gap:8px; }
+.stack-xs{ display:flex; flex-direction:column; gap:5px; }
+.row{ display:flex; align-items:center; gap:10px; }
+.row-sm{ display:flex; align-items:center; gap:6px; }
+.row-top{ display:flex; align-items:flex-start; gap:10px; }
+.between{ justify-content:space-between; }
+.wrap{ flex-wrap:wrap; }
+.grow{ flex:1; min-width:0; }
+.cols-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.cols-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.cols-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.auto-fit{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:14px; }
+
+/* ---------- duyarlı ---------- */
+@media (max-width:1060px){
+  .span-2, .span-3, .span-4, .span-5{ grid-column:span 6; }
+  .span-6, .span-7, .span-8, .span-9, .span-10{ grid-column:span 12; }
+  .cols-4{ grid-template-columns:repeat(2,1fr); }
+  :root{ --fs-display:35px; }
+  .hero__in{ grid-template-columns:minmax(0,1fr); gap:26px; }
+  .hero__side{ align-items:flex-start; }
+  .hero__motif{ grid-column:1; justify-self:start; margin-top:4px; }
+  .sitefoot__in{ grid-template-columns:minmax(0,1fr); }
+}
+
+@media (max-width:860px){
+  .wrapc{ padding-inline:20px; }
+  .masthead__in{ height:58px; gap:14px; }
+  .masthead__date{ display:none; }
+  .hero__in{ padding-block:32px 26px; gap:22px; }
+  .hero__motif{ height:28px; margin-top:20px; }
+  .herostat{ padding:0 16px; }
+  .herostat__value{ font-size:24px; }
+  :root{ --fs-display:31px; }
+  .hero__lede{ font-size:15px; }
+  .sect__h h2{ font-size:21px; }
+  .navlinks{ display:none; }
+  .sitenav{ display:none; }
+  .sitenav__menu{ display:inline-flex; }
+  .content{ padding-block:28px 72px; }
+  .sect{ margin-bottom:40px; }
+}
+
+@media (max-width:720px){
+  .cols-3, .cols-4{ grid-template-columns:repeat(2,1fr); }
+  .span-2, .span-3, .span-4, .span-5{ grid-column:span 12; }
+}
+
+@media (max-width:560px){
+  .wrapc{ padding-inline:16px; }
+  :root{ --fs-display:27px; }
+  .cols-2, .cols-3, .cols-4{ grid-template-columns:1fr; }
+  .brand__text span{ display:none; }
+  .hero__in{ padding-block:26px 22px; }
+  .hero__side{ flex-wrap:wrap; row-gap:18px; }
+  .herostat{ padding:0 14px; }
+  .herostat__value{ font-size:21px; }
+  .sitefoot__in{ padding-block:28px 32px; }
+}
+
+/* ---------- mobil bölüm menüsü ---------- */
+.navsheet{
+  position:fixed; inset:0; z-index:var(--z-overlay);
+  background:var(--bg);
+  display:flex; flex-direction:column;
+  animation:navsheet-in var(--dur-lg) var(--ease);
+}
+@keyframes navsheet-in{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
+.navsheet__head{
+  height:64px; flex:none;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding-inline:20px;
+  border-bottom:1px solid var(--border);
+}
+.navsheet__body{ flex:1; overflow-y:auto; padding:8px 20px 24px; }
+.navsheet__grid{ display:grid; gap:0; }
+.navsheet__item{
+  position:relative;
+  display:grid; grid-template-columns:34px 1fr; align-items:baseline;
+  gap:4px 12px;
+  padding:18px 4px;
+  border:none; border-bottom:1px solid var(--border);
+  background:none; color:var(--text);
+  text-align:left;
+}
+.navsheet__item svg{ display:none; }
+.navsheet__item::before{
+  content:attr(data-num);
+  font-family:var(--font-display); font-size:11px; font-weight:600;
+  letter-spacing:.06em; color:var(--text-3); font-variant-numeric:tabular-nums;
+}
+.navsheet__item b{
+  font-family:var(--font-serif); font-size:21px; font-weight:500; letter-spacing:-.01em;
+}
+.navsheet__item span{
+  grid-column:2; font-size:13px; color:var(--text-3); line-height:1.4;
+}
+.navsheet__item.is-active b{ color:var(--sec); }
+.navsheet__item.is-active::before{ color:var(--sec); }
+
+@media (prefers-reduced-motion:reduce){
+  .navsheet{ animation:none; }
+}
+
+/* ================= DEFTER DÜZENİ =================
+
+   Sistemin ana düzen birimi. Kart değil.
+
+   Kart dili bir yönetim panelinin dilidir: her şey eşit ağırlıkta beyaz
+   bir dikdörtgene konur, on beş dikdörtgen yan yana dizilir ve sayfa bir
+   tepsiye döner. Günde birkaç kez açılıp aylarca okunacak bir sistemde
+   bu dil yorar — çünkü hiçbir şey öne çıkmaz ve göz dinlenecek yer
+   bulamaz.
+
+   Defter satırı bunun yerine kitapların, defterlerin ve teknik belgelerin
+   yüzyıllardır kullandığı düzeni kurar: solda dar bir künye sütunu,
+   sağda içeriğin kendisi, arada ince bir çizgi.
+
+   Kutu yalnız SEÇİLEBİLİR ya da YÜZEN şeylerde kalır. Okunacak bir şey
+   kutuya konmaz. */
+
+.ledger{ display:flex; flex-direction:column; }
+
+.lrow{
+  display:grid;
+  grid-template-columns:var(--gutter) minmax(0,1fr);
+  gap:0 var(--gutter-gap);
+  padding-block:38px;
+  border-top:1px solid var(--border);
+}
+/* İlk satırın üst çizgisi yoktur: hero'nun alt çizgisi zaten oradadır ve
+   iki çizgi üst üste gelmez. */
+.ledger > .lrow:first-child{ border-top:none; padding-top:30px; }
+.ledger > .lrow:last-child{ padding-bottom:8px; }
+
+/* Künye sütunu uzun içerikte YAPIŞIR: yüz satırlık bir listeyi
+   kaydırırken hangi bölümde olduğunu unutmayasın diye. */
+.lrow__side{
+  position:sticky;
+  top:calc(var(--nav-h) + 26px);
+  align-self:start;
+  min-width:0;
+}
+.lrow__label{
+  display:flex; align-items:center; gap:6px;
+  font-size:11px; font-weight:600; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--text);
+  line-height:1.4;
+}
+.lrow__meta{
+  margin-top:7px;
+  font-size:var(--fs-sm); color:var(--text-3);
+  font-variant-numeric:tabular-nums;
+  line-height:1.5;
+}
+.lrow__note{
+  margin:12px 0 0;
+  font-size:var(--fs-sm); line-height:1.6; color:var(--text-2);
+  max-width:34ch;
+}
+.lrow__act{ margin-top:16px; display:flex; flex-direction:column; align-items:flex-start;
+  gap:8px; min-width:0; max-width:100%; }
+.lrow__act .btn{ width:100%; justify-content:center; }
+
+/* Defter satırının içeriği KENDİ kutusunun enini bilir.
+
+   Bileşenler duyarlı kurallarını pencere genişliğine göre uyguluyordu;
+   oysa asıl soru «pencere kaç piksel» değil «bu satıra kaç piksel
+   kaldı». İkisi «Katmanlı» düzeninde ayrışıyor (raf 228 px alıyor) ve
+   «Harita» düzeninde büsbütün ayrışıyor (satır bir karta giriyor):
+   masaüstü genişliğinde bir pencerede satır 570 px'lik bir kutuda
+   duruyor ama hâlâ masaüstü kalıbını kullanıyor, taşıyordu.
+
+   `container-type:inline-size` güvenlidir: bu kutunun eni ızgara
+   parçasından gelir, içeriğinden değil. */
+.lrow__main{ min-width:0; container-type:inline-size; container-name:satir; }
+/* Defter satırının içinde ARDIŞIK bloklar arasında da ritim olsun. */
+.lrow__main > * + *{ margin-top:20px; }
+
+/* Geniş satır: künye üstte, içerik tam genişlikte. Bir grafiğin ya da
+   uzun bir cetvelin künye sütunu kadar daralması saçmadır. */
+.lrow--wide{ grid-template-columns:minmax(0,1fr); gap:18px; }
+.lrow--wide .lrow__side{
+  position:static;
+  display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+}
+.lrow--wide .lrow__meta{ margin-top:0; }
+.lrow--wide .lrow__note{ flex-basis:100%; margin-top:0; max-width:70ch; }
+.lrow--wide .lrow__act{ margin-top:0; margin-left:auto; flex-direction:row; }
+.lrow--wide .lrow__act .btn{ width:auto; }
+
+@media (max-width:900px){
+  .lrow{
+    grid-template-columns:minmax(0,1fr);
+    gap:16px;
+    padding-block:30px;
+  }
+  .lrow__side{
+    position:static;
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+  }
+  .lrow__meta{ margin-top:0; }
+  .lrow__note{ flex-basis:100%; margin-top:0; max-width:none; }
+  .lrow__act{ margin-top:0; margin-left:auto; flex-direction:row; }
+  .lrow__act .btn{ width:auto; }
+}
+
+/* İki sütunlu içerik — defterin içinde, kart olmadan. */
+.pair{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:28px 40px; }
+.pair > *{ min-width:0; }
+
+/* Künye sütununun içindeki mini ölçü listesi. */
+.sidestat{ display:flex; flex-direction:column; gap:2px; margin-top:14px; }
+.sidestat__v{
+  font-family:var(--font-display); font-size:22px; font-weight:600;
+  letter-spacing:-.025em; line-height:1; color:var(--text);
+  font-variant-numeric:tabular-nums;
+}
+.sidestat__v small{ font-size:12px; font-weight:500; color:var(--text-3); margin-left:2px; }
+.sidestat__k{
+  font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-3);
+}
+
+/* Derleme damgası — hangi sürümün ekranda olduğunu söyler. Alt bandın
+   en sessiz satırı: aranınca bulunur, okunurken rahatsız etmez. */
+.sitefoot__build{
+  margin:0; font-size:11px; color:var(--ink-on-2);
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+/* Sürüm kimliği git'ten gelir ve KÜÇÜK harflidir; büyük harfe çevirmek
+   onu tanınmaz kılar. Bu yüzden .mono-label kullanılmaz. */
+.sitefoot__sha{
+  font-family:ui-monospace, 'SFMono-Regular', 'Courier New', monospace;
+  font-size:11px; letter-spacing:.02em; color:var(--ink-on);
+}
+.sitefoot__reload{
+  border:1px solid color-mix(in srgb, var(--ink-on) 30%, transparent);
+  background:none; color:var(--ink-on-2);
+  border-radius:var(--r-pill); padding:1px 9px; font-size:10.5px;
+  transition:color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.sitefoot__reload:hover{ color:var(--ink-on); border-color:var(--ink-on); }
+
+/* ================= telefonda alt gezinme =================
+
+   Telefonda her şey hamburger menüden geçiyordu. Veri girişinin çoğu
+   telefonda yapılacak; en çok kullanılan dört yol başparmağın altında
+   durur, beşinci yuva tam listeyi açar.
+
+   Yalnız 860 pikselin altında çizilir. */
+.tabbar{ display:none; }
+
+@media (max-width:860px){
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:var(--z-nav);
+    display:grid; grid-template-columns:repeat(5, 1fr);
+    background:color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter:saturate(1.3) blur(16px);
+    border-top:1px solid var(--border);
+    /* Ekranın alt kenarındaki sistem çubuğu düğmeleri yutmasın. */
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+  }
+  .tabbtn{
+    position:relative;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; padding:9px 2px 8px;
+    border:none; background:none; color:var(--text-3);
+    min-height:56px;
+    transition:color var(--dur) var(--ease);
+  }
+  .tabbtn__ic{ display:block; line-height:0; }
+  .tabbtn__ic svg{ width:21px; height:21px; stroke:currentColor; fill:none; stroke-width:1.7; }
+  .tabbtn__t{ font-size:10.5px; font-weight:550; letter-spacing:.01em; }
+  .tabbtn.is-active{ color:var(--sec); }
+  .tabbtn.is-active .tabbtn__t{ font-weight:650; }
+  /* Etkin yuvanın üstünde bölüm renginde kısa bir çizgi: hangi
+     bölümde olunduğu renkle değil KONUMLA da söylenir. */
+  .tabbtn.is-active::before{
+    content:''; position:absolute; top:0; left:22%; right:22%; height:2px;
+    background:var(--sec);
+  }
+  .tabbtn__b{
+    position:absolute; top:5px; left:calc(50% + 9px);
+    min-width:15px; height:15px; padding:0 4px; border-radius:var(--r-pill);
+    background:var(--danger); color:#fff;
+    font-size:9.5px; font-weight:700; line-height:15px; text-align:center;
+  }
+  .tabbtn__b.is-quiet{ background:var(--surface-3); color:var(--text-2); }
+
+  /* Alt bandın ve içeriğin sonu çubuğun altında kalmasın. */
+  .sitefoot__in{ padding-bottom:calc(40px + 56px + env(safe-area-inset-bottom, 0px)); }
+}

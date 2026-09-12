@@ -1,0 +1,372 @@
+/* ESP'ye ozel katman.
+
+   Alti ortak dosya (tokens · palettes · base · layout · components · designs)
+   AYS ve SPI ile AYNI kalir ve elle duzenlenmez; bir gun `LifeOs/ortak/`
+   altinda tek nusha durup her build.py tarafindan derleme aninda cekilecekler.
+   Uygulamaya ozgu ne varsa bu dosyada yasar — AYS'de `rota.css`, SPI'de
+   `components.css`in alt yarisi ne yapiyorsa o.
+
+   Iki sey burada:
+
+     1. BOLUM KIMLIKLERI. palettes.css SPI'nin bolum adlarini tasir
+        (testler, besin, hareket, finans). ESP'nin bolum adlari baska;
+        eslesmeyen her bolum ana renkte kalirdi. Bu, devir notundaki
+        "kopyalanan palettes.css yanlis bolum adlarini tasiyordu" hatasinin
+        tekrari olurdu. Burada ESP'nin sekiz bolumu tanimlanir ve dosya
+        sirasi geregi (esp.css en son yuklenir) SPI'nin satirlarini ezer.
+
+     2. AJAN RENKLERI. tokens.css bes SPI ajani tanimlar; ESP'nin alti
+        uzmani + Patron'u var. Patron ortak jetondan gelir, alti uzman
+        burada.
+
+   Ekrana ozel yapilar (metronom gostergesi, sentopik matris, argüman agaci,
+   SRS karti) da burada; bilesen sozlugune (`C.*`) girmezler cunku alana
+   bagimlidirlar. */
+
+/* ------------------------------------------------------- bolum kimlikleri
+
+   Sekiz bolum, sekiz imza. Renkler ayni doygunluk ailesinden secildi:
+   yan yana konduklarinda gokkusagi degil tek bir palet gibi okunurlar.
+
+   `--sec` yalniz bes yerde gorunur: bolum numarasi, etkin sekme cizgisi,
+   bolum basliginin ustundeki kisa cizgi, ana dugme ve bolum imzasi.
+   Durum renkleri (ok/warn/danger) buna KARISMAZ. */
+:root[data-section="gunluk"]  { --sec-base:#2F6B52; }  /* adaçayı */
+:root[data-section="dil"]     { --sec-base:#2F5A8A; }  /* mürekkep mavisi */
+:root[data-section="felsefe"] { --sec-base:#6B3F63; }  /* erik */
+:root[data-section="ses"]     { --sec-base:#9A4A2F; }  /* kiremit */
+:root[data-section="okuma"]   { --sec-base:#8A5A18; }  /* kehribar */
+:root[data-section="yazi"]    { --sec-base:#5E6B2A; }  /* zeytin */
+:root[data-section="ofis"]    { --sec-base:#4A5570; }  /* çivit grisi */
+:root[data-section="ayarlar"] { --sec-base:#5A5750; }  /* taş */
+
+/* Koyu temada ayni sekiz ton acilir: koyu zeminde doygun ton okunmaz.
+   Harmanlama kurali ayni kalir, yalniz taban renk degisir. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"])[data-section="gunluk"]  { --sec-base:#79C09C; }
+  :root:not([data-theme="light"])[data-section="dil"]     { --sec-base:#86AEDC; }
+  :root:not([data-theme="light"])[data-section="felsefe"] { --sec-base:#C193BA; }
+  :root:not([data-theme="light"])[data-section="ses"]     { --sec-base:#DF9376; }
+  :root:not([data-theme="light"])[data-section="okuma"]   { --sec-base:#D6A961; }
+  :root:not([data-theme="light"])[data-section="yazi"]    { --sec-base:#AFBF74; }
+  :root:not([data-theme="light"])[data-section="ofis"]    { --sec-base:#A3AECB; }
+  :root:not([data-theme="light"])[data-section="ayarlar"] { --sec-base:#AFAAA0; }
+}
+:root[data-theme="dark"][data-section="gunluk"]  { --sec-base:#79C09C; }
+:root[data-theme="dark"][data-section="dil"]     { --sec-base:#86AEDC; }
+:root[data-theme="dark"][data-section="felsefe"] { --sec-base:#C193BA; }
+:root[data-theme="dark"][data-section="ses"]     { --sec-base:#DF9376; }
+:root[data-theme="dark"][data-section="okuma"]   { --sec-base:#D6A961; }
+:root[data-theme="dark"][data-section="yazi"]    { --sec-base:#AFBF74; }
+:root[data-theme="dark"][data-section="ofis"]    { --sec-base:#A3AECB; }
+:root[data-theme="dark"][data-section="ayarlar"] { --sec-base:#AFAAA0; }
+
+/* ---------------------------------------------------------- ajan renkleri
+
+   Kimlik tasir, durum degil. Yalnizca avatarda kullanilir; ajanin durumu
+   her zaman ayrica rozetle verilir. Her uzmanin rengi kendi disiplininin
+   bolum rengiyle ayni aileden gelir — masa hangi bolume bakiyorsa oradan. */
+:root{
+  --agent-lang:#2F5A8A;
+  --agent-philo:#6B3F63;
+  --agent-music:#9A4A2F;
+  --agent-diction:#7A4A5E;
+  --agent-reading:#8A5A18;
+  --agent-writing:#4F5C24;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --agent-lang:#86AEDC;
+    --agent-philo:#C193BA;
+    --agent-music:#DF9376;
+    --agent-diction:#D39BB4;
+    --agent-reading:#D6A961;
+    --agent-writing:#AFBF74;
+  }
+}
+:root[data-theme="dark"]{
+  --agent-lang:#86AEDC;
+  --agent-philo:#C193BA;
+  --agent-music:#DF9376;
+  --agent-diction:#D39BB4;
+  --agent-reading:#D6A961;
+  --agent-writing:#AFBF74;
+}
+
+/* ===================================================== ekrana ozel yapilar
+
+   Bilesen sozlugune (`C.*`) girmeyen, alana bagli parcalar. Hepsi jetondan
+   beslenir: ham renk yazilmaz, yoksa yedi palet ve karanlik tema altinda
+   biri mutlaka bozulur.
+
+   Olculer 8px ritmine uyar (4 · 8 · 12 · 16 · 24), yaricap uc seviyededir
+   (--r-sm kontrol, --r kart, --r-pill rozet). */
+
+/* ------------------------------------------------------------ gun seridi
+
+   On dort gunun tek bakista okunmasi. Dolu gun ile BOS gun ayri gorunur:
+   bos gun "0 dakika" degil "veri yok"tur ve bu ayrim rengin degil ICERIGIN
+   isidir — hucrede sayi yerine tire durur. */
+.daystrip{
+  display:flex; gap:4px; overflow-x:auto; padding-bottom:4px;
+  scrollbar-width:thin;
+}
+.daycell{
+  flex:0 0 auto; width:46px; min-height:52px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--text-3);
+  font-size:var(--fs-xs); cursor:pointer;
+  transition:background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.daycell:hover{ background:var(--surface-hover); }
+.daycell.is-on{ color:var(--text); border-color:var(--border-strong); }
+.daycell.is-sel{ border-color:var(--sec); box-shadow:inset 0 0 0 1px var(--sec); }
+.daycell__d{ font-family:var(--font-display); font-weight:600; }
+.daycell__v{ font-family:var(--font-display); font-variant-numeric:tabular-nums; }
+
+/* --------------------------------------------------------- kesinlik rozeti
+
+   Her sayinin yaninda durur. Kucuk ve sakindir: on bes kez tekrarlanan bir
+   rozetin cercevesi gurultu uretir, bu yuzden cerceve yok — yalniz renk ve
+   punto farki. */
+.cert{
+  font-size:var(--fs-xs); letter-spacing:.02em;
+  color:var(--text-3); white-space:nowrap;
+}
+.cert--measured{ color:var(--primary); }
+.cert--estimated{ color:var(--accent); }
+.cert--derived{ color:var(--info); }
+.cert--missing{ color:var(--text-3); font-style:italic; }
+
+.measure{ display:inline-flex; align-items:baseline; gap:4px; }
+.measure b{ font-family:var(--font-display); font-variant-numeric:tabular-nums; }
+.measure small{ color:var(--text-2); font-size:var(--fs-xs); }
+.measure--none{ color:var(--text-3); }
+
+/* ------------------------------------------------------------- SRS karti
+
+   Ekranin en buyuk nesnesi odur cunku o anda yapilan tek is odur. Karsilik
+   ACILMADAN once gorunmez: gorunuyorsa hatirlama denenmemis olur. */
+.srscard{
+  border:1px solid var(--border); border-radius:var(--r);
+  background:var(--surface); padding:var(--sp-6) var(--sp-5);
+  text-align:center; min-height:132px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--sp-3);
+}
+.srscard__front{ font-family:var(--font-serif); font-size:var(--fs-xl); line-height:1.25; }
+.srscard__ctx{ color:var(--text-2); font-size:var(--fs-sm); max-width:46ch; }
+.srscard__back{
+  font-size:var(--fs-md); color:var(--text);
+  padding-top:var(--sp-3); border-top:1px solid var(--rule); width:100%;
+  max-width:46ch;
+}
+.srscard__reveal{
+  border:1px dashed var(--border-strong); border-radius:var(--r-pill);
+  background:transparent; color:var(--text-2);
+  padding:var(--sp-2) var(--sp-5); cursor:pointer; font:inherit;
+}
+.srscard__reveal:hover{ background:var(--surface-hover); color:var(--text); }
+
+/* ------------------------------------------------------------- arguman
+
+   Tez serifle yazilir: okunacak bir cumledir, bir veri degeri degil.
+   Destek ve itiraz iki sutun; dar kutuda alt alta iner — pencereye gore
+   degil KENDI KUTUSUNA gore (bkz. STIL kurali 7). */
+.thesis{
+  font-family:var(--font-serif); font-size:var(--fs-lg); line-height:1.4;
+  text-wrap:pretty;
+}
+.argcols{ display:grid; gap:var(--sp-5); }
+@container satir (min-width:560px){ .argcols{ grid-template-columns:1fr 1fr; } }
+.argcol__h{
+  font-size:var(--fs-xs); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text-3); margin-bottom:var(--sp-2);
+}
+.argcol__list{ list-style:none; display:flex; flex-direction:column; gap:var(--sp-3); }
+.argcol__list li{
+  padding-left:var(--sp-3); border-left:2px solid var(--rule);
+  font-size:var(--fs-sm);
+}
+.argcol__list li.is-answered{ border-left-color:var(--primary); color:var(--text-2); }
+.argcol__ans{ display:block; color:var(--text-3); font-size:var(--fs-xs); margin-top:2px; }
+
+/* ------------------------------------------------------------- metronom
+
+   Sayi sayfanin en buyuk nesnesidir: metronom acikken bakilan tek sey odur. */
+.metro{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  gap:var(--sp-4);
+  border:1px solid var(--border); border-radius:var(--r);
+  background:var(--surface); padding:var(--sp-4) var(--sp-5);
+}
+.metro__bpm{ display:flex; align-items:center; gap:var(--sp-4); }
+.metro__val{
+  font-family:var(--font-display); font-size:var(--fs-hero); font-weight:700;
+  font-variant-numeric:tabular-nums; min-width:3ch; text-align:center;
+}
+.metro__step{
+  width:38px; height:38px; border-radius:var(--r-pill);
+  border:1px solid var(--border-strong); background:transparent;
+  color:var(--text-2); font:inherit; cursor:pointer;
+}
+.metro__step:hover{ background:var(--surface-hover); color:var(--text); }
+.metro__ctrl{ display:flex; gap:var(--sp-2); align-items:center; }
+
+.twister{
+  font-family:var(--font-serif); font-size:var(--fs-lg); line-height:1.5;
+  padding:var(--sp-4) var(--sp-5);
+  border-left:2px solid var(--sec); background:var(--surface-2);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  text-wrap:pretty;
+}
+
+/* --------------------------------------------------------------- notlar */
+
+.noterow{ padding:var(--sp-4) 0; border-bottom:1px solid var(--rule); }
+.noterow:last-child{ border-bottom:0; }
+.noterow__text{ font-size:var(--fs-base); line-height:1.5; text-wrap:pretty; }
+.noterow__meta{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+  margin-top:var(--sp-2);
+}
+.noterow__links{ list-style:none; margin-top:var(--sp-3); display:flex;
+  flex-direction:column; gap:var(--sp-2); }
+.noterow__links li{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--sp-2);
+  font-size:var(--fs-sm); color:var(--text-2);
+  padding-left:var(--sp-4); border-left:2px solid var(--rule);
+}
+.noterow__links em{ color:var(--text-3); font-size:var(--fs-xs); }
+.linkform{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2); align-items:center;
+  margin-top:var(--sp-3); padding:var(--sp-3);
+  background:var(--surface-2); border-radius:var(--r-sm);
+}
+
+/* Bag onerisi — iki not ve aralarindaki isaret. */
+.sugg__pair{ display:grid; gap:var(--sp-2); align-items:center; }
+@container satir (min-width:560px){
+  .sugg__pair{ grid-template-columns:1fr auto 1fr; }
+}
+.sugg__pair p{ font-size:var(--fs-sm); line-height:1.45; }
+.sugg__op{ color:var(--text-3); text-align:center; font-size:var(--fs-lg); }
+.sugg__meta{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+  margin-top:var(--sp-2); }
+
+/* ---------------------------------------------------------------- ofis */
+
+.desknotes{ list-style:none; display:flex; flex-direction:column; gap:var(--sp-2); }
+.desknote{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--sp-2);
+  font-size:var(--fs-sm); padding-left:var(--sp-3);
+  border-left:2px solid var(--border);
+}
+.desknote--danger{ border-left-color:var(--danger); }
+.desknote--warn{ border-left-color:var(--accent); }
+.desknote--ok{ border-left-color:var(--primary); }
+.desknote--info{ border-left-color:var(--info); }
+.desknote__label{
+  font-size:var(--fs-xs); letter-spacing:.05em; text-transform:uppercase;
+  color:var(--text-3); flex:0 0 auto;
+}
+.desknote__text{ color:var(--text-2); flex:1 1 12ch; min-width:0; }
+
+/* Kimlik seridi: masanin KIME ait oldugunu soyler, durumunu degil.
+   Durum renkleri bu seride asla kullanilmaz. */
+.desk--polyglot{ --desk-ink:var(--agent-lang); }
+.desk--socrates{ --desk-ink:var(--agent-philo); }
+.desk--maestro{ --desk-ink:var(--agent-music); }
+.desk--demosthenes{ --desk-ink:var(--agent-diction); }
+.desk--aristoteles{ --desk-ink:var(--agent-reading); }
+.desk--montaigne{ --desk-ink:var(--agent-writing); }
+.desk--patron{ --desk-ink:var(--agent-patron); }
+.desk[class*="desk--"]{ border-left:3px solid var(--desk-ink, var(--border)); }
+
+.handoff{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--sp-2);
+  width:100%; text-align:left; font:inherit; cursor:pointer;
+  background:transparent; border:0; border-bottom:1px solid var(--rule);
+  padding:var(--sp-3) 0; color:var(--text);
+}
+.handoff:hover{ background:var(--surface-hover); }
+.handoff__from, .handoff__to{ font-weight:600; font-size:var(--fs-sm); }
+.handoff__arrow{ color:var(--text-3); }
+.handoff__text{ flex:1 1 20ch; min-width:0; color:var(--text-2); font-size:var(--fs-sm); }
+
+.crossrow{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-3);
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.crossrow:last-child{ border-bottom:0; }
+.crossrow__pair{ display:flex; align-items:center; gap:4px; flex:0 0 auto; }
+.crossrow__arrow{ color:var(--text-3); }
+.crossrow p{ flex:1 1 24ch; min-width:0; font-size:var(--fs-sm); color:var(--text-2); }
+
+/* Kural motorunun cumlesi — ajanin modelsiz konustugu dil.
+   Serif degil gövde yazisi: bu bir baslik degil bir RAPORDUR. */
+.rulesay{
+  font-size:var(--fs-base); line-height:1.55; color:var(--text);
+  text-wrap:pretty;
+}
+
+/* --------------------------------------------------------------- sohbet */
+
+.chat{ display:flex; flex-direction:column; gap:var(--sp-3); max-height:420px;
+  overflow-y:auto; padding-right:var(--sp-2); }
+.msg__foot{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+  margin-top:var(--sp-2); }
+.composer{ display:flex; gap:var(--sp-2); align-items:flex-end; }
+.composer__input{ flex:1 1 auto; min-width:0; }
+
+.meetturn--close{ border-left:3px solid var(--agent-patron); padding-left:var(--sp-3); }
+.meetturn__head{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+  margin-bottom:var(--sp-2); }
+
+.decision{ padding:var(--sp-3) 0; border-bottom:1px solid var(--rule); }
+.decision:last-child{ border-bottom:0; }
+
+.jsonbox{
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:var(--fs-xs); line-height:1.5;
+  background:var(--surface-2); border-radius:var(--r-sm);
+  padding:var(--sp-3); overflow-x:auto; max-height:360px; overflow-y:auto;
+  color:var(--text-2); white-space:pre;
+}
+
+/* ---------------------------------------------------------------- radar
+
+   Olculmemis eksen SIFIRA CEKILMEZ: poligona hic girmez, yerine eksenin
+   dibinde kucuk kesik bir nokta durur. Sifira cekmek "hic calisilmadi"
+   demek olurdu; oysa soylenen sey "olculmedi". */
+.radar{ display:flex; flex-direction:column; align-items:center; gap:var(--sp-2); }
+.radar svg{ width:100%; max-width:340px; height:auto; overflow:visible; }
+.radar__ring{ fill:none; stroke:var(--rule); stroke-width:1; }
+.radar__axis{ stroke:var(--rule); stroke-width:1; }
+.radar__shape{
+  fill:color-mix(in oklab, var(--sec) 22%, transparent);
+  stroke:var(--sec); stroke-width:1.5; stroke-linejoin:round;
+}
+.radar__dot{ fill:var(--sec); }
+.radar__dot--none{ fill:none; stroke:var(--text-3); stroke-width:1; stroke-dasharray:2 2; }
+.radar__label{ fill:var(--text-2); font-size:9px; font-family:var(--font-body); }
+.radar__cap{
+  font-size:var(--fs-xs); color:var(--text-3); text-align:center;
+  display:flex; flex-direction:column; gap:2px;
+}
+.radar__none{ color:var(--text-3); font-style:italic; }
+
+/* --------------------------------------------------------- disiplin secimi
+
+   Alti kutu; secim onay kutusuyla degil KART'la yapilir — dokunmatikte
+   onay kutusunun hedef alani belirsizdir. */
+.picks--disc{
+  display:grid; gap:var(--sp-2);
+  grid-template-columns:repeat(auto-fit, minmax(104px, 1fr));
+}
+
+/* Hareket azaltilmis tercihinde gecisler durur; STIL'deki genel kural
+   burada da gecerlidir. */
+@media (prefers-reduced-motion:reduce){
+  .daycell, .srscard__reveal, .metro__step, .handoff{ transition:none; }
+}
