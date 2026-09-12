@@ -1,0 +1,10 @@
+{
+  "host": "127.0.0.1",
+  "port": 4200,
+  "local_token": "buraya-uzun-rastgele-bir-dize-koy",
+  "thresholds": {
+    "bio": { "sleep_hours_min": 7.0 },
+    "academic": { "questions_min": 80 },
+    "intellect": { "retention_floor": 0.50 }
+  }
+}

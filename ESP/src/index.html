@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="tr" translate="no">
+<head>
+<meta charset="utf-8"/>
+<!-- Mobil tarayicilar sayfayi yabanci sanip otomatik cevirebiliyor ve arayuz
+     Turkce-Ingilizce karisik gorunuyor. Ceviri acikca kapatilir. -->
+<meta name="google" content="notranslate"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ESP — Entelektüel Seviye Planlayıcı</title>
+<!-- Yazi tipleri GOMULU: ag beklenmez. Gerekcesi ve olcumu src/fonts/OKU.md -->
+<link rel="stylesheet" href="css/fonts.css"/>
+<link rel="stylesheet" href="css/tokens.css"/>
+<link rel="stylesheet" href="css/palettes.css"/>
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/layout.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/designs.css"/>
+<!-- ESP'ye ozel katman EN SON: bolum kimlikleri ve ajan renkleri ortak
+     dosyalarin uzerine yazar (bkz. css/esp.css bas yorumu). -->
+<link rel="stylesheet" href="css/esp.css"/>
+<link id="pwa-manifest" rel="manifest"/>
+<meta name="theme-color" content="#2F5A8A"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="ESP"/>
+</head>
+<body>
+
+<div id="app">
+  <div class="boot">
+    <div class="boot__mark">E</div>
+    <div class="boot__bar"><span></span></div>
+    <p class="boot__text">ESP yükleniyor…</p>
+  </div>
+</div>
+
+<div id="overlay-root"></div>
+<div id="toast-root" class="toast-root" role="status" aria-live="polite"></div>
+
+<!-- veri once, cekirdek sonra, ekranlar en son: bagimlilik siralamasi budur -->
+<script src="js/data/build.js"></script>
+<script src="js/data/rules.js"></script>
+<script src="js/data/agents.js"></script>
+<script src="js/data/canon.js"></script>
+<script src="js/data/lexicon.js"></script>
+<script src="js/data/guitar_tabs.js"></script>
+<script src="js/data/phonetics.js"></script>
+<script src="js/data/hints.js"></script>
+<script src="js/data/palettes.js"></script>
+<script src="js/data/designs.js"></script>
+<script src="js/data/providers.js"></script>
+
+<script src="js/core/utils.js"></script>
+<script src="js/core/memo.js"></script>
+<script src="js/core/h.js"></script>
+<script src="js/core/store.js"></script>
+<script src="js/core/state.js"></script>
+<script src="js/core/srs.js"></script>
+<script src="js/core/intellect.js"></script>
+<script src="js/core/acoustic.js"></script>
+<script src="js/core/planner.js"></script>
+<script src="js/core/parse.js"></script>
+<script src="js/core/voice.js"></script>
+<script src="js/core/speak.js"></script>
+<script src="js/core/talk.js"></script>
+<script src="js/core/ui.js"></script>
+<script src="js/core/components.js"></script>
+<script src="js/core/parts.js"></script>
+<script src="js/core/quota.js"></script>
+<script src="js/core/llm.js"></script>
+<script src="js/core/office.js"></script>
+<script src="js/core/palette.js"></script>
+<script src="js/core/setup.js"></script>
+
+<script src="js/screens/today.js"></script>
+<script src="js/screens/lang.js"></script>
+<script src="js/screens/symposium.js"></script>
+<script src="js/screens/studio.js"></script>
+<script src="js/screens/library.js"></script>
+<script src="js/screens/writing.js"></script>
+<script src="js/screens/office.js"></script>
+<script src="js/screens/team.js"></script>
+<script src="js/screens/meeting.js"></script>
+<script src="js/screens/analytics.js"></script>
+<script src="js/screens/profile.js"></script>
+<script src="js/screens/guide.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
