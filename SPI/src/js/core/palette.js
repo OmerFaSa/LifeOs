@@ -69,70 +69,115 @@ SP.Palette = (function(){
      Hicbir sey dogrudan kaydedilmez: onizleme secilince alt sayfa acilir
      ve kullanici gordukten sonra onaylar. Yanlis anlasilmis bir satirin
      sessizce depoya yazilmasi, elle girmekten kotudur. */
+  /* ---- hizli giris: oneri kutusu uzerinden ------------------------
+
+     Palet uzun sure cumlede TEK sey anliyordu (SP.Quick.parse) ve
+     ikinci olgu sessizce dusuyordu. Artik oneri kutusu kullanilir:
+     «uyku 7 saat ve 45 dakika yurudum» iki satir uretir ve ikisi de
+     ayri ayri onaylanir.
+
+     Ayni kapi: onaysiz hicbir sey yazilmaz, her kayit geri alinabilir. */
+  let bekleyen = null;     /* { oneriler, anlasilmayan, metin } */
+
   function quickCommand(){
     const t = query.trim();
     if(t.length < 3) return null;
-    let p;
-    try{ p = SP.Quick.parse(t); }catch(e){ p = null; }
-    if(!p) return null;
+    let r;
+    try{ r = SP.Proposals.fromText(t); }catch(e){ return null; }
+    if(!r.oneriler.length) return null;
+
+    const adlar = r.oneriler.map(o => {
+      const e = SP.Proposals.eylem(o.action);
+      return e ? e.label : o.action;
+    });
     return {
-      id:'quick:' + p.kind,
+      id:'quick:' + r.oneriler.map(o => o.action).join('+'),
       kind:'Hızlı giriş',
-      label:p.label,
-      hint:p.hint,
-      quick:p,
-      run:() => confirmQuick(p),
+      label:adlar.join(' · '),
+      hint:r.oneriler.length === 1 ? '1 kayıt' : r.oneriler.length + ' kayıt',
+      run:() => confirmQuick(r, t),
     };
   }
 
-  /* Onizleme: ne anlasildigi, nereye yazilacagi ve hangi kesinlikle. */
-  function confirmQuick(p){
+  /* Onizleme: NE anlasildi, nereye yazilacak ve ne degisecek.
+     Her satir once/sonra tasir — kaydetmeden once ne olacagi gorunur. */
+  function confirmQuick(r, metin){
     const K = SP.C;
     const { html, map, when } = SP.h;
-    const hedef = { vital:'Günlük ölçüm', move:'Antrenman kaydı',
-      lab:'Tahlil oturumu', meal:'Öğün' }[p.kind];
 
-    const satirlar = p.kind === 'lab'
-      ? p.data.rows.map(r => [r.marker.name, U.fmtNum(r.value) + ' ' + r.marker.unit, 'ölçüldü'])
-      : p.kind === 'meal'
-        ? p.data.items.map(i => [i.food.name, U.fmtNum(i.grams) + ' g',
-            i.cert === 'measured' ? 'ölçüldü' : 'tahmin'])
-        : p.kind === 'vital'
-          ? [[p.data.field.label, U.fmtNum(p.data.value) + ' ' + p.data.field.unit, 'ölçüldü']]
-          : [[p.data.exercise ? p.data.exercise.name : 'Serbest seans',
-              p.data.minutes + ' dk', 'ölçüldü']];
+    const bloklar = r.oneriler.map((o, i) => {
+      const e = SP.Proposals.eylem(o.action);
+      const pv = SP.Proposals.preview(o);
+      return html`
+        <div class="qeblok">
+          <div class="qeblok__bas">
+            <b>${e ? e.label : o.action}</b>
+            ${when(o.metin, () => html`<span class="tiny dim">«${o.metin}»</span>`)}
+          </div>
+          ${when(!pv.ok, () => html`<p class="small" style="color:var(--danger)">${pv.why}</p>`)}
+          ${when(pv.ok, () => html`<div class="qeblok__satirlar">
+            ${map(pv.rows, x => html`<div class="qeblok__satir">
+              <span>${x.alan}</span>
+              <span class="dim">${x.once}</span>
+              <span aria-hidden="true">→</span>
+              <b>${x.sonra}</b>
+            </div>`)}
+          </div>`)}
+        </div>`;
+    });
 
     SP.UI.sheet({
-      title:'Bunu mu demek istedin?', subtitle:hedef, wide:true,
+      title:r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
+        : r.oneriler.length + ' kayıt anladım',
+      subtitle:metin, wide:true,
+      note:'Bu satırlar yorumlandı, KAYDEDİLMEDİ. Onaylayınca yazılır ve '
+        + 'her biri tek tek geri alınabilir.',
       body:String(SP.C.Stack([
-        K.Table({ tight:true, headers:['Ne', 'Değer', 'Kesinlik'], rows:satirlar }),
-        when(p.kind === 'meal' && p.data.unmatched && p.data.unmatched.length,
-          () => K.Notice({ tone:'warn', title:'Eşleşmeyen:',
-            body:p.data.unmatched.join(', ') + ' — bunlar kaydedilmeyecek. '
-              + 'Eşleşmeyen satır atılmaz, söylenir.' })),
+        html`<div class="qebloklar">${map(bloklar, b => b)}</div>`,
+        when(r.anlasilmayan.length, () => K.Notice({ tone:'warn',
+          title:'Çözemediğim kısım:',
+          body:'«' + r.anlasilmayan.join('», «') + '» — bu kısım kaydedilmeyecek. '
+            + 'Anlaşılmayan satır atılmaz, söylenir.' })),
         K.Field({ label:'Tarih',
           input:K.Input({ id:'qe-date', type:'date', value:U.todayISO() }) }),
-        K.Notice({ tone:'info',
-          body:'Bu satır yorumlandı, kaydedilmedi. Onaylayınca yazılır ve '
-            + 'düzeltmek için ilgili bölüme gidebilirsin.' }),
       ])),
       footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'quick-save' })}`),
+        ${K.Button({ label:r.oneriler.length === 1 ? 'Kaydet' : 'Hepsini kaydet',
+          tone:'primary', act:'quick-save' })}`),
     });
-    pendingQuick = p;
+    bekleyen = r;
   }
-
-  let pendingQuick = null;
 
   async function saveQuick(){
-    if(!pendingQuick) return;
+    if(!bekleyen) return;
     const el = document.getElementById('qe-date');
-    const r = await SP.Quick.apply(pendingQuick, { date:(el && el.value) || U.todayISO() });
-    pendingQuick = null;
+    const tarih = (el && el.value) || U.todayISO();
+
+    let yazilan = 0, dusen = 0, rota = null;
+    for(const o of bekleyen.oneriler){
+      /* Tarih alt sayfada degistirilmis olabilir. */
+      const oneri = Object.assign({}, o, {
+        params:Object.assign({}, o.params, { date:tarih }) });
+      const kayit = await SP.Proposals.propose(oneri);
+      const res = await SP.Proposals.approve(kayit.id);
+      if(res.ok){
+        yazilan++;
+        rota = rota || ROTA[o.action] || null;
+      }else dusen++;
+    }
+    bekleyen = null;
     SP.UI.closeSheet();
-    SP.UI.toast(r.text);
-    if(r.route) SP.App.go(r.route); else SP.App.render();
+    SP.UI.toast(dusen
+      ? yazilan + ' kayıt yazıldı, ' + dusen + ' tanesi yazılamadı'
+      : yazilan + ' kayıt yazıldı');
+    if(rota) SP.App.go(rota); else SP.App.render();
   }
+
+  /* Kayittan sonra nereye gidilir — kullanici yazdigini GORMELI. */
+  const ROTA = {
+    'vital-yaz':'today', 'ogun-ekle':'meals', 'seans-ekle':'move',
+    'olcum-gir':'labs', 'semptom-isaretle':'today',
+  };
 
   function filtered(){
     const q = U.norm(query);

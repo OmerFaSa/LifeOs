@@ -475,3 +475,59 @@
     });
   });
 })();
+
+/* Komut paleti — bileşik cümle her ekrandan.
+
+   Palet uzun süre cümlede TEK şey anlıyordu ve ikinci olgu sessizce
+   düşüyordu. Artık öneri kutusu üzerinden geçer. */
+(function(){
+  const { describe, it, expect, resetState, withToday, withTodayAsync } = SP.Test;
+
+  describe('Palet — hızlı giriş', () => {
+    it('üç olguluk cümle üç öneri üretir', () => {
+      resetState();
+      withToday('2026-03-01', () => {
+        const r = SP.Proposals.fromText('uyku 7 saat ve 45 dakika yürüdüm ve 200 gram tavuk yedim');
+        expect(r.oneriler).toHaveLength(3);
+        expect(r.oneriler.map(o => o.action).sort())
+          .toEqual(['ogun-ekle', 'seans-ekle', 'vital-yaz']);
+      });
+    });
+
+    it('her önerinin bir hedef ekranı vardır', () => {
+      /* Kullanıcı yazdığını GÖRMELİ: kayıttan sonra bir yere gidilir. */
+      const rota = { 'vital-yaz':'today', 'ogun-ekle':'meals', 'seans-ekle':'move',
+        'olcum-gir':'labs', 'semptom-isaretle':'today' };
+      SP.Proposals.katalogIdleri().forEach(id => {
+        expect(typeof rota[id]).toBe('string');
+        expect(Boolean(SP.Screens[rota[id]])).toBeTruthy();
+      });
+    });
+
+    it('tarih değiştirilirse kayıt O GÜNE yazılır', async () => {
+      resetState();
+      await withTodayAsync('2026-03-10', async () => {
+        const r = SP.Proposals.fromText('uyku 6,5 saat');
+        const o = Object.assign({}, r.oneriler[0], {
+          params:Object.assign({}, r.oneriler[0].params, { date:'2026-03-05' }) });
+        const p = await SP.Proposals.propose(o);
+        await SP.Proposals.approve(p.id);
+        expect(SP.Model.vitalsOf('2026-03-05').sleep).toBe(6.5);
+        const bugun = SP.Model.vitalsOf('2026-03-10');
+        expect(bugun == null || bugun.sleep == null).toBeTruthy();
+      });
+    });
+
+    it('bekleyen öneri onaylanana kadar bekleyende kalır', async () => {
+      resetState();
+      await withTodayAsync('2026-03-01', async () => {
+        const r = SP.Proposals.fromText('nabız 60 ve 20 dakika yüzdüm');
+        for(const o of r.oneriler) await SP.Proposals.propose(o);
+        expect(SP.Proposals.pending()).toHaveLength(2);
+        const ilk = SP.Proposals.pending()[0];
+        await SP.Proposals.approve(ilk.id);
+        expect(SP.Proposals.pending()).toHaveLength(1);
+      });
+    });
+  });
+})();

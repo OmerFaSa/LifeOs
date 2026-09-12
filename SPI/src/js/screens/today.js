@@ -398,12 +398,47 @@ SP.Screens.today = (function(){
       aria:'Günlük görünümü' });
   }
 
+  /* ---- bekleyen oneriler -------------------------------------------
+
+     Danisma ekraninda konusurken uretilen bir oneri onaylanmadan
+     baska bir ekrana gecilirse GORUNMEZ olur ve kullanici
+     kaydettigini saniyor olabilir. Bekleyen oneri Gunluk'un en
+     ustunde durur: onaylanmamis bir kayit, unutulmus bir kayittir. */
+  function bekleyenOneriler(){
+    const liste = SP.Proposals ? SP.Proposals.pending() : [];
+    if(!liste.length) return raw('');
+    return html`<div class="bekleyen mb-16">
+      <div class="bekleyen__bas">
+        <b>${liste.length === 1 ? 'Bir kayıt onayını bekliyor'
+          : liste.length + ' kayıt onayını bekliyor'}</b>
+        <span class="tiny dim">Onaylanana kadar hiçbiri yazılmadı.</span>
+      </div>
+      ${map(liste.slice(0, 4), o => {
+        const e = SP.Proposals.eylem(o.action);
+        const pv = SP.Proposals.preview(o);
+        return html`<div class="bekleyen__satir">
+          <span class="bekleyen__ne">${e ? e.label : o.action}</span>
+          <span class="bekleyen__ne2">${pv.ok && pv.rows.length
+            ? pv.rows.map(r => r.alan + ' → ' + r.sonra).join(' · ') : (pv.why || '')}</span>
+          <span class="bekleyen__dug">
+            ${K.Button({ label:'Kaydet', size:'sm', tone:'primary',
+              act:'bekleyen-onay', data:{ 'data-id':o.id } })}
+            ${K.Button({ label:'Vazgeç', size:'sm', act:'bekleyen-ret', data:{ 'data-id':o.id } })}
+          </span>
+        </div>`;
+      })}
+      ${when(liste.length > 4, () => html`<p class="tiny dim">
+        ${liste.length - 4} kayıt daha — Danışma ekranında.</p>`)}
+    </div>`;
+  }
+
   async function render(){
     const tab = S.ui.dayTab || 'giris';
     const flags = M.openFlags();
 
     const head = html`
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
+      ${bekleyenOneriler()}
       <div class="mb-8">${tabs()}</div>`;
 
     if(tab === 'ozet'){
@@ -425,6 +460,15 @@ SP.Screens.today = (function(){
   }
 
   const handle = {
+    async 'bekleyen-onay'(el){
+      const r = await SP.Proposals.approve(el.dataset.id);
+      UI.toast(r.ok ? 'Kaydedildi' : (r.why || 'Kaydedilemedi'));
+      SP.App.render();
+    },
+    async 'bekleyen-ret'(el){
+      await SP.Proposals.reject(el.dataset.id);
+      SP.App.render();
+    },
     async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; SP.App.render(); },
     async 'shift-day'(el){
       const n = Number(el.dataset.value);
