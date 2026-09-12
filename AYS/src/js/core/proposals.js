@@ -247,6 +247,196 @@ R.Proposals = (function(){
       },
       async revert(s){ await R.Office.closeDecision(s.id, 'open'); },
     },
+
+    /* ==================== KONUŞARAK VERİ GİRİŞİ ====================
+
+       Yukarıdaki eylemler PLAN eylemleridir: konuyu tekrara al, blok
+       ekle, hedefi değiştir. Aşağıdakiler ise HAM VERİ girişidir —
+       «bugün matematikten 40 soru çözdüm» cümlesinin karşılığı.
+
+       İkisi aynı kapıdan geçer ve geçmelidir: öneri → doğrulama →
+       onay → uygulama → geri alma. Veri girişine ayrı ve daha gevşek
+       bir yol açmak, sistemin en çok kullanılan yolunu en az
+       korunan yol yapardı. */
+
+    'soru-yaz':{
+      check(p){
+        const n = Number(p.count);
+        if(!isFinite(n) || n <= 0) return fail('Soru sayısı yok.');
+        if(n > 1000) return fail(n + ' soru bir gün için fazla; yanlış anlaşılmış olabilir.');
+        let dogru = p.correct == null ? null : Number(p.correct);
+        if(dogru != null && (!isFinite(dogru) || dogru < 0)) dogru = null;
+        if(dogru != null && dogru > n) return fail('Doğru sayısı çözülenden fazla olamaz.');
+        const subject = p.subjectId ? (R.SUBJECTS || []).find(x => x.id === p.subjectId) : null;
+        if(p.subjectId && !subject) return fail('Bu ders sistemde yok.');
+        const day = R.S.days[p.date];
+        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        /* Derse bagli bir blok varsa oraya yazilir; yoksa gunun
+           serbest sorusuna eklenir. Uydurma blok ACILMAZ. */
+        const blok = subject
+          ? (day.blocks || []).find(b => b.subjectId === subject.id
+              || (b.subject && R.U.norm(b.subject) === R.U.norm(subject.name)))
+          : null;
+        return pass({ n:Math.round(n), dogru:dogru == null ? null : Math.round(dogru),
+          subject, blok, day });
+      },
+      preview(p, ctx){
+        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : 'Gün toplamı';
+        const once = ctx.blok ? (ctx.blok.actualQ == null ? 'girilmemiş' : String(ctx.blok.actualQ))
+          : String(ctx.day.freeQ || 0);
+        const sonra = ctx.blok ? String((Number(ctx.blok.actualQ) || 0) + ctx.n)
+          : String((ctx.day.freeQ || 0) + ctx.n);
+        const rows = [{ label:nereye + ' · soru', before:once, after:sonra }];
+        if(ctx.dogru != null){
+          const varOlan = ctx.blok ? ctx.blok.correctQ : ctx.day.freeCorrect;
+          rows.push({ label:'Doğru',
+            before:varOlan == null ? 'girilmemiş' : String(varOlan),
+            after:String((Number(varOlan) || 0) + ctx.dogru) });
+        }
+        return rows;
+      },
+      async apply(p, ctx){
+        const geri = { date:p.date, blockId:ctx.blok ? ctx.blok.id : null,
+          eskiQ:ctx.blok ? ctx.blok.actualQ : (ctx.day.freeQ || 0),
+          eskiC:ctx.blok ? ctx.blok.correctQ : (ctx.day.freeCorrect || 0) };
+        if(ctx.blok){
+          ctx.blok.actualQ = (Number(ctx.blok.actualQ) || 0) + ctx.n;
+          if(ctx.dogru != null) ctx.blok.correctQ = (Number(ctx.blok.correctQ) || 0) + ctx.dogru;
+          if(ctx.blok.status === 'pending') ctx.blok.status = 'done';
+        }else{
+          ctx.day.freeQ = (ctx.day.freeQ || 0) + ctx.n;
+          /* Blok yoksa dogru sayisi da gunun toplamina yazilir. Onceden
+             DUSUYORDU: onizleme «dogru: 32 yazilacak» diyor ama kayit
+             yalniz bloga gidiyordu. Onizlemenin verdigi soz tutulmali. */
+          if(ctx.dogru != null) ctx.day.freeCorrect = (ctx.day.freeCorrect || 0) + ctx.dogru;
+        }
+        await R.Model.saveDay(p.date);
+        return geri;
+      },
+      async revert(s){
+        const day = R.S.days[s.date];
+        if(!day) return;
+        if(s.blockId){
+          const b = (day.blocks || []).find(x => x.id === s.blockId);
+          if(b){ b.actualQ = s.eskiQ; b.correctQ = s.eskiC; }
+        }else{ day.freeQ = s.eskiQ; day.freeCorrect = s.eskiC; }
+        await R.Model.saveDay(s.date);
+      },
+    },
+
+    'paragraf-yaz':{
+      check(p){
+        const n = Number(p.count);
+        if(!isFinite(n) || n <= 0 || n > 500) return fail('Paragraf sayısı anlaşılmadı.');
+        const day = R.S.days[p.date];
+        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        return pass({ n:Math.round(n), day });
+      },
+      preview(p, ctx){
+        return [{ label:'Paragraf', before:String(ctx.day.paragraphActual || 0),
+          after:String((ctx.day.paragraphActual || 0) + ctx.n) }];
+      },
+      async apply(p, ctx){
+        const geri = { date:p.date, eski:ctx.day.paragraphActual || 0 };
+        ctx.day.paragraphActual = (ctx.day.paragraphActual || 0) + ctx.n;
+        await R.Model.saveDay(p.date);
+        return geri;
+      },
+      async revert(s){
+        const day = R.S.days[s.date];
+        if(!day) return;
+        day.paragraphActual = s.eski;
+        await R.Model.saveDay(s.date);
+      },
+    },
+
+    'problem-yaz':{
+      check(p){
+        const n = Number(p.count);
+        if(!isFinite(n) || n <= 0 || n > 500) return fail('Problem sayısı anlaşılmadı.');
+        const day = R.S.days[p.date];
+        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        return pass({ n:Math.round(n), day });
+      },
+      preview(p, ctx){
+        return [{ label:'Problem', before:String(ctx.day.problemActual || 0),
+          after:String((ctx.day.problemActual || 0) + ctx.n) }];
+      },
+      async apply(p, ctx){
+        const geri = { date:p.date, eski:ctx.day.problemActual || 0 };
+        ctx.day.problemActual = (ctx.day.problemActual || 0) + ctx.n;
+        await R.Model.saveDay(p.date);
+        return geri;
+      },
+      async revert(s){
+        const day = R.S.days[s.date];
+        if(!day) return;
+        day.problemActual = s.eski;
+        await R.Model.saveDay(s.date);
+      },
+    },
+
+    'uyku-yaz':{
+      check(p){
+        const h = Number(p.hours);
+        if(!isFinite(h) || h <= 0 || h > 24) return fail('Uyku süresi anlaşılmadı.');
+        const day = R.S.days[p.date];
+        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        return pass({ h, day });
+      },
+      preview(p, ctx){
+        return [{ label:'Uyku',
+          before:ctx.day.sleepHours == null ? 'girilmemiş' : ctx.day.sleepHours + ' saat',
+          after:ctx.h + ' saat' }];
+      },
+      async apply(p, ctx){
+        const geri = { date:p.date, eski:ctx.day.sleepHours };
+        ctx.day.sleepHours = ctx.h;
+        await R.Model.saveDay(p.date);
+        return geri;
+      },
+      async revert(s){
+        const day = R.S.days[s.date];
+        if(!day) return;
+        day.sleepHours = s.eski;
+        await R.Model.saveDay(s.date);
+      },
+    },
+
+    'sure-yaz':{
+      check(p){
+        const dk = Number(p.minutes);
+        if(!isFinite(dk) || dk <= 0) return fail('Süre yok.');
+        if(dk > 960) return fail(dk + ' dakika bir blok için fazla.');
+        const subject = (R.SUBJECTS || []).find(x => x.id === p.subjectId);
+        if(!subject) return fail('Bu ders sistemde yok.');
+        const day = R.S.days[p.date];
+        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        const blok = (day.blocks || []).find(b => b.subjectId === subject.id
+          || (b.subject && R.U.norm(b.subject) === R.U.norm(subject.name)));
+        if(!blok) return fail(subject.name + ' için bugün planlanmış bir blok yok.');
+        return pass({ dk:Math.round(dk), subject, blok });
+      },
+      preview(p, ctx){
+        return [{ label:(ctx.blok.topic || ctx.subject.name) + ' · süre',
+          before:ctx.blok.actualMin == null ? 'girilmemiş' : ctx.blok.actualMin + ' dk',
+          after:((Number(ctx.blok.actualMin) || 0) + ctx.dk) + ' dk' }];
+      },
+      async apply(p, ctx){
+        const geri = { date:p.date, blockId:ctx.blok.id, eski:ctx.blok.actualMin };
+        ctx.blok.actualMin = (Number(ctx.blok.actualMin) || 0) + ctx.dk;
+        if(ctx.blok.status === 'pending') ctx.blok.status = 'done';
+        await R.Model.saveDay(p.date);
+        return geri;
+      },
+      async revert(s){
+        const day = R.S.days[s.date];
+        if(!day) return;
+        const b = (day.blocks || []).find(x => x.id === s.blockId);
+        if(b) b.actualMin = s.eski;
+        await R.Model.saveDay(s.date);
+      },
+    },
   };
 
   function cardFront(err){

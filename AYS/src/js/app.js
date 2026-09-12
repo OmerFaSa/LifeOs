@@ -346,6 +346,8 @@ R.App = (function(){
       }, route && route !== S.route ? 80 : 0);
     },
     async 'sheet-close'(){ UI.closeSheet(); },
+    /* Paletten gelen veri girisi onayi — bkz. core/palette.js */
+    async 'veri-kaydet'(){ await R.Palette.veriKaydet(); },
     async reload(){ location.reload(); },
     /* Herhangi bir ekrandan bir ajana soru sormak icin. */
     async 'ask-agent'(el){

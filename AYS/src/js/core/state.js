@@ -93,6 +93,10 @@ R.Model = (function(){
     if(doc.paragraphTarget == null) doc.paragraphTarget = 18;
     if(doc.problemTarget == null) doc.problemTarget = 18;
     if(doc.paragraphActual == null) doc.paragraphActual = 0;
+    /* Bloga baglanmayan serbest soru: «10 soru cozdum» dendiginde ders
+       belli degilse gunun toplamina yazilir. */
+    if(doc.freeQ == null) doc.freeQ = 0;
+    if(doc.freeCorrect == null) doc.freeCorrect = 0;
     if(doc.problemActual == null) doc.problemActual = 0;
     if(doc.note == null) doc.note = '';
     if(doc.badDay == null) doc.badDay = false;
@@ -330,6 +334,7 @@ R.Model = (function(){
       dow,
       ritual:tmpl.ritual || null,
       paragraphTarget:18, paragraphActual:0,
+      freeQ:0, freeCorrect:0,
       problemTarget:18, problemActual:0,
       sleepHours:null,
       checklist:{},

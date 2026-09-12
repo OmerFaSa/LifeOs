@@ -2830,6 +2830,30 @@ button.listitem.is-on{ background:var(--primary-soft); }
 @keyframes sessonuk{ 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
 @media (prefers-reduced-motion:reduce){ .ses__isik{ animation:none !important; } }
 
+/* Hızlı giriş önizlemesi — paletten açılan alt sayfa.
+
+   Her blok bir kayıt adayıdır ve ne değişeceğini önce/sonra yazar.
+   Bileşik cümle birden çok blok üretir; hepsi bir arada onaylanır. */
+.qebloklar{ display:flex; flex-direction:column; gap:10px; }
+.qeblok{
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface-2); padding:11px 13px;
+}
+.qeblok__bas{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.qeblok__bas b{ font-size:var(--fs-sm); }
+.qeblok__satirlar{ display:flex; flex-direction:column; gap:4px; margin-top:8px; }
+.qeblok__satir{
+  display:grid; grid-template-columns:minmax(0,1fr) auto 14px auto;
+  gap:4px 9px; align-items:baseline; font-size:var(--fs-sm);
+}
+.qeblok__satir b,.qeblok__satir .dim{
+  font-family:var(--font-display); font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+@media (max-width:520px){
+  .qeblok__satir{ grid-template-columns:minmax(0,1fr); }
+  .qeblok__satir [aria-hidden]{ display:none; }
+}
+
 /* ==== css/defter.css ==== */
 /* DEFTER DİLİ — SPİ'nin görünümü, AYS'nin kabuğunda.
 
@@ -5729,6 +5753,79 @@ R.ACTIONS = [
     params:{ decisionId:'string', state:'string' },
     why:'Kapanmayan karar bir sonraki toplantının önüne düşer.',
   },
+
+  /* ==================== KONUŞARAK VERİ GİRİŞİ ====================
+
+     Yukarıdakiler PLAN eylemleridir: konuyu tekrara al, blok ekle,
+     hedefi değiştir — ajanın bir ÖNERİSİDİR.
+
+     Aşağıdakiler ham veri girişidir: «bugün matematikten 40 soru
+     çözdüm» cümlesinin karşılığı. Öneren ajan değil KULLANICIDIR;
+     yine de aynı kapıdan geçer, çünkü veri girişine ayrı ve daha
+     gevşek bir yol açmak sistemin en çok kullanılan yolunu en az
+     korunan yol yapardı.
+
+     Yetki Patron'dadır ve bunun bir sebebi var: konuştuğun ajan odur.
+     Alt koçlar bu eylemleri öneremez — Tuna senin adına «40 soru
+     çözdün» diyemez. Sayı senin cümlenden çıkar, koçun tahmininden
+     değil; önerinin gerekçesine SENİN cümlen yazılır. */
+  {
+    id:'soru-yaz',
+    title:'Çözülen soruyu yaz',
+    summary:'Söylediğin soru sayısı o günün ilgili bloğuna eklenir.',
+    touches:'Gün kaydı',
+    icon:'zap',
+    route:'today',
+    agents:['patron'],
+    params:{ count:'number', correct:'number', subjectId:'string', topicId:'string', date:'string' },
+    why:'Soru sayısı planın gerçekleşme oranını belirler; girilmeyen soru '
+      + 'yapılmamış sayılır.',
+  },
+  {
+    id:'paragraf-yaz',
+    title:'Paragraf sayısını yaz',
+    summary:'Günün paragraf sayacına eklenir.',
+    touches:'Gün kaydı',
+    icon:'zap',
+    route:'today',
+    agents:['patron'],
+    params:{ count:'number', date:'string' },
+    why:'Paragraf dokuz ay süren bir beceridir; günlük sayaç onu görünür tutar.',
+  },
+  {
+    id:'problem-yaz',
+    title:'Problem sayısını yaz',
+    summary:'Günün problem sayacına eklenir.',
+    touches:'Gün kaydı',
+    icon:'zap',
+    route:'today',
+    agents:['patron'],
+    params:{ count:'number', date:'string' },
+    why:'Problem günlük rutinin ikinci ayağıdır.',
+  },
+  {
+    id:'uyku-yaz',
+    title:'Uyku süresini yaz',
+    summary:'O günün uyku saati kaydedilir.',
+    touches:'Gün kaydı',
+    icon:'moon',
+    route:'today',
+    agents:['patron'],
+    params:{ hours:'number', date:'string' },
+    why:'Uyku, ertesi günün kapasitesini belirleyen tek ölçülebilir girdidir.',
+  },
+  {
+    id:'sure-yaz',
+    title:'Çalışma süresini yaz',
+    summary:'Söylediğin süre o dersin bugünkü bloğuna eklenir.',
+    touches:'Gün kaydı',
+    icon:'clock',
+    route:'today',
+    agents:['patron'],
+    params:{ minutes:'number', subjectId:'string', date:'string' },
+    why:'Planlanan süre ile gerçekleşen süre arasındaki fark, planın '
+      + 'gerçekçi olup olmadığını söyler.',
+  },
 ];
 
 R.ACTION_BY_ID = R.ACTIONS.reduce((m, a) => { m[a.id] = a; return m; }, {});
@@ -6315,6 +6412,10 @@ R.Model = (function(){
     if(doc.paragraphTarget == null) doc.paragraphTarget = 18;
     if(doc.problemTarget == null) doc.problemTarget = 18;
     if(doc.paragraphActual == null) doc.paragraphActual = 0;
+    /* Bloga baglanmayan serbest soru: «10 soru cozdum» dendiginde ders
+       belli degilse gunun toplamina yazilir. */
+    if(doc.freeQ == null) doc.freeQ = 0;
+    if(doc.freeCorrect == null) doc.freeCorrect = 0;
     if(doc.problemActual == null) doc.problemActual = 0;
     if(doc.note == null) doc.note = '';
     if(doc.badDay == null) doc.badDay = false;
@@ -6552,6 +6653,7 @@ R.Model = (function(){
       dow,
       ritual:tmpl.ritual || null,
       paragraphTarget:18, paragraphActual:0,
+      freeQ:0, freeCorrect:0,
       problemTarget:18, problemActual:0,
       sleepHours:null,
       checklist:{},
@@ -16831,6 +16933,196 @@ R.Proposals = (function(){
       },
       async revert(s){ await R.Office.closeDecision(s.id, 'open'); },
     },
+
+    /* ==================== KONUŞARAK VERİ GİRİŞİ ====================
+
+       Yukarıdaki eylemler PLAN eylemleridir: konuyu tekrara al, blok
+       ekle, hedefi değiştir. Aşağıdakiler ise HAM VERİ girişidir —
+       «bugün matematikten 40 soru çözdüm» cümlesinin karşılığı.
+
+       İkisi aynı kapıdan geçer ve geçmelidir: öneri → doğrulama →
+       onay → uygulama → geri alma. Veri girişine ayrı ve daha gevşek
+       bir yol açmak, sistemin en çok kullanılan yolunu en az
+       korunan yol yapardı. */
+
+    'soru-yaz':{
+      check(p){
+        const n = Number(p.count);
+        if(!isFinite(n) || n <= 0) return fail('Soru sayısı yok.');
+        if(n > 1000) return fail(n + ' soru bir gün için fazla; yanlış anlaşılmış olabilir.');
+        let dogru = p.correct == null ? null : Number(p.correct);
+        if(dogru != null && (!isFinite(dogru) || dogru < 0)) dogru = null;
+        if(dogru != null && dogru > n) return fail('Doğru sayısı çözülenden fazla olamaz.');
+        const subject = p.subjectId ? (R.SUBJECTS || []).find(x => x.id === p.subjectId) : null;
+        if(p.subjectId && !subject) return fail('Bu ders sistemde yok.');
+        const day = R.S.days[p.date];
+        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        /* Derse bagli bir blok varsa oraya yazilir; yoksa gunun
+           serbest sorusuna eklenir. Uydurma blok ACILMAZ. */
+        const blok = subject
+          ? (day.blocks || []).find(b => b.subjectId === subject.id
+              || (b.subject && R.U.norm(b.subject) === R.U.norm(subject.name)))
+          : null;
+        return pass({ n:Math.round(n), dogru:dogru == null ? null : Math.round(dogru),
+          subject, blok, day });
+      },
+      preview(p, ctx){
+        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : 'Gün toplamı';
+        const once = ctx.blok ? (ctx.blok.actualQ == null ? 'girilmemiş' : String(ctx.blok.actualQ))
+          : String(ctx.day.freeQ || 0);
+        const sonra = ctx.blok ? String((Number(ctx.blok.actualQ) || 0) + ctx.n)
+          : String((ctx.day.freeQ || 0) + ctx.n);
+        const rows = [{ label:nereye + ' · soru', before:once, after:sonra }];
+        if(ctx.dogru != null){
+          const varOlan = ctx.blok ? ctx.blok.correctQ : ctx.day.freeCorrect;
+          rows.push({ label:'Doğru',
+            before:varOlan == null ? 'girilmemiş' : String(varOlan),
+            after:String((Number(varOlan) || 0) + ctx.dogru) });
+        }
+        return rows;
+      },
+      async apply(p, ctx){
+        const geri = { date:p.date, blockId:ctx.blok ? ctx.blok.id : null,
+          eskiQ:ctx.blok ? ctx.blok.actualQ : (ctx.day.freeQ || 0),
+          eskiC:ctx.blok ? ctx.blok.correctQ : (ctx.day.freeCorrect || 0) };
+        if(ctx.blok){
+          ctx.blok.actualQ = (Number(ctx.blok.actualQ) || 0) + ctx.n;
+          if(ctx.dogru != null) ctx.blok.correctQ = (Number(ctx.blok.correctQ) || 0) + ctx.dogru;
+          if(ctx.blok.status === 'pending') ctx.blok.status = 'done';
+        }else{
+          ctx.day.freeQ = (ctx.day.freeQ || 0) + ctx.n;
+          /* Blok yoksa dogru sayisi da gunun toplamina yazilir. Onceden
+             DUSUYORDU: onizleme «dogru: 32 yazilacak» diyor ama kayit
+             yalniz bloga gidiyordu. Onizlemenin verdigi soz tutulmali. */
+          if(ctx.dogru != null) ctx.day.freeCorrect = (ctx.day.freeCorrect || 0) + ctx.dogru;
+        }
+        await R.Model.saveDay(p.date);
+        return geri;
+      },
+      async revert(s){
+        const day = R.S.days[s.date];
+        if(!day) return;
+        if(s.blockId){
+          const b = (day.blocks || []).find(x => x.id === s.blockId);
+          if(b){ b.actualQ = s.eskiQ; b.correctQ = s.eskiC; }
+        }else{ day.freeQ = s.eskiQ; day.freeCorrect = s.eskiC; }
+        await R.Model.saveDay(s.date);
+      },
+    },
+
+    'paragraf-yaz':{
+      check(p){
+        const n = Number(p.count);
+        if(!isFinite(n) || n <= 0 || n > 500) return fail('Paragraf sayısı anlaşılmadı.');
+        const day = R.S.days[p.date];
+        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        return pass({ n:Math.round(n), day });
+      },
+      preview(p, ctx){
+        return [{ label:'Paragraf', before:String(ctx.day.paragraphActual || 0),
+          after:String((ctx.day.paragraphActual || 0) + ctx.n) }];
+      },
+      async apply(p, ctx){
+        const geri = { date:p.date, eski:ctx.day.paragraphActual || 0 };
+        ctx.day.paragraphActual = (ctx.day.paragraphActual || 0) + ctx.n;
+        await R.Model.saveDay(p.date);
+        return geri;
+      },
+      async revert(s){
+        const day = R.S.days[s.date];
+        if(!day) return;
+        day.paragraphActual = s.eski;
+        await R.Model.saveDay(s.date);
+      },
+    },
+
+    'problem-yaz':{
+      check(p){
+        const n = Number(p.count);
+        if(!isFinite(n) || n <= 0 || n > 500) return fail('Problem sayısı anlaşılmadı.');
+        const day = R.S.days[p.date];
+        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        return pass({ n:Math.round(n), day });
+      },
+      preview(p, ctx){
+        return [{ label:'Problem', before:String(ctx.day.problemActual || 0),
+          after:String((ctx.day.problemActual || 0) + ctx.n) }];
+      },
+      async apply(p, ctx){
+        const geri = { date:p.date, eski:ctx.day.problemActual || 0 };
+        ctx.day.problemActual = (ctx.day.problemActual || 0) + ctx.n;
+        await R.Model.saveDay(p.date);
+        return geri;
+      },
+      async revert(s){
+        const day = R.S.days[s.date];
+        if(!day) return;
+        day.problemActual = s.eski;
+        await R.Model.saveDay(s.date);
+      },
+    },
+
+    'uyku-yaz':{
+      check(p){
+        const h = Number(p.hours);
+        if(!isFinite(h) || h <= 0 || h > 24) return fail('Uyku süresi anlaşılmadı.');
+        const day = R.S.days[p.date];
+        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        return pass({ h, day });
+      },
+      preview(p, ctx){
+        return [{ label:'Uyku',
+          before:ctx.day.sleepHours == null ? 'girilmemiş' : ctx.day.sleepHours + ' saat',
+          after:ctx.h + ' saat' }];
+      },
+      async apply(p, ctx){
+        const geri = { date:p.date, eski:ctx.day.sleepHours };
+        ctx.day.sleepHours = ctx.h;
+        await R.Model.saveDay(p.date);
+        return geri;
+      },
+      async revert(s){
+        const day = R.S.days[s.date];
+        if(!day) return;
+        day.sleepHours = s.eski;
+        await R.Model.saveDay(s.date);
+      },
+    },
+
+    'sure-yaz':{
+      check(p){
+        const dk = Number(p.minutes);
+        if(!isFinite(dk) || dk <= 0) return fail('Süre yok.');
+        if(dk > 960) return fail(dk + ' dakika bir blok için fazla.');
+        const subject = (R.SUBJECTS || []).find(x => x.id === p.subjectId);
+        if(!subject) return fail('Bu ders sistemde yok.');
+        const day = R.S.days[p.date];
+        if(!day) return fail('O günün kaydı henüz açılmamış.');
+        const blok = (day.blocks || []).find(b => b.subjectId === subject.id
+          || (b.subject && R.U.norm(b.subject) === R.U.norm(subject.name)));
+        if(!blok) return fail(subject.name + ' için bugün planlanmış bir blok yok.');
+        return pass({ dk:Math.round(dk), subject, blok });
+      },
+      preview(p, ctx){
+        return [{ label:(ctx.blok.topic || ctx.subject.name) + ' · süre',
+          before:ctx.blok.actualMin == null ? 'girilmemiş' : ctx.blok.actualMin + ' dk',
+          after:((Number(ctx.blok.actualMin) || 0) + ctx.dk) + ' dk' }];
+      },
+      async apply(p, ctx){
+        const geri = { date:p.date, blockId:ctx.blok.id, eski:ctx.blok.actualMin };
+        ctx.blok.actualMin = (Number(ctx.blok.actualMin) || 0) + ctx.dk;
+        if(ctx.blok.status === 'pending') ctx.blok.status = 'done';
+        await R.Model.saveDay(p.date);
+        return geri;
+      },
+      async revert(s){
+        const day = R.S.days[s.date];
+        if(!day) return;
+        const b = (day.blocks || []).find(x => x.id === s.blockId);
+        if(b) b.actualMin = s.eski;
+        await R.Model.saveDay(s.date);
+      },
+    },
   };
 
   function cardFront(err){
@@ -17125,6 +17417,232 @@ R.Proposals = (function(){
   };
 })();
 
+/* ==== js/core/entry.js ==== */
+/* KONUŞARAK VERİ GİRİŞİ — cümleden kayda.
+
+   «Bugün matematikten 40 soru çözdüm, 32'si doğru ve 20 paragraf
+   yaptım» bir cümle değil ÜÇ olgudur. Sistem bunu üç ayrı öneriye
+   çevirir; hiçbiri onaysız yazılmaz.
+
+   ─────────────────────────────────────────────────────────────────
+
+   NEDEN KURAL MOTORU ÖNCE
+
+   Cümleyi modele göndermek kolaydır ama üç bedeli vardır: kota harcar,
+   çevrimdışı çalışmaz ve en önemlisi MODEL SAYI UYDURABİLİR. «40 soru»
+   yerine «45» yazarsa kimse yakalayamaz.
+
+   Bu yüzden önce burası dener. Kural motoru çözerse model hiç
+   çağrılmaz. Çözemezse cümle modele gider ama model yine SAYI
+   ÜRETMEZ: kapalı katalogdan bir eylem ve yapısal parametre döndürür,
+   parametreler gerçek veriye karşı doğrulanır (bkz. core/proposals.js).
+
+   ─────────────────────────────────────────────────────────────────
+
+   BİLEŞİK CÜMLE
+
+   Yan cümlelere bölünür. Ayraçlar dilin kendi bağlaçlarıdır; virgül de
+   ayraçtır ama SAYININ İÇİNDEKİ virgül değildir — «7,5 saat uyudum»
+   tek parçadır. */
+
+window.R = window.R || {};
+
+R.Entry = (function(){
+  const U = R.U;
+
+  /* ---------------------------------------------------------- sayı */
+
+  const RAKAM = {
+    'bir':1, 'iki':2, 'üç':3, 'uc':3, 'dört':4, 'dort':4, 'beş':5, 'bes':5,
+    'altı':6, 'alti':6, 'yedi':7, 'sekiz':8, 'dokuz':9, 'on':10,
+    'yirmi':20, 'otuz':30, 'kırk':40, 'kirk':40, 'elli':50, 'altmış':60,
+    'altmis':60, 'yetmiş':70, 'yetmis':70, 'seksen':80, 'doksan':90, 'yüz':100, 'yuz':100,
+  };
+
+  function sayi(x){
+    if(x == null) return null;
+    const t = String(x).trim().replace(',', '.');
+    if(/^\d+(\.\d+)?$/.test(t)) return Number(t);
+    const k = U.norm ? U.norm(t) : t.toLocaleLowerCase('tr-TR');
+    return RAKAM[k] != null ? RAKAM[k] : null;
+  }
+
+  /* Metindeki ilk sayıyı bulur — yazıyla da olabilir. */
+  const SAYI_RE = new RegExp(
+    '(\\d+(?:[.,]\\d+)?|' + Object.keys(RAKAM).join('|') + ')', 'i');
+
+  function ilkSayi(text){
+    const m = String(text).match(SAYI_RE);
+    return m ? sayi(m[1]) : null;
+  }
+
+  /* --------------------------------------------------------- ders */
+
+  function dersBul(text){
+    const n = U.norm(text);
+    let bulunan = null;
+    (R.SUBJECT_ALIASES || []).some(x => {
+      const a = U.norm(x.alias);
+      if(a.length >= 3 && n.indexOf(a) >= 0){ bulunan = x.subject; return true; }
+      return false;
+    });
+    return bulunan;
+  }
+
+  /* Konu adı geçiyor mu? Dersin kendi konu listesinde aranır — ders
+     bilinmiyorsa bütün konularda. Uzun ad önce denenir. */
+  function konuBul(text, subject){
+    const n = U.norm(text);
+    const havuz = [];
+    (subject ? [subject] : (R.SUBJECTS || [])).forEach(s => {
+      (s.topics || []).forEach(t => havuz.push({ s, t, ad:U.norm(t.name) }));
+    });
+    havuz.sort((a, b) => b.ad.length - a.ad.length);
+    let bulunan = null;
+    havuz.some(x => {
+      if(x.ad.length >= 5 && n.indexOf(x.ad) >= 0){ bulunan = x; return true; }
+      return false;
+    });
+    return bulunan;
+  }
+
+  /* ------------------------------------------------------ kalıplar
+
+     Sıra önemlidir: en ÖZGÜL olan önce denenir. «20 paragraf çözdüm»
+     hem paragraf sayacıdır hem genel soru sayısı gibi görünür;
+     paragraf önce bakılır. */
+
+  const UYKU_RE  = /(\d+(?:[.,]\d+)?)\s*(saat|sa)\b[^.]*uyu/i;
+  const PARAGRAF_RE = /(\d+|[a-zçğıöşü]+)\s*(?:tane\s*)?paragraf/i;
+  const PROBLEM_RE  = /(\d+|[a-zçğıöşü]+)\s*(?:tane\s*)?problem/i;
+  const SORU_RE     = /(\d+|[a-zçğıöşü]+)\s*(?:tane\s*)?soru/i;
+  const DOGRU_RE    = /(\d+)\s*(?:'?[sy]i\s*)?(?:tane\s*)?(?:doğru|dogru|net)/i;
+  const DAKIKA_RE   = /(\d+(?:[.,]\d+)?)\s*(dakika|dk|saat|sa)\b/i;
+
+  function parseUyku(text){
+    const m = String(text).match(UYKU_RE);
+    if(!m) return null;
+    const s = sayi(m[1]);
+    if(s == null || s <= 0 || s > 24) return null;
+    return { kind:'uyku', hours:s };
+  }
+
+  function parseParagraf(text){
+    const m = String(text).match(PARAGRAF_RE);
+    if(!m) return null;
+    const n = sayi(m[1]);
+    if(n == null || n <= 0 || n > 500) return null;
+    return { kind:'paragraf', count:Math.round(n) };
+  }
+
+  function parseProblem(text){
+    const m = String(text).match(PROBLEM_RE);
+    if(!m) return null;
+    const n = sayi(m[1]);
+    if(n == null || n <= 0 || n > 500) return null;
+    return { kind:'problem', count:Math.round(n) };
+  }
+
+  function parseSoru(text){
+    const m = String(text).match(SORU_RE);
+    if(!m) return null;
+    const n = sayi(m[1]);
+    if(n == null || n <= 0 || n > 1000) return null;
+
+    const d = String(text).match(DOGRU_RE);
+    let dogru = d ? sayi(d[1]) : null;
+    /* Doğru sayısı çözülenden çok olamaz: yanlış okunmuştur. */
+    if(dogru != null && (dogru < 0 || dogru > n)) dogru = null;
+
+    const subject = dersBul(text);
+    const konu = konuBul(text, subject);
+    return {
+      kind:'soru', count:Math.round(n),
+      correct:dogru == null ? null : Math.round(dogru),
+      subject:subject || (konu ? konu.s : null),
+      topic:konu ? konu.t : null,
+    };
+  }
+
+  function parseSure(text){
+    /* «45 dakika matematik çalıştım» — soru sayısı yoksa süre kaydı. */
+    if(SORU_RE.test(text) || PARAGRAF_RE.test(text) || PROBLEM_RE.test(text)) return null;
+    if(/uyu/i.test(text)) return null;
+    const m = String(text).match(DAKIKA_RE);
+    if(!m) return null;
+    let dk = sayi(m[1]);
+    if(dk == null) return null;
+    if(/^s(a|aat)?$/i.test(m[2])) dk = dk * 60;
+    if(dk <= 0 || dk > 960) return null;
+    const subject = dersBul(text);
+    if(!subject) return null;          /* dersi bilinmeyen süre nereye yazılır? */
+    return { kind:'sure', minutes:Math.round(dk), subject };
+  }
+
+  /* Sıra: özgülden genele. */
+  function parseOne(text){
+    const t = String(text || '').trim();
+    if(t.length < 3) return null;
+    return parseUyku(t) || parseParagraf(t) || parseProblem(t)
+        || parseSoru(t) || parseSure(t) || null;
+  }
+
+  /* ------------------------------------------------- bileşik cümle */
+
+  const AYRAC = /\s+(?:ve|ayrıca|bir de|sonra|artı)\s+|[;]|,(?!\d)/gi;
+
+  function yanCumleler(text){
+    return String(text || '')
+      .split(AYRAC)
+      .map(x => String(x || '').trim())
+      .filter(x => x.length > 2);
+  }
+
+  /* Çözülen her yan cümle için bir katalog eylemi. */
+  function toAction(p, date){
+    if(!p) return null;
+    if(p.kind === 'uyku')     return { action:'uyku-yaz', params:{ hours:p.hours, date } };
+    if(p.kind === 'paragraf') return { action:'paragraf-yaz', params:{ count:p.count, date } };
+    if(p.kind === 'problem')  return { action:'problem-yaz', params:{ count:p.count, date } };
+    if(p.kind === 'sure')     return { action:'sure-yaz',
+      params:{ minutes:p.minutes, subjectId:p.subject.id, date } };
+    if(p.kind === 'soru')     return { action:'soru-yaz',
+      params:{ count:p.count, correct:p.correct,
+        subjectId:p.subject ? p.subject.id : null,
+        topicId:p.topic ? p.topic.id : null, date } };
+    return null;
+  }
+
+  /* Serbest cümleden öneri üretir — MODEL GEREKMEZ.
+
+     `anlasilmayan` kural motorunun çözemediği yan cümleleri taşır.
+     Bunlar sessizce düşmez: kullanıcıya gösterilir. */
+  function fromText(text, opts){
+    const o = opts || {};
+    const date = o.date || U.todayISO();
+    const parcalar = yanCumleler(text);
+    const oneriler = [], anlasilmayan = [];
+
+    parcalar.forEach(p => {
+      const a = toAction(parseOne(p), date);
+      if(a) oneriler.push(Object.assign(a, { kaynak:'rules', metin:p }));
+      else anlasilmayan.push(p);
+    });
+
+    /* Hiçbir parça anlaşılmadıysa cümlenin TAMAMINI bir kez dene:
+       bölme yanlış yerden olmuş olabilir. */
+    if(!oneriler.length && parcalar.length > 1){
+      const a = toAction(parseOne(text), date);
+      if(a) return { oneriler:[Object.assign(a, { kaynak:'rules', metin:String(text).trim() })],
+        anlasilmayan:[] };
+    }
+    return { oneriler, anlasilmayan };
+  }
+
+  return { fromText, parseOne, yanCumleler, dersBul, konuBul, sayi, ilkSayi,
+    parseSoru, parseUyku, parseParagraf, parseProblem, parseSure };
+})();
+
 /* ==== js/core/palette.js ==== */
 /* Komut paleti (Ctrl/Cmd+K) ve odak modu.
    Amac: gunluk kullanimda tikla-gezin yerine tek kisayolla is baslatmak. */
@@ -17355,6 +17873,101 @@ R.Palette = (function(){
     setTimeout(() => input.focus(), 20);
   }
 
+  /* ---- konusarak veri girisi ---------------------------------------
+
+     Cumlede VERI varsa once kural motoru cozer; model hic cagrilmaz.
+     «matematikten 40 soru cozdum ve 20 paragraf yaptim» iki oneri
+     uretir ve ikisi de ayri ayri onaylanir.
+
+     Komut listesinin EN USTUNDE durur: Enter'a basan onu bekler. */
+  let bekleyen = null;
+
+  function veriKomutu(q){
+    const t = String(q || '').trim();
+    if(t.length < 4 || !R.Entry) return null;
+    let r;
+    try{ r = R.Entry.fromText(t, { date:R.U.todayISO() }); }catch(e){ return null; }
+    if(!r.oneriler.length) return null;
+    const adlar = r.oneriler.map(o => {
+      const e = R.Proposals.eylem ? R.Proposals.eylem(o.action) : null;
+      return (e && e.label) || ETIKET[o.action] || o.action;
+    });
+    return {
+      group:'Kayıt', icon:'zap',
+      label:adlar.join(' · '),
+      sub:r.oneriler.length === 1 ? '1 kayıt' : r.oneriler.length + ' kayıt',
+      hint:'Enter',
+      run:() => onizle(r, t),
+    };
+  }
+
+  const ETIKET = {
+    'soru-yaz':'Çözülen soru', 'paragraf-yaz':'Paragraf', 'problem-yaz':'Problem',
+    'uyku-yaz':'Uyku', 'sure-yaz':'Çalışma süresi',
+  };
+
+  /* Onizleme: NE anlasildi ve ne degisecek. Kaydedilmeden once
+     gorunur — onaysiz hicbir sey yazilmaz. */
+  function onizle(r, metin){
+    const K = R.C;
+    const bloklar = r.oneriler.map(o => {
+      const pv = R.Proposals.preview({ action:o.action, agent:'patron', params:o.params });
+      const ad = ETIKET[o.action] || o.action;
+      return html`
+        <div class="qeblok">
+          <div class="qeblok__bas"><b>${ad}</b>
+            ${when(o.metin, () => html`<span class="tiny dim">«${o.metin}»</span>`)}</div>
+          ${when(!pv.ok, () => html`<p class="small" style="color:var(--danger)">${pv.why}</p>`)}
+          ${when(pv.ok, () => html`<div class="qeblok__satirlar">
+            ${map(pv.rows || [], x => html`<div class="qeblok__satir">
+              <span>${x.label}</span><span class="dim">${x.before}</span>
+              <span aria-hidden="true">→</span><b>${x.after}</b></div>`)}
+          </div>`)}
+        </div>`;
+    });
+
+    close();
+    UI.sheet({
+      title:r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
+        : r.oneriler.length + ' kayıt anladım',
+      subtitle:metin,
+      body:String(html`
+        <div class="qebloklar">${map(bloklar, b => b)}</div>
+        ${when(r.anlasilmayan.length, () => K.Notice({ tone:'warn',
+          title:'Çözemediğim kısım:',
+          body:'«' + r.anlasilmayan.join('», «') + '» — bu kısım kaydedilmeyecek. '
+            + 'Anlaşılmayan satır atılmaz, söylenir.' }))}
+        ${K.Notice({ tone:'info',
+          body:'Bu satırlar yorumlandı, KAYDEDİLMEDİ. Onaylayınca yazılır ve '
+            + 'her biri tek tek geri alınabilir.' })}`),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:r.oneriler.length === 1 ? 'Kaydet' : 'Hepsini kaydet',
+          tone:'primary', act:'veri-kaydet' })}`),
+    });
+    bekleyen = Object.assign({}, r, { metin });
+  }
+
+  async function veriKaydet(){
+    if(!bekleyen) return;
+    const metinSon = bekleyen.metin || '';
+    let yazilan = 0, dusen = 0;
+    for(const o of bekleyen.oneriler){
+      /* Yetki Patron'da: konustugun ajan odur. Gerekce alanina SENIN
+         cumlen yazilir — sayi koçun tahmininden degil senin sozunden
+         cikar. */
+      const kayit = await R.Proposals.propose({ action:o.action, agent:'patron',
+        params:o.params, reason:o.metin || metinSon });
+      if(!kayit){ dusen++; continue; }
+      const res = await R.Proposals.approve(kayit.id);
+      if(res) yazilan++; else dusen++;
+    }
+    bekleyen = null;
+    UI.closeSheet();
+    UI.toast(dusen ? yazilan + ' kayıt yazıldı, ' + dusen + ' tanesi yazılamadı'
+      : yazilan + ' kayıt yazıldı');
+    R.App.render();
+  }
+
   function renderList(q){
     /* Komutlar ve icerik sonuclari ortak siralanir.
        Icerik sonuclari zaten gercek eslesmedir; bulanik komut eslesmesinin ustunde durur. */
@@ -17368,6 +17981,9 @@ R.Palette = (function(){
       .sort((a,b) => b.s - a.s)
       .map(x => x.c)
       .slice(0, 40);
+    /* Veri girisi HER ZAMAN en ustte: Enter'a basan onu bekler. */
+    const veri = veriKomutu(q);
+    if(veri) items = [veri].concat(items).slice(0, 40);
     active = Math.min(active, Math.max(0, items.length-1));
 
     const list = document.getElementById('cmdk-list');
@@ -17507,7 +18123,8 @@ R.Palette = (function(){
   }
   function isFocusOpen(){ return !!document.getElementById('focusmode'); }
 
-  return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock };
+  return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock,
+    veriKaydet, veriKomutu };
 })();
 
 /* ==== js/core/setup.js ==== */
@@ -27522,6 +28139,8 @@ R.App = (function(){
       }, route && route !== S.route ? 80 : 0);
     },
     async 'sheet-close'(){ UI.closeSheet(); },
+    /* Paletten gelen veri girisi onayi — bkz. core/palette.js */
+    async 'veri-kaydet'(){ await R.Palette.veriKaydet(); },
     async reload(){ location.reload(); },
     /* Herhangi bir ekrandan bir ajana soru sormak icin. */
     async 'ask-agent'(el){

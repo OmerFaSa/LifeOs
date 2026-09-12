@@ -99,6 +99,79 @@ R.ACTIONS = [
     params:{ decisionId:'string', state:'string' },
     why:'Kapanmayan karar bir sonraki toplantının önüne düşer.',
   },
+
+  /* ==================== KONUŞARAK VERİ GİRİŞİ ====================
+
+     Yukarıdakiler PLAN eylemleridir: konuyu tekrara al, blok ekle,
+     hedefi değiştir — ajanın bir ÖNERİSİDİR.
+
+     Aşağıdakiler ham veri girişidir: «bugün matematikten 40 soru
+     çözdüm» cümlesinin karşılığı. Öneren ajan değil KULLANICIDIR;
+     yine de aynı kapıdan geçer, çünkü veri girişine ayrı ve daha
+     gevşek bir yol açmak sistemin en çok kullanılan yolunu en az
+     korunan yol yapardı.
+
+     Yetki Patron'dadır ve bunun bir sebebi var: konuştuğun ajan odur.
+     Alt koçlar bu eylemleri öneremez — Tuna senin adına «40 soru
+     çözdün» diyemez. Sayı senin cümlenden çıkar, koçun tahmininden
+     değil; önerinin gerekçesine SENİN cümlen yazılır. */
+  {
+    id:'soru-yaz',
+    title:'Çözülen soruyu yaz',
+    summary:'Söylediğin soru sayısı o günün ilgili bloğuna eklenir.',
+    touches:'Gün kaydı',
+    icon:'zap',
+    route:'today',
+    agents:['patron'],
+    params:{ count:'number', correct:'number', subjectId:'string', topicId:'string', date:'string' },
+    why:'Soru sayısı planın gerçekleşme oranını belirler; girilmeyen soru '
+      + 'yapılmamış sayılır.',
+  },
+  {
+    id:'paragraf-yaz',
+    title:'Paragraf sayısını yaz',
+    summary:'Günün paragraf sayacına eklenir.',
+    touches:'Gün kaydı',
+    icon:'zap',
+    route:'today',
+    agents:['patron'],
+    params:{ count:'number', date:'string' },
+    why:'Paragraf dokuz ay süren bir beceridir; günlük sayaç onu görünür tutar.',
+  },
+  {
+    id:'problem-yaz',
+    title:'Problem sayısını yaz',
+    summary:'Günün problem sayacına eklenir.',
+    touches:'Gün kaydı',
+    icon:'zap',
+    route:'today',
+    agents:['patron'],
+    params:{ count:'number', date:'string' },
+    why:'Problem günlük rutinin ikinci ayağıdır.',
+  },
+  {
+    id:'uyku-yaz',
+    title:'Uyku süresini yaz',
+    summary:'O günün uyku saati kaydedilir.',
+    touches:'Gün kaydı',
+    icon:'moon',
+    route:'today',
+    agents:['patron'],
+    params:{ hours:'number', date:'string' },
+    why:'Uyku, ertesi günün kapasitesini belirleyen tek ölçülebilir girdidir.',
+  },
+  {
+    id:'sure-yaz',
+    title:'Çalışma süresini yaz',
+    summary:'Söylediğin süre o dersin bugünkü bloğuna eklenir.',
+    touches:'Gün kaydı',
+    icon:'clock',
+    route:'today',
+    agents:['patron'],
+    params:{ minutes:'number', subjectId:'string', date:'string' },
+    why:'Planlanan süre ile gerçekleşen süre arasındaki fark, planın '
+      + 'gerçekçi olup olmadığını söyler.',
+  },
 ];
 
 R.ACTION_BY_ID = R.ACTIONS.reduce((m, a) => { m[a.id] = a; return m; }, {});

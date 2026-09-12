@@ -227,6 +227,101 @@ R.Palette = (function(){
     setTimeout(() => input.focus(), 20);
   }
 
+  /* ---- konusarak veri girisi ---------------------------------------
+
+     Cumlede VERI varsa once kural motoru cozer; model hic cagrilmaz.
+     «matematikten 40 soru cozdum ve 20 paragraf yaptim» iki oneri
+     uretir ve ikisi de ayri ayri onaylanir.
+
+     Komut listesinin EN USTUNDE durur: Enter'a basan onu bekler. */
+  let bekleyen = null;
+
+  function veriKomutu(q){
+    const t = String(q || '').trim();
+    if(t.length < 4 || !R.Entry) return null;
+    let r;
+    try{ r = R.Entry.fromText(t, { date:R.U.todayISO() }); }catch(e){ return null; }
+    if(!r.oneriler.length) return null;
+    const adlar = r.oneriler.map(o => {
+      const e = R.Proposals.eylem ? R.Proposals.eylem(o.action) : null;
+      return (e && e.label) || ETIKET[o.action] || o.action;
+    });
+    return {
+      group:'Kayıt', icon:'zap',
+      label:adlar.join(' · '),
+      sub:r.oneriler.length === 1 ? '1 kayıt' : r.oneriler.length + ' kayıt',
+      hint:'Enter',
+      run:() => onizle(r, t),
+    };
+  }
+
+  const ETIKET = {
+    'soru-yaz':'Çözülen soru', 'paragraf-yaz':'Paragraf', 'problem-yaz':'Problem',
+    'uyku-yaz':'Uyku', 'sure-yaz':'Çalışma süresi',
+  };
+
+  /* Onizleme: NE anlasildi ve ne degisecek. Kaydedilmeden once
+     gorunur — onaysiz hicbir sey yazilmaz. */
+  function onizle(r, metin){
+    const K = R.C;
+    const bloklar = r.oneriler.map(o => {
+      const pv = R.Proposals.preview({ action:o.action, agent:'patron', params:o.params });
+      const ad = ETIKET[o.action] || o.action;
+      return html`
+        <div class="qeblok">
+          <div class="qeblok__bas"><b>${ad}</b>
+            ${when(o.metin, () => html`<span class="tiny dim">«${o.metin}»</span>`)}</div>
+          ${when(!pv.ok, () => html`<p class="small" style="color:var(--danger)">${pv.why}</p>`)}
+          ${when(pv.ok, () => html`<div class="qeblok__satirlar">
+            ${map(pv.rows || [], x => html`<div class="qeblok__satir">
+              <span>${x.label}</span><span class="dim">${x.before}</span>
+              <span aria-hidden="true">→</span><b>${x.after}</b></div>`)}
+          </div>`)}
+        </div>`;
+    });
+
+    close();
+    UI.sheet({
+      title:r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
+        : r.oneriler.length + ' kayıt anladım',
+      subtitle:metin,
+      body:String(html`
+        <div class="qebloklar">${map(bloklar, b => b)}</div>
+        ${when(r.anlasilmayan.length, () => K.Notice({ tone:'warn',
+          title:'Çözemediğim kısım:',
+          body:'«' + r.anlasilmayan.join('», «') + '» — bu kısım kaydedilmeyecek. '
+            + 'Anlaşılmayan satır atılmaz, söylenir.' }))}
+        ${K.Notice({ tone:'info',
+          body:'Bu satırlar yorumlandı, KAYDEDİLMEDİ. Onaylayınca yazılır ve '
+            + 'her biri tek tek geri alınabilir.' })}`),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:r.oneriler.length === 1 ? 'Kaydet' : 'Hepsini kaydet',
+          tone:'primary', act:'veri-kaydet' })}`),
+    });
+    bekleyen = Object.assign({}, r, { metin });
+  }
+
+  async function veriKaydet(){
+    if(!bekleyen) return;
+    const metinSon = bekleyen.metin || '';
+    let yazilan = 0, dusen = 0;
+    for(const o of bekleyen.oneriler){
+      /* Yetki Patron'da: konustugun ajan odur. Gerekce alanina SENIN
+         cumlen yazilir — sayi koçun tahmininden degil senin sozunden
+         cikar. */
+      const kayit = await R.Proposals.propose({ action:o.action, agent:'patron',
+        params:o.params, reason:o.metin || metinSon });
+      if(!kayit){ dusen++; continue; }
+      const res = await R.Proposals.approve(kayit.id);
+      if(res) yazilan++; else dusen++;
+    }
+    bekleyen = null;
+    UI.closeSheet();
+    UI.toast(dusen ? yazilan + ' kayıt yazıldı, ' + dusen + ' tanesi yazılamadı'
+      : yazilan + ' kayıt yazıldı');
+    R.App.render();
+  }
+
   function renderList(q){
     /* Komutlar ve icerik sonuclari ortak siralanir.
        Icerik sonuclari zaten gercek eslesmedir; bulanik komut eslesmesinin ustunde durur. */
@@ -240,6 +335,9 @@ R.Palette = (function(){
       .sort((a,b) => b.s - a.s)
       .map(x => x.c)
       .slice(0, 40);
+    /* Veri girisi HER ZAMAN en ustte: Enter'a basan onu bekler. */
+    const veri = veriKomutu(q);
+    if(veri) items = [veri].concat(items).slice(0, 40);
     active = Math.min(active, Math.max(0, items.length-1));
 
     const list = document.getElementById('cmdk-list');
@@ -379,5 +477,6 @@ R.Palette = (function(){
   }
   function isFocusOpen(){ return !!document.getElementById('focusmode'); }
 
-  return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock };
+  return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock,
+    veriKaydet, veriKomutu };
 })();
