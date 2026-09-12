@@ -714,6 +714,16 @@ ESP.App = (function(){
   /* ---------------------------------------------------------- küresel eylemler */
   const globalHandle = {
     async go(el){ go(el.dataset.route); },
+
+    /* Egzersiz isleme ORTAK bir eylemdir: koç kutusu yedi ekranda birden
+       duruyor ve her ekranda ayri bir islem yazmak, yedi kez bozulabilecek
+       bir islem demektir. */
+    async 'log-drill'(el){
+      const res = await ESP.Coach.logDrill(el.dataset.id);
+      if(!res.ok){ UI.toast(res.error); return; }
+      UI.toast('İşlendi — gün kaydına yazıldı');
+      render();
+    },
     async 'toggle-menu'(){ S.sidebarOpen = !S.sidebarOpen; render(); },
     async hint(el){
       if(UI.isHintOpen() && el.dataset.hint === UI._lastHint){ UI.closeHint(); UI._lastHint = null; return; }

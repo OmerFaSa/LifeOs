@@ -202,7 +202,7 @@ ESP.Screens.writing = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'taslaklar' ? { count:(S.drafts || []).length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('writing')].concat(rows)))}`);
   }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value : ''; }

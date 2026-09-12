@@ -13,7 +13,7 @@ ESP.Screens = ESP.Screens || {};
 
 ESP.Screens.today = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
-  const { html, raw, when, map } = ESP.h;
+  const { html, raw, when, map, cls } = ESP.h;
   const K = ESP.C;
 
   function gun(){ return S.ui.dayDate || U.todayISO(); }
@@ -289,13 +289,71 @@ ESP.Screens.today = (function(){
     ];
   }
 
+  /* ---------------------------------------------------------- günün planı
+
+     Sıradaki tek iş SIRAYI söyler, plan İÇERİĞİ. İkisi ayrı satırdır ve
+     ayrı kalmalıdır: «bugün dil çalış» ile «on kartı bağlam cümlesiyle
+     karta çevir» aynı cümle değildir.
+
+     Plan en fazla İKİ disiplin taşır. Üçüncüyü eklemek, günde üç alan
+     açmanın kibar hâlidir — üçü de kapanmaz. */
+  function planRow(){
+    const p = ESP.Coach.plan(gun());
+    const asgari = ESP.Coach.minimumDay(gun());
+
+    return K.Entry({
+      label:'GÜNÜN REÇETESİ', hint:'coach',
+      meta:p.minutes + ' dk',
+      note:'Reçeteyi koç yazar, sırayı planlayıcı verir. Toplam, profildeki '
+         + 'günlük tabandan (' + p.budget + ' dk) taşmaz.',
+      action:K.Button({ label:'Merdiven', size:'sm', act:'go',
+        data:{ 'data-route':'ladder' } }),
+      wide:true,
+      body:html`
+        ${p.prescriptions.length
+          ? map(p.prescriptions, r => html`
+              <div class="rxblock">
+                <div class="rxblock__head">
+                  <b>${r.label}</b>
+                  ${K.Badge({ label:r.level.label, tone:'muted', icon:false })}
+                  ${K.Button({ label:'Masaya git', size:'sm', act:'go',
+                    data:{ 'data-route':r.route } })}
+                </div>
+                <p class="small muted">${r.why}</p>
+                <ul class="rx">${map(r.items, it => {
+                  const bitti = (r.done || []).indexOf(it.drill.id) >= 0;
+                  return html`<li class="${cls('rx__row', 'rx__row--' + it.kind,
+                      bitti && 'is-done')}">
+                    <span class="rx__kind">${it.label}</span>
+                    <span class="rx__body">
+                      <b>${it.drill.label}</b>
+                      <span class="rx__task">${it.drill.task}</span>
+                    </span>
+                    <span class="rx__min num">${it.drill.minutes} dk</span>
+                    ${bitti
+                      ? K.Badge({ label:'işlendi', tone:'ok' })
+                      : K.Button({ label:'İşle', size:'sm', act:'log-drill',
+                          data:{ 'data-id':it.drill.id } })}
+                  </li>`;
+                })}</ul>
+              </div>`)
+          : K.Empty({ text:'Reçete yazılamadı: disiplin listesi boş.' })}
+
+        ${K.Notice({ tone:asgari.metToday ? 'info' : 'warn',
+          body:'Asgari gün — ' + (asgari.cards ? asgari.cards + ' vadeli kart, '
+            : 'vadesi gelen kart yok, ') + asgari.read.toLocaleLowerCase('tr-TR')
+            + ', ' + asgari.practice.toLocaleLowerCase('tr-TR') + '. '
+            + asgari.note })}`,
+    });
+  }
+
   /* ------------------------------------------------------------------ cizim */
 
   function render(){
     const tab = S.ui.dayTab || 'giris';
     const rows = tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [nextCard(), entryForm(), quickForm(), sessionList()];
+      : [nextCard(), planRow(), entryForm(), quickForm(), sessionList()];
 
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({

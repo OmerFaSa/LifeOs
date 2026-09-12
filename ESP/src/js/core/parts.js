@@ -136,5 +136,54 @@ ESP.Parts = (function(){
     return K.Empty({ text, action });
   }
 
-  return { cert, measure, avatar, discChip, radar, empty };
+  /* ------------------------------------------------------------ koç kutusu
+
+     Her disiplin ekraninda ayni yerde, ayni bicimde durur. Tek bir yerde
+     tanimli olmasi kasitli: recete bicimi ekrandan ekrana degisirse
+     kullanici her bolumde yeniden okumayi ogrenir.
+
+     Kutu bir TAVSIYE kutusu degildir — icinde yapilacak isler ve onlari
+     isleyen dugmeler vardir. Okunup gecilen bir kutu yazmanin anlami yok. */
+  function coach(discId){
+    const r = ESP.Coach.prescribe(discId);
+    if(!r) return raw('');
+    const lv = r.level;
+    const yapilan = r.done || [];
+
+    return K.Entry({
+      label:'KOÇ', hint:'coach',
+      meta:r.cert === 'missing' ? 'kademe yok' : lv.label,
+      note:r.why,
+      action:K.Button({ label:'Merdiven', size:'sm', act:'go',
+        data:{ 'data-route':'ladder' } }),
+      wide:true,
+      body:html`
+        <div class="coachhead">
+          ${K.Badge({ label:lv.label + ' · ' + lv.short,
+            tone:r.cert === 'missing' ? 'muted' : 'info', icon:false })}
+          ${cert(r.cert)}
+          <span class="tiny dim">${r.minutes} dk / ${r.budget} dk taban</span>
+        </div>
+        ${r.items.length
+          ? html`<ul class="rx">${map(r.items, it => {
+              const bitti = yapilan.indexOf(it.drill.id) >= 0;
+              return html`<li class="${cls('rx__row', 'rx__row--' + it.kind,
+                  bitti && 'is-done')}">
+                <span class="rx__kind">${it.label}</span>
+                <span class="rx__body">
+                  <b>${it.drill.label}</b>
+                  <span class="rx__task">${it.drill.task}</span>
+                </span>
+                <span class="rx__min num">${it.drill.minutes} dk</span>
+                ${bitti
+                  ? K.Badge({ label:'işlendi', tone:'ok' })
+                  : K.Button({ label:'İşle', size:'sm', act:'log-drill',
+                      data:{ 'data-id':it.drill.id } })}
+              </li>`;
+            })}</ul>`
+          : K.Empty({ text:'Bu kademede tanımlı egzersiz yok.' })}`,
+    });
+  }
+
+  return { cert, measure, avatar, discChip, radar, empty, coach };
 })();

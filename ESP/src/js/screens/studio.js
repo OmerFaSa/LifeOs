@@ -352,7 +352,13 @@ ESP.Screens.studio = (function(){
       ${K.Span(12, K.Toolbar({
         tabs:K.Subtabs({ value:tab, act:'studio-tab', aria:'Stüdyo sekmeleri', items:TABS }),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, K.Ledger(() => {
+        /* Studyoda iki disiplin var: sekme hangisindeyse koç o masanin
+           recetesini yazar. Ikisini birden gostermek, otuz dakikalik bir
+           gunu altmis dakikalik bir recete ile karsilamak olurdu. */
+        const disc = S.ui.studioTab === 'diksiyon' ? 'diction' : 'music';
+        return (S.ui.studioTab === 'ilerleme' ? [] : [ESP.Parts.coach(disc)]).concat(rows);
+      }))}`);
   }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }

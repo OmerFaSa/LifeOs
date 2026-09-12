@@ -484,7 +484,7 @@ ESP.Screens.history = (function(){
         actions:when(evs().length, () => K.Button({ label:'Tohumu yükle', size:'sm',
           act:'seed' })),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('history')].concat(rows)))}`);
   }
 
   /* ----------------------------------------------------------------- eylem */

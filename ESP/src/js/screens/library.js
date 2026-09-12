@@ -265,7 +265,7 @@ ESP.Screens.library = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'notlar' ? { count:(S.notes || []).length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('reading')].concat(rows)))}`);
   }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }

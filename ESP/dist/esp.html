@@ -5045,6 +5045,50 @@ body.is-dragging .drop.is-over{
 }
 .step--done .lrow__label{ opacity:.7; }
 .step--ahead .step__cols{ opacity:.72; }
+
+/* ============================================================ koç reçetesi
+
+   Reçete satırı bir yapılacaklar listesi DEĞİLDİR ve onay kutusu taşımaz:
+   kutu işaretlemek işi yapmış gibi hissettirir. Buradaki düğme günün
+   kaydına bir OTURUM yazar — yani ölçüme dönüşür.
+
+   Üç bölüm (ısınma, asıl iş, zorlanma) renkle değil KONUMLA ayrılır: sol
+   kenardaki etiket sütunu. Renk burada durum taşırdı ve durum renkleriyle
+   karışırdı. */
+.coachhead{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+  margin-bottom:var(--sp-3);
+}
+.rx{ list-style:none; margin:0; padding:0; }
+.rx__row{
+  display:flex; flex-wrap:wrap; gap:var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.rx__row:last-child{ border-bottom:0; }
+.rx__kind{
+  flex:0 0 8ch; font-size:var(--fs-xs); text-transform:uppercase;
+  letter-spacing:.05em; color:var(--text-3);
+}
+.rx__body{ flex:1 1 20ch; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.rx__task{ font-size:var(--fs-sm); color:var(--text-2); }
+.rx__min{
+  flex:0 0 auto; font-size:var(--fs-sm); color:var(--text-3);
+  font-variant-numeric:tabular-nums;
+}
+.rx__row.is-done .rx__body b{ text-decoration:line-through; }
+.rx__row.is-done{ opacity:.72; }
+
+.rxblock{ padding:var(--sp-3) 0; border-bottom:1px solid var(--rule); }
+.rxblock:last-of-type{ border-bottom:0; }
+.rxblock__head{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+}
+.rxblock p{ margin:var(--sp-1) 0 var(--sp-2); }
+
+@media (max-width:520px){
+  .rx__kind{ flex:0 0 100%; }
+  .evrow__year{ flex:0 0 5ch; }
+}
 </style>
 <div id="app">
   <div class="boot">
@@ -5065,7 +5109,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'567ae55', at:'2026-09-12 19:10', dirty:true };
+SP.BUILD = { id:'3189445', at:'2026-09-12 19:19', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -6860,6 +6904,376 @@ ESP.PLACEMENT = {
       ] },
   ],
 };
+
+/* ==== js/data/drills.js ==== */
+/* Egzersiz katalogu — koçun yazdığı reçetenin ham maddesi.
+
+   Bir sistem «bugün 40 dakika dil çalış» derse hiçbir şey söylememiş olur.
+   Çalışmak bir eylem değil bir kategoridir; eylem «on kartı sesli üret»tir.
+   Bu dosya o eylemleri tutar.
+
+   Her egzersizin dört zorunlu alanı vardır:
+
+     level    hangi kademeden itibaren anlamlı (ESP.LEVELS)
+     minutes  gerçekçi süre — reçete bu sayıyla toplanır, uydurulmaz
+     task     tek cümlelik, YAPILABİLİR emir
+     targets  hangi kapıyı ilerletir (core/curriculum.js olcu adlari)
+
+   `targets` bu dosyanın omurgasıdır: koç rastgele egzersiz seçmez, açık
+   olan KAPIYA bakar ve o kapıyı ilerleten egzersizi verir. Hedefi olmayan
+   bir egzersiz, iyi hissettiren ama hiçbir kapıyı açmayan çalışmadır —
+   sistemin tam olarak engellemeye çalıştığı şey.
+
+   `kind` reçetenin şeklini verir:
+     warmup   ısınma; kısa, kolay, her kademede yapılabilir
+     core     asıl iş; kapıyı ilerleten egzersiz
+     stretch  bir üst kademeden; zorlanma payı
+
+   Üçlü yapı kasıtlıdır: yalnız core'dan kurulu bir seans tükeniştir,
+   yalnız warmup'tan kurulu bir seans oyalanmadır. */
+
+window.ESP = window.ESP || {};
+
+ESP.DRILLS = [
+
+  /* ------------------------------------------------------------------ dil */
+  { id:'lang-ses', disc:'lang', level:1, kind:'warmup', minutes:5,
+    label:'Ses ısınması',
+    task:'Hedef dilde bir paragrafı sesli oku; anlamı değil sesi dinle.',
+    targets:['lang.minutes30'] },
+  { id:'lang-10kart', disc:'lang', level:1, kind:'core', minutes:10,
+    label:'On yeni kart',
+    task:'On yeni kelimeyi bağlam cümlesiyle birlikte karta çevir.',
+    targets:['lang.cards'] },
+  { id:'lang-tekrar', disc:'lang', level:1, kind:'core', minutes:15,
+    label:'Vadesi gelen tekrar',
+    task:'Vadesi gelen bütün kartları cevapla; bilmediğini «tekrar» işaretle.',
+    targets:['lang.retention'] },
+  { id:'lang-shadow', disc:'lang', level:1, kind:'core', minutes:10,
+    label:'Shadowing',
+    task:'Bir dakikalık kaydı üç kez gölgele: dinle, aynı anda söyle, tekrar dinle.',
+    targets:['lang.minutes30'] },
+  { id:'lang-uretim', disc:'lang', level:2, kind:'core', minutes:15,
+    label:'Üretim: beş cümle',
+    task:'Bugün öğrendiğin beş kelimeyi kendi cümlende kullan ve kartları '
+       + '«üretimde kullanıldı» işaretle.',
+    targets:['lang.cards', 'lang.retention'] },
+  { id:'lang-dinleme', disc:'lang', level:2, kind:'core', minutes:20,
+    label:'Dinleme günlüğü',
+    task:'Beş dakikalık bir kaydı dinle; anlamadığın üç yeri yazıp karta çevir.',
+    targets:['lang.minutes30', 'lang.cards'] },
+  { id:'lang-esdizim', disc:'lang', level:3, kind:'core', minutes:15,
+    label:'Eşdizim avı',
+    task:'Okuduğun metinden on eşdizim (collocation) çıkar; tek kelime değil '
+       + 'öbek olarak karta çevir.',
+    targets:['lang.cards'] },
+  { id:'lang-ozet', disc:'lang', level:3, kind:'stretch', minutes:20,
+    label:'Özet anlatma',
+    task:'Okuduğun bir metni kitaba bakmadan hedef dilde sesli özetle.',
+    targets:['lang.minutes30'] },
+  { id:'lang-hatagunlugu', disc:'lang', level:3, kind:'core', minutes:10,
+    label:'Hata günlüğü',
+    task:'Kendi ürettiğin metindeki üç hatayı bul, doğrusunu karta çevir.',
+    targets:['lang.cards', 'lang.retention'] },
+  { id:'lang-tartisma', disc:'lang', level:4, kind:'stretch', minutes:25,
+    label:'Savunma',
+    task:'Bir görüşü hedef dilde savun, sonra aynı görüşü çürüt.',
+    targets:['lang.minutes30'] },
+  { id:'lang-uslup', disc:'lang', level:4, kind:'core', minutes:20,
+    label:'Üslup karşılaştırması',
+    task:'Aynı olayı anlatan gazete ve akademik metni karşılaştır; farkı yaz.',
+    targets:['lang.minutes30'] },
+  { id:'lang-geri', disc:'lang', level:5, kind:'core', minutes:30,
+    label:'Çeviri ve geri çeviri',
+    task:'Bir paragrafı çevir, bir gün bekle, geri çevir; kaybı listele.',
+    targets:['lang.minutes30'] },
+  { id:'lang-ikinci', disc:'lang', level:5, kind:'stretch', minutes:20,
+    label:'İkinci dil teması',
+    task:'İkinci dilde günlük on kart aç; birinci dilin destesini bozma.',
+    targets:['lang.langs'] },
+  { id:'lang-zincir', disc:'lang', level:2, kind:'warmup', minutes:5,
+    label:'Zincir kırılmasın',
+    task:'Bugün hiçbir şey yapamayacaksan yalnızca vadesi gelen kartları kapat.',
+    targets:['lang.streakDays'] },
+
+  /* -------------------------------------------------------------- felsefe */
+  { id:'philo-kavram', disc:'philo', level:1, kind:'warmup', minutes:5,
+    label:'Kavram tanımı',
+    task:'Bir kavramı sözlüğe bakmadan kendi cümlenle tanımla, sonra bak.',
+    targets:['philo.concepts'] },
+  { id:'philo-primer', disc:'philo', level:1, kind:'core', minutes:25,
+    label:'Primer metin',
+    task:'Yorum değil metnin kendisini oku; anlamadığın yeri işaretle, geç.',
+    targets:['philo.primaryBooks', 'philo.minutes30'] },
+  { id:'philo-tez', disc:'philo', level:2, kind:'core', minutes:15,
+    label:'Tek cümlelik tez',
+    task:'Bugün okuduğundan bir tez çıkar; tek cümle, tek iddia.',
+    targets:['philo.args'] },
+  { id:'philo-itiraz', disc:'philo', level:2, kind:'core', minutes:15,
+    label:'Kendi itirazın',
+    task:'Kendi tezine en güçlü itirazı sen yaz; zayıf itiraz yazmak hile.',
+    targets:['philo.closedArgs'] },
+  { id:'philo-safsata', disc:'philo', level:2, kind:'warmup', minutes:10,
+    label:'Safsata taraması',
+    task:'Bir köşe yazısında üç safsata bul ve adını koy.',
+    targets:['philo.concepts'] },
+  { id:'philo-cevap', disc:'philo', level:3, kind:'core', minutes:20,
+    label:'İtirazı cevapla',
+    task:'Açık duran bir itirazı cevapla ya da tezi düzelt; üçüncü seçenek yok.',
+    targets:['philo.closedArgs'] },
+  { id:'philo-deney', disc:'philo', level:3, kind:'stretch', minutes:15,
+    label:'Düşünce deneyi',
+    task:'Tezini sınayan bir düşünce deneyi kur; sonucu tezi bozuyorsa yaz.',
+    targets:['philo.args'] },
+  { id:'philo-gelenek', disc:'philo', level:4, kind:'core', minutes:30,
+    label:'İki gelenek',
+    task:'Aynı soruya iki geleneğin cevabını yan yana koy.',
+    targets:['philo.traditions'] },
+  { id:'philo-baglam', disc:'philo', level:4, kind:'core', minutes:20,
+    label:'Tarihsel bağlam',
+    task:'Okuduğun metnin yazıldığı dönemi öğren; tez bağlamda ne anlama geliyordu?',
+    targets:['philo.traditions', 'philo.minutes30'] },
+  { id:'philo-konum', disc:'philo', level:5, kind:'stretch', minutes:30,
+    label:'Kendi konumun',
+    task:'Kendi konumunu bir sayfada kur ve hangi geleneğe yaslandığını söyle.',
+    targets:['philo.closedArgs'] },
+  { id:'philo-soru', disc:'philo', level:5, kind:'core', minutes:20,
+    label:'Özgün soru',
+    task:'Okuduğun hiçbir yerde geçmeyen bir soru yaz ve neden sorulmadığını düşün.',
+    targets:['philo.args'] },
+
+  /* ---------------------------------------------------------------- müzik */
+  { id:'music-isin', disc:'music', level:1, kind:'warmup', minutes:5,
+    label:'Kromatik ısınma',
+    task:'Dört parmak kromatik, yavaş tempoda, temiz ses hedefiyle.',
+    targets:['music.minutes30'] },
+  { id:'music-akor', disc:'music', level:1, kind:'core', minutes:15,
+    label:'Akor geçişi',
+    task:'İki akor arasında metronomla geç; hız değil temizlik say.',
+    targets:['music.cleanBpm', 'music.pieces'] },
+  { id:'music-ritim', disc:'music', level:1, kind:'core', minutes:10,
+    label:'Ritim kalıbı',
+    task:'Tek akor üzerinde bir ritim kalıbını bir dakika kesintisiz çal.',
+    targets:['music.minutes30'] },
+  { id:'music-esik', disc:'music', level:2, kind:'core', minutes:15,
+    label:'Temiz eşik ölçümü',
+    task:'Bir pasajı üç kez üst üste temiz çalabildiğin en yüksek BPM\'i kaydet.',
+    targets:['music.cleanBpm'] },
+  { id:'music-barre', disc:'music', level:2, kind:'core', minutes:15,
+    label:'Barre dayanıklılığı',
+    task:'Barre akorda kırk saniye kal, yirmi saniye dinlen; beş tur.',
+    targets:['music.cleanBpm'] },
+  { id:'music-pentatonik', disc:'music', level:3, kind:'core', minutes:20,
+    label:'Pentatonik kalıplar',
+    task:'Beş kalıbı sırayla bağla; geçiş noktasında duraksama olmasın.',
+    targets:['music.pieces', 'music.cleanBpm'] },
+  { id:'music-kulak', disc:'music', level:3, kind:'stretch', minutes:15,
+    label:'Kulakla bulma',
+    task:'Bir şarkının akorlarını tabla bakmadan bul; sonra doğrula.',
+    targets:['music.pieces'] },
+  { id:'music-plato', disc:'music', level:3, kind:'core', minutes:20,
+    label:'Plato kırma',
+    task:'Tıkanan pasajı yarı tempoda ve ters yönde çalış; aynı çalışma aynı '
+       + 'sonucu veriyorsa değişmesi gereken çalışmadır.',
+    targets:['music.noPlateau'] },
+  { id:'music-dogaclama', disc:'music', level:4, kind:'stretch', minutes:20,
+    label:'On iki ölçü doğaçlama',
+    task:'Bir akor dizisi üzerine doğaçla; kaydet, dinle, bir şey değiştir.',
+    targets:['music.minutes30'] },
+  { id:'music-dinamik', disc:'music', level:4, kind:'core', minutes:15,
+    label:'Dinamik çalışma',
+    task:'Aynı pasajı üç farklı şiddette çal; nota aynı, müzik farklı.',
+    targets:['music.cleanBpm'] },
+  { id:'music-beste', disc:'music', level:5, kind:'core', minutes:30,
+    label:'Sekiz ölçü beste',
+    task:'Sekiz ölçülük bir fikir yaz ve kaydet; bitmemiş olması sorun değil.',
+    targets:['music.pieces'] },
+
+  /* ------------------------------------------------------------- diksiyon */
+  { id:'dic-nefes', disc:'diction', level:1, kind:'warmup', minutes:5,
+    label:'Diyafram nefesi',
+    task:'Dört saniye al, yedi tut, sekiz ver; beş tur.',
+    targets:['diction.minutes30'] },
+  { id:'dic-tekerleme', disc:'diction', level:1, kind:'core', minutes:10,
+    label:'Tekerleme (kolay)',
+    task:'Bir tekerlemeyi yavaş ve temiz söyle; hata sayısını kendin işaretle.',
+    targets:['diction.recordings', 'diction.errorRate'] },
+  { id:'dic-kayit', disc:'diction', level:1, kind:'core', minutes:10,
+    label:'Kendi kaydın',
+    task:'Bir paragraf oku, kaydet, dinle; duyduğun üç kusuru yaz.',
+    targets:['diction.recordings'] },
+  { id:'dic-unsuz', disc:'diction', level:2, kind:'core', minutes:15,
+    label:'Ünsüz netliği',
+    task:'Zor ünsüz çiftlerini abartarak söyle, sonra normal tempoda tekrarla.',
+    targets:['diction.errorRate'] },
+  { id:'dic-hiz', disc:'diction', level:3, kind:'core', minutes:15,
+    label:'WPM ölçümü',
+    task:'İki dakika konuş, kelime say, hızını kaydet; bant dışıysa yavaşla.',
+    targets:['diction.wpm'] },
+  { id:'dic-vurgu', disc:'diction', level:3, kind:'core', minutes:15,
+    label:'Vurgu ve duraklama',
+    task:'Aynı cümleyi vurguyu değiştirerek beş kez söyle; anlam nasıl kayıyor?',
+    targets:['diction.recordings'] },
+  { id:'dic-hazirsiz', disc:'diction', level:3, kind:'stretch', minutes:10,
+    label:'Hazırlıksız iki dakika',
+    task:'Rastgele bir konuda hazırlıksız iki dakika konuş ve kaydet.',
+    targets:['diction.wpm', 'diction.recordings'] },
+  { id:'dic-retorik', disc:'diction', level:4, kind:'core', minutes:20,
+    label:'Retorik figür',
+    task:'Bir fikri üç retorik figürle anlat: tekrar, karşıtlık, üçleme.',
+    targets:['diction.minutes30'] },
+  { id:'dic-sunum', disc:'diction', level:4, kind:'stretch', minutes:25,
+    label:'On dakikalık sunum',
+    task:'Notsuz on dakika konuş, kaydet, izle; dolgu sesleri say.',
+    targets:['diction.errorRate', 'diction.recordings'] },
+  { id:'dic-soru', disc:'diction', level:5, kind:'core', minutes:20,
+    label:'Soru-cevap yönetimi',
+    task:'Zor bir soruya üç farklı cevap kur: kısa, gerekçeli, karşı soruyla.',
+    targets:['diction.minutes30'] },
+
+  /* ---------------------------------------------------------------- okuma */
+  { id:'read-20', disc:'reading', level:1, kind:'warmup', minutes:20,
+    label:'Yirmi dakika',
+    task:'Telefon başka odada; yirmi dakika kesintisiz oku.',
+    targets:['reading.minutes30'] },
+  { id:'read-kaynak', disc:'reading', level:1, kind:'core', minutes:5,
+    label:'Kaynağı kaydet',
+    task:'Okumaya başladığın kitabı kaynak olarak kaydet; yazarını doğru yaz.',
+    targets:['reading.books', 'reading.authors'] },
+  { id:'read-atomik', disc:'reading', level:2, kind:'core', minutes:15,
+    label:'Atomik not',
+    task:'Okuduğundan beş not çıkar; her not TEK fikir, kendi cümlenle.',
+    targets:['reading.notes'] },
+  { id:'read-bag', disc:'reading', level:3, kind:'core', minutes:15,
+    label:'Bağ kur',
+    task:'İki notu gerekçesiyle bağla; gerekçeyi uydurma, bulamıyorsan bağlama.',
+    targets:['reading.linkedRatio'] },
+  { id:'read-bagsiz', disc:'reading', level:3, kind:'core', minutes:10,
+    label:'Bağsız not avı',
+    task:'Hiçbir yere bağlı olmayan üç notu aç; birini bağla ya da sil.',
+    targets:['reading.linkedRatio'] },
+  { id:'read-karsit', disc:'reading', level:3, kind:'stretch', minutes:20,
+    label:'Çelişen iki yazar',
+    task:'Aynı konuda ters şey söyleyen iki yazarı yan yana koy.',
+    targets:['reading.authors', 'reading.syntopic'] },
+  { id:'read-sentopik', disc:'reading', level:4, kind:'core', minutes:30,
+    label:'Sentopik tur',
+    task:'Tek bir soruyu seç; üç kitapta o sorunun geçtiği yerleri oku.',
+    targets:['reading.syntopic'] },
+  { id:'read-matris', disc:'reading', level:4, kind:'core', minutes:20,
+    label:'Kavram matrisi',
+    task:'Bir kavramın etrafındaki bütün notları aç; eksik bağı tamamla.',
+    targets:['reading.linkedRatio', 'reading.syntopic'] },
+  { id:'read-kanon', disc:'reading', level:5, kind:'stretch', minutes:30,
+    label:'Kendi kanonun',
+    task:'Bir konuda okunacak beş kitabı sırala ve sıranın gerekçesini yaz.',
+    targets:['reading.authors'] },
+
+  /* ----------------------------------------------------------------- yazı */
+  { id:'write-200', disc:'writing', level:1, kind:'warmup', minutes:15,
+    label:'İki yüz kelime',
+    task:'Düzeltmeden iki yüz kelime yaz; geri dönüp okuma.',
+    targets:['writing.words30', 'writing.drafts'] },
+  { id:'write-gunluk', disc:'writing', level:1, kind:'core', minutes:10,
+    label:'Günlük',
+    task:'Bugün olan bir şeyi anlat; yorum değil ayrıntı yaz.',
+    targets:['writing.words30'] },
+  { id:'write-revizyon', disc:'writing', level:2, kind:'core', minutes:20,
+    label:'İkinci taslak',
+    task:'Eski bir taslağı aç ve yeniden yaz; revizyon sayacını artır.',
+    targets:['writing.revisionRatio'] },
+  { id:'write-yarim', disc:'writing', level:2, kind:'core', minutes:20,
+    label:'Yarıya indir',
+    task:'Bir metni anlamını kaybetmeden yarı uzunluğa indir.',
+    targets:['writing.revisionRatio', 'writing.readability'] },
+  { id:'write-yapi', disc:'writing', level:3, kind:'core', minutes:25,
+    label:'Yapı iskeleti',
+    task:'Yazmadan önce üç başlık çıkar; her başlık bir iş yapsın.',
+    targets:['writing.drafts'] },
+  { id:'write-okunabilir', disc:'writing', level:3, kind:'core', minutes:15,
+    label:'Okunabilirlik geçişi',
+    task:'Uzun cümleleri böl, tekrarları çıkar; ölçümü tekrar al.',
+    targets:['writing.readability'] },
+  { id:'write-uslup', disc:'writing', level:4, kind:'stretch', minutes:25,
+    label:'Üç üslup',
+    task:'Aynı fikri üç ayrı üslupta yaz: kuru, anlatısal, polemik.',
+    targets:['writing.words30'] },
+  { id:'write-ritim', disc:'writing', level:4, kind:'core', minutes:20,
+    label:'Ritim',
+    task:'Bir paragrafta cümle uzunluklarını bilerek değiştir; sesli oku.',
+    targets:['writing.readability'] },
+  { id:'write-bolum', disc:'writing', level:5, kind:'core', minutes:40,
+    label:'Bölüm',
+    task:'Uzun bir metnin tek bölümünü baştan sona bitir.',
+    targets:['writing.drafts', 'writing.words30'] },
+
+  /* ---------------------------------------------------------------- tarih */
+  { id:'hist-serit', disc:'history', level:1, kind:'warmup', minutes:10,
+    label:'Boş şerit',
+    task:'On olayı tarihsiz karıştır, sıraya diz; yanlışları not et.',
+    targets:['history.events', 'history.retention'] },
+  { id:'hist-yuzyil', disc:'history', level:1, kind:'core', minutes:10,
+    label:'Yüzyıl eşlemesi',
+    task:'Beş olayın yüzyılını ve dönemini söyle; MÖ/MS ayrımını atlama.',
+    targets:['history.events', 'history.eras'] },
+  { id:'hist-olay', disc:'history', level:1, kind:'core', minutes:15,
+    label:'Beş olay ekle',
+    task:'Kronolojiye beş olay ekle; her birine «neden dönüm noktası» yaz.',
+    targets:['history.events', 'history.eras'] },
+  { id:'hist-esanli', disc:'history', level:2, kind:'core', minutes:15,
+    label:'Eşzamanlılık',
+    task:'Bir olay seç: aynı yüzyılda üç başka bölgede ne oluyordu?',
+    targets:['history.eras', 'history.events'] },
+  { id:'hist-zincir', disc:'history', level:2, kind:'core', minutes:20,
+    label:'Neden zinciri',
+    task:'Bir olaya iki yapısal koşul, bir konjonktür ve bir tetikleyici yaz.',
+    targets:['history.causal'] },
+  { id:'hist-kart', disc:'history', level:2, kind:'warmup', minutes:10,
+    label:'Tarih destesi',
+    task:'Vadesi gelen tarih kartlarını kapat; deste dil destesinden ayrıdır.',
+    targets:['history.retention'] },
+  { id:'hist-kaynak', disc:'history', level:3, kind:'core', minutes:25,
+    label:'Kaynak eleştirisi',
+    task:'Bir birincil kaynak al, sekiz soruyu sırayla cevapla.',
+    targets:['history.sources', 'history.primaryRatio'] },
+  { id:'hist-birincil', disc:'history', level:3, kind:'core', minutes:20,
+    label:'Birincil kaynağa in',
+    task:'Bildiğin bir olayın birincil kaynağını bul ve kaydet.',
+    targets:['history.primaryRatio', 'history.sources'] },
+  { id:'hist-okul', disc:'history', level:4, kind:'stretch', minutes:25,
+    label:'İki okul',
+    task:'Aynı olayı iki tarih yazımı okulunun sorusuyla yeniden yaz.',
+    targets:['history.schools'] },
+  { id:'hist-anakronizm', disc:'history', level:4, kind:'core', minutes:15,
+    label:'Anakronizm avı',
+    task:'Okuduğun metinde beş tuzaktan hangileri var? Her birini alıntıyla göster.',
+    targets:['history.schools'] },
+  { id:'hist-karsi', disc:'history', level:4, kind:'stretch', minutes:20,
+    label:'Karşı-olgusal',
+    task:'«Bu olmasaydı ne olurdu?» — yalnız kaynakla savunulabilen kadarını yaz.',
+    targets:['history.causal'] },
+  { id:'hist-mikro', disc:'history', level:5, kind:'core', minutes:30,
+    label:'Mikro vaka',
+    task:'Tek bir kişinin ya da köyün hikâyesinden dönemin yapısını çıkar.',
+    targets:['history.causal', 'history.sources'] },
+];
+
+ESP.DRILL_BY_ID = ESP.DRILLS.reduce(function(m, d){ m[d.id] = d; return m; }, {});
+
+ESP.DRILLS_OF = function(discId){
+  return ESP.DRILLS.filter(function(d){ return d.disc === discId; });
+};
+
+/* Reçetenin şekli. Koç bu sırayı bozmaz: ısınma, asıl iş, zorlanma.
+   Süreler profil tabanına göre ölçeklenir, kendi başlarına hedef değildir. */
+ESP.PRESCRIPTION_SHAPE = [
+  { kind:'warmup',  label:'Isınma',    max:1,
+    note:'Kısa ve kolay. Başlamanın önündeki sürtünmeyi kaldırmak için.' },
+  { kind:'core',    label:'Asıl iş',   max:2,
+    note:'Açık olan kapıyı ilerleten egzersiz. Seansın ağırlığı burada.' },
+  { kind:'stretch', label:'Zorlanma',  max:1,
+    note:'Bir üst kademeden. Başarısız olmak serbesttir; amaç sınırı görmek.' },
+];
 
 /* ==== js/data/hints.js ==== */
 /* Aciklama metinleri tek yerde.
@@ -10493,6 +10907,245 @@ ESP.Chrono = (function(){
   };
 })();
 
+/* ==== js/core/coach.js ==== */
+/* Koç motoru — reçete yazar, tavsiye vermez.
+
+   Aradaki fark şudur: tavsiye «dil çalışmalısın» der ve kullanıcıyı aynı
+   kararla baş başa bırakır. Reçete «on kartı bağlam cümlesiyle karta çevir,
+   on dakika» der ve karar vermeyi bitirir.
+
+   Reçetenin üç kuralı:
+
+   1. HER EGZERSİZ BİR KAPIYA BAĞLIDIR. Koç rastgele seçmez; merdivende
+      açık olan kapıya (ESP.Curriculum.nextGate) bakar ve o kapıyı
+      ilerleten egzersizi verir. Hiçbir kapıyı ilerletmeyen çalışma, iyi
+      hissettirir ve hiçbir yere götürmez.
+
+   2. SÜRE UYDURULMAZ. Reçetenin toplamı, profildeki günlük tabandan
+      taşmaz. Taşan bir reçete okunmaz; okunmayan reçete yoktur.
+
+   3. KADEME ATLATMAZ. Isınma ve asıl iş kullanıcının bulunduğu kademeden,
+      zorlanma egzersizi yalnızca BİR üst kademeden gelir. İki üst kademe
+      bir egzersiz değil bir hayal kırıklığıdır.
+
+   Koç bir ajan DEĞİLDİR: model çağırmaz, cümle üretmez. Mnemosyne masası
+   bu motorun çıktısını okur — tersi değil. */
+
+window.ESP = window.ESP || {};
+
+ESP.Coach = (function(){
+  const U = ESP.U, S = ESP.S;
+
+  const SHAPE = function(){ return ESP.PRESCRIPTION_SHAPE || []; };
+
+  function dailyBase(){
+    const n = (S.profile && S.profile.dailyMinutes) || 60;
+    return (typeof n === 'number' && isFinite(n) && n > 0) ? n : 60;
+  }
+
+  /* SURE ve DUZEN kapilari her egzersizle ilerler ve bunu tek tek etiketle
+     yazmak yanlis olurdu: "30 gunde 600 dakika" kapisini ilerleten sey
+     belirli bir egzersiz degil, o disiplinde gecirilen HERHANGI bir
+     dakikadir. Katalogda her satira 'lang.minutes30' yazmak, hedef alanini
+     anlamsizlastirirdi. */
+  const SURE_KAPILARI = /\.(minutes30|days14|streakDays)$/;
+
+  /* Bir egzersizin bugunku kapiyi ilerletip ilerletmedigi. */
+  function hits(drill, metric){
+    if(!metric) return false;
+    if(SURE_KAPILARI.test(metric)){
+      return metric.indexOf(drill.disc + '.') === 0;
+    }
+    return (drill.targets || []).indexOf(metric) >= 0;
+  }
+
+  /* Gunun icinde kararli ama gunden gune degisen secim. Rastgele secim iki
+     sorun uretirdi: ayni ekran iki kez cizildiginde recete degisirdi ve
+     kullanici "yenile"ye basip hosuna gideni secerdi. Gunun tarihi tohumdur. */
+  function rota(list, seedStr){
+    if(!list.length) return null;
+    let h = 0;
+    const s = String(seedStr || '');
+    for(let i = 0; i < s.length; i++){ h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+    return list[Math.abs(h) % list.length];
+  }
+
+  /* --------------------------------------------------------------- reçete */
+
+  function prescribe(discId, opts){
+    const o = opts || {};
+    const bugun = o.today || U.todayISO();
+    const d = ESP.DISCIPLINE_BY_ID[discId];
+    if(!d) return null;
+
+    const lv = ESP.Curriculum.levelOf(discId);
+    const kapi = ESP.Curriculum.nextGate(discId);
+    const metric = kapi ? kapi.gate.gate.metric : null;
+    /* Kademe 0 da bir kademedir: oradaki kullanici birinci kademenin
+       egzersizlerini yapar. Hicbir egzersiz vermemek, "once bir seviye
+       kazan" demek olurdu ki bu bir kisir dongudur. */
+    const rank = Math.max(1, lv ? lv.rank : 1);
+    const havuz = ESP.DRILLS_OF(discId);
+
+    const butce = o.minutes || dailyBase();
+    const secilen = [];
+    let toplam = 0;
+
+    SHAPE().forEach(function(bolum){
+      const uygun = havuz.filter(function(x){
+        if(x.kind !== bolum.kind) return false;
+        if(bolum.kind === 'stretch') return x.level === rank + 1;
+        return x.level <= rank;
+      });
+      if(!uygun.length) return;
+
+      /* Asil iste once kapiyi ilerletenler gelir; hicbiri yoksa kademedeki
+         en yuksek egzersiz. */
+      const hedefli = uygun.filter(function(x){ return hits(x, metric); });
+      const sira = (hedefli.length ? hedefli : uygun).slice()
+        .sort(function(a, b){ return b.level - a.level; });
+
+      const kac = Math.min(bolum.max, sira.length);
+      for(let i = 0; i < kac; i++){
+        const aday = i === 0 ? (rota(sira.slice(0, Math.min(3, sira.length)), bugun + discId + bolum.kind) || sira[0])
+          : sira.filter(function(x){ return !secilen.some(function(y){ return y.drill.id === x.id; }); })[0];
+        if(!aday) break;
+        if(secilen.some(function(y){ return y.drill.id === aday.id; })) continue;
+        if(toplam + aday.minutes > butce && secilen.length) break;
+        secilen.push({ drill:aday, kind:bolum.kind, label:bolum.label, note:bolum.note });
+        toplam += aday.minutes;
+      }
+    });
+
+    return {
+      disc:discId, label:d.label, route:d.route, agent:d.agent,
+      rank:rank, level:lv ? lv.level : ESP.LEVEL_BY_RANK[0],
+      cert:lv ? lv.cert : 'missing',
+      gate:kapi, metric:metric,
+      items:secilen, minutes:toplam, budget:butce,
+      why:kapi
+        ? (kapi.action === 'measure'
+            ? 'Sıradaki kapı ölçülemiyor: «' + kapi.gate.label + '». '
+              + 'Bu reçete o ölçümü üretir.'
+            : 'Sıradaki kapı: «' + kapi.gate.label + '». Reçete oraya çalışıyor.')
+        : 'Bu merdivenin bütün kapıları geçilmiş görünüyor; reçete korumaya çalışıyor.',
+      done:doneToday(discId, bugun),
+    };
+  }
+
+  /* Bugun bu disiplinde hangi egzersizler islendi.
+
+     Kaynak gun kayitlaridir: bir egzersiz "yapildi" sayilmasi icin bir
+     OTURUM olarak girilmis olmali. Ayri bir "tamamlandi" bayragi tutmak,
+     yapilmamis isi yapilmis gostermenin en kolay yolu olurdu. */
+  function doneToday(discId, todayISO){
+    const bugun = todayISO || U.todayISO();
+    return ESP.Model.sessionsOf(bugun)
+      .filter(function(s){ return s.disc === discId && s.ref; })
+      .map(function(s){ return s.ref; });
+  }
+
+  /* Bir egzersizin gecmisi: kac kez, en son ne zaman. */
+  function historyOf(drillId, days){
+    const n = days || 90;
+    const gunler = U.lastDays(n);
+    let kez = 0, son = null, dakika = 0;
+    gunler.forEach(function(g){
+      ESP.Model.sessionsOf(g).forEach(function(s){
+        if(s.ref !== drillId) return;
+        kez++;
+        son = g;
+        if(s.minutes != null) dakika += s.minutes;
+      });
+    });
+    return { drillId:drillId, times:kez, lastDate:son, minutes:dakika,
+      cert:kez ? 'measured' : 'missing', windowDays:n };
+  }
+
+  /* Bir egzersizi yapildi olarak isler. Sure verilmezse egzersizin kendi
+     suresi kullanilir ama etiket yine 'measured' olur — cunku kullanici
+     "yaptim" demistir; tahmin edilen sey sure degil, suresinin standarda
+     uydugudur. Kullanici degistirebilir. */
+  async function logDrill(drillId, opts){
+    const o = opts || {};
+    const d = ESP.DRILL_BY_ID[drillId];
+    if(!d) return { ok:false, error:'Bilinmeyen egzersiz.' };
+    const gun = o.date || U.todayISO();
+    const dakika = o.minutes != null ? o.minutes : d.minutes;
+    const s = await ESP.Model.addSession(gun, {
+      disc:d.disc, minutes:dakika, ref:d.id,
+      note:o.note || d.label,
+    });
+    ESP.Memo.bitir();
+    return { ok:true, session:s };
+  }
+
+  /* ----------------------------------------------------------- günün planı
+
+     Hangi disiplinlerin bugun calisilacagi PLANLAYICIDAN gelir; koç yalnizca
+     o disiplinlere recete yazar. Iki motorun isi ayridir: planlayici SIRAYI
+     bilir, koç ICERIGI. */
+  function plan(todayISO){
+    const bugun = todayISO || U.todayISO();
+    const next = ESP.Planner.nextAction(bugun);
+    const rota_ = ESP.Planner.weeklyRoute(bugun);
+    const taban = dailyBase();
+
+    /* Ilk disiplin siradaki isten, ikincisi haftalik rotanin en ustunden.
+       Ucuncu bir disiplin EKLENMEZ: gunde uc alan acmak, hicbirini
+       kapatmamanin en kibar yoludur. */
+    const idler = [];
+    if(next && next.disc) idler.push(next.disc);
+    (rota_.rows || []).forEach(function(r){
+      if(idler.length < 2 && idler.indexOf(r.disc.id) < 0) idler.push(r.disc.id);
+    });
+
+    /* Butce boluşur ama her disipline en az on dakika kalir; on dakikanin
+       altinda bir recete yazilamaz. */
+    const pay = Math.max(10, Math.floor(taban / Math.max(1, idler.length)));
+    const receteler = idler.map(function(id){
+      return prescribe(id, { minutes:pay, today:bugun });
+    }).filter(Boolean);
+
+    return {
+      date:bugun,
+      budget:taban,
+      minutes:receteler.reduce(function(a, r){ return a + r.minutes; }, 0),
+      prescriptions:receteler,
+      next:next,
+      minimum:ESP.MINIMUM_DAY,
+    };
+  }
+
+  /* Asgari gun: kotu gunun alt siniri. Recete degil SIGINAKTIR — reçeteyi
+     yapamayan kisi burayi yapar ve zincir kopmaz. */
+  function minimumDay(todayISO){
+    const bugun = todayISO || U.todayISO();
+    const due = ESP.SRS.dueCards(bugun);
+    return {
+      cards:due.length,
+      read:ESP.MINIMUM_DAY.read,
+      practice:ESP.MINIMUM_DAY.practice,
+      note:ESP.MINIMUM_DAY.note,
+      metToday:ESP.Model.dayHasEntry(ESP.Model.dayOf(bugun)),
+    };
+  }
+
+  /* Koçun tek cümlesi — model kapaliyken de konusan dil. */
+  function sentence(discId){
+    const r = prescribe(discId);
+    if(!r) return '';
+    if(!r.items.length){
+      return r.label + ' için bu kademede tanımlı egzersiz yok.';
+    }
+    return r.label + ' · ' + r.level.label + ': ' + r.items.length + ' egzersiz, '
+      + r.minutes + ' dakika. ' + r.why;
+  }
+
+  return { prescribe, plan, logDrill, doneToday, historyOf, minimumDay, sentence,
+    dailyBase, advances:hits };
+})();
+
 /* ==== js/core/planner.js ==== */
 /* Planlayici — siradaki tek is, haftalik rota ve capraz bulgular.
 
@@ -13257,7 +13910,56 @@ ESP.Parts = (function(){
     return K.Empty({ text, action });
   }
 
-  return { cert, measure, avatar, discChip, radar, empty };
+  /* ------------------------------------------------------------ koç kutusu
+
+     Her disiplin ekraninda ayni yerde, ayni bicimde durur. Tek bir yerde
+     tanimli olmasi kasitli: recete bicimi ekrandan ekrana degisirse
+     kullanici her bolumde yeniden okumayi ogrenir.
+
+     Kutu bir TAVSIYE kutusu degildir — icinde yapilacak isler ve onlari
+     isleyen dugmeler vardir. Okunup gecilen bir kutu yazmanin anlami yok. */
+  function coach(discId){
+    const r = ESP.Coach.prescribe(discId);
+    if(!r) return raw('');
+    const lv = r.level;
+    const yapilan = r.done || [];
+
+    return K.Entry({
+      label:'KOÇ', hint:'coach',
+      meta:r.cert === 'missing' ? 'kademe yok' : lv.label,
+      note:r.why,
+      action:K.Button({ label:'Merdiven', size:'sm', act:'go',
+        data:{ 'data-route':'ladder' } }),
+      wide:true,
+      body:html`
+        <div class="coachhead">
+          ${K.Badge({ label:lv.label + ' · ' + lv.short,
+            tone:r.cert === 'missing' ? 'muted' : 'info', icon:false })}
+          ${cert(r.cert)}
+          <span class="tiny dim">${r.minutes} dk / ${r.budget} dk taban</span>
+        </div>
+        ${r.items.length
+          ? html`<ul class="rx">${map(r.items, it => {
+              const bitti = yapilan.indexOf(it.drill.id) >= 0;
+              return html`<li class="${cls('rx__row', 'rx__row--' + it.kind,
+                  bitti && 'is-done')}">
+                <span class="rx__kind">${it.label}</span>
+                <span class="rx__body">
+                  <b>${it.drill.label}</b>
+                  <span class="rx__task">${it.drill.task}</span>
+                </span>
+                <span class="rx__min num">${it.drill.minutes} dk</span>
+                ${bitti
+                  ? K.Badge({ label:'işlendi', tone:'ok' })
+                  : K.Button({ label:'İşle', size:'sm', act:'log-drill',
+                      data:{ 'data-id':it.drill.id } })}
+              </li>`;
+            })}</ul>`
+          : K.Empty({ text:'Bu kademede tanımlı egzersiz yok.' })}`,
+    });
+  }
+
+  return { cert, measure, avatar, discChip, radar, empty, coach };
 })();
 
 /* ==== js/core/quota.js ==== */
@@ -15536,7 +16238,7 @@ ESP.Screens = ESP.Screens || {};
 
 ESP.Screens.today = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
-  const { html, raw, when, map } = ESP.h;
+  const { html, raw, when, map, cls } = ESP.h;
   const K = ESP.C;
 
   function gun(){ return S.ui.dayDate || U.todayISO(); }
@@ -15812,13 +16514,71 @@ ESP.Screens.today = (function(){
     ];
   }
 
+  /* ---------------------------------------------------------- günün planı
+
+     Sıradaki tek iş SIRAYI söyler, plan İÇERİĞİ. İkisi ayrı satırdır ve
+     ayrı kalmalıdır: «bugün dil çalış» ile «on kartı bağlam cümlesiyle
+     karta çevir» aynı cümle değildir.
+
+     Plan en fazla İKİ disiplin taşır. Üçüncüyü eklemek, günde üç alan
+     açmanın kibar hâlidir — üçü de kapanmaz. */
+  function planRow(){
+    const p = ESP.Coach.plan(gun());
+    const asgari = ESP.Coach.minimumDay(gun());
+
+    return K.Entry({
+      label:'GÜNÜN REÇETESİ', hint:'coach',
+      meta:p.minutes + ' dk',
+      note:'Reçeteyi koç yazar, sırayı planlayıcı verir. Toplam, profildeki '
+         + 'günlük tabandan (' + p.budget + ' dk) taşmaz.',
+      action:K.Button({ label:'Merdiven', size:'sm', act:'go',
+        data:{ 'data-route':'ladder' } }),
+      wide:true,
+      body:html`
+        ${p.prescriptions.length
+          ? map(p.prescriptions, r => html`
+              <div class="rxblock">
+                <div class="rxblock__head">
+                  <b>${r.label}</b>
+                  ${K.Badge({ label:r.level.label, tone:'muted', icon:false })}
+                  ${K.Button({ label:'Masaya git', size:'sm', act:'go',
+                    data:{ 'data-route':r.route } })}
+                </div>
+                <p class="small muted">${r.why}</p>
+                <ul class="rx">${map(r.items, it => {
+                  const bitti = (r.done || []).indexOf(it.drill.id) >= 0;
+                  return html`<li class="${cls('rx__row', 'rx__row--' + it.kind,
+                      bitti && 'is-done')}">
+                    <span class="rx__kind">${it.label}</span>
+                    <span class="rx__body">
+                      <b>${it.drill.label}</b>
+                      <span class="rx__task">${it.drill.task}</span>
+                    </span>
+                    <span class="rx__min num">${it.drill.minutes} dk</span>
+                    ${bitti
+                      ? K.Badge({ label:'işlendi', tone:'ok' })
+                      : K.Button({ label:'İşle', size:'sm', act:'log-drill',
+                          data:{ 'data-id':it.drill.id } })}
+                  </li>`;
+                })}</ul>
+              </div>`)
+          : K.Empty({ text:'Reçete yazılamadı: disiplin listesi boş.' })}
+
+        ${K.Notice({ tone:asgari.metToday ? 'info' : 'warn',
+          body:'Asgari gün — ' + (asgari.cards ? asgari.cards + ' vadeli kart, '
+            : 'vadesi gelen kart yok, ') + asgari.read.toLocaleLowerCase('tr-TR')
+            + ', ' + asgari.practice.toLocaleLowerCase('tr-TR') + '. '
+            + asgari.note })}`,
+    });
+  }
+
   /* ------------------------------------------------------------------ cizim */
 
   function render(){
     const tab = S.ui.dayTab || 'giris';
     const rows = tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [nextCard(), entryForm(), quickForm(), sessionList()];
+      : [nextCard(), planRow(), entryForm(), quickForm(), sessionList()];
 
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({
@@ -16250,7 +17010,7 @@ ESP.Screens.lang = (function(){
           aria:'Çalışılan dil',
           options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('lang')].concat(rows)))}`);
   }
 
   const handle = {
@@ -16621,7 +17381,7 @@ ESP.Screens.symposium = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'acik' ? { count:ESP.Intellect.openArguments().length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('philo')].concat(rows)))}`);
   }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
@@ -17298,7 +18058,7 @@ ESP.Screens.history = (function(){
         actions:when(evs().length, () => K.Button({ label:'Tohumu yükle', size:'sm',
           act:'seed' })),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('history')].concat(rows)))}`);
   }
 
   /* ----------------------------------------------------------------- eylem */
@@ -18169,7 +18929,13 @@ ESP.Screens.studio = (function(){
       ${K.Span(12, K.Toolbar({
         tabs:K.Subtabs({ value:tab, act:'studio-tab', aria:'Stüdyo sekmeleri', items:TABS }),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, K.Ledger(() => {
+        /* Studyoda iki disiplin var: sekme hangisindeyse koç o masanin
+           recetesini yazar. Ikisini birden gostermek, otuz dakikalik bir
+           gunu altmis dakikalik bir recete ile karsilamak olurdu. */
+        const disc = S.ui.studioTab === 'diksiyon' ? 'diction' : 'music';
+        return (S.ui.studioTab === 'ilerleme' ? [] : [ESP.Parts.coach(disc)]).concat(rows);
+      }))}`);
   }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
@@ -18600,7 +19366,7 @@ ESP.Screens.library = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'notlar' ? { count:(S.notes || []).length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('reading')].concat(rows)))}`);
   }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
@@ -18923,7 +19689,7 @@ ESP.Screens.writing = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'taslaklar' ? { count:(S.drafts || []).length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('writing')].concat(rows)))}`);
   }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value : ''; }
@@ -21215,6 +21981,16 @@ ESP.App = (function(){
   /* ---------------------------------------------------------- küresel eylemler */
   const globalHandle = {
     async go(el){ go(el.dataset.route); },
+
+    /* Egzersiz isleme ORTAK bir eylemdir: koç kutusu yedi ekranda birden
+       duruyor ve her ekranda ayri bir islem yazmak, yedi kez bozulabilecek
+       bir islem demektir. */
+    async 'log-drill'(el){
+      const res = await ESP.Coach.logDrill(el.dataset.id);
+      if(!res.ok){ UI.toast(res.error); return; }
+      UI.toast('İşlendi — gün kaydına yazıldı');
+      render();
+    },
     async 'toggle-menu'(){ S.sidebarOpen = !S.sidebarOpen; render(); },
     async hint(el){
       if(UI.isHintOpen() && el.dataset.hint === UI._lastHint){ UI.closeHint(); UI._lastHint = null; return; }

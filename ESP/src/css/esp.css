@@ -501,3 +501,47 @@
 }
 .step--done .lrow__label{ opacity:.7; }
 .step--ahead .step__cols{ opacity:.72; }
+
+/* ============================================================ koç reçetesi
+
+   Reçete satırı bir yapılacaklar listesi DEĞİLDİR ve onay kutusu taşımaz:
+   kutu işaretlemek işi yapmış gibi hissettirir. Buradaki düğme günün
+   kaydına bir OTURUM yazar — yani ölçüme dönüşür.
+
+   Üç bölüm (ısınma, asıl iş, zorlanma) renkle değil KONUMLA ayrılır: sol
+   kenardaki etiket sütunu. Renk burada durum taşırdı ve durum renkleriyle
+   karışırdı. */
+.coachhead{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+  margin-bottom:var(--sp-3);
+}
+.rx{ list-style:none; margin:0; padding:0; }
+.rx__row{
+  display:flex; flex-wrap:wrap; gap:var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.rx__row:last-child{ border-bottom:0; }
+.rx__kind{
+  flex:0 0 8ch; font-size:var(--fs-xs); text-transform:uppercase;
+  letter-spacing:.05em; color:var(--text-3);
+}
+.rx__body{ flex:1 1 20ch; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.rx__task{ font-size:var(--fs-sm); color:var(--text-2); }
+.rx__min{
+  flex:0 0 auto; font-size:var(--fs-sm); color:var(--text-3);
+  font-variant-numeric:tabular-nums;
+}
+.rx__row.is-done .rx__body b{ text-decoration:line-through; }
+.rx__row.is-done{ opacity:.72; }
+
+.rxblock{ padding:var(--sp-3) 0; border-bottom:1px solid var(--rule); }
+.rxblock:last-of-type{ border-bottom:0; }
+.rxblock__head{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+}
+.rxblock p{ margin:var(--sp-1) 0 var(--sp-2); }
+
+@media (max-width:520px){
+  .rx__kind{ flex:0 0 100%; }
+  .evrow__year{ flex:0 0 5ch; }
+}
