@@ -8,6 +8,15 @@ Tek kişinin gündelik hayatını yöneten üç bağımsız sistem.
 | [`SPI/`](SPI/) | **Sağlık Performans İzleyicisi** | Sağlık, beslenme, hareket, sağlık ekonomisi | [`SPI/src/MIMARI.md`](SPI/src/MIMARI.md) |
 | [`ESP/`](ESP/) | **Entelektüel Seviye Planlayıcı** | Dil, felsefe, müzik, diksiyon, okuma, yazı | [`ESP/src/MIMARI.md`](ESP/src/MIMARI.md) |
 
+Yanlarında dördüncü, **isteğe bağlı** bir katman durur:
+
+| Klasör | Katman | Durum | Belge |
+|---|---|---|---|
+| [`HKM/`](HKM/) | **Hayat Kontrol Merkezi** | iskelet (Faz 1–2, 36 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
+
+HKM üçünün **üstünde değil yanındadır**: üç sistem onun var olduğunu bilmez ve
+o kapalıyken hiçbiri bozulmaz.
+
 ## Üçü neyi paylaşır
 
 - **Doktrin.** Kural motoru otoritedir: sayıyı hesap üretir, dil modeli yalnızca
@@ -55,6 +64,16 @@ node tools/ledgercheck.js    # defter düzenini denetler (yalnız SPİ)
 
 Bir denetim geçtiğinde de **sayı gösterir**: hiçbir şey ölçmeyen bir betik de
 «geçti» yazar. ESP'nin son koşumu: 151 birim testi, 1848 kontrast ölçümü.
+
+HKM bir tarayıcı uygulaması değil bir arka plan servisidir; kendi komutları
+vardır (yalnızca Python standart kütüphanesi):
+
+```bash
+cd HKM
+cp config.example.json config.json    # local_token'ı değiştir
+python3 daemon.py                     # 127.0.0.1:4200
+python3 -m tests.run                  # 36 test
+```
 
 ## Sınırlar
 
