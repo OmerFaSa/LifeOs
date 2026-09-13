@@ -144,22 +144,35 @@ ESP.Parts = (function(){
 
      Kutu bir TAVSİYE kutusu değildir — içinde yapılacak işler ve onları
      işleyen düğmeler vardır. Okunup geçilen bir kutu yazmanın anlamı yok. */
+  /* Reçete satırı MİNİMAL: bir egzersiz tek satırdır.
+
+     İlk sürüm her egzersizi üç satırda çiziyordu (bölüm etiketi, ad, tam
+     görev metni) ve iki disiplinlik bir reçete ekranın yarısını yiyordu.
+     Bugün ekranında bu, asıl işin — oturum girmenin — altına itilmesi
+     demekti.
+
+     Görev metni kaybolmadı, KATLANDI: ada dokununca açılır. Varsayılan
+     kapalı, çünkü reçeteyi her gün okuyan biri üçüncü günden sonra görev
+     metnini değil adı arar. */
   function rxList(r){
     const yapilan = r.done || [];
     if(!r.items.length) return K.Empty({ text:'Bu kademede tanımlı egzersiz yok.' });
+    const acik = ESP.S.ui.rxOpen;
     return html`<ul class="rx">${map(r.items, it => {
       const bitti = yapilan.indexOf(it.drill.id) >= 0;
+      const on = acik === it.drill.id;
       return html`<li class="${cls('rx__row', 'rx__row--' + it.kind, bitti && 'is-done')}">
-        <span class="rx__kind">${it.label}</span>
-        <span class="rx__body">
+        <button class="rx__name" data-act="rx-open" data-id="${it.drill.id}"
+          aria-expanded="${on ? 'true' : 'false'}">
+          <span class="rx__kind">${it.label}</span>
           <b>${it.drill.label}</b>
-          <span class="rx__task">${it.drill.task}</span>
-        </span>
+        </button>
         <span class="rx__min num">${it.drill.minutes} dk</span>
         ${bitti
           ? K.Badge({ label:'işlendi', tone:'ok' })
           : K.Button({ label:'İşle', size:'sm', act:'log-drill',
               data:{ 'data-id':it.drill.id } })}
+        ${when(on, () => html`<span class="rx__task">${it.drill.task}</span>`)}
       </li>`;
     })}</ul>`;
   }
@@ -169,6 +182,9 @@ ESP.Parts = (function(){
     if(!r) return raw('');
     const lv = r.level;
 
+    /* Kutunun kendisi de sadelesti: kademe rozeti, kesinlik ve sure tek
+       satirda; gerekce (`why`) kunye sutununda zaten duruyor, govdede
+       ikinci kez yazilmiyordu. */
     return K.Entry({
       label:'KOÇ', hint:'coach',
       meta:r.cert === 'missing' ? 'kademe yok' : lv.label,
@@ -178,8 +194,6 @@ ESP.Parts = (function(){
       wide:true,
       body:html`
         <div class="coachhead">
-          ${K.Badge({ label:lv.label + ' · ' + lv.short,
-            tone:r.cert === 'missing' ? 'muted' : 'info', icon:false })}
           ${cert(r.cert)}
           <span class="tiny dim">${U.fmtMin(r.minutes)} / ${U.fmtMin(r.budget)} taban</span>
         </div>
@@ -628,6 +642,6 @@ ESP.Parts = (function(){
 
   return { cert, measure, avatar, discChip, radar, empty, coach, desk,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, units, practice,
-    proposalList, weekPlan };
+    proposalList, weekPlan, rx:rxList };
 
 })();

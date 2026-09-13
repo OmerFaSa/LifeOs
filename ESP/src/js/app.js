@@ -122,6 +122,14 @@ ESP.App = (function(){
             <span class="masthead__wd">${gun}</span>
           </div>
 
+          ${when(ESP.Timer && ESP.Timer.active(), () => html`
+            <button class="topclock" data-act="go" data-route="today"
+              aria-label="Açık sayaç — Bugün ekranına git">
+              <span class="topclock__dot" aria-hidden="true"></span>
+              <span class="num" data-timer="1">${ESP.Timer.clock()}</span>
+              <span class="topclock__disc">${(ESP.DISCIPLINE_BY_ID[ESP.Timer.disc()]
+                || {}).short || ''}</span>
+            </button>`)}
           <div class="navtools">
             ${ESP.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
             ${ESP.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema ve palet',
@@ -169,7 +177,8 @@ ESP.App = (function(){
             <span class="brand__mark" aria-hidden="true">E</span>
             <div>
               <b>Entelektüel Seviye Planlayıcı</b>
-              <span>Dil · felsefe · müzik · diksiyon · okuma · yazı</span>
+              <span>${ESP.Mod.active().map(d => d.short.toLocaleLowerCase('tr-TR'))
+                .join(' · ')}</span>
             </div>
           </div>
           <div class="sitefoot__notes">
@@ -895,6 +904,13 @@ ESP.App = (function(){
       render();
     },
 
+    /* Egzersizin gorev metni katli durur: ada dokununca acilir. Tek bir
+       tanesi acik kalir — ikisi acikken liste yine uzuyordu. */
+    async 'rx-open'(el){
+      S.ui.rxOpen = S.ui.rxOpen === el.dataset.id ? null : el.dataset.id;
+      render();
+    },
+
     async 'log-drill'(el){
       const res = await ESP.Coach.logDrill(el.dataset.id);
       if(!res.ok){ UI.toast(res.error); return; }
@@ -1274,6 +1290,24 @@ ESP.App = (function(){
   window.__ESP_GLOBAL_ACTS__ = Object.keys(globalHandle);
   window.__ESP_GLOBAL_CHANGES__ = Object.keys(globalChange);
 
+  /* Sayaç çizimle güncellenmez, KENDİ TIK'ıyla güncellenir.
+
+     Her saniye bütün ekranı yeniden çizmek saçma olurdu: ekranda değişen
+     tek şey bir metin. Bu yüzden yalnızca `[data-timer]` düğümlerinin metni
+     tazelenir. Süre yine duvar saatinden okunur; tik kaçsa bile sayı doğru
+     kalır (bkz. core/timer.js). */
+  let saatTik = null;
+  function startClock(){
+    if(saatTik) return;
+    saatTik = setInterval(() => {
+      if(!ESP.Timer || !ESP.Timer.active() || !ESP.Timer.running()) return;
+      const metin = ESP.Timer.clock();
+      document.querySelectorAll('[data-timer]').forEach(el => {
+        if(el.textContent !== metin) el.textContent = metin;
+      });
+    }, 1000);
+  }
+
   async function boot(){
     try{
       /* Arayüz Türkçe: CSS büyük harfe çevirirken "i" → "İ" olsun.
@@ -1293,6 +1327,7 @@ ESP.App = (function(){
       applySection(S.route);
       await render();
       installManifest();
+      startClock();
 
       /* Ofis açılışı bloklamaz: yüklenince yeniden çizilir ve günün
          brifingi bir kez üretilir. */

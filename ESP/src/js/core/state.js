@@ -48,6 +48,7 @@ ESP.S = {
   drafts:[],           // yazi taslaklari
   goals:[],            // zamana bagli hedefler
 
+  timer:null,          // acik pratik zamanlayicisi (core/timer.js)
   proposals:[],        // ajan teklifleri (onaylanan / reddedilen)
   weekPlan:null,       // onaylanmis haftalik plan
 
@@ -99,6 +100,7 @@ ESP.S = {
     practice:null,          // acik pratik oturumu
     practiceShown:false,
     practiceOrder:null,
+    rxOpen:null,            // acik egzersiz (gorev metni katli durur)
     unitOpen:null,
     histTab:'serit',        // serit | olaylar | kaynaklar | zincir | calisma
     eventOpen:null,
@@ -1267,6 +1269,8 @@ ESP.Model = (function(){
       .sort((a, b) => (a.year || 0) - (b.year || 0));
     S.sources = ((await ESP.Store.list('sources')) || []).map(normSource);
     S.chains = ((await ESP.Store.list('chains')) || []).map(normChain);
+
+    if(ESP.Timer) await ESP.Timer.load();
 
     S.storeHealth = ESP.Store.health();
     S.ready = true;

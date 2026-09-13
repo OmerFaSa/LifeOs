@@ -61,9 +61,11 @@ ESP.Screens.today = (function(){
         <div class="picks picks--disc">
           ${map(ESP.Mod.active(), x => K.PickCard({
             on:x.id === d, act:'pick-disc', data:{ 'data-disc':x.id },
-            title:x.short, note:x.unit,
+            label:x.short, meta:x.unit,
           }))}
         </div>
+
+        ${timerRow(d)}
 
         <div class="cols-3 mt-10">
           ${K.Field({ label:'Süre (dakika)',
@@ -289,6 +291,47 @@ ESP.Screens.today = (function(){
     ];
   }
 
+  /* --------------------------------------------------------- zamanlayıcı
+
+     Sistem baştan beri «süre ölçümdür» diyordu ama ölçecek bir şey
+     vermiyordu: kullanıcı saatine bakıp dakikayı elle yazıyordu. Elle
+     yazılan dakika da bir ölçümdür — ama başlarken saate bakmayı
+     hatırlamak ve bitirirken çıkarma yapmak gerekiyordu; ikisi de
+     unutulur, unutulan oturum hiç girilmez.
+
+     Sayaç DUVAR SAATİNDEN okur (bkz. core/timer.js): arka plan sekmesinde
+     de doğru ölçer, sayfa kapanıp açılsa da yerinde durur. */
+  function timerRow(secili){
+    const T = ESP.Timer;
+    const acik = T.active();
+    const calisiyor = T.running();
+    const td = T.disc();
+    const d = ESP.DISCIPLINE_BY_ID[td] || {};
+
+    if(!acik){
+      return html`<div class="timer">
+        ${K.Button({ label:'Sayacı başlat', act:'timer-start',
+          data:{ 'data-disc':secili } })}
+        <span class="tiny dim">${(ESP.DISCIPLINE_BY_ID[secili] || {}).label
+          || ''} için ölçmeye başla — süreyi sistem tutar.</span>
+      </div>`;
+    }
+
+    return html`<div class="${cls('timer', 'is-on', calisiyor && 'is-running')}">
+      <span class="timer__clock num" data-timer="1"
+        aria-label="Geçen süre">${T.clock()}</span>
+      <span class="timer__disc">${d.label || td}</span>
+      ${calisiyor
+        ? K.Button({ label:'Duraklat', size:'sm', act:'timer-pause' })
+        : K.Button({ label:'Sürdür', size:'sm', act:'timer-resume' })}
+      ${K.Button({ label:'Bitir ve kaydet', tone:'primary', size:'sm',
+        act:'timer-stop' })}
+      ${K.Button({ label:'Vazgeç', size:'sm', act:'timer-reset' })}
+      ${when(T.suspicious(), () => K.Badge({ label:T.SUPHE_SAAT
+        + ' saati geçti — unutulmuş olabilir', tone:'warn' }))}
+    </div>`;
+  }
+
   /* ---------------------------------------------------------- günün planı
 
      Sıradaki tek iş SIRAYI söyler, plan İÇERİĞİ. İkisi ayrı satırdır ve
@@ -304,8 +347,7 @@ ESP.Screens.today = (function(){
     return K.Entry({
       label:'GÜNÜN REÇETESİ', hint:'coach',
       meta:U.fmtMin(p.minutes),
-      note:'Reçeteyi koç yazar, sırayı planlayıcı verir. Toplam, profildeki '
-         + 'günlük tabandan (' + U.fmtMin(p.budget) + ') taşmaz.',
+      note:'Reçeteyi koç yazar, sırayı planlayıcı verir.',
       action:K.Button({ label:'Merdiven', size:'sm', act:'go',
         data:{ 'data-route':'ladder' } }),
       wide:true,
@@ -315,35 +357,22 @@ ESP.Screens.today = (function(){
               <div class="rxblock">
                 <div class="rxblock__head">
                   <b>${r.label}</b>
-                  ${K.Badge({ label:r.level.label, tone:'muted', icon:false })}
-                  ${K.Button({ label:'Masaya git', size:'sm', act:'go',
+                  <span class="tiny dim">${r.level.label}</span>
+                  <span class="tiny dim">${U.fmtMin(r.minutes)}</span>
+                  ${K.Button({ label:'Aç', size:'sm', act:'go',
                     data:{ 'data-route':r.route } })}
                 </div>
-                <p class="small muted">${r.why}</p>
-                <ul class="rx">${map(r.items, it => {
-                  const bitti = (r.done || []).indexOf(it.drill.id) >= 0;
-                  return html`<li class="${cls('rx__row', 'rx__row--' + it.kind,
-                      bitti && 'is-done')}">
-                    <span class="rx__kind">${it.label}</span>
-                    <span class="rx__body">
-                      <b>${it.drill.label}</b>
-                      <span class="rx__task">${it.drill.task}</span>
-                    </span>
-                    <span class="rx__min num">${it.drill.minutes} dk</span>
-                    ${bitti
-                      ? K.Badge({ label:'işlendi', tone:'ok' })
-                      : K.Button({ label:'İşle', size:'sm', act:'log-drill',
-                          data:{ 'data-id':it.drill.id } })}
-                  </li>`;
-                })}</ul>
+                ${ESP.Parts.rx(r)}
               </div>`)
           : K.Empty({ text:'Reçete yazılamadı: disiplin listesi boş.' })}
 
-        ${K.Notice({ tone:asgari.metToday ? 'info' : 'warn',
-          body:'Asgari gün — ' + (asgari.cards ? asgari.cards + ' vadeli kart, '
-            : 'vadesi gelen kart yok, ') + asgari.read.toLocaleLowerCase('tr-TR')
-            + ', ' + asgari.practice.toLocaleLowerCase('tr-TR') + '. '
-            + asgari.note })}`,
+        <p class="minline${asgari.metToday ? '' : ' is-open'}">
+          ${raw(ESP.UI.hint('minimum-day'))}
+          <b>Asgari gün</b>
+          <span>${asgari.cards ? asgari.cards + ' vadeli kart' : 'vadeli kart yok'}
+            · 10 dk okuma · 15 dk pratik</span>
+          ${when(asgari.metToday, () => K.Badge({ label:'bugün açıldı', tone:'ok' }))}
+        </p>`,
     });
   }
 
@@ -384,8 +413,12 @@ ESP.Screens.today = (function(){
       wide:true,
       body:html`<ul class="remlist">${map(bugun, r => {
         const d = ESP.DISCIPLINE_BY_ID[r.disc] || {};
+        /* Tam tarih yerine YAS: "2026-09-13" satirda iki satira boluyordu
+           ve zaten bugunku listede tarihin kendisi bilgi tasimiyor —
+           "bugun" ya da "3 gun gecikti" tasiyor. */
+        const yas = U.diffDays(r.due, gun());
         return html`<li class="${cls('remrow', r.due < gun() && 'is-due')}">
-          <span class="remrow__date num">${r.due}</span>
+          <span class="remrow__date">${yas ? yas + ' gün gecikti' : 'bugün'}</span>
           <span class="remrow__text">${r.text}</span>
           <span class="tiny dim">${d.label || r.disc}</span>
           ${K.Button({ label:'Yapıldı', size:'sm', act:'desk-done-rem',
@@ -420,6 +453,46 @@ ESP.Screens.today = (function(){
     async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; ESP.App.render(); },
 
     async 'pick-disc'(el){ S.ui.sessionDisc = el.dataset.disc; ESP.App.render(); },
+
+    async 'timer-start'(el){
+      const res = await ESP.Timer.start(el.dataset.disc || S.ui.sessionDisc || 'lang');
+      if(!res.ok){ ESP.UI.toast(res.error); return; }
+      if(res.handedOver){
+        /* Devreden sayaç KAYBOLMAZ: ne kadar olduğu söylenir, kullanıcı
+           isterse elle girer. Sessizce silmek, ölçülmüş bir süreyi yok
+           saymak olurdu. */
+        const o = ESP.DISCIPLINE_BY_ID[res.handedOver.disc] || {};
+        ESP.UI.toast((o.label || res.handedOver.disc) + ' sayacı kapandı — '
+          + res.handedOver.minutes + ' dk ölçülmüştü');
+      }
+      ESP.App.render();
+    },
+
+    async 'timer-pause'(){ await ESP.Timer.pause(); ESP.App.render(); },
+    async 'timer-resume'(){ await ESP.Timer.resume(); ESP.App.render(); },
+
+    async 'timer-stop'(){
+      const res = await ESP.Timer.stop();
+      if(res.suspicious){
+        ESP.UI.confirmSheet(res.minutes + ' dakika kaydedilsin mi?',
+          res.error, async () => {
+            const zorla = await ESP.Timer.stop({ force:true });
+            if(zorla.ok) ESP.UI.toast(zorla.minutes + ' dk kaydedildi');
+            ESP.App.render();
+          });
+        return;
+      }
+      if(!res.ok){ ESP.UI.toast(res.error); ESP.App.render(); return; }
+      ESP.UI.toast(res.minutes + ' dk kaydedildi');
+      ESP.App.render();
+    },
+
+    async 'timer-reset'(){
+      const dk = ESP.Timer.minutes();
+      ESP.UI.confirmSheet('Sayaç silinsin mi?',
+        dk + ' dakika ölçülmüştü ve kaydedilmeden silinecek.',
+        async () => { await ESP.Timer.reset(); ESP.App.render(); }, true);
+    },
 
     async 'add-session'(){
       const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };

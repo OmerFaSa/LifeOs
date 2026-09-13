@@ -35,7 +35,7 @@ ESP.Screens.meeting = (function(){
         <div class="picks">
           ${map(adaylar, a => K.PickCard({
             on:a.id === secili, act:'pick-agenda', data:{ 'data-id':a.id },
-            title:a.label, note:a.detail || a.lead,
+            label:a.label, meta:a.detail || a.lead,
           }))}
         </div>
         <div class="row mt-12">

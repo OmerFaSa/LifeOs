@@ -544,9 +544,25 @@
 }
 .rxblock p{ margin:var(--sp-1) 0 var(--sp-2); }
 
+/* Telefonda reçete satırı İKİ SATIRDIR: üstte iş, altta ölçü ve düğme.
+
+   Tek satıra sıkıştırıldığında ad dikeyde kırılıyordu — «On yeni kart» üç
+   satıra bölünüp okunmaz hâle geliyor ve yanındaki süre kayboluyordu.
+   Taşma yok, ama okunmuyor: dar ekranda satırı bölmek, satırı sıkıştırmaktan
+   iyidir. */
 @media (max-width:520px){
   .rx__kind{ flex:0 0 100%; }
   .evrow__year{ flex:0 0 5ch; }
+
+  .rx__row{
+    display:grid; grid-template-columns:1fr auto auto;
+    grid-template-areas:'ad ad ad' 'sure . dugme';
+    gap:var(--sp-2) var(--sp-3); align-items:center;
+  }
+  .rx__name{ grid-area:ad; flex-wrap:wrap; }
+  .rx__min{ grid-area:sure; }
+  .rx__row > .btn, .rx__row > .badge{ grid-area:dugme; justify-self:end; }
+  .rx__task{ grid-column:1 / -1; }
 }
 
 /* Dilbilgisi satırı: beyan ile ölçümü aynı satırda ama ayrı işaretle
@@ -752,4 +768,67 @@
 .asrow__body, .asrow__text, .noterow__text, .evrow__body,
 .rx__task, .prop__why, .unit__items span{
   overflow-wrap:anywhere;
+}
+
+/* Reçete satırı minimal hâlde: bir egzersiz TEK satır. Görev metni ada
+   dokununca açılır ve satırın altına tam genişlikte akar. */
+.rx__name{
+  flex:1 1 18ch; min-width:0; display:flex; align-items:baseline; gap:var(--sp-2);
+  background:none; border:0; padding:0; font:inherit; color:inherit;
+  text-align:left; cursor:pointer; min-height:24px;
+}
+.rx__name:hover b{ text-decoration:underline; }
+.rx__task{
+  flex:1 1 100%; font-size:var(--fs-sm); color:var(--text-2);
+  padding-top:var(--sp-1);
+}
+.rx__row{ padding:var(--sp-2) 0; }
+
+/* Asgari gün: bir paragraf değil bir satır. Açılmadığı gün hafifçe
+   vurgulanır — uyarı değil hatırlatma. */
+.minline{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--sp-2);
+  margin:var(--sp-3) 0 0; padding-top:var(--sp-3);
+  border-top:1px solid var(--rule); font-size:var(--fs-sm);
+}
+.minline span{ color:var(--text-2); }
+.minline.is-open b{ color:var(--text); }
+
+.remrow__date{ flex:0 0 auto; }
+
+/* ========================================================== zamanlayıcı
+
+   Sayaç bir SÜS değil bir ölçüm göstergesidir: yanıp sönmez, büyümez,
+   dikkat çekmez. Çalışırken tek fark, yanındaki noktanın dolu olması. */
+.timer{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2) var(--sp-3);
+  margin-top:var(--sp-3); padding-top:var(--sp-3);
+  border-top:1px solid var(--rule);
+}
+.timer__clock{
+  font-size:var(--fs-lg); font-variant-numeric:tabular-nums;
+  letter-spacing:.02em;
+}
+.timer__disc{ font-size:var(--fs-sm); color:var(--text-2); }
+.timer.is-on .timer__clock{ color:var(--text); }
+.timer:not(.is-running) .timer__clock{ opacity:.7; }
+
+/* Üst çubuktaki canlı sayaç: açık bir ölçüm varsa her ekranda görünür.
+   Görünmeyen bir sayaç, unutulan bir sayaçtır. */
+.topclock{
+  display:inline-flex; align-items:center; gap:var(--sp-2);
+  padding:4px var(--sp-2); min-height:28px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); font:inherit; font-size:var(--fs-sm);
+  color:var(--text); cursor:pointer;
+}
+.topclock:hover{ background:var(--surface-hover); }
+.topclock .num{ font-variant-numeric:tabular-nums; }
+.topclock__disc{ color:var(--text-3); font-size:var(--fs-xs); }
+.topclock__dot{
+  width:7px; height:7px; border-radius:50%;
+  background:var(--sec); flex:none;
+}
+@media (max-width:560px){
+  .topclock__disc{ display:none; }
 }

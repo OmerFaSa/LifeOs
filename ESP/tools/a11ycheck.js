@@ -127,7 +127,18 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
       const r = await page.evaluate(() => {
         const out = { adsiz:[], etiketsiz:[], baslik:[], kucuk:[], imgAlt:[],
           tabindex:[], odaksiz:[] };
-        const metin = el => (el.textContent || '').trim();
+        /* Ekran okuyucu `aria-hidden` isaretli metni OKUMAZ. textContent
+           ise okur: icinde yalnizca dekoratif bir ✓ olan bir dugme,
+           "adli" gorunup aslinda adsiz kaliyordu. Bu denetim tam da bunu
+           bulmak icin var; kendi olcusu yanlisken bulamaz.
+
+           Olculdu: bu duzeltmeden once etiketi hic cizilmeyen disiplin
+           secicisi (bos kutular) denetimden TEMIZ gecti. */
+        const metin = el => {
+          const k = el.cloneNode(true);
+          k.querySelectorAll('[aria-hidden="true"]').forEach(x => x.remove());
+          return (k.textContent || '').trim();
+        };
         const ad = el => metin(el) || el.getAttribute('aria-label')
           || el.getAttribute('title')
           || (el.getAttribute('aria-labelledby') &&
