@@ -248,3 +248,82 @@
     });
   });
 })();
+
+/* Etkin yetki — dört eksen birlikte hesaplanır.
+
+   Dışarıdan gelen eleştiri şu boşluğu gösterdi: eksenler «ayrı» diye
+   yazılmıştı ama yetki kararına yalnızca biri giriyordu. Kılavuzdan gelen
+   ama kesinliği değerlendirilmemiş, bu kullanıcıya dolaylı uyan bir eşik
+   tam yetkiyle konuşabiliyordu. */
+(function(){
+  const { describe, it, expect } = SP.Test;
+  const Ev = () => SP.Ev;
+
+  describe('Kanıt — etkin yetki', () => {
+
+    /* Tavan aşılamaz: iniş var, çıkış yok. */
+    it('etkin yetki tavanı asla aşmaz', () => {
+      const sira = ['steer', 'limited_steer', 'inform', 'observe_only'];
+      SP.EVIDENCE.forEach(e => {
+        const r = Ev().resolve(e);
+        const ef = Ev().effectiveOf(e.marker, e.field);
+        expect(sira.indexOf(ef.authority) >= sira.indexOf(r.authority)).toBeTruthy();
+      });
+    });
+
+    /* Dolaylı uygulanabilirlik bir basamak indirir. */
+    it('dolaylı uygulanan kılavuz eşiği bir basamak iner', () => {
+      const r = Ev().of('ldl', 'optimal');
+      expect(r.authority).toBe('steer');
+      expect(r.applicability).toBe('indirect');
+      const ef = Ev().effectiveOf('ldl', 'optimal');
+      expect(ef.authority).toBe('limited_steer');
+      expect(ef.capped).toBeTruthy();
+      expect(ef.steps).toBe(1);
+    });
+
+    /* Doğrudan uygulanan, kesinliği yüksek eşik indirilmez. */
+    it('dört eksen de temizse yetki korunur', () => {
+      const ef = Ev().effectiveOf('hba1c', 'ref');
+      expect(ef.authority).toBe('steer');
+      expect(ef.capped).toBeFalsy();
+      expect(ef.steps).toBe(0);
+    });
+
+    /* İnişler BİRİKİR: bir eşiğin gücü en zayıf halkasından fazla olamaz. */
+    it('birden çok zayıf eksen birikerek iner', () => {
+      const ef = Ev().effectiveOf('tsh', 'optimal');
+      /* system_tuning zaten en alttadır; iniş onu daha aşağı atamaz. */
+      expect(ef.authority).toBe('observe_only');
+    });
+
+    /* Sessizce zayıflatmak yanıltmaktır: sebep yazılır. */
+    it('indirilen yetkinin sebebi yazılır', () => {
+      const ef = Ev().effectiveOf('ldl', 'optimal');
+      expect(ef.reasons.length > 0).toBeTruthy();
+      expect(ef.reasons[0].reason.length > 15).toBeTruthy();
+      const l = Ev().line('ldl', 'optimal');
+      expect(l.authorityCapped).toBeTruthy();
+      expect(l.authorityCeiling).toBe('steer');
+      expect(l.authorityReasons.length > 0).toBeTruthy();
+    });
+
+    /* mayDirect ve cap artık ETKİN yetkiden okunur. */
+    it('yönlendirme izni ve tavan etkin yetkiden gelir', () => {
+      /* rhr/optimal gözlemsel + dolaylı → inform'dan observe_only'ye iner. */
+      expect(Ev().effectiveOf('rhr', 'optimal').authority).toBe('observe_only');
+      expect(Ev().mayDirect('rhr', 'optimal')).toBeFalsy();
+      expect(Ev().cap('ldl', 'optimal')).toBe(0.35);
+    });
+
+    /* Kırmızı bayraklar ETKİN yetkiyle de denetimden geçmeli. */
+    it('etkin yetkiyle de her kırmızı bayrak dayanaklı', () => {
+      const s = Ev().audit();
+      if(s.length){
+        throw new Error('Etkin yetkiden sonra dayanaksız: '
+          + s.map(x => x.marker + ' (' + x.kind + ')').join(', '));
+      }
+      expect(s.length).toBe(0);
+    });
+  });
+})();

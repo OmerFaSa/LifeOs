@@ -224,3 +224,82 @@
     });
   });
 })();
+
+/* Yön semantiği — "iyileşme" ile "hareket" aynı şey değildir.
+
+   Dışarıdan gelen bir eleştiri `Math.abs(dS) > eşik` kullanımının sonucun
+   KÖTÜYE gitmesini de "gösterge sağlam" saydığını söylüyordu. Eleştiri
+   doğruydu ama hatayı ESP'ye atfediyordu; hata SPİ'deydi. Yine de
+   soyutlamanın ikinci yarısı burada da eksikti: `lower` bir alan olarak
+   vardı, bir SÖZLÜK değildi. Yön artık her çift için zorunlu. */
+(function(){
+  const { describe, it, expect } = ESP.Test;
+  const G = () => ESP.Goodhart;
+
+  describe('goodhart · yon semantigi', () => {
+
+    it('her ciftin yon tanimi var', () => {
+      G().PAIRS.forEach(p => {
+        expect(!!G().DIRECTIONS[p.direction]).toBeTruthy();
+      });
+    });
+
+    it('uc yon tanimli ve iyilesme islevleri dogru', () => {
+      const D = G().DIRECTIONS;
+      expect(D.higher_better.improvement(0.2)).toBe(0.2);
+      expect(D.lower_better.improvement(0.2)).toBe(-0.2);
+      expect(D.movement_only.improvement(-0.2)).toBe(0.2);
+      /* Olculmemis degisim yon cevrilse de olculmemis kalir. */
+      expect(D.lower_better.improvement(null)).toBe(null);
+      expect(D.movement_only.improvement(null)).toBe(null);
+    });
+
+    /* Yon tanimsizsa SESSIZCE "yukselmesi iyi" sayilmaz. */
+    it('yon tanimsiz cift degerlendirilmez', () => {
+      const p = G().pair({ id:'test', direction:null, disc:'lang',
+        effortLabel:'a', outcomeLabel:'b', question:'s?',
+        effort:() => 1000, outcome:() => 10, minEffort:1 });
+      expect(p.status).toBe('unknown');
+      expect(p.cert).toBe('missing');
+      expect(p.note.indexOf('yön tanımı yok') > 0).toBeTruthy();
+    });
+
+    /* Hata orani DUSTUKCE iyidir; yukselmesi "birlikte" sayilamaz. */
+    it('dusmesi iyi olan olcude yukselme ayrisma sayilir', () => {
+      const p = G().pair({ id:'t2', direction:'lower_better', disc:'lang',
+        effortLabel:'çaba', outcomeLabel:'hata oranı', question:'s?',
+        effort:function(w){ return w.from === G().windows().now.from ? 1000 : 500; },
+        outcome:function(w){ return w.from === G().windows().now.from ? 0.20 : 0.10; },
+        minEffort:1 });
+      expect(p.status).toBe('decoupled');
+      expect(p.regressed).toBeTruthy();
+    });
+
+    it('dusmesi iyi olan olcude dusme birlikte sayilir', () => {
+      const p = G().pair({ id:'t3', direction:'lower_better', disc:'lang',
+        effortLabel:'çaba', outcomeLabel:'hata oranı', question:'s?',
+        effort:function(w){ return w.from === G().windows().now.from ? 1000 : 500; },
+        outcome:function(w){ return w.from === G().windows().now.from ? 0.05 : 0.10; },
+        minEffort:1 });
+      expect(p.status).toBe('aligned');
+    });
+  });
+
+  describe('goodhart · politika parametreleri', () => {
+
+    /* Sayilar gizli "dogru esik" gibi sunulmaz. */
+    it('esikler acikca sistem ayari olarak etiketli', () => {
+      const p = G().policy();
+      expect(p.status).toBe('system_tuning');
+      expect(p.rationale.length > 80).toBeTruthy();
+      expect(p.note.indexOf('eşik değil') > 0).toBeTruthy();
+    });
+
+    it('kullanilan sabitler politikadan okunur', () => {
+      const p = G().policy();
+      expect(G().PENCERE).toBe(p.windowDays);
+      expect(G().CABA_ARTIS).toBe(p.effortRiseThreshold);
+      expect(G().SONUC_DURGUN).toBe(p.stagnationThreshold);
+    });
+  });
+})();

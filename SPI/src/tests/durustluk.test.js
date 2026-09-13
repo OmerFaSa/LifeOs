@@ -269,3 +269,121 @@
     });
   });
 })();
+
+/* Yön semantiği — "iyileşme" ile "hareket" aynı şey değildir.
+
+   Bu paket dışarıdan gelen bir eleştiriden doğdu. Eleştiri şunu söylüyordu:
+   `Math.abs(dS) > eşik` kullanmak, sonucun KÖTÜYE gitmesini de "gösterge
+   sağlam" saymaktır. Doğruydu — ama eleştiri hatayı ESP'ye atfediyordu;
+   ESP zaten `lower` alanını kullanıyordu. Hata SPİ'deydi ve orada gerçekten
+   ısırıyordu: antrenman ↑ / toparlanma ↓ "birlikte" sayılıyordu. */
+(function(){
+  const { describe, it, expect, resetState, withToday, pushVitals, pushWorkout } = SP.Test;
+  const G = () => SP.Goodhart;
+  const U = SP.U;
+
+  const BUGUN = '2026-06-01';
+  function once(n){ return U.iso(U.addDays(U.parse(BUGUN), -n)); }
+  function cift(id){ return G().scan().filter(p => p.id === id)[0]; }
+
+  /* Cabayi artir: onceki pencerede az, simdiki pencerede cok antrenman. */
+  function cabaArtir(){
+    for(let i = 0; i < 8; i++) pushWorkout(once(70 + i), { minutes:60 });
+    for(let i = 0; i < 20; i++) pushWorkout(once(10 + i), { minutes:60 });
+  }
+  function toparlanma(oncekiUyku, simdikiUyku){
+    for(let i = 0; i < 12; i++){
+      pushVitals(once(70 + i), { sleep:oncekiUyku, hrv:60, rhr:60, soreness:3 });
+      pushVitals(once(10 + i), { sleep:simdikiUyku, hrv:60, rhr:60, soreness:3 });
+    }
+  }
+
+  describe('Goodhart — yön semantiği', () => {
+
+    it('her çiftin yön tanımı var', () => {
+      G().PAIRS.forEach(p => {
+        expect(!!G().DIRECTIONS[p.direction]).toBeTruthy();
+      });
+    });
+
+    /* Yon tanimsizsa SESSIZCE "yukselmesi iyi" sayilmaz. */
+    it('yön tanımsız çift değerlendirilmez', () => {
+      resetState();
+      withToday(BUGUN, () => {
+        const p = G().pair({ id:'test', direction:null,
+          effortLabel:'a', outcomeLabel:'b', question:'s?',
+          effort:() => 100, outcome:() => 10, minEffort:1 });
+        expect(p.status).toBe('unknown');
+        expect(p.note.indexOf('yön tanımı yok') > 0).toBeTruthy();
+      });
+    });
+
+    /* ASIL HATA: caba artarken sonuc KOTULESIRSE bu "birlikte" degildir. */
+    it('sonuç ters yöne giderse ayrışma sayılır, birlikte değil', () => {
+      resetState();
+      withToday(BUGUN, () => {
+        cabaArtir();
+        /* Uyku 8 → 5: toparlanma skoru duser. */
+        toparlanma(8, 5);
+        const p = cift('training-vs-readiness');
+        expect(p.status).toBe('decoupled');
+        expect(p.regressed).toBeTruthy();
+        /* Cumle "yerinde saydi" DEMEMELI. */
+        expect(p.note.indexOf('GERİLEDİ') > 0).toBeTruthy();
+      });
+    });
+
+    it('sonuç doğru yönde artarsa birlikte sayılır', () => {
+      resetState();
+      withToday(BUGUN, () => {
+        cabaArtir();
+        toparlanma(5, 8);
+        const p = cift('training-vs-readiness');
+        expect(p.status).toBe('aligned');
+        expect(p.regressed).toBeFalsy();
+      });
+    });
+
+    /* Sistem hedef kiloyu BILMEZ; yon atfetmek uydurma olurdu. */
+    it('kilo çiftinde yön sistem tarafından bilinmez', () => {
+      resetState();
+      withToday(BUGUN, () => {
+        const p = G().PAIRS.filter(x => x.id === 'weighins-vs-weight')[0];
+        expect(p.direction).toBe('movement_only');
+      });
+    });
+
+    it('yönü bilinmeyen çiftte her iki yöndeki hareket de birlikte sayılır', () => {
+      resetState();
+      withToday(BUGUN, () => {
+        /* Tartilma sayisi artsin */
+        for(let i = 0; i < 10; i++) pushVitals(once(70 + i), { weight:80 });
+        for(let i = 0; i < 25; i++) pushVitals(once(10 + i), { weight:72 });
+        const p = cift('weighins-vs-weight');
+        expect(p.status).toBe('aligned');
+        /* Ama sistem yonu YORUMLAMAZ ve bunu soyler. */
+        expect(p.note.indexOf('YÖNÜ') > 0).toBeTruthy();
+      });
+    });
+  });
+
+  describe('Goodhart — politika parametreleri', () => {
+
+    /* Sayilar gizli "dogru esik" gibi sunulmaz. */
+    it('eşikler açıkça sistem ayarı olarak etiketli', () => {
+      const p = G().policy();
+      expect(p.status).toBe('system_tuning');
+      expect(p.windowDays).toBe(56);
+      expect(p.effortRiseThreshold > 0.3).toBeTruthy();
+      expect(p.rationale.length > 80).toBeTruthy();
+      expect(p.note.indexOf('bilimsel bir eşik değil') > 0).toBeTruthy();
+    });
+
+    it('kullanılan sabitler politikadan okunur', () => {
+      const p = G().policy();
+      expect(G().PENCERE).toBe(p.windowDays);
+      expect(G().CABA_ARTIS).toBe(p.effortRiseThreshold);
+      expect(G().SONUC_DURGUN).toBe(p.stagnationThreshold);
+    });
+  });
+})();

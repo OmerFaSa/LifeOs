@@ -22,9 +22,56 @@ window.SP = window.SP || {};
 SP.Goodhart = (function(){
   const U = SP.U, S = SP.S;
 
-  const PENCERE = 56;
-  const CABA_ARTIS = 0.35;
-  const SONUC_DURGUN = 0.05;
+  /* ------------------------------------------------- POLITIKA PARAMETRELERI
+
+     Bu uc sayi bir BULGU DEGILDIR; bu yazilimin secimidir. Nicin 56 gun?
+     Nicin %35? Cevap "gurultuyu azaltmak icin" — ve bu bir gerekcedir,
+     bir kanit degil. Kanit katmanindaki (core/evidence.js) ayni dilin
+     burada da kullanilmasi kasitlidir: sayilari gizli "dogru esik" gibi
+     sunmak, tasarim tercihini bulgu gibi gostermek olurdu.
+
+     SPI'nin sayilari AYS ve ESP'dekinden MUHAFAZAKARDIR cunku saglik
+     verisi daha gurultuludur. Bu da bir secimdir. */
+  const POLICY = {
+    version:1,
+    status:'system_tuning',
+    windowDays:56,
+    effortRiseThreshold:0.35,
+    stagnationThreshold:0.05,
+    rationale:'Kilo, tansiyon, HRV ve laboratuvar değerleri kısa vadede çok '
+      + 'dalgalanır. İki 28 günlük pencereyi karşılaştırmak, gürültüyü bulgu '
+      + 'sanmaktır; bu yüzden pencere iki katına çıkarıldı ve çaba artışının '
+      + '«belirgin» sayılması için gereken eşik yükseltildi. Başka sayılar da '
+      + 'savunulabilirdi.',
+    note:'Bu parametreler bilimsel bir eşik değil, bu yazılımın ayarıdır.',
+  };
+
+  const PENCERE = POLICY.windowDays;
+  const CABA_ARTIS = POLICY.effortRiseThreshold;
+  const SONUC_DURGUN = POLICY.stagnationThreshold;
+
+  /* ---------------------------------------------------- YON SEMANTIGI
+
+     Her sonuc olcusunun IYI YONU acikca yazilir. Bunu yazmamak, sessiz
+     bir hata uretir: "daha cok antrenman yaptin, toparlanman DUSTU ama
+     gosterge hala bir seyi temsil ediyor" gibi savunulamaz bir cumle.
+
+       higher_better   buyudukce iyi (protein hedefi tutturulan gun orani)
+       lower_better    kucukduikce iyi (hata orani, istirahat nabzi)
+       movement_only   yonu SISTEM BILMEZ; yalnizca hareket olup olmadigina
+                       bakilir (kilo — hedefin ne oldugunu sistem bilmiyor)
+
+     Ucuncu deger bir kacamak degil bir DURUSTLUK aracidir: sistemin
+     bilmedigi bir hedefe yon atfetmesi, olculmemis bir seyi olculmus
+     gostermek olurdu. */
+  const DIRECTIONS = {
+    higher_better:{ id:'higher_better', label:'yükselmesi iyi',
+      improvement:function(d){ return d; } },
+    lower_better:{ id:'lower_better', label:'düşmesi iyi',
+      improvement:function(d){ return d == null ? null : -d; } },
+    movement_only:{ id:'movement_only', label:'yönü sistem bilmez',
+      improvement:function(d){ return d == null ? null : Math.abs(d); } },
+  };
 
   function iso(n){ return U.iso(U.addDays(U.parse(U.todayISO()), n)); }
 
@@ -96,20 +143,20 @@ SP.Goodhart = (function(){
   /* -------------------------------------------------------------- ciftler */
 
   const PAIRS = [
-    { id:'logging-vs-protein',
+    { id:'logging-vs-protein', direction:'higher_better',
       effortLabel:'öğün kaydedilen gün', outcomeLabel:'protein hedefine ulaşılan gün oranı',
       question:'Daha çok gün kayıt tutuyorsun ama hedefe ulaşılan gün oranı '
              + 'yerinde. Kayıt tutmak ile yemeği değiştirmek aynı şey mi oldu?',
       effort:loggedDays, outcome:proteinHitRate, minEffort:20 },
 
-    { id:'training-vs-readiness',
+    { id:'training-vs-readiness', direction:'higher_better',
       effortLabel:'antrenman dakikası', outcomeLabel:'toparlanma skoru',
       question:'Antrenman süresi arttı, toparlanma skoru yerinde ya da '
              + 'geriledi. Yük artışı taşınabiliyor mu, yoksa uyku ve '
              + 'beslenme mi geride kaldı?',
       effort:trainingMinutes, outcome:readinessAvg, minEffort:400 },
 
-    { id:'weighins-vs-weight',
+    { id:'weighins-vs-weight', direction:'movement_only',
       effortLabel:'tartılan gün', outcomeLabel:'kilo yönü',
       /* Kilo YONU hedefe gore degerlendirilemez: hedefin ne oldugunu
          sistem bilmez. Bu yuzden yalnizca DEGISIM olculur ve degismemek
@@ -121,7 +168,7 @@ SP.Goodhart = (function(){
       }).length,
       outcome:w => markerMedian('weight', w), minEffort:20 },
 
-    { id:'supplements-vs-marker',
+    { id:'supplements-vs-marker', direction:'higher_better',
       effortLabel:'takviye kaydı', outcomeLabel:'D vitamini düzeyi',
       question:'Takviye kaydı arttı ama ölçülen düzey yerinde. Emilim '
              + 'koşulları (yağlı öğünle eşleştirme) sağlanıyor mu?',
@@ -161,21 +208,42 @@ SP.Goodhart = (function(){
     }
     const dC = oran(yC, eC);
     const dS = oran(yS, eS);
+
+    /* Yon olmadan "sonuc iyilesti mi" sorusu cevaplanamaz. Tanimsiz
+       birakilmis bir cift, sessizce "yukselmesi iyi" sayilmaz — bu bir
+       varsayim olurdu; acikca hata verir. */
+    const yon = DIRECTIONS[def.direction || ''];
+    if(!yon){
+      return Object.assign(base, { status:'unknown', cert:'missing',
+        note:'Bu çiftin yön tanımı yok; sonucun hangi yönde iyi olduğu '
+           + 'bilinmeden ayrışma değerlendirilemez.' });
+    }
+    const iyilesme = yon.improvement(dS);
+
     if(dC == null || dC < CABA_ARTIS){
       return Object.assign(base, { status:'idle', cert:'measured',
-        effortChange:dC, outcomeChange:dS,
+        direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
         note:'Çaba belirgin biçimde artmamış; nöbetçi burada bir şey aramaz.' });
     }
-    if(dS != null && Math.abs(dS) > SONUC_DURGUN){
+    if(iyilesme != null && iyilesme > SONUC_DURGUN){
       return Object.assign(base, { status:'aligned', cert:'measured',
-        effortChange:dC, outcomeChange:dS,
-        note:'Çaba arttı, sonuç da hareket etti. Gösterge hâlâ bir şeyi '
-           + 'temsil ediyor — yönü senin hedefine göre sen değerlendir.' });
+        direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
+        note:yon.id === 'movement_only'
+          ? 'Çaba arttı, sonuç da hareket etti. Hareketin YÖNÜ bu sistemin '
+            + 'bileceği bir şey değil — hedefini sen biliyorsun.'
+          : 'Çaba da sonuç da doğru yönde arttı. Gösterge hâlâ bir şeyi '
+            + 'temsil ediyor.' });
     }
+    /* Sonuc TERS yone gittiyse bu "yerinde saymak" degildir ve oyle
+       yazilmaz. Once bunu ayirmak, uyarinin dogru cumleyi kurmasini saglar. */
+    const geriledi = iyilesme != null && iyilesme < -SONUC_DURGUN;
     return Object.assign(base, { status:'decoupled', cert:'measured',
-      effortChange:dC, outcomeChange:dS,
+      direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
+      regressed:geriledi,
       note:def.effortLabel + ' %' + Math.round(dC * 100) + ' arttı, '
-         + def.outcomeLabel + ' yerinde saydı.' });
+         + def.outcomeLabel + (geriledi
+            ? ' %' + Math.round(Math.abs(iyilesme) * 100) + ' GERİLEDİ.'
+            : ' yerinde saydı.') });
   }
 
   function scan(){ return PAIRS.map(pair); }
@@ -189,6 +257,8 @@ SP.Goodhart = (function(){
       body:f[0].note + ' ' + f[0].question, flags:f };
   }
 
-  return { PAIRS, windows, pair, scan, flags, brief,
+  function policy(){ return POLICY; }
+
+  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS,
     PENCERE, CABA_ARTIS, SONUC_DURGUN };
 })();

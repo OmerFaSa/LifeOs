@@ -32,19 +32,58 @@ window.ESP = window.ESP || {};
 ESP.Goodhart = (function(){
   const U = ESP.U, S = ESP.S;
 
+  /* ------------------------------------------------- POLİTİKA PARAMETRELERİ
+
+     Bu sayılar bir PEDAGOJİK BULGU DEĞİLDİR; bu yazılımın seçimidir.
+     Kanıt katmanındaki (core/evidence.js) ayrımın aynısı burada da geçerli:
+     sayıları gizli «doğru eşik» gibi sunmak, bir tasarım tercihini bulgu
+     gibi göstermek olurdu. */
+  const POLICY = {
+    version:1,
+    status:'system_tuning',
+    windowDays:28,
+    effortRiseThreshold:0.25,
+    stagnationThreshold:0.05,
+    minEffortMinutes:60,
+    rationale:'28 gün, çoğu pratik disiplininde bir «dönem» hissi verecek '
+      + 'kadar uzun; iki bitişik pencere iki ayı kapsar. %25\'lik eşik '
+      + 'gürültüyü ayıklamak için seçildi: küçük dalgalanmalar çaba artışı '
+      + 'sayılmaz. Başka sayılar da savunulabilirdi.',
+    note:'Bu parametreler pedagojik bir eşik değil, bu yazılımın ayarıdır.',
+  };
+
   /* Pencere uzunluğu (gün). İki bitişik pencere karşılaştırılır:
      [bugün−28, bugün] ile [bugün−56, bugün−28]. */
-  const PENCERE = 28;
-
-  /* Çabanın "arttı" sayılması için gereken oran. */
-  const CABA_ARTIS = 0.25;
-
-  /* Sonucun "yerinde saydı" sayılması için üst sınır. Bunun üstünde bir
-     iyileşme varsa ayrışma yoktur. */
-  const SONUC_DURGUN = 0.05;
+  const PENCERE = POLICY.windowDays;
+  const CABA_ARTIS = POLICY.effortRiseThreshold;
+  const SONUC_DURGUN = POLICY.stagnationThreshold;
 
   /* Bu hacmin altındaki çabada çift değerlendirilmez (dakika). */
-  const ASGARI_CABA = 60;
+  const ASGARI_CABA = POLICY.minEffortMinutes;
+
+  /* ---------------------------------------------------- YÖN SEMANTİĞİ
+
+     `lower:true` alanı baştan beri vardı ama bir SÖZLÜK değildi. Her çift
+     için açık bir yön adı yazmak iki şey kazandırır: üçüncü bir durumu
+     («yönü sistem bilmez») mümkün kılar, ve yön tanımı unutulmuş bir çifti
+     sessiz varsayımla çalıştırmak yerine açıkça reddeder.
+
+       higher_better   büyüdükçe iyi
+       lower_better    küçüldükçe iyi (hata oranı)
+       movement_only   yönü SİSTEM BİLMEZ; yalnızca hareket olup olmadığına
+                       bakılır
+
+     Üçüncü değer bir kaçamak değil bir DÜRÜSTLÜK aracıdır: sistemin
+     bilmediği bir hedefe yön atfetmesi, ölçülmemiş bir şeyi ölçülmüş
+     göstermek olurdu. */
+  const DIRECTIONS = {
+    higher_better:{ id:'higher_better', label:'yükselmesi iyi',
+      improvement:function(d){ return d; } },
+    lower_better:{ id:'lower_better', label:'düşmesi iyi',
+      improvement:function(d){ return d == null ? null : -d; } },
+    movement_only:{ id:'movement_only', label:'yönü sistem bilmez',
+      improvement:function(d){ return d == null ? null : Math.abs(d); } },
+  };
 
   function iso(n){ return U.iso(U.addDays(U.parse(U.todayISO()), n)); }
 
@@ -126,28 +165,28 @@ ESP.Goodhart = (function(){
 
      Her çift, sonucun çabanın yerine geçemeyeceği bir yerde durur. */
   const PAIRS = [
-    { id:'lang-volume-vs-recall', disc:'lang',
+    { id:'lang-volume-vs-recall', direction:'higher_better', disc:'lang',
       effortLabel:'çalışma dakikası', outcomeLabel:'ilk denemede hatırlama',
       question:'Kart sayısını mı artırdın, yoksa aynı kartları mı '
              + 'tekrar ediyorsun?',
       effort:w => minutesIn('lang', w),
       outcome:w => { const a = cardAnswers(w); return a.n >= 20 ? a.rate : null; } },
 
-    { id:'lang-reps-vs-recall', disc:'lang',
+    { id:'lang-reps-vs-recall', direction:'higher_better', disc:'lang',
       effortLabel:'kart tekrarı', outcomeLabel:'ilk denemede hatırlama',
       question:'Kart destesi çok mu büyük, yoksa kartlar çok mu uzun?',
       effort:w => cardAnswers(w).n,
       outcome:w => { const a = cardAnswers(w); return a.n >= 20 ? a.rate : null; },
       minEffort:40 },
 
-    { id:'reading-minutes-vs-notes', disc:'reading',
+    { id:'reading-minutes-vs-notes', direction:'higher_better', disc:'reading',
       effortLabel:'okuma dakikası', outcomeLabel:'çıkan not',
       question:'Okuduğun metin not almaya değmiyor mu, yoksa okuma '
              + 'pasifleşti mi?',
       effort:w => minutesIn('reading', w),
       outcome:w => countIn(S.notes, w, 'createdAt') },
 
-    { id:'reading-notes-vs-links', disc:'reading',
+    { id:'reading-notes-vs-links', direction:'higher_better', disc:'reading',
       effortLabel:'not sayısı', outcomeLabel:'not başına bağ',
       question:'Bağlanmayan not ikinci kez okunmaz; notları bağlamayı '
              + 'mı erteliyorsun, yoksa bağlanacak bir şey mi çıkmıyor?',
@@ -159,14 +198,14 @@ ESP.Goodhart = (function(){
       },
       minEffort:5 },
 
-    { id:'writing-minutes-vs-drafts', disc:'writing',
+    { id:'writing-minutes-vs-drafts', direction:'higher_better', disc:'writing',
       effortLabel:'yazı dakikası', outcomeLabel:'elden geçen taslak',
       question:'Yazmak ile yazıyı düzenlemek aynı iş değil — süre '
              + 'hangisine gidiyor?',
       effort:w => minutesIn('writing', w),
       outcome:w => countIn(S.drafts, w, 'updatedAt') },
 
-    { id:'philo-minutes-vs-closed', disc:'philo',
+    { id:'philo-minutes-vs-closed', direction:'higher_better', disc:'philo',
       effortLabel:'felsefe dakikası', outcomeLabel:'kapanan argüman',
       question:'Açık kalan argüman bir düşünce değil bir niyettir; '
              + 'hangisi kapanmaya en yakın?',
@@ -174,21 +213,20 @@ ESP.Goodhart = (function(){
       outcome:w => countIn(S.args, w, 'updatedAt', a => a.status === 'closed') },
 
 
-    { id:'music-minutes-vs-clean', disc:'music',
+    { id:'music-minutes-vs-clean', direction:'higher_better', disc:'music',
       effortLabel:'gitar dakikası', outcomeLabel:'temiz deneme oranı',
       question:'Tempoyu erken mi açtın? Plato kontrolüne bakmak ister misin?',
       effort:w => minutesIn('music', w),
       outcome:w => cleanRate(w) },
 
-    { id:'diction-minutes-vs-error', disc:'diction',
+    { id:'diction-minutes-vs-error', direction:'lower_better', disc:'diction',
       effortLabel:'diksiyon dakikası', outcomeLabel:'hata oranı',
-      lower:true,
       question:'Kaydı dinleyip hataları işaretliyor musun, yoksa aynı '
              + 'tekrarı mı sürdürüyorsun?',
       effort:w => minutesIn('diction', w),
       outcome:w => dictionError(w) },
 
-    { id:'history-minutes-vs-events', disc:'history',
+    { id:'history-minutes-vs-events', direction:'higher_better', disc:'history',
       effortLabel:'tarih dakikası', outcomeLabel:'yerleştirilen olay',
       question:'Yerleştirilmeyen olay hatırlanmaz; okuduklarını '
              + 'kronolojiye taşımayı mı erteliyorsun?',
@@ -233,7 +271,16 @@ ESP.Goodhart = (function(){
 
     const dC = oran(yC, eC);
     const dS = oran(yS, eS);
-    const sonucIyilesme = def.lower ? (dS == null ? null : -dS) : dS;
+
+    /* Yön olmadan «sonuç iyileşti mi» sorusu cevaplanamaz. Tanımsız bir
+       çift sessizce «yükselmesi iyi» SAYILMAZ — bu bir varsayım olurdu. */
+    const yon = DIRECTIONS[def.direction || ''];
+    if(!yon){
+      return Object.assign(base, { status:'unknown', cert:'missing',
+        note:'Bu çiftin yön tanımı yok; sonucun hangi yönde iyi olduğu '
+           + 'bilinmeden ayrışma değerlendirilemez.' });
+    }
+    const sonucIyilesme = yon.improvement(dS);
 
     if(dC == null || dC < CABA_ARTIS){
       return Object.assign(base, { status:'idle', cert:'measured',
@@ -242,10 +289,16 @@ ESP.Goodhart = (function(){
     }
     if(sonucIyilesme != null && sonucIyilesme > SONUC_DURGUN){
       return Object.assign(base, { status:'aligned', cert:'measured',
-        effortChange:dC, outcomeChange:sonucIyilesme,
-        note:'Çaba da sonuç da arttı. Gösterge hâlâ bir şeyi temsil ediyor.' });
+        direction:yon.id, effortChange:dC, outcomeChange:sonucIyilesme,
+        note:yon.id === 'movement_only'
+          ? 'Çaba arttı, sonuç da hareket etti. Hareketin YÖNÜ bu sistemin '
+            + 'bileceği bir şey değil.'
+          : 'Çaba da sonuç da doğru yönde arttı. Gösterge hâlâ bir şeyi '
+            + 'temsil ediyor.' });
     }
     return Object.assign(base, { status:'decoupled', cert:'measured',
+      direction:yon.id,
+      regressed:sonucIyilesme != null && sonucIyilesme < -SONUC_DURGUN,
       effortChange:dC, outcomeChange:sonucIyilesme,
       note:def.effortLabel + ' %' + Math.round(dC * 100) + ' arttı, '
          + def.outcomeLabel + ' ' + (sonucIyilesme == null ? 'ölçülemedi'
@@ -276,6 +329,8 @@ ESP.Goodhart = (function(){
     };
   }
 
-  return { PAIRS, windows, pair, scan, flags, brief,
+  function policy(){ return POLICY; }
+
+  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS,
     PENCERE, CABA_ARTIS, SONUC_DURGUN, ASGARI_CABA };
 })();

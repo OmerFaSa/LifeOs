@@ -27,9 +27,55 @@ window.R = window.R || {};
 R.Goodhart = (function(){
   const U = R.U, S = R.S, M = R.Model;
 
-  const PENCERE = 28;
-  const CABA_ARTIS = 0.25;
-  const SONUC_DURGUN = 0.05;
+  /* ------------------------------------------------- POLITIKA PARAMETRELERI
+
+     Bu uc sayi bir PEDAGOJIK BULGU DEGILDIR; bu yazilimin secimidir.
+     Nicin 28 gun, nicin %25? Cevap "gurultuyu azaltmak ve bir aylik ritmi
+     yakalamak" — bu bir gerekcedir, bir kanit degil. Kanit katmanindaki
+     (core/evidence.js) ayni dil burada da kullanilir. */
+  const POLICY = {
+    version:1,
+    status:'system_tuning',
+    windowDays:28,
+    effortRiseThreshold:0.25,
+    stagnationThreshold:0.05,
+    rationale:'28 gün, sınav hazırlığının aylık ritmine denk gelir ve iki '
+      + 'bitişik pencere iki ayı kapsar — tek bir kötü haftanın sonucu '
+      + 'belirlemesini engelleyecek kadar uzun, mevsimsel değişimi '
+      + 'gizleyecek kadar uzun değil. %25\'lik eşik, gürültüyü ayıklamak '
+      + 'için seçildi. Başka sayılar da savunulabilirdi.',
+    note:'Bu parametreler pedagojik bir eşik değil, bu yazılımın ayarıdır.',
+  };
+
+  const PENCERE = POLICY.windowDays;
+  const CABA_ARTIS = POLICY.effortRiseThreshold;
+  const SONUC_DURGUN = POLICY.stagnationThreshold;
+
+  /* ---------------------------------------------------- YON SEMANTIGI
+
+     Her sonuc olcusunun IYI YONU acikca yazilir. Bunu yazmamak sessiz bir
+     hata uretir: "daha cok calistin, sonuc kotulesti ama gosterge hala bir
+     seyi temsil ediyor" gibi savunulamaz bir cumle.
+
+       higher_better   buyudukce iyi
+       lower_better    kucukduikce iyi (hata orani, sure sapmasi)
+       movement_only   yonu SISTEM BILMEZ; yalnizca hareket olup olmadigina
+                       bakilir
+
+     Ucuncu deger bir kacamak degil bir DURUSTLUK aracidir: sistemin
+     bilmedigi bir hedefe yon atfetmesi, olculmemis bir seyi olculmus
+     gostermek olurdu.
+
+     BUGUN butun ciftler higher_better; yon alani yine de ZORUNLU, cunku
+     ilk lower_better cift eklendiginde sessizce yanlis calisirdi. */
+  const DIRECTIONS = {
+    higher_better:{ id:'higher_better', label:'yükselmesi iyi',
+      improvement:function(d){ return d; } },
+    lower_better:{ id:'lower_better', label:'düşmesi iyi',
+      improvement:function(d){ return d == null ? null : -d; } },
+    movement_only:{ id:'movement_only', label:'yönü sistem bilmez',
+      improvement:function(d){ return d == null ? null : Math.abs(d); } },
+  };
 
   function iso(n){ return U.iso(U.addDays(U.parse(U.todayISO()), n)); }
 
@@ -108,31 +154,31 @@ R.Goodhart = (function(){
   /* -------------------------------------------------------------- çiftler */
 
   const PAIRS = [
-    { id:'questions-vs-net',
+    { id:'questions-vs-net', direction:'higher_better',
       effortLabel:'çözülen soru', outcomeLabel:'deneme medyan neti',
       question:'Soru sayısı artarken net yerinde sayıyor — kolay soruları mı '
              + 'seçiyorsun, yoksa yanlışların üzerinden geçmiyor musun?',
       effort:questionsIn, outcome:examMedianIn, minEffort:300 },
 
-    { id:'questions-vs-accuracy',
+    { id:'questions-vs-accuracy', direction:'higher_better',
       effortLabel:'çözülen soru', outcomeLabel:'doğruluk oranı',
       question:'Daha çok soru çözüp aynı oranda yanlış yapmak, hatayı '
              + 'pekiştirmek olabilir. Yanlışlarını etiketliyor musun?',
       effort:questionsIn, outcome:accuracyIn, minEffort:300 },
 
-    { id:'minutes-vs-closed',
+    { id:'minutes-vs-closed', direction:'higher_better',
       effortLabel:'çalışma dakikası', outcomeLabel:'kapanan konu',
       question:'Süre artıyor ama konu kapanmıyor. Konu testlerini erteliyor '
              + 'musun, yoksa konular kapanış eşiğini geçemiyor mu?',
       effort:minutesIn, outcome:closedTopicsIn, minEffort:600 },
 
-    { id:'exams-vs-net',
+    { id:'exams-vs-net', direction:'higher_better',
       effortLabel:'çözülen deneme', outcomeLabel:'medyan net',
       question:'Deneme sayısı arttı, net yerinde. Analiz edilmeyen deneme '
              + 'bir ölçüm değil, bir yorgunluktur — kaç tanesinin analizi bitti?',
       effort:w => examsIn(w).length, outcome:examMedianIn, minEffort:4 },
 
-    { id:'errors-vs-analysis',
+    { id:'errors-vs-analysis', direction:'higher_better',
       effortLabel:'işaretlenen hata', outcomeLabel:'analizi biten hata oranı',
       question:'Hata biriktiriyorsun ama üzerinden geçilmiyor. İncelenmeyen '
              + 'hata, tekrar edeceğin hatadır — hangisiyle başlarsın?',
@@ -174,23 +220,37 @@ R.Goodhart = (function(){
     }
     const dC = oran(yC, eC);
     const dS = oran(yS, eS);
+
+    /* Yon olmadan "sonuc iyilesti mi" sorusu cevaplanamaz. Tanimsiz bir
+       cift sessizce "yukselmesi iyi" SAYILMAZ — bu bir varsayim olurdu. */
+    const yon = DIRECTIONS[def.direction || ''];
+    if(!yon){
+      return Object.assign(base, { status:'unknown', cert:'missing',
+        note:'Bu çiftin yön tanımı yok; sonucun hangi yönde iyi olduğu '
+           + 'bilinmeden ayrışma değerlendirilemez.' });
+    }
+    const iyilesme = yon.improvement(dS);
+
     if(dC == null || dC < CABA_ARTIS){
       return Object.assign(base, { status:'idle', cert:'measured',
-        effortChange:dC, outcomeChange:dS,
+        direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
         note:'Çaba belirgin biçimde artmamış; nöbetçi burada bir şey aramaz.' });
     }
-    if(dS != null && dS > SONUC_DURGUN){
+    if(iyilesme != null && iyilesme > SONUC_DURGUN){
       return Object.assign(base, { status:'aligned', cert:'measured',
-        effortChange:dC, outcomeChange:dS,
-        note:'Çaba da sonuç da arttı. Gösterge hâlâ bir şeyi temsil ediyor.' });
+        direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
+        note:'Çaba da sonuç da doğru yönde arttı. Gösterge hâlâ bir şeyi '
+           + 'temsil ediyor.' });
     }
+    /* Sonuc TERS yone gittiyse bu "yerinde saymak" degildir. */
+    const geriledi = iyilesme != null && iyilesme < -SONUC_DURGUN;
     return Object.assign(base, { status:'decoupled', cert:'measured',
-      effortChange:dC, outcomeChange:dS,
+      direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
+      regressed:geriledi,
       note:def.effortLabel + ' %' + Math.round(dC * 100) + ' arttı, '
-         + def.outcomeLabel + ' '
-         + (dS == null ? 'ölçülemedi'
-            : dS >= 0 ? '%' + Math.round(dS * 100) + ' değişti'
-            : '%' + Math.round(Math.abs(dS) * 100) + ' geriledi') + '.' });
+         + def.outcomeLabel + (dS == null ? ' ölçülemedi'
+            : geriledi ? ' %' + Math.round(Math.abs(iyilesme) * 100) + ' GERİLEDİ'
+            : ' yerinde saydı') + '.' });
   }
 
   function scan(){ return PAIRS.map(pair); }
@@ -207,6 +267,8 @@ R.Goodhart = (function(){
     };
   }
 
-  return { PAIRS, windows, pair, scan, flags, brief,
+  function policy(){ return POLICY; }
+
+  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS,
     PENCERE, CABA_ARTIS, SONUC_DURGUN };
 })();
