@@ -39,6 +39,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     await SP.Model.setBasketItem('pilav', 2);
   });
   const bad = [];
+  let bakilan = 0;
   const routes = ['today','labs','meals','kitchen','move','basket','office','team','meeting','analytics','family','guide'];
   const tabs = { today:['giris','ozet','gecmis'], labs:['sonuc','giris','gecmis','trend'],
     meals:['gunluk','oneri','deger'], move:['bugun','kardiyo','kuvvet','esneklik','dinlenme','ilerleme'],
@@ -54,12 +55,14 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
         cardInLedger:document.querySelectorAll('.ledger > .card').length,
         overflow:document.documentElement.scrollWidth > window.innerWidth + 2,
       }));
+      bakilan++;
       if(res.nested) bad.push(`${r}${t?'/'+t:''}  ic ice defter satiri: ${res.nested}`);
       if(res.cardInLedger) bad.push(`${r}${t?'/'+t:''}  defterde kutu kart: ${res.cardInLedger}`);
       if(res.overflow) bad.push(`${r}${t?'/'+t:''}  yatay tasma`);
     }
   }
   console.log(errs.length ? 'JS HATASI:\n'+errs.slice(0,5).join('\n') : 'js temiz');
-  console.log(bad.length ? 'DUZEN SORUNU:\n' + bad.join('\n') : 'duzen temiz');
+  console.log(bad.length ? 'DUZEN SORUNU:\n' + bad.join('\n')
+    : bakilan + ' ekran/sekmede defter düzeni temiz');
   await b.close(); srv.kill(); process.exit(0);
 })().catch(e => { console.error(e); srv.kill(); process.exit(1); });

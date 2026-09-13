@@ -31,7 +31,27 @@ için. HKM bir istisna ve tek istisna (bkz. §18).
 | Depo anahtarı | `rota84285.v2[.profil]` | `spi.v1.<profil>` | `esp.v1.<profil>` |
 | Şema sürümü | 5 | 1 | 1 |
 | Dağıtım | `dist/rota.html` | `dist/spi.html` | `dist/esp.html` |
-| Test | 897 ✅ | 656 ✅ | — |
+| Test | ↓ aşağıdaki tablo | ↓ | ↓ |
+
+Test sayıları elle yazılmaz — elle yazılan sayı sessizce eskir.
+`python3 tools/sayilar.py --yaz` araçları koşturur ve her aracın kendi son
+satırını buraya yazar:
+
+<!-- SAYILAR:baslangic -->
+
+_Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturur ve her aracın kendi son satırını buraya yazar. Son koşum: 2026-09-13._
+
+| Araç | AYS | SPI | ESP |
+|---|---|---|---|
+| `runtests.js` | 1019/1019 gecti | 761/761 gecti | 579/579 gecti |
+| `smoke.js` | Duman testi temiz — 2 hedefte 36 ekran, 36 sekme gezildi. | Duman testi temiz — 2 hedefte 24 ekran, 64 sekme gezildi. | Duman testi temiz — 2 hedefte 28 ekran, 182 sekme gezildi. |
+| `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (4 bilinen eksik izin listesinde) |
+| `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
+| `layoutcheck.js` | Telefon düzeni temiz: taşma yok, bütün hedefler 24px ve üstü. | Telefon düzeni temiz: taşma yok, bütün hedefler 24px ve üstü. | Telefon düzeni temiz: taşma yok, bütün hedefler 24px ve üstü. |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 26 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 19.2 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 61.6 ms (bütçe 100). |
+| `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
+| `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
+<!-- SAYILAR:bitis -->
 
 ### Komutlar
 

@@ -165,11 +165,9 @@ function checksOf(m){
   if(bad.length){
     console.log('KONTRAST SORUNU (' + bad.length + '):\n' + bad.join('\n'));
   }else{
-    console.log('butun paletler AA gecti — ' + olculen + ' olcum');
-    if(enDar){
-      console.log('en dar pay: ' + enDar.name + ' ' + enDar.r.toFixed(2)
-        + ' (asgari ' + enDar.min + ') — ' + enDar.where);
-    }
+    console.log(olculen + ' kontrast ölçümü AA geçti'
+      + (enDar ? ' — en dar pay: ' + enDar.name + ' ' + enDar.r.toFixed(2)
+          + ' (asgari ' + enDar.min + ') — ' + enDar.where : ''));
   }
   await b.close(); srv.kill(); process.exit(0);
 })().catch(e => { console.error(e); srv.kill(); process.exit(1); });

@@ -86,6 +86,8 @@ function checksOf(m){
   const pals = ['kagit','indigo','grafit','okyanus','mor','bordo','orman'];
   const secs = ['today','labs','meals','move','basket','office','family'];
   const bad = [];
+  /* Gecen bir denetim de SAYI gostermeli. */
+  let olcum = 0, dar = null;
   for(const theme of ['light','dark']){
     for(const pal of pals){
       await p.evaluate(async ([pl, th]) => {
@@ -97,6 +99,9 @@ function checksOf(m){
         await wait(180);
         const m = await measure(p);
         checksOf(m).forEach(([name, r, min]) => {
+          olcum++;
+          if(!dar || r - min < dar.pay) dar = { pay:r - min, name, r, min,
+            where:`${theme}/${pal}/${route}` };
           if(r < min) bad.push(`${theme}/${pal}/${route}  ${name}  ${r.toFixed(2)} < ${min}`);
         });
       }
@@ -114,6 +119,9 @@ function checksOf(m){
         await wait(220);
         const m = await measure(p);
         checksOf(m).forEach(([name, r, min]) => {
+          olcum++;
+          if(!dar || r - min < dar.pay) dar = { pay:r - min, name, r, min,
+            where:`${theme}/${pal}/${design}` };
           if(r < min) bad.push(`${theme}/${pal}/${design}  ${name}  ${r.toFixed(2)} < ${min}`);
         });
       }
@@ -129,6 +137,8 @@ function checksOf(m){
       await p.screenshot({ path:`${OUT}/${theme}-${pal}.png` });
     }
   }
-  console.log(bad.length ? 'KONTRAST SORUNU:\n' + bad.join('\n') : 'butun paletler AA gecti');
+  console.log(bad.length ? 'KONTRAST SORUNU:\n' + bad.join('\n')
+    : olcum + ' kontrast olcumu AA gecti — en dar pay: ' + dar.name + ' '
+      + dar.r.toFixed(2) + ' (asgari ' + dar.min + ') — ' + dar.where);
   await b.close(); srv.kill(); process.exit(0);
 })().catch(e => { console.error(e); srv.kill(); process.exit(1); });

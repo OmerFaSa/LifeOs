@@ -70,10 +70,25 @@ deneme/tahlil/kart. Boş bir ekran hızlı çizilir; asıl soru dokuz ayın sonu
 ekranların hâlâ açılıp açılmadığıdır.
 
 Bir denetim geçtiğinde de **sayı gösterir**: hiçbir şey ölçmeyen bir betik de
-«geçti» yazar. ESP'nin son koşumu: 521 birim testi, 14 ekran ve 85 sekmelik
-duman testi, 1848 kontrast ölçümü, 390 pikselde 98 yer ve ağır veriyle
-76 ms'lik en ağır ekran. AYS 939 birim testi ve 18 ekran / 16 sekmelik duman
-testi, SPİ 681 birim testi ve 12 ekranlık duman testi ile koşar.
+«geçti» yazar. Bu sayılar belgeye elle yazılmaz — elle yazılan sayı, yazıldığı
+gün doğrudur ve sonra sessizce eskir. `python3 tools/sayilar.py --tam --yaz`
+araçları koşturur ve her aracın **kendi son satırını** aşağıya yazar:
+
+<!-- SAYILAR:baslangic -->
+
+_Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturur ve her aracın kendi son satırını buraya yazar. Son koşum: 2026-09-13._
+
+| Araç | AYS | SPI | ESP |
+|---|---|---|---|
+| `runtests.js` | 1019/1019 gecti | 761/761 gecti | 579/579 gecti |
+| `smoke.js` | Duman testi temiz — 2 hedefte 36 ekran, 36 sekme gezildi. | Duman testi temiz — 2 hedefte 24 ekran, 64 sekme gezildi. | Duman testi temiz — 2 hedefte 28 ekran, 182 sekme gezildi. |
+| `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (4 bilinen eksik izin listesinde) |
+| `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
+| `layoutcheck.js` | Telefon düzeni temiz: taşma yok, bütün hedefler 24px ve üstü. | Telefon düzeni temiz: taşma yok, bütün hedefler 24px ve üstü. | Telefon düzeni temiz: taşma yok, bütün hedefler 24px ve üstü. |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 26 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 19.2 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 61.6 ms (bütçe 100). |
+| `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
+| `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
+<!-- SAYILAR:bitis -->
 
 Üç sistem de artık **kendini denetleyen bir katman** taşır — dışarıdan gelen
 eleştirilerin koda dönüşmüş hâli:

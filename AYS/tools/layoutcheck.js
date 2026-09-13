@@ -175,8 +175,8 @@ function waitForServer(url, tries){
       if(errors.length > 30) console.log('  … ve ' + (errors.length - 30) + ' tane daha');
       process.exitCode = 1;
     }else{
-      console.log('\nTelefon düzeni temiz: taşma yok, bütün hedefler '
-        + MIN_TAP + 'px ve üstü.');
+      console.log('\nTelefon düzeni temiz — ' + WIDTH + ' pikselde ' + rows.length
+        + ' yerde taşma yok, bütün dokunma hedefleri ' + MIN_TAP + 'px ve üstü.');
     }
   }catch(err){
     console.error('Koşum hatası:', err.message);

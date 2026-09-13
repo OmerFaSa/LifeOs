@@ -54,6 +54,9 @@ async function waitForServer(url){
   throw new Error('sunucu açılmadı: ' + url);
 }
 
+/* Gecen bir denetim de SAYI gostermeli. */
+let BAKILAN = 0;
+
 (async () => {
   const server = spawn('python3', [path.join(ROOT, 'devserver.py'), String(PORT)],
     { cwd:ROOT, stdio:'ignore' });
@@ -170,6 +173,7 @@ async function waitForServer(url){
         for(const route of (tamListe ? routes : AZ_ROTA)){
           await page.evaluate(r => SP.App.go(r), route);
           await wait(170);
+          BAKILAN++;
 
           const r = await page.evaluate(() => {
             const d = document.documentElement;
@@ -303,5 +307,5 @@ async function waitForServer(url){
     console.log('\n' + problems.length + ' sorun');
     process.exit(1);
   }
-  console.log('beş düzen temiz');
+  console.log('beş düzen temiz — ' + BAKILAN + ' ekran/genişlik kombinasyonu bakıldı');
 })();

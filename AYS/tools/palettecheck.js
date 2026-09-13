@@ -94,6 +94,7 @@ function checksOf(m){
      «gecti» yazar; en dusuk oran yazilinca olcumun gercekten yapildigi
      gorunur. */
   let en = { ad:"-", oran:Infinity, min:1, pay:Infinity, yer:"" };
+  let olcum = 0;
   for(const theme of ['light','dark']){
     for(const pal of pals){
       await p.evaluate(async ([pl, th]) => {
@@ -107,6 +108,7 @@ function checksOf(m){
         const m = await measure(p);
         checksOf(m).forEach(([name, r, min]) => {
           if(r < min) bad.push(`${theme}/${pal}/${route}  ${name}  ${r.toFixed(2)} < ${min}`);
+          olcum++;
           if(r / min < en.pay || en.pay === undefined){ en = { ad:name, oran:r, min, pay:r/min, yer:`${theme}/${pal}/${route}` }; }
         });
       }
@@ -141,7 +143,11 @@ function checksOf(m){
       await p.screenshot({ path:`${OUT}/${theme}-${pal}.png` });
     }
   }
-  console.log(bad.length ? 'KONTRAST SORUNU:\n' + bad.join('\n') : 'butun paletler AA gecti');
-  console.log(`en dar pay: ${en.ad} ${en.oran.toFixed(2)} (asgari ${en.min}) — ${en.yer}`);
+  if(bad.length){
+    console.log('KONTRAST SORUNU:\n' + bad.join('\n'));
+  }else{
+    console.log(`${olcum} kontrast ölçümü AA geçti — en dar pay: ${en.ad} `
+      + `${en.oran.toFixed(2)} (asgari ${en.min}) — ${en.yer}`);
+  }
   await b.close(); srv.kill(); process.exit(0);
 })().catch(e => { console.error(e); srv.kill(); process.exit(1); });

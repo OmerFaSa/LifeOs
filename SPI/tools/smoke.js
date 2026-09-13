@@ -51,6 +51,10 @@ async function dismissSetup(page){
   await wait(200);
 }
 
+/* Gecen bir denetim de SAYI gostermeli: hicbir sey gezmeyen bir betik
+   de «temiz» yazar. Son satir bu yuzden ne gezildigini soyler. */
+const SAYAC = { hedef:0, ekran:0, sekme:0 };
+
 async function walkScreens(page, base, target, errors){
   await page.goto(base + target, { waitUntil:'load' });
   await page.waitForSelector('.site', { timeout:15000 });
@@ -134,6 +138,7 @@ async function walkScreens(page, base, target, errors){
   await wait(150);
 
   console.log('  ' + target + ' → ' + routes.length + ' ekran, ' + sekme + ' sekme gezildi');
+  SAYAC.ekran += routes.length; SAYAC.sekme += sekme; SAYAC.hedef++;
 }
 
 /* Gercek kullanim akisi: profil → ogun → tahlil → hedefin degismesi. */
@@ -217,7 +222,8 @@ async function walkFlows(page, base, errors){
       console.log('\n' + errors.length + ' sorun:');
       errors.forEach(e => console.log('  ✕ ' + e));
     }else{
-      console.log('\nDuman testi temiz.');
+      console.log('\nDuman testi temiz — ' + SAYAC.hedef + ' hedefte '
+        + SAYAC.ekran + ' ekran, ' + SAYAC.sekme + ' sekme gezildi.');
     }
     code = errors.length ? 1 : 0;
   }catch(err){
