@@ -68,26 +68,51 @@ ESP.Screens.profile = (function(){
               hepsi kapalı bir ESP, açılış ekranından ibaret bir kabuktur.</p>`,
         }),
 
+        /* GÖRÜNÜM — üç hata birden buradaydı ve üçü de sessizdi:
+
+           1. Seçenekler `x.label` okuyordu; palet ve düzen verisinde o alan
+              `name`. Etiket undefined kalınca Select nesnenin kendisini
+              yazıyor, ekranda «[object Object]» görünüyordu.
+           2. Ekran `prefs.theme/palette/design` yazıyordu; kabuk ise
+              `profile`'dan okuyor. Yani buradan yapılan hiçbir görünüm
+              değişikliği UYGULANMIYORDU.
+           3. İki ayrı yer, iki ayrı doğru: üst çubuktaki palet düğmesi
+              profile yazıyor, bu ekran prefs'e. Aynı ayarın iki kaydı,
+              hangisinin doğru olduğu sorusunu doğuruyor.
+
+           Tek kaynak: `profile`. Bu ekran üst çubuğun kullandığı EYLEMLERİ
+           çağırır — ayrı bir yol açmaz. */
         K.Entry({
           label:'GÖRÜNÜM',
-          meta:(S.prefs && S.prefs.palette) || 'kağıt',
-          note:'Aynı üç tercih üst çubuktaki palet düğmesinden de açılır. '
-             + 'Palet rengi, düzen iskeleti değiştirir; durum renkleri ikisinden de '
-             + 'etkilenmez.',
+          meta:(ESP.PALETTES.filter(x => x.id === ((p.palette) || ESP.DEFAULT_PALETTE))[0]
+            || {}).name || 'Kâğıt',
+          note:'Aynı üç tercih üst çubuktaki palet düğmesinden de açılır ve '
+             + 'ikisi aynı kaydı kullanır. Palet rengi, düzen iskeleti '
+             + 'değiştirir; durum renkleri ikisinden de etkilenmez.',
+          wide:true,
           body:html`
-            <div class="cols-3">
-              ${K.Field({ label:'Tema',
-                input:K.Select({ id:'pf-theme', value:(S.prefs && S.prefs.theme) || 'system',
-                  options:[{ value:'system', label:'Sistem' }, { value:'light', label:'Açık' },
-                    { value:'dark', label:'Koyu' }] }) })}
-              ${K.Field({ label:'Palet',
-                input:K.Select({ id:'pf-palette', value:(S.prefs && S.prefs.palette) || 'kagit',
-                  options:(ESP.PALETTES || []).map(x => ({ value:x.id, label:x.label })) }) })}
-              ${K.Field({ label:'Düzen',
-                input:K.Select({ id:'pf-design', value:(S.prefs && S.prefs.design) || 'defter',
-                  options:(ESP.DESIGNS || []).map(x => ({ value:x.id, label:x.label })) }) })}
+            ${K.SectionTitle('Tema')}
+            <div class="picks picks--disc">${map([
+                { id:'system', label:'Sistem', note:'Cihazın ayarına uyar' },
+                { id:'light', label:'Açık', note:'Her zaman açık' },
+                { id:'dark', label:'Koyu', note:'Her zaman koyu' }],
+              x => K.PickCard({ label:x.label, meta:x.note,
+                on:(p.theme || 'system') === x.id,
+                act:'set-theme', data:{ 'data-theme':x.id } }))}</div>
+            <div class="mt-10">
+              ${K.SectionTitle('Palet')}
+              <div class="picks picks--disc">${map(ESP.PALETTES, x => K.PickCard({
+                label:x.name, meta:x.note,
+                on:(p.palette || ESP.DEFAULT_PALETTE) === x.id,
+                act:'set-palette', data:{ 'data-palette':x.id } }))}</div>
             </div>
-            ${K.Button({ label:'Uygula', act:'save-view', class:'mt-10' })}`,
+            <div class="mt-10">
+              ${K.SectionTitle('Düzen')}
+              <div class="picks picks--disc">${map(ESP.DESIGNS, x => K.PickCard({
+                label:x.name, meta:x.note,
+                on:(p.design || 'defter') === x.id,
+                act:'set-design', data:{ 'data-design':x.id } }))}</div>
+            </div>`,
         }),
 
         K.Entry({
@@ -131,8 +156,16 @@ ESP.Screens.profile = (function(){
           note:yedek == null ? 'Henüz yedek alınmadı.'
             : yedek + ' gün önce yedeklendi.',
           body:html`
-            ${when(ayak.pct != null, () => K.Meter({ label:'Yerel kota',
-              value:ayak.pct, text:'%' + ayak.pct }))}
+            ${ayak.pct != null
+              ? K.Meter({ label:'Yerel kota', value:ayak.pct, text:'%' + ayak.pct,
+                  tone:ayak.full ? 'danger' : (ayak.near ? 'warn' : null),
+                  note:ayak.limit
+                    ? Math.round(ayak.bytes / 1024) + ' KB / '
+                      + Math.round(ayak.limit / 1024) + ' KB'
+                    : null })
+              : K.Notice({ tone:'info',
+                  body:'Yerel kota bu tarayıcıda ölçülemiyor. Ölçülemeyen bir '
+                    + 'oran yüzde olarak gösterilmez.' })}
             <div class="row wrap mt-10">
               ${K.Button({ label:'Yedek indir', act:'export-data' })}
               ${K.Button({ label:'Yedekten yükle', act:'import-data' })}
@@ -178,15 +211,6 @@ ESP.Screens.profile = (function(){
       /* Kapatilan bolumun ekraninda durmak mumkun degil; kabuk zaten
          yonlendirmeyi denetliyor ama burada da tazelenmeli. */
       ESP.UI.toast(ESP.Mod.isOn(id) ? 'Bölüm açıldı' : 'Bölüm kapandı — verisi duruyor');
-      ESP.App.render();
-    },
-
-    async 'save-view'(){
-      await M.savePrefs({
-        theme:val('pf-theme'), palette:val('pf-palette'), design:val('pf-design'),
-      });
-      ESP.App.applyTheme();
-      ESP.UI.toast('Uygulandı');
       ESP.App.render();
     },
 

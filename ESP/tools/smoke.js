@@ -100,6 +100,25 @@ async function walkScreens(page, base, target, errors){
       sekme++;
     }
 
+    /* METINDE SIZINTI: "undefined", "NaN", "[object Object]" ya da "null"
+       cizilmis olmasi bir bicim hatasi degil bir VERI hatasidir — cogu
+       zaman olmayan bir alani okumaktan gelir ve ekranda kullaniciya
+       hicbir sey soylemez. Bos veriyle ozellikle sik cikar. */
+    const sizinti = await page.evaluate(() => {
+      const t = (document.getElementById('main') || {}).innerText || '';
+      const bulgular = [];
+      [/\bundefined\b/, /\bNaN\b/, /\[object Object\]/, /\bnull\b/]
+        .forEach(re => {
+          const m = re.exec(t);
+          if(m){
+            const i = Math.max(0, m.index - 40);
+            bulgular.push(m[0] + ' → …' + t.slice(i, m.index + 40).replace(/\n/g, ' ') + '…');
+          }
+        });
+      return bulgular;
+    });
+    sizinti.forEach(x => errors.push(target + ' · ' + r + ': metinde sızıntı — ' + x));
+
     /* Ipucu anahtari eksikse UI.hint('') doner ve dugme HIC cizilmez:
        sessiz bir kayip. Cizilen her `data-hint` anahtarinin karsiligi
        olmali; olmayan anahtar burada gorunur olur. */

@@ -368,6 +368,71 @@
     });
   });
 
+  describe('denetim · gorunum ayari', () => {
+
+    /* HATA: Ayarlar ekrani gorunum tercihlerini `prefs`'e yaziyordu, kabuk
+       ise `profile`'dan okuyor. Yani o ekrandan yapilan hicbir gorunum
+       degisikligi UYGULANMIYORDU. Ayni ayarin iki kaydi, hangisinin dogru
+       oldugu sorusunu dogurur — tek kaynak `profile`. */
+    it('gorunum tercihleri profilde durur', async () => {
+      resetState();
+      await ESP.Model.saveProfile({ theme:'dark', palette:'indigo', design:'odak' });
+      expect(ESP.S.profile.theme).toBe('dark');
+      expect(ESP.S.profile.palette).toBe('indigo');
+      /* prefs bu alanlari HIC tasimaz: varsayilanlarda yoklar. */
+      const d = ESP.Model.defaultPrefs();
+      expect(d.theme).toBeUndefined();
+      expect(d.palette).toBeUndefined();
+      expect(d.design).toBeUndefined();
+    });
+
+    /* HATA: secenekler `x.label` okuyordu; palet ve duzen verisinde o alan
+       `name`. Etiket undefined kalinca ekranda «[object Object]» goruluyordu. */
+    it('eski kayittaki gorunum tercihi profile tasinir ve prefs\'ten silinir', async () => {
+      resetState();
+      await ESP.Store.set('prefs', { reduceMotion:false, palette:'bordo', theme:'dark' });
+      await ESP.Store.set('profile', { id:'test', name:'Test' });
+      await ESP.Model.loadAll();
+      expect(ESP.S.profile.palette).toBe('bordo');
+      expect(ESP.S.prefs.palette).toBeUndefined();
+    });
+
+    it('profilde zaten deger varsa eski prefs onu ezmez', async () => {
+      resetState();
+      await ESP.Store.set('prefs', { palette:'bordo' });
+      await ESP.Store.set('profile', { id:'test', name:'Test', palette:'indigo' });
+      await ESP.Model.loadAll();
+      expect(ESP.S.profile.palette).toBe('indigo');
+    });
+
+    it('palet ve duzen verisinde etiket alani `name`dir', () => {
+      ESP.PALETTES.forEach(x => {
+        expect(String(x.name || '').length > 0).toBeTruthy();
+        expect(x.label).toBeUndefined();
+      });
+      ESP.DESIGNS.forEach(x => {
+        expect(String(x.name || '').length > 0).toBeTruthy();
+      });
+    });
+
+    /* HATA: localQuota() bir NESNE dondurur, sayi gibi bolununce «%NaN». */
+    it('ayak izi yuzdesi NaN olamaz', () => {
+      resetState();
+      const a = ESP.Model.dataFootprint();
+      expect(a.pct == null || isFinite(a.pct)).toBeTruthy();
+      expect(typeof a.bytes).toBe('number');
+    });
+
+    it('olculemeyen kota yuzde olarak gosterilmez', () => {
+      resetState();
+      const gercek = ESP.Store.localQuota;
+      ESP.Store.localQuota = () => ({ bytes:10, limit:0, pct:null });
+      try{
+        expect(ESP.Model.dataFootprint().pct).toBeNull();
+      }finally{ ESP.Store.localQuota = gercek; }
+    });
+  });
+
   describe('denetim · depo hatasi', () => {
 
     /* HATA: model fonksiyonlari Store.set donusunu yok sayiyor, kota dolsa

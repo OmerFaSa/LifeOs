@@ -219,11 +219,15 @@ ESP.Model = (function(){
     return S.profile;
   }
 
+  /* Gorunum tercihleri BURADA DEGIL, profilde durur.
+
+     Ikisinde birden durduklari surece iki ayri dogru vardi: ust cubuktaki
+     palet dugmesi profile yaziyor, Ayarlar ekrani prefs'e — ve kabuk
+     yalnizca profile okudugu icin o ekrandan yapilan degisiklik hicbir
+     zaman uygulanmiyordu. Bir ayarin iki kaydi, "hangisi dogru?" sorusunu
+     dogurur ve o soru er ya da gec yanlis cevaplanir. */
   function defaultPrefs(){
     return {
-      theme:'system',
-      palette:'kagit',
-      design:'defter',
       reduceMotion:false,
       autoBriefing:true,
       pinned:[],
@@ -1162,10 +1166,18 @@ ESP.Model = (function(){
     return n == null ? true : n >= 30;
   }
 
+  /* Yerel depo ayak izi.
+
+     HATA: `localQuota()` bir SAYI degil bir NESNE dondurur
+     ({bytes, limit, pct, near, full}) ve burada sayi gibi bolunuyordu —
+     ekranda "Yerel kota %NaN" yaziyordu. Bir yuzde hic gostermemek, yanlis
+     gostermekten iyidir; ama dogrusunu gostermek en iyisi. */
   function dataFootprint(){
     const bytes = ESP.Store.localSize();
-    const quota = ESP.Store.localQuota();
-    return { bytes, quota, pct:quota ? Math.round(bytes / quota * 100) : null };
+    const kota = ESP.Store.localQuota() || {};
+    const pct = (typeof kota.pct === 'number' && isFinite(kota.pct)) ? kota.pct : null;
+    return { bytes, quota:kota, limit:kota.limit || null, pct:pct,
+      near:!!kota.near, full:!!kota.full };
   }
 
   /* ------------------------------------------------------------------ goc
@@ -1192,6 +1204,25 @@ ESP.Model = (function(){
 
     S.profile = Object.assign(defaultProfile(), await ESP.Store.get('profile'));
     S.prefs = Object.assign(defaultPrefs(), await ESP.Store.get('prefs'));
+
+    /* Eski kayitlarda gorunum tercihleri prefs'te durabilir. Tasinir ve
+       oradan silinir: iki kayit birakmak, ayni hatayi acik tutmaktir.
+       Profilde zaten bir deger varsa O gecerlidir — kullanicinin son
+       gordugu ve uygulanan sey odur. */
+    (function(){
+      const eski = ['theme', 'palette', 'design'];
+      let tasindi = false;
+      eski.forEach(k => {
+        if(S.prefs[k] == null) return;
+        if(S.profile[k] == null) S.profile[k] = S.prefs[k];
+        delete S.prefs[k];
+        tasindi = true;
+      });
+      if(tasindi){
+        ESP.Store.set('profile', S.profile);
+        ESP.Store.set('prefs', S.prefs);
+      }
+    })();
     S.profiles = profileList();
     if(!S.profiles.length) await touchProfileList();
 
