@@ -128,6 +128,16 @@ SP.Ev = (function(){
     return AUTH_ORDER[Math.min(AUTH_ORDER.length - 1, i + Math.max(0, steps))];
   }
 
+  /* «Yerel» eksen, GENELLENEBILIRLIGI olcer; bu kullaniciya UYGUNLUGU
+     degil. Kullanicinin KENDI verisinden gelen bir esik baskasiyla
+     karsilastirilamaz — ama tam da bu kullanici icin en uygun olandir.
+     Bu yuzden kendi veri kaynaklarinda «yerel» bir zayiflik sayilmaz;
+     onun zayifligi varsa kesinlik ekseninde yazilir.
+     SPI'de bugun kullanicinin kendi verisini temsil eden bir kaynak turu
+     YOK; eklendigi gun bu listeye yazilmalidir, yoksa kullanicinin kendi
+     cihazindan gelen esik haksiz yere bir basamak iner. */
+  const SELF_SOURCES = [];
+
   /* Kaç basamak inilecek ve NİÇİN. Sebepler kullanıcıya gösterilir:
      sessizce zayıflatmak, yanıltmanın başka bir biçimidir. */
   function downgrades(r){
@@ -140,7 +150,7 @@ SP.Ev = (function(){
     if(r.applicability === 'indirect'){
       out.push({ axis:'applicability',
         reason:'Eşik bu kullanıcıya dolaylı uyuyor; popülasyona göre kayabilir.' });
-    } else if(r.applicability === 'local'){
+    } else if(r.applicability === 'local' && SELF_SOURCES.indexOf(r.source) < 0){
       out.push({ axis:'applicability',
         reason:'Eşik kişiye/cihaza özel; genel bir karar eşiği değil.' });
     }
