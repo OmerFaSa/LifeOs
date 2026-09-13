@@ -154,6 +154,55 @@ Reçetenin toplamı profildeki günlük tabandan taşmaz ve gün içinde değiş
 Bir egzersiz «işlendi» bayrağıyla değil, **gün kaydına oturum yazılarak**
 kapanır: ayrı bir bayrak, yapılmamış işi yapılmış göstermenin en kolay yolu.
 
+### Modül 0.5 — Bölümler, tezgâh, ders ve teklif
+
+Dört katman sonradan eklendi ve dördü de **yedi bölümde birden** çalışır.
+
+**Bölümler (`core/modules.js`).** Yedi disiplinin hepsini herkes çalışmaz.
+Kapalı bir disiplin gezinmeden kalkar, reçeteye ve denge hesabına girmez,
+merdiven ortalamasına katılmaz, ofiste masası kapanır. Ama **verisi
+silinmez**: «kapalı» ile «yok» ayrı şeylerdir. En az bir bölüm açık kalmak
+zorundadır — sistem kendi kendini kullanılamaz hâle getiremez.
+
+Şerit numaraları çizim anında verilir (`core/nav.js`): kapalı bölüm boşluk
+bırakmaz. Numara bir kimlik değil bir **sıra**dır; kimlik `id`'dir ve
+yönlendirme ona bağlıdır.
+
+**Tezgâh (`core/desk.js`).** Her bölüm sayfasının altında beş sekme: Koç ·
+Harita · Ekler · Hatırlatma · Plan. Tek yerde tanımlı olmasının sebebi
+tutarlılık: kullanıcı bir kez öğrensin, yedi kez değil.
+
+İki değişmez:
+
+- **Ses ikinci bir yol açmaz.** Bölüm sayfasındaki sohbet — sesli olanı
+  dahil — Danışma ekranıyla aynı `ESP.Office.send()` üzerinden geçer: aynı
+  brifing, aynı ev kuralları denetimi, aynı kayıt.
+- **Koç ekleri görür, içeriğini görmez.** Brifinge yalnızca sayı, tür ve
+  başlık gider. Ham ses dosyası zaten hiç tutulmaz: ses eki süresini taşır.
+
+**Ders ve pratik (`core/lesson.js`).** Ünite bir ders değildir — ESP
+öğretmen değil — bir **başlangıç malzemesidir**: boş ekranı kaldırır.
+Üniteden gelen kart `seed` etiketi taşır. İlerleme ayrı bir «tamamlandı»
+bayrağından değil SRS'ten okunur: bir kartı bilinen yapan şey bir kez doğru
+bilmek değil, **aralığının uzamasıdır**.
+
+Pratik ayrı bir hafıza kaydı açmaz; cevap tekrar ekranındakiyle aynı SRS'e
+yazılır. Çeldiriciler aynı desteden gelir — uydurulmuş bir çeldirici yanlış
+bir şeyi öğretebilir.
+
+**Teklif (`core/plans.js`).** Koçun sistemi değiştirme yolu. İki seçenek
+vardı ve aralarındaki fark bütün doktrin:
+
+| | Ne olur |
+|---|---|
+| (a) Ajan doğrudan yazar | Yanlış bir çıkarım bir cümle olarak kalmaz; bir hatırlatıcıya, bir hedefe, bir karta dönüşür. |
+| (b) Ajan **teklif eder**, kullanıcı onaylar, **kural motoru uygular** | Model hiçbir aşamada veriye dokunmaz. |
+
+(b) seçildi. Teklif bir cümle değil **tipli bir nesnedir** ve onu kural
+motoru üretir; model yalnızca cümleye çevirir. Her teklif ajanın kendi
+alanındadır (`allowed()`), hiçbiri kendiliğinden uygulanmaz, hiçbiri silme
+önermez ve uygulanan her teklif ne yaptığını kaydeder.
+
 ### Modül 1 — Aralıklı tekrar (`core/srs.js`)
 
 Leitner kutuları, SM-2 ile yumuşatılmış. İki yapı birlikte çalışır:
@@ -302,18 +351,21 @@ disiplinin kendi tezgâhı, sonra danışma, en sonda ayar.
 | # | Bölüm | Sayfalar | Sekmeler |
 |---|---|---|---|
 | 01 | **Günlük** | Bugün · Merdiven | reçete, ölçüm, geçmiş / genel, yol, seviye tespiti |
-| 02 | Dil | Dil Stüdyosu | çalış, kartlar, ekle, **dilbilgisi**, ilerleme |
-| 03 | Düşünce | Sempozyum · **Kronoloji** | açık, kapalı, ekle, metinler, **deneyler** / şerit, olaylar, kaynaklar, zincir, çalışma |
-| 04 | Ses | Stüdyo | müzik, diksiyon, **kulak**, ilerleme |
-| 05 | Okuma | Kütüphane | notlar, matris, kaynaklar, **yöntem** |
-| 06 | Yazı | Yazı Laboratuvarı | taslaklar, ölçüm, **araçlar** |
-| 07 | Ofis | Masalar · Danışma · Toplantı · Analiz | — |
-| 08 | Ayarlar | Profil · Rehber | — |
+| 02 | Dil | Dil Stüdyosu | çalış, kartlar, ekle, **öğren**, dilbilgisi, ilerleme |
+| 03 | Felsefe | Sempozyum | açık, kapalı, ekle, metinler, deneyler |
+| 04 | Ses | Stüdyo | müzik, diksiyon, kulak, ilerleme |
+| 05 | Okuma | Kütüphane | notlar, matris, kaynaklar, yöntem |
+| 06 | Yazı | Yazı Laboratuvarı | taslaklar, ölçüm, araçlar |
+| 07 | **Tarih** | Kronoloji | şerit, olaylar, kaynaklar, zincir, **öğren**, çalışma |
+| 08 | Ofis | Masalar · Danışma · Toplantı · Analiz | — |
+| 09 | Ayarlar | Profil · Rehber | — |
 
-**Felsefe ile tarih neden aynı bölümde?** Bu bir yerleştirme kolaylığı değil
-bir iddia: ikisi de aynı kası çalıştırır — öncül ile sonucu ayırmak. Ayrıca
-dokuz numaralı bir şerit telefonda okunmuyordu; birleştirme hem düzeni hem
-sayfayı kurtardı.
+Numaralar **kullanıcıya göre** verilir: kapalı bir bölüm hiç çizilmez ve
+kalanlar boşluk bırakmadan yeniden numaralanır. Yukarıdaki tablo «hepsi
+açık» hâlidir.
+
+Her disiplin bölümünün altında ayrıca **tezgâh** durur: Koç (yazılı + sesli
+sohbet) · Harita · Ekler · Hatırlatma · Plan.
 
 **Spesifikasyondan bilinçli sapma:** spec «Analiz»i ayrı bir gezinme grubu
 sayıyor; burada Ofis'in dördüncü sayfası. Sebep: analiz bir alan değil bir
@@ -453,11 +505,11 @@ node tools/palettecheck.js   # kontrast
 
 | Ölçüm | Sonuç |
 |---|---|
-| Birim testi | **245/245** geçiyor |
-| Duman testi | temiz — 14 ekran, **48 sekme**, kaynak + `dist/esp.html` |
+| Birim testi | **343/343** geçiyor |
+| Duman testi | temiz — 14 ekran, **75 sekme**, kaynak + `dist/esp.html` |
 | Erişilebilirlik | temiz (4 bilinen eksik izin listesinde) |
 | Kontrast | **1848 ölçüm**, hepsi AA — en dar pay 4,52 (asgari 4,5) |
-| Tek dosya dağıtım | ~1,1 MB, 58 js modülü |
+| Tek dosya dağıtım | ~1,2 MB, 65 js modülü |
 
 Duman testi artık **sekmeleri de gezer**: ekranın açılması ikinci sekmesinin
 çizildiğini söylemez ve çoğu ekranda içeriğin yarısı ilk sekmede değil.

@@ -30,6 +30,32 @@ der ve hangi masaya gittiğini hatırlar.
 
 ---
 
+## Ajan sistemi nasıl değiştirir: TEKLİF
+
+Koçların «kendi alanlarında değişiklik yapması» iki şekilde kurulabilirdi:
+
+1. Ajan doğrudan yazar.
+2. Ajan **teklif eder**, kullanıcı onaylar, **kural motoru uygular**.
+
+Birincisi tartışmasız yanlış. Bir dil modelinin kullanıcının verisine
+doğrudan yazması halüsinasyon riskini kalıcı hâle getirir: yanlış bir çıkarım
+bir cümle olarak kalmaz, bir hatırlatıcıya, bir hedefe, bir karta dönüşür.
+
+İkincisi seçildi (`core/plans.js`). Teklif bir cümle değil **tipli bir
+nesnedir** ve onu kural motoru üretir; model yalnızca cümleye çevirir.
+
+| Değişmez | Ne demek |
+|---|---|
+| Her teklif ajanın **kendi alanındadır** | Maestro hatırlatıcı kurabilir, dil ünitesi ekleyemez. Kapsam dışı teklif üretilmez; elle uydurulsa bile uygulanmaz. |
+| Hiçbir teklif **kendiliğinden uygulanmaz** | Reddedilen teklif tekrar sorulmaz ama kaydı silinmez. |
+| **Geri alınamayan iş teklif edilmez** | Hiçbir teklif silme önermez; uygulanan her teklif ne yaptığını kaydeder. |
+
+Toplantının çıktısı da yalnız bir cümle değil bir **eylem listesidir**:
+masaların o andaki teklifleri tutanağa yazılır. «Konuştuk ve dağıldık» bir
+toplantı değildir.
+
+---
+
 ## Temel ilke: kural motoru otoritedir
 
 ```

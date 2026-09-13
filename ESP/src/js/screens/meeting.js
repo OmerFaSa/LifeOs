@@ -98,6 +98,16 @@ ESP.Screens.meeting = (function(){
                   tone:m.closing.source === 'model' ? 'info' : 'muted', icon:false })}</div>
               <p>${m.closing.text}</p>
             </div>`)}
+          ${when((m.proposals || []).length, () => html`
+            <div class="mt-10">
+              ${K.SectionTitle('Toplantıda masaya gelen teklifler')}
+              <p class="small muted">«Konuştuk ve dağıldık» bir toplantı değildir.
+                Teklifleri model üretmez: kural motoru üretir, toplantı yalnızca
+                o anın fotoğrafını saklar. Onay senin.</p>
+              ${ESP.Parts.proposalList(m.proposals.filter(t =>
+                !(ESP.S.proposals || []).some(x => x.id === t.id && x.state !== 'proposed')),
+                'Bu toplantının bütün teklifleri karara bağlanmış.')}
+            </div>`)}
           ${when(m.decision, () => html`
             <div class="row mt-10">
               ${K.Button({ label:'Kararı takibe al', size:'sm', act:'track-decision',

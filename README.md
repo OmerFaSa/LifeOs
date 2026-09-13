@@ -63,12 +63,17 @@ node tools/ledgercheck.js    # defter düzenini denetler (yalnız SPİ)
 ```
 
 Bir denetim geçtiğinde de **sayı gösterir**: hiçbir şey ölçmeyen bir betik de
-«geçti» yazar. ESP'nin son koşumu: 245 birim testi, 14 ekran ve 48 sekmelik
+«geçti» yazar. ESP'nin son koşumu: 343 birim testi, 14 ekran ve 75 sekmelik
 duman testi, 1848 kontrast ölçümü.
 
 ESP ayrıca bir **merdiven** taşır: yedi disiplinin her birinde sıfırdan
 üstatlığa beş kademe, her kademede ölçülebilir kapılar ve o kapıya çalışan
 somut bir günlük reçete. Kademe kişiye değil ÜRETİME verilir.
+
+Bölümler **açılıp kapanabilir** (kapatmak veriyi silmez), her bölümün altında
+koçuyla yazılı ve sesli konuşulabilen bir **tezgâh** durur, ve koçlar sistemi
+**teklif** ederek değiştirir: onayı kullanıcı verir, uygulamayı kural motoru
+yapar.
 
 HKM bir tarayıcı uygulaması değil bir arka plan servisidir; kendi komutları
 vardır (yalnızca Python standart kütüphanesi):

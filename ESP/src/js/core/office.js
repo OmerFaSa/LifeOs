@@ -845,6 +845,14 @@ ESP.Office = (function(){
       + 'Kararı DEĞİŞTİRME, gerekçelendir. Karar: «' + karar.title + '» — ' + karar.why,
       { brief:pb, history:false, maxTokens:300 });
 
+    /* Toplantinin ciktisi yalniz bir CUMLE degil bir EYLEM LISTESI de olmali:
+       "konustuk ve dagildik" bir toplanti degildir. Masalarin o andaki
+       teklifleri tutanaga yazilir; kullanici sonradan tek tek onaylar.
+
+       Teklifleri model uretmez — kural motoru uretir (core/plans.js) ve
+       toplanti yalnizca o anin fotografini cekip saklar. */
+    const teklifler = ESP.Plans ? ESP.Plans.all() : [];
+
     const rec = {
       id:U.uid('mtg'), at:new Date().toISOString(),
       agenda:gundem.id, agendaLabel:gundem.label,
@@ -852,6 +860,8 @@ ESP.Office = (function(){
       closing:{ text:kapanis.text, source:kapanis.source },
       decision:{ id:karar.id, title:karar.title, why:karar.why,
         route:karar.route, rank:karar.rank },
+      proposals:teklifler.map(t => ({ id:t.id, agentId:t.agentId, kind:t.kind,
+        title:t.title, why:t.why, disc:t.disc, payload:t.payload, at:t.at })),
     };
     S.officeMeetings.unshift(rec);
     await ESP.Store.set('meetings/' + rec.id, rec);

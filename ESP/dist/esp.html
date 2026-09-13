@@ -5289,7 +5289,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'0052fec', at:'2026-09-13 02:44', dirty:true };
+SP.BUILD = { id:'aa21d6d', at:'2026-09-13 02:48', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -18513,6 +18513,14 @@ ESP.Office = (function(){
       + 'Kararı DEĞİŞTİRME, gerekçelendir. Karar: «' + karar.title + '» — ' + karar.why,
       { brief:pb, history:false, maxTokens:300 });
 
+    /* Toplantinin ciktisi yalniz bir CUMLE degil bir EYLEM LISTESI de olmali:
+       "konustuk ve dagildik" bir toplanti degildir. Masalarin o andaki
+       teklifleri tutanaga yazilir; kullanici sonradan tek tek onaylar.
+
+       Teklifleri model uretmez — kural motoru uretir (core/plans.js) ve
+       toplanti yalnizca o anin fotografini cekip saklar. */
+    const teklifler = ESP.Plans ? ESP.Plans.all() : [];
+
     const rec = {
       id:U.uid('mtg'), at:new Date().toISOString(),
       agenda:gundem.id, agendaLabel:gundem.label,
@@ -18520,6 +18528,8 @@ ESP.Office = (function(){
       closing:{ text:kapanis.text, source:kapanis.source },
       decision:{ id:karar.id, title:karar.title, why:karar.why,
         route:karar.route, rank:karar.rank },
+      proposals:teklifler.map(t => ({ id:t.id, agentId:t.agentId, kind:t.kind,
+        title:t.title, why:t.why, disc:t.disc, payload:t.payload, at:t.at })),
     };
     S.officeMeetings.unshift(rec);
     await ESP.Store.set('meetings/' + rec.id, rec);
@@ -23533,6 +23543,16 @@ ESP.Screens.meeting = (function(){
                 ${K.Badge({ label:m.closing.source === 'model' ? 'model' : 'kural motoru',
                   tone:m.closing.source === 'model' ? 'info' : 'muted', icon:false })}</div>
               <p>${m.closing.text}</p>
+            </div>`)}
+          ${when((m.proposals || []).length, () => html`
+            <div class="mt-10">
+              ${K.SectionTitle('Toplantıda masaya gelen teklifler')}
+              <p class="small muted">«Konuştuk ve dağıldık» bir toplantı değildir.
+                Teklifleri model üretmez: kural motoru üretir, toplantı yalnızca
+                o anın fotoğrafını saklar. Onay senin.</p>
+              ${ESP.Parts.proposalList(m.proposals.filter(t =>
+                !(ESP.S.proposals || []).some(x => x.id === t.id && x.state !== 'proposed')),
+                'Bu toplantının bütün teklifleri karara bağlanmış.')}
             </div>`)}
           ${when(m.decision, () => html`
             <div class="row mt-10">
