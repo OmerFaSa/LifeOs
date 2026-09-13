@@ -59,20 +59,70 @@ async function walkScreens(page, base, target, errors){
   const routes = await page.evaluate(() =>
     SP.App.SECTIONS.reduce((acc, s) => acc.concat(s.views.map(v => v.route)), []));
 
+  /* Cizilen METINDE sizinti: bunlar kullaniciya asla gorunmemeli ve
+     gorundugunde bir hesap sessizce bozulmus demektir. (Bu tarama ve
+     asagidaki sekme gezisi ESP'den alindi — uc sistemin denetim
+     araclari birbirine tasinir.) */
+  const SIZINTI = [/\bundefined\b/, /\bNaN\b/, /\[object Object\]/];
+
+  async function scanText(nerede){
+    const txt = await page.$eval('#main', el => el.innerText || '');
+    SIZINTI.forEach(re => {
+      if(re.test(txt)){
+        const m = txt.match(new RegExp('.{0,40}' + re.source + '.{0,40}'));
+        errors.push(nerede + ': metinde sızıntı — ' + (m ? m[0].trim() : re.source));
+      }
+    });
+  }
+
+  async function checkPanel(nerede){
+    const panel = await page.$('.notice--danger');
+    if(!panel) return;
+    const txt = (await panel.textContent()) || '';
+    if(/çizilemedi|başlatılamadı|ters gitti/.test(txt)){
+      errors.push(nerede + ': hata paneli — ' + txt.trim().slice(0, 120));
+    }
+  }
+
+  async function kapat(){
+    const acik = await page.$('#sheet > *');
+    if(acik){
+      await page.keyboard.press('Escape');
+      await wait(150);
+    }
+  }
+
+  let sekme = 0;
   for(const r of routes){
+    await kapat();
     await page.evaluate(id => SP.App.go(id), r);
-    await wait(160);
+    await wait(200);
+    await kapat();
+    const nerede = target + ' · ' + r;
+
     const title = await page.textContent('.hero__title');
     const size = await page.$eval('#main', el => el.innerHTML.length);
-    if(!title) errors.push(target + ' · ' + r + ': başlık yok');
-    if(size < 50) errors.push(target + ' · ' + r + ': ekran boş çizildi');
+    if(!title) errors.push(nerede + ': başlık yok');
+    if(size < 50) errors.push(nerede + ': ekran boş çizildi');
+    await checkPanel(nerede);
+    await scanText(nerede);
 
-    const panel = await page.$('.notice--danger');
-    if(panel){
-      const txt = (await panel.textContent()) || '';
-      if(/çizilemedi|başlatılamadı/.test(txt)){
-        errors.push(target + ' · ' + r + ': hata paneli — ' + txt.trim().slice(0, 120));
-      }
+    /* Sekmeleri de gez: ekranin acilmasi ikinci sekmesinin calistigi
+       anlamina gelmez. */
+    const SEC = '.subtabs [data-act]';
+    const tablar = await page.$$(SEC);
+    for(let i = 0; i < tablar.length; i++){
+      const el = (await page.$$(SEC))[i];
+      if(!el) continue;
+      const ad = ((await el.textContent()) || '').trim().slice(0, 24);
+      await kapat();
+      await el.click({ timeout:5000 }).catch(() => {});
+      await wait(220);
+      sekme++;
+      await checkPanel(nerede + '/' + ad);
+      await scanText(nerede + '/' + ad);
+      const s2 = await page.$eval('#main', e => e.innerHTML.length);
+      if(s2 < 50) errors.push(nerede + '/' + ad + ': sekme boş çizildi');
     }
   }
 
@@ -83,7 +133,7 @@ async function walkScreens(page, base, target, errors){
   await page.keyboard.press('Escape');
   await wait(150);
 
-  console.log('  ' + target + ' → ' + routes.length + ' ekran gezildi');
+  console.log('  ' + target + ' → ' + routes.length + ' ekran, ' + sekme + ' sekme gezildi');
 }
 
 /* Gercek kullanim akisi: profil → ogun → tahlil → hedefin degismesi. */

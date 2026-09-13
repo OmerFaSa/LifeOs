@@ -69,6 +69,15 @@ SP.HINTS = {
   /* --- ofis --- */
   'office':{ t:'Beş ajanlı ofis', b:'Dört uzman kendi alanına bakar, Patron çelişkiyi çözer ve tek karar çıkar.',
     more:'Yetki ayrımı kasıtlıdır: bir ajan alan dışına çıkarsa soruyu sahibine yönlendirir. Sayı kural motorundan gelir; ajan hesap yapmaz, yalnızca cümleye çevirir.' },
+  'friction':{ t:'Sürtünme', b:'Takip ekranlarında geçen süre — günlük bütçeye göre.',
+    more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar. SPİ\'de ORAN hesaplanmaz: sağlıklı yaşamak bir saat işi değildir; uyumak, doğru yemek ve yürümek uygulamada dakika olarak görünmez. Sahte bir payda uydurmak, ölçülmemiş bir şeyi ölçülmüş göstermek olurdu. Bu yüzden yalnızca mutlak süre izlenir ve sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
+  'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',
+    more:'Goodhart yasası: bir ölçü hedef hâline geldiğinde iyi bir ölçü olmaktan çıkar. Sağlık verisi gürültülü olduğu için pencere 56 gün ve eşik %35 — AYS ve ESP\'dekinden daha muhafazakâr. Biyobelirteç çiftlerinde iki pencerenin her ikisinde de ölçüm şartı vardır: tek tahlille eğilim çıkarmak, iki noktadan doğru geçirip «eğilim» demektir.' },
+  'calib':{ t:'Kalibrasyon', b:'Ölçümü görmeden önce senin tahminin; sonra ikisinin farkı.',
+    more:'Saglik takibinin en sinsi yan etkisi: her sayıyı cihazdan bekleyen biri, cihaz yokken kendini okuyamaz. Yorgun olup olmadığını anlamak için HRV\'ye bakmak zorunda kalmak bir beceri kaybıdır. Tahmin KÖR yazılır; beşin altında kapanmış tahminle puan verilmez; puan kişiye değil tahmine aittir ve bir sağlık yargısı değildir.' },
+  'signal':{ t:'Denetim sorusu', b:'Nöbetçinin ya da sürtünme ölçerin sorduğu tek soru.',
+    more:'Denetim mekanizması ile denetim EKRANI aynı şey değildir: arka planda çalışan nöbetçinin bir ekran ağacı olması gerekmez, doğru anda mevcut akışa düşen tek bir soru yeter. Aynı anda en fazla bir soru açık kalır; «bu soru bana uymuyor» da bir cevaptır. Soru cevaplanınca kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı sonraki pencerede ölçülür.' },
+
   'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın derecesi eşiğin ne kadar güçlü konuşabileceğini belirler.',
     more:'Deterministik olmak, bilimsel olarak doğru olmak demek değildir: yanlış seçilmiş bir eşik, son derece güvenilir görünen yanlış bir sonuç üretir. Dört derece vardır — kılavuz ve uzlaşı yönlendirebilir; gözlemsel ilişki ve sistemin kendi seçimi yalnızca gözlem bildirir. Kaynağı yazılmamış eşik de yönlendiremez: bilinmeyen kaynak, iyi kaynak değildir.' },
   'grounding':{ t:'Halüsinasyon engeli', b:'Model serbest sayı üretmez; sayıyı kural motoru verir, model yorumlar.',

@@ -247,7 +247,16 @@ SP.Quota = (function(){
     const k = key(cfg);
     rollDay();
     const usedToday = daily.used[k] || 0;
-    if(!eff) return { known:false, usedToday };
+    /* Limit BILINMIYORSA alanlar eksik degil NULL doner.
+
+       Eskiden burada yalnizca { known, usedToday } donuyordu; cagiran
+       taraf `String(st.lastMinute)` yazinca ekranda "undefined" gorunuyordu.
+       Eksik alan, sifir degildir — ama eksik alan ayni zamanda cagiranin
+       basina is acar. Sema her iki durumda da AYNI kalir. */
+    if(!eff){
+      return { known:false, rpm:null, rpd:null, gapMs:null,
+        lastMinute:null, usedToday, remainingToday:null, full:false };
+    }
     const b = bucket(k);
     prune(b, Date.now());
     return {

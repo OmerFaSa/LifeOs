@@ -432,6 +432,41 @@ SP.Screens.today = (function(){
     </div>`;
   }
 
+  /* Denetim sorusu — AYRI EKRAN DEĞİL, Bugün akışının içinde tek kart.
+
+     Nöbetçi (core/goodhart.js) ve sürtünme ölçer (core/friction.js) arka
+     planda çalışır; buraya yalnızca sıradaki TEK soru düşer. Soru yoksa
+     kart hiç çizilmez — sistemin sormadığı gün, iyi gündür. */
+  function signalEntry(){
+    if(!SP.Signals) return null;
+    const sig = SP.Signals.current();
+    if(!sig) return null;
+    if(!sig.seenAt) SP.Signals.markSeen(sig.id);
+
+    return K.Entry({
+      label:'BİR SORU', hint:'signal',
+      meta:sig.kind === 'friction' ? 'sürtünme' : 'gösterge',
+      note:sig.title,
+      body:html`
+        ${K.Notice({ tone:'info', body:sig.question })}
+        ${when(sig.answeredAt, () => html`
+          <p class="small muted mt-8">Cevabın: ${sig.answer}</p>
+          <p class="tiny dim">Soru açık kalır: ayrışmanın gerçekten kapanıp
+            kapanmadığı bir sonraki pencerede ölçülecek.</p>`)}
+        ${when(!sig.answeredAt, () => html`
+          <div class="mt-8">
+            ${K.Field({ label:'Kısa cevabın (isteğe bağlı)',
+              input:K.Input({ id:'sig-answer', placeholder:'tek cümle yeter' }) })}
+            <div class="row wrap mt-8">
+              ${K.Button({ label:'Kaydet', tone:'primary', size:'sm',
+                act:'signal-answer', data:{ 'data-id':sig.id } })}
+              ${K.Button({ label:'Bu soru bana uymuyor', size:'sm',
+                act:'signal-dismiss', data:{ 'data-id':sig.id } })}
+            </div>
+          </div>`)}`,
+    });
+  }
+
   async function render(){
     const tab = S.ui.dayTab || 'giris';
     const flags = M.openFlags();
@@ -454,12 +489,26 @@ SP.Screens.today = (function(){
     }
 
     return String(html`${head}${K.Ledger([
-      formEntry(), symptomEntry(), quickEntry(), statusEntry(), whyEntry(),
-    ])}
+      signalEntry(), formEntry(), symptomEntry(), quickEntry(), statusEntry(), whyEntry(),
+    ].filter(Boolean))}
     <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'certainty']))}</div>`);
   }
 
   const handle = {
+    async 'signal-answer'(el){
+      const inp = document.getElementById('sig-answer');
+      const r = await SP.Signals.answer(el.dataset.id, inp ? inp.value : '');
+      if(!r.ok){ UI.toast(r.error); return; }
+      UI.toast('Kaydedildi. Sonucu bir sonraki pencere gösterecek.');
+      SP.App.render();
+    },
+
+    async 'signal-dismiss'(el){
+      await SP.Signals.dismiss(el.dataset.id);
+      UI.toast('Soru kapatıldı');
+      SP.App.render();
+    },
+
     async 'bekleyen-onay'(el){
       const r = await SP.Proposals.approve(el.dataset.id);
       UI.toast(r.ok ? 'Kaydedildi' : (r.why || 'Kaydedilemedi'));

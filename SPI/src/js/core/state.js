@@ -45,6 +45,9 @@ SP.S = {
   prices:{},          // foodId -> { tl, at, source }
 
   flags:[],           // kirmizi bayrak kayitlari
+  usage:null,         // surtunme olcumu (core/friction.js)
+  forecasts:[],       // kalibrasyon defteri (core/calib.js)
+  signals:[],         // acik/kapali denetim sorulari (core/signals.js)
   decisions:[],       // ofis kararlari
 
   office:null,        // ofis ayarlari (saglayici, model, ajan basina secim)
@@ -845,6 +848,10 @@ SP.Model = (function(){
 
     await touchHousehold();
     await refreshFlags();
+
+    if(SP.Friction) await SP.Friction.load();
+    if(SP.Calib) await SP.Calib.load();
+    if(SP.Signals) await SP.Signals.load();
 
     S.ready = true;
     return S;

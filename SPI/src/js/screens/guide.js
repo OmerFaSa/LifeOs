@@ -104,11 +104,17 @@ SP.Screens.guide = (function(){
     if(!st) return null;
     return K.Card({
       title:'Kullanım hakkı',
-      body:K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
-        ['Son dakikada', String(st.lastMinute)],
-        ['Bugün kullanılan', String(st.usedToday)],
-        ['Bugün kalan', st.remainingToday == null ? 'sınırsız' : String(st.remainingToday)],
-      ] }),
+      body:html`
+        ${when(!st.known, () => K.Notice({ tone:'info',
+          body:'Bu sağlayıcı/model için tanımlı bir kullanım sınırı yok. '
+             + 'Bilinmeyen sınır, sınırsız demek değildir: sistem yalnızca '
+             + 'kendi saydığı çağrıyı bilir.' }))}
+        ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
+          ['Son dakikada', st.lastMinute == null ? '—' : String(st.lastMinute)],
+          ['Bugün kullanılan', String(st.usedToday)],
+          ['Bugün kalan', !st.known ? 'bilinmiyor'
+            : st.remainingToday == null ? 'sınırsız' : String(st.remainingToday)],
+        ] })}`,
       foot:html`<span class="small dim">Ofis günde bir brifing, toplantı başına beş çağrı harcar.</span>`,
     });
   }

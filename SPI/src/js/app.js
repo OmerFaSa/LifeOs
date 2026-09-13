@@ -1077,6 +1077,33 @@ SP.App = (function(){
      yerine kapatmak daha dürüst: kullanıcı nereye tıkladığını bilir. */
   window.addEventListener('resize', () => { if(isAppearanceOpen()) closeAppearance(); });
 
+  /* ------------------------------------------------------- sürtünme ölçümü
+
+     Sistemin kendi maliyeti de ölçülür (core/friction.js). SPİ'de oran
+     hesaplanmaz: sağlıklı yaşamak bir saat işi değildir ve sahte bir
+     payda uydurmak, ölçülmemiş bir şeyi ölçülmüş göstermek olurdu. */
+  (function wireFriction(){
+    if(!SP.Friction) return;
+    let sonYazim = 0;
+    const YAZIM_ARALIK = 30000;
+
+    function dokun(){
+      if(!S.ready) return;
+      SP.Friction.tick();
+      const now = Date.now();
+      if(now - sonYazim > YAZIM_ARALIK){ sonYazim = now; SP.Friction.save(); }
+    }
+    ['click', 'keydown', 'input', 'scroll', 'pointerdown'].forEach(t => {
+      document.addEventListener(t, dokun, { passive:true, capture:true });
+    });
+    document.addEventListener('visibilitychange', () => {
+      if(document.hidden){ SP.Friction.blur(); SP.Friction.save(); }
+      else SP.Friction.tick();
+    });
+    window.addEventListener('blur', () => SP.Friction.blur());
+    window.addEventListener('pagehide', () => { SP.Friction.blur(); SP.Friction.save(); });
+  })();
+
   /* ------------------------------------------------------------ depolama sağlığı */
   let lastErrorToastAt = 0;
   function wireStoreErrors(){
@@ -1142,6 +1169,13 @@ SP.App = (function(){
       applySection(S.route);
       await render();
       installManifest();
+
+      /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez
+         koşar ve gerekiyorsa TEK soru açar (core/signals.js). */
+      if(SP.Signals){
+        SP.Signals.sync().then(r => { if(r && r.changed) render(); })
+          .catch(e => console.error('Sinyal eşitleme hatası:', e));
+      }
 
       /* Ofis açılışı bloklamaz: yüklenince yeniden çizilir ve günün
          brifingi bir kez üretilir. */

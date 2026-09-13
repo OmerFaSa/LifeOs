@@ -54,7 +54,7 @@ SP.U = (function(){
   function monthKey(d){ const x = parse(d); return x.getFullYear()+'-'+pad2(x.getMonth()+1); }
 
   function relativeDay(dateISO){
-    const n = diffDays(todayISO(), dateISO);
+    const n = diffDays(bugunISO(), dateISO);
     if(n === 0) return 'bugün';
     if(n === 1) return 'yarın';
     if(n === -1) return 'dün';
@@ -141,8 +141,22 @@ SP.U = (function(){
   /* Son n gunun ISO tarihleri, ESKIDEN YENIYE. Bir pencereyi gezerken
      sirali olmasi onemli: ilk yarisi gecen hafta, ikinci yarisi bu hafta
      gibi karsilastirmalar bu siraya dayanir. */
+
+  /* "Bugun" TEK bir yerden okunur.
+
+     Modul icinden dogrudan `todayISO()` cagirmak sessiz bir tuzaktir:
+     testler withToday() ile SP.U.todayISO'yu degistirir ama modul ici
+     cagrilar o degisimi gormez. Sahte tarihle kurulmus bir test gercek
+     bugunun penceresine bakar ve "olcum yok" der; hicbir sey patlamadigi
+     icin de fark edilmez. (Ayni hata ESP'de bulundu ve orada da boyle
+     kapatildi.) */
+  function bugunISO(){
+    return (window.SP && SP.U && SP.U.todayISO && SP.U.todayISO !== todayISO)
+      ? SP.U.todayISO() : todayISO();
+  }
+
   function lastDays(n, endISO){
-    const end = parse(endISO || todayISO());
+    const end = parse(endISO || bugunISO());
     const out = [];
     for(let i = n - 1; i >= 0; i--) out.push(iso(addDays(end, -i)));
     return out;
