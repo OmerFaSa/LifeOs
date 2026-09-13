@@ -303,9 +303,9 @@ ESP.Screens.today = (function(){
 
     return K.Entry({
       label:'GÜNÜN REÇETESİ', hint:'coach',
-      meta:p.minutes + ' dk',
+      meta:U.fmtMin(p.minutes),
       note:'Reçeteyi koç yazar, sırayı planlayıcı verir. Toplam, profildeki '
-         + 'günlük tabandan (' + p.budget + ' dk) taşmaz.',
+         + 'günlük tabandan (' + U.fmtMin(p.budget) + ') taşmaz.',
       action:K.Button({ label:'Merdiven', size:'sm', act:'go',
         data:{ 'data-route':'ladder' } }),
       wide:true,
@@ -360,7 +360,7 @@ ESP.Screens.today = (function(){
          + 'saatini sen seçersin.',
       body:html`
         <div class="row wrap">
-          ${K.Badge({ label:g.minutes + ' dk', tone:'muted', icon:false })}
+          ${K.Badge({ label:U.fmtMin(g.minutes), tone:'muted', icon:false })}
           <span class="small">${(g.items || []).map(x => x.label).join(' · ') || '—'}</span>
           ${K.Button({ label:'Bölüme git', size:'sm', act:'go',
             data:{ 'data-route':g.route } })}

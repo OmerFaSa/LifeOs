@@ -5317,7 +5317,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'d55f386', at:'2026-09-13 03:30', dirty:true };
+SP.BUILD = { id:'e3ee672', at:'2026-09-13 03:33', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -13055,13 +13055,26 @@ ESP.Desk = (function(){
   function reminders(discId){ return ESP.Model.remindersOf(discId); }
   function due(discId, todayISO){ return ESP.Model.dueReminders(discId, todayISO); }
 
+  /* Hatirlatma ozeti SAYIDIR, metin degil.
+
+     Ilk surumde bugune dusen hatirlaticilarin METNI de brifinge giriyordu
+     ve bunu bir mahremiyet testi yakaladi. Bir ekin BASLIGI bir etikettir
+     (parca adi gibi: olmadan "hangi parca platoda" cumlesi kurulamaz), ama
+     bir hatirlatmanin metni etiket degil ICERIGIN KENDISIDIR — kullanicinin
+     kendine yazdigi cumle. ESP.PRIVACY.model bunu zaten disarida
+     birakiyordu; burasi artik uyguluyor.
+
+     Kaybedilen sey kucuk: ajan "3 hatirlatma bugune dustu" diyebiliyor,
+     hangisi oldugunu soyleyemiyor. Kullanici zaten ekranda goruyor. */
   function reminderSummary(discId, todayISO){
     const hepsi = reminders(discId).filter(function(r){ return !r.done; });
     const bugun = due(discId, todayISO);
     return {
       open:hepsi.length, due:bugun.length,
       cert:reminders(discId).length ? 'measured' : 'missing',
-      texts:bugun.slice(0, 5).map(function(r){ return r.text; }),
+      /* En eski vadenin YASI bir olcumdur ve metin tasimaz. */
+      oldestDays:bugun.length
+        ? U.diffDays(bugun[0].due, todayISO || U.todayISO()) : null,
     };
   }
 
@@ -16642,7 +16655,7 @@ ESP.Parts = (function(){
           ${K.Badge({ label:lv.label + ' · ' + lv.short,
             tone:r.cert === 'missing' ? 'muted' : 'info', icon:false })}
           ${cert(r.cert)}
-          <span class="tiny dim">${r.minutes} dk / ${r.budget} dk taban</span>
+          <span class="tiny dim">${U.fmtMin(r.minutes)} / ${U.fmtMin(r.budget)} taban</span>
         </div>
         ${rxList(r)}`,
     });
@@ -17041,7 +17054,7 @@ ESP.Parts = (function(){
             d.date < bugun && 'is-past')}">
           <span class="wpday__date num">${d.date}</span>
           <span class="wpday__disc"><b>${d.label}</b>
-            <span class="tiny dim">${d.minutes} dk · ${(d.items || [])
+            <span class="tiny dim">${U.fmtMin(d.minutes)} · ${(d.items || [])
               .map(x => x.label).join(', ') || '—'}</span></span>
           ${K.Button({ label:'Aç', size:'sm', act:'go',
             data:{ 'data-route':d.route } })}
@@ -19786,9 +19799,9 @@ ESP.Screens.today = (function(){
 
     return K.Entry({
       label:'GÜNÜN REÇETESİ', hint:'coach',
-      meta:p.minutes + ' dk',
+      meta:U.fmtMin(p.minutes),
       note:'Reçeteyi koç yazar, sırayı planlayıcı verir. Toplam, profildeki '
-         + 'günlük tabandan (' + p.budget + ' dk) taşmaz.',
+         + 'günlük tabandan (' + U.fmtMin(p.budget) + ') taşmaz.',
       action:K.Button({ label:'Merdiven', size:'sm', act:'go',
         data:{ 'data-route':'ladder' } }),
       wide:true,
@@ -19843,7 +19856,7 @@ ESP.Screens.today = (function(){
          + 'saatini sen seçersin.',
       body:html`
         <div class="row wrap">
-          ${K.Badge({ label:g.minutes + ' dk', tone:'muted', icon:false })}
+          ${K.Badge({ label:U.fmtMin(g.minutes), tone:'muted', icon:false })}
           <span class="small">${(g.items || []).map(x => x.label).join(' · ') || '—'}</span>
           ${K.Button({ label:'Bölüme git', size:'sm', act:'go',
             data:{ 'data-route':g.route } })}

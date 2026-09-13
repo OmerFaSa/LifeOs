@@ -181,7 +181,7 @@ ESP.Parts = (function(){
           ${K.Badge({ label:lv.label + ' · ' + lv.short,
             tone:r.cert === 'missing' ? 'muted' : 'info', icon:false })}
           ${cert(r.cert)}
-          <span class="tiny dim">${r.minutes} dk / ${r.budget} dk taban</span>
+          <span class="tiny dim">${U.fmtMin(r.minutes)} / ${U.fmtMin(r.budget)} taban</span>
         </div>
         ${rxList(r)}`,
     });
@@ -580,7 +580,7 @@ ESP.Parts = (function(){
             d.date < bugun && 'is-past')}">
           <span class="wpday__date num">${d.date}</span>
           <span class="wpday__disc"><b>${d.label}</b>
-            <span class="tiny dim">${d.minutes} dk · ${(d.items || [])
+            <span class="tiny dim">${U.fmtMin(d.minutes)} · ${(d.items || [])
               .map(x => x.label).join(', ') || '—'}</span></span>
           ${K.Button({ label:'Aç', size:'sm', act:'go',
             data:{ 'data-route':d.route } })}

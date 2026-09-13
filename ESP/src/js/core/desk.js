@@ -145,13 +145,26 @@ ESP.Desk = (function(){
   function reminders(discId){ return ESP.Model.remindersOf(discId); }
   function due(discId, todayISO){ return ESP.Model.dueReminders(discId, todayISO); }
 
+  /* Hatirlatma ozeti SAYIDIR, metin degil.
+
+     Ilk surumde bugune dusen hatirlaticilarin METNI de brifinge giriyordu
+     ve bunu bir mahremiyet testi yakaladi. Bir ekin BASLIGI bir etikettir
+     (parca adi gibi: olmadan "hangi parca platoda" cumlesi kurulamaz), ama
+     bir hatirlatmanin metni etiket degil ICERIGIN KENDISIDIR — kullanicinin
+     kendine yazdigi cumle. ESP.PRIVACY.model bunu zaten disarida
+     birakiyordu; burasi artik uyguluyor.
+
+     Kaybedilen sey kucuk: ajan "3 hatirlatma bugune dustu" diyebiliyor,
+     hangisi oldugunu soyleyemiyor. Kullanici zaten ekranda goruyor. */
   function reminderSummary(discId, todayISO){
     const hepsi = reminders(discId).filter(function(r){ return !r.done; });
     const bugun = due(discId, todayISO);
     return {
       open:hepsi.length, due:bugun.length,
       cert:reminders(discId).length ? 'measured' : 'missing',
-      texts:bugun.slice(0, 5).map(function(r){ return r.text; }),
+      /* En eski vadenin YASI bir olcumdur ve metin tasimaz. */
+      oldestDays:bugun.length
+        ? U.diffDays(bugun[0].due, todayISO || U.todayISO()) : null,
     };
   }
 
