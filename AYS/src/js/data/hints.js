@@ -8,6 +8,8 @@ window.R = window.R || {};
 
 R.HINTS = {
   /* --- sistemin kendi denetimi --- */
+  'audit':{ t:'Bakım borcu', b:'Beş alanda birikmiş bozukluk var mı?',
+    more:'Analiz edilmemiş on deneme, ikinci testi hiç yapılmamış yirmi konu, kapatılmamış yüz yanlış — hepsi tabloda «hacim» gibi görünür ve hiçbiri ilerleme değildir. Her bulgu eyleme bağlıdır ve hiçbiri suçlamaz: «tembellik ediyorsun» denmez, «şu kayıtlar şu durumda» denir. Veri eşiğin altındaysa bulgu değil «ölçülmedi» döner — ölçülmemiş bir geçmiş temiz değildir.' },
   'storage':{ t:'Depo ufku', b:'Bu sistem dokuz ay her gün kullanılırsa depo dolar mı?',
     more:'«Depo %80 dolu» tek başına işe yaramaz: ne zaman dolacağını ve NEYİN şiştiğini söylemez, ikisi bambaşka kararlar gerektirir. Büyüme hızı her açılıştaki bir ölçümden HESAPLANIR; iki ölçümden az varsa hız bilinmiyordur. Budama yalnızca sistemin kendi ürettiği kayıtlara dokunur: bir adayın dokuz aylık deneme, hata ve konu kaydı hiçbir koşulda yer açmak için silinmez.' },
   'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın türü eşiğin ne kadar güçlü konuşabileceğini belirler.',

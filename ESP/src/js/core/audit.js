@@ -591,9 +591,11 @@ ESP.Audit = (function(){
         out.push(Object.assign({ disc:d.id, discLabel:d.label }, f));
       });
     });
-    return out.sort(function(a, b){
-      return (siralama[a.severity] || 9) - (siralama[b.severity] || 9);
-    });
+    /* DIKKAT — `||` burada kullanilamaz: siralama.warn degeri SIFIRDIR ve
+       `0 || 9` dokuz doner. Bu hata butun uyarilari listenin SONUNA
+       atiyordu. Sifir gecerli bir sira degeridir. */
+    const sira = function(s){ return siralama[s] == null ? 9 : siralama[s]; };
+    return out.sort(function(a, b){ return sira(a.severity) - sira(b.severity); });
   }
 
   function count(discId){

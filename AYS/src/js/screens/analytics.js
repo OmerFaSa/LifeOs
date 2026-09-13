@@ -22,6 +22,7 @@ R.Screens.analytics = (function(){
     { id:'speed',   label:'Hız ve isabet' },
     { id:'value',   label:'Konu değeri' },
     { id:'habits',  label:'Alışkanlık' },
+    { id:'denetim', label:'Denetim' },
     { id:'durust',  label:'Dürüstlük' },
   ];
 
@@ -525,8 +526,50 @@ R.Screens.analytics = (function(){
     ]);
   }
 
+
+  /* ------------------------------------------------------------ denetim
+
+     Bes alanda birikmis bakim borcu: deneme, konu, tekrar, yanlis
+     defteri, plan. Plan NEREDE olunacagini, siradaki is NE yapilacagini
+     soyler; bu, "bir sey ters gidiyor mu?" sorusunu cevaplar. */
+  function denetimTab(){
+    const hepsi = R.Audit.all();
+    const ciddi = hepsi.filter(f => f.severity !== 'none');
+
+    return K.Grid([
+      K.Span(12, K.Card({ title:'Bakım borcu', hint:'audit',
+        sub:ciddi.length ? ciddi.length + ' bulgu' : 'temiz',
+        body:html`
+          ${when(!ciddi.length, () => K.Notice({ tone:'ok',
+            body:'Beş alanda da bakım borcu görünmüyor. Veri eşiğin '
+               + 'altındaysa bu "temiz" değil "ölçülmedi" demektir — '
+               + 'aşağıdaki gri satırlar onu söyler.' }))}
+          <p class="tiny dim">Her bulgu eyleme bağlıdır: yanında hangi
+            kayıtların söz konusu olduğu yazar. Hiçbir bulgu kişiyi
+            suçlamaz — «şu kayıtlar şu durumda» der.</p>` })),
+
+      ...R.Audit.AREAS.map(function(a){
+        const bulgular = R.Audit.of(a.id);
+        if(!bulgular.length) return '';
+        return K.Span(6, K.Card({ title:a.label,
+          sub:bulgular.filter(f => f.severity !== 'none').length + ' bulgu',
+          body:html`${map(bulgular, f => html`
+            <div class="mt-12">
+              ${K.Notice({ tone:f.severity === 'warn' ? 'warn' : 'info',
+                title:f.title, body:f.note })}
+              ${when((f.items || []).length, () => K.Table({ tight:true,
+                headers:['Kayıt', 'Durum'],
+                rows:f.items.map(x => [x.label, x.meta || '—']) }))}
+              ${when(f.route, () => K.Button({ label:'Aç', size:'sm', act:'go',
+                data:{ 'data-route':f.route }, class:'mt-8' }))}
+            </div>`)}` }));
+      }).filter(Boolean),
+    ]);
+  }
+
   const BODIES = { compare:compareTab, errors:errorsTab, rank:rankTab,
-    speed:speedTab, value:valueTab, habits:habitsTab, durust:durustTab };
+    speed:speedTab, value:valueTab, habits:habitsTab,
+    denetim:denetimTab, durust:durustTab };
 
   async function render(){
     /* Kayitli sekme adi artik yoksa ilk sekmeye duser. Eskimis bir deger

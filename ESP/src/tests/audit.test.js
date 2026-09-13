@@ -224,14 +224,28 @@
       expect(A().all().filter(f => f.disc === 'lang').length).toBe(0);
     });
 
+    /* DIKKAT — bu test bilerek KARISIK siddette bulgu uretir.
+
+       Once yalnizca 'lang' bulgulariyla yaziliydi ve hepsi 'warn'
+       oldugu icin siralamayi hic sinamiyordu. O halde bir hatayi
+       kacirdi: siralama tablosunda warn degeri SIFIR ve `0 || 9`
+       dokuz doner — butun uyarilar listenin SONUNA dusuyordu. */
     it('ciddi bulgular once siralanir', () => {
       resetState();
+      /* lang: uyari uretir (sulk + bozuk kart) */
       for(let i = 0; i < 6; i++) pushCard({ front:'a' + i, back:'b' + i });
       S.cards[0].lapses = 5;
       S.cards[1].back = '';
+      /* felsefe, okuma, yazi: veri esigi altinda → 'none' uretir */
       ESP.Memo.bitir();
-      const hepsi = A().all().filter(f => f.disc === 'lang');
+      const hepsi = A().all();
+      expect(hepsi.length > 3).toBeTruthy();
       expect(hepsi[0].severity).toBe('warn');
+      /* 'none' olanlarin hicbiri bir 'warn'dan once gelmemeli. */
+      let ilkNone = hepsi.findIndex(f => f.severity === 'none');
+      let sonWarn = -1;
+      hepsi.forEach((f, i) => { if(f.severity === 'warn') sonWarn = i; });
+      if(ilkNone >= 0) expect(sonWarn < ilkNone).toBeTruthy();
     });
 
     /* Bulgu SUCLAMAZ. */
