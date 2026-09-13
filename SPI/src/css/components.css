@@ -1703,7 +1703,10 @@ button.minrow:hover{ background:var(--surface-2); }
   cursor:pointer; text-align:left; text-decoration:underline;
   text-underline-offset:2px;
   display:inline-flex; align-items:center;
-  min-height:24px; min-width:24px;
+  /* Taban 24px ama tam 24 vermek sinirda kaliyor: satir yuksekligi
+     yuvarlanirken 23,99'a dusen olcum denetimde «kucuk hedef» sayiliyordu.
+     Iki piksel pay, sinirdaki bir kurali kararli bir kurala cevirir. */
+  min-height:26px; min-width:26px;
 }
 .linkbtn:hover{ color:var(--primary-hover); }
 

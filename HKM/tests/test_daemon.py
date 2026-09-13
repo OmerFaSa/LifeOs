@@ -7,6 +7,8 @@
    ve bellekte degil gecici dosyada bir veritabaniyla.
 """
 
+import hashlib
+import hmac
 import json
 import os
 import tempfile
@@ -16,10 +18,12 @@ import urllib.request
 from http.server import ThreadingHTTPServer
 
 import daemon
-from core import db, thresholds
+from core import channels, db, thresholds
 from tests.harness import eq, metric, no, ok, suite, test
 
 TOKEN = "test-token-uzun-ve-rastgele"
+WA_SIR = "webhook-uygulama-sirri"
+IZINLI = "905551112233"
 BUGUN = "2026-09-13"
 
 
@@ -29,7 +33,14 @@ class _Server(object):
         self.db_path = os.path.join(self.dir, "hkm.db")
         db.connect(self.db_path).close()
         self.srv = ThreadingHTTPServer(("127.0.0.1", 0), daemon.Handler)
-        self.srv.config = {"local_token": TOKEN}
+        self.srv.config = {"local_token": TOKEN, "channels": {"whatsapp": {
+            "enabled": True, "phone_number_id": "555", "token": "WAJETON",
+            "app_secret": WA_SIR, "verify_token": "WADOGRULAMA",
+            "allow_from": [IZINLI],
+            # Test AGA CIKMAZ: taban adres kapali bir yerel porta bakar.
+            # Gercek bir servise istek atan birim testi, olcmedigi bir seye
+            # bagli olur ve cevrimdisi ortamda sessizce yavaslar.
+            "api_base": "http://127.0.0.1:4997"}}}
         self.srv.local = threading.local()
         self.srv.db_path = self.db_path
         self.srv.thresholds = thresholds.DEFAULTS
@@ -39,6 +50,18 @@ class _Server(object):
 
     def url(self, yol):
         return "http://127.0.0.1:%d%s" % (self.port, yol)
+
+    def ham(self, yol, govde, basliklar, method="POST"):
+        """Imzali/imzasiz ham govde — webhook yolu JSON yardimcisini
+        kullanamaz, cunku imza BAYTLAR uzerinden hesaplanir."""
+        req = urllib.request.Request(self.url(yol), data=govde, method=method)
+        for k, v in (basliklar or {}).items():
+            req.add_header(k, v)
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return r.status, (r.read() or b"").decode("utf-8")
+        except urllib.error.HTTPError as e:
+            return e.code, (e.read() or b"").decode("utf-8")
 
     def call(self, yol, body=None, token=TOKEN, method=None):
         data = None if body is None else json.dumps(body).encode("utf-8")
@@ -181,6 +204,76 @@ def run():
             with urllib.request.urlopen(req, timeout=10) as r:
                 no(r.headers.get("Access-Control-Allow-Origin"))
         test("yanit basligi yalniz yerel kokene yazilir", t_cors_header_on_response)
+
+        def t_local_message_endpoint():
+            kod, r = S.call("/api/message", body={"text": "yardim", "date": BUGUN})
+            eq(kod, 200)
+            eq(r["command"], "yardim")
+            ok("durum" in r["text"])
+            kod, g = S.call("/api/conversation?limit=5")
+            eq(kod, 200)
+            ok(len(g["messages"]) >= 2)
+        test("yerel mesaj ucnoktasi Patron'a baglar", t_local_message_endpoint)
+
+        def t_message_needs_token():
+            eq(S.call("/api/message", body={"text": "durum"}, token=None)[0], 401)
+            eq(S.call("/api/conversation", token=None)[0], 401)
+        test("mesaj ve konusma jetonsuz acilmaz", t_message_needs_token)
+
+        def t_wa_challenge():
+            kod, govde = S.ham(
+                "/api/wa/webhook?hub.mode=subscribe&hub.verify_token=WADOGRULAMA"
+                "&hub.challenge=42", None, {}, method="GET")
+            eq(kod, 200)
+            eq(govde, "42")
+            kod, _ = S.ham(
+                "/api/wa/webhook?hub.mode=subscribe&hub.verify_token=yanlis"
+                "&hub.challenge=42", None, {}, method="GET")
+            eq(kod, 403)
+        test("webhook kurulumu yalniz dogru jetonla dogrulanir", t_wa_challenge)
+
+        def t_wa_requires_signature():
+            """Imza dogrulanmadan govde AYRISTIRILMAZ."""
+            govde = json.dumps({"entry": [{"changes": [{"value": {"messages": [
+                {"type": "text", "from": IZINLI, "text": {"body": "yardim"},
+                 "id": "wamid.1"}]}}]}]}).encode("utf-8")
+            kod, _ = S.ham("/api/wa/webhook", govde,
+                           {"Content-Type": "application/json"})
+            eq(kod, 401)
+            kod, _ = S.ham("/api/wa/webhook", govde, {
+                "Content-Type": "application/json",
+                "X-Hub-Signature-256": "sha256=deadbeef"})
+            eq(kod, 401)
+        test("imzasiz webhook govdesi okunmaz", t_wa_requires_signature)
+
+        def t_wa_unknown_sender_gets_nothing():
+            """Tanimayan numaraya cevap YOK ve icerigi ambara girmez."""
+            govde = json.dumps({"entry": [{"changes": [{"value": {"messages": [
+                {"type": "text", "from": "900000000000",
+                 "text": {"body": "gizli bir cumle"}, "id": "wamid.9"}]}}]}]}
+            ).encode("utf-8")
+            imza = "sha256=" + hmac.new(WA_SIR.encode(), govde,
+                                        hashlib.sha256).hexdigest()
+            kod, yanit = S.ham("/api/wa/webhook", govde, {
+                "Content-Type": "application/json", "X-Hub-Signature-256": imza})
+            eq(kod, 200)
+            r = json.loads(yanit)
+            eq(r["results"][0]["reason"], "not-allowed")
+            kod, g = S.call("/api/conversation?limit=50")
+            butun = " ".join(m["text"] for m in g["messages"])
+            no("gizli bir cumle" in butun, "izinsiz mesajin icerigi ambara yazildi")
+        test("tanimayan numaranin icerigi ambara girmez",
+             t_wa_unknown_sender_gets_nothing)
+
+        def t_say_refuses_when_channel_unreachable():
+            """Kanal acik ama ag yok: bu bir DURUMDUR, daemon cokmez."""
+            kod, r = S.call("/api/say", body={"channel": "whatsapp",
+                                              "date": BUGUN, "force": True})
+            eq(kod, 200)
+            eq(r["ok"], False)
+            ok("status" in r)
+        test("kanal ulasilamazken say cokmez",
+             t_say_refuses_when_channel_unreachable)
 
         def t_bad_json():
             req = urllib.request.Request(S.url("/api/sync/ays"), data=b"{bozuk",

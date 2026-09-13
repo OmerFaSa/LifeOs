@@ -6,13 +6,14 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tests import (harness, test_daemon, test_manager, test_precedence,  # noqa: E402
-                   test_sync, test_twin, test_vps)
+from tests import (harness, test_channels, test_cross, test_daemon,  # noqa: E402
+                   test_manager, test_precedence, test_sync, test_twin,
+                   test_vps)
 
 
 def main():
     for mod in (test_vps, test_sync, test_precedence, test_twin,
-                test_manager, test_daemon):
+                test_cross, test_manager, test_channels, test_daemon):
         mod.run()
 
     suite = None

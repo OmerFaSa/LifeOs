@@ -3,8 +3,29 @@
   "port": 4200,
   "local_token": "buraya-uzun-rastgele-bir-dize-koy",
   "thresholds": {
-    "bio": { "sleep_hours_min": 7.0 },
-    "academic": { "questions_min": 80 },
-    "intellect": { "retention_floor": 0.50 }
+    "bio": {
+      "sleep_hours_min": 7.0
+    },
+    "academic": {
+      "questions_min": 80
+    },
+    "intellect": {
+      "retention_floor": 0.5
+    }
+  },
+  "channels": {
+    "whatsapp": {
+      "enabled": false,
+      "phone_number_id": "",
+      "token": "",
+      "app_secret": "",
+      "verify_token": "",
+      "allow_from": []
+    },
+    "telegram": {
+      "enabled": false,
+      "bot_token": "",
+      "allow_from": []
+    }
   }
 }

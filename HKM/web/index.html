@@ -80,8 +80,22 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
 
     <div class="card" id="brifing"><p class="muted">Yükleniyor…</p></div>
     <div class="card" id="oneri" hidden></div>
+    <div class="card" id="capraz"></div>
     <div class="card" id="ikiz"></div>
     <div class="card" id="gecmis"></div>
+
+    <div class="card" id="konusma">
+      <div class="tag">Büyük Patron</div>
+      <p class="muted">Komut seti küçük ve kapalıdır: serbest metin
+        yorumlanmaz. Anlaşılmayan bir mesaja «anlamadım» denir —
+        anlamadığını anlamış gibi yapmak en pahalı hatadır.</p>
+      <div class="row">
+        <input id="mesaj" placeholder="durum · kabul · ret · neden · capraz · yardim"
+          style="flex:1 1 220px" aria-label="Patron'a komut"/>
+        <button class="primary" id="gonder">Gönder</button>
+      </div>
+      <div id="konusmalar"></div>
+    </div>
   </div>
 </div>
 
@@ -203,6 +217,34 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
     $('ikiz').innerHTML = h;
   }
 
+  /* Capraz bulgu HKM'nin var olma gerekcesidir: AYS uykuyu olcmez, SPI
+     soru sayisini bilmez. Ama burada bile cumle bir ESLESMEDIR — sayfa
+     «cunku» demez, daemon da demez. */
+  function caprazCiz(c){
+    var h = '<div class="tag">Çapraz bulgu · son ' + esc(c.days) + ' gün</div>';
+    var gorunur = (c.pairs || []).filter(function(p){
+      return p.status === 'higher' || p.status === 'lower';
+    });
+    var duz = (c.pairs || []).filter(function(p){ return p.status === 'flat'; });
+    var yok = (c.pairs || []).filter(function(p){ return p.status === 'missing'; });
+    if(gorunur.length){
+      gorunur.forEach(function(p){
+        h += '<div class="line"><b>' + esc(p.aLabel) + ' → ' + esc(p.bLabel) + '</b>'
+           + '<div>' + esc(p.note) + '</div>'
+           + '<div class="muted">' + esc(p.question) + '</div></div>';
+      });
+    }else{
+      h += '<p class="muted">Görünür bir ayrışma yok. Bu, «ilişki yok» demek '
+         + 'değildir: ölçülen günlerde fark, ölçünün genişliğinin altında kaldı.</p>';
+    }
+    if(duz.length || yok.length){
+      h += '<p class="muted">' + esc(duz.length) + ' çift yerinde sayıyor, '
+         + esc(yok.length) + ' çift için henüz yeterli eşleşmiş gün yok. '
+         + 'Az veri bir bulgu değildir.</p>';
+    }
+    $('capraz').innerHTML = h;
+  }
+
   function gecmisCiz(g){
     var h = '<div class="tag">Günün bütün önerileri</div>';
     if(!(g.decisions || []).length){
@@ -225,6 +267,22 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
 
   /* --------------------------------------------------------------- akış */
 
+  function konusmaCiz(liste){
+    var h = '';
+    (liste || []).slice(-8).forEach(function(m){
+      h += '<div class="line"><span class="tag">'
+         + esc(m.role === 'user' ? 'sen' : m.role === 'system' ? 'sistem' : 'patron')
+         + ' · ' + esc(m.channel) + '</span><div>'
+         + esc(m.text).replace(/\n/g, '<br/>') + '</div></div>';
+    });
+    $('konusmalar').innerHTML = h;
+  }
+
+  async function konusmaYukle(){
+    var r = await api('/api/conversation?limit=20');
+    if(r.status === 200) konusmaCiz(r.body.messages);
+  }
+
   async function yukle(){
     var t = $('tarih').value || bugun();
     var b = await api('/api/briefing?date=' + t);
@@ -236,10 +294,25 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
     }
     brifingCiz(b.body);
     oneriCiz(b.body);
+    var c = await api('/api/cross?date=' + t);
+    if(c.status === 200) caprazCiz(c.body);
     var i = await api('/api/twin?date=' + t);
     if(i.status === 200) ikizCiz(i.body);
     var g = await api('/api/decisions?date=' + t);
     if(g.status === 200) gecmisCiz(g.body);
+    await konusmaYukle();
+  }
+
+  async function mesajGonder(){
+    var metin = $('mesaj').value.trim();
+    if(!metin) return;
+    $('gonder').disabled = true;
+    var t = $('tarih').value || bugun();
+    await api('/api/message', { method:'POST',
+      body:JSON.stringify({ text:metin, date:t }) });
+    $('mesaj').value = '';
+    $('gonder').disabled = false;
+    await yukle();
   }
 
   async function bagla(){
@@ -263,6 +336,10 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
     girisGoster('Jeton bu tarayıcıdan silindi.');
   });
 
+  $('gonder').addEventListener('click', mesajGonder);
+  $('mesaj').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') mesajGonder();
+  });
   $('yenile').addEventListener('click', yukle);
   $('tarih').addEventListener('change', yukle);
   $('tarih').value = bugun();

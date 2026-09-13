@@ -6,11 +6,12 @@ LifeOS'un dördüncü katmanı. AYS, SPİ ve ESP kendi alanlarında egemen, sıf
 bağımlılıklı, tarayıcıda koşan üç ayrı sistemdir. HKM onların **üstünde
 değil, yanında** duran isteğe bağlı bir servistir.
 
-**Bu klasör hâlâ bir İSKELETTİR ama artık kapalı bir döngüsü var.**
-Faz 1–3 (çekirdek şema, sync, VP konseyi, öncelik sırası, dijital ikiz,
-Yönetici, öneri yaşam döngüsü) ve Faz 6 (üç arayüzden best-effort işaret)
-yazıldı; **73/73 HKM testi** ve depo kökündeki `tools/entegre.js`
-bütünleşme denetimi geçiyor. Faz 4–5 (Telegram, WhatsApp, ses) yazılmadı.
+**Artık kapalı bir döngü var: veri → denetim → öneri → cevap.**
+Faz 1–3 (şema, sync, VP konseyi, öncelik sırası, dijital ikiz, Yönetici,
+öneri yaşam döngüsü), Faz 4–5'in metin tarafı (Büyük Patron, kanal katmanı,
+WhatsApp geçidi) ve Faz 6 (üç arayüzden işaret) yazıldı. **106 HKM testi**
+ve depo kökündeki `tools/entegre.js` bütünleşme denetimi geçiyor. Ses
+(konuşma girişi) yazılmadı.
 
 ---
 
@@ -146,6 +147,7 @@ Uç noktalar:
 | `GET /api/briefing?date=` | günün brifingi: VP raporları, dayanak ve **tek** öneri |
 | `GET /api/twin?date=&days=` | dijital ikiz — son N günün tek resmi |
 | `GET /api/decisions?date=` | günün bütün önerileri, reddedilenler dahil |
+| `GET /api/cross?date=&days=` | çapraz bulgular — üç ambar yan yana |
 | `POST /api/decision/<id>/accept` | öneriyi kabul eder |
 | `POST /api/decision/<id>/decline` | öneriyi reddeder — **kayıt silinmez** |
 
@@ -256,6 +258,93 @@ girer, brifingin ve ikizin çizildiğini doğrular, sentetik bir kırmızı
 bayrakla öneriyi tetikler ve düğmeye basıp kararın ambara yazıldığını
 kontrol eder. Yüklenmeyen bir sayfa çürür.
 
+## 8.8 Çapraz bulgu — `core/cross.py`
+
+§10'daki dürüst soru şuydu: «üçünü tek sesle özetlemek» için bir daemon,
+bir SQLite ve bir VP konseyi gerekiyor mu? Cevabın tek bir yeri var:
+**hiçbirinin tek başına göremeyeceği şey.** AYS uykuyu ölçmez, SPİ soru
+sayısını bilmez, ESP ikisini de görmez. Bir gecenin ertesi güne ne yaptığı
+yalnızca üç ambar yan yana konduğunda görünür.
+
+Beş çift tanımlı: uyku→ertesi gün soru, uyku→ertesi gün pratik,
+toparlanma→aynı gün çalışma, çalışma↔pratik (aynı saatlerden beslenirler),
+uyku→ertesi gün retansiyon.
+
+Dört kural dosyanın tamamını yönetir:
+
+1. **Neden-sonuç kurulmaz.** Üretilen her cümle bir EŞLEŞMEDİR: «şu
+   günlerde şu böyle ölçüldü». Aynı haftada başka her şey de değişti ve bu
+   dosya bunu bilmez. «Çünkü» kelimesi buradan çıkmaz — bir test bunu
+   kelime kelime arar.
+2. **Eşiğin altında hüküm yok.** Taban sekiz eşleşmiş gün ve her yarıda üç
+   gündür; altında «veri yok» denir — «ilişki yok» DEĞİL.
+3. **Bölünme medyandan.** Kullanıcının kendi medyanı eşik olur; dışarıdan
+   getirilmiş bir «7 saat uyku» eşiği bu kişi için doğru olmayabilir.
+   İki değerli bir dağılımda medyan üst değere eşit düşerse bölünme
+   yanlıştır, veri değil: eşitler üst yarıya alınıp bir kez daha denenir.
+4. **Küçük fark bulgu değildir.** İki yarının ortancası arasındaki fark
+   %15'in altındaysa «görünür bir ayrışma yok» denir.
+
+Çapraz bulgu bir öneri DEĞİLDİR ve önceliği değiştirmez: brifinge en fazla
+iki satır olarak düşer, yanında sorduğu soruyla. Öneri hâlâ yalnızca
+`HKM.PRECEDENCE`'ten çıkar.
+
+## 8.9 Büyük Patron ve kanallar (Faz 4–5)
+
+### Hiyerarşi — ve her katmanın NE YAPMADIĞI
+
+| Katman | İşi | Yapmadığı |
+|---|---|---|
+| VP'ler (`vp_*.py`) | ölçümü denetler | cümle kurmaz, öncelik bilmez |
+| Yönetici (`manager.py`) | brifingi derler | karar üretmez, karar taşır |
+| **Büyük Patron** (`patron.py`) | kanaldan konuşur | sayı üretmez, hüküm kurmaz |
+
+Patron bir dil modeli **değildir** ve bir model ya da ağ katmanı **import
+etmez** — bir test bunu her koşumda denetler. Metin, kural motorunun kendi
+cümlelerinden dizilir.
+
+Dört kural:
+
+1. **Günde tek mesaj.** Kanal bir bildirim akışı değildir; aynı gün aynı
+   kanala ikinci kez gönderilmez (`force` ile bilinçli olarak aşılır).
+2. **Emir kipi yok.** Çıkan her metin buyurgan kip denetçisinden geçer;
+   geçemeyen metin sessizce düzeltilmez, düşürülür.
+3. **Tanımayan kişiye veri gitmez.** Gönderen izin listesinde değilse cevap
+   verilmez ve **içeriği ambara yazılmaz** — yalnız reddedildiği not edilir.
+4. **Komut seti küçük ve kapalıdır:** `durum`, `kabul`, `ret`, `neden`,
+   `capraz`, `yardim`. Serbest metin yorumlanmaz. Anlaşılmayan mesaja
+   «anlamadım, şunları yapabilirim» denir — anlamadığını anlamış gibi
+   yapmak, bu depodaki en pahalı hatadır.
+
+### `core/channels.py` — bir kolaylık değil, bir risk yüzeyi
+
+Yerel bir daemon'a WhatsApp eklemek, o daemon'un kapısını internete açmak
+demektir. Bu yüzden kurallar gevşek değil katı:
+
+1. **Varsayılan kapalı.** Hiçbir kanal kendiliğinden açılmaz; `enabled`
+   tek başına da yetmez — kimlik bilgileri eksikse kanal açık sayılmaz.
+2. **İzin listesi boşsa kimse yok.** Boş liste «herkes» demek DEĞİLDİR.
+3. **İmza doğrulanmadan içerik okunmaz.** Gelen webhook gövdesi uygulama
+   sırrıyla HMAC-SHA256 imzalanmış olmalı (`X-Hub-Signature-256`);
+   karşılaştırma `hmac.compare_digest` ile yapılır. İmzasız gövde
+   ayrıştırılmaz bile. Tek baytı değişen gövdenin imzası düşer.
+4. **Hiçbir çağrı fırlatmaz, hiçbiri bekletmez.** Ağ hatası bir DURUMDUR.
+5. **Sır loglanmaz.** Jeton, uygulama sırrı ve doğrulama jetonu hiçbir
+   çıktıda, hata metninde ya da kayıt satırında görünmez.
+
+Taşıma için yalnız standart kütüphane (urllib) kullanılır ve testler gerçek
+ağa çıkmaz: `transport` bağımlılığı dışarıdan verilebilir.
+
+### Uç noktalar ve kimlik
+
+`/api/wa/webhook` HKM'nin **tek** bearer'sız POST yoludur; isteği Meta
+yollar, bearer taşıyamaz. Kapısı imzadır. `GET` tarafı yalnız doğru
+`verify_token` ile gelen meydan okumayı yansıtır.
+
+WhatsApp'ın çalışması için HKM'nin dışarıdan erişilebilir olması gerekir
+(tünel ya da sunucu). Bu bir yazılım kararı değil bir **altyapı kararıdır**
+ve kullanıcınındır: kanal kapalıyken HKM ve üç sistem olduğu gibi çalışır.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |
@@ -263,8 +352,8 @@ kontrol eder. Yüklenmeyen bir sayfa çürür.
 | 1 | Çekirdek daemon, SQLite şeması, bearer'lı sync | **yazıldı** |
 | 2 | Başkan Yardımcıları (VP) + öncelik sırası | **yazıldı** |
 | 3 | Dijital İkiz, Yönetici, öneri yaşam döngüsü | **yazıldı, 70 test** |
-| 4 | Telegram ağ geçidi | yapılacak |
-| 5 | WhatsApp & ses | yapılacak |
+| 4 | Kanal katmanı + Telegram adaptörü | **yazıldı** (kapalı gelir) |
+| 5 | WhatsApp geçidi (Cloud API, imzalı webhook) | **yazıldı** · ses yapılacak |
 | 6 | Üç arayüzden best-effort işaret | **yazıldı** |
 
 ## 10. Ve dürüst bir soru
@@ -275,5 +364,11 @@ Devir notu §18.8'deki soru duruyor ve cevaplanmadı:
 > için bir daemon, SQLite, iki bot ve bir VP konseyi gerekiyor mu — yoksa
 > SPİ'nin ofisine üç satırlık bir çapraz bulgu mu yeter?
 
-Bu iskelet o soruyu kapatmıyor; yalnızca cevabın «gerekiyor» olması hâlinde
-temelin hazır olmasını sağlıyor. Karar kullanıcınındır.
+Soru hâlâ açık ama artık **ölçülebilir**. `core/cross.py` tam da o «üç
+satırlık çapraz bulgu»yu üretiyor: uykunun ertesi güne, toparlanmanın aynı
+güne, çalışmanın pratiğe ne yaptığı. Eğer dokuz ayın sonunda bu beş çiftten
+hiçbiri hiç görünür bir ayrışma göstermediyse, cevap «gerekmiyor»dur ve
+HKM'yi kapatmak bir kayıp değil bir kazançtır.
+
+Yani bu klasör kendi gerekliliğini de ölçüyor. Kapatma kararı kullanıcının,
+ama karar artık bir izlenime değil `GET /api/cross` çıktısına dayanacak.

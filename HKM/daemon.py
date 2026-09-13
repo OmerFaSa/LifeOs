@@ -8,6 +8,11 @@ Ucnoktalar:
     GET  /api/briefing?date=        gunun brifingi: VP raporlari + TEK oneri
     GET  /api/twin?date=&days=      dijital ikiz: son N gunun tek resmi
     GET  /api/decisions?date=       gunun butun onerileri (reddedilenler dahil)
+    GET  /api/cross?date=&days=     capraz bulgular: uc ambar yan yana
+    POST /api/message               Buyuk Patron'a kisa komut (yerel kanal)
+    GET  /api/conversation          son konusma kayitlari
+    POST /api/say                   gunun mesajini kanala gonderir (gunde bir)
+    GET/POST /api/wa/webhook        WhatsApp — jetonsuz ama IMZALI (bkz. §7)
     POST /api/decision/<id>/accept  oneriyi kabul et
     POST /api/decision/<id>/decline oneriyi reddet — kayit silinmez
     GET  /api/health                token istemez
@@ -29,7 +34,8 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import db, manager, sync_engine, thresholds, twin  # noqa: E402
+from core import (channels, cross, db, manager, patron,  # noqa: E402
+                  sync_engine, thresholds, twin)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -137,6 +143,56 @@ class Handler(BaseHTTPRequestHandler):
         sys.stderr.write("[hkm] " + (fmt % args) + "\n")
 
     # --- yollar ----------------------------------------------------------
+    def _wa_webhook(self):
+        cfg = self.server.config
+        a = channels.settings(cfg, "whatsapp")
+        if not channels.enabled(cfg, "whatsapp"):
+            return self._send(404, {"error": "kanal kapali"})
+        n = int(self.headers.get("Content-Length") or 0)
+        ham = self.rfile.read(n) if n else b""
+        imza = self.headers.get("X-Hub-Signature-256", "")
+        if not channels.verify_signature(a.get("app_secret"), ham, imza):
+            return self._send(401, {"error": "imza dogrulanmadi"})
+        try:
+            govde = json.loads(ham or b"{}")
+        except ValueError:
+            return self._send(400, {"error": "gecersiz JSON"})
+
+        cevaplar = []
+        for m in channels.parse_whatsapp(govde):
+            if not channels.allowed(cfg, "whatsapp", m["from"]):
+                # Icerik AMBARA YAZILMAZ; yalniz reddedildigi not edilir.
+                patron.log(self.con, "whatsapp", "system",
+                           "Bilinmeyen numaradan mesaj reddedildi.")
+                cevaplar.append({"from": "?", "ok": False, "reason": "not-allowed"})
+                continue
+            r = patron.respond(self.con, m["text"], th=self.server.thresholds,
+                               channel="whatsapp")
+            g = channels.send(cfg, "whatsapp", r["text"], to=m["from"])
+            cevaplar.append({"command": r["command"], "sent": g["ok"],
+                             "status": g["status"]})
+        return self._send(200, {"handled": len(cevaplar), "results": cevaplar})
+
+    def _say(self, body):
+        """Gunun mesajini kanala gonderir. GUNDE TEK MESAJ: ayni gun ayni
+        kanala ikinci kez gonderilmez (force ile bilincli olarak asilir)."""
+        cfg = self.server.config
+        kanal = body.get("channel") or "whatsapp"
+        tarih = body.get("date") or datetime.date.today().isoformat()
+        if not channels.enabled(cfg, kanal):
+            return {"ok": False, "reason": "off", "note": "Kanal kapalı."}
+        if not body.get("force") and patron.already_sent(self.con, tarih, kanal):
+            return {"ok": False, "reason": "already-sent",
+                    "note": "Bugünün mesajı bu kanala zaten gönderildi."}
+        m = patron.daily_message(self.con, tarih, th=self.server.thresholds)
+        if not m["ok"]:
+            return {"ok": False, "reason": "imperative", "note": m["error"]}
+        g = channels.send(cfg, kanal, m["text"], to=body.get("to"))
+        if g["ok"]:
+            patron.log(self.con, kanal, "manager", m["text"])
+        return {"ok": g["ok"], "status": g["status"], "note": g["note"],
+                "chars": len(m["text"])}
+
     def _send_page(self):
         """Yerel yuz — tek dosya, sifir bagimlilik.
 
@@ -161,6 +217,20 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_page()
         if u.path == "/api/health":
             return self._send(200, {"ok": True, "service": "hkm"})
+        if u.path == "/api/wa/webhook":
+            """Meta'nin kurulum dogrulamasi. Bearer TASIYAMAZ (istegi Meta
+            yollar), bu yuzden tek kapi dogrulama jetonudur: yanlis jetonda
+            hicbir sey yansitilmaz."""
+            meydan = channels.verify_challenge(self.server.config, parse_qs(u.query))
+            if meydan is None:
+                return self._send(403, {"error": "dogrulama basarisiz"})
+            body = str(meydan).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
         q = parse_qs(u.query)
@@ -175,6 +245,22 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "days bir sayi olmali"})
             days = max(1, min(days, 365))
             return self._send(200, twin.snapshot(self.con, date, days))
+        if u.path == "/api/cross":
+            try:
+                days = int((q.get("days") or [cross.PENCERE])[0])
+            except ValueError:
+                return self._send(400, {"error": "days bir sayi olmali"})
+            days = max(7, min(days, 365))
+            return self._send(200, {"date": date, "days": days,
+                                    "pairs": cross.scan(self.con, date, days)})
+        if u.path == "/api/conversation":
+            try:
+                limit = int((q.get("limit") or [40])[0])
+            except ValueError:
+                limit = 40
+            return self._send(200, {"messages": patron.history(
+                self.con, max(1, min(limit, 200)),
+                (q.get("channel") or [None])[0])})
         if u.path == "/api/decisions":
             return self._send(200, {"date": date,
                                     "decisions": db.decisions_of(self.con, date),
@@ -183,8 +269,33 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
+
+        """WhatsApp webhook'u BEARER TASIYAMAZ: istegi Meta yollar. Kapisi
+        imzadir — govde, uygulama sirriyla HMAC-SHA256 imzalanmamissa
+        AYRISTIRILMAZ bile. Gonderen izin listesinde degilse icerik ambara
+        yazilmaz; yalniz reddedildigi not edilir."""
+        if u.path == "/api/wa/webhook":
+            return self._wa_webhook()
+
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
+        if u.path == "/api/message":
+            n = int(self.headers.get("Content-Length") or 0)
+            try:
+                body = json.loads(self.rfile.read(n) or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            res = patron.respond(self.con, body.get("text"),
+                                 date=body.get("date"),
+                                 th=self.server.thresholds, channel="local")
+            return self._send(200, res)
+        if u.path == "/api/say":
+            n = int(self.headers.get("Content-Length") or 0)
+            try:
+                body = json.loads(self.rfile.read(n) or b"{}")
+            except ValueError:
+                body = {}
+            return self._send(200, self._say(body))
         if u.path.startswith("/api/decision/"):
             parca = u.path.strip("/").split("/")
             if len(parca) != 4 or parca[3] not in ("accept", "decline"):

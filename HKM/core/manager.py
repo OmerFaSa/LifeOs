@@ -28,7 +28,7 @@ import datetime
 import re
 
 from core import certainty as C
-from core import db, precedence, sync_engine, twin
+from core import cross, db, precedence, sync_engine, twin
 
 # --- buyurgan kip denetcisi -------------------------------------------------
 # TAM KELIME aranir: «kapatmani oneririm» bir oneridir, «kapat» degil.
@@ -47,6 +47,10 @@ VERDICT_TEXT = {
 }
 
 VP_LABEL = {"academic": "AYS", "bio": "SPI", "intellect": "ESP"}
+
+# Brifing bir liste degil bir OZETTIR: iki capraz bulgudan fazlasi,
+# okunmayan bir rapor uretir.
+CAPRAZ_SATIR = 2
 
 
 def imperatives(text):
@@ -138,6 +142,14 @@ def brief(con, date, th=None, days=twin.WINDOW_DAYS):
     if kor:
         lines.append(kor)
 
+    # Capraz bulgu: UC AMBAR YAN YANA konmadan gorunmeyen sey. Bu
+    # satirlar bir oneri DEGILDIR ve onceligi degistirmez; bir
+    # gozlemdir ve oyle yazilir.
+    capraz = cross.findings(con, date)
+    for f in capraz[:CAPRAZ_SATIR]:
+        lines.append(_line(f["note"], "cross", pair=f["id"], status=f["status"],
+                           cert=f["cert"], n=f["n"], question=f["question"]))
+
     karar = None
     if prop:
         suc = imperatives(prop["proposal"])
@@ -162,6 +174,7 @@ def brief(con, date, th=None, days=twin.WINDOW_DAYS):
         assert advisory(ln["text"]), "buyurgan satir sizdi: " + ln["text"]
 
     return {"date": date, "audits": audits, "twin": resim,
+            "cross": capraz,
             "proposal": prop, "decision": karar, "lines": lines,
             "dropped": dropped, "precedence": precedence.PRECEDENCE,
             "source": "kural motoru"}

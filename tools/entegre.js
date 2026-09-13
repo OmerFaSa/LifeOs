@@ -213,12 +213,14 @@ async function main(){
       brifing:(document.querySelector('#brifing') || {}).textContent || '',
       ikiz:(document.querySelector('#ikiz') || {}).textContent || '',
       gecmis:(document.querySelector('#gecmis') || {}).textContent || '',
+      capraz:(document.querySelector('#capraz') || {}).textContent || '',
       girisAcik:!document.querySelector('#giris').hidden,
     }));
     if(ekran.girisAcik) hatalar.push('HKM yuzu: dogru jetonla bile giris ekraninda kaldi');
     if(ekran.brifing.length < 40) hatalar.push('HKM yuzu: brifing cizilmedi');
     if(ekran.ikiz.indexOf('metriğe dayanıyor') < 0) hatalar.push('HKM yuzu: ikiz cizilmedi');
     if(ekran.gecmis.length < 20) hatalar.push('HKM yuzu: oneri gecmisi cizilmedi');
+    if(ekran.capraz.indexOf('Çapraz bulgu') < 0) hatalar.push('HKM yuzu: capraz bulgu karti cizilmedi');
     if(yuzHata.length) hatalar.push('HKM yuzu: sayfa hatasi — ' + yuzHata[0]);
     else console.log('  HKM yuzu → brifing, ikiz ve oneri gecmisi cizildi');
 
@@ -236,6 +238,20 @@ async function main(){
       const kalan = (kabul.decisions || []).filter(d => d.state === 'declined');
       if(kalan.length) console.log('  · reddedilen ' + kalan.length + ' oneri kaydi da duruyor');
     }
+    /* 8 — Buyuk Patron: yuzden komut gonderilir ve cevap ayni sayfada
+       gorunur. Kanal (WhatsApp) kapali olsa bile yerel kanal calisir. */
+    await yuz.fill('#mesaj', 'neden');
+    await yuz.click('#gonder');
+    await wait(900);
+    const konusma = await yuz.evaluate(() =>
+      (document.querySelector('#konusmalar') || {}).textContent || '');
+    if(konusma.indexOf('neden') < 0) hatalar.push('HKM yuzu: komut kaydi gorunmedi');
+    else if(konusma.indexOf('Öncelik') < 0 && konusma.indexOf('öneri yok') < 0){
+      hatalar.push('HKM yuzu: Patron cevabi gorunmedi');
+    }else{
+      console.log('  HKM yuzu → Patron komutu cevaplandi');
+    }
+
     await yuz.close();
   }catch(err){
     hatalar.push('kosum hatasi: ' + (err && err.message ? err.message : err));
