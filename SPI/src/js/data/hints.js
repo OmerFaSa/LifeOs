@@ -69,6 +69,8 @@ SP.HINTS = {
   /* --- ofis --- */
   'office':{ t:'Beş ajanlı ofis', b:'Dört uzman kendi alanına bakar, Patron çelişkiyi çözer ve tek karar çıkar.',
     more:'Yetki ayrımı kasıtlıdır: bir ajan alan dışına çıkarsa soruyu sahibine yönlendirir. Sayı kural motorundan gelir; ajan hesap yapmaz, yalnızca cümleye çevirir.' },
+  'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın derecesi eşiğin ne kadar güçlü konuşabileceğini belirler.',
+    more:'Deterministik olmak, bilimsel olarak doğru olmak demek değildir: yanlış seçilmiş bir eşik, son derece güvenilir görünen yanlış bir sonuç üretir. Dört derece vardır — kılavuz ve uzlaşı yönlendirebilir; gözlemsel ilişki ve sistemin kendi seçimi yalnızca gözlem bildirir. Kaynağı yazılmamış eşik de yönlendiremez: bilinmeyen kaynak, iyi kaynak değildir.' },
   'grounding':{ t:'Halüsinasyon engeli', b:'Model serbest sayı üretmez; sayıyı kural motoru verir, model yorumlar.',
     more:'Çıktı ayrıca ev kurallarına karşı denetlenir: doz, teşhis, garanti ve tedavi bırakma ifadeleri reddedilir ve yerine kural motorunun cümlesi basılır.' },
   'no-model':{ t:'Model olmadan', b:'Dil modeli bağlı değilse ofis kapanmaz; brifing doğrudan cümleye çevrilir.',

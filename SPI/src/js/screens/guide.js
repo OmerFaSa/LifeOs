@@ -156,6 +156,60 @@ SP.Screens.guide = (function(){
     });
   }
 
+
+  /* ------------------------------------------------------------- kanit
+
+     Sistemin en sert cumlesi ("hekime basvur") en zayif dayanaktan
+     cikamaz. Bu kart, o kuralin KENDI KARNESIDIR: kac esik kaynak
+     tasiyor, kaci yonlendirebiliyor, hangileri hala bos. Bosluklari
+     gostermek, onlari gizlemekten her zaman iyidir. */
+  function evidenceCard(){
+    const k = SP.Ev.coverage();
+    const denetim = SP.Ev.audit();
+    const ayrisan = SP.Ev.disputed();
+
+    return K.Entry({
+      label:'Eşiklerin dayanağı', hint:'evidence',
+      meta:'%' + k.pct + ' kaynaklı',
+      body:html`
+        <p class="small muted">Deterministik olmak, bilimsel olarak doğru olmak
+          değildir. Bir eşik kodda ne kadar kesin yazılırsa yazılsın, eşiğin
+          kendisi yanlış seçilmişse sistem çok güvenilir görünen yanlış bir
+          sonuç üretir. Bu yüzden her eşik kendi kaynağını taşır ve kaynağının
+          derecesi, o eşiğin ne kadar güçlü konuşabileceğini belirler.</p>
+
+        ${K.Table({ tight:true, headers:['Derece', 'Ne yapabilir'],
+          rows:SP.EVIDENCE_GRADES.map(g => [
+            g.label, g.mayDirect ? 'Yönlendirebilir' : 'Yalnızca gözlem bildirir',
+          ]) })}
+
+        ${K.Table({ tight:true, headers:['Ölçüm', { label:'Sayı', num:true }], rows:[
+          ['Tanımlı eşik', String(k.total)],
+          ['Kaynağı yazılmış', String(k.sourced)],
+          ['Yönlendirmeye yetkili', String(k.mayDirect)],
+          ['Kaynağı eksik', String(k.missing.length)],
+        ] })}
+
+        ${denetim.length
+          ? K.Notice({ tone:'danger', title:'Dayanaksız kırmızı bayrak',
+              body:denetim.map(d => d.name).join(', ') })
+          : K.Notice({ tone:'ok', title:'Denetim temiz',
+              body:'Her kırmızı bayrak en az uzlaşı derecesinde bir dayanağa '
+                 + 'oturuyor. Bu denetim testte de koşar; bozulursa test kırılır.' })}
+
+        ${when(ayrisan.length, () => K.Notice({ tone:'info',
+          title:'Kılavuzların ayrıştığı eşikler',
+          body:ayrisan.length + ' eşikte kaynaklar tek bir sayıda birleşmiyor '
+             + 'ya da eşik popülasyona göre kayıyor. Ayrışma gizlenmez: '
+             + 'ölçümün kendi sayfasında hangi kaynağa dayandığı yazar.' }))}
+
+        ${when(k.missing.length, () => html`
+          <p class="tiny dim mt-8">Kaynağı yazılmamış eşikler:
+            ${k.missing.slice(0, 12).map(m => m.name).join(', ')}${k.missing.length > 12 ? '…' : ''}.
+            Bu eşikler yönlendirme üretmez.</p>`)}`,
+    });
+  }
+
   /* -------------------------------------------------------------- sinirlar */
 
   function clinicalCard(){
@@ -236,7 +290,7 @@ SP.Screens.guide = (function(){
     }
     if(tab === 'sinir'){
       return String(html`${head}
-        ${K.Ledger(() => [clinicalCard(), redFlagCard(), privacyCard(), groundingCard()])}
+        ${K.Ledger(() => [clinicalCard(), redFlagCard(), evidenceCard(), privacyCard(), groundingCard()])}
         <div class="mt-24">${raw(UI.rail(['red-flag', 'grounding', 'privacy', 'certainty']))}</div>`);
     }
     return String(html`${head}

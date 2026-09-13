@@ -181,3 +181,31 @@
     });
   });
 })();
+
+(function(){
+  const { describe, it, expect } = ESP.Test;
+
+  describe('merdiven · kor nokta', () => {
+
+    /* Olculemeyeni olculuyormus gibi gostermek, olcmemekten kotudur.
+       Her merdiven neyi GOREMEDIGINI acikca yazmak zorundadir. */
+    it('her merdiven kor noktasini yazar', () => {
+      Object.keys(ESP.LADDERS).forEach(k => {
+        const lad = ESP.LADDERS[k];
+        expect(Array.isArray(lad.blind)).toBeTruthy();
+        expect(lad.blind.length >= 3).toBeTruthy();
+        lad.blind.forEach(x => expect(String(x).length > 10).toBeTruthy());
+      });
+    });
+
+    /* Kor nokta maddesi bir KAPI olamaz: olculebilir bir esik yaziyorsa
+       zaten kapilar arasinda olmaliydi. */
+    it('kor nokta maddesi sayi esigi icermez', () => {
+      Object.keys(ESP.LADDERS).forEach(k => {
+        ESP.LADDERS[k].blind.forEach(x => {
+          expect(/\d+\s*(%|dakika|kart|gün|bpm)/i.test(x)).toBeFalsy();
+        });
+      });
+    });
+  });
+})();

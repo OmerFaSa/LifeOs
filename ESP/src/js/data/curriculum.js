@@ -65,6 +65,16 @@ ESP.LADDERS = {
   lang:{
     disc:'lang', coach:'polyglot',
     aim:'Anlamaktan üretmeye, üretmekten düşünmeye.',
+    /* Kapıların GÖREMEDİĞİ şeyler. Bu liste süs değil: ölçülen şeyin
+       önemli, ölçülmeyenin önemsiz sanılması, ölçen her sistemin en
+       pahalı hatasıdır. Merdiven bir yeterlilik belgesi değil, bir
+       ÇALIŞMA DÜZENİDİR — sınırı burada yazılıdır. */
+    blind:[
+      'Aksanın bir anadili konuşanda bıraktığı izlenim',
+      'Şaka, ima ve kibarlık derecesini yerinde kullanabilmek',
+      'Gerçek bir konuşmada, hazırlıksız, kelime bulamadan devam edebilmek',
+      'O dilde düşünüp o dilde hissetmek',
+    ],
     levels:[
       { rank:1, title:'Ses ve ilk 500 kelime',
         study:['Alfabe ve ses uyumu', 'Günlük 10 yeni kart', 'Günde 10 dk shadowing',
@@ -121,6 +131,12 @@ ESP.LADDERS = {
   philo:{
     disc:'philo', coach:'socrates',
     aim:'Okumaktan argüman kurmaya, argümandan kendi konumuna.',
+    blind:[
+      'Bir argümanın gerçekten ikna edici olup olmadığı',
+      'Kendi konumunu değiştirebilecek kadar dürüst okuyabilmek',
+      'Sorunun doğru soru olup olmadığı — kapılar cevabı sayar, soruyu değil',
+      'Düşüncenin hayata dokunup dokunmadığı',
+    ],
     levels:[
       { rank:1, title:'Soruyu tanımak',
         study:['Felsefenin dört ana sorusu', 'Sokratik diyalog okuma',
@@ -172,6 +188,12 @@ ESP.LADDERS = {
   music:{
     disc:'music', coach:'maestro',
     aim:'Temiz çalmaktan müzik yapmaya.',
+    blind:[
+      'Müzikal ifade: aynı notaların neden birinde canlı, ötekinde ölü olduğu',
+      'Zamanlamanın insani esnekliği (rubato, nefes, gecikme)',
+      'Dinleyicide bıraktığı etki',
+      'Bir parçayı neden seçtiğin',
+    ],
     levels:[
       { rank:1, title:'El ve ses',
         study:['Duruş ve pena tutuşu', 'Açık akorlar', 'Metronomla dörtlük vuruş'],
@@ -222,6 +244,12 @@ ESP.LADDERS = {
   diction:{
     disc:'diction', coach:'demosthenes',
     aim:'Anlaşılır olmaktan ikna ediciye.',
+    blind:[
+      'Sesin sıcaklığı ve inandırıcılığı',
+      'Dinleyiciyi okuyup tempoyu oracıkta değiştirebilmek',
+      'Susmanın doğru yerini bilmek',
+      'Hata oranı düşükken bile sıkıcı olmak — temizlik, ilgi değildir',
+    ],
     levels:[
       { rank:1, title:'Nefes',
         study:['Diyafram nefesi', 'Tekerleme (kolay grup)', 'Kendi kaydını dinleme'],
@@ -270,6 +298,12 @@ ESP.LADDERS = {
   reading:{
     disc:'reading', coach:'aristoteles',
     aim:'Sayfa saymaktan bağ kurmaya.',
+    blind:[
+      'Bir metnin seni değiştirip değiştirmediği',
+      'Anlamanın derinliği — not sayısı anlamayı değil, not almayı ölçer',
+      'Yanlış kitabı iyi okumak: doğru kitabı seçmek ölçülmez',
+      'Yeniden okumanın kazandırdığı, ilk okumada görünmeyen şey',
+    ],
     levels:[
       { rank:1, title:'Düzenli okuma',
         study:['Günde 20 dakika', 'Okurken altını çizme', 'Kaynak kaydı'],
@@ -319,6 +353,12 @@ ESP.LADDERS = {
   writing:{
     disc:'writing', coach:'montaigne',
     aim:'Yazabilmekten düşünebilmeye.',
+    blind:[
+      'Özgünlük: söylenenin daha önce söylenmemiş olup olmadığı',
+      'Sesin kendine ait olup olmadığı',
+      'Okunabilirlik puanı yüksek ama söyleyecek bir şeyi olmayan yazı',
+      'Yazının doğru kişiye ulaşıp ulaşmadığı',
+    ],
     levels:[
       { rank:1, title:'Sayfayı doldurmak',
         study:['Günde 200 kelime', 'Düzeltmeden yazma', 'Günlük tutma'],
@@ -367,6 +407,12 @@ ESP.LADDERS = {
   history:{
     disc:'history', coach:'herodot',
     aim:'Tarih bilmekten tarihsel düşünmeye.',
+    blind:[
+      'Tarihsel empati: geçmiştekilerin neden öyle davrandığını anlamak',
+      'Kendi önyargını kaynakta fark edebilmek',
+      'Nedenselliğin gerçekten öyle işleyip işlemediği — zincir kurmak, doğrulamak değildir',
+      'Bugünü anlamakta işe yarayıp yaramadığı',
+    ],
     levels:[
       { rank:1, title:'İskelet kronoloji',
         study:['Büyük dönemler ve sınırları', 'Yüzyıl mantığı',

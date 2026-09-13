@@ -49,6 +49,8 @@ ESP.S = {
   goals:[],            // zamana bagli hedefler
 
   timer:null,          // acik pratik zamanlayicisi (core/timer.js)
+  usage:null,          // surtunme olcumu (core/friction.js)
+  forecasts:[],        // kalibrasyon defteri (core/calib.js)
   proposals:[],        // ajan teklifleri (onaylanan / reddedilen)
   weekPlan:null,       // onaylanmis haftalik plan
 
@@ -1272,6 +1274,8 @@ ESP.Model = (function(){
     S.chains = ((await ESP.Store.list('chains')) || []).map(normChain);
 
     if(ESP.Timer) await ESP.Timer.load();
+    if(ESP.Friction) await ESP.Friction.load();
+    if(ESP.Calib) await ESP.Calib.load();
 
     S.storeHealth = ESP.Store.health();
     S.ready = true;

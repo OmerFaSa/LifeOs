@@ -1247,6 +1247,39 @@ ESP.App = (function(){
      yerine kapatmak daha dürüst: kullanıcı nereye tıkladığını bilir. */
   window.addEventListener('resize', () => { if(isAppearanceOpen()) closeAppearance(); });
 
+  /* ------------------------------------------------------------ sürtünme ölçümü
+
+     Sistemin kendi maliyeti de ölçülür (core/friction.js). Etkileşim ve
+     görünürlük olayları sayaca dokunur; sekme arkaya gidince zincir kesilir
+     ki açık unutulmuş bir sayfa «yönetim süresi» sayılmasın.
+
+     Yazma işi seyrek yapılır: her tıklamada depoya yazmak, sürtünmeyi
+     ölçerken sürtünme üretmek olurdu. */
+  (function wireFriction(){
+    if(!ESP.Friction) return;
+    let sonYazim = 0;
+    const YAZIM_ARALIK = 30000;
+
+    function dokun(){
+      if(!S.ready) return;
+      ESP.Friction.tick();
+      const now = Date.now();
+      if(now - sonYazim > YAZIM_ARALIK){
+        sonYazim = now;
+        ESP.Friction.save();
+      }
+    }
+    ['click', 'keydown', 'input', 'scroll', 'pointerdown'].forEach(t => {
+      document.addEventListener(t, dokun, { passive:true, capture:true });
+    });
+    document.addEventListener('visibilitychange', () => {
+      if(document.hidden){ ESP.Friction.blur(); ESP.Friction.save(); }
+      else ESP.Friction.tick();
+    });
+    window.addEventListener('blur', () => ESP.Friction.blur());
+    window.addEventListener('pagehide', () => { ESP.Friction.blur(); ESP.Friction.save(); });
+  })();
+
   /* ------------------------------------------------------------ depolama sağlığı */
   let lastErrorToastAt = 0;
   function wireStoreErrors(){

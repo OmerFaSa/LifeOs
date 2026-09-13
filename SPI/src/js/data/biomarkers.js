@@ -199,20 +199,20 @@ SP.BIOMARKERS = [
     note:'Referans araligi genistir; hedef bant cok daha dardir.' },
 
   { id:'homa', name:'HOMA-IR', unit:'', panel:'metabolic', dir:'low',
-    ref:[0, 2.5], optimal:[0.5, 1.8], red:{ above:5 },
+    ref:[0, 2.5], optimal:[0.5, 1.8], red:{},
     derived:'homa', aliases:['homa','homa-ir','insulin direnci'],
     nutrients:[], nutrientWhy:'Türetilmiş indeks: bağı girdilerinden (glukoz, insülin) gelir; ikinci kez sayılmaz.',
     note:'Insulin direnci endeksi. Aclik glukozu ve insulin girildiginde kendiliginden hesaplanir.' },
 
   /* ------------------------------------------------------------------ lipid */
   { id:'eag', name:'Ortalama glukoz (eAG)', unit:'mg/dL', panel:'metabolic', dir:'low',
-    ref:[70, 154], optimal:[70, 114], red:{ above:240 },
+    ref:[70, 154], optimal:[70, 114], red:{},
     derived:'eag', aliases:['eag','ortalama glukoz','tahmini ortalama glukoz'],
     nutrients:[], nutrientWhy:'Türetilmiş indeks: bağı HbA1c\'den gelir.',
     note:'HbA1c\'nin gündelik dildeki karşılığı: son üç ayın ortalama kan şekeri. Tek bir ölçüm değil, ortalamadır.' },
 
   { id:'tyg', name:'TyG indeksi', unit:'', panel:'metabolic', dir:'low',
-    ref:[7, 9.5], optimal:[7, 8.5], red:{ above:10 },
+    ref:[7, 9.5], optimal:[7, 8.5], red:{},
     derived:'tyg', aliases:['tyg','trigliserit glukoz indeksi'],
     nutrients:[], nutrientWhy:'Türetilmiş indeks: bağı trigliserit ve glukozdan gelir.',
     note:'Açlık insülini ölçülmediğinde insülin direncinin yerini tutar. Trigliserit ve açlık glukozundan hesaplanır.' },
@@ -244,7 +244,7 @@ SP.BIOMARKERS = [
     note:'Sivi sekere ve rafine karbonhidrata en hizli tepki veren degerdir.' },
 
   { id:'tg_hdl', name:'Trigliserit / HDL', unit:'oran', panel:'lipid', dir:'low',
-    ref:[0, 3.5], optimal:[0, 2], red:{ above:6 },
+    ref:[0, 3.5], optimal:[0, 2], red:{},
     derived:'tg_hdl', aliases:['tg/hdl','trigliserit hdl orani'],
     nutrients:[], nutrientWhy:'Türetilmiş oran: bağı trigliserit ve HDL\'den gelir.',
     note:'İnsülin direncinin en ucuz göstergesi. 2 altı iyi, 3 üstü dikkat ister. Aç karnına alınan kandan hesaplanır.' },
@@ -286,7 +286,7 @@ SP.BIOMARKERS = [
 
   /* ----------------------------------------------------------------- bobrek */
   { id:'deritis', name:'AST / ALT (De Ritis)', unit:'oran', panel:'liver', dir:'mid',
-    ref:[0.4, 2], optimal:[0.7, 1.3], red:{ above:3 },
+    ref:[0.4, 2], optimal:[0.7, 1.3], red:{},
     derived:'deritis', aliases:['ast/alt','de ritis','deritis'],
     nutrients:[], nutrientWhy:'Türetilmiş oran: bağı AST ve ALT\'den gelir.',
     note:'İki enzimin oranı, tek başına değerlerinden fazlasını söyler. 1 altı ve 2 üstü farklı yönleri gösterir.' },

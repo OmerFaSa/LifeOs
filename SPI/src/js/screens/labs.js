@@ -23,6 +23,16 @@ SP.Screens.labs = (function(){
   const { html, raw, when, map, cls } = SP.h;
   const K = SP.C, P = SP.Parts;
 
+  /* Eşiğin dayanağı — tabloda tek kelimelik özet, ayrıntısı altındaki
+     kartta. Derece gizlenmez: kullanıcının «bu sayı nereden geliyor»
+     sorusunun cevabı bir tık uzakta olmalıdır. */
+  const ALAN_ADI = { ref:'Referans aralığı', optimal:'Hedef bant', red:'Kırmızı bayrak' };
+
+  function dayanak(markerId, field){
+    const e = SP.Ev.line(markerId, field);
+    return e.grade ? e.label : 'kaynak yok';
+  }
+
   const TABS = [
     { id:'sonuc',  label:'Sonuçlar',     icon:'layers' },
     { id:'giris',  label:'Test gir',     icon:'flask' },
@@ -399,14 +409,43 @@ SP.Screens.labs = (function(){
         <div class="markerrow__bar">${raw(UI.rangeBar(last.v, r.ref, r.optimal, b.unit))}</div>
         <p class="markerrow__note">${SP.Bio.statusNote(id, last.v)}</p>
       </div>`),
-      K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
-        ['Referans aralığı', r.ref ? U.fmtNum(r.ref[0]) + ' – ' + U.fmtNum(r.ref[1]) + ' ' + b.unit : '—'],
-        ['Hedef bant', r.optimal ? U.fmtNum(r.optimal[0]) + ' – ' + U.fmtNum(r.optimal[1]) + ' ' + b.unit : 'tanımlı değil'],
+      K.Table({ tight:true, headers:['Alan', 'Değer', 'Dayanak'], rows:[
+        ['Referans aralığı', r.ref ? U.fmtNum(r.ref[0]) + ' – ' + U.fmtNum(r.ref[1]) + ' ' + b.unit : '—',
+          dayanak(id, 'ref')],
+        ['Hedef bant', r.optimal ? U.fmtNum(r.optimal[0]) + ' – ' + U.fmtNum(r.optimal[1]) + ' ' + b.unit : 'tanımlı değil',
+          r.optimal ? dayanak(id, 'optimal') : '—'],
         ['Kırmızı bayrak', [r.red.below != null ? '< ' + r.red.below : null,
-          r.red.above != null ? '> ' + r.red.above : null].filter(Boolean).join(' · ') || 'tanımlı değil'],
-        ['Eğilim', tr.ok ? vd.text : tr.note],
-        ['Ölçüm sayısı', String(series.length)],
+          r.red.above != null ? '> ' + r.red.above : null].filter(Boolean).join(' · ') || 'tanımlı değil',
+          (r.red.below != null || r.red.above != null) ? dayanak(id, 'red') : '—'],
+        ['Eğilim', tr.ok ? vd.text : tr.note, '—'],
+        ['Ölçüm sayısı', String(series.length), '—'],
       ] }),
+
+      /* Eşiğin KAYNAĞI. Bir sayının nereden geldiği, sayının kendisi kadar
+         önemlidir: deterministik olmak bilimsel olarak doğru olmak değildir.
+         Kaynağı zayıf olan eşik yönlendirme üretemez ve bu burada yazar. */
+      (function(){
+         const satirlar = ['ref', 'optimal', 'red']
+           .filter(f => f === 'ref' ? !!r.ref
+             : f === 'optimal' ? !!r.optimal
+             : (r.red.below != null || r.red.above != null))
+           .map(f => ({ f, e:SP.Ev.line(id, f) }));
+         if(!satirlar.length) return raw('');
+         return K.Card({
+           title:'Bu eşikler nereden geliyor?',
+           sub:'Kaynağı zayıf olan eşik yönlendirme üretmez',
+           body:html`${map(satirlar, x => html`
+             <div class="mt-8">
+               <div class="row wrap">
+                 ${K.Badge({ label:ALAN_ADI[x.f], tone:'muted' })}
+                 ${K.Badge({ label:x.e.label, tone:x.e.tone })}
+                 ${when(!x.e.mayDirect, () => K.Badge({ label:'yönlendirmez', tone:'warn' }))}
+               </div>
+               <p class="small muted mt-4">${x.e.text}</p>
+               ${when(x.e.note, () => html`<p class="tiny dim">${x.e.note}</p>`)}
+             </div>`)}`,
+         });
+      })(),
       /* SATIR İÇİ DÜZELTME. Bir sayıyı düzeltmek için alt sayfa açıp
          forma gidip aramak üç dokunuştu. Değer burada, ölçümün kendi
          sayfasında düzeltilir ve aynı oturuma yazılır.

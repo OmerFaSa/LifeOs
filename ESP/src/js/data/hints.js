@@ -75,6 +75,17 @@ ESP.HINTS = {
     more:'Üstteki alttakini her zaman yener. Ama yenilen uzmanın işi bitmez: yeni parça yerine mevcut repertuarda ilerleme önerir. «Hiçbir şey yapma» demek değildir.' },
   'ehs':{ t:'Entelektüel hacim', b:'EHS = Σ (disiplin ağırlığı × ölçülen saat × kalite katsayısı).',
     more:'H_i yalnızca ölçülen pratik saatidir; «veri yok» günler toplama girmez. Bu yüzden EHS bir hedef değil bir hacim ölçüsüdür: iki haftada bir bakılır, her gün değil.' },
+  'blind':{ t:'Merdivenin kör noktası', b:'Kapıların ölçemediği ama asıl mesele olan şeyler.',
+    more:'Ölçülemeyeni ölçülüyormuş gibi göstermek, ölçmemekten kötüdür. Her merdiven neyi göremediğini açıkça yazar; böylece «Üstat» kademesi bile bir yeterlilik iddiası değil, ölçülebilir üretimin vardığı yer olarak kalır.' },
+
+  /* --- sistemin kendi denetimi --- */
+  'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile çalışmaya giden sürenin payı.',
+    more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar. Tek dürüst cevap sürtünmeyi de ÖLÇMEKTİR: uygulama açıkken geçen süre (pratik sayacı çalışırken geçen hariç) yönetim sayılır. İki eşik birden aşılmadıkça sistem susar — bir kurulum günü hüküm değildir. Sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
+  'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',
+    more:'Goodhart yasası: bir ölçü hedef hâline geldiğinde iyi bir ölçü olmaktan çıkar. Nöbetçi iki bitişik 28 günlük pencerede çabayı ve sonucu karşılaştırır. Hüküm vermez, soru sorar — ayrışmanın meşru sebepleri vardır (plato, zor parçaya geçiş, yeni dil). Çaba düşerken uyarı üretmez: nöbetçinin işi tembelliği değil verimsiz gayreti görmektir.' },
+  'calib':{ t:'Kalibrasyon', b:'Sistem söylemeden önce senin tahminin; sonra ikisinin farkı.',
+    more:'Bir karar destek sistemi doğru hesaplayıp kullanıcının yargısını köreltebilir. Kalibrasyon defteri buna karşı: tahmin KÖR yazılır (gerçek değer o an hesaplanmaz), vadesi gelince kapanır. Beşin altında kapanmış tahminle puan verilmez. Puan kişiye değil tahminlere aittir — «kendini tanımıyorsun» denmez, «son 12 tahminin ortalama sapması %22» denir.' },
+
   /* --- merdiven ve koç --- */
   'level':{ t:'Kademe', b:'Ölçülmüş üretimin merdivende karşıladığı basamak.',
     more:'Kademe kişiye değil ÜRETİME verilir: «Kalfa\'sın» denmez, «son 30 günün ölçülmüş üretimi Kalfa kapılarını karşılıyor» denir. Üretim durursa kademe de durur. Genel kademe disiplinlerin ortalaması değildir; ortalama ile en düşüğün arasıdır.' },

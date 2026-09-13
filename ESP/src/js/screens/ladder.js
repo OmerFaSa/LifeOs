@@ -146,6 +146,28 @@ ESP.Screens.ladder = (function(){
           title:kapi.title, why:kapi.why }))}`,
     }));
 
+    /* Merdivenin GÖREMEDİĞİ şeyler.
+
+       Bu kutu kasten kapıların hemen altında durur. Bir merdiven, ölçtüğü
+       şeyleri sıralar; okuyan kişi de zamanla ölçülenin önemli, ölçülmeyenin
+       önemsiz olduğunu sanmaya başlar. O sanı burada kırılır: üstatlık bu
+       listedeki maddelerdedir ve sistem onların hiçbirini göremez. */
+    if((lad.blind || []).length){
+      rows.push(K.Entry({
+        label:'BU MERDİVENİN GÖREMEDİĞİ', hint:'blind',
+        meta:lad.blind.length + ' madde',
+        note:'Kapılar ölçülebilir olanı ölçer. Aşağıdakiler ölçülemez ve '
+           + 'ölçülemediği için önemsiz değildir — asıl mesele çoğu zaman '
+           + 'buradadır.',
+        wide:true,
+        body:html`
+          <ul class="studylist">${map(lad.blind, x => html`<li>${x}</li>`)}</ul>
+          ${K.Notice({ tone:'info',
+            body:'Üstat kademesi bile bu maddeleri kapatmaz. Merdiven bir '
+               + 'yeterlilik belgesi değil, bir çalışma düzenidir.' })}`,
+      }));
+    }
+
     yol.steps.forEach(st => {
       rows.push(K.Entry({
         label:'KADEME ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short,

@@ -5422,7 +5422,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'e245864', at:'2026-09-13 05:25', dirty:true };
+SP.BUILD = { id:'4f2a9ba', at:'2026-09-13 07:32', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -7340,6 +7340,16 @@ ESP.LADDERS = {
   lang:{
     disc:'lang', coach:'polyglot',
     aim:'Anlamaktan üretmeye, üretmekten düşünmeye.',
+    /* Kapıların GÖREMEDİĞİ şeyler. Bu liste süs değil: ölçülen şeyin
+       önemli, ölçülmeyenin önemsiz sanılması, ölçen her sistemin en
+       pahalı hatasıdır. Merdiven bir yeterlilik belgesi değil, bir
+       ÇALIŞMA DÜZENİDİR — sınırı burada yazılıdır. */
+    blind:[
+      'Aksanın bir anadili konuşanda bıraktığı izlenim',
+      'Şaka, ima ve kibarlık derecesini yerinde kullanabilmek',
+      'Gerçek bir konuşmada, hazırlıksız, kelime bulamadan devam edebilmek',
+      'O dilde düşünüp o dilde hissetmek',
+    ],
     levels:[
       { rank:1, title:'Ses ve ilk 500 kelime',
         study:['Alfabe ve ses uyumu', 'Günlük 10 yeni kart', 'Günde 10 dk shadowing',
@@ -7396,6 +7406,12 @@ ESP.LADDERS = {
   philo:{
     disc:'philo', coach:'socrates',
     aim:'Okumaktan argüman kurmaya, argümandan kendi konumuna.',
+    blind:[
+      'Bir argümanın gerçekten ikna edici olup olmadığı',
+      'Kendi konumunu değiştirebilecek kadar dürüst okuyabilmek',
+      'Sorunun doğru soru olup olmadığı — kapılar cevabı sayar, soruyu değil',
+      'Düşüncenin hayata dokunup dokunmadığı',
+    ],
     levels:[
       { rank:1, title:'Soruyu tanımak',
         study:['Felsefenin dört ana sorusu', 'Sokratik diyalog okuma',
@@ -7447,6 +7463,12 @@ ESP.LADDERS = {
   music:{
     disc:'music', coach:'maestro',
     aim:'Temiz çalmaktan müzik yapmaya.',
+    blind:[
+      'Müzikal ifade: aynı notaların neden birinde canlı, ötekinde ölü olduğu',
+      'Zamanlamanın insani esnekliği (rubato, nefes, gecikme)',
+      'Dinleyicide bıraktığı etki',
+      'Bir parçayı neden seçtiğin',
+    ],
     levels:[
       { rank:1, title:'El ve ses',
         study:['Duruş ve pena tutuşu', 'Açık akorlar', 'Metronomla dörtlük vuruş'],
@@ -7497,6 +7519,12 @@ ESP.LADDERS = {
   diction:{
     disc:'diction', coach:'demosthenes',
     aim:'Anlaşılır olmaktan ikna ediciye.',
+    blind:[
+      'Sesin sıcaklığı ve inandırıcılığı',
+      'Dinleyiciyi okuyup tempoyu oracıkta değiştirebilmek',
+      'Susmanın doğru yerini bilmek',
+      'Hata oranı düşükken bile sıkıcı olmak — temizlik, ilgi değildir',
+    ],
     levels:[
       { rank:1, title:'Nefes',
         study:['Diyafram nefesi', 'Tekerleme (kolay grup)', 'Kendi kaydını dinleme'],
@@ -7545,6 +7573,12 @@ ESP.LADDERS = {
   reading:{
     disc:'reading', coach:'aristoteles',
     aim:'Sayfa saymaktan bağ kurmaya.',
+    blind:[
+      'Bir metnin seni değiştirip değiştirmediği',
+      'Anlamanın derinliği — not sayısı anlamayı değil, not almayı ölçer',
+      'Yanlış kitabı iyi okumak: doğru kitabı seçmek ölçülmez',
+      'Yeniden okumanın kazandırdığı, ilk okumada görünmeyen şey',
+    ],
     levels:[
       { rank:1, title:'Düzenli okuma',
         study:['Günde 20 dakika', 'Okurken altını çizme', 'Kaynak kaydı'],
@@ -7594,6 +7628,12 @@ ESP.LADDERS = {
   writing:{
     disc:'writing', coach:'montaigne',
     aim:'Yazabilmekten düşünebilmeye.',
+    blind:[
+      'Özgünlük: söylenenin daha önce söylenmemiş olup olmadığı',
+      'Sesin kendine ait olup olmadığı',
+      'Okunabilirlik puanı yüksek ama söyleyecek bir şeyi olmayan yazı',
+      'Yazının doğru kişiye ulaşıp ulaşmadığı',
+    ],
     levels:[
       { rank:1, title:'Sayfayı doldurmak',
         study:['Günde 200 kelime', 'Düzeltmeden yazma', 'Günlük tutma'],
@@ -7642,6 +7682,12 @@ ESP.LADDERS = {
   history:{
     disc:'history', coach:'herodot',
     aim:'Tarih bilmekten tarihsel düşünmeye.',
+    blind:[
+      'Tarihsel empati: geçmiştekilerin neden öyle davrandığını anlamak',
+      'Kendi önyargını kaynakta fark edebilmek',
+      'Nedenselliğin gerçekten öyle işleyip işlemediği — zincir kurmak, doğrulamak değildir',
+      'Bugünü anlamakta işe yarayıp yaramadığı',
+    ],
     levels:[
       { rank:1, title:'İskelet kronoloji',
         study:['Büyük dönemler ve sınırları', 'Yüzyıl mantığı',
@@ -8767,6 +8813,17 @@ ESP.HINTS = {
     more:'Üstteki alttakini her zaman yener. Ama yenilen uzmanın işi bitmez: yeni parça yerine mevcut repertuarda ilerleme önerir. «Hiçbir şey yapma» demek değildir.' },
   'ehs':{ t:'Entelektüel hacim', b:'EHS = Σ (disiplin ağırlığı × ölçülen saat × kalite katsayısı).',
     more:'H_i yalnızca ölçülen pratik saatidir; «veri yok» günler toplama girmez. Bu yüzden EHS bir hedef değil bir hacim ölçüsüdür: iki haftada bir bakılır, her gün değil.' },
+  'blind':{ t:'Merdivenin kör noktası', b:'Kapıların ölçemediği ama asıl mesele olan şeyler.',
+    more:'Ölçülemeyeni ölçülüyormuş gibi göstermek, ölçmemekten kötüdür. Her merdiven neyi göremediğini açıkça yazar; böylece «Üstat» kademesi bile bir yeterlilik iddiası değil, ölçülebilir üretimin vardığı yer olarak kalır.' },
+
+  /* --- sistemin kendi denetimi --- */
+  'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile çalışmaya giden sürenin payı.',
+    more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar. Tek dürüst cevap sürtünmeyi de ÖLÇMEKTİR: uygulama açıkken geçen süre (pratik sayacı çalışırken geçen hariç) yönetim sayılır. İki eşik birden aşılmadıkça sistem susar — bir kurulum günü hüküm değildir. Sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
+  'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',
+    more:'Goodhart yasası: bir ölçü hedef hâline geldiğinde iyi bir ölçü olmaktan çıkar. Nöbetçi iki bitişik 28 günlük pencerede çabayı ve sonucu karşılaştırır. Hüküm vermez, soru sorar — ayrışmanın meşru sebepleri vardır (plato, zor parçaya geçiş, yeni dil). Çaba düşerken uyarı üretmez: nöbetçinin işi tembelliği değil verimsiz gayreti görmektir.' },
+  'calib':{ t:'Kalibrasyon', b:'Sistem söylemeden önce senin tahminin; sonra ikisinin farkı.',
+    more:'Bir karar destek sistemi doğru hesaplayıp kullanıcının yargısını köreltebilir. Kalibrasyon defteri buna karşı: tahmin KÖR yazılır (gerçek değer o an hesaplanmaz), vadesi gelince kapanır. Beşin altında kapanmış tahminle puan verilmez. Puan kişiye değil tahminlere aittir — «kendini tanımıyorsun» denmez, «son 12 tahminin ortalama sapması %22» denir.' },
+
   /* --- merdiven ve koç --- */
   'level':{ t:'Kademe', b:'Ölçülmüş üretimin merdivende karşıladığı basamak.',
     more:'Kademe kişiye değil ÜRETİME verilir: «Kalfa\'sın» denmez, «son 30 günün ölçülmüş üretimi Kalfa kapılarını karşılıyor» denir. Üretim durursa kademe de durur. Genel kademe disiplinlerin ortalaması değildir; ortalama ile en düşüğün arasıdır.' },
@@ -9864,6 +9921,8 @@ ESP.S = {
   goals:[],            // zamana bagli hedefler
 
   timer:null,          // acik pratik zamanlayicisi (core/timer.js)
+  usage:null,          // surtunme olcumu (core/friction.js)
+  forecasts:[],        // kalibrasyon defteri (core/calib.js)
   proposals:[],        // ajan teklifleri (onaylanan / reddedilen)
   weekPlan:null,       // onaylanmis haftalik plan
 
@@ -11087,6 +11146,8 @@ ESP.Model = (function(){
     S.chains = ((await ESP.Store.list('chains')) || []).map(normChain);
 
     if(ESP.Timer) await ESP.Timer.load();
+    if(ESP.Friction) await ESP.Friction.load();
+    if(ESP.Calib) await ESP.Calib.load();
 
     S.storeHealth = ESP.Store.health();
     S.ready = true;
@@ -13370,6 +13431,812 @@ ESP.Timer = (function(){
 
   return { SUPHE_SAAT, start, pause, resume, stop, reset, load,
     elapsedMs, minutes, clock, running, active, disc, suspicious, state };
+})();
+
+/* ==== js/core/friction.js ==== */
+/* Sürtünme ölçer — sistemi yönetmek, çalışmanın yerine geçiyor mu?
+
+   Bu dosya bir eleştiriden doğdu ve eleştiri haklıydı: ölçen bir sistem
+   bir süre sonra ölçmeyi işin kendisi sanmaya başlar. Kullanıcı gitar
+   çalmak yerine gitar çalışmasını yönetir, kitap okumak yerine okuma
+   kaydını düzenler. Buna karşı yazılmış bir uyarı cümlesi işe yaramaz;
+   çünkü uyarı da bir ekrandır ve ekranda geçen süre de sürtünmedir.
+
+   Tek dürüst cevap, sürtünmeyi ÖLÇMEKTİR. Sistem kendi maliyetini de
+   kendi tartısına koyar.
+
+   Dört karar bu dosyayı yönetir:
+
+   1. YÖNETİM SÜRESİ DUVAR SAATİNDEN GELİR. Uygulama görünürken ve son
+      bir dakika içinde bir etkileşim olmuşken geçen süre sayılır. Açık
+      unutulmuş bir sekme sürtünme değildir; kimse onunla uğraşmıyordur.
+
+   2. PRATİK ZAMANLAYICISI ÇALIŞIRKEN GEÇEN SÜRE SÜRTÜNME DEĞİLDİR. O süre
+      çalışmanın kendisidir. Sayaç açıkken ekrana bakmak da çalışmanın
+      parçasıdır — metronom da bir ekrandır.
+
+   3. ORAN TEK BAŞINA HÜKÜM DEĞİLDİR. Beş dakika yönetim, on dakika
+      çalışma: oran yüksek ama toplam küçük. Bir kurulum günü, bir ayar
+      günü olabilir. Bu yüzden hem MUTLAK bütçe hem ORAN aranır ve ikisi
+      birden aşılmadıkça sistem bir şey söylemez.
+
+   4. SİSTEM KENDİ YÜKÜNÜ AZALTMAYI ÖNEREBİLİR, ARTIRMAYI ÖNEREMEZ. Bu
+      SPİ'deki antrenman yükü kuralının aynısıdır: kendi lehine karar
+      veren bir ölçü, ölçü değildir. */
+
+window.ESP = window.ESP || {};
+
+ESP.Friction = (function(){
+  const U = ESP.U, S = ESP.S;
+
+  /* Etkileşimden sonra kaç saniye boyunca "hâlâ burada" sayılır. Bir
+     dakika: bir ekranı okumak bu kadar sürer, bir sekme unutmak sürmez. */
+  const CANLI_SN = 60;
+
+  /* Günlük yönetim bütçesi (dakika) ve oran eşiği. İkisi de AŞILMADIKÇA
+     sistem susar. Bu sayılar bir bilimsel bulgu değil, açıkça seçilmiş
+     bir SINIRDIR ve öyle etiketlenir. */
+  const BUTCE_DK = 12;
+  const ORAN_ESIK = 0.34;
+
+  /* Kaç günlük pencereye bakılır. */
+  const PENCERE = 14;
+
+  function now(){ return Date.now(); }
+  function bugun(){ return U.todayISO(); }
+
+  function bos(){ return { days:{}, lastTick:null }; }
+
+  function state(){
+    if(!S.usage) S.usage = bos();
+    if(!S.usage.days) S.usage.days = {};
+    return S.usage;
+  }
+
+  function gun(tarih){
+    const u = state();
+    const t = tarih || bugun();
+    if(!u.days[t]) u.days[t] = { date:t, adminMs:0, ticks:0 };
+    return u.days[t];
+  }
+
+  /* ------------------------------------------------------------- ölçüm */
+
+  /* Her etkileşimde çağrılır. Geçen süreyi bir öncekiyle arasındaki farktan
+     alır; fark CANLI_SN'yi aşıyorsa kullanıcı aradan çıkmış demektir ve o
+     boşluk sayılmaz. Sayılmayan boşluk, uydurulmuş bir süreden iyidir. */
+  function tick(opts){
+    const o = opts || {};
+    const u = state();
+    const t = o.at != null ? o.at : now();
+    const onceki = u.lastTick;
+    u.lastTick = t;
+
+    /* Pratik sayacı açıkken geçen süre çalışmadır, yönetim değil. */
+    const calisiyor = !!(ESP.Timer && ESP.Timer.running && ESP.Timer.running());
+    if(calisiyor) return { counted:0, reason:'practice' };
+
+    if(onceki == null) return { counted:0, reason:'first' };
+    const fark = t - onceki;
+    if(!(fark > 0)) return { counted:0, reason:'nonmonotonic' };
+    if(fark > CANLI_SN * 1000) return { counted:0, reason:'away' };
+
+    const g = gun(o.date || bugun());
+    g.adminMs += fark;
+    g.ticks += 1;
+    return { counted:fark, reason:'ok' };
+  }
+
+  /* Sekme arkaya gittiğinde: zincir kesilir, boşluk sayılmaz. */
+  function blur(){ state().lastTick = null; }
+
+  async function save(){
+    /* Pencerenin dışında kalan günler atılır: sürtünme kaydı da bir yüktür
+       ve kendi kuralına uymalıdır. */
+    const u = state();
+    const sinir = U.iso(U.addDays(U.parse(bugun()), -(PENCERE * 3)));
+    Object.keys(u.days).forEach(k => { if(k < sinir) delete u.days[k]; });
+    await ESP.Store.set('usage', u);
+    return u;
+  }
+
+  async function load(){
+    const raw = await ESP.Store.get('usage');
+    S.usage = Object.assign(bos(), raw || {});
+    if(!S.usage.days || typeof S.usage.days !== 'object') S.usage.days = {};
+    /* Depodan gelen süre her zaman sayı olmalı: bozuk kayıt sıfırlanır,
+       NaN taşınmaz. */
+    Object.keys(S.usage.days).forEach(k => {
+      const g = S.usage.days[k] || {};
+      const ms = Number(g.adminMs);
+      S.usage.days[k] = { date:k, adminMs:(isFinite(ms) && ms >= 0) ? ms : 0,
+        ticks:Math.max(0, Math.round(Number(g.ticks) || 0)) };
+    });
+    S.usage.lastTick = null;
+    return S.usage;
+  }
+
+  /* ------------------------------------------------------------- okuma */
+
+  function adminMinutes(tarih){
+    const g = state().days[tarih || bugun()];
+    return g ? Math.round(g.adminMs / 60000) : 0;
+  }
+
+  /* O günün çalışma dakikası: gün kaydındaki oturumların toplamı. */
+  function workMinutes(tarih){
+    const t = tarih || bugun();
+    if(!ESP.S.days) return 0;
+    const d = ESP.S.days[t];
+    if(!d) return 0;
+    return (d.sessions || []).reduce((a, s) => a + (Number(s.minutes) || 0), 0);
+  }
+
+  /* Bir günün özeti.
+
+     `cert` üç değer alır:
+       'measured'  yönetim süresi ölçüldü, çalışma süresi de girildi
+       'partial'   yönetim ölçüldü ama o gün hiç oturum girilmedi —
+                   oran hesaplanamaz, çünkü payda VERI YOK, sıfır değil
+       'missing'   o güne ait hiç ölçüm yok */
+  function day(tarih){
+    const t = tarih || bugun();
+    const g = state().days[t];
+    const admin = g ? Math.round(g.adminMs / 60000) : 0;
+    const work = workMinutes(t);
+    const girdiVar = !!(ESP.S.days && ESP.S.days[t]);
+
+    if(!g && !girdiVar) return { date:t, admin:0, work:0, ratio:null, cert:'missing' };
+    if(!girdiVar) return { date:t, admin, work:0, ratio:null, cert:'partial' };
+    const toplam = admin + work;
+    return { date:t, admin, work,
+      ratio:toplam > 0 ? admin / toplam : null,
+      cert:toplam > 0 ? 'measured' : 'partial' };
+  }
+
+  /* Son PENCERE günün toplamı. Günleri tek tek toplamak, günlük oranların
+     ortalamasını almaktan daha doğrudur: iki dakikalık bir gün, üç saatlik
+     bir günle aynı ağırlığı taşımamalı. */
+  function window_(gunSayisi){
+    const n = Math.max(1, Math.round(gunSayisi || PENCERE));
+    let admin = 0, work = 0, olculenGun = 0;
+    for(let i = 0; i < n; i++){
+      const t = U.iso(U.addDays(U.parse(bugun()), -i));
+      const d = day(t);
+      if(d.cert === 'missing') continue;
+      admin += d.admin; work += d.work; olculenGun++;
+    }
+    const toplam = admin + work;
+    return {
+      days:n, measuredDays:olculenGun, admin, work,
+      ratio:toplam > 0 ? admin / toplam : null,
+      perDay:olculenGun ? Math.round(admin / olculenGun) : 0,
+      cert:olculenGun ? (work > 0 ? 'measured' : 'partial') : 'missing',
+    };
+  }
+
+  /* ------------------------------------------------------------- hüküm */
+
+  /* Sürtünme yüksek mi?
+
+     Hem mutlak bütçe hem oran aşılmadıkça 'ok' döner. Veri yoksa 'unknown':
+     ölçülmemiş sürtünme, sıfır sürtünme değildir. */
+  function verdict(gunSayisi){
+    const w = window_(gunSayisi);
+    if(w.cert === 'missing'){
+      return { level:'unknown', cert:'missing', window:w,
+        title:'Sürtünme ölçülmedi',
+        note:'Bu pencerede yeterli kayıt yok. Sistem kendi maliyetini '
+           + 'bilmiyorsa, onu sıfır saymaz.' };
+    }
+    if(w.cert === 'partial'){
+      return { level:'unknown', cert:'estimated', window:w,
+        title:'Çalışma süresi girilmemiş',
+        note:'Uygulamada ' + w.perDay + ' dk/gün geçiyor ama bu pencerede '
+           + 'hiç oturum kaydı yok. Oran hesaplanamaz: payda veri yok, sıfır değil.' };
+    }
+    const butceAsti = w.perDay > BUTCE_DK;
+    const oranAsti = w.ratio != null && w.ratio > ORAN_ESIK;
+    if(butceAsti && oranAsti){
+      return { level:'high', cert:'measured', window:w,
+        title:'Sistem, işin önüne geçiyor olabilir',
+        note:'Son ' + w.days + ' günde günde ' + w.perDay + ' dk sistemle, '
+           + Math.round(w.work / Math.max(1, w.measuredDays)) + ' dk çalışmayla geçti '
+           + '(%' + Math.round(w.ratio * 100) + ' yönetim). Bütçe günde '
+           + BUTCE_DK + ' dk ve %' + Math.round(ORAN_ESIK * 100) + '.' };
+    }
+    if(butceAsti || oranAsti){
+      return { level:'watch', cert:'measured', window:w,
+        title:'Sürtünme sınıra yakın',
+        note:'İki eşikten biri aşıldı. Tek başına aşılması hüküm değildir — '
+           + 'kurulum ya da ayar günü olabilir.' };
+    }
+    return { level:'ok', cert:'measured', window:w,
+      title:'Sürtünme bütçede',
+      note:'Günde ' + w.perDay + ' dk sistem, %'
+         + (w.ratio == null ? '—' : Math.round(w.ratio * 100)) + ' yönetim payı.' };
+  }
+
+  /* Sürtünme yüksekse NE azaltılabilir?
+
+     Bu bir teklif listesidir, uygulama değil. Sistem yalnızca kendi yükünü
+     AZALTMAYI önerir; hiçbir madde "daha çok veri gir" demez. */
+  function relief(){
+    const v = verdict();
+    if(v.level !== 'high') return [];
+    const out = [];
+
+    const acik = (ESP.Mod && ESP.Mod.active) ? ESP.Mod.active() : [];
+    if(acik.length > 3){
+      out.push({ id:'fewer-modules', label:acik.length + ' bölüm açık',
+        note:'Aynı anda ' + acik.length + ' disiplin taşımak, her birinin '
+           + 'kaydını da taşımak demektir. Kapatılan bölümün verisi silinmez.',
+        act:'go-profile' });
+    }
+    if(ESP.Timer && !ESP.Timer.active()){
+      out.push({ id:'use-timer', label:'Süreyi elle yazıyorsun',
+        note:'Zamanlayıcı, oturum girişinin çoğunu ortadan kaldırır: '
+           + 'başlat–bitir, kayıt kendiliğinden düşer.', act:'timer-hint' });
+    }
+    const bek = (ESP.S.proposals || []).filter(p => p.status === 'pending').length;
+    if(bek > 4){
+      out.push({ id:'clear-proposals', label:bek + ' bekleyen teklif',
+        note:'Karar bekleyen her teklif, her açılışta yeniden okunuyor. '
+           + 'Toplu reddetmek de bir karardır.', act:'go-office' });
+    }
+    if(!out.length){
+      out.push({ id:'shorter-visits', label:'Ziyaretler uzun',
+        note:'Bölüm sayısı ve kayıt yükü makul görünüyor; süre ekranlarda '
+           + 'geziniyor. Günün tek işini yapıp kapatmak yeterli.', act:'go-today' });
+    }
+    return out;
+  }
+
+  return {
+    tick, blur, save, load, day, verdict, relief,
+    adminMinutes, workMinutes, window:window_,
+    BUTCE_DK, ORAN_ESIK, PENCERE, CANLI_SN,
+  };
+})();
+
+/* ==== js/core/calib.js ==== */
+/* Kalibrasyon defteri — kullanıcının kendi yargısını ÖLÇER.
+
+   Bir karar destek sistemi iki şekilde başarısız olur. Birincisi bilinir:
+   yanlış hesaplar. İkincisi sinsidir: doğru hesaplar ama kullanıcının
+   kendi yargısını köreltir. Her sayıyı sistemden bekleyen biri, sistem
+   kapandığında hiçbir şey bilmiyordur. Bu, ölçmenin yan etkisidir ve
+   ölçülmediği sürece görünmez.
+
+   Buradaki cevap basit: SİSTEM SÖYLEMEDEN ÖNCE SEN SÖYLE.
+
+   Kullanıcı bir sayıyı görmeden önce tahminini yazar; sistem gerçek değeri
+   sonra açar ve ikisi arasındaki farkı BİRİKTİRİR. Zamanla ortaya bir şey
+   çıkar: kişi kendi durumunu ne kadar biliyor? Bu, sistemin ürettiği
+   herhangi bir metrikten daha değerlidir — çünkü sistem yokken de geçerlidir.
+
+   Dört kural:
+
+   1. TAHMİN KÖR OLMAK ZORUNDADIR. Gerçek değer ekranda dururken yazılan
+      tahmin, tahmin değil kopyadır. Kayıt açılırken gerçek değer ÇÖZÜLMEZ;
+      yalnızca kapanışta hesaplanır. Kör olmayan kayıt `blind:false` ile
+      işaretlenir ve puana katılmaz.
+
+   2. TAHMİN ETMEMEK BİR HATA DEĞİLDİR. Defter boşsa sistem "kalibrasyonun
+      kötü" demez, "veri yok" der. Sıfır tahmin, sıfır isabet demek değildir.
+
+   3. PUAN KİŞİYE DEĞİL, TAHMİNE VERİLİR. "Kendini tanımıyorsun" denmez;
+      "son 12 tahminin ortalama sapması %22" denir. ESP.PEDAGOGIC sınırı
+      burada da geçerlidir.
+
+   4. AZ SAYIDA KAYIT HÜKÜM VERMEZ. Beşin altında kapanmış tahmin varsa
+      puan hesaplanmaz. Üç tahminle kalibrasyon ölçmek, üç soruyla sınav
+      yapmaktır. */
+
+window.ESP = window.ESP || {};
+
+ESP.Calib = (function(){
+  const U = ESP.U, S = ESP.S;
+
+  /* Puan için gereken en az kapanmış tahmin sayısı. */
+  const ASGARI = 5;
+
+  /* Puan penceresi: son bu kadar kapanmış tahmine bakılır. */
+  const PENCERE = 20;
+
+  /* Soru türleri. `kind` kaydın nasıl kapanacağını söyler.
+
+       number   sayısal tahmin, sapma yüzdeyle ölçülür
+       binary   olacak/olmayacak, olasılıkla (0–1) tahmin edilir
+
+     `resolve` gerçek değeri HESAPLAYAN işlevin adıdır; kapanışta çağrılır.
+     Burada değil, core/calib_sources.js'te değil — çağıran taraf verir.
+     Böylece defter, neyi ölçtüğünden bağımsız kalır. */
+  ESP.CALIB_KINDS = [
+    { id:'retention', type:'number', unit:'%',
+      label:'Kart retansiyonun', ask:'Son 30 günde kartlarının yüzde kaçını ilk denemede hatırladın?' },
+    { id:'minutes', type:'number', unit:'dk',
+      label:'Haftalık çalışma süren', ask:'Bu hafta toplam kaç dakika çalıştın?' },
+    { id:'sessions', type:'number', unit:'oturum',
+      label:'Haftalık oturum sayın', ask:'Bu hafta kaç oturum kaydettin?' },
+    { id:'gate', type:'binary', unit:'',
+      label:'Sıradaki kapı', ask:'Bu ayın sonunda sıradaki kapıyı geçmiş olacak mısın?' },
+    { id:'readability', type:'number', unit:'puan',
+      label:'Yazının okunabilirliği', ask:'Bu taslağın Ateşman puanı kaç çıkar?' },
+  ];
+
+  const KIND_BY_ID = ESP.CALIB_KINDS.reduce((m, k) => { m[k.id] = k; return m; }, {});
+
+  function kindOf(id){ return KIND_BY_ID[id] || null; }
+
+  function list(){ return (S.forecasts || []).slice(); }
+
+  function open_(){ return list().filter(f => f.actual == null); }
+  function settled(){
+    return list().filter(f => f.actual != null && f.blind !== false)
+      .sort((a, b) => (a.settledAt || '') < (b.settledAt || '') ? 1 : -1);
+  }
+
+  function norm(f){
+    const o = f || {};
+    const k = kindOf(o.kind);
+    return {
+      id:o.id || U.uid('f'),
+      kind:k ? o.kind : 'minutes',
+      ref:o.ref || null,
+      guess:Number(o.guess),
+      actual:(o.actual == null || !isFinite(Number(o.actual))) ? null : Number(o.actual),
+      blind:o.blind !== false,
+      note:String(o.note || ''),
+      at:o.at || new Date().toISOString(),
+      dueAt:o.dueAt || null,
+      settledAt:o.settledAt || null,
+    };
+  }
+
+  /* ------------------------------------------------------------ kayıt */
+
+  /* Tahmin aç. Gerçek değer BURADA hesaplanmaz — kasıtlı.
+
+     `dueAt` tahmin ne zaman kapanabilir olacağını söyler; o tarihten önce
+     kapanış reddedilir. "Bu hafta kaç dakika çalışacağım" sorusunun cevabı
+     hafta bitmeden belli değildir; erken kapatmak tahmini kolaylaştırır. */
+  async function open(kindId, guess, opts){
+    const o = opts || {};
+    const k = kindOf(kindId);
+    if(!k) return { ok:false, error:'Bilinmeyen tahmin türü.' };
+
+    const g = Number(guess);
+    if(!isFinite(g)) return { ok:false, error:'Tahmin bir sayı olmalı.' };
+    if(k.type === 'binary' && (g < 0 || g > 1)){
+      return { ok:false, error:'Olasılık 0 ile 1 arasında olmalı.' };
+    }
+    if(k.type === 'number' && g < 0){
+      return { ok:false, error:'Tahmin negatif olamaz.' };
+    }
+
+    const kayit = norm({ kind:kindId, guess:g, ref:o.ref || null,
+      note:o.note, dueAt:o.dueAt || null, blind:o.blind !== false });
+
+    S.forecasts = list().concat([kayit]);
+    await ESP.Store.set('forecasts/' + kayit.id, kayit);
+    return { ok:true, forecast:kayit };
+  }
+
+  /* Tahmini kapat: gerçek değer şimdi verilir.
+
+     Çağıran gerçek değeri kural motorundan alır; defter kendi başına bir
+     ölçü üretmez. Bu, "kural motoru otoritedir" kuralının defterdeki
+     karşılığıdır. */
+  async function settle(id, actual){
+    const f = list().filter(x => x.id === id)[0];
+    if(!f) return { ok:false, error:'Tahmin bulunamadı.' };
+    if(f.actual != null) return { ok:false, error:'Bu tahmin zaten kapandı.' };
+
+    const a = Number(actual);
+    if(!isFinite(a)) return { ok:false, error:'Gerçek değer bir sayı olmalı.' };
+    if(f.dueAt && U.todayISO() < f.dueAt){
+      return { ok:false, error:'Bu tahmin ' + f.dueAt + ' tarihinden önce kapanmaz.',
+        early:true };
+    }
+
+    f.actual = a;
+    f.settledAt = new Date().toISOString();
+    S.forecasts = list().map(x => x.id === id ? f : x);
+    await ESP.Store.set('forecasts/' + f.id, f);
+    return { ok:true, forecast:f, error_:error(f) };
+  }
+
+  async function remove(id){
+    S.forecasts = list().filter(x => x.id !== id);
+    await ESP.Store.remove('forecasts/' + id);
+    return { ok:true };
+  }
+
+  /* ------------------------------------------------------------- puan */
+
+  /* Tek bir tahminin hatası.
+
+     Sayısal: |tahmin − gerçek| / max(gerçek, 1). Paydada gerçek değer
+     durur; 10 dakikayı 20 tahmin etmek, 200'ü 210 tahmin etmekten çok
+     daha büyük bir sapmadır.
+
+     İkili: Brier — (olasılık − sonuç)². 0 mükemmel, 0.25 yazı-tura,
+     1 tam ters. */
+  function error(f){
+    const k = kindOf(f.kind);
+    if(!k || f.actual == null) return null;
+    if(k.type === 'binary'){
+      const sonuc = f.actual >= 0.5 ? 1 : 0;
+      return { type:'brier', value:Math.pow(f.guess - sonuc, 2) };
+    }
+    const payda = Math.max(Math.abs(f.actual), 1);
+    return { type:'ape', value:Math.abs(f.guess - f.actual) / payda };
+  }
+
+  /* Yanlılık: sürekli fazla mı tahmin ediyor, az mı?
+
+     Ortalama işaretli sapma. Hatanın büyüklüğünden AYRI bir bilgidir:
+     rastgele sapan biriyle sistemli olarak kendini abartan biri aynı
+     ortalama hataya sahip olabilir ama farklı şeyler yapmaları gerekir. */
+  function bias(kindId){
+    const kayitlar = settled().filter(f => !kindId || f.kind === kindId)
+      .filter(f => kindOf(f.kind) && kindOf(f.kind).type === 'number')
+      .slice(0, PENCERE);
+    if(kayitlar.length < ASGARI){
+      return { cert:'missing', n:kayitlar.length, value:null,
+        note:'Yanlılık için en az ' + ASGARI + ' kapanmış sayısal tahmin gerekir.' };
+    }
+    const toplam = kayitlar.reduce((a, f) => {
+      const payda = Math.max(Math.abs(f.actual), 1);
+      return a + (f.guess - f.actual) / payda;
+    }, 0);
+    const v = toplam / kayitlar.length;
+    return { cert:'measured', n:kayitlar.length, value:v,
+      direction:v > 0.05 ? 'over' : v < -0.05 ? 'under' : 'even',
+      note:v > 0.05 ? 'Kendini olduğundan iyi tahmin etme eğilimindesin.'
+        : v < -0.05 ? 'Kendini olduğundan kötü tahmin etme eğilimindesin.'
+        : 'Sistemli bir yanlılık görünmüyor.' };
+  }
+
+  /* Kalibrasyon puanı: son PENCERE kapanmış tahminin ortalama hatası.
+
+     İki tür bir arada ortalanmaz — yüzde sapma ile Brier aynı ölçek
+     değildir. İkisi ayrı döner. */
+  function score(){
+    const hepsi = settled().slice(0, PENCERE);
+    const sayisal = hepsi.filter(f => (kindOf(f.kind) || {}).type === 'number');
+    const ikili = hepsi.filter(f => (kindOf(f.kind) || {}).type === 'binary');
+
+    const out = { n:hepsi.length, open:open_().length, cert:'missing',
+      ape:null, brier:null, grade:null, bias:bias() };
+
+    if(hepsi.length < ASGARI){
+      out.note = 'Kapanmış ' + hepsi.length + ' tahmin var; puan için '
+        + ASGARI + ' gerekir. Az sayıda tahmin hüküm vermez.';
+      return out;
+    }
+    out.cert = 'measured';
+    if(sayisal.length){
+      out.ape = sayisal.reduce((a, f) => a + error(f).value, 0) / sayisal.length;
+    }
+    if(ikili.length){
+      out.brier = ikili.reduce((a, f) => a + error(f).value, 0) / ikili.length;
+    }
+    /* Derece yalnızca sayısal sapmadan verilir ve KİŞİYE DEĞİL, tahminlere
+       aittir. Eşikler açıkça seçilmiş sınırlardır, bir bulgu değil. */
+    if(out.ape != null){
+      out.grade = out.ape <= 0.10 ? 'keskin'
+        : out.ape <= 0.25 ? 'makul'
+        : out.ape <= 0.50 ? 'dağınık' : 'uzak';
+      out.note = 'Son ' + sayisal.length + ' sayısal tahminin ortalama sapması %'
+        + Math.round(out.ape * 100) + '.';
+    } else {
+      out.note = 'Son ' + ikili.length + ' ikili tahminin Brier puanı '
+        + (out.brier == null ? '—' : out.brier.toFixed(2)) + ' (0 kusursuz, 0,25 yazı-tura).';
+    }
+    return out;
+  }
+
+  /* Kapanmaya hazır tahminler: vadesi gelmiş ama henüz kapanmamış. */
+  function due(){
+    const t = U.todayISO();
+    return open_().filter(f => !f.dueAt || f.dueAt <= t);
+  }
+
+  async function load(){
+    S.forecasts = ((await ESP.Store.list('forecasts')) || []).map(norm);
+    return S.forecasts;
+  }
+
+  return {
+    open, settle, remove, load, norm,
+    list, settled, openList:open_, due, error, bias, score, kindOf,
+    ASGARI, PENCERE,
+  };
+})();
+
+/* ==== js/core/goodhart.js ==== */
+/* Goodhart nöbetçisi — gösterge amaca dönüştüğünde haber verir.
+
+   Goodhart yasası tek cümledir: bir ölçü hedef hâline geldiğinde, iyi bir
+   ölçü olmaktan çıkar. Bu, ölçen her sistemin başına gelir ve sessizce
+   gelir. Kullanıcı daha çok dakika yazar, daha çok kart çevirir, daha çok
+   sayfa okur — sayılar yükselir, tablo güzelleşir, HİÇBİR ŞEY öğrenilmez.
+
+   Bu dosya o boşluğu arar. Yöntem basit ve kaba: her disiplinde ÇABA'yı
+   temsil eden bir sayı ile SONUÇ'u temsil eden bir sayı yan yana konur,
+   iki bitişik pencerede ölçülür ve şu sorulur: çaba arttı da sonuç yerinde
+   mi saydı?
+
+   Dört kural:
+
+   1. NÖBETÇİ HÜKÜM VERMEZ, SORU SORAR. Çıktısı "yanlış çalışıyorsun"
+      değildir; "bu iki sayı ayrışmış, sebebini sen bilirsin"dir. Ayrışmanın
+      meşru sebepleri vardır: plato, zor bir parçaya geçiş, yeni bir dil.
+
+   2. İKİ TARAFTA DA VERİ OLMADAN AYRIŞMA YOKTUR. Sonuç ölçülmediyse sonuç
+      sıfır değildir; o çift 'unknown' döner. Bu, deponun en eski kuralıdır.
+
+   3. ÇABA DÜŞERKEN UYARI ÜRETİLMEZ. Az çalışıp az ilerlemek bir Goodhart
+      vakası değildir, yalnızca az çalışmaktır. Nöbetçinin işi tembelliği
+      değil, VERİMSİZ GAYRETİ görmektir.
+
+   4. KÜÇÜK SAYILARDA GÜRÜLTÜ VARDIR. Eşiğin altındaki hacimde bir çift
+      hiç değerlendirilmez: 4 karttan 6 karta çıkmak %50 artıştır ve
+      hiçbir şey ifade etmez. */
+
+window.ESP = window.ESP || {};
+
+ESP.Goodhart = (function(){
+  const U = ESP.U, S = ESP.S;
+
+  /* Pencere uzunluğu (gün). İki bitişik pencere karşılaştırılır:
+     [bugün−28, bugün] ile [bugün−56, bugün−28]. */
+  const PENCERE = 28;
+
+  /* Çabanın "arttı" sayılması için gereken oran. */
+  const CABA_ARTIS = 0.25;
+
+  /* Sonucun "yerinde saydı" sayılması için üst sınır. Bunun üstünde bir
+     iyileşme varsa ayrışma yoktur. */
+  const SONUC_DURGUN = 0.05;
+
+  /* Bu hacmin altındaki çabada çift değerlendirilmez (dakika). */
+  const ASGARI_CABA = 60;
+
+  function iso(n){ return U.iso(U.addDays(U.parse(U.todayISO()), n)); }
+
+  /* Bir pencerenin sınırları: [bas, son) — son hariç. */
+  function windows(){
+    return {
+      now:{ from:iso(-PENCERE), to:iso(0) },
+      prev:{ from:iso(-2 * PENCERE), to:iso(-PENCERE) },
+    };
+  }
+
+  function inWin(dateISO, w){
+    const d = String(dateISO || '').slice(0, 10);
+    return !!d && d >= w.from && d < w.to;
+  }
+
+  /* ------------------------------------------------------- ham sayaçlar */
+
+  function minutesIn(discId, w){
+    let t = 0;
+    Object.keys(S.days || {}).forEach(k => {
+      if(!inWin(k, w)) return;
+      (S.days[k].sessions || []).forEach(s => {
+        if(s.disc === discId) t += Number(s.minutes) || 0;
+      });
+    });
+    return t;
+  }
+
+  /* Kart cevapları: pencerede kaç cevap ve bunların yüzde kaçı ilk
+     denemede hatırlandı ('good' ya da 'easy'). */
+  function cardAnswers(w){
+    let n = 0, iyi = 0;
+    (S.cards || []).forEach(c => {
+      (c.history || []).forEach(h => {
+        if(!inWin(h.at, w)) return;
+        n++;
+        if(h.grade === 'good' || h.grade === 'easy') iyi++;
+      });
+    });
+    return { n, rate:n ? iyi / n : null };
+  }
+
+  function countIn(list, w, dateField, pred){
+    return (list || []).filter(x => inWin(x[dateField], w) && (!pred || pred(x))).length;
+  }
+
+  /* Diksiyon: pencerede okunan kelime başına hata. Kayıt kayıt ortalama
+     ALINMAZ — üç kelimelik bir kayıt, üç yüz kelimelik bir kayıtla aynı
+     ağırlığı taşımamalı. Toplam hata / toplam kelime doğru olandır. */
+  function dictionError(w){
+    let hata = 0, kelime = 0;
+    (S.recordings || []).forEach(x => {
+      if(!inWin(x.date, w)) return;
+      const h = Number(x.errors), k = Number(x.words);
+      if(!isFinite(h) || !isFinite(k) || !(k > 0)) return;
+      hata += h; kelime += k;
+    });
+    return kelime >= 100 ? hata / kelime : null;
+  }
+
+  /* Müzik: pencerede yapılan denemelerin kaçı temiz kapandı. */
+  function cleanRate(w){
+    let n = 0, temiz = 0;
+    (S.pieces || []).forEach(p => {
+      (p.attempts || []).forEach(a => {
+        if(!inWin(a.date, w)) return;
+        n++; if(a.clean) temiz++;
+      });
+    });
+    return n >= 10 ? temiz / n : null;
+  }
+
+  /* -------------------------------------------------------------- çiftler
+
+     `effort`  çabayı temsil eden sayı — hep dakika ya da tekrar sayısı
+     `outcome` sonucu temsil eden sayı — üretim, isabet ya da temizlik
+     `lower`   sonuç DÜŞTÜKÇE mi iyi? (hata oranı gibi)
+
+     Her çift, sonucun çabanın yerine geçemeyeceği bir yerde durur. */
+  const PAIRS = [
+    { id:'lang-volume-vs-recall', disc:'lang',
+      effortLabel:'çalışma dakikası', outcomeLabel:'ilk denemede hatırlama',
+      question:'Kart sayısını mı artırdın, yoksa aynı kartları mı '
+             + 'tekrar ediyorsun?',
+      effort:w => minutesIn('lang', w),
+      outcome:w => { const a = cardAnswers(w); return a.n >= 20 ? a.rate : null; } },
+
+    { id:'lang-reps-vs-recall', disc:'lang',
+      effortLabel:'kart tekrarı', outcomeLabel:'ilk denemede hatırlama',
+      question:'Kart destesi çok mu büyük, yoksa kartlar çok mu uzun?',
+      effort:w => cardAnswers(w).n,
+      outcome:w => { const a = cardAnswers(w); return a.n >= 20 ? a.rate : null; },
+      minEffort:40 },
+
+    { id:'reading-minutes-vs-notes', disc:'reading',
+      effortLabel:'okuma dakikası', outcomeLabel:'çıkan not',
+      question:'Okuduğun metin not almaya değmiyor mu, yoksa okuma '
+             + 'pasifleşti mi?',
+      effort:w => minutesIn('reading', w),
+      outcome:w => countIn(S.notes, w, 'createdAt') },
+
+    { id:'reading-notes-vs-links', disc:'reading',
+      effortLabel:'not sayısı', outcomeLabel:'not başına bağ',
+      question:'Bağlanmayan not ikinci kez okunmaz; notları bağlamayı '
+             + 'mı erteliyorsun, yoksa bağlanacak bir şey mi çıkmıyor?',
+      effort:w => countIn(S.notes, w, 'createdAt'),
+      outcome:w => {
+        const n = (S.notes || []).filter(x => inWin(x.createdAt, w));
+        if(n.length < 5) return null;
+        return n.reduce((a, x) => a + ((x.links || []).length), 0) / n.length;
+      },
+      minEffort:5 },
+
+    { id:'writing-minutes-vs-drafts', disc:'writing',
+      effortLabel:'yazı dakikası', outcomeLabel:'elden geçen taslak',
+      question:'Yazmak ile yazıyı düzenlemek aynı iş değil — süre '
+             + 'hangisine gidiyor?',
+      effort:w => minutesIn('writing', w),
+      outcome:w => countIn(S.drafts, w, 'updatedAt') },
+
+    { id:'philo-minutes-vs-closed', disc:'philo',
+      effortLabel:'felsefe dakikası', outcomeLabel:'kapanan argüman',
+      question:'Açık kalan argüman bir düşünce değil bir niyettir; '
+             + 'hangisi kapanmaya en yakın?',
+      effort:w => minutesIn('philo', w),
+      outcome:w => countIn(S.args, w, 'updatedAt', a => a.status === 'closed') },
+
+
+    { id:'music-minutes-vs-clean', disc:'music',
+      effortLabel:'gitar dakikası', outcomeLabel:'temiz deneme oranı',
+      question:'Tempoyu erken mi açtın? Plato kontrolüne bakmak ister misin?',
+      effort:w => minutesIn('music', w),
+      outcome:w => cleanRate(w) },
+
+    { id:'diction-minutes-vs-error', disc:'diction',
+      effortLabel:'diksiyon dakikası', outcomeLabel:'hata oranı',
+      lower:true,
+      question:'Kaydı dinleyip hataları işaretliyor musun, yoksa aynı '
+             + 'tekrarı mı sürdürüyorsun?',
+      effort:w => minutesIn('diction', w),
+      outcome:w => dictionError(w) },
+
+    { id:'history-minutes-vs-events', disc:'history',
+      effortLabel:'tarih dakikası', outcomeLabel:'yerleştirilen olay',
+      question:'Yerleştirilmeyen olay hatırlanmaz; okuduklarını '
+             + 'kronolojiye taşımayı mı erteliyorsun?',
+      effort:w => minutesIn('history', w),
+      outcome:w => countIn(S.events, w, 'createdAt') },
+  ];
+
+  /* ------------------------------------------------------------ ölçüm */
+
+  function oran(yeni, eski){
+    if(eski == null || yeni == null) return null;
+    if(eski === 0) return yeni > 0 ? Infinity : 0;
+    return (yeni - eski) / Math.abs(eski);
+  }
+
+  /* Tek bir çiftin durumu.
+
+     'decoupled'  çaba arttı, sonuç yerinde saydı ya da düştü
+     'aligned'    ikisi de arttı ya da ikisi de düştü
+     'idle'       çaba artmadı — nöbetçinin işi değil
+     'unknown'    iki taraftan biri ölçülmedi */
+  function pair(def){
+    const w = windows();
+    const eC = def.effort(w.prev), yC = def.effort(w.now);
+    const eS = def.outcome(w.prev), yS = def.outcome(w.now);
+
+    const base = { id:def.id, disc:def.disc,
+      effortLabel:def.effortLabel, outcomeLabel:def.outcomeLabel,
+      effort:{ prev:eC, now:yC }, outcome:{ prev:eS, now:yS },
+      question:def.question };
+
+    const asgari = def.minEffort != null ? def.minEffort : ASGARI_CABA;
+    if(eS == null || yS == null){
+      return Object.assign(base, { status:'unknown', cert:'missing',
+        note:'Sonuç tarafında iki pencerenin birinde ölçüm yok. '
+           + 'Ölçülmemiş sonuç, sıfır sonuç değildir.' });
+    }
+    if(!(yC >= asgari)){
+      return Object.assign(base, { status:'idle', cert:'measured',
+        note:'Bu pencerede hacim değerlendirmeye yetmiyor (' + yC + ' < ' + asgari + ').' });
+    }
+
+    const dC = oran(yC, eC);
+    const dS = oran(yS, eS);
+    const sonucIyilesme = def.lower ? (dS == null ? null : -dS) : dS;
+
+    if(dC == null || dC < CABA_ARTIS){
+      return Object.assign(base, { status:'idle', cert:'measured',
+        effortChange:dC, outcomeChange:sonucIyilesme,
+        note:'Çaba belirgin biçimde artmamış; nöbetçi burada bir şey aramaz.' });
+    }
+    if(sonucIyilesme != null && sonucIyilesme > SONUC_DURGUN){
+      return Object.assign(base, { status:'aligned', cert:'measured',
+        effortChange:dC, outcomeChange:sonucIyilesme,
+        note:'Çaba da sonuç da arttı. Gösterge hâlâ bir şeyi temsil ediyor.' });
+    }
+    return Object.assign(base, { status:'decoupled', cert:'measured',
+      effortChange:dC, outcomeChange:sonucIyilesme,
+      note:def.effortLabel + ' %' + Math.round(dC * 100) + ' arttı, '
+         + def.outcomeLabel + ' ' + (sonucIyilesme == null ? 'ölçülemedi'
+            : (sonucIyilesme >= 0 ? '%' + Math.round(sonucIyilesme * 100) + ' değişti'
+               : '%' + Math.round(Math.abs(sonucIyilesme) * 100) + ' geriledi')) + '.' });
+  }
+
+  /* Açık bölümlerin çiftleri. Kapalı bölüm hakkında hüküm kurulmaz. */
+  function scan(){
+    return PAIRS
+      .filter(p => !ESP.Mod || ESP.Mod.isOn(p.disc))
+      .map(pair);
+  }
+
+  function flags(){ return scan().filter(p => p.status === 'decoupled'); }
+
+  /* Ekrana çıkacak tek cümle. Bayrak yoksa sessizdir — nöbetçinin
+     konuşmadığı gün, iyi gündür. */
+  function brief(){
+    const f = flags();
+    if(!f.length) return null;
+    const ilk = f[0];
+    return {
+      count:f.length,
+      title:f.length === 1 ? 'Bir gösterge ayrışmış' : f.length + ' gösterge ayrışmış',
+      body:ilk.note + ' ' + ilk.question,
+      flags:f,
+    };
+  }
+
+  return { PAIRS, windows, pair, scan, flags, brief,
+    PENCERE, CABA_ARTIS, SONUC_DURGUN, ASGARI_CABA };
 })();
 
 /* ==== js/core/coach.js ==== */
@@ -22961,6 +23828,28 @@ ESP.Screens.ladder = (function(){
           title:kapi.title, why:kapi.why }))}`,
     }));
 
+    /* Merdivenin GÖREMEDİĞİ şeyler.
+
+       Bu kutu kasten kapıların hemen altında durur. Bir merdiven, ölçtüğü
+       şeyleri sıralar; okuyan kişi de zamanla ölçülenin önemli, ölçülmeyenin
+       önemsiz olduğunu sanmaya başlar. O sanı burada kırılır: üstatlık bu
+       listedeki maddelerdedir ve sistem onların hiçbirini göremez. */
+    if((lad.blind || []).length){
+      rows.push(K.Entry({
+        label:'BU MERDİVENİN GÖREMEDİĞİ', hint:'blind',
+        meta:lad.blind.length + ' madde',
+        note:'Kapılar ölçülebilir olanı ölçer. Aşağıdakiler ölçülemez ve '
+           + 'ölçülemediği için önemsiz değildir — asıl mesele çoğu zaman '
+           + 'buradadır.',
+        wide:true,
+        body:html`
+          <ul class="studylist">${map(lad.blind, x => html`<li>${x}</li>`)}</ul>
+          ${K.Notice({ tone:'info',
+            body:'Üstat kademesi bile bu maddeleri kapatmaz. Merdiven bir '
+               + 'yeterlilik belgesi değil, bir çalışma düzenidir.' })}`,
+      }));
+    }
+
     yol.steps.forEach(st => {
       rows.push(K.Entry({
         label:'KADEME ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short,
@@ -25248,6 +26137,7 @@ ESP.Screens.analytics = (function(){
     { id:'radar',   label:'Radar' },
     { id:'seriler', label:'Seriler' },
     { id:'rapor',   label:'Rapor' },
+    { id:'durust',  label:'Dürüstlük' },
   ];
 
   /* ------------------------------------------------------------------ radar */
@@ -25465,12 +26355,148 @@ ESP.Screens.analytics = (function(){
     ];
   }
 
+
+  /* ------------------------------------------------------- dürüstlük sekmesi
+
+     Bu sekme sistemin KENDİSİNİ ölçer. Üç soru sorar ve üçünün de cevabı
+     kullanıcı hakkında değil, sistem hakkındadır:
+
+       Sürtünme      Sistemi yönetmek, çalışmanın yerine mi geçiyor?
+       Ayrışma       Bir gösterge, temsil ettiği şeyden koptu mu?
+       Kalibrasyon   Kullanıcı sistemsiz de kendi durumunu biliyor mu?
+
+     Üçü de kötü çıkabilir ve bu bir arıza değildir; ölçüldüğü için
+     görünür olmasıdır. Ölçülmeyen sürtünme sıfır değildir, yalnızca
+     görünmezdir. */
+
+  function honestyRows(){
+    const f = ESP.Friction.verdict();
+    const rahatlama = ESP.Friction.relief();
+    const bayraklar = ESP.Goodhart.scan();
+    const ayrisan = bayraklar.filter(p => p.status === 'decoupled');
+    const puan = ESP.Calib.score();
+    const vadesi = ESP.Calib.due();
+
+    const ton = f.level === 'high' ? 'warn' : f.level === 'watch' ? 'info' : 'ok';
+
+    return [
+      K.Entry({
+        label:'SÜRTÜNME', hint:'friction',
+        meta:f.cert === 'missing' ? 'veri yok'
+          : f.window.perDay + ' dk/gün'
+            + (f.window.ratio == null ? '' : ' · %' + Math.round(f.window.ratio * 100)),
+        note:'Sistemde geçen süre ile çalışmada geçen süre. Pratik sayacı '
+           + 'açıkken geçen süre çalışma sayılır, yönetim değil.',
+        wide:true,
+        body:html`
+          ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info',
+            title:f.title, body:f.note })}
+          ${when(f.cert === 'measured', () => K.Table({ tight:true,
+            headers:['Pencere', { label:'Yönetim', num:true }, { label:'Çalışma', num:true },
+              { label:'Pay', num:true }],
+            rows:[[
+              f.window.days + ' gün (' + f.window.measuredDays + ' ölçüldü)',
+              U.fmtMin(f.window.admin), U.fmtMin(f.window.work),
+              f.window.ratio == null ? '—' : '%' + Math.round(f.window.ratio * 100),
+            ]] }))}
+          ${when(rahatlama.length, () => html`
+            <div class="mt-10">
+              ${map(rahatlama, r => K.Entry({ label:r.label, note:r.note,
+                body:K.Button({ label:'Bak', size:'sm', act:r.act }) }))}
+            </div>`)}`,
+      }),
+
+      K.Entry({
+        label:'GÖSTERGE AYRIŞMASI', hint:'goodhart',
+        meta:ayrisan.length ? ayrisan.length + ' ayrışma' : 'temiz',
+        note:'Çaba arttı da sonuç yerinde mi saydı? Nöbetçi hüküm vermez, '
+           + 'soru sorar: ayrışmanın meşru sebepleri vardır.',
+        wide:true,
+        body:bayraklar.length
+          ? K.Table({ tight:true,
+              headers:['Çift', 'Çaba', 'Sonuç', 'Durum'],
+              rows:bayraklar.map(p => [
+                p.effortLabel + ' → ' + p.outcomeLabel,
+                p.effortChange == null ? P.cert(p.cert === 'missing' ? 'missing' : 'estimated')
+                  : (p.effortChange === Infinity ? 'yeni' : '%' + Math.round(p.effortChange * 100)),
+                p.outcomeChange == null ? P.cert('missing')
+                  : (p.outcomeChange === Infinity ? 'yeni' : '%' + Math.round(p.outcomeChange * 100)),
+                p.status === 'decoupled' ? 'ayrıştı'
+                  : p.status === 'aligned' ? 'birlikte'
+                  : p.status === 'unknown' ? 'ölçülmedi' : 'sessiz',
+              ]) })
+          : K.Empty({ text:'Açık bölüm yok; nöbetçinin bakacağı çift de yok.' }),
+      }),
+
+      ...ayrisan.map(p => K.Entry({
+        label:p.effortLabel.toUpperCase(),
+        meta:'ayrıştı',
+        note:p.note,
+        body:K.Notice({ tone:'info', title:'Soru', body:p.question }),
+      })),
+
+      K.Entry({
+        label:'KALİBRASYON', hint:'calib',
+        meta:puan.cert === 'missing' ? puan.n + '/' + ESP.Calib.ASGARI + ' tahmin'
+          : (puan.grade || (puan.brier == null ? '—' : 'brier ' + puan.brier.toFixed(2))),
+        note:'Sistem söylemeden önce sen söyle. Burada ölçülen şey senin '
+           + 'kendi durumunu ne kadar bildiğin — sistem kapalıyken de geçerli '
+           + 'olan tek ölçü bu.',
+        wide:true,
+        body:html`
+          ${K.Notice({ tone:'info', body:puan.note })}
+          ${when(puan.bias.cert === 'measured', () => K.Notice({ tone:'info',
+            title:'Yanlılık', body:puan.bias.note }))}
+          <div class="mt-10">
+            ${K.Field({ label:'Ne tahmin ediyorsun?',
+              input:K.Select({ id:'calib-kind', value:S.ui.calibKind || 'minutes',
+                change:'calib-kind', aria:'Tahmin türü',
+                options:ESP.CALIB_KINDS.map(k => ({ value:k.id, label:k.label })) }) })}
+            ${(function(){
+              const k = ESP.Calib.kindOf(S.ui.calibKind || 'minutes');
+              return html`
+                <p class="lrow__note">${k.ask}</p>
+                ${K.Field({ label:k.type === 'binary' ? 'Olasılık (0–1)' : 'Tahminin' + (k.unit ? ' (' + k.unit + ')' : ''),
+                  input:K.Input({ id:'calib-guess', type:'number', numeric:true,
+                    step:k.type === 'binary' ? '0.05' : '1',
+                    placeholder:k.type === 'binary' ? '0,70' : '0' }) })}`;
+            })()}
+            ${K.Button({ label:'Tahmini kaydet', tone:'primary', act:'calib-open' })}
+          </div>
+          ${when(vadesi.length, () => html`
+            <div class="mt-10">
+              ${map(vadesi, fo => K.Entry({
+                label:(ESP.Calib.kindOf(fo.kind) || {}).label || fo.kind,
+                meta:'tahminin: ' + U.fmtNum(fo.guess),
+                note:'Gerçek değer girilince tahmin kapanır ve deftere yazılır.',
+                body:html`
+                  ${K.Field({ label:'Gerçekleşen',
+                    input:K.Input({ id:'calib-actual-' + fo.id, type:'number', numeric:true }) })}
+                  ${K.Button({ label:'Kapat', size:'sm', act:'calib-settle',
+                    data:{ 'data-id':fo.id } })}`,
+              }))}
+            </div>`)}
+          ${when(ESP.Calib.settled().length, () => K.Table({ tight:true,
+            headers:['Tür', { label:'Tahmin', num:true }, { label:'Gerçek', num:true },
+              { label:'Sapma', num:true }],
+            rows:ESP.Calib.settled().slice(0, 10).map(fo => {
+              const h = ESP.Calib.error(fo);
+              return [(ESP.Calib.kindOf(fo.kind) || {}).label || fo.kind,
+                U.fmtNum(fo.guess), U.fmtNum(fo.actual),
+                h == null ? '—' : (h.type === 'brier' ? h.value.toFixed(2)
+                  : '%' + Math.round(h.value * 100))];
+            }) }))}`,
+      }),
+    ];
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
     const tab = S.ui.analyticsTab || 'radar';
     const rows = tab === 'seriler' ? seriesRows()
       : tab === 'rapor' ? reportRows()
+      : tab === 'durust' ? honestyRows()
       : radarRows();
 
     return K.Grid(html`
@@ -25490,11 +26516,47 @@ ESP.Screens.analytics = (function(){
       }, 'Brifing üretiliyor');
       ESP.App.render();
     },
+
+    /* Tahmin KÖR açılır: gerçek değer burada hesaplanmaz, yalnızca
+       kapanışta. Ekranda duran bir sayıya bakarak yazılan tahmin, tahmin
+       değil kopyadır. */
+    async 'calib-open'(){
+      const kind = S.ui.calibKind || 'minutes';
+      const el = document.getElementById('calib-guess');
+      const r = await ESP.Calib.open(kind, el ? el.value : null,
+        { dueAt:dueFor(kind) });
+      if(!r.ok){ ESP.UI.toast(r.error); return; }
+      if(el) el.value = '';
+      ESP.UI.toast('Tahmin deftere yazıldı.');
+      ESP.App.render();
+    },
+
+    async 'calib-settle'(el){
+      const id = el.dataset.id;
+      const inp = document.getElementById('calib-actual-' + id);
+      const r = await ESP.Calib.settle(id, inp ? inp.value : null);
+      if(!r.ok){ ESP.UI.toast(r.error); return; }
+      const h = ESP.Calib.error(r.forecast);
+      ESP.UI.toast(h && h.type === 'ape'
+        ? 'Kapandı — sapma %' + Math.round(h.value * 100)
+        : 'Kapandı.');
+      ESP.App.render();
+    },
   };
+
+  /* Tahminin vadesi: haftalık sayılar hafta bitmeden, aylık kapı tahmini
+     ay bitmeden kapanmaz. Erken kapanış tahmini kolaylaştırır. */
+  function dueFor(kind){
+    const bugun = U.parse(U.todayISO());
+    if(kind === 'minutes' || kind === 'sessions') return U.iso(U.addDays(bugun, 7));
+    if(kind === 'gate') return U.iso(U.addDays(bugun, 30));
+    return null;
+  }
 
   const change = {
     async 'radar-window'(el){ S.ui.radarWindow = Number(el.value) || 14; ESP.App.render(); },
     async 'series-disc'(el){ S.ui.seriesDisc = el.value; ESP.App.render(); },
+    async 'calib-kind'(el){ S.ui.calibKind = el.value; ESP.App.render(); },
   };
 
   return {
@@ -27444,6 +28506,39 @@ ESP.App = (function(){
   /* Pencere boyutu değişince panelin çapası kayar; yeniden konumlamak
      yerine kapatmak daha dürüst: kullanıcı nereye tıkladığını bilir. */
   window.addEventListener('resize', () => { if(isAppearanceOpen()) closeAppearance(); });
+
+  /* ------------------------------------------------------------ sürtünme ölçümü
+
+     Sistemin kendi maliyeti de ölçülür (core/friction.js). Etkileşim ve
+     görünürlük olayları sayaca dokunur; sekme arkaya gidince zincir kesilir
+     ki açık unutulmuş bir sayfa «yönetim süresi» sayılmasın.
+
+     Yazma işi seyrek yapılır: her tıklamada depoya yazmak, sürtünmeyi
+     ölçerken sürtünme üretmek olurdu. */
+  (function wireFriction(){
+    if(!ESP.Friction) return;
+    let sonYazim = 0;
+    const YAZIM_ARALIK = 30000;
+
+    function dokun(){
+      if(!S.ready) return;
+      ESP.Friction.tick();
+      const now = Date.now();
+      if(now - sonYazim > YAZIM_ARALIK){
+        sonYazim = now;
+        ESP.Friction.save();
+      }
+    }
+    ['click', 'keydown', 'input', 'scroll', 'pointerdown'].forEach(t => {
+      document.addEventListener(t, dokun, { passive:true, capture:true });
+    });
+    document.addEventListener('visibilitychange', () => {
+      if(document.hidden){ ESP.Friction.blur(); ESP.Friction.save(); }
+      else ESP.Friction.tick();
+    });
+    window.addEventListener('blur', () => ESP.Friction.blur());
+    window.addEventListener('pagehide', () => { ESP.Friction.blur(); ESP.Friction.save(); });
+  })();
 
   /* ------------------------------------------------------------ depolama sağlığı */
   let lastErrorToastAt = 0;

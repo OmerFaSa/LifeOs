@@ -21,6 +21,7 @@ ESP.Screens.analytics = (function(){
     { id:'radar',   label:'Radar' },
     { id:'seriler', label:'Seriler' },
     { id:'rapor',   label:'Rapor' },
+    { id:'durust',  label:'Dürüstlük' },
   ];
 
   /* ------------------------------------------------------------------ radar */
@@ -238,12 +239,148 @@ ESP.Screens.analytics = (function(){
     ];
   }
 
+
+  /* ------------------------------------------------------- dürüstlük sekmesi
+
+     Bu sekme sistemin KENDİSİNİ ölçer. Üç soru sorar ve üçünün de cevabı
+     kullanıcı hakkında değil, sistem hakkındadır:
+
+       Sürtünme      Sistemi yönetmek, çalışmanın yerine mi geçiyor?
+       Ayrışma       Bir gösterge, temsil ettiği şeyden koptu mu?
+       Kalibrasyon   Kullanıcı sistemsiz de kendi durumunu biliyor mu?
+
+     Üçü de kötü çıkabilir ve bu bir arıza değildir; ölçüldüğü için
+     görünür olmasıdır. Ölçülmeyen sürtünme sıfır değildir, yalnızca
+     görünmezdir. */
+
+  function honestyRows(){
+    const f = ESP.Friction.verdict();
+    const rahatlama = ESP.Friction.relief();
+    const bayraklar = ESP.Goodhart.scan();
+    const ayrisan = bayraklar.filter(p => p.status === 'decoupled');
+    const puan = ESP.Calib.score();
+    const vadesi = ESP.Calib.due();
+
+    const ton = f.level === 'high' ? 'warn' : f.level === 'watch' ? 'info' : 'ok';
+
+    return [
+      K.Entry({
+        label:'SÜRTÜNME', hint:'friction',
+        meta:f.cert === 'missing' ? 'veri yok'
+          : f.window.perDay + ' dk/gün'
+            + (f.window.ratio == null ? '' : ' · %' + Math.round(f.window.ratio * 100)),
+        note:'Sistemde geçen süre ile çalışmada geçen süre. Pratik sayacı '
+           + 'açıkken geçen süre çalışma sayılır, yönetim değil.',
+        wide:true,
+        body:html`
+          ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info',
+            title:f.title, body:f.note })}
+          ${when(f.cert === 'measured', () => K.Table({ tight:true,
+            headers:['Pencere', { label:'Yönetim', num:true }, { label:'Çalışma', num:true },
+              { label:'Pay', num:true }],
+            rows:[[
+              f.window.days + ' gün (' + f.window.measuredDays + ' ölçüldü)',
+              U.fmtMin(f.window.admin), U.fmtMin(f.window.work),
+              f.window.ratio == null ? '—' : '%' + Math.round(f.window.ratio * 100),
+            ]] }))}
+          ${when(rahatlama.length, () => html`
+            <div class="mt-10">
+              ${map(rahatlama, r => K.Entry({ label:r.label, note:r.note,
+                body:K.Button({ label:'Bak', size:'sm', act:r.act }) }))}
+            </div>`)}`,
+      }),
+
+      K.Entry({
+        label:'GÖSTERGE AYRIŞMASI', hint:'goodhart',
+        meta:ayrisan.length ? ayrisan.length + ' ayrışma' : 'temiz',
+        note:'Çaba arttı da sonuç yerinde mi saydı? Nöbetçi hüküm vermez, '
+           + 'soru sorar: ayrışmanın meşru sebepleri vardır.',
+        wide:true,
+        body:bayraklar.length
+          ? K.Table({ tight:true,
+              headers:['Çift', 'Çaba', 'Sonuç', 'Durum'],
+              rows:bayraklar.map(p => [
+                p.effortLabel + ' → ' + p.outcomeLabel,
+                p.effortChange == null ? P.cert(p.cert === 'missing' ? 'missing' : 'estimated')
+                  : (p.effortChange === Infinity ? 'yeni' : '%' + Math.round(p.effortChange * 100)),
+                p.outcomeChange == null ? P.cert('missing')
+                  : (p.outcomeChange === Infinity ? 'yeni' : '%' + Math.round(p.outcomeChange * 100)),
+                p.status === 'decoupled' ? 'ayrıştı'
+                  : p.status === 'aligned' ? 'birlikte'
+                  : p.status === 'unknown' ? 'ölçülmedi' : 'sessiz',
+              ]) })
+          : K.Empty({ text:'Açık bölüm yok; nöbetçinin bakacağı çift de yok.' }),
+      }),
+
+      ...ayrisan.map(p => K.Entry({
+        label:p.effortLabel.toUpperCase(),
+        meta:'ayrıştı',
+        note:p.note,
+        body:K.Notice({ tone:'info', title:'Soru', body:p.question }),
+      })),
+
+      K.Entry({
+        label:'KALİBRASYON', hint:'calib',
+        meta:puan.cert === 'missing' ? puan.n + '/' + ESP.Calib.ASGARI + ' tahmin'
+          : (puan.grade || (puan.brier == null ? '—' : 'brier ' + puan.brier.toFixed(2))),
+        note:'Sistem söylemeden önce sen söyle. Burada ölçülen şey senin '
+           + 'kendi durumunu ne kadar bildiğin — sistem kapalıyken de geçerli '
+           + 'olan tek ölçü bu.',
+        wide:true,
+        body:html`
+          ${K.Notice({ tone:'info', body:puan.note })}
+          ${when(puan.bias.cert === 'measured', () => K.Notice({ tone:'info',
+            title:'Yanlılık', body:puan.bias.note }))}
+          <div class="mt-10">
+            ${K.Field({ label:'Ne tahmin ediyorsun?',
+              input:K.Select({ id:'calib-kind', value:S.ui.calibKind || 'minutes',
+                change:'calib-kind', aria:'Tahmin türü',
+                options:ESP.CALIB_KINDS.map(k => ({ value:k.id, label:k.label })) }) })}
+            ${(function(){
+              const k = ESP.Calib.kindOf(S.ui.calibKind || 'minutes');
+              return html`
+                <p class="lrow__note">${k.ask}</p>
+                ${K.Field({ label:k.type === 'binary' ? 'Olasılık (0–1)' : 'Tahminin' + (k.unit ? ' (' + k.unit + ')' : ''),
+                  input:K.Input({ id:'calib-guess', type:'number', numeric:true,
+                    step:k.type === 'binary' ? '0.05' : '1',
+                    placeholder:k.type === 'binary' ? '0,70' : '0' }) })}`;
+            })()}
+            ${K.Button({ label:'Tahmini kaydet', tone:'primary', act:'calib-open' })}
+          </div>
+          ${when(vadesi.length, () => html`
+            <div class="mt-10">
+              ${map(vadesi, fo => K.Entry({
+                label:(ESP.Calib.kindOf(fo.kind) || {}).label || fo.kind,
+                meta:'tahminin: ' + U.fmtNum(fo.guess),
+                note:'Gerçek değer girilince tahmin kapanır ve deftere yazılır.',
+                body:html`
+                  ${K.Field({ label:'Gerçekleşen',
+                    input:K.Input({ id:'calib-actual-' + fo.id, type:'number', numeric:true }) })}
+                  ${K.Button({ label:'Kapat', size:'sm', act:'calib-settle',
+                    data:{ 'data-id':fo.id } })}`,
+              }))}
+            </div>`)}
+          ${when(ESP.Calib.settled().length, () => K.Table({ tight:true,
+            headers:['Tür', { label:'Tahmin', num:true }, { label:'Gerçek', num:true },
+              { label:'Sapma', num:true }],
+            rows:ESP.Calib.settled().slice(0, 10).map(fo => {
+              const h = ESP.Calib.error(fo);
+              return [(ESP.Calib.kindOf(fo.kind) || {}).label || fo.kind,
+                U.fmtNum(fo.guess), U.fmtNum(fo.actual),
+                h == null ? '—' : (h.type === 'brier' ? h.value.toFixed(2)
+                  : '%' + Math.round(h.value * 100))];
+            }) }))}`,
+      }),
+    ];
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
     const tab = S.ui.analyticsTab || 'radar';
     const rows = tab === 'seriler' ? seriesRows()
       : tab === 'rapor' ? reportRows()
+      : tab === 'durust' ? honestyRows()
       : radarRows();
 
     return K.Grid(html`
@@ -263,11 +400,47 @@ ESP.Screens.analytics = (function(){
       }, 'Brifing üretiliyor');
       ESP.App.render();
     },
+
+    /* Tahmin KÖR açılır: gerçek değer burada hesaplanmaz, yalnızca
+       kapanışta. Ekranda duran bir sayıya bakarak yazılan tahmin, tahmin
+       değil kopyadır. */
+    async 'calib-open'(){
+      const kind = S.ui.calibKind || 'minutes';
+      const el = document.getElementById('calib-guess');
+      const r = await ESP.Calib.open(kind, el ? el.value : null,
+        { dueAt:dueFor(kind) });
+      if(!r.ok){ ESP.UI.toast(r.error); return; }
+      if(el) el.value = '';
+      ESP.UI.toast('Tahmin deftere yazıldı.');
+      ESP.App.render();
+    },
+
+    async 'calib-settle'(el){
+      const id = el.dataset.id;
+      const inp = document.getElementById('calib-actual-' + id);
+      const r = await ESP.Calib.settle(id, inp ? inp.value : null);
+      if(!r.ok){ ESP.UI.toast(r.error); return; }
+      const h = ESP.Calib.error(r.forecast);
+      ESP.UI.toast(h && h.type === 'ape'
+        ? 'Kapandı — sapma %' + Math.round(h.value * 100)
+        : 'Kapandı.');
+      ESP.App.render();
+    },
   };
+
+  /* Tahminin vadesi: haftalık sayılar hafta bitmeden, aylık kapı tahmini
+     ay bitmeden kapanmaz. Erken kapanış tahmini kolaylaştırır. */
+  function dueFor(kind){
+    const bugun = U.parse(U.todayISO());
+    if(kind === 'minutes' || kind === 'sessions') return U.iso(U.addDays(bugun, 7));
+    if(kind === 'gate') return U.iso(U.addDays(bugun, 30));
+    return null;
+  }
 
   const change = {
     async 'radar-window'(el){ S.ui.radarWindow = Number(el.value) || 14; ESP.App.render(); },
     async 'series-disc'(el){ S.ui.seriesDisc = el.value; ESP.App.render(); },
+    async 'calib-kind'(el){ S.ui.calibKind = el.value; ESP.App.render(); },
   };
 
   return {

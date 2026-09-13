@@ -48,6 +48,10 @@ SP.Nutri = (function(){
      Tablo deklaratiftir: kosul, hangi ogeyi ne kadar buyuttugu ve GEREKCESI
      birlikte durur. Gerekce ekranda gorunur; carpanin nedenini kullanicidan
      saklamayiz. */
+  /* Dayanagi zayif bir esikten cikabilecek EN BUYUK hedef degisikligi.
+     %20: fark edilir ama bir karar esigi gibi davranmayan bir pay. */
+  const ZAYIF_PAY = 0.20;
+
   const LAB_LINKS = [
     { when:['ferritin', 'low'],    nutrient:'iron',      mult:1.6,
       why:'Ferritin referans aralığının altında — demir deposu boşalmış.' },
@@ -103,11 +107,34 @@ SP.Nutri = (function(){
       if(!last) return;
       const st = SP.Bio.statusOf(markerId, last.v, profile);
       if(st.id !== wanted) return;
+
+      /* Kanit derecesi carpanin gucunu SINIRLAR (core/evidence.js).
+
+         Hedef bandindan gelen bir tetik ile referans araligindan gelen bir
+         tetik ayni agirlikta degildir: referans araliklari laboratuvar ve
+         kilavuz uzlasisina dayanir, hedef bantlarinin bir kismi ise bu
+         sistemin SECIMIDIR. Secilmis bir banttan cikan hedef degisikligi
+         zayiflatilir ve NEDEN zayiflatildigi gerekcenin icine yazilir —
+         sessizce zayiflatmak, kullaniciyi yaniltmanin baska bir bicimidir. */
+      const alan = (wanted === 'belowOpt' || wanted === 'aboveOpt') ? 'optimal' : 'ref';
+      const yetki = SP.Ev ? SP.Ev.temper(markerId, alan, 'act') : { downgraded:false };
+      let mult = link.mult;
+      let why = link.why;
+      if(yetki.downgraded){
+        const yon = link.mult >= 1 ? 1 : -1;
+        const tavan = 1 + yon * Math.min(Math.abs(link.mult - 1), ZAYIF_PAY);
+        mult = tavan;
+        why = link.why + ' ' + yetki.why;
+      }
+
       const cur = out[link.nutrient];
       /* Ayni oge icin birden fazla kural tetiklenirse en guclusu gecerlidir;
          carpanlar carpilmaz — ust uste binerek asiri hedef uretmesin. */
-      const stronger = !cur || Math.abs(link.mult - 1) > Math.abs(cur.mult - 1);
-      if(stronger) out[link.nutrient] = { mult:link.mult, why:link.why, marker:markerId };
+      const stronger = !cur || Math.abs(mult - 1) > Math.abs(cur.mult - 1);
+      if(stronger){
+        out[link.nutrient] = { mult, why, marker:markerId,
+          grade:yetki.grade || null, soft:!!yetki.downgraded };
+      }
     });
     return out;
   }

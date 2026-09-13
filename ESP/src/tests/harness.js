@@ -185,7 +185,7 @@ ESP.Test = (function(){
     S.events = []; S.sources = []; S.chains = [];
     S.assets = []; S.reminders = [];
     S.proposals = []; S.weekPlan = null;
-    S.timer = null;
+    S.timer = null; S.usage = null; S.forecasts = [];
     S.office = null; S.officeChats = {}; S.officeMeetings = [];
     S.officeBriefings = {}; S.journal = {};
     S.decisions = [];
