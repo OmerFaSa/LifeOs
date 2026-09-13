@@ -16,6 +16,10 @@ birbirleriyle konuşur; sonunda **tek bir karar** çıkar.
 | **Herodot** | Tarih ve kaynak eleştirisi | Kronoloji kapsamı, yüzyıl boşlukları, neden zincirlerinin dengesi, birincil–ikincil oranı | Bir olayın «doğru» yorumunu dayatmaz, güncel siyaset konuşmaz |
 | **Mnemosyne** | Hafıza ve tekrar **koçu** | Bütün destelerin tekrar durumu, merdivendeki sıradaki kapı | İçeriğe karışmaz: bir kartın doğruluğunu tartışmaz |
 
+Her uzman masası, kendi bölüm sayfasında **tezgâhın** içinde de durur:
+Reçete (bugün ne yapılacak), Koç (yazılı ve sesli sohbet), Harita, Ekler,
+Hatırlatma, Plan.
+
 Yetki ayrımı kasıtlıdır: bir ajan alan dışına çıkan bir soru görürse sahibine
 yönlendirir, **cevap uydurmaz**. Çelişkiyi Patron çözer.
 

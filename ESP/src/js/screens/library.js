@@ -322,7 +322,7 @@ ESP.Screens.library = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'notlar' ? { count:(S.notes || []).length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('reading'), ESP.Parts.desk('reading')]
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('reading')]
         .concat(rows)))}`);
   }
 

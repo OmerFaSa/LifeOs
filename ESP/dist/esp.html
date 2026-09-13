@@ -5396,7 +5396,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'d10e697', at:'2026-09-13 04:30', dirty:true };
+SP.BUILD = { id:'79de965', at:'2026-09-13 04:36', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -13186,13 +13186,19 @@ ESP.Coach = (function(){
 
    Yedi bölüm yedi ayrı iş yapar ama DÖRT şeyi aynı şekilde ister:
 
+     REÇETE       bugün ne yapılacağı — koçun yazdığı üç bölümlük seans
      KOÇ          o bölümün uzmanıyla konuşmak (yazılı ya da sesli)
      HARİTA       sıfırdan üstatlığa nerede durduğun
      EKLER        not, belge, bağlantı ve ses ölçümü iliştirmek
      HATIRLATMA   kendine bir şey söyleyip günü gelince duymak
 
-   Dördü de tek bir yerde tanımlı çünkü bölümden bölüme değişmemeleri
+   Hepsi tek bir yerde tanımlı çünkü bölümden bölüme değişmemeleri
    gerekiyor: kullanıcı bir kez öğrensin, yedi kez değil.
+
+   Reçete bir zamanlar AYRI bir kutuydu ve tezgâhın hemen üstünde
+   duruyordu. İkisi aynı cümleyi (sıradaki kapı) iki kez yazıyor, ekranı
+   iki kat uzatıyordu. Reçete de koçun işi: artık tezgâhın ilk sekmesi ve
+   varsayılan görünüm.
 
    İki değişmez bu dosyanın tamamını yönetir:
 
@@ -13211,6 +13217,7 @@ ESP.Desk = (function(){
   const U = ESP.U, S = ESP.S;
 
   const TABS = [
+    { id:'recete',     label:'Reçete' },
     { id:'kocla',      label:'Koç' },
     { id:'harita',     label:'Harita' },
     { id:'ekler',      label:'Ekler' },
@@ -13226,7 +13233,7 @@ ESP.Desk = (function(){
   }
 
   function tab(discId){
-    return (S.ui.deskTab && S.ui.deskTab[discId]) || 'kocla';
+    return (S.ui.deskTab && S.ui.deskTab[discId]) || 'recete';
   }
 
   function setTab(discId, id){
@@ -16884,13 +16891,12 @@ ESP.Parts = (function(){
     return K.Empty({ text, action });
   }
 
-  /* ------------------------------------------------------------ koç kutusu
+  /* ------------------------------------------------------------ reçete satırı
 
-     Her disiplin ekranının en üstünde, aynı yerde, aynı biçimde durur.
      Tek yerde tanımlı olması kasıtlı: reçete biçimi bölümden bölüme
      değişirse kullanıcı her bölümde yeniden okumayı öğrenir.
 
-     Kutu bir TAVSİYE kutusu değildir — içinde yapılacak işler ve onları
+     Liste bir TAVSİYE kutusu değildir — içinde yapılacak işler ve onları
      işleyen düğmeler vardır. Okunup geçilen bir kutu yazmanın anlamı yok. */
   /* Reçete satırı MİNİMAL: bir egzersiz tek satırdır.
 
@@ -16925,28 +16931,23 @@ ESP.Parts = (function(){
     })}</ul>`;
   }
 
-  function coach(discId){
+  /* Reçete sekmesi — bir zamanlar AYRI bir kutuydu (KOÇ) ve tezgâhın
+     hemen üstünde duruyordu. İkisi aynı cümleyi (sıradaki kapı) iki kez
+     yazıyor, ekranı iki katına çıkarıyordu. Reçete de koçun işi: artık
+     tezgâhın ilk sekmesi ve varsayılan görünüm. */
+  function deskRx(discId){
     const r = ESP.Coach.prescribe(discId);
     if(!r) return raw('');
-    const lv = r.level;
-
-    /* Kutunun kendisi de sadelesti: kademe rozeti, kesinlik ve sure tek
-       satirda; gerekce (`why`) kunye sutununda zaten duruyor, govdede
-       ikinci kez yazilmiyordu. */
-    return K.Entry({
-      label:'KOÇ', hint:'coach',
-      meta:r.cert === 'missing' ? 'kademe yok' : lv.label,
-      note:r.why,
-      action:K.Button({ label:'Merdiven', size:'sm', act:'go',
-        data:{ 'data-route':'ladder' } }),
-      wide:true,
-      body:html`
-        <div class="coachhead">
-          ${cert(r.cert)}
-          <span class="tiny dim">${U.fmtMin(r.minutes)} / ${U.fmtMin(r.budget)} taban</span>
-        </div>
-        ${rxList(r)}`,
-    });
+    return html`
+      <div class="coachhead">
+        ${K.Badge({ label:r.level.label + ' · ' + r.level.short,
+          tone:r.cert === 'missing' ? 'muted' : 'info', icon:false })}
+        ${cert(r.cert)}
+        <span class="tiny dim">${U.fmtMin(r.minutes)} / ${U.fmtMin(r.budget)} taban</span>
+        ${K.Button({ label:'Merdiven', size:'sm', act:'go',
+          data:{ 'data-route':'ladder' } })}
+      </div>
+      ${rxList(r)}`;
   }
 
   /* --------------------------------------------------------------- tezgâh
@@ -17377,7 +17378,8 @@ ESP.Parts = (function(){
               x.id === 'hatirlatma' && bekleyen ? { count:bekleyen }
                 : (x.id === 'plan' && teklif ? { count:teklif } : {}))) })}
           <div class="desk__body" data-disc="${discId}">
-            ${t === 'harita' ? deskMap(discId)
+            ${t === 'recete' ? deskRx(discId)
+              : t === 'harita' ? deskMap(discId)
               : t === 'ekler' ? deskAssets(discId)
               : t === 'hatirlatma' ? deskReminders(discId)
               : t === 'plan' ? deskPlans(discId)
@@ -17388,7 +17390,7 @@ ESP.Parts = (function(){
     });
   }
 
-  return { cert, measure, avatar, discChip, radar, empty, coach, desk,
+  return { cert, measure, avatar, discChip, radar, empty, desk, deskRx,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, units, practice,
     proposalList, weekPlan, rx:rxList };
 
@@ -20827,7 +20829,7 @@ ESP.Screens.lang = (function(){
           aria:'Çalışılan dil',
           options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('lang'), ESP.Parts.desk('lang')]
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('lang')]
         .concat(rows)))}`);
   }
 
@@ -21281,7 +21283,7 @@ ESP.Screens.symposium = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'acik' ? { count:ESP.Intellect.openArguments().length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('philo'), ESP.Parts.desk('philo')]
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('philo')]
         .concat(rows)))}`);
   }
 
@@ -22010,7 +22012,7 @@ ESP.Screens.history = (function(){
         actions:when(evs().length, () => K.Button({ label:'Tohumu yükle', size:'sm',
           act:'seed' })),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('history'), ESP.Parts.desk('history')]
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('history')]
         .concat(rows)))}`);
   }
 
@@ -22962,7 +22964,7 @@ ESP.Screens.studio = (function(){
            gunu altmis dakikalik bir recete ile karsilamak olurdu. */
         const disc = S.ui.studioTab === 'diksiyon' ? 'diction' : 'music';
         const sessiz = S.ui.studioTab === 'ilerleme' || S.ui.studioTab === 'kulak';
-        return (sessiz ? [] : [ESP.Parts.coach(disc), ESP.Parts.desk(disc)]).concat(rows);
+        return (sessiz ? [] : [ESP.Parts.desk(disc)]).concat(rows);
       }))}`);
   }
 
@@ -23451,7 +23453,7 @@ ESP.Screens.library = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'notlar' ? { count:(S.notes || []).length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('reading'), ESP.Parts.desk('reading')]
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('reading')]
         .concat(rows)))}`);
   }
 
@@ -23826,7 +23828,7 @@ ESP.Screens.writing = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'taslaklar' ? { count:(S.drafts || []).length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('writing'), ESP.Parts.desk('writing')]
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('writing')]
         .concat(rows)))}`);
   }
 

@@ -253,7 +253,7 @@ ESP.Screens.writing = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'taslaklar' ? { count:(S.drafts || []).length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('writing'), ESP.Parts.desk('writing')]
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('writing')]
         .concat(rows)))}`);
   }
 

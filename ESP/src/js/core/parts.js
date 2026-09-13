@@ -136,13 +136,12 @@ ESP.Parts = (function(){
     return K.Empty({ text, action });
   }
 
-  /* ------------------------------------------------------------ koç kutusu
+  /* ------------------------------------------------------------ reçete satırı
 
-     Her disiplin ekranının en üstünde, aynı yerde, aynı biçimde durur.
      Tek yerde tanımlı olması kasıtlı: reçete biçimi bölümden bölüme
      değişirse kullanıcı her bölümde yeniden okumayı öğrenir.
 
-     Kutu bir TAVSİYE kutusu değildir — içinde yapılacak işler ve onları
+     Liste bir TAVSİYE kutusu değildir — içinde yapılacak işler ve onları
      işleyen düğmeler vardır. Okunup geçilen bir kutu yazmanın anlamı yok. */
   /* Reçete satırı MİNİMAL: bir egzersiz tek satırdır.
 
@@ -177,28 +176,23 @@ ESP.Parts = (function(){
     })}</ul>`;
   }
 
-  function coach(discId){
+  /* Reçete sekmesi — bir zamanlar AYRI bir kutuydu (KOÇ) ve tezgâhın
+     hemen üstünde duruyordu. İkisi aynı cümleyi (sıradaki kapı) iki kez
+     yazıyor, ekranı iki katına çıkarıyordu. Reçete de koçun işi: artık
+     tezgâhın ilk sekmesi ve varsayılan görünüm. */
+  function deskRx(discId){
     const r = ESP.Coach.prescribe(discId);
     if(!r) return raw('');
-    const lv = r.level;
-
-    /* Kutunun kendisi de sadelesti: kademe rozeti, kesinlik ve sure tek
-       satirda; gerekce (`why`) kunye sutununda zaten duruyor, govdede
-       ikinci kez yazilmiyordu. */
-    return K.Entry({
-      label:'KOÇ', hint:'coach',
-      meta:r.cert === 'missing' ? 'kademe yok' : lv.label,
-      note:r.why,
-      action:K.Button({ label:'Merdiven', size:'sm', act:'go',
-        data:{ 'data-route':'ladder' } }),
-      wide:true,
-      body:html`
-        <div class="coachhead">
-          ${cert(r.cert)}
-          <span class="tiny dim">${U.fmtMin(r.minutes)} / ${U.fmtMin(r.budget)} taban</span>
-        </div>
-        ${rxList(r)}`,
-    });
+    return html`
+      <div class="coachhead">
+        ${K.Badge({ label:r.level.label + ' · ' + r.level.short,
+          tone:r.cert === 'missing' ? 'muted' : 'info', icon:false })}
+        ${cert(r.cert)}
+        <span class="tiny dim">${U.fmtMin(r.minutes)} / ${U.fmtMin(r.budget)} taban</span>
+        ${K.Button({ label:'Merdiven', size:'sm', act:'go',
+          data:{ 'data-route':'ladder' } })}
+      </div>
+      ${rxList(r)}`;
   }
 
   /* --------------------------------------------------------------- tezgâh
@@ -629,7 +623,8 @@ ESP.Parts = (function(){
               x.id === 'hatirlatma' && bekleyen ? { count:bekleyen }
                 : (x.id === 'plan' && teklif ? { count:teklif } : {}))) })}
           <div class="desk__body" data-disc="${discId}">
-            ${t === 'harita' ? deskMap(discId)
+            ${t === 'recete' ? deskRx(discId)
+              : t === 'harita' ? deskMap(discId)
               : t === 'ekler' ? deskAssets(discId)
               : t === 'hatirlatma' ? deskReminders(discId)
               : t === 'plan' ? deskPlans(discId)
@@ -640,7 +635,7 @@ ESP.Parts = (function(){
     });
   }
 
-  return { cert, measure, avatar, discChip, radar, empty, coach, desk,
+  return { cert, measure, avatar, discChip, radar, empty, desk, deskRx,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, units, practice,
     proposalList, weekPlan, rx:rxList };
 

@@ -168,9 +168,17 @@ zorundadır — sistem kendi kendini kullanılamaz hâle getiremez.
 bırakmaz. Numara bir kimlik değil bir **sıra**dır; kimlik `id`'dir ve
 yönlendirme ona bağlıdır.
 
-**Tezgâh (`core/desk.js`).** Her bölüm sayfasının altında beş sekme: Koç ·
-Harita · Ekler · Hatırlatma · Plan. Tek yerde tanımlı olmasının sebebi
-tutarlılık: kullanıcı bir kez öğrensin, yedi kez değil.
+**Tezgâh (`core/desk.js`).** Her bölüm sayfasının altında altı sekme:
+**Reçete** · Koç · Harita · Ekler · Hatırlatma · Plan. Tek yerde tanımlı
+olmasının sebebi tutarlılık: kullanıcı bir kez öğrensin, yedi kez değil.
+
+Reçete bir zamanlar ayrı bir kutuydu (KOÇ) ve tezgâhın hemen üstünde
+duruyordu. İkisi aynı cümleyi — sıradaki kapı — iki kez yazıyor, ekranı iki
+katına çıkarıyordu. Reçete de koçun işi; artık tezgâhın ilk sekmesi.
+
+Reçete satırı **minimaldir**: bir egzersiz tek satır. Görev metni kaybolmaz,
+ada dokununca açılır — reçeteyi her gün okuyan biri üçüncü günden sonra görev
+metnini değil adı arar.
 
 İki değişmez:
 
@@ -350,7 +358,7 @@ disiplinin kendi tezgâhı, sonra danışma, en sonda ayar.
 
 | # | Bölüm | Sayfalar | Sekmeler |
 |---|---|---|---|
-| 01 | **Günlük** | Bugün · Merdiven | reçete, ölçüm, geçmiş / genel, yol, seviye tespiti |
+| 01 | **Günlük** | Bugün · Merdiven | giriş (reçete · sayaç · form), özet, geçmiş / genel, yol, seviye tespiti |
 | 02 | Dil | Dil Stüdyosu | çalış, kartlar, ekle, **öğren**, dilbilgisi, ilerleme |
 | 03 | Felsefe | Sempozyum | açık, kapalı, ekle, metinler, deneyler |
 | 04 | Ses | Stüdyo | müzik, diksiyon, kulak, ilerleme |

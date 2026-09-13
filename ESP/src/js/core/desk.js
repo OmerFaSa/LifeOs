@@ -2,13 +2,19 @@
 
    Yedi bölüm yedi ayrı iş yapar ama DÖRT şeyi aynı şekilde ister:
 
+     REÇETE       bugün ne yapılacağı — koçun yazdığı üç bölümlük seans
      KOÇ          o bölümün uzmanıyla konuşmak (yazılı ya da sesli)
      HARİTA       sıfırdan üstatlığa nerede durduğun
      EKLER        not, belge, bağlantı ve ses ölçümü iliştirmek
      HATIRLATMA   kendine bir şey söyleyip günü gelince duymak
 
-   Dördü de tek bir yerde tanımlı çünkü bölümden bölüme değişmemeleri
+   Hepsi tek bir yerde tanımlı çünkü bölümden bölüme değişmemeleri
    gerekiyor: kullanıcı bir kez öğrensin, yedi kez değil.
+
+   Reçete bir zamanlar AYRI bir kutuydu ve tezgâhın hemen üstünde
+   duruyordu. İkisi aynı cümleyi (sıradaki kapı) iki kez yazıyor, ekranı
+   iki kat uzatıyordu. Reçete de koçun işi: artık tezgâhın ilk sekmesi ve
+   varsayılan görünüm.
 
    İki değişmez bu dosyanın tamamını yönetir:
 
@@ -27,6 +33,7 @@ ESP.Desk = (function(){
   const U = ESP.U, S = ESP.S;
 
   const TABS = [
+    { id:'recete',     label:'Reçete' },
     { id:'kocla',      label:'Koç' },
     { id:'harita',     label:'Harita' },
     { id:'ekler',      label:'Ekler' },
@@ -42,7 +49,7 @@ ESP.Desk = (function(){
   }
 
   function tab(discId){
-    return (S.ui.deskTab && S.ui.deskTab[discId]) || 'kocla';
+    return (S.ui.deskTab && S.ui.deskTab[discId]) || 'recete';
   }
 
   function setTab(discId, id){

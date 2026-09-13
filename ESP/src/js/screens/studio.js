@@ -432,7 +432,7 @@ ESP.Screens.studio = (function(){
            gunu altmis dakikalik bir recete ile karsilamak olurdu. */
         const disc = S.ui.studioTab === 'diksiyon' ? 'diction' : 'music';
         const sessiz = S.ui.studioTab === 'ilerleme' || S.ui.studioTab === 'kulak';
-        return (sessiz ? [] : [ESP.Parts.coach(disc), ESP.Parts.desk(disc)]).concat(rows);
+        return (sessiz ? [] : [ESP.Parts.desk(disc)]).concat(rows);
       }))}`);
   }
 
