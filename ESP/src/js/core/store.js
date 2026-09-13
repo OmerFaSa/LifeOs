@@ -277,6 +277,27 @@ ESP.Store = (function(){
   }
 
   /* Kabaca kullanilan yerel alan (byte) */
+
+  /* Koleksiyon basina boyut — "depo dolmus" uyarisi tek basina ise
+     yaramaz; NEYIN buyudugunu bilmek gerekir.
+
+     Yol semasi "koleksiyon/kimlik" ya da tek parcali ("meta", "prefs").
+     Tek parcalilar kendi adlariyla sayilir. */
+  function sizeByCollection(){
+    const all = localAll();
+    const out = {};
+    Object.keys(all).forEach(function(k){
+      const kok = k.indexOf('/') > 0 ? k.slice(0, k.indexOf('/')) : k;
+      let n = 0;
+      try{ n = JSON.stringify(all[k]).length; }catch(e){ n = 0; }
+      if(!out[kok]) out[kok] = { collection:kok, bytes:0, count:0 };
+      out[kok].bytes += n + k.length + 4;   /* anahtar ve ayraclar da yer kaplar */
+      out[kok].count += 1;
+    });
+    return Object.keys(out).map(function(k){ return out[k]; })
+      .sort(function(a, b){ return b.bytes - a.bytes; });
+  }
+
   function localSize(){
     try{ return (localStorage.getItem(LOCAL_KEY) || '').length; }
     catch(e){ return 0; }
@@ -298,7 +319,7 @@ ESP.Store = (function(){
        ihtiyac duyar; depo anahtarini uretmis olan katman soylesin diye
        disari acilir. */
     activeProfileId(){ return PROFILE; },
-    exportAll, importAll, readBackup, clear, localSize, localQuota,
+    exportAll, importAll, readBackup, clear, localSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
     get mode(){ return mode; },

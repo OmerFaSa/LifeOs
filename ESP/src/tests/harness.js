@@ -154,6 +154,20 @@ ESP.Test = (function(){
         const pct = Math.min(100, Math.round(100*this.localSize()/limit));
         return { bytes:this.localSize(), limit, pct, near:pct >= 75, full:pct >= 92 };
       },
+      /* Koleksiyon basina boyut — depo sagligi (core/storage.js) bunu okur.
+         Sahte yuzey, gercek yuzeyin eksigi olamaz. */
+      sizeByCollection(){
+        const out = {};
+        Object.keys(data).forEach(k => {
+          const kok = k.indexOf('/') > 0 ? k.slice(0, k.indexOf('/')) : k;
+          let n = 0;
+          try{ n = JSON.stringify(data[k]).length; }catch(e){ n = 0; }
+          if(!out[kok]) out[kok] = { collection:kok, bytes:0, count:0 };
+          out[kok].bytes += n + k.length + 4;
+          out[kok].count += 1;
+        });
+        return Object.keys(out).map(k => out[k]).sort((a, b) => b.bytes - a.bytes);
+      },
       _data:data,
     };
   }
@@ -185,7 +199,7 @@ ESP.Test = (function(){
     S.events = []; S.sources = []; S.chains = [];
     S.assets = []; S.reminders = [];
     S.proposals = []; S.weekPlan = null;
-    S.timer = null; S.usage = null; S.forecasts = []; S.signals = [];
+    S.timer = null; S.usage = null; S.forecasts = []; S.signals = []; S.storage = null;
     S.office = null; S.officeChats = {}; S.officeMeetings = [];
     S.officeBriefings = {}; S.journal = {};
     S.decisions = [];

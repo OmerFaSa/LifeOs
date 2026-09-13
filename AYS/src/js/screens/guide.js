@@ -300,6 +300,61 @@ R.Screens.guide = (function(){
     ['data["cards/c…"]', 'Tekrar kartı: ön/arka yüz, aşama, sonraki tarih'],
   ];
 
+
+  /* ------------------------------------------------------- dokuz aylık ufuk
+
+     "Depo %80 dolu" tek basina ise yaramaz: ne zaman dolacagini ve NEYIN
+     sisdigini soylemez, ikisi bambaska kararlar gerektirir. Buyume hizi
+     her acilistaki bir olcumden HESAPLANIR; iki olcumden az varsa hiz
+     bilinmiyordur ve bilinmeyen hiz sifir hiz degildir. */
+  function storageHorizonCard(){
+    const dp = R.Storage;
+    const hukum = dp.verdict();
+    const buyume = dp.growth();
+    const ufuk = dp.horizon();
+    const dagilim = dp.breakdown();
+    const budanabilir = dp.prunable();
+
+    return K.Card({
+      title:'Dokuz aylık ufuk', hint:'storage', sub:hukum.title,
+      body:html`
+        ${K.Notice({ tone:hukum.level === 'full' ? 'danger'
+          : (hukum.level === 'near' || hukum.level === 'watch') ? 'warn' : 'ok',
+          title:hukum.title, body:hukum.note })}
+
+        ${K.Table({ tight:true, headers:['Ölçüm', 'Değer'], rows:[
+          ['Şu anki boyut', dp.fmtBytes(buyume.bytes)],
+          ['Günlük büyüme', buyume.perDay == null ? 'veri yok'
+            : dp.fmtBytes(buyume.perDay) + '/gün'],
+          ['Ölçüm günü', String(buyume.samples)
+            + (buyume.cert === 'measured' ? ' (ölçüldü)'
+              : buyume.cert === 'estimated' ? ' (tahmin)' : '')],
+          ['Dolmaya kalan', buyume.daysLeft == null ? '—' : buyume.daysLeft + ' gün'],
+          ['270 gün sonra', ufuk.cert === 'missing' ? 'veri yok'
+            : dp.fmtBytes(ufuk.projected) + (ufuk.willFit ? ' (sığar)' : ' (sığmaz)')],
+        ] })}
+
+        <div class="mt-12">${K.SectionTitle('Ne büyüyor')}</div>
+        ${K.Table({ tight:true,
+          headers:['Kayıt', { label:'Boyut', num:true }, { label:'Adet', num:true }, 'Tür'],
+          rows:dagilim.slice(0, 10).map(r => [r.label, dp.fmtBytes(r.bytes),
+            String(r.count), r.content ? 'içerik' : (r.prunable ? 'budanabilir' : 'sistem')]) })}
+
+        ${when(budanabilir.length, () => html`
+          <div class="mt-12">${K.SectionTitle('Yer aç')}</div>
+          <p class="tiny dim">Yalnızca sistemin kendi ürettiği kayıtlar listelenir.
+            Girdiğin hiçbir veri burada yer almaz — hiçbir koşulda.</p>
+          ${map(budanabilir, b => html`
+            <label class="row wrap gap-8 mt-8">
+              <input type="checkbox" data-prune="${b.collection}"/>
+              <span><b>${b.label}</b> — ${dp.fmtBytes(b.bytes)}
+                <span class="tiny dim">${b.note}</span></span>
+            </label>`)}
+          ${K.Button({ label:'Seçilenleri buda', tone:'danger', size:'sm',
+            act:'prune-storage', class:'mt-10' })}`)}`,
+    });
+  }
+
   /* Telefona kurulum ve yedek hatırlatması. */
   function installCard(){
     const standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
@@ -401,6 +456,7 @@ R.Screens.guide = (function(){
       ])),
       K.Span(6, K.Stack([
         dataCard(),
+        storageHorizonCard(),
         backupShapeCard(),
         installCard(),
         K.Card({ title:'Klavye kısayolları',
@@ -495,6 +551,19 @@ R.Screens.guide = (function(){
 
   const handle = {
     async 'guide-tab'(el){ S.ui.guideTab = el.dataset.tab; R.App.render(); },
+
+    /* Budama. Motor kullanicinin girdigi veriyi reddeder; ekran da
+       yalnizca izinli olanlari sunar. */
+    async 'prune-storage'(){
+      const secili = Array.prototype.slice
+        .call(document.querySelectorAll('[data-prune]'))
+        .filter(el => el.checked).map(el => el.dataset.prune);
+      if(!secili.length){ UI.toast('Önce budanacak kaydı seç.'); return; }
+      const r = await R.Storage.prune(secili);
+      if(!r.ok){ UI.toast(r.error); return; }
+      UI.toast(R.Storage.fmtBytes(r.freed) + ' yer açıldı.');
+      R.App.render();
+    },
     async 'toggle-backup-shape'(){ S.ui.backupShapeOpen = !S.ui.backupShapeOpen; R.App.render(); },
     async 'guide-check'(el){
       const day = await M.ensureDay(U.today());

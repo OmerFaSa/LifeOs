@@ -17,6 +17,19 @@ R.U = (function(){
     return new Date(parts[0], parts[1]-1, parts[2]);
   }
 
+
+  /* Gecerli bir ISO tarih dizesi mi? (YYYY-AA-GG ve gercekten var olan gun)
+
+     Sebep: `new Date('2026-02-31')` bazi tarayicilarda gecerli bir tarihe
+     KAYAR, bazilarinda Invalid Date doner; ikisi de sessizdir. Depodan
+     gelen bir tarihi dogrulamadan kullanmak, bozuk tek bir kaydin butun
+     pencereyi kaydirmasina yol acar. */
+  function isISO(s){
+    if(typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+    const d = parse(s);
+    return !!d && isFinite(d.getTime()) && iso(d) === s;
+  }
+
   function today(){
     const n = new Date();
     return new Date(n.getFullYear(), n.getMonth(), n.getDate());
@@ -140,7 +153,7 @@ R.U = (function(){
 
   return {
     MONTHS, MONTHS_SHORT, DAY_MS,
-    pad2, iso, parse, today, todayISO, addDays, diffDays, weekdayIndex,
+    pad2, iso, parse, isISO, today, todayISO, addDays, diffDays, weekdayIndex,
     fmtDate, fmtShort, fmtRange, monthName, monthKey, relativeDay,
     median, round, clamp, sum, pct, fmtNet, fmtNum, fmtMin, fmtClock,
     esc, uid, slug, plural, norm, debounce,

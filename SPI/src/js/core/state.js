@@ -48,6 +48,7 @@ SP.S = {
   usage:null,         // surtunme olcumu (core/friction.js)
   forecasts:[],       // kalibrasyon defteri (core/calib.js)
   signals:[],         // acik/kapali denetim sorulari (core/signals.js)
+  storage:null,       // depo buyume ornekleri (core/storage.js)
   decisions:[],       // ofis kararlari
 
   office:null,        // ofis ayarlari (saglayici, model, ajan basina secim)
@@ -852,6 +853,7 @@ SP.Model = (function(){
     if(SP.Friction) await SP.Friction.load();
     if(SP.Calib) await SP.Calib.load();
     if(SP.Signals) await SP.Signals.load();
+    if(SP.Storage){ await SP.Storage.load(); await SP.Storage.sample(); }
 
     S.ready = true;
     return S;

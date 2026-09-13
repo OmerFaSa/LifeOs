@@ -125,6 +125,18 @@ R.Test = (function(){
       async clear(){ Object.keys(data).forEach(k => delete data[k]); },
       /* Gercek depoyla ayni yuzey: ekranlar boyut/kota okuyabilmeli. */
       localSize(){ return JSON.stringify(data).length; },
+      sizeByCollection(){
+        const out = {};
+        Object.keys(data).forEach(k => {
+          const kok = k.indexOf('/') > 0 ? k.slice(0, k.indexOf('/')) : k;
+          let n = 0;
+          try{ n = JSON.stringify(data[k]).length; }catch(e){ n = 0; }
+          if(!out[kok]) out[kok] = { collection:kok, bytes:0, count:0 };
+          out[kok].bytes += n + k.length + 4;
+          out[kok].count += 1;
+        });
+        return Object.keys(out).map(k => out[k]).sort((a, b) => b.bytes - a.bytes);
+      },
       localQuota(){
         const limit = 5*1024*1024;
         const pct = Math.min(100, Math.round(100*this.localSize()/limit));
@@ -148,7 +160,7 @@ R.Test = (function(){
     S.prefs = R.Model.defaultPrefs();
     S.videoNotes = []; S.activities = []; S.mood = {}; S.breaks = []; S.plan = null;
     S.calendar = []; S.sessions = []; S.profiles = [];
-    S.usage = null; S.forecasts = []; S.signals = [];
+    S.usage = null; S.forecasts = []; S.signals = []; S.storage = null;
     S.meta = { lastBackupAt:null, schemaVersion:R.SCHEMA_VERSION };
     S.ui = { weekView:null, examTab:'list', examOpen:null, cardTab:'due',
       subjectOpen:'tyt-turkce', guideTab:'analysis', progressRange:8, flipped:{}, timer:null,

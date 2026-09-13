@@ -69,6 +69,8 @@ SP.HINTS = {
   /* --- ofis --- */
   'office':{ t:'Beş ajanlı ofis', b:'Dört uzman kendi alanına bakar, Patron çelişkiyi çözer ve tek karar çıkar.',
     more:'Yetki ayrımı kasıtlıdır: bir ajan alan dışına çıkarsa soruyu sahibine yönlendirir. Sayı kural motorundan gelir; ajan hesap yapmaz, yalnızca cümleye çevirir.' },
+  'storage':{ t:'Depo ufku', b:'Bu sistem dokuz ay her gün kullanılırsa depo dolar mı?',
+    more:'«Depo %80 dolu» tek başına işe yaramaz: ne zaman dolacağını ve NEYİN şiştiğini söylemez. Büyüme hızı her açılıştaki bir ölçümden HESAPLANIR; iki ölçümden az varsa hız bilinmiyordur. Budama yalnızca sistemin kendi ürettiği kayıtlara dokunur: tahlil, ölçüm, öğün ve antrenman kayıtların hiçbir koşulda yer açmak için silinmez.' },
   'friction':{ t:'Sürtünme', b:'Takip ekranlarında geçen süre — günlük bütçeye göre.',
     more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar. SPİ\'de ORAN hesaplanmaz: sağlıklı yaşamak bir saat işi değildir; uyumak, doğru yemek ve yürümek uygulamada dakika olarak görünmez. Sahte bir payda uydurmak, ölçülmemiş bir şeyi ölçülmüş göstermek olurdu. Bu yüzden yalnızca mutlak süre izlenir ve sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
   'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',

@@ -83,6 +83,8 @@ ESP.HINTS = {
   /* --- sistemin kendi denetimi --- */
   'signal':{ t:'Denetim sorusu', b:'Nöbetçinin ya da sürtünme ölçerin sorduğu tek soru.',
     more:'Denetim mekanizması ile denetim EKRANI aynı şey değildir: arka planda çalışan nöbetçinin bir ekran ağacı olması gerekmez, doğru anda mevcut akışa düşen tek bir soru yeter. Aynı anda en fazla bir soru açık kalır; cevaplamak zorunlu değildir ve «bu soru bana uymuyor» da bir cevaptır. Soru cevaplanınca kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı bir sonraki pencerede ölçülür.' },
+  'storage':{ t:'Depo ufku', b:'Bu sistem dokuz ay her gün kullanılırsa depo dolar mı?',
+    more:'«Depo %80 dolu» tek başına işe yaramaz: ne zaman dolacağını ve NEYİN şiştiğini söylemez, ikisi bambaşka kararlar gerektirir. Büyüme hızı her açılıştaki bir ölçümden HESAPLANIR; iki ölçümden az varsa hız bilinmiyordur ve bilinmeyen hız sıfır hız değildir. Budama yalnızca sistemin kendi ürettiği kayıtlara dokunur: kullanıcının girdiği tek bir oturum, kart ya da not hiçbir koşulda silinmez.' },
   'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın türü kademe ilerlemesinde ne kadar söz hakkı olduğunu belirler.',
     more:'Deterministik olmak, pedagojik olarak doğru olmak demek değildir. Dört kaynak türü vardır — yayımlanmış çerçeve (CEFR, Ateşman) ve kendi ölçümün kapı açabilir; öğrenme araştırması sınırlı katkı verir; sistemin kendi ayarı yalnızca izlenir. Merdiven kapılarının sayıları (300 kart, %75 retansiyon, 100 BPM) BU SİSTEMİN SEÇİMİDİR; ölçülebilir oldukları için seçilmişlerdir, bir literatürden geldikleri için değil.' },
   'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile çalışmaya giden sürenin payı.',

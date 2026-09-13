@@ -23,6 +23,7 @@ R.S = {
   usage:null,      // surtunme olcumu (core/friction.js)
   forecasts:[],    // kalibrasyon defteri (core/calib.js)
   signals:[],      // acik/kapali denetim sorulari (core/signals.js)
+  storage:null,    // depo buyume ornekleri (core/storage.js)
   profiles:[],     // cihazdaki profiller (cok kullanicili kullanim)
   videoNotes:[],   // izlenen ders kaydi + zaman damgali notlar
   solved:[],       // cozulen sorular: metin/fotograf, anlatim, konu, zorluk
@@ -1151,6 +1152,7 @@ R.Model = (function(){
     if(R.Friction) await R.Friction.load();
     if(R.Calib) await R.Calib.load();
     if(R.Signals) await R.Signals.load();
+    if(R.Storage){ await R.Storage.load(); await R.Storage.sample(); }
 
     for(const s of R.SUBJECTS){ await ensureTopics(s.id); }
 

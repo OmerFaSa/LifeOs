@@ -8,6 +8,8 @@ window.R = window.R || {};
 
 R.HINTS = {
   /* --- sistemin kendi denetimi --- */
+  'storage':{ t:'Depo ufku', b:'Bu sistem dokuz ay her gün kullanılırsa depo dolar mı?',
+    more:'«Depo %80 dolu» tek başına işe yaramaz: ne zaman dolacağını ve NEYİN şiştiğini söylemez, ikisi bambaşka kararlar gerektirir. Büyüme hızı her açılıştaki bir ölçümden HESAPLANIR; iki ölçümden az varsa hız bilinmiyordur. Budama yalnızca sistemin kendi ürettiği kayıtlara dokunur: bir adayın dokuz aylık deneme, hata ve konu kaydı hiçbir koşulda yer açmak için silinmez.' },
   'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın türü eşiğin ne kadar güçlü konuşabileceğini belirler.',
     more:'Deterministik olmak, pedagojik olarak doğru olmak demek değildir: keyfî seçilmiş bir eşik, son derece güvenilir görünen keyfî bir sonuç üretir. Dört kaynak türü vardır — sınav kaynağı ve kendi verin yönlendirebilir; öğrenme araştırması sınırlı yönlendirir; sistemin kendi ayarı yalnızca izlenir. Kapanış kuralının %75/%70\'i, plan tamamlamanın %85\'i ve ay kapıları BU SİSTEMİN SEÇİMİDİR, bir bulgu değil.' },
   'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile gerçekleşen çalışma süresinin payı.',

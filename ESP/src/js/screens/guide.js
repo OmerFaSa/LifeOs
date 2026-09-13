@@ -10,7 +10,7 @@ ESP.Screens = ESP.Screens || {};
 ESP.Screens.guide = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
   const { html, raw, when, map } = ESP.h;
-  const K = ESP.C;
+  const K = ESP.C, P = ESP.Parts;
 
   const TABS = [
     { id:'kullanim', label:'Kullanım' },
@@ -186,7 +186,77 @@ ESP.Screens.guide = (function(){
 
   function dataRows(){
     const ayak = M.dataFootprint();
+    const dp = ESP.Storage;
+    const hukum = dp.verdict();
+    const buyume = dp.growth();
+    const ufuk = dp.horizon();
+    const dagilim = dp.breakdown();
+    const budanabilir = dp.prunable();
+
     return [
+      /* Dokuz aylik ufuk.
+
+         "Depo %80 dolu" tek basina ise yaramaz: ne zaman dolacagini ve
+         NEYIN sisdigini soylemez. Ikisi bambaska kararlar gerektirir. */
+      K.Entry({
+        label:'DOKUZ AYLIK UFUK', hint:'storage',
+        meta:hukum.title,
+        note:'Bu sistem dokuz ay her gün kullanılırsa ne olur? Büyüme hızı '
+           + 'ölçülür, tahmin edilmez: iki ölçümden az varsa hız bilinmiyordur.',
+        wide:true,
+        body:html`
+          ${K.Notice({ tone:hukum.level === 'full' ? 'danger'
+            : hukum.level === 'near' ? 'warn'
+            : hukum.level === 'watch' ? 'warn' : 'ok',
+            title:hukum.title, body:hukum.note })}
+          ${K.Table({ tight:true, headers:['Ölçüm', 'Değer'], rows:[
+            ['Şu anki boyut', dp.fmtBytes(buyume.bytes)],
+            ['Günlük büyüme', buyume.perDay == null ? P.cert('missing')
+              : dp.fmtBytes(buyume.perDay) + '/gün'],
+            ['Ölçüm günü', String(buyume.samples)
+              + (buyume.cert === 'measured' ? ' (ölçüldü)'
+                : buyume.cert === 'estimated' ? ' (tahmin)' : '')],
+            ['Dolmaya kalan', buyume.daysLeft == null ? '—' : buyume.daysLeft + ' gün'],
+            ['270 gün sonra', ufuk.cert === 'missing' ? P.cert('missing')
+              : dp.fmtBytes(ufuk.projected) + (ufuk.willFit ? ' (sığar)' : ' (sığmaz)')],
+          ] })}`,
+      }),
+
+      K.Entry({
+        label:'NE BÜYÜYOR',
+        meta:dagilim.length + ' koleksiyon',
+        note:'Toplam yüzde hangi kaydın şiştiğini söylemez; burada söyler. '
+           + '«İçerik» işaretli olanlar senin girdiğin veridir ve sistem '
+           + 'onları yer açmak için silmez.',
+        wide:true,
+        body:K.Table({ tight:true,
+          headers:['Kayıt', { label:'Boyut', num:true }, { label:'Adet', num:true }, 'Tür'],
+          rows:dagilim.slice(0, 12).map(r => [
+            r.label, dp.fmtBytes(r.bytes), String(r.count),
+            r.content ? 'içerik' : (r.prunable ? 'budanabilir' : 'sistem'),
+          ]) }),
+      }),
+
+      ...(budanabilir.length ? [K.Entry({
+        label:'YER AÇ',
+        meta:dp.fmtBytes(budanabilir.reduce((a, b) => a + b.bytes, 0)) + ' budanabilir',
+        note:'Yalnızca sistemin kendi ürettiği kayıtlar listelenir. '
+           + 'Girdiğin hiçbir oturum, kart ya da not burada yer almaz — '
+           + 'hiçbir koşulda.',
+        wide:true,
+        body:html`
+          ${map(budanabilir, b => html`
+            <label class="row wrap gap-8 mt-8">
+              <input type="checkbox" data-prune="${b.collection}"/>
+              <span><b>${b.label}</b> — ${dp.fmtBytes(b.bytes)}
+                <span class="tiny dim">${b.note}</span></span>
+            </label>`)}
+          ${K.Button({ label:'Seçilenleri buda', tone:'danger', act:'prune-storage',
+            class:'mt-10' })}
+          <p class="tiny dim mt-8">Budamadan önce yedek almak iyi olur:
+            budanan kayıt geri gelmez.</p>`,
+      })] : []),
+
       K.Entry({
         label:'NEREDE DURUYOR',
         meta:ayak.bytes ? Math.round(ayak.bytes / 1024) + ' KB' : '—',
@@ -383,6 +453,19 @@ ESP.Screens.guide = (function(){
 
   const handle = {
     async 'guide-tab'(el){ S.ui.guideTab = el.dataset.tab; ESP.App.render(); },
+
+    /* Budama. Sistem kullanicinin girdigi veriyi yer acmak icin silmez;
+       motor zaten reddeder ama ekran da yalnizca izinli olanlari sunar. */
+    async 'prune-storage'(){
+      const secili = Array.prototype.slice
+        .call(document.querySelectorAll('[data-prune]'))
+        .filter(el => el.checked).map(el => el.dataset.prune);
+      if(!secili.length){ ESP.UI.toast('Önce budanacak kaydı seç.'); return; }
+      const r = await ESP.Storage.prune(secili);
+      if(!r.ok){ ESP.UI.toast(r.error); return; }
+      ESP.UI.toast(ESP.Storage.fmtBytes(r.freed) + ' yer açıldı.');
+      ESP.App.render();
+    },
 
     async 'save-model'(){
       const p = val('md-provider'), m = val('md-model'), k = val('md-key');

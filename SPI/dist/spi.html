@@ -4563,7 +4563,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'206c1c3', at:'2026-09-13 14:50', dirty:true };
+SP.BUILD = { id:'0592ce7', at:'2026-09-13 15:13', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -7363,6 +7363,8 @@ SP.HINTS = {
   /* --- ofis --- */
   'office':{ t:'Beş ajanlı ofis', b:'Dört uzman kendi alanına bakar, Patron çelişkiyi çözer ve tek karar çıkar.',
     more:'Yetki ayrımı kasıtlıdır: bir ajan alan dışına çıkarsa soruyu sahibine yönlendirir. Sayı kural motorundan gelir; ajan hesap yapmaz, yalnızca cümleye çevirir.' },
+  'storage':{ t:'Depo ufku', b:'Bu sistem dokuz ay her gün kullanılırsa depo dolar mı?',
+    more:'«Depo %80 dolu» tek başına işe yaramaz: ne zaman dolacağını ve NEYİN şiştiğini söylemez. Büyüme hızı her açılıştaki bir ölçümden HESAPLANIR; iki ölçümden az varsa hız bilinmiyordur. Budama yalnızca sistemin kendi ürettiği kayıtlara dokunur: tahlil, ölçüm, öğün ve antrenman kayıtların hiçbir koşulda yer açmak için silinmez.' },
   'friction':{ t:'Sürtünme', b:'Takip ekranlarında geçen süre — günlük bütçeye göre.',
     more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar. SPİ\'de ORAN hesaplanmaz: sağlıklı yaşamak bir saat işi değildir; uyumak, doğru yemek ve yürümek uygulamada dakika olarak görünmez. Sahte bir payda uydurmak, ölçülmemiş bir şeyi ölçülmüş göstermek olurdu. Bu yüzden yalnızca mutlak süre izlenir ve sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
   'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',
@@ -7918,6 +7920,19 @@ SP.U = (function(){
     return new Date(parts[0], parts[1]-1, parts[2]);
   }
 
+
+  /* Gecerli bir ISO tarih dizesi mi? (YYYY-AA-GG ve gercekten var olan gun)
+
+     Sebep: `new Date('2026-02-31')` bazi tarayicilarda gecerli bir tarihe
+     KAYAR, bazilarinda Invalid Date doner; ikisi de sessizdir. Depodan
+     gelen bir tarihi dogrulamadan kullanmak, bozuk tek bir kaydin butun
+     pencereyi kaydirmasina yol acar. */
+  function isISO(s){
+    if(typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+    const d = parse(s);
+    return !!d && isFinite(d.getTime()) && iso(d) === s;
+  }
+
   function today(){
     const n = new Date();
     return new Date(n.getFullYear(), n.getMonth(), n.getDate());
@@ -8065,7 +8080,7 @@ SP.U = (function(){
 
   return {
     MONTHS, MONTHS_SHORT, DAY_MS,
-    pad2, iso, parse, today, todayISO, addDays, diffDays, weekdayIndex, lastDays,
+    pad2, iso, parse, isISO, today, todayISO, addDays, diffDays, weekdayIndex, lastDays,
     fmtDate, fmtShort, fmtRange, monthName, monthKey, relativeDay,
     median, round, clamp, sum, pct, fmtNet, fmtNum, fmtMin, fmtClock,
     esc, uid, slug, plural, norm, debounce,
@@ -8485,6 +8500,24 @@ SP.Store = (function(){
   }
 
   /* Kabaca kullanilan yerel alan (byte) */
+
+  /* Koleksiyon basina boyut — "depo dolmus" uyarisi tek basina ise
+     yaramaz; NEYIN buyudugunu bilmek gerekir. */
+  function sizeByCollection(){
+    const all = localAll();
+    const out = {};
+    Object.keys(all).forEach(function(k){
+      const kok = k.indexOf('/') > 0 ? k.slice(0, k.indexOf('/')) : k;
+      let n = 0;
+      try{ n = JSON.stringify(all[k]).length; }catch(e){ n = 0; }
+      if(!out[kok]) out[kok] = { collection:kok, bytes:0, count:0 };
+      out[kok].bytes += n + k.length + 4;
+      out[kok].count += 1;
+    });
+    return Object.keys(out).map(function(k){ return out[k]; })
+      .sort(function(a, b){ return b.bytes - a.bytes; });
+  }
+
   function localSize(){
     try{ return (localStorage.getItem(LOCAL_KEY) || '').length; }
     catch(e){ return 0; }
@@ -8502,7 +8535,7 @@ SP.Store = (function(){
 
   return {
     init, get, set, remove, list,
-    exportAll, importAll, readBackup, clear, localSize, localQuota,
+    exportAll, importAll, readBackup, clear, localSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
     get mode(){ return mode; },
@@ -8560,6 +8593,7 @@ SP.S = {
   usage:null,         // surtunme olcumu (core/friction.js)
   forecasts:[],       // kalibrasyon defteri (core/calib.js)
   signals:[],         // acik/kapali denetim sorulari (core/signals.js)
+  storage:null,       // depo buyume ornekleri (core/storage.js)
   decisions:[],       // ofis kararlari
 
   office:null,        // ofis ayarlari (saglayici, model, ajan basina secim)
@@ -9364,6 +9398,7 @@ SP.Model = (function(){
     if(SP.Friction) await SP.Friction.load();
     if(SP.Calib) await SP.Calib.load();
     if(SP.Signals) await SP.Signals.load();
+    if(SP.Storage){ await SP.Storage.load(); await SP.Storage.sample(); }
 
     S.ready = true;
     return S;
@@ -11074,6 +11109,281 @@ SP.Signals = (function(){
 
   return { load, sync, current, markSeen, answer, dismiss, efficacy,
     screenVerdict, list, open, closed, norm, SOGUMA_GUN, OMUR_GUN };
+})();
+
+/* ==== js/core/storage.js ==== */
+/* Depo sagligi — dokuz aylik kullanim icin.
+
+   Bu dosya tek bir soruyla yazildi: bu sistem dokuz ay her gun
+   kullanilirsa ne olur?
+
+   Cevap hos degil. Tarayici deposu kaynak basina genelde ~5 MB'tir ve
+   bu sinir sessizce gelir: bir gun kayit dusmemeye baslar. Mevcut
+   uyari ("depo %80 dolu") ise iki seyi soylemiyordu:
+
+     1. NEYIN buyudugunu. Toplam yuzde, hangi koleksiyonun sisdigini
+        soylemez; kullanici ne silecegini bilemez.
+     2. NE ZAMAN dolacagini. %80 bir hafta sonra mi dolacak, alti ay
+        sonra mi? Ikisi bambaska kararlar gerektirir.
+
+   Uc karar bu dosyayi yonetir:
+
+   1. BUYUME OLCULUR, TAHMIN EDILMEZ. Her acilista toplam boyut bir
+      ornekleme defterine yazilir. Gunluk buyume hizi bu defterden
+      HESAPLANIR; iki ornekten az varsa hiz "bilinmiyor"dur — iki nokta
+      her zaman bir dogru cizer ve o dogru bir egilim degildir.
+
+   2. ICERIK ASLA KENDILIGINDEN SILINMEZ. Budanabilir olan yalnizca
+      SISTEMIN KENDI URETTIGI kayitlardir: surtunme gunlugu, ofis sohbet
+      gecmisi, uretilmis brifingler. Kullanicinin girdigi tek bir oturum,
+      kart ya da not bu listede yer almaz — hicbir kosulda.
+
+   3. UYARI EYLEME BAGLI OLMALIDIR. "Depo doluyor" demek yetmez; yaninda
+      "su kadar yer su kadarda acilir" yazmayan bir uyari, kaygi uretir
+      ve cozum uretmez. */
+
+window.SP = window.SP || {};
+
+SP.Storage = (function(){
+  const U = SP.U, S = SP.S;
+
+  /* Ornekleme defterinde tutulacak en fazla kayit. Otuz gunluk pencere
+     buyume hizi icin fazlasiyla yeter ve defterin kendisi kucuk kalir. */
+  const ORNEK_LIMIT = 30;
+
+  /* Projeksiyonun anlamli sayilmasi icin gereken en az gun araligi.
+     Ayni gun icinde alinan iki ornek bir "gunluk hiz" vermez. */
+  const ASGARI_ARALIK = 3;
+
+  /* Budanabilir koleksiyonlar. Hicbiri kullanicinin girdigi icerik
+     DEGILDIR; hepsi sistemin kendi urettigi kayitlardir. */
+  const BUDANABILIR = [
+    { collection:'usage', label:'Sürtünme günlüğü',
+      note:'Sistemin kendi maliyet ölçümü. Silinince geçmiş sürtünme '
+         + 'raporu kaybolur, hiçbir çalışma kaydı etkilenmez.' },
+    { collection:'officeChats', label:'Ofis sohbet geçmişi',
+      note:'Uzmanlarla yapılmış yazışmalar. Kararlar ve öneriler ayrı '
+         + 'saklanır; onlar silinmez.' },
+    { collection:'officeBriefings', label:'Üretilmiş brifingler',
+      note:'Her gün yeniden üretilebilir; saklanmaları bir kolaylıktır.' },
+    { collection:'officeMeetings', label:'Eski toplantı tutanakları',
+      note:'Toplantıdan çıkan KARARLAR ayrı saklanır ve silinmez.' },
+    { collection:'signals', label:'Kapanmış denetim soruları',
+      note:'Kapanmış sinyaller. Fayda ölçüsü bu kayıtlardan hesaplandığı '
+         + 'için silmek o ölçüyü sıfırlar.' },
+  ];
+
+  /* Kullanicinin girdigi icerik — ASLA budanmaz, yalnizca gosterilir. */
+  const ICERIK = ['labs', 'vitals', 'meals', 'workouts', 'meds', 'foods',
+    'progress', 'basket', 'prices', 'flags', 'decisions', 'proposals',
+    'forecasts'];
+
+  function bos(){ return { samples:[] }; }
+
+  function state(){
+    if(!S.storage) S.storage = bos();
+    if(!Array.isArray(S.storage.samples)) S.storage.samples = [];
+    return S.storage;
+  }
+
+  async function load(){
+    const raw = await SP.Store.get('storage');
+    S.storage = Object.assign(bos(), raw || {});
+    /* Depodan gelen `samples` bir DIZI olmayabilir: bozuk ya da elle
+       duzenlenmis bir yedek buraya string de gonderebilir. Object.assign
+       onu oldugu gibi tasir ve bir sonraki .filter cagrisi uygulamayi
+       acilista oldururdu. Once sekil dogrulanir, sonra icerik. */
+    if(!Array.isArray(S.storage.samples)) S.storage.samples = [];
+    S.storage.samples = S.storage.samples
+      .filter(x => x && U.isISO(x.date) && isFinite(Number(x.bytes)))
+      .map(x => ({ date:x.date, bytes:Math.max(0, Math.round(Number(x.bytes))) }))
+      .slice(-ORNEK_LIMIT);
+    return S.storage;
+  }
+
+  /* Gunde bir ornek. Ayni gun icinde ikinci cagri yalnizca degeri
+     GUNCELLER; iki ornek ayni gune yazilirsa hiz hesabi bozulur. */
+  async function sample(){
+    const st = state();
+    const bugun = U.todayISO();
+    const bytes = SP.Store.localSize();
+    const son = st.samples[st.samples.length - 1];
+    if(son && son.date === bugun){
+      son.bytes = bytes;
+    } else {
+      st.samples.push({ date:bugun, bytes });
+      if(st.samples.length > ORNEK_LIMIT) st.samples = st.samples.slice(-ORNEK_LIMIT);
+    }
+    await SP.Store.set('storage', st);
+    return { date:bugun, bytes };
+  }
+
+  /* ------------------------------------------------------------ okuma */
+
+  function breakdown(){
+    const rows = SP.Store.sizeByCollection ? SP.Store.sizeByCollection() : [];
+    const budaMap = {};
+    BUDANABILIR.forEach(b => { budaMap[b.collection] = b; });
+    return rows.map(r => Object.assign({}, r, {
+      prunable:!!budaMap[r.collection],
+      content:ICERIK.indexOf(r.collection) >= 0,
+      label:(budaMap[r.collection] || {}).label || r.collection,
+    }));
+  }
+
+  /* Gunluk buyume hizi ve doluluk projeksiyonu.
+
+     `cert`:
+       'missing'   iki ornekten az ya da aralik cok kisa — hiz BILINMIYOR
+       'estimated' hesaplandi; az sayida ornege dayaniyor
+       'measured'  en az on gunluk ornekle hesaplandi */
+  function growth(){
+    const st = state();
+    const n = st.samples.length;
+    const kota = SP.Store.localQuota() || {};
+    const bytes = SP.Store.localSize();
+    const base = { bytes, quota:kota, samples:n,
+      perDay:null, daysLeft:null, cert:'missing' };
+
+    if(n < 2){
+      base.note = 'Büyüme hızı için en az iki ölçüm günü gerekir. '
+        + 'Ölçülmemiş hız, sıfır hız değildir.';
+      return base;
+    }
+    const ilk = st.samples[0], son = st.samples[n - 1];
+    const gun = U.diffDays(ilk.date, son.date);
+    if(gun == null || gun < ASGARI_ARALIK){
+      base.note = 'Ölçümler arasında en az ' + ASGARI_ARALIK + ' gün olmalı; '
+        + 'daha kısa aralık günlük hız vermez.';
+      return base;
+    }
+    const perDay = (son.bytes - ilk.bytes) / gun;
+    base.perDay = Math.round(perDay);
+    base.cert = n >= 10 ? 'measured' : 'estimated';
+    base.spanDays = gun;
+
+    const kalan = (kota.limit || 0) - bytes;
+    if(perDay <= 0){
+      base.daysLeft = null;
+      base.note = 'Depo bu pencerede büyümemiş. Hiç büyümeyen bir depo '
+        + 'dolmaz — ama bu, büyümeyeceği anlamına gelmez.';
+      return base;
+    }
+    base.daysLeft = Math.max(0, Math.floor(kalan / perDay));
+    base.note = 'Son ' + gun + ' günde günde ~' + fmtBytes(Math.round(perDay))
+      + ' büyüdü. Bu hızla ' + base.daysLeft + ' gün sonra dolar.';
+    return base;
+  }
+
+  /* Dokuz aylik ufuk: bu hizla 270 gun sonra ne olur?
+
+     Sistemin kendi yol haritasi dokuz aylik bir kullanim varsayiyor;
+     projeksiyon da o ufka gore okunur. */
+  const UFUK_GUN = 270;
+
+  function horizon(){
+    const g = growth();
+    if(g.cert === 'missing' || g.perDay == null){
+      return { cert:'missing', note:g.note, willFit:null };
+    }
+    const kota = g.quota || {};
+    const tahmin = g.bytes + (g.perDay > 0 ? g.perDay * UFUK_GUN : 0);
+    const sigar = tahmin < (kota.limit || Infinity);
+    return {
+      cert:g.cert, days:UFUK_GUN, projected:tahmin, limit:kota.limit || null,
+      willFit:sigar, perDay:g.perDay,
+      note:sigar
+        ? 'Bu hızla dokuz ay sonunda ~' + fmtBytes(tahmin) + ' olur; '
+          + 'sınıra takılmaz.'
+        : 'Bu hızla dokuz ay dolmadan sınır aşılır (~' + fmtBytes(tahmin)
+          + '). Yedek alıp budamak ya da eski dönemleri dışa aktarmak gerekir.',
+    };
+  }
+
+  /* ------------------------------------------------------------ budama */
+
+  /* Budanabilir kayitlarin listesi ve kazandiracagi yer.
+     Icerik ASLA bu listede yer almaz. */
+  function prunable(){
+    const boyut = {};
+    breakdown().forEach(r => { boyut[r.collection] = r; });
+    return BUDANABILIR.map(b => {
+      const r = boyut[b.collection];
+      return Object.assign({}, b, {
+        bytes:r ? r.bytes : 0, count:r ? r.count : 0, empty:!r || !r.count });
+    }).filter(x => !x.empty);
+  }
+
+  function fmtBytes(n){
+    const b = Number(n) || 0;
+    if(b < 1024) return b + ' B';
+    if(b < 1024 * 1024) return Math.round(b / 1024) + ' KB';
+    return (Math.round(b / 1024 / 102.4) / 10) + ' MB';
+  }
+
+  /* Budama. Yalnizca BUDANABILIR listesindeki koleksiyonlar silinebilir;
+     baska bir ad gelirse islem reddedilir ve sebebi soylenir.
+
+     Bu bir savunma degil bir SOZDUR: kullanicinin girdigi veriyi sistem
+     kendi yer acmak icin silmez. */
+  async function prune(collections){
+    const istenen = (collections || []).slice();
+    const izinli = BUDANABILIR.map(b => b.collection);
+    const yasak = istenen.filter(c => izinli.indexOf(c) < 0);
+    if(yasak.length){
+      return { ok:false, refused:yasak,
+        error:'Bu kayıtlar budanamaz: ' + yasak.join(', ')
+          + '. Kullanıcının girdiği veri, yer açmak için silinmez.' };
+    }
+    if(!istenen.length) return { ok:false, error:'Budanacak bir şey seçilmedi.' };
+
+    const once = SP.Store.localSize();
+    for(const c of istenen){
+      const rows = (await SP.Store.list(c)) || [];
+      for(const r of rows){
+        if(r && r.id) await SP.Store.remove(c + '/' + r.id);
+      }
+      /* Tek parcali kayitlar (usage gibi) dogrudan silinir. */
+      await SP.Store.remove(c);
+    }
+    const sonra = SP.Store.localSize();
+
+    /* Bellekteki kopyalar da temizlenir; yoksa ekran silinmis veriyi
+       gostermeye devam eder. */
+    if(istenen.indexOf('usage') >= 0){ S.usage = null; if(SP.Friction) await SP.Friction.load(); }
+    if(istenen.indexOf('signals') >= 0){ S.signals = (S.signals || []).filter(x => x.status === 'open'); }
+    if(istenen.indexOf('officeChats') >= 0) S.officeChats = {};
+    if(istenen.indexOf('officeBriefings') >= 0) S.officeBriefings = {};
+    if(istenen.indexOf('officeMeetings') >= 0) S.officeMeetings = [];
+
+    return { ok:true, freed:Math.max(0, once - sonra), before:once, after:sonra };
+  }
+
+  /* Ekran icin tek cumle. */
+  function verdict(){
+    const g = growth();
+    const h = horizon();
+    const q = g.quota || {};
+    if(q.full){
+      return { level:'full', title:'Depo doldu',
+        note:'Yeni kayıt düşmeyebilir. Önce yedek al, sonra buda.' };
+    }
+    if(q.near){
+      return { level:'near', title:'Depo doluyor (%' + q.pct + ')',
+        note:g.daysLeft != null
+          ? 'Bu hızla ' + g.daysLeft + ' gün sonra dolar.'
+          : 'Büyüme hızı henüz ölçülmedi.' };
+    }
+    if(h.cert !== 'missing' && h.willFit === false){
+      return { level:'watch', title:'Dokuz ay sığmayabilir',
+        note:h.note };
+    }
+    return { level:'ok', title:'Depo rahat',
+      note:g.cert === 'missing' ? g.note : h.note };
+  }
+
+  return { load, sample, breakdown, growth, horizon, prunable, prune, verdict,
+    fmtBytes, BUDANABILIR, ICERIK, UFUK_GUN, ORNEK_LIMIT };
 })();
 
 /* ==== js/core/nutri.js ==== */
@@ -25024,6 +25334,61 @@ SP.Screens.guide = (function(){
 
   /* ---------------------------------------------------------------- veri */
 
+
+  /* ------------------------------------------------------- dokuz aylık ufuk
+
+     "Depo %80 dolu" tek basina ise yaramaz: ne zaman dolacagini ve NEYIN
+     sisdigini soylemez, ikisi bambaska kararlar gerektirir. Buyume hizi
+     her acilistaki bir olcumden HESAPLANIR; iki olcumden az varsa hiz
+     bilinmiyordur ve bilinmeyen hiz sifir hiz degildir. */
+  function storageHorizonCard(){
+    const dp = SP.Storage;
+    const hukum = dp.verdict();
+    const buyume = dp.growth();
+    const ufuk = dp.horizon();
+    const dagilim = dp.breakdown();
+    const budanabilir = dp.prunable();
+
+    return K.Card({
+      title:'Dokuz aylık ufuk', hint:'storage', sub:hukum.title,
+      body:html`
+        ${K.Notice({ tone:hukum.level === 'full' ? 'danger'
+          : (hukum.level === 'near' || hukum.level === 'watch') ? 'warn' : 'ok',
+          title:hukum.title, body:hukum.note })}
+
+        ${K.Table({ tight:true, headers:['Ölçüm', 'Değer'], rows:[
+          ['Şu anki boyut', dp.fmtBytes(buyume.bytes)],
+          ['Günlük büyüme', buyume.perDay == null ? 'veri yok'
+            : dp.fmtBytes(buyume.perDay) + '/gün'],
+          ['Ölçüm günü', String(buyume.samples)
+            + (buyume.cert === 'measured' ? ' (ölçüldü)'
+              : buyume.cert === 'estimated' ? ' (tahmin)' : '')],
+          ['Dolmaya kalan', buyume.daysLeft == null ? '—' : buyume.daysLeft + ' gün'],
+          ['270 gün sonra', ufuk.cert === 'missing' ? 'veri yok'
+            : dp.fmtBytes(ufuk.projected) + (ufuk.willFit ? ' (sığar)' : ' (sığmaz)')],
+        ] })}
+
+        <div class="mt-12">${K.SectionTitle('Ne büyüyor')}</div>
+        ${K.Table({ tight:true,
+          headers:['Kayıt', { label:'Boyut', num:true }, { label:'Adet', num:true }, 'Tür'],
+          rows:dagilim.slice(0, 10).map(r => [r.label, dp.fmtBytes(r.bytes),
+            String(r.count), r.content ? 'içerik' : (r.prunable ? 'budanabilir' : 'sistem')]) })}
+
+        ${when(budanabilir.length, () => html`
+          <div class="mt-12">${K.SectionTitle('Yer aç')}</div>
+          <p class="tiny dim">Yalnızca sistemin kendi ürettiği kayıtlar listelenir.
+            Girdiğin hiçbir veri burada yer almaz — hiçbir koşulda.</p>
+          ${map(budanabilir, b => html`
+            <label class="row wrap gap-8 mt-8">
+              <input type="checkbox" data-prune="${b.collection}"/>
+              <span><b>${b.label}</b> — ${dp.fmtBytes(b.bytes)}
+                <span class="tiny dim">${b.note}</span></span>
+            </label>`)}
+          ${K.Button({ label:'Seçilenleri buda', tone:'danger', size:'sm',
+            act:'prune-storage', class:'mt-10' })}`)}`,
+    });
+  }
+
   function dataCard(){
     const f = M.dataFootprint();
     const age = M.backupAgeDays();
@@ -25201,7 +25566,7 @@ SP.Screens.guide = (function(){
     }
     if(tab === 'veri'){
       return String(html`${head}
-        ${K.Ledger(() => [dataCard(), storageCard()])}
+        ${K.Ledger(() => [dataCard(), storageHorizonCard(), storageCard()])}
         <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`);
     }
     if(tab === 'sinir'){
@@ -25220,6 +25585,19 @@ SP.Screens.guide = (function(){
   }
 
   const handle = {
+    /* Budama. Motor kullanicinin girdigi veriyi reddeder; ekran da
+       yalnizca izinli olanlari sunar. */
+    async 'prune-storage'(){
+      const secili = Array.prototype.slice
+        .call(document.querySelectorAll('[data-prune]'))
+        .filter(el => el.checked).map(el => el.dataset.prune);
+      if(!secili.length){ UI.toast('Önce budanacak kaydı seç.'); return; }
+      const r = await SP.Storage.prune(secili);
+      if(!r.ok){ UI.toast(r.error); return; }
+      UI.toast(SP.Storage.fmtBytes(r.freed) + ' yer açıldı.');
+      SP.App.render();
+    },
+
     async 'guide-tab'(el){ S.ui.guideTab = el.dataset.tab; SP.App.render(); },
     async 'save-model'(){
       const provider = (document.getElementById('m-provider') || {}).value;
