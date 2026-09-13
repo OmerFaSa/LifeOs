@@ -53,6 +53,30 @@ def kosu(sistem, arac):
     return ('geçti' if p.returncode == 0 else 'KALDI', son)
 
 
+def kok_araclar():
+    """Depo kokundeki denetimler — tek bir sistemin degil, ARALARININ."""
+    out = {}
+    for ad, komut in (("HKM tests", ["python3", "-m", "tests.run"]),):
+        try:
+            p = subprocess.run(komut, cwd=os.path.join(KOK, "HKM"),
+                               capture_output=True, text=True, timeout=900)
+        except Exception as e:
+            out[ad] = ("KALDI", str(e))
+            continue
+        satir = [s.strip() for s in p.stdout.splitlines() if s.strip()]
+        out[ad] = ("gecti" if p.returncode == 0 else "KALDI",
+                   satir[-1] if satir else "—")
+    try:
+        p = subprocess.run(["node", "tools/entegre.js"], cwd=KOK,
+                           capture_output=True, text=True, timeout=1800)
+        satir = [s.strip() for s in p.stdout.splitlines() if s.strip()]
+        out["entegre.js"] = ("gecti" if p.returncode == 0 else "KALDI",
+                             satir[-1] if satir else "—")
+    except Exception as e:
+        out["entegre.js"] = ("KALDI", str(e))
+    return out
+
+
 def topla(araclar):
     out = {}
     for sistem, _ad in SISTEMLER:
@@ -108,7 +132,14 @@ def main():
     tam = '--tam' in sys.argv
     araclar = TAM if tam else HIZLI
     sonuc = topla(araclar)
+    kok = kok_araclar() if tam else {}
+    for ad, r in kok.items():
+        print('%-4s %-16s %s — %s' % ('kök', ad, r[0], r[1]))
     metin = govde(sonuc, araclar)
+    if kok:
+        metin += ('\n| Depo denetimi | Sonuç |\n|---|---|\n'
+                  + ''.join('| `%s` | %s |\n' % (a, r[1].replace('|', '¦'))
+                            for a, r in kok.items()))
     if '--yaz' in sys.argv:
         for d in ['README.md', 'NOTLAR.md']:
             yaz(d, metin)
@@ -116,6 +147,7 @@ def main():
         print()
         print(metin)
     kalan = [(s, a) for s in sonuc for a in sonuc[s] if sonuc[s][a][0] != 'geçti']
+    kalan += [('kök', a) for a, r in kok.items() if r[0] != 'gecti']
     if kalan:
         print('KALAN: ' + ', '.join(s + '/' + a for s, a in kalan))
         return 1

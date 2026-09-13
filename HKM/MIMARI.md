@@ -6,10 +6,11 @@ LifeOS'un dördüncü katmanı. AYS, SPİ ve ESP kendi alanlarında egemen, sıf
 bağımlılıklı, tarayıcıda koşan üç ayrı sistemdir. HKM onların **üstünde
 değil, yanında** duran isteğe bağlı bir servistir.
 
-**Bu klasör hâlâ bir İSKELETTİR ama artık bir döngüsü var.** Faz 1–3
-(çekirdek şema, sync, VP konseyi, öncelik sırası, dijital ikiz, Yönetici ve
-öneri yaşam döngüsü) yazıldı ve **70/70 testi geçiyor**; Faz 4–6 (Telegram,
-WhatsApp, ses, üç arayüze beacon) yazılmadı.
+**Bu klasör hâlâ bir İSKELETTİR ama artık kapalı bir döngüsü var.**
+Faz 1–3 (çekirdek şema, sync, VP konseyi, öncelik sırası, dijital ikiz,
+Yönetici, öneri yaşam döngüsü) ve Faz 6 (üç arayüzden best-effort işaret)
+yazıldı; **73/73 HKM testi** ve depo kökündeki `tools/entegre.js`
+bütünleşme denetimi geçiyor. Faz 4–5 (Telegram, WhatsApp, ses) yazılmadı.
 
 ---
 
@@ -194,6 +195,39 @@ takvimi» (sıra 2) testte geçiyor ama üretimde hiç ateşlenmiyordu — testt
 yaşayan, üretimde ölü bir yol. Artık gövdedeki metrikler de taşınıyor ve
 `test_manager.py` bunu ayrıca denetliyor.
 
+## 8.6 İşaret (Faz 6) — ve tarayıcının getirdiği sınır
+
+Her arayüzde `core/beacon.js` durur. Beş kural dosyanın başında yazılı:
+
+1. **Hiçbir çizimde çalışmaz.** Gönderim yalnızca açılışta bir kez (aralık
+   dolduysa) ya da kullanıcı «Şimdi gönder» dediğinde tetiklenir.
+2. **Hiçbir kaydı bloklamaz.** `ping()` söz vermez, beklemez, fırlatmaz.
+3. **Etiketsiz sayı gönderilmez.** Sözleşmeyi gönderen taraf da denetler:
+   HKM'nin 422 dönmesini beklemek yerine hatalı gövde hiç yola çıkmaz.
+   Yerel «derived» etiketi HKM'nin «computed»ına AÇIK bir tabloyla
+   eşlenir; bilinmeyen etiket sessizce «ölçüldü» sayılmaz, gövdeyi reddeder.
+4. **Varsayılan kapalıdır** ve açılmadan önce gidecek gövdenin tamamı
+   satır satır gösterilir.
+5. **Açık metin jeton ağa çıkmaz.** Yerel olmayan bir adrese düz `http`
+   ile gönderim reddedilir.
+
+Giden şey günün ÖZETİDİR: AYS'den beş sayı, SPİ ve ESP'den dörder sayı.
+Soru metni, tahlil değeri, ilaç adı, kart metni, not içeriği gitmez.
+
+### Tarayıcı sınırı: CORS
+
+`tools/entegre.js` yazıldığı gün ortaya çıkan şey: üç arayüz kendi
+devserver'ında (4173/4183/4193), HKM 4200'de koşuyor. Yani işaret isteği
+**çift kökenli**dir ve tarayıcı önce bir ön-istek (OPTIONS) yollar. Daemon
+buna cevap vermediği sürece gönderim hiç denenmiyor, dışarıdan bakınca
+«HKM ulaşılamıyor» gibi görünüyordu — oysa daemon ayaktaydı. İki taraf da
+kendi testinde geçerken aralarındaki bu boşluk yalnızca bütünleşme
+denetiminde göründü.
+
+Şimdi daemon ön-isteğe cevap veriyor, ama izin **yalnız yerel kökenlere**
+(127.0.0.1, localhost, ::1 ve `config.json` → `allowed_origins`).
+CORS bir kimlik doğrulama değildir: jeton yine şarttır.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |
@@ -203,7 +237,7 @@ yaşayan, üretimde ölü bir yol. Artık gövdedeki metrikler de taşınıyor v
 | 3 | Dijital İkiz, Yönetici, öneri yaşam döngüsü | **yazıldı, 70 test** |
 | 4 | Telegram ağ geçidi | yapılacak |
 | 5 | WhatsApp & ses | yapılacak |
-| 6 | Üç arayüze best-effort beacon | yapılacak |
+| 6 | Üç arayüzden best-effort işaret | **yazıldı** |
 
 ## 10. Ve dürüst bir soru
 

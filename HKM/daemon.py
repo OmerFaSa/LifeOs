@@ -19,6 +19,7 @@ degistirilmesi bilincli bir karardir.
 import datetime
 import json
 import os
+import re
 import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -30,6 +31,32 @@ from core import db, manager, sync_engine, thresholds, twin  # noqa: E402
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
+
+
+"""Tarayici, HKM'ye BASKA BIR KOKENDEN konusur.
+
+Uc arayuz kendi devserver'inda (4173/4183/4193) kosar; HKM 4200'dedir.
+Bu yuzden isaret istegi cifte kokenlidir ve tarayici once bir on-istek
+(OPTIONS) yollar. On-istege cevap verilmezse gonderim hic denenmez ve
+disaridan bakinca «HKM ulasilamiyor» gibi gorunur — oysa daemon ayaktadir.
+
+Izin YALNIZ yerel kokenlere verilir: 127.0.0.1, localhost ve ::1. Bunun
+disindaki bir kokene acmak, kullanicinin ziyaret ettigi herhangi bir web
+sayfasinin yerel HKM'ye istek atabilmesi demektir. Jeton yine sarttir;
+CORS bir kimlik dogrulama degil, bir tarayici sinirdir."""
+LOCAL_ORIGIN = re.compile(
+    r"^https?://(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$", re.I)
+
+
+def cors_origin(headers, cfg):
+    origin = headers.get("Origin", "")
+    if not origin:
+        return None
+    if LOCAL_ORIGIN.match(origin):
+        return origin
+    if origin in (cfg or {}).get("allowed_origins", []):
+        return origin
+    return None
 
 
 def load_config():
@@ -71,8 +98,33 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
+        self._cors()
         self.end_headers()
         self.wfile.write(body)
+
+    def _cors(self):
+        origin = cors_origin(self.headers, self.server.config)
+        if not origin:
+            return
+        self.send_header("Access-Control-Allow-Origin", origin)
+        self.send_header("Vary", "Origin")
+
+    def do_OPTIONS(self):
+        """On-istek: yalniz yerel kokene, yalniz kullanilan basliklara."""
+        origin = cors_origin(self.headers, self.server.config)
+        if not origin:
+            self.send_response(403)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", origin)
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
+        self.send_header("Access-Control-Max-Age", "600")
+        self.send_header("Vary", "Origin")
+        self.send_header("Content-Length", "0")
+        self.end_headers()
 
     def _authorized(self):
         head = self.headers.get("Authorization", "")

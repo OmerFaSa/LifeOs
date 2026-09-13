@@ -1279,6 +1279,9 @@ ESP.Model = (function(){
     if(ESP.Friction) await ESP.Friction.load();
     if(ESP.Calib) await ESP.Calib.load();
     if(ESP.Signals) await ESP.Signals.load();
+    /* Isaret ayari en sonda yuklenir ve yuklenmezse KAPALI kalir:
+       kullanicinin secmedigi bir gonderim varsayilan olamaz. */
+    if(ESP.Beacon) await ESP.Beacon.load();
     if(ESP.Storage){ await ESP.Storage.load(); await ESP.Storage.sample(); }
 
     S.storeHealth = ESP.Store.health();

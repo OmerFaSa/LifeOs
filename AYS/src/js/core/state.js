@@ -1152,6 +1152,9 @@ R.Model = (function(){
     if(R.Friction) await R.Friction.load();
     if(R.Calib) await R.Calib.load();
     if(R.Signals) await R.Signals.load();
+    /* Isaret ayari en sonda yuklenir ve yuklenmezse KAPALI kalir:
+       kullanicinin secmedigi bir gonderim varsayilan olamaz. */
+    if(R.Beacon) await R.Beacon.load();
     if(R.Storage){ await R.Storage.load(); await R.Storage.sample(); }
 
     for(const s of R.SUBJECTS){ await ensureTopics(s.id); }

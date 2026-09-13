@@ -131,6 +131,41 @@ def run():
             eq(S.call("/api/yok", body={})[0], 404)
         test("bilinmeyen yol 404", t_unknown_path)
 
+        def t_cors_preflight_local_only():
+            """Tarayici BASKA BIR KOKENDEN konusur: on-istege cevap
+            verilmezse gonderim hic denenmez ve disaridan «HKM ulasilamiyor»
+            gibi gorunur. Izin yalniz yerel kokenlere verilir."""
+            req = urllib.request.Request(S.url("/api/sync/ays"), method="OPTIONS")
+            req.add_header("Origin", "http://127.0.0.1:4173")
+            req.add_header("Access-Control-Request-Method", "POST")
+            with urllib.request.urlopen(req, timeout=10) as r:
+                eq(r.status, 204)
+                eq(r.headers.get("Access-Control-Allow-Origin"), "http://127.0.0.1:4173")
+                ok("Authorization" in (r.headers.get("Access-Control-Allow-Headers") or ""))
+        test("yerel kokenin on-istegi gecer", t_cors_preflight_local_only)
+
+        def t_cors_foreign_origin_refused():
+            req = urllib.request.Request(S.url("/api/sync/ays"), method="OPTIONS")
+            req.add_header("Origin", "https://baska-site.example.com")
+            try:
+                with urllib.request.urlopen(req, timeout=10) as r:
+                    kod = r.status
+            except urllib.error.HTTPError as e:
+                kod = e.code
+            eq(kod, 403)
+        test("yabanci koken on-istegi reddedilir", t_cors_foreign_origin_refused)
+
+        def t_cors_header_on_response():
+            req = urllib.request.Request(S.url("/api/health"))
+            req.add_header("Origin", "http://localhost:4193")
+            with urllib.request.urlopen(req, timeout=10) as r:
+                eq(r.headers.get("Access-Control-Allow-Origin"), "http://localhost:4193")
+            req = urllib.request.Request(S.url("/api/health"))
+            req.add_header("Origin", "https://baska-site.example.com")
+            with urllib.request.urlopen(req, timeout=10) as r:
+                no(r.headers.get("Access-Control-Allow-Origin"))
+        test("yanit basligi yalniz yerel kokene yazilir", t_cors_header_on_response)
+
         def t_bad_json():
             req = urllib.request.Request(S.url("/api/sync/ays"), data=b"{bozuk",
                                          method="POST")

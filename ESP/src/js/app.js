@@ -1400,6 +1400,13 @@ ESP.App = (function(){
         render();
       });
 
+
+      /* HKM işareti — AÇILIŞTA BİR KEZ, aralığı dolduysa. Bir ekranın
+         açılması ağ trafiği doğurmaz; çizim döngüsünde hiçbir yerde
+         çağrılmaz. Ateşle-ve-unut: söz beklenmez, hata yutulur, açılışı
+         bloklamaz. İşaret kapalıysa (varsayılan) hiçbir şey olmaz. */
+      if(ESP.Beacon) ESP.Beacon.ping();
+
       if(ESP.Setup.needed()) setTimeout(() => ESP.Setup.open(), 400);
     }catch(err){
       console.error('Açılış hatası:', err);

@@ -12,10 +12,20 @@ Yanlarında dördüncü, **isteğe bağlı** bir katman durur:
 
 | Klasör | Katman | Durum | Belge |
 |---|---|---|---|
-| [`HKM/`](HKM/) | **Hayat Kontrol Merkezi** | iskelet (Faz 1–2, 36 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
+| [`HKM/`](HKM/) | **Hayat Kontrol Merkezi** | kapalı döngü iskeleti (Faz 1–3 + 6, 73 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
 
 HKM üçünün **üstünde değil yanındadır**: üç sistem onun var olduğunu bilmez ve
-o kapalıyken hiçbiri bozulmaz.
+o kapalıyken hiçbiri bozulmaz. Tek bağ, her arayüzdeki `core/beacon.js`
+işaretidir: **varsayılan kapalı**, tek yönlü, hiçbir çizimde çalışmayan ve
+hiçbir kaydı bekletmeyen bir en-iyi-çaba gönderimi. Giden şey günün
+özetidir — birkaç sayı, her biri kesinlik etiketiyle; içerik gitmez.
+
+İki tarafın gerçekten konuşup konuşmadığını `node tools/entegre.js`
+denetler: HKM'yi geçici bir veritabanıyla ayağa kaldırır, üç arayüzü gerçek
+tarayıcıda açar, işareti açıp gönderir, HKM'nin üç modülü de gördüğünü
+doğrular — ve HKM kapalıyken hiçbir arayüzün bozulmadığını. Bu denetim
+yazıldığı gün, iki tarafın da kendi testlerinde geçip birbiriyle
+konuşamadığı bir boşluğu buldu (tarayıcının CORS ön-isteği).
 
 ## Üçü neyi paylaşır
 

@@ -71,6 +71,8 @@ SP.HINTS = {
     more:'Yetki ayrımı kasıtlıdır: bir ajan alan dışına çıkarsa soruyu sahibine yönlendirir. Sayı kural motorundan gelir; ajan hesap yapmaz, yalnızca cümleye çevirir.' },
   'audit':{ t:'Bakım borcu', b:'Beş alanda birikmiş bozukluk var mı?',
     more:'Bu denetim TEŞHİS KOYMAZ: bir değerin ne anlama geldiği hekimin işidir. Söyleyebileceği tek şey kaydın durumudur — tahlil eskimiş, kırmızı bayrak açık kalmış, RPE girilmemiş, gıda tanınmamış. Her bulgu eyleme bağlıdır ve hiçbiri suçlamaz. Veri eşiğin altındaysa bulgu değil «ölçülmedi» döner: ölçülmemiş bir tablo temiz değildir.' },
+  'hkm':{ t:'HKM işareti', b:'İsteğe bağlı dördüncü katmana günün özetini gönderir.',
+    more:'SPİ, HKM\'nin var olduğunu bilmez: işaret tek yönlüdür, hiçbir çizimde çalışmaz ve hiçbir kaydı bekletmez. Varsayılan kapalıdır ve açılmadan önce ne gönderileceği satır satır gösterilir. Tahlil değeri, ilaç adı, semptom ve öğün gitmez; giden şey yük kararını etkileyen dört sayıdır ve her biri kesinlik etiketiyle gider — değeri olmayan alan «veri yok» gider, sıfır değil. Klinik sınır burada da geçerlidir.' },
   'storage':{ t:'Depo ufku', b:'Bu sistem dokuz ay her gün kullanılırsa depo dolar mı?',
     more:'«Depo %80 dolu» tek başına işe yaramaz: ne zaman dolacağını ve NEYİN şiştiğini söylemez. Büyüme hızı her açılıştaki bir ölçümden HESAPLANIR; iki ölçümden az varsa hız bilinmiyordur. Budama yalnızca sistemin kendi ürettiği kayıtlara dokunur: tahlil, ölçüm, öğün ve antrenman kayıtların hiçbir koşulda yer açmak için silinmez.' },
   'friction':{ t:'Sürtünme', b:'Takip ekranlarında geçen süre — günlük bütçeye göre.',

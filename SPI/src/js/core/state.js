@@ -853,6 +853,9 @@ SP.Model = (function(){
     if(SP.Friction) await SP.Friction.load();
     if(SP.Calib) await SP.Calib.load();
     if(SP.Signals) await SP.Signals.load();
+    /* Isaret ayari en sonda yuklenir ve yuklenmezse KAPALI kalir:
+       kullanicinin secmedigi bir gonderim varsayilan olamaz. */
+    if(SP.Beacon) await SP.Beacon.load();
     if(SP.Storage){ await SP.Storage.load(); await SP.Storage.sample(); }
 
     S.ready = true;

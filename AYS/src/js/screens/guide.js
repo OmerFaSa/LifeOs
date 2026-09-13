@@ -408,11 +408,74 @@ R.Screens.guide = (function(){
     'Net düşüşü bildirim olarak gönderilmez; ödül davranışa bağlanır.',
   ];
 
+  /* ---------- HKM isareti ----------
+
+     Dorduncu katman ISTEGE BAGLIDIR ve varsayilan olarak KAPALIDIR.
+     Kullanici ne gonderildigini gormeden acmamali: bu yuzden kart, acik
+     olsun olmasin, bugun gidecek gövdenin TAMAMINI satır satır gosterir. */
+  function hkmCard(){
+    if(!R.Beacon) return '';
+    const a = R.Beacon.settings();
+    const on = R.Beacon.preview();
+    const durum = a.lastAt
+      ? (a.lastStatus === 202 ? 'Son gönderim başarılı' : 'Son deneme başarısız')
+        + ' — ' + String(a.lastAt).slice(0, 16).replace('T', ' ') + '. '
+        + (a.lastNote || '')
+      : 'Henüz hiç gönderilmedi.';
+    return K.Card({ title:'HKM işareti', hint:'hkm',
+      sub:'İsteğe bağlı dördüncü katmana günün özeti',
+      body:html`
+        ${K.Notice({ tone:'info', body:'AYS, HKM\'nin var olduğunu bilmez. '
+          + 'İşaret tek yönlüdür, hiçbir çizimde çalışmaz ve hiçbir kaydı '
+          + 'bekletmez: HKM kapalıyken AYS olduğu gibi çalışır.' })}
+
+        <div class="mt-12">
+          ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)', checked:!!a.enabled,
+            act:'hkm-toggle' })}
+        </div>
+
+        <div class="mt-12">
+          ${K.Field({ label:'HKM adresi',
+            input:K.Input({ id:'ay-hkm-url', value:a.url, change:'hkm-url',
+              placeholder:'http://127.0.0.1:4200', aria:'HKM adresi' }) })}
+          ${K.Field({ label:'Yerel jeton', hint:'config.json içindeki local_token',
+            input:K.Input({ id:'ay-hkm-token', type:'password', value:a.token,
+              change:'hkm-token', aria:'HKM jetonu' }) })}
+          ${K.Field({ label:'En sık kaç dakikada bir',
+            input:K.Input({ id:'ay-hkm-int', type:'number', min:'15', step:'5',
+              value:a.intervalMinutes, change:'hkm-interval',
+              aria:'Gönderim aralığı' }) })}
+        </div>
+
+        ${when(!R.Beacon.urlOk(a.url), () => K.Notice({ tone:'warn',
+          body:'Bu adrese gönderim yapılmaz: yerel olmayan bir adrese düz http '
+             + 'ile giderken jeton ağda açık gider. https ya da 127.0.0.1 gerekir.' }))}
+
+        <div class="mt-12">
+          <span class="mono-label">Bugün ne gidiyor</span>
+          ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
+            rows:on.rows.map(r => [r.key,
+              r.value == null ? '—' : U.fmtNum(r.value), r.label]) })}
+          <p class="tiny dim mt-8">Soru metni, hata defteri ve deneme ayrıntısı
+            GİTMEZ. Giden şey bu dört beş sayıdır; değeri olmayan alan «veri yok»
+            gider, sıfır değil.</p>
+        </div>
+
+        ${when(on.errors.length, () => K.Notice({ tone:'warn',
+          body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
+
+        <div class="mt-12">
+          ${K.Button({ label:'Şimdi gönder', act:'hkm-send', tone:'primary' })}
+        </div>
+        <p class="tiny dim mt-8">${durum}</p>` });
+  }
+
   function settingsTab(){
     return K.Grid([
       K.Span(6, K.Stack([
         profileCard(),
         calendarCard(),
+        hkmCard(),
         K.Card({ title:'Koç üslubu', sub:'Aynı veri herkese aynı dille söylenmez',
           body:html`
             ${K.Segmented({ act:'set-tone', block:true, primary:true, aria:'Koç üslubu',
@@ -689,6 +752,17 @@ R.Screens.guide = (function(){
         UI.toast('Yükleme başarısız: '+(e.message || 'bilinmeyen hata'));
       }
     },
+    async 'hkm-toggle'(){
+      const a = R.Beacon.settings();
+      await R.Beacon.save({ enabled:!a.enabled });
+      UI.toast(!a.enabled ? 'HKM işareti açıldı' : 'HKM işareti kapatıldı');
+      R.App.render();
+    },
+    async 'hkm-send'(){
+      const r = await R.Beacon.send({ force:true });
+      UI.toast(r.ok ? 'Gönderildi' : (r.note || 'Gönderilemedi'));
+      R.App.render();
+    },
     async 'reset-data'(){
       UI.confirmSheet('Tüm veriyi sıfırla',
         'Tüm haftalar, günler, denemeler, hatalar ve kartlar silinecek. Bu işlem geri alınamaz — önce yedek al.',
@@ -700,6 +774,15 @@ R.Screens.guide = (function(){
     },
   };
 
+  const change = {
+    async 'hkm-url'(el){ await R.Beacon.save({ url:el.value.trim() }); R.App.render(); },
+    async 'hkm-token'(el){ await R.Beacon.save({ token:el.value.trim() }); },
+    async 'hkm-interval'(el){
+      const n = Math.max(R.Beacon.ASGARI_ARA_DK, Number(el.value) || 60);
+      await R.Beacon.save({ intervalMinutes:n });
+    },
+  };
+
   return {
     id:'guide',
     title:'Rehber',
@@ -708,6 +791,6 @@ R.Screens.guide = (function(){
       return tab ? tab.label + ' · protokoller ve ayarlar' : 'Protokoller, kontrol listeleri ve ayarlar';
     },
     actions(){ return ''; },
-    render, handle,
+    render, handle, change,
   };
 })();

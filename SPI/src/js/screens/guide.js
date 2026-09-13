@@ -176,6 +176,70 @@ SP.Screens.guide = (function(){
     });
   }
 
+  /* -------------------------------------------------------- HKM isareti
+
+     Dorduncu katman ISTEGE BAGLIDIR ve varsayilan olarak KAPALIDIR.
+     Saglik verisinin en kucuk kumesi bile bir sorumluluktur: bu yuzden
+     kart, acik olsun olmasin, gidecek gövdenin TAMAMINI satir satir
+     gosterir. Tahlil degeri, ilac adi, semptom ve ogun GITMEZ. */
+  function hkmCard(){
+    if(!SP.Beacon) return '';
+    const a = SP.Beacon.settings();
+    const on = SP.Beacon.preview();
+    const durum = a.lastAt
+      ? (a.lastStatus === 202 ? 'Son gönderim başarılı' : 'Son deneme başarısız')
+        + ' — ' + String(a.lastAt).slice(0, 16).replace('T', ' ') + '. '
+        + (a.lastNote || '')
+      : 'Henüz hiç gönderilmedi.';
+    return K.Card({
+      title:'HKM işareti', hint:'hkm',
+      sub:'İsteğe bağlı dördüncü katmana günün özeti',
+      badge:a.enabled ? K.Badge({ label:'açık', tone:'ok' })
+        : K.Badge({ label:'kapalı', tone:'warn' }),
+      body:html`
+        ${K.Notice({ tone:'info', body:'SPİ, HKM\'nin var olduğunu bilmez. '
+          + 'İşaret tek yönlüdür, hiçbir çizimde çalışmaz ve hiçbir kaydı '
+          + 'bekletmez: HKM kapalıyken SPİ olduğu gibi çalışır.' })}
+
+        <div class="mt-12">
+          ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
+            checked:!!a.enabled, act:'hkm-toggle' })}
+        </div>
+
+        <div class="mt-12">
+          ${K.Field({ label:'HKM adresi',
+            input:K.Input({ id:'sp-hkm-url', value:a.url, change:'hkm-url',
+              placeholder:'http://127.0.0.1:4200', aria:'HKM adresi' }) })}
+          ${K.Field({ label:'Yerel jeton', hint:'config.json → local_token',
+            input:K.Input({ id:'sp-hkm-token', type:'password', value:a.token,
+              change:'hkm-token', aria:'HKM jetonu' }) })}
+          ${K.Field({ label:'En sık kaç dakikada bir',
+            input:K.Input({ id:'sp-hkm-int', type:'number', min:'15', step:'5',
+              value:a.intervalMinutes, change:'hkm-interval',
+              aria:'Gönderim aralığı' }) })}
+        </div>
+
+        ${when(!SP.Beacon.urlOk(a.url), () => K.Notice({ tone:'warn', class:'mt-10',
+          body:'Bu adrese gönderim yapılmaz: yerel olmayan bir adrese düz http '
+             + 'ile giderken jeton ağda açık gider. https ya da 127.0.0.1 gerekir.' }))}
+
+        <div class="mt-12">${K.SectionTitle('Bugün ne gidiyor')}</div>
+        ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
+          rows:on.rows.map(r => [r.key,
+            r.value == null ? '—' : U.fmtNum(r.value), r.label]) })}
+        <p class="tiny dim mt-8">Tahlil değeri, ilaç adı, semptom ve öğün GİTMEZ.
+          Giden şey yük kararını etkileyen dört sayıdır; değeri olmayan alan
+          «veri yok» gider, sıfır değil. Klinik sınır burada da geçerlidir.</p>
+
+        ${when(on.errors.length, () => K.Notice({ tone:'warn', class:'mt-10',
+          body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
+
+        <p class="tiny dim mt-10">${durum}</p>`,
+      foot:html`${K.Button({ label:'Şimdi gönder', size:'sm', tone:'primary',
+        act:'hkm-send' })}`,
+    });
+  }
+
   function dataCard(){
     const f = M.dataFootprint();
     const age = M.backupAgeDays();
@@ -353,7 +417,7 @@ SP.Screens.guide = (function(){
     }
     if(tab === 'veri'){
       return String(html`${head}
-        ${K.Ledger(() => [dataCard(), storageHorizonCard(), storageCard()])}
+        ${K.Ledger(() => [dataCard(), storageHorizonCard(), storageCard(), hkmCard()])}
         <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`);
     }
     if(tab === 'sinir'){
@@ -372,6 +436,18 @@ SP.Screens.guide = (function(){
   }
 
   const handle = {
+    async 'hkm-toggle'(){
+      const a = SP.Beacon.settings();
+      await SP.Beacon.save({ enabled:!a.enabled });
+      UI.toast(!a.enabled ? 'HKM işareti açıldı' : 'HKM işareti kapatıldı');
+      SP.App.render();
+    },
+    async 'hkm-send'(){
+      const r = await SP.Beacon.send({ force:true });
+      UI.toast(r.ok ? 'Gönderildi' : (r.note || 'Gönderilemedi'));
+      SP.App.render();
+    },
+
     /* Budama. Motor kullanicinin girdigi veriyi reddeder; ekran da
        yalnizca izinli olanlari sunar. */
     async 'prune-storage'(){
@@ -449,6 +525,12 @@ SP.Screens.guide = (function(){
   };
 
   const change = {
+    async 'hkm-url'(el){ await SP.Beacon.save({ url:el.value.trim() }); SP.App.render(); },
+    async 'hkm-token'(el){ await SP.Beacon.save({ token:el.value.trim() }); },
+    async 'hkm-interval'(el){
+      const n = Math.max(SP.Beacon.ASGARI_ARA_DK, Number(el.value) || 60);
+      await SP.Beacon.save({ intervalMinutes:n });
+    },
     async 'pick-provider'(el){
       const p = SP.PROVIDERS[el.value];
       const first = p && p.models && p.models[0] ? p.models[0].id : '';

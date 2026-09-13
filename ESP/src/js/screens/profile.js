@@ -176,6 +176,11 @@ ESP.Screens.profile = (function(){
                 + 'cihaz kaybolursa veri de kaybolur.' }))}`,
         }),
 
+        /* HKM isareti — dorduncu katman ISTEGE BAGLI ve varsayilan KAPALI.
+           Ne gonderildigi acik olsun olmasin satir satir gosterilir:
+           gormeden acilan bir gonderim, onay degildir. */
+        hkmEntry(),
+
         K.Entry({
           label:'SINIR', hint:'pedagogic',
           meta:'değişmez',
@@ -187,9 +192,76 @@ ESP.Screens.profile = (function(){
       ]))}`);
   }
 
+  function hkmEntry(){
+    if(!ESP.Beacon) return '';
+    const a = ESP.Beacon.settings();
+    const on = ESP.Beacon.preview();
+    const durum = a.lastAt
+      ? (a.lastStatus === 202 ? 'Son gönderim başarılı' : 'Son deneme başarısız')
+        + ' — ' + String(a.lastAt).slice(0, 16).replace('T', ' ') + '. '
+        + (a.lastNote || '')
+      : 'Henüz hiç gönderilmedi.';
+    return K.Entry({
+      label:'HKM İŞARETİ', hint:'hkm',
+      meta:a.enabled ? 'açık' : 'kapalı',
+      note:'ESP, HKM\'nin var olduğunu bilmez. İşaret tek yönlüdür, hiçbir '
+         + 'çizimde çalışmaz ve hiçbir kaydı bekletmez: HKM kapalıyken ESP '
+         + 'olduğu gibi çalışır.',
+      wide:true,
+      body:html`
+        ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
+          checked:!!a.enabled, act:'hkm-toggle' })}
+
+        <div class="cols-3 mt-12">
+          ${K.Field({ label:'HKM adresi',
+            input:K.Input({ id:'hkm-url', value:a.url, change:'hkm-url',
+              placeholder:'http://127.0.0.1:4200', aria:'HKM adresi' }) })}
+          ${K.Field({ label:'Yerel jeton', hint:'config.json → local_token',
+            input:K.Input({ id:'hkm-token', type:'password', value:a.token,
+              change:'hkm-token', aria:'HKM jetonu' }) })}
+          ${K.Field({ label:'En sık kaç dakikada bir',
+            input:K.Input({ id:'hkm-int', type:'number', min:'15', step:'5',
+              value:a.intervalMinutes, change:'hkm-interval',
+              aria:'Gönderim aralığı' }) })}
+        </div>
+
+        ${when(!ESP.Beacon.urlOk(a.url), () => K.Notice({ tone:'warn',
+          body:'Bu adrese gönderim yapılmaz: yerel olmayan bir adrese düz http '
+             + 'ile giderken jeton ağda açık gider. https ya da 127.0.0.1 gerekir.' }))}
+
+        <div class="mt-12">
+          <span class="mono-label">Bugün ne gidiyor</span>
+          ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
+            rows:on.rows.map(r => [r.key,
+              r.value == null ? '—' : U.fmtNum(r.value), r.label]) })}
+          <p class="small muted mt-8">Kart metni, not içeriği ve kitap adı GİTMEZ.
+            Giden şey bu dört sayıdır; değeri olmayan alan «veri yok» gider,
+            sıfır değil.</p>
+        </div>
+
+        ${when(on.errors.length, () => K.Notice({ tone:'warn',
+          body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
+
+        <div class="mt-12">${K.Button({ label:'Şimdi gönder', act:'hkm-send',
+          tone:'primary' })}</div>
+        <p class="small muted mt-8">${durum}</p>`,
+    });
+  }
+
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'hkm-toggle'(){
+      const a = ESP.Beacon.settings();
+      await ESP.Beacon.save({ enabled:!a.enabled });
+      ESP.UI.toast(!a.enabled ? 'HKM işareti açıldı' : 'HKM işareti kapatıldı');
+      ESP.App.render();
+    },
+    async 'hkm-send'(){
+      const r = await ESP.Beacon.send({ force:true });
+      ESP.UI.toast(r.ok ? 'Gönderildi' : (r.note || 'Gönderilemedi'));
+      ESP.App.render();
+    },
     async 'save-profile'(){
       const ad = val('pf-name');
       if(!ad){ ESP.UI.toast('Ad boş olamaz'); return; }
@@ -257,7 +329,14 @@ ESP.Screens.profile = (function(){
     },
   };
 
-  const change = {};
+  const change = {
+    async 'hkm-url'(el){ await ESP.Beacon.save({ url:el.value.trim() }); ESP.App.render(); },
+    async 'hkm-token'(el){ await ESP.Beacon.save({ token:el.value.trim() }); },
+    async 'hkm-interval'(el){
+      const n = Math.max(ESP.Beacon.ASGARI_ARA_DK, Number(el.value) || 60);
+      await ESP.Beacon.save({ intervalMinutes:n });
+    },
+  };
 
   return {
     id:'profile',
