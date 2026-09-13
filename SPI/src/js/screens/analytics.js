@@ -16,6 +16,7 @@ SP.Screens.analytics = (function(){
     { id:'capraz', label:'Çapraz bağlar',  icon:'layers' },
     { id:'hafta',  label:'Haftalık rapor', icon:'list' },
     { id:'seri',   label:'Seriler',        icon:'chart' },
+    { id:'denetim', label:'Denetim',      icon:'list' },
     { id:'durust', label:'Dürüstlük',      icon:'shield' },
   ];
 
@@ -319,6 +320,46 @@ SP.Screens.analytics = (function(){
     });
   }
 
+
+  /* ------------------------------------------------------------ denetim
+
+     Bes alanda birikmis bakim borcu. SPI'ye ozgu ek kural: DENETIM
+     TESHIS KOYMAZ. Bir bulgu asla "su degerin tehlikeli" demez;
+     soyleyebilecegi tek sey KAYDIN durumudur. */
+  function denetimCard(){
+    const hepsi = SP.Audit.all();
+    const ciddi = hepsi.filter(f => f.severity !== 'none');
+    return K.Entry({
+      label:'BAKIM BORCU', hint:'audit',
+      meta:ciddi.length ? ciddi.length + ' bulgu' : 'temiz',
+      note:'Bu denetim teşhis koymaz: bir değerin ne anlama geldiği '
+         + 'hekimin işidir. Söylediği tek şey kaydın durumudur — tahlil '
+         + 'eskimiş, ölçüm girilmemiş, bayrak açık kalmış.',
+      wide:true,
+      body:html`
+        ${when(!ciddi.length, () => K.Notice({ tone:'ok',
+          body:'Beş alanda da bakım borcu görünmüyor. Veri eşiğin '
+             + 'altındaysa bu «temiz» değil «ölçülmedi» demektir.' }))}
+        ${map(SP.Audit.AREAS, a => {
+          const bulgular = SP.Audit.of(a.id);
+          if(!bulgular.length) return '';
+          return html`<div class="mt-16">
+            ${K.SectionTitle(a.label)}
+            ${map(bulgular, f => html`
+              <div class="mt-8">
+                ${K.Notice({ tone:f.severity === 'warn' ? 'warn' : 'info',
+                  title:f.title, body:f.note })}
+                ${when((f.items || []).length, () => K.Table({ tight:true,
+                  headers:['Kayıt', 'Durum'],
+                  rows:f.items.map(x => [x.label, x.meta || '—']) }))}
+                ${when(f.route, () => K.Button({ label:'Aç', size:'sm', act:'go',
+                  data:{ 'data-route':f.route }, class:'mt-8' }))}
+              </div>`)}
+          </div>`;
+        })}`,
+    });
+  }
+
   async function render(){
     const tab = S.ui.analyticsTab;
     const head = html`<div class="mb-8">${K.Subtabs({ items:TABS, value:tab,
@@ -334,6 +375,11 @@ SP.Screens.analytics = (function(){
               rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
         ])}
         <div class="mt-24">${raw(UI.rail(['grounding', 'decision', 'minimum-day']))}</div>`);
+    }
+    if(tab === 'denetim'){
+      return String(html`${head}
+        ${K.Ledger(() => [denetimCard()])}
+        <div class="mt-24">${raw(UI.rail(['audit', 'certainty', 'red-flag']))}</div>`);
     }
     if(tab === 'durust'){
       return String(html`${head}
