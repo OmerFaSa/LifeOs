@@ -347,6 +347,27 @@ ESP.Screens.today = (function(){
     });
   }
 
+  /* Planın bugünkü satırı. Plan kurulmamışsa hiç çizilmez: kurulmamış bir
+     planın yerine boş bir kutu koymak, kullanıcıya eksik bir şey varmış gibi
+     gösterirdi. */
+  function planRowToday(){
+    const g = ESP.Plans.today(gun());
+    if(!g) return '';
+    return K.Entry({
+      label:'PLANDA BUGÜN', hint:'weekplan',
+      meta:g.label,
+      note:'Haftalık plandan geliyor. Plan bir takvim değil bir sıradır; '
+         + 'saatini sen seçersin.',
+      body:html`
+        <div class="row wrap">
+          ${K.Badge({ label:g.minutes + ' dk', tone:'muted', icon:false })}
+          <span class="small">${(g.items || []).map(x => x.label).join(' · ') || '—'}</span>
+          ${K.Button({ label:'Bölüme git', size:'sm', act:'go',
+            data:{ 'data-route':g.route } })}
+        </div>`,
+    });
+  }
+
   /* Bugüne düşen hatırlatmalar — bütün bölümlerden tek listede.
 
      Hatırlatıcı bir görev değildir ve kaçırılmış olması ceza üretmez.
@@ -382,7 +403,8 @@ ESP.Screens.today = (function(){
     const tab = S.ui.dayTab || 'giris';
     const rows = tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [nextCard(), planRow(), reminderRow(), entryForm(), quickForm(), sessionList()]
+      : [nextCard(), planRow(), planRowToday(), reminderRow(), entryForm(),
+          quickForm(), sessionList()]
           .filter(Boolean);
 
     return K.Grid(html`

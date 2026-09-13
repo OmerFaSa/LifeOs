@@ -869,6 +869,32 @@ ESP.App = (function(){
       render();
     },
 
+    /* --- teklif ve plan: tezgâhta, ofiste ve Bugün'de ortak --- */
+    async 'prop-accept'(el){
+      const res = await ESP.Plans.accept(el.dataset.id);
+      if(!res.ok){ UI.toast(res.error); return; }
+      UI.toast('Onaylandı — kural motoru uyguladı');
+      render();
+    },
+
+    async 'prop-decline'(el){
+      const res = await ESP.Plans.decline(el.dataset.id);
+      if(!res.ok){ UI.toast(res.error); return; }
+      UI.toast('Reddedildi — bu teklif tekrar sorulmaz');
+      render();
+    },
+
+    async 'plan-make'(){
+      await ESP.Plans.savePlan(ESP.Plans.weekPlan());
+      UI.toast('Plan kuruldu');
+      render();
+    },
+
+    async 'plan-clear'(){
+      await ESP.Plans.clearPlan();
+      render();
+    },
+
     async 'log-drill'(el){
       const res = await ESP.Coach.logDrill(el.dataset.id);
       if(!res.ok){ UI.toast(res.error); return; }

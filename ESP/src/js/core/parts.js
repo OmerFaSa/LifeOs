@@ -514,6 +514,83 @@ ESP.Parts = (function(){
       </div>`;
   }
 
+  /* ----------------------------------------------------------------- plan
+
+     Koçun sistemi değiştirme YOLU. Ajan doğrudan yazmaz: teklif eder,
+     kullanıcı onaylar, uygulamayı kural motoru yapar. Bir dil modelinin
+     kullanıcının verisine doğrudan yazması, halüsinasyon riskini kalıcı
+     hâle getirirdi — yanlış bir çıkarım bir cümle olarak kalmaz, bir
+     hatırlatıcıya ya da bir hedefe dönüşürdü. */
+  function proposalList(list, bos){
+    if(!list.length) return K.Empty({ text:bos || 'Bekleyen teklif yok.' });
+    return html`<ul class="props">${map(list, p => {
+      const k = ESP.Plans.KIND_BY_ID[p.kind] || {};
+      const a = ESP.AGENT_BY_ID[p.agentId] || {};
+      return html`<li class="prop">
+        <span class="prop__kind">${k.label || p.kind}</span>
+        <span class="prop__body">
+          <b>${p.title}</b>
+          <span class="prop__why">${p.why}</span>
+          <span class="tiny dim">${a.short || a.name || p.agentId} · ${k.note || ''}</span>
+        </span>
+        ${K.Button({ label:'Onayla', tone:'primary', size:'sm', act:'prop-accept',
+          data:{ 'data-id':p.id } })}
+        ${K.Button({ label:'Reddet', size:'sm', act:'prop-decline',
+          data:{ 'data-id':p.id } })}
+      </li>`;
+    })}</ul>`;
+  }
+
+  function deskPlans(discId){
+    const list = ESP.Desk.proposals(discId);
+    const gecmis = (ESP.S.proposals || []).filter(p => p.disc === discId);
+    return html`
+      <div class="deskplan">
+        ${K.Notice({ tone:'info',
+          body:'Koç doğrudan yazmaz: teklif eder, sen onaylarsın, uygulamayı '
+            + 'kural motoru yapar. Reddedilen bir teklif yarın tekrar sorulmaz.' })}
+        ${proposalList(list, 'Bu masada bekleyen teklif yok.')}
+        ${when(gecmis.length, () => html`
+          <div class="mt-10">
+            ${K.SectionTitle('Karar verilenler')}
+            ${K.Table({ tight:true, headers:['Teklif', 'Karar', 'Uygulanan'],
+              rows:gecmis.slice(0, 8).map(p => [
+                p.title,
+                p.state === 'accepted' ? 'onaylandı' : 'reddedildi',
+                p.applied ? (ESP.Plans.KIND_BY_ID[p.applied.kind] || {}).label || p.applied.kind : '—',
+              ]) })}
+          </div>`)}
+      </div>`;
+  }
+
+  /* Haftalık plan — takvim değil SIRA. */
+  function weekPlan(){
+    const p = ESP.Plans.plan();
+    if(!p || !(p.days || []).length){
+      return html`
+        <p class="small muted">Plan bir takvim değildir: «salı 19:00'da gitar»
+          demek sistemin işi değil. Haftanın kalan günlerine hangi disiplinin
+          düştüğünü söyler ve sırayı haftalık rota verir.</p>
+        ${K.Button({ label:'Plan kur', tone:'primary', act:'plan-make', class:'mt-10' })}`;
+    }
+    const bugun = ESP.U.todayISO();
+    return html`
+      <ul class="weekplan">${map(p.days, d => html`
+        <li class="${cls('wpday', d.date === bugun && 'is-today',
+            d.date < bugun && 'is-past')}">
+          <span class="wpday__date num">${d.date}</span>
+          <span class="wpday__disc"><b>${d.label}</b>
+            <span class="tiny dim">${d.minutes} dk · ${(d.items || [])
+              .map(x => x.label).join(', ') || '—'}</span></span>
+          ${K.Button({ label:'Aç', size:'sm', act:'go',
+            data:{ 'data-route':d.route } })}
+        </li>`)}</ul>
+      <div class="row wrap mt-10">
+        ${K.Button({ label:'Planı yenile', act:'plan-make' })}
+        ${K.Button({ label:'Planı kaldır', act:'plan-clear' })}
+      </div>`;
+  }
+
   /* Tezgâhın kendisi — dört sekme tek bir defter satırında. */
   function desk(discId){
     const d = ESP.DISCIPLINE_BY_ID[discId];
@@ -522,6 +599,7 @@ ESP.Parts = (function(){
     const t = ESP.Desk.tab(discId);
     const acik = ESP.Desk.isOpen(discId);
     const bekleyen = ESP.Desk.due(discId).length;
+    const teklif = ESP.Desk.proposals(discId).length;
 
     return K.Entry({
       label:'TEZGÂH', hint:'desk',
@@ -534,11 +612,13 @@ ESP.Parts = (function(){
         ? html`
           ${K.Subtabs({ value:t, act:'desk-tab', aria:'Tezgâh bölümleri',
             items:ESP.Desk.TABS.map(x => Object.assign({ id:x.id, label:x.label },
-              x.id === 'hatirlatma' && bekleyen ? { count:bekleyen } : {})) })}
+              x.id === 'hatirlatma' && bekleyen ? { count:bekleyen }
+                : (x.id === 'plan' && teklif ? { count:teklif } : {}))) })}
           <div class="desk__body" data-disc="${discId}">
             ${t === 'harita' ? deskMap(discId)
               : t === 'ekler' ? deskAssets(discId)
               : t === 'hatirlatma' ? deskReminders(discId)
+              : t === 'plan' ? deskPlans(discId)
               : deskChat(discId)}
           </div>`
         : html`<p class="small muted">Tezgâh kapalı. ${a.name} ile konuşmak,
@@ -547,6 +627,7 @@ ESP.Parts = (function(){
   }
 
   return { cert, measure, avatar, discChip, radar, empty, coach, desk,
-    deskChat, deskMap, deskAssets, deskReminders, units, practice };
+    deskChat, deskMap, deskAssets, deskReminders, deskPlans, units, practice,
+    proposalList, weekPlan };
 
 })();

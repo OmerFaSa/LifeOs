@@ -160,6 +160,7 @@ ESP.Test = (function(){
     S.pieces = []; S.recordings = []; S.drafts = []; S.goals = [];
     S.events = []; S.sources = []; S.chains = [];
     S.assets = []; S.reminders = [];
+    S.proposals = []; S.weekPlan = null;
     S.office = null; S.officeChats = {}; S.officeMeetings = [];
     S.officeBriefings = {}; S.journal = {};
     S.decisions = [];

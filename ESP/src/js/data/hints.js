@@ -165,4 +165,8 @@ ESP.HINTS = {
     more:'Ünite bir ders değildir — ESP öğretmen değil — bir başlangıç malzemesidir: boş ekranı kaldırır. Üniteden gelen kartlar «tohum» etiketi taşır, yani «bu kartı ben yazmadım» bilgisi kaybolmaz. İlerleme ayrı bir «tamamlandı» bayrağından değil SRS\'ten okunur: bir kartı bilinen yapan şey bir kez doğru bilmek değil, aralığının uzamasıdır.' },
   'practice':{ t:'Pratik', b:'Destedeki kartlardan üretilen soru–cevap oturumu.',
     more:'Pratik ayrı bir hafıza kaydı açmaz: cevabın tekrar ekranındakiyle aynı yere, aynı SRS\'e yazılır. Çeldiriciler aynı desteden gelir ve model uydurmaz — uydurulmuş bir çeldirici yanlış bir şeyi öğretebilir. «Bilmiyorum» bir atlama değildir: kart «tekrar» işaretlenir ve başa döner.' },
+  'proposal':{ t:'Teklif', b:'Bir masanın kendi alanında önerdiği somut eylem.',
+    more:'Ajan doğrudan yazmaz — teklif eder, sen onaylarsın, uygulamayı kural motoru yapar. Bir dil modelinin verine doğrudan yazması, halüsinasyon riskini kalıcı hâle getirirdi: yanlış bir çıkarım bir cümle olarak kalmaz, bir hatırlatıcıya ya da bir hedefe dönüşürdü. Her teklif ajanın KENDİ alanındadır: Maestro hatırlatıcı kurabilir, dil ünitesi ekleyemez. Reddedilen teklif tekrar sorulmaz ama kaydı silinmez.' },
+  'weekplan':{ t:'Haftalık plan', b:'Haftanın günlerine disiplin dağıtımı.',
+    more:'Takvim DEĞİLDİR: «salı 19:00\'da gitar» demek sistemin işi değil. Sırayı haftalık rota verir, plan onu güne dağıtır — yeni bir karar üretmez. Saatini sen seçersin.' },
 };

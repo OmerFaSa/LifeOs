@@ -689,3 +689,39 @@
   display:flex; flex-wrap:wrap; gap:var(--sp-3); align-items:baseline;
   padding:var(--sp-2) 0; border-bottom:1px solid var(--rule);
 }
+
+/* ============================================================ teklif ve plan
+
+   Teklif satırı bir bildirim değildir: iki düğmesi vardır ve ikisi de bir
+   karardır. Onaysız hiçbir teklif uygulanmaz. */
+.props{ list-style:none; margin:var(--sp-3) 0 0; padding:0; }
+.prop{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2) var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.prop:last-child{ border-bottom:0; }
+.prop__kind{
+  flex:0 0 10ch; font-size:var(--fs-xs); text-transform:uppercase;
+  letter-spacing:.05em; color:var(--text-3);
+}
+.prop__body{ flex:1 1 22ch; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.prop__why{ font-size:var(--fs-sm); color:var(--text-2); }
+
+.weekplan{ list-style:none; margin:var(--sp-3) 0 0; padding:0; }
+.wpday{
+  display:flex; flex-wrap:wrap; gap:var(--sp-3); align-items:baseline;
+  padding:var(--sp-2) 0; border-bottom:1px solid var(--rule);
+}
+.wpday:last-child{ border-bottom:0; }
+.wpday__date{
+  flex:0 0 10ch; color:var(--text-3); font-size:var(--fs-sm);
+  font-variant-numeric:tabular-nums;
+}
+.wpday__disc{ flex:1 1 18ch; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.wpday.is-today{ background:var(--surface-hover); }
+.wpday.is-today .wpday__date{ color:var(--sec); font-weight:600; }
+.wpday.is-past{ opacity:.6; }
+
+@media (max-width:520px){
+  .prop__kind, .wpday__date{ flex:0 0 100%; }
+}

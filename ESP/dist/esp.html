@@ -5233,6 +5233,42 @@ body.is-dragging .drop.is-over{
   display:flex; flex-wrap:wrap; gap:var(--sp-3); align-items:baseline;
   padding:var(--sp-2) 0; border-bottom:1px solid var(--rule);
 }
+
+/* ============================================================ teklif ve plan
+
+   Teklif satırı bir bildirim değildir: iki düğmesi vardır ve ikisi de bir
+   karardır. Onaysız hiçbir teklif uygulanmaz. */
+.props{ list-style:none; margin:var(--sp-3) 0 0; padding:0; }
+.prop{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2) var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.prop:last-child{ border-bottom:0; }
+.prop__kind{
+  flex:0 0 10ch; font-size:var(--fs-xs); text-transform:uppercase;
+  letter-spacing:.05em; color:var(--text-3);
+}
+.prop__body{ flex:1 1 22ch; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.prop__why{ font-size:var(--fs-sm); color:var(--text-2); }
+
+.weekplan{ list-style:none; margin:var(--sp-3) 0 0; padding:0; }
+.wpday{
+  display:flex; flex-wrap:wrap; gap:var(--sp-3); align-items:baseline;
+  padding:var(--sp-2) 0; border-bottom:1px solid var(--rule);
+}
+.wpday:last-child{ border-bottom:0; }
+.wpday__date{
+  flex:0 0 10ch; color:var(--text-3); font-size:var(--fs-sm);
+  font-variant-numeric:tabular-nums;
+}
+.wpday__disc{ flex:1 1 18ch; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.wpday.is-today{ background:var(--surface-hover); }
+.wpday.is-today .wpday__date{ color:var(--sec); font-weight:600; }
+.wpday.is-past{ opacity:.6; }
+
+@media (max-width:520px){
+  .prop__kind, .wpday__date{ flex:0 0 100%; }
+}
 </style>
 <div id="app">
   <div class="boot">
@@ -5253,7 +5289,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'9c0f5af', at:'2026-09-13 02:38', dirty:true };
+SP.BUILD = { id:'0052fec', at:'2026-09-13 02:44', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -8278,6 +8314,10 @@ ESP.HINTS = {
     more:'Ünite bir ders değildir — ESP öğretmen değil — bir başlangıç malzemesidir: boş ekranı kaldırır. Üniteden gelen kartlar «tohum» etiketi taşır, yani «bu kartı ben yazmadım» bilgisi kaybolmaz. İlerleme ayrı bir «tamamlandı» bayrağından değil SRS\'ten okunur: bir kartı bilinen yapan şey bir kez doğru bilmek değil, aralığının uzamasıdır.' },
   'practice':{ t:'Pratik', b:'Destedeki kartlardan üretilen soru–cevap oturumu.',
     more:'Pratik ayrı bir hafıza kaydı açmaz: cevabın tekrar ekranındakiyle aynı yere, aynı SRS\'e yazılır. Çeldiriciler aynı desteden gelir ve model uydurmaz — uydurulmuş bir çeldirici yanlış bir şeyi öğretebilir. «Bilmiyorum» bir atlama değildir: kart «tekrar» işaretlenir ve başa döner.' },
+  'proposal':{ t:'Teklif', b:'Bir masanın kendi alanında önerdiği somut eylem.',
+    more:'Ajan doğrudan yazmaz — teklif eder, sen onaylarsın, uygulamayı kural motoru yapar. Bir dil modelinin verine doğrudan yazması, halüsinasyon riskini kalıcı hâle getirirdi: yanlış bir çıkarım bir cümle olarak kalmaz, bir hatırlatıcıya ya da bir hedefe dönüşürdü. Her teklif ajanın KENDİ alanındadır: Maestro hatırlatıcı kurabilir, dil ünitesi ekleyemez. Reddedilen teklif tekrar sorulmaz ama kaydı silinmez.' },
+  'weekplan':{ t:'Haftalık plan', b:'Haftanın günlerine disiplin dağıtımı.',
+    more:'Takvim DEĞİLDİR: «salı 19:00\'da gitar» demek sistemin işi değil. Sırayı haftalık rota verir, plan onu güne dağıtır — yeni bir karar üretmez. Saatini sen seçersin.' },
 };
 
 /* ==== js/data/palettes.js ==== */
@@ -9242,6 +9282,9 @@ ESP.S = {
   recordings:[],       // diksiyon olcumleri
   drafts:[],           // yazi taslaklari
   goals:[],            // zamana bagli hedefler
+
+  proposals:[],        // ajan teklifleri (onaylanan / reddedilen)
+  weekPlan:null,       // onaylanmis haftalik plan
 
   assets:[],           // bolume eklenmis not, belge, bag ve ses olcumu
   reminders:[],        // bolume bagli hatirlaticilar
@@ -10305,6 +10348,9 @@ ESP.Model = (function(){
       .map(d => Object.assign(newDraft(), d));
     S.goals = ((await ESP.Store.list('goals')) || []).map(g => Object.assign(newGoal(), g));
     S.decisions = ((await ESP.Store.list('decisions')) || []);
+
+    S.proposals = ((await ESP.Store.list('proposals')) || []);
+    S.weekPlan = (await ESP.Store.get('weekplan')) || null;
 
     S.assets = ((await ESP.Store.list('assets')) || []).map(normAsset)
       .sort((a, b) => (b.at || '') < (a.at || '') ? -1 : 1);
@@ -12518,6 +12564,7 @@ ESP.Desk = (function(){
     { id:'harita',     label:'Harita' },
     { id:'ekler',      label:'Ekler' },
     { id:'hatirlatma', label:'Hatırlatma' },
+    { id:'plan',       label:'Plan' },
   ];
 
   /* Bir disiplinin masası. Müzik ve diksiyon aynı ekranı paylaşır ama AYRI
@@ -12668,7 +12715,13 @@ ESP.Desk = (function(){
     return 'Bu merdivenin bütün kapıları geçilmiş görünüyor.';
   }
 
-  return { TABS, agentOf, tab, setTab, isOpen, toggle,
+  /* Bu masanın teklifleri. Teklif bir cümle değil TİPLİ bir nesnedir ve
+     kural motoru üretir (bkz. core/plans.js). */
+  function proposals(discId, todayISO){
+    return ESP.Plans.proposalsFor(agentOf(discId).id, todayISO);
+  }
+
+  return { TABS, proposals, agentOf, tab, setTab, isOpen, toggle,
     messages, ask, lastAnswer, speakLast, talk, talking,
     assets, assetSummary, reminders, due, reminderSummary,
     briefExtras, headline };
@@ -12986,6 +13039,337 @@ ESP.Lesson = (function(){
 
   return { units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
     start, question, answer, result, log, correct, norm, shuffle };
+})();
+
+/* ==== js/core/plans.js ==== */
+/* Teklif ve eylem planı — koçun sistemi değiştirme YOLU.
+
+   İstenen şey şuydu: koçlar kendi alanlarında değişiklik yapabilsin, plan
+   kurabilsin. Bunun iki yolu var ve aralarındaki fark bu dosyanın tamamı:
+
+     (a) Ajan doğrudan yazar. Model bir şey söyler, sistem yapar.
+     (b) Ajan TEKLİF eder, kullanıcı onaylar, KURAL MOTORU uygular.
+
+   (a) yanlıştır ve tartışılmaz. Bir dil modelinin kullanıcının verisine
+   doğrudan yazması, halüsinasyon riskini kalıcı hâle getirir: yanlış bir
+   çıkarım bir cümle olarak kalmaz, bir hatırlatıcıya, bir hedefe, bir
+   silinmiş karta dönüşür. Bu depodaki bütün doktrin (kural motoru
+   otoritedir, model yalnızca cümleye çevirir) bunun üstüne kurulu.
+
+   Bu yüzden (b): teklif KURAL MOTORUNUN ürettiği TİPLİ bir nesnedir.
+   Modelin teklifi yazması diye bir şey yok — model teklifi yalnızca
+   CÜMLEYE çevirir. Kullanıcı onaylar, uygulamayı yine kural motoru yapar.
+
+   Üç değişmez:
+
+   1. HER TEKLİF BİR AJANIN KENDİ ALANINDADIR. Maestro hatırlatıcı kurabilir
+      ama dil ünitesi ekleyemez. `allowed()` bunu denetler ve bir ihlal bir
+      hata değil bir IMKANSIZLIKTIR: kapsam dışı teklif hiç üretilmez.
+
+   2. HİÇBİR TEKLİF KENDİLİĞİNDEN UYGULANMAZ. Onaysız teklif bir öneridir;
+      reddedilen teklif kaydı SİLİNMEZ (aynı öneriyi yarın tekrar üretmemek
+      için hatırlanır).
+
+   3. TEKLİF GERİ ALINABİLİR OLMALIDIR. Uygulanan her teklif ne yaptığını
+      (`applied`) kaydeder; geri alınamayacak bir iş teklif edilmez. Bu
+      yüzden hiçbir teklif SİLME işlemi önermez. */
+
+window.ESP = window.ESP || {};
+
+ESP.Plans = (function(){
+  const U = ESP.U, S = ESP.S;
+
+  /* Teklif türleri ve hangi masanın üretebileceği.
+
+     `scope:'own'` demek, teklifin ajanın kendi disiplinine bağlı olması
+     demektir. `scope:'coach'` yalnızca koç ve Patron içindir: merdiven ve
+     tekrar bütün disiplinlerin ortak işi. */
+  const KINDS = [
+    { id:'reminder', label:'Hatırlatıcı kur', scope:'own',
+      note:'Bir tarihe bağlı hatırlatma. Kaçırılırsa ceza üretmez.' },
+    { id:'goal', label:'Zamana bağlı hedef', scope:'own',
+      note:'Takvimde tarihi olan bir hedef. Öncelik sırasında ikinci sıraya girer.' },
+    { id:'unit', label:'Ünite ekle', scope:'own',
+      note:'Bir öğrenme ünitesini desteye ekler. Kartlar «tohum» etiketiyle gelir.' },
+    { id:'drill', label:'Egzersiz işle', scope:'own',
+      note:'Bugünün reçetesindeki bir egzersizi gün kaydına yazar.' },
+    { id:'weekplan', label:'Haftalık plan', scope:'coach',
+      note:'Haftanın kalan günlerine disiplin dağıtır. Takvim değil sıradır.' },
+    { id:'focus', label:'Odağı değiştir', scope:'coach',
+      note:'Eşit skorlu iki iş çıkarsa hangisinin öne geçeceğini değiştirir.' },
+    { id:'base', label:'Günlük tabanı değiştir', scope:'coach',
+      note:'Reçetenin sığdığı dakika. Hedef değil ölçüt.' },
+  ];
+
+  const KIND_BY_ID = KINDS.reduce(function(m, k){ m[k.id] = k; return m; }, {});
+
+  function discOf(agentId){
+    const d = (ESP.DISCIPLINES || []).filter(function(x){ return x.agent === agentId; })[0];
+    return d ? d.id : null;
+  }
+
+  /* Bir ajan bu türü teklif edebilir mi? */
+  function allowed(agentId, kindId){
+    const k = KIND_BY_ID[kindId];
+    if(!k) return false;
+    if(k.scope === 'coach') return agentId === 'patron'
+      || (ESP.COACH_IDS || []).indexOf(agentId) >= 0;
+    /* 'own': ajanın bir disiplini olmalı ve o disiplin açık olmalı. */
+    const disc = discOf(agentId);
+    if(!disc) return false;
+    if(k.id === 'unit') return ESP.Lesson.units(disc).length > 0;
+    return ESP.Mod.isOn(disc);
+  }
+
+  /* ------------------------------------------------------------- üretim
+
+     Teklifler BULGUDAN doğar: koşul sağlandığında üretilir, koşul geçtiğinde
+     üretilmez. Masa notlarıyla aynı mantık — fark, notun bir bilgi, teklifin
+     bir EYLEM önerisi olması. */
+  function proposalsFor(agentId, todayISO){
+    const bugun = todayISO || U.todayISO();
+    const out = [];
+    const disc = discOf(agentId);
+    const ekle = function(kind, title, why, payload){
+      if(!allowed(agentId, kind)) return;
+      out.push({
+        id:'p:' + agentId + ':' + kind + ':' + (payload && payload.key || title),
+        agentId:agentId, kind:kind, disc:disc, title:title, why:why,
+        payload:payload || {}, at:bugun,
+      });
+    };
+
+    /* --- uzman masaları: kendi disiplininde --- */
+    if(disc && ESP.Mod.isOn(disc)){
+      const kapi = ESP.Curriculum.nextGate(disc);
+      const d = ESP.DISCIPLINE_BY_ID[disc];
+
+      /* Ölçülemeyen kapı → hatırlatıcı. Burada istenen şey çalışmak değil
+         ölçmek; ölçüm bir kez yapılır ve unutulur, hatırlatıcı tam da bunun
+         içindir. */
+      if(kapi && kapi.action === 'measure'){
+        ekle('reminder', d.label + ': «' + kapi.gate.label + '» ölçülsün',
+          'Bu kapı ölçülemiyor; ölçüm yapılmadan kademe kanıtlanmaz.',
+          { key:'gate', text:kapi.gate.label + ' için ölçüm gir',
+            due:U.iso(U.addDays(U.parse(bugun), 1)), repeat:'none' });
+      }
+
+      /* Üniteler → desteye eklenmemiş ilk ünite. */
+      const uniteler = ESP.Lesson.units(disc);
+      const eksik = uniteler.filter(function(u){
+        const p = ESP.Lesson.progress(u);
+        return p.total > 0 && p.added === 0;
+      })[0];
+      if(eksik){
+        ekle('unit', eksik.title + ' ünitesi desteye eklensin',
+          'Bu ünitenin malzemesi var ama hiçbir kartı destede değil.',
+          { key:eksik.id, unitId:eksik.id, disc:disc });
+      }
+
+      /* Bugünün reçetesinden işlenmemiş ilk egzersiz. */
+      const r = ESP.Coach.prescribe(disc, { today:bugun });
+      const yapilmamis = (r.items || []).filter(function(it){
+        return (r.done || []).indexOf(it.drill.id) < 0; })[0];
+      if(yapilmamis){
+        ekle('drill', yapilmamis.drill.label + ' işlensin',
+          'Bugünün reçetesinde duruyor ve gün kaydına henüz yazılmadı.',
+          { key:yapilmamis.drill.id, drillId:yapilmamis.drill.id });
+      }
+
+      /* Açık hedefi olmayan disipline tarihli hedef önerisi. */
+      const hedefVar = ESP.Model.openGoals().some(function(g){ return g.disc === disc; });
+      const lv = ESP.Curriculum.levelOf(disc);
+      if(!hedefVar && lv && lv.next && lv.next.step){
+        ekle('goal', lv.next.step.proof,
+          'Kademenin kapanış işi bu; tarihi olmayan iş ertelenir.',
+          { key:'proof', label:lv.next.step.proof, disc:disc,
+            date:U.iso(U.addDays(U.parse(bugun), 30)) });
+      }
+    }
+
+    /* --- koç ve Patron: bütün disiplinlerin ortak işi --- */
+    if(allowed(agentId, 'weekplan')){
+      const denge = ESP.Planner.balance(7, bugun);
+      if(denge.untouched.length){
+        ekle('weekplan', 'Haftanın kalanına plan kurulsun',
+          denge.untouched.map(function(d){ return d.label; }).join(', ')
+            + ' bu hafta hiç açılmadı.',
+          { key:'week' });
+      }
+      const taban = ESP.Coach.dailyBase();
+      const r7 = ESP.Intellect.hoursOf(null, 7);
+      if(r7.cert !== 'missing' && r7.enteredDays >= 4){
+        const ort = r7.minutes / r7.enteredDays;
+        if(ort < taban * 0.6){
+          ekle('base', 'Günlük taban ' + Math.max(15, Math.round(ort / 5) * 5)
+            + ' dakikaya çekilsin',
+            'Son 7 günün ölçülmüş ortalaması ' + Math.round(ort) + ' dakika; '
+              + 'taban ' + taban + '. Tutulmayan bir taban, reçeteyi okunmaz yapar.',
+            { key:'down', minutes:Math.max(15, Math.round(ort / 5) * 5) });
+        }else if(ort > taban * 1.5){
+          ekle('base', 'Günlük taban ' + Math.round(ort / 5) * 5 + ' dakikaya çıksın',
+            'Son 7 günün ortalaması tabanın bir buçuk katı; reçete olduğundan '
+              + 'küçük yazılıyor.',
+            { key:'up', minutes:Math.round(ort / 5) * 5 });
+        }
+      }
+    }
+
+    /* Daha önce reddedilen teklif yeniden üretilmez: aynı öneriyi her gün
+       tekrar sormak, öneriyi gürültüye çevirir. */
+    const red = (S.proposals || []).filter(function(p){ return p.state === 'declined'; })
+      .map(function(p){ return p.id; });
+    return out.filter(function(p){ return red.indexOf(p.id) < 0; });
+  }
+
+  /* Bütün açık masaların teklifleri. */
+  function all(todayISO){
+    return ESP.Mod.activeAgents().reduce(function(acc, a){
+      return acc.concat(proposalsFor(a.id, todayISO));
+    }, []);
+  }
+
+  function open_(){ return (S.proposals || []).filter(function(p){ return p.state === 'proposed'; }); }
+
+  function record(id){
+    return (S.proposals || []).filter(function(p){ return p.id === id; })[0] || null;
+  }
+
+  /* ------------------------------------------------------------ uygulama
+
+     Uygulamayı KURAL MOTORU yapar. Model hiçbir aşamada veriye dokunmaz;
+     bu fonksiyona bir metin değil TİPLİ bir nesne gelir. */
+  async function accept(prop){
+    const p = typeof prop === 'string' ? (record(prop) || bul(prop)) : prop;
+    if(!p) return { ok:false, error:'Teklif bulunamadı.' };
+    if(!allowed(p.agentId, p.kind)){
+      return { ok:false, error:'Bu masa bu teklifi veremez.' };
+    }
+
+    let uygulanan = null;
+
+    if(p.kind === 'reminder'){
+      const res = await ESP.Model.saveReminder(ESP.Model.newReminder({
+        disc:p.disc, text:p.payload.text, due:p.payload.due,
+        repeat:p.payload.repeat || 'none' }));
+      if(!res.ok) return res;
+      uygulanan = { kind:'reminder', id:res.reminder.id };
+
+    }else if(p.kind === 'goal'){
+      const g = await ESP.Model.saveGoal(ESP.Model.newGoal({
+        label:p.payload.label, disc:p.disc, date:p.payload.date,
+        note:'Kademenin kapanış işi.' }));
+      uygulanan = { kind:'goal', id:g.id };
+
+    }else if(p.kind === 'unit'){
+      const u = ESP.Lesson.unitOf(p.disc, p.payload.unitId);
+      const res = await ESP.Lesson.addUnit(u);
+      if(!res.ok) return res;
+      uygulanan = { kind:'unit', added:res.added, unitId:p.payload.unitId };
+
+    }else if(p.kind === 'drill'){
+      const res = await ESP.Coach.logDrill(p.payload.drillId);
+      if(!res.ok) return res;
+      uygulanan = { kind:'drill', sessionId:res.session.id };
+
+    }else if(p.kind === 'base'){
+      await ESP.Model.saveProfile({ dailyMinutes:p.payload.minutes });
+      uygulanan = { kind:'base', minutes:p.payload.minutes };
+
+    }else if(p.kind === 'focus'){
+      await ESP.Model.saveProfile({ focus:p.payload.focus });
+      uygulanan = { kind:'focus', focus:p.payload.focus };
+
+    }else if(p.kind === 'weekplan'){
+      const plan = weekPlan(p.at);
+      await savePlan(plan);
+      uygulanan = { kind:'weekplan', days:plan.days.length };
+
+    }else{
+      return { ok:false, error:'Bilinmeyen teklif türü.' };
+    }
+
+    await write(Object.assign({}, p, { state:'accepted',
+      decidedAt:new Date().toISOString(), applied:uygulanan }));
+    if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+    return { ok:true, applied:uygulanan };
+  }
+
+  async function decline(prop){
+    const p = typeof prop === 'string' ? (record(prop) || bul(prop)) : prop;
+    if(!p) return { ok:false, error:'Teklif bulunamadı.' };
+    await write(Object.assign({}, p, { state:'declined',
+      decidedAt:new Date().toISOString() }));
+    return { ok:true };
+  }
+
+  function bul(id){
+    return all().filter(function(p){ return p.id === id; })[0] || null;
+  }
+
+  async function write(rec){
+    const i = (S.proposals || []).findIndex(function(x){ return x.id === rec.id; });
+    if(i >= 0) S.proposals[i] = rec; else S.proposals.unshift(rec);
+    await ESP.Store.set('proposals/' + encodeURIComponent(rec.id), rec);
+    return rec;
+  }
+
+  /* --------------------------------------------------------- haftalık plan
+
+     Plan bir TAKVİM DEĞİLDİR: «salı 19:00'da gitar» demek sistemin işi
+     değil. Haftanın kalan günlerine hangi disiplinin düştüğünü söyler ve
+     sırayı `ESP.Planner.weeklyRoute()` verir — burada yeni bir karar
+     üretilmez, var olan sıra güne dağıtılır. */
+  function weekPlan(todayISO){
+    const bugun = todayISO || U.todayISO();
+    const rota = ESP.Planner.weeklyRoute(bugun);
+    const sirali = (rota.rows || []).map(function(r){ return r.disc; });
+    if(!sirali.length) return { from:bugun, days:[], cert:'missing' };
+
+    const kalan = [];
+    const d0 = U.parse(bugun);
+    for(let i = 0; i < 7; i++){
+      kalan.push(U.iso(U.addDays(d0, i)));
+    }
+    return {
+      from:bugun, cert:rota.cert,
+      days:kalan.map(function(g, i){
+        const disc = sirali[i % sirali.length];
+        const r = ESP.Coach.prescribe(disc.id, { today:g });
+        return {
+          date:g, disc:disc.id, label:disc.label, route:disc.route,
+          minutes:r.minutes,
+          items:(r.items || []).map(function(x){
+            return { id:x.drill.id, label:x.drill.label, minutes:x.drill.minutes }; }),
+        };
+      }),
+    };
+  }
+
+  async function savePlan(plan){
+    S.weekPlan = plan;
+    await ESP.Store.set('weekplan', plan);
+    return plan;
+  }
+
+  function plan(){ return S.weekPlan || null; }
+
+  async function clearPlan(){
+    S.weekPlan = null;
+    await ESP.Store.remove('weekplan');
+  }
+
+  /* Planın bugünkü satırı — Bugün ekranı bunu gösterir. */
+  function today(todayISO){
+    const p = plan();
+    if(!p) return null;
+    const g = todayISO || U.todayISO();
+    return (p.days || []).filter(function(x){ return x.date === g; })[0] || null;
+  }
+
+  return { KINDS, KIND_BY_ID, allowed, discOf,
+    proposalsFor, all, open:open_, record, accept, decline,
+    weekPlan, savePlan, plan, clearPlan, today };
 })();
 
 /* ==== js/core/planner.js ==== */
@@ -16142,6 +16526,83 @@ ESP.Parts = (function(){
       </div>`;
   }
 
+  /* ----------------------------------------------------------------- plan
+
+     Koçun sistemi değiştirme YOLU. Ajan doğrudan yazmaz: teklif eder,
+     kullanıcı onaylar, uygulamayı kural motoru yapar. Bir dil modelinin
+     kullanıcının verisine doğrudan yazması, halüsinasyon riskini kalıcı
+     hâle getirirdi — yanlış bir çıkarım bir cümle olarak kalmaz, bir
+     hatırlatıcıya ya da bir hedefe dönüşürdü. */
+  function proposalList(list, bos){
+    if(!list.length) return K.Empty({ text:bos || 'Bekleyen teklif yok.' });
+    return html`<ul class="props">${map(list, p => {
+      const k = ESP.Plans.KIND_BY_ID[p.kind] || {};
+      const a = ESP.AGENT_BY_ID[p.agentId] || {};
+      return html`<li class="prop">
+        <span class="prop__kind">${k.label || p.kind}</span>
+        <span class="prop__body">
+          <b>${p.title}</b>
+          <span class="prop__why">${p.why}</span>
+          <span class="tiny dim">${a.short || a.name || p.agentId} · ${k.note || ''}</span>
+        </span>
+        ${K.Button({ label:'Onayla', tone:'primary', size:'sm', act:'prop-accept',
+          data:{ 'data-id':p.id } })}
+        ${K.Button({ label:'Reddet', size:'sm', act:'prop-decline',
+          data:{ 'data-id':p.id } })}
+      </li>`;
+    })}</ul>`;
+  }
+
+  function deskPlans(discId){
+    const list = ESP.Desk.proposals(discId);
+    const gecmis = (ESP.S.proposals || []).filter(p => p.disc === discId);
+    return html`
+      <div class="deskplan">
+        ${K.Notice({ tone:'info',
+          body:'Koç doğrudan yazmaz: teklif eder, sen onaylarsın, uygulamayı '
+            + 'kural motoru yapar. Reddedilen bir teklif yarın tekrar sorulmaz.' })}
+        ${proposalList(list, 'Bu masada bekleyen teklif yok.')}
+        ${when(gecmis.length, () => html`
+          <div class="mt-10">
+            ${K.SectionTitle('Karar verilenler')}
+            ${K.Table({ tight:true, headers:['Teklif', 'Karar', 'Uygulanan'],
+              rows:gecmis.slice(0, 8).map(p => [
+                p.title,
+                p.state === 'accepted' ? 'onaylandı' : 'reddedildi',
+                p.applied ? (ESP.Plans.KIND_BY_ID[p.applied.kind] || {}).label || p.applied.kind : '—',
+              ]) })}
+          </div>`)}
+      </div>`;
+  }
+
+  /* Haftalık plan — takvim değil SIRA. */
+  function weekPlan(){
+    const p = ESP.Plans.plan();
+    if(!p || !(p.days || []).length){
+      return html`
+        <p class="small muted">Plan bir takvim değildir: «salı 19:00'da gitar»
+          demek sistemin işi değil. Haftanın kalan günlerine hangi disiplinin
+          düştüğünü söyler ve sırayı haftalık rota verir.</p>
+        ${K.Button({ label:'Plan kur', tone:'primary', act:'plan-make', class:'mt-10' })}`;
+    }
+    const bugun = ESP.U.todayISO();
+    return html`
+      <ul class="weekplan">${map(p.days, d => html`
+        <li class="${cls('wpday', d.date === bugun && 'is-today',
+            d.date < bugun && 'is-past')}">
+          <span class="wpday__date num">${d.date}</span>
+          <span class="wpday__disc"><b>${d.label}</b>
+            <span class="tiny dim">${d.minutes} dk · ${(d.items || [])
+              .map(x => x.label).join(', ') || '—'}</span></span>
+          ${K.Button({ label:'Aç', size:'sm', act:'go',
+            data:{ 'data-route':d.route } })}
+        </li>`)}</ul>
+      <div class="row wrap mt-10">
+        ${K.Button({ label:'Planı yenile', act:'plan-make' })}
+        ${K.Button({ label:'Planı kaldır', act:'plan-clear' })}
+      </div>`;
+  }
+
   /* Tezgâhın kendisi — dört sekme tek bir defter satırında. */
   function desk(discId){
     const d = ESP.DISCIPLINE_BY_ID[discId];
@@ -16150,6 +16611,7 @@ ESP.Parts = (function(){
     const t = ESP.Desk.tab(discId);
     const acik = ESP.Desk.isOpen(discId);
     const bekleyen = ESP.Desk.due(discId).length;
+    const teklif = ESP.Desk.proposals(discId).length;
 
     return K.Entry({
       label:'TEZGÂH', hint:'desk',
@@ -16162,11 +16624,13 @@ ESP.Parts = (function(){
         ? html`
           ${K.Subtabs({ value:t, act:'desk-tab', aria:'Tezgâh bölümleri',
             items:ESP.Desk.TABS.map(x => Object.assign({ id:x.id, label:x.label },
-              x.id === 'hatirlatma' && bekleyen ? { count:bekleyen } : {})) })}
+              x.id === 'hatirlatma' && bekleyen ? { count:bekleyen }
+                : (x.id === 'plan' && teklif ? { count:teklif } : {}))) })}
           <div class="desk__body" data-disc="${discId}">
             ${t === 'harita' ? deskMap(discId)
               : t === 'ekler' ? deskAssets(discId)
               : t === 'hatirlatma' ? deskReminders(discId)
+              : t === 'plan' ? deskPlans(discId)
               : deskChat(discId)}
           </div>`
         : html`<p class="small muted">Tezgâh kapalı. ${a.name} ile konuşmak,
@@ -16175,7 +16639,8 @@ ESP.Parts = (function(){
   }
 
   return { cert, measure, avatar, discChip, radar, empty, coach, desk,
-    deskChat, deskMap, deskAssets, deskReminders, units, practice };
+    deskChat, deskMap, deskAssets, deskReminders, deskPlans, units, practice,
+    proposalList, weekPlan };
 
 })();
 
@@ -18856,6 +19321,27 @@ ESP.Screens.today = (function(){
     });
   }
 
+  /* Planın bugünkü satırı. Plan kurulmamışsa hiç çizilmez: kurulmamış bir
+     planın yerine boş bir kutu koymak, kullanıcıya eksik bir şey varmış gibi
+     gösterirdi. */
+  function planRowToday(){
+    const g = ESP.Plans.today(gun());
+    if(!g) return '';
+    return K.Entry({
+      label:'PLANDA BUGÜN', hint:'weekplan',
+      meta:g.label,
+      note:'Haftalık plandan geliyor. Plan bir takvim değil bir sıradır; '
+         + 'saatini sen seçersin.',
+      body:html`
+        <div class="row wrap">
+          ${K.Badge({ label:g.minutes + ' dk', tone:'muted', icon:false })}
+          <span class="small">${(g.items || []).map(x => x.label).join(' · ') || '—'}</span>
+          ${K.Button({ label:'Bölüme git', size:'sm', act:'go',
+            data:{ 'data-route':g.route } })}
+        </div>`,
+    });
+  }
+
   /* Bugüne düşen hatırlatmalar — bütün bölümlerden tek listede.
 
      Hatırlatıcı bir görev değildir ve kaçırılmış olması ceza üretmez.
@@ -18891,7 +19377,8 @@ ESP.Screens.today = (function(){
     const tab = S.ui.dayTab || 'giris';
     const rows = tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [nextCard(), planRow(), reminderRow(), entryForm(), quickForm(), sessionList()]
+      : [nextCard(), planRow(), planRowToday(), reminderRow(), entryForm(),
+          quickForm(), sessionList()]
           .filter(Boolean);
 
     return K.Grid(html`
@@ -22684,6 +23171,25 @@ ESP.Screens.office = (function(){
         }),
 
         K.Entry({
+          label:'TEKLİFLER', hint:'proposal',
+          meta:ESP.Plans.all().length + ' teklif',
+          note:'Ajan doğrudan yazmaz: teklif eder, sen onaylarsın, uygulamayı '
+             + 'kural motoru yapar. Her teklif ajanın KENDİ alanındadır.',
+          wide:true,
+          body:ESP.Parts.proposalList(ESP.Plans.all(),
+            'Bekleyen teklif yok: masaların bulgusu eylem gerektirmiyor.'),
+        }),
+
+        K.Entry({
+          label:'HAFTALIK PLAN', hint:'weekplan',
+          meta:ESP.Plans.plan() ? 'kurulu' : 'yok',
+          note:'Takvim değil sıra: hangi gün hangi disiplinin düştüğünü söyler, '
+             + 'saat vermez.',
+          wide:true,
+          body:ESP.Parts.weekPlan(),
+        }),
+
+        K.Entry({
           label:'ÖNCELİK SIRASI', hint:'precedence',
           meta:ESP.PRECEDENCE.length + ' kural',
           note:'İki uzman ters şey söylediğinde Patron bu sıraya uyar. '
@@ -24917,6 +25423,32 @@ ESP.App = (function(){
 
     async 'prac-close'(){
       S.ui.practice = null; S.ui.practiceShown = false; S.ui.practiceOrder = null;
+      render();
+    },
+
+    /* --- teklif ve plan: tezgâhta, ofiste ve Bugün'de ortak --- */
+    async 'prop-accept'(el){
+      const res = await ESP.Plans.accept(el.dataset.id);
+      if(!res.ok){ UI.toast(res.error); return; }
+      UI.toast('Onaylandı — kural motoru uyguladı');
+      render();
+    },
+
+    async 'prop-decline'(el){
+      const res = await ESP.Plans.decline(el.dataset.id);
+      if(!res.ok){ UI.toast(res.error); return; }
+      UI.toast('Reddedildi — bu teklif tekrar sorulmaz');
+      render();
+    },
+
+    async 'plan-make'(){
+      await ESP.Plans.savePlan(ESP.Plans.weekPlan());
+      UI.toast('Plan kuruldu');
+      render();
+    },
+
+    async 'plan-clear'(){
+      await ESP.Plans.clearPlan();
       render();
     },
 

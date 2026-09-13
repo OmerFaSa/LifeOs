@@ -48,6 +48,9 @@ ESP.S = {
   drafts:[],           // yazi taslaklari
   goals:[],            // zamana bagli hedefler
 
+  proposals:[],        // ajan teklifleri (onaylanan / reddedilen)
+  weekPlan:null,       // onaylanmis haftalik plan
+
   assets:[],           // bolume eklenmis not, belge, bag ve ses olcumu
   reminders:[],        // bolume bagli hatirlaticilar
 
@@ -1110,6 +1113,9 @@ ESP.Model = (function(){
       .map(d => Object.assign(newDraft(), d));
     S.goals = ((await ESP.Store.list('goals')) || []).map(g => Object.assign(newGoal(), g));
     S.decisions = ((await ESP.Store.list('decisions')) || []);
+
+    S.proposals = ((await ESP.Store.list('proposals')) || []);
+    S.weekPlan = (await ESP.Store.get('weekplan')) || null;
 
     S.assets = ((await ESP.Store.list('assets')) || []).map(normAsset)
       .sort((a, b) => (b.at || '') < (a.at || '') ? -1 : 1);

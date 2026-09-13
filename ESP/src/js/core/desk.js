@@ -31,6 +31,7 @@ ESP.Desk = (function(){
     { id:'harita',     label:'Harita' },
     { id:'ekler',      label:'Ekler' },
     { id:'hatirlatma', label:'Hatırlatma' },
+    { id:'plan',       label:'Plan' },
   ];
 
   /* Bir disiplinin masası. Müzik ve diksiyon aynı ekranı paylaşır ama AYRI
@@ -181,7 +182,13 @@ ESP.Desk = (function(){
     return 'Bu merdivenin bütün kapıları geçilmiş görünüyor.';
   }
 
-  return { TABS, agentOf, tab, setTab, isOpen, toggle,
+  /* Bu masanın teklifleri. Teklif bir cümle değil TİPLİ bir nesnedir ve
+     kural motoru üretir (bkz. core/plans.js). */
+  function proposals(discId, todayISO){
+    return ESP.Plans.proposalsFor(agentOf(discId).id, todayISO);
+  }
+
+  return { TABS, proposals, agentOf, tab, setTab, isOpen, toggle,
     messages, ask, lastAnswer, speakLast, talk, talking,
     assets, assetSummary, reminders, due, reminderSummary,
     briefExtras, headline };

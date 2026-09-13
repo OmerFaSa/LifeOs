@@ -120,6 +120,25 @@ ESP.Screens.office = (function(){
         }),
 
         K.Entry({
+          label:'TEKLİFLER', hint:'proposal',
+          meta:ESP.Plans.all().length + ' teklif',
+          note:'Ajan doğrudan yazmaz: teklif eder, sen onaylarsın, uygulamayı '
+             + 'kural motoru yapar. Her teklif ajanın KENDİ alanındadır.',
+          wide:true,
+          body:ESP.Parts.proposalList(ESP.Plans.all(),
+            'Bekleyen teklif yok: masaların bulgusu eylem gerektirmiyor.'),
+        }),
+
+        K.Entry({
+          label:'HAFTALIK PLAN', hint:'weekplan',
+          meta:ESP.Plans.plan() ? 'kurulu' : 'yok',
+          note:'Takvim değil sıra: hangi gün hangi disiplinin düştüğünü söyler, '
+             + 'saat vermez.',
+          wide:true,
+          body:ESP.Parts.weekPlan(),
+        }),
+
+        K.Entry({
           label:'ÖNCELİK SIRASI', hint:'precedence',
           meta:ESP.PRECEDENCE.length + ' kural',
           note:'İki uzman ters şey söylediğinde Patron bu sıraya uyar. '
