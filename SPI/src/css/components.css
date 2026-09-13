@@ -1691,10 +1691,19 @@ button.minrow:hover{ background:var(--surface-2); }
 }
 
 /* Tablo içinde satır açan düğme — görünüşü bağlantı, davranışı düğme. */
+/* Metin gorunumlu dugme.
+
+   Dokunma hedefi 24 pikselin altina DUSMEMELI: telefonda 19 piksellik bir
+   satir, parmakla isabet edilemeyen bir dugmedir ve kullanici "calismiyor"
+   sanir. Gorsel yukseklik degismesin diye buyume dikey PADDING ile degil
+   `min-height` ve hizalamayla yapilir; boylece satir araligi bozulmaz.
+   (Bu kusuru tools/layoutcheck.js buldu.) */
 .linkbtn{
   background:none; border:0; padding:0; font:inherit; color:var(--primary);
   cursor:pointer; text-align:left; text-decoration:underline;
   text-underline-offset:2px;
+  display:inline-flex; align-items:center;
+  min-height:24px; min-width:24px;
 }
 .linkbtn:hover{ color:var(--primary-hover); }
 

@@ -1,0 +1,188 @@
+#!/usr/bin/env node
+/* Telefon düzeni denetimi — 390 pikselde yatay taşma ve küçük dokunma hedefi.
+ *
+ * Veri girişinin çoğu telefonda yapılıyor. Yatay kaydırma telefonda bir
+ * hata değil bir ENGELDİR: sayfa sağa kayınca sol kenardaki künye sütunu
+ * ekrandan çıkar ve kullanıcı ne okuduğunu kaybeder. Masaüstünde hiç
+ * görünmez — bu yüzden ayrı bir denetim.
+ *
+ * İki şey ölçülür:
+ *
+ *   TAŞMA          belgenin kaydırma genişliği pencereden büyük mü?
+ *                  Hangi öğenin taştığı da yazılır; "bir yerde taşma var"
+ *                  demek, olmayan bir hatayı aramaya göndermektir.
+ *   DOKUNMA HEDEFI 24 pikselden küçük tıklanabilir öğe. (WCAG 2.2 AA asgari
+ *                  24×24; 44 önerilir ama bu depodaki yoğun defter düzeninde
+ *                  gerçekçi taban 24'tür ve öyle ölçülür.)
+ *
+ *   node tools/layoutcheck.js [port]
+ */
+
+const { spawn } = require('child_process');
+const path = require('path');
+
+const PORT = Number(process.argv[2]) || 4188;
+const ROOT = path.resolve(__dirname, '..');
+const WIDTH = 390, HEIGHT = 780;
+const MIN_TAP = 24;
+
+/* Bilerek kucuk birakilan hedefler: ipucu dugmesi bir metnin icinde durur
+   ve buyutmek satiri bozar. Liste KISA kalmali; uzadigi an denetim isini
+   yapmiyor demektir. */
+const TAP_ALLOW = ['.hint'];
+
+let chromium;
+try{ ({ chromium } = require('playwright')); }
+catch(e){ console.error('Playwright kurulu değil: npm i -D playwright'); process.exit(0); }
+
+function waitForServer(url, tries){
+  return new Promise((resolve, reject) => {
+    let n = tries || 40;
+    const dene = () => {
+      fetch(url).then(() => resolve()).catch(() => {
+        if(n-- <= 0) return reject(new Error('sunucu açılmadı: ' + url));
+        setTimeout(dene, 250);
+      });
+    };
+    dene();
+  });
+}
+
+(async () => {
+  const server = spawn('python3', [path.join(ROOT, 'devserver.py'), String(PORT)],
+    { cwd:ROOT, stdio:'ignore' });
+  let browser;
+  const errors = [];
+  try{
+    await waitForServer('http://127.0.0.1:' + PORT + '/index.html');
+    browser = await chromium.launch(process.env.CHROMIUM_PATH
+      ? { executablePath:process.env.CHROMIUM_PATH } : {});
+    const page = await browser.newPage({ viewport:{ width:WIDTH, height:HEIGHT } });
+    await page.goto('http://127.0.0.1:' + PORT + '/index.html', { waitUntil:'load' });
+    await page.waitForSelector('.site', { timeout:15000 });
+    /* Sihirbaz gecikmeyle aciliyor ve acikken bütün tiklamalari yutuyor:
+       once beklenir, sonra kapatilir. */
+    await page.waitForTimeout(600);
+    for(let i = 0; i < 3; i++){
+      const skip = await page.$('[data-act="setup-skip"]');
+      if(!skip) break;
+      await skip.click({ force:true }).catch(() => {});
+      await page.waitForTimeout(300);
+    }
+
+    /* Bos ekran tasmaz; tasma VERIYLE gelir. */
+    await page.evaluate(() => {
+      const U = SP.U;
+      for(let i = 0; i < 10; i++){
+        SP.S.labs.push({ id:'l' + i, date:U.iso(U.addDays(U.today(), -i * 20)),
+          lab:'Cok uzun bir laboratuvar adi olabilir ' + i,
+          values:{ hgb:{ v:14 - i * 0.1, cert:'measured' },
+            ferritin:{ v:60 + i, cert:'measured' },
+            glucose:{ v:92, cert:'measured' } } });
+      }
+      for(let i = 0; i < 14; i++){
+        const d = U.iso(U.addDays(U.today(), -i));
+        SP.S.vitals[d] = { sleep:7, hrv:60, rhr:58, soreness:3, weight:78 };
+        SP.S.workouts.push({ id:'w' + i, date:d, name:'Uzun antrenman adi ' + i,
+          kind:'strength', items:[], minutes:45, rpe:6, note:'',
+          createdAt:new Date().toISOString() });
+      }
+      SP.S.meds.push({ id:'m1', kindId:'demir',
+        name:'Cok uzun bir ilac adi yazildiginda satir tasabilir',
+        dose:'1x1', startDate:U.todayISO(), endDate:null, note:'' });
+    }).catch(() => {});
+
+    const routes = await page.evaluate(() =>
+      SP.App.SECTIONS.reduce((a, s) => a.concat(s.views.map(v => v.route)), []));
+
+    const rows = [];
+    for(const r of routes){
+      await page.evaluate(id => SP.App.go(id), r);
+      await page.waitForTimeout(160);
+
+      /* Sekmeleri de gez: tasma cogu zaman ikinci sekmede. */
+      const tabs = await page.$$eval('.subtabs .subtab',
+        els => els.map(e => e.getAttribute('data-tab')).filter(Boolean));
+      const yerler = [null].concat(tabs);
+
+      for(const t of yerler){
+        if(t){
+          const btn = await page.$('.subtabs .subtab[data-tab="' + t + '"]');
+          if(!btn) continue;
+          await btn.click();
+          await page.waitForTimeout(120);
+        }
+        const sonuc = await page.evaluate(({ minTap, allow }) => {
+          const doc = document.documentElement;
+          const tasma = doc.scrollWidth - window.innerWidth;
+          const sucluler = [];
+          if(tasma > 1){
+            document.querySelectorAll('#main *').forEach(el => {
+              const r = el.getBoundingClientRect();
+              if(r.width > window.innerWidth + 1 || r.right > window.innerWidth + 1){
+                /* Kendi icinde kaydirilan kap (tablo sarmalayici) tasma
+                   sayilmaz: orada yatay kaydirma KASITLIDIR. */
+                let p = el, kasitli = false;
+                while(p && p !== document.body){
+                  const st = getComputedStyle(p);
+                  if(st.overflowX === 'auto' || st.overflowX === 'scroll'){ kasitli = true; break; }
+                  p = p.parentElement;
+                }
+                if(!kasitli){
+                  const ad = el.tagName.toLowerCase()
+                    + (el.className ? '.' + String(el.className).split(' ').filter(Boolean).slice(0, 2).join('.') : '');
+                  if(sucluler.indexOf(ad) < 0) sucluler.push(ad);
+                }
+              }
+            });
+          }
+          const kucuk = [];
+          document.querySelectorAll('#main [data-act], #main button, #main a[href]')
+            .forEach(el => {
+              if(allow.some(sel => el.matches(sel))) return;
+              /* Onay kutusu ETIKETIN icinde durur ve etikete dokunmak kutuyu
+                 isaretler: kullanicinin dokundugu hedef kutu degil etikettir.
+                 Olculmesi gereken de odur — kutunun kendi 18 pikselini
+                 "kucuk hedef" saymak, olmayan bir hatayi raporlamak olurdu. */
+              const etiket = el.closest('label');
+              if(etiket && etiket.contains(el)) el = etiket;
+              const r = el.getBoundingClientRect();
+              if(r.width === 0 && r.height === 0) return;
+              if(r.width < minTap || r.height < minTap){
+                const ad = (el.getAttribute('data-act') || el.tagName.toLowerCase())
+                  + ' ' + Math.round(r.width) + '×' + Math.round(r.height);
+                if(kucuk.indexOf(ad) < 0) kucuk.push(ad);
+              }
+            });
+          return { tasma, sucluler:sucluler.slice(0, 4), kucuk:kucuk.slice(0, 4) };
+        }, { minTap:MIN_TAP, allow:TAP_ALLOW });
+
+        const yer = r + (t ? '/' + t : '');
+        rows.push({ yer, tasma:sonuc.tasma });
+        if(sonuc.tasma > 1){
+          errors.push(yer + ': yatay taşma ' + sonuc.tasma + 'px'
+            + (sonuc.sucluler.length ? ' — ' + sonuc.sucluler.join(', ') : ''));
+        }
+        sonuc.kucuk.forEach(k => errors.push(yer + ': küçük dokunma hedefi — ' + k));
+      }
+    }
+
+    console.log('\nTelefon düzeni — ' + WIDTH + '×' + HEIGHT + ', '
+      + rows.length + ' yer gezildi, dokunma tabanı ' + MIN_TAP + 'px.');
+    if(errors.length){
+      console.log('\n' + errors.length + ' sorun:');
+      errors.slice(0, 30).forEach(e => console.log('  ✕ ' + e));
+      if(errors.length > 30) console.log('  … ve ' + (errors.length - 30) + ' tane daha');
+      process.exitCode = 1;
+    }else{
+      console.log('\nTelefon düzeni temiz: taşma yok, bütün hedefler '
+        + MIN_TAP + 'px ve üstü.');
+    }
+  }catch(err){
+    console.error('Koşum hatası:', err.message);
+    process.exitCode = 1;
+  }finally{
+    if(browser) await browser.close();
+    server.kill();
+  }
+})();

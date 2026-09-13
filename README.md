@@ -53,16 +53,21 @@ python build.py              # tek dosyalık dağıtım üretir
 node tools/runtests.js       # birim testleri
 ```
 
-SPİ ve ESP ayrıca gerçek uygulamayı gezen denetimler taşır:
+Üç sistemin **üçü de** gerçek uygulamayı açıp gezen denetimler taşır. Bir
+denetim bir sistemde bir hata bulduysa, aynı denetim ötekilere de taşınır:
 
 ```bash
-node tools/a11ycheck.js      # erişilebilirlik — çizilen sayfadan          # ekranları ve sekmeleri gezer, akışları dener
+node tools/smoke.js          # ekranları ve sekmeleri gezer, akışları dener
 node tools/a11ycheck.js      # erişilebilirlik — çizilen sayfadan
 node tools/palettecheck.js   # bütün paletlerde kontrastı ölçer
-node tools/perfcheck.js      # ağır veriyle çizim maliyeti (yalnız ESP)
-node tools/layoutcheck.js    # 390 pikselde taşma ve dokunma hedefi (yalnız ESP)
+node tools/layoutcheck.js    # 390 pikselde taşma ve 24px dokunma hedefi
+node tools/perfcheck.js      # DOKUZ AYLIK veriyle çizim maliyeti
 node tools/ledgercheck.js    # defter düzenini denetler (yalnız SPİ)
 ```
+
+`perfcheck` özellikle dokuz aylık ufka göre kurulur: 270 gün kaydı, yüzlerce
+deneme/tahlil/kart. Boş bir ekran hızlı çizilir; asıl soru dokuz ayın sonunda
+ekranların hâlâ açılıp açılmadığıdır.
 
 Bir denetim geçtiğinde de **sayı gösterir**: hiçbir şey ölçmeyen bir betik de
 «geçti» yazar. ESP'nin son koşumu: 521 birim testi, 14 ekran ve 85 sekmelik
