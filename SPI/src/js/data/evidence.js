@@ -8,66 +8,166 @@
    kural yapar, cikti denetlenir. Ama kuralin KENDISI nereden geliyordu?
    Bir esik kodda ne kadar kesin yazilirsa yazilsin, esigin kendisi yanlis
    secilmisse sistem son derece guvenilir gorunen yanlis bir sonuc uretir.
-   Kesinlik gorunumu, kesinligin yerine gecer.
 
-   Cozum su: HER ESIK KENDI KAYNAGINI TASIR ve kaynaginin derecesi, o
-   esigin ne kadar guclu konusabilecegini BELIRLER.
+   ---------------------------------------------------------------------
+   IKINCI TUR: DORT EKSEN
 
-   Dort derece vardir ve aralarindaki fark suslu degil, islevseldir:
+   Ilk surumde tek bir siralama vardi: kilavuz > uzlasi > gozlemsel >
+   secim. Gelen elestiri hakliydi ve su kategori hatasini gosterdi:
 
-     guideline     Adi konmus bir klinik kilavuzun karar esigi. Yonlendirme
-                   yapabilir ("hekime basvur" diyebilir).
-     consensus     Laboratuvar ve klinik pratikte yaygin uzlasi; tek bir
-                   kilavuza baglanmamis. Yonlendirme yapabilir.
-     observational Gozlemsel calismalardan gelen BIR ILISKI. Karar esigi
-                   degildir. Yalnizca gozlem bildirir, yonlendirmez.
-     convention    Bu sistemin pratik sebeplerle SECTIGI sayi. Bilimsel bir
-                   bulgu degildir ve oyle sunulmaz. Yalnizca soru sorar.
+     "kilavuz"    bir BELGE / karar urunu
+     "uzlasi"     bir epistemik URETIM SURECI
+     "gozlemsel"  bir ARASTIRMA TASARIMI
+     "secim"      sistemin kendi AYAR TERCIHI
 
-   Kural: `observational` ve `convention` dereceli bir esik, DIREKTIF
-   uretemez. Kaynagi hic yazilmamis bir esik de uretemez — bilinmeyen
-   kaynak, iyi kaynak degildir. Bu kural core/evidence.js'te uygulanir ve
-   tests/evidence.test.js'te denetlenir.
+   Bunlar ayni turden nesneler degil; tek bir dikey eksene dizilince
+   kategorik olarak farkli seyler karsilastirilmis oluyor. Ustelik kati
+   kanit merdivenleri baglamdan kopuk okundugunda yanilticidir: iyi
+   tasarlanmis bir gozlemsel calisma, dar kapsamli bir kilavuz ifadesinden
+   daha bilgilendirici olabilir.
+
+   GRADE yaklasiminin temel ayrimi burada yol gosterici: KANITIN KESINLIGI
+   ile ONERININ GUCU ayri seylerdir. Bu yuzden tek eksen dorde bolundu:
+
+     source        Bu sayi NEREDEN geliyor? (siralama YOK, sadece tur)
+     certainty     Elimizdekine NE KADAR guveniyoruz? (high…unknown)
+     applicability Bu esik BU kullaniciya ne kadar uyuyor? (direct…local)
+     authority     SPI bu kaynaga dayanarak NE YAPABILIR?
+
+   Dorduncusu digerlerinden farklidir ve bu fark bilerek korunur:
+   ilk ucu EPISTEMIK iddialardir, dorduncusu bir TASARIM POLITIKASIDIR.
+   "Bu dogrudur" ile "sistemimiz yalnizca su kosulda bunu eyleme cevirir"
+   ayni turden cumleler degildir. Sonsuz gerilemeyi kesen sey de budur:
+   yetki politikasinin kendisi bir kanit derecesi tasimaz, cunku bir
+   bulgu degil bir karardir. O karar yonetisimle denetlenir — yazili,
+   surumlu, gerekceli ve degistirilebilir (bkz. SP.EVIDENCE_POLICY).
 
    Kaynak yazarken uydurma YOKTUR. Emin olunmayan her esik acikca
-   'convention' derecesine yazilir; uydurulmus bir atif, atifsiz bir
+   'system_tuning' kaynagina yazilir; uydurulmus bir atif, atifsiz bir
    esikten kotudur. Bu dosyadaki bosluklar da bir olcumdur:
    SP.Ev.coverage() kac esigin kaynak tasidigini sayar. */
 
 window.SP = window.SP || {};
 
-SP.EVIDENCE_GRADES = [
-  { id:'guideline', rank:4, label:'Kılavuz', tone:'ok',
-    mayDirect:true,
+/* ------------------------------------------------------------- eksen 1
+   KAYNAK TURU — siralanmaz, yalnizca tanimlar.
+
+   Burada bilerek bir "ustunluk" sirasi yoktur: kohort calismasi RCT'den
+   kotu, kilavuz uzlasidan iyi DEGILDIR. Bunlar farkli turden seylerdir.
+   Siralama yalnizca yetki politikasinda (eksen 4) yapilir ve orasi bir
+   bilimsel iddia degil, bu yazilimin tercihidir. */
+SP.EVIDENCE_SOURCES = [
+  { id:'guideline',    label:'Kılavuz',
     note:'Adı konmuş bir klinik kılavuzun karar eşiği.' },
-  { id:'consensus', rank:3, label:'Uzlaşı', tone:'ok',
-    mayDirect:true,
+  { id:'consensus',    label:'Uzlaşı',
     note:'Laboratuvar ve klinik pratikte yaygın uzlaşı; tek kılavuza bağlı değil.' },
-  { id:'observational', rank:2, label:'Gözlemsel', tone:'info',
-    mayDirect:false,
-    note:'Gözlemsel çalışmalardan gelen bir ilişki. Karar eşiği değildir.' },
-  { id:'convention', rank:1, label:'Seçim', tone:'warn',
-    mayDirect:false,
-    note:'Bu sistemin pratik sebeplerle seçtiği sayı. Bilimsel bir bulgu değildir.' },
+  { id:'observational',label:'Gözlemsel',
+    note:'Gözlemsel çalışmalardan gelen bir ilişki. Karar eşiği olarak tasarlanmamış.' },
+  { id:'system_tuning',label:'Sistem ayarı',
+    note:'Bu yazılımın pratik sebeplerle seçtiği sayı. Bilimsel bir bulgu değildir.' },
 ];
+
+/* ------------------------------------------------------------- eksen 2
+   KESINLIK — elimizdekine ne kadar guveniyoruz.
+
+   Kaynak turunden AYRIDIR: iyi bir gozlemsel calisma 'moderate',
+   tartismali bir kilavuz ifadesi 'low' olabilir. */
+SP.EVIDENCE_CERTAINTY = [
+  { id:'high',     label:'Yüksek',  note:'Kaynaklar birleşiyor, eşik istikrarlı.' },
+  { id:'moderate', label:'Orta',    note:'Genel kabul var ama ayrıntıda ayrışma olabilir.' },
+  { id:'low',      label:'Düşük',   note:'Kaynaklar ayrışıyor ya da kanıt dolaylı.' },
+  { id:'unknown',  label:'Bilinmiyor', note:'Kesinlik değerlendirilmemiş.' },
+];
+
+/* ------------------------------------------------------------- eksen 3
+   UYGULANABILIRLIK — esik BU kullaniciya ne kadar uyuyor.
+
+   En sik gozden kacan eksen budur: yetiskin erkekte gecerli bir sinir,
+   sporcuda, gebelikte ya da baska bir etnik kokende ayni sey demek
+   degildir. */
+SP.EVIDENCE_APPLICABILITY = [
+  { id:'direct',   label:'Doğrudan',
+    note:'Eşiğin tanımlandığı popülasyon kullanıcıyla örtüşüyor.' },
+  { id:'indirect', label:'Dolaylı',
+    note:'Popülasyon kısmen örtüşüyor; eşik kayabilir.' },
+  { id:'local',    label:'Yerel',
+    note:'Eşik kişiye/cihaza özel; başkasıyla karşılaştırılamaz.' },
+];
+
+/* ------------------------------------------------------------- eksen 4
+   YETKI — SPI bu kaynaga dayanarak NE YAPABILIR.
+
+   BU BIR EVRENSEL KANIT HIYERARSISI DEGILDIR. Bu, SPI'nin operasyonel
+   yetki politikasidir: hangi kaynak turune eyleme donuk ne kadar soz
+   hakki tanindigini soyler. Sorumlulugu bilim degil bu yazilim tasir. */
+SP.EVIDENCE_AUTHORITY = [
+  { id:'steer',         label:'Yönlendirebilir', tone:'ok',  mayDirect:true, cap:null,
+    note:'Hekime yönlendirme ve davranış önerisi üretebilir.' },
+  { id:'limited_steer', label:'Sınırlı yönlendirir', tone:'ok', mayDirect:true, cap:0.35,
+    note:'Öneri üretebilir ama etkisi sınırlıdır.' },
+  { id:'inform',        label:'Bilgilendirir', tone:'info', mayDirect:false, cap:0.20,
+    note:'Gözlem bildirir; eyleme dönük yönlendirme üretmez.' },
+  { id:'observe_only',  label:'Yalnız izler', tone:'warn', mayDirect:false, cap:0.20,
+    note:'Yalnızca izlenir; hiçbir karar bu eşiğe dayandırılmaz.' },
+];
+
+/* Kaynak turunun VARSAYILAN yetkisi. Kayit basina acikca ezilebilir.
+
+   Bu tablo politikadir, bulgu degildir — surumu ve gerekcesi asagida. */
+SP.EVIDENCE_POLICY = {
+  version:2,
+  changedAt:'2026-09-13',
+  title:'SPİ operasyonel yetki politikası',
+  disclaimer:'Bu tablo evrensel bir kanıt hiyerarşisi DEĞİLDİR. '
+    + 'SPİ\'nin hangi kaynak türüne eyleme dönük ne kadar söz hakkı '
+    + 'tanıdığını söyler. Bilimsel bir iddia değil, bir yazılım kararıdır; '
+    + 'sorumluluğu bu yazılıma aittir.',
+  rationale:'Klinik sınır (SP.CLINICAL) sistemin en sert cümlesinin '
+    + '«hekime başvur» olmasını gerektirir. Bu cümlenin en zayıf dayanaktan '
+    + 'çıkmaması için kaynak türüne göre bir yetki tavanı konur. Gözlemsel '
+    + 'göstergeler ve sistemin kendi ayarları yönlendirme üretemez; çünkü '
+    + 'ikisi de karar eşiği olarak tasarlanmamıştır.',
+  history:[
+    { version:1, at:'2026-09-13',
+      note:'Tek eksenli derece: kılavuz > uzlaşı > gözlemsel > seçim.' },
+    { version:2, at:'2026-09-13',
+      note:'Dört eksene bölündü (kaynak / kesinlik / uygulanabilirlik / yetki). '
+         + 'Sebep: tek eksen kategorik olarak farklı nesneleri — bir belge, '
+         + 'bir üretim süreci, bir araştırma tasarımı ve bir ayar tercihini — '
+         + 'aynı ölçeğe diziyordu. Kanıtın kesinliği ile önerinin gücü ayrıldı.' },
+  ],
+  defaults:{
+    guideline:'steer',
+    consensus:'limited_steer',
+    observational:'inform',
+    system_tuning:'observe_only',
+  },
+};
+
+/* Eski tek eksenli derecenin yeni eksenlere karsiligi. Veri dosyasindaki
+   `grade` alanlari boylece kirilmadan tasinir. */
+SP.EVIDENCE_LEGACY = {
+  guideline:    { source:'guideline',     certainty:'high' },
+  consensus:    { source:'consensus',     certainty:'moderate' },
+  observational:{ source:'observational', certainty:'low' },
+  convention:   { source:'system_tuning', certainty:'unknown' },
+};
+
+SP.SOURCE_BY_ID = SP.EVIDENCE_SOURCES.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+SP.CERTAINTY_BY_ID = SP.EVIDENCE_CERTAINTY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+SP.APPLICABILITY_BY_ID = SP.EVIDENCE_APPLICABILITY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+SP.AUTHORITY_BY_ID = SP.EVIDENCE_AUTHORITY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+
+/* Geriye donuk uyum: eski ad hala okunabilir olsun diye korunur ama
+   artik bir SIRALAMA degil, yetki politikasinin gorunumudur. */
+SP.EVIDENCE_GRADES = SP.EVIDENCE_SOURCES.map(function(src){
+  const yetki = SP.AUTHORITY_BY_ID[SP.EVIDENCE_POLICY.defaults[src.id]];
+  return { id:src.id, label:src.label, tone:yetki.tone,
+    mayDirect:yetki.mayDirect, authority:yetki.id, note:src.note };
+});
 
 SP.GRADE_BY_ID = SP.EVIDENCE_GRADES.reduce(function(m, g){ m[g.id] = g; return m; }, {});
 
-/* Kayitlar.
-
-   `marker` biyobelirtec kimligi, `field` hangi esigi anlattigi:
-     'red'      kirmizi bayrak esigi
-     'ref'      laboratuvar referans araligi
-     'optimal'  hedef bant
-
-   `source` kaynagin ADIDIR; bir baglanti degil. Baglanti verilirse
-   cürür, ad kalir. `year` kaynagin yili ya da surumudur; bos olabilir
-   ama bos birakilirsa derece kendiliginden dusmez — kaynagin adi yeterse
-   yeter, guncelligini kullanici tartar.
-
-   `population` esigin KIME ait oldugunu soyler. Bir esigin en sik
-   gozden kacan yani budur: yetiskin erkekte gecerli bir sinir, sporcuda
-   ya da gebelikte ayni sey demek degildir. */
 SP.EVIDENCE = [
 
   /* ----------------------------------------------------------- vital */
@@ -305,9 +405,9 @@ SP.EVIDENCE = [
        + 'yanıltıcıdır.' },
 
   /* ------------------------------------------------------ vücut ölçüsü */
-  { marker:'waist', field:'ref', grade:'guideline',
+  { marker:'waist', field:'ref', grade:'guideline', applicability:'indirect',
     source:'Bel çevresi risk eşikleri (DSÖ; erkek ≥94/102, kadın ≥80/88 cm)',
-    population:'Avrupa kökenli erişkin',
+    population:'Avrupa kökenli erişkin — etnik kökene göre DEĞİŞİR',
     note:'Eşikler ETNİK KÖKENE göre değişir: Güney Asya kökenli kişilerde '
        + 'daha düşük sınırlar kullanılır.' },
   { marker:'bodyfat', field:'ref', grade:'convention',

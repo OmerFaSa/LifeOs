@@ -133,15 +133,26 @@ ESP.Curriculum = (function(){
     /* -------- diksiyon */
     'diction.recordings':function(){ return count(S.recordings); },
     'diction.minutes30': function(){ return minutes('diction', 30); },
+    /* DIKKAT — bu iki olcu KAYIT OZETINDEN okunur, tek kayittan degil.
+
+       Onceki surumde `ESP.Acoustic.wpmOf()` ve `errorRateOf()` ARGUMANSIZ
+       cagriliyordu; ikisi de tek bir kayit bekler ve bos nesneyle her
+       zaman 'missing' doner. Sonuc: bes merdiven kapisi (WPM >= 120,
+       WPM >= 140, hata orani <= %8 / %5 / %3) kalici olarak
+       "olculemedi" durumunda kaliyordu ve hicbir test bunu gormuyordu,
+       cunku testler tek tek fonksiyonlari deniyordu, kapilari degil.
+
+       Dogrusu son 30 gunun MEDYANIDIR: tek bir iyi kayit kapiyi acmaz,
+       tek bir kotu kayit da kapatmaz. */
     'diction.wpm':       function(){
-      const w = ESP.Acoustic.wpmOf ? ESP.Acoustic.wpmOf() : null;
-      if(!w || w.value == null) return MISSING;
-      return m(w.value, w.cert || 'derived');
+      const d = ESP.Acoustic.dictionStatus(30);
+      if(!d || d.cert === 'missing' || !d.wpm || d.wpm.value == null) return MISSING;
+      return m(d.wpm.value, d.wpm.cert || 'derived');
     },
     'diction.errorRate': function(){
-      const e = ESP.Acoustic.errorRateOf ? ESP.Acoustic.errorRateOf() : null;
-      if(!e || e.value == null) return MISSING;
-      return m(e.value, e.cert || 'estimated');
+      const d = ESP.Acoustic.dictionStatus(30);
+      if(!d || d.cert === 'missing' || !d.errorRate || d.errorRate.value == null) return MISSING;
+      return m(d.errorRate.value, d.errorRate.cert || 'estimated');
     },
 
     /* -------- okuma */
@@ -257,6 +268,56 @@ ESP.Curriculum = (function(){
     return { value:r.value, cert:r.cert, metric:name };
   }
 
+
+  /* -------------------------------------------------- BEYANA DAYALI ÖLÇÜM
+
+     Dışarıdan gelen bir eleştiri şunu söyledi: düşük güvenli bir ölçüm
+     kademe ilerlemesine tam olarak katkıda bulunmamalı; yoksa ölçüm
+     kalitesi beceriymiş gibi davranır.
+
+     Eleştirinin gerekçesi (tarayıcı mikrofonunun sinyal/gürültü oranı)
+     bu sistemde geçerli DEĞİL: ESP hiçbir yerde mikrofonu dinlemez,
+     ses analizi yapmaz. Ama kuralın KENDİSİ burada bire bir geçerli,
+     çünkü aynı boşluk başka bir sebeple var:
+
+       Bazı ölçümler kullanıcının KENDİ YARGISINDAN gelir.
+
+     "Bu tekrar temiz miydi?" ve "bu hece hatalı mıydı?" sorularının
+     cevabını sistem bilmiyor; kullanıcı söylüyor. Bu bir ölçümdür ve
+     değerlidir — ama sayaçtan okunan bir dakikayla aynı şey değildir.
+     Kendi kendini değerlendiren bir ölçü, gevşemeye açıktır ve bu
+     gevşeme tam da kademe yükselirken işe yarar hâle gelir.
+
+     Kural: beyana dayalı bir ölçümle geçilen kapı GEÇİLMİŞ SAYILIR ama
+     ZAYIF işaretlenir; o basamağın kesinliği 'measured' olamaz. Kademe
+     durur, ama yanında nasıl ölçüldüğü yazar.
+
+     İkinci kural — «asgari sinyal, üstüne ödül yok»: beyana dayalı bir
+     kapı, o disiplinde en az ASGARI_BEYAN kayıt yoksa hiç değerlendirilmez
+     ('unknown' döner). Eşiğin üstünde daha çok kayıt daha hızlı ilerleme
+     GETİRMEZ; yalnızca ölçümün gürültüsünü düşürür. */
+  const SELF_REPORTED = {
+    'diction.errorRate':'Hataları sen işaretledin; sistem sesini dinlemedi.',
+    'music.cleanBpm':'«Temiz» kararını sen verdin; sistem çalışını dinlemedi.',
+    'music.noPlateau':'Temiz eşik beyanından türetildi.',
+  };
+
+  const ASGARI_BEYAN = 5;
+
+  function selfReported(metric){ return !!SELF_REPORTED[metric]; }
+
+  /* Beyana dayalı ölçümün arkasındaki kayıt sayısı. Eşiğin ALTINDA
+     kapı değerlendirilmez; üstünde fark yaratmaz. */
+  function declaredCount(metric){
+    if(metric === 'diction.errorRate') return (S.recordings || []).length;
+    if(metric === 'music.cleanBpm' || metric === 'music.noPlateau'){
+      return (S.pieces || []).reduce(function(a, p){
+        return a + (p.attempts || []).length;
+      }, 0);
+    }
+    return null;
+  }
+
   /* --------------------------------------------------------------- kapilar */
 
   /* Bir kapinin durumu: 'pass' | 'fail' | 'unknown'.
@@ -267,10 +328,26 @@ ESP.Curriculum = (function(){
       return { gate:gate, status:'unknown', value:null, cert:'missing',
         label:gate.label, why:'Bu kapı için henüz ölçüm yok.' };
     }
+
+    /* Asgari sinyal: beyana dayalı bir kapı, arkasında yeterli kayıt
+       yoksa hiç değerlendirilmez. Üç kayıttan çıkan bir hata oranı bir
+       ölçü değil bir izlenimdir. */
+    const beyan = selfReported(gate.metric);
+    if(beyan){
+      const n = declaredCount(gate.metric);
+      if(n != null && n < ASGARI_BEYAN){
+        return { gate:gate, status:'unknown', value:o.value, cert:'estimated',
+          weak:true, declared:n, label:gate.label,
+          why:'Bu kapı senin işaretlemelerine dayanıyor ve arkasında yalnızca '
+            + n + ' kayıt var; değerlendirme için ' + ASGARI_BEYAN + ' gerekir.' };
+      }
+    }
+
     let gecti = true;
     if(gate.min != null && o.value < gate.min) gecti = false;
     if(gate.max != null && o.value > gate.max) gecti = false;
     return { gate:gate, status:gecti ? 'pass' : 'fail', value:o.value, cert:o.cert,
+      weak:beyan, declaredWhy:beyan ? SELF_REPORTED[gate.metric] : null,
       label:gate.label,
       why:gecti ? null : (gate.max != null
         ? 'Ölçülen ' + fmt(o.value) + ', üst sınır ' + fmt(gate.max) + '.'
@@ -298,10 +375,16 @@ ESP.Curriculum = (function(){
     const kapilar = step.gates.map(gateStatus);
     const gecen = kapilar.filter(function(g){ return g.status === 'pass'; }).length;
     const bilinmeyen = kapilar.filter(function(g){ return g.status === 'unknown'; }).length;
+    /* Bu basamak BEYANA dayali bir kapiyla mi gecildi? Gecildiyse
+       kademe durur ama kesinligi 'measured' olamaz. */
+    const zayif = kapilar.filter(function(g){
+      return g.status === 'pass' && g.weak;
+    });
     return {
       rank:rank, step:step, gates:kapilar,
       passed:gecen, total:kapilar.length, unknown:bilinmeyen,
       complete:gecen === kapilar.length,
+      weak:zayif.length > 0, weakGates:zayif,
       /* Yuzde ilerleme: bilinmeyen kapi ilerleme SAYILMAZ. */
       pct:kapilar.length ? Math.round(100 * gecen / kapilar.length) : 0,
     };
@@ -344,10 +427,24 @@ ESP.Curriculum = (function(){
          unknown   'tahmin'    — bir ust basamakta olculemeyen kapi var;
                    kademe dogru olabilir ama kanitlanmis degil.
          digeri    'hesaplandi' */
+    /* Kademeye BEYANA dayali bir kapiyla ulasildiysa kesinlik 'derived'
+       olamaz: kullanicinin kendi yargisiyla acilan bir kapi, sayactan
+       okunan bir dakikayla ayni kanit degildir. Kademe durur — yaninda
+       nasil olculdugu yazar. */
+    const zayifBasamak = basamaklar.some(function(b){
+      return b.rank <= rank && b.weak;
+    });
     const cert = rank === 0 ? 'missing'
-      : (engel && engel.unknown ? 'estimated' : 'derived');
+      : (engel && engel.unknown) ? 'estimated'
+      : zayifBasamak ? 'estimated' : 'derived';
     return {
       disc:discId, rank:rank, level:seviye, cert:cert,
+      declared:zayifBasamak,
+      declaredWhy:zayifBasamak
+        ? 'Bu kademedeki kapılardan en az biri senin kendi işaretlemenle '
+          + 'geçildi (temiz tekrar ya da hata sayısı). Kademe durur ama '
+          + '«ölçüldü» değil «beyan edildi» sayılır.'
+        : null,
       next:engel, steps:basamaklar, ladder:l,
       /* Merdivenin tamaminda nerede duruyor (0-100). */
       mastery:masteryPct(basamaklar),
@@ -495,5 +592,6 @@ ESP.Curriculum = (function(){
     levelOf, all, overall, masteryPct,
     nextGate, roadmap, placement, sentence,
     ladder, traditionsRead,
+    selfReported, declaredCount, ASGARI_BEYAN,
   };
 })();

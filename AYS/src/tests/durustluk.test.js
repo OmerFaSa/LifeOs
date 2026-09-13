@@ -326,3 +326,152 @@
     });
   });
 })();
+
+/* Sinyal katmanı — mekanizma ile ekran ayrı şeylerdir. */
+(function(){
+  const { describe, it, expect, resetState, withToday, withTodayAsync } = R.Test;
+  const S = R.S, U = R.U;
+  const Sg = () => R.Signals;
+
+  const BUGUN = '2026-06-01';
+  function once(n){ return U.iso(U.addDays(U.parse(BUGUN), -n)); }
+  function gun(tarih, bloklar){
+    S.days[tarih] = { date:tarih, blocks:bloklar || [], paragraphActual:0,
+      problemActual:0, freeQ:0, checklist:{}, note:'' };
+  }
+  function blok(dk, soru, dogru){
+    return { id:'b', slot:'', subject:'', targetMin:dk, targetQ:soru,
+      status:'done', actualMin:dk, actualQ:soru, correctQ:dogru };
+  }
+  /* Soru sayisi artar, dogruluk yerinde sayar → ayrisma. */
+  function ayrismaKur(){
+    gun(once(40), [blok(300, 400, 280)]);
+    gun(once(10), [blok(600, 900, 630)]);
+  }
+  function ayrismaKapat(){
+    S.days = {};
+    gun(once(40), [blok(300, 400, 200)]);
+    gun(once(10), [blok(600, 900, 630)]);
+  }
+
+  describe('Sinyal — üretim', () => {
+
+    it('ayrışma yoksa soru açılmaz', async () => {
+      resetState();
+      await withTodayAsync(BUGUN, async () => {
+        expect((await Sg().sync()).opened).toBe(null);
+        expect(Sg().current()).toBe(null);
+      });
+    });
+
+    it('ayrışma varsa tek soru açılır', async () => {
+      resetState();
+      await withTodayAsync(BUGUN, async () => {
+        ayrismaKur();
+        const r = await Sg().sync();
+        expect(!!r.opened).toBeTruthy();
+        expect(r.opened.question.indexOf('?') > 0).toBeTruthy();
+      });
+    });
+
+    /* Bu dosyanın en önemli kuralı: üç soruyu aynı anda sormak,
+       üç ekran açmakla aynı şeydir. */
+    it('açık soru varken yenisi açılmaz', async () => {
+      resetState();
+      await withTodayAsync(BUGUN, async () => {
+        ayrismaKur();
+        await Sg().sync();
+        await Sg().sync();
+        await Sg().sync();
+        expect(Sg().open().length).toBe(1);
+      });
+    });
+
+    it('cevap soruyu kapatmaz', async () => {
+      resetState();
+      await withTodayAsync(BUGUN, async () => {
+        ayrismaKur();
+        const r = await Sg().sync();
+        await Sg().answer(r.opened.id, 'Kolay soruları seçmişim.');
+        expect(Sg().current().status).toBe('open');
+        expect(!!Sg().current().answeredAt).toBeTruthy();
+      });
+    });
+
+    /* Sistemin her sorusunun haklı olması gerekmez. */
+    it('aday soruyu geçersiz bulabilir', async () => {
+      resetState();
+      await withTodayAsync(BUGUN, async () => {
+        ayrismaKur();
+        const r = await Sg().sync();
+        await Sg().dismiss(r.opened.id, 'Yeni konuya geçtim, doğruluk zaten düşecekti.');
+        expect(Sg().current()).toBe(null);
+        expect(Sg().closed()[0].outcome).toBe('dismissed');
+      });
+    });
+
+    it('ayrışma kapanınca soru sonucuyla kapanır', async () => {
+      resetState();
+      await withTodayAsync(BUGUN, async () => {
+        ayrismaKur();
+        const r = await Sg().sync();
+        await Sg().answer(r.opened.id, 'Yanlış defterine dönüyorum.');
+        ayrismaKapat();
+        await Sg().sync();
+        const k = Sg().closed()[0];
+        expect(k.status).toBe('resolved');
+        expect(k.outcome).toBe('realigned');
+      });
+    });
+  });
+
+  describe('Sinyal — fayda ölçüsü', () => {
+
+    function kapaliSinyal(cevapli, sonuc){
+      S.signals.push(R.Signals.norm({ kind:'goodhart', ref:'x' + Math.random(),
+        title:'t', question:'s?', status:cevapli ? 'resolved' : 'expired',
+        answeredAt:cevapli ? '2026-05-01T10:00:00.000Z' : null,
+        seenAt:'2026-05-01T09:00:00.000Z',
+        closedAt:'2026-05-20T10:00:00.000Z', outcome:sonuc }));
+    }
+
+    /* «Kaç anomali yakaladı» bir fayda ölçüsü DEĞİLDİR. */
+    it('az kayıtta fayda ölçülmez', () => {
+      resetState();
+      kapaliSinyal(true, 'realigned');
+      expect(Sg().efficacy().cert).toBe('missing');
+    });
+
+    it('cevaplanan ve cevaplanmayan ayrı sayılır', () => {
+      resetState();
+      kapaliSinyal(true, 'realigned');
+      kapaliSinyal(true, 'realigned');
+      kapaliSinyal(true, 'still-decoupled');
+      kapaliSinyal(false, 'still-decoupled');
+      kapaliSinyal(false, 'still-decoupled');
+      const e = Sg().efficacy();
+      expect(e.answeredRate).toBe(67);
+      expect(e.unansweredRate).toBe(0);
+    });
+
+    /* Nedensellik İDDİA EDİLMEZ. */
+    it('fayda notu nedensellik iddia etmez', () => {
+      resetState();
+      for(let i = 0; i < 3; i++) kapaliSinyal(true, 'realigned');
+      for(let i = 0; i < 3; i++) kapaliSinyal(false, 'still-decoupled');
+      const e = Sg().efficacy();
+      expect(e.note.indexOf('NEDENSELLİK') > 0).toBeTruthy();
+      expect(/sayesinde|nedeniyle/.test(e.note)).toBeFalsy();
+    });
+
+    /* Görülmeyen bir denetim, denetim değildir — sistem bunu KENDİSİ söyler. */
+    it('hiç görülmeyen sinyal sayfayı savunmasız bırakır', () => {
+      resetState();
+      for(let i = 0; i < 4; i++){
+        S.signals.push(R.Signals.norm({ kind:'goodhart', ref:'r' + i, title:'t',
+          question:'s?', status:'expired', closedAt:'2026-05-20T10:00:00.000Z' }));
+      }
+      expect(Sg().screenVerdict().level).toBe('unused');
+    });
+  });
+})();

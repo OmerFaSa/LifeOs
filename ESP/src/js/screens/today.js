@@ -46,6 +46,47 @@ ESP.Screens.today = (function(){
     });
   }
 
+  /* Denetim sorusu — AYRI EKRAN DEĞİL, mevcut akışın içinde tek satır.
+
+     Nöbetçi ve sürtünme ölçer arka planda çalışır (core/signals.js);
+     buraya yalnızca sıradaki TEK soru düşer. Grafik yok, pencere
+     karşılaştırması yok, "nöbetler" listesi yok — onlar isteyen için
+     Analiz → Dürüstlük'te durur.
+
+     Soru yoksa bu satır HİÇ ÇİZİLMEZ. Sistemin sormadığı gün, iyi gündür. */
+  function signalRow(){
+    if(!ESP.Signals) return null;
+    const sig = ESP.Signals.current();
+    if(!sig) return null;
+
+    /* Gösterim anında «görüldü» damgalanır: sonradan sormanın yolu yok.
+       Yeniden çizim döngüsü açmasın diye sessizce yazılır. */
+    if(!sig.seenAt) ESP.Signals.markSeen(sig.id);
+
+    return K.Entry({
+      label:'BİR SORU', hint:'signal',
+      meta:sig.kind === 'friction' ? 'sürtünme' : 'gösterge',
+      note:sig.title,
+      body:html`
+        ${K.Notice({ tone:'info', body:sig.question })}
+        ${when(sig.answeredAt, () => html`
+          <p class="small muted mt-8">Cevabın: ${sig.answer}</p>
+          <p class="tiny dim">Soru açık kalır: ayrışmanın gerçekten kapanıp
+            kapanmadığı bir sonraki pencerede ölçülecek.</p>`)}
+        ${when(!sig.answeredAt, () => html`
+          <div class="mt-8">
+            ${K.Field({ label:'Kısa cevabın (isteğe bağlı)',
+              input:K.Input({ id:'sig-answer', placeholder:'tek cümle yeter' }) })}
+            <div class="row wrap mt-8">
+              ${K.Button({ label:'Kaydet', tone:'primary', size:'sm', act:'signal-answer',
+                data:{ 'data-id':sig.id } })}
+              ${K.Button({ label:'Bu soru bana uymuyor', size:'sm', act:'signal-dismiss',
+                data:{ 'data-id':sig.id } })}
+            </div>
+          </div>`)}`,
+    });
+  }
+
   /* ------------------------------------------------------------ oturum girisi */
 
   function entryForm(){
@@ -436,8 +477,8 @@ ESP.Screens.today = (function(){
     const tab = S.ui.dayTab || 'giris';
     const rows = tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [nextCard(), planRow(), planRowToday(), reminderRow(), entryForm(),
-          quickForm(), sessionList()]
+      : [nextCard(), signalRow(), planRow(), planRowToday(), reminderRow(),
+          entryForm(), quickForm(), sessionList()]
           .filter(Boolean);
 
     return K.Grid(html`
@@ -451,6 +492,20 @@ ESP.Screens.today = (function(){
 
   const handle = {
     async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; ESP.App.render(); },
+
+    async 'signal-answer'(el){
+      const inp = document.getElementById('sig-answer');
+      const r = await ESP.Signals.answer(el.dataset.id, inp ? inp.value : '');
+      if(!r.ok){ ESP.UI.toast(r.error); return; }
+      ESP.UI.toast('Kaydedildi. Sonucu bir sonraki pencere gösterecek.');
+      ESP.App.render();
+    },
+
+    async 'signal-dismiss'(el){
+      await ESP.Signals.dismiss(el.dataset.id);
+      ESP.UI.toast('Soru kapatıldı.');
+      ESP.App.render();
+    },
 
     async 'pick-disc'(el){ S.ui.sessionDisc = el.dataset.disc; ESP.App.render(); },
 

@@ -4563,7 +4563,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'a313382', at:'2026-09-13 08:01', dirty:true };
+SP.BUILD = { id:'5733eb1', at:'2026-09-13 09:17', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -5121,66 +5121,166 @@ SP.DERIVED = {
    kural yapar, cikti denetlenir. Ama kuralin KENDISI nereden geliyordu?
    Bir esik kodda ne kadar kesin yazilirsa yazilsin, esigin kendisi yanlis
    secilmisse sistem son derece guvenilir gorunen yanlis bir sonuc uretir.
-   Kesinlik gorunumu, kesinligin yerine gecer.
 
-   Cozum su: HER ESIK KENDI KAYNAGINI TASIR ve kaynaginin derecesi, o
-   esigin ne kadar guclu konusabilecegini BELIRLER.
+   ---------------------------------------------------------------------
+   IKINCI TUR: DORT EKSEN
 
-   Dort derece vardir ve aralarindaki fark suslu degil, islevseldir:
+   Ilk surumde tek bir siralama vardi: kilavuz > uzlasi > gozlemsel >
+   secim. Gelen elestiri hakliydi ve su kategori hatasini gosterdi:
 
-     guideline     Adi konmus bir klinik kilavuzun karar esigi. Yonlendirme
-                   yapabilir ("hekime basvur" diyebilir).
-     consensus     Laboratuvar ve klinik pratikte yaygin uzlasi; tek bir
-                   kilavuza baglanmamis. Yonlendirme yapabilir.
-     observational Gozlemsel calismalardan gelen BIR ILISKI. Karar esigi
-                   degildir. Yalnizca gozlem bildirir, yonlendirmez.
-     convention    Bu sistemin pratik sebeplerle SECTIGI sayi. Bilimsel bir
-                   bulgu degildir ve oyle sunulmaz. Yalnizca soru sorar.
+     "kilavuz"    bir BELGE / karar urunu
+     "uzlasi"     bir epistemik URETIM SURECI
+     "gozlemsel"  bir ARASTIRMA TASARIMI
+     "secim"      sistemin kendi AYAR TERCIHI
 
-   Kural: `observational` ve `convention` dereceli bir esik, DIREKTIF
-   uretemez. Kaynagi hic yazilmamis bir esik de uretemez — bilinmeyen
-   kaynak, iyi kaynak degildir. Bu kural core/evidence.js'te uygulanir ve
-   tests/evidence.test.js'te denetlenir.
+   Bunlar ayni turden nesneler degil; tek bir dikey eksene dizilince
+   kategorik olarak farkli seyler karsilastirilmis oluyor. Ustelik kati
+   kanit merdivenleri baglamdan kopuk okundugunda yanilticidir: iyi
+   tasarlanmis bir gozlemsel calisma, dar kapsamli bir kilavuz ifadesinden
+   daha bilgilendirici olabilir.
+
+   GRADE yaklasiminin temel ayrimi burada yol gosterici: KANITIN KESINLIGI
+   ile ONERININ GUCU ayri seylerdir. Bu yuzden tek eksen dorde bolundu:
+
+     source        Bu sayi NEREDEN geliyor? (siralama YOK, sadece tur)
+     certainty     Elimizdekine NE KADAR guveniyoruz? (high…unknown)
+     applicability Bu esik BU kullaniciya ne kadar uyuyor? (direct…local)
+     authority     SPI bu kaynaga dayanarak NE YAPABILIR?
+
+   Dorduncusu digerlerinden farklidir ve bu fark bilerek korunur:
+   ilk ucu EPISTEMIK iddialardir, dorduncusu bir TASARIM POLITIKASIDIR.
+   "Bu dogrudur" ile "sistemimiz yalnizca su kosulda bunu eyleme cevirir"
+   ayni turden cumleler degildir. Sonsuz gerilemeyi kesen sey de budur:
+   yetki politikasinin kendisi bir kanit derecesi tasimaz, cunku bir
+   bulgu degil bir karardir. O karar yonetisimle denetlenir — yazili,
+   surumlu, gerekceli ve degistirilebilir (bkz. SP.EVIDENCE_POLICY).
 
    Kaynak yazarken uydurma YOKTUR. Emin olunmayan her esik acikca
-   'convention' derecesine yazilir; uydurulmus bir atif, atifsiz bir
+   'system_tuning' kaynagina yazilir; uydurulmus bir atif, atifsiz bir
    esikten kotudur. Bu dosyadaki bosluklar da bir olcumdur:
    SP.Ev.coverage() kac esigin kaynak tasidigini sayar. */
 
 window.SP = window.SP || {};
 
-SP.EVIDENCE_GRADES = [
-  { id:'guideline', rank:4, label:'Kılavuz', tone:'ok',
-    mayDirect:true,
+/* ------------------------------------------------------------- eksen 1
+   KAYNAK TURU — siralanmaz, yalnizca tanimlar.
+
+   Burada bilerek bir "ustunluk" sirasi yoktur: kohort calismasi RCT'den
+   kotu, kilavuz uzlasidan iyi DEGILDIR. Bunlar farkli turden seylerdir.
+   Siralama yalnizca yetki politikasinda (eksen 4) yapilir ve orasi bir
+   bilimsel iddia degil, bu yazilimin tercihidir. */
+SP.EVIDENCE_SOURCES = [
+  { id:'guideline',    label:'Kılavuz',
     note:'Adı konmuş bir klinik kılavuzun karar eşiği.' },
-  { id:'consensus', rank:3, label:'Uzlaşı', tone:'ok',
-    mayDirect:true,
+  { id:'consensus',    label:'Uzlaşı',
     note:'Laboratuvar ve klinik pratikte yaygın uzlaşı; tek kılavuza bağlı değil.' },
-  { id:'observational', rank:2, label:'Gözlemsel', tone:'info',
-    mayDirect:false,
-    note:'Gözlemsel çalışmalardan gelen bir ilişki. Karar eşiği değildir.' },
-  { id:'convention', rank:1, label:'Seçim', tone:'warn',
-    mayDirect:false,
-    note:'Bu sistemin pratik sebeplerle seçtiği sayı. Bilimsel bir bulgu değildir.' },
+  { id:'observational',label:'Gözlemsel',
+    note:'Gözlemsel çalışmalardan gelen bir ilişki. Karar eşiği olarak tasarlanmamış.' },
+  { id:'system_tuning',label:'Sistem ayarı',
+    note:'Bu yazılımın pratik sebeplerle seçtiği sayı. Bilimsel bir bulgu değildir.' },
 ];
+
+/* ------------------------------------------------------------- eksen 2
+   KESINLIK — elimizdekine ne kadar guveniyoruz.
+
+   Kaynak turunden AYRIDIR: iyi bir gozlemsel calisma 'moderate',
+   tartismali bir kilavuz ifadesi 'low' olabilir. */
+SP.EVIDENCE_CERTAINTY = [
+  { id:'high',     label:'Yüksek',  note:'Kaynaklar birleşiyor, eşik istikrarlı.' },
+  { id:'moderate', label:'Orta',    note:'Genel kabul var ama ayrıntıda ayrışma olabilir.' },
+  { id:'low',      label:'Düşük',   note:'Kaynaklar ayrışıyor ya da kanıt dolaylı.' },
+  { id:'unknown',  label:'Bilinmiyor', note:'Kesinlik değerlendirilmemiş.' },
+];
+
+/* ------------------------------------------------------------- eksen 3
+   UYGULANABILIRLIK — esik BU kullaniciya ne kadar uyuyor.
+
+   En sik gozden kacan eksen budur: yetiskin erkekte gecerli bir sinir,
+   sporcuda, gebelikte ya da baska bir etnik kokende ayni sey demek
+   degildir. */
+SP.EVIDENCE_APPLICABILITY = [
+  { id:'direct',   label:'Doğrudan',
+    note:'Eşiğin tanımlandığı popülasyon kullanıcıyla örtüşüyor.' },
+  { id:'indirect', label:'Dolaylı',
+    note:'Popülasyon kısmen örtüşüyor; eşik kayabilir.' },
+  { id:'local',    label:'Yerel',
+    note:'Eşik kişiye/cihaza özel; başkasıyla karşılaştırılamaz.' },
+];
+
+/* ------------------------------------------------------------- eksen 4
+   YETKI — SPI bu kaynaga dayanarak NE YAPABILIR.
+
+   BU BIR EVRENSEL KANIT HIYERARSISI DEGILDIR. Bu, SPI'nin operasyonel
+   yetki politikasidir: hangi kaynak turune eyleme donuk ne kadar soz
+   hakki tanindigini soyler. Sorumlulugu bilim degil bu yazilim tasir. */
+SP.EVIDENCE_AUTHORITY = [
+  { id:'steer',         label:'Yönlendirebilir', tone:'ok',  mayDirect:true, cap:null,
+    note:'Hekime yönlendirme ve davranış önerisi üretebilir.' },
+  { id:'limited_steer', label:'Sınırlı yönlendirir', tone:'ok', mayDirect:true, cap:0.35,
+    note:'Öneri üretebilir ama etkisi sınırlıdır.' },
+  { id:'inform',        label:'Bilgilendirir', tone:'info', mayDirect:false, cap:0.20,
+    note:'Gözlem bildirir; eyleme dönük yönlendirme üretmez.' },
+  { id:'observe_only',  label:'Yalnız izler', tone:'warn', mayDirect:false, cap:0.20,
+    note:'Yalnızca izlenir; hiçbir karar bu eşiğe dayandırılmaz.' },
+];
+
+/* Kaynak turunun VARSAYILAN yetkisi. Kayit basina acikca ezilebilir.
+
+   Bu tablo politikadir, bulgu degildir — surumu ve gerekcesi asagida. */
+SP.EVIDENCE_POLICY = {
+  version:2,
+  changedAt:'2026-09-13',
+  title:'SPİ operasyonel yetki politikası',
+  disclaimer:'Bu tablo evrensel bir kanıt hiyerarşisi DEĞİLDİR. '
+    + 'SPİ\'nin hangi kaynak türüne eyleme dönük ne kadar söz hakkı '
+    + 'tanıdığını söyler. Bilimsel bir iddia değil, bir yazılım kararıdır; '
+    + 'sorumluluğu bu yazılıma aittir.',
+  rationale:'Klinik sınır (SP.CLINICAL) sistemin en sert cümlesinin '
+    + '«hekime başvur» olmasını gerektirir. Bu cümlenin en zayıf dayanaktan '
+    + 'çıkmaması için kaynak türüne göre bir yetki tavanı konur. Gözlemsel '
+    + 'göstergeler ve sistemin kendi ayarları yönlendirme üretemez; çünkü '
+    + 'ikisi de karar eşiği olarak tasarlanmamıştır.',
+  history:[
+    { version:1, at:'2026-09-13',
+      note:'Tek eksenli derece: kılavuz > uzlaşı > gözlemsel > seçim.' },
+    { version:2, at:'2026-09-13',
+      note:'Dört eksene bölündü (kaynak / kesinlik / uygulanabilirlik / yetki). '
+         + 'Sebep: tek eksen kategorik olarak farklı nesneleri — bir belge, '
+         + 'bir üretim süreci, bir araştırma tasarımı ve bir ayar tercihini — '
+         + 'aynı ölçeğe diziyordu. Kanıtın kesinliği ile önerinin gücü ayrıldı.' },
+  ],
+  defaults:{
+    guideline:'steer',
+    consensus:'limited_steer',
+    observational:'inform',
+    system_tuning:'observe_only',
+  },
+};
+
+/* Eski tek eksenli derecenin yeni eksenlere karsiligi. Veri dosyasindaki
+   `grade` alanlari boylece kirilmadan tasinir. */
+SP.EVIDENCE_LEGACY = {
+  guideline:    { source:'guideline',     certainty:'high' },
+  consensus:    { source:'consensus',     certainty:'moderate' },
+  observational:{ source:'observational', certainty:'low' },
+  convention:   { source:'system_tuning', certainty:'unknown' },
+};
+
+SP.SOURCE_BY_ID = SP.EVIDENCE_SOURCES.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+SP.CERTAINTY_BY_ID = SP.EVIDENCE_CERTAINTY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+SP.APPLICABILITY_BY_ID = SP.EVIDENCE_APPLICABILITY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+SP.AUTHORITY_BY_ID = SP.EVIDENCE_AUTHORITY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+
+/* Geriye donuk uyum: eski ad hala okunabilir olsun diye korunur ama
+   artik bir SIRALAMA degil, yetki politikasinin gorunumudur. */
+SP.EVIDENCE_GRADES = SP.EVIDENCE_SOURCES.map(function(src){
+  const yetki = SP.AUTHORITY_BY_ID[SP.EVIDENCE_POLICY.defaults[src.id]];
+  return { id:src.id, label:src.label, tone:yetki.tone,
+    mayDirect:yetki.mayDirect, authority:yetki.id, note:src.note };
+});
 
 SP.GRADE_BY_ID = SP.EVIDENCE_GRADES.reduce(function(m, g){ m[g.id] = g; return m; }, {});
 
-/* Kayitlar.
-
-   `marker` biyobelirtec kimligi, `field` hangi esigi anlattigi:
-     'red'      kirmizi bayrak esigi
-     'ref'      laboratuvar referans araligi
-     'optimal'  hedef bant
-
-   `source` kaynagin ADIDIR; bir baglanti degil. Baglanti verilirse
-   cürür, ad kalir. `year` kaynagin yili ya da surumudur; bos olabilir
-   ama bos birakilirsa derece kendiliginden dusmez — kaynagin adi yeterse
-   yeter, guncelligini kullanici tartar.
-
-   `population` esigin KIME ait oldugunu soyler. Bir esigin en sik
-   gozden kacan yani budur: yetiskin erkekte gecerli bir sinir, sporcuda
-   ya da gebelikte ayni sey demek degildir. */
 SP.EVIDENCE = [
 
   /* ----------------------------------------------------------- vital */
@@ -5418,9 +5518,9 @@ SP.EVIDENCE = [
        + 'yanıltıcıdır.' },
 
   /* ------------------------------------------------------ vücut ölçüsü */
-  { marker:'waist', field:'ref', grade:'guideline',
+  { marker:'waist', field:'ref', grade:'guideline', applicability:'indirect',
     source:'Bel çevresi risk eşikleri (DSÖ; erkek ≥94/102, kadın ≥80/88 cm)',
-    population:'Avrupa kökenli erişkin',
+    population:'Avrupa kökenli erişkin — etnik kökene göre DEĞİŞİR',
     note:'Eşikler ETNİK KÖKENE göre değişir: Güney Asya kökenli kişilerde '
        + 'daha düşük sınırlar kullanılır.' },
   { marker:'bodyfat', field:'ref', grade:'convention',
@@ -9821,30 +9921,29 @@ SP.Bio = (function(){
 /* ==== js/core/evidence.js ==== */
 /* Kanit motoru — bir esigin ne soylemeye yetkili oldugunu belirler.
 
-   data/evidence.js kaynaklari tasir; bu dosya o kaynaklardan BIR KURAL
-   cikarir ve kuralin uygulanmasini saglar:
+   data/evidence.js dort ekseni tasir; bu dosya onlari COZER ve tek bir
+   kurali uygular:
 
-     Yalnizca 'guideline' ve 'consensus' dereceli esikler YONLENDIREBILIR.
+     Bir esik, YETKISININ izin verdiginden daha guclu konusamaz.
 
-   Yonlendirme, kullaniciyi bir eyleme sevk eden cumledir: "hekime basvur",
-   "bu degeri dusurmeye calis", "su besini artir". Gozlemsel bir iliskiden
-   ya da bu sistemin kendi sectigi bir sayidan boyle bir cumle cikamaz.
-   Cikabilecek olan sudur: "bu deger sectigimiz bandin disinda — bandin
-   kendisi bir karar esigi degil".
+   Yetki, kaynak turunun politika tablosundaki karsiligidir (kayit basina
+   acikca ezilebilir). Politika bir bilimsel iddia degil bir tasarim
+   kararidir ve oyle etiketlenir — bu ayrim, "kanit siniflandirmasinin
+   kendisi hangi kanita dayaniyor?" sorusunun sonsuz gerilemesini keser:
+   dayanmiyor, cunku bir bulgu degil bir karar.
 
    Uc kural:
 
    1. KAYNAGI OLMAYAN ESIK YONLENDIREMEZ. Bilinmeyen kaynak, iyi kaynak
-      degildir. Bu, deponun "olculmemis veri sifir degildir" kuralinin
-      kanit tarafindaki karsiligidir.
+      degildir — "olculmemis veri sifir degildir" kuralinin kanit
+      tarafindaki karsiligi.
 
-   2. KIRMIZI BAYRAK EN AZ 'consensus' OLMAK ZORUNDADIR. Sistemin en sert
-      cumlesi ("hekime basvur") en zayif dayanaktan cikamaz. denetim()
-      bunu tarar ve testler denetimin bos olmasini bekler.
+   2. KIRMIZI BAYRAK YONLENDIRME YETKISI OLMAK ZORUNDADIR. Sistemin en
+      sert cumlesi ("hekime basvur") en zayif dayanaktan cikamaz.
+      audit() bunu tarar; testler denetimin BOS donmesini bekler.
 
-   3. DERECE GIZLENMEZ. Arayuz esigi gosteriyorsa derecesini de gosterir.
-      Kullanicinin "bu sayi nereden geliyor" sorusunun cevabi bir tik
-      uzakta olmalidir. */
+   3. EKSENLER GIZLENMEZ. Arayuz esigi gosteriyorsa kaynagini, kesinligini,
+      uygulanabilirligini ve yetkisini de gosterir. */
 
 window.SP = window.SP || {};
 
@@ -9858,65 +9957,127 @@ SP.Ev = (function(){
     return m;
   })();
 
-  function of(markerId, field){
-    return BY_KEY[markerId + '/' + field] || null;
-  }
+  /* Ham kaydi dort eksene cozer.
 
-  function gradeOf(markerId, field){
-    const e = of(markerId, field);
+     Eski kayitlar tek eksenli `grade` tasir; SP.EVIDENCE_LEGACY onlari
+     kaynak + kesinlige cevirir. Yeni kayitlar eksenleri dogrudan yazabilir
+     ve yazdiklari varsayilani EZER. */
+  function resolve(e){
     if(!e) return null;
-    return SP.GRADE_BY_ID[e.grade] || null;
-  }
+    /* DIKKAT — ad carpismasi: kayitlardaki `source` alani ATIF METNIDIR
+       ("ADA HbA1c siniflamasi"), kaynak TURU degil. Tur ekseni
+       `sourceType` ile yazilir, yazilmamissa eski tek eksenli `grade`
+       alanindan cozulur. Bu ikisini karistirmak butun esikleri sessizce
+       'yalniz izler' yetkisine dusururdu. */
+    const eski = SP.EVIDENCE_LEGACY[e.grade] || {};
+    const source = e.sourceType || eski.source || null;
+    if(!source) return null;
 
-  /* Bu esik bir DIREKTIF uretebilir mi?
+    const certainty = e.certainty || eski.certainty || 'unknown';
 
-     Kaynak yoksa hayir. Derecesi dusukse hayir. Ikisi de ayni sebepten:
-     sistemin cumlesinin agirligi, dayanaginin agirligini asamaz. */
-  function mayDirect(markerId, field){
-    const g = gradeOf(markerId, field);
-    return !!(g && g.mayDirect);
-  }
+    /* Uygulanabilirlik yazilmamissa popülasyon metninden okunur:
+       "DEĞİŞİR" diyen bir esik dogrudan uygulanabilir sayilamaz. */
+    const pop = String(e.population || '');
+    const applicability = e.applicability
+      || (/DEĞİŞİR|değişir/.test(pop) ? 'indirect'
+        : (pop === '—' || pop === '') ? 'local' : 'direct');
 
-  /* Bir esik hakkinda kullaniciya gosterilecek tek satir. */
-  function line(markerId, field){
-    const e = of(markerId, field);
-    if(!e){
-      return { grade:null, label:'kaynak yok', tone:'warn', mayDirect:false,
-        text:'Bu eşiğin kaynağı yazılmamış. Kaynağı bilinmeyen bir eşik '
-           + 'yönlendirme üretmez.' };
-    }
-    const g = SP.GRADE_BY_ID[e.grade] || {};
+    const authority = e.authority || SP.EVIDENCE_POLICY.defaults[source] || 'observe_only';
+
     return {
-      grade:e.grade, label:g.label || e.grade, tone:g.tone || 'info',
-      mayDirect:!!g.mayDirect,
-      source:e.source, year:e.year || null, population:e.population || null,
-      text:e.source + (e.year ? ' (' + e.year + ')' : '')
-        + (e.population ? ' · ' + e.population : ''),
-      note:e.note || g.note || '',
+      marker:e.marker, field:e.field,
+      source:source, certainty:certainty,
+      applicability:applicability, authority:authority,
+      sourceInfo:SP.SOURCE_BY_ID[source] || null,
+      certaintyInfo:SP.CERTAINTY_BY_ID[certainty] || null,
+      applicabilityInfo:SP.APPLICABILITY_BY_ID[applicability] || null,
+      authorityInfo:SP.AUTHORITY_BY_ID[authority] || null,
+      citation:e.source, year:e.year || null, population:e.population || null,
+      note:e.note || '',
     };
   }
 
-  /* Bir cumlenin tonunu kanita gore KISAR.
+  function of(markerId, field){
+    return resolve(BY_KEY[markerId + '/' + field]);
+  }
 
-     Cagiran taraf ne demek istedigini `strength` ile soyler:
-       'refer'   hekime yonlendirme
-       'act'     davranis onerisi
-       'observe' gozlem bildirimi
+  /* Eski cagri yuzeyi: tek eksenli "derece" isteyen kod hala calisir.
+     Donen sey kaynak turudur ve artik bir SIRALAMA degildir. */
+  function gradeOf(markerId, field){
+    const r = of(markerId, field);
+    if(!r) return null;
+    return SP.GRADE_BY_ID[r.source] || null;
+  }
 
-     Kanit yetmiyorsa cumle otomatik olarak 'observe' seviyesine iner ve
-     neden indigi acikca yazilir. Sessizce zayiflatmak, kullaniciyi
-     yaniltmanin baska bir bicimidir. */
-  function temper(markerId, field, strength){
-    const g = gradeOf(markerId, field);
-    const izin = !!(g && g.mayDirect);
-    if(strength === 'observe' || izin){
-      return { strength:strength, downgraded:false, grade:g ? g.id : null };
+  function authorityOf(markerId, field){
+    const r = of(markerId, field);
+    return r ? r.authorityInfo : null;
+  }
+
+  /* Bu esik bir DIREKTIF uretebilir mi? Yetki ekseni karar verir. */
+  function mayDirect(markerId, field){
+    const a = authorityOf(markerId, field);
+    return !!(a && a.mayDirect);
+  }
+
+  /* Bu esikten cikan bir hedef degisikliginin ust siniri.
+     null = sinir yok. Kaynagi olmayan esikte en dar tavan uygulanir. */
+  function cap(markerId, field){
+    const a = authorityOf(markerId, field);
+    if(!a) return SP.AUTHORITY_BY_ID.observe_only.cap;
+    return a.cap;
+  }
+
+  /* Kullaniciya gosterilecek satir — dort eksen birden. */
+  function line(markerId, field){
+    const r = of(markerId, field);
+    if(!r){
+      return { source:null, label:'kaynak yok', tone:'warn', mayDirect:false,
+        certainty:'unknown', applicability:null, authority:'observe_only',
+        authorityLabel:'Yalnız izler',
+        text:'Bu eşiğin kaynağı yazılmamış. Kaynağı bilinmeyen bir eşik '
+           + 'yönlendirme üretmez.' };
     }
     return {
-      strength:'observe', downgraded:true, grade:g ? g.id : null,
-      why:g
-        ? 'Bu eşik «' + g.label + '» derecesinde: ' + g.note
-          + ' Bu yüzden burada yönlendirme değil gözlem bildirilir.'
+      source:r.source, label:(r.sourceInfo || {}).label || r.source,
+      tone:(r.authorityInfo || {}).tone || 'info',
+      mayDirect:!!(r.authorityInfo || {}).mayDirect,
+      certainty:r.certainty,
+      certaintyLabel:(r.certaintyInfo || {}).label || r.certainty,
+      applicability:r.applicability,
+      applicabilityLabel:(r.applicabilityInfo || {}).label || r.applicability,
+      authority:r.authority,
+      authorityLabel:(r.authorityInfo || {}).label || r.authority,
+      citation:r.citation, year:r.year, population:r.population,
+      text:r.citation + (r.year ? ' (' + r.year + ')' : '')
+        + (r.population ? ' · ' + r.population : ''),
+      note:r.note || (r.sourceInfo || {}).note || '',
+    };
+  }
+
+  /* Bir cumlenin tonunu YETKIYE gore kisar.
+
+     Cagiran ne demek istedigini `strength` ile soyler: 'refer' | 'act' |
+     'observe'. Yetki yetmiyorsa cumle 'observe' seviyesine iner ve NEDEN
+     indigi acikca yazilir. Sessizce zayiflatmak, yaniltmanin baska bir
+     bicimidir. */
+  function temper(markerId, field, strength){
+    const r = of(markerId, field);
+    const a = r ? r.authorityInfo : null;
+    const izin = !!(a && a.mayDirect);
+    if(strength === 'observe' || izin){
+      return { strength:strength, downgraded:false,
+        source:r ? r.source : null, authority:r ? r.authority : null,
+        cap:cap(markerId, field) };
+    }
+    return {
+      strength:'observe', downgraded:true,
+      source:r ? r.source : null, authority:r ? r.authority : 'observe_only',
+      cap:cap(markerId, field),
+      why:r
+        ? 'Bu eşik «' + (r.sourceInfo || {}).label + '» kaynağından geliyor ve '
+          + 'SPİ yetki politikasında «' + (a || {}).label + '» sayılıyor: '
+          + (a || {}).note + ' Bu yüzden burada yönlendirme değil gözlem bildirilir.'
         : 'Bu eşiğin kaynağı yazılmamış; kaynağı bilinmeyen bir eşikten '
           + 'yönlendirme çıkmaz.',
     };
@@ -9924,11 +10085,11 @@ SP.Ev = (function(){
 
   /* ------------------------------------------------------------ kapsam */
 
-  /* Kac esik kaynak tasiyor? Bosluklar da bir olcumdur ve gizlenmez. */
   function coverage(){
     const alanlar = ['ref', 'optimal', 'red'];
     let toplam = 0, kaynakli = 0, yonlendirebilen = 0;
     const eksik = [];
+    const kaynakSayim = {}, kesinlikSayim = {}, yetkiSayim = {};
 
     (SP.BIOMARKERS || []).forEach(function(b){
       alanlar.forEach(function(f){
@@ -9937,9 +10098,12 @@ SP.Ev = (function(){
           : !!b[f];
         if(!varMi) return;
         toplam++;
-        const e = of(b.id, f);
-        if(e){
+        const r = of(b.id, f);
+        if(r){
           kaynakli++;
+          kaynakSayim[r.source] = (kaynakSayim[r.source] || 0) + 1;
+          kesinlikSayim[r.certainty] = (kesinlikSayim[r.certainty] || 0) + 1;
+          yetkiSayim[r.authority] = (yetkiSayim[r.authority] || 0) + 1;
           if(mayDirect(b.id, f)) yonlendirebilen++;
         } else {
           eksik.push({ marker:b.id, name:b.name, field:f });
@@ -9948,43 +10112,48 @@ SP.Ev = (function(){
     });
 
     return { total:toplam, sourced:kaynakli, mayDirect:yonlendirebilen,
-      missing:eksik, pct:toplam ? Math.round(100 * kaynakli / toplam) : 0 };
+      missing:eksik, pct:toplam ? Math.round(100 * kaynakli / toplam) : 0,
+      bySource:kaynakSayim, byCertainty:kesinlikSayim, byAuthority:yetkiSayim };
   }
 
-  /* Denetim: sistemin en sert cumlesi en zayif dayanaktan cikmasin.
-
-     Kirmizi bayragi olup kaynagi olmayan ya da derecesi yetmeyen her esik
-     burada listelenir. Bos donmesi beklenir; dolu donmesi bir HATADIR ve
-     testte kirilir. */
+  /* Denetim: kirmizi bayragi olup yonlendirme yetkisi olmayan her esik. */
   function audit(){
     const sorunlar = [];
     (SP.BIOMARKERS || []).forEach(function(b){
       const kirmizi = b.red && (b.red.below != null || b.red.above != null);
       if(!kirmizi) return;
-      const g = gradeOf(b.id, 'red');
-      if(!g){
+      const r = of(b.id, 'red');
+      if(!r){
         sorunlar.push({ marker:b.id, name:b.name, kind:'no-source',
           note:'Kırmızı bayrak eşiğinin kaynağı yazılmamış.' });
-      } else if(!g.mayDirect){
-        sorunlar.push({ marker:b.id, name:b.name, kind:'weak-source',
-          grade:g.id,
-          note:'Kırmızı bayrak «' + g.label + '» derecesine dayanıyor; '
-             + 'yönlendirme için yetersiz.' });
+      } else if(!(r.authorityInfo || {}).mayDirect){
+        sorunlar.push({ marker:b.id, name:b.name, kind:'no-authority',
+          authority:r.authority,
+          note:'Kırmızı bayrak «' + (r.authorityInfo || {}).label
+             + '» yetkisine dayanıyor; yönlendirme için yetersiz.' });
       }
     });
     return sorunlar;
   }
 
-  /* Kilavuzlarin AYRISTIGI esikler. Ayrisma gizlenmez: iki kilavuzun ayni
-     sayida birlesmemesi, kullanicinin bilmesi gereken bir seydir. */
+  /* Kilavuzlarin AYRISTIGI ya da popülasyona gore KAYAN esikler.
+     Ayrisma gizlenmez: kullanicinin bilmesi gereken bir seydir. */
   function disputed(){
     return (SP.EVIDENCE || []).filter(function(e){
-      return /AYRIŞ|ayrış|DEĞİŞİR|değişir/.test(e.note || '')
-        || /DEĞİŞİR|değişir/.test(e.population || '');
-    });
+      const r = resolve(e);
+      if(!r) return false;
+      return r.applicability !== 'direct'
+        || r.certainty === 'low'
+        || /AYRIŞ|ayrış/.test(e.note || '');
+    }).map(resolve);
   }
 
-  return { of, gradeOf, mayDirect, line, temper, coverage, audit, disputed,
+  /* Yetki politikasi — arayuzde gosterilmek uzere. */
+  function policy(){ return SP.EVIDENCE_POLICY; }
+
+  return { of, resolve, gradeOf, authorityOf, mayDirect, cap, line, temper,
+    coverage, audit, disputed, policy,
+    SOURCES:SP.EVIDENCE_SOURCES, AUTHORITY:SP.EVIDENCE_AUTHORITY,
     GRADES:SP.EVIDENCE_GRADES };
 })();
 
@@ -10039,10 +10208,6 @@ SP.Nutri = (function(){
      Tablo deklaratiftir: kosul, hangi ogeyi ne kadar buyuttugu ve GEREKCESI
      birlikte durur. Gerekce ekranda gorunur; carpanin nedenini kullanicidan
      saklamayiz. */
-  /* Dayanagi zayif bir esikten cikabilecek EN BUYUK hedef degisikligi.
-     %20: fark edilir ama bir karar esigi gibi davranmayan bir pay. */
-  const ZAYIF_PAY = 0.20;
-
   const LAB_LINKS = [
     { when:['ferritin', 'low'],    nutrient:'iron',      mult:1.6,
       why:'Ferritin referans aralığının altında — demir deposu boşalmış.' },
@@ -10108,14 +10273,19 @@ SP.Nutri = (function(){
          zayiflatilir ve NEDEN zayiflatildigi gerekcenin icine yazilir —
          sessizce zayiflatmak, kullaniciyi yaniltmanin baska bir bicimidir. */
       const alan = (wanted === 'belowOpt' || wanted === 'aboveOpt') ? 'optimal' : 'ref';
-      const yetki = SP.Ev ? SP.Ev.temper(markerId, alan, 'act') : { downgraded:false };
+      const yetki = SP.Ev ? SP.Ev.temper(markerId, alan, 'act') : { downgraded:false, cap:null };
+
+      /* Tavan YETKI EKSENINDEN gelir (core/evidence.js), burada sabit
+         degildir: 'steer' sinirsiz, 'limited_steer' dar, 'inform' ve
+         'observe_only' en dar. Boylece kisma orani da politikanin
+         parcasi olur ve tek yerden degisir. */
       let mult = link.mult;
       let why = link.why;
-      if(yetki.downgraded){
+      const tavanPay = yetki.cap;
+      if(tavanPay != null && Math.abs(link.mult - 1) > tavanPay){
         const yon = link.mult >= 1 ? 1 : -1;
-        const tavan = 1 + yon * Math.min(Math.abs(link.mult - 1), ZAYIF_PAY);
-        mult = tavan;
-        why = link.why + ' ' + yetki.why;
+        mult = 1 + yon * tavanPay;
+        if(yetki.downgraded) why = link.why + ' ' + yetki.why;
       }
 
       const cur = out[link.nutrient];
@@ -18314,7 +18484,7 @@ SP.Screens.labs = (function(){
 
   function dayanak(markerId, field){
     const e = SP.Ev.line(markerId, field);
-    return e.grade ? e.label : 'kaynak yok';
+    return e.source ? e.authorityLabel : 'kaynak yok';
   }
 
   const TABS = [
@@ -18722,12 +18892,21 @@ SP.Screens.labs = (function(){
              <div class="mt-8">
                <div class="row wrap">
                  ${K.Badge({ label:ALAN_ADI[x.f], tone:'muted' })}
-                 ${K.Badge({ label:x.e.label, tone:x.e.tone })}
-                 ${when(!x.e.mayDirect, () => K.Badge({ label:'yönlendirmez', tone:'warn' }))}
+                 ${K.Badge({ label:'kaynak: ' + x.e.label, tone:'muted' })}
+                 ${when(x.e.certaintyLabel,
+                   () => K.Badge({ label:'kesinlik: ' + x.e.certaintyLabel, tone:'muted' }))}
+                 ${when(x.e.applicabilityLabel,
+                   () => K.Badge({ label:'uygulanır: ' + x.e.applicabilityLabel, tone:'muted' }))}
+                 ${K.Badge({ label:x.e.authorityLabel, tone:x.e.tone })}
                </div>
                <p class="small muted mt-4">${x.e.text}</p>
                ${when(x.e.note, () => html`<p class="tiny dim">${x.e.note}</p>`)}
-             </div>`)}`,
+             </div>`)}
+           ${K.Notice({ tone:'info',
+             body:'Kaynak, kesinlik ve uygulanabilirlik birer bilgi; '
+                + '«yetki» ise SPİ\'nin kararıdır — hangi kaynağa dayanarak '
+                + 'ne yapmasına izin verildiğini söyler. Bu bir kanıt '
+                + 'hiyerarşisi değildir.' })}`,
          });
       })(),
       /* SATIR İÇİ DÜZELTME. Bir sayıyı düzeltmek için alt sayfa açıp
@@ -23735,10 +23914,17 @@ SP.Screens.guide = (function(){
           sonuç üretir. Bu yüzden her eşik kendi kaynağını taşır ve kaynağının
           derecesi, o eşiğin ne kadar güçlü konuşabileceğini belirler.</p>
 
-        ${K.Table({ tight:true, headers:['Derece', 'Ne yapabilir'],
-          rows:SP.EVIDENCE_GRADES.map(g => [
-            g.label, g.mayDirect ? 'Yönlendirebilir' : 'Yalnızca gözlem bildirir',
-          ]) })}
+        ${K.Notice({ tone:'warn', title:'Bu bir kanıt hiyerarşisi değildir',
+          body:SP.Ev.policy().disclaimer })}
+
+        ${K.Table({ tight:true, headers:['Kaynak türü', 'SPİ\'nin tanıdığı yetki'],
+          rows:SP.EVIDENCE_SOURCES.map(src => {
+            const y = SP.AUTHORITY_BY_ID[SP.Ev.policy().defaults[src.id]];
+            return [src.label, y.label + ' — ' + y.note];
+          }) })}
+
+        <p class="tiny dim mt-8">Politika sürümü ${SP.Ev.policy().version}
+          (${SP.Ev.policy().changedAt}). ${SP.Ev.policy().rationale}</p>
 
         ${K.Table({ tight:true, headers:['Ölçüm', { label:'Sayı', num:true }], rows:[
           ['Tanımlı eşik', String(k.total)],

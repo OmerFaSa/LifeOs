@@ -5422,7 +5422,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'a313382', at:'2026-09-13 08:00', dirty:true };
+SP.BUILD = { id:'5733eb1', at:'2026-09-13 09:28', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -8813,10 +8813,14 @@ ESP.HINTS = {
     more:'Üstteki alttakini her zaman yener. Ama yenilen uzmanın işi bitmez: yeni parça yerine mevcut repertuarda ilerleme önerir. «Hiçbir şey yapma» demek değildir.' },
   'ehs':{ t:'Entelektüel hacim', b:'EHS = Σ (disiplin ağırlığı × ölçülen saat × kalite katsayısı).',
     more:'H_i yalnızca ölçülen pratik saatidir; «veri yok» günler toplama girmez. Bu yüzden EHS bir hedef değil bir hacim ölçüsüdür: iki haftada bir bakılır, her gün değil.' },
+  'declared':{ t:'Beyana dayalı kapı', b:'Ölçümü sistem değil sen yaptın: «temiz miydi», «hatalı mıydı».',
+    more:'Beyana dayalı bir kapı geçilmiş sayılır ama ZAYIF işaretlenir ve o kademenin kesinliği «ölçüldü» olamaz. Sebep basit: kendi kendini değerlendiren bir ölçü gevşemeye açıktır ve bu gevşeme tam da kademe yükselirken işe yarar hâle gelir. Ayrıca asgari sinyal kuralı vardır: beş kayıttan az varsa kapı hiç değerlendirilmez; beşin üstünde daha çok kayıt daha hızlı ilerleme getirmez, yalnızca gürültüyü düşürür.' },
   'blind':{ t:'Merdivenin kör noktası', b:'Kapıların ölçemediği ama asıl mesele olan şeyler.',
     more:'Ölçülemeyeni ölçülüyormuş gibi göstermek, ölçmemekten kötüdür. Her merdiven neyi göremediğini açıkça yazar; böylece «Üstat» kademesi bile bir yeterlilik iddiası değil, ölçülebilir üretimin vardığı yer olarak kalır.' },
 
   /* --- sistemin kendi denetimi --- */
+  'signal':{ t:'Denetim sorusu', b:'Nöbetçinin ya da sürtünme ölçerin sorduğu tek soru.',
+    more:'Denetim mekanizması ile denetim EKRANI aynı şey değildir: arka planda çalışan nöbetçinin bir ekran ağacı olması gerekmez, doğru anda mevcut akışa düşen tek bir soru yeter. Aynı anda en fazla bir soru açık kalır; cevaplamak zorunlu değildir ve «bu soru bana uymuyor» da bir cevaptır. Soru cevaplanınca kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı bir sonraki pencerede ölçülür.' },
   'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile çalışmaya giden sürenin payı.',
     more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar. Tek dürüst cevap sürtünmeyi de ÖLÇMEKTİR: uygulama açıkken geçen süre (pratik sayacı çalışırken geçen hariç) yönetim sayılır. İki eşik birden aşılmadıkça sistem susar — bir kurulum günü hüküm değildir. Sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
   'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',
@@ -9325,7 +9329,7 @@ ESP.U = (function(){
   function monthKey(d){ const x = parse(d); return x.getFullYear()+'-'+pad2(x.getMonth()+1); }
 
   function relativeDay(dateISO){
-    const n = diffDays(todayISO(), dateISO);
+    const n = diffDays(bugunISO(), dateISO);
     if(n === 0) return 'bugün';
     if(n === 1) return 'yarın';
     if(n === -1) return 'dün';
@@ -9412,8 +9416,24 @@ ESP.U = (function(){
   /* Son n gunun ISO tarihleri, ESKIDEN YENIYE. Bir pencereyi gezerken
      sirali olmasi onemli: ilk yarisi gecen hafta, ikinci yarisi bu hafta
      gibi karsilastirmalar bu siraya dayanir. */
+
+  /* "Bugun" TEK bir yerden okunur.
+
+     Modul icinden dogrudan `todayISO()` cagirmak sessiz bir tuzak uretti:
+     testler `withToday()` ile ESP.U.todayISO'yu degistiriyor ama modul ici
+     cagrilar o degisimi GORMUYORDU. Sonuc: sahte tarihle kurulmus bir test,
+     gercek bugunun penceresine bakiyor ve "olcum yok" diyordu. Hicbir sey
+     patlamadigi icin de fark edilmiyordu.
+
+     Cozum: tarihe bagli yardimcilar bugunu DISARIYA acilan nesne uzerinden
+     okur. Uretimde ayni degeri dondurur, testte degistirilebilir olur. */
+  function bugunISO(){
+    return (window.ESP && ESP.U && ESP.U.todayISO && ESP.U.todayISO !== todayISO)
+      ? ESP.U.todayISO() : todayISO();
+  }
+
   function lastDays(n, endISO){
-    const end = parse(endISO || todayISO());
+    const end = parse(endISO || bugunISO());
     const out = [];
     for(let i = n - 1; i >= 0; i--) out.push(iso(addDays(end, -i)));
     return out;
@@ -9923,6 +9943,7 @@ ESP.S = {
   timer:null,          // acik pratik zamanlayicisi (core/timer.js)
   usage:null,          // surtunme olcumu (core/friction.js)
   forecasts:[],        // kalibrasyon defteri (core/calib.js)
+  signals:[],          // acik/kapali denetim sorulari (core/signals.js)
   proposals:[],        // ajan teklifleri (onaylanan / reddedilen)
   weekPlan:null,       // onaylanmis haftalik plan
 
@@ -11148,6 +11169,7 @@ ESP.Model = (function(){
     if(ESP.Timer) await ESP.Timer.load();
     if(ESP.Friction) await ESP.Friction.load();
     if(ESP.Calib) await ESP.Calib.load();
+    if(ESP.Signals) await ESP.Signals.load();
 
     S.storeHealth = ESP.Store.health();
     S.ready = true;
@@ -12576,15 +12598,26 @@ ESP.Curriculum = (function(){
     /* -------- diksiyon */
     'diction.recordings':function(){ return count(S.recordings); },
     'diction.minutes30': function(){ return minutes('diction', 30); },
+    /* DIKKAT — bu iki olcu KAYIT OZETINDEN okunur, tek kayittan degil.
+
+       Onceki surumde `ESP.Acoustic.wpmOf()` ve `errorRateOf()` ARGUMANSIZ
+       cagriliyordu; ikisi de tek bir kayit bekler ve bos nesneyle her
+       zaman 'missing' doner. Sonuc: bes merdiven kapisi (WPM >= 120,
+       WPM >= 140, hata orani <= %8 / %5 / %3) kalici olarak
+       "olculemedi" durumunda kaliyordu ve hicbir test bunu gormuyordu,
+       cunku testler tek tek fonksiyonlari deniyordu, kapilari degil.
+
+       Dogrusu son 30 gunun MEDYANIDIR: tek bir iyi kayit kapiyi acmaz,
+       tek bir kotu kayit da kapatmaz. */
     'diction.wpm':       function(){
-      const w = ESP.Acoustic.wpmOf ? ESP.Acoustic.wpmOf() : null;
-      if(!w || w.value == null) return MISSING;
-      return m(w.value, w.cert || 'derived');
+      const d = ESP.Acoustic.dictionStatus(30);
+      if(!d || d.cert === 'missing' || !d.wpm || d.wpm.value == null) return MISSING;
+      return m(d.wpm.value, d.wpm.cert || 'derived');
     },
     'diction.errorRate': function(){
-      const e = ESP.Acoustic.errorRateOf ? ESP.Acoustic.errorRateOf() : null;
-      if(!e || e.value == null) return MISSING;
-      return m(e.value, e.cert || 'estimated');
+      const d = ESP.Acoustic.dictionStatus(30);
+      if(!d || d.cert === 'missing' || !d.errorRate || d.errorRate.value == null) return MISSING;
+      return m(d.errorRate.value, d.errorRate.cert || 'estimated');
     },
 
     /* -------- okuma */
@@ -12700,6 +12733,56 @@ ESP.Curriculum = (function(){
     return { value:r.value, cert:r.cert, metric:name };
   }
 
+
+  /* -------------------------------------------------- BEYANA DAYALI ÖLÇÜM
+
+     Dışarıdan gelen bir eleştiri şunu söyledi: düşük güvenli bir ölçüm
+     kademe ilerlemesine tam olarak katkıda bulunmamalı; yoksa ölçüm
+     kalitesi beceriymiş gibi davranır.
+
+     Eleştirinin gerekçesi (tarayıcı mikrofonunun sinyal/gürültü oranı)
+     bu sistemde geçerli DEĞİL: ESP hiçbir yerde mikrofonu dinlemez,
+     ses analizi yapmaz. Ama kuralın KENDİSİ burada bire bir geçerli,
+     çünkü aynı boşluk başka bir sebeple var:
+
+       Bazı ölçümler kullanıcının KENDİ YARGISINDAN gelir.
+
+     "Bu tekrar temiz miydi?" ve "bu hece hatalı mıydı?" sorularının
+     cevabını sistem bilmiyor; kullanıcı söylüyor. Bu bir ölçümdür ve
+     değerlidir — ama sayaçtan okunan bir dakikayla aynı şey değildir.
+     Kendi kendini değerlendiren bir ölçü, gevşemeye açıktır ve bu
+     gevşeme tam da kademe yükselirken işe yarar hâle gelir.
+
+     Kural: beyana dayalı bir ölçümle geçilen kapı GEÇİLMİŞ SAYILIR ama
+     ZAYIF işaretlenir; o basamağın kesinliği 'measured' olamaz. Kademe
+     durur, ama yanında nasıl ölçüldüğü yazar.
+
+     İkinci kural — «asgari sinyal, üstüne ödül yok»: beyana dayalı bir
+     kapı, o disiplinde en az ASGARI_BEYAN kayıt yoksa hiç değerlendirilmez
+     ('unknown' döner). Eşiğin üstünde daha çok kayıt daha hızlı ilerleme
+     GETİRMEZ; yalnızca ölçümün gürültüsünü düşürür. */
+  const SELF_REPORTED = {
+    'diction.errorRate':'Hataları sen işaretledin; sistem sesini dinlemedi.',
+    'music.cleanBpm':'«Temiz» kararını sen verdin; sistem çalışını dinlemedi.',
+    'music.noPlateau':'Temiz eşik beyanından türetildi.',
+  };
+
+  const ASGARI_BEYAN = 5;
+
+  function selfReported(metric){ return !!SELF_REPORTED[metric]; }
+
+  /* Beyana dayalı ölçümün arkasındaki kayıt sayısı. Eşiğin ALTINDA
+     kapı değerlendirilmez; üstünde fark yaratmaz. */
+  function declaredCount(metric){
+    if(metric === 'diction.errorRate') return (S.recordings || []).length;
+    if(metric === 'music.cleanBpm' || metric === 'music.noPlateau'){
+      return (S.pieces || []).reduce(function(a, p){
+        return a + (p.attempts || []).length;
+      }, 0);
+    }
+    return null;
+  }
+
   /* --------------------------------------------------------------- kapilar */
 
   /* Bir kapinin durumu: 'pass' | 'fail' | 'unknown'.
@@ -12710,10 +12793,26 @@ ESP.Curriculum = (function(){
       return { gate:gate, status:'unknown', value:null, cert:'missing',
         label:gate.label, why:'Bu kapı için henüz ölçüm yok.' };
     }
+
+    /* Asgari sinyal: beyana dayalı bir kapı, arkasında yeterli kayıt
+       yoksa hiç değerlendirilmez. Üç kayıttan çıkan bir hata oranı bir
+       ölçü değil bir izlenimdir. */
+    const beyan = selfReported(gate.metric);
+    if(beyan){
+      const n = declaredCount(gate.metric);
+      if(n != null && n < ASGARI_BEYAN){
+        return { gate:gate, status:'unknown', value:o.value, cert:'estimated',
+          weak:true, declared:n, label:gate.label,
+          why:'Bu kapı senin işaretlemelerine dayanıyor ve arkasında yalnızca '
+            + n + ' kayıt var; değerlendirme için ' + ASGARI_BEYAN + ' gerekir.' };
+      }
+    }
+
     let gecti = true;
     if(gate.min != null && o.value < gate.min) gecti = false;
     if(gate.max != null && o.value > gate.max) gecti = false;
     return { gate:gate, status:gecti ? 'pass' : 'fail', value:o.value, cert:o.cert,
+      weak:beyan, declaredWhy:beyan ? SELF_REPORTED[gate.metric] : null,
       label:gate.label,
       why:gecti ? null : (gate.max != null
         ? 'Ölçülen ' + fmt(o.value) + ', üst sınır ' + fmt(gate.max) + '.'
@@ -12741,10 +12840,16 @@ ESP.Curriculum = (function(){
     const kapilar = step.gates.map(gateStatus);
     const gecen = kapilar.filter(function(g){ return g.status === 'pass'; }).length;
     const bilinmeyen = kapilar.filter(function(g){ return g.status === 'unknown'; }).length;
+    /* Bu basamak BEYANA dayali bir kapiyla mi gecildi? Gecildiyse
+       kademe durur ama kesinligi 'measured' olamaz. */
+    const zayif = kapilar.filter(function(g){
+      return g.status === 'pass' && g.weak;
+    });
     return {
       rank:rank, step:step, gates:kapilar,
       passed:gecen, total:kapilar.length, unknown:bilinmeyen,
       complete:gecen === kapilar.length,
+      weak:zayif.length > 0, weakGates:zayif,
       /* Yuzde ilerleme: bilinmeyen kapi ilerleme SAYILMAZ. */
       pct:kapilar.length ? Math.round(100 * gecen / kapilar.length) : 0,
     };
@@ -12787,10 +12892,24 @@ ESP.Curriculum = (function(){
          unknown   'tahmin'    — bir ust basamakta olculemeyen kapi var;
                    kademe dogru olabilir ama kanitlanmis degil.
          digeri    'hesaplandi' */
+    /* Kademeye BEYANA dayali bir kapiyla ulasildiysa kesinlik 'derived'
+       olamaz: kullanicinin kendi yargisiyla acilan bir kapi, sayactan
+       okunan bir dakikayla ayni kanit degildir. Kademe durur — yaninda
+       nasil olculdugu yazar. */
+    const zayifBasamak = basamaklar.some(function(b){
+      return b.rank <= rank && b.weak;
+    });
     const cert = rank === 0 ? 'missing'
-      : (engel && engel.unknown ? 'estimated' : 'derived');
+      : (engel && engel.unknown) ? 'estimated'
+      : zayifBasamak ? 'estimated' : 'derived';
     return {
       disc:discId, rank:rank, level:seviye, cert:cert,
+      declared:zayifBasamak,
+      declaredWhy:zayifBasamak
+        ? 'Bu kademedeki kapılardan en az biri senin kendi işaretlemenle '
+          + 'geçildi (temiz tekrar ya da hata sayısı). Kademe durur ama '
+          + '«ölçüldü» değil «beyan edildi» sayılır.'
+        : null,
       next:engel, steps:basamaklar, ladder:l,
       /* Merdivenin tamaminda nerede duruyor (0-100). */
       mastery:masteryPct(basamaklar),
@@ -12938,6 +13057,7 @@ ESP.Curriculum = (function(){
     levelOf, all, overall, masteryPct,
     nextGate, roadmap, placement, sentence,
     ladder, traditionsRead,
+    selfReported, declaredCount, ASGARI_BEYAN,
   };
 })();
 
@@ -14237,6 +14357,288 @@ ESP.Goodhart = (function(){
 
   return { PAIRS, windows, pair, scan, flags, brief,
     PENCERE, CABA_ARTIS, SONUC_DURGUN, ASGARI_CABA };
+})();
+
+/* ==== js/core/signals.js ==== */
+/* Sinyal katmani — denetim mekanizmasi ile denetim EKRANI ayni sey degildir.
+
+   Bu dosya bir elestiriden dogdu ve elestiri hakliydi:
+
+     "Sisteme bir denetim katmani eklemek ile kullaniciya bir denetim
+      ekrani eklemek ayni sey degildir. Yeni bir karar mekanizmasinin bir
+      arayuz yuzeyi olmasi gerekmez."
+
+   Nobetci (core/goodhart.js) ve surtunme olcer (core/friction.js) arka
+   planda calisan mekanizmalardir. Kullanicinin "Nobetci → Nobetler →
+   Cabalar → Pencereler" diye bir ekran agacini gezmesi gerekmez; gerekli
+   olan tek sey, dogru anda MEVCUT is akisinin icine dusen TEK BIR SORUDUR.
+
+   Dort karar bu dosyayi yonetir:
+
+   1. AYNI ANDA EN FAZLA BIR ACIK SINYAL. Bu, butun dosyanin en onemli
+      kurali. Uc soruyu ayni anda sormak, uc ekran acmakla ayni sey olur.
+      Yeni bir ayrisma bulunsa bile, acik sinyal kapanmadan siraya girer.
+
+   2. SINYAL BIR SORUDUR, BIR RAPOR DEGIL. Govdesi tek cumle, cevabi tek
+      dokunus. Grafik yok, tablo yok, pencere karsilastirmasi yok — onlar
+      isteyen icin ayrintida durur.
+
+   3. HAYAT DONGUSU KAYDEDILIR: tespit → farkindalik → mudahale → sonuc.
+      "Kac anomali yakaladi" bir fayda olcusu DEGILDIR. Faydayi olcen sey,
+      sorudan SONRA davranisin degisip degismedigi ve sonraki pencerede
+      ayrismanin kapanip kapanmadigidir.
+
+   4. NEDENSELLIK IDDIA EDILMEZ. Zincir kaydedilir, "bu soru sayesinde
+      duzeldi" denmez. Iki pencere arasinda bir suru sey degisir. Sistem
+      yalnizca sirayi gosterir; yorumu kullaniciya birakir. */
+
+window.ESP = window.ESP || {};
+
+ESP.Signals = (function(){
+  const U = ESP.U, S = ESP.S;
+
+  /* Ayni sinyal kapandiktan sonra en az bu kadar gun gecmeden yeniden
+     acilmaz. Ayni soruyu her hafta sormak, soru sormak degil dirtmektir. */
+  const SOGUMA_GUN = 21;
+
+  /* Bir sinyal bu kadar gun cevapsiz kalirsa kendiliginden kapanir:
+     cevaplanmayan soru da bir cevaptir ve israr etmek yuk uretir. */
+  const OMUR_GUN = 14;
+
+  function list(){ return (S.signals || []).slice(); }
+  function open(){ return list().filter(s => s.status === 'open'); }
+  function closed(){ return list().filter(s => s.status !== 'open'); }
+
+  function norm(x){
+    const o = x || {};
+    return {
+      id:o.id || U.uid('sg'),
+      kind:o.kind || 'goodhart',        // goodhart | friction
+      ref:o.ref || null,                // hangi cift / hangi olcum
+      title:String(o.title || ''),
+      question:String(o.question || ''),
+      /* tespit anindaki olcum — sonucu karsilastirmak icin saklanir */
+      snapshot:o.snapshot || null,
+      status:o.status || 'open',        // open | answered | expired | resolved
+      openedAt:o.openedAt || new Date().toISOString(),
+      seenAt:o.seenAt || null,          // kullaniciya GOSTERILDI
+      answeredAt:o.answeredAt || null,  // kullanici CEVAPLADI
+      answer:o.answer || null,
+      closedAt:o.closedAt || null,
+      /* kapanista olculen sonuc — iddia degil, kayit */
+      outcome:o.outcome || null,        // 'realigned' | 'still-decoupled' | 'unmeasurable'
+    };
+  }
+
+  async function save(sig){
+    S.signals = list().map(x => x.id === sig.id ? sig : x);
+    if(!S.signals.some(x => x.id === sig.id)) S.signals = S.signals.concat([sig]);
+    await ESP.Store.set('signals/' + sig.id, sig);
+    return sig;
+  }
+
+  async function load(){
+    S.signals = ((await ESP.Store.list('signals')) || []).map(norm);
+    return S.signals;
+  }
+
+  /* ------------------------------------------------------------ üretim */
+
+  /* Bir çiftin son kapanmış sinyalinden bu yana kaç gün geçti? */
+  function sonKapanis(ref){
+    const g = closed().filter(s => s.ref === ref)
+      .map(s => s.closedAt).filter(Boolean).sort();
+    if(!g.length) return null;
+    return U.diffDays(g[g.length - 1].slice(0, 10), U.todayISO());
+  }
+
+  /* Nöbetçiyi ve sürtünme ölçeri çalıştırır, gerekiyorsa TEK sinyal açar
+     ve açık sinyalin kaderini günceller.
+
+     Bu işlev her açılışta bir kez çağrılır; kendi başına hiçbir şey
+     çizmez. Ekran yüzeyi yok — kural motoru ile iş akışı arasındaki
+     köprü bu. */
+  async function sync(){
+    const bugun = U.todayISO();
+    let degisti = false;
+
+    /* 1 — Açık sinyalin kaderi. */
+    for(const s of open()){
+      const yas = U.diffDays(s.openedAt.slice(0, 10), bugun);
+
+      /* Ayrışma kapandı mı? Kapandıysa sinyal de kapanır ve SONUÇ
+         kaydedilir. Nedensellik iddia edilmez: yalnızca sıra kaydedilir. */
+      if(s.kind === 'goodhart'){
+        const cift = ESP.Goodhart.scan().filter(p => p.id === s.ref)[0];
+        if(cift && cift.status !== 'decoupled'){
+          s.status = s.answeredAt ? 'resolved' : 'expired';
+          s.closedAt = new Date().toISOString();
+          s.outcome = cift.status === 'unknown' ? 'unmeasurable' : 'realigned';
+          await save(s); degisti = true;
+          continue;
+        }
+      }
+      if(yas != null && yas >= OMUR_GUN){
+        s.status = s.answeredAt ? 'resolved' : 'expired';
+        s.closedAt = new Date().toISOString();
+        s.outcome = s.kind === 'goodhart' ? 'still-decoupled' : 'unmeasurable';
+        await save(s); degisti = true;
+      }
+    }
+
+    /* 2 — Açık sinyal varsa YENİSİ AÇILMAZ. Kuralın tamamı bu satırda. */
+    if(open().length) return { changed:degisti, opened:null };
+
+    /* 3 — Yeni sinyal: önce nöbetçi, sonra sürtünme. */
+    const bayraklar = ESP.Goodhart.flags()
+      .filter(p => { const g = sonKapanis(p.id); return g == null || g >= SOGUMA_GUN; });
+
+    if(bayraklar.length){
+      const p = bayraklar[0];
+      const sig = norm({ kind:'goodhart', ref:p.id,
+        title:p.effortLabel + ' → ' + p.outcomeLabel,
+        question:p.question,
+        snapshot:{ effort:p.effort, outcome:p.outcome,
+          effortChange:p.effortChange, outcomeChange:p.outcomeChange } });
+      await save(sig);
+      return { changed:true, opened:sig };
+    }
+
+    const f = ESP.Friction.verdict();
+    if(f.level === 'high' && (sonKapanis('friction') == null
+        || sonKapanis('friction') >= SOGUMA_GUN)){
+      const sig = norm({ kind:'friction', ref:'friction',
+        title:'Sistemde geçen süre',
+        question:'Son iki haftada günde ' + f.window.perDay + ' dakika sistemi '
+          + 'yönetmekle geçti. Hangi kaydı bırakmak işini bozmaz?',
+        snapshot:{ perDay:f.window.perDay, ratio:f.window.ratio } });
+      await save(sig);
+      return { changed:true, opened:sig };
+    }
+
+    return { changed:degisti, opened:null };
+  }
+
+  /* Şu an sorulacak tek soru. Yoksa null — ve sessizlik iyi haberdir. */
+  function current(){ return open()[0] || null; }
+
+  /* Kullanıcıya gösterildi. «Farkındalık» adımı budur ve gösterim
+     anında damgalanır: sonradan "gördü mü" diye sormanın yolu yok. */
+  async function markSeen(id){
+    const s = open().filter(x => x.id === id)[0];
+    if(!s || s.seenAt) return { ok:false };
+    s.seenAt = new Date().toISOString();
+    await save(s);
+    return { ok:true };
+  }
+
+  /* Cevap. Sinyal kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı
+     bir sonraki pencerede ölçülecek. Cevap yalnızca zincire yazılır. */
+  async function answer(id, text){
+    const s = open().filter(x => x.id === id)[0];
+    if(!s) return { ok:false, error:'Açık sinyal bulunamadı.' };
+    s.answeredAt = new Date().toISOString();
+    s.answer = String(text || '').slice(0, 400);
+    s.status = 'open';
+    await save(s);
+    return { ok:true, signal:s };
+  }
+
+  /* Kullanıcı soruyu reddedebilir: «bu bende bir sorun değil». Bu da bir
+     cevaptır ve kaydedilir — sistemin her sorusunun haklı olması gerekmez. */
+  async function dismiss(id, why){
+    const s = open().filter(x => x.id === id)[0];
+    if(!s) return { ok:false };
+    s.status = 'resolved';
+    s.answeredAt = s.answeredAt || new Date().toISOString();
+    s.answer = String(why || 'Kullanıcı bu soruyu geçerli bulmadı.').slice(0, 400);
+    s.closedAt = new Date().toISOString();
+    s.outcome = 'dismissed';
+    await save(s);
+    return { ok:true };
+  }
+
+  /* ---------------------------------------------------------- fayda ölçüsü
+
+     «Kaç anomali yakaladı» bir fayda ölçüsü değildir. Burada ölçülen şey
+     ZİNCİRDİR: kaç soru soruldu, kaçı görüldü, kaçı cevaplandı, ve
+     cevaplananların kaçında ayrışma sonraki pencerede kapandı.
+
+     Son sütun nedensellik DEĞİLDİR ve öyle etiketlenmez. Cevaplanan ve
+     cevaplanmayan sinyallerin kapanma oranını yan yana koymak, elde
+     edilebilecek en dürüst karşılaştırmadır — deney değil, gözlem. */
+  function efficacy(){
+    const hepsi = list();
+    const kapali = closed();
+    const cevaplanan = kapali.filter(s => s.answeredAt && s.outcome !== 'dismissed');
+    const cevapsiz = kapali.filter(s => !s.answeredAt);
+
+    const duzelen = arr => arr.filter(s => s.outcome === 'realigned').length;
+
+    const out = {
+      opened:hepsi.length,
+      seen:hepsi.filter(s => s.seenAt).length,
+      answered:hepsi.filter(s => s.answeredAt).length,
+      dismissed:kapali.filter(s => s.outcome === 'dismissed').length,
+      closed:kapali.length,
+      answeredClosed:cevaplanan.length,
+      unansweredClosed:cevapsiz.length,
+      realignedAfterAnswer:duzelen(cevaplanan),
+      realignedWithoutAnswer:duzelen(cevapsiz),
+      cert:'missing',
+      note:'',
+    };
+
+    /* Az sayida kayit hukum vermez — kalibrasyon defterindeki kuralin
+       aynisi. Uc sinyalle "nobetci ise yariyor" demek, uc soruyla sinav
+       yapmaktir. */
+    const ASGARI = 5;
+    if(kapali.length < ASGARI){
+      out.note = 'Kapanmış ' + kapali.length + ' sinyal var; karşılaştırma için '
+        + ASGARI + ' gerekir. Nöbetçinin işe yarayıp yaramadığı henüz ölçülmedi '
+        + '— ve ölçülmeden «yarıyor» denmez.';
+      return out;
+    }
+    out.cert = 'observed';
+    const oran = (a, n) => n ? Math.round(100 * a / n) : null;
+    out.answeredRate = oran(out.realignedAfterAnswer, cevaplanan.length);
+    out.unansweredRate = oran(out.realignedWithoutAnswer, cevapsiz.length);
+    out.note = 'Cevaplanan ' + cevaplanan.length + ' sinyalin %'
+      + (out.answeredRate == null ? '—' : out.answeredRate) + '\'inde ayrışma '
+      + 'sonraki pencerede kapandı; cevaplanmayan ' + cevapsiz.length
+      + ' sinyalde bu oran %' + (out.unansweredRate == null ? '—' : out.unansweredRate)
+      + '. Bu bir NEDENSELLİK ölçüsü değildir: iki pencere arasında başka '
+      + 'çok şey değişir. Yalnızca sıra kaydedilmiştir.';
+    return out;
+  }
+
+  /* Ekranın kendini kanıtlaması için tek cümle.
+
+     Eğer nöbetçi hiç görülmüyor ya da görülüp hiç cevaplanmıyorsa, bu
+     ekranın varlığı savunulamaz ve sistem bunu KENDİSİ söyler. */
+  function screenVerdict(){
+    const e = efficacy();
+    if(e.opened < 3){
+      return { level:'unknown',
+        text:'Henüz yeterli sinyal üretilmedi; bu sayfanın gerekliliği '
+           + 'ölçülmemiş durumda.' };
+    }
+    if(e.seen === 0){
+      return { level:'unused',
+        text:'Üretilen ' + e.opened + ' sinyalin hiçbiri görülmemiş. '
+           + 'Görülmeyen bir denetim, denetim değildir.' };
+    }
+    if(e.answered === 0){
+      return { level:'ignored',
+        text:'Sinyaller görülüyor ama hiçbiri cevaplanmıyor. Sorular '
+           + 'yanlış soru olabilir ya da yanlış anda geliyor olabilir.' };
+    }
+    return { level:'used',
+      text:e.answered + '/' + e.opened + ' sinyal cevaplanmış. ' + e.note };
+  }
+
+  return { load, sync, current, markSeen, answer, dismiss, efficacy,
+    screenVerdict, list, open, closed, norm, SOGUMA_GUN, OMUR_GUN };
 })();
 
 /* ==== js/core/coach.js ==== */
@@ -21271,6 +21673,47 @@ ESP.Screens.today = (function(){
     });
   }
 
+  /* Denetim sorusu — AYRI EKRAN DEĞİL, mevcut akışın içinde tek satır.
+
+     Nöbetçi ve sürtünme ölçer arka planda çalışır (core/signals.js);
+     buraya yalnızca sıradaki TEK soru düşer. Grafik yok, pencere
+     karşılaştırması yok, "nöbetler" listesi yok — onlar isteyen için
+     Analiz → Dürüstlük'te durur.
+
+     Soru yoksa bu satır HİÇ ÇİZİLMEZ. Sistemin sormadığı gün, iyi gündür. */
+  function signalRow(){
+    if(!ESP.Signals) return null;
+    const sig = ESP.Signals.current();
+    if(!sig) return null;
+
+    /* Gösterim anında «görüldü» damgalanır: sonradan sormanın yolu yok.
+       Yeniden çizim döngüsü açmasın diye sessizce yazılır. */
+    if(!sig.seenAt) ESP.Signals.markSeen(sig.id);
+
+    return K.Entry({
+      label:'BİR SORU', hint:'signal',
+      meta:sig.kind === 'friction' ? 'sürtünme' : 'gösterge',
+      note:sig.title,
+      body:html`
+        ${K.Notice({ tone:'info', body:sig.question })}
+        ${when(sig.answeredAt, () => html`
+          <p class="small muted mt-8">Cevabın: ${sig.answer}</p>
+          <p class="tiny dim">Soru açık kalır: ayrışmanın gerçekten kapanıp
+            kapanmadığı bir sonraki pencerede ölçülecek.</p>`)}
+        ${when(!sig.answeredAt, () => html`
+          <div class="mt-8">
+            ${K.Field({ label:'Kısa cevabın (isteğe bağlı)',
+              input:K.Input({ id:'sig-answer', placeholder:'tek cümle yeter' }) })}
+            <div class="row wrap mt-8">
+              ${K.Button({ label:'Kaydet', tone:'primary', size:'sm', act:'signal-answer',
+                data:{ 'data-id':sig.id } })}
+              ${K.Button({ label:'Bu soru bana uymuyor', size:'sm', act:'signal-dismiss',
+                data:{ 'data-id':sig.id } })}
+            </div>
+          </div>`)}`,
+    });
+  }
+
   /* ------------------------------------------------------------ oturum girisi */
 
   function entryForm(){
@@ -21661,8 +22104,8 @@ ESP.Screens.today = (function(){
     const tab = S.ui.dayTab || 'giris';
     const rows = tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [nextCard(), planRow(), planRowToday(), reminderRow(), entryForm(),
-          quickForm(), sessionList()]
+      : [nextCard(), signalRow(), planRow(), planRowToday(), reminderRow(),
+          entryForm(), quickForm(), sessionList()]
           .filter(Boolean);
 
     return K.Grid(html`
@@ -21676,6 +22119,20 @@ ESP.Screens.today = (function(){
 
   const handle = {
     async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; ESP.App.render(); },
+
+    async 'signal-answer'(el){
+      const inp = document.getElementById('sig-answer');
+      const r = await ESP.Signals.answer(el.dataset.id, inp ? inp.value : '');
+      if(!r.ok){ ESP.UI.toast(r.error); return; }
+      ESP.UI.toast('Kaydedildi. Sonucu bir sonraki pencere gösterecek.');
+      ESP.App.render();
+    },
+
+    async 'signal-dismiss'(el){
+      await ESP.Signals.dismiss(el.dataset.id);
+      ESP.UI.toast('Soru kapatıldı.');
+      ESP.App.render();
+    },
 
     async 'pick-disc'(el){ S.ui.sessionDisc = el.dataset.disc; ESP.App.render(); },
 
@@ -23722,6 +24179,10 @@ ESP.Screens.ladder = (function(){
         <span class="gate__why">${g.status === 'pass' ? 'geçildi' : (g.why || '')}</span>
         ${K.Badge({ label:(ESP.CERTAINTY[g.cert] || ESP.CERTAINTY.missing).label,
           tone:toneOfGate(g), icon:false })}
+        ${when(g.weak && g.status === 'pass', () => K.Badge({ label:'beyan',
+          tone:'warn', icon:false }))}
+        ${when(g.declaredWhy && g.status === 'pass',
+          () => html`<span class="gate__why tiny dim">${g.declaredWhy}</span>`)}
       </li>`;
   }
 
@@ -23822,6 +24283,8 @@ ESP.Screens.ladder = (function(){
       body:html`
         ${K.Meter({ label:'Merdiven', value:lv.mastery, text:'%' + lv.mastery })}
         <p class="rulesay mt-10">${C().sentence(discId)}</p>
+        ${when(lv.declared, () => K.Notice({ tone:'warn', title:'Beyana dayalı kademe',
+          body:lv.declaredWhy }))}
         ${when(kapi, () => K.NextUp({
           icon:kapi.action === 'measure' ? 'info' : 'zap',
           label:kapi.action === 'measure' ? 'Önce ölç' : 'Sıradaki kapı',
@@ -26369,6 +26832,68 @@ ESP.Screens.analytics = (function(){
      görünür olmasıdır. Ölçülmeyen sürtünme sıfır değildir, yalnızca
      görünmezdir. */
 
+  /* Bu sayfanın KENDİ gerekliliği.
+
+     Gelen eleştiri şuydu: «Nöbetçi kullanıcıya görünmeden kaldırıldığında
+     karar kalitesi düşüyor mu? Cevap hayırsa ekran gereksizdir.»
+
+     Cevabı tahmin etmek yerine ölçüyoruz. Asıl iş artık Bugün ekranına
+     düşen tek soruda (core/signals.js); burası o soruların DEFTERİ ve
+     defterin ilk satırı, defterin kendisinin işe yarayıp yaramadığı.
+
+     «Kaç anomali yakaladı» bir fayda ölçüsü değildir. Ölçülen şey zincir:
+     tespit → farkındalık → cevap → sonraki pencerede ayrışma kapandı mı. */
+  function signalLedgerRow(){
+    const e = ESP.Signals.efficacy();
+    const h = ESP.Signals.screenVerdict();
+    const acik = ESP.Signals.current();
+    const kapali = ESP.Signals.closed().slice(-8).reverse();
+
+    return K.Entry({
+      label:'DENETİM DEFTERİ', hint:'signal',
+      meta:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
+      note:'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün '
+         + 'ekranına tek satır olarak düşer. Burası o soruların defteri.',
+      wide:true,
+      body:html`
+        ${K.Notice({ tone:h.level === 'used' ? 'ok' : h.level === 'unknown' ? 'info' : 'warn',
+          title:'Bu sayfa gerekli mi?', body:h.text })}
+
+        ${when(acik, () => K.Notice({ tone:'info', title:'Açık soru',
+          body:acik.question + ' (Bugün ekranında cevaplanabilir.)' }))}
+
+        ${K.Table({ tight:true, headers:['Zincir', { label:'Sayı', num:true }], rows:[
+          ['Açılan sinyal', String(e.opened)],
+          ['Görüldü', String(e.seen)],
+          ['Cevaplandı', String(e.answered)],
+          ['«Bana uymuyor» denildi', String(e.dismissed)],
+          ['Kapandı', String(e.closed)],
+        ] })}
+
+        ${when(e.cert === 'observed', () => K.Table({ tight:true,
+          headers:['Kapanan sinyal', { label:'Adet', num:true },
+            { label:'Ayrışma kapandı', num:true }],
+          rows:[
+            ['Cevaplananlar', String(e.answeredClosed),
+              (e.answeredRate == null ? '—' : '%' + e.answeredRate)],
+            ['Cevaplanmayanlar', String(e.unansweredClosed),
+              (e.unansweredRate == null ? '—' : '%' + e.unansweredRate)],
+          ] }))}
+
+        <p class="tiny dim mt-8">${e.note}</p>
+
+        ${when(kapali.length, () => K.Table({ tight:true,
+          headers:['Soru', 'Cevap', 'Sonuç'],
+          rows:kapali.map(sg => [
+            sg.title,
+            sg.answer ? sg.answer.slice(0, 60) : '—',
+            sg.outcome === 'realigned' ? 'ayrışma kapandı'
+              : sg.outcome === 'still-decoupled' ? 'sürüyor'
+              : sg.outcome === 'dismissed' ? 'geçersiz bulundu' : 'ölçülemedi',
+          ]) }))}`,
+    });
+  }
+
   function honestyRows(){
     const f = ESP.Friction.verdict();
     const rahatlama = ESP.Friction.relief();
@@ -26377,9 +26902,9 @@ ESP.Screens.analytics = (function(){
     const puan = ESP.Calib.score();
     const vadesi = ESP.Calib.due();
 
-    const ton = f.level === 'high' ? 'warn' : f.level === 'watch' ? 'info' : 'ok';
-
     return [
+      signalLedgerRow(),
+
       K.Entry({
         label:'SÜRTÜNME', hint:'friction',
         meta:f.cert === 'missing' ? 'veri yok'
@@ -28632,6 +29157,14 @@ ESP.App = (function(){
       await render();
       installManifest();
       startClock();
+
+      /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez
+         koşar ve gerekiyorsa TEK bir soru açar (core/signals.js). Açılışı
+         bloklamaz; soru varsa Bugün ekranına bir satır olarak düşer. */
+      if(ESP.Signals){
+        ESP.Signals.sync().then(r => { if(r && r.changed) render(); })
+          .catch(e => console.error('Sinyal eşitleme hatası:', e));
+      }
 
       /* Ofis açılışı bloklamaz: yüklenince yeniden çizilir ve günün
          brifingi bir kez üretilir. */

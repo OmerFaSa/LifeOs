@@ -1150,6 +1150,14 @@ R.App = (function(){
       // AI koc yetenegi acilisi bloklamaz; hazir olunca panelleri gostermek icin yeniden ciz.
       installManifest();
       R.Auto.onDayOpen().then(done => { if(done.length) render(); });
+
+      /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez
+         koşar ve gerekiyorsa TEK soru açar (core/signals.js). Açılışı
+         bloklamaz; soru varsa Bugün ekranına bir kart olarak düşer. */
+      if(R.Signals){
+        R.Signals.sync().then(r => { if(r && r.changed) render(); })
+          .catch(e => console.error('Sinyal eşitleme hatası:', e));
+      }
       /* Profil özeti gözetmen tablosu için sessizce tazelenir. */
       try{ if(R.Screens.profiles) R.Screens.profiles.writeSnapshot(); }catch(e){}
       /* Ofis ekibi: ayarlar, defter, sohbetler ve tutanaklar acilisi bloklamaz.

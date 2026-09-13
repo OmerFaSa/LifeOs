@@ -7,6 +7,16 @@
 window.R = window.R || {};
 
 R.HINTS = {
+  /* --- sistemin kendi denetimi --- */
+  'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile gerçekleşen çalışma süresinin payı.',
+    more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar: aday ders çalışmak yerine kendi çalışma sistemini yönetir. Tek dürüst cevap sürtünmeyi de ÖLÇMEKTİR. Süreli deneme açıkken geçen süre sınavdır, yönetim değil. Bütçe (15 dk/gün) VE oran (%25) birlikte aşılmadıkça sistem susar — hafta planı kurulan gün doğal olarak yönetim ağırlıklıdır. Sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
+  'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',
+    more:'Goodhart yasası: bir ölçü hedef hâline geldiğinde iyi bir ölçü olmaktan çıkar. Soru sayısı hedefe dönüştüğünde kolay sorular seçilir, yanlışlar incelenmez, süre tutulmaz — sayı yükselir, net yükselmez. Nöbetçi iki bitişik 28 günlük pencerede çabayı ve sonucu karşılaştırır; hüküm vermez, soru sorar. Çaba düşerken uyarı üretmez: işi tembelliği değil verimsiz gayreti görmektir.' },
+  'calib':{ t:'Kalibrasyon', b:'Sistem söylemeden önce senin tahminin; sonra ikisinin farkı.',
+    more:'Kendi netini kestirebilmek bir süs değil sınav becerisidir: hangi testte zaman harcayacağını, hangi soruyu bırakacağını ve bir denemenin kötü mü yoksa zor mu olduğunu o kestirim söyler. Tahmin KÖR yazılır — net ekranda dururken yazılan tahmin, tahmin değil kopyadır. Beşin altında kapanmış tahminle puan verilmez; puan kişiye değil tahmine aittir.' },
+  'signal':{ t:'Denetim sorusu', b:'Nöbetçinin ya da sürtünme ölçerin sorduğu tek soru.',
+    more:'Denetim mekanizması ile denetim EKRANI aynı şey değildir: arka planda çalışan nöbetçinin bir ekran ağacı olması gerekmez, doğru anda mevcut akışa düşen tek bir soru yeter. Aynı anda en fazla bir soru açık kalır; cevaplamak zorunlu değildir ve «bu soru bana uymuyor» da bir cevaptır. Soru cevaplanınca kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı bir sonraki pencerede ölçülür.' },
+
   /* --- gunluk --- */
   'anchor':{ t:'Günlük çıpalar', b:'Paragraf ve problem her gün sabit kalır; konu değişse de bu iki rutin düşmez.',
     more:'Paragraf TYT Türkçe’nin en büyük soru bloğu (2018–2025 arası 199 soru) ve dokuz ay süren bir beceridir. Problem rutini ilk dört ay boyunca her güne yayılır.' },

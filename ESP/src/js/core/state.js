@@ -51,6 +51,7 @@ ESP.S = {
   timer:null,          // acik pratik zamanlayicisi (core/timer.js)
   usage:null,          // surtunme olcumu (core/friction.js)
   forecasts:[],        // kalibrasyon defteri (core/calib.js)
+  signals:[],          // acik/kapali denetim sorulari (core/signals.js)
   proposals:[],        // ajan teklifleri (onaylanan / reddedilen)
   weekPlan:null,       // onaylanmis haftalik plan
 
@@ -1276,6 +1277,7 @@ ESP.Model = (function(){
     if(ESP.Timer) await ESP.Timer.load();
     if(ESP.Friction) await ESP.Friction.load();
     if(ESP.Calib) await ESP.Calib.load();
+    if(ESP.Signals) await ESP.Signals.load();
 
     S.storeHealth = ESP.Store.health();
     S.ready = true;

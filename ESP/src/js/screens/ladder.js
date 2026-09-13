@@ -40,6 +40,10 @@ ESP.Screens.ladder = (function(){
         <span class="gate__why">${g.status === 'pass' ? 'geçildi' : (g.why || '')}</span>
         ${K.Badge({ label:(ESP.CERTAINTY[g.cert] || ESP.CERTAINTY.missing).label,
           tone:toneOfGate(g), icon:false })}
+        ${when(g.weak && g.status === 'pass', () => K.Badge({ label:'beyan',
+          tone:'warn', icon:false }))}
+        ${when(g.declaredWhy && g.status === 'pass',
+          () => html`<span class="gate__why tiny dim">${g.declaredWhy}</span>`)}
       </li>`;
   }
 
@@ -140,6 +144,8 @@ ESP.Screens.ladder = (function(){
       body:html`
         ${K.Meter({ label:'Merdiven', value:lv.mastery, text:'%' + lv.mastery })}
         <p class="rulesay mt-10">${C().sentence(discId)}</p>
+        ${when(lv.declared, () => K.Notice({ tone:'warn', title:'Beyana dayalı kademe',
+          body:lv.declaredWhy }))}
         ${when(kapi, () => K.NextUp({
           icon:kapi.action === 'measure' ? 'info' : 'zap',
           label:kapi.action === 'measure' ? 'Önce ölç' : 'Sıradaki kapı',

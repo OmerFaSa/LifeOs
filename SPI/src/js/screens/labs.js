@@ -30,7 +30,7 @@ SP.Screens.labs = (function(){
 
   function dayanak(markerId, field){
     const e = SP.Ev.line(markerId, field);
-    return e.grade ? e.label : 'kaynak yok';
+    return e.source ? e.authorityLabel : 'kaynak yok';
   }
 
   const TABS = [
@@ -438,12 +438,21 @@ SP.Screens.labs = (function(){
              <div class="mt-8">
                <div class="row wrap">
                  ${K.Badge({ label:ALAN_ADI[x.f], tone:'muted' })}
-                 ${K.Badge({ label:x.e.label, tone:x.e.tone })}
-                 ${when(!x.e.mayDirect, () => K.Badge({ label:'yönlendirmez', tone:'warn' }))}
+                 ${K.Badge({ label:'kaynak: ' + x.e.label, tone:'muted' })}
+                 ${when(x.e.certaintyLabel,
+                   () => K.Badge({ label:'kesinlik: ' + x.e.certaintyLabel, tone:'muted' }))}
+                 ${when(x.e.applicabilityLabel,
+                   () => K.Badge({ label:'uygulanır: ' + x.e.applicabilityLabel, tone:'muted' }))}
+                 ${K.Badge({ label:x.e.authorityLabel, tone:x.e.tone })}
                </div>
                <p class="small muted mt-4">${x.e.text}</p>
                ${when(x.e.note, () => html`<p class="tiny dim">${x.e.note}</p>`)}
-             </div>`)}`,
+             </div>`)}
+           ${K.Notice({ tone:'info',
+             body:'Kaynak, kesinlik ve uygulanabilirlik birer bilgi; '
+                + '«yetki» ise SPİ\'nin kararıdır — hangi kaynağa dayanarak '
+                + 'ne yapmasına izin verildiğini söyler. Bu bir kanıt '
+                + 'hiyerarşisi değildir.' })}`,
          });
       })(),
       /* SATIR İÇİ DÜZELTME. Bir sayıyı düzeltmek için alt sayfa açıp

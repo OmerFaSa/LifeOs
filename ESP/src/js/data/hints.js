@@ -75,10 +75,14 @@ ESP.HINTS = {
     more:'Üstteki alttakini her zaman yener. Ama yenilen uzmanın işi bitmez: yeni parça yerine mevcut repertuarda ilerleme önerir. «Hiçbir şey yapma» demek değildir.' },
   'ehs':{ t:'Entelektüel hacim', b:'EHS = Σ (disiplin ağırlığı × ölçülen saat × kalite katsayısı).',
     more:'H_i yalnızca ölçülen pratik saatidir; «veri yok» günler toplama girmez. Bu yüzden EHS bir hedef değil bir hacim ölçüsüdür: iki haftada bir bakılır, her gün değil.' },
+  'declared':{ t:'Beyana dayalı kapı', b:'Ölçümü sistem değil sen yaptın: «temiz miydi», «hatalı mıydı».',
+    more:'Beyana dayalı bir kapı geçilmiş sayılır ama ZAYIF işaretlenir ve o kademenin kesinliği «ölçüldü» olamaz. Sebep basit: kendi kendini değerlendiren bir ölçü gevşemeye açıktır ve bu gevşeme tam da kademe yükselirken işe yarar hâle gelir. Ayrıca asgari sinyal kuralı vardır: beş kayıttan az varsa kapı hiç değerlendirilmez; beşin üstünde daha çok kayıt daha hızlı ilerleme getirmez, yalnızca gürültüyü düşürür.' },
   'blind':{ t:'Merdivenin kör noktası', b:'Kapıların ölçemediği ama asıl mesele olan şeyler.',
     more:'Ölçülemeyeni ölçülüyormuş gibi göstermek, ölçmemekten kötüdür. Her merdiven neyi göremediğini açıkça yazar; böylece «Üstat» kademesi bile bir yeterlilik iddiası değil, ölçülebilir üretimin vardığı yer olarak kalır.' },
 
   /* --- sistemin kendi denetimi --- */
+  'signal':{ t:'Denetim sorusu', b:'Nöbetçinin ya da sürtünme ölçerin sorduğu tek soru.',
+    more:'Denetim mekanizması ile denetim EKRANI aynı şey değildir: arka planda çalışan nöbetçinin bir ekran ağacı olması gerekmez, doğru anda mevcut akışa düşen tek bir soru yeter. Aynı anda en fazla bir soru açık kalır; cevaplamak zorunlu değildir ve «bu soru bana uymuyor» da bir cevaptır. Soru cevaplanınca kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı bir sonraki pencerede ölçülür.' },
   'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile çalışmaya giden sürenin payı.',
     more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar. Tek dürüst cevap sürtünmeyi de ÖLÇMEKTİR: uygulama açıkken geçen süre (pratik sayacı çalışırken geçen hariç) yönetim sayılır. İki eşik birden aşılmadıkça sistem susar — bir kurulum günü hüküm değildir. Sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
   'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',

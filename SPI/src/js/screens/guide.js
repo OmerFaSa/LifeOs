@@ -178,10 +178,17 @@ SP.Screens.guide = (function(){
           sonuç üretir. Bu yüzden her eşik kendi kaynağını taşır ve kaynağının
           derecesi, o eşiğin ne kadar güçlü konuşabileceğini belirler.</p>
 
-        ${K.Table({ tight:true, headers:['Derece', 'Ne yapabilir'],
-          rows:SP.EVIDENCE_GRADES.map(g => [
-            g.label, g.mayDirect ? 'Yönlendirebilir' : 'Yalnızca gözlem bildirir',
-          ]) })}
+        ${K.Notice({ tone:'warn', title:'Bu bir kanıt hiyerarşisi değildir',
+          body:SP.Ev.policy().disclaimer })}
+
+        ${K.Table({ tight:true, headers:['Kaynak türü', 'SPİ\'nin tanıdığı yetki'],
+          rows:SP.EVIDENCE_SOURCES.map(src => {
+            const y = SP.AUTHORITY_BY_ID[SP.Ev.policy().defaults[src.id]];
+            return [src.label, y.label + ' — ' + y.note];
+          }) })}
+
+        <p class="tiny dim mt-8">Politika sürümü ${SP.Ev.policy().version}
+          (${SP.Ev.policy().changedAt}). ${SP.Ev.policy().rationale}</p>
 
         ${K.Table({ tight:true, headers:['Ölçüm', { label:'Sayı', num:true }], rows:[
           ['Tanımlı eşik', String(k.total)],

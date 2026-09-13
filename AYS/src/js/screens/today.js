@@ -267,6 +267,44 @@ R.Screens.today = (function(){
   }
 
   /* ---------- uyarilar ---------- */
+  /* Denetim sorusu — AYRI EKRAN DEĞİL, Bugün akışının içinde tek kart.
+
+     Nöbetçi (core/goodhart.js) ve sürtünme ölçer (core/friction.js) arka
+     planda çalışır; buraya yalnızca sıradaki TEK soru düşer. Grafik yok,
+     pencere karşılaştırması yok — onlar isteyen için Analiz →
+     Dürüstlük'te durur. Soru yoksa kart HİÇ ÇİZİLMEZ.
+
+     Bir denetim mekanizmasının bir arayüz yüzeyi olması gerekmez; gerekli
+     olan tek şey, doğru anda doğru sorunun sorulmasıdır. */
+  function SignalCard(){
+    if(!R.Signals) return '';
+    const sig = R.Signals.current();
+    if(!sig) return '';
+    if(!sig.seenAt) R.Signals.markSeen(sig.id);
+
+    return c.Card({ title:'Bir soru', hint:'signal',
+      sub:sig.kind === 'friction' ? 'sürtünme ölçer' : 'gösterge nöbetçisi',
+      body:html`
+        <p class="small muted">${sig.title}</p>
+        ${c.Notice({ tone:'info', body:sig.question })}
+        ${when(sig.answeredAt, () => html`
+          <p class="small muted mt-8">Cevabın: ${sig.answer}</p>
+          <p class="tiny dim">Soru açık kalır: ayrışmanın gerçekten kapanıp
+            kapanmadığı bir sonraki pencerede ölçülecek.</p>`)}
+        ${when(!sig.answeredAt, () => html`
+          <div class="mt-8">
+            ${c.Field({ label:'Kısa cevabın (isteğe bağlı)',
+              input:c.Input({ id:'sig-answer', placeholder:'tek cümle yeter' }) })}
+            <div class="row wrap mt-8">
+              ${c.Button({ label:'Kaydet', tone:'primary', size:'sm',
+                act:'signal-answer', data:{ 'data-id':sig.id } })}
+              ${c.Button({ label:'Bu soru bana uymuyor', size:'sm',
+                act:'signal-dismiss', data:{ 'data-id':sig.id } })}
+            </div>
+          </div>`)}`,
+    });
+  }
+
   function Banners(){
     const out = [];
     const untilStart = M.daysUntilStart();
@@ -514,6 +552,7 @@ R.Screens.today = (function(){
     return c.Grid(html`
       ${when(banners.length, () => c.Span(12, html`<div class="stack-sm">${banners}</div>`))}
       ${c.Span(12, R.Setup.needed() ? raw(R.Setup.card()) : NextUpCard())}
+      ${when(R.Signals && R.Signals.current(), () => c.Span(12, SignalCard()))}
 
       ${c.Span(12, c.Cols(4, html`
         ${c.Stat({ label:'Bugünün bloğu', value:html`${doneBlocks}<small>/${planBlocks}</small>`,
@@ -564,6 +603,20 @@ R.Screens.today = (function(){
 
   /* ---------- eylemler ---------- */
   const handle = {
+    async 'signal-answer'(el){
+      const inp = document.getElementById('sig-answer');
+      const r = await R.Signals.answer(el.dataset.id, inp ? inp.value : '');
+      if(!r.ok){ UI.toast(r.error); return; }
+      UI.toast('Kaydedildi. Sonucu bir sonraki pencere gösterecek.');
+      R.App.render();
+    },
+
+    async 'signal-dismiss'(el){
+      await R.Signals.dismiss(el.dataset.id);
+      UI.toast('Soru kapatıldı');
+      R.App.render();
+    },
+
     async 'bad-day'(){
       UI.confirmSheet(R.BAD_DAY.label,
         'Bugünün hedefi minimum güne iner, kalan bloklar “kötü gün” nedeniyle atlanır ve '

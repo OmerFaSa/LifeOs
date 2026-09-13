@@ -6105,7 +6105,7 @@ tbody tr:hover{ background:var(--surface-2); }
 
 window.R = window.R || {};
 
-R.BUILD = { id:'a313382', at:'2026-09-13 08:01', dirty:true };
+R.BUILD = { id:'5733eb1', at:'2026-09-13 09:34', dirty:true };
 
 /* ==== js/data/curriculum.js ==== */
 /* 40 haftalik uygulama plani — "Hemsirelik Hedefi" belgesinin 4. bolumu.
@@ -7327,6 +7327,16 @@ R.REWARD_TIERS = [
 window.R = window.R || {};
 
 R.HINTS = {
+  /* --- sistemin kendi denetimi --- */
+  'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile gerçekleşen çalışma süresinin payı.',
+    more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar: aday ders çalışmak yerine kendi çalışma sistemini yönetir. Tek dürüst cevap sürtünmeyi de ÖLÇMEKTİR. Süreli deneme açıkken geçen süre sınavdır, yönetim değil. Bütçe (15 dk/gün) VE oran (%25) birlikte aşılmadıkça sistem susar — hafta planı kurulan gün doğal olarak yönetim ağırlıklıdır. Sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
+  'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',
+    more:'Goodhart yasası: bir ölçü hedef hâline geldiğinde iyi bir ölçü olmaktan çıkar. Soru sayısı hedefe dönüştüğünde kolay sorular seçilir, yanlışlar incelenmez, süre tutulmaz — sayı yükselir, net yükselmez. Nöbetçi iki bitişik 28 günlük pencerede çabayı ve sonucu karşılaştırır; hüküm vermez, soru sorar. Çaba düşerken uyarı üretmez: işi tembelliği değil verimsiz gayreti görmektir.' },
+  'calib':{ t:'Kalibrasyon', b:'Sistem söylemeden önce senin tahminin; sonra ikisinin farkı.',
+    more:'Kendi netini kestirebilmek bir süs değil sınav becerisidir: hangi testte zaman harcayacağını, hangi soruyu bırakacağını ve bir denemenin kötü mü yoksa zor mu olduğunu o kestirim söyler. Tahmin KÖR yazılır — net ekranda dururken yazılan tahmin, tahmin değil kopyadır. Beşin altında kapanmış tahminle puan verilmez; puan kişiye değil tahmine aittir.' },
+  'signal':{ t:'Denetim sorusu', b:'Nöbetçinin ya da sürtünme ölçerin sorduğu tek soru.',
+    more:'Denetim mekanizması ile denetim EKRANI aynı şey değildir: arka planda çalışan nöbetçinin bir ekran ağacı olması gerekmez, doğru anda mevcut akışa düşen tek bir soru yeter. Aynı anda en fazla bir soru açık kalır; cevaplamak zorunlu değildir ve «bu soru bana uymuyor» da bir cevaptır. Soru cevaplanınca kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı bir sonraki pencerede ölçülür.' },
+
   /* --- gunluk --- */
   'anchor':{ t:'Günlük çıpalar', b:'Paragraf ve problem her gün sabit kalır; konu değişse de bu iki rutin düşmez.',
     more:'Paragraf TYT Türkçe’nin en büyük soru bloğu (2018–2025 arası 199 soru) ve dokuz ay süren bir beceridir. Problem rutini ilk dört ay boyunca her güne yayılır.' },
@@ -9285,6 +9295,7 @@ R.S = {
   sessions:[],     // sureli deneme oturumlari (soru bazli sure dahil)
   usage:null,      // surtunme olcumu (core/friction.js)
   forecasts:[],    // kalibrasyon defteri (core/calib.js)
+  signals:[],      // acik/kapali denetim sorulari (core/signals.js)
   profiles:[],     // cihazdaki profiller (cok kullanicili kullanim)
   videoNotes:[],   // izlenen ders kaydi + zaman damgali notlar
   solved:[],       // cozulen sorular: metin/fotograf, anlatim, konu, zorluk
@@ -10412,6 +10423,7 @@ R.Model = (function(){
 
     if(R.Friction) await R.Friction.load();
     if(R.Calib) await R.Calib.load();
+    if(R.Signals) await R.Signals.load();
 
     for(const s of R.SUBJECTS){ await ensureTopics(s.id); }
 
@@ -14776,6 +14788,288 @@ R.Goodhart = (function(){
 
   return { PAIRS, windows, pair, scan, flags, brief,
     PENCERE, CABA_ARTIS, SONUC_DURGUN };
+})();
+
+/* ==== js/core/signals.js ==== */
+/* Sinyal katmani — denetim mekanizmasi ile denetim EKRANI ayni sey degildir.
+
+   Bu dosya bir elestiriden dogdu ve elestiri hakliydi:
+
+     "Sisteme bir denetim katmani eklemek ile kullaniciya bir denetim
+      ekrani eklemek ayni sey degildir. Yeni bir karar mekanizmasinin bir
+      arayuz yuzeyi olmasi gerekmez."
+
+   Nobetci (core/goodhart.js) ve surtunme olcer (core/friction.js) arka
+   planda calisan mekanizmalardir. Kullanicinin "Nobetci → Nobetler →
+   Cabalar → Pencereler" diye bir ekran agacini gezmesi gerekmez; gerekli
+   olan tek sey, dogru anda MEVCUT is akisinin icine dusen TEK BIR SORUDUR.
+
+   Dort karar bu dosyayi yonetir:
+
+   1. AYNI ANDA EN FAZLA BIR ACIK SINYAL. Bu, butun dosyanin en onemli
+      kurali. Uc soruyu ayni anda sormak, uc ekran acmakla ayni sey olur.
+      Yeni bir ayrisma bulunsa bile, acik sinyal kapanmadan siraya girer.
+
+   2. SINYAL BIR SORUDUR, BIR RAPOR DEGIL. Govdesi tek cumle, cevabi tek
+      dokunus. Grafik yok, tablo yok, pencere karsilastirmasi yok — onlar
+      isteyen icin ayrintida durur.
+
+   3. HAYAT DONGUSU KAYDEDILIR: tespit → farkindalik → mudahale → sonuc.
+      "Kac anomali yakaladi" bir fayda olcusu DEGILDIR. Faydayi olcen sey,
+      sorudan SONRA davranisin degisip degismedigi ve sonraki pencerede
+      ayrismanin kapanip kapanmadigidir.
+
+   4. NEDENSELLIK IDDIA EDILMEZ. Zincir kaydedilir, "bu soru sayesinde
+      duzeldi" denmez. Iki pencere arasinda bir suru sey degisir. Sistem
+      yalnizca sirayi gosterir; yorumu kullaniciya birakir. */
+
+window.R = window.R || {};
+
+R.Signals = (function(){
+  const U = R.U, S = R.S;
+
+  /* Ayni sinyal kapandiktan sonra en az bu kadar gun gecmeden yeniden
+     acilmaz. Ayni soruyu her hafta sormak, soru sormak degil dirtmektir. */
+  const SOGUMA_GUN = 21;
+
+  /* Bir sinyal bu kadar gun cevapsiz kalirsa kendiliginden kapanir:
+     cevaplanmayan soru da bir cevaptir ve israr etmek yuk uretir. */
+  const OMUR_GUN = 14;
+
+  function list(){ return (S.signals || []).slice(); }
+  function open(){ return list().filter(s => s.status === 'open'); }
+  function closed(){ return list().filter(s => s.status !== 'open'); }
+
+  function norm(x){
+    const o = x || {};
+    return {
+      id:o.id || U.uid('sg'),
+      kind:o.kind || 'goodhart',        // goodhart | friction
+      ref:o.ref || null,                // hangi cift / hangi olcum
+      title:String(o.title || ''),
+      question:String(o.question || ''),
+      /* tespit anindaki olcum — sonucu karsilastirmak icin saklanir */
+      snapshot:o.snapshot || null,
+      status:o.status || 'open',        // open | answered | expired | resolved
+      openedAt:o.openedAt || new Date().toISOString(),
+      seenAt:o.seenAt || null,          // kullaniciya GOSTERILDI
+      answeredAt:o.answeredAt || null,  // kullanici CEVAPLADI
+      answer:o.answer || null,
+      closedAt:o.closedAt || null,
+      /* kapanista olculen sonuc — iddia degil, kayit */
+      outcome:o.outcome || null,        // 'realigned' | 'still-decoupled' | 'unmeasurable'
+    };
+  }
+
+  async function save(sig){
+    S.signals = list().map(x => x.id === sig.id ? sig : x);
+    if(!S.signals.some(x => x.id === sig.id)) S.signals = S.signals.concat([sig]);
+    await R.Store.set('signals/' + sig.id, sig);
+    return sig;
+  }
+
+  async function load(){
+    S.signals = ((await R.Store.list('signals')) || []).map(norm);
+    return S.signals;
+  }
+
+  /* ------------------------------------------------------------ üretim */
+
+  /* Bir çiftin son kapanmış sinyalinden bu yana kaç gün geçti? */
+  function sonKapanis(ref){
+    const g = closed().filter(s => s.ref === ref)
+      .map(s => s.closedAt).filter(Boolean).sort();
+    if(!g.length) return null;
+    return U.diffDays(g[g.length - 1].slice(0, 10), U.todayISO());
+  }
+
+  /* Nöbetçiyi ve sürtünme ölçeri çalıştırır, gerekiyorsa TEK sinyal açar
+     ve açık sinyalin kaderini günceller.
+
+     Bu işlev her açılışta bir kez çağrılır; kendi başına hiçbir şey
+     çizmez. Ekran yüzeyi yok — kural motoru ile iş akışı arasındaki
+     köprü bu. */
+  async function sync(){
+    const bugun = U.todayISO();
+    let degisti = false;
+
+    /* 1 — Açık sinyalin kaderi. */
+    for(const s of open()){
+      const yas = U.diffDays(s.openedAt.slice(0, 10), bugun);
+
+      /* Ayrışma kapandı mı? Kapandıysa sinyal de kapanır ve SONUÇ
+         kaydedilir. Nedensellik iddia edilmez: yalnızca sıra kaydedilir. */
+      if(s.kind === 'goodhart'){
+        const cift = R.Goodhart.scan().filter(p => p.id === s.ref)[0];
+        if(cift && cift.status !== 'decoupled'){
+          s.status = s.answeredAt ? 'resolved' : 'expired';
+          s.closedAt = new Date().toISOString();
+          s.outcome = cift.status === 'unknown' ? 'unmeasurable' : 'realigned';
+          await save(s); degisti = true;
+          continue;
+        }
+      }
+      if(yas != null && yas >= OMUR_GUN){
+        s.status = s.answeredAt ? 'resolved' : 'expired';
+        s.closedAt = new Date().toISOString();
+        s.outcome = s.kind === 'goodhart' ? 'still-decoupled' : 'unmeasurable';
+        await save(s); degisti = true;
+      }
+    }
+
+    /* 2 — Açık sinyal varsa YENİSİ AÇILMAZ. Kuralın tamamı bu satırda. */
+    if(open().length) return { changed:degisti, opened:null };
+
+    /* 3 — Yeni sinyal: önce nöbetçi, sonra sürtünme. */
+    const bayraklar = R.Goodhart.flags()
+      .filter(p => { const g = sonKapanis(p.id); return g == null || g >= SOGUMA_GUN; });
+
+    if(bayraklar.length){
+      const p = bayraklar[0];
+      const sig = norm({ kind:'goodhart', ref:p.id,
+        title:p.effortLabel + ' → ' + p.outcomeLabel,
+        question:p.question,
+        snapshot:{ effort:p.effort, outcome:p.outcome,
+          effortChange:p.effortChange, outcomeChange:p.outcomeChange } });
+      await save(sig);
+      return { changed:true, opened:sig };
+    }
+
+    const f = R.Friction.verdict();
+    if(f.level === 'high' && (sonKapanis('friction') == null
+        || sonKapanis('friction') >= SOGUMA_GUN)){
+      const sig = norm({ kind:'friction', ref:'friction',
+        title:'Sistemde geçen süre',
+        question:'Son iki haftada günde ' + f.window.perDay + ' dakika sistemi '
+          + 'yönetmekle geçti. Hangi kaydı bırakmak çalışmanı bozmaz?',
+        snapshot:{ perDay:f.window.perDay, ratio:f.window.ratio } });
+      await save(sig);
+      return { changed:true, opened:sig };
+    }
+
+    return { changed:degisti, opened:null };
+  }
+
+  /* Şu an sorulacak tek soru. Yoksa null — ve sessizlik iyi haberdir. */
+  function current(){ return open()[0] || null; }
+
+  /* Kullanıcıya gösterildi. «Farkındalık» adımı budur ve gösterim
+     anında damgalanır: sonradan "gördü mü" diye sormanın yolu yok. */
+  async function markSeen(id){
+    const s = open().filter(x => x.id === id)[0];
+    if(!s || s.seenAt) return { ok:false };
+    s.seenAt = new Date().toISOString();
+    await save(s);
+    return { ok:true };
+  }
+
+  /* Cevap. Sinyal kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı
+     bir sonraki pencerede ölçülecek. Cevap yalnızca zincire yazılır. */
+  async function answer(id, text){
+    const s = open().filter(x => x.id === id)[0];
+    if(!s) return { ok:false, error:'Açık sinyal bulunamadı.' };
+    s.answeredAt = new Date().toISOString();
+    s.answer = String(text || '').slice(0, 400);
+    s.status = 'open';
+    await save(s);
+    return { ok:true, signal:s };
+  }
+
+  /* Kullanıcı soruyu reddedebilir: «bu bende bir sorun değil». Bu da bir
+     cevaptır ve kaydedilir — sistemin her sorusunun haklı olması gerekmez. */
+  async function dismiss(id, why){
+    const s = open().filter(x => x.id === id)[0];
+    if(!s) return { ok:false };
+    s.status = 'resolved';
+    s.answeredAt = s.answeredAt || new Date().toISOString();
+    s.answer = String(why || 'Kullanıcı bu soruyu geçerli bulmadı.').slice(0, 400);
+    s.closedAt = new Date().toISOString();
+    s.outcome = 'dismissed';
+    await save(s);
+    return { ok:true };
+  }
+
+  /* ---------------------------------------------------------- fayda ölçüsü
+
+     «Kaç anomali yakaladı» bir fayda ölçüsü değildir. Burada ölçülen şey
+     ZİNCİRDİR: kaç soru soruldu, kaçı görüldü, kaçı cevaplandı, ve
+     cevaplananların kaçında ayrışma sonraki pencerede kapandı.
+
+     Son sütun nedensellik DEĞİLDİR ve öyle etiketlenmez. Cevaplanan ve
+     cevaplanmayan sinyallerin kapanma oranını yan yana koymak, elde
+     edilebilecek en dürüst karşılaştırmadır — deney değil, gözlem. */
+  function efficacy(){
+    const hepsi = list();
+    const kapali = closed();
+    const cevaplanan = kapali.filter(s => s.answeredAt && s.outcome !== 'dismissed');
+    const cevapsiz = kapali.filter(s => !s.answeredAt);
+
+    const duzelen = arr => arr.filter(s => s.outcome === 'realigned').length;
+
+    const out = {
+      opened:hepsi.length,
+      seen:hepsi.filter(s => s.seenAt).length,
+      answered:hepsi.filter(s => s.answeredAt).length,
+      dismissed:kapali.filter(s => s.outcome === 'dismissed').length,
+      closed:kapali.length,
+      answeredClosed:cevaplanan.length,
+      unansweredClosed:cevapsiz.length,
+      realignedAfterAnswer:duzelen(cevaplanan),
+      realignedWithoutAnswer:duzelen(cevapsiz),
+      cert:'missing',
+      note:'',
+    };
+
+    /* Az sayida kayit hukum vermez — kalibrasyon defterindeki kuralin
+       aynisi. Uc sinyalle "nobetci ise yariyor" demek, uc soruyla sinav
+       yapmaktir. */
+    const ASGARI = 5;
+    if(kapali.length < ASGARI){
+      out.note = 'Kapanmış ' + kapali.length + ' sinyal var; karşılaştırma için '
+        + ASGARI + ' gerekir. Nöbetçinin işe yarayıp yaramadığı henüz ölçülmedi '
+        + '— ve ölçülmeden «yarıyor» denmez.';
+      return out;
+    }
+    out.cert = 'observed';
+    const oran = (a, n) => n ? Math.round(100 * a / n) : null;
+    out.answeredRate = oran(out.realignedAfterAnswer, cevaplanan.length);
+    out.unansweredRate = oran(out.realignedWithoutAnswer, cevapsiz.length);
+    out.note = 'Cevaplanan ' + cevaplanan.length + ' sinyalin %'
+      + (out.answeredRate == null ? '—' : out.answeredRate) + '\'inde ayrışma '
+      + 'sonraki pencerede kapandı; cevaplanmayan ' + cevapsiz.length
+      + ' sinyalde bu oran %' + (out.unansweredRate == null ? '—' : out.unansweredRate)
+      + '. Bu bir NEDENSELLİK ölçüsü değildir: iki pencere arasında başka '
+      + 'çok şey değişir. Yalnızca sıra kaydedilmiştir.';
+    return out;
+  }
+
+  /* Ekranın kendini kanıtlaması için tek cümle.
+
+     Eğer nöbetçi hiç görülmüyor ya da görülüp hiç cevaplanmıyorsa, bu
+     ekranın varlığı savunulamaz ve sistem bunu KENDİSİ söyler. */
+  function screenVerdict(){
+    const e = efficacy();
+    if(e.opened < 3){
+      return { level:'unknown',
+        text:'Henüz yeterli sinyal üretilmedi; bu sayfanın gerekliliği '
+           + 'ölçülmemiş durumda.' };
+    }
+    if(e.seen === 0){
+      return { level:'unused',
+        text:'Üretilen ' + e.opened + ' sinyalin hiçbiri görülmemiş. '
+           + 'Görülmeyen bir denetim, denetim değildir.' };
+    }
+    if(e.answered === 0){
+      return { level:'ignored',
+        text:'Sinyaller görülüyor ama hiçbiri cevaplanmıyor. Sorular '
+           + 'yanlış soru olabilir ya da yanlış anda geliyor olabilir.' };
+    }
+    return { level:'used',
+      text:e.answered + '/' + e.opened + ' sinyal cevaplanmış. ' + e.note };
+  }
+
+  return { load, sync, current, markSeen, answer, dismiss, efficacy,
+    screenVerdict, list, open, closed, norm, SOGUMA_GUN, OMUR_GUN };
 })();
 
 /* ==== js/core/auto.js ==== */
@@ -23160,6 +23454,44 @@ R.Screens.today = (function(){
   }
 
   /* ---------- uyarilar ---------- */
+  /* Denetim sorusu — AYRI EKRAN DEĞİL, Bugün akışının içinde tek kart.
+
+     Nöbetçi (core/goodhart.js) ve sürtünme ölçer (core/friction.js) arka
+     planda çalışır; buraya yalnızca sıradaki TEK soru düşer. Grafik yok,
+     pencere karşılaştırması yok — onlar isteyen için Analiz →
+     Dürüstlük'te durur. Soru yoksa kart HİÇ ÇİZİLMEZ.
+
+     Bir denetim mekanizmasının bir arayüz yüzeyi olması gerekmez; gerekli
+     olan tek şey, doğru anda doğru sorunun sorulmasıdır. */
+  function SignalCard(){
+    if(!R.Signals) return '';
+    const sig = R.Signals.current();
+    if(!sig) return '';
+    if(!sig.seenAt) R.Signals.markSeen(sig.id);
+
+    return c.Card({ title:'Bir soru', hint:'signal',
+      sub:sig.kind === 'friction' ? 'sürtünme ölçer' : 'gösterge nöbetçisi',
+      body:html`
+        <p class="small muted">${sig.title}</p>
+        ${c.Notice({ tone:'info', body:sig.question })}
+        ${when(sig.answeredAt, () => html`
+          <p class="small muted mt-8">Cevabın: ${sig.answer}</p>
+          <p class="tiny dim">Soru açık kalır: ayrışmanın gerçekten kapanıp
+            kapanmadığı bir sonraki pencerede ölçülecek.</p>`)}
+        ${when(!sig.answeredAt, () => html`
+          <div class="mt-8">
+            ${c.Field({ label:'Kısa cevabın (isteğe bağlı)',
+              input:c.Input({ id:'sig-answer', placeholder:'tek cümle yeter' }) })}
+            <div class="row wrap mt-8">
+              ${c.Button({ label:'Kaydet', tone:'primary', size:'sm',
+                act:'signal-answer', data:{ 'data-id':sig.id } })}
+              ${c.Button({ label:'Bu soru bana uymuyor', size:'sm',
+                act:'signal-dismiss', data:{ 'data-id':sig.id } })}
+            </div>
+          </div>`)}`,
+    });
+  }
+
   function Banners(){
     const out = [];
     const untilStart = M.daysUntilStart();
@@ -23407,6 +23739,7 @@ R.Screens.today = (function(){
     return c.Grid(html`
       ${when(banners.length, () => c.Span(12, html`<div class="stack-sm">${banners}</div>`))}
       ${c.Span(12, R.Setup.needed() ? raw(R.Setup.card()) : NextUpCard())}
+      ${when(R.Signals && R.Signals.current(), () => c.Span(12, SignalCard()))}
 
       ${c.Span(12, c.Cols(4, html`
         ${c.Stat({ label:'Bugünün bloğu', value:html`${doneBlocks}<small>/${planBlocks}</small>`,
@@ -23457,6 +23790,20 @@ R.Screens.today = (function(){
 
   /* ---------- eylemler ---------- */
   const handle = {
+    async 'signal-answer'(el){
+      const inp = document.getElementById('sig-answer');
+      const r = await R.Signals.answer(el.dataset.id, inp ? inp.value : '');
+      if(!r.ok){ UI.toast(r.error); return; }
+      UI.toast('Kaydedildi. Sonucu bir sonraki pencere gösterecek.');
+      R.App.render();
+    },
+
+    async 'signal-dismiss'(el){
+      await R.Signals.dismiss(el.dataset.id);
+      UI.toast('Soru kapatıldı');
+      R.App.render();
+    },
+
     async 'bad-day'(){
       UI.confirmSheet(R.BAD_DAY.label,
         'Bugünün hedefi minimum güne iner, kalan bloklar “kötü gün” nedeniyle atlanır ve '
@@ -28731,6 +29078,58 @@ R.Screens.analytics = (function(){
      olmasıdır. Sınav salonunda hiçbir ekran yoktur — orada yalnızca
      üçüncüsü işe yarar. */
 
+
+  /* Bu sayfanın KENDİ gerekliliği.
+
+     Gelen eleştiri şuydu: «Nöbetçi kullanıcıya görünmeden kaldırıldığında
+     karar kalitesi düşüyor mu? Cevap hayırsa ekran gereksizdir.»
+
+     Cevabı tahmin etmek yerine ölçüyoruz. Asıl iş Bugün ekranına düşen tek
+     soruda (core/signals.js); burası o soruların defteri — ve defterin ilk
+     satırı, defterin kendisinin işe yarayıp yaramadığı.
+
+     «Kaç anomali yakaladı» bir fayda ölçüsü DEĞİLDİR. Ölçülen şey zincir:
+     tespit → farkındalık → cevap → sonraki pencerede ayrışma kapandı mı. */
+  function SignalLedger(){
+    const e = R.Signals.efficacy();
+    const h = R.Signals.screenVerdict();
+    const acik = R.Signals.current();
+    const kapali = R.Signals.closed().slice(-8).reverse();
+
+    return K.Card({ title:'Denetim defteri', hint:'signal',
+      sub:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
+      body:html`
+        ${K.Notice({ tone:h.level === 'used' ? 'ok' : h.level === 'unknown' ? 'info' : 'warn',
+          title:'Bu sayfa gerekli mi?', body:h.text })}
+        ${when(acik, () => html`<div class="mt-8">${K.Notice({ tone:'info',
+          title:'Açık soru', body:acik.question + ' (Bugün ekranında cevaplanabilir.)' })}</div>`)}
+        <div class="mt-12">${K.Table({ tight:true,
+          headers:['Zincir', { label:'Sayı', num:true }], rows:[
+            ['Açılan sinyal', String(e.opened)],
+            ['Görüldü', String(e.seen)],
+            ['Cevaplandı', String(e.answered)],
+            ['«Bana uymuyor» denildi', String(e.dismissed)],
+            ['Kapandı', String(e.closed)],
+          ] })}</div>
+        ${when(e.cert === 'observed', () => html`<div class="mt-12">${K.Table({ tight:true,
+          headers:['Kapanan sinyal', { label:'Adet', num:true }, { label:'Ayrışma kapandı', num:true }],
+          rows:[
+            ['Cevaplananlar', String(e.answeredClosed),
+              e.answeredRate == null ? '—' : '%' + e.answeredRate],
+            ['Cevaplanmayanlar', String(e.unansweredClosed),
+              e.unansweredRate == null ? '—' : '%' + e.unansweredRate],
+          ] })}</div>`)}
+        <p class="tiny dim mt-8">${e.note}</p>
+        ${when(kapali.length, () => html`<div class="mt-12">${K.Table({ tight:true,
+          headers:['Soru', 'Cevap', 'Sonuç'],
+          rows:kapali.map(sg => [sg.title, sg.answer ? sg.answer.slice(0, 60) : '—',
+            sg.outcome === 'realigned' ? 'ayrışma kapandı'
+              : sg.outcome === 'still-decoupled' ? 'sürüyor'
+              : sg.outcome === 'dismissed' ? 'geçersiz bulundu' : 'ölçülemedi',
+          ]) })}</div>`)}`,
+    });
+  }
+
   function durustTab(){
     const f = R.Friction.verdict();
     const rahat = R.Friction.relief();
@@ -28740,6 +29139,7 @@ R.Screens.analytics = (function(){
     const vade = R.Calib.due();
 
     return K.Grid([
+      K.Span(12, SignalLedger()),
       K.Span(6, K.Stack([
         K.Card({ title:'Sürtünme', hint:'friction',
           sub:'Sistemi yönetmek ile çalışmak',
@@ -33573,6 +33973,14 @@ R.App = (function(){
       // AI koc yetenegi acilisi bloklamaz; hazir olunca panelleri gostermek icin yeniden ciz.
       installManifest();
       R.Auto.onDayOpen().then(done => { if(done.length) render(); });
+
+      /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez
+         koşar ve gerekiyorsa TEK soru açar (core/signals.js). Açılışı
+         bloklamaz; soru varsa Bugün ekranına bir kart olarak düşer. */
+      if(R.Signals){
+        R.Signals.sync().then(r => { if(r && r.changed) render(); })
+          .catch(e => console.error('Sinyal eşitleme hatası:', e));
+      }
       /* Profil özeti gözetmen tablosu için sessizce tazelenir. */
       try{ if(R.Screens.profiles) R.Screens.profiles.writeSnapshot(); }catch(e){}
       /* Ofis ekibi: ayarlar, defter, sohbetler ve tutanaklar acilisi bloklamaz.

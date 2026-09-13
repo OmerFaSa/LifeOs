@@ -562,6 +562,32 @@ düzenidir.
 Testler bu listelerin varlığını ve **sayı eşiği içermemesini** denetler:
 ölçülebilir bir eşik yazılabiliyorsa o zaten bir kapı olmalıydı.
 
+
+### Sinyal katmanı — `core/signals.js`
+
+Gelen ikinci tur eleştiri haklıydı: *bir denetim mekanizmasının bir arayüz
+yüzeyi olması gerekmez.* Nöbetçi ve sürtünme ölçer artık arka planda
+çalışır; kullanıcıya **Bugün ekranına düşen tek bir soru** gider. Aynı anda
+en fazla bir soru açıktır — bu, dosyanın en önemli kuralı. Cevap soruyu
+kapatmaz; ayrışmanın gerçekten kapanıp kapanmadığı sonraki pencerede
+ölçülür. «Bu soru bana uymuyor» da bir cevaptır.
+
+Hayat döngüsü kaydedilir: **tespit → farkındalık → cevap → sonraki
+pencerede ayrışma kapandı mı.** Analiz → Dürüstlük sekmesi bu defterin
+özetiyle açılır ve ilk satırı **kendi gerekliliğini** raporlar: hiç
+görülmemiş sinyaller varsa «görülmeyen bir denetim, denetim değildir»
+der. Nedensellik iddia edilmez ve bu, testle denetlenir.
+
+### Beyana dayalı kapı — `core/curriculum.js`
+
+*Düşük güvenli ölçüm kademe ilerlemesine tam katkıda bulunmamalı*
+eleştirisi, ESP'de mikrofon olmadığı için farklı bir sebeple geçerli:
+bazı ölçümler kullanıcının **kendi yargısından** gelir («bu tekrar temiz
+miydi», «bu hece hatalı mıydı»). Üç kural: asgari 5 kayıt yoksa kapı
+değerlendirilmez; eşiğin üstünde fazladan kayıt ayrıcalık sağlamaz;
+beyanla geçilen kapı geçer ama `weak` işaretlenir ve o kademenin
+kesinliği `derived` olamaz. Ayrıntı: [`AKUSTIK.md`](AKUSTIK.md).
+
 ### Nerede görünür
 
 Analiz ekranında **Dürüstlük** sekmesi; merdiven ekranında **«Bu
@@ -571,7 +597,7 @@ merdivenin göremediği»** bölümü.
 
 | Ölçüm | Sonuç |
 |---|---|
-| Birim testi | **501/501** geçiyor |
+| Birim testi | **521/521** geçiyor |
 | Duman testi | temiz — 14 ekran, **85 sekme**, kaynak + `dist/esp.html` |
 | Erişilebilirlik | temiz (4 bilinen eksik izin listesinde) |
 | Kontrast | **1848 ölçüm**, hepsi AA — en dar pay 4,52 (asgari 4,5) |

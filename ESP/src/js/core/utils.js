@@ -87,7 +87,7 @@ ESP.U = (function(){
   function monthKey(d){ const x = parse(d); return x.getFullYear()+'-'+pad2(x.getMonth()+1); }
 
   function relativeDay(dateISO){
-    const n = diffDays(todayISO(), dateISO);
+    const n = diffDays(bugunISO(), dateISO);
     if(n === 0) return 'bugün';
     if(n === 1) return 'yarın';
     if(n === -1) return 'dün';
@@ -174,8 +174,24 @@ ESP.U = (function(){
   /* Son n gunun ISO tarihleri, ESKIDEN YENIYE. Bir pencereyi gezerken
      sirali olmasi onemli: ilk yarisi gecen hafta, ikinci yarisi bu hafta
      gibi karsilastirmalar bu siraya dayanir. */
+
+  /* "Bugun" TEK bir yerden okunur.
+
+     Modul icinden dogrudan `todayISO()` cagirmak sessiz bir tuzak uretti:
+     testler `withToday()` ile ESP.U.todayISO'yu degistiriyor ama modul ici
+     cagrilar o degisimi GORMUYORDU. Sonuc: sahte tarihle kurulmus bir test,
+     gercek bugunun penceresine bakiyor ve "olcum yok" diyordu. Hicbir sey
+     patlamadigi icin de fark edilmiyordu.
+
+     Cozum: tarihe bagli yardimcilar bugunu DISARIYA acilan nesne uzerinden
+     okur. Uretimde ayni degeri dondurur, testte degistirilebilir olur. */
+  function bugunISO(){
+    return (window.ESP && ESP.U && ESP.U.todayISO && ESP.U.todayISO !== todayISO)
+      ? ESP.U.todayISO() : todayISO();
+  }
+
   function lastDays(n, endISO){
-    const end = parse(endISO || todayISO());
+    const end = parse(endISO || bugunISO());
     const out = [];
     for(let i = n - 1; i >= 0; i--) out.push(iso(addDays(end, -i)));
     return out;

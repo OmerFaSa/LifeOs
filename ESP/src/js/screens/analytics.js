@@ -253,6 +253,68 @@ ESP.Screens.analytics = (function(){
      görünür olmasıdır. Ölçülmeyen sürtünme sıfır değildir, yalnızca
      görünmezdir. */
 
+  /* Bu sayfanın KENDİ gerekliliği.
+
+     Gelen eleştiri şuydu: «Nöbetçi kullanıcıya görünmeden kaldırıldığında
+     karar kalitesi düşüyor mu? Cevap hayırsa ekran gereksizdir.»
+
+     Cevabı tahmin etmek yerine ölçüyoruz. Asıl iş artık Bugün ekranına
+     düşen tek soruda (core/signals.js); burası o soruların DEFTERİ ve
+     defterin ilk satırı, defterin kendisinin işe yarayıp yaramadığı.
+
+     «Kaç anomali yakaladı» bir fayda ölçüsü değildir. Ölçülen şey zincir:
+     tespit → farkındalık → cevap → sonraki pencerede ayrışma kapandı mı. */
+  function signalLedgerRow(){
+    const e = ESP.Signals.efficacy();
+    const h = ESP.Signals.screenVerdict();
+    const acik = ESP.Signals.current();
+    const kapali = ESP.Signals.closed().slice(-8).reverse();
+
+    return K.Entry({
+      label:'DENETİM DEFTERİ', hint:'signal',
+      meta:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
+      note:'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün '
+         + 'ekranına tek satır olarak düşer. Burası o soruların defteri.',
+      wide:true,
+      body:html`
+        ${K.Notice({ tone:h.level === 'used' ? 'ok' : h.level === 'unknown' ? 'info' : 'warn',
+          title:'Bu sayfa gerekli mi?', body:h.text })}
+
+        ${when(acik, () => K.Notice({ tone:'info', title:'Açık soru',
+          body:acik.question + ' (Bugün ekranında cevaplanabilir.)' }))}
+
+        ${K.Table({ tight:true, headers:['Zincir', { label:'Sayı', num:true }], rows:[
+          ['Açılan sinyal', String(e.opened)],
+          ['Görüldü', String(e.seen)],
+          ['Cevaplandı', String(e.answered)],
+          ['«Bana uymuyor» denildi', String(e.dismissed)],
+          ['Kapandı', String(e.closed)],
+        ] })}
+
+        ${when(e.cert === 'observed', () => K.Table({ tight:true,
+          headers:['Kapanan sinyal', { label:'Adet', num:true },
+            { label:'Ayrışma kapandı', num:true }],
+          rows:[
+            ['Cevaplananlar', String(e.answeredClosed),
+              (e.answeredRate == null ? '—' : '%' + e.answeredRate)],
+            ['Cevaplanmayanlar', String(e.unansweredClosed),
+              (e.unansweredRate == null ? '—' : '%' + e.unansweredRate)],
+          ] }))}
+
+        <p class="tiny dim mt-8">${e.note}</p>
+
+        ${when(kapali.length, () => K.Table({ tight:true,
+          headers:['Soru', 'Cevap', 'Sonuç'],
+          rows:kapali.map(sg => [
+            sg.title,
+            sg.answer ? sg.answer.slice(0, 60) : '—',
+            sg.outcome === 'realigned' ? 'ayrışma kapandı'
+              : sg.outcome === 'still-decoupled' ? 'sürüyor'
+              : sg.outcome === 'dismissed' ? 'geçersiz bulundu' : 'ölçülemedi',
+          ]) }))}`,
+    });
+  }
+
   function honestyRows(){
     const f = ESP.Friction.verdict();
     const rahatlama = ESP.Friction.relief();
@@ -261,9 +323,9 @@ ESP.Screens.analytics = (function(){
     const puan = ESP.Calib.score();
     const vadesi = ESP.Calib.due();
 
-    const ton = f.level === 'high' ? 'warn' : f.level === 'watch' ? 'info' : 'ok';
-
     return [
+      signalLedgerRow(),
+
       K.Entry({
         label:'SÜRTÜNME', hint:'friction',
         meta:f.cert === 'missing' ? 'veri yok'

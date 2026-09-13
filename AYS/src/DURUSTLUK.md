@@ -96,3 +96,54 @@ Betik 18 ekranı ve 16 sekmeyi hem kaynakta hem `dist/rota.html`'de gezer,
 kör net tahmini akışını uçtan uca dener. İlk koşumunda gerçek bir hata
 buldu: körlük denetimi test **adı** alanına da bakıyordu ve o alan
 şablondan dolu geldiği için her tahmini "kör değil" sayıyordu.
+
+---
+
+## İkinci tur — gelen eleştiri ve karşılığı
+
+Yukarıdaki üç katman yayımlandıktan sonra gelen eleştiri şuydu:
+
+> **«Sisteme bir denetim katmanı eklemek ile kullanıcıya bir denetim
+> ekranı eklemek aynı şey değildir. Her yeni karar mekanizmasının bir UI
+> yüzeyi olması gerekmez.»**
+
+Haklıydı. Nöbetçi ve kalibrasyon defteri, ayrı birer ekran oldukları
+sürece «bilişsel yük» eleştirisine tam cevap vermiyordu: sistem gerçek
+problemi çözmek yerine «ben senin davranışını denetleyen bir denetim
+sistemi kurdum» demeye başlıyordu.
+
+### Sinyal katmanı — `core/signals.js`
+
+Mekanizma kaldı, **yüzey değişti**. Nöbetçi ve sürtünme ölçer arka planda
+çalışır; kullanıcıya yalnızca **Bugün ekranına düşen tek bir soru** gider.
+
+| Kural | Sebep |
+|---|---|
+| Aynı anda en fazla **bir** açık sinyal | Üç soruyu aynı anda sormak, üç ekran açmakla aynı şey |
+| Sinyal bir **soru**dur, bir rapor değil | Gövdesi tek cümle, cevabı tek dokunuş |
+| Cevap soruyu **kapatmaz** | Ayrışmanın gerçekten kapanıp kapanmadığı sonraki pencerede ölçülür |
+| «Bu soru bana uymuyor» da bir **cevaptır** | Sistemin her sorusunun haklı olması gerekmez |
+| Kapanan sinyal 21 gün **soğur** | Aynı soruyu her hafta sormak, soru sormak değil dürtmektir |
+| 14 gün cevapsız sinyal kendiliğinden kapanır | Cevaplanmayan soru da bir cevaptır; ısrar yük üretir |
+
+### Fayda ölçüsü — ekran kendini kanıtlar
+
+Aynı eleştiri ikinci bir kriter koydu: *«Kaç anomali yakaladı» yeterli
+değildir; downstream outcome gerekir.* Bu da uygulandı.
+
+Sinyalin hayat döngüsü kaydediliyor: **tespit → farkındalık → cevap →
+sonraki pencerede ayrışma kapandı mı.** Analiz → Dürüstlük sekmesinin ilk
+satırı artık üç dashboard değil, bu defterin özeti — ve defterin kendisi
+hakkındaki hüküm:
+
+- Üretilen sinyallerin hiçbiri görülmemişse: *«Görülmeyen bir denetim,
+  denetim değildir.»*
+- Görülüp hiç cevaplanmıyorsa: *«Sorular yanlış soru olabilir ya da
+  yanlış anda geliyor olabilir.»*
+- Beşten az kapanmış sinyalde hiçbir hüküm verilmez.
+
+Cevaplanan ve cevaplanmayan sinyallerin ayrışma kapanma oranları yan yana
+konur — **ama bu bir nedensellik ölçüsü değildir ve öyle etiketlenmez**:
+iki pencere arasında başka çok şey değişir. Sistem yalnızca sırayı
+kaydeder, yorumu adaya bırakır. Testler bu cümlenin varlığını denetler
+(`durustluk.test.js` → «fayda notu nedensellik iddia etmez»).

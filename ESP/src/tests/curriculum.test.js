@@ -209,3 +209,79 @@
     });
   });
 })();
+
+/* Beyana dayalı ölçüm — kendi yargın bir ölçümdür ama sayaçla aynı şey değil. */
+(function(){
+  const { describe, it, expect, resetState, withToday, pushSession } = ESP.Test;
+  const C = () => ESP.Curriculum;
+  const S = ESP.S;
+
+  function kayit(n, hata, kelime){
+    for(let i = 0; i < n; i++){
+      S.recordings.push({ id:'r' + i, date:ESP.U.todayISO(),
+        words:kelime, wordsCert:'measured',
+        errors:hata, errorsCert:'measured',
+        seconds:60, secondsCert:'measured' });
+    }
+  }
+
+  describe('merdiven · beyana dayali kapi', () => {
+
+    it('beyana dayali olcumler isaretli', () => {
+      expect(C().selfReported('diction.errorRate')).toBeTruthy();
+      expect(C().selfReported('music.cleanBpm')).toBeTruthy();
+      /* Sureyi sayac olcer: beyan degildir. */
+      expect(C().selfReported('diction.minutes30')).toBeFalsy();
+      expect(C().selfReported('lang.cards')).toBeFalsy();
+    });
+
+    /* Uc kayittan cikan bir hata orani bir olcu degil bir izlenimdir. */
+    it('asgari kayit altinda kapi degerlendirilmez', () => {
+      resetState();
+      withToday('2026-04-10', () => {
+        kayit(3, 1, 100);
+        const g = C().gateStatus({ metric:'diction.errorRate', max:0.08,
+          label:'Hata oranı ≤ %8' });
+        expect(g.status).toBe('unknown');
+        expect(g.weak).toBeTruthy();
+        expect(g.declared).toBe(3);
+      });
+    });
+
+    it('asgari kayit ustunde kapi gecilir ama zayif isaretlenir', () => {
+      resetState();
+      withToday('2026-04-10', () => {
+        kayit(6, 1, 100);
+        const g = C().gateStatus({ metric:'diction.errorRate', max:0.08,
+          label:'Hata oranı ≤ %8' });
+        expect(g.status).toBe('pass');
+        expect(g.weak).toBeTruthy();
+        expect(String(g.declaredWhy || '').length > 10).toBeTruthy();
+      });
+    });
+
+    /* Esigin ustunde daha cok kayit daha hizli ilerleme GETIRMEZ. */
+    it('asgarinin ustunde fazladan kayit ayricalik saglamaz', () => {
+      resetState();
+      withToday('2026-04-10', () => {
+        kayit(6, 1, 100);
+        const az = C().gateStatus({ metric:'diction.errorRate', max:0.08, label:'x' });
+        resetState();
+        kayit(60, 1, 100);
+        const cok = C().gateStatus({ metric:'diction.errorRate', max:0.08, label:'x' });
+        expect(cok.status).toBe(az.status);
+        expect(cok.weak).toBe(az.weak);
+      });
+    });
+
+    it('sayaca dayali kapi zayif isaretlenmez', () => {
+      resetState();
+      withToday('2026-04-10', () => {
+        pushSession('2026-04-10', 'lang', 300);
+        const g = C().gateStatus({ metric:'lang.minutes30', min:60, label:'x' });
+        expect(g.status).toBe('pass');
+        expect(g.weak).toBeFalsy();
+      });
+    });
+  });
+})();

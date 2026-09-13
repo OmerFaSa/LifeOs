@@ -148,7 +148,7 @@ R.Test = (function(){
     S.prefs = R.Model.defaultPrefs();
     S.videoNotes = []; S.activities = []; S.mood = {}; S.breaks = []; S.plan = null;
     S.calendar = []; S.sessions = []; S.profiles = [];
-    S.usage = null; S.forecasts = [];
+    S.usage = null; S.forecasts = []; S.signals = [];
     S.meta = { lastBackupAt:null, schemaVersion:R.SCHEMA_VERSION };
     S.ui = { weekView:null, examTab:'list', examOpen:null, cardTab:'due',
       subjectOpen:'tyt-turkce', guideTab:'analysis', progressRange:8, flipped:{}, timer:null,

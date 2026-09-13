@@ -48,10 +48,6 @@ SP.Nutri = (function(){
      Tablo deklaratiftir: kosul, hangi ogeyi ne kadar buyuttugu ve GEREKCESI
      birlikte durur. Gerekce ekranda gorunur; carpanin nedenini kullanicidan
      saklamayiz. */
-  /* Dayanagi zayif bir esikten cikabilecek EN BUYUK hedef degisikligi.
-     %20: fark edilir ama bir karar esigi gibi davranmayan bir pay. */
-  const ZAYIF_PAY = 0.20;
-
   const LAB_LINKS = [
     { when:['ferritin', 'low'],    nutrient:'iron',      mult:1.6,
       why:'Ferritin referans aralığının altında — demir deposu boşalmış.' },
@@ -117,14 +113,19 @@ SP.Nutri = (function(){
          zayiflatilir ve NEDEN zayiflatildigi gerekcenin icine yazilir —
          sessizce zayiflatmak, kullaniciyi yaniltmanin baska bir bicimidir. */
       const alan = (wanted === 'belowOpt' || wanted === 'aboveOpt') ? 'optimal' : 'ref';
-      const yetki = SP.Ev ? SP.Ev.temper(markerId, alan, 'act') : { downgraded:false };
+      const yetki = SP.Ev ? SP.Ev.temper(markerId, alan, 'act') : { downgraded:false, cap:null };
+
+      /* Tavan YETKI EKSENINDEN gelir (core/evidence.js), burada sabit
+         degildir: 'steer' sinirsiz, 'limited_steer' dar, 'inform' ve
+         'observe_only' en dar. Boylece kisma orani da politikanin
+         parcasi olur ve tek yerden degisir. */
       let mult = link.mult;
       let why = link.why;
-      if(yetki.downgraded){
+      const tavanPay = yetki.cap;
+      if(tavanPay != null && Math.abs(link.mult - 1) > tavanPay){
         const yon = link.mult >= 1 ? 1 : -1;
-        const tavan = 1 + yon * Math.min(Math.abs(link.mult - 1), ZAYIF_PAY);
-        mult = tavan;
-        why = link.why + ' ' + yetki.why;
+        mult = 1 + yon * tavanPay;
+        if(yetki.downgraded) why = link.why + ' ' + yetki.why;
       }
 
       const cur = out[link.nutrient];

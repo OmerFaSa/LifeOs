@@ -1373,6 +1373,14 @@ ESP.App = (function(){
       installManifest();
       startClock();
 
+      /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez
+         koşar ve gerekiyorsa TEK bir soru açar (core/signals.js). Açılışı
+         bloklamaz; soru varsa Bugün ekranına bir satır olarak düşer. */
+      if(ESP.Signals){
+        ESP.Signals.sync().then(r => { if(r && r.changed) render(); })
+          .catch(e => console.error('Sinyal eşitleme hatası:', e));
+      }
+
       /* Ofis açılışı bloklamaz: yüklenince yeniden çizilir ve günün
          brifingi bir kez üretilir. */
       ESP.Office.load().then(async () => {

@@ -65,10 +65,10 @@ node tools/ledgercheck.js    # defter düzenini denetler (yalnız SPİ)
 ```
 
 Bir denetim geçtiğinde de **sayı gösterir**: hiçbir şey ölçmeyen bir betik de
-«geçti» yazar. ESP'nin son koşumu: 501 birim testi, 14 ekran ve 85 sekmelik
+«geçti» yazar. ESP'nin son koşumu: 521 birim testi, 14 ekran ve 85 sekmelik
 duman testi, 1848 kontrast ölçümü, 390 pikselde 98 yer ve ağır veriyle
-76 ms'lik en ağır ekran. AYS 929 birim testi ve 18 ekran / 16 sekmelik duman
-testi, SPİ 676 birim testi ve 12 ekranlık duman testi ile koşar.
+76 ms'lik en ağır ekran. AYS 939 birim testi ve 18 ekran / 16 sekmelik duman
+testi, SPİ 681 birim testi ve 12 ekranlık duman testi ile koşar.
 
 Üç sistem de artık **kendini denetleyen bir katman** taşır — dışarıdan gelen
 eleştirilerin koda dönüşmüş hâli:
@@ -78,7 +78,8 @@ eleştirilerin koda dönüşmüş hâli:
 | **Sürtünme** | Sistemi yönetmek, çalışmanın yerine mi geçiyor? | AYS + ESP `core/friction.js` |
 | **Goodhart nöbetçisi** | Çaba arttı da sonuç yerinde mi saydı? | AYS + ESP `core/goodhart.js` |
 | **Kalibrasyon defteri** | Sistem kapalıyken de kendi durumunu biliyor musun? | AYS + ESP `core/calib.js` |
-| **Kanıt derecesi** | Bu eşik nereden geliyor ve ne söylemeye yetkili? | SPİ `core/evidence.js` |
+| **Kanıt eksenleri** | Bu eşik nereden geliyor, ne kadar kesin, kime uyar, ne söylemeye yetkili? | SPİ `core/evidence.js` |
+| **Sinyal katmanı** | Bu denetim yeni bir ekran mı gerektiriyor, yoksa tek bir soru mu? | AYS + ESP `core/signals.js` |
 | **Kör nokta** | Bu merdiven neyi ölçemez? | ESP `data/curriculum.js` |
 
 Üçü de kötü çıkabilir; bu bir arıza değil, ölçüldüğü için görünür olmasıdır.

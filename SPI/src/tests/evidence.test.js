@@ -4,46 +4,95 @@
   const { describe, it, expect } = SP.Test;
   const Ev = () => SP.Ev;
 
-  describe('Kanıt — derece ve yetki', () => {
+  describe('Kanıt — dört eksen', () => {
 
-    it('dört derece tanımlı ve sıralı', () => {
-      const g = SP.EVIDENCE_GRADES;
-      expect(g.length).toBe(4);
-      for(let i = 1; i < g.length; i++){
-        expect(g[i - 1].rank > g[i].rank).toBeTruthy();
-      }
+    /* Eksenler AYRI seylerdir: kaynak turu bir siralama TASIMAZ.
+       Tek eksene dizmek, bir belgeyi bir arastirma tasarimiyla ayni
+       olcege koymak olurdu. */
+    it('dört eksen de tanımlı', () => {
+      expect(SP.EVIDENCE_SOURCES.length).toBe(4);
+      expect(SP.EVIDENCE_CERTAINTY.length).toBe(4);
+      expect(SP.EVIDENCE_APPLICABILITY.length).toBe(3);
+      expect(SP.EVIDENCE_AUTHORITY.length).toBe(4);
     });
 
-    /* Sistemin cümlesinin ağırlığı, dayanağının ağırlığını aşamaz. */
-    it('yalnızca kılavuz ve uzlaşı yönlendirebilir', () => {
-      expect(SP.GRADE_BY_ID.guideline.mayDirect).toBeTruthy();
-      expect(SP.GRADE_BY_ID.consensus.mayDirect).toBeTruthy();
-      expect(SP.GRADE_BY_ID.observational.mayDirect).toBeFalsy();
-      expect(SP.GRADE_BY_ID.convention.mayDirect).toBeFalsy();
+    /* Kaynak turunde rank/sira alani OLMAMALI: siralama iddiasi yalnizca
+       yetki politikasinda, ve orasi bilimsel degil operasyonel. */
+    it('kaynak türü bir sıralama taşımaz', () => {
+      SP.EVIDENCE_SOURCES.forEach(x => {
+        expect(x.rank == null).toBeTruthy();
+        expect(x.mayDirect == null).toBeTruthy();
+      });
+    });
+
+    it('yetki politikası sürümlü ve gerekçeli', () => {
+      const p = SP.Ev.policy();
+      expect(p.version >= 2).toBeTruthy();
+      expect(p.rationale.length > 50).toBeTruthy();
+      expect(p.history.length >= 2).toBeTruthy();
+      /* Politikanin kendisi bir kanit degil bir KARAR oldugunu yazmali. */
+      expect(p.disclaimer.indexOf('hiyerarşi') >= 0).toBeTruthy();
+      expect(p.disclaimer.indexOf('DEĞİLDİR') >= 0).toBeTruthy();
+    });
+
+    it('her kaynak türünün varsayılan yetkisi tanımlı', () => {
+      SP.EVIDENCE_SOURCES.forEach(x => {
+        const y = SP.Ev.policy().defaults[x.id];
+        expect(!!SP.AUTHORITY_BY_ID[y]).toBeTruthy();
+      });
     });
 
     it('kaynağı olmayan eşik yönlendiremez', () => {
-      expect(Ev().mayDirect('uydurma_belirtec', 'ref')).toBeFalsy();
-      expect(Ev().line('uydurma_belirtec', 'ref').mayDirect).toBeFalsy();
+      expect(SP.Ev.mayDirect('uydurma_belirtec', 'ref')).toBeFalsy();
+      expect(SP.Ev.line('uydurma_belirtec', 'ref').mayDirect).toBeFalsy();
+      /* Kaynaksiz esikte en dar tavan uygulanir. */
+      expect(SP.Ev.cap('uydurma_belirtec', 'ref')).toBe(0.2);
     });
 
-    it('kılavuz dayanaklı eşik yönlendirebilir', () => {
-      expect(Ev().mayDirect('hba1c', 'ref')).toBeTruthy();
-      expect(Ev().mayDirect('egfr', 'ref')).toBeTruthy();
+    it('kılavuz dayanaklı eşik yönlendirebilir ve tavansızdır', () => {
+      expect(SP.Ev.mayDirect('hba1c', 'ref')).toBeTruthy();
+      expect(SP.Ev.of('hba1c', 'ref').authority).toBe('steer');
+      expect(SP.Ev.cap('hba1c', 'ref')).toBe(null);
     });
 
     /* HOMA-IR bir ARASTIRMA gostergesidir; evrensel tani esigi yoktur. */
     it('gözlemsel gösterge yönlendiremez', () => {
-      expect(Ev().gradeOf('homa', 'ref').id).toBe('observational');
-      expect(Ev().mayDirect('homa', 'ref')).toBeFalsy();
+      expect(SP.Ev.of('homa', 'ref').source).toBe('observational');
+      expect(SP.Ev.mayDirect('homa', 'ref')).toBeFalsy();
     });
 
     /* "Optimal TSH" bandi kilavuzlarda tanimli DEGILDIR. */
-    it('sistemin kendi seçtiği bant karar eşiği sayılmaz', () => {
-      expect(Ev().gradeOf('tsh', 'optimal').id).toBe('convention');
-      expect(Ev().mayDirect('tsh', 'optimal')).toBeFalsy();
+    it('sistem ayarı karar eşiği sayılmaz', () => {
+      const r = SP.Ev.of('tsh', 'optimal');
+      expect(r.source).toBe('system_tuning');
+      expect(r.authority).toBe('observe_only');
+      expect(SP.Ev.mayDirect('tsh', 'optimal')).toBeFalsy();
       /* Ama TSH referans araligi kilavuza dayanir: ikisi karismaz. */
-      expect(Ev().mayDirect('tsh', 'ref')).toBeTruthy();
+      expect(SP.Ev.mayDirect('tsh', 'ref')).toBeTruthy();
+    });
+
+    /* Kesinlik, kaynak turunden BAGIMSIZ bir eksendir. */
+    it('kesinlik kaynak türünden ayrı okunur', () => {
+      const g = SP.Ev.of('hba1c', 'ref');
+      const t = SP.Ev.of('tsh', 'optimal');
+      expect(g.certainty).toBe('high');
+      expect(t.certainty).toBe('unknown');
+      /* Ikisi de kendi kaynagindan degil, kendi eksenlerinden gelir. */
+      expect(g.certainty !== g.source).toBeTruthy();
+    });
+
+    /* Popülasyonu "DEĞİŞİR" diyen esik dogrudan uygulanabilir sayilamaz. */
+    it('popülasyona göre kayan eşik dolaylı işaretlenir', () => {
+      expect(SP.Ev.of('ldl', 'optimal').applicability).toBe('indirect');
+      expect(SP.Ev.of('waist', 'ref').applicability).toBe('indirect');
+    });
+
+    /* Kayitlardaki `source` alani ATIF METNIDIR, kaynak turu degil.
+       Ikisini karistirmak butun esikleri sessizce yetkisiz birakirdi. */
+    it('atıf metni ile kaynak türü karışmaz', () => {
+      const r = SP.Ev.of('sbp', 'ref');
+      expect(r.source).toBe('guideline');
+      expect(r.citation.indexOf('ACC/AHA') >= 0).toBeTruthy();
     });
   });
 
@@ -53,6 +102,7 @@
       const t = Ev().temper('hba1c', 'ref', 'refer');
       expect(t.downgraded).toBeFalsy();
       expect(t.strength).toBe('refer');
+      expect(t.cap).toBe(null);
     });
 
     /* Sessizce zayiflatmak, yaniltmanin baska bir bicimidir. */
@@ -104,12 +154,17 @@
 
   describe('Kanıt — veri bütünlüğü', () => {
 
-    it('her kayıt bilinen bir belirtece ve bilinen bir dereceye bağlı', () => {
+    it('her kayıt bilinen bir belirtece ve çözülebilir bir kaynağa bağlı', () => {
       SP.EVIDENCE.forEach(e => {
         expect(!!SP.BIO_BY_ID[e.marker]).toBeTruthy();
-        expect(!!SP.GRADE_BY_ID[e.grade]).toBeTruthy();
         expect(['ref', 'optimal', 'red'].indexOf(e.field) >= 0).toBeTruthy();
         expect(String(e.source || '').length > 5).toBeTruthy();
+        const r = SP.Ev.resolve(e);
+        expect(!!r).toBeTruthy();
+        expect(!!SP.SOURCE_BY_ID[r.source]).toBeTruthy();
+        expect(!!SP.CERTAINTY_BY_ID[r.certainty]).toBeTruthy();
+        expect(!!SP.APPLICABILITY_BY_ID[r.applicability]).toBeTruthy();
+        expect(!!SP.AUTHORITY_BY_ID[r.authority]).toBeTruthy();
       });
     });
 
@@ -124,10 +179,13 @@
 
     /* "Bu sistemin secimi" diyen her kayit, NEDEN sectigini yazmak
        zorundadir: gerekcesiz bir secim, gizlenmis bir keyfilik olur. */
-    it('seçim dereceli her kayıt gerekçe taşır', () => {
-      SP.EVIDENCE.filter(e => e.grade === 'convention').forEach(e => {
-        expect(String(e.note || '').length > 40).toBeTruthy();
-      });
+    /* "Sistemin kendi ayari" diyen her kayit NEDEN oyle sectigini yazmak
+       zorundadir: gerekcesiz bir secim, gizlenmis bir keyfiliktir. */
+    it('sistem ayarı olan her kayıt gerekçe taşır', () => {
+      SP.EVIDENCE.filter(e => SP.Ev.resolve(e).source === 'system_tuning')
+        .forEach(e => {
+          expect(String(e.note || '').length > 40).toBeTruthy();
+        });
     });
   });
 })();
