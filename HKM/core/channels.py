@@ -48,6 +48,7 @@ DEFAULTS = {
     "telegram": {
         "enabled": False,
         "bot_token": "",
+        "webhook_secret": "",      # X-Telegram-Bot-Api-Secret-Token
         "allow_from": [],          # sohbet kimlikleri (bos = kimse)
         "api_base": "https://api.telegram.org",
     },
@@ -176,6 +177,17 @@ def parse_whatsapp(payload):
     except AttributeError:
         return []
     return out
+
+
+def verify_telegram_secret(cfg, header):
+    """Telegram imza yollamaz; bunun yerine kurulumda verilen gizli basligi
+    her istekte geri gonderir. Sir tanimli degilse webhook KAPALIDIR —
+    «sir yoksa herkese acik» bir varsayilan, sessiz bir acik kapidir."""
+    a = settings(cfg, "telegram")
+    sir = a.get("webhook_secret") or ""
+    if not sir or not header:
+        return False
+    return hmac.compare_digest(str(header), str(sir))
 
 
 def parse_telegram(payload):

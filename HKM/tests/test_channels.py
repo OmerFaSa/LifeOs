@@ -141,6 +141,18 @@ def run():
         eq(ch.parse_telegram({}), [])
     test("ayristiricilar uydurmaz", t_parsers_do_not_invent)
 
+    def t_telegram_secret_required():
+        """Sir tanimli degilse webhook KAPALIDIR: «sir yoksa herkese acik»
+        bir varsayilan, sessiz bir acik kapidir."""
+        cfg = {"channels": {"telegram": {"enabled": True, "bot_token": "B",
+                                         "webhook_secret": "S",
+                                         "allow_from": ["7"]}}}
+        ok(ch.verify_telegram_secret(cfg, "S"))
+        no(ch.verify_telegram_secret(cfg, "yanlis"))
+        no(ch.verify_telegram_secret(cfg, ""))
+        no(ch.verify_telegram_secret({"channels": {"telegram": {"enabled": True}}}, "S"))
+    test("telegram gizli basligi zorunlu", t_telegram_secret_required)
+
     suite("patron")
 
     def t_commands_are_closed_set():

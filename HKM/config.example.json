@@ -25,7 +25,8 @@
     "telegram": {
       "enabled": false,
       "bot_token": "",
-      "allow_from": []
+      "allow_from": [],
+      "webhook_secret": ""
     }
   }
 }

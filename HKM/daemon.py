@@ -13,6 +13,7 @@ Ucnoktalar:
     GET  /api/conversation          son konusma kayitlari
     POST /api/say                   gunun mesajini kanala gonderir (gunde bir)
     GET/POST /api/wa/webhook        WhatsApp — jetonsuz ama IMZALI (bkz. §7)
+    POST /api/tg/webhook            Telegram — gizli baslikla dogrulanir
     POST /api/decision/<id>/accept  oneriyi kabul et
     POST /api/decision/<id>/decline oneriyi reddet — kayit silinmez
     GET  /api/health                token istemez
@@ -173,6 +174,34 @@ class Handler(BaseHTTPRequestHandler):
                              "status": g["status"]})
         return self._send(200, {"handled": len(cevaplar), "results": cevaplar})
 
+    def _tg_webhook(self):
+        """Telegram imza yollamaz; kurulumda verilen gizli basligi geri
+        gonderir. Sir tanimsizsa webhook KAPALIDIR."""
+        cfg = self.server.config
+        if not channels.enabled(cfg, "telegram"):
+            return self._send(404, {"error": "kanal kapali"})
+        if not channels.verify_telegram_secret(
+                cfg, self.headers.get("X-Telegram-Bot-Api-Secret-Token")):
+            return self._send(401, {"error": "gizli baslik dogrulanmadi"})
+        n = int(self.headers.get("Content-Length") or 0)
+        try:
+            govde = json.loads(self.rfile.read(n) or b"{}")
+        except ValueError:
+            return self._send(400, {"error": "gecersiz JSON"})
+        cevaplar = []
+        for m in channels.parse_telegram(govde):
+            if not channels.allowed(cfg, "telegram", m["from"]):
+                patron.log(self.con, "telegram", "system",
+                           "Bilinmeyen sohbetten mesaj reddedildi.")
+                cevaplar.append({"from": "?", "ok": False, "reason": "not-allowed"})
+                continue
+            r = patron.respond(self.con, m["text"], th=self.server.thresholds,
+                               channel="telegram")
+            g = channels.send(cfg, "telegram", r["text"], to=m["from"])
+            cevaplar.append({"command": r["command"], "sent": g["ok"],
+                             "status": g["status"]})
+        return self._send(200, {"handled": len(cevaplar), "results": cevaplar})
+
     def _say(self, body):
         """Gunun mesajini kanala gonderir. GUNDE TEK MESAJ: ayni gun ayni
         kanala ikinci kez gonderilmez (force ile bilincli olarak asilir)."""
@@ -276,6 +305,8 @@ class Handler(BaseHTTPRequestHandler):
         yazilmaz; yalniz reddedildigi not edilir."""
         if u.path == "/api/wa/webhook":
             return self._wa_webhook()
+        if u.path == "/api/tg/webhook":
+            return self._tg_webhook()
 
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})

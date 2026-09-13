@@ -147,10 +147,11 @@ bulgular, dijital ikiz ve **tek** öneri durur; öneri oradan kabul ya da
 reddedilir. Sayfa hiçbir sayı hesaplamaz — ekrandaki her satır kural
 motorundan geldiği gibi yazılır.
 
-Aynı özet WhatsApp'a da gidebilir (`channels.whatsapp`, **varsayılan
-kapalı**): komut seti küçük ve kapalıdır (`durum`, `kabul`, `ret`, `neden`,
-`capraz`, `yardim`), izin listesi boşsa kimseye cevap verilmez ve gelen
-webhook gövdesi imzası doğrulanmadan ayrıştırılmaz bile.
+Aynı özet WhatsApp ya da Telegram'a da gidebilir (**varsayılan kapalı**):
+komut seti küçük ve kapalıdır (`durum`, `kabul`, `ret`, `neden`, `capraz`,
+`yardim`), izin listesi boşsa kimseye cevap verilmez ve gelen webhook
+gövdesi imzası doğrulanmadan ayrıştırılmaz bile. Sunucu, systemd, tünel ve
+kanal kurulumu: [`HKM/KURULUM.md`](HKM/KURULUM.md).
 
 ## Sınırlar
 

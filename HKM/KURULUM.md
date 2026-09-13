@@ -1,0 +1,133 @@
+# HKM — kurulum, sunucu ve kanallar
+
+> Bu belge bir «kolay kurulum» kılavuzu değildir. HKM'yi dışarı açmak bir
+> **altyapı kararıdır** ve kararın maliyeti burada yazılıdır. Kanallar
+> kapalıyken HKM ve üç sistem olduğu gibi çalışır: aşağıdaki adımların
+> hiçbiri zorunlu değildir.
+
+## 1. Yerel çalıştırma (varsayılan ve en güvenli hâl)
+
+```bash
+cd HKM
+cp config.example.json config.json
+# local_token'ı uzun ve rastgele bir dizeyle değiştir:
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+python3 daemon.py
+```
+
+- Daemon yalnız `127.0.0.1`'e bağlanır. `host` değerini değiştirmek
+  **bilinçli bir karardır** ve o andan itibaren ağdaki herkes kapıyı görür.
+- Yüz: `http://127.0.0.1:4200` — jetonu tarayıcıya bir kez girersin.
+- Üç arayüzdeki işaret ayrı ayrı açılır (Ayarlar → HKM işareti) ve aynı
+  jetonu ister.
+
+Doğrulama:
+
+```bash
+python3 -m tests.run            # HKM'nin kendi denetimleri
+node ../tools/entegre.js        # üç arayüz + HKM: uçtan uca
+```
+
+## 2. Sunucuda sürekli çalıştırma (systemd)
+
+`/etc/systemd/system/hkm.service`:
+
+```ini
+[Unit]
+Description=HKM — Hayat Kontrol Merkezi
+After=network.target
+
+[Service]
+Type=simple
+User=hkm
+WorkingDirectory=/opt/lifeos/HKM
+ExecStart=/usr/bin/python3 /opt/lifeos/HKM/daemon.py
+Restart=on-failure
+RestartSec=5
+# Sertlestirme: servis kendi dizini disinda hicbir yere yazamaz.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/lifeos/HKM/db
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl enable --now hkm
+journalctl -u hkm -f
+```
+
+**Yedek:** bütün durum tek bir dosyadadır — `HKM/db/hkm.db`. Kopyalamak
+yeterlidir; kopyalamamak, dokuz aylık kaydı tek bir disk hatasına bağlar.
+
+## 3. WhatsApp (Meta Cloud API)
+
+Gereken dört şey `config.json` → `channels.whatsapp` altına yazılır:
+
+| Alan | Nereden gelir |
+|---|---|
+| `phone_number_id` | Meta uygulamanın WhatsApp numarası kimliği |
+| `token` | kalıcı erişim jetonu |
+| `app_secret` | uygulama sırrı — gelen webhook imzasını doğrular |
+| `verify_token` | webhook kurulumunda senin belirlediğin dize |
+| `allow_from` | **cevap verilecek numaralar.** Boş liste «kimse» demektir |
+
+Sonra `"enabled": true`.
+
+**Meta'nın HKM'ye ulaşabilmesi gerekir.** İki yol vardır ve ikisi de bir
+karardır:
+
+- **Tünel** (cloudflared, tailscale funnel, ngrok): makine evde kalır,
+  yalnız webhook yolu dışarı açılır. Daha küçük yüzey, bir üçüncü tarafa
+  bağımlılık.
+- **Sunucu**: HKM bir VPS'te koşar, önünde TLS sonlandıran bir ters vekil
+  (nginx/caddy) durur. Daha çok kontrol, daha çok bakım.
+
+Ters vekil kullanıyorsan **yalnız webhook yolunu** aç:
+
+```nginx
+location /api/wa/webhook { proxy_pass http://127.0.0.1:4200; }
+location /api/tg/webhook { proxy_pass http://127.0.0.1:4200; }
+# Baska hicbir yol disari acilmaz: brifing, ikiz ve karar yollari yereldir.
+```
+
+Webhook kurulumunda Meta önce bir `GET` doğrulaması yapar; HKM yalnızca
+`verify_token` eşleşirse meydan okumayı yansıtır.
+
+### Neden bu iki yol bearer istemez
+
+`POST /api/wa/webhook` HKM'nin **tek** bearer'sız POST yoludur: isteği Meta
+yollar ve bearer taşıyamaz. Kapısı **imzadır** — gövde, uygulama sırrıyla
+HMAC-SHA256 imzalanmamışsa ayrıştırılmaz bile. Telegram imza yerine
+kurulumda verdiğin gizli başlığı geri gönderir; sır tanımsızsa o webhook
+kapalıdır.
+
+## 4. Telegram
+
+```json
+"telegram": { "enabled": true, "bot_token": "…", "webhook_secret": "…",
+              "allow_from": ["<sohbet kimliğin>"] }
+```
+
+```bash
+curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
+  -d "url=https://alanadin/api/tg/webhook" \
+  -d "secret_token=<webhook_secret>"
+```
+
+## 5. Açmadan önce okunacak beş satır
+
+1. **İzin listesi boşsa kimse yok.** Boş liste «herkes» demek değildir;
+   tanımadığı numaradan gelen mesajın içeriği ambara bile yazılmaz.
+2. **Sır sızmaz.** Jeton, uygulama sırrı ve doğrulama jetonu hiçbir çıktıda
+   görünmez — ama `config.json` dosyanın kendisi `.gitignore`'dadır ve
+   yedeklerken de öyle kalmalıdır.
+3. **Günde tek mesaj.** Kanal bir bildirim akışı değildir.
+4. **Komut seti kapalıdır:** `durum`, `kabul`, `ret`, `neden`, `capraz`,
+   `yardim`. Serbest metin yorumlanmaz.
+5. **HKM'nin uygulama ya da ekran düzeyinde hiçbir yetkisi yoktur.**
+   Kabul ettiğin öneriyi uygulayan sensin; «ekran kapatma zorunlu kılındı»
+   cümlesi kod düzeyinde bile yanlıştır.

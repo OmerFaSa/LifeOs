@@ -265,6 +265,14 @@ def run():
         test("tanimayan numaranin icerigi ambara girmez",
              t_wa_unknown_sender_gets_nothing)
 
+        def t_tg_webhook_closed_when_channel_off():
+            """Kanal kapaliyken webhook YOKTUR: acik ama bos bir kapi,
+            kapali bir kapidan daha kotudur."""
+            kod, _ = S.ham("/api/tg/webhook", b'{"message":{}}',
+                           {"Content-Type": "application/json"})
+            eq(kod, 404)
+        test("kapali kanalin webhooku yoktur", t_tg_webhook_closed_when_channel_off)
+
         def t_say_refuses_when_channel_unreachable():
             """Kanal acik ama ag yok: bu bir DURUMDUR, daemon cokmez."""
             kod, r = S.call("/api/say", body={"channel": "whatsapp",

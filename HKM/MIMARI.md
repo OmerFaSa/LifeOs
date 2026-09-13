@@ -128,6 +128,9 @@ notunda (`NOTLAR.md` §18.5) gerekçelendirilmişti:
 
 ## 8. Çalıştırma
 
+Sunucu, systemd, tünel ve kanal kurulumu ayrı bir belgede:
+[`KURULUM.md`](KURULUM.md).
+
 ```bash
 cd HKM
 cp config.example.json config.json    # local_token'ı uzun rastgele bir dizeyle değiştir
