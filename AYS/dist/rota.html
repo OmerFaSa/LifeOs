@@ -6105,7 +6105,7 @@ tbody tr:hover{ background:var(--surface-2); }
 
 window.R = window.R || {};
 
-R.BUILD = { id:'5733eb1', at:'2026-09-13 09:34', dirty:true };
+R.BUILD = { id:'e200f40', at:'2026-09-13 14:59', dirty:true };
 
 /* ==== js/data/curriculum.js ==== */
 /* 40 haftalik uygulama plani — "Hemsirelik Hedefi" belgesinin 4. bolumu.
@@ -6978,6 +6978,233 @@ R.CERTAINTY = {
     detail:'Hiç girilmemiş. Sıfır sayılmaz, ortalamaya girmez.' },
 };
 
+/* ==== js/data/evidence.js ==== */
+/* Kanit katmani — hangi esik nereden geliyor ve NE SOYLEMEYE YETKILI.
+
+   SPI'de dogan katmanin AYS'ye tasinmis hali. Oradaki cumle burada da
+   aynen gecerli:
+
+     "Deterministik olmak, bilimsel olarak dogru olmak anlamina gelmez."
+
+   AYS'nin kural motoru saglamdi ama esiklerin KENDISI nereden geliyordu?
+   "Konu testi >=%75 ve yedi gun sonra >=%70 ise konu kapanir" cumlesi
+   kodda kesindir. Peki 75 neden 75? 70 neden 70? Yedi gun neden yedi?
+
+   Durust cevap: cogu BU SISTEMIN SECIMIDIR. Bunu gizlemek, bir tasarim
+   tercihini pedagojik bir bulgu gibi sunmak olurdu.
+
+   ---------------------------------------------------------------------
+   DORT EKSEN (SPI ile ayni, alan farkli)
+
+     source        Bu sayi NEREDEN geliyor? (siralama YOK, sadece tur)
+     certainty     Elimizdekine NE KADAR guveniyoruz?
+     applicability Bu esik BU adaya ne kadar uyuyor?
+     authority     AYS bu kaynaga dayanarak NE YAPABILIR?
+
+   Ilk ucu epistemik iddia, dorduncusu TASARIM POLITIKASIDIR. "Bu
+   dogrudur" ile "sistemimiz yalnizca su kosulda bunu eyleme cevirir"
+   ayni turden cumleler degildir; sonsuz gerilemeyi kesen sey de budur.
+
+   Ev kurallari (data/rules.js) burada da gecerlidir: hicbir esik
+   "sen bu bolume giremezsin" demez. En guclu yetki bile bir ONERI
+   uretir, bir yargi degil. */
+
+window.R = window.R || {};
+
+/* ------------------------------------------------------------- eksen 1
+   KAYNAK TURU — siralanmaz, yalnizca tanimlar. */
+R.EVIDENCE_SOURCES = [
+  { id:'exam_authority', label:'Sınav kaynağı',
+    note:'Sınavı düzenleyen kurumun ilan ettiği bilgi: tarih, soru sayısı, '
+       + 'puan formülü, katsayı.' },
+  { id:'research', label:'Öğrenme araştırması',
+    note:'Öğrenme bilimi bulgusu: aralıklı tekrar, geri getirme pratiği, '
+       + 'harmanlanmış çalışma gibi genel kabul görmüş etkiler.' },
+  { id:'personal_data', label:'Kendi verin',
+    note:'Adayın kendi ölçümünden hesaplanır: medyan, taban, hata dağılımı. '
+       + 'Başkasıyla karşılaştırılmaz.' },
+  { id:'system_tuning', label:'Sistem ayarı',
+    note:'Bu yazılımın pratik sebeplerle seçtiği sayı. Pedagojik bir bulgu '
+       + 'değildir ve öyle sunulmaz.' },
+];
+
+/* ------------------------------------------------------------- eksen 2 */
+R.EVIDENCE_CERTAINTY = [
+  { id:'high',     label:'Yüksek',     note:'Kaynak açık ve tartışmasız.' },
+  { id:'moderate', label:'Orta',       note:'Genel kabul var, ayrıntıda değişebilir.' },
+  { id:'low',      label:'Düşük',      note:'Dolaylı ya da bağlama çok bağlı.' },
+  { id:'unknown',  label:'Bilinmiyor', note:'Kesinlik değerlendirilmemiş.' },
+];
+
+/* ------------------------------------------------------------- eksen 3 */
+R.EVIDENCE_APPLICABILITY = [
+  { id:'direct',   label:'Doğrudan',
+    note:'Eşik bu aday ve bu sınav için doğrudan geçerli.' },
+  { id:'indirect', label:'Dolaylı',
+    note:'Bulgu genel; bu adaya uyarlanırken kayabilir.' },
+  { id:'local',    label:'Yerel',
+    note:'Eşik kişiye özel; başka adayla karşılaştırılamaz.' },
+];
+
+/* ------------------------------------------------------------- eksen 4
+   YETKI — BU BIR PEDAGOJIK HIYERARSI DEGILDIR. AYS'nin operasyonel
+   yetki politikasidir. */
+R.EVIDENCE_AUTHORITY = [
+  { id:'steer',         label:'Yönlendirebilir', tone:'ok', mayDirect:true, cap:null,
+    note:'Plan ve öncelik değiştirebilir.' },
+  { id:'limited_steer', label:'Sınırlı yönlendirir', tone:'ok', mayDirect:true, cap:0.35,
+    note:'Öneri üretebilir ama etkisi sınırlıdır.' },
+  { id:'inform',        label:'Bilgilendirir', tone:'info', mayDirect:false, cap:0.20,
+    note:'Gözlem bildirir; plan değiştirmez.' },
+  { id:'observe_only',  label:'Yalnız izler', tone:'warn', mayDirect:false, cap:0.20,
+    note:'Yalnızca izlenir; hiçbir karar yalnız buna dayandırılmaz.' },
+];
+
+R.EVIDENCE_POLICY = {
+  version:1,
+  changedAt:'2026-09-13',
+  title:'AYS operasyonel yetki politikası',
+  disclaimer:'Bu tablo evrensel bir pedagojik hiyerarşi DEĞİLDİR. '
+    + 'AYS\'nin hangi kaynak türüne eyleme dönük ne kadar söz hakkı '
+    + 'tanıdığını söyler. Bilimsel bir iddia değil, bir yazılım kararıdır.',
+  rationale:'Sınavın kendi kuralları (tarih, puan formülü) tartışılmaz; '
+    + 'adayın kendi ölçümü onun için en geçerli veridir; öğrenme araştırması '
+    + 'genel bir yön verir ama kişiye uyarlanırken kayar; sistemin kendi '
+    + 'seçtiği sayılar ise yalnızca bir başlangıç noktasıdır ve öyle '
+    + 'etiketlenir.',
+  history:[
+    { version:1, at:'2026-09-13',
+      note:'SPİ\'de doğan dört eksenli katman AYS\'ye taşındı. Sebep: '
+         + 'AYS\'nin eşiklerinin çoğu (kapanış kuralı, ay kapıları, plan '
+         + 'tamamlama hedefi) sistemin kendi seçimiydi ve hiçbiri bunu '
+         + 'söylemiyordu.' },
+  ],
+  defaults:{
+    exam_authority:'steer',
+    personal_data:'steer',
+    research:'limited_steer',
+    system_tuning:'observe_only',
+  },
+};
+
+/* Kayitlar.
+
+   `rule` esigin kod icindeki adi; `cite` kaynagin ADIDIR (baglanti degil,
+   baglanti curur). `population` esigin KIME ait oldugunu soyler. */
+R.EVIDENCE = [
+
+  /* -------------------------------------------------- sinavin kendisi */
+  { rule:'exam.dates', sourceType:'exam_authority', certainty:'high',
+    cite:'Sınav takvimi — sınavı düzenleyen kurumun ilanı',
+    population:'bütün adaylar',
+    note:'Tarih her yıl ilan edilir ve değişebilir; sistem ilan edileni '
+       + 'kullanır, tahmin etmez.' },
+  { rule:'exam.netFormula', sourceType:'exam_authority', certainty:'high',
+    cite:'Net = doğru − yanlış/4',
+    population:'bütün adaylar',
+    note:'Sınavın kendi kuralıdır; sistemin yorumu değildir.' },
+  { rule:'exam.testCounts', sourceType:'exam_authority', certainty:'high',
+    cite:'Test başına soru sayısı ve süre — kurum ilanı',
+    population:'bütün adaylar' },
+
+  /* --------------------------------------------- ogrenme arastirmasi */
+  { rule:'srs.spacing', sourceType:'research', certainty:'moderate',
+    applicability:'indirect',
+    cite:'Aralıklı tekrar (spacing effect) — tekrarların araya zaman '
+       + 'koyularak yapılmasının, üst üste yapılmasından daha kalıcı '
+       + 'olduğu yönündeki yerleşik bulgu',
+    population:'genel öğrenen; birey ve konuya göre DEĞİŞİR',
+    note:'Etkinin varlığı yerleşiktir; ARALIKLARIN kendisi (1, 3, 7, 16 gün) '
+       + 'bu sistemin seçimidir. Bulgu ile ayarı karıştırmamak gerekir.' },
+  { rule:'srs.retrieval', sourceType:'research', certainty:'moderate',
+    applicability:'indirect',
+    cite:'Geri getirme pratiği (testing effect) — hatırlamaya çalışmanın, '
+       + 'tekrar okumaktan daha kalıcı olduğu yönündeki yerleşik bulgu',
+    population:'genel öğrenen',
+    note:'Sistemin kart yerine SORU sormasının dayanağı budur.' },
+  { rule:'plan.interleaving', sourceType:'research', certainty:'low',
+    applicability:'indirect',
+    cite:'Harmanlanmış çalışma (interleaving) — farklı konu tiplerini '
+       + 'karıştırmanın transferi artırdığı yönündeki bulgu',
+    population:'çalışmaya ve konuya göre DEĞİŞİR',
+    note:'Etkisi konuya çok bağlıdır; bu yüzden yalnızca bilgilendirme '
+       + 'üretir, plan zorlamaz.' },
+  { rule:'sleep.performance', sourceType:'research', certainty:'moderate',
+    applicability:'indirect',
+    cite:'Uyku yoksunluğunun dikkat ve çalışma belleği üzerindeki olumsuz '
+       + 'etkisi — yerleşik bulgu',
+    population:'genel; bireysel ihtiyaç DEĞİŞİR',
+    note:'Sistem uyku ile net arasındaki ilişkiyi SENİN verinden ölçer; '
+       + 'genel bulguyu senin üzerinde varsaymaz.' },
+
+  /* ------------------------------------------------------ kendi verin */
+  { rule:'exam.median', sourceType:'personal_data', certainty:'high',
+    applicability:'local',
+    cite:'Son 3–4 denemenin medyanı — adayın kendi ölçümü',
+    population:'yalnızca bu aday',
+    note:'Medyan seçilmesi kasıtlıdır: tek kötü deneme ortalamayı bozar, '
+       + 'medyanı bozmaz. Aynı yayın ailesinden olmak şarttır — farklı '
+       + 'zorluktaki denemelerin medyanı bir şey ölçmez.' },
+  { rule:'exam.base', sourceType:'personal_data', certainty:'high',
+    applicability:'local',
+    cite:'Son 4 denemenin en düşüğü (taban) — adayın kendi ölçümü',
+    population:'yalnızca bu aday',
+    note:'Taban, kötü gün dayanıklılığını ölçer. Medyan yükselirken taban '
+       + 'düşüyorsa istikrar bozuluyor demektir.' },
+  { rule:'error.pareto', sourceType:'personal_data', certainty:'moderate',
+    applicability:'local',
+    cite:'Hata etiketlerinin dağılımı — adayın kendi işaretlemesi',
+    population:'yalnızca bu aday',
+    note:'Etiketi aday koyar: bu bir ÖLÇÜM değil bir BEYANDIR ve öyle '
+       + 'etiketlenir.' },
+
+  /* -------------------------------------------------- sistemin secimi */
+  { rule:'closure.first', sourceType:'system_tuning', certainty:'unknown',
+    cite:'Bu sistemin seçimi — ilk konu testi eşiği %75',
+    population:'—',
+    note:'%75 pedagojik bir bulgu DEĞİLDİR. Seçilme sebebi pratiktir: '
+       + 'dörtte üçü bilmek konuyu "öğrenilmiş" saymaya yetecek kadar '
+       + 'yüksek, ama adayı tek bir testte tıkayacak kadar da yüksek değil. '
+       + 'Başka bir sayı da savunulabilirdi ve bu açıkça yazılıdır.' },
+  { rule:'closure.second', sourceType:'system_tuning', certainty:'unknown',
+    cite:'Bu sistemin seçimi — yedi gün sonraki tekrar testi eşiği %70',
+    population:'—',
+    note:'İkinci eşiğin daha düşük olması kasıtlıdır: aradan geçen zamanda '
+       + 'bir miktar unutma BEKLENİR. Yedi günün kendisi de bir seçimdir; '
+       + 'aralıklı tekrar bulgusuna dayanır ama o bulgu "yedi" demez.' },
+  { rule:'kpi.planCompletion', sourceType:'system_tuning', certainty:'unknown',
+    cite:'Bu sistemin seçimi — plan tamamlama hedefi %85',
+    population:'—',
+    note:'%85, sürdürülebilirlik için seçilmiş bir sayıdır: %100 hedefi '
+       + 'ilk aksayan günde planı çöpe attırır. Bir bulgu değil bir '
+       + 'davranış tercihidir.' },
+  { rule:'kpi.cardDebt', sourceType:'system_tuning', certainty:'unknown',
+    cite:'Bu sistemin seçimi — tekrar borcu üst sınırı %10',
+    population:'—',
+    note:'Borç eşiği, yeni kart üretimini ne zaman kısacağını belirler. '
+       + 'Pedagojik bir sınır değil, bir kuyruk yönetimi kararıdır.' },
+  { rule:'month.gates', sourceType:'system_tuning', certainty:'unknown',
+    applicability:'indirect',
+    cite:'Bu sistemin seçimi — aylık net bantları',
+    population:'hedefe ve başlangıç seviyesine göre DEĞİŞİR',
+    note:'Bu bantlar bir norm DEĞİLDİR: kimsenin ortalaması değil, bu '
+       + 'sistemin kurduğu bir tempo çizgisidir. Bandın altında kalmak '
+       + '"geri kaldın" demek değil, "planı gözden geçir" demektir. Bu '
+       + 'yüzden yalnızca izlenir, plan zorlamaz.' },
+  { rule:'exam.volume', sourceType:'system_tuning', certainty:'unknown',
+    applicability:'indirect',
+    cite:'Bu sistemin seçimi — dönemlik deneme sayısı aralıkları',
+    population:'—',
+    note:'Deneme sayısı bir hedef değil bir tavandır: analiz edilmeyen '
+       + 'deneme bir ölçüm değil bir yorgunluktur.' },
+  { rule:'break.rule', sourceType:'system_tuning', certainty:'low',
+    applicability:'indirect',
+    cite:'Bu sistemin seçimi — blok ve mola süreleri',
+    population:'kişiye göre DEĞİŞİR',
+    note:'Sabit odak süresi olduğu yönünde güçlü bir bulgu yoktur; süreler '
+       + 'bir başlangıç noktasıdır ve adayın kendi verisiyle değişmelidir.' },
+];
+
 /* ==== js/data/activities.js ==== */
 /* Meşgale kataloğu — mola ve denge önerileri.
 
@@ -7328,6 +7555,8 @@ window.R = window.R || {};
 
 R.HINTS = {
   /* --- sistemin kendi denetimi --- */
+  'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın türü eşiğin ne kadar güçlü konuşabileceğini belirler.',
+    more:'Deterministik olmak, pedagojik olarak doğru olmak demek değildir: keyfî seçilmiş bir eşik, son derece güvenilir görünen keyfî bir sonuç üretir. Dört kaynak türü vardır — sınav kaynağı ve kendi verin yönlendirebilir; öğrenme araştırması sınırlı yönlendirir; sistemin kendi ayarı yalnızca izlenir. Kapanış kuralının %75/%70\'i, plan tamamlamanın %85\'i ve ay kapıları BU SİSTEMİN SEÇİMİDİR, bir bulgu değil.' },
   'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile gerçekleşen çalışma süresinin payı.',
     more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar: aday ders çalışmak yerine kendi çalışma sistemini yönetir. Tek dürüst cevap sürtünmeyi de ÖLÇMEKTİR. Süreli deneme açıkken geçen süre sınavdır, yönetim değil. Bütçe (15 dk/gün) VE oran (%25) birlikte aşılmadıkça sistem susar — hafta planı kurulan gün doğal olarak yönetim ağırlıklıdır. Sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
   'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',
@@ -10896,6 +11125,180 @@ R.Planner = (function(){
   return { LEVELS, PHASES, levels, level, phaseAt, topicDays, pool,
     weeklyQuestions, topicsPerWeek, gateWeeks, generate, health, replan,
     scenarios, checkPrerequisites, energyByWeekday };
+})();
+
+/* ==== js/core/evidence.js ==== */
+/* Kanit motoru — bir esigin ne soylemeye yetkili oldugunu belirler.
+
+   data/evidence.js dort ekseni tasir; bu dosya onlari cozer ve tek bir
+   kurali uygular:
+
+     Bir esik, YETKISININ izin verdiginden daha guclu konusamaz.
+
+   Yetki, kaynak turunun politika tablosundaki karsiligidir (kayit basina
+   ezilebilir). Politika bir pedagojik iddia degil bir tasarim kararidir
+   ve oyle etiketlenir.
+
+   Uc kural:
+
+   1. KAYNAGI OLMAYAN ESIK YONLENDIREMEZ.
+   2. PLAN DEGISTIREN HER KURAL YETKI TASIMALIDIR. audit() bunu tarar.
+   3. EKSENLER GIZLENMEZ — arayuz esigi gosteriyorsa dayanagini da gosterir. */
+
+window.R = window.R || {};
+
+R.Ev = (function(){
+
+  const BY_RULE = (function(){
+    const m = {};
+    (R.EVIDENCE || []).forEach(function(e){ m[e.rule] = e; });
+    return m;
+  })();
+
+  function resolve(e){
+    if(!e) return null;
+    const source = e.sourceType || null;
+    if(!source) return null;
+    const certainty = e.certainty || 'unknown';
+
+    /* Uygulanabilirlik yazilmamissa populasyon metninden okunur:
+       "DEGISIR" diyen bir esik dogrudan uygulanabilir sayilamaz. */
+    const pop = String(e.population || '');
+    const applicability = e.applicability
+      || (/DEĞİŞİR|değişir/.test(pop) ? 'indirect'
+        : (pop === '—' || pop === '') ? 'local' : 'direct');
+
+    const authority = e.authority || R.EVIDENCE_POLICY.defaults[source] || 'observe_only';
+
+    return {
+      rule:e.rule, source:source, certainty:certainty,
+      applicability:applicability, authority:authority,
+      sourceInfo:SOURCE_BY_ID[source] || null,
+      certaintyInfo:CERT_BY_ID[certainty] || null,
+      applicabilityInfo:APPL_BY_ID[applicability] || null,
+      authorityInfo:AUTH_BY_ID[authority] || null,
+      citation:e.cite, population:e.population || null, note:e.note || '',
+    };
+  }
+
+  const SOURCE_BY_ID = R.EVIDENCE_SOURCES.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+  const CERT_BY_ID = R.EVIDENCE_CERTAINTY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+  const APPL_BY_ID = R.EVIDENCE_APPLICABILITY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+  const AUTH_BY_ID = R.EVIDENCE_AUTHORITY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+
+  function of(rule){ return resolve(BY_RULE[rule]); }
+
+  function authorityOf(rule){
+    const r = of(rule);
+    return r ? r.authorityInfo : null;
+  }
+
+  function mayDirect(rule){
+    const a = authorityOf(rule);
+    return !!(a && a.mayDirect);
+  }
+
+  function cap(rule){
+    const a = authorityOf(rule);
+    return a ? a.cap : AUTH_BY_ID.observe_only.cap;
+  }
+
+  function line(rule){
+    const r = of(rule);
+    if(!r){
+      return { source:null, label:'kaynak yok', tone:'warn', mayDirect:false,
+        authority:'observe_only', authorityLabel:'Yalnız izler',
+        text:'Bu eşiğin kaynağı yazılmamış. Kaynağı bilinmeyen bir eşik '
+           + 'plan değiştirmez.' };
+    }
+    return {
+      rule:r.rule, source:r.source,
+      label:(r.sourceInfo || {}).label || r.source,
+      tone:(r.authorityInfo || {}).tone || 'info',
+      mayDirect:!!(r.authorityInfo || {}).mayDirect,
+      certainty:r.certainty,
+      certaintyLabel:(r.certaintyInfo || {}).label || r.certainty,
+      applicability:r.applicability,
+      applicabilityLabel:(r.applicabilityInfo || {}).label || r.applicability,
+      authority:r.authority,
+      authorityLabel:(r.authorityInfo || {}).label || r.authority,
+      citation:r.citation, population:r.population,
+      text:r.citation + (r.population ? ' · ' + r.population : ''),
+      note:r.note || (r.sourceInfo || {}).note || '',
+    };
+  }
+
+  /* Bir cumlenin tonunu YETKIYE gore kisar. Sessizce degil — neden
+     kisildigi yazilir. */
+  function temper(rule, strength){
+    const r = of(rule);
+    const a = r ? r.authorityInfo : null;
+    const izin = !!(a && a.mayDirect);
+    if(strength === 'observe' || izin){
+      return { strength:strength, downgraded:false,
+        source:r ? r.source : null, authority:r ? r.authority : null,
+        cap:cap(rule) };
+    }
+    return {
+      strength:'observe', downgraded:true,
+      source:r ? r.source : null, authority:r ? r.authority : 'observe_only',
+      cap:cap(rule),
+      why:r
+        ? 'Bu eşik «' + (r.sourceInfo || {}).label + '» kaynağından geliyor ve '
+          + 'AYS yetki politikasında «' + (a || {}).label + '» sayılıyor: '
+          + (a || {}).note + ' Bu yüzden burada plan değiştirilmez, gözlem bildirilir.'
+        : 'Bu eşiğin kaynağı yazılmamış; kaynağı bilinmeyen bir eşikten '
+          + 'plan değişikliği çıkmaz.',
+    };
+  }
+
+  /* Kapsam: kayitli esiklerin dagilimi. */
+  function coverage(){
+    const bySource = {}, byAuthority = {};
+    (R.EVIDENCE || []).forEach(function(e){
+      const r = resolve(e);
+      if(!r) return;
+      bySource[r.source] = (bySource[r.source] || 0) + 1;
+      byAuthority[r.authority] = (byAuthority[r.authority] || 0) + 1;
+    });
+    return { total:(R.EVIDENCE || []).length, bySource, byAuthority };
+  }
+
+  /* Denetim: kayit butunlugu. Bir esik kayitliysa kaynagi cozulebilmeli
+     ve atfi yazili olmali. */
+  function audit(){
+    const sorunlar = [];
+    (R.EVIDENCE || []).forEach(function(e){
+      const r = resolve(e);
+      if(!r){
+        sorunlar.push({ rule:e.rule, kind:'unresolved',
+          note:'Kaynak türü çözülemedi.' });
+        return;
+      }
+      if(String(e.cite || '').length < 8){
+        sorunlar.push({ rule:e.rule, kind:'no-citation',
+          note:'Atıf metni yok ya da çok kısa.' });
+      }
+      if(r.source === 'system_tuning' && String(e.note || '').length < 40){
+        sorunlar.push({ rule:e.rule, kind:'no-rationale',
+          note:'Sistem ayarı olan eşik NEDEN öyle seçildiğini yazmalı; '
+             + 'gerekçesiz bir seçim gizlenmiş bir keyfiliktir.' });
+      }
+    });
+    return sorunlar;
+  }
+
+  function disputed(){
+    return (R.EVIDENCE || []).map(resolve).filter(function(r){
+      return r && (r.applicability !== 'direct' || r.certainty === 'low'
+        || r.certainty === 'unknown');
+    });
+  }
+
+  function policy(){ return R.EVIDENCE_POLICY; }
+
+  return { of, resolve, line, authorityOf, mayDirect, cap, temper,
+    coverage, audit, disputed, policy, rules:function(){ return Object.keys(BY_RULE); } };
 })();
 
 /* ==== js/core/calc.js ==== */
@@ -27459,6 +27862,14 @@ R.Screens.subjects = (function(){
         <p class="small muted mt-4">Tahmini süre: ${topic.days} · ${freq} frekans${topic.group ? ' · '+topic.group : ''}</p>` }),
       K.Notice({ tone:'info', body:html`Kapanış kuralı: konu testi ≥%${R.CLOSURE_RULE.first} <b>ve</b>
         ${R.CLOSURE_RULE.gapDays} gün sonraki test ≥%${R.CLOSURE_RULE.second}. Tek ölçüm kapanış saymaz.` }),
+
+      /* Esigin KAYNAGI. %75 ve %70 pedagojik bir bulgu degil, bu sistemin
+         secimidir — ve bunu gizlemek, bir tasarim tercihini bulgu gibi
+         sunmak olurdu (core/evidence.js). */
+      K.Notice({ tone:'warn', hint:'evidence',
+        body:html`<b>Bu sayılar nereden geliyor?</b>
+          ${R.Ev.line('closure.first').note}
+          ${R.Ev.line('closure.second').note}` }),
       K.Cols(2, [
         K.Field({ label:'1. ölçüm — konu testi %', input:pctInput('tp-first', st.first) }),
         K.Field({ label:'1. ölçüm tarihi', input:K.Input({ id:'tp-first-at', type:'date', value:st.firstAt || U.todayISO() }) }),
@@ -29510,6 +29921,7 @@ R.Screens.guide = (function(){
     { id:'calendar',  label:'Resmî takvim' },
     { id:'istisna',   label:'Takvim istisnaları' },
     { id:'examweek',  label:'Sınav haftası' },
+    { id:'kanit',     label:'Eşiklerin dayanağı' },
     { id:'settings',  label:'Ayarlar' },
   ];
 
@@ -29904,9 +30316,76 @@ R.Screens.guide = (function(){
     ]);
   }
 
+
+  /* ------------------------------------------------------------- kanıt
+
+     Sistemin butun esiklerinin nereden geldigi tek tabloda.
+
+     Bu sayfanin varlik sebebi tek cumle: deterministik olmak, pedagojik
+     olarak dogru olmak anlamina gelmez. Bir esik kodda ne kadar kesin
+     yazilirsa yazilsin, esigin kendisi keyfi secilmisse sistem son derece
+     guvenilir gorunen keyfi bir sonuc uretir. */
+  function evidenceTab(){
+    const kapsam = R.Ev.coverage();
+    const denetim = R.Ev.audit();
+    const kurallar = R.EVIDENCE.map(e => R.Ev.resolve(e));
+    const ayrisan = R.Ev.disputed();
+
+    const grup = id => kurallar.filter(r => r.source === id);
+
+    return K.Stack([
+      K.Card({ title:'Eşikler nereden geliyor?', hint:'evidence',
+        body:html`
+          ${K.Notice({ tone:'warn', title:'Bu bir pedagojik hiyerarşi değildir',
+            body:R.Ev.policy().disclaimer })}
+          <p class="small muted mt-8">${R.Ev.policy().rationale}</p>
+          ${K.Table({ tight:true, headers:['Kaynak türü', 'AYS\'nin tanıdığı yetki',
+            { label:'Eşik', num:true }],
+            rows:R.EVIDENCE_SOURCES.map(src => {
+              const y = R.EVIDENCE_AUTHORITY.find(a =>
+                a.id === R.Ev.policy().defaults[src.id]);
+              return [src.label, y.label + ' — ' + y.note,
+                String((kapsam.bySource[src.id] || 0))];
+            }) })}
+          <p class="tiny dim mt-8">Politika sürümü ${R.Ev.policy().version}
+            (${R.Ev.policy().changedAt}).</p>` }),
+
+      ...R.EVIDENCE_SOURCES.map(src => {
+        const rows = grup(src.id);
+        if(!rows.length) return '';
+        return K.Card({ title:src.label, sub:src.note,
+          body:K.Table({ tight:true,
+            headers:['Eşik', 'Dayanak', 'Kesinlik', 'Uygulanır', 'Yetki'],
+            rows:rows.map(r => [
+              r.rule,
+              html`${r.citation}${when(r.note, () => html`<br><span class="tiny dim">${r.note}</span>`)}`,
+              (r.certaintyInfo || {}).label || r.certainty,
+              (r.applicabilityInfo || {}).label || r.applicability,
+              (r.authorityInfo || {}).label || r.authority,
+            ]) }) });
+      }).filter(Boolean),
+
+      K.Card({ title:'Denetim',
+        body:html`
+          ${denetim.length
+            ? K.Notice({ tone:'danger', title:'Kayıt sorunlu',
+                body:denetim.map(d => d.rule + ' (' + d.kind + ')').join(', ') })
+            : K.Notice({ tone:'ok', title:'Denetim temiz',
+                body:'Her kayıt çözülebiliyor, her atıf yazılı ve sistem ayarı '
+                   + 'olan her eşik gerekçesini taşıyor. Bu denetim testte de '
+                   + 'koşar; bozulursa test kırılır.' })}
+          ${when(ayrisan.length, () => K.Notice({ tone:'info',
+            title:'Dolaylı ya da kesinliği düşük eşikler',
+            body:ayrisan.length + ' eşik ya popülasyona göre kayıyor ya da '
+               + 'kesinliği düşük. Bunlar plan değiştirmez, yalnızca '
+               + 'bilgilendirir.' }))}` }),
+    ]);
+  }
+
   const TAB_BODY = {
     analysis:analysisTab, checklist:checklistTab, calendar:calendarTab,
-    istisna:istisnaTab, examweek:examWeekTab, settings:settingsTab,
+    istisna:istisnaTab, examweek:examWeekTab, kanit:evidenceTab,
+    settings:settingsTab,
   };
 
   async function render(){

@@ -153,6 +153,14 @@ R.Screens.subjects = (function(){
         <p class="small muted mt-4">Tahmini süre: ${topic.days} · ${freq} frekans${topic.group ? ' · '+topic.group : ''}</p>` }),
       K.Notice({ tone:'info', body:html`Kapanış kuralı: konu testi ≥%${R.CLOSURE_RULE.first} <b>ve</b>
         ${R.CLOSURE_RULE.gapDays} gün sonraki test ≥%${R.CLOSURE_RULE.second}. Tek ölçüm kapanış saymaz.` }),
+
+      /* Esigin KAYNAGI. %75 ve %70 pedagojik bir bulgu degil, bu sistemin
+         secimidir — ve bunu gizlemek, bir tasarim tercihini bulgu gibi
+         sunmak olurdu (core/evidence.js). */
+      K.Notice({ tone:'warn', hint:'evidence',
+        body:html`<b>Bu sayılar nereden geliyor?</b>
+          ${R.Ev.line('closure.first').note}
+          ${R.Ev.line('closure.second').note}` }),
       K.Cols(2, [
         K.Field({ label:'1. ölçüm — konu testi %', input:pctInput('tp-first', st.first) }),
         K.Field({ label:'1. ölçüm tarihi', input:K.Input({ id:'tp-first-at', type:'date', value:st.firstAt || U.todayISO() }) }),

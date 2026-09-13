@@ -17,6 +17,7 @@ R.Screens.guide = (function(){
     { id:'calendar',  label:'Resmî takvim' },
     { id:'istisna',   label:'Takvim istisnaları' },
     { id:'examweek',  label:'Sınav haftası' },
+    { id:'kanit',     label:'Eşiklerin dayanağı' },
     { id:'settings',  label:'Ayarlar' },
   ];
 
@@ -411,9 +412,76 @@ R.Screens.guide = (function(){
     ]);
   }
 
+
+  /* ------------------------------------------------------------- kanıt
+
+     Sistemin butun esiklerinin nereden geldigi tek tabloda.
+
+     Bu sayfanin varlik sebebi tek cumle: deterministik olmak, pedagojik
+     olarak dogru olmak anlamina gelmez. Bir esik kodda ne kadar kesin
+     yazilirsa yazilsin, esigin kendisi keyfi secilmisse sistem son derece
+     guvenilir gorunen keyfi bir sonuc uretir. */
+  function evidenceTab(){
+    const kapsam = R.Ev.coverage();
+    const denetim = R.Ev.audit();
+    const kurallar = R.EVIDENCE.map(e => R.Ev.resolve(e));
+    const ayrisan = R.Ev.disputed();
+
+    const grup = id => kurallar.filter(r => r.source === id);
+
+    return K.Stack([
+      K.Card({ title:'Eşikler nereden geliyor?', hint:'evidence',
+        body:html`
+          ${K.Notice({ tone:'warn', title:'Bu bir pedagojik hiyerarşi değildir',
+            body:R.Ev.policy().disclaimer })}
+          <p class="small muted mt-8">${R.Ev.policy().rationale}</p>
+          ${K.Table({ tight:true, headers:['Kaynak türü', 'AYS\'nin tanıdığı yetki',
+            { label:'Eşik', num:true }],
+            rows:R.EVIDENCE_SOURCES.map(src => {
+              const y = R.EVIDENCE_AUTHORITY.find(a =>
+                a.id === R.Ev.policy().defaults[src.id]);
+              return [src.label, y.label + ' — ' + y.note,
+                String((kapsam.bySource[src.id] || 0))];
+            }) })}
+          <p class="tiny dim mt-8">Politika sürümü ${R.Ev.policy().version}
+            (${R.Ev.policy().changedAt}).</p>` }),
+
+      ...R.EVIDENCE_SOURCES.map(src => {
+        const rows = grup(src.id);
+        if(!rows.length) return '';
+        return K.Card({ title:src.label, sub:src.note,
+          body:K.Table({ tight:true,
+            headers:['Eşik', 'Dayanak', 'Kesinlik', 'Uygulanır', 'Yetki'],
+            rows:rows.map(r => [
+              r.rule,
+              html`${r.citation}${when(r.note, () => html`<br><span class="tiny dim">${r.note}</span>`)}`,
+              (r.certaintyInfo || {}).label || r.certainty,
+              (r.applicabilityInfo || {}).label || r.applicability,
+              (r.authorityInfo || {}).label || r.authority,
+            ]) }) });
+      }).filter(Boolean),
+
+      K.Card({ title:'Denetim',
+        body:html`
+          ${denetim.length
+            ? K.Notice({ tone:'danger', title:'Kayıt sorunlu',
+                body:denetim.map(d => d.rule + ' (' + d.kind + ')').join(', ') })
+            : K.Notice({ tone:'ok', title:'Denetim temiz',
+                body:'Her kayıt çözülebiliyor, her atıf yazılı ve sistem ayarı '
+                   + 'olan her eşik gerekçesini taşıyor. Bu denetim testte de '
+                   + 'koşar; bozulursa test kırılır.' })}
+          ${when(ayrisan.length, () => K.Notice({ tone:'info',
+            title:'Dolaylı ya da kesinliği düşük eşikler',
+            body:ayrisan.length + ' eşik ya popülasyona göre kayıyor ya da '
+               + 'kesinliği düşük. Bunlar plan değiştirmez, yalnızca '
+               + 'bilgilendirir.' }))}` }),
+    ]);
+  }
+
   const TAB_BODY = {
     analysis:analysisTab, checklist:checklistTab, calendar:calendarTab,
-    istisna:istisnaTab, examweek:examWeekTab, settings:settingsTab,
+    istisna:istisnaTab, examweek:examWeekTab, kanit:evidenceTab,
+    settings:settingsTab,
   };
 
   async function render(){

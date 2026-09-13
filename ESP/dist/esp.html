@@ -5422,7 +5422,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'5733eb1', at:'2026-09-13 09:28', dirty:true };
+SP.BUILD = { id:'e200f40', at:'2026-09-13 15:00', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -7770,6 +7770,223 @@ ESP.PLACEMENT = {
   ],
 };
 
+/* ==== js/data/evidence.js ==== */
+/* Kanit katmani — hangi esik nereden geliyor ve NE SOYLEMEYE YETKILI.
+
+   SPI'de dogan, AYS'ye tasinan katmanin ESP'deki hali. Ayni cumle:
+
+     "Deterministik olmak, pedagojik olarak dogru olmak anlamina gelmez."
+
+   ESP'nin merdiveni kesin sayilarla doludur: "son 30 gunde 300+ aktif
+   kart ve retansiyon >= 0.75", "temiz BPM >= 100", "hata orani <= %8".
+   Kodda hepsi kesindir. Peki 300 neden 300? 0,75 neden 0,75?
+
+   Durust cevap: cogu BU SISTEMIN SECIMIDIR. Bir kismi yayimlanmis bir
+   cerceveden gelir (CEFR bantlari, Atesman okunabilirlik formulu), bir
+   kismi yerlesmis ogrenme bulgularina dayanir (araliikli tekrar), bir
+   kismi da kullanicinin kendi olcumudur. Bunlari birbirine karistirmak,
+   bir tasarim tercihini bulgu gibi sunmaktir.
+
+   PEDAGOJIK SINIR (ESP.PEDAGOGIC) burada da gecerlidir: hicbir esik
+   yetenek yargisi kurmaz, sertifika vermez, sonuc garantisi uretmez. */
+
+window.ESP = window.ESP || {};
+
+ESP.EVIDENCE_SOURCES = [
+  { id:'framework', label:'Yayımlanmış çerçeve',
+    note:'Adı konmuş, dışarıda yayımlanmış bir ölçek ya da formül: CEFR '
+       + 'bantları, Ateşman okunabilirlik formülü, klasik retorik kanonları.' },
+  { id:'research', label:'Öğrenme araştırması',
+    note:'Öğrenme bilimi bulgusu: aralıklı tekrar, geri getirme pratiği, '
+       + 'ara verilmiş pratik gibi genel kabul görmüş etkiler.' },
+  { id:'personal_data', label:'Kendi ölçümün',
+    note:'Kullanıcının kendi kaydından hesaplanır: retansiyon, temiz eşik, '
+       + 'okuma hızı. Başkasıyla karşılaştırılmaz.' },
+  { id:'system_tuning', label:'Sistem ayarı',
+    note:'Bu yazılımın pratik sebeplerle seçtiği sayı. Pedagojik bir bulgu '
+       + 'değildir ve öyle sunulmaz.' },
+];
+
+ESP.EVIDENCE_CERTAINTY = [
+  { id:'high',     label:'Yüksek',     note:'Kaynak açık ve tartışmasız.' },
+  { id:'moderate', label:'Orta',       note:'Genel kabul var, ayrıntıda değişebilir.' },
+  { id:'low',      label:'Düşük',      note:'Dolaylı ya da bağlama çok bağlı.' },
+  { id:'unknown',  label:'Bilinmiyor', note:'Kesinlik değerlendirilmemiş.' },
+];
+
+ESP.EVIDENCE_APPLICABILITY = [
+  { id:'direct',   label:'Doğrudan', note:'Eşik bu disiplin ve bu kişi için doğrudan geçerli.' },
+  { id:'indirect', label:'Dolaylı',  note:'Bulgu genel; bu disipline uyarlanırken kayabilir.' },
+  { id:'local',    label:'Yerel',    note:'Eşik kişiye özel; başkasıyla karşılaştırılamaz.' },
+];
+
+ESP.EVIDENCE_AUTHORITY = [
+  { id:'steer',         label:'Kapı açabilir', tone:'ok', mayDirect:true, cap:null,
+    note:'Kademe ilerlemesine tam katkıda bulunabilir.' },
+  { id:'limited_steer', label:'Sınırlı katkı', tone:'ok', mayDirect:true, cap:0.35,
+    note:'Kapı açabilir ama etkisi sınırlıdır.' },
+  { id:'inform',        label:'Bilgilendirir', tone:'info', mayDirect:false, cap:0.20,
+    note:'Gözlem bildirir; kademe değiştirmez.' },
+  { id:'observe_only',  label:'Yalnız izler', tone:'warn', mayDirect:false, cap:0.20,
+    note:'Yalnızca izlenir; hiçbir kademe yalnız buna dayandırılmaz.' },
+];
+
+ESP.EVIDENCE_POLICY = {
+  version:1,
+  changedAt:'2026-09-13',
+  title:'ESP operasyonel yetki politikası',
+  disclaimer:'Bu tablo evrensel bir pedagojik hiyerarşi DEĞİLDİR. '
+    + 'ESP\'nin hangi kaynak türüne kademe ilerlemesinde ne kadar söz hakkı '
+    + 'tanıdığını söyler. Bilimsel bir iddia değil, bir yazılım kararıdır.',
+  rationale:'Yayımlanmış bir çerçeve (CEFR bandı, Ateşman formülü) ve '
+    + 'kullanıcının kendi ölçümü doğrudan kapı açabilir; öğrenme araştırması '
+    + 'genel bir yön verir ama disipline uyarlanırken kayar; sistemin kendi '
+    + 'seçtiği sayılar bir başlangıç noktasıdır ve öyle etiketlenir. '
+    + 'Ayrıca beyana dayalı ölçümler ayrı bir kuralla zayıflatılır '
+    + '(core/curriculum.js → selfReported).',
+  history:[
+    { version:1, at:'2026-09-13',
+      note:'SPİ\'de doğan dört eksenli katman ESP\'ye taşındı. Sebep: '
+         + 'merdiven kapılarının sayılarının çoğu sistemin kendi seçimiydi '
+         + 've hiçbiri bunu söylemiyordu.' },
+  ],
+  defaults:{
+    framework:'steer',
+    personal_data:'steer',
+    research:'limited_steer',
+    system_tuning:'observe_only',
+  },
+};
+
+ESP.EVIDENCE = [
+
+  /* ------------------------------------------------ yayimlanmis cerceve */
+  { rule:'lang.cefr', sourceType:'framework', certainty:'high',
+    applicability:'indirect',
+    cite:'CEFR — Avrupa Ortak Dil Referans Çerçevesi (2020 Tamamlayıcı Cilt), '
+       + 'aracılık ve çevrim içi etkileşim ölçekleri dahil',
+    population:'dil öğrenenler; bandın kişiye oturması DEĞİŞİR',
+    note:'Konu haritalarının dil başlıkları buradan alınmıştır. Dikkat: '
+       + 'CEFR\'in ALTI bandı ile ESP\'nin BEŞ merdiven basamağı farklı '
+       + 'ölçeklerdir ve birbirine çevrilmez.' },
+  { rule:'writing.readability', sourceType:'framework', certainty:'moderate',
+    applicability:'direct',
+    cite:'Ateşman okunabilirlik formülü — Türkçe için uyarlanmış '
+       + 'okunabilirlik ölçeği',
+    population:'Türkçe metin',
+    note:'Formül yayımlanmıştır ve deterministik hesaplanır. Ama ölçtüğü şey '
+       + 'yalnızca cümle ve hece uzunluğudur: anlamı, özgünlüğü ya da '
+       + 'doğruluğu ölçmez. Yüksek puan iyi yazı demek değildir.' },
+  { rule:'writing.canons', sourceType:'framework', certainty:'moderate',
+    applicability:'indirect',
+    cite:'Klasik retoriğin beş kanonu (buluş, düzen, üslup, bellek, sunum)',
+    population:'yazı ve hitabet',
+    note:'İki bin yıllık bir düzenleme çerçevesidir; bir ölçüm aracı değil '
+       + 'bir müfredat iskeletidir.' },
+  { rule:'reading.levels', sourceType:'framework', certainty:'moderate',
+    applicability:'indirect',
+    cite:'Adler\'in dört okuma düzeyi (temel, gözden geçirme, analitik, '
+       + 'sentopik)',
+    population:'derin okuma',
+    note:'Düzeyler bir sıra önerir; ölçülebilir bir eşik vermez. Eşikleri '
+       + 'bu sistem koymuştur.' },
+
+  /* ---------------------------------------------- ogrenme arastirmasi */
+  { rule:'srs.spacing', sourceType:'research', certainty:'moderate',
+    applicability:'indirect',
+    cite:'Aralıklı tekrar (spacing effect) — tekrarların araya zaman '
+       + 'koyularak yapılmasının daha kalıcı olduğu yönündeki yerleşik bulgu',
+    population:'genel öğrenen; birey ve malzemeye göre DEĞİŞİR',
+    note:'Etkinin varlığı yerleşiktir; KUTU ARALIKLARI (1, 3, 7, 16, 35 gün) '
+       + 'bu sistemin seçimidir. Bulgu ile ayarı karıştırmamak gerekir.' },
+  { rule:'srs.retrieval', sourceType:'research', certainty:'moderate',
+    applicability:'indirect',
+    cite:'Geri getirme pratiği (testing effect) — hatırlamaya çalışmanın '
+       + 'tekrar okumaktan daha kalıcı olduğu yönündeki yerleşik bulgu',
+    population:'genel öğrenen',
+    note:'Kart sisteminin varlık sebebi budur.' },
+  { rule:'srs.forgetting', sourceType:'research', certainty:'low',
+    applicability:'indirect',
+    cite:'Unutma eğrisi — hatırlamanın zamanla üstel olarak azaldığı '
+       + 'yönündeki klasik gözlem; R(t) = e^(−t/S)',
+    population:'malzemeye ve kişiye göre belirgin biçimde DEĞİŞİR',
+    note:'Eğrinin BİÇİMİ genel kabul görür; kararlılık parametresi S '
+       + 'kişiye ve karta özeldir ve bu sistem onu senin kendi cevap '
+       + 'geçmişinden tahmin eder. Mutlak bir retansiyon sayısı değil, '
+       + 'kendi geçmişine göre bir tahmindir.' },
+  { rule:'music.slowPractice', sourceType:'research', certainty:'low',
+    applicability:'indirect',
+    cite:'Yavaş ve hatasız tekrarın, hızlı ve hatalı tekrardan daha iyi '
+       + 'öğrettiği yönündeki yaygın pedagojik kabul',
+    population:'enstrüman çalışması',
+    note:'Güçlü bir deneysel literatürden çok, yerleşmiş bir öğretim '
+       + 'geleneğidir. Bu yüzden sınırlı katkı verir.' },
+
+  /* ---------------------------------------------------- kendi olcumun */
+  { rule:'srs.retention', sourceType:'personal_data', certainty:'moderate',
+    applicability:'local',
+    cite:'Retansiyon — kendi kart geçmişinden hesaplanan hatırlama tahmini',
+    population:'yalnızca bu kullanıcı',
+    note:'Bir ÖLÇÜM değil bir HESAPTIR: kartın kararlılığı ve son tekrardan '
+       + 'bu yana geçen süreden türetilir. Kesinlik etiketi bu yüzden '
+       + '«hesaplandı»dır.' },
+  { rule:'music.cleanBpm', sourceType:'personal_data', certainty:'low',
+    applicability:'local',
+    cite:'Temiz eşik — kullanıcının kendi işaretlediği temiz tekrarlar',
+    population:'yalnızca bu kullanıcı',
+    note:'«Temiz» kararını sistem vermez, kullanıcı verir. Bu bir BEYANDIR '
+       + 've kapıyı zayıf açar (core/curriculum.js → selfReported).' },
+  { rule:'diction.errorRate', sourceType:'personal_data', certainty:'low',
+    applicability:'local',
+    cite:'Hata oranı — kullanıcının kendi işaretlediği hata sayısı / kelime',
+    population:'yalnızca bu kullanıcı',
+    note:'Sistem sesi dinlemez. Hataları kullanıcı işaretler; bu bir beyandır '
+       + 've kapıyı zayıf açar. Asgari beş kayıt şartı vardır.' },
+  { rule:'intellect.ehs', sourceType:'personal_data', certainty:'low',
+    applicability:'local',
+    cite:'EHS — Σ(disiplin ağırlığı × ölçülen saat × kalite katsayısı)',
+    population:'yalnızca bu kullanıcı',
+    note:'Bir hacim ölçüsüdür, bir başarı ölçüsü değil. Ağırlıklar ve '
+       + 'katsayılar bu sistemin seçimidir; sayı yalnızca KENDİ geçmişinle '
+       + 'karşılaştırılır.' },
+
+  /* -------------------------------------------------- sistemin secimi */
+  { rule:'ladder.levels', sourceType:'system_tuning', certainty:'unknown',
+    cite:'Bu sistemin seçimi — beş kademe (Acemi, Çırak, Kalfa, Usta, Üstat)',
+    population:'—',
+    note:'Beş basamak pedagojik bir bulgu DEĞİLDİR; lonca geleneğinden '
+       + 'alınmış bir anlatı çerçevesidir. Seçilme sebebi şu: bu adlar bir '
+       + 'SÜREÇ anlatır, bir yetenek yargısı değil. Dört ya da yedi basamak '
+       + 'da savunulabilirdi.' },
+  { rule:'ladder.gates', sourceType:'system_tuning', certainty:'unknown',
+    applicability:'indirect',
+    cite:'Bu sistemin seçimi — kapı eşikleri (300 kart, %75 retansiyon, '
+       + '100 BPM, %8 hata oranı ve benzerleri)',
+    population:'disipline ve kişiye göre DEĞİŞİR',
+    note:'Bu sayıların hiçbiri bir literatürden gelmez. Ölçülebilir olmaları '
+       + 'için seçilmişlerdir: ölçülemeyen bir kapı, kullanıcının kendine '
+       + 'söylediği bir hikâyedir. Sayının kendisi tartışmaya açıktır ve bu '
+       + 'açıkça yazılıdır.' },
+  { rule:'srs.boxes', sourceType:'system_tuning', certainty:'unknown',
+    cite:'Bu sistemin seçimi — Leitner kutu aralıkları (1, 3, 7, 16, 35 gün)',
+    population:'—',
+    note:'Aralıklı tekrar bulgusu "araya zaman koy" der, "yedi gün" demez. '
+       + 'Bu sayılar yaygın uygulamadan alınmış pratik bir başlangıçtır ve '
+       + 'SM-2 kolaylık katsayısıyla kişiye göre kayar.' },
+  { rule:'coach.dose', sourceType:'system_tuning', certainty:'unknown',
+    applicability:'indirect',
+    cite:'Bu sistemin seçimi — günlük reçete süreleri ve tekrar sayıları',
+    population:'kişiye göre DEĞİŞİR',
+    note:'Reçete bir öneridir, bir doz değil. Süreler bir başlangıç '
+       + 'noktasıdır ve kullanıcının kendi verisiyle değişmelidir.' },
+  { rule:'friction.budget', sourceType:'system_tuning', certainty:'unknown',
+    cite:'Bu sistemin seçimi — sürtünme bütçesi (12 dk/gün, %34 pay)',
+    population:'—',
+    note:'İki eşik de açıkça seçilmiş sınırlardır, bir bulgu değil. Sebebi '
+       + 'pratiktir: ikisi birden aşılmadıkça sistem susar, çünkü tek eşiğin '
+       + 'aşılması bir kurulum günü olabilir.' },
+];
+
 /* ==== js/data/drills.js ==== */
 /* Egzersiz katalogu — koçun yazdığı reçetenin ham maddesi.
 
@@ -8821,6 +9038,8 @@ ESP.HINTS = {
   /* --- sistemin kendi denetimi --- */
   'signal':{ t:'Denetim sorusu', b:'Nöbetçinin ya da sürtünme ölçerin sorduğu tek soru.',
     more:'Denetim mekanizması ile denetim EKRANI aynı şey değildir: arka planda çalışan nöbetçinin bir ekran ağacı olması gerekmez, doğru anda mevcut akışa düşen tek bir soru yeter. Aynı anda en fazla bir soru açık kalır; cevaplamak zorunlu değildir ve «bu soru bana uymuyor» da bir cevaptır. Soru cevaplanınca kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı bir sonraki pencerede ölçülür.' },
+  'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın türü kademe ilerlemesinde ne kadar söz hakkı olduğunu belirler.',
+    more:'Deterministik olmak, pedagojik olarak doğru olmak demek değildir. Dört kaynak türü vardır — yayımlanmış çerçeve (CEFR, Ateşman) ve kendi ölçümün kapı açabilir; öğrenme araştırması sınırlı katkı verir; sistemin kendi ayarı yalnızca izlenir. Merdiven kapılarının sayıları (300 kart, %75 retansiyon, 100 BPM) BU SİSTEMİN SEÇİMİDİR; ölçülebilir oldukları için seçilmişlerdir, bir literatürden geldikleri için değil.' },
   'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile çalışmaya giden sürenin payı.',
     more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar. Tek dürüst cevap sürtünmeyi de ÖLÇMEKTİR: uygulama açıkken geçen süre (pratik sayacı çalışırken geçen hariç) yönetim sayılır. İki eşik birden aşılmadıkça sistem susar — bir kurulum günü hüküm değildir. Sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
   'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',
@@ -12460,6 +12679,180 @@ ESP.Nav = (function(){
 
 
   return { sections, sectionOn, routeOn, sectionOf, all:function(){ return ESP.SECTIONS_ALL; } };
+})();
+
+/* ==== js/core/evidence.js ==== */
+/* Kanit motoru — bir esigin ne soylemeye yetkili oldugunu belirler.
+
+   data/evidence.js dort ekseni tasir; bu dosya onlari cozer ve tek bir
+   kurali uygular:
+
+     Bir esik, YETKISININ izin verdiginden daha guclu konusamaz.
+
+   Yetki, kaynak turunun politika tablosundaki karsiligidir (kayit basina
+   ezilebilir). Politika bir pedagojik iddia degil bir tasarim kararidir
+   ve oyle etiketlenir.
+
+   Uc kural:
+
+   1. KAYNAGI OLMAYAN ESIK YONLENDIREMEZ.
+   2. KAPI ACAN HER ESIK YETKI TASIMALIDIR. audit() bunu tarar.
+   3. EKSENLER GIZLENMEZ — arayuz esigi gosteriyorsa dayanagini da gosterir. */
+
+window.ESP = window.ESP || {};
+
+ESP.Ev = (function(){
+
+  const BY_RULE = (function(){
+    const m = {};
+    (ESP.EVIDENCE || []).forEach(function(e){ m[e.rule] = e; });
+    return m;
+  })();
+
+  function resolve(e){
+    if(!e) return null;
+    const source = e.sourceType || null;
+    if(!source) return null;
+    const certainty = e.certainty || 'unknown';
+
+    /* Uygulanabilirlik yazilmamissa populasyon metninden okunur:
+       "DEGISIR" diyen bir esik dogrudan uygulanabilir sayilamaz. */
+    const pop = String(e.population || '');
+    const applicability = e.applicability
+      || (/DEĞİŞİR|değişir/.test(pop) ? 'indirect'
+        : (pop === '—' || pop === '') ? 'local' : 'direct');
+
+    const authority = e.authority || ESP.EVIDENCE_POLICY.defaults[source] || 'observe_only';
+
+    return {
+      rule:e.rule, source:source, certainty:certainty,
+      applicability:applicability, authority:authority,
+      sourceInfo:SOURCE_BY_ID[source] || null,
+      certaintyInfo:CERT_BY_ID[certainty] || null,
+      applicabilityInfo:APPL_BY_ID[applicability] || null,
+      authorityInfo:AUTH_BY_ID[authority] || null,
+      citation:e.cite, population:e.population || null, note:e.note || '',
+    };
+  }
+
+  const SOURCE_BY_ID = ESP.EVIDENCE_SOURCES.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+  const CERT_BY_ID = ESP.EVIDENCE_CERTAINTY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+  const APPL_BY_ID = ESP.EVIDENCE_APPLICABILITY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+  const AUTH_BY_ID = ESP.EVIDENCE_AUTHORITY.reduce(function(m, x){ m[x.id] = x; return m; }, {});
+
+  function of(rule){ return resolve(BY_RULE[rule]); }
+
+  function authorityOf(rule){
+    const r = of(rule);
+    return r ? r.authorityInfo : null;
+  }
+
+  function mayDirect(rule){
+    const a = authorityOf(rule);
+    return !!(a && a.mayDirect);
+  }
+
+  function cap(rule){
+    const a = authorityOf(rule);
+    return a ? a.cap : AUTH_BY_ID.observe_only.cap;
+  }
+
+  function line(rule){
+    const r = of(rule);
+    if(!r){
+      return { source:null, label:'kaynak yok', tone:'warn', mayDirect:false,
+        authority:'observe_only', authorityLabel:'Yalnız izler',
+        text:'Bu eşiğin kaynağı yazılmamış. Kaynağı bilinmeyen bir eşik '
+           + 'kademe değiştirmez.' };
+    }
+    return {
+      rule:r.rule, source:r.source,
+      label:(r.sourceInfo || {}).label || r.source,
+      tone:(r.authorityInfo || {}).tone || 'info',
+      mayDirect:!!(r.authorityInfo || {}).mayDirect,
+      certainty:r.certainty,
+      certaintyLabel:(r.certaintyInfo || {}).label || r.certainty,
+      applicability:r.applicability,
+      applicabilityLabel:(r.applicabilityInfo || {}).label || r.applicability,
+      authority:r.authority,
+      authorityLabel:(r.authorityInfo || {}).label || r.authority,
+      citation:r.citation, population:r.population,
+      text:r.citation + (r.population ? ' · ' + r.population : ''),
+      note:r.note || (r.sourceInfo || {}).note || '',
+    };
+  }
+
+  /* Bir cumlenin tonunu YETKIYE gore kisar. Sessizce degil — neden
+     kisildigi yazilir. */
+  function temper(rule, strength){
+    const r = of(rule);
+    const a = r ? r.authorityInfo : null;
+    const izin = !!(a && a.mayDirect);
+    if(strength === 'observe' || izin){
+      return { strength:strength, downgraded:false,
+        source:r ? r.source : null, authority:r ? r.authority : null,
+        cap:cap(rule) };
+    }
+    return {
+      strength:'observe', downgraded:true,
+      source:r ? r.source : null, authority:r ? r.authority : 'observe_only',
+      cap:cap(rule),
+      why:r
+        ? 'Bu eşik «' + (r.sourceInfo || {}).label + '» kaynağından geliyor ve '
+          + 'AYS yetki politikasında «' + (a || {}).label + '» sayılıyor: '
+          + (a || {}).note + ' Bu yüzden burada plan değiştirilmez, gözlem bildirilir.'
+        : 'Bu eşiğin kaynağı yazılmamış; kaynağı bilinmeyen bir eşikten '
+          + 'kademe değişikliği çıkmaz.',
+    };
+  }
+
+  /* Kapsam: kayitli esiklerin dagilimi. */
+  function coverage(){
+    const bySource = {}, byAuthority = {};
+    (ESP.EVIDENCE || []).forEach(function(e){
+      const r = resolve(e);
+      if(!r) return;
+      bySource[r.source] = (bySource[r.source] || 0) + 1;
+      byAuthority[r.authority] = (byAuthority[r.authority] || 0) + 1;
+    });
+    return { total:(ESP.EVIDENCE || []).length, bySource, byAuthority };
+  }
+
+  /* Denetim: kayit butunlugu. Bir esik kayitliysa kaynagi cozulebilmeli
+     ve atfi yazili olmali. */
+  function audit(){
+    const sorunlar = [];
+    (ESP.EVIDENCE || []).forEach(function(e){
+      const r = resolve(e);
+      if(!r){
+        sorunlar.push({ rule:e.rule, kind:'unresolved',
+          note:'Kaynak türü çözülemedi.' });
+        return;
+      }
+      if(String(e.cite || '').length < 8){
+        sorunlar.push({ rule:e.rule, kind:'no-citation',
+          note:'Atıf metni yok ya da çok kısa.' });
+      }
+      if(r.source === 'system_tuning' && String(e.note || '').length < 40){
+        sorunlar.push({ rule:e.rule, kind:'no-rationale',
+          note:'Sistem ayarı olan eşik NEDEN öyle seçildiğini yazmalı; '
+             + 'gerekçesiz bir seçim gizlenmiş bir keyfiliktir.' });
+      }
+    });
+    return sorunlar;
+  }
+
+  function disputed(){
+    return (ESP.EVIDENCE || []).map(resolve).filter(function(r){
+      return r && (r.applicability !== 'direct' || r.certainty === 'low'
+        || r.certainty === 'unknown');
+    });
+  }
+
+  function policy(){ return ESP.EVIDENCE_POLICY; }
+
+  return { of, resolve, line, authorityOf, mayDirect, cap, temper,
+    coverage, audit, disputed, policy, rules:function(){ return Object.keys(BY_RULE); } };
 })();
 
 /* ==== js/core/curriculum.js ==== */
@@ -27429,6 +27822,7 @@ ESP.Screens.guide = (function(){
     { id:'model',    label:'Model' },
     { id:'veri',     label:'Veri' },
     { id:'sinirlar', label:'Sınırlar' },
+    { id:'kanit',    label:'Dayanak' },
   ];
 
   function usageRows(){
@@ -27697,11 +28091,90 @@ ESP.Screens.guide = (function(){
     ];
   }
 
+  /* ------------------------------------------------------------- kanıt
+
+     Merdivenin butun esiklerinin nereden geldigi tek tabloda.
+
+     Varlik sebebi tek cumle: deterministik olmak, pedagojik olarak dogru
+     olmak anlamina gelmez. "Retansiyon >= 0,75" kodda kesindir; 0,75'in
+     kendisi bu sistemin secimidir ve bunu gizlemek, bir tasarim tercihini
+     bulgu gibi sunmak olurdu. */
+  function evidenceRows(){
+    const kapsam = ESP.Ev.coverage();
+    const denetim = ESP.Ev.audit();
+    const ayrisan = ESP.Ev.disputed();
+    const kurallar = ESP.EVIDENCE.map(e => ESP.Ev.resolve(e));
+
+    return [
+      K.Entry({
+        label:'EŞİKLER NEREDEN GELİYOR?', hint:'evidence',
+        meta:kapsam.total + ' kayıt',
+        note:'Kaynak, kesinlik ve uygulanabilirlik birer bilgi; «yetki» ise '
+           + 'ESP\'nin kararıdır — hangi kaynağa dayanarak kademe '
+           + 'ilerletebileceğini söyler.',
+        wide:true,
+        body:html`
+          ${K.Notice({ tone:'warn', title:'Bu bir pedagojik hiyerarşi değildir',
+            body:ESP.Ev.policy().disclaimer })}
+          <p class="small muted mt-8">${ESP.Ev.policy().rationale}</p>
+          ${K.Table({ tight:true,
+            headers:['Kaynak türü', 'Tanınan yetki', { label:'Eşik', num:true }],
+            rows:ESP.EVIDENCE_SOURCES.map(src => {
+              const y = ESP.EVIDENCE_AUTHORITY.filter(a =>
+                a.id === ESP.Ev.policy().defaults[src.id])[0];
+              return [src.label, y.label + ' — ' + y.note,
+                String(kapsam.bySource[src.id] || 0)];
+            }) })}
+          <p class="tiny dim mt-8">Politika sürümü ${ESP.Ev.policy().version}
+            (${ESP.Ev.policy().changedAt}).</p>`,
+      }),
+
+      ...ESP.EVIDENCE_SOURCES.map(src => {
+        const rows = kurallar.filter(r => r.source === src.id);
+        if(!rows.length) return null;
+        return K.Entry({
+          label:src.label.toLocaleUpperCase('tr-TR'),
+          meta:rows.length + ' eşik',
+          note:src.note,
+          wide:true,
+          body:K.Table({ tight:true,
+            headers:['Eşik', 'Dayanak', 'Kesinlik', 'Uygulanır', 'Yetki'],
+            rows:rows.map(r => [
+              r.rule,
+              html`${r.citation}${when(r.note, () => html`<br><span class="tiny dim">${r.note}</span>`)}`,
+              (r.certaintyInfo || {}).label || r.certainty,
+              (r.applicabilityInfo || {}).label || r.applicability,
+              (r.authorityInfo || {}).label || r.authority,
+            ]) }),
+        });
+      }).filter(Boolean),
+
+      K.Entry({
+        label:'DENETİM',
+        meta:denetim.length ? denetim.length + ' sorun' : 'temiz',
+        body:html`
+          ${denetim.length
+            ? K.Notice({ tone:'danger', title:'Kayıt sorunlu',
+                body:denetim.map(d => d.rule + ' (' + d.kind + ')').join(', ') })
+            : K.Notice({ tone:'ok', title:'Denetim temiz',
+                body:'Her kayıt çözülebiliyor, her atıf yazılı ve sistem ayarı '
+                   + 'olan her eşik gerekçesini taşıyor. Bu denetim testte de '
+                   + 'koşar; bozulursa test kırılır.' })}
+          ${when(ayrisan.length, () => K.Notice({ tone:'info',
+            title:'Dolaylı ya da kesinliği düşük eşikler',
+            body:ayrisan.length + ' eşik ya disipline uyarlanırken kayıyor ya '
+               + 'da kesinliği düşük. Bunlar kademe değiştirmez, yalnızca '
+               + 'bilgilendirir.' }))}`,
+      }),
+    ];
+  }
+
   function render(){
     const tab = S.ui.guideTab || 'kullanim';
     const rows = tab === 'model' ? modelRows()
       : tab === 'veri' ? dataRows()
       : tab === 'sinirlar' ? limitRows()
+      : tab === 'kanit' ? evidenceRows()
       : usageRows();
 
     return K.Grid(html`

@@ -17,6 +17,7 @@ ESP.Screens.guide = (function(){
     { id:'model',    label:'Model' },
     { id:'veri',     label:'Veri' },
     { id:'sinirlar', label:'Sınırlar' },
+    { id:'kanit',    label:'Dayanak' },
   ];
 
   function usageRows(){
@@ -285,11 +286,90 @@ ESP.Screens.guide = (function(){
     ];
   }
 
+  /* ------------------------------------------------------------- kanıt
+
+     Merdivenin butun esiklerinin nereden geldigi tek tabloda.
+
+     Varlik sebebi tek cumle: deterministik olmak, pedagojik olarak dogru
+     olmak anlamina gelmez. "Retansiyon >= 0,75" kodda kesindir; 0,75'in
+     kendisi bu sistemin secimidir ve bunu gizlemek, bir tasarim tercihini
+     bulgu gibi sunmak olurdu. */
+  function evidenceRows(){
+    const kapsam = ESP.Ev.coverage();
+    const denetim = ESP.Ev.audit();
+    const ayrisan = ESP.Ev.disputed();
+    const kurallar = ESP.EVIDENCE.map(e => ESP.Ev.resolve(e));
+
+    return [
+      K.Entry({
+        label:'EŞİKLER NEREDEN GELİYOR?', hint:'evidence',
+        meta:kapsam.total + ' kayıt',
+        note:'Kaynak, kesinlik ve uygulanabilirlik birer bilgi; «yetki» ise '
+           + 'ESP\'nin kararıdır — hangi kaynağa dayanarak kademe '
+           + 'ilerletebileceğini söyler.',
+        wide:true,
+        body:html`
+          ${K.Notice({ tone:'warn', title:'Bu bir pedagojik hiyerarşi değildir',
+            body:ESP.Ev.policy().disclaimer })}
+          <p class="small muted mt-8">${ESP.Ev.policy().rationale}</p>
+          ${K.Table({ tight:true,
+            headers:['Kaynak türü', 'Tanınan yetki', { label:'Eşik', num:true }],
+            rows:ESP.EVIDENCE_SOURCES.map(src => {
+              const y = ESP.EVIDENCE_AUTHORITY.filter(a =>
+                a.id === ESP.Ev.policy().defaults[src.id])[0];
+              return [src.label, y.label + ' — ' + y.note,
+                String(kapsam.bySource[src.id] || 0)];
+            }) })}
+          <p class="tiny dim mt-8">Politika sürümü ${ESP.Ev.policy().version}
+            (${ESP.Ev.policy().changedAt}).</p>`,
+      }),
+
+      ...ESP.EVIDENCE_SOURCES.map(src => {
+        const rows = kurallar.filter(r => r.source === src.id);
+        if(!rows.length) return null;
+        return K.Entry({
+          label:src.label.toLocaleUpperCase('tr-TR'),
+          meta:rows.length + ' eşik',
+          note:src.note,
+          wide:true,
+          body:K.Table({ tight:true,
+            headers:['Eşik', 'Dayanak', 'Kesinlik', 'Uygulanır', 'Yetki'],
+            rows:rows.map(r => [
+              r.rule,
+              html`${r.citation}${when(r.note, () => html`<br><span class="tiny dim">${r.note}</span>`)}`,
+              (r.certaintyInfo || {}).label || r.certainty,
+              (r.applicabilityInfo || {}).label || r.applicability,
+              (r.authorityInfo || {}).label || r.authority,
+            ]) }),
+        });
+      }).filter(Boolean),
+
+      K.Entry({
+        label:'DENETİM',
+        meta:denetim.length ? denetim.length + ' sorun' : 'temiz',
+        body:html`
+          ${denetim.length
+            ? K.Notice({ tone:'danger', title:'Kayıt sorunlu',
+                body:denetim.map(d => d.rule + ' (' + d.kind + ')').join(', ') })
+            : K.Notice({ tone:'ok', title:'Denetim temiz',
+                body:'Her kayıt çözülebiliyor, her atıf yazılı ve sistem ayarı '
+                   + 'olan her eşik gerekçesini taşıyor. Bu denetim testte de '
+                   + 'koşar; bozulursa test kırılır.' })}
+          ${when(ayrisan.length, () => K.Notice({ tone:'info',
+            title:'Dolaylı ya da kesinliği düşük eşikler',
+            body:ayrisan.length + ' eşik ya disipline uyarlanırken kayıyor ya '
+               + 'da kesinliği düşük. Bunlar kademe değiştirmez, yalnızca '
+               + 'bilgilendirir.' }))}`,
+      }),
+    ];
+  }
+
   function render(){
     const tab = S.ui.guideTab || 'kullanim';
     const rows = tab === 'model' ? modelRows()
       : tab === 'veri' ? dataRows()
       : tab === 'sinirlar' ? limitRows()
+      : tab === 'kanit' ? evidenceRows()
       : usageRows();
 
     return K.Grid(html`

@@ -83,6 +83,8 @@ ESP.HINTS = {
   /* --- sistemin kendi denetimi --- */
   'signal':{ t:'Denetim sorusu', b:'Nöbetçinin ya da sürtünme ölçerin sorduğu tek soru.',
     more:'Denetim mekanizması ile denetim EKRANI aynı şey değildir: arka planda çalışan nöbetçinin bir ekran ağacı olması gerekmez, doğru anda mevcut akışa düşen tek bir soru yeter. Aynı anda en fazla bir soru açık kalır; cevaplamak zorunlu değildir ve «bu soru bana uymuyor» da bir cevaptır. Soru cevaplanınca kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı bir sonraki pencerede ölçülür.' },
+  'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın türü kademe ilerlemesinde ne kadar söz hakkı olduğunu belirler.',
+    more:'Deterministik olmak, pedagojik olarak doğru olmak demek değildir. Dört kaynak türü vardır — yayımlanmış çerçeve (CEFR, Ateşman) ve kendi ölçümün kapı açabilir; öğrenme araştırması sınırlı katkı verir; sistemin kendi ayarı yalnızca izlenir. Merdiven kapılarının sayıları (300 kart, %75 retansiyon, 100 BPM) BU SİSTEMİN SEÇİMİDİR; ölçülebilir oldukları için seçilmişlerdir, bir literatürden geldikleri için değil.' },
   'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile çalışmaya giden sürenin payı.',
     more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar. Tek dürüst cevap sürtünmeyi de ÖLÇMEKTİR: uygulama açıkken geçen süre (pratik sayacı çalışırken geçen hariç) yönetim sayılır. İki eşik birden aşılmadıkça sistem susar — bir kurulum günü hüküm değildir. Sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
   'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',

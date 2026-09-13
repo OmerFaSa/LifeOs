@@ -8,6 +8,8 @@ window.R = window.R || {};
 
 R.HINTS = {
   /* --- sistemin kendi denetimi --- */
+  'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın türü eşiğin ne kadar güçlü konuşabileceğini belirler.',
+    more:'Deterministik olmak, pedagojik olarak doğru olmak demek değildir: keyfî seçilmiş bir eşik, son derece güvenilir görünen keyfî bir sonuç üretir. Dört kaynak türü vardır — sınav kaynağı ve kendi verin yönlendirebilir; öğrenme araştırması sınırlı yönlendirir; sistemin kendi ayarı yalnızca izlenir. Kapanış kuralının %75/%70\'i, plan tamamlamanın %85\'i ve ay kapıları BU SİSTEMİN SEÇİMİDİR, bir bulgu değil.' },
   'friction':{ t:'Sürtünme', b:'Sistemi yönetmeye giden süre ile gerçekleşen çalışma süresinin payı.',
     more:'Ölçen bir sistem bir süre sonra ölçmeyi işin kendisi sanmaya başlar: aday ders çalışmak yerine kendi çalışma sistemini yönetir. Tek dürüst cevap sürtünmeyi de ÖLÇMEKTİR. Süreli deneme açıkken geçen süre sınavdır, yönetim değil. Bütçe (15 dk/gün) VE oran (%25) birlikte aşılmadıkça sistem susar — hafta planı kurulan gün doğal olarak yönetim ağırlıklıdır. Sistem yalnızca kendi yükünü AZALTMAYI önerebilir.' },
   'goodhart':{ t:'Gösterge ayrışması', b:'Çaba arttı da sonuç yerinde mi saydı?',
