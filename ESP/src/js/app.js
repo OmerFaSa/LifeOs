@@ -694,6 +694,106 @@ ESP.App = (function(){
       el.setAttribute('aria-pressed', on ? 'true' : 'false');
     },
 
+    /* --- tezgâh: yedi ekranda ortak ---
+
+       Eylemler burada çünkü tezgâh yedi ekranda birden duruyor; her ekranda
+       ayrı bir işlem yazmak, yedi kez bozulabilecek bir işlem demektir. */
+    async 'desk-toggle'(el){ ESP.Desk.toggle(el.dataset.disc); render(); },
+    async 'desk-tab'(el){
+      const kap = el.closest('.lrow');
+      const govde = kap ? kap.querySelector('.desk__body') : null;
+      ESP.Desk.setTab(govde ? govde.dataset.disc : S.ui.sessionDisc, el.dataset.tab);
+      render();
+    },
+
+    async 'desk-send'(el){
+      const disc = el.dataset.disc;
+      const alan = document.getElementById('desk-ask-' + disc);
+      const soru = alan ? alan.value.trim() : '';
+      if(!soru) return;
+      if(alan) alan.value = '';
+      await UI.withBusy(async () => { await ESP.Desk.ask(disc, soru); },
+        'Yanıt bekleniyor');
+      render();
+    },
+
+    async 'desk-talk'(el){
+      const res = ESP.Desk.talk(el.dataset.disc);
+      if(!res.ok) UI.toast(res.message || 'Sesli sohbet açılamadı');
+      render();
+    },
+
+    async 'desk-listen'(el){
+      const res = ESP.Desk.speakLast(el.dataset.disc);
+      if(!res.ok) UI.toast('Seslendirilecek bir cevap yok');
+      render();
+    },
+
+    async 'desk-open-team'(el){
+      S.ui.officeAgent = ESP.Desk.agentOf(el.dataset.disc).id;
+      go('team');
+    },
+
+    async 'desk-clear'(el){
+      await ESP.Office.clearChat(ESP.Desk.agentOf(el.dataset.disc).id);
+      render();
+    },
+
+    async 'desk-ladder'(el){
+      S.ui.curDisc = el.dataset.disc;
+      S.ui.ladderTab = 'yol';
+      go('ladder');
+    },
+
+    async 'desk-add-asset'(el){
+      const disc = el.dataset.disc;
+      const v = id => { const n = document.getElementById(id + '-' + disc); return n ? n.value.trim() : ''; };
+      const tur = v('as-kind') || 'note';
+      const ham = v('as-url');
+      const res = await ESP.Model.saveAsset(ESP.Model.newAsset({
+        disc, kind:tur, title:v('as-title'), text:v('as-text'),
+        url:tur === 'link' ? ham : '',
+        seconds:tur === 'audio' ? Number(String(ham).replace(',', '.')) || null : null,
+      }));
+      if(!res.ok){ UI.toast(res.error); return; }
+      ESP.Memo.bitir();
+      UI.toast('Eklendi — koç sayısını ve başlığını görür, içeriğini görmez');
+      render();
+    },
+
+    async 'desk-del-asset'(el){
+      await ESP.Model.deleteAsset(el.dataset.id);
+      ESP.Memo.bitir();
+      render();
+    },
+
+    async 'desk-add-rem'(el){
+      const disc = el.dataset.disc;
+      const v = id => { const n = document.getElementById(id + '-' + disc); return n ? n.value.trim() : ''; };
+      const res = await ESP.Model.saveReminder(ESP.Model.newReminder({
+        disc, text:v('rm-text'), due:v('rm-due') || ESP.U.todayISO(),
+        repeat:v('rm-rep') || 'none',
+      }));
+      if(!res.ok){ UI.toast(res.error); return; }
+      ESP.Memo.bitir();
+      render();
+    },
+
+    async 'desk-done-rem'(el){
+      const res = await ESP.Model.completeReminder(el.dataset.id);
+      if(!res.ok){ UI.toast(res.error); return; }
+      ESP.Memo.bitir();
+      UI.toast(res.reminder.repeat === 'none' ? 'Kapandı'
+        : 'Bir sonraki tarihe taşındı: ' + res.reminder.due);
+      render();
+    },
+
+    async 'desk-del-rem'(el){
+      await ESP.Model.deleteReminder(el.dataset.id);
+      ESP.Memo.bitir();
+      render();
+    },
+
     async 'log-drill'(el){
       const res = await ESP.Coach.logDrill(el.dataset.id);
       if(!res.ok){ UI.toast(res.error); return; }

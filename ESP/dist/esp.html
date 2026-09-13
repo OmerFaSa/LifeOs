@@ -5126,6 +5126,67 @@ body.is-dragging .drop.is-over{
   display:grid; gap:var(--sp-2); margin-top:var(--sp-3);
   grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
 }
+
+/* ============================================================== tezgâh
+
+   Yedi bölümde aynı görünür. Sekmeler renk taşımaz: sekme bir durum değil
+   bir yer bildirir. */
+.desk__body{ margin-top:var(--sp-3); }
+
+.deskchat__head{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-3);
+  margin-bottom:var(--sp-3);
+}
+.deskchat__head p{ margin:0; }
+.chat--desk{ max-height:280px; overflow-y:auto; }
+
+.deskmap__top{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+  margin-bottom:var(--sp-3);
+}
+/* Basamak listesi bir ilerleme çubuğu değildir: her basamak kendi adını
+   taşır, yüzde değil. Yüzde merdivenin üstünde bir kez yazar. */
+.steps{ list-style:none; margin:0 0 var(--sp-3); padding:0; }
+.stepdot{
+  display:flex; gap:var(--sp-3); align-items:baseline;
+  padding:var(--sp-2) 0; border-bottom:1px solid var(--rule);
+}
+.stepdot:last-child{ border-bottom:0; }
+.stepdot__n{
+  flex:0 0 2.5em; text-align:center; color:var(--text-3);
+  letter-spacing:.06em; font-size:var(--fs-sm);
+}
+.stepdot__body{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.stepdot--done .stepdot__n{ color:var(--ok, var(--text-2)); }
+.stepdot--current{ background:var(--surface-hover); }
+.stepdot--current .stepdot__n{ color:var(--sec); }
+.stepdot--ahead{ opacity:.66; }
+
+.aslist, .remlist{ list-style:none; margin:0; padding:0; }
+.asrow, .remrow{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2) var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.asrow:last-child, .remrow:last-child{ border-bottom:0; }
+.asrow__kind{
+  flex:0 0 7ch; font-size:var(--fs-xs); text-transform:uppercase;
+  letter-spacing:.05em; color:var(--text-3);
+}
+.asrow__body{ flex:1 1 20ch; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.asrow__text{ font-size:var(--fs-sm); color:var(--text-2); }
+
+.remrow__date{
+  flex:0 0 10ch; color:var(--text-3); font-size:var(--fs-sm);
+  font-variant-numeric:tabular-nums;
+}
+.remrow__text{ flex:1 1 18ch; min-width:0; }
+.remrow.is-due .remrow__date{ color:var(--warn, var(--text)); font-weight:600; }
+.remrow.is-done{ opacity:.6; }
+.remrow.is-done .remrow__text{ text-decoration:line-through; }
+
+@media (max-width:520px){
+  .asrow__kind, .remrow__date{ flex:0 0 100%; }
+}
 </style>
 <div id="app">
   <div class="boot">
@@ -5146,7 +5207,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'75be01a', at:'2026-09-13 02:20', dirty:true };
+SP.BUILD = { id:'797c8da', at:'2026-09-13 02:29', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -7968,6 +8029,10 @@ ESP.HINTS = {
 
   'modules':{ t:'Bölümler', b:'Hangi disiplinlerin açık olduğu.',
     more:'Kapalı bir bölüm gezinmede görünmez, reçeteye ve denge hesabına girmez, merdivende ortalamaya katılmaz ve ofiste masası kapanır. Ama verisi SİLİNMEZ — «kapalı» ile «yok» ayrı şeylerdir. Numaralar da boşluk bırakmadan yeniden verilir: eksik bir numara, kaybedilmiş bir şey varmış gibi görünürdü.' },
+  'desk':{ t:'Tezgâh', b:'Her bölümün altındaki ortak katman: koç, harita, ekler, hatırlatma.',
+    more:'Dördü de tek yerde tanımlı çünkü bölümden bölüme değişmemeleri gerekiyor: kullanıcı bir kez öğrensin, yedi kez değil. Buradaki sohbet — sesli olanı dahil — Danışma ekranıyla aynı yoldan geçer: aynı brifing, aynı ev kuralları denetimi, aynı kayıt. Ses ikinci bir yol açmaz.' },
+  'reminder':{ t:'Hatırlatma', b:'Kendine söylediğin bir şeyin günü gelince tekrar söylenmesi.',
+    more:'Bir görev değildir: sistem hiçbir şeyi zorunlu kılmaz ve kaçırılan bir hatırlatıcı ceza üretmez, borç yazmaz. Tekrarlı olan tamamlanınca silinmez, bir sonraki tarihe taşınır — ve o tarih BUGÜNDEN sayılır: iki hafta geciken günlük bir hatırlatıcı on dört kez üst üste düşmemeli.' },
 };
 
 /* ==== js/data/palettes.js ==== */
@@ -8933,6 +8998,9 @@ ESP.S = {
   drafts:[],           // yazi taslaklari
   goals:[],            // zamana bagli hedefler
 
+  assets:[],           // bolume eklenmis not, belge, bag ve ses olcumu
+  reminders:[],        // bolume bagli hatirlaticilar
+
   events:[],           // kronolojiye yerlestirilmis tarih olaylari
   sources:[],          // elestirilmis tarih kaynaklari
   chains:[],           // nedensellik zincirleri
@@ -8972,6 +9040,9 @@ ESP.S = {
     writeTab:'taslaklar',   // taslaklar | olcum
     draftOpen:null,
     analyticsTab:'radar',   // radar | seriler | rapor
+    deskTab:{},             // discId -> 'kocla' | 'harita' | 'ekler' | 'hatirlatma'
+    deskOpen:{},            // discId -> tezgah acik mi
+    assetOpen:null,
     histTab:'serit',        // serit | olaylar | kaynaklar | zincir | calisma
     eventOpen:null,
     sourceOpen:null,
@@ -9569,6 +9640,143 @@ ESP.Model = (function(){
       .sort((a, b) => a.date < b.date ? -1 : 1);
   }
 
+  /* ------------------------------------------------------------ ekler
+
+     Bir bölüme iliştirilen malzeme: not, belge, bağlantı ya da ses ÖLÇÜMÜ.
+
+     Dört tür arasında bir tanesi ayrı davranır. `audio` türü ham ses
+     dosyasını TUTMAZ — süresini, başlığını ve kullanıcının kendi notunu
+     tutar. Sebebi `ESP.PRIVACY` ve tarayıcı kotasıdır: beş megabaytlık bir
+     yerel depoya iki ses kaydı sığar ve üçüncüsü bütün sistemi kilitler.
+     «Ses ekle» düğmesinin dürüst karşılığı, sesin kendisini değil ölçüsünü
+     kaydetmektir; dosya kullanıcının kendi diskinde kalır.
+
+     Koç ekleri GÖRÜR ama İÇERİĞİNİ GÖRMEZ: brifinge yalnızca sayı, tür ve
+     başlık gider. Tam metin, dosya içeriği ve ses hiçbir zaman modele
+     gitmez (ESP.PRIVACY.model). */
+
+  const ASSET_KINDS = ['note', 'doc', 'link', 'audio'];
+
+  function newAsset(patch){
+    return Object.assign({
+      id:U.uid('as'),
+      disc:'lang',
+      kind:'note',              // note | doc | link | audio
+      title:'',
+      text:'',                  // note: metin · doc: özet · link: not
+      url:'',                   // link
+      seconds:null,             // audio: süre (ölçüldü)
+      tags:[],
+      at:new Date().toISOString(),
+    }, patch || {});
+  }
+
+  function normAsset(doc){
+    const a = obj(doc);
+    const r = Object.assign(newAsset(), a, { tags:arr(a.tags) });
+    if(ASSET_KINDS.indexOf(r.kind) < 0) r.kind = 'note';
+    r.seconds = (typeof a.seconds === 'number' && isFinite(a.seconds) && a.seconds > 0)
+      ? a.seconds : null;
+    return r;
+  }
+
+  async function saveAsset(rec){
+    const a = normAsset(rec);
+    if(!String(a.title || '').trim() && !String(a.text || '').trim()){
+      return { ok:false, error:'Başlık ya da metin gerekir.' };
+    }
+    if(a.kind === 'link' && !String(a.url || '').trim()){
+      return { ok:false, error:'Bağlantı adresi boş olamaz.' };
+    }
+    if(!a.title) a.title = String(a.text).slice(0, 60);
+    const i = S.assets.findIndex(x => x.id === a.id);
+    if(i >= 0) S.assets[i] = a; else S.assets.unshift(a);
+    await ESP.Store.set('assets/' + a.id, a);
+    return { ok:true, asset:a };
+  }
+
+  async function deleteAsset(id){
+    S.assets = S.assets.filter(a => a.id !== id);
+    await ESP.Store.remove('assets/' + id);
+  }
+
+  function assetsOf(discId){
+    return (S.assets || []).filter(a => !discId || a.disc === discId);
+  }
+
+  /* ------------------------------------------------------ hatirlaticilar
+
+     Hatırlatıcı bir GÖREV DEĞİLDİR: sistem hiçbir şeyi zorunlu kılmaz ve
+     kaçırılan bir hatırlatıcı ceza üretmez. Yaptığı tek şey, kullanıcının
+     kendi kendine söylediği bir şeyi günü gelince tekrar söylemektir.
+
+     Tekrar (`repeat`) günlük/haftalık/aylık olabilir. Tamamlanan tekrarlı
+     bir hatırlatıcı SİLİNMEZ, bir sonraki tarihe taşınır: silmek, zincirin
+     kendisini silmek olurdu. */
+
+  const REPEATS = { none:0, daily:1, weekly:7, monthly:30 };
+
+  function newReminder(patch){
+    return Object.assign({
+      id:U.uid('rem'),
+      disc:'lang',
+      text:'',
+      due:U.todayISO(),
+      repeat:'none',            // none | daily | weekly | monthly
+      done:false,
+      doneAt:null,
+      createdAt:new Date().toISOString(),
+    }, patch || {});
+  }
+
+  async function saveReminder(rec){
+    const r = Object.assign(newReminder(), obj(rec));
+    if(!String(r.text || '').trim()) return { ok:false, error:'Hatırlatma metni boş olamaz.' };
+    if(!(r.repeat in REPEATS)) r.repeat = 'none';
+    const i = S.reminders.findIndex(x => x.id === r.id);
+    if(i >= 0) S.reminders[i] = r; else S.reminders.unshift(r);
+    await ESP.Store.set('reminders/' + r.id, r);
+    return { ok:true, reminder:r };
+  }
+
+  async function deleteReminder(id){
+    S.reminders = S.reminders.filter(r => r.id !== id);
+    await ESP.Store.remove('reminders/' + id);
+  }
+
+  /* Tamamla. Tekrarlı olan bir sonraki tarihe taşınır ve AÇIK KALIR. */
+  async function completeReminder(id, todayISO){
+    const r = S.reminders.find(x => x.id === id);
+    if(!r) return { ok:false, error:'Hatırlatıcı bulunamadı.' };
+    const bugun = todayISO || U.todayISO();
+    const adim = REPEATS[r.repeat] || 0;
+    if(adim){
+      /* Bir sonraki tarih BUGÜNDEN sayılır, eski vadeden değil: iki hafta
+         geciken günlük bir hatırlatıcı, on dört kez üst üste düşmemeli. */
+      r.due = U.iso(U.addDays(U.parse(bugun), adim));
+      r.done = false;
+      r.doneAt = new Date().toISOString();
+    }else{
+      r.done = true;
+      r.doneAt = new Date().toISOString();
+    }
+    await ESP.Store.set('reminders/' + r.id, r);
+    return { ok:true, reminder:r };
+  }
+
+  /* Bugün ve öncesinde vadesi dolmuş, tamamlanmamış hatırlatıcılar. */
+  function dueReminders(discId, todayISO){
+    const bugun = todayISO || U.todayISO();
+    return (S.reminders || [])
+      .filter(r => !r.done && r.due <= bugun)
+      .filter(r => !discId || r.disc === discId)
+      .sort((a, b) => a.due < b.due ? -1 : 1);
+  }
+
+  function remindersOf(discId){
+    return (S.reminders || []).filter(r => !discId || r.disc === discId);
+  }
+
   /* ----------------------------------------------------------------- tarih
 
      Uc kayit turu ve aralarindaki sira:
@@ -9849,6 +10057,11 @@ ESP.Model = (function(){
     S.goals = ((await ESP.Store.list('goals')) || []).map(g => Object.assign(newGoal(), g));
     S.decisions = ((await ESP.Store.list('decisions')) || []);
 
+    S.assets = ((await ESP.Store.list('assets')) || []).map(normAsset)
+      .sort((a, b) => (b.at || '') < (a.at || '') ? -1 : 1);
+    S.reminders = ((await ESP.Store.list('reminders')) || [])
+      .map(r => Object.assign(newReminder(), r));
+
     S.events = ((await ESP.Store.list('events')) || []).map(normEvent)
       .sort((a, b) => (a.year || 0) - (b.year || 0));
     S.sources = ((await ESP.Store.list('sources')) || []).map(normSource);
@@ -9878,6 +10091,10 @@ ESP.Model = (function(){
     newRecording, saveRecording, deleteRecording,
     /* yazi */
     newDraft, saveDraft, deleteDraft,
+    /* ekler ve hatirlaticilar */
+    newAsset, saveAsset, deleteAsset, assetsOf, ASSET_KINDS,
+    newReminder, saveReminder, deleteReminder, completeReminder,
+    dueReminders, remindersOf, REPEATS,
     /* tarih */
     newEvent, saveEvent, deleteEvent, seedEvents,
     newSource, saveSource, deleteSource, critiqueDepth,
@@ -12016,6 +12233,196 @@ ESP.Coach = (function(){
 
   return { prescribe, plan, logDrill, doneToday, historyOf, minimumDay, sentence,
     dailyBase, advances:hits };
+})();
+
+/* ==== js/core/desk.js ==== */
+/* Bölüm tezgâhı — her disiplin sayfasının altındaki ortak katman.
+
+   Yedi bölüm yedi ayrı iş yapar ama DÖRT şeyi aynı şekilde ister:
+
+     KOÇ          o bölümün uzmanıyla konuşmak (yazılı ya da sesli)
+     HARİTA       sıfırdan üstatlığa nerede durduğun
+     EKLER        not, belge, bağlantı ve ses ölçümü iliştirmek
+     HATIRLATMA   kendine bir şey söyleyip günü gelince duymak
+
+   Dördü de tek bir yerde tanımlı çünkü bölümden bölüme değişmemeleri
+   gerekiyor: kullanıcı bir kez öğrensin, yedi kez değil.
+
+   İki değişmez bu dosyanın tamamını yönetir:
+
+   1. SES İKİNCİ BİR YOL AÇMAZ. Bölüm sayfasındaki sohbet, Danışma
+      ekranındakiyle aynı `ESP.Office.send()` üzerinden geçer: aynı brifing,
+      aynı ev kuralları denetimi, aynı kayıt. Sesli sohbet de öyle. Ekran
+      değişir, yol değişmez.
+
+   2. KOÇ EKLERİ GÖRÜR, İÇERİĞİNİ GÖRMEZ. Brifinge yalnızca sayı, tür ve
+      başlık gider. Tam metin, belge içeriği ve ses hiçbir zaman modele
+      gitmez — `ESP.PRIVACY.model` bunu zaten söylüyordu, burası uyguluyor. */
+
+window.ESP = window.ESP || {};
+
+ESP.Desk = (function(){
+  const U = ESP.U, S = ESP.S;
+
+  const TABS = [
+    { id:'kocla',      label:'Koç' },
+    { id:'harita',     label:'Harita' },
+    { id:'ekler',      label:'Ekler' },
+    { id:'hatirlatma', label:'Hatırlatma' },
+  ];
+
+  /* Bir disiplinin masası. Müzik ve diksiyon aynı ekranı paylaşır ama AYRI
+     masalardır: Maestro ile Demosthenes'in ölçtüğü şey bir değil. */
+  function agentOf(discId){
+    const d = ESP.DISCIPLINE_BY_ID[discId];
+    return d ? (ESP.AGENT_BY_ID[d.agent] || ESP.AGENT_BY_ID.patron) : ESP.AGENT_BY_ID.patron;
+  }
+
+  function tab(discId){
+    return (S.ui.deskTab && S.ui.deskTab[discId]) || 'kocla';
+  }
+
+  function setTab(discId, id){
+    S.ui.deskTab = Object.assign({}, S.ui.deskTab || {});
+    S.ui.deskTab[discId] = id;
+  }
+
+  function isOpen(discId){
+    const m = S.ui.deskOpen || {};
+    /* Varsayılan AÇIK: tezgâhı görmek için bir tıklama istemek, onu
+       kullanılmaz yapardı. Kapatmak kullanıcının kararı ve hatırlanır. */
+    return m[discId] !== false;
+  }
+
+  function toggle(discId){
+    S.ui.deskOpen = Object.assign({}, S.ui.deskOpen || {});
+    S.ui.deskOpen[discId] = !isOpen(discId);
+    return S.ui.deskOpen[discId];
+  }
+
+  /* --------------------------------------------------------------- sohbet */
+
+  /* Sohbetin kendisi Office'te; burada yalnızca «bu masanın son N mesajı»
+     sorusu var. Ayrı bir kayıt tutmak iki gerçek yaratırdı. */
+  function messages(discId, n){
+    const a = agentOf(discId);
+    const list = (S.officeChats[a.id] || []);
+    return n ? list.slice(-n) : list;
+  }
+
+  async function ask(discId, question){
+    const a = agentOf(discId);
+    return ESP.Office.send(a.id, question);
+  }
+
+  /* Son ajan cümlesi — «dinle» düğmesi bunu seslendirir. */
+  function lastAnswer(discId){
+    const list = messages(discId);
+    for(let i = list.length - 1; i >= 0; i--){
+      if(list[i].role !== 'user') return list[i];
+    }
+    return null;
+  }
+
+  function speakLast(discId){
+    const m = lastAnswer(discId);
+    if(!m || !ESP.Speak || !ESP.Speak.supported()) return { ok:false, reason:'yok' };
+    if(ESP.Speak.isSpeaking()){ ESP.Speak.stop(); return { ok:true, stopped:true }; }
+    ESP.Speak.say(m.text, { agent:agentOf(discId).id });
+    return { ok:true };
+  }
+
+  /* Sesli sohbet: sıra alma döngüsü core/talk.js içinde. Buradaki tek iş,
+     doğru masayı açmak. */
+  function talk(discId){
+    const a = agentOf(discId);
+    if(!ESP.Talk || !ESP.Talk.supported()){
+      return { ok:false, reason:'unsupported',
+        message:ESP.Voice ? ESP.Voice.message('unsupported') : 'Bu tarayıcı desteklemiyor.' };
+    }
+    if(ESP.Talk.isActive()){ ESP.Talk.stop(); return { ok:true, stopped:true }; }
+    return ESP.Talk.start(a.id);
+  }
+
+  function talking(discId){
+    return !!(ESP.Talk && ESP.Talk.isActive() && ESP.Talk.agent
+      && ESP.Talk.agent() === agentOf(discId).id);
+  }
+
+  /* ---------------------------------------------------------------- ekler */
+
+  function assets(discId){ return ESP.Model.assetsOf(discId); }
+
+  /* Eklerin ÖZETİ — brifinge giden şey budur. İçerik geçmez.
+
+     Ses için toplam süre taşınır çünkü ölçülmüş bir sayıdır; ham kayıt
+     zaten hiç tutulmaz (bkz. state.js §ekler). */
+  function assetSummary(discId){
+    const list = assets(discId);
+    if(!list.length){
+      return { total:0, cert:'missing', byKind:{}, audioSeconds:null, titles:[] };
+    }
+    const tur = {};
+    let saniye = 0, sesli = 0;
+    list.forEach(function(a){
+      tur[a.kind] = (tur[a.kind] || 0) + 1;
+      if(a.kind === 'audio' && a.seconds != null){ saniye += a.seconds; sesli++; }
+    });
+    return {
+      total:list.length, cert:'measured', byKind:tur,
+      audioSeconds:sesli ? saniye : null,
+      /* Başlık bir içerik değil bir etikettir: ajanın «hangi malzemeye
+         baktığını» söyleyebilmesi için gerekir, metnin kendisi için değil. */
+      titles:list.slice(0, 8).map(function(a){ return a.title; }),
+    };
+  }
+
+  /* ----------------------------------------------------------- hatirlatma */
+
+  function reminders(discId){ return ESP.Model.remindersOf(discId); }
+  function due(discId, todayISO){ return ESP.Model.dueReminders(discId, todayISO); }
+
+  function reminderSummary(discId, todayISO){
+    const hepsi = reminders(discId).filter(function(r){ return !r.done; });
+    const bugun = due(discId, todayISO);
+    return {
+      open:hepsi.length, due:bugun.length,
+      cert:reminders(discId).length ? 'measured' : 'missing',
+      texts:bugun.slice(0, 5).map(function(r){ return r.text; }),
+    };
+  }
+
+  /* ------------------------------------------------------------- brifing ek
+
+     Ofisin disiplin brifinglerine eklenen ortak bölüm. Ayrı bir fonksiyon
+     olmasının sebebi tekrar değil TUTARLILIK: yedi masa aynı biçimi görsün. */
+  function briefExtras(discId){
+    return {
+      assets:assetSummary(discId),
+      reminders:reminderSummary(discId),
+      level:(function(){
+        const lv = ESP.Curriculum.levelOf(discId);
+        if(!lv) return { rank:0, label:null, cert:'missing' };
+        return { rank:lv.rank, label:lv.level.label, mastery:lv.mastery, cert:lv.cert };
+      })(),
+    };
+  }
+
+  /* Tezgâhın üst satırında duran tek cümle. Model kapalıyken de doludur. */
+  function headline(discId, todayISO){
+    const r = reminderSummary(discId, todayISO);
+    if(r.due) return r.due + ' hatırlatma bugüne düştü.';
+    const kapi = ESP.Curriculum.nextGate(discId);
+    if(kapi) return kapi.action === 'measure'
+      ? 'Sıradaki kapı ölçülemiyor: ' + kapi.gate.label + '.'
+      : 'Sıradaki kapı: ' + kapi.gate.label + '.';
+    return 'Bu merdivenin bütün kapıları geçilmiş görünüyor.';
+  }
+
+  return { TABS, agentOf, tab, setTab, isOpen, toggle,
+    messages, ask, lastAnswer, speakLast, talk, talking,
+    assets, assetSummary, reminders, due, reminderSummary,
+    briefExtras, headline };
 })();
 
 /* ==== js/core/planner.js ==== */
@@ -14796,17 +15203,36 @@ ESP.Parts = (function(){
 
   /* ------------------------------------------------------------ koç kutusu
 
-     Her disiplin ekraninda ayni yerde, ayni bicimde durur. Tek bir yerde
-     tanimli olmasi kasitli: recete bicimi ekrandan ekrana degisirse
-     kullanici her bolumde yeniden okumayi ogrenir.
+     Her disiplin ekranının en üstünde, aynı yerde, aynı biçimde durur.
+     Tek yerde tanımlı olması kasıtlı: reçete biçimi bölümden bölüme
+     değişirse kullanıcı her bölümde yeniden okumayı öğrenir.
 
-     Kutu bir TAVSIYE kutusu degildir — icinde yapilacak isler ve onlari
-     isleyen dugmeler vardir. Okunup gecilen bir kutu yazmanin anlami yok. */
+     Kutu bir TAVSİYE kutusu değildir — içinde yapılacak işler ve onları
+     işleyen düğmeler vardır. Okunup geçilen bir kutu yazmanın anlamı yok. */
+  function rxList(r){
+    const yapilan = r.done || [];
+    if(!r.items.length) return K.Empty({ text:'Bu kademede tanımlı egzersiz yok.' });
+    return html`<ul class="rx">${map(r.items, it => {
+      const bitti = yapilan.indexOf(it.drill.id) >= 0;
+      return html`<li class="${cls('rx__row', 'rx__row--' + it.kind, bitti && 'is-done')}">
+        <span class="rx__kind">${it.label}</span>
+        <span class="rx__body">
+          <b>${it.drill.label}</b>
+          <span class="rx__task">${it.drill.task}</span>
+        </span>
+        <span class="rx__min num">${it.drill.minutes} dk</span>
+        ${bitti
+          ? K.Badge({ label:'işlendi', tone:'ok' })
+          : K.Button({ label:'İşle', size:'sm', act:'log-drill',
+              data:{ 'data-id':it.drill.id } })}
+      </li>`;
+    })}</ul>`;
+  }
+
   function coach(discId){
     const r = ESP.Coach.prescribe(discId);
     if(!r) return raw('');
     const lv = r.level;
-    const yapilan = r.done || [];
 
     return K.Entry({
       label:'KOÇ', hint:'coach',
@@ -14822,28 +15248,244 @@ ESP.Parts = (function(){
           ${cert(r.cert)}
           <span class="tiny dim">${r.minutes} dk / ${r.budget} dk taban</span>
         </div>
-        ${r.items.length
-          ? html`<ul class="rx">${map(r.items, it => {
-              const bitti = yapilan.indexOf(it.drill.id) >= 0;
-              return html`<li class="${cls('rx__row', 'rx__row--' + it.kind,
-                  bitti && 'is-done')}">
-                <span class="rx__kind">${it.label}</span>
-                <span class="rx__body">
-                  <b>${it.drill.label}</b>
-                  <span class="rx__task">${it.drill.task}</span>
-                </span>
-                <span class="rx__min num">${it.drill.minutes} dk</span>
-                ${bitti
-                  ? K.Badge({ label:'işlendi', tone:'ok' })
-                  : K.Button({ label:'İşle', size:'sm', act:'log-drill',
-                      data:{ 'data-id':it.drill.id } })}
-              </li>`;
-            })}</ul>`
-          : K.Empty({ text:'Bu kademede tanımlı egzersiz yok.' })}`,
+        ${rxList(r)}`,
     });
   }
 
-  return { cert, measure, avatar, discChip, radar, empty, coach };
+  /* --------------------------------------------------------------- tezgâh
+
+     Dört sekme: Koç · Harita · Ekler · Hatırlatma. Yedi bölümde de aynı.
+     Ayrıntılar core/desk.js içinde; burada yalnızca çizim var. */
+
+  function deskChat(discId){
+    const a = ESP.Desk.agentOf(discId);
+    const mesajlar = ESP.Desk.messages(discId, 8);
+    const hazir = ESP.Office.ready(a.id);
+    const konusuyor = ESP.Desk.talking(discId);
+    const sesVar = ESP.Talk && ESP.Talk.supported();
+    const okuyabilir = ESP.Speak && ESP.Speak.supported();
+    const son = ESP.Desk.lastAnswer(discId);
+
+    return html`
+      <div class="deskchat">
+        <div class="deskchat__head">
+          ${avatar(a)}
+          <div>
+            <b>${a.name}</b>
+            <p class="tiny dim">${a.role}</p>
+          </div>
+          ${K.Badge({ label:hazir ? 'model bağlı' : 'kural motoru',
+            tone:hazir ? 'info' : 'muted', icon:false })}
+        </div>
+
+        <div class="chat chat--desk">
+          ${mesajlar.length
+            ? map(mesajlar, m => html`
+                <div class="${cls('msg', m.role === 'user' ? 'msg--me' : 'msg--agent')}">
+                  <p>${m.text}</p>
+                  ${when(m.role !== 'user', () => html`<div class="msg__foot">
+                    ${K.Badge({ label:m.source === 'model' ? 'model' : 'kural motoru',
+                      tone:m.source === 'model' ? 'info' : 'muted', icon:false })}
+                    ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
+                  </div>`)}
+                </div>`)
+            : html`<p class="small muted">${a.opening}</p>`}
+        </div>
+
+        <div class="composer mt-10">
+          ${K.Textarea({ id:'desk-ask-' + discId, rows:2, class:'composer__input',
+            aria:a.name + ' masasına sor', placeholder:'Sorunu yaz…' })}
+          ${K.Mic({ target:'desk-ask-' + discId })}
+          ${K.Button({ label:'Gönder', tone:'primary', act:'desk-send',
+            data:{ 'data-disc':discId } })}
+        </div>
+
+        <div class="row wrap mt-8">
+          ${when(sesVar, () => K.Button({
+            label:konusuyor ? 'Sesli sohbeti bitir' : 'Sesli sohbet',
+            tone:konusuyor ? 'danger' : null, size:'sm',
+            act:'desk-talk', data:{ 'data-disc':discId } }))}
+          ${when(okuyabilir && son, () => K.Button({
+            label:ESP.Speak.isSpeaking() ? 'Sesi durdur' : 'Son cevabı dinle', size:'sm',
+            act:'desk-listen', data:{ 'data-disc':discId } }))}
+          ${K.Button({ label:'Danışma ekranı', size:'sm', act:'desk-open-team',
+            data:{ 'data-disc':discId } })}
+          ${when(mesajlar.length, () => K.Button({ label:'Geçmişi temizle', size:'sm',
+            act:'desk-clear', data:{ 'data-disc':discId } }))}
+        </div>
+
+        ${when(konusuyor, () => K.Notice({ tone:'info',
+          body:'Sesli sohbet açık. Ajan konuşurken mikrofon kapalıdır: sözü '
+            + 'boşluk tuşuyla ya da düğmeyle kesersin — sesle kesilemez.' }))}
+        ${when(!sesVar, () => html`<p class="tiny dim mt-8">Bu tarayıcı sesli
+          sohbeti desteklemiyor; yazarak sorduğun soru aynı yoldan geçer.</p>`)}
+      </div>`;
+  }
+
+  function deskMap(discId){
+    const lv = ESP.Curriculum.levelOf(discId);
+    const yol = ESP.Curriculum.roadmap(discId);
+    const kapi = ESP.Curriculum.nextGate(discId);
+    if(!lv || !yol) return K.Empty({ text:'Bu bölümün merdiveni tanımlı değil.' });
+
+    return html`
+      <div class="deskmap">
+        <div class="deskmap__top">
+          ${K.Badge({ label:lv.level.label + ' · ' + lv.level.short,
+            tone:lv.cert === 'missing' ? 'muted' : 'info', icon:false })}
+          ${cert(lv.cert)}
+          <span class="tiny dim">merdivenin %${lv.mastery}'i</span>
+        </div>
+
+        <ol class="steps">${map(yol.steps, st => html`
+          <li class="${cls('stepdot', 'stepdot--' + st.state)}">
+            <span class="stepdot__n num">${(ESP.LEVEL_BY_RANK[st.rank] || {}).short}</span>
+            <span class="stepdot__body">
+              <b>${st.title}</b>
+              <span class="tiny dim">${st.state === 'done' ? 'geçildi'
+                : (st.state === 'current' ? '%' + st.pct + ' — ' + st.gates.filter(g =>
+                    g.status === 'pass').length + '/' + st.gates.length + ' kapı'
+                  : 'ileride')}</span>
+            </span>
+          </li>`)}</ol>
+
+        ${when(kapi, () => K.NextUp({
+          icon:kapi.action === 'measure' ? 'info' : 'zap',
+          label:kapi.action === 'measure' ? 'Önce ölç' : 'Sıradaki kapı',
+          title:kapi.title, why:kapi.why }))}
+
+        ${K.Button({ label:'Tam haritayı aç', size:'sm', act:'desk-ladder',
+          class:'mt-10', data:{ 'data-disc':discId } })}
+      </div>`;
+  }
+
+  const ASSET_LABELS = { note:'Not', doc:'Belge', link:'Bağlantı', audio:'Ses' };
+
+  function deskAssets(discId){
+    const list = ESP.Desk.assets(discId);
+    return html`
+      <div class="deskassets">
+        <div class="cols-3">
+          ${K.Field({ label:'Tür',
+            input:K.Select({ id:'as-kind-' + discId, value:'note', aria:'Ek türü',
+              options:ESP.Model.ASSET_KINDS.map(k => ({ value:k, label:ASSET_LABELS[k] })) }) })}
+          ${K.Field({ label:'Başlık',
+            input:K.Input({ id:'as-title-' + discId, aria:'Ekin başlığı' }) })}
+          ${K.Field({ label:'Bağlantı / süre (sn)', hint:'yalnız bağlantı ve ses için',
+            input:K.Input({ id:'as-url-' + discId, aria:'Bağlantı adresi ya da ses süresi' }) })}
+        </div>
+        ${K.Textarea({ id:'as-text-' + discId, rows:3, class:'mt-10',
+          aria:'Ekin metni', placeholder:'Notun, belgenin özeti ya da kaydın hakkında not…' })}
+        <div class="row wrap mt-10">
+          ${K.Mic({ target:'as-text-' + discId })}
+          ${K.Button({ label:'Ekle', tone:'primary', act:'desk-add-asset',
+            data:{ 'data-disc':discId } })}
+        </div>
+
+        ${K.Notice({ tone:'info',
+          body:'Ham ses dosyası ve belge içeriği TUTULMAZ: ses için süresi ve '
+            + 'notun, belge için özetin saklanır. Koç bu eklerin sayısını, '
+            + 'türünü ve başlığını görür; içeriğini görmez.' })}
+
+        ${list.length
+          ? html`<ul class="aslist mt-10">${map(list, a => html`
+              <li class="${cls('asrow', 'asrow--' + a.kind)}">
+                <span class="asrow__kind">${ASSET_LABELS[a.kind] || a.kind}</span>
+                <span class="asrow__body">
+                  <b>${a.title}</b>
+                  ${when(a.text, () => html`<span class="asrow__text">${a.text}</span>`)}
+                  ${when(a.url, () => html`<span class="tiny dim">${a.url}</span>`)}
+                  ${when(a.seconds != null, () => html`<span class="tiny dim">${
+                    Math.round(a.seconds)} sn · ölçüldü</span>`)}
+                </span>
+                <span class="tiny dim">${(a.at || '').slice(0, 10)}</span>
+                ${K.Button({ label:'Sil', size:'sm', act:'desk-del-asset',
+                  data:{ 'data-id':a.id } })}
+              </li>`)}</ul>`
+          : K.Empty({ text:'Bu bölüme henüz bir şey iliştirilmedi.' })}
+      </div>`;
+  }
+
+  const REPEAT_LABELS = { none:'tekrar yok', daily:'her gün', weekly:'her hafta',
+    monthly:'her ay' };
+
+  function deskReminders(discId){
+    const list = ESP.Desk.reminders(discId);
+    const bugun = ESP.Desk.due(discId);
+    return html`
+      <div class="deskrem">
+        <div class="cols-3">
+          ${K.Field({ label:'Hatırlatma',
+            input:K.Input({ id:'rm-text-' + discId, aria:'Hatırlatma metni',
+              placeholder:'Perşembe akşamı ikinci taslağı oku' }) })}
+          ${K.Field({ label:'Tarih',
+            input:K.Input({ id:'rm-due-' + discId, type:'date', value:ESP.U.todayISO(),
+              aria:'Hatırlatma tarihi' }) })}
+          ${K.Field({ label:'Tekrar',
+            input:K.Select({ id:'rm-rep-' + discId, value:'none', aria:'Tekrar aralığı',
+              options:Object.keys(ESP.Model.REPEATS).map(k => ({ value:k,
+                label:REPEAT_LABELS[k] })) }) })}
+        </div>
+        ${K.Button({ label:'Hatırlat', tone:'primary', act:'desk-add-rem',
+          class:'mt-10', data:{ 'data-disc':discId } })}
+
+        ${when(bugun.length, () => K.Notice({ tone:'warn',
+          body:bugun.length + ' hatırlatma bugüne düştü. Kaçırılan bir hatırlatıcı '
+            + 'ceza üretmez: sistem hiçbir şeyi zorunlu kılmaz.' }))}
+
+        ${list.length
+          ? html`<ul class="remlist mt-10">${map(list, r => html`
+              <li class="${cls('remrow', r.done && 'is-done',
+                  !r.done && r.due <= ESP.U.todayISO() && 'is-due')}">
+                <span class="remrow__date num">${r.due}</span>
+                <span class="remrow__text">${r.text}</span>
+                <span class="tiny dim">${REPEAT_LABELS[r.repeat] || ''}</span>
+                ${r.done
+                  ? K.Badge({ label:'kapandı', tone:'ok' })
+                  : K.Button({ label:'Yapıldı', size:'sm', act:'desk-done-rem',
+                      data:{ 'data-id':r.id } })}
+                ${K.Button({ label:'Sil', size:'sm', act:'desk-del-rem',
+                  data:{ 'data-id':r.id } })}
+              </li>`)}</ul>`
+          : K.Empty({ text:'Bu bölümde hatırlatma yok.' })}
+      </div>`;
+  }
+
+  /* Tezgâhın kendisi — dört sekme tek bir defter satırında. */
+  function desk(discId){
+    const d = ESP.DISCIPLINE_BY_ID[discId];
+    if(!d) return raw('');
+    const a = ESP.Desk.agentOf(discId);
+    const t = ESP.Desk.tab(discId);
+    const acik = ESP.Desk.isOpen(discId);
+    const bekleyen = ESP.Desk.due(discId).length;
+
+    return K.Entry({
+      label:'TEZGÂH', hint:'desk',
+      meta:a.short || a.name,
+      note:ESP.Desk.headline(discId),
+      action:K.Button({ label:acik ? 'Kapat' : 'Aç', size:'sm', act:'desk-toggle',
+        data:{ 'data-disc':discId } }),
+      wide:true,
+      body:acik
+        ? html`
+          ${K.Subtabs({ value:t, act:'desk-tab', aria:'Tezgâh bölümleri',
+            items:ESP.Desk.TABS.map(x => Object.assign({ id:x.id, label:x.label },
+              x.id === 'hatirlatma' && bekleyen ? { count:bekleyen } : {})) })}
+          <div class="desk__body" data-disc="${discId}">
+            ${t === 'harita' ? deskMap(discId)
+              : t === 'ekler' ? deskAssets(discId)
+              : t === 'hatirlatma' ? deskReminders(discId)
+              : deskChat(discId)}
+          </div>`
+        : html`<p class="small muted">Tezgâh kapalı. ${a.name} ile konuşmak,
+            haritayı görmek, not/belge iliştirmek ve hatırlatma kurmak için aç.</p>`,
+    });
+  }
+
+  return { cert, measure, avatar, discChip, radar, empty, coach, desk,
+    deskChat, deskMap, deskAssets, deskReminders };
+
 })();
 
 /* ==== js/core/quota.js ==== */
@@ -16121,9 +16763,20 @@ ESP.Office = (function(){
     patron:patronBrief,
   };
 
+  /* Bir ajanin brifingi = kendi olcumleri + TEZGAH EKI.
+
+     Tezgah eki (ekler, hatirlaticilar, kademe) yedi masada da AYNI bicimde
+     durur. Her brifing fonksiyonuna elle eklemek yedi kez unutulabilecek
+     bir sey demekti; tek yerde birlestirilmesinin sebebi bu.
+
+     Iceriğin kendisi GITMEZ: ek sayisi, turu ve basligi gider. */
   function brief(agentId){
     const fn = BRIEFS[agentId] || patronBrief;
-    return fn();
+    const b = fn();
+    const a = ESP.AGENT_BY_ID[agentId];
+    const disc = a ? (ESP.DISCIPLINES.filter(d => d.agent === a.id)[0] || null) : null;
+    if(disc && ESP.Desk) b.desk = ESP.Desk.briefExtras(disc.id);
+    return b;
   }
 
   /* ------------------------------------------------------------- kural dili
@@ -16140,6 +16793,16 @@ ESP.Office = (function(){
     const brf = b || brief(agentId);
     const cumle = [];
 
+    /* Tezgah eki her masanin cumlesine AYNI bicimde eklenir. */
+    function tezgah(){
+      const t = brf.desk;
+      if(!t) return '';
+      const parca = [];
+      if(t.assets.total) parca.push(t.assets.total + ' ek iliştirilmiş');
+      if(t.reminders.due) parca.push(t.reminders.due + ' hatırlatma bugüne düştü');
+      return parca.length ? ' ' + parca.join(', ') + '.' : '';
+    }
+
     if(agentId === 'polyglot'){
       if(brf.cards.cert === 'missing') return 'Henüz kart yok. İlk kartı eklediğinde retansiyon ölçülmeye başlar.';
       cumle.push(brf.cards.total + ' kart var, ' + brf.cards.active + ' tanesi üretimde kullanılmış.');
@@ -16149,7 +16812,7 @@ ESP.Office = (function(){
       cumle.push(brf.retention.cert === 'missing'
         ? 'Retansiyon henüz ölçülemedi: hiç cevaplanmış kart yok.'
         : 'Retansiyon ' + pct(brf.retention.value) + ' (' + brf.retention.n + ' karttan hesaplandı).');
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'socrates'){
@@ -16160,7 +16823,7 @@ ESP.Office = (function(){
       cumle.push(brf.primaryTexts.cert === 'missing'
         ? 'Kaynak listesi boş.'
         : brf.primaryTexts.value + ' primer metin kayıtlı.');
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'maestro'){
@@ -16173,7 +16836,7 @@ ESP.Office = (function(){
       if(brf.progress.cert !== 'missing'){
         cumle.push('Hedefi olan ' + brf.progress.n + ' parçanın ' + brf.progress.reached + ' tanesi hedef tempoda.');
       }
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'demosthenes'){
@@ -16187,7 +16850,7 @@ ESP.Office = (function(){
       if(brf.errorRate.cert !== 'missing'){
         cumle.push('Kendi işaretlediğin hata oranı ' + pct(brf.errorRate.value) + ' (tahmin).');
       }
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'aristoteles'){
@@ -16198,7 +16861,7 @@ ESP.Office = (function(){
         : 'Sentez katsayısı ' + U.fmtNum(Math.round(brf.ssk.value * 100) / 100)
           + ' (' + brf.books.value + ' kaynak, ' + brf.books.authors + ' yazar).');
       if(brf.suggestions) cumle.push(brf.suggestions + ' bağ önerisi bekliyor.');
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'montaigne'){
@@ -16210,7 +16873,7 @@ ESP.Office = (function(){
       if(brf.readability.cert !== 'missing'){
         cumle.push('Son taslağın okunabilirliği ' + brf.readability.value + ' (' + brf.readability.band + '), cümle başına ' + U.fmtNum(brf.readability.wordsPerSentence) + ' kelime.');
       }
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'herodot'){
@@ -16232,7 +16895,7 @@ ESP.Office = (function(){
       if(brf.sources.total){
         cumle.push(brf.sources.total + ' kaynağın ' + brf.sources.primary + ' tanesi birincil.');
       }
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'mnemosyne'){
@@ -17502,13 +18165,43 @@ ESP.Screens.today = (function(){
     });
   }
 
+  /* Bugüne düşen hatırlatmalar — bütün bölümlerden tek listede.
+
+     Hatırlatıcı bir görev değildir ve kaçırılmış olması ceza üretmez.
+     Burada durmasının tek sebebi, bölüm bölüm dolaşmadan görülebilmesi. */
+  function reminderRow(){
+    const bugun = M.dueReminders(null, gun())
+      .filter(r => ESP.Mod.isOn(r.disc));
+    if(!bugun.length) return '';
+    return K.Entry({
+      label:'HATIRLATMA', hint:'reminder',
+      meta:bugun.length + ' satır',
+      note:'Kendine söylediğin şeyler. Sistem hiçbirini zorunlu kılmaz; '
+         + 'kaçırılan bir hatırlatıcı borç yazmaz.',
+      wide:true,
+      body:html`<ul class="remlist">${map(bugun, r => {
+        const d = ESP.DISCIPLINE_BY_ID[r.disc] || {};
+        return html`<li class="${cls('remrow', r.due < gun() && 'is-due')}">
+          <span class="remrow__date num">${r.due}</span>
+          <span class="remrow__text">${r.text}</span>
+          <span class="tiny dim">${d.label || r.disc}</span>
+          ${K.Button({ label:'Yapıldı', size:'sm', act:'desk-done-rem',
+            data:{ 'data-id':r.id } })}
+          ${K.Button({ label:'Bölüme git', size:'sm', act:'go',
+            data:{ 'data-route':d.route || 'today' } })}
+        </li>`;
+      })}</ul>`,
+    });
+  }
+
   /* ------------------------------------------------------------------ cizim */
 
   function render(){
     const tab = S.ui.dayTab || 'giris';
     const rows = tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [nextCard(), planRow(), entryForm(), quickForm(), sessionList()];
+      : [nextCard(), planRow(), reminderRow(), entryForm(), quickForm(), sessionList()]
+          .filter(Boolean);
 
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({
@@ -18018,7 +18711,8 @@ ESP.Screens.lang = (function(){
           aria:'Çalışılan dil',
           options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('lang')].concat(rows)))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('lang'), ESP.Parts.desk('lang')]
+        .concat(rows)))}`);
   }
 
   const handle = {
@@ -18471,7 +19165,8 @@ ESP.Screens.symposium = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'acik' ? { count:ESP.Intellect.openArguments().length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('philo')].concat(rows)))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('philo'), ESP.Parts.desk('philo')]
+        .concat(rows)))}`);
   }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
@@ -19169,7 +19864,8 @@ ESP.Screens.history = (function(){
         actions:when(evs().length, () => K.Button({ label:'Tohumu yükle', size:'sm',
           act:'seed' })),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('history')].concat(rows)))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('history'), ESP.Parts.desk('history')]
+        .concat(rows)))}`);
   }
 
   /* ----------------------------------------------------------------- eylem */
@@ -20120,7 +20816,7 @@ ESP.Screens.studio = (function(){
            gunu altmis dakikalik bir recete ile karsilamak olurdu. */
         const disc = S.ui.studioTab === 'diksiyon' ? 'diction' : 'music';
         const sessiz = S.ui.studioTab === 'ilerleme' || S.ui.studioTab === 'kulak';
-        return (sessiz ? [] : [ESP.Parts.coach(disc)]).concat(rows);
+        return (sessiz ? [] : [ESP.Parts.coach(disc), ESP.Parts.desk(disc)]).concat(rows);
       }))}`);
   }
 
@@ -20609,7 +21305,8 @@ ESP.Screens.library = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'notlar' ? { count:(S.notes || []).length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('reading')].concat(rows)))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('reading'), ESP.Parts.desk('reading')]
+        .concat(rows)))}`);
   }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
@@ -20983,7 +21680,8 @@ ESP.Screens.writing = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'taslaklar' ? { count:(S.drafts || []).length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('writing')].concat(rows)))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('writing'), ESP.Parts.desk('writing')]
+        .concat(rows)))}`);
   }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value : ''; }
@@ -23283,6 +23981,106 @@ ESP.App = (function(){
       const on = list.indexOf(el.dataset.id) >= 0;
       el.classList.toggle('is-on', on);
       el.setAttribute('aria-pressed', on ? 'true' : 'false');
+    },
+
+    /* --- tezgâh: yedi ekranda ortak ---
+
+       Eylemler burada çünkü tezgâh yedi ekranda birden duruyor; her ekranda
+       ayrı bir işlem yazmak, yedi kez bozulabilecek bir işlem demektir. */
+    async 'desk-toggle'(el){ ESP.Desk.toggle(el.dataset.disc); render(); },
+    async 'desk-tab'(el){
+      const kap = el.closest('.lrow');
+      const govde = kap ? kap.querySelector('.desk__body') : null;
+      ESP.Desk.setTab(govde ? govde.dataset.disc : S.ui.sessionDisc, el.dataset.tab);
+      render();
+    },
+
+    async 'desk-send'(el){
+      const disc = el.dataset.disc;
+      const alan = document.getElementById('desk-ask-' + disc);
+      const soru = alan ? alan.value.trim() : '';
+      if(!soru) return;
+      if(alan) alan.value = '';
+      await UI.withBusy(async () => { await ESP.Desk.ask(disc, soru); },
+        'Yanıt bekleniyor');
+      render();
+    },
+
+    async 'desk-talk'(el){
+      const res = ESP.Desk.talk(el.dataset.disc);
+      if(!res.ok) UI.toast(res.message || 'Sesli sohbet açılamadı');
+      render();
+    },
+
+    async 'desk-listen'(el){
+      const res = ESP.Desk.speakLast(el.dataset.disc);
+      if(!res.ok) UI.toast('Seslendirilecek bir cevap yok');
+      render();
+    },
+
+    async 'desk-open-team'(el){
+      S.ui.officeAgent = ESP.Desk.agentOf(el.dataset.disc).id;
+      go('team');
+    },
+
+    async 'desk-clear'(el){
+      await ESP.Office.clearChat(ESP.Desk.agentOf(el.dataset.disc).id);
+      render();
+    },
+
+    async 'desk-ladder'(el){
+      S.ui.curDisc = el.dataset.disc;
+      S.ui.ladderTab = 'yol';
+      go('ladder');
+    },
+
+    async 'desk-add-asset'(el){
+      const disc = el.dataset.disc;
+      const v = id => { const n = document.getElementById(id + '-' + disc); return n ? n.value.trim() : ''; };
+      const tur = v('as-kind') || 'note';
+      const ham = v('as-url');
+      const res = await ESP.Model.saveAsset(ESP.Model.newAsset({
+        disc, kind:tur, title:v('as-title'), text:v('as-text'),
+        url:tur === 'link' ? ham : '',
+        seconds:tur === 'audio' ? Number(String(ham).replace(',', '.')) || null : null,
+      }));
+      if(!res.ok){ UI.toast(res.error); return; }
+      ESP.Memo.bitir();
+      UI.toast('Eklendi — koç sayısını ve başlığını görür, içeriğini görmez');
+      render();
+    },
+
+    async 'desk-del-asset'(el){
+      await ESP.Model.deleteAsset(el.dataset.id);
+      ESP.Memo.bitir();
+      render();
+    },
+
+    async 'desk-add-rem'(el){
+      const disc = el.dataset.disc;
+      const v = id => { const n = document.getElementById(id + '-' + disc); return n ? n.value.trim() : ''; };
+      const res = await ESP.Model.saveReminder(ESP.Model.newReminder({
+        disc, text:v('rm-text'), due:v('rm-due') || ESP.U.todayISO(),
+        repeat:v('rm-rep') || 'none',
+      }));
+      if(!res.ok){ UI.toast(res.error); return; }
+      ESP.Memo.bitir();
+      render();
+    },
+
+    async 'desk-done-rem'(el){
+      const res = await ESP.Model.completeReminder(el.dataset.id);
+      if(!res.ok){ UI.toast(res.error); return; }
+      ESP.Memo.bitir();
+      UI.toast(res.reminder.repeat === 'none' ? 'Kapandı'
+        : 'Bir sonraki tarihe taşındı: ' + res.reminder.due);
+      render();
+    },
+
+    async 'desk-del-rem'(el){
+      await ESP.Model.deleteReminder(el.dataset.id);
+      ESP.Memo.bitir();
+      render();
     },
 
     async 'log-drill'(el){

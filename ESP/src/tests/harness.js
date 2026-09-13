@@ -159,6 +159,7 @@ ESP.Test = (function(){
     S.days = {}; S.cards = []; S.args = []; S.notes = []; S.books = [];
     S.pieces = []; S.recordings = []; S.drafts = []; S.goals = [];
     S.events = []; S.sources = []; S.chains = [];
+    S.assets = []; S.reminders = [];
     S.office = null; S.officeChats = {}; S.officeMeetings = [];
     S.officeBriefings = {}; S.journal = {};
     S.decisions = [];
@@ -175,6 +176,7 @@ ESP.Test = (function(){
       analyticsTab:'radar',
       histTab:'serit', eventOpen:null, sourceOpen:null, chainOpen:null,
       histEra:'all', histQuery:'', curDisc:null, ladderTab:'ozet', expField:'all',
+      deskTab:{}, deskOpen:{}, assetOpen:null,
       officeAgent:'patron', officeDesk:null, officePerAgent:false,
       meetingAgenda:0, meetingOpen:null, guideTab:'kullanim',
       profileOpen:null, quickOpen:false,
@@ -250,6 +252,20 @@ ESP.Test = (function(){
     return p;
   }
 
+  /* Ek: pushAsset('lang', 'note', { text:'...' }) */
+  function pushAsset(disc, kind, patch){
+    const a = ESP.Model.newAsset(Object.assign({ disc, kind:kind || 'note' }, patch || {}));
+    if(!a.title) a.title = String(a.text || '').slice(0, 60) || 'ek';
+    ESP.S.assets.unshift(a);
+    return a;
+  }
+
+  function pushReminder(disc, text, patch){
+    const r = ESP.Model.newReminder(Object.assign({ disc, text }, patch || {}));
+    ESP.S.reminders.unshift(r);
+    return r;
+  }
+
   /* Tarih: pushEvent(1071, 'Malazgirt', { kind:'siyasi', region:'anadolu' }) */
   function pushEvent(year, title, patch){
     const e = ESP.Model.newEvent(Object.assign({ year, title }, patch || {}));
@@ -285,6 +301,6 @@ ESP.Test = (function(){
   return { describe, it, expect, run, mockStore, resetState, testProfile,
     withToday, withTodayAsync,
     pushSession, pushCard, pushBook, pushNote, pushPiece, pushArgument,
-    pushEvent, pushSource, pushChain,
+    pushEvent, pushSource, pushChain, pushAsset, pushReminder,
     suites, realStore };
 })();

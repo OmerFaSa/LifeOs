@@ -287,7 +287,8 @@ ESP.Screens.symposium = (function(){
           items:TABS.map(t => Object.assign({}, t,
             t.id === 'acik' ? { count:ESP.Intellect.openArguments().length || null } : {})) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('philo')].concat(rows)))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('philo'), ESP.Parts.desk('philo')]
+        .concat(rows)))}`);
   }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }

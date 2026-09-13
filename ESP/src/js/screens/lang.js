@@ -404,7 +404,8 @@ ESP.Screens.lang = (function(){
           aria:'Çalışılan dil',
           options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('lang')].concat(rows)))}`);
+      ${K.Span(12, K.Ledger(() => [ESP.Parts.coach('lang'), ESP.Parts.desk('lang')]
+        .concat(rows)))}`);
   }
 
   const handle = {

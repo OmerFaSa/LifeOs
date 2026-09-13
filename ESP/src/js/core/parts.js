@@ -138,17 +138,36 @@ ESP.Parts = (function(){
 
   /* ------------------------------------------------------------ koç kutusu
 
-     Her disiplin ekraninda ayni yerde, ayni bicimde durur. Tek bir yerde
-     tanimli olmasi kasitli: recete bicimi ekrandan ekrana degisirse
-     kullanici her bolumde yeniden okumayi ogrenir.
+     Her disiplin ekranının en üstünde, aynı yerde, aynı biçimde durur.
+     Tek yerde tanımlı olması kasıtlı: reçete biçimi bölümden bölüme
+     değişirse kullanıcı her bölümde yeniden okumayı öğrenir.
 
-     Kutu bir TAVSIYE kutusu degildir — icinde yapilacak isler ve onlari
-     isleyen dugmeler vardir. Okunup gecilen bir kutu yazmanin anlami yok. */
+     Kutu bir TAVSİYE kutusu değildir — içinde yapılacak işler ve onları
+     işleyen düğmeler vardır. Okunup geçilen bir kutu yazmanın anlamı yok. */
+  function rxList(r){
+    const yapilan = r.done || [];
+    if(!r.items.length) return K.Empty({ text:'Bu kademede tanımlı egzersiz yok.' });
+    return html`<ul class="rx">${map(r.items, it => {
+      const bitti = yapilan.indexOf(it.drill.id) >= 0;
+      return html`<li class="${cls('rx__row', 'rx__row--' + it.kind, bitti && 'is-done')}">
+        <span class="rx__kind">${it.label}</span>
+        <span class="rx__body">
+          <b>${it.drill.label}</b>
+          <span class="rx__task">${it.drill.task}</span>
+        </span>
+        <span class="rx__min num">${it.drill.minutes} dk</span>
+        ${bitti
+          ? K.Badge({ label:'işlendi', tone:'ok' })
+          : K.Button({ label:'İşle', size:'sm', act:'log-drill',
+              data:{ 'data-id':it.drill.id } })}
+      </li>`;
+    })}</ul>`;
+  }
+
   function coach(discId){
     const r = ESP.Coach.prescribe(discId);
     if(!r) return raw('');
     const lv = r.level;
-    const yapilan = r.done || [];
 
     return K.Entry({
       label:'KOÇ', hint:'coach',
@@ -164,26 +183,242 @@ ESP.Parts = (function(){
           ${cert(r.cert)}
           <span class="tiny dim">${r.minutes} dk / ${r.budget} dk taban</span>
         </div>
-        ${r.items.length
-          ? html`<ul class="rx">${map(r.items, it => {
-              const bitti = yapilan.indexOf(it.drill.id) >= 0;
-              return html`<li class="${cls('rx__row', 'rx__row--' + it.kind,
-                  bitti && 'is-done')}">
-                <span class="rx__kind">${it.label}</span>
-                <span class="rx__body">
-                  <b>${it.drill.label}</b>
-                  <span class="rx__task">${it.drill.task}</span>
-                </span>
-                <span class="rx__min num">${it.drill.minutes} dk</span>
-                ${bitti
-                  ? K.Badge({ label:'işlendi', tone:'ok' })
-                  : K.Button({ label:'İşle', size:'sm', act:'log-drill',
-                      data:{ 'data-id':it.drill.id } })}
-              </li>`;
-            })}</ul>`
-          : K.Empty({ text:'Bu kademede tanımlı egzersiz yok.' })}`,
+        ${rxList(r)}`,
     });
   }
 
-  return { cert, measure, avatar, discChip, radar, empty, coach };
+  /* --------------------------------------------------------------- tezgâh
+
+     Dört sekme: Koç · Harita · Ekler · Hatırlatma. Yedi bölümde de aynı.
+     Ayrıntılar core/desk.js içinde; burada yalnızca çizim var. */
+
+  function deskChat(discId){
+    const a = ESP.Desk.agentOf(discId);
+    const mesajlar = ESP.Desk.messages(discId, 8);
+    const hazir = ESP.Office.ready(a.id);
+    const konusuyor = ESP.Desk.talking(discId);
+    const sesVar = ESP.Talk && ESP.Talk.supported();
+    const okuyabilir = ESP.Speak && ESP.Speak.supported();
+    const son = ESP.Desk.lastAnswer(discId);
+
+    return html`
+      <div class="deskchat">
+        <div class="deskchat__head">
+          ${avatar(a)}
+          <div>
+            <b>${a.name}</b>
+            <p class="tiny dim">${a.role}</p>
+          </div>
+          ${K.Badge({ label:hazir ? 'model bağlı' : 'kural motoru',
+            tone:hazir ? 'info' : 'muted', icon:false })}
+        </div>
+
+        <div class="chat chat--desk">
+          ${mesajlar.length
+            ? map(mesajlar, m => html`
+                <div class="${cls('msg', m.role === 'user' ? 'msg--me' : 'msg--agent')}">
+                  <p>${m.text}</p>
+                  ${when(m.role !== 'user', () => html`<div class="msg__foot">
+                    ${K.Badge({ label:m.source === 'model' ? 'model' : 'kural motoru',
+                      tone:m.source === 'model' ? 'info' : 'muted', icon:false })}
+                    ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
+                  </div>`)}
+                </div>`)
+            : html`<p class="small muted">${a.opening}</p>`}
+        </div>
+
+        <div class="composer mt-10">
+          ${K.Textarea({ id:'desk-ask-' + discId, rows:2, class:'composer__input',
+            aria:a.name + ' masasına sor', placeholder:'Sorunu yaz…' })}
+          ${K.Mic({ target:'desk-ask-' + discId })}
+          ${K.Button({ label:'Gönder', tone:'primary', act:'desk-send',
+            data:{ 'data-disc':discId } })}
+        </div>
+
+        <div class="row wrap mt-8">
+          ${when(sesVar, () => K.Button({
+            label:konusuyor ? 'Sesli sohbeti bitir' : 'Sesli sohbet',
+            tone:konusuyor ? 'danger' : null, size:'sm',
+            act:'desk-talk', data:{ 'data-disc':discId } }))}
+          ${when(okuyabilir && son, () => K.Button({
+            label:ESP.Speak.isSpeaking() ? 'Sesi durdur' : 'Son cevabı dinle', size:'sm',
+            act:'desk-listen', data:{ 'data-disc':discId } }))}
+          ${K.Button({ label:'Danışma ekranı', size:'sm', act:'desk-open-team',
+            data:{ 'data-disc':discId } })}
+          ${when(mesajlar.length, () => K.Button({ label:'Geçmişi temizle', size:'sm',
+            act:'desk-clear', data:{ 'data-disc':discId } }))}
+        </div>
+
+        ${when(konusuyor, () => K.Notice({ tone:'info',
+          body:'Sesli sohbet açık. Ajan konuşurken mikrofon kapalıdır: sözü '
+            + 'boşluk tuşuyla ya da düğmeyle kesersin — sesle kesilemez.' }))}
+        ${when(!sesVar, () => html`<p class="tiny dim mt-8">Bu tarayıcı sesli
+          sohbeti desteklemiyor; yazarak sorduğun soru aynı yoldan geçer.</p>`)}
+      </div>`;
+  }
+
+  function deskMap(discId){
+    const lv = ESP.Curriculum.levelOf(discId);
+    const yol = ESP.Curriculum.roadmap(discId);
+    const kapi = ESP.Curriculum.nextGate(discId);
+    if(!lv || !yol) return K.Empty({ text:'Bu bölümün merdiveni tanımlı değil.' });
+
+    return html`
+      <div class="deskmap">
+        <div class="deskmap__top">
+          ${K.Badge({ label:lv.level.label + ' · ' + lv.level.short,
+            tone:lv.cert === 'missing' ? 'muted' : 'info', icon:false })}
+          ${cert(lv.cert)}
+          <span class="tiny dim">merdivenin %${lv.mastery}'i</span>
+        </div>
+
+        <ol class="steps">${map(yol.steps, st => html`
+          <li class="${cls('stepdot', 'stepdot--' + st.state)}">
+            <span class="stepdot__n num">${(ESP.LEVEL_BY_RANK[st.rank] || {}).short}</span>
+            <span class="stepdot__body">
+              <b>${st.title}</b>
+              <span class="tiny dim">${st.state === 'done' ? 'geçildi'
+                : (st.state === 'current' ? '%' + st.pct + ' — ' + st.gates.filter(g =>
+                    g.status === 'pass').length + '/' + st.gates.length + ' kapı'
+                  : 'ileride')}</span>
+            </span>
+          </li>`)}</ol>
+
+        ${when(kapi, () => K.NextUp({
+          icon:kapi.action === 'measure' ? 'info' : 'zap',
+          label:kapi.action === 'measure' ? 'Önce ölç' : 'Sıradaki kapı',
+          title:kapi.title, why:kapi.why }))}
+
+        ${K.Button({ label:'Tam haritayı aç', size:'sm', act:'desk-ladder',
+          class:'mt-10', data:{ 'data-disc':discId } })}
+      </div>`;
+  }
+
+  const ASSET_LABELS = { note:'Not', doc:'Belge', link:'Bağlantı', audio:'Ses' };
+
+  function deskAssets(discId){
+    const list = ESP.Desk.assets(discId);
+    return html`
+      <div class="deskassets">
+        <div class="cols-3">
+          ${K.Field({ label:'Tür',
+            input:K.Select({ id:'as-kind-' + discId, value:'note', aria:'Ek türü',
+              options:ESP.Model.ASSET_KINDS.map(k => ({ value:k, label:ASSET_LABELS[k] })) }) })}
+          ${K.Field({ label:'Başlık',
+            input:K.Input({ id:'as-title-' + discId, aria:'Ekin başlığı' }) })}
+          ${K.Field({ label:'Bağlantı / süre (sn)', hint:'yalnız bağlantı ve ses için',
+            input:K.Input({ id:'as-url-' + discId, aria:'Bağlantı adresi ya da ses süresi' }) })}
+        </div>
+        ${K.Textarea({ id:'as-text-' + discId, rows:3, class:'mt-10',
+          aria:'Ekin metni', placeholder:'Notun, belgenin özeti ya da kaydın hakkında not…' })}
+        <div class="row wrap mt-10">
+          ${K.Mic({ target:'as-text-' + discId })}
+          ${K.Button({ label:'Ekle', tone:'primary', act:'desk-add-asset',
+            data:{ 'data-disc':discId } })}
+        </div>
+
+        ${K.Notice({ tone:'info',
+          body:'Ham ses dosyası ve belge içeriği TUTULMAZ: ses için süresi ve '
+            + 'notun, belge için özetin saklanır. Koç bu eklerin sayısını, '
+            + 'türünü ve başlığını görür; içeriğini görmez.' })}
+
+        ${list.length
+          ? html`<ul class="aslist mt-10">${map(list, a => html`
+              <li class="${cls('asrow', 'asrow--' + a.kind)}">
+                <span class="asrow__kind">${ASSET_LABELS[a.kind] || a.kind}</span>
+                <span class="asrow__body">
+                  <b>${a.title}</b>
+                  ${when(a.text, () => html`<span class="asrow__text">${a.text}</span>`)}
+                  ${when(a.url, () => html`<span class="tiny dim">${a.url}</span>`)}
+                  ${when(a.seconds != null, () => html`<span class="tiny dim">${
+                    Math.round(a.seconds)} sn · ölçüldü</span>`)}
+                </span>
+                <span class="tiny dim">${(a.at || '').slice(0, 10)}</span>
+                ${K.Button({ label:'Sil', size:'sm', act:'desk-del-asset',
+                  data:{ 'data-id':a.id } })}
+              </li>`)}</ul>`
+          : K.Empty({ text:'Bu bölüme henüz bir şey iliştirilmedi.' })}
+      </div>`;
+  }
+
+  const REPEAT_LABELS = { none:'tekrar yok', daily:'her gün', weekly:'her hafta',
+    monthly:'her ay' };
+
+  function deskReminders(discId){
+    const list = ESP.Desk.reminders(discId);
+    const bugun = ESP.Desk.due(discId);
+    return html`
+      <div class="deskrem">
+        <div class="cols-3">
+          ${K.Field({ label:'Hatırlatma',
+            input:K.Input({ id:'rm-text-' + discId, aria:'Hatırlatma metni',
+              placeholder:'Perşembe akşamı ikinci taslağı oku' }) })}
+          ${K.Field({ label:'Tarih',
+            input:K.Input({ id:'rm-due-' + discId, type:'date', value:ESP.U.todayISO(),
+              aria:'Hatırlatma tarihi' }) })}
+          ${K.Field({ label:'Tekrar',
+            input:K.Select({ id:'rm-rep-' + discId, value:'none', aria:'Tekrar aralığı',
+              options:Object.keys(ESP.Model.REPEATS).map(k => ({ value:k,
+                label:REPEAT_LABELS[k] })) }) })}
+        </div>
+        ${K.Button({ label:'Hatırlat', tone:'primary', act:'desk-add-rem',
+          class:'mt-10', data:{ 'data-disc':discId } })}
+
+        ${when(bugun.length, () => K.Notice({ tone:'warn',
+          body:bugun.length + ' hatırlatma bugüne düştü. Kaçırılan bir hatırlatıcı '
+            + 'ceza üretmez: sistem hiçbir şeyi zorunlu kılmaz.' }))}
+
+        ${list.length
+          ? html`<ul class="remlist mt-10">${map(list, r => html`
+              <li class="${cls('remrow', r.done && 'is-done',
+                  !r.done && r.due <= ESP.U.todayISO() && 'is-due')}">
+                <span class="remrow__date num">${r.due}</span>
+                <span class="remrow__text">${r.text}</span>
+                <span class="tiny dim">${REPEAT_LABELS[r.repeat] || ''}</span>
+                ${r.done
+                  ? K.Badge({ label:'kapandı', tone:'ok' })
+                  : K.Button({ label:'Yapıldı', size:'sm', act:'desk-done-rem',
+                      data:{ 'data-id':r.id } })}
+                ${K.Button({ label:'Sil', size:'sm', act:'desk-del-rem',
+                  data:{ 'data-id':r.id } })}
+              </li>`)}</ul>`
+          : K.Empty({ text:'Bu bölümde hatırlatma yok.' })}
+      </div>`;
+  }
+
+  /* Tezgâhın kendisi — dört sekme tek bir defter satırında. */
+  function desk(discId){
+    const d = ESP.DISCIPLINE_BY_ID[discId];
+    if(!d) return raw('');
+    const a = ESP.Desk.agentOf(discId);
+    const t = ESP.Desk.tab(discId);
+    const acik = ESP.Desk.isOpen(discId);
+    const bekleyen = ESP.Desk.due(discId).length;
+
+    return K.Entry({
+      label:'TEZGÂH', hint:'desk',
+      meta:a.short || a.name,
+      note:ESP.Desk.headline(discId),
+      action:K.Button({ label:acik ? 'Kapat' : 'Aç', size:'sm', act:'desk-toggle',
+        data:{ 'data-disc':discId } }),
+      wide:true,
+      body:acik
+        ? html`
+          ${K.Subtabs({ value:t, act:'desk-tab', aria:'Tezgâh bölümleri',
+            items:ESP.Desk.TABS.map(x => Object.assign({ id:x.id, label:x.label },
+              x.id === 'hatirlatma' && bekleyen ? { count:bekleyen } : {})) })}
+          <div class="desk__body" data-disc="${discId}">
+            ${t === 'harita' ? deskMap(discId)
+              : t === 'ekler' ? deskAssets(discId)
+              : t === 'hatirlatma' ? deskReminders(discId)
+              : deskChat(discId)}
+          </div>`
+        : html`<p class="small muted">Tezgâh kapalı. ${a.name} ile konuşmak,
+            haritayı görmek, not/belge iliştirmek ve hatırlatma kurmak için aç.</p>`,
+    });
+  }
+
+  return { cert, measure, avatar, discChip, radar, empty, coach, desk,
+    deskChat, deskMap, deskAssets, deskReminders };
+
 })();

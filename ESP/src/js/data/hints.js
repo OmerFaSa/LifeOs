@@ -157,4 +157,8 @@ ESP.HINTS = {
 
   'modules':{ t:'Bölümler', b:'Hangi disiplinlerin açık olduğu.',
     more:'Kapalı bir bölüm gezinmede görünmez, reçeteye ve denge hesabına girmez, merdivende ortalamaya katılmaz ve ofiste masası kapanır. Ama verisi SİLİNMEZ — «kapalı» ile «yok» ayrı şeylerdir. Numaralar da boşluk bırakmadan yeniden verilir: eksik bir numara, kaybedilmiş bir şey varmış gibi görünürdü.' },
+  'desk':{ t:'Tezgâh', b:'Her bölümün altındaki ortak katman: koç, harita, ekler, hatırlatma.',
+    more:'Dördü de tek yerde tanımlı çünkü bölümden bölüme değişmemeleri gerekiyor: kullanıcı bir kez öğrensin, yedi kez değil. Buradaki sohbet — sesli olanı dahil — Danışma ekranıyla aynı yoldan geçer: aynı brifing, aynı ev kuralları denetimi, aynı kayıt. Ses ikinci bir yol açmaz.' },
+  'reminder':{ t:'Hatırlatma', b:'Kendine söylediğin bir şeyin günü gelince tekrar söylenmesi.',
+    more:'Bir görev değildir: sistem hiçbir şeyi zorunlu kılmaz ve kaçırılan bir hatırlatıcı ceza üretmez, borç yazmaz. Tekrarlı olan tamamlanınca silinmez, bir sonraki tarihe taşınır — ve o tarih BUGÜNDEN sayılır: iki hafta geciken günlük bir hatırlatıcı on dört kez üst üste düşmemeli.' },
 };

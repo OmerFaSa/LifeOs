@@ -347,13 +347,43 @@ ESP.Screens.today = (function(){
     });
   }
 
+  /* Bugüne düşen hatırlatmalar — bütün bölümlerden tek listede.
+
+     Hatırlatıcı bir görev değildir ve kaçırılmış olması ceza üretmez.
+     Burada durmasının tek sebebi, bölüm bölüm dolaşmadan görülebilmesi. */
+  function reminderRow(){
+    const bugun = M.dueReminders(null, gun())
+      .filter(r => ESP.Mod.isOn(r.disc));
+    if(!bugun.length) return '';
+    return K.Entry({
+      label:'HATIRLATMA', hint:'reminder',
+      meta:bugun.length + ' satır',
+      note:'Kendine söylediğin şeyler. Sistem hiçbirini zorunlu kılmaz; '
+         + 'kaçırılan bir hatırlatıcı borç yazmaz.',
+      wide:true,
+      body:html`<ul class="remlist">${map(bugun, r => {
+        const d = ESP.DISCIPLINE_BY_ID[r.disc] || {};
+        return html`<li class="${cls('remrow', r.due < gun() && 'is-due')}">
+          <span class="remrow__date num">${r.due}</span>
+          <span class="remrow__text">${r.text}</span>
+          <span class="tiny dim">${d.label || r.disc}</span>
+          ${K.Button({ label:'Yapıldı', size:'sm', act:'desk-done-rem',
+            data:{ 'data-id':r.id } })}
+          ${K.Button({ label:'Bölüme git', size:'sm', act:'go',
+            data:{ 'data-route':d.route || 'today' } })}
+        </li>`;
+      })}</ul>`,
+    });
+  }
+
   /* ------------------------------------------------------------------ cizim */
 
   function render(){
     const tab = S.ui.dayTab || 'giris';
     const rows = tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [nextCard(), planRow(), entryForm(), quickForm(), sessionList()];
+      : [nextCard(), planRow(), reminderRow(), entryForm(), quickForm(), sessionList()]
+          .filter(Boolean);
 
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({

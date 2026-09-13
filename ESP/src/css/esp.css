@@ -582,3 +582,64 @@
   display:grid; gap:var(--sp-2); margin-top:var(--sp-3);
   grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
 }
+
+/* ============================================================== tezgâh
+
+   Yedi bölümde aynı görünür. Sekmeler renk taşımaz: sekme bir durum değil
+   bir yer bildirir. */
+.desk__body{ margin-top:var(--sp-3); }
+
+.deskchat__head{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-3);
+  margin-bottom:var(--sp-3);
+}
+.deskchat__head p{ margin:0; }
+.chat--desk{ max-height:280px; overflow-y:auto; }
+
+.deskmap__top{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+  margin-bottom:var(--sp-3);
+}
+/* Basamak listesi bir ilerleme çubuğu değildir: her basamak kendi adını
+   taşır, yüzde değil. Yüzde merdivenin üstünde bir kez yazar. */
+.steps{ list-style:none; margin:0 0 var(--sp-3); padding:0; }
+.stepdot{
+  display:flex; gap:var(--sp-3); align-items:baseline;
+  padding:var(--sp-2) 0; border-bottom:1px solid var(--rule);
+}
+.stepdot:last-child{ border-bottom:0; }
+.stepdot__n{
+  flex:0 0 2.5em; text-align:center; color:var(--text-3);
+  letter-spacing:.06em; font-size:var(--fs-sm);
+}
+.stepdot__body{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.stepdot--done .stepdot__n{ color:var(--ok, var(--text-2)); }
+.stepdot--current{ background:var(--surface-hover); }
+.stepdot--current .stepdot__n{ color:var(--sec); }
+.stepdot--ahead{ opacity:.66; }
+
+.aslist, .remlist{ list-style:none; margin:0; padding:0; }
+.asrow, .remrow{
+  display:flex; flex-wrap:wrap; gap:var(--sp-2) var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
+.asrow:last-child, .remrow:last-child{ border-bottom:0; }
+.asrow__kind{
+  flex:0 0 7ch; font-size:var(--fs-xs); text-transform:uppercase;
+  letter-spacing:.05em; color:var(--text-3);
+}
+.asrow__body{ flex:1 1 20ch; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.asrow__text{ font-size:var(--fs-sm); color:var(--text-2); }
+
+.remrow__date{
+  flex:0 0 10ch; color:var(--text-3); font-size:var(--fs-sm);
+  font-variant-numeric:tabular-nums;
+}
+.remrow__text{ flex:1 1 18ch; min-width:0; }
+.remrow.is-due .remrow__date{ color:var(--warn, var(--text)); font-weight:600; }
+.remrow.is-done{ opacity:.6; }
+.remrow.is-done .remrow__text{ text-decoration:line-through; }
+
+@media (max-width:520px){
+  .asrow__kind, .remrow__date{ flex:0 0 100%; }
+}

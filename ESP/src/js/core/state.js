@@ -48,6 +48,9 @@ ESP.S = {
   drafts:[],           // yazi taslaklari
   goals:[],            // zamana bagli hedefler
 
+  assets:[],           // bolume eklenmis not, belge, bag ve ses olcumu
+  reminders:[],        // bolume bagli hatirlaticilar
+
   events:[],           // kronolojiye yerlestirilmis tarih olaylari
   sources:[],          // elestirilmis tarih kaynaklari
   chains:[],           // nedensellik zincirleri
@@ -87,6 +90,9 @@ ESP.S = {
     writeTab:'taslaklar',   // taslaklar | olcum
     draftOpen:null,
     analyticsTab:'radar',   // radar | seriler | rapor
+    deskTab:{},             // discId -> 'kocla' | 'harita' | 'ekler' | 'hatirlatma'
+    deskOpen:{},            // discId -> tezgah acik mi
+    assetOpen:null,
     histTab:'serit',        // serit | olaylar | kaynaklar | zincir | calisma
     eventOpen:null,
     sourceOpen:null,
@@ -684,6 +690,143 @@ ESP.Model = (function(){
       .sort((a, b) => a.date < b.date ? -1 : 1);
   }
 
+  /* ------------------------------------------------------------ ekler
+
+     Bir bölüme iliştirilen malzeme: not, belge, bağlantı ya da ses ÖLÇÜMÜ.
+
+     Dört tür arasında bir tanesi ayrı davranır. `audio` türü ham ses
+     dosyasını TUTMAZ — süresini, başlığını ve kullanıcının kendi notunu
+     tutar. Sebebi `ESP.PRIVACY` ve tarayıcı kotasıdır: beş megabaytlık bir
+     yerel depoya iki ses kaydı sığar ve üçüncüsü bütün sistemi kilitler.
+     «Ses ekle» düğmesinin dürüst karşılığı, sesin kendisini değil ölçüsünü
+     kaydetmektir; dosya kullanıcının kendi diskinde kalır.
+
+     Koç ekleri GÖRÜR ama İÇERİĞİNİ GÖRMEZ: brifinge yalnızca sayı, tür ve
+     başlık gider. Tam metin, dosya içeriği ve ses hiçbir zaman modele
+     gitmez (ESP.PRIVACY.model). */
+
+  const ASSET_KINDS = ['note', 'doc', 'link', 'audio'];
+
+  function newAsset(patch){
+    return Object.assign({
+      id:U.uid('as'),
+      disc:'lang',
+      kind:'note',              // note | doc | link | audio
+      title:'',
+      text:'',                  // note: metin · doc: özet · link: not
+      url:'',                   // link
+      seconds:null,             // audio: süre (ölçüldü)
+      tags:[],
+      at:new Date().toISOString(),
+    }, patch || {});
+  }
+
+  function normAsset(doc){
+    const a = obj(doc);
+    const r = Object.assign(newAsset(), a, { tags:arr(a.tags) });
+    if(ASSET_KINDS.indexOf(r.kind) < 0) r.kind = 'note';
+    r.seconds = (typeof a.seconds === 'number' && isFinite(a.seconds) && a.seconds > 0)
+      ? a.seconds : null;
+    return r;
+  }
+
+  async function saveAsset(rec){
+    const a = normAsset(rec);
+    if(!String(a.title || '').trim() && !String(a.text || '').trim()){
+      return { ok:false, error:'Başlık ya da metin gerekir.' };
+    }
+    if(a.kind === 'link' && !String(a.url || '').trim()){
+      return { ok:false, error:'Bağlantı adresi boş olamaz.' };
+    }
+    if(!a.title) a.title = String(a.text).slice(0, 60);
+    const i = S.assets.findIndex(x => x.id === a.id);
+    if(i >= 0) S.assets[i] = a; else S.assets.unshift(a);
+    await ESP.Store.set('assets/' + a.id, a);
+    return { ok:true, asset:a };
+  }
+
+  async function deleteAsset(id){
+    S.assets = S.assets.filter(a => a.id !== id);
+    await ESP.Store.remove('assets/' + id);
+  }
+
+  function assetsOf(discId){
+    return (S.assets || []).filter(a => !discId || a.disc === discId);
+  }
+
+  /* ------------------------------------------------------ hatirlaticilar
+
+     Hatırlatıcı bir GÖREV DEĞİLDİR: sistem hiçbir şeyi zorunlu kılmaz ve
+     kaçırılan bir hatırlatıcı ceza üretmez. Yaptığı tek şey, kullanıcının
+     kendi kendine söylediği bir şeyi günü gelince tekrar söylemektir.
+
+     Tekrar (`repeat`) günlük/haftalık/aylık olabilir. Tamamlanan tekrarlı
+     bir hatırlatıcı SİLİNMEZ, bir sonraki tarihe taşınır: silmek, zincirin
+     kendisini silmek olurdu. */
+
+  const REPEATS = { none:0, daily:1, weekly:7, monthly:30 };
+
+  function newReminder(patch){
+    return Object.assign({
+      id:U.uid('rem'),
+      disc:'lang',
+      text:'',
+      due:U.todayISO(),
+      repeat:'none',            // none | daily | weekly | monthly
+      done:false,
+      doneAt:null,
+      createdAt:new Date().toISOString(),
+    }, patch || {});
+  }
+
+  async function saveReminder(rec){
+    const r = Object.assign(newReminder(), obj(rec));
+    if(!String(r.text || '').trim()) return { ok:false, error:'Hatırlatma metni boş olamaz.' };
+    if(!(r.repeat in REPEATS)) r.repeat = 'none';
+    const i = S.reminders.findIndex(x => x.id === r.id);
+    if(i >= 0) S.reminders[i] = r; else S.reminders.unshift(r);
+    await ESP.Store.set('reminders/' + r.id, r);
+    return { ok:true, reminder:r };
+  }
+
+  async function deleteReminder(id){
+    S.reminders = S.reminders.filter(r => r.id !== id);
+    await ESP.Store.remove('reminders/' + id);
+  }
+
+  /* Tamamla. Tekrarlı olan bir sonraki tarihe taşınır ve AÇIK KALIR. */
+  async function completeReminder(id, todayISO){
+    const r = S.reminders.find(x => x.id === id);
+    if(!r) return { ok:false, error:'Hatırlatıcı bulunamadı.' };
+    const bugun = todayISO || U.todayISO();
+    const adim = REPEATS[r.repeat] || 0;
+    if(adim){
+      /* Bir sonraki tarih BUGÜNDEN sayılır, eski vadeden değil: iki hafta
+         geciken günlük bir hatırlatıcı, on dört kez üst üste düşmemeli. */
+      r.due = U.iso(U.addDays(U.parse(bugun), adim));
+      r.done = false;
+      r.doneAt = new Date().toISOString();
+    }else{
+      r.done = true;
+      r.doneAt = new Date().toISOString();
+    }
+    await ESP.Store.set('reminders/' + r.id, r);
+    return { ok:true, reminder:r };
+  }
+
+  /* Bugün ve öncesinde vadesi dolmuş, tamamlanmamış hatırlatıcılar. */
+  function dueReminders(discId, todayISO){
+    const bugun = todayISO || U.todayISO();
+    return (S.reminders || [])
+      .filter(r => !r.done && r.due <= bugun)
+      .filter(r => !discId || r.disc === discId)
+      .sort((a, b) => a.due < b.due ? -1 : 1);
+  }
+
+  function remindersOf(discId){
+    return (S.reminders || []).filter(r => !discId || r.disc === discId);
+  }
+
   /* ----------------------------------------------------------------- tarih
 
      Uc kayit turu ve aralarindaki sira:
@@ -964,6 +1107,11 @@ ESP.Model = (function(){
     S.goals = ((await ESP.Store.list('goals')) || []).map(g => Object.assign(newGoal(), g));
     S.decisions = ((await ESP.Store.list('decisions')) || []);
 
+    S.assets = ((await ESP.Store.list('assets')) || []).map(normAsset)
+      .sort((a, b) => (b.at || '') < (a.at || '') ? -1 : 1);
+    S.reminders = ((await ESP.Store.list('reminders')) || [])
+      .map(r => Object.assign(newReminder(), r));
+
     S.events = ((await ESP.Store.list('events')) || []).map(normEvent)
       .sort((a, b) => (a.year || 0) - (b.year || 0));
     S.sources = ((await ESP.Store.list('sources')) || []).map(normSource);
@@ -993,6 +1141,10 @@ ESP.Model = (function(){
     newRecording, saveRecording, deleteRecording,
     /* yazi */
     newDraft, saveDraft, deleteDraft,
+    /* ekler ve hatirlaticilar */
+    newAsset, saveAsset, deleteAsset, assetsOf, ASSET_KINDS,
+    newReminder, saveReminder, deleteReminder, completeReminder,
+    dueReminders, remindersOf, REPEATS,
     /* tarih */
     newEvent, saveEvent, deleteEvent, seedEvents,
     newSource, saveSource, deleteSource, critiqueDepth,

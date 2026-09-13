@@ -251,9 +251,20 @@ ESP.Office = (function(){
     patron:patronBrief,
   };
 
+  /* Bir ajanin brifingi = kendi olcumleri + TEZGAH EKI.
+
+     Tezgah eki (ekler, hatirlaticilar, kademe) yedi masada da AYNI bicimde
+     durur. Her brifing fonksiyonuna elle eklemek yedi kez unutulabilecek
+     bir sey demekti; tek yerde birlestirilmesinin sebebi bu.
+
+     Iceriğin kendisi GITMEZ: ek sayisi, turu ve basligi gider. */
   function brief(agentId){
     const fn = BRIEFS[agentId] || patronBrief;
-    return fn();
+    const b = fn();
+    const a = ESP.AGENT_BY_ID[agentId];
+    const disc = a ? (ESP.DISCIPLINES.filter(d => d.agent === a.id)[0] || null) : null;
+    if(disc && ESP.Desk) b.desk = ESP.Desk.briefExtras(disc.id);
+    return b;
   }
 
   /* ------------------------------------------------------------- kural dili
@@ -270,6 +281,16 @@ ESP.Office = (function(){
     const brf = b || brief(agentId);
     const cumle = [];
 
+    /* Tezgah eki her masanin cumlesine AYNI bicimde eklenir. */
+    function tezgah(){
+      const t = brf.desk;
+      if(!t) return '';
+      const parca = [];
+      if(t.assets.total) parca.push(t.assets.total + ' ek iliştirilmiş');
+      if(t.reminders.due) parca.push(t.reminders.due + ' hatırlatma bugüne düştü');
+      return parca.length ? ' ' + parca.join(', ') + '.' : '';
+    }
+
     if(agentId === 'polyglot'){
       if(brf.cards.cert === 'missing') return 'Henüz kart yok. İlk kartı eklediğinde retansiyon ölçülmeye başlar.';
       cumle.push(brf.cards.total + ' kart var, ' + brf.cards.active + ' tanesi üretimde kullanılmış.');
@@ -279,7 +300,7 @@ ESP.Office = (function(){
       cumle.push(brf.retention.cert === 'missing'
         ? 'Retansiyon henüz ölçülemedi: hiç cevaplanmış kart yok.'
         : 'Retansiyon ' + pct(brf.retention.value) + ' (' + brf.retention.n + ' karttan hesaplandı).');
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'socrates'){
@@ -290,7 +311,7 @@ ESP.Office = (function(){
       cumle.push(brf.primaryTexts.cert === 'missing'
         ? 'Kaynak listesi boş.'
         : brf.primaryTexts.value + ' primer metin kayıtlı.');
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'maestro'){
@@ -303,7 +324,7 @@ ESP.Office = (function(){
       if(brf.progress.cert !== 'missing'){
         cumle.push('Hedefi olan ' + brf.progress.n + ' parçanın ' + brf.progress.reached + ' tanesi hedef tempoda.');
       }
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'demosthenes'){
@@ -317,7 +338,7 @@ ESP.Office = (function(){
       if(brf.errorRate.cert !== 'missing'){
         cumle.push('Kendi işaretlediğin hata oranı ' + pct(brf.errorRate.value) + ' (tahmin).');
       }
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'aristoteles'){
@@ -328,7 +349,7 @@ ESP.Office = (function(){
         : 'Sentez katsayısı ' + U.fmtNum(Math.round(brf.ssk.value * 100) / 100)
           + ' (' + brf.books.value + ' kaynak, ' + brf.books.authors + ' yazar).');
       if(brf.suggestions) cumle.push(brf.suggestions + ' bağ önerisi bekliyor.');
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'montaigne'){
@@ -340,7 +361,7 @@ ESP.Office = (function(){
       if(brf.readability.cert !== 'missing'){
         cumle.push('Son taslağın okunabilirliği ' + brf.readability.value + ' (' + brf.readability.band + '), cümle başına ' + U.fmtNum(brf.readability.wordsPerSentence) + ' kelime.');
       }
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'herodot'){
@@ -362,7 +383,7 @@ ESP.Office = (function(){
       if(brf.sources.total){
         cumle.push(brf.sources.total + ' kaynağın ' + brf.sources.primary + ' tanesi birincil.');
       }
-      return cumle.join(' ');
+      return cumle.join(' ') + tezgah();
     }
 
     if(agentId === 'mnemosyne'){
