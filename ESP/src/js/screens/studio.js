@@ -22,6 +22,7 @@ ESP.Screens.studio = (function(){
     { id:'muzik',    label:'Müzik' },
     { id:'diksiyon', label:'Diksiyon' },
     { id:'kulak',    label:'Kulak' },
+    { id:'ogren',    label:'Öğren' },
     { id:'ilerleme', label:'İlerleme' },
   ];
 
@@ -413,12 +414,33 @@ ESP.Screens.studio = (function(){
     ];
   }
 
+  /* Konu haritasi — studyoda iki disiplin var, ikisinin de haritasi burada.
+
+     Isaretler beyandir ve oyle etiketlenir; hicbir kapiyi acmaz. */
+  function topicRows(){
+    return [
+      { id:'music', label:'MÜZİK KONULARI' },
+      { id:'diction', label:'DİKSİYON KONULARI' },
+    ].map(d => {
+      const ozet = ESP.Lesson.topicSummary(d.id);
+      return K.Entry({
+        label:d.label, hint:'topic',
+        meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
+        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
+           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
+        wide:true,
+        body:ESP.Parts.topics(d.id),
+      });
+    });
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
     const tab = S.ui.studioTab || 'muzik';
     const rows = tab === 'diksiyon' ? dictionRows()
       : tab === 'kulak' ? earRows()
+      : tab === 'ogren' ? topicRows()
       : tab === 'ilerleme' ? progressRows()
       : musicRows();
 

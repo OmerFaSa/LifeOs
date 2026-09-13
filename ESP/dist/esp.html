@@ -5376,6 +5376,32 @@ body.is-dragging .drop.is-over{
 @media (max-width:560px){
   .topclock__disc{ display:none; }
 }
+
+/* Kurulum seçim kartları: iki sütun, işaretli olan belirgin.
+   «Seçili mi değil mi» sorusu bir saniyede cevaplanmalı. */
+.setup__picks .pickcard{ align-items:flex-start; }
+.setup__hintline{
+  margin:var(--sp-2) 0 0; font-size:var(--fs-xs); color:var(--text-3);
+}
+
+/* Konu haritası: kapalıyken tek satır, açıkken işaretlenebilir liste. */
+.topics{ display:flex; flex-direction:column; }
+.topic{ border-bottom:1px solid var(--rule); }
+.topic:last-child{ border-bottom:0; }
+.topic__head{
+  display:flex; width:100%; gap:var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; background:none; border:0; font:inherit;
+  color:inherit; text-align:left; cursor:pointer;
+}
+.topic__head:hover b{ text-decoration:underline; }
+.topic__lv{ flex:0 0 2.5em; text-align:center; color:var(--text-3);
+  font-size:var(--fs-sm); letter-spacing:.06em; }
+.topic__body{ flex:1 1 20ch; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.topic__detail{ padding:0 0 var(--sp-3) calc(2.5em + var(--sp-3)); }
+.topicrow{ padding:2px 0; }
+@media (max-width:520px){
+  .topic__detail{ padding-left:0; }
+}
 </style>
 <div id="app">
   <div class="boot">
@@ -5396,7 +5422,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'79de965', at:'2026-09-13 04:36', dirty:true };
+SP.BUILD = { id:'e245864', at:'2026-09-13 05:25', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -5595,27 +5621,37 @@ ESP.CERTAINTY = {
    `weight` EHS'deki D_i katsayisidir: butun disiplinler esit degildir, ama
    fark KUCUK tutulur. Buyuk fark, dusuk katsayili disiplini gorunmez yapar
    ve kullanici onu birakir — oysa denge sistemin amaci. */
+/* `covers` kurulum ekranindaki secim kartinda gorunur: bir disiplini
+   acmadan once ne yapacagini bilmek gerekir. Uzun `note` orada okunmuyordu;
+   uc-dort kelime okunuyor. */
 ESP.DISCIPLINES = [
   { id:'lang',    label:'Yabancı Dil',  short:'Dil',     weight:1.0, agent:'polyglot',
     unit:'dakika', route:'lang',
+    covers:'Kelime kartları, aralıklı tekrar, dilbilgisi, dinleme',
     note:'Shadowing, üretim ve aralıklı tekrar. Hacmi dakika, kalitesi retansiyon ölçer.' },
   { id:'philo',   label:'Felsefe',      short:'Felsefe', weight:1.1, agent:'socrates',
     unit:'dakika', route:'symposium',
+    covers:'Tez kurma, itiraz, safsata denetimi, düşünce deneyi',
     note:'Primer metin okuma ve argüman kurma. Tez yazılmadan okuma tamamlanmış sayılmaz.' },
   { id:'music',   label:'Müzik / Gitar', short:'Müzik',  weight:1.0, agent:'maestro',
     unit:'dakika', route:'studio',
+    covers:'Metronom, temiz tempo, kulak eğitimi, repertuar',
     note:'Metronomlu teknik çalışma ve repertuar. Hacmi dakika, kalitesi temiz BPM.' },
   { id:'diction', label:'Diksiyon',     short:'Diksiyon', weight:0.9, agent:'demosthenes',
     unit:'dakika', route:'studio',
+    covers:'Nefes, artikülasyon, tekerleme, konuşma hızı',
     note:'Artikülasyon, nefes ve vurgu. En kolay ertelenen disiplin; ofis bunu izler.' },
   { id:'reading', label:'Derin Okuma',  short:'Okuma',   weight:1.1, agent:'aristoteles',
     unit:'dakika', route:'library',
+    covers:'Atomik not, kavram bağı, sentopik okuma',
     note:'Atomik not ve sentopik bağ. Sayfa değil BAĞLANTI biriktirir.' },
   { id:'writing', label:'Yazı',         short:'Yazı',    weight:1.0, agent:'montaigne',
     unit:'dakika', route:'writing',
+    covers:'Taslak, revizyon, okunabilirlik, retorik',
     note:'Taslak üretimi ve revizyon. Hacmi kelime, kalitesi okunabilirlik ölçer.' },
   { id:'history', label:'Tarih',        short:'Tarih',   weight:1.1, agent:'herodot',
     unit:'dakika', route:'history',
+    covers:'Kronoloji, neden zinciri, kaynak eleştirisi',
     note:'Kronoloji, nedensellik ve kaynak eleştirisi. Olay sayısı iskelet, '
        + 'zincir ve kaynak ettir.' },
 ];
@@ -8253,6 +8289,406 @@ ESP.PRACTICE_BY_ID = ESP.PRACTICE_KINDS.reduce(function(m, k){ m[k.id] = k; retu
    bırakılan bir oturumdur ve yarıda bırakılan oturum ölçüm üretmez. */
 ESP.PRACTICE_LENGTH = 10;
 
+/* ==== js/data/topics.js ==== */
+/* KONU HARİTALARI — her bölümün altındaki müfredat.
+
+   Ünitelerden (data/lessons.js) farkı şu: ünite KARTA döner, konu DÖNMEZ.
+   Bir dil ünitesi on kelimeyi desteye ekler ve ilerlemesi SRS'ten okunur.
+   Bir konu ise «bu alanda nelerin çalışılacağı»dır: metronom tekniği, tez
+   kurma, kaynak eleştirisi. Bunların ölçüsü kart değildir.
+
+   O yüzden konu ilerlemesi ÖLÇÜM DEĞİL BEYANDIR ve öyle etiketlenir:
+   kullanıcı «bunu çalıştım» der, sistem doğrulayamaz. Dilbilgisi sekmesinde
+   aynı desen zaten vardı; burada bütün bölümlere yayılıyor.
+
+   ─────────────────────────────────────────────────────────────────────
+
+   KAYNAK VE DOĞRULUK
+
+   Buradaki çerçeveler uydurulmadı; yaygın kabul görmüş kaynaklardan alındı
+   ve nereden geldikleri `source` alanında yazar:
+
+     · Diller için CEFR (Avrupa Konseyi, 2020 Companion Volume) — altı
+       düzey, yeni Pre-A1 düzeyi ve 2020'de eklenen ARACILIK (mediation) ve
+       çevrim içi etkileşim ölçekleri.
+     · Retorik için klasik beş kanon: inventio, dispositio, elocutio,
+       memoria, pronuntiatio.
+     · Diksiyon için Türkçe eğitim geleneğinin başlıkları: nefes/diyafram,
+       boğumlanma (artikülasyon), vurgu, tonlama, ulama, durak.
+     · Gitar için yaygın müfredat sırası: duruş ve akort → açık akorlar ve
+       ritim → barre ve CAGED → gam/ton bilgisi → arpej ve ses yürütümü →
+       hammer-on/pull-off/bend/fingerstyle → doğaçlama → repertuar.
+     · Okuma için Adler'in dört düzeyi (zaten core/data'da).
+
+   İKİ ÖLÇEK BİRBİRİNE KARIŞTIRILMADI. CEFR'in ALTI bandı (A1–C2) ile ESP
+   merdiveninin BEŞ kademesi (Acemi → Üstat) ayrı şeylerdir ve birebir
+   eşlenmez: C1 ve C2 konuları aynı kademede durabilir. Konunun `band`
+   alanı CEFR'i, `level` alanı ESP merdivenini söyler; ikisini tek sayıya
+   indirmek, olmayan bir denklik iddia etmek olurdu.
+
+   BİR ŞEY BİLEREK YAPILMADI: hiçbir konuya «kaç saatte biter» yazılmadı.
+   Süre vaadi ESP.PEDAGOGIC'teki sonuç garantisi yasağına girer. */
+
+window.ESP = window.ESP || {};
+
+ESP.TOPICS = {
+
+  /* ------------------------------------------------------------------ dil */
+  lang:[
+    { id:'l-ses', level:1, band:'A1', title:'Ses ve alfabe',
+      goal:'Hedef dilin seslerini tanımak ve yazıyla eşleştirmek.',
+      items:['Alfabe ve sesletim', 'Ana dilde olmayan sesler',
+        'Vurgunun kelimedeki yeri', 'Yazıldığı gibi okunmayan kalıplar'],
+      source:'CEFR A1' },
+    { id:'l-gunluk', level:1, band:'A1', title:'Günlük hayat',
+      goal:'Selamlaşma, tanışma, sayı, saat, yön.',
+      items:['Selamlaşma ve vedalaşma', 'Kendini tanıtma', 'Sayılar ve saat',
+        'Yön sorma ve tarif etme', 'Alışveriş kalıpları'],
+      source:'CEFR A1' },
+    { id:'l-zaman', level:2, band:'A2', title:'Zaman ve anlatım',
+      goal:'Geçmişi, şimdiyi ve geleceği kaymadan anlatmak.',
+      items:['Geçmiş zamanlar ve görünüş', 'Gelecek ve niyet',
+        'Sıklık zarfları', 'Bir günü baştan sona anlatma'],
+      source:'CEFR A2' },
+    { id:'l-betim', level:2, band:'A2', title:'Betimleme',
+      goal:'Kişi, yer ve nesneyi ayrıntılı anlatmak.',
+      items:['Sıfat sırası', 'Karşılaştırma ve üstünlük',
+        'Mekân ve yer edatları', 'Duygu ve durum anlatımı'],
+      source:'CEFR A2' },
+    { id:'l-baglanti', level:3, band:'B1', title:'Bağlantılı metin',
+      goal:'Cümleleri neden, karşıtlık ve koşulla bağlamak.',
+      items:['Bağlaçlar ve geçiş ifadeleri', 'Yan cümle kurma',
+        'Paragraf içinde akış', 'Anlatıda zaman sıçraması'],
+      source:'CEFR B1' },
+    { id:'l-kiplik', level:3, band:'B1', title:'Kiplik ve incelik',
+      goal:'Gereklilik, olasılık, izin ve rica arasındaki farkı üretmek.',
+      items:['Gereklilik ve zorunluluk', 'Olasılık dereceleri',
+        'Kibar rica kalıpları', 'Dolaylı anlatım'],
+      source:'CEFR B1' },
+    { id:'l-tartisma', level:4, band:'B2', title:'Tartışma ve savunma',
+      goal:'Bir görüşü savunmak, kısmen katılmak, karşı çıkmak.',
+      items:['Katılma ve kısmen katılma', 'Karşı çıkma kalıpları',
+        'Örnek ve kanıt sunma', 'Karşı tarafın itirazını önceden karşılama'],
+      source:'CEFR B2' },
+    { id:'l-akademik', level:4, band:'B2', title:'Kayıt ve üslup',
+      goal:'Günlük, resmî ve akademik kaydı ayırmak.',
+      items:['Resmî yazışma kalıpları', 'Akademik fiil ve öbekler',
+        'Edilgen yapı ve fail gizleme', 'Aynı fikri iki kayıtta yazma'],
+      source:'CEFR B2' },
+    /* 2020 Companion Volume'ün eklediği ölçekler: aracılık ve çevrim içi
+       etkileşim. Bunlar «dördüncü beceri» değil, dördünü birleştiren iş. */
+    { id:'l-aracilik', level:5, band:'C1', title:'Aracılık (mediation)',
+      goal:'Bir metni ya da konuşmayı başkası için anlaşılır kılmak.',
+      items:['Metni özetleyip aktarma', 'İki dil arasında köprü kurma',
+        'Kavramı sadeleştirerek anlatma', 'Grup tartışmasını kolaylaştırma'],
+      source:'CEFR 2020 Companion Volume — mediation' },
+    { id:'l-cevrimici', level:5, band:'C1', title:'Çevrim içi etkileşim',
+      goal:'Yazılı ve eşzamanlı çevrim içi ortamda dil kullanmak.',
+      items:['Yazışmada ton ayarı', 'Çevrim içi tartışmaya katılma',
+        'İşbirlikli belge üzerinde çalışma', 'Yanlış anlaşılmayı onarma'],
+      source:'CEFR 2020 Companion Volume — online interaction' },
+    { id:'l-deyim', level:5, band:'C2', title:'Deyim, ima ve mizah',
+      goal:'Söylenmeyeni anlamak ve kurabilmek.',
+      items:['Deyim ve eşdizim ağı', 'İroni ve alt metin',
+        'Kültürel gönderme', 'Kelime oyunu'],
+      source:'CEFR C2' },
+  ],
+
+  /* -------------------------------------------------------------- felsefe */
+  philo:[
+    { id:'p-mantik', level:1, title:'Mantık ve argüman',
+      goal:'Öncül ile sonucu ayırmak, geçerlilik ile doğruluğu karıştırmamak.',
+      items:['Öncül–sonuç ayrımı', 'Geçerlilik ve sağlamlık',
+        'Tümdengelim ve tümevarım', 'Safsata kataloğu', 'Gizli öncül avı'] },
+    { id:'p-bilgi', level:2, title:'Bilgi kuramı',
+      goal:'«Biliyorum» demenin koşullarını tartışmak.',
+      items:['Gerekçelendirilmiş doğru inanç', 'Şüphecilik',
+        'Akılcılık ve deneycilik', 'Tanıklık ve otorite', 'Gettier sorunu'] },
+    { id:'p-etik', level:2, title:'Etik',
+      goal:'Üç büyük ahlak kuramını ayırt etmek ve sınamak.',
+      items:['Erdem etiği', 'Ödev etiği (deontoloji)', 'Sonuççuluk',
+        'Ahlaki görelilik tartışması', 'Uygulamalı etik vakaları'] },
+    { id:'p-varlik', level:3, title:'Metafizik',
+      goal:'Var olmak, özdeşlik ve nedensellik üzerine.',
+      items:['Töz ve nitelik', 'Özdeşlik ve süreklilik', 'Nedensellik',
+        'Özgür irade ve determinizm', 'Zamanın doğası'] },
+    { id:'p-siyaset', level:3, title:'Siyaset felsefesi',
+      goal:'İktidarın meşruiyetini ve adaleti tartışmak.',
+      items:['Toplum sözleşmesi', 'Adalet kuramları', 'Özgürlük kavramları',
+        'Devletin sınırları', 'Eşitlik ve hak'] },
+    { id:'p-islam', level:3, title:'İslam felsefesi',
+      goal:'Akıl–vahiy ilişkisini kendi geleneğinde okumak.',
+      items:['Meşşâî gelenek (Fârâbî, İbn Sînâ)', 'Gazâlî\'nin eleştirisi',
+        'İbn Rüşd\'ün cevabı', 'İbn Haldûn ve tarih bilimi', 'Tasavvuf düşüncesi'] },
+    { id:'p-alman', level:4, title:'Alman idealizmi',
+      goal:'Kant sonrası düşüncenin kırılmasını izlemek.',
+      items:['Kant: eleştiri projesi', 'Fichte ve ben', 'Hegel: diyalektik',
+        'Schopenhauer: istenç', 'Marx: tersine çevirme'] },
+    { id:'p-varolus', level:4, title:'Varoluşçuluk ve fenomenoloji',
+      goal:'Özne, kaygı ve anlam sorusunu ele almak.',
+      items:['Kierkegaard ve iman', 'Nietzsche: değerlerin yeniden değerlendirilmesi',
+        'Husserl: yönelmişlik', 'Heidegger: Dasein', 'Sartre ve Camus'] },
+    { id:'p-analitik', level:4, title:'Analitik felsefe',
+      goal:'Dil çözümlemesi yoluyla felsefi sorunları ele almak.',
+      items:['Frege ve anlam–gönderim', 'Russell: betimlemeler',
+        'Wittgenstein: erken ve geç', 'Mantıkçı pozitivizm ve eleştirisi',
+        'Quine: iki dogma'] },
+    { id:'p-zihin', level:5, title:'Zihin felsefesi',
+      goal:'Zihin–beden sorununu ve bilinç tartışmasını kurmak.',
+      items:['İkicilik ve fizikalizm', 'İşlevselcilik', 'Nitel deneyim (qualia)',
+        'Yapay zihin tartışması', 'Kişi özdeşliği'] },
+    { id:'p-bilim', level:5, title:'Bilim felsefesi',
+      goal:'Bilimi bilim yapan şeyi tartışmak.',
+      items:['Yanlışlanabilirlik (Popper)', 'Paradigma ve devrim (Kuhn)',
+        'Araştırma programları (Lakatos)', 'Bilimsel gerçekçilik',
+        'Nedensellik ve açıklama'] },
+    { id:'p-turk', level:5, title:'Türk düşüncesi',
+      goal:'Kendi düşünce geleneğini kaynağından okumak.',
+      items:['Tanzimat sonrası fikir akımları', 'Batılılaşma tartışması',
+        'Cumhuriyet dönemi düşüncesi', 'Çağdaş Türk felsefesi'] },
+  ],
+
+  /* ---------------------------------------------------------------- müzik */
+  music:[
+    { id:'m-temel', level:1, title:'Duruş, akort, ilk sesler',
+      goal:'Enstrümanı doğru tutmak ve temiz tek ses çıkarmak.',
+      items:['Oturuş ve el pozisyonu', 'Akort (kulak ve alet ile)',
+        'Tel–perde haritası', 'Tabulatür ve nota okumanın farkı',
+        'Pena tutuşu ve vuruş yönü'],
+      source:'Yaygın gitar müfredatı — başlangıç' },
+    { id:'m-acik', level:1, title:'Açık akorlar ve ritim',
+      goal:'Sekiz açık akorla şarkı boyunca durmadan çalmak.',
+      items:['Em, Am, C, G, D, E, A, Dm', 'Akor geçişinde ölü zaman',
+        'Vuruş kalıpları (downstroke/upstroke)', 'Metronomla dörtlük ve sekizlik',
+        'Susturma (palm mute) ve dinamik'],
+      source:'Yaygın gitar müfredatı — başlangıç' },
+    { id:'m-barre', level:2, title:'Barre ve CAGED',
+      goal:'Aynı akoru klavyenin beş yerinde kurmak.',
+      items:['E ve A şekilli barre', 'CAGED beş şekli',
+        'Şekiller arası bağlama', 'Kök sesi bulma', 'Dayanıklılık çalışması'],
+      source:'Yaygın gitar müfredatı — orta seviye' },
+    { id:'m-teori', level:2, title:'Temel teori',
+      goal:'Ne çaldığını adlandırabilmek.',
+      items:['Tam ses–yarım ses', 'Majör gam formülü', 'Donanım ve beşliler çemberi',
+        'Akor kuruluşu (üçlü, yedili)', 'Derece ve fonksiyon (I–IV–V)'],
+      source:'Yaygın gitar müfredatı — teori' },
+    { id:'m-gam', level:3, title:'Gam ve pozisyon',
+      goal:'Beş pentatonik kalıbı ve majör gamı klavyede bağlamak.',
+      items:['Pentatonik beş kalıp', 'Majör ve doğal minör',
+        'Pozisyon değiştirme', 'Modlar (Dorian, Mixolydian…)',
+        'Gamı müzikal cümleye çevirme'],
+      source:'Yaygın gitar müfredatı — orta/ileri' },
+    { id:'m-teknik', level:3, title:'Teknik dağarcık',
+      goal:'Sağ ve sol el tekniklerini temiz uygulamak.',
+      items:['Hammer-on ve pull-off', 'Slide ve bend (entonasyon!)',
+        'Vibrato', 'Fingerstyle ve arpej', 'Alternate picking ve ekonomi'],
+      source:'Yaygın gitar müfredatı — ileri' },
+    { id:'m-kulak', level:4, title:'Kulak eğitimi',
+      goal:'Duyduğunu adlandırmak ve yazmak.',
+      items:['Aralık tanıma', 'Akor türü ayırt etme', 'Derece duyma',
+        'Ritim yazımı', 'Melodi yazımı'] },
+    { id:'m-dogac', level:4, title:'Doğaçlama',
+      goal:'Bir akor dizisi üzerine anlamlı cümle kurmak.',
+      items:['Hedef ses (chord tone) yaklaşımı', 'Motif geliştirme',
+        'Soru–cevap kurgusu', 'Dinamik ve boşluk kullanımı',
+        'Blues formu üzerinde uygulama'] },
+    { id:'m-repertuar', level:5, title:'Repertuar ve sahne',
+      goal:'Baştan sona çalınabilir bir set kurmak ve korumak.',
+      items:['Parça seçimi ve zorluk dengesi', 'Ezber stratejisi',
+        'Bakım planı (çalınmayan parça geri gider)', 'Kayıt alma ve dinleme',
+        'Sahne provası'] },
+  ],
+
+  /* -------------------------------------------------------------- diksiyon */
+  diction:[
+    { id:'d-nefes', level:1, title:'Nefes ve diyafram',
+      goal:'Cümle sonuna nefesi yetirerek konuşmak.',
+      items:['Diyafram nefesi', 'Nefes destekli ses',
+        'Cümle içinde nefes yeri seçme', 'Nefes egzersizleri (4-7-8)'],
+      source:'Türkçe diksiyon eğitimi başlıkları — nefes/diyafram' },
+    { id:'d-ses', level:1, title:'Ses ve rezonans',
+      goal:'Bağırmadan duyulur olmak.',
+      items:['Göğüs ve kafa rezonansı', 'Ses ısınması',
+        'Ses hijyeni (su, uyku, yorgunluk)', 'Perde (pitch) genişliği'] },
+    { id:'d-bogumlama', level:2, title:'Boğumlanma (artikülasyon)',
+      goal:'Ünlü ve ünsüzleri eksiksiz çıkarmak.',
+      items:['Ünlülerin çıkış yerleri', 'Zor ünsüz çiftleri',
+        'Kelime sonu düşmesi', 'Tekerleme çalışması',
+        'Abartılı söyleyip normale dönme'],
+      source:'Türkçe diksiyon eğitimi başlıkları — boğumlanma' },
+    { id:'d-vurgu', level:2, title:'Vurgu',
+      goal:'Kelime ve cümle vurgusunu doğru yere koymak.',
+      items:['Türkçede kelime vurgusu (genelde son hece)',
+        'Yer adlarında vurgu istisnaları', 'Yabancı kökenli kelimelerde vurgu',
+        'Cümle vurgusuyla anlam değiştirme'],
+      source:'Türkçe diksiyon eğitimi başlıkları — vurgu' },
+    { id:'d-ulama', level:3, title:'Ulama ve durak',
+      goal:'Akıcılığı kuralla kurmak, hızla değil.',
+      items:['Ulama kuralı ve istisnaları', 'Durak yerleri',
+        'Noktalamanın sesteki karşılığı', 'Tonlama eğrisi (soru, ünlem)'],
+      source:'Türkçe diksiyon eğitimi başlıkları — ulama/tonlama' },
+    { id:'d-hiz', level:3, title:'Tempo ve ritim',
+      goal:'Dinleyicinin izleyebileceği hızda konuşmak.',
+      items:['Kelime/dakika ölçümü', 'Hız değiştirerek vurgulama',
+        'Dolgu sesleri (ıı, şey) azaltma', 'Sessizliği kullanma'] },
+    /* Klasik retoriğin beş kanonu — konuşmanın hazırlanmasından
+       sunulmasına kadarki bütün süreci adlandırır. */
+    { id:'d-retorik', level:4, title:'Retoriğin beş kanonu',
+      goal:'Konuşmayı hazırlamaktan sunmaya kadar sistemli çalışmak.',
+      items:['Inventio — ne söyleneceğinin bulunması',
+        'Dispositio — malzemenin sıraya konması',
+        'Elocutio — üslup ve söz sanatları',
+        'Memoria — içselleştirme ve bellek',
+        'Pronuntiatio — ses ve bedenle sunum'],
+      source:'Klasik retorik: beş kanon' },
+    { id:'d-sunum', level:4, title:'Sunum ve dinleyici',
+      goal:'Dinleyiciyle bağ kurarak konuşmak.',
+      items:['Açılış ve kapanış kurgusu', 'Göz teması ve duruş',
+        'Soru–cevap yönetimi', 'Zor soruya cevap kalıpları',
+        'Heyecanı yönetme'] },
+    { id:'d-okuma', level:5, title:'Metin seslendirme',
+      goal:'Yazılı metni doğal duyulacak biçimde okumak.',
+      items:['Metni işaretleme (vurgu, durak)', 'Anlatıcı tonu',
+        'Diyalog seslendirme', 'Mikrofon mesafesi ve patlayıcı sesler'] },
+  ],
+
+  /* ---------------------------------------------------------------- okuma */
+  reading:[
+    { id:'r-duzey', level:1, title:'Dört okuma düzeyi',
+      goal:'Hangi düzeyde okuduğunu bilerek okumak.',
+      items:['Temel okuma', 'Gözden geçirme (inceleme)', 'Analitik okuma',
+        'Sentopik okuma'],
+      source:'Adler — How to Read a Book' },
+    { id:'r-gozden', level:1, title:'Gözden geçirme tekniği',
+      goal:'On beş dakikada kitabın ne olduğunu anlamak.',
+      items:['Kapak, içindekiler, dizin', 'Giriş ve sonuç okuması',
+        'Rastgele paragraf örneklemesi', 'Bırakma kararı'] },
+    { id:'r-not', level:2, title:'Atomik not',
+      goal:'Tek fikir taşıyan, kendi cümlenle yazılmış not üretmek.',
+      items:['Tek not = tek fikir', 'Kendi cümlenle yazma',
+        'Kavram etiketi', 'Alıntı ile not arasındaki fark'] },
+    { id:'r-analitik', level:3, title:'Analitik okumanın soruları',
+      goal:'Bir kitabı bitirdikten sonra dört soruyu cevaplayabilmek.',
+      items:['Kitap ne hakkında?', 'Ayrıntıda ne söyleniyor?',
+        'Doğru mu, hangi kısmı?', 'Ne olmuş yani?'],
+      source:'Adler — analitik okuma' },
+    { id:'r-bag', level:3, title:'Bağ kurma',
+      goal:'Notları birbirine gerekçeyle bağlamak.',
+      items:['Ortak kavram üzerinden bağ', 'Çelişki bağı',
+        'Bağın gerekçesini yazma', 'Bağlanmamış not avı'] },
+    { id:'r-sentopik', level:4, title:'Sentopik okuma',
+      goal:'Bir soruyu birden çok yazar üzerinden okumak.',
+      items:['Soruyu kitaptan önce kurma', 'İlgili bölümleri bulma',
+        'Yazarları ortak terime çevirme', 'Soruları sıraya koyma',
+        'Tarafsız kalma sorumluluğu'],
+      source:'Adler — sentopik okuma' },
+    { id:'r-elestiri', level:4, title:'Eleştirel okuma',
+      goal:'Anlamadan katılmamak, anlamadan karşı çıkmamak.',
+      items:['Yazarı anlamadan yargılamamak', 'Bilgi eksikliği iddiası',
+        'Mantık hatası iddiası', 'Eksik çözümleme iddiası'] },
+    { id:'r-kanon', level:5, title:'Kendi kanonunu kurmak',
+      goal:'Okuma listesini rastlantıdan kurtarmak.',
+      items:['Alan haritası çıkarma', 'Birincil–ikincil dengesi',
+        'Okuma sırası tasarımı', 'Yeniden okuma planı'] },
+  ],
+
+  /* ----------------------------------------------------------------- yazı */
+  writing:[
+    { id:'w-cumle', level:1, title:'Cümle',
+      goal:'Tek bir işi yapan, okunur cümle kurmak.',
+      items:['Özne–yüklem yakınlığı', 'Cümle uzunluğu değişimi',
+        'Edilgen yapının bedeli', 'Gereksiz kelime avı'] },
+    { id:'w-paragraf', level:1, title:'Paragraf',
+      goal:'Her paragrafa bir iş yaptırmak.',
+      items:['Konu cümlesi', 'Geçiş ifadeleri', 'Paragraf uzunluğu',
+        'Tek fikir kuralı'] },
+    { id:'w-yapi', level:2, title:'Metin yapısı',
+      goal:'Yazmadan önce iskelet kurmak.',
+      items:['Tez–karşı tez–sentez', 'Sorun–çözüm', 'Anlatı yapısı',
+        'Karşılaştırma', 'Numaralı sav'] },
+    { id:'w-iddia', level:2, title:'İddia ve kanıt',
+      goal:'Her iddianın arkasına bir şey koymak.',
+      items:['Tek cümlelik iddia', 'Örnek, sayı, alıntı',
+        'Kanıtın kaynağını verme', 'Görüş ile olguyu ayırma'] },
+    { id:'w-revizyon', level:3, title:'Revizyon',
+      goal:'Sıralı geçişlerle metni sağlamlaştırmak.',
+      items:['Yapı geçişi', 'İddia geçişi', 'Kanıt geçişi', 'Kısaltma geçişi',
+        'Cümle geçişi', 'Tekrar geçişi', 'Sesli okuma'] },
+    { id:'w-uslup', level:3, title:'Üslup',
+      goal:'Aynı fikri farklı seslerde yazabilmek.',
+      items:['Kayıt (resmî, günlük, akademik)', 'Ritim ve uzunluk',
+        'Somut ayrıntı', 'Klişe avı'] },
+    /* Retorik figürler: araç tanımı, kalite yargısı değil. */
+    { id:'w-retorik', level:4, title:'Söz sanatları',
+      goal:'Dilin araçlarını bilerek kullanmak.',
+      items:['Üçleme ve karşıtlık', 'Baş yinelemesi', 'Benzetme ve eğretileme',
+        'Sözde soru', 'Eksiltme', 'Dereceleme'],
+      source:'Klasik retorik — elocutio' },
+    { id:'w-tur', level:4, title:'Türler',
+      goal:'Türün kendi kurallarına göre yazmak.',
+      items:['Deneme', 'Eleştiri', 'Anlatı', 'Teknik metin', 'Mektup'] },
+    { id:'w-uzun', level:5, title:'Uzun biçim',
+      goal:'Bölümlü bir metni bitirebilmek.',
+      items:['Bölüm mimarisi', 'Taslak yönetimi', 'Kendi editörün olmak',
+        'Bitirme disiplini'] },
+  ],
+
+  /* ---------------------------------------------------------------- tarih */
+  history:[
+    { id:'h-kronoloji', level:1, title:'Kronoloji kurma',
+      goal:'Olayları zamanda doğru yere koymak.',
+      items:['Yüzyıl hesabı ve MÖ/MS', 'Dönem sınırları ve tartışmalılığı',
+        'Eşzamanlılık (aynı anda başka yerde)', 'Uzun süre ve kısa olay'] },
+    { id:'h-neden', level:2, title:'Nedensellik',
+      goal:'Kıvılcımı neden sanmamak.',
+      items:['Yapısal koşul', 'Kurumsal neden', 'Konjonktür', 'Tetikleyici',
+        'Fail kararı', 'Tesadüf'] },
+    { id:'h-kaynak', level:3, title:'Kaynak eleştirisi',
+      goal:'Bir bilginin nereden geldiğini sormak.',
+      items:['Birincil–ikincil–üçüncül', 'Yazarın konumu ve çıkarı',
+        'İç ve dış tutarlılık', 'Suskunluk sorunu', 'Çeviri ve yorum'] },
+    { id:'h-yazim', level:4, title:'Tarih yazımı okulları',
+      goal:'Aynı olayın farklı anlatılarını tanımak.',
+      items:['Olaysal/siyasi tarih', 'Annales ve uzun süre',
+        'Marksist tarih', 'Kültürel tarih', 'Mikro tarih',
+        'Küresel/bağlantı tarihi', 'Sözlü tarih',
+        'Toplumsal cinsiyet tarihi'] },
+    { id:'h-anakronizm', level:4, title:'Anakronizm',
+      goal:'Geçmişi bugünün kavramlarıyla okumamak.',
+      items:['Ulus-devlet okuması', 'Bugünün ahlakıyla yargılama',
+        'Kaçınılmazlık yanılgısı', 'Büyük adam indirgemesi',
+        'Geriye dönük proje'] },
+    { id:'h-tema-ekonomi', level:3, title:'Tematik: ekonomi ve teknoloji',
+      goal:'Siyasetin altındaki zemini görmek.',
+      items:['Tarım ve artı ürün', 'Ticaret yolları', 'Para ve kredi',
+        'Sanayileşme', 'Enerji geçişleri', 'Krizler'] },
+    { id:'h-tema-toplum', level:3, title:'Tematik: toplum ve nüfus',
+      goal:'Kaynaklarda sesi az çıkanları görmek.',
+      items:['Salgınlar', 'Göç ve yerleşme', 'Şehirleşme', 'Sınıf ve emek',
+        'Kadınların tarihteki yeri', 'Kölelik ve kaldırılışı'] },
+    { id:'h-tema-dusunce', level:4, title:'Tematik: bilim ve düşünce',
+      goal:'Fikirlerin kendi kronolojisini izlemek.',
+      items:['Yazının ve matbaanın etkisi', 'Bilim devrimi',
+        'Aydınlanma', 'Evrim ve modern biyoloji', 'Bilgi çağı'] },
+    { id:'h-anadolu', level:2, title:'Anadolu ve Türk tarihi',
+      goal:'Kendi coğrafyanın çizgisini bütün olarak görmek.',
+      items:['Orta Asya ve göçler', 'Selçuklu ve beylikler',
+        'Osmanlı kuruluş–yükseliş–dönüşüm', 'Tanzimat ve Meşrutiyet',
+        'Kurtuluş Savaşı ve Cumhuriyet'] },
+    { id:'h-yontem', level:5, title:'Kendi araştırman',
+      goal:'Kaynağa dayanan kendi yazını üretmek.',
+      items:['Soru kurma', 'Kaynak taraması', 'Not ve künye düzeni',
+        'Karşı-olgusal düşünme', 'Yazma ve gerekçelendirme'] },
+  ],
+};
+
+/* Bütün konuların düz listesi — denetim ve sayım için. */
+ESP.TOPIC_LIST = Object.keys(ESP.TOPICS).reduce(function(acc, k){
+  return acc.concat(ESP.TOPICS[k].map(function(t){
+    return Object.assign({ disc:k }, t);
+  }));
+}, []);
+
 /* ==== js/data/hints.js ==== */
 /* Aciklama metinleri tek yerde.
 
@@ -8427,6 +8863,8 @@ ESP.HINTS = {
     more:'Takvim DEĞİLDİR: «salı 19:00\'da gitar» demek sistemin işi değil. Sırayı haftalık rota verir, plan onu güne dağıtır — yeni bir karar üretmez. Saatini sen seçersin.' },
   'ladder':{ t:'Merdiven', b:'Sıfırdan üstatlığa beş kademe ve ölçülebilir kapılar.',
     more:'Kademe kişiye değil ÜRETİME verilir; üretim durursa kademe de durur. Merdiven ardışıktır: alttaki kapı atlanarak üsttekine geçilmez, çünkü atlanan kapı ileride üstüne kurulan her şeyi çökertir. Süre tahmini yoktur — «üç ayda usta olursun» sonuç garantisi yasağına girer.' },
+  'topic':{ t:'Konu haritası', b:'Bu bölümde nelerin çalışılacağı.',
+    more:'Ünite KARTA döner, konu dönmez: bir dil ünitesi on kelimeyi desteye ekler ve ilerlemesi SRS\'ten okunur; «barre akorlar» ya da «kaynak eleştirisi» ise çalışılacak bir konudur ve ölçüsü kart değildir. Bu yüzden konu işaretleri ÖLÇÜM DEĞİL BEYANDIR: hiçbir kapıyı açmaz, kademeyi değiştirmez, hiçbir hesaba girmez. Çerçeveler uydurulmadı — CEFR (2020 Companion Volume), klasik retoriğin beş kanonu, Türkçe diksiyon başlıkları, yaygın gitar müfredatı ve Adler\'in okuma düzeyleri. Kaynağı olan konuda kaynak satırı yazar.' },
 };
 
 /* ==== js/data/palettes.js ==== */
@@ -9479,6 +9917,7 @@ ESP.S = {
     practiceOrder:null,
     rxOpen:null,            // acik egzersiz (gorev metni katli durur)
     unitOpen:null,
+    topicOpen:null,
     histTab:'serit',        // serit | olaylar | kaynaklar | zincir | calisma
     eventOpen:null,
     sourceOpen:null,
@@ -13534,6 +13973,70 @@ ESP.Lesson = (function(){
     return { ok:true, added:eklenen, skipped:atlanan };
   }
 
+  /* --------------------------------------------------------------- konular
+
+     Ünite KARTA döner, konu DÖNMEZ. Bir dil ünitesi on kelimeyi desteye
+     ekler ve ilerlemesi SRS'ten okunur; «barre akorlar» ya da «kaynak
+     eleştirisi» ise çalışılacak bir konudur ve ölçüsü kart değildir.
+
+     Bu yüzden konu ilerlemesi ÖLÇÜM DEĞİL BEYANDIR ve her yerde öyle
+     etiketlenir: kullanıcı «bunu çalıştım» der, sistem doğrulayamaz.
+     Beyanı ölçüm gibi göstermek, retansiyon sayısını uydurmakla aynı şey
+     olurdu — bu yüzden beyan hiçbir kapıyı açmaz, hiçbir kademeyi
+     değiştirmez ve hiçbir hesaba girmez. Yaptığı tek şey kullanıcının
+     kendi listesini işaretleyebilmesidir. */
+
+  function topics(discId){
+    return ((ESP.TOPICS || {})[discId] || []).map(function(t){
+      return Object.assign({ disc:discId }, t);
+    });
+  }
+
+  function topicOf(discId, id){
+    return topics(discId).filter(function(t){ return t.id === id; })[0] || null;
+  }
+
+  function topicMarks(){
+    return ((S.prefs && S.prefs.topics) || {});
+  }
+
+  function topicProgress(topic){
+    if(!topic) return { total:0, marked:0, cert:'missing' };
+    const isaret = topicMarks()[topic.id] || {};
+    const n = (topic.items || []).length;
+    const k = Object.keys(isaret).filter(function(i){ return isaret[i]; }).length;
+    return {
+      total:n, marked:Math.min(k, n),
+      /* Beyan bir olcum degildir: etiketi DAIMA 'tahmin'. */
+      cert:k ? 'estimated' : 'missing',
+      pct:n ? Math.round(100 * Math.min(k, n) / n) : 0,
+    };
+  }
+
+  async function markTopic(topicId, index){
+    const prefs = Object.assign({}, S.prefs || {});
+    prefs.topics = Object.assign({}, prefs.topics || {});
+    const cur = Object.assign({}, prefs.topics[topicId] || {});
+    if(cur[index]) delete cur[index]; else cur[index] = true;
+    prefs.topics[topicId] = cur;
+    await ESP.Model.savePrefs(prefs);
+    return { ok:true, marked:!!cur[index] };
+  }
+
+  /* Bir disiplinin konu ozeti — ekran basligi ve ders sekmesi icin. */
+  function topicSummary(discId){
+    const list = topics(discId);
+    if(!list.length) return { topics:0, items:0, marked:0, cert:'missing' };
+    let madde = 0, isaretli = 0;
+    list.forEach(function(t){
+      const p = topicProgress(t);
+      madde += p.total; isaretli += p.marked;
+    });
+    return { topics:list.length, items:madde, marked:isaretli,
+      cert:isaretli ? 'estimated' : 'missing',
+      pct:madde ? Math.round(100 * isaretli / madde) : 0 };
+  }
+
   /* --------------------------------------------------------------- pratik */
 
   function norm(s){
@@ -13718,6 +14221,7 @@ ESP.Lesson = (function(){
   }
 
   return { units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
+    topics, topicOf, topicMarks, topicProgress, markTopic, topicSummary,
     start, question, answer, result, log, correct, norm, shuffle };
 })();
 
@@ -17197,6 +17701,49 @@ ESP.Parts = (function(){
     })}</div>`;
   }
 
+  /* Konu listesi — her bölümün müfredatı.
+
+     İşaretler ÖLÇÜM DEĞİL BEYANDIR ve her satırda öyle görünür. Hiçbir
+     kapıyı açmaz, hiçbir kademeyi değiştirmez: kullanıcının kendi listesi. */
+  function topics(discId){
+    const list = ESP.Lesson.topics(discId);
+    if(!list.length) return K.Empty({ text:'Bu bölümde konu haritası yok.' });
+    const isaret = ESP.Lesson.topicMarks();
+    const acik = ESP.S.ui.topicOpen;
+
+    return html`<div class="topics">${map(list, t => {
+      const p = ESP.Lesson.topicProgress(t);
+      const on = acik === t.id;
+      return html`
+        <div class="${cls('topic', on && 'is-open')}">
+          <button class="topic__head" data-act="topic-open" data-id="${t.id}"
+            aria-expanded="${on ? 'true' : 'false'}">
+            <span class="topic__lv num">${(ESP.LEVEL_BY_RANK[t.level] || {}).short || ''}</span>
+            <span class="topic__body">
+              <b>${t.title}</b>
+              <span class="small muted">${t.goal}</span>
+            </span>
+            ${when(t.band, () => K.Badge({ label:t.band, tone:'muted', icon:false }))}
+            <span class="tiny dim">${p.marked}/${p.total}</span>
+          </button>
+          ${when(on, () => html`
+            <div class="topic__detail">
+              ${map(t.items, (it, i) => html`
+                <div class="topicrow">
+                  ${K.Checkbox({ label:it, checked:!!(isaret[t.id] || {})[i],
+                    act:'topic-mark', data:{ 'data-id':t.id, 'data-i':String(i) } })}
+                </div>`)}
+              <div class="row wrap mt-8">
+                ${cert('estimated')}
+                <span class="tiny dim">İşaretler beyandır: hiçbir kapıyı açmaz,
+                  kademeyi değiştirmez.</span>
+              </div>
+              ${when(t.source, () => html`<p class="tiny dim mt-8">Kaynak: ${t.source}</p>`)}
+            </div>`)}
+        </div>`;
+    })}</div>`;
+  }
+
   function practice(deck){
     const s = ESP.S.ui.practice;
     if(!s || s.deck !== deck){
@@ -17392,7 +17939,7 @@ ESP.Parts = (function(){
 
   return { cert, measure, avatar, discChip, radar, empty, desk, deskRx,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, units, practice,
-    proposalList, weekPlan, rx:rxList };
+    proposalList, weekPlan, rx:rxList, topics };
 
 })();
 
@@ -19640,6 +20187,15 @@ ESP.Palette = (function(){
    Uc alan: ad, odak, hangi dil. Gerisi zamanla dolar ve olmadan da sistem
    calisir. Sihirbaz atlanabilir; atlandiginda ekranlar bos kalmaz.
 
+   Bir hata burada uzun sure gorunmeden durdu: secim kartlari
+   `String(K.PickCard(...))` ile uretiliyordu. `html` sablonu icine giren duz
+   bir dize KACILIR (auto-escape) — yani kullanici kartlari degil,
+   `<button class="pickcard">…` diye HAM ETIKETLERI okuyordu.
+
+   Dogrusu `map()` yardimcisini kullanmak: o, isaretli (Raw) parcalari
+   oldugu gibi gecirir. Ders: `html` sablonuna giren her sey ya Raw'dur ya
+   kacilir; String() ikisinin arasindaki isareti siler.
+
    Dorduncu bir soru sonradan eklendi ve arayuzun tamamini degistiriyor:
    HANGI BOLUMLER. Kullanici burada calismayacagi disiplinleri kapatir;
    gezinme seridi, reçete, denge hesabi ve ofis masalari ona gore daralir.
@@ -19654,7 +20210,7 @@ window.ESP = window.ESP || {};
 ESP.Setup = (function(){
   const U = ESP.U;
   const K = ESP.C;
-  const { html } = ESP.h;
+  const { html, map, when } = ESP.h;
 
   /* Sihirbaz yalnizca ad yoksa gerekir. Odak ve dilin varsayilani vardir ve
      varsayilan dogru calisir — zorunlu soru sayisi bir tutulur. */
@@ -19721,9 +20277,11 @@ ESP.Setup = (function(){
           <p class="setup__lede">Dokunmazsan hepsi açık kalır. Kapattığın bölüm
             gezinmeden kalkar, reçeteye ve denge hesabına girmez — ama verisi
             silinmez, istediğin zaman Ayarlar'dan geri açarsın.</p>
-          <div class="setup__picks">${ESP.DISCIPLINES.map(d => String(K.PickCard({
-            label:d.label, meta:d.short, on:ESP.Mod.isOn(d.id),
-            act:'setup-mod', data:{ 'data-id':d.id } }))).join('')}</div>
+          <div class="setup__picks">${map(ESP.DISCIPLINES, d => K.PickCard({
+            label:d.label, meta:d.covers, on:ESP.Mod.isOn(d.id),
+            act:'setup-mod', data:{ 'data-id':d.id } }))}</div>
+          <p class="setup__hintline">Seçili olanlar ✓ işaretlidir. Dokununca
+            açılır ya da kapanır.</p>
         </div>
 
         <div class="setup__unlock">
@@ -20793,6 +21351,16 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
+        label:'KONULAR', hint:'topic',
+        meta:ESP.Lesson.topicSummary('lang').topics + ' konu · '
+          + ESP.Lesson.topicSummary('lang').items + ' madde',
+        note:'CEFR düzeylerine bağlı konu haritası. İşaretler beyandır: '
+           + 'hiçbir kapıyı açmaz, bandı değiştirmez.',
+        wide:true,
+        body:ESP.Parts.topics('lang'),
+      }),
+
+      K.Entry({
         label:'ÜNİTELER', hint:'unit',
         meta:ESP.Lesson.units('lang').length + ' ünite',
         note:'İlerleme SRS\'ten okunur: bir kartı «bilinen» yapan şey bir kez '
@@ -21021,6 +21589,7 @@ ESP.Screens.symposium = (function(){
     { id:'ekle',     label:'Ekle' },
     { id:'metinler', label:'Metinler' },
     { id:'deneyler', label:'Deneyler' },
+    { id:'ogren',     label:'Öğren' },
   ];
 
   /* --------------------------------------------------------------- deneyler
@@ -21267,6 +21836,23 @@ ESP.Screens.symposium = (function(){
     ];
   }
 
+  /* Konu haritası — bu bölümde nelerin çalışılacağı.
+
+     İşaretler beyandır ve öyle etiketlenir; hiçbir kapıyı açmaz. */
+  function topicRows(){
+    const ozet = ESP.Lesson.topicSummary('philo');
+    return [
+      K.Entry({
+        label:'KONULAR', hint:'topic',
+        meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
+        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
+           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
+        wide:true,
+        body:ESP.Parts.topics('philo'),
+      }),
+    ];
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
@@ -21275,6 +21861,7 @@ ESP.Screens.symposium = (function(){
       : tab === 'ekle' ? addRows()
       : tab === 'metinler' ? textRows()
       : tab === 'deneyler' ? experimentRows()
+      : tab === 'ogren' ? topicRows()
       : openRows();
 
     return K.Grid(html`
@@ -21984,6 +22571,16 @@ ESP.Screens.history = (function(){
       }),
 
       K.Entry({
+        label:'KONULAR', hint:'topic',
+        meta:ESP.Lesson.topicSummary('history').topics + ' konu · '
+          + ESP.Lesson.topicSummary('history').items + ' madde',
+        note:'Kronoloji, nedensellik, kaynak eleştirisi ve tarih yazımı. '
+           + 'İşaretler beyandır.',
+        wide:true,
+        body:ESP.Parts.topics('history'),
+      }),
+
+      K.Entry({
         label:'ÜNİTELER', hint:'unit',
         meta:ESP.Lesson.units('history').length + ' ünite',
         note:'Ünite bir dönemi, bölgeyi ya da alanı toplar. Eklenen kartlar '
@@ -22554,6 +23151,7 @@ ESP.Screens.studio = (function(){
     { id:'muzik',    label:'Müzik' },
     { id:'diksiyon', label:'Diksiyon' },
     { id:'kulak',    label:'Kulak' },
+    { id:'ogren',    label:'Öğren' },
     { id:'ilerleme', label:'İlerleme' },
   ];
 
@@ -22945,12 +23543,33 @@ ESP.Screens.studio = (function(){
     ];
   }
 
+  /* Konu haritasi — studyoda iki disiplin var, ikisinin de haritasi burada.
+
+     Isaretler beyandir ve oyle etiketlenir; hicbir kapiyi acmaz. */
+  function topicRows(){
+    return [
+      { id:'music', label:'MÜZİK KONULARI' },
+      { id:'diction', label:'DİKSİYON KONULARI' },
+    ].map(d => {
+      const ozet = ESP.Lesson.topicSummary(d.id);
+      return K.Entry({
+        label:d.label, hint:'topic',
+        meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
+        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
+           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
+        wide:true,
+        body:ESP.Parts.topics(d.id),
+      });
+    });
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
     const tab = S.ui.studioTab || 'muzik';
     const rows = tab === 'diksiyon' ? dictionRows()
       : tab === 'kulak' ? earRows()
+      : tab === 'ogren' ? topicRows()
       : tab === 'ilerleme' ? progressRows()
       : musicRows();
 
@@ -23153,6 +23772,7 @@ ESP.Screens.library = (function(){
     { id:'matris',    label:'Matris' },
     { id:'kaynaklar', label:'Kaynaklar' },
     { id:'yontem',    label:'Yöntem' },
+    { id:'ogren',     label:'Öğren' },
   ];
 
   /* ----------------------------------------------------------------- yöntem
@@ -23438,6 +24058,23 @@ ESP.Screens.library = (function(){
     ];
   }
 
+  /* Konu haritası — bu bölümde nelerin çalışılacağı.
+
+     İşaretler beyandır ve öyle etiketlenir; hiçbir kapıyı açmaz. */
+  function topicRows(){
+    const ozet = ESP.Lesson.topicSummary('reading');
+    return [
+      K.Entry({
+        label:'KONULAR', hint:'topic',
+        meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
+        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
+           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
+        wide:true,
+        body:ESP.Parts.topics('reading'),
+      }),
+    ];
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
@@ -23445,6 +24082,7 @@ ESP.Screens.library = (function(){
     const rows = tab === 'matris' ? matrixRows()
       : tab === 'kaynaklar' ? bookRows()
       : tab === 'yontem' ? methodRows()
+      : tab === 'ogren' ? topicRows()
       : noteRows();
 
     return K.Grid(html`
@@ -23597,6 +24235,7 @@ ESP.Screens.writing = (function(){
     { id:'taslaklar', label:'Taslaklar' },
     { id:'olcum',     label:'Ölçüm' },
     { id:'araclar',   label:'Araçlar' },
+    { id:'ogren',     label:'Öğren' },
   ];
 
   /* ---------------------------------------------------------------- araçlar
@@ -23814,12 +24453,30 @@ ESP.Screens.writing = (function(){
     ];
   }
 
+  /* Konu haritası — bu bölümde nelerin çalışılacağı.
+
+     İşaretler beyandır ve öyle etiketlenir; hiçbir kapıyı açmaz. */
+  function topicRows(){
+    const ozet = ESP.Lesson.topicSummary('writing');
+    return [
+      K.Entry({
+        label:'KONULAR', hint:'topic',
+        meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
+        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
+           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
+        wide:true,
+        body:ESP.Parts.topics('writing'),
+      }),
+    ];
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
     const tab = S.ui.writeTab || 'taslaklar';
     const rows = tab === 'olcum' ? measureRows()
       : tab === 'araclar' ? toolRows()
+      : tab === 'ogren' ? topicRows()
       : draftRows();
 
     return K.Grid(html`
@@ -24940,7 +25597,8 @@ ESP.Screens.profile = (function(){
           body:html`
             <div class="picks picks--disc">${map(ESP.DISCIPLINES, d => K.PickCard({
               label:d.label, on:ESP.Mod.isOn(d.id),
-              meta:(ESP.Mod.footprint(d.id) || '') + (ESP.Mod.isOn(d.id) ? '' : ' · kapalı'),
+              meta:d.covers + ' · ' + (ESP.Mod.footprint(d.id) || '')
+                + (ESP.Mod.isOn(d.id) ? '' : ' · KAPALI'),
               act:'toggle-mod', data:{ 'data-id':d.id } }))}</div>
             <p class="small muted mt-10">En az bir bölüm açık kalmak zorunda:
               hepsi kapalı bir ESP, açılış ekranından ibaret bir kabuktur.</p>`,
@@ -26344,6 +27002,17 @@ ESP.App = (function(){
     },
 
     /* --- öğren ve pratik: iki ekranda ortak --- */
+    async 'topic-open'(el){
+      S.ui.topicOpen = S.ui.topicOpen === el.dataset.id ? null : el.dataset.id;
+      render();
+    },
+
+    /* Beyan bir ölçüm değildir: prefs içinde durur, hiçbir kapıyı açmaz. */
+    async 'topic-mark'(el){
+      await ESP.Lesson.markTopic(el.dataset.id, el.dataset.i);
+      render();
+    },
+
     async 'unit-open'(el){
       S.ui.unitOpen = S.ui.unitOpen === el.dataset.id ? null : el.dataset.id;
       render();

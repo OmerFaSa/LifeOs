@@ -25,6 +25,7 @@ ESP.Screens.symposium = (function(){
     { id:'ekle',     label:'Ekle' },
     { id:'metinler', label:'Metinler' },
     { id:'deneyler', label:'Deneyler' },
+    { id:'ogren',     label:'Öğren' },
   ];
 
   /* --------------------------------------------------------------- deneyler
@@ -271,6 +272,23 @@ ESP.Screens.symposium = (function(){
     ];
   }
 
+  /* Konu haritası — bu bölümde nelerin çalışılacağı.
+
+     İşaretler beyandır ve öyle etiketlenir; hiçbir kapıyı açmaz. */
+  function topicRows(){
+    const ozet = ESP.Lesson.topicSummary('philo');
+    return [
+      K.Entry({
+        label:'KONULAR', hint:'topic',
+        meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
+        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
+           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
+        wide:true,
+        body:ESP.Parts.topics('philo'),
+      }),
+    ];
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
@@ -279,6 +297,7 @@ ESP.Screens.symposium = (function(){
       : tab === 'ekle' ? addRows()
       : tab === 'metinler' ? textRows()
       : tab === 'deneyler' ? experimentRows()
+      : tab === 'ogren' ? topicRows()
       : openRows();
 
     return K.Grid(html`

@@ -486,6 +486,16 @@ ESP.Screens.history = (function(){
       }),
 
       K.Entry({
+        label:'KONULAR', hint:'topic',
+        meta:ESP.Lesson.topicSummary('history').topics + ' konu · '
+          + ESP.Lesson.topicSummary('history').items + ' madde',
+        note:'Kronoloji, nedensellik, kaynak eleştirisi ve tarih yazımı. '
+           + 'İşaretler beyandır.',
+        wide:true,
+        body:ESP.Parts.topics('history'),
+      }),
+
+      K.Entry({
         label:'ÜNİTELER', hint:'unit',
         meta:ESP.Lesson.units('history').length + ' ünite',
         note:'Ünite bir dönemi, bölgeyi ya da alanı toplar. Eklenen kartlar '

@@ -194,27 +194,37 @@ ESP.CERTAINTY = {
    `weight` EHS'deki D_i katsayisidir: butun disiplinler esit degildir, ama
    fark KUCUK tutulur. Buyuk fark, dusuk katsayili disiplini gorunmez yapar
    ve kullanici onu birakir — oysa denge sistemin amaci. */
+/* `covers` kurulum ekranindaki secim kartinda gorunur: bir disiplini
+   acmadan once ne yapacagini bilmek gerekir. Uzun `note` orada okunmuyordu;
+   uc-dort kelime okunuyor. */
 ESP.DISCIPLINES = [
   { id:'lang',    label:'Yabancı Dil',  short:'Dil',     weight:1.0, agent:'polyglot',
     unit:'dakika', route:'lang',
+    covers:'Kelime kartları, aralıklı tekrar, dilbilgisi, dinleme',
     note:'Shadowing, üretim ve aralıklı tekrar. Hacmi dakika, kalitesi retansiyon ölçer.' },
   { id:'philo',   label:'Felsefe',      short:'Felsefe', weight:1.1, agent:'socrates',
     unit:'dakika', route:'symposium',
+    covers:'Tez kurma, itiraz, safsata denetimi, düşünce deneyi',
     note:'Primer metin okuma ve argüman kurma. Tez yazılmadan okuma tamamlanmış sayılmaz.' },
   { id:'music',   label:'Müzik / Gitar', short:'Müzik',  weight:1.0, agent:'maestro',
     unit:'dakika', route:'studio',
+    covers:'Metronom, temiz tempo, kulak eğitimi, repertuar',
     note:'Metronomlu teknik çalışma ve repertuar. Hacmi dakika, kalitesi temiz BPM.' },
   { id:'diction', label:'Diksiyon',     short:'Diksiyon', weight:0.9, agent:'demosthenes',
     unit:'dakika', route:'studio',
+    covers:'Nefes, artikülasyon, tekerleme, konuşma hızı',
     note:'Artikülasyon, nefes ve vurgu. En kolay ertelenen disiplin; ofis bunu izler.' },
   { id:'reading', label:'Derin Okuma',  short:'Okuma',   weight:1.1, agent:'aristoteles',
     unit:'dakika', route:'library',
+    covers:'Atomik not, kavram bağı, sentopik okuma',
     note:'Atomik not ve sentopik bağ. Sayfa değil BAĞLANTI biriktirir.' },
   { id:'writing', label:'Yazı',         short:'Yazı',    weight:1.0, agent:'montaigne',
     unit:'dakika', route:'writing',
+    covers:'Taslak, revizyon, okunabilirlik, retorik',
     note:'Taslak üretimi ve revizyon. Hacmi kelime, kalitesi okunabilirlik ölçer.' },
   { id:'history', label:'Tarih',        short:'Tarih',   weight:1.1, agent:'herodot',
     unit:'dakika', route:'history',
+    covers:'Kronoloji, neden zinciri, kaynak eleştirisi',
     note:'Kronoloji, nedensellik ve kaynak eleştirisi. Olay sayısı iskelet, '
        + 'zincir ve kaynak ettir.' },
 ];

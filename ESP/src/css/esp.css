@@ -832,3 +832,29 @@
 @media (max-width:560px){
   .topclock__disc{ display:none; }
 }
+
+/* Kurulum seçim kartları: iki sütun, işaretli olan belirgin.
+   «Seçili mi değil mi» sorusu bir saniyede cevaplanmalı. */
+.setup__picks .pickcard{ align-items:flex-start; }
+.setup__hintline{
+  margin:var(--sp-2) 0 0; font-size:var(--fs-xs); color:var(--text-3);
+}
+
+/* Konu haritası: kapalıyken tek satır, açıkken işaretlenebilir liste. */
+.topics{ display:flex; flex-direction:column; }
+.topic{ border-bottom:1px solid var(--rule); }
+.topic:last-child{ border-bottom:0; }
+.topic__head{
+  display:flex; width:100%; gap:var(--sp-3); align-items:baseline;
+  padding:var(--sp-3) 0; background:none; border:0; font:inherit;
+  color:inherit; text-align:left; cursor:pointer;
+}
+.topic__head:hover b{ text-decoration:underline; }
+.topic__lv{ flex:0 0 2.5em; text-align:center; color:var(--text-3);
+  font-size:var(--fs-sm); letter-spacing:.06em; }
+.topic__body{ flex:1 1 20ch; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.topic__detail{ padding:0 0 var(--sp-3) calc(2.5em + var(--sp-3)); }
+.topicrow{ padding:2px 0; }
+@media (max-width:520px){
+  .topic__detail{ padding-left:0; }
+}

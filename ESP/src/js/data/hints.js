@@ -171,4 +171,6 @@ ESP.HINTS = {
     more:'Takvim DEĞİLDİR: «salı 19:00\'da gitar» demek sistemin işi değil. Sırayı haftalık rota verir, plan onu güne dağıtır — yeni bir karar üretmez. Saatini sen seçersin.' },
   'ladder':{ t:'Merdiven', b:'Sıfırdan üstatlığa beş kademe ve ölçülebilir kapılar.',
     more:'Kademe kişiye değil ÜRETİME verilir; üretim durursa kademe de durur. Merdiven ardışıktır: alttaki kapı atlanarak üsttekine geçilmez, çünkü atlanan kapı ileride üstüne kurulan her şeyi çökertir. Süre tahmini yoktur — «üç ayda usta olursun» sonuç garantisi yasağına girer.' },
+  'topic':{ t:'Konu haritası', b:'Bu bölümde nelerin çalışılacağı.',
+    more:'Ünite KARTA döner, konu dönmez: bir dil ünitesi on kelimeyi desteye ekler ve ilerlemesi SRS\'ten okunur; «barre akorlar» ya da «kaynak eleştirisi» ise çalışılacak bir konudur ve ölçüsü kart değildir. Bu yüzden konu işaretleri ÖLÇÜM DEĞİL BEYANDIR: hiçbir kapıyı açmaz, kademeyi değiştirmez, hiçbir hesaba girmez. Çerçeveler uydurulmadı — CEFR (2020 Companion Volume), klasik retoriğin beş kanonu, Türkçe diksiyon başlıkları, yaygın gitar müfredatı ve Adler\'in okuma düzeyleri. Kaynağı olan konuda kaynak satırı yazar.' },
 };

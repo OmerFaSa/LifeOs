@@ -22,6 +22,7 @@ ESP.Screens.library = (function(){
     { id:'matris',    label:'Matris' },
     { id:'kaynaklar', label:'Kaynaklar' },
     { id:'yontem',    label:'Yöntem' },
+    { id:'ogren',     label:'Öğren' },
   ];
 
   /* ----------------------------------------------------------------- yöntem
@@ -307,6 +308,23 @@ ESP.Screens.library = (function(){
     ];
   }
 
+  /* Konu haritası — bu bölümde nelerin çalışılacağı.
+
+     İşaretler beyandır ve öyle etiketlenir; hiçbir kapıyı açmaz. */
+  function topicRows(){
+    const ozet = ESP.Lesson.topicSummary('reading');
+    return [
+      K.Entry({
+        label:'KONULAR', hint:'topic',
+        meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
+        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
+           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
+        wide:true,
+        body:ESP.Parts.topics('reading'),
+      }),
+    ];
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
@@ -314,6 +332,7 @@ ESP.Screens.library = (function(){
     const rows = tab === 'matris' ? matrixRows()
       : tab === 'kaynaklar' ? bookRows()
       : tab === 'yontem' ? methodRows()
+      : tab === 'ogren' ? topicRows()
       : noteRows();
 
     return K.Grid(html`

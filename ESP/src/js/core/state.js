@@ -102,6 +102,7 @@ ESP.S = {
     practiceOrder:null,
     rxOpen:null,            // acik egzersiz (gorev metni katli durur)
     unitOpen:null,
+    topicOpen:null,
     histTab:'serit',        // serit | olaylar | kaynaklar | zincir | calisma
     eventOpen:null,
     sourceOpen:null,

@@ -804,6 +804,17 @@ ESP.App = (function(){
     },
 
     /* --- öğren ve pratik: iki ekranda ortak --- */
+    async 'topic-open'(el){
+      S.ui.topicOpen = S.ui.topicOpen === el.dataset.id ? null : el.dataset.id;
+      render();
+    },
+
+    /* Beyan bir ölçüm değildir: prefs içinde durur, hiçbir kapıyı açmaz. */
+    async 'topic-mark'(el){
+      await ESP.Lesson.markTopic(el.dataset.id, el.dataset.i);
+      render();
+    },
+
     async 'unit-open'(el){
       S.ui.unitOpen = S.ui.unitOpen === el.dataset.id ? null : el.dataset.id;
       render();

@@ -442,6 +442,49 @@ ESP.Parts = (function(){
     })}</div>`;
   }
 
+  /* Konu listesi — her bölümün müfredatı.
+
+     İşaretler ÖLÇÜM DEĞİL BEYANDIR ve her satırda öyle görünür. Hiçbir
+     kapıyı açmaz, hiçbir kademeyi değiştirmez: kullanıcının kendi listesi. */
+  function topics(discId){
+    const list = ESP.Lesson.topics(discId);
+    if(!list.length) return K.Empty({ text:'Bu bölümde konu haritası yok.' });
+    const isaret = ESP.Lesson.topicMarks();
+    const acik = ESP.S.ui.topicOpen;
+
+    return html`<div class="topics">${map(list, t => {
+      const p = ESP.Lesson.topicProgress(t);
+      const on = acik === t.id;
+      return html`
+        <div class="${cls('topic', on && 'is-open')}">
+          <button class="topic__head" data-act="topic-open" data-id="${t.id}"
+            aria-expanded="${on ? 'true' : 'false'}">
+            <span class="topic__lv num">${(ESP.LEVEL_BY_RANK[t.level] || {}).short || ''}</span>
+            <span class="topic__body">
+              <b>${t.title}</b>
+              <span class="small muted">${t.goal}</span>
+            </span>
+            ${when(t.band, () => K.Badge({ label:t.band, tone:'muted', icon:false }))}
+            <span class="tiny dim">${p.marked}/${p.total}</span>
+          </button>
+          ${when(on, () => html`
+            <div class="topic__detail">
+              ${map(t.items, (it, i) => html`
+                <div class="topicrow">
+                  ${K.Checkbox({ label:it, checked:!!(isaret[t.id] || {})[i],
+                    act:'topic-mark', data:{ 'data-id':t.id, 'data-i':String(i) } })}
+                </div>`)}
+              <div class="row wrap mt-8">
+                ${cert('estimated')}
+                <span class="tiny dim">İşaretler beyandır: hiçbir kapıyı açmaz,
+                  kademeyi değiştirmez.</span>
+              </div>
+              ${when(t.source, () => html`<p class="tiny dim mt-8">Kaynak: ${t.source}</p>`)}
+            </div>`)}
+        </div>`;
+    })}</div>`;
+  }
+
   function practice(deck){
     const s = ESP.S.ui.practice;
     if(!s || s.deck !== deck){
@@ -637,6 +680,6 @@ ESP.Parts = (function(){
 
   return { cert, measure, avatar, discChip, radar, empty, desk, deskRx,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, units, practice,
-    proposalList, weekPlan, rx:rxList };
+    proposalList, weekPlan, rx:rxList, topics };
 
 })();

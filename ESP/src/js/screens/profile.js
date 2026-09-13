@@ -62,7 +62,8 @@ ESP.Screens.profile = (function(){
           body:html`
             <div class="picks picks--disc">${map(ESP.DISCIPLINES, d => K.PickCard({
               label:d.label, on:ESP.Mod.isOn(d.id),
-              meta:(ESP.Mod.footprint(d.id) || '') + (ESP.Mod.isOn(d.id) ? '' : ' · kapalı'),
+              meta:d.covers + ' · ' + (ESP.Mod.footprint(d.id) || '')
+                + (ESP.Mod.isOn(d.id) ? '' : ' · KAPALI'),
               act:'toggle-mod', data:{ 'data-id':d.id } }))}</div>
             <p class="small muted mt-10">En az bir bölüm açık kalmak zorunda:
               hepsi kapalı bir ESP, açılış ekranından ibaret bir kabuktur.</p>`,

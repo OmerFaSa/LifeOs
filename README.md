@@ -65,9 +65,9 @@ node tools/ledgercheck.js    # defter düzenini denetler (yalnız SPİ)
 ```
 
 Bir denetim geçtiğinde de **sayı gösterir**: hiçbir şey ölçmeyen bir betik de
-«geçti» yazar. ESP'nin son koşumu: 423 birim testi, 14 ekran ve 75 sekmelik
-duman testi, 1848 kontrast ölçümü, 390 pikselde 89 yer ve ağır veriyle
-65 ms'lik en ağır ekran.
+«geçti» yazar. ESP'nin son koşumu: 451 birim testi, 14 ekran ve 84 sekmelik
+duman testi, 1848 kontrast ölçümü, 390 pikselde 98 yer ve ağır veriyle
+76 ms'lik en ağır ekran.
 
 ESP ayrıca bir **merdiven** taşır: yedi disiplinin her birinde sıfırdan
 üstatlığa beş kademe, her kademede ölçülebilir kapılar ve o kapıya çalışan

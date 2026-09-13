@@ -409,6 +409,16 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
+        label:'KONULAR', hint:'topic',
+        meta:ESP.Lesson.topicSummary('lang').topics + ' konu · '
+          + ESP.Lesson.topicSummary('lang').items + ' madde',
+        note:'CEFR düzeylerine bağlı konu haritası. İşaretler beyandır: '
+           + 'hiçbir kapıyı açmaz, bandı değiştirmez.',
+        wide:true,
+        body:ESP.Parts.topics('lang'),
+      }),
+
+      K.Entry({
         label:'ÜNİTELER', hint:'unit',
         meta:ESP.Lesson.units('lang').length + ' ünite',
         note:'İlerleme SRS\'ten okunur: bir kartı «bilinen» yapan şey bir kez '

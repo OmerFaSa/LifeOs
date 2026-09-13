@@ -483,7 +483,7 @@ src/
       voice.js speak.js talk.js
     screens/            12 ekran
     app.js              kabuk: gezinme, olay dağıtımı, açılış
-  tests/                151 test, 7 paket
+  tests/                451 test, 20 paket
 tools/
   runtests.js           birim testleri (başsız tarayıcı)
   smoke.js              duman testi: 12 ekranı hem kaynakta hem dist'te gezer
@@ -501,7 +501,7 @@ paket. Playwright yalnızca test betikleri için gerekir.
 ```bash
 python devserver.py          # http://localhost:4193
 python build.py              # dist/esp.html üretir
-node tools/runtests.js       # 151 birim testi
+node tools/runtests.js       # 451 birim testi
 node tools/smoke.js          # gerçek uygulamayı gez
 node tools/a11ycheck.js      # erişilebilirlik
 node tools/palettecheck.js   # kontrast
@@ -513,13 +513,13 @@ node tools/palettecheck.js   # kontrast
 
 | Ölçüm | Sonuç |
 |---|---|
-| Birim testi | **423/423** geçiyor |
-| Duman testi | temiz — 14 ekran, **75 sekme**, kaynak + `dist/esp.html` |
+| Birim testi | **451/451** geçiyor |
+| Duman testi | temiz — 14 ekran, **84 sekme**, kaynak + `dist/esp.html` |
 | Erişilebilirlik | temiz (4 bilinen eksik izin listesinde) |
 | Kontrast | **1848 ölçüm**, hepsi AA — en dar pay 4,52 (asgari 4,5) |
-| Çizim maliyeti | ağır veriyle en ağır ekran **65 ms** (bütçe 100) |
-| Telefon düzeni | 390 pikselde **89 yer**: taşma yok, hedefler ≥ 24 px |
-| Tek dosya dağıtım | ~1,2 MB, 65 js modülü |
+| Çizim maliyeti | ağır veriyle en ağır ekran **76 ms** (bütçe 100) |
+| Telefon düzeni | 390 pikselde **98 yer**: taşma yok, hedefler ≥ 24 px |
+| Tek dosya dağıtım | ~1,2 MB, 67 js modülü |
 
 Duman testi üç şeyi daha denetler ve üçü de ölçülmüş birer olaydan doğdu:
 **metinde sızıntı** (çizilen metinde «undefined», «NaN», «[object Object]»),

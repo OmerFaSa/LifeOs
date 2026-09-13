@@ -7,6 +7,15 @@
    Uc alan: ad, odak, hangi dil. Gerisi zamanla dolar ve olmadan da sistem
    calisir. Sihirbaz atlanabilir; atlandiginda ekranlar bos kalmaz.
 
+   Bir hata burada uzun sure gorunmeden durdu: secim kartlari
+   `String(K.PickCard(...))` ile uretiliyordu. `html` sablonu icine giren duz
+   bir dize KACILIR (auto-escape) — yani kullanici kartlari degil,
+   `<button class="pickcard">…` diye HAM ETIKETLERI okuyordu.
+
+   Dogrusu `map()` yardimcisini kullanmak: o, isaretli (Raw) parcalari
+   oldugu gibi gecirir. Ders: `html` sablonuna giren her sey ya Raw'dur ya
+   kacilir; String() ikisinin arasindaki isareti siler.
+
    Dorduncu bir soru sonradan eklendi ve arayuzun tamamini degistiriyor:
    HANGI BOLUMLER. Kullanici burada calismayacagi disiplinleri kapatir;
    gezinme seridi, reçete, denge hesabi ve ofis masalari ona gore daralir.
@@ -21,7 +30,7 @@ window.ESP = window.ESP || {};
 ESP.Setup = (function(){
   const U = ESP.U;
   const K = ESP.C;
-  const { html } = ESP.h;
+  const { html, map, when } = ESP.h;
 
   /* Sihirbaz yalnizca ad yoksa gerekir. Odak ve dilin varsayilani vardir ve
      varsayilan dogru calisir — zorunlu soru sayisi bir tutulur. */
@@ -88,9 +97,11 @@ ESP.Setup = (function(){
           <p class="setup__lede">Dokunmazsan hepsi açık kalır. Kapattığın bölüm
             gezinmeden kalkar, reçeteye ve denge hesabına girmez — ama verisi
             silinmez, istediğin zaman Ayarlar'dan geri açarsın.</p>
-          <div class="setup__picks">${ESP.DISCIPLINES.map(d => String(K.PickCard({
-            label:d.label, meta:d.short, on:ESP.Mod.isOn(d.id),
-            act:'setup-mod', data:{ 'data-id':d.id } }))).join('')}</div>
+          <div class="setup__picks">${map(ESP.DISCIPLINES, d => K.PickCard({
+            label:d.label, meta:d.covers, on:ESP.Mod.isOn(d.id),
+            act:'setup-mod', data:{ 'data-id':d.id } }))}</div>
+          <p class="setup__hintline">Seçili olanlar ✓ işaretlidir. Dokununca
+            açılır ya da kapanır.</p>
         </div>
 
         <div class="setup__unlock">

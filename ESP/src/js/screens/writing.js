@@ -22,6 +22,7 @@ ESP.Screens.writing = (function(){
     { id:'taslaklar', label:'Taslaklar' },
     { id:'olcum',     label:'Ölçüm' },
     { id:'araclar',   label:'Araçlar' },
+    { id:'ogren',     label:'Öğren' },
   ];
 
   /* ---------------------------------------------------------------- araçlar
@@ -239,12 +240,30 @@ ESP.Screens.writing = (function(){
     ];
   }
 
+  /* Konu haritası — bu bölümde nelerin çalışılacağı.
+
+     İşaretler beyandır ve öyle etiketlenir; hiçbir kapıyı açmaz. */
+  function topicRows(){
+    const ozet = ESP.Lesson.topicSummary('writing');
+    return [
+      K.Entry({
+        label:'KONULAR', hint:'topic',
+        meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
+        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
+           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
+        wide:true,
+        body:ESP.Parts.topics('writing'),
+      }),
+    ];
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
     const tab = S.ui.writeTab || 'taslaklar';
     const rows = tab === 'olcum' ? measureRows()
       : tab === 'araclar' ? toolRows()
+      : tab === 'ogren' ? topicRows()
       : draftRows();
 
     return K.Grid(html`

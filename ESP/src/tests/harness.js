@@ -203,7 +203,7 @@ ESP.Test = (function(){
       histTab:'serit', eventOpen:null, sourceOpen:null, chainOpen:null,
       histEra:'all', histQuery:'', curDisc:null, ladderTab:'ozet', expField:'all',
       deskTab:{}, deskOpen:{}, assetOpen:null,
-      practice:null, practiceShown:false, practiceOrder:null, rxOpen:null, unitOpen:null,
+      practice:null, practiceShown:false, practiceOrder:null, rxOpen:null, unitOpen:null, topicOpen:null,
       officeAgent:'patron', officeDesk:null, officePerAgent:false,
       meetingAgenda:0, meetingOpen:null, guideTab:'kullanim',
       profileOpen:null, quickOpen:false,

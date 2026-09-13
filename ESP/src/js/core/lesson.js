@@ -133,6 +133,70 @@ ESP.Lesson = (function(){
     return { ok:true, added:eklenen, skipped:atlanan };
   }
 
+  /* --------------------------------------------------------------- konular
+
+     Ünite KARTA döner, konu DÖNMEZ. Bir dil ünitesi on kelimeyi desteye
+     ekler ve ilerlemesi SRS'ten okunur; «barre akorlar» ya da «kaynak
+     eleştirisi» ise çalışılacak bir konudur ve ölçüsü kart değildir.
+
+     Bu yüzden konu ilerlemesi ÖLÇÜM DEĞİL BEYANDIR ve her yerde öyle
+     etiketlenir: kullanıcı «bunu çalıştım» der, sistem doğrulayamaz.
+     Beyanı ölçüm gibi göstermek, retansiyon sayısını uydurmakla aynı şey
+     olurdu — bu yüzden beyan hiçbir kapıyı açmaz, hiçbir kademeyi
+     değiştirmez ve hiçbir hesaba girmez. Yaptığı tek şey kullanıcının
+     kendi listesini işaretleyebilmesidir. */
+
+  function topics(discId){
+    return ((ESP.TOPICS || {})[discId] || []).map(function(t){
+      return Object.assign({ disc:discId }, t);
+    });
+  }
+
+  function topicOf(discId, id){
+    return topics(discId).filter(function(t){ return t.id === id; })[0] || null;
+  }
+
+  function topicMarks(){
+    return ((S.prefs && S.prefs.topics) || {});
+  }
+
+  function topicProgress(topic){
+    if(!topic) return { total:0, marked:0, cert:'missing' };
+    const isaret = topicMarks()[topic.id] || {};
+    const n = (topic.items || []).length;
+    const k = Object.keys(isaret).filter(function(i){ return isaret[i]; }).length;
+    return {
+      total:n, marked:Math.min(k, n),
+      /* Beyan bir olcum degildir: etiketi DAIMA 'tahmin'. */
+      cert:k ? 'estimated' : 'missing',
+      pct:n ? Math.round(100 * Math.min(k, n) / n) : 0,
+    };
+  }
+
+  async function markTopic(topicId, index){
+    const prefs = Object.assign({}, S.prefs || {});
+    prefs.topics = Object.assign({}, prefs.topics || {});
+    const cur = Object.assign({}, prefs.topics[topicId] || {});
+    if(cur[index]) delete cur[index]; else cur[index] = true;
+    prefs.topics[topicId] = cur;
+    await ESP.Model.savePrefs(prefs);
+    return { ok:true, marked:!!cur[index] };
+  }
+
+  /* Bir disiplinin konu ozeti — ekran basligi ve ders sekmesi icin. */
+  function topicSummary(discId){
+    const list = topics(discId);
+    if(!list.length) return { topics:0, items:0, marked:0, cert:'missing' };
+    let madde = 0, isaretli = 0;
+    list.forEach(function(t){
+      const p = topicProgress(t);
+      madde += p.total; isaretli += p.marked;
+    });
+    return { topics:list.length, items:madde, marked:isaretli,
+      cert:isaretli ? 'estimated' : 'missing',
+      pct:madde ? Math.round(100 * isaretli / madde) : 0 };
+  }
+
   /* --------------------------------------------------------------- pratik */
 
   function norm(s){
@@ -317,5 +381,6 @@ ESP.Lesson = (function(){
   }
 
   return { units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
+    topics, topicOf, topicMarks, topicProgress, markTopic, topicSummary,
     start, question, answer, result, log, correct, norm, shuffle };
 })();
