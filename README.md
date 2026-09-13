@@ -56,7 +56,7 @@ node tools/runtests.js       # birim testleri
 SPİ ve ESP ayrıca gerçek uygulamayı gezen denetimler taşır:
 
 ```bash
-node tools/smoke.js          # ekranları ve sekmeleri gezer, akışları dener
+node tools/a11ycheck.js      # erişilebilirlik — çizilen sayfadan          # ekranları ve sekmeleri gezer, akışları dener
 node tools/a11ycheck.js      # erişilebilirlik — çizilen sayfadan
 node tools/palettecheck.js   # bütün paletlerde kontrastı ölçer
 node tools/perfcheck.js      # ağır veriyle çizim maliyeti (yalnız ESP)
@@ -65,9 +65,25 @@ node tools/ledgercheck.js    # defter düzenini denetler (yalnız SPİ)
 ```
 
 Bir denetim geçtiğinde de **sayı gösterir**: hiçbir şey ölçmeyen bir betik de
-«geçti» yazar. ESP'nin son koşumu: 451 birim testi, 14 ekran ve 84 sekmelik
+«geçti» yazar. ESP'nin son koşumu: 501 birim testi, 14 ekran ve 85 sekmelik
 duman testi, 1848 kontrast ölçümü, 390 pikselde 98 yer ve ağır veriyle
-76 ms'lik en ağır ekran.
+76 ms'lik en ağır ekran. AYS 929 birim testi ve 18 ekran / 16 sekmelik duman
+testi, SPİ 676 birim testi ve 12 ekranlık duman testi ile koşar.
+
+Üç sistem de artık **kendini denetleyen bir katman** taşır — dışarıdan gelen
+eleştirilerin koda dönüşmüş hâli:
+
+| Katman | Ne sorar | Nerede |
+|---|---|---|
+| **Sürtünme** | Sistemi yönetmek, çalışmanın yerine mi geçiyor? | AYS + ESP `core/friction.js` |
+| **Goodhart nöbetçisi** | Çaba arttı da sonuç yerinde mi saydı? | AYS + ESP `core/goodhart.js` |
+| **Kalibrasyon defteri** | Sistem kapalıyken de kendi durumunu biliyor musun? | AYS + ESP `core/calib.js` |
+| **Kanıt derecesi** | Bu eşik nereden geliyor ve ne söylemeye yetkili? | SPİ `core/evidence.js` |
+| **Kör nokta** | Bu merdiven neyi ölçemez? | ESP `data/curriculum.js` |
+
+Üçü de kötü çıkabilir; bu bir arıza değil, ölçüldüğü için görünür olmasıdır.
+Ayrıntı: [`AYS/src/DURUSTLUK.md`](AYS/src/DURUSTLUK.md), ESP ve SPİ mimari
+belgelerinin ilgili bölümleri.
 
 ESP ayrıca bir **merdiven** taşır: yedi disiplinin her birinde sıfırdan
 üstatlığa beş kademe, her kademede ölçülebilir kapılar ve o kapıya çalışan

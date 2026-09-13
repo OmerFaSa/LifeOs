@@ -989,6 +989,38 @@ R.App = (function(){
      yerine kapatmak daha durust: kullanici nereye tikladigini bilir. */
   window.addEventListener('resize', () => { if(isAppearanceOpen()) closeAppearance(); });
 
+  /* ------------------------------------------------------- sürtünme ölçümü
+
+     Sistemin kendi maliyeti de ölçülür (core/friction.js): etkileşim ve
+     görünürlük olayları sayaca dokunur, sekme arkaya gidince zincir kesilir.
+     Süreli deneme oturumu açıkken geçen süre SINAVDIR, yönetim değil.
+
+     Depoya yazma seyrektir: sürtünmeyi ölçerken sürtünme üretmemek gerekir. */
+  (function wireFriction(){
+    if(!R.Friction) return;
+    let sonYazim = 0;
+    const YAZIM_ARALIK = 30000;
+
+    function dokun(){
+      if(!S.ready) return;
+      R.Friction.tick();
+      const now = Date.now();
+      if(now - sonYazim > YAZIM_ARALIK){
+        sonYazim = now;
+        R.Friction.save();
+      }
+    }
+    ['click', 'keydown', 'input', 'scroll', 'pointerdown'].forEach(t => {
+      document.addEventListener(t, dokun, { passive:true, capture:true });
+    });
+    document.addEventListener('visibilitychange', () => {
+      if(document.hidden){ R.Friction.blur(); R.Friction.save(); }
+      else R.Friction.tick();
+    });
+    window.addEventListener('blur', () => R.Friction.blur());
+    window.addEventListener('pagehide', () => { R.Friction.blur(); R.Friction.save(); });
+  })();
+
   /* ---------- depolama sagligi ---------- */
   let lastErrorToastAt = 0;
   function wireStoreErrors(){

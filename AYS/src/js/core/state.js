@@ -20,6 +20,8 @@ R.S = {
   plan:null,       // uretilmis kisisel program
   calendar:[],     // tatil / okul sinavi / yogun gun istisnalari
   sessions:[],     // sureli deneme oturumlari (soru bazli sure dahil)
+  usage:null,      // surtunme olcumu (core/friction.js)
+  forecasts:[],    // kalibrasyon defteri (core/calib.js)
   profiles:[],     // cihazdaki profiller (cok kullanicili kullanim)
   videoNotes:[],   // izlenen ders kaydi + zaman damgali notlar
   solved:[],       // cozulen sorular: metin/fotograf, anlatim, konu, zorluk
@@ -1144,6 +1146,9 @@ R.Model = (function(){
     R.S.profiles = profiles;
 
     await migrate();
+
+    if(R.Friction) await R.Friction.load();
+    if(R.Calib) await R.Calib.load();
 
     for(const s of R.SUBJECTS){ await ensureTopics(s.id); }
 

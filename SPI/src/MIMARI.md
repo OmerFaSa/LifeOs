@@ -425,7 +425,55 @@ node tools/smoke.js          # gerçek uygulamayı gez
 
 ---
 
-## 7. Yol haritası durumu
+## 7. Kanıt katmanı — eşikler nereden geliyor
+
+Dışarıdan gelen en keskin eleştiri tek cümleydi:
+
+> **«Deterministik olmak, bilimsel olarak doğru olmak anlamına gelmez.»**
+
+Doğruydu. SPİ'nin kural motoru baştan beri sağlamdı — model sayı üretmez,
+hesabı kural yapar, çıktı denetlenir. Ama kuralın **kendisi** nereden
+geliyordu? Bir eşik kodda ne kadar kesin yazılırsa yazılsın, eşiğin kendisi
+yanlış seçilmişse sistem son derece güvenilir görünen yanlış bir sonuç
+üretir. Kesinlik görünümü, kesinliğin yerine geçer.
+
+Cevap: **her eşik kendi kaynağını taşır ve kaynağının derecesi, o eşiğin ne
+kadar güçlü konuşabileceğini belirler.**
+
+| Derece | Ne demek | Ne yapabilir |
+|---|---|---|
+| `guideline` | Adı konmuş bir klinik kılavuzun karar eşiği | Yönlendirebilir |
+| `consensus` | Laboratuvar ve klinik pratikte yaygın uzlaşı | Yönlendirebilir |
+| `observational` | Gözlemsel çalışmalardan gelen bir ilişki | Yalnızca gözlem bildirir |
+| `convention` | Bu sistemin pratik sebeplerle seçtiği sayı | Yalnızca gözlem bildirir |
+
+Üç kural `core/evidence.js`'te uygulanır, `tests/evidence.test.js`'te denetlenir:
+
+1. **Kaynağı olmayan eşik yönlendiremez.** Bilinmeyen kaynak, iyi kaynak
+   değildir — "ölçülmemiş veri sıfır değildir" kuralının kanıt tarafındaki
+   karşılığı.
+2. **Kırmızı bayrak en az `consensus` olmak zorundadır.** Sistemin en sert
+   cümlesi («hekime başvur») en zayıf dayanaktan çıkamaz. `SP.Ev.audit()`
+   bunu tarar; testler denetimin **boş** dönmesini bekler.
+3. **Derece gizlenmez.** Arayüz eşiği gösteriyorsa derecesini de gösterir
+   (`screens/labs.js` → «Bu eşikler nereden geliyor?»).
+
+**Zayıf dayanak cümleyi kısar, sessizce değil.** `SP.Ev.temper()` bir
+direktifi gözleme indirir ve *neden* indirdiğini yazar. `core/nutri.js`'te
+hedef bandından gelen bir düzeltme — bantların bir kısmı bu sistemin
+seçimidir — en fazla **%20** ile sınırlanır ve gerekçeye sebebi eklenir.
+Sessizce zayıflatmak, kullanıcıyı yanıltmanın başka bir biçimidir.
+
+**Denetim ilk koşumunda gerçek bir hata buldu.** HOMA-IR, TyG, TG/HDL,
+De Ritis ve eAG birer **araştırma göstergesidir** — evrensel karar eşikleri
+yoktur — ama kırmızı bayrak taşıyorlardı. Bayraklar kaldırıldı.
+
+Kaynak yazarken **uydurma yoktur**: emin olunmayan her eşik açıkça
+`convention` derecesine yazılır. Uydurulmuş bir atıf, atıfsız bir eşikten
+kötüdür. Boşluklar da bir ölçümdür; `SP.Ev.coverage()` onları sayar ve
+rehber ekranı gösterir.
+
+## 8. Yol haritası durumu
 
 Spesifikasyondaki MVP aşamalarının karşılığı:
 
@@ -459,7 +507,7 @@ girişini kolaylaştırma (belge, fotoğraf, dikte) ve tasarımı derinleştirme
 
 ---
 
-## 8. Kardeş proje
+## 9. Kardeş proje
 
 Bu depoda iki bağımsız sistem yaşar:
 

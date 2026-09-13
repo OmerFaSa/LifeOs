@@ -483,7 +483,7 @@ src/
       voice.js speak.js talk.js
     screens/            12 ekran
     app.js              kabuk: gezinme, olay dağıtımı, açılış
-  tests/                451 test, 20 paket
+  tests/                501 test, 23 paket
 tools/
   runtests.js           birim testleri (başsız tarayıcı)
   smoke.js              duman testi: 12 ekranı hem kaynakta hem dist'te gezer
@@ -501,7 +501,7 @@ paket. Playwright yalnızca test betikleri için gerekir.
 ```bash
 python devserver.py          # http://localhost:4193
 python build.py              # dist/esp.html üretir
-node tools/runtests.js       # 451 birim testi
+node tools/runtests.js       # 501 birim testi
 node tools/smoke.js          # gerçek uygulamayı gez
 node tools/a11ycheck.js      # erişilebilirlik
 node tools/palettecheck.js   # kontrast
@@ -509,12 +509,70 @@ node tools/palettecheck.js   # kontrast
 
 ---
 
-## 7. Ölçülmüş durum
+## 7. Dürüstlük katmanı — sistemin kendini denetlemesi
+
+Dışarıdan gelen üç ayrı eleştiri (Gemini, GPT-5.6, Grok) dört noktada
+buluştu ve dördü de haklıydı: **ölçüm fetişizmi**, **Goodhart yasası**,
+**karar bağımlılığı** ve **ölçülemeyeni ölçülüyormuş gibi göstermek**.
+
+Bunlara karşı yazılmış bir uyarı cümlesi işe yaramaz; uyarı da bir
+ekrandır. Tek dürüst cevap dördünü de ölçmek ya da açıkça yazmaktır.
+
+### Sürtünme — `core/friction.js`
+
+Sistemi yönetmeye giden süre, çalışmaya giden sürenin karşısına konur.
+Süre duvar saatinden gelir; pratik sayacı açıkken geçen süre **çalışma**
+sayılır (metronom da bir ekrandır); son bir dakikada etkileşim yoksa
+sayılmaz (açık unutulmuş sekme sürtünme değildir). Bütçe (12 dk/gün) **ve**
+oran (%34) birlikte aşılmadıkça sistem susar. Öneriler yalnızca yükü
+**azaltır**: kendi lehine karar veren bir ölçü, ölçü değildir. Veri yoksa
+`unknown` — ölçülmemiş sürtünme sıfır sürtünme değildir.
+
+### Goodhart nöbetçisi — `core/goodhart.js`
+
+Dokuz çift, iki bitişik 28 günlük pencerede karşılaştırılır: okuma
+dakikası → çıkan not, not sayısı → not başına bağ, kart tekrarı → ilk
+denemede hatırlama, gitar dakikası → temiz deneme oranı, diksiyon
+dakikası → kelime başına hata, ve diğerleri.
+
+Dört kural: nöbetçi **hüküm vermez, soru sorar**; iki tarafta da ölçüm
+yoksa ayrışma yoktur; **çaba düşerken uyarı üretilmez** (işi tembelliği
+değil verimsiz gayreti görmektir); küçük hacimde gürültü vardır.
+
+### Kalibrasyon defteri — `core/calib.js`
+
+Sistem söylemeden önce kullanıcı söyler. Tahmin **kör** açılır (gerçek
+değer o an hesaplanmaz), vadesinde kapanır, beşin altında kayıtla puan
+verilmez. Yanlılık yönü hatanın büyüklüğünden **ayrı** ölçülür: rastgele
+sapan biriyle sistemli olarak kendini abartan biri aynı ortalama hataya
+sahip olabilir ama farklı şeyler yapmaları gerekir. Yüzde sapma ile Brier
+aynı ölçek değildir; ortalanmazlar.
+
+Bu, sistem kapalıyken de geçerli olan tek ölçüdür.
+
+### Merdivenin kör noktası — `data/curriculum.js` → `blind[]`
+
+Her merdiven, kapılarının **göremediği** şeyleri yazar: müzikal ifade,
+yazının özgünlüğü, tarihsel empati, bir metnin seni değiştirip
+değiştirmediği. Liste süs değil: ölçülenin önemli, ölçülmeyenin önemsiz
+sanılması ölçen her sistemin en pahalı hatasıdır. Üstat kademesi bile bu
+maddeleri kapatmaz — merdiven bir yeterlilik belgesi değil, bir çalışma
+düzenidir.
+
+Testler bu listelerin varlığını ve **sayı eşiği içermemesini** denetler:
+ölçülebilir bir eşik yazılabiliyorsa o zaten bir kapı olmalıydı.
+
+### Nerede görünür
+
+Analiz ekranında **Dürüstlük** sekmesi; merdiven ekranında **«Bu
+merdivenin göremediği»** bölümü.
+
+## 8. Ölçülmüş durum
 
 | Ölçüm | Sonuç |
 |---|---|
-| Birim testi | **451/451** geçiyor |
-| Duman testi | temiz — 14 ekran, **84 sekme**, kaynak + `dist/esp.html` |
+| Birim testi | **501/501** geçiyor |
+| Duman testi | temiz — 14 ekran, **85 sekme**, kaynak + `dist/esp.html` |
 | Erişilebilirlik | temiz (4 bilinen eksik izin listesinde) |
 | Kontrast | **1848 ölçüm**, hepsi AA — en dar pay 4,52 (asgari 4,5) |
 | Çizim maliyeti | ağır veriyle en ağır ekran **76 ms** (bütçe 100) |
@@ -533,7 +591,7 @@ Aynı geçişte her `data-hint` anahtarının karşılığı olup olmadığı da
 
 ---
 
-## 8. Bilinçli olarak ertelenenler
+## 9. Bilinçli olarak ertelenenler
 
 - **Otomatik transkripsiyon.** Konuşma-metin modeli gerektirir; MVP'de süre ve
   öz-değerlendirme elle işaretlenir.
@@ -547,7 +605,7 @@ Aynı geçişte her `data-hint` anahtarının karşılığı olup olmadığı da
 
 ---
 
-## 9. Açık borçlar
+## 10. Açık borçlar
 
 | Borç | Nerede | Risk |
 |---|---|---|
@@ -561,7 +619,7 @@ Aynı geçişte her `data-hint` anahtarının karşılığı olup olmadığı da
 
 ---
 
-## 10. Kardeş projeler
+## 11. Kardeş projeler
 
 | | AYS | SPİ | ESP |
 |---|---|---|---|

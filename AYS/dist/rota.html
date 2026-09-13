@@ -6105,7 +6105,7 @@ tbody tr:hover{ background:var(--surface-2); }
 
 window.R = window.R || {};
 
-R.BUILD = { id:'16060ec', at:'2026-09-12 11:14', dirty:true };
+R.BUILD = { id:'a313382', at:'2026-09-13 08:01', dirty:true };
 
 /* ==== js/data/curriculum.js ==== */
 /* 40 haftalik uygulama plani — "Hemsirelik Hedefi" belgesinin 4. bolumu.
@@ -9283,6 +9283,8 @@ R.S = {
   plan:null,       // uretilmis kisisel program
   calendar:[],     // tatil / okul sinavi / yogun gun istisnalari
   sessions:[],     // sureli deneme oturumlari (soru bazli sure dahil)
+  usage:null,      // surtunme olcumu (core/friction.js)
+  forecasts:[],    // kalibrasyon defteri (core/calib.js)
   profiles:[],     // cihazdaki profiller (cok kullanicili kullanim)
   videoNotes:[],   // izlenen ders kaydi + zaman damgali notlar
   solved:[],       // cozulen sorular: metin/fotograf, anlatim, konu, zorluk
@@ -10407,6 +10409,9 @@ R.Model = (function(){
     R.S.profiles = profiles;
 
     await migrate();
+
+    if(R.Friction) await R.Friction.load();
+    if(R.Calib) await R.Calib.load();
 
     for(const s of R.SUBJECTS){ await ensureTopics(s.id); }
 
@@ -14137,6 +14142,640 @@ R.ExamRun = (function(){
 
   return { MARKS, start, active, currentTest, elapsedTotal, elapsedTest, remaining,
     pause, resume, isPaused, mark, undoMark, nextTest, gotoTest, summary, finish, cancel };
+})();
+
+/* ==== js/core/friction.js ==== */
+/* Sürtünme ölçer — sistemi yönetmek, çalışmanın yerine mi geçiyor?
+
+   AYS'ye yöneltilen en yerinde eleştiri şuydu: bir öğrenci her gün süre,
+   soru, konu kapanışı, hata etiketi, tekrar ve plan tamamlama verisi
+   girdikçe, bir noktadan sonra ders çalışmaktan çok kendi çalışma
+   sistemini yönetmeye başlar. Araç amacın önüne geçer.
+
+   Bir uyarı cümlesi bunu çözmez; uyarı da bir ekrandır. Tek dürüst cevap
+   sürtünmeyi ÖLÇMEKTİR: sistem kendi maliyetini de kendi tartısına koyar.
+
+   Dört karar:
+
+   1. YÖNETİM SÜRESİ DUVAR SAATİNDEN GELİR. Uygulama görünürken ve son bir
+      dakika içinde etkileşim varken geçen süre sayılır. Açık unutulmuş
+      sekme sürtünme değildir.
+
+   2. ÇALIŞMA SÜRESİ BLOKLARDAN GELİR. Gün kaydındaki `actualMin`
+      toplamıdır — planlanan değil, GERÇEKLEŞEN süre. Planlanan süreyle
+      karşılaştırmak, sürtünmeyi olduğundan küçük gösterirdi.
+
+   3. ORAN TEK BAŞINA HÜKÜM DEĞİLDİR. Hem mutlak bütçe hem oran
+      aşılmadıkça sistem susar: hafta planı kurulan gün, bir deneme
+      analizi günü ya da ilk kurulum günü doğal olarak yönetim ağırlıklıdır.
+
+   4. SİSTEM KENDİ YÜKÜNÜ AZALTMAYI ÖNEREBİLİR, ARTIRMAYI ÖNEREMEZ. */
+
+window.R = window.R || {};
+
+R.Friction = (function(){
+  const U = R.U, S = R.S;
+
+  const CANLI_SN = 60;
+  /* Günlük yönetim bütçesi (dakika) ve oran eşiği. Açıkça SEÇİLMİŞ
+     sınırlardır, bir bulgu değil. */
+  const BUTCE_DK = 15;
+  const ORAN_ESIK = 0.25;
+  const PENCERE = 14;
+
+  function now(){ return Date.now(); }
+  function bugun(){ return U.todayISO(); }
+  function bos(){ return { days:{}, lastTick:null }; }
+
+  function state(){
+    if(!S.usage) S.usage = bos();
+    if(!S.usage.days) S.usage.days = {};
+    return S.usage;
+  }
+  function gun(t){
+    const u = state();
+    if(!u.days[t]) u.days[t] = { date:t, adminMs:0, ticks:0 };
+    return u.days[t];
+  }
+
+  function tick(opts){
+    const o = opts || {};
+    const u = state();
+    const t = o.at != null ? o.at : now();
+    const onceki = u.lastTick;
+    u.lastTick = t;
+
+    /* Süreli deneme oturumu açıkken geçen süre SINAVDIR, yönetim değil.
+       Kronometreye bakmak da sınavın parçasıdır. */
+    if(R.ExamRun && R.ExamRun.active && R.ExamRun.active()){
+      return { counted:0, reason:'exam' };
+    }
+
+    if(onceki == null) return { counted:0, reason:'first' };
+    const fark = t - onceki;
+    if(!(fark > 0)) return { counted:0, reason:'nonmonotonic' };
+    if(fark > CANLI_SN * 1000) return { counted:0, reason:'away' };
+
+    const g = gun(o.date || bugun());
+    g.adminMs += fark;
+    g.ticks += 1;
+    return { counted:fark, reason:'ok' };
+  }
+
+  function blur(){ state().lastTick = null; }
+
+  async function save(){
+    const u = state();
+    const sinir = U.iso(U.addDays(U.parse(bugun()), -(PENCERE * 3)));
+    Object.keys(u.days).forEach(k => { if(k < sinir) delete u.days[k]; });
+    await R.Store.set('usage', u);
+    return u;
+  }
+
+  async function load(){
+    const raw = await R.Store.get('usage');
+    S.usage = Object.assign(bos(), raw || {});
+    if(!S.usage.days || typeof S.usage.days !== 'object') S.usage.days = {};
+    Object.keys(S.usage.days).forEach(k => {
+      const g = S.usage.days[k] || {};
+      const ms = Number(g.adminMs);
+      S.usage.days[k] = { date:k, adminMs:(isFinite(ms) && ms >= 0) ? ms : 0,
+        ticks:Math.max(0, Math.round(Number(g.ticks) || 0)) };
+    });
+    S.usage.lastTick = null;
+    return S.usage;
+  }
+
+  /* Gerçekleşen çalışma dakikası — planlanan değil. */
+  function workMinutes(tarih){
+    const d = S.days[tarih || bugun()];
+    if(!d) return 0;
+    return (d.blocks || []).reduce((a, b) => a + (Number(b.actualMin) || 0), 0);
+  }
+
+  function day(tarih){
+    const t = tarih || bugun();
+    const g = state().days[t];
+    const admin = g ? Math.round(g.adminMs / 60000) : 0;
+    const work = workMinutes(t);
+    const girdiVar = !!S.days[t];
+
+    if(!g && !girdiVar) return { date:t, admin:0, work:0, ratio:null, cert:'missing' };
+    if(!work) return { date:t, admin, work:0, ratio:null, cert:'partial' };
+    const toplam = admin + work;
+    return { date:t, admin, work, ratio:toplam > 0 ? admin / toplam : null,
+      cert:'measured' };
+  }
+
+  function window_(gunSayisi){
+    const n = Math.max(1, Math.round(gunSayisi || PENCERE));
+    let admin = 0, work = 0, olculen = 0;
+    for(let i = 0; i < n; i++){
+      const t = U.iso(U.addDays(U.parse(bugun()), -i));
+      const d = day(t);
+      if(d.cert === 'missing') continue;
+      admin += d.admin; work += d.work; olculen++;
+    }
+    const toplam = admin + work;
+    return { days:n, measuredDays:olculen, admin, work,
+      ratio:toplam > 0 ? admin / toplam : null,
+      perDay:olculen ? Math.round(admin / olculen) : 0,
+      cert:olculen ? (work > 0 ? 'measured' : 'partial') : 'missing' };
+  }
+
+  function verdict(gunSayisi){
+    const w = window_(gunSayisi);
+    if(w.cert === 'missing'){
+      return { level:'unknown', cert:'missing', window:w,
+        title:'Sürtünme ölçülmedi',
+        note:'Bu pencerede kayıt yok. Sistem kendi maliyetini bilmiyorsa '
+           + 'onu sıfır saymaz.' };
+    }
+    if(w.cert === 'partial'){
+      return { level:'unknown', cert:'estimated', window:w,
+        title:'Gerçekleşen çalışma girilmemiş',
+        note:'Sistemde günde ' + w.perDay + ' dk geçiyor ama bloklara '
+           + 'gerçekleşen süre yazılmamış. Oran hesaplanamaz: payda veri yok, '
+           + 'sıfır değil.' };
+    }
+    const butceAsti = w.perDay > BUTCE_DK;
+    const oranAsti = w.ratio != null && w.ratio > ORAN_ESIK;
+    if(butceAsti && oranAsti){
+      return { level:'high', cert:'measured', window:w,
+        title:'Sistem, çalışmanın önüne geçiyor olabilir',
+        note:'Son ' + w.days + ' günde günde ' + w.perDay + ' dk sistemle, '
+           + Math.round(w.work / Math.max(1, w.measuredDays)) + ' dk çalışmayla '
+           + 'geçti (%' + Math.round(w.ratio * 100) + ' yönetim). Sınır günde '
+           + BUTCE_DK + ' dk ve %' + Math.round(ORAN_ESIK * 100) + '.' };
+    }
+    if(butceAsti || oranAsti){
+      return { level:'watch', cert:'measured', window:w,
+        title:'Sürtünme sınıra yakın',
+        note:'İki eşikten biri aşıldı. Hafta planı kurulan ya da deneme '
+           + 'analizi yapılan bir gün doğal olarak yönetim ağırlıklıdır.' };
+    }
+    return { level:'ok', cert:'measured', window:w,
+      title:'Sürtünme bütçede',
+      note:'Günde ' + w.perDay + ' dk sistem, %'
+         + (w.ratio == null ? '—' : Math.round(w.ratio * 100)) + ' yönetim payı.' };
+  }
+
+  /* Yük azaltma önerileri. Hiçbiri "daha çok veri gir" demez. */
+  function relief(){
+    if(verdict().level !== 'high') return [];
+    const out = [];
+
+    const bekleyen = (S.exams || []).filter(e => !e.analysisCompletedAt).length;
+    if(bekleyen > 2){
+      out.push({ id:'exam-backlog', label:bekleyen + ' analiz edilmemiş deneme',
+        note:'Biriken analiz her açılışta yeniden karşına çıkıyor. En eski '
+           + 'ikisini analiz etmeden yenisini çözmemek, yükü de sonucu da '
+           + 'düzeltir.', route:'exams' });
+    }
+    const acikProtokol = (S.protocols || []).filter(p => p.status === 'active').length;
+    if(acikProtokol > 2){
+      out.push({ id:'protocols', label:acikProtokol + ' açık telafi protokolü',
+        note:'Aynı anda ikiden fazla telafi taşımak, hiçbirini bitirmemekle '
+           + 'sonuçlanır. Birini kapat, kalanı ertele.', route:'protocols' });
+    }
+    if(!out.length){
+      out.push({ id:'one-thing', label:'Günün tek işi',
+        note:'Blok sayısı ve kayıt yükü makul; süre ekranlarda geziniyor. '
+           + 'Bugünün tek işini yapıp kapatmak yeterli.', route:'today' });
+    }
+    return out;
+  }
+
+  return { tick, blur, save, load, day, verdict, relief,
+    workMinutes, window:window_, BUTCE_DK, ORAN_ESIK, PENCERE, CANLI_SN };
+})();
+
+/* ==== js/core/calib.js ==== */
+/* Kalibrasyon defteri — adayın kendi yargısını ÖLÇER.
+
+   Bir karar destek sistemi iki şekilde başarısız olur. Birincisi bilinir:
+   yanlış hesaplar. İkincisi sinsidir: doğru hesaplar ama adayın kendi
+   yargısını köreltir. Her şeyi sistemden bekleyen bir aday, sınav
+   salonunda yalnızdır ve orada hiçbir ekran yoktur.
+
+   Sınav hazırlığında bu, süs değil ASIL BECERİDİR. Kendi netini önceden
+   kestirebilen aday, hangi testte zaman harcayacağını, hangi soruyu
+   bırakacağını ve bir denemenin kötü mü yoksa zor mu olduğunu bilir.
+   Kestiremeyen aday, her denemeden sonra bir sürprizle karşılaşır.
+
+   Dört kural:
+
+   1. TAHMİN KÖR OLMAK ZORUNDADIR. Net ekranda dururken yazılan tahmin,
+      tahmin değil kopyadır. Kayıt açılırken gerçek değer ÇÖZÜLMEZ.
+
+   2. TAHMİN ETMEMEK HATA DEĞİLDİR. Defter boşsa "kalibrasyonun kötü"
+      denmez, "veri yok" denir.
+
+   3. PUAN KİŞİYE DEĞİL, TAHMİNE VERİLİR. "Kendini tanımıyorsun" denmez;
+      "son 12 tahminin ortalama sapması %18" denir.
+
+   4. BEŞİN ALTINDA KAYIT HÜKÜM VERMEZ. */
+
+window.R = window.R || {};
+
+R.Calib = (function(){
+  const U = R.U, S = R.S;
+
+  const ASGARI = 5;
+  const PENCERE = 20;
+
+  R.CALIB_KINDS = [
+    { id:'exam-net', type:'number', unit:'net',
+      label:'Deneme netin',
+      ask:'Bu denemeyi okumadan önce: kaç net çıkardığını tahmin ediyorsun?' },
+    { id:'test-net', type:'number', unit:'net',
+      label:'Tek testin neti',
+      ask:'Bu testte kaç net yaptığını tahmin ediyorsun?' },
+    { id:'topic-test', type:'number', unit:'%',
+      label:'Konu testi yüzden',
+      ask:'Bu konu testinden yüzde kaç çıkaracaksın?' },
+    { id:'week-minutes', type:'number', unit:'dk',
+      label:'Haftalık çalışma süren',
+      ask:'Bu hafta bloklara kaç dakika gerçekleşen süre yazacaksın?' },
+    { id:'week-plan', type:'binary', unit:'',
+      label:'Hafta planı',
+      ask:'Bu haftanın planını tamamlama olasılığın nedir?' },
+  ];
+
+  const KIND_BY_ID = R.CALIB_KINDS.reduce((m, k) => { m[k.id] = k; return m; }, {});
+  function kindOf(id){ return KIND_BY_ID[id] || null; }
+
+  function list(){ return (S.forecasts || []).slice(); }
+  function openList(){ return list().filter(f => f.actual == null); }
+  function settled(){
+    return list().filter(f => f.actual != null && f.blind !== false)
+      .sort((a, b) => (a.settledAt || '') < (b.settledAt || '') ? 1 : -1);
+  }
+
+  function norm(f){
+    const o = f || {};
+    return {
+      id:o.id || U.uid('f'),
+      kind:kindOf(o.kind) ? o.kind : 'exam-net',
+      ref:o.ref || null,
+      guess:Number(o.guess),
+      actual:(o.actual == null || !isFinite(Number(o.actual))) ? null : Number(o.actual),
+      blind:o.blind !== false,
+      note:String(o.note || ''),
+      at:o.at || new Date().toISOString(),
+      dueAt:o.dueAt || null,
+      settledAt:o.settledAt || null,
+    };
+  }
+
+  async function open(kindId, guess, opts){
+    const o = opts || {};
+    const k = kindOf(kindId);
+    if(!k) return { ok:false, error:'Bilinmeyen tahmin türü.' };
+    const g = Number(guess);
+    if(!isFinite(g)) return { ok:false, error:'Tahmin bir sayı olmalı.' };
+    if(k.type === 'binary' && (g < 0 || g > 1)){
+      return { ok:false, error:'Olasılık 0 ile 1 arasında olmalı.' };
+    }
+    if(k.type === 'number' && g < 0){
+      return { ok:false, error:'Tahmin negatif olamaz.' };
+    }
+    const kayit = norm({ kind:kindId, guess:g, ref:o.ref || null, note:o.note,
+      dueAt:o.dueAt || null, blind:o.blind !== false });
+    S.forecasts = list().concat([kayit]);
+    await R.Store.set('forecasts/' + kayit.id, kayit);
+    return { ok:true, forecast:kayit };
+  }
+
+  async function settle(id, actual){
+    const f = list().filter(x => x.id === id)[0];
+    if(!f) return { ok:false, error:'Tahmin bulunamadı.' };
+    if(f.actual != null) return { ok:false, error:'Bu tahmin zaten kapandı.' };
+    const a = Number(actual);
+    if(!isFinite(a)) return { ok:false, error:'Gerçek değer bir sayı olmalı.' };
+    if(f.dueAt && U.todayISO() < f.dueAt){
+      return { ok:false, early:true,
+        error:'Bu tahmin ' + f.dueAt + ' tarihinden önce kapanmaz.' };
+    }
+    f.actual = a;
+    f.settledAt = new Date().toISOString();
+    S.forecasts = list().map(x => x.id === id ? f : x);
+    await R.Store.set('forecasts/' + f.id, f);
+    return { ok:true, forecast:f };
+  }
+
+  async function remove(id){
+    S.forecasts = list().filter(x => x.id !== id);
+    await R.Store.remove('forecasts/' + id);
+    return { ok:true };
+  }
+
+  /* Tek tahminin hatası.
+
+     Net tahmininde payda GERÇEK NETTİR ama en az 1 alınır: 2 neti 6
+     tahmin etmek, 60 neti 64 tahmin etmekten çok daha büyük bir sapmadır
+     ve bu fark korunmalıdır. */
+  function error(f){
+    const k = kindOf(f.kind);
+    if(!k || f.actual == null) return null;
+    if(k.type === 'binary'){
+      const sonuc = f.actual >= 0.5 ? 1 : 0;
+      return { type:'brier', value:Math.pow(f.guess - sonuc, 2) };
+    }
+    return { type:'ape',
+      value:Math.abs(f.guess - f.actual) / Math.max(Math.abs(f.actual), 1) };
+  }
+
+  /* Yanlılık: sistemli olarak fazla mı tahmin ediyor, az mı?
+
+     Hatanın büyüklüğünden AYRI bir bulgudur. Kendini sürekli abartan aday
+     ile rastgele sapan aday aynı ortalama hataya sahip olabilir ama
+     farklı şeyler yapmaları gerekir. */
+  function bias(kindId){
+    const kayitlar = settled().filter(f => !kindId || f.kind === kindId)
+      .filter(f => (kindOf(f.kind) || {}).type === 'number')
+      .slice(0, PENCERE);
+    if(kayitlar.length < ASGARI){
+      return { cert:'missing', n:kayitlar.length, value:null,
+        note:'Yanlılık için en az ' + ASGARI + ' kapanmış sayısal tahmin gerekir.' };
+    }
+    const v = kayitlar.reduce((a, f) =>
+      a + (f.guess - f.actual) / Math.max(Math.abs(f.actual), 1), 0) / kayitlar.length;
+    return { cert:'measured', n:kayitlar.length, value:v,
+      direction:v > 0.05 ? 'over' : v < -0.05 ? 'under' : 'even',
+      note:v > 0.05
+        ? 'Netini olduğundan yüksek tahmin etme eğilimindesin. Sınav günü '
+          + 'sürpriz, hazırlıkta iyimserlik anlamına gelir.'
+        : v < -0.05
+        ? 'Netini olduğundan düşük tahmin etme eğilimindesin. Bu, gereksiz '
+          + 'kaygı ya da fazla temkinli soru seçimi olarak dönebilir.'
+        : 'Sistemli bir yanlılık görünmüyor.' };
+  }
+
+  function score(){
+    const hepsi = settled().slice(0, PENCERE);
+    const sayisal = hepsi.filter(f => (kindOf(f.kind) || {}).type === 'number');
+    const ikili = hepsi.filter(f => (kindOf(f.kind) || {}).type === 'binary');
+    const out = { n:hepsi.length, open:openList().length, cert:'missing',
+      ape:null, brier:null, grade:null, bias:bias() };
+
+    if(hepsi.length < ASGARI){
+      out.note = 'Kapanmış ' + hepsi.length + ' tahmin var; puan için '
+        + ASGARI + ' gerekir. Az sayıda tahmin hüküm vermez.';
+      return out;
+    }
+    out.cert = 'measured';
+    if(sayisal.length){
+      out.ape = sayisal.reduce((a, f) => a + error(f).value, 0) / sayisal.length;
+    }
+    if(ikili.length){
+      out.brier = ikili.reduce((a, f) => a + error(f).value, 0) / ikili.length;
+    }
+    if(out.ape != null){
+      out.grade = out.ape <= 0.10 ? 'keskin'
+        : out.ape <= 0.25 ? 'makul'
+        : out.ape <= 0.50 ? 'dağınık' : 'uzak';
+      out.note = 'Son ' + sayisal.length + ' sayısal tahminin ortalama sapması %'
+        + Math.round(out.ape * 100) + '.';
+    } else {
+      out.note = 'Son ' + ikili.length + ' ikili tahminin Brier puanı '
+        + (out.brier == null ? '—' : out.brier.toFixed(2))
+        + ' (0 kusursuz, 0,25 yazı-tura).';
+    }
+    return out;
+  }
+
+  function due(){
+    const t = U.todayISO();
+    return openList().filter(f => !f.dueAt || f.dueAt <= t);
+  }
+
+  /* Bir denemeye bağlı açık tahmin var mı? Deneme okunurken sorulur. */
+  function forExam(examId){
+    return openList().filter(f => f.kind === 'exam-net' && f.ref === examId)[0] || null;
+  }
+
+  async function load(){
+    S.forecasts = ((await R.Store.list('forecasts')) || []).map(norm);
+    return S.forecasts;
+  }
+
+  return { open, settle, remove, load, norm, list, settled, openList, due,
+    error, bias, score, kindOf, forExam, ASGARI, PENCERE };
+})();
+
+/* ==== js/core/goodhart.js ==== */
+/* Goodhart nöbetçisi — gösterge amaca dönüştüğünde haber verir.
+
+   Goodhart yasası: bir ölçü hedef hâline geldiğinde, iyi bir ölçü olmaktan
+   çıkar. Sınav hazırlığında bunun en bilinen hâli soru sayısıdır. Günde
+   300 soru çözmek bir hedefe dönüştüğünde, aday kolay soruları seçmeye,
+   yanlışlarını incelememeye ve süreyi tutmamaya başlar. Sayı yükselir,
+   net yükselmez.
+
+   Nöbetçi bunu arar: ÇABA'yı temsil eden bir sayı ile SONUÇ'u temsil eden
+   bir sayı iki bitişik pencerede karşılaştırılır.
+
+   Dört kural:
+
+   1. NÖBETÇİ HÜKÜM VERMEZ, SORU SORAR. Ayrışmanın meşru sebepleri vardır:
+      zor bir konuya geçiş, deneme kalitesinin değişmesi, hasta bir hafta.
+
+   2. İKİ TARAFTA DA ÖLÇÜM YOKSA AYRIŞMA YOKTUR. Ölçülmemiş sonuç, sıfır
+      sonuç değildir.
+
+   3. ÇABA DÜŞERKEN UYARI ÜRETİLMEZ. Nöbetçinin işi tembelliği değil,
+      VERİMSİZ GAYRETİ görmektir.
+
+   4. KÜÇÜK HACİMDE GÜRÜLTÜ VARDIR; eşiğin altındaki hacim değerlendirilmez. */
+
+window.R = window.R || {};
+
+R.Goodhart = (function(){
+  const U = R.U, S = R.S, M = R.Model;
+
+  const PENCERE = 28;
+  const CABA_ARTIS = 0.25;
+  const SONUC_DURGUN = 0.05;
+
+  function iso(n){ return U.iso(U.addDays(U.parse(U.todayISO()), n)); }
+
+  function windows(){
+    return {
+      now:{ from:iso(-PENCERE), to:iso(0) },
+      prev:{ from:iso(-2 * PENCERE), to:iso(-PENCERE) },
+    };
+  }
+  function inWin(d, w){
+    const x = String(d || '').slice(0, 10);
+    return !!x && x >= w.from && x < w.to;
+  }
+
+  /* ------------------------------------------------------------ sayaçlar */
+
+  function daysIn(w){
+    return Object.keys(S.days || {}).filter(k => inWin(k, w)).map(k => S.days[k]);
+  }
+
+  function minutesIn(w){
+    return daysIn(w).reduce((a, d) =>
+      a + (d.blocks || []).reduce((x, b) => x + (Number(b.actualMin) || 0), 0), 0);
+  }
+
+  function questionsIn(w){
+    return daysIn(w).reduce((a, d) => {
+      const blok = (d.blocks || []).reduce((x, b) => x + (Number(b.actualQ) || 0), 0);
+      return a + blok + (Number(d.paragraphActual) || 0) + (Number(d.problemActual) || 0)
+        + (Number(d.freeQ) || 0);
+    }, 0);
+  }
+
+  /* Blok doğruluk oranı: sayılan soruların kaçı doğru. */
+  function accuracyIn(w){
+    let soru = 0, dogru = 0;
+    daysIn(w).forEach(d => {
+      (d.blocks || []).forEach(b => {
+        const q = Number(b.actualQ), c = Number(b.correctQ);
+        if(!isFinite(q) || !isFinite(c) || !(q > 0)) return;
+        soru += q; dogru += c;
+      });
+    });
+    return soru >= 100 ? dogru / soru : null;
+  }
+
+  function examsIn(w){
+    return (S.exams || []).filter(e => e.kind === 'full' && inWin(e.date, w));
+  }
+
+  /* Pencere içindeki tam denemelerin medyan neti. */
+  function examMedianIn(w){
+    const nets = examsIn(w).map(M.examNet).filter(v => isFinite(v));
+    return nets.length >= 2 ? U.median(nets) : null;
+  }
+
+  /* Pencere içinde kapanan konu sayısı. Kapanış tarihi ikinci testin
+     tarihinden gelir: bir konu ikinci testiyle kapanır. */
+  function closedTopicsIn(w){
+    let n = 0;
+    Object.keys(S.topics || {}).forEach(sid => {
+      const st = (S.topics[sid] || {}).states || {};
+      Object.keys(st).forEach(tid => {
+        const t = st[tid];
+        if(t.state === 'closed' && inWin(t.secondAt, w)) n++;
+      });
+    });
+    return n;
+  }
+
+  /* Pencerede işaretlenen hatalar ve bunların kaçının analizi yapılmış. */
+  function errorsIn(w){
+    return (S.errors || []).filter(e => inWin(e.createdAt, w));
+  }
+
+  /* -------------------------------------------------------------- çiftler */
+
+  const PAIRS = [
+    { id:'questions-vs-net',
+      effortLabel:'çözülen soru', outcomeLabel:'deneme medyan neti',
+      question:'Soru sayısı artarken net yerinde sayıyor — kolay soruları mı '
+             + 'seçiyorsun, yoksa yanlışların üzerinden geçmiyor musun?',
+      effort:questionsIn, outcome:examMedianIn, minEffort:300 },
+
+    { id:'questions-vs-accuracy',
+      effortLabel:'çözülen soru', outcomeLabel:'doğruluk oranı',
+      question:'Daha çok soru çözüp aynı oranda yanlış yapmak, hatayı '
+             + 'pekiştirmek olabilir. Yanlışlarını etiketliyor musun?',
+      effort:questionsIn, outcome:accuracyIn, minEffort:300 },
+
+    { id:'minutes-vs-closed',
+      effortLabel:'çalışma dakikası', outcomeLabel:'kapanan konu',
+      question:'Süre artıyor ama konu kapanmıyor. Konu testlerini erteliyor '
+             + 'musun, yoksa konular kapanış eşiğini geçemiyor mu?',
+      effort:minutesIn, outcome:closedTopicsIn, minEffort:600 },
+
+    { id:'exams-vs-net',
+      effortLabel:'çözülen deneme', outcomeLabel:'medyan net',
+      question:'Deneme sayısı arttı, net yerinde. Analiz edilmeyen deneme '
+             + 'bir ölçüm değil, bir yorgunluktur — kaç tanesinin analizi bitti?',
+      effort:w => examsIn(w).length, outcome:examMedianIn, minEffort:4 },
+
+    { id:'errors-vs-analysis',
+      effortLabel:'işaretlenen hata', outcomeLabel:'analizi biten hata oranı',
+      question:'Hata biriktiriyorsun ama üzerinden geçilmiyor. İncelenmeyen '
+             + 'hata, tekrar edeceğin hatadır — hangisiyle başlarsın?',
+      effort:w => errorsIn(w).length,
+      outcome:w => {
+        const h = errorsIn(w);
+        if(h.length < 10) return null;
+        return h.filter(e => e.closedAt || e.repairDoneAt).length / h.length;
+      },
+      minEffort:10 },
+  ];
+
+  /* ---------------------------------------------------------------- ölçüm */
+
+  function oran(yeni, eski){
+    if(eski == null || yeni == null) return null;
+    if(eski === 0) return yeni > 0 ? Infinity : 0;
+    return (yeni - eski) / Math.abs(eski);
+  }
+
+  function pair(def){
+    const w = windows();
+    const eC = def.effort(w.prev), yC = def.effort(w.now);
+    const eS = def.outcome(w.prev), yS = def.outcome(w.now);
+
+    const base = { id:def.id, effortLabel:def.effortLabel,
+      outcomeLabel:def.outcomeLabel, question:def.question,
+      effort:{ prev:eC, now:yC }, outcome:{ prev:eS, now:yS } };
+
+    if(eS == null || yS == null){
+      return Object.assign(base, { status:'unknown', cert:'missing',
+        note:'Sonuç tarafında iki pencerenin birinde ölçüm yok. Ölçülmemiş '
+           + 'sonuç, sıfır sonuç değildir.' });
+    }
+    if(!(yC >= def.minEffort)){
+      return Object.assign(base, { status:'idle', cert:'measured',
+        note:'Bu pencerede hacim değerlendirmeye yetmiyor ('
+           + yC + ' < ' + def.minEffort + ').' });
+    }
+    const dC = oran(yC, eC);
+    const dS = oran(yS, eS);
+    if(dC == null || dC < CABA_ARTIS){
+      return Object.assign(base, { status:'idle', cert:'measured',
+        effortChange:dC, outcomeChange:dS,
+        note:'Çaba belirgin biçimde artmamış; nöbetçi burada bir şey aramaz.' });
+    }
+    if(dS != null && dS > SONUC_DURGUN){
+      return Object.assign(base, { status:'aligned', cert:'measured',
+        effortChange:dC, outcomeChange:dS,
+        note:'Çaba da sonuç da arttı. Gösterge hâlâ bir şeyi temsil ediyor.' });
+    }
+    return Object.assign(base, { status:'decoupled', cert:'measured',
+      effortChange:dC, outcomeChange:dS,
+      note:def.effortLabel + ' %' + Math.round(dC * 100) + ' arttı, '
+         + def.outcomeLabel + ' '
+         + (dS == null ? 'ölçülemedi'
+            : dS >= 0 ? '%' + Math.round(dS * 100) + ' değişti'
+            : '%' + Math.round(Math.abs(dS) * 100) + ' geriledi') + '.' });
+  }
+
+  function scan(){ return PAIRS.map(pair); }
+  function flags(){ return scan().filter(p => p.status === 'decoupled'); }
+
+  function brief(){
+    const f = flags();
+    if(!f.length) return null;
+    return {
+      count:f.length,
+      title:f.length === 1 ? 'Bir gösterge ayrışmış' : f.length + ' gösterge ayrışmış',
+      body:f[0].note + ' ' + f[0].question,
+      flags:f,
+    };
+  }
+
+  return { PAIRS, windows, pair, scan, flags, brief,
+    PENCERE, CABA_ARTIS, SONUC_DURGUN };
 })();
 
 /* ==== js/core/auto.js ==== */
@@ -23831,6 +24470,20 @@ R.Screens.exams = (function(){
           input:K.Input({ id:'ex-pub', placeholder:'ör. 345, Bilgi Sarmal, Endemik' }) }),
         K.Field({ label:'Toplam süre (dk)', input:K.Input({ id:'ex-dur', type:'number', numeric:true, value:165 }) }),
       ]),
+      /* KÖR NET TAHMİNİ — sonuçları yazmadan ÖNCE.
+
+         Kendi netini kestirebilmek bir süs değil sınav becerisidir: hangi
+         testte zaman harcayacağını, hangi soruyu bırakacağını ve bir
+         denemenin kötü mü yoksa zor mu olduğunu o kestirim söyler.
+
+         Alan bilerek test satırlarının ÜSTÜNDE durur. Kayıt sırasında
+         satırların o an boş olup olmadığına bakılır: sonuçlar girildikten
+         sonra yazılan bir tahmin «kör değil» işaretlenir ve kalibrasyon
+         puanına katılmaz. Tahmin değil kopya olurdu. */
+      K.Field({ label:'Netini kaç tahmin ediyorsun? (isteğe bağlı)',
+        hint:'sonuçları yazmadan önce doldur — sonra yazılan tahmin puana girmez',
+        input:K.Input({ id:'ex-guess', type:'number', step:'any',
+          placeholder:'ör. 62' }) }),
       raw('<div id="ex-tests" class="stack-sm"></div>'),
       K.Notice({ tone:'info', body:'Net otomatik hesaplanır: doğru − yanlış/4. Boş bırakılan testler kaydedilmez.' }),
     ]);
@@ -23848,6 +24501,26 @@ R.Screens.exams = (function(){
       const t = R.EXAM_TEMPLATES.find(x => x.id === sel.value);
       document.getElementById('ex-dur').value = t.duration;
     });
+
+    /* Tahminin KÖRLÜĞÜ yazıldığı anda ölçülür, kayıt anında değil: o an
+       satırlar boşsa tahmin gerçekten bir tahmindir. Sonradan bakıp
+       "boş mıydı" diye sormanın yolu yok — bu yüzden burada damgalanır. */
+    const tahmin = document.getElementById('ex-guess');
+    if(tahmin){
+      /* Yalnızca SONUÇ hücrelerine bakılır. Test adı alanı da `data-t`
+         taşır ve şablondan dolu gelir; ona bakmak her tahmini «kör değil»
+         yapardı. */
+      const bosMu = () => ['c', 'w', 'b'].every(k => Array.prototype.slice
+        .call(document.querySelectorAll('#ex-tests [data-t="' + k + '"]'))
+        .every(i => String(i.value).trim() === ''));
+      tahmin.dataset.rowsEmpty = 'true';
+      tahmin.addEventListener('input', () => {
+        /* Bir kez "kör değil" olan tahmin geri KÖR olamaz: satırları
+           silip tahmini düzeltmek, sonucu görmüş olmayı geri almaz. */
+        if(tahmin.dataset.rowsEmpty === 'false') return;
+        tahmin.dataset.rowsEmpty = bosMu() ? 'true' : 'false';
+      });
+    }
   }
 
   function renderTemplateRows(tmplId){
@@ -24013,10 +24686,31 @@ R.Screens.exams = (function(){
         publisher, duration, tests, protocol:{},
         createdAt:new Date().toISOString(), analysisCompletedAt:null,
       };
+      /* Tahmin, sonuclar YAZILMADAN once girilmis mi? Girilmediyse kayit
+         yine tutulur ama «kor degil» isaretlenir ve puana katilmaz. */
+      const tahminEl = document.getElementById('ex-guess');
+      const tahmin = tahminEl ? Number(tahminEl.value) : NaN;
+
       await M.saveExam(exam);
+
+      let kalibrasyonNotu = '';
+      if(isFinite(tahmin) && tahminEl && tahminEl.value !== ''){
+        const kor = tahminEl.dataset.rowsEmpty !== 'false';
+        const acik = await R.Calib.open('exam-net', tahmin,
+          { ref:exam.id, blind:kor });
+        if(acik.ok){
+          const kapali = await R.Calib.settle(acik.forecast.id, M.examNet(exam));
+          if(kapali.ok){
+            const h = R.Calib.error(kapali.forecast);
+            kalibrasyonNotu = ' · tahmin sapması %' + Math.round(h.value * 100)
+              + (kor ? '' : ' (kör değil, puana girmez)');
+          }
+        }
+      }
+
       UI.closeSheet();
       S.ui.examOpen = exam.id;
-      UI.toast('Deneme kaydedildi · net '+U.fmtNet(M.examNet(exam)));
+      UI.toast('Deneme kaydedildi · net ' + U.fmtNet(M.examNet(exam)) + kalibrasyonNotu);
       R.App.render();
     },
     async 'delete-exam'(el){
@@ -27691,6 +28385,7 @@ R.Screens.analytics = (function(){
     { id:'speed',   label:'Hız ve isabet' },
     { id:'value',   label:'Konu değeri' },
     { id:'habits',  label:'Alışkanlık' },
+    { id:'durust',  label:'Dürüstlük' },
   ];
 
   function empty(text, action){
@@ -28023,8 +28718,125 @@ R.Screens.analytics = (function(){
     ]);
   }
 
+
+  /* ---------------------------------------------------------- dürüstlük
+
+     Bu sekme sistemin KENDİSİNİ ölçer. Üç soru sorar:
+
+       Sürtünme      Sistemi yönetmek, çalışmanın yerine mi geçiyor?
+       Ayrışma       Bir gösterge, temsil ettiği şeyden koptu mu?
+       Kalibrasyon   Aday sistemsiz de kendi durumunu biliyor mu?
+
+     Üçü de kötü çıkabilir; bu bir arıza değil, ölçüldüğü için görünür
+     olmasıdır. Sınav salonunda hiçbir ekran yoktur — orada yalnızca
+     üçüncüsü işe yarar. */
+
+  function durustTab(){
+    const f = R.Friction.verdict();
+    const rahat = R.Friction.relief();
+    const cifts = R.Goodhart.scan();
+    const ayrisan = cifts.filter(p => p.status === 'decoupled');
+    const puan = R.Calib.score();
+    const vade = R.Calib.due();
+
+    return K.Grid([
+      K.Span(6, K.Stack([
+        K.Card({ title:'Sürtünme', hint:'friction',
+          sub:'Sistemi yönetmek ile çalışmak',
+          body:html`
+            ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info', body:f.title + ' — ' + f.note })}
+            ${when(f.cert === 'measured', () => html`
+              <div class="mt-12">${K.Cols(3, [
+                K.Stat({ label:'Yönetim', value:String(f.window.perDay), note:'dk/gün' }),
+                K.Stat({ label:'Çalışma',
+                  value:String(Math.round(f.window.work / Math.max(1, f.window.measuredDays))),
+                  note:'dk/gün' }),
+                K.Stat({ label:'Yönetim payı',
+                  value:f.window.ratio == null ? '—' : '%' + Math.round(f.window.ratio * 100),
+                  tone:f.level === 'high' ? 'warn' : null }),
+              ])}</div>`)}
+            ${when(rahat.length, () => html`<div class="mt-12">
+              ${map(rahat, r => html`<div class="mt-8">
+                ${K.Notice({ tone:'info', body:r.label + ' — ' + r.note })}
+              </div>`)}</div>`)}` }),
+
+        K.Card({ title:'Gösterge ayrışması', hint:'goodhart',
+          sub:'Çaba arttı da sonuç yerinde mi saydı?',
+          body:html`
+            ${K.Table({ tight:true, headers:['Çift', 'Çaba', 'Sonuç', 'Durum'],
+              rows:cifts.map(p => [
+                p.effortLabel + ' → ' + p.outcomeLabel,
+                p.effortChange == null ? '—'
+                  : (p.effortChange === Infinity ? 'yeni' : '%' + Math.round(p.effortChange * 100)),
+                p.outcomeChange == null ? '—'
+                  : (p.outcomeChange === Infinity ? 'yeni' : '%' + Math.round(p.outcomeChange * 100)),
+                p.status === 'decoupled' ? 'ayrıştı'
+                  : p.status === 'aligned' ? 'birlikte'
+                  : p.status === 'unknown' ? 'ölçülmedi' : 'sessiz',
+              ]) })}
+            ${map(ayrisan, p => html`<div class="mt-12">
+              ${K.Notice({ tone:'warn', body:p.note })}
+              ${K.Notice({ tone:'info', body:p.question })}
+            </div>`)}
+            ${when(!ayrisan.length, () => html`<p class="tiny dim mt-10">
+              Ayrışma yok. Nöbetçinin konuşmadığı gün, iyi gündür.</p>`)}` }),
+      ])),
+
+      K.Span(6, K.Stack([
+        K.Card({ title:'Kalibrasyon', hint:'calib',
+          sub:'Sistem söylemeden önce sen söyle',
+          body:html`
+            ${K.Notice({ tone:'info', body:puan.note })}
+            ${when(puan.bias.cert === 'measured',
+              () => html`<div class="mt-8">${K.Notice({ tone:'info', body:puan.bias.note })}</div>`)}
+            <p class="tiny dim mt-10">Kendi netini önceden kestirebilmek bir
+              süs değil, sınav becerisidir: hangi testte zaman harcayacağını,
+              hangi soruyu bırakacağını ve bir denemenin kötü mü yoksa zor mu
+              olduğunu o kestirim söyler. Tahmin KÖR yazılır — net ekranda
+              dururken yazılan tahmin, tahmin değil kopyadır.</p>
+
+            <div class="mt-12">
+              ${K.Field({ label:'Ne tahmin ediyorsun?',
+                input:K.Select({ id:'ay-calib-kind', value:S.ui.calibKind || 'week-minutes',
+                  change:'calib-kind', aria:'Tahmin türü',
+                  options:R.CALIB_KINDS.map(k => ({ value:k.id, label:k.label })) }) })}
+              ${(function(){
+                const k = R.Calib.kindOf(S.ui.calibKind || 'week-minutes');
+                return html`<p class="tiny dim">${k.ask}</p>
+                  ${K.Field({ label:k.type === 'binary' ? 'Olasılık (0–1)' : 'Tahminin'
+                      + (k.unit ? ' (' + k.unit + ')' : ''),
+                    input:K.Input({ id:'ay-calib-guess', type:'number',
+                      step:k.type === 'binary' ? '0.05' : 'any' }) })}`;
+              })()}
+              ${K.Button({ label:'Tahmini kaydet', tone:'primary', act:'calib-open' })}
+            </div>
+
+            ${when(vade.length, () => html`<div class="mt-12">
+              ${map(vade, fo => html`<div class="mt-8">
+                ${K.Field({ label:(R.Calib.kindOf(fo.kind) || {}).label
+                    + ' — tahminin: ' + U.fmtNum(fo.guess),
+                  input:K.Input({ id:'ay-calib-actual-' + fo.id, type:'number', step:'any' }) })}
+                ${K.Button({ label:'Kapat', size:'sm', act:'calib-settle',
+                  data:{ 'data-id':fo.id } })}
+              </div>`)}</div>`)}
+
+            ${when(R.Calib.settled().length, () => html`<div class="mt-12">
+              ${K.Table({ tight:true,
+                headers:['Tür', { label:'Tahmin', num:true }, { label:'Gerçek', num:true },
+                  { label:'Sapma', num:true }],
+                rows:R.Calib.settled().slice(0, 10).map(fo => {
+                  const h = R.Calib.error(fo);
+                  return [(R.Calib.kindOf(fo.kind) || {}).label || fo.kind,
+                    U.fmtNum(fo.guess), U.fmtNum(fo.actual),
+                    h == null ? '—' : (h.type === 'brier' ? h.value.toFixed(2)
+                      : '%' + Math.round(h.value * 100))];
+                }) })}</div>`)}` }),
+      ])),
+    ]);
+  }
+
   const BODIES = { compare:compareTab, errors:errorsTab, rank:rankTab,
-    speed:speedTab, value:valueTab, habits:habitsTab };
+    speed:speedTab, value:valueTab, habits:habitsTab, durust:durustTab };
 
   async function render(){
     /* Kayitli sekme adi artik yoksa ilk sekmeye duser. Eskimis bir deger
@@ -28039,11 +28851,42 @@ R.Screens.analytics = (function(){
 
   const handle = {
     async 'analytics-tab'(el){ S.ui.analyticsTab = el.dataset.tab; R.App.render(); },
+
+    /* Tahmin KÖR açılır: gerçek değer burada hesaplanmaz. */
+    async 'calib-open'(){
+      const kind = S.ui.calibKind || 'week-minutes';
+      const el = document.getElementById('ay-calib-guess');
+      const r = await R.Calib.open(kind, el ? el.value : null, { dueAt:vadeFor(kind) });
+      if(!r.ok){ UI.toast(r.error); return; }
+      if(el) el.value = '';
+      UI.toast('Tahmin deftere yazıldı');
+      R.App.render();
+    },
+
+    async 'calib-settle'(el){
+      const id = el.dataset.id;
+      const inp = document.getElementById('ay-calib-actual-' + id);
+      const r = await R.Calib.settle(id, inp ? inp.value : null);
+      if(!r.ok){ UI.toast(r.error); return; }
+      const h = R.Calib.error(r.forecast);
+      UI.toast(h && h.type === 'ape'
+        ? 'Kapandı — sapma %' + Math.round(h.value * 100) : 'Kapandı');
+      R.App.render();
+    },
   };
+
+  /* Haftalık sayılar hafta bitmeden kapanmaz; deneme tahmini denemeyi
+     okurken kapanır, vadesi yoktur. */
+  function vadeFor(kind){
+    const bugun = U.parse(U.todayISO());
+    if(kind === 'week-minutes' || kind === 'week-plan') return U.iso(U.addDays(bugun, 7));
+    return null;
+  }
 
   const change = {
     async 'cmp-a'(el){ S.ui.compareA = el.value; R.App.render(); },
     async 'cmp-b'(el){ S.ui.compareB = el.value; R.App.render(); },
+    async 'calib-kind'(el){ S.ui.calibKind = el.value; R.App.render(); },
   };
 
   return {
@@ -32568,6 +33411,38 @@ R.App = (function(){
   /* Pencere boyutu degisince panelin capasi kayar; yeniden konumlamak
      yerine kapatmak daha durust: kullanici nereye tikladigini bilir. */
   window.addEventListener('resize', () => { if(isAppearanceOpen()) closeAppearance(); });
+
+  /* ------------------------------------------------------- sürtünme ölçümü
+
+     Sistemin kendi maliyeti de ölçülür (core/friction.js): etkileşim ve
+     görünürlük olayları sayaca dokunur, sekme arkaya gidince zincir kesilir.
+     Süreli deneme oturumu açıkken geçen süre SINAVDIR, yönetim değil.
+
+     Depoya yazma seyrektir: sürtünmeyi ölçerken sürtünme üretmemek gerekir. */
+  (function wireFriction(){
+    if(!R.Friction) return;
+    let sonYazim = 0;
+    const YAZIM_ARALIK = 30000;
+
+    function dokun(){
+      if(!S.ready) return;
+      R.Friction.tick();
+      const now = Date.now();
+      if(now - sonYazim > YAZIM_ARALIK){
+        sonYazim = now;
+        R.Friction.save();
+      }
+    }
+    ['click', 'keydown', 'input', 'scroll', 'pointerdown'].forEach(t => {
+      document.addEventListener(t, dokun, { passive:true, capture:true });
+    });
+    document.addEventListener('visibilitychange', () => {
+      if(document.hidden){ R.Friction.blur(); R.Friction.save(); }
+      else R.Friction.tick();
+    });
+    window.addEventListener('blur', () => R.Friction.blur());
+    window.addEventListener('pagehide', () => { R.Friction.blur(); R.Friction.save(); });
+  })();
 
   /* ---------- depolama sagligi ---------- */
   let lastErrorToastAt = 0;

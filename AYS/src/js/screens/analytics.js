@@ -22,6 +22,7 @@ R.Screens.analytics = (function(){
     { id:'speed',   label:'Hız ve isabet' },
     { id:'value',   label:'Konu değeri' },
     { id:'habits',  label:'Alışkanlık' },
+    { id:'durust',  label:'Dürüstlük' },
   ];
 
   function empty(text, action){
@@ -354,8 +355,125 @@ R.Screens.analytics = (function(){
     ]);
   }
 
+
+  /* ---------------------------------------------------------- dürüstlük
+
+     Bu sekme sistemin KENDİSİNİ ölçer. Üç soru sorar:
+
+       Sürtünme      Sistemi yönetmek, çalışmanın yerine mi geçiyor?
+       Ayrışma       Bir gösterge, temsil ettiği şeyden koptu mu?
+       Kalibrasyon   Aday sistemsiz de kendi durumunu biliyor mu?
+
+     Üçü de kötü çıkabilir; bu bir arıza değil, ölçüldüğü için görünür
+     olmasıdır. Sınav salonunda hiçbir ekran yoktur — orada yalnızca
+     üçüncüsü işe yarar. */
+
+  function durustTab(){
+    const f = R.Friction.verdict();
+    const rahat = R.Friction.relief();
+    const cifts = R.Goodhart.scan();
+    const ayrisan = cifts.filter(p => p.status === 'decoupled');
+    const puan = R.Calib.score();
+    const vade = R.Calib.due();
+
+    return K.Grid([
+      K.Span(6, K.Stack([
+        K.Card({ title:'Sürtünme', hint:'friction',
+          sub:'Sistemi yönetmek ile çalışmak',
+          body:html`
+            ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info', body:f.title + ' — ' + f.note })}
+            ${when(f.cert === 'measured', () => html`
+              <div class="mt-12">${K.Cols(3, [
+                K.Stat({ label:'Yönetim', value:String(f.window.perDay), note:'dk/gün' }),
+                K.Stat({ label:'Çalışma',
+                  value:String(Math.round(f.window.work / Math.max(1, f.window.measuredDays))),
+                  note:'dk/gün' }),
+                K.Stat({ label:'Yönetim payı',
+                  value:f.window.ratio == null ? '—' : '%' + Math.round(f.window.ratio * 100),
+                  tone:f.level === 'high' ? 'warn' : null }),
+              ])}</div>`)}
+            ${when(rahat.length, () => html`<div class="mt-12">
+              ${map(rahat, r => html`<div class="mt-8">
+                ${K.Notice({ tone:'info', body:r.label + ' — ' + r.note })}
+              </div>`)}</div>`)}` }),
+
+        K.Card({ title:'Gösterge ayrışması', hint:'goodhart',
+          sub:'Çaba arttı da sonuç yerinde mi saydı?',
+          body:html`
+            ${K.Table({ tight:true, headers:['Çift', 'Çaba', 'Sonuç', 'Durum'],
+              rows:cifts.map(p => [
+                p.effortLabel + ' → ' + p.outcomeLabel,
+                p.effortChange == null ? '—'
+                  : (p.effortChange === Infinity ? 'yeni' : '%' + Math.round(p.effortChange * 100)),
+                p.outcomeChange == null ? '—'
+                  : (p.outcomeChange === Infinity ? 'yeni' : '%' + Math.round(p.outcomeChange * 100)),
+                p.status === 'decoupled' ? 'ayrıştı'
+                  : p.status === 'aligned' ? 'birlikte'
+                  : p.status === 'unknown' ? 'ölçülmedi' : 'sessiz',
+              ]) })}
+            ${map(ayrisan, p => html`<div class="mt-12">
+              ${K.Notice({ tone:'warn', body:p.note })}
+              ${K.Notice({ tone:'info', body:p.question })}
+            </div>`)}
+            ${when(!ayrisan.length, () => html`<p class="tiny dim mt-10">
+              Ayrışma yok. Nöbetçinin konuşmadığı gün, iyi gündür.</p>`)}` }),
+      ])),
+
+      K.Span(6, K.Stack([
+        K.Card({ title:'Kalibrasyon', hint:'calib',
+          sub:'Sistem söylemeden önce sen söyle',
+          body:html`
+            ${K.Notice({ tone:'info', body:puan.note })}
+            ${when(puan.bias.cert === 'measured',
+              () => html`<div class="mt-8">${K.Notice({ tone:'info', body:puan.bias.note })}</div>`)}
+            <p class="tiny dim mt-10">Kendi netini önceden kestirebilmek bir
+              süs değil, sınav becerisidir: hangi testte zaman harcayacağını,
+              hangi soruyu bırakacağını ve bir denemenin kötü mü yoksa zor mu
+              olduğunu o kestirim söyler. Tahmin KÖR yazılır — net ekranda
+              dururken yazılan tahmin, tahmin değil kopyadır.</p>
+
+            <div class="mt-12">
+              ${K.Field({ label:'Ne tahmin ediyorsun?',
+                input:K.Select({ id:'ay-calib-kind', value:S.ui.calibKind || 'week-minutes',
+                  change:'calib-kind', aria:'Tahmin türü',
+                  options:R.CALIB_KINDS.map(k => ({ value:k.id, label:k.label })) }) })}
+              ${(function(){
+                const k = R.Calib.kindOf(S.ui.calibKind || 'week-minutes');
+                return html`<p class="tiny dim">${k.ask}</p>
+                  ${K.Field({ label:k.type === 'binary' ? 'Olasılık (0–1)' : 'Tahminin'
+                      + (k.unit ? ' (' + k.unit + ')' : ''),
+                    input:K.Input({ id:'ay-calib-guess', type:'number',
+                      step:k.type === 'binary' ? '0.05' : 'any' }) })}`;
+              })()}
+              ${K.Button({ label:'Tahmini kaydet', tone:'primary', act:'calib-open' })}
+            </div>
+
+            ${when(vade.length, () => html`<div class="mt-12">
+              ${map(vade, fo => html`<div class="mt-8">
+                ${K.Field({ label:(R.Calib.kindOf(fo.kind) || {}).label
+                    + ' — tahminin: ' + U.fmtNum(fo.guess),
+                  input:K.Input({ id:'ay-calib-actual-' + fo.id, type:'number', step:'any' }) })}
+                ${K.Button({ label:'Kapat', size:'sm', act:'calib-settle',
+                  data:{ 'data-id':fo.id } })}
+              </div>`)}</div>`)}
+
+            ${when(R.Calib.settled().length, () => html`<div class="mt-12">
+              ${K.Table({ tight:true,
+                headers:['Tür', { label:'Tahmin', num:true }, { label:'Gerçek', num:true },
+                  { label:'Sapma', num:true }],
+                rows:R.Calib.settled().slice(0, 10).map(fo => {
+                  const h = R.Calib.error(fo);
+                  return [(R.Calib.kindOf(fo.kind) || {}).label || fo.kind,
+                    U.fmtNum(fo.guess), U.fmtNum(fo.actual),
+                    h == null ? '—' : (h.type === 'brier' ? h.value.toFixed(2)
+                      : '%' + Math.round(h.value * 100))];
+                }) })}</div>`)}` }),
+      ])),
+    ]);
+  }
+
   const BODIES = { compare:compareTab, errors:errorsTab, rank:rankTab,
-    speed:speedTab, value:valueTab, habits:habitsTab };
+    speed:speedTab, value:valueTab, habits:habitsTab, durust:durustTab };
 
   async function render(){
     /* Kayitli sekme adi artik yoksa ilk sekmeye duser. Eskimis bir deger
@@ -370,11 +488,42 @@ R.Screens.analytics = (function(){
 
   const handle = {
     async 'analytics-tab'(el){ S.ui.analyticsTab = el.dataset.tab; R.App.render(); },
+
+    /* Tahmin KÖR açılır: gerçek değer burada hesaplanmaz. */
+    async 'calib-open'(){
+      const kind = S.ui.calibKind || 'week-minutes';
+      const el = document.getElementById('ay-calib-guess');
+      const r = await R.Calib.open(kind, el ? el.value : null, { dueAt:vadeFor(kind) });
+      if(!r.ok){ UI.toast(r.error); return; }
+      if(el) el.value = '';
+      UI.toast('Tahmin deftere yazıldı');
+      R.App.render();
+    },
+
+    async 'calib-settle'(el){
+      const id = el.dataset.id;
+      const inp = document.getElementById('ay-calib-actual-' + id);
+      const r = await R.Calib.settle(id, inp ? inp.value : null);
+      if(!r.ok){ UI.toast(r.error); return; }
+      const h = R.Calib.error(r.forecast);
+      UI.toast(h && h.type === 'ape'
+        ? 'Kapandı — sapma %' + Math.round(h.value * 100) : 'Kapandı');
+      R.App.render();
+    },
   };
+
+  /* Haftalık sayılar hafta bitmeden kapanmaz; deneme tahmini denemeyi
+     okurken kapanır, vadesi yoktur. */
+  function vadeFor(kind){
+    const bugun = U.parse(U.todayISO());
+    if(kind === 'week-minutes' || kind === 'week-plan') return U.iso(U.addDays(bugun, 7));
+    return null;
+  }
 
   const change = {
     async 'cmp-a'(el){ S.ui.compareA = el.value; R.App.render(); },
     async 'cmp-b'(el){ S.ui.compareB = el.value; R.App.render(); },
+    async 'calib-kind'(el){ S.ui.calibKind = el.value; R.App.render(); },
   };
 
   return {

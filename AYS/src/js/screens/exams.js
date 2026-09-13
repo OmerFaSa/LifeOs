@@ -366,6 +366,20 @@ R.Screens.exams = (function(){
           input:K.Input({ id:'ex-pub', placeholder:'ör. 345, Bilgi Sarmal, Endemik' }) }),
         K.Field({ label:'Toplam süre (dk)', input:K.Input({ id:'ex-dur', type:'number', numeric:true, value:165 }) }),
       ]),
+      /* KÖR NET TAHMİNİ — sonuçları yazmadan ÖNCE.
+
+         Kendi netini kestirebilmek bir süs değil sınav becerisidir: hangi
+         testte zaman harcayacağını, hangi soruyu bırakacağını ve bir
+         denemenin kötü mü yoksa zor mu olduğunu o kestirim söyler.
+
+         Alan bilerek test satırlarının ÜSTÜNDE durur. Kayıt sırasında
+         satırların o an boş olup olmadığına bakılır: sonuçlar girildikten
+         sonra yazılan bir tahmin «kör değil» işaretlenir ve kalibrasyon
+         puanına katılmaz. Tahmin değil kopya olurdu. */
+      K.Field({ label:'Netini kaç tahmin ediyorsun? (isteğe bağlı)',
+        hint:'sonuçları yazmadan önce doldur — sonra yazılan tahmin puana girmez',
+        input:K.Input({ id:'ex-guess', type:'number', step:'any',
+          placeholder:'ör. 62' }) }),
       raw('<div id="ex-tests" class="stack-sm"></div>'),
       K.Notice({ tone:'info', body:'Net otomatik hesaplanır: doğru − yanlış/4. Boş bırakılan testler kaydedilmez.' }),
     ]);
@@ -383,6 +397,26 @@ R.Screens.exams = (function(){
       const t = R.EXAM_TEMPLATES.find(x => x.id === sel.value);
       document.getElementById('ex-dur').value = t.duration;
     });
+
+    /* Tahminin KÖRLÜĞÜ yazıldığı anda ölçülür, kayıt anında değil: o an
+       satırlar boşsa tahmin gerçekten bir tahmindir. Sonradan bakıp
+       "boş mıydı" diye sormanın yolu yok — bu yüzden burada damgalanır. */
+    const tahmin = document.getElementById('ex-guess');
+    if(tahmin){
+      /* Yalnızca SONUÇ hücrelerine bakılır. Test adı alanı da `data-t`
+         taşır ve şablondan dolu gelir; ona bakmak her tahmini «kör değil»
+         yapardı. */
+      const bosMu = () => ['c', 'w', 'b'].every(k => Array.prototype.slice
+        .call(document.querySelectorAll('#ex-tests [data-t="' + k + '"]'))
+        .every(i => String(i.value).trim() === ''));
+      tahmin.dataset.rowsEmpty = 'true';
+      tahmin.addEventListener('input', () => {
+        /* Bir kez "kör değil" olan tahmin geri KÖR olamaz: satırları
+           silip tahmini düzeltmek, sonucu görmüş olmayı geri almaz. */
+        if(tahmin.dataset.rowsEmpty === 'false') return;
+        tahmin.dataset.rowsEmpty = bosMu() ? 'true' : 'false';
+      });
+    }
   }
 
   function renderTemplateRows(tmplId){
@@ -548,10 +582,31 @@ R.Screens.exams = (function(){
         publisher, duration, tests, protocol:{},
         createdAt:new Date().toISOString(), analysisCompletedAt:null,
       };
+      /* Tahmin, sonuclar YAZILMADAN once girilmis mi? Girilmediyse kayit
+         yine tutulur ama «kor degil» isaretlenir ve puana katilmaz. */
+      const tahminEl = document.getElementById('ex-guess');
+      const tahmin = tahminEl ? Number(tahminEl.value) : NaN;
+
       await M.saveExam(exam);
+
+      let kalibrasyonNotu = '';
+      if(isFinite(tahmin) && tahminEl && tahminEl.value !== ''){
+        const kor = tahminEl.dataset.rowsEmpty !== 'false';
+        const acik = await R.Calib.open('exam-net', tahmin,
+          { ref:exam.id, blind:kor });
+        if(acik.ok){
+          const kapali = await R.Calib.settle(acik.forecast.id, M.examNet(exam));
+          if(kapali.ok){
+            const h = R.Calib.error(kapali.forecast);
+            kalibrasyonNotu = ' · tahmin sapması %' + Math.round(h.value * 100)
+              + (kor ? '' : ' (kör değil, puana girmez)');
+          }
+        }
+      }
+
       UI.closeSheet();
       S.ui.examOpen = exam.id;
-      UI.toast('Deneme kaydedildi · net '+U.fmtNet(M.examNet(exam)));
+      UI.toast('Deneme kaydedildi · net ' + U.fmtNet(M.examNet(exam)) + kalibrasyonNotu);
       R.App.render();
     },
     async 'delete-exam'(el){
