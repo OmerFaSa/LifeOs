@@ -256,7 +256,10 @@ ESP.Goodhart = (function(){
     const base = { id:def.id, disc:def.disc,
       effortLabel:def.effortLabel, outcomeLabel:def.outcomeLabel,
       effort:{ prev:eC, now:yC }, outcome:{ prev:eS, now:yS },
-      question:def.question };
+      question:def.question,
+      /* Yon her satirda durur: «tanimsiz» ile «olculmedi» ayri seylerdir
+         ve arayuz ikisini ayirt edebilmeli. */
+      direction:def.direction || null, };
 
     const asgari = def.minEffort != null ? def.minEffort : ASGARI_CABA;
     if(eS == null || yS == null){

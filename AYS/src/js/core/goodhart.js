@@ -206,6 +206,9 @@ R.Goodhart = (function(){
 
     const base = { id:def.id, effortLabel:def.effortLabel,
       outcomeLabel:def.outcomeLabel, question:def.question,
+      /* Yon her satirda durur: «tanimsiz» ile «olculmedi» ayri seylerdir
+         ve arayuz ikisini ayirt edebilmeli. */
+      direction:def.direction || null,
       effort:{ prev:eC, now:yC }, outcome:{ prev:eS, now:yS } };
 
     if(eS == null || yS == null){

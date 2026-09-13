@@ -359,10 +359,11 @@ ESP.Screens.analytics = (function(){
            + 'soru sorar: ayrışmanın meşru sebepleri vardır.',
         wide:true,
         body:bayraklar.length
-          ? K.Table({ tight:true,
-              headers:['Çift', 'Çaba', 'Sonuç', 'Durum'],
+          ? html`${K.Table({ tight:true,
+              headers:['Çift', 'Yön', 'Çaba', 'Sonuç', 'Durum'],
               rows:bayraklar.map(p => [
                 p.effortLabel + ' → ' + p.outcomeLabel,
+                (ESP.Goodhart.DIRECTIONS[p.direction] || {}).label || 'tanımsız',
                 p.effortChange == null ? P.cert(p.cert === 'missing' ? 'missing' : 'estimated')
                   : (p.effortChange === Infinity ? 'yeni' : '%' + Math.round(p.effortChange * 100)),
                 p.outcomeChange == null ? P.cert('missing')
@@ -370,7 +371,18 @@ ESP.Screens.analytics = (function(){
                 p.status === 'decoupled' ? 'ayrıştı'
                   : p.status === 'aligned' ? 'birlikte'
                   : p.status === 'unknown' ? 'ölçülmedi' : 'sessiz',
-              ]) })
+              ]) })}
+            <p class="small muted mt-8">«Yön» sütunu sonucun hangi tarafa
+              gitmesinin iyi sayıldığını söyler. Yönü tanımsız bir çift
+              değerlendirilmez: sistem yüksek olanın iyi olduğunu VARSAYMAZ.</p>
+            ${(function(){
+              const pol = ESP.Goodhart.policy();
+              return html`<p class="small muted mt-8">Pencere ${pol.windowDays} gün ·
+                çaba artışı eşiği %${Math.round(pol.effortRiseThreshold * 100)} ·
+                sonuç durgunluk eşiği %${Math.round(pol.stagnationThreshold * 100)} ·
+                asgari çaba ${pol.minEffortMinutes} dk. Bu sayılar bir bulgu
+                değil bu yazılımın ayarıdır: ${pol.rationale}</p>`;
+            })()}`
           : K.Empty({ text:'Açık bölüm yok; nöbetçinin bakacağı çift de yok.' }),
       }),
 

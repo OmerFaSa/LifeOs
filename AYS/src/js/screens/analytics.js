@@ -454,9 +454,10 @@ R.Screens.analytics = (function(){
         K.Card({ title:'Gösterge ayrışması', hint:'goodhart',
           sub:'Çaba arttı da sonuç yerinde mi saydı?',
           body:html`
-            ${K.Table({ tight:true, headers:['Çift', 'Çaba', 'Sonuç', 'Durum'],
+            ${K.Table({ tight:true, headers:['Çift', 'Yön', 'Çaba', 'Sonuç', 'Durum'],
               rows:cifts.map(p => [
                 p.effortLabel + ' → ' + p.outcomeLabel,
+                (R.Goodhart.DIRECTIONS[p.direction] || {}).label || 'tanımsız',
                 p.effortChange == null ? '—'
                   : (p.effortChange === Infinity ? 'yeni' : '%' + Math.round(p.effortChange * 100)),
                 p.outcomeChange == null ? '—'
@@ -465,6 +466,17 @@ R.Screens.analytics = (function(){
                   : p.status === 'aligned' ? 'birlikte'
                   : p.status === 'unknown' ? 'ölçülmedi' : 'sessiz',
               ]) })}
+            <p class="tiny dim mt-8">«Yön» sütunu sonucun hangi tarafa gitmesinin
+              iyi sayıldığını söyler. Yönü tanımsız bir çift değerlendirilmez:
+              sistem yüksek olanın iyi olduğunu VARSAYMAZ.</p>
+            ${(function(){
+              const pol = R.Goodhart.policy();
+              return html`<p class="tiny dim mt-8">Pencere ${pol.windowDays} gün ·
+                çaba artışı eşiği %${Math.round(pol.effortRiseThreshold * 100)} ·
+                sonuç durgunluk eşiği %${Math.round(pol.stagnationThreshold * 100)} ·
+                asgari çaba ${pol.minEffortMinutes} dk. Bu sayılar bir bulgu
+                değil bu yazılımın ayarıdır: ${pol.rationale}</p>`;
+            })()}
             ${map(ayrisan, p => html`<div class="mt-12">
               ${K.Notice({ tone:'warn', body:p.note })}
               ${K.Notice({ tone:'info', body:p.question })}
