@@ -56,9 +56,11 @@ node tools/runtests.js       # birim testleri
 SPİ ve ESP ayrıca gerçek uygulamayı gezen denetimler taşır:
 
 ```bash
-node tools/smoke.js          # ekranları gezer, akışları dener
+node tools/smoke.js          # ekranları ve sekmeleri gezer, akışları dener
 node tools/a11ycheck.js      # erişilebilirlik — çizilen sayfadan
 node tools/palettecheck.js   # bütün paletlerde kontrastı ölçer
+node tools/perfcheck.js      # ağır veriyle çizim maliyeti (yalnız ESP)
+node tools/layoutcheck.js    # 390 pikselde taşma ve dokunma hedefi (yalnız ESP)
 node tools/ledgercheck.js    # defter düzenini denetler (yalnız SPİ)
 ```
 

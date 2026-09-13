@@ -505,11 +505,18 @@ node tools/palettecheck.js   # kontrast
 
 | Ölçüm | Sonuç |
 |---|---|
-| Birim testi | **343/343** geçiyor |
+| Birim testi | **381/381** geçiyor |
 | Duman testi | temiz — 14 ekran, **75 sekme**, kaynak + `dist/esp.html` |
 | Erişilebilirlik | temiz (4 bilinen eksik izin listesinde) |
 | Kontrast | **1848 ölçüm**, hepsi AA — en dar pay 4,52 (asgari 4,5) |
+| Çizim maliyeti | ağır veriyle en ağır ekran **66 ms** (bütçe 100) |
+| Telefon düzeni | 390 pikselde **89 yer**: taşma yok, hedefler ≥ 24 px |
 | Tek dosya dağıtım | ~1,2 MB, 65 js modülü |
+
+Duman testi üç şeyi daha denetler ve üçü de ölçülmüş birer olaydan doğdu:
+**metinde sızıntı** (çizilen metinde «undefined», «NaN», «[object Object]»),
+**ölü düğme** (karşılığı olmayan `data-act` — tıklanır, hiçbir şey olmaz) ve
+**eksik ipucu** (karşılığı olmayan `data-hint` düğmesi hiç çizilmez).
 
 Duman testi artık **sekmeleri de gezer**: ekranın açılması ikinci sekmesinin
 çizildiğini söylemez ve çoğu ekranda içeriğin yarısı ilk sekmede değil.

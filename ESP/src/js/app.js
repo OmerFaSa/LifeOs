@@ -1266,6 +1266,14 @@ ESP.App = (function(){
   }
 
   /* ------------------------------------------------------------------ açılış */
+  /* Denetim betikleri (tools/smoke.js) ortak eylem adlarini bilmeli:
+     karsiligi olmayan bir `data-act`, tiklaninca hicbir sey yapmayan bir
+     dugme demektir ve bu SESSIZCE olur — kullanici tiklar, bir sey olmaz,
+     bir kez daha tiklar. Liste burada uretilir ki ikinci bir yerde elle
+     tutulmasin ve eskimesin. */
+  window.__ESP_GLOBAL_ACTS__ = Object.keys(globalHandle);
+  window.__ESP_GLOBAL_CHANGES__ = Object.keys(globalChange);
+
   async function boot(){
     try{
       /* Arayüz Türkçe: CSS büyük harfe çevirirken "i" → "İ" olsun.

@@ -100,6 +100,41 @@ async function walkScreens(page, base, target, errors){
       sekme++;
     }
 
+    /* OLU DUGME: `data-act` degeri hicbir yerde karsiligi olmayan bir
+       dugme SESSIZCE hicbir sey yapmaz — tiklanir, bir sey olmaz, kullanici
+       iki kez tiklar. Bir harf hatasi (desk-tab / desk-tabs) burada
+       gorunmezdi; artik goruluyor. */
+    const oluEylem = await page.evaluate(() => {
+      const sc = ESP.Screens[ESP.S.route] || {};
+      const ekran = Object.keys(sc.handle || {});
+      const genel = (window.__ESP_GLOBAL_ACTS__ || []);
+      const bilinen = ekran.concat(genel);
+      const out = [];
+      document.querySelectorAll('[data-act]').forEach(el => {
+        const a = el.getAttribute('data-act');
+        if(a && bilinen.indexOf(a) < 0 && out.indexOf(a) < 0) out.push(a);
+      });
+      return out;
+    });
+    oluEylem.forEach(a => errors.push(target + ' · ' + r + ': ölü düğme — data-act="' + a + '"'));
+
+    /* Ayni sey degisim kancalari icin: `data-change` karsiligi yoksa alan
+       yazilir ama hicbir yere islenmez. */
+    const oluDegisim = await page.evaluate(() => {
+      const sc = ESP.Screens[ESP.S.route] || {};
+      const ekran = Object.keys(sc.change || {});
+      const genel = (window.__ESP_GLOBAL_CHANGES__ || []);
+      const bilinen = ekran.concat(genel);
+      const out = [];
+      document.querySelectorAll('[data-change]').forEach(el => {
+        const a = el.getAttribute('data-change');
+        if(a && bilinen.indexOf(a) < 0 && out.indexOf(a) < 0) out.push(a);
+      });
+      return out;
+    });
+    oluDegisim.forEach(a => errors.push(target + ' · ' + r
+      + ': ölü alan — data-change="' + a + '"'));
+
     /* METINDE SIZINTI: "undefined", "NaN", "[object Object]" ya da "null"
        cizilmis olmasi bir bicim hatasi degil bir VERI hatasidir — cogu
        zaman olmayan bir alani okumaktan gelir ve ekranda kullaniciya

@@ -5269,6 +5269,34 @@ body.is-dragging .drop.is-over{
 @media (max-width:520px){
   .prop__kind, .wpday__date{ flex:0 0 100%; }
 }
+
+/* =================================================== telefon düzeni düzeltmeleri
+
+   Ölçülerek bulundu (tools/layoutcheck.js, 390 piksel):
+
+   1. Onay kutusu 15×15 idi. WCAG 2.2'nin asgari dokunma hedefi 24×24 ve
+      telefonda 15 piksellik bir kutuya isabet ettirmek bir beceri sınavı.
+      Kutunun kendisi büyütülmez — GÖRSEL boyutu korunur, DOKUNMA alanı
+      büyür: etiketin tamamı zaten tıklanabilir, ona yükseklik verilir.
+   2. Kırılmayan uzun bir bağlantı (120 karakterlik URL) satırı 517 piksel
+      taşırıyordu. Taşma telefonda bir hata değil bir ENGELDİR: sayfa sağa
+      kayınca soldaki künye sütunu ekrandan çıkar ve kullanıcı ne okuduğunu
+      kaybeder. */
+.check{ min-height:24px; align-items:center; }
+.check input{ width:18px; height:18px; margin-top:0; }
+/* Dokunma alanı görünen kutudan büyüktür: görsel küçük kalır, hedef büyür. */
+.check input::before{
+  content:''; position:absolute; inset:-4px;
+}
+.check input{ position:relative; }
+
+/* Kırılmayan uzun dizeler (URL, uzun kelime) satırı taşırmaz. Yalnızca
+   taşıyabilecek yerlerde: gövde metninde `anywhere` kelime ortasından
+   böler ve okumayı bozar. */
+.asrow__body, .asrow__text, .noterow__text, .evrow__body,
+.rx__task, .prop__why, .unit__items span{
+  overflow-wrap:anywhere;
+}
 </style>
 <div id="app">
   <div class="boot">
@@ -5289,7 +5317,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'5e9dd04', at:'2026-09-13 03:15', dirty:true };
+SP.BUILD = { id:'d55f386', at:'2026-09-13 03:30', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -26338,6 +26366,14 @@ ESP.App = (function(){
   }
 
   /* ------------------------------------------------------------------ açılış */
+  /* Denetim betikleri (tools/smoke.js) ortak eylem adlarini bilmeli:
+     karsiligi olmayan bir `data-act`, tiklaninca hicbir sey yapmayan bir
+     dugme demektir ve bu SESSIZCE olur — kullanici tiklar, bir sey olmaz,
+     bir kez daha tiklar. Liste burada uretilir ki ikinci bir yerde elle
+     tutulmasin ve eskimesin. */
+  window.__ESP_GLOBAL_ACTS__ = Object.keys(globalHandle);
+  window.__ESP_GLOBAL_CHANGES__ = Object.keys(globalChange);
+
   async function boot(){
     try{
       /* Arayüz Türkçe: CSS büyük harfe çevirirken "i" → "İ" olsun.
