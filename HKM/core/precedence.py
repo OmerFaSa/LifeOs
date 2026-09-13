@@ -37,30 +37,30 @@ def resolve(bio=None, academic=None, intellect=None, payloads=None):
 
     if bio and vp_bio.red_flag(bio):
         return _proposal(1,
-            "Fiziksel sermaye cokus esiginde. Bugunku agir yuku yarina "
-            "ertelenmesini oneririm; onaylarsan yerine hafif konu tekrari koyarim.")
+            "Fiziksel sermaye çöküş eşiğinde. Bugünkü ağır yükün yarına "
+            "ertelenmesini öneririm; onaylarsan yerine hafif konu tekrarı koyarım.")
 
     days = vp_academic.deadline_days(payloads.get("ays"))
     if days is not None and days <= DEADLINE_NEAR_DAYS:
         return _proposal(2,
-            "Sinava %d gun kaldi. Bugunun merkezine AYS'yi almani oneririm."
+            "Sınava %d gün kaldı. Bugünün merkezine AYS'yi almanı öneririm."
             % int(days))
 
     if academic and any(f["code"] in ("questions_low", "study_low", "net_drop")
                         for f in academic["findings"]):
         return _proposal(3,
-            "AYS'nin gunluk tabani karsilanmadi. Once oradaki acigi kapatmani "
-            "oneririm.")
+            "AYS'nin günlük tabanı karşılanmadı. Önce oradaki açığı kapatmanı "
+            "öneririm.")
 
     if intellect and vp_intellect.blocked_core(intellect):
         return _proposal(4,
-            "ESP'nin temeli tikali: vadesi gecmis kartlar yeni icerigin onunde. "
-            "Once tekrar oturumunu kapatmani oneririm.")
+            "ESP'nin temeli tıkalı: vadesi geçmiş kartlar yeni içeriğin önünde. "
+            "Önce tekrar oturumunu kapatmanı öneririm.")
 
     if intellect and any(f["code"] in ("practice_low", "synthesis_gap")
                          for f in intellect["findings"]):
         return _proposal(5,
-            "Temel acik degil; ESP'de yeni icerige gecebilirsin. Sentez acigini "
-            "kapatmakla baslamani oneririm.")
+            "Temel açık değil; ESP'de yeni içeriğe geçebilirsin. Sentez açığını "
+            "kapatmakla başlamanı öneririm.")
 
     return None

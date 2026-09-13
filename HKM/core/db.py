@@ -131,3 +131,56 @@ def sources_of(con, decision_id):
         "WHERE ds.decision_id=? ORDER BY a.id", (decision_id,)
     ).fetchall()
     return [dict(r) for r in rows]
+
+
+def events_between(con, start, end, module=None):
+    """[start, end] araligindaki ham olaylar — eskiden yeniye.
+
+    Ham olay SILINMEZ ve OZETLENMEZ: ikizin butun resmi buradan turetilir,
+    turetilmis bir tablodan degil. Turetilmis tabloyu duzeltmek mumkun,
+    kaybolan ham olayi geri getirmek degildir."""
+    q = ("SELECT * FROM raw_events WHERE date BETWEEN ? AND ? "
+         + ("AND module=? " if module else "")
+         + "ORDER BY date, id")
+    args = (start, end, module) if module else (start, end)
+    rows = con.execute(q, args).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["payload"] = json.loads(d["payload"])
+        out.append(d)
+    return out
+
+
+def latest_payloads(con, date):
+    """Gunun her modulu icin EN SON gonderilen govde.
+
+    Brifing bunu kullanir: ayni gun iki kez gonderilen bir govdenin
+    ikincisi birincisini gecersiz kilar, ama birincisi ambarda durur."""
+    out = {}
+    for e in events_between(con, date, date):
+        out[e["module"]] = e["payload"]
+    return out
+
+
+def decisions_of(con, date):
+    """Gunun butun onerileri — reddedilenler dahil, eskiden yeniye.
+
+    Reddedilen oneri silinmez: bir katmanin neyi onerdigi ve kullanicinin
+    neyi reddettigi, sonradan o katmani denetlemenin tek yoludur."""
+    rows = con.execute(
+        "SELECT * FROM decisions WHERE date=? ORDER BY id", (date,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def open_decision(con, date, proposal):
+    """Ayni gun ayni cumleyle duran, henuz reddedilmemis oneri."""
+    row = con.execute(
+        "SELECT * FROM decisions WHERE date=? AND proposal=? AND state<>'declined' "
+        "ORDER BY id DESC LIMIT 1", (date, proposal)).fetchone()
+    return dict(row) if row else None
+
+
+def decision(con, decision_id):
+    row = con.execute("SELECT * FROM decisions WHERE id=?", (decision_id,)).fetchone()
+    return dict(row) if row else None

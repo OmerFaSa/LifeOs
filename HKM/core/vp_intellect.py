@@ -41,7 +41,7 @@ def audit(payload, th=None):
         missing.append("synthesis_gap_days")
     elif g >= t["synthesis_gap_days"]:
         findings.append(finding("synthesis_gap",
-            "En eski baglanmamis not %g gunluk — esik %g."
+            "En eski bağlanmamış not %g günlük — eşik %g."
             % (g, t["synthesis_gap_days"]), "warn", "synthesis_gap_days", gc))
 
     return {"vp": VP, "module": MODULE,

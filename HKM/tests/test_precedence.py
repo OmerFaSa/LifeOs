@@ -68,7 +68,7 @@ def run():
                      {"bio": bio_ok, "academic": ac_ok, "intellect": int_new}):
             p = precedence.resolve(**args)
             t = p["proposal"].lower()
-            ok("oneririm" in t, "cumle oneri kipinde degil: " + p["proposal"])
+            ok("öneririm" in t, "cumle oneri kipinde degil: " + p["proposal"])
             m = BUYURGAN_RE.search(t)
             assert not m, "emir kipi sizdi (%s): %s" % (m.group(0), p["proposal"])
     test("her oneri emir degil oneri kipinde", t_proposal_not_command)

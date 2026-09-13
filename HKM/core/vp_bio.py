@@ -21,7 +21,7 @@ def audit(payload, th=None):
         missing.append("sleep_hours")
     elif sleep < t["sleep_hours_critical"]:
         findings.append(finding("sleep_critical",
-            "Uyku %.1f saat — kritik esigin (%.1f) altinda." % (sleep, t["sleep_hours_critical"]),
+            "Uyku %.1f saat — kritik eşiğin (%.1f) altında." % (sleep, t["sleep_hours_critical"]),
             "danger", "sleep_hours", sc))
     elif sleep < t["sleep_hours_min"]:
         findings.append(finding("sleep_low",
@@ -44,7 +44,7 @@ def audit(payload, th=None):
         drop = (base - hrv) / base * 100.0
         if drop >= t["hrv_drop_pct"]:
             findings.append(finding("hrv_drop",
-                "HRV tabana gore %%%.0f dusuk." % drop, "warn", "hrv", hc))
+                "HRV tabana göre %%%.0f düşük." % drop, "warn", "hrv", hc))
 
     return {"vp": VP, "module": MODULE,
             "verdict": verdict_of(findings, missing),

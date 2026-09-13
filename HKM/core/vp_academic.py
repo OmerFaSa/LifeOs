@@ -20,7 +20,7 @@ def audit(payload, th=None):
         missing.append("questions")
     elif q < t["questions_min"]:
         findings.append(finding("questions_low",
-            "Soru sayisi %g — taban %g." % (q, t["questions_min"]),
+            "Soru sayısı %g — taban %g." % (q, t["questions_min"]),
             "warn", "questions", qc))
 
     mins, mc = read(payload, "study_minutes")
@@ -28,7 +28,7 @@ def audit(payload, th=None):
         missing.append("study_minutes")
     elif mins < t["study_minutes_min"]:
         findings.append(finding("study_low",
-            "Calisma %g dakika — taban %g." % (mins, t["study_minutes_min"]),
+            "Çalışma %g dakika — taban %g." % (mins, t["study_minutes_min"]),
             "warn", "study_minutes", mc))
 
     net, nc = read(payload, "mock_net")
@@ -39,7 +39,7 @@ def audit(payload, th=None):
         drop = (base - net) / base * 100.0
         if drop >= t["net_drop_pct"]:
             findings.append(finding("net_drop",
-                "Deneme neti tabana gore %%%.0f dusuk." % drop,
+                "Deneme neti tabana göre %%%.0f düşük." % drop,
                 "warn", "mock_net", nc))
 
     return {"vp": VP, "module": MODULE,

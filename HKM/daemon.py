@@ -3,10 +3,14 @@
 
     python daemon.py            # http://127.0.0.1:4200
 
-Uc ucnokta:
-    POST /api/sync/<modul>      etiketli metrikleri yutar (202 / 422)
-    GET  /api/briefing?date=    gunun VP raporu ve onerisi
-    GET  /api/health            token istemez
+Ucnoktalar:
+    POST /api/sync/<modul>          etiketli metrikleri yutar (202 / 422)
+    GET  /api/briefing?date=        gunun brifingi: VP raporlari + TEK oneri
+    GET  /api/twin?date=&days=      dijital ikiz: son N gunun tek resmi
+    GET  /api/decisions?date=       gunun butun onerileri (reddedilenler dahil)
+    POST /api/decision/<id>/accept  oneriyi kabul et
+    POST /api/decision/<id>/decline oneriyi reddet — kayit silinmez
+    GET  /api/health                token istemez
 
 Dis dunyaya acilmaz: host varsayilani 127.0.0.1'dir ve config.json ile
 degistirilmesi bilincli bir karardir.
@@ -22,7 +26,7 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import db, precedence, sync_engine, thresholds  # noqa: E402
+from core import db, manager, sync_engine, thresholds, twin  # noqa: E402
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -36,13 +40,14 @@ def load_config():
     return cfg
 
 
-def briefing(con, date, th=None):
-    audits = sync_engine.latest_audits(con, date)
-    prop = precedence.resolve(
-        bio=audits.get("bio"), academic=audits.get("academic"),
-        intellect=audits.get("intellect"))
-    return {"date": date, "audits": audits, "proposal": prop,
-            "precedence": precedence.PRECEDENCE}
+def briefing(con, date, th=None, days=twin.WINDOW_DAYS):
+    """Brifing artik Yoneticiden gecer.
+
+    Onceki hali onceligi ham VP raporlarindan hesapliyor ama gunun
+    govdesini precedence'a GECIRMIYORDU: «sabit takvim» sirasi (rank 2)
+    boylece uretimde hic ateslenmiyordu — testte gecen bir yol, uretimde
+    olu bir yoldu. manager.brief() govdeleri de tasir."""
+    return manager.brief(con, date, th=th, days=days)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -84,16 +89,39 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"ok": True, "service": "hkm"})
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
+        q = parse_qs(u.query)
+        date = (q.get("date") or [datetime.date.today().isoformat()])[0]
         if u.path == "/api/briefing":
-            q = parse_qs(u.query)
-            date = (q.get("date") or [datetime.date.today().isoformat()])[0]
-            return self._send(200, briefing(self.con, date))
+            return self._send(200, briefing(self.con, date,
+                                            th=self.server.thresholds))
+        if u.path == "/api/twin":
+            try:
+                days = int((q.get("days") or [twin.WINDOW_DAYS])[0])
+            except ValueError:
+                return self._send(400, {"error": "days bir sayi olmali"})
+            days = max(1, min(days, 365))
+            return self._send(200, twin.snapshot(self.con, date, days))
+        if u.path == "/api/decisions":
+            return self._send(200, {"date": date,
+                                    "decisions": db.decisions_of(self.con, date),
+                                    "current": db.current_decision(self.con, date)})
         return self._send(404, {"error": "yok"})
 
     def do_POST(self):
         u = urlparse(self.path)
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
+        if u.path.startswith("/api/decision/"):
+            parca = u.path.strip("/").split("/")
+            if len(parca) != 4 or parca[3] not in ("accept", "decline"):
+                return self._send(404, {"error": "yok"})
+            try:
+                did = int(parca[2])
+            except ValueError:
+                return self._send(400, {"error": "oneri kimligi sayi olmali"})
+            durum = "accepted" if parca[3] == "accept" else "declined"
+            res = manager.respond(self.con, did, durum)
+            return self._send(res["status"], res)
         if not u.path.startswith("/api/sync/"):
             return self._send(404, {"error": "yok"})
         n = int(self.headers.get("Content-Length") or 0)

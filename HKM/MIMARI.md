@@ -6,10 +6,10 @@ LifeOS'un dördüncü katmanı. AYS, SPİ ve ESP kendi alanlarında egemen, sıf
 bağımlılıklı, tarayıcıda koşan üç ayrı sistemdir. HKM onların **üstünde
 değil, yanında** duran isteğe bağlı bir servistir.
 
-**Bu klasör şu an bir İSKELETTİR.** Faz 1–2 (çekirdek şema, sync, VP
-konseyi, öncelik sırası) yazıldı ve **36/36 testi geçiyor**; Faz 3–6
-(Yönetici, Telegram, WhatsApp, ses, tam döngü) yazılmadı. Şu anki odak
-ESP'dir; HKM sonra.
+**Bu klasör hâlâ bir İSKELETTİR ama artık bir döngüsü var.** Faz 1–3
+(çekirdek şema, sync, VP konseyi, öncelik sırası, dijital ikiz, Yönetici ve
+öneri yaşam döngüsü) yazıldı ve **70/70 testi geçiyor**; Faz 4–6 (Telegram,
+WhatsApp, ses, üç arayüze beacon) yazılmadı.
 
 ---
 
@@ -139,19 +139,68 @@ Uç noktalar:
 |---|---|
 | `GET /api/health` | token istemez, yalnızca «ayakta mı» der |
 | `POST /api/sync/<modul>` | etiketli metrikleri yutar — `202` ya da `422` |
-| `GET /api/briefing?date=` | günün VP raporu ve **tek** önerisi |
+| `GET /api/briefing?date=` | günün brifingi: VP raporları, dayanak ve **tek** öneri |
+| `GET /api/twin?date=&days=` | dijital ikiz — son N günün tek resmi |
+| `GET /api/decisions?date=` | günün bütün önerileri, reddedilenler dahil |
+| `POST /api/decision/<id>/accept` | öneriyi kabul eder |
+| `POST /api/decision/<id>/decline` | öneriyi reddeder — **kayıt silinmez** |
 
 Daemon `ThreadingHTTPServer`'dır ve SQLite bağlantısı **iş parçacığına
 bağlıdır**: paylaşılan tek bağlantı ilk eş zamanlı istekte `SQLite objects
 created in a thread…` ile patlıyordu.
 
+## 8.5 Dijital ikiz ve Yönetici (Faz 3)
+
+### `core/twin.py` — bir resim, üç modül
+
+İkiz, `raw_events`'ten **türetilmiş** bir görüntüdür; ayrı bir tabloya
+yazılmaz. Yazılsaydı iki gerçek olurdu ve hangisinin doğru olduğu
+sorulurdu.
+
+Üç kural:
+
+1. **Eksik veri sıfır değildir** — ve iki ayrı körlük ayrı yazılır:
+   bir metrik hiç gönderilmediyse «hiç görülmedi» (modülün sessizliği),
+   gönderilip boş geldiyse «veri yok» (kullanıcının boş günü).
+2. **Etiket resmin parçasıdır.** Kapsama tablosu «bu brifing neye
+   dayanıyor» sorusunun cevabıdır; bir kalite notu değildir.
+3. **Yön, yeterli nokta yoksa söylenmez.** Taban dört ölçümdür; altında
+   yön «bilinmiyor»dur, ve %10'un altındaki fark «yerinde sayıyor»dur.
+   İki noktadan trend çıkarmak, gürültüyü bulgu diye sunmaktır.
+
+### `core/manager.py` — karar üretmez, karar taşır
+
+Yönetici bir **dil modeli değildir** ve bir model katmanı **import etmez**;
+`tests/test_manager.py` bunu her koşumda denetler. Bir model eklenecekse
+yeri burası değil, bu brifingi yeniden ifade edecek ayrı bir katmandır — ve
+o katman sayı üretemez.
+
+Dört kural:
+
+1. **Cümle emir değil öneridir.** Üretilen her satır buyurgan kelime
+   denetçisinden geçer. Geçemeyen satır **sessizce düzeltilmez**: düşürülür
+   ve düşürüldüğü brifingde yazar (`dropped[]`). Sessiz yeniden yazım
+   anlamı tersine çevirebilir.
+2. **Günde tek öneri.** İkinci bir öneri, birincinin önceliğini yok eder.
+3. **Kaynak görünür.** Her öneri `decision_sources` üzerinden hangi VP
+   denetimlerinden doğduğunu taşır.
+4. **Reddedilen öneri silinmez.** Bir katmanın neyi önerdiği ve kullanıcının
+   neyi reddettiği, o katmanı sonradan denetlemenin tek yoludur. Aynı cümle
+   gün içinde iki kez yazılmaz; reddedilmiş bir cümle yeniden önerilebilir.
+
+Faz 3 sırasında bulunan bir hata: brifing, önceliği hesaplarken günün
+**gövdesini** `precedence.resolve`'a geçirmiyordu. «Dış dünyanın sabit
+takvimi» (sıra 2) testte geçiyor ama üretimde hiç ateşlenmiyordu — testte
+yaşayan, üretimde ölü bir yol. Artık gövdedeki metrikler de taşınıyor ve
+`test_manager.py` bunu ayrıca denetliyor.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |
 |---|---|---|
-| 1 | Çekirdek daemon, SQLite şeması, bearer'lı sync | **yazıldı, 36 test** |
-| 2 | Başkan Yardımcıları (VP) + öncelik sırası | **yazıldı, 36 test** |
-| 3 | Dijital İkiz & sentez (Yönetici) | yapılacak |
+| 1 | Çekirdek daemon, SQLite şeması, bearer'lı sync | **yazıldı** |
+| 2 | Başkan Yardımcıları (VP) + öncelik sırası | **yazıldı** |
+| 3 | Dijital İkiz, Yönetici, öneri yaşam döngüsü | **yazıldı, 70 test** |
 | 4 | Telegram ağ geçidi | yapılacak |
 | 5 | WhatsApp & ses | yapılacak |
 | 6 | Üç arayüze best-effort beacon | yapılacak |
