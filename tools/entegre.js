@@ -179,6 +179,64 @@ async function main(){
     if(!kapsam) hatalar.push('HKM ikizi bos: hicbir etiketli metrik ambara girmedi');
     else console.log('  HKM → brifing ' + (b.lines || []).length + ' satir · ikiz '
       + kapsam + ' metrik · oneri: ' + (b.proposal ? 'rank ' + b.proposal.rank : 'yok'));
+    /* 6 — Tam dongu: veri → oneri → KULLANICININ CEVABI.
+       Gercek arayuzlerden gelen bos profiller bulgu uretmez (ve uretmemeli:
+       veri yoklugu anomali degildir). Donguyu uctan uca denemek icin
+       SENTETIK bir kirmizi bayrak gonderilir — bu, uc sistemin verisi
+       degil, HKM'nin kendi yolunu denemek icindir. */
+    const sentetik = await hkmFetch('/api/sync/spi', {
+      method:'POST',
+      body:JSON.stringify({ date:BUGUN, metrics:{
+        sleep_hours:{ value:4.0, cert:'measured' },
+        recovery:{ value:30, cert:'computed' } } }),
+    });
+    if(sentetik.status !== 202) hatalar.push('sentetik kirmizi bayrak yutulmadi: ' + sentetik.status);
+    const b2 = await (await hkmFetch('/api/briefing?date=' + BUGUN)).json();
+    if(!b2.proposal || b2.proposal.rank !== 1){
+      hatalar.push('kirmizi bayrak birinci sirayi tetiklemedi');
+    }else{
+      console.log('  HKM → sentetik kirmizi bayrak: oncelik 1, oneri ' + b2.decision.id);
+    }
+
+    /* 7 — HKM'nin kendi yuzu: gercek tarayicida acilir, jeton girilir,
+       brifing cizilir ve oneri varsa cevaplanabilir. Yuklenmeyen bir
+       sayfa curur; bu yuzden denetim sayfayi da gezer. */
+    const yuz = await browser.newPage();
+    const yuzHata = [];
+    yuz.on('pageerror', e => yuzHata.push(String(e.message)));
+    await yuz.goto('http://127.0.0.1:' + HKM_PORT + '/', { waitUntil:'load' });
+    await yuz.waitForSelector('#giris', { timeout:10000 });
+    await yuz.fill('#token', TOKEN);
+    await yuz.click('#gir');
+    await wait(900);
+    const ekran = await yuz.evaluate(() => ({
+      brifing:(document.querySelector('#brifing') || {}).textContent || '',
+      ikiz:(document.querySelector('#ikiz') || {}).textContent || '',
+      gecmis:(document.querySelector('#gecmis') || {}).textContent || '',
+      girisAcik:!document.querySelector('#giris').hidden,
+    }));
+    if(ekran.girisAcik) hatalar.push('HKM yuzu: dogru jetonla bile giris ekraninda kaldi');
+    if(ekran.brifing.length < 40) hatalar.push('HKM yuzu: brifing cizilmedi');
+    if(ekran.ikiz.indexOf('metriğe dayanıyor') < 0) hatalar.push('HKM yuzu: ikiz cizilmedi');
+    if(ekran.gecmis.length < 20) hatalar.push('HKM yuzu: oneri gecmisi cizilmedi');
+    if(yuzHata.length) hatalar.push('HKM yuzu: sayfa hatasi — ' + yuzHata[0]);
+    else console.log('  HKM yuzu → brifing, ikiz ve oneri gecmisi cizildi');
+
+    /* Oneri yuzden CEVAPLANABILIYOR mu? Cevaplanamayan bir oneri, oneri
+       degil bildirimdir. */
+    const buton = await yuz.$('[data-cevap="accept"]');
+    if(!buton){
+      hatalar.push('HKM yuzu: oneri cevaplanabilir degil (kabul dugmesi yok)');
+    }else{
+      await buton.click();
+      await wait(700);
+      const kabul = await (await hkmFetch('/api/decisions?date=' + BUGUN)).json();
+      if(!kabul.current) hatalar.push('HKM yuzu: kabul kaydedilmedi');
+      else console.log('  HKM yuzu → oneri kabul edildi (karar ' + kabul.current.id + ')');
+      const kalan = (kabul.decisions || []).filter(d => d.state === 'declined');
+      if(kalan.length) console.log('  · reddedilen ' + kalan.length + ' oneri kaydi da duruyor');
+    }
+    await yuz.close();
   }catch(err){
     hatalar.push('kosum hatasi: ' + (err && err.message ? err.message : err));
   }finally{

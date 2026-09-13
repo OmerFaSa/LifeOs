@@ -126,6 +126,22 @@ def run():
             eq(S.call("/api/twin?date=%s&days=abc" % BUGUN)[0], 400)
         test("ikiz ucnoktasi calisir ve bozuk gunu reddeder", t_twin_endpoint)
 
+        def t_page_served_without_token():
+            """Sayfanin KENDISI veri tasimaz; veri /api/* uzerinden gelir
+            ve orasi jeton ister. Yuzu jeton arkasina koymak, kullaniciyi
+            jetonu bir yere yapistirmadan once hicbir sey goremez birakirdi."""
+            req = urllib.request.Request(S.url("/"))
+            with urllib.request.urlopen(req, timeout=10) as r:
+                govde = r.read().decode("utf-8")
+                eq(r.status, 200)
+                ok("text/html" in r.headers.get("Content-Type", ""))
+            ok("HKM" in govde)
+            # Sayfa hicbir sayi HESAPLAMAZ: kural motoru otoritedir.
+            no("Math.round" in govde, "yuz kendi sayisini uretiyor")
+            # Ve hicbir jeton gomulu degildir.
+            no(TOKEN in govde, "jeton sayfaya gomulmus")
+        test("yerel yuz jetonsuz servis edilir", t_page_served_without_token)
+
         def t_unknown_path():
             eq(S.call("/api/yok")[0], 404)
             eq(S.call("/api/yok", body={})[0], 404)

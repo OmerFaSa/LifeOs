@@ -130,8 +130,10 @@ notunda (`NOTLAR.md` §18.5) gerekçelendirilmişti:
 ```bash
 cd HKM
 cp config.example.json config.json    # local_token'ı uzun rastgele bir dizeyle değiştir
-python3 daemon.py                     # http://127.0.0.1:4200
-python3 -m tests.run                  # 36 test: VP, sync, şema, öncelik
+python3 daemon.py                     # http://127.0.0.1:4200 (yüz de burada)
+python3 -m tests.run                  # 74 test: VP, sync, şema, öncelik,
+                                      # ikiz, Yönetici, daemon ve yüz
+node ../tools/entegre.js              # üç arayüz + HKM: uçtan uca
 ```
 
 Uç noktalar:
@@ -139,6 +141,7 @@ Uç noktalar:
 | Yol | Ne yapar |
 |---|---|
 | `GET /api/health` | token istemez, yalnızca «ayakta mı» der |
+| `GET /` | yerel yüz — tek dosya, sıfır bağımlılık |
 | `POST /api/sync/<modul>` | etiketli metrikleri yutar — `202` ya da `422` |
 | `GET /api/briefing?date=` | günün brifingi: VP raporları, dayanak ve **tek** öneri |
 | `GET /api/twin?date=&days=` | dijital ikiz — son N günün tek resmi |
@@ -227,6 +230,31 @@ denetiminde göründü.
 Şimdi daemon ön-isteğe cevap veriyor, ama izin **yalnız yerel kökenlere**
 (127.0.0.1, localhost, ::1 ve `config.json` → `allowed_origins`).
 CORS bir kimlik doğrulama değildir: jeton yine şarttır.
+
+## 8.7 Yerel yüz — `web/index.html`
+
+Brifing yalnızca JSON olarak durduğu sürece HKM'nin vaadi kâğıt üzerindeydi:
+«üçünü tek sesle özetlemek» için o sesin okunabildiği bir yer gerekir.
+`GET /` tek bir HTML dosyası servis eder — çerçeve yok, paket yok, derleme
+yok; üç arayüzün tasarım diline de benzemez, çünkü HKM bir arayüz değil bir
+ÖZETTİR.
+
+Üç kural sayfanın kendisinde de geçerlidir:
+
+1. **Sayfa hiçbir sayı hesaplamaz ve hiçbir cümle kurmaz.** Ekrandaki her
+   satır daemon'dan geldiği gibi yazılır. Burada bir hesap yapmak, iki
+   gerçek yaratırdı — hangisinin doğru olduğu sorulurdu.
+2. **Sayfa jeton taşımaz.** İçinde veri olmadığı için jetonsuz servis
+   edilir; bütün veri `/api/*` üzerinden gelir ve orası bearer ister.
+   Jetonu kullanıcı girer, kendi tarayıcısında saklanır.
+3. **Öneri CEVAPLANABİLİR.** Cevaplanamayan bir öneri, öneri değil
+   bildirimdir: kabul ve ret düğmeleri `decisions` kaydına yazar, reddedilen
+   öneri silinmez.
+
+`tools/entegre.js` bu sayfayı da gezer: gerçek tarayıcıda açar, jetonu
+girer, brifingin ve ikizin çizildiğini doğrular, sentetik bir kırmızı
+bayrakla öneriyi tetikler ve düğmeye basıp kararın ambara yazıldığını
+kontrol eder. Yüklenmeyen bir sayfa çürür.
 
 ## 9. Fazlar
 

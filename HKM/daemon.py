@@ -11,6 +11,8 @@ Ucnoktalar:
     POST /api/decision/<id>/accept  oneriyi kabul et
     POST /api/decision/<id>/decline oneriyi reddet — kayit silinmez
     GET  /api/health                token istemez
+    GET  /                          tek dosyalik yerel yuz (token istemez;
+                                    jetonu kullanici girer, veri yine korumali)
 
 Dis dunyaya acilmaz: host varsayilani 127.0.0.1'dir ve config.json ile
 degistirilmesi bilincli bir karardir.
@@ -135,8 +137,28 @@ class Handler(BaseHTTPRequestHandler):
         sys.stderr.write("[hkm] " + (fmt % args) + "\n")
 
     # --- yollar ----------------------------------------------------------
+    def _send_page(self):
+        """Yerel yuz — tek dosya, sifir bagimlilik.
+
+        Sayfanin KENDISI jeton istemez cunku icinde veri yoktur: butun
+        veri /api/* uzerinden gelir ve orasi bearer ister. Kullanici jetonu
+        sayfaya girer, sayfa da kendi tarayicisinda saklar."""
+        yol = os.path.join(ROOT, "web", "index.html")
+        if not os.path.exists(yol):
+            return self._send(404, {"error": "yuz kurulu degil"})
+        with open(yol, "rb") as f:
+            body = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
         u = urlparse(self.path)
+        if u.path in ("/", "/index.html"):
+            return self._send_page()
         if u.path == "/api/health":
             return self._send(200, {"ok": True, "service": "hkm"})
         if not self._authorized():

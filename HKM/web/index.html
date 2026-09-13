@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="tr" translate="no">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>HKM — Hayat Kontrol Merkezi</title>
+<style>
+/* Tek sayfa, tek dosya, sifir bagimlilik.
+
+   Bu yuz UC SISTEMIN yuzu degildir ve onlara benzemez: HKM bir arayuz
+   degil bir OZETTIR. Renk, ikon ve tablo suslemesi yok; ekranda yalnizca
+   gunun cumleleri, dayanagi ve tek soru duruyor. */
+:root{
+  --bg:#faf9f7; --fg:#1b1a18; --dim:#6b6864; --line:#e2ded8; --card:#fff;
+  --ok:#1f6f4a; --warn:#8a5a0b; --danger:#9b2c2c; --accent:#2d4a7c;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#151719; --fg:#e8e6e3; --dim:#9b9691; --line:#2b2f33;
+    --card:#1c1f22; --ok:#6fd3a3; --warn:#e3b061; --danger:#f08c8c;
+    --accent:#8fb0e8; }
+}
+*{ box-sizing:border-box; }
+body{ margin:0; background:var(--bg); color:var(--fg);
+  font:15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap{ max-width:760px; margin:0 auto; padding:24px 16px 64px; }
+h1{ font-size:18px; margin:0 0 2px; letter-spacing:.02em; }
+.sub{ color:var(--dim); font-size:13px; margin:0 0 20px; }
+.card{ background:var(--card); border:1px solid var(--line); border-radius:10px;
+  padding:16px; margin:12px 0; }
+.line{ padding:10px 0; border-bottom:1px solid var(--line); }
+.line:last-child{ border-bottom:0; }
+.tag{ font:11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--dim);
+  display:inline-block; margin-bottom:4px; }
+.prop{ border-left:3px solid var(--accent); padding-left:12px; }
+.muted{ color:var(--dim); font-size:13px; }
+.row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+button{ font:inherit; padding:8px 14px; border-radius:8px; cursor:pointer;
+  border:1px solid var(--line); background:var(--card); color:var(--fg);
+  min-height:36px; }
+button.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+button:disabled{ opacity:.5; cursor:default; }
+input{ font:inherit; padding:8px 10px; border-radius:8px; border:1px solid var(--line);
+  background:var(--bg); color:var(--fg); min-height:36px; }
+table{ width:100%; border-collapse:collapse; font-size:13px; }
+th,td{ text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); }
+th{ color:var(--dim); font-weight:500; font-size:11px; letter-spacing:.06em;
+  text-transform:uppercase; }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; }
+.state{ font-size:12px; padding:2px 8px; border-radius:99px; border:1px solid var(--line); }
+.ok{ color:var(--ok); } .warn{ color:var(--warn); } .danger{ color:var(--danger); }
+.scroll{ overflow-x:auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>HKM — Hayat Kontrol Merkezi</h1>
+  <p class="sub">Üçünü tek sesle özetler. Karar üretmez, karar taşır:
+    aşağıdaki her cümle kural motorundan gelir ve her öneri senin onayını bekler.</p>
+
+  <div class="card" id="giris" hidden>
+    <div class="tag">Yerel jeton</div>
+    <p class="muted">HKM yalnız bu bilgisayarda dinler. Jeton
+      <code>HKM/config.json</code> içindeki <code>local_token</code>'dır.</p>
+    <div class="row">
+      <input id="token" type="password" placeholder="local_token" style="flex:1 1 240px"/>
+      <button class="primary" id="gir">Bağlan</button>
+    </div>
+    <p class="muted" id="giris-not"></p>
+  </div>
+
+  <div id="govde" hidden>
+    <div class="row" style="justify-content:space-between; margin-bottom:4px">
+      <div class="row">
+        <input id="tarih" type="date"/>
+        <button id="yenile">Yenile</button>
+      </div>
+      <button id="cikis">Jetonu unut</button>
+    </div>
+
+    <div class="card" id="brifing"><p class="muted">Yükleniyor…</p></div>
+    <div class="card" id="oneri" hidden></div>
+    <div class="card" id="ikiz"></div>
+    <div class="card" id="gecmis"></div>
+  </div>
+</div>
+
+<script>
+/* Kural motoru otoritedir: bu sayfa HİÇBİR sayı hesaplamaz ve hiçbir cümle
+   kurmaz. Ekrandaki her satır daemon'dan geldiği gibi yazılır. Bir şeyin
+   burada hesaplanması, iki gerçek yaratırdı. */
+(function(){
+  var TOKEN_KEY = 'hkm.token';
+  var token = null;
+  try{ token = localStorage.getItem(TOKEN_KEY); }catch(e){ token = null; }
+
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c];
+    });
+  }
+  function bugun(){ return new Date().toISOString().slice(0, 10); }
+
+  async function api(yol, opt){
+    var o = Object.assign({ headers:{} }, opt || {});
+    o.headers = Object.assign({ 'Authorization':'Bearer ' + token,
+      'Content-Type':'application/json' }, o.headers);
+    var r = await fetch(yol, o);
+    var g = null;
+    try{ g = await r.json(); }catch(e){ g = null; }
+    return { status:r.status, body:g };
+  }
+
+  function girisGoster(not){
+    $('giris').hidden = false;
+    $('govde').hidden = true;
+    $('giris-not').textContent = not || '';
+  }
+
+  /* --------------------------------------------------------------- çizim */
+
+  var TON = { ANOMALY:'danger', INCOMPLETE:'warn', APPROVED:'ok' };
+
+  function brifingCiz(b){
+    var h = '<div class="tag">' + esc(b.date) + ' · kural motoru</div>';
+    (b.lines || []).forEach(function(l){
+      if(l.kind === 'proposal') return;          /* öneri ayrı kartta */
+      var sinif = l.verdict ? (TON[l.verdict] || '') : '';
+      h += '<div class="line"><span class="' + sinif + '">' + esc(l.text) + '</span></div>';
+    });
+    if(b.dropped && b.dropped.length){
+      h += '<div class="line danger"><b>Düşürülen cümle:</b> ' + esc(b.dropped[0].note)
+         + ' («' + esc(b.dropped[0].text) + '»)</div>';
+    }
+    $('brifing').innerHTML = h;
+  }
+
+  function oneriCiz(b){
+    var k = $('oneri');
+    var satir = (b.lines || []).filter(function(l){ return l.kind === 'proposal'; })[0];
+    if(!satir){ k.hidden = true; return; }
+    k.hidden = false;
+    if(!b.decision){
+      k.innerHTML = '<div class="tag">Öneri</div><div class="prop">'
+        + esc(satir.text) + '</div>';
+      return;
+    }
+    var d = b.decision;
+    var h = '<div class="tag">Günün önerisi · öncelik ' + esc(d.rank) + '</div>'
+      + '<div class="prop">' + esc(d.proposal) + '</div>'
+      + '<p class="muted">Bu bir emir değil bir öneridir; HKM\'nin uygulama ya da '
+      + 'ekran düzeyinde hiçbir yetkisi yoktur. Reddedilen öneri silinmez.</p>';
+    if(d.state === 'proposed'){
+      h += '<div class="row"><button class="primary" data-cevap="accept">Kabul ediyorum</button>'
+         + '<button data-cevap="decline">Reddediyorum</button></div>';
+    }else{
+      h += '<p class="' + (d.state === 'accepted' ? 'ok' : 'muted') + '">'
+         + (d.state === 'accepted' ? 'Kabul edildi.' : 'Reddedildi.') + '</p>';
+    }
+    k.innerHTML = h;
+    Array.prototype.forEach.call(k.querySelectorAll('[data-cevap]'), function(btn){
+      btn.addEventListener('click', async function(){
+        btn.disabled = true;
+        await api('/api/decision/' + d.id + '/' + btn.dataset.cevap, { method:'POST' });
+        yukle();
+      });
+    });
+  }
+
+  var ETIKET = { measured:'ölçüldü', estimated:'tahmin', computed:'hesaplandı',
+    missing:'veri yok' };
+  var MODUL = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+
+  function ikizCiz(t){
+    var c = t.coverage || {};
+    var h = '<div class="tag">Dijital ikiz · son ' + esc(t.days) + ' gün</div>';
+    h += '<p class="muted">Bu resim ' + esc(c.total || 0) + ' metriğe dayanıyor: '
+       + esc(c.measured || 0) + ' ölçüldü, ' + esc(c.computed || 0) + ' hesaplandı, '
+       + esc(c.estimated || 0) + ' tahmin, ' + esc(c.missing || 0) + ' veri yok.</p>';
+    var satirlar = [];
+    Object.keys(t.modules || {}).forEach(function(mod){
+      var m = t.modules[mod];
+      Object.keys(m.metrics || {}).forEach(function(k){
+        var x = m.metrics[k];
+        satirlar.push('<tr><td>' + esc(MODUL[mod] || mod) + '</td><td>' + esc(k) + '</td>'
+          + '<td class="num">' + (x.value == null ? '—' : esc(x.value)) + '</td>'
+          + '<td>' + esc(ETIKET[x.cert] || x.cert) + '</td>'
+          + '<td>' + esc(x.trend && x.trend.direction === 'unknown' ? 'yön bilinmiyor'
+              : x.trend ? ({ rising:'yükseliyor', falling:'düşüyor', flat:'yerinde' })[x.trend.direction]
+              : '—') + '</td></tr>');
+      });
+    });
+    if(satirlar.length){
+      h += '<div class="scroll"><table><thead><tr><th>Sistem</th><th>Alan</th>'
+         + '<th class="num">Değer</th><th>Kaynak</th><th>Yön</th></tr></thead><tbody>'
+         + satirlar.join('') + '</tbody></table></div>';
+    }
+    (t.blind || []).forEach(function(b){
+      h += '<p class="muted warn">' + esc(MODUL[b.module] || b.module) + ' — '
+         + esc(b.note) + '</p>';
+    });
+    $('ikiz').innerHTML = h;
+  }
+
+  function gecmisCiz(g){
+    var h = '<div class="tag">Günün bütün önerileri</div>';
+    if(!(g.decisions || []).length){
+      h += '<p class="muted">Bugün için yazılmış bir öneri yok. Uydurulmuş bir öneri, '
+         + 'öneri olmamasından kötüdür.</p>';
+    }else{
+      h += '<div class="scroll"><table><thead><tr><th>Öneri</th><th>Öncelik</th>'
+         + '<th>Durum</th></tr></thead><tbody>';
+      g.decisions.forEach(function(d){
+        h += '<tr><td>' + esc(d.proposal) + '</td><td class="num">' + esc(d.rank) + '</td>'
+           + '<td><span class="state">' + esc({ proposed:'bekliyor', accepted:'kabul',
+             declined:'ret' }[d.state] || d.state) + '</span></td></tr>';
+      });
+      h += '</tbody></table></div>';
+      h += '<p class="muted">Reddedilen öneri silinmez: bir katmanın neyi önerdiği ve '
+         + 'senin neyi reddettiğin, o katmanı sonradan denetlemenin tek yoludur.</p>';
+    }
+    $('gecmis').innerHTML = h;
+  }
+
+  /* --------------------------------------------------------------- akış */
+
+  async function yukle(){
+    var t = $('tarih').value || bugun();
+    var b = await api('/api/briefing?date=' + t);
+    if(b.status === 401){ girisGoster('Jeton kabul edilmedi.'); return; }
+    if(b.status !== 200){
+      $('brifing').innerHTML = '<p class="danger">Brifing alınamadı ('
+        + esc(b.status) + ').</p>';
+      return;
+    }
+    brifingCiz(b.body);
+    oneriCiz(b.body);
+    var i = await api('/api/twin?date=' + t);
+    if(i.status === 200) ikizCiz(i.body);
+    var g = await api('/api/decisions?date=' + t);
+    if(g.status === 200) gecmisCiz(g.body);
+  }
+
+  async function bagla(){
+    $('govde').hidden = false;
+    $('giris').hidden = true;
+    await yukle();
+  }
+
+  $('gir').addEventListener('click', async function(){
+    token = $('token').value.trim();
+    if(!token){ $('giris-not').textContent = 'Jeton boş olamaz.'; return; }
+    var r = await api('/api/briefing?date=' + bugun());
+    if(r.status === 401){ girisGoster('Jeton kabul edilmedi.'); return; }
+    try{ localStorage.setItem(TOKEN_KEY, token); }catch(e){}
+    bagla();
+  });
+
+  $('cikis').addEventListener('click', function(){
+    try{ localStorage.removeItem(TOKEN_KEY); }catch(e){}
+    token = null;
+    girisGoster('Jeton bu tarayıcıdan silindi.');
+  });
+
+  $('yenile').addEventListener('click', yukle);
+  $('tarih').addEventListener('change', yukle);
+  $('tarih').value = bugun();
+
+  if(token) bagla(); else girisGoster('');
+})();
+</script>
+</body>
+</html>

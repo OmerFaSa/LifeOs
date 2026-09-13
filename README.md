@@ -12,7 +12,7 @@ Yanlarında dördüncü, **isteğe bağlı** bir katman durur:
 
 | Klasör | Katman | Durum | Belge |
 |---|---|---|---|
-| [`HKM/`](HKM/) | **Hayat Kontrol Merkezi** | kapalı döngü iskeleti (Faz 1–3 + 6, 73 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
+| [`HKM/`](HKM/) | **Hayat Kontrol Merkezi** | kapalı döngü (Faz 1–3 + 6, yerel yüz, 74 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
 
 HKM üçünün **üstünde değil yanındadır**: üç sistem onun var olduğunu bilmez ve
 o kapalıyken hiçbiri bozulmaz. Tek bağ, her arayüzdeki `core/beacon.js`
@@ -90,14 +90,19 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1019/1019 gecti | 761/761 gecti | 579/579 gecti |
+| `runtests.js` | 1033/1033 gecti | 775/775 gecti | 593/593 gecti |
 | `smoke.js` | Duman testi temiz — 2 hedefte 36 ekran, 36 sekme gezildi. | Duman testi temiz — 2 hedefte 24 ekran, 64 sekme gezildi. | Duman testi temiz — 2 hedefte 28 ekran, 182 sekme gezildi. |
 | `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (4 bilinen eksik izin listesinde) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
-| `layoutcheck.js` | Telefon düzeni temiz: taşma yok, bütün hedefler 24px ve üstü. | Telefon düzeni temiz: taşma yok, bütün hedefler 24px ve üstü. | Telefon düzeni temiz: taşma yok, bütün hedefler 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 26 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 19.2 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 61.6 ms (bütçe 100). |
+| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 36 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 44 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 105 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 30.8 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 19.4 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 61.6 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
+
+| Depo denetimi | Sonuç |
+|---|---|
+| `HKM tests` | 74/74 test gecti |
+| `entegre.js` | Butunlesme temiz: uc arayuz de HKM ile konustu, HKM kapaliyken hicbiri bozulmadi. |
 <!-- SAYILAR:bitis -->
 
 Üç sistem de artık **kendini denetleyen bir katman** taşır — dışarıdan gelen
@@ -131,9 +136,15 @@ vardır (yalnızca Python standart kütüphanesi):
 ```bash
 cd HKM
 cp config.example.json config.json    # local_token'ı değiştir
-python3 daemon.py                     # 127.0.0.1:4200
-python3 -m tests.run                  # 36 test
+python3 daemon.py                     # 127.0.0.1:4200 — yerel yüz de burada
+python3 -m tests.run                  # VP, sync, şema, öncelik, ikiz,
+                                      # Yönetici, daemon ve yüz
+node ../tools/entegre.js              # üç arayüz + HKM: uçtan uca
 ```
+
+Tarayıcıda `http://127.0.0.1:4200` açıldığında günün brifingi, dijital ikiz
+ve **tek** öneri durur; öneri oradan kabul ya da reddedilir. Sayfa hiçbir
+sayı hesaplamaz — ekrandaki her satır kural motorundan geldiği gibi yazılır.
 
 ## Sınırlar
 
