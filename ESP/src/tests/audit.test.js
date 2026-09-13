@@ -201,6 +201,173 @@
     });
   });
 
+  describe('denetim · bozuk belge', () => {
+
+    /* HATA: depodan gelen belge temizlenmiyordu. `box:"abc"` olan bir kart
+       SRS'e giriyor, schedule() `card.reps + 1` yapinca "iki1" uretiyordu.
+       Hicbir yerde hata gorunmuyor — yalnizca sayilar yanlis. */
+    it('bozuk SRS alanlari sinirda temizlenir', async () => {
+      resetState();
+      await ESP.Store.set('cards/x', { id:'x', front:'a', back:'b', lang:'en',
+        box:'abc', ease:'çok', interval:null, due:'yarın', reps:'iki',
+        lapses:-5, history:'yok' });
+      await ESP.Model.loadAll();
+      const c = ESP.S.cards[0];
+      expect(typeof c.box).toBe('number');
+      expect(typeof c.ease).toBe('number');
+      expect(c.reps).toBe(0);
+      expect(c.lapses).toBe(0);
+      expect(Array.isArray(c.history)).toBeTruthy();
+      /* Cozulemeyen tarih bugune cekilir: gorunmeyen bir kart, kullanicinin
+         neden gormedigini anlayamayacagi bir karttir. */
+      expect(c.due).toBe(ESP.U.todayISO());
+    });
+
+    it('temizlenmis kart SRS hesabini bozmaz', async () => {
+      resetState();
+      await ESP.Store.set('cards/x', { id:'x', front:'a', back:'b', lang:'en',
+        box:'abc', ease:'çok', reps:'iki' });
+      await ESP.Model.loadAll();
+      const n = ESP.SRS.schedule(ESP.S.cards[0], 'good');
+      expect(typeof n.reps).toBe('number');
+      expect(typeof n.box).toBe('number');
+      expect(isFinite(n.interval)).toBeTruthy();
+    });
+
+    /* Doktrin: degeri olmayan alan «olculdu» etiketi tasiyamaz. */
+    it('etiket ile deger birlikte tutarli kalir', async () => {
+      resetState();
+      await ESP.Store.set('days/2026-09-12', { date:'2026-09-12', sessions:[
+        { id:'s1', disc:'lang', minutes:'çok', minutesCert:'measured' },
+        { id:'s2', disc:'lang', minutes:30, minutesCert:'missing' },
+      ] });
+      await ESP.Model.loadAll();
+      const ss = ESP.S.days['2026-09-12'].sessions;
+      expect(ss[0].minutesCert).toBe('missing');     // deger yok → etiket yok
+      expect(ss[1].minutesCert).toBe('measured');    // deger var → etiket var
+      expect(ss[1].minutes).toBe(30);
+    });
+
+    it('bilinmeyen disiplin varsayilana duser', async () => {
+      resetState();
+      await ESP.Store.set('days/2026-09-12', { date:'2026-09-12',
+        sessions:[{ id:'s1', disc:'astroloji', minutes:20, minutesCert:'measured' }] });
+      await ESP.Model.loadAll();
+      expect(ESP.S.days['2026-09-12'].sessions[0].disc).toBe('lang');
+    });
+
+    it('bozuk tempo kaydi eleniyor, esik sayi kaliyor', async () => {
+      resetState();
+      await ESP.Store.set('pieces/p1', { id:'p1', name:'x', cleanBpm:'hizli',
+        targetBpm:'140', kind:'sarki',
+        attempts:[{ date:'2026-09-10', bpm:'yavas', clean:true },
+                  { date:'2026-09-11', bpm:100, clean:true },
+                  { bpm:120, clean:true }] });
+      await ESP.Model.loadAll();
+      const p = ESP.S.pieces[0];
+      expect(p.cleanBpm).toBeNull();
+      expect(p.targetBpm).toBe(140);
+      expect(p.kind).toBe('technique');
+      expect(p.attempts.length).toBe(1);      // sayisiz ve tarihsiz olan eleniyor
+    });
+
+    it('tarihi cozulemeyen hedef TARIHSIZ sayilir', async () => {
+      resetState();
+      await ESP.Store.set('goals/g1', { id:'g1', label:'x', disc:'lang',
+        date:'bir ara' });
+      await ESP.Model.loadAll();
+      expect(ESP.S.goals[0].date).toBeNull();
+      /* Tarihsiz hedef «yaklasan hedef» kuralina girmez. */
+      expect(ESP.Planner.deadlines().length).toBe(0);
+    });
+
+    it('bozuk diksiyon olcumu etiketiyle birlikte duzelir', async () => {
+      resetState();
+      await ESP.Store.set('recordings/r1', { id:'r1', date:'2026-09-12',
+        seconds:'kirk', secondsCert:'measured', words:120, wordsCert:'missing',
+        errors:null, errorsCert:'measured' });
+      await ESP.Model.loadAll();
+      const r = ESP.S.recordings[0];
+      expect(r.secondsCert).toBe('missing');
+      expect(r.wordsCert).toBe('measured');
+      expect(r.errorsCert).toBe('missing');
+    });
+
+    it('sayi() virgullu ondaligi okur, sacmaligi okumaz', () => {
+      expect(ESP.Model.sayi('12,5')).toBe(12.5);
+      expect(ESP.Model.sayi('abc')).toBeNull();
+      expect(ESP.Model.sayi(undefined, 7)).toBe(7);
+      expect(ESP.Model.sayi(Infinity)).toBeNull();
+      expect(ESP.Model.sayi(NaN)).toBeNull();
+    });
+  });
+
+  describe('denetim · gecersiz tarih', () => {
+
+    /* HATA: `new Date('yarın')` GECERSIZ bir Date uretir ve gecersiz Date
+       nesnesi TRUTHY'dir. `if(U.parse(x))` yazan her denetim bozuk bir
+       tarihte de "gecerli" diyordu. */
+    it('cozulemeyen tarih null doner, truthy bir nesne degil', () => {
+      expect(ESP.U.parse('yarın')).toBeNull();
+      expect(ESP.U.parse('')).toBeNull();
+      expect(ESP.U.parse('2026-13-01')).toBeNull();
+      expect(ESP.U.parse('2026-02-31')).toBeNull();      // takvimde yok
+      expect(ESP.U.parse('2026-09-12') != null).toBeTruthy();
+    });
+
+    it('isISO takvimi bilir', () => {
+      expect(ESP.U.isISO('2026-02-29')).toBeFalsy();     // 2026 artik yil degil
+      expect(ESP.U.isISO('2024-02-29')).toBeTruthy();
+      expect(ESP.U.isISO('20260912')).toBeFalsy();
+      expect(ESP.U.isISO(null)).toBeFalsy();
+    });
+
+    /* NaN sessizce yayilir ve her karsilastirmayi false yapar; null
+       cagirani durmaya zorlar. */
+    it('cozulemeyen tarihte diffDays null doner, NaN degil', () => {
+      expect(ESP.U.diffDays('yarın', '2026-09-12')).toBeNull();
+      expect(ESP.U.diffDays('2026-09-10', '2026-09-12')).toBe(2);
+    });
+
+    it('bozuk esik tarihi olmamis bir kazanim yazmaz', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        ESP.S.pieces.push(ESP.Model.newPiece({ name:'Gam', cleanBpm:150,
+          targetBpm:140, thresholdAt:'gecen hafta' }));
+        ESP.Memo.bitir();
+        const win = ESP.Office.notes('maestro').filter(n => n.kind === 'win');
+        expect(win.length).toBe(0);
+      });
+    });
+
+    it('bozuk hedef tarihi butun plani acil yapmaz', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        ESP.S.goals.push(ESP.Model.newGoal({ label:'x', disc:'lang', date:'bir ara' }));
+        expect(ESP.Planner.deadlines().some(d => d.urgent)).toBeFalsy();
+      });
+    });
+  });
+
+  describe('denetim · pratikte silinen kart', () => {
+
+    it('oturum sirasinda silinen kart isabet sayisina girmez', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        for(let i = 0; i < 6; i++) pushCard({ front:'k' + i, back:'b' + i, lang:'en' });
+        const s = ESP.Lesson.start('en', { kinds:['recall'], length:3 });
+        const q = s.questions[0];
+        await ESP.Model.deleteCard(q.cardId);
+        const res = await ESP.Lesson.answer(s, q.answer);
+        expect(res.ok).toBeFalsy();
+        expect(res.skipped).toBeTruthy();
+        expect(s.right).toBe(0);
+        expect(s.wrong).toBe(0);
+        expect(s.pos).toBe(1);            // soru yine de gecilir, oturum kilitlenmez
+      });
+    });
+  });
+
   describe('denetim · depo hatasi', () => {
 
     /* HATA: model fonksiyonlari Store.set donusunu yok sayiyor, kota dolsa

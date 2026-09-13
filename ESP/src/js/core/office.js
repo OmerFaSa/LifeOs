@@ -684,8 +684,11 @@ ESP.Office = (function(){
         + p.bpm + ' BPM\'de duruyor.', 'studio');
     });
     (S.pieces || []).forEach(p => {
+      /* `diffDays` cozulemeyen tarihte null doner ve `null <= 7` TRUE'dur:
+         bozuk bir esik tarihi, olmamis bir kazanimi masaya yazardi. */
+      const yas = p.thresholdAt ? U.diffDays(p.thresholdAt, U.todayISO()) : null;
       if(p.targetBpm && p.cleanBpm && p.cleanBpm >= p.targetBpm
-         && p.thresholdAt && U.diffDays(p.thresholdAt, U.todayISO()) <= 7){
+         && yas != null && yas <= 7){
         add('maestro', 'win', p.name + ' hedef tempoya ulaştı: ' + p.cleanBpm + ' BPM.', 'studio');
       }
     });

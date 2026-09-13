@@ -149,6 +149,41 @@ ESP.Model = (function(){
   function arr(v){ return Array.isArray(v) ? v : []; }
   function obj(v){ return (v && typeof v === 'object') ? v : {}; }
 
+  /* ------------------------------------------------------ belge temizligi
+
+     Depodan gelen belge GUVENILIR DEGILDIR. Yedek dosyasi elle
+     duzenlenebilir, bir surum eski bir alan birakabilir, bir tarayici
+     eklentisi JSON'u bozabilir.
+
+     Olculdu: bozuk bir belge sessizce hayatta kaliyordu. `box:"abc"` olan
+     bir kart yuklenip SRS'e giriyor, schedule() `card.reps + 1` yapinca
+     "iki1" uretiyor ve o kart bir daha hicbir hesaba dogru girmiyordu.
+     Hicbir yerde hata gorunmuyor — yalnizca sayilar yanlis.
+
+     Bu yuzden sayilar SINIRDA temizlenir: modele giren her sayi ya bir
+     sayidir ya da null. Ucuncu bir ihtimal yok.
+
+     Ikinci kural, doktrinin kendisi: DEGERI OLMAYAN ALAN "olculdu"
+     ETIKETI TASIYAMAZ. `minutes:null` ama `minutesCert:'measured'` diyen
+     bir kayit, olculmemis bir seyi olculmus gosterir. `cift()` bu ikiliyi
+     her zaman tutarli birakir. */
+  function sayi(v, varsayilan){
+    if(typeof v === 'number' && isFinite(v)) return v;
+    if(typeof v === 'string' && v.trim() !== ''){
+      const n = Number(v.replace(',', '.'));
+      if(isFinite(n)) return n;
+    }
+    return varsayilan === undefined ? null : varsayilan;
+  }
+
+  /* Sayi + kesinlik ikilisi. Deger yoksa etiket daima 'missing' olur. */
+  function cift(deger, etiket, kabul){
+    const n = sayi(deger);
+    if(n == null) return { value:null, cert:'missing' };
+    const e = ESP.CERTAINTY[etiket] ? etiket : (kabul || 'measured');
+    return { value:n, cert:e === 'missing' ? (kabul || 'measured') : e };
+  }
+
   /* Bir sayiyi kesinlik etiketiyle birlikte okur.
 
      Devir notundaki en pahali hata buydu: `Number(x) || 0` bos alani sifir
@@ -283,21 +318,26 @@ ESP.Model = (function(){
 
   function normSession(s){
     const r = obj(s);
+    /* Etiket ile deger BIRLIKTE temizlenir: degeri olmayan alan 'olculdu'
+       diyemez, degeri olan alan da 'veri yok' diyemez. */
+    const dk = cift(r.minutes, r.minutesCert, 'measured');
+    const kal = cift(r.quality, 'estimated', 'estimated');
+    const say = cift(r.count, r.countCert, 'measured');
     return {
       id:r.id || U.uid('s'),
-      disc:r.disc || 'lang',
-      minutes:(typeof r.minutes === 'number' && isFinite(r.minutes)) ? r.minutes : null,
-      minutesCert:r.minutesCert || (r.minutes == null ? 'missing' : 'measured'),
+      disc:(ESP.DISCIPLINE_BY_ID && ESP.DISCIPLINE_BY_ID[r.disc]) ? r.disc : 'lang',
+      minutes:dk.value,
+      minutesCert:dk.cert,
       /* Kalite kullanicinin kendi degerlendirmesidir ve DAIMA tahmindir.
          Olculmus bir sey gibi gosterilmesi doktrin ihlali olurdu. */
-      quality:(typeof r.quality === 'number' && isFinite(r.quality)) ? r.quality : null,
-      qualityCert:r.quality == null ? 'missing' : 'estimated',
+      quality:kal.value,
+      qualityCert:kal.cert,
       /* Disipline ozel olculmus ikinci sayi. Yazida kelime, dilde cozulen
          kart, muzikte temiz tekrar. Tek alan tutulur cunku ekranlarin
          hepsinde "sure + bir sayi" kalibi var; ucuncu bir sayi isteyen
          disiplin cikmadi. */
-      count:(typeof r.count === 'number' && isFinite(r.count)) ? r.count : null,
-      countCert:r.count == null ? 'missing' : 'measured',
+      count:say.value,
+      countCert:say.cert,
       ref:r.ref || null,        // hangi karta/parcaya/kaynaga baglandi
       note:r.note || '',
       at:r.at || null,
@@ -428,9 +468,22 @@ ESP.Model = (function(){
 
   function normCard(doc){
     const c = obj(doc);
-    return Object.assign(newCard(), c, {
-      tags:arr(c.tags), history:arr(c.history),
+    const k = Object.assign(newCard(), c, {
+      tags:arr(c.tags), history:arr(c.history).filter(h => h && h.at),
     });
+    /* SRS alanlari sayidir; degilse varsayilana doner. Bozuk bir kutu
+       degeri butun desteyi yanlis hesaplatir. */
+    k.box = Math.max(1, Math.min(ESP.SRS ? ESP.SRS.BOXES.length : 5,
+      Math.round(sayi(c.box, 1))));
+    k.ease = Math.max(1.3, Math.min(3.2, sayi(c.ease, 2.5)));
+    k.interval = Math.max(0, Math.round(sayi(c.interval, 0)));
+    k.reps = Math.max(0, Math.round(sayi(c.reps, 0)));
+    k.lapses = Math.max(0, Math.round(sayi(c.lapses, 0)));
+    k.active = !!c.active;
+    /* Cozulemeyen tarih bugune cekilir: gecersiz bir tarih kart hic
+       gorunmez yapar ve kullanici neden gormedigini anlayamaz. */
+    k.due = U.parse(c.due) ? c.due : U.todayISO();
+    return k;
   }
 
   async function saveCard(rec){
@@ -603,7 +656,33 @@ ESP.Model = (function(){
 
   function normPiece(doc){
     const p = obj(doc);
-    return Object.assign(newPiece(), p, { attempts:arr(p.attempts) });
+    const r = Object.assign(newPiece(), p, {
+      /* Deneme kaydinda BPM sayi olmak zorunda: "hizli" diye bir tempo
+         esigi yoktur ve bir kez girerse butun karsilastirmalar sessizce
+         yanlis doner. */
+      attempts:arr(p.attempts)
+        .map(a => Object.assign({}, a, { bpm:sayi(a && a.bpm), clean:!!(a && a.clean) }))
+        .filter(a => a.bpm != null && a.date),
+    });
+    r.cleanBpm = sayi(p.cleanBpm);
+    r.targetBpm = sayi(p.targetBpm);
+    r.kind = (p.kind === 'piece' || p.kind === 'technique') ? p.kind : 'technique';
+    return r;
+  }
+
+  /* Diksiyon olcumu: uc sayi ve uc etiket. Ayni kural — degeri olmayan
+     alan 'olculdu' diyemez. */
+  function normRecording(doc){
+    const r = obj(doc);
+    const sn = cift(r.seconds, r.secondsCert, 'measured');
+    const kl = cift(r.words, r.wordsCert, 'measured');
+    const ht = cift(r.errors, r.errorsCert, 'estimated');
+    return Object.assign(newRecording(), r, {
+      seconds:sn.value, secondsCert:sn.cert,
+      words:kl.value, wordsCert:kl.cert,
+      errors:ht.value, errorsCert:ht.cert,
+      date:U.parse(r.date) ? r.date : U.todayISO(),
+    });
   }
 
   async function savePiece(rec){
@@ -1128,11 +1207,21 @@ ESP.Model = (function(){
     S.notes = ((await ESP.Store.list('notes')) || []).map(normNote);
     S.books = ((await ESP.Store.list('books')) || []).map(b => Object.assign(newBook(), b));
     S.pieces = ((await ESP.Store.list('pieces')) || []).map(normPiece);
-    S.recordings = ((await ESP.Store.list('recordings')) || [])
-      .map(r => Object.assign(newRecording(), r));
-    S.drafts = ((await ESP.Store.list('drafts')) || [])
-      .map(d => Object.assign(newDraft(), d));
-    S.goals = ((await ESP.Store.list('goals')) || []).map(g => Object.assign(newGoal(), g));
+    S.recordings = ((await ESP.Store.list('recordings')) || []).map(normRecording);
+    S.drafts = ((await ESP.Store.list('drafts')) || []).map(d => {
+      const t = Object.assign(newDraft(), obj(d));
+      t.revisions = Math.max(0, Math.round(sayi(d && d.revisions, 0)));
+      t.text = String(t.text || '');
+      return t;
+    });
+    S.goals = ((await ESP.Store.list('goals')) || []).map(g => {
+      const h = Object.assign(newGoal(), obj(g));
+      /* Tarihi cozulemeyen hedef TARIHSIZ sayilir: gecersiz bir tarih,
+         "yaklasan hedef" kuralini sessizce bozardi. */
+      if(!U.parse(h.date)) h.date = null;
+      h.done = !!h.done;
+      return h;
+    });
     S.decisions = ((await ESP.Store.list('decisions')) || []);
 
     S.proposals = ((await ESP.Store.list('proposals')) || []);
@@ -1169,7 +1258,7 @@ ESP.Model = (function(){
     /* muzik */
     newPiece, savePiece, deletePiece,
     /* diksiyon */
-    newRecording, saveRecording, deleteRecording,
+    newRecording, normRecording, saveRecording, deleteRecording,
     /* yazi */
     newDraft, saveDraft, deleteDraft,
     /* ekler ve hatirlaticilar */
@@ -1184,6 +1273,7 @@ ESP.Model = (function(){
     newGoal, saveGoal, deleteGoal, openGoals,
     saveDecision, closeDecision, openDecisions,
     /* sistem */
+    sayi, cift, normCard, normSession, normPiece,
     numCert, markBackup, backupAgeDays, backupDue, dataFootprint, migrate, loadAll,
   };
 })();

@@ -269,7 +269,16 @@ ESP.Lesson = (function(){
       ? correct(given, q.answer)
       : norm(given) === norm(q.answer);
 
-    await ESP.SRS.answer(q.cardId, dogru ? 'good' : 'again');
+    /* Kart oturum sirasinda silinmis olabilir (baska sekmede, baska
+       ekranda). SRS "kart bulunamadi" derse soru SAYILMAZ: olmayan bir
+       karta verilmis cevap, retansiyonu da isabeti de yalan yapar. */
+    const yazildi = await ESP.SRS.answer(q.cardId, dogru ? 'good' : 'again');
+    if(!yazildi.ok){
+      session.pos++;
+      if(session.pos >= session.questions.length) session.done = true;
+      return { ok:false, error:'Bu kart artık yok; soru atlandı.',
+        skipped:true, done:session.done };
+    }
 
     session.log.push({ cardId:q.cardId, kind:q.kind, ok:dogru,
       given:String(given || ''), expected:q.answer });

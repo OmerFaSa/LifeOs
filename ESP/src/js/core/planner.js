@@ -94,8 +94,11 @@ ESP.Planner = (function(){
     const today = todayISO || U.todayISO();
     return ESP.Model.openGoals().map(g => {
       const kalan = U.diffDays(today, g.date);
-      return { goal:g, daysLeft:kalan, urgent:kalan <= DEADLINE_DAYS };
-    });
+      /* Cozulemeyen tarih null doner ve `null <= 14` TRUE'dur: bozuk bir
+         hedef tarihi butun plani "acil" yapardi. */
+      return { goal:g, daysLeft:kalan,
+        urgent:kalan != null && kalan <= DEADLINE_DAYS };
+    }).filter(x => x.daysLeft != null);
   }
 
   /* -------------------------------------------------------- 3 · vadesi gecmis */

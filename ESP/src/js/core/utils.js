@@ -11,8 +11,32 @@ ESP.U = (function(){
 
   function iso(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
 
+  /* Bir ISO tarihi (YYYY-MM-DD) gecerli mi?
+
+     Bu fonksiyon bir tuzaktan dogdu: `parse('yarın')` gecersiz bir Date
+     uretiyordu ve gecersiz Date NESNESI TRUTHY'dir. Yani `if(U.parse(x))`
+     yazan her denetim, bozuk bir tarihte de "gecerli" diyordu — sessizce.
+     Sonra o tarihle yapilan her hesap NaN uretiyor, her karsilastirma false
+     donuyor ve hicbir yerde hata gorunmuyordu.
+
+     Bicim denetimi burada, ayri ve acik. Yalnizca "sayi sayi sayi" degil,
+     takvimde gercekten var olan gun aranir: 2026-02-31 gecerli bir dize
+     ama gecersiz bir gundur. */
+  function isISO(s){
+    if(typeof s !== 'string') return false;
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s.slice(0, 10));
+    if(!m) return false;
+    const y = Number(m[1]), ay = Number(m[2]), g = Number(m[3]);
+    if(ay < 1 || ay > 12 || g < 1 || g > 31) return false;
+    const d = new Date(y, ay - 1, g);
+    return d.getFullYear() === y && d.getMonth() === ay - 1 && d.getDate() === g;
+  }
+
+  /* Cozulemeyen tarih icin `null` doner — gecersiz bir Date DEGIL.
+     Cagiran taraf ikisini ayirt edebilmeli. */
   function parse(s){
-    if(s instanceof Date) return s;
+    if(s instanceof Date) return isFinite(s.getTime()) ? s : null;
+    if(!isISO(s)) return null;
     const parts = String(s).slice(0,10).split('-').map(Number);
     return new Date(parts[0], parts[1]-1, parts[2]);
   }
@@ -24,14 +48,23 @@ ESP.U = (function(){
 
   function todayISO(){ return iso(today()); }
 
+  /* Gun ekler. Cozulemeyen bir tarih gelirse BUGUNDEN sayar: burada
+     patlamak, kullanicinin bozuk tek bir kaydi yuzunden butun ekrani
+     kapatmak olurdu. */
   function addDays(d, n){
-    const r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const t = (d instanceof Date && isFinite(d.getTime())) ? d : today();
+    const r = new Date(t.getFullYear(), t.getMonth(), t.getDate());
     r.setDate(r.getDate()+n);
     return r;
   }
 
+  /* Iki ISO tarih arasindaki gun farki. Biri cozulemiyorsa sonuc NaN degil
+     `null` olur: NaN sessizce yayilir ve her karsilastirmayi false yapar;
+     null cagirani durmaya zorlar. */
   function diffDays(a, b){
-    return Math.round((parse(b) - parse(a)) / DAY_MS);
+    const x = parse(a), y = parse(b);
+    if(!x || !y) return null;
+    return Math.round((y - x) / DAY_MS);
   }
 
   /* 0 = Pazartesi ... 6 = Pazar */
@@ -150,7 +183,7 @@ ESP.U = (function(){
 
   return {
     MONTHS, MONTHS_SHORT, DAY_MS,
-    pad2, iso, parse, today, todayISO, addDays, diffDays, weekdayIndex, lastDays,
+    pad2, iso, parse, isISO, today, todayISO, addDays, diffDays, weekdayIndex, lastDays,
     fmtDate, fmtShort, fmtRange, monthName, monthKey, relativeDay,
     median, round, clamp, sum, pct, fmtNet, fmtNum, fmtMin, fmtClock,
     esc, uid, slug, plural, norm, debounce,
