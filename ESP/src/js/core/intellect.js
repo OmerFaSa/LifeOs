@@ -379,10 +379,25 @@ ESP.Intellect = (function(){
     const hece = kelimeler.reduce((a, w) => a + syllables(w), 0);
     const hkOran = hece / kelimeler.length;
     const kcOran = kelimeler.length / cumleler.length;
-    const os = 198.825 - 40.175 * hkOran - 2.610 * kcOran;
+    const ham = 198.825 - 40.175 * hkOran - 2.610 * kcOran;
+
+    /* Atesman OLCEGI 0-100'dur ama FORMUL sinirsizdir: iki kelimelik bir
+       cumle 113 uretir, cok uzun bir cumle eksiye duser. Olcegin disina
+       tasan bir sayiyi oldugu gibi gostermek, bandi olmayan bir deger
+       gostermektir — "%113 okunabilirlik" diye bir sey yok.
+
+       Bu yuzden olcege kirpilir. Kirpma bir bilgi kaybi degil: 113 ile 100
+       ayni banttadir (cok kolay) ve ikisi de "bu metin cok kisa cumlelerden
+       kuruluyor" der. Kaybolan sey yalnizca olceksiz bir sayidir.
+
+       Ham deger `raw` alaninda durur: kirpildigini gizlemek, kirpmaktan
+       kotudur. */
+    const os = Math.max(0, Math.min(100, ham));
 
     return {
       value:Math.round(os * 10) / 10,
+      raw:Math.round(ham * 10) / 10,
+      clamped:ham > 100 || ham < 0,
       cert:'derived',
       words:kelimeler.length, sentences:cumleler.length, syllables:hece,
       wordsPerSentence:Math.round(kcOran * 10) / 10,
