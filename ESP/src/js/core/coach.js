@@ -62,7 +62,16 @@ ESP.Coach = (function(){
 
   /* --------------------------------------------------------------- reçete */
 
+  /* Recete de kare onbelleginde: koç kutusu, tezgah, gunun plani ve teklif
+     uretimi ayni receteyi ayri ayri istiyor. Anahtara butce ve gun girer —
+     farkli butceyle yazilan recete farkli bir recetedir. */
   function prescribe(discId, opts){
+    const o = opts || {};
+    const anahtar = 'coach.rx:' + discId + ':' + (o.minutes || '') + ':' + (o.today || '');
+    return ESP.Memo.of(anahtar, function(){ return prescribeRaw(discId, o); });
+  }
+
+  function prescribeRaw(discId, opts){
     const o = opts || {};
     const bugun = o.today || U.todayISO();
     const d = ESP.DISCIPLINE_BY_ID[discId];

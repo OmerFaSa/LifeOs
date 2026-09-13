@@ -84,7 +84,7 @@ ESP.Screens.writing = (function(){
     const rows = [];
 
     if(acik){
-      const ok = ESP.Intellect.readability(acik.text);
+      const ok = ESP.Intellect.readability(acik.text, acik.id + (acik.updatedAt || ''));
       const tekrar = ESP.Intellect.repeats(acik.text);
       rows.push(K.Entry({
         label:'TASLAK',
@@ -140,7 +140,7 @@ ESP.Screens.writing = (function(){
             headers:['Başlık', { label:'Kelime', num:true }, { label:'Revizyon', num:true },
               'Güncellendi', ''],
             rows:liste.map(d => {
-              const ok = ESP.Intellect.readability(d.text);
+              const ok = ESP.Intellect.readability(d.text, d.id + (d.updatedAt || ''));
               return [
                 d.title || 'başlıksız',
                 ok.cert === 'missing' ? '—' : U.fmtNum(ok.words),
@@ -164,7 +164,7 @@ ESP.Screens.writing = (function(){
     const r = ESP.Intellect.draftRatio();
     const h = ESP.Intellect.hoursOf('writing', 14);
     const hepsi = (S.drafts || []);
-    const olculen = hepsi.map(d => ({ d, ok:ESP.Intellect.readability(d.text) }))
+    const olculen = hepsi.map(d => ({ d, ok:ESP.Intellect.readability(d.text, d.id + (d.updatedAt || '')) }))
       .filter(x => x.ok.cert !== 'missing');
 
     return [
@@ -358,7 +358,7 @@ ESP.Screens.writing = (function(){
       const w = ESP.Intellect.wordsWritten(7);
       const r = ESP.Intellect.draftRatio();
       const son = (S.drafts || [])[0];
-      const ok = son ? ESP.Intellect.readability(son.text) : { cert:'missing' };
+      const ok = son ? ESP.Intellect.readability(son.text, son.id + (son.updatedAt || '')) : { cert:'missing' };
       return [
         { value:String((S.drafts || []).length), label:'taslak' },
         { value:w.cert === 'missing' ? '—' : U.fmtNum(w.value), label:'kelime / 7g' },

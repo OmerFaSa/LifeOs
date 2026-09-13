@@ -182,7 +182,8 @@ ESP.Curriculum = (function(){
          kademe acmaz. */
       const metinli = (S.drafts || []).filter(function(d){ return (d.text || '').trim(); });
       if(!metinli.length) return MISSING;
-      const skorlar = metinli.map(function(d){ return ESP.Intellect.readability(d.text).value; })
+      const skorlar = metinli.map(function(d){
+        return ESP.Intellect.readability(d.text, d.id + (d.updatedAt || '')).value; })
         .filter(function(x){ return x != null; });
       if(!skorlar.length) return MISSING;
       return m(skorlar.reduce(function(a, b){ return a + b; }, 0) / skorlar.length, 'derived');
@@ -237,7 +238,18 @@ ESP.Curriculum = (function(){
 
   /* Tek bir olcuyu okur. Bilinmeyen ad sessizce 'veri yok' dondurmez:
      bu bir programci hatasidir ve gorunur olmalidir. */
+  /* Ayni olcu bir kademe hesabinda BES KEZ sorulur: "lang.cards" merdivenin
+     bes basamaginin besinde de bir kapidir ve her basamak onu yeniden
+     olcer. Uzerine yedi disiplin binince tek cizimde otuz-kirk kez ayni
+     tarama yapiliyordu (olculdu: kademe hesabinin maliyeti 10 ms, bunun
+     cogu tekrar).
+
+     Kare onbellegi tekrari kaldirir, hesabi degil. */
   function measure(name){
+    return ESP.Memo.of('cur.m:' + name, function(){ return measureRaw(name); });
+  }
+
+  function measureRaw(name){
     const fn = METRICS[name];
     if(!fn) return { value:null, cert:'missing', unknown:true, metric:name };
     let r;
@@ -299,7 +311,21 @@ ESP.Curriculum = (function(){
 
      Ardisiklik sarti onemlidir — 1. kademeyi atlayip 3'u gecmek diye bir
      sey yoktur; atlanan kapi ileride cokme uretir. */
+  /* Kademe hesabi UCUZ DEGILDIR: her basamagin her kapisi icin bir olcu
+     okunur ve bazi olculer (retansiyon, sentopik katsayi) butun desteyi
+     dolasir. Tek bir cizimde levelOf() on kez cagriliyor — koc kutusu,
+     tezgah haritasi, merdiven kartlari, ofis brifingi ve Patron ozeti ayni
+     sayiyi ayri ayri istiyor.
+
+     Kare onbellegi (core/memo.js) tam bu sorun icin var ve siniri nettir:
+     yalnizca bir cizim boyunca yasar, kare disinda hicbir sey saklamaz.
+     Boylece "durum degisti mi?" sorusu hic sorulmaz — veri kare icinde
+     degismez. */
   function levelOf(discId){
+    return ESP.Memo.of('cur.level:' + discId, function(){ return levelOfRaw(discId); });
+  }
+
+  function levelOfRaw(discId){
     const l = ladder(discId);
     if(!l) return null;
     const basamaklar = l.levels.map(function(x){ return stepStatus(discId, x.rank); });
@@ -349,13 +375,19 @@ ESP.Curriculum = (function(){
      dokunmayacagini soylemis birinin "ustatlik yuzdesi"ni muzikten dolayi
      dusurmek, olculmemis bir seyi olcmek olurdu. */
   function all(){
-    return ESP.Mod.active().map(function(d){ return levelOf(d.id); }).filter(Boolean);
+    return ESP.Memo.of('cur.all', function(){
+      return ESP.Mod.active().map(function(d){ return levelOf(d.id); }).filter(Boolean);
+    });
   }
 
   /* Sistemin genel kademesi: disiplinlerin ORTALAMASI degil, EN DUSUGU ile
      ortalamanin arasi. Sebep: her seyi ihmal edip tek disiplinde ustat olan
      biri "ustat" degildir; ama tek zayif disiplin de butun emegi silmez. */
   function overall(){
+    return ESP.Memo.of('cur.overall', function(){ return overallRaw(); });
+  }
+
+  function overallRaw(){
     const hepsi = all().filter(Boolean);
     if(!hepsi.length) return { rank:0, level:ESP.LEVEL_BY_RANK[0], cert:'missing' };
     const ranks = hepsi.map(function(x){ return x.rank; });
@@ -376,6 +408,10 @@ ESP.Curriculum = (function(){
      Once OLCULEBILIR ve eksik olan kapi gelir; hicbiri yoksa olculemeyen
      kapi gelir ve istenen sey "calis" degil "olc"tur. */
   function nextGate(discId){
+    return ESP.Memo.of('cur.gate:' + discId, function(){ return nextGateRaw(discId); });
+  }
+
+  function nextGateRaw(discId){
     const lv = levelOf(discId);
     if(!lv || !lv.next) return null;
     const eksik = lv.next.gates.filter(function(g){ return g.status === 'fail'; });

@@ -84,6 +84,12 @@ ESP.Intellect = (function(){
      `days` kac gun geriye bakildigini, `entered` o araliktaki KAC GUNDE
      kayit bulundugunu soyler. Ikisi farkliysa ekran bunu yazar. */
   function hoursOf(discId, days){
+    return ESP.Memo.of('int.hours:' + (discId || '') + ':' + (days || ''), function(){
+      return hoursOfRaw(discId, days);
+    });
+  }
+
+  function hoursOfRaw(discId, days){
     const n = days || 14;
     const gunler = U.lastDays(n);
     let dakika = 0, girilen = 0;
@@ -144,6 +150,10 @@ ESP.Intellect = (function(){
      Payda "toplam kitap"tir, "toplam not" degil: olcuyu buyuten sey nota
      bolunmus bir kitap degil, kitaplar ARASI baglardir. */
   function syntopic(){
+    return ESP.Memo.of('int.syn', syntopicRaw);
+  }
+
+  function syntopicRaw(){
     const notlar = S.notes || [];
     const kitaplar = S.books || [];
     if(!notlar.length && !kitaplar.length){
@@ -178,23 +188,78 @@ ESP.Intellect = (function(){
   /* Iki notu birlestirebilecek ortak kavramlar. Oneri URETIR, bag KURMAZ:
      bagin nedenini kullanici yazar, sistem uyduramaz. */
   function linkSuggestions(limit){
+    return ESP.Memo.of('int.sugg:' + (limit || ''), function(){
+      return linkSuggestionsRaw(limit);
+    });
+  }
+
+  /* Bag onerisi — KAVRAM DIZINI uzerinden.
+
+     Ilk surum butun not ciftlerini dolasiyordu: n notta n(n-1)/2 cift ve her
+     ciftte kavramlar yeniden normalize ediliyordu. 400 notta 80 bin cift,
+     olculen sure 62 ms; 2000 notta bu saniyelere cikiyor ve her cizimde
+     tekrar ediyordu.
+
+     Cozum, ciftleri degil KAVRAMLARI dolasmak: her kavram bir kova, kova
+     icindeki notlar zaten o kavrami paylasiyor. Kavram tasimayan not hic
+     dokunulmadan eliniyor — ki notlarin cogu oyle.
+
+     Kovalar KUCUKTEN BUYUGE islenir ve bu bir siralama tercihi degil bir
+     ANLAM tercihi: nadir bir kavramda bulusan iki not, "zaman" gibi her
+     yerde gecen bir kavramda bulusan iki nottan daha cok sey soyler. Kesme
+     noktasi (asagidaki tavan) bu yuzden once en zayif onerileri atar.
+
+     Oneri listesi bir DIZIN DEGILDIR: kullaniciya gosterilecek ilk birkac
+     satirdir. Tavan, o satirlarin kalitesini degil yalnizca tarama
+     maliyetini sinirlar. */
+  const MAX_PAIRS = 20000;
+
+  function linkSuggestionsRaw(limit){
     const notlar = S.notes || [];
-    const out = [];
-    for(let i = 0; i < notlar.length; i++){
-      for(let j = i + 1; j < notlar.length; j++){
-        const a = notlar[i], b = notlar[j];
-        if((a.links || []).some(l => l.to === b.id)) continue;
-        const ortak = (a.concepts || []).filter(c =>
-          (b.concepts || []).some(x => U.norm(x) === U.norm(c)));
-        if(!ortak.length) continue;
-        /* Ayni kaynaktan iki not zaten aynı yazari paylasir; sentopik olan
-           FARKLI kaynaklar arasindaki bagdir ve once o onerilir. */
-        const farkliKaynak = a.bookId && b.bookId && a.bookId !== b.bookId;
-        out.push({ a, b, concepts:ortak, cross:farkliKaynak,
-          score:ortak.length + (farkliKaynak ? 2 : 0) });
+    if(notlar.length < 2) return [];
+
+    /* Kavramlar bir kez normalize edilir; ic dongude bir daha degil. */
+    const dizin = new Map();
+    notlar.forEach(function(n, i){
+      (n.concepts || []).forEach(function(c){
+        const k = U.norm(c);
+        if(!k) return;
+        if(!dizin.has(k)) dizin.set(k, []);
+        const kova = dizin.get(k);
+        if(kova[kova.length - 1] !== i) kova.push(i);
+      });
+    });
+
+    const kovalar = Array.from(dizin.entries())
+      .filter(function(e){ return e[1].length > 1; })
+      .sort(function(a, b){ return a[1].length - b[1].length; });
+
+    const ciftler = new Map();
+    let sayac = 0;
+    for(const [kavram, kova] of kovalar){
+      for(let x = 0; x < kova.length && sayac < MAX_PAIRS; x++){
+        for(let y = x + 1; y < kova.length && sayac < MAX_PAIRS; y++){
+          const i = kova[x], j = kova[y];
+          const a = notlar[i], b = notlar[j];
+          if((a.links || []).some(function(l){ return l.to === b.id; })) continue;
+          const anahtar = i + '|' + j;
+          const kayit = ciftler.get(anahtar);
+          if(kayit){ kayit.concepts.push(kavram); }
+          else{ ciftler.set(anahtar, { a:a, b:b, concepts:[kavram] }); sayac++; }
+        }
       }
+      if(sayac >= MAX_PAIRS) break;
     }
-    return out.sort((x, y) => y.score - x.score).slice(0, limit || 8);
+
+    const out = [];
+    ciftler.forEach(function(p){
+      /* Ayni kaynaktan iki not zaten ayni yazari paylasir; sentopik olan
+         FARKLI kaynaklar arasindaki bagdir ve once o onerilir. */
+      const farkliKaynak = p.a.bookId && p.b.bookId && p.a.bookId !== p.b.bookId;
+      out.push({ a:p.a, b:p.b, concepts:p.concepts, cross:farkliKaynak,
+        score:p.concepts.length + (farkliKaynak ? 2 : 0) });
+    });
+    return out.sort(function(x, y){ return y.score - x.score; }).slice(0, limit || 8);
   }
 
   /* ============================================================ arguman
@@ -279,7 +344,22 @@ ESP.Intellect = (function(){
     return n;
   }
 
-  function readability(text){
+  /* Okunabilirlik TASLAK BASINA onbelleklenir.
+
+     Metnin kendisini anahtar yapmak yanlis olurdu (uzun metin, uzun
+     anahtar); onun yerine cagiran taraf `id` verir. Vermezse onbellek
+     devreye girmez ve hesap her seferinde yapilir — dogruluktan odun
+     verilmez, yalnizca tekrar kalkar.
+
+     Ayni taslagin okunabilirligi tek cizimde bes yerde isteniyordu: liste
+     satiri, acik taslak, olcum sekmesi, kademe kapisi ve brifing. */
+  function readability(text, id){
+    if(id == null) return readabilityRaw(text);
+    return ESP.Memo.of('int.read:' + id + ':' + String(text || '').length,
+      function(){ return readabilityRaw(text); });
+  }
+
+  function readabilityRaw(text){
     const s = String(text || '').trim();
     if(!s){
       return { value:null, cert:'missing', words:0, sentences:0, syllables:0,

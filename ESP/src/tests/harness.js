@@ -120,11 +120,35 @@ ESP.Test = (function(){
           .filter(k => k.indexOf(p) === 0 && k.slice(p.length).indexOf('/') === -1)
           .map(k => Object.assign({ id:k.slice(p.length) }, JSON.parse(JSON.stringify(data[k]))));
       },
-      exportAll(){ return JSON.parse(JSON.stringify(data)); },
-      async importAll(obj){ Object.keys(data).forEach(k => delete data[k]); Object.assign(data, obj); },
+      /* Sahte deponun yuzeyi GERCEK depoyla ayni olmali: exportAll orada
+         {__meta, data} dondurur. Duz sozluk donduren bir sahte, yedek
+         testlerini gercek olmayan bir sozlesmeye karsi yazdirirdi. */
+      exportAll(){
+        return {
+          __meta:{ app:'esp-entelektuel', schemaVersion:ESP.SCHEMA_VERSION,
+            exportedAt:new Date().toISOString(), mode:'test' },
+          data:JSON.parse(JSON.stringify(data)),
+        };
+      },
+      readBackup(obj){
+        if(!obj || typeof obj !== 'object') return { ok:false, error:'Dosya okunamadı.' };
+        if(obj.__meta && obj.data) return { ok:true, data:obj.data, meta:obj.__meta };
+        return { ok:true, data:obj, meta:{ schemaVersion:1, legacy:true } };
+      },
+      async importAll(obj){
+        const parsed = this.readBackup(obj);
+        if(!parsed.ok) throw new Error(parsed.error);
+        Object.keys(data).forEach(k => delete data[k]);
+        Object.assign(data, JSON.parse(JSON.stringify(parsed.data)));
+        return parsed.meta;
+      },
       async clear(){ Object.keys(data).forEach(k => delete data[k]); },
       /* Gercek depoyla ayni yuzey: ekranlar boyut/kota okuyabilmeli. */
       localSize(){ return JSON.stringify(data).length; },
+      /* loadAll() bunu cagirir: gercek depoda var, sahtede yoktu ve yedek
+         testi tam da orada patliyordu. Sahte yuzey, gercek yuzeyin eksigi
+         olamaz. */
+      health(){ return { mode:'test', local:'ok', cloud:'off', pendingCloudWrites:0 }; },
       localQuota(){
         const limit = 5*1024*1024;
         const pct = Math.min(100, Math.round(100*this.localSize()/limit));

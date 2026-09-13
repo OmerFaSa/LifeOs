@@ -5289,7 +5289,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'aa21d6d', at:'2026-09-13 02:48', dirty:true };
+SP.BUILD = { id:'4d094e9', at:'2026-09-13 03:03', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -9365,6 +9365,22 @@ ESP.Model = (function(){
      belge kullanilmadan once eksik kaplari tamamlanir. Eksik kap yuzunden
      cizim sirasinda patlayan bir ekran, kabugu da kapatmasa bile o bolumu
      kullanilamaz hale getirir. */
+  /* Depoya yazma BASARISIZ OLABILIR: tarayici kotasi dolar, gizli sekmede
+     localStorage kapali olur. Store bunu saglik bayragina yazar ve
+     kullaniciya bildirir ama DONUS DEGERINI de verir.
+
+     Donusu yok saymak, "Eklendi" diyip hicbir sey eklememek demekti. Bu
+     yardimci, {ok:false} donduren model fonksiyonlarinda o hatayi cagirana
+     tasir — durum nesnesi yine guncellenir (kullanici yazdigini kaybetmesin)
+     ama sonuc dogru soylenir. */
+  async function write(path, doc){
+    const ok = await ESP.Store.set(path, doc);
+    return ok === false
+      ? { ok:false, error:'Kaydedilemedi: tarayıcı depolama alanı dolu olabilir. '
+        + 'Rehber → Veri bölümünden yedek alıp eski kayıtları temizle.' }
+      : { ok:true };
+  }
+
   function arr(v){ return Array.isArray(v) ? v : []; }
   function obj(v){ return (v && typeof v === 'object') ? v : {}; }
 
@@ -9983,7 +9999,8 @@ ESP.Model = (function(){
     if(!a.title) a.title = String(a.text).slice(0, 60);
     const i = S.assets.findIndex(x => x.id === a.id);
     if(i >= 0) S.assets[i] = a; else S.assets.unshift(a);
-    await ESP.Store.set('assets/' + a.id, a);
+    const w = await write('assets/' + a.id, a);
+    if(!w.ok) return w;
     return { ok:true, asset:a };
   }
 
@@ -10027,7 +10044,8 @@ ESP.Model = (function(){
     if(!(r.repeat in REPEATS)) r.repeat = 'none';
     const i = S.reminders.findIndex(x => x.id === r.id);
     if(i >= 0) S.reminders[i] = r; else S.reminders.unshift(r);
-    await ESP.Store.set('reminders/' + r.id, r);
+    const w = await write('reminders/' + r.id, r);
+    if(!w.ok) return w;
     return { ok:true, reminder:r };
   }
 
@@ -10120,7 +10138,8 @@ ESP.Model = (function(){
     const i = S.events.findIndex(x => x.id === e.id);
     if(i >= 0) S.events[i] = e; else S.events.push(e);
     S.events.sort((a, b) => (a.year || 0) - (b.year || 0));
-    await ESP.Store.set('events/' + e.id, e);
+    const w = await write('events/' + e.id, e);
+    if(!w.ok) return w;
     return { ok:true, event:e };
   }
 
@@ -10163,7 +10182,8 @@ ESP.Model = (function(){
     if(!String(s.title || '').trim()) return { ok:false, error:'Kaynağın adı boş olamaz.' };
     const i = S.sources.findIndex(x => x.id === s.id);
     if(i >= 0) S.sources[i] = s; else S.sources.unshift(s);
-    await ESP.Store.set('sources/' + s.id, s);
+    const w = await write('sources/' + s.id, s);
+    if(!w.ok) return w;
     return { ok:true, source:s };
   }
 
@@ -10230,7 +10250,8 @@ ESP.Model = (function(){
     c.updatedAt = new Date().toISOString();
     const i = S.chains.findIndex(x => x.id === c.id);
     if(i >= 0) S.chains[i] = c; else S.chains.unshift(c);
-    await ESP.Store.set('chains/' + c.id, c);
+    const w = await write('chains/' + c.id, c);
+    if(!w.ok) return w;
     return { ok:true, chain:c };
   }
 
@@ -10536,6 +10557,12 @@ ESP.SRS = (function(){
      `null` donmez, bos dizi doner: "vadesi gelen kart yok" olculmus bir
      sonuctur, eksik veri degil. */
   function dueCards(todayISO){
+    return ESP.Memo.of('srs.due:' + (todayISO || ''), function(){
+      return dueCardsRaw(todayISO);
+    });
+  }
+
+  function dueCardsRaw(todayISO){
     const today = todayISO || U.todayISO();
     return S.cards
       .filter(c => (c.due || today) <= today)
@@ -10593,7 +10620,16 @@ ESP.SRS = (function(){
 
      Hic cevaplanmamis kartlar `total`da gorunur ama `value`ya girmez.
      Kapsam ekranda yazilir: "12 karttan 9'undan hesaplandi". */
+  /* Retansiyon butun desteyi dolasir ve bir cizimde onlarca kez isteniyor
+     (brifing, masa notlari, kademe kapisi, ekran basligi). Kare onbellegi
+     hesabi degil YALNIZCA TEKRARI kaldirir. */
   function retention(lang, todayISO){
+    return ESP.Memo.of('srs.ret:' + (lang || '') + ':' + (todayISO || ''), function(){
+      return retentionRaw(lang, todayISO);
+    });
+  }
+
+  function retentionRaw(lang, todayISO){
     const kartlar = ESP.Model.cardsOf(lang);
     const olculen = kartlar
       .map(c => retentionOf(c, todayISO))
@@ -10626,6 +10662,12 @@ ESP.SRS = (function(){
 
   /* Destenin durumu — brifingin dil bolumu buradan beslenir. */
   function deckStatus(lang, todayISO){
+    return ESP.Memo.of('srs.deck:' + (lang || '') + ':' + (todayISO || ''), function(){
+      return deckStatusRaw(lang, todayISO);
+    });
+  }
+
+  function deckStatusRaw(lang, todayISO){
     const today = todayISO || U.todayISO();
     const kartlar = ESP.Model.cardsOf(lang);
     const due = dueCards(today).filter(c => !lang || c.lang === lang);
@@ -10750,6 +10792,12 @@ ESP.Intellect = (function(){
      `days` kac gun geriye bakildigini, `entered` o araliktaki KAC GUNDE
      kayit bulundugunu soyler. Ikisi farkliysa ekran bunu yazar. */
   function hoursOf(discId, days){
+    return ESP.Memo.of('int.hours:' + (discId || '') + ':' + (days || ''), function(){
+      return hoursOfRaw(discId, days);
+    });
+  }
+
+  function hoursOfRaw(discId, days){
     const n = days || 14;
     const gunler = U.lastDays(n);
     let dakika = 0, girilen = 0;
@@ -10810,6 +10858,10 @@ ESP.Intellect = (function(){
      Payda "toplam kitap"tir, "toplam not" degil: olcuyu buyuten sey nota
      bolunmus bir kitap degil, kitaplar ARASI baglardir. */
   function syntopic(){
+    return ESP.Memo.of('int.syn', syntopicRaw);
+  }
+
+  function syntopicRaw(){
     const notlar = S.notes || [];
     const kitaplar = S.books || [];
     if(!notlar.length && !kitaplar.length){
@@ -10844,23 +10896,78 @@ ESP.Intellect = (function(){
   /* Iki notu birlestirebilecek ortak kavramlar. Oneri URETIR, bag KURMAZ:
      bagin nedenini kullanici yazar, sistem uyduramaz. */
   function linkSuggestions(limit){
+    return ESP.Memo.of('int.sugg:' + (limit || ''), function(){
+      return linkSuggestionsRaw(limit);
+    });
+  }
+
+  /* Bag onerisi — KAVRAM DIZINI uzerinden.
+
+     Ilk surum butun not ciftlerini dolasiyordu: n notta n(n-1)/2 cift ve her
+     ciftte kavramlar yeniden normalize ediliyordu. 400 notta 80 bin cift,
+     olculen sure 62 ms; 2000 notta bu saniyelere cikiyor ve her cizimde
+     tekrar ediyordu.
+
+     Cozum, ciftleri degil KAVRAMLARI dolasmak: her kavram bir kova, kova
+     icindeki notlar zaten o kavrami paylasiyor. Kavram tasimayan not hic
+     dokunulmadan eliniyor — ki notlarin cogu oyle.
+
+     Kovalar KUCUKTEN BUYUGE islenir ve bu bir siralama tercihi degil bir
+     ANLAM tercihi: nadir bir kavramda bulusan iki not, "zaman" gibi her
+     yerde gecen bir kavramda bulusan iki nottan daha cok sey soyler. Kesme
+     noktasi (asagidaki tavan) bu yuzden once en zayif onerileri atar.
+
+     Oneri listesi bir DIZIN DEGILDIR: kullaniciya gosterilecek ilk birkac
+     satirdir. Tavan, o satirlarin kalitesini degil yalnizca tarama
+     maliyetini sinirlar. */
+  const MAX_PAIRS = 20000;
+
+  function linkSuggestionsRaw(limit){
     const notlar = S.notes || [];
-    const out = [];
-    for(let i = 0; i < notlar.length; i++){
-      for(let j = i + 1; j < notlar.length; j++){
-        const a = notlar[i], b = notlar[j];
-        if((a.links || []).some(l => l.to === b.id)) continue;
-        const ortak = (a.concepts || []).filter(c =>
-          (b.concepts || []).some(x => U.norm(x) === U.norm(c)));
-        if(!ortak.length) continue;
-        /* Ayni kaynaktan iki not zaten aynı yazari paylasir; sentopik olan
-           FARKLI kaynaklar arasindaki bagdir ve once o onerilir. */
-        const farkliKaynak = a.bookId && b.bookId && a.bookId !== b.bookId;
-        out.push({ a, b, concepts:ortak, cross:farkliKaynak,
-          score:ortak.length + (farkliKaynak ? 2 : 0) });
+    if(notlar.length < 2) return [];
+
+    /* Kavramlar bir kez normalize edilir; ic dongude bir daha degil. */
+    const dizin = new Map();
+    notlar.forEach(function(n, i){
+      (n.concepts || []).forEach(function(c){
+        const k = U.norm(c);
+        if(!k) return;
+        if(!dizin.has(k)) dizin.set(k, []);
+        const kova = dizin.get(k);
+        if(kova[kova.length - 1] !== i) kova.push(i);
+      });
+    });
+
+    const kovalar = Array.from(dizin.entries())
+      .filter(function(e){ return e[1].length > 1; })
+      .sort(function(a, b){ return a[1].length - b[1].length; });
+
+    const ciftler = new Map();
+    let sayac = 0;
+    for(const [kavram, kova] of kovalar){
+      for(let x = 0; x < kova.length && sayac < MAX_PAIRS; x++){
+        for(let y = x + 1; y < kova.length && sayac < MAX_PAIRS; y++){
+          const i = kova[x], j = kova[y];
+          const a = notlar[i], b = notlar[j];
+          if((a.links || []).some(function(l){ return l.to === b.id; })) continue;
+          const anahtar = i + '|' + j;
+          const kayit = ciftler.get(anahtar);
+          if(kayit){ kayit.concepts.push(kavram); }
+          else{ ciftler.set(anahtar, { a:a, b:b, concepts:[kavram] }); sayac++; }
+        }
       }
+      if(sayac >= MAX_PAIRS) break;
     }
-    return out.sort((x, y) => y.score - x.score).slice(0, limit || 8);
+
+    const out = [];
+    ciftler.forEach(function(p){
+      /* Ayni kaynaktan iki not zaten ayni yazari paylasir; sentopik olan
+         FARKLI kaynaklar arasindaki bagdir ve once o onerilir. */
+      const farkliKaynak = p.a.bookId && p.b.bookId && p.a.bookId !== p.b.bookId;
+      out.push({ a:p.a, b:p.b, concepts:p.concepts, cross:farkliKaynak,
+        score:p.concepts.length + (farkliKaynak ? 2 : 0) });
+    });
+    return out.sort(function(x, y){ return y.score - x.score; }).slice(0, limit || 8);
   }
 
   /* ============================================================ arguman
@@ -10945,7 +11052,22 @@ ESP.Intellect = (function(){
     return n;
   }
 
-  function readability(text){
+  /* Okunabilirlik TASLAK BASINA onbelleklenir.
+
+     Metnin kendisini anahtar yapmak yanlis olurdu (uzun metin, uzun
+     anahtar); onun yerine cagiran taraf `id` verir. Vermezse onbellek
+     devreye girmez ve hesap her seferinde yapilir — dogruluktan odun
+     verilmez, yalnizca tekrar kalkar.
+
+     Ayni taslagin okunabilirligi tek cizimde bes yerde isteniyordu: liste
+     satiri, acik taslak, olcum sekmesi, kademe kapisi ve brifing. */
+  function readability(text, id){
+    if(id == null) return readabilityRaw(text);
+    return ESP.Memo.of('int.read:' + id + ':' + String(text || '').length,
+      function(){ return readabilityRaw(text); });
+  }
+
+  function readabilityRaw(text){
     const s = String(text || '').trim();
     if(!s){
       return { value:null, cert:'missing', words:0, sentences:0, syllables:0,
@@ -11193,6 +11315,12 @@ ESP.Acoustic = (function(){
      Hic calisilmamis parca PLATO SAYILMAZ — plato calisan bir seyin
      durmasidir, hic baslamamis bir seyin degil. */
   function plateaus(todayISO){
+    return ESP.Memo.of('ac.plateau:' + (todayISO || ''), function(){
+      return plateausRaw(todayISO);
+    });
+  }
+
+  function plateausRaw(todayISO){
     const today = todayISO || U.todayISO();
     return (S.pieces || []).filter(p => {
       if(p.cleanBpm == null) return false;                 // henuz esik yok
@@ -11251,6 +11379,12 @@ ESP.Acoustic = (function(){
   /* Son N kaydin ozeti. Karsilastirma DAIMA kendi gecmisiyle yapilir;
      baskasinin WPM'i ile karsilastirma yapilmaz. */
   function dictionStatus(days, todayISO){
+    return ESP.Memo.of('ac.diction:' + (days || '') + ':' + (todayISO || ''), function(){
+      return dictionStatusRaw(days, todayISO);
+    });
+  }
+
+  function dictionStatusRaw(days, todayISO){
     const n = days || 30;
     const today = todayISO || U.todayISO();
     const sinir = U.iso(U.addDays(U.parse(today), -n));
@@ -11309,6 +11443,12 @@ ESP.Acoustic = (function(){
 
   /* Muzik masasinin brifing girdisi. */
   function musicStatus(todayISO){
+    return ESP.Memo.of('ac.music:' + (todayISO || ''), function(){
+      return musicStatusRaw(todayISO);
+    });
+  }
+
+  function musicStatusRaw(todayISO){
     const today = todayISO || U.todayISO();
     const parcalar = S.pieces || [];
     if(!parcalar.length){
@@ -11703,7 +11843,8 @@ ESP.Curriculum = (function(){
          kademe acmaz. */
       const metinli = (S.drafts || []).filter(function(d){ return (d.text || '').trim(); });
       if(!metinli.length) return MISSING;
-      const skorlar = metinli.map(function(d){ return ESP.Intellect.readability(d.text).value; })
+      const skorlar = metinli.map(function(d){
+        return ESP.Intellect.readability(d.text, d.id + (d.updatedAt || '')).value; })
         .filter(function(x){ return x != null; });
       if(!skorlar.length) return MISSING;
       return m(skorlar.reduce(function(a, b){ return a + b; }, 0) / skorlar.length, 'derived');
@@ -11758,7 +11899,18 @@ ESP.Curriculum = (function(){
 
   /* Tek bir olcuyu okur. Bilinmeyen ad sessizce 'veri yok' dondurmez:
      bu bir programci hatasidir ve gorunur olmalidir. */
+  /* Ayni olcu bir kademe hesabinda BES KEZ sorulur: "lang.cards" merdivenin
+     bes basamaginin besinde de bir kapidir ve her basamak onu yeniden
+     olcer. Uzerine yedi disiplin binince tek cizimde otuz-kirk kez ayni
+     tarama yapiliyordu (olculdu: kademe hesabinin maliyeti 10 ms, bunun
+     cogu tekrar).
+
+     Kare onbellegi tekrari kaldirir, hesabi degil. */
   function measure(name){
+    return ESP.Memo.of('cur.m:' + name, function(){ return measureRaw(name); });
+  }
+
+  function measureRaw(name){
     const fn = METRICS[name];
     if(!fn) return { value:null, cert:'missing', unknown:true, metric:name };
     let r;
@@ -11820,7 +11972,21 @@ ESP.Curriculum = (function(){
 
      Ardisiklik sarti onemlidir — 1. kademeyi atlayip 3'u gecmek diye bir
      sey yoktur; atlanan kapi ileride cokme uretir. */
+  /* Kademe hesabi UCUZ DEGILDIR: her basamagin her kapisi icin bir olcu
+     okunur ve bazi olculer (retansiyon, sentopik katsayi) butun desteyi
+     dolasir. Tek bir cizimde levelOf() on kez cagriliyor — koc kutusu,
+     tezgah haritasi, merdiven kartlari, ofis brifingi ve Patron ozeti ayni
+     sayiyi ayri ayri istiyor.
+
+     Kare onbellegi (core/memo.js) tam bu sorun icin var ve siniri nettir:
+     yalnizca bir cizim boyunca yasar, kare disinda hicbir sey saklamaz.
+     Boylece "durum degisti mi?" sorusu hic sorulmaz — veri kare icinde
+     degismez. */
   function levelOf(discId){
+    return ESP.Memo.of('cur.level:' + discId, function(){ return levelOfRaw(discId); });
+  }
+
+  function levelOfRaw(discId){
     const l = ladder(discId);
     if(!l) return null;
     const basamaklar = l.levels.map(function(x){ return stepStatus(discId, x.rank); });
@@ -11870,13 +12036,19 @@ ESP.Curriculum = (function(){
      dokunmayacagini soylemis birinin "ustatlik yuzdesi"ni muzikten dolayi
      dusurmek, olculmemis bir seyi olcmek olurdu. */
   function all(){
-    return ESP.Mod.active().map(function(d){ return levelOf(d.id); }).filter(Boolean);
+    return ESP.Memo.of('cur.all', function(){
+      return ESP.Mod.active().map(function(d){ return levelOf(d.id); }).filter(Boolean);
+    });
   }
 
   /* Sistemin genel kademesi: disiplinlerin ORTALAMASI degil, EN DUSUGU ile
      ortalamanin arasi. Sebep: her seyi ihmal edip tek disiplinde ustat olan
      biri "ustat" degildir; ama tek zayif disiplin de butun emegi silmez. */
   function overall(){
+    return ESP.Memo.of('cur.overall', function(){ return overallRaw(); });
+  }
+
+  function overallRaw(){
     const hepsi = all().filter(Boolean);
     if(!hepsi.length) return { rank:0, level:ESP.LEVEL_BY_RANK[0], cert:'missing' };
     const ranks = hepsi.map(function(x){ return x.rank; });
@@ -11897,6 +12069,10 @@ ESP.Curriculum = (function(){
      Once OLCULEBILIR ve eksik olan kapi gelir; hicbiri yoksa olculemeyen
      kapi gelir ve istenen sey "calis" degil "olc"tur. */
   function nextGate(discId){
+    return ESP.Memo.of('cur.gate:' + discId, function(){ return nextGateRaw(discId); });
+  }
+
+  function nextGateRaw(discId){
     const lv = levelOf(discId);
     if(!lv || !lv.next) return null;
     const eksik = lv.next.gates.filter(function(g){ return g.status === 'fail'; });
@@ -12183,7 +12359,13 @@ ESP.Chrono = (function(){
   /* -------------------------------------------------------------- durum */
 
   /* Tarih masasinin brifingi. Ajanin gordugu tek sey budur. */
+  /* Durum ozeti bir cizimde en az bes kez isteniyor (baslik, istatistik,
+     alt baslik, brifing, bulgular). Kare onbellegi. */
   function status(){
+    return ESP.Memo.of('chrono.status', function(){ return statusRaw(); });
+  }
+
+  function statusRaw(){
     const list = events();
     const donem = spread('era'), bolge = spread('region'), alan = spread('kind');
     const bosluk = centuryGaps();
@@ -12211,6 +12393,10 @@ ESP.Chrono = (function(){
 
   /* Masa notlari — kosul saglandiginda kendiliginden duser. */
   function findings(){
+    return ESP.Memo.of('chrono.findings', function(){ return findingsRaw(); });
+  }
+
+  function findingsRaw(){
     const out = [];
     const st = status();
     if(!st.events){
@@ -12356,7 +12542,16 @@ ESP.Coach = (function(){
 
   /* --------------------------------------------------------------- reçete */
 
+  /* Recete de kare onbelleginde: koç kutusu, tezgah, gunun plani ve teklif
+     uretimi ayni receteyi ayri ayri istiyor. Anahtara butce ve gun girer —
+     farkli butceyle yazilan recete farkli bir recetedir. */
   function prescribe(discId, opts){
+    const o = opts || {};
+    const anahtar = 'coach.rx:' + discId + ':' + (o.minutes || '') + ':' + (o.today || '');
+    return ESP.Memo.of(anahtar, function(){ return prescribeRaw(discId, o); });
+  }
+
+  function prescribeRaw(discId, opts){
     const o = opts || {};
     const bugun = o.today || U.todayISO();
     const d = ESP.DISCIPLINE_BY_ID[discId];
@@ -13128,6 +13323,13 @@ ESP.Plans = (function(){
      bir EYLEM önerisi olması. */
   function proposalsFor(agentId, todayISO){
     const bugun = todayISO || U.todayISO();
+    return ESP.Memo.of('plans.for:' + agentId + ':' + bugun, function(){
+      return proposalsForRaw(agentId, bugun);
+    });
+  }
+
+  function proposalsForRaw(agentId, todayISO){
+    const bugun = todayISO || U.todayISO();
     const out = [];
     const disc = discOf(agentId);
     const ekle = function(kind, title, why, payload){
@@ -13215,18 +13417,71 @@ ESP.Plans = (function(){
       }
     }
 
-    /* Daha önce reddedilen teklif yeniden üretilmez: aynı öneriyi her gün
-       tekrar sormak, öneriyi gürültüye çevirir. */
-    const red = (S.proposals || []).filter(function(p){ return p.state === 'declined'; })
-      .map(function(p){ return p.id; });
-    return out.filter(function(p){ return red.indexOf(p.id) < 0; });
+    /* İki süzgeç, iki ayrı sebep:
+
+       REDDEDİLEN teklif bir daha üretilmez — aynı öneriyi her gün tekrar
+       sormak, öneriyi gürültüye çevirir.
+
+       ONAYLANAN teklif ise, UYGULADIĞI ŞEY HÂLÂ DURUYORSA üretilmez. Bu
+       ayrım şart: koşul (ölçülemeyen kapı) teklif onaylandıktan sonra da
+       sürer — hatırlatıcı kurulmuş olması kapıyı ölçmüş olmaz. Süzgeç
+       olmasaydı sistem her çizimde aynı hatırlatıcıyı yeniden önerir ve
+       onaylayan kullanıcı yirmi kopya biriktirirdi.
+
+       Uygulanan şey kapandığında (hatırlatıcı yapıldı, hedef tamamlandı,
+       plan kaldırıldı) teklif yeniden üretilebilir hâle gelir — çünkü o
+       zaman gerçekten yeniden gerekiyordur. */
+    const karar = {};
+    (S.proposals || []).forEach(function(p){ karar[p.id] = p; });
+
+    return out.filter(function(p){
+      const k = karar[p.id];
+      if(!k) return true;
+      if(k.state === 'declined') return false;
+      if(k.state === 'accepted') return !stillApplied(k);
+      return true;
+    });
+  }
+
+  /* Onaylanmış bir teklifin uyguladığı şey hâlâ duruyor mu?
+
+     Bilmediğimiz bir türü «duruyor» saymak, teklifi sonsuza dek susturmak
+     olurdu; «durmuyor» saymak ise her gün yeniden sormak. İkisi arasında
+     daha az zararlı olan ikincisidir: kullanıcı reddedebilir, ama hiç
+     görmediği bir öneriyi geri getiremez. */
+  function stillApplied(p){
+    const a = p.applied;
+    if(!a) return false;
+    if(a.kind === 'reminder'){
+      return (S.reminders || []).some(function(r){ return r.id === a.id && !r.done; });
+    }
+    if(a.kind === 'goal'){
+      return (S.goals || []).some(function(g){ return g.id === a.id && !g.done; });
+    }
+    if(a.kind === 'unit'){
+      const u = ESP.Lesson.unitOf(p.disc, a.unitId);
+      return !!u && ESP.Lesson.progress(u).added > 0;
+    }
+    if(a.kind === 'drill'){
+      return ESP.Coach.doneToday(p.disc).indexOf(p.payload.drillId) >= 0;
+    }
+    if(a.kind === 'weekplan') return !!plan();
+    if(a.kind === 'base'){
+      return (S.profile && S.profile.dailyMinutes) === a.minutes;
+    }
+    if(a.kind === 'focus'){
+      return (S.profile && S.profile.focus) === a.focus;
+    }
+    return false;
   }
 
   /* Bütün açık masaların teklifleri. */
   function all(todayISO){
-    return ESP.Mod.activeAgents().reduce(function(acc, a){
-      return acc.concat(proposalsFor(a.id, todayISO));
-    }, []);
+    return ESP.Memo.of('plans.all:' + (todayISO || U.todayISO()), function(){
+      return ESP.Mod.activeAgents().reduce(function(acc, a){
+        return acc.concat(proposalsFor(a.id, todayISO));
+      }, []);
+    });
   }
 
   function open_(){ return (S.proposals || []).filter(function(p){ return p.state === 'proposed'; }); }
@@ -13367,7 +13622,7 @@ ESP.Plans = (function(){
     return (p.days || []).filter(function(x){ return x.date === g; })[0] || null;
   }
 
-  return { KINDS, KIND_BY_ID, allowed, discOf,
+  return { KINDS, KIND_BY_ID, allowed, discOf, stillApplied,
     proposalsFor, all, open:open_, record, accept, decline,
     weekPlan, savePlan, plan, clearPlan, today };
 })();
@@ -17734,6 +17989,10 @@ ESP.Office = (function(){
      zorunda, yoksa olmayan bir dususu yorumlar. */
 
   function langBrief(){
+    return ESP.Memo.of('office.b:langBrief', langBriefRaw);
+  }
+
+  function langBriefRaw(){
     const d = ESP.SRS.deckStatus();
     const h = ESP.Intellect.hoursOf('lang', 14);
     return {
@@ -17750,6 +18009,10 @@ ESP.Office = (function(){
   }
 
   function philoBrief(){
+    return ESP.Memo.of('office.b:philoBrief', philoBriefRaw);
+  }
+
+  function philoBriefRaw(){
     const acik = ESP.Intellect.openArguments();
     const tikanan = ESP.Intellect.stalledArguments();
     const h = ESP.Intellect.hoursOf('philo', 14);
@@ -17770,6 +18033,10 @@ ESP.Office = (function(){
   }
 
   function musicBrief(){
+    return ESP.Memo.of('office.b:musicBrief', musicBriefRaw);
+  }
+
+  function musicBriefRaw(){
     const m = ESP.Acoustic.musicStatus();
     const h = ESP.Intellect.hoursOf('music', 14);
     return {
@@ -17789,6 +18056,10 @@ ESP.Office = (function(){
   }
 
   function dictionBrief(){
+    return ESP.Memo.of('office.b:dictionBrief', dictionBriefRaw);
+  }
+
+  function dictionBriefRaw(){
     const d = ESP.Acoustic.dictionStatus(30);
     const t = ESP.Acoustic.dictionTrend();
     const h = ESP.Intellect.hoursOf('diction', 14);
@@ -17805,6 +18076,10 @@ ESP.Office = (function(){
   }
 
   function readingBrief(){
+    return ESP.Memo.of('office.b:readingBrief', readingBriefRaw);
+  }
+
+  function readingBriefRaw(){
     const ss = ESP.Intellect.syntopic();
     const h = ESP.Intellect.hoursOf('reading', 14);
     return {
@@ -17820,12 +18095,17 @@ ESP.Office = (function(){
   }
 
   function writingBrief(){
+    return ESP.Memo.of('office.b:writingBrief', writingBriefRaw);
+  }
+
+  function writingBriefRaw(){
     const w = ESP.Intellect.wordsWritten(7);
     const r = ESP.Intellect.draftRatio();
     const h = ESP.Intellect.hoursOf('writing', 14);
     /* Taslak METNI gitmez; yalnizca son taslagin OLCUMU gider. */
     const son = (S.drafts || [])[0];
-    const ok = son ? ESP.Intellect.readability(son.text) : { value:null, cert:'missing' };
+    const ok = son ? ESP.Intellect.readability(son.text, son.id + (son.updatedAt || ''))
+      : { value:null, cert:'missing' };
     return {
       agent:'montaigne',
       words7:{ value:w.value, cert:w.cert, enteredDays:w.enteredDays },
@@ -17841,6 +18121,10 @@ ESP.Office = (function(){
   /* Tarih masasi. Uc eksen ayri durur ve tek puana toplanmaz: hangi
      eksenin zayif oldugunu gizleyen bir sayi, o ekseni calistirmaz. */
   function historyBrief(){
+    return ESP.Memo.of('office.b:historyBrief', historyBriefRaw);
+  }
+
+  function historyBriefRaw(){
     const st = ESP.Chrono.status();
     const h = ESP.Intellect.hoursOf('history', 14);
     const lv = ESP.Curriculum.levelOf('history');
@@ -17863,6 +18147,10 @@ ESP.Office = (function(){
      hangisi» sorularina bakar. Bu ayrim sayesinde koc, bir disiplinin
      uzmaniyla asla celismez — ayni seyi olcmuyorlar. */
   function coachBrief(){
+    return ESP.Memo.of('office.b:coachBrief', coachBriefRaw);
+  }
+
+  function coachBriefRaw(){
     const ov = ESP.Curriculum.overall();
     const d = ESP.SRS.deckStatus();
     const kapilar = ESP.Mod.active().map(x => {
@@ -17887,6 +18175,10 @@ ESP.Office = (function(){
   }
 
   function patronBrief(){
+    return ESP.Memo.of('office.b:patron', patronBriefRaw);
+  }
+
+  function patronBriefRaw(){
     const next = ESP.Planner.nextAction();
     const ehs = ESP.Intellect.ehs(14);
     const denge = ESP.Planner.balance(7);
@@ -17927,6 +18219,10 @@ ESP.Office = (function(){
 
      Iceriğin kendisi GITMEZ: ek sayisi, turu ve basligi gider. */
   function brief(agentId){
+    return ESP.Memo.of('office.brief:' + agentId, function(){ return briefRaw(agentId); });
+  }
+
+  function briefRaw(agentId){
     const fn = BRIEFS[agentId] || patronBrief;
     const b = fn();
     const a = ESP.AGENT_BY_ID[agentId];
@@ -18140,9 +18436,15 @@ ESP.Office = (function(){
     if(a && a.owns){
       const kendi = ESP.DISCIPLINES.filter(d => d.agent === a.id);
       const baskasi = ESP.DISCIPLINES.filter(d => d.agent !== a.id && d.agent !== 'patron');
-      const kendiGecti = kendi.some(d => new RegExp('\\b' + d.short + '', 'i').test(s));
+      /* JavaScript'in `\b` siniri Turkce harfleri kelime karakteri SAYMAZ.
+         «Yazı» kelimesinin sonundaki «ı» bir kelime karakteri olmadigi icin
+         /\bYazı\b/ hicbir cumlede eslesmiyordu: alan ihlali denetimi
+         yazi disiplini icin SESSIZCE oludu. Bir denetimin yanlis susmasi,
+         denetledigi hatadan pahalidir (bkz. data/rules.js §Turkce kelime
+         siniri) — bu yuzden ESP.trRe. */
+      const kendiGecti = kendi.some(d => ESP.trRe(d.short, 'i').test(s));
       baskasi.forEach(d => {
-        if(!kendiGecti && new RegExp('\\b' + d.short + '\\b', 'i').test(s)){
+        if(!kendiGecti && ESP.trRe(d.short, 'i').test(s)){
           scope.push({ id:'scope:' + d.id, why:d.label + ' alanı bu masaya ait değil' });
         }
       });
@@ -22770,7 +23072,7 @@ ESP.Screens.writing = (function(){
     const rows = [];
 
     if(acik){
-      const ok = ESP.Intellect.readability(acik.text);
+      const ok = ESP.Intellect.readability(acik.text, acik.id + (acik.updatedAt || ''));
       const tekrar = ESP.Intellect.repeats(acik.text);
       rows.push(K.Entry({
         label:'TASLAK',
@@ -22826,7 +23128,7 @@ ESP.Screens.writing = (function(){
             headers:['Başlık', { label:'Kelime', num:true }, { label:'Revizyon', num:true },
               'Güncellendi', ''],
             rows:liste.map(d => {
-              const ok = ESP.Intellect.readability(d.text);
+              const ok = ESP.Intellect.readability(d.text, d.id + (d.updatedAt || ''));
               return [
                 d.title || 'başlıksız',
                 ok.cert === 'missing' ? '—' : U.fmtNum(ok.words),
@@ -22850,7 +23152,7 @@ ESP.Screens.writing = (function(){
     const r = ESP.Intellect.draftRatio();
     const h = ESP.Intellect.hoursOf('writing', 14);
     const hepsi = (S.drafts || []);
-    const olculen = hepsi.map(d => ({ d, ok:ESP.Intellect.readability(d.text) }))
+    const olculen = hepsi.map(d => ({ d, ok:ESP.Intellect.readability(d.text, d.id + (d.updatedAt || '')) }))
       .filter(x => x.ok.cert !== 'missing');
 
     return [
@@ -23044,7 +23346,7 @@ ESP.Screens.writing = (function(){
       const w = ESP.Intellect.wordsWritten(7);
       const r = ESP.Intellect.draftRatio();
       const son = (S.drafts || [])[0];
-      const ok = son ? ESP.Intellect.readability(son.text) : { cert:'missing' };
+      const ok = son ? ESP.Intellect.readability(son.text, son.id + (son.updatedAt || '')) : { cert:'missing' };
       return [
         { value:String((S.drafts || []).length), label:'taslak' },
         { value:w.cert === 'missing' ? '—' : U.fmtNum(w.value), label:'kelime / 7g' },

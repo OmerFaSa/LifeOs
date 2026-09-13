@@ -66,6 +66,10 @@ ESP.Office = (function(){
      zorunda, yoksa olmayan bir dususu yorumlar. */
 
   function langBrief(){
+    return ESP.Memo.of('office.b:langBrief', langBriefRaw);
+  }
+
+  function langBriefRaw(){
     const d = ESP.SRS.deckStatus();
     const h = ESP.Intellect.hoursOf('lang', 14);
     return {
@@ -82,6 +86,10 @@ ESP.Office = (function(){
   }
 
   function philoBrief(){
+    return ESP.Memo.of('office.b:philoBrief', philoBriefRaw);
+  }
+
+  function philoBriefRaw(){
     const acik = ESP.Intellect.openArguments();
     const tikanan = ESP.Intellect.stalledArguments();
     const h = ESP.Intellect.hoursOf('philo', 14);
@@ -102,6 +110,10 @@ ESP.Office = (function(){
   }
 
   function musicBrief(){
+    return ESP.Memo.of('office.b:musicBrief', musicBriefRaw);
+  }
+
+  function musicBriefRaw(){
     const m = ESP.Acoustic.musicStatus();
     const h = ESP.Intellect.hoursOf('music', 14);
     return {
@@ -121,6 +133,10 @@ ESP.Office = (function(){
   }
 
   function dictionBrief(){
+    return ESP.Memo.of('office.b:dictionBrief', dictionBriefRaw);
+  }
+
+  function dictionBriefRaw(){
     const d = ESP.Acoustic.dictionStatus(30);
     const t = ESP.Acoustic.dictionTrend();
     const h = ESP.Intellect.hoursOf('diction', 14);
@@ -137,6 +153,10 @@ ESP.Office = (function(){
   }
 
   function readingBrief(){
+    return ESP.Memo.of('office.b:readingBrief', readingBriefRaw);
+  }
+
+  function readingBriefRaw(){
     const ss = ESP.Intellect.syntopic();
     const h = ESP.Intellect.hoursOf('reading', 14);
     return {
@@ -152,12 +172,17 @@ ESP.Office = (function(){
   }
 
   function writingBrief(){
+    return ESP.Memo.of('office.b:writingBrief', writingBriefRaw);
+  }
+
+  function writingBriefRaw(){
     const w = ESP.Intellect.wordsWritten(7);
     const r = ESP.Intellect.draftRatio();
     const h = ESP.Intellect.hoursOf('writing', 14);
     /* Taslak METNI gitmez; yalnizca son taslagin OLCUMU gider. */
     const son = (S.drafts || [])[0];
-    const ok = son ? ESP.Intellect.readability(son.text) : { value:null, cert:'missing' };
+    const ok = son ? ESP.Intellect.readability(son.text, son.id + (son.updatedAt || ''))
+      : { value:null, cert:'missing' };
     return {
       agent:'montaigne',
       words7:{ value:w.value, cert:w.cert, enteredDays:w.enteredDays },
@@ -173,6 +198,10 @@ ESP.Office = (function(){
   /* Tarih masasi. Uc eksen ayri durur ve tek puana toplanmaz: hangi
      eksenin zayif oldugunu gizleyen bir sayi, o ekseni calistirmaz. */
   function historyBrief(){
+    return ESP.Memo.of('office.b:historyBrief', historyBriefRaw);
+  }
+
+  function historyBriefRaw(){
     const st = ESP.Chrono.status();
     const h = ESP.Intellect.hoursOf('history', 14);
     const lv = ESP.Curriculum.levelOf('history');
@@ -195,6 +224,10 @@ ESP.Office = (function(){
      hangisi» sorularina bakar. Bu ayrim sayesinde koc, bir disiplinin
      uzmaniyla asla celismez — ayni seyi olcmuyorlar. */
   function coachBrief(){
+    return ESP.Memo.of('office.b:coachBrief', coachBriefRaw);
+  }
+
+  function coachBriefRaw(){
     const ov = ESP.Curriculum.overall();
     const d = ESP.SRS.deckStatus();
     const kapilar = ESP.Mod.active().map(x => {
@@ -219,6 +252,10 @@ ESP.Office = (function(){
   }
 
   function patronBrief(){
+    return ESP.Memo.of('office.b:patron', patronBriefRaw);
+  }
+
+  function patronBriefRaw(){
     const next = ESP.Planner.nextAction();
     const ehs = ESP.Intellect.ehs(14);
     const denge = ESP.Planner.balance(7);
@@ -259,6 +296,10 @@ ESP.Office = (function(){
 
      Iceriğin kendisi GITMEZ: ek sayisi, turu ve basligi gider. */
   function brief(agentId){
+    return ESP.Memo.of('office.brief:' + agentId, function(){ return briefRaw(agentId); });
+  }
+
+  function briefRaw(agentId){
     const fn = BRIEFS[agentId] || patronBrief;
     const b = fn();
     const a = ESP.AGENT_BY_ID[agentId];
@@ -472,9 +513,15 @@ ESP.Office = (function(){
     if(a && a.owns){
       const kendi = ESP.DISCIPLINES.filter(d => d.agent === a.id);
       const baskasi = ESP.DISCIPLINES.filter(d => d.agent !== a.id && d.agent !== 'patron');
-      const kendiGecti = kendi.some(d => new RegExp('\\b' + d.short + '', 'i').test(s));
+      /* JavaScript'in `\b` siniri Turkce harfleri kelime karakteri SAYMAZ.
+         «Yazı» kelimesinin sonundaki «ı» bir kelime karakteri olmadigi icin
+         /\bYazı\b/ hicbir cumlede eslesmiyordu: alan ihlali denetimi
+         yazi disiplini icin SESSIZCE oludu. Bir denetimin yanlis susmasi,
+         denetledigi hatadan pahalidir (bkz. data/rules.js §Turkce kelime
+         siniri) — bu yuzden ESP.trRe. */
+      const kendiGecti = kendi.some(d => ESP.trRe(d.short, 'i').test(s));
       baskasi.forEach(d => {
-        if(!kendiGecti && new RegExp('\\b' + d.short + '\\b', 'i').test(s)){
+        if(!kendiGecti && ESP.trRe(d.short, 'i').test(s)){
           scope.push({ id:'scope:' + d.id, why:d.label + ' alanı bu masaya ait değil' });
         }
       });

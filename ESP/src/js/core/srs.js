@@ -131,6 +131,12 @@ ESP.SRS = (function(){
      `null` donmez, bos dizi doner: "vadesi gelen kart yok" olculmus bir
      sonuctur, eksik veri degil. */
   function dueCards(todayISO){
+    return ESP.Memo.of('srs.due:' + (todayISO || ''), function(){
+      return dueCardsRaw(todayISO);
+    });
+  }
+
+  function dueCardsRaw(todayISO){
     const today = todayISO || U.todayISO();
     return S.cards
       .filter(c => (c.due || today) <= today)
@@ -188,7 +194,16 @@ ESP.SRS = (function(){
 
      Hic cevaplanmamis kartlar `total`da gorunur ama `value`ya girmez.
      Kapsam ekranda yazilir: "12 karttan 9'undan hesaplandi". */
+  /* Retansiyon butun desteyi dolasir ve bir cizimde onlarca kez isteniyor
+     (brifing, masa notlari, kademe kapisi, ekran basligi). Kare onbellegi
+     hesabi degil YALNIZCA TEKRARI kaldirir. */
   function retention(lang, todayISO){
+    return ESP.Memo.of('srs.ret:' + (lang || '') + ':' + (todayISO || ''), function(){
+      return retentionRaw(lang, todayISO);
+    });
+  }
+
+  function retentionRaw(lang, todayISO){
     const kartlar = ESP.Model.cardsOf(lang);
     const olculen = kartlar
       .map(c => retentionOf(c, todayISO))
@@ -221,6 +236,12 @@ ESP.SRS = (function(){
 
   /* Destenin durumu — brifingin dil bolumu buradan beslenir. */
   function deckStatus(lang, todayISO){
+    return ESP.Memo.of('srs.deck:' + (lang || '') + ':' + (todayISO || ''), function(){
+      return deckStatusRaw(lang, todayISO);
+    });
+  }
+
+  function deckStatusRaw(lang, todayISO){
     const today = todayISO || U.todayISO();
     const kartlar = ESP.Model.cardsOf(lang);
     const due = dueCards(today).filter(c => !lang || c.lang === lang);

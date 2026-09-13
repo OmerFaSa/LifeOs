@@ -197,7 +197,13 @@ ESP.Chrono = (function(){
   /* -------------------------------------------------------------- durum */
 
   /* Tarih masasinin brifingi. Ajanin gordugu tek sey budur. */
+  /* Durum ozeti bir cizimde en az bes kez isteniyor (baslik, istatistik,
+     alt baslik, brifing, bulgular). Kare onbellegi. */
   function status(){
+    return ESP.Memo.of('chrono.status', function(){ return statusRaw(); });
+  }
+
+  function statusRaw(){
     const list = events();
     const donem = spread('era'), bolge = spread('region'), alan = spread('kind');
     const bosluk = centuryGaps();
@@ -225,6 +231,10 @@ ESP.Chrono = (function(){
 
   /* Masa notlari — kosul saglandiginda kendiliginden duser. */
   function findings(){
+    return ESP.Memo.of('chrono.findings', function(){ return findingsRaw(); });
+  }
+
+  function findingsRaw(){
     const out = [];
     const st = status();
     if(!st.events){

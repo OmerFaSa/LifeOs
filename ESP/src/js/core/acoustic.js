@@ -146,6 +146,12 @@ ESP.Acoustic = (function(){
      Hic calisilmamis parca PLATO SAYILMAZ — plato calisan bir seyin
      durmasidir, hic baslamamis bir seyin degil. */
   function plateaus(todayISO){
+    return ESP.Memo.of('ac.plateau:' + (todayISO || ''), function(){
+      return plateausRaw(todayISO);
+    });
+  }
+
+  function plateausRaw(todayISO){
     const today = todayISO || U.todayISO();
     return (S.pieces || []).filter(p => {
       if(p.cleanBpm == null) return false;                 // henuz esik yok
@@ -204,6 +210,12 @@ ESP.Acoustic = (function(){
   /* Son N kaydin ozeti. Karsilastirma DAIMA kendi gecmisiyle yapilir;
      baskasinin WPM'i ile karsilastirma yapilmaz. */
   function dictionStatus(days, todayISO){
+    return ESP.Memo.of('ac.diction:' + (days || '') + ':' + (todayISO || ''), function(){
+      return dictionStatusRaw(days, todayISO);
+    });
+  }
+
+  function dictionStatusRaw(days, todayISO){
     const n = days || 30;
     const today = todayISO || U.todayISO();
     const sinir = U.iso(U.addDays(U.parse(today), -n));
@@ -262,6 +274,12 @@ ESP.Acoustic = (function(){
 
   /* Muzik masasinin brifing girdisi. */
   function musicStatus(todayISO){
+    return ESP.Memo.of('ac.music:' + (todayISO || ''), function(){
+      return musicStatusRaw(todayISO);
+    });
+  }
+
+  function musicStatusRaw(todayISO){
     const today = todayISO || U.todayISO();
     const parcalar = S.pieces || [];
     if(!parcalar.length){

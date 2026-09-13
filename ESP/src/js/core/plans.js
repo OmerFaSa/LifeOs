@@ -84,6 +84,13 @@ ESP.Plans = (function(){
      bir EYLEM önerisi olması. */
   function proposalsFor(agentId, todayISO){
     const bugun = todayISO || U.todayISO();
+    return ESP.Memo.of('plans.for:' + agentId + ':' + bugun, function(){
+      return proposalsForRaw(agentId, bugun);
+    });
+  }
+
+  function proposalsForRaw(agentId, todayISO){
+    const bugun = todayISO || U.todayISO();
     const out = [];
     const disc = discOf(agentId);
     const ekle = function(kind, title, why, payload){
@@ -171,18 +178,71 @@ ESP.Plans = (function(){
       }
     }
 
-    /* Daha önce reddedilen teklif yeniden üretilmez: aynı öneriyi her gün
-       tekrar sormak, öneriyi gürültüye çevirir. */
-    const red = (S.proposals || []).filter(function(p){ return p.state === 'declined'; })
-      .map(function(p){ return p.id; });
-    return out.filter(function(p){ return red.indexOf(p.id) < 0; });
+    /* İki süzgeç, iki ayrı sebep:
+
+       REDDEDİLEN teklif bir daha üretilmez — aynı öneriyi her gün tekrar
+       sormak, öneriyi gürültüye çevirir.
+
+       ONAYLANAN teklif ise, UYGULADIĞI ŞEY HÂLÂ DURUYORSA üretilmez. Bu
+       ayrım şart: koşul (ölçülemeyen kapı) teklif onaylandıktan sonra da
+       sürer — hatırlatıcı kurulmuş olması kapıyı ölçmüş olmaz. Süzgeç
+       olmasaydı sistem her çizimde aynı hatırlatıcıyı yeniden önerir ve
+       onaylayan kullanıcı yirmi kopya biriktirirdi.
+
+       Uygulanan şey kapandığında (hatırlatıcı yapıldı, hedef tamamlandı,
+       plan kaldırıldı) teklif yeniden üretilebilir hâle gelir — çünkü o
+       zaman gerçekten yeniden gerekiyordur. */
+    const karar = {};
+    (S.proposals || []).forEach(function(p){ karar[p.id] = p; });
+
+    return out.filter(function(p){
+      const k = karar[p.id];
+      if(!k) return true;
+      if(k.state === 'declined') return false;
+      if(k.state === 'accepted') return !stillApplied(k);
+      return true;
+    });
+  }
+
+  /* Onaylanmış bir teklifin uyguladığı şey hâlâ duruyor mu?
+
+     Bilmediğimiz bir türü «duruyor» saymak, teklifi sonsuza dek susturmak
+     olurdu; «durmuyor» saymak ise her gün yeniden sormak. İkisi arasında
+     daha az zararlı olan ikincisidir: kullanıcı reddedebilir, ama hiç
+     görmediği bir öneriyi geri getiremez. */
+  function stillApplied(p){
+    const a = p.applied;
+    if(!a) return false;
+    if(a.kind === 'reminder'){
+      return (S.reminders || []).some(function(r){ return r.id === a.id && !r.done; });
+    }
+    if(a.kind === 'goal'){
+      return (S.goals || []).some(function(g){ return g.id === a.id && !g.done; });
+    }
+    if(a.kind === 'unit'){
+      const u = ESP.Lesson.unitOf(p.disc, a.unitId);
+      return !!u && ESP.Lesson.progress(u).added > 0;
+    }
+    if(a.kind === 'drill'){
+      return ESP.Coach.doneToday(p.disc).indexOf(p.payload.drillId) >= 0;
+    }
+    if(a.kind === 'weekplan') return !!plan();
+    if(a.kind === 'base'){
+      return (S.profile && S.profile.dailyMinutes) === a.minutes;
+    }
+    if(a.kind === 'focus'){
+      return (S.profile && S.profile.focus) === a.focus;
+    }
+    return false;
   }
 
   /* Bütün açık masaların teklifleri. */
   function all(todayISO){
-    return ESP.Mod.activeAgents().reduce(function(acc, a){
-      return acc.concat(proposalsFor(a.id, todayISO));
-    }, []);
+    return ESP.Memo.of('plans.all:' + (todayISO || U.todayISO()), function(){
+      return ESP.Mod.activeAgents().reduce(function(acc, a){
+        return acc.concat(proposalsFor(a.id, todayISO));
+      }, []);
+    });
   }
 
   function open_(){ return (S.proposals || []).filter(function(p){ return p.state === 'proposed'; }); }
@@ -323,7 +383,7 @@ ESP.Plans = (function(){
     return (p.days || []).filter(function(x){ return x.date === g; })[0] || null;
   }
 
-  return { KINDS, KIND_BY_ID, allowed, discOf,
+  return { KINDS, KIND_BY_ID, allowed, discOf, stillApplied,
     proposalsFor, all, open:open_, record, accept, decline,
     weekPlan, savePlan, plan, clearPlan, today };
 })();

@@ -130,6 +130,22 @@ ESP.Model = (function(){
      belge kullanilmadan once eksik kaplari tamamlanir. Eksik kap yuzunden
      cizim sirasinda patlayan bir ekran, kabugu da kapatmasa bile o bolumu
      kullanilamaz hale getirir. */
+  /* Depoya yazma BASARISIZ OLABILIR: tarayici kotasi dolar, gizli sekmede
+     localStorage kapali olur. Store bunu saglik bayragina yazar ve
+     kullaniciya bildirir ama DONUS DEGERINI de verir.
+
+     Donusu yok saymak, "Eklendi" diyip hicbir sey eklememek demekti. Bu
+     yardimci, {ok:false} donduren model fonksiyonlarinda o hatayi cagirana
+     tasir — durum nesnesi yine guncellenir (kullanici yazdigini kaybetmesin)
+     ama sonuc dogru soylenir. */
+  async function write(path, doc){
+    const ok = await ESP.Store.set(path, doc);
+    return ok === false
+      ? { ok:false, error:'Kaydedilemedi: tarayıcı depolama alanı dolu olabilir. '
+        + 'Rehber → Veri bölümünden yedek alıp eski kayıtları temizle.' }
+      : { ok:true };
+  }
+
   function arr(v){ return Array.isArray(v) ? v : []; }
   function obj(v){ return (v && typeof v === 'object') ? v : {}; }
 
@@ -748,7 +764,8 @@ ESP.Model = (function(){
     if(!a.title) a.title = String(a.text).slice(0, 60);
     const i = S.assets.findIndex(x => x.id === a.id);
     if(i >= 0) S.assets[i] = a; else S.assets.unshift(a);
-    await ESP.Store.set('assets/' + a.id, a);
+    const w = await write('assets/' + a.id, a);
+    if(!w.ok) return w;
     return { ok:true, asset:a };
   }
 
@@ -792,7 +809,8 @@ ESP.Model = (function(){
     if(!(r.repeat in REPEATS)) r.repeat = 'none';
     const i = S.reminders.findIndex(x => x.id === r.id);
     if(i >= 0) S.reminders[i] = r; else S.reminders.unshift(r);
-    await ESP.Store.set('reminders/' + r.id, r);
+    const w = await write('reminders/' + r.id, r);
+    if(!w.ok) return w;
     return { ok:true, reminder:r };
   }
 
@@ -885,7 +903,8 @@ ESP.Model = (function(){
     const i = S.events.findIndex(x => x.id === e.id);
     if(i >= 0) S.events[i] = e; else S.events.push(e);
     S.events.sort((a, b) => (a.year || 0) - (b.year || 0));
-    await ESP.Store.set('events/' + e.id, e);
+    const w = await write('events/' + e.id, e);
+    if(!w.ok) return w;
     return { ok:true, event:e };
   }
 
@@ -928,7 +947,8 @@ ESP.Model = (function(){
     if(!String(s.title || '').trim()) return { ok:false, error:'Kaynağın adı boş olamaz.' };
     const i = S.sources.findIndex(x => x.id === s.id);
     if(i >= 0) S.sources[i] = s; else S.sources.unshift(s);
-    await ESP.Store.set('sources/' + s.id, s);
+    const w = await write('sources/' + s.id, s);
+    if(!w.ok) return w;
     return { ok:true, source:s };
   }
 
@@ -995,7 +1015,8 @@ ESP.Model = (function(){
     c.updatedAt = new Date().toISOString();
     const i = S.chains.findIndex(x => x.id === c.id);
     if(i >= 0) S.chains[i] = c; else S.chains.unshift(c);
-    await ESP.Store.set('chains/' + c.id, c);
+    const w = await write('chains/' + c.id, c);
+    if(!w.ok) return w;
     return { ok:true, chain:c };
   }
 
