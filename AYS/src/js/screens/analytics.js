@@ -363,7 +363,7 @@ R.Screens.analytics = (function(){
 
        Sürtünme      Sistemi yönetmek, çalışmanın yerine mi geçiyor?
        Ayrışma       Bir gösterge, temsil ettiği şeyden koptu mu?
-       Kalibrasyon   Aday sistemsiz de kendi durumunu biliyor mu?
+       Kalibrasyon   Aday kayıtlı türlerde kendi sayısını kestirebiliyor mu?
 
      Üçü de kötü çıkabilir; bu bir arıza değil, ölçüldüğü için görünür
      olmasıdır. Sınav salonunda hiçbir ekran yoktur — orada yalnızca
@@ -484,7 +484,10 @@ R.Screens.analytics = (function(){
               süs değil, sınav becerisidir: hangi testte zaman harcayacağını,
               hangi soruyu bırakacağını ve bir denemenin kötü mü yoksa zor mu
               olduğunu o kestirim söyler. Tahmin KÖR yazılır — net ekranda
-              dururken yazılan tahmin, tahmin değil kopyadır.</p>
+              dururken yazılan tahmin, tahmin değil kopyadır. Defter «kendini
+              tanımayı» ölçmez: yalnızca kayıtlı türlerde kör tahminlerinin
+              kayıtlı sayıya ne kadar yaklaştığını ölçer. Net ile dakika ayrı
+              ailelerdir, tek ortalamada toplanmazlar.</p>
 
             <div class="mt-12">
               ${K.Field({ label:'Ne tahmin ediyorsun?',

@@ -280,7 +280,9 @@ SP.Screens.analytics = (function(){
         : (puan.grade || '—'),
       note:'Her sayıyı cihazdan bekleyen biri, cihaz yokken kendini okuyamaz. '
          + 'Tahmin KÖR yazılır: değer ekranda dururken yazılan tahmin, tahmin '
-         + 'değil kopyadır. Bu bir sağlık yargısı değildir.',
+         + 'değil kopyadır. Ölçülen şey dardır — kayıtlı türlerde tahminin '
+         + 'sayıya ne kadar yaklaştığı; «kendini tanıma» değil. Bu bir sağlık '
+         + 'yargısı da değildir.',
       wide:true,
       body:html`
         ${K.Notice({ tone:'info', body:puan.note })}

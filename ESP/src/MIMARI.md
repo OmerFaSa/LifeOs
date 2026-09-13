@@ -548,7 +548,15 @@ sapan biriyle sistemli olarak kendini abartan biri aynı ortalama hataya
 sahip olabilir ama farklı şeyler yapmaları gerekir. Yüzde sapma ile Brier
 aynı ölçek değildir; ortalanmazlar.
 
-Bu, sistem kapalıyken de geçerli olan tek ölçüdür.
+Defterin ölçtüğü şey dardır ve dar olduğu yazılır: kayıt altındaki
+birkaç türde, kör yazılmış tahminlerin kayıtlı sayıya ne kadar
+yaklaştığı. «Kendini tanıma» ölçülmez — bu bir üstbiliş sinyalidir,
+bir özbilgi ölçüsü değil. Değeri, sistem kapandığında da elde kalmasıdır.
+
+Hata ölçüsü artık tek değil: oranı anlamlı büyüklüklerde bağıl
+(dakika), kendi biriminde sapması anlamlı olanlarda mutlak (net, puan,
+saat, oturum), olasılıklarda Brier. Aileler ortalanmaz; karşılaştırılabilir
+olan tek şey banttır.
 
 ### Merdivenin kör noktası — `data/curriculum.js` → `blind[]`
 

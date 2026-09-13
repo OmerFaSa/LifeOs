@@ -196,18 +196,46 @@
       resetState();
       for(let i = 0; i < 6; i++) kapali('exam-net', 60, 60);
       const p = K().score();
-      expect(p.ape).toBe(0);
+      expect(p.byKind['exam-net'].mean).toBe(0);
       expect(p.grade).toBe('keskin');
     });
 
-    /* Düşük netlerde aynı mutlak sapma DAHA BÜYÜK bir hatadır. */
-    it('sapma gerçek değere göre ölçülür', () => {
+    /* Eski hata: net de bağıl ölçülüyordu. 5 neti 10 tahmin etmek %100,
+       60 neti 65 tahmin etmek %8 sayılıyordu — oysa ikisi de 5 netlik
+       sapmadır ve denemede 5 net her yerde 5 nettir. */
+    it('net sapması kendi biriminde ölçülür', () => {
       resetState();
       for(let i = 0; i < 5; i++) kapali('exam-net', 10, 5);
-      expect(K().score().ape).toBe(1);
+      const kucuk = K().score();
       resetState();
       for(let i = 0; i < 5; i++) kapali('exam-net', 65, 60);
-      expect(Math.round(K().score().ape * 100)).toBe(8);
+      const buyuk = K().score();
+      expect(kucuk.ape).toBe(null);
+      expect(kucuk.byKind['exam-net'].mean).toBe(5);
+      expect(buyuk.byKind['exam-net'].mean).toBe(5);
+      expect(kucuk.grade).toBe(buyuk.grade);
+      expect(kucuk.byKind['exam-net'].unit).toBe('net');
+    });
+
+    /* Dakika gibi oranı anlamlı büyüklüklerde bağıl hata korunur. */
+    it('sürede bağıl sapma ölçülür', () => {
+      resetState();
+      for(let i = 0; i < 5; i++) kapali('week-minutes', 600, 500);
+      const p = K().score();
+      expect(Math.round(p.ape * 100)).toBe(20);
+      expect(p.byKind['week-minutes'].type).toBe('ape');
+    });
+
+    /* Farkli birimler tek ortalamada toplanmaz; ortak olan yalnizca bant. */
+    it('farklı birimler tek ortalamada toplanmaz', () => {
+      resetState();
+      for(let i = 0; i < 3; i++) kapali('exam-net', 62, 60);
+      for(let i = 0; i < 3; i++) kapali('week-minutes', 520, 500);
+      const p = K().score();
+      expect(p.byKind['exam-net'].n).toBe(3);
+      expect(p.byKind['week-minutes'].n).toBe(3);
+      expect(p.ape != null).toBeTruthy();
+      expect(p.grade).toBe('keskin');
     });
 
     it('sistemli abartma yanlılık olarak görünür', () => {

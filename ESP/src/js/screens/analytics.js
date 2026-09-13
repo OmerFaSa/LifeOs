@@ -385,9 +385,10 @@ ESP.Screens.analytics = (function(){
         label:'KALİBRASYON', hint:'calib',
         meta:puan.cert === 'missing' ? puan.n + '/' + ESP.Calib.ASGARI + ' tahmin'
           : (puan.grade || (puan.brier == null ? '—' : 'brier ' + puan.brier.toFixed(2))),
-        note:'Sistem söylemeden önce sen söyle. Burada ölçülen şey senin '
-           + 'kendi durumunu ne kadar bildiğin — sistem kapalıyken de geçerli '
-           + 'olan tek ölçü bu.',
+        note:'Sistem söylemeden önce sen söyle. Ölçülen şey dardır: kayıtlı '
+           + 'türlerde kör tahminlerinin kayıtlı sayıya ne kadar yaklaştığı. '
+           + '«Kendini tanıma» ölçülmez; bu bir üstbiliş sinyalidir. Değeri, '
+           + 'sistem kapalıyken de elde kalmasıdır.',
         wide:true,
         body:html`
           ${K.Notice({ tone:'info', body:puan.note })}

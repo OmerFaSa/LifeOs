@@ -86,6 +86,47 @@
       expect(Math.round(K().score().ape * 100)).toBe(20);
     });
 
+    /* Eski hata: oturum sayisi da bagil olculuyordu. 3 oturumu 6 tahmin
+       etmek %100, 30 oturumu 33 tahmin etmek %10 sayiliyordu — oysa ikisi
+       de uc oturumluk sapmadir. */
+    it('oturum sapmasi kendi biriminde olculur', () => {
+      resetState();
+      for(let i = 0; i < 5; i++) kapali('sessions', 6, 3);
+      const kucuk = K().score();
+      resetState();
+      for(let i = 0; i < 5; i++) kapali('sessions', 33, 30);
+      const buyuk = K().score();
+      expect(kucuk.ape).toBe(null);
+      expect(kucuk.byKind['sessions'].mean).toBe(3);
+      expect(buyuk.byKind['sessions'].mean).toBe(3);
+      expect(kucuk.grade).toBe(buyuk.grade);
+      expect(kucuk.byKind['sessions'].unit).toBe('oturum');
+    });
+
+    /* Retansiyon bir yuzde puanidir: 40 puani 45 tahmin etmek ile 80'i 85
+       tahmin etmek ayni bes puanlik sapmadir. */
+    it('retansiyonda puan farki olculur', () => {
+      resetState();
+      for(let i = 0; i < 5; i++) kapali('retention', 85, 80);
+      const p = K().score();
+      expect(p.byKind['retention'].mean).toBe(5);
+      expect(p.byKind['retention'].type).toBe('abs');
+      expect(p.grade).toBe('keskin');
+    });
+
+    /* Farkli birimler tek ortalamada toplanmaz; ortak olan yalnizca bant. */
+    it('farkli aileler ayri raporlanir', () => {
+      resetState();
+      for(let i = 0; i < 3; i++) kapali('minutes', 110, 100);
+      for(let i = 0; i < 3; i++) kapali('retention', 82, 80);
+      const p = K().score();
+      expect(p.byKind['minutes'].type).toBe('ape');
+      expect(p.byKind['retention'].type).toBe('abs');
+      expect(p.byKind['minutes'].n).toBe(3);
+      expect(p.byKind['retention'].n).toBe(3);
+      expect(p.grade).toBe('keskin');
+    });
+
     /* Sistemli abartma, rastgele sapmadan FARKLI bir bulgudur. */
     it('yanlilik yonu ayri olculur', () => {
       resetState();

@@ -112,10 +112,39 @@
       expect(K().score().cert).toBe('missing');
     });
 
-    it('sapma gerçek değere göre ölçülür', () => {
+    /* Tartıda 4 kiloluk sapma, 80'in de 60'ın da yanında 4 kilodur.
+       Kilonun oranı değil KENDİSİ anlamlıdır; bu yüzden mutlak ölçülür. */
+    it('tartı sapması kendi biriminde ölçülür', () => {
       resetState();
       for(let i = 0; i < 5; i++) kapali('weight', 84, 80);
-      expect(K().score().ape).toBe(0.05);
+      const p = K().score();
+      expect(p.ape).toBe(null);
+      expect(p.byKind['weight'].mean).toBe(4);
+      expect(p.byKind['weight'].unit).toBe('kg');
+      expect(p.grade).toBe('uzak');
+    });
+
+    /* Oranı anlamlı olan büyüklüklerde bağıl hata korunur. */
+    it('proteinde bağıl sapma ölçülür', () => {
+      resetState();
+      for(let i = 0; i < 5; i++) kapali('protein', 120, 100);
+      const p = K().score();
+      expect(Math.round(p.ape * 100)).toBe(20);
+      expect(p.byKind['protein'].type).toBe('ape');
+    });
+
+    /* Eski hata: tek bir bağıl ölçü her değişkene uygulanıyordu. 2 saatlik
+       uykuyu 3 tahmin etmek %50, 8 saatliği 9 tahmin etmek %12 sayılıyordu;
+       oysa ikisi de bir saatlik sapmadır. */
+    it('küçük değerde aynı sapma şişmez', () => {
+      resetState();
+      for(let i = 0; i < 5; i++) kapali('sleep', 3, 2);
+      const kucuk = K().score();
+      resetState();
+      for(let i = 0; i < 5; i++) kapali('sleep', 9, 8);
+      const buyuk = K().score();
+      expect(kucuk.byKind['sleep'].mean).toBe(buyuk.byKind['sleep'].mean);
+      expect(kucuk.grade).toBe(buyuk.grade);
     });
 
     /* Kendini sürekli iyi okuyan ile kötü okuyan farklı şeyler yapmalı. */
