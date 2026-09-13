@@ -48,6 +48,20 @@ ESP.Palette = (function(){
       hint:'Yazı', run:() => { ESP.S.ui.writeTab = 'taslaklar'; ESP.App.go('writing'); } });
     out.push({ id:'act:meeting', kind:'Eylem', label:'Ofis toplantısı başlat',
       hint:'Ofis', run:() => ESP.App.go('meeting') });
+    /* Yeni katmanlarin kisayollari: merdiven, pratik ve tezgah. Komut
+       paleti bir ekran listesi degil bir IS listesidir; is eklenince
+       buraya da eklenir. */
+    out.push({ id:'act:ladder', kind:'Eylem', label:'Merdiveni aç',
+      hint:'Günlük', run:() => { ESP.S.ui.ladderTab = 'ozet'; ESP.App.go('ladder'); } });
+    out.push({ id:'act:practice-lang', kind:'Eylem', label:'Dil pratiği başlat',
+      hint:'Dil', run:() => { ESP.S.ui.langTab = 'ogren'; ESP.App.go('lang'); } });
+    out.push({ id:'act:practice-history', kind:'Eylem', label:'Tarih pratiği başlat',
+      hint:'Tarih', run:() => { ESP.S.ui.histTab = 'ogren'; ESP.App.go('history'); } });
+    out.push({ id:'act:timeline', kind:'Eylem', label:'Kronolojiye olay ekle',
+      hint:'Tarih', run:() => { ESP.S.ui.histTab = 'olaylar'; ESP.App.go('history'); } });
+    out.push({ id:'act:proposals', kind:'Eylem', label:'Bekleyen teklifleri gör',
+      hint:'Ofis', run:() => ESP.App.go('office') });
+
     out.push({ id:'act:backup', kind:'Eylem', label:'Yedek indir',
       hint:'Veri', run:() => { ESP.S.ui.guideTab = 'veri'; ESP.App.go('guide'); } });
 

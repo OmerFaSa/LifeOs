@@ -61,7 +61,57 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'ALTI DİSİPLİN',
+        label:'MERDİVEN', hint:'ladder',
+        meta:ESP.LEVELS.length - 1 + ' kademe',
+        note:'Her bölümde sıfırdan üstatlığa beş basamak ve her basamakta '
+           + 'ölçülebilir kapılar. Kademe kişiye değil ÜRETİME verilir: '
+           + 'üretim durursa kademe de durur.',
+        wide:true,
+        body:html`
+          ${K.Table({ tight:true, headers:['Kademe', 'Ne demek'],
+            rows:ESP.LEVELS.map(l => [l.short + ' · ' + l.label, l.note]) })}
+          <p class="small muted mt-8">Merdiven ardışıktır: alttaki kapı
+            atlanarak üsttekine geçilmez. Ölçülemeyen kapı üçüncü bir
+            durumdur — ne geçildi ne kalındı; orada istenen şey çalışmak
+            değil ölçmek.</p>`,
+      }),
+
+      K.Entry({
+        label:'TEZGÂH', hint:'desk',
+        meta:ESP.Desk.TABS.length + ' sekme',
+        note:'Her bölümün altında aynı yerde durur ve bölümden bölüme '
+           + 'değişmez: bir kez öğrenilir, yedi kez değil.',
+        wide:true,
+        body:K.Table({ tight:true, headers:['Sekme', 'Ne yapar'],
+          rows:[
+            ['Koç', 'O bölümün uzmanıyla yazılı ya da SESLİ sohbet; cevabı '
+              + 'dinleyebilirsin. Danışma ekranıyla aynı yoldan geçer.'],
+            ['Harita', 'Bu bölümde nerede durduğun ve sıradaki kapı.'],
+            ['Ekler', 'Not, belge, bağlantı ve ses ÖLÇÜMÜ. Koç sayısını, türünü '
+              + 've başlığını görür; içeriğini görmez.'],
+            ['Hatırlatma', 'Tarihli ve tekrarlı. Kaçırılan hatırlatıcı ceza '
+              + 'üretmez; tekrarlı olan bugünden sayılarak taşınır.'],
+            ['Plan', 'O masanın teklifleri. Ajan doğrudan yazmaz: teklif eder, '
+              + 'sen onaylarsın, uygulamayı kural motoru yapar.'],
+          ] }),
+      }),
+
+      K.Entry({
+        label:'BÖLÜMLER', hint:'modules',
+        meta:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length + ' açık',
+        note:'Çalışmayacağın bölümü kapatabilirsin: gezinmeden kalkar, '
+           + 'reçeteye ve denge hesabına girmez, ofiste masası kapanır.',
+        body:html`
+          ${K.Notice({ tone:'info',
+            body:'Kapatmak SİLMEZ. Altı ay sonra geri açtığında kartların, '
+              + 'notların ve kademen olduğu yerde durur — «kapalı» ile «yok» '
+              + 'ayrı şeylerdir.' })}
+          ${K.Button({ label:'Bölümleri aç/kapat', size:'sm', act:'go',
+            data:{ 'data-route':'profile' }, class:'mt-10' })}`,
+      }),
+
+      K.Entry({
+        label:'YEDİ DİSİPLİN',
         meta:ESP.DISCIPLINES.length + ' alan',
         note:'Ağırlıklar birbirine yakın tutulur: büyük fark, düşük katsayılı '
            + 'disiplini görünmez yapar ve kullanıcı onu bırakır.',

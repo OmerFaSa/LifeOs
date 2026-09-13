@@ -169,4 +169,6 @@ ESP.HINTS = {
     more:'Ajan doğrudan yazmaz — teklif eder, sen onaylarsın, uygulamayı kural motoru yapar. Bir dil modelinin verine doğrudan yazması, halüsinasyon riskini kalıcı hâle getirirdi: yanlış bir çıkarım bir cümle olarak kalmaz, bir hatırlatıcıya ya da bir hedefe dönüşürdü. Her teklif ajanın KENDİ alanındadır: Maestro hatırlatıcı kurabilir, dil ünitesi ekleyemez. Reddedilen teklif tekrar sorulmaz ama kaydı silinmez.' },
   'weekplan':{ t:'Haftalık plan', b:'Haftanın günlerine disiplin dağıtımı.',
     more:'Takvim DEĞİLDİR: «salı 19:00\'da gitar» demek sistemin işi değil. Sırayı haftalık rota verir, plan onu güne dağıtır — yeni bir karar üretmez. Saatini sen seçersin.' },
+  'ladder':{ t:'Merdiven', b:'Sıfırdan üstatlığa beş kademe ve ölçülebilir kapılar.',
+    more:'Kademe kişiye değil ÜRETİME verilir; üretim durursa kademe de durur. Merdiven ardışıktır: alttaki kapı atlanarak üsttekine geçilmez, çünkü atlanan kapı ileride üstüne kurulan her şeyi çökertir. Süre tahmini yoktur — «üç ayda usta olursun» sonuç garantisi yasağına girer.' },
 };

@@ -5317,7 +5317,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'7023edc', at:'2026-09-13 03:38', dirty:true };
+SP.BUILD = { id:'fba8c3b', at:'2026-09-13 03:40', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -19144,6 +19144,20 @@ ESP.Palette = (function(){
       hint:'Yazı', run:() => { ESP.S.ui.writeTab = 'taslaklar'; ESP.App.go('writing'); } });
     out.push({ id:'act:meeting', kind:'Eylem', label:'Ofis toplantısı başlat',
       hint:'Ofis', run:() => ESP.App.go('meeting') });
+    /* Yeni katmanlarin kisayollari: merdiven, pratik ve tezgah. Komut
+       paleti bir ekran listesi degil bir IS listesidir; is eklenince
+       buraya da eklenir. */
+    out.push({ id:'act:ladder', kind:'Eylem', label:'Merdiveni aç',
+      hint:'Günlük', run:() => { ESP.S.ui.ladderTab = 'ozet'; ESP.App.go('ladder'); } });
+    out.push({ id:'act:practice-lang', kind:'Eylem', label:'Dil pratiği başlat',
+      hint:'Dil', run:() => { ESP.S.ui.langTab = 'ogren'; ESP.App.go('lang'); } });
+    out.push({ id:'act:practice-history', kind:'Eylem', label:'Tarih pratiği başlat',
+      hint:'Tarih', run:() => { ESP.S.ui.histTab = 'ogren'; ESP.App.go('history'); } });
+    out.push({ id:'act:timeline', kind:'Eylem', label:'Kronolojiye olay ekle',
+      hint:'Tarih', run:() => { ESP.S.ui.histTab = 'olaylar'; ESP.App.go('history'); } });
+    out.push({ id:'act:proposals', kind:'Eylem', label:'Bekleyen teklifleri gör',
+      hint:'Ofis', run:() => ESP.App.go('office') });
+
     out.push({ id:'act:backup', kind:'Eylem', label:'Yedek indir',
       hint:'Veri', run:() => { ESP.S.ui.guideTab = 'veri'; ESP.App.go('guide'); } });
 
@@ -24866,7 +24880,57 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'ALTI DİSİPLİN',
+        label:'MERDİVEN', hint:'ladder',
+        meta:ESP.LEVELS.length - 1 + ' kademe',
+        note:'Her bölümde sıfırdan üstatlığa beş basamak ve her basamakta '
+           + 'ölçülebilir kapılar. Kademe kişiye değil ÜRETİME verilir: '
+           + 'üretim durursa kademe de durur.',
+        wide:true,
+        body:html`
+          ${K.Table({ tight:true, headers:['Kademe', 'Ne demek'],
+            rows:ESP.LEVELS.map(l => [l.short + ' · ' + l.label, l.note]) })}
+          <p class="small muted mt-8">Merdiven ardışıktır: alttaki kapı
+            atlanarak üsttekine geçilmez. Ölçülemeyen kapı üçüncü bir
+            durumdur — ne geçildi ne kalındı; orada istenen şey çalışmak
+            değil ölçmek.</p>`,
+      }),
+
+      K.Entry({
+        label:'TEZGÂH', hint:'desk',
+        meta:ESP.Desk.TABS.length + ' sekme',
+        note:'Her bölümün altında aynı yerde durur ve bölümden bölüme '
+           + 'değişmez: bir kez öğrenilir, yedi kez değil.',
+        wide:true,
+        body:K.Table({ tight:true, headers:['Sekme', 'Ne yapar'],
+          rows:[
+            ['Koç', 'O bölümün uzmanıyla yazılı ya da SESLİ sohbet; cevabı '
+              + 'dinleyebilirsin. Danışma ekranıyla aynı yoldan geçer.'],
+            ['Harita', 'Bu bölümde nerede durduğun ve sıradaki kapı.'],
+            ['Ekler', 'Not, belge, bağlantı ve ses ÖLÇÜMÜ. Koç sayısını, türünü '
+              + 've başlığını görür; içeriğini görmez.'],
+            ['Hatırlatma', 'Tarihli ve tekrarlı. Kaçırılan hatırlatıcı ceza '
+              + 'üretmez; tekrarlı olan bugünden sayılarak taşınır.'],
+            ['Plan', 'O masanın teklifleri. Ajan doğrudan yazmaz: teklif eder, '
+              + 'sen onaylarsın, uygulamayı kural motoru yapar.'],
+          ] }),
+      }),
+
+      K.Entry({
+        label:'BÖLÜMLER', hint:'modules',
+        meta:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length + ' açık',
+        note:'Çalışmayacağın bölümü kapatabilirsin: gezinmeden kalkar, '
+           + 'reçeteye ve denge hesabına girmez, ofiste masası kapanır.',
+        body:html`
+          ${K.Notice({ tone:'info',
+            body:'Kapatmak SİLMEZ. Altı ay sonra geri açtığında kartların, '
+              + 'notların ve kademen olduğu yerde durur — «kapalı» ile «yok» '
+              + 'ayrı şeylerdir.' })}
+          ${K.Button({ label:'Bölümleri aç/kapat', size:'sm', act:'go',
+            data:{ 'data-route':'profile' }, class:'mt-10' })}`,
+      }),
+
+      K.Entry({
+        label:'YEDİ DİSİPLİN',
         meta:ESP.DISCIPLINES.length + ' alan',
         note:'Ağırlıklar birbirine yakın tutulur: büyük fark, düşük katsayılı '
            + 'disiplini görünmez yapar ve kullanıcı onu bırakır.',
