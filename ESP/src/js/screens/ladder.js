@@ -98,7 +98,7 @@ ESP.Screens.ladder = (function(){
     }));
 
     /* Ölçülemeyen kapılar tek listede: bunlar "çalış" değil "ölç" işleridir. */
-    const olcum = ESP.DISCIPLINES.map(d => C().nextGate(d.id))
+    const olcum = ESP.Mod.active().map(d => C().nextGate(d.id))
       .filter(g => g && g.action === 'measure');
     rows.push(K.Entry({
       label:'ÖLÇÜLEMEYEN KAPILAR', hint:'unknown-gate',
@@ -193,7 +193,7 @@ ESP.Screens.ladder = (function(){
           ${K.Field({ label:'Disiplin',
             input:K.Select({ id:'pl-disc', value:disc, change:'pick-disc-sel',
               aria:'Tespit yapılacak disiplin',
-              options:ESP.DISCIPLINES.map(x => ({ value:x.id, label:x.label })) }) })}
+              options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }) })}
           ${map(ESP.PLACEMENT.questions, q => K.Field({ label:q.label, class:'mt-10',
             input:K.Select({ id:'pl-' + q.id,
               value:mevcut[q.id] != null ? String(mevcut[q.id]) : '',
@@ -241,7 +241,7 @@ ESP.Screens.ladder = (function(){
           items:TABS.map(t => ({ id:t.id, label:t.label })) }),
         actions:when(tab !== 'ozet', () => K.Select({ id:'lad-disc', value:disc,
           change:'pick-disc-sel', aria:'Disiplin seç',
-          options:ESP.DISCIPLINES.map(x => ({ value:x.id, label:x.label })) })),
+          options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) })),
       }))}
       ${K.Span(12, K.Ledger(() => rows))}`);
   }
@@ -282,7 +282,7 @@ ESP.Screens.ladder = (function(){
     headline(){
       const ov = C().overall();
       if(ov.cert === 'missing') return 'Merdiven henüz başlamadı.';
-      const olc = ESP.DISCIPLINES.map(d => C().nextGate(d.id))
+      const olc = ESP.Mod.active().map(d => C().nextGate(d.id))
         .filter(g => g && g.action === 'measure').length;
       if(olc) return olc + ' kapı ölçülemiyor.';
       return 'Ölçülmüş üretim «' + ov.level.label + '» kademesinde.';
@@ -298,7 +298,7 @@ ESP.Screens.ladder = (function(){
         { value:ov.cert === 'missing' ? '—' : ov.level.short, label:'genel kademe' },
         { value:ov.cert === 'missing' ? '—' : String(ov.mastery), unit:'%', label:'merdiven' },
         { value:String(hepsi.filter(x => x.rank > 0).length), label:'başlamış disiplin' },
-        { value:String(ESP.DISCIPLINES.map(d => C().nextGate(d.id))
+        { value:String(ESP.Mod.active().map(d => C().nextGate(d.id))
           .filter(g => g && g.action === 'measure').length), label:'ölçülemeyen kapı' },
       ];
     },

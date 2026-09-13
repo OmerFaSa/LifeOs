@@ -132,7 +132,7 @@ ESP.Screens.analytics = (function(){
         action:K.Select({ value:disipl, change:'series-disc', size:'sm',
           aria:'Disiplin süzgeci',
           options:[{ value:'all', label:'Tümü' }]
-            .concat(ESP.DISCIPLINES.map(d => ({ value:d.id, label:d.short }))) }),
+            .concat(ESP.Mod.active().map(d => ({ value:d.id, label:d.short }))) }),
         wide:true,
         body:olculen.length
           ? html`

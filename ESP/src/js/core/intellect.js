@@ -103,7 +103,9 @@ ESP.Intellect = (function(){
 
   function ehs(days){
     const n = days || 14;
-    const rows = ESP.DISCIPLINES.map(d => {
+    /* Kapali disiplin hacme girmez: kullanicinin hic calismayacagini
+       soyledigi bir alan, "dokunulmamis" diye hesabi asagi cekmemeli. */
+    const rows = ESP.Mod.active().map(d => {
       const h = hoursOf(d.id, n);
       const k = qualityCoef(d.id);
       return {

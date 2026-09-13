@@ -50,7 +50,7 @@ ESP.Screens.meeting = (function(){
     if(!canli) return [];
     return [K.Entry({
       label:'TOPLANTI',
-      meta:canli.turns.length + '/' + (ESP.AGENTS.length - 1) + ' tur',
+      meta:canli.turns.length + '/' + (ESP.Mod.activeAgents().length - 1) + ' tur',
       note:'Her tur geldiği anda basılır; hepsinin bitmesi beklenmez.',
       wide:true,
       body:html`

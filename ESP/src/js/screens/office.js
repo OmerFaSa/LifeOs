@@ -69,7 +69,7 @@ ESP.Screens.office = (function(){
 
   function render(){
     const patron = ESP.AGENT_BY_ID.patron;
-    const uzmanlar = ESP.AGENTS.filter(a => a.id !== 'patron');
+    const uzmanlar = ESP.Mod.activeAgents().filter(a => a.id !== 'patron');
     const devir = ESP.Office.handoffs();
     const brf = ESP.Office.patronBrief();
     const next = brf.next;
@@ -157,7 +157,7 @@ ESP.Screens.office = (function(){
     stats(){
       const notlar = ESP.Office.notes();
       return [
-        { value:String(ESP.AGENTS.length), label:'masa' },
+        { value:String(ESP.Mod.activeAgents().length), label:'masa' },
         { value:String(notlar.filter(n => n.tone === 'danger').length), label:'tıkanma' },
         { value:String(notlar.filter(n => n.tone === 'warn').length), label:'vadesi geçmiş' },
         { value:String(ESP.Office.handoffs().length), label:'devir' },

@@ -119,7 +119,7 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
 
     /* ---- her ekran ---- */
     const routes = await page.evaluate(() =>
-      ESP.App.SECTIONS.reduce((a, s) => a.concat(s.views.map(v => v.route)), []));
+      ESP.Nav.sections().reduce((a, s) => a.concat(s.views.map(v => v.route)), []));
 
     for(const route of routes){
       await page.evaluate(async r => { await ESP.App.go(r); }, route);

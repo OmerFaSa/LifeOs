@@ -26,68 +26,12 @@ ESP.App = (function(){
      `views` bir bölümün sayfalarıdır. Tek sayfalı bölümde sayfa şeridi
      çizilmez: tek sekmelik bir sekme çubuğu gürültüden başka bir şey
      değildir. */
-  const SECTIONS = [
-    { id:'gunluk', num:'01', icon:'pulse', label:'Günlük',
-      note:'Günün pratiğini gir, karşılığını gör',
-      views:[
-        { route:'today',  label:'Bugün',    icon:'pulse' },
-        { route:'ladder', label:'Merdiven', icon:'chart' },
-      ] },
-
-    { id:'dil', num:'02', icon:'cards', label:'Dil',
-      note:'Kelime, aralıklı tekrar ve shadowing',
-      views:[{ route:'lang', label:'Dil Stüdyosu', icon:'cards' }] },
-
-    /* Felsefe ile tarih ayni bolumde durur ve bu bir yerlestirme kolayligi
-       degil bir iddiadir: ikisi de ayni kasi calistirir — oncul ile sonucu
-       ayirmak. Dokuzuncu bir serit telefonda okunmuyordu; bu birlestirme
-       hem duzeni hem sayfayi kurtardi. */
-    { id:'dusunce', num:'03', icon:'socratic', label:'Düşünce',
-      note:'Tez, itiraz, kronoloji ve kaynak eleştirisi',
-      views:[
-        { route:'symposium', label:'Sempozyum', icon:'socratic' },
-        { route:'history',   label:'Kronoloji', icon:'book' },
-      ] },
-
-    { id:'ses', num:'04', icon:'wave', label:'Ses',
-      note:'Gitar metronomu ve diksiyon',
-      views:[{ route:'studio', label:'Stüdyo', icon:'wave' }] },
-
-    { id:'okuma', num:'05', icon:'book', label:'Okuma',
-      note:'Atomik not ve sentopik matris',
-      views:[{ route:'library', label:'Kütüphane', icon:'book' }] },
-
-    { id:'yazi', num:'06', icon:'quill', label:'Yazı',
-      note:'Taslak, okunabilirlik ve üslup',
-      views:[{ route:'writing', label:'Yazı Laboratuvarı', icon:'quill' }] },
-
-    { id:'ofis', num:'07', icon:'users', label:'Ofis',
-      note:'Patron ve altı uzman',
-      views:[
-        { route:'office',    label:'Masalar',  icon:'users' },
-        { route:'team',      label:'Danışma',  icon:'zap' },
-        { route:'meeting',   label:'Toplantı', icon:'list' },
-        { route:'analytics', label:'Analiz',   icon:'chart' },
-      ] },
-
-    { id:'ayarlar', num:'08', icon:'sliders', label:'Ayarlar',
-      note:'Profil, görünüm, veri ve rehber',
-      views:[
-        { route:'profile', label:'Profil', icon:'sliders' },
-        { route:'guide',   label:'Rehber', icon:'guide' },
-      ] },
-  ];
-
-  /* Yönlendirme kimlikleri değişmedi; değişen yalnızca kullanıcıya görünen
-     gruplama. Bu sayede komut paleti, testler ve derin bağlantılar bozulmaz. */
-  const SECTION_OF = (function(){
-    const m = {};
-    SECTIONS.forEach(sec => sec.views.forEach(v => { m[v.route] = sec; }));
-    return m;
-  })();
-
-  function sectionOf(route){ return SECTION_OF[route] || SECTIONS[0]; }
-
+  /* Gezinme şeridi `data/sections.js` içinde bir VERİDİR ve mantığı
+     `core/nav.js` içinde yaşar. İkisi de kabuktan ayrı durur: bölüm
+     kataloğunu test edebilmek için uygulamayı açmak gerekmesin. */
+  const SECTIONS = ESP.Nav.sections;
+  const routeOn = ESP.Nav.routeOn;
+  const sectionOf = ESP.Nav.sectionOf;
 
   function screen(){ return ESP.Screens[S.route] || ESP.Screens.today; }
 
@@ -196,7 +140,7 @@ ESP.App = (function(){
     const active = sectionOf(sc.id);
     return html`
       <nav class="sitenav" aria-label="Bölümler">
-        <div class="wrapc navlinks">${map(SECTIONS, sec => {
+        <div class="wrapc navlinks">${map(SECTIONS(), sec => {
           const on = sec.id === active.id;
           const b = sectionBadge(sec);
           return html`<button class="${cls('navlink', on && 'is-active')}"
@@ -249,18 +193,33 @@ ESP.App = (function(){
      listeyi açar.
 
      Yalnız 860 pikselin altında çizilir. */
-  const TABBAR = [
+  const TABBAR_ALL = [
     { route:'today',  label:'Bugün',  icon:'pulse' },
     { route:'lang',   label:'Dil',    icon:'cards' },
     { route:'studio', label:'Stüdyo', icon:'wave' },
+    { route:'history', label:'Tarih', icon:'book' },
+    { route:'library', label:'Okuma', icon:'book' },
+    { route:'symposium', label:'Felsefe', icon:'socratic' },
+    { route:'writing', label:'Yazı',  icon:'quill' },
     { route:'office', label:'Ofis',   icon:'users' },
   ];
+
+  /* Dört yuva + menü. Hangi dördü? Bugün ve Ofis sabittir; aradaki iki yuva
+     kullanıcının AÇIK bölümlerinden, katalog sırasına göre doldurulur.
+     Kapalı bir bölümü başparmağın altında tutmak, en değerli iki yuvayı
+     boşa harcamak olurdu. */
+  function tabbar(){
+    const sabit = TABBAR_ALL.filter(t => t.route === 'today');
+    const orta = TABBAR_ALL.filter(t => t.route !== 'today' && t.route !== 'office'
+      && routeOn(t.route)).slice(0, 2);
+    return sabit.concat(orta, TABBAR_ALL.filter(t => t.route === 'office'));
+  }
 
   function tabbarHtml(sc){
     const aktif = sectionOf(sc.id);
     return html`
       <nav class="tabbar" aria-label="Hızlı gezinme">
-        ${map(TABBAR, t => {
+        ${map(tabbar(), t => {
           const sec = sectionOf(t.route);
           const on = sec.id === aktif.id;
           const b = safe(() => badgeFor(t.route), null);
@@ -320,7 +279,7 @@ ESP.App = (function(){
           ${ESP.C.IconButton({ icon:'close', aria:'Kapat', act:'toggle-menu' })}
         </div>
         <div class="navsheet__body">
-          <div class="navsheet__grid">${map(SECTIONS, sec => html`
+          <div class="navsheet__grid">${map(SECTIONS(), sec => html`
             <button class="${cls('navsheet__item', sec.id === active.id && 'is-active')}"
               data-act="go" data-route="${sec.views[0].route}" data-num="${sec.num}">
               <b>${sec.label}</b>
@@ -675,6 +634,14 @@ ESP.App = (function(){
   }
 
   function go(route){
+    /* Kapalı bir bölümün ekranına gidilmez: boş bir tezgâh, kullanıcının
+       kapattığı şeyi geri getirmiş gibi görünür. Sessizce Bugün'e düşer ve
+       sebebini söyler. */
+    if(ESP.Screens[route] && !routeOn(route)){
+      UI.toast('Bu bölüm kapalı. Ayarlar → Bölümler\'den açabilirsin.');
+      route = 'today';
+    }
+
     /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
     if(ESP.Talk && ESP.Talk.isActive()) ESP.Talk.stop();
@@ -718,6 +685,15 @@ ESP.App = (function(){
     /* Egzersiz isleme ORTAK bir eylemdir: koç kutusu yedi ekranda birden
        duruyor ve her ekranda ayri bir islem yazmak, yedi kez bozulabilecek
        bir islem demektir. */
+    /* Sihirbazdaki bolum secimi: kart yerinde isaretlenir, sayfa yeniden
+       cizilmez — sihirbaz acikken tam cizim, acik sayfayi kapatirdi. */
+    async 'setup-mod'(el){
+      const list = ESP.Setup.pick(el.dataset.id);
+      const on = list.indexOf(el.dataset.id) >= 0;
+      el.classList.toggle('is-on', on);
+      el.setAttribute('aria-pressed', on ? 'true' : 'false');
+    },
+
     async 'log-drill'(el){
       const res = await ESP.Coach.logDrill(el.dataset.id);
       if(!res.ok){ UI.toast(res.error); return; }
@@ -1130,7 +1106,8 @@ ESP.App = (function(){
     }
   }
 
-  return { boot, render, go, applyTheme, applySection, SECTIONS, sectionOf, THEMES, installManifest,
+  return { boot, render, go, applyTheme, applySection, SECTIONS,
+    sectionOf, routeOn, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen };
 })();
 

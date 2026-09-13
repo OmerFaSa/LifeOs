@@ -197,7 +197,7 @@ ESP.Office = (function(){
   function coachBrief(){
     const ov = ESP.Curriculum.overall();
     const d = ESP.SRS.deckStatus();
-    const kapilar = ESP.DISCIPLINES.map(x => {
+    const kapilar = ESP.Mod.active().map(x => {
       const g = ESP.Curriculum.nextGate(x.id);
       const lv = ESP.Curriculum.levelOf(x.id);
       return {
@@ -572,7 +572,10 @@ ESP.Office = (function(){
      satir tek. Bes masa ayni notlari uretip kendi satirlarini suzuyordu;
      kare onbellegi bunu bire indirir. */
   function notes(agentId){
-    const hepsi = ESP.Memo.of('office.notes', notesRaw);
+    /* Kapali masanin bulgusu hic gorunmez: kullanicinin kapattigi bir
+       disiplin, ofiste "tikanma" diye geri gelemez. */
+    const hepsi = ESP.Memo.of('office.notes', notesRaw)
+      .filter(n => ESP.Mod.agentOn(n.agent));
     return agentId ? hepsi.filter(n => n.agent === agentId) : hepsi;
   }
 
@@ -660,7 +663,7 @@ ESP.Office = (function(){
     });
 
     /* --- koc --- */
-    ESP.DISCIPLINES.forEach(x => {
+    ESP.Mod.active().forEach(x => {
       const g = ESP.Curriculum.nextGate(x.id);
       if(g && g.action === 'measure'){
         add('mnemosyne', 'info', x.label + ': «' + g.gate.label + '» kapısı ölçülemiyor. '
@@ -754,7 +757,7 @@ ESP.Office = (function(){
     const ss = ESP.Intellect.syntopic();
     if(ss.total - ss.linked >= 3) add('synthesis', 50, (ss.total - ss.linked) + ' bağsız not.');
 
-    const kapi = ESP.DISCIPLINES
+    const kapi = ESP.Mod.active()
       .map(x => ESP.Curriculum.nextGate(x.id))
       .filter(g => g && g.action === 'measure');
     if(kapi.length) add('gate', 55, kapi.length + ' kapı ölçülemiyor.');
@@ -799,7 +802,9 @@ ESP.Office = (function(){
   async function runMeeting(agendaId, onTurn){
     const gundem = agendaCandidates().find(a => a.id === agendaId) || agendaCandidates()[0];
     const turlar = [];
-    const uzmanlar = ESP.AGENTS.filter(a => a.id !== 'patron');
+    /* Kapali bir disiplinin ajani toplantiya cagrilmaz: masasi yoksa
+       raporu da yoktur ve bos bir tur, toplantiyi uzatan bir gurultudur. */
+    const uzmanlar = ESP.Mod.activeAgents().filter(a => a.id !== 'patron');
 
     for(const a of uzmanlar){
       const b = brief(a.id);

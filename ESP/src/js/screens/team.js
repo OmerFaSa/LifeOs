@@ -16,7 +16,10 @@ ESP.Screens.team = (function(){
   const K = ESP.C;
 
   function agent(){
-    return ESP.AGENT_BY_ID[S.ui.officeAgent] || ESP.AGENT_BY_ID.patron;
+    const a = ESP.AGENT_BY_ID[S.ui.officeAgent];
+    /* Kapali bir masaya eski bir baglantidan girilebilir; o durumda Patron
+       acilir — bos bir masa, kapatilan seyi geri gelmis gibi gosterir. */
+    return (a && ESP.Mod.agentOn(a.id)) ? a : ESP.AGENT_BY_ID.patron;
   }
 
   function avatar(a){
@@ -50,7 +53,7 @@ ESP.Screens.team = (function(){
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({
         tabs:K.Subtabs({ value:a.id, act:'pick-agent', aria:'Ajan seçimi',
-          items:ESP.AGENTS.map(x => ({ id:x.id, label:x.short || x.name })) }),
+          items:ESP.Mod.activeAgents().map(x => ({ id:x.id, label:x.short || x.name })) }),
       }))}
 
       ${K.Span(12, K.Ledger(() => [

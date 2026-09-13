@@ -5,7 +5,16 @@
    bagimsizdir; sorulmasi gereken tek sey NE CALISILDIGIDIR.
 
    Uc alan: ad, odak, hangi dil. Gerisi zamanla dolar ve olmadan da sistem
-   calisir. Sihirbaz atlanabilir; atlandiginda ekranlar bos kalmaz. */
+   calisir. Sihirbaz atlanabilir; atlandiginda ekranlar bos kalmaz.
+
+   Dorduncu bir soru sonradan eklendi ve arayuzun tamamini degistiriyor:
+   HANGI BOLUMLER. Kullanici burada calismayacagi disiplinleri kapatir;
+   gezinme seridi, reçete, denge hesabi ve ofis masalari ona gore daralir.
+
+   Secim ZORUNLU DEGIL: hicbiri dokunulmazsa hepsi acik kalir. Varsayilan
+   "hepsi acik"tir cunku bir sistemin ilk acilista kullaniciya bir seyi
+   kapattirmasi, daha kullanmadan bir sey kaybettirmektir. Kapatmak sonra
+   da mumkun — ve kapatmak veriyi SILMEZ (bkz. core/modules.js). */
 
 window.ESP = window.ESP || {};
 
@@ -74,13 +83,24 @@ ESP.Setup = (function(){
               min:10, max:600, value:p.dailyMinutes || 60, placeholder:'60' }) })}
         </div>
 
+        <div class="setup__mods">
+          <p class="setup__kicker">Hangi bölümler açık olsun?</p>
+          <p class="setup__lede">Dokunmazsan hepsi açık kalır. Kapattığın bölüm
+            gezinmeden kalkar, reçeteye ve denge hesabına girmez — ama verisi
+            silinmez, istediğin zaman Ayarlar'dan geri açarsın.</p>
+          <div class="setup__picks">${ESP.DISCIPLINES.map(d => String(K.PickCard({
+            label:d.label, meta:d.short, on:ESP.Mod.isOn(d.id),
+            act:'setup-mod', data:{ 'data-id':d.id } }))).join('')}</div>
+        </div>
+
         <div class="setup__unlock">
           <p class="setup__kicker">Bu alanlar neyi açar</p>
           <ul class="setup__list">
-            <li><b>Sıradaki tek iş</b> — altı disiplin arasında önceliği kural motoru seçer</li>
+            <li><b>Sıradaki tek iş</b> — açık disiplinler arasında önceliği kural motoru seçer</li>
             <li><b>Aralıklı tekrar</b> — kart eklediğinde retansiyon ölçülmeye başlar</li>
             <li><b>Haftalık rota</b> — hiç açılmayan disiplin öne alınır</li>
-            <li><b>Yedi ajanlı ofis</b> — her masa yalnızca kendi ölçümüne bakar</li>
+            <li><b>Dokuz ajanlı ofis</b> — her masa yalnızca kendi ölçümüne bakar</li>
+            <li><b>Merdiven</b> — her bölümde sıfırdan üstatlığa ölçülebilir kapılar</li>
           </ul>
         </div>
 
@@ -90,6 +110,20 @@ ESP.Setup = (function(){
         ${K.Button({ label:'Başla', tone:'primary', act:'setup-save' })}`),
     });
   }
+
+  /* Sihirbaz içindeki seçim GEÇİCİDİR: kaydedilene kadar yalnızca bu
+     nesnede durur. Yarıda kapatılan bir sihirbaz, kullanıcının profilini
+     yarım bir seçimle bırakmamalı. */
+  let secim = null;
+
+  function pick(id){
+    if(!secim) secim = ESP.Mod.activeIds().slice();
+    const i = secim.indexOf(id);
+    if(i >= 0) secim.splice(i, 1); else secim.push(id);
+    return secim;
+  }
+
+  function picked(){ return secim; }
 
   async function save(){
     const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
@@ -109,6 +143,12 @@ ESP.Setup = (function(){
       dailyMinutes:numOr(get('su-minutes')) || 60,
     });
 
+    if(secim && secim.length){
+      const res = await ESP.Mod.setAll(secim);
+      if(!res.ok){ ESP.UI.toast(res.error); return false; }
+    }
+    secim = null;
+
     ESP.UI.closeSheet();
     ESP.UI.toast('Hazır — ilk oturumu girince ölçüm başlar');
     ESP.App.render();
@@ -116,9 +156,10 @@ ESP.Setup = (function(){
   }
 
   function skip(){
+    secim = null;
     ESP.UI.closeSheet();
     ESP.UI.toast('Atlandı — Profil ekranından istediğin zaman doldurabilirsin');
   }
 
-  return { needed, open, save, skip };
+  return { needed, open, save, skip, pick, picked };
 })();

@@ -4569,7 +4569,7 @@ body.is-dragging .drop.is-over{
 
 /* ------------------------------------------------------- bolum kimlikleri
 
-   Sekiz bolum, sekiz imza. Renkler ayni doygunluk ailesinden secildi:
+   Dokuz bolum, dokuz imza (tarih kendi bolumu oldu). Renkler ayni doygunluk ailesinden secildi:
    yan yana konduklarinda gokkusagi degil tek bir palet gibi okunurlar.
 
    `--sec` yalniz bes yerde gorunur: bolum numarasi, etkin sekme cizgisi,
@@ -4577,7 +4577,8 @@ body.is-dragging .drop.is-over{
    Durum renkleri (ok/warn/danger) buna KARISMAZ. */
 :root[data-section="gunluk"]  { --sec-base:#2F6B52; }  /* adaçayı */
 :root[data-section="dil"]     { --sec-base:#2F5A8A; }  /* mürekkep mavisi */
-:root[data-section="dusunce"] { --sec-base:#6B3F63; }  /* erik */
+:root[data-section="felsefe"] { --sec-base:#6B3F63; }  /* erik */
+:root[data-section="tarih"]   { --sec-base:#6E4B2A; }  /* ceviz */
 :root[data-section="ses"]     { --sec-base:#9A4A2F; }  /* kiremit */
 :root[data-section="okuma"]   { --sec-base:#8A5A18; }  /* kehribar */
 :root[data-section="yazi"]    { --sec-base:#5E6B2A; }  /* zeytin */
@@ -4589,7 +4590,8 @@ body.is-dragging .drop.is-over{
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"])[data-section="gunluk"]  { --sec-base:#79C09C; }
   :root:not([data-theme="light"])[data-section="dil"]     { --sec-base:#86AEDC; }
-  :root:not([data-theme="light"])[data-section="dusunce"] { --sec-base:#C193BA; }
+  :root:not([data-theme="light"])[data-section="felsefe"] { --sec-base:#C193BA; }
+  :root:not([data-theme="light"])[data-section="tarih"]   { --sec-base:#D3A87E; }
   :root:not([data-theme="light"])[data-section="ses"]     { --sec-base:#DF9376; }
   :root:not([data-theme="light"])[data-section="okuma"]   { --sec-base:#D6A961; }
   :root:not([data-theme="light"])[data-section="yazi"]    { --sec-base:#AFBF74; }
@@ -4598,7 +4600,8 @@ body.is-dragging .drop.is-over{
 }
 :root[data-theme="dark"][data-section="gunluk"]  { --sec-base:#79C09C; }
 :root[data-theme="dark"][data-section="dil"]     { --sec-base:#86AEDC; }
-:root[data-theme="dark"][data-section="dusunce"] { --sec-base:#C193BA; }
+:root[data-theme="dark"][data-section="felsefe"] { --sec-base:#C193BA; }
+:root[data-theme="dark"][data-section="tarih"]   { --sec-base:#D3A87E; }
 :root[data-theme="dark"][data-section="ses"]     { --sec-base:#DF9376; }
 :root[data-theme="dark"][data-section="okuma"]   { --sec-base:#D6A961; }
 :root[data-theme="dark"][data-section="yazi"]    { --sec-base:#AFBF74; }
@@ -5114,6 +5117,15 @@ body.is-dragging .drop.is-over{
 .exprow:last-child{ border-bottom:0; }
 .exprow__head{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2); }
 .exprow p{ margin:var(--sp-2) 0 0; }
+
+
+/* Kurulum sihirbazindaki bolum secimi. Kartlar esit genislikte: bir
+   disiplini otekinden buyuk gostermek, secimi yonlendirmek olurdu. */
+.setup__mods{ margin-top:var(--sp-4); }
+.setup__picks{
+  display:grid; gap:var(--sp-2); margin-top:var(--sp-3);
+  grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+}
 </style>
 <div id="app">
   <div class="boot">
@@ -5134,7 +5146,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'d7724a7', at:'2026-09-12 19:35', dirty:true };
+SP.BUILD = { id:'75be01a', at:'2026-09-13 02:20', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -7954,6 +7966,8 @@ ESP.HINTS = {
   'repertoire':{ t:'Repertuar bakımı', b:'Çalınmayan parça geri gider.',
     more:'«Bitti» diye bir hâl yoktur. Otuz günden uzun süredir çalınmayan parça bakımsızdır: çalınabilir ama garanti değil. Repertuar genişletmek kadar korumak da bir iştir.' },
 
+  'modules':{ t:'Bölümler', b:'Hangi disiplinlerin açık olduğu.',
+    more:'Kapalı bir bölüm gezinmede görünmez, reçeteye ve denge hesabına girmez, merdivende ortalamaya katılmaz ve ofiste masası kapanır. Ama verisi SİLİNMEZ — «kapalı» ile «yok» ayrı şeylerdir. Numaralar da boşluk bırakmadan yeniden verilir: eksik bir numara, kaybedilmiş bir şey varmış gibi görünürdü.' },
 };
 
 /* ==== js/data/palettes.js ==== */
@@ -8016,6 +8030,72 @@ ESP.DESIGNS = [
 ESP.DEFAULT_DESIGN = 'defter';
 
 ESP.DESIGN_BY_ID = ESP.DESIGNS.reduce((m, d) => { m[d.id] = d; return m; }, {});
+
+/* ==== js/data/sections.js ==== */
+/* Gezinme kataloğu — hangi bölüm, hangi sayfalar.
+
+   Bu bir VERİDİR ve kabuktan (app.js) ayrı durur. Sebebi mimari değil
+   pratik: bölüm listesini test edebilmek için bütün uygulamayı açmak
+   gerekmemeli. `core/nav.js` bu listeyi kullanıcının açık bölümlerine göre
+   süzer ve numaralandırır.
+
+   `disc` alanı bölümü bir disipline bağlar; disiplin kapalıysa bölüm hiç
+   çizilmez. `disc` taşımayan bölümler (Günlük, Ofis, Ayarlar) hiçbir zaman
+   kapanmaz — onlar bir alan değil sistemin kendisidir.
+
+   Numara burada YOKTUR: numara çizim anında verilir çünkü bir kimlik değil
+   bir sıradır (bkz. core/nav.js). */
+
+window.ESP = window.ESP || {};
+
+ESP.SECTIONS_ALL = [
+    { id:'gunluk', icon:'pulse', label:'Günlük',
+      note:'Günün pratiğini gir, karşılığını gör',
+      views:[
+        { route:'today',  label:'Bugün',    icon:'pulse' },
+        { route:'ladder', label:'Merdiven', icon:'chart' },
+      ] },
+
+    { id:'dil', disc:'lang', icon:'cards', label:'Dil',
+      note:'Kelime, aralıklı tekrar ve shadowing',
+      views:[{ route:'lang', label:'Dil Stüdyosu', icon:'cards' }] },
+
+    { id:'felsefe', disc:'philo', icon:'socratic', label:'Felsefe',
+      note:'Tez, itiraz, düşünce deneyi ve safsata denetimi',
+      views:[{ route:'symposium', label:'Sempozyum', icon:'socratic' }] },
+
+    { id:'tarih', disc:'history', icon:'book', label:'Tarih',
+      note:'Kronoloji, neden zinciri ve kaynak eleştirisi',
+      views:[{ route:'history', label:'Kronoloji', icon:'book' }] },
+
+    { id:'ses', disc:['music', 'diction'], icon:'wave', label:'Ses',
+      note:'Gitar metronomu ve diksiyon',
+      views:[{ route:'studio', label:'Stüdyo', icon:'wave' }] },
+
+    { id:'okuma', disc:'reading', icon:'book', label:'Okuma',
+      note:'Atomik not ve sentopik matris',
+      views:[{ route:'library', label:'Kütüphane', icon:'book' }] },
+
+    { id:'yazi', disc:'writing', icon:'quill', label:'Yazı',
+      note:'Taslak, okunabilirlik ve üslup',
+      views:[{ route:'writing', label:'Yazı Laboratuvarı', icon:'quill' }] },
+
+    { id:'ofis', icon:'users', label:'Ofis',
+      note:'Patron ve altı uzman',
+      views:[
+        { route:'office',    label:'Masalar',  icon:'users' },
+        { route:'team',      label:'Danışma',  icon:'zap' },
+        { route:'meeting',   label:'Toplantı', icon:'list' },
+        { route:'analytics', label:'Analiz',   icon:'chart' },
+      ] },
+
+    { id:'ayarlar', icon:'sliders', label:'Ayarlar',
+      note:'Profil, görünüm, veri ve rehber',
+      views:[
+        { route:'profile', label:'Profil', icon:'sliders' },
+        { route:'guide',   label:'Rehber', icon:'guide' },
+      ] },
+  ];
 
 /* ==== js/data/providers.js ==== */
 /* Model saglayicilari — ofis ajanlarinin kullandigi ucretsiz LLM uclari.
@@ -10177,7 +10257,9 @@ ESP.Intellect = (function(){
 
   function ehs(days){
     const n = days || 14;
-    const rows = ESP.DISCIPLINES.map(d => {
+    /* Kapali disiplin hacme girmez: kullanicinin hic calismayacagini
+       soyledigi bir alan, "dokunulmamis" diye hesabi asagi cekmemeli. */
+    const rows = ESP.Mod.active().map(d => {
       const h = hoursOf(d.id, n);
       const k = qualityCoef(d.id);
       return {
@@ -10740,6 +10822,190 @@ ESP.Acoustic = (function(){
   };
 })();
 
+/* ==== js/core/modules.js ==== */
+/* Bölüm açma–kapama — sistemi kullanıcının hayatına göre daraltmak.
+
+   Yedi disiplinin hepsini herkes çalışmaz. Gitara hiç dokunmayacak birine
+   Stüdyo'yu, metronomu, temiz BPM eşiğini ve Maestro'nun masasını göstermek
+   üç şeyi birden bozar: gezinme şeridi uzar, boş ekranlar «yapmadığın iş»
+   gibi durur, ve denge hesabı hiç açılmayacak bir disiplini sürekli «hiç
+   dokunulmamış» diye rapor eder.
+
+   Bu yüzden her disiplin AÇILIP KAPANABİLİR. Kapalı bir disiplin:
+
+     · gezinme şeridinde görünmez, ekranı yönlendirmeden kalkar
+     · denge, rota ve reçetede hiç hesaba girmez
+     · merdivende «üstatlık yüzdesi» ortalamasına girmez
+     · ofiste masası kapanır, ajanı toplantıya çağrılmaz
+
+   Ama VERİSİ SİLİNMEZ. Kapatmak bir silme işlemi değildir: altı ay sonra
+   yeniden açan kullanıcı kartlarını, notlarını ve kademesini olduğu yerde
+   bulur. «Kapalı» ile «yok» ayrı şeylerdir — bu dosyanın tamamı bu ayrımın
+   üstüne kurulu.
+
+   Değişmez: EN AZ BİR disiplin açık kalmak zorundadır. Hepsi kapalı bir
+   ESP, açılış ekranından ibaret bir kabuktur; sistem kendi kendini
+   kullanılamaz hâle getiremez. */
+
+window.ESP = window.ESP || {};
+
+ESP.Mod = (function(){
+  const S = ESP.S;
+
+  /* Varsayılan: hepsi açık. İlk kurulumda kullanıcı seçer; seçmeden
+     geçerse hiçbir şey eksilmez. */
+  function defaults(){
+    const m = {};
+    (ESP.DISCIPLINES || []).forEach(function(d){ m[d.id] = true; });
+    return m;
+  }
+
+  function map(){
+    const kayitli = (S.prefs && S.prefs.modules) || null;
+    if(!kayitli) return defaults();
+    const m = defaults();
+    Object.keys(m).forEach(function(id){
+      if(kayitli[id] === false) m[id] = false;
+      if(kayitli[id] === true) m[id] = true;
+    });
+    /* Bilinmeyen anahtar (silinmiş bir disiplin) sessizce düşer. */
+    return m;
+  }
+
+  function isOn(discId){
+    if(!discId) return true;
+    return map()[discId] !== false;
+  }
+
+  /* Açık disiplinler. Hiçbiri açık değilse (bozuk kayıt, elle düzenlenmiş
+     yedek) listenin tamamı döner: kullanılamaz bir arayüz çizmektense
+     tercihi yok saymak yeğdir. */
+  function active(){
+    const m = map();
+    const list = (ESP.DISCIPLINES || []).filter(function(d){ return m[d.id] !== false; });
+    return list.length ? list : (ESP.DISCIPLINES || []).slice();
+  }
+
+  function activeIds(){ return active().map(function(d){ return d.id; }); }
+
+  function count(){ return active().length; }
+
+  /* Açık disiplinlerin ekranları — gezinme ve komut paleti buradan okur. */
+  function activeRoutes(){
+    const out = {};
+    active().forEach(function(d){ out[d.route] = true; });
+    return out;
+  }
+
+  /* Bir ajanın masası açık mı? Patron ve koç her zaman açıktır: ikisi de
+     bir disiplinin değil bir İŞİN sahibidir. */
+  function agentOn(agentId){
+    if(!agentId || agentId === 'patron') return true;
+    if((ESP.COACH_IDS || []).indexOf(agentId) >= 0) return true;
+    const sahip = (ESP.DISCIPLINES || []).filter(function(d){ return d.agent === agentId; });
+    if(!sahip.length) return true;
+    return sahip.some(function(d){ return isOn(d.id); });
+  }
+
+  function activeAgents(){
+    return (ESP.AGENTS || []).filter(function(a){ return agentOn(a.id); });
+  }
+
+  /* Tek bir disiplini açar/kapatır. Son açık disiplini kapatmaya çalışmak
+     bir hata değil bir REDDİR: sebebi söylenir, işlem yapılmaz. */
+  async function set(discId, on){
+    const m = map();
+    if(!(discId in m)) return { ok:false, error:'Bilinmeyen bölüm.' };
+    if(!on){
+      const kalan = Object.keys(m).filter(function(id){
+        return id !== discId && m[id] !== false; });
+      if(!kalan.length){
+        return { ok:false,
+          error:'En az bir bölüm açık kalmalı. Önce başka bir bölümü aç.' };
+      }
+    }
+    m[discId] = !!on;
+    await ESP.Model.savePrefs(Object.assign({}, S.prefs || {}, { modules:m }));
+    if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+    return { ok:true, modules:m };
+  }
+
+  /* Toplu seçim — kurulum sihirbazı ve ayarlar ekranı kullanır. */
+  async function setAll(ids){
+    const secilen = (ids || []).filter(function(id){
+      return (ESP.DISCIPLINE_BY_ID || {})[id]; });
+    if(!secilen.length) return { ok:false, error:'En az bir bölüm seçilmeli.' };
+    const m = defaults();
+    Object.keys(m).forEach(function(id){ m[id] = secilen.indexOf(id) >= 0; });
+    await ESP.Model.savePrefs(Object.assign({}, S.prefs || {}, { modules:m }));
+    if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+    return { ok:true, modules:m };
+  }
+
+  /* Kapalı bir disiplinin biriktirdiği veri. Kapatmadan önce gösterilir:
+     kullanıcı neyin görünmez olacağını bilmeli — silinmediğini de. */
+  function footprint(discId){
+    const d = (ESP.DISCIPLINE_BY_ID || {})[discId];
+    if(!d) return null;
+    const sayilar = {
+      lang:function(){ return (S.cards || []).filter(function(c){
+        return c.lang !== ESP.HISTORY_DECK; }).length + ' kart'; },
+      philo:function(){ return (S.args || []).length + ' tez'; },
+      music:function(){ return (S.pieces || []).length + ' parça'; },
+      diction:function(){ return (S.recordings || []).length + ' kayıt'; },
+      reading:function(){ return (S.notes || []).length + ' not'; },
+      writing:function(){ return (S.drafts || []).length + ' taslak'; },
+      history:function(){ return (S.events || []).length + ' olay'; },
+    };
+    return sayilar[discId] ? sayilar[discId]() : '';
+  }
+
+  return { defaults, map, isOn, active, activeIds, activeRoutes, count,
+    agentOn, activeAgents, set, setAll, footprint };
+})();
+
+/* ==== js/core/nav.js ==== */
+/* Gezinme mantığı — kullanıcının açık bölümlerine göre şerit kurar.
+
+   Kabuktan ayrı durmasının tek sebebi test edilebilirlik: bölüm listesini
+   sınamak için uygulamayı açmak gerekmesin.
+*/
+
+window.ESP = window.ESP || {};
+
+ESP.Nav = (function(){
+  function sectionOn(sec){
+    if(!sec.disc) return true;
+    const list = Array.isArray(sec.disc) ? sec.disc : [sec.disc];
+    return list.some(id => ESP.Mod.isOn(id));
+  }
+
+  function sections(){
+    let n = 0;
+    return ESP.SECTIONS_ALL.filter(sectionOn).map(sec => {
+      n++;
+      return Object.assign({}, sec, { num:(n < 10 ? '0' : '') + n });
+    });
+  }
+
+  /* Kapalı bölümün ekranı da kapalıdır: adresi elle yazan ya da eski bir
+     derin bağlantıya tıklayan kullanıcı boş bir tezgâh görmez. */
+  function routeOn(route){
+    const sec = ESP.SECTIONS_ALL.filter(x => x.views.some(v => v.route === route))[0];
+    return sec ? sectionOn(sec) : true;
+  }
+
+  function sectionOf(route){
+    const list = sections();
+    const bulunan = list.filter(sec => sec.views.some(v => v.route === route))[0];
+    return bulunan || list[0];
+  }
+
+
+
+  return { sections, sectionOn, routeOn, sectionOf, all:function(){ return ESP.SECTIONS_ALL; } };
+})();
+
 /* ==== js/core/curriculum.js ==== */
 /* Mufredat motoru — kademeyi OLCUMDEN uretir, kullanicidan sormaz.
 
@@ -11086,9 +11352,13 @@ ESP.Curriculum = (function(){
     return Math.round(100 * toplam / n);
   }
 
-  /* Butun disiplinlerin kademesi — analiz ekrani ve Patron brifingi icin. */
+  /* ACIK disiplinlerin kademesi — analiz ekrani ve Patron brifingi icin.
+
+     Kapali bir disiplinin merdiveni durur ama ortalamaya girmez: gitara hic
+     dokunmayacagini soylemis birinin "ustatlik yuzdesi"ni muzikten dolayi
+     dusurmek, olculmemis bir seyi olcmek olurdu. */
   function all(){
-    return Object.keys(ESP.LADDERS).map(function(id){ return levelOf(id); });
+    return ESP.Mod.active().map(function(d){ return levelOf(d.id); }).filter(Boolean);
   }
 
   /* Sistemin genel kademesi: disiplinlerin ORTALAMASI degil, EN DUSUGU ile
@@ -11898,11 +12168,18 @@ ESP.Planner = (function(){
      Donus `{ rank, id, title, detail, route, tab, ref, agent, why }`.
      `why` hangi oncelik kuralinin devreye girdigini soyler — kullanici
      sistemin neden bunu sectigini gorebilmeli. */
+  /* Kapali bir disiplinin isi siraya girmez. Suzgec nextAction'in EN BASINDA
+     durur, her kuralin icinde ayri ayri degil: tek yerde suzulen bir liste,
+     yedi yerde unutulabilecek bir kosuldan guvenlidir. */
+  function acik(list){
+    return (list || []).filter(x => !x.disc || ESP.Mod.isOn(x.disc));
+  }
+
   function nextAction(todayISO){
     const today = todayISO || U.todayISO();
 
     /* 1 — tikanmis temel */
-    const tikanan = blockedCore(today);
+    const tikanan = acik(blockedCore(today));
     if(tikanan.length){
       const t = tikanan[0];
       return {
@@ -11914,7 +12191,7 @@ ESP.Planner = (function(){
     }
 
     /* 2 — zamana bagli hedef */
-    const acil = deadlines(today).filter(d => d.urgent)[0];
+    const acil = deadlines(today).filter(d => d.urgent && ESP.Mod.isOn(d.goal.disc))[0];
     if(acil){
       const d = ESP.DISCIPLINE_BY_ID[acil.goal.disc];
       return {
@@ -11929,6 +12206,11 @@ ESP.Planner = (function(){
 
     /* 3 — vadesi gecmis kartlar */
     const o = overdueDeck(today);
+    if(!ESP.Mod.isOn(o.disc)){
+      /* Destesi kapali bir disiplinin karti bekletilmez, gosterilmez de:
+         kullanici o desteyi calismayacagini soylemis. */
+      o.due = []; o.overdue = [];
+    }
     const desteAdi = o.deck === 'history' ? 'tarih' : 'dil';
     if(o.overdue.length){
       return {
@@ -11952,7 +12234,7 @@ ESP.Planner = (function(){
     }
 
     /* 4 — sentopik sentez */
-    const sentez = synthesisGap();
+    const sentez = ESP.Mod.isOn('reading') ? synthesisGap() : { unlinked:[], suggestions:[] };
     if(sentez.suggestions.length){
       const s = sentez.suggestions[0];
       return {
@@ -12020,7 +12302,7 @@ ESP.Planner = (function(){
      yogunlasma kasitli olabilir. Ofis yalnizca gorunur kilar. */
   function balance(days, todayISO){
     const n = days || BALANCE_WINDOW;
-    const rows = ESP.DISCIPLINES.map(d => {
+    const rows = ESP.Mod.active().map(d => {
       const h = ESP.Intellect.hoursOf(d.id, n);
       return { disc:d, minutes:h.minutes, enteredDays:h.enteredDays, cert:h.cert };
     });
@@ -12064,7 +12346,7 @@ ESP.Planner = (function(){
     const denge = balance(BALANCE_WINDOW, today);
     const odak = (S.profile && S.profile.focus) || 'balanced';
 
-    const puanli = ESP.DISCIPLINES.map(d => {
+    const puanli = ESP.Mod.active().map(d => {
       const row = denge.rows.find(r => r.disc.id === d.id);
       let puan = 0;
       /* Hic dokunulmamis disiplin en yuksek puani alir: denge sistemin amaci. */
@@ -15785,7 +16067,7 @@ ESP.Office = (function(){
   function coachBrief(){
     const ov = ESP.Curriculum.overall();
     const d = ESP.SRS.deckStatus();
-    const kapilar = ESP.DISCIPLINES.map(x => {
+    const kapilar = ESP.Mod.active().map(x => {
       const g = ESP.Curriculum.nextGate(x.id);
       const lv = ESP.Curriculum.levelOf(x.id);
       return {
@@ -16160,7 +16442,10 @@ ESP.Office = (function(){
      satir tek. Bes masa ayni notlari uretip kendi satirlarini suzuyordu;
      kare onbellegi bunu bire indirir. */
   function notes(agentId){
-    const hepsi = ESP.Memo.of('office.notes', notesRaw);
+    /* Kapali masanin bulgusu hic gorunmez: kullanicinin kapattigi bir
+       disiplin, ofiste "tikanma" diye geri gelemez. */
+    const hepsi = ESP.Memo.of('office.notes', notesRaw)
+      .filter(n => ESP.Mod.agentOn(n.agent));
     return agentId ? hepsi.filter(n => n.agent === agentId) : hepsi;
   }
 
@@ -16248,7 +16533,7 @@ ESP.Office = (function(){
     });
 
     /* --- koc --- */
-    ESP.DISCIPLINES.forEach(x => {
+    ESP.Mod.active().forEach(x => {
       const g = ESP.Curriculum.nextGate(x.id);
       if(g && g.action === 'measure'){
         add('mnemosyne', 'info', x.label + ': «' + g.gate.label + '» kapısı ölçülemiyor. '
@@ -16342,7 +16627,7 @@ ESP.Office = (function(){
     const ss = ESP.Intellect.syntopic();
     if(ss.total - ss.linked >= 3) add('synthesis', 50, (ss.total - ss.linked) + ' bağsız not.');
 
-    const kapi = ESP.DISCIPLINES
+    const kapi = ESP.Mod.active()
       .map(x => ESP.Curriculum.nextGate(x.id))
       .filter(g => g && g.action === 'measure');
     if(kapi.length) add('gate', 55, kapi.length + ' kapı ölçülemiyor.');
@@ -16387,7 +16672,9 @@ ESP.Office = (function(){
   async function runMeeting(agendaId, onTurn){
     const gundem = agendaCandidates().find(a => a.id === agendaId) || agendaCandidates()[0];
     const turlar = [];
-    const uzmanlar = ESP.AGENTS.filter(a => a.id !== 'patron');
+    /* Kapali bir disiplinin ajani toplantiya cagrilmaz: masasi yoksa
+       raporu da yoktur ve bos bir tur, toplantiyi uzatan bir gurultudur. */
+    const uzmanlar = ESP.Mod.activeAgents().filter(a => a.id !== 'patron');
 
     for(const a of uzmanlar){
       const b = brief(a.id);
@@ -16476,7 +16763,7 @@ ESP.Palette = (function(){
     const out = [];
 
     /* ekranlar */
-    (ESP.App ? ESP.App.SECTIONS : []).forEach(sec => {
+    (ESP.Nav ? ESP.Nav.sections() : []).forEach(sec => {
       sec.views.forEach(v => {
         out.push({ id:'go:' + v.route, kind:'Sayfa', label:v.label, hint:sec.label,
           run:() => ESP.App.go(v.route) });
@@ -16706,7 +16993,16 @@ ESP.Palette = (function(){
    bagimsizdir; sorulmasi gereken tek sey NE CALISILDIGIDIR.
 
    Uc alan: ad, odak, hangi dil. Gerisi zamanla dolar ve olmadan da sistem
-   calisir. Sihirbaz atlanabilir; atlandiginda ekranlar bos kalmaz. */
+   calisir. Sihirbaz atlanabilir; atlandiginda ekranlar bos kalmaz.
+
+   Dorduncu bir soru sonradan eklendi ve arayuzun tamamini degistiriyor:
+   HANGI BOLUMLER. Kullanici burada calismayacagi disiplinleri kapatir;
+   gezinme seridi, reçete, denge hesabi ve ofis masalari ona gore daralir.
+
+   Secim ZORUNLU DEGIL: hicbiri dokunulmazsa hepsi acik kalir. Varsayilan
+   "hepsi acik"tir cunku bir sistemin ilk acilista kullaniciya bir seyi
+   kapattirmasi, daha kullanmadan bir sey kaybettirmektir. Kapatmak sonra
+   da mumkun — ve kapatmak veriyi SILMEZ (bkz. core/modules.js). */
 
 window.ESP = window.ESP || {};
 
@@ -16775,13 +17071,24 @@ ESP.Setup = (function(){
               min:10, max:600, value:p.dailyMinutes || 60, placeholder:'60' }) })}
         </div>
 
+        <div class="setup__mods">
+          <p class="setup__kicker">Hangi bölümler açık olsun?</p>
+          <p class="setup__lede">Dokunmazsan hepsi açık kalır. Kapattığın bölüm
+            gezinmeden kalkar, reçeteye ve denge hesabına girmez — ama verisi
+            silinmez, istediğin zaman Ayarlar'dan geri açarsın.</p>
+          <div class="setup__picks">${ESP.DISCIPLINES.map(d => String(K.PickCard({
+            label:d.label, meta:d.short, on:ESP.Mod.isOn(d.id),
+            act:'setup-mod', data:{ 'data-id':d.id } }))).join('')}</div>
+        </div>
+
         <div class="setup__unlock">
           <p class="setup__kicker">Bu alanlar neyi açar</p>
           <ul class="setup__list">
-            <li><b>Sıradaki tek iş</b> — altı disiplin arasında önceliği kural motoru seçer</li>
+            <li><b>Sıradaki tek iş</b> — açık disiplinler arasında önceliği kural motoru seçer</li>
             <li><b>Aralıklı tekrar</b> — kart eklediğinde retansiyon ölçülmeye başlar</li>
             <li><b>Haftalık rota</b> — hiç açılmayan disiplin öne alınır</li>
-            <li><b>Yedi ajanlı ofis</b> — her masa yalnızca kendi ölçümüne bakar</li>
+            <li><b>Dokuz ajanlı ofis</b> — her masa yalnızca kendi ölçümüne bakar</li>
+            <li><b>Merdiven</b> — her bölümde sıfırdan üstatlığa ölçülebilir kapılar</li>
           </ul>
         </div>
 
@@ -16791,6 +17098,20 @@ ESP.Setup = (function(){
         ${K.Button({ label:'Başla', tone:'primary', act:'setup-save' })}`),
     });
   }
+
+  /* Sihirbaz içindeki seçim GEÇİCİDİR: kaydedilene kadar yalnızca bu
+     nesnede durur. Yarıda kapatılan bir sihirbaz, kullanıcının profilini
+     yarım bir seçimle bırakmamalı. */
+  let secim = null;
+
+  function pick(id){
+    if(!secim) secim = ESP.Mod.activeIds().slice();
+    const i = secim.indexOf(id);
+    if(i >= 0) secim.splice(i, 1); else secim.push(id);
+    return secim;
+  }
+
+  function picked(){ return secim; }
 
   async function save(){
     const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
@@ -16810,6 +17131,12 @@ ESP.Setup = (function(){
       dailyMinutes:numOr(get('su-minutes')) || 60,
     });
 
+    if(secim && secim.length){
+      const res = await ESP.Mod.setAll(secim);
+      if(!res.ok){ ESP.UI.toast(res.error); return false; }
+    }
+    secim = null;
+
     ESP.UI.closeSheet();
     ESP.UI.toast('Hazır — ilk oturumu girince ölçüm başlar');
     ESP.App.render();
@@ -16817,11 +17144,12 @@ ESP.Setup = (function(){
   }
 
   function skip(){
+    secim = null;
     ESP.UI.closeSheet();
     ESP.UI.toast('Atlandı — Profil ekranından istediğin zaman doldurabilirsin');
   }
 
-  return { needed, open, save, skip };
+  return { needed, open, save, skip, pick, picked };
 })();
 
 /* ==== js/screens/today.js ==== */
@@ -16886,7 +17214,7 @@ ESP.Screens.today = (function(){
          + 'Boş bıraktığın alan sıfır değil, «veri yok» olur.',
       body:html`
         <div class="picks picks--disc">
-          ${map(ESP.DISCIPLINES, x => K.PickCard({
+          ${map(ESP.Mod.active(), x => K.PickCard({
             on:x.id === d, act:'pick-disc', data:{ 'data-disc':x.id },
             title:x.short, note:x.unit,
           }))}
@@ -19144,7 +19472,7 @@ ESP.Screens.ladder = (function(){
     }));
 
     /* Ölçülemeyen kapılar tek listede: bunlar "çalış" değil "ölç" işleridir. */
-    const olcum = ESP.DISCIPLINES.map(d => C().nextGate(d.id))
+    const olcum = ESP.Mod.active().map(d => C().nextGate(d.id))
       .filter(g => g && g.action === 'measure');
     rows.push(K.Entry({
       label:'ÖLÇÜLEMEYEN KAPILAR', hint:'unknown-gate',
@@ -19239,7 +19567,7 @@ ESP.Screens.ladder = (function(){
           ${K.Field({ label:'Disiplin',
             input:K.Select({ id:'pl-disc', value:disc, change:'pick-disc-sel',
               aria:'Tespit yapılacak disiplin',
-              options:ESP.DISCIPLINES.map(x => ({ value:x.id, label:x.label })) }) })}
+              options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }) })}
           ${map(ESP.PLACEMENT.questions, q => K.Field({ label:q.label, class:'mt-10',
             input:K.Select({ id:'pl-' + q.id,
               value:mevcut[q.id] != null ? String(mevcut[q.id]) : '',
@@ -19287,7 +19615,7 @@ ESP.Screens.ladder = (function(){
           items:TABS.map(t => ({ id:t.id, label:t.label })) }),
         actions:when(tab !== 'ozet', () => K.Select({ id:'lad-disc', value:disc,
           change:'pick-disc-sel', aria:'Disiplin seç',
-          options:ESP.DISCIPLINES.map(x => ({ value:x.id, label:x.label })) })),
+          options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) })),
       }))}
       ${K.Span(12, K.Ledger(() => rows))}`);
   }
@@ -19328,7 +19656,7 @@ ESP.Screens.ladder = (function(){
     headline(){
       const ov = C().overall();
       if(ov.cert === 'missing') return 'Merdiven henüz başlamadı.';
-      const olc = ESP.DISCIPLINES.map(d => C().nextGate(d.id))
+      const olc = ESP.Mod.active().map(d => C().nextGate(d.id))
         .filter(g => g && g.action === 'measure').length;
       if(olc) return olc + ' kapı ölçülemiyor.';
       return 'Ölçülmüş üretim «' + ov.level.label + '» kademesinde.';
@@ -19344,7 +19672,7 @@ ESP.Screens.ladder = (function(){
         { value:ov.cert === 'missing' ? '—' : ov.level.short, label:'genel kademe' },
         { value:ov.cert === 'missing' ? '—' : String(ov.mastery), unit:'%', label:'merdiven' },
         { value:String(hepsi.filter(x => x.rank > 0).length), label:'başlamış disiplin' },
-        { value:String(ESP.DISCIPLINES.map(d => C().nextGate(d.id))
+        { value:String(ESP.Mod.active().map(d => C().nextGate(d.id))
           .filter(g => g && g.action === 'measure').length), label:'ölçülemeyen kapı' },
       ];
     },
@@ -20845,7 +21173,7 @@ ESP.Screens.office = (function(){
 
   function render(){
     const patron = ESP.AGENT_BY_ID.patron;
-    const uzmanlar = ESP.AGENTS.filter(a => a.id !== 'patron');
+    const uzmanlar = ESP.Mod.activeAgents().filter(a => a.id !== 'patron');
     const devir = ESP.Office.handoffs();
     const brf = ESP.Office.patronBrief();
     const next = brf.next;
@@ -20933,7 +21261,7 @@ ESP.Screens.office = (function(){
     stats(){
       const notlar = ESP.Office.notes();
       return [
-        { value:String(ESP.AGENTS.length), label:'masa' },
+        { value:String(ESP.Mod.activeAgents().length), label:'masa' },
         { value:String(notlar.filter(n => n.tone === 'danger').length), label:'tıkanma' },
         { value:String(notlar.filter(n => n.tone === 'warn').length), label:'vadesi geçmiş' },
         { value:String(ESP.Office.handoffs().length), label:'devir' },
@@ -20964,7 +21292,10 @@ ESP.Screens.team = (function(){
   const K = ESP.C;
 
   function agent(){
-    return ESP.AGENT_BY_ID[S.ui.officeAgent] || ESP.AGENT_BY_ID.patron;
+    const a = ESP.AGENT_BY_ID[S.ui.officeAgent];
+    /* Kapali bir masaya eski bir baglantidan girilebilir; o durumda Patron
+       acilir — bos bir masa, kapatilan seyi geri gelmis gibi gosterir. */
+    return (a && ESP.Mod.agentOn(a.id)) ? a : ESP.AGENT_BY_ID.patron;
   }
 
   function avatar(a){
@@ -20998,7 +21329,7 @@ ESP.Screens.team = (function(){
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({
         tabs:K.Subtabs({ value:a.id, act:'pick-agent', aria:'Ajan seçimi',
-          items:ESP.AGENTS.map(x => ({ id:x.id, label:x.short || x.name })) }),
+          items:ESP.Mod.activeAgents().map(x => ({ id:x.id, label:x.short || x.name })) }),
       }))}
 
       ${K.Span(12, K.Ledger(() => [
@@ -21189,7 +21520,7 @@ ESP.Screens.meeting = (function(){
     if(!canli) return [];
     return [K.Entry({
       label:'TOPLANTI',
-      meta:canli.turns.length + '/' + (ESP.AGENTS.length - 1) + ' tur',
+      meta:canli.turns.length + '/' + (ESP.Mod.activeAgents().length - 1) + ' tur',
       note:'Her tur geldiği anda basılır; hepsinin bitmesi beklenmez.',
       wide:true,
       body:html`
@@ -21496,7 +21827,7 @@ ESP.Screens.analytics = (function(){
         action:K.Select({ value:disipl, change:'series-disc', size:'sm',
           aria:'Disiplin süzgeci',
           options:[{ value:'all', label:'Tümü' }]
-            .concat(ESP.DISCIPLINES.map(d => ({ value:d.id, label:d.short }))) }),
+            .concat(ESP.Mod.active().map(d => ({ value:d.id, label:d.short }))) }),
         wide:true,
         body:olculen.length
           ? html`
@@ -21725,6 +22056,22 @@ ESP.Screens.profile = (function(){
         }),
 
         K.Entry({
+          label:'BÖLÜMLER', hint:'modules',
+          meta:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length + ' açık',
+          note:'Kapattığın bölüm gezinmeden kalkar, reçeteye ve denge hesabına '
+             + 'girmez, ofiste masası kapanır. Verisi SİLİNMEZ: geri açtığında '
+             + 'kartların, notların ve kademen olduğu yerde durur.',
+          wide:true,
+          body:html`
+            <div class="picks picks--disc">${map(ESP.DISCIPLINES, d => K.PickCard({
+              label:d.label, on:ESP.Mod.isOn(d.id),
+              meta:(ESP.Mod.footprint(d.id) || '') + (ESP.Mod.isOn(d.id) ? '' : ' · kapalı'),
+              act:'toggle-mod', data:{ 'data-id':d.id } }))}</div>
+            <p class="small muted mt-10">En az bir bölüm açık kalmak zorunda:
+              hepsi kapalı bir ESP, açılış ekranından ibaret bir kabuktur.</p>`,
+        }),
+
+        K.Entry({
           label:'GÖRÜNÜM',
           meta:(S.prefs && S.prefs.palette) || 'kağıt',
           note:'Aynı üç tercih üst çubuktaki palet düğmesinden de açılır. '
@@ -21827,6 +22174,16 @@ ESP.Screens.profile = (function(){
       ESP.App.render();
     },
 
+    async 'toggle-mod'(el){
+      const id = el.dataset.id;
+      const res = await ESP.Mod.set(id, !ESP.Mod.isOn(id));
+      if(!res.ok){ ESP.UI.toast(res.error); return; }
+      /* Kapatilan bolumun ekraninda durmak mumkun degil; kabuk zaten
+         yonlendirmeyi denetliyor ama burada da tazelenmeli. */
+      ESP.UI.toast(ESP.Mod.isOn(id) ? 'Bölüm açıldı' : 'Bölüm kapandı — verisi duruyor');
+      ESP.App.render();
+    },
+
     async 'save-view'(){
       await M.savePrefs({
         theme:val('pf-theme'), palette:val('pf-palette'), design:val('pf-design'),
@@ -21896,6 +22253,7 @@ ESP.Screens.profile = (function(){
       const ayak = M.dataFootprint();
       const yedek = M.backupAgeDays();
       return [
+        { value:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length, label:'açık bölüm' },
         { value:String(M.profileList().length), label:'profil' },
         { value:ayak.bytes ? String(Math.round(ayak.bytes / 1024)) : '—', unit:'KB', label:'veri' },
         { value:yedek == null ? '—' : String(yedek), unit:'gün', label:'son yedek' },
@@ -22259,68 +22617,12 @@ ESP.App = (function(){
      `views` bir bölümün sayfalarıdır. Tek sayfalı bölümde sayfa şeridi
      çizilmez: tek sekmelik bir sekme çubuğu gürültüden başka bir şey
      değildir. */
-  const SECTIONS = [
-    { id:'gunluk', num:'01', icon:'pulse', label:'Günlük',
-      note:'Günün pratiğini gir, karşılığını gör',
-      views:[
-        { route:'today',  label:'Bugün',    icon:'pulse' },
-        { route:'ladder', label:'Merdiven', icon:'chart' },
-      ] },
-
-    { id:'dil', num:'02', icon:'cards', label:'Dil',
-      note:'Kelime, aralıklı tekrar ve shadowing',
-      views:[{ route:'lang', label:'Dil Stüdyosu', icon:'cards' }] },
-
-    /* Felsefe ile tarih ayni bolumde durur ve bu bir yerlestirme kolayligi
-       degil bir iddiadir: ikisi de ayni kasi calistirir — oncul ile sonucu
-       ayirmak. Dokuzuncu bir serit telefonda okunmuyordu; bu birlestirme
-       hem duzeni hem sayfayi kurtardi. */
-    { id:'dusunce', num:'03', icon:'socratic', label:'Düşünce',
-      note:'Tez, itiraz, kronoloji ve kaynak eleştirisi',
-      views:[
-        { route:'symposium', label:'Sempozyum', icon:'socratic' },
-        { route:'history',   label:'Kronoloji', icon:'book' },
-      ] },
-
-    { id:'ses', num:'04', icon:'wave', label:'Ses',
-      note:'Gitar metronomu ve diksiyon',
-      views:[{ route:'studio', label:'Stüdyo', icon:'wave' }] },
-
-    { id:'okuma', num:'05', icon:'book', label:'Okuma',
-      note:'Atomik not ve sentopik matris',
-      views:[{ route:'library', label:'Kütüphane', icon:'book' }] },
-
-    { id:'yazi', num:'06', icon:'quill', label:'Yazı',
-      note:'Taslak, okunabilirlik ve üslup',
-      views:[{ route:'writing', label:'Yazı Laboratuvarı', icon:'quill' }] },
-
-    { id:'ofis', num:'07', icon:'users', label:'Ofis',
-      note:'Patron ve altı uzman',
-      views:[
-        { route:'office',    label:'Masalar',  icon:'users' },
-        { route:'team',      label:'Danışma',  icon:'zap' },
-        { route:'meeting',   label:'Toplantı', icon:'list' },
-        { route:'analytics', label:'Analiz',   icon:'chart' },
-      ] },
-
-    { id:'ayarlar', num:'08', icon:'sliders', label:'Ayarlar',
-      note:'Profil, görünüm, veri ve rehber',
-      views:[
-        { route:'profile', label:'Profil', icon:'sliders' },
-        { route:'guide',   label:'Rehber', icon:'guide' },
-      ] },
-  ];
-
-  /* Yönlendirme kimlikleri değişmedi; değişen yalnızca kullanıcıya görünen
-     gruplama. Bu sayede komut paleti, testler ve derin bağlantılar bozulmaz. */
-  const SECTION_OF = (function(){
-    const m = {};
-    SECTIONS.forEach(sec => sec.views.forEach(v => { m[v.route] = sec; }));
-    return m;
-  })();
-
-  function sectionOf(route){ return SECTION_OF[route] || SECTIONS[0]; }
-
+  /* Gezinme şeridi `data/sections.js` içinde bir VERİDİR ve mantığı
+     `core/nav.js` içinde yaşar. İkisi de kabuktan ayrı durur: bölüm
+     kataloğunu test edebilmek için uygulamayı açmak gerekmesin. */
+  const SECTIONS = ESP.Nav.sections;
+  const routeOn = ESP.Nav.routeOn;
+  const sectionOf = ESP.Nav.sectionOf;
 
   function screen(){ return ESP.Screens[S.route] || ESP.Screens.today; }
 
@@ -22429,7 +22731,7 @@ ESP.App = (function(){
     const active = sectionOf(sc.id);
     return html`
       <nav class="sitenav" aria-label="Bölümler">
-        <div class="wrapc navlinks">${map(SECTIONS, sec => {
+        <div class="wrapc navlinks">${map(SECTIONS(), sec => {
           const on = sec.id === active.id;
           const b = sectionBadge(sec);
           return html`<button class="${cls('navlink', on && 'is-active')}"
@@ -22482,18 +22784,33 @@ ESP.App = (function(){
      listeyi açar.
 
      Yalnız 860 pikselin altında çizilir. */
-  const TABBAR = [
+  const TABBAR_ALL = [
     { route:'today',  label:'Bugün',  icon:'pulse' },
     { route:'lang',   label:'Dil',    icon:'cards' },
     { route:'studio', label:'Stüdyo', icon:'wave' },
+    { route:'history', label:'Tarih', icon:'book' },
+    { route:'library', label:'Okuma', icon:'book' },
+    { route:'symposium', label:'Felsefe', icon:'socratic' },
+    { route:'writing', label:'Yazı',  icon:'quill' },
     { route:'office', label:'Ofis',   icon:'users' },
   ];
+
+  /* Dört yuva + menü. Hangi dördü? Bugün ve Ofis sabittir; aradaki iki yuva
+     kullanıcının AÇIK bölümlerinden, katalog sırasına göre doldurulur.
+     Kapalı bir bölümü başparmağın altında tutmak, en değerli iki yuvayı
+     boşa harcamak olurdu. */
+  function tabbar(){
+    const sabit = TABBAR_ALL.filter(t => t.route === 'today');
+    const orta = TABBAR_ALL.filter(t => t.route !== 'today' && t.route !== 'office'
+      && routeOn(t.route)).slice(0, 2);
+    return sabit.concat(orta, TABBAR_ALL.filter(t => t.route === 'office'));
+  }
 
   function tabbarHtml(sc){
     const aktif = sectionOf(sc.id);
     return html`
       <nav class="tabbar" aria-label="Hızlı gezinme">
-        ${map(TABBAR, t => {
+        ${map(tabbar(), t => {
           const sec = sectionOf(t.route);
           const on = sec.id === aktif.id;
           const b = safe(() => badgeFor(t.route), null);
@@ -22553,7 +22870,7 @@ ESP.App = (function(){
           ${ESP.C.IconButton({ icon:'close', aria:'Kapat', act:'toggle-menu' })}
         </div>
         <div class="navsheet__body">
-          <div class="navsheet__grid">${map(SECTIONS, sec => html`
+          <div class="navsheet__grid">${map(SECTIONS(), sec => html`
             <button class="${cls('navsheet__item', sec.id === active.id && 'is-active')}"
               data-act="go" data-route="${sec.views[0].route}" data-num="${sec.num}">
               <b>${sec.label}</b>
@@ -22908,6 +23225,14 @@ ESP.App = (function(){
   }
 
   function go(route){
+    /* Kapalı bir bölümün ekranına gidilmez: boş bir tezgâh, kullanıcının
+       kapattığı şeyi geri getirmiş gibi görünür. Sessizce Bugün'e düşer ve
+       sebebini söyler. */
+    if(ESP.Screens[route] && !routeOn(route)){
+      UI.toast('Bu bölüm kapalı. Ayarlar → Bölümler\'den açabilirsin.');
+      route = 'today';
+    }
+
     /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
     if(ESP.Talk && ESP.Talk.isActive()) ESP.Talk.stop();
@@ -22951,6 +23276,15 @@ ESP.App = (function(){
     /* Egzersiz isleme ORTAK bir eylemdir: koç kutusu yedi ekranda birden
        duruyor ve her ekranda ayri bir islem yazmak, yedi kez bozulabilecek
        bir islem demektir. */
+    /* Sihirbazdaki bolum secimi: kart yerinde isaretlenir, sayfa yeniden
+       cizilmez — sihirbaz acikken tam cizim, acik sayfayi kapatirdi. */
+    async 'setup-mod'(el){
+      const list = ESP.Setup.pick(el.dataset.id);
+      const on = list.indexOf(el.dataset.id) >= 0;
+      el.classList.toggle('is-on', on);
+      el.setAttribute('aria-pressed', on ? 'true' : 'false');
+    },
+
     async 'log-drill'(el){
       const res = await ESP.Coach.logDrill(el.dataset.id);
       if(!res.ok){ UI.toast(res.error); return; }
@@ -23363,7 +23697,8 @@ ESP.App = (function(){
     }
   }
 
-  return { boot, render, go, applyTheme, applySection, SECTIONS, sectionOf, THEMES, installManifest,
+  return { boot, render, go, applyTheme, applySection, SECTIONS,
+    sectionOf, routeOn, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen };
 })();
 

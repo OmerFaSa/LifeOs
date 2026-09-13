@@ -58,7 +58,7 @@ async function walkScreens(page, base, target, errors){
   await dismissSetup(page);
 
   const routes = await page.evaluate(() =>
-    ESP.App.SECTIONS.reduce((acc, s) => acc.concat(s.views.map(v => v.route)), []));
+    ESP.Nav.sections().reduce((acc, s) => acc.concat(s.views.map(v => v.route)), []));
 
   let sekme = 0;
   for(const r of routes){

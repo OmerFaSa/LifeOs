@@ -155,4 +155,6 @@ ESP.HINTS = {
   'repertoire':{ t:'Repertuar bakımı', b:'Çalınmayan parça geri gider.',
     more:'«Bitti» diye bir hâl yoktur. Otuz günden uzun süredir çalınmayan parça bakımsızdır: çalınabilir ama garanti değil. Repertuar genişletmek kadar korumak da bir iştir.' },
 
+  'modules':{ t:'Bölümler', b:'Hangi disiplinlerin açık olduğu.',
+    more:'Kapalı bir bölüm gezinmede görünmez, reçeteye ve denge hesabına girmez, merdivende ortalamaya katılmaz ve ofiste masası kapanır. Ama verisi SİLİNMEZ — «kapalı» ile «yok» ayrı şeylerdir. Numaralar da boşluk bırakmadan yeniden verilir: eksik bir numara, kaybedilmiş bir şey varmış gibi görünürdü.' },
 };

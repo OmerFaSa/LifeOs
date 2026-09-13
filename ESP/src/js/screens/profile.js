@@ -53,6 +53,22 @@ ESP.Screens.profile = (function(){
         }),
 
         K.Entry({
+          label:'BÖLÜMLER', hint:'modules',
+          meta:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length + ' açık',
+          note:'Kapattığın bölüm gezinmeden kalkar, reçeteye ve denge hesabına '
+             + 'girmez, ofiste masası kapanır. Verisi SİLİNMEZ: geri açtığında '
+             + 'kartların, notların ve kademen olduğu yerde durur.',
+          wide:true,
+          body:html`
+            <div class="picks picks--disc">${map(ESP.DISCIPLINES, d => K.PickCard({
+              label:d.label, on:ESP.Mod.isOn(d.id),
+              meta:(ESP.Mod.footprint(d.id) || '') + (ESP.Mod.isOn(d.id) ? '' : ' · kapalı'),
+              act:'toggle-mod', data:{ 'data-id':d.id } }))}</div>
+            <p class="small muted mt-10">En az bir bölüm açık kalmak zorunda:
+              hepsi kapalı bir ESP, açılış ekranından ibaret bir kabuktur.</p>`,
+        }),
+
+        K.Entry({
           label:'GÖRÜNÜM',
           meta:(S.prefs && S.prefs.palette) || 'kağıt',
           note:'Aynı üç tercih üst çubuktaki palet düğmesinden de açılır. '
@@ -155,6 +171,16 @@ ESP.Screens.profile = (function(){
       ESP.App.render();
     },
 
+    async 'toggle-mod'(el){
+      const id = el.dataset.id;
+      const res = await ESP.Mod.set(id, !ESP.Mod.isOn(id));
+      if(!res.ok){ ESP.UI.toast(res.error); return; }
+      /* Kapatilan bolumun ekraninda durmak mumkun degil; kabuk zaten
+         yonlendirmeyi denetliyor ama burada da tazelenmeli. */
+      ESP.UI.toast(ESP.Mod.isOn(id) ? 'Bölüm açıldı' : 'Bölüm kapandı — verisi duruyor');
+      ESP.App.render();
+    },
+
     async 'save-view'(){
       await M.savePrefs({
         theme:val('pf-theme'), palette:val('pf-palette'), design:val('pf-design'),
@@ -224,6 +250,7 @@ ESP.Screens.profile = (function(){
       const ayak = M.dataFootprint();
       const yedek = M.backupAgeDays();
       return [
+        { value:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length, label:'açık bölüm' },
         { value:String(M.profileList().length), label:'profil' },
         { value:ayak.bytes ? String(Math.round(ayak.bytes / 1024)) : '—', unit:'KB', label:'veri' },
         { value:yedek == null ? '—' : String(yedek), unit:'gün', label:'son yedek' },

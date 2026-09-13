@@ -23,7 +23,7 @@ ESP.Palette = (function(){
     const out = [];
 
     /* ekranlar */
-    (ESP.App ? ESP.App.SECTIONS : []).forEach(sec => {
+    (ESP.Nav ? ESP.Nav.sections() : []).forEach(sec => {
       sec.views.forEach(v => {
         out.push({ id:'go:' + v.route, kind:'Sayfa', label:v.label, hint:sec.label,
           run:() => ESP.App.go(v.route) });

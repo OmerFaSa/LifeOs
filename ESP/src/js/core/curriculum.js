@@ -343,9 +343,13 @@ ESP.Curriculum = (function(){
     return Math.round(100 * toplam / n);
   }
 
-  /* Butun disiplinlerin kademesi — analiz ekrani ve Patron brifingi icin. */
+  /* ACIK disiplinlerin kademesi — analiz ekrani ve Patron brifingi icin.
+
+     Kapali bir disiplinin merdiveni durur ama ortalamaya girmez: gitara hic
+     dokunmayacagini soylemis birinin "ustatlik yuzdesi"ni muzikten dolayi
+     dusurmek, olculmemis bir seyi olcmek olurdu. */
   function all(){
-    return Object.keys(ESP.LADDERS).map(function(id){ return levelOf(id); });
+    return ESP.Mod.active().map(function(d){ return levelOf(d.id); }).filter(Boolean);
   }
 
   /* Sistemin genel kademesi: disiplinlerin ORTALAMASI degil, EN DUSUGU ile

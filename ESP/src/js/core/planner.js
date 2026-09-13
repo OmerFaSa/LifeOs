@@ -147,11 +147,18 @@ ESP.Planner = (function(){
      Donus `{ rank, id, title, detail, route, tab, ref, agent, why }`.
      `why` hangi oncelik kuralinin devreye girdigini soyler — kullanici
      sistemin neden bunu sectigini gorebilmeli. */
+  /* Kapali bir disiplinin isi siraya girmez. Suzgec nextAction'in EN BASINDA
+     durur, her kuralin icinde ayri ayri degil: tek yerde suzulen bir liste,
+     yedi yerde unutulabilecek bir kosuldan guvenlidir. */
+  function acik(list){
+    return (list || []).filter(x => !x.disc || ESP.Mod.isOn(x.disc));
+  }
+
   function nextAction(todayISO){
     const today = todayISO || U.todayISO();
 
     /* 1 — tikanmis temel */
-    const tikanan = blockedCore(today);
+    const tikanan = acik(blockedCore(today));
     if(tikanan.length){
       const t = tikanan[0];
       return {
@@ -163,7 +170,7 @@ ESP.Planner = (function(){
     }
 
     /* 2 — zamana bagli hedef */
-    const acil = deadlines(today).filter(d => d.urgent)[0];
+    const acil = deadlines(today).filter(d => d.urgent && ESP.Mod.isOn(d.goal.disc))[0];
     if(acil){
       const d = ESP.DISCIPLINE_BY_ID[acil.goal.disc];
       return {
@@ -178,6 +185,11 @@ ESP.Planner = (function(){
 
     /* 3 — vadesi gecmis kartlar */
     const o = overdueDeck(today);
+    if(!ESP.Mod.isOn(o.disc)){
+      /* Destesi kapali bir disiplinin karti bekletilmez, gosterilmez de:
+         kullanici o desteyi calismayacagini soylemis. */
+      o.due = []; o.overdue = [];
+    }
     const desteAdi = o.deck === 'history' ? 'tarih' : 'dil';
     if(o.overdue.length){
       return {
@@ -201,7 +213,7 @@ ESP.Planner = (function(){
     }
 
     /* 4 — sentopik sentez */
-    const sentez = synthesisGap();
+    const sentez = ESP.Mod.isOn('reading') ? synthesisGap() : { unlinked:[], suggestions:[] };
     if(sentez.suggestions.length){
       const s = sentez.suggestions[0];
       return {
@@ -269,7 +281,7 @@ ESP.Planner = (function(){
      yogunlasma kasitli olabilir. Ofis yalnizca gorunur kilar. */
   function balance(days, todayISO){
     const n = days || BALANCE_WINDOW;
-    const rows = ESP.DISCIPLINES.map(d => {
+    const rows = ESP.Mod.active().map(d => {
       const h = ESP.Intellect.hoursOf(d.id, n);
       return { disc:d, minutes:h.minutes, enteredDays:h.enteredDays, cert:h.cert };
     });
@@ -313,7 +325,7 @@ ESP.Planner = (function(){
     const denge = balance(BALANCE_WINDOW, today);
     const odak = (S.profile && S.profile.focus) || 'balanced';
 
-    const puanli = ESP.DISCIPLINES.map(d => {
+    const puanli = ESP.Mod.active().map(d => {
       const row = denge.rows.find(r => r.disc.id === d.id);
       let puan = 0;
       /* Hic dokunulmamis disiplin en yuksek puani alir: denge sistemin amaci. */

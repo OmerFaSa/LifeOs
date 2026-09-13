@@ -59,7 +59,7 @@ ESP.Screens.today = (function(){
          + 'Boş bıraktığın alan sıfır değil, «veri yok» olur.',
       body:html`
         <div class="picks picks--disc">
-          ${map(ESP.DISCIPLINES, x => K.PickCard({
+          ${map(ESP.Mod.active(), x => K.PickCard({
             on:x.id === d, act:'pick-disc', data:{ 'data-disc':x.id },
             title:x.short, note:x.unit,
           }))}
