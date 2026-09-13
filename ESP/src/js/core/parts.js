@@ -592,6 +592,32 @@ ESP.Parts = (function(){
     })}</ul>`;
   }
 
+
+  /* Bolum denetimi — bu disiplinde birikmis bakim borcu.
+
+     Merdiven NEREDE olduğunu, reçete NE yapılacağını söyler; burası
+     "bir şey ters gidiyor mu?" sorusunu cevaplar. Her bulgu eyleme
+     bağlıdır: yanında hangi kayıtların söz konusu olduğu yazar. */
+  function deskAudit(discId){
+    const bulgular = ESP.Audit.of(discId);
+    if(!bulgular.length){
+      return K.Empty({ text:'Bu bölümde denetim bulgusu yok.' });
+    }
+    const ciddi = bulgular.filter(f => f.severity !== 'none');
+    return html`
+      ${when(!ciddi.length, () => K.Notice({ tone:'ok',
+        body:'Bakım borcu görünmüyor.' }))}
+      ${map(bulgular, f => html`
+        <div class="mt-12">
+          ${K.Notice({ tone:f.severity === 'warn' ? 'warn'
+            : f.severity === 'none' ? 'info' : 'info',
+            title:f.title, body:f.note })}
+          ${when((f.items || []).length, () => K.Table({ tight:true,
+            headers:['Kayıt', 'Durum'],
+            rows:f.items.map(x => [x.label, x.meta || '—']) }))}
+        </div>`)}`;
+  }
+
   function deskPlans(discId){
     const list = ESP.Desk.proposals(discId);
     const gecmis = (ESP.S.proposals || []).filter(p => p.disc === discId);
@@ -661,16 +687,24 @@ ESP.Parts = (function(){
       wide:true,
       body:acik
         ? html`
-          ${K.Subtabs({ value:t, act:'desk-tab', aria:'Tezgâh bölümleri',
-            items:ESP.Desk.TABS.map(x => Object.assign({ id:x.id, label:x.label },
-              x.id === 'hatirlatma' && bekleyen ? { count:bekleyen }
-                : (x.id === 'plan' && teklif ? { count:teklif } : {}))) })}
+          ${(function(){
+            /* Denetim sekmesinde ROZET: bakim borcu varsa sekmeye girmeden
+               gorunur. Sifir bulgu rozet uretmez — "0" yazan bir rozet,
+               gereksiz bir dikkat cagrisidir. */
+            const denetim = ESP.Audit ? ESP.Audit.count(discId) : 0;
+            return K.Subtabs({ value:t, act:'desk-tab', aria:'Tezgâh bölümleri',
+              items:ESP.Desk.TABS.map(x => Object.assign({ id:x.id, label:x.label },
+                x.id === 'hatirlatma' && bekleyen ? { count:bekleyen }
+                  : x.id === 'plan' && teklif ? { count:teklif }
+                  : x.id === 'denetim' && denetim ? { count:denetim } : {})) });
+          })()}
           <div class="desk__body" data-disc="${discId}">
             ${t === 'recete' ? deskRx(discId)
               : t === 'harita' ? deskMap(discId)
               : t === 'ekler' ? deskAssets(discId)
               : t === 'hatirlatma' ? deskReminders(discId)
               : t === 'plan' ? deskPlans(discId)
+              : t === 'denetim' ? deskAudit(discId)
               : deskChat(discId)}
           </div>`
         : html`<p class="small muted">Tezgâh kapalı. ${a.name} ile konuşmak,
@@ -679,7 +713,7 @@ ESP.Parts = (function(){
   }
 
   return { cert, measure, avatar, discChip, radar, empty, desk, deskRx,
-    deskChat, deskMap, deskAssets, deskReminders, deskPlans, units, practice,
-    proposalList, weekPlan, rx:rxList, topics };
+    deskChat, deskMap, deskAssets, deskReminders, deskPlans, deskAudit,
+    units, practice, proposalList, weekPlan, rx:rxList, topics };
 
 })();

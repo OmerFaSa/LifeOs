@@ -39,6 +39,7 @@ ESP.Desk = (function(){
     { id:'ekler',      label:'Ekler' },
     { id:'hatirlatma', label:'Hatırlatma' },
     { id:'plan',       label:'Plan' },
+    { id:'denetim',    label:'Denetim' },
   ];
 
   /* Bir disiplinin masası. Müzik ve diksiyon aynı ekranı paylaşır ama AYRI

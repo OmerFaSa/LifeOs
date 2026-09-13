@@ -83,6 +83,8 @@ ESP.HINTS = {
   /* --- sistemin kendi denetimi --- */
   'signal':{ t:'Denetim sorusu', b:'Nöbetçinin ya da sürtünme ölçerin sorduğu tek soru.',
     more:'Denetim mekanizması ile denetim EKRANI aynı şey değildir: arka planda çalışan nöbetçinin bir ekran ağacı olması gerekmez, doğru anda mevcut akışa düşen tek bir soru yeter. Aynı anda en fazla bir soru açık kalır; cevaplamak zorunlu değildir ve «bu soru bana uymuyor» da bir cevaptır. Soru cevaplanınca kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı bir sonraki pencerede ölçülür.' },
+  'audit':{ t:'Bölüm denetimi', b:'Bu disiplinde birikmiş bakım borcu var mı?',
+    more:'Merdiven NEREDE olduğunu, reçete NE yapılacağını söyler; denetim «bir şey ters gidiyor mu?» sorusunu cevaplar. Sülük kartlar, yetim notlar, itirazsız argümanlar, elden geçmemiş taslaklar — hepsi kademe tablosunda «ilerleme» gibi görünür. Her bulgu eyleme bağlıdır ve hiçbiri kişiyi suçlamaz: «dağınık çalışıyorsun» denmez, «şu kayıtlar şu durumda» denir. Veri eşiğin altındaysa bulgu değil «veri yok» döner.' },
   'storage':{ t:'Depo ufku', b:'Bu sistem dokuz ay her gün kullanılırsa depo dolar mı?',
     more:'«Depo %80 dolu» tek başına işe yaramaz: ne zaman dolacağını ve NEYİN şiştiğini söylemez, ikisi bambaşka kararlar gerektirir. Büyüme hızı her açılıştaki bir ölçümden HESAPLANIR; iki ölçümden az varsa hız bilinmiyordur ve bilinmeyen hız sıfır hız değildir. Budama yalnızca sistemin kendi ürettiği kayıtlara dokunur: kullanıcının girdiği tek bir oturum, kart ya da not hiçbir koşulda silinmez.' },
   'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın türü kademe ilerlemesinde ne kadar söz hakkı olduğunu belirler.',

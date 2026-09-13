@@ -694,6 +694,14 @@ SP.App = (function(){
     /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
     if(SP.Talk && SP.Talk.isActive()) SP.Talk.stop();
+
+    /* Acik alt sayfa da kapanir.
+
+       Eskiden kapanmiyordu: bir ekranda sheet acip gezinince o sheet'in
+       govdesi DOM'da kaliyor ve YENI ekranin uzerinde duruyordu. Kullanici
+       icin sonuc: tikladiginda hicbir sey olmayan bir dugme. (ESP'de duman
+       testi bunu "olu dugme" olarak yakaladi.) */
+    if(UI.isSheetOpen && UI.isSheetOpen()) UI.closeSheet();
     S.route = route;
     S.sidebarOpen = false;
     rotaDegisti = true;

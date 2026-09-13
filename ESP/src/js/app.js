@@ -655,6 +655,15 @@ ESP.App = (function(){
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
     if(ESP.Talk && ESP.Talk.isActive()) ESP.Talk.stop();
 
+    /* Acik alt sayfa da kapanir.
+
+       Eskiden kapanmiyordu: bir ekranda sheet acip gezinince, o sheet'in
+       govdesi DOM'da kaliyor ve YENI ekranin uzerinde duruyordu. Duman
+       testi bunu "olu dugme" olarak yakaladi — onceki ekrana ait bir
+       dugme, yeni ekranda hicbir islevi olmadan duruyordu. Kullanici
+       icin de ayni sey: tikladiginda hicbir sey olmayan bir dugme. */
+    if(UI.isSheetOpen && UI.isSheetOpen()) UI.closeSheet();
+
     /* Ekranin kendi temizligi. Ayni sebep: gorunmeyen bir ekranin metronomu
        kullanicinin kapatamayacagi bir sestir. Kanca istege baglidir;
        tanimlamayan ekran hicbir sey odemez. */
