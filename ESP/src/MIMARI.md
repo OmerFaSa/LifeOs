@@ -505,11 +505,11 @@ node tools/palettecheck.js   # kontrast
 
 | Ölçüm | Sonuç |
 |---|---|
-| Birim testi | **381/381** geçiyor |
+| Birim testi | **423/423** geçiyor |
 | Duman testi | temiz — 14 ekran, **75 sekme**, kaynak + `dist/esp.html` |
 | Erişilebilirlik | temiz (4 bilinen eksik izin listesinde) |
 | Kontrast | **1848 ölçüm**, hepsi AA — en dar pay 4,52 (asgari 4,5) |
-| Çizim maliyeti | ağır veriyle en ağır ekran **66 ms** (bütçe 100) |
+| Çizim maliyeti | ağır veriyle en ağır ekran **65 ms** (bütçe 100) |
 | Telefon düzeni | 390 pikselde **89 yer**: taşma yok, hedefler ≥ 24 px |
 | Tek dosya dağıtım | ~1,2 MB, 65 js modülü |
 

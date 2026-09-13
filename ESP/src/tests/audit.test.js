@@ -465,3 +465,81 @@
     });
   });
 })();
+
+/* --------------------------------------------------------------- model yolu
+
+   Model bir İYİLEŞTİRMEDİR, gereklilik değil. Bu blok o cümlenin üç
+   sonucunu kilitler: model yoksa sistem çalışır, model patlarsa sistem
+   çalışır, model kural dışına çıkarsa sistem ONUN YERİNE kendi cümlesini
+   basar — hiçbirinde ekran boş kalmaz. */
+(function(){
+  const { describe, it, expect, resetState } = ESP.Test;
+
+  describe('denetim · model yolu', () => {
+
+    function sahteLLM(fn){
+      const gercek = { ready:ESP.LLM.ready, chat:ESP.LLM.chat };
+      ESP.LLM.ready = () => true;
+      ESP.LLM.chat = fn;
+      return () => { ESP.LLM.ready = gercek.ready; ESP.LLM.chat = gercek.chat; };
+    }
+
+    it('model yokken cevap kural motorundan gelir', async () => {
+      resetState();
+      const res = await ESP.Office.ask('polyglot', 'durum?');
+      expect(res.source).toBe('rules');
+      expect(String(res.text).length > 0).toBeTruthy();
+    });
+
+    it('model patlarsa ekran bos kalmaz, hata ayrica soylenir', async () => {
+      resetState();
+      const geri = sahteLLM(async () => { throw new Error('ağ yok'); });
+      try{
+        const res = await ESP.Office.ask('polyglot', 'durum?');
+        expect(res.source).toBe('rules');
+        expect(String(res.text).length > 0).toBeTruthy();
+        expect(res.error != null).toBeTruthy();
+      }finally{ geri(); }
+    });
+
+    /* En onemlisi: kural disi bir cikti KULLANILMAZ ve YENIDEN YAZILMAZ —
+       yerine kural motorunun cumlesi basilir, takildigi da soylenir. */
+    it('kurallara takilan cikti kullanilmaz', async () => {
+      resetState();
+      const geri = sahteLLM(async () => ({ text:'Artık C1\'sin, sertifikaya hazırsın.' }));
+      try{
+        const res = await ESP.Office.ask('polyglot', 'seviyem ne?');
+        expect(res.source).toBe('rules');
+        expect(res.text.indexOf('sertifika')).toBe(-1);
+        expect(res.blocked != null).toBeTruthy();
+      }finally{ geri(); }
+    });
+
+    it('kurallara uyan cikti oldugu gibi gecer', async () => {
+      resetState();
+      const geri = sahteLLM(async () => ({ text:'Henüz kart yok; ilk kartı ekle.' }));
+      try{
+        const res = await ESP.Office.ask('polyglot', 'nereden başlayayım?');
+        expect(res.source).toBe('model');
+        expect(res.text).toBe('Henüz kart yok; ilk kartı ekle.');
+      }finally{ geri(); }
+    });
+
+    it('brifingde olmayan sayi ciktiyi takar', async () => {
+      resetState();
+      const geri = sahteLLM(async () => ({ text:'Retansiyonun %87, harika gidiyor.' }));
+      try{
+        const res = await ESP.Office.ask('polyglot', 'retansiyon?');
+        expect(res.source).toBe('rules');
+        expect(res.blocked.unsupported.length > 0).toBeTruthy();
+      }finally{ geri(); }
+    });
+
+    it('yuvarlanmis sayi desteksiz sayilmaz', () => {
+      resetState();
+      const b = { retention:{ value:0.384, cert:'derived' } };
+      const r = ESP.Office.validate('Retansiyon %38 civarında.', { brief:b });
+      expect(r.unsupported.length).toBe(0);
+    });
+  });
+})();
