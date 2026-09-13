@@ -21,6 +21,7 @@ ESP.Screens.lang = (function(){
     { id:'calis',    label:'Çalış' },
     { id:'kartlar',  label:'Kartlar' },
     { id:'ekle',     label:'Ekle' },
+    { id:'ogren',    label:'Öğren' },
     { id:'gramer',   label:'Dilbilgisi' },
     { id:'ilerleme', label:'İlerleme' },
   ];
@@ -384,6 +385,45 @@ ESP.Screens.lang = (function(){
     return rows;
   }
 
+  /* ------------------------------------------------------------------ öğren
+
+     Boş bir sistemin önündeki kullanıcı «ne ekleyeceğim» diye takılır.
+     Ünite bu boşluğu doldurur: konu, ölçülebilir hedef ve kartlaşacak somut
+     öğeler. Ünite bir DERS değildir — ESP öğretmen değil — bir BAŞLANGIÇ
+     MALZEMESİDİR ve geldiği yer «tohum» etiketiyle kartta durur. */
+  function learnRows(){
+    const dil = aktifDil();
+    const l = ESP.LANG_BY_ID[dil] || {};
+    const malzemesiz = ESP.Lesson.units('lang')
+      .filter(u => !ESP.Lesson.itemsOf(u, dil).length).length;
+
+    return [
+      K.Entry({
+        label:'PRATİK', hint:'practice',
+        meta:S.ui.practice && S.ui.practice.deck === dil ? 'oturum açık'
+          : ESP.PRACTICE_LENGTH + ' soru',
+        note:'Cevabın doğrudan aralıklı tekrara yazılır: pratik ayrı bir kayıt '
+           + 'açmaz. Çeldiriciler aynı desteden gelir, model uydurmaz.',
+        wide:true,
+        body:ESP.Parts.practice(dil),
+      }),
+
+      K.Entry({
+        label:'ÜNİTELER', hint:'unit',
+        meta:ESP.Lesson.units('lang').length + ' ünite',
+        note:'İlerleme SRS\'ten okunur: bir kartı «bilinen» yapan şey bir kez '
+           + 'doğru bilmek değil, aralığının uzamasıdır.',
+        wide:true,
+        body:html`
+          ${when(malzemesiz, () => K.Notice({ tone:'info',
+            body:malzemesiz + ' ünitenin ' + (l.label || dil) + ' malzemesi yok. '
+              + 'Yanlış çeviriyle dolu bir ünite, boş bir üniteden pahalıdır: '
+              + 'konusu duruyor, kartını sen yazarsın.' }))}
+          ${ESP.Parts.units('lang', dil)}`,
+      }),
+    ];
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
@@ -391,6 +431,7 @@ ESP.Screens.lang = (function(){
     const d = ESP.SRS.deckStatus(aktifDil());
     const rows = tab === 'kartlar' ? cardRows()
       : tab === 'ekle' ? addRows()
+      : tab === 'ogren' ? learnRows()
       : tab === 'gramer' ? grammarRows()
       : tab === 'ilerleme' ? progressRows()
       : reviewRows();

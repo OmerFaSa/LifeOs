@@ -23,6 +23,7 @@ ESP.Screens.history = (function(){
     { id:'olaylar',   label:'Olaylar' },
     { id:'kaynaklar', label:'Kaynaklar' },
     { id:'zincir',    label:'Zincir' },
+    { id:'ogren',     label:'Öğren' },
     { id:'calisma',   label:'Çalışma' },
   ];
 
@@ -467,6 +468,34 @@ ESP.Screens.history = (function(){
     return rows;
   }
 
+  /* ------------------------------------------------------------------ öğren
+
+     Tarih ünitesi kendi olay listesini taşımaz: tohum olaylardan döneme,
+     bölgeye ya da alana göre süzer. İki yerde iki liste tutmak, birinin
+     eskimesi demektir. */
+  function learnRows(){
+    return [
+      K.Entry({
+        label:'PRATİK', hint:'practice',
+        meta:S.ui.practice && S.ui.practice.deck === ESP.HISTORY_DECK
+          ? 'oturum açık' : ESP.PRACTICE_LENGTH + ' soru',
+        note:'Tarih destesinde dört soru türü var: hatırla, seç, dönem ve '
+           + 'sırala. Sıralamada seçenekler hazır dizilmez — sırayı sen kurarsın.',
+        wide:true,
+        body:ESP.Parts.practice(ESP.HISTORY_DECK),
+      }),
+
+      K.Entry({
+        label:'ÜNİTELER', hint:'unit',
+        meta:ESP.Lesson.units('history').length + ' ünite',
+        note:'Ünite bir dönemi, bölgeyi ya da alanı toplar. Eklenen kartlar '
+           + '«tohum» etiketiyle durur: bu kartları sen yazmadın.',
+        wide:true,
+        body:ESP.Parts.units('history'),
+      }),
+    ];
+  }
+
   /* ----------------------------------------------------------------- çizim */
 
   function render(){
@@ -475,6 +504,7 @@ ESP.Screens.history = (function(){
       : tab === 'olaylar' ? olayRows()
       : tab === 'kaynaklar' ? kaynakRows()
       : tab === 'zincir' ? zincirRows()
+      : tab === 'ogren' ? learnRows()
       : calismaRows();
 
     return K.Grid(html`

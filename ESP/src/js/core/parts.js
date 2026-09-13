@@ -386,6 +386,134 @@ ESP.Parts = (function(){
       </div>`;
   }
 
+  /* ------------------------------------------------------- öğren ve pratik
+
+     İki parça, iki ekranda paylaşılır (Dil ve Kronoloji):
+
+       units(disc)     ünite listesi ve her birinin ilerlemesi
+       practice(deck)  soru–cevap oturumu
+
+     İlerleme çubuğu SRS'ten okunur; ayrı bir «tamamlandı» bayrağı yoktur. */
+  function units(discId, lang){
+    const list = ESP.Lesson.units(discId);
+    if(!list.length) return K.Empty({ text:'Bu bölümde ünite tanımlı değil.' });
+
+    return html`<div class="units">${map(list, u => {
+      const p = ESP.Lesson.progress(u, lang);
+      const acik = ESP.S.ui.unitOpen === u.id;
+      return html`
+        <div class="${cls('unit', p.total === 0 && 'is-empty', acik && 'is-open')}">
+          <div class="unit__head">
+            <span class="unit__lv num">${(ESP.LEVEL_BY_RANK[u.level] || {}).short || ''}</span>
+            <div class="unit__body">
+              <b>${u.title}</b>
+              <span class="small muted">${u.goal}</span>
+            </div>
+            ${p.total
+              ? K.Badge({ label:p.known + '/' + p.total + ' bilinen',
+                  tone:p.known >= p.total ? 'ok' : (p.added ? 'info' : 'muted') })
+              : K.Badge({ label:'malzeme yok', tone:'muted', icon:false })}
+            ${K.Button({ label:acik ? 'Kapat' : 'Aç', size:'sm', act:'unit-open',
+              data:{ 'data-id':u.id } })}
+          </div>
+          ${when(p.total, () => html`<div class="unit__bar" aria-hidden="true">
+            <span style="width:${p.pct}%"></span></div>`)}
+          ${when(acik, () => html`
+            <div class="unit__detail">
+              ${when(p.why, () => K.Notice({ tone:'info', body:p.why }))}
+              ${when(u.task, () => html`<p class="small"><b>Görev:</b> ${u.task}</p>`)}
+              ${when(u.ask, () => html`<p class="small"><b>Soru:</b> ${u.ask}</p>`)}
+              ${when(p.total, () => html`
+                <ul class="unit__items">${map(ESP.Lesson.itemsOf(u, lang).slice(0, 12),
+                  it => html`<li><b>${it.front}</b><span>${it.back}</span></li>`)}</ul>
+                ${K.Button({ label:p.added ? 'Eksikleri desteye ekle' : 'Desteye ekle',
+                  tone:'primary', size:'sm', act:'unit-add',
+                  data:{ 'data-id':u.id, 'data-disc':discId } })}`)}
+            </div>`)}
+        </div>`;
+    })}</div>`;
+  }
+
+  function practice(deck){
+    const s = ESP.S.ui.practice;
+    if(!s || s.deck !== deck){
+      return html`
+        <p class="small muted">Pratik bir sınav değildir: cevabın doğrudan
+          aralıklı tekrara yazılır, ayrı bir kayıt açılmaz.</p>
+        ${K.Button({ label:'Pratiğe başla', tone:'primary', act:'prac-start',
+          class:'mt-10', data:{ 'data-deck':deck } })}`;
+    }
+
+    if(s.done){
+      const r = ESP.Lesson.result(s);
+      return html`
+        <div class="pracend">
+          ${K.NextUp({ icon:'check', calm:true, label:'Oturum bitti',
+            title:r.right + '/' + r.asked + ' doğru',
+            why:'İsabet bir not değil bir ölçümdür: yanlışlar destede başa döndü.' })}
+          ${when(r.missed.length, () => html`
+            <ul class="pracmiss">${map(r.missed, m => html`<li>
+              <b>${m.expected}</b><span class="tiny dim">senin cevabın: ${m.given || '—'}</span>
+            </li>`)}</ul>`)}
+          <div class="row wrap mt-10">
+            ${K.Button({ label:'Gün kaydına yaz', tone:'primary', act:'prac-log' })}
+            ${K.Button({ label:'Yeni oturum', act:'prac-start',
+              data:{ 'data-deck':deck } })}
+            ${K.Button({ label:'Kapat', act:'prac-close' })}
+          </div>
+        </div>`;
+    }
+
+    const q = s.questions[s.pos];
+    const gosterildi = ESP.S.ui.practiceShown;
+    return html`
+      <div class="prac">
+        <div class="prac__top">
+          <span class="tiny dim">${s.pos + 1} / ${s.questions.length}</span>
+          ${K.Badge({ label:(ESP.PRACTICE_BY_ID[q.kind] || {}).label || q.kind,
+            tone:'muted', icon:false })}
+          <span class="tiny dim">${s.right} doğru · ${s.wrong} yanlış</span>
+        </div>
+
+        <p class="prac__q">${q.prompt}</p>
+
+        ${q.kind === 'order'
+          ? (function(){
+              /* Sıralama sorusu bir çoktan seçme değildir: seçenekleri hazır
+                 dizmek, sıralamayı düşünmeden tanımayı ölçerdi. Kullanıcı
+                 sırayı KENDİ kurar; seçtiği her olay listeden düşer. */
+              const secilen = ESP.S.ui.practiceOrder || [];
+              const kalan = q.options.filter(o => secilen.indexOf(o) < 0);
+              return html`
+                <ol class="prac__order">${map(secilen, o => html`<li>${o}</li>`)}</ol>
+                <div class="prac__opts">${map(kalan, opt => K.Button({ label:opt,
+                  act:'prac-pick', data:{ 'data-value':opt }, class:'prac__opt' }))}</div>
+                <div class="row wrap mt-8">
+                  ${when(secilen.length, () => K.Button({ label:'Sırayı temizle',
+                    size:'sm', act:'prac-clear-order' }))}
+                  ${when(!kalan.length, () => K.Button({ label:'Sırayı onayla',
+                    tone:'primary', act:'prac-answer',
+                    data:{ 'data-value':secilen.join(' | ') } }))}
+                </div>`;
+            })()
+          : q.options
+          ? html`<div class="prac__opts">${map(q.options, opt => K.Button({ label:opt,
+              act:'prac-answer', data:{ 'data-value':opt }, class:'prac__opt' }))}</div>`
+          : html`<div class="row mt-10">
+              ${K.Input({ id:'prac-input', aria:'Cevabın', placeholder:'Cevabını yaz…' })}
+              ${K.Mic({ target:'prac-input' })}
+              ${K.Button({ label:'Cevapla', tone:'primary', act:'prac-answer' })}
+            </div>`}
+
+        ${when(gosterildi, () => K.Notice({ tone:'info',
+          body:'Doğrusu: ' + q.answer }))}
+        <div class="row wrap mt-10">
+          ${K.Button({ label:'Bilmiyorum', size:'sm', act:'prac-skip' })}
+          ${K.Button({ label:'Oturumu bitir', size:'sm', act:'prac-close' })}
+        </div>
+      </div>`;
+  }
+
   /* Tezgâhın kendisi — dört sekme tek bir defter satırında. */
   function desk(discId){
     const d = ESP.DISCIPLINE_BY_ID[discId];
@@ -419,6 +547,6 @@ ESP.Parts = (function(){
   }
 
   return { cert, measure, avatar, discChip, radar, empty, coach, desk,
-    deskChat, deskMap, deskAssets, deskReminders };
+    deskChat, deskMap, deskAssets, deskReminders, units, practice };
 
 })();

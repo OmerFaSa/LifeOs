@@ -161,4 +161,8 @@ ESP.HINTS = {
     more:'Dördü de tek yerde tanımlı çünkü bölümden bölüme değişmemeleri gerekiyor: kullanıcı bir kez öğrensin, yedi kez değil. Buradaki sohbet — sesli olanı dahil — Danışma ekranıyla aynı yoldan geçer: aynı brifing, aynı ev kuralları denetimi, aynı kayıt. Ses ikinci bir yol açmaz.' },
   'reminder':{ t:'Hatırlatma', b:'Kendine söylediğin bir şeyin günü gelince tekrar söylenmesi.',
     more:'Bir görev değildir: sistem hiçbir şeyi zorunlu kılmaz ve kaçırılan bir hatırlatıcı ceza üretmez, borç yazmaz. Tekrarlı olan tamamlanınca silinmez, bir sonraki tarihe taşınır — ve o tarih BUGÜNDEN sayılır: iki hafta geciken günlük bir hatırlatıcı on dört kez üst üste düşmemeli.' },
+  'unit':{ t:'Ünite', b:'Bir konunun somut öğeleri ve ölçülebilir hedefi.',
+    more:'Ünite bir ders değildir — ESP öğretmen değil — bir başlangıç malzemesidir: boş ekranı kaldırır. Üniteden gelen kartlar «tohum» etiketi taşır, yani «bu kartı ben yazmadım» bilgisi kaybolmaz. İlerleme ayrı bir «tamamlandı» bayrağından değil SRS\'ten okunur: bir kartı bilinen yapan şey bir kez doğru bilmek değil, aralığının uzamasıdır.' },
+  'practice':{ t:'Pratik', b:'Destedeki kartlardan üretilen soru–cevap oturumu.',
+    more:'Pratik ayrı bir hafıza kaydı açmaz: cevabın tekrar ekranındakiyle aynı yere, aynı SRS\'e yazılır. Çeldiriciler aynı desteden gelir ve model uydurmaz — uydurulmuş bir çeldirici yanlış bir şeyi öğretebilir. «Bilmiyorum» bir atlama değildir: kart «tekrar» işaretlenir ve başa döner.' },
 };

@@ -93,6 +93,10 @@ ESP.S = {
     deskTab:{},             // discId -> 'kocla' | 'harita' | 'ekler' | 'hatirlatma'
     deskOpen:{},            // discId -> tezgah acik mi
     assetOpen:null,
+    practice:null,          // acik pratik oturumu
+    practiceShown:false,
+    practiceOrder:null,
+    unitOpen:null,
     histTab:'serit',        // serit | olaylar | kaynaklar | zincir | calisma
     eventOpen:null,
     sourceOpen:null,

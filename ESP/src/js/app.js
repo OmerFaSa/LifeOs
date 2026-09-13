@@ -794,6 +794,81 @@ ESP.App = (function(){
       render();
     },
 
+    /* --- öğren ve pratik: iki ekranda ortak --- */
+    async 'unit-open'(el){
+      S.ui.unitOpen = S.ui.unitOpen === el.dataset.id ? null : el.dataset.id;
+      render();
+    },
+
+    async 'unit-add'(el){
+      const u = ESP.Lesson.unitOf(el.dataset.disc, el.dataset.id);
+      if(!u) return;
+      const res = await ESP.Lesson.addUnit(u);
+      if(!res.ok){ UI.toast(res.error); return; }
+      UI.toast(res.added + ' kart eklendi'
+        + (res.skipped ? ', ' + res.skipped + ' tanesi zaten vardı' : ''));
+      render();
+    },
+
+    async 'prac-start'(el){
+      const s = ESP.Lesson.start(el.dataset.deck);
+      if(!s.ok){ UI.toast(s.error); return; }
+      S.ui.practice = s;
+      S.ui.practiceShown = false;
+      S.ui.practiceOrder = null;
+      render();
+    },
+
+    async 'prac-pick'(el){
+      S.ui.practiceOrder = (S.ui.practiceOrder || []).concat([el.dataset.value]);
+      render();
+    },
+
+    async 'prac-clear-order'(){ S.ui.practiceOrder = null; render(); },
+
+    async 'prac-answer'(el){
+      const s = S.ui.practice;
+      if(!s) return;
+      let cevap = el.dataset.value;
+      if(cevap == null){
+        const alan = document.getElementById('prac-input');
+        cevap = alan ? alan.value : '';
+      }
+      const res = await ESP.Lesson.answer(s, cevap);
+      if(!res.ok){ UI.toast(res.error); return; }
+      S.ui.practiceShown = !res.correct;
+      S.ui.practiceOrder = null;
+      UI.toast(res.correct ? 'Doğru' : 'Yanlış — doğrusu: ' + res.expected);
+      render();
+    },
+
+    /* «Bilmiyorum» bir atlama DEĞİLDİR: kart «tekrar» olarak işaretlenir ve
+       başa döner. Cevabı görmeden geçmek, unutma eğrisini kandırmak olurdu. */
+    async 'prac-skip'(){
+      const s = S.ui.practice;
+      if(!s) return;
+      const res = await ESP.Lesson.answer(s, '');
+      S.ui.practiceShown = true;
+      S.ui.practiceOrder = null;
+      if(res.ok) UI.toast('Doğrusu: ' + res.expected);
+      render();
+    },
+
+    async 'prac-log'(){
+      const s = S.ui.practice;
+      if(!s) return;
+      const res = await ESP.Lesson.log(s);
+      if(!res.ok){ UI.toast(res.error); return; }
+      S.ui.practice = null;
+      UI.toast('Gün kaydına yazıldı');
+      render();
+    },
+
+    async 'prac-close'(){
+      S.ui.practice = null; S.ui.practiceShown = false; S.ui.practiceOrder = null;
+      render();
+    },
+
     async 'log-drill'(el){
       const res = await ESP.Coach.logDrill(el.dataset.id);
       if(!res.ok){ UI.toast(res.error); return; }

@@ -5187,6 +5187,52 @@ body.is-dragging .drop.is-over{
 @media (max-width:520px){
   .asrow__kind, .remrow__date{ flex:0 0 100%; }
 }
+
+/* ========================================================= öğren ve pratik
+
+   Ünite kartı bir ders kartı değildir: içinde ilerleme çubuğu var ama
+   rozet, yıldız ya da kutlama yok. Çubuk SRS'ten okunan bir ölçümdür. */
+.units{ display:flex; flex-direction:column; }
+.unit{ padding:var(--sp-3) 0; border-bottom:1px solid var(--rule); }
+.unit:last-child{ border-bottom:0; }
+.unit__head{ display:flex; flex-wrap:wrap; gap:var(--sp-3); align-items:baseline; }
+.unit__lv{
+  flex:0 0 2.5em; text-align:center; color:var(--text-3);
+  font-size:var(--fs-sm); letter-spacing:.06em;
+}
+.unit__body{ flex:1 1 20ch; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.unit.is-empty{ opacity:.72; }
+.unit__bar{
+  height:3px; margin-top:var(--sp-2); background:var(--rule);
+  border-radius:2px; overflow:hidden;
+}
+.unit__bar span{ display:block; height:100%; background:var(--sec); }
+.unit__detail{ margin-top:var(--sp-3); }
+.unit__items{ list-style:none; margin:var(--sp-2) 0; padding:0; }
+.unit__items li{
+  display:flex; gap:var(--sp-3); padding:2px 0; font-size:var(--fs-sm);
+  border-bottom:1px dotted var(--rule);
+}
+.unit__items b{ flex:0 0 40%; }
+.unit__items span{ color:var(--text-2); }
+
+.prac__top{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
+  padding-bottom:var(--sp-2); border-bottom:1px solid var(--rule);
+}
+.prac__q{
+  font-size:var(--fs-lg); margin:var(--sp-4) 0;
+  line-height:1.4;
+}
+.prac__opts{ display:flex; flex-wrap:wrap; gap:var(--sp-2); }
+.prac__opt{ flex:1 1 40%; justify-content:flex-start; text-align:left; }
+.prac__order{ margin:0 0 var(--sp-3); padding-left:1.4em; }
+.prac__order li{ padding:2px 0; }
+.pracmiss{ list-style:none; margin:var(--sp-3) 0 0; padding:0; }
+.pracmiss li{
+  display:flex; flex-wrap:wrap; gap:var(--sp-3); align-items:baseline;
+  padding:var(--sp-2) 0; border-bottom:1px solid var(--rule);
+}
 </style>
 <div id="app">
   <div class="boot">
@@ -5207,7 +5253,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'797c8da', at:'2026-09-13 02:29', dirty:true };
+SP.BUILD = { id:'9c0f5af', at:'2026-09-13 02:38', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -7869,6 +7915,201 @@ ESP.PRESCRIPTION_SHAPE = [
     note:'Bir üst kademeden. Başarısız olmak serbesttir; amaç sınırı görmek.' },
 ];
 
+/* ==== js/data/lessons.js ==== */
+/* Öğrenme üniteleri — «bir şey öğrenilecek yer».
+
+   ESP şimdiye kadar ÖLÇTÜ ve YÖNLENDİRDİ ama hiçbir şey ÖĞRETMEDİ: kartı
+   kullanıcı yazıyor, olayı kullanıcı giriyordu. Boş bir sistemin önündeki
+   kullanıcı ise çoğu zaman «ne ekleyeceğim» diye takılır.
+
+   Ünite bu boşluğu doldurur: bir konu, o konunun ölçülebilir hedefi ve
+   kartlaşacak somut öğeler. Ünite bir DERS DEĞİLDİR — ESP öğretmen değildir
+   (ESP.PEDAGOGIC) — bir BAŞLANGIÇ MALZEMESİDİR. Kullanıcı kendi kartını
+   yazdığında sistem onu yeğler; ünite yalnızca boş ekranı kaldırır.
+
+   İki dürüstlük kuralı:
+
+   1. TOHUM, ÖLÇÜM DEĞİLDİR. Üniteden gelen kartlar `seed` etiketi taşır.
+      «Bu kartları ben yazmadım» bilgisi kaybolmaz.
+   2. OLMAYAN İÇERİK UYDURULMAZ. Sekiz dilin sekizine tam kelime listesi
+      yazmak yerine, içeriği olmayan dilde ünite AÇIKÇA boş görünür ve
+      kullanıcıdan kendi kartını ister. Yanlış çeviriyle dolu bir ünite,
+      boş bir üniteden pahalıdır.
+
+   Ünite ilerlemesi UYDURULMAZ da: «%60 tamamlandı» demek için o ünitenin
+   kartlarının SRS'te ne durumda olduğuna bakılır (bkz. core/lesson.js). */
+
+window.ESP = window.ESP || {};
+
+/* --------------------------------------------------------------- dil üniteleri
+
+   `items` yalnızca içeriği yazılabilmiş dillerde doludur. Boş olan ünite
+   bir hata değil, dürüst bir boşluktur: konusu ve hedefi durur, malzemesi
+   kullanıcıdan gelir. */
+ESP.LANG_UNITS = [
+  { id:'temel-fiil', level:1, band:'A1', title:'Temel fiiller',
+    goal:'En sık kullanılan otuz fiili tanıyıp cümlede kullanmak.',
+    task:'Beş fiili kendi cümlende kullan ve kartları «üretimde kullanıldı» işaretle.',
+    items:{
+      en:[
+        { front:'to be', back:'olmak' }, { front:'to have', back:'sahip olmak' },
+        { front:'to do', back:'yapmak' }, { front:'to go', back:'gitmek' },
+        { front:'to come', back:'gelmek' }, { front:'to want', back:'istemek' },
+        { front:'to need', back:'ihtiyaç duymak' }, { front:'to know', back:'bilmek' },
+        { front:'to think', back:'düşünmek' }, { front:'to say', back:'söylemek' },
+      ],
+      de:[
+        { front:'sein', back:'olmak' }, { front:'haben', back:'sahip olmak' },
+        { front:'machen', back:'yapmak' }, { front:'gehen', back:'gitmek' },
+        { front:'kommen', back:'gelmek' }, { front:'wollen', back:'istemek' },
+        { front:'brauchen', back:'ihtiyaç duymak' }, { front:'wissen', back:'bilmek' },
+        { front:'denken', back:'düşünmek' }, { front:'sagen', back:'söylemek' },
+      ],
+    } },
+
+  { id:'gundelik', level:1, band:'A1', title:'Gündelik kalıplar',
+    goal:'Selamlaşma, rica ve özür kalıplarını düşünmeden kurmak.',
+    task:'Bir gün boyunca içinden bu kalıpları kur; akşam hangileri eksikti yaz.',
+    items:{
+      en:[
+        { front:'How are you doing?', back:'Nasıl gidiyor?' },
+        { front:'Could you help me?', back:'Yardım eder misin?' },
+        { front:'I\'m sorry, I didn\'t catch that.', back:'Pardon, anlayamadım.' },
+        { front:'Never mind.', back:'Boş ver.' },
+        { front:'It depends.', back:'Duruma göre değişir.' },
+        { front:'I\'m on my way.', back:'Yoldayım.' },
+      ],
+      de:[
+        { front:'Wie geht es dir?', back:'Nasılsın?' },
+        { front:'Könntest du mir helfen?', back:'Yardım eder misin?' },
+        { front:'Entschuldigung, ich habe das nicht verstanden.', back:'Pardon, anlayamadım.' },
+        { front:'Macht nichts.', back:'Boş ver.' },
+        { front:'Das kommt darauf an.', back:'Duruma göre değişir.' },
+      ],
+    } },
+
+  { id:'zaman', level:2, band:'A2', title:'Zaman ve sıklık',
+    goal:'Geçmiş, şimdi ve gelecek arasında kayma yapmadan anlatmak.',
+    task:'Dününü beş cümlede anlat; her cümlede farklı bir zaman kullan.',
+    items:{
+      en:[
+        { front:'yesterday / today / tomorrow', back:'dün / bugün / yarın' },
+        { front:'used to', back:'eskiden -erdi' },
+        { front:'by the time', back:'-diğinde, o zamana kadar' },
+        { front:'as soon as', back:'-er ermez' },
+        { front:'hardly ever', back:'neredeyse hiç' },
+        { front:'once in a while', back:'ara sıra' },
+      ],
+      de:[
+        { front:'gestern / heute / morgen', back:'dün / bugün / yarın' },
+        { front:'früher', back:'eskiden' },
+        { front:'sobald', back:'-er ermez' },
+        { front:'kaum', back:'neredeyse hiç' },
+        { front:'ab und zu', back:'ara sıra' },
+      ],
+    } },
+
+  { id:'baglac', level:2, band:'B1', title:'Bağlaçlar',
+    goal:'İki cümleyi neden, karşıtlık ve koşulla bağlamak.',
+    task:'Aynı iki cümleyi üç farklı bağlaçla birleştir; anlam nasıl kayıyor?',
+    items:{
+      en:[
+        { front:'however', back:'ancak, ne var ki' },
+        { front:'therefore', back:'bu yüzden' },
+        { front:'although', back:'-e rağmen' },
+        { front:'unless', back:'-medikçe' },
+        { front:'whereas', back:'oysa ki' },
+        { front:'in order to', back:'-mek için' },
+      ],
+      de:[
+        { front:'jedoch', back:'ancak' },
+        { front:'deshalb', back:'bu yüzden' },
+        { front:'obwohl', back:'-e rağmen' },
+        { front:'es sei denn', back:'-medikçe' },
+        { front:'während', back:'oysa ki' },
+      ],
+    } },
+
+  { id:'tartisma', level:3, band:'B2', title:'Tartışma dili',
+    goal:'Katılmak, kısmen katılmak ve karşı çıkmak için ayrı kalıplar.',
+    task:'Bir görüşe önce katıl, sonra aynı görüşe karşı çık; ikisini de yaz.',
+    items:{
+      en:[
+        { front:'I see your point, but…', back:'Ne demek istediğini anlıyorum ama…' },
+        { front:'That\'s a fair point.', back:'Haklı bir nokta.' },
+        { front:'I\'d argue the opposite.', back:'Tam tersini savunurum.' },
+        { front:'to be fair', back:'hakkını yemeyelim' },
+        { front:'on the contrary', back:'aksine' },
+        { front:'it doesn\'t follow that', back:'bundan şu çıkmaz ki' },
+      ],
+    } },
+
+  { id:'akademik', level:4, band:'C1', title:'Akademik kayıt',
+    goal:'Aynı fikri günlük ve akademik kayıtta ayrı ayrı söylemek.',
+    task:'Bir paragrafı günlük dilden akademik kayda çevir, sonra geri çevir.',
+    items:{
+      en:[
+        { front:'to put forward (an argument)', back:'öne sürmek' },
+        { front:'with respect to', back:'-e ilişkin olarak' },
+        { front:'this suggests that', back:'bu şunu düşündürüyor' },
+        { front:'a body of evidence', back:'bir kanıt gövdesi' },
+        { front:'to account for', back:'açıklamak, hesabını vermek' },
+      ],
+    } },
+];
+
+/* ------------------------------------------------------------ tarih üniteleri
+
+   Tarih ünitesi kendi olay listesini TAŞIMAZ: tohum olaylardan (data/history.js)
+   döneme ve alana göre süzer. İki yerde iki liste tutmak, birinin eskimesi
+   demektir. */
+ESP.HISTORY_UNITS = [
+  { id:'ilkcag', level:1, era:'ilkcag', title:'İlk Çağ iskeleti',
+    goal:'Yazıdan Roma\'nın bölünmesine kadar on dönüm noktasını yerine koymak.',
+    ask:'Bu dönemde devletin işi neydi ve neden yazıya ihtiyaç duydu?' },
+  { id:'ortacag', level:2, era:'ortacag', title:'Orta Çağ',
+    goal:'Üç büyük dinin kurumsallaşması, feodalite ve İslam biliminin yükselişi.',
+    ask:'Aynı yüzyılda Avrupa ile Orta Doğu arasında ne fark vardı?' },
+  { id:'yenicag', level:2, era:'yenicag', title:'Yeni Çağ',
+    goal:'Keşifler, matbaa, Reform ve bilim devriminin birbirini nasıl beslediği.',
+    ask:'Kopyalama maliyeti düşünce hangi otorite bölündü?' },
+  { id:'yakincag', level:3, era:'yakincag', title:'Yakın Çağ',
+    goal:'Devrimler, sanayileşme, ulus-devlet ve iki dünya savaşı.',
+    ask:'Egemenliğin kaynağı hanedandan ulusa nasıl geçti?' },
+  { id:'cagdas', level:3, era:'cagdas', title:'Çağdaş dönem',
+    goal:'Soğuk Savaş, dekolonizasyon ve bilgi çağı.',
+    ask:'İki kutuplu dünyanın sonu hangi boşluğu bıraktı?' },
+  { id:'anadolu', level:2, region:'anadolu', title:'Anadolu ve Türk tarihi',
+    goal:'Malazgirt\'ten Cumhuriyet\'e kadarki çizgi.',
+    ask:'Hangi kırılma noktasında yön değişti ve neden?' },
+  { id:'ekonomi', level:3, kind:'ekonomik', title:'Ekonomi tarihi',
+    goal:'Teknoloji, ticaret ve kriz: siyasetin altındaki zemin.',
+    ask:'Bu olayların hangisi bir teknolojinin sonucuydu?' },
+  { id:'dusunce', level:4, kind:'dusunsel', title:'Düşünce tarihi',
+    goal:'Fikirlerin kendi kronolojisi: felsefe, din, bilim.',
+    ask:'Bir fikir ne zaman kurum hâline geldi?' },
+];
+
+/* Pratik biçimleri — soru TİPLERİ. Motor bunları üretir (core/lesson.js);
+   burada yalnızca ne oldukları ve neyi ölçtükleri yazar. */
+ESP.PRACTICE_KINDS = [
+  { id:'recall', label:'Hatırla', note:'Ön yüz gösterilir, arka yüz yazılır. '
+    + 'En zoru ve en çok öğreteni: tanımak değil ÜRETMEK.' },
+  { id:'choice', label:'Seç', note:'Dört seçenek arasından doğruyu bulmak. '
+    + 'Tanıma ölçer; üretimden kolaydır ve öyle sayılır.' },
+  { id:'reverse', label:'Ters', note:'Arka yüzden ön yüze. Aynı kart, ayrı beceri.' },
+  { id:'order', label:'Sırala', note:'Dört olayı kronolojik sıraya dizmek. '
+    + 'Yalnızca tarih destesinde.' },
+  { id:'era', label:'Dönem', note:'Bir olayın hangi döneme düştüğü. '
+    + 'Yalnızca tarih destesinde.' },
+];
+
+ESP.PRACTICE_BY_ID = ESP.PRACTICE_KINDS.reduce(function(m, k){ m[k.id] = k; return m; }, {});
+
+/* Pratik oturumunun uzunluğu. Sabit ve kısa: bitmeyen bir oturum, yarıda
+   bırakılan bir oturumdur ve yarıda bırakılan oturum ölçüm üretmez. */
+ESP.PRACTICE_LENGTH = 10;
+
 /* ==== js/data/hints.js ==== */
 /* Aciklama metinleri tek yerde.
 
@@ -8033,6 +8274,10 @@ ESP.HINTS = {
     more:'Dördü de tek yerde tanımlı çünkü bölümden bölüme değişmemeleri gerekiyor: kullanıcı bir kez öğrensin, yedi kez değil. Buradaki sohbet — sesli olanı dahil — Danışma ekranıyla aynı yoldan geçer: aynı brifing, aynı ev kuralları denetimi, aynı kayıt. Ses ikinci bir yol açmaz.' },
   'reminder':{ t:'Hatırlatma', b:'Kendine söylediğin bir şeyin günü gelince tekrar söylenmesi.',
     more:'Bir görev değildir: sistem hiçbir şeyi zorunlu kılmaz ve kaçırılan bir hatırlatıcı ceza üretmez, borç yazmaz. Tekrarlı olan tamamlanınca silinmez, bir sonraki tarihe taşınır — ve o tarih BUGÜNDEN sayılır: iki hafta geciken günlük bir hatırlatıcı on dört kez üst üste düşmemeli.' },
+  'unit':{ t:'Ünite', b:'Bir konunun somut öğeleri ve ölçülebilir hedefi.',
+    more:'Ünite bir ders değildir — ESP öğretmen değil — bir başlangıç malzemesidir: boş ekranı kaldırır. Üniteden gelen kartlar «tohum» etiketi taşır, yani «bu kartı ben yazmadım» bilgisi kaybolmaz. İlerleme ayrı bir «tamamlandı» bayrağından değil SRS\'ten okunur: bir kartı bilinen yapan şey bir kez doğru bilmek değil, aralığının uzamasıdır.' },
+  'practice':{ t:'Pratik', b:'Destedeki kartlardan üretilen soru–cevap oturumu.',
+    more:'Pratik ayrı bir hafıza kaydı açmaz: cevabın tekrar ekranındakiyle aynı yere, aynı SRS\'e yazılır. Çeldiriciler aynı desteden gelir ve model uydurmaz — uydurulmuş bir çeldirici yanlış bir şeyi öğretebilir. «Bilmiyorum» bir atlama değildir: kart «tekrar» işaretlenir ve başa döner.' },
 };
 
 /* ==== js/data/palettes.js ==== */
@@ -9043,6 +9288,10 @@ ESP.S = {
     deskTab:{},             // discId -> 'kocla' | 'harita' | 'ekler' | 'hatirlatma'
     deskOpen:{},            // discId -> tezgah acik mi
     assetOpen:null,
+    practice:null,          // acik pratik oturumu
+    practiceShown:false,
+    practiceOrder:null,
+    unitOpen:null,
     histTab:'serit',        // serit | olaylar | kaynaklar | zincir | calisma
     eventOpen:null,
     sourceOpen:null,
@@ -12425,6 +12674,320 @@ ESP.Desk = (function(){
     briefExtras, headline };
 })();
 
+/* ==== js/core/lesson.js ==== */
+/* Öğrenme ve pratik motoru — ünite kartlaşır, pratik ölçüme dönüşür.
+
+   İki iş yapar ve ikisi de kural motorunun içindedir; hiçbiri modele
+   sorulmaz:
+
+     ÜNİTE   bir konunun somut öğelerini SRS kartına çevirir ve o ünitenin
+             ilerlemesini kartların durumundan OKUR.
+     PRATİK  destedeki kartlardan soru üretir, cevabı denetler ve sonucu
+             doğrudan SRS'e yazar.
+
+   Üç kural bu dosyayı yönetir:
+
+   1. İLERLEME UYDURULMAZ. «%60 tamamlandı» demek için ünitenin kartlarının
+      SRS'te hangi kutuda olduğuna bakılır. Ayrı bir «tamamlandı» bayrağı
+      tutulmaz: bayrak, yapılmamış işi yapılmış göstermenin en kolay yolu.
+
+   2. PRATİK AYRI BİR KAYIT AÇMAZ. Bir soruya verilen cevap, tekrar
+      ekranında verilen cevapla aynı yere gider (`ESP.SRS.answer`). İki ayrı
+      hafıza kaydı, iki ayrı retansiyon demekti.
+
+   3. SORU ÜRETİMİ KURAL MOTORUNUNDUR. Çeldiriciler aynı desteden gelir;
+      model çeldirici uydurmaz. Uydurulmuş bir çeldirici yanlış bir şeyi
+      öğretebilir — sistemin yapabileceği en pahalı hata.
+
+   Cevap denetimi TOLERANSLIDIR ama körü körüne değil: büyük-küçük harf,
+   noktalama ve baştaki «to / the / bir» gibi işaretleyiciler yok sayılır;
+   kelimenin kendisi yanlışsa yanlıştır. Türkçe'de büyük harf dönüşümü
+   `toLocaleLowerCase('tr-TR')` ile yapılır — «I» harfinin karşılığı
+   İngilizce'de «i», Türkçe'de «ı»dır ve bu ayrım sessizce yanlış cevap
+   üretir. */
+
+window.ESP = window.ESP || {};
+
+ESP.Lesson = (function(){
+  const U = ESP.U, S = ESP.S;
+
+  /* ------------------------------------------------------------- üniteler */
+
+  function langUnits(){ return ESP.LANG_UNITS || []; }
+  function historyUnits(){ return ESP.HISTORY_UNITS || []; }
+
+  function units(discId){
+    if(discId === 'history') return historyUnits().map(function(u){
+      return Object.assign({ disc:'history' }, u); });
+    if(discId === 'lang') return langUnits().map(function(u){
+      return Object.assign({ disc:'lang' }, u); });
+    return [];
+  }
+
+  function unitOf(discId, id){
+    return units(discId).filter(function(u){ return u.id === id; })[0] || null;
+  }
+
+  /* Bir dil ünitesinin bu dildeki öğeleri. İçeriği olmayan dil BOŞ döner ve
+     ekran bunu açıkça söyler — uydurulmuş çeviri, boş üniteden pahalıdır. */
+  function itemsOf(unit, lang){
+    if(!unit) return [];
+    if(unit.disc === 'history') return historyItems(unit);
+    const dil = lang || (S.profile && S.profile.langs && S.profile.langs[0]) || 'en';
+    return ((unit.items || {})[dil] || []).map(function(x){
+      return { front:x.front, back:x.back, lang:dil };
+    });
+  }
+
+  /* Tarih ünitesinin öğeleri tohum olaylardan süzülür: iki yerde iki liste
+     tutmak, birinin eskimesi demektir. */
+  function historyItems(unit){
+    const hepsi = (ESP.SEED_EVENTS || []);
+    return hepsi.filter(function(e){
+      if(unit.era) return ((ESP.eraOf(e.year) || {}).id === unit.era);
+      if(unit.region) return e.region === unit.region;
+      if(unit.kind) return e.kind === unit.kind;
+      return false;
+    }).map(function(e){
+      return { front:e.title, back:ESP.yearLabel(e.year), lang:ESP.HISTORY_DECK,
+        year:e.year, why:e.why, era:(ESP.eraOf(e.year) || {}).id || null,
+        kind:e.kind, region:e.region };
+    });
+  }
+
+  /* Ünitenin kartları: aynı destede, ön yüzü eşleşenler. Etiketle de
+     işaretlenir ama etiket TEK dayanak değildir — kullanıcının kendi yazdığı
+     aynı kart da o üniteye sayılır ve sayılmalıdır. */
+  function cardsOf(unit, lang){
+    const ogeler = itemsOf(unit, lang);
+    if(!ogeler.length) return [];
+    const idx = {};
+    ogeler.forEach(function(o){ idx[U.norm(o.front)] = true; });
+    return (S.cards || []).filter(function(c){ return idx[U.norm(c.front)]; });
+  }
+
+  /* Ünite ilerlemesi — SRS'ten OKUNUR, tutulmaz.
+
+     `known` sayısı 3. kutu ve üstündeki kartlardır: bir kez doğru bilmek
+     «öğrenildi» değildir, aralık uzadıysa öğrenilmiştir. */
+  const KNOWN_BOX = 3;
+
+  function progress(unit, lang){
+    const ogeler = itemsOf(unit, lang);
+    const kartlar = cardsOf(unit, lang);
+    if(!ogeler.length){
+      return { total:0, added:0, known:0, pct:0, cert:'missing',
+        why:'Bu ünitenin bu dilde malzemesi yok; kartını kendin yazarsın.' };
+    }
+    const bilinen = kartlar.filter(function(c){ return (c.box || 1) >= KNOWN_BOX; }).length;
+    return {
+      total:ogeler.length, added:kartlar.length, known:bilinen,
+      pct:Math.round(100 * bilinen / ogeler.length),
+      cert:kartlar.length ? 'derived' : 'missing',
+      why:kartlar.length ? null : 'Ünite henüz desteye eklenmedi.',
+    };
+  }
+
+  /* Üniteyi desteye ekler. İki kez basmak kartı iki kez EKLEMEZ: ön yüzü
+     aynı olan kart varsa atlanır ve kaç tanesinin atlandığı söylenir. */
+  async function addUnit(unit, lang){
+    const ogeler = itemsOf(unit, lang);
+    if(!ogeler.length) return { ok:false, error:'Bu ünitenin bu dilde malzemesi yok.' };
+    let eklenen = 0, atlanan = 0;
+    for(const o of ogeler){
+      const var_ = (S.cards || []).some(function(c){
+        return c.lang === o.lang && U.norm(c.front) === U.norm(o.front); });
+      if(var_){ atlanan++; continue; }
+      await ESP.Model.saveCard(ESP.Model.newCard({
+        front:o.front, back:o.back, lang:o.lang,
+        context:o.why || '',
+        /* «tohum» etiketi kaybolmaz: bu kartı kullanıcı yazmadı. */
+        tags:['seed', 'unit:' + unit.id].concat(o.era ? [o.era] : []),
+      }));
+      eklenen++;
+    }
+    if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+    return { ok:true, added:eklenen, skipped:atlanan };
+  }
+
+  /* --------------------------------------------------------------- pratik */
+
+  function norm(s){
+    return String(s == null ? '' : s)
+      .toLocaleLowerCase('tr-TR')
+      .replace(/[.,;:!?"'`´‘’“”()\[\]]/g, ' ')
+      .replace(/^\s*(to|the|a|an|bir|der|die|das)\s+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /* Cevap doğru mu? Eş anlamlılar «,» ya da «/» ile ayrılmışsa herhangi
+     biri kabul edilir: «yine de, buna rağmen» kartında ikisi de doğrudur. */
+  function correct(given, expected){
+    const g = norm(given);
+    if(!g) return false;
+    const secenekler = String(expected || '').split(/[,/]|;/)
+      .map(norm).filter(Boolean);
+    if(!secenekler.length) return false;
+    return secenekler.some(function(x){ return x === g; });
+  }
+
+  function shuffle(list, seedStr){
+    /* Karıştırma da kararlı: aynı oturum iki kez çizildiğinde sıra
+       değişmemeli, yoksa cevaplanan soru yer değiştirir. */
+    let h = 0;
+    const s = String(seedStr || '');
+    for(let i = 0; i < s.length; i++){ h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+    const out = list.slice();
+    for(let i = out.length - 1; i > 0; i--){
+      h = (h * 1103515245 + 12345) & 0x7fffffff;
+      const j = h % (i + 1);
+      const t = out[i]; out[i] = out[j]; out[j] = t;
+    }
+    return out;
+  }
+
+  /* Bir soru üretir. Çeldiriciler AYNI DESTEDEN gelir; model uydurmaz. */
+  function question(card, deck, kind, seed){
+    const tarih = deck === ESP.HISTORY_DECK;
+    const digerleri = (S.cards || []).filter(function(c){
+      return c.lang === card.lang && c.id !== card.id; });
+
+    if(kind === 'choice' || kind === 'reverse'){
+      if(digerleri.length < 3) kind = 'recall';
+    }
+    if((kind === 'order' || kind === 'era') && !tarih) kind = 'recall';
+
+    if(kind === 'choice'){
+      const celdirici = shuffle(digerleri, seed).slice(0, 3)
+        .map(function(c){ return c.back; });
+      return { kind:'choice', cardId:card.id, prompt:card.front,
+        options:shuffle([card.back].concat(celdirici), seed + 'o'),
+        answer:card.back };
+    }
+    if(kind === 'reverse'){
+      const celdirici = shuffle(digerleri, seed).slice(0, 3)
+        .map(function(c){ return c.front; });
+      return { kind:'reverse', cardId:card.id, prompt:card.back,
+        options:shuffle([card.front].concat(celdirici), seed + 'o'),
+        answer:card.front };
+    }
+    if(kind === 'era'){
+      const yil = Number(String(card.back).replace(/[^\-0-9]/g, ''));
+      const donem = ESP.eraOf(yil);
+      if(!donem) return { kind:'recall', cardId:card.id, prompt:card.front,
+        answer:card.back };
+      return { kind:'era', cardId:card.id, prompt:card.front,
+        options:(ESP.ERAS || []).map(function(e){ return e.label; }),
+        answer:donem.label };
+    }
+    if(kind === 'order'){
+      const havuz = digerleri.filter(function(c){
+        return /^(MÖ )?\d+$/.test(String(c.back).trim()); });
+      if(havuz.length < 3) return { kind:'recall', cardId:card.id,
+        prompt:card.front, answer:card.back };
+      const secilen = [card].concat(shuffle(havuz, seed).slice(0, 3));
+      const yilOf = function(c){
+        const t = String(c.back).trim();
+        const n = Number(t.replace(/[^0-9]/g, ''));
+        return /^MÖ/.test(t) ? -n : n;
+      };
+      const dogru = secilen.slice().sort(function(a, b){ return yilOf(a) - yilOf(b); })
+        .map(function(c){ return c.front; });
+      return { kind:'order', cardId:card.id,
+        prompt:'Bu dört olayı eskiden yeniye sırala.',
+        options:shuffle(secilen.map(function(c){ return c.front; }), seed + 'r'),
+        answer:dogru.join(' | ') };
+    }
+    return { kind:'recall', cardId:card.id, prompt:card.front, answer:card.back };
+  }
+
+  /* Bir pratik oturumu kurar.
+
+     Kartlar önce VADESİ GELENLERDEN seçilir: pratik, tekrarın yerine geçmez
+     ama tekrarı da boşa harcamamalı. */
+  function start(deck, opts){
+    const o = opts || {};
+    const bugun = o.today || U.todayISO();
+    const deste = deck || ((S.profile && S.profile.langs && S.profile.langs[0]) || 'en');
+    const hepsi = (S.cards || []).filter(function(c){ return c.lang === deste; });
+    if(hepsi.length < 1) return { ok:false, error:'Bu destede kart yok.' };
+
+    const vadesi = ESP.SRS.dueCards(bugun).filter(function(c){ return c.lang === deste; });
+    const geri = hepsi.filter(function(c){ return vadesi.indexOf(c) < 0; });
+    const sira = vadesi.concat(shuffle(geri, bugun + deste))
+      .slice(0, o.length || ESP.PRACTICE_LENGTH);
+
+    const turler = o.kinds && o.kinds.length ? o.kinds
+      : (deste === ESP.HISTORY_DECK ? ['recall', 'choice', 'era', 'order']
+        : ['recall', 'choice', 'reverse']);
+
+    return {
+      ok:true,
+      deck:deste, at:new Date().toISOString(), today:bugun,
+      questions:sira.map(function(c, i){
+        return question(c, deste, turler[i % turler.length], bugun + deste + i);
+      }),
+      pos:0, right:0, wrong:0, done:false, log:[],
+    };
+  }
+
+  /* Cevabı denetler ve SRS'e yazar.
+
+     Not «tekrar» ile «iyi» arasında üçüncü bir değer YOKTUR: pratik bir
+     ölçüm değil bir denemedir ve kullanıcının «kolaydı» demesi burada
+     sorulmaz. Kolaylık, aralığın kendisinden okunur. */
+  async function answer(session, given){
+    if(!session || session.done) return { ok:false, error:'Oturum kapalı.' };
+    const q = session.questions[session.pos];
+    if(!q) return { ok:false, error:'Soru yok.' };
+
+    const dogru = q.kind === 'recall'
+      ? correct(given, q.answer)
+      : norm(given) === norm(q.answer);
+
+    await ESP.SRS.answer(q.cardId, dogru ? 'good' : 'again');
+
+    session.log.push({ cardId:q.cardId, kind:q.kind, ok:dogru,
+      given:String(given || ''), expected:q.answer });
+    if(dogru) session.right++; else session.wrong++;
+    session.pos++;
+    if(session.pos >= session.questions.length) session.done = true;
+    return { ok:true, correct:dogru, expected:q.answer, done:session.done };
+  }
+
+  /* Oturumun sonucu. İsabet bir «not» değil bir ölçümdür ve öyle yazılır. */
+  function result(session){
+    if(!session) return null;
+    const n = session.right + session.wrong;
+    return {
+      asked:n, right:session.right, wrong:session.wrong,
+      accuracy:n ? session.right / n : null,
+      cert:n ? 'measured' : 'missing',
+      deck:session.deck,
+      missed:session.log.filter(function(x){ return !x.ok; }),
+    };
+  }
+
+  /* Oturumu gün kaydına yazar: pratik de bir pratiktir ve dakikası sayılır. */
+  async function log(session, minutes){
+    const r = result(session);
+    if(!r || !r.asked) return { ok:false, error:'Cevaplanmış soru yok.' };
+    const disc = session.deck === ESP.HISTORY_DECK ? 'history' : 'lang';
+    await ESP.Model.addSession(session.today || U.todayISO(), {
+      disc:disc,
+      minutes:minutes != null ? minutes : Math.max(1, Math.round(r.asked * 0.5)),
+      count:r.right,
+      note:'pratik · ' + r.right + '/' + r.asked,
+    });
+    if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+    return { ok:true, result:r };
+  }
+
+  return { units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
+    start, question, answer, result, log, correct, norm, shuffle };
+})();
+
 /* ==== js/core/planner.js ==== */
 /* Planlayici — siradaki tek is, haftalik rota ve capraz bulgular.
 
@@ -15451,6 +16014,134 @@ ESP.Parts = (function(){
       </div>`;
   }
 
+  /* ------------------------------------------------------- öğren ve pratik
+
+     İki parça, iki ekranda paylaşılır (Dil ve Kronoloji):
+
+       units(disc)     ünite listesi ve her birinin ilerlemesi
+       practice(deck)  soru–cevap oturumu
+
+     İlerleme çubuğu SRS'ten okunur; ayrı bir «tamamlandı» bayrağı yoktur. */
+  function units(discId, lang){
+    const list = ESP.Lesson.units(discId);
+    if(!list.length) return K.Empty({ text:'Bu bölümde ünite tanımlı değil.' });
+
+    return html`<div class="units">${map(list, u => {
+      const p = ESP.Lesson.progress(u, lang);
+      const acik = ESP.S.ui.unitOpen === u.id;
+      return html`
+        <div class="${cls('unit', p.total === 0 && 'is-empty', acik && 'is-open')}">
+          <div class="unit__head">
+            <span class="unit__lv num">${(ESP.LEVEL_BY_RANK[u.level] || {}).short || ''}</span>
+            <div class="unit__body">
+              <b>${u.title}</b>
+              <span class="small muted">${u.goal}</span>
+            </div>
+            ${p.total
+              ? K.Badge({ label:p.known + '/' + p.total + ' bilinen',
+                  tone:p.known >= p.total ? 'ok' : (p.added ? 'info' : 'muted') })
+              : K.Badge({ label:'malzeme yok', tone:'muted', icon:false })}
+            ${K.Button({ label:acik ? 'Kapat' : 'Aç', size:'sm', act:'unit-open',
+              data:{ 'data-id':u.id } })}
+          </div>
+          ${when(p.total, () => html`<div class="unit__bar" aria-hidden="true">
+            <span style="width:${p.pct}%"></span></div>`)}
+          ${when(acik, () => html`
+            <div class="unit__detail">
+              ${when(p.why, () => K.Notice({ tone:'info', body:p.why }))}
+              ${when(u.task, () => html`<p class="small"><b>Görev:</b> ${u.task}</p>`)}
+              ${when(u.ask, () => html`<p class="small"><b>Soru:</b> ${u.ask}</p>`)}
+              ${when(p.total, () => html`
+                <ul class="unit__items">${map(ESP.Lesson.itemsOf(u, lang).slice(0, 12),
+                  it => html`<li><b>${it.front}</b><span>${it.back}</span></li>`)}</ul>
+                ${K.Button({ label:p.added ? 'Eksikleri desteye ekle' : 'Desteye ekle',
+                  tone:'primary', size:'sm', act:'unit-add',
+                  data:{ 'data-id':u.id, 'data-disc':discId } })}`)}
+            </div>`)}
+        </div>`;
+    })}</div>`;
+  }
+
+  function practice(deck){
+    const s = ESP.S.ui.practice;
+    if(!s || s.deck !== deck){
+      return html`
+        <p class="small muted">Pratik bir sınav değildir: cevabın doğrudan
+          aralıklı tekrara yazılır, ayrı bir kayıt açılmaz.</p>
+        ${K.Button({ label:'Pratiğe başla', tone:'primary', act:'prac-start',
+          class:'mt-10', data:{ 'data-deck':deck } })}`;
+    }
+
+    if(s.done){
+      const r = ESP.Lesson.result(s);
+      return html`
+        <div class="pracend">
+          ${K.NextUp({ icon:'check', calm:true, label:'Oturum bitti',
+            title:r.right + '/' + r.asked + ' doğru',
+            why:'İsabet bir not değil bir ölçümdür: yanlışlar destede başa döndü.' })}
+          ${when(r.missed.length, () => html`
+            <ul class="pracmiss">${map(r.missed, m => html`<li>
+              <b>${m.expected}</b><span class="tiny dim">senin cevabın: ${m.given || '—'}</span>
+            </li>`)}</ul>`)}
+          <div class="row wrap mt-10">
+            ${K.Button({ label:'Gün kaydına yaz', tone:'primary', act:'prac-log' })}
+            ${K.Button({ label:'Yeni oturum', act:'prac-start',
+              data:{ 'data-deck':deck } })}
+            ${K.Button({ label:'Kapat', act:'prac-close' })}
+          </div>
+        </div>`;
+    }
+
+    const q = s.questions[s.pos];
+    const gosterildi = ESP.S.ui.practiceShown;
+    return html`
+      <div class="prac">
+        <div class="prac__top">
+          <span class="tiny dim">${s.pos + 1} / ${s.questions.length}</span>
+          ${K.Badge({ label:(ESP.PRACTICE_BY_ID[q.kind] || {}).label || q.kind,
+            tone:'muted', icon:false })}
+          <span class="tiny dim">${s.right} doğru · ${s.wrong} yanlış</span>
+        </div>
+
+        <p class="prac__q">${q.prompt}</p>
+
+        ${q.kind === 'order'
+          ? (function(){
+              /* Sıralama sorusu bir çoktan seçme değildir: seçenekleri hazır
+                 dizmek, sıralamayı düşünmeden tanımayı ölçerdi. Kullanıcı
+                 sırayı KENDİ kurar; seçtiği her olay listeden düşer. */
+              const secilen = ESP.S.ui.practiceOrder || [];
+              const kalan = q.options.filter(o => secilen.indexOf(o) < 0);
+              return html`
+                <ol class="prac__order">${map(secilen, o => html`<li>${o}</li>`)}</ol>
+                <div class="prac__opts">${map(kalan, opt => K.Button({ label:opt,
+                  act:'prac-pick', data:{ 'data-value':opt }, class:'prac__opt' }))}</div>
+                <div class="row wrap mt-8">
+                  ${when(secilen.length, () => K.Button({ label:'Sırayı temizle',
+                    size:'sm', act:'prac-clear-order' }))}
+                  ${when(!kalan.length, () => K.Button({ label:'Sırayı onayla',
+                    tone:'primary', act:'prac-answer',
+                    data:{ 'data-value':secilen.join(' | ') } }))}
+                </div>`;
+            })()
+          : q.options
+          ? html`<div class="prac__opts">${map(q.options, opt => K.Button({ label:opt,
+              act:'prac-answer', data:{ 'data-value':opt }, class:'prac__opt' }))}</div>`
+          : html`<div class="row mt-10">
+              ${K.Input({ id:'prac-input', aria:'Cevabın', placeholder:'Cevabını yaz…' })}
+              ${K.Mic({ target:'prac-input' })}
+              ${K.Button({ label:'Cevapla', tone:'primary', act:'prac-answer' })}
+            </div>`}
+
+        ${when(gosterildi, () => K.Notice({ tone:'info',
+          body:'Doğrusu: ' + q.answer }))}
+        <div class="row wrap mt-10">
+          ${K.Button({ label:'Bilmiyorum', size:'sm', act:'prac-skip' })}
+          ${K.Button({ label:'Oturumu bitir', size:'sm', act:'prac-close' })}
+        </div>
+      </div>`;
+  }
+
   /* Tezgâhın kendisi — dört sekme tek bir defter satırında. */
   function desk(discId){
     const d = ESP.DISCIPLINE_BY_ID[discId];
@@ -15484,7 +16175,7 @@ ESP.Parts = (function(){
   }
 
   return { cert, measure, avatar, discChip, radar, empty, coach, desk,
-    deskChat, deskMap, deskAssets, deskReminders };
+    deskChat, deskMap, deskAssets, deskReminders, units, practice };
 
 })();
 
@@ -18328,6 +19019,7 @@ ESP.Screens.lang = (function(){
     { id:'calis',    label:'Çalış' },
     { id:'kartlar',  label:'Kartlar' },
     { id:'ekle',     label:'Ekle' },
+    { id:'ogren',    label:'Öğren' },
     { id:'gramer',   label:'Dilbilgisi' },
     { id:'ilerleme', label:'İlerleme' },
   ];
@@ -18691,6 +19383,45 @@ ESP.Screens.lang = (function(){
     return rows;
   }
 
+  /* ------------------------------------------------------------------ öğren
+
+     Boş bir sistemin önündeki kullanıcı «ne ekleyeceğim» diye takılır.
+     Ünite bu boşluğu doldurur: konu, ölçülebilir hedef ve kartlaşacak somut
+     öğeler. Ünite bir DERS değildir — ESP öğretmen değil — bir BAŞLANGIÇ
+     MALZEMESİDİR ve geldiği yer «tohum» etiketiyle kartta durur. */
+  function learnRows(){
+    const dil = aktifDil();
+    const l = ESP.LANG_BY_ID[dil] || {};
+    const malzemesiz = ESP.Lesson.units('lang')
+      .filter(u => !ESP.Lesson.itemsOf(u, dil).length).length;
+
+    return [
+      K.Entry({
+        label:'PRATİK', hint:'practice',
+        meta:S.ui.practice && S.ui.practice.deck === dil ? 'oturum açık'
+          : ESP.PRACTICE_LENGTH + ' soru',
+        note:'Cevabın doğrudan aralıklı tekrara yazılır: pratik ayrı bir kayıt '
+           + 'açmaz. Çeldiriciler aynı desteden gelir, model uydurmaz.',
+        wide:true,
+        body:ESP.Parts.practice(dil),
+      }),
+
+      K.Entry({
+        label:'ÜNİTELER', hint:'unit',
+        meta:ESP.Lesson.units('lang').length + ' ünite',
+        note:'İlerleme SRS\'ten okunur: bir kartı «bilinen» yapan şey bir kez '
+           + 'doğru bilmek değil, aralığının uzamasıdır.',
+        wide:true,
+        body:html`
+          ${when(malzemesiz, () => K.Notice({ tone:'info',
+            body:malzemesiz + ' ünitenin ' + (l.label || dil) + ' malzemesi yok. '
+              + 'Yanlış çeviriyle dolu bir ünite, boş bir üniteden pahalıdır: '
+              + 'konusu duruyor, kartını sen yazarsın.' }))}
+          ${ESP.Parts.units('lang', dil)}`,
+      }),
+    ];
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
   function render(){
@@ -18698,6 +19429,7 @@ ESP.Screens.lang = (function(){
     const d = ESP.SRS.deckStatus(aktifDil());
     const rows = tab === 'kartlar' ? cardRows()
       : tab === 'ekle' ? addRows()
+      : tab === 'ogren' ? learnRows()
       : tab === 'gramer' ? grammarRows()
       : tab === 'ilerleme' ? progressRows()
       : reviewRows();
@@ -19403,6 +20135,7 @@ ESP.Screens.history = (function(){
     { id:'olaylar',   label:'Olaylar' },
     { id:'kaynaklar', label:'Kaynaklar' },
     { id:'zincir',    label:'Zincir' },
+    { id:'ogren',     label:'Öğren' },
     { id:'calisma',   label:'Çalışma' },
   ];
 
@@ -19847,6 +20580,34 @@ ESP.Screens.history = (function(){
     return rows;
   }
 
+  /* ------------------------------------------------------------------ öğren
+
+     Tarih ünitesi kendi olay listesini taşımaz: tohum olaylardan döneme,
+     bölgeye ya da alana göre süzer. İki yerde iki liste tutmak, birinin
+     eskimesi demektir. */
+  function learnRows(){
+    return [
+      K.Entry({
+        label:'PRATİK', hint:'practice',
+        meta:S.ui.practice && S.ui.practice.deck === ESP.HISTORY_DECK
+          ? 'oturum açık' : ESP.PRACTICE_LENGTH + ' soru',
+        note:'Tarih destesinde dört soru türü var: hatırla, seç, dönem ve '
+           + 'sırala. Sıralamada seçenekler hazır dizilmez — sırayı sen kurarsın.',
+        wide:true,
+        body:ESP.Parts.practice(ESP.HISTORY_DECK),
+      }),
+
+      K.Entry({
+        label:'ÜNİTELER', hint:'unit',
+        meta:ESP.Lesson.units('history').length + ' ünite',
+        note:'Ünite bir dönemi, bölgeyi ya da alanı toplar. Eklenen kartlar '
+           + '«tohum» etiketiyle durur: bu kartları sen yazmadın.',
+        wide:true,
+        body:ESP.Parts.units('history'),
+      }),
+    ];
+  }
+
   /* ----------------------------------------------------------------- çizim */
 
   function render(){
@@ -19855,6 +20616,7 @@ ESP.Screens.history = (function(){
       : tab === 'olaylar' ? olayRows()
       : tab === 'kaynaklar' ? kaynakRows()
       : tab === 'zincir' ? zincirRows()
+      : tab === 'ogren' ? learnRows()
       : calismaRows();
 
     return K.Grid(html`
@@ -24080,6 +24842,81 @@ ESP.App = (function(){
     async 'desk-del-rem'(el){
       await ESP.Model.deleteReminder(el.dataset.id);
       ESP.Memo.bitir();
+      render();
+    },
+
+    /* --- öğren ve pratik: iki ekranda ortak --- */
+    async 'unit-open'(el){
+      S.ui.unitOpen = S.ui.unitOpen === el.dataset.id ? null : el.dataset.id;
+      render();
+    },
+
+    async 'unit-add'(el){
+      const u = ESP.Lesson.unitOf(el.dataset.disc, el.dataset.id);
+      if(!u) return;
+      const res = await ESP.Lesson.addUnit(u);
+      if(!res.ok){ UI.toast(res.error); return; }
+      UI.toast(res.added + ' kart eklendi'
+        + (res.skipped ? ', ' + res.skipped + ' tanesi zaten vardı' : ''));
+      render();
+    },
+
+    async 'prac-start'(el){
+      const s = ESP.Lesson.start(el.dataset.deck);
+      if(!s.ok){ UI.toast(s.error); return; }
+      S.ui.practice = s;
+      S.ui.practiceShown = false;
+      S.ui.practiceOrder = null;
+      render();
+    },
+
+    async 'prac-pick'(el){
+      S.ui.practiceOrder = (S.ui.practiceOrder || []).concat([el.dataset.value]);
+      render();
+    },
+
+    async 'prac-clear-order'(){ S.ui.practiceOrder = null; render(); },
+
+    async 'prac-answer'(el){
+      const s = S.ui.practice;
+      if(!s) return;
+      let cevap = el.dataset.value;
+      if(cevap == null){
+        const alan = document.getElementById('prac-input');
+        cevap = alan ? alan.value : '';
+      }
+      const res = await ESP.Lesson.answer(s, cevap);
+      if(!res.ok){ UI.toast(res.error); return; }
+      S.ui.practiceShown = !res.correct;
+      S.ui.practiceOrder = null;
+      UI.toast(res.correct ? 'Doğru' : 'Yanlış — doğrusu: ' + res.expected);
+      render();
+    },
+
+    /* «Bilmiyorum» bir atlama DEĞİLDİR: kart «tekrar» olarak işaretlenir ve
+       başa döner. Cevabı görmeden geçmek, unutma eğrisini kandırmak olurdu. */
+    async 'prac-skip'(){
+      const s = S.ui.practice;
+      if(!s) return;
+      const res = await ESP.Lesson.answer(s, '');
+      S.ui.practiceShown = true;
+      S.ui.practiceOrder = null;
+      if(res.ok) UI.toast('Doğrusu: ' + res.expected);
+      render();
+    },
+
+    async 'prac-log'(){
+      const s = S.ui.practice;
+      if(!s) return;
+      const res = await ESP.Lesson.log(s);
+      if(!res.ok){ UI.toast(res.error); return; }
+      S.ui.practice = null;
+      UI.toast('Gün kaydına yazıldı');
+      render();
+    },
+
+    async 'prac-close'(){
+      S.ui.practice = null; S.ui.practiceShown = false; S.ui.practiceOrder = null;
       render();
     },
 
