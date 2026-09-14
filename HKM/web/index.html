@@ -1324,13 +1324,32 @@ details.detay > summary:hover{ color:var(--fg); }
     var oran = a.pct == null ? null : a.pct;
     var sinif = oran == null ? '' : (oran >= 95 ? 'danger'
       : (oran >= 80 ? 'warn' : 'ok'));
+    var pb = a.currency_label || 'TL';
     h += '<div class="metric"><div class="metric__name">Bu ay harcanan</div>'
-      + '<div class="metric__val ' + sinif + '">' + esc(a.spent_try)
-      + ' TL</div><div class="metric__meta">tavan ' + esc(a.ceiling_try)
-      + ' TL' + (oran == null ? ' · oran hesaplanamadı (kur girilmemiş)'
+      + '<div class="metric__val ' + sinif + '">' + esc(a.spent) + ' ' + esc(pb)
+      + '</div><div class="metric__meta">tavan ' + esc(a.ceiling) + ' ' + esc(pb)
+      + (oran == null ? ' · oran hesaplanamadı'
           : ' · %' + esc(oran)) + ' · ' + esc(a.calls) + ' çağrı</div></div>';
 
-    if(a.rate_stale){
+    /* Tavanin BIRIMI bir secimdir ve ekranda durur. Bir sure tavan
+       yalnizca TL olabiliyordu; kuru girmemis bir kullanicinin HICBIR
+       model cagrisi yapilamiyordu ve sohbet sebepsiz susuyordu. */
+    h += '<div class="metric"><div class="metric__name">Tavan para birimi'
+      + '<div class="muted" style="font-size:11px">USD seçilirse kur '
+      + 'gerekmez: harcama zaten USD ölçülür. TL seçilirse '
+      + 'USD/TRY kuru şart olur.</div></div>'
+      + '<div class="metric__val"><select id="butce-birim" '
+      + 'aria-label="Tavan para birimi">'
+      + '<option value="usd"' + (a.currency === 'usd' ? ' selected' : '')
+      + '>USD</option>'
+      + '<option value="try"' + (a.currency === 'try' ? ' selected' : '')
+      + '>TL</option></select></div></div>';
+
+    if(a.currency === 'try' && !a.rate){
+      h += '<p class="danger">Tavan TL cinsinden ama USD/TRY kuru '
+        + 'girilmemiş: <b>model çağrıları yapılmıyor.</b> Aşağıya kuru '
+        + 'yaz ya da tavanı USD\'ye çevir.</p>';
+    }else if(a.rate_stale && a.currency === 'try'){
       h += '<p class="warn">USD/TRY kuru ' + (a.rate_date
         ? esc(a.rate_date) + ' tarihli ve eskimiş' : 'girilmemiş')
         + '. Eski bir kurla yapılan TL hesabı, doğru görünen yanlış bir '
@@ -1376,7 +1395,13 @@ details.detay > summary:hover{ color:var(--fg); }
       + 'değil, aşılmaması gereken sınır</div></div>'
       + '<div class="metric__val"><input id="butce-tavan" type="number" '
       + 'step="any" value="' + esc(a.ceiling_try) + '" class="alan alan--dar" '
-      + 'aria-label="Aylık tavan"/></div></div>'
+      + 'aria-label="Aylık tavan TL"/></div></div>'
+      + '<div class="metric"><div class="metric__name">Aylık tavan (USD)'
+      + '<div class="muted" style="font-size:11px">Birim USD seçiliyse '
+      + 'geçerli olan budur</div></div>'
+      + '<div class="metric__val"><input id="butce-tavan-usd" type="number" '
+      + 'step="any" value="' + esc(a.ceiling_usd) + '" class="alan alan--dar" '
+      + 'aria-label="Aylık tavan USD"/></div></div>'
       + '<div class="metric"><div class="metric__name">USD/TRY kuru'
       + '<div class="muted" style="font-size:11px">Elle girilir: kuru sessizce '
       + 'internetten çekmek, hesabı her gün değiştiren görünmez bir '
@@ -1407,6 +1432,8 @@ details.detay > summary:hover{ color:var(--fg); }
   async function butceKaydet(){
     var yama = { budget:{
       monthly_try:Number($('butce-tavan').value),
+      monthly_usd:Number($('butce-tavan-usd').value),
+      ceiling_currency:$('butce-birim').value,
       usd_try:Number($('butce-kur').value),
       rate_date:$('butce-kurtarih').value || '',
       stop_at_pct:Number($('butce-dur').value) } };
@@ -1575,7 +1602,8 @@ details.detay > summary:hover{ color:var(--fg); }
       + ' sağlayıcısı">' + secenek + '</select> '
       + '<input data-model="' + esc(rol.key) + '" value="'
       + esc(kendi ? (atama.model || '') : '') + '" placeholder="model adı" '
-      + 'class="alan alan--orta" aria-label="' + esc(rol.label) + ' modeli"/>'
+      + 'list="modeller-' + esc(kendi && atama.provider ? atama.provider : '')
+      + '" class="alan alan--orta" aria-label="' + esc(rol.label) + ' modeli"/>'
       + anahtarSec
       + '</div>'
       + '<div class="metric__meta">' + rol.key + (durum ? ' · ' + durum : '')
@@ -1584,7 +1612,18 @@ details.detay > summary:hover{ color:var(--fg); }
 
   function gorevCiz(c){
     var m = (c.models || {});
-    var h = '<div class="tag">Görev dağılımı · kademe kademe</div>'
+    /* Model adlari LISTEDEN secilir. Elle yazilan bir ad tek harf
+       yanlis oldugunda saglayici 404 doner ve kullanici «anahtar
+       calismiyor» sanir; oysa anahtar dogrudur, ad yanlistir. */
+    var h = '';
+    (m.providers || []).forEach(function(p){
+      h += '<datalist id="modeller-' + esc(p.id) + '">';
+      (p.models || []).forEach(function(ad){
+        h += '<option value="' + esc(ad) + '"></option>';
+      });
+      h += '</datalist>';
+    });
+    h += '<div class="tag">Görev dağılımı · kademe kademe</div>'
       + '<p class="muted">Atama yoksa <b>üstüne</b> bakılır; en üstte de '
       + 'yoksa «atanmamış» denir. Uydurulmuş bir varsayılan, senin '
       + 'seçmediğin bir modele para ödemen demektir.</p>';
@@ -1606,9 +1645,18 @@ details.detay > summary:hover{ color:var(--fg); }
     });
     h += '<div class="row" style="margin-top:12px">'
       + '<button class="primary" id="gorev-kaydet">Görev dağılımını kaydet</button>'
-      + '</div><p class="muted" id="gorev-not"></p>';
+      + '<button id="sohbet-dene">Sohbeti dene</button>'
+      + '<select id="sohbet-dene-kim" aria-label="Hangi görevli denenecek">'
+      + '<option value="king">King</option>'
+      + '<option value="bio">Biyolojik sermaye (SPİ)</option>'
+      + '<option value="academic">Akademik hedef (AYS)</option>'
+      + '<option value="intellect">Entelektüel gelişim (ESP)</option>'
+      + '</select>'
+      + '</div><p class="muted" id="gorev-not"></p>'
+      + '<div id="sohbet-tani"></div>';
     $('gorevler').innerHTML = h;
     $('gorev-kaydet').addEventListener('click', gorevKaydet);
+    $('sohbet-dene').addEventListener('click', sohbetDene);
   }
 
   async function anahtarKaydet(){
@@ -1663,6 +1711,41 @@ details.detay > summary:hover{ color:var(--fg); }
       $('gorev-not').textContent = 'Kaydedilmedi — '
         + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
     }
+  }
+
+  /* Zinciri BASTAN SONA dener ve nerede koptugunu yazar. «API girdim
+     ama çalışmıyor» cümlesinin tek cevabı, zinciri gerçekten koşturup
+     hangi halkanın koptığını göstermektir. */
+  async function sohbetDene(){
+    var kim = $('sohbet-dene-kim').value || 'king';
+    var yer = $('sohbet-tani');
+    yer.innerHTML = '<p class="muted">Deneniyor… gerçek bir çağrı '
+      + 'yapılıyor.</p>';
+    $('sohbet-dene').disabled = true;
+    var r = await api('/api/chat/tani', { method:'POST',
+      body:JSON.stringify({ agent:kim, date:$('tarih').value || bugun() }) });
+    $('sohbet-dene').disabled = false;
+    if(r.status !== 200){
+      yer.innerHTML = '<p class="danger">Denenemedi (' + esc(r.status) + ').</p>';
+      return;
+    }
+    var g = r.body || {};
+    var h = '<div class="tag" style="margin-top:14px">Sohbet zinciri</div>';
+    (g.adimlar || []).forEach(function(a){
+      h += '<div class="metric"><div class="metric__name">'
+        + (a.ok ? '<span class="ok">✓</span> ' : '<span class="danger">✗</span> ')
+        + esc(a.ad) + '</div>'
+        + '<div class="metric__meta">' + esc(a.note || '') + '</div></div>';
+    });
+    if(g.ok){
+      h += '<p class="ok">Sohbet çalışıyor. Modelin cevabı: «'
+        + esc(g.text || '') + '»</p>';
+    }else{
+      h += '<p class="danger">Zincir yukarıdaki adımda kopuyor. Sohbet '
+        + 'bu yüzden serbest cümleyle cevap veremiyor — komutlar '
+        + 'çalışmaya devam ediyor.</p>';
+    }
+    yer.innerHTML = h;
   }
 
   /* «Kurulu» ile «calisiyor» ayri seylerdir. */

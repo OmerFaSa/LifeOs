@@ -31,6 +31,7 @@ Ucnoktalar:
     GET  /api/series?date=&days=&module=  metrik metrik zaman serisi
     POST /api/message               Buyuk Patron'a kisa komut (yerel kanal)
     POST /api/chat                  sohbet: once komut, sonra model
+    POST /api/chat/tani             sohbet zincirini dener, nerede koptugunu soyler
     GET  /api/agents                gorevliler ve her birinin hazir olup olmadigi
     GET  /api/conversation          son konusma kayitlari
     POST /api/pair/open             esleme penceresini acar (bearer ister)
@@ -660,6 +661,23 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "niyet kimligi sayi olmali"})
             r = intents.answer(self.con, nid, parca[3])
             return self._send(200 if r.get("ok") else 409, r)
+        if u.path == "/api/chat/tani":
+            # «API girdim ama calismiyor» cumlesinin tek cevabi, zinciri
+            # GERCEKTEN kosturup hangi halkanin koptugunu gostermektir.
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                govde = json.loads(ham or b"{}")
+            except ValueError:
+                govde = {}
+            gorevli = (govde or {}).get("agent") or "king"
+            if gorevli not in sohbet.GOREVLILER:
+                return self._send(404, {"error": "bilinmeyen gorevli"})
+            return self._send(200, sohbet.tani(
+                self.con, self.server.config,
+                (govde or {}).get("date") or date, gorevli=gorevli,
+                th=self.server.thresholds))
         if u.path == "/api/chat":
             # Sohbet: once komut, sonra model, sonra durust bir «yok».
             ham, hata = self._read_body()

@@ -807,6 +807,16 @@ tutar. Beş kural:
 3. **Kur elle girilir ve tarihlidir.** Kuru sessizce internetten çekmek,
    hesabı her gün değiştiren görünmez bir değişken eklemektir. Eskiyen kur
    ekranda **söylenir**.
+
+   **Tavanın para birimi bir seçimdir** (`ceiling_currency`: `usd` ya da
+   `try`) ve varsayılanı USD'dir. Bu bir kolaylık değil, bir tıkanıklığın
+   çözümü: tavan yalnızca TL olabilirken, TL hesabı için kur gerekiyordu
+   ve **kur girilmeden hiçbir model çağrısı yapılamıyordu**. Kullanıcı
+   anahtarını giriyor, modelini seçiyor, sohbet sessizce çalışmıyordu —
+   anahtarı doğru, modeli doğru, ama başka bir sekmedeki boş bir kur alanı
+   yüzünden. Tavan USD tutulursa kur hiç gerekmez: harcama zaten USD
+   ölçülür. TL seçilirse kur şarttır ve eksikliği ekranda **kırmızı**
+   yazılır — «model çağrıları yapılmıyor» cümlesiyle birlikte.
 4. **Ölçülmeyen kategori sıfır değildir.** Hiç kullanılmamış bir yetenek
    için «0 TL» yazmak, o kategorinin bedava olduğunu ima eder.
 5. **Tahmin iki sayıdır.** Tek bir aylık tahmin, iyimser günün tahminidir:
@@ -933,15 +943,81 @@ başarısız çağrı da), **sınır** (cevap kural motorunun yerine geçemez) v
 **kaynak** (hangi veriye dayandığı söylenebilir olmalı). Bu dördü ayrı ayrı
 yazılsaydı, biri bir gün unutulurdu.
 
-Yedi kural: kural motoru otoritedir · model sayı uyduramaz (cevapta geçip
-bağlamda geçmeyen sayı taşıyan cevap **düşürülür**) · buyurgan kip
-düşürülür · bütçe önce sorulur · her çağrı deftere yazılır · model modeli
-çağırmaz · atanmamış kademe çağrı yapmaz.
+Yedi kural: kural motoru otoritedir · model **ölçüm** uyduramaz ·
+buyurgan kip düşürülür · bütçe önce sorulur · her çağrı deftere yazılır ·
+model modeli çağırmaz · atanmamış kademe çağrı yapmaz.
+
+### Sayı söylemek ile ölçüm uydurmak ayrı şeylerdir
+
+Bir süre **her sayı** şüphe sayılıyordu: cevapta geçip bağlamda geçmeyen
+bir sayı varsa cevabın tamamı düşüyordu. Sonuç şuydu — «Bugün 45 dakikalık
+bir blok deneyebilirsin» ya da «Saat 22:00'den sonra ekranı azaltmayı
+önerebilirim» gibi **tamamen doğru** cevaplar düşürülüyor, kullanıcı
+sohbet edemiyor ve sorusunun yerine günün brifingini alıyordu. Kural,
+korumak istediği şeyin kendisini bozuyordu.
+
+Orada uydurulmuş bir ölçüm yok, **önerilen** bir süre var: bir öneri,
+geçmiş hakkında hiçbir şey iddia etmez. Şimdi üç koşul birden aranır:
+
+1. Sayı bağlamda **geçmiyor** (kural motoru böyle bir şey üretmedi),
+2. Sayının bulunduğu parçada bir **ölçüm adı** geçiyor (uyku, soru, net,
+   kalıcılık… — sistemin gerçekten ölçtüğü şeylerin adları),
+3. O parça **öneri kipinde değil** («önerebilirim», «istersen»,
+   «-ebilir», «yarın»…).
+
+Öneri kipi **ileri doğru** işler: «İstersen yarın iki saatlik bir plan
+kuralım, 3 blok halinde» cümlesinde «3 blok» birinci parçanın devamıdır.
+Ama «Uyku ortalaman 7.83 saat, istersen artıralım» cümlesinde öneri
+**sonra** gelir ve kendinden önceki iddiayı aklamaz.
+
+Nokta ve virgül iki rakamın arasında bölmez: `7.83` bir sayıdır, iki parça
+değil.
+
+### Düşen cevap için bir kez düzeltme istenir
+
+Kullanıcıya «cevap düşürüldü» deyip bırakmak, sohbeti her ihlalde kesmek
+demekti; oysa ihlalin ne olduğunu **modele söylemek** çoğu zaman yeter.
+Düşen bir cevabın ardından modele tam olarak neyi ihlal ettiği yazılır ve
+bir kez daha sorulur. Sınır yumuşamaz: ikinci cevap da düşerse üçüncü
+deneme **yoktur** — sınırsız deneme, sınırın kendisini kaldırmanın yavaş
+biçimi olurdu. Her iki çağrı da deftere yazılır.
+
+### Model konuşamazsa cevap yine sohbet biçimindedir
+
+Önce kural motorunun **komut tahmini** dönüyordu: kullanıcı «uykum nasıl?»
+diye soruyor, karşısına «Emin olamadım: durum mu demek istedin?»
+çıkıyordu. Model konuşamadıysa söylenecek şey budur — sebep, ve çalışan
+yolun adı. Gerçek bir komut yazılmışsa kural motorunun cevabı zaten doğru
+cevaptır ve o döner.
 
 **Düşürülen cevap yutulmaz:** kural motoru devreye girer ve sebebi ekranda
 yazılır — hangi sayının dayanağı olmadığı, hangi buyurgan kelimenin
 geçtiği. Bilinmeyen bir model için tarife bulunamazsa **0 yazılmaz**;
 «bedava» demek olurdu, tahmini bir taban kullanılır.
+
+### «API girdim ama çalışmıyor» — `POST /api/chat/tani`
+
+Bu cümlenin tek cevabı, zinciri **gerçekten koşturup** hangi halkanın
+koptuğunu göstermektir. Ayarlar → Yapay zekâ → **«Sohbeti dene»** sırayla
+şunları işaretler ve her birine kendi cümlesini yazar:
+
+| Adım | Ne söyler |
+|---|---|
+| Model ataması | Hangi sağlayıcı, hangi model, King'den miras mı |
+| Model adı | Sağlayıcı seçilmiş ama ad yazılmamışsa burada durur |
+| Anahtar | Hangi anahtar, kimin; silinmişse söyler |
+| Bütçe | Sınır içinde mi; kur eksikse **hangi iki yolla** çözüleceği |
+| Kural motoru bağlamı | Kaç satır ölçüme dayanıyor |
+| Sağlayıcıya çağrı | **Sağlayıcının kendi cümlesi** — «HTTP 404» değil, «model not found: gemini-2.5-flush» |
+| Cevabın denetimi | Sınırlardan geçti mi, geçmediyse hangi kural |
+
+Geçen adımlar da yazılır: «nerede çalışıyor» bilgisi «nerede bozuk» kadar
+iş görür. Gerçek bir çağrı yapar — çok az para harcar ve deftere yazılır;
+sınamak, sınanmamış bir şeye «çalışıyor» demekten ucuzdur.
+
+**Model adları listeden seçilir.** Elle yazılan bir ad tek harf yanlış
+olduğunda sağlayıcı 404 döner ve kullanıcı «anahtar çalışmıyor» sanır;
+oysa anahtar doğrudur, ad yanlıştır.
 
 ## Gelen mesaj: iki kapı, tek işleme
 

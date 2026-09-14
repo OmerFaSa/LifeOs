@@ -27,7 +27,7 @@ def _con():
 def _cfg(model="gemini-2.5-flash", rol="king", **ek):
     cfg = {"local_token": "x",
            "budget": {"monthly_try": 850.0, "usd_try": 48.6,
-                      "rate_date": BUGUN}}
+                      "rate_date": BUGUN, "ceiling_currency": "try"}}
     cfg.update(ek)
     cfg = models.apply(cfg, {"keys": {"google": "AIza-test"},
                              "assignments": {rol: {"provider": "google",
@@ -275,3 +275,141 @@ def run():
         no(cagrildi, "silinmis anahtarla cagri yapildi")
         eq(con.execute("SELECT COUNT(*) n FROM usage").fetchone()["n"], 0)
     test("silinmis anahtarla cagri yapilmaz", t_deleted_key_stops_the_call)
+
+    def t_normal_conversation_is_not_dropped():
+        """SAYI UYDURMAK ile SAYI SOYLEMEK ayri seylerdir.
+
+        Bir sure her sayi suphe sayiliyordu: «45 dakikalik bir blok
+        deneyebilirsin» ya da «saat 22:00'den sonra» diyen tamamen dogru
+        cevaplar dusuruluyor, kullanici sohbet edemiyor ve yerine gunun
+        brifingini aliyordu. Oysa orada uydurulmus bir olcum yok,
+        ONERILEN bir sure var: bir oneri, gecmis hakkinda hicbir sey
+        iddia etmez."""
+        con = _con()
+        cfg = _cfg()
+        gecer = [
+            "Bugün 45 dakikalık bir çalışma bloğu deneyebilirsin.",
+            "Saat 22:00'den sonra ekranı azaltmayı önerebilirim.",
+            "İstersen yarın 2 saatlik bir plan kuralım, 3 blok halinde.",
+            "Merhaba! Bugün neye takıldın?",
+            "İstersen 25 dakika çalış 5 dakika dinlen düzenini deneyebiliriz.",
+        ]
+        for cevap in gecer:
+            r = sohbet.konus(con, cfg, "bugün odaklanamadım", BUGUN,
+                             transport=_cevap(cevap))
+            eq(r["mode"], "model", "dusurulen cevap: %s" % cevap)
+            eq(r["text"], cevap)
+    test("olagan sohbet dusurulmez", t_normal_conversation_is_not_dropped)
+
+    def t_fabricated_measurement_still_dropped():
+        """Sinir YUMUSAMADI: olcum gibi sunulan dayanaksiz sayi hala
+        duser. Uydurulmus bir olcum, olcum olmayan bir seyi olcum gibi
+        gosterir."""
+        con = _con()
+        cfg = _cfg()
+        duser = [
+            "Uyku ortalaman 7.83 saat, gayet iyi gidiyorsun.",
+            "Uyku ortalaman 7.83 saat, istersen bunu artıralım.",
+            "Son 30 günde ortalama 95 soru çözmüşsün.",
+        ]
+        for cevap in duser:
+            r = sohbet.konus(con, cfg, "uykum nasıl?", BUGUN,
+                             transport=_cevap(cevap))
+            eq(r["mode"], "komut", "gecmemeliydi: %s" % cevap)
+            ok("dayanağı olmayan" in r["ai"]["note"])
+    test("uydurulmus olcum hala duser", t_fabricated_measurement_still_dropped)
+
+    def t_one_correction_is_asked_for():
+        """Dusen bir cevabin ardindan modele BIR KEZ ne yaptigi soylenir.
+
+        Kullaniciya «cevap dusuruldu» deyip birakmak, sohbeti her ihlalde
+        kesmek demekti; oysa ihlalin ne oldugunu modele soylemek cogu
+        zaman yeter. Sinirsiz deneme ise sinirin kendisini kaldirmanin
+        yavas bicimi olurdu — o yuzden TEK deneme."""
+        con = _con()
+        cfg = _cfg()
+        cagri = []
+
+        def duzelen(provider, anahtar, model, sistem, mesajlar):
+            cagri.append(sistem)
+            if len(cagri) == 1:
+                return "Uyku ortalaman 7.83 saat.", 400, 60
+            return "Uyku ölçümün düşük görünüyor.", 420, 50
+
+        r = sohbet.konus(con, cfg, "uykum nasıl?", BUGUN, transport=duzelen)
+        eq(r["mode"], "model")
+        eq(r["text"], "Uyku ölçümün düşük görünüyor.")
+        eq(len(cagri), 2)
+        # Modele NEYIN yanlis oldugu soylendi.
+        ok("7.83" in cagri[1])
+        # Iki cagri da deftere yazildi: para, dusen cevap icin de harcandi.
+        eq(con.execute("SELECT COUNT(*) n FROM usage").fetchone()["n"], 2)
+
+        # Iki denemede de ihlal varsa UCUNCUSU YOK.
+        cagri2 = []
+
+        def inatci(provider, anahtar, model, sistem, mesajlar):
+            cagri2.append(1)
+            return "Uyku ortalaman 9.91 saat.", 400, 60
+
+        r = sohbet.konus(con, cfg, "uykum nasıl?", BUGUN, transport=inatci)
+        eq(len(cagri2), 2)
+        eq(r["mode"], "komut")
+    test("dusen cevap icin bir kez duzeltme istenir",
+         t_one_correction_is_asked_for)
+
+    def t_fallback_is_chat_shaped():
+        """Model konusamadiginda donen sey KOMUT TAHMINI olmamali.
+
+        Kullanici «uykum nasil?» diye soruyor, karsisina «Emin olamadim:
+        durum mu demek istedin?» cikiyordu. Model konusamadiysa
+        soylenecek sey budur — komut tahmini degil."""
+        con = _con()
+        cfg = _cfg()
+
+        def patla(*a):
+            raise OSError("ag yok")
+
+        r = sohbet.konus(con, cfg, "uykum nasıl gidiyor?", BUGUN,
+                         transport=patla)
+        no("demek istedin" in (r["text"] or ""))
+        ok("Sağlayıcıya ulaşılamadı" in r["text"])
+        ok("durum" in r["text"])          # calisan yol ADIYLA sunulur
+
+        # Ama GERCEK bir komut yazildiysa kural motorunun cevabi donmeli.
+        r = sohbet.konus(con, cfg, "durum", BUGUN, transport=patla)
+        eq(r["mode"], "komut")
+        ok("HKM" in r["text"])
+    test("model konusamayinca cevap sohbet bicimindedir",
+         t_fallback_is_chat_shaped)
+
+    def t_diagnosis_names_the_broken_link():
+        """«API girdim ama calismiyor» cumlesinin tek cevabi, zinciri
+        GERCEKTEN kosturup hangi halkanin koptugunu gostermektir."""
+        con = _con()
+        # 1) Hicbir atama yok
+        d = sohbet.tani(con, {"local_token": "x"}, BUGUN)
+        no(d["ok"])
+        eq(d["adimlar"][0]["ad"], "Model ataması")
+        no(d["adimlar"][0]["ok"])
+
+        # 2) Her sey yerinde
+        d = sohbet.tani(con, _cfg(), BUGUN,
+                        transport=_cevap("Merhaba, bugün nasılsın?"))
+        ok(d["ok"], "zincir tam oldugu halde kopuk dendi")
+        ok(all(a["ok"] for a in d["adimlar"]))
+        adlar = [a["ad"] for a in d["adimlar"]]
+        for gereken in ("Model ataması", "Anahtar", "Bütçe",
+                        "Sağlayıcıya çağrı", "Cevabın denetimi"):
+            ok(gereken in adlar, "eksik adim: %s" % gereken)
+
+        # 3) Saglayici patlarsa SEBEBI yazilir
+        def patla(*a):
+            raise OSError("ag yok")
+        d = sohbet.tani(con, _cfg(), BUGUN, transport=patla)
+        no(d["ok"])
+        son = d["adimlar"][-1]
+        eq(son["ad"], "Sağlayıcıya çağrı")
+        ok("ag yok" in son["note"])
+    test("tani hangi halkanin koptugunu soyler",
+         t_diagnosis_names_the_broken_link)

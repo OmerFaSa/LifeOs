@@ -19,7 +19,10 @@ def _con():
 
 
 def _cfg(**ek):
-    b = {"monthly_try": 850.0, "usd_try": KUR, "rate_date": BUGUN}
+    # Bu paketin cogu sinamasi TL tavanini olcer; tavan birimi artik bir
+    # SECIMDIR ve varsayilani USD'dir, o yuzden acikca yazilir.
+    b = {"monthly_try": 850.0, "usd_try": KUR, "rate_date": BUGUN,
+         "ceiling_currency": "try"}
     b.update(ek)
     return {"local_token": "x", "budget": b}
 
@@ -82,16 +85,59 @@ def run():
     test("sinirda ucretli cagri durur", t_ceiling_stops_paid_calls)
 
     def t_no_rate_no_paid_call():
-        """Kur girilmemisse TL hesabi yapilamaz; hesaplanamayan bir
-        maliyetle harcama yapmak, sinirsiz harcamaktir."""
+        """TL tavani secilmisse ve kur girilmemisse TL hesabi yapilamaz;
+        hesaplanamayan bir maliyetle harcama yapmak, sinirsiz
+        harcamaktir."""
         con = _con()
         r = butce.guard(con, _cfg(usd_try=0.0), BUGUN)
         no(r["ok"])
         eq(r["reason"], "no-rate")
+        # Eksigin ADI ve iki ayri cikis yolu ayni cumlede durur.
+        ok("kur" in r["note"].lower())
+        ok("USD" in r["note"])
         r = butce.guard(con, _cfg(monthly_try=0.0), BUGUN)
         no(r["ok"])
         eq(r["reason"], "no-ceiling")
     test("kur ya da tavan yoksa ucretli cagri yok", t_no_rate_no_paid_call)
+
+    def t_usd_ceiling_needs_no_rate():
+        """Tavan USD ise KUR GEREKMEZ: harcama zaten USD olculur.
+
+        Bu, bir kolaylik degil bir TIKANIKLIGIN cozumu. Tavan yalnizca TL
+        olabilirken, kuru girmemis bir kullanicinin HICBIR model cagrisi
+        yapilamiyordu: anahtari dogru, modeli dogru, ama baska bir
+        sekmedeki bos bir kur alani yuzunden sohbet sessizce
+        calismiyordu."""
+        con = _con()
+        cfg = {"local_token": "x",
+               "budget": {"ceiling_currency": "usd", "monthly_usd": 20.0,
+                          "usd_try": 0.0, "rate_date": ""}}
+        r = butce.guard(con, cfg, BUGUN)
+        ok(r["ok"], "kur yok diye USD tavani engellendi")
+
+        # Sinir yine SINIRDIR: USD cinsinden de durur.
+        _yaz(con, BUGUN, 20.0)
+        r = butce.guard(con, cfg, BUGUN)
+        no(r["ok"])
+        eq(r["reason"], "ceiling")
+        ok("USD" in r["note"])
+
+        d = butce.month(con, cfg, BUGUN)
+        eq(d["currency"], "usd")
+        eq(d["spent_usd"], 20.0)
+        # TL'ye cevrilemeyen bir harcama SIFIR degildir: USD olculmustur.
+        eq(d["spent"], 20.0)
+    test("USD tavani kur istemez", t_usd_ceiling_needs_no_rate)
+
+    def t_default_setup_can_call():
+        """Kurulumdan HEMEN SONRA, hicbir butce alani doldurulmadan,
+        ucretli cagri yapilabilmeli. Aksi halde kullanici anahtarini
+        girer, modelini secer ve sohbetin neden sustugunu anlamaz."""
+        con = _con()
+        r = butce.guard(con, {"local_token": "x"}, BUGUN)
+        ok(r["ok"], "varsayilan kurulumda cagri engellendi: %s"
+           % r.get("note"))
+    test("varsayilan kurulumda sohbet calisir", t_default_setup_can_call)
 
     def t_stale_rate_is_reported():
         """Eski bir kurla yapilan TL hesabi, dogru gorunen yanlis bir

@@ -57,8 +57,14 @@ def acik_mi(cfg):
     return bool(a.get("enabled") and a.get("bot_token") and a.get("polling"))
 
 
-def _cagir(token, yol, veri=None, timeout=BEKLEME + 10):
-    url = "%s/bot%s/%s" % (API, token, yol)
+def _cagir(token, yol, veri=None, timeout=BEKLEME + 10, api_base=None):
+    """Telegram'a bir istek.
+
+    Adres AYARDAN gelir (channels.VARSAYILAN'daki `api_base`). Bir sure
+    giden mesaj ayardaki adresi, gelen mesaj ise koda gomulu sabiti
+    kullaniyordu: tek kanal icin IKI ADRES demekti bu, ve birini
+    degistirmek otekini degistirmiyordu."""
+    url = "%s/bot%s/%s" % ((api_base or API).rstrip("/"), token, yol)
     govde = None
     basliklar = {}
     if veri is not None:
@@ -79,7 +85,7 @@ def webhook_sil(cfg):
         return {"ok": False, "reason": "no-token"}
     try:
         r = _cagir(token, "deleteWebhook", {"drop_pending_updates": False},
-                   timeout=10)
+                   timeout=10, api_base=a.get("api_base"))
         return {"ok": bool(r.get("ok")), "result": r.get("description", "")}
     except Exception as e:                      # noqa: BLE001
         return {"ok": False, "reason": "%s" % type(e).__name__}
@@ -107,7 +113,8 @@ def komut_menusu(cfg):
             continue
         komutlar.append({"command": ad, "description": c["note"][:256]})
     try:
-        r = _cagir(token, "setMyCommands", {"commands": komutlar}, timeout=10)
+        r = _cagir(token, "setMyCommands", {"commands": komutlar}, timeout=10,
+                   api_base=a.get("api_base"))
         return {"ok": bool(r.get("ok")), "count": len(komutlar)}
     except Exception as e:                      # noqa: BLE001
         return {"ok": False, "reason": type(e).__name__}
@@ -170,7 +177,7 @@ def tur(con, cfg, th=None, timeout=BEKLEME, transport=None,
                 "offset": imlec + 1 if imlec else 0,
                 "timeout": int(timeout),
                 "allowed_updates": json.dumps(["message"]),
-            }), timeout=timeout + 10)
+            }), timeout=timeout + 10, api_base=a.get("api_base"))
         except urllib.error.HTTPError as e:
             # 409'un IKI sebebi var ve ikisi ayri islerdir:
             #   · webhook tanimli              → yapilandirma

@@ -31,7 +31,7 @@ def _sahte_api(yanitlar):
     """_cagir yerine gecen tasiyici: ag'a cikilmaz."""
     cagrilar = []
 
-    def sahte(token, yol, veri=None, timeout=None):
+    def sahte(token, yol, veri=None, timeout=None, api_base=None):
         cagrilar.append(yol)
         if yol.startswith("deleteWebhook"):
             return {"ok": True, "result": True}
@@ -99,7 +99,7 @@ def run():
         # gitmeli — ayni guncelleme bir daha gelmez.
         istekler = []
 
-        def izle(token, yol, veri=None, timeout=None):
+        def izle(token, yol, veri=None, timeout=None, api_base=None):
             istekler.append(yol)
             return {"ok": True, "result": []}
         eski = yoklama._cagir
@@ -158,7 +158,7 @@ def run():
         def _409(aciklama):
             govde = json.dumps({"ok": False, "description": aciklama})
 
-            def patla(token, yol, veri=None, timeout=None):
+            def patla(token, yol, veri=None, timeout=None, api_base=None):
                 raise urllib.error.HTTPError(
                     yol, 409, "Conflict", None,
                     io.BytesIO(govde.encode("utf-8")))
@@ -203,7 +203,7 @@ def run():
         """Hata da bir SONUCTUR, sessiz bir bosluk degil."""
         con = db.connect(":memory:")
 
-        def patla(token, yol, veri=None, timeout=None):
+        def patla(token, yol, veri=None, timeout=None, api_base=None):
             raise OSError("ag yok")
         eski = yoklama._cagir
         yoklama._cagir = patla
@@ -315,3 +315,29 @@ def run():
         eq(len(cagrildi), 0)
     test("telegramda da once komut",
          t_command_on_telegram_does_not_call_the_model)
+
+    def t_address_comes_from_one_place():
+        """Bir kanal icin IKI ADRES olmaz.
+
+        Giden mesaj ayardaki `api_base`i, gelen mesaj ise koda gomulu bir
+        sabiti kullaniyordu; birini degistirmek otekini degistirmiyordu.
+        Ayrica bu, butun zinciri disari cikmadan sinamayi imkansiz
+        kiliyordu."""
+        con = db.connect(":memory:")
+        gorulen = []
+
+        def izle(token, yol, veri=None, timeout=None, api_base=None):
+            gorulen.append(api_base)
+            return {"ok": True, "result": []}
+
+        eski = yoklama._cagir
+        yoklama._cagir = izle
+        try:
+            yoklama.tur(con, _cfg(api_base="http://127.0.0.1:4997"))
+        finally:
+            yoklama._cagir = eski
+        eq(gorulen, ["http://127.0.0.1:4997"])
+        # Ayardaki adres, channels'in varsayilaniyla AYNI yerden gelir.
+        eq(channels.settings({}, "telegram")["api_base"],
+           "https://api.telegram.org")
+    test("adres tek yerden gelir", t_address_comes_from_one_place)

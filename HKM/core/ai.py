@@ -127,25 +127,77 @@ def _sayilar(metin):
     return set(SAYI.findall(metin or ""))
 
 
-def uydurma_sayilar(cevap, baglam):
-    """Cevapta gecip BAGLAMDA GECMEYEN sayilar.
+# OLCUM SOZLERI — sistemin GERCEKTEN olctugu seylerin adlari.
+#
+# Kural «sayi uydurma» degil, «OLCUM uydurma»dir. Ikisini bir tutan bir
+# denetci, «45 dakikalik bir blok deneyebilirsin» cumlesini de dusururdu:
+# orada uydurulmus bir olcum yok, ONERILEN bir sure var. Bir oneri, gecmis
+# hakkinda hicbir sey iddia etmez.
+#
+# Bu yuzden sayi ancak bir OLCUM ADINA baglandiginda ve cumle IDDIA
+# kipinde oldugunda suphelidir.
+OLCUM_SOZ = (
+    "uyku", "uyu", "toparlan", "hrv", "nab[ıi]z", "nabz", "ad[ıi]m", "kilo",
+    "protein", "kalori", "antrenman", "su tuket",
+    "soru", "net", "[çc]al[ıi][şs]", "ders", "konu", "blok", "plana uyum",
+    "do[ğg]ru oran",
+    "kal[ıi]c[ıi]l[ıi]k", "kart", "pratik", "sentez", "okuma", "oturum",
+    "ortalama", "skor", "seri", "e[şs]ik", "oran", "[öo]l[çc][üu]m",
+)
+OLCUM_RE = re.compile("|".join(OLCUM_SOZ), re.IGNORECASE)
 
-    Model bir olcum uydurursa, olcum olmayan bir sey olcum gibi gorunur.
-    Tarih ve saat bicimleri baglamda zaten var; kalan her sayi
-    dayanagiyla birlikte gelmeli."""
+# ONERI IZLERI — cumleyi gelecege ve kullanicinin secimine baglayan sozler.
+# «Onerebilirim», «istersen», «deneyebilirsin»: bunlarin gectigi bir
+# cumlede sayi, olculmus bir sey degil TEKLIF EDILEN bir seydir.
+ONERI_SOZ = (
+    "[öo]ner", "istersen", "dilersen", "ister misin", "olur mu",
+    r"\w+[eaıioöuü]bilir", "deneyebil", "hedefl", "planla", "yar[ıi]n",
+    "gelecek hafta", "bundan sonra", "[şs]imdilik", "belki", "olabilir",
+)
+ONERI_RE = re.compile("|".join(ONERI_SOZ), re.IGNORECASE)
+
+# Cumleden kucuk parca: virgul ve «ama/ancak» da bir sinirdir. «Uyku
+# ortalaman 7.83 saat, istersen artiralim» cumlesinde oneri izi IKINCI
+# parcadadir ve birinci parcadaki uydurma olcumu aklamamali.
+#
+# Nokta ve virgul IKI RAKAMIN ARASINDA bolmez: «7.83» bir sayidir, iki
+# parca degil. Boler gibi yapmak «7» ile «83»u ayri sayilar sayardi ve
+# baglamdaki «4.5» bir daha eslesmezdi.
+CUMLE_RE = re.compile(r"(?<!\d)[.](?!\d)|[!?;\n]")
+PARCA_RE = re.compile(r"(?<!\d),(?!\d)|\bama\b|\bancak\b|\bfakat\b",
+                      re.IGNORECASE)
+
+
+def uydurma_sayilar(cevap, baglam):
+    """Cevapta OLCUM gibi sunulan ama dayanagi olmayan sayilar.
+
+    Uc kosul birden aranir:
+
+      1. Sayi baglamda GECMIYOR (kural motoru boyle bir sey uretmedi),
+      2. Sayinin bulundugu parcada bir OLCUM ADI geciyor,
+      3. O parca ONERI kipinde DEGIL.
+
+    Ucu birden saglanmadikca sayi serbesttir. Once her sayi suphe
+    sayiliyordu ve «Saat 22:00'den sonra ekrani azaltmayi onerebilirim»
+    gibi tamamen dogru bir cumle dusuruluyordu: kullanici sohbet
+    edemiyor, yerine gunun brifingini aliyordu."""
     var = _sayilar(baglam)
     out = []
-    for s in _sayilar(cevap):
-        if s in var:
-            continue
-        # Kucuk tam sayilar (siralama, madde numarasi) gurultu uretir.
-        try:
-            if abs(float(s.replace(",", "."))) <= 10 and "." not in s \
-                    and "," not in s:
-                continue
-        except ValueError:
-            continue
-        out.append(s)
+    for cumle in CUMLE_RE.split(cevap or ""):
+        # ONERI KIPI ILERI DOGRU ISLER. «Istersen yarin iki saatlik bir
+        # plan kuralim, 3 blok halinde» cumlesinde «3 blok» birinci
+        # parcanin devamidir — ayri bir iddia degil. Ama «Uyku ortalaman
+        # 7.83 saat, istersen artiralim» cumlesinde oneri SONRA gelir ve
+        # kendinden ONCEKI iddiayi aklamaz.
+        oneri = False
+        for parca in PARCA_RE.split(cumle):
+            if ONERI_RE.search(parca):
+                oneri = True
+            if oneri or not OLCUM_RE.search(parca):
+                continue                # oneri kipi ya da olcum adi yok
+            for s in _sayilar(parca):
+                if s not in var and s not in out:
+                    out.append(s)
     return sorted(out)
 
 
@@ -190,63 +242,121 @@ def hazir_mi(cfg, role):
     return {"ok": True, "assignment": a}
 
 
+def _saglayici_hatasi(e):
+    """Saglayicinin KENDI cumlesi. «HTTP 404» bir kullaniciya hicbir sey
+    soylemez; «model not found: gemini-2.5-flush» tam olarak neyin yanlis
+    oldugunu soyler. Sebebi yutmak, hatayi gizlemektir."""
+    try:
+        ham = e.read().decode("utf-8", "replace")[:600]
+    except Exception:                           # noqa: BLE001
+        ham = ""
+    ayrinti = ""
+    try:
+        g = json.loads(ham or "{}")
+        h = g.get("error") if isinstance(g.get("error"), dict) else None
+        ayrinti = (h or {}).get("message") or g.get("message") or ""
+        if not ayrinti and isinstance(g.get("error"), str):
+            ayrinti = g["error"]
+    except ValueError:
+        ayrinti = " ".join((ham or "").split())[:200]
+    kisa = {401: "Anahtar reddedildi.", 403: "Anahtar bu isteme yetkili değil.",
+            404: "Model ya da adres bulunamadı — model adını kontrol et.",
+            429: "Sağlayıcı «çok fazla istek» dedi.",
+            402: "Sağlayıcıda bakiye kalmamış."}.get(e.code, "")
+    return ("HTTP %s%s%s" % (e.code, " — " + kisa if kisa else "",
+                             " (%s)" % ayrinti if ayrinti else ""))
+
+
+# Dusen bir cevabin ardindan MODELE BIR KEZ soylenir. Kullaniciya «cevap
+# dusuruldu» deyip birakmak, sohbeti her ihlalde kesmek demekti; oysa
+# ihlalin ne oldugunu modele soylemek cogu zaman yeter.
+DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
+            "Aynı şeyi tekrar etme. Ölçüm iddia etme; yalnızca sana "
+            "verilen ölçümlere dayan. Önerdiğin süre ya da saat "
+            "sayıları serbesttir, ama olmuş bitmiş bir ölçüm gibi "
+            "sunulamaz. Buyurgan kip kullanma.")
+
+
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
-        transport=None, now=None):
+        transport=None, now=None, duzeltme=True):
     """Bir kademe adina model cagirir.
 
     `baglam`: kural motorunun urettigi olculer. Modelin gorecegi TEK
-    gercek budur ve cevaptaki sayilar bununla denetlenir."""
+    gercek budur ve cevaptaki sayilar bununla denetlenir.
+
+    `duzeltme`: cevap sinirdan dondugunde BIR KEZ duzeltme istenir."""
     hazir = hazir_mi(cfg, role)
     if not hazir["ok"]:
         return dict(hazir, text=None)
     a = hazir["assignment"]
-
-    izin = butce.guard(con, cfg)
-    if not izin["ok"]:
-        return {"ok": False, "reason": "budget", "text": None,
-                "note": izin["note"]}
 
     anahtar = models.key_value(cfg, a["provider"], a.get("key_id"))
     # Harcama, anahtarin SAHIBININ defterine yazilir: iki kisi ayni
     # sistemi kullaniyorsa harcamalari da ayri gorunmeli.
     user = a.get("key_user") or user
     mesajlar = list(mesajlar or [])[-EN_COK_MESAJ:]
-    t0 = datetime.datetime.now()
-    hata = None
-    metin = None
-    gir = cik = 0
-    try:
-        if transport is not None:
-            metin, gir, cik = transport(a["provider"], anahtar, a["model"],
-                                        sistem, mesajlar)
-        else:
-            metin, gir, cik = _cagir(a["provider"], anahtar, a["model"],
-                                     sistem, mesajlar)
-    except urllib.error.HTTPError as e:
-        hata = "HTTP %s" % e.code
-    except Exception as e:                      # noqa: BLE001
-        hata = type(e).__name__
-
-    # HER CAGRI DEFTERE YAZILIR — basarisiz olan da.
     b = butce.settings(cfg)
-    usd = _fiyat(a["provider"], a["model"], gir, cik)
-    butce.record(con, role=role, task=task, provider=a["provider"],
-                 model=a["model"], user=user, in_tok=gir, out_tok=cik,
-                 usd=usd, rate=float(b.get("usd_try") or 0),
-                 ok=(hata is None), note=hata or "", now=now)
+    t0 = datetime.datetime.now()
 
-    if hata:
-        return {"ok": False, "reason": "provider", "text": None,
-                "note": "Model çağrısı başarısız: %s" % hata}
+    def _tur(sistem_metni, gecmis):
+        """Bir cagri: butce sorulur, gidilir, deftere yazilir."""
+        izin = butce.guard(con, cfg)
+        if not izin["ok"]:
+            return {"ok": False, "reason": "budget", "text": None,
+                    "note": izin["note"]}
+        hata = None
+        metin = None
+        gir = cik = 0
+        try:
+            if transport is not None:
+                metin, gir, cik = transport(a["provider"], anahtar,
+                                            a["model"], sistem_metni, gecmis)
+            else:
+                metin, gir, cik = _cagir(a["provider"], anahtar, a["model"],
+                                         sistem_metni, gecmis)
+        except urllib.error.HTTPError as e:
+            hata = _saglayici_hatasi(e)
+        except Exception as e:                  # noqa: BLE001
+            hata = "%s: %s" % (type(e).__name__, e)
 
-    temiz, dusme = _temizle(metin, baglam)
+        # HER CAGRI DEFTERE YAZILIR — basarisiz olan da.
+        usd = _fiyat(a["provider"], a["model"], gir, cik)
+        butce.record(con, role=role, task=task, provider=a["provider"],
+                     model=a["model"], user=user, in_tok=gir, out_tok=cik,
+                     usd=usd, rate=float(b.get("usd_try") or 0),
+                     ok=(hata is None), note=hata or "", now=now)
+        if hata:
+            return {"ok": False, "reason": "provider", "text": None,
+                    "note": "Model çağrısı başarısız: %s" % hata}
+        return {"ok": True, "raw": metin, "in_tok": gir, "out_tok": cik,
+                "usd": usd}
+
+    r = _tur(sistem, mesajlar)
+    if not r["ok"]:
+        return r
+    temiz, dusme = _temizle(r["raw"], baglam)
+
+    if dusme and duzeltme:
+        # IKINCI VE SON DENEME. Sinir yumusatilmaz — modele NEYI ihlal
+        # ettigi soylenir ve bir kez daha sorulur. Sinirsiz deneme,
+        # sinirin kendisini kaldirmanin yavas bicimi olurdu.
+        r2 = _tur(sistem + "\n\n" + DUZELTME % dusme,
+                  mesajlar + [{"role": "assistant", "content": r["raw"]},
+                              {"role": "user", "content": DUZELTME % dusme}])
+        if r2["ok"]:
+            temiz2, dusme2 = _temizle(r2["raw"], baglam)
+            if not dusme2:
+                r, temiz, dusme = r2, temiz2, None
+            else:
+                dusme = dusme2
+
     if dusme:
         return {"ok": False, "reason": "dropped", "text": None, "note": dusme,
-                "raw_len": len(metin or "")}
+                "raw_len": len(r.get("raw") or "")}
     return {"ok": True, "text": temiz, "model": a["model"],
-            "provider": a["provider"], "in_tok": gir, "out_tok": cik,
-            "usd": usd, "seconds": round(
-                (datetime.datetime.now() - t0).total_seconds(), 1)}
+            "provider": a["provider"], "in_tok": r["in_tok"],
+            "out_tok": r["out_tok"], "usd": r["usd"],
+            "seconds": round((datetime.datetime.now() - t0).total_seconds(), 1)}
 
 
 # Fiyatlar: 1M jeton basina USD (giris, cikis). Bilinmeyen model icin

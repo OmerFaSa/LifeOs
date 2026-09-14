@@ -23,7 +23,7 @@
       «Yapay zeka yok» ile «sistem bozuk» ayri seylerdir.
 """
 
-from core import ai, cross, manager, patron, streak
+from core import ai, butce, cross, manager, models, patron, streak
 
 # Kademeler: kullanici kiminle konusuyor.
 GOREVLILER = {
@@ -44,13 +44,20 @@ ALAN = {"bio": "bio", "academic": "academic", "intellect": "intellect"}
 SISTEM_METNI = """Sen HKM'nin %(ad)s görevlisisin. %(is)s
 
 Kesin kurallar:
-- Sana verilen ÖLÇÜMLER dışında hiçbir sayı kullanma. Bilmediğin bir şey
-  sorulursa «bu ölçülmedi» de; tahmin etme, uydurma.
+- ÖLÇÜM UYDURMA. Kullanıcının uykusu, soru sayısı, neti, kalıcılığı gibi
+  ÖLÇÜLEN bir şey hakkında sayı söyleyeceksen, o sayı aşağıdaki listede
+  GEÇMELİ. Listede olmayan bir ölçümü «şu kadardı» diye sunma; «bu
+  ölçülmedi» demek bir başarısızlık değildir, uydurmak öyledir.
+- ÖNERDİĞİN sayılar serbesttir. «25 dakikalık bir blok», «saat 22:00'den
+  sonra», «yarın iki oturum» diyebilirsin: bunlar geçmiş hakkında bir
+  iddia değil, senin teklifindir. Yeter ki olmuş bitmiş bir ölçüm gibi
+  sunma.
 - Emir kipi kullanma. Öneri kur: «…önerebilirim», «…istersen».
 - Kısa yaz: en fazla 5 cümle. Kullanıcı Türkçe konuşuyor, sen de Türkçe yaz.
 - Sen bir şey uygulayamazsın. Kullanıcı bir değişiklik isterse, bunun bir
   TEKLİF olarak bırakılacağını ve onun onayıyla uygulanacağını söyle.
-- Veri yoksa bunu söylemek bir başarısızlık değildir; uydurmak öyledir.
+- Selamlaşma, soru sorma, konuşma serbesttir: her cevabın ölçüm raporu
+  olmak zorunda değil.
 
 Bugünün ölçümleri:
 %(baglam)s"""
@@ -85,6 +92,40 @@ def baglam(con, date, gorevli="king", th=None):
         satir.append("- Bugünün önerisi «%s» ve durumu: %s"
                      % (b["decision"]["proposal"], b["decision"]["state"]))
     return "\n".join(satir)
+
+
+# Model konusamadiginda kullaniciya ne yazilacagi. Sebep SOYLENIR ve
+# yapilacak is ayni cumlede durur; «bir sey olmadi» gibi durmak, sistemi
+# bozuk sanmaya yol acar.
+YEDEK_METIN = {
+    "budget": "Aylık bütçe sınırına gelindiği için model çağrısı "
+              "yapılmadı. Kural motoru çalışmaya devam ediyor; istersen "
+              "«durum» yaz.",
+    "provider": "Sağlayıcıya ulaşılamadı, bu yüzden serbest cümleyle "
+                "cevap veremiyorum. Ayarlar → Yapay zekâ'daki «Sohbeti "
+                "dene» bunun sebebini yazar. Bu arada «durum» komutu "
+                "çalışıyor.",
+    "dropped": "Model iki denemede de dayanağı olmayan bir ölçüm "
+               "söyledi; bu yüzden cevabını göstermiyorum. Uydurulmuş "
+               "bir ölçüm, ölçüm olmayan bir şeyi ölçüm gibi gösterir. "
+               "Ölçülen şeyler için «durum» yaz.",
+    "key-missing": "Bu kademeye seçilen anahtar artık yok. Ayarlar → "
+                   "Yapay zekâ'dan yeniden seç.",
+}
+
+
+def _yedek_metin(r, yedek):
+    """Model konusamadiginda donecek SOHBET cevabi.
+
+    Kullanici bir komut yazmissa kural motorunun cevabi zaten dogru
+    cevaptir. Komut YAZMAMISSA komut tahmini donmek, soruyu cevapsiz
+    birakip ustune yanlis bir sey sormaktir."""
+    # Komut tanindiysa (ya da bir teklif birakildiysa) kural motorunun
+    # cevabi ZATEN dogru cevaptir; taninmadiysa `command` None gelir.
+    if yedek.get("command"):
+        return yedek["text"]
+    return YEDEK_METIN.get(r.get("reason"),
+                           "Şu an serbest cümleyle cevap veremiyorum.")
 
 
 def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
@@ -130,10 +171,20 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     if not r["ok"]:
         # Model konusamadiysa kural motoru devrede kalir: sohbet
         # bozulabilir, sistem bozulmaz.
+        #
+        # Ama YEDEK CEVAP SOHBET BICIMINDE olmali. Once burada
+        # patron.respond'un komut tahmini donuyordu: kullanici «uykum
+        # nasil?» diye soruyor, karsisina «Emin olamadim: durum mu demek
+        # istedin?» cikiyordu. Model konusamadiysa soylenecek sey
+        # budur — komut tahmini degil.
         yedek = patron.respond(con, metin, date=date, th=th, channel=kanal,
-                               agent=gorevli, kayit=kayit)
+                               agent=gorevli, kayit=False)
+        govde = _yedek_metin(r, yedek)
+        if kayit:
+            patron.log(con, kanal, "user", metin, agent=gorevli)
+            patron.log(con, kanal, "manager", govde, agent=gorevli)
         return {"ok": True, "mode": "komut", "command": yedek["command"],
-                "text": yedek["text"], "agent": gorevli,
+                "text": govde, "agent": gorevli,
                 "ai": {"ok": False, "reason": r.get("reason"),
                        "note": r.get("note")}}
     if kayit:
@@ -142,3 +193,77 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     return {"ok": True, "mode": "model", "text": r["text"], "agent": gorevli,
             "model": r["model"], "usd": r["usd"], "seconds": r["seconds"],
             "context_lines": len(bg.splitlines())}
+
+def tani(con, cfg, date, gorevli="king", th=None, transport=None):
+    """Sohbet zincirini BASTAN SONA dener ve nerede koptugunu soyler.
+
+    «API girdim ama calismiyor» cumlesinin tek cevabi, zinciri gercekten
+    kosturup hangi halkanin koptugunu GOSTERMEKTIR. Her adim ayri ayri
+    isaretlenir; gecen adimlar da yazilir, cunku «nerede calisiyor»
+    bilgisi «nerede bozuk» kadar is gorur.
+
+    Gercek bir cagri yapar: para harcar (cok az) ve deftere yazilir.
+    Sinamak, sinanmamis bir seye «calisiyor» demekten ucuzdur."""
+    if gorevli not in GOREVLILER:
+        return {"ok": False, "adimlar": [], "note": "Bilinmeyen görevli."}
+    rol = GOREVLILER[gorevli]["role"]
+    adim = []
+
+    def ekle(ad, ok, not_=""):
+        adim.append({"ad": ad, "ok": bool(ok), "note": not_})
+
+    a = models.resolve(cfg, rol) or {}
+    ekle("Model ataması", bool(a.get("provider")),
+         ("%s · %s%s" % (a.get("provider_label") or "", a.get("model") or "—",
+                         " (King'den miras)" if a.get("inherited") else ""))
+         if a.get("provider") else
+         "Bu kademeye model atanmamış. Ayarlar → Yapay zekâ → Görev dağılımı.")
+    if not a.get("provider"):
+        return {"ok": False, "adimlar": adim, "agent": gorevli}
+
+    ekle("Model adı", bool(a.get("model")),
+         a.get("model") or "Sağlayıcı seçilmiş ama model adı yazılmamış.")
+    if a.get("key_missing"):
+        ekle("Anahtar", False, "Seçilen anahtar silinmiş; yeniden seç.")
+        return {"ok": False, "adimlar": adim, "agent": gorevli}
+    ekle("Anahtar", bool(a.get("key_set")),
+         ("«%s» (%s)" % (a.get("key_label") or "anahtar",
+                         a.get("key_user") or "ben"))
+         if a.get("key_set") else
+         "%s için anahtar girilmemiş." % (a.get("provider_label") or ""))
+    if not (a.get("model") and a.get("key_set")):
+        return {"ok": False, "adimlar": adim, "agent": gorevli}
+
+    izin = butce.guard(con, cfg)
+    ekle("Bütçe", izin["ok"], izin.get("note") or "Sınır içinde.")
+    if not izin["ok"]:
+        return {"ok": False, "adimlar": adim, "agent": gorevli}
+
+    bg = baglam(con, date, gorevli, th=th)
+    ekle("Kural motoru bağlamı", bool(bg.strip()),
+         "%d satır ölçüme dayanıyor" % len(bg.splitlines()))
+
+    g = GOREVLILER[gorevli]
+    sistem = SISTEM_METNI % {"ad": g["ad"], "is": g["is"], "baglam": bg}
+    r = ai.ask(con, cfg, rol, "tani",
+               [{"role": "user", "content": "Tek cümleyle merhaba de."}],
+               baglam=bg, sistem=sistem, transport=transport)
+
+    if r.get("reason") == "provider":
+        # Saglayicinin KENDI cumlesi burada durur: «HTTP 404» degil,
+        # «model not found: ...» — yanlis yazilmis bir model adini
+        # ancak bu satir gosterir.
+        ekle("Sağlayıcıya çağrı", False, r.get("note") or "Başarısız.")
+        return {"ok": False, "adimlar": adim, "agent": gorevli}
+    ekle("Sağlayıcıya çağrı", True,
+         "Cevap alındı (%s sn)" % r.get("seconds", "?"))
+
+    if r.get("reason") == "dropped":
+        ekle("Cevabın denetimi", False, r.get("note") or "Cevap düşürüldü.")
+        return {"ok": False, "adimlar": adim, "agent": gorevli}
+    ekle("Cevabın denetimi", bool(r.get("ok")),
+         "Sınırlardan geçti." if r.get("ok") else (r.get("note") or ""))
+
+    return {"ok": bool(r.get("ok")), "adimlar": adim, "agent": gorevli,
+            "text": r.get("text"), "model": r.get("model"),
+            "usd": r.get("usd"), "seconds": r.get("seconds")}
