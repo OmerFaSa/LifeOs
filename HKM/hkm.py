@@ -11,6 +11,7 @@
     python3 hkm.py kutu               giden kutusu
     python3 hkm.py niyetler           bekleyen teklifler
     python3 hkm.py sor "<cumle>"      Buyuk Patron'a yaz
+    python3 hkm.py gonder [kanal]     gunun ozetini kanala GONDERIR
     python3 hkm.py yedek [dosya]      butun ambari JSON olarak yazar
     python3 hkm.py geri <dosya> [--ustune]   yedegi geri yukler
 
@@ -30,7 +31,7 @@ import sys
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
 
-from core import (cross, db, impact, intents, outbox,  # noqa: E402
+from core import (channels, cross, db, impact, intents, outbox,  # noqa: E402
                   patron, streak, thresholds, weekly)
 from daemon import load_config  # noqa: E402
 
@@ -161,10 +162,52 @@ def komut_yedek(con, cfg, args):
     yaz("%s yazıldı — %d satır." % (yol, say))
 
 
+def komut_gonder(con, cfg, argv):
+    """Gunun ozetini kanala gonderir — GIDEN yon.
+
+    Giden yon icin tunele gerek yoktur: HKM disari cikar, disarinin iceri
+    girmesi gerekmez. Gelen yon (senin yazdigin mesaj) ayri bir istir ve
+    webhook ister.
+
+    Mesaj once GIDEN KUTUSUNA yazilir, sonra gonderilmeye calisilir:
+    ag koptugunda kaybolmaz, tekrar denenir."""
+    kanal = (argv[0] if argv else "") or cfg.get("schedule", {}).get(
+        "channel") or "telegram"
+    if kanal not in ("telegram", "whatsapp"):
+        yaz("Bilinmeyen kanal: %s (telegram ya da whatsapp)" % kanal)
+        return 2
+    if not channels.enabled(cfg, kanal):
+        yaz("%s kapalı ya da kimlik bilgileri eksik." % kanal)
+        yaz("Ayarlar → Sohbet kanalları bölümünden doldur ve «Aç» de.")
+        return 1
+    gun = _bugun()
+    th = thresholds.from_config(cfg)
+    m = patron.daily_message(con, gun, th=th)
+    if not m["ok"]:
+        yaz("Mesaj üretilemedi: %s" % m.get("error"))
+        return 1
+    zorla = "--zorla" in argv
+    if not zorla and patron.already_sent(con, gun, kanal):
+        yaz("Bugünün mesajı bu kanala zaten gönderildi. (--zorla ile yine gönderilir)")
+        return 0
+    outbox.enqueue(con, kanal, "daily", gun, m["text"])
+    ozet = outbox.flush(con, cfg, limit=5)
+    if ozet.get("sent"):
+        patron.log(con, kanal, "manager", m["text"])
+        yaz("Gönderildi — %d karakter." % len(m["text"]))
+        return 0
+    son = outbox.status(con, limit=3)["recent"]
+    sebep = (son[0].get("last_error") if son else "") or "sebep yazılmadı"
+    yaz("Gönderilemedi ama KAYBOLMADI: mesaj giden kutusunda bekliyor.")
+    yaz("  " + str(sebep))
+    return 1
+
+
 KOMUTLAR = {
     "durum": komut_durum, "hafta": komut_hafta, "capraz": komut_capraz,
     "etki": komut_etki, "seri": komut_seri, "kararlar": komut_kararlar, "kutu": komut_kutu,
-    "niyetler": komut_niyetler, "sor": komut_sor, "yedek": komut_yedek, "geri": komut_geri,
+    "niyetler": komut_niyetler, "sor": komut_sor, "yedek": komut_yedek,
+    "geri": komut_geri, "gonder": komut_gonder,
 }
 
 
