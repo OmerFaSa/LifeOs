@@ -355,7 +355,7 @@ async function main(){
     await yuz.click('#gir');
     await wait(900);
     /* Sistemler sekmesi: ambardaki seri gercekten ciziliyor mu? */
-    await yuz.click('[data-sekme="sistemler"]');
+    await yuz.click('#gez a[data-yol="sistemler"]');
     await wait(400);
     const sistemler = await yuz.evaluate(() => ({
       metin:(document.querySelector('#sistemler') || {}).textContent || '',
@@ -374,7 +374,9 @@ async function main(){
     }
     /* Yonetim sekmesi: esik kaydi GERCEKTEN yaziliyor ve bozuk deger
        REDDEDILIYOR mu? */
-    await yuz.click('[data-sekme="yonetim"]');
+    await yuz.click('#ayar-bag');
+    await wait(400);
+    await yuz.click('[data-ayar="esikler"]');
     await wait(400);
     await yuz.evaluate(t => { window.__jeton = t; }, TOKEN);
     const yonetim = await yuz.evaluate(async () => {
@@ -382,8 +384,9 @@ async function main(){
       if(!alan) return { hata:'esik alani yok' };
       /* Sir kurulu degilse «girilmemis» yazar; olan sey ASLA degerin
          kendisi olmamali. Denetim, satirin varligini ve degerin
-         YOKLUGUNU arar. */
-      const metin = document.querySelector('#ayarlar').textContent;
+         YOKLUGUNU arar. Kanallar artik AYRI bir ayar sekmesinde ve
+         gizli olsa bile DOM'da durur. */
+      const metin = (document.querySelector('#kanallar') || {}).textContent || '';
       const maskeli = metin.indexOf('İzin listesi') >= 0
         && !!document.querySelector('[data-kanal-alan="whatsapp.app_secret"]')
         && !!document.querySelector('[data-kanal-alan="telegram.bot_token"]');
@@ -399,6 +402,8 @@ async function main(){
     });
     /* Saglayici katmani: anahtar YAZILIR ama GERI OKUNMAZ, ve atama
        kademe kademe MIRAS alir. */
+    await yuz.click('[data-ayar="yapayzeka"]');
+    await wait(400);
     const api = await yuz.evaluate(async () => {
       const alan = document.querySelector('[data-anahtar="anthropic"]');
       const sec = document.querySelector('[data-rol="king"]');
@@ -451,20 +456,33 @@ async function main(){
       console.log('  HKM yuzu → yonetim: bozuk esik reddedildi, gecerli esik kaydedildi');
     }
 
-    await yuz.click('[data-sekme="genel"]');
+    await yuz.click('#gez a[data-yol="bugun"]');
     await wait(300);
 
-    const ekran = await yuz.evaluate(() => ({
-      brifing:(document.querySelector('#brifing') || {}).textContent || '',
-      ikiz:(document.querySelector('#ikiz') || {}).textContent || '',
-      gecmis:(document.querySelector('#gecmis') || {}).textContent || '',
-      capraz:(document.querySelector('#capraz') || {}).textContent || '',
-      etki:(document.querySelector('#etki') || {}).textContent || '',
-      hafta:(document.querySelector('#hafta') || {}).textContent || '',
-      kutu:(document.querySelector('#kutu') || {}).textContent || '',
-      ritim:(document.querySelector('#ritim') || {}).textContent || '',
-      girisAcik:!document.querySelector('#giris').hidden,
-    }));   /* icerik gizli sekmede de DOM'da durur: okumak icin tiklamak gerekmez */
+    /* Icerik artik GORUNUME GORE cekiliyor: her sekmede butun ambari
+       sorgulamak acilisi bekletmekten baska is yapmiyordu. Denetim de o
+       yuzden gorunumleri gezerek okur. */
+    const oku = sel => yuz.evaluate(
+      s => (document.querySelector(s) || {}).textContent || '', sel);
+    const ekran = {
+      brifing:await oku('#brifing'),
+      capraz:await oku('#capraz'),
+      girisAcik:await yuz.evaluate(() => !document.querySelector('#giris').hidden),
+    };
+    await yuz.click('#gez a[data-yol="sistemler"]');
+    await wait(700);
+    ekran.ikiz = await oku('#ikiz');
+    ekran.gecmis = await oku('#gecmis');
+    ekran.etki = await oku('#etki');
+    ekran.hafta = await oku('#hafta');
+    await yuz.click('#ayar-bag');
+    await wait(300);
+    await yuz.click('[data-ayar="sunucu"]');
+    await wait(700);
+    ekran.kutu = await oku('#kutu');
+    ekran.ritim = await oku('#ritim');
+    await yuz.click('#gez a[data-yol="bugun"]');
+    await wait(500);
     if(ekran.girisAcik) hatalar.push('HKM yuzu: dogru jetonla bile giris ekraninda kaldi');
     if(ekran.brifing.length < 40) hatalar.push('HKM yuzu: brifing cizilmedi');
     if(ekran.ikiz.indexOf('metriğe dayanıyor') < 0) hatalar.push('HKM yuzu: ikiz cizilmedi');
@@ -503,7 +521,7 @@ async function main(){
     /* 8 — Buyuk Patron: yuzden komut gonderilir ve cevap ayni sayfada
        gorunur. Kanal (WhatsApp) kapali olsa bile yerel kanal calisir.
        Patron kutusu «HKM» sekmesindedir. */
-    await yuz.click('[data-sekme="hkm"]');
+    await yuz.click('#gez a[data-yol="sohbet"]');
     await wait(300);
     await yuz.fill('#mesaj', 'neden');
     await yuz.click('#gonder');

@@ -212,7 +212,14 @@ def read(cfg):
     """Disari cikan hal — ANAHTARLAR MASKELI."""
     anahtarlar = keys(cfg)
     saglayicilar = []
-    for ad, tanim in sorted(PROVIDERS.items()):
+    # Onerilen saglayici ONCE gelir. Alfabetik sira, kullaniciya «once
+    # sunu dene» demenin tam tersini yapiyordu: listenin basinda onerilmeyen
+    # bir secenek duruyordu.
+    def _sira(ad):
+        return (0 if ad == "openrouter" else 1, ad)
+
+    for ad in sorted(PROVIDERS, key=_sira):
+        tanim = PROVIDERS[ad]
         saglayicilar.append({
             "id": ad, "label": tanim["label"], "base": tanim["base"],
             "models": tanim["models"],

@@ -25,7 +25,11 @@ const ROOT = path.resolve(__dirname, '..');
 const DEPO = path.resolve(ROOT, '..');
 const PORT = 4296;
 const TOKEN = 'yuz-denetimi-icin-gecici-jeton';
-const SEKMELER = ['genel', 'sistemler', 'hkm', 'yonetim'];
+/* Ana gorunumler ve Ayarlar'in alt sekmeleri AYRI gezilir: teknik
+ * yonetim artik gunluk ekranin icinde degil, kendi sayfasinda. */
+const GORUNUMLER = ['bugun', 'sohbet', 'sistemler'];
+const AYAR_SEKMELERI = ['yapayzeka', 'butce', 'kanallar', 'cihazlar',
+  'esikler', 'sunucu'];
 const MIN_TAP = 24;
 const MIN_KONTRAST = 4.5;
 
@@ -186,13 +190,23 @@ async function main(){
         await page.waitForSelector('#giris');
         await page.fill('#token', TOKEN);
         await page.click('#gir');
-        await wait(1200);
-        for(const sekme of SEKMELER){
-          await page.click('[data-sekme="' + sekme + '"]');
+        await wait(1500);
+        const duraklar = GORUNUMLER.map(g => ({ ad:g, git:async () => {
+          await page.click('#gez a[data-yol="' + g + '"]');
+        }}));
+        for(const a of AYAR_SEKMELERI){
+          duraklar.push({ ad:'ayarlar/' + a, git:async () => {
+            await page.click('#ayar-bag');
+            await wait(250);
+            await page.click('[data-ayar="' + a + '"]');
+          }});
+        }
+        for(const durak of duraklar){
+          await durak.git();
           await wait(350);
           bakilan++;
           const r = await page.evaluate(OLC);
-          const yer = ad + '/' + tema + '/' + sekme;
+          const yer = ad + '/' + tema + '/' + durak.ad;
           if(genislik === 390 && r.tasma > 1){
             hatalar.push(yer + ': yatay taşma ' + r.tasma + 'px'
               + (r.sucluler.length ? ' — ' + r.sucluler.join(', ') : ''));

@@ -812,3 +812,29 @@ ayarıdır: varsayılan kipte unutulan tek bir `commit()`, başka bir iş
 parçacığının yazmasını «database is locked» ile düşürür — kaybolan yazma,
 olmamış bir olaydır. Atomik olması gereken tek yer geri yüklemedir ve orada
 işlem açıkça başlatılır (`BEGIN IMMEDIATE … COMMIT`).
+
+## Yüz — günlük kullanım ile teknik yönetim ayrı
+
+Önce dört teknik sekme vardı (Genel / Sistemler / HKM / Yönetim) ve günlük
+ekran; jeton, webhook ve eşik ayarlarıyla **aynı yerdeydi**. Gün içinde
+açılan bir merkez ile ayda bir açılan bir yönetim paneli aynı ekranı
+paylaşmamalı: her gün gördüğün şey, her gün ihtiyacın olan şey olmalı.
+
+| Bölüm | İçerik |
+|---|---|
+| **Bugün** | Selam + tarih, üç sistemin durumu yan yana, **onay bekleyen öneri** öne çıkmış, günün özeti (en fazla 5 satır), King'e yazma kutusu. Dayanak «Dayanağı göster» altında. |
+| **Sohbetler** | Kim bağlı kim değil (King bağlı; alan görevlileri ve model henüz değil — **yazılı**), balon biçiminde konuşma, Enter gönderir / Shift+Enter satır başı. |
+| **Sistemler** | Metrik serileri; haftalık karşılaştırma, dijital ikiz, etki ve karar geçmişi **istenince açılır**. |
+| **Ayarlar** (ayrı sayfa) | Yapay zekâ · Bütçe · Sohbet kanalları · Cihazlar · Eşikler · **Sunucu** |
+
+**Yol adres çubuğunda durur** (`#/bugun`, `#/ayarlar`): yenilendiğinde aynı
+yerde kalırsın. **Yükleme görünüme göredir** — her sekmede bütün ambarı
+sorgulamak, açılışı bekletmekten başka iş yapmıyordu.
+
+**Tema üç hâldir:** açık, koyu, sistem. «Sistem» işaretsiz bırakılır ve
+işletim sisteminin tercihi geçerli olur; kullanıcı açıkça seçtiğinde
+`<html data-tema>` damgalanır ve medya sorgusunu yener. Seçim kaydedilir:
+her açılışta yeniden seçmek zorunda kalmak, seçim olmamasından kötüdür.
+
+`tools/yuz.js` artık **36 görünüm** denetler (3 ana bölüm + 6 ayar sekmesi
+× 2 genişlik × 2 tema).

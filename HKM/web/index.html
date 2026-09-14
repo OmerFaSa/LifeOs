@@ -29,11 +29,23 @@
   --on-accent:#ffffff;
   --mono:ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
+/* Tema UC HALDIR: acik, koyu, sistem.
+   «Sistem» isaretsiz birakilir ve isletim sisteminin tercihi gecerli olur;
+   kullanici acikca sectiginde <html data-tema> damgalanir ve medya
+   sorgusunu YENER. Secim kaydedilir: her acilista yeniden secmek zorunda
+   kalmak, secim olmamasindan kotudur. */
 @media (prefers-color-scheme: dark){
-  :root{ --bg:#0f1113; --yuzey:#15181b; --fg:#e9eaec; --dim:#9aa0a6;
+  html:not([data-tema="acik"]) {
+    --bg:#0f1113; --yuzey:#15181b; --fg:#e9eaec; --dim:#9aa0a6;
     --line:#24282c; --line-strong:#333940;
     --ok:#67d2a2; --warn:#e0ae5f; --danger:#f28e8e;
     --accent:#9dbdf0; --on-accent:#0f1113; }
+}
+html[data-tema="koyu"]{
+  --bg:#0f1113; --yuzey:#15181b; --fg:#e9eaec; --dim:#9aa0a6;
+  --line:#24282c; --line-strong:#333940;
+  --ok:#67d2a2; --warn:#e0ae5f; --danger:#f28e8e;
+  --accent:#9dbdf0; --on-accent:#0f1113;
 }
 *{ box-sizing:border-box; }
 /* [hidden] ozniteligi, .row gibi display veren bir SINIFA yenilir:
@@ -157,103 +169,249 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
   .alan--genis, .alan--orta, .metric__val select{ width:100%; }
 }
 
+/* ---- ana gezinme: gunluk kullanim ile teknik yonetim AYRI ----
+
+   Once dort teknik sekme vardi (Genel/Sistemler/HKM/Yonetim) ve gunluk
+   ekran, jeton-webhook-esik ayarlariyla ayni yerdeydi. Gun icinde acilan
+   bir merkez ile ayda bir acilan bir yonetim paneli ayni ekrani
+   paylasmamali: her gun gordugun sey, her gun ihtiyacin olan sey
+   olmali. */
+.gez{ display:flex; gap:2px; align-items:center; }
+.gez a{ text-decoration:none; color:var(--dim); padding:9px 14px;
+  border-radius:4px; font-size:14px; line-height:20px; min-height:24px;
+  display:inline-block; }
+.gez a:hover{ color:var(--fg); background:var(--yuzey); }
+.gez a.on{ color:var(--fg); background:var(--yuzey);
+  box-shadow:inset 0 0 0 1px var(--line); font-weight:600; }
+.ikon-dugme{ min-width:36px; padding:8px 10px; }
+
+/* Gunluk ekran: iki sutun masaustunde, tek sutun telefonda. */
+.iki{ display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);
+  gap:0 32px; align-items:start; }
+@media (max-width:820px){ .iki{ grid-template-columns:1fr; gap:0; } }
+
+/* Bugun ekraninin baslik satiri */
+.gun{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  padding:24px 0 4px; }
+.gun h1{ font-size:22px; margin:0; letter-spacing:-.01em; }
+.gun .tarih{ color:var(--dim); font:12px/1 var(--mono); letter-spacing:.08em; }
+
+/* Sistem seridi: uc sistem YAN YANA, tek bakista */
+.serit{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;
+  margin:4px 0 8px; }
+@media (max-width:560px){ .serit{ grid-template-columns:1fr; } }
+.serit__kutu{ border:1px solid var(--line); border-radius:5px; padding:12px 14px;
+  background:var(--yuzey); }
+.serit__ad{ font:11px/1 var(--mono); letter-spacing:.12em; color:var(--dim);
+  text-transform:uppercase; }
+.serit__durum{ font-size:15px; margin-top:6px; }
+.serit__alt{ color:var(--dim); font-size:12px; margin-top:4px; }
+
+/* Onay bekleyen sey: ekranda ONE CIKAR */
+.onay{ border:1px solid var(--accent); border-radius:6px; padding:16px;
+  background:var(--yuzey); margin:12px 0; }
+.onay__baslik{ font:11px/1 var(--mono); letter-spacing:.12em; color:var(--accent);
+  text-transform:uppercase; margin-bottom:8px; }
+
+/* Sohbet balonlari */
+.sohbet{ display:flex; flex-direction:column; gap:10px; margin:12px 0;
+  max-height:none; }
+.balon{ max-width:78%; padding:10px 14px; border-radius:12px; font-size:14.5px;
+  line-height:1.5; white-space:pre-wrap; }
+.balon--ben{ align-self:flex-end; background:var(--accent);
+  color:var(--on-accent); border-bottom-right-radius:3px; }
+.balon--o{ align-self:flex-start; background:var(--yuzey);
+  border:1px solid var(--line); border-bottom-left-radius:3px; }
+.balon__kim{ font:10px/1 var(--mono); letter-spacing:.1em; color:var(--dim);
+  text-transform:uppercase; margin-bottom:4px; }
+/* Bugun ekranindaki balon KISALIR: gunluk ekranin isi sohbetin tamamini
+   gostermek degil, son durumu hatirlatmak. Tamami bir tik oteye yazili
+   ve bag balonun hemen altinda duruyor — gizlenen sey ulasilamaz
+   olmamali. */
+#bugun-konusmalar .balon{ max-height:7.5em; overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,#000 72%,transparent);
+  mask-image:linear-gradient(180deg,#000 72%,transparent); }
+.yaz{ display:flex; gap:8px; align-items:flex-end; margin-top:12px; }
+.yaz textarea{ flex:1 1 auto; font:14px/1.5 ui-sans-serif, system-ui, sans-serif;
+  padding:10px 12px; border-radius:6px; border:1px solid var(--line-strong);
+  background:var(--yuzey); color:var(--fg); resize:vertical; min-height:44px; }
+.yaz textarea:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+/* Detay: istenince acilir, ekrani varsayilan olarak doldurmaz */
+details.detay{ border-top:1px solid var(--line); padding:10px 0; }
+details.detay > summary{ cursor:pointer; font-size:13px; color:var(--dim);
+  min-height:24px; line-height:24px; list-style:none; }
+details.detay > summary::-webkit-details-marker{ display:none; }
+details.detay > summary::before{ content:"▸ "; }
+details.detay[open] > summary::before{ content:"▾ "; }
+details.detay > summary:hover{ color:var(--fg); }
+
 @media (max-width:520px){
   .ust__ic{ padding:10px 14px; }
   .wrap{ padding:0 14px 56px; }
   .tabs button{ padding:10px 10px 8px; }
+  .gez a{ padding:9px 10px; font-size:13px; }
+  .balon{ max-width:88%; }
 }
 </style>
 </head>
 <body>
 <header class="ust">
   <div class="ust__ic">
-    <p class="marka">HKM <span>hayat kontrol merkezi</span></p>
+    <p class="marka">HKM</p>
+    <nav class="gez" id="gez" hidden>
+      <a href="#/bugun" data-yol="bugun">Bugün</a>
+      <a href="#/sohbet" data-yol="sohbet">Sohbetler</a>
+      <a href="#/sistemler" data-yol="sistemler">Sistemler</a>
+    </nav>
     <div class="bosluk"></div>
     <div class="row" id="ust-araclar" hidden>
-      <input id="tarih" type="date" aria-label="Görüntülenen gün"/>
-      <button id="yenile">Yenile</button>
+      <button id="tema" class="ikon-dugme" title="Tema" aria-label="Tema seç">◐</button>
+      <a href="#/ayarlar" class="gez" id="ayar-bag" style="text-decoration:none">
+        <span class="ikon-dugme" style="display:inline-block;border:1px solid var(--line-strong);border-radius:3px">Ayarlar</span>
+      </a>
     </div>
   </div>
 </header>
 
 <div class="wrap">
-  <div class="giris-alan">
-    <h1>Üçünü tek sesle özetler.</h1>
-    <p class="sub">Karar üretmez, karar taşır: aşağıdaki her cümle kural
-      motorundan gelir ve her öneri senin onayını bekler. Ekranda
-      hesaplanan tek bir sayı yoktur.</p>
-  </div>
-
   <div class="card" id="giris" hidden>
-    <div class="tag">Yerel jeton</div>
-    <p class="muted">HKM yalnız bu bilgisayarda dinler. Jeton
-      <code>HKM/config.json</code> içindeki <code>local_token</code>'dır.</p>
+    <div class="tag">Bağlan</div>
+    <p class="muted">HKM yalnız bu bilgisayarda çalışıyor. Bağlanmak için
+      bir kez anahtar gerekiyor; <code>HKM/config.json</code> içindeki
+      <code>local_token</code> değeri.</p>
     <div class="row">
-      <input id="token" type="password" placeholder="local_token" style="flex:1 1 240px"/>
+      <input id="token" type="password" placeholder="anahtar" class="alan alan--genis"
+        aria-label="Yerel anahtar"/>
       <button class="primary" id="gir">Bağlan</button>
     </div>
     <p class="muted" id="giris-not"></p>
   </div>
 
   <div id="govde" hidden>
-    <div class="tabs" id="sekmeler">
-      <button data-sekme="genel" class="on">Genel</button>
-      <button data-sekme="sistemler">Sistemler</button>
-      <button data-sekme="hkm">HKM</button>
-      <button data-sekme="yonetim">Yönetim</button>
-    </div>
 
-    <div data-bolme="genel">
-      <div class="card" id="brifing"><p class="muted">Yükleniyor…</p></div>
-      <div class="card" id="oneri" hidden></div>
-      <div class="card" id="konsey"></div>
-      <div class="card" id="seri"></div>
-      <div class="card" id="capraz"></div>
-    </div>
-
-    <div data-bolme="sistemler" hidden>
-      <div class="card" id="sistemler"><p class="muted">Yükleniyor…</p></div>
-    </div>
-
-    <div data-bolme="hkm" hidden>
-      <div class="card" id="hafta"></div>
-      <div class="card" id="etki"></div>
-      <div class="card" id="ikiz"></div>
-      <div class="card" id="gecmis"></div>
-
-    <div class="card" id="konusma">
-      <div class="tag">Büyük Patron</div>
-      <p class="muted">Komut seti küçük ve kapalıdır: serbest metin
-        yorumlanmaz. Anlaşılmayan bir mesaja «anlamadım» denir —
-        anlamadığını anlamış gibi yapmak en pahalı hatadır.</p>
-      <div class="row">
-        <input id="mesaj" placeholder="durum · kabul · ret · neden · capraz · yardim"
-          style="flex:1 1 220px" aria-label="Patron'a komut"/>
-        <button class="primary" id="gonder">Gönder</button>
+    <!-- ============================ BUGÜN ============================ -->
+    <div data-bolme="bugun">
+      <div class="gun">
+        <h1 id="gun-selam">Bugün</h1>
+        <span class="tarih" id="gun-tarih"></span>
+        <div class="bosluk"></div>
+        <input id="tarih" type="date" aria-label="Görüntülenen gün"
+          class="alan alan--orta"/>
+        <button id="yenile">Yenile</button>
       </div>
-      <div id="konusmalar"></div>
-    </div>
-    </div>
 
-    <div data-bolme="yonetim" hidden>
-      <div class="card">
-        <span class="tag">Cihazlar</span>
-        <p class="muted">Üç sistem jeton kopyalamadan bağlanır: pencere
-          açılır, ilgili sistemde «Bağlan» denir, pencere kapanır.</p>
-        <div class="row">
-          <button id="esle">Cihazları bağla</button>
-          <button id="cikis">Jetonu bu tarayıcıdan sil</button>
+      <div class="serit" id="serit"></div>
+      <div id="onay"></div>
+
+      <div class="iki">
+        <div>
+          <div class="card" id="brifing"><p class="muted">Yükleniyor…</p></div>
+          <details class="detay" id="detay-genel">
+            <summary>Dayanağı göster</summary>
+            <div id="konsey"></div>
+            <div id="seri"></div>
+            <div id="capraz"></div>
+          </details>
+        </div>
+        <div>
+          <div class="card" id="bugun-sohbet">
+            <span class="tag">King'e yaz</span>
+            <p class="muted" id="bugun-sohbet-not">Günün durumunu sor,
+              planını hafifletmek iste ya da bir şey anlat.</p>
+            <div class="sohbet" id="bugun-konusmalar"></div>
+            <div class="yaz">
+              <textarea id="bugun-mesaj" rows="2"
+                placeholder="Bugün nasıl gidiyor?" aria-label="King'e mesaj"></textarea>
+              <button class="primary" id="bugun-gonder">Gönder</button>
+            </div>
+            <p class="muted" style="margin-top:8px"><a href="#/sohbet">Bütün
+              sohbeti aç →</a></p>
+          </div>
         </div>
       </div>
-      <div class="card" id="esleme" hidden></div>
-      <div class="card" id="baslarken"></div>
-      <div class="card" id="butce"></div>
-      <div class="card" id="saglayicilar"></div>
-      <div class="card" id="gorevler"></div>
-      <div class="card" id="ayarlar"><p class="muted">Yükleniyor…</p></div>
-      <div class="card" id="ritim"></div>
-      <div class="card" id="kutu"></div>
-      <div class="card" id="bakim"></div>
+    </div>
+
+    <!-- =========================== SOHBETLER ========================= -->
+    <div data-bolme="sohbet" hidden>
+      <div class="gun"><h1>Sohbetler</h1></div>
+      <div class="card" id="gorevliler"></div>
+      <div class="card" id="konusma">
+        <div class="sohbet" id="konusmalar"></div>
+        <div class="yaz">
+          <textarea id="mesaj" rows="2" placeholder="Bir şey yaz…"
+            aria-label="Mesaj"></textarea>
+          <button class="primary" id="gonder">Gönder</button>
+        </div>
+        <p class="muted" id="sohbet-not"></p>
+      </div>
+    </div>
+
+    <!-- =========================== SİSTEMLER ========================= -->
+    <div data-bolme="sistemler" hidden>
+      <div class="gun"><h1>Sistemler</h1></div>
+      <div class="card" id="sistemler"><p class="muted">Yükleniyor…</p></div>
+      <details class="detay">
+        <summary>Haftalık karşılaştırma</summary>
+        <div id="hafta"></div>
+      </details>
+      <details class="detay">
+        <summary>Bütün ölçümler (dijital ikiz)</summary>
+        <div id="ikiz"></div>
+      </details>
+      <details class="detay">
+        <summary>Önerilerin ardından ölçüler ne yaptı</summary>
+        <div id="etki"></div>
+      </details>
+      <details class="detay">
+        <summary>Karar geçmişi</summary>
+        <div id="gecmis"></div>
+      </details>
+    </div>
+
+    <!-- ============================ AYARLAR ========================== -->
+    <div data-bolme="ayarlar" hidden>
+      <div class="gun"><h1>Ayarlar</h1></div>
+      <div class="tabs" id="ayar-sekmeler">
+        <button data-ayar="yapayzeka" class="on">Yapay zekâ</button>
+        <button data-ayar="butce">Bütçe</button>
+        <button data-ayar="kanallar">Sohbet kanalları</button>
+        <button data-ayar="cihazlar">Cihazlar</button>
+        <button data-ayar="esikler">Eşikler</button>
+        <button data-ayar="sunucu">Sunucu</button>
+      </div>
+
+      <div data-ayar-bolme="yapayzeka">
+        <div class="card" id="baslarken"></div>
+        <div class="card" id="saglayicilar"></div>
+        <div class="card" id="gorevler"></div>
+      </div>
+      <div data-ayar-bolme="butce" hidden>
+        <div class="card" id="butce"></div>
+      </div>
+      <div data-ayar-bolme="kanallar" hidden>
+        <div class="card" id="kanallar"></div>
+      </div>
+      <div data-ayar-bolme="cihazlar" hidden>
+        <div class="card">
+          <span class="tag">Cihazlar</span>
+          <p class="muted">Üç sistem anahtar kopyalamadan bağlanır: pencere
+            açılır, ilgili sistemde «Bağlan» denir, pencere kapanır.</p>
+          <div class="row">
+            <button id="esle">Cihazları bağla</button>
+            <button id="cikis">Anahtarı bu tarayıcıdan sil</button>
+          </div>
+        </div>
+        <div class="card" id="esleme" hidden></div>
+      </div>
+      <div data-ayar-bolme="esikler" hidden>
+        <div class="card" id="esikler"></div>
+      </div>
+      <div data-ayar-bolme="sunucu" hidden>
+        <div class="card" id="ritim"></div>
+        <div class="card" id="kutu"></div>
+        <div class="card" id="bakim"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -289,6 +447,7 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
     $('giris').hidden = false;
     $('govde').hidden = true;
     $('ust-araclar').hidden = true;
+    $('gez').hidden = true;
     $('giris-not').textContent = not || '';
   }
 
@@ -605,19 +764,18 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
 
   /* --------------------------------------------------------------- akış */
 
+  /* Konusma: etiketli satir degil BALON. Kimin konustugu bicimden
+     anlasilmali; her satira «sen ·» yazmak, sohbeti bir gunluge cevirir. */
   function konusmaCiz(liste){
-    var h = '';
-    (liste || []).slice(-8).forEach(function(m){
-      h += '<div class="line"><span class="tag">'
-         + esc(m.role === 'user' ? 'sen' : m.role === 'system' ? 'sistem' : 'patron')
-         + ' · ' + esc(m.channel) + '</span><div>'
-         + esc(m.text).replace(/\n/g, '<br/>') + '</div></div>';
-    });
-    $('konusmalar').innerHTML = h;
+    var temiz = (liste || []).filter(function(m){ return m.role !== 'system'; });
+    balonlarCiz($('konusmalar'), temiz.slice(-40),
+      'Henüz konuşmadınız. Aşağıya bir şey yaz.');
+    balonlarCiz($('bugun-konusmalar'), temiz.slice(-6),
+      'Henüz konuşmadınız.');
   }
 
   async function konusmaYukle(){
-    var r = await api('/api/conversation?limit=20');
+    var r = await api('/api/conversation?limit=60');
     if(r.status === 200) konusmaCiz(r.body.messages);
   }
 
@@ -765,6 +923,11 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
 
   function ayarCiz(c){
     AYAR = c;
+    esiklerCiz(c);
+    kanallarCiz(c);
+  }
+
+  function esiklerCiz(c){
     var h = '<div class="tag">Eşikler</div>'
       + '<p class="muted">Bir VP\'nin «uyku az» demesi bir ölçüm değil bir '
       + 'yargıdır; yargıyı üretecek sayı senindir. Aralık dışında bir değer '
@@ -781,8 +944,12 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
     h += '<div class="row" style="margin-top:12px">'
       + '<button class="primary" id="esik-kaydet">Eşikleri kaydet</button></div>'
       + '<p class="muted" id="esik-not"></p>';
+    $('esikler').innerHTML = h;
+    $('esik-kaydet').addEventListener('click', esikKaydet);
+  }
 
-    h += '<div class="tag" style="margin-top:24px">Sohbet kanalları</div>'
+  function kanallarCiz(c){
+    var h = '<div class="tag">Sohbet kanalları</div>'
       + '<p class="muted">Aynı özet WhatsApp ya da Telegram\'a da gidebilir. '
       + 'Üç kural: <b>günde tek mesaj</b>, <b>izin listesi boşsa kimseye '
       + 'cevap verilmez</b>, ve gelen webhook gövdesi <b>imzası '
@@ -817,12 +984,10 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
     h += '<div class="row" style="margin-top:12px">'
       + '<button class="primary" id="kanal-kaydet">Kanal ayarlarını kaydet</button>'
       + '</div>'
-      + '<p class="muted" id="kanal-not">Boş bırakılan sır alanı var olanı '
-      + 'DEĞİŞTİRMEZ. Sırlar buradan geri OKUNMAZ: bir ayar ekranı, sırrı '
-      + 'ekranda göstermek zorunda değildir.</p>';
-    $('ayarlar').innerHTML = h;
+      + '<p class="muted" id="kanal-not">Boş bıraktığın gizli alan var olanı '
+      + 'DEĞİŞTİRMEZ. Girdiğin sırlar buradan geri okunamaz.</p>';
+    $('kanallar').innerHTML = h;
 
-    $('esik-kaydet').addEventListener('click', esikKaydet);
     $('kanal-kaydet').addEventListener('click', kanalKaydet);
     Array.prototype.forEach.call(
       document.querySelectorAll('[data-kanal]'), function(b){
@@ -1287,68 +1452,324 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
       : 'Budanamadı.';
   }
 
-  function sekmeSec(ad){
-    Array.prototype.forEach.call(
-      document.querySelectorAll('#sekmeler button'), function(b){
-        b.className = b.dataset.sekme === ad ? 'on' : '';
-      });
-    Array.prototype.forEach.call(
-      document.querySelectorAll('[data-bolme]'), function(el){
-        el.hidden = el.dataset.bolme !== ad;
+  /* ---------- Bugün ekranı
+
+     Gunluk ekranin isi durumu ANLATMAK, ayar sunmak degil. Uc soruya
+     cevap verir: bugun ne oldu, neye onay bekleniyor, ne yazmak
+     istiyorum. Geri kalan her sey «Dayanağı göster» altinda ya da
+     Ayarlar'da durur. */
+  var SISTEM_KISA = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+  var HUKUM_SOZ = {
+    APPROVED:  { metin:'yolunda', sinif:'ok' },
+    ANOMALY:   { metin:'dikkat',  sinif:'danger' },
+    INCOMPLETE:{ metin:'eksik veri', sinif:'warn' },
+  };
+
+  function selam(){
+    var s = new Date().getHours();
+    if(s < 5)  return 'İyi geceler';
+    if(s < 12) return 'Günaydın';
+    if(s < 18) return 'İyi günler';
+    return 'İyi akşamlar';
+  }
+
+  var AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  var GUNLER = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe',
+    'Cuma', 'Cumartesi'];
+
+  function tarihYaz(iso){
+    var p = String(iso || '').split('-');
+    if(p.length !== 3) return iso || '';
+    var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    return d.getDate() + ' ' + AYLAR[d.getMonth()] + ' ' + GUNLER[d.getDay()];
+  }
+
+  /* Uc sistem YAN YANA: tek bakista hangisi yolunda, hangisi degil. */
+  function seritCiz(b){
+    var uyeler = ((b.council || {}).members) || [];
+    if(!uyeler.length){ $('serit').innerHTML = ''; return; }
+    /* Sira kullanicinin bildigi sira: AYS · SPİ · ESP. Konseyin ic sirasi
+       (bio, academic, intellect) bir uygulama ayrintisidir. */
+    var SIRA = ['ays', 'spi', 'esp'];
+    uyeler = uyeler.slice().sort(function(a, c){
+      return SIRA.indexOf(a.module) - SIRA.indexOf(c.module);
+    });
+    var h = '';
+    uyeler.forEach(function(u){
+      var d = HUKUM_SOZ[u.verdict];
+      var durum = d ? d.metin : 'veri yok';
+      var sinif = d ? d.sinif : 'muted';
+      h += '<div class="serit__kutu"><div class="serit__ad">'
+        + esc(SISTEM_KISA[u.module] || u.module) + '</div>'
+        + '<div class="serit__durum ' + sinif + '">' + esc(durum) + '</div>'
+        + '<div class="serit__alt">' + esc(u.first || u.scope) + '</div></div>';
+    });
+    $('serit').innerHTML = h;
+  }
+
+  /* Onay bekleyen sey ekranda ONE CIKAR — gomulu bir satir degil. */
+  function onayCiz(b){
+    var kutu = $('onay');
+    var d = b.decision;
+    if(!d){
+      var satir = (b.lines || []).filter(function(l){
+        return l.kind === 'proposal'; })[0];
+      kutu.innerHTML = satir
+        ? '<p class="muted" style="margin:12px 0">' + esc(satir.text) + '</p>'
+        : '';
+      return;
+    }
+    if(d.state !== 'proposed'){
+      kutu.innerHTML = '<p class="muted" style="margin:12px 0">Bugünün önerisi: '
+        + esc(d.proposal) + ' — <b>'
+        + (d.state === 'accepted' ? 'kabul ettin' : 'istemedin') + '</b>.</p>';
+      return;
+    }
+    kutu.innerHTML = '<div class="onay"><div class="onay__baslik">'
+      + 'Onayını bekliyor</div><div style="font-size:16px">'
+      + esc(d.proposal) + '</div>'
+      + '<p class="muted" style="margin:10px 0 12px">Sen onaylamadan hiçbir '
+      + 'şey değişmez. İstemezsen kayıt silinmez, «istenmedi» diye '
+      + 'işaretlenir.</p>'
+      + '<div class="row"><button class="primary" data-cevap="accept">Kabul '
+      + 'ediyorum</button><button data-cevap="decline">İstemiyorum</button>'
+      + '</div></div>';
+    Array.prototype.forEach.call(kutu.querySelectorAll('[data-cevap]'),
+      function(btn){
+        btn.addEventListener('click', async function(){
+          btn.disabled = true;
+          await api('/api/decision/' + d.id + '/' + btn.dataset.cevap,
+            { method:'POST' });
+          yukle();
+        });
       });
   }
 
+  /* Brifing: gunluk ekranda KISA. Dayanak «Dayanağı göster» altinda. */
+  function ozetCiz(b){
+    var satirlar = (b.lines || []).filter(function(l){
+      return l.kind !== 'proposal';
+    });
+    var h = '<span class="tag">Bugün ne oldu</span>';
+    if(!satirlar.length){
+      h += '<p class="muted">Bugün için henüz bir şey gelmedi.</p>';
+    }
+    satirlar.slice(0, 5).forEach(function(l){
+      var sinif = l.verdict ? (TON[l.verdict] || '') : '';
+      h += '<div class="line"><span class="' + sinif + '">' + esc(l.text)
+        + '</span></div>';
+    });
+    if(satirlar.length > 5){
+      h += '<p class="muted">' + esc(satirlar.length - 5)
+        + ' satır daha var; aşağıdan açabilirsin.</p>';
+    }
+    if(b.dropped && b.dropped.length){
+      h += '<div class="line danger"><b>Düşürülen cümle:</b> '
+        + esc(b.dropped[0].note) + '</div>';
+    }
+    $('brifing').innerHTML = h;
+  }
+
+  function balonlarCiz(hedef, liste, bosMetin){
+    if(!liste.length){
+      hedef.innerHTML = '<p class="muted">' + esc(bosMetin) + '</p>';
+      return;
+    }
+    var h = '';
+    liste.forEach(function(m){
+      var ben = m.role === 'user';
+      h += '<div class="balon balon--' + (ben ? 'ben' : 'o') + '">'
+        + (ben ? '' : '<div class="balon__kim">King</div>')
+        + esc(m.text) + '</div>';
+    });
+    hedef.innerHTML = h;
+    hedef.scrollTop = hedef.scrollHeight;
+  }
+
+  /* Gorevliler: bugun yalniz King baglı. Olmayan bir seyi varmis gibi
+     gostermek yerine, ne zaman gelecegi YAZILI. */
+  function gorevlilerCiz(){
+    $('gorevliler').innerHTML =
+      '<span class="tag">Kiminle konuşuyorsun</span>'
+      + '<div class="serit">'
+      + '<div class="serit__kutu"><div class="serit__ad">King</div>'
+      + '<div class="serit__durum ok">bağlı</div>'
+      + '<div class="serit__alt">Üç sistemi birlikte değerlendirir; '
+      + 'günün tek cümlesini taşır.</div></div>'
+      + '<div class="serit__kutu"><div class="serit__ad">Alan görevlileri'
+      + '</div><div class="serit__durum muted">henüz bağlı değil</div>'
+      + '<div class="serit__alt">Akademik, biyolojik ve entelektüel '
+      + 'görevlilerle ayrı ayrı konuşma bir sonraki adımda geliyor.</div>'
+      + '</div>'
+      + '<div class="serit__kutu"><div class="serit__ad">Model</div>'
+      + '<div class="serit__durum muted" id="model-durum">bağlı değil</div>'
+      + '<div class="serit__alt">Şu an komutlarla konuşuyorsun: '
+      + '<code>durum · kabul · ret · neden · capraz · seri · etki · '
+      + 'yardim</code>. Doğal cümle için Ayarlar → Yapay zekâ.</div></div>'
+      + '</div>';
+  }
+
+  /* ---------- gezinme
+
+     Adres cubugunda yol tutulur: yenilendiginde ayni yerde kalirsin ve
+     bir ekrani baskasina gonderebilirsin. Gorunum degistiginde YALNIZ o
+     gorunumun verisi cekilir — her sekmede butun ambari sorgulamak,
+     acilisi bekletmekten baska is yapmiyordu. */
+  var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'ayarlar'];
+  var gorunum = 'bugun';
+
+  function yolOku(){
+    var h = (location.hash || '').replace(/^#\/?/, '').split('/')[0];
+    return GORUNUMLER.indexOf(h) >= 0 ? h : 'bugun';
+  }
+
+  function gorunumSec(ad, yenidenYukle){
+    gorunum = GORUNUMLER.indexOf(ad) >= 0 ? ad : 'bugun';
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-bolme]'), function(el){
+        el.hidden = el.dataset.bolme !== gorunum;
+      });
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#gez a'), function(a){
+        a.className = a.dataset.yol === gorunum ? 'on' : '';
+      });
+    if(yenidenYukle !== false) yukle();
+  }
+
+  function ayarSekmesi(ad){
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#ayar-sekmeler button'), function(b){
+        b.className = b.dataset.ayar === ad ? 'on' : '';
+      });
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-ayar-bolme]'), function(el){
+        el.hidden = el.dataset.ayarBolme !== ad;
+      });
+  }
+
+  /* ---------- tema: acik / koyu / sistem
+
+     «Sistem» isaretsiz birakilir ve isletim sisteminin tercihi gecerli
+     olur. Secim kaydedilir: her acilista yeniden secmek zorunda kalmak,
+     secim olmamasindan kotudur. */
+  var TEMA_KEY = 'hkm.tema';
+  var TEMALAR = ['sistem', 'acik', 'koyu'];
+  var TEMA_ADI = { sistem:'Sistem teması', acik:'Açık tema', koyu:'Koyu tema' };
+  var TEMA_ISARET = { sistem:'◐', acik:'☀', koyu:'☾' };
+
+  function temaUygula(t){
+    var kok = document.documentElement;
+    if(t === 'sistem') kok.removeAttribute('data-tema');
+    else kok.setAttribute('data-tema', t);
+    var d = $('tema');
+    if(d){
+      d.textContent = TEMA_ISARET[t] || '◐';
+      d.title = TEMA_ADI[t] || 'Tema';
+      d.setAttribute('aria-label', (TEMA_ADI[t] || 'Tema') + ' — değiştir');
+    }
+  }
+
+  function temaOku(){
+    try{
+      var t = localStorage.getItem(TEMA_KEY);
+      return TEMALAR.indexOf(t) >= 0 ? t : 'sistem';
+    }catch(e){ return 'sistem'; }
+  }
+
+  function temaDegistir(){
+    var simdi = temaOku();
+    var yeni = TEMALAR[(TEMALAR.indexOf(simdi) + 1) % TEMALAR.length];
+    try{ localStorage.setItem(TEMA_KEY, yeni); }catch(e){}
+    temaUygula(yeni);
+  }
+
+  /* Gorunume gore yukle: her sekmede butun ambari sorgulamak, acilisi
+     bekletmekten baska is yapmiyordu. Bugun ekrani acildiginda gerekli
+     olan uc istek atilir; gerisi sekmesine girildiginde gelir. */
   async function yukle(){
     var t = $('tarih').value || bugun();
+    if(gorunum === 'bugun') return yukleBugun(t);
+    if(gorunum === 'sohbet') return yukleSohbet();
+    if(gorunum === 'sistemler') return yukleSistemler(t);
+    if(gorunum === 'ayarlar') return yukleAyarlar();
+  }
+
+  async function yukleBugun(t){
+    $('gun-selam').textContent = selam();
+    $('gun-tarih').textContent = tarihYaz(t);
     var b = await api('/api/briefing?date=' + t);
-    if(b.status === 401){ girisGoster('Jeton kabul edilmedi.'); return; }
+    if(b.status === 401){ girisGoster('Anahtar kabul edilmedi.'); return; }
     if(b.status !== 200){
-      $('brifing').innerHTML = '<p class="danger">Brifing alınamadı ('
+      $('brifing').innerHTML = '<p class="danger">Bugünün özeti alınamadı ('
         + esc(b.status) + ').</p>';
       return;
     }
-    brifingCiz(b.body);
-    oneriCiz(b.body);
+    ozetCiz(b.body);
+    seritCiz(b.body);
+    onayCiz(b.body);
     konseyCiz(b.body);
     var sr = await api('/api/streak?date=' + t);
     if(sr.status === 200) seriCiz(sr.body);
     var c = await api('/api/cross?date=' + t);
     if(c.status === 200) caprazCiz(c.body);
+    await konusmaYukle();
+  }
+
+  async function yukleSohbet(){
+    gorevlilerCiz();
+    await konusmaYukle();
+  }
+
+  async function yukleSistemler(t){
     var ser = await api('/api/series?date=' + t + '&days=60');
     if(ser.status === 200) sistemlerCiz(ser.body);
     var i = await api('/api/twin?date=' + t);
     if(i.status === 200) ikizCiz(i.body);
-    var g = await api('/api/decisions?date=' + t);
-    if(g.status === 200) gecmisCiz(g.body);
-    var et = await api('/api/impact');
-    if(et.status === 200) etkiCiz(et.body);
     var hf = await api('/api/weekly?date=' + t);
     if(hf.status === 200) haftaCiz(hf.body);
-    var kt = await api('/api/outbox');
-    if(kt.status === 200) kutuCiz(kt.body);
-    var ay = await api('/api/config');
-    if(ay.status === 200){ ayarlariCiz(ay.body); ritimCiz(ay.body); }
-    await butceYukle();
-    bakimCiz();
-    await konusmaYukle();
+    var et = await api('/api/impact');
+    if(et.status === 200) etkiCiz(et.body);
+    var g = await api('/api/decisions?date=' + t);
+    if(g.status === 200) gecmisCiz(g.body);
   }
 
-  async function mesajGonder(){
-    var metin = $('mesaj').value.trim();
+  async function yukleAyarlar(){
+    var ay = await api('/api/config');
+    if(ay.status === 200){ ayarlariCiz(ay.body); ritimCiz(ay.body); }
+    var kt = await api('/api/outbox');
+    if(kt.status === 200) kutuCiz(kt.body);
+    await butceYukle();
+    bakimCiz();
+  }
+
+  /* Mesaj: iki yerden de ayni kapidan gecer (Bugun ekrani ve Sohbetler).
+     Iki ayri gonderim yolu, bir gun birbirinden ayrilirdi. */
+  async function mesajGonder(alanId, dugmeId){
+    var alan = $(alanId);
+    var metin = (alan.value || '').trim();
     if(!metin) return;
-    $('gonder').disabled = true;
+    $(dugmeId).disabled = true;
     var t = $('tarih').value || bugun();
-    await api('/api/message', { method:'POST',
+    var r = await api('/api/message', { method:'POST',
       body:JSON.stringify({ text:metin, date:t }) });
-    $('mesaj').value = '';
-    $('gonder').disabled = false;
-    await yukle();
+    alan.value = '';
+    $(dugmeId).disabled = false;
+    var not = $(gorunum === 'bugun' ? 'bugun-sohbet-not' : 'sohbet-not');
+    if(not && r.status !== 200){
+      not.textContent = 'Mesaj gönderilemedi (' + r.status + ').';
+    }else if(not && gorunum === 'sohbet'){
+      not.textContent = '';
+    }
+    await konusmaYukle();
   }
 
   async function bagla(){
     $('govde').hidden = false;
     $('giris').hidden = true;
     $('ust-araclar').hidden = false;
+    $('gez').hidden = false;
+    gorunumSec(yolOku(), false);
     await yukle();
   }
 
@@ -1367,18 +1788,32 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
     girisGoster('Jeton bu tarayıcıdan silindi.');
   });
 
-  Array.prototype.forEach.call(
-    document.querySelectorAll('#sekmeler button'), function(b){
-      b.addEventListener('click', function(){ sekmeSec(b.dataset.sekme); });
+  /* ---------- baglayicilar */
+  Array.prototype.forEach.call(document.querySelectorAll('#ayar-sekmeler button'),
+    function(b){
+      b.addEventListener('click', function(){ ayarSekmesi(b.dataset.ayar); });
     });
+  window.addEventListener('hashchange', function(){ gorunumSec(yolOku()); });
+  $('tema').addEventListener('click', temaDegistir);
   $('esle').addEventListener('click', eslemeAc);
-  $('gonder').addEventListener('click', mesajGonder);
-  $('mesaj').addEventListener('keydown', function(e){
-    if(e.key === 'Enter') mesajGonder();
+  $('gonder').addEventListener('click', function(){
+    mesajGonder('mesaj', 'gonder'); });
+  $('bugun-gonder').addEventListener('click', function(){
+    mesajGonder('bugun-mesaj', 'bugun-gonder'); });
+  /* Enter gonderir, Shift+Enter yeni satir: uzun bir cumleyi yazarken
+     satir baslamak isteyen kullaniciyi mesaji gondermeye zorlamaz. */
+  ['mesaj', 'bugun-mesaj'].forEach(function(id){
+    $(id).addEventListener('keydown', function(e){
+      if(e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault();
+        mesajGonder(id, id === 'mesaj' ? 'gonder' : 'bugun-gonder');
+      }
+    });
   });
   $('yenile').addEventListener('click', yukle);
   $('tarih').addEventListener('change', yukle);
   $('tarih').value = bugun();
+  temaUygula(temaOku());
 
   /* Acilista jeton yoksa: ACIK PENCERE VARSA al, yoksa sor.
 
