@@ -6,6 +6,8 @@
 (function(){
   const { describe, it, expect, resetState } = ESP.Test;
   const B = () => ESP.Beacon;
+  const BUGUN = ESP.U.todayISO();
+  const DUN = ESP.U.iso(ESP.U.addDays(ESP.U.parse(BUGUN), -1));
 
   /* Gercek fetch'i hicbir test cagirmaz: agla konusan bir birim testi,
      olcmedigi bir seye bagli olur. */
@@ -25,6 +27,11 @@
     await B().save(Object.assign({ enabled:true, token:'jeton',
       url:'http://127.0.0.1:4200', lastAt:null, lastOkAt:null,
       lastStatus:null, lastNote:'' }, patch || {}));
+  }
+
+  function olculmusGun(){
+    ESP.S.days[BUGUN] = Object.assign(ESP.S.days[BUGUN] || {}, { date:BUGUN,
+      sessions:[{ id:'s1', disc:'lang', minutes:45, minutesCert:'measured' }] });
   }
 
   describe('HKM işareti — sınırlar', () => {
@@ -128,7 +135,7 @@
 
     it('her metrik kesinlik etiketi taşır', () => {
       resetState();
-      const p = B().payload('2026-09-13');
+      const p = B().payload(BUGUN);
       expect(B().contract(p).length).toBe(0);
       Object.keys(p.metrics).forEach(k => {
         const m = p.metrics[k];
@@ -140,7 +147,7 @@
     /* Eksik veri SIFIR DEGILDIR. */
     it('veri yokken alan sıfır değil «veri yok» gider', () => {
       resetState();
-      const m = B().payload('2026-09-13').metrics;
+      const m = B().payload(BUGUN).metrics;
       const bos = Object.keys(m).filter(k => m[k].cert === 'missing');
       expect(bos.length > 0).toBe(true);
       bos.forEach(k => expect(m[k].value).toBe(null));
@@ -154,19 +161,19 @@
 
     it('bozuk gövde sözleşmeden geçmez ve yola çıkmaz', async () => {
       resetState();
-      expect(B().contract({ module:'esp', date:'2026-09-13',
+      expect(B().contract({ module:'esp', date:BUGUN,
         metrics:{ x:{ value:5 } } }).length).toBe(1);
       expect(B().contract({ module:'esp', date:'13.09.2026',
         metrics:{ x:{ value:5, cert:'measured' } } }).length).toBe(1);
-      expect(B().contract({ module:'baska', date:'2026-09-13',
+      expect(B().contract({ module:'baska', date:BUGUN,
         metrics:{ x:{ value:5, cert:'measured' } } }).length).toBe(1);
-      expect(B().contract({ module:'esp', date:'2026-09-13', metrics:{} }).length).toBe(1);
+      expect(B().contract({ module:'esp', date:BUGUN, metrics:{} }).length).toBe(1);
     });
 
     /* Giden sey gunun OZETIDIR: icerik gitmez. */
     it('gövde yalnızca sayı taşır, içerik taşımaz', () => {
       resetState();
-      const p = B().payload('2026-09-13');
+      const p = B().payload(BUGUN);
       expect(Object.keys(p.metrics).sort().join(',')).toBe('practice_minutes,retention,retention_cards,synthesis_gap_days');
       const metin = JSON.stringify(p);
       expect(metin.length < 1200).toBe(true);
@@ -178,7 +185,7 @@
 
     it('önizleme kullanıcıya etiketiyle gösterilir', () => {
       resetState();
-      const on = B().preview('2026-09-13');
+      const on = B().preview(BUGUN);
       expect(on.rows.length).toBe(Object.keys(on.payload.metrics).length);
       on.rows.forEach(r => expect(!!r.label).toBe(true));
       expect(on.errors.length).toBe(0);
@@ -241,6 +248,115 @@
         const r = await B().pair('http://127.0.0.1:4200');
         expect(r.ok).toBe(false);
         expect(r.note.indexOf('ulaşılamadı') >= 0).toBe(true);
+      } finally { window.fetch = eski; }
+    });
+  });
+
+
+  describe('HKM işareti — kapsam ve geçmiş', () => {
+
+    it('varsayılan kapsam özettir', () => {
+      resetState();
+      expect(B().levelOf()).toBe('ozet');
+      expect(B().LEVELS.length).toBe(2);
+    });
+
+    it('gelişmiş kapsam daha çok alan gönderir, içerik göndermez', async () => {
+      resetState();
+      const az = Object.keys(B().payload(BUGUN).metrics).length;
+      await B().save({ level:'gelismis' });
+      const p = B().payload(BUGUN);
+      expect(Object.keys(p.metrics).length > az).toBe(true);
+      expect(B().contract(p).length).toBe(0);
+      /* İçerik yok: her değer sayı ya da null. */
+      Object.keys(p.metrics).forEach(k => {
+        const v = p.metrics[k].value;
+        expect(v === null || typeof v === 'number').toBe(true);
+      });
+    });
+
+    /* Bugunku degeri dunun tarihiyle yollamak, ambara SAHTE bir olcum
+       yazmaktir: bugunden turetilen alanlar gecmis gunde gitmez. */
+    it('bugünden türetilen alan geçmiş güne yazılmaz', async () => {
+      resetState();
+      await B().save({ level:'gelismis' });
+      const bugun = B().payload(BUGUN).metrics;
+      const dun = B().payload(DUN).metrics;
+      const bugunden = ['retention', 'retention_cards', 'cards_total', 'cards_due'];
+      bugunden.forEach(k => {
+        if(bugun[k] === undefined) return;
+        const d = dun[k];
+        expect(d === undefined || d.cert === 'missing').toBe(true);
+      });
+    });
+
+    it('geçmiş gönderimi kapalıyken ağa çıkmaz', async () => {
+      resetState();
+      await B().save({ enabled:false, token:'jeton' });
+      const eski = window.fetch;
+      const cagri = [];
+      window.fetch = function(){ cagri.push(1); return Promise.resolve({ status:202 }); };
+      try{
+        const r = await B().backfill(5);
+        expect(r.ok).toBe(false);
+        expect(r.reason).toBe('off');
+        expect(cagri.length).toBe(0);
+      } finally { window.fetch = eski; }
+    });
+
+    /* Bos bir govde, ambarda «o gun olculdu ama her sey bostu» izlenimi
+       birakir — olculmemis gun GONDERILMEZ. */
+    it('ölçümsüz gün gönderilmez', async () => {
+      resetState();
+      await B().save({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' });
+      const eski = window.fetch;
+      const cagri = [];
+      window.fetch = function(url, opt){
+        cagri.push(JSON.parse(opt.body));
+        return Promise.resolve({ status:202 });
+      };
+      try{
+        const r = await B().backfill(7);
+        expect(r.ok).toBe(true);
+        expect(cagri.length).toBe(r.sent);
+        cagri.forEach(g => {
+          /* «Hesaplandı» yetmez: en az bir ÖLÇÜLMÜŞ alan olmalı. */
+          const dolu = Object.keys(g.metrics)
+            .some(k => g.metrics[k].cert === 'measured');
+          expect(dolu).toBe(true);
+        });
+      } finally { window.fetch = eski; }
+    });
+
+    it('geçmiş gönderimi ilk hatada durur', async () => {
+      resetState();
+      olculmusGun();
+      await B().save({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' });
+      const eski = window.fetch;
+      window.fetch = function(){ return Promise.resolve({ status:401 }); };
+      try{
+        const r = await B().backfill(30);
+        expect(r.ok).toBe(false);
+        expect(r.status).toBe(401);
+        expect(r.sent).toBe(0);
+      } finally { window.fetch = eski; }
+    });
+
+    it('ölçülmüş gün gerçekten gönderilir', async () => {
+      resetState();
+      olculmusGun();
+      await B().save({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' });
+      const eski = window.fetch;
+      const cagri = [];
+      window.fetch = function(url, opt){
+        cagri.push(JSON.parse(opt.body));
+        return Promise.resolve({ status:202 });
+      };
+      try{
+        const r = await B().backfill(3);
+        expect(r.ok).toBe(true);
+        expect(r.sent >= 1).toBe(true);
+        expect(cagri[cagri.length - 1].date).toBe(BUGUN);
       } finally { window.fetch = eski; }
     });
   });

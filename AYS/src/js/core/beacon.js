@@ -41,6 +41,7 @@ R.Beacon = (function(){
     url:'http://127.0.0.1:4200',
     token:'',
     intervalMinutes:60,
+    level:'ozet',            // ozet | gelismis
     lastAt:null,                   // son DENEME
     lastOkAt:null,                 // son BAŞARILI gönderim
     lastStatus:null,               // 202 | 422 | 401 | 0 (ulaşılamadı)
@@ -64,6 +65,36 @@ R.Beacon = (function(){
     await R.Store.set('hkm', AYAR);
     return settings();
   }
+
+
+  /* --------------------------------------------------------- kapsam seviyesi
+
+     Ilk surum gunde birkac sayi goruyordu; bu, «bu haftayi analiz et» gibi
+     sorulari cevaplanamaz kiliyordu. Cozum gonderimi genisletmek ama
+     GENISLIGI KULLANICININ SECMESI:
+
+       ozet      — yuk kararini etkileyen cekirdek olcumler (VARSAYILAN)
+       gelismis  — bolum bazinda ilerleme de gider
+
+     Iki seviyede de giden sey SAYIDIR: icerik hicbir seviyede gitmez.
+     Seviye degistirmek yeni bir izin ister gibi davranir: ne gonderilecegi
+     yine satir satir gosterilir. */
+  const LEVELS = [
+    { id:'ozet', label:'Özet',
+      note:'Yalnız yük kararını etkileyen çekirdek ölçümler.' },
+    { id:'gelismis', label:'Gelişmiş',
+      note:'Bölüm bazında ilerleme de gider — hâlâ yalnız sayı.' },
+  ];
+
+  function levelOf(){
+    const id = settings().level;
+    return LEVELS.some(function(l){ return l.id === id; }) ? id : 'ozet';
+  }
+
+  /* Gecmis bir gun icin GERIYE DONUK hesaplanamayan alanlar gonderilmez:
+     bugunku degeri dunun tarihiyle yollamak, ambara sahte bir olcum
+     yazmaktir. */
+  function gecmisMi(dateISO){ return String(dateISO) !== U.todayISO(); }
 
   /* ----------------------------------------------------------- sözleşme
 
@@ -137,17 +168,68 @@ R.Beacon = (function(){
       : metric(null, 'missing');
 
     /* Net: TEK deneme değil MEDYAN. Tek denemeyle konuşmak bu depoda
-       yasak değil, yanlış: bir kötü deneme ortalamayı bozar. */
-    const trend = R.Calc.medianTrend('TYT');
-    out.mock_net = trend.last3 == null ? metric(null, 'missing')
-      : metric(trend.last3, 'computed');
-    out.mock_net_baseline = trend.prev3 == null ? metric(null, 'missing')
-      : metric(trend.prev3, 'computed');
+       yasak değil, yanlış: bir kötü deneme ortalamayı bozar.
 
-    const ew = R.Calc.examWeekMode();
-    out.exam_days_left = ew.daysLeft == null ? metric(null, 'missing')
-      : metric(ew.daysLeft, 'computed');
+       Medyan O GÜNE KADARKI denemelerden hesaplanır. Calc.medianTrend()
+       bütün denemeleri kullanır; geçmiş bir günü onunla göndermek, o güne
+       henüz girilmemiş bir denemeyi o günün ölçümü gibi yazmak olurdu. */
+    const netler = (S.exams || [])
+      .filter(function(e){ return e.family === 'TYT' && e.kind === 'full'
+        && String(e.date) <= d; })
+      .sort(function(a, b){ return String(a.date).localeCompare(String(b.date)); })
+      .map(R.Model.examNet);
+    out.mock_net = netler.length >= 3
+      ? metric(ortanca(netler.slice(-3)), 'computed') : metric(null, 'missing');
+    out.mock_net_baseline = netler.length >= 6
+      ? metric(ortanca(netler.slice(-6, -3)), 'computed') : metric(null, 'missing');
 
+    /* Sınava kalan gün her tarih için hesaplanabilir: sabit bir takvim. */
+    const kalan = U.diffDays(d, R.PLAN.examTytISO);
+    out.exam_days_left = isFinite(kalan) ? metric(kalan, 'computed')
+      : metric(null, 'missing');
+
+    if(levelOf() === 'gelismis') Object.assign(out, genis(d, gun, bloklar));
+    return out;
+  }
+
+  function ortanca(xs){
+    const a = xs.slice().sort(function(x, y){ return x - y; });
+    const n = a.length;
+    if(!n) return null;
+    return n % 2 ? a[(n - 1) / 2] : (a[n / 2 - 1] + a[n / 2]) / 2;
+  }
+
+  /* Gelişmiş kapsam — bölüm bazında ilerleme. Yine yalnız SAYI: konu adı,
+     soru metni ve hata defteri kaydı burada da gitmez. */
+  function genis(d, gun, bloklar){
+    const out = {};
+
+    if(gun){
+      out.plan_blocks = metric(bloklar.length, 'measured');
+      out.plan_done = metric(bloklar.filter(function(b){
+        return b.status === 'done'; }).length, 'measured');
+      out.paragraph_done = metric(Number(gun.paragraphActual) || 0, 'measured');
+      out.problem_done = metric(Number(gun.problemActual) || 0, 'measured');
+      const dogru = bloklar.filter(function(b){ return b.correctQ != null; });
+      out.correct_questions = dogru.length
+        ? metric(dogru.reduce(function(a, b){ return a + Number(b.correctQ || 0); }, 0),
+            'measured')
+        : metric(null, 'missing');
+    }
+
+    out.exam_count = metric((S.exams || []).filter(function(e){
+      return String(e.date) <= d; }).length, 'computed');
+
+    /* Buradan sonrası BUGÜNÜN durumundan türetilir; geçmiş bir gün için
+       gönderilmez — dünkü tarihle bugünkü kart borcunu yollamak, ambara
+       sahte bir ölçüm yazmaktır. */
+    if(gecmisMi(d)) return out;
+
+    out.cards_total = metric((S.cards || []).length, 'measured');
+    out.cards_due = metric((S.cards || []).filter(function(c){
+      return c.dueAt && c.dueAt <= d; }).length, 'computed');
+    out.errors_open = metric((S.errors || []).filter(function(e){
+      return !e.closedAt; }).length, 'computed');
     return out;
   }
 
@@ -272,6 +354,54 @@ R.Beacon = (function(){
     return { ok:durum === 202, status:durum, note:not, payload:body };
   }
 
+
+  /* ------------------------------------------------------------- geçmiş
+
+     Capraz bulgu ve yon tahlili GECMIS ister: bugunden itibaren biriken bir
+     ambar ilk iki ay hicbir sey soyleyemez. «Gecmisi gonder» o boslugu
+     kapatir — ama yalnizca geriye donuk hesaplanabilen alanlarla. */
+  async function backfill(days, onProgress){
+    const a = settings();
+    if(!a.enabled) return { ok:false, reason:'off', sent:0 };
+    if(!a.token) return { ok:false, reason:'no-token', sent:0 };
+    if(!urlOk(a.url)) return { ok:false, reason:'unsafe-url', sent:0 };
+    const n = Math.max(1, Math.min(Number(days) || 30, 180));
+    const bugun = U.todayISO();
+    let gonderilen = 0, bos = 0, hata = null;
+    for(let i = n - 1; i >= 0; i--){
+      const t = U.iso(U.addDays(U.parse(bugun), -i));
+      const govde = payload(t);
+      /* Bir gunun gonderilmesi icin en az bir OLCULMUS alan gerekir.
+         «Hesaplandi» yetmez: sinava kalan gun her tarih icin hesaplanabilir
+         ve yalniz onu tasiyan bir govde, kullanicinin o gun bir sey yaptigi
+         izlenimini birakir. Ambarda «gorulen gun» sayisini boyle sismek,
+         sessiz bir yalandir. */
+      const dolu = Object.keys(govde.metrics).some(function(k){
+        return govde.metrics[k].cert === 'measured';
+      });
+      if(!dolu || contract(govde).length){ bos++; continue; }
+      let durum = 0;
+      try{
+        const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json',
+            'Authorization':'Bearer ' + a.token },
+          body:JSON.stringify(govde),
+        });
+        durum = res.status;
+      }catch(e){ durum = 0; }
+      if(durum !== 202){ hata = durum; break; }
+      gonderilen++;
+      if(typeof onProgress === 'function') onProgress(gonderilen, n);
+    }
+    await save({ lastAt:new Date().toISOString(),
+      lastStatus:hata == null ? 202 : hata,
+      lastNote:hata == null
+        ? gonderilen + ' günlük geçmiş gönderildi (' + bos + ' gün ölçümsüz).'
+        : 'Geçmiş gönderimi ' + hata + ' ile durdu.' });
+    return { ok:hata == null, sent:gonderilen, empty:bos, status:hata || 202 };
+  }
+
   /* Ateşle ve unut: arayüz akışlarının çağırdığı biçim. Söz vermez,
      beklemez, hata fırlatmaz. */
   function ping(opts){
@@ -282,5 +412,6 @@ R.Beacon = (function(){
   }
 
   return { load, save, settings, collect, payload, preview, contract, metric,
-    urlOk, due, send, ping, pair, MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
+    urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
+    MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
 })();

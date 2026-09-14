@@ -173,6 +173,30 @@ async function main(){
       if(!acik.ok) hatalar.push(s.id + ': HKM gonderimi basarisiz (' + acik.status + ') ' + acik.note);
       else console.log('  ' + s.id + ' → HKM 202 · ' + acik.keys.length + ' alan: ' + acik.keys.join(', '));
 
+      /* 2.5 — GELISMIS kapsam ve GECMIS: HKM'nin korlugu kapaniyor mu?
+         Ambar genislemeden brifing, veri gorunturuleme ve capraz bulgu
+         icin veri yok demektir. */
+      const genis = await page.evaluate(async ([ns]) => {
+        const B = window[ns].Beacon;
+        await B.save({ level:'gelismis' });
+        const p = B.payload();
+        const r = await B.send({ force:true });
+        return { ok:r.ok, keys:Object.keys(p.metrics).length,
+          hata:B.contract(p).length };
+      }, [s.ns]);
+      if(genis.hata) hatalar.push(s.id + ': gelismis govde kendi sozlesmesini gecemedi');
+      if(!genis.ok) hatalar.push(s.id + ': gelismis govde HKM tarafindan kabul edilmedi');
+      else console.log('  ' + s.id + ' → gelismis kapsam: ' + genis.keys + ' alan');
+
+      const gecmis = await page.evaluate(async ([ns]) => {
+        const B = window[ns].Beacon;
+        const r = await B.backfill(20);
+        return { ok:r.ok, sent:r.sent, empty:r.empty, status:r.status };
+      }, [s.ns]);
+      if(!gecmis.ok) hatalar.push(s.id + ': gecmis gonderimi basarisiz (' + gecmis.status + ')');
+      else console.log('  ' + s.id + ' → gecmis: ' + gecmis.sent + ' gun gonderildi, '
+        + gecmis.empty + ' gun olcumsuz (dogru davranis)');
+
       /* 3 — jeton yanlisken 401, ve bu arayuzu bozmaz. */
       const yanlis = await page.evaluate(async ([ns, url]) => {
         const B = window[ns].Beacon;

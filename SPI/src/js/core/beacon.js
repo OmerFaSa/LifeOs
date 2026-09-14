@@ -41,6 +41,7 @@ SP.Beacon = (function(){
     url:'http://127.0.0.1:4200',
     token:'',
     intervalMinutes:60,
+    level:'ozet',            // ozet | gelismis
     lastAt:null,                   // son DENEME
     lastOkAt:null,                 // son BAŞARILI gönderim
     lastStatus:null,               // 202 | 422 | 401 | 0 (ulaşılamadı)
@@ -64,6 +65,36 @@ SP.Beacon = (function(){
     await SP.Store.set('hkm', AYAR);
     return settings();
   }
+
+
+  /* --------------------------------------------------------- kapsam seviyesi
+
+     Ilk surum gunde birkac sayi goruyordu; bu, «bu haftayi analiz et» gibi
+     sorulari cevaplanamaz kiliyordu. Cozum gonderimi genisletmek ama
+     GENISLIGI KULLANICININ SECMESI:
+
+       ozet      — yuk kararini etkileyen cekirdek olcumler (VARSAYILAN)
+       gelismis  — bolum bazinda ilerleme de gider
+
+     Iki seviyede de giden sey SAYIDIR: icerik hicbir seviyede gitmez.
+     Seviye degistirmek yeni bir izin ister gibi davranir: ne gonderilecegi
+     yine satir satir gosterilir. */
+  const LEVELS = [
+    { id:'ozet', label:'Özet',
+      note:'Yalnız yük kararını etkileyen çekirdek ölçümler.' },
+    { id:'gelismis', label:'Gelişmiş',
+      note:'Bölüm bazında ilerleme de gider — hâlâ yalnız sayı.' },
+  ];
+
+  function levelOf(){
+    const id = settings().level;
+    return LEVELS.some(function(l){ return l.id === id; }) ? id : 'ozet';
+  }
+
+  /* Gecmis bir gun icin GERIYE DONUK hesaplanamayan alanlar gonderilmez:
+     bugunku degeri dunun tarihiyle yollamak, ambara sahte bir olcum
+     yazmaktir. */
+  function gecmisMi(dateISO){ return String(dateISO) !== U.todayISO(); }
 
   /* ----------------------------------------------------------- sözleşme
 
@@ -152,6 +183,43 @@ SP.Beacon = (function(){
     }else{
       out.hrv_baseline = metric(null, 'missing');
     }
+
+    if(levelOf() === 'gelismis') Object.assign(out, genis(d, v));
+    return out;
+  }
+
+  /* Gelişmiş kapsam — günün ölçüm ve yük tablosu. Hepsi O GÜNE bağlıdır,
+     bu yüzden geçmiş günler için de dürüstçe hesaplanabilir.
+
+     Klinik sınır burada da geçerli: tahlil değeri, ilaç adı, semptom adı
+     ve öğün içeriği HİÇBİR seviyede gitmez. Semptom yalnızca SAYI olarak
+     gider — hangi semptom olduğu değil, kaç tane işaretlendiği. */
+  function genis(d, v){
+    const out = {};
+    [['weight', 'weight'], ['rhr', 'rhr'], ['sbp', 'sbp'], ['dbp', 'dbp'],
+     ['waist', 'waist'], ['water', 'water']].forEach(function(p){
+      const x = v[p[1]];
+      out[p[0]] = x == null ? metric(null, 'missing') : metric(x, 'measured');
+    });
+
+    const ogun = SP.Nutri && SP.Nutri.dayTotals ? SP.Nutri.dayTotals(d) : null;
+    const yendi = ogun && (SP.Model.mealsOf(d) || []).length;
+    out.protein_g = yendi ? metric(Math.round(ogun.protein), 'computed')
+      : metric(null, 'missing');
+    out.kcal = yendi ? metric(Math.round(ogun.kcal), 'computed')
+      : metric(null, 'missing');
+
+    const antrenman = (S.workouts || []).filter(function(w){ return w.date === d; });
+    out.train_minutes = antrenman.length
+      ? metric(antrenman.reduce(function(a, w){ return a + (Number(w.minutes) || 0); }, 0),
+          'measured')
+      : metric(null, 'missing');
+
+    /* Semptom SAYISI gider, semptomun kendisi gitmez. Ve «işaretlenmedi»
+       ile «hiç bakılmadı» ayrı şeylerdir: ikincisi veri yoktur. */
+    out.symptom_count = v.symptomsLogged
+      ? metric(Object.keys(v.symptoms || {}).length, 'measured')
+      : metric(null, 'missing');
     return out;
   }
 
@@ -276,6 +344,54 @@ SP.Beacon = (function(){
     return { ok:durum === 202, status:durum, note:not, payload:body };
   }
 
+
+  /* ------------------------------------------------------------- geçmiş
+
+     Capraz bulgu ve yon tahlili GECMIS ister: bugunden itibaren biriken bir
+     ambar ilk iki ay hicbir sey soyleyemez. «Gecmisi gonder» o boslugu
+     kapatir — ama yalnizca geriye donuk hesaplanabilen alanlarla. */
+  async function backfill(days, onProgress){
+    const a = settings();
+    if(!a.enabled) return { ok:false, reason:'off', sent:0 };
+    if(!a.token) return { ok:false, reason:'no-token', sent:0 };
+    if(!urlOk(a.url)) return { ok:false, reason:'unsafe-url', sent:0 };
+    const n = Math.max(1, Math.min(Number(days) || 30, 180));
+    const bugun = U.todayISO();
+    let gonderilen = 0, bos = 0, hata = null;
+    for(let i = n - 1; i >= 0; i--){
+      const t = U.iso(U.addDays(U.parse(bugun), -i));
+      const govde = payload(t);
+      /* Bir gunun gonderilmesi icin en az bir OLCULMUS alan gerekir.
+         «Hesaplandi» yetmez: sinava kalan gun her tarih icin hesaplanabilir
+         ve yalniz onu tasiyan bir govde, kullanicinin o gun bir sey yaptigi
+         izlenimini birakir. Ambarda «gorulen gun» sayisini boyle sismek,
+         sessiz bir yalandir. */
+      const dolu = Object.keys(govde.metrics).some(function(k){
+        return govde.metrics[k].cert === 'measured';
+      });
+      if(!dolu || contract(govde).length){ bos++; continue; }
+      let durum = 0;
+      try{
+        const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json',
+            'Authorization':'Bearer ' + a.token },
+          body:JSON.stringify(govde),
+        });
+        durum = res.status;
+      }catch(e){ durum = 0; }
+      if(durum !== 202){ hata = durum; break; }
+      gonderilen++;
+      if(typeof onProgress === 'function') onProgress(gonderilen, n);
+    }
+    await save({ lastAt:new Date().toISOString(),
+      lastStatus:hata == null ? 202 : hata,
+      lastNote:hata == null
+        ? gonderilen + ' günlük geçmiş gönderildi (' + bos + ' gün ölçümsüz).'
+        : 'Geçmiş gönderimi ' + hata + ' ile durdu.' });
+    return { ok:hata == null, sent:gonderilen, empty:bos, status:hata || 202 };
+  }
+
   /* Ateşle ve unut: arayüz akışlarının çağırdığı biçim. Söz vermez,
      beklemez, hata fırlatmaz. */
   function ping(opts){
@@ -286,5 +402,6 @@ SP.Beacon = (function(){
   }
 
   return { load, save, settings, collect, payload, preview, contract, metric,
-    urlOk, due, send, ping, pair, MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
+    urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
+    MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
 })();

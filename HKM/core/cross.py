@@ -62,6 +62,21 @@ PAIRS = [
      "lag": 0,
      "question": "Ikisi ayni gunun ayni saatlerinden besleniyor. Biri "
                  "buyurken digeri kuculuyorsa, bu bir tercih mi bir kayip mi?"},
+    # --- gelismis kapsam ciftleri ---
+    # Bu ikisi yalniz «gelismis» kapsamda veri bulur; ozet kapsamda
+    # eslesmis gun sayisi esigi gecmez ve dogru sekilde «veri yok» der.
+    {"id": "training-vs-next-day-study",
+     "a": {"module": "spi", "metric": "train_minutes", "label": "antrenman dakikasi"},
+     "b": {"module": "ays", "metric": "study_minutes", "label": "ertesi gun calisma dakikasi"},
+     "lag": 1,
+     "question": "Agir antrenman gunlerinin ertesi gunu masada ne oluyor? "
+                 "Ikisi ayni gunun enerjisinden besleniyor."},
+    {"id": "protein-vs-next-day-recovery",
+     "a": {"module": "spi", "metric": "protein_g", "label": "gunluk protein"},
+     "b": {"module": "spi", "metric": "recovery", "label": "ertesi gun toparlanma"},
+     "lag": 1,
+     "question": "Protein alimi ile ertesi gunun toparlanmasi birlikte mi "
+                 "hareket ediyor?"},
     {"id": "sleep-vs-retention",
      "a": {"module": "spi", "metric": "sleep_hours", "label": "uyku saati"},
      "b": {"module": "esp", "metric": "retention", "label": "ertesi gun retansiyon"},

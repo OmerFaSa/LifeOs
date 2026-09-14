@@ -219,8 +219,32 @@ Her arayüzde `core/beacon.js` durur. Beş kural dosyanın başında yazılı:
 5. **Açık metin jeton ağa çıkmaz.** Yerel olmayan bir adrese düz `http`
    ile gönderim reddedilir.
 
-Giden şey günün ÖZETİDİR: AYS'den beş sayı, SPİ ve ESP'den dörder sayı.
-Soru metni, tahlil değeri, ilaç adı, kart metni, not içeriği gitmez.
+Giden şeyin genişliğini **kullanıcı seçer**:
+
+| Kapsam | Ne gider | Kaç alan |
+|---|---|---|
+| **Özet** (varsayılan) | yük kararını etkileyen çekirdek ölçümler | 4–5 |
+| **Gelişmiş** | bölüm bazında ilerleme de: plan, kart, hata, ölçüm, öğün, antrenman, disiplin dakikaları | ~14 |
+
+İki seviyede de giden şey **sayıdır**. Soru metni, tahlil değeri, ilaç adı,
+kart metni, not içeriği ve öğün **hiçbir seviyede** gitmez; SPİ'de semptom
+yalnızca *kaç tane işaretlendiği* olarak gider, hangisi olduğu değil.
+
+### Geçmiş gönderimi — ve geriye dönük dürüstlük
+
+Çapraz bulgu ve yön tahlili **geçmiş** ister: bugünden biriken bir ambar ilk
+iki ay hiçbir şey söyleyemez. «Geçmişi gönder» o boşluğu kapatır, iki katı
+kuralla:
+
+1. **Bugünden türetilen alan geçmiş güne yazılmaz.** Vadesi gelen kart
+   sayısı, retansiyon ve kademe bugünün durumundan hesaplanır; dünün
+   tarihiyle göndermek ambara **sahte bir ölçüm** yazmaktır. Bu alanlar
+   geçmiş günlerde «veri yok» gider. AYS'nin deneme medyanı da o güne
+   kadarki denemelerden hesaplanır — sonraki denemeler o güne sızmaz.
+2. **Ölçülmemiş gün hiç gönderilmez.** Bir günün gönderilmesi için en az bir
+   ÖLÇÜLMÜŞ alan gerekir; «hesaplandı» yetmez. Sınava kalan gün her tarih
+   için hesaplanabilir ve yalnız onu taşıyan bir gövde, kullanıcının o gün
+   bir şey yaptığı izlenimi bırakırdı.
 
 ### Tarayıcı sınırı: CORS
 

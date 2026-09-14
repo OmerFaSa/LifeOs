@@ -223,6 +223,16 @@ SP.Screens.guide = (function(){
           body:'Bu adrese gönderim yapılmaz: yerel olmayan bir adrese düz http '
              + 'ile giderken jeton ağda açık gider. https ya da 127.0.0.1 gerekir.' }))}
 
+        <div class="mt-12">
+          ${K.Field({ label:'Kapsam', hint:'ne kadarı gönderilsin',
+            input:K.Select({ id:'sp-hkm-level', value:SP.Beacon.levelOf(),
+              change:'hkm-level', aria:'Gönderim kapsamı',
+              options:SP.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
+          <p class="tiny dim">${(SP.Beacon.LEVELS.find(l => l.id === SP.Beacon.levelOf()) || {}).note}
+            Gelişmiş kapsamda bile tahlil değeri, ilaç adı ve semptomun kendisi
+            GİTMEZ — semptom yalnızca sayı olarak gider.</p>
+        </div>
+
         <div class="mt-12">${K.SectionTitle('Bugün ne gidiyor')}</div>
         ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
           rows:on.rows.map(r => [r.key,
@@ -240,7 +250,8 @@ SP.Screens.guide = (function(){
         <p class="tiny dim mt-10">${durum}</p>`,
       foot:html`${K.Button({ label:'Bağlan', size:'sm', tone:'primary',
           act:'hkm-pair' })}
-        ${K.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-send' })}`,
+        ${K.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-send' })}
+        ${K.Button({ label:'Geçmişi gönder (60 gün)', size:'sm', act:'hkm-backfill' })}`,
     });
   }
 
@@ -452,6 +463,13 @@ SP.Screens.guide = (function(){
       UI.toast(r.note);
       SP.App.render();
     },
+    async 'hkm-backfill'(){
+      UI.toast('Geçmiş gönderiliyor…');
+      const r = await SP.Beacon.backfill(60);
+      UI.toast(r.ok ? r.sent + ' gün gönderildi (' + r.empty + ' gün ölçümsüz)'
+        : 'Gönderilemedi (' + (r.reason || r.status) + ')');
+      SP.App.render();
+    },
     async 'hkm-send'(){
       const r = await SP.Beacon.send({ force:true });
       UI.toast(r.ok ? 'Gönderildi' : (r.note || 'Gönderilemedi'));
@@ -541,6 +559,7 @@ SP.Screens.guide = (function(){
       const n = Math.max(SP.Beacon.ASGARI_ARA_DK, Number(el.value) || 60);
       await SP.Beacon.save({ intervalMinutes:n });
     },
+    async 'hkm-level'(el){ await SP.Beacon.save({ level:el.value }); SP.App.render(); },
     async 'pick-provider'(el){
       const p = SP.PROVIDERS[el.value];
       const first = p && p.models && p.models[0] ? p.models[0].id : '';

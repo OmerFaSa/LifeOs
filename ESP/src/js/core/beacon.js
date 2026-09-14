@@ -41,6 +41,7 @@ ESP.Beacon = (function(){
     url:'http://127.0.0.1:4200',
     token:'',
     intervalMinutes:60,
+    level:'ozet',            // ozet | gelismis
     lastAt:null,                   // son DENEME
     lastOkAt:null,                 // son BAŞARILI gönderim
     lastStatus:null,               // 202 | 422 | 401 | 0 (ulaşılamadı)
@@ -64,6 +65,36 @@ ESP.Beacon = (function(){
     await ESP.Store.set('hkm', AYAR);
     return settings();
   }
+
+
+  /* --------------------------------------------------------- kapsam seviyesi
+
+     Ilk surum gunde birkac sayi goruyordu; bu, «bu haftayi analiz et» gibi
+     sorulari cevaplanamaz kiliyordu. Cozum gonderimi genisletmek ama
+     GENISLIGI KULLANICININ SECMESI:
+
+       ozet      — yuk kararini etkileyen cekirdek olcumler (VARSAYILAN)
+       gelismis  — bolum bazinda ilerleme de gider
+
+     Iki seviyede de giden sey SAYIDIR: icerik hicbir seviyede gitmez.
+     Seviye degistirmek yeni bir izin ister gibi davranir: ne gonderilecegi
+     yine satir satir gosterilir. */
+  const LEVELS = [
+    { id:'ozet', label:'Özet',
+      note:'Yalnız yük kararını etkileyen çekirdek ölçümler.' },
+    { id:'gelismis', label:'Gelişmiş',
+      note:'Bölüm bazında ilerleme de gider — hâlâ yalnız sayı.' },
+  ];
+
+  function levelOf(){
+    const id = settings().level;
+    return LEVELS.some(function(l){ return l.id === id; }) ? id : 'ozet';
+  }
+
+  /* Gecmis bir gun icin GERIYE DONUK hesaplanamayan alanlar gonderilmez:
+     bugunku degeri dunun tarihiyle yollamak, ambara sahte bir olcum
+     yazmaktir. */
+  function gecmisMi(dateISO){ return String(dateISO) !== U.todayISO(); }
 
   /* ----------------------------------------------------------- sözleşme
 
@@ -124,9 +155,17 @@ ESP.Beacon = (function(){
     const d = dateISO || U.todayISO();
     const out = {};
 
-    const ret = ESP.SRS.retention(null, d);
-    out.retention = metric(ret.value, ret.cert);
-    out.retention_cards = ret.n ? metric(ret.n, 'computed') : metric(null, 'missing');
+    /* Retansiyon BUGÜNÜN kart durumundan hesaplanır: kartın kararlılığı ve
+       son tekrardan bu yana geçen süre. Geçmiş bir gün için bu sayı o günün
+       ölçümü DEĞİLDİR — o yüzden geçmişte gönderilmez. */
+    if(gecmisMi(d)){
+      out.retention = metric(null, 'missing');
+      out.retention_cards = metric(null, 'missing');
+    }else{
+      const ret = ESP.SRS.retention(null, d);
+      out.retention = metric(ret.value, ret.cert);
+      out.retention_cards = ret.n ? metric(ret.n, 'computed') : metric(null, 'missing');
+    }
 
     const dk = ESP.Model.minutesOf(d);
     out.practice_minutes = dk == null ? metric(null, 'missing') : metric(dk, 'measured');
@@ -149,6 +188,33 @@ ESP.Beacon = (function(){
           : metric(null, 'missing');
       }
     }
+
+    if(levelOf() === 'gelismis') Object.assign(out, genis(d));
+    return out;
+  }
+
+  /* Gelişmiş kapsam — disiplin disiplin dakika. Hangi kitabı okuduğun,
+     hangi parçayı çalıştığın ve not içeriği gitmez; giden şey AÇIK olan
+     disiplinlerin o günkü ölçülmüş dakikasıdır.
+
+     Kapalı bir disiplin hiç gönderilmez: kapalı bölümün «0 dakika»sı bir
+     ölçüm değil, olmayan bir sorunun cevabıdır. */
+  function genis(d){
+    const out = {};
+    (ESP.DISCIPLINES || []).forEach(function(disc){
+      if(ESP.Mod && !ESP.Mod.isOn(disc.id)) return;
+      const dk = ESP.Model.minutesOf(d, disc.id);
+      out['disc.' + disc.id + '.minutes'] = dk == null
+        ? metric(null, 'missing') : metric(dk, 'measured');
+    });
+    const oturum = ESP.Model.sessionsOf(d);
+    out.sessions = oturum.length ? metric(oturum.length, 'measured')
+      : metric(null, 'missing');
+
+    if(gecmisMi(d)) return out;
+    out.cards_total = metric((S.cards || []).length, 'measured');
+    out.cards_due = metric((S.cards || []).filter(function(c){
+      return c.dueAt && c.dueAt <= d; }).length, 'computed');
     return out;
   }
 
@@ -273,6 +339,54 @@ ESP.Beacon = (function(){
     return { ok:durum === 202, status:durum, note:not, payload:body };
   }
 
+
+  /* ------------------------------------------------------------- geçmiş
+
+     Capraz bulgu ve yon tahlili GECMIS ister: bugunden itibaren biriken bir
+     ambar ilk iki ay hicbir sey soyleyemez. «Gecmisi gonder» o boslugu
+     kapatir — ama yalnizca geriye donuk hesaplanabilen alanlarla. */
+  async function backfill(days, onProgress){
+    const a = settings();
+    if(!a.enabled) return { ok:false, reason:'off', sent:0 };
+    if(!a.token) return { ok:false, reason:'no-token', sent:0 };
+    if(!urlOk(a.url)) return { ok:false, reason:'unsafe-url', sent:0 };
+    const n = Math.max(1, Math.min(Number(days) || 30, 180));
+    const bugun = U.todayISO();
+    let gonderilen = 0, bos = 0, hata = null;
+    for(let i = n - 1; i >= 0; i--){
+      const t = U.iso(U.addDays(U.parse(bugun), -i));
+      const govde = payload(t);
+      /* Bir gunun gonderilmesi icin en az bir OLCULMUS alan gerekir.
+         «Hesaplandi» yetmez: sinava kalan gun her tarih icin hesaplanabilir
+         ve yalniz onu tasiyan bir govde, kullanicinin o gun bir sey yaptigi
+         izlenimini birakir. Ambarda «gorulen gun» sayisini boyle sismek,
+         sessiz bir yalandir. */
+      const dolu = Object.keys(govde.metrics).some(function(k){
+        return govde.metrics[k].cert === 'measured';
+      });
+      if(!dolu || contract(govde).length){ bos++; continue; }
+      let durum = 0;
+      try{
+        const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json',
+            'Authorization':'Bearer ' + a.token },
+          body:JSON.stringify(govde),
+        });
+        durum = res.status;
+      }catch(e){ durum = 0; }
+      if(durum !== 202){ hata = durum; break; }
+      gonderilen++;
+      if(typeof onProgress === 'function') onProgress(gonderilen, n);
+    }
+    await save({ lastAt:new Date().toISOString(),
+      lastStatus:hata == null ? 202 : hata,
+      lastNote:hata == null
+        ? gonderilen + ' günlük geçmiş gönderildi (' + bos + ' gün ölçümsüz).'
+        : 'Geçmiş gönderimi ' + hata + ' ile durdu.' });
+    return { ok:hata == null, sent:gonderilen, empty:bos, status:hata || 202 };
+  }
+
   /* Ateşle ve unut: arayüz akışlarının çağırdığı biçim. Söz vermez,
      beklemez, hata fırlatmaz. */
   function ping(opts){
@@ -283,5 +397,6 @@ ESP.Beacon = (function(){
   }
 
   return { load, save, settings, collect, payload, preview, contract, metric,
-    urlOk, due, send, ping, pair, MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
+    urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
+    MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
 })();

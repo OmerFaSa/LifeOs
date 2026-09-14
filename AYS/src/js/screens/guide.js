@@ -452,6 +452,15 @@ R.Screens.guide = (function(){
              + 'ile giderken jeton ağda açık gider. https ya da 127.0.0.1 gerekir.' }))}
 
         <div class="mt-12">
+          ${K.Field({ label:'Kapsam',
+            hint:'ne kadarı gönderilsin',
+            input:K.Select({ id:'ay-hkm-level', value:R.Beacon.levelOf(),
+              change:'hkm-level', aria:'Gönderim kapsamı',
+              options:R.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
+          <p class="tiny dim">${(R.Beacon.LEVELS.find(l => l.id === R.Beacon.levelOf()) || {}).note}</p>
+        </div>
+
+        <div class="mt-12">
           <span class="mono-label">Bugün ne gidiyor</span>
           ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
             rows:on.rows.map(r => [r.key,
@@ -467,7 +476,13 @@ R.Screens.guide = (function(){
         <div class="mt-12">
           ${K.Button({ label:'Bağlan', act:'hkm-pair', tone:'primary' })}
           ${K.Button({ label:'Şimdi gönder', act:'hkm-send' })}
+          ${K.Button({ label:'Geçmişi gönder (60 gün)', act:'hkm-backfill' })}
         </div>
+        <p class="tiny dim mt-8">Çapraz bulgu ve yön tahlili GEÇMİŞ ister;
+          bugünden biriken bir ambar ilk iki ay hiçbir şey söyleyemez.
+          Geçmiş gönderimi yalnızca geriye dönük HESAPLANABİLEN alanları
+          yollar: dünkü tarihle bugünkü kart borcunu yazmak, ambara sahte
+          bir ölçüm koymaktır.</p>
         <p class="tiny dim mt-8">«Bağlan», jetonu HKM'den doğrudan alır:
           önce HKM yüzünde «Cihazları bağla» de, sonra iki dakika içinde
           buraya bas. Jetonu elle yazmak da çalışır.</p>
@@ -768,6 +783,13 @@ R.Screens.guide = (function(){
       UI.toast(r.note);
       R.App.render();
     },
+    async 'hkm-backfill'(){
+      UI.toast('Geçmiş gönderiliyor…');
+      const r = await R.Beacon.backfill(60);
+      UI.toast(r.ok ? r.sent + ' gün gönderildi (' + r.empty + ' gün ölçümsüz)'
+        : 'Gönderilemedi (' + (r.reason || r.status) + ')');
+      R.App.render();
+    },
     async 'hkm-send'(){
       const r = await R.Beacon.send({ force:true });
       UI.toast(r.ok ? 'Gönderildi' : (r.note || 'Gönderilemedi'));
@@ -791,6 +813,7 @@ R.Screens.guide = (function(){
       const n = Math.max(R.Beacon.ASGARI_ARA_DK, Number(el.value) || 60);
       await R.Beacon.save({ intervalMinutes:n });
     },
+    async 'hkm-level'(el){ await R.Beacon.save({ level:el.value }); R.App.render(); },
   };
 
   return {
