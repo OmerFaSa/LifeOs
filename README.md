@@ -12,7 +12,7 @@ Yanlarında dördüncü, **isteğe bağlı** bir katman durur:
 
 | Klasör | Katman | Durum | Belge |
 |---|---|---|---|
-| [`HKM/`](HKM/) | **Hayat Kontrol Merkezi** | merkez katman: brifing, çapraz bulgu, etki, sohbet, niyet kuyruğu, ritim (184 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
+| [`HKM/`](HKM/) | **Hayat Kontrol Merkezi** | merkez katman: brifing, çapraz bulgu, etki, sohbet, niyet kuyruğu, ritim (207 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
 
 HKM üçünün **üstünde değil yanındadır**: üç sistem onun var olduğunu bilmez ve
 o kapalıyken hiçbiri bozulmaz. Tek bağ, her arayüzdeki `core/beacon.js`
