@@ -161,6 +161,7 @@ def run():
         eq(patron.parse("Kabul"), "kabul")
         eq(patron.parse("neden böyle"), "neden")
         eq(patron.parse("bugün ne yapsam acaba"), None)
+        eq(patron.parse("etki"), "etki")
         eq(patron.parse(""), None)
     test("komut seti kucuk ve kapali", t_commands_are_closed_set)
 
@@ -201,6 +202,15 @@ def run():
         ok("SPİ" in r["text"])
         ok("Öncelik" in r["text"])
     test("«neden» dayanagi soyler", t_reason_names_sources)
+
+    def t_impact_command_says_not_yet_measured():
+        """«Etki» komutu, olculmemis faydayi «fayda yok» diye sunmaz."""
+        con = _con()
+        r = patron.respond(con, "etki", date=BUGUN)
+        eq(r["command"], "etki")
+        ok("HENÜZ ÖLÇÜLMEDİ" in r["text"])
+    test("«etki» komutu olcumu oldugu gibi soyler",
+         t_impact_command_says_not_yet_measured)
 
     def t_conversation_is_logged():
         con = _con()

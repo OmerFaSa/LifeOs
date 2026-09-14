@@ -32,7 +32,7 @@
 
 import datetime
 
-from core import cross, db, manager
+from core import cross, db, impact, manager
 
 # Komut sozlugu — kucuk ve KAPALI. Her biri tek bir sey yapar.
 COMMANDS = [
@@ -46,6 +46,8 @@ COMMANDS = [
      "note": "Onerinin hangi denetimlerden dogdugunu soyler."},
     {"id": "capraz", "words": ("capraz", "çapraz", "esleme", "eşleşme"),
      "note": "Uc ambarin yan yana konmasindan cikan bulgular."},
+    {"id": "etki", "words": ("etki", "fayda", "ise", "işe"),
+     "note": "Kabul edilen onerilerin ardindan olculer ne yapti."},
     {"id": "yardim", "words": ("yardim", "yardım", "komut", "?"),
      "note": "Bu listeyi gosterir."},
 ]
@@ -149,6 +151,9 @@ def respond(con, text, date=None, th=None, channel="local", now=None):
                      "altında kaldı ya da eşleşmiş gün sayısı yetmedi.")
         else:
             cevap = "\n".join("• " + b["note"] for b in bulgu[:2])
+    elif komut == "etki":
+        ozet = impact.summary(con)
+        cevap = ozet["verdict"]["note"]
     elif komut == "neden":
         karar = db.current_decision(con, date) or _acik_oneri(con, date)
         cevap = _dayanak(con, karar)

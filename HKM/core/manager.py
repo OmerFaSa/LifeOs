@@ -191,7 +191,7 @@ def carry(con, date, prop, audits, now=None):
         return var
     kaynak = [a["id"] for a in audits.values() if a.get("id")]
     did = db.insert_decision(con, date, prop["rank"], prop["proposal"], now,
-                             audit_ids=kaynak)
+                             audit_ids=kaynak, key=prop.get("key"))
     return db.decision(con, did)
 
 

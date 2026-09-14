@@ -7,6 +7,7 @@
 3. Dogrulama metni yeniden yazmaz; reddeder (sync_engine).
 """
 
+import datetime
 import json
 import os
 import sqlite3
@@ -40,8 +41,10 @@ CREATE TABLE IF NOT EXISTS decisions (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   date       TEXT NOT NULL,              -- UNIQUE DEGIL: gunde birden cok oneri
   rank       INTEGER NOT NULL,           -- HKM.PRECEDENCE sirasi
+  key        TEXT,                       -- hangi oncelik kurali (bio_red, ...)
   proposal   TEXT NOT NULL,              -- oneri cumlesi (emir degil)
   state      TEXT NOT NULL DEFAULT 'proposed',  -- proposed|accepted|declined
+  answered_at TEXT,                      -- kabul/ret zamani
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ix_decisions_date ON decisions(date);
@@ -63,6 +66,31 @@ CREATE TABLE IF NOT EXISTS conversations (
 """
 
 
+# Sema degisikligi: CREATE TABLE IF NOT EXISTS var olan bir tabloyu
+# GUNCELLEMEZ. Yeni bir sutun eklendiginde eski veritabani sessizce eski
+# semayla kalir ve ilk sorguda patlar. Tasima bu yuzden ACIK yazilir ve
+# her acilista kosar: yoksa «calisiyor gorunen» bir surum, gercekte eski
+# kaydi okuyamayan bir surumdur.
+MIGRATIONS = [
+    # (tablo, sutun, tanim)
+    ("decisions", "key", "TEXT"),          # oncelik kurali kimligi
+    ("decisions", "answered_at", "TEXT"),  # kabul/ret ne zaman verildi
+]
+
+
+def _migrate(con):
+    uygulanan = []
+    for tablo, sutun, tanim in MIGRATIONS:
+        var = [r["name"] for r in con.execute("PRAGMA table_info(%s)" % tablo)]
+        if sutun in var:
+            continue
+        con.execute("ALTER TABLE %s ADD COLUMN %s %s" % (tablo, sutun, tanim))
+        uygulanan.append("%s.%s" % (tablo, sutun))
+    if uygulanan:
+        con.commit()
+    return uygulanan
+
+
 def connect(path=None):
     p = path or DB_PATH
     if p != ":memory:":
@@ -70,6 +98,7 @@ def connect(path=None):
     con = sqlite3.connect(p)
     con.row_factory = sqlite3.Row
     con.executescript(SCHEMA)
+    _migrate(con)
     return con
 
 
@@ -91,10 +120,11 @@ def insert_audit(con, event_id, vp, verdict, findings, created_at):
     return cur.lastrowid
 
 
-def insert_decision(con, date, rank, proposal, created_at, audit_ids=()):
+def insert_decision(con, date, rank, proposal, created_at, audit_ids=(), key=None):
     cur = con.execute(
-        "INSERT INTO decisions(date, rank, proposal, created_at) VALUES (?,?,?,?)",
-        (date, rank, proposal, created_at),
+        "INSERT INTO decisions(date, rank, key, proposal, created_at) "
+        "VALUES (?,?,?,?,?)",
+        (date, rank, key, proposal, created_at),
     )
     did = cur.lastrowid
     for aid in audit_ids:
@@ -118,10 +148,12 @@ def current_decision(con, date):
     return dict(row) if row else None
 
 
-def set_decision_state(con, decision_id, state):
+def set_decision_state(con, decision_id, state, answered_at=None):
     if state not in ("proposed", "accepted", "declined"):
         raise ValueError("gecersiz karar durumu: %r" % (state,))
-    con.execute("UPDATE decisions SET state=? WHERE id=?", (state, decision_id))
+    con.execute("UPDATE decisions SET state=?, answered_at=? WHERE id=?",
+                (state, answered_at or datetime.datetime.now()
+                 .isoformat(timespec="seconds"), decision_id))
     con.commit()
 
 
@@ -161,6 +193,15 @@ def latest_payloads(con, date):
     for e in events_between(con, date, date):
         out[e["module"]] = e["payload"]
     return out
+
+
+def answered_decisions(con, states=("accepted", "declined")):
+    """Cevaplanmis butun oneriler — etki olcumunun girdisi."""
+    isaret = ",".join("?" * len(states))
+    rows = con.execute(
+        "SELECT * FROM decisions WHERE state IN (%s) ORDER BY date, id" % isaret,
+        tuple(states)).fetchall()
+    return [dict(r) for r in rows]
 
 
 def decisions_of(con, date):

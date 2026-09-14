@@ -110,6 +110,7 @@ svg.spark{ width:100%; height:34px; display:block; }
     </div>
 
     <div data-bolme="hkm" hidden>
+      <div class="card" id="etki"></div>
       <div class="card" id="ikiz"></div>
       <div class="card" id="gecmis"></div>
 
@@ -273,6 +274,33 @@ svg.spark{ width:100%; height:34px; display:block; }
          + 'Az veri bir bulgu değildir.</p>';
     }
     $('capraz').innerHTML = h;
+  }
+
+  /* Etki: HKM'nin kendi faydasını ölçmesi. Buradaki cümle asla «öneri işe
+     yaradı» demez — «kabul edilen önerilerin ardından ölçü şöyle hareket
+     etti» der, ve seçilim uyarısı hep yanındadır. */
+  function etkiCiz(e){
+    var h = '<div class="tag">Etki · öneri sonrası</div>';
+    h += '<p>' + esc((e.verdict || {}).note || '') + '</p>';
+    var kurallar = Object.keys(e.rules || {});
+    if(kurallar.length){
+      h += '<div class="scroll"><table><thead><tr><th>Kural</th>'
+         + '<th class="num">Kabul</th><th class="num">Ret</th>'
+         + '<th class="num">Yukarı</th><th class="num">Aşağı</th>'
+         + '<th class="num">Yerinde</th></tr></thead><tbody>';
+      kurallar.forEach(function(k){
+        var g = e.rules[k];
+        h += '<tr><td>' + esc(g.label || k) + '</td>'
+           + '<td class="num">' + esc(g.accepted) + '</td>'
+           + '<td class="num">' + esc(g.declined) + '</td>'
+           + '<td class="num">' + esc(g.accepted_improved) + '</td>'
+           + '<td class="num">' + esc(g.accepted_worsened) + '</td>'
+           + '<td class="num">' + esc(g.accepted_flat) + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+    h += '<p class="muted">' + esc(e.caveat || '') + '</p>';
+    $('etki').innerHTML = h;
   }
 
   function gecmisCiz(g){
@@ -453,6 +481,8 @@ svg.spark{ width:100%; height:34px; display:block; }
     if(i.status === 200) ikizCiz(i.body);
     var g = await api('/api/decisions?date=' + t);
     if(g.status === 200) gecmisCiz(g.body);
+    var et = await api('/api/impact');
+    if(et.status === 200) etkiCiz(et.body);
     await konusmaYukle();
   }
 

@@ -302,6 +302,7 @@ async function main(){
       ikiz:(document.querySelector('#ikiz') || {}).textContent || '',
       gecmis:(document.querySelector('#gecmis') || {}).textContent || '',
       capraz:(document.querySelector('#capraz') || {}).textContent || '',
+      etki:(document.querySelector('#etki') || {}).textContent || '',
       girisAcik:!document.querySelector('#giris').hidden,
     }));   /* icerik gizli sekmede de DOM'da durur: okumak icin tiklamak gerekmez */
     if(ekran.girisAcik) hatalar.push('HKM yuzu: dogru jetonla bile giris ekraninda kaldi');
@@ -309,6 +310,10 @@ async function main(){
     if(ekran.ikiz.indexOf('metriğe dayanıyor') < 0) hatalar.push('HKM yuzu: ikiz cizilmedi');
     if(ekran.gecmis.length < 20) hatalar.push('HKM yuzu: oneri gecmisi cizilmedi');
     if(ekran.capraz.indexOf('Çapraz bulgu') < 0) hatalar.push('HKM yuzu: capraz bulgu karti cizilmedi');
+    /* Etki karti: olculmemis faydayi «fayda yok» diye sunmamali. */
+    if(ekran.etki.indexOf('deney değildir') < 0){
+      hatalar.push('HKM yuzu: etki kartinda secilim uyarisi yok');
+    }
     if(yuzHata.length) hatalar.push('HKM yuzu: sayfa hatasi — ' + yuzHata[0]);
     else console.log('  HKM yuzu → brifing, ikiz ve oneri gecmisi cizildi');
 

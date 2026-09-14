@@ -150,6 +150,7 @@ Uç noktalar:
 | `GET /api/briefing?date=` | günün brifingi: VP raporları, dayanak ve **tek** öneri |
 | `GET /api/twin?date=&days=` | dijital ikiz — son N günün tek resmi |
 | `GET /api/decisions?date=` | günün bütün önerileri, reddedilenler dahil |
+| `GET /api/impact` | öneri sonrası ölçüler ne yaptı (etki) |
 | `GET /api/cross?date=&days=` | çapraz bulgular — üç ambar yan yana |
 | `GET /api/series?date=&days=&module=` | metrik metrik zaman serisi |
 | `POST /api/decision/<id>/accept` | öneriyi kabul eder |
@@ -388,13 +389,50 @@ WhatsApp'ın çalışması için HKM'nin dışarıdan erişilebilir olması gere
 (tünel ya da sunucu). Bu bir yazılım kararı değil bir **altyapı kararıdır**
 ve kullanıcınındır: kanal kapalıyken HKM ve üç sistem olduğu gibi çalışır.
 
+## 8.10 Etki — `core/impact.py`
+
+Bir katman kendi faydasını ölçmüyorsa, «gerekli mi» sorusunu ancak
+**izlenimle** cevaplayabilir — ve izlenim, ölçmeyen her sistemin kendini
+haklı çıkarma biçimidir. Bu dosya zinciri kapatır:
+
+```text
+öneri → kullanıcının cevabı → SONRAKİ GÜNLERDE ÖLÇÜ NE OLDU
+```
+
+Beş kural, ve üçü «söylememe» kuralıdır:
+
+1. **Neden-sonuç yok.** «Öneri işe yaradı» cümlesi buradan çıkmaz; çıkan
+   cümle «kabul ettiğin önerilerin ardından şu ölçü şöyle hareket etti»dir.
+   Aradaki fark bu dosyanın tamamıdır.
+2. **Seçilim yanlılığı yazılır ve kaldırılamaz.** Kabul ettiğin günler zaten
+   farklı günlerdi: bir öneriyi kabul edebilecek durumda olmak, ölçünün
+   zaten iyi gidiyor olmasıyla aynı şeyden besleniyor olabilir.
+3. **Eşiğin altında hüküm yok.** Üç cevaptan az, ya da önce/sonra
+   pencerelerinde üçer ölçüm yoksa «veri yok» denir — «etkisiz» değil.
+4. **Ret de bir veridir** ve kabulle karıştırılmaz; ikisini yan yana koymak
+   HKM'nin elindeki en yakın karşılaştırmadır ve **bu bile bir deney
+   değildir**.
+5. **Yön tanımsızsa ölçülmez.** Sentez açığının düşmesi iyidir, soru
+   sayısının düşmesi değil; yönü yazılı olmayan bir ölçüde etki hesaplanmaz.
+
+Büyük Patron'a bir komut eklendi: **`etki`**. Cevap, ölçülmemiş bir faydayı
+«fayda yok» diye sunmaz — «henüz ölçülmedi» der.
+
+### Şema taşıma
+
+`decisions` tablosuna iki sütun eklendi (`key`, `answered_at`).
+`CREATE TABLE IF NOT EXISTS` var olan bir tabloyu **güncellemez**; bu yüzden
+`db.MIGRATIONS` açık bir liste olarak yazıldı ve her açılışta koşuyor.
+Tekrarlanabilir: ikinci koşumda hiçbir şey yapmaz. Bir test eski şemayla
+kurulmuş bir veritabanını taşıyarak bunu denetliyor.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |
 |---|---|---|
 | 1 | Çekirdek daemon, SQLite şeması, bearer'lı sync | **yazıldı** |
 | 2 | Başkan Yardımcıları (VP) + öncelik sırası | **yazıldı** |
-| 3 | Dijital İkiz, Yönetici, öneri yaşam döngüsü | **yazıldı, 70 test** |
+| 3 | Dijital İkiz, Yönetici, öneri yaşam döngüsü, çapraz bulgu, veri merkezi, etki | **yazıldı** |
 | 4 | Kanal katmanı + Telegram adaptörü | **yazıldı** (kapalı gelir) |
 | 5 | WhatsApp geçidi (Cloud API, imzalı webhook) | **yazıldı** · ses yapılacak |
 | 6 | Üç arayüzden best-effort işaret | **yazıldı** |

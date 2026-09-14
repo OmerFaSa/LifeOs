@@ -8,6 +8,7 @@ Ucnoktalar:
     GET  /api/briefing?date=        gunun brifingi: VP raporlari + TEK oneri
     GET  /api/twin?date=&days=      dijital ikiz: son N gunun tek resmi
     GET  /api/decisions?date=       gunun butun onerileri (reddedilenler dahil)
+    GET  /api/impact                oneri sonrasi olculer ne yapti (etki)
     GET  /api/cross?date=&days=     capraz bulgular: uc ambar yan yana
     GET  /api/series?date=&days=&module=  metrik metrik zaman serisi
     POST /api/message               Buyuk Patron'a kisa komut (yerel kanal)
@@ -41,8 +42,8 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import (channels, cross, db, manager, patron,  # noqa: E402
-                  sync_engine, thresholds, twin)
+from core import (channels, cross, db, impact, manager,  # noqa: E402
+                  patron, sync_engine, thresholds, twin)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -363,6 +364,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"messages": patron.history(
                 self.con, max(1, min(limit, 200)),
                 (q.get("channel") or [None])[0])})
+        if u.path == "/api/impact":
+            return self._send(200, impact.summary(self.con))
         if u.path == "/api/decisions":
             return self._send(200, {"date": date,
                                     "decisions": db.decisions_of(self.con, date),
