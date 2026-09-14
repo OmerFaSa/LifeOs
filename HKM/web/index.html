@@ -1647,13 +1647,30 @@ details.detay > summary:hover{ color:var(--fg); }
   var SISTEM_ADRES = { ays:'http://127.0.0.1:4173/',
     spi:'http://127.0.0.1:4183/', esp:'http://127.0.0.1:4193/' };
 
+  /* Kapali bir sisteme BAGLANTI VERILMEZ.
+     «Ulaşılamadı» sayfasina gonderip kullaniciyi neyin yanlis oldugunu
+     aramaya birakmak, bir merkezin yapmayacagi seydir: kapali olan sey
+     kapali yazar ve ACMA YOLU yanina konur. */
   function acikMiYokla(){
     Array.prototype.forEach.call(document.querySelectorAll('[data-yokla]'),
       function(el){
+        var kutu = el.closest('.serit__kutu');
+        var bag = kutu ? kutu.querySelector('[data-ac-bag]') : null;
         fetch(el.dataset.yokla, { mode:'no-cors' })
-          .then(function(){ el.classList.add('ok'); el.textContent = 'açık'; })
-          .catch(function(){ el.classList.add('muted');
-            el.textContent = 'kapalı'; });
+          .then(function(){
+            el.className = 'ok';
+            el.textContent = 'açık';
+            if(bag) bag.hidden = false;
+          })
+          .catch(function(){
+            el.className = 'muted';
+            el.textContent = 'kapalı';
+            if(bag){
+              bag.hidden = true;
+              var not = kutu.querySelector('[data-kapali-not]');
+              if(not) not.hidden = false;
+            }
+          });
       });
   }
 
@@ -1678,8 +1695,11 @@ details.detay > summary:hover{ color:var(--fg); }
         + '<div class="serit__durum ' + sinif + '">' + esc(durum) + '</div>'
         + '<div class="serit__alt">' + esc(u.first || u.scope) + '</div>'
         + '<div style="margin-top:10px"><a href="' + esc(adres)
-        + '" target="_blank" rel="noopener">' + esc(SISTEM_KISA[u.module])
-        + '\u2019i aç →</a></div></div>';
+        + '" target="_blank" rel="noopener" data-ac-bag hidden>'
+        + esc(SISTEM_KISA[u.module]) + '\u2019i aç →</a>'
+        + '<span class="muted" data-kapali-not hidden style="font-size:12px">'
+        + 'Sunucusu kapalı. Açmak için kök klasörde: '
+        + '<code>python3 baslat.py</code></span></div></div>';
     });
     $('serit').innerHTML = h;
     acikMiYokla();
