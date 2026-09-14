@@ -100,6 +100,18 @@ input{ font:13px/1 ui-sans-serif, system-ui, sans-serif; padding:9px 10px;
    WCAG 2.2'nin 24px tabanini gecemez. */
 input[type="checkbox"]{ width:24px; height:24px; min-height:24px; }
 input[type="file"]{ min-height:36px; }
+select{ font:13px/1 ui-sans-serif, system-ui, sans-serif; padding:8px 10px;
+  border-radius:3px; border:1px solid var(--line-strong);
+  background:var(--yuzey); color:var(--fg); min-height:36px; max-width:100%; }
+select:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+/* Gorev satirinda secici + model alani yan yana; dar ekranda alt alta. */
+.metric__val{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+  min-width:0; }
+/* Genislik SINIFTAN gelir, satir ici stilden DEGIL: satir ici stil medya
+   sorgusunu yener ve telefonda 186 piksel tasma uretiyordu. */
+.alan{ max-width:100%; }
+.alan--genis{ width:240px; } .alan--orta{ width:180px; } .alan--dar{ width:100px; }
+.metric__val select{ max-width:100%; }
 
 table{ width:100%; border-collapse:collapse; font-size:13px; }
 /* Sag bosluk SIFIR OLAMAZ: saga yaslanmis bir sayi, yanindaki sola
@@ -134,6 +146,11 @@ code{ font:12px/1.4 var(--mono); }
 .metric__spark{ grid-column:1 / -1; margin:8px 0 2px; }
 .metric__meta{ grid-column:1 / -1; color:var(--dim); font:11px/1.5 var(--mono); }
 svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
+@media (max-width:560px){
+  .metric{ grid-template-columns:1fr; }
+  .metric__val{ justify-content:flex-start; }
+  .alan--genis, .alan--orta, .metric__val select{ width:100%; }
+}
 
 @media (max-width:520px){
   .ust__ic{ padding:10px 14px; }
@@ -224,6 +241,8 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
         </div>
       </div>
       <div class="card" id="esleme" hidden></div>
+      <div class="card" id="saglayicilar"></div>
+      <div class="card" id="gorevler"></div>
       <div class="card" id="ayarlar"><p class="muted">Yükleniyor…</p></div>
       <div class="card" id="ritim"></div>
       <div class="card" id="kutu"></div>
@@ -723,11 +742,17 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
     return '<div class="metric"><div class="metric__name">' + esc(baslik)
       + '</div><div class="metric__val">'
       + '<input data-esik="' + esc(grup) + '.' + esc(ad) + '" type="number" '
-      + 'step="any" value="' + esc(deger) + '" style="width:100px" '
+      + 'step="any" value="' + esc(deger) + '" class="alan alan--dar" '
       + 'aria-label="' + esc(baslik) + '"/></div>'
       + '<div class="metric__meta">' + esc(grup) + '.' + esc(ad)
       + ' · izin verilen aralık: '
       + esc(aralik[0]) + ' – ' + esc(aralik[1]) + '</div></div>';
+  }
+
+  function ayarlariCiz(c){
+    ayarCiz(c);
+    saglayiciCiz(c);
+    gorevCiz(c);
   }
 
   function ayarCiz(c){
@@ -749,31 +774,264 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
       + '<button class="primary" id="esik-kaydet">Eşikleri kaydet</button></div>'
       + '<p class="muted" id="esik-not"></p>';
 
-    h += '<div class="tag" style="margin-top:20px">Kanallar</div>';
-    ['whatsapp', 'telegram'].forEach(function(ad){
-      var k = (c.channels || {})[ad] || {};
-      h += '<div class="line"><b>' + esc(ad) + '</b> — '
-        + (k.ready ? '<span class="ok">açık</span>' : '<span class="muted">kapalı</span>')
-        + '<div class="muted">izin listesi: '
-        + esc((k.allow_from || []).length ? (k.allow_from || []).join(', ')
-            : 'boş (kimseye cevap verilmez)') + '</div>'
-        + '<div class="muted">jeton: ' + esc(kurulu(k.token || k.bot_token))
-        + ' · imza sırrı: ' + esc(kurulu(k.app_secret || k.webhook_secret)) + '</div>'
-        + '<div class="row" style="margin-top:6px">'
-        + '<button data-kanal="' + esc(ad) + '" data-ac="'
-        + (k.enabled ? '0' : '1') + '">' + (k.enabled ? 'Kapat' : 'Aç') + '</button>'
-        + '</div></div>';
+    h += '<div class="tag" style="margin-top:24px">Sohbet kanalları</div>'
+      + '<p class="muted">Aynı özet WhatsApp ya da Telegram\'a da gidebilir. '
+      + 'Üç kural: <b>günde tek mesaj</b>, <b>izin listesi boşsa kimseye '
+      + 'cevap verilmez</b>, ve gelen webhook gövdesi <b>imzası '
+      + 'doğrulanmadan ayrıştırılmaz bile</b>.</p>';
+    KANAL_ALAN.forEach(function(kanal){
+      var k = (c.channels || {})[kanal.id] || {};
+      h += '<h2 style="font-size:14px;margin:18px 0 2px">' + esc(kanal.ad)
+        + ' — ' + (k.ready ? '<span class="ok">hazır</span>'
+            : '<span class="muted">kapalı</span>') + '</h2>';
+      kanal.alanlar.forEach(function(a){
+        var m = k[a.id];
+        var kurulumu = a.gizli ? kurulu(m) : '';
+        h += '<div class="metric">'
+          + '<div class="metric__name">' + esc(a.ad)
+          + '<div class="muted" style="font-size:11px">' + esc(a.not) + '</div></div>'
+          + '<div class="metric__val"><input data-kanal-alan="' + esc(kanal.id)
+          + '.' + esc(a.id) + '" type="' + (a.gizli ? 'password' : 'text')
+          + '" value="' + esc(a.gizli ? '' : (a.liste
+              ? (k[a.id] || []).join(', ') : (m || '')))
+          + '" placeholder="' + esc(a.gizli
+              ? (m && m.set ? (m.value || 'kurulu') : 'girilmemiş') : a.ornek)
+          + '" class="alan alan--genis" aria-label="' + esc(kanal.ad + ' ' + a.ad)
+          + '"/></div>'
+          + (kurulumu ? '<div class="metric__meta">' + esc(kurulumu) + '</div>' : '')
+          + '</div>';
+      });
+      h += '<div class="row" style="margin-top:10px">'
+        + '<button data-kanal="' + esc(kanal.id) + '" data-ac="'
+        + (k.enabled ? '0' : '1') + '">' + (k.enabled ? 'Kapat' : 'Aç')
+        + '</button></div>';
     });
-    h += '<p class="muted">Jeton ve sırlar buradan GÖRÜNMEZ ve buradan '
-      + 'yazılmaz: dosyada dururlar (config.json). Bir ayar ekranı, sırrı '
+    h += '<div class="row" style="margin-top:12px">'
+      + '<button class="primary" id="kanal-kaydet">Kanal ayarlarını kaydet</button>'
+      + '</div>'
+      + '<p class="muted" id="kanal-not">Boş bırakılan sır alanı var olanı '
+      + 'DEĞİŞTİRMEZ. Sırlar buradan geri OKUNMAZ: bir ayar ekranı, sırrı '
       + 'ekranda göstermek zorunda değildir.</p>';
     $('ayarlar').innerHTML = h;
 
     $('esik-kaydet').addEventListener('click', esikKaydet);
+    $('kanal-kaydet').addEventListener('click', kanalKaydet);
     Array.prototype.forEach.call(
       document.querySelectorAll('[data-kanal]'), function(b){
         b.addEventListener('click', function(){ kanalAc(b.dataset.kanal, b.dataset.ac === '1'); });
       });
+  }
+
+  /* Kanal alanlari: hangi sir nereden gelir, ekranda YAZILI. Kullanicinin
+     «app_secret neydi» diye belgeye donmesi gerekmemeli. */
+  var KANAL_ALAN = [
+    { id:'whatsapp', ad:'WhatsApp (Meta Cloud API)', alanlar:[
+      { id:'phone_number_id', ad:'Numara kimliği',
+        not:'Meta uygulamandaki WhatsApp numarasının kimliği', ornek:'1234567890' },
+      { id:'token', ad:'Erişim jetonu', gizli:true,
+        not:'Kalıcı erişim jetonu' },
+      { id:'app_secret', ad:'Uygulama sırrı', gizli:true,
+        not:'Gelen webhook imzasını doğrular — bu olmadan gövde okunmaz' },
+      { id:'verify_token', ad:'Doğrulama jetonu', gizli:true,
+        not:'Webhook kurulumunda senin belirlediğin dize' },
+      { id:'allow_from', ad:'İzin listesi', liste:true,
+        not:'Cevap verilecek numaralar. BOŞ LİSTE «kimse» demektir',
+        ornek:'905551112233, 905554443322' },
+    ]},
+    { id:'telegram', ad:'Telegram', alanlar:[
+      { id:'bot_token', ad:'Bot jetonu', gizli:true,
+        not:'BotFather\'ın verdiği jeton' },
+      { id:'webhook_secret', ad:'Webhook sırrı', gizli:true,
+        not:'Telegram imza yollamaz; bunu her istekte geri gönderir. '
+           + 'Tanımsızsa webhook KAPALIDIR' },
+      { id:'allow_from', ad:'İzin listesi', liste:true,
+        not:'Cevap verilecek sohbet kimlikleri. BOŞ LİSTE «kimse» demektir',
+        ornek:'123456789' },
+    ]},
+  ];
+
+  async function kanalKaydet(){
+    var yama = { channels:{} };
+    var degisen = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-kanal-alan]'),
+      function(el){
+        var p = el.dataset.kanalAlan.split('.');
+        var kanal = p[0], alan = p[1];
+        var tanim = null;
+        KANAL_ALAN.forEach(function(k){
+          if(k.id !== kanal) return;
+          k.alanlar.forEach(function(a){ if(a.id === alan) tanim = a; });
+        });
+        if(!tanim) return;
+        var v = (el.value || '').trim();
+        /* Bos birakilan SIR alani var olani DEGISTIRMEZ: bos gondermek,
+           kullanicinin dokunmadigi bir sirri silmek olurdu. */
+        if(tanim.gizli && !v) return;
+        var deger = tanim.liste
+          ? v.split(',').map(function(x){ return x.trim(); })
+              .filter(function(x){ return x; })
+          : v;
+        (yama.channels[kanal] = yama.channels[kanal] || {})[alan] = deger;
+        degisen++;
+      });
+    if(!degisen){ $('kanal-not').textContent = 'Değişen bir alan yok.'; return; }
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
+    if(r.status === 200){
+      ayarlariCiz(r.body.config);
+      $('kanal-not').textContent = degisen + ' alan kaydedildi.';
+    }else{
+      $('kanal-not').textContent = 'Kaydedilmedi — '
+        + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+    }
+  }
+
+  /* ---------- sağlayıcılar ve görev dağılımı
+
+     Sistemde bir hiyerarsi var ve her kademenin isi farkli. Hepsini tek
+     anahtara baglamak ucuz bir isi pahali modele yaptirmak, ve tek bir
+     sirrin sizmasini butun sistemin sizmasi haline getirmekti.
+
+     Ekranin soylemesi gereken uc sey:
+       · anahtar KURULU MU (degeri degil),
+       · her kademe HANGI modele bagli ve bu MIRAS MI,
+       · anahtarin GERCEKTEN calisip calismadigi (sinanmadan yazilmaz). */
+
+  function saglayiciCiz(c){
+    var m = (c.models || {});
+    var h = '<div class="tag">Sağlayıcılar · anahtarlar</div>'
+      + '<p class="muted">' + esc(m.note || '') + '</p>';
+    (m.providers || []).forEach(function(p){
+      h += '<div class="metric">'
+        + '<div class="metric__name">' + esc(p.label)
+        + '<div class="muted" style="font-size:11px">' + esc(p.base) + '</div></div>'
+        + '<div class="metric__val"><input type="password" data-anahtar="'
+        + esc(p.id) + '" placeholder="' + (p.key_set ? esc(p.key_hint)
+            : 'anahtar girilmemiş') + '" class="alan alan--genis" aria-label="'
+        + esc(p.label) + ' anahtarı"/></div>'
+        + '<div class="metric__meta">' + (p.key_set ? 'kurulu' : 'yok')
+        + ' · <button data-sina="' + esc(p.id) + '" style="min-height:24px;'
+        + 'padding:2px 8px">Sına</button> '
+        + '<span data-sonuc="' + esc(p.id) + '"></span></div>'
+        + '</div>';
+    });
+    h += '<div class="row" style="margin-top:12px">'
+      + '<button class="primary" id="anahtar-kaydet">Anahtarları kaydet</button>'
+      + '</div><p class="muted" id="anahtar-not">Boş bırakılan alan var olan '
+      + 'anahtarı DEĞİŞTİRMEZ. Silmek için alana bir boşluk yazıp kaydet.</p>';
+    $('saglayicilar').innerHTML = h;
+    $('anahtar-kaydet').addEventListener('click', anahtarKaydet);
+    Array.prototype.forEach.call(document.querySelectorAll('[data-sina]'),
+      function(b){ b.addEventListener('click', function(){ sina(b.dataset.sina); }); });
+  }
+
+  function gorevSatiri(rol, atama, saglayicilar){
+    var secenek = '<option value="">— atanmamış —</option>';
+    (saglayicilar || []).forEach(function(p){
+      secenek += '<option value="' + esc(p.id) + '"'
+        + (atama && atama.from === rol.key && atama.provider === p.id
+            ? ' selected' : '') + '>' + esc(p.label) + '</option>';
+    });
+    var kendi = atama && atama.from === rol.key;
+    var durum = !atama || !atama.provider
+      ? '<span class="muted">atanmamış</span>'
+      : (kendi ? '' : '<span class="muted">üstünden miras: '
+          + esc(atama.provider_label) + (atama.model ? ' · ' + esc(atama.model) : '')
+          + '</span>');
+    if(atama && atama.provider && !atama.key_set){
+      durum += ' <span class="warn">anahtar yok</span>';
+    }
+    return '<div class="metric">'
+      + '<div class="metric__name">' + esc(rol.label)
+      + '<div class="muted" style="font-size:11px">' + esc(rol.note) + '</div></div>'
+      + '<div class="metric__val">'
+      + '<select data-rol="' + esc(rol.key) + '" aria-label="' + esc(rol.label)
+      + ' sağlayıcısı">' + secenek + '</select> '
+      + '<input data-model="' + esc(rol.key) + '" value="'
+      + esc(kendi ? (atama.model || '') : '') + '" placeholder="model adı" '
+      + 'class="alan alan--orta" aria-label="' + esc(rol.label) + ' modeli"/>'
+      + '</div>'
+      + '<div class="metric__meta">' + rol.key + (durum ? ' · ' + durum : '')
+      + '</div></div>';
+  }
+
+  function gorevCiz(c){
+    var m = (c.models || {});
+    var h = '<div class="tag">Görev dağılımı · kademe kademe</div>'
+      + '<p class="muted">Atama yoksa <b>üstüne</b> bakılır; en üstte de '
+      + 'yoksa «atanmamış» denir. Uydurulmuş bir varsayılan, senin '
+      + 'seçmediğin bir modele para ödemen demektir.</p>';
+    (m.layers || []).forEach(function(kat){
+      h += '<h2 style="font-size:14px;margin:22px 0 2px">' + esc(kat.label)
+        + '</h2>';
+      /* Modul katmani on iki satir: sistem sistem ayrilmazsa liste
+         okunmaz bir duvar olur. */
+      var oncekiModul = null;
+      (kat.roles || []).forEach(function(rol){
+        if(kat.layer === 'modul' && rol.module !== oncekiModul){
+          oncekiModul = rol.module;
+          h += '<div class="tag" style="margin:16px 0 4px">'
+            + esc(({ ays:'AYS', spi:'SPİ', esp:'ESP' })[rol.module] || rol.module)
+            + '</div>';
+        }
+        h += gorevSatiri(rol, (m.assignments || {})[rol.key], m.providers);
+      });
+    });
+    h += '<div class="row" style="margin-top:12px">'
+      + '<button class="primary" id="gorev-kaydet">Görev dağılımını kaydet</button>'
+      + '</div><p class="muted" id="gorev-not"></p>';
+    $('gorevler').innerHTML = h;
+    $('gorev-kaydet').addEventListener('click', gorevKaydet);
+  }
+
+  async function anahtarKaydet(){
+    var yama = { models:{ keys:{} } };
+    var degisen = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-anahtar]'),
+      function(el){
+        if(!el.value) return;            /* bos alan var olani DEGISTIRMEZ */
+        yama.models.keys[el.dataset.anahtar] = el.value.trim();
+        degisen++;
+      });
+    if(!degisen){ $('anahtar-not').textContent = 'Değişen bir anahtar yok.'; return; }
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
+    if(r.status === 200){
+      ayarlariCiz(r.body.config);
+      $('anahtar-not').textContent = degisen + ' anahtar kaydedildi.';
+    }else{
+      $('anahtar-not').textContent = 'Kaydedilmedi — '
+        + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+    }
+  }
+
+  async function gorevKaydet(){
+    var yama = { models:{ assignments:{} } };
+    Array.prototype.forEach.call(document.querySelectorAll('[data-rol]'),
+      function(sec){
+        var rol = sec.dataset.rol;
+        var model = (document.querySelector('[data-model="' + rol + '"]') || {}).value;
+        yama.models.assignments[rol] = sec.value
+          ? { provider:sec.value, model:(model || '').trim() } : null;
+      });
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
+    if(r.status === 200){
+      ayarlariCiz(r.body.config);
+      $('gorev-not').textContent = 'Kaydedildi.';
+    }else{
+      $('gorev-not').textContent = 'Kaydedilmedi — '
+        + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+    }
+  }
+
+  /* «Kurulu» ile «calisiyor» ayri seylerdir. */
+  async function sina(saglayici){
+    var yer = document.querySelector('[data-sonuc="' + saglayici + '"]');
+    if(yer) yer.textContent = 'sınanıyor…';
+    var r = await api('/api/probe', { method:'POST',
+      body:JSON.stringify({ provider:saglayici }) });
+    var g = r.body || {};
+    if(!yer) return;
+    yer.className = g.ok ? 'ok' : 'danger';
+    yer.textContent = g.note || (g.ok ? 'çalışıyor' : 'başarısız');
   }
 
   function kurulu(m){ return m && m.set ? 'kurulu' : 'yok'; }
@@ -905,7 +1163,7 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
     var kt = await api('/api/outbox');
     if(kt.status === 200) kutuCiz(kt.body);
     var ay = await api('/api/config');
-    if(ay.status === 200){ ayarCiz(ay.body); ritimCiz(ay.body); }
+    if(ay.status === 200){ ayarlariCiz(ay.body); ritimCiz(ay.body); }
     bakimCiz();
     await konusmaYukle();
   }

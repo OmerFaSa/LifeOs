@@ -380,11 +380,13 @@ async function main(){
     const yonetim = await yuz.evaluate(async () => {
       const alan = document.querySelector('[data-esik="bio.sleep_hours_min"]');
       if(!alan) return { hata:'esik alani yok' };
-      /* Sir kurulu degilse «yok» yazar; olan sey ASLA degerin kendisi
-         olmamali. Denetim, satirin varligini ve degerin YOKLUGUNU arar. */
+      /* Sir kurulu degilse «girilmemis» yazar; olan sey ASLA degerin
+         kendisi olmamali. Denetim, satirin varligini ve degerin
+         YOKLUGUNU arar. */
       const metin = document.querySelector('#ayarlar').textContent;
-      const maskeli = metin.indexOf('jeton:') >= 0
-        && metin.indexOf('izin listesi') >= 0;
+      const maskeli = metin.indexOf('İzin listesi') >= 0
+        && !!document.querySelector('[data-kanal-alan="whatsapp.app_secret"]')
+        && !!document.querySelector('[data-kanal-alan="telegram.bot_token"]');
       alan.value = '40';                         /* aralik disi */
       document.querySelector('#esik-kaydet').click();
       await new Promise(r => setTimeout(r, 500));
@@ -395,6 +397,47 @@ async function main(){
       return { red, kabul:document.querySelector('#esik-not').textContent, maskeli,
         sirSizdi:document.body.textContent.indexOf(window.__jeton || '@@yok@@') >= 0 };
     });
+    /* Saglayici katmani: anahtar YAZILIR ama GERI OKUNMAZ, ve atama
+       kademe kademe MIRAS alir. */
+    const api = await yuz.evaluate(async () => {
+      const alan = document.querySelector('[data-anahtar="anthropic"]');
+      const sec = document.querySelector('[data-rol="king"]');
+      if(!alan || !sec) return { hata:'saglayici/gorev satiri yok' };
+      alan.value = 'sk-ant-entegre-denemesi';
+      document.querySelector('#anahtar-kaydet').click();
+      await new Promise(r => setTimeout(r, 600));
+      const anahtarNotu = document.querySelector('#anahtar-not').textContent;
+
+      const sec2 = document.querySelector('[data-rol="king"]');
+      sec2.value = 'anthropic';
+      document.querySelector('[data-model="king"]').value = 'claude-opus-5';
+      document.querySelector('#gorev-kaydet').click();
+      await new Promise(r => setTimeout(r, 600));
+      const gorevNotu = document.querySelector('#gorev-not').textContent;
+      /* Atanmamis bir alt kademe, king'den MIRAS almali. */
+      const miras = (document.querySelector('[data-rol="spi.gorsel"]')
+        .closest('.metric').textContent || '');
+      return { anahtarNotu, gorevNotu, miras,
+        sizdi:document.body.textContent.indexOf('sk-ant-entegre-denemesi') >= 0 };
+    });
+    if(api.hata) hatalar.push('HKM yuzu: ' + api.hata);
+    else{
+      if((api.anahtarNotu || '').indexOf('kaydedildi') < 0){
+        hatalar.push('HKM yuzu: saglayici anahtari kaydedilmedi');
+      }
+      if((api.gorevNotu || '').indexOf('Kaydedildi') < 0){
+        hatalar.push('HKM yuzu: gorev atamasi kaydedilmedi');
+      }
+      if(api.miras.indexOf('miras') < 0){
+        hatalar.push('HKM yuzu: alt kademe king atamasini miras almadi');
+      }
+      if(api.sizdi) hatalar.push('HKM yuzu: SAGLAYICI ANAHTARI EKRANA SIZDI');
+      if(!api.hata){
+        console.log('  HKM yuzu → saglayici anahtari yazildi, geri okunmadi; '
+          + 'king atamasi alt kademelere miras kaldi');
+      }
+    }
+
     if(yonetim.hata) hatalar.push('HKM yuzu: ' + yonetim.hata);
     else{
       if((yonetim.red || '').indexOf('Kaydedilmedi') < 0){

@@ -11,6 +11,7 @@ Ucnoktalar:
     GET  /api/impact                oneri sonrasi olculer ne yapti (etki)
     GET  /api/config                ayarlar — SIRLAR MASKELI
     POST /api/config                ayar yamasi (dogrulanir; jetona dokunmaz)
+    POST /api/probe                 saglayici anahtarini SINAR (mesaj uretmez)
     GET  /api/backup                butun ambar tek JSON
     POST /api/prune                 eski ham olaylari siler (kararlar kalir)
     POST /api/restore               yedegi geri yukler (replace acik karar)
@@ -56,7 +57,7 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import (channels, cross, db, impact, intents,  # noqa: E402
+from core import (channels, cross, db, impact, intents, models,  # noqa: E402
                   manager, outbox, patron, schedule, settings, streak,
                   sync_engine, thresholds, twin, weekly)
 
@@ -516,6 +517,18 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 istek = {}
             return self._pair_open((istek or {}).get("seconds"))
+        if u.path == "/api/probe":
+            # «Kurulu» ile «calisiyor» ayri seylerdir: anahtarin gecerliligi
+            # ancak SINANARAK bilinir.
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                govde = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            return self._send(200, models.probe(self.server.config,
+                                                (govde or {}).get("provider")))
         if u.path == "/api/config":
             ham, hata = self._read_body()
             if hata:

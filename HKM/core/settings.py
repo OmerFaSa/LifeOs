@@ -28,7 +28,7 @@ import json
 import os
 import re
 
-from core import adlar, channels, schedule, thresholds
+from core import adlar, channels, models, schedule, thresholds
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -88,6 +88,8 @@ def read(cfg):
     # gun ikisi ayrisirdi.
     out["threshold_names"] = {g: {a: adlar.esik(g, a) for a in alanlar}
                               for g, alanlar in THRESHOLD_RANGE.items()}
+    # Saglayicilar ve gorev dagilimi — anahtarlar MASKELI.
+    out["models"] = models.read(cfg)
     return out
 
 
@@ -97,8 +99,13 @@ def validate(patch):
     if not isinstance(patch, dict):
         return False, ["gövde bir nesne olmalı"]
     for k in patch:
-        if k not in ("thresholds", "channels", "schedule"):
+        if k not in ("thresholds", "channels", "schedule", "models"):
             hata.append("bilinmeyen alan: %s" % k)
+
+    if patch.get("models") is not None:
+        ok_m, hata_m = models.validate(patch["models"])
+        if not ok_m:
+            hata.extend(hata_m)
 
     for grup, alanlar in (patch.get("thresholds") or {}).items():
         if grup not in THRESHOLD_RANGE:
@@ -169,41 +176,24 @@ def validate(patch):
 
 
 def apply(cfg, patch):
-    """Dogrulanmis yamayi birlestirir. local_token'a DOKUNMAZ."""
+    """Dogrulanmis yamayi birlestirir. local_token'a DOKUNMAZ.
+
+    Burada DOGRULAMA YAPILMAZ. Bir sure bu govdenin icinde validate()'in
+    zamanlama blogunun bir KOPYASI duruyordu; burada tanimsiz olan `hata`
+    listesine yazdigi icin, gecersiz bir zamanlama degeriyle cagrildiginda
+    NameError ile cokuyordu. validate() cagrilmadan apply() cagrilmamali
+    ve apply() bir dogrulayici gibi davranmamali: iki yerde iki dogrulama,
+    bir gun birbirinden ayrilir."""
     yeni = copy.deepcopy(cfg)
     for grup, alanlar in (patch.get("thresholds") or {}).items():
         yeni.setdefault("thresholds", {}).setdefault(grup, {}).update(alanlar)
     if patch.get("schedule"):
         yeni.setdefault("schedule", {}).update(patch["schedule"])
-    zaman = patch.get("schedule")
-    if zaman is not None:
-        if not isinstance(zaman, dict):
-            hata.append("schedule bir nesne olmalı")
-        else:
-            for k, v in zaman.items():
-                tip = SCHEDULE_FIELDS.get(k)
-                if tip is None:
-                    hata.append("bilinmeyen zamanlama alanı: %s" % k)
-                elif tip is bool and not isinstance(v, bool):
-                    hata.append("schedule.%s bir bool olmalı" % k)
-                elif tip is int and (isinstance(v, bool)
-                                     or not isinstance(v, int)):
-                    hata.append("schedule.%s bir sayı olmalı" % k)
-                elif tip is str and not isinstance(v, str):
-                    hata.append("schedule.%s bir dize olmalı" % k)
-                elif k in ("morning", "evening", "weekly_time") and v \
-                        and not SAAT.match(v):
-                    # «8» ya da «25:00» sessizce kabul edilirse, is hic
-                    # calismaz ve kullanici sebebini bulamaz.
-                    hata.append("schedule.%s SS:DD biçiminde olmalı" % k)
-                elif k == "weekly_day" and v and v.lower() not in schedule.GUNLER:
-                    hata.append("schedule.weekly_day bir gün adı olmalı")
-                elif k == "channel" and v not in ("whatsapp", "telegram"):
-                    hata.append("schedule.channel bilinmeyen kanal")
-
     for ad, alanlar in (patch.get("channels") or {}).items():
         temiz = {k: v for k, v in alanlar.items() if k not in ("local_token",)}
         yeni.setdefault("channels", {}).setdefault(ad, {}).update(temiz)
+    if patch.get("models") is not None:
+        yeni = models.apply(yeni, patch["models"])
     yeni["local_token"] = cfg.get("local_token")
     return yeni
 

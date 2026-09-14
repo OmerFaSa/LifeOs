@@ -441,6 +441,21 @@ def run():
             eq(S.call("/api/config", token=None)[0], 401)
             eq(S.call("/api/backup", token=None)[0], 401)
             eq(S.call("/api/prune", body={"confirm": True}, token=None)[0], 401)
+        def t_probe_needs_token():
+            """Sinama ucnoktasi da bearer duvarinin ARDINDA: jetonsuz bir
+            sinama, sirrin kurulu olup olmadigini disari soylerdi."""
+            eq(S.call("/api/probe", body={"provider": "anthropic"},
+                      token=None)[0], 401)
+            kod, r = S.call("/api/probe", body={"provider": "yok-boyle"})
+            eq(kod, 200)
+            no(r["ok"])
+            eq(r["reason"], "unknown-provider")
+            # Anahtar yokken «calisiyor» DENMEZ.
+            kod, r = S.call("/api/probe", body={"provider": "openai"})
+            no(r["ok"])
+            eq(r["reason"], "no-key")
+        test("sinama jetonsuz yapilmaz", t_probe_needs_token)
+
         test("yonetim yollari jetonsuz acilmaz", t_config_needs_token)
 
         run_extra(S)

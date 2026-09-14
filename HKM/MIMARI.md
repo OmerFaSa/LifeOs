@@ -152,6 +152,7 @@ Uç noktalar:
 | `GET /api/decisions?date=` | günün bütün önerileri, reddedilenler dahil |
 | `GET /api/impact` | öneri sonrası ölçüler ne yaptı (etki) |
 | `GET /api/config` | ayarlar — **sırlar maskeli** |
+| `POST /api/probe` | sağlayıcı anahtarını **sınar** (mesaj üretmez) |
 | `POST /api/config` | ayar yaması (doğrulanır; jetona dokunmaz) |
 | `GET /api/backup` | bütün ambar tek JSON |
 | `POST /api/prune` | eski ham ölçümler silinir; kararlar kalır |
@@ -704,3 +705,43 @@ HKM'yi kapatmak bir kayıp değil bir kazançtır.
 
 Yani bu klasör kendi gerekliliğini de ölçüyor. Kapatma kararı kullanıcının,
 ama karar artık bir izlenime değil `GET /api/cross` çıktısına dayanacak.
+
+
+## Sağlayıcılar ve görev dağılımı
+
+Sistemde bir hiyerarşi var ve her kademenin işi farklı. Hepsini tek
+anahtara bağlamak iki şeyi birden yapardı: ucuz bir işi pahalı modele
+yaptırmak, ve tek bir anahtarın sızmasını bütün sistemin sızması hâline
+getirmek. Bu yüzden **atama kademe kademedir** (`core/models.py`):
+
+```
+king                        Büyük Patron — günün tek cümlesini taşıyan ses
+├── vp_bio                  HKM konseyi: biyolojik sermaye   (SPİ)
+│   └── spi.{sohbet,analiz,plan,gorsel}
+├── vp_academic             HKM konseyi: akademik hedef      (AYS)
+│   └── ays.{sohbet,analiz,plan,gorsel}
+└── vp_intellect            HKM konseyi: entelektüel gelişim (ESP)
+    └── esp.{sohbet,analiz,plan,gorsel}
+```
+
+Altı kural, hepsi bir şeyi korur — **model otorite değildir**:
+
+1. **Kural motoru otoritedir.** Buradaki hiçbir ayar bir eşiği, bir hükmü
+   ya da bir önceliği değiştirmez. Bütün anahtarlar boş olsa sistem aynen
+   çalışır.
+2. **Varsayılan kapalıdır.** Hiçbir kademe kendiliğinden bir modele
+   bağlanmaz; bağlamak bilinçli ve **parası olan** bir karardır.
+3. **Sır ekranda görünmez.** Anahtar dışarı maskeli çıkar (`key_set` +
+   son iki karakter) ve hiçbir günlüğe yazılmaz.
+4. **Atama miras alır.** Kademeye atama yoksa üstüne bakılır; en üstte de
+   yoksa «atanmamış» denir. Uydurulmuş bir varsayılan, kullanıcının
+   seçmediği bir modele para ödemesidir.
+5. **Bilinmeyen kademe reddedilir.** Kademe listesi kapalı bir kümedir.
+6. **Bağlantı denenmeden «çalışıyor» denmez.** `POST /api/probe` anahtarı
+   sınar — model çağırmaz, mesaj üretmez; yalnızca kapının kimliği tanıyıp
+   tanımadığına bakar. **Kurulu olmak, çalışmak değildir.**
+
+Yönetim sekmesinde üç bölüm: **Sağlayıcılar** (anahtarlar + «Sına»),
+**Görev dağılımı** (kademe kademe, mirasla birlikte) ve **Sohbet
+kanalları** (WhatsApp/Telegram kimlik alanları, izin listesi, aç/kapat).
+Boş bırakılan bir sır alanı var olanı **değiştirmez**.

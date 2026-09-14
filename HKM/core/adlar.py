@@ -66,8 +66,10 @@ ESIK = {
     "academic.study_minutes_min": "Günlük çalışma tabanı (dk)",
     "academic.net_drop_pct": "Net düşüşü — tabana göre yüzde kaç düşünce uyarılır",
     "intellect.retention_floor": "Kalıcılık tabanı (0–1)",
+    "intellect.retention_min_cards": "Kalıcılık için en az kaç kart gerekli",
     "intellect.practice_minutes_min": "Günlük pratik tabanı (dk)",
     "intellect.synthesis_gap_max": "Sentezsiz geçebilecek en çok gün",
+    "intellect.synthesis_gap_days": "Sentezsiz geçebilecek en çok gün",
 }
 
 MODUL = {"ays": "AYS", "spi": "SPİ", "esp": "ESP"}
