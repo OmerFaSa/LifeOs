@@ -127,9 +127,16 @@ def send(cfg, name, text, to=None, transport=None):
                 "note": "Bilinmeyen kanal: %s" % name}
 
     durum, yanit = gonder(url, govde, basliklar)
+    # Durum 0, «sunucu 0 dondu» demek degil «HIC CEVAP GELMEDI» demektir.
+    # Kullaniciya «Kanal yaniti: 0» yazmak, hatayi anlasilmaz kilar.
+    if 200 <= durum < 300:
+        aciklama = "Gönderildi."
+    elif not durum:
+        aciklama = "Kanala ulaşılamadı (ağ ya da adres)."
+    else:
+        aciklama = "Kanal yanıtı: %s" % durum
     return {"ok": 200 <= durum < 300, "status": durum, "to": hedef,
-            "note": "Gönderildi." if 200 <= durum < 300
-            else "Kanal yanıtı: %s" % durum,
+            "note": aciklama,
             # Sir loglanmaz: yanit govdesi kirpilir ve jeton hicbir yerde gecmez.
             "detail": (yanit or "")[:200]}
 

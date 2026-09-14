@@ -76,6 +76,18 @@ def due(con, now=None):
     return [dict(r) for r in rows]
 
 
+def _hata_metni(durum, r, belirsiz):
+    """Kullaniciya «0» gostermek bilgi degildir.
+
+    Durum kodu 0, «sunucu 0 dondu» demek degil «hic cevap gelmedi»
+    demektir; bunu oldugu gibi yazmak, hatayi anlasilmaz kilar."""
+    sebep = r.get("note") or r.get("reason") or "sebep yazilmadi"
+    onek = "teslim belirsiz — " if belirsiz else ""
+    if not durum:
+        return "%sulaşılamadı: %s" % (onek, sebep)
+    return "%sHTTP %s: %s" % (onek, durum, sebep)
+
+
 def _mark(con, row_id, **alanlar):
     if not alanlar:
         return
@@ -115,17 +127,13 @@ def flush(con, cfg, now=None, transport=None, limit=20):
         if kalici or deneme >= ASGARI_DENEME:
             # Sonsuz yeniden deneme, bir hatayi gizlemenin yavas bicimidir.
             _mark(con, row["id"], state="given_up", attempts=deneme,
-                  last_error="%s%s · %s" % (
-                      "teslim belirsiz: " if belirsiz else "", durum,
-                      r.get("note") or r.get("reason")))
+                  last_error=_hata_metni(durum, r, belirsiz))
             ozet["given_up"] += 1
             continue
         bekle = GERI_CEKILME[min(deneme - 1, len(GERI_CEKILME) - 1)]
         _mark(con, row["id"], state="failed", attempts=deneme,
               next_at=_iso(t + datetime.timedelta(seconds=bekle)),
-              last_error="%s%s · %s" % (
-                  "teslim belirsiz: " if belirsiz else "", durum,
-                  r.get("note") or r.get("reason")))
+              last_error=_hata_metni(durum, r, belirsiz))
         ozet["failed"] += 1
         if belirsiz:
             ozet["uncertain"] += 1
