@@ -13,9 +13,14 @@
       Tolerans penceresi dardir (varsayilan 90 dakika).
    4. IS URETMEZ, MESAJ URETIR. Zamanlayici kural motorunu cagirir ve
       ciktisini giden kutusuna birakir; gonderimi outbox yapar.
+
+   5. BAKIM SESSIZ OLUR VE MESAJ URETMEZ. Gunluk yedek ve budama da
+      buradan kosar ama kimseye mesaj atmaz: bakim, kullanicinin dikkatini
+      hak eden bir olay degildir — BASARISIZ OLDUGUNDA hak eder.
 """
 
 import datetime
+import os
 
 from core import manager, outbox, patron
 
@@ -27,6 +32,12 @@ VARSAYILAN = {
     "weekly_day": "",        # ornek: "pazartesi" — bos: kapali
     "weekly_time": "09:00",
     "tolerance_minutes": 90,
+    # Bakim AYRI bir anahtarla acilir: kanal ayari kapaliyken de yedek
+    # alinabilmeli. «Mesaj gondermiyorum» ile «kendimi korumuyorum» ayri
+    # seylerdir.
+    "maintenance": True,
+    "maintenance_time": "03:30",
+    "keep_days": 270,          # dokuz ay — ufuk disiplininin karsiligi
 }
 
 GUNLER = {"pazartesi": 0, "sali": 1, "carsamba": 2, "persembe": 3,
@@ -99,16 +110,87 @@ def run(con, cfg, job, now=None, th=None):
             "chars": len(metin)}
 
 
+# Bakim: yedek + budama. Mesaj uretmez, giden kutusuna dokunmaz.
+BAKIM_KOPYA_SAKLA = 7          # bir haftalik gunluk yedek
+
+
+def maintenance(con, cfg, now=None):
+    """Gunluk bakim — sessiz, ama basarisizligi SESSIZ DEGIL.
+
+    Uc is:
+      · gunluk yedek kopyasi (KURULUM.md «kopyalamamak dokuz aylik kaydi
+        tek bir disk hatasina baglar» diyordu ama kopyalayan yoktu),
+      · dokuz aydan eski ham olaylarin budanmasi — kararlar KALIR,
+      · gelen mesaj kimlik defterinin budanmasi.
+
+    Hicbiri firlatmaz: bir bakim hatasi daemon'u durduramaz, ama sonuc
+    dondurulur ve gorunur olur."""
+    from core import db
+    now = now or datetime.datetime.now()
+    a = settings(cfg)
+    sonuc = {"date": now.date().isoformat(), "backup": None,
+             "pruned_events": None, "pruned_inbox": None, "errors": []}
+    try:
+        sonuc["backup"] = db.snapshot_file(con, etiket="gunluk",
+                                           sakla=BAKIM_KOPYA_SAKLA)
+    except Exception as e:                      # noqa: BLE001
+        sonuc["errors"].append("yedek: %s" % e)
+    try:
+        gun = int(a.get("keep_days") or 270)
+        r = db.prune_events(con, gun)
+        sonuc["pruned_events"] = r.get("deleted")
+    except Exception as e:                      # noqa: BLE001
+        sonuc["errors"].append("budama: %s" % e)
+    try:
+        sonuc["pruned_inbox"] = db.prune_inbox(con).get("deleted")
+    except Exception as e:                      # noqa: BLE001
+        sonuc["errors"].append("gelen defteri: %s" % e)
+    return sonuc
+
+
+def _bakim_vakti(cfg, now):
+    """Bakim penceresi: gunde BIR kez, tolerans icinde."""
+    a = settings(cfg)
+    if not a.get("maintenance"):
+        return False
+    hedef = _dakika(a.get("maintenance_time") or "03:30")
+    if hedef is None:
+        return False
+    simdi = now.hour * 60 + now.minute
+    tolerans = int(a.get("tolerance_minutes") or 90)
+    return 0 <= simdi - hedef <= tolerans
+
+
+def _bugun_bakim_yapildi(now):
+    """Bugunun yedegi zaten alindi mi — DOSYADAN bakilir.
+
+    Bellekteki bir bayrak, daemon yeniden baslatildiginda kaybolur ve ayni
+    gun ikinci bir yedek alinir. Gunun kopyasi zaten diskte duruyor;
+    dogruyu oradan sormak, ayri bir kayit tutmaktan daha az yalan soyler."""
+    from core import db
+    kok = os.path.dirname(db.DB_PATH)
+    damga = now.strftime("%Y%m%d")
+    try:
+        return any(a.startswith("hkm-gunluk-%s" % damga)
+                   for a in os.listdir(kok))
+    except OSError:
+        return False
+
+
 def tick(con, cfg, now=None, th=None, transport=None):
     """Daemon'un dakikalik tiki: vadesi gelen isleri kuyruga koy, kuyrugu
     bosalt. Hicbir kosulda firlatmaz — bir zamanlayici hatasi daemon'u
     durduramaz."""
     now = now or datetime.datetime.now()
-    sonuc = {"jobs": [], "flush": None}
+    sonuc = {"jobs": [], "flush": None, "maintenance": None}
     try:
         for job in due(cfg, now):
             sonuc["jobs"].append(run(con, cfg, job, now=now, th=th))
         sonuc["flush"] = outbox.flush(con, cfg, now=now, transport=transport)
+        # Bakim gunde BIR kez: ayni gun ikinci kez kosmaz. Isaret ambarda
+        # degil bellekte tutulmaz — gunun kopyasi zaten dosyada durur.
+        if _bakim_vakti(cfg, now) and not _bugun_bakim_yapildi(now):
+            sonuc["maintenance"] = maintenance(con, cfg, now=now)
     except Exception as e:                      # noqa: BLE001
         sonuc["error"] = "%s: %s" % (type(e).__name__, e)
     return sonuc

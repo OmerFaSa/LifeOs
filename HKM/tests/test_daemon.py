@@ -361,6 +361,64 @@ def run():
         test("tanimayan numaranin icerigi ambara girmez",
              t_wa_unknown_sender_gets_nothing)
 
+        def t_wa_duplicate_webhook_handled_once():
+            """Saglayici, cevap alamadiginda AYNI webhook'u tekrar yollar.
+            Bu bir ariza degil, sozlesmenin parcasidir: teslim garanti
+            edilir, TEK teslim degil.
+
+            Tekrar gelen mesaji yeniden islemek «kabul» komutunu iki kez
+            calistirmak olurdu."""
+            govde = json.dumps({"entry": [{"changes": [{"value": {"messages": [
+                {"type": "text", "from": IZINLI,
+                 "text": {"body": "durum"}, "id": "wamid.tekrar.1"}]}}]}]}
+            ).encode("utf-8")
+            imza = "sha256=" + hmac.new(WA_SIR.encode(), govde,
+                                        hashlib.sha256).hexdigest()
+            basliklar = {"Content-Type": "application/json",
+                         "X-Hub-Signature-256": imza}
+
+            kod, yanit = S.ham("/api/wa/webhook", govde, basliklar)
+            eq(kod, 200)
+            bir = json.loads(yanit)["results"][0]
+            ok(bir.get("queued"))
+            no(bir.get("duplicate"))
+
+            # AYNI govde ikinci kez: islenmez.
+            kod, yanit = S.ham("/api/wa/webhook", govde, basliklar)
+            eq(kod, 200)
+            iki = json.loads(yanit)["results"][0]
+            ok(iki.get("duplicate"))
+            no(iki.get("queued"))
+
+            # Konusma defterinde kullanicinin cumlesi BIR KEZ var.
+            kod, g = S.call("/api/conversation?limit=50")
+            kullanici = [m for m in g["messages"]
+                         if m["role"] == "user" and m["text"] == "durum"]
+            eq(len(kullanici), 1)
+        test("tekrar gelen webhook bir kez islenir",
+             t_wa_duplicate_webhook_handled_once)
+
+        def t_wa_reply_goes_through_outbox():
+            """Cevap DOGRUDAN gonderilmez: once giden kutusuna yazilir.
+            Ag koptugunda dogrudan gonderim, mesaji hicbir yere yazmadan
+            yok ediyordu."""
+            govde = json.dumps({"entry": [{"changes": [{"value": {"messages": [
+                {"type": "text", "from": IZINLI,
+                 "text": {"body": "yardim"}, "id": "wamid.kutu.1"}]}}]}]}
+            ).encode("utf-8")
+            imza = "sha256=" + hmac.new(WA_SIR.encode(), govde,
+                                        hashlib.sha256).hexdigest()
+            S.ham("/api/wa/webhook", govde, {
+                "Content-Type": "application/json", "X-Hub-Signature-256": imza})
+            kod, kutu = S.call("/api/outbox")
+            satir = [x for x in kutu["recent"]
+                     if x["kind"] == "reply:%s:wamid.kutu.1" % IZINLI]
+            eq(len(satir), 1)
+            eq(satir[0]["target"], IZINLI)
+            # Ag yok: satir kaybolmaz, tekrar denenmek uzere BEKLER.
+            ok(satir[0]["state"] in ("queued", "failed"))
+        test("cevap giden kutusundan gecer", t_wa_reply_goes_through_outbox)
+
         def t_tg_webhook_closed_when_channel_off():
             """Kanal kapaliyken webhook YOKTUR: acik ama bos bir kapi,
             kapali bir kapidan daha kotudur."""
@@ -370,12 +428,27 @@ def run():
         test("kapali kanalin webhooku yoktur", t_tg_webhook_closed_when_channel_off)
 
         def t_say_refuses_when_channel_unreachable():
-            """Kanal acik ama ag yok: bu bir DURUMDUR, daemon cokmez."""
+            """Kanal acik ama ag yok: bu bir DURUMDUR, daemon cokmez — VE
+            MESAJ KAYBOLMAZ.
+
+            Once dogrudan gonderiliyordu: ag koptugunda mesaj hicbir yere
+            yazilmadan yok oluyordu. Artik once giden kutusuna yazilir,
+            sonra gonderilmeye calisilir; gec gelen bir mesaj, hic
+            gelmeyenden iyidir."""
             kod, r = S.call("/api/say", body={"channel": "whatsapp",
                                               "date": BUGUN, "force": True})
             eq(kod, 200)
             eq(r["ok"], False)
-            ok("status" in r)
+            ok(r["queued"])
+            kod, kutu = S.call("/api/outbox")
+            satir = [x for x in kutu["recent"] if x["kind"] == "daily"]
+            eq(len(satir), 1)
+            ok(satir[0]["state"] in ("queued", "failed"))
+            # Ikinci cagri IKINCI SATIR yazmaz: gunde tek mesaj.
+            S.call("/api/say", body={"channel": "whatsapp", "date": BUGUN,
+                                     "force": True})
+            kod, kutu = S.call("/api/outbox")
+            eq(len([x for x in kutu["recent"] if x["kind"] == "daily"]), 1)
         test("kanal ulasilamazken say cokmez",
              t_say_refuses_when_channel_unreachable)
 
@@ -515,7 +588,10 @@ def run_extra(S):
         ok("intents" in y, "yedekte intents yok")
         ok("outbox" in y, "yedekte outbox yok")
         eq(len(y["intents"]), 1)
-        eq(len(y["outbox"]), 1)
+        # Bu ambari onceki testler de kullaniyor: satirin VARLIGI aranir,
+        # sayisi degil. Sayiya bagli bir test, test sirasina baglidir.
+        ok(any(x["kind"] == "daily" for x in y["outbox"]),
+           "yedekte gunluk mesaj satiri yok")
         ok(y["__meta"].get("tables"), "yedekte tablo envanteri yok")
     test("yedek butun tablolari kapsar", t_backup_covers_every_table)
 

@@ -105,6 +105,28 @@ CREATE TABLE IF NOT EXISTS outbox (
 );
 CREATE INDEX IF NOT EXISTS ix_outbox_state ON outbox(state, next_at);
 
+/* Gelen mesaj defteri — AYNI MESAJI IKI KEZ ISLEMEMEK icin.
+
+   WhatsApp ve Telegram, cevap alamadiklarinda ayni webhook'u TEKRAR
+   yollar. Bu bir ariza degil, sozlesmenin parcasidir: saglayici teslimi
+   garanti eder, TEK teslimi degil.
+
+   Tekrar gelen bir mesaji yeniden islemek, «kabul» komutunu iki kez
+   calistirmak demektir. Bu yuzden her gelen mesajin saglayici kimligi
+   (WhatsApp wamid, Telegram chat:message_id) burada durur ve ayni kimlik
+   ikinci kez islenmez.
+
+   Defter KALICIDIR: bellekte tutulan bir kume, daemon yeniden baslatildigi
+   anda bosalir ve koruma tam da en kirilgan anda kaybolurdu. */
+CREATE TABLE IF NOT EXISTS inbox_seen (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel    TEXT NOT NULL,
+  msg_id     TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  UNIQUE(channel, msg_id)
+);
+CREATE INDEX IF NOT EXISTS ix_inbox_seen ON inbox_seen(created_at);
+
 /* Kullanim defteri — PARANIN kaydi.
 
    Bir model cagrisinin maliyeti ancak KAYDEDILIRSE bilinir. Fatura ay
@@ -178,12 +200,47 @@ def _migrate(con):
     return uygulanan
 
 
+# Es zamanli yazma — «database is locked» ONLENIR.
+#
+# Daemon is parcacikli calisir ve her is parcaciginin kendi baglantisi var.
+# Varsayilan SQLite kipinde (rollback journal) tek bir yazar butun
+# okuyuculari kilitler: bir webhook cevabi yazilirken gelen bir modul
+# senkronu «database is locked» ile DUSER. Bu, bir performans ayari degil
+# bir DOGRULUK ayaridir — kaybolan yazma, olmamis bir olaydir.
+#
+#   WAL          okuyucu ile yazari birbirine engellemez
+#   busy_timeout kilitli bir an icin BEKLER, hemen hata vermez
+#   NORMAL       WAL ile birlikte guvenli; her yazmada diske fsync yapmaz
+PRAGMALAR = (
+    "PRAGMA journal_mode=WAL",
+    "PRAGMA busy_timeout=5000",
+    "PRAGMA synchronous=NORMAL",
+)
+
+
 def connect(path=None):
     p = path or DB_PATH
     if p != ":memory:":
         os.makedirs(os.path.dirname(p), exist_ok=True)
-    con = sqlite3.connect(p)
+    # isolation_level=None: OTOMATIK COMMIT.
+    #
+    # Python'un varsayilaninda her INSERT/UPDATE sessizce bir islem acar ve
+    # commit() cagrilana kadar YAZMA KILIDINI TUTAR. Bir yerde unutulan tek
+    # bir commit, baska bir is parcaciginin yazmasini «database is locked»
+    # ile dusurur — hem de bes saniye bekledikten sonra. Otomatik commit'te
+    # kilit tek bir ifade boyunca yasar.
+    #
+    # Atomik olmasi gereken tek yer geri yuklemedir ve orada islem ACIKCA
+    # baslatilir (BEGIN IMMEDIATE ... COMMIT). Ortuk bir guvence yerine
+    # yazili bir guvence.
+    con = sqlite3.connect(p, isolation_level=None)
     con.row_factory = sqlite3.Row
+    for pragma in PRAGMALAR:
+        try:
+            con.execute(pragma)
+        except sqlite3.Error:
+            # Bellek veritabani WAL kabul etmez; bu bir ariza degildir.
+            pass
     con.executescript(SCHEMA)
     _migrate(con)
     return con
@@ -319,8 +376,9 @@ def decision(con, decision_id):
 # aradaki fark sessizdi: teklif ve gonderim kuyruklari yedege hic girmiyor,
 # «yedek aldim» diyen kullanicinin islem durumu eksik kaliyordu.
 BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
-                 "conversations", "intents", "outbox", "usage")
-BACKUP_SCHEMA = 3
+                 "conversations", "intents", "outbox", "usage",
+                 "inbox_seen")
+BACKUP_SCHEMA = 4
 
 
 def export_all(con):
@@ -361,6 +419,44 @@ def prune_events(con, days, today=None):
     con.execute("DELETE FROM raw_events WHERE date < ?", (sinir,))
     con.commit()
     return {"ok": True, "deleted": say, "before": sinir, "kept_days": gun}
+
+
+# --------------------------------------------------------- gelen mesajlar
+
+INBOX_TUTMA_GUN = 30        # bundan eski kimlikler budanir
+
+
+def seen_message(con, channel, msg_id, now=None):
+    """Bu mesaj DAHA ONCE islendi mi.
+
+    Gorulmemisse kaydeder ve False doner; gorulmusse hicbir sey yazmaz ve
+    True doner. Kontrol ile kayit AYNI islemdedir: ikisini ayirmak, iki
+    webhook'un ayni anda gelmesi halinde ikisinin de «yeni» gormesine yol
+    acardi."""
+    if not msg_id:
+        # Kimliksiz mesaj tekrar korumasi ALAMAZ. Uydurulmus bir kimlik
+        # (metnin ozeti gibi) ayni cumleyi iki kez yazan kullaniciyi
+        # susturardi.
+        return False
+    now = now or datetime.datetime.now().isoformat(timespec="seconds")
+    try:
+        con.execute(
+            "INSERT INTO inbox_seen(channel, msg_id, created_at) VALUES (?,?,?)",
+            (channel, str(msg_id), now))
+        con.commit()
+        return False
+    except sqlite3.IntegrityError:
+        return True
+
+
+def prune_inbox(con, days=INBOX_TUTMA_GUN, now=None):
+    """Eski kimlikleri budar: saglayici bir mesaji haftalarca tekrar
+    yollamaz, defterin sonsuza kadar buyumesi gereksizdir."""
+    t = now or datetime.datetime.now()
+    sinir = (t - datetime.timedelta(days=int(days))).isoformat(timespec="seconds")
+    cur = con.execute("DELETE FROM inbox_seen WHERE created_at < ?", (sinir,))
+    con.commit()
+    return {"ok": True, "deleted": cur.rowcount, "before": sinir}
 
 
 # ------------------------------------------------------------- niyetler
@@ -413,21 +509,65 @@ def set_intent_state(con, intent_id, state, at=None):
     return intent(con, intent_id)
 
 
-def snapshot_file(con, etiket="oncesi"):
+# Kac kopya saklanir. Sinirsiz kopya, diski dolduran ve hicbiri
+# bakilmayan bir yigindir; sifir kopya ise geri donusu olmayan bir islem.
+KOPYA_SAKLA = 10
+
+
+def snapshot_file(con, etiket="oncesi", sakla=KOPYA_SAKLA):
     """Geri yukleme ONCESI kopya — geri donusu olan bir islem.
 
     SQLite'in kendi yedekleme API'si kullanilir: dosyayi kopyalamak,
-    yazilmakta olan bir veritabaninda yarim kopya uretebilir."""
+    yazilmakta olan bir veritabaninda yarim kopya uretebilir.
+
+    ONEMLI: bu cagri, cagiran baglantinin ACIK BIR YAZMA ISLEMI OLMADIGI
+    anda yapilmalidir. Yedekleme API'si kaynagin kilidini bekler; kendi
+    actigi kilidi bekleyen bir cagri sonsuza kadar kilitlenir."""
     kok = os.path.dirname(DB_PATH)
     os.makedirs(kok, exist_ok=True)
     damga = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     yol = os.path.join(kok, "hkm-%s-%s.db" % (etiket, damga))
+    # Ayni saniyede alinan iki kopya AYNI ADI tasiyordu ve ikincisi
+    # birincinin ustune yaziyordu: geri donus kopyasinin tek isi, geri
+    # donulebilecek bir hal saklamakti — ustune yazilani saklamak degil.
+    if os.path.exists(yol):
+        for i in range(2, 100):
+            aday = os.path.join(kok, "hkm-%s-%s-%d.db" % (etiket, damga, i))
+            if not os.path.exists(aday):
+                yol = aday
+                break
     hedef = sqlite3.connect(yol)
     try:
         con.backup(hedef)
     finally:
         hedef.close()
+    _kopya_donusu(kok, etiket, sakla)
     return yol
+
+
+def _kopya_donusu(kok, etiket, sakla):
+    """Eski kopyalari siler. Once hicbiri silinmiyordu: her geri yukleme
+    bir dosya birakiyor ve dizin sessizce buyuyordu — dokuz aylik ufuk
+    disiplinini kiran sey veritabani degil, yaninda biriken kopyalardi."""
+    if not sakla or sakla < 1:
+        return []
+    # Siralama ADA gore degil ZAMANA gore yapilir. Ad sirasinda
+    # «...-104501-2.db», «...-104501.db»den ONCE gelir ('-' < '.') ve en
+    # yeni kopya en eski sanilip silinirdi.
+    try:
+        adlar = [a for a in os.listdir(kok)
+                 if a.startswith("hkm-%s-" % etiket) and a.endswith(".db")]
+        adlar.sort(key=lambda a: os.path.getmtime(os.path.join(kok, a)))
+    except OSError:
+        return []
+    silinen = []
+    for a in adlar[:-int(sakla)]:
+        try:
+            os.remove(os.path.join(kok, a))
+            silinen.append(a)
+        except OSError:
+            pass
+    return silinen
 
 
 def import_all(con, veri, replace=False):
@@ -484,14 +624,22 @@ def import_all(con, veri, replace=False):
 
     yazilan = {}
     kopya = None
+    # Ustune yazmadan ONCE geri donus kopyasi: «geri alinamaz» bir islem,
+    # geri alinabilir hale gelmelidir. Kopya ISLEMIN DISINDA alinir; iceride
+    # alinirsa iki sey birden bozulur: kopya zaten degistirilmis bir ambari
+    # gosterir, ve SQLite'in yedekleme API'si kendi baglantisinin actigi
+    # yazma kilidini beklerken SONSUZA KADAR KILITLENIR.
+    if replace:
+        try:
+            kopya = snapshot_file(con)
+        except (sqlite3.Error, OSError):
+            kopya = None
     try:
+        # Geri yukleme YA TAMAMEN OLUR YA HIC: yarim yazilmis bir ambar,
+        # bozuk bir ambardir. Otomatik commit kipinde bu guvence ortuk
+        # degildir, ACIKCA istenir.
+        con.execute("BEGIN IMMEDIATE")
         if replace:
-            # Ustune yazmadan ONCE geri donus kopyasi: «geri alinamaz» bir
-            # islem, geri alinabilir hale gelmelidir.
-            try:
-                kopya = snapshot_file(con)
-            except (sqlite3.Error, OSError):
-                kopya = None
             for t in tablolar:
                 con.execute("DELETE FROM %s" % t)
         for t in tablolar:
@@ -512,9 +660,12 @@ def import_all(con, veri, replace=False):
                 % (t, ",".join(kullanilan), isaret),
                 [tuple(r.get(c) for c in kullanilan) for r in satirlar])
             yazilan[t] = len(satirlar)
-        con.commit()
+        con.execute("COMMIT")
     except sqlite3.Error as e:
-        con.rollback()
+        try:
+            con.execute("ROLLBACK")
+        except sqlite3.Error:
+            pass
         return {"ok": False, "error": "Geri yukleme yarida kesildi: %s" % e}
     return {"ok": True, "written": yazilan, "skipped": atlanan,
             "replaced": bool(replace), "rollback_copy": kopya,

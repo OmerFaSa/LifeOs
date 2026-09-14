@@ -62,6 +62,37 @@ def ayakta_mi(cfg, timeout=1.5):
         return False
 
 
+GUNLUK_SINIR = 2 * 1024 * 1024      # 2 MB
+GUNLUK_ESKI_SAY = 3                 # bu kadar eski dosya saklanir
+
+
+def _gunluk_donusu(yol, sinir=GUNLUK_SINIR, sakla=GUNLUK_ESKI_SAY):
+    """Gunluk dosyasi SINIRSIZ BUYUMEZ.
+
+    Donus yoktu: db/daemon.log her baslatmada uzuyordu ve aylar sonra
+    diski dolduran sey veritabani degil GUNLUK oluyordu. Bu, sistemin
+    kendi dokuz aylik ufuk disiplinini kendi kendine kirmasiydi.
+
+    Dosya silinmez, KAYDIRILIR: son hata, bir sonraki baslatmada hala
+    okunabilir olmali."""
+    try:
+        if not os.path.exists(yol) or os.path.getsize(yol) < sinir:
+            return False
+        for i in range(sakla, 0, -1):
+            eski = "%s.%d" % (yol, i)
+            if i == sakla and os.path.exists(eski):
+                os.remove(eski)
+                continue
+            if os.path.exists(eski):
+                os.replace(eski, "%s.%d" % (yol, i + 1))
+        os.replace(yol, yol + ".1")
+        return True
+    except OSError:
+        # Gunluk donusu basarisiz olursa daemon YINE DE baslar: gunlugu
+        # dondurememek, sistemi calistirmamak icin bir sebep degildir.
+        return False
+
+
 def daemon_baslat(cfg):
     """Daemon'u AYRI bir surecte baslatir ve cevap verene kadar bekler.
 
@@ -69,6 +100,7 @@ def daemon_baslat(cfg):
     «basladi» demek, calismayan bir kurulumu calisiyor gostermektir."""
     gunluk_yolu = os.path.join(ROOT, "db", "daemon.log")
     os.makedirs(os.path.dirname(gunluk_yolu), exist_ok=True)
+    _gunluk_donusu(gunluk_yolu)
     gunluk = open(gunluk_yolu, "a", encoding="utf-8")
     kwargs = {"cwd": ROOT, "stdout": gunluk, "stderr": subprocess.STDOUT}
     if os.name == "posix":

@@ -200,6 +200,7 @@ def run():
 
     run_cli()
     run_kurtarma()
+    run_bakim()
 
 
 def run_cli():
@@ -339,3 +340,97 @@ def run_kurtarma():
         ok(_os.path.exists(r["rollback_copy"]))
         _os.remove(r["rollback_copy"])
     test("ustune yazmadan once kopya alinir", t_rollback_copy_written)
+
+
+def run_bakim():
+    """Bakim, gunluk donusu ve kopya donusu — sistemin KENDINI korumasi."""
+    import os as _os
+    import tempfile
+    from core import schedule
+
+    suite("bakim")
+
+    def t_snapshot_rotation():
+        """Sinirsiz kopya, diski dolduran ve hicbiri bakilmayan bir yigindir.
+
+        Once hicbiri silinmiyordu: her geri yukleme bir dosya birakiyor ve
+        dizin sessizce buyuyordu — dokuz aylik ufuk disiplinini kiran sey
+        veritabani degil, yaninda biriken kopyalardi."""
+        con = db.connect(":memory:")
+        kok = _os.path.dirname(db.DB_PATH)
+        # Temiz bir etiketle calis: baska testlerin kopyalarina dokunma.
+        etiket = "test%d" % _os.getpid()
+        yollar = [db.snapshot_file(con, etiket=etiket, sakla=3) for _ in range(5)]
+        kalan = [a for a in _os.listdir(kok) if a.startswith("hkm-%s-" % etiket)]
+        eq(len(kalan), 3)
+        # EN YENILER kalir: eskiyi degil yeniyi saklamak istenir.
+        ok(_os.path.basename(yollar[-1]) in kalan)
+        for a in kalan:
+            _os.remove(_os.path.join(kok, a))
+    test("kopyalar sinirsiz birikmez", t_snapshot_rotation)
+
+    def t_maintenance_backs_up_and_prunes():
+        """KURULUM.md «kopyalamamak dokuz aylik kaydi tek bir disk hatasina
+        baglar» diyordu — ama kopyalayan yoktu."""
+        con = db.connect(":memory:")
+        eski = (datetime.date.today() - datetime.timedelta(days=400)).isoformat()
+        sync_engine.ingest(con, {"module": "spi", "date": eski,
+                                 "metrics": {"sleep_hours": metric(7.0)}},
+                           now=eski + "T09:00:00")
+        db.seen_message(con, "whatsapp", "wamid.eski",
+                        now=(datetime.datetime.now()
+                             - datetime.timedelta(days=90)).isoformat())
+        r = schedule.maintenance(con, {"schedule": {"keep_days": 270}})
+        eq(r["errors"], [])
+        ok(r["backup"] and _os.path.exists(r["backup"]))
+        eq(r["pruned_events"], 1)               # dokuz aydan eski olay gitti
+        eq(r["pruned_inbox"], 1)                # eski mesaj kimligi gitti
+        # KARARLAR KALIR: budama gecmisi degil ham olculeri siler.
+        _os.remove(r["backup"])
+    test("bakim yedek alir ve eskiyi budar", t_maintenance_backs_up_and_prunes)
+
+    def t_maintenance_runs_once_a_day():
+        """Bellekteki bir bayrak, daemon yeniden baslatildiginda kaybolur ve
+        ayni gun ikinci bir yedek alinir."""
+        con = db.connect(":memory:")
+        simdi = datetime.datetime.now().replace(hour=3, minute=35)
+        cfg = {"schedule": {"maintenance": True, "maintenance_time": "03:30"}}
+        ok(schedule._bakim_vakti(cfg, simdi))
+        no(schedule._bakim_vakti(cfg, simdi.replace(hour=12)))
+        no(schedule._bakim_vakti({"schedule": {"maintenance": False}}, simdi))
+        r = schedule.maintenance(con, cfg, now=simdi)
+        ok(schedule._bugun_bakim_yapildi(datetime.datetime.now()))
+        _os.remove(r["backup"])
+    test("bakim gunde bir kez kosar", t_maintenance_runs_once_a_day)
+
+    def t_log_rotation():
+        """Donus yoktu: db/daemon.log her baslatmada uzuyordu ve aylar sonra
+        diski dolduran sey veritabani degil GUNLUK oluyordu."""
+        import baslat
+        d = tempfile.mkdtemp()
+        yol = _os.path.join(d, "daemon.log")
+        with open(yol, "w", encoding="utf-8") as f:
+            f.write("x" * 3000)
+        no(baslat._gunluk_donusu(yol, sinir=10000))     # kucuk dosya donmez
+        ok(baslat._gunluk_donusu(yol, sinir=1000))      # buyuk dosya doner
+        # Dosya SILINMEZ, kaydirilir: son hata hala okunabilir olmali.
+        ok(_os.path.exists(yol + ".1"))
+        no(_os.path.exists(yol))
+    test("gunluk dosyasi sinirsiz buyumez", t_log_rotation)
+
+    def t_restore_does_not_deadlock():
+        """Geri donus kopyasi ISLEMIN DISINDA alinir: iceride alinirsa
+        SQLite'in yedekleme API'si kendi baglantisinin actigi yazma kilidini
+        beklerken sonsuza kadar kilitlenir."""
+        a = db.connect(":memory:")
+        sync_engine.ingest(a, {"module": "spi", "date": gun(0),
+                               "metrics": {"sleep_hours": metric(7.0)}},
+                           now=gun(0) + "T09:00:00")
+        yedek = db.export_all(a)
+        b = db.connect(":memory:")
+        db.import_all(b, yedek)
+        r = db.import_all(b, yedek, replace=True)       # kilitlenirse test asilir
+        ok(r["ok"])
+        ok(r["rollback_copy"])
+        _os.remove(r["rollback_copy"])
+    test("ustune yazma kilitlenmez", t_restore_does_not_deadlock)

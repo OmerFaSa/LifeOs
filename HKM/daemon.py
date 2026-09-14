@@ -256,11 +256,7 @@ class Handler(BaseHTTPRequestHandler):
                            "Bilinmeyen numaradan mesaj reddedildi.")
                 cevaplar.append({"from": "?", "ok": False, "reason": "not-allowed"})
                 continue
-            r = patron.respond(self.con, m["text"], th=self.server.thresholds,
-                               channel="whatsapp")
-            g = channels.send(cfg, "whatsapp", r["text"], to=m["from"])
-            cevaplar.append({"command": r["command"], "sent": g["ok"],
-                             "status": g["status"]})
+            cevaplar.append(self._gelen_mesaj("whatsapp", m, cfg))
         return self._send(200, {"handled": len(cevaplar), "results": cevaplar})
 
     def _tg_webhook(self):
@@ -288,12 +284,37 @@ class Handler(BaseHTTPRequestHandler):
                            "Bilinmeyen sohbetten mesaj reddedildi.")
                 cevaplar.append({"from": "?", "ok": False, "reason": "not-allowed"})
                 continue
-            r = patron.respond(self.con, m["text"], th=self.server.thresholds,
-                               channel="telegram")
-            g = channels.send(cfg, "telegram", r["text"], to=m["from"])
-            cevaplar.append({"command": r["command"], "sent": g["ok"],
-                             "status": g["status"]})
+            cevaplar.append(self._gelen_mesaj("telegram", m, cfg))
         return self._send(200, {"handled": len(cevaplar), "results": cevaplar})
+
+    def _gelen_mesaj(self, kanal, m, cfg):
+        """Gelen bir mesaji BIR KEZ isler ve cevabi GIDEN KUTUSUNA birakir.
+
+        Iki delik birden kapanir:
+
+        1. TEKRAR. Saglayici, cevap alamadiginda ayni webhook'u yeniden
+           yollar — bu bir ariza degil, sozlesmenin parcasidir: teslim
+           garanti edilir, TEK teslim degil. Ayni kimlikli mesaj ikinci kez
+           ISLENMEZ; yoksa «kabul» komutu iki kez calisirdi.
+
+        2. KAYIP. Cevap once dogrudan gonderiliyordu; ag koptugunda mesaj
+           sessizce kayboluyordu cunku giden kutusunun tekrar deneme defteri
+           devreye girmiyordu. Artik her cevap once kuyruga yazilir, sonra
+           gonderilmeye calisilir: gec gelen bir mesaj, hic gelmeyenden
+           iyidir."""
+        kimlik = "%s:%s" % (m.get("from") or "?", m.get("id") or "")
+        if db.seen_message(self.con, kanal, m.get("id") and kimlik):
+            return {"duplicate": True, "note": "Bu mesaj daha önce işlendi."}
+        r = patron.respond(self.con, m["text"], th=self.server.thresholds,
+                           channel=kanal)
+        gun = datetime.date.today().isoformat()
+        satir = outbox.enqueue(self.con, kanal, outbox.reply_kind(kimlik), gun,
+                               r["text"], target=m.get("from"))
+        ozet = outbox.flush(self.con, cfg, limit=5)
+        return {"command": r["command"], "queued": True,
+                "duplicate_row": satir.get("duplicate", False),
+                "sent": ozet.get("sent", 0), "failed": ozet.get("failed", 0),
+                "uncertain": ozet.get("uncertain", 0)}
 
     def _say(self, body):
         """Gunun mesajini kanala gonderir. GUNDE TEK MESAJ: ayni gun ayni
@@ -309,10 +330,21 @@ class Handler(BaseHTTPRequestHandler):
         m = patron.daily_message(self.con, tarih, th=self.server.thresholds)
         if not m["ok"]:
             return {"ok": False, "reason": "imperative", "note": m["error"]}
-        g = channels.send(cfg, kanal, m["text"], to=body.get("to"))
-        if g["ok"]:
+        # Gunun mesaji da GIDEN KUTUSUNDAN gecer: dogrudan gonderim, ag
+        # koptugunda tekrar denenmeyen ve hicbir yere yazilmayan bir
+        # mesajdi. Kimlik (kanal, «daily», gun) zaten gunde tek mesaj
+        # demektir; ikinci cagri var olan satiri bulur.
+        satir = outbox.enqueue(self.con, kanal, "daily", tarih, m["text"],
+                               target=body.get("to"))
+        ozet = outbox.flush(self.con, cfg, limit=5)
+        gonderildi = ozet.get("sent", 0) > 0
+        if gonderildi:
             patron.log(self.con, kanal, "manager", m["text"])
-        return {"ok": g["ok"], "status": g["status"], "note": g["note"],
+        return {"ok": gonderildi, "queued": True,
+                "duplicate": satir.get("duplicate", False),
+                "uncertain": ozet.get("uncertain", 0),
+                "note": "Mesaj giden kutusuna yazıldı." if not gonderildi
+                        else "Gönderildi.",
                 "chars": len(m["text"])}
 
     # ------------------------------------------------------------ esleme

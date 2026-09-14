@@ -39,6 +39,18 @@ def _iso(dt):
     return dt.isoformat(timespec="seconds")
 
 
+def reply_kind(msg_id):
+    """Bir CEVABIN kimligi, cevapladigi mesajin kimligidir.
+
+    Satir kimligi (kanal, tur, gun) uclusudur ve gunluk ozet icin dogrudur:
+    gunde tek mesaj. Ama bir gunde ONLARCA cevap olur; hepsini «reply»
+    turune koymak, ikinci cevabi ilkinin kopyasi sanip DUSURURDU. Cevabin
+    turune gelen mesajin kimligini katmak, her cevaba kendi kimligini verir
+    ve tekrar korumasini da kendiliginden saglar: ayni mesaja iki kez cevap
+    yazilmaz."""
+    return "reply:%s" % (msg_id or "bilinmeyen")
+
+
 def enqueue(con, channel, kind, day, text, target=None, now=None):
     """Kuyruga koyar. Ayni kimlik varsa YENISINI YAZMAZ."""
     t = _now(now)
@@ -76,7 +88,8 @@ def _mark(con, row_id, **alanlar):
 def flush(con, cfg, now=None, transport=None, limit=20):
     """Vadesi gelmis satirlari gonderir. Sonuc ozetini dondurur."""
     t = _now(now)
-    ozet = {"sent": 0, "failed": 0, "given_up": 0, "skipped": 0}
+    ozet = {"sent": 0, "failed": 0, "given_up": 0, "skipped": 0,
+            "uncertain": 0}
     for row in due(con, t)[:limit]:
         if not channels.enabled(cfg, row["channel"]):
             # Kanal kapaliyken denemek anlamsiz: satir bekler.
@@ -91,19 +104,31 @@ def flush(con, cfg, now=None, transport=None, limit=20):
             ozet["sent"] += 1
             continue
         durum = r.get("status") or 0
+        # Ag hatasi (durum 0): istek gitti mi, gitmedi mi BILINMIYOR. Tekrar
+        # denemek mesaji iki kez dusurebilir; denememek hic dusurmeyebilir.
+        # Ikisinden biri secilmek zorunda ve gec gelen bir mesaj, hic
+        # gelmeyenden iyidir — ama bu BELIRSIZLIK kayda gecer.
+        belirsiz = durum == 0 and r.get("reason") not in (
+            "not-allowed", "no-target", "unsafe-url", "unknown-channel", "off")
         kalici = durum in KALICI_HATALAR or r.get("reason") in (
             "not-allowed", "no-target", "unsafe-url", "unknown-channel")
         if kalici or deneme >= ASGARI_DENEME:
             # Sonsuz yeniden deneme, bir hatayi gizlemenin yavas bicimidir.
             _mark(con, row["id"], state="given_up", attempts=deneme,
-                  last_error="%s · %s" % (durum, r.get("note") or r.get("reason")))
+                  last_error="%s%s · %s" % (
+                      "teslim belirsiz: " if belirsiz else "", durum,
+                      r.get("note") or r.get("reason")))
             ozet["given_up"] += 1
             continue
         bekle = GERI_CEKILME[min(deneme - 1, len(GERI_CEKILME) - 1)]
         _mark(con, row["id"], state="failed", attempts=deneme,
               next_at=_iso(t + datetime.timedelta(seconds=bekle)),
-              last_error="%s · %s" % (durum, r.get("note") or r.get("reason")))
+              last_error="%s%s · %s" % (
+                  "teslim belirsiz: " if belirsiz else "", durum,
+                  r.get("note") or r.get("reason")))
         ozet["failed"] += 1
+        if belirsiz:
+            ozet["uncertain"] += 1
     return ozet
 
 
@@ -113,4 +138,13 @@ def status(con, limit=30):
     sayim = {}
     for r in con.execute("SELECT state, COUNT(*) n FROM outbox GROUP BY state"):
         sayim[r["state"]] = r["n"]
-    return {"counts": sayim, "recent": [dict(r) for r in rows]}
+    belirsiz = con.execute(
+        "SELECT COUNT(*) n FROM outbox WHERE last_error LIKE 'teslim belirsiz%'"
+    ).fetchone()["n"]
+    return {"counts": sayim, "recent": [dict(r) for r in rows],
+            "uncertain": belirsiz,
+            "note": "«Teslim belirsiz», isteğin gidip gitmediğinin "
+                    "BİLİNMEDİĞİ hâldir: ağ koptuğunda sağlayıcı mesajı almış "
+                    "da olabilir. Tekrar denemek onu iki kez düşürebilir; "
+                    "denememek hiç düşürmeyebilir. Bu sistem tekrar dener ve "
+                    "belirsizliği kayda geçer."}

@@ -776,3 +776,39 @@ OpenAI, Claude, Gemini, DeepSeek, Qwen ve diğerleri aynı anahtarla. Anahtar
 başına aylık limit, bütçe sayacından bağımsız **ikinci bir kilittir**.
 Yönetim sekmesindeki «Başlarken» bölümü beş adımı ekranda anlatır: anahtar
 girilecek yerde, nereden alınacağı da yazılıdır.
+
+## Teslim garantisi ve bakım
+
+**Gelen mesaj bir kez işlenir.** WhatsApp ve Telegram, cevap alamadıklarında
+aynı webhook'u **tekrar yollar** — bu bir arıza değil, sözleşmenin
+parçasıdır: sağlayıcı teslimi garanti eder, **tek** teslimi değil. Her gelen
+mesajın sağlayıcı kimliği (`wamid`, `chat:message_id`) `inbox_seen`
+tablosunda **kalıcı** durur; aynı kimlik ikinci kez işlenmez. Bellekte
+tutulan bir küme, daemon yeniden başlatıldığı anda boşalır ve koruma tam da
+en kırılgan anda kaybolurdu.
+
+**Her cevap giden kutusundan geçer.** Webhook cevapları ve `/api/say` önce
+doğrudan gönderiliyordu: ağ koptuğunda mesaj hiçbir yere yazılmadan yok
+oluyordu. Artık kuyruğa yazılır, sonra gönderilmeye çalışılır — geç gelen
+bir mesaj, hiç gelmeyenden iyidir. Bir cevabın kimliği, cevapladığı mesajın
+kimliğidir (`reply:<kanal kimliği>`); böylece aynı mesaja iki kez cevap
+yazılmaz.
+
+**«Teslim belirsiz» ayrı bir hâldir.** Ağ koptuğunda isteğin gidip
+gitmediği **bilinmez**: sağlayıcı mesajı almış da olabilir. Tekrar denemek
+onu iki kez düşürebilir, denememek hiç düşürmeyebilir. Bu sistem tekrar
+dener **ve belirsizliği kayda geçer** — `/api/outbox` bunu ayrıca sayar.
+
+**Bakım sessiz olur, başarısızlığı sessiz olmaz.** Zamanlayıcı günde bir
+kez (varsayılan 03:30) yedek alır, dokuz aydan eski ham ölçümleri budar
+(kararlar kalır) ve gelen mesaj defterini temizler. Kanal ayarı kapalıyken
+de çalışır: «mesaj göndermiyorum» ile «kendimi korumuyorum» ayrı şeylerdir.
+
+### Eşzamanlılık
+
+Veritabanı **WAL** kipinde açılır, `busy_timeout` tanımlıdır ve bağlantılar
+**otomatik commit** kullanır. Bu bir başarım ayarı değil bir **doğruluk**
+ayarıdır: varsayılan kipte unutulan tek bir `commit()`, başka bir iş
+parçacığının yazmasını «database is locked» ile düşürür — kaybolan yazma,
+olmamış bir olaydır. Atomik olması gereken tek yer geri yüklemedir ve orada
+işlem açıkça başlatılır (`BEGIN IMMEDIATE … COMMIT`).

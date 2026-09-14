@@ -50,6 +50,7 @@ THRESHOLD_RANGE = {
 SCHEDULE_FIELDS = {
     "enabled": bool, "channel": str, "morning": str, "evening": str,
     "weekly_day": str, "weekly_time": str, "tolerance_minutes": int,
+    "maintenance": bool, "maintenance_time": str, "keep_days": int,
 }
 
 SAAT = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
@@ -149,8 +150,8 @@ def validate(patch):
                     hata.append("schedule.%s bir sayı olmalı" % k)
                 elif tip is str and not isinstance(v, str):
                     hata.append("schedule.%s bir dize olmalı" % k)
-                elif k in ("morning", "evening", "weekly_time") and v \
-                        and not SAAT.match(v):
+                elif k in ("morning", "evening", "weekly_time",
+                           "maintenance_time") and v and not SAAT.match(v):
                     # «8» ya da «25:00» sessizce kabul edilirse, is hic
                     # calismaz ve kullanici sebebini bulamaz.
                     hata.append("schedule.%s SS:DD biçiminde olmalı" % k)
@@ -158,6 +159,11 @@ def validate(patch):
                     hata.append("schedule.weekly_day bir gün adı olmalı")
                 elif k == "channel" and v not in ("whatsapp", "telegram"):
                     hata.append("schedule.channel bilinmeyen kanal")
+                elif k == "keep_days" and not (7 <= v <= 3650):
+                    # Yedi gunden kisa bir saklama, dokuz aylik hicbir
+                    # analizi mumkun kilmaz; on yildan uzugu da bir karar
+                    # degil bir unutkanliktir.
+                    hata.append("schedule.keep_days 7–3650 arasında olmalı")
 
     for ad, alanlar in (patch.get("channels") or {}).items():
         if ad not in ("whatsapp", "telegram"):
