@@ -10,14 +10,16 @@ from tests import (harness, test_baslat, test_butce, test_channels,  # noqa: E40
                    test_cross,
                    test_daemon, test_dil, test_impact, test_intents,
                    test_manager, test_models, test_precedence, test_ritim,
-                   test_streak, test_sync, test_twin, test_vps)
+                   test_streak, test_sync, test_twin, test_vps,
+                   test_yoklama)
 
 
 def main():
     for mod in (test_vps, test_sync, test_precedence, test_twin,
                 test_cross, test_impact, test_dil, test_intents,
                 test_manager, test_ritim, test_streak, test_channels,
-                test_daemon, test_models, test_butce, test_baslat):
+                test_daemon, test_models, test_butce, test_yoklama,
+                test_baslat):
         mod.run()
 
     suite = None

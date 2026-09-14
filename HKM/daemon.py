@@ -13,6 +13,7 @@ Ucnoktalar:
     GET  /api/budget                aylik harcama, tahmin ve sinir durumu
     POST /api/config                ayar yamasi (dogrulanir; jetona dokunmaz)
     POST /api/probe                 saglayici anahtarini SINAR (mesaj uretmez)
+    POST /api/telegram/yoklama      webhook'u siler ve bir yoklama turu dener
     GET  /api/backup                butun ambar tek JSON
     POST /api/prune                 eski ham olaylari siler (kararlar kalir)
     POST /api/restore               yedegi geri yukler (replace acik karar)
@@ -58,9 +59,10 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import (butce, channels, cross, db, impact, intents,  # noqa: E402
-                  manager, models, outbox, patron, schedule, settings,
-                  streak, sync_engine, thresholds, twin, weekly)
+from core import (butce, channels, cross, db, gelen, impact,  # noqa: E402
+                  intents, manager, models, outbox, patron, schedule,
+                  settings, streak, sync_engine, thresholds, twin,
+                  weekly, yoklama)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -250,12 +252,6 @@ class Handler(BaseHTTPRequestHandler):
 
         cevaplar = []
         for m in channels.parse_whatsapp(govde):
-            if not channels.allowed(cfg, "whatsapp", m["from"]):
-                # Icerik AMBARA YAZILMAZ; yalniz reddedildigi not edilir.
-                patron.log(self.con, "whatsapp", "system",
-                           "Bilinmeyen numaradan mesaj reddedildi.")
-                cevaplar.append({"from": "?", "ok": False, "reason": "not-allowed"})
-                continue
             cevaplar.append(self._gelen_mesaj("whatsapp", m, cfg))
         return self._send(200, {"handled": len(cevaplar), "results": cevaplar})
 
@@ -279,42 +275,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, {"error": "gecersiz JSON"})
         cevaplar = []
         for m in channels.parse_telegram(govde):
-            if not channels.allowed(cfg, "telegram", m["from"]):
-                patron.log(self.con, "telegram", "system",
-                           "Bilinmeyen sohbetten mesaj reddedildi.")
-                cevaplar.append({"from": "?", "ok": False, "reason": "not-allowed"})
-                continue
             cevaplar.append(self._gelen_mesaj("telegram", m, cfg))
         return self._send(200, {"handled": len(cevaplar), "results": cevaplar})
 
     def _gelen_mesaj(self, kanal, m, cfg):
-        """Gelen bir mesaji BIR KEZ isler ve cevabi GIDEN KUTUSUNA birakir.
-
-        Iki delik birden kapanir:
-
-        1. TEKRAR. Saglayici, cevap alamadiginda ayni webhook'u yeniden
-           yollar — bu bir ariza degil, sozlesmenin parcasidir: teslim
-           garanti edilir, TEK teslim degil. Ayni kimlikli mesaj ikinci kez
-           ISLENMEZ; yoksa «kabul» komutu iki kez calisirdi.
-
-        2. KAYIP. Cevap once dogrudan gonderiliyordu; ag koptugunda mesaj
-           sessizce kayboluyordu cunku giden kutusunun tekrar deneme defteri
-           devreye girmiyordu. Artik her cevap once kuyruga yazilir, sonra
-           gonderilmeye calisilir: gec gelen bir mesaj, hic gelmeyenden
-           iyidir."""
-        kimlik = "%s:%s" % (m.get("from") or "?", m.get("id") or "")
-        if db.seen_message(self.con, kanal, m.get("id") and kimlik):
-            return {"duplicate": True, "note": "Bu mesaj daha önce işlendi."}
-        r = patron.respond(self.con, m["text"], th=self.server.thresholds,
-                           channel=kanal)
-        gun = datetime.date.today().isoformat()
-        satir = outbox.enqueue(self.con, kanal, outbox.reply_kind(kimlik), gun,
-                               r["text"], target=m.get("from"))
-        ozet = outbox.flush(self.con, cfg, limit=5)
-        return {"command": r["command"], "queued": True,
-                "duplicate_row": satir.get("duplicate", False),
-                "sent": ozet.get("sent", 0), "failed": ozet.get("failed", 0),
-                "uncertain": ozet.get("uncertain", 0)}
+        """Gelen mesajin islenmesi core/gelen.py'de — webhook ve yoklama
+        AYNI yoldan gecer. Kopyalanan bir mantik, bir gun yalniz bir
+        kapida duzeltilir ve otekinde bozuk kalir."""
+        return gelen.isle(self.con, cfg, kanal, m, th=self.server.thresholds)
 
     def _say(self, body):
         """Gunun mesajini kanala gonderir. GUNDE TEK MESAJ: ayni gun ayni
@@ -556,6 +524,13 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 istek = {}
             return self._pair_open((istek or {}).get("seconds"))
+        if u.path == "/api/telegram/yoklama":
+            # Yoklamayi acmadan once webhook SILINIR: Telegram ikisini
+            # ayni anda kabul etmez ve sessizce reddeder.
+            silme = yoklama.webhook_sil(self.server.config)
+            r = yoklama.tur(self.con, self.server.config,
+                            th=self.server.thresholds, timeout=1)
+            return self._send(200, {"webhook_deleted": silme, "poll": r})
         if u.path == "/api/probe":
             # «Kurulu» ile «calisiyor» ayri seylerdir: anahtarin gecerliligi
             # ancak SINANARAK bilinir.
@@ -705,6 +680,11 @@ def main():
     srv.dur = threading.Event()
     ritim = threading.Thread(target=_ritim, args=(srv,), daemon=True)
     ritim.start()
+    # Yoklama AYRI bir is parcaciginda: Telegram bizi 25 saniye bekletir ve
+    # o sirada ritim ile HTTP sunucusu durmamali.
+    yok = threading.Thread(target=yoklama.dongu, args=(srv, srv.db_path),
+                           daemon=True)
+    yok.start()
     zaman = schedule.settings(cfg)
     sys.stderr.write("[hkm] http://%s:%s · ritim %s\n"
                      % (cfg["host"], cfg["port"],

@@ -49,6 +49,10 @@ DEFAULTS = {
         "enabled": False,
         "bot_token": "",
         "webhook_secret": "",      # X-Telegram-Bot-Api-Secret-Token
+        # Yoklama: HKM disari CIKIP «mesaj var mi» diye sorar. Webhook'un
+        # aksine hicbir kapi acmaz, adres ve sertifika istemez — ev
+        # bilgisayarinda iki yonlu sohbetin en ucuz yolu.
+        "polling": False,
         "allow_from": [],          # sohbet kimlikleri (bos = kimse)
         "api_base": "https://api.telegram.org",
     },

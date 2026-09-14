@@ -153,6 +153,7 @@ Uç noktalar:
 | `GET /api/impact` | öneri sonrası ölçüler ne yaptı (etki) |
 | `GET /api/config` | ayarlar — **sırlar maskeli** |
 | `POST /api/probe` | sağlayıcı anahtarını **sınar** (mesaj üretmez) |
+| `POST /api/telegram/yoklama` | webhook'u siler, bir yoklama turu dener |
 | `GET /api/budget` | aylık harcama, tahmin ve sınır durumu |
 | `POST /api/config` | ayar yaması (doğrulanır; jetona dokunmaz) |
 | `GET /api/backup` | bütün ambar tek JSON |
@@ -838,3 +839,22 @@ her açılışta yeniden seçmek zorunda kalmak, seçim olmamasından kötüdür
 
 `tools/yuz.js` artık **36 görünüm** denetler (3 ana bölüm + 6 ayar sekmesi
 × 2 genişlik × 2 tema).
+
+## Gelen mesaj: iki kapı, tek işleme
+
+Bir mesaj HKM'ye iki kapıdan gelebilir:
+
+- **webhook** — sağlayıcı bize bağlanır (dışarı açık bir adres ister),
+- **yoklama** — biz sağlayıcıya bağlanırız (`getUpdates`; hiçbir kapı
+  açmaz, adres ve sertifika istemez).
+
+İki kapı ama **tek işleme** (`core/gelen.py`): tanımayan gönderenin içeriği
+ambara girmez, aynı mesaj iki kez işlenmez, cevap giden kutusundan geçer.
+Kopyalanan bir mantık, bir gün yalnız bir kapıda düzeltilir ve ötekinde
+bozuk kalır.
+
+**Yoklama kuralları** (`core/yoklama.py`): varsayılan kapalı · webhook ile
+aynı anda olmaz (Telegram reddeder; açarken webhook silinir ve **söylenir**)
+· uzun bekleme (25 sn), kısa döngü değil · **imleç ambarda durur** —
+bellekteki bir imleç tam da yeniden başlatma anında kaybolur ve aynı
+mesajlar yeniden işlenirdi · hata döngüyü durdurmaz.

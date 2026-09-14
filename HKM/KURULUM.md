@@ -125,7 +125,33 @@ HMAC-SHA256 imzalanmamışsa ayrıştırılmaz bile. Telegram imza yerine
 kurulumda verdiğin gizli başlığı geri gönderir; sır tanımsızsa o webhook
 kapalıdır.
 
-## 4. Telegram
+## 4. Telegram — iki yol, biri hiçbir kapı açmaz
+
+Telegram'da **iki yön** vardır ve gereksinimleri farklıdır:
+
+| Yön | Ne gerekir |
+|---|---|
+| **Giden** (HKM → telefonun) | hiçbir şey; HKM dışarı çıkar |
+| **Gelen** (sen → HKM) | ya **yoklama** ya **webhook** |
+
+### 4.1 Yoklama — önerilen
+
+HKM dışarı çıkıp «bana mesaj var mı» diye sorar (`getUpdates`). Bilgisayarı
+internete açmak, alan adı almak, sertifika kurmak **gerekmez**.
+
+1. @BotFather → `/newbot` → jetonu al
+2. @userinfobot → `/start` → **Id**'ni al
+3. HKM → Ayarlar → Sohbet kanalları → Telegram: bot jetonu ve izin
+   listesine kendi Id'n. **Kaydet**, sonra **Aç**.
+4. Aynı yerdeki **«Mesajları sorarak al (yoklama)»** kutusunu işaretle ve
+   kaydet. **«Şimdi dene»** bağlantıyı sınar.
+5. Telegram'da botuna `/start` yaz (Telegram, başlatmadığın bir bottan
+   mesaj almana izin vermez), sonra `durum` yaz.
+
+Webhook ile yoklama **aynı anda olmaz**: Telegram, webhook tanımlıyken
+`getUpdates`'i reddeder. «Şimdi dene» webhook'u önce siler ve bunu söyler.
+
+### 4.2 Webhook — sunucuda çalıştırıyorsan
 
 ```json
 "telegram": { "enabled": true, "bot_token": "…", "webhook_secret": "…",
@@ -137,6 +163,9 @@ curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
   -d "url=https://alanadin/api/tg/webhook" \
   -d "secret_token=<webhook_secret>"
 ```
+
+> HKM'yi dışarı açmak bir **altyapı kararıdır**. Ev bilgisayarında
+> yoklama, hem daha az yüzey hem daha az iş.
 
 ## 5. Açmadan önce okunacak beş satır
 

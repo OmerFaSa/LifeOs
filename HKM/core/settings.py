@@ -58,7 +58,7 @@ SAAT = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
 CHANNEL_FIELDS = {
     "enabled": bool,
     "phone_number_id": str, "token": str, "app_secret": str, "verify_token": str,
-    "bot_token": str, "webhook_secret": str,
+    "bot_token": str, "webhook_secret": str, "polling": bool,
     "allow_from": list, "api_base": str,
 }
 

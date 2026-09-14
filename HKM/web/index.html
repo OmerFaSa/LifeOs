@@ -980,6 +980,25 @@ details.detay > summary:hover{ color:var(--fg); }
         + '<button data-kanal="' + esc(kanal.id) + '" data-ac="'
         + (k.enabled ? '0' : '1') + '">' + (k.enabled ? 'Kapat' : 'Aç')
         + '</button></div>';
+      if(kanal.id === 'telegram'){
+        /* Iki yonlu sohbetin iki yolu var ve biri hicbir kapi acmaz.
+           Kullanicinin «tunel» kelimesini duymadan calistirabilmesi
+           gereken sey budur. */
+        h += '<div class="metric" style="margin-top:14px">'
+          + '<div class="metric__name">Mesajları sorarak al (yoklama)'
+          + '<div class="muted" style="font-size:11px">HKM dışarı çıkıp '
+          + '«bana mesaj var mı» diye sorar. Bilgisayarını internete '
+          + 'açman, adres ya da sertifika kurman GEREKMEZ — botla iki '
+          + 'yönlü konuşmanın en kolay yolu.</div></div>'
+          + '<div class="metric__val"><input type="checkbox" '
+          + 'id="tg-yoklama"' + (k.polling ? ' checked' : '')
+          + ' aria-label="Telegram yoklama"/></div>'
+          + '<div class="metric__meta">'
+          + (k.polling ? '<span class="ok">açık</span>'
+              : '<span class="muted">kapalı</span>')
+          + ' · <button id="tg-dene" style="min-height:24px;padding:2px 8px">'
+          + 'Şimdi dene</button> <span id="tg-sonuc"></span></div></div>';
+      }
     });
     h += '<div class="row" style="margin-top:12px">'
       + '<button class="primary" id="kanal-kaydet">Kanal ayarlarını kaydet</button>'
@@ -989,6 +1008,7 @@ details.detay > summary:hover{ color:var(--fg); }
     $('kanallar').innerHTML = h;
 
     $('kanal-kaydet').addEventListener('click', kanalKaydet);
+    if($('tg-dene')) $('tg-dene').addEventListener('click', yoklamaDene);
     Array.prototype.forEach.call(
       document.querySelectorAll('[data-kanal]'), function(b){
         b.addEventListener('click', function(){ kanalAc(b.dataset.kanal, b.dataset.ac === '1'); });
@@ -1015,13 +1035,37 @@ details.detay > summary:hover{ color:var(--fg); }
       { id:'bot_token', ad:'Bot jetonu', gizli:true,
         not:'BotFather\'ın verdiği jeton' },
       { id:'webhook_secret', ad:'Webhook sırrı', gizli:true,
-        not:'Telegram imza yollamaz; bunu her istekte geri gönderir. '
-           + 'Tanımsızsa webhook KAPALIDIR' },
+        not:'Yalnız webhook yolunu kullanacaksan gerekir. Yoklama ile '
+           + 'çalışıyorsan boş kalabilir' },
       { id:'allow_from', ad:'İzin listesi', liste:true,
         not:'Cevap verilecek sohbet kimlikleri. BOŞ LİSTE «kimse» demektir',
         ornek:'123456789' },
     ]},
   ];
+
+  /* «Şimdi dene»: webhook'u siler (Telegram ikisini ayni anda kabul
+     etmez) ve bir yoklama turu kosar. Sonuc UYDURULMAZ: kac mesaj
+     islendigi soylenir. */
+  async function yoklamaDene(){
+    var yer = $('tg-sonuc');
+    yer.className = 'muted';
+    yer.textContent = 'deneniyor…';
+    var r = await api('/api/telegram/yoklama', { method:'POST',
+      body:JSON.stringify({}) });
+    var g = (r.body || {});
+    var p = g.poll || {};
+    if(r.status !== 200){ yer.className = 'danger';
+      yer.textContent = 'denenemedi (' + r.status + ')'; return; }
+    if(!p.ok){
+      yer.className = 'danger';
+      yer.textContent = p.note || ('başarısız: ' + (p.reason || '?'));
+      return;
+    }
+    yer.className = 'ok';
+    yer.textContent = p.handled
+      ? p.handled + ' mesaj işlendi'
+      : 'bağlantı çalışıyor, bekleyen mesaj yok';
+  }
 
   async function kanalKaydet(){
     var yama = { channels:{} };
@@ -1047,6 +1091,14 @@ details.detay > summary:hover{ color:var(--fg); }
         (yama.channels[kanal] = yama.channels[kanal] || {})[alan] = deger;
         degisen++;
       });
+    /* Onay kutusu her zaman gonderilir: isaretini KALDIRMAK da bir
+       degisikliktir ve «degisen alan yok» deyip yutulmamali. */
+    var yoklamaKutusu = $('tg-yoklama');
+    if(yoklamaKutusu){
+      (yama.channels.telegram = yama.channels.telegram || {}).polling =
+        yoklamaKutusu.checked;
+      degisen++;
+    }
     if(!degisen){ $('kanal-not').textContent = 'Değişen bir alan yok.'; return; }
     var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
     if(r.status === 200){
