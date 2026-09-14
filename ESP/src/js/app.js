@@ -1415,6 +1415,12 @@ ESP.App = (function(){
         ESP.Beacon.intents().then(liste => {
           if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
         }).catch(() => {});
+        /* Uygulamasi yarida kalmis teklifler: kuyruktan bagimsiz, YEREL
+           defterden gelir. HKM kapali olsa da gosterilir — cunku belirsiz
+           kalan is bizim tarafimizdadir. */
+        ESP.Beacon.intentDoubts().then(d => {
+          if(d && d.length){ S.ui.hkmDoubts = d; render(); }
+        }).catch(() => {});
       }
 
       if(ESP.Setup.needed()) setTimeout(() => ESP.Setup.open(), 400);

@@ -159,9 +159,9 @@ Uç noktalar:
 | `GET /api/weekly?date=` | haftalık rapor |
 | `POST /api/restore` | yedeği geri yükler (üstüne yazmak açık karar) |
 | `GET /api/outbox` | giden kutusu durumu |
-| `GET /api/intents/<modul>` | modülün bekleyen teklifleri |
-| `POST /api/intents/<modul>/take` | kuyruğu alır (delivered işaretler) |
-| `POST /api/intent/<id>/applied\|dismissed` | modülün/kullanıcının cevabı |
+| `GET /api/intents/<modul>` | modülün açık teklifleri |
+| `POST /api/intents/<modul>/take` | kuyruğu alır — **açık** teklifler; ilki `delivered` işaretlenir |
+| `POST /api/intent/<id>/applied\|acknowledged\|dismissed\|unknown` | modülün/kullanıcının cevabı |
 | `GET /api/cross?date=&days=` | çapraz bulgular — üç ambar yan yana |
 | `GET /api/series?date=&days=&module=` | metrik metrik zaman serisi |
 | `POST /api/decision/<id>/accept` | öneriyi kabul eder |
@@ -526,6 +526,31 @@ Dört kural:
 3. **Görülmemiş ile reddedilmiş ayrı şeylerdir** (`delivered` ≠ `dismissed`),
    ve teslim edilmiş bir niyet **uygulanmış sayılmaz**.
 4. **Kuyruk kısa tutulur:** aynı teklif iki kez yazılmaz.
+5. **Açık niyet, cevaplanana kadar açıktır.** Kuyruğu sormak bir cevap
+   değildir: modül teklifi gösterdikten sonra kullanıcı sayfayı
+   yenilerse teklif **yeniden gelir**. Aksi hâlde görülmüş ama
+   cevaplanmamış bir teklif sessizce kaybolur, merkez de onu sonsuza
+   kadar bekler.
+
+Cevap dört sonuçtan biridir ve dördü birbirine indirgenmez:
+
+| Cevap | Anlamı |
+|---|---|
+| `applied` | modül teklifi **kendi koduyla** uyguladı |
+| `acknowledged` | teklif görüldü; uygulamak kullanıcının işi (SPİ'de hep budur) |
+| `dismissed` | istenmedi |
+| `unknown` | uygulama yarıda kaldı, sonuç **bilinmiyor** |
+
+Son satır bir kaçamak değil bir ölçümdür: sekme kapanmışsa iş olmuş da
+olabilir olmamış da. `applied` yazmak yapılmamış bir işi yapılmış,
+`dismissed` yazmak olmuş olabilecek bir işi yok saymak olurdu.
+
+Modül tarafında cevabın kaydı **ağdan önce** yerel deftere yazılır. Bu
+defter üç şeyi garanti eder: aynı iş **en fazla bir kez** yapılır (çift
+tıklama, yeniden yükleme, yeniden bağlanma), «uygulandı ama merkeze
+bildirilemedi» hâli **kaybolmaz** — bağlantı gelince bildirim tekrar
+denenir — ve yarıda kalmış bir uygulama kullanıcıya **belirsiz** diye
+gösterilir, sessizce tekrarlanmaz.
 
 Modül tarafında gelen sözlük bir «komut» değil bir **girdidir**: alanları
 tek tek okunur, sınırlanır (süre 10–480 dk) ve sistemin kendi modeliyle

@@ -51,12 +51,17 @@ ESP.Beacon = (function(){
   /* Yüklenmeden önce her şey KAPALIDIR. Bir ayar dosyası okunamadığında
      «varsayılan açık» davranmak, kullanıcının seçmediği bir şeyi yapmaktır. */
   let AYAR = null;
+  let DEFTER = null;   // teklif defteri (asagida)
 
   function settings(){ return Object.assign({}, VARSAYILAN, AYAR || {}); }
 
   async function load(){
     try{ AYAR = (await ESP.Store.get('hkm')) || {}; }
     catch(e){ AYAR = {}; }
+    /* Teklif defterinin bellekteki kopyasi da tazelenir: ambar
+       degistiginde (acilis, hesap degisimi) eski kopyayla devam etmek,
+       cevaplanmis bir teklifi cevapsiz sanmak olurdu. */
+    DEFTER = null;
     return settings();
   }
 
@@ -403,6 +408,91 @@ ESP.Beacon = (function(){
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
   const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce'];
 
+  /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
+
+     Kuyruk artik acik teklifleri her soruşta yeniden veriyor (cevaplanmamis
+     bir teklif sayfa yenilendiginde kaybolmasin diye). Bu, tek basina yeni
+     bir tehlike dogurur: aynı teklif iki kez UYGULANABILIR.
+
+     Bu yuzden cevabin kaydi burada, YEREL olarak tutulur ve ag'dan ONCE
+     yazilir. Uc hal ayrilir:
+
+       applying      — uygulama basladi, bitip bitmedigi BILINMIYOR
+       applied       — uygulandi
+       acknowledged  — goruldu; uygulamak kullanicinin isi
+       dismissed     — istenmedi
+       unknown       — yarida kalmisti, kullanici kapatti
+
+     «applying» bir basarisizlik degil bir BILINMEZLIKTIR: uygulama
+     sirasinda sekme kapanirsa teklif ne yeniden uygulanir ne de sessizce
+     yutulur; kullaniciya «belirsiz» diye gosterilir. Uydurmak yerine
+     bilmedigimizi soylemek, bu sistemin her yerindeki kural.
+
+     `reported` alani ayri bir sozdur: is YERELDE bitmis ama merkeze
+     BILDIRILEMEMIS olabilir. O kayit silinmez; bir sonraki kuyruk
+     sorusunda bildirim tekrar denenir. */
+  const DEFTER_YOLU = 'hkmIntentLog';
+  const DEFTER_SINIR = 200;             // defter sinirsiz buyumez
+
+  async function intentLog(){
+    if(DEFTER) return DEFTER;
+    let ham = null;
+    try{ ham = await ESP.Store.get(DEFTER_YOLU); }catch(e){ ham = null; }
+    DEFTER = (ham && typeof ham === 'object' && ham.entries
+      && typeof ham.entries === 'object') ? ham.entries : {};
+    return DEFTER;
+  }
+
+  async function markIntent(id, state, reported, note, closed){
+    const d = await intentLog();
+    d[String(id)] = { state:state, reported:!!reported, closed:!!closed,
+      note:String(note || ''), at:new Date().toISOString() };
+    const anahtar = Object.keys(d);
+    if(anahtar.length > DEFTER_SINIR){
+      anahtar.sort(function(x, y){
+        return String(d[x].at).localeCompare(String(d[y].at)); });
+      anahtar.slice(0, anahtar.length - DEFTER_SINIR)
+        .forEach(function(k){ delete d[k]; });
+    }
+    try{ await ESP.Store.set(DEFTER_YOLU, { entries:d }); }catch(e){ /* yerel */ }
+    return d[String(id)];
+  }
+
+  async function forgetIntent(id){
+    const d = await intentLog();
+    delete d[String(id)];
+    try{ await ESP.Store.set(DEFTER_YOLU, { entries:d }); }catch(e){ /* yerel */ }
+  }
+
+  /* Bildirilememis cevaplar — bağlantı gelince tekrar denenir. */
+  async function flushIntentReports(){
+    const d = await intentLog();
+    let denenen = 0, basarili = 0;
+    for(const id of Object.keys(d)){
+      const k = d[id];
+      if(k.reported || k.closed || k.state === 'applying') continue;
+      denenen++;
+      const r = await answerIntent(id, k.state);
+      if(r.ok){ basarili++; await markIntent(id, k.state, true, k.note); continue; }
+      /* Merkez «boyle bir niyet yok» (404) ya da «zaten baska bir cevabi
+         var» (409) diyorsa tekrar denemek bir sey duzeltmez; sonsuza
+         kadar denemek de o kaydi asla kapatmamak olurdu. Kayit KAPANIR
+         ama «bildirildi» YAZILMAZ: bildirilmedi, denenmeyecek. */
+      if(r.status === 404 || r.status === 409){
+        await markIntent(id, k.state, false, k.note, true);
+      }
+    }
+    return { tried:denenen, ok:basarili };
+  }
+
+  /* Uygulanip uygulanmadigi BILINMEYEN teklifler. Arayuz bunlari bir
+     eylem olarak degil bir UYARI olarak gosterir. */
+  async function intentDoubts(){
+    const d = await intentLog();
+    return Object.keys(d).filter(function(id){ return d[id].state === 'applying'; })
+      .map(function(id){ return Object.assign({ id:id }, d[id]); });
+  }
+
   async function intents(){
     const a = settings();
     if(!a.enabled || !a.token || !urlOk(a.url)) return [];
@@ -419,19 +509,46 @@ ESP.Beacon = (function(){
     let govde = null;
     try{ govde = await res.json(); }catch(e){ return []; }
     const liste = (govde && govde.intents) || [];
-    return liste.filter(function(n){
-      return n && INTENT_KINDS.indexOf(n.kind) >= 0 && n.payload;
+    const defter = await intentLog();
+    /* Merkez hala acik sanıyorsa ama biz cevaplamissak: gosterme, BILDIR.
+       Kuyruk acik teklifi tekrar tekrar verir; ikinci kez sormak
+       kullaniciya ayni seyi iki kez sordurmak olurdu. */
+    const gosterilecek = liste.filter(function(n){
+      if(!n || INTENT_KINDS.indexOf(n.kind) < 0 || !n.payload) return false;
+      return !defter[String(n.id)];
     });
+    flushIntentReports().catch(function(){});
+    return gosterilecek;
   }
 
   /* Kullanicinin cevabi HKM'ye bildirilir: gorulmemis bir niyetle
-     reddedilmis bir niyeti ayirmak, kuyrugun tek anlamli tarafi. */
+     reddedilmis bir niyeti ayirmak, kuyrugun tek anlamli tarafi.
+
+     Ikinci parametre artik bir bayrak degil bir DURUM da olabilir:
+
+       applied      — modul teklifi kendi koduyla uyguladi
+       acknowledged — teklif goruldu; uygulamak kullanicinin isi
+       dismissed    — istenmedi
+       unknown      — uygulama yarida kaldi, sonuc BILINMIYOR
+
+     Dordunu bire indirmek, birbirinden farkli dort sonucu tek kelimeyle
+     anlatmak olurdu; merkezdeki kayit da o kadar dogru olurdu. */
+  function _durumAdi(applied){
+    if(applied === true) return 'applied';
+    if(applied === false) return 'dismissed';
+    return String(applied);
+  }
+
   async function answerIntent(id, applied){
     const a = settings();
+    const durum = _durumAdi(applied);
+    if(['applied', 'acknowledged', 'dismissed', 'unknown'].indexOf(durum) < 0){
+      return { ok:false, error:'Geçersiz durum.' };
+    }
     if(!a.enabled || !a.token || !urlOk(a.url)) return { ok:false };
     try{
       const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/intent/'
-        + id + '/' + (applied ? 'applied' : 'dismissed'), {
+        + id + '/' + durum, {
         method:'POST',
         headers:{ 'Content-Type':'application/json',
           'Authorization':'Bearer ' + a.token },
@@ -472,6 +589,70 @@ ESP.Beacon = (function(){
       + 'oturum olarak DEĞİL: yapılmamış bir çalışma ölçülmüş görünmemeli.' };
   }
 
+  /* ---------- teklifi KAPATMAK: tek kapi
+
+     Arayuz artik `applyIntent` + `answerIntent` ikilisini kendisi
+     sirayla cagirmaz. Dort hatanin dordu de o sirada dogmustu:
+
+       - iki tiklama iki blok yaziyordu,
+       - uygulamadan sonra baglanti koparsa merkez «cevapsiz» kaliyordu,
+       - bildirim basarisiz olunca kullaniciya «uygulandi» deniyordu,
+       - sayfa yenilenince is bastan yapilabiliyordu.
+
+     Sira burada tektir ve defter AG'DAN ONCE yazilir. */
+  const ISLEMDE = {};
+
+  async function resolveIntent(n, action){
+    if(!n || n.id == null) return { ok:false, error:'Teklif bulunamadı.' };
+    const anahtar = String(n.id);
+    if(['apply', 'seen', 'dismiss'].indexOf(action) < 0){
+      return { ok:false, error:'Bilinmeyen işlem.' };
+    }
+    /* Cift tiklama: es zamanli iki cagri tek is olur. */
+    if(ISLEMDE[anahtar]) return { ok:false, error:'Bu teklif işleniyor.' };
+    ISLEMDE[anahtar] = true;
+    try{
+      const defter = await intentLog();
+      const onceki = defter[anahtar];
+      const durum = action === 'apply' ? 'applied'
+        : (action === 'seen' ? 'acknowledged' : 'dismissed');
+      let not = '';
+      let uygulandi = false;
+      if(action === 'apply'){
+        if(onceki && (onceki.state === 'applied' || onceki.state === 'applying')){
+          /* En fazla BIR KEZ: daha once uygulanmis (ya da uygulanmis
+             olabilecek) bir teklif tekrar plana yazilmaz. */
+          not = 'Bu teklif daha önce uygulanmıştı; ikinci kez yazılmadı.';
+        }else{
+          await markIntent(n.id, 'applying', false, '');
+          const r = await applyIntent(n);
+          if(!r.ok){
+            await forgetIntent(n.id);
+            return { ok:false, error:r.error };
+          }
+          not = r.note;
+          uygulandi = true;
+        }
+      }
+      await markIntent(n.id, durum, false, not);
+      const bildirim = await answerIntent(n.id, durum);
+      if(bildirim.ok) await markIntent(n.id, durum, true, not);
+      return { ok:true, applied:uygulandi, state:durum,
+        reported:!!bildirim.ok, note:not };
+    }finally{
+      delete ISLEMDE[anahtar];
+    }
+  }
+
+  /* Belirsiz bir teklifi KAPATMAK. Kullanici planina bakip karar verir;
+     merkeze «uygulandi» da «istenmedi» de denmez — BILINMIYOR denir. */
+  async function clearDoubt(id){
+    await markIntent(id, 'unknown', false, '');
+    const bildirim = await answerIntent(id, 'unknown');
+    if(bildirim.ok) await markIntent(id, 'unknown', true, '');
+    return { ok:true, reported:!!bildirim.ok };
+  }
+
   /* Ateşle ve unut: arayüz akışlarının çağırdığı biçim. Söz vermez,
      beklemez, hata fırlatmaz. */
   function ping(opts){
@@ -484,5 +665,7 @@ ESP.Beacon = (function(){
   return { load, save, settings, collect, payload, preview, contract, metric,
     urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
     intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE,
+    resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
+    intentDoubts, clearDoubt,
     MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
 })();

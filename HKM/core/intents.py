@@ -25,6 +25,11 @@
 
    4. KUYRUK KISA TUTULUR. Ayni modul icin ayni tur ve ayni govdeyle acik
       bir niyet varsa ikincisi YAZILMAZ: tekrar, bilgi degil gurultudur.
+
+   5. ACIK NIYET, CEVAPLANANA KADAR ACIKTIR. Kuyrugu sormak bir cevap
+      degildir; modul teklifi bir kez gosterdikten sonra kullanici sayfayi
+      yenilerse teklif YENIDEN gelir. Aksi halde gorulmus ama cevaplanmamis
+      bir teklif sessizce kaybolur ve merkez onu sonsuza kadar bekler.
 """
 
 import datetime
@@ -150,25 +155,64 @@ def create(con, module, kind, payload, note, source="patron"):
 
 
 def take(con, module):
-    """Modul kuyrugu SORAR. Alinan niyetler «delivered» olur — ama bu
-    «uygulandi» demek DEGILDIR."""
+    """Modul kuyrugu SORAR: ACIK niyetlerin TAMAMI doner.
+
+    Once yalniz «pending» donuyordu ve alinanlar «delivered» isaretleniyordu.
+    Sonuc, gorulen ama HENUZ CEVAPLANMAMIS bir teklifin ikinci acilista
+    KAYBOLMASIYDI: kullanici sayfayi yenilerse teklif bir daha gelmiyor,
+    merkezde ise sonsuza kadar «delivered» olarak asili kaliyordu.
+
+    «Teslim edildi» ile «cevaplandi» ayri seylerdir. Kuyruk, cevaplanana
+    kadar ACIK kalir; teslim isareti yalnizca ilk gorulmeyi tarihler.
+    """
     if module not in MODULES:
         return {"ok": False, "errors": ["bilinmeyen modul"]}
-    bekleyen = db.intents_for(con, module, ("pending",))
-    for n in bekleyen:
-        db.set_intent_state(con, n["id"], "delivered")
-    return {"ok": True, "intents": bekleyen,
+    acik = db.intents_for(con, module, ("pending", "delivered"))
+    yeni = 0
+    for n in acik:
+        if n["state"] == "pending":
+            db.set_intent_state(con, n["id"], "delivered")
+            n["state"] = "delivered"
+            yeni += 1
+    return {"ok": True, "intents": acik, "new": yeni,
+            "again": len(acik) - yeni,
             "note": "Bu niyetler birer TEKLIFTIR. Kullanıcı görmeden hiçbir "
                     "şey uygulanmaz; uygulayan da HKM değil modülün kendisidir."}
 
 
+# Cevap DORT sonuctan biridir ve dordu birbirine indirgenmez:
+#
+#   applied      — modul teklifi KENDI koduyla uyguladi
+#   acknowledged — teklif goruldu ama modul uygulamadi; cunku o modulde
+#                  uygulamak kullanicinin isi. SPI'de bir olcumu girmek ya
+#                  da yuku dusurmek hicbir kosulda sistemin karari degildir.
+#   dismissed    — istenmedi
+#   unknown      — uygulama YARIDA kaldi (sekme kapandi, cihaz kapandi) ve
+#                  sonuc bilinmiyor
+#
+# Sonuncusu bir kacamak degil bir OLCUMDUR: «applied» yazmak yapilmamis bir
+# isi yapilmis, «dismissed» yazmak olmus olabilecek bir isi yok saymak
+# olurdu. Ayni sekilde «acknowledged»i «applied» saymak, modulun yapmadigi
+# bir isi yapmis gostermek olurdu.
+ANSWERS = ("applied", "acknowledged", "dismissed", "unknown")
+
+
 def answer(con, intent_id, state):
-    if state not in ("applied", "dismissed"):
-        return {"ok": False, "errors": ["durum yalniz applied ya da dismissed"]}
+    if state not in ANSWERS:
+        return {"ok": False,
+                "errors": ["durum yalniz %s olabilir" % ", ".join(ANSWERS)]}
     n = db.intent(con, intent_id)
     if not n:
         return {"ok": False, "errors": ["niyet yok"]}
-    if n["state"] in ("applied", "dismissed"):
+    if n["state"] == state:
+        # AYNI cevabin tekrari HATA DEGILDIR. Modul, baglanti koptugu icin
+        # bildiremedigi bir cevabi sonra tekrar dener; bunu 409 ile geri
+        # cevirmek, dogru calisan bir istemciyi basarisiz gostermek olurdu.
+        # Sonuc ayni: niyet zaten o durumda.
+        return {"ok": True, "intent": n, "duplicate": True}
+    if n["state"] in ANSWERS:
+        # FARKLI bir cevap ise catisma gercektir: uygulanmis bir teklifi
+        # «istenmedi» yapmak, olmus bir isi olmamis gibi gostermektir.
         return {"ok": False, "errors": ["bu niyet zaten %s" % n["state"]],
                 "intent": n}
     return {"ok": True, "intent": db.set_intent_state(con, intent_id, state)}

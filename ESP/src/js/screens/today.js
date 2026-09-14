@@ -480,10 +480,23 @@ ESP.Screens.today = (function(){
      ESP'in kendi kodudur. Kuyruk bossa hic cizilmez. */
   function hkmTeklifRow(){
     const liste = S.ui.hkmIntents || [];
-    if(!liste.length) return '';
+    const supheli = S.ui.hkmDoubts || [];
+    if(!liste.length && !supheli.length) return '';
     return K.Entry({ label:'HKM TEKLİFİ', hint:'hkm',
-      meta:liste.length + ' teklif', wide:true,
+      meta:liste.length ? liste.length + ' teklif'
+        : supheli.length + ' belirsiz', wide:true,
       body:html`
+        ${/* Uygulama yarida kalmis teklif: uydurmak yerine BILMEDIGIMIZI
+              soyleriz. Ne tekrar uygulanir ne de olmus sayilir. */''}
+        ${map(supheli, d => html`<div class="mt-8">
+          ${K.Notice({ tone:'warn', body:'Bir teklif uygulanırken işlem '
+            + 'yarıda kaldı; kaydına yazılıp yazılmadığı bilinmiyor. '
+            + 'Hatırlatıcılarına bakıp doğrula.' })}
+          <div class="row gap-8 mt-8">
+            ${K.Button({ label:'Kontrol ettim', size:'sm',
+              act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } })}
+          </div>
+        </div>`)}
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
           <div class="row gap-8 mt-8">
@@ -520,37 +533,38 @@ ESP.Screens.today = (function(){
       ${K.Span(12, K.Ledger(() => rows))}`);
   }
 
+  /* HKM teklifine verilen cevabin TEK yolu: uygulama, yerel kayit ve
+     merkeze bildirim tek sirada olur. «Uygulandı ama merkeze
+     bildirilemedi» hali yutulmaz, SOYLENIR. */
+  async function hkmCevap(id, action){
+    const liste = S.ui.hkmIntents || [];
+    const n = liste.filter(x => String(x.id) === String(id))[0];
+    if(!n) return;
+    const r = await ESP.Beacon.resolveIntent(n, action);
+    if(!r.ok){ ESP.UI.toast(r.error || 'İşlenemedi'); return; }
+    S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+    const bas = r.state === 'applied' ? (r.note || 'Uygulandı')
+      : (r.state === 'acknowledged' ? 'Görüldü olarak işaretlendi'
+        : 'İstenmedi olarak işaretlendi');
+    ESP.UI.toast(r.reported ? bas
+      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.');
+    ESP.App.render();
+  }
+
   const handle = {
-    /* HKM teklifleri: uygulayan ESP'in kendi kodudur. */
-    async 'hkm-intent-yes'(el){
-      const liste = S.ui.hkmIntents || [];
-      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
-      if(!n) return;
-      const r = await ESP.Beacon.applyIntent(n);
-      if(!r.ok){ ESP.UI.toast(r.error || 'Uygulanamadı'); return; }
-      await ESP.Beacon.answerIntent(n.id, true);
-      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
-      ESP.UI.toast(r.note || 'Uygulandı');
+    async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },
+    async 'hkm-intent-seen'(el){ await hkmCevap(el.dataset.id, 'seen'); },
+    async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
+
+    async 'hkm-doubt-ok'(el){
+      const r = await ESP.Beacon.clearDoubt(el.dataset.id);
+      S.ui.hkmDoubts = (S.ui.hkmDoubts || [])
+        .filter(x => String(x.id) !== el.dataset.id);
+      ESP.UI.toast(r.reported ? 'Kapatıldı; merkeze «belirsiz» diye bildirildi.'
+        : 'Kapatıldı; merkeze şimdilik bildirilemedi.');
       ESP.App.render();
     },
-    async 'hkm-intent-seen'(el){
-      const liste = S.ui.hkmIntents || [];
-      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
-      if(!n) return;
-      await ESP.Beacon.answerIntent(n.id, false);
-      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
-      ESP.UI.toast('Görüldü olarak işaretlendi');
-      ESP.App.render();
-    },
-    async 'hkm-intent-no'(el){
-      const liste = S.ui.hkmIntents || [];
-      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
-      if(!n) return;
-      await ESP.Beacon.answerIntent(n.id, false);
-      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
-      ESP.UI.toast('İstenmedi olarak işaretlendi');
-      ESP.App.render();
-    },
+
     async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; ESP.App.render(); },
 
     async 'signal-answer'(el){

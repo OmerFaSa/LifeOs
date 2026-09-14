@@ -21,6 +21,8 @@ Ucnoktalar:
     POST /api/intents/<modul>/take  kuyrugu alir (delivered isaretler)
     POST /api/intent/<id>/applied   modul uyguladi
     POST /api/intent/<id>/dismissed kullanici istemedi
+    POST /api/intent/<id>/acknowledged goruldu; uygulamak kullanicinin isi
+    POST /api/intent/<id>/unknown   uygulandigi belirsiz (yarida kaldi)
     GET  /api/cross?date=&days=     capraz bulgular: uc ambar yan yana
     GET  /api/series?date=&days=&module=  metrik metrik zaman serisi
     POST /api/message               Buyuk Patron'a kisa komut (yerel kanal)
@@ -546,7 +548,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, intents.take(self.con, mod))
         if u.path.startswith("/api/intent/"):
             parca = u.path.strip("/").split("/")
-            if len(parca) != 4 or parca[3] not in ("applied", "dismissed"):
+            if len(parca) != 4 or parca[3] not in intents.ANSWERS:
                 return self._send(404, {"error": "yok"})
             try:
                 nid = int(parca[2])

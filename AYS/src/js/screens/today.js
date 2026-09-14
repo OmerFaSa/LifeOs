@@ -542,10 +542,24 @@ R.Screens.today = (function(){
      AYS'in kendi kodudur. Kuyruk bossa bu kart hic cizilmez. */
   function HkmTeklifKart(){
     const liste = S.ui.hkmIntents || [];
-    if(!liste.length) return '';
+    const supheli = S.ui.hkmDoubts || [];
+    if(!liste.length && !supheli.length) return '';
     return c.Card({ title:'HKM teklifi', hint:'hkm',
-      sub:liste.length + ' teklif bekliyor',
+      sub:liste.length ? liste.length + ' teklif bekliyor'
+        : supheli.length + ' teklifin sonucu belirsiz',
       body:html`
+        ${/* Uygulama yarida kalmis teklif: uydurmak yerine BILMEDIGIMIZI
+              soyleriz. Ne tekrar uygulanir ne de olmus sayilir. */''}
+        ${map(supheli, d => html`<div class="mt-8">
+          ${c.Notice({ tone:'warn', body:'Bir teklif uygulanırken işlem '
+            + 'yarıda kaldı; plana yazılıp yazılmadığı bilinmiyor. Planına '
+            + 'bakıp doğrula — bu satır, olmamış bir işi olmuş göstermemek '
+            + 'için duruyor.' })}
+          <div class="row gap-8 mt-8">
+            ${c.Button({ label:'Kontrol ettim', size:'sm',
+              act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } })}
+          </div>
+        </div>`)}
         ${map(liste, n => html`<div class="mt-8">
           ${c.Notice({ tone:'info', body:n.note })}
           <div class="row gap-8 mt-8">
@@ -634,38 +648,40 @@ R.Screens.today = (function(){
     if(runningBlock()) startTick(); else stopTick();
   }
 
+  /* HKM teklifine verilen cevabin TEK yolu. */
+  async function hkmCevap(id, action){
+    const liste = S.ui.hkmIntents || [];
+    const n = liste.filter(x => String(x.id) === String(id))[0];
+    if(!n) return;
+    const r = await R.Beacon.resolveIntent(n, action);
+    if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
+    S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+    const bas = r.state === 'applied' ? (r.note || 'Uygulandı')
+      : (r.state === 'acknowledged' ? 'Görüldü olarak işaretlendi'
+        : 'İstenmedi olarak işaretlendi');
+    /* Merkeze ulasilamadiysa bunu SOYLE: kayit yerelde duruyor ve bir
+       sonraki baglantida tekrar denenecek. */
+    UI.toast(r.reported ? bas
+      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.');
+    R.App.render();
+  }
+
   /* ---------- eylemler ---------- */
   const handle = {
     /* HKM teklifleri: uygulayan AYS'in kendi kodudur. */
-    async 'hkm-intent-yes'(el){
-      const liste = S.ui.hkmIntents || [];
-      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
-      if(!n) return;
-      const r = await R.Beacon.applyIntent(n);
-      if(!r.ok){ UI.toast(r.error || 'Uygulanamadı'); return; }
-      await R.Beacon.answerIntent(n.id, true);
-      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
-      UI.toast(r.note || 'Uygulandı');
-      R.App.render();
-    },
-    /* «Gördüm»: uygulanamayan bir türü kapatmanın dürüst yolu. Bir şey
-       uygulanmadı; teklif görüldü ve merkeze öyle bildirildi. */
-    async 'hkm-intent-seen'(el){
-      const liste = S.ui.hkmIntents || [];
-      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
-      if(!n) return;
-      await R.Beacon.answerIntent(n.id, false);
-      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
-      UI.toast('Görüldü olarak işaretlendi');
-      R.App.render();
-    },
-    async 'hkm-intent-no'(el){
-      const liste = S.ui.hkmIntents || [];
-      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
-      if(!n) return;
-      await R.Beacon.answerIntent(n.id, false);
-      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
-      UI.toast('İstenmedi olarak işaretlendi');
+    /* Uc dugmenin ucu de TEK kapidan gecer: uygulama, yerel kayit ve
+       merkeze bildirim tek sirada olur. «Uygulandı ama merkeze
+       bildirilemedi» hali yutulmaz, SOYLENIR. */
+    async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },
+    async 'hkm-intent-seen'(el){ await hkmCevap(el.dataset.id, 'seen'); },
+    async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
+
+    async 'hkm-doubt-ok'(el){
+      const r = await R.Beacon.clearDoubt(el.dataset.id);
+      S.ui.hkmDoubts = (S.ui.hkmDoubts || [])
+        .filter(x => String(x.id) !== el.dataset.id);
+      UI.toast(r.reported ? 'Kapatıldı; merkeze «belirsiz» diye bildirildi.'
+        : 'Kapatıldı; merkeze şimdilik bildirilemedi.');
       R.App.render();
     },
 

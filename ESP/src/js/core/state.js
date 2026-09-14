@@ -78,6 +78,7 @@ ESP.S = {
     /* HKM'nin bekleyen teklifleri — bellekte durur, depoya YAZILMAZ:
        kaynagi HKM'dir ve tek gercek orada olmali. */
     hkmIntents:[],
+    hkmDoubts:[],
     railOpen:false,
     undo:null,              // son yikici islemin geri alma kaydi
     dayTab:'giris',         // giris | ozet | gecmis

@@ -1210,6 +1210,12 @@ SP.App = (function(){
         SP.Beacon.intents().then(liste => {
           if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
         }).catch(() => {});
+        /* Uygulamasi yarida kalmis teklifler: kuyruktan bagimsiz, YEREL
+           defterden gelir. HKM kapali olsa da gosterilir — cunku belirsiz
+           kalan is bizim tarafimizdadir. */
+        SP.Beacon.intentDoubts().then(d => {
+          if(d && d.length){ S.ui.hkmDoubts = d; render(); }
+        }).catch(() => {});
       }
 
       if(SP.Setup.needed()) setTimeout(() => SP.Setup.open(), 400);

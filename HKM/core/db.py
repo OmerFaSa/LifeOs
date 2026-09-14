@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS decision_sources (
    modul acilista kuyrugu sorar, kullaniciya gosterir ve onaylanirsa
    KENDI kodu ile uygular. Yazan yine moduldur.
 
-   Durum: pending → delivered → applied | dismissed
+   Durum: pending → delivered → applied | acknowledged | dismissed | unknown
    «delivered» modulun gordugu, «applied» kullanicinin onayladigi demektir;
    ikisini ayirmak, gorulmeyen bir niyetle reddedilmis bir niyeti
    birbirinden ayirir. */
@@ -328,7 +328,8 @@ def prune_events(con, days, today=None):
 
 # ------------------------------------------------------------- niyetler
 
-INTENT_STATES = ("pending", "delivered", "applied", "dismissed")
+INTENT_STATES = ("pending", "delivered", "applied", "acknowledged",
+                 "dismissed", "unknown")
 
 
 def insert_intent(con, module, kind, payload, note, source, created_at=None):

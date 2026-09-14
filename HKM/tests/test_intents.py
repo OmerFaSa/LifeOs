@@ -73,9 +73,44 @@ def run():
         eq(ozet["delivered"], 1)
         eq(ozet["applied"], 0)
         eq(ozet["pending"], 0)
-        # Ikinci kez alinmaz: kuyruk yalniz BEKLEYENI verir.
-        eq(len(intents.take(con, "ays")["intents"]), 0)
+        eq(alinan["new"], 1)
     test("teslim edilmis niyet uygulanmis sayilmaz", t_delivered_is_not_applied)
+
+    def t_open_intent_survives_refresh():
+        """Gorulmus ama CEVAPLANMAMIS teklif ikinci sorusta da gelir.
+
+        Once kuyruk yalniz «pending» veriyordu: kullanici sayfayi cevap
+        vermeden yenilerse teklif kayboluyor, merkezde ise sonsuza kadar
+        «delivered» olarak asili kaliyordu."""
+        con = _con()
+        intents.create(con, "ays", "plan.add", {"date": BUGUN, "minutes": 60}, "not")
+        bir = intents.take(con, "ays")
+        eq(bir["new"], 1)
+        iki = intents.take(con, "ays")          # sayfa yenilendi
+        eq(len(iki["intents"]), 1)
+        eq(iki["new"], 0)
+        eq(iki["again"], 1)
+        eq(iki["intents"][0]["state"], "delivered")
+        # Cevaplandiktan SONRA bir daha gelmez.
+        intents.answer(con, iki["intents"][0]["id"], "applied")
+        eq(len(intents.take(con, "ays")["intents"]), 0)
+    test("cevaplanmamis teklif yenilemede kaybolmaz", t_open_intent_survives_refresh)
+
+    def t_same_answer_is_not_a_conflict():
+        """Baglanti koptugu icin bildirilemeyen cevap sonra tekrar denenir;
+        AYNI cevabin tekrari hata degildir."""
+        con = _con()
+        r = intents.create(con, "spi", "measure.ask",
+                           {"date": BUGUN, "metric": "sleep"}, "not")
+        nid = r["intent"]["id"]
+        eq(intents.answer(con, nid, "applied")["ok"], True)
+        tekrar = intents.answer(con, nid, "applied")
+        ok(tekrar["ok"])
+        ok(tekrar["duplicate"])
+        eq(intents.summary(con)["spi"]["applied"], 1)
+        # FARKLI cevap hala catismadir.
+        no(intents.answer(con, nid, "dismissed")["ok"])
+    test("ayni cevabin tekrari catisma degildir", t_same_answer_is_not_a_conflict)
 
     def t_answer_once():
         con = _con()

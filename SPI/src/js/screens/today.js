@@ -521,32 +521,30 @@ SP.Screens.today = (function(){
     <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'certainty']))}</div>`);
   }
 
+  /* HKM teklifine verilen cevabin TEK yolu: yerel kayit AG'DAN ONCE
+     yazilir, bildirim sonra denenir. «İşaretlendi ama merkeze
+     bildirilemedi» hali yutulmaz, SOYLENIR.
+
+     SPİ'de «Gördüm» bir UYGULAMA değildir: ölçüm de yük de kullanıcının
+     kararıdır. Merkeze de öyle bildirilir — «uygulandı» değil «görüldü». */
+  async function hkmCevap(id, action){
+    const liste = S.ui.hkmIntents || [];
+    const n = liste.filter(x => String(x.id) === String(id))[0];
+    if(!n) return;
+    const r = await SP.Beacon.resolveIntent(n, action);
+    if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
+    S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+    const bas = r.state === 'acknowledged'
+      ? (r.note || 'Görüldü olarak işaretlendi')
+      : 'İstenmedi olarak işaretlendi';
+    UI.toast(r.reported ? bas
+      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.');
+    SP.App.render();
+  }
+
   const handle = {
-    /* HKM teklifleri: uygulayan SPİ'in kendi kodudur. */
-    /* SPİ'de «Gördüm» bir UYGULAMA değildir ve applyIntent() yoluna
-       bağlanmaz: o yol her durumda hata döndürür, dolayısıyla düğme kendi
-       anlamını hiç tamamlayamıyordu. Görülen bir teklif, görüldü diye
-       kapanır — ölçüm ya da yük değiştirilmeden. */
-    async 'hkm-intent-yes'(el){
-      const liste = S.ui.hkmIntents || [];
-      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
-      if(!n) return;
-      const r = await SP.Beacon.acknowledgeIntent(n);
-      if(!r.ok){ UI.toast(r.error || 'İşaretlenemedi'); return; }
-      await SP.Beacon.answerIntent(n.id, true);
-      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
-      UI.toast(r.note || 'Uygulandı');
-      SP.App.render();
-    },
-    async 'hkm-intent-no'(el){
-      const liste = S.ui.hkmIntents || [];
-      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
-      if(!n) return;
-      await SP.Beacon.answerIntent(n.id, false);
-      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
-      UI.toast('İstenmedi olarak işaretlendi');
-      SP.App.render();
-    },
+    async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'seen'); },
+    async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
 
     async 'signal-answer'(el){
       const inp = document.getElementById('sig-answer');

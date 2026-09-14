@@ -224,11 +224,28 @@ async function main(){
           const say = () => ((window[ns].S.days[n.payload.date] || {}).blocks || [])
             .filter(b => b.slot === 'HKM teklifi').length;
           const oncekiBlok = say();
-          const r = await B.applyIntent(n);
+
+          /* B04 — teklif yasam dongusu.
+
+             Once burada dogrudan applyIntent + answerIntent cagriliyordu
+             ve dis inceleme bunun dort deligini buldu. Simdi sirasiyla:
+
+               a) CEVAP VERMEDEN kuyrugu tekrar sor (sayfa yenilemesi):
+                  teklif KAYBOLMAMALI,
+               b) tek kapidan cevapla,
+               c) ayni teklifi tekrar cevapla (cift tiklama / yeniden
+                  baglanma): ikinci kez UYGULANMAMALI,
+               d) cevaptan sonra kuyrugu yine sor: teklif ARTIK
+                  gosterilmemeli. */
+          const yenilendi = (await B.intents()).length;
+          const r = await B.resolveIntent(n, 'apply');
           const sonrakiBlok = say();
-          await B.answerIntent(n.id, true);
+          const tekrar = await B.resolveIntent(n, 'apply');
+          const tekrarBlok = say();
+          const kalan = (await B.intents()).length;
           return { alindi:liste.length, ok:r.ok, oncekiBlok, sonrakiBlok,
-            not:r.note || r.error };
+            yenilendi, tekrarBlok, kalan, bildirildi:r.reported,
+            tekrarUyguladi:tekrar.applied, not:r.note || r.error };
         }, [s.ns]);
         if(!niyet.alindi) hatalar.push('AYS: niyet kuyrugu bos geldi');
         else if(!niyet.ok) hatalar.push('AYS: niyet uygulanamadi — ' + niyet.not);
@@ -237,6 +254,24 @@ async function main(){
         }else{
           console.log('  AYS → niyeti KENDI kodu ile uyguladi (teklif blogu: '
             + niyet.oncekiBlok + ' → ' + niyet.sonrakiBlok + ')');
+        }
+        if(niyet.alindi){
+          if(!niyet.yenilendi){
+            hatalar.push('AYS: cevaplanmamis teklif ikinci soruşta kayboldu');
+          }else{
+            console.log('  AYS → cevaplanmadan yenilendi, teklif duruyor');
+          }
+          if(niyet.tekrarUyguladi || niyet.tekrarBlok !== niyet.sonrakiBlok){
+            hatalar.push('AYS: ayni teklif IKINCI KEZ uygulandi');
+          }else{
+            console.log('  AYS → ikinci tiklama yeni is yaratmadi');
+          }
+          if(!niyet.bildirildi) hatalar.push('AYS: cevap merkeze bildirilemedi');
+          if(niyet.kalan){
+            hatalar.push('AYS: cevaplanan teklif hala gosteriliyor');
+          }else{
+            console.log('  AYS → cevaplanan teklif bir daha gosterilmedi');
+          }
         }
       }
 

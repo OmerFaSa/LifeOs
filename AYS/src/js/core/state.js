@@ -43,6 +43,7 @@ R.S = {
     /* HKM'nin bekleyen teklifleri — bellekte durur, depoya YAZILMAZ:
        kaynagi HKM'dir ve tek gercek orada olmali. */
     hkmIntents:[],
+    hkmDoubts:[],
     examTab:'list',
     examOpen:null,
     cardTab:'due',

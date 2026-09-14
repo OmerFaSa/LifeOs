@@ -401,4 +401,142 @@
     });
   });
 
+  /* ------------------------------------------------------------- B04
+
+     Dis inceleme: «teslim edilen teklif yeniden acilista kayboluyor».
+     Kuyruk artik acik teklifleri tekrar veriyor; bu dort seyi zorunlu
+     kilar ve dordu de burada olculur:
+
+       1. cevaplanmis bir teklif bir daha GOSTERILMEZ,
+       2. is en fazla BIR KEZ yapilir (cift tiklama, yeniden yukleme),
+       3. «uygulandi ama merkeze bildirilemedi» hali KAYBOLMAZ,
+       4. yarida kalan uygulama «olmus» da «olmamis» da sayilmaz. */
+  describe('HKM teklifi — yaşam döngüsü', () => {
+
+    const TEKLIF = { id:7, kind:'plan.add', note:'not',
+      payload:{ date:BUGUN, minutes:60 } };
+
+    function kuyrukCevabi(liste){
+      return { status:200, json:() => Promise.resolve({ intents:liste }) };
+    }
+
+    async function temiz(){
+      resetState();
+      await ayarla({});
+      await B().load();
+    }
+
+    it('cevaplanan teklif kuyrukta dursa da bir daha gösterilmez', async () => {
+      await temiz();
+      await withFetch(async () => {
+        const bir = await B().intents();
+        expect(bir.length).toBe(1);
+      }, kuyrukCevabi([TEKLIF]));
+
+      await withFetch(async () => {
+        const r = await B().resolveIntent(TEKLIF, 'dismiss');
+        expect(r.ok).toBe(true);
+        expect(r.state).toBe('dismissed');
+      }, { status:200 });
+
+      /* Merkez hala «acik» diyor olabilir: cevap bizde, kayit bizde. */
+      await withFetch(async () => {
+        const iki = await B().intents();
+        expect(iki.length).toBe(0);
+      }, kuyrukCevabi([TEKLIF]));
+    });
+
+    it('aynı teklif iki kez uygulanmaz', async () => {
+      await temiz();
+      await withFetch(async () => {
+        const bir = await B().resolveIntent(TEKLIF, 'apply');
+        expect(bir.ok).toBe(true);
+        const iki = await B().resolveIntent(TEKLIF, 'apply');
+        expect(iki.ok).toBe(true);
+        expect(iki.applied).toBe(false);
+        const hatirlatma = (ESP.S.reminders || [])
+          .filter(r => String(r.text || '').indexOf('HKM teklifi') >= 0);
+        expect(hatirlatma.length).toBe(1);
+      }, { status:200 });
+    });
+
+    it('uygulandı ama bildirilemedi hâli yutulmaz ve kaybolmaz', async () => {
+      await temiz();
+      /* Ag yok: is yerelde bitti, merkez bilmiyor. */
+      await withFetch(async () => {
+        const r = await B().resolveIntent(TEKLIF, 'apply');
+        expect(r.ok).toBe(true);
+        expect(r.reported).toBe(false);
+      }, new Error('ağ yok'));
+
+      const defter = await B().intentLog();
+      expect(defter['7'].reported).toBe(false);
+      expect(defter['7'].state).toBe('applied');
+
+      /* Bağlantı gelince bildirim TEKRAR denenir. */
+      await withFetch(async cagri => {
+        const r = await B().flushIntentReports();
+        expect(r.tried).toBe(1);
+        expect(r.ok).toBe(1);
+        expect(cagri[0].url.indexOf('/api/intent/7/' + 'applied') > 0).toBe(true);
+      }, { status:200 });
+      expect((await B().intentLog())['7'].reported).toBe(true);
+    });
+
+    it('yarıda kalan uygulama ne olmuş ne olmamış sayılır', async () => {
+      await temiz();
+      /* Sekme kapanmis gibi: defterde “applying” kalmis. */
+      await B().markIntent(7, 'applying', false, '');
+      const supheli = await B().intentDoubts();
+      expect(supheli.length).toBe(1);
+      expect(supheli[0].state).toBe('applying');
+
+      /* Belirsiz teklif kuyrukta gorunse de YENIDEN UYGULANMAZ. */
+      await withFetch(async () => {
+        expect((await B().intents()).length).toBe(0);
+      }, kuyrukCevabi([TEKLIF]));
+
+      /* Merkeze «uygulandi» da «istenmedi» de denmez: BILINMIYOR. */
+      await withFetch(async cagri => {
+        const r = await B().clearDoubt(7);
+        expect(r.reported).toBe(true);
+        expect(cagri[0].url.indexOf('/api/intent/7/unknown') > 0).toBe(true);
+      }, { status:200 });
+      expect((await B().intentDoubts()).length).toBe(0);
+    });
+
+    /* Merkez «boyle bir niyet yok» diyorsa sonsuza kadar denemek, o
+       kaydi asla kapatmamak olurdu. */
+    it('merkez kalıcı olarak reddederse bildirim sonsuza kadar denenmez', async () => {
+      await temiz();
+      await withFetch(async () => {
+        await B().resolveIntent(TEKLIF, 'apply');
+      }, new Error('ağ yok'));
+
+      await withFetch(async cagri => {
+        const r = await B().flushIntentReports();
+        expect(r.tried).toBe(1);
+        expect(r.ok).toBe(0);
+        expect(cagri.length).toBe(1);
+      }, { status:404 });
+
+      const k = (await B().intentLog())['7'];
+      expect(k.closed).toBe(true);
+      expect(k.reported).toBe(false);   // bildirilmedi; uydurulmuyor
+
+      await withFetch(async cagri => {
+        const r = await B().flushIntentReports();
+        expect(r.tried).toBe(0);
+        expect(cagri.length).toBe(0);
+      }, { status:200 });
+    });
+
+    it('bilinmeyen işlem sessizce bir şey yapmaz', async () => {
+      await temiz();
+      const r = await B().resolveIntent(TEKLIF, 'sil');
+      expect(r.ok).toBe(false);
+      expect((await B().resolveIntent(null, 'apply')).ok).toBe(false);
+    });
+  });
+
 })();
