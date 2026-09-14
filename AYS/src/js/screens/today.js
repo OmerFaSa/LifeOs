@@ -581,6 +581,68 @@ R.Screens.today = (function(){
           bir teklif ayrı şeylerdir.</p>` });
   }
 
+  /* ---------- HKM seridi: KUCUK ve HER GUN ORADA
+
+     HKM ayarlari «Rehber» ekraninin icinde duruyordu: gunde bir bakilan
+     bir ekranda, gun boyu acik duran bir baglantinin durumu. Bagli mi
+     degil mi, en son ne zaman gitti, bekleyen teklif var mi — bunlar
+     Bugun ekraninda TEK SATIR olmali.
+
+     Serit bir AYAR EKRANI DEGILDIR: yalnizca durumu soyler ve tek bir
+     is yaptirir (simdi gonder). Ayarin yeri yine Rehber'dir; iki yerde
+     iki ayar olsaydi, biri otekini sessizce yenerdi. */
+  /* Yalniz burada kullanilan bir gosterim bicimi: ortak araca eklemek,
+     ortak araci tek bir ekranin ihtiyaciyla buyutmek olurdu. */
+  function saat(iso){
+    if(!iso) return null;
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return null;
+    return U.pad2(d.getHours()) + ':' + U.pad2(d.getMinutes());
+  }
+
+  function HkmSerit(){
+    if(!R.Beacon) return '';
+    const a = R.Beacon.settings();
+    const teklif = (S.ui.hkmIntents || []).length;
+
+    if(!a.enabled){
+      /* Kapaliyken de GORUNUR ama bagirmaz: kapali olmak bir hata
+         degildir, bir secimdir. */
+      return c.Card({ title:'HKM', hint:'hkm', sub:'bağlı değil',
+        body:html`<p class="tiny dim">Hayat Kontrol Merkezi'ne günün
+          özetini göndermek istersen Rehber'den açabilirsin. AYS bundan
+          bağımsız çalışır: HKM kapalıyken hiçbir şey eksilmez.</p>
+          <div class="row gap-8 mt-8">
+            ${c.Button({ label:'Rehber\u2019de aç', size:'sm', act:'go',
+              data:{ 'data-route':'guide' } })}
+          </div>` });
+    }
+
+    const gitti = saat(a.lastOkAt);
+    const denendi = saat(a.lastAt);
+    /* Basarisiz son deneme YUTULMAZ: «gonderildi» ile «gonderilmeye
+       calisildi» ayri seylerdir. */
+    const bozuk = a.lastStatus !== null && a.lastStatus !== undefined
+      && a.lastStatus !== 202;
+    const alt = bozuk ? ('son deneme ' + (denendi || '—') + ' · başarısız')
+      : (gitti ? ('son gönderim ' + gitti) : 'henüz gönderilmedi');
+
+    return c.Card({ title:'HKM', hint:'hkm', sub:alt,
+      body:html`
+        ${when(bozuk, () => c.Notice({ tone:'warn',
+          body:(a.lastNote || 'Gönderilemedi.') + ' AYS bundan etkilenmez; '
+             + 'veri burada duruyor ve bir sonraki denemede gider.' }))}
+        ${when(teklif > 0, () => html`<p class="tiny dim">${teklif} teklif
+          bekliyor — aşağıda.</p>`)}
+        <div class="row gap-8 mt-8">
+          ${c.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-gonder' })}
+          ${c.Button({ label:'Ayarlar', size:'sm', act:'go',
+            data:{ 'data-route':'guide' } })}
+        </div>
+        <p class="tiny dim mt-8">Giden şey günün ÖZETİDİR: etiketli
+          ölçümler. Ham veri AYS\u2019te kalır.</p>` });
+  }
+
   async function render(){
     const dateISO = U.todayISO();
     const n = M.currentWeek();
@@ -600,6 +662,7 @@ R.Screens.today = (function(){
       ${c.Span(12, R.Setup.needed() ? raw(R.Setup.card()) : NextUpCard())}
       ${when(R.Signals && R.Signals.current(), () => c.Span(12, SignalCard()))}
       ${when((S.ui.hkmIntents || []).length, () => c.Span(12, HkmTeklifKart()))}
+      ${c.Span(12, HkmSerit())}
 
       ${c.Span(12, c.Cols(4, html`
         ${c.Stat({ label:'Bugünün bloğu', value:html`${doneBlocks}<small>/${planBlocks}</small>`,
@@ -675,6 +738,17 @@ R.Screens.today = (function(){
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-seen'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
+
+    /* Elle gonderim: kullanicinin ACIKCA istedigi an. Kapaliyken de
+       zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
+       olmasini anlamsiz kilardi. */
+    async 'hkm-gonder'(){
+      UI.toast('HKM\u2019ye gönderiliyor…');
+      const r = await R.Beacon.send({ reason:'manual' });
+      UI.toast(r.ok ? 'HKM\u2019ye gönderildi.'
+        : ('Gönderilemedi — ' + (r.note || r.reason || 'sebep bilinmiyor')));
+      R.App.render();
+    },
 
     async 'hkm-doubt-ok'(el){
       const r = await R.Beacon.clearDoubt(el.dataset.id);

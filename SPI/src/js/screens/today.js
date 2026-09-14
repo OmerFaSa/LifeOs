@@ -493,6 +493,56 @@ SP.Screens.today = (function(){
           bir teklif ayrı şeylerdir.</p>` });
   }
 
+  /* ---------- HKM seridi: KUCUK ve HER GUN ORADA
+
+     HKM ayarlari bir ayar ekraninin icinde duruyordu: gunde bir bakilan
+     bir yerde, gun boyu acik duran bir baglantinin durumu. Bagli mi
+     degil mi, en son ne zaman gitti — bunlar gunluk ekranda TEK SATIR
+     olmali.
+
+     Serit bir AYAR EKRANI DEGILDIR: durumu soyler ve tek bir is
+     yaptirir. Ayarin yeri yine kendi ekranidir; iki yerde iki ayar
+     olsaydi biri otekini sessizce yenerdi. */
+  function saat(iso){
+    if(!iso) return null;
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return null;
+    return U.pad2(d.getHours()) + ':' + U.pad2(d.getMinutes());
+  }
+
+  function hkmSeritRow(){
+    if(!SP.Beacon) return '';
+    const a = SP.Beacon.settings();
+
+    if(!a.enabled){
+      return K.Entry({ label:'HKM', hint:'hkm', meta:'bağlı değil',
+        wide:true, body:html`<p class="tiny dim">Hayat Kontrol
+          Merkezi'ne günün özetini göndermek istersen ayarlardan
+          açabilirsin. SPİ bundan bağımsız çalışır: HKM kapalıyken
+          hiçbir şey eksilmez.</p>` });
+    }
+
+    const gitti = saat(a.lastOkAt);
+    const denendi = saat(a.lastAt);
+    /* Basarisiz son deneme YUTULMAZ: «gonderildi» ile «gonderilmeye
+       calisildi» ayri seylerdir. */
+    const bozuk = a.lastStatus !== null && a.lastStatus !== undefined
+      && a.lastStatus !== 202;
+
+    return K.Entry({ label:'HKM', hint:'hkm', wide:true,
+      meta:bozuk ? ('son deneme ' + (denendi || '—') + ' · başarısız')
+        : (gitti ? ('son gönderim ' + gitti) : 'henüz gönderilmedi'),
+      body:html`
+        ${when(bozuk, () => K.Notice({ tone:'warn',
+          body:(a.lastNote || 'Gönderilemedi.') + ' SPİ bundan etkilenmez; '
+             + 'veri burada duruyor ve bir sonraki denemede gider.' }))}
+        <div class="row gap-8 mt-8">
+          ${K.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-gonder' })}
+        </div>
+        <p class="tiny dim mt-8">Giden şey günün ÖZETİDİR: etiketli
+          ölçümler. Ham kayıt SPİ'de kalır.</p>` });
+  }
+
   async function render(){
     const tab = S.ui.dayTab || 'giris';
     const flags = M.openFlags();
@@ -501,6 +551,7 @@ SP.Screens.today = (function(){
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${bekleyenOneriler()}
       ${when((S.ui.hkmIntents || []).length, () => html`<div class="mb-16">${K.Ledger([hkmTeklifRow()])}</div>`)}
+      <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>
       <div class="mb-8">${tabs()}</div>`;
 
     if(tab === 'ozet'){
@@ -543,6 +594,17 @@ SP.Screens.today = (function(){
   }
 
   const handle = {
+    /* Elle gonderim: kullanicinin ACIKCA istedigi an. Kapaliyken
+       zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
+       olmasini anlamsiz kilardi. */
+    async 'hkm-gonder'(){
+      UI.toast('HKM\u2019ye gönderiliyor…');
+      const r = await SP.Beacon.send({ reason:'manual' });
+      UI.toast(r.ok ? 'HKM\u2019ye gönderildi.'
+        : ('Gönderilemedi — ' + (r.note || r.reason || 'sebep bilinmiyor')));
+      SP.App.render();
+    },
+
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
 

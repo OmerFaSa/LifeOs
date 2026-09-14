@@ -211,6 +211,17 @@ koyulabilir: bütçe sayacından bağımsız **ikinci bir kilit**.
 5. Ayarlar → **Bütçe**: aylık tavan (TL), USD/TRY kuru ve kurun tarihi.
    Kur elle girilir; sınıra varıldığında ücretli çağrı **durur**.
 
+**Çalışmıyorsa tahmin etme, sına.** Aynı ekrandaki **«Sohbeti dene»**
+düğmesi zinciri baştan sona koşturur ve hangi adımda koptuğunu yazar:
+atama → model adı → anahtar → bütçe → bağlam → sağlayıcıya çağrı →
+cevabın denetimi. Sağlayıcı bir hata döndürdüyse **onun kendi cümlesi**
+gösterilir («model not found: …» gibi) — çünkü «HTTP 404» kullanıcıya
+hiçbir şey söylemez.
+
+> En sık iki tuzak: **model adı** elle yanlış yazılmış olur (artık
+> listeden seçilebiliyor), ve **tavan TL seçiliyken kur girilmemiştir** —
+> o zaman hiçbir çağrı yapılmaz ve Bütçe ekranı bunu kırmızı yazar.
+
 **Birden çok anahtar** ekleyebilirsin — örneğin biri senin, biri
 kardeşinin. Harcama, anahtarın **sahibinin** defterine yazılır ve bütçe
 ekranında kimin ne harcadığı ayrı görünür. Hangi kademenin hangi anahtarla

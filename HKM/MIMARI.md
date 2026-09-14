@@ -1046,6 +1046,34 @@ aynı anda olmaz (Telegram reddeder; açarken webhook silinir ve **söylenir**)
 bellekteki bir imleç tam da yeniden başlatma anında kaybolur ve aynı
 mesajlar yeniden işlenirdi · hata döngüyü durdurmaz.
 
+## Üç sistemde HKM şeridi
+
+HKM ayarları üç uygulamanın da **ayar/rehber ekranının içinde** duruyordu:
+günde bir bakılan bir yerde, gün boyu açık duran bir bağlantının durumu.
+Bağlı mı değil mi, en son ne zaman gitti, gitmediyse neden — bunlar
+**günlük ekranda tek satır** olmalı.
+
+Her üç sistemde de (AYS, SPİ, ESP) `Bugün` ekranında küçük bir HKM şeridi
+var. Şerit **bir ayar ekranı değildir**: yalnızca durumu söyler ve tek bir
+iş yaptırır — «Şimdi gönder». Ayarın yeri yine kendi ekranıdır; iki yerde
+iki ayar olsaydı biri ötekini sessizce yenerdi.
+
+| Durum | Şeritte yazan |
+|---|---|
+| Kapalı | «bağlı değil» + HKM kapalıyken hiçbir şeyin eksilmediği |
+| Açık, gitmiş | «son gönderim 14:32» |
+| Açık, gitmemiş | «henüz gönderilmedi» |
+| Son deneme başarısız | «son deneme 14:32 · başarısız» + sağlayıcının sebebi |
+
+Başarısız son deneme **yutulmaz**: «gönderildi» ile «gönderilmeye
+çalışıldı» ayrı şeylerdir. Ve şerit hiçbir durumda bağırmaz — HKM'nin
+kapalı olması bir hata değil, bir seçimdir.
+
+Şerit **tek yönlü bağımlılığı bozmaz**: üç sistem HKM'nin varlığını yine
+bilmez, `beacon.js` bu kuralın tek istisnasıdır ve şerit de o modülün
+okuduğu durumu gösterir. HKM kapalıyken şerit «bağlı değil» der ve
+uygulamada başka hiçbir şey değişmez.
+
 ## Teklifler ekranı — HKM'nin sistemlere konuşma yolu
 
 HKM üç sisteme doğrudan yazmaz ve yazamaz. **Teklifler** bölümünden
