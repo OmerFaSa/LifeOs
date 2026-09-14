@@ -1013,6 +1013,16 @@ details.detay > summary:hover{ color:var(--fg); }
 
     $('kanal-kaydet').addEventListener('click', kanalKaydet);
     if($('tg-dene')) $('tg-dene').addEventListener('click', yoklamaDene);
+    /* Onay kutusu ANINDA kaydedilir. Ayri bir «kaydet» bekleyen bir
+       anahtar, kullanicinin actigini sandigi ama kapali kalan bir
+       ayardir: araya giren her yeniden cizim (ornegin «Aç» dugmesi)
+       isareti sessizce geri aliyordu. Metin alanlari kaydet dugmesini
+       bekler — onlarda yarim yazilmis bir deger kaydedilmemeli. */
+    if($('tg-yoklama')){
+      $('tg-yoklama').addEventListener('change', function(e){
+        yoklamaAyarla(e.target.checked);
+      });
+    }
     Array.prototype.forEach.call(
       document.querySelectorAll('[data-kanal]'), function(b){
         b.addEventListener('click', function(){ kanalAc(b.dataset.kanal, b.dataset.ac === '1'); });
@@ -1046,6 +1056,31 @@ details.detay > summary:hover{ color:var(--fg); }
         ornek:'123456789' },
     ]},
   ];
+
+  async function yoklamaAyarla(acik){
+    var not = $('kanal-not');
+    not.textContent = acik ? 'Yoklama açılıyor…' : 'Yoklama kapatılıyor…';
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify({
+      channels:{ telegram:{ polling:!!acik } } }) });
+    if(r.status !== 200){
+      not.textContent = 'Kaydedilemedi — '
+        + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+      return;
+    }
+    var k = ((r.body.config.channels || {}).telegram) || {};
+    ayarlariCiz(r.body.config);
+    not = $('kanal-not');
+    if(acik && !k.ready){
+      not.textContent = 'Yoklama açıldı ama kanal kapalı: «Aç» düğmesine bas.';
+    }else if(acik && !(k.allow_from || []).length){
+      not.textContent = 'Yoklama açıldı ama izin listesi boş — kimseye '
+        + 'cevap verilmez.';
+    }else{
+      not.textContent = acik
+        ? 'Yoklama açık. Telegram\'da botuna yazabilirsin.'
+        : 'Yoklama kapatıldı.';
+    }
+  }
 
   /* «Şimdi dene»: webhook'u siler (Telegram ikisini ayni anda kabul
      etmez) ve bir yoklama turu kosar. Sonuc UYDURULMAZ: kac mesaj
