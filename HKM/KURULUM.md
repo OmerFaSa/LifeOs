@@ -1,27 +1,35 @@
 # HKM — kurulum, sunucu ve kanallar
 
-> Bu belge bir «kolay kurulum» kılavuzu değildir. HKM'yi dışarı açmak bir
-> **altyapı kararıdır** ve kararın maliyeti burada yazılıdır. Kanallar
-> kapalıyken HKM ve üç sistem olduğu gibi çalışır: aşağıdaki adımların
-> hiçbiri zorunlu değildir.
+> Yerel kullanım **tek tıktır** (§1). Bu belgenin geri kalanı HKM'yi
+> dışarı açmakla ilgilidir ve o bir **altyapı kararıdır**: maliyeti burada
+> yazılıdır. Kanallar kapalıyken HKM ve üç sistem olduğu gibi çalışır —
+> §2'den sonrası zorunlu değildir.
 
-## 1. Yerel çalıştırma (varsayılan ve en güvenli hâl)
+## 1. Yerel çalıştırma — TEK TIK
 
-```bash
-cd HKM
-python3 kur.py --baslat
-```
+`HKM` klasöründeki başlatıcıya çift tıkla:
 
-Bu kadar. `kur.py` yapılandırmayı yazar (var olanı **ezmez**), şemayı kurar,
-kanalların durumunu söyler ve `--baslat` ile daemon'u çalıştırır. Ürettiği
-jeton **hiçbir yerde ekrana yazılmaz**: terminal geçmişinde ve omuz üstünde
-kalmasın diye.
+| İşletim sistemi | Dosya |
+|---|---|
+| macOS | `BASLAT.command` |
+| Windows | `BASLAT.bat` |
+| Linux | `baslat.sh` (ya da `python3 baslat.py`) |
 
-Modülleri bağlamak da jeton kopyalamadan olur:
+Tek tık şunları yapar ve **her satırı gerçekten dener**: yapılandırmayı
+yazar (var olanı **ezmez**), şemayı kurar, daemon ayakta değilse başlatır
+ve cevap verene kadar bekler, yüz için kısa bir eşleme penceresi açar,
+tarayıcıyı açar. Jeton **hiçbir yerde görünmez** — ne ekranda, ne adres
+çubuğunda: yüz onu eşleme penceresinden alır ve yalnız kendi tarayıcısında
+saklar.
 
-1. Yüzü aç: `http://127.0.0.1:4200`
-2. **Cihazları bağla** — iki dakikalık, **tek kullanımlık** bir pencere açılır
-3. AYS / SPİ / ESP → Ayarlar → HKM işareti → **Bağlan**
+Durdurmak: `python3 baslat.py --dur`. Pencereyi kapatmak yetmez; daemon
+arka planda çalışır.
+
+Üç sistemi bağlamak da jeton kopyalamadan olur:
+
+1. Yüzde **Yönetim → Cihazları bağla** — iki dakikalık, **tek kullanımlık**
+   bir pencere açılır
+2. AYS / SPİ / ESP → Ayarlar → HKM işareti → **Bağlan**
 
 Pencereyi yalnız jetonu zaten bilen taraf açabilir; jeton yalnız yerel
 kökene verilir ve pencere ilk cihazda kapanır. Her sistem için pencereyi
@@ -31,14 +39,12 @@ yeniden aç. Jetonu elle yazmak da çalışmaya devam eder.
 
 - Daemon yalnız `127.0.0.1`'e bağlanır. `host` değerini değiştirmek
   **bilinçli bir karardır** ve o andan itibaren ağdaki herkes kapıyı görür.
-- Yüz: `http://127.0.0.1:4200` — jetonu tarayıcıya bir kez girersin.
-- Üç arayüzdeki işaret ayrı ayrı açılır (Ayarlar → HKM işareti) ve aynı
-  jetonu ister.
 
 Doğrulama:
 
 ```bash
 python3 -m tests.run            # HKM'nin kendi denetimleri
+node tools/yuz.js               # yüz: taşma, hedef boyu, etiket, kontrast
 node ../tools/entegre.js        # üç arayüz + HKM: uçtan uca
 ```
 

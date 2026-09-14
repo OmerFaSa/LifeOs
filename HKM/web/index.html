@@ -5,78 +5,159 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>HKM — Hayat Kontrol Merkezi</title>
 <style>
-/* Tek sayfa, tek dosya, sifir bagimlilik.
+/* HKM yuzu — tek dosya, sifir bagimlilik.
 
-   Bu yuz UC SISTEMIN yuzu degildir ve onlara benzemez: HKM bir arayuz
-   degil bir OZETTIR. Renk, ikon ve tablo suslemesi yok; ekranda yalnizca
-   gunun cumleleri, dayanagi ve tek soru duruyor. */
+   Bu yuz UC SISTEMIN yuzu DEGILDIR ve onlara benzemez. AYS/SPI/ESP birer
+   CALISMA arayuzudur: kart, sekme, renk, dugme — gun boyu icine girilir.
+   HKM ise gunde bir kez bakilan bir PANOdur. O yuzden burada:
+
+     · kart yok, hat var          — kutu icinde kutu, dikkat boler
+     · renk yok, kontrast var     — renk yalniz UYARI icin kullanilir
+     · sus yok, hizalama var      — sayilar tek sutunda, tabular rakamla
+     · ikon yok, sozcuk var       — simgeyi herkes ayni okumaz
+
+   Tek vurgu rengi vardir ve yalniz bir seye ayrilmistir: kullanicinin
+   karar vermesi beklenen yere. Her yerde vurgu, hicbir yerde vurgudur. */
 :root{
-  --bg:#faf9f7; --fg:#1b1a18; --dim:#6b6864; --line:#e2ded8; --card:#fff;
-  --ok:#1f6f4a; --warn:#8a5a0b; --danger:#9b2c2c; --accent:#2d4a7c;
+  /* Tarafsiz, hafif sicak gri — ekrana uzun bakmak icin. */
+  --bg:#f7f7f5; --yuzey:#ffffff; --fg:#17181a; --dim:#63666b;
+  --line:#e3e3df; --line-strong:#cfd0cb;
+  --ok:#1c6b4a; --warn:#8a5a0b; --danger:#a02525;
+  --accent:#22456f;
   /* Vurgu renginin UZERINE gelen metin ayri bir jetondur: koyu temada
      vurgu acilir ve uzerine beyaz yazmak kontrasti 2,2'ye dusuruyordu. */
   --on-accent:#ffffff;
+  --mono:ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark){
-  :root{ --bg:#151719; --fg:#e8e6e3; --dim:#9b9691; --line:#2b2f33;
-    --card:#1c1f22; --ok:#6fd3a3; --warn:#e3b061; --danger:#f08c8c;
-    --accent:#8fb0e8; --on-accent:#151719; }
+  :root{ --bg:#0f1113; --yuzey:#15181b; --fg:#e9eaec; --dim:#9aa0a6;
+    --line:#24282c; --line-strong:#333940;
+    --ok:#67d2a2; --warn:#e0ae5f; --danger:#f28e8e;
+    --accent:#9dbdf0; --on-accent:#0f1113; }
 }
 *{ box-sizing:border-box; }
+/* [hidden] ozniteligi, .row gibi display veren bir SINIFA yenilir:
+   ozgulluk esit oldugunda sonra gelen kural kazanir. Gizli dedigi halde
+   gorunen bir oge, arayuzun kendi sozunu tutmamasidir. */
+[hidden]{ display:none !important; }
+html{ -webkit-text-size-adjust:100%; }
 body{ margin:0; background:var(--bg); color:var(--fg);
-  font:15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-.wrap{ max-width:760px; margin:0 auto; padding:24px 16px 64px; }
-h1{ font-size:18px; margin:0 0 2px; letter-spacing:.02em; }
-.sub{ color:var(--dim); font-size:13px; margin:0 0 20px; }
-.card{ background:var(--card); border:1px solid var(--line); border-radius:10px;
-  padding:16px; margin:12px 0; }
-.line{ padding:10px 0; border-bottom:1px solid var(--line); }
+  font:15px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing:antialiased; }
+
+/* ---- ust serit: her zaman gorunur, hicbir zaman gurultulu ---- */
+.ust{ position:sticky; top:0; z-index:5; background:var(--bg);
+  border-bottom:1px solid var(--line); }
+.ust__ic{ max-width:900px; margin:0 auto; padding:10px 20px;
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.marka{ font:600 13px/1 var(--mono); letter-spacing:.16em;
+  text-transform:uppercase; margin:0; }
+.marka span{ color:var(--dim); font-weight:400; letter-spacing:.08em; }
+.bosluk{ flex:1 1 auto; }
+
+.wrap{ max-width:900px; margin:0 auto; padding:0 20px 72px; }
+h1{ font-size:18px; margin:0 0 2px; letter-spacing:.01em; }
+.sub{ color:var(--dim); font-size:13.5px; margin:0; max-width:62ch; }
+/* Duz metin 74 karakterden uzun satirda okunmaz: goz satir basini
+   kaybeder. Tablolar ve sayilar bu sinirin disindadir. */
+.line, .prop, .card > p, .card > .muted{ max-width:76ch; }
+.giris-alan{ padding:28px 0; }
+
+/* ---- bolum: kart degil, HAT ---- */
+.card{ background:transparent; border:0; border-top:1px solid var(--line);
+  border-radius:0; padding:20px 0 4px; margin:0; }
+.card:first-child{ border-top:0; }
+#giris.card{ border-top:0; background:var(--yuzey);
+  border:1px solid var(--line); padding:20px; margin:24px 0;
+  max-width:520px; }
+#esleme.card{ background:var(--yuzey); border:1px solid var(--line-strong);
+  padding:16px; margin:16px 0; }
+
+.tag{ font:11px/1 var(--mono); letter-spacing:.14em; text-transform:uppercase;
+  color:var(--dim); display:block; margin-bottom:10px; }
+.line{ padding:9px 0; border-bottom:1px solid var(--line); }
 .line:last-child{ border-bottom:0; }
-.tag{ font:11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-  letter-spacing:.08em; text-transform:uppercase; color:var(--dim);
-  display:inline-block; margin-bottom:4px; }
-.prop{ border-left:3px solid var(--accent); padding-left:12px; }
+/* Karar bekleyen tek yer: vurgu burada, baska yerde degil. */
+.prop{ border-left:2px solid var(--accent); padding:2px 0 2px 14px;
+  font-size:16px; }
 .muted{ color:var(--dim); font-size:13px; }
 .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-button{ font:inherit; padding:8px 14px; border-radius:8px; cursor:pointer;
-  border:1px solid var(--line); background:var(--card); color:var(--fg);
-  min-height:36px; }
+
+button{ font:13px/1 ui-sans-serif, system-ui, sans-serif; padding:9px 14px;
+  border-radius:3px; cursor:pointer; border:1px solid var(--line-strong);
+  background:var(--yuzey); color:var(--fg); min-height:36px; }
+button:hover{ border-color:var(--fg); }
 button.primary{ background:var(--accent); border-color:var(--accent);
   color:var(--on-accent); }
-button:disabled{ opacity:.5; cursor:default; }
-input{ font:inherit; padding:8px 10px; border-radius:8px; border:1px solid var(--line);
-  background:var(--bg); color:var(--fg); min-height:36px; }
+button:disabled{ opacity:.45; cursor:default; }
+button:focus-visible, input:focus-visible{ outline:2px solid var(--accent);
+  outline-offset:2px; }
+input{ font:13px/1 ui-sans-serif, system-ui, sans-serif; padding:9px 10px;
+  border-radius:3px; border:1px solid var(--line-strong);
+  background:var(--yuzey); color:var(--fg); min-height:36px; }
 /* Onay kutusu tarayici varsayilaninda 13 pikselden kucuk cizilir ve
    WCAG 2.2'nin 24px tabanini gecemez. */
 input[type="checkbox"]{ width:24px; height:24px; min-height:24px; }
 input[type="file"]{ min-height:36px; }
+
 table{ width:100%; border-collapse:collapse; font-size:13px; }
-th,td{ text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); }
-th{ color:var(--dim); font-weight:500; font-size:11px; letter-spacing:.06em;
-  text-transform:uppercase; }
-td.num{ text-align:right; font-variant-numeric:tabular-nums; }
-.state{ font-size:12px; padding:2px 8px; border-radius:99px; border:1px solid var(--line); }
+th,td{ text-align:left; padding:7px 10px 7px 0; border-bottom:1px solid var(--line); }
+th{ color:var(--dim); font:11px/1 var(--mono); letter-spacing:.1em;
+  text-transform:uppercase; font-weight:400; padding-bottom:9px; }
+td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums;
+  font-family:var(--mono); padding-right:0; }
+.state{ font:11px/1 var(--mono); padding:4px 8px; border-radius:2px;
+  border:1px solid var(--line-strong); letter-spacing:.06em; }
 .ok{ color:var(--ok); } .warn{ color:var(--warn); } .danger{ color:var(--danger); }
 .scroll{ overflow-x:auto; }
-.tabs{ display:flex; gap:4px; margin:4px 0 12px; flex-wrap:wrap; }
-.tabs button{ border-radius:999px; padding:6px 14px; }
-.tabs button.on{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
-.metric{ display:grid; grid-template-columns:1fr auto; gap:4px 12px;
-  align-items:center; padding:10px 0; border-bottom:1px solid var(--line); }
+code{ font:12px/1.4 var(--mono); }
+
+/* ---- sekmeler: hap degil, ALT CIZGI ---- */
+.tabs{ display:flex; gap:0; margin:0; flex-wrap:wrap;
+  border-bottom:1px solid var(--line); }
+.tabs button{ border:0; border-bottom:2px solid transparent; border-radius:0;
+  background:none; color:var(--dim); padding:10px 14px 8px;
+  font:12px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; }
+.tabs button:hover{ color:var(--fg); border-color:var(--line-strong); }
+.tabs button.on{ color:var(--fg); border-bottom-color:var(--accent); }
+
+.metric{ display:grid; grid-template-columns:1fr auto; gap:2px 16px;
+  align-items:baseline; padding:11px 0; border-bottom:1px solid var(--line); }
 .metric:last-child{ border-bottom:0; }
-.metric__name{ font-size:13px; }
-.metric__val{ font-variant-numeric:tabular-nums; font-size:15px; text-align:right; }
-.metric__spark{ grid-column:1 / -1; }
-.metric__meta{ grid-column:1 / -1; color:var(--dim); font-size:11px; }
-svg.spark{ width:100%; height:34px; display:block; }
-@media (max-width:420px){ .wrap{ padding:16px 12px 48px; } }
+.metric__name{ font-size:13.5px; }
+.metric__val{ font-variant-numeric:tabular-nums; font-family:var(--mono);
+  font-size:15px; text-align:right; }
+.metric__spark{ grid-column:1 / -1; margin:8px 0 2px; }
+.metric__meta{ grid-column:1 / -1; color:var(--dim); font:11px/1.5 var(--mono); }
+svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
+
+@media (max-width:520px){
+  .ust__ic{ padding:10px 14px; }
+  .wrap{ padding:0 14px 56px; }
+  .tabs button{ padding:10px 10px 8px; }
+}
 </style>
 </head>
 <body>
+<header class="ust">
+  <div class="ust__ic">
+    <p class="marka">HKM <span>hayat kontrol merkezi</span></p>
+    <div class="bosluk"></div>
+    <div class="row" id="ust-araclar" hidden>
+      <input id="tarih" type="date" aria-label="Görüntülenen gün"/>
+      <button id="yenile">Yenile</button>
+    </div>
+  </div>
+</header>
+
 <div class="wrap">
-  <h1>HKM — Hayat Kontrol Merkezi</h1>
-  <p class="sub">Üçünü tek sesle özetler. Karar üretmez, karar taşır:
-    aşağıdaki her cümle kural motorundan gelir ve her öneri senin onayını bekler.</p>
+  <div class="giris-alan">
+    <h1>Üçünü tek sesle özetler.</h1>
+    <p class="sub">Karar üretmez, karar taşır: aşağıdaki her cümle kural
+      motorundan gelir ve her öneri senin onayını bekler. Ekranda
+      hesaplanan tek bir sayı yoktur.</p>
+  </div>
 
   <div class="card" id="giris" hidden>
     <div class="tag">Yerel jeton</div>
@@ -90,17 +171,6 @@ svg.spark{ width:100%; height:34px; display:block; }
   </div>
 
   <div id="govde" hidden>
-    <div class="row" style="justify-content:space-between; margin-bottom:4px">
-      <div class="row">
-        <input id="tarih" type="date" aria-label="Görüntülenen gün"/>
-        <button id="yenile">Yenile</button>
-        <button id="esle">Cihazları bağla</button>
-      </div>
-      <button id="cikis">Jetonu unut</button>
-    </div>
-
-    <div class="card" id="esleme" hidden></div>
-
     <div class="tabs" id="sekmeler">
       <button data-sekme="genel" class="on">Genel</button>
       <button data-sekme="sistemler">Sistemler</button>
@@ -140,6 +210,16 @@ svg.spark{ width:100%; height:34px; display:block; }
     </div>
 
     <div data-bolme="yonetim" hidden>
+      <div class="card">
+        <span class="tag">Cihazlar</span>
+        <p class="muted">Üç sistem jeton kopyalamadan bağlanır: pencere
+          açılır, ilgili sistemde «Bağlan» denir, pencere kapanır.</p>
+        <div class="row">
+          <button id="esle">Cihazları bağla</button>
+          <button id="cikis">Jetonu bu tarayıcıdan sil</button>
+        </div>
+      </div>
+      <div class="card" id="esleme" hidden></div>
       <div class="card" id="ayarlar"><p class="muted">Yükleniyor…</p></div>
       <div class="card" id="ritim"></div>
       <div class="card" id="kutu"></div>
@@ -178,6 +258,7 @@ svg.spark{ width:100%; height:34px; display:block; }
   function girisGoster(not){
     $('giris').hidden = false;
     $('govde').hidden = true;
+    $('ust-araclar').hidden = true;
     $('giris-not').textContent = not || '';
   }
 
@@ -246,7 +327,8 @@ svg.spark{ width:100%; height:34px; display:block; }
       var m = t.modules[mod];
       Object.keys(m.metrics || {}).forEach(function(k){
         var x = m.metrics[k];
-        satirlar.push('<tr><td>' + esc(MODUL[mod] || mod) + '</td><td>' + esc(k) + '</td>'
+        satirlar.push('<tr><td>' + esc(MODUL[mod] || mod) + '</td>'
+          + '<td>' + esc(x.name || k) + '</td>'
           + '<td class="num">' + (x.value == null ? '—' : esc(x.value)) + '</td>'
           + '<td>' + esc(ETIKET[x.cert] || x.cert) + '</td>'
           + '<td>' + esc(x.trend && x.trend.direction === 'unknown' ? 'yön bilinmiyor'
@@ -563,10 +645,12 @@ svg.spark{ width:100%; height:34px; display:block; }
       liste.forEach(function(kayit){
         var son = kayit.last || [null, null, null];
         h += '<div class="metric">'
-          + '<div class="metric__name">' + esc(kayit.metric) + '</div>'
+          + '<div class="metric__name">' + esc(kayit.name || kayit.metric)
+          + '</div>'
           + '<div class="metric__val">' + esc(son[1] == null ? '—' : son[1]) + '</div>'
           + '<div class="metric__spark">' + spark(kayit.points) + '</div>'
-          + '<div class="metric__meta">' + esc(kayit.n) + ' ölçüm · '
+          + '<div class="metric__meta">' + esc(kayit.metric) + ' · '
+          + esc(kayit.n) + ' ölçüm · '
           + esc(kayit.certs.map(function(c){ return ETIKET[c] || c; }).join(', '))
           + ' · en az ' + esc(kayit.min) + ' / ortanca ' + esc(kayit.median)
           + ' / en çok ' + esc(kayit.max) + ' · '
@@ -587,13 +671,18 @@ svg.spark{ width:100%; height:34px; display:block; }
      ve hiçbir şey kaydedilmez. */
   var AYAR = null;
 
-  function esikSatiri(grup, ad, deger, aralik){
-    return '<div class="metric"><div class="metric__name">' + esc(grup) + '.'
-      + esc(ad) + '</div><div class="metric__val">'
+  function esikSatiri(grup, ad, deger, aralik, isim){
+    /* Baslik NE OLDUGUNU soyler, anahtar altta durur: «bio.hrv_drop_pct»
+       bir sayidir ama neyin sayisi oldugu ancak yazilinca belli olur.
+       Ekran okuyucu da anahtari degil cumleyi okur. */
+    var baslik = isim || (grup + '.' + ad);
+    return '<div class="metric"><div class="metric__name">' + esc(baslik)
+      + '</div><div class="metric__val">'
       + '<input data-esik="' + esc(grup) + '.' + esc(ad) + '" type="number" '
       + 'step="any" value="' + esc(deger) + '" style="width:100px" '
-      + 'aria-label="' + esc(grup) + ' ' + esc(ad) + '"/></div>'
-      + '<div class="metric__meta">izin verilen aralık: '
+      + 'aria-label="' + esc(baslik) + '"/></div>'
+      + '<div class="metric__meta">' + esc(grup) + '.' + esc(ad)
+      + ' · izin verilen aralık: '
       + esc(aralik[0]) + ' – ' + esc(aralik[1]) + '</div></div>';
   }
 
@@ -608,7 +697,8 @@ svg.spark{ width:100%; height:34px; display:block; }
       Object.keys(c.thresholds[grup]).forEach(function(ad){
         var aralik = ((c.ranges || {})[grup] || {})[ad];
         if(!aralik) return;
-        h += esikSatiri(grup, ad, c.thresholds[grup][ad], aralik);
+        h += esikSatiri(grup, ad, c.thresholds[grup][ad], aralik,
+          ((c.threshold_names || {})[grup] || {})[ad]);
       });
     });
     h += '<div class="row" style="margin-top:12px">'
@@ -790,6 +880,7 @@ svg.spark{ width:100%; height:34px; display:block; }
   async function bagla(){
     $('govde').hidden = false;
     $('giris').hidden = true;
+    $('ust-araclar').hidden = false;
     await yukle();
   }
 
@@ -821,7 +912,32 @@ svg.spark{ width:100%; height:34px; display:block; }
   $('tarih').addEventListener('change', yukle);
   $('tarih').value = bugun();
 
-  if(token) bagla(); else girisGoster('');
+  /* Acilista jeton yoksa: ACIK PENCERE VARSA al, yoksa sor.
+
+     `baslat.py` (tek tik) yuzu acmadan once daemon'da kisa bir esleme
+     penceresi acar. Jetonu adres cubuguna koymak bir sirri tarayici
+     gecmisine yazmak olurdu; pencereden almak ise yalniz bu makinede,
+     yalniz birkac saniye mumkundur. Pencere yoksa hicbir sey olmaz ve
+     eski yol — jetonu elle girmek — oldugu gibi durur. */
+  async function jetonuPencereden_al(){
+    try{
+      var r = await fetch('/api/pair', { method:'POST',
+        headers:{ 'Content-Type':'application/json' } });
+      if(r.status !== 200) return false;
+      var g = await r.json();
+      if(!g || !g.token) return false;
+      token = g.token;
+      try{ localStorage.setItem(TOKEN_KEY, token); }catch(e){}
+      return true;
+    }catch(e){ return false; }
+  }
+
+  (async function ac(){
+    if(token){ bagla(); return; }
+    var alindi = await jetonuPencereden_al();
+    if(alindi) bagla();
+    else girisGoster('');
+  })();
 })();
 </script>
 </body>

@@ -66,6 +66,7 @@ CONFIG_PATH = os.path.join(ROOT, "config.json")
 # Esleme penceresi: jetonu elle yapistirmayi bitirir ama kapiyi acik
 # birakmaz. Kisa, TEK KULLANIMLIK ve yalniz YEREL kokene.
 PAIR_SECONDS = 120
+PAIR_MIN_SECONDS = 15        # pencere bundan kisa da olamaz, uzun da
 
 # --------------------------------------------------------------- sinirlar
 #
@@ -332,12 +333,23 @@ class Handler(BaseHTTPRequestHandler):
             srv.pair_lock = threading.Lock()
         return srv.pair
 
-    def _pair_open(self):
+    def _pair_open(self, seconds=None):
+        """Pencereyi acar. Sure ISTENEBILIR ama uzatilamaz.
+
+        Tek tikla baslatma (baslat.py) yuzun kendisi icin cok kisa bir
+        pencere acar: pencere ne kadar acik kalirsa, o makinede acik duran
+        baska bir sayfanin jetonu kapma ihtimali o kadar uzun surer. Kisa
+        pencere istemek serbesttir; UZATMAK degil."""
+        try:
+            sure = int(seconds) if seconds is not None else PAIR_SECONDS
+        except (TypeError, ValueError):
+            sure = PAIR_SECONDS
+        sure = max(PAIR_MIN_SECONDS, min(sure, PAIR_SECONDS))
         durum = self._pair_state()
         with self.server.pair_lock:
-            durum["until"] = time.time() + PAIR_SECONDS
+            durum["until"] = time.time() + sure
             durum["used"] = False
-        return self._send(200, {"ok": True, "seconds": PAIR_SECONDS,
+        return self._send(200, {"ok": True, "seconds": sure,
                                 "note": "Eşleme penceresi açıldı. Tek cihaz "
                                         "bağlanabilir; süre dolunca kapanır."})
 
@@ -496,7 +508,14 @@ class Handler(BaseHTTPRequestHandler):
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
         if u.path == "/api/pair/open":
-            return self._pair_open()
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                istek = json.loads(ham or b"{}")
+            except ValueError:
+                istek = {}
+            return self._pair_open((istek or {}).get("seconds"))
         if u.path == "/api/config":
             ham, hata = self._read_body()
             if hata:

@@ -259,6 +259,27 @@ def run():
             eq(d["used"], True)
         test("acik pencere jetonu bir kez verir", t_pair_gives_token_once)
 
+        def t_pair_window_can_be_shortened_not_lengthened():
+            """Tek tik, yuz icin KISA bir pencere ister: pencere ne kadar
+            acik kalirsa, ayni makinede acik duran baska bir sayfanin jetonu
+            kapma ihtimali o kadar uzun surer. Kisaltmak serbest, UZATMAK
+            degil — istemciden gelen bir sayi guvenlik sinirini genisletemez."""
+            kod, r = S.call("/api/pair/open", body={"seconds": 20})
+            eq(kod, 200)
+            eq(r["seconds"], 20)
+            # Uzatma denemesi tavana kirpilir.
+            kod, r = S.call("/api/pair/open", body={"seconds": 99999})
+            eq(r["seconds"], daemon.PAIR_SECONDS)
+            # Sacma deger varsayilana duser, hata vermez.
+            kod, r = S.call("/api/pair/open", body={"seconds": "yarin"})
+            eq(r["seconds"], daemon.PAIR_SECONDS)
+            # Tabanin altina da inilmez: 1 saniyelik pencere, acilmamis
+            # sayilacak kadar kisadir ve sessiz bir basarisizlik uretirdi.
+            kod, r = S.call("/api/pair/open", body={"seconds": 1})
+            eq(r["seconds"], daemon.PAIR_MIN_SECONDS)
+        test("esleme penceresi kisaltilir ama uzatilmaz",
+             t_pair_window_can_be_shortened_not_lengthened)
+
         def t_pair_refuses_foreign_origin():
             S.call("/api/pair/open", body={})
             kod, _ = S.ham("/api/pair", b"{}", {

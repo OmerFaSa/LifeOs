@@ -28,7 +28,7 @@ import json
 import os
 import re
 
-from core import channels, schedule, thresholds
+from core import adlar, channels, schedule, thresholds
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -82,6 +82,12 @@ def read(cfg):
         out["channels"][ad] = kanal
     out["schedule"] = schedule.settings(cfg)
     out["ranges"] = THRESHOLD_RANGE
+    # Esigin NE OLDUGU da disari cikar: «bio.hrv_drop_pct» bir sayidir ama
+    # neyin sayisi oldugu ancak yazilinca belli olur. Ad sunum katmanidir
+    # ve tek yerden (core/adlar.py) gelir; yuzun kendi sozlugu olsaydi bir
+    # gun ikisi ayrisirdi.
+    out["threshold_names"] = {g: {a: adlar.esik(g, a) for a in alanlar}
+                              for g, alanlar in THRESHOLD_RANGE.items()}
     return out
 
 

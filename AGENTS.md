@@ -10,8 +10,9 @@
 Dört bağımsız sistem: **AYS** (sınav), **SPİ** (sağlık), **ESP** (gelişim)
 tarayıcıda çalışan sıfır bağımlılıklı tek sayfa uygulamalarıdır; **HKM**
 onların yanında duran isteğe bağlı bir Python servisidir. Ayrıntı:
-`README.md`, `ANALIZ.md`, her sistemin `MIMARI.md`'si. Dış inceleme için
-hazır özet: `PAKET.md` (üreten: `python3 tools/paket.py`).
+`README.md` ve her sistemin `MIMARI.md`'si. Dış inceleme için hazır özet
+`python3 tools/paket.py` ile ÜRETİLİR (`PAKET.md`); depoda durmaz, çünkü
+üretilmiş bir dosya bir gün kaynağıyla ayrışır.
 
 ## 1. Değişmeyen kurallar
 
@@ -80,7 +81,8 @@ bir bulgudur. Emin değilsen **«göremedim»** yaz, «yok» yazma: bu depoda
 
 ## 5. Sık yapılan üç hata
 
-1. **Var olanı yeniden önermek.** `PAKET.md` §2 modül yüzeylerini listeler;
+1. **Var olanı yeniden önermek.** `tools/paket.py` çıktısının §2'si modül
+   yüzeylerini listeler;
    orada adı geçen şey vardır.
 2. **Genel yazılım tavsiyesi.** «Test yazın, CI kurun, tip ekleyin» —
    2 600+ test ve on denetim aracı var; sayılar `README.md`'de ve elle

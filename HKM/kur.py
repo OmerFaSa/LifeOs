@@ -89,7 +89,7 @@ def daemon_durumu(cfg):
         return False
 
 
-def kur(yaz=True):
+def kur(yaz=True, yol_goster=True):
     print("\nHKM kurulumu\n")
     mevcut = oku(CONFIG)
     cfg = birlestir(varsayilanlar(), mevcut)
@@ -137,16 +137,15 @@ def kur(yaz=True):
           "ayakta · http://%s:%s" % (cfg["host"], cfg["port"]) if ayakta
           else "çalışmıyor")
 
-    print("""
-  Modül bağlantısı jetonla değil EŞLEME ile yapılır:
+    if yol_goster:
+        print("""
+  Tek tık:  baslat.py  (ya da BASLAT.command / BASLAT.bat)
+  — kurar, daemon'u başlatır, yüzü açar. Jeton elle yazılmaz.
 
-    1. Daemon'u başlat        python3 daemon.py
-    2. Yüzü aç               http://127.0.0.1:%s
-    3. «Cihazları bağla» de   — iki dakikalık pencere açılır
-    4. AYS/SPİ/ESP → Ayarlar → HKM işareti → «Bağlan»
-
-  Jeton hiçbir yerde ekrana yazılmaz; pencere kapandığında eşleme kapanır.
-""" % cfg.get("port", 4200))
+  Modül bağlantısı da jetonla değil EŞLEME ile yapılır: yüzdeki
+  «Cihazları bağla» düğmesi kısa bir pencere açar, sonra
+  AYS/SPİ/ESP → Ayarlar → HKM işareti → «Bağlan».
+""")
     return cfg
 
 

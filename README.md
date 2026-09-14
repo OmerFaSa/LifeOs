@@ -132,13 +132,17 @@ koçuyla yazılı ve sesli konuşulabilen bir **tezgâh** durur, ve koçlar sist
 **teklif** ederek değiştirir: onayı kullanıcı verir, uygulamayı kural motoru
 yapar.
 
-HKM bir tarayıcı uygulaması değil bir arka plan servisidir; kendi komutları
-vardır (yalnızca Python standart kütüphanesi):
+HKM bir tarayıcı uygulaması değil bir arka plan servisidir. Açmak **tek
+tıktır**: `HKM` klasöründe **`BASLAT.command`** (macOS), **`BASLAT.bat`**
+(Windows) ya da **`baslat.sh`** (Linux). Kurar, daemon'u başlatır, yüzü
+açar; jeton ne ekranda ne adres çubuğunda görünür. Durdurmak:
+`python3 baslat.py --dur`.
+
+Terminalden kullanmak isteyene (yalnızca Python standart kütüphanesi):
 
 ```bash
 cd HKM
-cp config.example.json config.json    # local_token'ı değiştir
-python3 daemon.py                     # 127.0.0.1:4200 — yerel yüz de burada
+python3 baslat.py                     # tek tıkın komut hâli
 python3 -m tests.run                  # VP, sync, şema, öncelik, ikiz,
                                       # Yönetici, daemon ve yüz
 python3 tools/perf.py                 # dokuz aylık ambarda sorgu bütçesi

@@ -26,7 +26,7 @@
 import datetime
 
 from core import certainty as C
-from core import db
+from core import adlar, db
 
 WINDOW_DAYS = 14
 TREND_MIN_POINTS = 4          # altinda yon soylenmez
@@ -109,6 +109,10 @@ def snapshot(con, date, days=WINDOW_DAYS):
         modules[mod]["metrics"][key] = {
             "value": v, "cert": cert, "at": d,
             "label": C.LABELS.get(cert, cert),
+            # «label» KESINLIK etiketidir (olculdu/tahmin/...); «name» ise
+            # alanin insan adi. Ikisini tek alanda toplamak, iki farkli
+            # seyi ayni kelimeyle anlatmak olurdu.
+            "name": adlar.metrik(key),
             "points": len(noktalar),
             "coverage": round(len(noktalar) / float(days), 3),
             "trend": _trend(noktalar),
@@ -161,6 +165,11 @@ def series(con, date, days=WINDOW_DAYS, module=None):
         # Kesinlik karisimi gorunur kalir: «olculdu» ile «hesaplandi» ayni
         # cizgide durabilir ama ayni sey degildir.
         kayit["certs"] = sorted(set(p[2] for p in noktalar))
+        # Ekran adi VERIYE degil SUNUMA aittir: anahtar ingilizce kalir,
+        # yaninda insanin okudugu ad gider. Yuzun kendi sozlugu olsaydi,
+        # ad iki yerde yasar ve bir gun ikisi ayrisirdi.
+        kayit["name"] = adlar.metrik(kayit["metric"])
+        kayit["module_name"] = adlar.modul(kayit["module"])
     return out
 
 
