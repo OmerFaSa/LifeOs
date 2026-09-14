@@ -242,8 +242,13 @@ ESP.Screens.profile = (function(){
         ${when(on.errors.length, () => K.Notice({ tone:'warn',
           body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
 
-        <div class="mt-12">${K.Button({ label:'Şimdi gönder', act:'hkm-send',
-          tone:'primary' })}</div>
+        <div class="mt-12">
+          ${K.Button({ label:'Bağlan', act:'hkm-pair', tone:'primary' })}
+          ${K.Button({ label:'Şimdi gönder', act:'hkm-send' })}
+        </div>
+        <p class="small muted mt-8">«Bağlan», jetonu HKM'den doğrudan alır:
+          önce HKM yüzünde «Cihazları bağla» de, sonra iki dakika içinde
+          buraya bas. Jetonu elle yazmak da çalışır.</p>
         <p class="small muted mt-8">${durum}</p>`,
     });
   }
@@ -255,6 +260,11 @@ ESP.Screens.profile = (function(){
       const a = ESP.Beacon.settings();
       await ESP.Beacon.save({ enabled:!a.enabled });
       ESP.UI.toast(!a.enabled ? 'HKM işareti açıldı' : 'HKM işareti kapatıldı');
+      ESP.App.render();
+    },
+    async 'hkm-pair'(){
+      const r = await ESP.Beacon.pair(val('hkm-url'));
+      ESP.UI.toast(r.note);
       ESP.App.render();
     },
     async 'hkm-send'(){

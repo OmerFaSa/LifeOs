@@ -11,6 +11,10 @@ Ucnoktalar:
     GET  /api/cross?date=&days=     capraz bulgular: uc ambar yan yana
     POST /api/message               Buyuk Patron'a kisa komut (yerel kanal)
     GET  /api/conversation          son konusma kayitlari
+    POST /api/pair/open             esleme penceresini acar (bearer ister)
+    GET  /api/pair/status           pencere acik mi (bearer ister)
+    POST /api/pair                  jetonu YEREL cihaza verir — pencere acikken,
+                                    tek kullanimlik, bearer ISTEMEZ
     POST /api/say                   gunun mesajini kanala gonderir (gunde bir)
     GET/POST /api/wa/webhook        WhatsApp — jetonsuz ama IMZALI (bkz. §7)
     POST /api/tg/webhook            Telegram — gizli baslikla dogrulanir
@@ -30,6 +34,7 @@ import os
 import re
 import sys
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
@@ -40,6 +45,10 @@ from core import (channels, cross, db, manager, patron,  # noqa: E402
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
+
+# Esleme penceresi: jetonu elle yapistirmayi bitirir ama kapiyi acik
+# birakmaz. Kisa, TEK KULLANIMLIK ve yalniz YEREL kokene.
+PAIR_SECONDS = 120
 
 
 """Tarayici, HKM'ye BASKA BIR KOKENDEN konusur.
@@ -222,6 +231,58 @@ class Handler(BaseHTTPRequestHandler):
         return {"ok": g["ok"], "status": g["status"], "note": g["note"],
                 "chars": len(m["text"])}
 
+    # ------------------------------------------------------------ esleme
+    #
+    # Jetonu uc arayuze elle yapistirmak, HKM'nin hic acilmamasinin en
+    # olasi sebebiydi. Cozum jetonu gevsetmek DEGIL, kisa bir pencere
+    # acmak:
+    #
+    #   · pencereyi yalniz jetonu ZATEN bilen taraf acabilir (bearer),
+    #   · pencere iki dakika yasar ve TEK KULLANIMLIKTIR,
+    #   · jeton yalniz YEREL kokene verilir (127.0.0.1 / localhost / ::1),
+    #   · jeton hicbir kayda, hicbir loga ve hicbir ekrana yazilmaz.
+    #
+    # Boylece «kapiyi ac» ile «kapiyi kir» arasindaki fark korunur.
+
+    def _pair_state(self):
+        srv = self.server
+        if not hasattr(srv, "pair"):
+            srv.pair = {"until": 0.0, "used": True}
+            srv.pair_lock = threading.Lock()
+        return srv.pair
+
+    def _pair_open(self):
+        durum = self._pair_state()
+        with self.server.pair_lock:
+            durum["until"] = time.time() + PAIR_SECONDS
+            durum["used"] = False
+        return self._send(200, {"ok": True, "seconds": PAIR_SECONDS,
+                                "note": "Eşleme penceresi açıldı. Tek cihaz "
+                                        "bağlanabilir; süre dolunca kapanır."})
+
+    def _pair_status(self):
+        durum = self._pair_state()
+        kalan = max(0, int(durum["until"] - time.time()))
+        return self._send(200, {"open": bool(kalan) and not durum["used"],
+                                "seconds_left": kalan, "used": durum["used"]})
+
+    def _pair_take(self):
+        """Jetonu yerel cihaza verir. Bearer ISTEMEZ — isteyen taraf zaten
+        jetonu bilmiyor; kapi pencerenin kendisidir."""
+        origin = self.headers.get("Origin", "")
+        if origin and not LOCAL_ORIGIN.match(origin):
+            return self._send(403, {"error": "yalniz yerel koken"})
+        durum = self._pair_state()
+        with self.server.pair_lock:
+            acik = time.time() < durum["until"] and not durum["used"]
+            if not acik:
+                return self._send(403, {
+                    "error": "esleme penceresi kapali",
+                    "note": "HKM yüzünden «Cihazları bağla» denmeli."})
+            durum["used"] = True
+        return self._send(200, {"token": self.server.config.get("local_token"),
+                                "note": "Bu jeton yalnız bu cihazda saklanır."})
+
     def _send_page(self):
         """Yerel yuz — tek dosya, sifir bagimlilik.
 
@@ -282,6 +343,8 @@ class Handler(BaseHTTPRequestHandler):
             days = max(7, min(days, 365))
             return self._send(200, {"date": date, "days": days,
                                     "pairs": cross.scan(self.con, date, days)})
+        if u.path == "/api/pair/status":
+            return self._pair_status()
         if u.path == "/api/conversation":
             try:
                 limit = int((q.get("limit") or [40])[0])
@@ -307,9 +370,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._wa_webhook()
         if u.path == "/api/tg/webhook":
             return self._tg_webhook()
+        if u.path == "/api/pair":
+            return self._pair_take()
 
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
+        if u.path == "/api/pair/open":
+            return self._pair_open()
         if u.path == "/api/message":
             n = int(self.headers.get("Content-Length") or 0)
             try:

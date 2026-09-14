@@ -125,6 +125,40 @@ async function main(){
         hatalar.push(s.id + ': isaret kapaliyken gonderim denendi (' + kapali.reason + ')');
       }
 
+      /* 1.5 — ESLEME: jeton hicbir yere ELLE yazilmadan baglanabiliyor mu?
+         Bu, kurulumun en pahali surtunmesiydi; calistigini gormeden
+         «tek tik kurulum» demek, denenmemis bir onay isareti basmaktir. */
+      const kapaliPencere = await page.evaluate(async ([ns, url]) => {
+        const B = window[ns].Beacon;
+        await B.save({ enabled:false, token:'', url });
+        const r = await B.pair(url);
+        return { ok:r.ok, enabled:B.settings().enabled };
+      }, [s.ns, 'http://127.0.0.1:' + HKM_PORT]);
+      if(kapaliPencere.ok || kapaliPencere.enabled){
+        hatalar.push(s.id + ': pencere kapaliyken esleme basarili gorundu');
+      }
+
+      const ac = await hkmFetch('/api/pair/open', { method:'POST', body:'{}' });
+      if(ac.status !== 200) hatalar.push(s.id + ': esleme penceresi acilamadi');
+      const esleme = await page.evaluate(async ([ns, url]) => {
+        const B = window[ns].Beacon;
+        const r = await B.pair(url);
+        const a = B.settings();
+        return { ok:r.ok, note:r.note, enabled:a.enabled, jetonVar:!!a.token };
+      }, [s.ns, 'http://127.0.0.1:' + HKM_PORT]);
+      if(!esleme.ok || !esleme.enabled || !esleme.jetonVar){
+        hatalar.push(s.id + ': esleme basarisiz — ' + esleme.note);
+      }else{
+        console.log('  ' + s.id + ' → esleme ile baglandi (jeton elle yazilmadi)');
+      }
+      /* Pencere TEK KULLANIMLIK: ikinci cihaz ayni pencereden gecemez. */
+      const ikinci = await page.evaluate(async ([ns, url]) => {
+        const B = window[ns].Beacon;
+        const r = await B.pair(url);
+        return r.ok;
+      }, [s.ns, 'http://127.0.0.1:' + HKM_PORT]);
+      if(ikinci) hatalar.push(s.id + ': esleme penceresi ikinci kez de jeton verdi');
+
       /* 2 — acikken gercekten gonderir ve HKM 202 doner. */
       const acik = await page.evaluate(async ([ns, url, token]) => {
         const B = window[ns].Beacon;

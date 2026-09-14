@@ -234,9 +234,13 @@ SP.Screens.guide = (function(){
         ${when(on.errors.length, () => K.Notice({ tone:'warn', class:'mt-10',
           body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
 
+        <p class="tiny dim mt-10">«Bağlan», jetonu HKM'den doğrudan alır:
+          önce HKM yüzünde «Cihazları bağla» de, sonra iki dakika içinde
+          buraya bas. Jetonu elle yazmak da çalışır.</p>
         <p class="tiny dim mt-10">${durum}</p>`,
-      foot:html`${K.Button({ label:'Şimdi gönder', size:'sm', tone:'primary',
-        act:'hkm-send' })}`,
+      foot:html`${K.Button({ label:'Bağlan', size:'sm', tone:'primary',
+          act:'hkm-pair' })}
+        ${K.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-send' })}`,
     });
   }
 
@@ -440,6 +444,12 @@ SP.Screens.guide = (function(){
       const a = SP.Beacon.settings();
       await SP.Beacon.save({ enabled:!a.enabled });
       UI.toast(!a.enabled ? 'HKM işareti açıldı' : 'HKM işareti kapatıldı');
+      SP.App.render();
+    },
+    async 'hkm-pair'(){
+      const el = document.getElementById('sp-hkm-url');
+      const r = await SP.Beacon.pair(el ? el.value.trim() : null);
+      UI.toast(r.note);
       SP.App.render();
     },
     async 'hkm-send'(){

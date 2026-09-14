@@ -9,11 +9,25 @@
 
 ```bash
 cd HKM
-cp config.example.json config.json
-# local_token'ı uzun ve rastgele bir dizeyle değiştir:
-python3 -c "import secrets; print(secrets.token_urlsafe(32))"
-python3 daemon.py
+python3 kur.py --baslat
 ```
+
+Bu kadar. `kur.py` yapılandırmayı yazar (var olanı **ezmez**), şemayı kurar,
+kanalların durumunu söyler ve `--baslat` ile daemon'u çalıştırır. Ürettiği
+jeton **hiçbir yerde ekrana yazılmaz**: terminal geçmişinde ve omuz üstünde
+kalmasın diye.
+
+Modülleri bağlamak da jeton kopyalamadan olur:
+
+1. Yüzü aç: `http://127.0.0.1:4200`
+2. **Cihazları bağla** — iki dakikalık, **tek kullanımlık** bir pencere açılır
+3. AYS / SPİ / ESP → Ayarlar → HKM işareti → **Bağlan**
+
+Pencereyi yalnız jetonu zaten bilen taraf açabilir; jeton yalnız yerel
+kökene verilir ve pencere ilk cihazda kapanır. Her sistem için pencereyi
+yeniden aç. Jetonu elle yazmak da çalışmaya devam eder.
+
+`python3 kur.py --durum` hiçbir şeyi değiştirmeden durumu yazar.
 
 - Daemon yalnız `127.0.0.1`'e bağlanır. `host` değerini değiştirmek
   **bilinçli bir karardır** ve o andan itibaren ağdaki herkes kapıyı görür.

@@ -172,6 +172,36 @@ ESP.Beacon = (function(){
     return { payload:p, rows:satirlar, errors:contract(p) };
   }
 
+
+  /* ------------------------------------------------------------- esleme
+
+     Jetonu elle yapistirmak, HKM'nin hic acilmamasinin en olasi sebebiydi.
+     Esleme, jetonu gevsetmeden bu surtunmeyi kaldirir: HKM yuzunde iki
+     dakikalik bir pencere acilir, bu dugme jetonu dogrudan alir ve yalniz
+     bu cihazda saklar. Pencere kapaliysa hicbir sey olmaz — ve bu bir
+     hata degil, dogru davranistir. */
+  async function pair(url){
+    const adres = String(url || settings().url || '').replace(/\/$/, '');
+    if(!urlOk(adres)){
+      return { ok:false, note:'Yerel olmayan bir adresle eşleme yapılmaz.' };
+    }
+    let res;
+    try{
+      res = await fetch(adres + '/api/pair', { method:'POST' });
+    }catch(e){
+      return { ok:false, note:'HKM\'ye ulaşılamadı. Daemon çalışıyor mu?' };
+    }
+    let govde = null;
+    try{ govde = await res.json(); }catch(e){ govde = null; }
+    if(res.status !== 200 || !govde || !govde.token){
+      return { ok:false, status:res.status,
+        note:(govde && govde.note) || 'Eşleme penceresi kapalı. HKM yüzünde '
+           + '«Cihazları bağla» dedikten sonra iki dakika içinde dene.' };
+    }
+    await save({ url:adres, token:govde.token, enabled:true });
+    return { ok:true, note:'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.' };
+  }
+
   /* ------------------------------------------------------------- gönderim */
 
   function urlOk(url){
@@ -253,5 +283,5 @@ ESP.Beacon = (function(){
   }
 
   return { load, save, settings, collect, payload, preview, contract, metric,
-    urlOk, due, send, ping, MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
+    urlOk, due, send, ping, pair, MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
 })();

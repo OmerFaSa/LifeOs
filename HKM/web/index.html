@@ -74,10 +74,12 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
       <div class="row">
         <input id="tarih" type="date"/>
         <button id="yenile">Yenile</button>
+        <button id="esle">Cihazları bağla</button>
       </div>
       <button id="cikis">Jetonu unut</button>
     </div>
 
+    <div class="card" id="esleme" hidden></div>
     <div class="card" id="brifing"><p class="muted">Yükleniyor…</p></div>
     <div class="card" id="oneri" hidden></div>
     <div class="card" id="capraz"></div>
@@ -283,6 +285,41 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
     if(r.status === 200) konusmaCiz(r.body.messages);
   }
 
+  /* Eşleme penceresi: jetonu üç arayüze elle yapıştırmayı bitirir ama
+     kapıyı açık bırakmaz — iki dakika, tek cihaz, yalnız yerel köken. */
+  var esleSayac = null;
+
+  function eslemeCiz(kalan){
+    var k = $('esleme');
+    k.hidden = false;
+    k.innerHTML = '<div class="tag">Eşleme penceresi</div>'
+      + '<p><b>' + esc(kalan) + ' saniye</b> — şimdi AYS, SPİ ya da ESP\'de '
+      + '<b>Ayarlar → HKM işareti → Bağlan</b> de. Pencere tek cihaz bağlar; '
+      + 'süre dolunca kendiliğinden kapanır.</p>'
+      + '<p class="muted">Jeton hiçbir ekranda yazılmaz ve hiçbir kayda '
+      + 'geçmez; cihaz onu doğrudan alır ve kendinde saklar.</p>';
+  }
+
+  async function eslemeAc(){
+    var r = await api('/api/pair/open', { method:'POST' });
+    if(r.status !== 200){ return; }
+    if(esleSayac) clearInterval(esleSayac);
+    esleSayac = setInterval(async function(){
+      var d = await api('/api/pair/status');
+      if(d.status !== 200) return;
+      if(!d.body.open){
+        clearInterval(esleSayac); esleSayac = null;
+        $('esleme').innerHTML = '<div class="tag">Eşleme penceresi</div>'
+          + '<p class="muted">' + (d.body.used
+            ? 'Bir cihaz bağlandı; pencere kapandı.'
+            : 'Süre doldu; pencere kapandı.') + '</p>';
+        return;
+      }
+      eslemeCiz(d.body.seconds_left);
+    }, 1000);
+    eslemeCiz(r.body.seconds);
+  }
+
   async function yukle(){
     var t = $('tarih').value || bugun();
     var b = await api('/api/briefing?date=' + t);
@@ -336,6 +373,7 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
     girisGoster('Jeton bu tarayıcıdan silindi.');
   });
 
+  $('esle').addEventListener('click', eslemeAc);
   $('gonder').addEventListener('click', mesajGonder);
   $('mesaj').addEventListener('keydown', function(e){
     if(e.key === 'Enter') mesajGonder();

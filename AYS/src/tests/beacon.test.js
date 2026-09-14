@@ -184,4 +184,65 @@
       expect(on.errors.length).toBe(0);
     });
   });
+
+  describe('HKM işareti — eşleme', () => {
+
+    it('yerel olmayan adrese eşleme yapılmaz', async () => {
+      resetState();
+      const r = await B().pair('http://sunucu.example.com:4200');
+      expect(r.ok).toBe(false);
+      expect(r.note.indexOf('Yerel olmayan') >= 0).toBe(true);
+    });
+
+    it('pencere kapalıysa jeton alınmaz ve işaret açılmaz', async () => {
+      resetState();
+      await B().save({ enabled:false, token:'' });
+      const eski = window.fetch;
+      window.fetch = function(){
+        return Promise.resolve({ status:403,
+          json:function(){ return Promise.resolve({ error:'kapali' }); } });
+      };
+      try{
+        const r = await B().pair('http://127.0.0.1:4200');
+        expect(r.ok).toBe(false);
+        expect(B().settings().enabled).toBe(false);
+        expect(B().settings().token).toBe('');
+      } finally { window.fetch = eski; }
+    });
+
+    it('açık pencerede jeton saklanır ve işaret açılır', async () => {
+      resetState();
+      await B().save({ enabled:false, token:'' });
+      const eski = window.fetch;
+      const cagri = [];
+      window.fetch = function(url, opt){
+        cagri.push({ url, opt });
+        return Promise.resolve({ status:200,
+          json:function(){ return Promise.resolve({ token:'jeton-esleme' }); } });
+      };
+      try{
+        const r = await B().pair('http://127.0.0.1:4200/');
+        expect(r.ok).toBe(true);
+        expect(cagri[0].url).toBe('http://127.0.0.1:4200/api/pair');
+        expect(cagri[0].opt.method).toBe('POST');
+        const a = B().settings();
+        expect(a.token).toBe('jeton-esleme');
+        expect(a.enabled).toBe(true);
+        expect(a.url).toBe('http://127.0.0.1:4200');
+      } finally { window.fetch = eski; }
+    });
+
+    /* Ag hatasi bir arayuz hatasi degildir. */
+    it('HKM kapalıyken eşleme sessizce başarısız olur', async () => {
+      resetState();
+      const eski = window.fetch;
+      window.fetch = function(){ return Promise.reject(new Error('kopuk')); };
+      try{
+        const r = await B().pair('http://127.0.0.1:4200');
+        expect(r.ok).toBe(false);
+        expect(r.note.indexOf('ulaşılamadı') >= 0).toBe(true);
+      } finally { window.fetch = eski; }
+    });
+  });
+
 })();

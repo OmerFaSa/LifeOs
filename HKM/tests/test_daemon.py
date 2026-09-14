@@ -205,6 +205,59 @@ def run():
                 no(r.headers.get("Access-Control-Allow-Origin"))
         test("yanit basligi yalniz yerel kokene yazilir", t_cors_header_on_response)
 
+        def t_pair_closed_by_default():
+            """Kapi varsayilan olarak KAPALI: pencere acilmadan jeton
+            verilmez. Acik duran bir esleme kapisi, jetonsuz bir daemon'dur."""
+            kod, r = S.call("/api/pair", body={}, token=None)
+            eq(kod, 403)
+            kod, d = S.call("/api/pair/status")
+            eq(d["open"], False)
+        test("esleme penceresi varsayilan kapali", t_pair_closed_by_default)
+
+        def t_pair_open_needs_token():
+            """Pencereyi yalniz jetonu ZATEN bilen taraf acabilir."""
+            eq(S.call("/api/pair/open", body={}, token=None)[0], 401)
+            eq(S.call("/api/pair/status", token=None)[0], 401)
+        test("pencereyi acmak jeton ister", t_pair_open_needs_token)
+
+        def t_pair_gives_token_once():
+            kod, r = S.call("/api/pair/open", body={})
+            eq(kod, 200)
+            ok(r["seconds"] >= 30)
+            kod, d = S.call("/api/pair/status")
+            eq(d["open"], True)
+            # Jeton bearer OLMADAN alinir: kapi pencerenin kendisidir.
+            kod, r = S.call("/api/pair", body={}, token=None)
+            eq(kod, 200)
+            eq(r["token"], TOKEN)
+            # TEK KULLANIMLIK: ikinci istek kapali kapi bulur.
+            eq(S.call("/api/pair", body={}, token=None)[0], 403)
+            kod, d = S.call("/api/pair/status")
+            eq(d["open"], False)
+            eq(d["used"], True)
+        test("acik pencere jetonu bir kez verir", t_pair_gives_token_once)
+
+        def t_pair_refuses_foreign_origin():
+            S.call("/api/pair/open", body={})
+            kod, _ = S.ham("/api/pair", b"{}", {
+                "Content-Type": "application/json",
+                "Origin": "https://baska-site.example.com"})
+            eq(kod, 403)
+            # Pencere HARCANMAZ: yabanci bir istek, yerel cihazin hakkini yemez.
+            kod, r = S.call("/api/pair", body={}, token=None)
+            eq(kod, 200)
+            eq(r["token"], TOKEN)
+        test("yabanci koken eslemeyi ne alir ne harcar",
+             t_pair_refuses_foreign_origin)
+
+        def t_pair_expires():
+            """Sure dolunca pencere kendiliginden kapanir."""
+            S.call("/api/pair/open", body={})
+            with S.srv.pair_lock:
+                S.srv.pair["until"] = 0.0          # zamani geriye al
+            eq(S.call("/api/pair", body={}, token=None)[0], 403)
+        test("suresi dolan pencere kapanir", t_pair_expires)
+
         def t_local_message_endpoint():
             kod, r = S.call("/api/message", body={"text": "yardim", "date": BUGUN})
             eq(kod, 200)
