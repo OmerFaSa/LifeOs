@@ -105,8 +105,21 @@ def tur(con, cfg, th=None, timeout=BEKLEME, transport=None):
     bosluk degil."""
     a = channels.settings(cfg, "telegram")
     token = a.get("bot_token")
+    # Eksigin ADI soylenir. «no-token» diyen bir hata, kullaniciya hangi
+    # adimi atladigini soylemez; eksik olan sey ile yapilacak is ayni
+    # cumlede durmali.
     if not token:
-        return {"ok": False, "reason": "no-token", "handled": 0}
+        return {"ok": False, "reason": "no-token", "handled": 0,
+                "note": "Bot jetonu kaydedilmemiş. Jetonu yapıştırıp "
+                        "«Kanal ayarlarını kaydet» de."}
+    if not a.get("enabled"):
+        return {"ok": False, "reason": "channel-off", "handled": 0,
+                "note": "Telegram kanalı kapalı. Telegram başlığının "
+                        "altındaki «Aç» düğmesine bas."}
+    if not (a.get("allow_from") or []):
+        return {"ok": False, "reason": "no-allow", "handled": 0,
+                "note": "İzin listesi boş — kimseye cevap verilmez. Kendi "
+                        "Id'ni yazıp kaydet."}
     imlec = _imlec_oku(con)
     try:
         yanit = _cagir(token, "getUpdates?" + urllib.parse.urlencode({

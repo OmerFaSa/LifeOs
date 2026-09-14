@@ -994,8 +994,12 @@ details.detay > summary:hover{ color:var(--fg); }
           + 'id="tg-yoklama"' + (k.polling ? ' checked' : '')
           + ' aria-label="Telegram yoklama"/></div>'
           + '<div class="metric__meta">'
-          + (k.polling ? '<span class="ok">açık</span>'
-              : '<span class="muted">kapalı</span>')
+          /* Uc hal, iki degil: kutu isaretli olsa bile KANAL KAPALIYSA
+             yoklama calismaz. «Acik» demek, calismayan bir seye calisiyor
+             demektir. */
+          + (!k.polling ? '<span class="muted">kapalı</span>'
+              : (k.ready ? '<span class="ok">açık</span>'
+                  : '<span class="warn">kanal kapalı — çalışmıyor</span>'))
           + ' · <button id="tg-dene" style="min-height:24px;padding:2px 8px">'
           + 'Şimdi dene</button> <span id="tg-sonuc"></span></div></div>';
       }
@@ -1103,7 +1107,18 @@ details.detay > summary:hover{ color:var(--fg); }
     var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
     if(r.status === 200){
       ayarlariCiz(r.body.config);
-      $('kanal-not').textContent = degisen + ' alan kaydedildi.';
+      /* Kaydetmek acmak DEGILDIR: kullanici her alani doldurup kaydettikten
+         sonra hicbir sey olmamasi, en can sikici sessizliktir. Eksik adim
+         ADIYLA soylenir. */
+      var k = ((r.body.config.channels || {}).telegram) || {};
+      var ek = '';
+      if(k.polling && !k.ready){
+        ek = ' Kanal hâlâ kapalı: Telegram başlığının altındaki «Aç» '
+          + 'düğmesine bas.';
+      }else if(k.polling && k.ready && !(k.allow_from || []).length){
+        ek = ' İzin listesi boş — kimseye cevap verilmez.';
+      }
+      $('kanal-not').textContent = degisen + ' alan kaydedildi.' + ek;
     }else{
       $('kanal-not').textContent = 'Kaydedilmedi — '
         + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);

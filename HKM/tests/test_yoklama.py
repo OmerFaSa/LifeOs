@@ -182,12 +182,24 @@ def run():
         ok(r["reason"])
     test("ag hatasi sonuc olarak doner", t_network_error_is_a_result)
 
-    def t_no_token_no_poll():
+    def t_missing_step_is_named():
+        """Eksigin ADI soylenir. «no-token» diyen bir hata, kullaniciya
+        hangi adimi atladigini soylemez; eksik olan sey ile yapilacak is
+        ayni cumlede durmali."""
         con = db.connect(":memory:")
         r = yoklama.tur(con, _cfg(bot_token=""))
         no(r["ok"])
         eq(r["reason"], "no-token")
-    test("jeton yoksa yoklama yok", t_no_token_no_poll)
+        ok("kaydet" in r["note"].lower())
+
+        r = yoklama.tur(con, _cfg(enabled=False))
+        eq(r["reason"], "channel-off")
+        ok("Aç" in r["note"])
+
+        r = yoklama.tur(con, _cfg(allow_from=[]))
+        eq(r["reason"], "no-allow")
+        ok("İzin listesi" in r["note"])
+    test("eksik adim adiyla soylenir", t_missing_step_is_named)
 
     def t_one_path_for_both_doors():
         """Webhook ve yoklama AYNI isleme yolundan gecer: kopyalanan bir
