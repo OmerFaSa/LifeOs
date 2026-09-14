@@ -155,6 +155,11 @@ Uç noktalar:
 | `POST /api/config` | ayar yaması (doğrulanır; jetona dokunmaz) |
 | `GET /api/backup` | bütün ambar tek JSON |
 | `POST /api/prune` | eski ham ölçümler silinir; kararlar kalır |
+| `GET /api/weekly?date=` | haftalık rapor |
+| `GET /api/outbox` | giden kutusu durumu |
+| `GET /api/intents/<modul>` | modülün bekleyen teklifleri |
+| `POST /api/intents/<modul>/take` | kuyruğu alır (delivered işaretler) |
+| `POST /api/intent/<id>/applied\|dismissed` | modülün/kullanıcının cevabı |
 | `GET /api/cross?date=&days=` | çapraz bulgular — üç ambar yan yana |
 | `GET /api/series?date=&days=&module=` | metrik metrik zaman serisi |
 | `POST /api/decision/<id>/accept` | öneriyi kabul eder |
@@ -525,6 +530,61 @@ tek tek okunur, sınırlanır (süre 10–480 dk) ve sistemin kendi modeliyle
 yazılır. SPİ bir teklifi kendiliğinden **uygulamaz** — sağlıkta ölçüm de
 yük de kullanıcının kararıdır; ESP ise teklifi bir *hatırlatıcı* yapar,
 oturum değil: yapılmamış bir çalışma ölçülmüş görünmemeli.
+
+## 8.14 Ritim, giden kutusu ve haftalık rapor
+
+### `core/outbox.py` — teslim güvencesi, ama tekrar değil
+
+Kanal gönderimi ağdan geçer; ağ her zaman çalışmaz. İki kötü ihtimal de
+burada engellenir: başarısız gönderimi **yutmak** (sessizce kaybolan bir
+mesaj) ve tekrar denemeyi **tekrar göndermeye** çevirmek (aynı özetin iki
+kez düşmesi).
+
+1. Her satırın bir kimliği var: **(kanal, tür, gün)**. Aynı kimlikle ikinci
+   satır yazılmaz.
+2. Geri çekilme artar: 1, 5, 15, 60 dakika — sonra **vazgeçilir** ve sebebi
+   yazılır. Sonsuz yeniden deneme, bir hatayı gizlemenin yavaş biçimidir.
+3. **Kalıcı hata tekrarlanmaz:** 401/403/422 ağdan değil yapılandırmadan
+   gelir; beklemenin faydası yoktur.
+4. Gönderilen satır silinmez: neyin kaç denemede gittiği, neyin hiç
+   gitmediği denetlenebilmeli.
+
+### `core/schedule.py` — ritim, ama bildirim akışı değil
+
+Varsayılan **kapalı**. Her işin kimliği (tür + gün) ve günde bir kez
+çalışır — daemon dakikada bir tiklamasına rağmen. **Geçmiş iş kovalanmaz:**
+daemon akşam açıldıysa sabahın brifingi gönderilmez; günü geçmiş bir
+hatırlatma, hatırlatma değil gürültüdür (tolerans 90 dakika). Zamanlayıcı
+iş üretmez, **mesaj** üretir: metni kural motoru kurar, teslimi outbox yapar.
+Tik hiçbir koşulda fırlatmaz — bir zamanlayıcı hatası daemon'u durduramaz.
+
+### `core/weekly.py` — günün altındaki eğri
+
+Günlük brifing bugünü anlatır ve bugün gürültülüdür. Hafta eğriyi gösterir,
+üç kuralla: **hafta bir toplam değil bir kapsamdır** (eksik günleri saymadan
+verilen ortalama, ölçülmeyen günleri sıfır saymaktır); karşılaştırma yalnız
+**iki hafta da ölçüldüyse** yapılır (tek hafta bir eğri değildir); ve hüküm
+yok, hareket var.
+
+Yüzde ve sıralama **daemon'da** üretilir: arayüzün kendi sayısını üretmesi
+iki gerçek yaratırdı. Bir test bunu sayfanın kaynağında arıyor.
+
+## 8.15 Sınırlar ve terminal
+
+**Gövde sınırı:** 1 MB'tan büyük bir gövde hiç okunmaz — okunup sonra
+reddedilen bir gövde zaten belleğe alınmıştır. **Hız sınırı:** jetonsuz
+yollar (webhook, eşleme) dakikada sayılır; sınır kabadır ve öyle olmalı —
+ince bir sayaç, korumadığı bir şeyi korur gibi görünür.
+
+**`hkm.py`** terminalden çalışır ve daemon'a HTTP ile **gitmez**:
+veritabanını doğrudan okur. Bir bakış için bir servisin ayakta olmasını şart
+koşmak, ayakta olmadığı anda hiçbir şey söyleyememek demektir.
+
+```bash
+python3 hkm.py durum | hafta | capraz | etki | kararlar | kutu | niyetler
+python3 hkm.py sor "bugün ne yapmalıyım"
+python3 hkm.py yedek [dosya]
+```
 
 ## 9. Fazlar
 

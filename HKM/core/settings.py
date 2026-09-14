@@ -26,8 +26,9 @@
 import copy
 import json
 import os
+import re
 
-from core import channels, thresholds
+from core import channels, schedule, thresholds
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -45,6 +46,13 @@ THRESHOLD_RANGE = {
     "intellect": {"retention_floor": (0.05, 0.99), "retention_min_cards": (1, 500),
                   "practice_minutes_min": (1, 1440), "synthesis_gap_days": (1, 365)},
 }
+
+SCHEDULE_FIELDS = {
+    "enabled": bool, "channel": str, "morning": str, "evening": str,
+    "weekly_day": str, "weekly_time": str, "tolerance_minutes": int,
+}
+
+SAAT = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
 
 CHANNEL_FIELDS = {
     "enabled": bool,
@@ -72,6 +80,7 @@ def read(cfg):
             kanal[k] = mask(v) if k in GIZLI else v
         kanal["ready"] = channels.enabled(cfg, ad)
         out["channels"][ad] = kanal
+    out["schedule"] = schedule.settings(cfg)
     out["ranges"] = THRESHOLD_RANGE
     return out
 
@@ -82,7 +91,7 @@ def validate(patch):
     if not isinstance(patch, dict):
         return False, ["gövde bir nesne olmalı"]
     for k in patch:
-        if k not in ("thresholds", "channels"):
+        if k not in ("thresholds", "channels", "schedule"):
             hata.append("bilinmeyen alan: %s" % k)
 
     for grup, alanlar in (patch.get("thresholds") or {}).items():
@@ -103,6 +112,32 @@ def validate(patch):
             if not (aralik[0] <= deger <= aralik[1]):
                 hata.append("%s.%s %s–%s aralığında olmalı (gelen: %s)"
                             % (grup, ad, aralik[0], aralik[1], deger))
+
+    zaman = patch.get("schedule")
+    if zaman is not None:
+        if not isinstance(zaman, dict):
+            hata.append("schedule bir nesne olmalı")
+        else:
+            for k, v in zaman.items():
+                tip = SCHEDULE_FIELDS.get(k)
+                if tip is None:
+                    hata.append("bilinmeyen zamanlama alanı: %s" % k)
+                elif tip is bool and not isinstance(v, bool):
+                    hata.append("schedule.%s bir bool olmalı" % k)
+                elif tip is int and (isinstance(v, bool)
+                                     or not isinstance(v, int)):
+                    hata.append("schedule.%s bir sayı olmalı" % k)
+                elif tip is str and not isinstance(v, str):
+                    hata.append("schedule.%s bir dize olmalı" % k)
+                elif k in ("morning", "evening", "weekly_time") and v \
+                        and not SAAT.match(v):
+                    # «8» ya da «25:00» sessizce kabul edilirse, is hic
+                    # calismaz ve kullanici sebebini bulamaz.
+                    hata.append("schedule.%s SS:DD biçiminde olmalı" % k)
+                elif k == "weekly_day" and v and v.lower() not in schedule.GUNLER:
+                    hata.append("schedule.weekly_day bir gün adı olmalı")
+                elif k == "channel" and v not in ("whatsapp", "telegram"):
+                    hata.append("schedule.channel bilinmeyen kanal")
 
     for ad, alanlar in (patch.get("channels") or {}).items():
         if ad not in ("whatsapp", "telegram"):
@@ -132,6 +167,34 @@ def apply(cfg, patch):
     yeni = copy.deepcopy(cfg)
     for grup, alanlar in (patch.get("thresholds") or {}).items():
         yeni.setdefault("thresholds", {}).setdefault(grup, {}).update(alanlar)
+    if patch.get("schedule"):
+        yeni.setdefault("schedule", {}).update(patch["schedule"])
+    zaman = patch.get("schedule")
+    if zaman is not None:
+        if not isinstance(zaman, dict):
+            hata.append("schedule bir nesne olmalı")
+        else:
+            for k, v in zaman.items():
+                tip = SCHEDULE_FIELDS.get(k)
+                if tip is None:
+                    hata.append("bilinmeyen zamanlama alanı: %s" % k)
+                elif tip is bool and not isinstance(v, bool):
+                    hata.append("schedule.%s bir bool olmalı" % k)
+                elif tip is int and (isinstance(v, bool)
+                                     or not isinstance(v, int)):
+                    hata.append("schedule.%s bir sayı olmalı" % k)
+                elif tip is str and not isinstance(v, str):
+                    hata.append("schedule.%s bir dize olmalı" % k)
+                elif k in ("morning", "evening", "weekly_time") and v \
+                        and not SAAT.match(v):
+                    # «8» ya da «25:00» sessizce kabul edilirse, is hic
+                    # calismaz ve kullanici sebebini bulamaz.
+                    hata.append("schedule.%s SS:DD biçiminde olmalı" % k)
+                elif k == "weekly_day" and v and v.lower() not in schedule.GUNLER:
+                    hata.append("schedule.weekly_day bir gün adı olmalı")
+                elif k == "channel" and v not in ("whatsapp", "telegram"):
+                    hata.append("schedule.channel bilinmeyen kanal")
+
     for ad, alanlar in (patch.get("channels") or {}).items():
         temiz = {k: v for k, v in alanlar.items() if k not in ("local_token",)}
         yeni.setdefault("channels", {}).setdefault(ad, {}).update(temiz)

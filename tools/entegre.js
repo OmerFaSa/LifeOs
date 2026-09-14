@@ -382,6 +382,9 @@ async function main(){
       gecmis:(document.querySelector('#gecmis') || {}).textContent || '',
       capraz:(document.querySelector('#capraz') || {}).textContent || '',
       etki:(document.querySelector('#etki') || {}).textContent || '',
+      hafta:(document.querySelector('#hafta') || {}).textContent || '',
+      kutu:(document.querySelector('#kutu') || {}).textContent || '',
+      ritim:(document.querySelector('#ritim') || {}).textContent || '',
       girisAcik:!document.querySelector('#giris').hidden,
     }));   /* icerik gizli sekmede de DOM'da durur: okumak icin tiklamak gerekmez */
     if(ekran.girisAcik) hatalar.push('HKM yuzu: dogru jetonla bile giris ekraninda kaldi');
@@ -392,6 +395,15 @@ async function main(){
     /* Etki karti: olculmemis faydayi «fayda yok» diye sunmamali. */
     if(ekran.etki.indexOf('deney değildir') < 0){
       hatalar.push('HKM yuzu: etki kartinda secilim uyarisi yok');
+    }
+    if(ekran.hafta.indexOf('Kayıtlı gün') < 0){
+      hatalar.push('HKM yuzu: haftalik rapor cizilmedi');
+    }
+    if(ekran.kutu.indexOf('Giden kutusu') < 0){
+      hatalar.push('HKM yuzu: giden kutusu cizilmedi');
+    }
+    if(ekran.ritim.indexOf('Ritim') < 0){
+      hatalar.push('HKM yuzu: ritim karti cizilmedi');
     }
     if(yuzHata.length) hatalar.push('HKM yuzu: sayfa hatasi — ' + yuzHata[0]);
     else console.log('  HKM yuzu → brifing, ikiz ve oneri gecmisi cizildi');

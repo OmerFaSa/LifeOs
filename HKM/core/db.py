@@ -80,6 +80,31 @@ CREATE TABLE IF NOT EXISTS intents (
 );
 CREATE INDEX IF NOT EXISTS ix_intents_module ON intents(module, state);
 
+/* Giden kutusu — teslim GUVENCESI.
+
+   Kanal gonderimi agdan gecer ve ag her zaman calismaz. Basarisiz bir
+   gonderimi yutmak, kullaniciya hicbir sey soylemeden sessizce kaybolan
+   bir mesaj demektir; gec gelen bir mesaj bundan iyidir.
+
+   Ama tekrar denemek TEKRAR GONDERMEK olmamali: her satirin bir kimligi
+   var (channel + kind + day) ve ayni kimlikle ikinci bir satir yazilmaz. */
+CREATE TABLE IF NOT EXISTS outbox (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel    TEXT NOT NULL,
+  target     TEXT,                      -- alici (bos: kanalin varsayilani)
+  kind       TEXT NOT NULL,             -- daily | weekly | reply | ...
+  day        TEXT NOT NULL,             -- kimligin parcasi: gunde tek mesaj
+  text       TEXT NOT NULL,
+  state      TEXT NOT NULL DEFAULT 'queued',  -- queued|sent|failed|given_up
+  attempts   INTEGER NOT NULL DEFAULT 0,
+  next_at    TEXT NOT NULL,             -- bir sonraki deneme zamani
+  last_error TEXT,
+  created_at TEXT NOT NULL,
+  sent_at    TEXT,
+  UNIQUE(channel, kind, day)
+);
+CREATE INDEX IF NOT EXISTS ix_outbox_state ON outbox(state, next_at);
+
 CREATE TABLE IF NOT EXISTS conversations (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   channel       TEXT NOT NULL,           -- local | telegram | whatsapp

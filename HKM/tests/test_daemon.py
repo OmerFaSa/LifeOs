@@ -162,8 +162,12 @@ def run():
                 eq(r.status, 200)
                 ok("text/html" in r.headers.get("Content-Type", ""))
             ok("HKM" in govde)
-            # Sayfa hicbir sayi HESAPLAMAZ: kural motoru otoritedir.
-            no("Math.round" in govde, "yuz kendi sayisini uretiyor")
+            # Sayfa VERI uzerinde hesap yapmaz: kural motoru otoritedir.
+            # (Cizim koordinatlari — spark() icindeki min/max — piksel
+            # uretir, kullaniciya gosterilen sayi degil.)
+            gövde_veri = govde.split("function spark(")[0] \
+                + govde.split("return '<svg class=\"spark\"")[-1]
+            no("Math.round" in gövde_veri, "yuz kendi sayisini uretiyor")
             # Ve hicbir jeton gomulu degildir.
             no(TOKEN in govde, "jeton sayfaya gomulmus")
         test("yerel yuz jetonsuz servis edilir", t_page_served_without_token)

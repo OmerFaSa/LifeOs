@@ -111,6 +111,7 @@ svg.spark{ width:100%; height:34px; display:block; }
     </div>
 
     <div data-bolme="hkm" hidden>
+      <div class="card" id="hafta"></div>
       <div class="card" id="etki"></div>
       <div class="card" id="ikiz"></div>
       <div class="card" id="gecmis"></div>
@@ -131,6 +132,8 @@ svg.spark{ width:100%; height:34px; display:block; }
 
     <div data-bolme="yonetim" hidden>
       <div class="card" id="ayarlar"><p class="muted">Yükleniyor…</p></div>
+      <div class="card" id="ritim"></div>
+      <div class="card" id="kutu"></div>
       <div class="card" id="bakim"></div>
     </div>
   </div>
@@ -307,6 +310,96 @@ svg.spark{ width:100%; height:34px; display:block; }
     }
     h += '<p class="muted">' + esc(e.caveat || '') + '</p>';
     $('etki').innerHTML = h;
+  }
+
+  /* Hafta, günün altındaki eğridir: bugün gürültülüdür, bir kötü gece ya
+     da bir yoğun gün onu savurur. Ama hafta da önce KAPSAMINI söyler. */
+  function haftaCiz(r){
+    var h = '<div class="tag">Hafta · ' + esc(r.from) + ' → ' + esc(r.to) + '</div>';
+    var g = r.days_seen || {};
+    h += '<p>Kayıtlı gün: AYS ' + esc(g.ays || 0) + ' · SPİ ' + esc(g.spi || 0)
+       + ' · ESP ' + esc(g.esp || 0) + ' (7 günde)</p>';
+    var karsilastirilan = (r.rows || []).filter(function(x){ return x.status === 'compared'; });
+    var yalniz = (r.rows || []).filter(function(x){ return x.status === 'alone'; });
+    var az = (r.rows || []).filter(function(x){ return x.status === 'missing'; });
+    if(karsilastirilan.length){
+      h += '<div class="scroll"><table><thead><tr><th>Ölçü</th>'
+         + '<th class="num">Bu hafta</th><th class="num">Önceki</th>'
+         + '<th class="num">Fark</th><th class="num">Gün</th></tr></thead><tbody>';
+      /* Sıralama ve yüzde daemon'dan gelir; burada yalnızca YAZILIR. */
+      karsilastirilan.forEach(function(x){
+        h += '<tr><td>' + esc(x.metric) + '</td>'
+           + '<td class="num">' + esc(x.median) + '</td>'
+           + '<td class="num">' + esc(x.previous) + '</td>'
+           + '<td class="num">%' + esc(x.change_pct) + '</td>'
+           + '<td class="num">' + esc(x.n) + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }else{
+      h += '<p class="muted">Haftalık karşılaştırma için yeterli ölçüm yok. '
+         + 'Bu, «kötü hafta» demek değildir.</p>';
+    }
+    if(yalniz.length || az.length){
+      h += '<p class="muted">' + esc(yalniz.length) + ' ölçünün önceki haftası yok, '
+         + esc(az.length) + ' ölçü haftalık ortanca için az gün taşıyor.</p>';
+    }
+    h += '<p class="muted">' + esc(r.note || '') + '</p>';
+    $('hafta').innerHTML = h;
+  }
+
+  /* Giden kutusu: bir mesajın sessizce kaybolmadığını gösterir. */
+  function kutuCiz(k){
+    var c = k.counts || {};
+    var h = '<div class="tag">Giden kutusu</div>'
+      + '<p>gönderildi ' + esc(c.sent || 0) + ' · kuyrukta ' + esc(c.queued || 0)
+      + ' · yeniden denenecek ' + esc(c.failed || 0)
+      + ' · vazgeçildi ' + esc(c.given_up || 0) + '</p>';
+    (k.recent || []).slice(0, 6).forEach(function(r){
+      h += '<div class="line"><span class="tag">' + esc(r.state) + ' · '
+        + esc(r.kind) + ' · ' + esc(r.day) + '</span><div class="muted">'
+        + esc((r.last_error || r.text || '').slice(0, 120)) + '</div></div>';
+    });
+    if(!(k.recent || []).length){
+      h += '<p class="muted">Kuyruk boş. Kanal kapalıyken buraya hiçbir şey '
+         + 'düşmez ve bu doğru davranıştır.</p>';
+    }
+    $('kutu').innerHTML = h;
+  }
+
+  /* Ritim: zamanlanmış işler. Varsayılan kapalı — bir özet, bildirim
+     akışına dönüştüğü an okunmaz olur. */
+  function ritimCiz(c){
+    var z = c.schedule || {};
+    var h = '<div class="tag">Ritim</div>'
+      + '<p class="muted">Zamanlanmış işler varsayılan olarak kapalıdır ve '
+      + 'günü geçmiş bir hatırlatma hiç gönderilmez: hatırlatma değil '
+      + 'gürültü olurdu.</p>'
+      + '<div class="row">'
+      + '<label><input type="checkbox" id="ritim-acik"' + (z.enabled ? ' checked' : '')
+      + '/> Açık</label>'
+      + '<label>Sabah <input id="ritim-sabah" value="' + esc(z.morning || '')
+      + '" placeholder="08:00" style="width:80px"/></label>'
+      + '<label>Akşam <input id="ritim-aksam" value="' + esc(z.evening || '')
+      + '" placeholder="21:00" style="width:80px"/></label>'
+      + '<label>Haftalık <input id="ritim-hgun" value="' + esc(z.weekly_day || '')
+      + '" placeholder="pazartesi" style="width:110px"/></label>'
+      + '<button class="primary" id="ritim-kaydet">Kaydet</button></div>'
+      + '<p class="muted" id="ritim-not"></p>';
+    $('ritim').innerHTML = h;
+    $('ritim-kaydet').addEventListener('click', ritimKaydet);
+  }
+
+  async function ritimKaydet(){
+    var yama = { schedule:{
+      enabled:$('ritim-acik').checked,
+      morning:$('ritim-sabah').value.trim(),
+      evening:$('ritim-aksam').value.trim(),
+      weekly_day:$('ritim-hgun').value.trim().toLowerCase(),
+    } };
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
+    $('ritim-not').textContent = r.status === 200 ? 'Kaydedildi.'
+      : 'Kaydedilmedi — ' + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+    if(r.status === 200) ritimCiz(r.body.config);
   }
 
   function gecmisCiz(g){
@@ -618,8 +711,12 @@ svg.spark{ width:100%; height:34px; display:block; }
     if(g.status === 200) gecmisCiz(g.body);
     var et = await api('/api/impact');
     if(et.status === 200) etkiCiz(et.body);
+    var hf = await api('/api/weekly?date=' + t);
+    if(hf.status === 200) haftaCiz(hf.body);
+    var kt = await api('/api/outbox');
+    if(kt.status === 200) kutuCiz(kt.body);
     var ay = await api('/api/config');
-    if(ay.status === 200) ayarCiz(ay.body);
+    if(ay.status === 200){ ayarCiz(ay.body); ritimCiz(ay.body); }
     bakimCiz();
     await konusmaYukle();
   }

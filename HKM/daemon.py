@@ -13,6 +13,8 @@ Ucnoktalar:
     POST /api/config                ayar yamasi (dogrulanir; jetona dokunmaz)
     GET  /api/backup                butun ambar tek JSON
     POST /api/prune                 eski ham olaylari siler (kararlar kalir)
+    GET  /api/weekly?date=          haftalik rapor
+    GET  /api/outbox                giden kutusu durumu
     GET  /api/intents/<modul>       modulun bekleyen niyetleri (teklifler)
     POST /api/intents/<modul>/take  kuyrugu alir (delivered isaretler)
     POST /api/intent/<id>/applied   modul uyguladi
@@ -51,8 +53,8 @@ from urllib.parse import parse_qs, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (channels, cross, db, impact, intents,  # noqa: E402
-                  manager, patron, settings, sync_engine, thresholds,
-                  twin)
+                  manager, outbox, patron, schedule, settings,
+                  sync_engine, thresholds, twin, weekly)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -60,6 +62,15 @@ CONFIG_PATH = os.path.join(ROOT, "config.json")
 # Esleme penceresi: jetonu elle yapistirmayi bitirir ama kapiyi acik
 # birakmaz. Kisa, TEK KULLANIMLIK ve yalniz YEREL kokene.
 PAIR_SECONDS = 120
+
+# --------------------------------------------------------------- sinirlar
+#
+# Yerel bir daemon da olsa, disari acilan bir yuzeyin sinirlari olmali:
+# sinirsiz bir gövde, bir hatayla butun belleği yiyebilir; sinirsiz bir
+# webhook, bir yanlis yapilandirmada daemon'u mesgul eder.
+MAX_BODY = 1024 * 1024          # 1 MB — etiketli metrik govdesi icin fazlasiyla
+WEBHOOK_LIMIT = 60              # dakikada en fazla webhook istegi
+WEBHOOK_WINDOW = 60
 
 
 """Tarayici, HKM'ye BASKA BIR KOKENDEN konusur.
@@ -155,6 +166,42 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", "0")
         self.end_headers()
 
+    # --------------------------------------------------------- sinirlar
+
+    def _read_body(self):
+        """Govdeyi SINIRLI okur. (bytes, hata) doner.
+
+        Content-Length'e guvenmek yetmez: sinirdan buyuk bir govde HIC
+        okunmaz — okunup sonra reddedilen bir govde, zaten bellege
+        alinmistir."""
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            return b"", "gecersiz Content-Length"
+        if n > MAX_BODY:
+            return b"", "govde cok buyuk (en fazla %d bayt)" % MAX_BODY
+        return (self.rfile.read(n) if n else b""), None
+
+    def _rate_ok(self, anahtar, limit=WEBHOOK_LIMIT, pencere=WEBHOOK_WINDOW):
+        """Kaba bir hiz siniri — jetonsuz yollar icin.
+
+        Bir yanlis yapilandirma ya da tekrar tekrar yollanan bir webhook,
+        daemon'u mesgul etmemeli. Sinir KABADIR ve oyle olmali: ince bir
+        sayac, korumadigi bir seyi korur gibi gorunur."""
+        srv = self.server
+        if not hasattr(srv, "rate"):
+            srv.rate = {}
+            srv.rate_lock = threading.Lock()
+        simdi = time.time()
+        with srv.rate_lock:
+            kayit = [t for t in srv.rate.get(anahtar, []) if simdi - t < pencere]
+            if len(kayit) >= limit:
+                srv.rate[anahtar] = kayit
+                return False
+            kayit.append(simdi)
+            srv.rate[anahtar] = kayit
+            return True
+
     def _authorized(self):
         head = self.headers.get("Authorization", "")
         given = head[7:] if head.startswith("Bearer ") else ""
@@ -169,8 +216,11 @@ class Handler(BaseHTTPRequestHandler):
         a = channels.settings(cfg, "whatsapp")
         if not channels.enabled(cfg, "whatsapp"):
             return self._send(404, {"error": "kanal kapali"})
-        n = int(self.headers.get("Content-Length") or 0)
-        ham = self.rfile.read(n) if n else b""
+        if not self._rate_ok("wa"):
+            return self._send(429, {"error": "cok fazla istek"})
+        ham, hata = self._read_body()
+        if hata:
+            return self._send(413, {"error": hata})
         imza = self.headers.get("X-Hub-Signature-256", "")
         if not channels.verify_signature(a.get("app_secret"), ham, imza):
             return self._send(401, {"error": "imza dogrulanmadi"})
@@ -203,9 +253,13 @@ class Handler(BaseHTTPRequestHandler):
         if not channels.verify_telegram_secret(
                 cfg, self.headers.get("X-Telegram-Bot-Api-Secret-Token")):
             return self._send(401, {"error": "gizli baslik dogrulanmadi"})
-        n = int(self.headers.get("Content-Length") or 0)
+        if not self._rate_ok("tg"):
+            return self._send(429, {"error": "cok fazla istek"})
+        ham, hata = self._read_body()
+        if hata:
+            return self._send(413, {"error": hata})
         try:
-            govde = json.loads(self.rfile.read(n) or b"{}")
+            govde = json.loads(ham or b"{}")
         except ValueError:
             return self._send(400, {"error": "gecersiz JSON"})
         cevaplar = []
@@ -283,6 +337,8 @@ class Handler(BaseHTTPRequestHandler):
         origin = self.headers.get("Origin", "")
         if origin and not LOCAL_ORIGIN.match(origin):
             return self._send(403, {"error": "yalniz yerel koken"})
+        if not self._rate_ok("pair", limit=20):
+            return self._send(429, {"error": "cok fazla esleme denemesi"})
         durum = self._pair_state()
         with self.server.pair_lock:
             acik = time.time() < durum["until"] and not durum["used"]
@@ -385,6 +441,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, settings.read(self.server.config))
         if u.path == "/api/backup":
             return self._send(200, db.export_all(self.con))
+        if u.path == "/api/weekly":
+            return self._send(200, weekly.report(self.con, date,
+                                                 th=self.server.thresholds))
+        if u.path == "/api/outbox":
+            return self._send(200, outbox.status(self.con))
         if u.path == "/api/impact":
             return self._send(200, impact.summary(self.con))
         if u.path == "/api/decisions":
@@ -412,9 +473,11 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/pair/open":
             return self._pair_open()
         if u.path == "/api/config":
-            n = int(self.headers.get("Content-Length") or 0)
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
             try:
-                yama = json.loads(self.rfile.read(n) or b"{}")
+                yama = json.loads(ham or b"{}")
             except ValueError:
                 return self._send(400, {"error": "gecersiz JSON"})
             ok, hatalar = settings.validate(yama)
@@ -431,9 +494,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"ok": True,
                                     "config": settings.read(yeni)})
         if u.path == "/api/prune":
-            n = int(self.headers.get("Content-Length") or 0)
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
             try:
-                govde = json.loads(self.rfile.read(n) or b"{}")
+                govde = json.loads(ham or b"{}")
             except ValueError:
                 govde = {}
             if not govde.get("confirm"):
@@ -455,9 +520,11 @@ class Handler(BaseHTTPRequestHandler):
             r = intents.answer(self.con, nid, parca[3])
             return self._send(200 if r.get("ok") else 409, r)
         if u.path == "/api/message":
-            n = int(self.headers.get("Content-Length") or 0)
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
             try:
-                body = json.loads(self.rfile.read(n) or b"{}")
+                body = json.loads(ham or b"{}")
             except ValueError:
                 return self._send(400, {"error": "gecersiz JSON"})
             res = patron.respond(self.con, body.get("text"),
@@ -465,9 +532,11 @@ class Handler(BaseHTTPRequestHandler):
                                  th=self.server.thresholds, channel="local")
             return self._send(200, res)
         if u.path == "/api/say":
-            n = int(self.headers.get("Content-Length") or 0)
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
             try:
-                body = json.loads(self.rfile.read(n) or b"{}")
+                body = json.loads(ham or b"{}")
             except ValueError:
                 body = {}
             return self._send(200, self._say(body))
@@ -484,14 +553,31 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(res["status"], res)
         if not u.path.startswith("/api/sync/"):
             return self._send(404, {"error": "yok"})
-        n = int(self.headers.get("Content-Length") or 0)
+        ham, hata = self._read_body()
+        if hata:
+            return self._send(413, {"error": hata})
         try:
-            body = json.loads(self.rfile.read(n) or b"{}")
+            body = json.loads(ham or b"{}")
         except ValueError:
             return self._send(400, {"error": "gecersiz JSON"})
         body.setdefault("module", u.path.rsplit("/", 1)[-1])
         res = sync_engine.ingest(self.con, body, th=self.server.thresholds)
         return self._send(res["status"], res)
+
+
+def _ritim(srv, aralik=60):
+    """Dakikalik tik — zamanlanmis isler ve giden kutusu.
+
+    Ayri bir is parcaciginda ve KENDI baglantisiyla calisir: SQLite bir
+    baglantiyi yaratildigi is parcaciginin disinda kullandirmaz. Hicbir
+    kosulda firlatmaz; bir zamanlayici hatasi daemon'u durduramaz."""
+    con = db.connect(srv.db_path)
+    while not srv.dur.is_set():
+        try:
+            schedule.tick(con, srv.config, th=srv.thresholds)
+        except Exception as e:                  # noqa: BLE001
+            sys.stderr.write("[hkm] ritim hatasi: %s\n" % e)
+        srv.dur.wait(aralik)
 
 
 def main():
@@ -508,11 +594,20 @@ def main():
     srv.db_path = cfg.get("db_path") or db.DB_PATH
     db.connect(srv.db_path).close()          # sema bir kez kurulur
     srv.thresholds = thresholds.load()
-    sys.stderr.write("[hkm] http://%s:%s\n" % (cfg["host"], cfg["port"]))
+    srv.dur = threading.Event()
+    ritim = threading.Thread(target=_ritim, args=(srv,), daemon=True)
+    ritim.start()
+    zaman = schedule.settings(cfg)
+    sys.stderr.write("[hkm] http://%s:%s · ritim %s\n"
+                     % (cfg["host"], cfg["port"],
+                        "acik (%s)" % zaman.get("morning") if zaman.get("enabled")
+                        else "kapali"))
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
         pass
+    finally:
+        srv.dur.set()
     return 0
 
 
