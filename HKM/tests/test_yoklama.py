@@ -146,24 +146,58 @@ def run():
     test("izinsiz gonderenin icerigi yazilmaz",
          t_unknown_sender_content_not_stored)
 
-    def t_webhook_conflict_is_named():
-        """409, ag hatasi degil YAPILANDIRMA hatasidir ve tekrar denemek
-        duzeltmez; soylenmesi gerekir."""
+    def t_409_has_two_causes():
+        """409'un IKI sebebi var ve ikisi AYRI islerdir:
+           · webhook tanimli               → yapilandirma
+           · baska bir getUpdates calisiyor → es zamanlilik
+        Ikisini tek cumleyle anlatmak, yanlis adimi tarif etmektir."""
+        import io
         import urllib.error
         con = db.connect(":memory:")
 
-        def patla(token, yol, veri=None, timeout=None):
-            raise urllib.error.HTTPError(yol, 409, "Conflict", None, None)
+        def _409(aciklama):
+            govde = json.dumps({"ok": False, "description": aciklama})
+
+            def patla(token, yol, veri=None, timeout=None):
+                raise urllib.error.HTTPError(
+                    yol, 409, "Conflict", None,
+                    io.BytesIO(govde.encode("utf-8")))
+            return patla
+
         eski = yoklama._cagir
-        yoklama._cagir = patla
         try:
+            yoklama._cagir = _409(
+                "Conflict: can't use getUpdates method while webhook is active")
             r = yoklama.tur(con, _cfg())
+            eq(r["reason"], "http-409")
+            ok("webhook" in r["note"].lower())
+
+            yoklama._cagir = _409(
+                "Conflict: terminated by other getUpdates request")
+            r = yoklama.tur(con, _cfg())
+            eq(r["reason"], "http-409")
+            ok("başka bir yoklama" in r["note"].lower())
+            no("webhook" in r["note"].lower())
         finally:
             yoklama._cagir = eski
-        no(r["ok"])
-        eq(r["reason"], "http-409")
-        ok("webhook" in r["note"].lower())
-    test("webhook catismasi adiyla soylenir", t_webhook_conflict_is_named)
+    test("409'un iki sebebi ayri anlatilir", t_409_has_two_causes)
+
+    def t_busy_is_not_an_error():
+        """Arka plan dongusu uzun beklemedeyken «Simdi dene» ikinci bir
+        getUpdates baslatir ve Telegram bunu 409 ile keser. Kilit ikisini
+        siraya sokar; bekleyemeyen taraf bunu HATA diye degil «zaten
+        calisiyor» diye bildirir — calisan bir seye «bozuk» demek."""
+        con = db.connect(":memory:")
+        yoklama._KILIT.acquire()
+        try:
+            r = yoklama.tur(con, _cfg(), bekle_kilit=0.05)
+        finally:
+            yoklama._KILIT.release()
+        ok(r["ok"])                    # hata DEGIL
+        ok(r["busy"])
+        eq(r["handled"], 0)
+        ok("zaten çalışıyor" in r["note"])
+    test("mesgul olmak hata degildir", t_busy_is_not_an_error)
 
     def t_network_error_is_a_result():
         """Hata da bir SONUCTUR, sessiz bir bosluk degil."""

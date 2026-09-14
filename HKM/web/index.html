@@ -1065,10 +1065,13 @@ details.detay > summary:hover{ color:var(--fg); }
       yer.textContent = p.note || ('başarısız: ' + (p.reason || '?'));
       return;
     }
-    yer.className = 'ok';
-    yer.textContent = p.handled
-      ? p.handled + ' mesaj işlendi'
-      : 'bağlantı çalışıyor, bekleyen mesaj yok';
+    /* «Meşgul» bir hata değil: arka plandaki yoklama zaten çalışıyor
+       demektir. Çalışan bir şeye «bozuk» demek, kullanıcıyı olmayan bir
+       sorunu aramaya gönderir. */
+    yer.className = p.busy ? 'muted' : 'ok';
+    yer.textContent = p.busy ? p.note
+      : (p.handled ? p.handled + ' mesaj işlendi'
+          : 'bağlantı çalışıyor, bekleyen mesaj yok');
   }
 
   async function kanalKaydet(){

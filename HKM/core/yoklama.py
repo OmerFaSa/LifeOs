@@ -32,6 +32,7 @@
 """
 
 import json
+import threading
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -42,6 +43,13 @@ API = "https://api.telegram.org"
 BEKLEME = 25               # saniye — Telegram bizi bu kadar bekletir
 ARA = 3                    # hata sonrasi bekleme
 EN_COK = 20                # tek turda islenecek en fazla mesaj
+
+# Telegram AYNI BOT icin iki es zamanli getUpdates kabul etmez: ikincisini
+# 409 ile keser. Arka plan dongusu uzun bekleme yaparken kullanicinin
+# «Simdi dene» demesi tam olarak bu durumu uretiyordu. Kilit, ikisinin
+# sirayla gecmesini saglar; bekleyemeyen taraf bunu HATA diye degil
+# «zaten calisiyor» diye bildirir.
+_KILIT = threading.Lock()
 
 
 def acik_mi(cfg):
@@ -98,7 +106,8 @@ def _imlec_yaz(con, deger):
     con.commit()
 
 
-def tur(con, cfg, th=None, timeout=BEKLEME, transport=None):
+def tur(con, cfg, th=None, timeout=BEKLEME, transport=None,
+        bekle_kilit=0.5):
     """Bir yoklama turu: sor, geleni isle, imleci ilerlet.
 
     Donen sozluk her zaman anlamlidir — hata da bir SONUCTUR, sessiz bir
@@ -120,46 +129,72 @@ def tur(con, cfg, th=None, timeout=BEKLEME, transport=None):
         return {"ok": False, "reason": "no-allow", "handled": 0,
                 "note": "İzin listesi boş — kimseye cevap verilmez. Kendi "
                         "Id'ni yazıp kaydet."}
-    imlec = _imlec_oku(con)
+    if not _KILIT.acquire(timeout=bekle_kilit):
+        # Kilit arka plan dongusunde: yoklama ZATEN calisiyor demektir.
+        # Bunu hata diye gostermek, calisan bir seye «bozuk» demekti.
+        return {"ok": True, "handled": 0, "busy": True, "results": [],
+                "note": "Yoklama zaten çalışıyor. Bekleyen mesaj varsa "
+                        "birkaç saniye içinde işlenir."}
     try:
-        yanit = _cagir(token, "getUpdates?" + urllib.parse.urlencode({
-            "offset": imlec + 1 if imlec else 0,
-            "timeout": int(timeout),
-            "allowed_updates": json.dumps(["message"]),
-        }), timeout=timeout + 10)
-    except urllib.error.HTTPError as e:
-        # 409: webhook tanimli. Bu bir AG hatasi degil YAPILANDIRMA hatasi
-        # ve tekrar denemek duzeltmez; soylenmesi gerekir.
-        return {"ok": False, "reason": "http-%s" % e.code, "handled": 0,
-                "note": ("Telegram webhook tanımlı olduğu için yoklama "
-                         "reddedildi." if e.code == 409 else "")}
-    except Exception as e:                      # noqa: BLE001
-        return {"ok": False, "reason": type(e).__name__, "handled": 0}
-
-    if not yanit.get("ok"):
-        return {"ok": False, "reason": "api", "handled": 0,
-                "note": str(yanit.get("description") or "")}
-
-    sonuc = {"ok": True, "handled": 0, "skipped": 0, "results": []}
-    son = imlec
-    for g in (yanit.get("result") or [])[:EN_COK]:
+        imlec = _imlec_oku(con)
         try:
-            son = max(son, int(g.get("update_id") or 0))
-        except (TypeError, ValueError):
-            pass
-        mesajlar = channels.parse_telegram(g)
-        if not mesajlar:
-            sonuc["skipped"] += 1
-            continue
-        for m in mesajlar:
-            r = gelen.isle(con, cfg, "telegram", m, th=th, transport=transport)
-            sonuc["results"].append(r)
-            sonuc["handled"] += 1
-    if son != imlec:
-        # Imlec, ISLENDIKTEN SONRA ilerletilir: once ilerletmek, islenmemis
-        # bir mesaji sonsuza kadar atlamak olurdu.
-        _imlec_yaz(con, son)
-    return sonuc
+            yanit = _cagir(token, "getUpdates?" + urllib.parse.urlencode({
+                "offset": imlec + 1 if imlec else 0,
+                "timeout": int(timeout),
+                "allowed_updates": json.dumps(["message"]),
+            }), timeout=timeout + 10)
+        except urllib.error.HTTPError as e:
+            # 409'un IKI sebebi var ve ikisi ayri islerdir:
+            #   · webhook tanimli              → yapilandirma
+            #   · baska bir getUpdates calisiyor → es zamanlilik
+            # Ikisini tek cumleyle anlatmak, yanlis adimi tarif etmektir.
+            aciklama = ""
+            try:
+                aciklama = json.loads(
+                    e.read().decode("utf-8", "replace") or "{}"
+                ).get("description") or ""
+            except Exception:                   # noqa: BLE001
+                aciklama = ""
+            if e.code == 409 and "webhook" in aciklama.lower():
+                not_ = ("Telegram webhook tanımlı olduğu için yoklama "
+                        "reddedildi.")
+            elif e.code == 409:
+                not_ = ("Bu bot için başka bir yoklama çalışıyor. Başka bir "
+                        "HKM ya da program aynı jetonu kullanıyor olabilir.")
+            else:
+                not_ = aciklama
+            return {"ok": False, "reason": "http-%s" % e.code, "handled": 0,
+                    "note": not_}
+        except Exception as e:                  # noqa: BLE001
+            return {"ok": False, "reason": type(e).__name__, "handled": 0}
+
+        if not yanit.get("ok"):
+            return {"ok": False, "reason": "api", "handled": 0,
+                    "note": str(yanit.get("description") or "")}
+
+        sonuc = {"ok": True, "handled": 0, "skipped": 0, "results": []}
+        son = imlec
+        for g in (yanit.get("result") or [])[:EN_COK]:
+            try:
+                son = max(son, int(g.get("update_id") or 0))
+            except (TypeError, ValueError):
+                pass
+            mesajlar = channels.parse_telegram(g)
+            if not mesajlar:
+                sonuc["skipped"] += 1
+                continue
+            for m in mesajlar:
+                r = gelen.isle(con, cfg, "telegram", m, th=th,
+                               transport=transport)
+                sonuc["results"].append(r)
+                sonuc["handled"] += 1
+        if son != imlec:
+            # Imlec, ISLENDIKTEN SONRA ilerletilir: once ilerletmek,
+            # islenmemis bir mesaji sonsuza kadar atlamak olurdu.
+            _imlec_yaz(con, son)
+        return sonuc
+    finally:
+        _KILIT.release()
 
 
 def dongu(srv, db_path):
