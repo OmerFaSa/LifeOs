@@ -60,6 +60,9 @@ PROVIDERS = {
     "openrouter": {
         "label": "OpenRouter (önerilen — tek anahtar, bütün modeller)",
         "base": "https://openrouter.ai/api/v1/chat/completions",
+        # Anahtari GERCEKTEN dogrulayan uc: kim oldugunu ve kalan
+        # bakiyeyi soyler.
+        "probe": "https://openrouter.ai/api/v1/key",
         "key_header": "Authorization",
         "signup": "https://openrouter.ai/keys",
         "note": "Tek hesap, tek bakiye; OpenAI, Claude, Gemini, DeepSeek, "
@@ -73,24 +76,31 @@ PROVIDERS = {
     "anthropic": {
         "label": "Anthropic (Claude)",
         "base": "https://api.anthropic.com/v1/messages",
+        "probe": "https://api.anthropic.com/v1/models",
         "key_header": "x-api-key",
+        "signup": "https://console.anthropic.com/settings/keys",
         "models": ["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5-20251001"],
     },
     "openai": {
         "label": "OpenAI",
         "base": "https://api.openai.com/v1/chat/completions",
+        "probe": "https://api.openai.com/v1/models",
         "key_header": "Authorization",
+        "signup": "https://platform.openai.com/api-keys",
         "models": ["gpt-5", "gpt-5-mini", "gpt-4.1"],
     },
     "google": {
         "label": "Google (Gemini)",
         "base": "https://generativelanguage.googleapis.com/v1beta/models",
+        "probe": "https://generativelanguage.googleapis.com/v1beta/models",
         "key_header": "x-goog-api-key",
+        "signup": "https://aistudio.google.com/apikey",
         "models": ["gemini-2.5-pro", "gemini-2.5-flash"],
     },
     "yerel": {
         "label": "Yerel sunucu (Ollama, LM Studio…)",
         "base": "http://127.0.0.1:11434/v1/chat/completions",
+        "probe": "http://127.0.0.1:11434/v1/models",
         "key_header": "Authorization",
         "models": [],
     },
@@ -313,12 +323,20 @@ def apply(cfg, patch):
 
 # ------------------------------------------------------------------- sinama
 
-def probe(cfg, provider, transport=None, timeout=8):
+def probe(cfg, provider, transport=None, timeout=10):
     """Anahtari SINAR. «Kurulu» ile «calisiyor» ayri seylerdir.
 
-    Model cagirmaz, mesaj uretmez: yalnizca kapinin kimligi taniyip
-    tanimadigina bakar. Bir yanit alinmadan «calisiyor» yazmak, yalan
-    soyleyen bir arayuzdur."""
+    Once bos bir POST atiliyordu ve 400/422 donmesi «anahtar kabul edildi»
+    sayiliyordu. Iki sorun birden vardi:
+
+      · Bos isteğe 400 donmesi, anahtarin gecerli oldugunu KANITLAMAZ —
+        istek gövdesi bozuk oldugu icin de 400 doner.
+      · Google'in o adresi POST kabul etmez ve 404 doner: dogru anahtar
+        girmis bir kullanici «basarisiz» goruyordu.
+
+    Artik saglayicinin MODEL LISTESI ucu GET ile cagriliyor. Bu uc
+    kimlik dogrular, para harcamaz ve cevabi tek anlamlidir: 200 gecerli,
+    401/403 reddedildi."""
     tanim = PROVIDERS.get(provider)
     if not tanim:
         return {"ok": False, "reason": "unknown-provider",
@@ -329,7 +347,8 @@ def probe(cfg, provider, transport=None, timeout=8):
                 "note": "Bu sağlayıcı için anahtar girilmemiş."}
     if transport is not None:
         return transport(provider, tanim, anahtar)
-    baslik = {"Content-Type": "application/json"}
+
+    baslik = {"Accept": "application/json"}
     if anahtar:
         if tanim["key_header"] == "Authorization":
             baslik["Authorization"] = "Bearer " + anahtar
@@ -337,24 +356,54 @@ def probe(cfg, provider, transport=None, timeout=8):
             baslik[tanim["key_header"]] = anahtar
     if provider == "anthropic":
         baslik["anthropic-version"] = "2023-06-01"
-    istek = urllib.request.Request(tanim["base"], data=json.dumps({}).encode(),
-                                   headers=baslik, method="POST")
+
+    url = tanim.get("probe") or tanim["base"]
+    istek = urllib.request.Request(url, headers=baslik, method="GET")
     try:
         with urllib.request.urlopen(istek, timeout=timeout) as r:
+            govde = r.read(4000).decode("utf-8", "replace")
             return {"ok": True, "status": r.status,
-                    "note": "Kapı yanıt verdi."}
+                    "note": _probe_notu(provider, govde)}
     except urllib.error.HTTPError as e:
-        # 400/422: istek bos ama KIMLIK KABUL EDILDI — aradigimiz bu.
-        # 401/403: anahtar reddedildi.
-        if e.code in (400, 422):
-            return {"ok": True, "status": e.code,
-                    "note": "Anahtar kabul edildi (boş istek reddedildi, "
-                            "beklenen budur)."}
         if e.code in (401, 403):
             return {"ok": False, "status": e.code, "reason": "unauthorized",
-                    "note": "Anahtar reddedildi."}
+                    "note": "Anahtar reddedildi. Yanlış ya da süresi dolmuş "
+                            "olabilir."}
+        if e.code == 404:
+            return {"ok": False, "status": 404, "reason": "not-found",
+                    "note": "Sağlayıcının adresi bulunamadı. Bu bir anahtar "
+                            "hatası değil, adres hatasıdır."}
+        if e.code == 429:
+            return {"ok": False, "status": 429, "reason": "rate",
+                    "note": "Sağlayıcı «çok fazla istek» dedi. Anahtar "
+                            "büyük olasılıkla geçerli; birazdan tekrar dene."}
         return {"ok": False, "status": e.code, "reason": "http",
                 "note": "Sağlayıcı %s döndü." % e.code}
-    except Exception as e:
+    except Exception as e:                      # noqa: BLE001
         return {"ok": False, "reason": "unreachable",
-                "note": "Ulaşılamadı: %s" % type(e).__name__}
+                "note": "Ulaşılamadı (%s). İnternet bağlantısını kontrol et."
+                        % type(e).__name__}
+
+
+def _probe_notu(provider, govde):
+    """Cevabin ICINDEN soylenebilecek seyi soyler, uydurmaz."""
+    if provider == "openrouter":
+        try:
+            d = (json.loads(govde or "{}").get("data") or {})
+        except ValueError:
+            d = {}
+        kalan = d.get("limit_remaining")
+        harcanan = d.get("usage")
+        if kalan is not None:
+            return "Anahtar geçerli. Kalan limit: %s USD." % kalan
+        if harcanan is not None:
+            return "Anahtar geçerli. Bu anahtarla harcanan: %s USD." % harcanan
+        return "Anahtar geçerli."
+    try:
+        veri = json.loads(govde or "{}")
+        say = len(veri.get("data") or veri.get("models") or [])
+    except ValueError:
+        say = 0
+    if say:
+        return "Anahtar geçerli — %d model görünüyor." % say
+    return "Anahtar geçerli."

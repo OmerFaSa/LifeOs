@@ -143,8 +143,8 @@ code{ font:12px/1.4 var(--mono); }
    baglanti, parmakla isabet ettirilemez (WCAG 2.2 asgari 24px). */
 a{ color:var(--accent); }
 a:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-.line a, p a, .serit__kutu a{ display:inline-block; min-height:24px;
-  line-height:24px; }
+.line a, p a, .serit__kutu a, .metric a{ display:inline-block;
+  min-height:24px; line-height:24px; }
 
 /* ---- sekmeler: hap degil, ALT CIZGI ---- */
 .tabs{ display:flex; gap:0; margin:0; flex-wrap:wrap;
@@ -1386,7 +1386,10 @@ details.detay > summary:hover{ color:var(--fg); }
     (m.providers || []).forEach(function(p){
       h += '<div class="metric">'
         + '<div class="metric__name">' + esc(p.label)
-        + '<div class="muted" style="font-size:11px">' + esc(p.base) + '</div></div>'
+        + '<div class="muted" style="font-size:11px">'
+        + (p.signup ? '<a href="' + esc(p.signup) + '" target="_blank" '
+            + 'rel="noopener">anahtar al →</a> · ' : '')
+        + esc(p.base) + '</div></div>'
         + '<div class="metric__val"><input type="password" data-anahtar="'
         + esc(p.id) + '" placeholder="' + (p.key_set ? esc(p.key_hint)
             : 'anahtar girilmemiş') + '" class="alan alan--genis" aria-label="'

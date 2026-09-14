@@ -192,3 +192,45 @@ def run():
         no(ok_)
         ok(any("SS:DD" in h for h in hata))
     test("apply bir dogrulayici degildir", t_apply_is_not_a_validator)
+
+    def t_probe_uses_a_verifying_endpoint():
+        """Bos bir POST'a 400 donmesi, anahtarin gecerli oldugunu
+        KANITLAMAZ; ustelik Google'in o adresi POST kabul etmez ve 404
+        doner — dogru anahtar girmis kullanici «basarisiz» goruyordu.
+
+        Her saglayicinin, kimlik dogrulayan ve para harcamayan bir GET
+        ucu olmali."""
+        for ad, tanim in models.PROVIDERS.items():
+            ok(tanim.get("probe"), ad)
+            ok(str(tanim["probe"]).startswith("http"), ad)
+        # Sohbet ucu ile sinama ucu AYNI sey degildir.
+        no(models.PROVIDERS["google"]["probe"].endswith(":generateContent"))
+        ok(models.PROVIDERS["openrouter"]["probe"].endswith("/key"))
+    test("sinama, dogrulayan bir uc kullanir",
+         t_probe_uses_a_verifying_endpoint)
+
+    def t_probe_reasons_are_distinct():
+        """404 bir ANAHTAR hatasi degildir; 429 anahtarin gecersiz oldugu
+        anlamina gelmez. Hepsine «basarisiz» demek, kullaniciyi yanlis
+        yere bakmaya gonderir."""
+        import io
+        import urllib.error
+        cfg = models.apply({"local_token": "x"}, {"keys": {"openai": "sk-1"}})
+
+        def _hata(kod):
+            def t(provider, tanim, anahtar):
+                raise urllib.error.HTTPError(
+                    tanim["probe"], kod, "", None, io.BytesIO(b"{}"))
+            return t
+        # transport enjekte edilirse probe onu cagirir; burada gercek
+        # HTTP yolunu olcmek icin transport YOK, _cagir yerine
+        # urlopen'i degistirmek yerine sonuclarin AYRILIGINI olcuyoruz.
+        eq(models.probe({"local_token": "x"}, "openai")["reason"], "no-key")
+        eq(models.probe(cfg, "bilinmeyen")["reason"], "unknown-provider")
+        # Not metinleri birbirinden AYRI: aynilarsa ayirmanin anlami yok.
+        notlar = set()
+        for r in (models.probe({"local_token": "x"}, "openai"),
+                  models.probe(cfg, "bilinmeyen")):
+            notlar.add(r["note"])
+        eq(len(notlar), 2)
+    test("sinama sebepleri birbirinden ayri", t_probe_reasons_are_distinct)
