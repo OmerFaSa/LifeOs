@@ -405,25 +405,52 @@ async function main(){
     await yuz.click('[data-ayar="yapayzeka"]');
     await wait(400);
     const api = await yuz.evaluate(async () => {
-      const alan = document.querySelector('[data-anahtar="anthropic"]');
+      /* Bir saglayicinin BIRDEN COK anahtari olabilir: satir once
+         eklenir, sonra doldurulur. Ikinci anahtar da eklenir ve kademe
+         HANGISIYLE odeyecegini secer. */
+      const ekle = document.querySelector('[data-ekle="anthropic"]');
       const sec = document.querySelector('[data-rol="king"]');
-      if(!alan || !sec) return { hata:'saglayici/gorev satiri yok' };
-      alan.value = 'sk-ant-entegre-denemesi';
+      if(!ekle || !sec) return { hata:'saglayici/gorev satiri yok' };
+      const grup = document.querySelector('[data-grup="anthropic"]');
+      const doldur = (ad, sahip, deger) => {
+        ekle.click();
+        const satir = grup.lastElementChild;
+        satir.querySelector('[data-k-ad]').value = ad;
+        satir.querySelector('[data-k-sahip]').value = sahip;
+        satir.querySelector('[data-k-deger]').value = deger;
+      };
+      doldur('Benim', 'ben', 'sk-ant-entegre-denemesi');
+      doldur('Kardesim', 'kardes', 'sk-ant-ikinci-anahtar');
       document.querySelector('#anahtar-kaydet').click();
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 700));
       const anahtarNotu = document.querySelector('#anahtar-not').textContent;
+      const satirSayisi = document.querySelectorAll(
+        '[data-grup="anthropic"] [data-kutu]').length;
 
       const sec2 = document.querySelector('[data-rol="king"]');
       sec2.value = 'anthropic';
       document.querySelector('[data-model="king"]').value = 'claude-opus-5';
       document.querySelector('#gorev-kaydet').click();
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 700));
       const gorevNotu = document.querySelector('#gorev-not').textContent;
+
+      /* Iki anahtar varken kademe hangisini kullanacagini SECEBILMELI. */
+      const anahtarSec = document.querySelector('[data-anahtarsec="king"]');
+      let secim = '';
+      if(anahtarSec){
+        anahtarSec.value = anahtarSec.options[2].value;
+        document.querySelector('#gorev-kaydet').click();
+        await new Promise(r => setTimeout(r, 700));
+        secim = (document.querySelector('[data-rol="king"]')
+          .closest('.metric').textContent || '');
+      }
       /* Atanmamis bir alt kademe, king'den MIRAS almali. */
       const miras = (document.querySelector('[data-rol="spi.gorsel"]')
         .closest('.metric').textContent || '');
-      return { anahtarNotu, gorevNotu, miras,
-        sizdi:document.body.textContent.indexOf('sk-ant-entegre-denemesi') >= 0 };
+      return { anahtarNotu, gorevNotu, miras, satirSayisi,
+        secici:!!anahtarSec, secim,
+        sizdi:(document.body.textContent.indexOf('sk-ant-entegre-denemesi') >= 0
+               || document.body.textContent.indexOf('sk-ant-ikinci-anahtar') >= 0) };
     });
     if(api.hata) hatalar.push('HKM yuzu: ' + api.hata);
     else{
@@ -436,10 +463,19 @@ async function main(){
       if(api.miras.indexOf('miras') < 0){
         hatalar.push('HKM yuzu: alt kademe king atamasini miras almadi');
       }
+      if(api.satirSayisi !== 2){
+        hatalar.push('HKM yuzu: iki anahtar kaydedilmedi (' + api.satirSayisi + ')');
+      }
+      if(!api.secici){
+        hatalar.push('HKM yuzu: iki anahtar varken kademe secici cikmadi');
+      }else if((api.secim || '').indexOf('Kardesim') < 0){
+        hatalar.push('HKM yuzu: secilen anahtar kademede gorunmedi');
+      }
       if(api.sizdi) hatalar.push('HKM yuzu: SAGLAYICI ANAHTARI EKRANA SIZDI');
       if(!api.hata){
-        console.log('  HKM yuzu → saglayici anahtari yazildi, geri okunmadi; '
-          + 'king atamasi alt kademelere miras kaldi');
+        console.log('  HKM yuzu → iki anahtar yazildi, geri okunmadi; '
+          + 'king hangisiyle odeyecegini secti; atama alt kademelere '
+          + 'miras kaldi');
       }
     }
 

@@ -13,7 +13,10 @@
    Kullanım:
      python3 tools/sayilar.py            # yalnız birim testleri (hızlı)
      python3 tools/sayilar.py --tam      # duman, palet, düzen, başarım da
-     python3 tools/sayilar.py --yaz      # README.md ve NOTLAR.md'yi günceller
+     python3 tools/sayilar.py --tam --yaz  # ölçer VE belgeleri günceller
+
+   `--yaz`, `--tam` olmadan çalışmaz: hızlı koşum yalnız birim testlerini
+   ölçer ve onunla yazmak, ölçülmemiş satırları belgeden **silerdi**.
 
    Belgelerde şu iki işaret arasındaki bölge değiştirilir:
      <!-- SAYILAR:baslangic -->  …  <!-- SAYILAR:bitis -->
@@ -143,6 +146,15 @@ def main():
                   + ''.join('| `%s` | %s |\n' % (a, r[1].replace('|', '¦'))
                             for a, r in kok.items()))
     if '--yaz' in sys.argv:
+        # OLCULMEYEN SATIR SILINMEZ. Hizli kosum yalnizca birim testlerini
+        # olcer; onunla yazmak, olculmemis satirlari belgeden KALDIRIRDI ve
+        # belge daha az sey olcuyormus gibi gorunurdu. Olculmeyen bir sey
+        # icin bos satir yazmak da, «bu arac artik yok» demekti.
+        if not tam:
+            print('yazilmadi: --yaz icin --tam gerekir. Hizli kosum yalniz '
+                  'birim testlerini olcer; olculmeyen satirlari silmek, '
+                  'belgeyi daha az sey olcuyormus gibi gosterirdi.')
+            return 2
         for d in ['README.md', 'NOTLAR.md']:
             yaz(d, metin)
     else:

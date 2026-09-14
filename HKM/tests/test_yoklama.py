@@ -7,7 +7,7 @@ disariya acmak gerekmez. Ag'a CIKILMAZ; Telegram'in cevabi enjekte edilir.
 
 import json
 
-from core import channels, db, gelen, yoklama
+from core import ai, channels, db, gelen, models, yoklama
 from tests.harness import eq, no, ok, suite, test
 
 BUGUN = "2026-09-14"
@@ -248,3 +248,70 @@ def run():
                         {"from": IZINLI, "text": "durum", "id": 4242})
         ok(r2["duplicate"])
     test("iki kapi tek isleme yolu", t_one_path_for_both_doors)
+
+    def t_free_sentence_reaches_the_model():
+        """Telegram'dan gelen SERBEST bir cumle, ekranla AYNI katmandan
+        gecer: iki ayri cevap uretici olsaydi, ayni soruya iki farkli
+        cevap veren bir sistem olurdu."""
+        con = db.connect(":memory:")
+        cfg = models.apply(_cfg(), {
+            "keys": {"google": "AIza-test"},
+            "assignments": {"king": {"provider": "google",
+                                     "model": "gemini-2.5-flash"}}})
+        cfg["budget"] = {"monthly_try": 850.0, "usd_try": 48.6,
+                         "rate_date": BUGUN}
+        gorulen = {}
+
+        def sahte_model(provider, anahtar, model, sistem, mesajlar):
+            gorulen["sistem"] = sistem
+            gorulen["mesajlar"] = mesajlar
+            return ("Bugün ölçümler düşük görünüyor; istersen hafif bir "
+                    "gün önerebilirim.", 400, 60)
+
+        eski_ai = ai._cagir
+        eski = _kur(None, [{"ok": True, "result": [
+            _guncelleme(1200, "bugün odaklanamadım, ne yapsam?")]}])
+        try:
+            # Ag'a CIKILMAZ: saglayicinin cevabi enjekte edilir.
+            ai._cagir = sahte_model
+            r = yoklama.tur(con, cfg, transport=_gonderim())
+        finally:
+            yoklama._cagir = eski
+            ai._cagir = eski_ai
+        eq(r["handled"], 1)
+        eq(r["results"][0]["mode"], "model")
+        ok(gorulen.get("sistem"))
+        # Modelin gordugu TEK gercek: kural motorunun urettigi olculer.
+        ok("Bugünün ölçümleri" in gorulen["sistem"])
+        # Cevap GIDEN KUTUSUNDAN gecer.
+        satir = con.execute("SELECT * FROM outbox").fetchall()
+        eq(len(satir), 1)
+        eq(satir[0]["target"], IZINLI)
+    test("serbest cumle modele ulasir", t_free_sentence_reaches_the_model)
+
+    def t_command_on_telegram_does_not_call_the_model():
+        """ONCE KOMUT: «durum» yazildiginda modele GIDILMEZ. Ucretsiz,
+        kesin ve her zaman ayni olan yol once denenir."""
+        con = db.connect(":memory:")
+        cfg = models.apply(_cfg(), {
+            "keys": {"google": "AIza-test"},
+            "assignments": {"king": {"provider": "google", "model": "m"}}})
+        cagrildi = []
+
+        def patla(*a):
+            cagrildi.append(1)
+            raise AssertionError("komut oldugu halde model cagrildi")
+
+        eski_ai = ai._cagir
+        eski = _kur(None, [{"ok": True, "result": [
+            _guncelleme(1300, "durum")]}])
+        try:
+            ai._cagir = patla
+            r = yoklama.tur(con, cfg, transport=_gonderim())
+        finally:
+            yoklama._cagir = eski
+            ai._cagir = eski_ai
+        eq(r["results"][0]["mode"], "komut")
+        eq(len(cagrildi), 0)
+    test("telegramda da once komut",
+         t_command_on_telegram_does_not_call_the_model)

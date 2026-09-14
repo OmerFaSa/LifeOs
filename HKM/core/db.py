@@ -184,6 +184,10 @@ MIGRATIONS = [
     # (tablo, sutun, tanim)
     ("decisions", "key", "TEXT"),          # oncelik kurali kimligi
     ("decisions", "answered_at", "TEXT"),  # kabul/ret ne zaman verildi
+    # Hangi gorevliyle konusuldugu: king, bio, academic, intellect.
+    # Tek bir konusma akisi, dort ayri gorevlinin sozlerini birbirine
+    # karistirirdi — ve «bunu kim soyledi» sorusu cevapsiz kalirdi.
+    ("conversations", "agent", "TEXT"),
 ]
 
 
@@ -191,6 +195,12 @@ def _migrate(con):
     uygulanan = []
     for tablo, sutun, tanim in MIGRATIONS:
         var = [r["name"] for r in con.execute("PRAGMA table_info(%s)" % tablo)]
+        # Tablo YOKSA tasinacak bir sey de yoktur. Onceki hal burada
+        # OperationalError ile cokuyordu: eksik bir tablo, tasimanin
+        # tamamini durduruyor ve VAR OLAN tablolarin tasimasi da
+        # yapilmiyordu.
+        if not var:
+            continue
         if sutun in var:
             continue
         con.execute("ALTER TABLE %s ADD COLUMN %s %s" % (tablo, sutun, tanim))

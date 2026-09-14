@@ -234,3 +234,118 @@ def run():
             notlar.add(r["note"])
         eq(len(notlar), 2)
     test("sinama sebepleri birbirinden ayri", t_probe_reasons_are_distinct)
+
+    def t_many_keys_per_provider():
+        """Bir saglayicinin BIRDEN COK anahtari olabilir: iki kisi ayni
+        sistemi kullaniyorsa harcamalari da ayri gorunmeli."""
+        cfg = models.apply({"local_token": "x"}, {"keys": {"openrouter": [
+            {"label": "Benim", "key": "sk-or-ben", "user": "ben"},
+            {"label": "Kardesim", "key": "sk-or-kardes", "user": "kardes"}]}})
+        liste = models.key_list(cfg, "openrouter")
+        eq(len(liste), 2)
+        eq([e["label"] for e in liste], ["Benim", "Kardesim"])
+        # Kimlikler AYRI ve her biri kendi degerini tasir.
+        eq(len({e["id"] for e in liste}), 2)
+        eq(models.key_value(cfg, "openrouter", liste[1]["id"]), "sk-or-kardes")
+        # Secim yoksa ILK anahtar gecerlidir.
+        eq(models.key_value(cfg, "openrouter"), "sk-or-ben")
+    test("bir saglayicinin birden cok anahtari olur",
+         t_many_keys_per_provider)
+
+    def t_old_single_key_still_works():
+        """Tek dizeli eski yapilandirma yeni kodla CALISMAYA DEVAM EDER:
+        kullanicinin dosyayi elle donusturmesi gereken bir surum
+        yukseltmesi, kurulumu bozmanin sessiz yoludur."""
+        cfg = {"local_token": "x", "models": {"keys": {"google": "AIza-eski"}}}
+        eq(models.key_value(cfg, "google"), "AIza-eski")
+        eq(models.keys(cfg)["google"], "AIza-eski")
+        eq(len(models.key_list(cfg, "google")), 1)
+    test("tek anahtarli eski yapilandirma calisir",
+         t_old_single_key_still_works)
+
+    def t_blank_value_keeps_the_secret():
+        """Ekran maskeyi geri gonderir. Bos deger sirri SILSEYDI,
+        kaydetmek tehlikeli bir is olurdu."""
+        cfg = models.apply({"local_token": "x"}, {"keys": {"openai": [
+            {"label": "Tek", "key": "sk-gizli"}]}})
+        kimlik = models.key_list(cfg, "openai")[0]["id"]
+        # Yalniz adi degistir: deger bos gelir.
+        cfg = models.apply(cfg, {"keys": {"openai": [
+            {"id": kimlik, "label": "Yeni ad", "key": ""}]}})
+        eq(models.key_value(cfg, "openai", kimlik), "sk-gizli")
+        eq(models.key_list(cfg, "openai")[0]["label"], "Yeni ad")
+        # Listeden CIKARMAK siler.
+        cfg = models.apply(cfg, {"keys": {"openai": []}})
+        eq(models.key_list(cfg, "openai"), [])
+    test("bos deger sirri korur, listeden cikarmak siler",
+         t_blank_value_keeps_the_secret)
+
+    def t_deleted_key_is_not_silently_replaced():
+        """Secilen anahtar silinmisse baska bir anahtara SESSIZCE
+        gecilmez: bu, baskasinin hesabindan para harcamak olurdu."""
+        cfg = models.apply({"local_token": "x"}, {"keys": {"openrouter": [
+            {"label": "Benim", "key": "sk-ben", "user": "ben"},
+            {"label": "Kardesim", "key": "sk-kardes", "user": "kardes"}]}})
+        ikinci = models.key_list(cfg, "openrouter")[1]["id"]
+        cfg = models.apply(cfg, {"assignments": {"king": {
+            "provider": "openrouter", "model": "m", "key": ikinci}}})
+        a = models.resolve(cfg, "king")
+        eq(a["key_id"], ikinci)
+        eq(a["key_user"], "kardes")
+        ok(a["key_set"])
+
+        # Kardesin anahtari silinir: ILK anahtara kaymaz, SOYLER.
+        birinci = models.key_list(cfg, "openrouter")[0]
+        cfg = models.apply(cfg, {"keys": {"openrouter": [
+            {"id": birinci["id"], "label": birinci["label"], "key": ""}]}})
+        a = models.resolve(cfg, "king")
+        ok(a["key_missing"])
+        no(a["key_set"])
+        eq(models.key_value(cfg, "openrouter", ikinci), None)
+    test("silinen anahtarin yerine sessizce baskasi konmaz",
+         t_deleted_key_is_not_silently_replaced)
+
+    def t_reused_id_would_repoint_an_assignment():
+        """Silinen bir kimlik YENIDEN KULLANILMAZ: kimligi geri vermek,
+        eski bir atamayi sessizce baska bir anahtara baglardi."""
+        cfg = models.apply({"local_token": "x"}, {"keys": {"google": [
+            {"label": "Bir", "key": "a"}]}})
+        ilk = models.key_list(cfg, "google")[0]["id"]
+        cfg = models.apply(cfg, {"keys": {"google": []}})
+        cfg = models.apply(cfg, {"keys": {"google": [
+            {"label": "Iki", "key": "b"}]}})
+        yeni = models.key_list(cfg, "google")[0]["id"]
+        no(yeni == ilk)
+        # Sayac YAMADAN GELMEZ: istemcinin yazabildigi bir sayac, kimlik
+        # geri vermenin kapisi olurdu.
+        ok_, hata = models.validate({"key_seq": {"google": 0}})
+        no(ok_)
+    test("silinen kimlik yeniden kullanilmaz",
+         t_reused_id_would_repoint_an_assignment)
+
+    def t_key_list_never_leaves_unmasked():
+        """Anahtarlar TEK TEK cikar — ama degerleri degil, maskeleri."""
+        gizli = "sk-or-cok-gizli-ikinci"
+        cfg = models.apply({"local_token": "x"}, {"keys": {"openrouter": [
+            {"label": "Benim", "key": "sk-or-birinci"},
+            {"label": "Kardesim", "key": gizli}]}})
+        disari = settings.read(cfg)
+        no(gizli in repr(disari))
+        orr = [p for p in disari["models"]["providers"]
+               if p["id"] == "openrouter"][0]
+        eq(len(orr["keys"]), 2)
+        ok(orr["keys"][1]["hint"].endswith(gizli[-2:]))
+        eq(orr["keys"][1]["label"], "Kardesim")
+    test("anahtar listesi maskeli cikar", t_key_list_never_leaves_unmasked)
+
+    def t_valueless_new_key_refused():
+        """Adi olan ama degeri olmayan bir anahtar, kurulu sanilan bir
+        bosluktur."""
+        ok_, hata = models.validate({"keys": {"openai": [
+            {"label": "Bos", "key": ""}]}})
+        no(ok_)
+        ok(any("boş olamaz" in h for h in hata))
+        ok_, hata = models.validate({"keys": {"openai": [
+            {"label": "Bir", "key": "a", "bilinmeyen": 1}]}})
+        no(ok_)
+    test("degersiz yeni anahtar reddedilir", t_valueless_new_key_refused)

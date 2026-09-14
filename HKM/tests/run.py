@@ -10,8 +10,8 @@ from tests import (harness, test_baslat, test_butce, test_channels,  # noqa: E40
                    test_cross,
                    test_daemon, test_dil, test_impact, test_intents,
                    test_manager, test_models, test_precedence, test_ritim,
-                   test_streak, test_sync, test_twin, test_vps,
-                   test_yoklama)
+                   test_sohbet, test_streak, test_sync, test_twin,
+                   test_vps, test_yoklama)
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
                 test_cross, test_impact, test_dil, test_intents,
                 test_manager, test_ritim, test_streak, test_channels,
                 test_daemon, test_models, test_butce, test_yoklama,
-                test_baslat):
+                test_sohbet, test_baslat):
         mod.run()
     test_channels.run_bot()
 

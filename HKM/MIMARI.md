@@ -727,7 +727,7 @@ king                        Büyük Patron — günün tek cümlesini taşıyan 
     └── esp.{sohbet,analiz,plan,gorsel}
 ```
 
-Altı kural, hepsi bir şeyi korur — **model otorite değildir**:
+Yedi kural, hepsi bir şeyi korur — **model otorite değildir**:
 
 1. **Kural motoru otoritedir.** Buradaki hiçbir ayar bir eşiği, bir hükmü
    ya da bir önceliği değiştirmez. Bütün anahtarlar boş olsa sistem aynen
@@ -742,12 +742,56 @@ Altı kural, hepsi bir şeyi korur — **model otorite değildir**:
 5. **Bilinmeyen kademe reddedilir.** Kademe listesi kapalı bir kümedir.
 6. **Bağlantı denenmeden «çalışıyor» denmez.** `POST /api/probe` anahtarı
    sınar — model çağırmaz, mesaj üretmez; yalnızca kapının kimliği tanıyıp
-   tanımadığına bakar. **Kurulu olmak, çalışmak değildir.**
+   tanımadığına bakar. **Kurulu olmak, çalışmak değildir.** Sınama, hangi
+   anahtar seçilmişse **onu** sınar: «sağlayıcı çalışıyor» demek, ikinci
+   anahtarın da çalıştığını göstermez.
+7. **Bir sağlayıcının birden çok anahtarı olabilir.** İki kişi aynı
+   sistemi kullanıyorsa harcamaları da ayrı görünmeli; bir anahtarın
+   limiti dolunca sistemin tamamı durmamalı. Her anahtarın bir **adı** ve
+   bir **sahibi** vardır; harcama o sahibin defterine yazılır
+   (`usage.user`), yani bütçe ekranındaki «kim harcadı» ayrımı bir
+   tahminden değil **ölçümden** gelir.
 
-Yönetim sekmesinde üç bölüm: **Sağlayıcılar** (anahtarlar + «Sına»),
-**Görev dağılımı** (kademe kademe, mirasla birlikte) ve **Sohbet
-kanalları** (WhatsApp/Telegram kimlik alanları, izin listesi, aç/kapat).
-Boş bırakılan bir sır alanı var olanı **değiştirmez**.
+   Kademe hangi anahtarla ödeyeceğini seçer; seçmezse sağlayıcının ilk
+   anahtarı geçerlidir. Seçilen anahtar **silinmişse başka bir anahtara
+   sessizce geçilmez** — bu, başkasının hesabından para harcamak olurdu;
+   durum «seçili anahtar silinmiş» diye söylenir ve çağrı yapılmaz.
+
+   Silinen bir anahtar kimliği **yeniden kullanılmaz**: kimliği geri
+   vermek, eski bir atamayı sessizce başka bir anahtara bağlardı. Sayaç
+   (`models.key_seq`) yamadan gelmez, sunucuda tutulur.
+
+### Anahtarların yapılandırmadaki hâli
+
+```json
+"models": {
+  "keys": {
+    "openrouter": [
+      { "id": "k1", "label": "Benim",    "key": "sk-or-…", "user": "ben" },
+      { "id": "k2", "label": "Kardeşim", "key": "sk-or-…", "user": "kardeş" }
+    ]
+  },
+  "assignments": { "king": { "provider": "openrouter",
+                             "model": "google/gemini-2.5-flash",
+                             "key": "k2" } }
+}
+```
+
+Tek dizeli **eski biçim** (`"openrouter": "sk-or-…"`) okunmaya devam eder
+ve tek elemanlı liste sayılır: kullanıcının dosyayı elle dönüştürmesi
+gereken bir sürüm yükseltmesi, kurulumu bozmanın sessiz yoludur.
+
+Ayarlar → **Yapay zekâ** sekmesinde iki bölüm: **Sağlayıcılar** (her
+sağlayıcının altında anahtar satırları; her satırda ad, sahip, değer,
+«Sına» ve «Sil») ve **Görev dağılımı** (kademe kademe, mirasla ve — iki
+anahtar varsa — anahtar seçiciyle birlikte). Sohbet kanalları ayrı bir
+sekmededir.
+
+Ekran kayıtlı bir anahtarın **değerini hiçbir zaman getirmez**, maske
+gösterir. Değer alanı boş bırakılırsa sır **korunur** ve yalnız adı ile
+sahibi güncellenir; bir anahtarı silmek için satırını «Sil» ile kaldırıp
+kaydetmek gerekir. Maskeyi geri gönderip sırrı silen bir ekran,
+kaydetmeyi tehlikeli bir iş yapardı.
 
 ## Bütçe — paranın ölçümü
 
@@ -824,8 +868,8 @@ paylaşmamalı: her gün gördüğün şey, her gün ihtiyacın olan şey olmal�
 
 | Bölüm | İçerik |
 |---|---|
-| **Bugün** | Selam + tarih, üç sistemin durumu yan yana, **onay bekleyen öneri** öne çıkmış, günün özeti (en fazla 5 satır), King'e yazma kutusu. Dayanak «Dayanağı göster» altında. |
-| **Sohbetler** | Kim bağlı kim değil (King bağlı; alan görevlileri ve model henüz değil — **yazılı**), balon biçiminde konuşma, Enter gönderir / Shift+Enter satır başı. |
+| **Bugün** | Selam + tarih, üç sistemin durumu yan yana, **onay bekleyen öneri** öne çıkmış, günün özeti (en fazla 5 satır), **konsey kartları** (üç alt patron: sistemi, bugünkü hükmü, kaç bulgusu, modeli var mı, «Konuş →» ve «… aç →»), King'e yazma kutusu. Seri ve çapraz dayanak «Dayanağı göster» altında. |
+| **Sohbetler** | Dört görevli kart hâlinde (King + üç alt patron; her birinin modeli ve **King'den miras mı** aldığı yazılı), balon biçiminde konuşma, Enter gönderir / Shift+Enter satır başı. `#/sohbet/bio` doğrudan o görevliyi açar. |
 | **Sistemler** | Metrik serileri; haftalık karşılaştırma, dijital ikiz, etki ve karar geçmişi **istenince açılır**. |
 | **Ayarlar** (ayrı sayfa) | Yapay zekâ · Bütçe · Sohbet kanalları · Cihazlar · Eşikler · **Sunucu** |
 
@@ -838,8 +882,66 @@ işletim sisteminin tercihi geçerli olur; kullanıcı açıkça seçtiğinde
 `<html data-tema>` damgalanır ve medya sorgusunu yener. Seçim kaydedilir:
 her açılışta yeniden seçmek zorunda kalmak, seçim olmamasından kötüdür.
 
-`tools/yuz.js` artık **36 görünüm** denetler (3 ana bölüm + 6 ayar sekmesi
-× 2 genişlik × 2 tema).
+**Konsey açıkta durur.** Bir süre «Dayanağı göster»in içindeydi ve o blok
+kapalı geliyordu: günün hükmünü veren üç alt patron, onları arayan bir
+kullanıcının bile göremediği bir yerdeydi. Hükmü verenler, hükmün yanında
+durur.
+
+`tools/yuz.js` **40 görünüm** denetler (4 ana bölüm + 6 ayar sekmesi
+× 2 genişlik × 2 tema): yatay taşma, 24px dokunma hedefi, etiket ve AA
+kontrast.
+
+## Sohbet — komut seti küçüktür, konuşma değil
+
+Komut seti küçük ve kapalıdır; bu iyi bir şey ama yeterli değil. «Bugün
+odaklanamadım, programı hafifletelim mi?» bir komut değildir ve bir komuta
+çevrilmesi de gerekmez.
+
+`core/sohbet.py` o cümleyi karşılar — ama **sistemi değiştirmez**. Dört
+sınır:
+
+1. **Önce komut.** Kullanıcı «durum» yazdıysa kural motoru cevap verir;
+   modele **gidilmez**. Ücretsiz, kesin ve her zaman aynı olan yol önce
+   denenir. Bu, Telegram'dan gelen mesajda da böyledir.
+2. **Model yalnız cümle kurar.** Gönderilen bağlam, kural motorunun
+   **ürettiği** ölçülerdir — ham veri değil, zaten yazılmış satırlar.
+   Modelin göreceği tek gerçek budur ve cevaptaki sayılar bununla
+   denetlenir.
+3. **Sohbet onay değildir.** Konuşmak bir şey değiştirmez. Planı ya da
+   veriyi değiştiren her şey **teklif** olur ve mevcut onay zincirinden
+   geçer.
+4. **Model yoksa sistem çalışır.** Atama yapılmamışsa ya da bütçe
+   bittiyse bu **açıkça** söylenir ve komutlar sunulmaya devam eder.
+   «Yapay zekâ yok» ile «sistem bozuk» ayrı şeylerdir — ekranda da ayrı
+   yazılır, eksik olan şey ile yapılacak iş aynı cümlede durur.
+
+Her görevli **yalnız kendi alanına** bakar: `vp_bio` SPİ'yi, `vp_academic`
+AYS'yi, `vp_intellect` ESP'yi görür; bağlamı da o kadardır. King hepsini
+görür — modüller arası ilişkiyi ancak böyle kurar.
+
+**Kayıt sorumluluğu tek yerdedir** (`core/sohbet.py`). Bir süre hem uç
+nokta hem `patron.respond` yazıyordu ve aynı cümle akışta iki kez
+görünüyordu. `conversations.agent` sütunu kimin konuştuğunu tutar; sütun
+eklenmeden önceki satırlar King'in akışı sayılır.
+
+### `core/ai.py` — tek kapı
+
+Hiçbir modül bir sağlayıcıya doğrudan istek atamaz. Bütün çağrılar buradan
+geçer; çünkü bir çağrının yanında her zaman dört şey olmalı: **bütçe**
+(para harcamadan önce sınır sorulur), **defter** (harcanan yazılır —
+başarısız çağrı da), **sınır** (cevap kural motorunun yerine geçemez) ve
+**kaynak** (hangi veriye dayandığı söylenebilir olmalı). Bu dördü ayrı ayrı
+yazılsaydı, biri bir gün unutulurdu.
+
+Yedi kural: kural motoru otoritedir · model sayı uyduramaz (cevapta geçip
+bağlamda geçmeyen sayı taşıyan cevap **düşürülür**) · buyurgan kip
+düşürülür · bütçe önce sorulur · her çağrı deftere yazılır · model modeli
+çağırmaz · atanmamış kademe çağrı yapmaz.
+
+**Düşürülen cevap yutulmaz:** kural motoru devreye girer ve sebebi ekranda
+yazılır — hangi sayının dayanağı olmadığı, hangi buyurgan kelimenin
+geçtiği. Bilinmeyen bir model için tarife bulunamazsa **0 yazılmaz**;
+«bedava» demek olurdu, tahmini bir taban kullanılır.
 
 ## Gelen mesaj: iki kapı, tek işleme
 
@@ -853,6 +955,14 @@ Bir mesaj HKM'ye iki kapıdan gelebilir:
 ambara girmez, aynı mesaj iki kez işlenmez, cevap giden kutusundan geçer.
 Kopyalanan bir mantık, bir gün yalnız bir kapıda düzeltilir ve ötekinde
 bozuk kalır.
+
+**Cevabı ekranla aynı katman üretir.** Telegram'dan gelen bir cümle ile HKM
+ekranından yazılan aynı cümle, aynı yoldan geçer (`core/sohbet.py`): önce
+komut, sonra model, sonra dürüst bir «yok». İki ayrı cevap üretici olsaydı,
+aynı soruya iki farklı cevap veren bir sistem olurdu — ve hangisinin doğru
+olduğu bilinemezdi. Yani Telegram'dan **doğal cümleyle** konuşulabilir ve
+bunun için ayrı bir ayar yoktur: King'e atanan model neyse, Telegram da
+onunla konuşur; model yoksa komutlar çalışmaya devam eder.
 
 **Yoklama kuralları** (`core/yoklama.py`): varsayılan kapalı · webhook ile
 aynı anda olmaz (Telegram reddeder; açarken webhook silinir ve **söylenir**)

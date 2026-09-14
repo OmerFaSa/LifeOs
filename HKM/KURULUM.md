@@ -156,6 +156,14 @@ gruplardaki `@botadı` eki de tanınır. Uygulamada «/» yazınca komut menüs�
 «yarın 2 saat matematik» gibi bir cümle yazarsan ilgili sisteme **teklif**
 bırakılır; sistemi açtığında onayına sunulur.
 
+**Serbest cümleyle konuşmak** için ayrı bir ayar yok: King'e bir model
+atadıysan (Ayarlar → Yapay zekâ), Telegram da onunla konuşur — ekranla
+aynı katmandan geçer. Model atanmamışsa ya da bütçe bittiyse komutlar
+çalışmaya devam eder; «yapay zekâ yok» ile «sistem bozuk» ayrı şeylerdir.
+
+Komut her zaman **önce** denenir: «durum» yazdığında modele gidilmez,
+para harcanmaz.
+
 ### Otomatik mesajlar
 
 Ayarlar → Sunucu → **Otomatik mesajlar**: sabah brifingi, akşam kapanışı,
@@ -181,7 +189,39 @@ curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
 > HKM'yi dışarı açmak bir **altyapı kararıdır**. Ev bilgisayarında
 > yoklama, hem daha az yüzey hem daha az iş.
 
-## 5. Açmadan önce okunacak beş satır
+## 5. Yapay zekâ anahtarı — isteğe bağlı
+
+HKM **modelsiz de çalışır**: kural motoru bütün sayıları üretir, komutlar
+cevap verir, teklifler işler. Model yalnız *cümle kurar*. Bu yüzden
+anahtar girmek bilinçli ve **parası olan** bir karardır.
+
+**Önerilen: OpenRouter** — tek hesap, tek bakiye; OpenAI, Claude, Gemini,
+DeepSeek ve diğerleri aynı anahtarla. Anahtar başına aylık limit
+koyulabilir: bütçe sayacından bağımsız **ikinci bir kilit**.
+
+1. Ayarlar → **Yapay zekâ** → Sağlayıcılar → OpenRouter satırındaki
+   «anahtar al →» bağlantısından anahtarı oluştur.
+2. **«+ Anahtar ekle»** de; açılan satıra bir **ad** («Benim»), bir
+   **sahip** («ben») ve anahtarın kendisini yaz. **«Anahtarları kaydet».**
+3. Satırdaki **«Sına»** düğmesi anahtarı sınar — model çağırmaz, para
+   harcamaz. *Kurulu olmak, çalışmak değildir.*
+4. **Görev dağılımı**nda King'e bir sağlayıcı ve model seç. Alt kademeler
+   atama yoksa King'den **miras** alır; hepsini tek tek doldurmak
+   gerekmez.
+5. Ayarlar → **Bütçe**: aylık tavan (TL), USD/TRY kuru ve kurun tarihi.
+   Kur elle girilir; sınıra varıldığında ücretli çağrı **durur**.
+
+**Birden çok anahtar** ekleyebilirsin — örneğin biri senin, biri
+kardeşinin. Harcama, anahtarın **sahibinin** defterine yazılır ve bütçe
+ekranında kimin ne harcadığı ayrı görünür. Hangi kademenin hangi anahtarla
+ödeyeceğini «Görev dağılımı»ndaki anahtar seçicisinden belirlersin;
+seçmezsen o sağlayıcının ilk anahtarı kullanılır.
+
+Kayıtlı bir anahtarın değeri ekrana **hiçbir zaman geri gelmez**, maske
+görünür. Değer alanını boş bırakıp kaydedersen sır **korunur** (yalnız adı
+ve sahibi güncellenir); silmek için satırı «Sil» ile kaldırıp kaydet.
+
+## 6. Açmadan önce okunacak beş satır
 
 1. **İzin listesi boşsa kimse yok.** Boş liste «herkes» demek değildir;
    tanımadığı numaradan gelen mesajın içeriği ambara bile yazılmaz.
@@ -190,7 +230,8 @@ curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
    yedeklerken de öyle kalmalıdır.
 3. **Günde tek mesaj.** Kanal bir bildirim akışı değildir.
 4. **Komut seti kapalıdır:** `durum`, `kabul`, `ret`, `neden`, `capraz`,
-   `yardim`. Serbest metin yorumlanmaz.
+   `yardim` — ve önce bunlar denenir. Serbest metin, yalnız bir model
+   atandıysa cevaplanır; atanmadığında yorumlanmaz ve uydurulmaz.
 5. **HKM'nin uygulama ya da ekran düzeyinde hiçbir yetkisi yoktur.**
    Kabul ettiğin öneriyi uygulayan sensin; «ekran kapatma zorunlu kılındı»
    cümlesi kod düzeyinde bile yanlıştır.

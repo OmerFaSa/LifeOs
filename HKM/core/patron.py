@@ -177,12 +177,18 @@ def _acik_oneri(con, date):
     return None
 
 
-def respond(con, text, date=None, th=None, channel="local", now=None):
-    """Gelen kisa komuta cevap. Anlasilmayan mesaj YORUMLANMAZ."""
+def respond(con, text, date=None, th=None, channel="local", now=None,
+            agent="king", kayit=True):
+    """Gelen kisa komuta cevap. Anlasilmayan mesaj YORUMLANMAZ.
+
+    `kayit=False`: konusmayi ambara YAZMA. Ust katman (core/sohbet.py)
+    kendi yazdiginda burasi da yazarsa, ayni cumle akista IKI KEZ gorunur
+    — ve hangisinin gercek oldugu belirsiz olur."""
     date = date or datetime.date.today().isoformat()
     now = now or datetime.datetime.now().isoformat(timespec="seconds")
     komut, ayrinti = understand(text)
-    log(con, channel, "user", text, now)
+    if kayit:
+        log(con, channel, "user", text, now, agent=agent)
 
     # Bir SORU degil bir ISTEK olabilir: «yarin iki saat matematik».
     # HKM bunu modullere YAZMAZ; bir niyet kuyruga birakir ve modul
@@ -192,7 +198,8 @@ def respond(con, text, date=None, th=None, channel="local", now=None):
         if talep:
             cevap = _niyet_kur(con, talep, text)
             cevap = _kirp(cevap)
-            log(con, channel, "manager", cevap, now)
+            if kayit:
+                log(con, channel, "manager", cevap, now, agent=agent)
             return {"command": "istek", "text": cevap, "date": date}
 
     if komut is None:
@@ -271,7 +278,8 @@ def respond(con, text, date=None, th=None, channel="local", now=None):
     if manager.imperatives(cevap):
         cevap = ("Cevap buyurgan kip taşıdığı için düşürüldü. Bu bir yazılım "
                  "hatasıdır ve sessizce düzeltilmez.")
-    log(con, channel, "manager", cevap, now)
+    if kayit:
+        log(con, channel, "manager", cevap, now, agent=agent)
     return {"command": komut, "text": cevap, "date": date}
 
 
@@ -300,21 +308,38 @@ def _niyet_kur(con, talep, ham):
                modul.upper()))
 
 
-def log(con, channel, role, text, now=None):
-    """Konusma kaydi. Ham ses saklanmaz: audio_retained varsayilani 0."""
+def log(con, channel, role, text, now=None, agent="king"):
+    """Konusma kaydi. Ham ses saklanmaz: audio_retained varsayilani 0.
+
+    `agent`: hangi gorevliyle konusuldugu. Tek bir akis, dort ayri
+    gorevlinin sozlerini birbirine karistirirdi."""
     now = now or datetime.datetime.now().isoformat(timespec="seconds")
     con.execute(
-        "INSERT INTO conversations(channel, role, text, audio_retained, created_at) "
-        "VALUES (?,?,?,0,?)", (channel, role, str(text or ""), now))
+        "INSERT INTO conversations(channel, role, text, audio_retained,"
+        " created_at, agent) VALUES (?,?,?,0,?,?)",
+        (channel, role, str(text or ""), now, agent or "king"))
     con.commit()
 
 
-def history(con, limit=40, channel=None):
+def history(con, limit=40, channel=None, agent=None):
+    """Konusma gecmisi. `agent` verilirse YALNIZ o gorevlinin akisi.
+
+    Gorevli sutunu sonradan eklendi: eski satirlarda bos olabilir ve
+    onlar King'in akisi sayilir — gecmisi silmek yerine yorumlamak, olmus
+    bir konusmayi yok saymamaktir."""
     q = "SELECT * FROM conversations"
-    args = []
+    kosul, args = [], []
     if channel:
-        q += " WHERE channel=?"
+        kosul.append("channel=?")
         args.append(channel)
+    if agent:
+        if agent == "king":
+            kosul.append("(agent=? OR agent IS NULL OR agent='')")
+        else:
+            kosul.append("agent=?")
+        args.append(agent)
+    if kosul:
+        q += " WHERE " + " AND ".join(kosul)
     q += " ORDER BY id DESC LIMIT ?"
     args.append(int(limit))
     rows = con.execute(q, args).fetchall()

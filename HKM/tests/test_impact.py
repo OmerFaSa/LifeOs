@@ -143,5 +143,12 @@ def run():
         eq(sorted(uygulanan), ["decisions.answered_at", "decisions.key"])
         # Ikinci kosum bir sey yapmaz: tasima tekrarlanabilir olmali.
         eq(db._migrate(eski), [])
+        # OLMAYAN bir tablo tasimayi DURDURMAZ: burada «conversations»
+        # yok ama «decisions» tasinabildi. Eksik bir tablo yuzunden butun
+        # tasimanin durmasi, var olan tablolari da guncellenmemis birakir.
+        ok(any(m[0] == "conversations" for m in db.MIGRATIONS))
+        sutun = [r["name"] for r in con.execute(
+            "PRAGMA table_info(conversations)")]
+        ok("agent" in sutun)
     test("sema tasimasi eski veritabanini gunceller",
          t_schema_migration_adds_columns)

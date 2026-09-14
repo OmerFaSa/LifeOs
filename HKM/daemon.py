@@ -30,6 +30,8 @@ Ucnoktalar:
     GET  /api/cross?date=&days=     capraz bulgular: uc ambar yan yana
     GET  /api/series?date=&days=&module=  metrik metrik zaman serisi
     POST /api/message               Buyuk Patron'a kisa komut (yerel kanal)
+    POST /api/chat                  sohbet: once komut, sonra model
+    GET  /api/agents                gorevliler ve her birinin hazir olup olmadigi
     GET  /api/conversation          son konusma kayitlari
     POST /api/pair/open             esleme penceresini acar (bearer ister)
     GET  /api/pair/status           pencere acik mi (bearer ister)
@@ -60,9 +62,10 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import (butce, channels, cross, db, gelen, impact,  # noqa: E402
+from core import (ai, butce, channels, cross, db, gelen,  # noqa: E402
+                  impact,
                   intents, manager, models, outbox, patron, schedule,
-                  settings, streak, sync_engine, thresholds, twin,
+                  settings, sohbet, streak, sync_engine, thresholds, twin,
                   weekly, yoklama)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -459,7 +462,8 @@ class Handler(BaseHTTPRequestHandler):
                 limit = 40
             return self._send(200, {"messages": patron.history(
                 self.con, max(1, min(limit, 200)),
-                (q.get("channel") or [None])[0])})
+                (q.get("channel") or [None])[0],
+                (q.get("agent") or [None])[0])})
         if u.path.startswith("/api/intents/"):
             mod = u.path.rsplit("/", 1)[-1]
             if mod not in intents.MODULES:
@@ -472,6 +476,30 @@ class Handler(BaseHTTPRequestHandler):
                                     "kinds": intents.KINDS,
                                     "fields": intents.FIELD_RULES,
                                     "summary": intents.summary(self.con)})
+        if u.path == "/api/agents":
+            # Kim bagli kim degil — ve degilse NEDEN. «Yapay zeka yok» ile
+            # «sistem bozuk» ayri seylerdir.
+            out = []
+            for k, g in sohbet.GOREVLILER.items():
+                h = ai.hazir_mi(self.server.config, g["role"])
+                a = models.resolve(self.server.config, g["role"])
+                rol = models.ROLES.get(g["role"]) or {}
+                mod = rol.get("module") or ""
+                out.append({"id": k, "ad": g["ad"], "is": g["is"],
+                            "role": g["role"], "ready": h["ok"],
+                            "reason": h.get("reason", ""),
+                            "note": h.get("note", ""),
+                            "model": (a or {}).get("model", ""),
+                            "provider": (a or {}).get("provider_label", ""),
+                            # Hangi sistemin alt patronu — ekran, gorevliyi
+                            # sistemiyle birlikte gostermeli: «Biyolojik
+                            # sermaye» tek basina hangi modul oldugunu
+                            # soylemiyordu.
+                            "module": mod,
+                            "module_label": models.MODULLER.get(mod, ""),
+                            "inherited": bool((a or {}).get("inherited")),
+                            "from": (a or {}).get("from") or ""})
+            return self._send(200, {"agents": out})
         if u.path == "/api/config":
             return self._send(200, settings.read(self.server.config))
         if u.path == "/api/budget":
@@ -551,8 +579,9 @@ class Handler(BaseHTTPRequestHandler):
                 govde = json.loads(ham or b"{}")
             except ValueError:
                 return self._send(400, {"error": "gecersiz JSON"})
-            return self._send(200, models.probe(self.server.config,
-                                                (govde or {}).get("provider")))
+            return self._send(200, models.probe(
+                self.server.config, (govde or {}).get("provider"),
+                key_id=(govde or {}).get("key")))
         if u.path == "/api/config":
             ham, hata = self._read_body()
             if hata:
@@ -631,6 +660,35 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "niyet kimligi sayi olmali"})
             r = intents.answer(self.con, nid, parca[3])
             return self._send(200 if r.get("ok") else 409, r)
+        if u.path == "/api/chat":
+            # Sohbet: once komut, sonra model, sonra durust bir «yok».
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                govde = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            metin = (govde or {}).get("text")
+            if not metin or not str(metin).strip():
+                return self._send(400, {"error": "bos mesaj"})
+            gorevli = (govde or {}).get("agent") or "king"
+            if gorevli not in sohbet.GOREVLILER:
+                return self._send(404, {"error": "bilinmeyen gorevli"})
+            gun = (govde or {}).get("date") or date
+            # Gecmis AMBARDAN gelir, istemciden degil: istemcinin
+            # gonderdigi bir gecmis, modele istedigini soyletmenin en
+            # kisa yoludur.
+            onceki = patron.history(self.con, limit=12, agent=gorevli)
+            mesajlar = [{"role": ("user" if m["role"] == "user"
+                                  else "assistant"), "content": m["text"]}
+                        for m in onceki if m["role"] in ("user", "manager")]
+            # Kayit sorumlulugu TEK yerde: core/sohbet.py. Burasi da
+            # yazsaydi ayni cumle akista iki kez gorunurdu.
+            r = sohbet.konus(self.con, self.server.config, metin, gun,
+                             gorevli=gorevli, gecmis=mesajlar,
+                             th=self.server.thresholds)
+            return self._send(200, r)
         if u.path == "/api/message":
             ham, hata = self._read_body()
             if hata:

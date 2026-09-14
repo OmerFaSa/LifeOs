@@ -123,6 +123,15 @@ select:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
    sorgusunu yener ve telefonda 186 piksel tasma uretiyordu. */
 .alan{ max-width:100%; }
 .alan--genis{ width:240px; } .alan--orta{ width:180px; } .alan--dar{ width:100px; }
+/* Etiket + kutu tek satira sigmadiginda TASMAZ, ALT SATIRA gecer:
+   telefonda 9px'lik yatay kaydirma da yatay kaydirmadir. */
+.sahip{ display:flex; flex-wrap:wrap; align-items:center; gap:6px;
+  margin-top:4px; }
+.sahip input{ flex:0 1 100px; }
+/* Adres tek parca bir kelimedir ve telefonda satira sigmaz: kirilmasina
+   IZIN VERILIR. Bir adresi gostermek icin sayfayi yana kaydirtmak,
+   gostermemekten iyi degildir. */
+.adres{ overflow-wrap:anywhere; }
 .metric__val select{ max-width:100%; }
 
 table{ width:100%; border-collapse:collapse; font-size:13px; }
@@ -309,9 +318,13 @@ details.detay > summary:hover{ color:var(--fg); }
       <div class="iki">
         <div>
           <div class="card" id="brifing"><p class="muted">Yükleniyor…</p></div>
+          <!-- Konsey ACIKTA durur. Bir sure «Dayanağı göster»in
+               içindeydi ve kapali geliyordu: uc alt patron, onlari
+               arayan bir kullanicinin bile goremedigi bir yerdeydi.
+               Gunun hukmunu verenler, hukmun yanında durmali. -->
+          <div class="card" id="konsey"></div>
           <details class="detay" id="detay-genel">
             <summary>Dayanağı göster</summary>
-            <div id="konsey"></div>
             <div id="seri"></div>
             <div id="capraz"></div>
           </details>
@@ -408,8 +421,17 @@ details.detay > summary:hover{ color:var(--fg); }
       <div data-ayar-bolme="cihazlar" hidden>
         <div class="card">
           <span class="tag">Cihazlar</span>
-          <p class="muted">Üç sistem anahtar kopyalamadan bağlanır: pencere
-            açılır, ilgili sistemde «Bağlan» denir, pencere kapanır.</p>
+          <p class="muted"><b>Bu ne işe yarar:</b> AYS, SPİ ve ESP'nin HKM'ye
+            veri gönderebilmesi için HKM'nin anahtarını bilmesi gerekir.
+            «Cihazları bağla», iki dakikalık <b>tek kullanımlık</b> bir pencere
+            açar: o sırada ilgili sistemde «Bağlan» dediğinde anahtar
+            doğrudan ona verilir. Böylece anahtarı hiçbir yere yapıştırman
+            gerekmez — bir sırrı kopyalamak, onu panoya ve tarayıcı
+            geçmişine de yazmaktır.</p>
+          <p class="muted">Pencere yalnız <b>bu bilgisayardan</b> ve yalnız
+            birkaç saniye açıktır; kapandıktan sonra hiçbir şey verilmez.
+            Bir sistemi bir kez bağlaman yeter — bu, her girişte
+            tekrarlanan bir iş değildir.</p>
           <div class="row">
             <button id="esle">Cihazları bağla</button>
             <button id="cikis">Anahtarı bu tarayıcıdan sil</button>
@@ -495,24 +517,46 @@ details.detay > summary:hover{ color:var(--fg); }
   var HUKUM_ISARET = { APPROVED:'ok', ANOMALY:'danger', INCOMPLETE:'warn' };
   var HUKUM_KISA = { APPROVED:'onay', ANOMALY:'aykırı', INCOMPLETE:'eksik' };
 
+  /* ---------- konsey: uc alt patron, kendi sistemleriyle birlikte
+
+     Once burada bir tablo vardi ve alt patronlar yalniz «Alan / Hukum /
+     Bulgu» sutunlariyla gorunuyordu. Ayni uc kisi Sohbetler ekraninda
+     baska bir kimlikle duruyordu: biri hukum veriyor, oteki konusuyordu.
+     Ayni gorevlinin iki ayri gorunumu, kimin ne yaptigini belirsiz yapar.
+
+     Artik tek kart: hangi sistemin patronu, bugun ne diyor, modeli var mi,
+     ve iki dogrudan is — onunla konus, sistemini ac. */
   function konseyCiz(b){
     var k = b.council;
     var kutu = $('konsey');
     if(!k || !(k.members || []).length){ kutu.innerHTML = ''; return; }
-    var h = '<div class="tag">Konsey · üç alt patron</div>';
-    h += '<div class="scroll"><table><thead><tr><th>Alan</th><th>Sistem</th>'
-       + '<th>Hüküm</th><th class="num">Bulgu</th><th>Bugün</th></tr></thead>'
-       + '<tbody>';
+    var bagli = {};
+    (GOREVLILER || []).forEach(function(g){ if(g.id) bagli[g.id] = g; });
+    var h = '<div class="tag">Konsey · üç alt patron</div><div class="serit">';
     (k.members || []).forEach(function(u){
-      h += '<tr><td>' + esc(u.title) + '<div class="muted" '
-        + 'style="font-size:11px">' + esc(u.scope) + '</div></td>'
-        + '<td>' + esc(u.module_label) + '</td>'
-        + '<td class="' + (HUKUM_ISARET[u.verdict] || '') + '">'
-        + esc(u.verdict ? HUKUM_KISA[u.verdict] : 'veri yok') + '</td>'
-        + '<td class="num">' + esc(u.findings) + '</td>'
-        + '<td>' + (u.heard ? '<b>duyuldu</b>' : '—') + '</td></tr>';
+      var g = bagli[u.vp] || {};
+      var acik = SISTEM_ADRES[u.module];
+      h += '<div class="serit__kutu" style="text-align:left">'
+        + '<span class="serit__ad">' + esc(u.title) + '</span>'
+        + '<div class="serit__durum"><b>' + esc(u.module_label || '') + '</b>'
+        + ' · <span class="' + (HUKUM_ISARET[u.verdict] || 'muted') + '">'
+        + esc(u.verdict ? HUKUM_KISA[u.verdict] : 'veri yok') + '</span></div>'
+        + '<div class="serit__alt">' + esc(u.scope) + '</div>'
+        + '<div class="serit__alt">' + esc(u.findings) + ' bulgu'
+        + (u.heard ? ' · <b>bugün duyulan bu</b>' : '') + '</div>'
+        + '<div class="serit__alt ' + (g.ready ? 'ok' : 'warn') + '">'
+        + (g.ready ? esc(g.model || 'model bağlı')
+                   : 'model yok — yalnız komutlar')
+        + (g.ready && g.inherited ? ' <span class="muted">(King\'den '
+            + 'miras)</span>' : '') + '</div>'
+        + '<div class="serit__alt"><a href="#/sohbet/' + esc(u.vp) + '">'
+        + 'Konuş →</a>'
+        + (acik ? ' · <a href="' + esc(acik) + '" target="_blank" '
+            + 'rel="noopener">' + esc(SISTEM_EKLI[u.module]
+                || u.module_label) + ' aç →</a>' : '')
+        + '</div></div>';
     });
-    h += '</tbody></table></div>';
+    h += '</div>';
     if(k.heard){
       h += '<p class="muted">Bugün <b>' + esc(k.label) + '</b> sırası '
          + 'geldi (öncelik ' + esc(k.rank) + '); günün cümlesini Büyük '
@@ -824,7 +868,10 @@ details.detay > summary:hover{ color:var(--fg); }
   }
 
   async function konusmaYukle(){
-    var r = await api('/api/conversation?limit=60');
+    /* Her gorevlinin AYRI akisi: tek bir konusma, dort ayri gorevlinin
+       sozlerini birbirine karistirirdi. */
+    var r = await api('/api/conversation?limit=60&agent='
+      + encodeURIComponent(gorunum === 'sohbet' ? GOREVLI : 'king'));
     if(r.status === 200) konusmaCiz(r.body.messages);
   }
 
@@ -1379,35 +1426,104 @@ details.detay > summary:hover{ color:var(--fg); }
     if(r.status === 200) butceCiz(r.body);
   }
 
+  /* ---------- saglayicilar: BIR saglayicinin BIRDEN COK anahtari olabilir
+
+     Iki kisi ayni sistemi kullaniyorsa harcamalari da ayri gorunmeli; bir
+     anahtarin limiti dolunca sistemin tamami durmamali. Her anahtarin bir
+     adi ve bir sahibi var.
+
+     Ekran, kayitli anahtarin DEGERINI hicbir zaman getirmez — maske
+     gosterir. Deger alani bos birakilirsa sir KORUNUR; bir anahtari silmek
+     icin satiri «Sil» ile kaldirip kaydetmek gerekir. Maskeyi geri
+     gonderip sirri silen bir ekran, kaydetmeyi tehlikeli bir is yapardi. */
+  var yeniSatirNo = 0;
+
+  function anahtarSatiri(p, k){
+    var no = k ? null : (++yeniSatirNo);
+    var kimlik = k ? k.id : '';
+    return '<div class="metric" data-kutu="' + esc(p.id) + '"'
+      + ' data-kimlik="' + esc(kimlik) + '">'
+      + '<div class="metric__name">'
+      + '<input data-k-ad value="' + esc(k ? k.label : '') + '" '
+      + 'placeholder="anahtarın adı (ör. Benim)" class="alan alan--orta" '
+      + 'aria-label="' + esc(p.label) + ' anahtar adı"/>'
+      + '<div class="muted sahip" style="font-size:11px">'
+      + '<span>Kimin harcaması:</span>'
+      + '<input data-k-sahip value="' + esc(k ? k.user : 'ben') + '" '
+      + 'placeholder="ben" class="alan alan--dar" aria-label="'
+      + esc(p.label) + ' anahtar sahibi"/></div></div>'
+      + '<div class="metric__val"><input type="password" data-k-deger '
+      + 'placeholder="' + (k ? esc(k.hint) + ' — dokunma, korunur'
+                             : 'anahtarı yapıştır') + '" '
+      + 'class="alan alan--genis" aria-label="' + esc(p.label)
+      + ' anahtar değeri"' + (k ? '' : ' data-yeni="' + no + '"') + '/></div>'
+      + '<div class="metric__meta">'
+      + (k ? '<button data-sina="' + esc(p.id) + '" data-sina-k="'
+             + esc(k.id) + '" style="min-height:24px;padding:2px 8px">Sına'
+             + '</button> <span data-sonuc="' + esc(p.id) + ':' + esc(k.id)
+             + '"></span> · '
+           : '<span class="muted">yeni</span> · ')
+      + '<button data-sil="1" style="min-height:24px;padding:2px 8px">Sil'
+      + '</button></div></div>';
+  }
+
   function saglayiciCiz(c){
     var m = (c.models || {});
     var h = '<div class="tag">Sağlayıcılar · anahtarlar</div>'
       + '<p class="muted">' + esc(m.note || '') + '</p>';
     (m.providers || []).forEach(function(p){
-      h += '<div class="metric">'
-        + '<div class="metric__name">' + esc(p.label)
-        + '<div class="muted" style="font-size:11px">'
+      var anahtarlar = p.keys || [];
+      h += '<h2 style="font-size:14px;margin:20px 0 2px">' + esc(p.label)
+        + '</h2><p class="muted adres" style="margin:0 0 6px">'
         + (p.signup ? '<a href="' + esc(p.signup) + '" target="_blank" '
             + 'rel="noopener">anahtar al →</a> · ' : '')
-        + esc(p.base) + '</div></div>'
-        + '<div class="metric__val"><input type="password" data-anahtar="'
-        + esc(p.id) + '" placeholder="' + (p.key_set ? esc(p.key_hint)
-            : 'anahtar girilmemiş') + '" class="alan alan--genis" aria-label="'
-        + esc(p.label) + ' anahtarı"/></div>'
-        + '<div class="metric__meta">' + (p.key_set ? 'kurulu' : 'yok')
-        + ' · <button data-sina="' + esc(p.id) + '" style="min-height:24px;'
-        + 'padding:2px 8px">Sına</button> '
-        + '<span data-sonuc="' + esc(p.id) + '"></span></div>'
-        + '</div>';
+        + esc(p.base) + '</p>';
+      h += '<div data-grup="' + esc(p.id) + '">';
+      anahtarlar.forEach(function(k){ h += anahtarSatiri(p, k); });
+      h += '</div>';
+      h += '<div class="row"><button data-ekle="' + esc(p.id) + '" '
+        + 'style="min-height:32px">+ Anahtar ekle</button>'
+        + '<span class="muted">'
+        + (anahtarlar.length ? anahtarlar.length + ' anahtar kurulu'
+                             : 'anahtar yok')
+        + '</span></div>';
     });
-    h += '<div class="row" style="margin-top:12px">'
+    h += '<div class="row" style="margin-top:16px">'
       + '<button class="primary" id="anahtar-kaydet">Anahtarları kaydet</button>'
-      + '</div><p class="muted" id="anahtar-not">Boş bırakılan alan var olan '
-      + 'anahtarı DEĞİŞTİRMEZ. Silmek için alana bir boşluk yazıp kaydet.</p>';
+      + '</div><p class="muted" id="anahtar-not">Değer alanı boş bırakılan '
+      + 'anahtarın sırrı KORUNUR; yalnız adı ve sahibi güncellenir. Bir '
+      + 'anahtarı silmek için satırını «Sil» ile kaldırıp kaydet.</p>';
     $('saglayicilar').innerHTML = h;
     $('anahtar-kaydet').addEventListener('click', anahtarKaydet);
-    Array.prototype.forEach.call(document.querySelectorAll('[data-sina]'),
-      function(b){ b.addEventListener('click', function(){ sina(b.dataset.sina); }); });
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#saglayicilar [data-sina]'), function(b){
+        b.addEventListener('click', function(){
+          sina(b.dataset.sina, b.dataset.sinaK); });
+      });
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#saglayicilar [data-ekle]'), function(b){
+        b.addEventListener('click', function(){
+          var p = (m.providers || []).filter(function(x){
+            return x.id === b.dataset.ekle; })[0];
+          if(!p) return;
+          var grup = document.querySelector('[data-grup="' + p.id + '"]');
+          grup.insertAdjacentHTML('beforeend', anahtarSatiri(p, null));
+          silBagla(grup.lastElementChild);
+          var alan = grup.lastElementChild.querySelector('[data-k-ad]');
+          if(alan) alan.focus();
+        });
+      });
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#saglayicilar [data-kutu]'), silBagla);
+  }
+
+  function silBagla(satir){
+    var d = satir.querySelector('[data-sil]');
+    if(d) d.addEventListener('click', function(){
+      satir.remove();
+      $('anahtar-not').textContent = 'Satır kaldırıldı — «Anahtarları '
+        + 'kaydet» demeden silinmiş olmaz.';
+    });
   }
 
   function gorevSatiri(rol, atama, saglayicilar){
@@ -1423,8 +1539,33 @@ details.detay > summary:hover{ color:var(--fg); }
       : (kendi ? '' : '<span class="muted">üstünden miras: '
           + esc(atama.provider_label) + (atama.model ? ' · ' + esc(atama.model) : '')
           + '</span>');
-    if(atama && atama.provider && !atama.key_set){
+    if(atama && atama.key_missing){
+      /* Seçilen anahtar silinmiş. Başkasına sessizce geçilmez: bu,
+         başkasının hesabından para harcamak olurdu. */
+      durum += ' <span class="danger">seçili anahtar silinmiş</span>';
+    }else if(atama && atama.provider && !atama.key_set){
       durum += ' <span class="warn">anahtar yok</span>';
+    }else if(atama && atama.key_label){
+      durum += ' <span class="muted">anahtar: ' + esc(atama.key_label)
+        + (atama.key_user ? ' (' + esc(atama.key_user) + ')' : '') + '</span>';
+    }
+    /* Hangi anahtarla ödenecek: seçilmezse sağlayıcının ilki. */
+    var anahtarSec = '';
+    if(kendi && atama.provider){
+      var p = (saglayicilar || []).filter(function(x){
+        return x.id === atama.provider; })[0];
+      var liste = (p && p.keys) || [];
+      if(liste.length > 1){
+        anahtarSec = ' <select data-anahtarsec="' + esc(rol.key)
+          + '" aria-label="' + esc(rol.label) + ' anahtarı">'
+          + '<option value="">— ilk anahtar —</option>';
+        liste.forEach(function(k){
+          anahtarSec += '<option value="' + esc(k.id) + '"'
+            + (atama.key_id === k.id ? ' selected' : '') + '>'
+            + esc(k.label) + ' (' + esc(k.user) + ')</option>';
+        });
+        anahtarSec += '</select>';
+      }
     }
     return '<div class="metric">'
       + '<div class="metric__name">' + esc(rol.label)
@@ -1435,6 +1576,7 @@ details.detay > summary:hover{ color:var(--fg); }
       + '<input data-model="' + esc(rol.key) + '" value="'
       + esc(kendi ? (atama.model || '') : '') + '" placeholder="model adı" '
       + 'class="alan alan--orta" aria-label="' + esc(rol.label) + ' modeli"/>'
+      + anahtarSec
       + '</div>'
       + '<div class="metric__meta">' + rol.key + (durum ? ' · ' + durum : '')
       + '</div></div>';
@@ -1470,19 +1612,32 @@ details.detay > summary:hover{ color:var(--fg); }
   }
 
   async function anahtarKaydet(){
+    /* Listenin TAMAMI gonderilir: ekranda olmayan anahtar silinmis
+       sayilir. Yalniz degiseni gondermek, silmeyi anlatilamaz bir is
+       yapardi. */
     var yama = { models:{ keys:{} } };
-    var degisen = 0;
-    Array.prototype.forEach.call(document.querySelectorAll('[data-anahtar]'),
-      function(el){
-        if(!el.value) return;            /* bos alan var olani DEGISTIRMEZ */
-        yama.models.keys[el.dataset.anahtar] = el.value.trim();
-        degisen++;
+    var say = 0, bos = 0;
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#saglayicilar [data-grup]'), function(g){
+        var liste = [];
+        Array.prototype.forEach.call(g.querySelectorAll('[data-kutu]'),
+          function(satir){
+            var deger = (satir.querySelector('[data-k-deger]').value || '').trim();
+            var kimlik = satir.dataset.kimlik || '';
+            if(!kimlik && !deger){ bos++; return; }   /* bos yeni satir */
+            liste.push({ id:kimlik,
+              label:(satir.querySelector('[data-k-ad]').value || '').trim(),
+              user:(satir.querySelector('[data-k-sahip]').value || '').trim(),
+              key:deger });
+            say++;
+          });
+        yama.models.keys[g.dataset.grup] = liste;
       });
-    if(!degisen){ $('anahtar-not').textContent = 'Değişen bir anahtar yok.'; return; }
     var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
     if(r.status === 200){
       ayarlariCiz(r.body.config);
-      $('anahtar-not').textContent = degisen + ' anahtar kaydedildi.';
+      $('anahtar-not').textContent = say + ' anahtar kaydedildi.'
+        + (bos ? ' ' + bos + ' boş satır atlandı.' : '');
     }else{
       $('anahtar-not').textContent = 'Kaydedilmedi — '
         + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
@@ -1495,8 +1650,10 @@ details.detay > summary:hover{ color:var(--fg); }
       function(sec){
         var rol = sec.dataset.rol;
         var model = (document.querySelector('[data-model="' + rol + '"]') || {}).value;
+        var ak = document.querySelector('[data-anahtarsec="' + rol + '"]');
         yama.models.assignments[rol] = sec.value
-          ? { provider:sec.value, model:(model || '').trim() } : null;
+          ? { provider:sec.value, model:(model || '').trim(),
+              key:(ak && ak.value) || '' } : null;
       });
     var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
     if(r.status === 200){
@@ -1509,11 +1666,14 @@ details.detay > summary:hover{ color:var(--fg); }
   }
 
   /* «Kurulu» ile «calisiyor» ayri seylerdir. */
-  async function sina(saglayici){
-    var yer = document.querySelector('[data-sonuc="' + saglayici + '"]');
+  async function sina(saglayici, kimlik){
+    /* Hangi anahtar sınanıyorsa O sınanır: «sağlayıcı çalışıyor»
+       demek, ikinci anahtarın da çalıştığını göstermez. */
+    var yer = document.querySelector('[data-sonuc="' + saglayici
+      + (kimlik ? ':' + kimlik : '') + '"]');
     if(yer) yer.textContent = 'sınanıyor…';
     var r = await api('/api/probe', { method:'POST',
-      body:JSON.stringify({ provider:saglayici }) });
+      body:JSON.stringify({ provider:saglayici, key:kimlik || '' }) });
     var g = r.body || {};
     if(!yer) return;
     yer.className = g.ok ? 'ok' : 'danger';
@@ -1616,6 +1776,11 @@ details.detay > summary:hover{ color:var(--fg); }
      istiyorum. Geri kalan her sey «Dayanağı göster» altinda ya da
      Ayarlar'da durur. */
   var SISTEM_KISA = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+  /* Turkce ek, kisaltmanin OKUNUSUNA gore gelir ve kuralla uretilemez:
+     «ays» son sesi ünsüz ve son ünlüsü kalın (AYS’ı), «spi» ünlüyle
+     biter ve kaynastirma ister (SPİ’yi), «esp» ünsüzle biter ve son
+     ünlüsü ince (ESP’i). Tek bir ek yazmak ucunden ikisini bozardi. */
+  var SISTEM_EKLI = { ays:'AYS’ı', spi:'SPİ’yi', esp:'ESP’i' };
   var HUKUM_SOZ = {
     APPROVED:  { metin:'yolunda', sinif:'ok' },
     ANOMALY:   { metin:'dikkat',  sinif:'danger' },
@@ -1699,7 +1864,8 @@ details.detay > summary:hover{ color:var(--fg); }
         + '<div class="serit__alt">' + esc(u.first || u.scope) + '</div>'
         + '<div style="margin-top:10px"><a href="' + esc(adres)
         + '" target="_blank" rel="noopener" data-ac-bag hidden>'
-        + esc(SISTEM_KISA[u.module]) + '\u2019i aç →</a>'
+        + esc(SISTEM_EKLI[u.module] || SISTEM_KISA[u.module])
+        + ' aç →</a>'
         + '<span class="muted" data-kapali-not hidden style="font-size:12px">'
         + 'Sunucusu kapalı. Açmak için kök klasörde: '
         + '<code>python3 baslat.py</code></span></div></div>';
@@ -1777,37 +1943,67 @@ details.detay > summary:hover{ color:var(--fg); }
       return;
     }
     var h = '';
+    var ad = 'King';
+    GOREVLILER.forEach(function(g){ if(g.id === GOREVLI) ad = g.ad; });
     liste.forEach(function(m){
       var ben = m.role === 'user';
       h += '<div class="balon balon--' + (ben ? 'ben' : 'o') + '">'
-        + (ben ? '' : '<div class="balon__kim">King</div>')
+        + (ben ? '' : '<div class="balon__kim">' + esc(ad) + '</div>')
         + esc(m.text) + '</div>';
     });
     hedef.innerHTML = h;
     hedef.scrollTop = hedef.scrollHeight;
   }
 
-  /* Gorevliler: bugun yalniz King baglı. Olmayan bir seyi varmis gibi
-     gostermek yerine, ne zaman gelecegi YAZILI. */
-  function gorevlilerCiz(){
-    $('gorevliler').innerHTML =
-      '<span class="tag">Kiminle konuşuyorsun</span>'
-      + '<div class="serit">'
-      + '<div class="serit__kutu"><div class="serit__ad">King</div>'
-      + '<div class="serit__durum ok">bağlı</div>'
-      + '<div class="serit__alt">Üç sistemi birlikte değerlendirir; '
-      + 'günün tek cümlesini taşır.</div></div>'
-      + '<div class="serit__kutu"><div class="serit__ad">Alan görevlileri'
-      + '</div><div class="serit__durum muted">henüz bağlı değil</div>'
-      + '<div class="serit__alt">Akademik, biyolojik ve entelektüel '
-      + 'görevlilerle ayrı ayrı konuşma bir sonraki adımda geliyor.</div>'
-      + '</div>'
-      + '<div class="serit__kutu"><div class="serit__ad">Model</div>'
-      + '<div class="serit__durum muted" id="model-durum">bağlı değil</div>'
-      + '<div class="serit__alt">Şu an komutlarla konuşuyorsun: '
-      + '<code>durum · kabul · ret · neden · capraz · seri · etki · '
-      + 'yardim</code>. Doğal cümle için Ayarlar → Yapay zekâ.</div></div>'
-      + '</div>';
+  /* ---------- görevliler: kiminle konuşuyorsun
+
+     Dort gorevli var ve her birinin isi bir cumleyle yazili. Kim bagli
+     kim degil ve DEGILSE NEDEN — «yapay zeka yok» ile «sistem bozuk»
+     ayri seylerdir. */
+  var GOREVLI = 'king';
+  var GOREVLILER = [];
+
+  function gorevlilerCiz(liste){
+    if(liste) GOREVLILER = liste;
+    var h = '<span class="tag">Kiminle konuşuyorsun</span><div class="serit">';
+    GOREVLILER.forEach(function(g){
+      var secili = g.id === GOREVLI;
+      h += '<button data-gorevli="' + esc(g.id) + '" class="serit__kutu" '
+        + 'style="text-align:left;cursor:pointer;'
+        + (secili ? 'border-color:var(--accent)' : '') + '">'
+        + '<span class="serit__ad">' + esc(g.ad) + '</span>'
+        + '<div class="serit__durum ' + (g.ready ? 'ok' : 'muted') + '">'
+        + esc(g.ready ? (g.model || 'bağlı') : 'model yok')
+        + (g.ready && g.inherited ? ' <span class="muted">(King\'den miras)'
+            + '</span>' : '') + '</div>'
+        + '<div class="serit__alt">' + esc(g.is) + '</div>'
+        + (g.ready ? '' : '<div class="serit__alt warn">' + esc(g.note)
+            + '</div>')
+        + '</button>';
+    });
+    h += '</div>';
+    var secili = GOREVLILER.filter(function(g){ return g.id === GOREVLI; })[0];
+    if(secili && !secili.ready){
+      h += '<p class="muted">Model bağlı olmadığı için şimdilik yalnız '
+        + 'komutlarla konuşuyorsun: <code>durum · kabul · ret · neden · '
+        + 'capraz · seri · etki · yardim</code>. Doğal cümle için '
+        + '<a href="#/ayarlar">Ayarlar → Yapay zekâ</a>.</p>';
+    }
+    $('gorevliler').innerHTML = h;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-gorevli]'),
+      function(b){
+        b.addEventListener('click', function(){
+          /* Adres, ekranin durumunu TASIR: gorevliyi degistirip adresi
+             eski gorevlide birakmak, yenilendiginde baska birinin
+             karsisina cikmak demekti. */
+          GOREVLI = b.dataset.gorevli;
+          if(location.hash !== '#/sohbet/' + GOREVLI){
+            location.hash = '#/sohbet/' + GOREVLI;   /* hashchange yukler */
+          }else{
+            yukleSohbet();
+          }
+        });
+      });
   }
 
   /* ---------- teklifler: HKM'nin sistemlere KONUSMA yolu
@@ -2032,6 +2228,28 @@ details.detay > summary:hover{ color:var(--fg); }
     return GORUNUMLER.indexOf(h) >= 0 ? h : 'bugun';
   }
 
+  /* Adresin ikinci parcasi ayar sekmesidir: «#/ayarlar/yapayzeka» dogrudan
+     o sekmeye acilir. Bir hatanin yanina konulan baglantinin, sozunu
+     ettigi ekrani ACMASI gerekir; kullaniciyi Ayarlar'a birakip alti
+     sekmeden dogrusunu ARATMAK yardim degildir. */
+  var AYAR_SEKMELERI = ['yapayzeka', 'butce', 'kanallar', 'cihazlar',
+                        'esikler', 'sunucu'];
+
+  function altYolOku(){
+    var p = (location.hash || '').replace(/^#\/?/, '').split('/');
+    return AYAR_SEKMELERI.indexOf(p[1]) >= 0 ? p[1] : null;
+  }
+
+  /* «#/sohbet/bio» dogrudan o alt patronla acilir: Bugun ekranindaki
+     «Konuş →» baglantisi, kullaniciyi Sohbetler'e birakip gorevliyi
+     yeniden SECTIRSEYDI, baglanti yarim bir is yapmis olurdu. */
+  var SOHBET_GOREVLILERI = ['king', 'bio', 'academic', 'intellect'];
+
+  function sohbetYoluOku(){
+    var p = (location.hash || '').replace(/^#\/?/, '').split('/');
+    return SOHBET_GOREVLILERI.indexOf(p[1]) >= 0 ? p[1] : null;
+  }
+
   function gorunumSec(ad, yenidenYukle){
     gorunum = GORUNUMLER.indexOf(ad) >= 0 ? ad : 'bugun';
     Array.prototype.forEach.call(
@@ -2042,6 +2260,14 @@ details.detay > summary:hover{ color:var(--fg); }
       document.querySelectorAll('#gez a'), function(a){
         a.className = a.dataset.yol === gorunum ? 'on' : '';
       });
+    if(gorunum === 'ayarlar'){
+      var alt = altYolOku();
+      if(alt) ayarSekmesi(alt);
+    }
+    if(gorunum === 'sohbet'){
+      var kim = sohbetYoluOku();
+      if(kim) GOREVLI = kim;
+    }
     if(yenidenYukle !== false) yukle();
   }
 
@@ -2117,6 +2343,11 @@ details.detay > summary:hover{ color:var(--fg); }
     ozetCiz(b.body);
     seritCiz(b.body);
     onayCiz(b.body);
+    /* Konsey kartlari «modeli var mi» diye de yazar; bu bilgi
+       /api/agents'tadir. Once cizip sonra doldurmak, alt patronun bagli
+       oldugu halde «model yok» gorunmesi demekti. */
+    var ag = await api('/api/agents');
+    if(ag.status === 200) GOREVLILER = ag.body.agents || [];
     konseyCiz(b.body);
     var sr = await api('/api/streak?date=' + t);
     if(sr.status === 200) seriCiz(sr.body);
@@ -2126,7 +2357,8 @@ details.detay > summary:hover{ color:var(--fg); }
   }
 
   async function yukleSohbet(){
-    gorevlilerCiz();
+    var g = await api('/api/agents');
+    gorevlilerCiz(g.status === 200 ? g.body.agents : null);
     await konusmaYukle();
   }
 
@@ -2160,15 +2392,42 @@ details.detay > summary:hover{ color:var(--fg); }
     if(!metin) return;
     $(dugmeId).disabled = true;
     var t = $('tarih').value || bugun();
-    var r = await api('/api/message', { method:'POST',
-      body:JSON.stringify({ text:metin, date:t }) });
-    alan.value = '';
-    $(dugmeId).disabled = false;
+    var hedef = gorunum === 'sohbet' ? GOREVLI : 'king';
     var not = $(gorunum === 'bugun' ? 'bugun-sohbet-not' : 'sohbet-not');
-    if(not && r.status !== 200){
-      not.textContent = 'Mesaj gönderilemedi (' + r.status + ').';
-    }else if(not && gorunum === 'sohbet'){
-      not.textContent = '';
+    if(not) not.textContent = 'yazıyor…';
+    var r = await api('/api/chat', { method:'POST',
+      body:JSON.stringify({ text:metin, date:t, agent:hedef }) });
+    /* Cevaplanamayan mesaj KUTUDA KALIR: hicbir yere yazilmadigi icin
+       silinirse kullanici, modeli baglayip ayni cumleyi bastan yazmak
+       zorunda kalirdi. */
+    var yazilamadi = r.status !== 200 || ((r.body || {}).mode === 'yok');
+    if(!yazilamadi) alan.value = '';
+    $(dugmeId).disabled = false;
+    if(not){
+      if(r.status !== 200){
+        not.className = 'danger';
+        not.textContent = 'Gönderilemedi (' + r.status + ').';
+      }else{
+        var g = r.body || {};
+        not.className = 'muted';
+        /* Modelin konusmadigi hal SOYLENIR: sessizce komut cevabi vermek,
+           kullaniciya neden oyle cevap aldigini arattirir. */
+        if(g.mode === 'model'){
+          not.textContent = g.model + ' · ' + g.seconds + ' sn · '
+            + (g.context_lines || 0) + ' satır ölçüme dayandı';
+        }else if(g.mode === 'yok'){
+          /* Hiçbir şey olmamış gibi durmak, en kötü cevaptır: kullanıcı
+             yazdı ve ekran sustu. Eksik olan şey ile yapılacak iş aynı
+             cümlede durur. */
+          not.className = 'danger';
+          not.innerHTML = esc(g.note || 'Bu görevli cevap veremedi.')
+            + ' <a href="#/ayarlar/yapayzeka">Ayarlar → Yapay zekâ</a>';
+        }else if(g.ai && g.ai.note){
+          not.textContent = 'Kural motoru cevapladı — ' + g.ai.note;
+        }else{
+          not.textContent = '';
+        }
+      }
     }
     await konusmaYukle();
   }
