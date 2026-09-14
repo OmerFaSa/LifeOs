@@ -46,7 +46,58 @@ VERDICT_TEXT = {
     "ANOMALY": "ölçülmüş bir değer eşiği kırdı",
 }
 
-VP_LABEL = {"academic": "AYS", "bio": "SPI", "intellect": "ESP"}
+VP_LABEL = {"academic": "AYS", "bio": "SPİ", "intellect": "ESP"}
+
+# KONSEY — kimin ne hakkinda konustugu.
+#
+# Uc alt patron (VP) vardir ve her biri YALNIZ kendi alanina bakar: biri
+# otekinin verisini gormez, goremedigi bir sey hakkinda hukum vermez. Uc
+# hukum catistiginda kimse tartismaz; sirayi precedence.PRECEDENCE soyler
+# ve gunun tek cumlesini Buyuk Patron tasir.
+#
+# Bu sozluk bir sunum katmanidir ve EKRANA CIKAR: kullanicinin «bunu kim
+# soyledi ve kim susturuldu» sorusunun cevabi, hiyerarsi gorunmeden
+# verilemez.
+KONSEY = [
+    {"vp": "bio", "module": "spi", "title": "Biyolojik sermaye",
+     "scope": "uyku, toparlanma, HRV"},
+    {"vp": "academic", "module": "ays", "title": "Akademik hedef",
+     "scope": "soru, çalışma süresi, net"},
+    {"vp": "intellect", "module": "esp", "title": "Entelektüel gelişim",
+     "scope": "kalıcılık, pratik, sentez"},
+]
+
+
+def council(audits, prop):
+    """Konseyin o gunku hali: kim ne dedi, kim duyuldu.
+
+    «Duyuldu» kelimesi dikkatle secildi: duyulmayan VP yanilmis degildir,
+    sirasi gelmemistir. Bir VP'nin susturulmasi onun bulgusunu silmez —
+    bulgu yerinde durur ve ertesi gun yine sayilir."""
+    duyulan = (prop or {}).get("vp")
+    out = []
+    for uye in KONSEY:
+        a = audits.get(uye["vp"])
+        bulgular = (a or {}).get("findings") or []
+        out.append({
+            "vp": uye["vp"],
+            "module": uye["module"],
+            "module_label": VP_LABEL.get(uye["vp"], uye["vp"]),
+            "title": uye["title"],
+            "scope": uye["scope"],
+            "verdict": (a or {}).get("verdict"),
+            "verdict_text": VERDICT_TEXT.get((a or {}).get("verdict"),
+                                             "bu modülden veri gelmedi"),
+            "findings": len(bulgular),
+            "first": bulgular[0]["text"] if bulgular else None,
+            "heard": bool(duyulan) and uye["vp"] == duyulan,
+        })
+    return {"members": out, "heard": duyulan,
+            "rank": (prop or {}).get("rank"),
+            "label": (prop or {}).get("label"),
+            "note": "Üç alt patron yalnız kendi alanına bakar; çelişkiyi "
+                    "tartışma değil SIRA çözer. Duyulmayan bir VP yanılmış "
+                    "değildir, sırası gelmemiştir — bulgusu silinmez."}
 
 # Brifing bir liste degil bir OZETTIR: iki capraz bulgudan fazlasi,
 # okunmayan bir rapor uretir.
@@ -136,8 +187,22 @@ def brief(con, date, th=None, days=twin.WINDOW_DAYS):
         intellect=audits.get("intellect"), payloads=payloads)
 
     lines, dropped = [], []
+    # Veri gelmeyen moduller TEK satirda toplanir. Once her biri icin ayri
+    # ayri ayni 20 kelimelik cumle yaziliyordu: bos bir gunde ekranin
+    # tamami ayni cumlenin uc kopyasiydi. Tekrar, bilgi degil gurultudur —
+    # ve gurultu, gercek bir bulguyu gormeyi zorlastirir.
+    sessiz = [vp for vp in ("bio", "academic", "intellect")
+              if not audits.get(vp)]
     for vp in ("bio", "academic", "intellect"):
+        if vp in sessiz and len(sessiz) > 1:
+            continue
         lines.append(_vp_line(vp, audits.get(vp)))
+    if len(sessiz) > 1:
+        adlar_ = ", ".join(VP_LABEL.get(v, v) for v in sessiz)
+        lines.append(_line(
+            "%s: bugün bu modüllerden veri gelmedi. Sessizlik bir ölçüm "
+            "değildir; bu satır bir yargı taşımaz." % adlar_, "vp",
+            vp=None, verdict=None, silent=sessiz))
     lines.append(_coverage_line(resim))
     kor = _blind_line(resim)
     if kor:
@@ -182,6 +247,7 @@ def brief(con, date, th=None, days=twin.WINDOW_DAYS):
         assert advisory(ln["text"]), "buyurgan satir sizdi: " + ln["text"]
 
     return {"date": date, "audits": audits, "twin": resim,
+            "council": council(audits, prop),
             "cross": capraz, "streaks": seriler,
             "proposal": prop, "decision": karar, "lines": lines,
             "dropped": dropped, "precedence": precedence.PRECEDENCE,

@@ -17,3 +17,6 @@ HKM/db/*.db
 
 # Uretilmis dis inceleme paketi (tools/paket.py)
 PAKET.md
+
+# Tek sunucu gunlugu
+sunucu.log

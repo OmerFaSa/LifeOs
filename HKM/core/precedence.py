@@ -9,17 +9,25 @@ bile yanlistir: HKM'nin isletim sistemi seviyesinde boyle bir yetkisi yoktur.
 
 from core import vp_academic, vp_bio, vp_intellect
 
+# Bu satirlar EKRANA CIKAR: kullanici gunun onerisinin hangi sirayla
+# secildigini burada okur. Bu yuzden ASCII degil, duzgun Turkce yazilir —
+# kod yorumlari ile kullaniciya gosterilen metin ayri seylerdir.
 PRECEDENCE = [
-    {"rank": 1, "key": "bio_red",        "label": "SPI kirmizi bayragi",
-     "note": "Kritik biyobelirtec ya da toparlanma esigi."},
-    {"rank": 2, "key": "fixed_calendar", "label": "Dis dunyanin sabit takvimi",
-     "note": "Sinav, teslim tarihi — ertelenemez."},
-    {"rank": 3, "key": "academic_goal",  "label": "AYS'nin zamana bagli hedefi",
-     "note": "Takvime bagli akademik taban."},
-    {"rank": 4, "key": "blocked_core",   "label": "ESP'nin tikanmis temeli",
+    {"rank": 1, "key": "bio_red",        "vp": "bio",
+     "label": "SPİ'nin kırmızı bayrağı",
+     "note": "Kritik biyobelirteç ya da toparlanma eşiği."},
+    {"rank": 2, "key": "fixed_calendar", "vp": "academic",
+     "label": "Dış dünyanın sabit takvimi",
+     "note": "Sınav, teslim tarihi — ertelenemez."},
+    {"rank": 3, "key": "academic_goal",  "vp": "academic",
+     "label": "AYS'nin zamana bağlı hedefi",
+     "note": "Takvime bağlı akademik taban."},
+    {"rank": 4, "key": "blocked_core",   "vp": "intellect",
+     "label": "ESP'nin tıkanmış temeli",
      "note": "SRS vadesi, teknik plato."},
-    {"rank": 5, "key": "new_content",    "label": "ESP'nin yeni icerik hedefi",
-     "note": "Ilk feda edilen."},
+    {"rank": 5, "key": "new_content",    "vp": "intellect",
+     "label": "ESP'nin yeni içerik hedefi",
+     "note": "İlk feda edilen."},
 ]
 
 DEADLINE_NEAR_DAYS = 7
@@ -27,7 +35,10 @@ DEADLINE_NEAR_DAYS = 7
 
 def _proposal(rank, text):
     p = next(x for x in PRECEDENCE if x["rank"] == rank)
-    return {"rank": rank, "key": p["key"], "label": p["label"], "proposal": text}
+    # «vp» de tasinir: kullanicinin «bunu kim soyledi» sorusunun cevabi,
+    # cumleyi uretenin kim oldugunu bilmeden verilemez.
+    return {"rank": rank, "key": p["key"], "label": p["label"],
+            "vp": p["vp"], "proposal": text}
 
 
 def resolve(bio=None, academic=None, intellect=None, payloads=None):

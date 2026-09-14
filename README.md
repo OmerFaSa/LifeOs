@@ -55,7 +55,31 @@ geliştirilir.
 
 ## Çalıştırma
 
-Her iki proje de aynı komutlarla çalışır, kendi klasöründen:
+**Hepsi tek komutla** (deponun kökünden):
+
+```bash
+python3 baslat.py
+```
+
+Üç sistemi ve HKM'yi tek süreçte açar, tarayıcıda giriş sayfasını
+gösterir: <http://127.0.0.1:4180>. Çift tıklamak isteyene
+`BASLAT.command` (macOS) · `BASLAT.bat` (Windows) · `baslat.sh` (Linux).
+
+| | adres |
+|---|---|
+| Giriş | `127.0.0.1:4180` |
+| AYS | `127.0.0.1:4173` |
+| SPİ | `127.0.0.1:4183` |
+| ESP | `127.0.0.1:4193` |
+| HKM | `127.0.0.1:4200` |
+
+Tek süreç ama **ayrı kapılar**: tarayıcı depolaması kökene bağlıdır ve
+köken porttur. Üçünü tek porta toplamak iki şeyi kırardı — var olan veri
+başka bir kökende kalıp «silinmiş» görünürdü, ve üç sistem tek
+localStorage kotasını (~5 MB) paylaşırdı. `python3 baslat.py --hkmsiz`
+HKM'yi hiç açmaz; üç sistem bundan etkilenmez.
+
+Tek tek çalıştırmak da mümkün — her proje kendi klasöründen:
 
 ```bash
 python devserver.py          # geliştirme sunucusu

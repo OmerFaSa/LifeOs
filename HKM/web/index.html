@@ -102,11 +102,14 @@ input[type="checkbox"]{ width:24px; height:24px; min-height:24px; }
 input[type="file"]{ min-height:36px; }
 
 table{ width:100%; border-collapse:collapse; font-size:13px; }
-th,td{ text-align:left; padding:7px 10px 7px 0; border-bottom:1px solid var(--line); }
+/* Sag bosluk SIFIR OLAMAZ: saga yaslanmis bir sayi, yanindaki sola
+   yaslanmis metne yapisir ve «2duyuldu» diye okunur. */
+th,td{ text-align:left; padding:7px 16px 7px 0; border-bottom:1px solid var(--line); }
+tr > :last-child{ padding-right:0; }
 th{ color:var(--dim); font:11px/1 var(--mono); letter-spacing:.1em;
   text-transform:uppercase; font-weight:400; padding-bottom:9px; }
 td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums;
-  font-family:var(--mono); padding-right:0; }
+  font-family:var(--mono); }
 .state{ font:11px/1 var(--mono); padding:4px 8px; border-radius:2px;
   border:1px solid var(--line-strong); letter-spacing:.06em; }
 .ok{ color:var(--ok); } .warn{ color:var(--warn); } .danger{ color:var(--danger); }
@@ -181,6 +184,7 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
     <div data-bolme="genel">
       <div class="card" id="brifing"><p class="muted">Yükleniyor…</p></div>
       <div class="card" id="oneri" hidden></div>
+      <div class="card" id="konsey"></div>
       <div class="card" id="seri"></div>
       <div class="card" id="capraz"></div>
     </div>
@@ -281,6 +285,46 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
          + ' («' + esc(b.dropped[0].text) + '»)</div>';
     }
     $('brifing').innerHTML = h;
+  }
+
+  /* ---------- konsey: uc alt patron ve onlarin ustundeki tek ses
+
+     Karari kim verdi sorusu, kararin kendisi kadar onemlidir. Uc VP
+     yalniz kendi alanina bakar; celiskiyi tartisma degil SIRA cozer ve
+     gunun tek cumlesini Buyuk Patron tasir. Bu satirlar o zinciri
+     gorunur kilar: susturulan VP yanilmis degildir, sirasi gelmemistir —
+     ve bulgusu silinmez, ertesi gun yine sayilir. */
+  var HUKUM_ISARET = { APPROVED:'ok', ANOMALY:'danger', INCOMPLETE:'warn' };
+  var HUKUM_KISA = { APPROVED:'onay', ANOMALY:'aykırı', INCOMPLETE:'eksik' };
+
+  function konseyCiz(b){
+    var k = b.council;
+    var kutu = $('konsey');
+    if(!k || !(k.members || []).length){ kutu.innerHTML = ''; return; }
+    var h = '<div class="tag">Konsey · üç alt patron</div>';
+    h += '<div class="scroll"><table><thead><tr><th>Alan</th><th>Sistem</th>'
+       + '<th>Hüküm</th><th class="num">Bulgu</th><th>Bugün</th></tr></thead>'
+       + '<tbody>';
+    (k.members || []).forEach(function(u){
+      h += '<tr><td>' + esc(u.title) + '<div class="muted" '
+        + 'style="font-size:11px">' + esc(u.scope) + '</div></td>'
+        + '<td>' + esc(u.module_label) + '</td>'
+        + '<td class="' + (HUKUM_ISARET[u.verdict] || '') + '">'
+        + esc(u.verdict ? HUKUM_KISA[u.verdict] : 'veri yok') + '</td>'
+        + '<td class="num">' + esc(u.findings) + '</td>'
+        + '<td>' + (u.heard ? '<b>duyuldu</b>' : '—') + '</td></tr>';
+    });
+    h += '</tbody></table></div>';
+    if(k.heard){
+      h += '<p class="muted">Bugün <b>' + esc(k.label) + '</b> sırası '
+         + 'geldi (öncelik ' + esc(k.rank) + '); günün cümlesini Büyük '
+         + 'Patron o sıradan taşıdı.</p>';
+    }else{
+      h += '<p class="muted">Bugün hiçbir sıra ateşlenmedi: taşınacak bir '
+         + 'cümle yok.</p>';
+    }
+    h += '<p class="muted">' + esc(k.note) + '</p>';
+    kutu.innerHTML = h;
   }
 
   function oneriCiz(b){
@@ -843,6 +887,7 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
     }
     brifingCiz(b.body);
     oneriCiz(b.body);
+    konseyCiz(b.body);
     var sr = await api('/api/streak?date=' + t);
     if(sr.status === 200) seriCiz(sr.body);
     var c = await api('/api/cross?date=' + t);

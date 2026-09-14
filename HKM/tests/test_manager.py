@@ -158,14 +158,58 @@ def run():
     test("bulgu yoksa oneri uydurulmaz", t_no_finding_no_proposal)
 
     def t_silence_is_not_judgement():
-        """Veri gelmeyen modul icin hukum degil sessizlik yazilir."""
+        """Veri gelmeyen modul icin hukum degil sessizlik yazilir.
+
+        Iki sessiz modul TEK satirda toplanir: ayni 20 kelimelik cumleyi
+        uc kez yazmak, bos bir gunde ekrani ayni cumlenin kopyalariyla
+        doldururdu. Toplamak sessizligi yumusatmaz — ikisi de adiyla
+        anilir ve hicbirine hukum yazilmaz."""
         con = _con()
         _push(con, "ays", BUGUN, questions=metric(200), study_minutes=metric(200))
         b = manager.brief(con, BUGUN)
-        bio = [l for l in b["lines"] if l.get("vp") == "bio"][0]
-        eq(bio["verdict"], None)
-        ok("Sessizlik bir ölçüm değildir" in bio["text"])
+        sessiz = [l for l in b["lines"] if l.get("silent")][0]
+        eq(sessiz["verdict"], None)
+        eq(sorted(sessiz["silent"]), ["bio", "intellect"])
+        ok("SPİ" in sessiz["text"] and "ESP" in sessiz["text"])
+        ok("Sessizlik bir ölçüm değildir" in sessiz["text"])
+        # Cumle BIR KEZ gecer: toplamanin tek sebebi buydu.
+        eq(sum(1 for l in b["lines"]
+               if "Sessizlik bir ölçüm değildir" in l["text"]), 1)
     test("sessizlik hukum sayilmaz", t_silence_is_not_judgement)
+
+    def t_single_silent_module_keeps_its_own_line():
+        """Tek bir modul sessizse toplanacak bir sey yoktur: kendi satirinda
+        ve KENDI ADIYLA anilir."""
+        con = _con()
+        _push(con, "ays", BUGUN, questions=metric(200), study_minutes=metric(200))
+        _push(con, "spi", BUGUN, sleep_hours=metric(8.0), recovery=metric(70))
+        b = manager.brief(con, BUGUN)
+        esp = [l for l in b["lines"] if l.get("vp") == "intellect"][0]
+        eq(esp["verdict"], None)
+        ok("ESP" in esp["text"])
+        no([l for l in b["lines"] if l.get("silent")])
+    test("tek sessiz modul kendi satirinda kalir",
+         t_single_silent_module_keeps_its_own_line)
+
+    def t_council_shows_who_was_heard():
+        """«Bunu kim soyledi, kim susturuldu» sorusunun cevabi ekranda
+        olmali: hiyerarsi gorunmuyorsa, karar da denetlenemez."""
+        con = _con()
+        _push(con, "spi", BUGUN, sleep_hours=metric(4.0), recovery=metric(30))
+        _push(con, "ays", BUGUN, questions=metric(10), study_minutes=metric(20))
+        b = manager.brief(con, BUGUN)
+        k = b["council"]
+        eq(len(k["members"]), 3)
+        eq(k["heard"], "bio")                 # rank 1: SPİ'nin kirmizi bayragi
+        duyulan = [m for m in k["members"] if m["heard"]]
+        eq(len(duyulan), 1)
+        eq(duyulan[0]["module"], "spi")
+        # Susturulan VP'nin BULGUSU DURUR: sira gelmemesi, yanilmasi degildir.
+        akademik = [m for m in k["members"] if m["vp"] == "academic"][0]
+        eq(akademik["heard"], False)
+        ok(akademik["findings"] > 0)
+        ok(akademik["verdict"] == "ANOMALY")
+    test("konsey kimin duyuldugunu soyler", t_council_shows_who_was_heard)
 
     def t_coverage_line_counts_labels():
         con = _con()
