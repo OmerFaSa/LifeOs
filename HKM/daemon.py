@@ -9,6 +9,7 @@ Ucnoktalar:
     GET  /api/twin?date=&days=      dijital ikiz: son N gunun tek resmi
     GET  /api/decisions?date=       gunun butun onerileri (reddedilenler dahil)
     GET  /api/cross?date=&days=     capraz bulgular: uc ambar yan yana
+    GET  /api/series?date=&days=&module=  metrik metrik zaman serisi
     POST /api/message               Buyuk Patron'a kisa komut (yerel kanal)
     GET  /api/conversation          son konusma kayitlari
     POST /api/pair/open             esleme penceresini acar (bearer ister)
@@ -335,6 +336,15 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "days bir sayi olmali"})
             days = max(1, min(days, 365))
             return self._send(200, twin.snapshot(self.con, date, days))
+        if u.path == "/api/series":
+            try:
+                days = int((q.get("days") or [twin.WINDOW_DAYS])[0])
+            except ValueError:
+                return self._send(400, {"error": "days bir sayi olmali"})
+            days = max(1, min(days, 365))
+            mod = (q.get("module") or [None])[0]
+            return self._send(200, {"date": date, "days": days, "module": mod,
+                                    "series": twin.series(self.con, date, days, mod)})
         if u.path == "/api/cross":
             try:
                 days = int((q.get("days") or [cross.PENCERE])[0])

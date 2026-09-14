@@ -249,6 +249,15 @@ async function main(){
         recovery:{ value:30, cert:'computed' } } }),
     });
     if(sentetik.status !== 202) hatalar.push('sentetik kirmizi bayrak yutulmadi: ' + sentetik.status);
+    /* Seri cizimi icin en az uc nokta gerekir; gercek arayuzlerden gelen
+       bos profiller bunu uretmez. Bes gunluk SENTETIK seri, cizim kodunun
+       kendisini dener — uc sistemin verisi degil, yuzun cizgisi. */
+    for(let i = 5; i >= 1; i--){
+      const t = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      await hkmFetch('/api/sync/spi', { method:'POST', body:JSON.stringify({
+        date:t, metrics:{ sleep_hours:{ value:6 + (i % 3), cert:'measured' } } }) });
+    }
+
     const b2 = await (await hkmFetch('/api/briefing?date=' + BUGUN)).json();
     if(!b2.proposal || b2.proposal.rank !== 1){
       hatalar.push('kirmizi bayrak birinci sirayi tetiklemedi');
@@ -267,13 +276,34 @@ async function main(){
     await yuz.fill('#token', TOKEN);
     await yuz.click('#gir');
     await wait(900);
+    /* Sistemler sekmesi: ambardaki seri gercekten ciziliyor mu? */
+    await yuz.click('[data-sekme="sistemler"]');
+    await wait(400);
+    const sistemler = await yuz.evaluate(() => ({
+      metin:(document.querySelector('#sistemler') || {}).textContent || '',
+      cizgi:document.querySelectorAll('#sistemler svg.spark').length,
+      satir:document.querySelectorAll('#sistemler .metric').length,
+      gorunur:!document.querySelector('[data-bolme="sistemler"]').hidden,
+    }));
+    if(!sistemler.gorunur) hatalar.push('HKM yuzu: Sistemler sekmesi acilmadi');
+    if(sistemler.metin.indexOf('ölçüm') < 0){
+      hatalar.push('HKM yuzu: sistem verisi cizilmedi');
+    }else if(!sistemler.cizgi){
+      hatalar.push('HKM yuzu: seri cizgisi cizilmedi (en az bir cift nokta vardi)');
+    }else{
+      console.log('  HKM yuzu → sistemler sekmesi: ' + sistemler.satir
+        + ' metrik, ' + sistemler.cizgi + ' seri cizgisi');
+    }
+    await yuz.click('[data-sekme="genel"]');
+    await wait(300);
+
     const ekran = await yuz.evaluate(() => ({
       brifing:(document.querySelector('#brifing') || {}).textContent || '',
       ikiz:(document.querySelector('#ikiz') || {}).textContent || '',
       gecmis:(document.querySelector('#gecmis') || {}).textContent || '',
       capraz:(document.querySelector('#capraz') || {}).textContent || '',
       girisAcik:!document.querySelector('#giris').hidden,
-    }));
+    }));   /* icerik gizli sekmede de DOM'da durur: okumak icin tiklamak gerekmez */
     if(ekran.girisAcik) hatalar.push('HKM yuzu: dogru jetonla bile giris ekraninda kaldi');
     if(ekran.brifing.length < 40) hatalar.push('HKM yuzu: brifing cizilmedi');
     if(ekran.ikiz.indexOf('metriğe dayanıyor') < 0) hatalar.push('HKM yuzu: ikiz cizilmedi');
@@ -283,7 +313,7 @@ async function main(){
     else console.log('  HKM yuzu → brifing, ikiz ve oneri gecmisi cizildi');
 
     /* Oneri yuzden CEVAPLANABILIYOR mu? Cevaplanamayan bir oneri, oneri
-       degil bildirimdir. */
+       degil bildirimdir. Oneri karti «Genel» sekmesindedir. */
     const buton = await yuz.$('[data-cevap="accept"]');
     if(!buton){
       hatalar.push('HKM yuzu: oneri cevaplanabilir degil (kabul dugmesi yok)');
@@ -297,7 +327,10 @@ async function main(){
       if(kalan.length) console.log('  · reddedilen ' + kalan.length + ' oneri kaydi da duruyor');
     }
     /* 8 — Buyuk Patron: yuzden komut gonderilir ve cevap ayni sayfada
-       gorunur. Kanal (WhatsApp) kapali olsa bile yerel kanal calisir. */
+       gorunur. Kanal (WhatsApp) kapali olsa bile yerel kanal calisir.
+       Patron kutusu «HKM» sekmesindedir. */
+    await yuz.click('[data-sekme="hkm"]');
+    await wait(300);
     await yuz.fill('#mesaj', 'neden');
     await yuz.click('#gonder');
     await wait(900);

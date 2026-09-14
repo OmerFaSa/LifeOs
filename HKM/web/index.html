@@ -50,6 +50,18 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .state{ font-size:12px; padding:2px 8px; border-radius:99px; border:1px solid var(--line); }
 .ok{ color:var(--ok); } .warn{ color:var(--warn); } .danger{ color:var(--danger); }
 .scroll{ overflow-x:auto; }
+.tabs{ display:flex; gap:4px; margin:4px 0 12px; flex-wrap:wrap; }
+.tabs button{ border-radius:999px; padding:6px 14px; }
+.tabs button.on{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+.metric{ display:grid; grid-template-columns:1fr auto; gap:4px 12px;
+  align-items:center; padding:10px 0; border-bottom:1px solid var(--line); }
+.metric:last-child{ border-bottom:0; }
+.metric__name{ font-size:13px; }
+.metric__val{ font-variant-numeric:tabular-nums; font-size:15px; text-align:right; }
+.metric__spark{ grid-column:1 / -1; }
+.metric__meta{ grid-column:1 / -1; color:var(--dim); font-size:11px; }
+svg.spark{ width:100%; height:34px; display:block; }
+@media (max-width:420px){ .wrap{ padding:16px 12px 48px; } }
 </style>
 </head>
 <body>
@@ -80,11 +92,26 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
     </div>
 
     <div class="card" id="esleme" hidden></div>
-    <div class="card" id="brifing"><p class="muted">Yükleniyor…</p></div>
-    <div class="card" id="oneri" hidden></div>
-    <div class="card" id="capraz"></div>
-    <div class="card" id="ikiz"></div>
-    <div class="card" id="gecmis"></div>
+
+    <div class="tabs" id="sekmeler">
+      <button data-sekme="genel" class="on">Genel</button>
+      <button data-sekme="sistemler">Sistemler</button>
+      <button data-sekme="hkm">HKM</button>
+    </div>
+
+    <div data-bolme="genel">
+      <div class="card" id="brifing"><p class="muted">Yükleniyor…</p></div>
+      <div class="card" id="oneri" hidden></div>
+      <div class="card" id="capraz"></div>
+    </div>
+
+    <div data-bolme="sistemler" hidden>
+      <div class="card" id="sistemler"><p class="muted">Yükleniyor…</p></div>
+    </div>
+
+    <div data-bolme="hkm" hidden>
+      <div class="card" id="ikiz"></div>
+      <div class="card" id="gecmis"></div>
 
     <div class="card" id="konusma">
       <div class="tag">Büyük Patron</div>
@@ -97,6 +124,7 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
         <button class="primary" id="gonder">Gönder</button>
       </div>
       <div id="konusmalar"></div>
+    </div>
     </div>
   </div>
 </div>
@@ -137,6 +165,9 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
   /* --------------------------------------------------------------- çizim */
 
   var TON = { ANOMALY:'danger', INCOMPLETE:'warn', APPROVED:'ok' };
+  var ETIKET = { measured:'ölçüldü', estimated:'tahmin', computed:'hesaplandı',
+    missing:'veri yok' };
+  var MODUL = { ays:'AYS', spi:'SPİ', esp:'ESP' };
 
   function brifingCiz(b){
     var h = '<div class="tag">' + esc(b.date) + ' · kural motoru</div>';
@@ -184,9 +215,6 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
     });
   }
 
-  var ETIKET = { measured:'ölçüldü', estimated:'tahmin', computed:'hesaplandı',
-    missing:'veri yok' };
-  var MODUL = { ays:'AYS', spi:'SPİ', esp:'ESP' };
 
   function ikizCiz(t){
     var c = t.coverage || {};
@@ -320,6 +348,92 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
     eslemeCiz(r.body.seconds);
   }
 
+  /* ------------------------------------------------------- sistem verisi
+
+     Bu bölüm HKM'nin ambarındaki HAM seriyi gösterir: hangi sistemden hangi
+     gün hangi sayı geldi. Burada hiçbir şey hesaplanmaz ve hiçbir şey
+     yorumlanmaz — çizgi, gelen noktaların kendisidir. Gelmeyen gün çizgide
+     de yoktur; sıfır olarak çizmek, olmayan bir ölçümü varmış gibi
+     göstermek olurdu. */
+  var SISTEM_ADI = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+
+  function spark(noktalar){
+    if(noktalar.length < 2) return '';
+    var deg = noktalar.map(function(p){ return p[1]; });
+    var enAz = Math.min.apply(null, deg), enCok = Math.max.apply(null, deg);
+    var aralik = (enCok - enAz) || 1;
+    var W = 300, H = 34, P = 3;
+    var d = noktalar.map(function(p, i){
+      var x = P + (i / (noktalar.length - 1)) * (W - 2 * P);
+      var y = H - P - ((p[1] - enAz) / aralik) * (H - 2 * P);
+      return (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }).join(' ');
+    var son = noktalar[noktalar.length - 1];
+    var sx = W - P;
+    var sy = H - P - ((son[1] - enAz) / aralik) * (H - 2 * P);
+    return '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" '
+      + 'preserveAspectRatio="none" role="img" aria-label="' + esc(noktalar.length)
+      + ' ölçüm">'
+      + '<path d="' + d + '" fill="none" stroke="currentColor" stroke-width="1.5" '
+      + 'stroke-linejoin="round" stroke-linecap="round" opacity="0.75"/>'
+      + '<circle cx="' + sx.toFixed(1) + '" cy="' + sy.toFixed(1) + '" r="2.5" '
+      + 'fill="currentColor"/></svg>';
+  }
+
+  var YON = { rising:'yükseliyor', falling:'düşüyor', flat:'yerinde sayıyor',
+    unknown:'yön bilinmiyor' };
+
+  function sistemlerCiz(veri){
+    var seri = veri.series || {};
+    var anahtarlar = Object.keys(seri).sort();
+    if(!anahtarlar.length){
+      $('sistemler').innerHTML = '<div class="tag">Sistemler</div>'
+        + '<p class="muted">Ambar boş. Üç arayüzde HKM işareti açılıp '
+        + '«Geçmişi gönder» dendiğinde buraya dolar. Boş bir ambar, '
+        + '«hiçbir şey yapılmadı» demek değildir.</p>';
+      return;
+    }
+    var gruplar = {};
+    anahtarlar.forEach(function(k){
+      var kayit = seri[k];
+      (gruplar[kayit.module] = gruplar[kayit.module] || []).push(kayit);
+    });
+    var h = '<div class="tag">Sistemler · son ' + esc(veri.days) + ' gün</div>';
+    ['ays', 'spi', 'esp'].forEach(function(mod){
+      var liste = gruplar[mod];
+      if(!liste) return;
+      h += '<h2 style="font-size:14px;margin:16px 0 4px">'
+         + esc(SISTEM_ADI[mod] || mod) + '</h2>';
+      liste.forEach(function(kayit){
+        var son = kayit.last || [null, null, null];
+        h += '<div class="metric">'
+          + '<div class="metric__name">' + esc(kayit.metric) + '</div>'
+          + '<div class="metric__val">' + esc(son[1] == null ? '—' : son[1]) + '</div>'
+          + '<div class="metric__spark">' + spark(kayit.points) + '</div>'
+          + '<div class="metric__meta">' + esc(kayit.n) + ' ölçüm · '
+          + esc(kayit.certs.map(function(c){ return ETIKET[c] || c; }).join(', '))
+          + ' · en az ' + esc(kayit.min) + ' / ortanca ' + esc(kayit.median)
+          + ' / en çok ' + esc(kayit.max) + ' · '
+          + esc(YON[(kayit.trend || {}).direction] || '—') + '</div>'
+          + '</div>';
+      });
+    });
+    h += '<p class="muted">Gelmeyen gün çizgide de yok: sıfır olarak çizmek, '
+       + 'olmayan bir ölçümü varmış gibi göstermek olurdu.</p>';
+    $('sistemler').innerHTML = h;
+  }
+
+  function sekmeSec(ad){
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#sekmeler button'), function(b){
+        b.className = b.dataset.sekme === ad ? 'on' : '';
+      });
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-bolme]'), function(el){
+        el.hidden = el.dataset.bolme !== ad;
+      });
+  }
+
   async function yukle(){
     var t = $('tarih').value || bugun();
     var b = await api('/api/briefing?date=' + t);
@@ -333,6 +447,8 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
     oneriCiz(b.body);
     var c = await api('/api/cross?date=' + t);
     if(c.status === 200) caprazCiz(c.body);
+    var ser = await api('/api/series?date=' + t + '&days=60');
+    if(ser.status === 200) sistemlerCiz(ser.body);
     var i = await api('/api/twin?date=' + t);
     if(i.status === 200) ikizCiz(i.body);
     var g = await api('/api/decisions?date=' + t);
@@ -373,6 +489,10 @@ td.num{ text-align:right; font-variant-numeric:tabular-nums; }
     girisGoster('Jeton bu tarayıcıdan silindi.');
   });
 
+  Array.prototype.forEach.call(
+    document.querySelectorAll('#sekmeler button'), function(b){
+      b.addEventListener('click', function(){ sekmeSec(b.dataset.sekme); });
+    });
   $('esle').addEventListener('click', eslemeAc);
   $('gonder').addEventListener('click', mesajGonder);
   $('mesaj').addEventListener('keydown', function(e){

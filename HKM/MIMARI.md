@@ -151,6 +151,7 @@ Uç noktalar:
 | `GET /api/twin?date=&days=` | dijital ikiz — son N günün tek resmi |
 | `GET /api/decisions?date=` | günün bütün önerileri, reddedilenler dahil |
 | `GET /api/cross?date=&days=` | çapraz bulgular — üç ambar yan yana |
+| `GET /api/series?date=&days=&module=` | metrik metrik zaman serisi |
 | `POST /api/decision/<id>/accept` | öneriyi kabul eder |
 | `POST /api/decision/<id>/decline` | öneriyi reddeder — **kayıt silinmez** |
 
@@ -279,6 +280,21 @@ yok; üç arayüzün tasarım diline de benzemez, çünkü HKM bir arayüz deği
 3. **Öneri CEVAPLANABİLİR.** Cevaplanamayan bir öneri, öneri değil
    bildirimdir: kabul ve ret düğmeleri `decisions` kaydına yazar, reddedilen
    öneri silinmez.
+
+Yüz üç sekmedir ve üçü üç ayrı soruya bakar:
+
+| Sekme | Soru |
+|---|---|
+| **Genel** | Bugün ne oldu, bir öneri var mı, çapraz bir bulgu görünüyor mu? |
+| **Sistemler** | Üç sistemden hangi gün hangi sayı geldi? (seri + kıvılcım çizgisi) |
+| **HKM** | Ambar ne durumda, hangi öneriler yazıldı, Patron'la ne konuşuldu? |
+
+Sistemler sekmesi ambardaki **ham** seriyi gösterir: hiçbir şey hesaplanmaz,
+çizgi gelen noktaların kendisidir. Gelmeyen gün çizgide de yoktur — sıfır
+olarak çizmek, olmayan bir ölçümü varmış gibi göstermek olurdu. Her satırda
+ölçüm sayısı, kesinlik karışımı (ölçüldü/hesaplandı ayrı ayrı yazılır), en
+az/ortanca/en çok ve yön durur. Çizgi için en az iki nokta gerekir; tek
+noktadan çizgi çizmek, olmayan bir eğilim uydurmaktır.
 
 `tools/entegre.js` bu sayfayı da gezer: gerçek tarayıcıda açar, jetonu
 girer, brifingin ve ikizin çizildiğini doğrular, sentetik bir kırmızı

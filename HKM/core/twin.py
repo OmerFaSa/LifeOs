@@ -124,6 +124,46 @@ def snapshot(con, date, days=WINDOW_DAYS):
             "blind": blind(modules)}
 
 
+def series(con, date, days=WINDOW_DAYS, module=None):
+    """Metrik metrik ZAMAN SERISI — veri merkezinin ham maddesi.
+
+    Ikizin ozeti «son deger + yon» der; bir insanin bakip karar verebilmesi
+    icinse serinin kendisi gerekir. Seri TURETILMEZ, ham olaylardan okunur:
+    ayni gun iki kez gonderilmisse SON gonderim gecerlidir (ikizin kurali
+    neyse burada da odur).
+
+    Donen bicim: { "modul/metrik": {points:[[gun, deger, kesinlik]], ...} }"""
+    start, end = _days(date, days)
+    out = {}
+    for e in db.events_between(con, start, end, module):
+        for key, m in (e["payload"].get("metrics") or {}).items():
+            if not isinstance(m, dict) or not C.is_valid(m.get("cert")):
+                continue
+            v = C.value_of(m)
+            if v is None:
+                continue
+            anahtar = e["module"] + "/" + key
+            kayit = out.setdefault(anahtar, {"module": e["module"], "metric": key,
+                                            "byDay": {}})
+            kayit["byDay"][e["date"]] = [e["date"], v, m["cert"]]
+
+    for anahtar, kayit in out.items():
+        noktalar = [kayit["byDay"][g] for g in sorted(kayit["byDay"])]
+        kayit.pop("byDay")
+        kayit["points"] = noktalar
+        kayit["n"] = len(noktalar)
+        kayit["last"] = noktalar[-1] if noktalar else None
+        degerler = [p[1] for p in noktalar]
+        kayit["min"] = min(degerler) if degerler else None
+        kayit["max"] = max(degerler) if degerler else None
+        kayit["median"] = _median(degerler)
+        kayit["trend"] = _trend([(p[0], p[1]) for p in noktalar])
+        # Kesinlik karisimi gorunur kalir: «olculdu» ile «hesaplandi» ayni
+        # cizgide durabilir ama ayni sey degildir.
+        kayit["certs"] = sorted(set(p[2] for p in noktalar))
+    return out
+
+
 def coverage(modules):
     """Resmin ne kadari OLCULDU, ne kadari tahmin, ne kadari yok.
 

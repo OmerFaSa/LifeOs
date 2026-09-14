@@ -9,6 +9,15 @@ def _con():
     return db.connect(":memory:")
 
 
+def gun_(i):
+    import datetime
+    return (datetime.date(2026, 9, 1) + datetime.timedelta(days=i)).isoformat()
+
+
+def cross_series(con):
+    return twin.series(con, gun_(9), 14)
+
+
 def _push(con, module, date, **metrics):
     body = {"module": module, "date": date, "metrics": metrics}
     return sync_engine.ingest(con, body, now=date + "T09:00:00")
@@ -115,6 +124,41 @@ def run():
         eq(m["days_seen"], 1)
         eq(m["silent_days"], 6)
     test("sessiz gunler sayilir", t_silent_days)
+
+    def t_series_reads_raw_not_summary():
+        """Seri TURETILMEZ, ham olaylardan okunur — ve ayni gunun ikinci
+        govdesi birincisini gecersiz kilar."""
+        con = _con()
+        for i, q in ((0, 100), (1, 80), (2, 60)):
+            _push(con, "ays", gun_(i), questions=metric(q))
+        _push(con, "ays", gun_(2), questions=metric(65))     # ayni gun duzeltme
+        s = cross_series(con)
+        kayit = s["ays/questions"]
+        eq(kayit["n"], 3)
+        eq(kayit["points"][-1][1], 65)
+        eq(kayit["min"], 65)
+        eq(kayit["max"], 100)
+        eq(kayit["certs"], ["measured"])
+    test("seri ham olaylardan okunur", t_series_reads_raw_not_summary)
+
+    def t_series_keeps_cert_mix_visible():
+        """«Olculdu» ile «hesaplandi» ayni cizgide durabilir ama ayni sey
+        degildir: karisim gorunur kalir."""
+        con = _con()
+        _push(con, "spi", gun_(0), sleep_hours=metric(7.0))
+        _push(con, "spi", gun_(1), sleep_hours=metric(7.5, "estimated"))
+        _push(con, "spi", gun_(2), sleep_hours=metric(8.0))
+        kayit = cross_series(con)["spi/sleep_hours"]
+        eq(kayit["certs"], ["estimated", "measured"])
+    test("seride kesinlik karisimi gorunur", t_series_keeps_cert_mix_visible)
+
+    def t_series_module_filter():
+        con = _con()
+        _push(con, "ays", gun_(0), questions=metric(100))
+        _push(con, "spi", gun_(0), sleep_hours=metric(7.0))
+        yalniz = twin.series(con, gun_(2), 14, "ays")
+        eq(sorted(yalniz.keys()), ["ays/questions"])
+    test("seri modul suzgeci calisir", t_series_module_filter)
 
     def t_unlabeled_never_enters():
         """Etiketsiz alan ambara zaten giremez; ikize de girmez."""
