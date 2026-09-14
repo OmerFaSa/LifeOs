@@ -1200,6 +1200,21 @@ R.App = (function(){
         R.Beacon.intentDoubts().then(d => {
           if(d && d.length){ S.ui.hkmDoubts = d; render(); }
         }).catch(() => {});
+
+        /* Sekmeye GERI DONUNCE tekrar sor. Once yalniz acilista
+           soruluyordu: HKM bir teklif biraktiginda, sayfa acikken
+           gormuyordun — yenilemeden haberin olmuyordu. Odaklanma bir
+           kullanici eylemidir, cizim degil: bu istek hicbir cizimde
+           atilmaz. */
+        let sonSoru = Date.now();
+        document.addEventListener('visibilitychange', () => {
+          if(document.hidden) return;
+          if(Date.now() - sonSoru < 30000) return;   /* sekme takibi degil */
+          sonSoru = Date.now();
+          R.Beacon.intents().then(liste => {
+            if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
+          }).catch(() => {});
+        });
       }
 
       if(R.Setup.needed()) setTimeout(() => R.Setup.open(), 400);

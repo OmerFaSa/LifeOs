@@ -163,6 +163,7 @@ Uç noktalar:
 | `POST /api/restore` | yedeği geri yükler (üstüne yazmak açık karar) |
 | `GET /api/outbox` | giden kutusu durumu |
 | `GET /api/intents/<modul>` | modülün açık teklifleri |
+| `POST /api/intents/<modul>` | **yeni teklif oluşturur** (tür + gövde) |
 | `POST /api/intents/<modul>/take` | kuyruğu alır — **açık** teklifler; ilki `delivered` işaretlenir |
 | `POST /api/intent/<id>/applied\|acknowledged\|dismissed\|unknown` | modülün/kullanıcının cevabı |
 | `GET /api/cross?date=&days=` | çapraz bulgular — üç ambar yan yana |
@@ -858,3 +859,28 @@ aynı anda olmaz (Telegram reddeder; açarken webhook silinir ve **söylenir**)
 · uzun bekleme (25 sn), kısa döngü değil · **imleç ambarda durur** —
 bellekteki bir imleç tam da yeniden başlatma anında kaybolur ve aynı
 mesajlar yeniden işlenirdi · hata döngüyü durdurmaz.
+
+## Teklifler ekranı — HKM'nin sistemlere konuşma yolu
+
+HKM üç sisteme doğrudan yazmaz ve yazamaz. **Teklifler** bölümünden
+bırakılan şey bir niyettir: ilgili sistem açıldığında kullanıcıya
+gösterilir ve onaylanırsa **o sistemin kendi kodu** uygular.
+
+- Form alanları **sunucudan** gelir (`intents.KINDS` + `FIELD_RULES`):
+  ekranın kendi listesi olsaydı, bir tür eklendiğinde iki yerde iki
+  sözleşme olurdu.
+- **Boş bırakılan cümle boş gitmez.** `intents.create()` türe ve gövdeye
+  göre Türkçe bir cümle kurar — modülde boş bir teklif satırı, ne olduğunu
+  söylemeyen bir düğmedir. Kullanıcının yazdığı cümle korunur; uydurulan
+  yalnız boşluğun yerine geçer.
+- «Geri al», teklifi **istenmedi** olarak kapatır; kayıt silinmez.
+- Aynı modüle aynı tür ve aynı gövdeyle ikinci bir teklif yazılmaz.
+
+**Modüller girişte sorar, sekmeye dönünce yeniden sorar.** Önce yalnız
+açılışta soruluyordu: HKM bir teklif bıraktığında, sayfa açıkken
+görmüyordun. Odaklanma bir kullanıcı eylemidir, çizim değil — bu istek
+hiçbir çizimde atılmaz ve 30 saniyeden sık tekrarlanmaz.
+
+**Bugün ekranından sistemler açılır.** Üç kartın her biri kendi sistemine
+bağlantı taşır ve yanındaki nokta o kapının gerçekten cevap verdiğini
+söyler.

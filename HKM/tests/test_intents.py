@@ -160,3 +160,33 @@ def run():
         eq(len(db.intents_for(con, "esp", ("pending",))), 1)
         eq(db.intents_for(con, "ays", ("pending",)), [])
     test("istek dogru modulun kuyruguna duser", t_esp_request_goes_to_esp)
+
+    def t_empty_note_gets_a_sentence():
+        """Modulde bos bir teklif satiri, ne oldugunu soylemeyen bir
+        dugmedir. Cumle SUNUCUDA kurulur: ekranin kendi metni olsaydi iki
+        yerde iki cumle olur ve bir gun ayrisirlardi."""
+        con = _con()
+        r = intents.create(con, "ays", "plan.add",
+                           {"date": BUGUN, "minutes": 120,
+                            "subject": "Matematik", "topic": "Türev"}, "")
+        ok(r["ok"])
+        cumle = r["intent"]["note"]
+        ok(cumle)
+        ok("AYS" in cumle and "120" in cumle and "Türev" in cumle)
+
+        # Kullanicinin yazdigi cumle KORUNUR: uydurulan yalniz boslugun
+        # yerine gecer.
+        r2 = intents.create(con, "spi", "measure.ask",
+                            {"date": BUGUN, "metric": "uyku"}, "Uykunu gir.")
+        eq(r2["intent"]["note"], "Uykunu gir.")
+
+        # Her tur icin bir cumle var: hicbiri bos kalmaz.
+        for tur, govde, mod in (
+                ("focus.set", {"date": BUGUN, "focus": "matematik"}, "ays"),
+                ("load.reduce", {"date": BUGUN, "ratio": 0.5}, "spi"),
+                ("measure.ask", {"date": BUGUN, "metric": "hrv"}, "spi")):
+            c = intents.create(con, mod, tur, govde, "   ")
+            ok(c["ok"], tur)
+            ok(len(c["intent"]["note"]) > 10, tur)
+    test("bos cumle uydurulmaz ama bos da birakilmaz",
+         t_empty_note_gets_a_sentence)

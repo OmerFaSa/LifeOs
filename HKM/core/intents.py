@@ -135,6 +135,31 @@ def validate(module, kind, payload):
     return (not hata), hata
 
 
+# Kullaniciya GOSTERILECEK cumle. Bos birakilirsa HKM kendi cumlesini
+# kurar: modulde bos bir teklif satiri, ne oldugunu soylemeyen bir
+# dugmedir. Cumle SUNUCUDA kurulur — ekranin kendi metni olsaydi, iki
+# yerde iki cumle olur ve bir gun ayrisirlardi.
+def _cumle(module, kind, payload):
+    p = payload or {}
+    ad = {"ays": "AYS", "spi": "SPİ", "esp": "ESP"}.get(module, module.upper())
+    gun = p.get("date") or ""
+    if kind == "plan.add":
+        konu = p.get("topic") or p.get("subject") or p.get("disc") or "çalışma"
+        return "%s planına %s günü %s dakikalık %s bloğu eklensin mi?" % (
+            ad, gun, p.get("minutes"), konu)
+    if kind == "focus.set":
+        return "%s için %s gününün odağı «%s» olsun mu?" % (
+            ad, gun, p.get("focus"))
+    if kind == "load.reduce":
+        oran = p.get("ratio")
+        nicelik = ("%d%% " % round(float(oran) * 100)) if oran else ""
+        return "%s için %s gününün yükü %sazaltılsın mı?" % (ad, gun, nicelik)
+    if kind == "measure.ask":
+        return "%s: %s günü için «%s» ölçümünü girmeyi unutma." % (
+            ad, gun, p.get("metric"))
+    return "%s için bir teklif var." % ad
+
+
 def _ayni_var_mi(con, module, kind, payload):
     for n in db.intents_for(con, module, ("pending", "delivered")):
         if n["kind"] == kind and n["payload"] == payload:
@@ -146,6 +171,7 @@ def create(con, module, kind, payload, note, source="patron"):
     ok, hata = validate(module, kind, payload)
     if not ok:
         return {"ok": False, "errors": hata}
+    note = (note or "").strip() or _cumle(module, kind, payload)
     var = _ayni_var_mi(con, module, kind, payload)
     if var:
         # Tekrar, bilgi degil gurultudur.

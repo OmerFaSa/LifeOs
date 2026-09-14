@@ -143,7 +143,8 @@ code{ font:12px/1.4 var(--mono); }
    baglanti, parmakla isabet ettirilemez (WCAG 2.2 asgari 24px). */
 a{ color:var(--accent); }
 a:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-.line a, p a{ display:inline-block; min-height:24px; line-height:24px; }
+.line a, p a, .serit__kutu a{ display:inline-block; min-height:24px;
+  line-height:24px; }
 
 /* ---- sekmeler: hap degil, ALT CIZGI ---- */
 .tabs{ display:flex; gap:0; margin:0; flex-wrap:wrap;
@@ -263,6 +264,7 @@ details.detay > summary:hover{ color:var(--fg); }
       <a href="#/bugun" data-yol="bugun">Bugün</a>
       <a href="#/sohbet" data-yol="sohbet">Sohbetler</a>
       <a href="#/sistemler" data-yol="sistemler">Sistemler</a>
+      <a href="#/teklifler" data-yol="teklifler">Teklifler</a>
     </nav>
     <div class="bosluk"></div>
     <div class="row" id="ust-araclar" hidden>
@@ -367,6 +369,17 @@ details.detay > summary:hover{ color:var(--fg); }
         <summary>Karar geçmişi</summary>
         <div id="gecmis"></div>
       </details>
+    </div>
+
+    <!-- =========================== TEKLİFLER ========================= -->
+    <div data-bolme="teklifler" hidden>
+      <div class="gun"><h1>Teklifler</h1></div>
+      <p class="sub" style="margin-bottom:16px">HKM sistemlere doğrudan
+        yazmaz. Buradan bıraktığın teklif, ilgili sistemi açtığında sana
+        gösterilir; <b>onaylarsan o sistemin kendi kodu uygular</b>.
+        Reddedersen kayıt silinmez, «istenmedi» diye işaretlenir.</p>
+      <div class="card" id="teklif-form"></div>
+      <div class="card" id="teklif-liste"></div>
     </div>
 
     <!-- ============================ AYARLAR ========================== -->
@@ -1591,6 +1604,23 @@ details.detay > summary:hover{ color:var(--fg); }
   }
 
   /* Uc sistem YAN YANA: tek bakista hangisi yolunda, hangisi degil. */
+  /* Uc sistemin adresleri. HKM onlari acabilmeli: «sistemine bak» deyip
+     kullaniciyi adres yazmaya birakmak, bir merkezin yapmayacagi seydir.
+     Nokta, o kapinin GERCEKTEN cevap verdigini soyler — denenmeden
+     yakilan bir isik, yalan soyleyen bir arayuzdur. */
+  var SISTEM_ADRES = { ays:'http://127.0.0.1:4173/',
+    spi:'http://127.0.0.1:4183/', esp:'http://127.0.0.1:4193/' };
+
+  function acikMiYokla(){
+    Array.prototype.forEach.call(document.querySelectorAll('[data-yokla]'),
+      function(el){
+        fetch(el.dataset.yokla, { mode:'no-cors' })
+          .then(function(){ el.classList.add('ok'); el.textContent = 'açık'; })
+          .catch(function(){ el.classList.add('muted');
+            el.textContent = 'kapalı'; });
+      });
+  }
+
   function seritCiz(b){
     var uyeler = ((b.council || {}).members) || [];
     if(!uyeler.length){ $('serit').innerHTML = ''; return; }
@@ -1605,12 +1635,18 @@ details.detay > summary:hover{ color:var(--fg); }
       var d = HUKUM_SOZ[u.verdict];
       var durum = d ? d.metin : 'veri yok';
       var sinif = d ? d.sinif : 'muted';
+      var adres = SISTEM_ADRES[u.module];
       h += '<div class="serit__kutu"><div class="serit__ad">'
-        + esc(SISTEM_KISA[u.module] || u.module) + '</div>'
+        + esc(SISTEM_KISA[u.module] || u.module)
+        + ' <span class="muted" data-yokla="' + esc(adres) + '">·</span></div>'
         + '<div class="serit__durum ' + sinif + '">' + esc(durum) + '</div>'
-        + '<div class="serit__alt">' + esc(u.first || u.scope) + '</div></div>';
+        + '<div class="serit__alt">' + esc(u.first || u.scope) + '</div>'
+        + '<div style="margin-top:10px"><a href="' + esc(adres)
+        + '" target="_blank" rel="noopener">' + esc(SISTEM_KISA[u.module])
+        + '\u2019i aç →</a></div></div>';
     });
     $('serit').innerHTML = h;
+    acikMiYokla();
   }
 
   /* Onay bekleyen sey ekranda ONE CIKAR — gomulu bir satir degil. */
@@ -1715,13 +1751,221 @@ details.detay > summary:hover{ color:var(--fg); }
       + '</div>';
   }
 
+  /* ---------- teklifler: HKM'nin sistemlere KONUSMA yolu
+
+     HKM uc sisteme dogrudan yazmaz ve yazamaz. Buradan birakilan sey bir
+     TEKLIFTIR: ilgili sistem acildiginda kullaniciya gosterilir ve
+     onaylanirsa O SISTEMIN KENDI KODU uygular. Yazan yine moduldur.
+
+     Alanlar sunucudan gelir (intents.KINDS): ekranin kendi listesi
+     olsaydi, bir tur eklendiginde iki yerde iki sozlesme olurdu. */
+  var TEKLIF_MODUL = 'ays';
+  var TEKLIF_TANIM = null;          // sunucudan gelen tur sozlesmesi
+
+  var ALAN_ADI = {
+    date:'Tarih', minutes:'Süre (dakika)', subject:'Ders',
+    topic:'Konu', disc:'Disiplin', focus:'Odak', ratio:'Oran (0–1)',
+    metric:'Ölçüm adı', why:'Neden',
+  };
+  var TUR_ADI = {
+    'plan.add':'Plana blok ekle', 'focus.set':'Günün odağını değiştir',
+    'load.reduce':'Günün yükünü azalt', 'measure.ask':'Ölçüm hatırlat',
+  };
+
+  function teklifAlani(ad, zorunlu, kural){
+    var tip = 'text';
+    var ekstra = '';
+    if(ad === 'date'){ tip = 'date'; }
+    else if(kural && kural[0] === 'int'){
+      tip = 'number'; ekstra = ' min="' + kural[1] + '" max="' + kural[2] + '"';
+    }else if(kural && kural[0] === 'float'){
+      tip = 'number'; ekstra = ' step="0.05" min="' + kural[1]
+        + '" max="' + kural[2] + '"';
+    }
+    var sinir = '';
+    if(kural && kural[0] !== 'date' && kural.length === 3){
+      sinir = kural[0] === 'str'
+        ? kural[1] + '–' + kural[2] + ' karakter'
+        : kural[1] + ' – ' + kural[2];
+    }
+    return '<div class="metric"><div class="metric__name">'
+      + esc(ALAN_ADI[ad] || ad) + (zorunlu ? ' <span class="danger">*</span>' : '')
+      + (sinir ? '<div class="muted" style="font-size:11px">' + esc(sinir)
+          + '</div>' : '')
+      + '</div><div class="metric__val"><input data-teklif="' + esc(ad)
+      + '" type="' + tip + '"' + ekstra + ' class="alan alan--orta" '
+      + 'aria-label="' + esc(ALAN_ADI[ad] || ad) + '"/></div></div>';
+  }
+
+  function teklifFormCiz(veri){
+    TEKLIF_TANIM = veri;
+    var turler = Object.keys(veri.kinds || {}).filter(function(k){
+      return (veri.kinds[k].modules || []).indexOf(TEKLIF_MODUL) >= 0;
+    });
+    var secili = (document.querySelector('[data-teklif-tur]') || {}).value;
+    if(turler.indexOf(secili) < 0) secili = turler[0];
+
+    var h = '<span class="tag">Yeni teklif</span>';
+    h += '<div class="row" style="margin-bottom:4px">';
+    ['ays', 'spi', 'esp'].forEach(function(m){
+      h += '<button data-teklif-modul="' + m + '"'
+        + (m === TEKLIF_MODUL ? ' class="primary"' : '') + '>'
+        + esc(SISTEM_KISA[m]) + '</button>';
+    });
+    h += '</div>';
+
+    if(!turler.length){
+      h += '<p class="muted">' + esc(SISTEM_KISA[TEKLIF_MODUL])
+        + ' için tanımlı teklif türü yok.</p>';
+      $('teklif-form').innerHTML = h;
+      teklifDugmeleri();
+      return;
+    }
+
+    h += '<div class="metric"><div class="metric__name">Tür'
+      + '<div class="muted" style="font-size:11px">'
+      + esc((veri.kinds[secili] || {}).note || '') + '</div></div>'
+      + '<div class="metric__val"><select data-teklif-tur '
+      + 'aria-label="Teklif türü">';
+    turler.forEach(function(t){
+      h += '<option value="' + esc(t) + '"' + (t === secili ? ' selected' : '')
+        + '>' + esc(TUR_ADI[t] || t) + '</option>';
+    });
+    h += '</select></div></div>';
+
+    var tanim = veri.kinds[secili] || {};
+    (tanim.required || []).forEach(function(a){
+      h += teklifAlani(a, true, (veri.fields || {})[a]);
+    });
+    (tanim.optional || []).forEach(function(a){
+      h += teklifAlani(a, false, (veri.fields || {})[a]);
+    });
+    h += '<div class="metric"><div class="metric__name">Gösterilecek cümle'
+      + '<div class="muted" style="font-size:11px">Sistemde bu yazacak. '
+      + 'Boş bırakırsan HKM kendi cümlesini kurar.</div></div>'
+      + '<div class="metric__val"><input data-teklif-not '
+      + 'class="alan alan--genis" aria-label="Gösterilecek cümle"/></div></div>';
+    h += '<div class="row" style="margin-top:12px">'
+      + '<button class="primary" id="teklif-gonder">Teklifi bırak</button>'
+      + '</div><p class="muted" id="teklif-not"></p>';
+    $('teklif-form').innerHTML = h;
+    teklifDugmeleri();
+    $('teklif-gonder').addEventListener('click', teklifGonder);
+    document.querySelector('[data-teklif-tur]').addEventListener('change',
+      function(){ teklifFormCiz(TEKLIF_TANIM); });
+    var bugunAlan = document.querySelector('[data-teklif="date"]');
+    if(bugunAlan && !bugunAlan.value) bugunAlan.value = bugun();
+  }
+
+  function teklifDugmeleri(){
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-teklif-modul]'), function(b){
+        b.addEventListener('click', function(){
+          TEKLIF_MODUL = b.dataset.teklifModul;
+          yukleTeklifler();
+        });
+      });
+  }
+
+  var DURUM_ADI = {
+    pending:'bekliyor', delivered:'gösterildi', applied:'uygulandı',
+    acknowledged:'görüldü', dismissed:'istenmedi', unknown:'belirsiz',
+  };
+
+  function teklifListeCiz(veri){
+    var acik = veri.intents || [];
+    var gecmis = (veri.answered || []).slice(-8).reverse();
+    var h = '<span class="tag">' + esc(SISTEM_KISA[TEKLIF_MODUL])
+      + ' · açık teklifler</span>';
+    if(!acik.length){
+      h += '<p class="muted">Açık teklif yok.</p>';
+    }else{
+      h += '<div class="scroll"><table><thead><tr><th>Tür</th><th>Cümle</th>'
+        + '<th>Durum</th><th></th></tr></thead><tbody>';
+      acik.forEach(function(n){
+        h += '<tr><td>' + esc(TUR_ADI[n.kind] || n.kind) + '</td>'
+          + '<td>' + esc(n.note) + '</td>'
+          + '<td>' + esc(DURUM_ADI[n.state] || n.state) + '</td>'
+          + '<td class="num"><button data-teklif-sil="' + esc(n.id)
+          + '" style="min-height:24px;padding:2px 8px">Geri al</button></td>'
+          + '</tr>';
+      });
+      h += '</tbody></table></div>'
+        + '<p class="muted">«Geri al», teklifi <b>istenmedi</b> olarak '
+        + 'kapatır — kayıt silinmez.</p>';
+    }
+    if(gecmis.length){
+      h += '<span class="tag" style="margin-top:20px">Cevaplanmışlar</span>';
+      h += '<div class="scroll"><table><tbody>';
+      gecmis.forEach(function(n){
+        h += '<tr><td>' + esc(n.note) + '</td><td>'
+          + esc(DURUM_ADI[n.state] || n.state) + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+    $('teklif-liste').innerHTML = h;
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-teklif-sil]'), function(b){
+        b.addEventListener('click', async function(){
+          b.disabled = true;
+          await api('/api/intent/' + b.dataset.teklifSil + '/dismissed',
+            { method:'POST' });
+          yukleTeklifler();
+        });
+      });
+  }
+
+  async function teklifGonder(){
+    var tur = (document.querySelector('[data-teklif-tur]') || {}).value;
+    var govde = {};
+    Array.prototype.forEach.call(document.querySelectorAll('[data-teklif]'),
+      function(el){
+        var v = (el.value || '').trim();
+        if(!v) return;
+        /* Sayi alani METIN olarak gonderilirse sunucu hakli olarak
+           reddeder: «120» ile 120 ayni sey degildir. */
+        govde[el.dataset.teklif] = el.type === 'number' ? Number(v) : v;
+      });
+    var not = (document.querySelector('[data-teklif-not]') || {}).value || '';
+    var r = await api('/api/intents/' + TEKLIF_MODUL, { method:'POST',
+      body:JSON.stringify({ kind:tur, payload:govde, note:not.trim(),
+        source:'user' }) });
+    if(r.status === 200 && r.body && r.body.ok){
+      /* Once yeniden ciz, SONRA notu yaz: ters sirada yeniden cizim yeni
+         bir #teklif-not uretip mesaji siliyor ve kullanici kaydettigini
+         goremiyordu. */
+      await yukleTeklifler();
+      var yer = $('teklif-not');
+      yer.className = 'ok';
+      yer.textContent = r.body.duplicate
+        ? 'Aynı teklif zaten açık; ikincisi yazılmadı.'
+        : 'Teklif bırakıldı: «' + (r.body.intent || {}).note + '»';
+    }else{
+      var hata = $('teklif-not');
+      hata.className = 'danger';
+      hata.textContent = 'Bırakılamadı — '
+        + (((r.body || {}).errors || []).join(' · ') || r.status);
+    }
+  }
+
+  async function yukleTeklifler(){
+    var r = await api('/api/intents/' + TEKLIF_MODUL);
+    if(r.status !== 200){
+      $('teklif-form').innerHTML = '<p class="danger">Teklifler alınamadı ('
+        + esc(r.status) + ').</p>';
+      return;
+    }
+    teklifFormCiz(r.body);
+    teklifListeCiz(r.body);
+  }
+
   /* ---------- gezinme
 
      Adres cubugunda yol tutulur: yenilendiginde ayni yerde kalirsin ve
      bir ekrani baskasina gonderebilirsin. Gorunum degistiginde YALNIZ o
      gorunumun verisi cekilir — her sekmede butun ambari sorgulamak,
      acilisi bekletmekten baska is yapmiyordu. */
-  var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'ayarlar'];
+  var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'teklifler', 'ayarlar'];
   var gorunum = 'bugun';
 
   function yolOku(){
@@ -1797,6 +2041,7 @@ details.detay > summary:hover{ color:var(--fg); }
     if(gorunum === 'bugun') return yukleBugun(t);
     if(gorunum === 'sohbet') return yukleSohbet();
     if(gorunum === 'sistemler') return yukleSistemler(t);
+    if(gorunum === 'teklifler') return yukleTeklifler();
     if(gorunum === 'ayarlar') return yukleAyarlar();
   }
 

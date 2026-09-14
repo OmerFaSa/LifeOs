@@ -20,7 +20,8 @@ Ucnoktalar:
     GET  /api/streak?date=&days=    ust uste suren esik kiriklari
     GET  /api/weekly?date=          haftalik rapor
     GET  /api/outbox                giden kutusu durumu
-    GET  /api/intents/<modul>       modulun bekleyen niyetleri (teklifler)
+    GET  /api/intents/<modul>       modulun acik niyetleri (teklifler)
+    POST /api/intents/<modul>       yeni teklif olusturur (tur + govde)
     POST /api/intents/<modul>/take  kuyrugu alir (delivered isaretler)
     POST /api/intent/<id>/applied   modul uyguladi
     POST /api/intent/<id>/dismissed kullanici istemedi
@@ -466,6 +467,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"module": mod,
                                     "intents": db.intents_for(
                                         self.con, mod, ("pending", "delivered")),
+                                    "answered": db.intents_for(
+                                        self.con, mod, intents.ANSWERS),
+                                    "kinds": intents.KINDS,
+                                    "fields": intents.FIELD_RULES,
                                     "summary": intents.summary(self.con)})
         if u.path == "/api/config":
             return self._send(200, settings.read(self.server.config))
@@ -589,6 +594,25 @@ class Handler(BaseHTTPRequestHandler):
                                         "note": "Silme islemi confirm:true ister."})
             res = db.prune_events(self.con, govde.get("days") or 180)
             return self._send(200 if res.get("ok") else 400, res)
+        if (u.path.startswith("/api/intents/")
+                and not u.path.endswith("/take")):
+            # Teklif OLUSTURMA. Kullanici kendi arayuzunden de teklif
+            # yazabilmeli: Patron'a cumle kurmak tek yol olmamali.
+            # Dogrulama intents.validate'de — iki yerde iki sozlesme
+            # olmasin diye burada tekrar edilmez.
+            mod = u.path.rsplit("/", 1)[-1]
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                govde = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            r = intents.create(self.con, mod, (govde or {}).get("kind"),
+                               (govde or {}).get("payload") or {},
+                               (govde or {}).get("note") or "",
+                               source=(govde or {}).get("source") or "user")
+            return self._send(200 if r.get("ok") else 422, r)
         if u.path.startswith("/api/intents/") and u.path.endswith("/take"):
             mod = u.path.split("/")[3]
             return self._send(200, intents.take(self.con, mod))

@@ -1216,6 +1216,21 @@ SP.App = (function(){
         SP.Beacon.intentDoubts().then(d => {
           if(d && d.length){ S.ui.hkmDoubts = d; render(); }
         }).catch(() => {});
+
+        /* Sekmeye GERI DONUNCE tekrar sor. Once yalniz acilista
+           soruluyordu: HKM bir teklif biraktiginda, sayfa acikken
+           gormuyordun — yenilemeden haberin olmuyordu. Odaklanma bir
+           kullanici eylemidir, cizim degil: bu istek hicbir cizimde
+           atilmaz. */
+        let sonSoru = Date.now();
+        document.addEventListener('visibilitychange', () => {
+          if(document.hidden) return;
+          if(Date.now() - sonSoru < 30000) return;   /* sekme takibi degil */
+          sonSoru = Date.now();
+          SP.Beacon.intents().then(liste => {
+            if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
+          }).catch(() => {});
+        });
       }
 
       if(SP.Setup.needed()) setTimeout(() => SP.Setup.open(), 400);
