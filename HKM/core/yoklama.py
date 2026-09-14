@@ -85,6 +85,34 @@ def webhook_sil(cfg):
         return {"ok": False, "reason": "%s" % type(e).__name__}
 
 
+def komut_menusu(cfg):
+    """Telegram'in komut menusu (setMyCommands).
+
+    Kullanici uygulamada «/» yazdiginda komutlari GORUR. Komut listesini
+    yalnizca «yardim» yazana gostermek, yardimi bilmeyenin hicbir komutu
+    bilmemesi demektir.
+
+    Liste patron.COMMANDS'tan uretilir: iki yerde iki komut listesi
+    olsaydi, bir komut eklendiginde biri eksik kalirdi."""
+    from core import patron
+    a = channels.settings(cfg, "telegram")
+    token = a.get("bot_token")
+    if not token:
+        return {"ok": False, "reason": "no-token"}
+    komutlar = []
+    for c in patron.COMMANDS:
+        # Telegram komut adi: kucuk harf, ASCII, en fazla 32 karakter.
+        ad = c["id"].replace("ı", "i").replace("ç", "c").replace("ş", "s")
+        if not ad.isascii() or not ad.isalnum():
+            continue
+        komutlar.append({"command": ad, "description": c["note"][:256]})
+    try:
+        r = _cagir(token, "setMyCommands", {"commands": komutlar}, timeout=10)
+        return {"ok": bool(r.get("ok")), "count": len(komutlar)}
+    except Exception as e:                      # noqa: BLE001
+        return {"ok": False, "reason": type(e).__name__}
+
+
 def _imlec_oku(con):
     r = con.execute("SELECT msg_id FROM inbox_seen WHERE channel='telegram:offset'"
                     ).fetchone()

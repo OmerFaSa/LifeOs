@@ -721,25 +721,61 @@ details.detay > summary:hover{ color:var(--fg); }
 
   /* Ritim: zamanlanmış işler. Varsayılan kapalı — bir özet, bildirim
      akışına dönüştüğü an okunmaz olur. */
+  /* ---------- otomatik mesajlar
+
+     Zamanlanmis is, bir bildirim akisina donusmenin de en kisa yoludur.
+     Bu yuzden ekran ne oldugunu ve NE OLMADIGINI birlikte soyler: gunde
+     bir kez, gunu gecmis hatirlatma gonderilmez, kanal kapaliysa hicbir
+     sey olmaz. */
   function ritimCiz(c){
     var z = c.schedule || {};
-    var h = '<div class="tag">Ritim</div>'
-      + '<p class="muted">Zamanlanmış işler varsayılan olarak kapalıdır ve '
-      + 'günü geçmiş bir hatırlatma hiç gönderilmez: hatırlatma değil '
-      + 'gürültü olurdu.</p>'
-      + '<div class="row">'
-      + '<label><input type="checkbox" id="ritim-acik"' + (z.enabled ? ' checked' : '')
-      + '/> Açık</label>'
-      + '<label>Sabah <input id="ritim-sabah" value="' + esc(z.morning || '')
-      + '" placeholder="08:00" style="width:80px"/></label>'
-      + '<label>Akşam <input id="ritim-aksam" value="' + esc(z.evening || '')
-      + '" placeholder="21:00" style="width:80px"/></label>'
-      + '<label>Haftalık <input id="ritim-hgun" value="' + esc(z.weekly_day || '')
-      + '" placeholder="pazartesi" style="width:110px"/></label>'
+    var kanallar = c.channels || {};
+    var acik = ['telegram', 'whatsapp'].filter(function(a){
+      return (kanallar[a] || {}).ready; });
+    var hedef = z.channel || acik[0] || '';
+
+    var h = '<div class="tag">Otomatik mesajlar</div>'
+      + '<p class="muted">Sen sormadan gelen özetler. Varsayılan '
+      + '<b>kapalıdır</b>; günü geçmiş bir hatırlatma hiç gönderilmez — '
+      + 'hatırlatma değil gürültü olurdu.</p>';
+
+    if(!acik.length){
+      h += '<p class="warn">Açık bir sohbet kanalı yok. Önce '
+        + '<a href="#/ayarlar">Sohbet kanalları</a> bölümünden Telegram '
+        + '(ya da WhatsApp) aç.</p>';
+    }else{
+      h += '<p class="muted">Gidecek kanal: <b>' + esc(hedef.toUpperCase())
+        + '</b>' + (z.channel ? '' : ' (açık olan kanal)') + '</p>';
+    }
+
+    h += '<div class="metric"><div class="metric__name">Otomatik mesajlar'
+      + '<div class="muted" style="font-size:11px">Kapalıyken hiçbir şey '
+      + 'gönderilmez</div></div>'
+      + '<div class="metric__val"><input type="checkbox" id="ritim-acik"'
+      + (z.enabled ? ' checked' : '') + ' aria-label="Otomatik mesajlar"/>'
+      + '</div></div>'
+      + ritimSaat('ritim-sabah', 'Sabah brifingi',
+          'Günün özeti ve varsa tek öneri', z.morning, '08:00')
+      + ritimSaat('ritim-aksam', 'Akşam kapanışı',
+          'Günün sonunda ne ölçüldü', z.evening, '21:00')
+      + ritimSaat('ritim-hgun', 'Haftalık rapor',
+          'Gün adı yaz (pazartesi, salı…). Boş bırakırsan gönderilmez',
+          z.weekly_day, 'pazartesi', 'text')
+      + '<div class="row" style="margin-top:12px">'
       + '<button class="primary" id="ritim-kaydet">Kaydet</button></div>'
-      + '<p class="muted" id="ritim-not"></p>';
+      + '<p class="muted" id="ritim-not">Boş bırakılan saat, o mesajın '
+      + 'kapalı olduğu anlamına gelir.</p>';
     $('ritim').innerHTML = h;
     $('ritim-kaydet').addEventListener('click', ritimKaydet);
+  }
+
+  function ritimSaat(id, ad, not, deger, ornek, tip){
+    return '<div class="metric"><div class="metric__name">' + esc(ad)
+      + '<div class="muted" style="font-size:11px">' + esc(not) + '</div></div>'
+      + '<div class="metric__val"><input id="' + id + '" type="'
+      + (tip || 'text') + '" value="' + esc(deger || '') + '" placeholder="'
+      + esc(ornek) + '" class="alan alan--dar" aria-label="' + esc(ad)
+      + '"/></div></div>';
   }
 
   async function ritimKaydet(){

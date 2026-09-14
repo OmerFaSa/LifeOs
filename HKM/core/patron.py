@@ -52,6 +52,14 @@ COMMANDS = [
      "note": "Kabul edilen onerilerin ardindan olculer ne yapti."},
     {"id": "yardim", "words": ("yardim", "yardım", "komut", "?"),
      "note": "Bu listeyi gosterir."},
+    # Telegram'in ilk komutu. Cevapsiz birakmak, botun bozuk oldugunu
+    # dusundurur: kullanicinin ilk yazdigi sey bu ve ilk izlenim bu.
+    # YALNIZ Telegram'in ilk komutu. «merhaba», «selam» gibi gunluk
+    # kelimeler bu kapali kumeye KONMAZ: ilk kelimesi selam olan her cumle
+    # anlasilmis sayilirdi ve «anlamadigimda anlamis gibi yapmam» sozu
+    # sessizce delinirdi.
+    {"id": "basla", "words": ("basla", "başla", "start"),
+     "note": "Karsilama ve ne yapabilecegin."},
 ]
 
 MAX_CHARS = 900          # kanal mesaji: okunmayan bir rapor, rapor degildir
@@ -81,6 +89,12 @@ def parse(text):
     if not t:
         return None
     ilk = t.split()[0].strip(".,!:;")
+    # Telegram komutlari «/» ile baslar ve GRUPLARDA bot adini ekler:
+    # «/durum@altay_hkm_bot». Bunu tanimamak, grupta hicbir komutun
+    # calismamasi demekti.
+    ilk = ilk.lstrip("/")
+    if "@" in ilk:
+        ilk = ilk.split("@", 1)[0]
     for c in COMMANDS:
         if ilk in c["words"]:
             return c["id"]
@@ -193,8 +207,22 @@ def respond(con, text, date=None, th=None, channel="local", now=None):
                      + ", ".join("«%s»" % c["id"] for c in COMMANDS)
                      + ". Serbest cümle de yazabilirsin; anlamadığımda "
                        "anlamış gibi yapmam.")
+    elif komut == "basla":
+        # Karsilama: ne oldugunu, ne YAPMADIGINI ve nasil konusulacagini
+        # bir arada soyler. Bos bir «merhaba», botun ne ise yaradigini
+        # kullaniciya arattirir.
+        cevap = ("Ben HKM'yim — AYS, SPİ ve ESP'nin özetini tek yerde "
+                 "tutarım.\n"
+                 "Karar üretmem, karar taşırım: her öneri senin onayını "
+                 "bekler ve sen onaylamadan hiçbir şey değişmez.\n\n"
+                 "Şunları yazabilirsin:\n"
+                 + "\n".join("• %s — %s" % (c["id"], c["note"])
+                             for c in COMMANDS if c["id"] != "basla")
+                 + "\n\n«yarın 2 saat matematik» gibi bir cümle yazarsan "
+                   "ilgili sisteme teklif bırakırım.")
     elif komut == "yardim":
-        cevap = "\n".join("«%s» — %s" % (c["id"], c["note"]) for c in COMMANDS)
+        cevap = "\n".join("«%s» — %s" % (c["id"], c["note"])
+                          for c in COMMANDS)
     elif komut == "durum":
         # Zaman bir niyet degil bir parametredir: «dun» dendiyse dunun
         # brifingi gider, bugunun degil.

@@ -148,6 +148,20 @@ internete açmak, alan adı almak, sertifika kurmak **gerekmez**.
 5. Telegram'da botuna `/start` yaz (Telegram, başlatmadığın bir bottan
    mesaj almana izin vermez), sonra `durum` yaz.
 
+**Botun anladıkları:** `durum` · `kabul` · `ret` · `neden` · `capraz` ·
+`seri` · `etki` · `yardim` · `basla`. Eğik çizgili biçim (`/durum`) ve
+gruplardaki `@botadı` eki de tanınır. Uygulamada «/» yazınca komut menüsü
+çıkar — «Şimdi dene» düğmesi menüyü de kurar.
+
+«yarın 2 saat matematik» gibi bir cümle yazarsan ilgili sisteme **teklif**
+bırakılır; sistemi açtığında onayına sunulur.
+
+### Otomatik mesajlar
+
+Ayarlar → Sunucu → **Otomatik mesajlar**: sabah brifingi, akşam kapanışı,
+haftalık rapor. Varsayılan kapalı; boş bırakılan saat o mesajın kapalı
+olduğu anlamına gelir. Kanal seçmezsen **açık olan** kanala gider.
+
 Webhook ile yoklama **aynı anda olmaz**: Telegram, webhook tanımlıyken
 `getUpdates`'i reddeder. «Şimdi dene» webhook'u önce siler ve bunu söyler.
 

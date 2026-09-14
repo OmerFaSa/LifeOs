@@ -243,3 +243,73 @@ def run():
             for yasakli in ("openai", "anthropic", "llm", "urllib", "http.client"):
                 no(yasakli in s.lower(), "Patron'a ag/model katmani sizdi: " + s)
     test("Patron model ve ag katmani import etmez", t_patron_has_no_model_layer)
+
+
+def run_bot():
+    """Telegram botunun kullanim yuzeyi."""
+    from core import schedule, yoklama
+    suite("bot")
+
+    def t_slash_and_botname():
+        """Telegram komutlari «/» ile baslar ve GRUPLARDA bot adini ekler.
+        Bunu tanimamak, grupta hicbir komutun calismamasi demekti."""
+        eq(patron.parse("/durum"), "durum")
+        eq(patron.parse("/durum@altay_hkm_bot"), "durum")
+        eq(patron.parse("/KABUL@bot"), "kabul")
+        eq(patron.parse("/olmayan@bot"), None)
+    test("egik cizgi ve bot adi tanini", t_slash_and_botname)
+
+    def t_start_answers():
+        """Cevapsiz birakilan bir /start, botun bozuk oldugunu dusundurur:
+        kullanicinin ilk yazdigi sey budur."""
+        con = _con()
+        r = patron.respond(con, "/start", date=BUGUN)
+        eq(r["command"], "basla")
+        ok("HKM" in r["text"])
+        ok("durum" in r["text"])          # komutlari sayar
+        ok("onayını bekler" in r["text"])  # ne YAPMADIGINI da soyler
+    test("basla komutu karsilar", t_start_answers)
+
+    def t_greeting_is_not_a_command():
+        """Gunluk kelimeler kapali kumeye KONMAZ: ilk kelimesi selam olan
+        her cumle anlasilmis sayilirdi."""
+        con = _con()
+        eq(patron.respond(con, "merhaba nasılsın", date=BUGUN)["command"], None)
+        eq(patron.parse("selam"), None)
+    test("selam bir komut degildir", t_greeting_is_not_a_command)
+
+    def t_schedule_channel_follows_open_one():
+        """Sabit «whatsapp» varsayilani, yalnizca Telegram kuran
+        kullanicinin mesajlarini hicbir yere gitmeyen bir kuyruga
+        yaziyordu."""
+        eq(schedule.settings({})["channel"], "")
+        tg = {"channels": {"telegram": {"enabled": True, "bot_token": "t",
+                                        "allow_from": ["1"]}}}
+        eq(schedule.acik_kanal(tg), "telegram")
+        wa = {"channels": {"whatsapp": {"enabled": True, "token": "t",
+                                        "phone_number_id": "1",
+                                        "allow_from": ["1"]}}}
+        eq(schedule.acik_kanal(wa), "whatsapp")
+        # Ikisi de aciksa yoklama ile calisan, hicbir kapi acmayan yol
+        # once gelir.
+        ikisi = {"channels": dict(tg["channels"], **wa["channels"])}
+        eq(schedule.acik_kanal(ikisi), "telegram")
+        eq(schedule.acik_kanal({}), "")
+    test("zamanlanmis mesaj acik kanala gider",
+         t_schedule_channel_follows_open_one)
+
+    def t_no_channel_is_named():
+        """Kanal yoksa mesaj uretilmez ve SEBEBI yazilir."""
+        con = _con()
+        r = schedule.run(con, {}, {"kind": "morning", "at": "08:00"})
+        no(r["ok"])
+        eq(r["reason"], "no-channel")
+    test("kanal yoksa sebebi soylenir", t_no_channel_is_named)
+
+    def t_command_menu_from_one_list():
+        """Iki yerde iki komut listesi olsaydi, bir komut eklendiginde biri
+        eksik kalirdi."""
+        r = yoklama.komut_menusu({"channels": {"telegram": {"bot_token": ""}}})
+        no(r["ok"])
+        eq(r["reason"], "no-token")
+    test("komut menusu tek listeden uretilir", t_command_menu_from_one_list)

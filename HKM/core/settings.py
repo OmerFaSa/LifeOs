@@ -157,7 +157,8 @@ def validate(patch):
                     hata.append("schedule.%s SS:DD biçiminde olmalı" % k)
                 elif k == "weekly_day" and v and v.lower() not in schedule.GUNLER:
                     hata.append("schedule.weekly_day bir gün adı olmalı")
-                elif k == "channel" and v not in ("whatsapp", "telegram"):
+                elif k == "channel" and v not in ("", "whatsapp", "telegram"):
+                    # Bos deger GECERLIDIR: «acik olani kullan» demektir.
                     hata.append("schedule.channel bilinmeyen kanal")
                 elif k == "keep_days" and not (7 <= v <= 3650):
                     # Yedi gunden kisa bir saklama, dokuz aylik hicbir

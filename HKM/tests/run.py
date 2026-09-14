@@ -21,6 +21,7 @@ def main():
                 test_daemon, test_models, test_butce, test_yoklama,
                 test_baslat):
         mod.run()
+    test_channels.run_bot()
 
     suite = None
     fails = 0

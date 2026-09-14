@@ -26,7 +26,10 @@ from core import manager, outbox, patron
 
 VARSAYILAN = {
     "enabled": False,
-    "channel": "whatsapp",
+    # Bos birakilirsa ACIK OLAN kanal kullanilir. Sabit «whatsapp»
+    # varsayilani, yalnizca Telegram kuran kullanicinin mesajlarini hicbir
+    # yere gitmeyen bir kuyruga yaziyordu.
+    "channel": "",
     "morning": "08:00",      # gunun brifingi
     "evening": "",           # bos: kapali
     "weekly_day": "",        # ornek: "pazartesi" — bos: kapali
@@ -42,6 +45,19 @@ VARSAYILAN = {
 
 GUNLER = {"pazartesi": 0, "sali": 1, "carsamba": 2, "persembe": 3,
           "cuma": 4, "cumartesi": 5, "pazar": 6}
+
+
+def acik_kanal(cfg):
+    """Hangi kanala gonderilecek: ACIK olani.
+
+    Kanal secimi bos birakilabilmeli ve dogru cevabi sistem bilmeli.
+    Ikisi de aciksa Telegram once gelir: yoklama ile calisan, hicbir kapi
+    acmayan yol odur."""
+    from core import channels
+    for ad in ("telegram", "whatsapp"):
+        if channels.enabled(cfg, ad):
+            return ad
+    return ""
 
 
 def settings(cfg):
@@ -87,7 +103,10 @@ def run(con, cfg, job, now=None, th=None):
     now = now or datetime.datetime.now()
     gun = now.date().isoformat()
     a = settings(cfg)
-    kanal = a.get("channel") or "whatsapp"
+    kanal = a.get("channel") or acik_kanal(cfg)
+    if not kanal:
+        return {"ok": False, "reason": "no-channel",
+                "note": "Açık bir sohbet kanalı yok."}
 
     if job["kind"] == "weekly":
         from core import weekly

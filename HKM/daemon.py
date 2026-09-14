@@ -533,9 +533,14 @@ class Handler(BaseHTTPRequestHandler):
             # Yoklamayi acmadan once webhook SILINIR: Telegram ikisini
             # ayni anda kabul etmez ve sessizce reddeder.
             silme = yoklama.webhook_sil(self.server.config)
+            # Komut menusu de burada kurulur: kullanici «/» yazdiginda
+            # komutlari gormeli. Basarisizligi olumcul degildir ve
+            # sonucu donulur — sessizce atlanmaz.
+            menu = yoklama.komut_menusu(self.server.config)
             r = yoklama.tur(self.con, self.server.config,
                             th=self.server.thresholds, timeout=1)
-            return self._send(200, {"webhook_deleted": silme, "poll": r})
+            return self._send(200, {"webhook_deleted": silme, "menu": menu,
+                                    "poll": r})
         if u.path == "/api/probe":
             # «Kurulu» ile «calisiyor» ayri seylerdir: anahtarin gecerliligi
             # ancak SINANARAK bilinir.
