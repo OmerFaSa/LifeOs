@@ -28,7 +28,7 @@ import datetime
 import re
 
 from core import certainty as C
-from core import cross, db, precedence, sync_engine, twin
+from core import cross, db, precedence, streak, sync_engine, twin
 
 # --- buyurgan kip denetcisi -------------------------------------------------
 # TAM KELIME aranir: «kapatmani oneririm» bir oneridir, «kapat» degil.
@@ -51,6 +51,7 @@ VP_LABEL = {"academic": "AYS", "bio": "SPI", "intellect": "ESP"}
 # Brifing bir liste degil bir OZETTIR: iki capraz bulgudan fazlasi,
 # okunmayan bir rapor uretir.
 CAPRAZ_SATIR = 2
+SERI_SATIR = 2
 
 
 def imperatives(text):
@@ -145,6 +146,13 @@ def brief(con, date, th=None, days=twin.WINDOW_DAYS):
     # Capraz bulgu: UC AMBAR YAN YANA konmadan gorunmeyen sey. Bu
     # satirlar bir oneri DEGILDIR ve onceligi degistirmez; bir
     # gozlemdir ve oyle yazilir.
+    # Seri: bir gunun degil ART ARDA gelen gunlerin hikayesi. VP'ler her
+    # gunu tek basina denetler; ust uste dorduncu gece ayni sey degildir.
+    seriler = streak.findings(con, date, th=th)
+    for f in seriler[:SERI_SATIR]:
+        lines.append(_line(f["note"], "streak", rule=f["id"],
+                           status=f["status"], length=f.get("length")))
+
     capraz = cross.findings(con, date)
     for f in capraz[:CAPRAZ_SATIR]:
         lines.append(_line(f["note"], "cross", pair=f["id"], status=f["status"],
@@ -174,7 +182,7 @@ def brief(con, date, th=None, days=twin.WINDOW_DAYS):
         assert advisory(ln["text"]), "buyurgan satir sizdi: " + ln["text"]
 
     return {"date": date, "audits": audits, "twin": resim,
-            "cross": capraz,
+            "cross": capraz, "streaks": seriler,
             "proposal": prop, "decision": karar, "lines": lines,
             "dropped": dropped, "precedence": precedence.PRECEDENCE,
             "source": "kural motoru"}

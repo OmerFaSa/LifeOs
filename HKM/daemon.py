@@ -13,6 +13,8 @@ Ucnoktalar:
     POST /api/config                ayar yamasi (dogrulanir; jetona dokunmaz)
     GET  /api/backup                butun ambar tek JSON
     POST /api/prune                 eski ham olaylari siler (kararlar kalir)
+    POST /api/restore               yedegi geri yukler (replace acik karar)
+    GET  /api/streak?date=&days=    ust uste suren esik kiriklari
     GET  /api/weekly?date=          haftalik rapor
     GET  /api/outbox                giden kutusu durumu
     GET  /api/intents/<modul>       modulun bekleyen niyetleri (teklifler)
@@ -53,7 +55,7 @@ from urllib.parse import parse_qs, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (channels, cross, db, impact, intents,  # noqa: E402
-                  manager, outbox, patron, schedule, settings,
+                  manager, outbox, patron, schedule, settings, streak,
                   sync_engine, thresholds, twin, weekly)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -441,6 +443,15 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, settings.read(self.server.config))
         if u.path == "/api/backup":
             return self._send(200, db.export_all(self.con))
+        if u.path == "/api/streak":
+            try:
+                days = int((q.get("days") or [streak.PENCERE])[0])
+            except ValueError:
+                return self._send(400, {"error": "days bir sayi olmali"})
+            return self._send(200, {"date": date,
+                                    "streaks": streak.scan(
+                                        self.con, date, max(7, min(days, 365)),
+                                        th=self.server.thresholds)})
         if u.path == "/api/weekly":
             return self._send(200, weekly.report(self.con, date,
                                                  th=self.server.thresholds))
@@ -493,6 +504,17 @@ class Handler(BaseHTTPRequestHandler):
             self.server.thresholds = thresholds.from_config(yeni)
             return self._send(200, {"ok": True,
                                     "config": settings.read(yeni)})
+        if u.path == "/api/restore":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                govde = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            veri = govde.get("backup") or govde
+            r = db.import_all(self.con, veri, replace=bool(govde.get("replace")))
+            return self._send(200 if r.get("ok") else 409, r)
         if u.path == "/api/prune":
             ham, hata = self._read_body()
             if hata:

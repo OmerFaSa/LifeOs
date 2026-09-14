@@ -155,7 +155,9 @@ Uç noktalar:
 | `POST /api/config` | ayar yaması (doğrulanır; jetona dokunmaz) |
 | `GET /api/backup` | bütün ambar tek JSON |
 | `POST /api/prune` | eski ham ölçümler silinir; kararlar kalır |
+| `GET /api/streak?date=&days=` | üst üste süren eşik kırıkları |
 | `GET /api/weekly?date=` | haftalık rapor |
+| `POST /api/restore` | yedeği geri yükler (üstüne yazmak açık karar) |
 | `GET /api/outbox` | giden kutusu durumu |
 | `GET /api/intents/<modul>` | modülün bekleyen teklifleri |
 | `POST /api/intents/<modul>/take` | kuyruğu alır (delivered işaretler) |
@@ -585,6 +587,46 @@ python3 hkm.py durum | hafta | capraz | etki | kararlar | kutu | niyetler
 python3 hkm.py sor "bugün ne yapmalıyım"
 python3 hkm.py yedek [dosya]
 ```
+
+## 8.16 Seri — `core/streak.py`
+
+VP'ler her günü **tek başına** denetler ve bu doğrudur: bir gecelik kötü
+uyku bir kriz değildir. Ama üst üste dördüncü gece aynı şey değildir ve gün
+gün bakan bir sistem bunu hiç görmez.
+
+Dört kural:
+
+1. **Seri en az üç gündür.** İki gün bir eğilim değil, bir rastlantıdır.
+2. **Aradaki ölçülmemiş gün seriyi kırmaz ama sayılmaz.** Kayıt girilmemiş
+   bir gün «iyiydi» de demek değildir «kötüydü» de: seri devam eder, uzunluk
+   ölçülen günlerden sayılır ve **kaç gün atlandığı yazılır**. Atlanan günü
+   iyi saymak, ölçmeyerek iyileşmek olurdu. (İki günden uzun boşluk kırar.)
+3. **Biten seri de bir bulgudur.** Yalnız devam edeni göstermek, düzelmeyi
+   görmezden gelmektir.
+4. **Seri bir hüküm değil bir sayımdır.** «Tükenmişsin» denmez; «şu eşik şu
+   kadar gün üst üste kırıldı» denir. Eşik de kullanıcınındır: `thresholds`
+   üzerinden okunur, kodda sabit tutulmaz.
+
+## 8.17 Dokuz aylık ufuk — `tools/perf.py`
+
+Üç arayüzde `perfcheck` vardı, HKM'de yoktu: boş bir ambarda her sorgu
+hızlıdır, asıl soru dokuz ayın sonunda brifingin hâlâ açılıp açılmadığıdır.
+Araç 270 gün × 3 modül × 6 gönderim (≈4 900 olay) + 270 karar + konuşmalar
+kurar ve sekiz sorguyu bütçeye karşı ölçer.
+
+Bütçenin **yarısını** geçen sorgu «geçti» yazsa bile işaretlenir: sessizce
+dolan bir bütçe, dolana kadar hiçbir şey söylemez. İlk koşumda `etki` 191 ms
+ile işaretlendi — her karar için ambarı yeniden okuyordu (270 kararda 540
+sorgu). Tek geçişli bir önbellekle **88 ms**'ye indi; haftalık rapor da 218 →
+113 ms.
+
+## 8.18 Geri yükleme
+
+`POST /api/restore` iki kuralla çalışır: **üstüne yazmak açık bir karardır**
+(`replace` verilmedikçe dolu bir ambara dokunulmaz — bir geri yükleme,
+sessizce silinmiş bir geçmiş olamaz) ve **tanımadığı tabloya dokunmaz**
+(yedekteki bilinmeyen anahtarlar atlanır ve kaç tanesinin atlandığı geri
+bildirilir).
 
 ## 9. Fazlar
 

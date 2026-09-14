@@ -32,7 +32,7 @@
 
 import datetime
 
-from core import cross, db, dil, impact, intents, manager
+from core import cross, db, dil, impact, intents, manager, streak
 
 # Komut sozlugu — kucuk ve KAPALI. Her biri tek bir sey yapar.
 COMMANDS = [
@@ -46,6 +46,8 @@ COMMANDS = [
      "note": "Onerinin hangi denetimlerden dogdugunu soyler."},
     {"id": "capraz", "words": ("capraz", "çapraz", "esleme", "eşleşme"),
      "note": "Uc ambarin yan yana konmasindan cikan bulgular."},
+    {"id": "seri", "words": ("seri", "ustuste", "üstüste", "kacgun", "kaçgün"),
+     "note": "Ust uste suren esik kiriklari."},
     {"id": "etki", "words": ("etki", "fayda", "ise", "işe"),
      "note": "Kabul edilen onerilerin ardindan olculer ne yapti."},
     {"id": "yardim", "words": ("yardim", "yardım", "komut", "?"),
@@ -208,6 +210,13 @@ def respond(con, text, date=None, th=None, channel="local", now=None):
                      "altında kaldı ya da eşleşmiş gün sayısı yetmedi.")
         else:
             cevap = "\n".join("• " + b["note"] for b in bulgu[:2])
+    elif komut == "seri":
+        bulgular = streak.findings(con, date, th=th)
+        if not bulgular:
+            cevap = ("Üst üste süren bir eşik kırığı görünmüyor. Ölçülmeyen "
+                     "gün «iyiydi» demek değildir.")
+        else:
+            cevap = "\n".join("• " + b["note"] for b in bulgular[:3])
     elif komut == "etki":
         ozet = impact.summary(con)
         cevap = ozet["verdict"]["note"]

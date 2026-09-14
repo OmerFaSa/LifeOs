@@ -358,3 +358,61 @@ def set_intent_state(con, intent_id, state, at=None):
                 (state, at, intent_id))
     con.commit()
     return intent(con, intent_id)
+
+
+def import_all(con, veri, replace=False):
+    """Yedegi geri yukler.
+
+    Iki kural:
+
+    1. USTUNE YAZMAK ACIK BIR KARARDIR. `replace` verilmedikce var olan
+       ambara dokunulmaz: bir geri yukleme, sessizce silinmis bir gecmis
+       olamaz.
+    2. TANIMADIGI TABLOYA DOKUNMAZ. Yedekteki bilinmeyen anahtarlar
+       ATLANIR ve kac satirin atlandigi geri bildirilir; sessizce
+       yutulan bir alan, eksik geri yuklenmis bir ambardir."""
+    if not isinstance(veri, dict) or "__meta" not in veri:
+        return {"ok": False, "error": "Bu dosya bir HKM yedegi degil."}
+    meta = veri.get("__meta") or {}
+    if meta.get("app") != "hkm":
+        return {"ok": False, "error": "Bu yedek baska bir uygulamadan."}
+    if int(meta.get("schema") or 0) > 1:
+        return {"ok": False,
+                "error": "Bu yedek daha yeni bir surumle alinmis (sema %s)."
+                         % meta.get("schema")}
+
+    tablolar = ("raw_events", "audits", "decisions", "decision_sources",
+                "conversations", "intents", "outbox")
+    mevcut = con.execute("SELECT COUNT(*) FROM raw_events").fetchone()[0]
+    if mevcut and not replace:
+        return {"ok": False, "error": "Ambar bos degil (%d olay). Ustune "
+                                      "yazmak icin replace istenir." % mevcut,
+                "existing": mevcut}
+
+    atlanan = [k for k in veri
+               if k != "__meta" and k not in tablolar]
+    yazilan = {}
+    try:
+        if replace:
+            for t in tablolar:
+                con.execute("DELETE FROM %s" % t)
+        for t in tablolar:
+            satirlar = veri.get(t) or []
+            if not satirlar:
+                continue
+            sutunlar = [r["name"] for r in con.execute("PRAGMA table_info(%s)" % t)]
+            kullanilan = [c for c in sutunlar if c in satirlar[0]]
+            if not kullanilan:
+                continue
+            isaret = ",".join("?" * len(kullanilan))
+            con.executemany(
+                "INSERT OR REPLACE INTO %s(%s) VALUES (%s)"
+                % (t, ",".join(kullanilan), isaret),
+                [tuple(r.get(c) for c in kullanilan) for r in satirlar])
+            yazilan[t] = len(satirlar)
+        con.commit()
+    except sqlite3.Error as e:
+        con.rollback()
+        return {"ok": False, "error": "Geri yukleme yarida kesildi: %s" % e}
+    return {"ok": True, "written": yazilan, "skipped": atlanan,
+            "replaced": bool(replace)}

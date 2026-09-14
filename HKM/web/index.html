@@ -103,6 +103,7 @@ svg.spark{ width:100%; height:34px; display:block; }
     <div data-bolme="genel">
       <div class="card" id="brifing"><p class="muted">Yükleniyor…</p></div>
       <div class="card" id="oneri" hidden></div>
+      <div class="card" id="seri"></div>
       <div class="card" id="capraz"></div>
     </div>
 
@@ -260,6 +261,26 @@ svg.spark{ width:100%; height:34px; display:block; }
   /* Capraz bulgu HKM'nin var olma gerekcesidir: AYS uykuyu olcmez, SPI
      soru sayisini bilmez. Ama burada bile cumle bir ESLESMEDIR — sayfa
      «cunku» demez, daemon da demez. */
+  /* Seri: bir günün değil, art arda gelen günlerin hikâyesi. */
+  function seriCiz(d){
+    var liste = d.streaks || [];
+    var suren = liste.filter(function(x){ return x.status === 'running'; });
+    var biten = liste.filter(function(x){ return x.status === 'ended'; });
+    var h = '<div class="tag">Üst üste</div>';
+    if(suren.length || biten.length){
+      suren.forEach(function(x){
+        h += '<div class="line warn">' + esc(x.note) + '</div>';
+      });
+      biten.forEach(function(x){
+        h += '<div class="line muted">' + esc(x.note) + '</div>';
+      });
+    }else{
+      h += '<p class="muted">Üst üste süren bir eşik kırığı görünmüyor. '
+         + 'Ölçülmeyen gün «iyiydi» demek değildir.</p>';
+    }
+    $('seri').innerHTML = h;
+  }
+
   function caprazCiz(c){
     var h = '<div class="tag">Çapraz bulgu · son ' + esc(c.days) + ' gün</div>';
     var gorunur = (c.pairs || []).filter(function(p){
@@ -649,12 +670,16 @@ svg.spark{ width:100%; height:34px; display:block; }
       + '<p class="muted">Bütün ambar tek dosyadadır. Yedek almak, dokuz aylık '
       + 'kaydı tek bir disk hatasına bağlı olmaktan çıkarır.</p>'
       + '<div class="row"><button id="yedek">Yedeği indir</button>'
-      + '<button id="buda">Eski ölçümleri buda</button></div>'
+      + '<button id="buda">Eski ölçümleri buda</button>'
+      + '<label class="muted" style="display:inline-flex;align-items:center;gap:6px">'
+      + 'Geri yükle <input type="file" id="geri" accept="application/json"/></label>'
+      + '</div>'
       + '<p class="muted" id="bakim-not">Budama yalnız ham ölçüm geçmişini '
       + 'siler; kararlar ve konuşmalar KALIR — onlar bu katmanı sonradan '
       + 'denetlemenin tek yolu.</p>';
     $('yedek').addEventListener('click', yedekIndir);
     $('buda').addEventListener('click', budama);
+    $('geri').addEventListener('change', geriYukle);
   }
 
   async function yedekIndir(){
@@ -667,6 +692,25 @@ svg.spark{ width:100%; height:34px; display:block; }
     a.download = 'hkm-yedek-' + bugun() + '.json';
     document.body.appendChild(a); a.click(); a.remove();
     $('bakim-not').textContent = 'Yedek indirildi.';
+  }
+
+  /* Geri yükleme ÜSTÜNE YAZMAK demektir ve öyle sorulur. */
+  async function geriYukle(e){
+    var dosya = e.target.files && e.target.files[0];
+    if(!dosya) return;
+    var metin = await dosya.text();
+    var veri = null;
+    try{ veri = JSON.parse(metin); }catch(err){
+      $('bakim-not').textContent = 'Dosya geçerli bir JSON değil.';
+      return;
+    }
+    if(!window.confirm('Bu yedek ambarın ÜSTÜNE yazılsın mı? Mevcut kayıtlar '
+      + 'silinir ve bu işlem geri alınamaz.')) return;
+    var r = await api('/api/restore', { method:'POST',
+      body:JSON.stringify({ backup:veri, replace:true }) });
+    $('bakim-not').textContent = r.status === 200
+      ? 'Geri yüklendi.' : ('Geri yüklenmedi — ' + ((r.body || {}).error || r.status));
+    if(r.status === 200) yukle();
   }
 
   async function budama(){
@@ -701,6 +745,8 @@ svg.spark{ width:100%; height:34px; display:block; }
     }
     brifingCiz(b.body);
     oneriCiz(b.body);
+    var sr = await api('/api/streak?date=' + t);
+    if(sr.status === 200) seriCiz(sr.body);
     var c = await api('/api/cross?date=' + t);
     if(c.status === 200) caprazCiz(c.body);
     var ser = await api('/api/series?date=' + t + '&days=60');

@@ -407,6 +407,8 @@ def run():
             eq(S.call("/api/prune", body={"confirm": True}, token=None)[0], 401)
         test("yonetim yollari jetonsuz acilmaz", t_config_needs_token)
 
+        run_extra(S)
+
         def t_bad_json():
             req = urllib.request.Request(S.url("/api/sync/ays"), data=b"{bozuk",
                                          method="POST")
@@ -420,3 +422,36 @@ def run():
         test("bozuk JSON 400 ile doner", t_bad_json)
     finally:
         S.close()
+
+
+def run_extra(S):
+    """Geri yukleme ve seri ucnoktalari — ayri bir sunucu istemezler."""
+    def t_restore_needs_explicit_replace():
+        """Bir geri yukleme, sessizce silinmis bir gecmis olamaz."""
+        kod, yedek = S.call("/api/backup")
+        eq(kod, 200)
+        kod, r = S.call("/api/restore", body={"backup": yedek})
+        eq(kod, 409)
+        ok("replace" in r["error"])
+        kod, r = S.call("/api/restore", body={"backup": yedek, "replace": True})
+        eq(kod, 200)
+        ok(r["written"])
+    test("geri yukleme ustune yazmayi acikca ister",
+         t_restore_needs_explicit_replace)
+
+    def t_restore_refuses_foreign_backup():
+        kod, r = S.call("/api/restore",
+                        body={"backup": {"__meta": {"app": "baska"}},
+                              "replace": True})
+        eq(kod, 409)
+        kod, r = S.call("/api/restore", body={"backup": {"raw_events": []},
+                                              "replace": True})
+        eq(kod, 409)
+    test("yabanci yedek geri yuklenmez", t_restore_refuses_foreign_backup)
+
+    def t_streak_endpoint():
+        kod, r = S.call("/api/streak?date=" + BUGUN)
+        eq(kod, 200)
+        ok(r["streaks"])
+        eq(S.call("/api/streak?days=abc")[0], 400)
+    test("seri ucnoktasi calisir", t_streak_endpoint)

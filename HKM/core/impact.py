@@ -76,8 +76,16 @@ def _median(xs):
     return s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2.0
 
 
-def _seri(con, modul, metrik, bas, bit):
-    """[bas, bit] araliginda olculmus/hesaplanmis degerler."""
+def _seri(con, modul, metrik, bas, bit, cache=None):
+    """[bas, bit] araliginda olculmus/hesaplanmis degerler.
+
+    `cache` verilirse ambar yeniden okunmaz. Sebebi olcumle bulundu:
+    her karar icin iki ayri sorgu, 270 kararda 540 sorgu demekti ve
+    `tools/perf.py` bunu «butcenin yarisini gecti» diye isaretledi.
+    Butce dolana kadar beklemek, dolana kadar hicbir sey soylememektir."""
+    if cache is not None:
+        gunler = cache.get((modul, metrik)) or {}
+        return [v for g, v in sorted(gunler.items()) if bas <= g <= bit]
     out = []
     for e in db.events_between(con, bas, bit, modul):
         m = (e["payload"].get("metrics") or {}).get(metrik)
@@ -89,7 +97,29 @@ def _seri(con, modul, metrik, bas, bit):
     return out
 
 
-def one(con, karar):
+def build_cache(con):
+    """Izlenen butun olculeri TEK geciste okur: (modul, metrik) → {gun: deger}.
+
+    Ayni gunun ikinci govdesi birincisini gecersiz kilar — ikizin kurali
+    neyse burada da odur."""
+    izlenen = set((w["module"], w["metric"]) for w in WATCH.values())
+    cache = dict((k, {}) for k in izlenen)
+    for e in db.events_between(con, "0000-01-01", "9999-12-31"):
+        mod = e["module"]
+        metrics = e["payload"].get("metrics") or {}
+        for (m, metrik) in izlenen:
+            if m != mod:
+                continue
+            ham = metrics.get(metrik)
+            if not isinstance(ham, dict) or not C.is_valid(ham.get("cert")):
+                continue
+            v = C.value_of(ham)
+            if v is not None:
+                cache[(m, metrik)][e["date"]] = v
+    return cache
+
+
+def one(con, karar, cache=None):
     """Tek bir cevaplanmis oneri icin etki. Hukum kurmaz, hareket bildirir."""
     anahtar = karar.get("key")
     bakilan = WATCH.get(anahtar or "")
@@ -104,9 +134,9 @@ def one(con, karar):
 
     gun = karar["date"]
     once = _seri(con, bakilan["module"], bakilan["metric"],
-                 _add(gun, -ONCE), _add(gun, -1))
+                 _add(gun, -ONCE), _add(gun, -1), cache)
     sonra = _seri(con, bakilan["module"], bakilan["metric"],
-                  _add(gun, 1), _add(gun, SONRA))
+                  _add(gun, 1), _add(gun, SONRA), cache)
     if len(once) < ASGARI_NOKTA or len(sonra) < ASGARI_NOKTA:
         return dict(base, status="missing", before_n=len(once), after_n=len(sonra),
                     note="Öncesinde %d, sonrasında %d ölçüm var; hüküm için her "
@@ -138,8 +168,11 @@ def _fmt(v):
     return ("%.1f" % v).replace(".", ",")
 
 
-def scan(con):
-    return [one(con, k) for k in db.answered_decisions(con)]
+def scan(con, cache=None):
+    kayitlar = db.answered_decisions(con)
+    if cache is None and len(kayitlar) > 20:
+        cache = build_cache(con)
+    return [one(con, k, cache) for k in kayitlar]
 
 
 UYARI = ("Bu bir deney değildir. Kabul ettiğin günler zaten farklı günlerdi: "

@@ -70,6 +70,8 @@ NIYETLER = {
               "yapalim": 2, "peki": 2},
     "ret": {"ret": 3, "red": 3, "reddet": 3, "hayir": 3, "istemiyorum": 3,
             "yok": 2, "olmaz": 3, "vazgec": 2},
+    "seri": {"seri": 3, "ustuste": 3, "arka": 2, "surekli": 2, "kac": 1,
+             "gundur": 3},
     "yardim": {"yardim": 3, "komut": 3, "yapabilir": 2, "nasil": 1,
                "secenek": 2},
 }

@@ -6,6 +6,7 @@
     python3 hkm.py hafta              haftalik rapor
     python3 hkm.py capraz             capraz bulgular
     python3 hkm.py etki               oneri sonrasi olculer ne yapti
+    python3 hkm.py seri               ust uste suren esik kiriklari
     python3 hkm.py kararlar           gunun onerileri
     python3 hkm.py kutu               giden kutusu
     python3 hkm.py niyetler           bekleyen teklifler
@@ -29,7 +30,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
 
 from core import (cross, db, impact, intents, outbox,  # noqa: E402
-                  patron, thresholds, weekly)
+                  patron, streak, thresholds, weekly)
 from daemon import load_config  # noqa: E402
 
 
@@ -62,6 +63,13 @@ def komut_capraz(con, cfg, args):
         isaret = {"higher": "↑", "lower": "↓", "flat": "=",
                   "missing": "·"}.get(b["status"], "?")
         yaz(" %s %-28s %s" % (isaret, b["id"], b["note"]))
+
+
+def komut_seri(con, cfg, args):
+    for b in streak.scan(con, args[0] if args else _bugun(),
+                         th=thresholds.from_config(cfg)):
+        isaret = {"running": "→", "ended": "·", "clean": " ", "missing": "?"}
+        yaz(" %s %-14s %s" % (isaret.get(b["status"], "?"), b["id"], b["note"]))
 
 
 def komut_etki(con, cfg, args):
@@ -122,7 +130,7 @@ def komut_yedek(con, cfg, args):
 
 KOMUTLAR = {
     "durum": komut_durum, "hafta": komut_hafta, "capraz": komut_capraz,
-    "etki": komut_etki, "kararlar": komut_kararlar, "kutu": komut_kutu,
+    "etki": komut_etki, "seri": komut_seri, "kararlar": komut_kararlar, "kutu": komut_kutu,
     "niyetler": komut_niyetler, "sor": komut_sor, "yedek": komut_yedek,
 }
 
