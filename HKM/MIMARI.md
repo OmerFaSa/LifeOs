@@ -153,6 +153,7 @@ Uç noktalar:
 | `GET /api/impact` | öneri sonrası ölçüler ne yaptı (etki) |
 | `GET /api/config` | ayarlar — **sırlar maskeli** |
 | `POST /api/probe` | sağlayıcı anahtarını **sınar** (mesaj üretmez) |
+| `GET /api/budget` | aylık harcama, tahmin ve sınır durumu |
 | `POST /api/config` | ayar yaması (doğrulanır; jetona dokunmaz) |
 | `GET /api/backup` | bütün ambar tek JSON |
 | `POST /api/prune` | eski ham ölçümler silinir; kararlar kalır |
@@ -745,3 +746,33 @@ Yönetim sekmesinde üç bölüm: **Sağlayıcılar** (anahtarlar + «Sına»),
 **Görev dağılımı** (kademe kademe, mirasla birlikte) ve **Sohbet
 kanalları** (WhatsApp/Telegram kimlik alanları, izin listesi, aç/kapat).
 Boş bırakılan bir sır alanı var olanı **değiştirmez**.
+
+## Bütçe — paranın ölçümü
+
+Fatura ay sonunda gelir; o zamana kadar «ne kadar harcadım» sorusunun
+cevabı ya ölçümdür ya tahmindir. `core/butce.py` + `usage` tablosu ölçümü
+tutar. Beş kural:
+
+1. **Tavan aşılmaz, aşılması gereken de değildir.** Tavan bir hedef değil
+   bir sınırdır; sınıra yaklaşmak bir başarı ölçüsü değildir.
+2. **Sınırda ücretli çağrı durur.** «Birazcık aşalım» diyen bir sistem,
+   sınırın kendisini kaldırmış olur. Kural motoru çalışmaya devam eder —
+   HKM modelsiz de çalışır.
+3. **Kur elle girilir ve tarihlidir.** Kuru sessizce internetten çekmek,
+   hesabı her gün değiştiren görünmez bir değişken eklemektir. Eskiyen kur
+   ekranda **söylenir**.
+4. **Ölçülmeyen kategori sıfır değildir.** Hiç kullanılmamış bir yetenek
+   için «0 TL» yazmak, o kategorinin bedava olduğunu ima eder.
+5. **Tahmin iki sayıdır.** Tek bir aylık tahmin, iyimser günün tahminidir:
+   p50 (ortanca gün) ve p90 (yoğun gün) ayrı ayrı verilir. Az sayıda gün
+   ölçüldüğünde p90, ölçülen **en yoğun gündür** — bütçe uyarısında yoğun
+   günü küçük göstermek, uyarıyı işe yaramaz yapar.
+
+Başarısız çağrı da deftere yazılır: para, cevap alınmadan da harcanmış
+olabilir; yazılmayan bir çağrı, görünmeyen bir giderdir.
+
+**Önerilen sağlayıcı: OpenRouter** — tek hesap, tek bakiye, tek anahtar;
+OpenAI, Claude, Gemini, DeepSeek, Qwen ve diğerleri aynı anahtarla. Anahtar
+başına aylık limit, bütçe sayacından bağımsız **ikinci bir kilittir**.
+Yönetim sekmesindeki «Başlarken» bölümü beş adımı ekranda anlatır: anahtar
+girilecek yerde, nereden alınacağı da yazılıdır.

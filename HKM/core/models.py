@@ -54,6 +54,22 @@ import urllib.request
 # Adres BURADA yazili: kullanicinin adres yazmasi gereken bir alan, yanlis
 # yazildiginda anahtari bilinmeyen bir sunucuya gonderir.
 PROVIDERS = {
+    # ONERILEN BASLANGIC. Tek anahtar, tek bakiye, butun modeller; anahtar
+    # basina harcama limiti saglayicinin kendisinde tanimlanabilir. Marka
+    # degistirmek icin kod degil, SATIR degisir.
+    "openrouter": {
+        "label": "OpenRouter (önerilen — tek anahtar, bütün modeller)",
+        "base": "https://openrouter.ai/api/v1/chat/completions",
+        "key_header": "Authorization",
+        "signup": "https://openrouter.ai/keys",
+        "note": "Tek hesap, tek bakiye; OpenAI, Claude, Gemini, DeepSeek, "
+                "Qwen ve digerleri ayni anahtarla. Anahtar basina aylik "
+                "limit koyulabilir — butcenin ikinci kilidi.",
+        "models": ["google/gemini-2.5-flash-lite", "google/gemini-2.5-flash",
+                   "deepseek/deepseek-chat", "anthropic/claude-haiku-4.5",
+                   "anthropic/claude-sonnet-5", "openai/gpt-5-mini",
+                   "qwen/qwen2.5-vl-72b-instruct"],
+    },
     "anthropic": {
         "label": "Anthropic (Claude)",
         "base": "https://api.anthropic.com/v1/messages",
@@ -200,6 +216,8 @@ def read(cfg):
         saglayicilar.append({
             "id": ad, "label": tanim["label"], "base": tanim["base"],
             "models": tanim["models"],
+            "signup": tanim.get("signup", ""),
+            "note": tanim.get("note", ""),
             "key_set": bool(anahtarlar.get(ad)),
             "key_hint": ("••••••" + str(anahtarlar[ad])[-2:])
                         if anahtarlar.get(ad) else "",

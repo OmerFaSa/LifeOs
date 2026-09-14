@@ -127,6 +127,11 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums;
 .ok{ color:var(--ok); } .warn{ color:var(--warn); } .danger{ color:var(--danger); }
 .scroll{ overflow-x:auto; }
 code{ font:12px/1.4 var(--mono); }
+/* Metin ici bag da bir dokunma hedefidir: 18 piksel yuksekligindeki bir
+   baglanti, parmakla isabet ettirilemez (WCAG 2.2 asgari 24px). */
+a{ color:var(--accent); }
+a:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.line a, p a{ display:inline-block; min-height:24px; line-height:24px; }
 
 /* ---- sekmeler: hap degil, ALT CIZGI ---- */
 .tabs{ display:flex; gap:0; margin:0; flex-wrap:wrap;
@@ -241,6 +246,8 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
         </div>
       </div>
       <div class="card" id="esleme" hidden></div>
+      <div class="card" id="baslarken"></div>
+      <div class="card" id="butce"></div>
       <div class="card" id="saglayicilar"></div>
       <div class="card" id="gorevler"></div>
       <div class="card" id="ayarlar"><p class="muted">Yükleniyor…</p></div>
@@ -751,6 +758,7 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
 
   function ayarlariCiz(c){
     ayarCiz(c);
+    baslarkenCiz(c);
     saglayiciCiz(c);
     gorevCiz(c);
   }
@@ -895,6 +903,162 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
        · anahtar KURULU MU (degeri degil),
        · her kademe HANGI modele bagli ve bu MIRAS MI,
        · anahtarin GERCEKTEN calisip calismadigi (sinanmadan yazilmaz). */
+
+  /* ---------- başlarken: tek anahtarla nereden başlanır
+
+     «Hangi siteden API alayim» sorusunun cevabi bir belgede degil, ayarin
+     yaninda durmali: anahtar girilecek yerde, nereden alinacagi da yazili
+     olmali. Yoksa kullanici once bir belge arar, sonra vazgecer. */
+  function baslarkenCiz(c){
+    var m = (c.models || {});
+    var onerilen = (m.providers || []).filter(function(p){
+      return p.id === 'openrouter'; })[0];
+    var kurulu_mu = onerilen && onerilen.key_set;
+    var h = '<div class="tag">Başlarken · nereden anahtar alınır</div>';
+    if(kurulu_mu){
+      h += '<p class="muted"><span class="ok">OpenRouter anahtarı kurulu.</span> '
+        + 'Aşağıdaki «Sına» ile gerçekten çalıştığını doğrulayabilirsin — '
+        + 'kurulu olmak, çalışmak değildir.</p>';
+    }
+    h += '<p class="muted"><b>Önerilen: OpenRouter.</b> Tek hesap, tek '
+      + 'bakiye, tek anahtar; OpenAI, Claude, Gemini, DeepSeek, Qwen ve '
+      + 'diğerleri aynı anahtarla. Marka değiştirmek için burada tek satır '
+      + 'değişir. Ayrıca anahtar başına aylık limit koyabilirsin: bu, '
+      + 'aşağıdaki bütçe sayacından bağımsız <b>ikinci bir kilit</b>.</p>'
+      + '<div class="line"><b>1.</b> <a href="https://openrouter.ai/keys" '
+      + 'target="_blank" rel="noopener">openrouter.ai/keys</a> adresinde '
+      + 'hesap aç.</div>'
+      + '<div class="line"><b>2.</b> Küçük bir bakiye yükle (5–10 USD ile '
+      + 'aylarca yeter; ölçümü aşağıda göreceksin). Kredi alımında '
+      + 'sağlayıcının komisyonu olduğunu unutma.</div>'
+      + '<div class="line"><b>3.</b> Yeni bir anahtar üret ve <b>o anahtara '
+      + 'aylık limit ver</b> — kardeşinle ayrı anahtar kullanırsanız '
+      + 'harcama da ayrışır.</div>'
+      + '<div class="line"><b>4.</b> Anahtarı aşağıdaki «Sağlayıcılar» '
+      + 'bölümüne yapıştır, <b>Sına</b>ya bas.</div>'
+      + '<div class="line"><b>5.</b> «Görev dağılımı»nda <b>Büyük Patron</b> '
+      + 'satırına OpenRouter\'ı seç; alt kademeler mirasla oradan alır. '
+      + 'Pahalı modeli her işe koşmamak için ucuz olanları tek tek '
+      + 'değiştirebilirsin.</div>'
+      + '<p class="muted">Hiçbir anahtar girmesen de HKM çalışır: kural '
+      + 'motoru otoritedir, model yalnız cümle kurar.</p>';
+    $('baslarken').innerHTML = h;
+  }
+
+  /* ---------- bütçe: paranın ÖLÇÜMÜ
+
+     Fatura ay sonunda gelir; o zamana kadar «ne kadar harcadım» sorusunun
+     cevabı ya ölçümdür ya tahmindir. Burada ölçüm gösterilir; tahmin de
+     gösterilir ama ADIYLA. */
+  function butceCiz(d){
+    var a = d.month || {};
+    var t = d.projection || {};
+    var h = '<div class="tag">Bütçe · bu ay</div>';
+
+    var oran = a.pct == null ? null : a.pct;
+    var sinif = oran == null ? '' : (oran >= 95 ? 'danger'
+      : (oran >= 80 ? 'warn' : 'ok'));
+    h += '<div class="metric"><div class="metric__name">Bu ay harcanan</div>'
+      + '<div class="metric__val ' + sinif + '">' + esc(a.spent_try)
+      + ' TL</div><div class="metric__meta">tavan ' + esc(a.ceiling_try)
+      + ' TL' + (oran == null ? ' · oran hesaplanamadı (kur girilmemiş)'
+          : ' · %' + esc(oran)) + ' · ' + esc(a.calls) + ' çağrı</div></div>';
+
+    if(a.rate_stale){
+      h += '<p class="warn">USD/TRY kuru ' + (a.rate_date
+        ? esc(a.rate_date) + ' tarihli ve eskimiş' : 'girilmemiş')
+        + '. Eski bir kurla yapılan TL hesabı, doğru görünen yanlış bir '
+        + 'sayıdır.</p>';
+    }
+
+    /* Olculmeyen kategori SIFIR DEGILDIR. */
+    h += '<div class="scroll"><table><thead><tr><th>Görev</th>'
+      + '<th class="num">Bu ay</th></tr></thead><tbody>';
+    (a.by_task || []).forEach(function(g){
+      h += '<tr><td>' + esc(GOREV_ADI[g.task] || g.task) + '</td>'
+        + '<td class="num">' + (g.measured ? esc(g['try']) + ' TL'
+            : '<span class="muted">ölçülmedi</span>') + '</td></tr>';
+    });
+    h += '</tbody></table></div>';
+
+    var kisiler = Object.keys(a.by_user || {});
+    if(kisiler.length){
+      h += '<p class="muted">Kişi başına: ' + kisiler.map(function(k){
+        return esc(k) + ' ' + esc(a.by_user[k]) + ' TL'; }).join(' · ') + '</p>';
+    }
+
+    h += '<div class="tag" style="margin-top:20px">Aylık tahmin</div>';
+    if(!t.ok){
+      h += '<p class="muted">' + esc(t.note || 'Henüz ölçüm yok.') + '</p>';
+    }else{
+      h += '<div class="line">Ölçülen ' + esc(t.measured_days)
+        + ' günün <b>ortancası</b> 30 güne uzatılırsa: <b>'
+        + esc(t.p50_monthly) + ' TL</b>'
+        + (t.fits_p50 === false ? ' <span class="danger">— tavanı aşar</span>'
+            : (t.fits_p50 ? ' <span class="ok">— tavana sığar</span>' : ''))
+        + '</div>'
+        + '<div class="line"><b>Yoğun gün</b> (p90) aynı şekilde: <b>'
+        + esc(t.p90_monthly) + ' TL</b>'
+        + (t.fits_p90 === false ? ' <span class="warn">— tavanı aşar</span>'
+            : (t.fits_p90 ? ' <span class="ok">— tavana sığar</span>' : ''))
+        + '</div><p class="muted">' + esc(t.note) + '</p>';
+    }
+
+    h += '<div class="tag" style="margin-top:20px">Ayar</div>'
+      + '<div class="metric"><div class="metric__name">Aylık tavan (TL)'
+      + '<div class="muted" style="font-size:11px">Harcanması gereken tutar '
+      + 'değil, aşılmaması gereken sınır</div></div>'
+      + '<div class="metric__val"><input id="butce-tavan" type="number" '
+      + 'step="any" value="' + esc(a.ceiling_try) + '" class="alan alan--dar" '
+      + 'aria-label="Aylık tavan"/></div></div>'
+      + '<div class="metric"><div class="metric__name">USD/TRY kuru'
+      + '<div class="muted" style="font-size:11px">Elle girilir: kuru sessizce '
+      + 'internetten çekmek, hesabı her gün değiştiren görünmez bir '
+      + 'değişken eklemektir</div></div>'
+      + '<div class="metric__val"><input id="butce-kur" type="number" '
+      + 'step="any" value="' + esc(a.rate || '') + '" class="alan alan--dar" '
+      + 'aria-label="USD TRY kuru"/>'
+      + '<input id="butce-kurtarih" type="date" value="' + esc(a.rate_date || '')
+      + '" class="alan alan--orta" aria-label="Kur tarihi"/></div></div>'
+      + '<div class="metric"><div class="metric__name">Durdurma oranı (%)'
+      + '<div class="muted" style="font-size:11px">Bu orana varılınca ücretli '
+      + 'çağrı yapılmaz; kural motoru çalışmaya devam eder</div></div>'
+      + '<div class="metric__val"><input id="butce-dur" type="number" '
+      + 'value="' + esc(a.stop_at_pct) + '" class="alan alan--dar" '
+      + 'aria-label="Durdurma oranı"/></div></div>'
+      + '<div class="row" style="margin-top:12px">'
+      + '<button class="primary" id="butce-kaydet">Bütçeyi kaydet</button>'
+      + '</div><p class="muted" id="butce-not">' + esc(a.note || '') + '</p>';
+    $('butce').innerHTML = h;
+    $('butce-kaydet').addEventListener('click', butceKaydet);
+  }
+
+  var GOREV_ADI = { sohbet:'Sohbet', ozet:'Özetleme',
+    gorev_cikar:'Görev çıkarma', gorsel_oku:'Görsel okuma',
+    belge_tablo:'Belge / tablo', yorum:'İstatistik yorumu',
+    arastir:'İnternet araştırması' };
+
+  async function butceKaydet(){
+    var yama = { budget:{
+      monthly_try:Number($('butce-tavan').value),
+      usd_try:Number($('butce-kur').value),
+      rate_date:$('butce-kurtarih').value || '',
+      stop_at_pct:Number($('butce-dur').value) } };
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
+    if(r.status === 200){
+      ayarlariCiz(r.body.config);
+      await butceYukle();
+      $('butce-not').textContent = 'Kaydedildi.';
+    }else{
+      $('butce-not').textContent = 'Kaydedilmedi — '
+        + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+    }
+  }
+
+  async function butceYukle(){
+    var r = await api('/api/budget?date=' + ($('tarih').value || bugun()));
+    if(r.status === 200) butceCiz(r.body);
+  }
 
   function saglayiciCiz(c){
     var m = (c.models || {});
@@ -1164,6 +1328,7 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
     if(kt.status === 200) kutuCiz(kt.body);
     var ay = await api('/api/config');
     if(ay.status === 200){ ayarlariCiz(ay.body); ritimCiz(ay.body); }
+    await butceYukle();
     bakimCiz();
     await konusmaYukle();
   }

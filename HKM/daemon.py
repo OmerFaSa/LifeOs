@@ -10,6 +10,7 @@ Ucnoktalar:
     GET  /api/decisions?date=       gunun butun onerileri (reddedilenler dahil)
     GET  /api/impact                oneri sonrasi olculer ne yapti (etki)
     GET  /api/config                ayarlar — SIRLAR MASKELI
+    GET  /api/budget                aylik harcama, tahmin ve sinir durumu
     POST /api/config                ayar yamasi (dogrulanir; jetona dokunmaz)
     POST /api/probe                 saglayici anahtarini SINAR (mesaj uretmez)
     GET  /api/backup                butun ambar tek JSON
@@ -57,9 +58,9 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import (channels, cross, db, impact, intents, models,  # noqa: E402
-                  manager, outbox, patron, schedule, settings, streak,
-                  sync_engine, thresholds, twin, weekly)
+from core import (butce, channels, cross, db, impact, intents,  # noqa: E402
+                  manager, models, outbox, patron, schedule, settings,
+                  streak, sync_engine, thresholds, twin, weekly)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -468,6 +469,12 @@ class Handler(BaseHTTPRequestHandler):
                                     "summary": intents.summary(self.con)})
         if u.path == "/api/config":
             return self._send(200, settings.read(self.server.config))
+        if u.path == "/api/budget":
+            # Harcama OLCUMDUR: defterdeki satirlardan gelir, tahminden degil.
+            return self._send(200, {
+                "month": butce.month(self.con, self.server.config, date),
+                "projection": butce.project(self.con, self.server.config, date),
+                "guard": butce.guard(self.con, self.server.config, date)})
         if u.path == "/api/backup":
             return self._send(200, db.export_all(self.con))
         if u.path == "/api/streak":

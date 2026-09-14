@@ -105,6 +105,43 @@ CREATE TABLE IF NOT EXISTS outbox (
 );
 CREATE INDEX IF NOT EXISTS ix_outbox_state ON outbox(state, next_at);
 
+/* Kullanim defteri — PARANIN kaydi.
+
+   Bir model cagrisinin maliyeti ancak KAYDEDILIRSE bilinir. Fatura ay
+   sonunda gelir; o zamana kadar «ne kadar harcadim» sorusunun cevabi
+   tahmin olurdu ve tahmin, bu sistemde olcum yerine gecmez.
+
+   Uc kural:
+
+   1. BASARISIZ CAGRI DA YAZILIR. Para, cevap alinmadan da harcanmis
+      olabilir; yazilmayan bir cagri, gorunmeyen bir gider demektir.
+   2. HER SATIR KENDI FIYATINI TASIR. Fiyat sonradan degisir; gecmis
+      satirin maliyeti, o gunku fiyatla hesaplanmis haliyle DURUR.
+   3. TOKEN TURLERI AYRI SAYILIR. Gorsel ve dusunme token'lari faturada
+      gorunur ama cevapta gorunmez: ayri sutun, ayri gercek. */
+CREATE TABLE IF NOT EXISTS usage (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at  TEXT NOT NULL,
+  day         TEXT NOT NULL,            -- YYYY-MM-DD (aylik toplam icin)
+  user        TEXT NOT NULL DEFAULT 'ben',
+  role        TEXT NOT NULL,            -- king | vp_bio | ays.gorsel ...
+  task        TEXT NOT NULL,            -- sohbet | gorev_cikar | gorsel_oku ...
+  provider    TEXT NOT NULL,
+  model       TEXT NOT NULL,
+  in_tok      INTEGER NOT NULL DEFAULT 0,
+  out_tok     INTEGER NOT NULL DEFAULT 0,
+  image_tok   INTEGER NOT NULL DEFAULT 0,
+  reason_tok  INTEGER NOT NULL DEFAULT 0,
+  usd         REAL NOT NULL DEFAULT 0,
+  try_        REAL NOT NULL DEFAULT 0,  -- o gunku kurla, SATIRDA DONDURULMUS
+  rate        REAL NOT NULL DEFAULT 0,  -- kullanilan USD/TRY
+  cached      INTEGER NOT NULL DEFAULT 0,
+  escalated   INTEGER NOT NULL DEFAULT 0,
+  ok          INTEGER NOT NULL DEFAULT 1,
+  note        TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_usage_day ON usage(day, user);
+
 CREATE TABLE IF NOT EXISTS conversations (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   channel       TEXT NOT NULL,           -- local | telegram | whatsapp
@@ -282,8 +319,8 @@ def decision(con, decision_id):
 # aradaki fark sessizdi: teklif ve gonderim kuyruklari yedege hic girmiyor,
 # «yedek aldim» diyen kullanicinin islem durumu eksik kaliyordu.
 BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
-                 "conversations", "intents", "outbox")
-BACKUP_SCHEMA = 2
+                 "conversations", "intents", "outbox", "usage")
+BACKUP_SCHEMA = 3
 
 
 def export_all(con):
