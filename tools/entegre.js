@@ -498,8 +498,11 @@ async function main(){
     if(ekran.kutu.indexOf('Giden kutusu') < 0){
       hatalar.push('HKM yuzu: giden kutusu cizilmedi');
     }
-    if(ekran.ritim.indexOf('Ritim') < 0){
-      hatalar.push('HKM yuzu: ritim karti cizilmedi');
+    /* Baslik «Ritim»den «Otomatik mesajlar»a dondu: denetim METNI degil
+       ISI aramali — sabah/aksam/haftalik alanlarinin varligini. */
+    if(ekran.ritim.indexOf('Sabah brifingi') < 0
+        || ekran.ritim.indexOf('Haftalık rapor') < 0){
+      hatalar.push('HKM yuzu: otomatik mesaj karti cizilmedi');
     }
     if(yuzHata.length) hatalar.push('HKM yuzu: sayfa hatasi — ' + yuzHata[0]);
     else console.log('  HKM yuzu → brifing, ikiz ve oneri gecmisi cizildi');
