@@ -13,11 +13,14 @@
 :root{
   --bg:#faf9f7; --fg:#1b1a18; --dim:#6b6864; --line:#e2ded8; --card:#fff;
   --ok:#1f6f4a; --warn:#8a5a0b; --danger:#9b2c2c; --accent:#2d4a7c;
+  /* Vurgu renginin UZERINE gelen metin ayri bir jetondur: koyu temada
+     vurgu acilir ve uzerine beyaz yazmak kontrasti 2,2'ye dusuruyordu. */
+  --on-accent:#ffffff;
 }
 @media (prefers-color-scheme: dark){
   :root{ --bg:#151719; --fg:#e8e6e3; --dim:#9b9691; --line:#2b2f33;
     --card:#1c1f22; --ok:#6fd3a3; --warn:#e3b061; --danger:#f08c8c;
-    --accent:#8fb0e8; }
+    --accent:#8fb0e8; --on-accent:#151719; }
 }
 *{ box-sizing:border-box; }
 body{ margin:0; background:var(--bg); color:var(--fg);
@@ -38,10 +41,15 @@ h1{ font-size:18px; margin:0 0 2px; letter-spacing:.02em; }
 button{ font:inherit; padding:8px 14px; border-radius:8px; cursor:pointer;
   border:1px solid var(--line); background:var(--card); color:var(--fg);
   min-height:36px; }
-button.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+button.primary{ background:var(--accent); border-color:var(--accent);
+  color:var(--on-accent); }
 button:disabled{ opacity:.5; cursor:default; }
 input{ font:inherit; padding:8px 10px; border-radius:8px; border:1px solid var(--line);
   background:var(--bg); color:var(--fg); min-height:36px; }
+/* Onay kutusu tarayici varsayilaninda 13 pikselden kucuk cizilir ve
+   WCAG 2.2'nin 24px tabanini gecemez. */
+input[type="checkbox"]{ width:24px; height:24px; min-height:24px; }
+input[type="file"]{ min-height:36px; }
 table{ width:100%; border-collapse:collapse; font-size:13px; }
 th,td{ text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); }
 th{ color:var(--dim); font-weight:500; font-size:11px; letter-spacing:.06em;
@@ -84,7 +92,7 @@ svg.spark{ width:100%; height:34px; display:block; }
   <div id="govde" hidden>
     <div class="row" style="justify-content:space-between; margin-bottom:4px">
       <div class="row">
-        <input id="tarih" type="date"/>
+        <input id="tarih" type="date" aria-label="Görüntülenen gün"/>
         <button id="yenile">Yenile</button>
         <button id="esle">Cihazları bağla</button>
       </div>

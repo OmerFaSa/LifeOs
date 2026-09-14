@@ -628,6 +628,28 @@ sessizce silinmiş bir geçmiş olamaz) ve **tanımadığı tabloya dokunmaz**
 (yedekteki bilinmeyen anahtarlar atlanır ve kaç tanesinin atlandığı geri
 bildirilir).
 
+## 8.19 Yüzün denetimi — `tools/yuz.js`
+
+Üç arayüz erişilebilirlik, telefon düzeni ve kontrast denetimlerinden
+geçiyordu; HKM'nin yüzü hiçbirinden geçmiyordu. «Sade bir sayfa» olmak onu
+denetimden muaf kılmaz: dört sekme, tablolar, formlar ve bir dosya seçici
+taşıyor.
+
+Araç daemon'u geçici bir veritabanıyla kaldırır, **veri tohumlar** (boş bir
+sayfa her denetimden geçer ve hiçbir şey kanıtlamaz), sonra 390 ve 1280
+pikselde, açık ve koyu temada, dört sekmeyi tek tek ölçer: yatay taşma,
+24×24 dokunma hedefi, etiketsiz öge ve WCAG AA kontrast (4.5).
+
+Yazıldığı ilk koşumda üç gerçek kusur buldu:
+
+1. **Koyu temada birincil düğme kontrastı 2,20** — açılan vurgu renginin
+   üzerine beyaz yazılıyordu. Vurgu üzerine gelen metin artık ayrı bir
+   jeton (`--on-accent`) ve temayla birlikte değişiyor.
+2. **Onay kutusu 13 piksel** — tarayıcı varsayılanı WCAG 2.2'nin 24px
+   tabanını geçmiyordu.
+3. **Tarih alanı etiketsiz** — ekran okuyucuda yalnızca «düzenleme kutusu»
+   diye anılıyordu.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

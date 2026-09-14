@@ -57,7 +57,8 @@ def kok_araclar():
     """Depo kokundeki denetimler — tek bir sistemin degil, ARALARININ."""
     out = {}
     for ad, komut in (("HKM tests", ["python3", "-m", "tests.run"]),
-                      ("HKM perf", ["python3", "tools/perf.py"])):
+                      ("HKM perf", ["python3", "tools/perf.py"]),
+                      ("HKM yuz", ["node", "tools/yuz.js"])):
         try:
             p = subprocess.run(komut, cwd=os.path.join(KOK, "HKM"),
                                capture_output=True, text=True, timeout=900)
