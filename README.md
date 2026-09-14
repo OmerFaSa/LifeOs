@@ -12,7 +12,7 @@ Yanlarında dördüncü, **isteğe bağlı** bir katman durur:
 
 | Klasör | Katman | Durum | Belge |
 |---|---|---|---|
-| [`HKM/`](HKM/) | **Hayat Kontrol Merkezi** | kapalı döngü + Büyük Patron ve kanallar (106 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
+| [`HKM/`](HKM/) | **Hayat Kontrol Merkezi** | merkez katman: brifing, çapraz bulgu, etki, sohbet, niyet kuyruğu, ritim (184 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
 
 HKM üçünün **üstünde değil yanındadır**: üç sistem onun var olduğunu bilmez ve
 o kapalıyken hiçbiri bozulmaz. Tek bağ, her arayüzdeki `core/beacon.js`
@@ -95,13 +95,15 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 | `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (4 bilinen eksik izin listesinde) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
 | `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 36 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 44 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 105 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 31.7 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 22.1 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 63.7 ms (bütçe 100). |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 31.2 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 20.9 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 54.9 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
 
 | Depo denetimi | Sonuç |
 |---|---|
-| `HKM tests` | 132/132 test gecti |
+| `HKM tests` | 184/184 test gecti |
+| `HKM perf` | Bütün sorgular bütçede. |
+| `HKM yuz` | HKM yüzü temiz — 16 görünümde taşma yok, bütün hedefler 24px ve üstü, etiketler yerinde, kontrast AA. |
 | `entegre.js` | Butunlesme temiz: uc arayuz de HKM ile konustu, HKM kapaliyken hicbiri bozulmadi. |
 <!-- SAYILAR:bitis -->
 
@@ -139,7 +141,12 @@ cp config.example.json config.json    # local_token'ı değiştir
 python3 daemon.py                     # 127.0.0.1:4200 — yerel yüz de burada
 python3 -m tests.run                  # VP, sync, şema, öncelik, ikiz,
                                       # Yönetici, daemon ve yüz
+python3 tools/perf.py                 # dokuz aylık ambarda sorgu bütçesi
+node tools/yuz.js                     # yüz: telefon, kontrast, etiket
 node ../tools/entegre.js              # üç arayüz + HKM: uçtan uca
+
+python3 hkm.py durum                  # terminalden: brifing
+python3 hkm.py sor "bugün ne yapmalıyım"
 ```
 
 Tarayıcıda `http://127.0.0.1:4200` açıldığında günün brifingi, çapraz
