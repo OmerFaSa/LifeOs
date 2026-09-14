@@ -1202,6 +1202,16 @@ SP.App = (function(){
          bloklamaz. İşaret kapalıysa (varsayılan) hiçbir şey olmaz. */
       if(SP.Beacon) SP.Beacon.ping();
 
+      /* HKM'nin bekleyen teklifleri — acilista BIR KEZ, ateşle ve unut.
+         Kuyruk okumak bir izin degildir: gelen sey Bugun ekraninda bir
+         teklif satiri olur ve kullanici gormeden hicbir sey uygulanmaz.
+         HKM kapaliysa kuyruk bos gelir ve hicbir sey degismez. */
+      if(SP.Beacon){
+        SP.Beacon.intents().then(liste => {
+          if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
+        }).catch(() => {});
+      }
+
       if(SP.Setup.needed()) setTimeout(() => SP.Setup.open(), 400);
     }catch(err){
       console.error('Açılış hatası:', err);

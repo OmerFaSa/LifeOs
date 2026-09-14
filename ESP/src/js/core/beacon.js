@@ -387,6 +387,81 @@ ESP.Beacon = (function(){
     return { ok:hata == null, sent:gonderilen, empty:bos, status:hata || 202 };
   }
 
+
+  /* --------------------------------------------------------- niyet kuyrugu
+
+     HKM bu sisteme YAZMAZ. «Yarin iki saat matematik» gibi bir istek
+     HKM'de bir NIYET olur; burasi acilista kuyrugu SORAR, kullaniciya
+     gosterir ve onaylanirsa ESP kendi koduyla uygular.
+
+     Uc kural:
+
+     1. Kuyruk okumak bir izin degildir: gelen sey bir TEKLIFTIR ve
+        kullanici gormeden hicbir sey uygulanmaz.
+     2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
+        bu sistemde calistirilacak bir komut degildir.
+     3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce'];
+
+  async function intents(){
+    const a = settings();
+    if(!a.enabled || !a.token || !urlOk(a.url)) return [];
+    let res;
+    try{
+      res = await fetch(String(a.url).replace(/\/$/, '') + '/api/intents/'
+        + MODULE + '/take', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json',
+          'Authorization':'Bearer ' + a.token },
+      });
+    }catch(e){ return []; }
+    if(res.status !== 200) return [];
+    let govde = null;
+    try{ govde = await res.json(); }catch(e){ return []; }
+    const liste = (govde && govde.intents) || [];
+    return liste.filter(function(n){
+      return n && INTENT_KINDS.indexOf(n.kind) >= 0 && n.payload;
+    });
+  }
+
+  /* Kullanicinin cevabi HKM'ye bildirilir: gorulmemis bir niyetle
+     reddedilmis bir niyeti ayirmak, kuyrugun tek anlamli tarafi. */
+  async function answerIntent(id, applied){
+    const a = settings();
+    if(!a.enabled || !a.token || !urlOk(a.url)) return { ok:false };
+    try{
+      const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/intent/'
+        + id + '/' + (applied ? 'applied' : 'dismissed'), {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json',
+          'Authorization':'Bearer ' + a.token },
+      });
+      return { ok:res.status === 200, status:res.status };
+    }catch(e){ return { ok:false }; }
+  }
+
+  /* Bir niyeti UYGULAMAK: yazan ESP'nin kendi kodudur.
+
+     ESP'de bir «oturum» ölçülmüş bir çalışmadır; ileriye dönük bir teklif
+     oturum olarak yazılamaz — yazılsaydı yapılmamış bir çalışma ölçülmüş
+     görünürdü. Teklif bu yüzden bir HATIRLATICI olur. */
+  async function applyIntent(n){
+    if(!n || n.kind !== 'plan.add') return { ok:false, error:'Bu teklif türü uygulanmaz.' };
+    const p = n.payload || {};
+    if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };
+    const dk = Math.max(5, Math.min(Number(p.minutes) || 0, 480));
+    if(!dk) return { ok:false, error:'Süre geçersiz.' };
+    const disc = (ESP.DISCIPLINES || []).some(function(d){ return d.id === p.disc; })
+      ? p.disc : 'lang';
+    const r = await ESP.Model.saveReminder({
+      disc:disc, due:p.date, repeat:'none',
+      text:dk + ' dakika ' + disc + ' (HKM teklifi)',
+    });
+    if(!r.ok) return { ok:false, error:r.error || 'Hatırlatıcı yazılamadı.' };
+    return { ok:true, note:p.date + ' için hatırlatıcı eklendi — ölçülmüş bir '
+      + 'oturum olarak DEĞİL: yapılmamış bir çalışma ölçülmüş görünmemeli.' };
+  }
+
   /* Ateşle ve unut: arayüz akışlarının çağırdığı biçim. Söz vermez,
      beklemez, hata fırlatmaz. */
   function ping(opts){
@@ -398,5 +473,6 @@ ESP.Beacon = (function(){
 
   return { load, save, settings, collect, payload, preview, contract, metric,
     urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
+    intents, answerIntent, applyIntent, INTENT_KINDS,
     MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
 })();

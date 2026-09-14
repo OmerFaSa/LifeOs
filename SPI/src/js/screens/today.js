@@ -467,6 +467,32 @@ SP.Screens.today = (function(){
     });
   }
 
+  /* ---------- HKM teklifleri ----------
+
+     HKM bu sisteme YAZMAZ: kuyruktan gelen her satir bir TEKLIFTIR ve
+     kullanici gormeden hicbir sey uygulanmaz. Uygulayan da HKM degil,
+     SPİ'in kendi kodudur. Kuyruk bossa hic cizilmez. */
+  function hkmTeklifRow(){
+    const liste = S.ui.hkmIntents || [];
+    if(!liste.length) return '';
+    return K.Entry({ label:'HKM TEKLİFİ', hint:'hkm',
+      meta:liste.length + ' teklif', wide:true,
+      body:html`
+        ${map(liste, n => html`<div class="mt-8">
+          ${K.Notice({ tone:'info', body:n.note })}
+          <div class="row gap-8 mt-8">
+            ${K.Button({ label:'Gördüm', size:'sm', tone:'primary',
+              act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
+            ${K.Button({ label:'İstemiyorum', size:'sm',
+              act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
+          </div>
+        </div>`)}
+        <p class="tiny dim mt-10">Bu satırlar birer tekliftir. Onaylarsan
+          SPİ kendi kaydına yazar; reddedersen HKM kaydı silmez,
+          «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş
+          bir teklif ayrı şeylerdir.</p>` });
+  }
+
   async function render(){
     const tab = S.ui.dayTab || 'giris';
     const flags = M.openFlags();
@@ -474,6 +500,7 @@ SP.Screens.today = (function(){
     const head = html`
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${bekleyenOneriler()}
+      ${when((S.ui.hkmIntents || []).length, () => html`<div class="mb-16">${K.Ledger([hkmTeklifRow()])}</div>`)}
       <div class="mb-8">${tabs()}</div>`;
 
     if(tab === 'ozet'){
@@ -495,6 +522,28 @@ SP.Screens.today = (function(){
   }
 
   const handle = {
+    /* HKM teklifleri: uygulayan SPİ'in kendi kodudur. */
+    async 'hkm-intent-yes'(el){
+      const liste = S.ui.hkmIntents || [];
+      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
+      if(!n) return;
+      const r = await SP.Beacon.applyIntent(n);
+      if(!r.ok){ UI.toast(r.error || 'Uygulanamadı'); return; }
+      await SP.Beacon.answerIntent(n.id, true);
+      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+      UI.toast(r.note || 'Uygulandı');
+      SP.App.render();
+    },
+    async 'hkm-intent-no'(el){
+      const liste = S.ui.hkmIntents || [];
+      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
+      if(!n) return;
+      await SP.Beacon.answerIntent(n.id, false);
+      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+      UI.toast('İstenmedi olarak işaretlendi');
+      SP.App.render();
+    },
+
     async 'signal-answer'(el){
       const inp = document.getElementById('sig-answer');
       const r = await SP.Signals.answer(el.dataset.id, inp ? inp.value : '');

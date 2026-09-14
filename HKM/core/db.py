@@ -55,6 +55,31 @@ CREATE TABLE IF NOT EXISTS decision_sources (
   PRIMARY KEY (decision_id, audit_id)
 );
 
+/* Niyet kuyrugu — HKM'nin modullere YAZMADAN is baslatma yolu.
+
+   «Yarin iki saat matematik» istegi, HKM'nin AYS'ye yazmasi demek olurdu
+   ve tek yonlu bagimliligi kirardi. Bunun yerine HKM bir NIYET yazar;
+   modul acilista kuyrugu sorar, kullaniciya gosterir ve onaylanirsa
+   KENDI kodu ile uygular. Yazan yine moduldur.
+
+   Durum: pending → delivered → applied | dismissed
+   «delivered» modulun gordugu, «applied» kullanicinin onayladigi demektir;
+   ikisini ayirmak, gorulmeyen bir niyetle reddedilmis bir niyeti
+   birbirinden ayirir. */
+CREATE TABLE IF NOT EXISTS intents (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  module      TEXT NOT NULL,             -- ays | spi | esp
+  kind        TEXT NOT NULL,             -- plan.add | focus.set | ...
+  payload     TEXT NOT NULL,             -- JSON: modulun anlayacagi alanlar
+  note        TEXT NOT NULL,             -- kullaniciya gosterilecek cumle
+  source      TEXT NOT NULL,             -- patron | precedence | user
+  state       TEXT NOT NULL DEFAULT 'pending',
+  created_at  TEXT NOT NULL,
+  delivered_at TEXT,
+  answered_at TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_intents_module ON intents(module, state);
+
 CREATE TABLE IF NOT EXISTS conversations (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   channel       TEXT NOT NULL,           -- local | telegram | whatsapp
@@ -259,3 +284,52 @@ def prune_events(con, days, today=None):
     con.execute("DELETE FROM raw_events WHERE date < ?", (sinir,))
     con.commit()
     return {"ok": True, "deleted": say, "before": sinir, "kept_days": gun}
+
+
+# ------------------------------------------------------------- niyetler
+
+INTENT_STATES = ("pending", "delivered", "applied", "dismissed")
+
+
+def insert_intent(con, module, kind, payload, note, source, created_at=None):
+    created_at = created_at or datetime.datetime.now().isoformat(timespec="seconds")
+    cur = con.execute(
+        "INSERT INTO intents(module, kind, payload, note, source, created_at) "
+        "VALUES (?,?,?,?,?,?)",
+        (module, kind, json.dumps(payload, ensure_ascii=False), note, source,
+         created_at))
+    con.commit()
+    return cur.lastrowid
+
+
+def intents_for(con, module, states=("pending",)):
+    isaret = ",".join("?" * len(states))
+    rows = con.execute(
+        "SELECT * FROM intents WHERE module=? AND state IN (%s) ORDER BY id" % isaret,
+        (module,) + tuple(states)).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["payload"] = json.loads(d["payload"])
+        out.append(d)
+    return out
+
+
+def intent(con, intent_id):
+    row = con.execute("SELECT * FROM intents WHERE id=?", (intent_id,)).fetchone()
+    if not row:
+        return None
+    d = dict(row)
+    d["payload"] = json.loads(d["payload"])
+    return d
+
+
+def set_intent_state(con, intent_id, state, at=None):
+    if state not in INTENT_STATES:
+        raise ValueError("gecersiz niyet durumu: %r" % (state,))
+    at = at or datetime.datetime.now().isoformat(timespec="seconds")
+    alan = "delivered_at" if state == "delivered" else "answered_at"
+    con.execute("UPDATE intents SET state=?, %s=? WHERE id=?" % alan,
+                (state, at, intent_id))
+    con.commit()
+    return intent(con, intent_id)

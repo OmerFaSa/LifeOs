@@ -473,11 +473,37 @@ ESP.Screens.today = (function(){
 
   /* ------------------------------------------------------------------ cizim */
 
+  /* ---------- HKM teklifleri ----------
+
+     HKM bu sisteme YAZMAZ: kuyruktan gelen her satir bir TEKLIFTIR ve
+     kullanici gormeden hicbir sey uygulanmaz. Uygulayan da HKM degil,
+     ESP'in kendi kodudur. Kuyruk bossa hic cizilmez. */
+  function hkmTeklifRow(){
+    const liste = S.ui.hkmIntents || [];
+    if(!liste.length) return '';
+    return K.Entry({ label:'HKM TEKLİFİ', hint:'hkm',
+      meta:liste.length + ' teklif', wide:true,
+      body:html`
+        ${map(liste, n => html`<div class="mt-8">
+          ${K.Notice({ tone:'info', body:n.note })}
+          <div class="row gap-8 mt-8">
+            ${K.Button({ label:'Uygula', size:'sm', tone:'primary',
+              act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
+            ${K.Button({ label:'İstemiyorum', size:'sm',
+              act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
+          </div>
+        </div>`)}
+        <p class="tiny dim mt-10">Bu satırlar birer tekliftir. Onaylarsan
+          ESP kendi kaydına yazar; reddedersen HKM kaydı silmez,
+          «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş
+          bir teklif ayrı şeylerdir.</p>` });
+  }
+
   function render(){
     const tab = S.ui.dayTab || 'giris';
     const rows = tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [nextCard(), signalRow(), planRow(), planRowToday(), reminderRow(),
+      : [hkmTeklifRow(), nextCard(), signalRow(), planRow(), planRowToday(), reminderRow(),
           entryForm(), quickForm(), sessionList()]
           .filter(Boolean);
 
@@ -491,6 +517,27 @@ ESP.Screens.today = (function(){
   }
 
   const handle = {
+    /* HKM teklifleri: uygulayan ESP'in kendi kodudur. */
+    async 'hkm-intent-yes'(el){
+      const liste = S.ui.hkmIntents || [];
+      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
+      if(!n) return;
+      const r = await ESP.Beacon.applyIntent(n);
+      if(!r.ok){ ESP.UI.toast(r.error || 'Uygulanamadı'); return; }
+      await ESP.Beacon.answerIntent(n.id, true);
+      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+      ESP.UI.toast(r.note || 'Uygulandı');
+      ESP.App.render();
+    },
+    async 'hkm-intent-no'(el){
+      const liste = S.ui.hkmIntents || [];
+      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
+      if(!n) return;
+      await ESP.Beacon.answerIntent(n.id, false);
+      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+      ESP.UI.toast('İstenmedi olarak işaretlendi');
+      ESP.App.render();
+    },
     async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; ESP.App.render(); },
 
     async 'signal-answer'(el){

@@ -13,6 +13,10 @@ Ucnoktalar:
     POST /api/config                ayar yamasi (dogrulanir; jetona dokunmaz)
     GET  /api/backup                butun ambar tek JSON
     POST /api/prune                 eski ham olaylari siler (kararlar kalir)
+    GET  /api/intents/<modul>       modulun bekleyen niyetleri (teklifler)
+    POST /api/intents/<modul>/take  kuyrugu alir (delivered isaretler)
+    POST /api/intent/<id>/applied   modul uyguladi
+    POST /api/intent/<id>/dismissed kullanici istemedi
     GET  /api/cross?date=&days=     capraz bulgular: uc ambar yan yana
     GET  /api/series?date=&days=&module=  metrik metrik zaman serisi
     POST /api/message               Buyuk Patron'a kisa komut (yerel kanal)
@@ -46,8 +50,9 @@ from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import (channels, cross, db, impact, manager,  # noqa: E402
-                  patron, settings, sync_engine, thresholds, twin)
+from core import (channels, cross, db, impact, intents,  # noqa: E402
+                  manager, patron, settings, sync_engine, thresholds,
+                  twin)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -368,6 +373,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"messages": patron.history(
                 self.con, max(1, min(limit, 200)),
                 (q.get("channel") or [None])[0])})
+        if u.path.startswith("/api/intents/"):
+            mod = u.path.rsplit("/", 1)[-1]
+            if mod not in intents.MODULES:
+                return self._send(404, {"error": "bilinmeyen modul"})
+            return self._send(200, {"module": mod,
+                                    "intents": db.intents_for(
+                                        self.con, mod, ("pending", "delivered")),
+                                    "summary": intents.summary(self.con)})
         if u.path == "/api/config":
             return self._send(200, settings.read(self.server.config))
         if u.path == "/api/backup":
@@ -428,6 +441,19 @@ class Handler(BaseHTTPRequestHandler):
                                         "note": "Silme islemi confirm:true ister."})
             res = db.prune_events(self.con, govde.get("days") or 180)
             return self._send(200 if res.get("ok") else 400, res)
+        if u.path.startswith("/api/intents/") and u.path.endswith("/take"):
+            mod = u.path.split("/")[3]
+            return self._send(200, intents.take(self.con, mod))
+        if u.path.startswith("/api/intent/"):
+            parca = u.path.strip("/").split("/")
+            if len(parca) != 4 or parca[3] not in ("applied", "dismissed"):
+                return self._send(404, {"error": "yok"})
+            try:
+                nid = int(parca[2])
+            except ValueError:
+                return self._send(400, {"error": "niyet kimligi sayi olmali"})
+            r = intents.answer(self.con, nid, parca[3])
+            return self._send(200 if r.get("ok") else 409, r)
         if u.path == "/api/message":
             n = int(self.headers.get("Content-Length") or 0)
             try:

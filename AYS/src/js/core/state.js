@@ -40,6 +40,9 @@ R.S = {
   officeBriefings:{},// YYYY-MM-DD -> gunluk brifing (gunde tek model cagrisi)
   ui:{
     weekView:null,     // gorunen hafta no
+    /* HKM'nin bekleyen teklifleri — bellekte durur, depoya YAZILMAZ:
+       kaynagi HKM'dir ve tek gercek orada olmali. */
+    hkmIntents:[],
     examTab:'list',
     examOpen:null,
     cardTab:'due',

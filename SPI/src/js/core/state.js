@@ -61,6 +61,9 @@ SP.S = {
   storeHealth:null,
 
   ui:{
+    /* HKM'nin bekleyen teklifleri — bellekte durur, depoya YAZILMAZ:
+       kaynagi HKM'dir ve tek gercek orada olmali. */
+    hkmIntents:[],
     railOpen:false,
     undo:null,             // son yikici islemin geri alma kaydi
     dayTab:'giris',        // giris | ozet | gecmis

@@ -32,7 +32,7 @@
 
 import datetime
 
-from core import cross, db, impact, manager
+from core import cross, db, dil, impact, intents, manager
 
 # Komut sozlugu — kucuk ve KAPALI. Her biri tek bir sey yapar.
 COMMANDS = [
@@ -54,14 +54,27 @@ COMMANDS = [
 
 MAX_CHARS = 900          # kanal mesaji: okunmayan bir rapor, rapor degildir
 
+# Hangi alan hangi modulun isi. Bilinmeyen bir alan icin niyet KURULMAZ:
+# hangi modulun ustlenecegi belirsizken teklif yazmak, kuyruga cop atmaktir.
+ALAN_MODUL = {
+    "mat": ("ays", "subject"), "tr": ("ays", "subject"), "fiz": ("ays", "subject"),
+    "kim": ("ays", "subject"), "biy": ("ays", "subject"), "tar": ("ays", "subject"),
+    "cog": ("ays", "subject"), "geo": ("ays", "subject"),
+    "lang": ("esp", "disc"), "music": ("esp", "disc"),
+    "reading": ("esp", "disc"), "writing": ("esp", "disc"),
+}
+
 
 def _norm(s):
     return (s or "").strip().lower().replace("i̇", "i")
 
 
 def parse(text):
-    """Serbest metin YORUMLANMAZ. Ilk kelime bir komuta esitse o komut,
-    degilse None. «Anlamadigini anlamis gibi yapmak» burada baslar."""
+    """Kesin eslesme: ilk kelime bir komuta esitse o komut, degilse None.
+
+    Bu katman DEGISMEDI ve degismeyecek: tam komut yazan kullanici her
+    zaman ayni cevabi alir. Serbest cumleyi cozen katman (core/dil.py)
+    bunun USTUNE gelir, yerine degil."""
     t = _norm(text)
     if not t:
         return None
@@ -70,6 +83,26 @@ def parse(text):
         if ilk in c["words"]:
             return c["id"]
     return None
+
+
+def understand(text):
+    """(niyet, ayrinti). Once kesin komut, sonra serbest cumle.
+
+    Serbest cumle yalnizca EMIN OLUNDUGUNDA bir komuta baglanir; emin
+    olunmadiginda niyet None doner ve Patron sorar — tahmin etmez."""
+    kesin = parse(text)
+    if kesin:
+        # DIKKAT — «kabul etmiyorum» cumlesinin ILK KELIMESI «kabul»dur.
+        # Kesin eslesme tek basina birakilsaydi, bu cumle bir ONAY olarak
+        # islenirdi: bu katmanin yapabilecegi en kotu sey. Olumsuzluk varsa
+        # onay tahmin EDILMEZ, sorulur.
+        if kesin == "kabul" and dil.olumsuz(text):
+            return None, {"mode": "komut", "tie": ["kabul", "ret"],
+                          "reason": "olumsuzluk var, onay sayilmaz"}
+        return kesin, {"mode": "komut"}
+    niyet, ayrinti = dil.parse(text)
+    ayrinti["mode"] = "cumle"
+    return niyet, ayrinti
 
 
 def _kirp(metin):
@@ -132,16 +165,40 @@ def respond(con, text, date=None, th=None, channel="local", now=None):
     """Gelen kisa komuta cevap. Anlasilmayan mesaj YORUMLANMAZ."""
     date = date or datetime.date.today().isoformat()
     now = now or datetime.datetime.now().isoformat(timespec="seconds")
-    komut = parse(text)
+    komut, ayrinti = understand(text)
     log(con, channel, "user", text, now)
 
+    # Bir SORU degil bir ISTEK olabilir: «yarin iki saat matematik».
+    # HKM bunu modullere YAZMAZ; bir niyet kuyruga birakir ve modul
+    # acilista sorar. Yazan yine moduldur.
     if komut is None:
-        cevap = ("Anlamadım — serbest metni yorumlamıyorum. Şunları yapabilirim: "
-                 + ", ".join("«%s»" % c["id"] for c in COMMANDS) + ".")
+        talep = dil.istek(text, date)
+        if talep:
+            cevap = _niyet_kur(con, talep, text)
+            cevap = _kirp(cevap)
+            log(con, channel, "manager", cevap, now)
+            return {"command": "istek", "text": cevap, "date": date}
+
+    if komut is None:
+        adaylar = (ayrinti or {}).get("tie") or (ayrinti or {}).get("candidates") or []
+        if adaylar:
+            # Emin degilsek SORARIZ. Bir kelimelik maliyet, yanlis
+            # anlasilmis bir onaydan ucuzdur.
+            cevap = ("Emin olamadım: " + " ya da ".join("«%s»" % a for a in adaylar[:2])
+                     + " mi demek istedin? Tek kelimeyle yazarsan uygularım.")
+        else:
+            cevap = ("Anlamadım. Şunları yapabilirim: "
+                     + ", ".join("«%s»" % c["id"] for c in COMMANDS)
+                     + ". Serbest cümle de yazabilirsin; anlamadığımda "
+                       "anlamış gibi yapmam.")
     elif komut == "yardim":
         cevap = "\n".join("«%s» — %s" % (c["id"], c["note"]) for c in COMMANDS)
     elif komut == "durum":
-        m = daily_message(con, date, th=th)
+        # Zaman bir niyet degil bir parametredir: «dun» dendiyse dunun
+        # brifingi gider, bugunun degil.
+        hedef = dil.cozum_tarihi(date, ayrinti) if ayrinti.get("mode") == "cumle" \
+            else date
+        m = daily_message(con, hedef, th=th)
         cevap = m["text"] if m["ok"] else m["error"]
     elif komut == "capraz":
         bulgu = cross.findings(con, date)
@@ -179,6 +236,31 @@ def respond(con, text, date=None, th=None, channel="local", now=None):
                  "hatasıdır ve sessizce düzeltilmez.")
     log(con, channel, "manager", cevap, now)
     return {"command": komut, "text": cevap, "date": date}
+
+
+def _niyet_kur(con, talep, ham):
+    """Istegi bir niyete cevirir. Alan bilinmiyorsa SORAR, uydurmaz."""
+    alan = talep.get("field")
+    if not alan:
+        return ("Hangi alanda olduğunu yazmadın; hangi modülün üstleneceğini "
+                "tahmin etmem. «yarın 2 saat matematik» gibi alanı da yazarsan "
+                "teklifi kuyruğa bırakırım.")
+    modul, alan_adi = ALAN_MODUL[alan]
+    govde = {"date": talep["date"], "minutes": talep["minutes"], alan_adi: alan}
+    not_ = ("%s için %d dakika %s teklifi — HKM'den geldi."
+            % (talep["date"], talep["minutes"], alan))
+    r = intents.create(con, modul, "plan.add", govde, not_, source="patron")
+    if not r.get("ok"):
+        return "Teklif kurulamadı: " + "; ".join(r.get("errors") or [])
+    if r.get("duplicate"):
+        return ("Aynı teklif zaten kuyrukta duruyor (%s, %d dakika). Tekrar "
+                "yazmam: tekrar bilgi değil gürültüdür."
+                % (talep["date"], talep["minutes"]))
+    return ("Teklif %s kuyruğuna bırakıldı: %s, %d dakika %s. %s açıldığında "
+            "bunu sana gösterecek ve onaylarsan KENDİ planına yazacak — "
+            "HKM senin adına hiçbir yere yazmaz."
+            % (modul.upper(), talep["date"], talep["minutes"], alan,
+               modul.upper()))
 
 
 def log(con, channel, role, text, now=None):

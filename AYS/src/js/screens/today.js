@@ -535,6 +535,32 @@ R.Screens.today = (function(){
     });
   }
 
+  /* ---------- HKM teklifleri ----------
+
+     HKM bu sisteme YAZMAZ: kuyruktan gelen her satir bir TEKLIFTIR ve
+     kullanici gormeden hicbir sey uygulanmaz. Uygulayan da HKM degil,
+     AYS'in kendi kodudur. Kuyruk bossa bu kart hic cizilmez. */
+  function HkmTeklifKart(){
+    const liste = S.ui.hkmIntents || [];
+    if(!liste.length) return '';
+    return c.Card({ title:'HKM teklifi', hint:'hkm',
+      sub:liste.length + ' teklif bekliyor',
+      body:html`
+        ${map(liste, n => html`<div class="mt-8">
+          ${c.Notice({ tone:'info', body:n.note })}
+          <div class="row gap-8 mt-8">
+            ${c.Button({ label:'Uygula', size:'sm', tone:'primary',
+              act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
+            ${c.Button({ label:'İstemiyorum', size:'sm',
+              act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
+          </div>
+        </div>`)}
+        <p class="tiny dim mt-10">Bu satırlar birer tekliftir. Onaylarsan
+          AYS kendi planına yazar; reddedersen HKM kaydı siler değil
+          «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş
+          bir teklif ayrı şeylerdir.</p>` });
+  }
+
   async function render(){
     const dateISO = U.todayISO();
     const n = M.currentWeek();
@@ -553,6 +579,7 @@ R.Screens.today = (function(){
       ${when(banners.length, () => c.Span(12, html`<div class="stack-sm">${banners}</div>`))}
       ${c.Span(12, R.Setup.needed() ? raw(R.Setup.card()) : NextUpCard())}
       ${when(R.Signals && R.Signals.current(), () => c.Span(12, SignalCard()))}
+      ${when((S.ui.hkmIntents || []).length, () => c.Span(12, HkmTeklifKart()))}
 
       ${c.Span(12, c.Cols(4, html`
         ${c.Stat({ label:'Bugünün bloğu', value:html`${doneBlocks}<small>/${planBlocks}</small>`,
@@ -603,6 +630,28 @@ R.Screens.today = (function(){
 
   /* ---------- eylemler ---------- */
   const handle = {
+    /* HKM teklifleri: uygulayan AYS'in kendi kodudur. */
+    async 'hkm-intent-yes'(el){
+      const liste = S.ui.hkmIntents || [];
+      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
+      if(!n) return;
+      const r = await R.Beacon.applyIntent(n);
+      if(!r.ok){ UI.toast(r.error || 'Uygulanamadı'); return; }
+      await R.Beacon.answerIntent(n.id, true);
+      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+      UI.toast(r.note || 'Uygulandı');
+      R.App.render();
+    },
+    async 'hkm-intent-no'(el){
+      const liste = S.ui.hkmIntents || [];
+      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
+      if(!n) return;
+      await R.Beacon.answerIntent(n.id, false);
+      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+      UI.toast('İstenmedi olarak işaretlendi');
+      R.App.render();
+    },
+
     async 'signal-answer'(el){
       const inp = document.getElementById('sig-answer');
       const r = await R.Signals.answer(el.dataset.id, inp ? inp.value : '');

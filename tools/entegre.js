@@ -92,6 +92,20 @@ async function main(){
     browser = await chromium.launch(process.env.CHROMIUM_PATH
       ? { executablePath:process.env.CHROMIUM_PATH } : {});
 
+    /* 0.5 — NIYET KUYRUGU: HKM is baslatir ama YAZMAZ.
+       Patron'a dogal dille bir istek yazilir, kuyruga bir teklif duser,
+       arayuz onu alir ve UYGULAYAN arayuzun kendi kodudur. */
+    const istek = await (await hkmFetch('/api/message', {
+      method:'POST',
+      body:JSON.stringify({ text:'yarın 2 saat matematik çalışacağım',
+        date:BUGUN }) })).json();
+    if(istek.command !== 'istek') hatalar.push('Patron istegi niyete cevirmedi');
+    const kuyruk = await (await hkmFetch('/api/intents/ays')).json();
+    if(!(kuyruk.intents || []).length) hatalar.push('niyet kuyruga dusmedi');
+    else console.log('  HKM → istek niyete cevrildi: ' + kuyruk.intents[0].kind
+      + ' (' + kuyruk.intents[0].payload.minutes + ' dk)');
+
+
     for(const s of SISTEMLER){
       const srv = spawn('python3', [path.join(ROOT, s.id, 'devserver.py'), String(s.port)],
         { cwd:path.join(ROOT, s.id), stdio:'ignore' });
@@ -196,6 +210,35 @@ async function main(){
       if(!gecmis.ok) hatalar.push(s.id + ': gecmis gonderimi basarisiz (' + gecmis.status + ')');
       else console.log('  ' + s.id + ' → gecmis: ' + gecmis.sent + ' gun gonderildi, '
         + gecmis.empty + ' gun olcumsuz (dogru davranis)');
+
+      /* 2.7 — NIYET: arayuz kuyrugu alir, UYGULAYAN kendi kodudur.
+         Yalniz AYS icin denenir: teklif oraya birakildi. */
+      if(s.id === 'AYS'){
+        const niyet = await page.evaluate(async ([ns]) => {
+          const B = window[ns].Beacon;
+          const liste = await B.intents();
+          if(!liste.length) return { alindi:0 };
+          const n = liste[0];
+          /* Gun kaydi henuz yoksa ensureDay() sablon bloklari da kurar;
+             bu yuzden toplam sayi degil, TEKLIFTEN gelen blok sayilir. */
+          const say = () => ((window[ns].S.days[n.payload.date] || {}).blocks || [])
+            .filter(b => b.slot === 'HKM teklifi').length;
+          const oncekiBlok = say();
+          const r = await B.applyIntent(n);
+          const sonrakiBlok = say();
+          await B.answerIntent(n.id, true);
+          return { alindi:liste.length, ok:r.ok, oncekiBlok, sonrakiBlok,
+            not:r.note || r.error };
+        }, [s.ns]);
+        if(!niyet.alindi) hatalar.push('AYS: niyet kuyrugu bos geldi');
+        else if(!niyet.ok) hatalar.push('AYS: niyet uygulanamadi — ' + niyet.not);
+        else if(niyet.sonrakiBlok !== niyet.oncekiBlok + 1){
+          hatalar.push('AYS: niyet uygulandi ama plan degismedi');
+        }else{
+          console.log('  AYS → niyeti KENDI kodu ile uyguladi (teklif blogu: '
+            + niyet.oncekiBlok + ' → ' + niyet.sonrakiBlok + ')');
+        }
+      }
 
       /* 3 — jeton yanlisken 401, ve bu arayuzu bozmaz. */
       const yanlis = await page.evaluate(async ([ns, url]) => {

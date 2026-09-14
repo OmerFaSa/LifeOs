@@ -462,6 +462,70 @@ Faz 7 sırasında bulunan iki hata: (a) ayar yazma yolu sabitti, bu yüzden bir
 sunucudan geliyor; (b) eşik kaydedildiğinde başarı mesajı, hemen ardından
 gelen yeniden çizimle siliniyordu, kullanıcı kaydettiğini göremiyordu.
 
+## 8.12 Dil — `core/dil.py` (Faz 8)
+
+Patron'un komut seti bilerek kapalı; ama insan «bugün ne yapmalıyım» der.
+Bu dosya o boşluğa köprüdür ve bir **dil modeli değildir**: kelime tablosu,
+Türkçe'ye uygun bir normalleştirme ve bir puanlama ile çalışır. Bir modelin
+niyeti yanlış eşlemesi, bir kelime tablosunun yanlış eşlemesinden pahalıdır
+— çünkü **neden** yanlış eşlediğini kimse gösteremez.
+
+Beş kural:
+
+1. **Emin değilse uydurmaz.** Puan eşiğin altındaysa ya da ilk iki aday
+   birbirine yakınsa niyet belirsizdir ve Patron «şunu mu demek istedin»
+   diye **sorar**.
+2. **Türkçe'nin kendi harfleri var.** `I→ı`, `İ→i` çevrimi tabloyla yapılır;
+   eşleştirmede aksan katlanır (`çapraz`≡`capraz`) — bir komut arayüzünün
+   klavye düzenine göre anlayıp anlamaması kabul edilemez.
+3. **Ek alır, kök kalır** — ama kök en az üç harf. Ek soyucu kısa
+   kelimelerde fazla yediği için (`yarın`→`yar`) hem kök hem ham biçim
+   birlikte aranır.
+4. **Zaman ayrı okunur:** «dün», «bu hafta», «son 14 gün» bir niyet değil
+   bir **parametredir**.
+5. **Model eklenirse sayı üretemez.** Dosyanın sonundaki kanca yalnızca
+   kurulmuş bir cümleyi yeniden ifade edebilir; kanca boşken HKM bugünkü
+   gibi çalışır ve kanca patlarsa cümle olduğu gibi kalır.
+
+### En tehlikeli kör nokta: olumsuzluk
+
+«kabul etmiyorum» cümlesinin **ilk kelimesi «kabul»dür**. Kesin eşleşme tek
+başına bırakılsaydı bu cümle bir ONAY olarak işlenirdi — bu katmanın
+yapabileceği en kötü şey. Kural asimetriktir ve bilerek öyle:
+
+| Durum | Sonuç |
+|---|---|
+| olumsuzluk + «kabul» | **belirsiz** → sorulur (bir kelimelik maliyet) |
+| olumsuzluk + «ret» | ret kalır (olumsuzluk reddi pekiştirir) |
+
+## 8.13 Niyet kuyruğu — `core/intents.py` (Faz 9)
+
+«Yarın iki saat matematik» isteği, HKM'nin AYS'ye **yazması** demek olurdu
+ve tek yönlü bağımlılığı kırardı. Çözüm sahip değiştirmektir:
+
+```text
+istek → HKM bir NIYET yazar → modül açılışta kuyruğu SORAR
+      → kullanıcıya gösterilir → onaylanırsa MODÜL kendi koduyla uygular
+```
+
+Dört kural:
+
+1. **Niyet bir emir değil bir tekliftir.** Kullanıcı görmeden hiçbir şey
+   olmaz.
+2. **Tanımlı türler dışında niyet yok.** Kuyruk serbest bir uzaktan komut
+   kanalı değildir: her tür, modülün ne yapacağını bilerek yazdığı bir
+   sözleşmedir (`plan.add`, `focus.set`, `load.reduce`, `measure.ask`).
+   Bilinmeyen tür ya da bilinmeyen alan **reddedilir**.
+3. **Görülmemiş ile reddedilmiş ayrı şeylerdir** (`delivered` ≠ `dismissed`),
+   ve teslim edilmiş bir niyet **uygulanmış sayılmaz**.
+4. **Kuyruk kısa tutulur:** aynı teklif iki kez yazılmaz.
+
+Modül tarafında gelen sözlük bir «komut» değil bir **girdidir**: alanları
+tek tek okunur, sınırlanır (süre 10–480 dk) ve sistemin kendi modeliyle
+yazılır. SPİ bir teklifi kendiliğinden **uygulamaz** — sağlıkta ölçüm de
+yük de kullanıcının kararıdır; ESP ise teklifi bir *hatırlatıcı* yapar,
+oturum değil: yapılmamış bir çalışma ölçülmüş görünmemeli.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |
@@ -471,6 +535,8 @@ gelen yeniden çizimle siliniyordu, kullanıcı kaydettiğini göremiyordu.
 | 3 | Dijital İkiz, Yönetici, öneri yaşam döngüsü, çapraz bulgu, veri merkezi, etki | **yazıldı** |
 | 4 | Kanal katmanı + Telegram adaptörü | **yazıldı** (kapalı gelir) |
 | 5 | WhatsApp geçidi (Cloud API, imzalı webhook) | **yazıldı** · ses yapılacak |
+| 8 | Doğal dil (kural tabanlı niyet eşleme) | **yazıldı** |
+| 9 | Niyet kuyruğu — HKM iş başlatır, modül yazar | **yazıldı** |
 | 6 | Üç arayüzden best-effort işaret | **yazıldı** |
 
 ## 10. Ve dürüst bir soru
