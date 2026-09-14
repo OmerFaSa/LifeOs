@@ -151,6 +151,10 @@ Uç noktalar:
 | `GET /api/twin?date=&days=` | dijital ikiz — son N günün tek resmi |
 | `GET /api/decisions?date=` | günün bütün önerileri, reddedilenler dahil |
 | `GET /api/impact` | öneri sonrası ölçüler ne yaptı (etki) |
+| `GET /api/config` | ayarlar — **sırlar maskeli** |
+| `POST /api/config` | ayar yaması (doğrulanır; jetona dokunmaz) |
+| `GET /api/backup` | bütün ambar tek JSON |
+| `POST /api/prune` | eski ham ölçümler silinir; kararlar kalır |
 | `GET /api/cross?date=&days=` | çapraz bulgular — üç ambar yan yana |
 | `GET /api/series?date=&days=&module=` | metrik metrik zaman serisi |
 | `POST /api/decision/<id>/accept` | öneriyi kabul eder |
@@ -425,6 +429,38 @@ Büyük Patron'a bir komut eklendi: **`etki`**. Cevap, ölçülmemiş bir fayday
 `db.MIGRATIONS` açık bir liste olarak yazıldı ve her açılışta koşuyor.
 Tekrarlanabilir: ikinci koşumda hiçbir şey yapmaz. Bir test eski şemayla
 kurulmuş bir veritabanını taşıyarak bunu denetliyor.
+
+## 8.11 Yönetim — `core/settings.py`
+
+`config.json`'u elle düzenlemek bir teknik ayrıntıdır ve kullanıcıya
+yansıtılmamalı; ama ayarı bir arayüze açmak, o arayüzü yeni bir yüzey
+yapar. Dört kural:
+
+1. **Sır okunmaz.** Jeton, uygulama sırrı ve bot jetonu dışarı **maskeli**
+   çıkar: «kurulu mu» bilgisi verilir, değerin kendisi verilmez. Bir ayar
+   ekranı, sırrı ekranda göstermek zorunda değildir.
+2. **Jeton buradan değişmez.** `local_token` bir ayar değil bir KİMLİKTİR;
+   API'den değiştirilebilmesi, jetonu bilen birinin jetonu değiştirebilmesi
+   demektir. Değişimi `kur.py` ve dosya yapar.
+3. **Doğrulanmayan değer yazılmaz.** Eşiklerin izinli aralıkları vardır:
+   «uyku tabanı 40 saat» diyen bir ayar, VP'yi sessizce susturur. Tip ya da
+   aralık tutmuyorsa istek reddedilir ve **hiçbir şey yazılmaz** — yarım
+   yazılmış bir yapılandırma, bozuk bir yapılandırmadır. Dosyaya yazma da
+   önce geçici dosyaya, sonra yerine taşıyarak yapılır.
+4. **Bilinmeyen alan sessizce yutulmaz.** Tanınmayan bir anahtar reddedilir;
+   sessizce yok sayılan bir ayar, kullanıcıya «kaydedildi» der ve hiçbir şey
+   yapmaz.
+
+Bakım tarafında iki iş var: **yedek** (bütün ambar tek JSON — dokuz aylık
+kayıt tek bir disk hatasına bağlı kalmasın) ve **budama** (yalnız ham ölçüm
+geçmişi silinir; kararlar ve konuşmalar KALIR, çünkü bu katmanı sonradan
+denetlemenin tek yolu onlar). Budama onay ister ve kaç satır sildiğini
+söyler: «temizlendi» deyip sayı vermeyen bir işlem, ne yaptığını gizler.
+
+Faz 7 sırasında bulunan iki hata: (a) ayar yazma yolu sabitti, bu yüzden bir
+**test koşumu kullanıcının gerçek `config.json`'unu eziyordu** — yol artık
+sunucudan geliyor; (b) eşik kaydedildiğinde başarı mesajı, hemen ardından
+gelen yeniden çizimle siliniyordu, kullanıcı kaydettiğini göremiyordu.
 
 ## 9. Fazlar
 

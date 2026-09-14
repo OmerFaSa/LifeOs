@@ -294,6 +294,42 @@ async function main(){
       console.log('  HKM yuzu → sistemler sekmesi: ' + sistemler.satir
         + ' metrik, ' + sistemler.cizgi + ' seri cizgisi');
     }
+    /* Yonetim sekmesi: esik kaydi GERCEKTEN yaziliyor ve bozuk deger
+       REDDEDILIYOR mu? */
+    await yuz.click('[data-sekme="yonetim"]');
+    await wait(400);
+    await yuz.evaluate(t => { window.__jeton = t; }, TOKEN);
+    const yonetim = await yuz.evaluate(async () => {
+      const alan = document.querySelector('[data-esik="bio.sleep_hours_min"]');
+      if(!alan) return { hata:'esik alani yok' };
+      /* Sir kurulu degilse «yok» yazar; olan sey ASLA degerin kendisi
+         olmamali. Denetim, satirin varligini ve degerin YOKLUGUNU arar. */
+      const metin = document.querySelector('#ayarlar').textContent;
+      const maskeli = metin.indexOf('jeton:') >= 0
+        && metin.indexOf('izin listesi') >= 0;
+      alan.value = '40';                         /* aralik disi */
+      document.querySelector('#esik-kaydet').click();
+      await new Promise(r => setTimeout(r, 500));
+      const red = document.querySelector('#esik-not').textContent;
+      alan.value = '7.25';                       /* gecerli */
+      document.querySelector('#esik-kaydet').click();
+      await new Promise(r => setTimeout(r, 500));
+      return { red, kabul:document.querySelector('#esik-not').textContent, maskeli,
+        sirSizdi:document.body.textContent.indexOf(window.__jeton || '@@yok@@') >= 0 };
+    });
+    if(yonetim.hata) hatalar.push('HKM yuzu: ' + yonetim.hata);
+    else{
+      if((yonetim.red || '').indexOf('Kaydedilmedi') < 0){
+        hatalar.push('HKM yuzu: aralik disi esik kabul edildi');
+      }
+      if((yonetim.kabul || '').indexOf('Kaydedildi') < 0){
+        hatalar.push('HKM yuzu: gecerli esik kaydedilmedi');
+      }
+      if(!yonetim.maskeli) hatalar.push('HKM yuzu: kanal ayar satiri cizilmedi');
+      if(yonetim.sirSizdi) hatalar.push('HKM yuzu: jeton ekranda gorundu');
+      console.log('  HKM yuzu → yonetim: bozuk esik reddedildi, gecerli esik kaydedildi');
+    }
+
     await yuz.click('[data-sekme="genel"]');
     await wait(300);
 

@@ -97,6 +97,7 @@ svg.spark{ width:100%; height:34px; display:block; }
       <button data-sekme="genel" class="on">Genel</button>
       <button data-sekme="sistemler">Sistemler</button>
       <button data-sekme="hkm">HKM</button>
+      <button data-sekme="yonetim">Yönetim</button>
     </div>
 
     <div data-bolme="genel">
@@ -126,6 +127,11 @@ svg.spark{ width:100%; height:34px; display:block; }
       </div>
       <div id="konusmalar"></div>
     </div>
+    </div>
+
+    <div data-bolme="yonetim" hidden>
+      <div class="card" id="ayarlar"><p class="muted">Yükleniyor…</p></div>
+      <div class="card" id="bakim"></div>
     </div>
   </div>
 </div>
@@ -451,6 +457,135 @@ svg.spark{ width:100%; height:34px; display:block; }
     $('sistemler').innerHTML = h;
   }
 
+  /* ---------------------------------------------------------- yönetim
+
+     Ayarı bir arayüze açmak, o arayüzü yeni bir yüzey yapar. Bu yüzden:
+     sırlar maskeli gösterilir (değeri ekranda görünmez), jeton buradan
+     DEĞİŞTİRİLEMEZ, ve doğrulanmayan bir değer yazılmaz — sunucu reddeder
+     ve hiçbir şey kaydedilmez. */
+  var AYAR = null;
+
+  function esikSatiri(grup, ad, deger, aralik){
+    return '<div class="metric"><div class="metric__name">' + esc(grup) + '.'
+      + esc(ad) + '</div><div class="metric__val">'
+      + '<input data-esik="' + esc(grup) + '.' + esc(ad) + '" type="number" '
+      + 'step="any" value="' + esc(deger) + '" style="width:100px" '
+      + 'aria-label="' + esc(grup) + ' ' + esc(ad) + '"/></div>'
+      + '<div class="metric__meta">izin verilen aralık: '
+      + esc(aralik[0]) + ' – ' + esc(aralik[1]) + '</div></div>';
+  }
+
+  function ayarCiz(c){
+    AYAR = c;
+    var h = '<div class="tag">Eşikler</div>'
+      + '<p class="muted">Bir VP\'nin «uyku az» demesi bir ölçüm değil bir '
+      + 'yargıdır; yargıyı üretecek sayı senindir. Aralık dışında bir değer '
+      + 'reddedilir: «uyku tabanı 40 saat» diyen bir ayar, VP\'yi sessizce '
+      + 'susturur.</p>';
+    Object.keys(c.thresholds || {}).forEach(function(grup){
+      Object.keys(c.thresholds[grup]).forEach(function(ad){
+        var aralik = ((c.ranges || {})[grup] || {})[ad];
+        if(!aralik) return;
+        h += esikSatiri(grup, ad, c.thresholds[grup][ad], aralik);
+      });
+    });
+    h += '<div class="row" style="margin-top:12px">'
+      + '<button class="primary" id="esik-kaydet">Eşikleri kaydet</button></div>'
+      + '<p class="muted" id="esik-not"></p>';
+
+    h += '<div class="tag" style="margin-top:20px">Kanallar</div>';
+    ['whatsapp', 'telegram'].forEach(function(ad){
+      var k = (c.channels || {})[ad] || {};
+      h += '<div class="line"><b>' + esc(ad) + '</b> — '
+        + (k.ready ? '<span class="ok">açık</span>' : '<span class="muted">kapalı</span>')
+        + '<div class="muted">izin listesi: '
+        + esc((k.allow_from || []).length ? (k.allow_from || []).join(', ')
+            : 'boş (kimseye cevap verilmez)') + '</div>'
+        + '<div class="muted">jeton: ' + esc(kurulu(k.token || k.bot_token))
+        + ' · imza sırrı: ' + esc(kurulu(k.app_secret || k.webhook_secret)) + '</div>'
+        + '<div class="row" style="margin-top:6px">'
+        + '<button data-kanal="' + esc(ad) + '" data-ac="'
+        + (k.enabled ? '0' : '1') + '">' + (k.enabled ? 'Kapat' : 'Aç') + '</button>'
+        + '</div></div>';
+    });
+    h += '<p class="muted">Jeton ve sırlar buradan GÖRÜNMEZ ve buradan '
+      + 'yazılmaz: dosyada dururlar (config.json). Bir ayar ekranı, sırrı '
+      + 'ekranda göstermek zorunda değildir.</p>';
+    $('ayarlar').innerHTML = h;
+
+    $('esik-kaydet').addEventListener('click', esikKaydet);
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-kanal]'), function(b){
+        b.addEventListener('click', function(){ kanalAc(b.dataset.kanal, b.dataset.ac === '1'); });
+      });
+  }
+
+  function kurulu(m){ return m && m.set ? 'kurulu' : 'yok'; }
+
+  async function esikKaydet(){
+    var yama = { thresholds:{} };
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-esik]'), function(el){
+        var p = el.dataset.esik.split('.');
+        var v = Number(el.value);
+        if(!isFinite(v)) return;
+        (yama.thresholds[p[0]] = yama.thresholds[p[0]] || {})[p[1]] = v;
+      });
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
+    if(r.status === 200){
+      /* Once yeniden ciz, SONRA notu yaz: ters sirada, ayarCiz() yeni bir
+         #esik-not uretip mesaji siliyordu — kullanici kaydettigini
+         goremiyordu. */
+      ayarCiz(r.body.config);
+      $('esik-not').textContent = 'Kaydedildi.';
+    }else{
+      $('esik-not').textContent = 'Kaydedilmedi — '
+        + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+    }
+  }
+
+  async function kanalAc(ad, ac){
+    var yama = { channels:{} };
+    yama.channels[ad] = { enabled:!!ac };
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
+    if(r.status === 200) ayarCiz(r.body.config);
+  }
+
+  function bakimCiz(){
+    $('bakim').innerHTML = '<div class="tag">Bakım</div>'
+      + '<p class="muted">Bütün ambar tek dosyadadır. Yedek almak, dokuz aylık '
+      + 'kaydı tek bir disk hatasına bağlı olmaktan çıkarır.</p>'
+      + '<div class="row"><button id="yedek">Yedeği indir</button>'
+      + '<button id="buda">Eski ölçümleri buda</button></div>'
+      + '<p class="muted" id="bakim-not">Budama yalnız ham ölçüm geçmişini '
+      + 'siler; kararlar ve konuşmalar KALIR — onlar bu katmanı sonradan '
+      + 'denetlemenin tek yolu.</p>';
+    $('yedek').addEventListener('click', yedekIndir);
+    $('buda').addEventListener('click', budama);
+  }
+
+  async function yedekIndir(){
+    var r = await api('/api/backup');
+    if(r.status !== 200) return;
+    var blob = new Blob([JSON.stringify(r.body, null, 2)],
+      { type:'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'hkm-yedek-' + bugun() + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    $('bakim-not').textContent = 'Yedek indirildi.';
+  }
+
+  async function budama(){
+    if(!window.confirm('180 günden eski ham ölçümler silinsin mi? '
+      + 'Kararlar ve konuşmalar kalır. Bu işlem geri alınamaz.')) return;
+    var r = await api('/api/prune', { method:'POST',
+      body:JSON.stringify({ confirm:true, days:180 }) });
+    $('bakim-not').textContent = r.status === 200
+      ? (r.body.deleted + ' ölçüm satırı silindi (' + r.body.before + ' öncesi).')
+      : 'Budanamadı.';
+  }
+
   function sekmeSec(ad){
     Array.prototype.forEach.call(
       document.querySelectorAll('#sekmeler button'), function(b){
@@ -483,6 +618,9 @@ svg.spark{ width:100%; height:34px; display:block; }
     if(g.status === 200) gecmisCiz(g.body);
     var et = await api('/api/impact');
     if(et.status === 200) etkiCiz(et.body);
+    var ay = await api('/api/config');
+    if(ay.status === 200) ayarCiz(ay.body);
+    bakimCiz();
     await konusmaYukle();
   }
 

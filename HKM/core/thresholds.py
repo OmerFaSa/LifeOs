@@ -44,6 +44,15 @@ def _merge(base, over):
     return out
 
 
+def from_config(cfg):
+    """Esikleri BELLEKTEKI yapilandirmadan cozer.
+
+    Diskten okumak, sunucunun o an calistigi degerle dosyadaki degerin
+    ayrisabilecegi anlamina gelir (ornegin ayar gecici bir yola yazildiysa).
+    Tek gercek, sunucunun elindeki nesnedir."""
+    return _merge(DEFAULTS, (cfg or {}).get("thresholds", {}))
+
+
 def load(path=None):
     """Esikleri dondurur. config.json yoksa varsayilanlar; varsa uzerine yazar.
 

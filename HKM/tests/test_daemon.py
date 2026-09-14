@@ -43,6 +43,9 @@ class _Server(object):
             "api_base": "http://127.0.0.1:4997"}}}
         self.srv.local = threading.local()
         self.srv.db_path = self.db_path
+        # Ayar yazma yolu GECICI: bir test kosumu kullanicinin
+        # config.json'unu asla degistirmemeli.
+        self.srv.config_path = os.path.join(self.dir, "config.json")
         self.srv.thresholds = thresholds.DEFAULTS
         self.port = self.srv.server_address[1]
         self.thread = threading.Thread(target=self.srv.serve_forever, daemon=True)
@@ -335,6 +338,70 @@ def run():
             ok("status" in r)
         test("kanal ulasilamazken say cokmez",
              t_say_refuses_when_channel_unreachable)
+
+        def t_config_masks_secrets():
+            """Bir ayar ekrani, sirri ekranda goruntulemek zorunda degildir."""
+            kod, c = S.call("/api/config")
+            eq(kod, 200)
+            eq(c["local_token"]["set"], True)
+            no(TOKEN in json.dumps(c), "jeton maskesiz cikti")
+            no(WA_SIR in json.dumps(c), "uygulama sirri maskesiz cikti")
+            eq(c["channels"]["whatsapp"]["app_secret"]["set"], True)
+            eq(c["channels"]["whatsapp"]["allow_from"], [IZINLI])
+        test("ayarlar sirlari maskeleyerek doner", t_config_masks_secrets)
+
+        def t_config_rejects_bad_values():
+            """Dogrulanmayan deger YAZILMAZ: yarim yazilmis bir
+            yapilandirma, bozuk bir yapilandirmadir."""
+            kod, r = S.call("/api/config",
+                            body={"thresholds": {"bio": {"sleep_hours_min": 40}}})
+            eq(kod, 422)
+            ok(r["errors"])
+            kod, r = S.call("/api/config", body={"local_token": "yeni"})
+            eq(kod, 422)
+            kod, r = S.call("/api/config", body={"channels": {"whatsapp":
+                                                 {"enabled": "evet"}}})
+            eq(kod, 422)
+        test("bozuk ayar reddedilir", t_config_rejects_bad_values)
+
+        def t_config_writes_and_keeps_token():
+            """Jeton bir ayar degil bir KIMLIKTIR: API'den degismez."""
+            kod, r = S.call("/api/config",
+                            body={"thresholds": {"bio": {"sleep_hours_min": 7.5}}})
+            eq(kod, 200)
+            eq(S.srv.config["local_token"], TOKEN)
+            eq(S.srv.thresholds["bio"]["sleep_hours_min"], 7.5)
+            # Jeton hala calisiyor: degistirilmedi.
+            eq(S.call("/api/health")[0], 200)
+            eq(S.call("/api/config")[0], 200)
+        test("ayar yazilir ama jetona dokunulmaz", t_config_writes_and_keeps_token)
+
+        def t_backup_carries_everything():
+            kod, y = S.call("/api/backup")
+            eq(kod, 200)
+            for tablo in ("raw_events", "audits", "decisions", "conversations"):
+                ok(tablo in y, "yedekte %s yok" % tablo)
+            eq(y["__meta"]["app"], "hkm")
+        test("yedek butun ambari tasir", t_backup_carries_everything)
+
+        def t_prune_needs_confirmation_and_keeps_decisions():
+            """Kararlar ve konusmalar SILINMEZ; ve silme onay ister."""
+            eq(S.call("/api/prune", body={"days": 30})[0], 400)
+            eq(S.call("/api/prune", body={"confirm": True, "days": 3})[0], 400)
+            oncekiKarar = len(S.call("/api/decisions?date=" + BUGUN)[1]["decisions"])
+            kod, r = S.call("/api/prune", body={"confirm": True, "days": 30})
+            eq(kod, 200)
+            ok("deleted" in r)
+            sonrakiKarar = len(S.call("/api/decisions?date=" + BUGUN)[1]["decisions"])
+            eq(sonrakiKarar, oncekiKarar)
+        test("budama onay ister ve kararlari silmez",
+             t_prune_needs_confirmation_and_keeps_decisions)
+
+        def t_config_needs_token():
+            eq(S.call("/api/config", token=None)[0], 401)
+            eq(S.call("/api/backup", token=None)[0], 401)
+            eq(S.call("/api/prune", body={"confirm": True}, token=None)[0], 401)
+        test("yonetim yollari jetonsuz acilmaz", t_config_needs_token)
 
         def t_bad_json():
             req = urllib.request.Request(S.url("/api/sync/ays"), data=b"{bozuk",

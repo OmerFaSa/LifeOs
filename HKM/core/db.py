@@ -225,3 +225,37 @@ def open_decision(con, date, proposal):
 def decision(con, decision_id):
     row = con.execute("SELECT * FROM decisions WHERE id=?", (decision_id,)).fetchone()
     return dict(row) if row else None
+
+
+def export_all(con):
+    """Butun ambar tek bir nesnede — yedegin ta kendisi.
+
+    Turetilmis hicbir sey yazilmaz: raw_events zaten her seyin kaynagi,
+    kararlar ve konusmalar da kullanicinin kendi izidir."""
+    out = {"__meta": {"app": "hkm", "schema": 1,
+                      "exportedAt": datetime.datetime.now().isoformat(
+                          timespec="seconds")}}
+    for tablo in ("raw_events", "audits", "decisions", "decision_sources",
+                  "conversations"):
+        rows = con.execute("SELECT * FROM %s ORDER BY rowid" % tablo).fetchall()
+        out[tablo] = [dict(r) for r in rows]
+    return out
+
+
+def prune_events(con, days, today=None):
+    """Belirtilen gunden ESKI ham olaylari siler.
+
+    Kararlar ve konusmalar SILINMEZ: onlar kullanicinin kendi izi ve
+    HKM'nin kendi denetiminin tek kaynagi. Silinen sey yalniz olcum
+    gecmisidir ve kac satirin silindigi geri bildirilir — «temizlendi»
+    diyen ama sayi vermeyen bir islem, ne yaptigini gizler."""
+    gun = int(days)
+    if gun < 7:
+        return {"ok": False, "error": "en az yedi gun saklanir"}
+    t = datetime.date.fromisoformat(today or datetime.date.today().isoformat())
+    sinir = (t - datetime.timedelta(days=gun)).isoformat()
+    say = con.execute("SELECT COUNT(*) FROM raw_events WHERE date < ?",
+                      (sinir,)).fetchone()[0]
+    con.execute("DELETE FROM raw_events WHERE date < ?", (sinir,))
+    con.commit()
+    return {"ok": True, "deleted": say, "before": sinir, "kept_days": gun}

@@ -9,6 +9,10 @@ Ucnoktalar:
     GET  /api/twin?date=&days=      dijital ikiz: son N gunun tek resmi
     GET  /api/decisions?date=       gunun butun onerileri (reddedilenler dahil)
     GET  /api/impact                oneri sonrasi olculer ne yapti (etki)
+    GET  /api/config                ayarlar — SIRLAR MASKELI
+    POST /api/config                ayar yamasi (dogrulanir; jetona dokunmaz)
+    GET  /api/backup                butun ambar tek JSON
+    POST /api/prune                 eski ham olaylari siler (kararlar kalir)
     GET  /api/cross?date=&days=     capraz bulgular: uc ambar yan yana
     GET  /api/series?date=&days=&module=  metrik metrik zaman serisi
     POST /api/message               Buyuk Patron'a kisa komut (yerel kanal)
@@ -43,7 +47,7 @@ from urllib.parse import parse_qs, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (channels, cross, db, impact, manager,  # noqa: E402
-                  patron, sync_engine, thresholds, twin)
+                  patron, settings, sync_engine, thresholds, twin)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -364,6 +368,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"messages": patron.history(
                 self.con, max(1, min(limit, 200)),
                 (q.get("channel") or [None])[0])})
+        if u.path == "/api/config":
+            return self._send(200, settings.read(self.server.config))
+        if u.path == "/api/backup":
+            return self._send(200, db.export_all(self.con))
         if u.path == "/api/impact":
             return self._send(200, impact.summary(self.con))
         if u.path == "/api/decisions":
@@ -390,6 +398,36 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(401, {"error": "bearer gerekli"})
         if u.path == "/api/pair/open":
             return self._pair_open()
+        if u.path == "/api/config":
+            n = int(self.headers.get("Content-Length") or 0)
+            try:
+                yama = json.loads(self.rfile.read(n) or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            ok, hatalar = settings.validate(yama)
+            if not ok:
+                # Yarim yazilmis bir yapilandirma, bozuk bir yapilandirmadir.
+                return self._send(422, {"errors": hatalar})
+            yeni = settings.apply(self.server.config, yama)
+            # Yazma yolu SUNUCUDAN gelir: testler gercek config.json'u
+            # ezmemeli. Bir test kosumu, kullanicinin yapilandirmasini
+            # degistirdigi an test olmaktan cikar.
+            settings.write(yeni, getattr(self.server, "config_path", None))
+            self.server.config = yeni
+            self.server.thresholds = thresholds.from_config(yeni)
+            return self._send(200, {"ok": True,
+                                    "config": settings.read(yeni)})
+        if u.path == "/api/prune":
+            n = int(self.headers.get("Content-Length") or 0)
+            try:
+                govde = json.loads(self.rfile.read(n) or b"{}")
+            except ValueError:
+                govde = {}
+            if not govde.get("confirm"):
+                return self._send(400, {"error": "onay gerekli",
+                                        "note": "Silme islemi confirm:true ister."})
+            res = db.prune_events(self.con, govde.get("days") or 180)
+            return self._send(200 if res.get("ok") else 400, res)
         if u.path == "/api/message":
             n = int(self.headers.get("Content-Length") or 0)
             try:
@@ -439,6 +477,7 @@ def main():
         return 1
     srv = ThreadingHTTPServer((cfg["host"], int(cfg["port"])), Handler)
     srv.config = cfg
+    srv.config_path = CONFIG_PATH
     srv.local = threading.local()
     srv.db_path = cfg.get("db_path") or db.DB_PATH
     db.connect(srv.db_path).close()          # sema bir kez kurulur
