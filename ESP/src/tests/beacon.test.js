@@ -361,4 +361,44 @@
     });
   });
 
+
+  /* ------------------------------------------------------------- B05
+
+     Dis inceleme: «gorunen eylem, yapilabilen eylemle ayni olmali» ve
+     «gecersiz sure sinirlandirilmadan once REDDEDILMELI». */
+  describe('HKM teklifi — uygulama sözleşmesi', () => {
+
+    const teklif = (patch) => Object.assign({
+      id:1, kind:'plan.add', payload:{ date:BUGUN, minutes:60 },
+    }, patch || {});
+
+    it('uygulanabilir tür açıkça listelenir', () => {
+      expect(B().APPLIABLE.length >= 0).toBe(true);
+      expect(B().canApply(teklif())).toBe(true);
+      expect(B().canApply(teklif({ kind:'focus.set' }))).toBe(false);
+      expect(B().canApply(null)).toBe(false);
+    });
+
+    it('uygulanamayan tür sessizce uygulanmış sayılmaz', async () => {
+      const r = await B().applyIntent(teklif({ kind:'load.reduce' }));
+      expect(r.ok).toBe(false);
+    });
+
+    /* Kullanicinin gormedigi bir sayiyi uydurup plana yazmak, teklifi
+       sessizce baska bir teklife cevirmektir. */
+    it('geçersiz süre sınırlandırılmaz, reddedilir', async () => {
+      resetState();
+      for(const dk of [-5, 0, 1000, 'abc', null]){
+        const r = await B().applyIntent(teklif({ payload:{ date:BUGUN, minutes:dk } }));
+        expect(r.ok).toBe(false);
+      }
+    });
+
+    it('geçersiz tarih reddedilir', async () => {
+      resetState();
+      const r = await B().applyIntent(teklif({ payload:{ date:'banana', minutes:60 } }));
+      expect(r.ok).toBe(false);
+    });
+  });
+
 })();

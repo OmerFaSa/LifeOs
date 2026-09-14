@@ -487,8 +487,12 @@ ESP.Screens.today = (function(){
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
           <div class="row gap-8 mt-8">
-            ${K.Button({ label:'Uygula', size:'sm', tone:'primary',
-              act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
+            ${when(ESP.Beacon.canApply(n), () => K.Button({ label:'Uygula',
+              size:'sm', tone:'primary', act:'hkm-intent-yes',
+              data:{ 'data-id':String(n.id) } }))}
+            ${when(!ESP.Beacon.canApply(n), () => K.Button({ label:'Gördüm',
+              size:'sm', tone:'primary', act:'hkm-intent-seen',
+              data:{ 'data-id':String(n.id) } }))}
             ${K.Button({ label:'İstemiyorum', size:'sm',
               act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
           </div>
@@ -527,6 +531,15 @@ ESP.Screens.today = (function(){
       await ESP.Beacon.answerIntent(n.id, true);
       S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
       ESP.UI.toast(r.note || 'Uygulandı');
+      ESP.App.render();
+    },
+    async 'hkm-intent-seen'(el){
+      const liste = S.ui.hkmIntents || [];
+      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
+      if(!n) return;
+      await ESP.Beacon.answerIntent(n.id, false);
+      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+      ESP.UI.toast('Görüldü olarak işaretlendi');
       ESP.App.render();
     },
     async 'hkm-intent-no'(el){

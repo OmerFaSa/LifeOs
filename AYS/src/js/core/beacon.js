@@ -461,25 +461,48 @@ R.Beacon = (function(){
      alanları tek tek okunur, sınırlanır ve AYS'nin kendi modeliyle
      yazılır. Uzaktan gelen bir nesneyi olduğu gibi kaydetmek, HKM'ye
      bu sistemin şemasına yazma yetkisi vermek olurdu. */
+  /* Hangi tur UYGULANABILIR — dugme buna gore cizilir.
+
+     Once kabul listesi uc tur sayiyor ama uygulama yalnizca plan.add
+     yapiyordu: gorunur bir «Uygula» dugmesi, basildiginda «bu teklif turu
+     uygulanmaz» diyordu. Gorunen eylem, yapilabilen eylemle ayni olmali. */
+  const APPLIABLE = ['plan.add'];
+
+  function canApply(n){
+    return !!(n && APPLIABLE.indexOf(n.kind) >= 0);
+  }
+
   async function applyIntent(n){
-    if(!n || n.kind !== 'plan.add') return { ok:false, error:'Bu teklif türü uygulanmaz.' };
+    if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
     const p = n.payload || {};
     if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };
-    const dk = Math.max(10, Math.min(Number(p.minutes) || 0, 480));
-    if(!dk) return { ok:false, error:'Süre geçersiz.' };
+
+    /* Gecersiz sure SINIRLANDIRILMAZ, REDDEDILIR. Onceki hal -5 dakikayi
+       10 dakikaya cekiyordu: kullanicinin gormedigi bir sayiyi uydurup
+       plana yazmak, teklifi sessizce baska bir teklife cevirmektir. */
+    const dk = Number(p.minutes);
+    if(!isFinite(dk) || dk <= 0 || dk > 480){
+      return { ok:false, error:'Süre geçersiz (5–480 dakika bekleniyor).' };
+    }
+
+    /* Konu ile DERS ayri alanlardir. Onceki hal ikisine de dersi yazip
+       «Türev» bilgisini sessizce düşürüyordu. */
+    const ders = String(p.subject || 'Genel').slice(0, 40);
+    const konu = String(p.topic || p.subject || 'Genel').slice(0, 80);
     const gun = await R.Model.ensureDay(p.date);
     gun.blocks = (gun.blocks || []).concat([{
       id:U.uid('b'),
       slot:'HKM teklifi',
-      subject:String(p.subject || 'Genel').slice(0, 40),
-      topic:String(p.subject || 'Genel').slice(0, 40),
-      targetMin:dk, targetQ:0, status:'pending',
+      subject:ders,
+      topic:konu,
+      targetMin:Math.round(dk), targetQ:0, status:'pending',
       subjectId:null, topicId:null,
       actualMin:null, actualQ:null, correctQ:null,
       skipReason:null, startedAt:null,
     }]);
     await R.Model.saveDay(p.date);
-    return { ok:true, note:p.date + ' gününe ' + dk + ' dakikalık blok eklendi.' };
+    return { ok:true, note:p.date + ' gününe ' + Math.round(dk)
+      + ' dakikalık blok eklendi (' + konu + ').' };
   }
 
   /* Ateşle ve unut: arayüz akışlarının çağırdığı biçim. Söz vermez,
@@ -493,6 +516,6 @@ R.Beacon = (function(){
 
   return { load, save, settings, collect, payload, preview, contract, metric,
     urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
-    intents, answerIntent, applyIntent, INTENT_KINDS,
+    intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE,
     MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
 })();

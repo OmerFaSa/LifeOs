@@ -549,8 +549,14 @@ R.Screens.today = (function(){
         ${map(liste, n => html`<div class="mt-8">
           ${c.Notice({ tone:'info', body:n.note })}
           <div class="row gap-8 mt-8">
-            ${c.Button({ label:'Uygula', size:'sm', tone:'primary',
-              act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
+            ${/* Uygulanamayan turde «Uygula» CIKMAZ: gorunen eylem,
+                  yapilabilen eylemle ayni olmali. */''}
+            ${when(R.Beacon.canApply(n), () => c.Button({ label:'Uygula',
+              size:'sm', tone:'primary', act:'hkm-intent-yes',
+              data:{ 'data-id':String(n.id) } }))}
+            ${when(!R.Beacon.canApply(n), () => c.Button({ label:'Gördüm',
+              size:'sm', tone:'primary', act:'hkm-intent-seen',
+              data:{ 'data-id':String(n.id) } }))}
             ${c.Button({ label:'İstemiyorum', size:'sm',
               act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
           </div>
@@ -640,6 +646,17 @@ R.Screens.today = (function(){
       await R.Beacon.answerIntent(n.id, true);
       S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
       UI.toast(r.note || 'Uygulandı');
+      R.App.render();
+    },
+    /* «Gördüm»: uygulanamayan bir türü kapatmanın dürüst yolu. Bir şey
+       uygulanmadı; teklif görüldü ve merkeze öyle bildirildi. */
+    async 'hkm-intent-seen'(el){
+      const liste = S.ui.hkmIntents || [];
+      const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
+      if(!n) return;
+      await R.Beacon.answerIntent(n.id, false);
+      S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+      UI.toast('Görüldü olarak işaretlendi');
       R.App.render();
     },
     async 'hkm-intent-no'(el){

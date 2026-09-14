@@ -450,6 +450,24 @@ SP.Beacon = (function(){
      Sağlık tarafında bir «teklifi uygulamak» ölçüm uydurmak ya da yük
      değiştirmek demek olurdu; ikisi de kullanıcının kendi kararıdır.
      Gelen teklif gösterilir, uygulaması kullanıcıya bırakılır. */
+  /* SPİ hiçbir teklifi KENDILIGINDEN uygulamaz ve bu bir eksiklik değil
+     bir SINIRDIR: sağlıkta ölçüm de yük de kullanıcının kararıdır.
+
+     Ama «Gördüm» demek de bir eylemdir ve kendi yolunu tamamlamalıdır.
+     Önceki hâlde bu düğme her durumda ok:false döndüren applyIntent()
+     yoluna bağlıydı: görünür bir düğme, basıldığında hata veriyordu.
+     Ayrım artık açık — uygulanan bir şey yok, ONAYLANAN bir şey var. */
+  const APPLIABLE = [];
+
+  function canApply(){ return false; }
+
+  async function acknowledgeIntent(n){
+    if(!n) return { ok:false, error:'Teklif yok.' };
+    return { ok:true, acknowledged:true,
+      note:'Görüldü olarak işaretlendi. SPİ bunu senin adına uygulamaz: '
+         + 'ölçüm de yük de senin kararın.' };
+  }
+
   async function applyIntent(n){
     return { ok:false,
       error:'SPİ bir teklifi kendiliğinden uygulamaz: ölçüm de yük de senin '
@@ -467,6 +485,7 @@ SP.Beacon = (function(){
 
   return { load, save, settings, collect, payload, preview, contract, metric,
     urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
-    intents, answerIntent, applyIntent, INTENT_KINDS,
+    intents, answerIntent, applyIntent, acknowledgeIntent, canApply,
+    INTENT_KINDS, APPLIABLE,
     MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
 })();

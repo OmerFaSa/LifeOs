@@ -514,7 +514,20 @@ ESP.Screens.guide = (function(){
       ESP.UI.confirmSheet('Yedekten yüklensin mi?',
         'Mevcut verinin TAMAMI bu yedekle değişir ve geri alınamaz. '
         + 'Devam etmeden önce mevcut veriyi indirmen önerilir.',
-        async () => { await ESP.Store.importAll(obj); location.reload(); }, true);
+        async () => {
+          try{
+            const meta = await ESP.Store.importAll(obj);
+            if(meta.partialCloud){
+              ESP.UI.toast(meta.cloudFailed + ' kayıt buluta yazılamadı; '
+                + 'bu cihazda yüklendi — sayfa yenileniyor');
+            }
+            /* Yerel yazma basarisizsa asagidaki satira HIC gelinmez:
+               yenilemek, tamamlanmamis bir islemi tamamlanmis gosterir. */
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            ESP.UI.toast(e && e.message ? e.message : 'Yedek yüklenemedi');
+          }
+        }, true);
     },
   };
 

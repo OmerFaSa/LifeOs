@@ -445,17 +445,27 @@ ESP.Beacon = (function(){
      ESP'de bir «oturum» ölçülmüş bir çalışmadır; ileriye dönük bir teklif
      oturum olarak yazılamaz — yazılsaydı yapılmamış bir çalışma ölçülmüş
      görünürdü. Teklif bu yüzden bir HATIRLATICI olur. */
+  const APPLIABLE = ['plan.add'];
+
+  function canApply(n){
+    return !!(n && APPLIABLE.indexOf(n.kind) >= 0);
+  }
+
   async function applyIntent(n){
-    if(!n || n.kind !== 'plan.add') return { ok:false, error:'Bu teklif türü uygulanmaz.' };
+    if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
     const p = n.payload || {};
     if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };
-    const dk = Math.max(5, Math.min(Number(p.minutes) || 0, 480));
-    if(!dk) return { ok:false, error:'Süre geçersiz.' };
+    /* Gecersiz sure sinirlandirilmaz, REDDEDILIR: -5 dakikayi 5 dakikaya
+       cekmek, teklifi sessizce baska bir teklife cevirmektir. */
+    const dk = Number(p.minutes);
+    if(!isFinite(dk) || dk <= 0 || dk > 480){
+      return { ok:false, error:'Süre geçersiz (5–480 dakika bekleniyor).' };
+    }
     const disc = (ESP.DISCIPLINES || []).some(function(d){ return d.id === p.disc; })
       ? p.disc : 'lang';
     const r = await ESP.Model.saveReminder({
       disc:disc, due:p.date, repeat:'none',
-      text:dk + ' dakika ' + disc + ' (HKM teklifi)',
+      text:Math.round(dk) + ' dakika ' + disc + ' (HKM teklifi)',
     });
     if(!r.ok) return { ok:false, error:r.error || 'Hatırlatıcı yazılamadı.' };
     return { ok:true, note:p.date + ' için hatırlatıcı eklendi — ölçülmüş bir '
@@ -473,6 +483,6 @@ ESP.Beacon = (function(){
 
   return { load, save, settings, collect, payload, preview, contract, metric,
     urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
-    intents, answerIntent, applyIntent, INTENT_KINDS,
+    intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE,
     MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
 })();

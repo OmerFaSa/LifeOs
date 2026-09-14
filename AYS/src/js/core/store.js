@@ -15,6 +15,10 @@ R.Store = (function(){
     catch(e){ return 'main'; }
   }
   const PROFILE = activeProfile();
+  /* Yedegin kimligi — disa aktarirken yazilir, geri yuklerken ARANIR.
+     Iki yerde ayri ayri yazilan bir kimlik, bir gun ayrisir. */
+  const APP_ID = 'rota-84285';
+
   const LOCAL_KEY = PROFILE === 'main' ? 'rota84285.v2' : 'rota84285.v2.' + PROFILE;
   let db = null;
   let mode = 'local';
@@ -185,7 +189,7 @@ R.Store = (function(){
   function exportAll(){
     return {
       __meta:{
-        app:'rota-84285',
+        app:APP_ID,
         schemaVersion:R.SCHEMA_VERSION,
         exportedAt:new Date().toISOString(),
         mode,
@@ -198,6 +202,17 @@ R.Store = (function(){
   function readBackup(obj){
     if(!obj || typeof obj !== 'object') return { ok:false, error:'Dosya okunamadı.' };
     if(obj.__meta && obj.data){
+      /* UYGULAMA KIMLIGI once denetlenir. Yalniz sema surumune bakan bir
+         okuma, baska bir LifeOS uygulamasinin yedegini kabul ediyordu:
+         dosya secicide yanlis dosyayi secmek, profil verisinin baska bir
+         uygulamanin verisiyle degismesi demekti. */
+      if(obj.__meta.app && obj.__meta.app !== APP_ID){
+        return { ok:false, error:'Bu yedek başka bir uygulamadan («'
+          + String(obj.__meta.app).slice(0, 32) + '»). Rota yedeği gerekir.' };
+      }
+      if(typeof obj.data !== 'object' || Array.isArray(obj.data)){
+        return { ok:false, error:'Yedek gövdesi okunamadı.' };
+      }
       if(obj.__meta.schemaVersion > R.SCHEMA_VERSION){
         return { ok:false, error:'Bu yedek daha yeni bir sürümle alınmış (şema '+obj.__meta.schemaVersion+'). Önce uygulamayı güncelle.' };
       }
@@ -212,14 +227,33 @@ R.Store = (function(){
   async function importAll(obj){
     const parsed = readBackup(obj);
     if(!parsed.ok) throw new Error(parsed.error);
-    localWrite(parsed.data);
+
+    /* YAZMA SONUCU DEGERLENDIRILIR. Once localWrite()'in donusu
+       yutuluyordu: kota dolu bir tarayicida hicbir sey yazilmadigi halde
+       cagri normal bitiyor, ekran «Yedek yuklendi» diyordu. Basarisiz bir
+       kaydi basari gibi gostermek, bu depodaki en pahali hata tipidir. */
+    const yerel = localWrite(parsed.data);
+    if(!yerel){
+      const e = new Error('Yedek bu cihaza yazılamadı; mevcut kayıt '
+        + 'korundu. Depolama alanı dolu olabilir: Ayarlar → Veri '
+        + 'bölümünden yer aç, sonra tekrar dene.');
+      e.code = 'local-write';
+      throw e;
+    }
+
+    /* Buluta KISMI yazma ayrica raporlanir: «tamamlandi» izlenimi
+       verilmez. */
+    let bulutYazilan = 0, bulutHata = 0;
     if(db){
       for(const k of Object.keys(parsed.data)){
-        try{ await db.doc(k).set(parsed.data[k]); }
-        catch(e){ health.cloud = 'error'; }
+        try{ await db.doc(k).set(parsed.data[k]); bulutYazilan++; }
+        catch(e){ bulutHata++; health.cloud = 'error'; }
       }
     }
-    return parsed.meta;
+    return Object.assign({}, parsed.meta, {
+      local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata,
+      partialCloud:bulutHata > 0,
+    });
   }
 
   async function clear(){

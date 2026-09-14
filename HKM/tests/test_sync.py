@@ -109,3 +109,82 @@ def run():
         a = sync_engine.latest_audits(con, "2026-09-12")
         eq(sorted(a), ["bio", "intellect"])
     test("gunun denetimleri VP basina toplanir", t_latest_audits)
+
+    run_sozlesme()
+
+
+def run_sozlesme():
+    """B08 — etiket tek basina yeterli degil.
+
+    «Ölçüldü» etiketli bir `true`, bir NaN ya da -200 saatlik uyku, etiketi
+    dogru olsa da OLCUM DEGILDIR: ambara girdigi an ikizi, capraz bulguyu,
+    seriyi ve etkiyi sessizce zehirler.
+    """
+    from core import intents
+    suite("sozlesme")
+
+    def govde(deger, metrik="sleep_hours", mod="spi"):
+        import datetime
+        return {"module": mod, "date": datetime.date.today().isoformat(),
+                "metrics": {metrik: {"value": deger, "cert": "measured"}}}
+
+    def t_bool_is_not_a_number():
+        """Python'da bool bir int'tir: True, sayi denetiminden GECER."""
+        ok_, hata = sync_engine.validate(govde(True))
+        no(ok_)
+        ok(any("sonlu bir sayi" in h for h in hata))
+    test("boolean sayi sayilmaz", t_bool_is_not_a_number)
+
+    def t_non_finite_refused():
+        for v in (float("nan"), float("inf"), float("-inf")):
+            no(sync_engine.validate(govde(v))[0], repr(v))
+    test("NaN ve sonsuz reddedilir", t_non_finite_refused)
+
+    def t_range_checked():
+        no(sync_engine.validate(govde(-200))[0])
+        no(sync_engine.validate(govde(99))[0])
+        ok(sync_engine.validate(govde(7.5))[0])
+    test("bilinen metrik araligi denetlenir", t_range_checked)
+
+    def t_unknown_metric_still_needs_a_number():
+        """Bilinmeyen metrik kabul edilir (isaret genisleyebilmeli) ama
+        SONLU bir sayi olmak zorundadir."""
+        ok(sync_engine.validate(govde(42, "uydurma_olcu"))[0])
+        no(sync_engine.validate(govde(float("nan"), "uydurma_olcu"))[0])
+    test("bilinmeyen metrik de sayi ister",
+         t_unknown_metric_still_needs_a_number)
+
+    def t_dotted_metric_uses_last_part():
+        ok(sync_engine.validate(govde(45, "disc.lang.minutes", "esp"))[0])
+        no(sync_engine.validate(govde(5000, "disc.lang.minutes", "esp"))[0])
+    test("noktali metrik adi son parcasiyla eslesir",
+         t_dotted_metric_uses_last_part)
+
+    def t_future_date_refused():
+        """Bir olcum, henuz yasanmamis bir gune ait olamaz."""
+        import datetime
+        yarin_otesi = (datetime.date.today()
+                       + datetime.timedelta(days=5)).isoformat()
+        g = govde(7.5)
+        g["date"] = yarin_otesi
+        no(sync_engine.validate(g)[0])
+    test("gelecek tarihli olcum reddedilir", t_future_date_refused)
+
+    def t_missing_with_value_refused():
+        import datetime
+        g = {"module": "spi", "date": datetime.date.today().isoformat(),
+             "metrics": {"sleep_hours": {"value": 7, "cert": "missing"}}}
+        no(sync_engine.validate(g)[0])
+    test("«veri yok» etiketiyle deger gonderilemez", t_missing_with_value_refused)
+
+    def t_intent_fields_are_checked():
+        """date:'banana', minutes:-90 kuyruga GIRMEMELI."""
+        ok_, hata = intents.validate("ays", "plan.add",
+                                     {"date": "banana", "minutes": -90})
+        no(ok_)
+        ok(any("takvim" in h or "ISO" in h for h in hata))
+        ok(any("minutes" in h for h in hata))
+        ok(intents.validate("ays", "plan.add",
+                            {"date": "2026-09-15", "minutes": 120,
+                             "subject": "mat"})[0])
+    test("niyet alanlari tur ve aralik denetlenir", t_intent_fields_are_checked)

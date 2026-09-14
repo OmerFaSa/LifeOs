@@ -27,7 +27,7 @@
       bir niyet varsa ikincisi YAZILMAZ: tekrar, bilgi degil gurultudur.
 """
 
-import json
+import datetime
 
 from core import db
 
@@ -62,6 +62,48 @@ KINDS = {
 }
 
 
+# Alan sozlesmesi: yalniz «var mi» degil, NE OLDUGU da denetlenir.
+# Bozuk bir niyetin kuyruga girmesi, merkez sozlesmesini zayiflatir:
+# date:"banana" ve minutes:-90 tasiyan bir teklif, arayuz ayrica
+# denetlese bile kuyrukta durmamali.
+FIELD_RULES = {
+    "date": "date", "minutes": ("int", 5, 480), "ratio": ("float", 0.05, 1.0),
+    "focus": ("str", 1, 40), "subject": ("str", 1, 40), "topic": ("str", 1, 80),
+    "disc": ("str", 1, 24), "metric": ("str", 1, 40), "why": ("str", 1, 200),
+}
+
+
+def _alan_hatasi(ad, deger):
+    kural = FIELD_RULES.get(ad)
+    if not kural:
+        return None
+    if kural == "date":
+        if not isinstance(deger, str) or len(deger) != 10:
+            return "%s ISO yyyy-mm-dd olmali" % ad
+        try:
+            datetime.date.fromisoformat(deger)
+        except ValueError:
+            return "%s gercek bir takvim gunu olmali: %r" % (ad, deger)
+        return None
+    tur = kural[0]
+    if tur == "int":
+        if isinstance(deger, bool) or not isinstance(deger, int):
+            return "%s tam sayi olmali" % ad
+        if not (kural[1] <= deger <= kural[2]):
+            return "%s %s-%s araliginda olmali (gelen: %r)" % (ad, kural[1],
+                                                              kural[2], deger)
+        return None
+    if tur == "float":
+        if isinstance(deger, bool) or not isinstance(deger, (int, float)):
+            return "%s sayi olmali" % ad
+        if not (kural[1] <= deger <= kural[2]):
+            return "%s %s-%s araliginda olmali" % (ad, kural[1], kural[2])
+        return None
+    if not isinstance(deger, str) or not (kural[1] <= len(deger.strip()) <= kural[2]):
+        return "%s %s-%s karakterlik bir metin olmali" % (ad, kural[1], kural[2])
+    return None
+
+
 def validate(module, kind, payload):
     hata = []
     if module not in MODULES:
@@ -78,9 +120,13 @@ def validate(module, kind, payload):
         if alan not in payload:
             hata.append("zorunlu alan eksik: %s" % alan)
     izinli = set(tanim["required"]) | set(tanim["optional"])
-    for alan in payload:
+    for alan, deger in payload.items():
         if alan not in izinli:
             hata.append("bilinmeyen alan: %s" % alan)
+            continue
+        sorun = _alan_hatasi(alan, deger)
+        if sorun:
+            hata.append(sorun)
     return (not hata), hata
 
 

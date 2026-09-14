@@ -523,12 +523,16 @@ SP.Screens.today = (function(){
 
   const handle = {
     /* HKM teklifleri: uygulayan SPİ'in kendi kodudur. */
+    /* SPİ'de «Gördüm» bir UYGULAMA değildir ve applyIntent() yoluna
+       bağlanmaz: o yol her durumda hata döndürür, dolayısıyla düğme kendi
+       anlamını hiç tamamlayamıyordu. Görülen bir teklif, görüldü diye
+       kapanır — ölçüm ya da yük değiştirilmeden. */
     async 'hkm-intent-yes'(el){
       const liste = S.ui.hkmIntents || [];
       const n = liste.filter(x => String(x.id) === el.dataset.id)[0];
       if(!n) return;
-      const r = await SP.Beacon.applyIntent(n);
-      if(!r.ok){ UI.toast(r.error || 'Uygulanamadı'); return; }
+      const r = await SP.Beacon.acknowledgeIntent(n);
+      if(!r.ok){ UI.toast(r.error || 'İşaretlenemedi'); return; }
       await SP.Beacon.answerIntent(n.id, true);
       S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
       UI.toast(r.note || 'Uygulandı');

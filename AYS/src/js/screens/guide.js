@@ -765,9 +765,18 @@ R.Screens.guide = (function(){
       try{
         const meta = await R.Store.importAll(obj);
         UI.closeSheet();
-        UI.toast('Yedek yüklendi'+(meta.legacy ? ' (eski sürüm)' : '')+' — yeniden başlatılıyor');
-        setTimeout(() => location.reload(), 700);
+        /* Kismi bulut yazimi «tamamlandi» diye sunulmaz: kullanici neyin
+           yazildigini, neyin yazilamadigini bilmeli. */
+        if(meta.partialCloud){
+          UI.toast('Yedek bu cihaza yüklendi ama ' + meta.cloudFailed
+            + ' kayıt buluta yazılamadı — yeniden başlatılıyor');
+        }else{
+          UI.toast('Yedek yüklendi'+(meta.legacy ? ' (eski sürüm)' : '')+' — yeniden başlatılıyor');
+        }
+        setTimeout(() => location.reload(), 900);
       }catch(e){
+        /* Yerel yazma basarisizsa sayfa YENILENMEZ: yenilemek, kullanicinin
+           gozunde islemi tamamlanmis gosterir. */
         UI.toast('Yükleme başarısız: '+(e.message || 'bilinmeyen hata'));
       }
     },

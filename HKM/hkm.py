@@ -12,6 +12,7 @@
     python3 hkm.py niyetler           bekleyen teklifler
     python3 hkm.py sor "<cumle>"      Buyuk Patron'a yaz
     python3 hkm.py yedek [dosya]      butun ambari JSON olarak yazar
+    python3 hkm.py geri <dosya> [--ustune]   yedegi geri yukler
 
    Daemon'a HTTP ile gitmez: veritabanini DOGRUDAN okur. Sebebi sade —
    daemon kapaliyken de ambara bakabilmek gerekir, ve bir bakis icin bir
@@ -119,6 +120,38 @@ def komut_sor(con, cfg, args):
     yaz(r["text"])
 
 
+def komut_geri(con, cfg, args):
+    """Dosyadan geri yukleme — HTTP govde sinirina takilmadan.
+
+    Dokuz aylik bir yedek megabaytlarca olur; onu bir HTTP govdesine
+    sigdirmaya calismak yerine dosyayi dogrudan okumak hem basit hem
+    guvenli. «--ustune» verilmedikce dolu ambara dokunulmaz."""
+    if not args:
+        yaz("Hangi dosya? Ornek: python3 hkm.py geri hkm-yedek-2026-09-14.json")
+        return 1
+    yol = args[0]
+    if not os.path.exists(yol):
+        yaz("Dosya yok: %s" % yol)
+        return 1
+    with open(yol, encoding="utf-8") as f:
+        try:
+            veri = json.load(f)
+        except ValueError as e:
+            yaz("Dosya gecerli bir JSON degil: %s" % e)
+            return 1
+    r = db.import_all(con, veri, replace=("--ustune" in args))
+    if not r.get("ok"):
+        yaz("Geri yuklenmedi — " + r["error"])
+        return 1
+    yaz("Geri yuklendi: " + ", ".join("%s %d" % (k, v)
+                                      for k, v in sorted(r["written"].items())))
+    if r.get("rollback_copy"):
+        yaz("Oncesinin kopyasi: " + r["rollback_copy"])
+    if r.get("skipped"):
+        yaz("Atlanan anahtarlar: " + ", ".join(r["skipped"]))
+    return 0
+
+
 def komut_yedek(con, cfg, args):
     veri = db.export_all(con)
     yol = args[0] if args else ("hkm-yedek-%s.json" % _bugun())
@@ -131,7 +164,7 @@ def komut_yedek(con, cfg, args):
 KOMUTLAR = {
     "durum": komut_durum, "hafta": komut_hafta, "capraz": komut_capraz,
     "etki": komut_etki, "seri": komut_seri, "kararlar": komut_kararlar, "kutu": komut_kutu,
-    "niyetler": komut_niyetler, "sor": komut_sor, "yedek": komut_yedek,
+    "niyetler": komut_niyetler, "sor": komut_sor, "yedek": komut_yedek, "geri": komut_geri,
 }
 
 

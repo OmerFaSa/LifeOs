@@ -9,6 +9,7 @@ Iki kural:
 
 import datetime
 import hmac
+import math
 
 from core import certainty as C
 from core import db, thresholds, vp_academic, vp_bio, vp_intellect
@@ -21,6 +22,58 @@ MODULES = {
 
 # Metrik olmayan, serbest alanlar: etiket aranmaz.
 PASSTHROUGH = {"module", "date", "profile", "notes", "version"}
+
+# Etiket TEK BASINA yetmez. «ölçüldü» etiketli bir `true`, bir NaN ya da
+# -200 saatlik bir uyku, etiketi dogru olsa da OLCUM DEGILDIR: ambara
+# girdigi an butun turetilmis katmanlari (ikiz, capraz, seri, etki)
+# sessizce zehirler.
+#
+# Aralik, bilinen metrikler icin yazilir; bilinmeyen bir metrik yine
+# kabul edilir ama SONLU bir sayi olmak zorundadir. Bilinmeyeni reddetmek
+# isaretin genislemesini (beacon v2) her seferinde merkeze bagimli
+# kilardi; sonsuzu kabul etmekse olcumu anlamsiz kilar.
+RANGES = {
+    "sleep_hours": (0, 24), "recovery": (0, 100), "hrv": (0, 400),
+    "hrv_baseline": (0, 400), "weight": (0, 500), "rhr": (0, 250),
+    "sbp": (0, 300), "dbp": (0, 250), "waist": (0, 300), "water": (0, 20000),
+    "protein_g": (0, 1000), "kcal": (0, 20000), "train_minutes": (0, 1440),
+    "symptom_count": (0, 100),
+    "questions": (0, 5000), "study_minutes": (0, 1440),
+    "mock_net": (-100, 200), "mock_net_baseline": (-100, 200),
+    "exam_days_left": (-3650, 3650), "plan_blocks": (0, 100),
+    "plan_done": (0, 100), "paragraph_done": (0, 1000),
+    "problem_done": (0, 1000), "correct_questions": (0, 5000),
+    "exam_count": (0, 10000), "cards_total": (0, 100000),
+    "cards_due": (0, 100000), "errors_open": (0, 100000),
+    "retention": (0, 1), "retention_cards": (0, 100000),
+    "practice_minutes": (0, 1440), "synthesis_gap_days": (0, 3650),
+    "sessions": (0, 100),
+}
+
+
+def _sayi_mi(v):
+    """Sonlu bir sayi mi? Python'da bool bir int'tir: True degeri
+    isinstance(v, int) denetiminden GECER ve «1 saat uyku» olur."""
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return False
+    return math.isfinite(v)
+
+
+# Birim ekleri: «disc.lang.minutes» gibi genisleyen adlarda son parca
+# birimi soyler. Her yeni disiplin icin ayri bir aralik yazmak yerine
+# birimin kendisine bir aralik verilir.
+UNIT_RANGES = {"minutes": (0, 1440), "hours": (0, 24), "days": (0, 3650),
+               "count": (0, 100000), "pct": (0, 100)}
+
+
+def _aralik(key):
+    """Noktali metrik adlari (disc.lang.minutes) son parcasiyla eslesir."""
+    if key in RANGES:
+        return RANGES[key]
+    son = key.rsplit(".", 1)[-1]
+    if son in RANGES:
+        return RANGES[son]
+    return UNIT_RANGES.get(son) or UNIT_RANGES.get(son.rsplit("_", 1)[-1])
 
 
 def check_token(given, expected):
@@ -45,9 +98,13 @@ def validate(body):
         errors.append("date ISO yyyy-mm-dd olmali")
     else:
         try:
-            datetime.date.fromisoformat(date)
+            g = datetime.date.fromisoformat(date)
         except ValueError:
             errors.append("date cozulemedi: %r" % (date,))
+        else:
+            # Gelecege ait bir olcum, olcum degildir.
+            if g > datetime.date.today() + datetime.timedelta(days=1):
+                errors.append("date gelecekte: %r" % (date,))
 
     metrics = body.get("metrics")
     if not isinstance(metrics, dict) or not metrics:
@@ -63,8 +120,19 @@ def validate(body):
         if not C.is_valid(m["cert"]):
             errors.append("%s: gecersiz etiket %r" % (key, m["cert"]))
             continue
-        if m["cert"] != "missing" and not isinstance(m.get("value"), (int, float)):
-            errors.append("%s: %s etiketli alanda sayi yok" % (key, m["cert"]))
+        if m["cert"] == "missing":
+            if m.get("value") is not None:
+                errors.append("%s: veri yok etiketiyle deger gonderilemez" % key)
+            continue
+        deger = m.get("value")
+        if not _sayi_mi(deger):
+            errors.append("%s: %s etiketli alanda sonlu bir sayi yok (%r)"
+                          % (key, m["cert"], deger))
+            continue
+        aralik = _aralik(key)
+        if aralik and not (aralik[0] <= deger <= aralik[1]):
+            errors.append("%s: %r degeri %s–%s araliginin disinda"
+                          % (key, deger, aralik[0], aralik[1]))
 
     return (not errors), errors
 

@@ -532,9 +532,15 @@ SP.Screens.guide = (function(){
         try{
           const text = await file.text();
           const meta = await SP.Store.importAll(JSON.parse(text));
-          UI.toast('Yedek yüklendi (şema ' + meta.schemaVersion + ') — sayfa yenileniyor');
+          if(meta.partialCloud){
+            UI.toast('Yedek bu cihaza yüklendi ama ' + meta.cloudFailed
+              + ' kayıt buluta yazılamadı — sayfa yenileniyor');
+          }else{
+            UI.toast('Yedek yüklendi (şema ' + meta.schemaVersion + ') — sayfa yenileniyor');
+          }
           setTimeout(() => location.reload(), 900);
         }catch(e){
+          /* Yerel yazma basarisizsa sayfa YENILENMEZ. */
           UI.toast(e && e.message ? e.message : 'Yedek okunamadı');
         }
       };

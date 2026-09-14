@@ -240,4 +240,61 @@
       expect(SP.Storage.growth().cert).toBe('missing');
     });
   });
+
+  /* ---------------------------------------------------------- B02 / B03
+
+     Dis inceleme iki acik buldu, ikisi de veri kaybi yolunda:
+
+       B02  readBackup() yalniz sema surumune bakiyordu; baska bir LifeOS
+            uygulamasinin yedegi «gecerli» sayiliyordu.
+       B03  importAll() localWrite() donusunu yutuyordu; kota dolu bir
+            tarayicida hicbir sey yazilmadigi halde ekran «Yedek yuklendi»
+            diyordu.
+
+     Ikisi de KAYNAGINDA tutulur. */
+  describe('yedek — kimlik ve yazma güvencesi', () => {
+
+    const S = () => SP.Test.realStore;
+    const yedek = (patch) => Object.assign({
+      __meta:{ app:'spi-saglik', schemaVersion:SP.SCHEMA_VERSION,
+        exportedAt:new Date().toISOString() },
+      data:{ 'profile':{ name:'Test' } },
+    }, patch || {});
+
+    it('başka uygulamanın yedeği reddedilir', () => {
+      const r = S().readBackup(yedek({ __meta:{ app:'alien', schemaVersion:1 } }));
+      expect(r.ok).toBe(false);
+      expect(r.error.indexOf('başka bir uygulamadan') >= 0).toBe(true);
+    });
+
+    it('kendi yedeği kabul edilir', () => {
+      expect(S().readBackup(yedek()).ok).toBe(true);
+    });
+
+    it('gövdesi nesne olmayan yedek reddedilir', () => {
+      expect(S().readBackup(yedek({ data:[1, 2, 3] })).ok).toBe(false);
+    });
+
+    /* Basarisiz bir kaydi basari gibi gostermek, bu depodaki en pahali
+       hata tipidir: yazma basarisizsa cagri HATA ile biter. */
+    it('yerel yazma başarısızsa geri yükleme hata verir', async () => {
+      const eski = Object.getOwnPropertyDescriptor(window, 'localStorage');
+      Object.defineProperty(window, 'localStorage', {
+        configurable:true,
+        value:{
+          getItem:() => null,
+          setItem:() => { const e = new Error('kota'); e.name = 'QuotaExceededError'; throw e; },
+          removeItem:() => {},
+        },
+      });
+      let bitti = false, hata = null;
+      try{ await S().importAll(yedek()); bitti = true; }
+      catch(e){ hata = e; }
+      if(eski) Object.defineProperty(window, 'localStorage', eski);
+      expect(bitti).toBe(false);
+      expect(!!hata).toBe(true);
+      expect(hata.code).toBe('local-write');
+    });
+  });
+
 })();

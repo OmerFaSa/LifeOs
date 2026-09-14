@@ -79,6 +79,21 @@ class _Server(object):
         except urllib.error.HTTPError as e:
             return e.code, json.loads(e.read() or b"{}")
 
+    def srv_read_body_test(self):
+        """_read_body'yi izole cagirir: negatif uzunluk okunmamali."""
+        class SahteBaslik(dict):
+            def get(self, k, d=None):
+                return "-1" if k == "Content-Length" else d
+
+        class SahteIstek(object):
+            headers = SahteBaslik()
+            rfile = None
+
+            def __init__(self, sunucu):
+                self.server = sunucu
+        istek = SahteIstek(self.srv)
+        return daemon.Handler._read_body(istek)
+
     def close(self):
         self.srv.shutdown()
         self.srv.server_close()
@@ -448,6 +463,54 @@ def run_extra(S):
                                               "replace": True})
         eq(kod, 409)
     test("yabanci yedek geri yuklenmez", t_restore_refuses_foreign_backup)
+
+    def t_backup_covers_every_table():
+        """B01/1 — yedek BUTUN ambari tasimali. Teklif ve gonderim
+        kuyruklari disarida kalirsa, «yedek aldim» diyen kullanicinin islem
+        durumu eksik kalir."""
+        con = db.connect(S.db_path)
+        db.insert_intent(con, "ays", "plan.add", {"date": BUGUN, "minutes": 60},
+                         "teklif", "patron")
+        from core import outbox
+        outbox.enqueue(con, "whatsapp", "daily", BUGUN, "mesaj")
+        con.close()
+        kod, y = S.call("/api/backup")
+        eq(kod, 200)
+        ok("intents" in y, "yedekte intents yok")
+        ok("outbox" in y, "yedekte outbox yok")
+        eq(len(y["intents"]), 1)
+        eq(len(y["outbox"]), 1)
+        ok(y["__meta"].get("tables"), "yedekte tablo envanteri yok")
+    test("yedek butun tablolari kapsar", t_backup_covers_every_table)
+
+    def t_restore_guard_covers_every_table():
+        """B01/3 — «ustune yazma» guvencesi YALNIZ raw_events'e bakiyordu:
+        ham olay yokken var olan bir niyet sessizce eziliyordu."""
+        kod, y = S.call("/api/backup")
+        # Ham olaylari bosalt ama niyeti birak: eski kontrol burada gecerdi.
+        con = db.connect(S.db_path)
+        con.execute("DELETE FROM raw_events")
+        con.commit()
+        onceki = con.execute("SELECT note FROM intents ORDER BY id LIMIT 1").fetchone()
+        con.close()
+        bozuk = dict(y)
+        bozuk["intents"] = [dict(r, note="EZILDI") for r in y.get("intents") or []]
+        kod, r = S.call("/api/restore", body={"backup": bozuk})
+        eq(kod, 409, "dolu bir tabloya replace'siz yazildi")
+        con = db.connect(S.db_path)
+        sonraki = con.execute("SELECT note FROM intents ORDER BY id LIMIT 1").fetchone()
+        con.close()
+        eq(sonraki["note"], onceki["note"], "niyet sessizce ezildi")
+    test("ustune yazma guvencesi butun tablolari gozetir",
+         t_restore_guard_covers_every_table)
+
+    def t_negative_content_length_refused():
+        """B09 — negatif uzunluk yalniz UST siniri denetleyen okumadan
+        gecip EOF'a kadar okuyordu."""
+        kod, hata = S.srv_read_body_test()
+        eq(kod, b"")
+        ok(hata, "negatif uzunluk reddedilmedi")
+    test("negatif Content-Length reddedilir", t_negative_content_length_refused)
 
     def t_streak_endpoint():
         kod, r = S.call("/api/streak?date=" + BUGUN)

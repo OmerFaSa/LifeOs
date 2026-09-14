@@ -199,6 +199,7 @@ def run():
     test("haftalik mesaj emir kipi tasimaz", t_weekly_message_is_advisory)
 
     run_cli()
+    run_kurtarma()
 
 
 def run_cli():
@@ -243,3 +244,98 @@ def run_cli():
     test("cli yalniz kendi ambarina yazar", t_cli_wrote_only_to_temp)
 
     cli.load_config = eski_yukle
+
+
+def run_kurtarma():
+    """B01 — dokuz aylik yedek/geri yukleme zinciri, uctan uca."""
+    import datetime as dt
+    import json as js
+    import os
+    import tempfile
+
+    import hkm as cli
+    suite("kurtarma")
+
+    def t_full_cycle_keeps_queues():
+        """Dolu yedek → bos ambar → yeniden yedek zincirinde veri ve
+        KUYRUK durumlari esdeger kalmali."""
+        a = db.connect(":memory:")
+        sync_engine.ingest(a, {"module": "spi", "date": gun(0),
+                               "metrics": {"sleep_hours": metric(7.0)}},
+                           now=gun(0) + "T09:00:00")
+        db.insert_intent(a, "ays", "plan.add", {"date": gun(1), "minutes": 60},
+                         "teklif", "patron")
+        outbox.enqueue(a, "whatsapp", "daily", gun(0), "mesaj")
+        yedek = db.export_all(a)
+
+        b = db.connect(":memory:")
+        r = db.import_all(b, yedek)
+        ok(r["ok"], str(r.get("error")))
+        eq(len(db.intents_for(b, "ays", ("pending",))), 1)
+        eq(outbox.status(b)["counts"].get("queued"), 1)
+        # Yeniden yedek: iki manifesto esdeger olmali.
+        ikinci = db.export_all(b)
+        eq(ikinci["__meta"]["tables"], yedek["__meta"]["tables"])
+    test("yedek-geri yukle-yedek zinciri kuyruklari korur",
+         t_full_cycle_keeps_queues)
+
+    def t_manifest_mismatch_refused():
+        """Eksik gelen bir yedek, eksik oldugunu SOYLEMELI."""
+        a = db.connect(":memory:")
+        sync_engine.ingest(a, {"module": "spi", "date": gun(0),
+                               "metrics": {"sleep_hours": metric(7.0)}},
+                           now=gun(0) + "T09:00:00")
+        yedek = db.export_all(a)
+        yedek["raw_events"] = []          # dosya kirpilmis
+        r = db.import_all(db.connect(":memory:"), yedek)
+        no(r["ok"])
+        ok("manifesto" in r["error"])
+    test("manifesto tutmayan yedek reddedilir", t_manifest_mismatch_refused)
+
+    def t_nine_month_backup_via_file():
+        """B01/2 — dokuz aylik yedek HTTP govde sinirindan buyuk olabilir;
+        dosya yolu bu yuzden var ve calismali."""
+        a = db.connect(":memory:")
+        # Tarihler GECMISTE olmali: ambar gelecege ait olcumu kabul etmez
+        # (bir olcum, henuz yasanmamis bir gune ait olamaz).
+        bugun = dt.date.today()
+        for i in range(120):
+            t = (bugun - dt.timedelta(days=i % 60)).isoformat()
+            sync_engine.ingest(a, {"module": "ays", "date": t,
+                                   "metrics": {"questions": metric(50 + i % 40),
+                                               "study_minutes": metric(60 + i % 40)}},
+                               now=t + "T09:00:00")
+        yedek = db.export_all(a)
+        dizin = tempfile.mkdtemp(prefix="hkm-yedek-")
+        yol = os.path.join(dizin, "yedek.json")
+        with open(yol, "w", encoding="utf-8") as f:
+            js.dump(yedek, f)
+        hedef = os.path.join(dizin, "hkm.db")
+        eski = cli.load_config
+        cli.load_config = lambda: {"db_path": hedef, "local_token": "t"}
+        try:
+            eq(cli.main(["geri", yol]), 0)
+            eq(cli.main(["geri", "/olmayan/dosya.json"]), 1)
+        finally:
+            cli.load_config = eski
+        con = db.connect(hedef)
+        eq(con.execute("SELECT COUNT(*) FROM raw_events").fetchone()[0], 120)
+        con.close()
+    test("buyuk yedek dosya yolundan geri yuklenir", t_nine_month_backup_via_file)
+
+    def t_rollback_copy_written():
+        """«Geri alinamaz» bir islem, geri alinabilir hale gelmeli."""
+        import os as _os
+        a = db.connect(":memory:")
+        sync_engine.ingest(a, {"module": "spi", "date": gun(0),
+                               "metrics": {"sleep_hours": metric(7.0)}},
+                           now=gun(0) + "T09:00:00")
+        yedek = db.export_all(a)
+        b = db.connect(":memory:")
+        db.import_all(b, yedek)
+        r = db.import_all(b, yedek, replace=True)
+        ok(r["ok"])
+        ok(r.get("rollback_copy"), "geri donus kopyasi yazilmadi")
+        ok(_os.path.exists(r["rollback_copy"]))
+        _os.remove(r["rollback_copy"])
+    test("ustune yazmadan once kopya alinir", t_rollback_copy_written)

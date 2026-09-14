@@ -71,6 +71,11 @@ PAIR_SECONDS = 120
 # sinirsiz bir gövde, bir hatayla butun belleği yiyebilir; sinirsiz bir
 # webhook, bir yanlis yapilandirmada daemon'u mesgul eder.
 MAX_BODY = 1024 * 1024          # 1 MB — etiketli metrik govdesi icin fazlasiyla
+# Geri yukleme AYRI bir sinirla calisir. Dokuz aylik ambarin kendi yedegi
+# 4,5 MB olcuuldu: genel govde siniri altinda kalsaydi, uygulamanin kendi
+# uretttigi yedek kendi geri yukleme yolundan gecemezdi. Genel sinir
+# GEVSETILMEZ; yalniz bu yol icin ayri ve acik bir sinir tanimlanir.
+RESTORE_BODY = 64 * 1024 * 1024
 WEBHOOK_LIMIT = 60              # dakikada en fazla webhook istegi
 WEBHOOK_WINDOW = 60
 
@@ -180,8 +185,15 @@ class Handler(BaseHTTPRequestHandler):
             n = int(self.headers.get("Content-Length") or 0)
         except ValueError:
             return b"", "gecersiz Content-Length"
-        if n > MAX_BODY:
-            return b"", "govde cok buyuk (en fazla %d bayt)" % MAX_BODY
+        # ALT SINIR da denetlenir: negatif bir uzunlukla rfile.read(-1)
+        # cagirmak, EOF'a kadar okumak demektir — yani sinirin hic
+        # uygulanmamasi. Yalniz ust siniri denetleyen bir okuma, sinirsiz
+        # bir okumadir.
+        if n < 0:
+            return b"", "gecersiz Content-Length (negatif)"
+        sinir = getattr(self, "_body_limit", MAX_BODY)
+        if n > sinir:
+            return b"", "govde cok buyuk (en fazla %d bayt)" % sinir
         return (self.rfile.read(n) if n else b""), None
 
     def _rate_ok(self, anahtar, limit=WEBHOOK_LIMIT, pencere=WEBHOOK_WINDOW):
@@ -505,6 +517,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"ok": True,
                                     "config": settings.read(yeni)})
         if u.path == "/api/restore":
+            self._body_limit = RESTORE_BODY
             ham, hata = self._read_body()
             if hata:
                 return self._send(413, {"error": hata})

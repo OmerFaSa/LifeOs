@@ -277,18 +277,33 @@ def decision(con, decision_id):
     return dict(row) if row else None
 
 
+# Yedegin kapsami TEK YERDE tanimlanir. Once iki liste vardi — disa
+# aktarma bes tablo yaziyor, geri yukleme yedi tablo kabul ediyordu — ve
+# aradaki fark sessizdi: teklif ve gonderim kuyruklari yedege hic girmiyor,
+# «yedek aldim» diyen kullanicinin islem durumu eksik kaliyordu.
+BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
+                 "conversations", "intents", "outbox")
+BACKUP_SCHEMA = 2
+
+
 def export_all(con):
     """Butun ambar tek bir nesnede — yedegin ta kendisi.
 
-    Turetilmis hicbir sey yazilmaz: raw_events zaten her seyin kaynagi,
-    kararlar ve konusmalar da kullanicinin kendi izidir."""
-    out = {"__meta": {"app": "hkm", "schema": 1,
+    Turetilmis hicbir sey yazilmaz: raw_events zaten her seyin kaynagi;
+    kararlar, konusmalar, teklifler ve gonderim gecmisi de kullanicinin
+    kendi izidir.
+
+    Manifesto (`__meta.tables`) hangi tablonun kac satirla cikitigini
+    yazar: geri yuklemede «eksik geldi mi» sorusu ancak boyle
+    cevaplanabilir."""
+    out = {"__meta": {"app": "hkm", "schema": BACKUP_SCHEMA,
                       "exportedAt": datetime.datetime.now().isoformat(
-                          timespec="seconds")}}
-    for tablo in ("raw_events", "audits", "decisions", "decision_sources",
-                  "conversations"):
+                          timespec="seconds"),
+                      "tables": {}}}
+    for tablo in BACKUP_TABLES:
         rows = con.execute("SELECT * FROM %s ORDER BY rowid" % tablo).fetchall()
         out[tablo] = [dict(r) for r in rows]
+        out["__meta"]["tables"][tablo] = len(out[tablo])
     return out
 
 
@@ -360,6 +375,23 @@ def set_intent_state(con, intent_id, state, at=None):
     return intent(con, intent_id)
 
 
+def snapshot_file(con, etiket="oncesi"):
+    """Geri yukleme ONCESI kopya — geri donusu olan bir islem.
+
+    SQLite'in kendi yedekleme API'si kullanilir: dosyayi kopyalamak,
+    yazilmakta olan bir veritabaninda yarim kopya uretebilir."""
+    kok = os.path.dirname(DB_PATH)
+    os.makedirs(kok, exist_ok=True)
+    damga = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    yol = os.path.join(kok, "hkm-%s-%s.db" % (etiket, damga))
+    hedef = sqlite3.connect(yol)
+    try:
+        con.backup(hedef)
+    finally:
+        hedef.close()
+    return yol
+
+
 def import_all(con, veri, replace=False):
     """Yedegi geri yukler.
 
@@ -376,24 +408,52 @@ def import_all(con, veri, replace=False):
     meta = veri.get("__meta") or {}
     if meta.get("app") != "hkm":
         return {"ok": False, "error": "Bu yedek baska bir uygulamadan."}
-    if int(meta.get("schema") or 0) > 1:
+    if int(meta.get("schema") or 0) > BACKUP_SCHEMA:
         return {"ok": False,
                 "error": "Bu yedek daha yeni bir surumle alinmis (sema %s)."
                          % meta.get("schema")}
 
-    tablolar = ("raw_events", "audits", "decisions", "decision_sources",
-                "conversations", "intents", "outbox")
-    mevcut = con.execute("SELECT COUNT(*) FROM raw_events").fetchone()[0]
-    if mevcut and not replace:
-        return {"ok": False, "error": "Ambar bos degil (%d olay). Ustune "
-                                      "yazmak icin replace istenir." % mevcut,
-                "existing": mevcut}
+    tablolar = BACKUP_TABLES
+    # Cakisma kontrolu BUTUN tablolara bakar. Once yalniz raw_events
+    # sayiliyordu: ham olay yokken var olan bir teklif, replace=False
+    # olmasina ragmen INSERT OR REPLACE ile sessizce eziliyordu.
+    dolu = {}
+    for t in tablolar:
+        n = con.execute("SELECT COUNT(*) FROM %s" % t).fetchone()[0]
+        if n:
+            dolu[t] = n
+    if dolu and not replace:
+        return {"ok": False,
+                "error": "Ambar bos degil (%s). Ustune yazmak icin replace "
+                         "istenir." % ", ".join("%s: %d" % (k, v)
+                                                for k, v in sorted(dolu.items())),
+                "existing": dolu}
 
     atlanan = [k for k in veri
                if k != "__meta" and k not in tablolar]
+
+    # Manifesto varsa DOGRULANIR: dosyada yazan satir sayisi ile gercek
+    # satir sayisi ayrisiyorsa yedek eksik ya da bozuktur.
+    beyan = (meta.get("tables") or {})
+    uyusmaz = []
+    for t, n in beyan.items():
+        gercek = len(veri.get(t) or [])
+        if gercek != n:
+            uyusmaz.append("%s: beyan %d, gelen %d" % (t, n, gercek))
+    if uyusmaz:
+        return {"ok": False, "error": "Yedek manifestosu tutmuyor — "
+                                      + "; ".join(uyusmaz)}
+
     yazilan = {}
+    kopya = None
     try:
         if replace:
+            # Ustune yazmadan ONCE geri donus kopyasi: «geri alinamaz» bir
+            # islem, geri alinabilir hale gelmelidir.
+            try:
+                kopya = snapshot_file(con)
+            except (sqlite3.Error, OSError):
+                kopya = None
             for t in tablolar:
                 con.execute("DELETE FROM %s" % t)
         for t in tablolar:
@@ -405,8 +465,12 @@ def import_all(con, veri, replace=False):
             if not kullanilan:
                 continue
             isaret = ",".join("?" * len(kullanilan))
+            # INSERT OR REPLACE DEGIL: replace=False durumunda var olan bir
+            # kaydin ustune yazmak, «ustune yazmiyorum» sozunu icten kirar.
+            # replace=True zaten tablolari bosaltti; catisma kalirsa bu bir
+            # yedek butunlugu sorunudur ve gorunur olmalidir.
             con.executemany(
-                "INSERT OR REPLACE INTO %s(%s) VALUES (%s)"
+                "INSERT INTO %s(%s) VALUES (%s)"
                 % (t, ",".join(kullanilan), isaret),
                 [tuple(r.get(c) for c in kullanilan) for r in satirlar])
             yazilan[t] = len(satirlar)
@@ -415,4 +479,6 @@ def import_all(con, veri, replace=False):
         con.rollback()
         return {"ok": False, "error": "Geri yukleme yarida kesildi: %s" % e}
     return {"ok": True, "written": yazilan, "skipped": atlanan,
-            "replaced": bool(replace)}
+            "replaced": bool(replace), "rollback_copy": kopya,
+            "note": ("Üstüne yazıldı; öncesinin kopyası: %s" % kopya)
+                    if kopya else None}
