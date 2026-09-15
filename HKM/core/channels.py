@@ -117,6 +117,27 @@ def send(cfg, name, text, to=None, transport=None):
                 "note": "Alıcı izin listesinde değil; gönderim yapılmadı."}
 
     gonder = transport or _post_json
+
+    # KANALIN KENDI SINIRI KANALIN SORUNUDUR. Telegram 4096 karakterden
+    # uzun mesaji reddeder (400) ve kullanici «gonderilemedi» gorurdu —
+    # cevabin tamami hazirdi, yalnizca tek parca halinde sigmiyordu.
+    # Kirpmak da cozum degil: sorunun cevabini yarim vermek, vermemenin
+    # kibar bicimi olurdu. Bu yuzden BOLUNUR ve sirayla gonderilir.
+    parcalar = _parcala(text, SINIR.get(name, 0))
+    if len(parcalar) > 1:
+        son = None
+        for i, p in enumerate(parcalar, 1):
+            isaretli = "%s\n\n(%d/%d)" % (p, i, len(parcalar))
+            son = send(cfg, name, isaretli, to=hedef, transport=transport)
+            if not son["ok"]:
+                # Bir parca gitmediyse GERISI DE GONDERILMEZ: yarim
+                # teslim edilmis bir metin, sirasi bozuk okunur.
+                return dict(son, note="%d/%d parça gönderildi, sonrası "
+                            "durduruldu — %s" % (i - 1, len(parcalar),
+                                                 son.get("note") or ""))
+        return dict(son or {"ok": True}, parts=len(parcalar),
+                    note="%d parça hâlinde gönderildi." % len(parcalar))
+
     if name == "whatsapp":
         url = "%s/%s/messages" % (a["api_base"].rstrip("/"), a["phone_number_id"])
         govde = {"messaging_product": "whatsapp", "to": hedef,
@@ -143,6 +164,42 @@ def send(cfg, name, text, to=None, transport=None):
             "note": aciklama,
             # Sir loglanmaz: yanit govdesi kirpilir ve jeton hicbir yerde gecmez.
             "detail": (yanit or "")[:200]}
+
+
+# Kanallarin metin siniri (karakter). 0 = sinir yok/bilinmiyor.
+# Emniyet payi birakilir: parca numarasi da ayni mesaja yazilir.
+SINIR = {"telegram": 3900, "whatsapp": 3900}
+
+
+def _parcala(metin, sinir):
+    """Uzun metni kanalin siniri icinde parcalara boler.
+
+    Bolme yeri ONEM SIRASIYLA aranir: bos satir, satir sonu, cumle sonu,
+    bosluk. Kelimenin ortasindan bolmek, okunabilir bir metni okunmaz
+    yapar. Hicbiri bulunamazsa sert bolunur — sonsuza kadar bolunemeyen
+    bir metin, hic gonderilemeyen bir metin olurdu."""
+    m = metin or ""
+    if not sinir or len(m) <= sinir:
+        return [m]
+    # Parca numarasi da ayni mesajda gider: yerini simdiden ayir.
+    pay = sinir - 12
+    out = []
+    while len(m) > pay:
+        dilim = m[:pay]
+        yer = -1
+        for ayrac in ("\n\n", "\n", ". ", " "):
+            yer = dilim.rfind(ayrac)
+            if yer > pay // 3:
+                yer += len(ayrac) if ayrac != ". " else 1
+                break
+            yer = -1
+        if yer <= 0:
+            yer = pay
+        out.append(m[:yer].rstrip())
+        m = m[yer:].lstrip()
+    if m:
+        out.append(m)
+    return out
 
 
 def verify_signature(app_secret, raw_body, header):

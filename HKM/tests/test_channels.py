@@ -153,6 +153,88 @@ def run():
         no(ch.verify_telegram_secret({"channels": {"telegram": {"enabled": True}}}, "S"))
     test("telegram gizli basligi zorunlu", t_telegram_secret_required)
 
+    def t_long_message_is_split_not_dropped():
+        """KANALIN KENDI SINIRI KANALIN SORUNUDUR.
+
+        Telegram 4096 karakterden uzun mesaji reddeder (400) ve kullanici
+        «gonderilemedi» goruyordu: cevabin tamami hazirdi, yalnizca tek
+        parca halinde sigmiyordu. Kirpmak da cozum degil — sorunun
+        cevabini yarim vermek, vermemenin kibar bicimidir."""
+        cfg = {"local_token": "x", "channels": {"telegram": {
+            "enabled": True, "bot_token": "t", "allow_from": ["1"]}}}
+        gonderilen = []
+
+        def t(url, govde, basliklar):
+            gonderilen.append(govde.get("text") or "")
+            return 200, '{"ok":true}'
+
+        uzun = "Bu cumle olcume dayanir. " * 400      # ~10.000 karakter
+        r = ch.send(cfg, "telegram", uzun, to="1", transport=t)
+        ok(r["ok"])
+        ok(len(gonderilen) > 1, "uzun mesaj bolunmedi")
+        eq(r["parts"], len(gonderilen))
+        for parca in gonderilen:
+            ok(len(parca) <= ch.SINIR["telegram"], len(parca))
+        # HICBIR SEY KAYBOLMAZ: parcalarin toplami metni tasir.
+        butun = " ".join(p.split("\n\n(")[0] for p in gonderilen)
+        eq(butun.replace(" ", ""), uzun.replace(" ", ""))
+        ok("(1/%d)" % len(gonderilen) in gonderilen[0])
+    test("uzun mesaj bolunur, dusurulmez", t_long_message_is_split_not_dropped)
+
+    def t_short_message_is_not_split():
+        """Bolme yalnizca GEREKTIGINDE: kisa bir mesaja parca numarasi
+        eklemek, olmayan bir sorunu gorunur kilardi."""
+        cfg = {"local_token": "x", "channels": {"telegram": {
+            "enabled": True, "bot_token": "t", "allow_from": ["1"]}}}
+        gonderilen = []
+
+        def t(url, govde, basliklar):
+            gonderilen.append(govde.get("text") or "")
+            return 200, '{"ok":true}'
+
+        ch.send(cfg, "telegram", "selam", to="1", transport=t)
+        eq(gonderilen, ["selam"])
+    test("kisa mesaj bolunmez", t_short_message_is_not_split)
+
+    def t_split_stops_on_failure():
+        """Bir parca gitmediyse GERISI DE GONDERILMEZ: yarim teslim
+        edilmis bir metin, sirasi bozuk okunur."""
+        cfg = {"local_token": "x", "channels": {"telegram": {
+            "enabled": True, "bot_token": "t", "allow_from": ["1"]}}}
+        say = {"n": 0}
+
+        def t(url, govde, basliklar):
+            say["n"] += 1
+            return (200, '{"ok":true}') if say["n"] == 1 else (400, '{"ok":false}')
+
+        r = ch.send(cfg, "telegram", "Cumle. " * 900, to="1", transport=t)
+        no(r["ok"])
+        eq(say["n"], 2)                     # ucuncuye GECILMEDI
+        ok("durduruldu" in r["note"])
+    test("bir parca gitmezse gerisi durur", t_split_stops_on_failure)
+
+
+    def t_answer_to_a_question_is_not_trimmed():
+        """PROAKTIF mesaj kisa olmali; SORULAN bir sorunun cevabi
+        kirpilmamali.
+
+        Ikisi bir sure ayni sinira tabiydi ve «hafta» diye soran
+        kullanici raporun 900. karakterinde «…» goruyordu. Sorunun
+        cevabini yarim vermek, vermemenin kibar bicimidir — ustelik uzun
+        cevap artik kanal katmaninda parcalara bolunuyor."""
+        con = db.connect(":memory:")
+        for gun in ("2026-09-08", "2026-09-09", "2026-09-10"):
+            sync_engine.ingest(con, {"module": "ays", "date": gun, "metrics": {
+                "questions": metric(120), "study_minutes": metric(300),
+                "mock_net": metric(78.5)}}, now=gun + "T20:00:00")
+            sync_engine.ingest(con, {"module": "spi", "date": gun, "metrics": {
+                "sleep_hours": metric(4.2), "recovery": metric(28, "computed"),
+                "hrv": metric(31)}}, now=gun + "T08:00:00")
+        r = patron.respond(con, "hafta", date="2026-09-10")
+        no(r["text"].endswith("…"), "cevap kirpildi")
+    test("sorulan sorunun cevabi kirpilmaz",
+         t_answer_to_a_question_is_not_trimmed)
+
     suite("patron")
 
     def t_commands_are_closed_set():

@@ -62,7 +62,15 @@ COMMANDS = [
      "note": "Karsilama ve ne yapabilecegin."},
 ]
 
-MAX_CHARS = 900          # kanal mesaji: okunmayan bir rapor, rapor degildir
+# PROAKTIF mesajin siniri: davet edilmeden gelen bir metin kisa olmali,
+# cunku okunmayan bir rapor rapor degildir.
+#
+# SORULAN bir sorunun cevabi ise KIRPILMAZ. Ikisi bir sure ayni sinira
+# tabiydi ve «hafta» diye soran kullanici raporun 900. karakterinde «…»
+# goruyordu: sorunun cevabini yarim vermek, vermemenin kibar bicimidir.
+# Uzun cevap artik kanal katmaninda PARCALARA BOLUNUP gonderiliyor
+# (core/channels.py), yani kirpmanin bir sebebi de kalmadi.
+MAX_CHARS = 900
 
 # Hangi alan hangi modulun isi. Bilinmeyen bir alan icin niyet KURULMAZ:
 # hangi modulun ustlenecegi belirsizken teklif yazmak, kuyruga cop atmaktir.
@@ -274,7 +282,6 @@ def respond(con, text, date=None, th=None, channel="local", now=None,
                 cevap = "Reddedildi. Kayıt silinmiyor: neyin önerildiği ve neyin " \
                         "reddedildiği, bu katmanı sonradan denetlemenin tek yolu."
 
-    cevap = _kirp(cevap)
     if manager.imperatives(cevap):
         cevap = ("Cevap buyurgan kip taşıdığı için düşürüldü. Bu bir yazılım "
                  "hatasıdır ve sessizce düzeltilmez.")

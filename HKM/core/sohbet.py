@@ -203,10 +203,18 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                 "text": govde, "agent": gorevli,
                 "ai": {"ok": False, "reason": r.get("reason"),
                        "note": r.get("note")}}
+    govde = r["text"]
+    if r.get("truncated"):
+        # Telegram'da yan not yeri yoktur: metnin KENDISI soyler.
+        # Kisaltilmis bir cevabi tam gibi sunmak, kullaniciya eksik
+        # oldugunu fark ettirmeden eksik bilgi vermektir.
+        govde += "\n\n(Cevap uzunluk sınırına takıldı, son tam cümlede "
+        govde += "kesildi. Daha dar bir soru sorarsan tamamını yazabilirim.)"
     if kayit:
         patron.log(con, kanal, "user", metin, agent=gorevli)
-        patron.log(con, kanal, "manager", r["text"], agent=gorevli)
-    return {"ok": True, "mode": "model", "text": r["text"], "agent": gorevli,
+        patron.log(con, kanal, "manager", govde, agent=gorevli)
+    return {"ok": True, "mode": "model", "text": govde, "agent": gorevli,
+            "truncated": bool(r.get("truncated")),
             "model": r["model"], "usd": r["usd"], "seconds": r["seconds"],
             "price_estimated": r.get("price_estimated", False),
             "context_lines": len(bg.splitlines())}

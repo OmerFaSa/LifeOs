@@ -69,8 +69,21 @@ def _istek(url, baslik, govde, timeout=ZAMAN_ASIMI):
         return json.loads(y.read().decode("utf-8", "replace") or "{}")
 
 
+# Saglayicinin «neden durdum» cevabi. Uc bicimde uc ad tasir ama anlam
+# ayni: cevap BITMEDI, jeton siniri doldugu icin KESILDI.
+#
+# Bu isaret bir sure hic okunmuyordu ve sonucu su oluyordu: model cumlenin
+# ortasinda kesiliyor, biz bunu tamamlanmis bir cevap sayip oldugu gibi
+# gonderiyorduk. Kullanici yarim bir cumle aliyor ve sebebini goremiyordu.
+# Yarim bir cevabi tam gibi gostermek, olculmemis bir seyi olculmus gibi
+# gostermekle ayni aileden bir yanlistir.
+KESILDI = {"length", "max_tokens", "MAX_TOKENS"}
+
+
 def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
-    """Saglayiciya gider. Doner: (metin, giris_jeton, cikis_jeton)."""
+    """Saglayiciya gider.
+
+    Doner: (metin, giris_jeton, cikis_jeton, kesildi_mi)."""
     tanim = models.PROVIDERS[provider]
     if provider in ("openrouter", "openai", "yerel"):
         url, baslik, govde = _openai_bicimi(
@@ -78,10 +91,11 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
             {"HTTP-Referer": "http://127.0.0.1:4200", "X-Title": "HKM"}
             if provider == "openrouter" else None)
         y = _istek(url, baslik, govde, timeout)
-        metin = (((y.get("choices") or [{}])[0].get("message") or {})
-                 .get("content") or "")
+        secim = (y.get("choices") or [{}])[0]
+        metin = (secim.get("message") or {}).get("content") or ""
         k = y.get("usage") or {}
-        return metin, k.get("prompt_tokens", 0), k.get("completion_tokens", 0)
+        return (metin, k.get("prompt_tokens", 0), k.get("completion_tokens", 0),
+                secim.get("finish_reason") in KESILDI)
 
     if provider == "anthropic":
         govde = {"model": model, "max_tokens": EN_COK_JETON,
@@ -95,8 +109,9 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
         parca = [p.get("text", "") for p in (y.get("content") or [])
                  if p.get("type") == "text"]
         k = y.get("usage") or {}
-        return "\n".join(parca), k.get("input_tokens", 0), \
-            k.get("output_tokens", 0)
+        return ("\n".join(parca), k.get("input_tokens", 0),
+                k.get("output_tokens", 0),
+                y.get("stop_reason") in KESILDI)
 
     if provider == "google":
         url = "%s/%s:generateContent" % (tanim["base"], model)
@@ -112,8 +127,9 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
         parca = [p.get("text", "") for p in
                  ((aday.get("content") or {}).get("parts") or [])]
         k = y.get("usageMetadata") or {}
-        return "\n".join(parca), k.get("promptTokenCount", 0), \
-            k.get("candidatesTokenCount", 0)
+        return ("\n".join(parca), k.get("promptTokenCount", 0),
+                k.get("candidatesTokenCount", 0),
+                aday.get("finishReason") in KESILDI)
 
     raise ValueError("bilinmeyen saglayici: %s" % provider)
 
@@ -270,6 +286,27 @@ def _saglayici_hatasi(e):
 # Dusen bir cevabin ardindan MODELE BIR KEZ soylenir. Kullaniciya «cevap
 # dusuruldu» deyip birakmak, sohbeti her ihlalde kesmek demekti; oysa
 # ihlalin ne oldugunu modele soylemek cogu zaman yeter.
+# Cevap jeton sinirina dayandiysa modele BIR KEZ «kisa yaz» denir.
+# Uzunlugu sessizce kesmek, yarim bir cumleyi tam cevap gibi gostermekti.
+KISALT = ("Önceki cevabın uzunluk sınırına takıldı ve yarıda kesildi. "
+          "Aynı şeyi DAHA KISA söyle: en fazla 3 cümle, madde listesi "
+          "kullanma.")
+
+
+def _son_cumlede_kes(metin):
+    """Yarim cumleyi ATAR: elde kalan son TAM cumleye kadar olan kisim.
+
+    Yarim bir cumle, kullaniciya bitmis bir dusunce gibi gorunur ve
+    cogu zaman anlamini da degistirir. Tam cumle kalmamissa metin
+    oldugu gibi doner — kirpmak, her seyi silmekten iyidir."""
+    m = (metin or "").rstrip()
+    yer = max(m.rfind(". "), m.rfind("! "), m.rfind("? "),
+              m.rfind("."), m.rfind("!"), m.rfind("?"))
+    if yer <= 0:
+        return m
+    return m[:yer + 1].rstrip()
+
+
 DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
             "Aynı şeyi tekrar etme. Ölçüm iddia etme; yalnızca sana "
             "verilen ölçümlere dayan. Önerdiğin süre ya da saat "
@@ -307,13 +344,17 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         hata = None
         metin = None
         gir = cik = 0
+        kesildi = False
         try:
-            if transport is not None:
-                metin, gir, cik = transport(a["provider"], anahtar,
-                                            a["model"], sistem_metni, gecmis)
+            cagir = transport if transport is not None else _cagir
+            sonuc = cagir(a["provider"], anahtar, a["model"], sistem_metni,
+                          gecmis)
+            # Tasiyici kesilme isareti vermeyebilir: vermeyen icin «kesilmedi»
+            # varsayilir, cunku bilinmeyeni «kesildi» saymak da uydurmaktir.
+            if len(sonuc) == 4:
+                metin, gir, cik, kesildi = sonuc
             else:
-                metin, gir, cik = _cagir(a["provider"], anahtar, a["model"],
-                                         sistem_metni, gecmis)
+                metin, gir, cik = sonuc
         except urllib.error.HTTPError as e:
             hata = _saglayici_hatasi(e)
         except Exception as e:                  # noqa: BLE001
@@ -336,11 +377,22 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
             return {"ok": False, "reason": "provider", "text": None,
                     "note": "Model çağrısı başarısız: %s" % hata}
         return {"ok": True, "raw": metin, "in_tok": gir, "out_tok": cik,
-                "usd": usd, "price_estimated": tahmini}
+                "usd": usd, "price_estimated": tahmini, "truncated": kesildi}
 
     r = _tur(sistem, mesajlar)
     if not r["ok"]:
         return r
+
+    # KESILME once ele alinir: yarim bir cevabi denetlemek, yarim bir
+    # cumleyi «uydurma sayi» diye dusurmeye de yol acabilir.
+    if r.get("truncated") and duzeltme:
+        r2 = _tur(sistem + "\n\n" + KISALT,
+                  mesajlar + [{"role": "user", "content": KISALT}])
+        if r2["ok"] and not r2.get("truncated"):
+            r = r2
+        elif r2["ok"]:
+            r = r2                       # yine kesildi; asagida isaretlenir
+
     temiz, dusme = _temizle(r["raw"], baglam)
 
     if dusme and duzeltme:
@@ -360,10 +412,15 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
     if dusme:
         return {"ok": False, "reason": "dropped", "text": None, "note": dusme,
                 "raw_len": len(r.get("raw") or "")}
+    # Hala kesikse YARIM CUMLE GOSTERILMEZ: son tam cumleye kadar
+    # kirpilir ve kesildigi SOYLENIR.
+    if r.get("truncated"):
+        temiz = _son_cumlede_kes(temiz)
     return {"ok": True, "text": temiz, "model": a["model"],
             "provider": a["provider"], "in_tok": r["in_tok"],
             "out_tok": r["out_tok"], "usd": r["usd"],
             "price_estimated": r.get("price_estimated", False),
+            "truncated": bool(r.get("truncated")),
             "seconds": round((datetime.datetime.now() - t0).total_seconds(), 1)}
 
 

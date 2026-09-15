@@ -447,3 +447,63 @@ def run():
         eq(con.execute("SELECT COUNT(*) n FROM intents").fetchone()["n"], 1)
     test("model baglaninca teklif yolu kaybolmaz",
          t_request_still_becomes_a_proposal)
+
+    def t_truncated_answer_never_shows_half_a_sentence():
+        """YARIM BIR CEVABI TAM GIBI GOSTERMEK, olculmemis bir seyi
+        olculmus gibi gostermekle ayni aileden bir yanlistir.
+
+        Saglayicinin «neden durdum» isareti bir sure hic okunmuyordu:
+        model cumlenin ortasinda kesiliyor, biz bunu tamamlanmis bir
+        cevap sayip oldugu gibi gonderiyorduk."""
+        con = _con()
+        cfg = _cfg()
+
+        def kesik(provider, anahtar, model, sistem, mesajlar):
+            return ("Uyku ölçümün düşük görünüyor. İstersen bugünü hafif "
+                    "geçirmeyi önerebilirim. Ayrıca akşam ekranı azaltmak "
+                    "toparlanmaya yardım edebilir çünkü", 400, 1200, True)
+
+        r = sohbet.konus(con, cfg, "uykum nasıl?", BUGUN, transport=kesik)
+        eq(r["mode"], "model")
+        ok(r["truncated"])
+        # Yarim cumle ATILDI.
+        no("çünkü" in r["text"].split("(Cevap")[0])
+        # Kesildigi SOYLENDI: Telegram'da yan not yeri yoktur.
+        ok("uzunluk sınırına takıldı" in r["text"])
+    test("kesilen cevap yarim cumle gostermez",
+         t_truncated_answer_never_shows_half_a_sentence)
+
+    def t_truncation_asks_for_a_shorter_answer_once():
+        """Kesilme olunca modele BIR KEZ «kisa yaz» denir; ikinci cevap
+        sigiyorsa kullanici tam cevabi alir ve hicbir uyari gormez."""
+        con = _con()
+        cfg = _cfg()
+        cagri = []
+
+        def once_kesik(provider, anahtar, model, sistem, mesajlar):
+            cagri.append(sistem)
+            if len(cagri) == 1:
+                return ("Uzun bir cevap ve yarida kesil", 400, 1200, True)
+            return ("Uyku ölçümün düşük görünüyor.", 400, 60, False)
+
+        r = sohbet.konus(con, cfg, "uykum nasıl?", BUGUN,
+                         transport=once_kesik)
+        eq(len(cagri), 2)
+        ok("KISA" in cagri[1] or "kısa" in cagri[1].lower())
+        eq(r["text"], "Uyku ölçümün düşük görünüyor.")
+        no(r["truncated"])
+        # Iki cagri da deftere yazildi.
+        eq(con.execute("SELECT COUNT(*) n FROM usage").fetchone()["n"], 2)
+    test("kesilince bir kez kisa yaz denir",
+         t_truncation_asks_for_a_shorter_answer_once)
+
+    def t_transport_without_truncation_flag_still_works():
+        """Uc deger donduren eski bir tasiyici da calismali: bilinmeyeni
+        «kesildi» saymak da uydurmaktir."""
+        con = _con()
+        r = sohbet.konus(con, _cfg(), "uykum nasıl?", BUGUN,
+                         transport=_cevap("Uyku ölçümün düşük görünüyor."))
+        eq(r["mode"], "model")
+        no(r["truncated"])
+    test("kesilme isareti vermeyen tasiyici calisir",
+         t_transport_without_truncation_flag_still_works)

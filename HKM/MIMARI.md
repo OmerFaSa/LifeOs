@@ -833,6 +833,42 @@ başına aylık limit, bütçe sayacından bağımsız **ikinci bir kilittir**.
 Yönetim sekmesindeki «Başlarken» bölümü beş adımı ekranda anlatır: anahtar
 girilecek yerde, nereden alınacağı da yazılıdır.
 
+## Mesaj neden yarım kesilirdi — üç ayrı sebep
+
+Kullanıcı «Telegram'da yazılar yarım kesiliyor» dedi. Tek bir sebep
+yoktu; üç ayrı yerde üç ayrı kesme vardı ve üçü de sessizdi.
+
+**1. Sağlayıcının «neden durdum» işareti hiç okunmuyordu.** Model jeton
+sınırına dayandığında cevabını cümlenin ortasında keser ve bunu
+söyler — OpenAI `finish_reason: "length"`, Anthropic
+`stop_reason: "max_tokens"`, Google `finishReason: "MAX_TOKENS"`. Biz bu
+alanı hiç okumuyor, yarım cevabı tamamlanmış sayıp olduğu gibi
+gönderiyorduk. Yarım bir cevabı tam gibi göstermek, ölçülmemiş bir şeyi
+ölçülmüş gibi göstermekle aynı aileden bir yanlıştır.
+
+Artık işaret okunuyor ve üç şey oluyor: modele **bir kez** «daha kısa
+yaz» deniyor; hâlâ kesikse metin **son tam cümlede** kırpılıyor (yarım
+bir cümle, kullanıcıya bitmiş bir düşünce gibi görünür ve çoğu zaman
+anlamını da değiştirir); ve kesildiği **metnin içinde söyleniyor** —
+Telegram'da yan not yeri yoktur, mesajın kendisi söylemelidir.
+
+**2. Telegram'ın 4096 karakter sınırı yoktu.** Uzun bir mesaj 400 ile
+reddediliyor ve kullanıcı «gönderilemedi» görüyordu: cevabın tamamı
+hazırdı, yalnızca tek parça hâlinde sığmıyordu. Kanalın kendi sınırı
+kanalın sorunudur — artık metin bölünüp sırayla gönderiliyor. Bölme yeri
+önem sırasıyla aranır: boş satır, satır sonu, cümle sonu, boşluk;
+kelimenin ortasından bölmek okunabilir bir metni okunmaz yapar. Her
+parça kaçıncı olduğunu yazar `(2/3)`. Bir parça gitmezse **gerisi de
+gönderilmez**: yarım teslim edilmiş bir metin, sırası bozuk okunur.
+
+**3. Sorulan sorunun cevabı da 900 karakterde kırpılıyordu.** `MAX_CHARS`
+proaktif mesaj için konmuştu ve gerekçesi doğruydu — davet edilmeden
+gelen bir metin kısa olmalı, okunmayan bir rapor rapor değildir. Ama aynı
+sınır **cevaplara** da uygulanıyordu: «hafta» diye soran kullanıcı
+raporun 900. karakterinde «…» görüyordu. Sorunun cevabını yarım vermek,
+vermemenin kibar biçimidir. Kırpma artık yalnızca proaktif mesajda;
+uzun cevap bölünerek gidiyor.
+
 ## Teslim garantisi ve bakım
 
 **Gelen mesaj bir kez işlenir.** WhatsApp ve Telegram, cevap alamadıklarında
