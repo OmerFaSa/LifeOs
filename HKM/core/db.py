@@ -127,6 +127,26 @@ CREATE TABLE IF NOT EXISTS inbox_seen (
 );
 CREATE INDEX IF NOT EXISTS ix_inbox_seen ON inbox_seen(created_at);
 
+/* Telegram ekleri — dosyanin kendisinden once gelen guvenli kuyruk. */
+CREATE TABLE IF NOT EXISTS attachments (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  channel     TEXT NOT NULL,
+  sender      TEXT NOT NULL,
+  message_id  TEXT NOT NULL,
+  kind        TEXT NOT NULL,
+  file_id     TEXT NOT NULL,
+  unique_id   TEXT,
+  mime_type   TEXT,
+  file_name   TEXT,
+  size        INTEGER,
+  duration    INTEGER,
+  caption     TEXT,
+  state       TEXT NOT NULL DEFAULT 'received',
+  created_at  TEXT NOT NULL,
+  UNIQUE(channel, sender, message_id, file_id)
+);
+CREATE INDEX IF NOT EXISTS ix_attachments_state ON attachments(state, created_at);
+
 /* Kullanim defteri — PARANIN kaydi.
 
    Bir model cagrisinin maliyeti ancak KAYDEDILIRSE bilinir. Fatura ay
@@ -386,7 +406,7 @@ def decision(con, decision_id):
 # aradaki fark sessizdi: teklif ve gonderim kuyruklari yedege hic girmiyor,
 # «yedek aldim» diyen kullanicinin islem durumu eksik kaliyordu.
 BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
-                 "conversations", "intents", "outbox", "usage",
+                 "conversations", "attachments", "intents", "outbox", "usage",
                  "inbox_seen")
 BACKUP_SCHEMA = 4
 

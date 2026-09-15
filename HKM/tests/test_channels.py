@@ -48,6 +48,30 @@ def run():
         eq(r["reason"], "off")
     test("kanallar varsayilan kapali", t_default_off)
 
+    def t_telegram_media_becomes_attachment():
+        g = {"message": {"message_id": 41, "chat": {"id": 123},
+             "caption": "kan sonucu", "photo": [
+                 {"file_id": "kucuk", "file_unique_id": "u1", "file_size": 12},
+                 {"file_id": "buyuk", "file_unique_id": "u2", "file_size": 99}]}}
+        m = ch.parse_telegram(g)[0]
+        eq(m["text"], "kan sonucu")
+        eq(m["attachment"]["kind"], "photo")
+        eq(m["attachment"]["file_id"], "buyuk")
+        eq(m["attachment"]["size"], 99)
+    test("Telegram fotografi en buyuk surumuyle eke donusur",
+         t_telegram_media_becomes_attachment)
+
+    def t_telegram_document_without_text_is_kept():
+        g = {"message": {"message_id": 42, "chat": {"id": 123},
+             "document": {"file_id": "belge", "file_unique_id": "ub",
+                          "file_name": "rapor.pdf", "mime_type": "application/pdf"}}}
+        m = ch.parse_telegram(g)[0]
+        eq(m["text"], "")
+        eq(m["attachment"]["kind"], "document")
+        eq(m["attachment"]["file_name"], "rapor.pdf")
+    test("metinsiz Telegram belgesi sessizce atilmaz",
+         t_telegram_document_without_text_is_kept)
+
     def t_enabled_needs_credentials():
         """«enabled» tek basina yetmez: eksik kimlikle kanal acik sayilmaz."""
         no(ch.enabled({"channels": {"whatsapp": {"enabled": True}}}, "whatsapp"))

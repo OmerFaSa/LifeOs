@@ -32,6 +32,24 @@ import datetime
 from core import db, outbox, patron, sohbet
 
 
+def _eki_kaydet(con, kanal, m):
+    ek = m.get("attachment")
+    if not isinstance(ek, dict) or not ek.get("file_id"):
+        return None
+    cur = con.execute(
+        "INSERT OR IGNORE INTO attachments(channel,sender,message_id,kind,"
+        "file_id,unique_id,mime_type,file_name,size,duration,caption,state,created_at) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        (kanal, str(m.get("from") or ""), str(m.get("id") or ""),
+         ek.get("kind") or "unknown", ek["file_id"], ek.get("unique_id") or "",
+         ek.get("mime_type") or "", ek.get("file_name") or "", ek.get("size"),
+         ek.get("duration"), m.get("text") or "", "received",
+         datetime.datetime.now().isoformat(timespec="seconds")))
+    con.commit()
+    return {"id": cur.lastrowid, "duplicate": cur.rowcount == 0,
+            "kind": ek.get("kind") or "unknown"}
+
+
 def isle(con, cfg, kanal, m, th=None, transport=None, date=None):
     """Bir gelen mesaji isler ve sonucunu dondurur.
 
@@ -49,6 +67,21 @@ def isle(con, cfg, kanal, m, th=None, transport=None, date=None):
         return {"duplicate": True, "note": "Bu mesaj daha önce işlendi."}
 
     gun = date or datetime.date.today().isoformat()
+    ek = _eki_kaydet(con, kanal, m)
+    if ek:
+        ad = {"photo": "Fotoğraf", "video": "Video", "voice": "Sesli mesaj",
+              "audio": "Ses", "document": "Belge"}.get(ek["kind"], "Dosya")
+        cevap = (ad + " alındı ve analiz kuyruğuna kaydedildi. "
+                 "İçeriği henüz ölçülmedi; analiz tamamlanmadan sonuç üretilmeyecek.")
+        patron.log(con, kanal, "user", m.get("text") or "[%s]" % ad, agent="king")
+        patron.log(con, kanal, "manager", cevap, agent="king")
+        satir = outbox.enqueue(con, kanal, outbox.reply_kind(kimlik), gun,
+                               cevap, target=m.get("from"))
+        ozet = outbox.flush(con, cfg, limit=5, transport=transport)
+        return {"command": "attachment", "attachment_id": ek["id"], "queued": True,
+                "duplicate_row": satir.get("duplicate", False),
+                "sent": ozet.get("sent", 0), "failed": ozet.get("failed", 0),
+                "uncertain": ozet.get("uncertain", 0)}
 
     # Cevabi ekranla AYNI katman uretir: once komut, sonra model, sonra
     # durust bir «yok». `transport` burada GIDEN KUTUSUNUN tasiyicisidir;

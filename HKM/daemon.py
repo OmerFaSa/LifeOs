@@ -35,6 +35,7 @@ Ucnoktalar:
     POST /api/chat/tani             sohbet zincirini dener, nerede koptugunu soyler
     GET  /api/agents                gorevliler ve her birinin hazir olup olmadigi
     GET  /api/conversation          son konusma kayitlari
+    GET  /api/attachments           gelen medya ve analiz kuyrugu
     POST /api/pair/open             esleme penceresini acar (bearer ister)
     GET  /api/pair/status           pencere acik mi (bearer ister)
     POST /api/pair                  jetonu YEREL cihaza verir — pencere acikken,
@@ -466,6 +467,16 @@ class Handler(BaseHTTPRequestHandler):
                 self.con, max(1, min(limit, 200)),
                 (q.get("channel") or [None])[0],
                 (q.get("agent") or [None])[0])})
+        if u.path == "/api/attachments":
+            try:
+                limit = max(1, min(int((q.get("limit") or [40])[0]), 200))
+            except ValueError:
+                limit = 40
+            rows = self.con.execute(
+                "SELECT id,channel,kind,mime_type,file_name,size,duration,"
+                "caption,state,created_at FROM attachments ORDER BY id DESC LIMIT ?",
+                (limit,)).fetchall()
+            return self._send(200, {"attachments": [dict(r) for r in rows]})
         if u.path.startswith("/api/intents/"):
             mod = u.path.rsplit("/", 1)[-1]
             if mod not in intents.MODULES:

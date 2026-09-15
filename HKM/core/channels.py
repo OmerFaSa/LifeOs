@@ -260,8 +260,42 @@ def verify_telegram_secret(cfg, header):
 
 def parse_telegram(payload):
     m = (payload or {}).get("message") or {}
-    metin = m.get("text")
     sohbet = ((m.get("chat") or {}).get("id"))
-    if not metin or sohbet is None:
+    if sohbet is None:
         return []
-    return [{"from": str(sohbet), "text": str(metin), "id": m.get("message_id")}]
+    metin = m.get("text") or m.get("caption") or ""
+    ek = _telegram_eki(m)
+    if not metin and not ek:
+        return []
+    return [{"from": str(sohbet), "text": str(metin),
+             "id": m.get("message_id"), "attachment": ek}]
+
+
+def _telegram_eki(m):
+    """Telegram medyasini tek, kapali bir sozlesmeye indirger.
+
+    Dosyanin kendisi burada indirilmez. Webhook/yoklama is parcaciginda
+    buyuk bir dosya indirmek cevap yolunu kilitlerdi. file_id, daha sonra
+    indirme ve analiz kuyrugunun Telegram'dan dosyayi almasi icin yeterlidir.
+    """
+    tur, veri = None, None
+    fotograflar = m.get("photo")
+    if isinstance(fotograflar, list) and fotograflar:
+        tur, veri = "photo", fotograflar[-1]
+    else:
+        for aday in ("video", "voice", "audio", "document"):
+            if isinstance(m.get(aday), dict):
+                tur, veri = aday, m[aday]
+                break
+    if not tur:
+        return None
+    return {
+        "kind": tur, "file_id": str(veri.get("file_id") or ""),
+        "unique_id": str(veri.get("file_unique_id") or ""),
+        "mime_type": str(veri.get("mime_type") or ""),
+        "file_name": str(veri.get("file_name") or ""),
+        "size": veri.get("file_size") if isinstance(veri.get("file_size"), int)
+                else None,
+        "duration": veri.get("duration") if isinstance(veri.get("duration"), int)
+                    else None,
+    }

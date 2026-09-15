@@ -1175,3 +1175,16 @@ hiçbir çizimde atılmaz ve 30 saniyeden sık tekrarlanmaz.
 **Bugün ekranından sistemler açılır.** Üç kartın her biri kendi sistemine
 bağlantı taşır ve yanındaki nokta o kapının gerçekten cevap verdiğini
 söyler.
+
+
+## Telegram medya girişi
+
+Telegram metin dışında fotoğraf, video, sesli mesaj, ses ve belge de kabul
+eder. Bu içerikler doğrudan «analiz edildi» sayılmaz. İlk kapı yalnızca
+Telegram'ın dosya kimliğini ve güvenli metaveriyi attachments kuyruğuna
+yazar; durum received olur. Fotoğrafta Telegram'ın gönderdiği en büyük
+sürüm seçilir.
+
+Gönderen izin listesinde değilse dosya kimliği dahil hiçbir içerik ambara
+girmez. file_id Telegram'dan dosya alma yetkisidir ve /api/attachments
+çıktısında gösterilmez.
