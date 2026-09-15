@@ -1510,10 +1510,13 @@ details.detay > summary:hover{ color:var(--fg); }
       h += '</div>';
       h += '<div class="row"><button data-ekle="' + esc(p.id) + '" '
         + 'style="min-height:32px">+ Anahtar ekle</button>'
+        + (anahtarlar.length ? '<button data-modeller="' + esc(p.id) + '" '
+            + 'style="min-height:32px">Modelleri getir</button>' : '')
         + '<span class="muted">'
         + (anahtarlar.length ? anahtarlar.length + ' anahtar kurulu'
                              : 'anahtar yok')
-        + '</span></div>';
+        + '</span></div>'
+        + '<p class="muted" id="model-not-' + esc(p.id) + '"></p>';
     });
     h += '<div class="row" style="margin-top:16px">'
       + '<button class="primary" id="anahtar-kaydet">Anahtarları kaydet</button>'
@@ -1539,6 +1542,11 @@ details.detay > summary:hover{ color:var(--fg); }
           var alan = grup.lastElementChild.querySelector('[data-k-ad]');
           if(alan) alan.focus();
         });
+      });
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#saglayicilar [data-modeller]'), function(b){
+        b.addEventListener('click', function(){
+          modelleriGetir(b.dataset.modeller); });
       });
     Array.prototype.forEach.call(
       document.querySelectorAll('#saglayicilar [data-kutu]'), silBagla);
@@ -1617,8 +1625,11 @@ details.detay > summary:hover{ color:var(--fg); }
        calismiyor» sanir; oysa anahtar dogrudur, ad yanlistir. */
     var h = '';
     (m.providers || []).forEach(function(p){
+      /* Canli liste varsa O gecerlidir: kodda yazili adlar yalnizca
+         hicbir sey sorulmamisken gosterilen bir baslangictir. */
+      var liste = CANLI_MODELLER[p.id] || p.models || [];
       h += '<datalist id="modeller-' + esc(p.id) + '">';
-      (p.models || []).forEach(function(ad){
+      liste.forEach(function(ad){
         h += '<option value="' + esc(ad) + '"></option>';
       });
       h += '</datalist>';
@@ -1732,8 +1743,12 @@ details.detay > summary:hover{ color:var(--fg); }
     var g = r.body || {};
     var h = '<div class="tag" style="margin-top:14px">Sohbet zinciri</div>';
     (g.adimlar || []).forEach(function(a){
-      h += '<div class="metric"><div class="metric__name">'
-        + (a.ok ? '<span class="ok">✓</span> ' : '<span class="danger">✗</span> ')
+      /* Ucuncu hal: zincir CALISIYOR ama soylenecek bir sey var.
+         Bunu «kopuk» diye gostermek, calisan bir seye bozuk demekti. */
+      var im = a.warn ? '<span class="warn">⚠</span> '
+        : (a.ok ? '<span class="ok">✓</span> '
+                : '<span class="danger">✗</span> ');
+      h += '<div class="metric"><div class="metric__name">' + im
         + esc(a.ad) + '</div>'
         + '<div class="metric__meta">' + esc(a.note || '') + '</div></div>';
     });
@@ -1761,6 +1776,39 @@ details.detay > summary:hover{ color:var(--fg); }
     if(!yer) return;
     yer.className = g.ok ? 'ok' : 'danger';
     yer.textContent = g.note || (g.ok ? 'çalışıyor' : 'başarısız');
+    /* Sinama zaten model listesi ucunu cagiriyor: donen adlari ATMAK,
+       kullaniciyi model adini elle yazmaya birakmak olurdu. */
+    if(g.ok && (g.models || []).length) modelListesiYaz(saglayici, g.models);
+  }
+
+  /* Koda gomulu model listesi ZAMANLA ESKIR ve bunu kullanici 404 ile
+     ogrenir. Saglayicidan gelen liste, gomulu olanin YERINE gecer. */
+  var CANLI_MODELLER = {};
+
+  function modelListesiYaz(saglayici, liste){
+    CANLI_MODELLER[saglayici] = liste;
+    var d = document.getElementById('modeller-' + saglayici);
+    if(!d) return;
+    d.innerHTML = liste.map(function(ad){
+      return '<option value="' + esc(ad) + '"></option>'; }).join('');
+    var not = document.getElementById('model-not-' + saglayici);
+    if(not){
+      not.textContent = liste.length + ' model anahtarına açık — '
+        + 'model kutusuna tıklayınca listelenir.';
+    }
+  }
+
+  async function modelleriGetir(saglayici){
+    var not = document.getElementById('model-not-' + saglayici);
+    if(not) not.textContent = 'modeller sorulunuyor…';
+    var r = await api('/api/models', { method:'POST',
+      body:JSON.stringify({ provider:saglayici }) });
+    var g = r.body || {};
+    if(g.ok && (g.models || []).length){ modelListesiYaz(saglayici, g.models); }
+    else if(not){
+      not.textContent = g.note || 'Model listesi alınamadı; '
+        + 'aşağıdaki adlar kodda yazılı olanlardır ve eskimiş olabilir.';
+    }
   }
 
   function kurulu(m){ return m && m.set ? 'kurulu' : 'yok'; }
@@ -2497,7 +2545,9 @@ details.detay > summary:hover{ color:var(--fg); }
            kullaniciya neden oyle cevap aldigini arattirir. */
         if(g.mode === 'model'){
           not.textContent = g.model + ' · ' + g.seconds + ' sn · '
-            + (g.context_lines || 0) + ' satır ölçüme dayandı';
+            + (g.context_lines || 0) + ' satır ölçüme dayandı'
+            + (g.price_estimated ? ' · fiyatı bilinmiyor, harcama '
+                + 'tahmini yazıldı' : '');
         }else if(g.mode === 'yok'){
           /* Hiçbir şey olmamış gibi durmak, en kötü cevaptır: kullanıcı
              yazdı ve ekran sustu. Eksik olan şey ile yapılacak iş aynı

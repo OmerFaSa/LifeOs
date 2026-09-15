@@ -105,7 +105,11 @@ PROVIDERS = {
         "probe": "https://generativelanguage.googleapis.com/v1beta/models",
         "key_header": "x-goog-api-key",
         "signup": "https://aistudio.google.com/apikey",
-        "models": ["gemini-2.5-pro", "gemini-2.5-flash"],
+        # Bu liste bir BASLANGICTIR, sozlesme degil: «Modelleri getir»
+        # saglayiciya sorar ve donen liste bunun YERINE gecer. Koda
+        # gomulu bir liste zamanla eskir — «gemini-2.5-flash artik yeni
+        # kullanicilara acik degil» diyen bir 404 tam da boyle cikti.
+        "models": ["gemini-3.6-flash", "gemini-2.5-pro"],
     },
     "yerel": {
         "label": "Yerel sunucu (Ollama, LM Studio…)",
@@ -562,8 +566,11 @@ def probe(cfg, provider, transport=None, timeout=10, key_id=None):
     istek = urllib.request.Request(url, headers=baslik, method="GET")
     try:
         with urllib.request.urlopen(istek, timeout=timeout) as r:
-            govde = r.read(4000).decode("utf-8", "replace")
+            # Liste uzun olabilir: 4000 bayt bir saglayicida bir avuc
+            # modelden sonrasini kesiyordu.
+            govde = r.read(400000).decode("utf-8", "replace")
             return {"ok": True, "status": r.status,
+                    "models": _liste_coz(provider, govde),
                     "note": _probe_notu(provider, govde)}
     except urllib.error.HTTPError as e:
         if e.code in (401, 403):
@@ -584,6 +591,38 @@ def probe(cfg, provider, transport=None, timeout=10, key_id=None):
         return {"ok": False, "reason": "unreachable",
                 "note": "Ulaşılamadı (%s). İnternet bağlantısını kontrol et."
                         % type(e).__name__}
+
+
+def _liste_coz(provider, govde):
+    """Saglayicinin cevabindan MODEL ADLARI.
+
+    Koda gomulu bir model listesi ZAMANLA ESKIR ve bunu kullanici
+    ogrenir: «gemini-2.5-flash artik yeni kullanicilara acik degil»
+    diyen bir 404, listeyi guncellemedigimiz icin cikmisti. Adlari
+    saglayiciya SORMAK, listeyi hep taze tutmanin tek yoludur.
+
+    Cozulemezse BOS liste doner: uydurulmus bir model adi, olmayan bir
+    modele para odemeye calismaktir."""
+    try:
+        veri = json.loads(govde or "{}")
+    except ValueError:
+        return []
+    ham = veri.get("data") or veri.get("models") or []
+    out = []
+    for m in ham:
+        if isinstance(m, str):
+            ad = m
+        elif isinstance(m, dict):
+            ad = m.get("id") or m.get("name") or ""
+        else:
+            continue
+        # Google «models/gemini-3.6-flash» doner; cagride kullanilan ad
+        # onekin SONRASIDIR.
+        if provider == "google" and ad.startswith("models/"):
+            ad = ad[len("models/"):]
+        if ad:
+            out.append(ad)
+    return sorted(set(out))
 
 
 def _probe_notu(provider, govde):

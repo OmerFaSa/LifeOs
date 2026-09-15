@@ -192,6 +192,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         patron.log(con, kanal, "manager", r["text"], agent=gorevli)
     return {"ok": True, "mode": "model", "text": r["text"], "agent": gorevli,
             "model": r["model"], "usd": r["usd"], "seconds": r["seconds"],
+            "price_estimated": r.get("price_estimated", False),
             "context_lines": len(bg.splitlines())}
 
 def tani(con, cfg, date, gorevli="king", th=None, transport=None):
@@ -209,8 +210,12 @@ def tani(con, cfg, date, gorevli="king", th=None, transport=None):
     rol = GOREVLILER[gorevli]["role"]
     adim = []
 
-    def ekle(ad, ok, not_=""):
-        adim.append({"ad": ad, "ok": bool(ok), "note": not_})
+    def ekle(ad, ok, not_="", uyari=False):
+        """Üçüncü bir hal var: ZINCIR CALISIYOR ama soylenecek bir sey
+        var. Bunu «kopuk» diye gostermek, calisan bir seye bozuk demek
+        olurdu; hic gostermemek ise bilinmeyeni bilinir sanmak."""
+        adim.append({"ad": ad, "ok": bool(ok), "note": not_,
+                     "warn": bool(uyari)})
 
     a = models.resolve(cfg, rol) or {}
     ekle("Model ataması", bool(a.get("provider")),
@@ -263,6 +268,15 @@ def tani(con, cfg, date, gorevli="king", th=None, transport=None):
         return {"ok": False, "adimlar": adim, "agent": gorevli}
     ekle("Cevabın denetimi", bool(r.get("ok")),
          "Sınırlardan geçti." if r.get("ok") else (r.get("note") or ""))
+
+    if r.get("price_estimated"):
+        # Tahmin, olcumun yerine SESSIZCE gecmemeli: yuksek bir tahmin
+        # tavani erken doldurur ve sohbetin neden durdugu anlasilmaz.
+        # Ama bu bir KOPMA degildir — sohbet calisiyor.
+        ekle("Model tarifesi", True, uyari=True, not_=
+             "«%s» için fiyat tarifesi elimizde yok; harcama TAHMİNİ bir "
+             "tabanla yazılıyor (1.00/5.00 USD · 1M jeton). Gerçek fiyat "
+             "daha düşükse tavan erken dolar." % (r.get("model") or ""))
 
     return {"ok": bool(r.get("ok")), "adimlar": adim, "agent": gorevli,
             "text": r.get("text"), "model": r.get("model"),

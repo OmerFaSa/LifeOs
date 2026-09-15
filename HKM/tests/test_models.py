@@ -6,6 +6,8 @@ Butun anahtarlar bos olsa sistem aynen calisir; hicbir atama bir esigi,
 bir hukmu ya da bir onceligi degistirmez.
 """
 
+import json
+
 from core import models, settings
 from tests.harness import eq, no, ok, suite, test
 
@@ -349,3 +351,40 @@ def run():
             {"label": "Bir", "key": "a", "bilinmeyen": 1}]}})
         no(ok_)
     test("degersiz yeni anahtar reddedilir", t_valueless_new_key_refused)
+
+    def t_model_list_comes_from_the_provider():
+        """Koda gomulu bir model listesi ZAMANLA ESKIR ve bunu kullanici
+        404 ile ogrenir.
+
+        Gercekten yasandi: «gemini-2.5-flash artik yeni kullanicilara
+        acik degil, models/gemini-3.6-flash kullanin» diyen bir 404.
+        Adlari saglayiciya SORMAK, listeyi taze tutmanin tek yoludur."""
+        # Google «models/...» onekiyle doner; cagride kullanilan ad
+        # onekin SONRASIDIR.
+        g = models._liste_coz("google", json.dumps({"models": [
+            {"name": "models/gemini-3.6-flash"},
+            {"name": "models/gemini-2.5-pro"}]}))
+        eq(g, ["gemini-2.5-pro", "gemini-3.6-flash"])
+
+        # OpenAI bicimi «data[].id» tasir.
+        o = models._liste_coz("openrouter", json.dumps({"data": [
+            {"id": "openai/gpt-5-mini"}, {"id": "google/gemini-3.6-flash"}]}))
+        eq(o, ["google/gemini-3.6-flash", "openai/gpt-5-mini"])
+
+        # Cozulemeyen cevap BOS liste doner: uydurulmus bir model adi,
+        # olmayan bir modele para odemeye calismaktir.
+        eq(models._liste_coz("google", "bu json degil"), [])
+        eq(models._liste_coz("google", ""), [])
+    test("model listesi saglayicidan gelir",
+         t_model_list_comes_from_the_provider)
+
+    def t_probe_returns_the_list():
+        """Sinama zaten model listesi ucunu cagiriyor: donen adlari
+        ATMAK, kullaniciyi model adini elle yazmaya birakmak olurdu."""
+        cfg = models.apply({"local_token": "x"}, {"keys": {"google": "k"}})
+        r = models.probe(cfg, "google", transport=lambda *a: {
+            "ok": True, "status": 200, "models": ["gemini-3.6-flash"],
+            "note": "Anahtar gecerli."})
+        ok(r["ok"])
+        eq(r["models"], ["gemini-3.6-flash"])
+    test("sinama model listesini de dondurur", t_probe_returns_the_list)

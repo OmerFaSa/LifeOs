@@ -1015,9 +1015,38 @@ Geçen adımlar da yazılır: «nerede çalışıyor» bilgisi «nerede bozuk» 
 iş görür. Gerçek bir çağrı yapar — çok az para harcar ve deftere yazılır;
 sınamak, sınanmamış bir şeye «çalışıyor» demekten ucuzdur.
 
-**Model adları listeden seçilir.** Elle yazılan bir ad tek harf yanlış
-olduğunda sağlayıcı 404 döner ve kullanıcı «anahtar çalışmıyor» sanır;
-oysa anahtar doğrudur, ad yanlıştır.
+**Model adları listeden seçilir — ve liste sağlayıcıdan gelir.**
+
+Elle yazılan bir ad tek harf yanlış olduğunda sağlayıcı 404 döner ve
+kullanıcı «anahtar çalışmıyor» sanır; oysa anahtar doğrudur, ad yanlıştır.
+
+Ama koda gömülü bir model listesi de **zamanla eskir** ve bunu kullanıcı
+bir 404 ile öğrenir. Gerçekten yaşandı:
+
+> `HTTP 404 — This model models/gemini-2.5-flash is no longer available to
+> new users. Please update your code to use models/gemini-3.6-flash…`
+
+Kullanıcının kendi yazdığı ad doğruydu, **bizim listemiz** eskiydi. Bu
+yüzden sağlayıcı satırındaki **«Modelleri getir»** düğmesi listeyi
+sağlayıcıya sorar (`POST /api/models`) ve dönen adlar gömülü listenin
+**yerine geçer**. Gömülü liste artık bir sözleşme değil, hiçbir şey
+sorulmamışken gösterilen bir başlangıçtır. «Sına» düğmesi de aynı ucu
+çağırdığı için dönen listeyi zaten doldurur — onu atmak, kullanıcıyı adı
+elle yazmaya bırakmak olurdu.
+
+Google `models/gemini-3.6-flash` biçiminde döner; çağrıda kullanılan ad
+önekin **sonrasıdır** ve bu ayıklama okuma tarafında yapılır.
+
+**Tarifesi bilinmeyen model işaretlenir.** Yeni bir model için fiyat
+tablomuzda karşılık yoksa harcama tahmini bir tabanla (1.00/5.00 USD ·
+1M jeton) yazılır — «bedava» demek yanlış olurdu. Ama bu tahmin sessizce
+ölçümün yerine geçmez: defterde `tahmini-fiyat` diye durur, sohbet
+notunda ve «Sohbeti dene» çıktısında **söylenir**. Yüksek bir tahmin
+tavanı erken doldurur ve kullanıcı sohbetin neden durduğunu anlamazdı.
+
+Tanı çıktısında üçüncü bir hâl vardır: **⚠** — zincir çalışıyor ama
+söylenecek bir şey var. Bunu «kopuk» diye göstermek çalışan bir şeye
+bozuk demek, hiç göstermemek ise bilinmeyeni bilinir saymak olurdu.
 
 ## Gelen mesaj: iki kapı, tek işleme
 

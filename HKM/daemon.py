@@ -13,6 +13,7 @@ Ucnoktalar:
     GET  /api/budget                aylik harcama, tahmin ve sinir durumu
     POST /api/config                ayar yamasi (dogrulanir; jetona dokunmaz)
     POST /api/probe                 saglayici anahtarini SINAR (mesaj uretmez)
+    POST /api/models                saglayicinin anahtara ACIK model listesi
     POST /api/telegram/yoklama      webhook'u siler ve bir yoklama turu dener
     GET  /api/backup                butun ambar tek JSON
     POST /api/prune                 eski ham olaylari siler (kararlar kalir)
@@ -661,6 +662,22 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "niyet kimligi sayi olmali"})
             r = intents.answer(self.con, nid, parca[3])
             return self._send(200 if r.get("ok") else 409, r)
+        if u.path == "/api/models":
+            # Model adlarini SAGLAYICIYA sorar. Koda gomulu bir liste
+            # zamanla eskir ve bunu kullanici 404 ile ogrenir.
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                govde = json.loads(ham or b"{}")
+            except ValueError:
+                govde = {}
+            r = models.probe(self.server.config, (govde or {}).get("provider"),
+                             key_id=(govde or {}).get("key"))
+            return self._send(200, {"ok": bool(r.get("ok")),
+                                    "models": r.get("models") or [],
+                                    "note": r.get("note") or "",
+                                    "reason": r.get("reason") or ""})
         if u.path == "/api/chat/tani":
             # «API girdim ama calismiyor» cumlesinin tek cevabi, zinciri
             # GERCEKTEN kosturup hangi halkanin koptugunu gostermektir.

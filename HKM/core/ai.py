@@ -321,15 +321,22 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
 
         # HER CAGRI DEFTERE YAZILIR — basarisiz olan da.
         usd = _fiyat(a["provider"], a["model"], gir, cik)
+        # Tarifesi bilinmeyen model icin TAHMINI bir taban kullanilir ve
+        # bu ISARETLENIR. Tahmin, olcumun yerine sessizce gecmemeli:
+        # yuksek bir tahmin tavani erken doldurur ve kullanici sohbetin
+        # neden durdugunu anlamaz.
+        tahmini = not fiyat_bilinir(a["provider"], a["model"])
         butce.record(con, role=role, task=task, provider=a["provider"],
                      model=a["model"], user=user, in_tok=gir, out_tok=cik,
                      usd=usd, rate=float(b.get("usd_try") or 0),
-                     ok=(hata is None), note=hata or "", now=now)
+                     ok=(hata is None),
+                     note=hata or ("tahmini-fiyat" if tahmini else ""),
+                     now=now)
         if hata:
             return {"ok": False, "reason": "provider", "text": None,
                     "note": "Model çağrısı başarısız: %s" % hata}
         return {"ok": True, "raw": metin, "in_tok": gir, "out_tok": cik,
-                "usd": usd}
+                "usd": usd, "price_estimated": tahmini}
 
     r = _tur(sistem, mesajlar)
     if not r["ok"]:
@@ -356,6 +363,7 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
     return {"ok": True, "text": temiz, "model": a["model"],
             "provider": a["provider"], "in_tok": r["in_tok"],
             "out_tok": r["out_tok"], "usd": r["usd"],
+            "price_estimated": r.get("price_estimated", False),
             "seconds": round((datetime.datetime.now() - t0).total_seconds(), 1)}
 
 
@@ -379,6 +387,11 @@ FIYAT = {
     "gpt-5": (1.25, 10.00),
 }
 BILINMEYEN_FIYAT = (1.00, 5.00)     # tahmini taban — bedava DEGIL
+
+
+def fiyat_bilinir(provider, model):
+    """Bu modelin TARIFESI elimizde mi."""
+    return provider == "yerel" or model in FIYAT
 
 
 def _fiyat(provider, model, gir, cik):
