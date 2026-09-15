@@ -1188,3 +1188,16 @@ sürüm seçilir.
 Gönderen izin listesinde değilse dosya kimliği dahil hiçbir içerik ambara
 girmez. file_id Telegram'dan dosya alma yetkisidir ve /api/attachments
 çıktısında gösterilmez.
+
+Dosya, kanal isteğini bekletmeden arka plan ritminde indirilir. Tür bazlı
+boyut sınırı hem Telegram metaverisinden önce hem indirme sırasında uygulanır;
+yarım dosya kalıcı ada taşınmaz. İçerik SHA-256 ile tekilleştirilir ve ham
+dosya saklama süresi ayarlanabilir.
+
+## Kullanıcı onaylı hafıza
+
+Kalıcı hafıza yalnız açık bir `hatırla:` komutuyla veya yönetim API'siyle
+yazılır. Model konuşmadan kendiliğinden hafıza oluşturamaz. `hafızam` etkin
+kayıtları listeler, `#<kimlik> unut` kaydı geri çağrılmayacak duruma getirir.
+Kayıtlar King, AYS, SPİ ve ESP kapsamlarıyla ayrılır; süresi dolan kayıt model
+bağlamına girmez.

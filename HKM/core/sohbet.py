@@ -23,7 +23,7 @@
       «Yapay zeka yok» ile «sistem bozuk» ayri seylerdir.
 """
 
-from core import ai, butce, cross, dil, manager, models, patron, streak
+from core import ai, butce, cross, dil, manager, memory, models, patron, streak
 
 # Kademeler: kullanici kiminle konusuyor.
 GOREVLILER = {
@@ -138,6 +138,14 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         return {"ok": False, "mode": "yok", "text": None,
                 "note": "Bilinmeyen görevli."}
 
+    hafiza_komutu = memory.command(con, metin, user=user)
+    if hafiza_komutu:
+        if kayit:
+            patron.log(con, kanal, "user", metin, agent=gorevli)
+            patron.log(con, kanal, "manager", hafiza_komutu["text"], agent=gorevli)
+        return {"ok": True, "mode": "memory", "command": "memory",
+                "text": hafiza_komutu["text"], "agent": gorevli}
+
     # 1 — ONCE KOMUT. Ucretsiz, kesin ve her zaman ayni olan yol.
     komut = patron.parse(metin)
 
@@ -178,6 +186,9 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                 "note": hazir["note"]}
 
     bg = baglam(con, date, gorevli, th=th)
+    hb = memory.context(con, user=user, scope=gorevli)
+    if hb:
+        bg += "\nKullanıcının açıkça kaydettiği hafıza:\n" + hb
     g = GOREVLILER[gorevli]
     sistem = SISTEM_METNI % {"ad": g["ad"], "is": g["is"], "baglam": bg}
     mesajlar = list(gecmis or []) + [{"role": "user", "content": metin}]

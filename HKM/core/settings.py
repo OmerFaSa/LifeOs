@@ -28,7 +28,7 @@ import json
 import os
 import re
 
-from core import adlar, butce, channels, models, schedule, thresholds
+from core import adlar, butce, channels, media, models, schedule, thresholds
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -92,6 +92,7 @@ def read(cfg):
     # Saglayicilar ve gorev dagilimi — anahtarlar MASKELI.
     out["models"] = models.read(cfg)
     out["budget"] = butce.settings(cfg)
+    out["media"] = media.settings(cfg)
     return out
 
 
@@ -102,7 +103,7 @@ def validate(patch):
         return False, ["gövde bir nesne olmalı"]
     for k in patch:
         if k not in ("thresholds", "channels", "schedule", "models",
-                     "budget"):
+                     "budget", "media"):
             hata.append("bilinmeyen alan: %s" % k)
 
     if patch.get("models") is not None:
@@ -114,6 +115,11 @@ def validate(patch):
         ok_b, hata_b = butce.validate(patch["budget"])
         if not ok_b:
             hata.extend(hata_b)
+
+    if patch.get("media") is not None:
+        ok_m, hata_m = media.validate(patch["media"])
+        if not ok_m:
+            hata.extend(hata_m)
 
     for grup, alanlar in (patch.get("thresholds") or {}).items():
         if grup not in THRESHOLD_RANGE:
@@ -210,6 +216,8 @@ def apply(cfg, patch):
         yeni = models.apply(yeni, patch["models"])
     if patch.get("budget") is not None:
         yeni = butce.apply(yeni, patch["budget"])
+    if patch.get("media") is not None:
+        yeni.setdefault("media", {}).update(patch["media"])
     yeni["local_token"] = cfg.get("local_token")
     return yeni
 

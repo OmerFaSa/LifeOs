@@ -142,10 +142,29 @@ CREATE TABLE IF NOT EXISTS attachments (
   duration    INTEGER,
   caption     TEXT,
   state       TEXT NOT NULL DEFAULT 'received',
+  local_path  TEXT,
+  sha256      TEXT,
+  downloaded_at TEXT,
+  analyzed_at TEXT,
+  error       TEXT,
   created_at  TEXT NOT NULL,
   UNIQUE(channel, sender, message_id, file_id)
 );
 CREATE INDEX IF NOT EXISTS ix_attachments_state ON attachments(state, created_at);
+
+CREATE TABLE IF NOT EXISTS memories (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user        TEXT NOT NULL,
+  scope       TEXT NOT NULL DEFAULT 'all',
+  text        TEXT NOT NULL,
+  source      TEXT NOT NULL,
+  state       TEXT NOT NULL DEFAULT 'active',
+  created_at  TEXT NOT NULL,
+  expires_at  TEXT,
+  last_used_at TEXT,
+  forgotten_at TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_memories_user_state ON memories(user,state,scope);
 
 /* Kullanim defteri — PARANIN kaydi.
 
@@ -208,6 +227,11 @@ MIGRATIONS = [
     # Tek bir konusma akisi, dort ayri gorevlinin sozlerini birbirine
     # karistirirdi — ve «bunu kim soyledi» sorusu cevapsiz kalirdi.
     ("conversations", "agent", "TEXT"),
+    ("attachments", "local_path", "TEXT"),
+    ("attachments", "sha256", "TEXT"),
+    ("attachments", "downloaded_at", "TEXT"),
+    ("attachments", "analyzed_at", "TEXT"),
+    ("attachments", "error", "TEXT"),
 ]
 
 
@@ -406,7 +430,7 @@ def decision(con, decision_id):
 # aradaki fark sessizdi: teklif ve gonderim kuyruklari yedege hic girmiyor,
 # «yedek aldim» diyen kullanicinin islem durumu eksik kaliyordu.
 BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
-                 "conversations", "attachments", "intents", "outbox", "usage",
+                 "conversations", "attachments", "memories", "intents", "outbox", "usage",
                  "inbox_seen")
 BACKUP_SCHEMA = 4
 

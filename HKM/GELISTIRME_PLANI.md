@@ -7,11 +7,11 @@ ve sonuç her zaman kaynağıyla etiketlenir.
 
 ## 1. Medya taşıma
 
-Durum: **ilk kapı tamamlandı.** Telegram fotoğraf, video, sesli mesaj, ses ve
+Durum: **güvenli taşıma tamamlandı.** Telegram fotoğraf, video, sesli mesaj, ses ve
 belge güncellemeleri artık kaybolmuyor; güvenli metaveriyle `attachments`
 kuyruğuna giriyor.
 
-Sonraki teslim:
+Tamamlananlar:
 
 - `getFile` ile dosyayı arka planda indirme; webhook/yoklama yanıtını
   bekletmeme.
@@ -35,7 +35,9 @@ birini taşır. Başarısız analiz dosyayı kaybetmez ve uydurma sonuç üretme
 
 ## 3. Yapay zekâ hafızası
 
-Hafıza iki ayrı sınıf olacaktır:
+Durum: **açık hafıza tamamlandı; hafıza adayı sırada.**
+
+Hafıza iki ayrı sınıftır:
 
 - **Açık hafıza:** kullanıcı “bunu hatırla” dediğinde yazılır; kullanıcı
   listeler, düzeltir ve siler.

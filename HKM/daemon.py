@@ -67,7 +67,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (ai, butce, channels, cross, db, gelen,  # noqa: E402
                   impact,
-                  intents, manager, models, outbox, patron, schedule,
+                  intents, manager, media, memory, models, outbox, patron, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
                   weekly, yoklama)
 
@@ -474,9 +474,15 @@ class Handler(BaseHTTPRequestHandler):
                 limit = 40
             rows = self.con.execute(
                 "SELECT id,channel,kind,mime_type,file_name,size,duration,"
-                "caption,state,created_at FROM attachments ORDER BY id DESC LIMIT ?",
+                "caption,state,error,downloaded_at,analyzed_at,created_at "
+                "FROM attachments ORDER BY id DESC LIMIT ?",
                 (limit,)).fetchall()
             return self._send(200, {"attachments": [dict(r) for r in rows]})
+        if u.path == "/api/memory":
+            user = (q.get("user") or ["ben"])[0]
+            scope = (q.get("scope") or [None])[0]
+            return self._send(200, {"memories": memory.list_active(
+                self.con, user=user, scope=scope)})
         if u.path.startswith("/api/intents/"):
             mod = u.path.rsplit("/", 1)[-1]
             if mod not in intents.MODULES:
@@ -582,6 +588,28 @@ class Handler(BaseHTTPRequestHandler):
                             th=self.server.thresholds, timeout=1)
             return self._send(200, {"webhook_deleted": silme, "menu": menu,
                                     "poll": r})
+        if u.path == "/api/attachments/process":
+            r = media.process_next(self.con, self.server.config)
+            return self._send(200 if r.get("ok") else 409, r)
+        if u.path == "/api/memory":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            r = memory.add(self.con, body.get("text"), body.get("user") or "ben",
+                           body.get("scope") or "all", expires=body.get("expires"))
+            return self._send(200 if r.get("ok") else 422, r)
+        if u.path.startswith("/api/memory/") and u.path.endswith("/forget"):
+            parca = u.path.strip("/").split("/")
+            try:
+                id_ = int(parca[2])
+            except (ValueError, IndexError):
+                return self._send(400, {"error": "hafiza kimligi sayi olmali"})
+            r = memory.forget(self.con, id_)
+            return self._send(200 if r.get("ok") else 404, r)
         if u.path == "/api/probe":
             # «Kurulu» ile «calisiyor» ayri seylerdir: anahtarin gecerliligi
             # ancak SINANARAK bilinir.
@@ -791,6 +819,7 @@ def _ritim(srv, aralik=60):
     while not srv.dur.is_set():
         try:
             schedule.tick(con, srv.config, th=srv.thresholds)
+            media.process_next(con, srv.config)
         except Exception as e:                  # noqa: BLE001
             sys.stderr.write("[hkm] ritim hatasi: %s\n" % e)
         srv.dur.wait(aralik)
