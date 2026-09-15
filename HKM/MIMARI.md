@@ -910,9 +910,21 @@ odaklanamadım, programı hafifletelim mi?» bir komut değildir ve bir komuta
 `core/sohbet.py` o cümleyi karşılar — ama **sistemi değiştirmez**. Dört
 sınır:
 
-1. **Önce komut.** Kullanıcı «durum» yazdıysa kural motoru cevap verir;
-   modele **gidilmez**. Ücretsiz, kesin ve her zaman aynı olan yol önce
-   denenir. Bu, Telegram'dan gelen mesajda da böyledir.
+1. **Önce komut, sonra istek.** Kullanıcı «durum» yazdıysa kural motoru
+   cevap verir; modele **gidilmez**. Ücretsiz, kesin ve her zaman aynı
+   olan yol önce denenir. Bu, Telegram'dan gelen mesajda da böyledir.
+
+   Komut değilse ikinci soru sorulur: bu bir **istek** mi? «Yarın iki saat
+   matematik» bir sohbet değil, ilgili modülün kuyruğuna **teklif**
+   bırakan bir eylemdir. Bu adım bir süre atlanıyordu ve sonucu sessiz bir
+   kayıptı: model bağlanmadan önce bu cümle teklif üretiyor, model
+   bağlandıktan sonra aynı cümleye yalnızca güzel bir laf dönüyordu —
+   **model bağlamak, sistemi daha az iş yapar hâle getirmişti.**
+
+   Eylem, ifadenin önünde gelir: bir teklif onay zincirinden geçer ve iş
+   yapar; bir paragraf yalnızca söyler. `dil.istek` ihtiyatlıdır (gün ve
+   süre birlikte geçmiyorsa `None` döner), bu yüzden olağan sohbeti
+   kaçırmaz.
 2. **Model yalnız cümle kurar.** Gönderilen bağlam, kural motorunun
    **ürettiği** ölçülerdir — ham veri değil, zaten yazılmış satırlar.
    Modelin göreceği tek gerçek budur ve cevaptaki sayılar bununla

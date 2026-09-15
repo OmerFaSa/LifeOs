@@ -413,3 +413,37 @@ def run():
         ok("ag yok" in son["note"])
     test("tani hangi halkanin koptugunu soyler",
          t_diagnosis_names_the_broken_link)
+
+    def t_request_still_becomes_a_proposal():
+        """MODEL BAGLAMAK, SISTEMI DAHA AZ IS YAPAR HALE GETIRMEMELI.
+
+        «Yarin iki saat matematik» bir sohbet degil bir ISTEKTIR: AYS'in
+        kuyruguna teklif birakir ve AYS kendi koduyla uygular. Model
+        baglandiktan sonra bu adim atlaniyordu ve ayni cumleye yalnizca
+        guzel bir laf donuyordu — eylem kayboluyor, yerine ifade
+        geciyordu."""
+        con = _con()
+        cfg = _cfg()
+        cagri = []
+
+        def izle(*a):
+            cagri.append(1)
+            return "Yarına iki saatlik bir blok önerebilirim.", 300, 40
+
+        r = sohbet.konus(con, cfg, "yarın 2 saat matematik", BUGUN,
+                         transport=izle)
+        eq(r["mode"], "komut")
+        eq(r["command"], "istek")
+        ok("Teklif" in r["text"])
+        eq(con.execute("SELECT COUNT(*) n FROM intents").fetchone()["n"], 1)
+        # Eylem varken modele GIDILMEZ: ucretsiz ve kesin yol once.
+        no(cagri, "istek oldugu halde model cagrildi")
+
+        # Olagan sohbet ETKILENMEZ: dil.istek ihtiyatlidir, gun ve sure
+        # birlikte gecmiyorsa niyet kurmaz.
+        r = sohbet.konus(con, cfg, "bugün odaklanamadım, ne yapsam?", BUGUN,
+                         transport=izle)
+        eq(r["mode"], "model")
+        eq(con.execute("SELECT COUNT(*) n FROM intents").fetchone()["n"], 1)
+    test("model baglaninca teklif yolu kaybolmaz",
+         t_request_still_becomes_a_proposal)

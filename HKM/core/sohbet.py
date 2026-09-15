@@ -23,7 +23,7 @@
       «Yapay zeka yok» ile «sistem bozuk» ayri seylerdir.
 """
 
-from core import ai, butce, cross, manager, models, patron, streak
+from core import ai, butce, cross, dil, manager, models, patron, streak
 
 # Kademeler: kullanici kiminle konusuyor.
 GOREVLILER = {
@@ -140,7 +140,23 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
 
     # 1 — ONCE KOMUT. Ucretsiz, kesin ve her zaman ayni olan yol.
     komut = patron.parse(metin)
-    if komut and gorevli == "king":
+
+    # 1b — SONRA ISTEK. «Yarin iki saat matematik» bir sohbet degil, bir
+    # ISTEKTIR: ilgili modulun kuyruguna TEKLIF birakir ve modul kendi
+    # koduyla uygular.
+    #
+    # Bu adim bir sure ATLANIYORDU ve sonucu sessiz bir kayipti: model
+    # baglanmadan once bu cumle teklif uretiyor, model baglandiktan
+    # sonra ayni cumleye yalnizca guzel bir laf donuyordu. Model
+    # baglamak, sistemi DAHA AZ is yapar hale getirmisti.
+    #
+    # Eylem, ifadenin onunde gelir: bir teklif onay zincirinden gecer ve
+    # is yapar; bir paragraf yalnizca soyler. dil.istek ihtiyatlidir —
+    # gun ve sure birlikte gecmiyorsa None doner — bu yuzden olagan
+    # sohbeti kacirmaz.
+    istek = None if komut else dil.istek(metin, date)
+
+    if (komut or istek) and gorevli == "king":
         r = patron.respond(con, metin, date=date, th=th, channel=kanal,
                            agent=gorevli, kayit=kayit)
         return {"ok": True, "mode": "komut", "command": r["command"],
