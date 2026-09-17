@@ -1,0 +1,310 @@
+/* PERDE — tam ekran video katmanı ve seviye bannerı.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/seviye/seviye.css`; `python3 tools/seviye.py --yay` ile
+   AYS/SPİ/ESP içine kopyalanır.
+
+   İki yerde kullanılır ve İKİSİ DE AYNI GÖRÜNÜR:
+
+     1. açılış perdesi   — uygulama açılırken marka videosu
+     2. seviye perdesi   — kademe atlandığında geçiş videosu
+
+   Aynı şeyin iki ayrı görünümü olması, bir gün birinin unutulması
+   demekti; bu yüzden tek blok, iki örnek.
+
+   ---------------------------------------------------------------
+   VİDEONUN KENARI NEDEN GÖRÜNMEZ
+
+   Videonun kendi arka planı tam siyah değilse, siyah zemin üstünde
+   dikdörtgen bir kenar belirir. Videoyu yeniden üretmek yerine arkaya
+   AYNI VİDEONUN bulanık ve büyütülmüş bir kopyası konur (`__ortam`):
+   kenar, kendi renginin içinde kaybolur. Böylece hangi video gelirse
+   gelsin kamuflaj kendiliğinden olur.
+
+   Ortam katmanı kapatılabilir: perdeye `data-ortam="kapali"` yazmak
+   yeterlidir (zayıf cihazda iki video çözmek istenmeyebilir). */
+
+.perde{
+  position:fixed; inset:0; z-index:10000;
+  display:grid; place-items:center;
+  background:#000;
+  opacity:1; transition:opacity .38s ease;
+  overflow:hidden;
+  /* Perde açıkken altındaki sayfa kaymasın. */
+  touch-action:none;
+}
+.perde--kapaniyor{ opacity:0; pointer-events:none; }
+.perde[hidden]{ display:none; }
+
+/* ---------- ortam (bulanık arka kopya) ---------- */
+.perde__ortam{
+  position:absolute; inset:-8%;
+  width:116%; height:116%;
+  object-fit:cover;
+  filter:blur(56px) saturate(1.35);
+  opacity:.55;
+  pointer-events:none;
+  transform:translateZ(0);          /* GPU katmanı: blur her karede yeniden çizilmesin */
+}
+.perde[data-ortam="kapali"] .perde__ortam{ display:none; }
+
+/* ---------- asıl video ---------- */
+.perde__video{
+  position:relative;
+  max-width:min(96vw, 1100px);
+  max-height:88vh;
+  width:auto; height:auto;
+  object-fit:contain;
+  border-radius:10px;
+  /* Kenarı yumuşat: bulanık zeminle birleşme noktası sert kalmasın. */
+  box-shadow:0 30px 120px rgba(0,0,0,.65);
+}
+
+/* ---------- araç şeridi ---------- */
+.perde__araclar{
+  position:absolute; right:clamp(14px, 3vw, 28px); bottom:clamp(14px, 3vw, 28px);
+  display:flex; align-items:center; gap:10px;
+  z-index:2;
+}
+
+/* Cam yüzey — iki düğme de aynı malzemeden. */
+.perde__dugme{
+  -webkit-appearance:none; appearance:none;
+  display:inline-flex; align-items:center; gap:10px;
+  min-height:44px; padding:0 6px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(14,14,16,.42);
+  -webkit-backdrop-filter:blur(16px) saturate(1.2);
+  backdrop-filter:blur(16px) saturate(1.2);
+  color:#fff; cursor:pointer;
+  font:500 14px/1 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  letter-spacing:.02em;
+  transition:background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.perde__dugme:hover{
+  background:rgba(255,255,255,.16);
+  border-color:rgba(255,255,255,.42);
+}
+.perde__dugme:active{ transform:scale(.97); }
+.perde__dugme:focus-visible{
+  outline:2px solid #fff; outline-offset:3px;
+}
+
+/* ---------- ses düğmesi ---------- */
+.perde__ses{ width:44px; justify-content:center; padding:0; }
+.perde__ses svg{ width:19px; height:19px; display:block; }
+/* Sessizken düğme kendini belli eder: kullanıcı sesi açabileceğini
+   bilmiyorsa o düğme yok demektir. */
+.perde__ses[data-ses="kapali"]{
+  border-color:rgba(255,255,255,.5);
+  background:rgba(255,255,255,.14);
+}
+
+/* ---------- GEÇ düğmesi ----------
+
+   Halka videonun ne kadarının geçtiğini söyler; sayı kaç saniye
+   kaldığını. İkisi birlikte «beklemeye değer mi» sorusunu cevaplar —
+   düz bir «Atla» yazısı o soruyu cevapsız bırakıyordu. */
+.perde__gec{ padding-right:16px; }
+.perde__gec-halka{
+  position:relative; flex:none;
+  width:32px; height:32px;
+  display:grid; place-items:center;
+}
+.perde__gec-halka svg{
+  position:absolute; inset:0;
+  width:32px; height:32px;
+  transform:rotate(-90deg);          /* saat 12'den başla */
+}
+.perde__gec-iz{
+  fill:none; stroke:rgba(255,255,255,.22); stroke-width:2.5;
+}
+.perde__gec-yol{
+  fill:none; stroke:#fff; stroke-width:2.5; stroke-linecap:round;
+  /* Çevre = 2πr, r = 14 → 87.96 */
+  stroke-dasharray:87.96;
+  stroke-dashoffset:calc(87.96 * (1 - var(--ilerleme, 0)));
+  transition:stroke-dashoffset .25s linear;
+}
+.perde__gec-sayi{
+  position:relative; z-index:1;
+  font:600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  color:#fff;
+}
+.perde__gec-yazi{ padding-right:2px; }
+
+/* Telefonda yazı gider, halka kalır: 44 pikselin altına inilmez. */
+@media (max-width:420px){
+  .perde__gec{ padding-right:6px; }
+  .perde__gec-yazi{ display:none; }
+}
+
+/* ---------- seviye bannerı ----------
+
+   Video YOKKEN (henüz yüklenmemiş bir kademe, ya da hareket azaltma
+   tercihi) kutlama yine yapılır. Banner bir yedek değil, sistemin asıl
+   cümlesidir: video onun üstüne gelen süstür. */
+.perde__banner{
+  position:relative; z-index:1;
+  display:grid; justify-items:center; gap:18px;
+  padding:clamp(24px, 6vw, 56px);
+  text-align:center;
+  color:#fff;
+  max-width:min(92vw, 560px);
+  animation:perde-banner-gir .6s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes perde-banner-gir{
+  from{ opacity:0; transform:translateY(14px) scale(.97); }
+  to{ opacity:1; transform:none; }
+}
+
+/* Rozet: kullanıcının kendi görseli (img/seviye/kademe-N.png) varsa O
+   kullanılır. Yoksa kademe renginden çizilmiş bir yer tutucu durur —
+   boş bir kare bırakmak, sistemin hazır olmadığını söylemek olurdu. */
+.perde__rozet{
+  width:clamp(104px, 26vw, 156px); height:clamp(104px, 26vw, 156px);
+  display:grid; place-items:center;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 42%,
+      color-mix(in srgb, var(--kademe-isik, #fff) 55%, transparent) 0%,
+      transparent 62%),
+    conic-gradient(from 210deg,
+      color-mix(in srgb, var(--kademe-renk, #fff) 85%, #000) 0%,
+      var(--kademe-isik, #fff) 45%,
+      color-mix(in srgb, var(--kademe-renk, #fff) 85%, #000) 100%);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--kademe-isik, #fff) 45%, transparent),
+    0 0 64px color-mix(in srgb, var(--kademe-renk, #fff) 42%, transparent);
+}
+.perde__rozet img{
+  width:100%; height:100%; object-fit:contain; border-radius:50%;
+}
+.perde__rozet-no{
+  font:600 clamp(30px, 8vw, 46px)/1 ui-serif, Georgia, "Times New Roman", serif;
+  color:#12100c;
+  text-shadow:0 1px 0 color-mix(in srgb, var(--kademe-isik, #fff) 70%, transparent);
+}
+
+.perde__ustyazi{
+  font:500 11px/1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing:.24em; text-transform:uppercase;
+  color:rgba(255,255,255,.62);
+}
+.perde__ad{
+  font:500 clamp(28px, 7vw, 44px)/1.05 ui-serif, Georgia, "Times New Roman", serif;
+  letter-spacing:.06em;
+  color:var(--kademe-isik, #fff);
+}
+.perde__etiket{
+  font:600 15px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.14em;
+  color:rgba(255,255,255,.8);
+}
+.perde__slogan{
+  font:400 15px/1.5 ui-sans-serif, system-ui, sans-serif;
+  color:rgba(255,255,255,.72);
+  max-width:34ch;
+}
+.perde__ayrac{
+  width:120px; height:1px;
+  background:linear-gradient(90deg, transparent,
+    color-mix(in srgb, var(--kademe-isik, #fff) 60%, transparent), transparent);
+}
+
+/* ---------- hareket azaltma ----------
+
+   Açılış perdesi tercihte HİÇ görünmez (bkz. base.css): marka videosu
+   bilgi taşımaz. Seviye perdesi görünür ama videosuz — kademe atlandığı
+   bilgisi tercihe kurban edilemez. */
+@media (prefers-reduced-motion:reduce){
+  .perde{ transition:none; }
+  .perde__banner{ animation:none; }
+  .perde__ortam{ display:none; }
+  .perde--seviye .perde__video{ display:none; }
+  /* Marka girişi tercihte HİÇ görünmez. JavaScript de onu kaldırır ama
+     kural burada da yazılıdır: betik geç çalışsa bile bir kare bile
+     görünmesin. Otomasyon (Playwright, reducedMotion:'reduce') bundan
+     hiç etkilenmez — denetim araçlarının dayandığı şey budur. */
+  .perde--marka{ display:none !important; }
+}
+
+
+/* ================================================================
+   SEVİYE ROZETİ — künyede ya da alt bantta duran küçük gösterge.
+
+   Rozet bir ÖDÜL DEĞİL bir KONUMDUR: «şu an neredesin ve bir sonraki
+   basamağa ne kadar kaldı». Bu yüzden büyük sayı yoktur, çubuk vardır.
+
+   Şu an alt bantta (koyu zemin) duruyor; künyeye ya da bir ekranın
+   içine taşımak yalnız `XP.rozetHtml()` çıktısını oraya koymaktır.
+   ================================================================ */
+
+.seviye-rozet{
+  display:inline-flex; align-items:center; gap:10px;
+  min-height:32px; padding:4px 12px 4px 4px;
+  border-radius:999px;
+  border:1px solid color-mix(in srgb, currentColor 22%, transparent);
+  background:color-mix(in srgb, currentColor 8%, transparent);
+  color:inherit; text-decoration:none;
+  max-width:100%;
+}
+
+.seviye-rozet__mark{
+  width:24px; height:24px; flex:none;
+  display:grid; place-items:center;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 38%,
+      color-mix(in srgb, var(--kademe-isik, currentColor) 60%, transparent) 0%,
+      transparent 64%),
+    conic-gradient(from 210deg,
+      color-mix(in srgb, var(--kademe-renk, currentColor) 82%, #000) 0%,
+      var(--kademe-isik, currentColor) 45%,
+      color-mix(in srgb, var(--kademe-renk, currentColor) 82%, #000) 100%);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--kademe-isik, currentColor) 40%, transparent);
+  overflow:hidden;
+}
+.seviye-rozet__mark{ position:relative; }
+/* Kullanıcının kendi rozeti — VARSA numaranın üstünü örter, yoksa hiç
+   çizilmez. `--kademe-gorsel` rozeti üreten kod tarafından verilir. */
+.seviye-rozet__mark::after{
+  content:''; position:absolute; inset:0; border-radius:50%;
+  background-image:var(--kademe-gorsel);
+  background-size:cover; background-position:center;
+}
+.seviye-rozet__mark span{
+  position:relative;
+  font:600 12px/1 ui-serif, Georgia, "Times New Roman", serif;
+  color:#12100c;
+}
+
+.seviye-rozet__metin{ display:flex; align-items:baseline; gap:7px; min-width:0; }
+.seviye-rozet__etiket{
+  font:600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums; letter-spacing:.06em;
+}
+.seviye-rozet__ad{
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  opacity:.7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+.seviye-rozet__cubuk{
+  width:56px; height:3px; flex:none;
+  border-radius:3px;
+  background:color-mix(in srgb, currentColor 20%, transparent);
+  overflow:hidden;
+}
+.seviye-rozet__cubuk i{
+  display:block; height:100%;
+  background:var(--kademe-isik, currentColor);
+}
+
+/* Telefonda ad gider; etiket ve çubuk kalır. */
+@media (max-width:420px){
+  .seviye-rozet__ad{ display:none; }
+  .seviye-rozet__cubuk{ width:40px; }
+}

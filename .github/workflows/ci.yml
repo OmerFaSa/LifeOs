@@ -39,6 +39,24 @@ jobs:
       - name: Duman testi
         run: node tools/smoke.js
 
+  seviye:
+    name: Seviye sistemi — üç kopya kaynakla aynı mı
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Kademe adlari, renkleri ve XP esikleri TEK KAYNAKTAN (brand/seviye/)
+      # uc arayuze kopyalanir. Kopyanin elle duzenlenmesi sessiz bir
+      # ayrisma demektir: AYS'te "Altin" olan SPI'de baska bir sey olur ve
+      # bu ancak iki ekran yan yana konunca fark edilir. Denetim o sessiz
+      # hali gurultuluye cevirir.
+      - name: Kopyalar kaynakla aynı mı
+        run: python3 tools/seviye.py --denetle
+
   hkm:
     name: HKM — birim testleri
     runs-on: ubuntu-latest

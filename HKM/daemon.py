@@ -405,10 +405,39 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_brand(self, ad):
+        """Marka gorseli — HKM/brand/ altindaki sabit adli dosya.
+
+        Yuzun kendisi gibi jeton ISTEMEZ: bir logoda veri yoktur. Yalniz
+        duz dosya adi kabul edilir ve yalniz gorsel uzantilari; bir
+        gorsel kapisinin dosya sistemine acilan bir pencereye donusmesi
+        bu depoda kabul edilebilir bir bedel degil."""
+        if "/" in ad or "\\" in ad or ad.startswith("."):
+            return self._send(404, {"error": "yok"})
+        uzanti = os.path.splitext(ad)[1].lower()
+        turler = {".png": "image/png", ".jpg": "image/jpeg",
+                  ".jpeg": "image/jpeg", ".webp": "image/webp",
+                  ".svg": "image/svg+xml", ".mp4": "video/mp4"}
+        if uzanti not in turler:
+            return self._send(404, {"error": "yok"})
+        yol = os.path.join(ROOT, "brand", ad)
+        if not os.path.exists(yol):
+            return self._send(404, {"error": "yok"})
+        with open(yol, "rb") as f:
+            body = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", turler[uzanti])
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
         u = urlparse(self.path)
         if u.path in ("/", "/index.html"):
             return self._send_page()
+        if u.path.startswith("/brand/"):
+            return self._send_brand(u.path[len("/brand/"):])
         if u.path == "/api/health":
             return self._send(200, {"ok": True, "service": "hkm"})
         if u.path == "/api/wa/webhook":

@@ -125,7 +125,7 @@ R.App = (function(){
       <div class="masthead">
         <div class="wrapc masthead__in">
           <button class="brand" data-act="go" data-route="today" aria-label="Bugün bölümüne git">
-            <span class="brand__mark" aria-hidden="true">R</span>
+            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
             <span class="brand__text"><b>Rota</b><span>${brandLine()}</span></span>
           </button>
 
@@ -252,6 +252,19 @@ R.App = (function(){
 
   /* Alt bant — sayfayi sonlandirir ve sistemin degismez cumlesini
      her ekranda bir kez soyler. */
+  /* Seviye rozeti — bu sistemin KENDİ kademesi (core/xp.js).
+
+     Şimdilik alt bantta duruyor: her ekranda var, hiçbir ekranı
+     kalabalıklaştırmıyor. Künyeye ya da bir ekranın içine taşımak,
+     `R.XP.rozetHtml()` çıktısını oraya koymaktan ibarettir.
+
+     Defter yüklenmemişse BOŞ döner — «0 XP» çizmek, bilinmeyeni sıfır
+     saymak olurdu. */
+  function seviyeRozeti(){
+    if(!R.XP) return '';
+    try{ return R.XP.rozetHtml(); }catch(e){ return ''; }
+  }
+
   function footerHtml(){
     const progress = M.programProgress();
     const cur = M.currentWeek();
@@ -259,10 +272,11 @@ R.App = (function(){
       <footer class="sitefoot">
         <div class="wrapc sitefoot__in">
           <div class="sitefoot__brand">
-            <span class="brand__mark" aria-hidden="true">R</span>
+            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
             <div>
               <b>Rota</b>
               <span>Kişisel çalışma sistemi</span>
+              ${raw(seviyeRozeti())}
             </div>
           </div>
           <div class="sitefoot__notes">
@@ -1150,12 +1164,43 @@ R.App = (function(){
       }
       wireStoreErrors();
       await M.loadAll();
+
+      /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
+
+         Yükleme çizimden önce yapılır: rozet bir kare «veri yok» gösterip
+         sonra dolarsa, kullanıcı seviyesinin sıfırlandığını sanır.
+         Depoya erişilemezse defter boş kalır ve rozet hiç çizilmez —
+         yüklenmemiş bir defteri «0 XP» diye çizmek, bu deponun en çok
+         tekrarlanan kuralının (eksik veri sıfır değildir) ihlali olurdu. */
+      if(R.XP) await R.XP.yukle();
       applyTheme();
       applySection(S.route);
       await render();
 
       // AI koc yetenegi acilisi bloklamaz; hazir olunca panelleri gostermek icin yeniden ciz.
       installManifest();
+
+      /* Seviye kutlaması. İki yol da buraya çıkar:
+
+           · Uygulama AÇIKKEN atlanan seviye — XP.dinle ile anında.
+           · Uygulama KAPALIYKEN atlanmış seviye — açılışta bir kez.
+
+         Kutlama gösterilene kadar «görülmedi» kalır: son kartı çözüp
+         uygulamayı kapatan biri kutlamasını kaybetmez. Perde kapanınca
+         XP.kutlandi() defteri damgalar ve aynı kutlama bir daha oynamaz. */
+      if(R.XP && R.Perde){
+        R.XP.dinle(function(y){
+          R.Perde.kutla(y, { bitti:function(){
+            R.XP.kutlandi().then(render).catch(function(){});
+          } });
+        });
+        const bekleyen = R.XP.bekleyenKutlama();
+        if(bekleyen){
+          R.Perde.kutla(bekleyen, { bitti:function(){
+            R.XP.kutlandi().then(render).catch(function(){});
+          } });
+        }
+      }
       R.Auto.onDayOpen().then(done => { if(done.length) render(); });
 
       /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez

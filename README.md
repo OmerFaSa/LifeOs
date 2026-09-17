@@ -17,12 +17,12 @@ Yanlarında dördüncü, **isteğe bağlı** bir katman durur:
 
 | Klasör | Katman | Durum | Belge |
 |---|---|---|---|
-| [`HKM/`](HKM/) | <img src="HKM/brand/favicon.png" width="20" valign="middle"/> **Hayat Kontrol Merkezi** | merkez katman: brifing, çapraz bulgu, etki, sohbet, niyet kuyruğu, ritim (207 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
+| [`HKM/`](HKM/) | <img src="HKM/brand/favicon.png" width="20" valign="middle"/> **Hayat Kontrol Merkezi** | merkez katman: brifing, çapraz bulgu, etki, sohbet, niyet kuyruğu, ritim (312 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
 
-HKM'nin kendi yüzü (`HKM/web/index.html`) kasıtlı olarak markasız kalır — panonun
-kendi doktrini "ikon yok, sözcük var" der (bkz. dosyanın baş yorumu); marka
-görseli yalnızca bu tabloda ve `HKM/brand/` klasöründe durur, canlı panele
-karışmaz.
+HKM'nin kendi yüzü (`HKM/web/index.html`) İÇERİK ikonu kullanmaz — panonun
+kendi doktrini "ikon yok, sözcük var" der (bkz. dosyanın baş yorumu). Markanın
+kendisi bir içerik ikonu değildir: sekme ikonu ve künyedeki küçük görsel
+`HKM/brand/` klasöründen gelir, panonun içi yine sözcüklerle çalışır.
 
 HKM üçünün **üstünde değil yanındadır**: üç sistem onun var olduğunu bilmez ve
 o kapalıyken hiçbiri bozulmaz. Tek bağ, her arayüzdeki `core/beacon.js`
@@ -47,6 +47,12 @@ konuşamadığı bir boşluğu buldu (tarayıcının CORS ön-isteği).
   ve iki tema.
 - **Bağımlılıksızlık.** Ne çerçeve, ne derleyici, ne paket. Tarayıcıda düz
   JavaScript. Test betikleri için yalnızca Playwright.
+- **Seviye sistemi.** Altı kademe (Bronz → Kutsal), her kademede üç basamak.
+  Ortak olan TANIMDIR — ad, renk, eşik: "Altın" üçünde de aynı şeydir. Her
+  sistemin **kendi seviyesi** vardır ve kendi işleriyle dolar: ESP'de gitar
+  çalarak, SPİ'de antrenman yaparak, AYS'de soru çözerek. Puanlar karışmaz.
+  Tek kaynak `brand/seviye/`; üçe `python3 tools/seviye.py --yay` ile
+  dağıtılır (bkz. [`brand/seviye/OKU.md`](brand/seviye/OKU.md)).
 
 ## Üçü neyi paylaşmaz
 
@@ -59,6 +65,7 @@ Kodları ayrıdır ve birbirini import etmez:
 | Test paketi | `AYS/src/tests/` | `SPI/src/tests/` | `ESP/src/tests/` |
 | Dev sunucu portu | 4173 | 4183 | 4193 |
 | Dağıtım | `AYS/dist/rota.html` | `SPI/dist/spi.html` | `ESP/dist/esp.html` |
+| Seviye defteri | kendi deposunda | kendi deposunda | kendi deposunda |
 
 Birinde yapılan bir değişiklik diğerini bozamaz. Üç proje ayrı ayrı
 geliştirilir.
@@ -124,12 +131,12 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1061/1061 gecti | 802/802 gecti | 620/620 gecti |
+| `runtests.js` | 1097/1097 gecti | 846/846 gecti | 661/661 gecti |
 | `smoke.js` | Duman testi temiz — 2 hedefte 36 ekran, 36 sekme gezildi. | Duman testi temiz — 2 hedefte 24 ekran, 64 sekme gezildi. | Duman testi temiz — 2 hedefte 28 ekran, 182 sekme gezildi. |
-| `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (4 bilinen eksik izin listesinde) |
+| `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
 | `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 36 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 44 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 105 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 40.5 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 23.1 ms (bütçe 120). | ✕ team 61.5 ms > 60 ms |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 30.5 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 19.4 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 59.1 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
 

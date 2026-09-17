@@ -31,14 +31,23 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    yazar, modül kendi koduyla uygular (`HKM/core/intents.py`).
 5. **Sınırlar:** SPİ teşhis koymaz ve doz önermez; ESP/AYS sertifika
    vermez, yetenek yargısı kurmaz, sonuç garantisi etmez.
-6. **Anlamadığını anlamış gibi yapma.** Belirsiz girdi tahmin edilmez,
+6. **XP karar vermez.** Seviye sistemi (`brand/seviye/`) yalnızca
+   görünürlüktür: hiçbir plan, reçete, uyarı ya da teşhis XP'ye bakmaz.
+   Her sistemin KENDİ seviyesi vardır; ortak olan yalnız tanımdır (ad,
+   renk, eşik) ve o tanım TEK KAYNAKTAN dağıtılır — kopyalar elle
+   düzenlenmez.
+7. **Anlamadığını anlamış gibi yapma.** Belirsiz girdi tahmin edilmez,
    sorulur. Ölçülmemiş bir şey «temiz» diye raporlanmaz.
-7. **Kullanıcıya giden metin düzgün Türkçe'dir.** Kod yorumları ASCII
+8. **Kullanıcıya giden metin düzgün Türkçe'dir.** Kod yorumları ASCII
    olabilir; ekranda görünen cümle olamaz.
 
 ## 2. Denetimler — birleştirmeden önce koşar
 
 ```bash
+# depo koku: seviye sistemi tek kaynaktan yayilir
+python3 tools/seviye.py --yay        # brand/seviye/ -> uc arayuz
+python3 tools/seviye.py --denetle    # kopyalar kaynakla ayni mi (CI de kosar)
+
 # her sistem kendi dizininde
 node tools/runtests.js      # birim testleri
 node tools/smoke.js         # uygulamayı gerçekten açar, ekranları gezer

@@ -113,7 +113,7 @@ ESP.App = (function(){
       <div class="masthead">
         <div class="wrapc masthead__in">
           <button class="brand" data-act="go" data-route="today" aria-label="Günlük bölümüne git">
-            <span class="brand__mark" aria-hidden="true">E</span>
+            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
             <span class="brand__text"><b>ESP</b><span>${brandLine()}</span></span>
           </button>
 
@@ -169,16 +169,30 @@ ESP.App = (function(){
      sistemin iki değişmez cümlesini —klinik sınır ve mahremiyet— her
      ekranda bir kez söyler. Bunları kart olarak sayfanın ortasına koymak
      her seferinde içeriği bölüyordu. */
+  /* Seviye rozeti — bu sistemin KENDİ kademesi (core/xp.js).
+
+     Şimdilik alt bantta duruyor: her ekranda var, hiçbir ekranı
+     kalabalıklaştırmıyor. Künyeye ya da bir ekranın içine taşımak,
+     `ESP.XP.rozetHtml()` çıktısını oraya koymaktan ibarettir.
+
+     Defter yüklenmemişse BOŞ döner — «0 XP» çizmek, bilinmeyeni sıfır
+     saymak olurdu. */
+  function seviyeRozeti(){
+    if(!ESP.XP) return '';
+    try{ return ESP.XP.rozetHtml(); }catch(e){ return ''; }
+  }
+
   function footerHtml(){
     return html`
       <footer class="sitefoot">
         <div class="wrapc sitefoot__in">
           <div class="sitefoot__brand">
-            <span class="brand__mark" aria-hidden="true">E</span>
+            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
             <div>
               <b>Entelektüel Seviye Planlayıcı</b>
               <span>${ESP.Mod.active().map(d => d.short.toLocaleLowerCase('tr-TR'))
                 .join(' · ')}</span>
+              ${raw(seviyeRozeti())}
             </div>
           </div>
           <div class="sitefoot__notes">
@@ -282,7 +296,7 @@ ESP.App = (function(){
       <div class="navsheet" role="dialog" aria-label="Bölümler">
         <div class="navsheet__head">
           <div class="brand">
-            <span class="brand__mark" aria-hidden="true">E</span>
+            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
             <span class="brand__text"><b>ESP</b><span>${brandLine()}</span></span>
           </div>
           ${ESP.C.IconButton({ icon:'close', aria:'Kapat', act:'toggle-menu' })}
@@ -1375,10 +1389,41 @@ ESP.App = (function(){
 
       wireStoreErrors();
       await M.loadAll();
+
+      /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
+
+         Yükleme çizimden önce yapılır: rozet bir kare «veri yok» gösterip
+         sonra dolarsa, kullanıcı seviyesinin sıfırlandığını sanır.
+         Depoya erişilemezse defter boş kalır ve rozet hiç çizilmez —
+         yüklenmemiş bir defteri «0 XP» diye çizmek, bu deponun en çok
+         tekrarlanan kuralının (eksik veri sıfır değildir) ihlali olurdu. */
+      if(ESP.XP) await ESP.XP.yukle();
       applyTheme();
       applySection(S.route);
       await render();
       installManifest();
+
+      /* Seviye kutlaması. İki yol da buraya çıkar:
+
+           · Uygulama AÇIKKEN atlanan seviye — XP.dinle ile anında.
+           · Uygulama KAPALIYKEN atlanmış seviye — açılışta bir kez.
+
+         Kutlama gösterilene kadar «görülmedi» kalır: son kartı çözüp
+         uygulamayı kapatan biri kutlamasını kaybetmez. Perde kapanınca
+         XP.kutlandi() defteri damgalar ve aynı kutlama bir daha oynamaz. */
+      if(ESP.XP && ESP.Perde){
+        ESP.XP.dinle(function(y){
+          ESP.Perde.kutla(y, { bitti:function(){
+            ESP.XP.kutlandi().then(render).catch(function(){});
+          } });
+        });
+        const bekleyen = ESP.XP.bekleyenKutlama();
+        if(bekleyen){
+          ESP.Perde.kutla(bekleyen, { bitti:function(){
+            ESP.XP.kutlandi().then(render).catch(function(){});
+          } });
+        }
+      }
       startClock();
 
       /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez

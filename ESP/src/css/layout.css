@@ -48,12 +48,20 @@
   border:none; background:none; padding:0;
   min-width:0; flex:none;
 }
+/* Künye markası KULLANICININ KENDİ GÖRSELİDİR.
+
+   Önce burada "R"/"S"/"E" harfi çizen bir daire vardı. Artık marka
+   görseli (img/brand/favicon.png — logo.png'nin kare kırpılmış hâli)
+   duruyor ve BU DEPODAKİ BÜTÜN LOGOLAR için kural aynı: ne atıldıysa o
+   görünür. Harf üretmek, kullanıcının markasının yerine sistemin kendi
+   icadını koymaktı.
+
+   Dosya değişince logo da değişir; burada hiçbir şey değişmez. */
 .brand__mark{
   width:30px; height:30px; border-radius:50%; flex:none;
-  background:var(--ink); color:var(--ink-on);
-  display:grid; place-items:center;
-  font-family:var(--font-serif); font-weight:500; font-size:15px;
-  letter-spacing:0; line-height:1;
+  display:block; object-fit:cover;
+  /* Görsel inerken daire boş bir delik gibi durmasın. */
+  background:color-mix(in srgb, var(--text) 8%, transparent);
 }
 .brand__text{ display:flex; flex-direction:column; line-height:1.1; min-width:0; text-align:left; }
 .brand__text b{
@@ -303,19 +311,27 @@
   gap:28px 56px; align-items:start;
 }
 .sitefoot__brand{ display:flex; align-items:flex-start; gap:12px; }
+/* Koyu bantta görselin kenarı zeminde kaybolmasın diye ince bir halka. */
 .sitefoot__brand .brand__mark{
-  background:transparent; color:var(--ink-on);
-  border:1px solid color-mix(in srgb, var(--ink-on) 34%, transparent);
+  background:color-mix(in srgb, var(--ink-on) 10%, transparent);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--ink-on) 34%, transparent);
 }
 .sitefoot__brand b{
   display:block;
   font-family:var(--font-serif); font-size:17px; font-weight:500;
   color:var(--ink-on); line-height:1.25;
 }
-.sitefoot__brand span{
+/* Alt satir: YALNIZ markanin kendi alt yazisi. Secici once
+   `.sitefoot__brand span` idi ve seviye rozetinin ICINDEKI span'lara da
+   vuruyordu — rozet blok blok dagiliyordu. Cocuk secicisi o kapiyi
+   kapatir: rozet kendi kurallariyla cizilir. */
+.sitefoot__brand > div > span:not(.seviye-rozet){
   display:block; margin-top:4px;
   font-size:11.5px; color:var(--ink-on-2); line-height:1.45;
 }
+/* Rozet markanin altinda durur: alt bant iki sutunlu bir izgaradir,
+   ucuncu bir cocuk sirayi bozardi. */
+.sitefoot__brand .seviye-rozet{ margin-top:11px; }
 .sitefoot__notes{ display:grid; gap:14px; }
 .sitefoot__notes p{
   margin:0; font-size:12.5px; line-height:1.6; color:var(--ink-on-2);

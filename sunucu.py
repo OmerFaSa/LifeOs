@@ -63,13 +63,41 @@ SISTEMLER = [
 ]
 
 
+def _ortak_seviye_yolu(clean, kok):
+    """/img/seviye/<ad> -> <kok>/brand/seviye/<ad>, yoksa None.
+
+    Yalniz duz dosya adi kabul edilir: alt klasor ve ".." yok. Bir
+    sunucunun kendi kokunun disina cikmasi, ancak sinirli ve okunakli
+    bir kapiyla kabul edilebilir."""
+    onek = "/img/seviye/"
+    if not clean.startswith(onek):
+        return None
+    ad = clean[len(onek):]
+    if not ad or "/" in ad or "\\" in ad or ad.startswith("."):
+        return None
+    return os.path.join(kok, "brand", "seviye", ad)
+
+
 class Sunucu(SimpleHTTPRequestHandler):
-    """Bir sistemin src/ klasoru. /dist/... derlenmis surume cikar."""
+    """Bir sistemin src/ klasoru.
+
+    Iki adres kendi klasorunun disina cikar:
+      /dist/...        o sistemin derlenmis tek dosya surumu
+      /img/seviye/...  UCUNUN ORTAK seviye gorselleri (brand/seviye/)
+
+    Ikincisi bilincli bir istisnadir. Kademe videolari uc sistemin de
+    ayni dosyasidir; uc kez kopyalamak depoyu yuz megabayta tasirdi.
+    Sistemlerin birbirinden bagimsizligi bozulmaz: dosya yoksa kutlama
+    banner'a duser, arayuzde hicbir sey kirilmaz.
+    """
 
     repo = KOK
 
     def translate_path(self, path):
         clean = path.split("?", 1)[0].split("#", 1)[0]
+        ortak = _ortak_seviye_yolu(clean, KOK)
+        if ortak:
+            return ortak
         if clean == "/dist" or clean.startswith("/dist/"):
             rel = clean[len("/dist/"):] if clean.startswith("/dist/") else ""
             safe = os.path.normpath(rel).replace("\\", "/").lstrip("./")
@@ -107,6 +135,7 @@ GIRIS_SAYFASI = """<!doctype html>
 <html lang="tr"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>LifeOS</title>
+<link rel="icon" type="image/png" href="/marka/favicon.png"/>
 <style>
 :root{ --bg:#f7f7f5; --yuzey:#fff; --fg:#17181a; --dim:#63666b; --line:#e3e3df;
   --line-strong:#cfd0cb; --accent:#22456f;
@@ -121,6 +150,10 @@ body{ margin:0; background:var(--bg); color:var(--fg);
 h1{ font:600 13px/1 var(--mono); letter-spacing:.16em; text-transform:uppercase;
   margin:0 0 28px; }
 h1 span{ color:var(--dim); font-weight:400; letter-spacing:.08em; }
+/* Marka gorseli brand/life/logo.png. Dosya degisirse logo degisir;
+   burada hicbir sey degismez. Yuklenemezse yalniz yazi kalir. */
+h1 .marka{ width:22px; height:22px; border-radius:5px; object-fit:cover;
+  vertical-align:-6px; margin-right:11px; }
 a.kart{ display:block; text-decoration:none; color:inherit;
   border-top:1px solid var(--line); padding:18px 0; }
 a.kart:last-of-type{ border-bottom:1px solid var(--line); }
@@ -136,7 +169,7 @@ a.kart:hover .ad{ text-decoration:underline; }
 .not code{ font:12px/1.4 var(--mono); }
 </style></head><body>
 <div class="wrap">
-  <h1>LifeOS <span>tek sunucu</span></h1>
+  <h1><img class="marka" src="/marka/logo.png" alt="" aria-hidden="true"/>LifeOS <span>tek sunucu</span></h1>
   __KARTLAR__
   <p class="not">Üç sistem birbirini bilmez ve birbirini bozamaz; ayrı
     kapılarda durmalarının sebebi budur. HKM de üçünün üstünde değil
@@ -175,11 +208,43 @@ def giris_html():
     return GIRIS_SAYFASI.replace("__KARTLAR__", "\n  ".join(kartlar))
 
 
+MARKA_TURLERI = {".png": "image/png", ".jpg": "image/jpeg",
+                 ".jpeg": "image/jpeg", ".webp": "image/webp",
+                 ".svg": "image/svg+xml", ".mp4": "video/mp4"}
+
+
 class Giris(SimpleHTTPRequestHandler):
     def do_GET(self):
+        yol = self.path.split("?", 1)[0]
+        if yol.startswith("/marka/"):
+            return self._marka(yol[len("/marka/"):])
         govde = giris_html().encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(govde)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(govde)
+
+    def _marka(self, ad):
+        """LifeOS markasi — brand/life/ altindaki sabit adli dosya.
+
+        Yalniz duz dosya adi ve yalniz gorsel uzantisi kabul edilir; bir
+        logo kapisinin dosya sistemine acilan bir pencereye donusmesi
+        kabul edilebilir bir bedel degil."""
+        uzanti = os.path.splitext(ad)[1].lower()
+        if ("/" in ad or "\\" in ad or ad.startswith(".")
+                or uzanti not in MARKA_TURLERI):
+            self.send_error(404)
+            return
+        tam = os.path.join(KOK, "brand", "life", ad)
+        if not os.path.exists(tam):
+            self.send_error(404)
+            return
+        with open(tam, "rb") as f:
+            govde = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", MARKA_TURLERI[uzanti])
         self.send_header("Content-Length", str(len(govde)))
         self.send_header("Cache-Control", "no-store")
         self.end_headers()

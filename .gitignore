@@ -20,3 +20,8 @@ PAKET.md
 
 # Tek sunucu gunlugu
 sunucu.log
+
+# Seviye videolari ve rozetleri TEK KOPYA durur: brand/seviye/.
+# build.py bunlari dist/img/seviye/ icine kopyalar; uc kopya daha depoya
+# girerse ayni videoyu dort kez tasimis oluruz.
+*/dist/img/seviye/

@@ -18,11 +18,31 @@ ROOT = "src"
 REPO = os.path.dirname(os.path.abspath(__file__))
 
 
+def _ortak_seviye_yolu(clean):
+    """/img/seviye/<ad> -> <depo koku>/brand/seviye/<ad>, yoksa None.
+
+    Yalniz duz dosya adi kabul edilir: alt klasor ve ".." yok."""
+    onek = "/img/seviye/"
+    if not clean.startswith(onek):
+        return None
+    ad = clean[len(onek):]
+    if not ad or "/" in ad or "\\" in ad or ad.startswith("."):
+        return None
+    return os.path.join(os.path.dirname(REPO), "brand", "seviye", ad)
+
+
 class NoCacheHandler(SimpleHTTPRequestHandler):
     def translate_path(self, path):
         # /dist/... derlenmis tek dosyaya cikar; boylece kaynak ve urun
         # ayni sunucudan, ayni sekilde denenebilir.
+        # /img/seviye/... uc sistemin ORTAK seviye gorsellerine (depo
+        # kokundeki brand/seviye/) cikar: ayni videoyu uc kez kopyalamak
+        # yerine uc kapidan ayni dosyaya bakilir. Dosya yoksa kutlama
+        # banner'a duser; arayuz bozulmaz.
         clean = path.split("?", 1)[0].split("#", 1)[0]
+        ortak = _ortak_seviye_yolu(clean)
+        if ortak:
+            return ortak
         if clean == "/dist" or clean.startswith("/dist/"):
             rel = clean[len("/dist/"):] if clean.startswith("/dist/") else ""
             safe = os.path.normpath(rel).replace("\\", "/").lstrip("./")
