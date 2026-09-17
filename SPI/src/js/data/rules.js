@@ -15,6 +15,24 @@
 
 window.SP = window.SP || {};
 
+/* ------------------------------------------------ Turkce kelime siniri
+
+   JavaScript'te `\b` yalnizca [A-Za-z0-9_] uzerinden calisir. "öğün"un
+   basindaki ö bir kelime karakteri SAYILMAZ; bu yuzden /\böğün\b/ hicbir
+   Turkce cumlede eslesmez ve alan ihlali denetimi sessizce oluk verir.
+
+   Bu yuzden siniri kendimiz yaziyoruz ve Turkce harfleri kelime karakteri
+   sayiyoruz (bkz. ESP.trRe, ayni tuzagin ESP tarafindaki cozumu). */
+SP.TR_LETTERS = 'A-Za-zÇĞİIÖŞÜçğıiöşüâîûÂÎÛ';
+SP.TR_W = SP.TR_LETTERS + '0-9_';
+SP.TR_B = '(?<![' + SP.TR_W + '])';    // kelime basi
+SP.TR_E = '(?![' + SP.TR_W + '])';     // kelime sonu
+
+/* Turkce farkinda desen kurar: trRe('çünkü|zira') → /(?<!harf)(?:çünkü|zira)(?!harf)/i */
+SP.trRe = function(inner, flags){
+  return new RegExp(SP.TR_B + '(?:' + inner + ')' + SP.TR_E, flags || 'i');
+};
+
 SP.CLINICAL = {
   disclaimer:'SPİ bir hekim ya da tıp merkezi değildir. Buradaki her çıktı '
     + '«yaşam kalitesi ve zindelik rehberliği» statüsündedir. Teşhis ve tedavide '

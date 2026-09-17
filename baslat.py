@@ -3,7 +3,7 @@
 """LifeOS — HEPSI, TEK KOMUT.
 
      python3 baslat.py            # uc sistem + HKM + giris sayfasi
-     python3 baslat.py --dur      # HKM daemon'unu durdurur
+     python3 baslat.py --dur      # uc sistemi VE HKM daemon'unu durdurur
      python3 baslat.py --hkmsiz   # yalniz uc sistem (HKM hic acilmaz)
 
    Ne yapar:
@@ -85,11 +85,37 @@ def sistemler_baslat():
     return False, p, gunluk_yolu
 
 
+def sistemler_dur():
+    """Uc sistemin sunucusunu ADIYLA durdurur — HKM'nin kendi durdur()'uyla
+    AYNI desen: port dinleyen her seyi oldurmek, baska bir programi
+    kapatmak olabilirdi."""
+    if not _cevap_veriyor(GIRIS):
+        _yaz("yok", "Sistem sunucusu zaten çalışmıyor")
+        return 0
+    hedef = os.path.join(KOK, "sunucu.py")
+    try:
+        subprocess.run(["pkill", "-f", hedef], capture_output=True)
+    except FileNotFoundError:
+        _yaz("hata", "pkill bulunamadı", "elle durdurulmalı: " + hedef)
+        return 1
+    son = time.time() + 5
+    while time.time() < son:
+        if not _cevap_veriyor(GIRIS, timeout=1.0):
+            _yaz("ok", "Sistem sunucusu durduruldu")
+            return 0
+        time.sleep(0.3)
+    _yaz("hata", "Sistem sunucusu durmadı", "elle: pkill -f " + hedef)
+    return 1
+
+
 def main():
     if "--dur" in sys.argv:
-        return subprocess.call([sys.executable,
-                                os.path.join(HKM, "baslat.py"), "--dur"],
-                               cwd=HKM)
+        print("")
+        kod_sistem = sistemler_dur()
+        kod_hkm = subprocess.call([sys.executable,
+                                   os.path.join(HKM, "baslat.py"), "--dur"],
+                                  cwd=HKM)
+        return kod_sistem or kod_hkm
 
     print("\nLifeOS başlatılıyor\n")
 
@@ -134,8 +160,7 @@ def main():
 
   Sunucular ARKA PLANDA çalışır; bu pencereyi kapatmak onları durdurmaz.
   Durdurmak için:
-      python3 baslat.py --dur          (HKM)
-      pkill -f sunucu.py               (üç sistem)
+      python3 baslat.py --dur          (üç sistem + HKM, hepsi)
 """ % GIRIS)
     return 0
 

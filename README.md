@@ -136,11 +136,11 @@ eleştirilerin koda dönüşmüş hâli:
 
 | Katman | Ne sorar | Nerede |
 |---|---|---|
-| **Sürtünme** | Sistemi yönetmek, çalışmanın yerine mi geçiyor? | AYS + ESP `core/friction.js` |
-| **Goodhart nöbetçisi** | Çaba arttı da sonuç yerinde mi saydı? | AYS + ESP `core/goodhart.js` |
-| **Kalibrasyon defteri** | Sistem kapalıyken de kendi durumunu biliyor musun? | AYS + ESP `core/calib.js` |
+| **Sürtünme** | Sistemi yönetmek, çalışmanın yerine mi geçiyor? | AYS + SPİ + ESP `core/friction.js` |
+| **Goodhart nöbetçisi** | Çaba arttı da sonuç yerinde mi saydı? | AYS + SPİ + ESP `core/goodhart.js` |
+| **Kalibrasyon defteri** | Sistem kapalıyken de kendi durumunu biliyor musun? | AYS + SPİ + ESP `core/calib.js` |
 | **Kanıt eksenleri** | Bu eşik nereden geliyor, ne kadar kesin, kime uyar, ne söylemeye yetkili? | SPİ `core/evidence.js` |
-| **Sinyal katmanı** | Bu denetim yeni bir ekran mı gerektiriyor, yoksa tek bir soru mu? | AYS + ESP `core/signals.js` |
+| **Sinyal katmanı** | Bu denetim yeni bir ekran mı gerektiriyor, yoksa tek bir soru mu? | AYS + SPİ + ESP `core/signals.js` |
 | **Kör nokta** | Bu merdiven neyi ölçemez? | ESP `data/curriculum.js` |
 
 Üçü de kötü çıkabilir; bu bir arıza değil, ölçüldüğü için görünür olmasıdır.

@@ -406,15 +406,25 @@ Pager / paginate
 
 ### 5.1 Hangi dosya ortak
 
-Şu **altı dosya AYS ile SPİ'de birebir aynıdır** ve elle düzenlenmez:
+**Düzeltme (cksum ile ölçüldü, önceki sürüm yanlıştı):** altı dosyanın
+**üçü** (`base.css`, `layout.css`, `designs.css`) gerçekten AYS/SPİ/ESP'de
+birebir aynıdır ve elle düzenlenmez. Diğer üçü (`tokens.css`,
+`palettes.css`, `components.css`) **hiçbir zaman** AYS ile SPİ arasında
+birebir olmadı — AYS kendi renk kimliğini kuruluşundan beri ayrı taşıyor.
+SPİ ile ESP arasında `tokens.css`/`palettes.css` hâlâ birebirdir (ESP
+kuruluşunda SPİ'den kopyalandığı için); `components.css` üçünde de artık
+farklı — ESP'nin kopyalanan SPİ ajan sınıfları (`agentav--lab` vb.) sonradan
+temizlendi.
 
 ```
-css/tokens.css   palettes.css   base.css   layout.css   components.css   designs.css
+birebir (AYS=SPİ=ESP):     base.css   layout.css   designs.css
+birebir (yalnız SPİ=ESP):  tokens.css   palettes.css
+her sistemde farklı:        components.css
 ```
 
 Uygulamaya özgü her şey ayrı dosyada: AYS'de `css/rota.css` (üç boyutlu
 ofis, kat planı, hafta ızgarası, sınama kartı, soru çözüm defteri).
-**ESP de aynısını yapmalı:** `css/esp.css`.
+**ESP de aynısını yapıyor:** `css/esp.css`.
 
 > **Borç:** ESP spec'i "tokens.css kopyalanmaz, referans alınır" diyor.
 > Sıfır bağımlılıklı vanilla'da böyle bir mekanizma **yok.** Bugün

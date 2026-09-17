@@ -34,7 +34,7 @@ ESP.AGENTS = [
     redirect:'Bu soru bir uzmanın alanında; ona bağlıyorum.' },
 
   { id:'polyglot', name:'Polyglot Mentor', short:'Polyglot', role:'Yabancı dil',
-    color:'var(--agent-lang)', initial:'P',
+    color:'var(--agent-lang)', initial:'Pg',
     title:'Disiplin 1',
     scope:'Aktif kelime dağarcığı, aralıklı tekrar (SRS) retansiyonu, shadowing '
         + 'süresi ve i+1 üretim düzeyi.',
@@ -93,7 +93,7 @@ ESP.AGENTS = [
     owns:['library'] },
 
   { id:'montaigne', name:'Montaigne', role:'Yazı ve üslup',
-    color:'var(--agent-writing)', initial:'M',
+    color:'var(--agent-writing)', initial:'Mt',
     title:'Disiplin 6',
     scope:'Haftalık kelime üretimi, cümle uzunluğu dağılımı, tekrar ve gereksiz '
         + 'dolaylama, taslak-revizyon oranı.',

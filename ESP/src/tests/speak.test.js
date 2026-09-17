@@ -41,4 +41,13 @@
     });
   });
 
+  describe('Ajan avatari · baş harf', () => {
+    it('dokuz ajanin hicbiri ayni bas harfi paylasmaz', () => {
+      /* Patron/Polyglot ikisi de P, Maestro/Montaigne ikisi de M idi —
+         portre olmadan avatar dairesindeki tek ayirt edici isaret buydu. */
+      const harfler = ESP.AGENTS.map(a => a.initial);
+      expect(new Set(harfler).size).toBe(ESP.AGENTS.length);
+    });
+  });
+
 })();

@@ -27,8 +27,17 @@ const PORT = Number(process.argv[2]) || 4187;
 const ROOT = path.resolve(__dirname, '..');
 
 /* Ekran başına bütçe (ms). Ofis en ağır ekran: sekiz masa, çapraz bulgular
-   ve teklifler aynı karede. */
-const BUDGET = { office:100, ladder:80, lang:80, today:80, history:80,
+   ve teklifler aynı karede.
+
+   team varsayılan olarak Patron'u açar (team.js `agent()`): bu, tek
+   başına patronBrief()'i hesaplamak demektir — sekiz uzmanın brifingini
+   ve Curriculum/Planner özetlerini TEK karede toplayan aynı agregasyon.
+   office da aynı hesabı yapar, ÜSTÜNE sekiz masa kartını da çizer; team
+   masa kartlarını çizmediği için ölçülen maliyeti office'ten düşük ama
+   `default`in kapsayacağı sıradan bir ekrandan çok daha ağır (ölçüldü:
+   62–66 ms, dört koşum). Bütçe office ile aynı kademeye (ladder/lang/
+   today/history) çekildi; default'ta bırakmak "ölçmeden geçti" derdi. */
+const BUDGET = { office:100, team:80, ladder:80, lang:80, today:80, history:80,
   analytics:100, default:60 };
 
 let chromium;

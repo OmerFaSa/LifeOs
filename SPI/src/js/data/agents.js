@@ -31,7 +31,8 @@ SP.AGENTS = [
     opening:'Tahlillerine referans aralığından değil, kendi geçmişinden bakıyorum. '
           + 'Eğilim tek ölçümden daha çok şey söyler.',
     redirect:'Bu beslenme tarafında; Nesrin\'e bağlıyorum.',
-    owns:['labs', 'today'] },
+    owns:['labs', 'today'],
+    keywords:['tahlil', 'ferritin', 'hormon', 'biyokimya', 'kırmızı bayrak', 'referans aralığ'] },
 
   { id:'nutri', name:'Nesrin', role:'Beslenme ve biyoyararlanım',
     color:'var(--agent-nutri)', initial:'N',
@@ -42,7 +43,8 @@ SP.AGENTS = [
     opening:'Ne kadar aldığın kadar ne kadarını emebildiğin de önemli. '
           + 'Öğünlerine ikisini birlikte bakıyorum.',
     redirect:'Bu bir laboratuvar sorusu; Kerem\'e bağlıyorum.',
-    owns:['meals', 'kitchen'] },
+    owns:['meals', 'kitchen'],
+    keywords:['öğün', 'kalori', 'makro', 'mikro besin', 'emilim', 'mutfak'] },
 
   { id:'move', name:'Barış', role:'Hareket ve toparlanma',
     color:'var(--agent-move)', initial:'B',
@@ -52,7 +54,8 @@ SP.AGENTS = [
     brief:'moveBrief',
     opening:'Günün yükünü isteğin değil toparlanman belirler. Ölçüme bakıp yükü ona göre veririm.',
     redirect:'Bu beslenme tarafında; Nesrin\'e bağlıyorum.',
-    owns:['workouts', 'recovery'] },
+    owns:['workouts', 'recovery'],
+    keywords:['antrenman', 'toparlanma', 'egzersiz', 'aşırı antrenman', 'set', 'tekrar sayısı'] },
 
   { id:'money', name:'Sedef', role:'Sağlık ekonomisi',
     color:'var(--agent-money)', initial:'S',
@@ -62,7 +65,8 @@ SP.AGENTS = [
     brief:'moneyBrief',
     opening:'Bütçe en son sırada gelir ama yok sayılmaz. Hedefi bozmadan en ucuz yolu ararım.',
     redirect:'Bu bir beslenme hedefi sorusu; Nesrin\'e bağlıyorum.',
-    owns:['basket', 'prices'] },
+    owns:['basket', 'prices'],
+    keywords:['sepet', 'bütçe', 'fiyat', 'tasarruf', 'maliyet'] },
 ];
 
 SP.AGENT_BY_ID = SP.AGENTS.reduce(function(acc, a){ acc[a.id] = a; return acc; }, {});

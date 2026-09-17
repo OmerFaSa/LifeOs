@@ -11,8 +11,10 @@
      bu istek acilisi kilitliyordu: olculdu, ag varken ilk cizim 12.552 ms,
      CDN yanit vermiyorken uygulama hic acilmiyordu. Gomulu surum ag
      istegi yapmaz. Bkz. tools/fonts.py -->
-<!-- Ilk alti dosya SPI ile BIREBIR AYNIDIR; rota.css yalniz AYS'ye ozgu
-     bilesenleri tasir ve en sonda yuklenir. -->
+<!-- base/layout/designs SPI (ve ESP) ile BIREBIR AYNIDIR. tokens/palettes/
+     components AYS'nin KENDI renk kimligini tasir, SPI ile birebir DEGIL
+     (cksum ile olculdu) — rota.css yalniz AYS'ye ozgu bilesenleri tasir
+     ve en sonda yuklenir. -->
 <link rel="stylesheet" href="css/fonts.css"/>
 <link rel="stylesheet" href="css/tokens.css"/>
 <link rel="stylesheet" href="css/palettes.css"/>

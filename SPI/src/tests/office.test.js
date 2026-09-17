@@ -155,6 +155,64 @@
     });
   });
 
+  describe('Ofis — alan ihlali (scopeBreaches)', () => {
+    it('agentId verilmezse alan denetimi çalışmaz (eski davranış korunur)', () => {
+      const v = SP.Office.validate('Bütçe aşıldı, tasarruf gerekiyor.');
+      expect(v.ok).toBeTruthy();
+      expect(v.scopeBreaches).toHaveLength(0);
+    });
+
+    it('başka ajanın anahtar kelimesi geçip kendisininki geçmezse işaretlenir', () => {
+      const v = SP.Office.validate('Tasarruf için ucuz kaynak seç, bütçe önemli.', { agentId:'lab' });
+      expect(v.ok).toBeFalsy();
+      expect(v.scopeBreaches.length > 0).toBeTruthy();
+    });
+
+    it('kendi anahtar kelimesi de geçiyorsa yanlış pozitif üretmez', () => {
+      // "antrenman" move'un anahtar kelimesi ama "ferritin" lab'ın kendi
+      // alanı — iki koşullu denetim bunu YANLIŞ pozitif saymamalı, çünkü
+      // lab'ın kendi kırmızı bayrak yorumu antrenmanı bir etken olarak
+      // geçirebilir.
+      const v = SP.Office.validate(
+        'Ferritin düşük görünüyor; bu tabloda antrenman yükü bir etken '
+        + 'olabilir ama önce kaynağı netleştirmek gerek.', { agentId:'lab' });
+      expect(v.scopeBreaches).toHaveLength(0);
+    });
+
+    it('patron hiçbir alan ihlaliyle işaretlenmez (anahtar kelimesi yok)', () => {
+      const v = SP.Office.validate('Bütçe ve tahlil ve antrenman hepsi burada geçiyor.',
+        { agentId:'patron' });
+      expect(v.scopeBreaches).toHaveLength(0);
+    });
+  });
+
+  describe('Ofis — sayı sadakati (numberFidelity)', () => {
+    it('brief verilmezse sayı denetimi çalışmaz', () => {
+      const v = SP.Office.validate('Değerin 999 civarında.', { agentId:'lab' });
+      expect(v.unsupported).toHaveLength(0);
+    });
+
+    it('brifingde olmayan sayı uydurma sayılır', () => {
+      const brief = { agent:'lab', summary:{ toplam:42 } };
+      const v = SP.Office.validate('Ferritin değerin 999 civarında.', { agentId:'lab', brief });
+      expect(v.ok).toBeFalsy();
+      expect(v.unsupported.length > 0).toBeTruthy();
+    });
+
+    it('brifingdeki sayıyla eşleşen sayı uydurma sayılmaz', () => {
+      const brief = { agent:'lab', summary:{ toplam:42 } };
+      const v = SP.Office.validate('Toplam kayıt sayın 42.', { agentId:'lab', brief });
+      expect(v.unsupported).toHaveLength(0);
+    });
+
+    it('küçük doğal dil sayıları (≤12) ve yıllar uydurma sayılmaz', () => {
+      const brief = { agent:'lab', summary:{ toplam:1 } };
+      const v = SP.Office.validate('Son 3 tahlilinde 2024 yılından beri 2 kez bakıldı.',
+        { agentId:'lab', brief });
+      expect(v.unsupported).toHaveLength(0);
+    });
+  });
+
   describe('Ofis — model yokken', () => {
     it('ask kural motoru cümlesiyle döner', async () => {
       resetState();
