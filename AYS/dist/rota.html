@@ -820,6 +820,30 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 @keyframes boot-slide{ 0%{transform:translateX(-100%);} 100%{transform:translateX(350%);} }
 .boot__text{ font-size:var(--fs-sm); }
 
+/* ---------- marka girisi (splash) ----------
+   Gercek acilisi (yukaridaki .boot) ETKILEMEZ: ayri, en ustte duran bir
+   katmandir. Video bitince ya da "Atla"ya basilinca kalkar; altta uygulama
+   kendi hizinda zaten acilmis olur — ikisi PARALEL calisir, biri digerini
+   beklemez. prefers-reduced-motion tercihinde hic gorunmez: hem kullanicinin
+   hareket tercihine saygi, hem de otomasyonun (Playwright, reducedMotion)
+   bundan hic etkilenmemesi ayni satirda cozulur. */
+.brand-splash{
+  position:fixed; inset:0; z-index:9999;
+  display:flex; align-items:center; justify-content:center;
+  background:#000; opacity:1; transition:opacity .35s ease;
+}
+.brand-splash--out{ opacity:0; pointer-events:none; }
+.brand-splash[hidden]{ display:none; }
+.brand-splash__video{ max-width:min(92vw, 420px); max-height:80vh; }
+.brand-splash__skip{
+  position:absolute; right:var(--sp-4); bottom:var(--sp-4);
+  padding:.5em 1.1em; border-radius:999px; border:1px solid rgba(255,255,255,.35);
+  background:rgba(0,0,0,.35); color:#fff; font-size:var(--fs-sm); cursor:pointer;
+}
+@media (prefers-reduced-motion:reduce){
+  .brand-splash{ display:none; }
+}
+
 
 /* ================= zanaat detayları =================
 
@@ -6083,6 +6107,35 @@ tbody tr:hover{ background:var(--surface-2); }
 .dsgn--map::after{ inset:4px 4px 8px auto; width:7px; border-radius:2px;
   background:var(--border-strong); }
 </style>
+<!-- marka girisi — logo/video, atlanabilir. Gercek acilisi (asagidaki
+     .boot) ETKILEMEZ: ayri, ustte duran bir katman; video bitince ya da
+     "Atla"ya basilinca kalkar. prefers-reduced-motion tercihinde hic
+     gorunmez (bkz. css/base.css), boylece otomasyon (Playwright,
+     reducedMotion:'reduce') bundan hic etkilenmez. Dosya img/brand/intro.mp4
+     — ileride logo ya da video degisirse yalniz bu dosyalar degisir,
+     kod degismez. -->
+<div id="brand-splash" class="brand-splash">
+  <video class="brand-splash__video" id="brand-splash-video"
+    src="img/brand/intro.mp4" autoplay muted playsinline aria-hidden="true"></video>
+  <button class="brand-splash__skip" id="brand-splash-skip" type="button">Atla</button>
+</div>
+<script>
+(function(){
+  var el = document.getElementById('brand-splash');
+  if(!el) return;
+  var v = document.getElementById('brand-splash-video');
+  var skip = document.getElementById('brand-splash-skip');
+  function kapat(){
+    if(!el || el.hidden) return;
+    el.classList.add('brand-splash--out');
+    setTimeout(function(){ el.hidden = true; }, 400);
+  }
+  if(skip) skip.addEventListener('click', kapat);
+  if(v){ v.addEventListener('ended', kapat); v.addEventListener('error', kapat); }
+  else{ kapat(); }
+})();
+</script>
+
 <div id="app">
   <div class="boot">
     <div class="boot__mark">R</div>
@@ -6105,7 +6158,7 @@ tbody tr:hover{ background:var(--surface-2); }
 
 window.R = window.R || {};
 
-R.BUILD = { id:'2088209', at:'2026-09-17 17:55', dirty:true };
+R.BUILD = { id:'39c734b', at:'2026-09-17 20:06', dirty:true };
 
 /* ==== js/data/curriculum.js ==== */
 /* 40 haftalik uygulama plani — "Hemsirelik Hedefi" belgesinin 4. bolumu.
@@ -36600,16 +36653,15 @@ R.App = (function(){
     const el = document.getElementById('pwa-manifest');
     if(!el) return;
     const name = (S.profile && S.profile.name) ? 'Rota — ' + S.profile.name : 'Rota';
-    const icon = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">'
-      + '<rect width="512" height="512" rx="112" fill="#3D3F8F"/>'
-      + '<text x="256" y="342" font-family="system-ui,sans-serif" font-size="280" font-weight="800"'
-      + ' fill="#fff" text-anchor="middle">R</text></svg>');
+    /* Once "R" harfi ureten bir SVG'ydi; artik gercek marka gorseli
+       (img/brand/favicon.png, kare kirpilmis logo). Dosya degisirse ikon
+       da kendiliginden degisir, burasi hic dokunulmaz. */
+    const icon = new URL('img/brand/favicon.png', location.href).href;
     const manifest = {
       name, short_name:'Rota', start_url:location.href, scope:'./',
       display:'standalone', background_color:'#F7F8FA', theme_color:'#3D3F8F',
       lang:'tr', description:'Kişisel YKS çalışma sistemi',
-      icons:[{ src:icon, sizes:'512x512', type:'image/svg+xml', purpose:'any maskable' }],
+      icons:[{ src:icon, sizes:'192x192', type:'image/png', purpose:'any maskable' }],
     };
     try{
       el.setAttribute('href', 'data:application/manifest+json;charset=utf-8,'

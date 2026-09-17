@@ -33,7 +33,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   let sureler = {}, motor = {};
 
   try{
-    const page = await browser.newPage({ viewport:{ width:1280, height:900 } });
+    const page = await browser.newPage({ reducedMotion:'reduce', viewport:{ width:1280, height:900 } });
     page.on('pageerror', e => problems.push('sayfa hatası: ' + String(e).slice(0, 120)));
     await page.goto('http://localhost:' + PORT + '/src/index.html', { waitUntil:'load' });
     await page.waitForSelector('.site', { timeout:15000 });

@@ -11,6 +11,7 @@ Kullanim:
 """
 
 import re
+import shutil
 import sys
 from pathlib import Path
 
@@ -164,6 +165,22 @@ def stamp() -> str:
     return sha
 
 
+def copy_brand_assets() -> None:
+    """Marka gorselleri/videosu METNE gomulmez — HTML'e kopyalanirsa dosya
+    boyutu megabaytlarca sisiyor (video ~1.8MB). Bunun yerine dist/ yaninda
+    ayri dosya olarak durur, index.html'deki gibi ayni goreli yoldan
+    okunur. Kaynagi degistirmek (ayni ad, yeni icerik) tek gerekli adim;
+    kod hic degismez. """
+    src_dir = SRC / "img" / "brand"
+    if not src_dir.exists():
+        return
+    dst_dir = DIST / "img" / "brand"
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    for f in src_dir.iterdir():
+        if f.is_file():
+            shutil.copy2(f, dst_dir / f.name)
+
+
 def build(minify: bool = False) -> None:
     for name in REQUIRED:
         if not (SRC / name).exists():
@@ -203,6 +220,7 @@ def build(minify: bool = False) -> None:
     DIST.mkdir(exist_ok=True)
     out_path = DIST / "spi.html"
     out_path.write_text(output, encoding="utf-8")
+    copy_brand_assets()
 
     size_kb = len(output.encode("utf-8")) / 1024
     mode = "minify" if minify else "okunabilir"

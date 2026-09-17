@@ -57,7 +57,7 @@ function waitForServer(url, tries){
     await waitForServer('http://127.0.0.1:' + PORT + '/index.html');
     browser = await chromium.launch(process.env.CHROMIUM_PATH
       ? { executablePath:process.env.CHROMIUM_PATH } : {});
-    const page = await browser.newPage({ viewport:{ width:WIDTH, height:HEIGHT } });
+    const page = await browser.newPage({ reducedMotion:'reduce', viewport:{ width:WIDTH, height:HEIGHT } });
     await page.goto('http://127.0.0.1:' + PORT + '/index.html', { waitUntil:'load' });
     await page.waitForSelector('.site', { timeout:15000 });
     /* Sihirbaz gecikmeyle aciliyor ve acikken bütün tiklamalari yutuyor:

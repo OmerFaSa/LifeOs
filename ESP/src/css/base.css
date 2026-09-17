@@ -123,6 +123,30 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 @keyframes boot-slide{ 0%{transform:translateX(-100%);} 100%{transform:translateX(350%);} }
 .boot__text{ font-size:var(--fs-sm); }
 
+/* ---------- marka girisi (splash) ----------
+   Gercek acilisi (yukaridaki .boot) ETKILEMEZ: ayri, en ustte duran bir
+   katmandir. Video bitince ya da "Atla"ya basilinca kalkar; altta uygulama
+   kendi hizinda zaten acilmis olur — ikisi PARALEL calisir, biri digerini
+   beklemez. prefers-reduced-motion tercihinde hic gorunmez: hem kullanicinin
+   hareket tercihine saygi, hem de otomasyonun (Playwright, reducedMotion)
+   bundan hic etkilenmemesi ayni satirda cozulur. */
+.brand-splash{
+  position:fixed; inset:0; z-index:9999;
+  display:flex; align-items:center; justify-content:center;
+  background:#000; opacity:1; transition:opacity .35s ease;
+}
+.brand-splash--out{ opacity:0; pointer-events:none; }
+.brand-splash[hidden]{ display:none; }
+.brand-splash__video{ max-width:min(92vw, 420px); max-height:80vh; }
+.brand-splash__skip{
+  position:absolute; right:var(--sp-4); bottom:var(--sp-4);
+  padding:.5em 1.1em; border-radius:999px; border:1px solid rgba(255,255,255,.35);
+  background:rgba(0,0,0,.35); color:#fff; font-size:var(--fs-sm); cursor:pointer;
+}
+@media (prefers-reduced-motion:reduce){
+  .brand-splash{ display:none; }
+}
+
 
 /* ================= zanaat detayları =================
 

@@ -115,7 +115,7 @@ async function main(){
         hatalar.push(s.id + ': devserver acilmadi');
         continue;
       }
-      const page = await browser.newPage();
+      const page = await browser.newPage({ reducedMotion:'reduce' });
       const konsol = [];
       page.on('pageerror', e => konsol.push(String(e.message)));
       await page.goto(base + '/index.html', { waitUntil:'load' });

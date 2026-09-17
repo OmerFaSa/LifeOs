@@ -31,7 +31,12 @@ try{
 }
 
 /* Cevrimdisi ortamda beklenen basarisizliklar: uygulamanin kendi hatasi degil. */
-const IGNORE = [/fonts\.googleapis\.com/, /fonts\.gstatic\.com/, /favicon\.ico/];
+/* img/brand/intro.mp4 gormezden gelinir: 1-2 MB'lik video henuz inerken
+   duman testi ikinci hedefe (dist) gecince tarayici bu istegi net::ERR_ABORTED
+   ile keser. Bu geculk sayfa gecisinin dogal sonucudur, gercek bir hata
+   degildir — splash.js zaten error olayinda da kapaniyor. */
+const IGNORE = [/fonts\.googleapis\.com/, /fonts\.gstatic\.com/, /favicon\.ico/,
+  /img\/brand\/intro\.mp4/];
 function ignorable(url){ return IGNORE.some(re => re.test(url || '')); }
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -202,7 +207,7 @@ async function walkFlows(page, base, errors){
     await waitForServer(base + '/index.html');
     browser = await chromium.launch(process.env.CHROMIUM_PATH
       ? { executablePath:process.env.CHROMIUM_PATH } : {});
-    const page = await browser.newPage();
+    const page = await browser.newPage({ reducedMotion:'reduce' });
 
     page.on('pageerror', e => errors.push('sayfa hatası: ' + (e && e.message || e)));
     page.on('requestfailed', r => {

@@ -24,11 +24,41 @@
 <link rel="stylesheet" href="css/designs.css"/>
 <link rel="stylesheet" href="css/rota.css"/>
 <link id="pwa-manifest" rel="manifest"/>
+<link rel="icon" type="image/png" href="img/brand/favicon.png"/>
 <meta name="theme-color" content="#3D3F8F"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="Rota"/>
 </head>
 <body>
+
+<!-- marka girisi — logo/video, atlanabilir. Gercek acilisi (asagidaki
+     .boot) ETKILEMEZ: ayri, ustte duran bir katman; video bitince ya da
+     "Atla"ya basilinca kalkar. prefers-reduced-motion tercihinde hic
+     gorunmez (bkz. css/base.css), boylece otomasyon (Playwright,
+     reducedMotion:'reduce') bundan hic etkilenmez. Dosya img/brand/intro.mp4
+     — ileride logo ya da video degisirse yalniz bu dosyalar degisir,
+     kod degismez. -->
+<div id="brand-splash" class="brand-splash">
+  <video class="brand-splash__video" id="brand-splash-video"
+    src="img/brand/intro.mp4" autoplay muted playsinline aria-hidden="true"></video>
+  <button class="brand-splash__skip" id="brand-splash-skip" type="button">Atla</button>
+</div>
+<script>
+(function(){
+  var el = document.getElementById('brand-splash');
+  if(!el) return;
+  var v = document.getElementById('brand-splash-video');
+  var skip = document.getElementById('brand-splash-skip');
+  function kapat(){
+    if(!el || el.hidden) return;
+    el.classList.add('brand-splash--out');
+    setTimeout(function(){ el.hidden = true; }, 400);
+  }
+  if(skip) skip.addEventListener('click', kapat);
+  if(v){ v.addEventListener('ended', kapat); v.addEventListener('error', kapat); }
+  else{ kapat(); }
+})();
+</script>
 
 <div id="app">
   <div class="boot">

@@ -114,7 +114,7 @@ function padL(s, n){ s = String(s); return ' '.repeat(Math.max(0, n - s.length))
     await waitForServer('http://127.0.0.1:' + PORT + '/tests/');
     browser = await chromium.launch(process.env.CHROMIUM_PATH
       ? { executablePath:process.env.CHROMIUM_PATH } : {});
-    const page = await browser.newPage();
+    const page = await browser.newPage({ reducedMotion:'reduce' });
     page.on('pageerror', e => console.error('sayfa hatasi:', e.message));
 
     /* Test sayfasi ekranlari yuklemez: motor ve sahte depo hazir gelir. */

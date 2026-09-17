@@ -54,7 +54,7 @@ function waitForServer(url, tries){
     await waitForServer('http://127.0.0.1:' + PORT + '/tests/');
     browser = await chromium.launch(process.env.CHROMIUM_PATH
       ? { executablePath:process.env.CHROMIUM_PATH } : {});
-    const page = await browser.newPage();
+    const page = await browser.newPage({ reducedMotion:'reduce' });
 
     const consoleErrors = [];
     page.on('pageerror', err => consoleErrors.push(String(err && err.message || err)));

@@ -1,18 +1,28 @@
+<p align="center"><img src="brand/life/logo.png" alt="LifeOS" width="180"/></p>
+
 # LifeOS
 
 Tek kişinin gündelik hayatını yöneten üç bağımsız sistem.
 
+<!-- Her sistemin kendi marka gorseli kendi src/img/brand/logo.png dosyasindadir
+     (bkz. brand/OKU.md); burada yalniz kucuk bir referans olarak gosterilir.
+     Dosya degisirse bu satirlar hic dokunulmadan guncel kalir. -->
 | Klasör | Sistem | Alan | Belge |
 |---|---|---|---|
-| [`AYS/`](AYS/) | **Akademik Yol Sistemi** | Sınav hazırlığı, çalışma düzeni, deneme analizi | [`AYS/src/OFIS.md`](AYS/src/OFIS.md) |
-| [`SPI/`](SPI/) | **Sağlık Performans İzleyicisi** | Sağlık, beslenme, hareket, sağlık ekonomisi | [`SPI/src/MIMARI.md`](SPI/src/MIMARI.md) |
-| [`ESP/`](ESP/) | **Entelektüel Seviye Planlayıcı** | Dil, felsefe, müzik, diksiyon, okuma, yazı, tarih | [`ESP/src/MIMARI.md`](ESP/src/MIMARI.md) |
+| [`AYS/`](AYS/) | <img src="AYS/src/img/brand/favicon.png" width="20" valign="middle"/> **Akademik Yol Sistemi** | Sınav hazırlığı, çalışma düzeni, deneme analizi | [`AYS/src/OFIS.md`](AYS/src/OFIS.md) |
+| [`SPI/`](SPI/) | <img src="SPI/src/img/brand/favicon.png" width="20" valign="middle"/> **Sağlık Performans İzleyicisi** | Sağlık, beslenme, hareket, sağlık ekonomisi | [`SPI/src/MIMARI.md`](SPI/src/MIMARI.md) |
+| [`ESP/`](ESP/) | <img src="ESP/src/img/brand/favicon.png" width="20" valign="middle"/> **Entelektüel Seviye Planlayıcı** | Dil, felsefe, müzik, diksiyon, okuma, yazı, tarih | [`ESP/src/MIMARI.md`](ESP/src/MIMARI.md) |
 
 Yanlarında dördüncü, **isteğe bağlı** bir katman durur:
 
 | Klasör | Katman | Durum | Belge |
 |---|---|---|---|
-| [`HKM/`](HKM/) | **Hayat Kontrol Merkezi** | merkez katman: brifing, çapraz bulgu, etki, sohbet, niyet kuyruğu, ritim (207 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
+| [`HKM/`](HKM/) | <img src="HKM/brand/favicon.png" width="20" valign="middle"/> **Hayat Kontrol Merkezi** | merkez katman: brifing, çapraz bulgu, etki, sohbet, niyet kuyruğu, ritim (207 test) | [`HKM/MIMARI.md`](HKM/MIMARI.md) |
+
+HKM'nin kendi yüzü (`HKM/web/index.html`) kasıtlı olarak markasız kalır — panonun
+kendi doktrini "ikon yok, sözcük var" der (bkz. dosyanın baş yorumu); marka
+görseli yalnızca bu tabloda ve `HKM/brand/` klasöründe durur, canlı panele
+karışmaz.
 
 HKM üçünün **üstünde değil yanındadır**: üç sistem onun var olduğunu bilmez ve
 o kapalıyken hiçbiri bozulmaz. Tek bağ, her arayüzdeki `core/beacon.js`

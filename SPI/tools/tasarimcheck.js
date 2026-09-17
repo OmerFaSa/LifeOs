@@ -20,7 +20,7 @@ const SCROLLS_OK = { '13-yogun.html':[900,420], '20-harita.html':[1280,900,420] 
   const problems = [];
 
   for(const f of files){
-    const page = await browser.newPage();
+    const page = await browser.newPage({ reducedMotion:'reduce' });
     // Yazi tipleri agdan gelmesin: olcum cevrimdisi da ayni olsun.
     await page.route('**fonts.googleapis.com**', r => r.abort());
     await page.route('**fonts.gstatic.com**', r => r.abort());

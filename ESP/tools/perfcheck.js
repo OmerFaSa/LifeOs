@@ -68,7 +68,7 @@ function waitForServer(url, tries){
     await waitForServer('http://127.0.0.1:' + PORT + '/index.html');
     browser = await chromium.launch(process.env.CHROMIUM_PATH
       ? { executablePath:process.env.CHROMIUM_PATH } : {});
-    const page = await browser.newPage();
+    const page = await browser.newPage({ reducedMotion:'reduce' });
     await page.goto('http://127.0.0.1:' + PORT + '/index.html', { waitUntil:'load' });
     await page.waitForSelector('.site', { timeout:15000 });
     const skip = await page.$('[data-act="setup-skip"]');

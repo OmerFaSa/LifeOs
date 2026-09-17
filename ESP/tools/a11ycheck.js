@@ -57,7 +57,7 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
     executablePath:process.env.CHROMIUM_PATH || undefined });
 
   try{
-    const page = await browser.newPage({ viewport:{ width:1280, height:900 } });
+    const page = await browser.newPage({ reducedMotion:'reduce', viewport:{ width:1280, height:900 } });
     page.on('pageerror', e => problems.push('sayfa hatası: ' + String(e).slice(0, 120)));
     await page.goto(base + '/src/index.html', { waitUntil:'load' });
     await page.waitForSelector('.site', { timeout:15000 });

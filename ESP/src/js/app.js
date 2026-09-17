@@ -1317,16 +1317,15 @@ ESP.App = (function(){
     const el = document.getElementById('pwa-manifest');
     if(!el) return;
     const name = (S.profile && S.profile.name) ? 'ESP — ' + S.profile.name : 'ESP';
-    const icon = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">'
-      + '<rect width="512" height="512" rx="112" fill="#2F5A8A"/>'
-      + '<text x="256" y="342" font-family="system-ui,sans-serif" font-size="270" font-weight="800"'
-      + ' fill="#fff" text-anchor="middle">E</text></svg>');
+    /* Once "E" harfi ureten bir SVG'ydi; artik gercek marka gorseli
+       (img/brand/favicon.png, kare kirpilmis logo). Dosya degisirse ikon
+       da kendiliginden degisir, burasi hic dokunulmaz. */
+    const icon = new URL('img/brand/favicon.png', location.href).href;
     const manifest = {
       name, short_name:'ESP', start_url:location.href, scope:'./',
       display:'standalone', background_color:'#F7F8FA', theme_color:'#2F5A8A',
       lang:'tr', description:'Dil, felsefe, müzik, diksiyon, okuma ve yazı pratiğinin kaydı',
-      icons:[{ src:icon, sizes:'512x512', type:'image/svg+xml', purpose:'any maskable' }],
+      icons:[{ src:icon, sizes:'192x192', type:'image/png', purpose:'any maskable' }],
     };
     try{
       el.setAttribute('href', 'data:application/manifest+json;charset=utf-8,'

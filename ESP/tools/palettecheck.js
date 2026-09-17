@@ -72,7 +72,7 @@ function checksOf(m){
 (async () => {
   await wait(1200);
   const b = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium' });
-  const p = await b.newPage({ viewport:{ width:1280, height:900 } });
+  const p = await b.newPage({ reducedMotion:'reduce', viewport:{ width:1280, height:900 } });
   await p.goto('http://127.0.0.1:4193/index.html', { waitUntil:'load' });
   await wait(1500);
   const skip = await p.$('[data-act="setup-skip"]'); if(skip){ await skip.click(); await wait(500); }

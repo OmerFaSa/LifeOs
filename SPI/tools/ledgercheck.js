@@ -19,7 +19,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
   await wait(1200);
   const b = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium' });
-  const p = await b.newPage({ viewport:{ width:1440, height:900 } });
+  const p = await b.newPage({ reducedMotion:'reduce', viewport:{ width:1440, height:900 } });
   const errs = [];
   p.on('pageerror', e => errs.push(String(e)));
   await p.goto('http://127.0.0.1:4183/index.html', { waitUntil:'load' });
