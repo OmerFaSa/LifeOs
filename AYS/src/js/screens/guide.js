@@ -260,6 +260,7 @@ R.Screens.guide = (function(){
     const q = R.Store.localQuota();
     const sizeKb = Math.max(1, Math.round(q.bytes/1024));
     const store = R.Store.mode === 'cloud' ? 'Hesabına bağlı (cihazlar arası) + yerel kopya' : 'Bu tarayıcıda yerel';
+    const undo = R.Store.importUndoInfo();
 
     return K.Card({
       title:'Veri', sub:store,
@@ -275,6 +276,12 @@ R.Screens.guide = (function(){
           title:'Yerel alan %'+q.pct+' dolu.',
           body:'Tarayıcı depolaması sınıra yaklaşıyor; dolduğunda yeni kayıtlar yazılamaz. '
              + 'Bir yedek al, sonra eski kapanmış yanlış ve kartları sadeleştir.' })}</div>`)}
+        ${when(undo, () => html`<div class="mt-12">${K.Notice({ tone:'warn',
+          title:'Bir içe aktarma yapıldı.',
+          body:new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki yedekten yükleme mevcut '
+             + 'verinin üzerine yazdı. Yanlışsa bir önceki duruma dönebilirsin — bu imkan yalnız '
+             + 'bu içe aktarma için geçerli.' })}</div>
+          <div class="mt-8">${K.Button({ label:'Bu içe aktarmayı geri al', icon:'undo', tone:'danger', act:'undo-import' })}</div>`)}
         ${K.Row([
           K.Button({ label:'Yedek al (JSON)', icon:'download', tone:due ? 'primary' : null, act:'export-data' }),
           K.Button({ label:'Yedekten yükle', icon:'upload', act:'import-data' }),
@@ -779,6 +786,23 @@ R.Screens.guide = (function(){
            gozunde islemi tamamlanmis gosterir. */
         UI.toast('Yükleme başarısız: '+(e.message || 'bilinmeyen hata'));
       }
+    },
+    async 'undo-import'(){
+      const undo = R.Store.importUndoInfo();
+      if(!undo){ UI.toast('Geri alınacak bir içe aktarma yok'); return; }
+      UI.confirmSheet('İçe aktarmayı geri al',
+        new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki içe aktarma öncesine dönülecek. '
+          + 'Aradan geçen sürede eklediğin her şey kaybolur.',
+        async () => {
+          try{
+            await R.Store.undoImport();
+            UI.closeSheet();
+            UI.toast('Geri alındı — yeniden başlatılıyor');
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            UI.toast('Geri alınamadı: '+(e.message || 'bilinmeyen hata'));
+          }
+        }, true);
     },
     async 'hkm-toggle'(){
       const a = R.Beacon.settings();

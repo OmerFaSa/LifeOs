@@ -5420,9 +5420,9 @@ body.is-dragging .drop.is-over{
 /* DERLEME DAMGASI — bu dosyayi elle duzenleme.
    build.py her derlemede yeniden yazar. */
 
-window.SP = window.SP || {};
+window.ESP = window.ESP || {};
 
-SP.BUILD = { id:'5b01ec9', at:'2026-09-13 15:37', dirty:true };
+ESP.BUILD = { id:'2088209', at:'2026-09-17 18:07', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -9040,6 +9040,8 @@ ESP.HINTS = {
     more:'Denetim mekanizması ile denetim EKRANI aynı şey değildir: arka planda çalışan nöbetçinin bir ekran ağacı olması gerekmez, doğru anda mevcut akışa düşen tek bir soru yeter. Aynı anda en fazla bir soru açık kalır; cevaplamak zorunlu değildir ve «bu soru bana uymuyor» da bir cevaptır. Soru cevaplanınca kapanmaz — ayrışmanın gerçekten kapanıp kapanmadığı bir sonraki pencerede ölçülür.' },
   'audit':{ t:'Bölüm denetimi', b:'Bu disiplinde birikmiş bakım borcu var mı?',
     more:'Merdiven NEREDE olduğunu, reçete NE yapılacağını söyler; denetim «bir şey ters gidiyor mu?» sorusunu cevaplar. Sülük kartlar, yetim notlar, itirazsız argümanlar, elden geçmemiş taslaklar — hepsi kademe tablosunda «ilerleme» gibi görünür. Her bulgu eyleme bağlıdır ve hiçbiri kişiyi suçlamaz: «dağınık çalışıyorsun» denmez, «şu kayıtlar şu durumda» denir. Veri eşiğin altındaysa bulgu değil «veri yok» döner.' },
+  'hkm':{ t:'HKM işareti', b:'İsteğe bağlı dördüncü katmana günün özetini gönderir.',
+    more:'ESP, HKM\'nin var olduğunu bilmez: işaret tek yönlüdür, hiçbir çizimde çalışmaz ve hiçbir kaydı bekletmez. Varsayılan kapalıdır ve açılmadan önce ne gönderileceği satır satır gösterilir. Kart metni, not içeriği ve kitap adı gitmez; giden şey dört sayıdır ve her biri kesinlik etiketiyle gider — değeri olmayan alan «veri yok» gider, sıfır değil.' },
   'storage':{ t:'Depo ufku', b:'Bu sistem dokuz ay her gün kullanılırsa depo dolar mı?',
     more:'«Depo %80 dolu» tek başına işe yaramaz: ne zaman dolacağını ve NEYİN şiştiğini söylemez, ikisi bambaşka kararlar gerektirir. Büyüme hızı her açılıştaki bir ölçümden HESAPLANIR; iki ölçümden az varsa hız bilinmiyordur ve bilinmeyen hız sıfır hız değildir. Budama yalnızca sistemin kendi ürettiği kayıtlara dokunur: kullanıcının girdiği tek bir oturum, kart ya da not hiçbir koşulda silinmez.' },
   'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın türü kademe ilerlemesinde ne kadar söz hakkı olduğunu belirler.',
@@ -9822,7 +9824,15 @@ ESP.Store = (function(){
     catch(e){ return 'ben'; }
   }
   const PROFILE = activeProfile();
+  /* Yedegin kimligi — disa aktarirken yazilir, geri yuklerken ARANIR.
+     Iki yerde ayri ayri yazilan bir kimlik, bir gun ayrisir. */
+  const APP_ID = 'esp-entelektuel';
+
   const LOCAL_KEY = 'esp.v1.' + PROFILE;
+  /* Yedekten yukleme ONCESI durumun tek yuvalik kopyasi. LOCAL_KEY'in
+     GOVDESINE degil, AYRI bir anahtara yazilir: importAll o anahtari
+     ezmedigi icin geri alma imkani import'un kendisinden hayatta kalir. */
+  const UNDO_KEY = LOCAL_KEY + '.oncesi';
   let db = null;
   let mode = 'local';
 
@@ -10035,7 +10045,7 @@ ESP.Store = (function(){
   function exportAll(){
     return {
       __meta:{
-        app:'esp-entelektuel',
+        app:APP_ID,
         schemaVersion:ESP.SCHEMA_VERSION,
         exportedAt:new Date().toISOString(),
         mode,
@@ -10048,6 +10058,17 @@ ESP.Store = (function(){
   function readBackup(obj){
     if(!obj || typeof obj !== 'object') return { ok:false, error:'Dosya okunamadı.' };
     if(obj.__meta && obj.data){
+      /* UYGULAMA KIMLIGI once denetlenir. Yalniz sema surumune bakan bir
+         okuma, baska bir LifeOS uygulamasinin yedegini kabul ediyordu:
+         dosya secicide yanlis dosyayi secmek, profil verisinin baska bir
+         uygulamanin verisiyle degismesi demekti. */
+      if(obj.__meta.app && obj.__meta.app !== APP_ID){
+        return { ok:false, error:'Bu yedek başka bir uygulamadan («'
+          + String(obj.__meta.app).slice(0, 32) + '»). ESP yedeği gerekir.' };
+      }
+      if(typeof obj.data !== 'object' || Array.isArray(obj.data)){
+        return { ok:false, error:'Yedek gövdesi okunamadı.' };
+      }
       if(obj.__meta.schemaVersion > ESP.SCHEMA_VERSION){
         return { ok:false, error:'Bu yedek daha yeni bir sürümle alınmış (şema '+obj.__meta.schemaVersion+'). Önce uygulamayı güncelle.' };
       }
@@ -10062,14 +10083,85 @@ ESP.Store = (function(){
   async function importAll(obj){
     const parsed = readBackup(obj);
     if(!parsed.ok) throw new Error(parsed.error);
-    localWrite(parsed.data);
+
+    /* USTUNE YAZMADAN ONCE tek yuvalik bir geri donus kopyasi birakilir.
+       Dosya secicide YANLIS AMA GECERLI bir yedek secmek — baska bir
+       profilin ya da eski bir donemin yedegi — bu depodaki geri donussuz
+       tek islemdi. Yazma basarisiz olursa (kota dolu) geri alma imkani
+       sessizce kaybolur ama import yine de denenir: hic geri alamamak,
+       hic import edememekten daha az kotudur. */
+    try{
+      localStorage.setItem(UNDO_KEY, JSON.stringify({ at:new Date().toISOString(), data:localAll() }));
+    }catch(e){ /* kota dolu olabilir — asagidaki import denemesi engellenmez */ }
+
+    /* YAZMA SONUCU DEGERLENDIRILIR. Once localWrite()'in donusu
+       yutuluyordu: kota dolu bir tarayicida hicbir sey yazilmadigi halde
+       cagri normal bitiyor, ekran «Yedek yuklendi» diyordu. Basarisiz bir
+       kaydi basari gibi gostermek, bu depodaki en pahali hata tipidir. */
+    const yerel = localWrite(parsed.data);
+    if(!yerel){
+      const e = new Error('Yedek bu cihaza yazılamadı; mevcut kayıt '
+        + 'korundu. Depolama alanı dolu olabilir: Ayarlar → Veri '
+        + 'bölümünden yer aç, sonra tekrar dene.');
+      e.code = 'local-write';
+      throw e;
+    }
+
+    /* Buluta KISMI yazma ayrica raporlanir: «tamamlandi» izlenimi
+       verilmez. */
+    let bulutYazilan = 0, bulutHata = 0;
     if(db){
       for(const k of Object.keys(parsed.data)){
-        try{ await db.doc(k).set(parsed.data[k]); }
-        catch(e){ health.cloud = 'error'; }
+        try{ await db.doc(k).set(parsed.data[k]); bulutYazilan++; }
+        catch(e){ bulutHata++; health.cloud = 'error'; }
       }
     }
-    return parsed.meta;
+    return Object.assign({}, parsed.meta, {
+      local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata,
+      partialCloud:bulutHata > 0,
+    });
+  }
+
+  /* En son ice aktarmadan ONCEKI duruma dair bilgi — «geri al» dugmesinin
+     gorunup gorunmeyecegine bu karar verir. Icerigin kendisini degil,
+     yalniz ne zaman alindigini dondurur. */
+  function importUndoInfo(){
+    try{
+      const raw = localStorage.getItem(UNDO_KEY);
+      if(!raw) return null;
+      const parsed = JSON.parse(raw);
+      return { at:parsed.at };
+    }catch(e){ return null; }
+  }
+
+  /* Son ice aktarmayi geri alir. TEK YUVALIDIR: bir kez kullanilinca
+     yuva bosalir — ikinci bir «geri al» ilk ice aktarmadan ONCEKI
+     duruma degil, geri alinmis duruma doner, bu da kafa karistirir. */
+  async function undoImport(){
+    let raw;
+    try{ raw = localStorage.getItem(UNDO_KEY); }
+    catch(e){ throw new Error('Geri alma kaydı okunamadı.'); }
+    if(!raw) throw new Error('Geri alınacak bir içe aktarma yok.');
+    let parsed;
+    try{ parsed = JSON.parse(raw); }
+    catch(e){ throw new Error('Geri alma kaydı bozuk.'); }
+
+    const yerel = localWrite(parsed.data);
+    if(!yerel){
+      const e = new Error('Geri alma bu cihaza yazılamadı. Depolama alanı dolu olabilir.');
+      e.code = 'local-write';
+      throw e;
+    }
+    try{ localStorage.removeItem(UNDO_KEY); }catch(e){}
+
+    let bulutYazilan = 0, bulutHata = 0;
+    if(db){
+      for(const k of Object.keys(parsed.data)){
+        try{ await db.doc(k).set(parsed.data[k]); bulutYazilan++; }
+        catch(e){ bulutHata++; health.cloud = 'error'; }
+      }
+    }
+    return { local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata, partialCloud:bulutHata > 0 };
   }
 
   async function clear(){
@@ -10126,7 +10218,7 @@ ESP.Store = (function(){
        ihtiyac duyar; depo anahtarini uretmis olan katman soylesin diye
        disari acilir. */
     activeProfileId(){ return PROFILE; },
-    exportAll, importAll, readBackup, clear, localSize, localQuota, sizeByCollection,
+    exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
     get mode(){ return mode; },
@@ -10211,6 +10303,10 @@ ESP.S = {
   storeHealth:null,
 
   ui:{
+    /* HKM'nin bekleyen teklifleri — bellekte durur, depoya YAZILMAZ:
+       kaynagi HKM'dir ve tek gercek orada olmali. */
+    hkmIntents:[],
+    hkmDoubts:[],
     railOpen:false,
     undo:null,              // son yikici islemin geri alma kaydi
     dayTab:'giris',         // giris | ozet | gecmis
@@ -11415,6 +11511,9 @@ ESP.Model = (function(){
     if(ESP.Friction) await ESP.Friction.load();
     if(ESP.Calib) await ESP.Calib.load();
     if(ESP.Signals) await ESP.Signals.load();
+    /* Isaret ayari en sonda yuklenir ve yuklenmezse KAPALI kalir:
+       kullanicinin secmedigi bir gonderim varsayilan olamaz. */
+    if(ESP.Beacon) await ESP.Beacon.load();
     if(ESP.Storage){ await ESP.Storage.load(); await ESP.Storage.sample(); }
 
     S.storeHealth = ESP.Store.health();
@@ -12769,9 +12868,86 @@ ESP.Ev = (function(){
 
   function of(rule){ return resolve(BY_RULE[rule]); }
 
+
+  /* ------------------------------------------------ ETKİN YETKİ (effective)
+
+     Dört eksen «ayrı» diye yazılmıştı ama yetki kararına yalnızca BİR
+     eksen giriyordu. Bu şu boşluğu bırakıyordu:
+
+       kaynak: çerçeve · kesinlik: bilinmiyor · uygulanır: dolaylı
+       → yetki: kapı açabilir
+
+     Yani adı konmuş bir kaynaktan geldiği için, kesinliği
+     değerlendirilmemiş ve bu kullanıcıya dolaylı uyan bir eşik tam
+     yetkiyle konuşabiliyordu.
+
+     Düzeltme: `authority` artık bir SONUÇ değil bir TAVAN. Etkin yetki
+     dört eksen birlikte hesaplanır ve tavanı hiçbir zaman aşamaz:
+
+       düşük kesinlik      → bir basamak iner
+       bilinmeyen kesinlik → bir basamak iner
+       dolaylı uygulanır   → bir basamak iner
+       yerel uygulanır     → bir basamak iner
+
+     İnişler birikir. Bu bir formül değil bir POLİTİKADIR ve öyle
+     etiketlenir; sayı vermez, basamak indirir. Gerekçesi: bir eşiğin
+     gücü, en zayıf halkasından fazla olamaz. */
+  const AUTH_ORDER = ['steer', 'limited_steer', 'inform', 'observe_only'];
+
+  function stepDown(authorityId, steps){
+    const i = AUTH_ORDER.indexOf(authorityId);
+    if(i < 0) return 'observe_only';
+    return AUTH_ORDER[Math.min(AUTH_ORDER.length - 1, i + Math.max(0, steps))];
+  }
+
+  /* «Yerel» eksen, GENELLENEBILIRLIGI olcer; bu kullaniciya UYGUNLUGU
+     degil. Kullanicinin KENDI verisinden gelen bir esik baskasiyla
+     karsilastirilamaz — ama tam da bu kullanici icin en uygun olandir.
+     Bu yuzden kendi veri kaynaklarinda «yerel» bir zayiflik sayilmaz;
+     onun zayifligi varsa kesinlik ekseninde yazilir.
+     ESP'de bu kaynak «personal_data» (kendi olcumun). */
+  const SELF_SOURCES = ['personal_data'];
+
+  /* Kaç basamak inilecek ve NİÇİN. Sebepler kullanıcıya gösterilir:
+     sessizce zayıflatmak, yanıltmanın başka bir biçimidir. */
+  function downgrades(r){
+    const out = [];
+    if(r.certainty === 'low'){
+      out.push({ axis:'certainty', reason:'Kesinlik düşük.' });
+    } else if(r.certainty === 'unknown'){
+      out.push({ axis:'certainty', reason:'Kesinlik değerlendirilmemiş.' });
+    }
+    if(r.applicability === 'indirect'){
+      out.push({ axis:'applicability',
+        reason:'Eşik bu kullanıcıya dolaylı uyuyor; kaynağın popülasyonuna '
+             + 'göre kayabilir.' });
+    } else if(r.applicability === 'local' && SELF_SOURCES.indexOf(r.source) < 0){
+      out.push({ axis:'applicability',
+        reason:'Eşik kişiye/bağlama özel; genel bir karar eşiği değil.' });
+    }
+    return out;
+  }
+
+  function effective(r){
+    if(!r) return { authority:'observe_only', ceiling:'observe_only',
+      capped:true, steps:0, reasons:[], info:AUTH_BY_ID.observe_only };
+    const inis = downgrades(r);
+    const id = stepDown(r.authority, inis.length);
+    return {
+      authority:id, ceiling:r.authority, steps:inis.length,
+      reasons:inis, capped:id !== r.authority,
+      info:AUTH_BY_ID[id] || AUTH_BY_ID.observe_only,
+    };
+  }
+
+  function effectiveOf(rule){ return effective(of(rule)); }
+
+  /* DIKKAT — bu ETKIN yetkidir, kayitta yazan tavan degil.
+     Tavani okumak icin of().authority kullanilir. */
   function authorityOf(rule){
     const r = of(rule);
-    return r ? r.authorityInfo : null;
+    if(!r) return null;
+    return effective(r).info;
   }
 
   function mayDirect(rule){
@@ -12792,17 +12968,22 @@ ESP.Ev = (function(){
         text:'Bu eşiğin kaynağı yazılmamış. Kaynağı bilinmeyen bir eşik '
            + 'kademe değiştirmez.' };
     }
+    const etkin = effective(r);
     return {
       rule:r.rule, source:r.source,
       label:(r.sourceInfo || {}).label || r.source,
-      tone:(r.authorityInfo || {}).tone || 'info',
-      mayDirect:!!(r.authorityInfo || {}).mayDirect,
+      tone:(etkin.info || {}).tone || 'info',
+      mayDirect:!!(etkin.info || {}).mayDirect,
       certainty:r.certainty,
       certaintyLabel:(r.certaintyInfo || {}).label || r.certainty,
       applicability:r.applicability,
       applicabilityLabel:(r.applicabilityInfo || {}).label || r.applicability,
-      authority:r.authority,
-      authorityLabel:(r.authorityInfo || {}).label || r.authority,
+      authority:etkin.authority,
+      authorityLabel:(etkin.info || {}).label || etkin.authority,
+      authorityCeiling:r.authority,
+      authorityCeilingLabel:(r.authorityInfo || {}).label || r.authority,
+      authorityCapped:etkin.capped,
+      authorityReasons:etkin.reasons.map(function(x){ return x.reason; }),
       citation:r.citation, population:r.population,
       text:r.citation + (r.population ? ' · ' + r.population : ''),
       note:r.note || (r.sourceInfo || {}).note || '',
@@ -12813,21 +12994,32 @@ ESP.Ev = (function(){
      kisildigi yazilir. */
   function temper(rule, strength){
     const r = of(rule);
-    const a = r ? r.authorityInfo : null;
+    const etkin = effective(r);
+    const a = etkin.info;
     const izin = !!(a && a.mayDirect);
     if(strength === 'observe' || izin){
       return { strength:strength, downgraded:false,
-        source:r ? r.source : null, authority:r ? r.authority : null,
+        source:r ? r.source : null, authority:r ? etkin.authority : null,
+        ceiling:r ? r.authority : null, capped:etkin.capped,
+        reasons:etkin.reasons.map(function(x){ return x.reason; }),
         cap:cap(rule) };
     }
+    const inis = etkin.reasons.map(function(x){ return x.reason; });
     return {
       strength:'observe', downgraded:true,
-      source:r ? r.source : null, authority:r ? r.authority : 'observe_only',
+      source:r ? r.source : null, authority:etkin.authority,
+      ceiling:r ? r.authority : 'observe_only', capped:etkin.capped,
+      reasons:inis,
       cap:cap(rule),
       why:r
         ? 'Bu eşik «' + (r.sourceInfo || {}).label + '» kaynağından geliyor ve '
-          + 'AYS yetki politikasında «' + (a || {}).label + '» sayılıyor: '
-          + (a || {}).note + ' Bu yüzden burada plan değiştirilmez, gözlem bildirilir.'
+          + 'ESP yetki politikasında en çok «'
+          + ((r.authorityInfo || {}).label || r.authority) + '» sayılıyor'
+          + (etkin.capped
+             ? '; ayrıca ' + inis.join(' ') + ' Bu yüzden etkin yetkisi «'
+               + (a || {}).label + '» seviyesine indi.'
+             : ': ' + (a || {}).note)
+          + ' Bu yüzden burada kademe değiştirilmez, gözlem bildirilir.'
         : 'Bu eşiğin kaynağı yazılmamış; kaynağı bilinmeyen bir eşikten '
           + 'kademe değişikliği çıkmaz.',
     };
@@ -12878,7 +13070,7 @@ ESP.Ev = (function(){
 
   function policy(){ return ESP.EVIDENCE_POLICY; }
 
-  return { of, resolve, line, authorityOf, mayDirect, cap, temper,
+  return { of, resolve, line, authorityOf, effectiveOf, mayDirect, cap, temper,
     coverage, audit, disputed, policy, rules:function(){ return Object.keys(BY_RULE); } };
 })();
 
@@ -14252,8 +14444,18 @@ ESP.Friction = (function(){
 
    Kullanıcı bir sayıyı görmeden önce tahminini yazar; sistem gerçek değeri
    sonra açar ve ikisi arasındaki farkı BİRİKTİRİR. Zamanla ortaya bir şey
-   çıkar: kişi kendi durumunu ne kadar biliyor? Bu, sistemin ürettiği
-   herhangi bir metrikten daha değerlidir — çünkü sistem yokken de geçerlidir.
+   çıkar: kişi bu türlerde kendi sayılarını ne kadar kestirebiliyor? Bu
+   sinyalin değeri, sistem kapandığında da elde kalmasıdır.
+
+   BU DEFTERİN ÖLÇEMEDİĞİ ŞEY:
+
+   Defter, «kendini tanıma»yı ölçmez. Ölçtüğü şey dardır ve dar olduğu
+   söylenmelidir: KAYIT ALTINDAKİ BİRKAÇ TÜRDE, kör yazılmış tahminlerin
+   aynı türdeki kayıtlı sayıya ne kadar yaklaştığı. Bunun dışında kalan
+   her şey — neyi neden yaptığın, bir günün nasıl geçtiği, tahmin
+   etmediğin alanlar — bu defterde görünmez. İyi bir kalibrasyon, iyi bir
+   karar vermek demek değildir; tahmin edilen sayıyı tahmin edebilmek
+   demektir. Bu bir üstbiliş SİNYALİDİR, bir özbilgi ÖLÇÜSÜ değil.
 
    Dört kural:
 
@@ -14293,15 +14495,15 @@ ESP.Calib = (function(){
      Burada değil, core/calib_sources.js'te değil — çağıran taraf verir.
      Böylece defter, neyi ölçtüğünden bağımsız kalır. */
   ESP.CALIB_KINDS = [
-    { id:'retention', type:'number', unit:'%',
+    { id:'retention', type:'number', unit:'puan', err:'abs', bands:[5, 12, 25],
       label:'Kart retansiyonun', ask:'Son 30 günde kartlarının yüzde kaçını ilk denemede hatırladın?' },
-    { id:'minutes', type:'number', unit:'dk',
+    { id:'minutes', type:'number', unit:'dk', err:'ape',
       label:'Haftalık çalışma süren', ask:'Bu hafta toplam kaç dakika çalıştın?' },
-    { id:'sessions', type:'number', unit:'oturum',
+    { id:'sessions', type:'number', unit:'oturum', err:'abs', bands:[1, 2, 4],
       label:'Haftalık oturum sayın', ask:'Bu hafta kaç oturum kaydettin?' },
-    { id:'gate', type:'binary', unit:'',
+    { id:'gate', type:'binary', unit:'', err:'brier',
       label:'Sıradaki kapı', ask:'Bu ayın sonunda sıradaki kapıyı geçmiş olacak mısın?' },
-    { id:'readability', type:'number', unit:'puan',
+    { id:'readability', type:'number', unit:'puan', err:'abs', bands:[5, 12, 25],
       label:'Yazının okunabilirliği', ask:'Bu taslağın Ateşman puanı kaç çıkar?' },
   ];
 
@@ -14395,61 +14597,122 @@ ESP.Calib = (function(){
 
   /* ------------------------------------------------------------- puan */
 
-  /* Tek bir tahminin hatası.
+  /* ------------------------------------------------------- HATA AİLELERİ
 
-     Sayısal: |tahmin − gerçek| / max(gerçek, 1). Paydada gerçek değer
-     durur; 10 dakikayı 20 tahmin etmek, 200'ü 210 tahmin etmekten çok
-     daha büyük bir sapmadır.
+     Tek bir hata ölçüsü her değişkene uymaz. İlk sürümde her sayısal
+     tahmin aynı bağıl hatayla (APE) ölçülüyordu; bu, sıfıra yakın
+     değerlerde anlamsızca büyür: 3 oturumu 6 tahmin etmek %100 «hata»
+     sayılıyordu, 30 oturumu 33 tahmin etmek %10 — oysa ikisi de 3
+     oturumluk sapmadır.
 
-     İkili: Brier — (olasılık − sonuç)². 0 mükemmel, 0.25 yazı-tura,
-     1 tam ters. */
+     Bu yüzden artık her tahmin türü, hangi ölçüyle değerlendirileceğini
+     kendisi söyler:
+
+       ape   — oranı anlamlı, sıfırdan uzak, üstten sınırsız büyüklükler
+               (dakika, gram, tahlil değeri): |t − g| / en az(|g|, 1)
+       abs   — kendi biriminde sapma anlamlı, sıfıra yakın değer olağan
+               (net, puan, saat, oturum): |t − g|, kendi bantlarıyla
+       brier — olasılık tahmini: (p − sonuç)²
+
+     `bands` bir bulgu DEĞİL bir SEÇİMDİR: bu yazılımın o birimde neyi
+     «keskin», «makul», «dağınık» saydığı. Kaynağı sistem ayarıdır.
+     Aileler birbiriyle ortalanmaz — dakikadaki yüzde ile oturumdaki sapma
+     aynı ölçek değildir. Karşılaştırılabilir olan tek şey BANTTIR. */
+  const BANDS = ['keskin', 'makul', 'dağınık', 'uzak'];
+  const APE_BANDS = [0.10, 0.25, 0.50];
+  const BRIER_BANDS = [0.05, 0.15, 0.30];
+
+  function errKind(k){
+    if(!k) return null;
+    return k.err || (k.type === 'binary' ? 'brier' : 'ape');
+  }
+
+  /* Bu türün «makul» bandı — yanlılığı ortak ölçeğe çevirmek için. */
+  function makul(k){
+    const tur = errKind(k);
+    if(tur === 'abs') return (k.bands || [1, 1])[1];
+    if(tur === 'brier') return BRIER_BANDS[1];
+    return APE_BANDS[1];
+  }
+
   function error(f){
     const k = kindOf(f.kind);
     if(!k || f.actual == null) return null;
-    if(k.type === 'binary'){
+    const tur = errKind(k);
+    if(tur === 'brier'){
       const sonuc = f.actual >= 0.5 ? 1 : 0;
-      return { type:'brier', value:Math.pow(f.guess - sonuc, 2) };
+      return { type:'brier', value:Math.pow(f.guess - sonuc, 2), unit:'' };
     }
-    const payda = Math.max(Math.abs(f.actual), 1);
-    return { type:'ape', value:Math.abs(f.guess - f.actual) / payda };
+    if(tur === 'abs'){
+      return { type:'abs', value:Math.abs(f.guess - f.actual), unit:k.unit || '' };
+    }
+    return { type:'ape', unit:'',
+      value:Math.abs(f.guess - f.actual) / Math.max(Math.abs(f.actual), 1) };
   }
 
-  /* Yanlılık: sürekli fazla mı tahmin ediyor, az mı?
+  /* Bir tahminin bandı (0 keskin … 3 uzak). Türü ne olursa olsun aynı
+     dört basamak: aileler ortalanamaz ama bantlar karşılaştırılabilir. */
+  function bandOf(f){
+    const k = kindOf(f.kind);
+    const e = error(f);
+    if(!k || !e) return null;
+    const esik = e.type === 'abs' ? (k.bands || [1, 2, 4])
+      : e.type === 'brier' ? BRIER_BANDS : APE_BANDS;
+    return e.value <= esik[0] ? 0 : e.value <= esik[1] ? 1
+      : e.value <= esik[2] ? 2 : 3;
+  }
 
-     Ortalama işaretli sapma. Hatanın büyüklüğünden AYRI bir bilgidir:
-     rastgele sapan biriyle sistemli olarak kendini abartan biri aynı
-     ortalama hataya sahip olabilir ama farklı şeyler yapmaları gerekir. */
+  function ondalik(v){
+    return (Math.round(v * 10) / 10).toFixed(1).replace('.', ',');
+  }
+
+
+    /* Yanlılık: sistemli olarak fazla mı tahmin ediyor, az mı?
+
+     Hatanın büyüklüğünden AYRI bir bulgudur: rastgele sapan biriyle
+     sistemli olarak kendini abartan biri aynı ortalama hataya sahip
+     olabilir ama farklı şeyler yapmaları gerekir.
+
+     Her kayıt KENDİ «makul» bandına bölünür; böylece farklı birimler
+     tek ölçeğe gelir. Değerin birimi bu yüzden BANTTIR, yüzde değil. */
   function bias(kindId){
     const kayitlar = settled().filter(f => !kindId || f.kind === kindId)
-      .filter(f => kindOf(f.kind) && kindOf(f.kind).type === 'number')
+      .filter(f => errKind(kindOf(f.kind)) !== 'brier')
       .slice(0, PENCERE);
     if(kayitlar.length < ASGARI){
-      return { cert:'missing', n:kayitlar.length, value:null,
+      return { cert:'missing', n:kayitlar.length, value:null, unit:'bant',
         note:'Yanlılık için en az ' + ASGARI + ' kapanmış sayısal tahmin gerekir.' };
     }
-    const toplam = kayitlar.reduce((a, f) => {
-      const payda = Math.max(Math.abs(f.actual), 1);
-      return a + (f.guess - f.actual) / payda;
-    }, 0);
-    const v = toplam / kayitlar.length;
-    return { cert:'measured', n:kayitlar.length, value:v,
-      direction:v > 0.05 ? 'over' : v < -0.05 ? 'under' : 'even',
-      note:v > 0.05 ? 'Kendini olduğundan iyi tahmin etme eğilimindesin.'
-        : v < -0.05 ? 'Kendini olduğundan kötü tahmin etme eğilimindesin.'
-        : 'Sistemli bir yanlılık görünmüyor.' };
+    const v = kayitlar.reduce((a, f) => {
+      const k = kindOf(f.kind);
+      const d = f.guess - f.actual;
+      const ham = errKind(k) === 'abs' ? d : d / Math.max(Math.abs(f.actual), 1);
+      return a + ham / makul(k);
+    }, 0) / kayitlar.length;
+    const ESIK = 0.25;
+    return { cert:'measured', n:kayitlar.length, value:v, unit:'bant',
+      direction:v > ESIK ? 'over' : v < -ESIK ? 'under' : 'even',
+      note:(v > ESIK ? 'Kendini olduğundan iyi tahmin etme eğilimindesin.'
+        : v < -ESIK ? 'Kendini olduğundan kötü tahmin etme eğilimindesin.'
+        : 'Sistemli bir yanlılık görünmüyor.')
+        + (Math.abs(v) > ESIK
+           ? ' Ortalama sapman, kendi «makul» bandının '
+             + ondalik(Math.abs(v)) + ' katı kadar tek yöne kayıyor.'
+           : '') };
   }
 
-  /* Kalibrasyon puanı: son PENCERE kapanmış tahminin ortalama hatası.
 
-     İki tür bir arada ortalanmaz — yüzde sapma ile Brier aynı ölçek
-     değildir. İkisi ayrı döner. */
+    /* Kalibrasyon puanı: son PENCERE kapanmış tahmin.
+
+     Aileler ayrı ayrı raporlanır, tür bazında da ayrı: net ile dakika
+     tek bir ortalamada toplanmaz. Genel derece bantların ORTANCASIDIR
+     — tek bir kötü tahmin bütün defteri boyamaz. Eşikler açıkça
+     seçilmiş sınırlardır ve puan KİŞİYE değil TAHMİNLERE aittir. */
   function score(){
     const hepsi = settled().slice(0, PENCERE);
-    const sayisal = hepsi.filter(f => (kindOf(f.kind) || {}).type === 'number');
-    const ikili = hepsi.filter(f => (kindOf(f.kind) || {}).type === 'binary');
-
     const out = { n:hepsi.length, open:open_().length, cert:'missing',
-      ape:null, brier:null, grade:null, bias:bias() };
+      ape:null, brier:null, abs:null, byKind:{}, band:null, grade:null,
+      bias:bias() };
 
     if(hepsi.length < ASGARI){
       out.note = 'Kapanmış ' + hepsi.length + ' tahmin var; puan için '
@@ -14457,26 +14720,43 @@ ESP.Calib = (function(){
       return out;
     }
     out.cert = 'measured';
-    if(sayisal.length){
-      out.ape = sayisal.reduce((a, f) => a + error(f).value, 0) / sayisal.length;
+
+    const aile = {};
+    hepsi.forEach(f => {
+      const e = error(f);
+      if(!e) return;
+      (aile[e.type] = aile[e.type] || []).push(e.value);
+      const k = kindOf(f.kind);
+      const g = out.byKind[f.kind] || (out.byKind[f.kind] = {
+        kind:f.kind, label:k.label, unit:e.unit, type:e.type,
+        n:0, total:0, mean:null });
+      g.n++; g.total += e.value; g.mean = g.total / g.n;
+    });
+    const ort = a => a.reduce((x, y) => x + y, 0) / a.length;
+    if(aile.ape) out.ape = ort(aile.ape);
+    if(aile.brier) out.brier = ort(aile.brier);
+    if(aile.abs) out.abs = { n:aile.abs.length };
+
+    const bantlar = hepsi.map(bandOf).filter(b => b != null).sort((a, b) => a - b);
+    if(bantlar.length){
+      out.band = bantlar[Math.floor((bantlar.length - 1) / 2)];
+      out.grade = BANDS[out.band];
     }
-    if(ikili.length){
-      out.brier = ikili.reduce((a, f) => a + error(f).value, 0) / ikili.length;
-    }
-    /* Derece yalnızca sayısal sapmadan verilir ve KİŞİYE DEĞİL, tahminlere
-       aittir. Eşikler açıkça seçilmiş sınırlardır, bir bulgu değil. */
-    if(out.ape != null){
-      out.grade = out.ape <= 0.10 ? 'keskin'
-        : out.ape <= 0.25 ? 'makul'
-        : out.ape <= 0.50 ? 'dağınık' : 'uzak';
-      out.note = 'Son ' + sayisal.length + ' sayısal tahminin ortalama sapması %'
-        + Math.round(out.ape * 100) + '.';
-    } else {
-      out.note = 'Son ' + ikili.length + ' ikili tahminin Brier puanı '
-        + (out.brier == null ? '—' : out.brier.toFixed(2)) + ' (0 kusursuz, 0,25 yazı-tura).';
-    }
+
+    const parca = Object.keys(out.byKind).map(id => {
+      const g = out.byKind[id];
+      return g.label + ': ' + (g.type === 'ape'
+        ? '%' + Math.round(g.mean * 100) + ' sapma'
+        : g.type === 'brier'
+        ? 'Brier ' + ondalik(g.mean)
+        : ondalik(g.mean) + (g.unit ? ' ' + g.unit : '') + ' sapma');
+    });
+    out.note = 'Son ' + hepsi.length + ' kapanmış tahmin — ' + parca.join(' · ')
+      + '. Ortanca bant: ' + (out.grade || '—') + '. Farklı birimler tek '
+      + 'ortalamada toplanmaz; karşılaştırılan şey banttır.';
     return out;
   }
+
 
   /* Kapanmaya hazır tahminler: vadesi gelmiş ama henüz kapanmamış. */
   function due(){
@@ -14491,7 +14771,7 @@ ESP.Calib = (function(){
 
   return {
     open, settle, remove, load, norm,
-    list, settled, openList:open_, due, error, bias, score, kindOf,
+    list, settled, openList:open_, due, error, bandOf, errKind, bias, score, kindOf,
     ASGARI, PENCERE,
   };
 })();
@@ -14531,19 +14811,58 @@ window.ESP = window.ESP || {};
 ESP.Goodhart = (function(){
   const U = ESP.U, S = ESP.S;
 
+  /* ------------------------------------------------- POLİTİKA PARAMETRELERİ
+
+     Bu sayılar bir PEDAGOJİK BULGU DEĞİLDİR; bu yazılımın seçimidir.
+     Kanıt katmanındaki (core/evidence.js) ayrımın aynısı burada da geçerli:
+     sayıları gizli «doğru eşik» gibi sunmak, bir tasarım tercihini bulgu
+     gibi göstermek olurdu. */
+  const POLICY = {
+    version:1,
+    status:'system_tuning',
+    windowDays:28,
+    effortRiseThreshold:0.25,
+    stagnationThreshold:0.05,
+    minEffortMinutes:60,
+    rationale:'28 gün, çoğu pratik disiplininde bir «dönem» hissi verecek '
+      + 'kadar uzun; iki bitişik pencere iki ayı kapsar. %25\'lik eşik '
+      + 'gürültüyü ayıklamak için seçildi: küçük dalgalanmalar çaba artışı '
+      + 'sayılmaz. Başka sayılar da savunulabilirdi.',
+    note:'Bu parametreler pedagojik bir eşik değil, bu yazılımın ayarıdır.',
+  };
+
   /* Pencere uzunluğu (gün). İki bitişik pencere karşılaştırılır:
      [bugün−28, bugün] ile [bugün−56, bugün−28]. */
-  const PENCERE = 28;
-
-  /* Çabanın "arttı" sayılması için gereken oran. */
-  const CABA_ARTIS = 0.25;
-
-  /* Sonucun "yerinde saydı" sayılması için üst sınır. Bunun üstünde bir
-     iyileşme varsa ayrışma yoktur. */
-  const SONUC_DURGUN = 0.05;
+  const PENCERE = POLICY.windowDays;
+  const CABA_ARTIS = POLICY.effortRiseThreshold;
+  const SONUC_DURGUN = POLICY.stagnationThreshold;
 
   /* Bu hacmin altındaki çabada çift değerlendirilmez (dakika). */
-  const ASGARI_CABA = 60;
+  const ASGARI_CABA = POLICY.minEffortMinutes;
+
+  /* ---------------------------------------------------- YÖN SEMANTİĞİ
+
+     `lower:true` alanı baştan beri vardı ama bir SÖZLÜK değildi. Her çift
+     için açık bir yön adı yazmak iki şey kazandırır: üçüncü bir durumu
+     («yönü sistem bilmez») mümkün kılar, ve yön tanımı unutulmuş bir çifti
+     sessiz varsayımla çalıştırmak yerine açıkça reddeder.
+
+       higher_better   büyüdükçe iyi
+       lower_better    küçüldükçe iyi (hata oranı)
+       movement_only   yönü SİSTEM BİLMEZ; yalnızca hareket olup olmadığına
+                       bakılır
+
+     Üçüncü değer bir kaçamak değil bir DÜRÜSTLÜK aracıdır: sistemin
+     bilmediği bir hedefe yön atfetmesi, ölçülmemiş bir şeyi ölçülmüş
+     göstermek olurdu. */
+  const DIRECTIONS = {
+    higher_better:{ id:'higher_better', label:'yükselmesi iyi',
+      improvement:function(d){ return d; } },
+    lower_better:{ id:'lower_better', label:'düşmesi iyi',
+      improvement:function(d){ return d == null ? null : -d; } },
+    movement_only:{ id:'movement_only', label:'yönü sistem bilmez',
+      improvement:function(d){ return d == null ? null : Math.abs(d); } },
+  };
 
   function iso(n){ return U.iso(U.addDays(U.parse(U.todayISO()), n)); }
 
@@ -14625,28 +14944,28 @@ ESP.Goodhart = (function(){
 
      Her çift, sonucun çabanın yerine geçemeyeceği bir yerde durur. */
   const PAIRS = [
-    { id:'lang-volume-vs-recall', disc:'lang',
+    { id:'lang-volume-vs-recall', direction:'higher_better', disc:'lang',
       effortLabel:'çalışma dakikası', outcomeLabel:'ilk denemede hatırlama',
       question:'Kart sayısını mı artırdın, yoksa aynı kartları mı '
              + 'tekrar ediyorsun?',
       effort:w => minutesIn('lang', w),
       outcome:w => { const a = cardAnswers(w); return a.n >= 20 ? a.rate : null; } },
 
-    { id:'lang-reps-vs-recall', disc:'lang',
+    { id:'lang-reps-vs-recall', direction:'higher_better', disc:'lang',
       effortLabel:'kart tekrarı', outcomeLabel:'ilk denemede hatırlama',
       question:'Kart destesi çok mu büyük, yoksa kartlar çok mu uzun?',
       effort:w => cardAnswers(w).n,
       outcome:w => { const a = cardAnswers(w); return a.n >= 20 ? a.rate : null; },
       minEffort:40 },
 
-    { id:'reading-minutes-vs-notes', disc:'reading',
+    { id:'reading-minutes-vs-notes', direction:'higher_better', disc:'reading',
       effortLabel:'okuma dakikası', outcomeLabel:'çıkan not',
       question:'Okuduğun metin not almaya değmiyor mu, yoksa okuma '
              + 'pasifleşti mi?',
       effort:w => minutesIn('reading', w),
       outcome:w => countIn(S.notes, w, 'createdAt') },
 
-    { id:'reading-notes-vs-links', disc:'reading',
+    { id:'reading-notes-vs-links', direction:'higher_better', disc:'reading',
       effortLabel:'not sayısı', outcomeLabel:'not başına bağ',
       question:'Bağlanmayan not ikinci kez okunmaz; notları bağlamayı '
              + 'mı erteliyorsun, yoksa bağlanacak bir şey mi çıkmıyor?',
@@ -14658,14 +14977,14 @@ ESP.Goodhart = (function(){
       },
       minEffort:5 },
 
-    { id:'writing-minutes-vs-drafts', disc:'writing',
+    { id:'writing-minutes-vs-drafts', direction:'higher_better', disc:'writing',
       effortLabel:'yazı dakikası', outcomeLabel:'elden geçen taslak',
       question:'Yazmak ile yazıyı düzenlemek aynı iş değil — süre '
              + 'hangisine gidiyor?',
       effort:w => minutesIn('writing', w),
       outcome:w => countIn(S.drafts, w, 'updatedAt') },
 
-    { id:'philo-minutes-vs-closed', disc:'philo',
+    { id:'philo-minutes-vs-closed', direction:'higher_better', disc:'philo',
       effortLabel:'felsefe dakikası', outcomeLabel:'kapanan argüman',
       question:'Açık kalan argüman bir düşünce değil bir niyettir; '
              + 'hangisi kapanmaya en yakın?',
@@ -14673,21 +14992,20 @@ ESP.Goodhart = (function(){
       outcome:w => countIn(S.args, w, 'updatedAt', a => a.status === 'closed') },
 
 
-    { id:'music-minutes-vs-clean', disc:'music',
+    { id:'music-minutes-vs-clean', direction:'higher_better', disc:'music',
       effortLabel:'gitar dakikası', outcomeLabel:'temiz deneme oranı',
       question:'Tempoyu erken mi açtın? Plato kontrolüne bakmak ister misin?',
       effort:w => minutesIn('music', w),
       outcome:w => cleanRate(w) },
 
-    { id:'diction-minutes-vs-error', disc:'diction',
+    { id:'diction-minutes-vs-error', direction:'lower_better', disc:'diction',
       effortLabel:'diksiyon dakikası', outcomeLabel:'hata oranı',
-      lower:true,
       question:'Kaydı dinleyip hataları işaretliyor musun, yoksa aynı '
              + 'tekrarı mı sürdürüyorsun?',
       effort:w => minutesIn('diction', w),
       outcome:w => dictionError(w) },
 
-    { id:'history-minutes-vs-events', disc:'history',
+    { id:'history-minutes-vs-events', direction:'higher_better', disc:'history',
       effortLabel:'tarih dakikası', outcomeLabel:'yerleştirilen olay',
       question:'Yerleştirilmeyen olay hatırlanmaz; okuduklarını '
              + 'kronolojiye taşımayı mı erteliyorsun?',
@@ -14717,7 +15035,10 @@ ESP.Goodhart = (function(){
     const base = { id:def.id, disc:def.disc,
       effortLabel:def.effortLabel, outcomeLabel:def.outcomeLabel,
       effort:{ prev:eC, now:yC }, outcome:{ prev:eS, now:yS },
-      question:def.question };
+      question:def.question,
+      /* Yon her satirda durur: «tanimsiz» ile «olculmedi» ayri seylerdir
+         ve arayuz ikisini ayirt edebilmeli. */
+      direction:def.direction || null, };
 
     const asgari = def.minEffort != null ? def.minEffort : ASGARI_CABA;
     if(eS == null || yS == null){
@@ -14732,7 +15053,16 @@ ESP.Goodhart = (function(){
 
     const dC = oran(yC, eC);
     const dS = oran(yS, eS);
-    const sonucIyilesme = def.lower ? (dS == null ? null : -dS) : dS;
+
+    /* Yön olmadan «sonuç iyileşti mi» sorusu cevaplanamaz. Tanımsız bir
+       çift sessizce «yükselmesi iyi» SAYILMAZ — bu bir varsayım olurdu. */
+    const yon = DIRECTIONS[def.direction || ''];
+    if(!yon){
+      return Object.assign(base, { status:'unknown', cert:'missing',
+        note:'Bu çiftin yön tanımı yok; sonucun hangi yönde iyi olduğu '
+           + 'bilinmeden ayrışma değerlendirilemez.' });
+    }
+    const sonucIyilesme = yon.improvement(dS);
 
     if(dC == null || dC < CABA_ARTIS){
       return Object.assign(base, { status:'idle', cert:'measured',
@@ -14741,10 +15071,16 @@ ESP.Goodhart = (function(){
     }
     if(sonucIyilesme != null && sonucIyilesme > SONUC_DURGUN){
       return Object.assign(base, { status:'aligned', cert:'measured',
-        effortChange:dC, outcomeChange:sonucIyilesme,
-        note:'Çaba da sonuç da arttı. Gösterge hâlâ bir şeyi temsil ediyor.' });
+        direction:yon.id, effortChange:dC, outcomeChange:sonucIyilesme,
+        note:yon.id === 'movement_only'
+          ? 'Çaba arttı, sonuç da hareket etti. Hareketin YÖNÜ bu sistemin '
+            + 'bileceği bir şey değil.'
+          : 'Çaba da sonuç da doğru yönde arttı. Gösterge hâlâ bir şeyi '
+            + 'temsil ediyor.' });
     }
     return Object.assign(base, { status:'decoupled', cert:'measured',
+      direction:yon.id,
+      regressed:sonucIyilesme != null && sonucIyilesme < -SONUC_DURGUN,
       effortChange:dC, outcomeChange:sonucIyilesme,
       note:def.effortLabel + ' %' + Math.round(dC * 100) + ' arttı, '
          + def.outcomeLabel + ' ' + (sonucIyilesme == null ? 'ölçülemedi'
@@ -14775,7 +15111,9 @@ ESP.Goodhart = (function(){
     };
   }
 
-  return { PAIRS, windows, pair, scan, flags, brief,
+  function policy(){ return POLICY; }
+
+  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS,
     PENCERE, CABA_ARTIS, SONUC_DURGUN, ASGARI_CABA };
 })();
 
@@ -15334,6 +15672,679 @@ ESP.Storage = (function(){
 
   return { load, sample, breakdown, growth, horizon, prunable, prune, verdict,
     fmtBytes, BUDANABILIR, ICERIK, UFUK_GUN, ORNEK_LIMIT };
+})();
+
+/* ==== js/core/beacon.js ==== */
+/* HKM işareti (beacon) — «varsa gönder», asla bekletme.
+
+   ESP HKM'nin var olduğunu BİLMEZ. Bu dosya o kuralın tek istisnası
+   ve istisnanın sınırları burada yazılı:
+
+   1. HİÇBİR ÇİZİMDE ÇALIŞMAZ. Gönderim yalnızca kullanıcının açıkça
+      istediği anda ya da gün kapanışında tetiklenir; bir ekranın açılması
+      ağ trafiği doğurmaz.
+
+   2. HİÇBİR KAYDI BLOKLAMAZ. Gönderim ateşle-ve-unut'tur; hata yakalanır
+      ve yutulur. HKM kapalıyken, yavaşken ya da yokken ESP arayüzünde
+      bekleme, hata ya da bozulma OLMAZ.
+
+   3. ETİKETSİZ SAYI GÖNDERİLMEZ. Her metrik alanı dört kesinlik
+      etiketinden birini taşır. Sözleşmeyi bu taraf da denetler: HKM'nin
+      422 döndürmesini beklemek yerine, hatalı gövde hiç yola çıkmaz.
+
+   4. VARSAYILAN KAPALIDIR. Açmak bilinçli bir karardır; adres, jeton ve
+      gönderilen alanların tamamı kullanıcıya gösterilir.
+
+   5. AÇIK METİN JETON AĞA ÇIKMAZ. Yerel olmayan bir adrese düz `http` ile
+      gönderim reddedilir — jeton ağda açık gider. Yerel adres (127.0.0.1,
+      localhost) ya da `https` şarttır.
+
+   Bu katman bir senkronizasyon değil bir İŞARETTİR: tek yön, en iyi çaba,
+   geri dönüşü yok sayılabilir. ESP'in verisi ESP'te kalır; HKM'ye giden
+   şey günün ÖZETİDİR. */
+
+window.ESP = window.ESP || {};
+
+ESP.Beacon = (function(){
+  const U = ESP.U;
+  const S = ESP.S;
+
+  const MODULE = 'esp';
+  const CONTRACT = 1;              // gövde sürümü — HKM tarafıyla ortak
+  const ASGARI_ARA_DK = 15;        // aynı gün içinde en sık bu kadar
+
+  const VARSAYILAN = {
+    enabled:false,
+    url:'http://127.0.0.1:4200',
+    token:'',
+    intervalMinutes:60,
+    level:'ozet',            // ozet | gelismis
+    lastAt:null,                   // son DENEME
+    lastOkAt:null,                 // son BAŞARILI gönderim
+    lastStatus:null,               // 202 | 422 | 401 | 0 (ulaşılamadı)
+    lastNote:'',
+  };
+
+  /* Yüklenmeden önce her şey KAPALIDIR. Bir ayar dosyası okunamadığında
+     «varsayılan açık» davranmak, kullanıcının seçmediği bir şeyi yapmaktır. */
+  let AYAR = null;
+  let DEFTER = null;   // teklif defteri (asagida)
+
+  function settings(){ return Object.assign({}, VARSAYILAN, AYAR || {}); }
+
+  async function load(){
+    try{ AYAR = (await ESP.Store.get('hkm')) || {}; }
+    catch(e){ AYAR = {}; }
+    /* Teklif defterinin bellekteki kopyasi da tazelenir: ambar
+       degistiginde (acilis, hesap degisimi) eski kopyayla devam etmek,
+       cevaplanmis bir teklifi cevapsiz sanmak olurdu. */
+    DEFTER = null;
+    return settings();
+  }
+
+  async function save(patch){
+    AYAR = Object.assign({}, settings(), patch || {});
+    await ESP.Store.set('hkm', AYAR);
+    return settings();
+  }
+
+
+  /* --------------------------------------------------------- kapsam seviyesi
+
+     Ilk surum gunde birkac sayi goruyordu; bu, «bu haftayi analiz et» gibi
+     sorulari cevaplanamaz kiliyordu. Cozum gonderimi genisletmek ama
+     GENISLIGI KULLANICININ SECMESI:
+
+       ozet      — yuk kararini etkileyen cekirdek olcumler (VARSAYILAN)
+       gelismis  — bolum bazinda ilerleme de gider
+
+     Iki seviyede de giden sey SAYIDIR: icerik hicbir seviyede gitmez.
+     Seviye degistirmek yeni bir izin ister gibi davranir: ne gonderilecegi
+     yine satir satir gosterilir. */
+  const LEVELS = [
+    { id:'ozet', label:'Özet',
+      note:'Yalnız yük kararını etkileyen çekirdek ölçümler.' },
+    { id:'gelismis', label:'Gelişmiş',
+      note:'Bölüm bazında ilerleme de gider — hâlâ yalnız sayı.' },
+  ];
+
+  function levelOf(){
+    const id = settings().level;
+    return LEVELS.some(function(l){ return l.id === id; }) ? id : 'ozet';
+  }
+
+  /* Gecmis bir gun icin GERIYE DONUK hesaplanamayan alanlar gonderilmez:
+     bugunku degeri dunun tarihiyle yollamak, ambara sahte bir olcum
+     yazmaktir. */
+  function gecmisMi(dateISO){ return String(dateISO) !== U.todayISO(); }
+
+  /* ----------------------------------------------------------- sözleşme
+
+     Yerel kesinlik sözlüğü ile HKM'ninki birebir aynı DEĞİL: bu depoda
+     hesaplanmış değerler yer yer «derived» diye etiketlenir. Eşleme
+     AÇIK yazılır; bilinmeyen bir etiket sessizce «measured» sayılmaz,
+     gövdeyi reddeder. */
+  const CERT_MAP = {
+    measured:'measured',
+    estimated:'estimated',
+    computed:'computed',
+    derived:'computed',
+    missing:'missing',
+  };
+  const CERTS = ['measured', 'estimated', 'computed', 'missing'];
+
+  function metric(value, cert){
+    const c = CERT_MAP[cert] || null;
+    if(!c) return { value:null, cert:null, raw:cert };
+    if(c === 'missing' || value == null || !isFinite(Number(value))){
+      return { value:null, cert:'missing' };
+    }
+    return { value:Number(value), cert:c };
+  }
+
+  /* Eksik veri SIFIR DEĞİLDİR: değeri olmayan alan «missing» gider,
+     0 değil. Bu kural gövdenin tek satırında bile bozulmamalı. */
+  function contract(body){
+    const hata = [];
+    if(!body || typeof body !== 'object') return ['gövde yok'];
+    if(body.module !== MODULE) hata.push('modül adı yanlış');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(body.date || ''))) hata.push('tarih ISO değil');
+    const m = body.metrics;
+    if(!m || typeof m !== 'object' || !Object.keys(m).length){
+      hata.push('metrik yok');
+      return hata;
+    }
+    Object.keys(m).forEach(function(k){
+      const x = m[k];
+      if(!x || typeof x !== 'object' || !x.cert){ hata.push(k + ': etiket yok'); return; }
+      if(CERTS.indexOf(x.cert) < 0){ hata.push(k + ': geçersiz etiket ' + x.cert); return; }
+      if(x.cert !== 'missing' && typeof x.value !== 'number'){
+        hata.push(k + ': ' + x.cert + ' etiketli alanda sayı yok');
+      }
+      if(x.cert === 'missing' && x.value != null){
+        hata.push(k + ': veri yok etiketiyle değer gönderilemez');
+      }
+    });
+    return hata;
+  }
+
+  /* ------------------------------------------------------------ toplama
+
+     Gönderilen şey GÜNÜN ÖZETİDİR: kart metni, not içeriği, kitap adı
+     gitmez. HKM'ye giden en küçük veri kümesi, onun işini görebilecek
+     kadarıdır — fazlası bir maliyet, bir sızıntı yüzeyi ve bir iddiadır. */
+  function collect(dateISO){
+    const d = dateISO || U.todayISO();
+    const out = {};
+
+    /* Retansiyon BUGÜNÜN kart durumundan hesaplanır: kartın kararlılığı ve
+       son tekrardan bu yana geçen süre. Geçmiş bir gün için bu sayı o günün
+       ölçümü DEĞİLDİR — o yüzden geçmişte gönderilmez. */
+    if(gecmisMi(d)){
+      out.retention = metric(null, 'missing');
+      out.retention_cards = metric(null, 'missing');
+    }else{
+      const ret = ESP.SRS.retention(null, d);
+      out.retention = metric(ret.value, ret.cert);
+      out.retention_cards = ret.n ? metric(ret.n, 'computed') : metric(null, 'missing');
+    }
+
+    const dk = ESP.Model.minutesOf(d);
+    out.practice_minutes = dk == null ? metric(null, 'missing') : metric(dk, 'measured');
+
+    /* Sentez açığı: en eski BAĞLANMAMIŞ notun yaşı. Hiç not yoksa bu bir
+       «0 gün açık» değil, ölçülmemiş bir alandır. */
+    const notlar = (S.notes || []);
+    if(!notlar.length){
+      out.synthesis_gap_days = metric(null, 'missing');
+    }else{
+      const bagsiz = ESP.Intellect.unlinkedNotes();
+      if(!bagsiz.length){
+        out.synthesis_gap_days = metric(0, 'computed');
+      }else{
+        const yas = bagsiz.map(function(n){
+          return U.diffDays(String(n.createdAt || '').slice(0, 10), d);
+        }).filter(function(x){ return isFinite(x); });
+        out.synthesis_gap_days = yas.length
+          ? metric(Math.max.apply(null, yas), 'computed')
+          : metric(null, 'missing');
+      }
+    }
+
+    if(levelOf() === 'gelismis') Object.assign(out, genis(d));
+    return out;
+  }
+
+  /* Gelişmiş kapsam — disiplin disiplin dakika. Hangi kitabı okuduğun,
+     hangi parçayı çalıştığın ve not içeriği gitmez; giden şey AÇIK olan
+     disiplinlerin o günkü ölçülmüş dakikasıdır.
+
+     Kapalı bir disiplin hiç gönderilmez: kapalı bölümün «0 dakika»sı bir
+     ölçüm değil, olmayan bir sorunun cevabıdır. */
+  function genis(d){
+    const out = {};
+    (ESP.DISCIPLINES || []).forEach(function(disc){
+      if(ESP.Mod && !ESP.Mod.isOn(disc.id)) return;
+      const dk = ESP.Model.minutesOf(d, disc.id);
+      out['disc.' + disc.id + '.minutes'] = dk == null
+        ? metric(null, 'missing') : metric(dk, 'measured');
+    });
+    const oturum = ESP.Model.sessionsOf(d);
+    out.sessions = oturum.length ? metric(oturum.length, 'measured')
+      : metric(null, 'missing');
+
+    if(gecmisMi(d)) return out;
+    out.cards_total = metric((S.cards || []).length, 'measured');
+    out.cards_due = metric((S.cards || []).filter(function(c){
+      return c.dueAt && c.dueAt <= d; }).length, 'computed');
+    return out;
+  }
+
+
+  function payload(dateISO){
+    const d = dateISO || U.todayISO();
+    return { module:MODULE, date:d, version:CONTRACT, metrics:collect(d) };
+  }
+
+  const LABELS = { measured:'ölçüldü', estimated:'tahmin',
+    computed:'hesaplandı', missing:'veri yok' };
+
+  /* Kullanıcı ne gönderildiğini GÖRMEDEN açmamalı. */
+  function preview(dateISO){
+    const p = payload(dateISO);
+    const satirlar = Object.keys(p.metrics).map(function(k){
+      const m = p.metrics[k];
+      return { key:k, value:m.value, cert:m.cert,
+        label:LABELS[m.cert] || m.cert };
+    });
+    return { payload:p, rows:satirlar, errors:contract(p) };
+  }
+
+
+  /* ------------------------------------------------------------- esleme
+
+     Jetonu elle yapistirmak, HKM'nin hic acilmamasinin en olasi sebebiydi.
+     Esleme, jetonu gevsetmeden bu surtunmeyi kaldirir: HKM yuzunde iki
+     dakikalik bir pencere acilir, bu dugme jetonu dogrudan alir ve yalniz
+     bu cihazda saklar. Pencere kapaliysa hicbir sey olmaz — ve bu bir
+     hata degil, dogru davranistir. */
+  async function pair(url){
+    const adres = String(url || settings().url || '').replace(/\/$/, '');
+    if(!urlOk(adres)){
+      return { ok:false, note:'Yerel olmayan bir adresle eşleme yapılmaz.' };
+    }
+    let res;
+    try{
+      res = await fetch(adres + '/api/pair', { method:'POST' });
+    }catch(e){
+      return { ok:false, note:'HKM\'ye ulaşılamadı. Daemon çalışıyor mu?' };
+    }
+    let govde = null;
+    try{ govde = await res.json(); }catch(e){ govde = null; }
+    if(res.status !== 200 || !govde || !govde.token){
+      return { ok:false, status:res.status,
+        note:(govde && govde.note) || 'Eşleme penceresi kapalı. HKM yüzünde '
+           + '«Cihazları bağla» dedikten sonra iki dakika içinde dene.' };
+    }
+    await save({ url:adres, token:govde.token, enabled:true });
+    return { ok:true, note:'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.' };
+  }
+
+  /* ------------------------------------------------------------- gönderim */
+
+  function urlOk(url){
+    const s = String(url || '');
+    if(/^https:\/\//i.test(s)) return true;
+    return /^http:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?(\/|$)/i.test(s);
+  }
+
+  /* Kısıt bir hız sınırı değil, bir GÜRÜLTÜ sınırıdır: aynı günün aynı
+     özeti dakikada bir gönderilirse HKM'nin ambarı bilgi değil tekrar
+     biriktirir. */
+  function due(nowMs){
+    const a = settings();
+    if(!a.lastAt) return true;
+    const ara = Math.max(ASGARI_ARA_DK, Number(a.intervalMinutes) || 60);
+    const fark = (nowMs || Date.now()) - Date.parse(a.lastAt);
+    return !(fark >= 0 && fark < ara * 60000);
+  }
+
+  /* Tek giriş noktası. HİÇBİR KOŞULDA fırlatmaz: çağıran taraf bir
+     arayüz akışının ortasındadır ve orada bir ağ hatası, kaydı kaybetmek
+     için sebep değildir. */
+  async function send(opts){
+    const o = opts || {};
+    const a = settings();
+    if(!a.enabled && !o.force) return { ok:false, reason:'off', note:'HKM işareti kapalı.' };
+    if(!a.token) return { ok:false, reason:'no-token', note:'Jeton girilmemiş.' };
+    if(!urlOk(a.url)){
+      return { ok:false, reason:'unsafe-url',
+        note:'Yerel olmayan bir adrese düz http ile gönderim yapılmaz: jeton '
+           + 'ağda açık gider. https ya da yerel adres gerekir.' };
+    }
+    if(!o.force && !due(Date.now())){
+      return { ok:false, reason:'throttled', note:'Son gönderimin üzerinden yeterli süre geçmedi.' };
+    }
+    const body = payload(o.date);
+    const hata = contract(body);
+    if(hata.length){
+      await save({ lastAt:new Date().toISOString(), lastStatus:0,
+        lastNote:'Gövde sözleşmeyi geçmedi: ' + hata[0] });
+      return { ok:false, reason:'contract', errors:hata,
+        note:'Etiketsiz ya da bozuk alan var; gövde yola çıkmadı.' };
+    }
+    let durum = 0, not = '';
+    try{
+      const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      const zaman = ctrl ? setTimeout(function(){ ctrl.abort(); }, 4000) : null;
+      const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json',
+          'Authorization':'Bearer ' + a.token },
+        body:JSON.stringify(body),
+        signal:ctrl ? ctrl.signal : undefined,
+      });
+      if(zaman) clearTimeout(zaman);
+      durum = res.status;
+      not = durum === 202 ? 'Gönderildi.'
+        : durum === 422 ? 'HKM gövdeyi reddetti (etiket ya da biçim).'
+        : durum === 401 ? 'Jeton kabul edilmedi.'
+        : 'Beklenmeyen yanıt: ' + durum;
+    }catch(e){
+      durum = 0;
+      not = 'HKM\'ye ulaşılamadı. Bu bir hata değil bir DURUMDUR: HKM '
+          + 'isteğe bağlıdır ve kapalıyken ' + MODULE.toUpperCase() + ' olduğu gibi çalışır.';
+    }
+    const simdi = new Date().toISOString();
+    await save(Object.assign({ lastAt:simdi, lastStatus:durum, lastNote:not },
+      durum === 202 ? { lastOkAt:simdi } : {}));
+    return { ok:durum === 202, status:durum, note:not, payload:body };
+  }
+
+
+  /* ------------------------------------------------------------- geçmiş
+
+     Capraz bulgu ve yon tahlili GECMIS ister: bugunden itibaren biriken bir
+     ambar ilk iki ay hicbir sey soyleyemez. «Gecmisi gonder» o boslugu
+     kapatir — ama yalnizca geriye donuk hesaplanabilen alanlarla. */
+  async function backfill(days, onProgress){
+    const a = settings();
+    if(!a.enabled) return { ok:false, reason:'off', sent:0 };
+    if(!a.token) return { ok:false, reason:'no-token', sent:0 };
+    if(!urlOk(a.url)) return { ok:false, reason:'unsafe-url', sent:0 };
+    const n = Math.max(1, Math.min(Number(days) || 30, 180));
+    const bugun = U.todayISO();
+    let gonderilen = 0, bos = 0, hata = null;
+    for(let i = n - 1; i >= 0; i--){
+      const t = U.iso(U.addDays(U.parse(bugun), -i));
+      const govde = payload(t);
+      /* Bir gunun gonderilmesi icin en az bir OLCULMUS alan gerekir.
+         «Hesaplandi» yetmez: sinava kalan gun her tarih icin hesaplanabilir
+         ve yalniz onu tasiyan bir govde, kullanicinin o gun bir sey yaptigi
+         izlenimini birakir. Ambarda «gorulen gun» sayisini boyle sismek,
+         sessiz bir yalandir. */
+      const dolu = Object.keys(govde.metrics).some(function(k){
+        return govde.metrics[k].cert === 'measured';
+      });
+      if(!dolu || contract(govde).length){ bos++; continue; }
+      let durum = 0;
+      try{
+        const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json',
+            'Authorization':'Bearer ' + a.token },
+          body:JSON.stringify(govde),
+        });
+        durum = res.status;
+      }catch(e){ durum = 0; }
+      if(durum !== 202){ hata = durum; break; }
+      gonderilen++;
+      if(typeof onProgress === 'function') onProgress(gonderilen, n);
+    }
+    await save({ lastAt:new Date().toISOString(),
+      lastStatus:hata == null ? 202 : hata,
+      lastNote:hata == null
+        ? gonderilen + ' günlük geçmiş gönderildi (' + bos + ' gün ölçümsüz).'
+        : 'Geçmiş gönderimi ' + hata + ' ile durdu.' });
+    return { ok:hata == null, sent:gonderilen, empty:bos, status:hata || 202 };
+  }
+
+
+  /* --------------------------------------------------------- niyet kuyrugu
+
+     HKM bu sisteme YAZMAZ. «Yarin iki saat matematik» gibi bir istek
+     HKM'de bir NIYET olur; burasi acilista kuyrugu SORAR, kullaniciya
+     gosterir ve onaylanirsa ESP kendi koduyla uygular.
+
+     Uc kural:
+
+     1. Kuyruk okumak bir izin degildir: gelen sey bir TEKLIFTIR ve
+        kullanici gormeden hicbir sey uygulanmaz.
+     2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
+        bu sistemde calistirilacak bir komut degildir.
+     3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce'];
+
+  /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
+
+     Kuyruk artik acik teklifleri her soruşta yeniden veriyor (cevaplanmamis
+     bir teklif sayfa yenilendiginde kaybolmasin diye). Bu, tek basina yeni
+     bir tehlike dogurur: aynı teklif iki kez UYGULANABILIR.
+
+     Bu yuzden cevabin kaydi burada, YEREL olarak tutulur ve ag'dan ONCE
+     yazilir. Uc hal ayrilir:
+
+       applying      — uygulama basladi, bitip bitmedigi BILINMIYOR
+       applied       — uygulandi
+       acknowledged  — goruldu; uygulamak kullanicinin isi
+       dismissed     — istenmedi
+       unknown       — yarida kalmisti, kullanici kapatti
+
+     «applying» bir basarisizlik degil bir BILINMEZLIKTIR: uygulama
+     sirasinda sekme kapanirsa teklif ne yeniden uygulanir ne de sessizce
+     yutulur; kullaniciya «belirsiz» diye gosterilir. Uydurmak yerine
+     bilmedigimizi soylemek, bu sistemin her yerindeki kural.
+
+     `reported` alani ayri bir sozdur: is YERELDE bitmis ama merkeze
+     BILDIRILEMEMIS olabilir. O kayit silinmez; bir sonraki kuyruk
+     sorusunda bildirim tekrar denenir. */
+  const DEFTER_YOLU = 'hkmIntentLog';
+  const DEFTER_SINIR = 200;             // defter sinirsiz buyumez
+
+  async function intentLog(){
+    if(DEFTER) return DEFTER;
+    let ham = null;
+    try{ ham = await ESP.Store.get(DEFTER_YOLU); }catch(e){ ham = null; }
+    DEFTER = (ham && typeof ham === 'object' && ham.entries
+      && typeof ham.entries === 'object') ? ham.entries : {};
+    return DEFTER;
+  }
+
+  async function markIntent(id, state, reported, note, closed){
+    const d = await intentLog();
+    d[String(id)] = { state:state, reported:!!reported, closed:!!closed,
+      note:String(note || ''), at:new Date().toISOString() };
+    const anahtar = Object.keys(d);
+    if(anahtar.length > DEFTER_SINIR){
+      anahtar.sort(function(x, y){
+        return String(d[x].at).localeCompare(String(d[y].at)); });
+      anahtar.slice(0, anahtar.length - DEFTER_SINIR)
+        .forEach(function(k){ delete d[k]; });
+    }
+    try{ await ESP.Store.set(DEFTER_YOLU, { entries:d }); }catch(e){ /* yerel */ }
+    return d[String(id)];
+  }
+
+  async function forgetIntent(id){
+    const d = await intentLog();
+    delete d[String(id)];
+    try{ await ESP.Store.set(DEFTER_YOLU, { entries:d }); }catch(e){ /* yerel */ }
+  }
+
+  /* Bildirilememis cevaplar — bağlantı gelince tekrar denenir. */
+  async function flushIntentReports(){
+    const d = await intentLog();
+    let denenen = 0, basarili = 0;
+    for(const id of Object.keys(d)){
+      const k = d[id];
+      if(k.reported || k.closed || k.state === 'applying') continue;
+      denenen++;
+      const r = await answerIntent(id, k.state);
+      if(r.ok){ basarili++; await markIntent(id, k.state, true, k.note); continue; }
+      /* Merkez «boyle bir niyet yok» (404) ya da «zaten baska bir cevabi
+         var» (409) diyorsa tekrar denemek bir sey duzeltmez; sonsuza
+         kadar denemek de o kaydi asla kapatmamak olurdu. Kayit KAPANIR
+         ama «bildirildi» YAZILMAZ: bildirilmedi, denenmeyecek. */
+      if(r.status === 404 || r.status === 409){
+        await markIntent(id, k.state, false, k.note, true);
+      }
+    }
+    return { tried:denenen, ok:basarili };
+  }
+
+  /* Uygulanip uygulanmadigi BILINMEYEN teklifler. Arayuz bunlari bir
+     eylem olarak degil bir UYARI olarak gosterir. */
+  async function intentDoubts(){
+    const d = await intentLog();
+    return Object.keys(d).filter(function(id){ return d[id].state === 'applying'; })
+      .map(function(id){ return Object.assign({ id:id }, d[id]); });
+  }
+
+  async function intents(){
+    const a = settings();
+    if(!a.enabled || !a.token || !urlOk(a.url)) return [];
+    let res;
+    try{
+      res = await fetch(String(a.url).replace(/\/$/, '') + '/api/intents/'
+        + MODULE + '/take', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json',
+          'Authorization':'Bearer ' + a.token },
+      });
+    }catch(e){ return []; }
+    if(res.status !== 200) return [];
+    let govde = null;
+    try{ govde = await res.json(); }catch(e){ return []; }
+    const liste = (govde && govde.intents) || [];
+    const defter = await intentLog();
+    /* Merkez hala acik sanıyorsa ama biz cevaplamissak: gosterme, BILDIR.
+       Kuyruk acik teklifi tekrar tekrar verir; ikinci kez sormak
+       kullaniciya ayni seyi iki kez sordurmak olurdu. */
+    const gosterilecek = liste.filter(function(n){
+      if(!n || INTENT_KINDS.indexOf(n.kind) < 0 || !n.payload) return false;
+      return !defter[String(n.id)];
+    });
+    flushIntentReports().catch(function(){});
+    return gosterilecek;
+  }
+
+  /* Kullanicinin cevabi HKM'ye bildirilir: gorulmemis bir niyetle
+     reddedilmis bir niyeti ayirmak, kuyrugun tek anlamli tarafi.
+
+     Ikinci parametre artik bir bayrak degil bir DURUM da olabilir:
+
+       applied      — modul teklifi kendi koduyla uyguladi
+       acknowledged — teklif goruldu; uygulamak kullanicinin isi
+       dismissed    — istenmedi
+       unknown      — uygulama yarida kaldi, sonuc BILINMIYOR
+
+     Dordunu bire indirmek, birbirinden farkli dort sonucu tek kelimeyle
+     anlatmak olurdu; merkezdeki kayit da o kadar dogru olurdu. */
+  function _durumAdi(applied){
+    if(applied === true) return 'applied';
+    if(applied === false) return 'dismissed';
+    return String(applied);
+  }
+
+  async function answerIntent(id, applied){
+    const a = settings();
+    const durum = _durumAdi(applied);
+    if(['applied', 'acknowledged', 'dismissed', 'unknown'].indexOf(durum) < 0){
+      return { ok:false, error:'Geçersiz durum.' };
+    }
+    if(!a.enabled || !a.token || !urlOk(a.url)) return { ok:false };
+    try{
+      const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/intent/'
+        + id + '/' + durum, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json',
+          'Authorization':'Bearer ' + a.token },
+      });
+      return { ok:res.status === 200, status:res.status };
+    }catch(e){ return { ok:false }; }
+  }
+
+  /* Bir niyeti UYGULAMAK: yazan ESP'nin kendi kodudur.
+
+     ESP'de bir «oturum» ölçülmüş bir çalışmadır; ileriye dönük bir teklif
+     oturum olarak yazılamaz — yazılsaydı yapılmamış bir çalışma ölçülmüş
+     görünürdü. Teklif bu yüzden bir HATIRLATICI olur. */
+  const APPLIABLE = ['plan.add'];
+
+  function canApply(n){
+    return !!(n && APPLIABLE.indexOf(n.kind) >= 0);
+  }
+
+  async function applyIntent(n){
+    if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
+    const p = n.payload || {};
+    if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };
+    /* Gecersiz sure sinirlandirilmaz, REDDEDILIR: -5 dakikayi 5 dakikaya
+       cekmek, teklifi sessizce baska bir teklife cevirmektir. */
+    const dk = Number(p.minutes);
+    if(!isFinite(dk) || dk <= 0 || dk > 480){
+      return { ok:false, error:'Süre geçersiz (5–480 dakika bekleniyor).' };
+    }
+    const disc = (ESP.DISCIPLINES || []).some(function(d){ return d.id === p.disc; })
+      ? p.disc : 'lang';
+    const r = await ESP.Model.saveReminder({
+      disc:disc, due:p.date, repeat:'none',
+      text:Math.round(dk) + ' dakika ' + disc + ' (HKM teklifi)',
+    });
+    if(!r.ok) return { ok:false, error:r.error || 'Hatırlatıcı yazılamadı.' };
+    return { ok:true, note:p.date + ' için hatırlatıcı eklendi — ölçülmüş bir '
+      + 'oturum olarak DEĞİL: yapılmamış bir çalışma ölçülmüş görünmemeli.' };
+  }
+
+  /* ---------- teklifi KAPATMAK: tek kapi
+
+     Arayuz artik `applyIntent` + `answerIntent` ikilisini kendisi
+     sirayla cagirmaz. Dort hatanin dordu de o sirada dogmustu:
+
+       - iki tiklama iki blok yaziyordu,
+       - uygulamadan sonra baglanti koparsa merkez «cevapsiz» kaliyordu,
+       - bildirim basarisiz olunca kullaniciya «uygulandi» deniyordu,
+       - sayfa yenilenince is bastan yapilabiliyordu.
+
+     Sira burada tektir ve defter AG'DAN ONCE yazilir. */
+  const ISLEMDE = {};
+
+  async function resolveIntent(n, action){
+    if(!n || n.id == null) return { ok:false, error:'Teklif bulunamadı.' };
+    const anahtar = String(n.id);
+    if(['apply', 'seen', 'dismiss'].indexOf(action) < 0){
+      return { ok:false, error:'Bilinmeyen işlem.' };
+    }
+    /* Cift tiklama: es zamanli iki cagri tek is olur. */
+    if(ISLEMDE[anahtar]) return { ok:false, error:'Bu teklif işleniyor.' };
+    ISLEMDE[anahtar] = true;
+    try{
+      const defter = await intentLog();
+      const onceki = defter[anahtar];
+      const durum = action === 'apply' ? 'applied'
+        : (action === 'seen' ? 'acknowledged' : 'dismissed');
+      let not = '';
+      let uygulandi = false;
+      if(action === 'apply'){
+        if(onceki && (onceki.state === 'applied' || onceki.state === 'applying')){
+          /* En fazla BIR KEZ: daha once uygulanmis (ya da uygulanmis
+             olabilecek) bir teklif tekrar plana yazilmaz. */
+          not = 'Bu teklif daha önce uygulanmıştı; ikinci kez yazılmadı.';
+        }else{
+          await markIntent(n.id, 'applying', false, '');
+          const r = await applyIntent(n);
+          if(!r.ok){
+            await forgetIntent(n.id);
+            return { ok:false, error:r.error };
+          }
+          not = r.note;
+          uygulandi = true;
+        }
+      }
+      await markIntent(n.id, durum, false, not);
+      const bildirim = await answerIntent(n.id, durum);
+      if(bildirim.ok) await markIntent(n.id, durum, true, not);
+      return { ok:true, applied:uygulandi, state:durum,
+        reported:!!bildirim.ok, note:not };
+    }finally{
+      delete ISLEMDE[anahtar];
+    }
+  }
+
+  /* Belirsiz bir teklifi KAPATMAK. Kullanici planina bakip karar verir;
+     merkeze «uygulandi» da «istenmedi» de denmez — BILINMIYOR denir. */
+  async function clearDoubt(id){
+    await markIntent(id, 'unknown', false, '');
+    const bildirim = await answerIntent(id, 'unknown');
+    if(bildirim.ok) await markIntent(id, 'unknown', true, '');
+    return { ok:true, reported:!!bildirim.ok };
+  }
+
+  /* Ateşle ve unut: arayüz akışlarının çağırdığı biçim. Söz vermez,
+     beklemez, hata fırlatmaz. */
+  function ping(opts){
+    try{
+      const p = send(opts);
+      if(p && typeof p.catch === 'function') p.catch(function(){});
+    }catch(e){ /* işaret, akışı asla bozmaz */ }
+  }
+
+  return { load, save, settings, collect, payload, preview, contract, metric,
+    urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
+    intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE,
+    resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
+    intentDoubts, clearDoubt,
+    MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
 })();
 
 /* ==== js/core/audit.js ==== */
@@ -23439,11 +24450,105 @@ ESP.Screens.today = (function(){
 
   /* ------------------------------------------------------------------ cizim */
 
+  /* ---------- HKM teklifleri ----------
+
+     HKM bu sisteme YAZMAZ: kuyruktan gelen her satir bir TEKLIFTIR ve
+     kullanici gormeden hicbir sey uygulanmaz. Uygulayan da HKM degil,
+     ESP'in kendi kodudur. Kuyruk bossa hic cizilmez. */
+  function hkmTeklifRow(){
+    const liste = S.ui.hkmIntents || [];
+    const supheli = S.ui.hkmDoubts || [];
+    if(!liste.length && !supheli.length) return '';
+    return K.Entry({ label:'HKM TEKLİFİ', hint:'hkm',
+      meta:liste.length ? liste.length + ' teklif'
+        : supheli.length + ' belirsiz', wide:true,
+      body:html`
+        ${/* Uygulama yarida kalmis teklif: uydurmak yerine BILMEDIGIMIZI
+              soyleriz. Ne tekrar uygulanir ne de olmus sayilir. */''}
+        ${map(supheli, d => html`<div class="mt-8">
+          ${K.Notice({ tone:'warn', body:'Bir teklif uygulanırken işlem '
+            + 'yarıda kaldı; kaydına yazılıp yazılmadığı bilinmiyor. '
+            + 'Hatırlatıcılarına bakıp doğrula.' })}
+          <div class="row gap-8 mt-8">
+            ${K.Button({ label:'Kontrol ettim', size:'sm',
+              act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } })}
+          </div>
+        </div>`)}
+        ${map(liste, n => html`<div class="mt-8">
+          ${K.Notice({ tone:'info', body:n.note })}
+          <div class="row gap-8 mt-8">
+            ${when(ESP.Beacon.canApply(n), () => K.Button({ label:'Uygula',
+              size:'sm', tone:'primary', act:'hkm-intent-yes',
+              data:{ 'data-id':String(n.id) } }))}
+            ${when(!ESP.Beacon.canApply(n), () => K.Button({ label:'Gördüm',
+              size:'sm', tone:'primary', act:'hkm-intent-seen',
+              data:{ 'data-id':String(n.id) } }))}
+            ${K.Button({ label:'İstemiyorum', size:'sm',
+              act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
+          </div>
+        </div>`)}
+        <p class="tiny dim mt-10">Bu satırlar birer tekliftir. Onaylarsan
+          ESP kendi kaydına yazar; reddedersen HKM kaydı silmez,
+          «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş
+          bir teklif ayrı şeylerdir.</p>` });
+  }
+
+  /* ---------- HKM seridi: KUCUK ve HER GUN ORADA
+
+     HKM ayarlari bir ayar ekraninin icinde duruyordu: gunde bir bakilan
+     bir yerde, gun boyu acik duran bir baglantinin durumu. Bagli mi
+     degil mi, en son ne zaman gitti — bunlar gunluk ekranda TEK SATIR
+     olmali.
+
+     Serit bir AYAR EKRANI DEGILDIR: durumu soyler ve tek bir is
+     yaptirir. Ayarin yeri yine kendi ekranidir; iki yerde iki ayar
+     olsaydi biri otekini sessizce yenerdi. */
+  function saat(iso){
+    if(!iso) return null;
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return null;
+    return U.pad2(d.getHours()) + ':' + U.pad2(d.getMinutes());
+  }
+
+  function hkmSeritRow(){
+    if(!ESP.Beacon) return '';
+    const a = ESP.Beacon.settings();
+
+    if(!a.enabled){
+      return K.Entry({ label:'HKM', hint:'hkm', meta:'bağlı değil',
+        wide:true, body:html`<p class="tiny dim">Hayat Kontrol
+          Merkezi'ne günün özetini göndermek istersen ayarlardan
+          açabilirsin. ESP bundan bağımsız çalışır: HKM kapalıyken
+          hiçbir şey eksilmez.</p>` });
+    }
+
+    const gitti = saat(a.lastOkAt);
+    const denendi = saat(a.lastAt);
+    /* Basarisiz son deneme YUTULMAZ: «gonderildi» ile «gonderilmeye
+       calisildi» ayri seylerdir. */
+    const bozuk = a.lastStatus !== null && a.lastStatus !== undefined
+      && a.lastStatus !== 202;
+
+    return K.Entry({ label:'HKM', hint:'hkm', wide:true,
+      meta:bozuk ? ('son deneme ' + (denendi || '—') + ' · başarısız')
+        : (gitti ? ('son gönderim ' + gitti) : 'henüz gönderilmedi'),
+      body:html`
+        ${when(bozuk, () => K.Notice({ tone:'warn',
+          body:(a.lastNote || 'Gönderilemedi.') + ' ESP bundan etkilenmez; '
+             + 'veri burada duruyor ve bir sonraki denemede gider.' }))}
+        <div class="row gap-8 mt-8">
+          ${K.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-gonder' })}
+        </div>
+        <p class="tiny dim mt-8">Giden şey günün ÖZETİDİR: etiketli
+          ölçümler. Ham kayıt ESP'de kalır.</p>` });
+  }
+
   function render(){
     const tab = S.ui.dayTab || 'giris';
     const rows = tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [nextCard(), signalRow(), planRow(), planRowToday(), reminderRow(),
+      : [hkmTeklifRow(), hkmSeritRow(), nextCard(), signalRow(), planRow(),
+          planRowToday(), reminderRow(),
           entryForm(), quickForm(), sessionList()]
           .filter(Boolean);
 
@@ -23456,7 +24561,49 @@ ESP.Screens.today = (function(){
       ${K.Span(12, K.Ledger(() => rows))}`);
   }
 
+  /* HKM teklifine verilen cevabin TEK yolu: uygulama, yerel kayit ve
+     merkeze bildirim tek sirada olur. «Uygulandı ama merkeze
+     bildirilemedi» hali yutulmaz, SOYLENIR. */
+  async function hkmCevap(id, action){
+    const liste = S.ui.hkmIntents || [];
+    const n = liste.filter(x => String(x.id) === String(id))[0];
+    if(!n) return;
+    const r = await ESP.Beacon.resolveIntent(n, action);
+    if(!r.ok){ ESP.UI.toast(r.error || 'İşlenemedi'); return; }
+    S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+    const bas = r.state === 'applied' ? (r.note || 'Uygulandı')
+      : (r.state === 'acknowledged' ? 'Görüldü olarak işaretlendi'
+        : 'İstenmedi olarak işaretlendi');
+    ESP.UI.toast(r.reported ? bas
+      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.');
+    ESP.App.render();
+  }
+
   const handle = {
+    /* Elle gonderim: kullanicinin ACIKCA istedigi an. Kapaliyken
+       zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
+       olmasini anlamsiz kilardi. */
+    async 'hkm-gonder'(){
+      ESP.UI.toast('HKM\u2019ye gönderiliyor…');
+      const r = await ESP.Beacon.send({ reason:'manual' });
+      ESP.UI.toast(r.ok ? 'HKM\u2019ye gönderildi.'
+        : ('Gönderilemedi — ' + (r.note || r.reason || 'sebep bilinmiyor')));
+      ESP.App.render();
+    },
+
+    async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },
+    async 'hkm-intent-seen'(el){ await hkmCevap(el.dataset.id, 'seen'); },
+    async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
+
+    async 'hkm-doubt-ok'(el){
+      const r = await ESP.Beacon.clearDoubt(el.dataset.id);
+      S.ui.hkmDoubts = (S.ui.hkmDoubts || [])
+        .filter(x => String(x.id) !== el.dataset.id);
+      ESP.UI.toast(r.reported ? 'Kapatıldı; merkeze «belirsiz» diye bildirildi.'
+        : 'Kapatıldı; merkeze şimdilik bildirilemedi.');
+      ESP.App.render();
+    },
+
     async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; ESP.App.render(); },
 
     async 'signal-answer'(el){
@@ -28277,10 +29424,11 @@ ESP.Screens.analytics = (function(){
            + 'soru sorar: ayrışmanın meşru sebepleri vardır.',
         wide:true,
         body:bayraklar.length
-          ? K.Table({ tight:true,
-              headers:['Çift', 'Çaba', 'Sonuç', 'Durum'],
+          ? html`${K.Table({ tight:true,
+              headers:['Çift', 'Yön', 'Çaba', 'Sonuç', 'Durum'],
               rows:bayraklar.map(p => [
                 p.effortLabel + ' → ' + p.outcomeLabel,
+                (ESP.Goodhart.DIRECTIONS[p.direction] || {}).label || 'tanımsız',
                 p.effortChange == null ? P.cert(p.cert === 'missing' ? 'missing' : 'estimated')
                   : (p.effortChange === Infinity ? 'yeni' : '%' + Math.round(p.effortChange * 100)),
                 p.outcomeChange == null ? P.cert('missing')
@@ -28288,7 +29436,18 @@ ESP.Screens.analytics = (function(){
                 p.status === 'decoupled' ? 'ayrıştı'
                   : p.status === 'aligned' ? 'birlikte'
                   : p.status === 'unknown' ? 'ölçülmedi' : 'sessiz',
-              ]) })
+              ]) })}
+            <p class="small muted mt-8">«Yön» sütunu sonucun hangi tarafa
+              gitmesinin iyi sayıldığını söyler. Yönü tanımsız bir çift
+              değerlendirilmez: sistem yüksek olanın iyi olduğunu VARSAYMAZ.</p>
+            ${(function(){
+              const pol = ESP.Goodhart.policy();
+              return html`<p class="small muted mt-8">Pencere ${pol.windowDays} gün ·
+                çaba artışı eşiği %${Math.round(pol.effortRiseThreshold * 100)} ·
+                sonuç durgunluk eşiği %${Math.round(pol.stagnationThreshold * 100)} ·
+                asgari çaba ${pol.minEffortMinutes} dk. Bu sayılar bir bulgu
+                değil bu yazılımın ayarıdır: ${pol.rationale}</p>`;
+            })()}`
           : K.Empty({ text:'Açık bölüm yok; nöbetçinin bakacağı çift de yok.' }),
       }),
 
@@ -28303,9 +29462,10 @@ ESP.Screens.analytics = (function(){
         label:'KALİBRASYON', hint:'calib',
         meta:puan.cert === 'missing' ? puan.n + '/' + ESP.Calib.ASGARI + ' tahmin'
           : (puan.grade || (puan.brier == null ? '—' : 'brier ' + puan.brier.toFixed(2))),
-        note:'Sistem söylemeden önce sen söyle. Burada ölçülen şey senin '
-           + 'kendi durumunu ne kadar bildiğin — sistem kapalıyken de geçerli '
-           + 'olan tek ölçü bu.',
+        note:'Sistem söylemeden önce sen söyle. Ölçülen şey dardır: kayıtlı '
+           + 'türlerde kör tahminlerinin kayıtlı sayıya ne kadar yaklaştığı. '
+           + '«Kendini tanıma» ölçülmez; bu bir üstbiliş sinyalidir. Değeri, '
+           + 'sistem kapalıyken de elde kalmasıdır.',
         wide:true,
         body:html`
           ${K.Notice({ tone:'info', body:puan.note })}
@@ -28637,6 +29797,11 @@ ESP.Screens.profile = (function(){
                 + 'cihaz kaybolursa veri de kaybolur.' }))}`,
         }),
 
+        /* HKM isareti — dorduncu katman ISTEGE BAGLI ve varsayilan KAPALI.
+           Ne gonderildigi acik olsun olmasin satir satir gosterilir:
+           gormeden acilan bir gonderim, onay degildir. */
+        hkmEntry(),
+
         K.Entry({
           label:'SINIR', hint:'pedagogic',
           meta:'değişmez',
@@ -28648,9 +29813,106 @@ ESP.Screens.profile = (function(){
       ]))}`);
   }
 
+  function hkmEntry(){
+    if(!ESP.Beacon) return '';
+    const a = ESP.Beacon.settings();
+    const on = ESP.Beacon.preview();
+    const durum = a.lastAt
+      ? (a.lastStatus === 202 ? 'Son gönderim başarılı' : 'Son deneme başarısız')
+        + ' — ' + String(a.lastAt).slice(0, 16).replace('T', ' ') + '. '
+        + (a.lastNote || '')
+      : 'Henüz hiç gönderilmedi.';
+    return K.Entry({
+      label:'HKM İŞARETİ', hint:'hkm',
+      meta:a.enabled ? 'açık' : 'kapalı',
+      note:'ESP, HKM\'nin var olduğunu bilmez. İşaret tek yönlüdür, hiçbir '
+         + 'çizimde çalışmaz ve hiçbir kaydı bekletmez: HKM kapalıyken ESP '
+         + 'olduğu gibi çalışır.',
+      wide:true,
+      body:html`
+        ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
+          checked:!!a.enabled, act:'hkm-toggle' })}
+
+        <div class="cols-3 mt-12">
+          ${K.Field({ label:'HKM adresi',
+            input:K.Input({ id:'hkm-url', value:a.url, change:'hkm-url',
+              placeholder:'http://127.0.0.1:4200', aria:'HKM adresi' }) })}
+          ${K.Field({ label:'Yerel jeton', hint:'config.json → local_token',
+            input:K.Input({ id:'hkm-token', type:'password', value:a.token,
+              change:'hkm-token', aria:'HKM jetonu' }) })}
+          ${K.Field({ label:'En sık kaç dakikada bir',
+            input:K.Input({ id:'hkm-int', type:'number', min:'15', step:'5',
+              value:a.intervalMinutes, change:'hkm-interval',
+              aria:'Gönderim aralığı' }) })}
+        </div>
+
+        ${when(!ESP.Beacon.urlOk(a.url), () => K.Notice({ tone:'warn',
+          body:'Bu adrese gönderim yapılmaz: yerel olmayan bir adrese düz http '
+             + 'ile giderken jeton ağda açık gider. https ya da 127.0.0.1 gerekir.' }))}
+
+        <div class="mt-12">
+          ${K.Field({ label:'Kapsam', hint:'ne kadarı gönderilsin',
+            input:K.Select({ id:'hkm-level', value:ESP.Beacon.levelOf(),
+              change:'hkm-level', aria:'Gönderim kapsamı',
+              options:ESP.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
+          <p class="small muted">${(ESP.Beacon.LEVELS.find(l => l.id === ESP.Beacon.levelOf()) || {}).note}</p>
+        </div>
+
+        <div class="mt-12">
+          <span class="mono-label">Bugün ne gidiyor</span>
+          ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
+            rows:on.rows.map(r => [r.key,
+              r.value == null ? '—' : U.fmtNum(r.value), r.label]) })}
+          <p class="small muted mt-8">Kart metni, not içeriği ve kitap adı GİTMEZ.
+            Giden şey bu dört sayıdır; değeri olmayan alan «veri yok» gider,
+            sıfır değil.</p>
+        </div>
+
+        ${when(on.errors.length, () => K.Notice({ tone:'warn',
+          body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
+
+        <div class="mt-12">
+          ${K.Button({ label:'Bağlan', act:'hkm-pair', tone:'primary' })}
+          ${K.Button({ label:'Şimdi gönder', act:'hkm-send' })}
+          ${K.Button({ label:'Geçmişi gönder (60 gün)', act:'hkm-backfill' })}
+        </div>
+        <p class="small muted mt-8">Çapraz bulgu GEÇMİŞ ister. Geçmiş
+          gönderimi yalnızca geriye dönük hesaplanabilen alanları yollar:
+          retansiyon bugünün kart durumundan türetildiği için dünün
+          tarihiyle gönderilmez.</p>
+        <p class="small muted mt-8">«Bağlan», jetonu HKM'den doğrudan alır:
+          önce HKM yüzünde «Cihazları bağla» de, sonra iki dakika içinde
+          buraya bas. Jetonu elle yazmak da çalışır.</p>
+        <p class="small muted mt-8">${durum}</p>`,
+    });
+  }
+
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'hkm-toggle'(){
+      const a = ESP.Beacon.settings();
+      await ESP.Beacon.save({ enabled:!a.enabled });
+      ESP.UI.toast(!a.enabled ? 'HKM işareti açıldı' : 'HKM işareti kapatıldı');
+      ESP.App.render();
+    },
+    async 'hkm-pair'(){
+      const r = await ESP.Beacon.pair(val('hkm-url'));
+      ESP.UI.toast(r.note);
+      ESP.App.render();
+    },
+    async 'hkm-backfill'(){
+      ESP.UI.toast('Geçmiş gönderiliyor…');
+      const r = await ESP.Beacon.backfill(60);
+      ESP.UI.toast(r.ok ? r.sent + ' gün gönderildi (' + r.empty + ' gün ölçümsüz)'
+        : 'Gönderilemedi (' + (r.reason || r.status) + ')');
+      ESP.App.render();
+    },
+    async 'hkm-send'(){
+      const r = await ESP.Beacon.send({ force:true });
+      ESP.UI.toast(r.ok ? 'Gönderildi' : (r.note || 'Gönderilemedi'));
+      ESP.App.render();
+    },
     async 'save-profile'(){
       const ad = val('pf-name');
       if(!ad){ ESP.UI.toast('Ad boş olamaz'); return; }
@@ -28718,7 +29980,15 @@ ESP.Screens.profile = (function(){
     },
   };
 
-  const change = {};
+  const change = {
+    async 'hkm-url'(el){ await ESP.Beacon.save({ url:el.value.trim() }); ESP.App.render(); },
+    async 'hkm-token'(el){ await ESP.Beacon.save({ token:el.value.trim() }); },
+    async 'hkm-interval'(el){
+      const n = Math.max(ESP.Beacon.ASGARI_ARA_DK, Number(el.value) || 60);
+      await ESP.Beacon.save({ intervalMinutes:n });
+    },
+    async 'hkm-level'(el){ await ESP.Beacon.save({ level:el.value }); ESP.App.render(); },
+  };
 
   return {
     id:'profile',
@@ -28943,6 +30213,7 @@ ESP.Screens.guide = (function(){
     const ufuk = dp.horizon();
     const dagilim = dp.breakdown();
     const budanabilir = dp.prunable();
+    const undo = ESP.Store.importUndoInfo();
 
     return [
       /* Dokuz aylik ufuk.
@@ -29029,8 +30300,13 @@ ESP.Screens.guide = (function(){
               label:'Yedek dosyasını buraya bırak ya da seç' })}
           </div>
           ${K.Notice({ tone:'warn', class:'mt-10', title:'Dikkat',
-            body:'Yedekten yükleme mevcut verinin TAMAMINI değiştirir ve şu an '
-              + 'geri alınamaz. Yüklemeden önce mevcut veriyi indir.' })}`,
+            body:'Yedekten yükleme mevcut verinin TAMAMINI değiştirir. Yüklemeden '
+              + 'önce mevcut veriyi indir; yanlış yükledin diyorsan bir sonraki '
+              + 'yükleme veya profil silmeye kadar geri alabilirsin.' })}
+          ${when(undo, () => html`<div class="mt-10">${K.Notice({ tone:'warn',
+            body:new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki yedekten yükleme mevcut '
+               + 'verinin üzerine yazdı.' })}</div>
+            <div class="mt-8">${K.Button({ label:'Bu içe aktarmayı geri al', tone:'danger', act:'undo-import' })}</div>`)}`,
       }),
 
       K.Entry({
@@ -29245,6 +30521,23 @@ ESP.Screens.guide = (function(){
         + 'Bu işlem geri alınamaz.',
         async () => { await ESP.Store.clear(); location.reload(); }, true);
     },
+
+    async 'undo-import'(){
+      const undo = ESP.Store.importUndoInfo();
+      if(!undo){ ESP.UI.toast('Geri alınacak bir içe aktarma yok'); return; }
+      ESP.UI.confirmSheet('İçe aktarmayı geri al',
+        new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki içe aktarma öncesine dönülecek. '
+          + 'Aradan geçen sürede eklediğin her şey kaybolur.',
+        async () => {
+          try{
+            await ESP.Store.undoImport();
+            ESP.UI.toast('Geri alındı — yeniden başlatılıyor');
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            ESP.UI.toast(e && e.message ? e.message : 'Geri alınamadı');
+          }
+        }, true);
+    },
   };
 
   const change = {
@@ -29265,7 +30558,20 @@ ESP.Screens.guide = (function(){
       ESP.UI.confirmSheet('Yedekten yüklensin mi?',
         'Mevcut verinin TAMAMI bu yedekle değişir ve geri alınamaz. '
         + 'Devam etmeden önce mevcut veriyi indirmen önerilir.',
-        async () => { await ESP.Store.importAll(obj); location.reload(); }, true);
+        async () => {
+          try{
+            const meta = await ESP.Store.importAll(obj);
+            if(meta.partialCloud){
+              ESP.UI.toast(meta.cloudFailed + ' kayıt buluta yazılamadı; '
+                + 'bu cihazda yüklendi — sayfa yenileniyor');
+            }
+            /* Yerel yazma basarisizsa asagidaki satira HIC gelinmez:
+               yenilemek, tamamlanmamis bir islemi tamamlanmis gosterir. */
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            ESP.UI.toast(e && e.message ? e.message : 'Yedek yüklenemedi');
+          }
+        }, true);
     },
   };
 
@@ -30686,6 +31992,44 @@ ESP.App = (function(){
         }catch(e){ /* brifing açılışı bozmaz */ }
         render();
       });
+
+
+      /* HKM işareti — AÇILIŞTA BİR KEZ, aralığı dolduysa. Bir ekranın
+         açılması ağ trafiği doğurmaz; çizim döngüsünde hiçbir yerde
+         çağrılmaz. Ateşle-ve-unut: söz beklenmez, hata yutulur, açılışı
+         bloklamaz. İşaret kapalıysa (varsayılan) hiçbir şey olmaz. */
+      if(ESP.Beacon) ESP.Beacon.ping();
+
+      /* HKM'nin bekleyen teklifleri — acilista BIR KEZ, ateşle ve unut.
+         Kuyruk okumak bir izin degildir: gelen sey Bugun ekraninda bir
+         teklif satiri olur ve kullanici gormeden hicbir sey uygulanmaz.
+         HKM kapaliysa kuyruk bos gelir ve hicbir sey degismez. */
+      if(ESP.Beacon){
+        ESP.Beacon.intents().then(liste => {
+          if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
+        }).catch(() => {});
+        /* Uygulamasi yarida kalmis teklifler: kuyruktan bagimsiz, YEREL
+           defterden gelir. HKM kapali olsa da gosterilir — cunku belirsiz
+           kalan is bizim tarafimizdadir. */
+        ESP.Beacon.intentDoubts().then(d => {
+          if(d && d.length){ S.ui.hkmDoubts = d; render(); }
+        }).catch(() => {});
+
+        /* Sekmeye GERI DONUNCE tekrar sor. Once yalniz acilista
+           soruluyordu: HKM bir teklif biraktiginda, sayfa acikken
+           gormuyordun — yenilemeden haberin olmuyordu. Odaklanma bir
+           kullanici eylemidir, cizim degil: bu istek hicbir cizimde
+           atilmaz. */
+        let sonSoru = Date.now();
+        document.addEventListener('visibilitychange', () => {
+          if(document.hidden) return;
+          if(Date.now() - sonSoru < 30000) return;   /* sekme takibi degil */
+          sonSoru = Date.now();
+          ESP.Beacon.intents().then(liste => {
+            if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
+          }).catch(() => {});
+        });
+      }
 
       if(ESP.Setup.needed()) setTimeout(() => ESP.Setup.open(), 400);
     }catch(err){

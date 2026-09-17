@@ -1,0 +1,54 @@
+name: CI
+
+# AGENTS.md §2: "bir değişiklik, dokunduğu sistemin testleri ve duman testi
+# geçmeden önerilmez." Bu iş akışı o kuralı otomatikleştirir — insan elle
+# koşturmayı unutsa da PR kırmızı/yeşil kalır.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  arayuz:
+    name: ${{ matrix.system }} — birim testleri + duman testi
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        system: [AYS, SPI, ESP]
+    defaults:
+      run:
+        working-directory: ${{ matrix.system }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bağımlılıkları kur
+        run: npm ci
+
+      - name: Chromium kur
+        run: npx playwright install --with-deps chromium
+
+      - name: Birim testleri
+        run: node tools/runtests.js
+
+      - name: Duman testi
+        run: node tools/smoke.js
+
+  hkm:
+    name: HKM — birim testleri
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Testler
+        working-directory: HKM
+        run: python3 -m tests.run

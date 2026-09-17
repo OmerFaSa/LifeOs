@@ -11,6 +11,7 @@ import datetime
 import json
 import os
 import sqlite3
+import time
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(_ROOT, "db", "hkm.db")
@@ -580,16 +581,17 @@ def snapshot_file(con, etiket="oncesi", sakla=KOPYA_SAKLA):
     kok = os.path.dirname(DB_PATH)
     os.makedirs(kok, exist_ok=True)
     damga = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    yol = os.path.join(kok, "hkm-%s-%s.db" % (etiket, damga))
-    # Ayni saniyede alinan iki kopya AYNI ADI tasiyordu ve ikincisi
-    # birincinin ustune yaziyordu: geri donus kopyasinin tek isi, geri
-    # donulebilecek bir hal saklamakti — ustune yazilani saklamak degil.
-    if os.path.exists(yol):
-        for i in range(2, 100):
-            aday = os.path.join(kok, "hkm-%s-%s-%d.db" % (etiket, damga, i))
-            if not os.path.exists(aday):
-                yol = aday
-                break
+    # Sira, dosya adinin sonuna gomulu nanosaniyeden gelir — dosya
+    # sisteminin mtime cozunurlugune guvenmez. Bazi dosya sistemleri
+    # (FAT/exFAT, HFS+, bazi NFS/konteyner katmanlari) mtime'i 1 saniyeye
+    # yuvarlar; o cozunurlukte ayni saniyede alinan kopyalar ayirt
+    # edilemez, siralama os.listdir()'in keyfi sirasina duser ve EN YENI
+    # kopya silinebilirdi — geri donus kopyasinin tam ihanet ettigi an.
+    sira = time.time_ns()
+    yol = os.path.join(kok, "hkm-%s-%s-%d.db" % (etiket, damga, sira))
+    while os.path.exists(yol):
+        sira += 1
+        yol = os.path.join(kok, "hkm-%s-%s-%d.db" % (etiket, damga, sira))
     hedef = sqlite3.connect(yol)
     try:
         con.backup(hedef)
@@ -599,19 +601,39 @@ def snapshot_file(con, etiket="oncesi", sakla=KOPYA_SAKLA):
     return yol
 
 
+# Nanosaniye damgasi bu tarihlerde hep 19 hanelidir; eski bicimli (damga
+# yalniz saniye + kucuk bir cakisma soneki tasiyan) kopyalarda kuyruk kisa
+# kalir ve bu esik onlari yanlislikla nanosaniye sanmaz.
+_NANO_HANE_ASGARI = 15
+
+
+def _kopya_sira_anahtari(kok, ad):
+    """Dosya adindaki sira numarasini kullanir — mtime'a degil.
+
+    Yeni kopyalar adin sonunda kendi sirasini tasir (bkz. snapshot_file);
+    o deger dosya sisteminin ne kadar hassas mtime tuttugundan bagimsizdir.
+    Bu fonksiyon yazilmadan ONCE alinmis eski bicimli kopyalar icin
+    (sirasi adinda olmayanlar) mtime'a duser — geriye donuk uyumluluk."""
+    govde = ad[:-3] if ad.endswith(".db") else ad
+    kuyruk = govde.rsplit("-", 1)[-1]
+    if kuyruk.isdigit() and len(kuyruk) >= _NANO_HANE_ASGARI:
+        return int(kuyruk)
+    try:
+        return int(os.path.getmtime(os.path.join(kok, ad)) * 1e9)
+    except OSError:
+        return 0
+
+
 def _kopya_donusu(kok, etiket, sakla):
     """Eski kopyalari siler. Once hicbiri silinmiyordu: her geri yukleme
     bir dosya birakiyor ve dizin sessizce buyuyordu — dokuz aylik ufuk
     disiplinini kiran sey veritabani degil, yaninda biriken kopyalardi."""
     if not sakla or sakla < 1:
         return []
-    # Siralama ADA gore degil ZAMANA gore yapilir. Ad sirasinda
-    # «...-104501-2.db», «...-104501.db»den ONCE gelir ('-' < '.') ve en
-    # yeni kopya en eski sanilip silinirdi.
     try:
         adlar = [a for a in os.listdir(kok)
                  if a.startswith("hkm-%s-" % etiket) and a.endswith(".db")]
-        adlar.sort(key=lambda a: os.path.getmtime(os.path.join(kok, a)))
+        adlar.sort(key=lambda a: _kopya_sira_anahtari(kok, a))
     except OSError:
         return []
     silinen = []

@@ -156,8 +156,8 @@ def stamp() -> str:
     body = (
         "/* DERLEME DAMGASI — bu dosyayi elle duzenleme.\n"
         "   build.py her derlemede yeniden yazar. */\n\n"
-        "window.SP = window.SP || {};\n\n"
-        "SP.BUILD = { id:'%s', at:'%s', dirty:%s };\n"
+        "window.ESP = window.ESP || {};\n\n"
+        "ESP.BUILD = { id:'%s', at:'%s', dirty:%s };\n"
         % (sha, now, "true" if kirli else "false")
     )
     (SRC / "js" / "data" / "build.js").write_text(body, encoding="utf-8")

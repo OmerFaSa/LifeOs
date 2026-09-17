@@ -297,4 +297,53 @@
     });
   });
 
+  /* B04  Yanlis ama GECERLI bir yedek secmek (baska bir profilin, eski
+     bir donemin) geri donussuzdu — mevcut veriyi ustune yazdiginda tek
+     imkan sifirdan baslamakti. Simdi importAll() ustune yazmadan once
+     tek yuvalik bir kopya birakiyor. */
+  describe('ice aktarma geri alma', () => {
+    const S = () => ESP.Test.realStore;
+    const undoKey = () => 'esp.v1.' + S().activeProfileId() + '.oncesi';
+
+    it('ice aktarma oncesi durumu saklar ve geri alinabilir', async () => {
+      const key = undoKey();
+      const oncekiUndo = localStorage.getItem(key);
+      // kopya (bellek ici onbellek) ile senkron kalmasi icin ONCEKI durum
+      // ham localStorage yerine gercek set()/importAll() yoluyla okunup
+      // yazilir — dogrudan localStorage.setItem() onbellegi eskitirdi.
+      const oncekiVeri = S().exportAll().data;
+      try{
+        localStorage.removeItem(key);
+        await S().set('profile', { name:'ESKI' });
+        expect(S().importUndoInfo()).toBe(null);
+
+        await S().importAll({ __meta:{ app:'esp-entelektuel', schemaVersion:ESP.SCHEMA_VERSION },
+          data:{ 'profile':{ name:'YENI' } } });
+        expect((await S().get('profile')).name).toBe('YENI');
+        expect(!!S().importUndoInfo()).toBe(true);
+
+        await S().undoImport();
+        expect((await S().get('profile')).name).toBe('ESKI');
+        // tek yuvalidir: kullanilinca bosalir
+        expect(S().importUndoInfo()).toBe(null);
+      }finally{
+        await S().importAll({ __meta:{ app:'esp-entelektuel', schemaVersion:ESP.SCHEMA_VERSION }, data:oncekiVeri });
+        if(oncekiUndo === null) localStorage.removeItem(key); else localStorage.setItem(key, oncekiUndo);
+      }
+    });
+
+    it('gecersiz geri alma istegini reddeder', async () => {
+      const key = undoKey();
+      const onceki = localStorage.getItem(key);
+      try{
+        localStorage.removeItem(key);
+        let hata = null;
+        try{ await S().undoImport(); }catch(e){ hata = e; }
+        expect(!!hata).toBe(true);
+      }finally{
+        if(onceki === null) localStorage.removeItem(key); else localStorage.setItem(key, onceki);
+      }
+    });
+  });
+
 })();

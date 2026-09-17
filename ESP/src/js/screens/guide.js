@@ -192,6 +192,7 @@ ESP.Screens.guide = (function(){
     const ufuk = dp.horizon();
     const dagilim = dp.breakdown();
     const budanabilir = dp.prunable();
+    const undo = ESP.Store.importUndoInfo();
 
     return [
       /* Dokuz aylik ufuk.
@@ -278,8 +279,13 @@ ESP.Screens.guide = (function(){
               label:'Yedek dosyasını buraya bırak ya da seç' })}
           </div>
           ${K.Notice({ tone:'warn', class:'mt-10', title:'Dikkat',
-            body:'Yedekten yükleme mevcut verinin TAMAMINI değiştirir ve şu an '
-              + 'geri alınamaz. Yüklemeden önce mevcut veriyi indir.' })}`,
+            body:'Yedekten yükleme mevcut verinin TAMAMINI değiştirir. Yüklemeden '
+              + 'önce mevcut veriyi indir; yanlış yükledin diyorsan bir sonraki '
+              + 'yükleme veya profil silmeye kadar geri alabilirsin.' })}
+          ${when(undo, () => html`<div class="mt-10">${K.Notice({ tone:'warn',
+            body:new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki yedekten yükleme mevcut '
+               + 'verinin üzerine yazdı.' })}</div>
+            <div class="mt-8">${K.Button({ label:'Bu içe aktarmayı geri al', tone:'danger', act:'undo-import' })}</div>`)}`,
       }),
 
       K.Entry({
@@ -493,6 +499,23 @@ ESP.Screens.guide = (function(){
         'Bütün oturumlar, kartlar, tezler, notlar ve taslaklar kalkar. '
         + 'Bu işlem geri alınamaz.',
         async () => { await ESP.Store.clear(); location.reload(); }, true);
+    },
+
+    async 'undo-import'(){
+      const undo = ESP.Store.importUndoInfo();
+      if(!undo){ ESP.UI.toast('Geri alınacak bir içe aktarma yok'); return; }
+      ESP.UI.confirmSheet('İçe aktarmayı geri al',
+        new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki içe aktarma öncesine dönülecek. '
+          + 'Aradan geçen sürede eklediğin her şey kaybolur.',
+        async () => {
+          try{
+            await ESP.Store.undoImport();
+            ESP.UI.toast('Geri alındı — yeniden başlatılıyor');
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            ESP.UI.toast(e && e.message ? e.message : 'Geri alınamadı');
+          }
+        }, true);
     },
   };
 

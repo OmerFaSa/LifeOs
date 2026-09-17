@@ -91,6 +91,44 @@
     it('bos girdiyi reddeder', function(){
       expect(R.Test.realStore.readBackup(null).ok).toBeFalsy();
     });
+    it('ice aktarma oncesi durumu saklar ve geri alinabilir', async function(){
+      /* Gercek localStorage'a dokunur: onceki degeri saklayip sonda geri koyar. */
+      const real = R.Test.realStore;
+      const key = 'rota84285.v2', undoKey = key + '.oncesi';
+      const oncekiVeri = localStorage.getItem(key), oncekiUndo = localStorage.getItem(undoKey);
+      try{
+        localStorage.removeItem(undoKey);
+        localStorage.setItem(key, JSON.stringify({ 'profile/main':{ name:'ESKI' } }));
+        expect(real.importUndoInfo()).toBeNull();
+
+        const meta = await real.importAll({ __meta:{ app:'rota-84285', schemaVersion:R.SCHEMA_VERSION },
+          data:{ 'profile/main':{ name:'YENI' } } });
+        expect(meta.local).toBeTruthy();
+        expect(JSON.parse(localStorage.getItem(key))['profile/main'].name).toBe('YENI');
+        expect(real.importUndoInfo()).toBeTruthy();
+
+        await real.undoImport();
+        expect(JSON.parse(localStorage.getItem(key))['profile/main'].name).toBe('ESKI');
+        // tek yuvalidir: kullanilinca bosalir, ikinci bir geri alma yanlis yone donmez
+        expect(real.importUndoInfo()).toBeNull();
+      }finally{
+        if(oncekiVeri === null) localStorage.removeItem(key); else localStorage.setItem(key, oncekiVeri);
+        if(oncekiUndo === null) localStorage.removeItem(undoKey); else localStorage.setItem(undoKey, oncekiUndo);
+      }
+    });
+    it('gecersiz geri alma istegini reddeder', async function(){
+      const real = R.Test.realStore;
+      const undoKey = 'rota84285.v2.oncesi';
+      const onceki = localStorage.getItem(undoKey);
+      try{
+        localStorage.removeItem(undoKey);
+        let hata = null;
+        try{ await real.undoImport(); }catch(e){ hata = e; }
+        expect(hata).toBeTruthy();
+      }finally{
+        if(onceki === null) localStorage.removeItem(undoKey); else localStorage.setItem(undoKey, onceki);
+      }
+    });
   });
 
   describe('Calc.intensityGrid', function(){

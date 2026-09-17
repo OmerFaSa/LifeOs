@@ -369,6 +369,28 @@ def run_bakim():
             _os.remove(_os.path.join(kok, a))
     test("kopyalar sinirsiz birikmez", t_snapshot_rotation)
 
+    def t_snapshot_rotation_kaba_mtime():
+        """Bazi dosya sistemleri (FAT/exFAT, HFS+, bazi NFS/konteyner
+        katmanlari) mtime'i 1 saniyeye yuvarlar. Butun kopyalar AYNI
+        mtime'i tasisa bile en yeni kopya kalmali — sira artik dosya
+        adindaki damgadan gelir, diskten okunan mtime'dan degil."""
+        con = db.connect(":memory:")
+        kok = _os.path.dirname(db.DB_PATH)
+        etiket = "kaba%d" % _os.getpid()
+        gercek_getmtime = _os.path.getmtime
+        _os.path.getmtime = lambda p: 0.0   # butun dosyalar tek bir mtime'a dusuyor
+        try:
+            yollar = [db.snapshot_file(con, etiket=etiket, sakla=3) for _ in range(5)]
+        finally:
+            _os.path.getmtime = gercek_getmtime
+        kalan = [a for a in _os.listdir(kok) if a.startswith("hkm-%s-" % etiket)]
+        eq(len(kalan), 3)
+        ok(_os.path.basename(yollar[-1]) in kalan)
+        eq(len({_os.path.basename(y) for y in yollar}), 5)   # ad yeniden kullanimi yok
+        for a in kalan:
+            _os.remove(_os.path.join(kok, a))
+    test("kaba mtime'da bile en yeni kopya kalir", t_snapshot_rotation_kaba_mtime)
+
     def t_maintenance_backs_up_and_prunes():
         """KURULUM.md «kopyalamamak dokuz aylik kaydi tek bir disk hatasina
         baglar» diyordu — ama kopyalayan yoktu."""

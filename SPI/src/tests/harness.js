@@ -121,7 +121,18 @@ SP.Test = (function(){
           .map(k => Object.assign({ id:k.slice(p.length) }, JSON.parse(JSON.stringify(data[k]))));
       },
       exportAll(){ return JSON.parse(JSON.stringify(data)); },
-      async importAll(obj){ Object.keys(data).forEach(k => delete data[k]); Object.assign(data, obj); },
+      async importAll(obj){
+        this._undo = JSON.parse(JSON.stringify(data));
+        Object.keys(data).forEach(k => delete data[k]); Object.assign(data, obj);
+      },
+      /* Gercek depoyla ayni yuzey: ekranlar «geri al» dugmesini kosulsuz cagirabilmeli. */
+      importUndoInfo(){ return this._undo ? { at:new Date().toISOString() } : null; },
+      async undoImport(){
+        if(!this._undo) throw new Error('Geri alınacak bir içe aktarma yok.');
+        Object.keys(data).forEach(k => delete data[k]);
+        Object.assign(data, this._undo);
+        this._undo = null;
+      },
       async clear(){ Object.keys(data).forEach(k => delete data[k]); },
       /* Gercek depoyla ayni yuzey: ekranlar boyut/kota okuyabilmeli. */
       localSize(){ return JSON.stringify(data).length; },

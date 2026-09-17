@@ -164,8 +164,9 @@ R.Auto = (function(){
 
     const triggers = C.protocolTriggers().filter(t => !M.activeProtocols().some(a => a.protoId === t.id));
     triggers.forEach(t => {
+      const def = R.RECOVERY_PROTOCOLS.find(p => p.id === t.id);
       out.push({
-        id:'proto-' + t.id, icon:'shield', title:'Telafi önerisi: ' + t.title,
+        id:'proto-' + t.id, icon:'shield', title:'Telafi önerisi: ' + def.title,
         why:t.detail, act:'go', data:{ 'data-route':'protocols' },
       });
     });

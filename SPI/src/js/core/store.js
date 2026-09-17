@@ -20,6 +20,10 @@ SP.Store = (function(){
   const APP_ID = 'spi-saglik';
 
   const LOCAL_KEY = 'spi.v1.' + PROFILE;
+  /* Yedekten yukleme ONCESI durumun tek yuvalik kopyasi. LOCAL_KEY'in
+     GOVDESINE degil, AYRI bir anahtara yazilir: importAll o anahtari
+     ezmedigi icin geri alma imkani import'un kendisinden hayatta kalir. */
+  const UNDO_KEY = LOCAL_KEY + '.oncesi';
   let db = null;
   let mode = 'local';
 
@@ -271,6 +275,16 @@ SP.Store = (function(){
     const parsed = readBackup(obj);
     if(!parsed.ok) throw new Error(parsed.error);
 
+    /* USTUNE YAZMADAN ONCE tek yuvalik bir geri donus kopyasi birakilir.
+       Dosya secicide YANLIS AMA GECERLI bir yedek secmek — baska bir
+       profilin ya da eski bir donemin yedegi — bu depodaki geri donussuz
+       tek islemdi. Yazma basarisiz olursa (kota dolu) geri alma imkani
+       sessizce kaybolur ama import yine de denenir: hic geri alamamak,
+       hic import edememekten daha az kotudur. */
+    try{
+      localStorage.setItem(UNDO_KEY, JSON.stringify({ at:new Date().toISOString(), data:localAll() }));
+    }catch(e){ /* kota dolu olabilir — asagidaki import denemesi engellenmez */ }
+
     /* YAZMA SONUCU DEGERLENDIRILIR. Once localWrite()'in donusu
        yutuluyordu: kota dolu bir tarayicida hicbir sey yazilmadigi halde
        cagri normal bitiyor, ekran «Yedek yuklendi» diyordu. Basarisiz bir
@@ -297,6 +311,48 @@ SP.Store = (function(){
       local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata,
       partialCloud:bulutHata > 0,
     });
+  }
+
+  /* En son ice aktarmadan ONCEKI duruma dair bilgi — «geri al» dugmesinin
+     gorunup gorunmeyecegine bu karar verir. Icerigin kendisini degil,
+     yalniz ne zaman alindigini dondurur. */
+  function importUndoInfo(){
+    try{
+      const raw = localStorage.getItem(UNDO_KEY);
+      if(!raw) return null;
+      const parsed = JSON.parse(raw);
+      return { at:parsed.at };
+    }catch(e){ return null; }
+  }
+
+  /* Son ice aktarmayi geri alir. TEK YUVALIDIR: bir kez kullanilinca
+     yuva bosalir — ikinci bir «geri al» ilk ice aktarmadan ONCEKI
+     duruma degil, geri alinmis duruma doner, bu da kafa karistirir. */
+  async function undoImport(){
+    let raw;
+    try{ raw = localStorage.getItem(UNDO_KEY); }
+    catch(e){ throw new Error('Geri alma kaydı okunamadı.'); }
+    if(!raw) throw new Error('Geri alınacak bir içe aktarma yok.');
+    let parsed;
+    try{ parsed = JSON.parse(raw); }
+    catch(e){ throw new Error('Geri alma kaydı bozuk.'); }
+
+    const yerel = localWrite(parsed.data);
+    if(!yerel){
+      const e = new Error('Geri alma bu cihaza yazılamadı. Depolama alanı dolu olabilir.');
+      e.code = 'local-write';
+      throw e;
+    }
+    try{ localStorage.removeItem(UNDO_KEY); }catch(e){}
+
+    let bulutYazilan = 0, bulutHata = 0;
+    if(db){
+      for(const k of Object.keys(parsed.data)){
+        try{ await db.doc(k).set(parsed.data[k]); bulutYazilan++; }
+        catch(e){ bulutHata++; health.cloud = 'error'; }
+      }
+    }
+    return { local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata, partialCloud:bulutHata > 0 };
   }
 
   async function clear(){
@@ -346,7 +402,7 @@ SP.Store = (function(){
 
   return {
     init, get, set, remove, list,
-    exportAll, importAll, readBackup, clear, localSize, localQuota, sizeByCollection,
+    exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
     get mode(){ return mode; },

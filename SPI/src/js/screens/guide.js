@@ -258,6 +258,7 @@ SP.Screens.guide = (function(){
   function dataCard(){
     const f = M.dataFootprint();
     const age = M.backupAgeDays();
+    const undo = SP.Store.importUndoInfo();
     return K.Card({
       title:'Veri ve yedek', hint:'backup',
       badge:M.backupDue() ? K.Badge({ label:'yedek gerekiyor', tone:'warn' })
@@ -273,9 +274,14 @@ SP.Screens.guide = (function(){
         ${when(f.near, () => K.Notice({ tone:'warn', class:'mt-10',
           body:'Tarayıcı depolama alanının %' + f.pct + '\'i dolu. Yedek al ve eski kayıtları temizle.' }))}
         ${K.Notice({ tone:'info', class:'mt-10',
-          body:age == null ? 'Henüz yedek alınmadı.' : 'Son yedek ' + age + ' gün önce.' })}`,
+          body:age == null ? 'Henüz yedek alınmadı.' : 'Son yedek ' + age + ' gün önce.' })}
+        ${when(undo, () => K.Notice({ tone:'warn', class:'mt-10',
+          body:new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki yedekten yükleme mevcut '
+             + 'verinin üzerine yazdı. Yanlışsa bir önceki duruma dönebilirsin — bu imkan yalnız '
+             + 'bu içe aktarma için geçerli.' }))}`,
       foot:html`${K.Button({ label:'Yedek indir', size:'sm', tone:'primary', act:'backup' })}
         ${K.Button({ label:'Yedek yükle', size:'sm', act:'restore' })}
+        ${when(undo, () => K.Button({ label:'İçe aktarmayı geri al', size:'sm', tone:'danger', act:'undo-import' }))}
         ${K.Button({ label:'Bütün veriyi sil', size:'sm', tone:'danger', act:'wipe' })}`,
     });
   }
@@ -545,6 +551,23 @@ SP.Screens.guide = (function(){
         }
       };
       input.click();
+    },
+    async 'undo-import'(){
+      const undo = SP.Store.importUndoInfo();
+      if(!undo){ UI.toast('Geri alınacak bir içe aktarma yok'); return; }
+      UI.confirmSheet('İçe aktarmayı geri al',
+        new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki içe aktarma öncesine dönülecek. '
+          + 'Aradan geçen sürede eklediğin her şey kaybolur.',
+        async () => {
+          try{
+            await SP.Store.undoImport();
+            UI.closeSheet();
+            UI.toast('Geri alındı — yeniden başlatılıyor');
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            UI.toast('Geri alınamadı: '+(e.message || 'bilinmeyen hata'));
+          }
+        }, true);
     },
     async wipe(){
       UI.confirmSheet('Bütün veriyi sil',

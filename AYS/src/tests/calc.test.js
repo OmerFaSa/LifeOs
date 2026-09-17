@@ -376,6 +376,14 @@
         expect(ids).toContain('illness-break');
       });
     });
+    it('tetiklenen protokol onerisi baslikta undefined tasimaz', function(){
+      resetState();
+      withToday('2026-11-02', function(){
+        const s = R.Auto.suggestions().find(x => x.id === 'proto-illness-break');
+        expect(s.title.indexOf('undefined')).toBe(-1);
+        expect(s.title).toBe('Telafi önerisi: Hastalık, aile yükü veya bir haftalık kopuş');
+      });
+    });
     it('Ekim ayinda TYT matematik 8 netin altindaysa tetikler', function(){
       resetState();
       withToday('2026-10-26', function(){

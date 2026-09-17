@@ -3244,7 +3244,10 @@ button.minrow:hover{ background:var(--surface-2); }
   cursor:pointer; text-align:left; text-decoration:underline;
   text-underline-offset:2px;
   display:inline-flex; align-items:center;
-  min-height:24px; min-width:24px;
+  /* Taban 24px ama tam 24 vermek sinirda kaliyor: satir yuksekligi
+     yuvarlanirken 23,99'a dusen olcum denetimde «kucuk hedef» sayiliyordu.
+     Iki piksel pay, sinirdaki bir kurali kararli bir kurala cevirir. */
+  min-height:26px; min-width:26px;
 }
 .linkbtn:hover{ color:var(--primary-hover); }
 
@@ -4572,7 +4575,7 @@ body.is-dragging .drop.is-over{
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'77c683b', at:'2026-09-13 15:45', dirty:true };
+SP.BUILD = { id:'2088209', at:'2026-09-17 18:07', dirty:true };
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -7374,6 +7377,8 @@ SP.HINTS = {
     more:'Yetki ayrımı kasıtlıdır: bir ajan alan dışına çıkarsa soruyu sahibine yönlendirir. Sayı kural motorundan gelir; ajan hesap yapmaz, yalnızca cümleye çevirir.' },
   'audit':{ t:'Bakım borcu', b:'Beş alanda birikmiş bozukluk var mı?',
     more:'Bu denetim TEŞHİS KOYMAZ: bir değerin ne anlama geldiği hekimin işidir. Söyleyebileceği tek şey kaydın durumudur — tahlil eskimiş, kırmızı bayrak açık kalmış, RPE girilmemiş, gıda tanınmamış. Her bulgu eyleme bağlıdır ve hiçbiri suçlamaz. Veri eşiğin altındaysa bulgu değil «ölçülmedi» döner: ölçülmemiş bir tablo temiz değildir.' },
+  'hkm':{ t:'HKM işareti', b:'İsteğe bağlı dördüncü katmana günün özetini gönderir.',
+    more:'SPİ, HKM\'nin var olduğunu bilmez: işaret tek yönlüdür, hiçbir çizimde çalışmaz ve hiçbir kaydı bekletmez. Varsayılan kapalıdır ve açılmadan önce ne gönderileceği satır satır gösterilir. Tahlil değeri, ilaç adı, semptom ve öğün gitmez; giden şey yük kararını etkileyen dört sayıdır ve her biri kesinlik etiketiyle gider — değeri olmayan alan «veri yok» gider, sıfır değil. Klinik sınır burada da geçerlidir.' },
   'storage':{ t:'Depo ufku', b:'Bu sistem dokuz ay her gün kullanılırsa depo dolar mı?',
     more:'«Depo %80 dolu» tek başına işe yaramaz: ne zaman dolacağını ve NEYİN şiştiğini söylemez. Büyüme hızı her açılıştaki bir ölçümden HESAPLANIR; iki ölçümden az varsa hız bilinmiyordur. Budama yalnızca sistemin kendi ürettiği kayıtlara dokunur: tahlil, ölçüm, öğün ve antrenman kayıtların hiçbir koşulda yer açmak için silinmez.' },
   'friction':{ t:'Sürtünme', b:'Takip ekranlarında geçen süre — günlük bütçeye göre.',
@@ -8249,7 +8254,15 @@ SP.Store = (function(){
     catch(e){ return 'ben'; }
   }
   const PROFILE = activeProfile();
+  /* Yedegin kimligi — disa aktarirken yazilir, geri yuklerken ARANIR.
+     Iki yerde ayri ayri yazilan bir kimlik, bir gun ayrisir. */
+  const APP_ID = 'spi-saglik';
+
   const LOCAL_KEY = 'spi.v1.' + PROFILE;
+  /* Yedekten yukleme ONCESI durumun tek yuvalik kopyasi. LOCAL_KEY'in
+     GOVDESINE degil, AYRI bir anahtara yazilir: importAll o anahtari
+     ezmedigi icin geri alma imkani import'un kendisinden hayatta kalir. */
+  const UNDO_KEY = LOCAL_KEY + '.oncesi';
   let db = null;
   let mode = 'local';
 
@@ -8462,7 +8475,7 @@ SP.Store = (function(){
   function exportAll(){
     return {
       __meta:{
-        app:'spi-saglik',
+        app:APP_ID,
         schemaVersion:SP.SCHEMA_VERSION,
         exportedAt:new Date().toISOString(),
         mode,
@@ -8475,6 +8488,17 @@ SP.Store = (function(){
   function readBackup(obj){
     if(!obj || typeof obj !== 'object') return { ok:false, error:'Dosya okunamadı.' };
     if(obj.__meta && obj.data){
+      /* UYGULAMA KIMLIGI once denetlenir. Yalniz sema surumune bakan bir
+         okuma, baska bir LifeOS uygulamasinin yedegini kabul ediyordu:
+         dosya secicide yanlis dosyayi secmek, profil verisinin baska bir
+         uygulamanin verisiyle degismesi demekti. */
+      if(obj.__meta.app && obj.__meta.app !== APP_ID){
+        return { ok:false, error:'Bu yedek başka bir uygulamadan («'
+          + String(obj.__meta.app).slice(0, 32) + '»). SPİ yedeği gerekir.' };
+      }
+      if(typeof obj.data !== 'object' || Array.isArray(obj.data)){
+        return { ok:false, error:'Yedek gövdesi okunamadı.' };
+      }
       if(obj.__meta.schemaVersion > SP.SCHEMA_VERSION){
         return { ok:false, error:'Bu yedek daha yeni bir sürümle alınmış (şema '+obj.__meta.schemaVersion+'). Önce uygulamayı güncelle.' };
       }
@@ -8489,14 +8513,85 @@ SP.Store = (function(){
   async function importAll(obj){
     const parsed = readBackup(obj);
     if(!parsed.ok) throw new Error(parsed.error);
-    localWrite(parsed.data);
+
+    /* USTUNE YAZMADAN ONCE tek yuvalik bir geri donus kopyasi birakilir.
+       Dosya secicide YANLIS AMA GECERLI bir yedek secmek — baska bir
+       profilin ya da eski bir donemin yedegi — bu depodaki geri donussuz
+       tek islemdi. Yazma basarisiz olursa (kota dolu) geri alma imkani
+       sessizce kaybolur ama import yine de denenir: hic geri alamamak,
+       hic import edememekten daha az kotudur. */
+    try{
+      localStorage.setItem(UNDO_KEY, JSON.stringify({ at:new Date().toISOString(), data:localAll() }));
+    }catch(e){ /* kota dolu olabilir — asagidaki import denemesi engellenmez */ }
+
+    /* YAZMA SONUCU DEGERLENDIRILIR. Once localWrite()'in donusu
+       yutuluyordu: kota dolu bir tarayicida hicbir sey yazilmadigi halde
+       cagri normal bitiyor, ekran «Yedek yuklendi» diyordu. Basarisiz bir
+       kaydi basari gibi gostermek, bu depodaki en pahali hata tipidir. */
+    const yerel = localWrite(parsed.data);
+    if(!yerel){
+      const e = new Error('Yedek bu cihaza yazılamadı; mevcut kayıt '
+        + 'korundu. Depolama alanı dolu olabilir: Ayarlar → Veri '
+        + 'bölümünden yer aç, sonra tekrar dene.');
+      e.code = 'local-write';
+      throw e;
+    }
+
+    /* Buluta KISMI yazma ayrica raporlanir: «tamamlandi» izlenimi
+       verilmez. */
+    let bulutYazilan = 0, bulutHata = 0;
     if(db){
       for(const k of Object.keys(parsed.data)){
-        try{ await db.doc(k).set(parsed.data[k]); }
-        catch(e){ health.cloud = 'error'; }
+        try{ await db.doc(k).set(parsed.data[k]); bulutYazilan++; }
+        catch(e){ bulutHata++; health.cloud = 'error'; }
       }
     }
-    return parsed.meta;
+    return Object.assign({}, parsed.meta, {
+      local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata,
+      partialCloud:bulutHata > 0,
+    });
+  }
+
+  /* En son ice aktarmadan ONCEKI duruma dair bilgi — «geri al» dugmesinin
+     gorunup gorunmeyecegine bu karar verir. Icerigin kendisini degil,
+     yalniz ne zaman alindigini dondurur. */
+  function importUndoInfo(){
+    try{
+      const raw = localStorage.getItem(UNDO_KEY);
+      if(!raw) return null;
+      const parsed = JSON.parse(raw);
+      return { at:parsed.at };
+    }catch(e){ return null; }
+  }
+
+  /* Son ice aktarmayi geri alir. TEK YUVALIDIR: bir kez kullanilinca
+     yuva bosalir — ikinci bir «geri al» ilk ice aktarmadan ONCEKI
+     duruma degil, geri alinmis duruma doner, bu da kafa karistirir. */
+  async function undoImport(){
+    let raw;
+    try{ raw = localStorage.getItem(UNDO_KEY); }
+    catch(e){ throw new Error('Geri alma kaydı okunamadı.'); }
+    if(!raw) throw new Error('Geri alınacak bir içe aktarma yok.');
+    let parsed;
+    try{ parsed = JSON.parse(raw); }
+    catch(e){ throw new Error('Geri alma kaydı bozuk.'); }
+
+    const yerel = localWrite(parsed.data);
+    if(!yerel){
+      const e = new Error('Geri alma bu cihaza yazılamadı. Depolama alanı dolu olabilir.');
+      e.code = 'local-write';
+      throw e;
+    }
+    try{ localStorage.removeItem(UNDO_KEY); }catch(e){}
+
+    let bulutYazilan = 0, bulutHata = 0;
+    if(db){
+      for(const k of Object.keys(parsed.data)){
+        try{ await db.doc(k).set(parsed.data[k]); bulutYazilan++; }
+        catch(e){ bulutHata++; health.cloud = 'error'; }
+      }
+    }
+    return { local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata, partialCloud:bulutHata > 0 };
   }
 
   async function clear(){
@@ -8546,7 +8641,7 @@ SP.Store = (function(){
 
   return {
     init, get, set, remove, list,
-    exportAll, importAll, readBackup, clear, localSize, localQuota, sizeByCollection,
+    exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
     get mode(){ return mode; },
@@ -8617,6 +8712,10 @@ SP.S = {
   storeHealth:null,
 
   ui:{
+    /* HKM'nin bekleyen teklifleri — bellekte durur, depoya YAZILMAZ:
+       kaynagi HKM'dir ve tek gercek orada olmali. */
+    hkmIntents:[],
+    hkmDoubts:[],
     railOpen:false,
     undo:null,             // son yikici islemin geri alma kaydi
     dayTab:'giris',        // giris | ozet | gecmis
@@ -9409,6 +9508,9 @@ SP.Model = (function(){
     if(SP.Friction) await SP.Friction.load();
     if(SP.Calib) await SP.Calib.load();
     if(SP.Signals) await SP.Signals.load();
+    /* Isaret ayari en sonda yuklenir ve yuklenmezse KAPALI kalir:
+       kullanicinin secmedigi bir gonderim varsayilan olamaz. */
+    if(SP.Beacon) await SP.Beacon.load();
     if(SP.Storage){ await SP.Storage.load(); await SP.Storage.sample(); }
 
     S.ready = true;
@@ -10085,28 +10187,107 @@ SP.Ev = (function(){
     return SP.GRADE_BY_ID[r.source] || null;
   }
 
+  /* DIKKAT — bu ETKIN yetkidir, kayitta yazan tavan degil.
+     Tavani okumak icin of().authority kullanilir. */
   function authorityOf(markerId, field){
     const r = of(markerId, field);
-    return r ? r.authorityInfo : null;
+    if(!r) return null;
+    return effective(r).info;
   }
 
-  /* Bu esik bir DIREKTIF uretebilir mi? Yetki ekseni karar verir. */
+
+  /* ------------------------------------------------ ETKİN YETKİ (effective)
+
+     Dışarıdan gelen eleştiri haklıydı: dört eksen «ayrı» diye yazılmıştı
+     ama yetki kararına yalnızca BİR eksen giriyordu. Bu şu boşluğu
+     bırakıyordu:
+
+       kaynak: kılavuz · kesinlik: bilinmiyor · uygulanır: dolaylı
+       → yetki: yönlendirebilir
+
+     Yani adı konmuş bir kılavuzdan geldiği için, kesinliği değerlendirilmemiş
+     ve bu kullanıcıya dolaylı uyan bir eşik tam yetkiyle konuşabiliyordu.
+
+     Düzeltme: `authority` artık bir SONUÇ değil bir TAVAN. Etkin yetki,
+     dört eksen birlikte hesaplanır ve tavanı hiçbir zaman aşamaz:
+
+       düşük kesinlik      → bir basamak iner
+       bilinmeyen kesinlik → bir basamak iner
+       dolaylı uygulanır   → bir basamak iner
+       yerel uygulanır     → bir basamak iner
+
+     İnişler birikir. Bu bir formül değil bir POLİTİKADIR ve öyle
+     etiketlenir; sayı vermez, basamak indirir. Gerekçesi: bir eşiğin
+     gücü, en zayıf halkasından fazla olamaz. */
+  const AUTH_ORDER = ['steer', 'limited_steer', 'inform', 'observe_only'];
+
+  function stepDown(authorityId, steps){
+    const i = AUTH_ORDER.indexOf(authorityId);
+    if(i < 0) return 'observe_only';
+    return AUTH_ORDER[Math.min(AUTH_ORDER.length - 1, i + Math.max(0, steps))];
+  }
+
+  /* «Yerel» eksen, GENELLENEBILIRLIGI olcer; bu kullaniciya UYGUNLUGU
+     degil. Kullanicinin KENDI verisinden gelen bir esik baskasiyla
+     karsilastirilamaz — ama tam da bu kullanici icin en uygun olandir.
+     Bu yuzden kendi veri kaynaklarinda «yerel» bir zayiflik sayilmaz;
+     onun zayifligi varsa kesinlik ekseninde yazilir.
+     SPI'de bugun kullanicinin kendi verisini temsil eden bir kaynak turu
+     YOK; eklendigi gun bu listeye yazilmalidir, yoksa kullanicinin kendi
+     cihazindan gelen esik haksiz yere bir basamak iner. */
+  const SELF_SOURCES = [];
+
+  /* Kaç basamak inilecek ve NİÇİN. Sebepler kullanıcıya gösterilir:
+     sessizce zayıflatmak, yanıltmanın başka bir biçimidir. */
+  function downgrades(r){
+    const out = [];
+    if(r.certainty === 'low'){
+      out.push({ axis:'certainty', reason:'Kesinlik düşük.' });
+    } else if(r.certainty === 'unknown'){
+      out.push({ axis:'certainty', reason:'Kesinlik değerlendirilmemiş.' });
+    }
+    if(r.applicability === 'indirect'){
+      out.push({ axis:'applicability',
+        reason:'Eşik bu kullanıcıya dolaylı uyuyor; popülasyona göre kayabilir.' });
+    } else if(r.applicability === 'local' && SELF_SOURCES.indexOf(r.source) < 0){
+      out.push({ axis:'applicability',
+        reason:'Eşik kişiye/cihaza özel; genel bir karar eşiği değil.' });
+    }
+    return out;
+  }
+
+  /* Etkin yetki — dört eksenin birlikte sonucu. */
+  function effective(r){
+    if(!r) return { authority:'observe_only', capped:true, steps:0, reasons:[],
+      info:SP.AUTHORITY_BY_ID.observe_only };
+    const inis = downgrades(r);
+    const id = stepDown(r.authority, inis.length);
+    return {
+      authority:id, ceiling:r.authority, steps:inis.length,
+      reasons:inis, capped:id !== r.authority,
+      info:SP.AUTHORITY_BY_ID[id] || SP.AUTHORITY_BY_ID.observe_only,
+    };
+  }
+
+  /* Bu esik bir DIREKTIF uretebilir mi? ETKIN yetki karar verir. */
   function mayDirect(markerId, field){
-    const a = authorityOf(markerId, field);
-    return !!(a && a.mayDirect);
+    const e = effective(of(markerId, field));
+    return !!(e.info && e.info.mayDirect);
   }
 
   /* Bu esikten cikan bir hedef degisikliginin ust siniri.
-     null = sinir yok. Kaynagi olmayan esikte en dar tavan uygulanir. */
+     null = sinir yok. Etkin yetkiden okunur. */
   function cap(markerId, field){
-    const a = authorityOf(markerId, field);
-    if(!a) return SP.AUTHORITY_BY_ID.observe_only.cap;
-    return a.cap;
+    const e = effective(of(markerId, field));
+    return e.info ? e.info.cap : SP.AUTHORITY_BY_ID.observe_only.cap;
   }
+
+  function effectiveOf(markerId, field){ return effective(of(markerId, field)); }
 
   /* Kullaniciya gosterilecek satir — dort eksen birden. */
   function line(markerId, field){
     const r = of(markerId, field);
+    const etkin = effective(r);
     if(!r){
       return { source:null, label:'kaynak yok', tone:'warn', mayDirect:false,
         certainty:'unknown', applicability:null, authority:'observe_only',
@@ -10116,14 +10297,17 @@ SP.Ev = (function(){
     }
     return {
       source:r.source, label:(r.sourceInfo || {}).label || r.source,
-      tone:(r.authorityInfo || {}).tone || 'info',
-      mayDirect:!!(r.authorityInfo || {}).mayDirect,
+      tone:(etkin.info || {}).tone || 'info',
+      mayDirect:!!(etkin.info || {}).mayDirect,
       certainty:r.certainty,
       certaintyLabel:(r.certaintyInfo || {}).label || r.certainty,
       applicability:r.applicability,
       applicabilityLabel:(r.applicabilityInfo || {}).label || r.applicability,
-      authority:r.authority,
-      authorityLabel:(r.authorityInfo || {}).label || r.authority,
+      authority:etkin.authority,
+      authorityLabel:(etkin.info || {}).label || etkin.authority,
+      authorityCeiling:r.authority,
+      authorityCapped:etkin.capped,
+      authorityReasons:etkin.reasons.map(function(x){ return x.reason; }),
       citation:r.citation, year:r.year, population:r.population,
       text:r.citation + (r.year ? ' (' + r.year + ')' : '')
         + (r.population ? ' · ' + r.population : ''),
@@ -10139,7 +10323,8 @@ SP.Ev = (function(){
      bicimidir. */
   function temper(markerId, field, strength){
     const r = of(markerId, field);
-    const a = r ? r.authorityInfo : null;
+    const etkin = effective(r);
+    const a = etkin.info;
     const izin = !!(a && a.mayDirect);
     if(strength === 'observe' || izin){
       return { strength:strength, downgraded:false,
@@ -10153,7 +10338,12 @@ SP.Ev = (function(){
       why:r
         ? 'Bu eşik «' + (r.sourceInfo || {}).label + '» kaynağından geliyor ve '
           + 'SPİ yetki politikasında «' + (a || {}).label + '» sayılıyor: '
-          + (a || {}).note + ' Bu yüzden burada yönlendirme değil gözlem bildirilir.'
+          + (a || {}).note
+          + (etkin.capped
+              ? ' Yetki tavandan indirildi — ' + etkin.reasons.map(function(x){
+                  return x.reason; }).join(' ')
+              : '')
+          + ' Bu yüzden burada yönlendirme değil gözlem bildirilir.'
         : 'Bu eşiğin kaynağı yazılmamış; kaynağı bilinmeyen bir eşikten '
           + 'yönlendirme çıkmaz.',
     };
@@ -10202,10 +10392,10 @@ SP.Ev = (function(){
       if(!r){
         sorunlar.push({ marker:b.id, name:b.name, kind:'no-source',
           note:'Kırmızı bayrak eşiğinin kaynağı yazılmamış.' });
-      } else if(!(r.authorityInfo || {}).mayDirect){
+      } else if(!(effective(r).info || {}).mayDirect){
         sorunlar.push({ marker:b.id, name:b.name, kind:'no-authority',
-          authority:r.authority,
-          note:'Kırmızı bayrak «' + (r.authorityInfo || {}).label
+          authority:effective(r).authority,
+          note:'Kırmızı bayrak «' + (effective(r).info || {}).label
              + '» yetkisine dayanıyor; yönlendirme için yetersiz.' });
       }
     });
@@ -10227,8 +10417,8 @@ SP.Ev = (function(){
   /* Yetki politikasi — arayuzde gosterilmek uzere. */
   function policy(){ return SP.EVIDENCE_POLICY; }
 
-  return { of, resolve, gradeOf, authorityOf, mayDirect, cap, line, temper,
-    coverage, audit, disputed, policy,
+  return { of, resolve, gradeOf, authorityOf, effectiveOf, mayDirect, cap,
+    line, temper, coverage, audit, disputed, policy,
     SOURCES:SP.EVIDENCE_SOURCES, AUTHORITY:SP.EVIDENCE_AUTHORITY,
     GRADES:SP.EVIDENCE_GRADES };
 })();
@@ -10438,6 +10628,16 @@ SP.Friction = (function(){
    Kendini surekli olduğundan iyi hisseden biri ile kotu hisseden biri
    ayni ortalama hataya sahip olabilir ama bambaska seyler yapmalidir.
 
+   BU DEFTERİN ÖLÇEMEDİĞİ ŞEY:
+
+   Defter, «kendini tanıma»yı ölçmez. Ölçtüğü şey dardır ve dar olduğu
+   söylenmelidir: KAYIT ALTINDAKİ BİRKAÇ TÜRDE, kör yazılmış tahminlerin
+   aynı türdeki kayıtlı sayıya ne kadar yaklaştığı. Bunun dışında kalan
+   her şey — neyi neden yaptığın, bir günün nasıl geçtiği, tahmin
+   etmediğin alanlar — bu defterde görünmez. İyi bir kalibrasyon, iyi bir
+   karar vermek demek değildir; tahmin edilen sayıyı tahmin edebilmek
+   demektir. Bu bir üstbiliş SİNYALİDİR, bir özbilgi ÖLÇÜSÜ değil.
+
    Dort kural degismez:
 
    1. TAHMIN KOR OLMAK ZORUNDADIR. Deger ekranda dururken yazilan tahmin,
@@ -10461,22 +10661,22 @@ SP.Calib = (function(){
   const PENCERE = 20;
 
   SP.CALIB_KINDS = [
-    { id:'lab-value', type:'number', unit:'',
+    { id:'lab-value', type:'number', unit:'', err:'ape',
       label:'Tahlil değerin',
       ask:'Sonucu açmadan önce: bu değer kaç çıkacak?' },
-    { id:'weight', type:'number', unit:'kg',
+    { id:'weight', type:'number', unit:'kg', err:'abs', bands:[0.5, 1.5, 3],
       label:'Tartı',
       ask:'Tartıya çıkmadan önce: kaç geleceğini tahmin ediyorsun?' },
-    { id:'readiness', type:'number', unit:'puan',
+    { id:'readiness', type:'number', unit:'puan', err:'abs', bands:[7, 15, 30],
       label:'Toparlanma skorun',
       ask:'Ölçümleri girmeden önce: bugünkü toparlanman 100 üzerinden kaç?' },
-    { id:'sleep', type:'number', unit:'saat',
+    { id:'sleep', type:'number', unit:'saat', err:'abs', bands:[0.5, 1, 2],
       label:'Uyku süren',
       ask:'Kaydına bakmadan: dün gece kaç saat uyudun?' },
-    { id:'protein', type:'number', unit:'g',
+    { id:'protein', type:'number', unit:'g', err:'ape',
       label:'Günlük proteinin',
       ask:'Hesabı görmeden: bugün kaç gram protein aldın?' },
-    { id:'flag', type:'binary', unit:'',
+    { id:'flag', type:'binary', unit:'', err:'brier',
       label:'Kırmızı bayrak',
       ask:'Bu tahlilde kırmızı bayrak çıkma olasılığı nedir?' },
   ];
@@ -10549,54 +10749,122 @@ SP.Calib = (function(){
     return { ok:true };
   }
 
-  /* Tek tahminin hatası.
+  /* ------------------------------------------------------- HATA AİLELERİ
 
-     Payda GERÇEK DEĞERDİR ama en az 1 alınır: ferritin 10'u 20 tahmin
-     etmek, 200'ü 210 tahmin etmekten çok daha büyük bir sapmadır ve bu
-     fark korunmalıdır. */
+     Tek bir hata ölçüsü her değişkene uymaz. İlk sürümde her sayısal
+     tahmin aynı bağıl hatayla (APE) ölçülüyordu; bu, sıfıra yakın
+     değerlerde anlamsızca büyür: 7 saatlik uykuyu 8 tahmin etmek ile 2
+     saatlik uykuyu 3 tahmin etmek aynı 1 saatlik sapmadır; bağıl hata
+     ikincisini beş kat büyük gösteriyordu.
+
+     Bu yüzden artık her tahmin türü, hangi ölçüyle değerlendirileceğini
+     kendisi söyler:
+
+       ape   — oranı anlamlı, sıfırdan uzak, üstten sınırsız büyüklükler
+               (dakika, gram, tahlil değeri): |t − g| / en az(|g|, 1)
+       abs   — kendi biriminde sapma anlamlı, sıfıra yakın değer olağan
+               (net, puan, saat, oturum): |t − g|, kendi bantlarıyla
+       brier — olasılık tahmini: (p − sonuç)²
+
+     `bands` bir bulgu DEĞİL bir SEÇİMDİR: bu yazılımın o birimde neyi
+     «keskin», «makul», «dağınık» saydığı. Kaynağı sistem ayarıdır.
+     Aileler birbiriyle ortalanmaz — dakikadaki yüzde ile kilodaki sapma
+     aynı ölçek değildir. Karşılaştırılabilir olan tek şey BANTTIR. */
+  const BANDS = ['keskin', 'makul', 'dağınık', 'uzak'];
+  const APE_BANDS = [0.10, 0.25, 0.50];
+  const BRIER_BANDS = [0.05, 0.15, 0.30];
+
+  function errKind(k){
+    if(!k) return null;
+    return k.err || (k.type === 'binary' ? 'brier' : 'ape');
+  }
+
+  /* Bu türün «makul» bandı — yanlılığı ortak ölçeğe çevirmek için. */
+  function makul(k){
+    const tur = errKind(k);
+    if(tur === 'abs') return (k.bands || [1, 1])[1];
+    if(tur === 'brier') return BRIER_BANDS[1];
+    return APE_BANDS[1];
+  }
+
   function error(f){
     const k = kindOf(f.kind);
     if(!k || f.actual == null) return null;
-    if(k.type === 'binary'){
+    const tur = errKind(k);
+    if(tur === 'brier'){
       const sonuc = f.actual >= 0.5 ? 1 : 0;
-      return { type:'brier', value:Math.pow(f.guess - sonuc, 2) };
+      return { type:'brier', value:Math.pow(f.guess - sonuc, 2), unit:'' };
     }
-    return { type:'ape',
+    if(tur === 'abs'){
+      return { type:'abs', value:Math.abs(f.guess - f.actual), unit:k.unit || '' };
+    }
+    return { type:'ape', unit:'',
       value:Math.abs(f.guess - f.actual) / Math.max(Math.abs(f.actual), 1) };
   }
 
-  /* Yanlılık: sistemli olarak fazla mı tahmin ediyor, az mı?
-
-     Hatanın büyüklüğünden AYRI bir bulgudur. Kendini sürekli abartan aday
-     ile rastgele sapan aday aynı ortalama hataya sahip olabilir ama
-     farklı şeyler yapmaları gerekir. */
-  function bias(kindId){
-    const kayitlar = settled().filter(f => !kindId || f.kind === kindId)
-      .filter(f => (kindOf(f.kind) || {}).type === 'number')
-      .slice(0, PENCERE);
-    if(kayitlar.length < ASGARI){
-      return { cert:'missing', n:kayitlar.length, value:null,
-        note:'Yanlılık için en az ' + ASGARI + ' kapanmış sayısal tahmin gerekir.' };
-    }
-    const v = kayitlar.reduce((a, f) =>
-      a + (f.guess - f.actual) / Math.max(Math.abs(f.actual), 1), 0) / kayitlar.length;
-    return { cert:'measured', n:kayitlar.length, value:v,
-      direction:v > 0.05 ? 'over' : v < -0.05 ? 'under' : 'even',
-      note:v > 0.05
-        ? 'Değerlerini olduğundan yüksek tahmin etme eğilimindesin. Bu bir '
-          + 'sağlık yargısı değil, bir okuma alışkanlığı bulgusudur.'
-        : v < -0.05
-        ? 'Değerlerini olduğundan düşük tahmin etme eğilimindesin. Kendini '
-          + 'olduğundan kötü okumak da bir sapmadır.'
-        : 'Sistemli bir yanlılık görünmüyor.' };
+  /* Bir tahminin bandı (0 keskin … 3 uzak). Türü ne olursa olsun aynı
+     dört basamak: aileler ortalanamaz ama bantlar karşılaştırılabilir. */
+  function bandOf(f){
+    const k = kindOf(f.kind);
+    const e = error(f);
+    if(!k || !e) return null;
+    const esik = e.type === 'abs' ? (k.bands || [1, 2, 4])
+      : e.type === 'brier' ? BRIER_BANDS : APE_BANDS;
+    return e.value <= esik[0] ? 0 : e.value <= esik[1] ? 1
+      : e.value <= esik[2] ? 2 : 3;
   }
 
+  function ondalik(v){
+    return (Math.round(v * 10) / 10).toFixed(1).replace('.', ',');
+  }
+
+
+    /* Yanlılık: sistemli olarak fazla mı tahmin ediyor, az mı?
+
+     Hatanın büyüklüğünden AYRI bir bulgudur: rastgele sapan biriyle
+     sistemli olarak kendini abartan biri aynı ortalama hataya sahip
+     olabilir ama farklı şeyler yapmaları gerekir.
+
+     Her kayıt KENDİ «makul» bandına bölünür; böylece farklı birimler
+     tek ölçeğe gelir. Değerin birimi bu yüzden BANTTIR, yüzde değil. */
+  function bias(kindId){
+    const kayitlar = settled().filter(f => !kindId || f.kind === kindId)
+      .filter(f => errKind(kindOf(f.kind)) !== 'brier')
+      .slice(0, PENCERE);
+    if(kayitlar.length < ASGARI){
+      return { cert:'missing', n:kayitlar.length, value:null, unit:'bant',
+        note:'Yanlılık için en az ' + ASGARI + ' kapanmış sayısal tahmin gerekir.' };
+    }
+    const v = kayitlar.reduce((a, f) => {
+      const k = kindOf(f.kind);
+      const d = f.guess - f.actual;
+      const ham = errKind(k) === 'abs' ? d : d / Math.max(Math.abs(f.actual), 1);
+      return a + ham / makul(k);
+    }, 0) / kayitlar.length;
+    const ESIK = 0.25;
+    return { cert:'measured', n:kayitlar.length, value:v, unit:'bant',
+      direction:v > ESIK ? 'over' : v < -ESIK ? 'under' : 'even',
+      note:(v > ESIK ? 'Değerlerini olduğundan yüksek tahmin etme eğilimindesin. Bu bir sağlık yargısı değil, bir okuma alışkanlığı bulgusudur.'
+        : v < -ESIK ? 'Değerlerini olduğundan düşük tahmin etme eğilimindesin. Kendini olduğundan kötü okumak da bir sapmadır.'
+        : 'Sistemli bir yanlılık görünmüyor.')
+        + (Math.abs(v) > ESIK
+           ? ' Ortalama sapman, kendi «makul» bandının '
+             + ondalik(Math.abs(v)) + ' katı kadar tek yöne kayıyor.'
+           : '') };
+  }
+
+
+  /* Kalibrasyon puanı: son PENCERE kapanmış tahmin.
+
+     Aileler ayrı ayrı raporlanır, tür bazında da ayrı: net ile dakika
+     tek bir ortalamada toplanmaz. Genel derece bantların ORTANCASIDIR
+     — tek bir kötü tahmin bütün defteri boyamaz. Eşikler açıkça
+     seçilmiş sınırlardır ve puan KİŞİYE değil TAHMİNLERE aittir. */
   function score(){
     const hepsi = settled().slice(0, PENCERE);
-    const sayisal = hepsi.filter(f => (kindOf(f.kind) || {}).type === 'number');
-    const ikili = hepsi.filter(f => (kindOf(f.kind) || {}).type === 'binary');
     const out = { n:hepsi.length, open:openList().length, cert:'missing',
-      ape:null, brier:null, grade:null, bias:bias() };
+      ape:null, brier:null, abs:null, byKind:{}, band:null, grade:null,
+      bias:bias() };
 
     if(hepsi.length < ASGARI){
       out.note = 'Kapanmış ' + hepsi.length + ' tahmin var; puan için '
@@ -10604,25 +10872,43 @@ SP.Calib = (function(){
       return out;
     }
     out.cert = 'measured';
-    if(sayisal.length){
-      out.ape = sayisal.reduce((a, f) => a + error(f).value, 0) / sayisal.length;
+
+    const aile = {};
+    hepsi.forEach(f => {
+      const e = error(f);
+      if(!e) return;
+      (aile[e.type] = aile[e.type] || []).push(e.value);
+      const k = kindOf(f.kind);
+      const g = out.byKind[f.kind] || (out.byKind[f.kind] = {
+        kind:f.kind, label:k.label, unit:e.unit, type:e.type,
+        n:0, total:0, mean:null });
+      g.n++; g.total += e.value; g.mean = g.total / g.n;
+    });
+    const ort = a => a.reduce((x, y) => x + y, 0) / a.length;
+    if(aile.ape) out.ape = ort(aile.ape);
+    if(aile.brier) out.brier = ort(aile.brier);
+    if(aile.abs) out.abs = { n:aile.abs.length };
+
+    const bantlar = hepsi.map(bandOf).filter(b => b != null).sort((a, b) => a - b);
+    if(bantlar.length){
+      out.band = bantlar[Math.floor((bantlar.length - 1) / 2)];
+      out.grade = BANDS[out.band];
     }
-    if(ikili.length){
-      out.brier = ikili.reduce((a, f) => a + error(f).value, 0) / ikili.length;
-    }
-    if(out.ape != null){
-      out.grade = out.ape <= 0.10 ? 'keskin'
-        : out.ape <= 0.25 ? 'makul'
-        : out.ape <= 0.50 ? 'dağınık' : 'uzak';
-      out.note = 'Son ' + sayisal.length + ' sayısal tahminin ortalama sapması %'
-        + Math.round(out.ape * 100) + '.';
-    } else {
-      out.note = 'Son ' + ikili.length + ' ikili tahminin Brier puanı '
-        + (out.brier == null ? '—' : out.brier.toFixed(2))
-        + ' (0 kusursuz, 0,25 yazı-tura).';
-    }
+
+    const parca = Object.keys(out.byKind).map(id => {
+      const g = out.byKind[id];
+      return g.label + ': ' + (g.type === 'ape'
+        ? '%' + Math.round(g.mean * 100) + ' sapma'
+        : g.type === 'brier'
+        ? 'Brier ' + ondalik(g.mean)
+        : ondalik(g.mean) + (g.unit ? ' ' + g.unit : '') + ' sapma');
+    });
+    out.note = 'Son ' + hepsi.length + ' kapanmış tahmin — ' + parca.join(' · ')
+      + '. Ortanca bant: ' + (out.grade || '—') + '. Farklı birimler tek '
+      + 'ortalamada toplanmaz; karşılaştırılan şey banttır.';
     return out;
   }
+
 
   function due(){
     const t = U.todayISO();
@@ -10640,7 +10926,7 @@ SP.Calib = (function(){
   }
 
   return { open, settle, remove, load, norm, list, settled, openList, due,
-    error, bias, score, kindOf, forLab, ASGARI, PENCERE };
+    error, bandOf, errKind, bias, score, kindOf, forLab, ASGARI, PENCERE };
 })();
 
 /* ==== js/core/goodhart.js ==== */
@@ -10668,9 +10954,56 @@ window.SP = window.SP || {};
 SP.Goodhart = (function(){
   const U = SP.U, S = SP.S;
 
-  const PENCERE = 56;
-  const CABA_ARTIS = 0.35;
-  const SONUC_DURGUN = 0.05;
+  /* ------------------------------------------------- POLITIKA PARAMETRELERI
+
+     Bu uc sayi bir BULGU DEGILDIR; bu yazilimin secimidir. Nicin 56 gun?
+     Nicin %35? Cevap "gurultuyu azaltmak icin" — ve bu bir gerekcedir,
+     bir kanit degil. Kanit katmanindaki (core/evidence.js) ayni dilin
+     burada da kullanilmasi kasitlidir: sayilari gizli "dogru esik" gibi
+     sunmak, tasarim tercihini bulgu gibi gostermek olurdu.
+
+     SPI'nin sayilari AYS ve ESP'dekinden MUHAFAZAKARDIR cunku saglik
+     verisi daha gurultuludur. Bu da bir secimdir. */
+  const POLICY = {
+    version:1,
+    status:'system_tuning',
+    windowDays:56,
+    effortRiseThreshold:0.35,
+    stagnationThreshold:0.05,
+    rationale:'Kilo, tansiyon, HRV ve laboratuvar değerleri kısa vadede çok '
+      + 'dalgalanır. İki 28 günlük pencereyi karşılaştırmak, gürültüyü bulgu '
+      + 'sanmaktır; bu yüzden pencere iki katına çıkarıldı ve çaba artışının '
+      + '«belirgin» sayılması için gereken eşik yükseltildi. Başka sayılar da '
+      + 'savunulabilirdi.',
+    note:'Bu parametreler bilimsel bir eşik değil, bu yazılımın ayarıdır.',
+  };
+
+  const PENCERE = POLICY.windowDays;
+  const CABA_ARTIS = POLICY.effortRiseThreshold;
+  const SONUC_DURGUN = POLICY.stagnationThreshold;
+
+  /* ---------------------------------------------------- YON SEMANTIGI
+
+     Her sonuc olcusunun IYI YONU acikca yazilir. Bunu yazmamak, sessiz
+     bir hata uretir: "daha cok antrenman yaptin, toparlanman DUSTU ama
+     gosterge hala bir seyi temsil ediyor" gibi savunulamaz bir cumle.
+
+       higher_better   buyudukce iyi (protein hedefi tutturulan gun orani)
+       lower_better    kucukduikce iyi (hata orani, istirahat nabzi)
+       movement_only   yonu SISTEM BILMEZ; yalnizca hareket olup olmadigina
+                       bakilir (kilo — hedefin ne oldugunu sistem bilmiyor)
+
+     Ucuncu deger bir kacamak degil bir DURUSTLUK aracidir: sistemin
+     bilmedigi bir hedefe yon atfetmesi, olculmemis bir seyi olculmus
+     gostermek olurdu. */
+  const DIRECTIONS = {
+    higher_better:{ id:'higher_better', label:'yükselmesi iyi',
+      improvement:function(d){ return d; } },
+    lower_better:{ id:'lower_better', label:'düşmesi iyi',
+      improvement:function(d){ return d == null ? null : -d; } },
+    movement_only:{ id:'movement_only', label:'yönü sistem bilmez',
+      improvement:function(d){ return d == null ? null : Math.abs(d); } },
+  };
 
   function iso(n){ return U.iso(U.addDays(U.parse(U.todayISO()), n)); }
 
@@ -10742,20 +11075,20 @@ SP.Goodhart = (function(){
   /* -------------------------------------------------------------- ciftler */
 
   const PAIRS = [
-    { id:'logging-vs-protein',
+    { id:'logging-vs-protein', direction:'higher_better',
       effortLabel:'öğün kaydedilen gün', outcomeLabel:'protein hedefine ulaşılan gün oranı',
       question:'Daha çok gün kayıt tutuyorsun ama hedefe ulaşılan gün oranı '
              + 'yerinde. Kayıt tutmak ile yemeği değiştirmek aynı şey mi oldu?',
       effort:loggedDays, outcome:proteinHitRate, minEffort:20 },
 
-    { id:'training-vs-readiness',
+    { id:'training-vs-readiness', direction:'higher_better',
       effortLabel:'antrenman dakikası', outcomeLabel:'toparlanma skoru',
       question:'Antrenman süresi arttı, toparlanma skoru yerinde ya da '
              + 'geriledi. Yük artışı taşınabiliyor mu, yoksa uyku ve '
              + 'beslenme mi geride kaldı?',
       effort:trainingMinutes, outcome:readinessAvg, minEffort:400 },
 
-    { id:'weighins-vs-weight',
+    { id:'weighins-vs-weight', direction:'movement_only',
       effortLabel:'tartılan gün', outcomeLabel:'kilo yönü',
       /* Kilo YONU hedefe gore degerlendirilemez: hedefin ne oldugunu
          sistem bilmez. Bu yuzden yalnizca DEGISIM olculur ve degismemek
@@ -10767,7 +11100,7 @@ SP.Goodhart = (function(){
       }).length,
       outcome:w => markerMedian('weight', w), minEffort:20 },
 
-    { id:'supplements-vs-marker',
+    { id:'supplements-vs-marker', direction:'higher_better',
       effortLabel:'takviye kaydı', outcomeLabel:'D vitamini düzeyi',
       question:'Takviye kaydı arttı ama ölçülen düzey yerinde. Emilim '
              + 'koşulları (yağlı öğünle eşleştirme) sağlanıyor mu?',
@@ -10793,6 +11126,9 @@ SP.Goodhart = (function(){
 
     const base = { id:def.id, effortLabel:def.effortLabel,
       outcomeLabel:def.outcomeLabel, question:def.question,
+      /* Yon her satirda durur: «tanimsiz» ile «olculmedi» ayri seylerdir
+         ve arayuz ikisini ayirt edebilmeli. */
+      direction:def.direction || null,
       effort:{ prev:eC, now:yC }, outcome:{ prev:eS, now:yS } };
 
     if(eS == null || yS == null){
@@ -10807,21 +11143,42 @@ SP.Goodhart = (function(){
     }
     const dC = oran(yC, eC);
     const dS = oran(yS, eS);
+
+    /* Yon olmadan "sonuc iyilesti mi" sorusu cevaplanamaz. Tanimsiz
+       birakilmis bir cift, sessizce "yukselmesi iyi" sayilmaz — bu bir
+       varsayim olurdu; acikca hata verir. */
+    const yon = DIRECTIONS[def.direction || ''];
+    if(!yon){
+      return Object.assign(base, { status:'unknown', cert:'missing',
+        note:'Bu çiftin yön tanımı yok; sonucun hangi yönde iyi olduğu '
+           + 'bilinmeden ayrışma değerlendirilemez.' });
+    }
+    const iyilesme = yon.improvement(dS);
+
     if(dC == null || dC < CABA_ARTIS){
       return Object.assign(base, { status:'idle', cert:'measured',
-        effortChange:dC, outcomeChange:dS,
+        direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
         note:'Çaba belirgin biçimde artmamış; nöbetçi burada bir şey aramaz.' });
     }
-    if(dS != null && Math.abs(dS) > SONUC_DURGUN){
+    if(iyilesme != null && iyilesme > SONUC_DURGUN){
       return Object.assign(base, { status:'aligned', cert:'measured',
-        effortChange:dC, outcomeChange:dS,
-        note:'Çaba arttı, sonuç da hareket etti. Gösterge hâlâ bir şeyi '
-           + 'temsil ediyor — yönü senin hedefine göre sen değerlendir.' });
+        direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
+        note:yon.id === 'movement_only'
+          ? 'Çaba arttı, sonuç da hareket etti. Hareketin YÖNÜ bu sistemin '
+            + 'bileceği bir şey değil — hedefini sen biliyorsun.'
+          : 'Çaba da sonuç da doğru yönde arttı. Gösterge hâlâ bir şeyi '
+            + 'temsil ediyor.' });
     }
+    /* Sonuc TERS yone gittiyse bu "yerinde saymak" degildir ve oyle
+       yazilmaz. Once bunu ayirmak, uyarinin dogru cumleyi kurmasini saglar. */
+    const geriledi = iyilesme != null && iyilesme < -SONUC_DURGUN;
     return Object.assign(base, { status:'decoupled', cert:'measured',
-      effortChange:dC, outcomeChange:dS,
+      direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
+      regressed:geriledi,
       note:def.effortLabel + ' %' + Math.round(dC * 100) + ' arttı, '
-         + def.outcomeLabel + ' yerinde saydı.' });
+         + def.outcomeLabel + (geriledi
+            ? ' %' + Math.round(Math.abs(iyilesme) * 100) + ' GERİLEDİ.'
+            : ' yerinde saydı.') });
   }
 
   function scan(){ return PAIRS.map(pair); }
@@ -10835,7 +11192,9 @@ SP.Goodhart = (function(){
       body:f[0].note + ' ' + f[0].question, flags:f };
   }
 
-  return { PAIRS, windows, pair, scan, flags, brief,
+  function policy(){ return POLICY; }
+
+  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS,
     PENCERE, CABA_ARTIS, SONUC_DURGUN };
 })();
 
@@ -11395,6 +11754,688 @@ SP.Storage = (function(){
 
   return { load, sample, breakdown, growth, horizon, prunable, prune, verdict,
     fmtBytes, BUDANABILIR, ICERIK, UFUK_GUN, ORNEK_LIMIT };
+})();
+
+/* ==== js/core/beacon.js ==== */
+/* HKM işareti (beacon) — «varsa gönder», asla bekletme.
+
+   SPİ HKM'nin var olduğunu BİLMEZ. Bu dosya o kuralın tek istisnası
+   ve istisnanın sınırları burada yazılı:
+
+   1. HİÇBİR ÇİZİMDE ÇALIŞMAZ. Gönderim yalnızca kullanıcının açıkça
+      istediği anda ya da gün kapanışında tetiklenir; bir ekranın açılması
+      ağ trafiği doğurmaz.
+
+   2. HİÇBİR KAYDI BLOKLAMAZ. Gönderim ateşle-ve-unut'tur; hata yakalanır
+      ve yutulur. HKM kapalıyken, yavaşken ya da yokken SPİ arayüzünde
+      bekleme, hata ya da bozulma OLMAZ.
+
+   3. ETİKETSİZ SAYI GÖNDERİLMEZ. Her metrik alanı dört kesinlik
+      etiketinden birini taşır. Sözleşmeyi bu taraf da denetler: HKM'nin
+      422 döndürmesini beklemek yerine, hatalı gövde hiç yola çıkmaz.
+
+   4. VARSAYILAN KAPALIDIR. Açmak bilinçli bir karardır; adres, jeton ve
+      gönderilen alanların tamamı kullanıcıya gösterilir.
+
+   5. AÇIK METİN JETON AĞA ÇIKMAZ. Yerel olmayan bir adrese düz `http` ile
+      gönderim reddedilir — jeton ağda açık gider. Yerel adres (127.0.0.1,
+      localhost) ya da `https` şarttır.
+
+   Bu katman bir senkronizasyon değil bir İŞARETTİR: tek yön, en iyi çaba,
+   geri dönüşü yok sayılabilir. SPİ'in verisi SPİ'te kalır; HKM'ye giden
+   şey günün ÖZETİDİR. */
+
+window.SP = window.SP || {};
+
+SP.Beacon = (function(){
+  const U = SP.U;
+  const S = SP.S;
+
+  const MODULE = 'spi';
+  const CONTRACT = 1;              // gövde sürümü — HKM tarafıyla ortak
+  const ASGARI_ARA_DK = 15;        // aynı gün içinde en sık bu kadar
+
+  const VARSAYILAN = {
+    enabled:false,
+    url:'http://127.0.0.1:4200',
+    token:'',
+    intervalMinutes:60,
+    level:'ozet',            // ozet | gelismis
+    lastAt:null,                   // son DENEME
+    lastOkAt:null,                 // son BAŞARILI gönderim
+    lastStatus:null,               // 202 | 422 | 401 | 0 (ulaşılamadı)
+    lastNote:'',
+  };
+
+  /* Yüklenmeden önce her şey KAPALIDIR. Bir ayar dosyası okunamadığında
+     «varsayılan açık» davranmak, kullanıcının seçmediği bir şeyi yapmaktır. */
+  let AYAR = null;
+  let DEFTER = null;   // teklif defteri (asagida)
+
+  function settings(){ return Object.assign({}, VARSAYILAN, AYAR || {}); }
+
+  async function load(){
+    try{ AYAR = (await SP.Store.get('hkm')) || {}; }
+    catch(e){ AYAR = {}; }
+    /* Teklif defterinin bellekteki kopyasi da tazelenir: ambar
+       degistiginde (acilis, hesap degisimi) eski kopyayla devam etmek,
+       cevaplanmis bir teklifi cevapsiz sanmak olurdu. */
+    DEFTER = null;
+    return settings();
+  }
+
+  async function save(patch){
+    AYAR = Object.assign({}, settings(), patch || {});
+    await SP.Store.set('hkm', AYAR);
+    return settings();
+  }
+
+
+  /* --------------------------------------------------------- kapsam seviyesi
+
+     Ilk surum gunde birkac sayi goruyordu; bu, «bu haftayi analiz et» gibi
+     sorulari cevaplanamaz kiliyordu. Cozum gonderimi genisletmek ama
+     GENISLIGI KULLANICININ SECMESI:
+
+       ozet      — yuk kararini etkileyen cekirdek olcumler (VARSAYILAN)
+       gelismis  — bolum bazinda ilerleme de gider
+
+     Iki seviyede de giden sey SAYIDIR: icerik hicbir seviyede gitmez.
+     Seviye degistirmek yeni bir izin ister gibi davranir: ne gonderilecegi
+     yine satir satir gosterilir. */
+  const LEVELS = [
+    { id:'ozet', label:'Özet',
+      note:'Yalnız yük kararını etkileyen çekirdek ölçümler.' },
+    { id:'gelismis', label:'Gelişmiş',
+      note:'Bölüm bazında ilerleme de gider — hâlâ yalnız sayı.' },
+  ];
+
+  function levelOf(){
+    const id = settings().level;
+    return LEVELS.some(function(l){ return l.id === id; }) ? id : 'ozet';
+  }
+
+  /* Gecmis bir gun icin GERIYE DONUK hesaplanamayan alanlar gonderilmez:
+     bugunku degeri dunun tarihiyle yollamak, ambara sahte bir olcum
+     yazmaktir. */
+  function gecmisMi(dateISO){ return String(dateISO) !== U.todayISO(); }
+
+  /* ----------------------------------------------------------- sözleşme
+
+     Yerel kesinlik sözlüğü ile HKM'ninki birebir aynı DEĞİL: bu depoda
+     hesaplanmış değerler yer yer «derived» diye etiketlenir. Eşleme
+     AÇIK yazılır; bilinmeyen bir etiket sessizce «measured» sayılmaz,
+     gövdeyi reddeder. */
+  const CERT_MAP = {
+    measured:'measured',
+    estimated:'estimated',
+    computed:'computed',
+    derived:'computed',
+    missing:'missing',
+  };
+  const CERTS = ['measured', 'estimated', 'computed', 'missing'];
+
+  function metric(value, cert){
+    const c = CERT_MAP[cert] || null;
+    if(!c) return { value:null, cert:null, raw:cert };
+    if(c === 'missing' || value == null || !isFinite(Number(value))){
+      return { value:null, cert:'missing' };
+    }
+    return { value:Number(value), cert:c };
+  }
+
+  /* Eksik veri SIFIR DEĞİLDİR: değeri olmayan alan «missing» gider,
+     0 değil. Bu kural gövdenin tek satırında bile bozulmamalı. */
+  function contract(body){
+    const hata = [];
+    if(!body || typeof body !== 'object') return ['gövde yok'];
+    if(body.module !== MODULE) hata.push('modül adı yanlış');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(body.date || ''))) hata.push('tarih ISO değil');
+    const m = body.metrics;
+    if(!m || typeof m !== 'object' || !Object.keys(m).length){
+      hata.push('metrik yok');
+      return hata;
+    }
+    Object.keys(m).forEach(function(k){
+      const x = m[k];
+      if(!x || typeof x !== 'object' || !x.cert){ hata.push(k + ': etiket yok'); return; }
+      if(CERTS.indexOf(x.cert) < 0){ hata.push(k + ': geçersiz etiket ' + x.cert); return; }
+      if(x.cert !== 'missing' && typeof x.value !== 'number'){
+        hata.push(k + ': ' + x.cert + ' etiketli alanda sayı yok');
+      }
+      if(x.cert === 'missing' && x.value != null){
+        hata.push(k + ': veri yok etiketiyle değer gönderilemez');
+      }
+    });
+    return hata;
+  }
+
+  /* ------------------------------------------------------------ toplama
+
+     Gönderilen şey GÜNÜN ÖZETİDİR: tahlil değeri, ilaç adı, semptom kaydı
+     ya da öğün içeriği GİTMEZ. Sağlık verisinin en küçük kümesi bile bir
+     sorumluluktur; HKM'ye yalnızca yük kararını etkileyen dört alan gider.
+
+     Klinik sınır burada da geçerlidir: bu alanlar bir teşhis değil, bir
+     günün yük taşıma kapasitesine dair ölçümlerdir. */
+  function collect(dateISO){
+    const d = dateISO || U.todayISO();
+    const out = {};
+    const v = (S.vitals || {})[d] || {};
+
+    out.sleep_hours = v.sleep == null ? metric(null, 'missing')
+      : metric(v.sleep, 'measured');
+
+    const r = SP.Move.readiness(d);
+    out.recovery = r && r.ok ? metric(r.score, 'computed') : metric(null, 'missing');
+
+    out.hrv = v.hrv == null ? metric(null, 'missing') : metric(v.hrv, 'measured');
+
+    /* Taban çizgi: son 30 günün ölçülmüş HRV ortancası. Kendi tabanı
+       olmayan bir HRV sayısı tek başına bir şey söylemez. */
+    const gecmis = [];
+    for(let i = 1; i <= 30; i++){
+      const t = U.iso(U.addDays(U.parse(d), -i));
+      const rec = (S.vitals || {})[t];
+      if(rec && rec.hrv != null) gecmis.push(Number(rec.hrv));
+    }
+    if(gecmis.length >= 5){
+      gecmis.sort(function(a, b){ return a - b; });
+      const n = gecmis.length;
+      const orta = n % 2 ? gecmis[(n - 1) / 2] : (gecmis[n / 2 - 1] + gecmis[n / 2]) / 2;
+      out.hrv_baseline = metric(Math.round(orta * 10) / 10, 'computed');
+    }else{
+      out.hrv_baseline = metric(null, 'missing');
+    }
+
+    if(levelOf() === 'gelismis') Object.assign(out, genis(d, v));
+    return out;
+  }
+
+  /* Gelişmiş kapsam — günün ölçüm ve yük tablosu. Hepsi O GÜNE bağlıdır,
+     bu yüzden geçmiş günler için de dürüstçe hesaplanabilir.
+
+     Klinik sınır burada da geçerli: tahlil değeri, ilaç adı, semptom adı
+     ve öğün içeriği HİÇBİR seviyede gitmez. Semptom yalnızca SAYI olarak
+     gider — hangi semptom olduğu değil, kaç tane işaretlendiği. */
+  function genis(d, v){
+    const out = {};
+    [['weight', 'weight'], ['rhr', 'rhr'], ['sbp', 'sbp'], ['dbp', 'dbp'],
+     ['waist', 'waist'], ['water', 'water']].forEach(function(p){
+      const x = v[p[1]];
+      out[p[0]] = x == null ? metric(null, 'missing') : metric(x, 'measured');
+    });
+
+    const ogun = SP.Nutri && SP.Nutri.dayTotals ? SP.Nutri.dayTotals(d) : null;
+    const yendi = ogun && (SP.Model.mealsOf(d) || []).length;
+    out.protein_g = yendi ? metric(Math.round(ogun.protein), 'computed')
+      : metric(null, 'missing');
+    out.kcal = yendi ? metric(Math.round(ogun.kcal), 'computed')
+      : metric(null, 'missing');
+
+    const antrenman = (S.workouts || []).filter(function(w){ return w.date === d; });
+    out.train_minutes = antrenman.length
+      ? metric(antrenman.reduce(function(a, w){ return a + (Number(w.minutes) || 0); }, 0),
+          'measured')
+      : metric(null, 'missing');
+
+    /* Semptom SAYISI gider, semptomun kendisi gitmez. Ve «işaretlenmedi»
+       ile «hiç bakılmadı» ayrı şeylerdir: ikincisi veri yoktur. */
+    out.symptom_count = v.symptomsLogged
+      ? metric(Object.keys(v.symptoms || {}).length, 'measured')
+      : metric(null, 'missing');
+    return out;
+  }
+
+
+  function payload(dateISO){
+    const d = dateISO || U.todayISO();
+    return { module:MODULE, date:d, version:CONTRACT, metrics:collect(d) };
+  }
+
+  const LABELS = { measured:'ölçüldü', estimated:'tahmin',
+    computed:'hesaplandı', missing:'veri yok' };
+
+  /* Kullanıcı ne gönderildiğini GÖRMEDEN açmamalı. */
+  function preview(dateISO){
+    const p = payload(dateISO);
+    const satirlar = Object.keys(p.metrics).map(function(k){
+      const m = p.metrics[k];
+      return { key:k, value:m.value, cert:m.cert,
+        label:LABELS[m.cert] || m.cert };
+    });
+    return { payload:p, rows:satirlar, errors:contract(p) };
+  }
+
+
+  /* ------------------------------------------------------------- esleme
+
+     Jetonu elle yapistirmak, HKM'nin hic acilmamasinin en olasi sebebiydi.
+     Esleme, jetonu gevsetmeden bu surtunmeyi kaldirir: HKM yuzunde iki
+     dakikalik bir pencere acilir, bu dugme jetonu dogrudan alir ve yalniz
+     bu cihazda saklar. Pencere kapaliysa hicbir sey olmaz — ve bu bir
+     hata degil, dogru davranistir. */
+  async function pair(url){
+    const adres = String(url || settings().url || '').replace(/\/$/, '');
+    if(!urlOk(adres)){
+      return { ok:false, note:'Yerel olmayan bir adresle eşleme yapılmaz.' };
+    }
+    let res;
+    try{
+      res = await fetch(adres + '/api/pair', { method:'POST' });
+    }catch(e){
+      return { ok:false, note:'HKM\'ye ulaşılamadı. Daemon çalışıyor mu?' };
+    }
+    let govde = null;
+    try{ govde = await res.json(); }catch(e){ govde = null; }
+    if(res.status !== 200 || !govde || !govde.token){
+      return { ok:false, status:res.status,
+        note:(govde && govde.note) || 'Eşleme penceresi kapalı. HKM yüzünde '
+           + '«Cihazları bağla» dedikten sonra iki dakika içinde dene.' };
+    }
+    await save({ url:adres, token:govde.token, enabled:true });
+    return { ok:true, note:'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.' };
+  }
+
+  /* ------------------------------------------------------------- gönderim */
+
+  function urlOk(url){
+    const s = String(url || '');
+    if(/^https:\/\//i.test(s)) return true;
+    return /^http:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?(\/|$)/i.test(s);
+  }
+
+  /* Kısıt bir hız sınırı değil, bir GÜRÜLTÜ sınırıdır: aynı günün aynı
+     özeti dakikada bir gönderilirse HKM'nin ambarı bilgi değil tekrar
+     biriktirir. */
+  function due(nowMs){
+    const a = settings();
+    if(!a.lastAt) return true;
+    const ara = Math.max(ASGARI_ARA_DK, Number(a.intervalMinutes) || 60);
+    const fark = (nowMs || Date.now()) - Date.parse(a.lastAt);
+    return !(fark >= 0 && fark < ara * 60000);
+  }
+
+  /* Tek giriş noktası. HİÇBİR KOŞULDA fırlatmaz: çağıran taraf bir
+     arayüz akışının ortasındadır ve orada bir ağ hatası, kaydı kaybetmek
+     için sebep değildir. */
+  async function send(opts){
+    const o = opts || {};
+    const a = settings();
+    if(!a.enabled && !o.force) return { ok:false, reason:'off', note:'HKM işareti kapalı.' };
+    if(!a.token) return { ok:false, reason:'no-token', note:'Jeton girilmemiş.' };
+    if(!urlOk(a.url)){
+      return { ok:false, reason:'unsafe-url',
+        note:'Yerel olmayan bir adrese düz http ile gönderim yapılmaz: jeton '
+           + 'ağda açık gider. https ya da yerel adres gerekir.' };
+    }
+    if(!o.force && !due(Date.now())){
+      return { ok:false, reason:'throttled', note:'Son gönderimin üzerinden yeterli süre geçmedi.' };
+    }
+    const body = payload(o.date);
+    const hata = contract(body);
+    if(hata.length){
+      await save({ lastAt:new Date().toISOString(), lastStatus:0,
+        lastNote:'Gövde sözleşmeyi geçmedi: ' + hata[0] });
+      return { ok:false, reason:'contract', errors:hata,
+        note:'Etiketsiz ya da bozuk alan var; gövde yola çıkmadı.' };
+    }
+    let durum = 0, not = '';
+    try{
+      const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      const zaman = ctrl ? setTimeout(function(){ ctrl.abort(); }, 4000) : null;
+      const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json',
+          'Authorization':'Bearer ' + a.token },
+        body:JSON.stringify(body),
+        signal:ctrl ? ctrl.signal : undefined,
+      });
+      if(zaman) clearTimeout(zaman);
+      durum = res.status;
+      not = durum === 202 ? 'Gönderildi.'
+        : durum === 422 ? 'HKM gövdeyi reddetti (etiket ya da biçim).'
+        : durum === 401 ? 'Jeton kabul edilmedi.'
+        : 'Beklenmeyen yanıt: ' + durum;
+    }catch(e){
+      durum = 0;
+      not = 'HKM\'ye ulaşılamadı. Bu bir hata değil bir DURUMDUR: HKM '
+          + 'isteğe bağlıdır ve kapalıyken ' + MODULE.toUpperCase() + ' olduğu gibi çalışır.';
+    }
+    const simdi = new Date().toISOString();
+    await save(Object.assign({ lastAt:simdi, lastStatus:durum, lastNote:not },
+      durum === 202 ? { lastOkAt:simdi } : {}));
+    return { ok:durum === 202, status:durum, note:not, payload:body };
+  }
+
+
+  /* ------------------------------------------------------------- geçmiş
+
+     Capraz bulgu ve yon tahlili GECMIS ister: bugunden itibaren biriken bir
+     ambar ilk iki ay hicbir sey soyleyemez. «Gecmisi gonder» o boslugu
+     kapatir — ama yalnizca geriye donuk hesaplanabilen alanlarla. */
+  async function backfill(days, onProgress){
+    const a = settings();
+    if(!a.enabled) return { ok:false, reason:'off', sent:0 };
+    if(!a.token) return { ok:false, reason:'no-token', sent:0 };
+    if(!urlOk(a.url)) return { ok:false, reason:'unsafe-url', sent:0 };
+    const n = Math.max(1, Math.min(Number(days) || 30, 180));
+    const bugun = U.todayISO();
+    let gonderilen = 0, bos = 0, hata = null;
+    for(let i = n - 1; i >= 0; i--){
+      const t = U.iso(U.addDays(U.parse(bugun), -i));
+      const govde = payload(t);
+      /* Bir gunun gonderilmesi icin en az bir OLCULMUS alan gerekir.
+         «Hesaplandi» yetmez: sinava kalan gun her tarih icin hesaplanabilir
+         ve yalniz onu tasiyan bir govde, kullanicinin o gun bir sey yaptigi
+         izlenimini birakir. Ambarda «gorulen gun» sayisini boyle sismek,
+         sessiz bir yalandir. */
+      const dolu = Object.keys(govde.metrics).some(function(k){
+        return govde.metrics[k].cert === 'measured';
+      });
+      if(!dolu || contract(govde).length){ bos++; continue; }
+      let durum = 0;
+      try{
+        const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json',
+            'Authorization':'Bearer ' + a.token },
+          body:JSON.stringify(govde),
+        });
+        durum = res.status;
+      }catch(e){ durum = 0; }
+      if(durum !== 202){ hata = durum; break; }
+      gonderilen++;
+      if(typeof onProgress === 'function') onProgress(gonderilen, n);
+    }
+    await save({ lastAt:new Date().toISOString(),
+      lastStatus:hata == null ? 202 : hata,
+      lastNote:hata == null
+        ? gonderilen + ' günlük geçmiş gönderildi (' + bos + ' gün ölçümsüz).'
+        : 'Geçmiş gönderimi ' + hata + ' ile durdu.' });
+    return { ok:hata == null, sent:gonderilen, empty:bos, status:hata || 202 };
+  }
+
+
+  /* --------------------------------------------------------- niyet kuyrugu
+
+     HKM bu sisteme YAZMAZ. «Yarin iki saat matematik» gibi bir istek
+     HKM'de bir NIYET olur; burasi acilista kuyrugu SORAR, kullaniciya
+     gosterir ve onaylanirsa SPİ kendi koduyla uygular.
+
+     Uc kural:
+
+     1. Kuyruk okumak bir izin degildir: gelen sey bir TEKLIFTIR ve
+        kullanici gormeden hicbir sey uygulanmaz.
+     2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
+        bu sistemde calistirilacak bir komut degildir.
+     3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce'];
+
+  /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
+
+     Kuyruk artik acik teklifleri her soruşta yeniden veriyor (cevaplanmamis
+     bir teklif sayfa yenilendiginde kaybolmasin diye). Bu, tek basina yeni
+     bir tehlike dogurur: aynı teklif iki kez UYGULANABILIR.
+
+     Bu yuzden cevabin kaydi burada, YEREL olarak tutulur ve ag'dan ONCE
+     yazilir. Uc hal ayrilir:
+
+       applying      — uygulama basladi, bitip bitmedigi BILINMIYOR
+       applied       — uygulandi
+       acknowledged  — goruldu; uygulamak kullanicinin isi
+       dismissed     — istenmedi
+       unknown       — yarida kalmisti, kullanici kapatti
+
+     «applying» bir basarisizlik degil bir BILINMEZLIKTIR: uygulama
+     sirasinda sekme kapanirsa teklif ne yeniden uygulanir ne de sessizce
+     yutulur; kullaniciya «belirsiz» diye gosterilir. Uydurmak yerine
+     bilmedigimizi soylemek, bu sistemin her yerindeki kural.
+
+     `reported` alani ayri bir sozdur: is YERELDE bitmis ama merkeze
+     BILDIRILEMEMIS olabilir. O kayit silinmez; bir sonraki kuyruk
+     sorusunda bildirim tekrar denenir. */
+  const DEFTER_YOLU = 'hkmIntentLog';
+  const DEFTER_SINIR = 200;             // defter sinirsiz buyumez
+
+  async function intentLog(){
+    if(DEFTER) return DEFTER;
+    let ham = null;
+    try{ ham = await SP.Store.get(DEFTER_YOLU); }catch(e){ ham = null; }
+    DEFTER = (ham && typeof ham === 'object' && ham.entries
+      && typeof ham.entries === 'object') ? ham.entries : {};
+    return DEFTER;
+  }
+
+  async function markIntent(id, state, reported, note, closed){
+    const d = await intentLog();
+    d[String(id)] = { state:state, reported:!!reported, closed:!!closed,
+      note:String(note || ''), at:new Date().toISOString() };
+    const anahtar = Object.keys(d);
+    if(anahtar.length > DEFTER_SINIR){
+      anahtar.sort(function(x, y){
+        return String(d[x].at).localeCompare(String(d[y].at)); });
+      anahtar.slice(0, anahtar.length - DEFTER_SINIR)
+        .forEach(function(k){ delete d[k]; });
+    }
+    try{ await SP.Store.set(DEFTER_YOLU, { entries:d }); }catch(e){ /* yerel */ }
+    return d[String(id)];
+  }
+
+  async function forgetIntent(id){
+    const d = await intentLog();
+    delete d[String(id)];
+    try{ await SP.Store.set(DEFTER_YOLU, { entries:d }); }catch(e){ /* yerel */ }
+  }
+
+  /* Bildirilememis cevaplar — bağlantı gelince tekrar denenir. */
+  async function flushIntentReports(){
+    const d = await intentLog();
+    let denenen = 0, basarili = 0;
+    for(const id of Object.keys(d)){
+      const k = d[id];
+      if(k.reported || k.closed || k.state === 'applying') continue;
+      denenen++;
+      const r = await answerIntent(id, k.state);
+      if(r.ok){ basarili++; await markIntent(id, k.state, true, k.note); continue; }
+      /* Merkez «boyle bir niyet yok» (404) ya da «zaten baska bir cevabi
+         var» (409) diyorsa tekrar denemek bir sey duzeltmez; sonsuza
+         kadar denemek de o kaydi asla kapatmamak olurdu. Kayit KAPANIR
+         ama «bildirildi» YAZILMAZ: bildirilmedi, denenmeyecek. */
+      if(r.status === 404 || r.status === 409){
+        await markIntent(id, k.state, false, k.note, true);
+      }
+    }
+    return { tried:denenen, ok:basarili };
+  }
+
+  /* Uygulanip uygulanmadigi BILINMEYEN teklifler. Arayuz bunlari bir
+     eylem olarak degil bir UYARI olarak gosterir. */
+  async function intentDoubts(){
+    const d = await intentLog();
+    return Object.keys(d).filter(function(id){ return d[id].state === 'applying'; })
+      .map(function(id){ return Object.assign({ id:id }, d[id]); });
+  }
+
+  async function intents(){
+    const a = settings();
+    if(!a.enabled || !a.token || !urlOk(a.url)) return [];
+    let res;
+    try{
+      res = await fetch(String(a.url).replace(/\/$/, '') + '/api/intents/'
+        + MODULE + '/take', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json',
+          'Authorization':'Bearer ' + a.token },
+      });
+    }catch(e){ return []; }
+    if(res.status !== 200) return [];
+    let govde = null;
+    try{ govde = await res.json(); }catch(e){ return []; }
+    const liste = (govde && govde.intents) || [];
+    const defter = await intentLog();
+    /* Merkez hala acik sanıyorsa ama biz cevaplamissak: gosterme, BILDIR.
+       Kuyruk acik teklifi tekrar tekrar verir; ikinci kez sormak
+       kullaniciya ayni seyi iki kez sordurmak olurdu. */
+    const gosterilecek = liste.filter(function(n){
+      if(!n || INTENT_KINDS.indexOf(n.kind) < 0 || !n.payload) return false;
+      return !defter[String(n.id)];
+    });
+    flushIntentReports().catch(function(){});
+    return gosterilecek;
+  }
+
+  /* Kullanicinin cevabi HKM'ye bildirilir: gorulmemis bir niyetle
+     reddedilmis bir niyeti ayirmak, kuyrugun tek anlamli tarafi.
+
+     Ikinci parametre artik bir bayrak degil bir DURUM da olabilir:
+
+       applied      — modul teklifi kendi koduyla uyguladi
+       acknowledged — teklif goruldu; uygulamak kullanicinin isi
+       dismissed    — istenmedi
+       unknown      — uygulama yarida kaldi, sonuc BILINMIYOR
+
+     Dordunu bire indirmek, birbirinden farkli dort sonucu tek kelimeyle
+     anlatmak olurdu; merkezdeki kayit da o kadar dogru olurdu. */
+  function _durumAdi(applied){
+    if(applied === true) return 'applied';
+    if(applied === false) return 'dismissed';
+    return String(applied);
+  }
+
+  async function answerIntent(id, applied){
+    const a = settings();
+    const durum = _durumAdi(applied);
+    if(['applied', 'acknowledged', 'dismissed', 'unknown'].indexOf(durum) < 0){
+      return { ok:false, error:'Geçersiz durum.' };
+    }
+    if(!a.enabled || !a.token || !urlOk(a.url)) return { ok:false };
+    try{
+      const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/intent/'
+        + id + '/' + durum, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json',
+          'Authorization':'Bearer ' + a.token },
+      });
+      return { ok:res.status === 200, status:res.status };
+    }catch(e){ return { ok:false }; }
+  }
+
+  /* SPİ'de niyet uygulanmaz — ve bu bir eksiklik değil bir SINIRDIR.
+
+     Sağlık tarafında bir «teklifi uygulamak» ölçüm uydurmak ya da yük
+     değiştirmek demek olurdu; ikisi de kullanıcının kendi kararıdır.
+     Gelen teklif gösterilir, uygulaması kullanıcıya bırakılır. */
+  /* SPİ hiçbir teklifi KENDILIGINDEN uygulamaz ve bu bir eksiklik değil
+     bir SINIRDIR: sağlıkta ölçüm de yük de kullanıcının kararıdır.
+
+     Ama «Gördüm» demek de bir eylemdir ve kendi yolunu tamamlamalıdır.
+     Önceki hâlde bu düğme her durumda ok:false döndüren applyIntent()
+     yoluna bağlıydı: görünür bir düğme, basıldığında hata veriyordu.
+     Ayrım artık açık — uygulanan bir şey yok, ONAYLANAN bir şey var. */
+  const APPLIABLE = [];
+
+  function canApply(){ return false; }
+
+  async function acknowledgeIntent(n){
+    if(!n) return { ok:false, error:'Teklif yok.' };
+    return { ok:true, acknowledged:true,
+      note:'Görüldü olarak işaretlendi. SPİ bunu senin adına uygulamaz: '
+         + 'ölçüm de yük de senin kararın.' };
+  }
+
+  async function applyIntent(n){
+    return { ok:false,
+      error:'SPİ bir teklifi kendiliğinden uygulamaz: ölçüm de yük de senin '
+          + 'kararın. Teklif gösterildi, gerisi sende.' };
+  }
+
+  /* ---------- teklifi KAPATMAK: tek kapi
+
+     Arayuz artik `applyIntent` + `answerIntent` ikilisini kendisi
+     sirayla cagirmaz. Dort hatanin dordu de o sirada dogmustu:
+
+       - iki tiklama iki blok yaziyordu,
+       - uygulamadan sonra baglanti koparsa merkez «cevapsiz» kaliyordu,
+       - bildirim basarisiz olunca kullaniciya «uygulandi» deniyordu,
+       - sayfa yenilenince is bastan yapilabiliyordu.
+
+     Sira burada tektir ve defter AG'DAN ONCE yazilir. */
+  const ISLEMDE = {};
+
+  async function resolveIntent(n, action){
+    if(!n || n.id == null) return { ok:false, error:'Teklif bulunamadı.' };
+    const anahtar = String(n.id);
+    if(['apply', 'seen', 'dismiss'].indexOf(action) < 0){
+      return { ok:false, error:'Bilinmeyen işlem.' };
+    }
+    /* Cift tiklama: es zamanli iki cagri tek is olur. */
+    if(ISLEMDE[anahtar]) return { ok:false, error:'Bu teklif işleniyor.' };
+    ISLEMDE[anahtar] = true;
+    try{
+      const defter = await intentLog();
+      const onceki = defter[anahtar];
+      const durum = action === 'apply' ? 'applied'
+        : (action === 'seen' ? 'acknowledged' : 'dismissed');
+      let not = '';
+      let uygulandi = false;
+      if(action === 'apply'){
+        if(onceki && (onceki.state === 'applied' || onceki.state === 'applying')){
+          /* En fazla BIR KEZ: daha once uygulanmis (ya da uygulanmis
+             olabilecek) bir teklif tekrar plana yazilmaz. */
+          not = 'Bu teklif daha önce uygulanmıştı; ikinci kez yazılmadı.';
+        }else{
+          await markIntent(n.id, 'applying', false, '');
+          const r = await applyIntent(n);
+          if(!r.ok){
+            await forgetIntent(n.id);
+            return { ok:false, error:r.error };
+          }
+          not = r.note;
+          uygulandi = true;
+        }
+      }
+      /* SPI'de «uygulamak» yoktur; ONAYLAMAK vardir. Cumleyi de o katman
+         yazar: burada uydurulan bir metin, yapilmamis bir isi anlatirdi. */
+      if(action === 'seen'){
+        const t = await acknowledgeIntent(n);
+        if(t.ok) not = t.note;
+      }
+      await markIntent(n.id, durum, false, not);
+      const bildirim = await answerIntent(n.id, durum);
+      if(bildirim.ok) await markIntent(n.id, durum, true, not);
+      return { ok:true, applied:uygulandi, state:durum,
+        reported:!!bildirim.ok, note:not };
+    }finally{
+      delete ISLEMDE[anahtar];
+    }
+  }
+
+  /* Belirsiz bir teklifi KAPATMAK. Kullanici planina bakip karar verir;
+     merkeze «uygulandi» da «istenmedi» de denmez — BILINMIYOR denir. */
+  async function clearDoubt(id){
+    await markIntent(id, 'unknown', false, '');
+    const bildirim = await answerIntent(id, 'unknown');
+    if(bildirim.ok) await markIntent(id, 'unknown', true, '');
+    return { ok:true, reported:!!bildirim.ok };
+  }
+
+  /* Ateşle ve unut: arayüz akışlarının çağırdığı biçim. Söz vermez,
+     beklemez, hata fırlatmaz. */
+  function ping(opts){
+    try{
+      const p = send(opts);
+      if(p && typeof p.catch === 'function') p.catch(function(){});
+    }catch(e){ /* işaret, akışı asla bozmaz */ }
+  }
+
+  return { load, save, settings, collect, payload, preview, contract, metric,
+    urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
+    intents, answerIntent, applyIntent, acknowledgeIntent, canApply,
+    INTENT_KINDS, APPLIABLE,
+    resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
+    intentDoubts, clearDoubt,
+    MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
 })();
 
 /* ==== js/core/audit.js ==== */
@@ -19929,6 +20970,82 @@ SP.Screens.today = (function(){
     });
   }
 
+  /* ---------- HKM teklifleri ----------
+
+     HKM bu sisteme YAZMAZ: kuyruktan gelen her satir bir TEKLIFTIR ve
+     kullanici gormeden hicbir sey uygulanmaz. Uygulayan da HKM degil,
+     SPİ'in kendi kodudur. Kuyruk bossa hic cizilmez. */
+  function hkmTeklifRow(){
+    const liste = S.ui.hkmIntents || [];
+    if(!liste.length) return '';
+    return K.Entry({ label:'HKM TEKLİFİ', hint:'hkm',
+      meta:liste.length + ' teklif', wide:true,
+      body:html`
+        ${map(liste, n => html`<div class="mt-8">
+          ${K.Notice({ tone:'info', body:n.note })}
+          <div class="row gap-8 mt-8">
+            ${K.Button({ label:'Gördüm', size:'sm', tone:'primary',
+              act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
+            ${K.Button({ label:'İstemiyorum', size:'sm',
+              act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
+          </div>
+        </div>`)}
+        <p class="tiny dim mt-10">Bu satırlar birer tekliftir. Onaylarsan
+          SPİ kendi kaydına yazar; reddedersen HKM kaydı silmez,
+          «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş
+          bir teklif ayrı şeylerdir.</p>` });
+  }
+
+  /* ---------- HKM seridi: KUCUK ve HER GUN ORADA
+
+     HKM ayarlari bir ayar ekraninin icinde duruyordu: gunde bir bakilan
+     bir yerde, gun boyu acik duran bir baglantinin durumu. Bagli mi
+     degil mi, en son ne zaman gitti — bunlar gunluk ekranda TEK SATIR
+     olmali.
+
+     Serit bir AYAR EKRANI DEGILDIR: durumu soyler ve tek bir is
+     yaptirir. Ayarin yeri yine kendi ekranidir; iki yerde iki ayar
+     olsaydi biri otekini sessizce yenerdi. */
+  function saat(iso){
+    if(!iso) return null;
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return null;
+    return U.pad2(d.getHours()) + ':' + U.pad2(d.getMinutes());
+  }
+
+  function hkmSeritRow(){
+    if(!SP.Beacon) return '';
+    const a = SP.Beacon.settings();
+
+    if(!a.enabled){
+      return K.Entry({ label:'HKM', hint:'hkm', meta:'bağlı değil',
+        wide:true, body:html`<p class="tiny dim">Hayat Kontrol
+          Merkezi'ne günün özetini göndermek istersen ayarlardan
+          açabilirsin. SPİ bundan bağımsız çalışır: HKM kapalıyken
+          hiçbir şey eksilmez.</p>` });
+    }
+
+    const gitti = saat(a.lastOkAt);
+    const denendi = saat(a.lastAt);
+    /* Basarisiz son deneme YUTULMAZ: «gonderildi» ile «gonderilmeye
+       calisildi» ayri seylerdir. */
+    const bozuk = a.lastStatus !== null && a.lastStatus !== undefined
+      && a.lastStatus !== 202;
+
+    return K.Entry({ label:'HKM', hint:'hkm', wide:true,
+      meta:bozuk ? ('son deneme ' + (denendi || '—') + ' · başarısız')
+        : (gitti ? ('son gönderim ' + gitti) : 'henüz gönderilmedi'),
+      body:html`
+        ${when(bozuk, () => K.Notice({ tone:'warn',
+          body:(a.lastNote || 'Gönderilemedi.') + ' SPİ bundan etkilenmez; '
+             + 'veri burada duruyor ve bir sonraki denemede gider.' }))}
+        <div class="row gap-8 mt-8">
+          ${K.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-gonder' })}
+        </div>
+        <p class="tiny dim mt-8">Giden şey günün ÖZETİDİR: etiketli
+          ölçümler. Ham kayıt SPİ'de kalır.</p>` });
+  }
+
   async function render(){
     const tab = S.ui.dayTab || 'giris';
     const flags = M.openFlags();
@@ -19936,6 +21053,8 @@ SP.Screens.today = (function(){
     const head = html`
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${bekleyenOneriler()}
+      ${when((S.ui.hkmIntents || []).length, () => html`<div class="mb-16">${K.Ledger([hkmTeklifRow()])}</div>`)}
+      <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>
       <div class="mb-8">${tabs()}</div>`;
 
     if(tab === 'ozet'){
@@ -19956,7 +21075,42 @@ SP.Screens.today = (function(){
     <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'certainty']))}</div>`);
   }
 
+  /* HKM teklifine verilen cevabin TEK yolu: yerel kayit AG'DAN ONCE
+     yazilir, bildirim sonra denenir. «İşaretlendi ama merkeze
+     bildirilemedi» hali yutulmaz, SOYLENIR.
+
+     SPİ'de «Gördüm» bir UYGULAMA değildir: ölçüm de yük de kullanıcının
+     kararıdır. Merkeze de öyle bildirilir — «uygulandı» değil «görüldü». */
+  async function hkmCevap(id, action){
+    const liste = S.ui.hkmIntents || [];
+    const n = liste.filter(x => String(x.id) === String(id))[0];
+    if(!n) return;
+    const r = await SP.Beacon.resolveIntent(n, action);
+    if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
+    S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
+    const bas = r.state === 'acknowledged'
+      ? (r.note || 'Görüldü olarak işaretlendi')
+      : 'İstenmedi olarak işaretlendi';
+    UI.toast(r.reported ? bas
+      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.');
+    SP.App.render();
+  }
+
   const handle = {
+    /* Elle gonderim: kullanicinin ACIKCA istedigi an. Kapaliyken
+       zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
+       olmasini anlamsiz kilardi. */
+    async 'hkm-gonder'(){
+      UI.toast('HKM\u2019ye gönderiliyor…');
+      const r = await SP.Beacon.send({ reason:'manual' });
+      UI.toast(r.ok ? 'HKM\u2019ye gönderildi.'
+        : ('Gönderilemedi — ' + (r.note || r.reason || 'sebep bilinmiyor')));
+      SP.App.render();
+    },
+
+    async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'seen'); },
+    async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
+
     async 'signal-answer'(el){
       const inp = document.getElementById('sig-answer');
       const r = await SP.Signals.answer(el.dataset.id, inp ? inp.value : '');
@@ -24104,9 +25258,10 @@ SP.Screens.analytics = (function(){
          + 'pencerede de ölçüm yoksa hüküm kurulmaz.',
       wide:true,
       body:html`
-        ${K.Table({ tight:true, headers:['Çift', 'Çaba', 'Sonuç', 'Durum'],
+        ${K.Table({ tight:true, headers:['Çift', 'Yön', 'Çaba', 'Sonuç', 'Durum'],
           rows:cifts.map(p => [
             p.effortLabel + ' → ' + p.outcomeLabel,
+            (SP.Goodhart.DIRECTIONS[p.direction] || {}).label || 'tanımsız',
             p.effortChange == null ? '—'
               : (p.effortChange === Infinity ? 'yeni' : '%' + Math.round(p.effortChange * 100)),
             p.outcomeChange == null ? '—'
@@ -24115,6 +25270,17 @@ SP.Screens.analytics = (function(){
               : p.status === 'aligned' ? 'birlikte'
               : p.status === 'unknown' ? 'ölçülmedi' : 'sessiz',
           ]) })}
+        <p class="tiny dim mt-8">«Yön» sütunu sonucun hangi tarafa gitmesinin
+          iyi sayıldığını söyler. Yönü tanımsız bir çift değerlendirilmez:
+          sistem yüksek olanın iyi olduğunu VARSAYMAZ.</p>
+        ${(function(){
+          const pol = SP.Goodhart.policy();
+          return html`<p class="tiny dim mt-8">Pencere ${pol.windowDays} gün ·
+            çaba artışı eşiği %${Math.round(pol.effortRiseThreshold * 100)} ·
+            sonuç durgunluk eşiği %${Math.round(pol.stagnationThreshold * 100)} ·
+            asgari çaba ${pol.minEffortMinutes} dk. Bu sayılar bir bulgu değil
+            bu yazılımın ayarıdır: ${pol.rationale}</p>`;
+        })()}
         ${map(ayrisan, p => html`<div class="mt-12">
           ${K.Notice({ tone:'warn', body:p.note })}
           ${K.Notice({ tone:'info', body:p.question })}</div>`)}`,
@@ -24130,7 +25296,9 @@ SP.Screens.analytics = (function(){
         : (puan.grade || '—'),
       note:'Her sayıyı cihazdan bekleyen biri, cihaz yokken kendini okuyamaz. '
          + 'Tahmin KÖR yazılır: değer ekranda dururken yazılan tahmin, tahmin '
-         + 'değil kopyadır. Bu bir sağlık yargısı değildir.',
+         + 'değil kopyadır. Ölçülen şey dardır — kayıtlı türlerde tahminin '
+         + 'sayıya ne kadar yaklaştığı; «kendini tanıma» değil. Bu bir sağlık '
+         + 'yargısı da değildir.',
       wide:true,
       body:html`
         ${K.Notice({ tone:'info', body:puan.note })}
@@ -25811,9 +26979,89 @@ SP.Screens.guide = (function(){
     });
   }
 
+  /* -------------------------------------------------------- HKM isareti
+
+     Dorduncu katman ISTEGE BAGLIDIR ve varsayilan olarak KAPALIDIR.
+     Saglik verisinin en kucuk kumesi bile bir sorumluluktur: bu yuzden
+     kart, acik olsun olmasin, gidecek gövdenin TAMAMINI satir satir
+     gosterir. Tahlil degeri, ilac adi, semptom ve ogun GITMEZ. */
+  function hkmCard(){
+    if(!SP.Beacon) return '';
+    const a = SP.Beacon.settings();
+    const on = SP.Beacon.preview();
+    const durum = a.lastAt
+      ? (a.lastStatus === 202 ? 'Son gönderim başarılı' : 'Son deneme başarısız')
+        + ' — ' + String(a.lastAt).slice(0, 16).replace('T', ' ') + '. '
+        + (a.lastNote || '')
+      : 'Henüz hiç gönderilmedi.';
+    return K.Card({
+      title:'HKM işareti', hint:'hkm',
+      sub:'İsteğe bağlı dördüncü katmana günün özeti',
+      badge:a.enabled ? K.Badge({ label:'açık', tone:'ok' })
+        : K.Badge({ label:'kapalı', tone:'warn' }),
+      body:html`
+        ${K.Notice({ tone:'info', body:'SPİ, HKM\'nin var olduğunu bilmez. '
+          + 'İşaret tek yönlüdür, hiçbir çizimde çalışmaz ve hiçbir kaydı '
+          + 'bekletmez: HKM kapalıyken SPİ olduğu gibi çalışır.' })}
+
+        <div class="mt-12">
+          ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
+            checked:!!a.enabled, act:'hkm-toggle' })}
+        </div>
+
+        <div class="mt-12">
+          ${K.Field({ label:'HKM adresi',
+            input:K.Input({ id:'sp-hkm-url', value:a.url, change:'hkm-url',
+              placeholder:'http://127.0.0.1:4200', aria:'HKM adresi' }) })}
+          ${K.Field({ label:'Yerel jeton', hint:'config.json → local_token',
+            input:K.Input({ id:'sp-hkm-token', type:'password', value:a.token,
+              change:'hkm-token', aria:'HKM jetonu' }) })}
+          ${K.Field({ label:'En sık kaç dakikada bir',
+            input:K.Input({ id:'sp-hkm-int', type:'number', min:'15', step:'5',
+              value:a.intervalMinutes, change:'hkm-interval',
+              aria:'Gönderim aralığı' }) })}
+        </div>
+
+        ${when(!SP.Beacon.urlOk(a.url), () => K.Notice({ tone:'warn', class:'mt-10',
+          body:'Bu adrese gönderim yapılmaz: yerel olmayan bir adrese düz http '
+             + 'ile giderken jeton ağda açık gider. https ya da 127.0.0.1 gerekir.' }))}
+
+        <div class="mt-12">
+          ${K.Field({ label:'Kapsam', hint:'ne kadarı gönderilsin',
+            input:K.Select({ id:'sp-hkm-level', value:SP.Beacon.levelOf(),
+              change:'hkm-level', aria:'Gönderim kapsamı',
+              options:SP.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
+          <p class="tiny dim">${(SP.Beacon.LEVELS.find(l => l.id === SP.Beacon.levelOf()) || {}).note}
+            Gelişmiş kapsamda bile tahlil değeri, ilaç adı ve semptomun kendisi
+            GİTMEZ — semptom yalnızca sayı olarak gider.</p>
+        </div>
+
+        <div class="mt-12">${K.SectionTitle('Bugün ne gidiyor')}</div>
+        ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
+          rows:on.rows.map(r => [r.key,
+            r.value == null ? '—' : U.fmtNum(r.value), r.label]) })}
+        <p class="tiny dim mt-8">Tahlil değeri, ilaç adı, semptom ve öğün GİTMEZ.
+          Giden şey yük kararını etkileyen dört sayıdır; değeri olmayan alan
+          «veri yok» gider, sıfır değil. Klinik sınır burada da geçerlidir.</p>
+
+        ${when(on.errors.length, () => K.Notice({ tone:'warn', class:'mt-10',
+          body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
+
+        <p class="tiny dim mt-10">«Bağlan», jetonu HKM'den doğrudan alır:
+          önce HKM yüzünde «Cihazları bağla» de, sonra iki dakika içinde
+          buraya bas. Jetonu elle yazmak da çalışır.</p>
+        <p class="tiny dim mt-10">${durum}</p>`,
+      foot:html`${K.Button({ label:'Bağlan', size:'sm', tone:'primary',
+          act:'hkm-pair' })}
+        ${K.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-send' })}
+        ${K.Button({ label:'Geçmişi gönder (60 gün)', size:'sm', act:'hkm-backfill' })}`,
+    });
+  }
+
   function dataCard(){
     const f = M.dataFootprint();
     const age = M.backupAgeDays();
+    const undo = SP.Store.importUndoInfo();
     return K.Card({
       title:'Veri ve yedek', hint:'backup',
       badge:M.backupDue() ? K.Badge({ label:'yedek gerekiyor', tone:'warn' })
@@ -25829,9 +27077,14 @@ SP.Screens.guide = (function(){
         ${when(f.near, () => K.Notice({ tone:'warn', class:'mt-10',
           body:'Tarayıcı depolama alanının %' + f.pct + '\'i dolu. Yedek al ve eski kayıtları temizle.' }))}
         ${K.Notice({ tone:'info', class:'mt-10',
-          body:age == null ? 'Henüz yedek alınmadı.' : 'Son yedek ' + age + ' gün önce.' })}`,
+          body:age == null ? 'Henüz yedek alınmadı.' : 'Son yedek ' + age + ' gün önce.' })}
+        ${when(undo, () => K.Notice({ tone:'warn', class:'mt-10',
+          body:new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki yedekten yükleme mevcut '
+             + 'verinin üzerine yazdı. Yanlışsa bir önceki duruma dönebilirsin — bu imkan yalnız '
+             + 'bu içe aktarma için geçerli.' }))}`,
       foot:html`${K.Button({ label:'Yedek indir', size:'sm', tone:'primary', act:'backup' })}
         ${K.Button({ label:'Yedek yükle', size:'sm', act:'restore' })}
+        ${when(undo, () => K.Button({ label:'İçe aktarmayı geri al', size:'sm', tone:'danger', act:'undo-import' }))}
         ${K.Button({ label:'Bütün veriyi sil', size:'sm', tone:'danger', act:'wipe' })}`,
     });
   }
@@ -25988,7 +27241,7 @@ SP.Screens.guide = (function(){
     }
     if(tab === 'veri'){
       return String(html`${head}
-        ${K.Ledger(() => [dataCard(), storageHorizonCard(), storageCard()])}
+        ${K.Ledger(() => [dataCard(), storageHorizonCard(), storageCard(), hkmCard()])}
         <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`);
     }
     if(tab === 'sinir'){
@@ -26007,6 +27260,31 @@ SP.Screens.guide = (function(){
   }
 
   const handle = {
+    async 'hkm-toggle'(){
+      const a = SP.Beacon.settings();
+      await SP.Beacon.save({ enabled:!a.enabled });
+      UI.toast(!a.enabled ? 'HKM işareti açıldı' : 'HKM işareti kapatıldı');
+      SP.App.render();
+    },
+    async 'hkm-pair'(){
+      const el = document.getElementById('sp-hkm-url');
+      const r = await SP.Beacon.pair(el ? el.value.trim() : null);
+      UI.toast(r.note);
+      SP.App.render();
+    },
+    async 'hkm-backfill'(){
+      UI.toast('Geçmiş gönderiliyor…');
+      const r = await SP.Beacon.backfill(60);
+      UI.toast(r.ok ? r.sent + ' gün gönderildi (' + r.empty + ' gün ölçümsüz)'
+        : 'Gönderilemedi (' + (r.reason || r.status) + ')');
+      SP.App.render();
+    },
+    async 'hkm-send'(){
+      const r = await SP.Beacon.send({ force:true });
+      UI.toast(r.ok ? 'Gönderildi' : (r.note || 'Gönderilemedi'));
+      SP.App.render();
+    },
+
     /* Budama. Motor kullanicinin girdigi veriyi reddeder; ekran da
        yalnizca izinli olanlari sunar. */
     async 'prune-storage'(){
@@ -26063,13 +27341,36 @@ SP.Screens.guide = (function(){
         try{
           const text = await file.text();
           const meta = await SP.Store.importAll(JSON.parse(text));
-          UI.toast('Yedek yüklendi (şema ' + meta.schemaVersion + ') — sayfa yenileniyor');
+          if(meta.partialCloud){
+            UI.toast('Yedek bu cihaza yüklendi ama ' + meta.cloudFailed
+              + ' kayıt buluta yazılamadı — sayfa yenileniyor');
+          }else{
+            UI.toast('Yedek yüklendi (şema ' + meta.schemaVersion + ') — sayfa yenileniyor');
+          }
           setTimeout(() => location.reload(), 900);
         }catch(e){
+          /* Yerel yazma basarisizsa sayfa YENILENMEZ. */
           UI.toast(e && e.message ? e.message : 'Yedek okunamadı');
         }
       };
       input.click();
+    },
+    async 'undo-import'(){
+      const undo = SP.Store.importUndoInfo();
+      if(!undo){ UI.toast('Geri alınacak bir içe aktarma yok'); return; }
+      UI.confirmSheet('İçe aktarmayı geri al',
+        new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki içe aktarma öncesine dönülecek. '
+          + 'Aradan geçen sürede eklediğin her şey kaybolur.',
+        async () => {
+          try{
+            await SP.Store.undoImport();
+            UI.closeSheet();
+            UI.toast('Geri alındı — yeniden başlatılıyor');
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            UI.toast('Geri alınamadı: '+(e.message || 'bilinmeyen hata'));
+          }
+        }, true);
     },
     async wipe(){
       UI.confirmSheet('Bütün veriyi sil',
@@ -26084,6 +27385,13 @@ SP.Screens.guide = (function(){
   };
 
   const change = {
+    async 'hkm-url'(el){ await SP.Beacon.save({ url:el.value.trim() }); SP.App.render(); },
+    async 'hkm-token'(el){ await SP.Beacon.save({ token:el.value.trim() }); },
+    async 'hkm-interval'(el){
+      const n = Math.max(SP.Beacon.ASGARI_ARA_DK, Number(el.value) || 60);
+      await SP.Beacon.save({ intervalMinutes:n });
+    },
+    async 'hkm-level'(el){ await SP.Beacon.save({ level:el.value }); SP.App.render(); },
     async 'pick-provider'(el){
       const p = SP.PROVIDERS[el.value];
       const first = p && p.models && p.models[0] ? p.models[0].id : '';
@@ -27303,6 +28611,44 @@ SP.App = (function(){
         }catch(e){ /* brifing açılışı bozmaz */ }
         render();
       });
+
+
+      /* HKM işareti — AÇILIŞTA BİR KEZ, aralığı dolduysa. Bir ekranın
+         açılması ağ trafiği doğurmaz; çizim döngüsünde hiçbir yerde
+         çağrılmaz. Ateşle-ve-unut: söz beklenmez, hata yutulur, açılışı
+         bloklamaz. İşaret kapalıysa (varsayılan) hiçbir şey olmaz. */
+      if(SP.Beacon) SP.Beacon.ping();
+
+      /* HKM'nin bekleyen teklifleri — acilista BIR KEZ, ateşle ve unut.
+         Kuyruk okumak bir izin degildir: gelen sey Bugun ekraninda bir
+         teklif satiri olur ve kullanici gormeden hicbir sey uygulanmaz.
+         HKM kapaliysa kuyruk bos gelir ve hicbir sey degismez. */
+      if(SP.Beacon){
+        SP.Beacon.intents().then(liste => {
+          if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
+        }).catch(() => {});
+        /* Uygulamasi yarida kalmis teklifler: kuyruktan bagimsiz, YEREL
+           defterden gelir. HKM kapali olsa da gosterilir — cunku belirsiz
+           kalan is bizim tarafimizdadir. */
+        SP.Beacon.intentDoubts().then(d => {
+          if(d && d.length){ S.ui.hkmDoubts = d; render(); }
+        }).catch(() => {});
+
+        /* Sekmeye GERI DONUNCE tekrar sor. Once yalniz acilista
+           soruluyordu: HKM bir teklif biraktiginda, sayfa acikken
+           gormuyordun — yenilemeden haberin olmuyordu. Odaklanma bir
+           kullanici eylemidir, cizim degil: bu istek hicbir cizimde
+           atilmaz. */
+        let sonSoru = Date.now();
+        document.addEventListener('visibilitychange', () => {
+          if(document.hidden) return;
+          if(Date.now() - sonSoru < 30000) return;   /* sekme takibi degil */
+          sonSoru = Date.now();
+          SP.Beacon.intents().then(liste => {
+            if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
+          }).catch(() => {});
+        });
+      }
 
       if(SP.Setup.needed()) setTimeout(() => SP.Setup.open(), 400);
     }catch(err){

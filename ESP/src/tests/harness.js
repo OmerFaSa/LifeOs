@@ -138,9 +138,18 @@ ESP.Test = (function(){
       async importAll(obj){
         const parsed = this.readBackup(obj);
         if(!parsed.ok) throw new Error(parsed.error);
+        this._undo = JSON.parse(JSON.stringify(data));
         Object.keys(data).forEach(k => delete data[k]);
         Object.assign(data, JSON.parse(JSON.stringify(parsed.data)));
         return parsed.meta;
+      },
+      /* Gercek depoyla ayni yuzey: ekranlar «geri al» dugmesini kosulsuz cagirabilmeli. */
+      importUndoInfo(){ return this._undo ? { at:new Date().toISOString() } : null; },
+      async undoImport(){
+        if(!this._undo) throw new Error('Geri alınacak bir içe aktarma yok.');
+        Object.keys(data).forEach(k => delete data[k]);
+        Object.assign(data, this._undo);
+        this._undo = null;
       },
       async clear(){ Object.keys(data).forEach(k => delete data[k]); },
       /* Gercek depoyla ayni yuzey: ekranlar boyut/kota okuyabilmeli. */

@@ -158,6 +158,44 @@
       try{ await S.importAll({ rastgele:1 }); }catch(e){ atti = true; }
       expect(atti).toBeTruthy();
     });
+
+    it('ice aktarma oncesi durumu saklar ve geri alinabilir', async function(){
+      const undoKey = 'spi.v1.ben.oncesi';
+      const oncekiUndo = localStorage.getItem(undoKey);
+      try{
+        localStorage.removeItem(undoKey);
+        await temizle();
+        await S.set(ON + 'eski', { v:'ESKI' });
+        expect(S.importUndoInfo()).toBeNull();
+
+        const oncekiTam = S.exportAll().data;
+        await S.importAll({ __meta:{ app:'spi-saglik', schemaVersion:SP.SCHEMA_VERSION },
+          data:Object.assign({}, oncekiTam, { [ON + 'eski']:{ v:'YENI' } }) });
+        expect((await S.get(ON + 'eski')).v).toBe('YENI');
+        expect(S.importUndoInfo()).toBeTruthy();
+
+        await S.undoImport();
+        expect((await S.get(ON + 'eski')).v).toBe('ESKI');
+        // tek yuvalidir: kullanilinca bosalir
+        expect(S.importUndoInfo()).toBeNull();
+        await temizle();
+      }finally{
+        if(oncekiUndo === null) localStorage.removeItem(undoKey); else localStorage.setItem(undoKey, oncekiUndo);
+      }
+    });
+
+    it('gecersiz geri alma istegini reddeder', async function(){
+      const undoKey = 'spi.v1.ben.oncesi';
+      const onceki = localStorage.getItem(undoKey);
+      try{
+        localStorage.removeItem(undoKey);
+        let atti = false;
+        try{ await S.undoImport(); }catch(e){ atti = true; }
+        expect(atti).toBeTruthy();
+      }finally{
+        if(onceki === null) localStorage.removeItem(undoKey); else localStorage.setItem(undoKey, onceki);
+      }
+    });
   });
 
   describe('Depo — alan ve sağlık', function(){
