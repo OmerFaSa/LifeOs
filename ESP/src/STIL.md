@@ -35,8 +35,8 @@ son yüklenir):
    eşleşmeyen her bölüm ana renkte kalırdı. Bu, devir notundaki *«kopyalanan
    palettes.css yanlış bölüm adlarını taşıyordu, kural yazılıydı ama hiç
    çalışmıyordu»* hatasının tekrarı olurdu.
-2. **Ajan renkleri.** `tokens.css` beş SPİ ajanı tanımlar; ESP'nin altı uzmanı
-   var. Patron ortak jetondan gelir, altısı burada.
+2. **Ajan renkleri.** `tokens.css` beş SPİ ajanı tanımlar; ESP'nin patron
+   dışında sekiz ajanı var. Patron ortak jetondan gelir, sekizi `esp.css`'te.
 
 ---
 

@@ -47,7 +47,7 @@ ESP.SECTIONS_ALL = [
       views:[{ route:'writing', label:'Yazı Laboratuvarı', icon:'quill' }] },
 
     { id:'ofis', icon:'users', label:'Ofis',
-      note:'Patron ve altı uzman',
+      note:'Patron, yedi uzman ve bir koç',
       views:[
         { route:'office',    label:'Masalar',  icon:'users' },
         { route:'team',      label:'Danışma',  icon:'zap' },

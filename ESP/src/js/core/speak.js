@@ -59,25 +59,33 @@ ESP.Speak = (function(){
 
   /* ------------------------------------------------- ajan ses kimliği
 
-     Beş ajanın sesi birbirinden AYRILMALI: toplantıyı dinlerken kimin
+     Dokuz ajanın sesi birbirinden AYRILMALI: toplantıyı dinlerken kimin
      konuştuğu duyulmadan anlaşılmalı.
 
-     Tarayıcıda genelde bir ya da iki Türkçe ses bulunur — beş ayrı ses
+     Tarayıcıda genelde bir ya da iki Türkçe ses bulunur — dokuz ayrı ses
      bulunmaz. Bu yüzden kimlik yalnız sese değil, KONUŞMA BİÇİMİNE de
-     yazılır: hız ve perde. Tek sesle bile beş karakter ayrışır.
+     yazılır: hız ve perde. Tek sesle bile dokuz karakter ayrışır.
 
      Değerler karakterden çıkar, rastgele değil:
-       Patron  — yavaş ve alçak: kararı o veriyor, acelesi yok
-       Kerem   — nötr: ölçüm okuyor, yorum katmıyor
-       Nesrin  — biraz daha canlı: mutfakta anlatıyor
-       Barış   — hızlı: antrenman veriyor
-       Sedef   — ölçülü: para konuşuyor, abartmıyor */
+       Patron      — yavaş ve alçak: kararı o veriyor, acelesi yok
+       Polyglot    — canlı: telaffuz pratiği veriyor, tekrar ister
+       Socrates    — ağır ve sorgulayıcı: cevabı değil soruyu taşır
+       Maestro     — en canlısı: müzik konuşuyor
+       Demosthenes — ölçülü: «önce temiz, sonra hızlı» kendi ilkesi
+       Aristoteles — en yavaşı: derin okuma acele kaldırmaz
+       Montaigne   — nötr-düşünceli: deneme yazarı sakinliği
+       Herodot     — alçak ve anlatıcı: tarih aktarıyor
+       Mnemosyne   — nötre en yakını: ölçüm okuyor, yorum katmıyor */
   const KIMLIK = {
-    patron:{ rate:0.94, pitch:0.92 },
-    lab:   { rate:1.00, pitch:1.00 },
-    nutri: { rate:1.02, pitch:1.08 },
-    move:  { rate:1.10, pitch:1.04 },
-    money: { rate:0.98, pitch:0.96 },
+    patron:     { rate:0.90, pitch:0.88 },
+    polyglot:   { rate:1.05, pitch:1.06 },
+    socrates:   { rate:0.89, pitch:0.94 },
+    maestro:    { rate:1.08, pitch:1.10 },
+    demosthenes:{ rate:0.96, pitch:1.00 },
+    aristoteles:{ rate:0.85, pitch:0.90 },
+    montaigne:  { rate:0.98, pitch:0.96 },
+    herodot:    { rate:0.93, pitch:0.86 },
+    mnemosyne:  { rate:1.00, pitch:0.98 },
   };
 
   /* Ses ataması KARARLI olmalı: aynı ajan her seferinde aynı sesle

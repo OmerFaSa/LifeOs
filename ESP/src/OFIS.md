@@ -210,7 +210,7 @@ koşul geçtiğinde kendiliğinden kalkar. Kullanıcı silmez.
 
 ## Toplantı
 
-Gündem seçilir, altı uzman sırayla konuşur, Patron kapatır. Her tur **ayrı bir
+Gündem seçilir, yedi uzman ve bir koç sırayla konuşur, Patron kapatır. Her tur **ayrı bir
 çağrıdır** ve geldiği anda ekrana basılır — hepsinin bitmesi beklenmez. Uzun
 süren bir toplantıda kullanıcı ilerlemeyi görür.
 

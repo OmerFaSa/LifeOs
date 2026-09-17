@@ -1946,7 +1946,7 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   box-shadow:inset 3px 0 0 var(--sec);
 }
 
-/* Devir düğmesi: ajan «bu Nesrin'in alanında» dediğinde oraya GİDEN
+/* Devir düğmesi: ajan «bu Montaigne'in alanında» dediğinde oraya GİDEN
    bir yol. Cümlenin altında durur, cümlenin yerine geçmez. */
 .devirdug{
   display:flex; align-items:center; gap:10px; flex-wrap:wrap;
@@ -2532,7 +2532,9 @@ button.listitem.is-on{ background:var(--primary-soft); }
 
 /* ---------- ofis: ajan masaları ---------- */
 
-/* Avatar — beş ajanın tek ayırt edici işareti.
+/* Avatar — dokuz ajanın tek ayırt edici işareti. Renk `office.js`'te
+   agent.color'dan İNLİNE yazılır (`--agent-lang` vb. esp.css'te tanımlı);
+   burada yalnız boyut ve tipografi durur, ajan başına ayrı sınıf yoktur.
    Renk yalnız kimliği taşır; durum her zaman rozet ve metinle verilir. */
 .agentav{
   width:38px; height:38px; flex:none;
@@ -2542,11 +2544,6 @@ button.listitem.is-on{ background:var(--primary-soft); }
   background:var(--surface-3); color:var(--text);
 }
 .agentav--sm{ width:26px; height:26px; font-size:var(--fs-xs); }
-.agentav--patron{ background:var(--agent-patron); color:var(--agent-ink); }
-.agentav--lab   { background:var(--agent-lab);    color:var(--agent-ink); }
-.agentav--nutri { background:var(--agent-nutri);  color:var(--agent-ink); }
-.agentav--move  { background:var(--agent-move);   color:var(--agent-ink); }
-.agentav--money { background:var(--agent-money);  color:var(--agent-ink); }
 
 /* Masalar defter satırının tam genişliğinde durur. Sütun alt sınırı
    geniştir: ajan adı, rolü ve rozeti aynı satıra sığmadığında üst üste
@@ -2571,18 +2568,13 @@ button.listitem.is-on{ background:var(--primary-soft); }
 /* Masanin kimlik seridi. Renk BIR DURUM DEGIL, bir imzadir: masanin
    kime ait oldugunu soyler. Durum renkleri (kirmizi/sari/yesil) bu
    seritte asla kullanilmaz — o ayrim bozulursa ofis okunamaz hale
-   gelir. Serit sol kenarda durur ve masa kapaliyken de gorunur. */
-.desk{ position:relative; }
-.desk::before{
-  content:''; position:absolute; inset:0 auto 0 0;
-  width:3px; border-radius:3px 0 0 3px;
-  background:var(--surface-3);
-}
-.desk--patron::before{ background:var(--agent-patron); }
-.desk--lab::before   { background:var(--agent-lab); }
-.desk--nutri::before { background:var(--agent-nutri); }
-.desk--move::before  { background:var(--agent-move); }
-.desk--money::before { background:var(--agent-money); }
+   gelir. Serit sol kenarda durur ve masa kapaliyken de gorunur.
+
+   Mekanizma esp.css'te durur (`--desk-ink` + ajan basina `.desk--{id}`
+   + `border-left`): dokuz ESP ajaninin adiyla, bu dosyanin eski SPI
+   kalintisi ::before kopyasi degil. Iki ayri mekanizma ayni seridi
+   cizerse ust uste biner ve serit kirli gorunur — bu yuzden burada
+   HICBIRI yok, tek kaynak esp.css. */
 
 /* Patron tek basina durur: esitlerin yaninda degil, ustunde. */
 .desks--solo{ columns:auto; }
@@ -5422,7 +5414,7 @@ body.is-dragging .drop.is-over{
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'2088209', at:'2026-09-17 18:07', dirty:true };
+ESP.BUILD = { id:'779fded', at:'2026-09-17 18:41', dirty:true };
 
 /* ==== js/data/rules.js ==== */
 /* Ev kurallari — sistemin bozulmaz sinirlari.
@@ -9264,7 +9256,7 @@ ESP.SECTIONS_ALL = [
       views:[{ route:'writing', label:'Yazı Laboratuvarı', icon:'quill' }] },
 
     { id:'ofis', icon:'users', label:'Ofis',
-      note:'Patron ve altı uzman',
+      note:'Patron, yedi uzman ve bir koç',
       views:[
         { route:'office',    label:'Masalar',  icon:'users' },
         { route:'team',      label:'Danışma',  icon:'zap' },
@@ -19104,25 +19096,33 @@ ESP.Speak = (function(){
 
   /* ------------------------------------------------- ajan ses kimliği
 
-     Beş ajanın sesi birbirinden AYRILMALI: toplantıyı dinlerken kimin
+     Dokuz ajanın sesi birbirinden AYRILMALI: toplantıyı dinlerken kimin
      konuştuğu duyulmadan anlaşılmalı.
 
-     Tarayıcıda genelde bir ya da iki Türkçe ses bulunur — beş ayrı ses
+     Tarayıcıda genelde bir ya da iki Türkçe ses bulunur — dokuz ayrı ses
      bulunmaz. Bu yüzden kimlik yalnız sese değil, KONUŞMA BİÇİMİNE de
-     yazılır: hız ve perde. Tek sesle bile beş karakter ayrışır.
+     yazılır: hız ve perde. Tek sesle bile dokuz karakter ayrışır.
 
      Değerler karakterden çıkar, rastgele değil:
-       Patron  — yavaş ve alçak: kararı o veriyor, acelesi yok
-       Kerem   — nötr: ölçüm okuyor, yorum katmıyor
-       Nesrin  — biraz daha canlı: mutfakta anlatıyor
-       Barış   — hızlı: antrenman veriyor
-       Sedef   — ölçülü: para konuşuyor, abartmıyor */
+       Patron      — yavaş ve alçak: kararı o veriyor, acelesi yok
+       Polyglot    — canlı: telaffuz pratiği veriyor, tekrar ister
+       Socrates    — ağır ve sorgulayıcı: cevabı değil soruyu taşır
+       Maestro     — en canlısı: müzik konuşuyor
+       Demosthenes — ölçülü: «önce temiz, sonra hızlı» kendi ilkesi
+       Aristoteles — en yavaşı: derin okuma acele kaldırmaz
+       Montaigne   — nötr-düşünceli: deneme yazarı sakinliği
+       Herodot     — alçak ve anlatıcı: tarih aktarıyor
+       Mnemosyne   — nötre en yakını: ölçüm okuyor, yorum katmıyor */
   const KIMLIK = {
-    patron:{ rate:0.94, pitch:0.92 },
-    lab:   { rate:1.00, pitch:1.00 },
-    nutri: { rate:1.02, pitch:1.08 },
-    move:  { rate:1.10, pitch:1.04 },
-    money: { rate:0.98, pitch:0.96 },
+    patron:     { rate:0.90, pitch:0.88 },
+    polyglot:   { rate:1.05, pitch:1.06 },
+    socrates:   { rate:0.89, pitch:0.94 },
+    maestro:    { rate:1.08, pitch:1.10 },
+    demosthenes:{ rate:0.96, pitch:1.00 },
+    aristoteles:{ rate:0.85, pitch:0.90 },
+    montaigne:  { rate:0.98, pitch:0.96 },
+    herodot:    { rate:0.93, pitch:0.86 },
+    mnemosyne:  { rate:1.00, pitch:0.98 },
   };
 
   /* Ses ataması KARARLI olmalı: aynı ajan her seferinde aynı sesle
@@ -19638,23 +19638,13 @@ ESP.UI = (function(){
     shield:'<path d="M12 3.5l7 2.6v5.4c0 4-2.9 7.4-7 8.9-4.1-1.5-7-4.9-7-8.9V6.1z"/>'
       + '<path d="M9 12.2l2.2 2.2L15.2 10"/>',
 
-    /* --- saglik alani --- */
-    heart:'<path d="M12 20.5C7 17 3.5 13.9 3.5 10.2A4.7 4.7 0 0112 7.6a4.7 4.7 0 018.5 2.6c0 3.7-3.5 6.8-8.5 10.3z"/>',
+    /* pulse: ESP kendi kullanimi (nabiz/canlilik gostergesi). SPI'den
+       kopyalanan "saglik alani" bloğunun geri kalanı (heart, drop, flask,
+       meal, leaf, dumbbell, wallet, scale, pill, fire, bed, camera) hiçbir
+       ekranda kullanılmıyordu — silindi. ESP sağlık uygulaması değil. */
     pulse:'<path d="M2.5 12.5h4l2-5 3.5 10 2.5-6 1.5 3h5.5"/>',
-    drop:'<path d="M12 3.2c3.4 4 5.5 6.6 5.5 9.1a5.5 5.5 0 11-11 0c0-2.5 2.1-5.1 5.5-9.1z"/>',
-    flask:'<path d="M9.5 3.5h5M10.5 3.5v6L5.4 18a2 2 0 001.7 3h9.8a2 2 0 001.7-3l-5.1-8.5v-6"/><path d="M7.6 14.5h8.8"/>',
-    meal:'<path d="M6 3.5v7a2.5 2.5 0 005 0v-7M8.5 10.5V21"/><path d="M17 3.5c-1.4 1.4-2 3.2-2 5.5 0 1.7.7 2.8 2 3.2V21"/>',
-    leaf:'<path d="M4.5 19.5C3 14 6.5 5.5 19.5 4.5c1 12-7 15.5-12.5 14"/><path d="M9 15c2.2-3.4 5-5.6 8.5-7"/>',
-    dumbbell:'<path d="M3 9.5v5M6.5 7v10M17.5 7v10M21 9.5v5M6.5 12h11"/>',
-    wallet:'<path d="M3.5 7.5A2 2 0 015.5 5.5h12A1.5 1.5 0 0119 7v.5"/><rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M16 13.5v.01"/>',
-    scale:'<path d="M12 3.5a8.5 8.5 0 018.5 8.5v7a1.5 1.5 0 01-1.5 1.5H5A1.5 1.5 0 013.5 19v-7A8.5 8.5 0 0112 3.5z"/><path d="M12 11.5l3-3.5"/>',
-    pill:'<rect x="2.8" y="8.6" width="18.4" height="6.8" rx="3.4" transform="rotate(-45 12 12)"/><path d="M8.5 8.5l7 7"/>',
-    fire:'<path d="M12 3.5c3.5 3.4 5.5 6 5.5 8.9a5.5 5.5 0 11-11 0c0-1.5.6-2.9 1.7-4.2.4 1.2 1 2 1.9 2.4C10.5 8.4 11 5.9 12 3.5z"/>',
-    bed:'<path d="M3 19v-8M3 13h18v6M7.5 10.5h3.5a2 2 0 012 2v.5"/><path d="M3 19h18"/>',
     mic:'<rect x="9" y="2.5" width="6" height="11" rx="3"/>'
       + '<path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/>',
-    camera:'<path d="M3.5 8.5A1.5 1.5 0 015 7h2.2l1.2-2h7.2l1.2 2H19a1.5 1.5 0 011.5 1.5v9A1.5 1.5 0 0119 19H5a1.5 1.5 0 01-1.5-1.5z"/>'
-      + '<circle cx="12" cy="12.5" r="3.4"/>',
     file:'<path d="M7 3.5h7l5 5V19a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 016 19V5a1.5 1.5 0 011-1.5z"/>'
       + '<path d="M13.5 3.5V9H19"/>',
 
@@ -22584,7 +22574,7 @@ ESP.LLM = (function(){
 })();
 
 /* ==== js/core/office.js ==== */
-/* Ofis — yedi ajanin calisma duzeni.
+/* Ofis — dokuz ajanin calisma duzeni.
 
    Akis her zaman ayni yonde gider:
 
@@ -28443,9 +28433,9 @@ ESP.Screens.writing = (function(){
 })();
 
 /* ==== js/screens/office.js ==== */
-/* Ofis — yedi masa ve aralarındaki devir.
+/* Ofis — dokuz masa ve aralarındaki devir.
 
-   Patron dört uzmanın yanına dizilmez, ÜSTÜNE konur: kendi defteri kendi
+   Patron sekiz uzmanın yanına dizilmez, ÜSTÜNE konur: kendi defteri kendi
    işi değil, trafiğin kendisidir.
 
    Masa notu bir tavsiye değil BULGUDUR: koşul sağlandığında kendiliğinden
@@ -28525,7 +28515,7 @@ ESP.Screens.office = (function(){
         K.Entry({
           label:'PATRON', hint:'rule-engine',
           meta:ESP.Office.ready('patron') ? 'model bağlı' : 'kural motoru',
-          note:'Patron kendi hesabını yapmaz: altı uzmanın raporunu okur, '
+          note:'Patron kendi hesabını yapmaz: yedi uzman ve bir koçun raporunu okur, '
              + 'çelişkiyi öncelik sırasına göre çözer.',
           action:K.Button({ label:'Danış', size:'sm', act:'open-agent',
             data:{ 'data-agent':'patron' } }),
@@ -28615,7 +28605,7 @@ ESP.Screens.office = (function(){
       return 'Masalarda bekleyen bulgu yok.';
     },
     lede(){
-      return 'Yedi masa: Patron ve altı uzman. Her masa yalnızca kendi '
+      return 'Dokuz masa: Patron, yedi uzman ve bir koç. Her masa yalnızca kendi '
            + 'ölçümüne bakar; çelişkiyi Patron çözer.';
     },
     stats(){
@@ -28828,7 +28818,7 @@ ESP.Screens.team = (function(){
 })();
 
 /* ==== js/screens/meeting.js ==== */
-/* Toplantı — gündem seçilir, altı uzman konuşur, Patron kapatır.
+/* Toplantı — gündem seçilir, yedi uzman ve bir koç konuşur, Patron kapatır.
 
    Her tur AYRI bir çağrıdır ve geldiği anda ekrana basılır; hepsinin
    bitmesi beklenmez. Uzun süren bir toplantıda kullanıcı ilerlemeyi görür.
@@ -31714,7 +31704,7 @@ ESP.App = (function(){
   }
 
   /* Enter ile hızlı giriş: metin alanında Enter, yanındaki eylemi tetikler. */
-  const ENTER_ACTIONS = { 'meal-text':'add-meal', 'quick-meal':'quick-meal', 'chat-text':'send-chat' };
+  const ENTER_ACTIONS = { 'chat-text':'send-chat' };
   document.addEventListener('keydown', async e => {
     if((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')){
       e.preventDefault();

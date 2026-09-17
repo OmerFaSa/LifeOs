@@ -1,4 +1,4 @@
-/* Toplantı — gündem seçilir, altı uzman konuşur, Patron kapatır.
+/* Toplantı — gündem seçilir, yedi uzman ve bir koç konuşur, Patron kapatır.
 
    Her tur AYRI bir çağrıdır ve geldiği anda ekrana basılır; hepsinin
    bitmesi beklenmez. Uzun süren bir toplantıda kullanıcı ilerlemeyi görür.

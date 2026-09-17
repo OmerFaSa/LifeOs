@@ -1121,7 +1121,7 @@ ESP.App = (function(){
   }
 
   /* Enter ile hızlı giriş: metin alanında Enter, yanındaki eylemi tetikler. */
-  const ENTER_ACTIONS = { 'meal-text':'add-meal', 'quick-meal':'quick-meal', 'chat-text':'send-chat' };
+  const ENTER_ACTIONS = { 'chat-text':'send-chat' };
   document.addEventListener('keydown', async e => {
     if((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')){
       e.preventDefault();

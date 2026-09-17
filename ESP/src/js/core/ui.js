@@ -51,23 +51,13 @@ ESP.UI = (function(){
     shield:'<path d="M12 3.5l7 2.6v5.4c0 4-2.9 7.4-7 8.9-4.1-1.5-7-4.9-7-8.9V6.1z"/>'
       + '<path d="M9 12.2l2.2 2.2L15.2 10"/>',
 
-    /* --- saglik alani --- */
-    heart:'<path d="M12 20.5C7 17 3.5 13.9 3.5 10.2A4.7 4.7 0 0112 7.6a4.7 4.7 0 018.5 2.6c0 3.7-3.5 6.8-8.5 10.3z"/>',
+    /* pulse: ESP kendi kullanimi (nabiz/canlilik gostergesi). SPI'den
+       kopyalanan "saglik alani" bloğunun geri kalanı (heart, drop, flask,
+       meal, leaf, dumbbell, wallet, scale, pill, fire, bed, camera) hiçbir
+       ekranda kullanılmıyordu — silindi. ESP sağlık uygulaması değil. */
     pulse:'<path d="M2.5 12.5h4l2-5 3.5 10 2.5-6 1.5 3h5.5"/>',
-    drop:'<path d="M12 3.2c3.4 4 5.5 6.6 5.5 9.1a5.5 5.5 0 11-11 0c0-2.5 2.1-5.1 5.5-9.1z"/>',
-    flask:'<path d="M9.5 3.5h5M10.5 3.5v6L5.4 18a2 2 0 001.7 3h9.8a2 2 0 001.7-3l-5.1-8.5v-6"/><path d="M7.6 14.5h8.8"/>',
-    meal:'<path d="M6 3.5v7a2.5 2.5 0 005 0v-7M8.5 10.5V21"/><path d="M17 3.5c-1.4 1.4-2 3.2-2 5.5 0 1.7.7 2.8 2 3.2V21"/>',
-    leaf:'<path d="M4.5 19.5C3 14 6.5 5.5 19.5 4.5c1 12-7 15.5-12.5 14"/><path d="M9 15c2.2-3.4 5-5.6 8.5-7"/>',
-    dumbbell:'<path d="M3 9.5v5M6.5 7v10M17.5 7v10M21 9.5v5M6.5 12h11"/>',
-    wallet:'<path d="M3.5 7.5A2 2 0 015.5 5.5h12A1.5 1.5 0 0119 7v.5"/><rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M16 13.5v.01"/>',
-    scale:'<path d="M12 3.5a8.5 8.5 0 018.5 8.5v7a1.5 1.5 0 01-1.5 1.5H5A1.5 1.5 0 013.5 19v-7A8.5 8.5 0 0112 3.5z"/><path d="M12 11.5l3-3.5"/>',
-    pill:'<rect x="2.8" y="8.6" width="18.4" height="6.8" rx="3.4" transform="rotate(-45 12 12)"/><path d="M8.5 8.5l7 7"/>',
-    fire:'<path d="M12 3.5c3.5 3.4 5.5 6 5.5 8.9a5.5 5.5 0 11-11 0c0-1.5.6-2.9 1.7-4.2.4 1.2 1 2 1.9 2.4C10.5 8.4 11 5.9 12 3.5z"/>',
-    bed:'<path d="M3 19v-8M3 13h18v6M7.5 10.5h3.5a2 2 0 012 2v.5"/><path d="M3 19h18"/>',
     mic:'<rect x="9" y="2.5" width="6" height="11" rx="3"/>'
       + '<path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/>',
-    camera:'<path d="M3.5 8.5A1.5 1.5 0 015 7h2.2l1.2-2h7.2l1.2 2H19a1.5 1.5 0 011.5 1.5v9A1.5 1.5 0 0119 19H5a1.5 1.5 0 01-1.5-1.5z"/>'
-      + '<circle cx="12" cy="12.5" r="3.4"/>',
     file:'<path d="M7 3.5h7l5 5V19a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 016 19V5a1.5 1.5 0 011-1.5z"/>'
       + '<path d="M13.5 3.5V9H19"/>',
 

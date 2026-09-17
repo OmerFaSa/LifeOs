@@ -10,7 +10,7 @@
 
   describe('brifing', () => {
 
-    it('yedi ajanin yedisinin de brifingi vardir', () => {
+    it('dokuz ajanin dokuzunun da brifingi vardir', () => {
       resetState();
       ESP.AGENTS.forEach(a => {
         const b = O.brief(a.id);

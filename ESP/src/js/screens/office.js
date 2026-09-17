@@ -1,6 +1,6 @@
-/* Ofis — yedi masa ve aralarındaki devir.
+/* Ofis — dokuz masa ve aralarındaki devir.
 
-   Patron dört uzmanın yanına dizilmez, ÜSTÜNE konur: kendi defteri kendi
+   Patron sekiz uzmanın yanına dizilmez, ÜSTÜNE konur: kendi defteri kendi
    işi değil, trafiğin kendisidir.
 
    Masa notu bir tavsiye değil BULGUDUR: koşul sağlandığında kendiliğinden
@@ -80,7 +80,7 @@ ESP.Screens.office = (function(){
         K.Entry({
           label:'PATRON', hint:'rule-engine',
           meta:ESP.Office.ready('patron') ? 'model bağlı' : 'kural motoru',
-          note:'Patron kendi hesabını yapmaz: altı uzmanın raporunu okur, '
+          note:'Patron kendi hesabını yapmaz: yedi uzman ve bir koçun raporunu okur, '
              + 'çelişkiyi öncelik sırasına göre çözer.',
           action:K.Button({ label:'Danış', size:'sm', act:'open-agent',
             data:{ 'data-agent':'patron' } }),
@@ -170,7 +170,7 @@ ESP.Screens.office = (function(){
       return 'Masalarda bekleyen bulgu yok.';
     },
     lede(){
-      return 'Yedi masa: Patron ve altı uzman. Her masa yalnızca kendi '
+      return 'Dokuz masa: Patron, yedi uzman ve bir koç. Her masa yalnızca kendi '
            + 'ölçümüne bakar; çelişkiyi Patron çözer.';
     },
     stats(){

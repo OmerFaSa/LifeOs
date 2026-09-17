@@ -448,7 +448,7 @@ Türkçe ayrıştırmanın üç kuralı (AYS/SPİ ile birebir aynı):
 src/
   index.html            yükleme sırası: veri → çekirdek → ekranlar
   MIMARI.md             bu belge
-  OFIS.md               yedi ajanın çalışma düzeni
+  OFIS.md               dokuz ajanın çalışma düzeni
   STIL.md               ESP'ye özel tasarım notları
   css/
     tokens.css palettes.css base.css layout.css components.css designs.css
@@ -460,7 +460,7 @@ src/
     data/               referans tabloları — mantık yok, yalnızca veri
       rules.js          ev kuralları: pedagojik sınır, öncelik, disiplinler,
                         Türkçe kelime sınırı (ESP.trRe)
-      agents.js         yedi ajan, gündem türleri (TEK yerde)
+      agents.js         dokuz ajan, gündem türleri (TEK yerde)
       canon.js          34 eser, 20 kavram, 11 gelenek, Sokratik kalıplar
       lexicon.js        8 dil, CEFR bantlarının ölçülebilir karşılığı
       guitar_tabs.js    12 gam/mod, 6 ilerleyiş, 10 teknik, 6 ölçü
@@ -476,7 +476,7 @@ src/
       acoustic.js       Modül 3 kural motoru (iki ajan paylaşır)
       planner.js        orkestratör: sıradaki iş, denge, çapraz bulgu
       parse.js          serbest metin ayrıştırıcıları
-      office.js         yedi ajanlı ofis, brifingler, validate()
+      office.js         dokuz ajanlı ofis, brifingler, validate()
       components.js     bileşen sözlüğü (uygulamadan bağımsız)
       parts.js          ESP'ye özel parçalar: kesinlik rozeti, radar
       ui.js memo.js llm.js quota.js palette.js setup.js

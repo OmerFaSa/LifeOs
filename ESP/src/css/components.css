@@ -405,7 +405,7 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
   box-shadow:inset 3px 0 0 var(--sec);
 }
 
-/* Devir düğmesi: ajan «bu Nesrin'in alanında» dediğinde oraya GİDEN
+/* Devir düğmesi: ajan «bu Montaigne'in alanında» dediğinde oraya GİDEN
    bir yol. Cümlenin altında durur, cümlenin yerine geçmez. */
 .devirdug{
   display:flex; align-items:center; gap:10px; flex-wrap:wrap;
@@ -991,7 +991,9 @@ button.listitem.is-on{ background:var(--primary-soft); }
 
 /* ---------- ofis: ajan masaları ---------- */
 
-/* Avatar — beş ajanın tek ayırt edici işareti.
+/* Avatar — dokuz ajanın tek ayırt edici işareti. Renk `office.js`'te
+   agent.color'dan İNLİNE yazılır (`--agent-lang` vb. esp.css'te tanımlı);
+   burada yalnız boyut ve tipografi durur, ajan başına ayrı sınıf yoktur.
    Renk yalnız kimliği taşır; durum her zaman rozet ve metinle verilir. */
 .agentav{
   width:38px; height:38px; flex:none;
@@ -1001,11 +1003,6 @@ button.listitem.is-on{ background:var(--primary-soft); }
   background:var(--surface-3); color:var(--text);
 }
 .agentav--sm{ width:26px; height:26px; font-size:var(--fs-xs); }
-.agentav--patron{ background:var(--agent-patron); color:var(--agent-ink); }
-.agentav--lab   { background:var(--agent-lab);    color:var(--agent-ink); }
-.agentav--nutri { background:var(--agent-nutri);  color:var(--agent-ink); }
-.agentav--move  { background:var(--agent-move);   color:var(--agent-ink); }
-.agentav--money { background:var(--agent-money);  color:var(--agent-ink); }
 
 /* Masalar defter satırının tam genişliğinde durur. Sütun alt sınırı
    geniştir: ajan adı, rolü ve rozeti aynı satıra sığmadığında üst üste
@@ -1030,18 +1027,13 @@ button.listitem.is-on{ background:var(--primary-soft); }
 /* Masanin kimlik seridi. Renk BIR DURUM DEGIL, bir imzadir: masanin
    kime ait oldugunu soyler. Durum renkleri (kirmizi/sari/yesil) bu
    seritte asla kullanilmaz — o ayrim bozulursa ofis okunamaz hale
-   gelir. Serit sol kenarda durur ve masa kapaliyken de gorunur. */
-.desk{ position:relative; }
-.desk::before{
-  content:''; position:absolute; inset:0 auto 0 0;
-  width:3px; border-radius:3px 0 0 3px;
-  background:var(--surface-3);
-}
-.desk--patron::before{ background:var(--agent-patron); }
-.desk--lab::before   { background:var(--agent-lab); }
-.desk--nutri::before { background:var(--agent-nutri); }
-.desk--move::before  { background:var(--agent-move); }
-.desk--money::before { background:var(--agent-money); }
+   gelir. Serit sol kenarda durur ve masa kapaliyken de gorunur.
+
+   Mekanizma esp.css'te durur (`--desk-ink` + ajan basina `.desk--{id}`
+   + `border-left`): dokuz ESP ajaninin adiyla, bu dosyanin eski SPI
+   kalintisi ::before kopyasi degil. Iki ayri mekanizma ayni seridi
+   cizerse ust uste biner ve serit kirli gorunur — bu yuzden burada
+   HICBIRI yok, tek kaynak esp.css. */
 
 /* Patron tek basina durur: esitlerin yaninda degil, ustunde. */
 .desks--solo{ columns:auto; }

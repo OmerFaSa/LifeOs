@@ -31,14 +31,19 @@ const ROOT = path.resolve(__dirname, '..');
 const PORT = Number(process.argv[2]) || 4291;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
-/* Kabul edilen, gerekçeli eksikler. Kapandıkça buradan silinir. */
+/* Kabul edilen, gerekçeli eksikler. Kapandıkça buradan silinir.
+
+   hint ve sitefoot__reload GERÇEK eksik DEĞİLDİR: ikisinde de görsel
+   boyut bilerek küçük tutulup dokunma alanı görünmez bir ::after ile
+   24×24'e çıkarılmış durumda (bkz. components.css .hint::after,
+   layout.css .sitefoot__reload::after). Bu araç DOM elemanının kendi
+   `getBoundingClientRect()`'ini ölçer; ::after bir sözde-öge olduğu
+   için ölçülemez ve boyut hâlâ küçük görünür. Allowlist bu YÖNTEM
+   sınırını belgeler, kodda kapatılacak bir borç değil. */
 const IZIN = [
-  /* Ölçüyü küçültmeden dokunma alanını büyütmek gerekiyor; görsel
-     boyut bilerek küçük (satırın içinde bir nokta kadar yer kaplar). */
-  { tur:'kucuk', desen:/\bhint\b/,            not:'ⓘ düğmesi 16×16 — dokunma alanı ::after ile büyütülecek' },
-  { tur:'kucuk', desen:/sitefoot__reload/,    not:'künye tazele bağlantısı 50×17' },
+  { tur:'kucuk', desen:/\bhint\b/,            not:'ⓘ düğmesi 16×16 — dokunma alanı ::after ile 24×24 (araç ::after ölçemiyor)' },
+  { tur:'kucuk', desen:/sitefoot__reload/,    not:'künye tazele bağlantısı 50×17 — dokunma alanı ::after ile 24×24 (araç ::after ölçemiyor)' },
   { tur:'kucuk', desen:/INPUT 1[0-9]×1[0-9]/, not:'onay kutusu yerel denetim boyutu' },
-  { tur:'etiketsiz', desen:/meal-slot/,       not:'öğün yuvası seçici — aria-label eklenecek' },
 ];
 const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(metin));
 

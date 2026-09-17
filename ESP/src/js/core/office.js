@@ -1,4 +1,4 @@
-/* Ofis — yedi ajanin calisma duzeni.
+/* Ofis — dokuz ajanin calisma duzeni.
 
    Akis her zaman ayni yonde gider:
 
