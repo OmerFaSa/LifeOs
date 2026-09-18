@@ -1209,11 +1209,13 @@ table td, table th{
   font-family:var(--font-serif); font-size:17px; font-weight:500;
   color:var(--ink-on); line-height:1.25;
 }
-/* Alt satir: YALNIZ markanin kendi alt yazisi. Secici once
+/* Markanin alt yazisi KENDI SINIFINI tasir. Secici once
    `.sitefoot__brand span` idi ve seviye rozetinin ICINDEKI span'lara da
-   vuruyordu — rozet blok blok dagiliyordu. Cocuk secicisi o kapiyi
-   kapatir: rozet kendi kurallariyla cizilir. */
-.sitefoot__brand > div > span:not(.seviye-rozet){
+   vuruyordu; sonra `> div > span:not(.seviye-rozet)` oldu ve bu kez
+   markupin sekline cakildi — araya bir sarmalayici koymak ya da rozeti
+   baska yere tasimak alt yaziyi sessizce bicimsiz birakirdi. Bir sinif,
+   iki ozel durumu birden gereksiz kilar. */
+.sitefoot__sub{
   display:block; margin-top:4px;
   font-size:11.5px; color:var(--ink-on-2); line-height:1.45;
 }
@@ -4035,7 +4037,12 @@ body.is-dragging .drop.is-over{
    yeterlidir (zayıf cihazda iki video çözmek istenmeyebilir). */
 
 .perde{
-  position:fixed; inset:0; z-index:10000;
+  position:fixed; inset:0;
+  /* Katman sirasi bilerek JETON DEGIL duz sayidir: bu dosya uc
+     uygulamada da ayni sekilde kosar ve hicbirinin jeton olcegine
+     bagimli olamaz. Uc uygulamanin da en ustteki jetonu --z-toast:80;
+     10000 o olcegin acikca ustunde durur. */
+  z-index:10000;
   display:grid; place-items:center;
   background:#000;
   opacity:1; transition:opacity .38s ease;
@@ -4886,12 +4893,14 @@ body.is-dragging .drop.is-over{
 .desbtn__mini--nodes{ grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:3px; }
 .desbtn__mini--nodes i{ opacity:.42; border-radius:2px; }
 </style>
+<!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
+     `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
 <!-- MARKA GİRİŞİ — logo videosu, geçilebilir.
 
      Perde burada DURAĞAN durur; sayfanın ilk boyamasında görünür.
      JavaScript'i beklemek, açılışta bir kare boş ekran demekti.
-     Davranışı (ses, «Geç» halkası, Esc, hata durumunda kapanma)
-     `js/core/perde.js` takar — seviye kutlamasıyla AYNI koddur.
+     Davranışı (ses, «Geç» halkası, Esc, odak hapsi, hata durumunda
+     kapanma) `js/core/perde.js` takar — seviye kutlamasıyla AYNI koddur.
 
      Gerçek açılışı (aşağıdaki .boot) ETKİLEMEZ: ayrı, üstte duran bir
      katmandır; ikisi paralel çalışır, biri diğerini beklemez.
@@ -4917,6 +4926,10 @@ body.is-dragging .drop.is-over{
     </button>
   </div>
 </div>
+<!-- Perde modulu markupin HEMEN ARDINDAN yuklenir. <head>'de blokleyici
+     bir betik olarak durursa, durağan perdenin ilk boyamasını da o
+     geciktirir — yani markupin durağan olmasinin sebebini ortadan
+     kaldirirdi. -->
 <script>
 (function(){
   var el = document.getElementById('marka-perde');
@@ -4934,6 +4947,11 @@ body.is-dragging .drop.is-over{
   var kurtarma = setTimeout(function(){
     if(el.parentNode) el.parentNode.removeChild(el);
   }, 14000);
+  /* Kaynak surumde ustteki <script src> bu satira gelinmeden calismis
+     olur ve dongu ILK denemede biter. TEK DOSYA surumunde (dist) ise
+     build.py butun <script src>'leri govdenin ARDINA tasir: orada
+     Perde bu betikten SONRA tanimlanir ve bekleme gercekten calisir.
+     Iki surumun tek markupla yasamasinin bedeli bu kucuk dongudur. */
   var deneme = 0;
   (function bekle(){
     if(window.SP && SP.Perde){
@@ -4946,6 +4964,7 @@ body.is-dragging .drop.is-over{
   })();
 })();
 </script>
+<!-- SEVIYE:perde-bit -->
 
 <div id="app">
   <div class="boot">
@@ -5047,11 +5066,53 @@ SP.Perde = (function(){
     + '<path d="M11 5 6 9H3v6h3l5 4z"/>'
     + '<path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>';
 
+  /* AYNI ANDA TEK PERDE.
+
+     Açılışta iki perde birden açılabiliyordu: marka videosu oynarken
+     bekleyen seviye kutlaması da açılıyor, İKİ SES AYNI ANDA çalıyor ve
+     tek Esc ikisini birden kapatıyordu — kullanıcı kutlamasını hiç
+     görmeden «görüldü» damgası yiyordu. Artık ikincisi SIRAYA GİRER:
+     marka girişi biter, kutlama onun ardından oynar.
+
+     Sıraya girme kararı DOM'a bakarak verilir (`.perde` var mı), çünkü
+     durağan marka perdesi sayfada JavaScript'ten önce durur; bir
+     değişkene bakmak, henüz bağlanmamış bir perdeyi görmezden gelmek
+     olurdu. */
+  var kuyruk = [];
+
+  /* İlk dokunuş sesi KENDİLİĞİNDEN açmalı mı?
+
+     Saf bir karar; ayrı durmasının sebebi sınanabilir olması. Bu karar
+     yanlışken düğme TERS çalışıyordu: `pointerdown` yakalama evresinde
+     `click`ten önce gelip sesi açıyor, hemen ardından düğmenin kendi
+     dinleyicisi «zaten açık» görüp kapatıyordu — «Sesi aç»a basmak sesi
+     kapatıyor ve tercihi üç uygulama için birden `kapali` yazıyordu. */
+  function kendiliginenAcilsinMi(hedef, araclar, sessizMi){
+    /* Dokunuş düğmelerin üstündeyse kararı KULLANICI veriyor. */
+    if(hedef && araclar && araclar.contains && araclar.contains(hedef)) return false;
+    if(!sessizMi) return false;
+    return sesTercihi() === 'acik';
+  }
+
+  function siradakini(){
+    var n;
+    while(kuyruk.length){
+      n = kuyruk.shift();
+      if(!n.iptal){ acHemen(n.sec); return; }
+    }
+  }
+
   /* GEÇ düğmesinin içi. Halka videonun ne kadarının geçtiğini, sayı kaç
      saniye kaldığını söyler; ikisi birlikte «beklemeye değer mi»
      sorusunu cevaplar. Düz bir «Atla» yazısı o soruyu cevapsız
-     bırakıyordu. `index.html` içindeki durağan perde de BİREBİR bu
-     gövdeyi taşır — ikisi ayrışmasın diye burada da yazılı. */
+     bırakıyordu.
+
+     `brand/seviye/perde.html` içindeki DURAĞAN perde aynı gövdeyi
+     taşır — orası sayfanın ilk boyamasında görünsün diye HTML, burası
+     sonradan kurulan perdeler için JavaScript. İkisi ayrı dosyada ama
+     ikisi de tek kaynakta; `tools/seviye.py --denetle` bu dosyanın
+     ARADIĞI her sınıfın markupta gerçekten bulunduğunu doğrular, yani
+     birinden bir parça düşerse sessiz kalmaz. */
   var GEC_ICI =
       '<span class="perde__gec-halka" aria-hidden="true">'
     + '<svg viewBox="0 0 32 32"><circle class="perde__gec-iz" cx="16" cy="16" r="14"/>'
@@ -5073,17 +5134,28 @@ SP.Perde = (function(){
 
     var kapandi = false;
     var sayacId = null;
+    /* Perde açıkken arkadaki sayfa kaymaz: tam ekran bir katmanın
+       altında sayfayı kaydırmak, kapandığında bambaşka bir yere
+       düşmek demektir. */
+    var eskiTasma = null;
+    function kaydirmaKilit(){
+      try{
+        eskiTasma = document.documentElement.style.overflow;
+        document.documentElement.style.overflow = 'hidden';
+      }catch(e){}
+    }
+    function kaydirmaSerbest(){
+      if(eskiTasma === null) return;
+      try{ document.documentElement.style.overflow = eskiTasma; }catch(e){}
+      eskiTasma = null;
+    }
 
     var v = perde.querySelector('.perde__video');
     var ortam = perde.querySelector('.perde__ortam');
     var banner = perde.querySelector('.perde__banner');
     var gec = perde.querySelector('.perde__gec');
     var sesDugme = perde.querySelector('.perde__ses');
-    /* Durağan perde `index.html` içinde yazılıdır ve bir gün buradaki
-       gövdeden ayrışabilir. Ayrışma sessiz olmasın diye onarılır: halkası
-       ya da sayacı eksik bir «Geç» düğmesi yeniden kurulur. Üç dosyada
-       elle güncellenmesi unutulan bir düğme, çalışmayan bir düğmedir. */
-    if(gec && !gec.querySelector('.perde__gec-yol')) gec.innerHTML = GEC_ICI;
+    var araclar = perde.querySelector('.perde__araclar') || perde;
     var sayi = gec ? gec.querySelector('.perde__gec-sayi') : null;
     var yol = gec ? gec.querySelector('.perde__gec-yol') : null;
 
@@ -5109,16 +5181,51 @@ SP.Perde = (function(){
          uygulamanın içinden geliyormuş gibi duyulur. */
       try{ if(v){ v.pause(); } if(ortam){ ortam.pause(); } }catch(e){}
       perde.classList.add('perde--kapaniyor');
+      kaydirmaSerbest();
       setTimeout(function(){
         if(perde.parentNode) perde.parentNode.removeChild(perde);
         if(typeof secenekler.bitti === 'function'){
           try{ secenekler.bitti(); }catch(e){}
         }
+        /* Sıradaki perde ANCAK bu DOM'dan çıktıktan sonra açılır:
+           `ac()` sıraya girip girmeyeceğine `.perde` var mı diye
+           bakıyor. */
+        siradakini();
       }, 420);
     }
 
     function tusla(e){
-      if(e.key === 'Escape' || e.key === 'Esc'){ e.preventDefault(); kapat(); }
+      if(e.key === 'Escape' || e.key === 'Esc'){
+        e.preventDefault();
+        /* Üstteki perde kapanır, altındaki değil. Bugün aynı anda tek
+           perde açık ama olayı yukarı bırakmak, yarın açılan ikinci bir
+           dinleyicinin de tetiklenmesi demekti. */
+        e.stopPropagation();
+        kapat();
+        return;
+      }
+      /* ODAK PERDEDE KALIR. `aria-modal="true"` demek, ekran okuyucuya
+         arkadaki sayfanın erişilemez olduğunu söylemektir; Tab hâlâ
+         arkaya geçiyorsa bu söz tutulmamış olur. */
+      if(e.key === 'Tab') odakHapset(e);
+    }
+
+    function odaklanabilirler(){
+      return Array.prototype.filter.call(
+        perde.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])'),
+        function(el){ return !el.hidden && el.offsetParent !== null; });
+    }
+
+    function odakHapset(e){
+      var liste = odaklanabilirler();
+      if(!liste.length) return;
+      var ilk = liste[0], son = liste[liste.length - 1];
+      var simdi = document.activeElement;
+      if(e.shiftKey && (simdi === ilk || !perde.contains(simdi))){
+        e.preventDefault(); son.focus();
+      }else if(!e.shiftKey && (simdi === son || !perde.contains(simdi))){
+        e.preventDefault(); ilk.focus();
+      }
     }
     document.addEventListener('keydown', tusla, true);
     if(gec) gec.addEventListener('click', kapat);
@@ -5157,10 +5264,17 @@ SP.Perde = (function(){
     /* Tarayıcı sesli otomatik oynatmayı reddettiyse video SESSİZ oynuyor
        demektir. Kullanıcının sayfaya ilk dokunuşu, tarayıcının beklediği
        «etkileşim»dir: tam o anda ses açılır. Kullanıcı sesi KENDİ
-       kapattıysa dokunulmaz — tercihi geri almak, tercihi yok saymaktır. */
-    function ilkDokunus(){
+       kapattıysa dokunulmaz — tercihi geri almak, tercihi yok saymaktır.
+
+       DOKUNUŞ SES DÜĞMESİNİN ÜSTÜNDEYSE HİÇBİR ŞEY YAPILMAZ. Bu satır
+       olmadan düğme TERS ÇALIŞIYORDU: `pointerdown` yakalama evresinde
+       `click`ten önce gelir, sesi açardı; hemen ardından düğmenin kendi
+       dinleyicisi «zaten açık» görüp KAPATIRDI. Yani «Sesi aç»a basmak
+       sesi kapatıyor ve tercihi üç uygulama için birden `kapali`
+       yazıyordu. */
+    function ilkDokunus(e){
       document.removeEventListener('pointerdown', ilkDokunus, true);
-      if(v && v.muted && sesTercihi() === 'acik') sesiAc(false);
+      if(kendiliginenAcilsinMi(e && e.target, araclar, v && v.muted)) sesiAc(false);
     }
     document.addEventListener('pointerdown', ilkDokunus, true);
 
@@ -5230,6 +5344,7 @@ SP.Perde = (function(){
       if(v) kapat();
     }, 20000);
 
+    kaydirmaKilit();
     try{ if(gec) gec.focus({ preventScroll:true }); }catch(e){}
 
     return { kapat:kapat, el:perde };
@@ -5246,6 +5361,20 @@ SP.Perde = (function(){
        bitti     kapanınca çağrılır
      ================================================================ */
   function ac(secenekler){
+    secenekler = secenekler || {};
+    /* Ekranda perde varsa sıraya gir (bkz. AYNI ANDA TEK PERDE). */
+    if(document.querySelector('.perde')){
+      var bekleyen = { sec:secenekler, iptal:false };
+      kuyruk.push(bekleyen);
+      return {
+        kapat:function(){ bekleyen.iptal = true; },
+        el:null, sirada:true,
+      };
+    }
+    return acHemen(secenekler);
+  }
+
+  function acHemen(secenekler){
     secenekler = secenekler || {};
 
     var perde = el('div', 'perde' + (secenekler.sinif ? ' ' + secenekler.sinif : ''));
@@ -5338,6 +5467,14 @@ SP.Perde = (function(){
      Video dosyası yoksa hata yoktur: banner zaten kutlamanın kendisidir,
      video onun üstüne gelen süstür. Altı videoyu altı ayrı günde
      eklemek böyle mümkün olur. */
+  /* Bu yükselme hangi videoyu ister? Saf karar; ayrı durmasının sebebi
+     sınanabilir olması. Kademe DEĞİŞTİYSE o kademenin videosu, yalnız
+     basamak değiştiyse HİÇBİRİ. */
+  function kutlamaVideosu(yukselme, kok){
+    if(!yukselme || !yukselme.yeniKademe) return null;
+    return (kok || 'img/seviye/') + 'kademe-' + yukselme.kademe + '.mp4';
+  }
+
   function kutla(yukselme, secenekler){
     if(!yukselme) return null;
     secenekler = secenekler || {};
@@ -5347,7 +5484,7 @@ SP.Perde = (function(){
     return ac({
       sinif:'perde--seviye',
       baslik:'Seviye atladın: ' + (k.ad || '') + ' ' + yukselme.etiket,
-      video:yukselme.yeniKademe ? (kok + 'kademe-' + yukselme.kademe + '.mp4') : null,
+      video:kutlamaVideosu(yukselme, kok),
       enAz:yukselme.yeniKademe ? 6000 : 3600,
       banner:{
         no:yukselme.kademe,
@@ -5362,7 +5499,27 @@ SP.Perde = (function(){
     });
   }
 
-  return { ac:ac, baglan:baglan, kutla:kutla, sesTercihi:sesTercihi, GEC_ICI:GEC_ICI };
+  /* ACİL ÇIKIŞ — açık perdeyi hemen kaldırır ve sırayı boşaltır.
+
+     İki yerde gerekli: testlerin birbirinin üstüne perde bırakmaması
+     ve ileride «girişleri kapat» ayarının tek satırda çalışması. Normal
+     akışta çağrılmaz; kapanma `kapat()` ile, yumuşak geçişle olur. */
+  function hepsiniKapat(){
+    kuyruk.length = 0;
+    var liste = document.querySelectorAll('.perde');
+    Array.prototype.forEach.call(liste, function(el){
+      if(el.parentNode) el.parentNode.removeChild(el);
+    });
+    try{ document.documentElement.style.overflow = ''; }catch(e){}
+  }
+
+  return {
+    ac:ac, baglan:baglan, kutla:kutla,
+    sesTercihi:sesTercihi, hepsiniKapat:hepsiniKapat,
+    kendiliginenAcilsinMi:kendiliginenAcilsinMi,
+    kutlamaVideosu:kutlamaVideosu,
+    GEC_ICI:GEC_ICI, SES_ANAHTAR:SES_ANAHTAR,
+  };
 })();
 
 /* ==== js/data/build.js ==== */
@@ -5371,7 +5528,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'75f90d4', at:'2026-09-17 21:23', dirty:true };
+SP.BUILD = { id:'d4af997', at:'2026-09-18 09:35', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -5432,7 +5589,11 @@ SP.BUILD = { id:'75f90d4', at:'2026-09-17 21:23', dirty:true };
        XP'ye bakmaz. XP yalnızca GÖRÜNÜRLÜKTÜR.
      · XP GERİYE DÖNÜK YAZILMAZ. Kazanılan gün, kazanıldığı gündür.
      · HER ETKİNLİĞİN GÜNLÜK TAVANI VARDIR. Tavansız bir sayaç,
-       bir gün otuz kez tıklanır ve anlamını kaybeder.
+       bir gün otuz kez tıklanır ve anlamını kaybeder. `tavan:null`
+       «tavan yok» DEĞİL «günde bir kez» demektir (bkz. core/xp.js,
+       gunlukTavan).
+     · GERİYE DÖNÜK PUAN TOPLANMAZ. Bir haftadan eski güne ve
+       geleceğe yazılmaz.
      · SİLİNEN VERİ XP'Yİ GERİ ALIR. Kaydı silip puanı tutmak, sistemin
        kendi sözünü tutmaması olurdu.
 
@@ -5497,8 +5658,10 @@ LIFEOS.KADEMELER = [
    ad       ekranda görünen cümle.
    xp       bir kez için kazanılan puan.
    tavan    aynı gün içinde bu etkinlikten kazanılabilecek EN ÇOK puan.
-            null ise tavan yok — yalnız günde bir kez olabilen işler
-            için (gün kapanışı gibi) kullanılır.
+            `null` TAVANSIZ DEMEK DEĞİLDİR: günde BİR KEZ olabilen işi
+            (gün kapanışı, beslenme günü) tarif eder ve tavanı tam
+            olarak `xp` kadardır. «Sınırsız» diye okumak, tek çağrıda
+            Bronz'dan Nebula'ya çıkmak demekti.
    birim    kullanıcıya «neyin başına» olduğunu söyler.
 
    Not: bu liste şimdilik BAĞLANMAMIŞ bir sözleşmedir. Motor hazır,
@@ -9733,6 +9896,12 @@ SP.S = {
   meta:null,
   storeHealth:null,
 
+  /* Seviye — bu sistemin KENDI kademesi (core/xp.js).
+     `null` YUKLENMEDI demektir, "sifir XP" demek DEGIL: rozet o halde
+     hic cizilmez. Defteri XP modulu tutar; burasi ekranlarin okudugu
+     ozet kopyadir ve yalnizca XP tarafindan yazilir. */
+  seviye:null,
+
   ui:{
     /* HKM'nin bekleyen teklifleri — bellekte durur, depoya YAZILMAZ:
        kaynagi HKM'dir ve tek gercek orada olmali. */
@@ -10595,9 +10764,21 @@ SP.Model = (function(){
 
      gunler: { '2026-09-17': { 'ays.soru':48, 'esp.kart':30 } }
 
-   Detay YÜZ YİRMİ GÜN yaşar, sonra `arsiv.xp` içine toplanır. Toplam XP
-   ayrı ve TEK YÖNLÜ bir sayaçtır: budama onu asla değiştirmez, yani
-   seviye geçmiş silindi diye düşmez.
+   Gün kırılımı SON YÜZ YİRMİ GÜN için saklanır; daha eskisi silinir.
+   Toplam XP ayrı ve TEK YÖNLÜ bir sayaçtır: budama onu asla
+   değiştirmez, yani seviye geçmiş silindi diye düşmez.
+
+   ARŞİV BİR SAYAÇ DEĞİL, BİR ÇIKARMADIR
+
+   «Silinen günlerin XP'sini bir sayaca ekle» ilk hâliydi ve iki yerde
+   yalan söylüyordu: katalogdan bir etkinlik kalkarsa o günün puanı
+   sayaca 0 olarak eklenir, toplamda ise durmaya devam ederdi. Artık
+   arşiv SAKLANMIYOR, çıkarılıyor:
+
+     arşiv = toplam − (defterde duran günlerin toplamı)
+
+   Böylece «kırılım + arşiv = toplam» eşitliği bir testin umuduna değil,
+   aritmetiğe dayanır ve katalog değişse de bozulmaz.
 
    ------------------------------------------------------------------
    XP KARAR VERMEZ
@@ -10626,12 +10807,23 @@ SP.XP = (function(){
   var MOD = 'spi';
 
   var YOL = 'seviye';          /* depo anahtarı */
-  var DETAY_GUN = 120;         /* gün kırılımının yaşı */
+  var DETAY_GUN = 120;         /* gün kırılımı bu yaştan eskiyse silinir */
+
+  /* GERİYE YAZMA PENCERESİ.
+
+     Dünkü antrenmanı bu sabah girmek olağandır; geçen ayın gününe puan
+     yazmak değildir. Pencere bir hafta: bundan eskisi ve gelecek
+     REDDEDİLİR. Sınır olmasaydı XP, ölçmek yerine oynanacak bir sayı
+     olurdu — ve budama penceresinden (120 gün) çok küçük olması ayrıca
+     önemli: yazılabilir bir gün asla budanmış olamaz, yoksa silinmiş
+     bir günün tavanı sıfırdan başlardı. */
+  var GERI_GUN = 7;
 
   /* Bellekteki defter. `null` = henüz yüklenmedi; sıfır DEĞİL.
      Yüklenmemiş bir defteri «0 XP» diye çizmek, bu deponun en çok
      tekrarlanan kuralının (eksik veri sıfır değildir) ihlali olurdu. */
   var defter = null;
+  var yukleniyor = null;       /* uçuştaki yükleme sözü — iki kez yüklenmesin */
   var dinleyiciler = [];
 
   function bosDefter(){
@@ -10639,7 +10831,9 @@ SP.XP = (function(){
       surum:K().SEVIYE_SURUM,
       toplam:0,
       gunler:{},
-      arsiv:{ xp:0, ilkGun:null, sonGun:null },
+      /* Arşivin XP'si SAKLANMAZ (yukarıdaki nota bakın); yalnız hangi
+         aralığın silindiği bilgi olarak durur. */
+      arsiv:{ ilkGun:null, sonGun:null },
       /* En son GÖRÜLEN basamak. Yükselmenin «yeni» olduğunu bilmenin tek
          yolu budur: kullanıcı uygulamayı kapatıp açsa da kutlama iki kez
          oynamaz. */
@@ -10658,12 +10852,33 @@ SP.XP = (function(){
     return U().iso(U().addDays(d, n));
   }
 
+  function isoMu(gun){
+    return typeof gun === 'string' && U().isISO ? !!U().isISO(gun) : false;
+  }
+
+  /* Yazılabilir gün mü? ISO metni olacak, gelecekte olmayacak ve
+     pencereden eski olmayacak. ISO metinleri sözlük sırasıyla tarih
+     sırasındadır; karşılaştırma bu yüzden düz metin karşılaştırmasıdır. */
+  function yazilabilirGun(gun){
+    if(!isoMu(gun)) return false;
+    var bugun = U().todayISO();
+    if(gun > bugun) return false;
+    return gun >= gunKaydir(bugun, -GERI_GUN);
+  }
+
   /* ---------------------------------------------------------- hesap */
 
-  /* Toplam XP'nin hangi basamağa denk geldiği. Dönen `basamakNo` 0 ise
-     henüz ilk basamak bitmemiştir — kullanıcı 1.1'in İÇİNDEDİR. */
+  /* Toplam XP'nin hangi basamağa denk geldiği. Saf fonksiyondur: deftere
+     de depoya da dokunmaz, bu yüzden eşik matematiği onu tek başına
+     sınayarak denetlenir. */
   function konum(toplam){
     var B = K().BASAMAKLAR;
+    if(!B || !B.length){
+      /* Katalog boş ya da bozuksa çökmek yerine «bilinmiyor» denir. */
+      return { toplam:toplam || 0, bitmisBasamak:0, kademe:0, basamak:0,
+        etiket:'—', kademeBilgi:null, icinde:0, gereken:0, oran:0, kalan:0,
+        tamam:false, tepe:0 };
+    }
     var bitmis = 0;
     for(var i = 0; i < B.length; i++){
       if(toplam >= B[i].esik) bitmis = i + 1; else break;
@@ -10685,7 +10900,6 @@ SP.XP = (function(){
       basamak:d.basamak,
       etiket:d.etiket,
       kademeBilgi:K().KADEME_ILE(d.kademe),
-      /* İçinde bulunulan basamakta ne kadar yol alındı */
       icinde:tamam ? gereken : kazanilan,
       gereken:gereken,
       oran:tamam ? 1 : (gereken > 0 ? Math.min(1, kazanilan / gereken) : 0),
@@ -10695,33 +10909,73 @@ SP.XP = (function(){
     };
   }
 
-  /* Bir basamak numarasının (1..18) hangi kademenin kaçıncı adımı olduğu.
-     Yükselme kutlaması «kademe değişti mi» sorusunu bununla sorar. */
+  /* Bir basamak numarasının (1..18) hangi kademenin kaçıncı adımı olduğu. */
   function basamagin(no){
     var B = K().BASAMAKLAR;
-    if(no < 1 || no > B.length) return null;
+    if(!B || no < 1 || no > B.length) return null;
     return B[no - 1];
+  }
+
+  /* ---------------------------------------------------------- tavan */
+
+  /* Bir etkinliğin o gün kazandırdığı XP — TAVAN UYGULANMIŞ hâli.
+
+     `tavan:null` «tavan yok» DEMEK DEĞİLDİR: günde bir kez olabilen işi
+     (gün kapanışı, beslenme günü) tarif eder ve tavanı tam olarak bir
+     kezdir. Bunu «sınırsız» diye okumak, `kazan(id, {adet:1000})` ile
+     bir çağrıda Bronz'dan Nebula'ya çıkmak demekti. */
+  function gunlukTavan(e){
+    return (e.tavan == null) ? e.xp : e.tavan;
+  }
+
+  function gunXPsi(gun, id, kaynak){
+    var e = K().ETKINLIK_ILE(id);
+    if(!e) return 0;
+    var d = kaynak || defter;
+    if(!d) return 0;
+    var satir = d.gunler[gun];
+    var adet = (satir && satir[id]) || 0;
+    return Math.min(adet * e.xp, gunlukTavan(e));
+  }
+
+  /* Bir günün toplamı — YALNIZ BU SİSTEMİN etkinlikleri.
+
+     Yazma yolu yabancı etkinliği zaten reddediyor; okuma yolu da
+     reddetmeli. Yoksa geri yüklenen bir yedek ya da elle düzenlenmiş bir
+     depo, «bugün» sayısıyla toplamı aynı ekranda çelişkiye düşürürdü. */
+  function gunToplami(gun, kaynak){
+    var d = kaynak || defter;
+    if(!d) return 0;
+    var satir = d.gunler[gun];
+    if(!satir) return 0;
+    var t = 0;
+    Object.keys(satir).forEach(function(id){
+      var e = K().ETKINLIK_ILE(id);
+      if(!e || e.mod !== MOD) return;
+      t += gunXPsi(gun, id, d);
+    });
+    return t;
+  }
+
+  /* Defterde duran günlerin toplamı. Arşiv bundan ÇIKARILIR. */
+  function detayToplami(kaynak){
+    var d = kaynak || defter;
+    if(!d) return 0;
+    var t = 0;
+    Object.keys(d.gunler).forEach(function(g){ t += gunToplami(g, d); });
+    return t;
   }
 
   /* ---------------------------------------------------------- defter */
 
-  function gunlerSirali(d){
-    return Object.keys(d.gunler).sort();
-  }
-
-  /* Yüz yirmi günden eski kırılımı arşive topla. Toplam XP'ye DOKUNMAZ. */
+  /* YAŞA göre budama. Önce SAYIYA göreydi («en yeni 120 anahtarı tut») ve
+     her gün kaydetmeyen biri için beş yıllık satır saklıyordu: yorum
+     «yüz yirmi gün yaşar» diyor, kod «yüz yirmi KAYIT yaşar» yapıyordu.
+     Artık pencere takvimden ölçülür. */
   function buda(d){
-    var gunler = gunlerSirali(d);
-    if(gunler.length <= DETAY_GUN) return d;
-    var atilacak = gunler.slice(0, gunler.length - DETAY_GUN);
-    atilacak.forEach(function(g){
-      var satir = d.gunler[g];
-      Object.keys(satir).forEach(function(id){
-        /* Arşive giden sayı, o günün TAVANDAN SONRAKİ XP'sidir. Ham adedi
-           çarpmak, tavanı dolduran bir günü arşivde olduğundan büyük
-           gösterirdi ve kırılım toplamı, toplam XP'yi aşardı. */
-        d.arsiv.xp += gunXPsi(g, id, d);
-      });
+    var sinir = gunKaydir(U().todayISO(), -(DETAY_GUN - 1));
+    Object.keys(d.gunler).forEach(function(g){
+      if(g >= sinir && isoMu(g)) return;
       if(!d.arsiv.ilkGun || g < d.arsiv.ilkGun) d.arsiv.ilkGun = g;
       if(!d.arsiv.sonGun || g > d.arsiv.sonGun) d.arsiv.sonGun = g;
       delete d.gunler[g];
@@ -10737,6 +10991,9 @@ SP.XP = (function(){
     d.guncellendi = ham.guncellendi || null;
     if(ham.gunler && typeof ham.gunler === 'object'){
       Object.keys(ham.gunler).forEach(function(g){
+        /* Tarih olmayan anahtar deftere alınmaz: sıralamaya, budamaya ve
+           çizime girip hepsini sessizce bozardı. */
+        if(!isoMu(g)) return;
         var satir = ham.gunler[g];
         if(!satir || typeof satir !== 'object') return;
         var temiz = {};
@@ -10748,7 +11005,6 @@ SP.XP = (function(){
       });
     }
     if(ham.arsiv && typeof ham.arsiv === 'object'){
-      d.arsiv.xp = Number(ham.arsiv.xp) > 0 ? Math.floor(Number(ham.arsiv.xp)) : 0;
       d.arsiv.ilkGun = ham.arsiv.ilkGun || null;
       d.arsiv.sonGun = ham.arsiv.sonGun || null;
     }
@@ -10757,15 +11013,35 @@ SP.XP = (function(){
        göç burada yazılır — defterin hangi eşiklerle doldurulduğunu
        bilmeden onu yeniden yorumlamak, seviyeyi sessizce oynatmak olur. */
     d.surum = Number(ham.surum) || K().SEVIYE_SURUM;
+    /* Görülen basamak, defterin gerçekten olduğu yerden ileride olamaz:
+       bozuk bir depo yüzünden kutlama sonsuza kadar susmasın. */
+    var k = konum(d.toplam);
+    if(d.gorulen > k.bitmisBasamak) d.gorulen = k.bitmisBasamak;
     return d;
   }
 
-  async function yukle(){
-    var ham = null;
-    try{ ham = await SP.Store.get(YOL); }catch(e){ ham = null; }
-    defter = normalize(ham);
-    if(SP.S) SP.S.seviye = durum();
-    return defter;
+  /* Yükleme TEK SEFERDİR. İki ekran aynı anda `kazan` çağırırsa ikisi de
+     `yukle()` tetikler, ikincisi birincinin taze defterini eziyor ve o
+     çağrının puanı yok oluyordu. Uçuştaki söz paylaşılır. */
+  function yukle(){
+    if(yukleniyor) return yukleniyor;
+    yukleniyor = (async function(){
+      var ham = null;
+      try{ ham = await SP.Store.get(YOL); }catch(e){ ham = null; }
+      defter = normalize(ham);
+      if(SP.S) SP.S.seviye = durum();
+      yukleniyor = null;
+      return defter;
+    })();
+    return yukleniyor;
+  }
+
+  /* Bellekteki defteri unut — depoya DOKUNMADAN. Profil değişiminde ve
+     testlerde «henüz yüklenmedi» hâline dönmenin tek yolu budur. */
+  function bosalt(){
+    defter = null;
+    yukleniyor = null;
+    if(SP.S) SP.S.seviye = null;
   }
 
   async function yaz(){
@@ -10776,39 +11052,15 @@ SP.XP = (function(){
     return defter;
   }
 
-  /* ---------------------------------------------------------- tavan */
-
-  /* Bir etkinliğin o gün kazandırdığı XP. Tavan burada uygulanır; çağıran
-     tarafın tavanı bilmesi gerekmez. */
-  function gunXPsi(gun, id, kaynak){
-    var e = K().ETKINLIK_ILE(id);
-    if(!e) return 0;
-    var d = kaynak || defter;
-    if(!d) return 0;
-    var satir = d.gunler[gun];
-    var adet = (satir && satir[id]) || 0;
-    var ham = adet * e.xp;
-    return (e.tavan == null) ? ham : Math.min(ham, e.tavan);
-  }
-
-  function gunToplami(gun){
-    var satir = defter.gunler[gun];
-    if(!satir) return 0;
-    var t = 0;
-    Object.keys(satir).forEach(function(id){ t += gunXPsi(gun, id); });
-    return t;
-  }
-
   /* ---------------------------------------------------------- yazma */
 
   /* XP kazan.
 
        XP.kazan('esp.kart', { adet:10 })
 
-     `adet` kaç kez olduğu (varsayılan 1), `gun` ise hangi güne yazılacağı
-     (varsayılan bugün). GELECEĞE ve GEÇMİŞE yazmaz: bugünden başka bir
-     gün verilirse yalnız o günün SATIRI güncellenir ama tavan yine o
-     günün tavanıdır — geriye dönük puan toplamak, ölçmeyi oyuna çevirir.
+     `adet` kaç kez olduğu (varsayılan 1), `gun` hangi güne yazılacağı
+     (varsayılan bugün). Gün GELECEKTE olamaz ve bir haftadan eski
+     olamaz; olursa hiçbir şey yazılmaz ve `gecersizGun` işaretlenir.
 
      Döner: { kazanilan, durum, yukselme }
        kazanilan  tavandan SONRA gerçekten eklenen XP (0 olabilir)
@@ -10825,18 +11077,23 @@ SP.XP = (function(){
     }
     if(!defter) await yukle();
 
+    var gun = opt.gun || U().todayISO();
+    if(!yazilabilirGun(gun)){
+      console.warn('[XP] «' + gun + '» yazılabilir bir gün değil '
+        + '(gelecek ya da ' + GERI_GUN + ' günden eski).');
+      return { kazanilan:0, durum:durum(), yukselme:null, gecersizGun:true };
+    }
+
     var adet = Number(opt.adet);
     if(!(adet > 0)) adet = 1;
     adet = Math.floor(adet);
 
-    var gun = opt.gun || U().todayISO();
     var oncekiGun = gunXPsi(gun, id);
 
     if(!defter.gunler[gun]) defter.gunler[gun] = {};
     defter.gunler[gun][id] = (defter.gunler[gun][id] || 0) + adet;
 
-    var sonrakiGun = gunXPsi(gun, id);
-    var kazanilan = Math.max(0, sonrakiGun - oncekiGun);
+    var kazanilan = Math.max(0, gunXPsi(gun, id) - oncekiGun);
 
     var onceki = konum(defter.toplam);
     defter.toplam += kazanilan;
@@ -10847,15 +11104,14 @@ SP.XP = (function(){
       var b = basamagin(sonraki.bitmisBasamak);
       /* Bitmiş basamak numarası, kutlanacak olan basamaktır: 1.1'i bitiren
          kişi 1.1'i kazanmıştır ve artık 1.2'nin içindedir. */
+      var oncekiB = basamagin(onceki.bitmisBasamak);
       yukselme = {
         kademe:b.kademe,
         basamak:b.basamak,
         etiket:b.etiket,
         kademeBilgi:K().KADEME_ILE(b.kademe),
         /* Kademe DEĞİŞTİYSE video oynar; basamak değiştiyse sessiz kalır. */
-        yeniKademe:basamagin(onceki.bitmisBasamak)
-          ? basamagin(onceki.bitmisBasamak).kademe !== b.kademe
-          : true,
+        yeniKademe:!oncekiB || oncekiB.kademe !== b.kademe,
       };
     }
 
@@ -10872,11 +11128,13 @@ SP.XP = (function(){
     if(!e || e.mod !== MOD) return { geriAlinan:0, durum:durum() };
     if(!defter) await yukle();
 
+    var gun = opt.gun || U().todayISO();
+    if(!isoMu(gun)) return { geriAlinan:0, durum:durum(), gecersizGun:true };
+
     var adet = Number(opt.adet);
     if(!(adet > 0)) adet = 1;
     adet = Math.floor(adet);
 
-    var gun = opt.gun || U().todayISO();
     var satir = defter.gunler[gun];
     if(!satir || !satir[id]) return { geriAlinan:0, durum:durum() };
 
@@ -10885,8 +11143,7 @@ SP.XP = (function(){
     if(!satir[id]) delete satir[id];
     if(!Object.keys(satir).length) delete defter.gunler[gun];
 
-    var sonra = gunXPsi(gun, id);
-    var fark = Math.max(0, onceki - sonra);
+    var fark = Math.max(0, onceki - gunXPsi(gun, id));
     defter.toplam = Math.max(0, defter.toplam - fark);
 
     /* Seviye düşebilir; «görülen» basamak da düşer, yoksa geri kazanınca
@@ -10907,6 +11164,7 @@ SP.XP = (function(){
     var k = konum(defter.toplam);
     if(k.bitmisBasamak <= defter.gorulen) return null;
     var b = basamagin(k.bitmisBasamak);
+    if(!b) return null;
     var onceki = basamagin(defter.gorulen);
     return {
       kademe:b.kademe, basamak:b.basamak, etiket:b.etiket,
@@ -10959,10 +11217,11 @@ SP.XP = (function(){
     return out;
   }
 
-  /* Bu sistemin XP'si hangi işten geldi. Defterde duran günler için
-     etkinlik başına toplanır; arşivlenmiş günler kırılımı taşımaz ve
-     `arsiv` olarak AYRI raporlanır — bilinmeyeni bir işe yamamak,
-     bilmediğini bilmemek olurdu. */
+  /* Bu sistemin XP'si hangi işten geldi.
+
+     `arsiv`, budanmış günlerin payıdır ve SAKLANMAZ — toplamdan
+     çıkarılır. Bu yüzden «kırılım + arşiv = toplam» her zaman doğrudur,
+     katalog değişse bile. */
   function kirilim(){
     if(!defter) return { etkinlik:{}, arsiv:0, mod:MOD };
     var out = {};
@@ -10973,7 +11232,11 @@ SP.XP = (function(){
         out[id] = (out[id] || 0) + gunXPsi(g, id);
       });
     });
-    return { etkinlik:out, arsiv:defter.arsiv.xp, mod:MOD };
+    return {
+      etkinlik:out,
+      arsiv:Math.max(0, defter.toplam - detayToplami()),
+      mod:MOD,
+    };
   }
 
   /* Bu sistemde XP veren işlerin listesi — ekranlar «ne yaparsam puan
@@ -10985,6 +11248,7 @@ SP.XP = (function(){
   /* Testler ve «her şeyi sil» için. */
   async function sifirla(){
     defter = bosDefter();
+    yukleniyor = null;
     if(SP.S) SP.S.seviye = durum();
     try{ await SP.Store.set(YOL, defter); }catch(e){}
     return defter;
@@ -11000,10 +11264,10 @@ SP.XP = (function(){
      sıfır saymaktır. */
   function rozetHtml(opt){
     var d = durum();
-    if(!d) return '';
+    if(!d || !d.kademeBilgi) return '';
     opt = opt || {};
     var kok = opt.kok || 'img/seviye/';
-    var k = d.kademeBilgi || {};
+    var k = d.kademeBilgi;
     var yuzde = Math.round(d.oran * 100);
 
     var baslik = 'Seviye ' + d.etiket + ' — ' + (k.ad || '') + ', '
@@ -11017,9 +11281,9 @@ SP.XP = (function(){
          `img/seviye/kademe-N.png` olarak bıraktığı an devreye girer.
 
          Adres MUTLAK verilir: özel bir CSS değişkeni içindeki göreli
-         url(), değişkenin kullanıldığı yere değil TANIMLANDIĞI
-         stil sayfasına göre çözülüyor ve `css/img/seviye/...` diye
-         yanlış bir adres çıkıyordu. */
+         url(), değişkenin kullanıldığı yere değil TANIMLANDIĞI stil
+         sayfasına göre çözülüyor ve `css/img/seviye/...` diye yanlış bir
+         adres çıkıyordu. */
       + ';--kademe-gorsel:url(&quot;' + kac(mutlak(kok + 'kademe-' + d.kademe + '.png')) + '&quot;)"'
       + ' title="' + kac(baslik) + '" aria-label="' + kac(baslik) + '">'
       + '<span class="seviye-rozet__mark" aria-hidden="true">'
@@ -11045,15 +11309,16 @@ SP.XP = (function(){
   }
 
   return {
-    yukle:yukle, sifirla:sifirla,
+    yukle:yukle, bosalt:bosalt, sifirla:sifirla,
     kazan:kazan, geriAl:geriAl,
     durum:durum, konum:konum, basamagin:basamagin, rozetHtml:rozetHtml,
-    gunToplami:gunToplami, sonGunler:sonGunler, kirilim:kirilim, etkinlikler:etkinlikler,
+    gunToplami:gunToplami, sonGunler:sonGunler, kirilim:kirilim,
+    etkinlikler:etkinlikler, gunlukTavan:gunlukTavan,
+    yazilabilirGun:yazilabilirGun, gunKaydir:gunKaydir,
     bekleyenKutlama:bekleyenKutlama, kutlandi:kutlandi, dinle:dinle,
     /* Test ve teşhis için ham defter; ekranlar buna DOKUNMAZ. */
     _defter:function(){ return defter; },
-    gunKaydir:gunKaydir,
-    YOL:YOL, DETAY_GUN:DETAY_GUN, MOD:MOD,
+    YOL:YOL, DETAY_GUN:DETAY_GUN, GERI_GUN:GERI_GUN, MOD:MOD,
   };
 })();
 
@@ -29238,7 +29503,7 @@ SP.App = (function(){
             <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
             <div>
               <b>Sağlık Performans İzleyicisi</b>
-              <span>Kişisel ve aile odaklı sağlık sistemi</span>
+              <span class="sitefoot__sub">Kişisel ve aile odaklı sağlık sistemi</span>
               ${raw(seviyeRozeti())}
             </div>
           </div>
@@ -30210,8 +30475,18 @@ SP.App = (function(){
          sonra dolarsa, kullanıcı seviyesinin sıfırlandığını sanır.
          Depoya erişilemezse defter boş kalır ve rozet hiç çizilmez —
          yüklenmemiş bir defteri «0 XP» diye çizmek, bu deponun en çok
-         tekrarlanan kuralının (eksik veri sıfır değildir) ihlali olurdu. */
-      if(SP.XP) await SP.XP.yukle();
+         tekrarlanan kuralının (eksik veri sıfır değildir) ihlali olurdu.
+
+         KENDİ BAŞINA DÜŞER. Seviye bir SÜStür; katalog yüklenmediyse ya
+         da defter bozuksa uygulamayı açılış ekranında kilitleyemez. Bu
+         `try` olmadan `kademeler.js`'teki tek bir hata bütün sistemi
+         kapatırdı — ve kapattığı şey, hiç olmasa da çalışacak bir
+         özellikti. */
+      try{
+        if(SP.XP) await SP.XP.yukle();
+      }catch(e){
+        console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
+      }
       applyTheme();
       applySection(S.route);
       await render();
@@ -30225,18 +30500,25 @@ SP.App = (function(){
          Kutlama gösterilene kadar «görülmedi» kalır: son kartı çözüp
          uygulamayı kapatan biri kutlamasını kaybetmez. Perde kapanınca
          XP.kutlandi() defteri damgalar ve aynı kutlama bir daha oynamaz. */
-      if(SP.XP && SP.Perde){
-        SP.XP.dinle(function(y){
-          SP.Perde.kutla(y, { bitti:function(){
-            SP.XP.kutlandi().then(render).catch(function(){});
-          } });
-        });
-        const bekleyen = SP.XP.bekleyenKutlama();
-        if(bekleyen){
-          SP.Perde.kutla(bekleyen, { bitti:function(){
-            SP.XP.kutlandi().then(render).catch(function(){});
-          } });
+      try{
+        if(SP.XP && SP.Perde){
+          SP.XP.dinle(function(y){
+            SP.Perde.kutla(y, { bitti:function(){
+              SP.XP.kutlandi().then(render).catch(function(){});
+            } });
+          });
+          /* Açılış perdesi hâlâ oynuyorsa kutlama SIRAYA girer; iki tam
+             ekran katman ve iki ses aynı anda olmaz (bkz. core/perde.js,
+             AYNI ANDA TEK PERDE). */
+          const bekleyen = SP.XP.bekleyenKutlama();
+          if(bekleyen){
+            SP.Perde.kutla(bekleyen, { bitti:function(){
+              SP.XP.kutlandi().then(render).catch(function(){});
+            } });
+          }
         }
+      }catch(e){
+        console.error('Seviye kutlaması açılamadı.', e);
       }
 
       /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez

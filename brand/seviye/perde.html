@@ -1,0 +1,70 @@
+<!-- MARKA GİRİŞİ — logo videosu, geçilebilir.
+
+     Perde burada DURAĞAN durur; sayfanın ilk boyamasında görünür.
+     JavaScript'i beklemek, açılışta bir kare boş ekran demekti.
+     Davranışı (ses, «Geç» halkası, Esc, odak hapsi, hata durumunda
+     kapanma) `js/core/perde.js` takar — seviye kutlamasıyla AYNI koddur.
+
+     Gerçek açılışı (aşağıdaki .boot) ETKİLEMEZ: ayrı, üstte duran bir
+     katmandır; ikisi paralel çalışır, biri diğerini beklemez.
+
+     Dosya `img/brand/intro.mp4`. Video ya da logo değişirse yalnız o
+     dosyalar değişir, burası değişmez. -->
+<div id="marka-perde" class="perde perde--marka" role="dialog" aria-modal="true"
+  aria-label="Marka girişi">
+  <!-- Bulanık arka kopya: videonun kendi arka planı tam siyah olmasa da
+       kenarı görünmesin. -->
+  <video class="perde__ortam" src="img/brand/intro.mp4" muted autoplay playsinline
+    aria-hidden="true" tabindex="-1"></video>
+  <video class="perde__video" src="img/brand/intro.mp4" autoplay playsinline
+    aria-hidden="true"></video>
+  <div class="perde__araclar">
+    <button class="perde__dugme perde__ses" type="button" aria-label="Sesi kapat"></button>
+    <button class="perde__dugme perde__gec" type="button" aria-label="Geç (Esc)" title="Geç — Esc">
+      <span class="perde__gec-halka" aria-hidden="true">
+        <svg viewBox="0 0 32 32"><circle class="perde__gec-iz" cx="16" cy="16" r="14"/>
+          <circle class="perde__gec-yol" cx="16" cy="16" r="14"/></svg>
+        <span class="perde__gec-sayi">·</span></span>
+      <span class="perde__gec-yazi">Geç</span>
+    </button>
+  </div>
+</div>
+<!-- Perde modulu markupin HEMEN ARDINDAN yuklenir. <head>'de blokleyici
+     bir betik olarak durursa, durağan perdenin ilk boyamasını da o
+     geciktirir — yani markupin durağan olmasinin sebebini ortadan
+     kaldirirdi. -->
+<script src="js/core/perde.js"></script>
+<script>
+(function(){
+  var el = document.getElementById('marka-perde');
+  if(!el) return;
+  /* Hareket azaltma tercihinde marka girisi HIC gorunmez: videonun
+     tasidigi bilgi yok, tercihe kurban edilecek bir sey de yok. */
+  try{
+    if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches){
+      if(el.parentNode) el.parentNode.removeChild(el);
+      return;
+    }
+  }catch(e){}
+  /* KURTARMA: Perde modulu hic yuklenmezse (betik hatasi, engellenmis
+     dosya) perde uygulamayi rehin almasin. */
+  var kurtarma = setTimeout(function(){
+    if(el.parentNode) el.parentNode.removeChild(el);
+  }, 14000);
+  /* Kaynak surumde ustteki <script src> bu satira gelinmeden calismis
+     olur ve dongu ILK denemede biter. TEK DOSYA surumunde (dist) ise
+     build.py butun <script src>'leri govdenin ARDINA tasir: orada
+     Perde bu betikten SONRA tanimlanir ve bekleme gercekten calisir.
+     Iki surumun tek markupla yasamasinin bedeli bu kucuk dongudur. */
+  var deneme = 0;
+  (function bekle(){
+    if(window.__NS__ && __NS__.Perde){
+      clearTimeout(kurtarma);
+      __NS__.Perde.baglan(el, { enAz:8000 });
+      return;
+    }
+    if(++deneme > 400) return;   /* ~12 sn; kurtarma zamanlayicisi devrede */
+    setTimeout(bekle, 30);
+  })();
+})();
+</script>

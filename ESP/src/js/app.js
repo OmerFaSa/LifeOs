@@ -190,7 +190,7 @@ ESP.App = (function(){
             <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
             <div>
               <b>Entelektüel Seviye Planlayıcı</b>
-              <span>${ESP.Mod.active().map(d => d.short.toLocaleLowerCase('tr-TR'))
+              <span class="sitefoot__sub">${ESP.Mod.active().map(d => d.short.toLocaleLowerCase('tr-TR'))
                 .join(' · ')}</span>
               ${raw(seviyeRozeti())}
             </div>
@@ -1396,8 +1396,18 @@ ESP.App = (function(){
          sonra dolarsa, kullanıcı seviyesinin sıfırlandığını sanır.
          Depoya erişilemezse defter boş kalır ve rozet hiç çizilmez —
          yüklenmemiş bir defteri «0 XP» diye çizmek, bu deponun en çok
-         tekrarlanan kuralının (eksik veri sıfır değildir) ihlali olurdu. */
-      if(ESP.XP) await ESP.XP.yukle();
+         tekrarlanan kuralının (eksik veri sıfır değildir) ihlali olurdu.
+
+         KENDİ BAŞINA DÜŞER. Seviye bir SÜStür; katalog yüklenmediyse ya
+         da defter bozuksa uygulamayı açılış ekranında kilitleyemez. Bu
+         `try` olmadan `kademeler.js`'teki tek bir hata bütün sistemi
+         kapatırdı — ve kapattığı şey, hiç olmasa da çalışacak bir
+         özellikti. */
+      try{
+        if(ESP.XP) await ESP.XP.yukle();
+      }catch(e){
+        console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
+      }
       applyTheme();
       applySection(S.route);
       await render();
@@ -1411,18 +1421,25 @@ ESP.App = (function(){
          Kutlama gösterilene kadar «görülmedi» kalır: son kartı çözüp
          uygulamayı kapatan biri kutlamasını kaybetmez. Perde kapanınca
          XP.kutlandi() defteri damgalar ve aynı kutlama bir daha oynamaz. */
-      if(ESP.XP && ESP.Perde){
-        ESP.XP.dinle(function(y){
-          ESP.Perde.kutla(y, { bitti:function(){
-            ESP.XP.kutlandi().then(render).catch(function(){});
-          } });
-        });
-        const bekleyen = ESP.XP.bekleyenKutlama();
-        if(bekleyen){
-          ESP.Perde.kutla(bekleyen, { bitti:function(){
-            ESP.XP.kutlandi().then(render).catch(function(){});
-          } });
+      try{
+        if(ESP.XP && ESP.Perde){
+          ESP.XP.dinle(function(y){
+            ESP.Perde.kutla(y, { bitti:function(){
+              ESP.XP.kutlandi().then(render).catch(function(){});
+            } });
+          });
+          /* Açılış perdesi hâlâ oynuyorsa kutlama SIRAYA girer; iki tam
+             ekran katman ve iki ses aynı anda olmaz (bkz. core/perde.js,
+             AYNI ANDA TEK PERDE). */
+          const bekleyen = ESP.XP.bekleyenKutlama();
+          if(bekleyen){
+            ESP.Perde.kutla(bekleyen, { bitti:function(){
+              ESP.XP.kutlandi().then(render).catch(function(){});
+            } });
+          }
         }
+      }catch(e){
+        console.error('Seviye kutlaması açılamadı.', e);
       }
       startClock();
 

@@ -275,7 +275,7 @@ R.App = (function(){
             <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
             <div>
               <b>Rota</b>
-              <span>Kişisel çalışma sistemi</span>
+              <span class="sitefoot__sub">Kişisel çalışma sistemi</span>
               ${raw(seviyeRozeti())}
             </div>
           </div>
@@ -1171,8 +1171,18 @@ R.App = (function(){
          sonra dolarsa, kullanıcı seviyesinin sıfırlandığını sanır.
          Depoya erişilemezse defter boş kalır ve rozet hiç çizilmez —
          yüklenmemiş bir defteri «0 XP» diye çizmek, bu deponun en çok
-         tekrarlanan kuralının (eksik veri sıfır değildir) ihlali olurdu. */
-      if(R.XP) await R.XP.yukle();
+         tekrarlanan kuralının (eksik veri sıfır değildir) ihlali olurdu.
+
+         KENDİ BAŞINA DÜŞER. Seviye bir SÜStür; katalog yüklenmediyse ya
+         da defter bozuksa uygulamayı açılış ekranında kilitleyemez. Bu
+         `try` olmadan `kademeler.js`'teki tek bir hata bütün sistemi
+         kapatırdı — ve kapattığı şey, hiç olmasa da çalışacak bir
+         özellikti. */
+      try{
+        if(R.XP) await R.XP.yukle();
+      }catch(e){
+        console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
+      }
       applyTheme();
       applySection(S.route);
       await render();
@@ -1188,18 +1198,25 @@ R.App = (function(){
          Kutlama gösterilene kadar «görülmedi» kalır: son kartı çözüp
          uygulamayı kapatan biri kutlamasını kaybetmez. Perde kapanınca
          XP.kutlandi() defteri damgalar ve aynı kutlama bir daha oynamaz. */
-      if(R.XP && R.Perde){
-        R.XP.dinle(function(y){
-          R.Perde.kutla(y, { bitti:function(){
-            R.XP.kutlandi().then(render).catch(function(){});
-          } });
-        });
-        const bekleyen = R.XP.bekleyenKutlama();
-        if(bekleyen){
-          R.Perde.kutla(bekleyen, { bitti:function(){
-            R.XP.kutlandi().then(render).catch(function(){});
-          } });
+      try{
+        if(R.XP && R.Perde){
+          R.XP.dinle(function(y){
+            R.Perde.kutla(y, { bitti:function(){
+              R.XP.kutlandi().then(render).catch(function(){});
+            } });
+          });
+          /* Açılış perdesi hâlâ oynuyorsa kutlama SIRAYA girer; iki tam
+             ekran katman ve iki ses aynı anda olmaz (bkz. core/perde.js,
+             AYNI ANDA TEK PERDE). */
+          const bekleyen = R.XP.bekleyenKutlama();
+          if(bekleyen){
+            R.Perde.kutla(bekleyen, { bitti:function(){
+              R.XP.kutlandi().then(render).catch(function(){});
+            } });
+          }
         }
+      }catch(e){
+        console.error('Seviye kutlaması açılamadı.', e);
       }
       R.Auto.onDayOpen().then(done => { if(done.length) render(); });
 

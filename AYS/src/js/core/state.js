@@ -33,6 +33,12 @@ R.S = {
   breaks:[],       // alinan molalar
   meta:null,       // { lastBackupAt, schemaVersion }
   storeHealth:null,// son depolama hatasi (varsa)
+
+  /* Seviye — bu sistemin KENDI kademesi (core/xp.js).
+     `null` YUKLENMEDI demektir, "sifir XP" demek DEGIL: rozet o halde
+     hic cizilmez. Defteri XP modulu tutar; burasi ekranlarin okudugu
+     ozet kopyadir ve yalnizca XP tarafindan yazilir. */
+  seviye:null,
   office:null,     // ofis ayarlari (saglayici, model, ajan basina secim)
   officeChats:{},  // agentId -> mesajlar
   officeMeetings:[],// ajanlarin toplanti tutanaklari

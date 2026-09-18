@@ -56,7 +56,11 @@
        XP'ye bakmaz. XP yalnızca GÖRÜNÜRLÜKTÜR.
      · XP GERİYE DÖNÜK YAZILMAZ. Kazanılan gün, kazanıldığı gündür.
      · HER ETKİNLİĞİN GÜNLÜK TAVANI VARDIR. Tavansız bir sayaç,
-       bir gün otuz kez tıklanır ve anlamını kaybeder.
+       bir gün otuz kez tıklanır ve anlamını kaybeder. `tavan:null`
+       «tavan yok» DEĞİL «günde bir kez» demektir (bkz. core/xp.js,
+       gunlukTavan).
+     · GERİYE DÖNÜK PUAN TOPLANMAZ. Bir haftadan eski güne ve
+       geleceğe yazılmaz.
      · SİLİNEN VERİ XP'Yİ GERİ ALIR. Kaydı silip puanı tutmak, sistemin
        kendi sözünü tutmaması olurdu.
 
@@ -121,8 +125,10 @@ LIFEOS.KADEMELER = [
    ad       ekranda görünen cümle.
    xp       bir kez için kazanılan puan.
    tavan    aynı gün içinde bu etkinlikten kazanılabilecek EN ÇOK puan.
-            null ise tavan yok — yalnız günde bir kez olabilen işler
-            için (gün kapanışı gibi) kullanılır.
+            `null` TAVANSIZ DEMEK DEĞİLDİR: günde BİR KEZ olabilen işi
+            (gün kapanışı, beslenme günü) tarif eder ve tavanı tam
+            olarak `xp` kadardır. «Sınırsız» diye okumak, tek çağrıda
+            Bronz'dan Nebula'ya çıkmak demekti.
    birim    kullanıcıya «neyin başına» olduğunu söyler.
 
    Not: bu liste şimdilik BAĞLANMAMIŞ bir sözleşmedir. Motor hazır,

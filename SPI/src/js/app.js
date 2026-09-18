@@ -221,7 +221,7 @@ SP.App = (function(){
             <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
             <div>
               <b>Sağlık Performans İzleyicisi</b>
-              <span>Kişisel ve aile odaklı sağlık sistemi</span>
+              <span class="sitefoot__sub">Kişisel ve aile odaklı sağlık sistemi</span>
               ${raw(seviyeRozeti())}
             </div>
           </div>
@@ -1193,8 +1193,18 @@ SP.App = (function(){
          sonra dolarsa, kullanıcı seviyesinin sıfırlandığını sanır.
          Depoya erişilemezse defter boş kalır ve rozet hiç çizilmez —
          yüklenmemiş bir defteri «0 XP» diye çizmek, bu deponun en çok
-         tekrarlanan kuralının (eksik veri sıfır değildir) ihlali olurdu. */
-      if(SP.XP) await SP.XP.yukle();
+         tekrarlanan kuralının (eksik veri sıfır değildir) ihlali olurdu.
+
+         KENDİ BAŞINA DÜŞER. Seviye bir SÜStür; katalog yüklenmediyse ya
+         da defter bozuksa uygulamayı açılış ekranında kilitleyemez. Bu
+         `try` olmadan `kademeler.js`'teki tek bir hata bütün sistemi
+         kapatırdı — ve kapattığı şey, hiç olmasa da çalışacak bir
+         özellikti. */
+      try{
+        if(SP.XP) await SP.XP.yukle();
+      }catch(e){
+        console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
+      }
       applyTheme();
       applySection(S.route);
       await render();
@@ -1208,18 +1218,25 @@ SP.App = (function(){
          Kutlama gösterilene kadar «görülmedi» kalır: son kartı çözüp
          uygulamayı kapatan biri kutlamasını kaybetmez. Perde kapanınca
          XP.kutlandi() defteri damgalar ve aynı kutlama bir daha oynamaz. */
-      if(SP.XP && SP.Perde){
-        SP.XP.dinle(function(y){
-          SP.Perde.kutla(y, { bitti:function(){
-            SP.XP.kutlandi().then(render).catch(function(){});
-          } });
-        });
-        const bekleyen = SP.XP.bekleyenKutlama();
-        if(bekleyen){
-          SP.Perde.kutla(bekleyen, { bitti:function(){
-            SP.XP.kutlandi().then(render).catch(function(){});
-          } });
+      try{
+        if(SP.XP && SP.Perde){
+          SP.XP.dinle(function(y){
+            SP.Perde.kutla(y, { bitti:function(){
+              SP.XP.kutlandi().then(render).catch(function(){});
+            } });
+          });
+          /* Açılış perdesi hâlâ oynuyorsa kutlama SIRAYA girer; iki tam
+             ekran katman ve iki ses aynı anda olmaz (bkz. core/perde.js,
+             AYNI ANDA TEK PERDE). */
+          const bekleyen = SP.XP.bekleyenKutlama();
+          if(bekleyen){
+            SP.Perde.kutla(bekleyen, { bitti:function(){
+              SP.XP.kutlandi().then(render).catch(function(){});
+            } });
+          }
         }
+      }catch(e){
+        console.error('Seviye kutlaması açılamadı.', e);
       }
 
       /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez

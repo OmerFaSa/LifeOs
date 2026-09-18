@@ -81,11 +81,53 @@ R.Perde = (function(){
     + '<path d="M11 5 6 9H3v6h3l5 4z"/>'
     + '<path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>';
 
+  /* AYNI ANDA TEK PERDE.
+
+     Açılışta iki perde birden açılabiliyordu: marka videosu oynarken
+     bekleyen seviye kutlaması da açılıyor, İKİ SES AYNI ANDA çalıyor ve
+     tek Esc ikisini birden kapatıyordu — kullanıcı kutlamasını hiç
+     görmeden «görüldü» damgası yiyordu. Artık ikincisi SIRAYA GİRER:
+     marka girişi biter, kutlama onun ardından oynar.
+
+     Sıraya girme kararı DOM'a bakarak verilir (`.perde` var mı), çünkü
+     durağan marka perdesi sayfada JavaScript'ten önce durur; bir
+     değişkene bakmak, henüz bağlanmamış bir perdeyi görmezden gelmek
+     olurdu. */
+  var kuyruk = [];
+
+  /* İlk dokunuş sesi KENDİLİĞİNDEN açmalı mı?
+
+     Saf bir karar; ayrı durmasının sebebi sınanabilir olması. Bu karar
+     yanlışken düğme TERS çalışıyordu: `pointerdown` yakalama evresinde
+     `click`ten önce gelip sesi açıyor, hemen ardından düğmenin kendi
+     dinleyicisi «zaten açık» görüp kapatıyordu — «Sesi aç»a basmak sesi
+     kapatıyor ve tercihi üç uygulama için birden `kapali` yazıyordu. */
+  function kendiliginenAcilsinMi(hedef, araclar, sessizMi){
+    /* Dokunuş düğmelerin üstündeyse kararı KULLANICI veriyor. */
+    if(hedef && araclar && araclar.contains && araclar.contains(hedef)) return false;
+    if(!sessizMi) return false;
+    return sesTercihi() === 'acik';
+  }
+
+  function siradakini(){
+    var n;
+    while(kuyruk.length){
+      n = kuyruk.shift();
+      if(!n.iptal){ acHemen(n.sec); return; }
+    }
+  }
+
   /* GEÇ düğmesinin içi. Halka videonun ne kadarının geçtiğini, sayı kaç
      saniye kaldığını söyler; ikisi birlikte «beklemeye değer mi»
      sorusunu cevaplar. Düz bir «Atla» yazısı o soruyu cevapsız
-     bırakıyordu. `index.html` içindeki durağan perde de BİREBİR bu
-     gövdeyi taşır — ikisi ayrışmasın diye burada da yazılı. */
+     bırakıyordu.
+
+     `brand/seviye/perde.html` içindeki DURAĞAN perde aynı gövdeyi
+     taşır — orası sayfanın ilk boyamasında görünsün diye HTML, burası
+     sonradan kurulan perdeler için JavaScript. İkisi ayrı dosyada ama
+     ikisi de tek kaynakta; `tools/seviye.py --denetle` bu dosyanın
+     ARADIĞI her sınıfın markupta gerçekten bulunduğunu doğrular, yani
+     birinden bir parça düşerse sessiz kalmaz. */
   var GEC_ICI =
       '<span class="perde__gec-halka" aria-hidden="true">'
     + '<svg viewBox="0 0 32 32"><circle class="perde__gec-iz" cx="16" cy="16" r="14"/>'
@@ -107,17 +149,28 @@ R.Perde = (function(){
 
     var kapandi = false;
     var sayacId = null;
+    /* Perde açıkken arkadaki sayfa kaymaz: tam ekran bir katmanın
+       altında sayfayı kaydırmak, kapandığında bambaşka bir yere
+       düşmek demektir. */
+    var eskiTasma = null;
+    function kaydirmaKilit(){
+      try{
+        eskiTasma = document.documentElement.style.overflow;
+        document.documentElement.style.overflow = 'hidden';
+      }catch(e){}
+    }
+    function kaydirmaSerbest(){
+      if(eskiTasma === null) return;
+      try{ document.documentElement.style.overflow = eskiTasma; }catch(e){}
+      eskiTasma = null;
+    }
 
     var v = perde.querySelector('.perde__video');
     var ortam = perde.querySelector('.perde__ortam');
     var banner = perde.querySelector('.perde__banner');
     var gec = perde.querySelector('.perde__gec');
     var sesDugme = perde.querySelector('.perde__ses');
-    /* Durağan perde `index.html` içinde yazılıdır ve bir gün buradaki
-       gövdeden ayrışabilir. Ayrışma sessiz olmasın diye onarılır: halkası
-       ya da sayacı eksik bir «Geç» düğmesi yeniden kurulur. Üç dosyada
-       elle güncellenmesi unutulan bir düğme, çalışmayan bir düğmedir. */
-    if(gec && !gec.querySelector('.perde__gec-yol')) gec.innerHTML = GEC_ICI;
+    var araclar = perde.querySelector('.perde__araclar') || perde;
     var sayi = gec ? gec.querySelector('.perde__gec-sayi') : null;
     var yol = gec ? gec.querySelector('.perde__gec-yol') : null;
 
@@ -143,16 +196,51 @@ R.Perde = (function(){
          uygulamanın içinden geliyormuş gibi duyulur. */
       try{ if(v){ v.pause(); } if(ortam){ ortam.pause(); } }catch(e){}
       perde.classList.add('perde--kapaniyor');
+      kaydirmaSerbest();
       setTimeout(function(){
         if(perde.parentNode) perde.parentNode.removeChild(perde);
         if(typeof secenekler.bitti === 'function'){
           try{ secenekler.bitti(); }catch(e){}
         }
+        /* Sıradaki perde ANCAK bu DOM'dan çıktıktan sonra açılır:
+           `ac()` sıraya girip girmeyeceğine `.perde` var mı diye
+           bakıyor. */
+        siradakini();
       }, 420);
     }
 
     function tusla(e){
-      if(e.key === 'Escape' || e.key === 'Esc'){ e.preventDefault(); kapat(); }
+      if(e.key === 'Escape' || e.key === 'Esc'){
+        e.preventDefault();
+        /* Üstteki perde kapanır, altındaki değil. Bugün aynı anda tek
+           perde açık ama olayı yukarı bırakmak, yarın açılan ikinci bir
+           dinleyicinin de tetiklenmesi demekti. */
+        e.stopPropagation();
+        kapat();
+        return;
+      }
+      /* ODAK PERDEDE KALIR. `aria-modal="true"` demek, ekran okuyucuya
+         arkadaki sayfanın erişilemez olduğunu söylemektir; Tab hâlâ
+         arkaya geçiyorsa bu söz tutulmamış olur. */
+      if(e.key === 'Tab') odakHapset(e);
+    }
+
+    function odaklanabilirler(){
+      return Array.prototype.filter.call(
+        perde.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])'),
+        function(el){ return !el.hidden && el.offsetParent !== null; });
+    }
+
+    function odakHapset(e){
+      var liste = odaklanabilirler();
+      if(!liste.length) return;
+      var ilk = liste[0], son = liste[liste.length - 1];
+      var simdi = document.activeElement;
+      if(e.shiftKey && (simdi === ilk || !perde.contains(simdi))){
+        e.preventDefault(); son.focus();
+      }else if(!e.shiftKey && (simdi === son || !perde.contains(simdi))){
+        e.preventDefault(); ilk.focus();
+      }
     }
     document.addEventListener('keydown', tusla, true);
     if(gec) gec.addEventListener('click', kapat);
@@ -191,10 +279,17 @@ R.Perde = (function(){
     /* Tarayıcı sesli otomatik oynatmayı reddettiyse video SESSİZ oynuyor
        demektir. Kullanıcının sayfaya ilk dokunuşu, tarayıcının beklediği
        «etkileşim»dir: tam o anda ses açılır. Kullanıcı sesi KENDİ
-       kapattıysa dokunulmaz — tercihi geri almak, tercihi yok saymaktır. */
-    function ilkDokunus(){
+       kapattıysa dokunulmaz — tercihi geri almak, tercihi yok saymaktır.
+
+       DOKUNUŞ SES DÜĞMESİNİN ÜSTÜNDEYSE HİÇBİR ŞEY YAPILMAZ. Bu satır
+       olmadan düğme TERS ÇALIŞIYORDU: `pointerdown` yakalama evresinde
+       `click`ten önce gelir, sesi açardı; hemen ardından düğmenin kendi
+       dinleyicisi «zaten açık» görüp KAPATIRDI. Yani «Sesi aç»a basmak
+       sesi kapatıyor ve tercihi üç uygulama için birden `kapali`
+       yazıyordu. */
+    function ilkDokunus(e){
       document.removeEventListener('pointerdown', ilkDokunus, true);
-      if(v && v.muted && sesTercihi() === 'acik') sesiAc(false);
+      if(kendiliginenAcilsinMi(e && e.target, araclar, v && v.muted)) sesiAc(false);
     }
     document.addEventListener('pointerdown', ilkDokunus, true);
 
@@ -264,6 +359,7 @@ R.Perde = (function(){
       if(v) kapat();
     }, 20000);
 
+    kaydirmaKilit();
     try{ if(gec) gec.focus({ preventScroll:true }); }catch(e){}
 
     return { kapat:kapat, el:perde };
@@ -280,6 +376,20 @@ R.Perde = (function(){
        bitti     kapanınca çağrılır
      ================================================================ */
   function ac(secenekler){
+    secenekler = secenekler || {};
+    /* Ekranda perde varsa sıraya gir (bkz. AYNI ANDA TEK PERDE). */
+    if(document.querySelector('.perde')){
+      var bekleyen = { sec:secenekler, iptal:false };
+      kuyruk.push(bekleyen);
+      return {
+        kapat:function(){ bekleyen.iptal = true; },
+        el:null, sirada:true,
+      };
+    }
+    return acHemen(secenekler);
+  }
+
+  function acHemen(secenekler){
     secenekler = secenekler || {};
 
     var perde = el('div', 'perde' + (secenekler.sinif ? ' ' + secenekler.sinif : ''));
@@ -372,6 +482,14 @@ R.Perde = (function(){
      Video dosyası yoksa hata yoktur: banner zaten kutlamanın kendisidir,
      video onun üstüne gelen süstür. Altı videoyu altı ayrı günde
      eklemek böyle mümkün olur. */
+  /* Bu yükselme hangi videoyu ister? Saf karar; ayrı durmasının sebebi
+     sınanabilir olması. Kademe DEĞİŞTİYSE o kademenin videosu, yalnız
+     basamak değiştiyse HİÇBİRİ. */
+  function kutlamaVideosu(yukselme, kok){
+    if(!yukselme || !yukselme.yeniKademe) return null;
+    return (kok || 'img/seviye/') + 'kademe-' + yukselme.kademe + '.mp4';
+  }
+
   function kutla(yukselme, secenekler){
     if(!yukselme) return null;
     secenekler = secenekler || {};
@@ -381,7 +499,7 @@ R.Perde = (function(){
     return ac({
       sinif:'perde--seviye',
       baslik:'Seviye atladın: ' + (k.ad || '') + ' ' + yukselme.etiket,
-      video:yukselme.yeniKademe ? (kok + 'kademe-' + yukselme.kademe + '.mp4') : null,
+      video:kutlamaVideosu(yukselme, kok),
       enAz:yukselme.yeniKademe ? 6000 : 3600,
       banner:{
         no:yukselme.kademe,
@@ -396,5 +514,25 @@ R.Perde = (function(){
     });
   }
 
-  return { ac:ac, baglan:baglan, kutla:kutla, sesTercihi:sesTercihi, GEC_ICI:GEC_ICI };
+  /* ACİL ÇIKIŞ — açık perdeyi hemen kaldırır ve sırayı boşaltır.
+
+     İki yerde gerekli: testlerin birbirinin üstüne perde bırakmaması
+     ve ileride «girişleri kapat» ayarının tek satırda çalışması. Normal
+     akışta çağrılmaz; kapanma `kapat()` ile, yumuşak geçişle olur. */
+  function hepsiniKapat(){
+    kuyruk.length = 0;
+    var liste = document.querySelectorAll('.perde');
+    Array.prototype.forEach.call(liste, function(el){
+      if(el.parentNode) el.parentNode.removeChild(el);
+    });
+    try{ document.documentElement.style.overflow = ''; }catch(e){}
+  }
+
+  return {
+    ac:ac, baglan:baglan, kutla:kutla,
+    sesTercihi:sesTercihi, hepsiniKapat:hepsiniKapat,
+    kendiliginenAcilsinMi:kendiliginenAcilsinMi,
+    kutlamaVideosu:kutlamaVideosu,
+    GEC_ICI:GEC_ICI, SES_ANAHTAR:SES_ANAHTAR,
+  };
 })();

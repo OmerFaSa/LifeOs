@@ -11,12 +11,26 @@
    Test adları birer CÜMLEDİR: bu liste okunduğunda seviye sisteminin
    sözleşmesi okunmuş olmalı. Testler, hangi sistemde koştuğunu
    BİLMEZ — etkinlikleri `XP.etkinlikler()` ile kendi sisteminden sorar.
-   Böylece aynı dosya üçünde de aynı şeyi ispat eder. */
+   Böylece aynı dosya üçünde de aynı şeyi ispat eder.
+
+   İKİ AYRI KATMAN, İKİ AYRI SINAMA BİÇİMİ
+
+     EŞİK MATEMATİĞİ  `XP.konum(n)` saf bir fonksiyondur; deftere de
+                      depoya da dokunmaz. On sekiz basamağın hepsi tek
+                      tek, anında sınanır.
+     DEFTER DAVRANIŞI `kazan/geriAl/buda` gerçek yazma yoludur ve gün
+                      gün ilerletilerek sınanır.
+
+   Önce ikisi de `kazan()` ile sınanıyordu: tepe basamağa ulaşmak için
+   binlerce ardışık depo yazması gerekiyor, üstelik sınanan şey eşik
+   matematiği değil yazma yolu oluyordu. */
 
 (function(){
   const { describe, it, expect, resetState, withTodayAsync } = ESP.Test;
   const XP = ESP.XP;
   const L = window.LIFEOS;
+
+  const BAS = '2026-01-01';
 
   /* Bu sistemin tavansız (günde bir) ve tavanlı etkinlikleri. */
   function tavansiz(){
@@ -25,37 +39,62 @@
   function tavanli(){
     return XP.etkinlikler().filter(e => e.tavan != null)[0];
   }
+  /* Bir günde en çok XP veren etkinlik — testin gün sayısını azaltır. */
+  function enVerimli(){
+    return XP.etkinlikler().slice()
+      .sort((a, b) => XP.gunlukTavan(b) - XP.gunlukTavan(a))[0];
+  }
 
   async function temiz(){
     resetState();
     await XP.sifirla();
-    await XP.yukle();
   }
 
-  /* Hedef XP'ye tavan yemeden ulaşmak: tavansız etkinlik GÜN BAŞINA bir
-     kez sayılır, bu yüzden ayrı günlere yazılır. Tek güne yığmak tavana
-     takılırdı ve test, ölçmek istediği şeyi değil tavanı ölçerdi.
+  /* Gün gün ilerleyerek XP topla.
 
-     İki ayrı hedef vardır ve karıştırılırsa test yalan söyler:
-       xpVer      en az `hedef` — eşiği GEÇMEK için
-       xpVerAlti  en çok `hedef` — eşiğin ALTINDA kalmak için */
-  const BAS_GUN = '2026-01-01';
+     `gun` parametresi vermek yerine «bugün»ü ilerletiyoruz: motor artık
+     bir haftadan eski güne yazmayı reddediyor (geriye dönük puan
+     toplamak, ölçmeyi oyuna çevirir) ve gerçek kullanım da böyle olur —
+     her gün o günün puanı yazılır. */
+  async function gunGecir(i, fn){
+    return withTodayAsync(XP.gunKaydir(BAS, i), fn);
+  }
 
-  async function xpKere(kere){
-    const e = tavansiz();
+  /* En az `hedef` XP.
+
+     `sonGun` de döner: budama TAKVİME göre çalıştığı için, geçmişe
+     kurulmuş bir defterle devam eden testin «bugün»ü de o güne
+     çekmesi gerekir. Yoksa bir sonraki yazma, kurulan bütün günleri
+     yüz yirmi günden eski sayıp arşive atar — ki bu motorun DOĞRU
+     davranışıdır, testin kurgusu yanlıştır. */
+  async function xpTopla(hedef){
+    const e = enVerimli();
+    const gunluk = XP.gunlukTavan(e);
+    const kere = Math.ceil(gunluk / e.xp);
+    const gun = Math.ceil(hedef / gunluk);
     let son = null;
-    for(let i = 0; i < kere; i++){
-      son = await XP.kazan(e.id, { gun:XP.gunKaydir(BAS_GUN, i) });
+    for(let i = 0; i < gun; i++){
+      son = await gunGecir(i, () => XP.kazan(e.id, { adet:kere }));
     }
+    son.sonGun = XP.gunKaydir(BAS, gun - 1);
+    son.gunlukKere = kere;
+    son.etkinlik = e;
     return son;
   }
 
-  async function xpVer(hedef){
-    return xpKere(Math.ceil(hedef / tavansiz().xp));
-  }
-
-  async function xpVerAlti(hedef){
-    return xpKere(Math.floor(hedef / tavansiz().xp));
+  /* En çok `hedef` XP — eşiğin ALTINDA kalmak için. */
+  async function xpTamAlti(hedef){
+    const e = enVerimli();
+    const gunluk = XP.gunlukTavan(e);
+    let kalan = hedef, i = 0, son = null;
+    while(kalan >= e.xp && i < 400){
+      const bugunluk = Math.min(gunluk, kalan - (kalan % e.xp));
+      const kere = Math.floor(bugunluk / e.xp);
+      son = await gunGecir(i, () => XP.kazan(e.id, { adet:kere }));
+      kalan -= kere * e.xp;
+      i++;
+    }
+    return son;
   }
 
   describe('seviye kataloğu — altı kademe, her kademede üç basamak', () => {
@@ -112,53 +151,130 @@
       });
     });
 
+    it('hiçbir etkinliğin günlük tavanı tek seferliğinden küçük olamaz', () => {
+      L.XP_ETKINLIK.forEach(e => {
+        expect(XP.gunlukTavan(e)).toBeGreaterThan(e.xp - 1);
+      });
+    });
+
     it('bu sistemin en az bir tavansız ve bir tavanlı etkinliği vardır', () => {
       expect(!!tavansiz()).toBe(true);
       expect(!!tavanli()).toBe(true);
     });
   });
 
-  describe('defter — yüklenmemiş defter sıfır değildir', () => {
+  describe('eşik matematiği — konum() saf bir fonksiyondur', () => {
 
-    it('yükleme öncesi durum null döner', async () => {
-      resetState();
-      await XP.sifirla();
-      /* sifirla() defteri kurar; gerçek «hiç yüklenmedi» hâli yalnız
-         açılışın ilk anında olur ve rozet o anda ÇİZİLMEZ. */
-      expect(XP.durum() !== null).toBe(true);
+    it('sıfır XP 1.1 basamağının İÇİNDEDİR, 1.1 bitmiş değildir', () => {
+      const k = XP.konum(0);
+      expect(k.kademe).toBe(1);
+      expect(k.basamak).toBe(1);
+      expect(k.bitmisBasamak).toBe(0);
+      expect(k.oran).toBe(0);
     });
 
-    it('boş defter 1.1 basamağının içindedir, 1.1 bitmiş değildir', async () => {
+    it('her basamağın eşiği o basamağı BİTİRİR', () => {
+      L.BASAMAKLAR.forEach((b, i) => {
+        expect(XP.konum(b.esik).bitmisBasamak).toBe(i + 1);
+      });
+    });
+
+    it('her eşiğin bir altı o basamağı bitirmez', () => {
+      L.BASAMAKLAR.forEach((b, i) => {
+        expect(XP.konum(b.esik - 1).bitmisBasamak).toBe(i);
+      });
+    });
+
+    it('bir basamağı bitiren bir sonrakinin içindedir', () => {
+      const ilk = L.BASAMAKLAR[0];
+      const k = XP.konum(ilk.esik);
+      expect(k.etiket).toBe('1.2');
+      expect(k.icinde).toBe(0);
+    });
+
+    it('üçüncü basamağı bitirmek ikinci kademeyi açar', () => {
+      const k = XP.konum(L.BASAMAKLAR[2].esik);
+      expect(k.kademe).toBe(2);
+      expect(k.basamak).toBe(1);
+    });
+
+    it('oran basamağın içinde doğrusaldır', () => {
+      const b = L.BASAMAKLAR[0];
+      expect(XP.konum(Math.floor(b.esik / 2)).oran).toBeCloseTo(0.5, 1);
+    });
+
+    it('en üst basamakta oran 1 kalır ve XP birikmeye devam eder', () => {
+      const k = XP.konum(L.TOPLAM_XP + 50000);
+      expect(k.tamam).toBe(true);
+      expect(k.etiket).toBe('6.3');
+      expect(k.oran).toBe(1);
+      expect(k.kalan).toBe(0);
+      expect(k.toplam).toBeGreaterThan(L.TOPLAM_XP);
+    });
+
+    it('kalan, bir sonraki eşiğe olan mesafedir', () => {
+      const b = L.BASAMAKLAR[0];
+      expect(XP.konum(b.esik - 10).kalan).toBe(10);
+    });
+  });
+
+  describe('defter — yüklenmemiş defter sıfır değildir', () => {
+
+    it('yüklenmemiş defterde durum null döner, sıfır değil', () => {
+      resetState();
+      XP.bosalt();
+      expect(XP.durum()).toBeNull();
+    });
+
+    it('yüklenmemiş defterde rozet HİÇ çizilmez', () => {
+      resetState();
+      XP.bosalt();
+      expect(XP.rozetHtml()).toBe('');
+    });
+
+    it('yükleme sonrası boş defter 1.1 basamağının içindedir', async () => {
       await temiz();
       const d = XP.durum();
       expect(d.toplam).toBe(0);
-      expect(d.kademe).toBe(1);
-      expect(d.basamak).toBe(1);
+      expect(d.etiket).toBe('1.1');
       expect(d.bitmisBasamak).toBe(0);
-      expect(d.oran).toBe(0);
     });
 
     it('rozet yüklü defterde etiketi taşır', async () => {
       await temiz();
       expect(XP.rozetHtml()).toContain('1.1');
     });
+
+    it('aynı anda iki yükleme tek defter üretir — biri diğerini ezmez', async () => {
+      resetState();
+      await XP.sifirla();
+      XP.bosalt();
+      const [a, b] = await Promise.all([XP.yukle(), XP.yukle()]);
+      expect(a === b).toBe(true);
+    });
   });
 
-  describe('kazanma — tavan ve kapsam', () => {
+  describe('kazanma — tavan, kapsam ve gün penceresi', () => {
 
     it('XP kazanmak toplamı artırır', async () => {
       await temiz();
       const e = tavansiz();
-      const r = await XP.kazan(e.id, { gun:'2026-01-01' });
+      const r = await XP.kazan(e.id);
       expect(r.kazanilan).toBe(e.xp);
+      expect(XP.durum().toplam).toBe(e.xp);
+    });
+
+    it('TAVANSIZ etkinlik günde BİR KEZ sayılır — «sınırsız» demek değildir', async () => {
+      await temiz();
+      const e = tavansiz();
+      await XP.kazan(e.id, { adet:1000 });
       expect(XP.durum().toplam).toBe(e.xp);
     });
 
     it('aynı gün tavanı aşan tekrar XP getirmez', async () => {
       await temiz();
       const e = tavanli();
-      const kac = Math.ceil(e.tavan / e.xp) + 5;
-      await XP.kazan(e.id, { gun:'2026-01-01', adet:kac });
+      await XP.kazan(e.id, { adet:Math.ceil(e.tavan / e.xp) + 5 });
       expect(XP.durum().toplam).toBe(e.tavan);
     });
 
@@ -166,17 +282,16 @@
       await temiz();
       const e = tavanli();
       const kac = Math.ceil(e.tavan / e.xp) + 5;
-      await XP.kazan(e.id, { gun:'2026-01-01', adet:kac });
-      await XP.kazan(e.id, { gun:'2026-01-02', adet:kac });
+      await gunGecir(0, () => XP.kazan(e.id, { adet:kac }));
+      await gunGecir(1, () => XP.kazan(e.id, { adet:kac }));
       expect(XP.durum().toplam).toBe(e.tavan * 2);
     });
 
     it('başka bir sistemin etkinliği bu deftere yazılmaz', async () => {
       await temiz();
       const yabanci = L.XP_ETKINLIK.filter(e => e.mod !== XP.MOD)[0];
-      const r = await XP.kazan(yabanci.id, { gun:'2026-01-01' });
+      const r = await XP.kazan(yabanci.id);
       expect(r.yabanci).toBe(true);
-      expect(r.kazanilan).toBe(0);
       expect(XP.durum().toplam).toBe(0);
     });
 
@@ -187,10 +302,43 @@
       expect(r.kazanilan).toBe(0);
     });
 
+    it('GELECEĞE puan yazılmaz', async () => {
+      await temiz();
+      const e = tavansiz();
+      const r = await XP.kazan(e.id, { gun:XP.gunKaydir(ESP.U.todayISO(), 1) });
+      expect(r.gecersizGun).toBe(true);
+      expect(XP.durum().toplam).toBe(0);
+    });
+
+    it('pencereden eski güne puan yazılmaz — geriye dönük puan toplanmaz', async () => {
+      await temiz();
+      const e = tavansiz();
+      const eski = XP.gunKaydir(ESP.U.todayISO(), -(XP.GERI_GUN + 1));
+      const r = await XP.kazan(e.id, { gun:eski });
+      expect(r.gecersizGun).toBe(true);
+      expect(XP.durum().toplam).toBe(0);
+    });
+
+    it('pencerenin içindeki düne puan yazılır — dünkü antrenman bu sabah girilir', async () => {
+      await temiz();
+      const e = tavansiz();
+      const dun = XP.gunKaydir(ESP.U.todayISO(), -1);
+      const r = await XP.kazan(e.id, { gun:dun });
+      expect(r.kazanilan).toBe(e.xp);
+    });
+
+    it('tarih olmayan gün reddedilir — defterde çöp anahtar oluşmaz', async () => {
+      await temiz();
+      const e = tavansiz();
+      const r = await XP.kazan(e.id, { gun:'dün' });
+      expect(r.gecersizGun).toBe(true);
+      expect(Object.keys(XP._defter().gunler)).toHaveLength(0);
+    });
+
     it('adet verilmezse bir kez sayılır, negatif adet bire yuvarlanır', async () => {
       await temiz();
       const e = tavansiz();
-      await XP.kazan(e.id, { gun:'2026-01-01', adet:-9 });
+      await XP.kazan(e.id, { adet:-9 });
       expect(XP.durum().toplam).toBe(e.xp);
     });
   });
@@ -199,7 +347,7 @@
 
     it('ilk basamağı bitirmek yükselme doğurur ve YENİ KADEMEDİR', async () => {
       await temiz();
-      const son = await xpVer(L.BASAMAKLAR[0].esik);
+      const son = await xpTopla(L.BASAMAKLAR[0].esik);
       expect(!!son.yukselme).toBe(true);
       expect(son.yukselme.etiket).toBe('1.1');
       expect(son.yukselme.yeniKademe).toBe(true);
@@ -207,34 +355,24 @@
 
     it('aynı kademe içinde basamak atlamak yeni kademe DEĞİLDİR', async () => {
       await temiz();
-      const son = await xpVer(L.BASAMAKLAR[1].esik);
+      const son = await xpTopla(L.BASAMAKLAR[1].esik);
       expect(son.yukselme.etiket).toBe('1.2');
       expect(son.yukselme.yeniKademe).toBe(false);
     });
 
     it('üçüncü basamağı bitirmek ikinci kademeyi açar', async () => {
       await temiz();
-      const son = await xpVer(L.BASAMAKLAR[2].esik);
+      const son = await xpTopla(L.BASAMAKLAR[2].esik);
       expect(son.yukselme.etiket).toBe('1.3');
+      expect(son.yukselme.yeniKademe).toBe(false);
       expect(XP.durum().kademe).toBe(2);
-      expect(XP.durum().basamak).toBe(1);
     });
 
-    it('eşiğin bir altında yükselme yoktur', async () => {
+    it('eşiğin altında yükselme yoktur', async () => {
       await temiz();
-      const son = await xpVerAlti(L.BASAMAKLAR[0].esik - 1);
+      const son = await xpTamAlti(L.BASAMAKLAR[0].esik - 1);
       expect(son.yukselme).toBeNull();
       expect(XP.durum().bitmisBasamak).toBe(0);
-    });
-
-    it('en üst basamakta oran 1 kalır ve XP birikmeye devam eder', async () => {
-      await temiz();
-      await xpVer(L.TOPLAM_XP + 5000);
-      const d = XP.durum();
-      expect(d.tamam).toBe(true);
-      expect(d.etiket).toBe('6.3');
-      expect(d.oran).toBe(1);
-      expect(d.toplam).toBeGreaterThan(L.TOPLAM_XP);
     });
   });
 
@@ -242,15 +380,13 @@
 
     it('yükselmeden sonra bekleyen kutlama vardır', async () => {
       await temiz();
-      await xpVer(L.BASAMAKLAR[0].esik);
-      const b = XP.bekleyenKutlama();
-      expect(!!b).toBe(true);
-      expect(b.etiket).toBe('1.1');
+      await xpTopla(L.BASAMAKLAR[0].esik);
+      expect(XP.bekleyenKutlama().etiket).toBe('1.1');
     });
 
     it('kutlandı damgası aynı kutlamayı bir daha göstermez', async () => {
       await temiz();
-      await xpVer(L.BASAMAKLAR[0].esik);
+      await xpTopla(L.BASAMAKLAR[0].esik);
       await XP.kutlandi();
       expect(XP.bekleyenKutlama()).toBeNull();
     });
@@ -259,9 +395,18 @@
       await temiz();
       const gorulen = [];
       const birak = XP.dinle(y => gorulen.push(y.etiket));
-      await xpVer(L.BASAMAKLAR[0].esik);
+      await xpTopla(L.BASAMAKLAR[0].esik);
       birak();
       expect(gorulen).toContain('1.1');
+    });
+
+    it('bozuk defterdeki ileri «görülen» damgası kutlamayı susturmaz', async () => {
+      await temiz();
+      /* Elle düzenlenmiş bir depoyu taklit et: hiç XP yokken 6.3 görülmüş. */
+      await ESP.Store.set(XP.YOL, { toplam:0, gorulen:18, gunler:{} });
+      XP.bosalt();
+      await XP.yukle();
+      expect(XP._defter().gorulen).toBe(0);
     });
   });
 
@@ -270,60 +415,48 @@
     it('geri almak toplamı düşürür', async () => {
       await temiz();
       const e = tavansiz();
-      await XP.kazan(e.id, { gun:'2026-01-01' });
-      await XP.geriAl(e.id, { gun:'2026-01-01' });
+      await XP.kazan(e.id);
+      await XP.geriAl(e.id);
       expect(XP.durum().toplam).toBe(0);
     });
 
     it('kazanılmamış puan geri alınmaz — toplam eksiye düşmez', async () => {
       await temiz();
-      const e = tavansiz();
-      const r = await XP.geriAl(e.id, { gun:'2026-01-01' });
+      const r = await XP.geriAl(tavansiz().id);
       expect(r.geriAlinan).toBe(0);
       expect(XP.durum().toplam).toBe(0);
     });
 
     it('seviye düşerse kutlama yeniden kazanılabilir', async () => {
       await temiz();
-      const e = tavansiz();
-      await xpVer(L.BASAMAKLAR[0].esik);
-      await XP.kutlandi();
-      /* Son günün kaydını geri al: eşiğin altına düşülür. */
-      const gunler = Object.keys(XP._defter().gunler).sort();
-      await XP.geriAl(e.id, { gun:gunler[gunler.length - 1] });
+      const son = await xpTopla(L.BASAMAKLAR[0].esik);
+      /* Kutlama ve geri alma, defterin kurulduğu günde yapılır. */
+      await withTodayAsync(son.sonGun, async () => {
+        await XP.kutlandi();
+        const r = await XP.geriAl(son.etkinlik.id,
+          { gun:son.sonGun, adet:son.gunlukKere });
+        expect(r.geriAlinan).toBeGreaterThan(0);
+      });
       expect(XP.durum().bitmisBasamak).toBe(0);
       expect(XP.bekleyenKutlama()).toBeNull();
-      await XP.kazan(e.id, { gun:'2027-06-01' });
-      expect(XP.bekleyenKutlama().etiket).toBe('1.1');
     });
   });
 
   describe('defter büyümesi — dokuz aylık ufuk', () => {
 
-    it('yüz yirmi günden eski kırılım arşive toplanır', async () => {
+    it('kırılım YAŞA göre budanır, kayıt sayısına göre değil', async () => {
       await temiz();
       const e = tavansiz();
-      for(let i = 0; i < XP.DETAY_GUN + 30; i++){
-        await XP.kazan(e.id, { gun:XP.gunKaydir('2026-01-01', i) });
+      /* Üç günde bir kaydeden biri: 60 kayıt, 180 günlük takvim. Sayıya
+         göre budayan bir motor 60 kaydın hepsini tutardı. */
+      for(let i = 0; i < 60; i++){
+        await gunGecir(i * 3, () => XP.kazan(e.id));
       }
-      const d = XP._defter();
-      expect(Object.keys(d.gunler).length).toBe(XP.DETAY_GUN);
-      expect(d.arsiv.xp).toBeGreaterThan(0);
-    });
-
-    it('arşive giden XP tavandan SONRAKİ XP\'dir — kırılım toplamı toplamı aşmaz', async () => {
-      await temiz();
-      const t = tavanli();
-      /* Tavanın üç katı deneme: ham adetle çarpan bir arşiv, burada
-         toplamın üstüne çıkar ve test kırmızıya döner. */
-      const kac = Math.ceil(t.tavan / t.xp) * 3;
-      for(let i = 0; i < XP.DETAY_GUN + 10; i++){
-        await XP.kazan(t.id, { gun:XP.gunKaydir('2026-01-01', i), adet:kac });
-      }
-      const k = XP.kirilim();
-      let kirilimToplam = k.arsiv;
-      Object.keys(k.etkinlik).forEach(id => { kirilimToplam += k.etkinlik[id]; });
-      expect(kirilimToplam).toBe(XP.durum().toplam);
+      const gunler = Object.keys(XP._defter().gunler);
+      const enEski = gunler.sort()[0];
+      const bugun = XP.gunKaydir(BAS, 59 * 3);
+      expect(enEski >= XP.gunKaydir(bugun, -(XP.DETAY_GUN - 1))).toBe(true);
+      expect(gunler.length).toBeLessThan(60);
     });
 
     it('budama TOPLAM XP\'ye dokunmaz — seviye geçmiş silindi diye düşmez', async () => {
@@ -331,9 +464,39 @@
       const e = tavansiz();
       const gun = XP.DETAY_GUN + 30;
       for(let i = 0; i < gun; i++){
-        await XP.kazan(e.id, { gun:XP.gunKaydir('2026-01-01', i) });
+        await gunGecir(i, () => XP.kazan(e.id));
       }
       expect(XP.durum().toplam).toBe(gun * e.xp);
+      expect(Object.keys(XP._defter().gunler).length).toBe(XP.DETAY_GUN);
+    });
+
+    it('kırılım + arşiv = toplam — katalog ne olursa olsun', async () => {
+      await temiz();
+      const e = enVerimli();
+      const kere = Math.ceil(XP.gunlukTavan(e) / e.xp);
+      for(let i = 0; i < XP.DETAY_GUN + 20; i++){
+        await gunGecir(i, () => XP.kazan(e.id, { adet:kere }));
+      }
+      const k = XP.kirilim();
+      let kirilimToplam = k.arsiv;
+      Object.keys(k.etkinlik).forEach(id => { kirilimToplam += k.etkinlik[id]; });
+      expect(kirilimToplam).toBe(XP.durum().toplam);
+      expect(k.arsiv).toBeGreaterThan(0);
+    });
+
+    it('katalogdan kalkmış bir etkinliğin XP\'si arşivde kaybolmaz', async () => {
+      await temiz();
+      const e = tavansiz();
+      for(let i = 0; i < XP.DETAY_GUN + 10; i++){
+        await gunGecir(i, () => XP.kazan(e.id));
+      }
+      /* Kataloğu değiştirmeden aynı ispatı yapmanın yolu: arşiv
+         SAKLANMIYOR, çıkarılıyor. Detay toplamı ne olursa olsun
+         kırılım + arşiv toplamı verir. */
+      const k = XP.kirilim();
+      const detay = Object.keys(k.etkinlik)
+        .reduce((t, id) => t + k.etkinlik[id], 0);
+      expect(detay + k.arsiv).toBe(XP.durum().toplam);
     });
   });
 
@@ -352,16 +515,29 @@
       await withTodayAsync('2026-03-10', async () => {
         await temiz();
         const e = tavansiz();
-        await XP.kazan(e.id, { gun:'2026-03-10' });
-        const seri = XP.sonGunler(3);
-        expect(seri[2].xp).toBe(e.xp);
+        await XP.kazan(e.id);
+        expect(XP.sonGunler(3)[2].xp).toBe(e.xp);
+      });
+    });
+
+    it('günün toplamı YABANCI sistemin puanını saymaz', async () => {
+      await withTodayAsync('2026-03-10', async () => {
+        await temiz();
+        const e = tavansiz();
+        const yabanci = L.XP_ETKINLIK.filter(x => x.mod !== XP.MOD)[0];
+        await XP.kazan(e.id);
+        /* Geri yüklenen bir yedek ya da elle düzenlenmiş depo taklidi:
+           yabancı kimlik deftere DIŞARIDAN girer. */
+        XP._defter().gunler['2026-03-10'][yabanci.id] = 50;
+        expect(XP.gunToplami('2026-03-10')).toBe(e.xp);
+        expect(XP.durum().bugun).toBe(e.xp);
       });
     });
 
     it('kırılım yalnız bu sistemin etkinliklerini sayar', async () => {
       await temiz();
       const e = tavansiz();
-      await XP.kazan(e.id, { gun:'2026-01-01' });
+      await XP.kazan(e.id);
       const k = XP.kirilim();
       expect(k.mod).toBe(XP.MOD);
       expect(k.etkinlik[e.id]).toBe(e.xp);

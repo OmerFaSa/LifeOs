@@ -24,9 +24,6 @@
 <link rel="stylesheet" href="css/seviye.css"/>
 <link rel="stylesheet" href="css/designs.css"/>
 <link rel="stylesheet" href="css/rota.css"/>
-<!-- Perde modulu EN ONCE yuklenir: marka perdesi uygulamanin
-     doksan betigini beklemeden sesini acsin ve gecilebilsin. -->
-<script src="js/core/perde.js"></script>
 <link id="pwa-manifest" rel="manifest"/>
 <link rel="icon" type="image/png" href="img/brand/favicon.png"/>
 <meta name="theme-color" content="#3D3F8F"/>
@@ -35,12 +32,14 @@
 </head>
 <body>
 
+<!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
+     `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
 <!-- MARKA GİRİŞİ — logo videosu, geçilebilir.
 
      Perde burada DURAĞAN durur; sayfanın ilk boyamasında görünür.
      JavaScript'i beklemek, açılışta bir kare boş ekran demekti.
-     Davranışı (ses, «Geç» halkası, Esc, hata durumunda kapanma)
-     `js/core/perde.js` takar — seviye kutlamasıyla AYNI koddur.
+     Davranışı (ses, «Geç» halkası, Esc, odak hapsi, hata durumunda
+     kapanma) `js/core/perde.js` takar — seviye kutlamasıyla AYNI koddur.
 
      Gerçek açılışı (aşağıdaki .boot) ETKİLEMEZ: ayrı, üstte duran bir
      katmandır; ikisi paralel çalışır, biri diğerini beklemez.
@@ -66,6 +65,11 @@
     </button>
   </div>
 </div>
+<!-- Perde modulu markupin HEMEN ARDINDAN yuklenir. <head>'de blokleyici
+     bir betik olarak durursa, durağan perdenin ilk boyamasını da o
+     geciktirir — yani markupin durağan olmasinin sebebini ortadan
+     kaldirirdi. -->
+<script src="js/core/perde.js"></script>
 <script>
 (function(){
   var el = document.getElementById('marka-perde');
@@ -83,6 +87,11 @@
   var kurtarma = setTimeout(function(){
     if(el.parentNode) el.parentNode.removeChild(el);
   }, 14000);
+  /* Kaynak surumde ustteki <script src> bu satira gelinmeden calismis
+     olur ve dongu ILK denemede biter. TEK DOSYA surumunde (dist) ise
+     build.py butun <script src>'leri govdenin ARDINA tasir: orada
+     Perde bu betikten SONRA tanimlanir ve bekleme gercekten calisir.
+     Iki surumun tek markupla yasamasinin bedeli bu kucuk dongudur. */
   var deneme = 0;
   (function bekle(){
     if(window.R && R.Perde){
@@ -95,6 +104,7 @@
   })();
 })();
 </script>
+<!-- SEVIYE:perde-bit -->
 
 <div id="app">
   <div class="boot">

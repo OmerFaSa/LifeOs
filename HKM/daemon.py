@@ -61,7 +61,7 @@ import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -412,7 +412,12 @@ class Handler(BaseHTTPRequestHandler):
         duz dosya adi kabul edilir ve yalniz gorsel uzantilari; bir
         gorsel kapisinin dosya sistemine acilan bir pencereye donusmesi
         bu depoda kabul edilebilir bir bedel degil."""
-        if "/" in ad or "\\" in ad or ad.startswith("."):
+        # Yuzde kodlamasi ONCE cozulur: cozmeden birakmak bosluklu bir
+        # dosya adini (kademe%201.png) sessizce bulunamaz yapardi ve
+        # muhafiz, cozulmus hali hic gormedigi icin yanlis yerde guven
+        # duyardi. (Ayni gerekce: brand/seviye/ortak_yol.py)
+        ad = unquote(ad or "")
+        if not ad or "/" in ad or "\\" in ad or ad.startswith("."):
             return self._send(404, {"error": "yok"})
         uzanti = os.path.splitext(ad)[1].lower()
         turler = {".png": "image/png", ".jpg": "image/jpeg",

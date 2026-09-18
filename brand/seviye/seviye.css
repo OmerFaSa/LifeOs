@@ -25,7 +25,12 @@
    yeterlidir (zayıf cihazda iki video çözmek istenmeyebilir). */
 
 .perde{
-  position:fixed; inset:0; z-index:10000;
+  position:fixed; inset:0;
+  /* Katman sirasi bilerek JETON DEGIL duz sayidir: bu dosya uc
+     uygulamada da ayni sekilde kosar ve hicbirinin jeton olcegine
+     bagimli olamaz. Uc uygulamanin da en ustteki jetonu --z-toast:80;
+     10000 o olcegin acikca ustunde durur. */
+  z-index:10000;
   display:grid; place-items:center;
   background:#000;
   opacity:1; transition:opacity .38s ease;

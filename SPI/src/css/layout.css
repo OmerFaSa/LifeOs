@@ -321,11 +321,13 @@
   font-family:var(--font-serif); font-size:17px; font-weight:500;
   color:var(--ink-on); line-height:1.25;
 }
-/* Alt satir: YALNIZ markanin kendi alt yazisi. Secici once
+/* Markanin alt yazisi KENDI SINIFINI tasir. Secici once
    `.sitefoot__brand span` idi ve seviye rozetinin ICINDEKI span'lara da
-   vuruyordu — rozet blok blok dagiliyordu. Cocuk secicisi o kapiyi
-   kapatir: rozet kendi kurallariyla cizilir. */
-.sitefoot__brand > div > span:not(.seviye-rozet){
+   vuruyordu; sonra `> div > span:not(.seviye-rozet)` oldu ve bu kez
+   markupin sekline cakildi — araya bir sarmalayici koymak ya da rozeti
+   baska yere tasimak alt yaziyi sessizce bicimsiz birakirdi. Bir sinif,
+   iki ozel durumu birden gereksiz kilar. */
+.sitefoot__sub{
   display:block; margin-top:4px;
   font-size:11.5px; color:var(--ink-on-2); line-height:1.45;
 }

@@ -74,6 +74,12 @@ ESP.S = {
   meta:null,
   storeHealth:null,
 
+  /* Seviye — bu sistemin KENDI kademesi (core/xp.js).
+     `null` YUKLENMEDI demektir, "sifir XP" demek DEGIL: rozet o halde
+     hic cizilmez. Defteri XP modulu tutar; burasi ekranlarin okudugu
+     ozet kopyadir ve yalnizca XP tarafindan yazilir. */
+  seviye:null,
+
   ui:{
     /* HKM'nin bekleyen teklifleri — bellekte durur, depoya YAZILMAZ:
        kaynagi HKM'dir ve tek gercek orada olmali. */
