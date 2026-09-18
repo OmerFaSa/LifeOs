@@ -37,7 +37,7 @@ yerde «göremedim» yazdım.
 | **İP-2** Beş yıllık yük denetimi | ✅ bitti | üç sistemde de `tools/loadcheck.js`, `sayilar.py` TAM listesinde |
 | **İP-3** Ortak CSS tek kaynağa | ✅ bitti | `brand/ortak/` + `tools/ortak.py`; 4 365 satır tekrar kalktı |
 | **İP-4** Telefon sorusu | ✅ bitti | **Seçenek B** seçildi (depo sahibi); README «Telefonda kullanım» |
-| **İP-5.1** Rozet ve video dosyaları | ⏳ depo sahibinde | kod hazır; eksik dosya hata değil |
+| **İP-5.1** Rütbe görselleri | ◑ 15 kart + 6 sahne geldi | Kutsal'ın K kartları ve küçük rozetler bekliyor |
 | **İP-5.2** HKM brifinginde seviye | ✅ bitti | `manager._level_line`, iki test |
 | **İP-5.3** Defterin bir yıllık boyutu | ✅ ölçüldü | AYS 13 117 B · SPİ 15 157 B · ESP 12 397 B (tavan) |
 | **İP-6** `labs.js` kapsamı | ⏳ açık | 1 482 satır, hâlâ testsiz |
@@ -103,6 +103,27 @@ etiketinden okuyor, yola elle yazmıyor.
 
 Üç `smoke.js` her koşumda bunu arıyor; `build.py`'de tek satır kapatılıp
 denetimin kırmızıya döndüğü doğrulandı.
+
+## Rapordan sonra gelen iş — RÜTBE SİSTEMİ
+
+Bu rapor yazıldığında seviye sistemi «kademe + basamak» idi ve görselleri
+yoktu. Sonra depo sahibi on beş rütbe kartı ile altı kademe sahnesi
+üretti ve sistem onların etrafında yeniden kuruldu:
+
+- Beşinci kademe **Hüküm → Safir** (kartların üstünde yazan ad).
+- Altıncı kademe **Kutsal noktasızlaştı**: 6.1/6.2/6.3 yerine
+  K100 … K1000, her biri bir öncekinin ~1,85 katı. K1000 bilerek
+  ulaşılmaz ve bunu bir test koruyor.
+- Kutlama artık **haberci → perde** sırasıyla çalışıyor; Space o ekrana
+  hiç sokmuyor.
+- Görseller `brand/seviye/medya/` altında **kayıpsız** duruyor
+  (15,0 → 11,8 MB, piksel değişmedi) ve `tools/rutbe.py` ile işleniyor.
+
+Bu iş sırasında bir şey daha ölçüldü: **şema sürümü artışı gün
+kırılımını siliyordu.** `xp.js` biçim değişimi ile eşik değişimini ayırt
+etmiyordu, yani «beşinci kademenin adı Safir oldu» gibi bir katalog
+düzenlemesi kullanıcının yüz yirmi günlük kırılımını arşive atıyordu.
+Ayrıldı: biçim değiştiyse arşiv, eşik değiştiyse yalnız yeniden türetme.
 
 ## Değişmeyenler
 

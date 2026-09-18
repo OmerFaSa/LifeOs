@@ -35,11 +35,13 @@ try{
    duman testi ikinci hedefe (dist) gecince tarayici bu istegi net::ERR_ABORTED
    ile keser. Bu geculk sayfa gecisinin dogal sonucudur, gercek bir hata
    degildir — splash.js zaten error olayinda da kapaniyor. */
-/* img/seviye/* gormezden gelinir ve bu BILINCLI bir eksikliktir: kademe
-   rozetleri ve gecis videolari kullanici tarafindan tek tek eklenir
-   (bkz. brand/seviye/OKU.md). Dosya yokken rozet kademe numarasina,
-   kutlama da banner'a duser — yani 404 burada bir hata degil, sistemin
-   tasarlanmis ara halidir. Dosyalar eklendikce bu satirlar susar. */
+/* img/seviye/* gormezden gelinir ve bu BILINCLI bir eksikliktir. Onbes
+   rutbe karti ile alti kademe sahnesi yerinde; eksik olanlar Kutsal'in
+   K kartlari (`rutbe-k100 …`) ve kunyedeki kucuk rozet (`rozet-N.png`).
+   Dosya yokken kart yerine kademe/etiket dairesi cizilir, rozet yerine
+   kademe numarasi gorunur — yani 404 burada bir hata degil, sistemin
+   tasarlanmis ara halidir (bkz. brand/seviye/OKU.md). Dosyalar
+   eklendikce bu satirlar susar. */
 const IGNORE = [/fonts\.googleapis\.com/, /fonts\.gstatic\.com/, /favicon\.ico/,
   /img\/brand\/intro\.mp4/, /img\/seviye\//];
 function ignorable(url){ return IGNORE.some(re => re.test(url || '')); }

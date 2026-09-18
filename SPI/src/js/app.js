@@ -944,7 +944,7 @@ SP.App = (function(){
     const sonuc = SP.Perde.kutla(y, { bitti:damgala });
     if(sonuc && sonuc.sessiz){
       const ad = (y.kademeBilgi && y.kademeBilgi.ad) || ('Kademe ' + y.kademe);
-      UI.toast('Seviye atladın — ' + ad + ' ' + y.etiket);
+      UI.toast('Yeni rütbe — ' + ad + ' ' + y.etiket);
       damgala();
     }
   }

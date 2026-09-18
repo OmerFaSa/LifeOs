@@ -1,7 +1,7 @@
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/perde.js içine yazılır; burası bir sonraki
    `python3 tools/seviye.py --yay` ile yeniden üretilir. */
-/* Perde — tam ekran video katmanı. Marka girişi ve seviye kutlaması.
+/* Perde — tam ekran gösterim katmanı. Marka girişi ve rütbe kutlaması.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/seviye/perde.js`; `python3 tools/seviye.py --yay` ile
@@ -113,7 +113,14 @@ ESP.Perde = (function(){
     var n;
     while(kuyruk.length){
       n = kuyruk.shift();
-      if(!n.iptal){ acHemen(n.sec); return; }
+      if(n.iptal) continue;
+      /* Sırada bekleyen bir KUTLAMA ise perde doğrudan açılmaz: önce
+         habercisi çıkar. Marka girişi biterken ekrana birden tam ekran
+         bir kutlama düşmesi, kullanıcının ne olduğunu anlamadan «Geç»e
+         basması demekti. */
+      if(n.haberci) habercileAc(n.sec);
+      else acHemen(n.sec);
+      return;
     }
   }
 
@@ -211,7 +218,11 @@ ESP.Perde = (function(){
     }
 
     function tusla(e){
-      if(e.key === 'Escape' || e.key === 'Esc'){
+      /* Space de geçer. Haberci penceresinde Space «beni bu ekrana hiç
+         sokma» demek; perde açıldıktan sonra da aynı tuşun aynı işi
+         yapması gerekir, yoksa kullanıcı iki ayrı kural öğrenir. */
+      if(e.key === 'Escape' || e.key === 'Esc' || e.key === ' '
+        || e.key === 'Spacebar' || e.code === 'Space'){
         e.preventDefault();
         /* Üstteki perde kapanır, altındaki değil. Bugün aynı anda tek
            perde açık ama olayı yukarı bırakmak, yarın açılan ikinci bir
@@ -404,7 +415,31 @@ ESP.Perde = (function(){
     if(renk) perde.style.setProperty('--kademe-renk', renk);
     if(isik) perde.style.setProperty('--kademe-isik', isik);
 
+    /* KADEME SAHNESİ — arka plan. Kartın arkasında duran geniş görsel
+       (`sahne-4.webp`). Karartma ve bulanıklık CSS'te; burada yalnız
+       katman kurulur. Dosya yoksa öğe hiç eklenmez ve kademe renginden
+       çizilmiş zemin kalır — kırık resim simgesi göstermek, hiç
+       göstermemekten kötüdür. */
+    if(secenekler.sahne){
+      var sahne = document.createElement('img');
+      sahne.className = 'perde__sahne';
+      sahne.alt = '';
+      sahne.setAttribute('aria-hidden', 'true');
+      sahne.addEventListener('error', function(){
+        if(sahne.parentNode) sahne.parentNode.removeChild(sahne);
+      });
+      sahne.src = secenekler.sahne;
+      perde.appendChild(sahne);
+    }
+
     if(secenekler.banner) perde.appendChild(bannerCiz(secenekler.banner));
+
+    /* RÜTBE KARTI — gösterimin kahramanı. Banner'dan ÖNCE değil SONRA
+       eklenir: kart yüklenirse banner gizlenir, yüklenmezse banner
+       zaten çizilmiş hâlde durur ve hiçbir an boş ekran olmaz. */
+    if(secenekler.kart){
+      perde.appendChild(kartCiz(perde, secenekler));
+    }
 
     if(secenekler.video){
       var ortam = document.createElement('video');
@@ -442,6 +477,58 @@ ESP.Perde = (function(){
     return baglan(perde, secenekler);
   }
 
+  /* -------------------------------------------------------- rütbe kartı
+
+     Kart bir GÖRSELDİR ve öyle kalmalı: yüklenirse gösterilir,
+     yüklenmezse aşağıdaki banner (kademe adı, etiket, slogan) zaten
+     ekranda durur. İki katman da aynı anda çizilir, biri diğerini
+     örter — «önce dene, olmazsa çiz» sırası bir kare boşluk bırakırdı.
+
+     İDLE VİDEO. `LIFEOS.RUTBE_VIDEO` açıkken aynı adın `.mp4`'ü
+     denenir ve oynayabilirse kartın yerini alır: sessiz, döngülü,
+     kullanıcıyı bekletmeyen bir hareket. Bayrak kapalıyken hiç istek
+     yapılmaz. Video hata verirse kart olduğu yerde kalır. */
+  function kartCiz(perde, secenekler){
+    var kutu = el('div', 'perde__kart');
+
+    var img = document.createElement('img');
+    img.className = 'perde__kart-gorsel';
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
+    img.addEventListener('load', function(){
+      /* Kart GELDİ. Perdeye işaret konur; CSS bunu görünce banner'daki
+         yuvarlak rozeti gizler — kartın üstünde zaten o kademenin
+         taşı duruyor, ikinci bir rozet aynı şeyi iki kez söylemekti.
+         Kart gelMEZse işaret hiç konmaz ve rozet yerinde kalır. */
+      perde.setAttribute('data-kart', 'var');
+    });
+    img.addEventListener('error', function(){
+      if(kutu.parentNode) kutu.parentNode.removeChild(kutu);
+    });
+    img.src = secenekler.kart;
+    kutu.appendChild(img);
+
+    if(secenekler.kartVideo){
+      var v = document.createElement('video');
+      v.className = 'perde__kart-video';
+      v.muted = true; v.loop = true; v.autoplay = true;
+      v.playsInline = true; v.setAttribute('playsinline', '');
+      v.setAttribute('aria-hidden', 'true');
+      v.tabIndex = -1;
+      v.addEventListener('canplay', function(){
+        kutu.setAttribute('data-video', 'var');
+      });
+      v.addEventListener('error', function(){
+        if(v.parentNode) v.parentNode.removeChild(v);
+      });
+      v.src = secenekler.kartVideo;
+      kutu.appendChild(v);
+      var oynat = v.play();
+      if(oynat && oynat.catch) oynat.catch(function(){});
+    }
+    return kutu;
+  }
+
   /* ------------------------------------------------------------ banner */
 
   function bannerCiz(b){
@@ -473,23 +560,164 @@ ESP.Perde = (function(){
     return kutu;
   }
 
-  /* ------------------------------------------------- seviye kutlaması
+  /* ================================================= RÜTBE KUTLAMASI
 
      `yukselme` nesnesi XP motorundan gelir (XP.bekleyenKutlama ya da
-     XP.dinle). Kademe DEĞİŞTİYSE video oynar; yalnız basamak değiştiyse
-     banner yeter — her 1.2'de on saniyelik video izletmek, üçüncü günde
-     kapatılan bir özelliktir.
+     XP.dinle) ve iki şey söyler: hangi basamağa çıkıldı (`etiket`) ve
+     kademe değişti mi (`yeniKademe`).
 
-     Video dosyası yoksa hata yoktur: banner zaten kutlamanın kendisidir,
-     video onun üstüne gelen süstür. Altı videoyu altı ayrı günde
-     eklemek böyle mümkün olur. */
-  /* Bu yükselme hangi videoyu ister? Saf karar; ayrı durmasının sebebi
-     sınanabilir olması. Kademe DEĞİŞTİYSE o kademenin videosu, yalnız
-     basamak değiştiyse HİÇBİRİ. */
-  function kutlamaVideosu(yukselme, kok){
-    if(!yukselme || !yukselme.yeniKademe) return null;
-    return (kok || 'img/seviye/') + 'kademe-' + yukselme.kademe + '.mp4';
+     GÖSTERİM ÜÇ KATMANDIR
+
+       sahne   o kademenin geniş görseli, arkada, karartılmış
+       kart    o rütbenin kendi kartı (5.2, K300 …), ortada
+       yazı    kademe adı, etiket ve slogan, kartın altında
+
+     Üçü de EKSİK OLABİLİR ve hiçbirinin eksikliği hata değildir: sahne
+     yoksa kademe renginden bir zemin kalır, kart yoksa banner'ın kendi
+     rozeti çizilir. Kutlama her hâlükârda olur.
+
+     ------------------------------------------------------------------
+     ÖNCE HABERCİ, SONRA PERDE
+
+     Tam ekran bir katmanın habersiz açılması, kullanıcıyı yaptığı işin
+     ortasında yakalar: yazarken, sayarken, bir kaydı bitirirken. Bu
+     yüzden perde doğrudan açılmaz — önce sağ üstte üç saniyelik bir
+     haberci çıkar ve ne olacağını söyler.
+
+     O üç saniyede Space'e basmak kutlamayı İPTAL ETMEZ, GÖSTERİMİ
+     atlar: rütbe kazanılmıştır, defterde durur, rozet yenilenir.
+     Atlanan yalnız tam ekran gösterimdir ve kullanıcı o ekrana HİÇ
+     girmez. Haberci dokunmatik cihazda da çalışsın diye kendi «Geç»
+     düğmesini taşır; Space onun klavye kısayoludur. */
+
+  var HABERCI_MS = 3000;
+
+  /* Bu yükselme hangi kartı ister? Saf karar, ayrı duruyor ki
+     sınanabilsin. Ad KATALOGDAN türer (`LIFEOS.MEDYA_ADI`), burada
+     ikinci bir adlandırma kuralı yazılmaz. */
+  function kartYolu(yukselme, kok){
+    var L = window.LIFEOS;
+    if(!yukselme || !yukselme.etiket || !L || !L.MEDYA_ADI) return null;
+    return (kok || 'img/seviye/') + L.MEDYA_ADI(yukselme.etiket) + '.webp';
   }
+
+  /* Kartın idle videosu — yalnız katalog bayrağı açıkken istenir.
+     Kapalıyken `null` döner ve hiç istek yapılmaz. */
+  function kartVideoYolu(yukselme, kok){
+    var L = window.LIFEOS;
+    if(!L || !L.RUTBE_VIDEO) return null;
+    if(!yukselme || !yukselme.etiket || !L.MEDYA_ADI) return null;
+    return (kok || 'img/seviye/') + L.MEDYA_ADI(yukselme.etiket) + '.mp4';
+  }
+
+  function sahneYolu(yukselme, kok){
+    if(!yukselme || !yukselme.kademe) return null;
+    return (kok || 'img/seviye/') + 'sahne-' + yukselme.kademe + '.webp';
+  }
+
+  /* Perde ne kadar dursun? Yeni bir kademe yeni bir ADDIR: okunacak bir
+     slogan, bakılacak yeni bir kart vardır. Basamak ise bir ilerleme
+     işaretidir, göz ucuyla görülür. İkisi de «Geç» ile kesilebilir. */
+  function kutlamaSuresi(yukselme){
+    return (yukselme && yukselme.yeniKademe) ? 7000 : 5000;
+  }
+
+  /* --------------------------------------------------------- haberci */
+
+  function habercileAc(secenekler){
+    var y = secenekler.yukselme || {};
+    var k = y.kademeBilgi || {};
+    var kutu = el('div', 'haberci' + (y.yeniKademe ? ' haberci--kademe' : ''));
+    kutu.setAttribute('role', 'status');
+    kutu.setAttribute('aria-live', 'polite');
+    if(k.renk) kutu.style.setProperty('--kademe-renk', k.renk);
+    if(k.isik) kutu.style.setProperty('--kademe-isik', k.isik);
+
+    var sayiEl = el('span', 'haberci__sayi', String(Math.ceil(HABERCI_MS / 1000)));
+    kutu.appendChild(el('div', 'haberci__ust',
+      kacis(y.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe')));
+    kutu.appendChild(el('div', 'haberci__ad',
+      kacis(k.ad || ('Kademe ' + y.kademe)) + ' <b>' + kacis(y.etiket || '') + '</b>'));
+
+    var alt = el('div', 'haberci__alt');
+    alt.appendChild(sayiEl);
+    alt.appendChild(el('span', 'haberci__alt-yazi', ' sn sonra açılıyor'));
+    /* Klavye ipucu yalnız KLAVYESİ OLANA gösterilir (CSS, pointer:fine).
+       Dokunmatikte «Space» yazmak, olmayan bir tuşu tarif etmektir. */
+    alt.appendChild(el('span', 'haberci__tus', ' · <kbd>Space</kbd> geçer'));
+    kutu.appendChild(alt);
+
+    var gec = el('button', 'haberci__gec', 'Geç');
+    gec.type = 'button';
+    gec.setAttribute('aria-label', 'Gösterimi geç (Space)');
+    kutu.appendChild(gec);
+
+    var cubuk = el('div', 'haberci__cubuk', '<i></i>');
+    cubuk.setAttribute('aria-hidden', 'true');
+    kutu.appendChild(cubuk);
+    var dolgu = cubuk.firstChild;
+
+    (document.body || document.documentElement).appendChild(kutu);
+
+    var basladi = Date.now();
+    var bitti = false;
+    var sayacId = setInterval(tik, 100);
+
+    function temizle(){
+      if(bitti) return true;
+      bitti = true;
+      clearInterval(sayacId);
+      document.removeEventListener('keydown', tusla, true);
+      kutu.classList.add('haberci--kapaniyor');
+      setTimeout(function(){
+        if(kutu.parentNode) kutu.parentNode.removeChild(kutu);
+      }, 260);
+      return false;
+    }
+
+    /* GEÇ: perde HİÇ AÇILMAZ. `bitti` yine çağrılır — kutlama görüldü
+       sayılır ve defter damgalanır, yoksa aynı kutlama her açılışta
+       yeniden çıkardı. */
+    function gecildi(){
+      if(temizle()) return;
+      if(typeof secenekler.bitti === 'function'){
+        try{ secenekler.bitti(); }catch(e){}
+      }
+      siradakini();
+    }
+
+    function ac_(){
+      if(temizle()) return;
+      acHemen(secenekler);
+    }
+
+    function tusla(e){
+      if(e.key === ' ' || e.key === 'Spacebar' || e.code === 'Space'
+        || e.key === 'Escape' || e.key === 'Esc'){
+        e.preventDefault();
+        e.stopPropagation();
+        gecildi();
+      }
+    }
+    document.addEventListener('keydown', tusla, true);
+    gec.addEventListener('click', gecildi);
+
+    function tik(){
+      var gecen = Date.now() - basladi;
+      var kalan = Math.max(0, HABERCI_MS - gecen);
+      sayiEl.textContent = String(Math.ceil(kalan / 1000));
+      dolgu.style.width = Math.min(100, 100 * gecen / HABERCI_MS) + '%';
+      if(kalan <= 0) ac_();
+    }
+    tik();
+
+    return {
+      kapat:gecildi, el:kutu, haberci:true,
+      yukselme:secenekler.yukselme, sirada:false,
+    };
+  }
+
+  /* ----------------------------------------------------------- kutla */
 
   function kutla(yukselme, secenekler){
     if(!yukselme) return null;
@@ -513,22 +741,43 @@ ESP.Perde = (function(){
         kapat:function(){}, sirada:false };
     }
 
-    return ac({
-      sinif:'perde--seviye',
-      baslik:'Seviye atladın: ' + (k.ad || '') + ' ' + yukselme.etiket,
-      video:kutlamaVideosu(yukselme, kok),
-      enAz:yukselme.yeniKademe ? 6000 : 3600,
+    var sec = {
+      sinif:'perde--rutbe' + (yukselme.yeniKademe ? ' perde--yeni-kademe' : ''),
+      baslik:(yukselme.yeniKademe ? 'Yeni kademe: ' : 'Yeni rütbe: ')
+        + (k.ad || '') + ' ' + yukselme.etiket,
+      sahne:sahneYolu(yukselme, kok),
+      kart:kartYolu(yukselme, kok),
+      kartVideo:kartVideoYolu(yukselme, kok),
+      enAz:kutlamaSuresi(yukselme),
       banner:{
-        no:yukselme.kademe,
-        rozet:kok + 'kademe-' + yukselme.kademe + '.png',
-        ustyazi:yukselme.yeniKademe ? 'Yeni kademe' : 'Yeni basamak',
+        /* Kart yoksa daire içinde bu yazar. Noktalı kademelerde kademe
+           NUMARASI doğru cevaptır (1.1 ile 1.3 aynı kademedir); Kutsal'da
+           numara yoktur, etiketin kendisi yazılır — «6» demek, noktasız
+           olsun diye kurulmuş bir kademeye nokta sistemini geri
+           getirmekti. */
+        no:(k.etiketler ? yukselme.etiket : yukselme.kademe),
+        rozet:null,        /* kart zaten o kademenin taşını taşıyor */
+        ustyazi:yukselme.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe',
         ad:k.ad || ('Kademe ' + yukselme.kademe),
-        etiket:'KADEME ' + yukselme.etiket,
+        etiket:yukselme.etiket,
         slogan:k.slogan || '',
         renk:k.renk, isik:k.isik,
       },
       bitti:secenekler.bitti,
-    });
+      yukselme:yukselme,
+    };
+
+    /* Ekranda perde varsa (marka girişi oynuyor olabilir) haberci de
+       SIRAYA GİRER: iki katman üst üste binmez. */
+    if(document.querySelector('.perde')){
+      var bekleyen = { sec:sec, iptal:false, haberci:true };
+      kuyruk.push(bekleyen);
+      return {
+        kapat:function(){ bekleyen.iptal = true; },
+        el:null, sirada:true, yukselme:yukselme,
+      };
+    }
+    return habercileAc(sec);
   }
 
   /* ACİL ÇIKIŞ — açık perdeyi hemen kaldırır ve sırayı boşaltır.
@@ -538,7 +787,7 @@ ESP.Perde = (function(){
      akışta çağrılmaz; kapanma `kapat()` ile, yumuşak geçişle olur. */
   function hepsiniKapat(){
     kuyruk.length = 0;
-    var liste = document.querySelectorAll('.perde');
+    var liste = document.querySelectorAll('.perde, .haberci');
     Array.prototype.forEach.call(liste, function(el){
       if(el.parentNode) el.parentNode.removeChild(el);
     });
@@ -549,7 +798,9 @@ ESP.Perde = (function(){
     ac:ac, baglan:baglan, kutla:kutla,
     sesTercihi:sesTercihi, hepsiniKapat:hepsiniKapat,
     kendiliginenAcilsinMi:kendiliginenAcilsinMi,
-    kutlamaVideosu:kutlamaVideosu,
-    GEC_ICI:GEC_ICI, SES_ANAHTAR:SES_ANAHTAR,
+    /* Saf kararlar — perde açmadan sınanabilsinler diye dışarıda. */
+    kartYolu:kartYolu, kartVideoYolu:kartVideoYolu, sahneYolu:sahneYolu,
+    kutlamaSuresi:kutlamaSuresi,
+    GEC_ICI:GEC_ICI, SES_ANAHTAR:SES_ANAHTAR, HABERCI_MS:HABERCI_MS,
   };
 })();

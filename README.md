@@ -58,9 +58,21 @@ konuşamadığı bir boşluğu buldu (tarayıcının CORS ön-isteği).
   XP tetiklenmez, o günün verisinden **türetilir**; silinen kayıt puanını
   bırakmaz. Üç sistemin günlük tavanı birbirine yakın tutulur (430 / 410 /
   420) — aynı kademe üçünde de aynı emeği istesin diye. HKM'nin kendi XP'si
-  yoktur, üçünün kademesini yalnızca **gösterir**. Tek kaynak
-  `brand/seviye/`; üçe `python3 tools/seviye.py --yay` ile dağıtılır
-  (bkz. [`brand/seviye/OKU.md`](brand/seviye/OKU.md)).
+  yoktur, üçünün kademesini yalnızca **gösterir**.
+
+  Altı kademe: **Bronz · Gümüş · Altın · Yakut · Safir · Kutsal.** İlk
+  beşinde üçer basamak vardır ve noktayla yazılır (`5.2`); her basamağın
+  kendi **rütbe kartı** vardır. Kutsal'da nokta yoktur: basamakları
+  `K100`'den `K1000`'e gider ve her biri bir öncekinin yaklaşık iki katı
+  emek ister — K1000 bilerek ulaşılmaz, çünkü tepesi görünen bir merdiven
+  varıldığı gün biter.
+
+  Rütbe kazanıldığında önce sağ üstte **üç saniyelik bir haberci** çıkar;
+  **Space** o ekrana hiç sokmaz. Geçilmezse arka plan kararır, kademenin
+  sahnesi gelir ve rütbe kartı gösterilir.
+
+  Tek kaynak `brand/seviye/`; üçe `python3 tools/seviye.py --yay` ile
+  dağıtılır (bkz. [`brand/seviye/OKU.md`](brand/seviye/OKU.md)).
 
 ## Üçü neyi paylaşmaz
 
@@ -218,12 +230,12 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1174/1174 gecti | 923/923 gecti | 741/741 gecti |
+| `runtests.js` | 1189/1189 gecti | 938/938 gecti | 756/756 gecti |
 | `smoke.js` | Duman testi temiz — 2 hedefte 36 ekran, 38 sekme gezildi. | Duman testi temiz — 2 hedefte 24 ekran, 66 sekme gezildi. | Duman testi temiz — 2 hedefte 28 ekran, 184 sekme gezildi. |
 | `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
 | `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 37 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 45 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 106 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.9 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 23.6 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 48.6 ms (bütçe 100). |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.6 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 23.9 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 44.9 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
 | `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |

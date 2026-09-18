@@ -49,6 +49,8 @@ python3 tools/seviye.py --yay        # brand/seviye/ -> uc arayuz
 python3 tools/seviye.py --denetle    # kopyalar kaynakla ayni mi (CI de kosar)
 python3 tools/ortak.py --yay         # brand/ortak/  -> uc arayuzun CSS'i
 python3 tools/ortak.py --denetle     # kopyalar kaynakla ayni mi (CI de kosar)
+python3 tools/rutbe.py <klasor>      # rutbe gorsellerini medya/'ya isler (kayipsiz)
+python3 tools/rutbe.py --liste       # medya/ altinda ne var
 
 # her sistem kendi dizininde
 node tools/runtests.js      # birim testleri

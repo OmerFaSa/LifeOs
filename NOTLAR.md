@@ -43,12 +43,12 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1174/1174 gecti | 923/923 gecti | 741/741 gecti |
+| `runtests.js` | 1189/1189 gecti | 938/938 gecti | 756/756 gecti |
 | `smoke.js` | Duman testi temiz — 2 hedefte 36 ekran, 38 sekme gezildi. | Duman testi temiz — 2 hedefte 24 ekran, 66 sekme gezildi. | Duman testi temiz — 2 hedefte 28 ekran, 184 sekme gezildi. |
 | `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
 | `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 37 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 45 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 106 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.9 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 23.6 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 48.6 ms (bütçe 100). |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.6 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 23.9 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 44.9 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
 | `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
@@ -1357,6 +1357,25 @@ yazmamış olurdum.
 | ~~Ortak CSS kopyaları~~ | — | — | **kapandı** — `brand/ortak/` + `tools/ortak.py` |
 | ~~Telefonda çalıştırma yolu~~ | — | — | **kapandı** — Seçenek B (tek dosya + elle yedek), README «Telefonda kullanım» |
 | `palette.js` kapsamı | ikisi | düşük | UI açan işlevler denenmiyor (kasıtlı) |
+
+**Rütbe sistemi kuruldu.** Beşinci kademe Hüküm iken **Safir** oldu
+(rütbe kartlarının üstünde yazan ad neyse katalogda da o yazar) ve
+altıncı kademe **Kutsal** noktalı üç basamaktan **on K basamağına**
+çıktı: K100 … K1000, her biri bir öncekinin ~1,85 katı. K1000 bilerek
+ulaşılmazdır ve bunu bir test koruyor (günlük tavanla otuz yıldan
+yakına düşerse paket kırmızıya döner).
+
+On beş rütbe kartı ve altı kademe sahnesi `brand/seviye/medya/` altında,
+**kayıpsız** WebP olarak duruyor (15,0 MB → 11,8 MB, piksel değişmedi).
+Adlar ekranda yazan etiketten türer: `5.2` → `rutbe-5-2.webp`,
+`K300` → `rutbe-k300.webp`. Kural tek yerde: `LIFEOS.MEDYA_ADI`.
+
+Kutlama artık doğrudan perde açmıyor: önce sağ üstte üç saniyelik bir
+**haberci** çıkıyor ve **Space** o ekrana hiç sokmuyor (rütbe yine
+kazanılmış sayılıyor, yalnız gösterim atlanıyor). Şema sürümü 2 → 3
+oldu ama gün kırılımı KORUNDU — `xp.js` artık biçim değişimi ile eşik
+değişimini ayırıyor; eskiden bir katalog düzenlemesi kullanıcının yüz
+yirmi günlük kırılımını siliyordu.
 
 **Ortak CSS nasıl kapandı.** `base.css`, `layout.css` ve `designs.css`
 üç uygulamada bayt düzeyinde aynıydı — 4 365 satır birebir tekrar ve
