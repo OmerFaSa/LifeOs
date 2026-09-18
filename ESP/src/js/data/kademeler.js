@@ -1,7 +1,7 @@
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/kademeler.js içine yazılır; burası bir sonraki
    `python3 tools/seviye.py --yay` ile yeniden üretilir. */
-/* LifeOS seviye sistemi — ALTI KADEME, HER KADEMEDE ÜÇ BASAMAK.
+/* LifeOS seviye sistemi — ALTI KADEME; BEŞİ NOKTALI, ALTINCISI SONSUZ.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
 
@@ -37,10 +37,28 @@
    ------------------------------------------------------------------
    İKİ KAVRAM, KARIŞTIRILMAMALI
 
-     KADEME    1..6 — büyük eşik. Rengi, adı, rozeti ve geçiş videosu
-               olan şey budur (Bronz, Gümüş, Altın, …).
-     BASAMAK   her kademenin içinde üç adım: 1.1, 1.2, 1.3. Sessizdir,
-               video oynatmaz; yalnız «ilerliyorsun» der.
+     KADEME    1..6 — büyük eşik. Rengi, adı, sahnesi olan şey budur
+               (Bronz, Gümüş, Altın, Yakut, Safir, Kutsal).
+     BASAMAK   kademenin içindeki adım. Beş kademede ÜÇ tane ve noktayla
+               yazılır: 1.1, 1.2, 1.3. Her basamağın kendi RÜTBE KARTI
+               vardır ve kart, o basamağa geçildiğinde gösterilir.
+
+   ------------------------------------------------------------------
+   KUTSAL'DA NOKTA YOKTUR
+
+   Altıncı kademe bir varış değil bir devamdır; sahnesinde yazdığı gibi:
+   «daima daha yükseğe». Bu yüzden basamakları 6.1/6.2/6.3 diye değil
+   K100, K200, … K1000 diye adlanır ve her biri bir öncekinin yaklaşık
+   iki katı kadar emek ister.
+
+   K1000 BİLEREK ULAŞILAMAZ. Ölçüldü: bir sistemin günlük tavanı ~430
+   XP; K1000'in kümülatif eşiği 6 863 500 XP eder. Yani HER GÜN, HİÇ
+   ATLAMADAN, katalogdaki her işi tavanına kadar yapan biri için bile
+   kırk üç yıl. Gerçekçi bir tempoda (günde ~250 XP) yetmiş beş yıl.
+
+   Bu bir hata değil TASARIM: tepesi görünen bir merdiven, tepesine
+   varıldığı gün biten bir merdivendir. K500'ü görmek bile olağanüstü
+   bir şeydir ve o hissi ancak üstünde hâlâ bir şey varsa verir.
 
    ESP'nin kendi `ESP.LEVELS` merdiveni (Acemi → Üstat) BAŞKA bir
    şeydir ve bununla birleştirilmez: o bir disiplinin ölçülmüş üretimi,
@@ -71,10 +89,15 @@ window.LIFEOS = window.LIFEOS || {};
 /* Şema sürümü: eşikler ya da basamak sayısı değişirse artar. Depodaki
    defter bu numarayı taşır; eski defterin yeni eşiklerle yeniden
    okunması (yani seviyenin sessizce düşmesi) böyle yakalanır. */
-LIFEOS.SEVIYE_SURUM = 2;
+/* 2 → 3: beşinci kademe Hüküm iken Safir oldu ve Kutsal üç basamaktan
+   on K basamağına çıktı. Defterin BİÇİMİ değişmedi; bu yüzden gün
+   kırılımı korunur (bkz. core/xp.js, BICIM_SURUM). */
+LIFEOS.SEVIYE_SURUM = 3;
 
-/* Her kademede kaç basamak var. Üçten başkasına geçilecekse tek yer
-   burasıdır; motor bu sayıyı sabit varsaymaz. */
+/* NOKTALI kademelerde (1–5) kaç basamak var. Kutsal bu sayıya UYMAZ:
+   kendi `etiketler` listesi kadar basamağı vardır. Motor zaten hiçbir
+   yerde sabit bir basamak sayısı varsaymaz — merdiveni katalogdan
+   türetir (`LIFEOS.BASAMAKLAR`). */
 LIFEOS.BASAMAK_SAYISI = 3;
 
 /* ======================= KADEMELER =======================
@@ -105,14 +128,39 @@ LIFEOS.KADEMELER = [
   { no:4, id:'yakut',  ad:'Yakut',      slogan:'Sınırlarını aş',
     renk:'#B31432', isik:'#FF6B7E', basamak:[ 2500,  3000,  3500 ] },
 
-  /* «Hüküm» bir keşif değil bir OTORİTE adıdır; «Evreni keşfet» sloganı
-     Nebula'ya aitti ve adla birlikte değişti. Mor kalıyor: hükümdarlığın
-     rengi. */
-  { no:5, id:'hukum',  ad:'Hüküm',      slogan:'Kendi hükmünü kur',
-    renk:'#6B4FC4', isik:'#C4A9FF', basamak:[ 4500,  5500,  6500 ] },
+  /* Beşinci kademe önce «Nebula», sonra «Hüküm»dü; şimdi SAFİR. Ad
+     rütbe kartlarıyla birlikte değişti — kartın üstünde yazan ne ise
+     burada da o yazar, yoksa ekranla dosya iki ayrı şey söyler. Renk
+     de kartın kendi mavisinden alındı. */
+  { no:5, id:'safir',  ad:'Safir',      slogan:'Ustalığı berraklaştır',
+    renk:'#1E3FA8', isik:'#7FB0FF', basamak:[ 4500,  5500,  6500 ] },
 
-  { no:6, id:'kutsal', ad:'Kutsal',     slogan:'Daha yüksek bir amaca hizmet et',
-    renk:'#EBD9A5', isik:'#FFF6DC', basamak:[ 8000, 10000, 12000 ] },
+  /* KUTSAL — noktasız ve sonsuz. Basamak adları `etiketler` listesinden
+     okunur; o liste varsa «no.sıra» biçimi hiç üretilmez.
+
+     Maliyetler kabaca 1,85 katlanarak artar ve bu keyfi değil ÖLÇÜLMÜŞ
+     bir seçimdir. Kümülatif eşikler (Safir 5.3 = 34 500 XP üstüne):
+
+       K100      46 500      ~6 ay      (günde ~250 XP ile)
+       K200      68 500      ~9 ay
+       K300     108 500      ~1,2 yıl
+       K400     183 500      ~2 yıl
+       K500     323 500      ~3,5 yıl
+       K600     583 500      ~6,4 yıl
+       K700   1 063 500      ~11,7 yıl
+       K800   1 963 500      ~21,5 yıl
+       K900   3 663 500      ~40 yıl
+       K1000  6 863 500      ~75 yıl   ← ulaşılmaz, bilerek
+
+     K1000'i günlük tavanın (~430 XP) tamamını HER GÜN alan biri bile
+     kırk üç yılda görebilir. Merdivenin tepesi görünmemeli: görünen
+     bir tepe, varıldığı gün sistemi bitirir. */
+  { no:6, id:'kutsal', ad:'Kutsal',     slogan:'Daima daha yükseğe',
+    renk:'#C9A227', isik:'#FFF1C4',
+    etiketler:['K100', 'K200', 'K300', 'K400', 'K500',
+               'K600', 'K700', 'K800', 'K900', 'K1000'],
+    basamak:[  12000,   22000,   40000,   75000,  140000,
+              260000,  480000,  900000, 1700000, 3200000 ] },
 ];
 
 /* ======================= ETKİNLİKLER =======================
@@ -121,6 +169,14 @@ LIFEOS.KADEMELER = [
    hangi sistemde yapılıyorsa `mod` alanı onu söyler.
 
    id       defterde yazılı kalan kimlik — DEĞİŞMEZ.
+   rota     bu iş hangi ekranda yapılır (Rütbe ekranı oraya götürür).
+   nerede   o ekranın kullanıcıya görünen adı — «Günlük › Bugün».
+   nasil    tek cümlede «bu puanı ne kazandırır».
+
+   Son üçü BİLGİ ALANIDIR ve motor onlara bakmaz; Rütbe ekranı
+   «nereden XP kazanırım» sorusunu onlarla cevaplar. Ekranın kendi
+   listesini tutması, katalog değiştiğinde eskiyen ikinci bir liste
+   demekti.
    mod      'ays' | 'spi' | 'esp' | 'hkm'
    ad       ekranda görünen cümle.
    xp       bir kez için kazanılan puan.
@@ -138,11 +194,16 @@ LIFEOS.KADEMELER = [
    yönü de denetler (bkz. src/tests/xp.test.js). */
 LIFEOS.XP_ETKINLIK = [
   /* --- AYS: sınav --- */
-  { id:'ays.soru',        mod:'ays', ad:'Soru çözümü',            xp: 2, tavan:120, birim:'soru' },
-  { id:'ays.deneme',      mod:'ays', ad:'Deneme tamamlama',       xp:80, tavan:160, birim:'deneme' },
-  { id:'ays.blok',        mod:'ays', ad:'Plan bloğu tamamlama',   xp:20, tavan: 80, birim:'blok' },
-  { id:'ays.kalibrasyon', mod:'ays', ad:'Tahmin kaydı',           xp:10, tavan: 30, birim:'tahmin' },
-  { id:'ays.gun',         mod:'ays', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün' },
+  { id:'ays.soru',        mod:'ays', ad:'Soru çözümü',            xp: 2, tavan:120, birim:'soru',
+    rota:'today',  nerede:'Günlük › Bugün',   nasil:'Blok sonuçlarına ve serbest soru alanına yazdığın her soru' },
+  { id:'ays.deneme',      mod:'ays', ad:'Deneme tamamlama',       xp:80, tavan:160, birim:'deneme',
+    rota:'exams',  nerede:'Kayıt › Deneme',   nasil:'Kaydettiğin her deneme' },
+  { id:'ays.blok',        mod:'ays', ad:'Plan bloğu tamamlama',   xp:20, tavan: 80, birim:'blok',
+    rota:'today',  nerede:'Günlük › Bugün',   nasil:'«Bitti» işaretlediğin her plan bloğu' },
+  { id:'ays.kalibrasyon', mod:'ays', ad:'Tahmin kaydı',           xp:10, tavan: 30, birim:'tahmin',
+    rota:'exams',  nerede:'Kayıt › Deneme',   nasil:'Denemeden önce yazdığın kör net tahmini' },
+  { id:'ays.gun',         mod:'ays', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün',
+    rota:'today',  nerede:'Günlük › Bugün',   nasil:'O güne dair bir şey girmen yeter — günde bir kez' },
 
   /* --- SPİ: sağlık ---
 
@@ -152,23 +213,34 @@ LIFEOS.XP_ETKINLIK = [
      sistem ona kendi sağlık verisini güzelleştirmesi için puan teklif
      ediyordu. SPİ'nin bütün değeri verinin dürüst olmasında; bozulursa
      geriye kalan şey, yalan söylenen bir defter. */
-  { id:'spi.antrenman',   mod:'spi', ad:'Antrenman kaydı',        xp:70, tavan:140, birim:'antrenman' },
-  { id:'spi.ogun',        mod:'spi', ad:'Öğün kaydı',             xp:15, tavan: 60, birim:'öğün' },
-  { id:'spi.uyku',        mod:'spi', ad:'Uyku kaydı',             xp:30, tavan: 30, birim:'gün' },
-  { id:'spi.olcum',       mod:'spi', ad:'Ölçüm kaydı',            xp:10, tavan: 60, birim:'ölçüm' },
-  { id:'spi.tahlil',      mod:'spi', ad:'Tahlil kaydı',           xp:40, tavan: 80, birim:'tahlil' },
-  { id:'spi.gun',         mod:'spi', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün' },
+  { id:'spi.antrenman',   mod:'spi', ad:'Antrenman kaydı',        xp:70, tavan:140, birim:'antrenman',
+    rota:'move',   nerede:'Hareket',          nasil:'Kaydettiğin her seans — kardiyo, kuvvet ya da esneklik' },
+  { id:'spi.ogun',        mod:'spi', ad:'Öğün kaydı',             xp:15, tavan: 60, birim:'öğün',
+    rota:'meals',  nerede:'Besin › Öğünler',  nasil:'Girdiğin her öğün' },
+  { id:'spi.uyku',        mod:'spi', ad:'Uyku kaydı',             xp:30, tavan: 30, birim:'gün',
+    rota:'today',  nerede:'Günlük',           nasil:'O günün uyku süresini yazman — günde bir kez' },
+  { id:'spi.olcum',       mod:'spi', ad:'Ölçüm kaydı',            xp:10, tavan: 60, birim:'ölçüm',
+    rota:'today',  nerede:'Günlük',           nasil:'Doldurduğun her ölçüm alanı: kilo, nabız, HRV, adım…' },
+  { id:'spi.tahlil',      mod:'spi', ad:'Tahlil kaydı',           xp:40, tavan: 80, birim:'tahlil',
+    rota:'labs',   nerede:'Testler',          nasil:'Girdiğin her hastane tahlili' },
+  { id:'spi.gun',         mod:'spi', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün',
+    rota:'today',  nerede:'Günlük',           nasil:'Yukarıdakilerden biri yeter — günde bir kez' },
 
   /* --- ESP: gelişim ---
 
      Tek bir «pratik dakikası» satırı var ve enstrüman da ona yazılır:
      ayrıca bir «gitar pratiği» satırı olsaydı aynı dakika iki kez
      sayılırdı. */
-  { id:'esp.kart',        mod:'esp', ad:'SRS kartı tekrarı',      xp: 1, tavan: 60, birim:'kart' },
-  { id:'esp.oturum',      mod:'esp', ad:'Pratik dakikası',        xp: 2, tavan:140, birim:'dakika' },
-  { id:'esp.okuma',       mod:'esp', ad:'Atomik not',             xp:15, tavan: 75, birim:'not' },
-  { id:'esp.yazi',        mod:'esp', ad:'Yazı taslağı',           xp:35, tavan:105, birim:'taslak' },
-  { id:'esp.gun',         mod:'esp', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün' },
+  { id:'esp.kart',        mod:'esp', ad:'SRS kartı tekrarı',      xp: 1, tavan: 60, birim:'kart',
+    rota:'lang',   nerede:'Dil › Dil Stüdyosu', nasil:'Tekrarladığın her kart' },
+  { id:'esp.oturum',      mod:'esp', ad:'Pratik dakikası',        xp: 2, tavan:140, birim:'dakika',
+    rota:'today',  nerede:'Günlük › Bugün',   nasil:'Girdiğin her pratik dakikası — hangi disiplin olursa olsun' },
+  { id:'esp.okuma',       mod:'esp', ad:'Atomik not',             xp:15, tavan: 75, birim:'not',
+    rota:'library', nerede:'Okuma › Kütüphane', nasil:'Yazdığın her atomik not' },
+  { id:'esp.yazi',        mod:'esp', ad:'Yazı taslağı',           xp:35, tavan:105, birim:'taslak',
+    rota:'writing', nerede:'Yazı › Yazı Laboratuvarı', nasil:'Oluşturduğun ya da üzerinden geçtiğin her taslak' },
+  { id:'esp.gun',         mod:'esp', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün',
+    rota:'today',  nerede:'Günlük › Bugün',   nasil:'O güne dair bir şey girmen yeter — günde bir kez' },
 
   /* HKM'nin XP'si YOKTUR ve olmamalı: HKM üçünün üstünde değil
      yanındadır, kendi defteri olsa dördüncü bir seviye yarışı açardı.
@@ -181,9 +253,15 @@ LIFEOS.XP_ETKINLIK = [
    basamağın KÜMÜLATİF eşiği burada bir kez hesaplanır.
 
    esik[i] = o basamağı BİTİRMEK için gereken toplam XP.
-   Son basamağın (6.3) eşiği aynı zamanda tavandır; üstünde XP birikmeye
-   devam eder ama kademe durur — «bitti» demek, her gün kullanılacak bir
-   sistemde bir yıl sonra anlamını kaybeder. */
+   Son basamağın (K1000) eşiği aynı zamanda tavandır; üstünde XP birikmeye
+   devam eder ama kademe durur. O tavan bilerek ulaşılamayacak kadar
+   uzaktır (bkz. KUTSAL'DA NOKTA YOKTUR): görünen bir tepe, varıldığı gün
+   biten bir sistemdir.
+
+   ETİKET KATALOGDAN GELİR, ÜRETİLMEZ — kademe kendi `etiketler`
+   listesini veriyorsa o kullanılır (Kutsal: K100, K200, …), vermiyorsa
+   «no.sıra» biçimi üretilir (1.1, 1.2, …). Kural tek yerde durur; iki
+   ayrı biçim iki ayrı yerde yazılsaydı biri diğerinden geri kalırdı. */
 LIFEOS.BASAMAKLAR = (function(){
   var liste = [];
   var toplam = 0;
@@ -193,7 +271,7 @@ LIFEOS.BASAMAKLAR = (function(){
       liste.push({
         kademe:k.no,
         basamak:i + 1,
-        etiket:k.no + '.' + (i + 1),
+        etiket:(k.etiketler && k.etiketler[i]) || (k.no + '.' + (i + 1)),
         maliyet:xp,
         esik:toplam,          // bu basamağı bitiren toplam XP
       });
@@ -201,6 +279,30 @@ LIFEOS.BASAMAKLAR = (function(){
   });
   return liste;
 })();
+
+/* Bir basamağın MEDYA ADI — ekranda yazan etiketten türer.
+
+     '5.2'  → 'rutbe-5-2'        (kart: rutbe-5-2.webp)
+     'K300' → 'rutbe-k300'
+
+   Kural TEK SATIRDIR ve tek yerdedir: perde de, `tools/rutbe.py` de
+   aynı adı bekler. İki yerde yazılsaydı, bir gün biri nokta koyar
+   diğeri koymazdı ve kart sessizce görünmezdi. */
+/* Rütbe kartının yerinde IDLE VİDEO oynasın mı?
+
+   Kartlar bugün durağan görsel. İleride her rütbenin kendi kısa idle
+   videosu gelecek (`rutbe-5-2.mp4`); o gün bu satır `true` olur ve
+   perde önce videoyu dener, bulamazsa karta düşer.
+
+   Neden bir liste değil de tek bayrak: «hangi rütbenin videosu var»
+   sorusunu hem dosya sistemi hem de bir liste cevaplasaydı, ikisi bir
+   gün ayrışırdı. Bayrak kapalıyken hiç istek yapılmaz — yani bugün
+   her kutlamada bulunamayacak bir dosya istenmez. */
+LIFEOS.RUTBE_VIDEO = false;
+
+LIFEOS.MEDYA_ADI = function(etiket){
+  return 'rutbe-' + String(etiket || '').toLowerCase().replace(/\./g, '-');
+};
 
 /* Bütün sistemin tepesi. Ekranda «64.500 XP'nin 1.240'ı» derken payda. */
 LIFEOS.TOPLAM_XP = LIFEOS.BASAMAKLAR.length

@@ -58,9 +58,27 @@ konuşamadığı bir boşluğu buldu (tarayıcının CORS ön-isteği).
   XP tetiklenmez, o günün verisinden **türetilir**; silinen kayıt puanını
   bırakmaz. Üç sistemin günlük tavanı birbirine yakın tutulur (430 / 410 /
   420) — aynı kademe üçünde de aynı emeği istesin diye. HKM'nin kendi XP'si
-  yoktur, üçünün kademesini yalnızca **gösterir**. Tek kaynak
-  `brand/seviye/`; üçe `python3 tools/seviye.py --yay` ile dağıtılır
-  (bkz. [`brand/seviye/OKU.md`](brand/seviye/OKU.md)).
+  yoktur, üçünün kademesini yalnızca **gösterir**.
+
+  Altı kademe: **Bronz · Gümüş · Altın · Yakut · Safir · Kutsal.** İlk
+  beşinde üçer basamak vardır ve noktayla yazılır (`5.2`); her basamağın
+  kendi **rütbe kartı** vardır. Kutsal'da nokta yoktur: basamakları
+  `K100`'den `K1000`'e gider ve her biri bir öncekinin yaklaşık iki katı
+  emek ister — K1000 bilerek ulaşılmaz, çünkü tepesi görünen bir merdiven
+  varıldığı gün biter.
+
+  Rütbe kazanıldığında önce sağ üstte **üç saniyelik bir haberci** çıkar;
+  **Space** o ekrana hiç sokmaz. Geçilmezse arka plan kararır, kademenin
+  sahnesi gelir ve rütbe kartı gösterilir.
+
+  Üç arayüzde de gezinmede kendi **Rütbe** bölümü vardır: kazanılmış
+  rütbenin kartı, yirmi beş basamaklık merdivenin tamamı, ham defter — ve
+  **XP'nin hangi işten geldiği**: her iş için kaç puan, hangi birimden,
+  hangi ekranda yapıldığı, bugün tavanın ne kadarının dolduğu ve o ekrana
+  giden bir düğme.
+
+  Tek kaynak `brand/seviye/`; üçe `python3 tools/seviye.py --yay` ile
+  dağıtılır (bkz. [`brand/seviye/OKU.md`](brand/seviye/OKU.md)).
 
 ## Üçü neyi paylaşmaz
 
@@ -77,6 +95,17 @@ Kodları ayrıdır ve birbirini import etmez:
 
 Birinde yapılan bir değişiklik diğerini bozamaz. Üç proje ayrı ayrı
 geliştirilir.
+
+**Paylaştıkları şey derleme zamanında paylaşılır, çalışma zamanında
+değil.** İki kaynak üçe birden dağıtılır ve ayrışmaları denetlenir:
+
+| Tek kaynak | Ne | Dağıtan |
+|---|---|---|
+| [`brand/seviye/`](brand/seviye/) | kademeler, XP motoru, perde | `python3 tools/seviye.py --yay` |
+| [`brand/ortak/`](brand/ortak/) | `base.css`, `layout.css`, `designs.css` | `python3 tools/ortak.py --yay` |
+
+İkisinin de `--denetle` biçimi CI'da koşar: bir kopya elle düzenlenirse
+sessiz kalmaz. Üretilen kopyalar başlıklarında bunu yazar.
 
 ## Çalıştırma
 
@@ -103,6 +132,74 @@ köken porttur. Üçünü tek porta toplamak iki şeyi kırardı — var olan ve
 başka bir kökende kalıp «silinmiş» görünürdü, ve üç sistem tek
 localStorage kotasını (~5 MB) paylaşırdı. `python3 baslat.py --hkmsiz`
 HKM'yi hiç açmaz; üç sistem bundan etkilenmez.
+
+## Telefonda kullanım
+
+**Seçilen yol: tek dosya + elle yedek.** Telefon burada İKİNCİL cihazdır:
+ara sıra bakmak için. Kod yok, altyapı yok — üç adım.
+
+1. Tek dosyalık sürümü üret (her sistem kendi klasöründen):
+
+   ```bash
+   cd AYS && python3 build.py     # -> AYS/dist/rota.html
+   cd SPI && python3 build.py     # -> SPI/dist/spi.html
+   cd ESP && python3 build.py     # -> ESP/dist/esp.html
+   ```
+
+2. Dosyayı telefona taşı (bulut, e-posta, kablo — fark etmez) ve
+   tarayıcıda aç. Tek dosyadır: CSS, JS, yazı tipleri ve marka görselleri
+   içindedir, dışarıdan hiçbir şey indirmez.
+3. Tarayıcının «Ana ekrana ekle» seçeneğiyle kısayol yap. Dosya tek
+   başına açıldığında da doğru ikonu ve adı taşır: manifest, tema rengi,
+   `apple-mobile-web-app-*` etiketleri ve **gömülü ikon** dosyanın
+   içindedir — yanında `img/` klasörü olmasa bile.
+
+   *Dürüst sınır:* gerçek bir PWA kurulumu (tam ekran, ayrı uygulama
+   penceresi) tarayıcıların çoğunda **`http(s)` üzerinden** servis
+   edilmeyi ister; `file://` ile açılan bir dosyada çoğu tarayıcı
+   yalnız bir kısayol oluşturur. Uygulamanın kendisi iki durumda da
+   eksiksiz çalışır — fark yalnız kabuğundadır.
+
+   (Tek dosya sürümü uzun süre bu etiketlerin hepsini kaybediyordu;
+   `build.py` artık onları kaynaktan taşıyor ve duman testi her koşumda
+   arıyor.)
+
+**Veriyi taşımak — yedek dosyası.** Her sistemde *Rehber* ekranında
+(ESP'de ayrıca *Profil*) iki düğme var:
+
+| | indir | yükle |
+|---|---|---|
+| AYS | *Rehber* → «Yedek al (JSON)» | *Rehber* → «Yedekten yükle» |
+| SPİ | *Rehber* → «Yedek indir» | *Rehber* → «Yedek yükle» |
+| ESP | *Profil* → «Yedek indir» | *Profil* → «Yedekten yükle» |
+
+Dizüstünde yedeği indir, telefona taşı, telefonda yükle. Ters yön de
+aynı. Yanlış yöne yüklersen: içe aktarma **geri alınabilir** — *Rehber*
+ekranındaki «Bu içe aktarmayı geri al».
+
+> ### İKİ CİHAZ = İKİ AYRI DEFTER
+>
+> Bunu bilerek yazıyoruz, çünkü bilmeden kullanmak veri kaybettirir.
+> Telefondaki kopya ile dizüstündeki kopya **birbirini görmez**. Tarayıcı
+> depolaması kökene bağlıdır ve iki cihaz iki ayrı kökendir. İki tarafta
+> da kayıt girersen, bir sonraki yedek yüklemesi birini diğerinin üstüne
+> yazar.
+>
+> Pratik kural: **bir taraf yazar, öteki bakar.** Telefonda yalnız
+> bakıyorsan sorun yok; telefonda da kayıt girmeye başladıysan, o günün
+> sonunda hangi tarafın gerçek olduğuna karar et ve tek yönde taşı.
+>
+> Yerel kullanımda veri **cihaza bağlıdır**; cihazlar arası senkron yalnız
+> uygulama Claude Artifact olarak yayımlandığında çalışır
+> (`core/store.js`, `window.claude.use('db')`). `python3 baslat.py` ile
+> açılan yerel sürümde mod **her zaman** `local`'dir ve bu bir arıza
+> değildir. Yerelde tek köprü yedek dosyasıdır.
+
+**Neden yerel ağ modu yok.** Sunucular bilerek `127.0.0.1`'e bağlıdır
+(`sunucu.py`). Dışarı açmak verinin şifresiz servis edilmesi ve yerel ağ
+güvenliğinin kullanıcıya geçmesi demektir; «ara sıra bakıyorum» bu bedeli
+karşılamaz. Telefon birincil cihaz hâline gelirse doğru cevap bu bölüm
+değil, `baslat.py --ag` bayrağıdır (GELISTIRME_RAPORU.md İP-4, Seçenek A).
 
 Tek tek çalıştırmak da mümkün — her proje kendi klasöründen:
 
@@ -139,18 +236,20 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1174/1174 gecti | 923/923 gecti | 738/738 gecti |
-| `smoke.js` | Duman testi temiz — 2 hedefte 36 ekran, 38 sekme gezildi. | Duman testi temiz — 2 hedefte 24 ekran, 66 sekme gezildi. | Duman testi temiz — 2 hedefte 28 ekran, 184 sekme gezildi. |
-| `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
+| `runtests.js` | 1192/1192 gecti | 941/941 gecti | 759/759 gecti |
+| `smoke.js` | Duman testi temiz — 2 hedefte 38 ekran, 44 sekme gezildi. | Duman testi temiz — 2 hedefte 26 ekran, 72 sekme gezildi. | Duman testi temiz — 2 hedefte 30 ekran, 190 sekme gezildi. |
+| `a11ycheck.js` | (1 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) | (1 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) | (3 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
-| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 37 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 45 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 106 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 40.4 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 20.8 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 66.9 ms (bütçe 100). |
+| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 41 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 49 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 110 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.1 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 22.7 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 47 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
-| `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
+| `designcheck.js` | — | beş düzen temiz — 460 ekran/genişlik kombinasyonu bakıldı | — |
+| `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
+| `loadcheck.js` | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) |
 
 | Depo denetimi | Sonuç |
 |---|---|
-| `HKM tests` | 312/312 test gecti |
+| `HKM tests` | 314/314 test gecti |
 | `HKM perf` | Bütün sorgular bütçede. |
 | `HKM yuz` | HKM yüzü temiz — 40 görünümde taşma yok, bütün hedefler 24px ve üstü, etiketler yerinde, kontrast AA. |
 | `entegre.js` | Butunlesme temiz: uc arayuz de HKM ile konustu, HKM kapaliyken hicbiri bozulmadi. |

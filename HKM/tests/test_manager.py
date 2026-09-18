@@ -222,6 +222,40 @@ def run():
         ok("dayanağın genişliğidir" in kapsam["text"])
     test("brifing neye dayandigini soyler", t_coverage_line_counts_labels)
 
+    def t_level_line_is_an_observation():
+        """Kademe brifingde GORUNUR ama bir hedef ya da uyari degildir.
+
+        Seviye uc arayuzden isaretle geliyordu ve yalniz panonun
+        *Sistemler* sayfasinda goruluyordu; gunluk brifing uc sistemin
+        ozetini veriyor ama seviyeyi tasimiyordu."""
+        con = _con()
+        _push(con, "ays", BUGUN, questions=metric(200), study_minutes=metric(90),
+              level_tier=metric(3), level_sub=metric(2), xp_total=metric(4200))
+        _push(con, "esp", BUGUN, level_tier=metric(1), level_sub=metric(1),
+              xp_total=metric(120))
+        b = manager.brief(con, BUGUN)
+        satir = [l for l in b["lines"] if l["kind"] == "level"]
+        eq(len(satir), 1)
+        ok("AYS 3.2" in satir[0]["text"])
+        ok("ESP 1.1" in satir[0]["text"])
+        # Isaret gondermeyen modul satirda HIC gecmez: "SPI —" yazmak,
+        # olculmemis bir seyi olculmus gibi siralamakti.
+        no("SPİ" in satir[0]["text"])
+        # Kademenin ADI merkezde tutulmaz, numarasi tasinir.
+        no("Altın" in satir[0]["text"])
+        ok("hiçbir kararı vermez" in satir[0]["text"])
+        eq(satir[0]["items"][0]["tier"], 3)
+    test("seviye satiri bir gozlemdir", t_level_line_is_an_observation)
+
+    def t_level_line_absent_when_no_signal():
+        """Bos bir «Seviye: —» satiri bilgi degil gurultudur."""
+        con = _con()
+        _push(con, "ays", BUGUN, questions=metric(200), study_minutes=metric(90))
+        b = manager.brief(con, BUGUN)
+        eq(len([l for l in b["lines"] if l["kind"] == "level"]), 0)
+    test("seviye isareti yoksa satir hic cizilmez",
+         t_level_line_absent_when_no_signal)
+
     def t_calendar_rank_reaches_production():
         """Govde tasinmazsa «sabit takvim» sirasi uretimde olu kalir."""
         con = _con()

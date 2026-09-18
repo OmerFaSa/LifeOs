@@ -97,18 +97,28 @@
     return son;
   }
 
-  describe('seviye kataloğu — altı kademe, her kademede üç basamak', () => {
+  describe('seviye kataloğu — beşi noktalı, altıncısı sonsuz', () => {
 
     it('altı kademe vardır', () => {
       expect(L.KADEMELER).toHaveLength(6);
     });
 
-    it('her kademe üç basamak taşır', () => {
-      L.KADEMELER.forEach(k => expect(k.basamak).toHaveLength(L.BASAMAK_SAYISI));
+    it('noktalı kademeler üç basamak taşır', () => {
+      L.KADEMELER.filter(k => !k.etiketler)
+        .forEach(k => expect(k.basamak).toHaveLength(L.BASAMAK_SAYISI));
     });
 
-    it('toplam on sekiz basamak üretilir', () => {
-      expect(L.BASAMAKLAR).toHaveLength(18);
+    it('KUTSAL on K basamağı taşır ve her etiketin bir maliyeti vardır', () => {
+      const kutsal = L.KADEME_ILE(6);
+      expect(kutsal.etiketler).toHaveLength(10);
+      /* Etiket listesi ile maliyet listesi AYRI iki dizidir; biri
+         diğerinden uzun kalırsa adı olan ama fiyatı olmayan (ya da
+         tersi) bir basamak doğar ve merdiven sessizce eksilir. */
+      expect(kutsal.basamak).toHaveLength(kutsal.etiketler.length);
+    });
+
+    it('toplam yirmi beş basamak üretilir', () => {
+      expect(L.BASAMAKLAR).toHaveLength(25);
     });
 
     it('eşikler kesintisiz artar — bir basamak öncekinden ucuz olamaz', () => {
@@ -119,9 +129,78 @@
       });
     });
 
-    it('etiket kademe.basamak biçimindedir', () => {
+    it('etiket noktalı kademelerde kademe.basamak biçimindedir', () => {
       expect(L.BASAMAKLAR[0].etiket).toBe('1.1');
-      expect(L.BASAMAKLAR[17].etiket).toBe('6.3');
+      expect(L.BASAMAKLAR[14].etiket).toBe('5.3');
+    });
+
+    it('KUTSAL etiketleri noktasızdır — K100 ile başlar, K1000 ile biter', () => {
+      const k = L.BASAMAKLAR.filter(b => b.kademe === 6).map(b => b.etiket);
+      expect(k[0]).toBe('K100');
+      expect(k[k.length - 1]).toBe('K1000');
+      /* Kutsal'da nokta ARANMAZ: bir gün «6.1» üretilirse hem ekranda
+         hem dosya adında yanlış bir şey belirir. */
+      k.forEach(e => expect(e.indexOf('.')).toBe(-1));
+    });
+
+    it('beşinci kademe SAFİR\'dir', () => {
+      const s = L.KADEME_ILE(5);
+      expect(s.ad).toBe('Safir');
+      expect(s.id).toBe('safir');
+    });
+
+    it('K1000 bir ömürde ulaşılamaz — bilerek', () => {
+      /* Ölçüt keyfi değil: bir sistemin GÜNLÜK TAVANI katalogdan
+         okunur. Tavanın tamamını HER GÜN alan biri bile otuz yıldan
+         önce göremiyorsa, merdivenin tepesi görünmüyor demektir. */
+      const tavan = Math.max(L.GUNLUK_TAVAN('ays'), L.GUNLUK_TAVAN('spi'),
+        L.GUNLUK_TAVAN('esp'));
+      const gun = L.TOPLAM_XP / tavan;
+      expect(gun / 365).toBeGreaterThan(30);
+    });
+
+    it('her etkinlik NEREDE yapıldığını söyler', () => {
+      /* Rütbe ekranının «XP nereden gelir» bölümü bu alanlarla çalışır.
+         Biri eksik kalırsa kullanıcı puanı görür ama nereye gideceğini
+         göremez — yani listenin yarısı işe yaramaz. */
+      L.XP_ETKINLIK.forEach(e => {
+        expect(typeof e.rota).toBe('string');
+        expect(e.rota.length).toBeGreaterThan(0);
+        expect(e.nerede.length).toBeGreaterThan(0);
+        expect(e.nasil.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('merdiven bütün basamakları durumuyla verir', () => {
+      const m = XP.merdiven();
+      expect(m).toHaveLength(L.BASAMAKLAR.length);
+      /* Her basamak üç durumdan birinde olmalı; dördüncü bir değer
+         ekranda sessizce sınıfsız bir kutu çizerdi. */
+      m.forEach(b => {
+        expect(['gecildi', 'simdi', 'kilitli'].indexOf(b.durum))
+          .toBeGreaterThan(-1);
+      });
+      /* İçinde bulunulan basamak EN ÇOK BİR tanedir. */
+      expect(m.filter(b => b.durum === 'simdi').length).toBeLessThan(2);
+    });
+
+    it('merdivendeki kart adresi medya kuralıyla aynıdır', () => {
+      const m = XP.merdiven();
+      const safir = m.filter(b => b.etiket === '5.2')[0];
+      expect(safir.kart).toBe('img/seviye/rutbe-5-2.webp');
+      const kutsal = m.filter(b => b.etiket === 'K300')[0];
+      expect(kutsal.kart).toBe('img/seviye/rutbe-k300.webp');
+    });
+
+    it('medya adı etiketten türer — nokta tireye döner, harf küçülür', () => {
+      expect(L.MEDYA_ADI('5.2')).toBe('rutbe-5-2');
+      expect(L.MEDYA_ADI('1.1')).toBe('rutbe-1-1');
+      expect(L.MEDYA_ADI('K300')).toBe('rutbe-k300');
+    });
+
+    it('her basamağın medya adı benzersizdir', () => {
+      const adlar = L.BASAMAKLAR.map(b => L.MEDYA_ADI(b.etiket));
+      expect(new Set(adlar).size).toBe(adlar.length);
     });
 
     it('kademe kimlikleri benzersizdir — defter kimlikle yazılır', () => {
@@ -231,7 +310,7 @@
     it('en üst basamakta oran 1 kalır ve XP birikmeye devam eder', () => {
       const k = XP.konum(L.TOPLAM_XP + 50000);
       expect(k.tamam).toBe(true);
-      expect(k.etiket).toBe('6.3');
+      expect(k.etiket).toBe('K1000');
       expect(k.oran).toBe(1);
       expect(k.kalan).toBe(0);
       expect(k.toplam).toBeGreaterThan(L.TOPLAM_XP);

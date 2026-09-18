@@ -12,7 +12,7 @@ geçer.
 | SPİ | `SPI/src/img/brand/` | Açılış videosu, favicon, PWA ikonu, `dist/img/brand/` (build.py kopyalar) |
 | ESP | `ESP/src/img/brand/` | Açılış videosu, favicon, PWA ikonu, `dist/img/brand/` (build.py kopyalar) |
 | HKM | `HKM/brand/` | Sekme ikonu ve panonun künyesi (`/brand/...` adresinden servis edilir), bu README ve dış tanıtım |
-| Seviye sistemi | `brand/seviye/` | Kademe rozetleri ve geçiş videoları — üç sistemin ORTAK dosyaları (bkz. `brand/seviye/OKU.md`) |
+| Seviye sistemi | `brand/seviye/medya/` | Rütbe kartları ve kademe sahneleri — üç sistemin ORTAK dosyaları (bkz. `brand/seviye/OKU.md`) |
 
 Her klasörde üç dosya:
 
@@ -42,7 +42,9 @@ markasının yerine sistemin kendi icadını koymaktı.
 | Açılış videosu | `img/brand/intro.mp4` |
 | HKM panosu — sekme ikonu ve künye | `HKM/brand/favicon.png` |
 | LifeOS giriş sayfası (`sunucu.py`) | `brand/life/logo.png`, `favicon.png` |
-| Kademe rozetleri ve geçiş videoları | `brand/seviye/kademe-N.png` / `.mp4` |
+| Rütbe kartı (gösterim) | `brand/seviye/medya/rutbe-5-2.webp` |
+| Kademe sahnesi (gösterimin arka planı) | `brand/seviye/medya/sahne-5.webp` |
+| Künyedeki küçük rozet | `brand/seviye/medya/rozet-5.png` (yok — numaraya düşüyor) |
 
 Hiçbirinde dosya adı koda yazılı değildir; hepsi bu sabit yollara bakar.
 

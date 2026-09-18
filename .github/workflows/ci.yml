@@ -3,16 +3,59 @@ name: CI
 # AGENTS.md §2: "bir değişiklik, dokunduğu sistemin testleri ve duman testi
 # geçmeden önerilmez." Bu iş akışı o kuralı otomatikleştirir — insan elle
 # koşturmayı unutsa da PR kırmızı/yeşil kalır.
+#
+# ---------------------------------------------------------------------
+# NEDEN BUTUN DENETIMLER BURADA
+#
+# Depoda on dort denetim araci yazili; bu is akisi uzun sure bunlardan
+# IKISINI kosturuyordu (runtests + smoke). Geri kalanlar yazildiklari
+# gun kosmus, sonra yalnizca elle cagrildiklarinda kosmustu. Sonucu
+# olculdu: seviye paneli eklendiginde SPI'nin layoutcheck'i ve ESP'nin
+# a11ycheck'i kirmiziya dondu — ikisi de gercek kullanici hatasiydi
+# (yazarken kaybolan odak, calinan ilk Tab duragi) ve ikisi de CI'dan
+# YESIL gececekti.
+#
+# Kosmayan bir denetim, yazilmis bir denetim degildir.
+#
+# ---------------------------------------------------------------------
+# SURE
+#
+# `arayuz` isi uc sistemi PARALEL kosar, yani toplam sure bir sistemin
+# kendi denetimleri kadar uzar — ucune bolunmez. Agir olan tek denetim
+# (`loadcheck`, bes yillik veri uretir) her PR'da degil, haftada bir
+# ayri bir iste kosar: asagidaki `yuk` isi.
+#
+# ---------------------------------------------------------------------
+# BURADA KOSMAYAN IKI ARAC — VE NEDEN
+#
+#   AYS/tools/audit.py       rapor uretir, HICBIR KOSULDA cikis kodu 1
+#                            vermez. Kirmiziya donmeyen bir denetim,
+#                            denetim degil bir olcumdur; CI'a konsa
+#                            yalnizca gurultu eklerdi.
+#   AYS/tools/evalagents.js  gercek bir dil modeli saglayicisina anahtar
+#                            ister (ROTA_KEY). CI'da ne anahtar vardir
+#                            ne de her PR'da para harcamak dogrudur.
+#
+# Ikisi de elle kosulur; `python3 tools/sayilar.py --tam` ciktisinda
+# yerleri yazilidir.
 
 on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    # Haftalik yuk denetimi (asagidaki `yuk` isi) — pazartesi 04:17 UTC.
+    # Dakika bilerek yuvarlak degil: her saatin basinda kalkan binlerce
+    # is akisinin kuyruguna girmemek icin.
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
 
 jobs:
   arayuz:
-    name: ${{ matrix.system }} — birim testleri + duman testi
+    name: ${{ matrix.system }} — bütün denetimler
     runs-on: ubuntu-latest
+    # Bir sistemin kirmizisi digerlerinin olcumunu gizlemesin: uc sistemin
+    # de raporu ayni kosumda gorunsun.
     strategy:
       fail-fast: false
       matrix:
@@ -20,12 +63,24 @@ jobs:
     defaults:
       run:
         working-directory: ${{ matrix.system }}
+    env:
+      # Bütçeler yerel bir makinede ölçülerek yazıldı; paylaşımlı koşum
+      # makinesi aynı kodu düzenli olarak daha yavaş ölçer. Bütçeyi
+      # gevşetmek yerine ORTAM kendi payını açıkça söylüyor — araç bu
+      # payı çıktısına da yazar (bkz. tools/perfcheck.js, PERF_PAY).
+      PERF_PAY: '1.5'
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      # Denetimlerin cogu sayfayi `devserver.py` ile servis eder: node
+      # tek basina yetmez.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
       - name: Bağımlılıkları kur
         run: npm ci
@@ -39,8 +94,37 @@ jobs:
       - name: Duman testi
         run: node tools/smoke.js
 
-  seviye:
-    name: Seviye sistemi — üç kopya kaynakla aynı mı
+      - name: Erişilebilirlik
+        run: node tools/a11ycheck.js
+
+      - name: Telefon düzeni (390px)
+        run: node tools/layoutcheck.js
+
+      - name: Palet kontrastı
+        run: node tools/palettecheck.js
+
+      - name: Çizim bütçesi (dokuz aylık veri)
+        run: node tools/perfcheck.js
+
+      # Bugun yalniz SPI'de olan denetimler. `if: matrix.system == 'SPI'`
+      # yerine DOSYA VARLIGINA bakilir: bir denetim yarin AYS'ye de
+      # tasindiginda bu is akisini duzenlemek gerekmesin — tasiyan kisi
+      # dosyayi koyar, CI onu kendiliginden kosar.
+      - name: Sisteme özel denetimler
+        run: |
+          set -e
+          bulundu=0
+          for t in ledgercheck designcheck tasarimcheck; do
+            if [ -f "tools/$t.js" ]; then
+              echo "→ $t"
+              node "tools/$t.js"
+              bulundu=$((bulundu + 1))
+            fi
+          done
+          echo "$bulundu sisteme özel denetim koştu."
+
+  tekkaynak:
+    name: Tek kaynaklar — üç kopya kaynakla aynı mı
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,11 +141,20 @@ jobs:
       - name: Kopyalar kaynakla aynı mı
         run: python3 tools/seviye.py --denetle
 
+      # Ortak CSS de ayni mekanizmayla yayiliyor (brand/ortak/ -> uc
+      # arayuz). Ayni gerekce: elle duzenlenen bir kopya bir gun ayrisir.
+      - name: Ortak CSS kaynakla aynı mı
+        run: python3 tools/ortak.py --denetle
+
   hkm:
-    name: HKM — birim testleri
+    name: HKM — testler, sorgu bütçesi, panonun yüzü
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - uses: actions/setup-python@v5
         with:
@@ -70,3 +163,79 @@ jobs:
       - name: Testler
         working-directory: HKM
         run: python3 -m tests.run
+
+      - name: Sorgu bütçesi
+        working-directory: HKM
+        run: python3 tools/perf.py
+
+      # yuz.js kendi Playwright'ini tasimaz; ESP'nin kurulumunu kullanir.
+      # Bagimliligi burada kuruyoruz ki denetim tek komutla kossun.
+      - name: Playwright (ESP'nin kurulumu)
+        working-directory: ESP
+        run: npm ci && npx playwright install --with-deps chromium
+
+      - name: Panonun yüzü (erişilebilirlik, telefon, kontrast)
+        run: node HKM/tools/yuz.js
+
+  butunlesme:
+    name: Üç arayüz + HKM uçtan uca
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # entegre.js de ESP'nin Playwright'ini kullanir.
+      - name: Bağımlılıklar
+        working-directory: ESP
+        run: npm ci && npx playwright install --with-deps chromium
+
+      # HKM kapaliyken uc arayuzun bozulmadigini da bu dogrular: bagin
+      # TEK YONLU oldugu sozu burada olculur (AGENTS.md §1.4).
+      - name: Uçtan uca
+        run: node tools/entegre.js
+
+  yuk:
+    name: ${{ matrix.system }} — beş yıllık yük denetimi
+    # Agir is: bes yillik veri uretir ve butun ekranlari cizer. Her PR'da
+    # kosturmak, her PR'a birkac dakika eklemek demekti — yavaslama veri
+    # biriktikce gelir, bir gunde degil. Haftada bir yeter; elle de
+    # baslatilabilir (workflow_dispatch).
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        system: [AYS, SPI, ESP]
+    defaults:
+      run:
+        working-directory: ${{ matrix.system }}
+    env:
+      # `perfcheck` ile aynı gerekçe: eşik değil ORTAM payı esner ve
+      # araç bu payı çıktısına yazar (tools/loadcheck.js, PERF_PAY).
+      PERF_PAY: '1.5'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Bağımlılıkları kur
+        run: npm ci
+
+      - name: Chromium kur
+        run: npx playwright install --with-deps chromium
+
+      - name: Beş yıllık veriyle çizim
+        run: node tools/loadcheck.js

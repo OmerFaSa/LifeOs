@@ -55,6 +55,16 @@ ESP.SECTIONS_ALL = [
         { route:'analytics', label:'Analiz',   icon:'chart' },
       ] },
 
+    /* Rütbe kendi bölümü — Ayarlar'ın bir sekmesi değil. Seviye orada
+       bir ayar gibi duruyordu; oysa merdiven, kartlar ve «XP nereden
+       gelir» kendi başına bakılacak bir yer.
+
+       `disc` YOKTUR: rütbe bir disipline bağlı değildir, o yüzden
+       kapatılan bir disiplinle birlikte kaybolmaz. */
+    { id:'rutbe', icon:'layers', label:'Rütbe',
+      note:'Kademe, merdiven ve XP kaynakları',
+      views:[{ route:'rutbe', label:'Rütbe', icon:'layers' }] },
+
     { id:'ayarlar', icon:'sliders', label:'Ayarlar',
       note:'Profil, görünüm, veri ve rehber',
       views:[

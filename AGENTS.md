@@ -44,16 +44,22 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
 ## 2. Denetimler — birleştirmeden önce koşar
 
 ```bash
-# depo koku: seviye sistemi tek kaynaktan yayilir
+# depo koku: tek kaynaktan yayilan iki sey
 python3 tools/seviye.py --yay        # brand/seviye/ -> uc arayuz
 python3 tools/seviye.py --denetle    # kopyalar kaynakla ayni mi (CI de kosar)
+python3 tools/ortak.py --yay         # brand/ortak/  -> uc arayuzun CSS'i
+python3 tools/ortak.py --denetle     # kopyalar kaynakla ayni mi (CI de kosar)
+python3 tools/rutbe.py <klasor>      # rutbe gorsellerini medya/'ya isler (kayipsiz)
+python3 tools/rutbe.py --liste       # medya/ altinda ne var
 
 # her sistem kendi dizininde
 node tools/runtests.js      # birim testleri
 node tools/smoke.js         # uygulamayı gerçekten açar, ekranları gezer
 node tools/a11ycheck.js     # erişilebilirlik
 node tools/layoutcheck.js   # 390 pikselde taşma ve 24px dokunma hedefi
+node tools/palettecheck.js  # bütün paletlerde kontrast
 node tools/perfcheck.js     # dokuz aylık veriyle çizim bütçesi
+node tools/loadcheck.js     # BEŞ YILLIK veriyle çizim (ağır; haftalık CI işi)
 
 # HKM
 cd HKM && python3 -m tests.run && python3 tools/perf.py && node tools/yuz.js

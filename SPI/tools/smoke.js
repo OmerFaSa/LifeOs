@@ -35,11 +35,13 @@ try{
    duman testi ikinci hedefe (dist) gecince tarayici bu istegi net::ERR_ABORTED
    ile keser. Bu geculk sayfa gecisinin dogal sonucudur, gercek bir hata
    degildir — splash.js zaten error olayinda da kapaniyor. */
-/* img/seviye/* gormezden gelinir ve bu BILINCLI bir eksikliktir: kademe
-   rozetleri ve gecis videolari kullanici tarafindan tek tek eklenir
-   (bkz. brand/seviye/OKU.md). Dosya yokken rozet kademe numarasina,
-   kutlama da banner'a duser — yani 404 burada bir hata degil, sistemin
-   tasarlanmis ara halidir. Dosyalar eklendikce bu satirlar susar. */
+/* img/seviye/* gormezden gelinir ve bu BILINCLI bir eksikliktir. Onbes
+   rutbe karti ile alti kademe sahnesi yerinde; eksik olanlar Kutsal'in
+   K kartlari (`rutbe-k100 …`) ve kunyedeki kucuk rozet (`rozet-N.png`).
+   Dosya yokken kart yerine kademe/etiket dairesi cizilir, rozet yerine
+   kademe numarasi gorunur — yani 404 burada bir hata degil, sistemin
+   tasarlanmis ara halidir (bkz. brand/seviye/OKU.md). Dosyalar
+   eklendikce bu satirlar susar. */
 const IGNORE = [/fonts\.googleapis\.com/, /fonts\.gstatic\.com/, /favicon\.ico/,
   /img\/brand\/intro\.mp4/, /img\/seviye\//];
 function ignorable(url){ return IGNORE.some(re => re.test(url || '')); }
@@ -65,10 +67,49 @@ async function dismissSetup(page){
    de «temiz» yazar. Son satir bu yuzden ne gezildigini soyler. */
 const SAYAC = { hedef:0, ekran:0, sekme:0 };
 
+/* TELEFON ETIKETLERI — tek dosya surumunde de durmali.
+
+   Tek dosya surumu telefona kopyalanip «Ana ekrana ekle» ile kurulmak
+   icin var (README, «Telefonda kullanim»). `build.py` uzun sure <head>'i
+   sifirdan yaziyordu ve su bes satir sessizce dusuyordu: manifest
+   dugumu, ikon, tema rengi ve iki apple etiketi. Sonucu: `installManifest()`
+   dugumu bulamayip sessizce donuyor, iOS'ta uygulama tam ekran acilmiyor,
+   ikon hic gelmiyordu.
+
+   Sessizce dusen bir sey, ancak onu arayan bir denetim varsa gorulur. */
+async function checkPwa(page, target, errors){
+  const r = await page.evaluate(() => {
+    const el = document.getElementById('pwa-manifest');
+    const href = (el && el.getAttribute('href')) || '';
+    let man = null;
+    try{ man = JSON.parse(decodeURIComponent(href.split(',')[1] || '')); }catch(e){}
+    const ikon = document.querySelector('link[rel="icon"]');
+    return {
+      manifest:!!(man && man.name && man.icons && man.icons.length),
+      ikon:(ikon && ikon.getAttribute('href')) || '',
+      apple:!!document.querySelector('meta[name="apple-mobile-web-app-capable"]'),
+      baslik:!!document.querySelector('meta[name="apple-mobile-web-app-title"]'),
+    };
+  });
+  if(!r.manifest) errors.push(target + ': PWA manifesti kurulmadi (#pwa-manifest)');
+  if(!r.apple) errors.push(target + ': apple-mobile-web-app-capable etiketi yok');
+  if(!r.baslik) errors.push(target + ': apple-mobile-web-app-title etiketi yok');
+  if(!r.ikon) errors.push(target + ': <link rel="icon"> yok');
+  /* Tek dosya TEK DOSYADIR: yanindaki img/ klasoru telefona gitmez.
+     Goreli bir ikon yolu orada 404 verir. */
+  if(target.indexOf('/dist/') === 0 && r.ikon.indexOf('data:') !== 0){
+    errors.push(target + ': tek dosya surumunun ikonu gomulu degil (' 
+      + r.ikon.slice(0, 40) + ')');
+  }
+}
+
+
 async function walkScreens(page, base, target, errors){
   await page.goto(base + target, { waitUntil:'load' });
   await page.waitForSelector('.site', { timeout:15000 });
   await dismissSetup(page);
+
+  await checkPwa(page, target, errors);
 
   const routes = await page.evaluate(() =>
     SP.App.SECTIONS.reduce((acc, s) => acc.concat(s.views.map(v => v.route)), []));

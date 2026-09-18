@@ -147,6 +147,12 @@ def daily_message(con, date, th=None):
     kapsam = [l for l in b["lines"] if l["kind"] == "coverage"]
     if kapsam:
         parca.append(kapsam[0]["text"])
+    # Seviye gunluk mesaja da girer: kademe yalniz panonun *Sistemler*
+    # sayfasinda gorunuyordu ve gune bakan kisi panoya hic bakmayabilir.
+    # Bir GOZLEM satiridir; onerinin ONUNDE durmaz, ardinda durur.
+    seviye = [l for l in b["lines"] if l["kind"] == "level"]
+    if seviye:
+        parca.append(seviye[0]["text"])
     capraz = [l for l in b["lines"] if l["kind"] == "cross"]
     for l in capraz[:1]:
         parca.append("Çapraz: " + l["text"])

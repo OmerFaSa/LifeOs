@@ -52,6 +52,13 @@ R.App = (function(){
       { id:'team',    icon:'zap',   label:'Ekip sohbeti' },
       { id:'meeting', icon:'list',  label:'Toplantı' },
     ]},
+    /* Rütbe kendi bölümü — Rehber'in bir sekmesi değil. Seviye orada
+       bir ayar gibi duruyordu; oysa merdiven, kartlar ve «XP nereden
+       gelir» kendi başına bakılacak bir yer. */
+    { id:'rutbe', num:'07', icon:'layers', label:'Rütbe',
+      note:'Kademe, merdiven ve XP kaynakları', items:[
+      { id:'rutbe', icon:'layers', label:'Rütbe' },
+    ]},
   ];
 
   const MOBILE_TABS = ['today','learn','cards','quiz','progress'];
@@ -918,7 +925,7 @@ R.App = (function(){
     const sonuc = R.Perde.kutla(y, { bitti:damgala });
     if(sonuc && sonuc.sessiz){
       const ad = (y.kademeBilgi && y.kademeBilgi.ad) || ('Kademe ' + y.kademe);
-      UI.toast('Seviye atladın — ' + ad + ' ' + y.etiket);
+      UI.toast('Yeni rütbe — ' + ad + ' ' + y.etiket);
       damgala();
     }
   }
@@ -1130,7 +1137,14 @@ R.App = (function(){
     /* Once "R" harfi ureten bir SVG'ydi; artik gercek marka gorseli
        (img/brand/favicon.png, kare kirpilmis logo). Dosya degisirse ikon
        da kendiliginden degisir, burasi hic dokunulmaz. */
-    const icon = new URL('img/brand/favicon.png', location.href).href;
+    /* Ikon <link rel="icon"> etiketinden OKUNUR, yola elle yazilmaz.
+       Tek dosya surumunde build.py o etiketin icine ikonu data URI
+       olarak gomer; kurulan uygulamanin ikonu da boylece dosyayla
+       birlikte gider. Kaynak surumde etiket goreli yolu tasir ve sonuc
+       degismez. Etiket hic yoksa eski davranis surer. */
+    const ikonEl = document.querySelector('link[rel="icon"]');
+    const ikonRef = ikonEl && ikonEl.getAttribute('href');
+    const icon = new URL(ikonRef || 'img/brand/favicon.png', location.href).href;
     const manifest = {
       name, short_name:'Rota', start_url:location.href, scope:'./',
       display:'standalone', background_color:'#F7F8FA', theme_color:'#3D3F8F',

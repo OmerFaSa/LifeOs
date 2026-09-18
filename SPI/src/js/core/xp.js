@@ -76,6 +76,12 @@ SP.XP = (function(){
   var YOL = 'seviye';          /* depo anahtarı */
   var DETAY_GUN = 120;         /* gün kırılımı bu yaştan eskiyse silinir */
 
+  /* Defterin BİÇİMİ en son bu sürümde değişti. Katalogdaki şema sürümü
+     (`LIFEOS.SEVIYE_SURUM`) bundan büyük olabilir — eşikler ya da
+     kademe adları değiştiğinde o da artar, ama eşik değişimi defteri
+     BOZMAZ. Ayrım `normalize` içindeki göç bloğunda kullanılır. */
+  var BICIM_SURUM = 2;
+
   /* GERİYE YAZMA PENCERESİ.
 
      Dünkü antrenmanı bu sabah girmek olağandır; geçen ayın gününe puan
@@ -315,19 +321,30 @@ SP.XP = (function(){
 
     /* ---------------------------------------------------------- göç
 
-       SÜRÜM 1 → 2: gün kırılımı `{id: adet}` idi ve XP okunurken
-       katalogdan hesaplanıyordu. Yeni biçim `{id: [adet, xp]}`.
+       İKİ AYRI DEĞİŞİKLİK, İKİ AYRI SONUÇ. Şema sürümü iki sebeple
+       artar ve ikisi aynı şey değildir:
 
-       Eski kırılım TAŞINMAZ, ARŞİVE DÜŞER. Çünkü onu yeni biçime
-       çevirmenin tek yolu bugünün fiyatlarıyla yeniden fiyatlamaktır ve
-       o fiyatlar değişti: kırılım toplamı, o gün gerçekten kazanılmış
-       toplamı aşabilirdi. TOPLAM XP'ye dokunulmaz — yani seviye
-       değişmez, yalnızca «bu XP hangi işten geldi» sorusunun cevabı o
-       günler için «arşiv» olur.
+         BİÇİM değişti   defterin yazılış şekli başkalaştı; eski
+                         satırlar okunamaz, arşive düşer.
+         EŞİK değişti    kademe adları ya da XP eşikleri başkalaştı;
+                         defter aynen okunur, yalnız seviye yeniden
+                         TÜRETİLİR.
 
-       Kaybedilen şey bir kırılımdır, bir puan değil; ve göç, defterde
-       yazılı kalır. */
-    if(gelenSurum < K().SEVIYE_SURUM){
+       Bu ayrım pahalıya öğrenildi: ikisi tek koşula bağlıyken, «beşinci
+       kademenin adı Safir oldu» gibi bir katalog düzenlemesi
+       kullanıcının yüz yirmi günlük kırılımını siliyordu. Kaybedilen
+       şey bir puan değildi ama bir sebep de yoktu.
+
+       SÜRÜM 1 → 2 BİÇİM değişimiydi: gün kırılımı `{id: adet}` idi ve
+       XP okunurken katalogdan hesaplanıyordu; yeni biçim `{id: [adet,
+       xp]}`. Eski kırılım taşınamazdı, çünkü onu çevirmenin tek yolu
+       bugünün fiyatlarıyla yeniden fiyatlamaktı ve fiyatlar değişmişti.
+
+       SÜRÜM 2 → 3 EŞİK değişimidir: Hüküm → Safir, ve Kutsal üç
+       basamaktan on K basamağına çıktı. Defter olduğu gibi kalır.
+
+       Toplam XP'ye hiçbir durumda dokunulmaz. */
+    if(gelenSurum < BICIM_SURUM){
       var atilan = Object.keys(d.gunler);
       if(atilan.length){
         atilan.sort();
@@ -342,6 +359,13 @@ SP.XP = (function(){
         at:new Date().toISOString(),
         not:'gün kırılımı arşive alındı; toplam XP korundu',
         gun:atilan.length,
+      });
+    }else if(gelenSurum < K().SEVIYE_SURUM){
+      d.gocler.push({
+        from:gelenSurum, to:K().SEVIYE_SURUM,
+        at:new Date().toISOString(),
+        not:'eşikler değişti; defter korundu, seviye yeniden türetildi',
+        gun:0,
       });
     }
     d.surum = K().SEVIYE_SURUM;
@@ -746,16 +770,20 @@ SP.XP = (function(){
     return '<span class="seviye-rozet" data-seviye-rozet style="--kademe-renk:'
       + kac(k.renk || '#888')
       + ';--kademe-isik:' + kac(k.isik || '#ccc')
-      /* Rozet görseli CSS katmanı olarak gelir. Dosya yoksa katman hiç
-         çizilmez ve altındaki kademe numarası görünür kalır — kırık
-         resim simgesi de, boşluk da göstermeden. Kullanıcı görseli
-         `img/seviye/kademe-N.png` olarak bıraktığı an devreye girer.
+      /* KÜÇÜK ROZET — künyedeki ve alt banttaki gösterge. Rütbe
+         kartından AYRI bir dosyadır ve olmak zorundadır: kart dikey
+         ve yazılı, bu ise 28 piksellik bir daire. Kartı buraya
+         küçültmek, okunmayan bir şey göstermekti.
+
+         Dosya yoksa katman hiç çizilmez ve altındaki kademe numarası
+         görünür kalır — kırık resim simgesi de, boşluk da göstermeden.
+         Kullanıcı `img/seviye/rozet-N.png` bıraktığı an devreye girer.
 
          Adres MUTLAK verilir: özel bir CSS değişkeni içindeki göreli
          url(), değişkenin kullanıldığı yere değil TANIMLANDIĞI stil
          sayfasına göre çözülüyor ve `css/img/seviye/...` diye yanlış bir
          adres çıkıyordu. */
-      + ';--kademe-gorsel:url(&quot;' + kac(mutlak(kok + 'kademe-' + d.kademe + '.png')) + '&quot;)"'
+      + ';--kademe-gorsel:url(&quot;' + kac(mutlak(kok + 'rozet-' + d.kademe + '.png')) + '&quot;)"'
       + ' title="' + kac(baslik) + '" aria-label="' + kac(baslik) + '">'
       + '<span class="seviye-rozet__mark" aria-hidden="true">'
       +   '<span>' + d.kademe + '</span></span>'
@@ -766,6 +794,66 @@ SP.XP = (function(){
       + '<span class="seviye-rozet__cubuk" aria-hidden="true">'
       +   '<i style="width:' + yuzde + '%"></i></span>'
       + '</span>';
+  }
+
+  /* ------------------------------------------------------- merdiven
+
+     BÜTÜN basamaklar, her birinin durumuyla. Rütbe ekranı bunu çizer.
+
+     Durum üç değerden biri:
+       gecildi   eşik aşıldı, rütbe kazanıldı
+       simdi     içinde bulunulan basamak
+       kilitli   henüz gelinmedi
+
+     Kart adresi burada üretilir çünkü kural katalogda tek satırdır
+     (`LIFEOS.MEDYA_ADI`); ekranın kendi adını kurması, bir gün perde
+     ile ekranın ayrı dosyalara bakması demekti. */
+  function merdiven(opt){
+    opt = opt || {};
+    var kok = opt.kok || 'img/seviye/';
+    var L = K();
+    var d = durum();
+    var bitmis = d ? d.bitmisBasamak : 0;
+    var simdiki = d ? d.etiket : null;
+    return (L.BASAMAKLAR || []).map(function(b, i){
+      var hal = 'kilitli';
+      if(i < bitmis) hal = 'gecildi';
+      else if(b.etiket === simdiki) hal = 'simdi';
+      return {
+        etiket:b.etiket, kademe:b.kademe, basamak:b.basamak,
+        maliyet:b.maliyet, esik:b.esik,
+        kademeBilgi:L.KADEME_ILE(b.kademe),
+        durum:hal,
+        kart:L.MEDYA_ADI ? (kok + L.MEDYA_ADI(b.etiket) + '.webp') : null,
+      };
+    });
+  }
+
+  /* ---------------------------------------------------- bugün ne oldu
+
+     Etkinlik başına BUGÜN: kaç kez yapıldı, kaç XP getirdi, tavanına
+     ne kadar kaldı. Defterden OKUNUR, katalogdan hesaplanmaz — o gün
+     kazanılan XP yazıldığı anda dondu (bkz. DEFTER NEDEN OLAY LİSTESİ
+     DEĞİL).
+
+     `tavan` alanı «bugün bu işten en çok kaç XP alınabilir» demektir;
+     `doldu` ise o tavana varıldığını söyler. İkisi birlikte, ekranın
+     «bugün buradan daha fazla puan çıkmaz» diyebilmesini sağlar. */
+  function bugunku(){
+    var gun = U().todayISO();
+    return etkinlikler().map(function(e){
+      var xp = gunXPsi(gun, e.id);
+      var tavan = gunlukTavan(e);
+      return {
+        id:e.id, ad:e.ad, birim:e.birim, xp:e.xp,
+        rota:e.rota || null, nerede:e.nerede || '', nasil:e.nasil || '',
+        adet:gunAdedi(gun, e.id),
+        kazanilan:xp,
+        tavan:tavan,
+        doldu:tavan > 0 && xp >= tavan,
+        oran:tavan > 0 ? Math.min(1, xp / tavan) : 0,
+      };
+    });
   }
 
   /* ---------------------------------------------------------- panel
@@ -929,6 +1017,7 @@ SP.XP = (function(){
     tazele:tazele,
     gunToplami:gunToplami, gunuVar:gunuVar, sonGunler:sonGunler, kirilim:kirilim,
     etkinlikler:etkinlikler, gunlukTavan:gunlukTavan,
+    merdiven:merdiven, bugunku:bugunku,
     yazilabilirGun:yazilabilirGun, gunKaydir:gunKaydir,
     bekleyenKutlama:bekleyenKutlama, kutlandi:kutlandi, dinle:dinle,
     /* Test ve teşhis için ham defter; ekranlar buna DOKUNMAZ. */

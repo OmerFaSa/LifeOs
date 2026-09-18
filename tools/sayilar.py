@@ -34,8 +34,15 @@ SISTEMLER = [('AYS', 'Akademik Yol Sistemi'),
              ('ESP', 'Entelektüel Seviye Planlayıcı')]
 
 HIZLI = ['runtests.js']
+# `loadcheck.js` bu listede: aracin var olmasi yetmez, RUTINE girmesi
+# gerekir. Uc sistemde de vardi ama hicbirinin rutin kosumunda yoktu —
+# yazildigi gun kosan, sonra unutulan bir denetim, yazilmamis bir
+# denetimle ayni sonucu verir. Agirdir (bes yillik veri uretir) ve bu
+# yuzden yalniz `--tam` kosumundadir; her PR'da degil, haftada bir CI
+# isinde de ayrica kosar (bkz. .github/workflows/ci.yml, `yuk`).
 TAM = ['runtests.js', 'smoke.js', 'a11ycheck.js', 'palettecheck.js',
-       'layoutcheck.js', 'perfcheck.js', 'ledgercheck.js', 'designcheck.js']
+       'layoutcheck.js', 'perfcheck.js', 'ledgercheck.js', 'designcheck.js',
+       'tasarimcheck.js', 'loadcheck.js']
 
 BASLANGIC = '<!-- SAYILAR:baslangic -->'
 BITIS = '<!-- SAYILAR:bitis -->'

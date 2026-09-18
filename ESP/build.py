@@ -10,6 +10,7 @@ Kullanim:
   python build.py --minify     # CSS sikistirilir, JS yorum/bosluklari azaltilir
 """
 
+import base64
 import re
 import shutil
 import sys
@@ -186,14 +187,19 @@ def copy_brand_assets() -> None:
 # Kaynak: brand/seviye/dist_kopya.py
 # Yayan:  python3 tools/seviye.py --yay   (denetim: --denetle)
 def copy_level_assets() -> None:
-    """Seviye videolari ve rozetleri TEK KOPYA durur: depo kokundeki
-    brand/seviye/. Uc sistem de onlari /img/seviye/... adresinden okur
-    (bkz. devserver.py ve sunucu.py). Tek dosya surumu ise kendi basina
-    tasinabilmeli, bu yuzden burada dist/img/seviye/ icine kopyalanir.
+    """Rutbe kartlari ve kademe sahneleri TEK KOPYA durur: depo
+    kokundeki brand/seviye/medya/. Uc sistem de onlari /img/seviye/...
+    adresinden okur (bkz. devserver.py ve sunucu.py). Tek dosya surumu
+    ise kendi basina tasinabilmeli, bu yuzden burada dist/img/seviye/
+    icine kopyalanir.
 
-    Klasor yoksa ya da bossa hicbir sey yapilmaz: eksik video hata
-    degildir, kutlama banner'a duser."""
-    src_dir = ROOT.parent / "brand" / "seviye"
+    Yalniz `medya/` kopyalanir. `brand/seviye/eski/` servis EDILMEZ ve
+    buraya da girmez: arsivlenmis bir dosyayi uc dagitima birden
+    tasimak, sakladigin seyi uc kez tasimaktir.
+
+    Klasor yoksa ya da bossa hicbir sey yapilmaz: eksik gorsel hata
+    degildir, perde karti kendisi cizer."""
+    src_dir = ROOT.parent / "brand" / "seviye" / "medya"
     if not src_dir.exists():
         return
     medya = [f for f in src_dir.iterdir()
@@ -205,8 +211,70 @@ def copy_level_assets() -> None:
     dst_dir.mkdir(parents=True, exist_ok=True)
     for f in medya:
         shutil.copy2(f, dst_dir / f.name)
+
+    # KAYNAKTA OLMAYAN DOSYA HEDEFTE DE KALMAZ. Bu betik uzun sure
+    # yalniz KOPYALIYORDU: adi degisen ya da arsive kaldirilan bir
+    # medya dosyasi uc `dist/` icinde yasamaya devam ediyordu. Olculdu
+    # — `kademe-1.mp4` arsive alindiktan sonra uc dagitimda 4,6 MB'lik
+    # olu kopya olarak duruyordu. Dagitim, kaynagin AYNASIDIR.
+    kalanlar = {f.name for f in medya}
+    for eski in dst_dir.iterdir():
+        if eski.is_file() and eski.name not in kalanlar:
+            eski.unlink()
 # ===== URETILMIS BLOK SONU =====
 # SEVIYE:dist-bit
+
+
+def pwa_etiketleri(html: str) -> list:
+    """Kaynak <head>'deki TELEFON etiketlerini tek dosya surumune tasir.
+
+    Tek dosya surumu telefona kopyalanip «Ana ekrana ekle» ile kurulmak
+    icin var (bkz. README, «Telefonda kullanim»). Ama bu betik uzun sure
+    <head>'i SIFIRDAN yaziyordu — dort etiket ve baslik — ve kaynaktaki
+    su bes satir sessizce dusuyordu:
+
+        <link id="pwa-manifest" rel="manifest">
+        <link rel="icon" ...>
+        <meta name="theme-color" ...>
+        <meta name="apple-mobile-web-app-capable" ...>
+        <meta name="apple-mobile-web-app-title" ...>
+
+    Sonucu olculdu: `installManifest()` (app.js) `#pwa-manifest`
+    dugumunu bulamayip sessizce donuyor, iOS'ta uygulama tam ekran
+    acilmiyor ve sekme ikonu hic gelmiyordu. Yani telefona kopyalanan
+    dosya, telefon icin yazilmis her seyi kaybediyordu.
+
+    Etiketler ELLE YAZILMAZ, kaynaktan cikarilir: yarin <head>'e bir
+    tanesi daha eklenirse burasi da tasir.
+    """
+    desenler = [
+        r'<link[^>]+id="pwa-manifest"[^>]*>',
+        r'<link[^>]+rel="icon"[^>]*>',
+        r'<meta[^>]+name="theme-color"[^>]*>',
+        r'<meta[^>]+name="apple-mobile-web-app-[^"]*"[^>]*>',
+    ]
+    out = []
+    for d in desenler:
+        out.extend(re.findall(d, html))
+    return out
+
+
+def ikonu_gom(etiketler: list) -> list:
+    """Sekme ikonunu data URI olarak gomer.
+
+    Tek dosya TEK DOSYADIR: telefona yalniz o kopyalanir, yanindaki
+    `img/` klasoru gitmez. Goreli bir ikon yolu orada 404 verir — ve
+    manifest ikonu da ayni etiketten okundugu icin (app.js,
+    `installManifest`) kurulan uygulamanin ikonu bos kalirdi.
+    """
+    yol = SRC / "img" / "brand" / "favicon.png"
+    if not yol.exists():
+        return etiketler
+    veri = base64.b64encode(yol.read_bytes()).decode("ascii")
+    uri = "data:image/png;base64," + veri
+    return [re.sub(r'href="[^"]*"', 'href="%s"' % uri, e)
+            if 'rel="icon"' in e else e
+            for e in etiketler]
 
 
 def build(minify: bool = False) -> None:
@@ -220,6 +288,7 @@ def build(minify: bool = False) -> None:
     title_match = re.search(r"<title>(.*?)</title>", html, re.S)
     title = title_match.group(1).strip() if title_match else "ESP"
     font_links = re.findall(r'<link[^>]+fonts\.(?:googleapis|gstatic)\.com[^>]*>', html)
+    telefon_etiketleri = ikonu_gom(pwa_etiketleri(html))
 
     html, style_blocks = inline_css(html, minify)
     html, script_blocks, js_files = inline_js(html, minify)
@@ -239,6 +308,7 @@ def build(minify: bool = False) -> None:
         '<meta name="google" content="notranslate">',
         f"<title>{title}</title>",
     ]
+    parts.extend(telefon_etiketleri)
     parts.extend(font_links)
     parts.extend(style_blocks)
     parts.append(body)

@@ -194,6 +194,44 @@
       expect(!!r.band.label).toBe(true);
       expect(!!r.band.note).toBe(true);
     });
+
+    /* Onbellek karenin otesine gecer (bkz. core/intellect.js). Bir
+       onbellegin degeri, ESKI SAYIYI gostermedigi surece vardir: asagidaki
+       iki test tam olarak onu sinar. */
+    it('ayni anahtar ayni nesneyi doner — hesap ikinci kez yapilmaz', () => {
+      I.readabilityUnut();
+      const metin = 'Kedi geldi. Su içti. Sonra gitti.';
+      const a = I.readability(metin, 'd1' + '2026-01-01T00:00:00.000Z');
+      const b = I.readability(metin, 'd1' + '2026-01-01T00:00:00.000Z');
+      expect(a === b).toBe(true);
+      I.readabilityUnut();
+    });
+
+    it('TASLAK DEGISINCE anahtar da degisir — eski sayi donmez', () => {
+      I.readabilityUnut();
+      /* `Model.saveDraft` her kayitta `updatedAt`i yeniden yazar; cagiran
+         taraf anahtari `id + updatedAt` olarak kurar. Yani ayni taslagin
+         yeni metni HER ZAMAN yeni bir anahtarla gelir. */
+      const eski = I.readability('Kedi geldi. Su içti. Sonra gitti.',
+        'd1' + '2026-01-01T00:00:00.000Z');
+      const yeni = I.readability(
+        'Kavramsallaştırmanın epistemolojik temellendirilmesi, transandantal '
+        + 'öznenin kurucu etkinliğiyle ilişkilendirildiğinde ortaya çıkan '
+        + 'metodolojik güçlükler çağdaş felsefenin merkezinde durmaktadır.',
+        'd1' + '2026-01-02T09:30:00.000Z');
+      expect(eski.value > yeni.value).toBe(true);
+      I.readabilityUnut();
+    });
+
+    it('id verilmezse onbellek HIC devreye girmez', () => {
+      I.readabilityUnut();
+      const metin = 'Kedi geldi. Su içti.';
+      const a = I.readability(metin);
+      const b = I.readability(metin);
+      /* Ayni sayi, AYRI nesne: anahtarsiz cagri saklanmaz. */
+      expect(a.value).toBe(b.value);
+      expect(a === b).toBe(false);
+    });
   });
 
   describe('yazi olcumu', () => {

@@ -21,7 +21,8 @@
 
      kademeler.js   kademe adlari, renkleri, XP esikleri, etkinlikler
      xp.js          motor (ad alani ve modul kimligi yerine konur)
-     perde.js       tam ekran video katmani
+     perde.js       tam ekran gosterim katmani
+     rutbe.js       RUTBE ekrani (kademe, merdiven, XP kaynaklari)
      seviye.css     perde ve rozet bicimleri
      xp.test.js     motorun sozlesmesi
      perde.test.js  perdenin sozlesmesi
@@ -61,6 +62,7 @@ DOSYALAR = [
     ("kademeler.js", "src/js/data/kademeler.js", False),
     ("xp.js",        "src/js/core/xp.js",        True),
     ("perde.js",     "src/js/core/perde.js",     True),
+    ("rutbe.js",     "src/js/screens/rutbe.js",  True),
     ("seviye.css",   "src/css/seviye.css",       False),
     ("xp.test.js",   "src/tests/xp.test.js",     True),
     ("perde.test.js", "src/tests/perde.test.js", True),

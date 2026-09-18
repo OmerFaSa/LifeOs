@@ -51,6 +51,7 @@ R.S = {
     hkmIntents:[],
     hkmDoubts:[],
     examTab:'list',
+    rutbeTab:'simdi',      // simdi | merdiven | kazanc | defter
     examOpen:null,
     cardTab:'due',
     subjectOpen:'tyt-turkce',

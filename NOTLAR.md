@@ -43,18 +43,20 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1174/1174 gecti | 923/923 gecti | 738/738 gecti |
-| `smoke.js` | Duman testi temiz — 2 hedefte 36 ekran, 38 sekme gezildi. | Duman testi temiz — 2 hedefte 24 ekran, 66 sekme gezildi. | Duman testi temiz — 2 hedefte 28 ekran, 184 sekme gezildi. |
-| `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
+| `runtests.js` | 1192/1192 gecti | 941/941 gecti | 759/759 gecti |
+| `smoke.js` | Duman testi temiz — 2 hedefte 38 ekran, 44 sekme gezildi. | Duman testi temiz — 2 hedefte 26 ekran, 72 sekme gezildi. | Duman testi temiz — 2 hedefte 30 ekran, 190 sekme gezildi. |
+| `a11ycheck.js` | (1 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) | (1 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) | (3 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
-| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 37 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 45 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 106 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 40.4 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 20.8 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 66.9 ms (bütçe 100). |
+| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 41 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 49 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 110 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.1 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 22.7 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 47 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
-| `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
+| `designcheck.js` | — | beş düzen temiz — 460 ekran/genişlik kombinasyonu bakıldı | — |
+| `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
+| `loadcheck.js` | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) |
 
 | Depo denetimi | Sonuç |
 |---|---|
-| `HKM tests` | 312/312 test gecti |
+| `HKM tests` | 314/314 test gecti |
 | `HKM perf` | Bütün sorgular bütçede. |
 | `HKM yuz` | HKM yüzü temiz — 40 görünümde taşma yok, bütün hedefler 24px ve üstü, etiketler yerinde, kontrast AA. |
 | `entegre.js` | Butunlesme temiz: uc arayuz de HKM ile konustu, HKM kapaliyken hicbiri bozulmadi. |
@@ -1348,12 +1350,78 @@ yazmamış olurdum.
 
 | Borç | Nerede | Risk | Not |
 |---|---|---|---|
-| İçe aktarma geri alınamıyor | ikisi | **yüksek** | §7.4 — tasarımı hazır, kod yazılmadı |
+| ~~İçe aktarma geri alınamıyor~~ | — | — | **kapandı** — `undoImport` üç `core/store.js`'de de var |
 | Depo ölçeklenmesi | `core/store.js` | orta | §7.3 — yaşayan veride göç, sormadan yapma |
-| `SPI/screens/labs.js` 1434 satır | — | orta | testi yok; bölmeden önce kapsam ister |
+| `SPI/screens/labs.js` 1482 satır | — | orta | testi yok; bölmeden önce kapsam ister |
 | `AYS/core/office.js` 2049 satır | — | orta | kapsam %59 |
-| Ortak CSS kopyaları | üç uygulama | orta | §5.1 — `LifeOs/ortak/` + derleme zamanı birleştirme |
+| ~~Ortak CSS kopyaları~~ | — | — | **kapandı** — `brand/ortak/` + `tools/ortak.py` |
+| ~~Telefonda çalıştırma yolu~~ | — | — | **kapandı** — Seçenek B (tek dosya + elle yedek), README «Telefonda kullanım» |
 | `palette.js` kapsamı | ikisi | düşük | UI açan işlevler denenmiyor (kasıtlı) |
+
+**Rütbe sistemi kuruldu.** Beşinci kademe Hüküm iken **Safir** oldu
+(rütbe kartlarının üstünde yazan ad neyse katalogda da o yazar) ve
+altıncı kademe **Kutsal** noktalı üç basamaktan **on K basamağına**
+çıktı: K100 … K1000, her biri bir öncekinin ~1,85 katı. K1000 bilerek
+ulaşılmazdır ve bunu bir test koruyor (günlük tavanla otuz yıldan
+yakına düşerse paket kırmızıya döner).
+
+On beş rütbe kartı ve altı kademe sahnesi `brand/seviye/medya/` altında,
+**kayıpsız** WebP olarak duruyor (15,0 MB → 11,8 MB, piksel değişmedi).
+Adlar ekranda yazan etiketten türer: `5.2` → `rutbe-5-2.webp`,
+`K300` → `rutbe-k300.webp`. Kural tek yerde: `LIFEOS.MEDYA_ADI`.
+
+Kutlama artık doğrudan perde açmıyor: önce sağ üstte üç saniyelik bir
+**haberci** çıkıyor ve **Space** o ekrana hiç sokmuyor (rütbe yine
+kazanılmış sayılıyor, yalnız gösterim atlanıyor). Şema sürümü 2 → 3
+oldu ama gün kırılımı KORUNDU — `xp.js` artık biçim değişimi ile eşik
+değişimini ayırıyor; eskiden bir katalog düzenlemesi kullanıcının yüz
+yirmi günlük kırılımını siliyordu.
+
+**Rütbe ekranı geldi.** Perde bir andır: kazanıldığı saniye görünür ve
+geçer. Durağan karşılığı yoktu — kullanıcı «şu an neredeyim, sıradaki
+basamak ne, bu puan nereden geldi» sorularını soracak bir yer bulamıyordu.
+Artık üç arayüzde de gezinmede kendi **Rütbe** bölümü var (Ayarlar ve
+Ofis gibi bir üst düzey bölüm) ve dört sekmeden oluşuyor: **Şu an**
+(kart, kademe, bugünün iş iş dökümü), **Merdiven** (yirmi beş basamağın
+hepsi — geçilen, şu an, kilitli; Kutsal'ın K merdiveni dahil),
+**XP nereden gelir** ve **Defter**.
+
+Üçüncü sekme bu işin sebebiydi. «Bugün 40 XP» tek başına işe yaramaz;
+hangi işten geldiği ve nereye gidip daha fazlasını yapabileceğim bilgisi
+yarar. Katalogdaki her satır artık üç alan daha taşıyor — `rota`
+(«Git» düğmesi nereye götürür), `nerede` (insan diliyle yeri), `nasil`
+(ne yapınca kazanılır) — ve bir test üçünün de dolu olmasını, `smoke.js`
+de her rotanın gerçekten açıldığını denetliyor. Ölü bir «Git» düğmesi,
+olmayan bir puandan beterdir.
+
+Motor tarafında iki erişimci eklendi (`XP.merdiven`, `XP.bugunku`);
+ikisi de hiçbir şey **hesaplamaz**, defterde yazılı olanı okunabilir
+hâle getirir. Ekranın kendisi `brand/seviye/rutbe.js` — tek kaynak,
+`--yay` ile üçe dağıtılır. Rehberdeki eski «Seviye» sekmesi kaldırıldı:
+aynı bilgi iki yerde durursa bir gün ikisi farklı şey söyler.
+
+**Ortak CSS nasıl kapandı.** `base.css`, `layout.css` ve `designs.css`
+üç uygulamada bayt düzeyinde aynıydı — 4 365 satır birebir tekrar ve
+onu koruyan hiçbir şey yoktu. Tek kaynak artık `brand/ortak/`;
+`python3 tools/ortak.py --yay` üç arayüzün `src/css/` klasörüne
+**aynı adla** yazar (yükleme sırası korunsun diye), `--denetle`
+ayrışmayı yakalar ve CI'da koşar. Kopyalar üretilmiş kopya başlığı
+taşır; elle düzenlenirse bir sonraki yayında kaybolur.
+
+**Telefon sorusu nasıl kapandı.** Depo sahibi kararı: telefon
+**ikincil** cihaz — ara sıra bakmak için. Yani yerel ağ modu (`--ag`)
+yazılmadı; `sunucu.py` bilerek `127.0.0.1`'de kaldı. Yol belgelendi:
+`dist/*.html` telefona kopyalanır, PWA olarak kurulur, veri yedek
+dosyasıyla taşınır. README o bölümde **iki cihazın iki ayrı defter**
+olduğunu ve cihazlar arası senkronun yalnız Artifact çalışma zamanında
+var olduğunu (B5) açıkça söyler. Telefon bir gün birincil cihaz olursa
+doğru cevap o bölüm değil, Seçenek A'dır.
+
+`tokens.css`, `palettes.css` ve `components.css` **kısmen** ortaktır
+(sırasıyla 78, 52 ve ~50 satır fark: ajan renkleri, grafik serisi
+renkleri ve uygulamaya özel birkaç bileşen). Onları paylaşmak «ortak
+gövde + uygulama kuyruğu» ayrımını gerektirir; bu bir tasarım kararıdır
+ve ayrı bir turdur.
 
 > **Büyük dosyaları bölmek, testi olan bir hatayı düzeltmekten daha
 > risklidir.** Önce kapsam, sonra bölme.

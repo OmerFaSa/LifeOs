@@ -16,7 +16,12 @@ const SCROLLS_OK = { '13-yogun.html':[900,420], '20-harita.html':[1280,900,420] 
 
 (async () => {
   const files = fs.readdirSync(DIR).filter(f => f.endsWith('.html')).sort();
-  const browser = await chromium.launch({ executablePath:process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
+  /* Tarayici ikilisi: CHROMIUM_PATH verilmisse O, verilmemisse
+     Playwright'in kendi kurdugu. Burada bir yol SABIT yaziliydi ve o
+     yol yalnizca bir gelistirme ortaminda vardi: denetim CI'da
+     "Executable doesn't exist" ile duserdi — yani hicbir zaman
+     kosmayacak bir denetimdi. */
+  const browser = await chromium.launch({ executablePath:process.env.CHROMIUM_PATH || undefined });
   const problems = [];
 
   for(const f of files){
