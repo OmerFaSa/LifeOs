@@ -1,3 +1,6 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/base.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
 /* Sifirlama, tipografi ve erisilebilirlik temelleri (WCAG 2.2 AA hedefi). */
 
 *, *::before, *::after{ box-sizing:border-box; }

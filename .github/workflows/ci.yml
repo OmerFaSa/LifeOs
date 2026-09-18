@@ -144,8 +144,7 @@ jobs:
       # Ortak CSS de ayni mekanizmayla yayiliyor (brand/ortak/ -> uc
       # arayuz). Ayni gerekce: elle duzenlenen bir kopya bir gun ayrisir.
       - name: Ortak CSS kaynakla aynı mı
-        run: |
-          if [ -f tools/ortak.py ]; then python3 tools/ortak.py --denetle; fi
+        run: python3 tools/ortak.py --denetle
 
   hkm:
     name: HKM — testler, sorgu bütçesi, panonun yüzü

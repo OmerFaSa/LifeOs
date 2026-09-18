@@ -115,6 +115,27 @@ diğerinden önce değişirse paket kırmızıya döner.
 3. **XP hiçbir kararı vermez.** Ne plan, ne reçete, ne uyarı ona bakar.
    XP yalnızca kullanıcının kendi emeğini görmesidir.
 
+## Defter ne kadar yer kaplar — ölçüldü
+
+Tahmin değil ölçüm: gün kırılımı **120 günle** sınırlıdır, yani defter
+büyümez, **tavanı vardır**. Tavan hâli — budama penceresinin her
+gününde katalogdaki her etkinlik yazılı — üç sistemde şu kadar eder:
+
+| Sistem | Etkinlik | `seviye` anahtarı (tavan) |
+|---|---:|---:|
+| AYS | 5 | 13 117 bayt (~12,8 KB) |
+| SPİ | 6 | 15 157 bayt (~14,8 KB) |
+| ESP | 5 | 12 397 bayt (~12,1 KB) |
+
+Gerçek bir kullanıcının defteri bundan **küçüktür**: hiç kimse her gün
+katalogdaki her işi yapmaz. Karşılaştırma için: tarayıcının tek kökene
+verdiği kota ~5 MB. Yani seviye defteri, bir yılın sonunda bile o
+kotanın **binde üçünden azını** kullanır.
+
+Bu sayı `python3 tools/sayilar.py` ile tazelenmez — ölçüm bir kereliktir
+ve katalog ya da `DETAY_GUN` değişmedikçe değişmez. İkisinden biri
+değişirse burası da yeniden ölçülür.
+
 Defter olay listesi değil **gün × etkinlik** toplamıdır ve her kayıt
 `[adet, kazanılan XP]` tutar — kazanılan XP yazıldığı anda **donar**.
 Fiyat değişir, kaydedilmiş işlem değişmez; bir muhasebe defteri böyle

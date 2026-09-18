@@ -78,6 +78,17 @@ Kodları ayrıdır ve birbirini import etmez:
 Birinde yapılan bir değişiklik diğerini bozamaz. Üç proje ayrı ayrı
 geliştirilir.
 
+**Paylaştıkları şey derleme zamanında paylaşılır, çalışma zamanında
+değil.** İki kaynak üçe birden dağıtılır ve ayrışmaları denetlenir:
+
+| Tek kaynak | Ne | Dağıtan |
+|---|---|---|
+| [`brand/seviye/`](brand/seviye/) | kademeler, XP motoru, perde | `python3 tools/seviye.py --yay` |
+| [`brand/ortak/`](brand/ortak/) | `base.css`, `layout.css`, `designs.css` | `python3 tools/ortak.py --yay` |
+
+İkisinin de `--denetle` biçimi CI'da koşar: bir kopya elle düzenlenirse
+sessiz kalmaz. Üretilen kopyalar başlıklarında bunu yazar.
+
 ## Çalıştırma
 
 **Hepsi tek komutla** (deponun kökünden):

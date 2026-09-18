@@ -1350,10 +1350,25 @@ yazmamış olurdum.
 |---|---|---|---|
 | İçe aktarma geri alınamıyor | ikisi | **yüksek** | §7.4 — tasarımı hazır, kod yazılmadı |
 | Depo ölçeklenmesi | `core/store.js` | orta | §7.3 — yaşayan veride göç, sormadan yapma |
-| `SPI/screens/labs.js` 1434 satır | — | orta | testi yok; bölmeden önce kapsam ister |
+| `SPI/screens/labs.js` 1482 satır | — | orta | testi yok; bölmeden önce kapsam ister |
 | `AYS/core/office.js` 2049 satır | — | orta | kapsam %59 |
-| Ortak CSS kopyaları | üç uygulama | orta | §5.1 — `LifeOs/ortak/` + derleme zamanı birleştirme |
+| ~~Ortak CSS kopyaları~~ | — | — | **kapandı** — `brand/ortak/` + `tools/ortak.py` |
+| Telefonda çalıştırma yolu | `sunucu.py`, README | orta | karar bekliyor (GELISTIRME_RAPORU §6, soru 1) |
 | `palette.js` kapsamı | ikisi | düşük | UI açan işlevler denenmiyor (kasıtlı) |
+
+**Ortak CSS nasıl kapandı.** `base.css`, `layout.css` ve `designs.css`
+üç uygulamada bayt düzeyinde aynıydı — 4 365 satır birebir tekrar ve
+onu koruyan hiçbir şey yoktu. Tek kaynak artık `brand/ortak/`;
+`python3 tools/ortak.py --yay` üç arayüzün `src/css/` klasörüne
+**aynı adla** yazar (yükleme sırası korunsun diye), `--denetle`
+ayrışmayı yakalar ve CI'da koşar. Kopyalar üretilmiş kopya başlığı
+taşır; elle düzenlenirse bir sonraki yayında kaybolur.
+
+`tokens.css`, `palettes.css` ve `components.css` **kısmen** ortaktır
+(sırasıyla 78, 52 ve ~50 satır fark: ajan renkleri, grafik serisi
+renkleri ve uygulamaya özel birkaç bileşen). Onları paylaşmak «ortak
+gövde + uygulama kuyruğu» ayrımını gerektirir; bu bir tasarım kararıdır
+ve ayrı bir turdur.
 
 > **Büyük dosyaları bölmek, testi olan bir hatayı düzeltmekten daha
 > risklidir.** Önce kapsam, sonra bölme.
