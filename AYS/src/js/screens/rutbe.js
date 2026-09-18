@@ -62,6 +62,16 @@ R.Screens.rutbe = (function(){
         + ';--kademe-isik:' + (k && k.isik || '#ccc')}">${ic}</div>`;
   }
 
+  /* Kart ve sahne adresleri. Ad kurali katalogda (`LIFEOS.MEDYA_ADI`)
+     yazili; burasi yalnizca klasoru onune ekler. Ikisi de dosya
+     YOKKEN de cagrilabilir — `onerror` dugumu kaldirir. */
+  function kartYolu(etiket){
+    return L().MEDYA_ADI ? 'img/seviye/' + L().MEDYA_ADI(etiket) + '.webp' : null;
+  }
+  function sahneYolu(no){
+    return no ? 'img/seviye/sahne-' + no + '.webp' : null;
+  }
+
   function yok(){
     return K.Card({ title:'Rütbe',
       body:html`<p class="small dim">Seviye defteri henüz yüklenmedi.</p>` });
@@ -73,8 +83,8 @@ R.Screens.rutbe = (function(){
     const d = XP().durum();
     if(!d || !d.kademeBilgi) return yok();
     const k = d.kademeBilgi;
-    const kart = L().MEDYA_ADI
-      ? 'img/seviye/' + L().MEDYA_ADI(d.etiket) + '.webp' : null;
+    const kart = kartYolu(d.etiket);
+    const sahne = sahneYolu(d.kademe);
 
     /* Kart yüklenmezse (henüz üretilmemiş bir rütbe) `onerror` düğümü
        kaldırır ve altındaki daire görünür kalır — kırık resim simgesi
@@ -92,6 +102,8 @@ R.Screens.rutbe = (function(){
     return K.Stack([
       renkli(k, html`
         <div class="rutbe-kart">
+          ${when(sahne, () => html`<img class="rutbe-kart__sahne" src="${sahne}"
+            alt="" aria-hidden="true" onerror="this.remove()">`)}
           <div class="rutbe-kart__sol">
             ${gorsel}
             <span class="rutbe-kart__no" aria-hidden="true">${d.etiket}</span>
@@ -157,20 +169,31 @@ R.Screens.rutbe = (function(){
       const gecilen = satir.filter(b => b.durum === 'gecildi').length;
       const icinde = satir.some(b => b.durum === 'simdi');
       const hal = gecilen === satir.length ? 'tamam' : (icinde || gecilen ? 'acik' : 'kilitli');
+      /* Kilitli kademenin sahnesi de çizilmez: sahne o rütbenin
+         dünyasıdır ve gelinmemiş bir dünyayı göstermek kartı
+         göstermekle aynı şeydir. */
+      const sahne = hal === 'kilitli' ? null : sahneYolu(k.no);
+      /* İKİ KATLI: üstte kademenin SAHNESİ bir bant olarak, altında
+         kartlar temiz zeminde. Sahne kartların arkasına yayıldığında
+         ikisi birbirini yiyordu — sahne bulanık, kart okunmaz. */
       return renkli(k, html`
         <div class="${'rutbe-kademe rutbe-kademe--' + hal}">
-          <div class="rutbe-kademe__ust">
-            <span class="rutbe-kademe__no">${k.no}</span>
-            <div>
-              <!-- Kademe adi da h2: merdiven sekmesinde bunlar ekranin
-                   birinci duzey basliklaridir (bkz. rutbe-kart__ad). -->
-              <h2 class="rutbe-kademe__ad">${k.ad}</h2>
-              <span class="rutbe-kademe__slogan">${k.slogan || ''}</span>
+          <div class="rutbe-kademe__bant">
+            ${when(sahne, () => html`<img class="rutbe-kademe__sahne" src="${sahne}"
+              alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">`)}
+            <div class="rutbe-kademe__ust">
+              <span class="rutbe-kademe__no">${k.no}</span>
+              <div>
+                <!-- Kademe adi da h2: merdiven sekmesinde bunlar ekranin
+                     birinci duzey basliklaridir (bkz. rutbe-kart__ad). -->
+                <h2 class="rutbe-kademe__ad">${k.ad}</h2>
+                <span class="rutbe-kademe__slogan">${k.slogan || ''}</span>
+              </div>
+              ${K.Badge({
+                tone:hal === 'tamam' ? 'ok' : (hal === 'acik' ? 'info' : 'muted'),
+                icon:false,
+                label:hal === 'kilitli' ? 'kilitli' : gecilen + ' / ' + satir.length })}
             </div>
-            ${K.Badge({
-              tone:hal === 'tamam' ? 'ok' : (hal === 'acik' ? 'info' : 'muted'),
-              icon:false,
-              label:hal === 'kilitli' ? 'kilitli' : gecilen + ' / ' + satir.length })}
           </div>
           <div class="rutbe-basamaklar">
             ${map(satir, b => basamakHtml(b))}
@@ -180,11 +203,17 @@ R.Screens.rutbe = (function(){
   }
 
   function basamakHtml(b){
-    /* Kilitli basamağın kartı GÖSTERİLMEZ. Görmediğin bir şeyin
-       görüntüsünü şimdiden vermek, gelindiğinde onu değersizleştirir;
-       üstelik henüz üretilmemiş kartlar da olabilir. */
+    /* GELMEDİĞİN RÜTBE GÖRÜNMEZ — depo sahibinin kararı, iki kez teyit
+       edildi. Kart yalnız geçilen ve şu an olunan basamakta çizilir;
+       kilitli basamak mühürlü bir kutu olarak durur, etiketi ve eşiği
+       okunur. Görülmemiş bir kartın görüntüsünü önden vermek, gelindiği
+       gün onu değersizleştiriyordu.
+
+       Dosya yoksa `onerror` düğümü kaldırır (henüz üretilmemiş K
+       kartları böyle) ve altındaki etiket görünür kalır. */
     const gorsel = (b.durum !== 'kilitli' && b.kart)
-      ? html`<img src="${b.kart}" alt="" aria-hidden="true" onerror="this.remove()">`
+      ? html`<img src="${b.kart}" alt="" aria-hidden="true" loading="lazy"
+          onerror="this.remove()">`
       : '';
     return html`
       <div class="${'rutbe-basamak rutbe-basamak--' + b.durum}"

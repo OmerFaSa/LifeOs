@@ -690,6 +690,8 @@
 /* ---------- şu anki rütbe ---------- */
 
 .rutbe-kart{
+  position:relative; overflow:hidden; isolation:isolate;
+  min-height:clamp(180px, 26vw, 240px);
   display:flex; align-items:center; gap:clamp(14px, 3vw, 26px);
   padding:clamp(14px, 2.4vw, 22px);
   border-radius:16px;
@@ -701,9 +703,34 @@
     color-mix(in srgb, currentColor 4%, transparent);
 }
 
+/* KADEME SAHNESİ kartın ARKASINDA durur. Depo sahibi altı sahne
+   üretti ve bunlar yalnız kutlama perdesinde görünüyordu — yani yılda
+   birkaç saniye. Burada kalıcı olarak duruyorlar. Okunabilirlik
+   pahasına değil: sahne silik ve üstüne bir karartma biniyor, yazı
+   kontrastı a11ycheck'in ölçtüğü yerde kalıyor. */
+.rutbe-kart__sahne{
+  position:absolute; inset:0; z-index:-1;
+  width:100%; height:100%;
+  object-fit:cover; object-position:center 42%;
+  pointer-events:none;
+}
+/* Karartma soldan sağa açılır: yazı solda okunur, sahne sağda görünür.
+   Her yere eşit dağıtılan bir perde sahneyi bembeyaz ediyordu. */
+.rutbe-kart::after{
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:linear-gradient(to right,
+    color-mix(in srgb, var(--surface) 90%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 66%, transparent) 46%,
+    color-mix(in srgb, var(--surface) 30%, transparent) 100%);
+}
+/* SAHNE HARİÇ. `> *` derken sahne de yakalanıyordu: `position:relative`
+   mutlak konumu eziyor, resim normal bir kutu olup bütün paneli
+   kaplıyordu — kart ve yazı gözden kayboluyordu. */
+.rutbe-kart > *:not(.rutbe-kart__sahne){ position:relative; z-index:1; }
+
 .rutbe-kart__sol{
   position:relative; flex:none;
-  width:clamp(84px, 18vw, 124px);
+  width:clamp(104px, 21vw, 164px);
   display:grid; place-items:center;
 }
 .rutbe-kart__gorsel{
@@ -750,25 +777,59 @@
 /* ---------- merdiven ---------- */
 
 .rutbe-kademe{
-  padding:14px 16px 16px;
+  position:relative; overflow:hidden;
   border-radius:14px;
   border:1px solid color-mix(in srgb, currentColor 12%, transparent);
   background:color-mix(in srgb, currentColor 3%, transparent);
 }
-/* Kilitli kademe SİLİK ama okunur kalır: gelmediğin bir yeri gizlemek,
-   merdivenin neye benzediğini de gizlemektir. */
-.rutbe-kademe--kilitli{ opacity:.52; }
+/* Kilitli kademe silik kalır — ama SOLMA ARTIK BLOĞUN TAMAMINDA DEĞİL.
+   Bloğa toptan opaklık vermek kartların da üstünü örtüyordu; oysa depo
+   sahibinin görmek istediği tam olarak o kartlar. Şimdi yalnız başlık
+   ve sahne soluyor, kart kendi kuralıyla (aşağıda). */
+.rutbe-kademe--kilitli .rutbe-kademe__ust{ opacity:.68; }
 .rutbe-kademe--acik{
   border-color:color-mix(in srgb, var(--kademe-renk) 42%, transparent);
-  background:
-    linear-gradient(to right,
-      color-mix(in srgb, var(--kademe-renk) 10%, transparent),
-      transparent 42%),
-    color-mix(in srgb, currentColor 3%, transparent);
+}
+
+/* SAHNE BANDI — kademenin kendi sahnesi BAŞLIĞIN arkasında durur,
+   kartların değil. Altı sahne, altı kademe, birebir. Sahne kartların
+   da arkasına yayıldığında ikisi birbirini yiyordu: sahne bulanık,
+   kart okunmaz. Bant ayrı kat, kartlar temiz zeminde. */
+.rutbe-kademe__bant{
+  position:relative; isolation:isolate;
+  min-height:104px;
+  display:flex; align-items:flex-end;
+  padding:16px;
+  border-bottom:1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+.rutbe-kademe__sahne{
+  position:absolute; inset:0; z-index:-1;
+  width:100%; height:100%;
+  object-fit:cover; object-position:center 46%;
+  pointer-events:none;
+}
+/* Karartma YAZININ altında ağır, sahnenin üstünde hafif. Her yere eşit
+   dağıtılan bir perde sahneyi bembeyaz ediyordu — sahne konmuş ama
+   gösterilmemiş oluyordu. Soldan sağa açılır: metin solda okunur,
+   sahne sağda görünür. Kontrast a11ycheck'in ölçtüğü yerde kalır. */
+.rutbe-kademe__bant::after{
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:linear-gradient(to right,
+    color-mix(in srgb, var(--surface) 92%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 70%, transparent) 34%,
+    color-mix(in srgb, var(--surface) 26%, transparent) 100%);
+}
+/* Kilitli kademenin sahnesi HİÇ ÇİZİLMEZ; bant yine de bir bant
+   kalsın diye kademe renginde ince bir zemin alır. */
+.rutbe-kademe--kilitli .rutbe-kademe__bant{
+  background:linear-gradient(to right,
+    color-mix(in srgb, var(--kademe-renk) 12%, transparent),
+    transparent 62%);
 }
 
 .rutbe-kademe__ust{
-  display:flex; align-items:center; gap:12px; margin-bottom:12px;
+  flex:1 1 auto; min-width:0;
+  display:flex; align-items:center; gap:12px;
 }
 .rutbe-kademe__ust > div{ flex:1 1 auto; min-width:0; }
 .rutbe-kademe__no{
@@ -783,16 +844,23 @@
     var(--kademe-isik) 45%,
     color-mix(in srgb, var(--kademe-renk) 82%, #000) 100%);
 }
-.rutbe-kademe__ad{ margin:0; font-size:16px; font-weight:600; }
-.rutbe-kademe__slogan{ font-size:12px; opacity:.6; }
+.rutbe-kademe__ad{
+  margin:0;
+  font:500 20px/1.15 ui-serif, Georgia, "Times New Roman", serif;
+}
+.rutbe-kademe__slogan{ font-size:12px; opacity:.72; }
 
 .rutbe-basamaklar{
-  display:flex; flex-wrap:wrap; gap:10px;
+  display:flex; flex-wrap:wrap; gap:12px;
+  padding:16px;
 }
 
 .rutbe-basamak{
   display:grid; justify-items:center; gap:4px;
-  width:clamp(62px, 15vw, 84px);
+  /* Kutu BÜYÜTÜLDÜ: 84 pikselde rütbe kartının üstündeki yazı
+     seçilmiyordu, yani kart konmuş ama gösterilmemiş oluyordu. Kademe
+     başına üç kart olduğu için geniş ekranda yer de boldu. */
+  width:clamp(96px, 21vw, 148px);
 }
 .rutbe-basamak__kutu{
   position:relative;
@@ -825,13 +893,27 @@
 
 .rutbe-basamak--simdi .rutbe-basamak__kutu{
   border-color:var(--kademe-renk);
-  box-shadow:0 0 0 2px color-mix(in srgb, var(--kademe-renk) 30%, transparent);
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--kademe-renk) 30%, transparent),
+    0 8px 22px color-mix(in srgb, var(--kademe-renk) 26%, transparent);
 }
+/* KİLİTLİ BASAMAK — kart çizilmez (bkz. `basamakHtml`). Boş bir kutu
+   bırakmak yerine MÜHÜRLÜ gösterilir: kademe renginde sönük bir doku,
+   kesik çerçeve, ortada etiketi. Merdivenin şekli görünür, içeriği
+   görünmez — istenen de buydu. */
 .rutbe-basamak--kilitli .rutbe-basamak__kutu{
   border-style:dashed;
-  background:transparent;
+  border-color:color-mix(in srgb, var(--kademe-renk) 30%, transparent);
+  background:
+    repeating-linear-gradient(135deg,
+      color-mix(in srgb, var(--kademe-renk) 7%, transparent) 0 6px,
+      transparent 6px 12px),
+    color-mix(in srgb, currentColor 4%, transparent);
 }
-.rutbe-basamak--kilitli .rutbe-basamak__etiket{ opacity:.45; }
+
+
+.rutbe-basamak--gecildi .rutbe-basamak__kutu{
+  border-color:color-mix(in srgb, var(--kademe-renk) 38%, transparent);
+}
 
 /* ---------- XP nereden gelir ---------- */
 

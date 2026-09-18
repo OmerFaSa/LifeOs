@@ -198,6 +198,20 @@ kaynaktan yayılır ve dört sekmeden oluşur:
 | **XP nereden gelir** | Katalogdaki her iş: kaç XP, hangi birimden, **nerede yapılır**, bugün tavanın ne kadarı dolmuş — ve o ekrana giden bir «Git» düğmesi |
 | **Defter** | Son günlerin ham dökümü; sayının nereden geldiğini kanıtlar |
 
+GÖRSELLER NEREDE GÖRÜNÜR — ve nerede GÖRÜNMEZ:
+
+| Görsel | Nerede |
+|---|---|
+| Rütbe kartı | kutlama perdesinde · «Şu an» sekmesinde · merdivende **geçilen ve şu an olunan** basamakta |
+| Kademe sahnesi | kutlama perdesinde · «Şu an» panelinin arkasında · merdivende **açılmış** kademenin başlık bandında |
+
+**Gelmediğin rütbe görünmez.** Kilitli basamağın kartı ve kilitli
+kademenin sahnesi ÇİZİLMEZ; onların yerinde kademe renginde mühürlü bir
+kutu durur, üstünde etiketi ve eşiği yazılı. Merdivenin şekli görünür,
+içeriği görünmez. Bu bir tasarım tercihi değil depo sahibinin kararıdır
+ve iki kez teyit edildi: görülmemiş bir kartın görüntüsünü önden vermek,
+gelindiği gün onu değersizleştiriyor.
+
 Üçüncü sekme bu özelliğin sebebidir. «Bugün 40 XP aldım» bilgisi tek
 başına işe yaramaz; **hangi işten** geldiği ve **nereye gidip** daha
 fazlasını yapabileceğim bilgisi yarar. O yüzden katalogdaki her satır
