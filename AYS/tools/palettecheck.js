@@ -15,7 +15,13 @@ const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const OUT = '/tmp/pal-ays'; fs.mkdirSync(OUT, { recursive:true });
-const srv = spawn('python3', ['devserver.py'], { cwd:'/home/user/LifeOs/AYS', stdio:'ignore' });
+const path = require('path');
+const ROOT = path.resolve(__dirname, '..');
+/* Sunucu, denetimin KENDI klasorunden acilir. Burada depo koku SABIT
+   yaziliydi (`/home/user/LifeOs/...`): o yol yalnizca bir gelistirme
+   makinesinde vardi, baska her yerde sunucu hic acilmiyor ve denetim
+   bos sayfa olcuyordu. __dirname her yerde dogrudur. */
+const srv = spawn('python3', ['devserver.py'], { cwd:ROOT, stdio:'ignore' });
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 /* WCAG kontrast — arayuzun okunabilirligi goz kararina birakilmaz. */
@@ -71,7 +77,12 @@ function checksOf(m){
 
 (async () => {
   await wait(1200);
-  const b = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium' });
+  /* Tarayici ikilisi: CHROMIUM_PATH verilmisse O, verilmemisse
+     Playwright'in kendi kurdugu. Burada bir yol SABIT yaziliydi ve o
+     yol yalnizca bir gelistirme ortaminda vardi: denetim CI'da
+     "Executable doesn't exist" ile duserdi — yani hicbir zaman
+     kosmayacak bir denetimdi. */
+  const b = await chromium.launch({ executablePath:process.env.CHROMIUM_PATH || undefined });
   const p = await b.newPage({ reducedMotion:'reduce', viewport:{ width:1280, height:900 } });
   await p.goto('http://127.0.0.1:4173/index.html', { waitUntil:'load' });
   await wait(1500);

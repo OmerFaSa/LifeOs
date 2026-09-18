@@ -124,6 +124,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     console.log('  en yavaş üç ekran → ' + sirali.slice(0, 3)
       .map(([k, v]) => k + ' ' + v + ' ms').join(' · '));
     console.log('  toplam → ' + toplam + ' ms');
+    console.log('  motor → ' + Object.entries(motor)
+      .map(([k, v]) => k + ' ' + v + ' ms').join(' · '));
   }catch(err){
     console.error('Koşum hatası:', err && err.message ? err.message : err);
     await browser.close(); srv.kill();
@@ -136,7 +138,6 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   if(problems.length){
     console.log('YÜK SORUNU (' + problems.length + ')');
     problems.forEach(p => console.log('  · ' + p));
-    console.log('  motor → ' + Object.entries(motor).map(([k, v]) => k + ' ' + v + ' ms').join(' · '));
     process.exit(1);
   }
   console.log('yuk denetimi temiz (' + YIL + ' yillik veri)');

@@ -6495,7 +6495,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'d46070b', at:'2026-09-18 14:47', dirty:true };
+ESP.BUILD = { id:'d915457', at:'2026-09-18 16:55', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -14536,12 +14536,54 @@ ESP.Intellect = (function(){
      verilmez, yalnizca tekrar kalkar.
 
      Ayni taslagin okunabilirligi tek cizimde bes yerde isteniyordu: liste
-     satiri, acik taslak, olcum sekmesi, kademe kapisi ve brifing. */
+     satiri, acik taslak, olcum sekmesi, kademe kapisi ve brifing.
+
+     ---------------------------------------------------------------
+     ONBELLEK KARENIN OTESINE GECER — VE NEDEN BU GUVENLI
+
+     Olculdu (`tools/loadcheck.js`, bes yillik hacim, 268 taslak):
+     `writing.readability` olcusu TEK CIZIMDE 214 ms suruyordu ve ofis
+     ekraninin 475 ms'sinin neredeyse yarisini tek basina o yapiyordu.
+     Sebep agir bir formul degil: her karede butun taslaklarin metni
+     yeniden hecelere ayriliyordu. Kare onbellegi bunu cozmez — o
+     yalnizca AYNI kare icindeki tekrari kaldirir, her yeni kare
+     hesabi sifirdan yapar.
+
+     `core/memo.js` kalici onbellegi bilerek reddeder ve gerekcesi
+     dogrudur: kalici bir onbellek "durum degisti mi?" sorusunu sormak
+     zorundadir, yanlis cevaplarsa ekranda ESKI SAYI durur.
+
+     Burada o soru SORULMAZ, cunku anahtar surumun kendisini tasir:
+     `id` degeri cagiran tarafta `d.id + d.updatedAt` olarak kurulur ve
+     `Model.saveDraft` HER kayitta `updatedAt`i yeniden yazar. Taslak
+     degisti demek, anahtar degisti demektir. Uzerine metin uzunlugu da
+     eklenir. Yani eskiyen bir kaydin okunabilecegi bir anahtar yoktur.
+
+     Kutu SINIRLIDIR: tavan asilinca en eski kayit dusurulur. Sinirsiz
+     bir onbellek, cozdugunden buyuk bir sorun olurdu. Tavan taslak
+     sayisindan cok yuksek secildi (1 000); dusuk bir tavan, her karede
+     birbirini dusuren kayitlarla onbellegi ISE YARAMAZ hale getirirdi.
+
+     KURAL, `memo.js`'teki ile ayni: buraya konan deger PAYLASILIR,
+     cagiran onu degistiremez. */
+  const OKUNAKLIK = new Map();
+  const OKUNAKLIK_TAVAN = 1000;
+
   function readability(text, id){
     if(id == null) return readabilityRaw(text);
-    return ESP.Memo.of('int.read:' + id + ':' + String(text || '').length,
-      function(){ return readabilityRaw(text); });
+    const anahtar = 'int.read:' + id + ':' + String(text || '').length;
+    if(OKUNAKLIK.has(anahtar)) return OKUNAKLIK.get(anahtar);
+    const deger = ESP.Memo.of(anahtar, function(){ return readabilityRaw(text); });
+    OKUNAKLIK.set(anahtar, deger);
+    if(OKUNAKLIK.size > OKUNAKLIK_TAVAN){
+      OKUNAKLIK.delete(OKUNAKLIK.keys().next().value);
+    }
+    return deger;
   }
+
+  /* Testler icin: onbellegi bosaltir. Uretimde cagrilmaz — orada
+     bosaltilacak bir sey yok, anahtar zaten surumu tasiyor. */
+  function readabilityUnut(){ OKUNAKLIK.clear(); }
 
   function readabilityRaw(text){
     const s = String(text || '').trim();
@@ -14653,7 +14695,7 @@ ESP.Intellect = (function(){
     /* arguman */
     openArguments, stalledArguments, checkFallacies, FALLACIES,
     /* yazi */
-    readability, bandOf, syllables, repeats, draftRatio, wordsWritten,
+    readability, readabilityUnut, bandOf, syllables, repeats, draftRatio, wordsWritten,
   };
 })();
 

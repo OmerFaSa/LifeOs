@@ -40,6 +40,25 @@ const ROOT = path.resolve(__dirname, '..');
 const BUDGET = { office:100, team:80, ladder:80, lang:80, today:80, history:80,
   analytics:100, default:60 };
 
+/* ÖLÇÜM ORTAMI BÜTÇEYİ DEĞİL, PAYI DEĞİŞTİRİR.
+
+   Yukarıdaki bütçeler yerel bir makinede ölçülerek yazıldı. Paylaşımlı
+   bir koşum makinesi (CI) aynı kodu düzenli olarak daha yavaş ölçer:
+   orada kırmızıya dönen bir sayı çoğu zaman bir gerileme değil, başka
+   bir makinedir. Bütçeyi gevşetmek bu farkı KALICI olarak silerdi —
+   yerelde de görünmez olurdu.
+
+   Bu yüzden bütçe sabit kalır ve ortam kendi payını AÇIKÇA söyler:
+
+     PERF_PAY=1.5 node tools/perfcheck.js
+
+   Pay çıktıya yazılır; kimse gevşetilmiş bir bütçeyi sıkı sanmasın.
+   Varsayılan 1: yerel koşum hep sıkı ölçer. */
+const PAY = Number(process.env.PERF_PAY) > 0 ? Number(process.env.PERF_PAY) : 1;
+function butce(rota){
+  return Math.round((BUDGET[rota] || BUDGET.default) * PAY);
+}
+
 let chromium;
 try{ ({ chromium } = require('playwright')); }
 catch(e){
@@ -137,7 +156,7 @@ function waitForServer(url, tries){
         return (performance.now() - t0) / N;
       }, r);
       rows.push({ route:r, ms:Math.round(ms * 10) / 10,
-        budget:BUDGET[r] || BUDGET.default });
+        budget:butce(r) });
     }
 
     rows.sort((a, b) => b.ms - a.ms);
@@ -145,6 +164,10 @@ function waitForServer(url, tries){
 
     console.log('\nÇizim maliyeti — ' + boyut.cards + ' kart, ' + boyut.notes
       + ' not, ' + boyut.events + ' olay, ' + boyut.days + ' gün:\n');
+    if(PAY !== 1){
+      console.log('BÜTÇE PAYI ×' + PAY + ' — bu koşum yerel ölçümden daha '
+        + 'gevşek bir eşikle bakıyor (PERF_PAY).');
+    }
     rows.forEach(x => {
       const pay = Math.round(100 * x.ms / x.budget);
       console.log('  ' + x.route.padEnd(12) + String(x.ms).padStart(7) + ' ms'
