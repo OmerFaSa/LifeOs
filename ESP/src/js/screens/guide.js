@@ -14,7 +14,6 @@ ESP.Screens.guide = (function(){
 
   const TABS = [
     { id:'kullanim', label:'Kullanım' },
-    { id:'seviye',   label:'Seviye' },
     { id:'model',    label:'Model' },
     { id:'veri',     label:'Veri' },
     { id:'sinirlar', label:'Sınırlar' },
@@ -441,18 +440,13 @@ ESP.Screens.guide = (function(){
     ];
   }
 
-  /* Seviye — «XP nereden geldi». Gövdeyi ortak motor üretir
-     (core/xp.js, panelHtml): üç sistemin üç ayrı seviye ekranı
-     çizmesi, üçünün bir gün ayrı şeyler söylemesi demekti. */
-  function seviyeRows(){
-    const govde = ESP.XP ? ESP.XP.panelHtml() : '';
-    if(!govde){
-      return [K.Card({ title:'Seviye',
-        body:html`<p class="small dim">Seviye defteri henüz yüklenmedi.</p>` })];
-    }
-    return [K.Card({ title:'Seviye', sub:'Her sistemin kendi kademesi vardır',
-      body:raw(govde) })];
-  }
+  /* SEVİYE SEKMESİ BURADAN KALKTI.
+
+     Rehber, sistemin nasıl çalıştığını anlatan yerdir; seviye ise
+     bakılacak bir yerdir. Aynı defteri iki ayrı sekmede göstermek
+     «hangisi gerçek» sorusunu doğuruyordu. Artık kendi bölümü var:
+     üst gezinmede «Rütbe» (screens/rutbe.js) — kademe, merdiven,
+     XP kaynakları ve defter orada. */
 
   function render(){
     const tab = S.ui.guideTab || 'kullanim';
@@ -460,7 +454,6 @@ ESP.Screens.guide = (function(){
       : tab === 'veri' ? dataRows()
       : tab === 'sinirlar' ? limitRows()
       : tab === 'kanit' ? evidenceRows()
-      : tab === 'seviye' ? seviyeRows()
       : usageRows();
 
     return K.Grid(html`

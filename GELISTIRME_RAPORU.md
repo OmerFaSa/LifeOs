@@ -40,6 +40,7 @@ yerde «göremedim» yazdım.
 | **İP-5.1** Rütbe görselleri | ◑ 15 kart + 6 sahne geldi | Kutsal'ın K kartları ve küçük rozetler bekliyor |
 | **İP-5.2** HKM brifinginde seviye | ✅ bitti | `manager._level_line`, iki test |
 | **İP-5.3** Defterin bir yıllık boyutu | ✅ ölçüldü | AYS 13 117 B · SPİ 15 157 B · ESP 12 397 B (tavan) |
+| **İP-5.4** Rütbe ekranı ve XP kaynakları | ✅ bitti | üç arayüzde Rütbe bölümü, dört sekme; katalogda `rota`·`nerede`·`nasil` |
 | **İP-6** `labs.js` kapsamı | ⏳ açık | 1 482 satır, hâlâ testsiz |
 
 ## Rapor yazılırken bilinmeyen dört şey
@@ -118,6 +119,18 @@ yoktu. Sonra depo sahibi on beş rütbe kartı ile altı kademe sahnesi
   hiç sokmuyor.
 - Görseller `brand/seviye/medya/` altında **kayıpsız** duruyor
   (15,0 → 11,8 MB, piksel değişmedi) ve `tools/rutbe.py` ile işleniyor.
+
+Ardından rütbenin **durağan** bir evi oldu: üç arayüzde de gezinmede
+kendi **Rütbe** bölümü (Ayarlar ve Ofis gibi bir üst düzey bölüm) ve
+dört sekme — **Şu an**, **Merdiven**, **XP nereden gelir**, **Defter**.
+Üçüncü sekme bu işin sebebiydi: katalogdaki her satır artık `rota`,
+`nerede` ve `nasil` alanlarını taşıyor, yani her puanın hangi işten
+geldiği ve hangi ekranda kazanıldığı yazılı — «Git» düğmesi de oraya
+götürüyor. Motora iki erişimci eklendi (`XP.merdiven`, `XP.bugunku`);
+ikisi de hesaplamaz, defterde yazılı olanı okunabilir kılar. Ekran tek
+kaynaktan (`brand/seviye/rutbe.js`) yayılır; rehberdeki eski «Seviye»
+sekmesi kaldırıldı, çünkü aynı bilgi iki yerde durursa bir gün ikisi
+farklı şey söyler.
 
 Bu iş sırasında bir şey daha ölçüldü: **şema sürümü artışı gün
 kırılımını siliyordu.** `xp.js` biçim değişimi ile eşik değişimini ayırt

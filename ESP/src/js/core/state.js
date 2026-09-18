@@ -88,6 +88,7 @@ ESP.S = {
     railOpen:false,
     undo:null,              // son yikici islemin geri alma kaydi
     dayTab:'giris',         // giris | ozet | gecmis
+    rutbeTab:'simdi',      // simdi | merdiven | kazanc | defter
     dayDate:null,           // gorunen gun (null = bugun)
     sessionDisc:'lang',     // giris formunda secili disiplin
     langTab:'calis',        // calis | kartlar | ekle | ilerleme

@@ -43,14 +43,14 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1189/1189 gecti | 938/938 gecti | 756/756 gecti |
-| `smoke.js` | Duman testi temiz — 2 hedefte 36 ekran, 38 sekme gezildi. | Duman testi temiz — 2 hedefte 24 ekran, 66 sekme gezildi. | Duman testi temiz — 2 hedefte 28 ekran, 184 sekme gezildi. |
-| `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
+| `runtests.js` | 1192/1192 gecti | 941/941 gecti | 759/759 gecti |
+| `smoke.js` | Duman testi temiz — 2 hedefte 38 ekran, 44 sekme gezildi. | Duman testi temiz — 2 hedefte 26 ekran, 72 sekme gezildi. | Duman testi temiz — 2 hedefte 30 ekran, 190 sekme gezildi. |
+| `a11ycheck.js` | (1 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) | (1 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) | (3 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
-| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 37 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 45 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 106 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.6 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 23.9 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 44.9 ms (bütçe 100). |
+| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 41 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 49 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 110 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.1 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 22.7 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 47 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
-| `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
+| `designcheck.js` | — | beş düzen temiz — 460 ekran/genişlik kombinasyonu bakıldı | — |
 | `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
 | `loadcheck.js` | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) |
 
@@ -1376,6 +1376,29 @@ kazanılmış sayılıyor, yalnız gösterim atlanıyor). Şema sürümü 2 → 
 oldu ama gün kırılımı KORUNDU — `xp.js` artık biçim değişimi ile eşik
 değişimini ayırıyor; eskiden bir katalog düzenlemesi kullanıcının yüz
 yirmi günlük kırılımını siliyordu.
+
+**Rütbe ekranı geldi.** Perde bir andır: kazanıldığı saniye görünür ve
+geçer. Durağan karşılığı yoktu — kullanıcı «şu an neredeyim, sıradaki
+basamak ne, bu puan nereden geldi» sorularını soracak bir yer bulamıyordu.
+Artık üç arayüzde de gezinmede kendi **Rütbe** bölümü var (Ayarlar ve
+Ofis gibi bir üst düzey bölüm) ve dört sekmeden oluşuyor: **Şu an**
+(kart, kademe, bugünün iş iş dökümü), **Merdiven** (yirmi beş basamağın
+hepsi — geçilen, şu an, kilitli; Kutsal'ın K merdiveni dahil),
+**XP nereden gelir** ve **Defter**.
+
+Üçüncü sekme bu işin sebebiydi. «Bugün 40 XP» tek başına işe yaramaz;
+hangi işten geldiği ve nereye gidip daha fazlasını yapabileceğim bilgisi
+yarar. Katalogdaki her satır artık üç alan daha taşıyor — `rota`
+(«Git» düğmesi nereye götürür), `nerede` (insan diliyle yeri), `nasil`
+(ne yapınca kazanılır) — ve bir test üçünün de dolu olmasını, `smoke.js`
+de her rotanın gerçekten açıldığını denetliyor. Ölü bir «Git» düğmesi,
+olmayan bir puandan beterdir.
+
+Motor tarafında iki erişimci eklendi (`XP.merdiven`, `XP.bugunku`);
+ikisi de hiçbir şey **hesaplamaz**, defterde yazılı olanı okunabilir
+hâle getirir. Ekranın kendisi `brand/seviye/rutbe.js` — tek kaynak,
+`--yay` ile üçe dağıtılır. Rehberdeki eski «Seviye» sekmesi kaldırıldı:
+aynı bilgi iki yerde durursa bir gün ikisi farklı şey söyler.
 
 **Ortak CSS nasıl kapandı.** `base.css`, `layout.css` ve `designs.css`
 üç uygulamada bayt düzeyinde aynıydı — 4 365 satır birebir tekrar ve

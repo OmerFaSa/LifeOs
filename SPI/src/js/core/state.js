@@ -74,6 +74,7 @@ SP.S = {
     railOpen:false,
     undo:null,             // son yikici islemin geri alma kaydi
     dayTab:'giris',        // giris | ozet | gecmis
+    rutbeTab:'simdi',      // simdi | merdiven | kazanc | defter
     labTab:'sonuc',        // sonuc | giris | gecmis | trend
     labPanel:'vital',      // acik panel id'si
     labQuery:'',           // sonuc ve giris listesindeki arama

@@ -159,6 +159,39 @@
       expect(gun / 365).toBeGreaterThan(30);
     });
 
+    it('her etkinlik NEREDE yapıldığını söyler', () => {
+      /* Rütbe ekranının «XP nereden gelir» bölümü bu alanlarla çalışır.
+         Biri eksik kalırsa kullanıcı puanı görür ama nereye gideceğini
+         göremez — yani listenin yarısı işe yaramaz. */
+      L.XP_ETKINLIK.forEach(e => {
+        expect(typeof e.rota).toBe('string');
+        expect(e.rota.length).toBeGreaterThan(0);
+        expect(e.nerede.length).toBeGreaterThan(0);
+        expect(e.nasil.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('merdiven bütün basamakları durumuyla verir', () => {
+      const m = XP.merdiven();
+      expect(m).toHaveLength(L.BASAMAKLAR.length);
+      /* Her basamak üç durumdan birinde olmalı; dördüncü bir değer
+         ekranda sessizce sınıfsız bir kutu çizerdi. */
+      m.forEach(b => {
+        expect(['gecildi', 'simdi', 'kilitli'].indexOf(b.durum))
+          .toBeGreaterThan(-1);
+      });
+      /* İçinde bulunulan basamak EN ÇOK BİR tanedir. */
+      expect(m.filter(b => b.durum === 'simdi').length).toBeLessThan(2);
+    });
+
+    it('merdivendeki kart adresi medya kuralıyla aynıdır', () => {
+      const m = XP.merdiven();
+      const safir = m.filter(b => b.etiket === '5.2')[0];
+      expect(safir.kart).toBe('img/seviye/rutbe-5-2.webp');
+      const kutsal = m.filter(b => b.etiket === 'K300')[0];
+      expect(kutsal.kart).toBe('img/seviye/rutbe-k300.webp');
+    });
+
     it('medya adı etiketten türer — nokta tireye döner, harf küçülür', () => {
       expect(L.MEDYA_ADI('5.2')).toBe('rutbe-5-2');
       expect(L.MEDYA_ADI('1.1')).toBe('rutbe-1-1');

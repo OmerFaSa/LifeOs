@@ -71,6 +71,12 @@ konuşamadığı bir boşluğu buldu (tarayıcının CORS ön-isteği).
   **Space** o ekrana hiç sokmaz. Geçilmezse arka plan kararır, kademenin
   sahnesi gelir ve rütbe kartı gösterilir.
 
+  Üç arayüzde de gezinmede kendi **Rütbe** bölümü vardır: kazanılmış
+  rütbenin kartı, yirmi beş basamaklık merdivenin tamamı, ham defter — ve
+  **XP'nin hangi işten geldiği**: her iş için kaç puan, hangi birimden,
+  hangi ekranda yapıldığı, bugün tavanın ne kadarının dolduğu ve o ekrana
+  giden bir düğme.
+
   Tek kaynak `brand/seviye/`; üçe `python3 tools/seviye.py --yay` ile
   dağıtılır (bkz. [`brand/seviye/OKU.md`](brand/seviye/OKU.md)).
 
@@ -230,14 +236,14 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1189/1189 gecti | 938/938 gecti | 756/756 gecti |
-| `smoke.js` | Duman testi temiz — 2 hedefte 36 ekran, 38 sekme gezildi. | Duman testi temiz — 2 hedefte 24 ekran, 66 sekme gezildi. | Duman testi temiz — 2 hedefte 28 ekran, 184 sekme gezildi. |
-| `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
+| `runtests.js` | 1192/1192 gecti | 941/941 gecti | 759/759 gecti |
+| `smoke.js` | Duman testi temiz — 2 hedefte 38 ekran, 44 sekme gezildi. | Duman testi temiz — 2 hedefte 26 ekran, 72 sekme gezildi. | Duman testi temiz — 2 hedefte 30 ekran, 190 sekme gezildi. |
+| `a11ycheck.js` | (1 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) | (1 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) | (3 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
-| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 37 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 45 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 106 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.6 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 23.9 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 44.9 ms (bütçe 100). |
+| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 41 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 49 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 110 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.1 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 22.7 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 47 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
-| `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
+| `designcheck.js` | — | beş düzen temiz — 460 ekran/genişlik kombinasyonu bakıldı | — |
 | `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
 | `loadcheck.js` | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) |
 

@@ -52,6 +52,13 @@ R.App = (function(){
       { id:'team',    icon:'zap',   label:'Ekip sohbeti' },
       { id:'meeting', icon:'list',  label:'Toplantı' },
     ]},
+    /* Rütbe kendi bölümü — Rehber'in bir sekmesi değil. Seviye orada
+       bir ayar gibi duruyordu; oysa merdiven, kartlar ve «XP nereden
+       gelir» kendi başına bakılacak bir yer. */
+    { id:'rutbe', num:'07', icon:'layers', label:'Rütbe',
+      note:'Kademe, merdiven ve XP kaynakları', items:[
+      { id:'rutbe', icon:'layers', label:'Rütbe' },
+    ]},
   ];
 
   const MOBILE_TABS = ['today','learn','cards','quiz','progress'];

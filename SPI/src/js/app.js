@@ -54,7 +54,14 @@ SP.App = (function(){
         { route:'analytics', label:'Analiz',   icon:'chart' },
       ] },
 
-    { id:'ayarlar', num:'07', icon:'sliders', label:'Ayarlar',
+    /* Rütbe kendi bölümü — Rehber'in bir sekmesi değil. Seviye orada
+       bir ayar gibi duruyordu; oysa merdiven, kartlar ve «XP nereden
+       gelir» kendi başına bakılacak bir yer. */
+    { id:'rutbe', num:'07', icon:'layers', label:'Rütbe',
+      note:'Kademe, merdiven ve XP kaynakları',
+      views:[{ route:'rutbe', label:'Rütbe', icon:'layers' }] },
+
+    { id:'ayarlar', num:'08', icon:'sliders', label:'Ayarlar',
       note:'Hane, görünüm, veri ve rehber',
       views:[
         { route:'family', label:'Hane',   icon:'heart' },

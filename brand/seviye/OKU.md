@@ -57,6 +57,9 @@ paket kırmızıya döner.
 | Sayma davranışı, tavan, defter | `xp.js` | aynı |
 | Perde/banner görünümü | `seviye.css`, `perde.js` | aynı |
 | Rehberdeki seviye paneli | `xp.js` → `panelHtml` | aynı |
+| Rütbe ekranının kendisi | `rutbe.js` | aynı |
+| Rütbe ekranının biçimleri | `seviye.css` → `.rutbe…` | aynı |
+| Bir işin hangi ekranda yapıldığı | `kademeler.js` → `rota` · `nerede` · `nasil` | aynı |
 | Açılıştaki durağan perde markupı | `perde.html` | aynı |
 | Sunucuların `/img/seviye/` muhafızı | `ortak_yol.py` | aynı |
 | `dist/` medya kopyalayıcı | `dist_kopya.py` | aynı |
@@ -80,7 +83,8 @@ brand/seviye/
   kademeler.js    kademeler, etiketler, eşikler, etkinlikler
   xp.js           motor
   perde.js        rütbe gösterimi ve haberci
-  seviye.css      perde, haberci, rozet biçimleri
+  rutbe.js        Rütbe ekranı (dört sekme)
+  seviye.css      perde, haberci, rozet ve Rütbe ekranı biçimleri
   perde.html      index.html içindeki durağan marka perdesi
   ortak_yol.py    sunucuların /img/seviye/ muhafızı
   dist_kopya.py   build.py'nin medya kopyalayıcısı
@@ -179,6 +183,48 @@ Bir rütbe kazanıldığında perde **hemen açılmaz**:
 Hareket azaltma tercihinde **hiçbiri açılmaz**: bilgi sakin bir satırla
 verilir. Tam ekran bir katman açıp odağı çalmak, o tercihi isteyen
 kişinin istemediği şeydir.
+
+## Rütbe ekranı — dört sekme
+
+Perde bir **an**dır: kazanıldığı saniye görünür, geçer, bir daha
+gelmez. Rütbe ekranı o anın **durağan** karşılığıdır — üç arayüzde de
+gezinmede kendi bölümü var (Ayarlar ve Ofis gibi), `rutbe.js` tek
+kaynaktan yayılır ve dört sekmeden oluşur:
+
+| Sekme | Ne gösterir |
+|---|---|
+| **Şu an** | Kazanılmış rütbenin kartı, kademe · etiket · slogan, bugünkü ve toplam XP, bir sonraki basamağa kalan yol, bugünün iş iş dökümü |
+| **Merdiven** | Yirmi beş basamağın hepsi — geçilen, şu an olunan, kilitli. Kutsal'ın K merdiveni de burada |
+| **XP nereden gelir** | Katalogdaki her iş: kaç XP, hangi birimden, **nerede yapılır**, bugün tavanın ne kadarı dolmuş — ve o ekrana giden bir «Git» düğmesi |
+| **Defter** | Son günlerin ham dökümü; sayının nereden geldiğini kanıtlar |
+
+Üçüncü sekme bu özelliğin sebebidir. «Bugün 40 XP aldım» bilgisi tek
+başına işe yaramaz; **hangi işten** geldiği ve **nereye gidip** daha
+fazlasını yapabileceğim bilgisi yarar. O yüzden katalogdaki her satır
+artık üç alan daha taşır:
+
+```js
+{ id:'esp.kart', ad:'SRS kartı tekrarı', xp:1, tavan:60, birim:'kart',
+  rota:'lang',                       // «Git» düğmesi nereye götürür
+  nerede:'Dil › Dil Stüdyosu',       // insan diliyle yeri
+  nasil:'Tekrarladığın her kart' },  // ne yapınca kazanılır
+```
+
+`rota` gerçek bir ekran kimliği olmak zorunda — bir test her satırın
+üçünü de taşıdığını denetler, `smoke.js` de her rotanın açıldığını.
+Ölü bir «Git» düğmesi, olmayan bir puandan beterdir.
+
+Ekran motora iki erişimciyle konuşur; ikisi de `xp.js` içindedir ve
+hiçbir şey **hesaplamaz**, yalnız defterde yazılı olanı okunabilir
+hâle getirir:
+
+- `XP.merdiven()` — yirmi beş basamağın hepsi, durumuyla
+  (`gecildi` · `simdi` · `kilitli`) ve kart yoluyla birlikte.
+- `XP.bugunku()` — bugün her işten kaç adet yapılmış, kaç XP gelmiş,
+  tavanın ne kadarı dolmuş.
+
+Rehberdeki eski «Seviye» sekmesi kaldırıldı: aynı bilgi iki yerde
+durursa bir gün ikisi farklı şey söyler.
 
 ## XP nereden gelir — türetilir, tetiklenmez
 

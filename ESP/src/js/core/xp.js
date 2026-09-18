@@ -796,6 +796,66 @@ ESP.XP = (function(){
       + '</span>';
   }
 
+  /* ------------------------------------------------------- merdiven
+
+     BÜTÜN basamaklar, her birinin durumuyla. Rütbe ekranı bunu çizer.
+
+     Durum üç değerden biri:
+       gecildi   eşik aşıldı, rütbe kazanıldı
+       simdi     içinde bulunulan basamak
+       kilitli   henüz gelinmedi
+
+     Kart adresi burada üretilir çünkü kural katalogda tek satırdır
+     (`LIFEOS.MEDYA_ADI`); ekranın kendi adını kurması, bir gün perde
+     ile ekranın ayrı dosyalara bakması demekti. */
+  function merdiven(opt){
+    opt = opt || {};
+    var kok = opt.kok || 'img/seviye/';
+    var L = K();
+    var d = durum();
+    var bitmis = d ? d.bitmisBasamak : 0;
+    var simdiki = d ? d.etiket : null;
+    return (L.BASAMAKLAR || []).map(function(b, i){
+      var hal = 'kilitli';
+      if(i < bitmis) hal = 'gecildi';
+      else if(b.etiket === simdiki) hal = 'simdi';
+      return {
+        etiket:b.etiket, kademe:b.kademe, basamak:b.basamak,
+        maliyet:b.maliyet, esik:b.esik,
+        kademeBilgi:L.KADEME_ILE(b.kademe),
+        durum:hal,
+        kart:L.MEDYA_ADI ? (kok + L.MEDYA_ADI(b.etiket) + '.webp') : null,
+      };
+    });
+  }
+
+  /* ---------------------------------------------------- bugün ne oldu
+
+     Etkinlik başına BUGÜN: kaç kez yapıldı, kaç XP getirdi, tavanına
+     ne kadar kaldı. Defterden OKUNUR, katalogdan hesaplanmaz — o gün
+     kazanılan XP yazıldığı anda dondu (bkz. DEFTER NEDEN OLAY LİSTESİ
+     DEĞİL).
+
+     `tavan` alanı «bugün bu işten en çok kaç XP alınabilir» demektir;
+     `doldu` ise o tavana varıldığını söyler. İkisi birlikte, ekranın
+     «bugün buradan daha fazla puan çıkmaz» diyebilmesini sağlar. */
+  function bugunku(){
+    var gun = U().todayISO();
+    return etkinlikler().map(function(e){
+      var xp = gunXPsi(gun, e.id);
+      var tavan = gunlukTavan(e);
+      return {
+        id:e.id, ad:e.ad, birim:e.birim, xp:e.xp,
+        rota:e.rota || null, nerede:e.nerede || '', nasil:e.nasil || '',
+        adet:gunAdedi(gun, e.id),
+        kazanilan:xp,
+        tavan:tavan,
+        doldu:tavan > 0 && xp >= tavan,
+        oran:tavan > 0 ? Math.min(1, xp / tavan) : 0,
+      };
+    });
+  }
+
   /* ---------------------------------------------------------- panel
 
      «XP nereden geldi» — bir ÖDÜL DUVARI değil bir DEFTER ÖZETİ.
@@ -957,6 +1017,7 @@ ESP.XP = (function(){
     tazele:tazele,
     gunToplami:gunToplami, gunuVar:gunuVar, sonGunler:sonGunler, kirilim:kirilim,
     etkinlikler:etkinlikler, gunlukTavan:gunlukTavan,
+    merdiven:merdiven, bugunku:bugunku,
     yazilabilirGun:yazilabilirGun, gunKaydir:gunKaydir,
     bekleyenKutlama:bekleyenKutlama, kutlandi:kutlandi, dinle:dinle,
     /* Test ve teşhis için ham defter; ekranlar buna DOKUNMAZ. */
