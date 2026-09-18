@@ -190,7 +190,7 @@ __NS__.XP = (function(){
      `tavan:null` «tavan yok» DEMEK DEĞİLDİR: günde bir kez olabilen işi
      (gün kapanışı, beslenme günü) tarif eder ve tavanı tam olarak bir
      kezdir. Bunu «sınırsız» diye okumak, `kazan(id, {adet:1000})` ile
-     bir çağrıda Bronz'dan Nebula'ya çıkmak demekti. */
+     bir çağrıda Bronz'dan Hüküm'e çıkmak demekti. */
   function gunlukTavan(e){
     return (e.tavan == null) ? e.xp : e.tavan;
   }

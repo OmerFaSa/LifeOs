@@ -7169,7 +7169,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'f91dec3', at:'2026-09-18 10:47', dirty:true };
+R.BUILD = { id:'be58468', at:'2026-09-18 11:20', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -7259,16 +7259,13 @@ LIFEOS.BASAMAK_SAYISI = 3;
    isik     rozetin parıltısı; renkten daha açık bir tonu.
    basamak  o kademedeki ÜÇ basamağın her birini bitiren XP miktarı.
 
-   «Kan Kırmızı» ve «Nebula» geçici adlardır; yerlerine daha iyisi
-   konacak. Aday listesi (sırayla denenebilir):
+   Adı değiştirmek yalnız `ad` alanını değiştirmektir; `no` sabit kalır.
+   Kademeye HER YERDE numarasıyla bakılır (`KADEME_ILE(no)`) ve rozet
+   ile video dosyaları da numarayla adlanır (`kademe-4.mp4`), bu yüzden
+   ad değişimi hiçbir dosyayı ve hiçbir kaydı sahipsiz bırakmaz.
 
-     4. kademe  →  Lal · Akik · Ateş · Köz · Yakut
-     5. kademe  →  Semavi · Şafak · Kutup · Burç · Sema
-     6. kademe  →  Kutsal · Arş · Nur · Zirve · Ebedî
-
-   Adı değiştirmek yalnız `ad` alanını değiştirmektir: `id` sabit kalır,
-   çünkü depodaki defter `id` ile yazılmıştır. `id` değişirse geçmiş
-   kayıt sahipsiz kalır. */
+   DEĞİŞMEMESİ GEREKEN şey `LIFEOS.XP_ETKINLIK` içindeki `id`'lerdir:
+   defterde yazılı olan odur. */
 LIFEOS.KADEMELER = [
   { no:1, id:'bronz',  ad:'Bronz',      slogan:'Temeli oluştur',
     renk:'#B87333', isik:'#E9A86A', basamak:[  300,   400,   500 ] },
@@ -7279,11 +7276,14 @@ LIFEOS.KADEMELER = [
   { no:3, id:'altin',  ad:'Altın',      slogan:'Potansiyelini açığa çıkar',
     renk:'#E3B341', isik:'#FFDC8A', basamak:[ 1400,  1700,  2000 ] },
 
-  { no:4, id:'lal',    ad:'Kan Kırmızı', slogan:'Sınırlarını aş',
-    renk:'#C1272D', isik:'#FF6B63', basamak:[ 2500,  3000,  3500 ] },
+  { no:4, id:'yakut',  ad:'Yakut',      slogan:'Sınırlarını aş',
+    renk:'#B31432', isik:'#FF6B7E', basamak:[ 2500,  3000,  3500 ] },
 
-  { no:5, id:'nebula', ad:'Nebula',     slogan:'Evreni keşfet',
-    renk:'#7A5CC7', isik:'#C4A9FF', basamak:[ 4500,  5500,  6500 ] },
+  /* «Hüküm» bir keşif değil bir OTORİTE adıdır; «Evreni keşfet» sloganı
+     Nebula'ya aitti ve adla birlikte değişti. Mor kalıyor: hükümdarlığın
+     rengi. */
+  { no:5, id:'hukum',  ad:'Hüküm',      slogan:'Kendi hükmünü kur',
+    renk:'#6B4FC4', isik:'#C4A9FF', basamak:[ 4500,  5500,  6500 ] },
 
   { no:6, id:'kutsal', ad:'Kutsal',     slogan:'Daha yüksek bir amaca hizmet et',
     renk:'#EBD9A5', isik:'#FFF6DC', basamak:[ 8000, 10000, 12000 ] },
@@ -7302,7 +7302,7 @@ LIFEOS.KADEMELER = [
             `null` TAVANSIZ DEMEK DEĞİLDİR: günde BİR KEZ olabilen işi
             (gün kapanışı, beslenme günü) tarif eder ve tavanı tam
             olarak `xp` kadardır. «Sınırsız» diye okumak, tek çağrıda
-            Bronz'dan Nebula'ya çıkmak demekti.
+            Bronz'dan Hüküm'e çıkmak demekti.
    birim    kullanıcıya «neyin başına» olduğunu söyler.
 
    HER SATIR TÜRETİLEBİLİR OLMALI. Bu liste bir dilek listesi değil:
@@ -12330,7 +12330,7 @@ R.XP = (function(){
      `tavan:null` «tavan yok» DEMEK DEĞİLDİR: günde bir kez olabilen işi
      (gün kapanışı, beslenme günü) tarif eder ve tavanı tam olarak bir
      kezdir. Bunu «sınırsız» diye okumak, `kazan(id, {adet:1000})` ile
-     bir çağrıda Bronz'dan Nebula'ya çıkmak demekti. */
+     bir çağrıda Bronz'dan Hüküm'e çıkmak demekti. */
   function gunlukTavan(e){
     return (e.tavan == null) ? e.xp : e.tavan;
   }
