@@ -896,40 +896,6 @@ R.App = (function(){
     async 'setup-cap'(){ R.Setup.refreshPreview(); },
   };
 
-  /* ---------------------------------------------------- XP sayımları
-
-     XP bir OLAY AKIŞI DEĞİL, verinin bir PROJEKSİYONUDUR: «bugün ne
-     yapıldı» sorusunun cevabı zaten bu sistemin kendi kayıtlarında
-     duruyor. Onaltı ekrana onaltı `XP.kazan()` serpiştirmek yerine
-     burada bir kez okunur ve `XP.esitle()` defteri ona eşitler.
-
-     Kazandırdığı üç şey:
-       · Bir ekran unutulamaz — sayım verinin kendisinden gelir.
-       · Silinen kayıt puanını bırakmaz — sayım düşer, XP düşer.
-       · Tekrar çalışması zararsızdır — eşitleme fikri budur.
-
-     Buradaki her satırın kataloğda bir karşılığı vardır ve tersi de
-     doğru olmalı (bkz. data/kademeler.js). */
-  function xpSayimlari(gun){
-    const d = S.days[gun];
-    const bloklar = (d && Array.isArray(d.blocks)) ? d.blocks : [];
-    /* Günün sorusu: bloklara yazılanlar + derse bağlanmayan serbest
-       sorular. İkisini toplamak core/goodhart.js ile aynı okumadır. */
-    const soru = bloklar.reduce((t, b) => t + (Number(b.actualQ) || 0), 0)
-      + (Number(d && d.freeQ) || 0);
-
-    return {
-      'ays.soru':soru,
-      'ays.deneme':(S.exams || []).filter(e => e && e.date === gun).length,
-      'ays.blok':bloklar.filter(b => b.status === 'done').length,
-      'ays.kalibrasyon':(S.forecasts || []).filter(
-        f => String(f.at || '').slice(0, 10) === gun).length,
-      /* Gün kaydı: o güne dair BİR ŞEY girilmiş mi. */
-      'ays.gun':(soru > 0 || bloklar.some(b => b.status !== 'pending')
-        || (d && d.note)) ? 1 : 0,
-    };
-  }
-
   /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
 
      · Gecikmeli, çünkü bir eylem sırasında art arda birkaç kayıt
@@ -940,15 +906,39 @@ R.App = (function(){
      Hiçbir şey değişmediyse depoya yazılmaz — çoğu çizim bedavaya
      gelir. Seviye atlanırsa kutlamayı `XP.dinle` dinleyicisi açar
      (bkz. boot). */
+  /* Seviye kutlaması — perde ya da sakin bir satır.
+
+     Hareket azaltma tercihinde perde HİÇ açılmaz (bkz. core/perde.js):
+     tam ekran bir katman açıp odağı çalmak, o tercihi isteyen kişinin
+     istemediği şeydir. Bilgi yine verilir, yalnız sesi kısılır. */
+  function kutla(y){
+    if(!y || !R.Perde || !R.XP) return;
+    const damgala = () => R.XP.kutlandi()
+      .then(() => R.XP.tazele()).catch(() => {});
+    const sonuc = R.Perde.kutla(y, { bitti:damgala });
+    if(sonuc && sonuc.sessiz){
+      const ad = (y.kademeBilgi && y.kademeBilgi.ad) || ('Kademe ' + y.kademe);
+      UI.toast('Seviye atladın — ' + ad + ' ' + y.etiket);
+      damgala();
+    }
+  }
+
   let xpBekleyen = null;
   function xpTara(){
     if(!R.XP) return;
     clearTimeout(xpBekleyen);
     xpBekleyen = setTimeout(async () => {
       try{
-        const gun = U.todayISO();
-        const r = await R.XP.esitle(gun, xpSayimlari(gun));
-        if(r && r.degisti) render();
+        /* YALNIZ BUGÜN DEĞİL, yazılabilir pencerenin tamamı. Dünkü
+           antrenmanı bu sabah giren kişinin puanı hiç gelmiyordu:
+           motor o güne yazmaya izin veriyordu ama kimse o günü
+           eşitlemiyordu. Sekiz gün okunur, en çok BİR kez yazılır. */
+        const r = await R.XP.esitleCok(
+          R.XPSayim.gunler(R.XP.pencere()));
+        /* ÇİZİM YOK, DÜĞÜM TAZELEME. Ekranda değişen tek şey rozet ve
+           panel; bütün sayfayı çizmek, tıklanan öğeyi kullanıcının
+           altından çekmek demekti (bkz. core/xp.js, tazele). */
+        if(r && r.degisti) R.XP.tazele();
       }catch(e){ console.error('XP eşitlenemedi:', e); }
     }, 400);
   }
@@ -1261,20 +1251,12 @@ R.App = (function(){
          XP.kutlandi() defteri damgalar ve aynı kutlama bir daha oynamaz. */
       try{
         if(R.XP && R.Perde){
-          R.XP.dinle(function(y){
-            R.Perde.kutla(y, { bitti:function(){
-              R.XP.kutlandi().then(render).catch(function(){});
-            } });
-          });
+          R.XP.dinle(function(y){ kutla(y); });
           /* Açılış perdesi hâlâ oynuyorsa kutlama SIRAYA girer; iki tam
              ekran katman ve iki ses aynı anda olmaz (bkz. core/perde.js,
              AYNI ANDA TEK PERDE). */
           const bekleyen = R.XP.bekleyenKutlama();
-          if(bekleyen){
-            R.Perde.kutla(bekleyen, { bitti:function(){
-              R.XP.kutlandi().then(render).catch(function(){});
-            } });
-          }
+          if(bekleyen) kutla(bekleyen);
         }
       }catch(e){
         console.error('Seviye kutlaması açılamadı.', e);

@@ -160,44 +160,38 @@
         .toBe('medya/kademe-5.mp4');
     });
 
-    it('basamak kutlaması banner ile çizilir', () => {
+    it('banner kademenin adını, etiketini ve sloganını söyler', () => {
       temiz();
-      P.kutla({ kademe:1, basamak:2, etiket:'1.2',
-        kademeBilgi:L.KADEME_ILE(1), yeniKademe:false });
-      expect(acikPerde().querySelector('.perde__video')).toBeNull();
-      expect(acikPerde().querySelector('.perde__banner').textContent).toContain('Yeni basamak');
-      temiz();
-    });
-
-    it('hareket azaltma tercihinde video oynamaz ama kutlama YAPILIR', () => {
-      temiz();
-      const az = window.matchMedia
-        && matchMedia('(prefers-reduced-motion: reduce)').matches;
-      P.kutla({ kademe:2, basamak:1, etiket:'2.1',
-        kademeBilgi:L.KADEME_ILE(2), yeniKademe:true });
-      const el = acikPerde();
-      /* Kutlama her hâlükârda görünür: kademe atladığın bilgisi bir süs
-         değil, kutlamanın kendisidir. Video ise tercihe uyar. */
-      expect(el.querySelector('.perde__banner').hidden).toBe(!!az ? false : true);
-      if(az) expect(el.querySelector('.perde__video')).toBeNull();
-      temiz();
-    });
-
-    it('kutlama kademenin adını, etiketini ve sloganını söyler', () => {
-      temiz();
-      P.kutla({ kademe:3, basamak:2, etiket:'3.2',
-        kademeBilgi:L.KADEME_ILE(3), yeniKademe:false });
+      P.ac({ banner:banner(3), enAz:60000 });
       const metin = acikPerde().querySelector('.perde__banner').textContent;
       expect(metin).toContain('Altın');
-      expect(metin).toContain('3.2');
       expect(metin).toContain(L.KADEME_ILE(3).slogan);
       temiz();
     });
 
+    it('HAREKET AZALTMA tercihinde perde HİÇ açılmaz, sessiz döner', () => {
+      temiz();
+      const az = !!(window.matchMedia
+        && matchMedia('(prefers-reduced-motion: reduce)').matches);
+      const r = P.kutla({ kademe:2, basamak:1, etiket:'2.1',
+        kademeBilgi:L.KADEME_ILE(2), yeniKademe:true });
+      if(az){
+        /* Tam ekran bir katman açıp odağı çalmak, hareket azaltmak
+           isteyen birinin istemediği şeydir. Bilgi verilir, perde
+           açılmaz: uygulama sakin yoluyla söyler (bkz. app.js, kutla). */
+        expect(r.sessiz).toBe(true);
+        expect(perdeler()).toHaveLength(0);
+      }else{
+        expect(!!r.sessiz).toBe(false);
+        expect(perdeler()).toHaveLength(1);
+      }
+      temiz();
+    });
+
+
     it('rozet görseli yoksa kademe numarası çizilir', () => {
       temiz();
-      P.kutla({ kademe:4, basamak:1, etiket:'4.1',
-        kademeBilgi:L.KADEME_ILE(4), yeniKademe:false });
+      P.ac({ banner:banner(4), enAz:60000 });
       const rozet = acikPerde().querySelector('.perde__rozet');
       /* Görsel <img> olarak denenir; yüklenemezse numaraya düşer.
          Test anında ikisinden biri duruyor olmalı — boş bir daire

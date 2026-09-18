@@ -174,8 +174,9 @@ R.Perde = (function(){
     var sayi = gec ? gec.querySelector('.perde__gec-sayi') : null;
     var yol = gec ? gec.querySelector('.perde__gec-yol') : null;
 
-    /* Hareket azaltma tercihinde video oynamaz. Banner varsa kalır —
-       kademe atladığın bilgisi bir süs değil, kutlamanın kendisidir. */
+    /* Hareket azaltma tercihinde video oynamaz. Banner varsa o kalır.
+       (Seviye kutlaması bu tercihte perde HİÇ açmaz — bkz. `kutla`;
+       buraya yalnız doğrudan `ac()` çağıran bir perde düşer.) */
     if(v && az() && banner){
       v.parentNode && v.parentNode.removeChild(v); v = null;
       if(ortam){ ortam.parentNode && ortam.parentNode.removeChild(ortam); ortam = null; }
@@ -495,6 +496,22 @@ R.Perde = (function(){
     secenekler = secenekler || {};
     var k = yukselme.kademeBilgi || {};
     var kok = secenekler.kok || 'img/seviye/';
+
+    /* HAREKET AZALTMA TERCİHİNDE PERDE AÇILMAZ.
+
+       Önce perde açılıp yalnız videosu kapatılıyordu: «kademe atladığın
+       bilgisi bir süs değil» diye. Bilgi kısmı doğru, taşıma biçimi
+       yanlıştı — hareket azaltmak isteyen birine tam ekran bir katman
+       açıp odağını çalmak, tam olarak istemediği şey. Üstelik erişilebilirlik
+       denetimi bunu yakaladı: perdenin «Geç» düğmesi sayfanın ilk Tab
+       durağı oluyor ve atlama bağlantısının önüne geçiyordu.
+
+       Karar çağırana bırakılır: `sessiz` işaretiyle döner, uygulama
+       bilgiyi kendi sakin yoluyla (toast) söyler. */
+    if(az()){
+      return { sessiz:true, yukselme:yukselme, el:null,
+        kapat:function(){}, sirada:false };
+    }
 
     return ac({
       sinif:'perde--seviye',

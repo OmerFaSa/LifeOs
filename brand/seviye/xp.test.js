@@ -533,6 +533,129 @@
     });
   });
 
+  describe('sayım ile katalog birbirini tutar', () => {
+
+    /* Bu iki test, kataloğun ve sayımın birlikte yaşamasını zorunlu
+       kılar. Biri diğerinden önce değişirse test kırmızıya döner:
+         · Katalogda olup sayımda olmayan iş, HİÇ KAZANILAMAYAN puandır.
+         · Sayımda olup katalogda olmayan kimlik, sessizce yok sayılır. */
+
+    it('katalogdaki her iş sayımda karşılık bulur', () => {
+      resetState();
+      const sayim = __NS__.XPSayim.gunluk(__NS__.U.todayISO());
+      const eksik = XP.etkinlikler().map(e => e.id)
+        .filter(id => !(id in sayim));
+      expect(eksik).toEqual([]);
+    });
+
+    it('sayımdaki her kimlik bu sistemin kataloğunda vardır', () => {
+      resetState();
+      const sayim = __NS__.XPSayim.gunluk(__NS__.U.todayISO());
+      const bilinen = XP.etkinlikler().map(e => e.id);
+      const fazla = Object.keys(sayim).filter(id => bilinen.indexOf(id) < 0);
+      expect(fazla).toEqual([]);
+    });
+
+    it('boş durumda her sayım sıfırdır — girilmemiş alan sıfır sayılmaz', () => {
+      resetState();
+      const sayim = __NS__.XPSayim.gunluk(__NS__.U.todayISO());
+      Object.keys(sayim).forEach(id => {
+        expect(typeof sayim[id]).toBe('number');
+        expect(sayim[id]).toBe(0);
+      });
+    });
+
+    it('gün kümesi ile tek gün AYNI sonucu verir', () => {
+      resetState();
+      /* ESP'de bu iki yol ayrı kodlar: `gunler` koleksiyonu tek geçişte
+         tarar, `gunluk` tek günü sorar. Ayrışırlarsa XP sessizce yanlış
+         olur — bu yüzden ikisi aynı cevabı vermek zorunda. */
+      const gunler = XP.pencere();
+      const kume = __NS__.XPSayim.gunler(gunler);
+      expect(Object.keys(kume).sort()).toEqual(gunler.slice().sort());
+      gunler.forEach(g => {
+        expect(kume[g]).toEqual(__NS__.XPSayim.gunluk(g));
+      });
+    });
+
+    it('gün kümesi boş çağrılırsa bugünü verir', () => {
+      resetState();
+      const kume = __NS__.XPSayim.gunler();
+      expect(Object.keys(kume)).toEqual([__NS__.U.todayISO()]);
+    });
+
+    it('boş durumda eşitleme hiçbir şey yazmaz', async () => {
+      await temiz();
+      const gun = __NS__.U.todayISO();
+      const r = await XP.esitle(gun, __NS__.XPSayim.gunluk(gun));
+      expect(r.degisti).toBe(false);
+      expect(XP.durum().toplam).toBe(0);
+    });
+  });
+
+  describe('pencere — dün girilen kayıt da sayılır', () => {
+
+    it('pencere bugünü ve geriye yazılabilir günleri kapsar', () => {
+      const p = XP.pencere();
+      expect(p).toHaveLength(XP.GERI_GUN + 1);
+      expect(p[0]).toBe(__NS__.U.todayISO());
+      expect(XP.yazilabilirGun(p[p.length - 1])).toBe(true);
+    });
+
+    it('penceredeki her gün yazılabilir, bir öncesi değil', () => {
+      const p = XP.pencere();
+      p.forEach(g => expect(XP.yazilabilirGun(g)).toBe(true));
+      expect(XP.yazilabilirGun(XP.gunKaydir(p[p.length - 1], -1))).toBe(false);
+    });
+
+    it('çok günlü eşitleme hepsini TEK turda yazar', async () => {
+      await temiz();
+      const e = tavanli();
+      const bugun = __NS__.U.todayISO();
+      const dun = XP.gunKaydir(bugun, -1);
+      const r = await XP.esitleCok({
+        [bugun]:{ [e.id]:1 },
+        [dun]:{ [e.id]:2 },
+      });
+      expect(r.degisti).toBe(true);
+      expect(XP.gunToplami(bugun)).toBe(Math.min(e.xp, e.tavan));
+      expect(XP.gunToplami(dun)).toBe(Math.min(2 * e.xp, e.tavan));
+      expect(XP.durum().toplam).toBe(XP.gunToplami(bugun) + XP.gunToplami(dun));
+    });
+
+    it('DÜN girilen kayıt bugün eşitlenince puanını alır', async () => {
+      await temiz();
+      const e = tavanli();
+      const dun = XP.gunKaydir(__NS__.U.todayISO(), -1);
+      /* Dünün verisi bugün giriliyor: tarama penceresi onu yakalar. */
+      const harita = {};
+      XP.pencere().forEach(g => { harita[g] = (g === dun) ? { [e.id]:1 } : {}; });
+      await XP.esitleCok(harita);
+      expect(XP.durum().toplam).toBe(Math.min(e.xp, e.tavan));
+      expect(XP.durum().bugun).toBe(0);      /* bugüne değil düne yazıldı */
+    });
+
+    it('pencere dışındaki gün sessizce atlanır, tur bozulmaz', async () => {
+      await temiz();
+      const e = tavanli();
+      const bugun = __NS__.U.todayISO();
+      const eski = XP.gunKaydir(bugun, -(XP.GERI_GUN + 3));
+      const r = await XP.esitleCok({ [eski]:{ [e.id]:5 }, [bugun]:{ [e.id]:1 } });
+      expect(r.degisti).toBe(true);
+      expect(XP.durum().toplam).toBe(Math.min(e.xp, e.tavan));
+      expect(XP._defter().gunler[eski]).toBeUndefined();
+    });
+
+    it('hiçbir gün değişmediyse hiç yazılmaz', async () => {
+      await temiz();
+      const e = tavanli();
+      const harita = {};
+      XP.pencere().forEach(g => { harita[g] = { [e.id]:0 }; });
+      const r = await XP.esitleCok(harita);
+      expect(r.degisti).toBe(false);
+    });
+  });
+
   describe('göç — sürüm 1 defteri kaybolmaz', () => {
 
     it('eski biçimli defterin TOPLAMI korunur, kırılımı arşive düşer', async () => {

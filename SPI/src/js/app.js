@@ -922,42 +922,6 @@ SP.App = (function(){
 
   const globalChange = {};
 
-  /* ---------------------------------------------------- XP sayımları
-
-     XP bir OLAY AKIŞI DEĞİL, verinin bir PROJEKSİYONUDUR: «bugün ne
-     yapıldı» sorusunun cevabı zaten bu sistemin kendi kayıtlarında
-     duruyor. Onaltı ekrana onaltı `XP.kazan()` serpiştirmek yerine
-     burada bir kez okunur ve `XP.esitle()` defteri ona eşitler.
-
-     Kazandırdığı üç şey:
-       · Bir ekran unutulamaz — sayım verinin kendisinden gelir.
-       · Silinen kayıt puanını bırakmaz — sayım düşer, XP düşer.
-       · Tekrar çalışması zararsızdır — eşitleme fikri budur.
-
-     Buradaki her satırın kataloğda bir karşılığı vardır ve tersi de
-     doğru olmalı (bkz. data/kademeler.js). */
-  function xpSayimlari(gun){
-    const v = M.vitalsOf(gun);
-    /* Ölçüm: o gün GERÇEKTEN girilmiş alan sayısı. Boş bir kayıt
-       «ölçüldü» değildir — bu deponun en çok tekrarlanan kuralı. */
-    const OLCUM = ['sbp', 'dbp', 'rhr', 'hrv', 'spo2', 'temp',
-      'weight', 'waist', 'bodyfat'];
-    const olcum = v ? OLCUM.filter(k => v[k] != null).length : 0;
-    const ogun = M.mealsOf(gun).length;
-    const antrenman = (S.workouts || []).filter(w => w && w.date === gun).length;
-    const tahlil = (S.labs || []).filter(l => l && l.date === gun).length;
-    const uyku = (v && v.sleep != null) ? 1 : 0;
-
-    return {
-      'spi.antrenman':antrenman,
-      'spi.ogun':ogun,
-      'spi.uyku':uyku,
-      'spi.olcum':olcum,
-      'spi.tahlil':tahlil,
-      'spi.gun':(olcum || ogun || antrenman || tahlil || uyku) ? 1 : 0,
-    };
-  }
-
   /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
 
      · Gecikmeli, çünkü bir eylem sırasında art arda birkaç kayıt
@@ -968,15 +932,39 @@ SP.App = (function(){
      Hiçbir şey değişmediyse depoya yazılmaz — çoğu çizim bedavaya
      gelir. Seviye atlanırsa kutlamayı `XP.dinle` dinleyicisi açar
      (bkz. boot). */
+  /* Seviye kutlaması — perde ya da sakin bir satır.
+
+     Hareket azaltma tercihinde perde HİÇ açılmaz (bkz. core/perde.js):
+     tam ekran bir katman açıp odağı çalmak, o tercihi isteyen kişinin
+     istemediği şeydir. Bilgi yine verilir, yalnız sesi kısılır. */
+  function kutla(y){
+    if(!y || !SP.Perde || !SP.XP) return;
+    const damgala = () => SP.XP.kutlandi()
+      .then(() => SP.XP.tazele()).catch(() => {});
+    const sonuc = SP.Perde.kutla(y, { bitti:damgala });
+    if(sonuc && sonuc.sessiz){
+      const ad = (y.kademeBilgi && y.kademeBilgi.ad) || ('Kademe ' + y.kademe);
+      UI.toast('Seviye atladın — ' + ad + ' ' + y.etiket);
+      damgala();
+    }
+  }
+
   let xpBekleyen = null;
   function xpTara(){
     if(!SP.XP) return;
     clearTimeout(xpBekleyen);
     xpBekleyen = setTimeout(async () => {
       try{
-        const gun = U.todayISO();
-        const r = await SP.XP.esitle(gun, xpSayimlari(gun));
-        if(r && r.degisti) render();
+        /* YALNIZ BUGÜN DEĞİL, yazılabilir pencerenin tamamı. Dünkü
+           antrenmanı bu sabah giren kişinin puanı hiç gelmiyordu:
+           motor o güne yazmaya izin veriyordu ama kimse o günü
+           eşitlemiyordu. Sekiz gün okunur, en çok BİR kez yazılır. */
+        const r = await SP.XP.esitleCok(
+          SP.XPSayim.gunler(SP.XP.pencere()));
+        /* ÇİZİM YOK, DÜĞÜM TAZELEME. Ekranda değişen tek şey rozet ve
+           panel; bütün sayfayı çizmek, tıklanan öğeyi kullanıcının
+           altından çekmek demekti (bkz. core/xp.js, tazele). */
+        if(r && r.degisti) SP.XP.tazele();
       }catch(e){ console.error('XP eşitlenemedi:', e); }
     }, 400);
   }
@@ -1283,20 +1271,12 @@ SP.App = (function(){
          XP.kutlandi() defteri damgalar ve aynı kutlama bir daha oynamaz. */
       try{
         if(SP.XP && SP.Perde){
-          SP.XP.dinle(function(y){
-            SP.Perde.kutla(y, { bitti:function(){
-              SP.XP.kutlandi().then(render).catch(function(){});
-            } });
-          });
+          SP.XP.dinle(function(y){ kutla(y); });
           /* Açılış perdesi hâlâ oynuyorsa kutlama SIRAYA girer; iki tam
              ekran katman ve iki ses aynı anda olmaz (bkz. core/perde.js,
              AYNI ANDA TEK PERDE). */
           const bekleyen = SP.XP.bekleyenKutlama();
-          if(bekleyen){
-            SP.Perde.kutla(bekleyen, { bitti:function(){
-              SP.XP.kutlandi().then(render).catch(function(){});
-            } });
-          }
+          if(bekleyen) kutla(bekleyen);
         }
       }catch(e){
         console.error('Seviye kutlaması açılamadı.', e);

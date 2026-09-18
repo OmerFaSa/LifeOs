@@ -130,8 +130,9 @@ LIFEOS.KADEMELER = [
 
    HER SATIR TÜRETİLEBİLİR OLMALI. Bu liste bir dilek listesi değil:
    her satırın karşılığı, o sistemin kendi verisinden okunabilen bir
-   SAYIDIR (`app.js` içindeki `xpSayimlari`). Karşılığı olmayan bir
-   satır, hiç kazanılamayan bir puandır ve kataloğu yalancı yapar. */
+   SAYIDIR (`core/xpsayim.js`). Karşılığı olmayan bir satır, hiç
+   kazanılamayan bir puandır ve kataloğu yalancı yapar; bir test iki
+   yönü de denetler (bkz. src/tests/xp.test.js). */
 LIFEOS.XP_ETKINLIK = [
   /* --- AYS: sınav --- */
   { id:'ays.soru',        mod:'ays', ad:'Soru çözümü',            xp: 2, tavan:120, birim:'soru' },

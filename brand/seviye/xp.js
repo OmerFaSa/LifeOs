@@ -476,15 +476,24 @@ __NS__.XP = (function(){
 
      Gün YAZILABİLİR olmalı (bugün ya da bir haftalık pencere). Eski bir
      günü eşitlemek, geçmişi bugünün fiyatlarıyla yeniden yazmak olurdu. */
-  async function esitle(gun, sayimlar){
-    if(!defter) await yukle();
-    gun = gun || U().todayISO();
-    if(!yazilabilirGun(gun)){
-      return { degisti:false, fark:0, durum:durum(), yukselme:null, gecersizGun:true };
-    }
-    if(!sayimlar || typeof sayimlar !== 'object'){
-      return { degisti:false, fark:0, durum:durum(), yukselme:null };
-    }
+  /* YAZILABİLİR GÜNLER — bugün ve pencere içindeki geçmiş.
+
+     Eşitleme yalnız bugüne bakarken gerçek bir boşluk vardı: dünkü
+     antrenmanı bu sabah giren kişinin puanı HİÇ gelmiyordu. Motor o
+     güne yazmaya izin veriyordu ama kimse o günü eşitlemiyordu. */
+  function pencere(){
+    var bugun = U().todayISO();
+    var out = [];
+    for(var i = 0; i <= GERI_GUN; i++) out.push(gunKaydir(bugun, -i));
+    return out;
+  }
+
+  /* Tek günü deftere uygular. Depoya YAZMAZ, yükselme HESAPLAMAZ:
+     ikisi de çağıranın işi, çünkü birden çok gün tek yazmada
+     eşitlenebilmeli. Döner: XP farkı (değişiklik yoksa 0). */
+  function gunuUygula(gun, sayimlar){
+    if(!yazilabilirGun(gun)) return null;
+    if(!sayimlar || typeof sayimlar !== 'object') return null;
 
     var satir = defter.gunler[gun] || {};
     var fark = 0;
@@ -504,11 +513,14 @@ __NS__.XP = (function(){
       fark += (yeniXP - eskiXP);
     });
 
-    if(!degisti) return { degisti:false, fark:0, durum:durum(), yukselme:null };
-
+    if(!degisti) return null;
     if(Object.keys(satir).length) defter.gunler[gun] = satir;
     else delete defter.gunler[gun];
+    return fark;
+  }
 
+  /* Uygulanan farkı toplama işler, yükselmeyi bulur, bir kez yazar. */
+  async function farkiIsle(fark){
     var onceki = konum(defter.toplam);
     defter.toplam = Math.max(0, defter.toplam + fark);
     var sonraki = konum(defter.toplam);
@@ -530,6 +542,41 @@ __NS__.XP = (function(){
     await yaz();
     if(yukselme) duyur(yukselme);
     return { degisti:true, fark:fark, durum:durum(), yukselme:yukselme };
+  }
+
+  async function esitle(gun, sayimlar){
+    if(!defter) await yukle();
+    gun = gun || U().todayISO();
+    if(!yazilabilirGun(gun)){
+      return { degisti:false, fark:0, durum:durum(), yukselme:null, gecersizGun:true };
+    }
+    var fark = gunuUygula(gun, sayimlar);
+    if(fark === null) return { degisti:false, fark:0, durum:durum(), yukselme:null };
+    return farkiIsle(fark);
+  }
+
+  /* Birden çok günü TEK YAZMADA eşitle.
+
+       XP.esitleCok({ '2026-09-18':{…}, '2026-09-17':{…} })
+
+     Çağıran genelde `pencere()` üzerinde döner: dün girilen bir kayıt
+     da, bugün silinen bir kayıt da aynı turda yerine oturur. Pencere
+     dışındaki gün sessizce atlanır — orası artık yazılabilir değil. */
+  async function esitleCok(harita){
+    if(!defter) await yukle();
+    if(!harita || typeof harita !== 'object'){
+      return { degisti:false, fark:0, durum:durum(), yukselme:null };
+    }
+    var toplamFark = 0;
+    var degisti = false;
+    Object.keys(harita).forEach(function(gun){
+      var fark = gunuUygula(gun, harita[gun]);
+      if(fark === null) return;
+      degisti = true;
+      toplamFark += fark;
+    });
+    if(!degisti) return { degisti:false, fark:0, durum:durum(), yukselme:null };
+    return farkiIsle(toplamFark);
   }
 
   /* Kaydı silen ekran puanı da geri alır. Kazanılmamış puan geri alınmaz:
@@ -693,7 +740,8 @@ __NS__.XP = (function(){
     var baslik = 'Seviye ' + d.etiket + ' — ' + (k.ad || '') + ', '
       + (d.tamam ? 'en üst basamak' : (d.icinde + '/' + d.gereken + ' XP'));
 
-    return '<span class="seviye-rozet" style="--kademe-renk:' + kac(k.renk || '#888')
+    return '<span class="seviye-rozet" data-seviye-rozet style="--kademe-renk:'
+      + kac(k.renk || '#888')
       + ';--kademe-isik:' + kac(k.isik || '#ccc')
       /* Rozet görseli CSS katmanı olarak gelir. Dosya yoksa katman hiç
          çizilmez ve altındaki kademe numarası görünür kalır — kırık
@@ -787,7 +835,8 @@ __NS__.XP = (function(){
       ? 'En üst basamaktasın. XP birikmeye devam ediyor.'
       : 'Bir sonraki basamağa <b>' + d.kalan + ' XP</b>';
 
-    return '<div class="seviye-panel" style="--kademe-renk:' + kac(k.renk || '#888')
+    return '<div class="seviye-panel" data-seviye-panel style="--kademe-renk:'
+      + kac(k.renk || '#888')
       + ';--kademe-isik:' + kac(k.isik || '#ccc') + '">'
       + '<div class="seviye-panel__ust">'
       +   rozetHtml(opt)
@@ -830,6 +879,34 @@ __NS__.XP = (function(){
       + '</details>';
   }
 
+  /* ---------------------------------------------------------- tazele
+
+     SEVİYE ÇİZİMLE GÜNCELLENMEZ, KENDİ DÜĞÜMÜYLE GÜNCELLENİR.
+
+     Eşitleme her tıklamadan kısa süre sonra koşuyor ve XP değiştiğinde
+     bütün ekranı yeniden çizdiriyordu. Ekranda değişen tek şey bir
+     rozet ve bir paneldi; bedeli ise tıklanan öğenin altından kayması
+     oldu (denetim aracı «element is not attached to the DOM» dedi —
+     kullanıcı tarafında bu, yazarken kaybolan bir odak demek).
+
+     Bu, deponun `startClock()` içinde zaten çözülmüş bir sorunu:
+     değişen düğüm tazelenir, sayfa çizilmez. */
+  function tazele(kok){
+    var alan = kok || document;
+    if(!alan || !alan.querySelectorAll) return 0;
+    var n = 0;
+    ['[data-seviye-rozet]', '[data-seviye-panel]'].forEach(function(sec){
+      var yeni = sec === '[data-seviye-panel]' ? panelHtml() : rozetHtml();
+      if(!yeni) return;
+      Array.prototype.forEach.call(alan.querySelectorAll(sec), function(el){
+        /* İçinde odak varsa DOKUNULMAZ: kullanıcı o an oradadır. */
+        if(el.contains && document.activeElement && el.contains(document.activeElement)) return;
+        try{ el.outerHTML = yeni; n++; }catch(e){}
+      });
+    });
+    return n;
+  }
+
   function kac(t){
     return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
       return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c];
@@ -843,8 +920,10 @@ __NS__.XP = (function(){
 
   return {
     yukle:yukle, bosalt:bosalt, sifirla:sifirla,
-    kazan:kazan, esitle:esitle, geriAl:geriAl,
+    kazan:kazan, esitle:esitle, esitleCok:esitleCok, geriAl:geriAl,
+    pencere:pencere,
     durum:durum, konum:konum, basamagin:basamagin, rozetHtml:rozetHtml, panelHtml:panelHtml,
+    tazele:tazele,
     gunToplami:gunToplami, gunuVar:gunuVar, sonGunler:sonGunler, kirilim:kirilim,
     etkinlikler:etkinlikler, gunlukTavan:gunlukTavan,
     yazilabilirGun:yazilabilirGun, gunKaydir:gunKaydir,

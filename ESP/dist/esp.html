@@ -6109,8 +6109,9 @@ ESP.Perde = (function(){
     var sayi = gec ? gec.querySelector('.perde__gec-sayi') : null;
     var yol = gec ? gec.querySelector('.perde__gec-yol') : null;
 
-    /* Hareket azaltma tercihinde video oynamaz. Banner varsa kalır —
-       kademe atladığın bilgisi bir süs değil, kutlamanın kendisidir. */
+    /* Hareket azaltma tercihinde video oynamaz. Banner varsa o kalır.
+       (Seviye kutlaması bu tercihte perde HİÇ açmaz — bkz. `kutla`;
+       buraya yalnız doğrudan `ac()` çağıran bir perde düşer.) */
     if(v && az() && banner){
       v.parentNode && v.parentNode.removeChild(v); v = null;
       if(ortam){ ortam.parentNode && ortam.parentNode.removeChild(ortam); ortam = null; }
@@ -6431,6 +6432,22 @@ ESP.Perde = (function(){
     var k = yukselme.kademeBilgi || {};
     var kok = secenekler.kok || 'img/seviye/';
 
+    /* HAREKET AZALTMA TERCİHİNDE PERDE AÇILMAZ.
+
+       Önce perde açılıp yalnız videosu kapatılıyordu: «kademe atladığın
+       bilgisi bir süs değil» diye. Bilgi kısmı doğru, taşıma biçimi
+       yanlıştı — hareket azaltmak isteyen birine tam ekran bir katman
+       açıp odağını çalmak, tam olarak istemediği şey. Üstelik erişilebilirlik
+       denetimi bunu yakaladı: perdenin «Geç» düğmesi sayfanın ilk Tab
+       durağı oluyor ve atlama bağlantısının önüne geçiyordu.
+
+       Karar çağırana bırakılır: `sessiz` işaretiyle döner, uygulama
+       bilgiyi kendi sakin yoluyla (toast) söyler. */
+    if(az()){
+      return { sessiz:true, yukselme:yukselme, el:null,
+        kapat:function(){}, sirada:false };
+    }
+
     return ac({
       sinif:'perde--seviye',
       baslik:'Seviye atladın: ' + (k.ad || '') + ' ' + yukselme.etiket,
@@ -6478,7 +6495,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'be58468', at:'2026-09-18 11:20', dirty:true };
+ESP.BUILD = { id:'d46070b', at:'2026-09-18 14:47', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -6616,8 +6633,9 @@ LIFEOS.KADEMELER = [
 
    HER SATIR TÜRETİLEBİLİR OLMALI. Bu liste bir dilek listesi değil:
    her satırın karşılığı, o sistemin kendi verisinden okunabilen bir
-   SAYIDIR (`app.js` içindeki `xpSayimlari`). Karşılığı olmayan bir
-   satır, hiç kazanılamayan bir puandır ve kataloğu yalancı yapar. */
+   SAYIDIR (`core/xpsayim.js`). Karşılığı olmayan bir satır, hiç
+   kazanılamayan bir puandır ve kataloğu yalancı yapar; bir test iki
+   yönü de denetler (bkz. src/tests/xp.test.js). */
 LIFEOS.XP_ETKINLIK = [
   /* --- AYS: sınav --- */
   { id:'ays.soru',        mod:'ays', ad:'Soru çözümü',            xp: 2, tavan:120, birim:'soru' },
@@ -13339,15 +13357,24 @@ ESP.XP = (function(){
 
      Gün YAZILABİLİR olmalı (bugün ya da bir haftalık pencere). Eski bir
      günü eşitlemek, geçmişi bugünün fiyatlarıyla yeniden yazmak olurdu. */
-  async function esitle(gun, sayimlar){
-    if(!defter) await yukle();
-    gun = gun || U().todayISO();
-    if(!yazilabilirGun(gun)){
-      return { degisti:false, fark:0, durum:durum(), yukselme:null, gecersizGun:true };
-    }
-    if(!sayimlar || typeof sayimlar !== 'object'){
-      return { degisti:false, fark:0, durum:durum(), yukselme:null };
-    }
+  /* YAZILABİLİR GÜNLER — bugün ve pencere içindeki geçmiş.
+
+     Eşitleme yalnız bugüne bakarken gerçek bir boşluk vardı: dünkü
+     antrenmanı bu sabah giren kişinin puanı HİÇ gelmiyordu. Motor o
+     güne yazmaya izin veriyordu ama kimse o günü eşitlemiyordu. */
+  function pencere(){
+    var bugun = U().todayISO();
+    var out = [];
+    for(var i = 0; i <= GERI_GUN; i++) out.push(gunKaydir(bugun, -i));
+    return out;
+  }
+
+  /* Tek günü deftere uygular. Depoya YAZMAZ, yükselme HESAPLAMAZ:
+     ikisi de çağıranın işi, çünkü birden çok gün tek yazmada
+     eşitlenebilmeli. Döner: XP farkı (değişiklik yoksa 0). */
+  function gunuUygula(gun, sayimlar){
+    if(!yazilabilirGun(gun)) return null;
+    if(!sayimlar || typeof sayimlar !== 'object') return null;
 
     var satir = defter.gunler[gun] || {};
     var fark = 0;
@@ -13367,11 +13394,14 @@ ESP.XP = (function(){
       fark += (yeniXP - eskiXP);
     });
 
-    if(!degisti) return { degisti:false, fark:0, durum:durum(), yukselme:null };
-
+    if(!degisti) return null;
     if(Object.keys(satir).length) defter.gunler[gun] = satir;
     else delete defter.gunler[gun];
+    return fark;
+  }
 
+  /* Uygulanan farkı toplama işler, yükselmeyi bulur, bir kez yazar. */
+  async function farkiIsle(fark){
     var onceki = konum(defter.toplam);
     defter.toplam = Math.max(0, defter.toplam + fark);
     var sonraki = konum(defter.toplam);
@@ -13393,6 +13423,41 @@ ESP.XP = (function(){
     await yaz();
     if(yukselme) duyur(yukselme);
     return { degisti:true, fark:fark, durum:durum(), yukselme:yukselme };
+  }
+
+  async function esitle(gun, sayimlar){
+    if(!defter) await yukle();
+    gun = gun || U().todayISO();
+    if(!yazilabilirGun(gun)){
+      return { degisti:false, fark:0, durum:durum(), yukselme:null, gecersizGun:true };
+    }
+    var fark = gunuUygula(gun, sayimlar);
+    if(fark === null) return { degisti:false, fark:0, durum:durum(), yukselme:null };
+    return farkiIsle(fark);
+  }
+
+  /* Birden çok günü TEK YAZMADA eşitle.
+
+       XP.esitleCok({ '2026-09-18':{…}, '2026-09-17':{…} })
+
+     Çağıran genelde `pencere()` üzerinde döner: dün girilen bir kayıt
+     da, bugün silinen bir kayıt da aynı turda yerine oturur. Pencere
+     dışındaki gün sessizce atlanır — orası artık yazılabilir değil. */
+  async function esitleCok(harita){
+    if(!defter) await yukle();
+    if(!harita || typeof harita !== 'object'){
+      return { degisti:false, fark:0, durum:durum(), yukselme:null };
+    }
+    var toplamFark = 0;
+    var degisti = false;
+    Object.keys(harita).forEach(function(gun){
+      var fark = gunuUygula(gun, harita[gun]);
+      if(fark === null) return;
+      degisti = true;
+      toplamFark += fark;
+    });
+    if(!degisti) return { degisti:false, fark:0, durum:durum(), yukselme:null };
+    return farkiIsle(toplamFark);
   }
 
   /* Kaydı silen ekran puanı da geri alır. Kazanılmamış puan geri alınmaz:
@@ -13556,7 +13621,8 @@ ESP.XP = (function(){
     var baslik = 'Seviye ' + d.etiket + ' — ' + (k.ad || '') + ', '
       + (d.tamam ? 'en üst basamak' : (d.icinde + '/' + d.gereken + ' XP'));
 
-    return '<span class="seviye-rozet" style="--kademe-renk:' + kac(k.renk || '#888')
+    return '<span class="seviye-rozet" data-seviye-rozet style="--kademe-renk:'
+      + kac(k.renk || '#888')
       + ';--kademe-isik:' + kac(k.isik || '#ccc')
       /* Rozet görseli CSS katmanı olarak gelir. Dosya yoksa katman hiç
          çizilmez ve altındaki kademe numarası görünür kalır — kırık
@@ -13650,7 +13716,8 @@ ESP.XP = (function(){
       ? 'En üst basamaktasın. XP birikmeye devam ediyor.'
       : 'Bir sonraki basamağa <b>' + d.kalan + ' XP</b>';
 
-    return '<div class="seviye-panel" style="--kademe-renk:' + kac(k.renk || '#888')
+    return '<div class="seviye-panel" data-seviye-panel style="--kademe-renk:'
+      + kac(k.renk || '#888')
       + ';--kademe-isik:' + kac(k.isik || '#ccc') + '">'
       + '<div class="seviye-panel__ust">'
       +   rozetHtml(opt)
@@ -13693,6 +13760,34 @@ ESP.XP = (function(){
       + '</details>';
   }
 
+  /* ---------------------------------------------------------- tazele
+
+     SEVİYE ÇİZİMLE GÜNCELLENMEZ, KENDİ DÜĞÜMÜYLE GÜNCELLENİR.
+
+     Eşitleme her tıklamadan kısa süre sonra koşuyor ve XP değiştiğinde
+     bütün ekranı yeniden çizdiriyordu. Ekranda değişen tek şey bir
+     rozet ve bir paneldi; bedeli ise tıklanan öğenin altından kayması
+     oldu (denetim aracı «element is not attached to the DOM» dedi —
+     kullanıcı tarafında bu, yazarken kaybolan bir odak demek).
+
+     Bu, deponun `startClock()` içinde zaten çözülmüş bir sorunu:
+     değişen düğüm tazelenir, sayfa çizilmez. */
+  function tazele(kok){
+    var alan = kok || document;
+    if(!alan || !alan.querySelectorAll) return 0;
+    var n = 0;
+    ['[data-seviye-rozet]', '[data-seviye-panel]'].forEach(function(sec){
+      var yeni = sec === '[data-seviye-panel]' ? panelHtml() : rozetHtml();
+      if(!yeni) return;
+      Array.prototype.forEach.call(alan.querySelectorAll(sec), function(el){
+        /* İçinde odak varsa DOKUNULMAZ: kullanıcı o an oradadır. */
+        if(el.contains && document.activeElement && el.contains(document.activeElement)) return;
+        try{ el.outerHTML = yeni; n++; }catch(e){}
+      });
+    });
+    return n;
+  }
+
   function kac(t){
     return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
       return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c];
@@ -13706,8 +13801,10 @@ ESP.XP = (function(){
 
   return {
     yukle:yukle, bosalt:bosalt, sifirla:sifirla,
-    kazan:kazan, esitle:esitle, geriAl:geriAl,
+    kazan:kazan, esitle:esitle, esitleCok:esitleCok, geriAl:geriAl,
+    pencere:pencere,
     durum:durum, konum:konum, basamagin:basamagin, rozetHtml:rozetHtml, panelHtml:panelHtml,
+    tazele:tazele,
     gunToplami:gunToplami, gunuVar:gunuVar, sonGunler:sonGunler, kirilim:kirilim,
     etkinlikler:etkinlikler, gunlukTavan:gunlukTavan,
     yazilabilirGun:yazilabilirGun, gunKaydir:gunKaydir,
@@ -13716,6 +13813,90 @@ ESP.XP = (function(){
     _defter:function(){ return defter; },
     YOL:YOL, DETAY_GUN:DETAY_GUN, GERI_GUN:GERI_GUN, MOD:MOD,
   };
+})();
+
+/* ==== js/core/xpsayim.js ==== */
+/* XP sayımları — «o gün ne yapıldı» sorusunun tek cevabı.
+
+   XP bir OLAY AKIŞI DEĞİL, verinin bir PROJEKSİYONUDUR. Onaltı ekrana
+   onaltı `XP.kazan()` serpiştirmek iki şeyi kaçınılmaz kılardı: biri
+   unutulur (o iş hiç puan vermez) ve birinin geri alma yolu yazılmaz
+   (silinen kayıt puanı bırakır). Burada bir kez okunur, `XP.esitle()`
+   defteri buna eşitler. Bu deponun doktrini zaten budur: sayıyı ve
+   kararı kod üretir.
+
+   Kazandırdığı üç şey:
+     · Bir ekran unutulamaz — sayım verinin kendisinden gelir.
+     · Silinen kayıt puanını bırakmaz — sayım düşer, XP düşer.
+     · Tekrar çalışması zararsızdır — eşitleme fikri budur.
+
+   NEDEN KABUKTA DEĞİL BURADA: bu bir arayüz işi değil, «hangi veri
+   hangi işe sayılır» kararıdır — yani alan bilgisi. Kabuğun içinde
+   dururken testten erişilemiyordu; oysa kataloğun ve sayımın birbirini
+   tutması tam olarak sınanması gereken şey (bkz. src/tests/xp.test.js).
+
+   Buradaki her satırın kataloğda bir karşılığı vardır ve TERSİ DE
+   doğrudur; bir test bunu denetler. */
+
+window.ESP = window.ESP || {};
+
+ESP.XPSayim = (function(){
+  const S = ESP.S, M = ESP.Model;
+
+  /* Bir gün kümesi için TEK GEÇİŞ.
+
+     Sekiz günü ayrı ayrı sormak, koleksiyonu sekiz kez taramak demekti.
+     Dokuz aylık ağır bir defterde (2 000 kart × 40 tekrar = 80 000
+     satır) ölçüldü:
+
+         gün gün sorma   60,1 ms
+         tek geçiş        7,5 ms
+
+     Fark sekiz kat ve bedeli her tıklamadan sonra ödeniyordu. Koleksiyon
+     bir kez gezilir, gün başına sayaç doldurulur. */
+  function gunBasi(liste, tarihAlani, gunler){
+    const say = {};
+    gunler.forEach(g => { say[g] = 0; });
+    (liste || []).forEach(x => {
+      const g = String((x && x[tarihAlani]) || '').slice(0, 10);
+      if(g in say) say[g]++;
+    });
+    return say;
+  }
+
+  function gunler(liste){
+    const g = (liste && liste.length) ? liste : [ESP.U.todayISO()];
+
+    /* Kart tekrarları kartın İÇİNDE (history) durur: iki katmanlı. */
+    const kart = {};
+    g.forEach(x => { kart[x] = 0; });
+    (S.cards || []).forEach(c => {
+      (c.history || []).forEach(h => {
+        const gun = String((h && h.at) || '').slice(0, 10);
+        if(gun in kart) kart[gun]++;
+      });
+    });
+
+    const not = gunBasi(S.notes, 'createdAt', g);
+    const taslak = gunBasi(S.drafts, 'createdAt', g);
+
+    const out = {};
+    g.forEach(gun => {
+      out[gun] = {
+        'esp.kart':kart[gun] || 0,
+        /* Dakika: ölçülmemiş oturum sayılmaz — `minutesOf` null döner. */
+        'esp.oturum':M.minutesOf(gun) || 0,
+        'esp.okuma':not[gun] || 0,
+        'esp.yazi':taslak[gun] || 0,
+        'esp.gun':M.dayHasEntry(M.dayOf(gun)) ? 1 : 0,
+      };
+    });
+    return out;
+  }
+
+  function gunluk(gun){ return gunler([gun])[gun]; }
+
+  return { gunluk:gunluk, gunler:gunler };
 })();
 
 /* ==== js/core/srs.js ==== */
@@ -33883,41 +34064,6 @@ ESP.App = (function(){
 
   const globalChange = {};
 
-  /* ---------------------------------------------------- XP sayımları
-
-     XP bir OLAY AKIŞI DEĞİL, verinin bir PROJEKSİYONUDUR: «bugün ne
-     yapıldı» sorusunun cevabı zaten bu sistemin kendi kayıtlarında
-     duruyor. Onaltı ekrana onaltı `XP.kazan()` serpiştirmek yerine
-     burada bir kez okunur ve `XP.esitle()` defteri ona eşitler.
-
-     Kazandırdığı üç şey:
-       · Bir ekran unutulamaz — sayım verinin kendisinden gelir.
-       · Silinen kayıt puanını bırakmaz — sayım düşer, XP düşer.
-       · Tekrar çalışması zararsızdır — eşitleme fikri budur.
-
-     Buradaki her satırın kataloğda bir karşılığı vardır ve tersi de
-     doğru olmalı (bkz. data/kademeler.js). */
-  function xpSayimlari(gun){
-    /* Kart: o gün geçmişe düşen tekrar satırları (core/srs.js). */
-    let kart = 0;
-    (S.cards || []).forEach(c => {
-      (c.history || []).forEach(h => {
-        if(String(h.at || '').slice(0, 10) === gun) kart++;
-      });
-    });
-    const gunlukSayim = liste => (liste || []).filter(
-      x => String(x.createdAt || '').slice(0, 10) === gun).length;
-
-    return {
-      'esp.kart':kart,
-      /* Dakika: ölçülmemiş oturum sayılmaz — `minutesOf` null döner. */
-      'esp.oturum':M.minutesOf(gun) || 0,
-      'esp.okuma':gunlukSayim(S.notes),
-      'esp.yazi':gunlukSayim(S.drafts),
-      'esp.gun':M.dayHasEntry(M.dayOf(gun)) ? 1 : 0,
-    };
-  }
-
   /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
 
      · Gecikmeli, çünkü bir eylem sırasında art arda birkaç kayıt
@@ -33928,15 +34074,39 @@ ESP.App = (function(){
      Hiçbir şey değişmediyse depoya yazılmaz — çoğu çizim bedavaya
      gelir. Seviye atlanırsa kutlamayı `XP.dinle` dinleyicisi açar
      (bkz. boot). */
+  /* Seviye kutlaması — perde ya da sakin bir satır.
+
+     Hareket azaltma tercihinde perde HİÇ açılmaz (bkz. core/perde.js):
+     tam ekran bir katman açıp odağı çalmak, o tercihi isteyen kişinin
+     istemediği şeydir. Bilgi yine verilir, yalnız sesi kısılır. */
+  function kutla(y){
+    if(!y || !ESP.Perde || !ESP.XP) return;
+    const damgala = () => ESP.XP.kutlandi()
+      .then(() => ESP.XP.tazele()).catch(() => {});
+    const sonuc = ESP.Perde.kutla(y, { bitti:damgala });
+    if(sonuc && sonuc.sessiz){
+      const ad = (y.kademeBilgi && y.kademeBilgi.ad) || ('Kademe ' + y.kademe);
+      UI.toast('Seviye atladın — ' + ad + ' ' + y.etiket);
+      damgala();
+    }
+  }
+
   let xpBekleyen = null;
   function xpTara(){
     if(!ESP.XP) return;
     clearTimeout(xpBekleyen);
     xpBekleyen = setTimeout(async () => {
       try{
-        const gun = U.todayISO();
-        const r = await ESP.XP.esitle(gun, xpSayimlari(gun));
-        if(r && r.degisti) render();
+        /* YALNIZ BUGÜN DEĞİL, yazılabilir pencerenin tamamı. Dünkü
+           antrenmanı bu sabah giren kişinin puanı hiç gelmiyordu:
+           motor o güne yazmaya izin veriyordu ama kimse o günü
+           eşitlemiyordu. Sekiz gün okunur, en çok BİR kez yazılır. */
+        const r = await ESP.XP.esitleCok(
+          ESP.XPSayim.gunler(ESP.XP.pencere()));
+        /* ÇİZİM YOK, DÜĞÜM TAZELEME. Ekranda değişen tek şey rozet ve
+           panel; bütün sayfayı çizmek, tıklanan öğeyi kullanıcının
+           altından çekmek demekti (bkz. core/xp.js, tazele). */
+        if(r && r.degisti) ESP.XP.tazele();
       }catch(e){ console.error('XP eşitlenemedi:', e); }
     }, 400);
   }
@@ -34275,20 +34445,12 @@ ESP.App = (function(){
          XP.kutlandi() defteri damgalar ve aynı kutlama bir daha oynamaz. */
       try{
         if(ESP.XP && ESP.Perde){
-          ESP.XP.dinle(function(y){
-            ESP.Perde.kutla(y, { bitti:function(){
-              ESP.XP.kutlandi().then(render).catch(function(){});
-            } });
-          });
+          ESP.XP.dinle(function(y){ kutla(y); });
           /* Açılış perdesi hâlâ oynuyorsa kutlama SIRAYA girer; iki tam
              ekran katman ve iki ses aynı anda olmaz (bkz. core/perde.js,
              AYNI ANDA TEK PERDE). */
           const bekleyen = ESP.XP.bekleyenKutlama();
-          if(bekleyen){
-            ESP.Perde.kutla(bekleyen, { bitti:function(){
-              ESP.XP.kutlandi().then(render).catch(function(){});
-            } });
-          }
+          if(bekleyen) kutla(bekleyen);
         }
       }catch(e){
         console.error('Seviye kutlaması açılamadı.', e);

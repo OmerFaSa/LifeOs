@@ -68,15 +68,31 @@ biraz daha tamamlanır, hiçbir aşamada bozulmaz.
 ## XP nereden gelir — türetilir, tetiklenmez
 
 Hiçbir ekran «bana puan ver» demez. Her sistem, o günün kendi
-verisinden bir **sayım** çıkarır (`app.js` → `xpSayimlari`) ve motor
-defteri o sayıma **eşitler** (`XP.esitle`). Doktrin zaten bu: sayıyı ve
-kararı kod üretir.
+verisinden bir **sayım** çıkarır (`core/xpsayim.js`) ve motor defteri o
+sayıma **eşitler** (`XP.esitleCok`). Doktrin zaten bu: sayıyı ve kararı
+kod üretir.
+
+Eşitleme **yalnız bugüne değil, yazılabilir pencerenin tamamına**
+bakar (bugün + 7 gün geriye). Dünkü antrenmanı bu sabah girdiğinde puan
+düne yazılır; sekiz gün TEK GEÇİŞTE okunur, en çok bir kez yazılır.
+
+Değişiklik olduğunda **sayfa yeniden çizilmez**: yalnız rozet ve panel
+düğümleri tazelenir (`XP.tazele`). Tam çizim, tıklanan öğeyi
+kullanıcının altından çekiyordu.
+
+Hareket azaltma tercihinde seviye kutlaması **perde açmaz**; bilgi sakin
+bir satırla verilir. Tam ekran bir katman açıp odağı çalmak, o tercihi
+isteyen kişinin istemediği şeydir.
 
 Üç şey bedavaya gelir:
 
 - **Bir ekran unutulamaz** — sayım verinin kendisinden okunur.
 - **Silinen kayıt puanını bırakmaz** — sayım düşer, XP düşer.
 - **Tekrar çalışması zararsızdır** — eşitleme iki kez çağrılabilir.
+
+Katalogdaki her işin sayımda bir karşılığı, sayımdaki her kimliğin
+katalogda bir satırı olmak zorunda — iki test bunu denetler. Biri
+diğerinden önce değişirse paket kırmızıya döner.
 
 | Sistem | Ne sayılıyor |
 |---|---|

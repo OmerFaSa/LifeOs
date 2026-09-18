@@ -1093,41 +1093,6 @@ ESP.App = (function(){
 
   const globalChange = {};
 
-  /* ---------------------------------------------------- XP sayımları
-
-     XP bir OLAY AKIŞI DEĞİL, verinin bir PROJEKSİYONUDUR: «bugün ne
-     yapıldı» sorusunun cevabı zaten bu sistemin kendi kayıtlarında
-     duruyor. Onaltı ekrana onaltı `XP.kazan()` serpiştirmek yerine
-     burada bir kez okunur ve `XP.esitle()` defteri ona eşitler.
-
-     Kazandırdığı üç şey:
-       · Bir ekran unutulamaz — sayım verinin kendisinden gelir.
-       · Silinen kayıt puanını bırakmaz — sayım düşer, XP düşer.
-       · Tekrar çalışması zararsızdır — eşitleme fikri budur.
-
-     Buradaki her satırın kataloğda bir karşılığı vardır ve tersi de
-     doğru olmalı (bkz. data/kademeler.js). */
-  function xpSayimlari(gun){
-    /* Kart: o gün geçmişe düşen tekrar satırları (core/srs.js). */
-    let kart = 0;
-    (S.cards || []).forEach(c => {
-      (c.history || []).forEach(h => {
-        if(String(h.at || '').slice(0, 10) === gun) kart++;
-      });
-    });
-    const gunlukSayim = liste => (liste || []).filter(
-      x => String(x.createdAt || '').slice(0, 10) === gun).length;
-
-    return {
-      'esp.kart':kart,
-      /* Dakika: ölçülmemiş oturum sayılmaz — `minutesOf` null döner. */
-      'esp.oturum':M.minutesOf(gun) || 0,
-      'esp.okuma':gunlukSayim(S.notes),
-      'esp.yazi':gunlukSayim(S.drafts),
-      'esp.gun':M.dayHasEntry(M.dayOf(gun)) ? 1 : 0,
-    };
-  }
-
   /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
 
      · Gecikmeli, çünkü bir eylem sırasında art arda birkaç kayıt
@@ -1138,15 +1103,39 @@ ESP.App = (function(){
      Hiçbir şey değişmediyse depoya yazılmaz — çoğu çizim bedavaya
      gelir. Seviye atlanırsa kutlamayı `XP.dinle` dinleyicisi açar
      (bkz. boot). */
+  /* Seviye kutlaması — perde ya da sakin bir satır.
+
+     Hareket azaltma tercihinde perde HİÇ açılmaz (bkz. core/perde.js):
+     tam ekran bir katman açıp odağı çalmak, o tercihi isteyen kişinin
+     istemediği şeydir. Bilgi yine verilir, yalnız sesi kısılır. */
+  function kutla(y){
+    if(!y || !ESP.Perde || !ESP.XP) return;
+    const damgala = () => ESP.XP.kutlandi()
+      .then(() => ESP.XP.tazele()).catch(() => {});
+    const sonuc = ESP.Perde.kutla(y, { bitti:damgala });
+    if(sonuc && sonuc.sessiz){
+      const ad = (y.kademeBilgi && y.kademeBilgi.ad) || ('Kademe ' + y.kademe);
+      UI.toast('Seviye atladın — ' + ad + ' ' + y.etiket);
+      damgala();
+    }
+  }
+
   let xpBekleyen = null;
   function xpTara(){
     if(!ESP.XP) return;
     clearTimeout(xpBekleyen);
     xpBekleyen = setTimeout(async () => {
       try{
-        const gun = U.todayISO();
-        const r = await ESP.XP.esitle(gun, xpSayimlari(gun));
-        if(r && r.degisti) render();
+        /* YALNIZ BUGÜN DEĞİL, yazılabilir pencerenin tamamı. Dünkü
+           antrenmanı bu sabah giren kişinin puanı hiç gelmiyordu:
+           motor o güne yazmaya izin veriyordu ama kimse o günü
+           eşitlemiyordu. Sekiz gün okunur, en çok BİR kez yazılır. */
+        const r = await ESP.XP.esitleCok(
+          ESP.XPSayim.gunler(ESP.XP.pencere()));
+        /* ÇİZİM YOK, DÜĞÜM TAZELEME. Ekranda değişen tek şey rozet ve
+           panel; bütün sayfayı çizmek, tıklanan öğeyi kullanıcının
+           altından çekmek demekti (bkz. core/xp.js, tazele). */
+        if(r && r.degisti) ESP.XP.tazele();
       }catch(e){ console.error('XP eşitlenemedi:', e); }
     }, 400);
   }
@@ -1485,20 +1474,12 @@ ESP.App = (function(){
          XP.kutlandi() defteri damgalar ve aynı kutlama bir daha oynamaz. */
       try{
         if(ESP.XP && ESP.Perde){
-          ESP.XP.dinle(function(y){
-            ESP.Perde.kutla(y, { bitti:function(){
-              ESP.XP.kutlandi().then(render).catch(function(){});
-            } });
-          });
+          ESP.XP.dinle(function(y){ kutla(y); });
           /* Açılış perdesi hâlâ oynuyorsa kutlama SIRAYA girer; iki tam
              ekran katman ve iki ses aynı anda olmaz (bkz. core/perde.js,
              AYNI ANDA TEK PERDE). */
           const bekleyen = ESP.XP.bekleyenKutlama();
-          if(bekleyen){
-            ESP.Perde.kutla(bekleyen, { bitti:function(){
-              ESP.XP.kutlandi().then(render).catch(function(){});
-            } });
-          }
+          if(bekleyen) kutla(bekleyen);
         }
       }catch(e){
         console.error('Seviye kutlaması açılamadı.', e);
