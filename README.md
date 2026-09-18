@@ -37,6 +37,10 @@ doğrular — ve HKM kapalıyken hiçbir arayüzün bozulmadığını. Bu deneti
 yazıldığı gün, iki tarafın da kendi testlerinde geçip birbiriyle
 konuşamadığı bir boşluğu buldu (tarayıcının CORS ön-isteği).
 
+> **Sırada ne var:** [`GELISTIRME_RAPORU.md`](GELISTIRME_RAPORU.md) —
+> ölçülmüş bulgular, öncelik sırası ve bilinçli olarak yapılmayacaklar.
+> Açık teknik borçlar `NOTLAR.md` §19'da.
+
 ## Üçü neyi paylaşır
 
 - **Doktrin.** Kural motoru otoritedir: sayıyı hesap üretir, dil modeli yalnızca
