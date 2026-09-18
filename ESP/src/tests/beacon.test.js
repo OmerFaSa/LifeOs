@@ -174,9 +174,9 @@
     it('gövde yalnızca sayı taşır, içerik taşımaz', () => {
       resetState();
       const p = B().payload(BUGUN);
-      expect(Object.keys(p.metrics).sort().join(',')).toBe('practice_minutes,retention,retention_cards,synthesis_gap_days');
+      expect(Object.keys(p.metrics).sort().join(',')).toBe('level_step,level_sub,level_tier,practice_minutes,retention,retention_cards,synthesis_gap_days,xp_today,xp_total');
       const metin = JSON.stringify(p);
-      expect(metin.length < 1200).toBe(true);
+      expect(metin.length < 1600).toBe(true);
       Object.keys(p.metrics).forEach(k => {
         const v = p.metrics[k].value;
         expect(v === null || typeof v === 'number').toBe(true);

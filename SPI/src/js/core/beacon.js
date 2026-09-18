@@ -189,6 +189,29 @@ SP.Beacon = (function(){
       out.hrv_baseline = metric(null, 'missing');
     }
 
+
+    /* SEVİYE — üçünde de AYNI sözleşme (bkz. brand/seviye/).
+
+       HKM bu üç sayıyı yan yana koyabilsin diye gönderilir; HKM'nin
+       kendi XP'si YOKTUR ve olmamalı: üçünün üstünde değil yanındadır.
+
+       Geçmiş bir gün için yalnız O GÜNÜN XP'si anlamlıdır; toplam ve
+       kademe BUGÜNÜN durumudur ve geçmişe yazılmaz. Deftere hiç kayıt
+       düşmemiş bir gün «0 XP» değil «veri yok»tur. */
+    if(SP.XP && SP.XP.durum()){
+      const sv = SP.XP.durum();
+      out.xp_today = SP.XP.gunuVar(d)
+        ? metric(SP.XP.gunToplami(d), 'computed') : metric(null, 'missing');
+      if(!gecmisMi(d)){
+        out.xp_total = metric(sv.toplam, 'computed');
+        out.level_step = metric(sv.bitmisBasamak, 'computed');
+        out.level_tier = metric(sv.kademe, 'computed');
+        /* Kademe İÇİNDEKİ adım (1–3) de gönderilir. «basamak
+           numarasından hesaplanır» demek, aynı formülü merkezde ikinci
+           kez yazmak ve iki kopyanın bir gün ayrışması demekti. */
+        out.level_sub = metric(sv.basamak, 'computed');
+      }
+    }
     if(levelOf() === 'gelismis') Object.assign(out, genis(d, v));
     return out;
   }

@@ -896,6 +896,63 @@ R.App = (function(){
     async 'setup-cap'(){ R.Setup.refreshPreview(); },
   };
 
+  /* ---------------------------------------------------- XP sayımları
+
+     XP bir OLAY AKIŞI DEĞİL, verinin bir PROJEKSİYONUDUR: «bugün ne
+     yapıldı» sorusunun cevabı zaten bu sistemin kendi kayıtlarında
+     duruyor. Onaltı ekrana onaltı `XP.kazan()` serpiştirmek yerine
+     burada bir kez okunur ve `XP.esitle()` defteri ona eşitler.
+
+     Kazandırdığı üç şey:
+       · Bir ekran unutulamaz — sayım verinin kendisinden gelir.
+       · Silinen kayıt puanını bırakmaz — sayım düşer, XP düşer.
+       · Tekrar çalışması zararsızdır — eşitleme fikri budur.
+
+     Buradaki her satırın kataloğda bir karşılığı vardır ve tersi de
+     doğru olmalı (bkz. data/kademeler.js). */
+  function xpSayimlari(gun){
+    const d = S.days[gun];
+    const bloklar = (d && Array.isArray(d.blocks)) ? d.blocks : [];
+    /* Günün sorusu: bloklara yazılanlar + derse bağlanmayan serbest
+       sorular. İkisini toplamak core/goodhart.js ile aynı okumadır. */
+    const soru = bloklar.reduce((t, b) => t + (Number(b.actualQ) || 0), 0)
+      + (Number(d && d.freeQ) || 0);
+
+    return {
+      'ays.soru':soru,
+      'ays.deneme':(S.exams || []).filter(e => e && e.date === gun).length,
+      'ays.blok':bloklar.filter(b => b.status === 'done').length,
+      'ays.kalibrasyon':(S.forecasts || []).filter(
+        f => String(f.at || '').slice(0, 10) === gun).length,
+      /* Gün kaydı: o güne dair BİR ŞEY girilmiş mi. */
+      'ays.gun':(soru > 0 || bloklar.some(b => b.status !== 'pending')
+        || (d && d.note)) ? 1 : 0,
+    };
+  }
+
+  /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
+
+     · Gecikmeli, çünkü bir eylem sırasında art arda birkaç kayıt
+       değişebilir; her birinde depoya yazmak gereksiz.
+     · Sessiz, çünkü XP bir yan üründür: hatası hiçbir kaydı
+       bozmamalı, hiçbir akışı kesmemeli.
+
+     Hiçbir şey değişmediyse depoya yazılmaz — çoğu çizim bedavaya
+     gelir. Seviye atlanırsa kutlamayı `XP.dinle` dinleyicisi açar
+     (bkz. boot). */
+  let xpBekleyen = null;
+  function xpTara(){
+    if(!R.XP) return;
+    clearTimeout(xpBekleyen);
+    xpBekleyen = setTimeout(async () => {
+      try{
+        const gun = U.todayISO();
+        const r = await R.XP.esitle(gun, xpSayimlari(gun));
+        if(r && r.degisti) render();
+      }catch(e){ console.error('XP eşitlenemedi:', e); }
+    }, 400);
+  }
+
   /* ---------- olay dagitimi ---------- */
   document.addEventListener('click', async e => {
     const el = e.target.closest('[data-act]');
@@ -907,6 +964,8 @@ R.App = (function(){
     if(el.tagName !== 'INPUT') e.preventDefault();
     try{ await fn(el, e); }
     catch(err){ console.error('Eylem hatası ('+act+'):', err); UI.toast('Bir şeyler ters gitti'); }
+    /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
+    xpTara();
   });
 
   /* KLAVYE, FARENIN IKIZIDIR.
@@ -934,6 +993,8 @@ R.App = (function(){
     if(!fn) return;
     try{ await fn(el, e); }
     catch(err){ console.error('Değişiklik hatası:', err); UI.toast('Değişiklik kaydedilemedi'); }
+    /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
+    xpTara();
   }
 
   document.addEventListener('change', e => {
@@ -1218,6 +1279,10 @@ R.App = (function(){
       }catch(e){
         console.error('Seviye kutlaması açılamadı.', e);
       }
+
+      /* Açılışta bir kez eşitle: uygulama kapalıyken (ya da XP
+         bağlanmadan önce) girilmiş kayıtlar da sayılsın. */
+      xpTara();
       R.Auto.onDayOpen().then(done => { if(done.length) render(); });
 
       /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez

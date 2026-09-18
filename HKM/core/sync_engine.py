@@ -48,6 +48,12 @@ RANGES = {
     "retention": (0, 1), "retention_cards": (0, 100000),
     "practice_minutes": (0, 1440), "synthesis_gap_days": (0, 3650),
     "sessions": (0, 100),
+    # Seviye sistemi — ucunde de ayni anlam. Ust sinirlar comert: esikler
+    # brand/seviye/kademeler.js icinde degisebilir ve merkezin o dosyayi
+    # bilmesi gerekmemeli (isaret genisleyebilmeli).
+    "xp_today": (0, 100000), "xp_total": (0, 100000000),
+    "level_step": (0, 1000), "level_tier": (0, 100),
+    "level_sub": (0, 100),
 }
 
 

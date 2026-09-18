@@ -71,7 +71,7 @@ window.LIFEOS = window.LIFEOS || {};
 /* Şema sürümü: eşikler ya da basamak sayısı değişirse artar. Depodaki
    defter bu numarayı taşır; eski defterin yeni eşiklerle yeniden
    okunması (yani seviyenin sessizce düşmesi) böyle yakalanır. */
-LIFEOS.SEVIYE_SURUM = 1;
+LIFEOS.SEVIYE_SURUM = 2;
 
 /* Her kademede kaç basamak var. Üçten başkasına geçilecekse tek yer
    burasıdır; motor bu sayıyı sabit varsaymaz. */
@@ -131,35 +131,47 @@ LIFEOS.KADEMELER = [
             Bronz'dan Nebula'ya çıkmak demekti.
    birim    kullanıcıya «neyin başına» olduğunu söyler.
 
-   Not: bu liste şimdilik BAĞLANMAMIŞ bir sözleşmedir. Motor hazır,
-   ekranlar `XP.kazan(id)` çağırdığı gün bu satırlar çalışır. Boş bir
-   katalog yazıp «altyapı kuruldu» demek, altyapının neyi taşıyacağını
-   söylememek olurdu. */
+   HER SATIR TÜRETİLEBİLİR OLMALI. Bu liste bir dilek listesi değil:
+   her satırın karşılığı, o sistemin kendi verisinden okunabilen bir
+   SAYIDIR (`app.js` içindeki `xpSayimlari`). Karşılığı olmayan bir
+   satır, hiç kazanılamayan bir puandır ve kataloğu yalancı yapar. */
 LIFEOS.XP_ETKINLIK = [
   /* --- AYS: sınav --- */
   { id:'ays.soru',        mod:'ays', ad:'Soru çözümü',            xp: 2, tavan:120, birim:'soru' },
   { id:'ays.deneme',      mod:'ays', ad:'Deneme tamamlama',       xp:80, tavan:160, birim:'deneme' },
-  { id:'ays.konu',        mod:'ays', ad:'Konu bitirme',           xp:40, tavan: 80, birim:'konu' },
+  { id:'ays.blok',        mod:'ays', ad:'Plan bloğu tamamlama',   xp:20, tavan: 80, birim:'blok' },
   { id:'ays.kalibrasyon', mod:'ays', ad:'Tahmin kaydı',           xp:10, tavan: 30, birim:'tahmin' },
-  { id:'ays.gun',         mod:'ays', ad:'Günün planını kapatma',  xp:25, tavan:null, birim:'gün' },
+  { id:'ays.gun',         mod:'ays', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün' },
 
-  /* --- SPİ: sağlık --- */
-  { id:'spi.antrenman',   mod:'spi', ad:'Antrenman',              xp:50, tavan:100, birim:'antrenman' },
-  { id:'spi.beslenme',    mod:'spi', ad:'Hedefe uyan beslenme günü', xp:40, tavan:null, birim:'gün' },
-  { id:'spi.uyku',        mod:'spi', ad:'Uyku hedefini tutturma', xp:30, tavan:null, birim:'gün' },
-  { id:'spi.olcum',       mod:'spi', ad:'Ölçüm kaydı',            xp: 8, tavan: 40, birim:'ölçüm' },
-  { id:'spi.gun',         mod:'spi', ad:'Günü eksiksiz kaydetme', xp:25, tavan:null, birim:'gün' },
+  /* --- SPİ: sağlık ---
 
-  /* --- ESP: gelişim --- */
+     Buradaki her satır bir KAYIT ödüllendirir, bir SONUÇ değil. Önce
+     «hedefe uyan beslenme günü» ve «uyku hedefini tutturma» vardı ve
+     ikisi de yanlış taraftaydı: o sonucu kullanıcı kendi giriyor, yani
+     sistem ona kendi sağlık verisini güzelleştirmesi için puan teklif
+     ediyordu. SPİ'nin bütün değeri verinin dürüst olmasında; bozulursa
+     geriye kalan şey, yalan söylenen bir defter. */
+  { id:'spi.antrenman',   mod:'spi', ad:'Antrenman kaydı',        xp:70, tavan:140, birim:'antrenman' },
+  { id:'spi.ogun',        mod:'spi', ad:'Öğün kaydı',             xp:15, tavan: 60, birim:'öğün' },
+  { id:'spi.uyku',        mod:'spi', ad:'Uyku kaydı',             xp:30, tavan: 30, birim:'gün' },
+  { id:'spi.olcum',       mod:'spi', ad:'Ölçüm kaydı',            xp:10, tavan: 60, birim:'ölçüm' },
+  { id:'spi.tahlil',      mod:'spi', ad:'Tahlil kaydı',           xp:40, tavan: 80, birim:'tahlil' },
+  { id:'spi.gun',         mod:'spi', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün' },
+
+  /* --- ESP: gelişim ---
+
+     Tek bir «pratik dakikası» satırı var ve enstrüman da ona yazılır:
+     ayrıca bir «gitar pratiği» satırı olsaydı aynı dakika iki kez
+     sayılırdı. */
   { id:'esp.kart',        mod:'esp', ad:'SRS kartı tekrarı',      xp: 1, tavan: 60, birim:'kart' },
-  { id:'esp.gitar',       mod:'esp', ad:'Gitar pratiği',          xp: 3, tavan: 90, birim:'dakika' },
+  { id:'esp.oturum',      mod:'esp', ad:'Pratik dakikası',        xp: 2, tavan:140, birim:'dakika' },
   { id:'esp.okuma',       mod:'esp', ad:'Atomik not',             xp:15, tavan: 75, birim:'not' },
-  { id:'esp.yazi',        mod:'esp', ad:'Yazı taslağı',           xp:35, tavan: 70, birim:'taslak' },
-  { id:'esp.oturum',      mod:'esp', ad:'Pratik oturumu',         xp: 2, tavan:120, birim:'dakika' },
-  { id:'esp.gun',         mod:'esp', ad:'Günü kaydetme',          xp:25, tavan:null, birim:'gün' },
+  { id:'esp.yazi',        mod:'esp', ad:'Yazı taslağı',           xp:35, tavan:105, birim:'taslak' },
+  { id:'esp.gun',         mod:'esp', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün' },
 
-  /* --- HKM: üçünün üstü --- */
-  { id:'hkm.brifing',     mod:'hkm', ad:'Günlük brifingi okuma',  xp:10, tavan:null, birim:'gün' },
+  /* HKM'nin XP'si YOKTUR ve olmamalı: HKM üçünün üstünde değil
+     yanındadır, kendi defteri olsa dördüncü bir seviye yarışı açardı.
+     HKM üç sistemin seviyesini GÖSTERİR, kazanmaz. */
 ];
 
 /* ======================= TÜRETİLMİŞ =======================
@@ -206,3 +218,19 @@ LIFEOS.ETKINLIK_ILE = function(id){
   }
   return null;
 };
+
+/* Bir sistemin BİR GÜNDE kazanabileceği en çok XP.
+
+   Üç sistemin bu sayısı birbirine yakın olmalı: aynı «Altın» birinde
+   iki kat yavaş kazanılıyorsa, ad aynı ama anlam aynı değildir. Ölçüm
+   burada durur ki dengeyi bozan bir düzenleme testten geçmesin. */
+LIFEOS.GUNLUK_TAVAN = function(mod){
+  var t = 0;
+  LIFEOS.XP_ETKINLIK.forEach(function(e){
+    if(e.mod !== mod) return;
+    t += (e.tavan == null) ? e.xp : e.tavan;
+  });
+  return t;
+};
+
+LIFEOS.MODULLER = ['ays', 'spi', 'esp'];

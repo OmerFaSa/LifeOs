@@ -18,6 +18,7 @@ R.Screens.guide = (function(){
     { id:'istisna',   label:'Takvim istisnaları' },
     { id:'examweek',  label:'Sınav haftası' },
     { id:'kanit',     label:'Eşiklerin dayanağı' },
+    { id:'seviye',    label:'Seviye' },
     { id:'settings',  label:'Ayarlar' },
   ];
 
@@ -623,10 +624,23 @@ R.Screens.guide = (function(){
     ]);
   }
 
+  /* Seviye — «XP nereden geldi». Govdeyi ortak motor uretir
+     (core/xp.js, panelHtml): uc sistemin uc ayri seviye ekrani
+     cizmesi, ucunun bir gun ayri seyler soylemesi demekti. */
+  function seviyeTab(){
+    const govde = R.XP ? R.XP.panelHtml() : '';
+    if(!govde){
+      return K.Card({ title:'Seviye',
+        body:html`<p class="small dim">Seviye defteri henüz yüklenmedi.</p>` });
+    }
+    return K.Card({ title:'Seviye', sub:'Her sistemin kendi kademesi vardır',
+      body:raw(govde) });
+  }
+
   const TAB_BODY = {
     analysis:analysisTab, checklist:checklistTab, calendar:calendarTab,
     istisna:istisnaTab, examweek:examWeekTab, kanit:evidenceTab,
-    settings:settingsTab,
+    seviye:seviyeTab, settings:settingsTab,
   };
 
   async function render(){

@@ -4338,7 +4338,7 @@ body.is-dragging .drop.is-over{
 }
 .seviye-rozet__cubuk i{
   display:block; height:100%;
-  background:var(--kademe-isik, currentColor);
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 60%, currentColor);
 }
 
 /* Telefonda ad gider; etiket ve çubuk kalır. */
@@ -4346,6 +4346,117 @@ body.is-dragging .drop.is-over{
   .seviye-rozet__ad{ display:none; }
   .seviye-rozet__cubuk{ width:40px; }
 }
+
+
+/* ================================================================
+   SEVİYE PANELİ — «XP nereden geldi».
+
+   Rehber ekranında duruyor: bir ödül duvarı değil, defterin özeti.
+   Renk yalnız kademeden gelir; geri kalan her şey `currentColor`
+   üzerinden çalışır, böylece açık ve koyu temada da, koyu bir bandın
+   içinde de aynı okunur.
+   ================================================================ */
+
+.seviye-panel{ display:grid; gap:14px; }
+
+.seviye-panel__ust{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.seviye-panel__sonraki{ font-size:13px; opacity:.8; }
+
+/* ---------- son on dört gün ---------- */
+.seviye-serit{
+  display:flex; align-items:flex-end; gap:3px;
+  height:34px;
+  /* Bir şerit, bir afiş değil: geniş ekranda sayfayı boydan boya kaplayan
+     on dört kutu, okunan bir grafik olmaktan çıkıyordu. */
+  max-width:420px;
+}
+.seviye-serit__gun, .seviye-serit__yok{
+  flex:1; height:100%; min-width:6px;
+  display:flex; align-items:flex-end;
+  border-radius:2px;
+}
+/* Kayıtlı günün kutusu, çubuğun ne kadarının dolduğunu göstersin. */
+.seviye-serit__gun{
+  background:color-mix(in srgb, currentColor 7%, transparent);
+}
+/* Çubuk rengi kademe rengiyle METNİN rengi arasında karışır.
+
+   Önce doğrudan `--kademe-isik` kullanılıyordu ve panel AÇIK temada
+   görünmez oluyordu: Gümüş'ün ışığı #F2F5F8, yani beyaz zeminde beyaz.
+   Kademe renkleri koyu zemindeki banner için seçilmiş; panel ise her
+   iki temada da okunmalı. `currentColor` ile karıştırmak ikisini de
+   çözer: açık temada koyulaşır, koyu temada açılır. */
+.seviye-serit__gun i{
+  display:block; width:100%;
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 55%, currentColor);
+  border-radius:2px; min-height:2px;
+}
+/* Kayıt OLMAYAN gün boş bırakılır — sıfır çizmek «o gün çalışmadı»
+   demektir, oysa «kayıt yok» başka bir cümledir. */
+.seviye-serit__yok{
+  background:repeating-linear-gradient(45deg,
+    transparent 0 3px, color-mix(in srgb, currentColor 14%, transparent) 3px 6px);
+}
+
+/* ---------- kırılım ---------- */
+.seviye-panel__liste{ list-style:none; margin:0; padding:0; display:grid; gap:7px; }
+.seviye-panel__satir{
+  display:grid; grid-template-columns:minmax(0,1fr) 84px 52px;
+  align-items:center; gap:10px;
+  font-size:13px;
+}
+.seviye-panel__ad{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.seviye-panel__ad.is-eski{ opacity:.6; font-style:italic; }
+.seviye-panel__not{ font-size:11px; opacity:.6; }
+.seviye-panel__cubuk{
+  height:6px; border-radius:6px; overflow:hidden;
+  background:color-mix(in srgb, currentColor 12%, transparent);
+}
+.seviye-panel__cubuk i{
+  display:block; height:100%;
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 55%, currentColor);
+}
+.seviye-panel__xp{
+  text-align:right;
+  font:600 13px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+}
+.seviye-panel__satir--arsiv .seviye-panel__cubuk i{ opacity:.45; }
+.seviye-panel__bos{ font-size:13px; opacity:.7; }
+
+.seviye-panel__sinir{ margin:0; font-size:12px; line-height:1.55; opacity:.72; }
+
+@media (max-width:420px){
+  .seviye-panel__satir{ grid-template-columns:minmax(0,1fr) 52px 44px; }
+  .seviye-serit{ height:28px; }
+}
+
+/* ---------- XP veren işler (katalogdan üretilir) ---------- */
+.seviye-isler{ font-size:13px; }
+.seviye-isler summary{
+  cursor:pointer; opacity:.8; padding:4px 0;
+  list-style-position:outside;
+}
+.seviye-isler summary:hover{ opacity:1; }
+.seviye-isler__tablo{
+  width:100%; border-collapse:collapse; margin:8px 0 4px;
+}
+.seviye-isler__tablo th, .seviye-isler__tablo td{
+  padding:5px 8px 5px 0; text-align:left;
+  border-bottom:1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+.seviye-isler__tablo th{
+  font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; opacity:.6;
+  font-weight:600;
+}
+.seviye-isler__sayi{
+  text-align:right;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+}
+.seviye-isler__birim{ opacity:.55; font-size:11.5px; white-space:nowrap; }
 
 /* ==== css/designs.css ==== */
 /* DÜZENLER — dört seçilebilir tasarım dili.
@@ -7058,7 +7169,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'d4af997', at:'2026-09-18 09:35', dirty:true };
+R.BUILD = { id:'f91dec3', at:'2026-09-18 10:47', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -7134,7 +7245,7 @@ window.LIFEOS = window.LIFEOS || {};
 /* Şema sürümü: eşikler ya da basamak sayısı değişirse artar. Depodaki
    defter bu numarayı taşır; eski defterin yeni eşiklerle yeniden
    okunması (yani seviyenin sessizce düşmesi) böyle yakalanır. */
-LIFEOS.SEVIYE_SURUM = 1;
+LIFEOS.SEVIYE_SURUM = 2;
 
 /* Her kademede kaç basamak var. Üçten başkasına geçilecekse tek yer
    burasıdır; motor bu sayıyı sabit varsaymaz. */
@@ -7194,35 +7305,47 @@ LIFEOS.KADEMELER = [
             Bronz'dan Nebula'ya çıkmak demekti.
    birim    kullanıcıya «neyin başına» olduğunu söyler.
 
-   Not: bu liste şimdilik BAĞLANMAMIŞ bir sözleşmedir. Motor hazır,
-   ekranlar `XP.kazan(id)` çağırdığı gün bu satırlar çalışır. Boş bir
-   katalog yazıp «altyapı kuruldu» demek, altyapının neyi taşıyacağını
-   söylememek olurdu. */
+   HER SATIR TÜRETİLEBİLİR OLMALI. Bu liste bir dilek listesi değil:
+   her satırın karşılığı, o sistemin kendi verisinden okunabilen bir
+   SAYIDIR (`app.js` içindeki `xpSayimlari`). Karşılığı olmayan bir
+   satır, hiç kazanılamayan bir puandır ve kataloğu yalancı yapar. */
 LIFEOS.XP_ETKINLIK = [
   /* --- AYS: sınav --- */
   { id:'ays.soru',        mod:'ays', ad:'Soru çözümü',            xp: 2, tavan:120, birim:'soru' },
   { id:'ays.deneme',      mod:'ays', ad:'Deneme tamamlama',       xp:80, tavan:160, birim:'deneme' },
-  { id:'ays.konu',        mod:'ays', ad:'Konu bitirme',           xp:40, tavan: 80, birim:'konu' },
+  { id:'ays.blok',        mod:'ays', ad:'Plan bloğu tamamlama',   xp:20, tavan: 80, birim:'blok' },
   { id:'ays.kalibrasyon', mod:'ays', ad:'Tahmin kaydı',           xp:10, tavan: 30, birim:'tahmin' },
-  { id:'ays.gun',         mod:'ays', ad:'Günün planını kapatma',  xp:25, tavan:null, birim:'gün' },
+  { id:'ays.gun',         mod:'ays', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün' },
 
-  /* --- SPİ: sağlık --- */
-  { id:'spi.antrenman',   mod:'spi', ad:'Antrenman',              xp:50, tavan:100, birim:'antrenman' },
-  { id:'spi.beslenme',    mod:'spi', ad:'Hedefe uyan beslenme günü', xp:40, tavan:null, birim:'gün' },
-  { id:'spi.uyku',        mod:'spi', ad:'Uyku hedefini tutturma', xp:30, tavan:null, birim:'gün' },
-  { id:'spi.olcum',       mod:'spi', ad:'Ölçüm kaydı',            xp: 8, tavan: 40, birim:'ölçüm' },
-  { id:'spi.gun',         mod:'spi', ad:'Günü eksiksiz kaydetme', xp:25, tavan:null, birim:'gün' },
+  /* --- SPİ: sağlık ---
 
-  /* --- ESP: gelişim --- */
+     Buradaki her satır bir KAYIT ödüllendirir, bir SONUÇ değil. Önce
+     «hedefe uyan beslenme günü» ve «uyku hedefini tutturma» vardı ve
+     ikisi de yanlış taraftaydı: o sonucu kullanıcı kendi giriyor, yani
+     sistem ona kendi sağlık verisini güzelleştirmesi için puan teklif
+     ediyordu. SPİ'nin bütün değeri verinin dürüst olmasında; bozulursa
+     geriye kalan şey, yalan söylenen bir defter. */
+  { id:'spi.antrenman',   mod:'spi', ad:'Antrenman kaydı',        xp:70, tavan:140, birim:'antrenman' },
+  { id:'spi.ogun',        mod:'spi', ad:'Öğün kaydı',             xp:15, tavan: 60, birim:'öğün' },
+  { id:'spi.uyku',        mod:'spi', ad:'Uyku kaydı',             xp:30, tavan: 30, birim:'gün' },
+  { id:'spi.olcum',       mod:'spi', ad:'Ölçüm kaydı',            xp:10, tavan: 60, birim:'ölçüm' },
+  { id:'spi.tahlil',      mod:'spi', ad:'Tahlil kaydı',           xp:40, tavan: 80, birim:'tahlil' },
+  { id:'spi.gun',         mod:'spi', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün' },
+
+  /* --- ESP: gelişim ---
+
+     Tek bir «pratik dakikası» satırı var ve enstrüman da ona yazılır:
+     ayrıca bir «gitar pratiği» satırı olsaydı aynı dakika iki kez
+     sayılırdı. */
   { id:'esp.kart',        mod:'esp', ad:'SRS kartı tekrarı',      xp: 1, tavan: 60, birim:'kart' },
-  { id:'esp.gitar',       mod:'esp', ad:'Gitar pratiği',          xp: 3, tavan: 90, birim:'dakika' },
+  { id:'esp.oturum',      mod:'esp', ad:'Pratik dakikası',        xp: 2, tavan:140, birim:'dakika' },
   { id:'esp.okuma',       mod:'esp', ad:'Atomik not',             xp:15, tavan: 75, birim:'not' },
-  { id:'esp.yazi',        mod:'esp', ad:'Yazı taslağı',           xp:35, tavan: 70, birim:'taslak' },
-  { id:'esp.oturum',      mod:'esp', ad:'Pratik oturumu',         xp: 2, tavan:120, birim:'dakika' },
-  { id:'esp.gun',         mod:'esp', ad:'Günü kaydetme',          xp:25, tavan:null, birim:'gün' },
+  { id:'esp.yazi',        mod:'esp', ad:'Yazı taslağı',           xp:35, tavan:105, birim:'taslak' },
+  { id:'esp.gun',         mod:'esp', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün' },
 
-  /* --- HKM: üçünün üstü --- */
-  { id:'hkm.brifing',     mod:'hkm', ad:'Günlük brifingi okuma',  xp:10, tavan:null, birim:'gün' },
+  /* HKM'nin XP'si YOKTUR ve olmamalı: HKM üçünün üstünde değil
+     yanındadır, kendi defteri olsa dördüncü bir seviye yarışı açardı.
+     HKM üç sistemin seviyesini GÖSTERİR, kazanmaz. */
 ];
 
 /* ======================= TÜRETİLMİŞ =======================
@@ -7269,6 +7392,22 @@ LIFEOS.ETKINLIK_ILE = function(id){
   }
   return null;
 };
+
+/* Bir sistemin BİR GÜNDE kazanabileceği en çok XP.
+
+   Üç sistemin bu sayısı birbirine yakın olmalı: aynı «Altın» birinde
+   iki kat yavaş kazanılıyorsa, ad aynı ama anlam aynı değildir. Ölçüm
+   burada durur ki dengeyi bozan bir düzenleme testten geçmesin. */
+LIFEOS.GUNLUK_TAVAN = function(mod){
+  var t = 0;
+  LIFEOS.XP_ETKINLIK.forEach(function(e){
+    if(e.mod !== mod) return;
+    t += (e.tavan == null) ? e.xp : e.tavan;
+  });
+  return t;
+};
+
+LIFEOS.MODULLER = ['ays', 'spi', 'esp'];
 
 /* ==== js/data/curriculum.js ==== */
 /* 40 haftalik uygulama plani — "Hemsirelik Hedefi" belgesinin 4. bolumu.
@@ -12020,7 +12159,14 @@ R.Model = (function(){
    (core/storage.js, tools/perfcheck.js). Bunun yerine defter GÜN × ETKİNLİK
    toplamı tutar: bir günde kaç soru çözüldüğü tek sayıdır.
 
-     gunler: { '2026-09-17': { 'ays.soru':48, 'esp.kart':30 } }
+     gunler: { '2026-09-17': { 'ays.soru':[48, 96] } }
+                                          adet  kazanılan XP
+
+   DEFTER ADEDİ DEĞİL KAZANILANI YAZAR. Önce yalnız adet yazılıyor, XP
+   okurken katalogdan yeniden hesaplanıyordu — yani katalogdaki bir
+   fiyat değişimi GEÇMİŞİ yeniden fiyatlıyordu. Bir muhasebe defteri
+   böyle çalışmaz: fiyat değişir, kaydedilmiş işlem değişmez. Artık
+   kazanılan XP yazıldığı anda donar ve okurken bir daha hesaplanmaz.
 
    Gün kırılımı SON YÜZ YİRMİ GÜN için saklanır; daha eskisi silinir.
    Toplam XP ayrı ve TEK YÖNLÜ bir sayaçtır: budama onu asla
@@ -12096,6 +12242,9 @@ R.XP = (function(){
          yolu budur: kullanıcı uygulamayı kapatıp açsa da kutlama iki kez
          oynamaz. */
       gorulen:0,
+      /* Uygulanmış göçlerin defteri. Bir gün «seviyem neden değişti»
+         diye sorulduğunda cevap burada yazılı olsun. */
+      gocler:[],
       guncellendi:null,
     };
   }
@@ -12186,14 +12335,34 @@ R.XP = (function(){
     return (e.tavan == null) ? e.xp : e.tavan;
   }
 
+  /* O gün o işten KAZANILMIŞ XP — defterde yazılı olan. Hesaplanmaz,
+     okunur: hesaplamak geçmişi bugünün fiyatıyla yeniden yazmaktı. */
   function gunXPsi(gun, id, kaynak){
-    var e = K().ETKINLIK_ILE(id);
-    if(!e) return 0;
     var d = kaynak || defter;
     if(!d) return 0;
     var satir = d.gunler[gun];
-    var adet = (satir && satir[id]) || 0;
-    return Math.min(adet * e.xp, gunlukTavan(e));
+    var kayit = satir && satir[id];
+    if(!kayit) return 0;
+    return Number(kayit[1]) || 0;
+  }
+
+  function gunAdedi(gun, id, kaynak){
+    var d = kaynak || defter;
+    if(!d) return 0;
+    var satir = d.gunler[gun];
+    var kayit = satir && satir[id];
+    if(!kayit) return 0;
+    return Number(kayit[0]) || 0;
+  }
+
+  /* Bu kimlik BAŞKA bir sisteme mi ait? Yalnız katalogda olup modülü
+     tutmayanlar yabancıdır. Katalogda HİÇ olmayan bir kimlik (bir
+     zamanlar bizdeydi, sonra katalogdan kalktı) yabancı DEĞİLDİR:
+     onu dışarıda bırakmak, kullanıcının geçmişte gerçekten yaptığı
+     işi yok saymak olurdu. */
+  function yabanciMi(id){
+    var e = K().ETKINLIK_ILE(id);
+    return !!e && e.mod !== MOD;
   }
 
   /* Bir günün toplamı — YALNIZ BU SİSTEMİN etkinlikleri.
@@ -12208,11 +12377,17 @@ R.XP = (function(){
     if(!satir) return 0;
     var t = 0;
     Object.keys(satir).forEach(function(id){
-      var e = K().ETKINLIK_ILE(id);
-      if(!e || e.mod !== MOD) return;
+      if(yabanciMi(id)) return;
       t += gunXPsi(gun, id, d);
     });
     return t;
+  }
+
+  /* O günün deftere yazılmış bir kaydı var mı? «0 XP» ile «kayıt yok»
+     ayrı cümlelerdir ve dışarıya (HKM işareti) doğru olanı gitmeli. */
+  function gunuVar(gun, kaynak){
+    var d = kaynak || defter;
+    return !!(d && d.gunler[gun]);
   }
 
   /* Defterde duran günlerin toplamı. Arşiv bundan ÇIKARILIR. */
@@ -12247,6 +12422,8 @@ R.XP = (function(){
     d.toplam = Number(ham.toplam) > 0 ? Math.floor(Number(ham.toplam)) : 0;
     d.gorulen = Number(ham.gorulen) > 0 ? Math.floor(Number(ham.gorulen)) : 0;
     d.guncellendi = ham.guncellendi || null;
+    var gelenSurum = Number(ham.surum) || 1;
+
     if(ham.gunler && typeof ham.gunler === 'object'){
       Object.keys(ham.gunler).forEach(function(g){
         /* Tarih olmayan anahtar deftere alınmaz: sıralamaya, budamaya ve
@@ -12256,8 +12433,13 @@ R.XP = (function(){
         if(!satir || typeof satir !== 'object') return;
         var temiz = {};
         Object.keys(satir).forEach(function(id){
-          var n = Number(satir[id]);
-          if(n > 0) temiz[id] = Math.floor(n);
+          var kayit = satir[id];
+          /* Bugünkü biçim: [adet, kazanılan XP]. */
+          if(Array.isArray(kayit)){
+            var adet = Math.floor(Number(kayit[0]) || 0);
+            var xp = Math.floor(Number(kayit[1]) || 0);
+            if(adet > 0 && xp >= 0) temiz[id] = [adet, xp];
+          }
         });
         if(Object.keys(temiz).length) d.gunler[g] = temiz;
       });
@@ -12266,11 +12448,40 @@ R.XP = (function(){
       d.arsiv.ilkGun = ham.arsiv.ilkGun || null;
       d.arsiv.sonGun = ham.arsiv.sonGun || null;
     }
-    /* Sürüm defterde SAKLANIR ama bugün bir göç yapmaz: eşikler
-       değişmedikçe gerek yok. Değiştiği gün LIFEOS.SEVIYE_SURUM artar ve
-       göç burada yazılır — defterin hangi eşiklerle doldurulduğunu
-       bilmeden onu yeniden yorumlamak, seviyeyi sessizce oynatmak olur. */
-    d.surum = Number(ham.surum) || K().SEVIYE_SURUM;
+    d.gocler = Array.isArray(ham.gocler) ? ham.gocler.slice(0, 20) : [];
+
+    /* ---------------------------------------------------------- göç
+
+       SÜRÜM 1 → 2: gün kırılımı `{id: adet}` idi ve XP okunurken
+       katalogdan hesaplanıyordu. Yeni biçim `{id: [adet, xp]}`.
+
+       Eski kırılım TAŞINMAZ, ARŞİVE DÜŞER. Çünkü onu yeni biçime
+       çevirmenin tek yolu bugünün fiyatlarıyla yeniden fiyatlamaktır ve
+       o fiyatlar değişti: kırılım toplamı, o gün gerçekten kazanılmış
+       toplamı aşabilirdi. TOPLAM XP'ye dokunulmaz — yani seviye
+       değişmez, yalnızca «bu XP hangi işten geldi» sorusunun cevabı o
+       günler için «arşiv» olur.
+
+       Kaybedilen şey bir kırılımdır, bir puan değil; ve göç, defterde
+       yazılı kalır. */
+    if(gelenSurum < K().SEVIYE_SURUM){
+      var atilan = Object.keys(d.gunler);
+      if(atilan.length){
+        atilan.sort();
+        d.arsiv.ilkGun = d.arsiv.ilkGun && d.arsiv.ilkGun < atilan[0]
+          ? d.arsiv.ilkGun : atilan[0];
+        d.arsiv.sonGun = d.arsiv.sonGun && d.arsiv.sonGun > atilan[atilan.length - 1]
+          ? d.arsiv.sonGun : atilan[atilan.length - 1];
+      }
+      d.gunler = {};
+      d.gocler.push({
+        from:gelenSurum, to:K().SEVIYE_SURUM,
+        at:new Date().toISOString(),
+        not:'gün kırılımı arşive alındı; toplam XP korundu',
+        gun:atilan.length,
+      });
+    }
+    d.surum = K().SEVIYE_SURUM;
     /* Görülen basamak, defterin gerçekten olduğu yerden ileride olamaz:
        bozuk bir depo yüzünden kutlama sonsuza kadar susmasın. */
     var k = konum(d.toplam);
@@ -12346,12 +12557,18 @@ R.XP = (function(){
     if(!(adet > 0)) adet = 1;
     adet = Math.floor(adet);
 
-    var oncekiGun = gunXPsi(gun, id);
+    var oncekiAdet = gunAdedi(gun, id);
+    var oncekiXP = gunXPsi(gun, id);
+    var yeniAdet = oncekiAdet + adet;
+    /* Tavan YAZARKEN uygulanır; okurken bir daha hesaplanmaz. */
+    var yeniXP = Math.min(yeniAdet * e.xp, gunlukTavan(e));
+    /* Fiyat düştüyse geçmişten puan geri alınmaz: kayıt asla küçülmez. */
+    if(yeniXP < oncekiXP) yeniXP = oncekiXP;
 
     if(!defter.gunler[gun]) defter.gunler[gun] = {};
-    defter.gunler[gun][id] = (defter.gunler[gun][id] || 0) + adet;
+    defter.gunler[gun][id] = [yeniAdet, yeniXP];
 
-    var kazanilan = Math.max(0, gunXPsi(gun, id) - oncekiGun);
+    var kazanilan = Math.max(0, yeniXP - oncekiXP);
 
     var onceki = konum(defter.toplam);
     defter.toplam += kazanilan;
@@ -12378,6 +12595,83 @@ R.XP = (function(){
     return { kazanilan:kazanilan, durum:durum(), yukselme:yukselme };
   }
 
+  /* ================= GÜNÜ EŞİTLE — XP'yi VERİDEN türet =================
+
+     `kazan()` bir OLAYDIR: «şunu yaptım, puanımı ver». Onaltı ayrı
+     ekrana serpiştirilmiş onaltı `kazan()` çağrısı iki şeyi kaçınılmaz
+     kılardı: biri unutulur (o iş hiç puan vermez) ve birinin geri alma
+     yolu yazılmaz (silinen kayıt puanı bırakır).
+
+     `esitle()` ise bir PROJEKSİYONDUR: «bugünün verisi şunu söylüyor,
+     defteri ona eşitle». Bu deponun doktrini zaten budur — sayıyı ve
+     kararı kod üretir. Sonuçları:
+
+       · Tek çağrı yeri. Ekranlar XP'yi bilmez.
+       · Kendiliğinden geri alır. Kayıt silinince sayım düşer, XP düşer.
+       · Tekrar çalışması zararsız. İki kez çağırmak bir şey değiştirmez.
+
+     `sayimlar` o günün ADET'leridir: { 'esp.kart':30, 'esp.oturum':45 }.
+     Yalnız verilen kimlikler yönetilir; deftere `kazan()` ile girmiş
+     başka bir satır varsa ona dokunulmaz.
+
+     Gün YAZILABİLİR olmalı (bugün ya da bir haftalık pencere). Eski bir
+     günü eşitlemek, geçmişi bugünün fiyatlarıyla yeniden yazmak olurdu. */
+  async function esitle(gun, sayimlar){
+    if(!defter) await yukle();
+    gun = gun || U().todayISO();
+    if(!yazilabilirGun(gun)){
+      return { degisti:false, fark:0, durum:durum(), yukselme:null, gecersizGun:true };
+    }
+    if(!sayimlar || typeof sayimlar !== 'object'){
+      return { degisti:false, fark:0, durum:durum(), yukselme:null };
+    }
+
+    var satir = defter.gunler[gun] || {};
+    var fark = 0;
+    var degisti = false;
+
+    Object.keys(sayimlar).forEach(function(id){
+      var e = K().ETKINLIK_ILE(id);
+      if(!e || e.mod !== MOD) return;      /* yabancı ya da bilinmeyen */
+      var adet = Math.floor(Number(sayimlar[id]));
+      if(!(adet > 0)) adet = 0;
+      var eskiAdet = gunAdedi(gun, id);
+      var eskiXP = gunXPsi(gun, id);
+      var yeniXP = adet > 0 ? Math.min(adet * e.xp, gunlukTavan(e)) : 0;
+      if(adet === eskiAdet && yeniXP === eskiXP) return;
+      degisti = true;
+      if(adet > 0) satir[id] = [adet, yeniXP]; else delete satir[id];
+      fark += (yeniXP - eskiXP);
+    });
+
+    if(!degisti) return { degisti:false, fark:0, durum:durum(), yukselme:null };
+
+    if(Object.keys(satir).length) defter.gunler[gun] = satir;
+    else delete defter.gunler[gun];
+
+    var onceki = konum(defter.toplam);
+    defter.toplam = Math.max(0, defter.toplam + fark);
+    var sonraki = konum(defter.toplam);
+
+    var yukselme = null;
+    if(sonraki.bitmisBasamak > onceki.bitmisBasamak){
+      var b = basamagin(sonraki.bitmisBasamak);
+      var oncekiB = basamagin(onceki.bitmisBasamak);
+      yukselme = {
+        kademe:b.kademe, basamak:b.basamak, etiket:b.etiket,
+        kademeBilgi:K().KADEME_ILE(b.kademe),
+        yeniKademe:!oncekiB || oncekiB.kademe !== b.kademe,
+      };
+    }
+    /* Veri silinip seviye düştüyse «görülen» de düşer: yeniden
+       kazanıldığında kutlama yine oynasın. */
+    if(defter.gorulen > sonraki.bitmisBasamak) defter.gorulen = sonraki.bitmisBasamak;
+
+    await yaz();
+    if(yukselme) duyur(yukselme);
+    return { degisti:true, fark:fark, durum:durum(), yukselme:yukselme };
+  }
+
   /* Kaydı silen ekran puanı da geri alır. Kazanılmamış puan geri alınmaz:
      sonuç asla eksiye düşmez. */
   async function geriAl(id, opt){
@@ -12396,12 +12690,21 @@ R.XP = (function(){
     var satir = defter.gunler[gun];
     if(!satir || !satir[id]) return { geriAlinan:0, durum:durum() };
 
-    var onceki = gunXPsi(gun, id);
-    satir[id] = Math.max(0, satir[id] - adet);
-    if(!satir[id]) delete satir[id];
+    var oncekiAdet = gunAdedi(gun, id);
+    var oncekiXP = gunXPsi(gun, id);
+    var kalanAdet = Math.max(0, oncekiAdet - adet);
+
+    /* Geri alınan pay ORANTILIDIR. Kaydı bugünün fiyatıyla yeniden
+       hesaplamak, tavana takılmış bir günde yanlış sonuç verirdi:
+       60 kartın 30'unu silmek, o günün yarısını geri alır. */
+    var kalanXP = oncekiAdet > 0
+      ? Math.round(oncekiXP * (kalanAdet / oncekiAdet)) : 0;
+
+    if(kalanAdet > 0){ satir[id] = [kalanAdet, kalanXP]; }
+    else{ delete satir[id]; kalanXP = 0; }
     if(!Object.keys(satir).length) delete defter.gunler[gun];
 
-    var fark = Math.max(0, onceki - gunXPsi(gun, id));
+    var fark = Math.max(0, oncekiXP - kalanXP);
     defter.toplam = Math.max(0, defter.toplam - fark);
 
     /* Seviye düşebilir; «görülen» basamak da düşer, yoksa geri kazanınca
@@ -12485,8 +12788,7 @@ R.XP = (function(){
     var out = {};
     Object.keys(defter.gunler).forEach(function(g){
       Object.keys(defter.gunler[g]).forEach(function(id){
-        var e = K().ETKINLIK_ILE(id);
-        if(!e || e.mod !== MOD) return;
+        if(yabanciMi(id)) return;
         out[id] = (out[id] || 0) + gunXPsi(g, id);
       });
     });
@@ -12555,6 +12857,119 @@ R.XP = (function(){
       + '</span>';
   }
 
+  /* ---------------------------------------------------------- panel
+
+     «XP nereden geldi» — bir ÖDÜL DUVARI değil bir DEFTER ÖZETİ.
+
+     Bilerek YOK olan üç şey:
+       seri (streak)  tatile çıkanı cezalandırır; dokuz aylık ufukla
+                      çelişir ve insanı sisteme değil sayaca bağlar.
+       sıralama       kiminle yarışacaksın? Tek kullanıcı var.
+       «geride kaldın» XP karar vermez; uyarı vermek karar vermektir.
+
+     Kalan şey tek bir cümleye indirgenebilir: bu puan hangi işten
+     geldi, ve bir sonraki basamağa ne kadar kaldı. */
+  function panelHtml(opt){
+    var d = durum();
+    if(!d || !d.kademeBilgi) return '';
+    opt = opt || {};
+    var k = d.kademeBilgi;
+    var kir = kirilim();
+
+    var satirlar = Object.keys(kir.etkinlik)
+      .map(function(id){
+        var e = K().ETKINLIK_ILE(id);
+        return { id:id, xp:kir.etkinlik[id],
+          ad:e ? e.ad : 'Katalogdan kalkmış iş', bilinen:!!e };
+      })
+      .filter(function(r){ return r.xp > 0; })
+      .sort(function(a, b){ return b.xp - a.xp; });
+
+    var enBuyuk = satirlar.length ? satirlar[0].xp : 0;
+    if(kir.arsiv > enBuyuk) enBuyuk = kir.arsiv;
+
+    var govde = '';
+    satirlar.forEach(function(r){
+      govde += '<li class="seviye-panel__satir">'
+        + '<span class="seviye-panel__ad' + (r.bilinen ? '' : ' is-eski') + '">'
+        + kac(r.ad) + '</span>'
+        + '<span class="seviye-panel__cubuk" aria-hidden="true"><i style="width:'
+        + (enBuyuk ? Math.round(100 * r.xp / enBuyuk) : 0) + '%"></i></span>'
+        + '<span class="seviye-panel__xp">' + r.xp + '</span></li>';
+    });
+    if(kir.arsiv > 0){
+      govde += '<li class="seviye-panel__satir seviye-panel__satir--arsiv">'
+        + '<span class="seviye-panel__ad">Arşiv <span class="seviye-panel__not">'
+        + 'kırılımı saklanmayan eski günler</span></span>'
+        + '<span class="seviye-panel__cubuk" aria-hidden="true"><i style="width:'
+        + (enBuyuk ? Math.round(100 * kir.arsiv / enBuyuk) : 0) + '%"></i></span>'
+        + '<span class="seviye-panel__xp">' + kir.arsiv + '</span></li>';
+    }
+    if(!govde){
+      govde = '<li class="seviye-panel__bos">Henüz XP yok. '
+        + 'Aşağıdaki işlerden biri kaydedildiğinde burada görünür.</li>';
+    }
+
+    /* Son on dört gün. Veri OLMAYAN gün boş bırakılır; sıfır çizmek
+       «o gün hiç çalışmadı» demektir, oysa «kayıt yok» başka cümledir. */
+    var seri = sonGunler(14);
+    var tepe = 0;
+    seri.forEach(function(g){ if(g.xp != null && g.xp > tepe) tepe = g.xp; });
+    var serit = '';
+    seri.forEach(function(g){
+      var yuzde = (g.xp != null && tepe) ? Math.max(6, Math.round(100 * g.xp / tepe)) : 0;
+      serit += '<span class="' + (g.xp == null ? 'seviye-serit__yok' : 'seviye-serit__gun')
+        + '" title="' + kac(g.gun + ' · ' + (g.xp == null ? 'kayıt yok' : g.xp + ' XP'))
+        + '"><i style="height:' + yuzde + '%"></i></span>';
+    });
+
+    var sonrakiSatir = d.tamam
+      ? 'En üst basamaktasın. XP birikmeye devam ediyor.'
+      : 'Bir sonraki basamağa <b>' + d.kalan + ' XP</b>';
+
+    return '<div class="seviye-panel" style="--kademe-renk:' + kac(k.renk || '#888')
+      + ';--kademe-isik:' + kac(k.isik || '#ccc') + '">'
+      + '<div class="seviye-panel__ust">'
+      +   rozetHtml(opt)
+      +   '<span class="seviye-panel__sonraki">' + sonrakiSatir + '</span>'
+      + '</div>'
+      + '<div class="seviye-serit" role="img" aria-label="Son on dört günün XP\'si">'
+      +   serit + '</div>'
+      + '<ul class="seviye-panel__liste">' + govde + '</ul>'
+      + '<p class="seviye-panel__sinir">Bugün <b>' + (d.bugun || 0) + ' XP</b>. '
+      + 'Toplam <b>' + d.toplam + '</b>. '
+      + 'XP hiçbir kararı vermez — ne plan, ne uyarı, ne teşhis ona bakar; '
+      + 'yalnızca emeği görünür kılar.</p>'
+      + isListesiHtml()
+      + '</div>';
+  }
+
+  /* Bu sistemde XP veren işler — katalogdan üretilir, elle yazılmaz.
+     Elle yazılan bir liste, kataloğa bir satır eklendiği gün eskir. */
+  function isListesiHtml(){
+    var isler = etkinlikler();
+    if(!isler.length) return '';
+    var satir = '';
+    isler.forEach(function(e){
+      var tavan = gunlukTavan(e);
+      satir += '<tr><td>' + kac(e.ad) + '</td>'
+        + '<td class="seviye-isler__sayi">' + e.xp + '</td>'
+        + '<td class="seviye-isler__birim">/ ' + kac(e.birim) + '</td>'
+        + '<td class="seviye-isler__sayi">' + tavan + '</td></tr>';
+    });
+    return '<details class="seviye-isler">'
+      + '<summary>Bu sistemde XP veren işler</summary>'
+      + '<table class="seviye-isler__tablo"><thead><tr>'
+      + '<th>İş</th><th class="seviye-isler__sayi">XP</th><th></th>'
+      + '<th class="seviye-isler__sayi">Günlük tavan</th>'
+      + '</tr></thead><tbody>' + satir + '</tbody></table>'
+      + '<p class="seviye-panel__sinir">Günlük tavan, aynı işin bir günde '
+      + 'kazandırabileceği en çok XP\'dir: tavansız bir sayaç bir gün otuz kez '
+      + 'tıklanır ve anlamını kaybeder. Geleceğe puan yazılmaz; geçmişe en fazla '
+      + GERI_GUN + ' gün geriye yazılır.</p>'
+      + '</details>';
+  }
+
   function kac(t){
     return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
       return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c];
@@ -12568,9 +12983,9 @@ R.XP = (function(){
 
   return {
     yukle:yukle, bosalt:bosalt, sifirla:sifirla,
-    kazan:kazan, geriAl:geriAl,
-    durum:durum, konum:konum, basamagin:basamagin, rozetHtml:rozetHtml,
-    gunToplami:gunToplami, sonGunler:sonGunler, kirilim:kirilim,
+    kazan:kazan, esitle:esitle, geriAl:geriAl,
+    durum:durum, konum:konum, basamagin:basamagin, rozetHtml:rozetHtml, panelHtml:panelHtml,
+    gunToplami:gunToplami, gunuVar:gunuVar, sonGunler:sonGunler, kirilim:kirilim,
     etkinlikler:etkinlikler, gunlukTavan:gunlukTavan,
     yazilabilirGun:yazilabilirGun, gunKaydir:gunKaydir,
     bekleyenKutlama:bekleyenKutlama, kutlandi:kutlandi, dinle:dinle,
@@ -18092,6 +18507,29 @@ R.Beacon = (function(){
     out.exam_days_left = isFinite(kalan) ? metric(kalan, 'computed')
       : metric(null, 'missing');
 
+
+    /* SEVİYE — üçünde de AYNI sözleşme (bkz. brand/seviye/).
+
+       HKM bu üç sayıyı yan yana koyabilsin diye gönderilir; HKM'nin
+       kendi XP'si YOKTUR ve olmamalı: üçünün üstünde değil yanındadır.
+
+       Geçmiş bir gün için yalnız O GÜNÜN XP'si anlamlıdır; toplam ve
+       kademe BUGÜNÜN durumudur ve geçmişe yazılmaz. Deftere hiç kayıt
+       düşmemiş bir gün «0 XP» değil «veri yok»tur. */
+    if(R.XP && R.XP.durum()){
+      const sv = R.XP.durum();
+      out.xp_today = R.XP.gunuVar(d)
+        ? metric(R.XP.gunToplami(d), 'computed') : metric(null, 'missing');
+      if(!gecmisMi(d)){
+        out.xp_total = metric(sv.toplam, 'computed');
+        out.level_step = metric(sv.bitmisBasamak, 'computed');
+        out.level_tier = metric(sv.kademe, 'computed');
+        /* Kademe İÇİNDEKİ adım (1–3) de gönderilir. «basamak
+           numarasından hesaplanır» demek, aynı formülü merkezde ikinci
+           kez yazmak ve iki kopyanın bir gün ayrışması demekti. */
+        out.level_sub = metric(sv.basamak, 'computed');
+      }
+    }
     if(levelOf() === 'gelismis') Object.assign(out, genis(d, gun, bloklar));
     return out;
   }
@@ -33694,6 +34132,7 @@ R.Screens.guide = (function(){
     { id:'istisna',   label:'Takvim istisnaları' },
     { id:'examweek',  label:'Sınav haftası' },
     { id:'kanit',     label:'Eşiklerin dayanağı' },
+    { id:'seviye',    label:'Seviye' },
     { id:'settings',  label:'Ayarlar' },
   ];
 
@@ -34299,10 +34738,23 @@ R.Screens.guide = (function(){
     ]);
   }
 
+  /* Seviye — «XP nereden geldi». Govdeyi ortak motor uretir
+     (core/xp.js, panelHtml): uc sistemin uc ayri seviye ekrani
+     cizmesi, ucunun bir gun ayri seyler soylemesi demekti. */
+  function seviyeTab(){
+    const govde = R.XP ? R.XP.panelHtml() : '';
+    if(!govde){
+      return K.Card({ title:'Seviye',
+        body:html`<p class="small dim">Seviye defteri henüz yüklenmedi.</p>` });
+    }
+    return K.Card({ title:'Seviye', sub:'Her sistemin kendi kademesi vardır',
+      body:raw(govde) });
+  }
+
   const TAB_BODY = {
     analysis:analysisTab, checklist:checklistTab, calendar:calendarTab,
     istisna:istisnaTab, examweek:examWeekTab, kanit:evidenceTab,
-    settings:settingsTab,
+    seviye:seviyeTab, settings:settingsTab,
   };
 
   async function render(){
@@ -38188,6 +38640,63 @@ R.App = (function(){
     async 'setup-cap'(){ R.Setup.refreshPreview(); },
   };
 
+  /* ---------------------------------------------------- XP sayımları
+
+     XP bir OLAY AKIŞI DEĞİL, verinin bir PROJEKSİYONUDUR: «bugün ne
+     yapıldı» sorusunun cevabı zaten bu sistemin kendi kayıtlarında
+     duruyor. Onaltı ekrana onaltı `XP.kazan()` serpiştirmek yerine
+     burada bir kez okunur ve `XP.esitle()` defteri ona eşitler.
+
+     Kazandırdığı üç şey:
+       · Bir ekran unutulamaz — sayım verinin kendisinden gelir.
+       · Silinen kayıt puanını bırakmaz — sayım düşer, XP düşer.
+       · Tekrar çalışması zararsızdır — eşitleme fikri budur.
+
+     Buradaki her satırın kataloğda bir karşılığı vardır ve tersi de
+     doğru olmalı (bkz. data/kademeler.js). */
+  function xpSayimlari(gun){
+    const d = S.days[gun];
+    const bloklar = (d && Array.isArray(d.blocks)) ? d.blocks : [];
+    /* Günün sorusu: bloklara yazılanlar + derse bağlanmayan serbest
+       sorular. İkisini toplamak core/goodhart.js ile aynı okumadır. */
+    const soru = bloklar.reduce((t, b) => t + (Number(b.actualQ) || 0), 0)
+      + (Number(d && d.freeQ) || 0);
+
+    return {
+      'ays.soru':soru,
+      'ays.deneme':(S.exams || []).filter(e => e && e.date === gun).length,
+      'ays.blok':bloklar.filter(b => b.status === 'done').length,
+      'ays.kalibrasyon':(S.forecasts || []).filter(
+        f => String(f.at || '').slice(0, 10) === gun).length,
+      /* Gün kaydı: o güne dair BİR ŞEY girilmiş mi. */
+      'ays.gun':(soru > 0 || bloklar.some(b => b.status !== 'pending')
+        || (d && d.note)) ? 1 : 0,
+    };
+  }
+
+  /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
+
+     · Gecikmeli, çünkü bir eylem sırasında art arda birkaç kayıt
+       değişebilir; her birinde depoya yazmak gereksiz.
+     · Sessiz, çünkü XP bir yan üründür: hatası hiçbir kaydı
+       bozmamalı, hiçbir akışı kesmemeli.
+
+     Hiçbir şey değişmediyse depoya yazılmaz — çoğu çizim bedavaya
+     gelir. Seviye atlanırsa kutlamayı `XP.dinle` dinleyicisi açar
+     (bkz. boot). */
+  let xpBekleyen = null;
+  function xpTara(){
+    if(!R.XP) return;
+    clearTimeout(xpBekleyen);
+    xpBekleyen = setTimeout(async () => {
+      try{
+        const gun = U.todayISO();
+        const r = await R.XP.esitle(gun, xpSayimlari(gun));
+        if(r && r.degisti) render();
+      }catch(e){ console.error('XP eşitlenemedi:', e); }
+    }, 400);
+  }
+
   /* ---------- olay dagitimi ---------- */
   document.addEventListener('click', async e => {
     const el = e.target.closest('[data-act]');
@@ -38199,6 +38708,8 @@ R.App = (function(){
     if(el.tagName !== 'INPUT') e.preventDefault();
     try{ await fn(el, e); }
     catch(err){ console.error('Eylem hatası ('+act+'):', err); UI.toast('Bir şeyler ters gitti'); }
+    /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
+    xpTara();
   });
 
   /* KLAVYE, FARENIN IKIZIDIR.
@@ -38226,6 +38737,8 @@ R.App = (function(){
     if(!fn) return;
     try{ await fn(el, e); }
     catch(err){ console.error('Değişiklik hatası:', err); UI.toast('Değişiklik kaydedilemedi'); }
+    /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
+    xpTara();
   }
 
   document.addEventListener('change', e => {
@@ -38510,6 +39023,10 @@ R.App = (function(){
       }catch(e){
         console.error('Seviye kutlaması açılamadı.', e);
       }
+
+      /* Açılışta bir kez eşitle: uygulama kapalıyken (ya da XP
+         bağlanmadan önce) girilmiş kayıtlar da sayılsın. */
+      xpTara();
       R.Auto.onDayOpen().then(done => { if(done.length) render(); });
 
       /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez

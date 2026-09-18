@@ -52,6 +52,14 @@ METRIK = {
     "cards_done": "çalışılan kart",
     "sessions": "oturum",
     "reading_minutes": "okuma (dk)",
+    # UCUNDE DE AYNI: seviye sistemi (bkz. brand/seviye/). HKM'nin kendi
+    # XP'si YOKTUR ve olmamali — ucunun uzerinde degil yaninda durur;
+    # burada yalnizca GORUR.
+    "xp_today": "bugünkü XP",
+    "xp_total": "toplam XP",
+    "level_step": "seviye basamağı (1–18)",
+    "level_tier": "kademe (1–6)",
+    "level_sub": "kademe içindeki adım (1–3)",
 }
 
 # Esikler: kullanicinin ELLE degistirdigi sayilar. Burada anlam, adin

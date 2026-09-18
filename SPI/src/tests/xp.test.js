@@ -157,6 +157,31 @@
       });
     });
 
+    it('üç sistemin günlük tavanı birbirine YAKIN — aynı kademe aynı emeği ister', () => {
+      /* Aynı «Altın» birinde iki kat yavaş kazanılıyorsa ad aynıdır ama
+         anlam aynı değildir. Ölçüm burada durur ki dengeyi bozan bir
+         düzenleme sessizce geçmesin. */
+      const tavanlar = L.MODULLER.map(m => L.GUNLUK_TAVAN(m));
+      const en = Math.max.apply(null, tavanlar);
+      const az = Math.min.apply(null, tavanlar);
+      expect(az).toBeGreaterThan(0);
+      expect(en / az).toBeLessThan(1.25);
+    });
+
+    it('SPİ hiçbir SONUCU ödüllendirmez — yalnız kaydı', () => {
+      /* Sonucu kullanıcı kendi giriyor. Sonuca puan vermek, ona kendi
+         sağlık verisini güzelleştirmesi için sebep vermektir. */
+      const spi = L.XP_ETKINLIK.filter(e => e.mod === 'spi');
+      expect(spi.length).toBeGreaterThan(0);
+      spi.forEach(e => {
+        expect(/hedef|tutturma|uyan|başar/i.test(e.ad)).toBe(false);
+      });
+    });
+
+    it('HKM\'nin XP\'si yoktur — üçünün üstünde değil yanındadır', () => {
+      expect(L.XP_ETKINLIK.filter(e => e.mod === 'hkm')).toHaveLength(0);
+    });
+
     it('bu sistemin en az bir tavansız ve bir tavanlı etkinliği vardır', () => {
       expect(!!tavansiz()).toBe(true);
       expect(!!tavanli()).toBe(true);
@@ -340,6 +365,217 @@
       const e = tavansiz();
       await XP.kazan(e.id, { adet:-9 });
       expect(XP.durum().toplam).toBe(e.xp);
+    });
+  });
+
+  describe('defter kazanılanı yazar — geçmiş yeniden fiyatlanmaz', () => {
+
+    it('her kayıt [adet, kazanılan XP] tutar', async () => {
+      await temiz();
+      const e = tavanli();
+      await XP.kazan(e.id, { adet:3 });
+      const kayit = XP._defter().gunler[SP.U.todayISO()][e.id];
+      expect(Array.isArray(kayit)).toBe(true);
+      expect(kayit[0]).toBe(3);
+      expect(kayit[1]).toBe(Math.min(3 * e.xp, e.tavan));
+    });
+
+    it('katalog fiyatı değişse de yazılmış gün DEĞİŞMEZ', async () => {
+      await temiz();
+      const e = tavanli();
+      await XP.kazan(e.id, { adet:1 });
+      const yazilan = XP.gunToplami(SP.U.todayISO());
+      const gercekXP = e.xp;
+      try{
+        e.xp = gercekXP * 10;          /* katalogda fiyat on katına çıktı */
+        expect(XP.gunToplami(SP.U.todayISO())).toBe(yazilan);
+        expect(XP.durum().toplam).toBe(yazilan);
+      }finally{ e.xp = gercekXP; }
+    });
+
+    it('kırılım + arşiv = toplam, fiyat değişse bile', async () => {
+      await temiz();
+      const e = tavanli();
+      await XP.kazan(e.id, { adet:2 });
+      const gercekXP = e.xp;
+      try{
+        e.xp = gercekXP * 7;
+        const k = XP.kirilim();
+        const detay = Object.keys(k.etkinlik).reduce((t, id) => t + k.etkinlik[id], 0);
+        expect(detay + k.arsiv).toBe(XP.durum().toplam);
+      }finally{ e.xp = gercekXP; }
+    });
+
+    it('katalogdan KALKMIŞ bir iş yabancı sayılmaz — geçmiş emek yok olmaz', async () => {
+      await temiz();
+      const e = tavansiz();
+      await XP.kazan(e.id);
+      /* Bir zamanlar bizdeydi, sonra katalogdan kalktı. */
+      const d = XP._defter();
+      d.gunler[SP.U.todayISO()]['esp.eski.bir.is'] = [1, 33];
+      d.toplam += 33;
+      expect(XP.gunToplami(SP.U.todayISO())).toBe(e.xp + 33);
+      const k = XP.kirilim();
+      expect(k.etkinlik['esp.eski.bir.is']).toBe(33);
+      expect(k.arsiv).toBe(0);
+    });
+
+    it('yarısını geri almak o günün YARISINI geri alır', async () => {
+      await temiz();
+      const e = tavanli();
+      const kac = Math.ceil(e.tavan / e.xp);
+      await XP.kazan(e.id, { adet:kac });
+      const tam = XP.durum().toplam;
+      await XP.geriAl(e.id, { adet:Math.floor(kac / 2) });
+      const kalan = XP.durum().toplam;
+      expect(kalan).toBeLessThan(tam);
+      expect(kalan).toBeGreaterThan(0);
+      /* Tavana takılmış bir günde bugünün fiyatıyla yeniden hesaplamak
+         yanlış sonuç verirdi; pay ORANTILI alınır. */
+      expect(Math.abs(kalan - Math.round(tam * (kac - Math.floor(kac / 2)) / kac)))
+        .toBeLessThan(2);
+    });
+  });
+
+  describe('eşitle — XP veriden türer, olaydan değil', () => {
+
+    it('sayımı yazar ve toplamı artırır', async () => {
+      await temiz();
+      const e = tavanli();
+      const r = await XP.esitle(null, { [e.id]:3 });
+      expect(r.degisti).toBe(true);
+      expect(XP.durum().toplam).toBe(Math.min(3 * e.xp, e.tavan));
+    });
+
+    it('İKİNCİ KEZ çağırmak hiçbir şey değiştirmez', async () => {
+      await temiz();
+      const e = tavanli();
+      await XP.esitle(null, { [e.id]:3 });
+      const once = XP.durum().toplam;
+      const r = await XP.esitle(null, { [e.id]:3 });
+      expect(r.degisti).toBe(false);
+      expect(r.fark).toBe(0);
+      expect(XP.durum().toplam).toBe(once);
+    });
+
+    it('sayım DÜŞERSE XP de düşer — silinen kayıt puanını bırakmaz', async () => {
+      await temiz();
+      const e = tavanli();
+      await XP.esitle(null, { [e.id]:4 });
+      const dolu = XP.durum().toplam;
+      const r = await XP.esitle(null, { [e.id]:1 });
+      expect(r.fark).toBeLessThan(0);
+      expect(XP.durum().toplam).toBeLessThan(dolu);
+      expect(XP.durum().toplam).toBe(Math.min(1 * e.xp, e.tavan));
+    });
+
+    it('sayım sıfırlanınca satır deftere hiç kalmaz', async () => {
+      await temiz();
+      const e = tavanli();
+      await XP.esitle(null, { [e.id]:2 });
+      await XP.esitle(null, { [e.id]:0 });
+      expect(XP.durum().toplam).toBe(0);
+      expect(Object.keys(XP._defter().gunler)).toHaveLength(0);
+    });
+
+    it('VERİLMEYEN kimliğe dokunmaz — kazan() ile girmiş satır silinmez', async () => {
+      await temiz();
+      const [a, b] = XP.etkinlikler().filter(x => x.tavan != null).slice(0, 2);
+      await XP.kazan(a.id, { adet:1 });
+      const aXP = XP.durum().toplam;
+      await XP.esitle(null, { [b.id]:1 });
+      const satir = XP._defter().gunler[SP.U.todayISO()];
+      expect(satir[a.id][1]).toBe(aXP);                 /* dokunulmadı */
+      expect(XP.durum().toplam).toBe(aXP + Math.min(b.xp, b.tavan));
+    });
+
+    it('yabancı sistemin kimliği eşitlemeye girmez', async () => {
+      await temiz();
+      const yabanci = L.XP_ETKINLIK.filter(e => e.mod !== XP.MOD)[0];
+      const r = await XP.esitle(null, { [yabanci.id]:99 });
+      expect(r.degisti).toBe(false);
+      expect(XP.durum().toplam).toBe(0);
+    });
+
+    it('eşik geçilirse yükselme doğurur', async () => {
+      await temiz();
+      const e = enVerimli();
+      const gerek = L.BASAMAKLAR[0].esik;
+      const gunluk = XP.gunlukTavan(e);
+      let son = null;
+      for(let i = 0; i < Math.ceil(gerek / gunluk); i++){
+        son = await gunGecir(i, () => XP.esitle(null, { [e.id]:Math.ceil(gunluk / e.xp) }));
+      }
+      expect(son.yukselme.etiket).toBe('1.1');
+    });
+
+    it('veri silinip seviye düşerse kutlama yeniden kazanılabilir', async () => {
+      await temiz();
+      const e = enVerimli();
+      const gunluk = XP.gunlukTavan(e);
+      const kere = Math.ceil(gunluk / e.xp);
+      const gun = Math.ceil(L.BASAMAKLAR[0].esik / gunluk);
+      for(let i = 0; i < gun; i++){
+        await gunGecir(i, () => XP.esitle(null, { [e.id]:kere }));
+      }
+      await gunGecir(gun - 1, async () => {
+        await XP.kutlandi();
+        await XP.esitle(null, { [e.id]:0 });          /* o günün kaydı silindi */
+      });
+      expect(XP.durum().bitmisBasamak).toBe(0);
+      expect(XP.bekleyenKutlama()).toBeNull();
+    });
+
+    it('pencereden eski güne eşitleme yapılmaz', async () => {
+      await temiz();
+      const e = tavanli();
+      const eski = XP.gunKaydir(SP.U.todayISO(), -(XP.GERI_GUN + 2));
+      const r = await XP.esitle(eski, { [e.id]:5 });
+      expect(r.gecersizGun).toBe(true);
+      expect(XP.durum().toplam).toBe(0);
+    });
+  });
+
+  describe('göç — sürüm 1 defteri kaybolmaz', () => {
+
+    it('eski biçimli defterin TOPLAMI korunur, kırılımı arşive düşer', async () => {
+      resetState();
+      await SP.Store.set(XP.YOL, {
+        surum:1, toplam:5000, gorulen:2,
+        gunler:{ '2026-05-01':{ 'esp.kart':30 }, '2026-05-02':{ 'ays.soru':10 } },
+      });
+      XP.bosalt();
+      await XP.yukle();
+      const d = XP._defter();
+      expect(d.surum).toBe(L.SEVIYE_SURUM);
+      expect(d.toplam).toBe(5000);              /* seviye DEĞİŞMEZ */
+      expect(Object.keys(d.gunler)).toHaveLength(0);
+      expect(d.gocler.length).toBe(1);
+      expect(d.gocler[0].from).toBe(1);
+      expect(d.gocler[0].to).toBe(L.SEVIYE_SURUM);
+    });
+
+    it('göçten sonra kırılım + arşiv yine toplamı verir', async () => {
+      resetState();
+      await SP.Store.set(XP.YOL, {
+        surum:1, toplam:5000, gunler:{ '2026-05-01':{ 'esp.kart':30 } },
+      });
+      XP.bosalt();
+      await XP.yukle();
+      const k = XP.kirilim();
+      const detay = Object.keys(k.etkinlik).reduce((t, id) => t + k.etkinlik[id], 0);
+      expect(detay + k.arsiv).toBe(5000);
+      expect(k.arsiv).toBe(5000);
+    });
+
+    it('güncel sürümlü defter göçe uğramaz', async () => {
+      await temiz();
+      const e = tavansiz();
+      await XP.kazan(e.id);
+      XP.bosalt();
+      await XP.yukle();
+      expect(XP._defter().gocler).toHaveLength(0);
+      expect(Object.keys(XP._defter().gunler).length).toBe(1);
     });
   });
 
@@ -528,7 +764,7 @@
         await XP.kazan(e.id);
         /* Geri yüklenen bir yedek ya da elle düzenlenmiş depo taklidi:
            yabancı kimlik deftere DIŞARIDAN girer. */
-        XP._defter().gunler['2026-03-10'][yabanci.id] = 50;
+        XP._defter().gunler['2026-03-10'][yabanci.id] = [1, 50];
         expect(XP.gunToplami('2026-03-10')).toBe(e.xp);
         expect(XP.durum().bugun).toBe(e.xp);
       });

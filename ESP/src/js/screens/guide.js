@@ -14,6 +14,7 @@ ESP.Screens.guide = (function(){
 
   const TABS = [
     { id:'kullanim', label:'Kullanım' },
+    { id:'seviye',   label:'Seviye' },
     { id:'model',    label:'Model' },
     { id:'veri',     label:'Veri' },
     { id:'sinirlar', label:'Sınırlar' },
@@ -440,12 +441,26 @@ ESP.Screens.guide = (function(){
     ];
   }
 
+  /* Seviye — «XP nereden geldi». Gövdeyi ortak motor üretir
+     (core/xp.js, panelHtml): üç sistemin üç ayrı seviye ekranı
+     çizmesi, üçünün bir gün ayrı şeyler söylemesi demekti. */
+  function seviyeRows(){
+    const govde = ESP.XP ? ESP.XP.panelHtml() : '';
+    if(!govde){
+      return [K.Card({ title:'Seviye',
+        body:html`<p class="small dim">Seviye defteri henüz yüklenmedi.</p>` })];
+    }
+    return [K.Card({ title:'Seviye', sub:'Her sistemin kendi kademesi vardır',
+      body:raw(govde) })];
+  }
+
   function render(){
     const tab = S.ui.guideTab || 'kullanim';
     const rows = tab === 'model' ? modelRows()
       : tab === 'veri' ? dataRows()
       : tab === 'sinirlar' ? limitRows()
       : tab === 'kanit' ? evidenceRows()
+      : tab === 'seviye' ? seviyeRows()
       : usageRows();
 
     return K.Grid(html`

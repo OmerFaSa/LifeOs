@@ -308,7 +308,7 @@
 }
 .seviye-rozet__cubuk i{
   display:block; height:100%;
-  background:var(--kademe-isik, currentColor);
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 60%, currentColor);
 }
 
 /* Telefonda ad gider; etiket ve çubuk kalır. */
@@ -316,3 +316,114 @@
   .seviye-rozet__ad{ display:none; }
   .seviye-rozet__cubuk{ width:40px; }
 }
+
+
+/* ================================================================
+   SEVİYE PANELİ — «XP nereden geldi».
+
+   Rehber ekranında duruyor: bir ödül duvarı değil, defterin özeti.
+   Renk yalnız kademeden gelir; geri kalan her şey `currentColor`
+   üzerinden çalışır, böylece açık ve koyu temada da, koyu bir bandın
+   içinde de aynı okunur.
+   ================================================================ */
+
+.seviye-panel{ display:grid; gap:14px; }
+
+.seviye-panel__ust{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.seviye-panel__sonraki{ font-size:13px; opacity:.8; }
+
+/* ---------- son on dört gün ---------- */
+.seviye-serit{
+  display:flex; align-items:flex-end; gap:3px;
+  height:34px;
+  /* Bir şerit, bir afiş değil: geniş ekranda sayfayı boydan boya kaplayan
+     on dört kutu, okunan bir grafik olmaktan çıkıyordu. */
+  max-width:420px;
+}
+.seviye-serit__gun, .seviye-serit__yok{
+  flex:1; height:100%; min-width:6px;
+  display:flex; align-items:flex-end;
+  border-radius:2px;
+}
+/* Kayıtlı günün kutusu, çubuğun ne kadarının dolduğunu göstersin. */
+.seviye-serit__gun{
+  background:color-mix(in srgb, currentColor 7%, transparent);
+}
+/* Çubuk rengi kademe rengiyle METNİN rengi arasında karışır.
+
+   Önce doğrudan `--kademe-isik` kullanılıyordu ve panel AÇIK temada
+   görünmez oluyordu: Gümüş'ün ışığı #F2F5F8, yani beyaz zeminde beyaz.
+   Kademe renkleri koyu zemindeki banner için seçilmiş; panel ise her
+   iki temada da okunmalı. `currentColor` ile karıştırmak ikisini de
+   çözer: açık temada koyulaşır, koyu temada açılır. */
+.seviye-serit__gun i{
+  display:block; width:100%;
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 55%, currentColor);
+  border-radius:2px; min-height:2px;
+}
+/* Kayıt OLMAYAN gün boş bırakılır — sıfır çizmek «o gün çalışmadı»
+   demektir, oysa «kayıt yok» başka bir cümledir. */
+.seviye-serit__yok{
+  background:repeating-linear-gradient(45deg,
+    transparent 0 3px, color-mix(in srgb, currentColor 14%, transparent) 3px 6px);
+}
+
+/* ---------- kırılım ---------- */
+.seviye-panel__liste{ list-style:none; margin:0; padding:0; display:grid; gap:7px; }
+.seviye-panel__satir{
+  display:grid; grid-template-columns:minmax(0,1fr) 84px 52px;
+  align-items:center; gap:10px;
+  font-size:13px;
+}
+.seviye-panel__ad{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.seviye-panel__ad.is-eski{ opacity:.6; font-style:italic; }
+.seviye-panel__not{ font-size:11px; opacity:.6; }
+.seviye-panel__cubuk{
+  height:6px; border-radius:6px; overflow:hidden;
+  background:color-mix(in srgb, currentColor 12%, transparent);
+}
+.seviye-panel__cubuk i{
+  display:block; height:100%;
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 55%, currentColor);
+}
+.seviye-panel__xp{
+  text-align:right;
+  font:600 13px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+}
+.seviye-panel__satir--arsiv .seviye-panel__cubuk i{ opacity:.45; }
+.seviye-panel__bos{ font-size:13px; opacity:.7; }
+
+.seviye-panel__sinir{ margin:0; font-size:12px; line-height:1.55; opacity:.72; }
+
+@media (max-width:420px){
+  .seviye-panel__satir{ grid-template-columns:minmax(0,1fr) 52px 44px; }
+  .seviye-serit{ height:28px; }
+}
+
+/* ---------- XP veren işler (katalogdan üretilir) ---------- */
+.seviye-isler{ font-size:13px; }
+.seviye-isler summary{
+  cursor:pointer; opacity:.8; padding:4px 0;
+  list-style-position:outside;
+}
+.seviye-isler summary:hover{ opacity:1; }
+.seviye-isler__tablo{
+  width:100%; border-collapse:collapse; margin:8px 0 4px;
+}
+.seviye-isler__tablo th, .seviye-isler__tablo td{
+  padding:5px 8px 5px 0; text-align:left;
+  border-bottom:1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+.seviye-isler__tablo th{
+  font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; opacity:.6;
+  font-weight:600;
+}
+.seviye-isler__sayi{
+  text-align:right;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+}
+.seviye-isler__birim{ opacity:.55; font-size:11.5px; white-space:nowrap; }

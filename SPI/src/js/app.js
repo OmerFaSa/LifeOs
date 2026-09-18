@@ -922,6 +922,65 @@ SP.App = (function(){
 
   const globalChange = {};
 
+  /* ---------------------------------------------------- XP sayımları
+
+     XP bir OLAY AKIŞI DEĞİL, verinin bir PROJEKSİYONUDUR: «bugün ne
+     yapıldı» sorusunun cevabı zaten bu sistemin kendi kayıtlarında
+     duruyor. Onaltı ekrana onaltı `XP.kazan()` serpiştirmek yerine
+     burada bir kez okunur ve `XP.esitle()` defteri ona eşitler.
+
+     Kazandırdığı üç şey:
+       · Bir ekran unutulamaz — sayım verinin kendisinden gelir.
+       · Silinen kayıt puanını bırakmaz — sayım düşer, XP düşer.
+       · Tekrar çalışması zararsızdır — eşitleme fikri budur.
+
+     Buradaki her satırın kataloğda bir karşılığı vardır ve tersi de
+     doğru olmalı (bkz. data/kademeler.js). */
+  function xpSayimlari(gun){
+    const v = M.vitalsOf(gun);
+    /* Ölçüm: o gün GERÇEKTEN girilmiş alan sayısı. Boş bir kayıt
+       «ölçüldü» değildir — bu deponun en çok tekrarlanan kuralı. */
+    const OLCUM = ['sbp', 'dbp', 'rhr', 'hrv', 'spo2', 'temp',
+      'weight', 'waist', 'bodyfat'];
+    const olcum = v ? OLCUM.filter(k => v[k] != null).length : 0;
+    const ogun = M.mealsOf(gun).length;
+    const antrenman = (S.workouts || []).filter(w => w && w.date === gun).length;
+    const tahlil = (S.labs || []).filter(l => l && l.date === gun).length;
+    const uyku = (v && v.sleep != null) ? 1 : 0;
+
+    return {
+      'spi.antrenman':antrenman,
+      'spi.ogun':ogun,
+      'spi.uyku':uyku,
+      'spi.olcum':olcum,
+      'spi.tahlil':tahlil,
+      'spi.gun':(olcum || ogun || antrenman || tahlil || uyku) ? 1 : 0,
+    };
+  }
+
+  /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
+
+     · Gecikmeli, çünkü bir eylem sırasında art arda birkaç kayıt
+       değişebilir; her birinde depoya yazmak gereksiz.
+     · Sessiz, çünkü XP bir yan üründür: hatası hiçbir kaydı
+       bozmamalı, hiçbir akışı kesmemeli.
+
+     Hiçbir şey değişmediyse depoya yazılmaz — çoğu çizim bedavaya
+     gelir. Seviye atlanırsa kutlamayı `XP.dinle` dinleyicisi açar
+     (bkz. boot). */
+  let xpBekleyen = null;
+  function xpTara(){
+    if(!SP.XP) return;
+    clearTimeout(xpBekleyen);
+    xpBekleyen = setTimeout(async () => {
+      try{
+        const gun = U.todayISO();
+        const r = await SP.XP.esitle(gun, xpSayimlari(gun));
+        if(r && r.degisti) render();
+      }catch(e){ console.error('XP eşitlenemedi:', e); }
+    }, 400);
+  }
+
   /* ------------------------------------------------------------ olay dağıtımı */
   document.addEventListener('click', async e => {
     const el = e.target.closest('[data-act]');
@@ -933,6 +992,8 @@ SP.App = (function(){
     if(el.tagName !== 'INPUT') e.preventDefault();
     try{ await fn(el, e); }
     catch(err){ console.error('Eylem hatası (' + act + '):', err); UI.toast('Bir şeyler ters gitti'); }
+    /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
+    xpTara();
   });
 
   async function runChange(el, e){
@@ -941,6 +1002,8 @@ SP.App = (function(){
     if(!fn) return;
     try{ await fn(el, e); }
     catch(err){ console.error('Değişiklik hatası:', err); UI.toast('Değişiklik kaydedilemedi'); }
+    /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
+    xpTara();
   }
 
   document.addEventListener('change', e => {
@@ -1238,6 +1301,10 @@ SP.App = (function(){
       }catch(e){
         console.error('Seviye kutlaması açılamadı.', e);
       }
+
+      /* Açılışta bir kez eşitle: uygulama kapalıyken (ya da XP
+         bağlanmadan önce) girilmiş kayıtlar da sayılsın. */
+      xpTara();
 
       /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez
          koşar ve gerekiyorsa TEK soru açar (core/signals.js). */

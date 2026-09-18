@@ -362,12 +362,18 @@ async function main(){
       cizgi:document.querySelectorAll('#sistemler svg.spark').length,
       satir:document.querySelectorAll('#sistemler .metric').length,
       gorunur:!document.querySelector('[data-bolme="sistemler"]').hidden,
+      /* Seviye seridi: uc sistemin kademesi yan yana geldi mi? */
+      seviye:(document.querySelector('#sistemler') || {}).textContent
+        ? /Seviye/.test(document.querySelector('#sistemler').textContent) : false,
     }));
     if(!sistemler.gorunur) hatalar.push('HKM yuzu: Sistemler sekmesi acilmadi');
     if(sistemler.metin.indexOf('ölçüm') < 0){
       hatalar.push('HKM yuzu: sistem verisi cizilmedi');
     }else if(!sistemler.cizgi){
       hatalar.push('HKM yuzu: seri cizgisi cizilmedi (en az bir cift nokta vardi)');
+    }else if(!sistemler.seviye){
+      hatalar.push('HKM yuzu: seviye seridi cizilmedi — uc arayuz '
+        + 'level_tier/level_sub gonderdi ama merkez gostermedi');
     }else{
       console.log('  HKM yuzu → sistemler sekmesi: ' + sistemler.satir
         + ' metrik, ' + sistemler.cizgi + ' seri cizgisi');

@@ -1093,6 +1093,64 @@ ESP.App = (function(){
 
   const globalChange = {};
 
+  /* ---------------------------------------------------- XP sayımları
+
+     XP bir OLAY AKIŞI DEĞİL, verinin bir PROJEKSİYONUDUR: «bugün ne
+     yapıldı» sorusunun cevabı zaten bu sistemin kendi kayıtlarında
+     duruyor. Onaltı ekrana onaltı `XP.kazan()` serpiştirmek yerine
+     burada bir kez okunur ve `XP.esitle()` defteri ona eşitler.
+
+     Kazandırdığı üç şey:
+       · Bir ekran unutulamaz — sayım verinin kendisinden gelir.
+       · Silinen kayıt puanını bırakmaz — sayım düşer, XP düşer.
+       · Tekrar çalışması zararsızdır — eşitleme fikri budur.
+
+     Buradaki her satırın kataloğda bir karşılığı vardır ve tersi de
+     doğru olmalı (bkz. data/kademeler.js). */
+  function xpSayimlari(gun){
+    /* Kart: o gün geçmişe düşen tekrar satırları (core/srs.js). */
+    let kart = 0;
+    (S.cards || []).forEach(c => {
+      (c.history || []).forEach(h => {
+        if(String(h.at || '').slice(0, 10) === gun) kart++;
+      });
+    });
+    const gunlukSayim = liste => (liste || []).filter(
+      x => String(x.createdAt || '').slice(0, 10) === gun).length;
+
+    return {
+      'esp.kart':kart,
+      /* Dakika: ölçülmemiş oturum sayılmaz — `minutesOf` null döner. */
+      'esp.oturum':M.minutesOf(gun) || 0,
+      'esp.okuma':gunlukSayim(S.notes),
+      'esp.yazi':gunlukSayim(S.drafts),
+      'esp.gun':M.dayHasEntry(M.dayOf(gun)) ? 1 : 0,
+    };
+  }
+
+  /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
+
+     · Gecikmeli, çünkü bir eylem sırasında art arda birkaç kayıt
+       değişebilir; her birinde depoya yazmak gereksiz.
+     · Sessiz, çünkü XP bir yan üründür: hatası hiçbir kaydı
+       bozmamalı, hiçbir akışı kesmemeli.
+
+     Hiçbir şey değişmediyse depoya yazılmaz — çoğu çizim bedavaya
+     gelir. Seviye atlanırsa kutlamayı `XP.dinle` dinleyicisi açar
+     (bkz. boot). */
+  let xpBekleyen = null;
+  function xpTara(){
+    if(!ESP.XP) return;
+    clearTimeout(xpBekleyen);
+    xpBekleyen = setTimeout(async () => {
+      try{
+        const gun = U.todayISO();
+        const r = await ESP.XP.esitle(gun, xpSayimlari(gun));
+        if(r && r.degisti) render();
+      }catch(e){ console.error('XP eşitlenemedi:', e); }
+    }, 400);
+  }
+
   /* ------------------------------------------------------------ olay dağıtımı */
   document.addEventListener('click', async e => {
     const el = e.target.closest('[data-act]');
@@ -1104,6 +1162,8 @@ ESP.App = (function(){
     if(el.tagName !== 'INPUT') e.preventDefault();
     try{ await fn(el, e); }
     catch(err){ console.error('Eylem hatası (' + act + '):', err); UI.toast('Bir şeyler ters gitti'); }
+    /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
+    xpTara();
   });
 
   async function runChange(el, e){
@@ -1112,6 +1172,8 @@ ESP.App = (function(){
     if(!fn) return;
     try{ await fn(el, e); }
     catch(err){ console.error('Değişiklik hatası:', err); UI.toast('Değişiklik kaydedilemedi'); }
+    /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
+    xpTara();
   }
 
   document.addEventListener('change', e => {
@@ -1441,6 +1503,10 @@ ESP.App = (function(){
       }catch(e){
         console.error('Seviye kutlaması açılamadı.', e);
       }
+
+      /* Açılışta bir kez eşitle: uygulama kapalıyken (ya da XP
+         bağlanmadan önce) girilmiş kayıtlar da sayılsın. */
+      xpTara();
       startClock();
 
       /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez

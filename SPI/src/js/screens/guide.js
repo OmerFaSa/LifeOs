@@ -14,6 +14,7 @@ SP.Screens.guide = (function(){
 
   const TABS = [
     { id:'kullanim', label:'Kullanım', icon:'guide' },
+    { id:'seviye',   label:'Seviye',   icon:'chart' },
     { id:'model',    label:'Model',    icon:'zap' },
     { id:'veri',     label:'Veri',     icon:'layers' },
     { id:'sinir',    label:'Sınırlar', icon:'shield' },
@@ -426,6 +427,19 @@ SP.Screens.guide = (function(){
 
   /* --------------------------------------------------------------- ekran */
 
+  /* Seviye — «XP nereden geldi». Gövdeyi ortak motor üretir
+     (core/xp.js, panelHtml): üç sistemin üç ayrı seviye ekranı
+     çizmesi, üçünün bir gün ayrı şeyler söylemesi demekti. */
+  function seviyeCard(){
+    const govde = SP.XP ? SP.XP.panelHtml() : '';
+    if(!govde){
+      return K.Card({ title:'Seviye',
+        body:html`<p class="small dim">Seviye defteri henüz yüklenmedi.</p>` });
+    }
+    return K.Card({ title:'Seviye', sub:'Her sistemin kendi kademesi vardır',
+      body:raw(govde) });
+  }
+
   async function render(){
     const tab = S.ui.guideTab;
     const head = html`<div class="mb-8">${K.Subtabs({ items:TABS, value:tab,
@@ -440,6 +454,9 @@ SP.Screens.guide = (function(){
       return String(html`${head}
         ${K.Ledger(() => [dataCard(), storageHorizonCard(), storageCard(), hkmCard()])}
         <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`);
+    }
+    if(tab === 'seviye'){
+      return String(html`${head}${K.Ledger(() => [seviyeCard()])}`);
     }
     if(tab === 'sinir'){
       return String(html`${head}

@@ -954,6 +954,68 @@ details.detay > summary:hover{ color:var(--fg); }
   var YON = { rising:'yükseliyor', falling:'düşüyor', flat:'yerinde sayıyor',
     unknown:'yön bilinmiyor' };
 
+  /* ---------- seviye şeridi: üç sistem yan yana ----------
+
+     Her sistemin KENDİ seviyesi var; ortak olan yalnız tanım (aynı
+     eşik, aynı ad). Burası o üç sayının tek yerde görüldüğü yer —
+     HKM'nin işi zaten bu: kendi verisi yoktur, üçünü GÖRÜR.
+
+     Kademe ADI yazılmaz, NUMARASI yazılır. İki sebep: bu panonun kendi
+     doktrini «renk yok, süs yok, sözcük var» diyor; ve adlar
+     `brand/seviye/kademeler.js` içinde değişebilen şeyler — merkezde
+     ikinci bir kopya tutmak, iki kopyanın bir gün ayrışması demekti.
+
+     HKM'nin KENDİ XP'si YOKTUR ve olmamalı: üçünün üstünde değil
+     yanındadır. */
+  function seviyeOku(liste, metrik){
+    for(var i = 0; i < (liste || []).length; i++){
+      if(liste[i].metric === metrik){
+        var son = liste[i].last || [null, null, null];
+        return son[1];
+      }
+    }
+    return null;
+  }
+
+  function seviyeSeridi(gruplar){
+    var satir = '';
+    var varMi = false;
+    ['ays', 'spi', 'esp'].forEach(function(mod){
+      var liste = gruplar[mod];
+      var kademe = seviyeOku(liste, 'level_tier');
+      var basamak = seviyeOku(liste, 'level_step');
+      var toplam = seviyeOku(liste, 'xp_total');
+      if(kademe == null && toplam == null){
+        satir += '<div class="metric"><div class="metric__name">'
+          + esc(SISTEM_ADI[mod] || mod) + '</div>'
+          + '<div class="metric__val">—</div>'
+          + '<div class="metric__spark"></div>'
+          + '<div class="metric__meta">işaret gelmedi</div></div>';
+        return;
+      }
+      varMi = true;
+      /* Etiket HESAPLANMAZ, OKUNUR: kademe ve adım ayrı ayrı gelir.
+         «Basamak numarasından türetiriz» demek, üç arayüzdeki formülü
+         merkezde ikinci kez yazmak ve iki kopyanın bir gün ayrışması
+         demekti. */
+      var adim = seviyeOku(liste, 'level_sub');
+      var etiket = (kademe == null || adim == null) ? '—'
+        : (kademe + '.' + adim);
+      satir += '<div class="metric"><div class="metric__name">'
+        + esc(SISTEM_ADI[mod] || mod) + '</div>'
+        + '<div class="metric__val">' + esc(etiket) + '</div>'
+        + '<div class="metric__spark"></div>'
+        + '<div class="metric__meta">'
+        + (toplam == null ? 'toplam bilinmiyor' : esc(toplam) + ' XP')
+        + ' · ' + esc(basamak == null ? '—' : basamak) + '/18 basamak'
+        + '</div></div>';
+    });
+    if(!varMi) return '';
+    return '<h2 style="font-size:14px;margin:16px 0 4px">Seviye</h2>' + satir
+      + '<p class="muted">Üçünün kademesi aynı eşiklerle ölçülür ama ayrı '
+      + 'kazanılır. HKM\'nin kendi puanı yoktur.</p>';
+  }
+
   function sistemlerCiz(veri){
     var seri = veri.series || {};
     var anahtarlar = Object.keys(seri).sort();
@@ -969,7 +1031,8 @@ details.detay > summary:hover{ color:var(--fg); }
       var kayit = seri[k];
       (gruplar[kayit.module] = gruplar[kayit.module] || []).push(kayit);
     });
-    var h = '<div class="tag">Sistemler · son ' + esc(veri.days) + ' gün</div>';
+    var h = '<div class="tag">Sistemler · son ' + esc(veri.days) + ' gün</div>'
+      + seviyeSeridi(gruplar);
     ['ays', 'spi', 'esp'].forEach(function(mod){
       var liste = gruplar[mod];
       if(!liste) return;

@@ -5,7 +5,7 @@ Altı kademe, her kademede üç basamak.
 **Ortak olan TANIMDIR, defter değil.** AYS'nin, SPİ'nin ve ESP'nin her
 birinin **kendi seviyesi** vardır: "Altın" üçünde de aynı şeyi ifade
 eder (aynı ad, aynı renk, aynı eşik) ama ayrı ayrı kazanılır — ESP'de
-gitar çalarak, SPİ'de antrenman yaparak, AYS'de soru çözerek. Motor,
+pratik yaparak, SPİ'de antrenman kaydederek, AYS'de soru çözerek. Motor,
 başka bir sistemin etkinliğini deftere yazmaz. Bir sistemin *içindeki*
 alt modüller (ESP'de dil/felsefe/müzik) ayrı seviye tutmaz: hepsi o
 sistemin tek seviyesini besler.
@@ -19,6 +19,7 @@ sistemin tek seviyesini besler.
 | Hangi iş kaç XP veriyor | `kademeler.js` → `LIFEOS.XP_ETKINLIK` | aynı |
 | Sayma davranışı, tavan, defter | `xp.js` | aynı |
 | Perde/banner görünümü | `seviye.css`, `perde.js` | aynı |
+| Rehberdeki seviye paneli | `xp.js` → `panelHtml` | aynı |
 | Açılıştaki durağan perde markupı | `perde.html` | aynı |
 | Sunucuların `/img/seviye/` muhafızı | `ortak_yol.py` | aynı |
 | `dist/` medya kopyalayıcı | `dist_kopya.py` | aynı |
@@ -64,6 +65,28 @@ biraz daha tamamlanır, hiçbir aşamada bozulmaz.
 | `kademe-2..6.mp4` | yok — banner'a düşüyor |
 | `kademe-1..6.png` | yok — numaraya düşüyor |
 
+## XP nereden gelir — türetilir, tetiklenmez
+
+Hiçbir ekran «bana puan ver» demez. Her sistem, o günün kendi
+verisinden bir **sayım** çıkarır (`app.js` → `xpSayimlari`) ve motor
+defteri o sayıma **eşitler** (`XP.esitle`). Doktrin zaten bu: sayıyı ve
+kararı kod üretir.
+
+Üç şey bedavaya gelir:
+
+- **Bir ekran unutulamaz** — sayım verinin kendisinden okunur.
+- **Silinen kayıt puanını bırakmaz** — sayım düşer, XP düşer.
+- **Tekrar çalışması zararsızdır** — eşitleme iki kez çağrılabilir.
+
+| Sistem | Ne sayılıyor |
+|---|---|
+| AYS | bloklara yazılan + serbest soru, deneme, biten plan bloğu, tahmin kaydı, gün |
+| SPİ | antrenman, öğün, uyku kaydı, girilmiş ölçüm alanı, tahlil, gün |
+| ESP | SRS tekrarı, pratik dakikası, atomik not, yazı taslağı, gün |
+
+> Katalogdaki her satırın burada bir karşılığı olmalı, ve tersi de
+> doğru. Karşılığı olmayan bir satır, hiç kazanılamayan bir puandır.
+
 ## XP nasıl sayılır — üç kural
 
 1. **Her etkinliğin günlük tavanı vardır.** `tavan:null` «tavan yok»
@@ -76,12 +99,27 @@ biraz daha tamamlanır, hiçbir aşamada bozulmaz.
 3. **XP hiçbir kararı vermez.** Ne plan, ne reçete, ne uyarı ona bakar.
    XP yalnızca kullanıcının kendi emeğini görmesidir.
 
-Defter olay listesi değil **gün × etkinlik** toplamıdır; gün kırılımı
-son 120 gün için saklanır, daha eskisi silinir. Toplam XP ayrı ve tek
-yönlü bir sayaçtır: budama onu değiştirmez, yani seviye geçmiş silindi
-diye düşmez. Arşiv saklanan bir sayaç değil bir **çıkarmadır**
-(`toplam − defterde duran günler`), bu yüzden «kırılım + arşiv = toplam»
-katalog değişse de bozulmaz.
+Defter olay listesi değil **gün × etkinlik** toplamıdır ve her kayıt
+`[adet, kazanılan XP]` tutar — kazanılan XP yazıldığı anda **donar**.
+Fiyat değişir, kaydedilmiş işlem değişmez; bir muhasebe defteri böyle
+çalışır. Gün kırılımı son 120 gün için saklanır, daha eskisi silinir.
+Toplam XP ayrı ve tek yönlü bir sayaçtır: budama onu değiştirmez, yani
+seviye geçmiş silindi diye düşmez. Arşiv saklanan bir sayaç değil bir
+**çıkarmadır** (`toplam − defterde duran günler`), bu yüzden «kırılım +
+arşiv = toplam» katalog değişse de bozulmaz.
+
+## Üçü ve HKM
+
+HKM'nin **kendi XP'si yoktur ve olmamalı**: üçünün üstünde değil
+yanındadır. Üç arayüz işaretle (`core/beacon.js`) günlük özetine dört
+sayı daha ekler — `xp_today`, `xp_total`, `level_tier`, `level_sub` —
+ve HKM panosunun *Sistemler* sayfasında üçünün kademesi yan yana
+görünür. Kademe **adı** gönderilmez, numarası gönderilir: panonun kendi
+doktrini «renk yok, süs yok, sözcük var» der ve merkezde ikinci bir ad
+kopyası tutmak, iki kopyanın bir gün ayrışması demekti.
+
+Bu bağ da tek yönlüdür: HKM kapalıyken hiçbir sistemin seviyesi
+etkilenmez.
 
 ## Ses
 
