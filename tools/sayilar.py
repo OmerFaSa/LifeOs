@@ -42,7 +42,7 @@ HIZLI = ['runtests.js']
 # isinde de ayrica kosar (bkz. .github/workflows/ci.yml, `yuk`).
 TAM = ['runtests.js', 'smoke.js', 'a11ycheck.js', 'palettecheck.js',
        'layoutcheck.js', 'perfcheck.js', 'ledgercheck.js', 'designcheck.js',
-       'loadcheck.js']
+       'tasarimcheck.js', 'loadcheck.js']
 
 BASLANGIC = '<!-- SAYILAR:baslangic -->'
 BITIS = '<!-- SAYILAR:bitis -->'

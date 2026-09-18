@@ -40,8 +40,20 @@ const PORT = Number(process.argv[2]) || 4296;
    Toplam eşiği ekran sayısına orantılıdır: SPİ on iki ekran için
    3 500 ms kullanıyor (ekran başına ~292 ms); ESP'nin on dört ekranı
    var → 4 000 ms. */
-const ESIK_MS = 400;
-const TOPLAM_ESIK_MS = 4000;
+/* ÖLÇÜM ORTAMI EŞİĞİ DEĞİL, PAYI DEĞİŞTİRİR.
+
+   Eşikler yerel bir makinede ölçülerek yazıldı; paylaşımlı bir koşum
+   makinesi (CI) aynı kodu düzenli olarak daha yavaş ölçer. Eşiği
+   gevşetmek bu farkı YERELDE de silerdi. Bunun yerine ortam kendi
+   payını açıkça söyler ve araç payı çıktısına yazar:
+
+     PERF_PAY=1.5 node tools/loadcheck.js
+
+   Varsayılan 1: yerel koşum hep sıkı ölçer. (Aynı mekanizma
+   `tools/perfcheck.js` içinde de var; ikisi aynı sebepten.) */
+const PAY = Number(process.env.PERF_PAY) > 0 ? Number(process.env.PERF_PAY) : 1;
+const ESIK_MS = Math.round(400 * PAY);
+const TOPLAM_ESIK_MS = Math.round(4000 * PAY);
 const YIL = 5;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
@@ -164,6 +176,10 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     console.log('  hacim → ' + hacim.kart + ' kart · ' + hacim.not + ' not · '
       + hacim.olay + ' olay · ' + hacim.gun + ' gün · ' + hacim.taslak
       + ' taslak · ' + hacim.parca + ' parça');
+    if(PAY !== 1){
+      console.log('  BÜTÇE PAYI ×' + PAY + ' — bu koşum yerel ölçümden '
+        + 'daha gevşek bir eşikle bakıyor (PERF_PAY).');
+    }
     const sirali = Object.entries(sureler).sort((a, b) => b[1] - a[1]);
     console.log('  en yavaş üç ekran → ' + sirali.slice(0, 3)
       .map(([k, v]) => k + ' ' + v + ' ms').join(' · '));

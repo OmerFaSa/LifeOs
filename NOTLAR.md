@@ -43,18 +43,20 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1174/1174 gecti | 923/923 gecti | 738/738 gecti |
+| `runtests.js` | 1174/1174 gecti | 923/923 gecti | 741/741 gecti |
 | `smoke.js` | Duman testi temiz — 2 hedefte 36 ekran, 38 sekme gezildi. | Duman testi temiz — 2 hedefte 24 ekran, 66 sekme gezildi. | Duman testi temiz — 2 hedefte 28 ekran, 184 sekme gezildi. |
 | `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
 | `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 37 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 45 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 106 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 40.4 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 20.8 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 66.9 ms (bütçe 100). |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.9 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 23.6 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 48.6 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | beş düzen temiz — 440 ekran/genişlik kombinasyonu bakıldı | — |
+| `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
+| `loadcheck.js` | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) |
 
 | Depo denetimi | Sonuç |
 |---|---|
-| `HKM tests` | 312/312 test gecti |
+| `HKM tests` | 314/314 test gecti |
 | `HKM perf` | Bütün sorgular bütçede. |
 | `HKM yuz` | HKM yüzü temiz — 40 görünümde taşma yok, bütün hedefler 24px ve üstü, etiketler yerinde, kontrast AA. |
 | `entegre.js` | Butunlesme temiz: uc arayuz de HKM ile konustu, HKM kapaliyken hicbiri bozulmadi. |
@@ -1348,12 +1350,12 @@ yazmamış olurdum.
 
 | Borç | Nerede | Risk | Not |
 |---|---|---|---|
-| İçe aktarma geri alınamıyor | ikisi | **yüksek** | §7.4 — tasarımı hazır, kod yazılmadı |
+| ~~İçe aktarma geri alınamıyor~~ | — | — | **kapandı** — `undoImport` üç `core/store.js`'de de var |
 | Depo ölçeklenmesi | `core/store.js` | orta | §7.3 — yaşayan veride göç, sormadan yapma |
 | `SPI/screens/labs.js` 1482 satır | — | orta | testi yok; bölmeden önce kapsam ister |
 | `AYS/core/office.js` 2049 satır | — | orta | kapsam %59 |
 | ~~Ortak CSS kopyaları~~ | — | — | **kapandı** — `brand/ortak/` + `tools/ortak.py` |
-| Telefonda çalıştırma yolu | `sunucu.py`, README | orta | karar bekliyor (GELISTIRME_RAPORU §6, soru 1) |
+| ~~Telefonda çalıştırma yolu~~ | — | — | **kapandı** — Seçenek B (tek dosya + elle yedek), README «Telefonda kullanım» |
 | `palette.js` kapsamı | ikisi | düşük | UI açan işlevler denenmiyor (kasıtlı) |
 
 **Ortak CSS nasıl kapandı.** `base.css`, `layout.css` ve `designs.css`
@@ -1363,6 +1365,15 @@ onu koruyan hiçbir şey yoktu. Tek kaynak artık `brand/ortak/`;
 **aynı adla** yazar (yükleme sırası korunsun diye), `--denetle`
 ayrışmayı yakalar ve CI'da koşar. Kopyalar üretilmiş kopya başlığı
 taşır; elle düzenlenirse bir sonraki yayında kaybolur.
+
+**Telefon sorusu nasıl kapandı.** Depo sahibi kararı: telefon
+**ikincil** cihaz — ara sıra bakmak için. Yani yerel ağ modu (`--ag`)
+yazılmadı; `sunucu.py` bilerek `127.0.0.1`'de kaldı. Yol belgelendi:
+`dist/*.html` telefona kopyalanır, PWA olarak kurulur, veri yedek
+dosyasıyla taşınır. README o bölümde **iki cihazın iki ayrı defter**
+olduğunu ve cihazlar arası senkronun yalnız Artifact çalışma zamanında
+var olduğunu (B5) açıkça söyler. Telefon bir gün birincil cihaz olursa
+doğru cevap o bölüm değil, Seçenek A'dır.
 
 `tokens.css`, `palettes.css` ve `components.css` **kısmen** ortaktır
 (sırasıyla 78, 52 ve ~50 satır fark: ajan renkleri, grafik serisi

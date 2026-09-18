@@ -10,6 +10,7 @@ Kullanim:
   python build.py --minify     # CSS sikistirilir, JS yorum/bosluklari azaltilir
 """
 
+import base64
 import re
 import shutil
 import sys
@@ -208,6 +209,58 @@ def copy_level_assets() -> None:
 # SEVIYE:dist-bit
 
 
+def pwa_etiketleri(html: str) -> list:
+    """Kaynak <head>'deki TELEFON etiketlerini tek dosya surumune tasir.
+
+    Tek dosya surumu telefona kopyalanip «Ana ekrana ekle» ile kurulmak
+    icin var (bkz. README, «Telefonda kullanim»). Ama bu betik uzun sure
+    <head>'i SIFIRDAN yaziyordu — dort etiket ve baslik — ve kaynaktaki
+    su bes satir sessizce dusuyordu:
+
+        <link id="pwa-manifest" rel="manifest">
+        <link rel="icon" ...>
+        <meta name="theme-color" ...>
+        <meta name="apple-mobile-web-app-capable" ...>
+        <meta name="apple-mobile-web-app-title" ...>
+
+    Sonucu olculdu: `installManifest()` (app.js) `#pwa-manifest`
+    dugumunu bulamayip sessizce donuyor, iOS'ta uygulama tam ekran
+    acilmiyor ve sekme ikonu hic gelmiyordu. Yani telefona kopyalanan
+    dosya, telefon icin yazilmis her seyi kaybediyordu.
+
+    Etiketler ELLE YAZILMAZ, kaynaktan cikarilir: yarin <head>'e bir
+    tanesi daha eklenirse burasi da tasir.
+    """
+    desenler = [
+        r'<link[^>]+id="pwa-manifest"[^>]*>',
+        r'<link[^>]+rel="icon"[^>]*>',
+        r'<meta[^>]+name="theme-color"[^>]*>',
+        r'<meta[^>]+name="apple-mobile-web-app-[^"]*"[^>]*>',
+    ]
+    out = []
+    for d in desenler:
+        out.extend(re.findall(d, html))
+    return out
+
+
+def ikonu_gom(etiketler: list) -> list:
+    """Sekme ikonunu data URI olarak gomer.
+
+    Tek dosya TEK DOSYADIR: telefona yalniz o kopyalanir, yanindaki
+    `img/` klasoru gitmez. Goreli bir ikon yolu orada 404 verir — ve
+    manifest ikonu da ayni etiketten okundugu icin (app.js,
+    `installManifest`) kurulan uygulamanin ikonu bos kalirdi.
+    """
+    yol = SRC / "img" / "brand" / "favicon.png"
+    if not yol.exists():
+        return etiketler
+    veri = base64.b64encode(yol.read_bytes()).decode("ascii")
+    uri = "data:image/png;base64," + veri
+    return [re.sub(r'href="[^"]*"', 'href="%s"' % uri, e)
+            if 'rel="icon"' in e else e
+            for e in etiketler]
+
+
 def build(minify: bool = False) -> None:
     for name in REQUIRED:
         if not (SRC / name).exists():
@@ -219,6 +272,7 @@ def build(minify: bool = False) -> None:
     title_match = re.search(r"<title>(.*?)</title>", html, re.S)
     title = title_match.group(1).strip() if title_match else "Rota"
     font_links = re.findall(r'<link[^>]+fonts\.(?:googleapis|gstatic)\.com[^>]*>', html)
+    telefon_etiketleri = ikonu_gom(pwa_etiketleri(html))
 
     html, style_blocks = inline_css(html, minify)
     html, script_blocks, js_files = inline_js(html, minify)
@@ -238,6 +292,7 @@ def build(minify: bool = False) -> None:
         '<meta name="google" content="notranslate">',
         f"<title>{title}</title>",
     ]
+    parts.extend(telefon_etiketleri)
     parts.extend(font_links)
     parts.extend(style_blocks)
     parts.append(body)

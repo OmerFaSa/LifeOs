@@ -1385,7 +1385,14 @@ ESP.App = (function(){
     /* Once "E" harfi ureten bir SVG'ydi; artik gercek marka gorseli
        (img/brand/favicon.png, kare kirpilmis logo). Dosya degisirse ikon
        da kendiliginden degisir, burasi hic dokunulmaz. */
-    const icon = new URL('img/brand/favicon.png', location.href).href;
+    /* Ikon <link rel="icon"> etiketinden OKUNUR, yola elle yazilmaz.
+       Tek dosya surumunde build.py o etiketin icine ikonu data URI
+       olarak gomer; kurulan uygulamanin ikonu da boylece dosyayla
+       birlikte gider. Kaynak surumde etiket goreli yolu tasir ve sonuc
+       degismez. Etiket hic yoksa eski davranis surer. */
+    const ikonEl = document.querySelector('link[rel="icon"]');
+    const ikonRef = ikonEl && ikonEl.getAttribute('href');
+    const icon = new URL(ikonRef || 'img/brand/favicon.png', location.href).href;
     const manifest = {
       name, short_name:'ESP', start_url:location.href, scope:'./',
       display:'standalone', background_color:'#F7F8FA', theme_color:'#2F5A8A',

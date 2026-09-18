@@ -123,8 +123,8 @@ jobs:
           done
           echo "$bulundu sisteme özel denetim koştu."
 
-  seviye:
-    name: Seviye sistemi — üç kopya kaynakla aynı mı
+  tekkaynak:
+    name: Tek kaynaklar — üç kopya kaynakla aynı mı
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -216,6 +216,10 @@ jobs:
     defaults:
       run:
         working-directory: ${{ matrix.system }}
+    env:
+      # `perfcheck` ile aynı gerekçe: eşik değil ORTAM payı esner ve
+      # araç bu payı çıktısına yazar (tools/loadcheck.js, PERF_PAY).
+      PERF_PAY: '1.5'
     steps:
       - uses: actions/checkout@v4
 

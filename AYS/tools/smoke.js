@@ -87,6 +87,43 @@ async function checkPanel(page, nerede, errors){
    de «temiz» yazar. Son satir bu yuzden ne gezildigini soyler. */
 const SAYAC = { hedef:0, ekran:0, sekme:0 };
 
+/* TELEFON ETIKETLERI — tek dosya surumunde de durmali.
+
+   Tek dosya surumu telefona kopyalanip «Ana ekrana ekle» ile kurulmak
+   icin var (README, «Telefonda kullanim»). `build.py` uzun sure <head>'i
+   sifirdan yaziyordu ve su bes satir sessizce dusuyordu: manifest
+   dugumu, ikon, tema rengi ve iki apple etiketi. Sonucu: `installManifest()`
+   dugumu bulamayip sessizce donuyor, iOS'ta uygulama tam ekran acilmiyor,
+   ikon hic gelmiyordu.
+
+   Sessizce dusen bir sey, ancak onu arayan bir denetim varsa gorulur. */
+async function checkPwa(page, target, errors){
+  const r = await page.evaluate(() => {
+    const el = document.getElementById('pwa-manifest');
+    const href = (el && el.getAttribute('href')) || '';
+    let man = null;
+    try{ man = JSON.parse(decodeURIComponent(href.split(',')[1] || '')); }catch(e){}
+    const ikon = document.querySelector('link[rel="icon"]');
+    return {
+      manifest:!!(man && man.name && man.icons && man.icons.length),
+      ikon:(ikon && ikon.getAttribute('href')) || '',
+      apple:!!document.querySelector('meta[name="apple-mobile-web-app-capable"]'),
+      baslik:!!document.querySelector('meta[name="apple-mobile-web-app-title"]'),
+    };
+  });
+  if(!r.manifest) errors.push(target + ': PWA manifesti kurulmadi (#pwa-manifest)');
+  if(!r.apple) errors.push(target + ': apple-mobile-web-app-capable etiketi yok');
+  if(!r.baslik) errors.push(target + ': apple-mobile-web-app-title etiketi yok');
+  if(!r.ikon) errors.push(target + ': <link rel="icon"> yok');
+  /* Tek dosya TEK DOSYADIR: yanindaki img/ klasoru telefona gitmez.
+     Goreli bir ikon yolu orada 404 verir. */
+  if(target.indexOf('/dist/') === 0 && r.ikon.indexOf('data:') !== 0){
+    errors.push(target + ': tek dosya surumunun ikonu gomulu degil (' 
+      + r.ikon.slice(0, 40) + ')');
+  }
+}
+
+
 async function walkScreens(page, base, target, errors){
   await page.goto(base + target, { waitUntil:'load' });
   await page.waitForSelector('.site', { timeout:15000 });
@@ -103,6 +140,8 @@ async function walkScreens(page, base, target, errors){
       await wait(120);
     }
   }
+
+  await checkPwa(page, target, errors);
 
   const routes = await page.evaluate(() =>
     R.App.NAV.reduce((acc, s) => acc.concat(s.items.map(i => i.id)), []));
