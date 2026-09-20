@@ -8184,7 +8184,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'e8da3d3', at:'2026-09-20 19:47', dirty:true };
+R.BUILD = { id:'afa2073', at:'2026-09-20 20:03', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20654,6 +20654,25 @@ R.Beacon = (function(){
            numarasından hesaplanır» demek, aynı formülü merkezde ikinci
            kez yazmak ve iki kopyanın bir gün ayrışması demekti. */
         out.level_sub = metric(sv.basamak, 'computed');
+      }
+    }
+
+    /* ROZET SAYAÇLARI — merkez profilinin girdisi.
+
+       Üç arayüz birbirini GÖRMEZ (AGENTS.md §1.4); «bütün alanların
+       toplamı 5000 saat» gibi bir rozet yalnız merkezde hesaplanabilir
+       ve bu satırlar onun girdisidir. Merkez bunları TOPLAR, kendi
+       rozetini kendi verir; modülün kendi rozetiyle karışmaz.
+
+       Kademe gibi bunlar da BUGÜNÜN durumudur ve geçmişe yazılmaz:
+       «üç ay önceki gün toplam 400 saatti» diye bir ölçüm yoktur,
+       olan tek şey bugünkü toplamdır. */
+    if(!gecmisMi(d) && R.Basarim){
+      const rz = R.Basarim.isaret();
+      if(rz){
+        Object.keys(rz).forEach(function(k){
+          out[k] = metric(rz[k], 'computed');
+        });
       }
     }
     if(levelOf() === 'gelismis') Object.assign(out, genis(d, gun, bloklar));

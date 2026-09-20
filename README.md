@@ -77,6 +77,21 @@ konuşamadığı bir boşluğu buldu (tarayıcının CORS ön-isteği).
   hangi ekranda yapıldığı, bugün tavanın ne kadarının dolduğu ve o ekrana
   giden bir düğme.
 
+  **Rozetler** rütbeden ayrıdır ve başka şey ölçer: yedi aile, 37 rozet
+  — görev, gün, saat, odak, istikrar, kusursuz. Her modül kendi verisinden
+  sayar; kazanılmış rozet sayaç düşse de geri alınmaz, çünkü rozet bir
+  durum değil bir **olay**dır. Günün odak rozeti günlük raporda,
+  eylemlerin yanında durur.
+
+  **HKM profili** dördünün toplamını gösterir — üç arayüz birbirini
+  görmediği için o toplamı yalnız merkez yapabilir. Kademeler yan yana
+  durur, toplanmaz. Zirvede tek bir onur rozeti var: **Sistem Ustası**,
+  dört şart birden ister.
+
+  **Mühür** kazanılmaz, **basılır**: bir belgenin damgasıdır. Beş alan —
+  eğitim, sağlık, entelektüellik, yönetim, yönetici — HKM'nin günlük
+  özetine, haftalık raporuna ve karar belgelerine.
+
   Tek kaynak `brand/seviye/`; üçe `python3 tools/seviye.py --yay` ile
   dağıtılır (bkz. [`brand/seviye/OKU.md`](brand/seviye/OKU.md)).
 

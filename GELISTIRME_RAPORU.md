@@ -41,6 +41,7 @@ yerde «göremedim» yazdım.
 | **İP-5.2** HKM brifinginde seviye | ✅ bitti | `manager._level_line`, iki test |
 | **İP-5.3** Defterin bir yıllık boyutu | ✅ ölçüldü | AYS 13 117 B · SPİ 15 157 B · ESP 12 397 B (tavan) |
 | **İP-5.4** Rütbe ekranı ve XP kaynakları | ✅ bitti | üç arayüzde Rütbe bölümü, dört sekme; katalogda `rota`·`nerede`·`nasil` |
+| **İP-5.5** Rozet sistemi | ✅ bitti | 37 rozet + 5 mühür + onur; ay özeti defteri, HKM profili |
 | **İP-6** `labs.js` kapsamı | ⏳ açık | 1 482 satır, hâlâ testsiz |
 
 ## Rapor yazılırken bilinmeyen dört şey

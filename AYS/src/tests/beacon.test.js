@@ -177,7 +177,13 @@
     it('gövde yalnızca sayı taşır, içerik taşımaz', () => {
       resetState();
       const p = B().payload(BUGUN);
-      expect(Object.keys(p.metrics).sort().join(',')).toBe('exam_days_left,level_step,level_sub,level_tier,mock_net,mock_net_baseline,questions,study_minutes,xp_today,xp_total');
+      /* Liste TEK TEK yazılıdır ve öyle kalmalı: «şu anahtarlar var»
+         demek yerine «yalnız bunlar var» demenin tek yolu bu. Yeni bir
+         işaret eklendiğinde bu satır KIRILIR ve kırılması gerekir —
+         merkeze ne gönderdiğimiz bir gözden kaçma olmamalı.
+         Rozet sayaçları (badge_*) merkezin profil sayfasının girdisi;
+         hepsi SAYIDIR, hiçbiri içerik taşımaz. */
+      expect(Object.keys(p.metrics).sort().join(',')).toBe('badge_count,badge_days,badge_focus_hours,badge_hours,badge_streak_months,badge_tasks,exam_days_left,level_step,level_sub,level_tier,mock_net,mock_net_baseline,questions,study_minutes,xp_today,xp_total');
       const metin = JSON.stringify(p);
       expect(metin.length < 1600).toBe(true);
       Object.keys(p.metrics).forEach(k => {

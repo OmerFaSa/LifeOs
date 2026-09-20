@@ -1377,6 +1377,38 @@ oldu ama gün kırılımı KORUNDU — `xp.js` artık biçim değişimi ile eşi
 değişimini ayırıyor; eskiden bir katalog düzenlemesi kullanıcının yüz
 yirmi günlük kırılımını siliyordu.
 
+**Rozet sistemi kuruldu.** Depo sahibi 53 görsel gönderdi (11'i `_a`/`_b`
+ikizi, md5 düzeyinde aynı) ve altı kademe videosu. Yedi aile, 37 rozet,
+5 mühür ve bir onur rozeti.
+
+Defter **ay özeti** üstüne kuruldu ve sebebi ölçüldü: XP defteri gün
+kırılımını 120 günde budar, ama «1000 gün» üç yıllık bir sayıdır ve o
+pencereden okunamaz; ham veriyi her açılışta taramak ise beş yıllık
+defterde on binlerce satır demekti. Her ay için dört sayı saklanıyor,
+bu özet asla budanmıyor — yirmi beş yıl 300 satır, 12 KB.
+
+Kazanılmış rozet **geri alınmaz**. Sayaç düşebilir; rozet bir DURUM
+değil bir OLAYdır ve «şu gün 500 saate ulaştın» cümlesi veri silinse de
+doğru kalır.
+
+Kutlama rütbeyle **aynı sözleşmeyi** kullanıyor (üç saniyelik haberci,
+Space o ekrana hiç sokmaz) ama görünümü ayrı ve süresi kısa — rozet
+daha sık kazanılır, yedi saniye otuz yedi kez tekrarlanınca kutlama
+olmaktan çıkar. Haberci bunun için genelleştirildi: artık `yukselme`
+değil bir TARİF okuyor.
+
+**HKM profili** dördünün toplamını gösteriyor. Üç kural: merkezin kendi
+XP'si yok (kademeler yan yana, toplanmaz), eksik veri sıfır değil
+(sayaç göndermeyen modül toplama girmez ve bu sayfada yazar), her sayaç
+toplanmaz (odak ve istikrarda en yüksek alınır).
+
+Yol boyunca iki hata yakalandı. **Birim eki ömürlük sayacı kesiyordu:**
+`sync_engine` `badge_hours`ü `hours` sanıp 0–24 aralığına sokuyor, 100
+saatlik toplam 422 dönüyordu. **Gezinme bağlantısı vardı, rota yoktu:**
+`GORUNUMLER` beyaz listesine `profil` eklenmemişti ve sayfa sessizce
+«bugün»e düşüyordu — `yuz.js` bunu yakalayamadı çünkü o da aynı adı
+kullanıp açılan yanlış sayfayı ölçüyordu.
+
 **Rütbe ekranı geldi.** Perde bir andır: kazanıldığı saniye görünür ve
 geçer. Durağan karşılığı yoktu — kullanıcı «şu an neredeyim, sıradaki
 basamak ne, bu puan nereden geldi» sorularını soracak bir yer bulamıyordu.

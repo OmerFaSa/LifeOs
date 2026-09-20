@@ -82,6 +82,8 @@ brand/seviye/
   OKU.md          bu belge
   kademeler.js    kademeler, etiketler, eşikler, etkinlikler
   xp.js           motor
+  basarimlar.js   rozet kataloğu (yedi aile, mühürler, onur)
+  basarim.js      rozet motoru (ay özeti, kazanım, kuyruk)
   perde.js        rütbe gösterimi ve haberci
   rutbe.js        Rütbe ekranı (dört sekme)
   seviye.css      perde, haberci, rozet ve Rütbe ekranı biçimleri
@@ -239,6 +241,106 @@ hâle getirir:
 
 Rehberdeki eski «Seviye» sekmesi kaldırıldı: aynı bilgi iki yerde
 durursa bir gün ikisi farklı şey söyler.
+
+## Rozet, mühür ve onur — rütbeden AYRI üç şey
+
+Rütbe TEK bir merdivendir: XP birikir, basamak geçilir. Rozet ise
+**birbirinden bağımsız eşiklerdir** ve başka şeyler ölçer. Üçü birbirine
+karışmasın diye rozetin XP ile hiçbir ilişkisi kurulmadı — XP'yi
+çoğaltmaz, hızlandırmaz, eşiğini değiştirmez.
+
+| | Ne | Kime ait | Nerede |
+|---|---|---|---|
+| **Rozet** | bir eşiği geçmenin kaydı | kullanıcıya | Rütbe › Başarımlar |
+| **Mühür** | bir belgenin damgası | **belgeye** | HKM raporları |
+| **Onur** | bütün alanların zirvesi | kullanıcıya | HKM › Profil |
+
+### Rozet — yedi aile, 37 rozet
+
+| Aile | Ölçü | Eşikler |
+|---|---|---|
+| Görev | toplam | 100 · 250 · 500 · 1000 · 2500 · 5000 |
+| Gün | toplam | 25 · 50 · 100 · 250 · 500 · 1000 |
+| Saat | toplam | 100 · 250 · 500 · 1000 · 2500 · 5000 |
+| Odak | **günlük** | 1 → 10 saat |
+| İstikrar | **seri** | 1 · 3 · 6 · 9 · 12 · 24 ay |
+| Kusursuz | özel | gün · hafta · ay |
+
+Dört ölçü türü ve dördü de ayrı: `toplam` ömür boyu birikir, `gunluk`
+BİR GÜNE ait en iyi değerdir, `seri` kesintisiz ay sayısıdır, `ozel`
+kendi kuralı olandır.
+
+### Defter neden AY ÖZETİ üstüne kurulu
+
+XP defteri gün kırılımını 120 günde bir budar. XP için doğru: toplam
+ayrı alanda durur. Rozet için yetmez — «1000 gün» üç yıllık bir sayı,
+«24 ay istikrar» iki yıllık bir seri; ikisi de 120 günlük pencereden
+okunamaz. Ham veriyi her açılışta taramak ise ölçülmüş bir bedeldi.
+
+Her ay için dört sayı saklanır — `{ gun, dakika, gorev, kusursuz }` — ve
+bu özet **asla budanmaz**. Yirmi beş yıl = 300 satır ≈ 12 KB. Toplam
+özetin toplamı, seri özetin sırası, kusursuz ay özetin kendisidir.
+
+### Kazanılmış rozet GERİ ALINMAZ
+
+Sayaç düşebilir (kayıt silinirse düşer), rozet düşmez. Rozet bir DURUM
+değil bir **OLAY**dır: «şu gün 500 saate ulaştın» cümlesi, sonradan veri
+silinse de doğru kalır. Sayacın düştüğünü ekran zaten gösterir.
+
+### «Kusursuz» ne demek
+
+O modülün **günlük beklenen** işlerinin hepsinin yapıldığı gün.
+«XP tavanının dolması» denenmedi ve bilerek: tavan bir ÜST SINIRDIR,
+hedef değil — «bugün 420 XP'ye ulaş» demek §1.6'yı kırardı.
+
+Nadir işler (deneme, tahlil, yazı taslağı) girmez. SPİ'de **antrenman da
+girmez** ve bu bir sağlık kararıdır: dinlenme günü eksiklik değildir.
+
+### Odak iki yerde, iki ayrı şey
+
+| Nerede | Ne söyler |
+|---|---|
+| Rütbe › Başarımlar | **ömür boyunca** görülen en iyi gün |
+| Günlük rapor, eylemlerin yanında | **bu günün** kendisi |
+
+İkisi aynı görseli kullanır ama aynı şeyi söylemez. Günlük rapora
+ömürlük rekoru basmak, o günün raporunu o günden başka bir şey hakkında
+yapardı.
+
+### HKM profili — toplamı yalnız merkez görür
+
+Üç arayüz birbirini görmez (AGENTS.md §1.4), o yüzden «bütün alanlarda
+5000 saat» gibi bir rozeti hiçbir modül kendi başına veremez. Modüller
+sayaçlarını işaretle gönderir (`badge_hours`, `badge_days` …), merkez
+toplar.
+
+Üç kural, üçü de bilerek:
+
+1. **Merkezin kendi XP'si yoktur.** Kademe yan yana durur; toplanmaz,
+   ortalanmaz, sıralanmaz.
+2. **Eksik veri sıfır değildir.** Sayaç göndermeyen modül toplama 0 ile
+   girmez ve kaç modülün konuştuğu sayfada yazar.
+3. **Her sayaç toplanmaz.** Odak ve istikrarda en yüksek alınır —
+   toplamak «üç sistemde 3'er saat odaklandım, demek ki 9 saat» demekti.
+
+**Sistem Ustası** dört şart birden ister: 1000 saat · 2500 görev ·
+365 gün · 12 ay kesintisiz. Biri eksikse verilmez, ama kazanılmamışken
+de şartlarıyla gösterilir.
+
+### Dosya adları
+
+```
+basarim-gorev-500.webp      rozet    (aile + eşik)
+basarim-odak-7.webp
+basarim-kusursuz-ay.webp
+muhur-saglik.webp           mühür    (alan)
+onur-usta.webp              onur
+```
+
+Önek `basarim-`, `rozet-` değil: `rozet-1.png` … `rozet-6.png` zaten
+KADEME rozetidir (`xp.js`, `panelHtml`). İki ayrı kavramı tek önekle
+adlandırmak, bir gün birinin diğerinin dosyasını çağırması demekti.
+Kullanıcıya hâlâ «rozet» denir; ayrım dosya adında, ekranda değil.
 
 ## XP nereden gelir — türetilir, tetiklenmez
 
