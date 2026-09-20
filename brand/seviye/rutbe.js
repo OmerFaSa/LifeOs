@@ -159,8 +159,51 @@ __NS__.Screens.rutbe = (function(){
       ]),
 
       K.Card({ title:'İlerleme', body:ilerleme }),
+      rozetOzetKart(),
       bugunKart(),
     ]);
+  }
+
+  /* «Şu an» sekmesinde ROZET ÖZETİ.
+
+     Sekme kullanıcının ilk gördüğü yerdir ve rozetlerden hiç
+     bahsetmiyordu: otuz yedi rozetlik bir sistem kurulmuş ama ana
+     ekranda izi yoktu. Burada TEK SATIR yeter — kaç tanesi kazanıldı
+     ve en son hangisi. Ayrıntı Başarımlar sekmesinde.
+
+     Son kazanılan rozet TARİHE göre seçilir, katalog sırasına göre
+     değil: «en son ne kazandım» sorusunun cevabı budur. */
+  function rozetOzetKart(){
+    const B = __NS__.Basarim;
+    if(!B) return '';
+    const d = B.durum();
+    if(!d) return '';
+
+    const kazanilan = B.liste().filter(r => r.kazanildi);
+    kazanilan.sort((a, b) => String(b.kazanildi).localeCompare(String(a.kazanildi)));
+    const son = kazanilan[0];
+    const sirada = B.siradaki(1)[0];
+
+    return K.Card({
+      title:'Rozetler',
+      actions:K.Button({ label:'Hepsi', size:'sm', act:'rutbe-tab',
+        data:{ 'data-tab':'rozet' } }),
+      body:K.Stack([
+        K.Grid([
+          K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
+            unit:'/ ' + d.toplamRozet }),
+          K.Stat({ label:'Toplam saat', value:d.saat, unit:'saat' }),
+          K.Stat({ label:'Kesintisiz', value:d.seriAy, unit:'ay' }),
+        ]),
+        when(son, () => html`<p class="small dim">Son kazanılan:
+          <b>${son.ad}</b> · ${son.kazanildi}</p>`),
+        when(sirada, () => html`<p class="small dim">Sıradaki:
+          <b>${sirada.kisaAd || sirada.ad}</b> —
+          ${sirada.kalan.toLocaleString('tr-TR')} ${sirada.birim || ''} kaldı</p>`),
+        when(!son && !sirada, () => K.Empty({ text:'Rozetler kayıt girdikçe '
+          + 'kendiliğinden açılır; hiçbirini elle almana gerek yok.' })),
+      ], 'sm'),
+    });
   }
 
   /* Bugün hangi işten kaç XP çıktı — ve tavanına ne kadar kaldı. */
