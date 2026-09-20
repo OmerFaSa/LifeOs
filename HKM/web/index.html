@@ -325,6 +325,20 @@ details.detay > summary:hover{ color:var(--fg); }
    rozetin uzerinde yazili. */
 .rz--acik .rz__e{ display:none; }
 
+
+/* ============================== MÜHÜR ===========================
+   Mühür bir SÜS değil bir ETİKETTİR: hangi belgeye baktığını başlığı
+   okumadan söyler. O yüzden küçük ve başlığın yanında durur —
+   belgeyi bastırmaz, imzalar. */
+.muhur{ width:22px; height:22px; object-fit:contain;
+  vertical-align:-5px; margin-right:7px; flex:none; }
+.muhur--sm{ width:20px; height:20px; }
+/* Konsey şeridinde köşeye basılır: orada başlık zaten dar ve mührün
+   satır içinde durması adı aşağı itiyordu. */
+.muhur--kose{ position:absolute; top:10px; right:10px;
+  width:26px; height:26px; margin:0; opacity:.9; }
+.serit__kutu{ position:relative; }
+
 </style>
 </head>
 <body>
@@ -569,8 +583,44 @@ details.detay > summary:hover{ color:var(--fg); }
     missing:'veri yok' };
   var MODUL = { ays:'AYS', spi:'SPİ', esp:'ESP' };
 
+  /* =============================== MÜHÜR ===========================
+
+     MÜHÜR KAZANILMAZ, BASILIR. Rozet bir eşiği geçmenin kaydıdır ve
+     kullanıcıya aittir; mühür bir BELGENİN damgasıdır ve belgeye
+     aittir. Aynı listede durmamalarının sebebi bu — birinin eşiği,
+     sayacı ve tarihi vardır, ötekinin hiçbiri yoktur.
+
+     Beş mühür, beş alan:
+
+       eğitim           AYS'nin raporu
+       sağlık           SPİ'nin raporu
+       entelektüellik   ESP'nin raporu
+       yönetim          HKM'nin günlük ve dönemsel brifingi
+       yönetici         HKM'nin karar ve teklif belgeleri
+
+     Mühür bir SÜS DEĞİL bir ETİKETTİR: hangi belgeye baktığını, başlığı
+     okumadan söyler. Dosya yoksa `onerror` düğümü kaldırır ve başlık
+     olduğu gibi kalır. */
+  var MUHUR_AD = {
+    egitim:'Eğitim', saglik:'Sağlık', entelektuellik:'Entelektüellik',
+    yonetim:'Yönetim', yonetici:'Yönetici',
+  };
+  /* Konseyin iç adı (bio/academic/intellect) bir uygulama ayrıntısıdır;
+     mühür kullanıcının bildiği alana basılır. */
+  var MUHUR_MODUL = { ays:'egitim', spi:'saglik', esp:'entelektuellik' };
+
+  function muhurHtml(id, olcu){
+    if(!MUHUR_AD[id]) return '';
+    return '<img class="muhur' + (olcu ? ' muhur--' + olcu : '') + '"'
+      + ' src="/img/seviye/muhur-' + esc(id) + '.webp"'
+      + ' alt="' + esc(MUHUR_AD[id]) + ' mührü"'
+      + ' title="' + esc(MUHUR_AD[id]) + ' mührü"'
+      + ' loading="lazy" onerror="this.remove()">';
+  }
+
   function brifingCiz(b){
-    var h = '<div class="tag">' + esc(b.date) + ' · kural motoru</div>';
+    var h = '<div class="tag">' + muhurHtml('yonetim', 'sm')
+      + esc(b.date) + ' · kural motoru</div>';
     (b.lines || []).forEach(function(l){
       if(l.kind === 'proposal') return;          /* öneri ayrı kartta */
       var sinif = l.verdict ? (TON[l.verdict] || '') : '';
@@ -651,12 +701,14 @@ details.detay > summary:hover{ color:var(--fg); }
     if(!satir){ k.hidden = true; return; }
     k.hidden = false;
     if(!b.decision){
-      k.innerHTML = '<div class="tag">Öneri</div><div class="prop">'
+      k.innerHTML = '<div class="tag">' + muhurHtml('yonetici', 'sm')
+        + 'Öneri</div><div class="prop">'
         + esc(satir.text) + '</div>';
       return;
     }
     var d = b.decision;
-    var h = '<div class="tag">Günün önerisi · öncelik ' + esc(d.rank) + '</div>'
+    var h = '<div class="tag">' + muhurHtml('yonetici', 'sm')
+      + 'Günün önerisi · öncelik ' + esc(d.rank) + '</div>'
       + '<div class="prop">' + esc(d.proposal) + '</div>'
       + '<p class="muted">Bu bir emir değil bir öneridir; HKM\'nin uygulama ya da '
       + 'ekran düzeyinde hiçbir yetkisi yoktur. Reddedilen öneri silinmez.</p>';
@@ -788,7 +840,8 @@ details.detay > summary:hover{ color:var(--fg); }
   /* Hafta, günün altındaki eğridir: bugün gürültülüdür, bir kötü gece ya
      da bir yoğun gün onu savurur. Ama hafta da önce KAPSAMINI söyler. */
   function haftaCiz(r){
-    var h = '<div class="tag">Hafta · ' + esc(r.from) + ' → ' + esc(r.to) + '</div>';
+    var h = '<div class="tag">' + muhurHtml('yonetim', 'sm')
+      + 'Hafta · ' + esc(r.from) + ' → ' + esc(r.to) + '</div>';
     var g = r.days_seen || {};
     h += '<p>Kayıtlı gün: AYS ' + esc(g.ays || 0) + ' · SPİ ' + esc(g.spi || 0)
        + ' · ESP ' + esc(g.esp || 0) + ' (7 günde)</p>';
@@ -2127,7 +2180,9 @@ details.detay > summary:hover{ color:var(--fg); }
       var durum = d ? d.metin : 'veri yok';
       var sinif = d ? d.sinif : 'muted';
       var adres = SISTEM_ADRES[u.module];
-      h += '<div class="serit__kutu"><div class="serit__ad">'
+      h += '<div class="serit__kutu">'
+        + muhurHtml(MUHUR_MODUL[u.module], 'kose')
+        + '<div class="serit__ad">'
         + esc(SISTEM_KISA[u.module] || u.module)
         + ' <span class="muted" data-yokla="' + esc(adres) + '">·</span></div>'
         + '<div class="serit__durum ' + sinif + '">' + esc(durum) + '</div>'
@@ -2187,7 +2242,8 @@ details.detay > summary:hover{ color:var(--fg); }
     var satirlar = (b.lines || []).filter(function(l){
       return l.kind !== 'proposal';
     });
-    var h = '<span class="tag">Bugün ne oldu</span>';
+    var h = '<span class="tag">' + muhurHtml('yonetim', 'sm')
+      + 'Bugün ne oldu</span>';
     if(!satirlar.length){
       h += '<p class="muted">Bugün için henüz bir şey gelmedi.</p>';
     }
@@ -2400,8 +2456,8 @@ details.detay > summary:hover{ color:var(--fg); }
   function teklifListeCiz(veri){
     var acik = veri.intents || [];
     var gecmis = (veri.answered || []).slice(-8).reverse();
-    var h = '<span class="tag">' + esc(SISTEM_KISA[TEKLIF_MODUL])
-      + ' · açık teklifler</span>';
+    var h = '<span class="tag">' + muhurHtml(MUHUR_MODUL[TEKLIF_MODUL], 'sm')
+      + esc(SISTEM_KISA[TEKLIF_MODUL]) + ' · açık teklifler</span>';
     if(!acik.length){
       h += '<p class="muted">Açık teklif yok.</p>';
     }else{
