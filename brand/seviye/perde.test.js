@@ -308,6 +308,85 @@
     });
   });
 
+  describe('rozet perdesi — rütbeyle aynı sözleşme, ayrı sahne', () => {
+
+    /* Gerçek bir rozet kullanılır, uydurulmuş bir nesne değil: katalog
+       değişirse bu testler de onunla birlikte değişmeli. */
+    function rozet(){
+      const r = L.ROZETLER.filter(x => x.aile === 'saat')[2];
+      return { kod:r.kod, aile:r.aile, aileAd:r.aileAd, ad:r.ad,
+        kisaAd:r.kisaAd, esik:r.esik, birim:r.birim, olcu:r.olcu,
+        gorsel:r.gorsel, ozet:r.ozet };
+    }
+
+    it('rozetin görseli katalogdaki adla aranır', () => {
+      const y = P.rozetGorseliYolu(rozet(), 'img/seviye/');
+      expect(y).toBe('img/seviye/' + rozet().gorsel + '.webp');
+    });
+
+    it('rozetsiz çağrı hiçbir şey açmaz', () => {
+      temiz();
+      expect(P.rozetKutla(null)).toBeNull();
+      temiz();
+    });
+
+    it('kutlama ÖNCE haberci açar — rütbedeki kuralın aynısı', () => {
+      temiz();
+      const s = P.rozetKutla(rozet(), {});
+      /* Hareket azaltma tercihinde perde hiç açılmaz ve `sessiz` döner;
+         o durumda haberci de aranmaz. */
+      if(s && s.sessiz){ temiz(); return; }
+      expect(!!document.querySelector('.haberci')).toBe(true);
+      expect(!!document.querySelector('.haberci--rozet')).toBe(true);
+      s.kapat();
+      temiz();
+    });
+
+    it('habercide AİLE ve kazanılan şey birlikte yazar', () => {
+      temiz();
+      const s = P.rozetKutla(rozet(), {});
+      if(s && s.sessiz){ temiz(); return; }
+      const metin = document.querySelector('.haberci').textContent;
+      expect(metin).toContain(rozet().aileAd);
+      expect(metin).toContain(String(rozet().esik));
+      s.kapat();
+      temiz();
+    });
+
+    it('perde rozetin ÖZETİNİ taşır — boş bırakılmaz', () => {
+      /* Bu satır bir kez boş kalmıştı: katalogda `ozet` vardı ama motor
+         onu dışarı taşımıyordu, kutlamada açıklama hiç görünmüyordu. */
+      temiz();
+      const r = rozet();
+      expect(typeof r.ozet).toBe('string');
+      expect(r.ozet.length > 0).toBe(true);
+      P.ac({ sinif:'perde--rozet', enAz:60000, kart:'img/seviye/' + r.gorsel + '.webp',
+        banner:{ no:String(r.esik), ustyazi:'Yeni rozet · ' + r.aileAd,
+          ad:r.kisaAd, etiket:'', slogan:r.ozet } });
+      const metin = acikPerde().querySelector('.perde__banner').textContent;
+      expect(metin).toContain(r.ozet);
+      temiz();
+    });
+
+    it('rozet perdesi AİLEYİ başlıkta iki kez yazmaz', () => {
+      /* «Saat 500 saat» okunuyordu: aile hem üst yazıda hem başlıkta. */
+      temiz();
+      const r = rozet();
+      P.ac({ sinif:'perde--rozet', enAz:60000,
+        banner:{ no:String(r.esik), ustyazi:'Yeni rozet · ' + r.aileAd,
+          ad:r.kisaAd, etiket:'', slogan:r.ozet } });
+      const baslik = acikPerde().querySelector('.perde__ad').textContent;
+      expect(baslik.indexOf(r.aileAd)).toBe(-1);
+      temiz();
+    });
+
+    it('rozet kutlaması rütbeden KISA durur', () => {
+      /* Rozet daha sık kazanılır; yedi saniye otuz yedi kez
+         tekrarlanınca kutlama olmaktan çıkıp engel olur. */
+      expect(P.rozetKutlamaSuresi() < P.kutlamaSuresi({ yeniKademe:false })).toBe(true);
+    });
+  });
+
   describe('ses — «Sesi aç» düğmesi sesi AÇAR', () => {
 
     it('düğmenin üstündeki dokunuş kendiliğinden ses açmaz', () => {

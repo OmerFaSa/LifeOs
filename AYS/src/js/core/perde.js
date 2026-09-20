@@ -841,9 +841,12 @@ R.Perde = (function(){
       banner:{
         no:String(rozet.esik || ''),
         rozet:null,
-        ustyazi:'Yeni rozet',
-        ad:rozet.ad || rozet.kod,
-        etiket:rozet.aileAd || '',
+        /* AİLE GÖZ ÜSTÜNDE, SAYI BAŞLIKTA. Önce başlık `ad` idi ve
+           «Saat 500 saat» okunuyordu — aile iki kez. Aile artık üst
+           satırda, başlıkta yalnız kazanılan şey var. */
+        ustyazi:'Yeni rozet · ' + (rozet.aileAd || ''),
+        ad:rozet.kisaAd || rozet.ad || rozet.kod,
+        etiket:'',
         slogan:rozet.ozet || '',
         renk:null, isik:null,
       },
@@ -852,8 +855,8 @@ R.Perde = (function(){
       haberci:{
         sinif:'haberci--rozet',
         ustyazi:'Yeni rozet',
-        ad:rozet.ad || rozet.kod,
-        etiket:'',
+        ad:rozet.aileAd || '',
+        etiket:rozet.kisaAd || rozet.ad || '',
       },
       bitti:secenekler.bitti,
       rozet:rozet,

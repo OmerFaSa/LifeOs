@@ -166,6 +166,10 @@ LIFEOS.ROZETLER = (function(){
         kod:a.id + '-' + e,
         aile:a.id, aileAd:a.ad, esik:e, sira:i,
         birim:a.birim, olcu:a.olcu,
+        /* Ailenin özeti rozete de iner: kutlama perdesi bu cümleyi
+           yazar ve aileye gidip aramak zorunda kalmaz. Yoksa kutlamada
+           açıklama satırı boş kalıyordu. */
+        ozet:a.ozet,
         /* İKİ AD, İKİ YER. `ad` kutlamada ve ipucunda geçer ve ailesini
            söylemek zorundadır («Saat 500 saat» değil «500 saat» dersek
            kutlamada neyin rozeti olduğu kaybolur). `kisaAd` ise rozet

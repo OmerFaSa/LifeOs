@@ -398,7 +398,7 @@ R.Basarim = (function(){
     if(!r) return null;
     return {
       kod:r.kod, aile:r.aile, aileAd:r.aileAd, ad:r.ad,
-      kisaAd:r.kisaAd, etiket:r.etiket, esik:r.esik,
+      kisaAd:r.kisaAd, etiket:r.etiket, ozet:r.ozet, esik:r.esik,
       birim:r.birim, olcu:r.olcu, gorsel:r.gorsel,
       kazanildi:(defter && defter.kazanilan[r.kod]) || null,
     };
@@ -421,7 +421,7 @@ R.Basarim = (function(){
       var deger = r.olcu === 'ozel' ? null : olcum(r.aile);
       return {
         kod:r.kod, aile:r.aile, aileAd:r.aileAd, ad:r.ad,
-        kisaAd:r.kisaAd, etiket:r.etiket,
+        kisaAd:r.kisaAd, etiket:r.etiket, ozet:r.ozet,
         esik:r.esik, birim:r.birim, olcu:r.olcu, gorsel:r.gorsel,
         kazanildi:kazanildi,
         deger:deger,
