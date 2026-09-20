@@ -341,8 +341,34 @@ ESP.Screens.rutbe = (function(){
           () => html` · sıradaki ${siradaki.esik.toLocaleString('tr-TR')}`)}<span
           class="rutbe-rozet__say">${kazanilan} / ${satir.length}</span></p>`,
         html`<div class="rutbe-rozetler">${map(satir, r => rozetHtml(r))}</div>`,
+        rozetAyrinti(satir),
       ], 'sm'),
     });
+  }
+
+  /* Seçili rozetin ayrıntısı — KENDİ AİLESİNİN altında açılır.
+
+     Panel tek bir yerde (sayfanın altında) açılsaydı, tıklanan rozet
+     ile açılan yazı arasında ekran boyu bir mesafe olurdu; dokunup
+     aşağı kaydırmak zorunda kalan biri neye baktığını unutur. */
+  function rozetAyrinti(satir){
+    const kod = S.ui.rutbeRozet;
+    if(!kod) return '';
+    const r = satir.filter(x => x.kod === kod)[0];
+    if(!r) return '';
+
+    const sayi = n => (n == null ? '—' : Number(n).toLocaleString('tr-TR'));
+    const durum = r.kazanildi
+      ? html`<b>Kazanıldı</b> · ${r.kazanildi}`
+      : (r.deger == null
+          ? html`<b>Henüz kazanılmadı</b>`
+          : html`<b>${sayi(Math.max(0, r.esik - r.deger))} ${r.birim || ''} kaldı</b>
+              · şu an ${sayi(r.deger)} / ${sayi(r.esik)}`);
+
+    return K.Notice({ tone:r.kazanildi ? 'ok' : 'info',
+      title:r.ad,
+      body:html`<p class="rutbe-ayrinti__ne">${r.ozet || ''}</p>
+        <p class="rutbe-ayrinti__durum">${durum}</p>` });
   }
 
   function rozetHtml(r){
@@ -358,18 +384,26 @@ ESP.Screens.rutbe = (function(){
     const baslik = r.ad + (r.kazanildi ? ' · kazanıldı ' + r.kazanildi
       : (yuzde == null ? ' · kilitli' : ' · %' + yuzde));
 
+    /* DÜĞME, div değil. `title` özniteliği masaüstünde iş görüyordu
+       ama telefonda hiç çalışmıyor — dokunmanın bir karşılığı yoktu.
+       Düğme hem dokunulabilir hem klavyeyle gezilebilir. */
+    const acik = S.ui.rutbeRozet === r.kod;
     return html`
-      <div class="${'rutbe-rozet rutbe-rozet--' + (r.kazanildi ? 'acik' : 'kilitli')}"
-        title="${baslik}">
-        <div class="rutbe-rozet__kutu">
+      <button type="button"
+        class="${'rutbe-rozet rutbe-rozet--' + (r.kazanildi ? 'acik' : 'kilitli')
+          + (acik ? ' rutbe-rozet--secili' : '')}"
+        data-act="rozet-ac" data-kod="${r.kod}"
+        aria-expanded="${acik ? 'true' : 'false'}"
+        aria-label="${baslik}">
+        <span class="rutbe-rozet__kutu">
           ${gorsel}
           <span class="rutbe-rozet__etiket">${r.etiket || r.esik}</span>
-        </div>
+        </span>
         <span class="rutbe-rozet__ad">${r.kisaAd || r.ad}</span>
         ${when(!r.kazanildi && yuzde != null, () => html`<span
           class="rutbe-rozet__oran" aria-hidden="true"><i
           style="${'width:' + yuzde + '%'}"></i></span>`)}
-      </div>`;
+      </button>`;
   }
 
   /* ============================================ XP NEREDEN GELİR ==== */
@@ -498,6 +532,13 @@ ESP.Screens.rutbe = (function(){
     async 'rutbe-git'(el){
       const rota = el.dataset.rota;
       if(rota) ESP.App.go(rota);
+    },
+    /* Aynı rozete tekrar dokunmak KAPATIR: açtığı şeyi kapatmanın yolu
+       olmayan bir düğme, kullanıcıyı başka bir yere dokunmaya zorlar. */
+    async 'rozet-ac'(el){
+      const kod = el.dataset.kod;
+      S.ui.rutbeRozet = (S.ui.rutbeRozet === kod) ? null : kod;
+      ESP.App.render();
     },
   };
 
