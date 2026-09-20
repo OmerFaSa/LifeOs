@@ -89,8 +89,11 @@ def uret(ad: str, ad_alani: str, mod: str, degistir: bool) -> str:
 # denetimin Python tarafini disarida birakmasi tutarsizlikti.
 YOL_BAS = "# SEVIYE:yol-bas"
 YOL_BIT = "# SEVIYE:yol-bit"
+# HKM de listede: merkez profili ayni rozet gorsellerini gosteriyor ve
+# muhafizin ikinci bir kopyasini yazmak, iki kopyanin bir gun ayrismasi
+# demekti — bu ozellikte tam olarak bunu onlemek icin --denetle var.
 YOL_HEDEFLER = ["AYS/devserver.py", "SPI/devserver.py", "ESP/devserver.py",
-                "sunucu.py"]
+                "sunucu.py", "HKM/daemon.py"]
 
 # Tek dosya surumune medya kopyalayan blok — uc build.py'de ayni.
 DIST_BAS = "# SEVIYE:dist-bas"

@@ -212,6 +212,25 @@ SP.Beacon = (function(){
         out.level_sub = metric(sv.basamak, 'computed');
       }
     }
+
+    /* ROZET SAYAÇLARI — merkez profilinin girdisi.
+
+       Üç arayüz birbirini GÖRMEZ (AGENTS.md §1.4); «bütün alanların
+       toplamı 5000 saat» gibi bir rozet yalnız merkezde hesaplanabilir
+       ve bu satırlar onun girdisidir. Merkez bunları TOPLAR, kendi
+       rozetini kendi verir; modülün kendi rozetiyle karışmaz.
+
+       Kademe gibi bunlar da BUGÜNÜN durumudur ve geçmişe yazılmaz:
+       «üç ay önceki gün toplam 400 saatti» diye bir ölçüm yoktur,
+       olan tek şey bugünkü toplamdır. */
+    if(!gecmisMi(d) && SP.Basarim){
+      const rz = SP.Basarim.isaret();
+      if(rz){
+        Object.keys(rz).forEach(function(k){
+          out[k] = metric(rz[k], 'computed');
+        });
+      }
+    }
     if(levelOf() === 'gelismis') Object.assign(out, genis(d, v));
     return out;
   }

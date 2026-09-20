@@ -272,6 +272,59 @@ details.detay > summary:hover{ color:var(--fg); }
   .gez a{ padding:9px 10px; font-size:13px; }
   .balon{ max-width:88%; }
 }
+
+/* ============================== PROFİL ==========================
+   Dort alanin tek sayfasi. Sayfa hicbir sey hesaplamaz ve hicbir
+   cumle kurmaz — sayilar /api/profil'den gelir. */
+
+/* ONUR — Sistem Ustasi. Kazanilmamisken de durur ve sartlarini yazar:
+   gizlemek «ulasilamaz bir sey var» hissi verirdi. */
+.onur{ border-top-color:var(--line-strong); }
+.onur__ic{ display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; }
+.onur .rz__g{ width:96px; height:96px; flex:none; object-fit:contain;
+  /* Kazanilmamis onur SOLUKTUR ama gizli degildir. */
+  filter:grayscale(1); opacity:.32; }
+.onur--var .rz__g{ filter:none; opacity:1; }
+.onur__yazi{ flex:1 1 280px; min-width:0; }
+.onur__ad{ margin:2px 0 6px; font-size:20px; font-weight:600; }
+.onur__sartlar{ list-style:none; margin:10px 0 0; padding:0;
+  display:flex; flex-wrap:wrap; gap:6px 18px; }
+.onur__s{ font-size:13px; opacity:.6; }
+.onur__s--ok{ opacity:1; }
+.onur__s--ok b::before{ content:'✓ '; color:var(--ok, currentColor); }
+
+/* KADEME — yan yana, toplanmadan. */
+.kademeler{ display:flex; flex-wrap:wrap; gap:10px; margin:8px 0; }
+.kademe{ display:flex; align-items:baseline; gap:8px;
+  padding:8px 14px; border:1px solid var(--line); border-radius:4px; }
+.kademe__ad{ font-size:13px; }
+.kademe__no{ font-size:18px; font-weight:600; }
+.kademe__xp{ font-size:12px; }
+
+/* SAYAÇ — toplamlar. */
+.sayaclar{ display:flex; flex-wrap:wrap; gap:10px; margin:8px 0; }
+.sayac{ display:flex; flex-direction:column; gap:2px;
+  padding:10px 16px; border:1px solid var(--line); border-radius:4px;
+  min-width:120px; }
+.sayac__n{ font-size:20px; font-weight:600; }
+.sayac__a{ font-size:11px; opacity:.62; }
+
+/* ROZET — uc arayuzdeki kuralin aynisi: kazanilmamis gorunmez. */
+.rozetler{ display:flex; flex-wrap:wrap; gap:10px; margin:6px 0 2px; }
+.rz{ width:64px; }
+.rz__kutu{ position:relative; display:grid; place-items:center;
+  width:64px; height:64px; border-radius:50%; }
+.rz__g{ position:absolute; inset:0; width:100%; height:100%;
+  object-fit:contain; }
+.rz__e{ position:relative; font-size:11px; opacity:.7; }
+.rz--kilitli .rz__kutu{ border:1px dashed var(--line-strong);
+  background:repeating-linear-gradient(135deg,
+    color-mix(in srgb, currentColor 5%, transparent) 0 6px,
+    transparent 6px 12px); }
+/* Rozet varsa esik yazisi gorselin ustunde okunmaz; esik zaten
+   rozetin uzerinde yazili. */
+.rz--acik .rz__e{ display:none; }
+
 </style>
 </head>
 <body>
@@ -282,6 +335,7 @@ details.detay > summary:hover{ color:var(--fg); }
       <a href="#/bugun" data-yol="bugun">Bugün</a>
       <a href="#/sohbet" data-yol="sohbet">Sohbetler</a>
       <a href="#/sistemler" data-yol="sistemler">Sistemler</a>
+      <a href="#/profil" data-yol="profil">Profil</a>
       <a href="#/teklifler" data-yol="teklifler">Teklifler</a>
     </nav>
     <div class="bosluk"></div>
@@ -369,6 +423,19 @@ details.detay > summary:hover{ color:var(--fg); }
         </div>
         <p class="muted" id="sohbet-not"></p>
       </div>
+    </div>
+
+    <!-- ============================= PROFİL ========================== -->
+    <!-- Dort alanin tek sayfada toplandigi yer. Burasi bir OZET DEGIL
+         bir GOZLEM sayfasidir: hicbir sey onerilmez, hicbir sey
+         siralanmaz ve merkezin kendi XP'si yoktur — uc sistemin
+         kademesi yan yana durur, toplanmaz. -->
+    <div data-bolme="profil" hidden>
+      <div class="gun"><h1>Profil</h1></div>
+      <div id="profil-onur"></div>
+      <div class="card" id="profil-kademe"><p class="muted">Yükleniyor…</p></div>
+      <div class="card" id="profil-sayac"></div>
+      <div id="profil-rozet"></div>
     </div>
 
     <!-- =========================== SİSTEMLER ========================= -->
@@ -2423,7 +2490,7 @@ details.detay > summary:hover{ color:var(--fg); }
      bir ekrani baskasina gonderebilirsin. Gorunum degistiginde YALNIZ o
      gorunumun verisi cekilir — her sekmede butun ambari sorgulamak,
      acilisi bekletmekten baska is yapmiyordu. */
-  var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'teklifler', 'ayarlar'];
+  var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'teklifler', 'ayarlar'];
   var gorunum = 'bugun';
 
   function yolOku(){
@@ -2528,6 +2595,7 @@ details.detay > summary:hover{ color:var(--fg); }
     var t = $('tarih').value || bugun();
     if(gorunum === 'bugun') return yukleBugun(t);
     if(gorunum === 'sohbet') return yukleSohbet();
+    if(gorunum === 'profil') return yukleProfil(t);
     if(gorunum === 'sistemler') return yukleSistemler(t);
     if(gorunum === 'teklifler') return yukleTeklifler();
     if(gorunum === 'ayarlar') return yukleAyarlar();
@@ -2563,6 +2631,148 @@ details.detay > summary:hover{ color:var(--fg); }
     var g = await api('/api/agents');
     gorevlilerCiz(g.status === 200 ? g.body.agents : null);
     await konusmaYukle();
+  }
+
+  /* =============================== PROFİL ==========================
+
+     Dort alanin tek sayfada toplandigi yer. UC KURAL, ucu de bilerek:
+
+     1. MERKEZIN KENDI XP'SI YOKTUR. Uc sistemin kademesi YAN YANA
+        durur; toplanmaz, ortalanmaz, siralanmaz. «AYS 3.2 + SPI 2.1»
+        diye bir sey yoktur ve olmasi saglikli da degildir.
+     2. EKSIK VERI SIFIR DEGILDIR. Sayac gondermeyen modul toplama 0
+        ile girmez ve kac modulun konustugu SAYFADA YAZAR.
+     3. ROZET HICBIR KARARI VERMEZ. Burasi bir gozlem sayfasidir. */
+
+  function rozetGorsel(ad, alt){
+    return '<img class="rz__g" src="/img/seviye/' + esc(ad) + '.webp"'
+      + ' alt="" aria-hidden="true" loading="lazy"'
+      + ' onerror="this.remove()">'
+      + (alt ? '' : '');
+  }
+
+  function profilOnurCiz(o){
+    var k = $('profil-onur');
+    if(!o){ k.innerHTML = ''; return; }
+    var sart = o.sartlar.map(function(s){
+      return '<li class="' + (s.tamam ? 'onur__s onur__s--ok' : 'onur__s') + '">'
+        + '<b>' + esc(adlandir(s.anahtar)) + '</b> '
+        + '<span class="num">' + sayiTr(s.olan) + ' / ' + sayiTr(s.gereken) + '</span>'
+        + '</li>';
+    }).join('');
+
+    /* Kazanilmamisken de gosterilir ve SARTLARI YAZAR. Gizlemek
+       «ulasilamaz bir sey var» hissi verirdi; sartlari gostermek ise
+       ölçülebilir bir hedef degil, yalnizca bilgidir. */
+    k.innerHTML = '<div class="card onur' + (o.kazanildi ? ' onur--var' : '') + '">'
+      + '<div class="onur__ic">'
+      +   rozetGorsel('onur-usta')
+      +   '<div class="onur__yazi">'
+      +     '<div class="tag">' + (o.kazanildi ? 'ONUR ROZETİ' : 'ONUR ROZETİ — HENÜZ DEĞİL') + '</div>'
+      +     '<h2 class="onur__ad">Sistem Ustası</h2>'
+      +     '<p class="muted">LifeOS’un bütün alanlarında istikrarlı ilerleme. '
+      +       'Dört şart birden ister; biri bile eksikse verilmez.</p>'
+      +     '<ul class="onur__sartlar">' + sart + '</ul>'
+      +   '</div>'
+      + '</div></div>';
+  }
+
+  var PROFIL_AD = {
+    badge_hours:'Ölçülmüş saat', badge_tasks:'Tamamlanan görev',
+    badge_days:'Kayıtlı gün', badge_streak_months:'Kesintisiz ay',
+    badge_focus_hours:'Bir günde en uzun odak', badge_count:'Kazanılmış rozet',
+  };
+  function adlandir(a){ return PROFIL_AD[a] || a; }
+  function sayiTr(n){ return Number(n || 0).toLocaleString('tr-TR'); }
+
+  function profilKademeCiz(veri){
+    var k = $('profil-kademe');
+    var liste = veri.kademeler || [];
+    if(!liste.length){
+      k.innerHTML = '<div class="tag">Kademe</div>'
+        + '<p class="muted">Hiçbir modül seviye göndermedi. '
+        + 'Bu bir hata değil: modüller HKM’den bağımsız çalışır ve '
+        + 'gönderim kapalı olabilir.</p>';
+      return;
+    }
+    k.innerHTML = '<div class="tag">Kademe — yan yana, toplanmadan</div>'
+      + '<div class="kademeler">'
+      + liste.map(function(x){
+          return '<div class="kademe"><b class="kademe__ad">' + esc(x.ad) + '</b>'
+            + '<span class="kademe__no num">' + x.tier + '.' + x.sub + '</span>'
+            + (x.xp_total != null
+                ? '<span class="kademe__xp muted num">' + sayiTr(x.xp_total) + ' XP</span>'
+                : '') + '</div>';
+        }).join('')
+      + '</div>'
+      + '<p class="muted small">Bu bir gözlemdir; seviye hiçbir kararı vermez.</p>';
+  }
+
+  function profilSayacCiz(veri){
+    var k = $('profil-sayac');
+    var t = veri.toplamlar || {};
+    var sira = ['badge_hours', 'badge_tasks', 'badge_days',
+                'badge_streak_months', 'badge_focus_hours', 'badge_count'];
+    var kac = (veri.konusan || []).length;
+    /* KAC MODULDEN geldigi yazilir. «Iki modulden gelen 300 saat»i
+       «uc modulun toplami» diye sunmak, olculmemis bir seyi olculmus
+       gibi gostermektir (AGENTS.md §1.2). */
+    var not = kac === 3
+      ? 'Üç modülün toplamı.'
+      : (kac === 0
+          ? 'Hiçbir modül sayaç göndermedi — aşağıdaki sıfırlar bir ölçüm değildir.'
+          : kac + ' modülden geldi; ' + (veri.eksik || []).join(', ').toUpperCase()
+            + ' göndermedi ve toplama SIFIR ile girmedi.');
+    k.innerHTML = '<div class="tag">Toplam</div>'
+      + '<div class="sayaclar">'
+      + sira.map(function(a){
+          return '<div class="sayac"><span class="sayac__n num">' + sayiTr(t[a])
+            + '</span><span class="sayac__a">' + esc(adlandir(a)) + '</span></div>';
+        }).join('')
+      + '</div><p class="muted small">' + esc(not) + '</p>';
+  }
+
+  function profilRozetCiz(veri){
+    var k = $('profil-rozet');
+    var hepsi = veri.rozetler || [];
+    var aileler = [];
+    hepsi.forEach(function(r){
+      var a = aileler.filter(function(x){ return x.id === r.aile; })[0];
+      if(!a){ a = { id:r.aile, ad:r.aileAd, birim:r.birim, satir:[] }; aileler.push(a); }
+      a.satir.push(r);
+    });
+
+    k.innerHTML = aileler.map(function(a){
+      var kazanilan = a.satir.filter(function(r){ return r.kazanildi; }).length;
+      var deger = a.satir.length ? a.satir[0].deger : 0;
+      return '<div class="card"><div class="tag">' + esc(a.ad)
+        + ' <span class="muted">· ' + sayiTr(deger) + ' ' + esc(a.birim || '')
+        + ' · ' + kazanilan + ' / ' + a.satir.length + '</span></div>'
+        + '<div class="rozetler">'
+        + a.satir.map(function(r){
+            /* KAZANILMAMIS ROZET GORUNMEZ — uc arayuzdeki kuralin
+               aynisi. Yerinde muhurlu bir daire durur, esigi okunur. */
+            return '<div class="rz ' + (r.kazanildi ? 'rz--acik' : 'rz--kilitli')
+              + '" title="' + esc(r.esik + ' ' + (r.birim || '')) + '">'
+              + '<span class="rz__kutu">'
+              +   (r.kazanildi ? rozetGorsel(r.gorsel) : '')
+              +   '<span class="rz__e num">' + r.esik + '</span>'
+              + '</span></div>';
+          }).join('')
+        + '</div></div>';
+    }).join('');
+  }
+
+  async function yukleProfil(t){
+    var p = await api('/api/profil?date=' + t);
+    if(p.status !== 200){
+      $('profil-kademe').innerHTML = '<p class="muted">Profil okunamadı.</p>';
+      return;
+    }
+    profilOnurCiz(p.body.onur);
+    profilKademeCiz(p.body);
+    profilSayacCiz(p.body);
+    profilRozetCiz(p.body);
   }
 
   async function yukleSistemler(t){

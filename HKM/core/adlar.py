@@ -60,6 +60,15 @@ METRIK = {
     "level_step": "seviye basamağı (1–18)",
     "level_tier": "kademe (1–6)",
     "level_sub": "kademe içindeki adım (1–3)",
+    # ROZET SAYACLARI. Modulun KENDI rozeti degil, merkezin toplamak
+    # icin kullandigi ham sayilardir: uc arayuz birbirini gormez, «butun
+    # alanlarda 5000 saat» gibi bir rozet yalniz burada hesaplanabilir.
+    "badge_days": "kayıtlı gün",
+    "badge_hours": "ölçülmüş saat",
+    "badge_tasks": "tamamlanan görev",
+    "badge_focus_hours": "bir günde en uzun odak (saat)",
+    "badge_streak_months": "kesintisiz ay",
+    "badge_count": "kazanılmış rozet",
 }
 
 # Esikler: kullanicinin ELLE degistirdigi sayilar. Burada anlam, adin

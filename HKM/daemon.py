@@ -28,6 +28,7 @@ Ucnoktalar:
     POST /api/intent/<id>/dismissed kullanici istemedi
     POST /api/intent/<id>/acknowledged goruldu; uygulamak kullanicinin isi
     POST /api/intent/<id>/unknown   uygulandigi belirsiz (yarida kaldi)
+    GET  /api/profil?date=          dort alanin profili: kademe, rozet, onur
     GET  /api/cross?date=&days=     capraz bulgular: uc ambar yan yana
     GET  /api/series?date=&days=&module=  metrik metrik zaman serisi
     POST /api/message               Buyuk Patron'a kisa komut (yerel kanal)
@@ -67,7 +68,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (ai, butce, channels, cross, db, gelen,  # noqa: E402
                   impact,
-                  intents, manager, media, memory, models, outbox, patron, schedule,
+                  intents, manager, media, memory, models, outbox, patron,
+                  profil, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
                   weekly, yoklama)
 
@@ -136,6 +138,75 @@ def briefing(con, date, th=None, days=twin.WINDOW_DAYS):
     boylece uretimde hic ateslenmiyordu — testte gecen bir yol, uretimde
     olu bir yoldu. manager.brief() govdeleri de tasir."""
     return manager.brief(con, date, th=th, days=days)
+
+
+# Seviye medyasinin muhafizi. Uc devserver ve sunucu.py ile AYNI blok;
+# tek kaynaktan (`brand/seviye/ortak_yol.py`) yayilir. Merkez profili
+# ayni rozet gorsellerini gosterdigi icin burada da gerekli — ikinci
+# bir kopya yazmak, iki kopyanin bir gun ayrismasi demekti.
+# SEVIYE:yol-bas
+# ===== BU BLOK URETILMISTIR — BURAYI DUZENLEME =====
+# Kaynak: brand/seviye/ortak_yol.py
+# Yayan:  python3 tools/seviye.py --yay   (denetim: --denetle)
+#
+# Ayni muhafiz dort sunucuda da duruyordu ve dordunu elle guncellemek
+# gerekiyordu: bu depoda tam olarak bunu onlemek icin --denetle yazildi,
+# ama Python tarafi disarida kalmisti. Artik o da yayiliyor.
+from urllib.parse import unquote as _unquote
+
+# Servis edilen medya turleri. Listede olmayan uzanti hic acilmaz: bir
+# gorsel kapisinin dosya sistemine acilan bir pencereye donusmesi, bu
+# depoda kabul edilebilir bir bedel degil.
+MEDYA_TURLERI = {
+    ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+    ".webp": "image/webp", ".svg": "image/svg+xml",
+    ".mp4": "video/mp4", ".webm": "video/webm",
+}
+
+
+def _guvenli_medya_adi(ad, izinli=None):
+    """URL parcasini DUZ bir dosya adina indirger; olmuyorsa None.
+
+    Yuzde kodlamasi ONCE cozulur. Cozmeden birakmak iki sey yapardi:
+    `kademe%201.png` gibi bosluklu bir ad hic bulunamaz (sessiz 404) ve
+    muhafiz, cozulmus hali hic gormedigi icin yanlis yerde guven
+    duyardi. Cozduktan sonra alt klasor, ".." ve gizli dosya reddedilir.
+    """
+    try:
+        ad = _unquote(ad or "")
+    except Exception:
+        return None
+    if not ad or "/" in ad or "\\" in ad or ad.startswith("."):
+        return None
+    uzanti = os.path.splitext(ad)[1].lower()
+    if uzanti not in (izinli if izinli is not None else MEDYA_TURLERI):
+        return None
+    return ad
+
+
+def _ortak_seviye_yolu(clean, kok):
+    """/img/seviye/<ad> -> <kok>/brand/seviye/medya/<ad>, yoksa None.
+
+    Rutbe kartlari ve kademe sahneleri uc sistemin de AYNI dosyasidir;
+    uc kez kopyalamak depoyu buyutmekten baska bir sey yapmazdi.
+    Sistemlerin bagimsizligi bozulmaz: dosya yoksa perde karti kendisi
+    cizer, arayuzde hicbir sey kirilmaz.
+
+    MEDYA KENDI KLASORUNDE. Once gorseller `brand/seviye/` icinde,
+    `xp.js` ve `perde.js` ile yan yana duruyordu; yirmi bir dosya
+    eklenince o klasorde kodu bulmak zorlasti. Kaynak kod ve servis
+    edilen medya ayni yerde durmaz — `medya/` yalniz servis edilen
+    dosyalari tutar, `eski/` ise servis EDILMEYENLERI (bkz. OKU.md).
+    """
+    onek = "/img/seviye/"
+    if not clean.startswith(onek):
+        return None
+    ad = _guvenli_medya_adi(clean[len(onek):])
+    if not ad:
+        return None
+    return os.path.join(kok, "brand", "seviye", "medya", ad)
+# ===== URETILMIS BLOK SONU =====
+# SEVIYE:yol-bit
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -405,6 +476,28 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_seviye(self, yol):
+        """Rutbe kartlari, kademe sahneleri ve basarim rozetleri.
+
+        Uc arayuzun okudugu AYNI dosyalar (`brand/seviye/medya/`);
+        merkez profili de ayni gorselleri gosterir. Marka kapisi gibi
+        jeton ISTEMEZ: bir rozette veri yoktur. Yol muhafizi tek
+        kaynaktan yayilan blokta (`_ortak_seviye_yolu`)."""
+        dosya = _ortak_seviye_yolu(yol, os.path.dirname(ROOT))
+        if not dosya or not os.path.exists(dosya):
+            return self._send(404, {"error": "yok"})
+        tur = MEDYA_TURLERI.get(os.path.splitext(dosya)[1].lower())
+        if not tur:
+            return self._send(404, {"error": "yok"})
+        with open(dosya, "rb") as f:
+            body = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", tur)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
+
     def _send_brand(self, ad):
         """Marka gorseli — HKM/brand/ altindaki sabit adli dosya.
 
@@ -441,6 +534,8 @@ class Handler(BaseHTTPRequestHandler):
         u = urlparse(self.path)
         if u.path in ("/", "/index.html"):
             return self._send_page()
+        if u.path.startswith("/img/seviye/"):
+            return self._send_seviye(u.path)
         if u.path.startswith("/brand/"):
             return self._send_brand(u.path[len("/brand/"):])
         if u.path == "/api/health":
@@ -482,6 +577,8 @@ class Handler(BaseHTTPRequestHandler):
             mod = (q.get("module") or [None])[0]
             return self._send(200, {"date": date, "days": days, "module": mod,
                                     "series": twin.series(self.con, date, days, mod)})
+        if u.path == "/api/profil":
+            return self._send(200, profil.anlik(self.con, date))
         if u.path == "/api/cross":
             try:
                 days = int((q.get("days") or [cross.PENCERE])[0])
