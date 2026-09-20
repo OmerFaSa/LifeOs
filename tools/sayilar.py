@@ -78,6 +78,20 @@ def kok_araclar():
         satir = [s.strip() for s in p.stdout.splitlines() if s.strip()]
         out[ad] = ("gecti" if p.returncode == 0 else "KALDI",
                    satir[-1] if satir else "—")
+    # Marka adlandirmasi ve yol muhafizi. Bu arac bir teslimatta otuz
+    # dosyayi tek seferde isimlendirip yerlestiriyor; kurali bozan bir
+    # degisiklik sessizce yanlis yere yazabilir.
+    for ad, komut in (("marka.py", ["python3", "tools/marka.py", "--sina"]),):
+        try:
+            p = subprocess.run(komut, cwd=KOK, capture_output=True,
+                               text=True, timeout=120)
+            satir = [s.strip() for s in (p.stdout + "\n" + p.stderr).splitlines()
+                     if s.strip()]
+            out[ad] = ("gecti" if p.returncode == 0 else "KALDI",
+                       satir[-1] if satir else "—")
+        except Exception as e:
+            out[ad] = ("KALDI", str(e))
+
     try:
         p = subprocess.run(["node", "tools/entegre.js"], cwd=KOK,
                            capture_output=True, text=True, timeout=1800)

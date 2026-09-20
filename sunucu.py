@@ -103,6 +103,30 @@ def _guvenli_medya_adi(ad, izinli=None):
     return ad
 
 
+def _ortak_marka_yolu(clean, kok):
+    """/img/marka/<ad> -> <kok>/brand/medya/<aile>/<ad>, yoksa None.
+
+    AILE ADDAN TURER, yoldan degil: `kimlik-ays.webp` ->
+    `brand/medya/kimlik/kimlik-ays.webp`. Boylece URL duz kalir ve
+    muhafiz alt klasor gezmek zorunda kalmaz — bir gorsel kapisinin
+    dosya sistemine acilan bir pencereye donusmesi, bu depoda kabul
+    edilebilir bir bedel degil.
+
+    Marka medyasi seviye medyasindan AYRI durur (bkz. brand/medya/OKU.md):
+    seviye medyasi bir kataloga baglidir ve eksigi kod tarafindan
+    bilinir; marka medyasi serbesttir ve eksik gorsel hata degildir."""
+    onek = "/img/marka/"
+    if not clean.startswith(onek):
+        return None
+    ad = _guvenli_medya_adi(clean[len(onek):])
+    if not ad:
+        return None
+    aile = os.path.splitext(ad)[0].split("-", 1)[0]
+    if not aile or not aile.isalnum():
+        return None
+    return os.path.join(kok, "brand", "medya", aile, ad)
+
+
 def _ortak_seviye_yolu(clean, kok):
     """/img/seviye/<ad> -> <kok>/brand/seviye/medya/<ad>, yoksa None.
 
@@ -145,7 +169,8 @@ class Sunucu(SimpleHTTPRequestHandler):
 
     def translate_path(self, path):
         clean = path.split("?", 1)[0].split("#", 1)[0]
-        ortak = _ortak_seviye_yolu(clean, KOK)
+        ortak = (_ortak_seviye_yolu(clean, KOK)
+                 or _ortak_marka_yolu(clean, KOK))
         if ortak:
             return ortak
         if clean == "/dist" or clean.startswith("/dist/"):

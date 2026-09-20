@@ -32,6 +32,28 @@ def copy_level_assets() -> None:
     # medya dosyasi uc `dist/` icinde yasamaya devam ediyordu. Olculdu
     # — `kademe-1.mp4` arsive alindiktan sonra uc dagitimda 4,6 MB'lik
     # olu kopya olarak duruyordu. Dagitim, kaynagin AYNASIDIR.
+    # MARKA MEDYASI da tek dosya surumune gider. Ayri bir klasorden
+    # gelir (`brand/medya/<aile>/`) ama AYNI duz adla servis edilir —
+    # aile addan turer, yoldan degil (bkz. `_ortak_marka_yolu`).
+    marka_kok = ROOT.parent / "brand" / "medya"
+    marka = []
+    if marka_kok.is_dir():
+        for aile in sorted(marka_kok.iterdir()):
+            if not aile.is_dir():
+                continue
+            marka += [f for f in sorted(aile.iterdir())
+                      if f.is_file() and f.suffix.lower() in (
+                          ".mp4", ".webm", ".png", ".jpg", ".webp", ".svg")]
+    if marka:
+        m_dst = DIST / "img" / "marka"
+        m_dst.mkdir(parents=True, exist_ok=True)
+        for f in marka:
+            shutil.copy2(f, m_dst / f.name)
+        m_kalan = {f.name for f in marka}
+        for eski in m_dst.iterdir():
+            if eski.is_file() and eski.name not in m_kalan:
+                eski.unlink()
+
     kalanlar = {f.name for f in medya}
     for eski in dst_dir.iterdir():
         if eski.is_file() and eski.name not in kalanlar:
