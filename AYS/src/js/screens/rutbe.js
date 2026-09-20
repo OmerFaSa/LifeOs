@@ -271,7 +271,13 @@ R.Screens.rutbe = (function(){
       a:a, satir:liste.filter(r => r.aile === a.id),
     }));
 
-    return K.Stack([
+    /* Sekme kullanıcının KENDİ kademesinin rengini taşır: ilerleme
+       çubukları ve rozet oranları `--kademe-renk` okuyor. Renksiz
+       bırakıldığında hepsi metin rengine düşüyor ve ekran soluyordu. */
+    const kd = (R.XP && R.XP.durum() || {}).kademeBilgi;
+
+    return renkli(kd, K.Stack([
+      siradakiKart(B),
       K.Grid([
         K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
           unit:'/ ' + d.toplamRozet }),
@@ -291,7 +297,32 @@ R.Screens.rutbe = (function(){
           <li><b>Ölçülmemiş süre sayılmaz.</b> Süresi boş bırakılan bir
             kayıt «sıfır dakika» değil, «veri yok»tur.</li>
         </ul>` }),
-    ]);
+    ]), 'rutbe--rozetler');
+  }
+
+  /* SIRADAKİ — en çok yaklaşılan üç rozet, en üstte.
+
+     Otuz yedi rozetlik ızgara «neredeyim» sorusunu cevaplıyordu ama
+     «sıradaki ne» sorusunu değil: kullanıcı en dolu çubuğu gözüyle
+     aramak zorunda kalıyordu. Sıralama motorda (`Basarim.siradaki`),
+     ekran yalnız çiziyor.
+
+     Hepsi kazanılmışsa hiçbir şey çizilmez — bitmiş bir listeye
+     «sıradaki» yazmak, olmayan bir şeyi göstermektir. */
+  function siradakiKart(B){
+    const liste = B.siradaki(3);
+    if(!liste.length) return '';
+    return K.Card({ title:'Sıradaki', body:html`
+      <div class="rutbe-sirada">${map(liste, r => html`
+        <div class="rutbe-sirada__sat">
+          <span class="rutbe-sirada__ad">${r.kisaAd || r.ad}
+            <span class="dim">· ${r.aileAd}</span></span>
+          <span class="rutbe-sirada__kalan">${r.kalan.toLocaleString('tr-TR')}
+            ${r.birim || ''} kaldı</span>
+          <span class="rutbe-sirada__cubuk" aria-hidden="true"
+            ><i style="${'width:' + Math.round(r.oran * 100) + '%'}"></i></span>
+        </div>`)}
+      </div>` });
   }
 
   function aileKart(a, satir){

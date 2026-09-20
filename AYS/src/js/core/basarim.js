@@ -447,6 +447,56 @@ R.Basarim = (function(){
     };
   }
 
+  /* --------------------------------------------- sıradaki rozet */
+
+  /* EN YAKIN kazanım — hangi rozete en çok yaklaşıldı.
+
+     Otuz yedi rozetin hepsini bir ızgarada göstermek «neredeyim»
+     sorusunu cevaplıyor ama «sıradaki ne» sorusunu cevaplamıyordu.
+     Kullanıcı kendi listesini gözüyle tarayıp en dolu çubuğu bulmak
+     zorunda kalıyordu; o iş kodun işi.
+
+     ORAN'a göre seçilir, EŞİĞE göre değil: 90 saatlik biri için
+     «100 saat» (%90), «250 görev» (%12) rozetinden daha yakındır.
+     `ozel` ölçüler (kusursuz) sıralamaya GİRMEZ — oranları yoktur ve
+     bir eşiğe «yaklaşmak» diye bir şey ifade etmezler.
+
+     Hepsi kazanılmışsa null döner ve ekran hiçbir şey çizmez; bitmiş
+     bir listeye «sıradaki» yazmak, olmayan bir şeyi göstermektir. */
+  function siradaki(kac){
+    if(!defter) return [];
+    var aday = liste().filter(function(r){
+      return !r.kazanildi && r.oran != null && typeof r.esik === 'number';
+    });
+    aday.sort(function(a, b){
+      if(b.oran !== a.oran) return b.oran - a.oran;
+      /* Eşit oranda UCUZ olan önce: aynı yakınlıkta iki rozetten
+         önce gelene ulaşmak daha kısa sürer. */
+      return a.esik - b.esik;
+    });
+
+    /* AİLE BAŞINA BİR TANE. Ölçüldü ve ekranda görüldü: sıralama
+       tek başına bırakılınca üçü de aynı aileden geliyordu —
+       «3 saat odak, 4 saat odak, 5 saat odak» aslında TEK hedeftir ve
+       diğer beş aileyi gizler. Bir ailenin en yakın rozeti alınır,
+       gerisi atlanır. */
+    var gorulen = {}, secili = [];
+    aday.forEach(function(r){
+      if(gorulen[r.aile]) return;
+      gorulen[r.aile] = 1;
+      secili.push(r);
+    });
+
+    return secili.slice(0, Math.max(1, kac || 3)).map(function(r){
+      return {
+        kod:r.kod, aile:r.aile, aileAd:r.aileAd, ad:r.ad, kisaAd:r.kisaAd,
+        etiket:r.etiket, birim:r.birim, gorsel:r.gorsel,
+        esik:r.esik, deger:r.deger, oran:r.oran,
+        kalan:Math.max(0, r.esik - (r.deger || 0)),
+      };
+    });
+  }
+
   /* ------------------------------------------- günün odak rozeti */
 
   /* O GÜNÜN odağı — günlük raporda, eylemlerin yanında duran rozet.
@@ -512,7 +562,7 @@ R.Basarim = (function(){
     durum:durum, liste:liste, rozet:rozet, isaret:isaret,
     bekleyen:bekleyen, gorundu:gorundu, dinle:dinle,
     toplamlar:toplamlar, seriAy:seriAy, olcum:olcum,
-    gununOdagi:gununOdagi, odakHtml:odakHtml,
+    gununOdagi:gununOdagi, odakHtml:odakHtml, siradaki:siradaki,
     PENCERE_GUN:PENCERE_GUN,
   };
 })();

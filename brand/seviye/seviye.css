@@ -1147,3 +1147,28 @@
   white-space:nowrap;
 }
 .odak-rozet__not{ font-weight:500; opacity:.62; }
+
+/* SIRADAKİ ROZET — en çok yaklaşılan üçü, Başarımlar'ın en üstünde.
+   Satır satır ve dar: bu bir vitrin değil, bir yön işareti. */
+.rutbe-sirada{ display:grid; gap:10px; }
+.rutbe-sirada__sat{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:2px 12px;
+  align-items:baseline;
+}
+.rutbe-sirada__ad{ font-size:13px; font-weight:600; }
+.rutbe-sirada__kalan{
+  font:500 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.7; white-space:nowrap;
+}
+.rutbe-sirada__cubuk{
+  grid-column:1 / -1;
+  display:block; height:4px; border-radius:2px; overflow:hidden;
+  background:color-mix(in srgb, currentColor 10%, transparent);
+}
+.rutbe-sirada__cubuk i{
+  display:block; height:100%;
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 58%, transparent);
+}

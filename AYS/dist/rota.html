@@ -5192,6 +5192,31 @@ body.is-dragging .drop.is-over{
 }
 .odak-rozet__not{ font-weight:500; opacity:.62; }
 
+/* SIRADAKİ ROZET — en çok yaklaşılan üçü, Başarımlar'ın en üstünde.
+   Satır satır ve dar: bu bir vitrin değil, bir yön işareti. */
+.rutbe-sirada{ display:grid; gap:10px; }
+.rutbe-sirada__sat{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:2px 12px;
+  align-items:baseline;
+}
+.rutbe-sirada__ad{ font-size:13px; font-weight:600; }
+.rutbe-sirada__kalan{
+  font:500 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.7; white-space:nowrap;
+}
+.rutbe-sirada__cubuk{
+  grid-column:1 / -1;
+  display:block; height:4px; border-radius:2px; overflow:hidden;
+  background:color-mix(in srgb, currentColor 10%, transparent);
+}
+.rutbe-sirada__cubuk i{
+  display:block; height:100%;
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 58%, transparent);
+}
+
 /* ==== css/designs.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/designs.css içine yazılır; burası bir sonraki
@@ -8269,7 +8294,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'8facc7f', at:'2026-09-20 20:48', dirty:true };
+R.BUILD = { id:'7b85bb1', at:'2026-09-20 20:51', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -15038,6 +15063,56 @@ R.Basarim = (function(){
     };
   }
 
+  /* --------------------------------------------- sıradaki rozet */
+
+  /* EN YAKIN kazanım — hangi rozete en çok yaklaşıldı.
+
+     Otuz yedi rozetin hepsini bir ızgarada göstermek «neredeyim»
+     sorusunu cevaplıyor ama «sıradaki ne» sorusunu cevaplamıyordu.
+     Kullanıcı kendi listesini gözüyle tarayıp en dolu çubuğu bulmak
+     zorunda kalıyordu; o iş kodun işi.
+
+     ORAN'a göre seçilir, EŞİĞE göre değil: 90 saatlik biri için
+     «100 saat» (%90), «250 görev» (%12) rozetinden daha yakındır.
+     `ozel` ölçüler (kusursuz) sıralamaya GİRMEZ — oranları yoktur ve
+     bir eşiğe «yaklaşmak» diye bir şey ifade etmezler.
+
+     Hepsi kazanılmışsa null döner ve ekran hiçbir şey çizmez; bitmiş
+     bir listeye «sıradaki» yazmak, olmayan bir şeyi göstermektir. */
+  function siradaki(kac){
+    if(!defter) return [];
+    var aday = liste().filter(function(r){
+      return !r.kazanildi && r.oran != null && typeof r.esik === 'number';
+    });
+    aday.sort(function(a, b){
+      if(b.oran !== a.oran) return b.oran - a.oran;
+      /* Eşit oranda UCUZ olan önce: aynı yakınlıkta iki rozetten
+         önce gelene ulaşmak daha kısa sürer. */
+      return a.esik - b.esik;
+    });
+
+    /* AİLE BAŞINA BİR TANE. Ölçüldü ve ekranda görüldü: sıralama
+       tek başına bırakılınca üçü de aynı aileden geliyordu —
+       «3 saat odak, 4 saat odak, 5 saat odak» aslında TEK hedeftir ve
+       diğer beş aileyi gizler. Bir ailenin en yakın rozeti alınır,
+       gerisi atlanır. */
+    var gorulen = {}, secili = [];
+    aday.forEach(function(r){
+      if(gorulen[r.aile]) return;
+      gorulen[r.aile] = 1;
+      secili.push(r);
+    });
+
+    return secili.slice(0, Math.max(1, kac || 3)).map(function(r){
+      return {
+        kod:r.kod, aile:r.aile, aileAd:r.aileAd, ad:r.ad, kisaAd:r.kisaAd,
+        etiket:r.etiket, birim:r.birim, gorsel:r.gorsel,
+        esik:r.esik, deger:r.deger, oran:r.oran,
+        kalan:Math.max(0, r.esik - (r.deger || 0)),
+      };
+    });
+  }
+
   /* ------------------------------------------- günün odak rozeti */
 
   /* O GÜNÜN odağı — günlük raporda, eylemlerin yanında duran rozet.
@@ -15103,7 +15178,7 @@ R.Basarim = (function(){
     durum:durum, liste:liste, rozet:rozet, isaret:isaret,
     bekleyen:bekleyen, gorundu:gorundu, dinle:dinle,
     toplamlar:toplamlar, seriAy:seriAy, olcum:olcum,
-    gununOdagi:gununOdagi, odakHtml:odakHtml,
+    gununOdagi:gununOdagi, odakHtml:odakHtml, siradaki:siradaki,
     PENCERE_GUN:PENCERE_GUN,
   };
 })();
@@ -36660,7 +36735,13 @@ R.Screens.rutbe = (function(){
       a:a, satir:liste.filter(r => r.aile === a.id),
     }));
 
-    return K.Stack([
+    /* Sekme kullanıcının KENDİ kademesinin rengini taşır: ilerleme
+       çubukları ve rozet oranları `--kademe-renk` okuyor. Renksiz
+       bırakıldığında hepsi metin rengine düşüyor ve ekran soluyordu. */
+    const kd = (R.XP && R.XP.durum() || {}).kademeBilgi;
+
+    return renkli(kd, K.Stack([
+      siradakiKart(B),
       K.Grid([
         K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
           unit:'/ ' + d.toplamRozet }),
@@ -36680,7 +36761,32 @@ R.Screens.rutbe = (function(){
           <li><b>Ölçülmemiş süre sayılmaz.</b> Süresi boş bırakılan bir
             kayıt «sıfır dakika» değil, «veri yok»tur.</li>
         </ul>` }),
-    ]);
+    ]), 'rutbe--rozetler');
+  }
+
+  /* SIRADAKİ — en çok yaklaşılan üç rozet, en üstte.
+
+     Otuz yedi rozetlik ızgara «neredeyim» sorusunu cevaplıyordu ama
+     «sıradaki ne» sorusunu değil: kullanıcı en dolu çubuğu gözüyle
+     aramak zorunda kalıyordu. Sıralama motorda (`Basarim.siradaki`),
+     ekran yalnız çiziyor.
+
+     Hepsi kazanılmışsa hiçbir şey çizilmez — bitmiş bir listeye
+     «sıradaki» yazmak, olmayan bir şeyi göstermektir. */
+  function siradakiKart(B){
+    const liste = B.siradaki(3);
+    if(!liste.length) return '';
+    return K.Card({ title:'Sıradaki', body:html`
+      <div class="rutbe-sirada">${map(liste, r => html`
+        <div class="rutbe-sirada__sat">
+          <span class="rutbe-sirada__ad">${r.kisaAd || r.ad}
+            <span class="dim">· ${r.aileAd}</span></span>
+          <span class="rutbe-sirada__kalan">${r.kalan.toLocaleString('tr-TR')}
+            ${r.birim || ''} kaldı</span>
+          <span class="rutbe-sirada__cubuk" aria-hidden="true"
+            ><i style="${'width:' + Math.round(r.oran * 100) + '%'}"></i></span>
+        </div>`)}
+      </div>` });
   }
 
   function aileKart(a, satir){

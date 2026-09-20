@@ -187,6 +187,53 @@ describe('Başarım — motor', () => {
     expect(typeof i.badge_streak_months).toBe('number');
   });
 
+  it('sıradaki rozetler ORANA göre sıralanır, eşiğe göre değil', async () => {
+    /* 90 saatlik biri için «100 saat» (%90), «250 görev» (%12)
+       rozetinden daha yakındır — eşiği daha büyük olsa bile. */
+    await sifirla();
+    await B().esitleCok(sonGunler(1, { dakika:60 * 90, gorev:30, kusursuz:0 }));
+    const s = B().siradaki(3);
+    expect(s.length > 0).toBeTruthy();
+    for(let i = 1; i < s.length; i++){
+      expect(s[i - 1].oran >= s[i].oran).toBeTruthy();
+    }
+    expect(s[0].aile).toBe('saat');
+  });
+
+  it('sıradakiler AİLE BAŞINA BİR TANEDİR', async () => {
+    /* Ölçüldü: sıralama tek başına bırakılınca üçü de aynı aileden
+       geliyordu — «3 saat, 4 saat, 5 saat odak» tek hedeftir ve diğer
+       beş aileyi gizler. */
+    await sifirla();
+    await B().esitleCok(sonGunler(3, { dakika:200, gorev:40, kusursuz:1 }));
+    const s = B().siradaki(3);
+    const gorulen = {};
+    s.forEach(r => {
+      expect(gorulen[r.aile]).toBeFalsy();
+      gorulen[r.aile] = 1;
+    });
+  });
+
+  it('sıradaki KAZANILMIŞ rozeti göstermez', async () => {
+    await sifirla();
+    await B().esitleCok(sonGunler(1, { dakika:180, gorev:120, kusursuz:0 }));
+    B().siradaki(6).forEach(r => expect(r.kazanildi).toBeFalsy());
+  });
+
+  it('sıradaki KALAN miktarı doğru söyler', async () => {
+    await sifirla();
+    await B().esitleCok(sonGunler(1, { dakika:60 * 40, gorev:10, kusursuz:0 }));
+    const saat = B().siradaki(6).filter(r => r.aile === 'saat')[0];
+    expect(saat).toBeTruthy();
+    expect(saat.kalan).toBe(saat.esik - saat.deger);
+  });
+
+  it('boş defterde sıradaki yine de bir yön gösterir', async () => {
+    /* Hiç veri yokken de «ilk hedef ne» sorusunun cevabı olmalı. */
+    await sifirla();
+    expect(B().siradaki(3).length > 0).toBeTruthy();
+  });
+
   it('liste bütün rozetleri durumuyla döner', async () => {
     await sifirla();
     const l = B().liste();
