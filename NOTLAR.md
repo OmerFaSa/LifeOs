@@ -39,16 +39,16 @@ satırını buraya yazar:
 
 <!-- SAYILAR:baslangic -->
 
-_Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturur ve her aracın kendi son satırını buraya yazar. Son koşum: 2026-09-18._
+_Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturur ve her aracın kendi son satırını buraya yazar. Son koşum: 2026-09-20._
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1192/1192 gecti | 941/941 gecti | 759/759 gecti |
-| `smoke.js` | Duman testi temiz — 2 hedefte 38 ekran, 44 sekme gezildi. | Duman testi temiz — 2 hedefte 26 ekran, 72 sekme gezildi. | Duman testi temiz — 2 hedefte 30 ekran, 190 sekme gezildi. |
-| `a11ycheck.js` | (1 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) | (1 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) | (3 bilinen eksik izin listesinde — bkz. tools/a11ycheck.js) |
+| `runtests.js` | 1230/1230 gecti | 979/979 gecti | 797/797 gecti |
+| `smoke.js` | Duman testi temiz — 2 hedefte 38 ekran, 46 sekme gezildi. | Duman testi temiz — 2 hedefte 26 ekran, 74 sekme gezildi. | Duman testi temiz — 2 hedefte 30 ekran, 192 sekme gezildi. |
+| `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
-| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 41 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 49 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 110 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 38.1 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 22.7 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 47 ms (bütçe 100). |
+| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 42 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 50 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 111 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 53.8 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 31.3 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 54.4 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | beş düzen temiz — 460 ekran/genişlik kombinasyonu bakıldı | — |
 | `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
@@ -56,9 +56,9 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Depo denetimi | Sonuç |
 |---|---|
-| `HKM tests` | 314/314 test gecti |
+| `HKM tests` | 331/331 test gecti |
 | `HKM perf` | Bütün sorgular bütçede. |
-| `HKM yuz` | HKM yüzü temiz — 40 görünümde taşma yok, bütün hedefler 24px ve üstü, etiketler yerinde, kontrast AA. |
+| `HKM yuz` | HKM yüzü temiz — 44 görünümde taşma yok, bütün hedefler 24px ve üstü, etiketler yerinde, kontrast AA. |
 | `entegre.js` | Butunlesme temiz: uc arayuz de HKM ile konustu, HKM kapaliyken hicbiri bozulmadi. |
 <!-- SAYILAR:bitis -->
 
