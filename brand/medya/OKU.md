@@ -42,6 +42,31 @@ aranan bir akşam demektir.
 `--dene` önce koşulur. Büyük bir teslimatta otuz dosyanın adı yanlışsa,
 bunu yazdıktan sonra değil YAZMADAN ÖNCE bilmek gerekir.
 
+## Toplu tabaka geldiyse
+
+Birden çok logo tek bir görselde geliyorsa önce kesilir:
+
+```bash
+python3 tools/marka.py tabaka.png --kes
+```
+
+Ayrı duran parçalar bulunur, **tam çözünürlükten** kırpılır (hiçbir
+piksel yeniden örneklenmez) ve `kesit-01`, `kesit-02` diye numaralanır.
+Yanına bir de `tabaka.png` yazılır: hepsi tek karede, numaralı.
+
+**Araç ad vermez.** Hangi parçanın hangi logo olduğunu GÖREREK söylemek
+insanın işi; araca «bu AYS'nin olmalı» dedirtmek, yanlış adla yerleşen
+bir dosya demekti. Temas tabakasına bakılır, parçalar adlarıyla yeniden
+adlandırılır, sonra normal yerleştirme koşulur.
+
+Üç zemin türünde de çalışır: saydam, beyaz ve koyu. Zemin rengi dört
+köşeden okunur — «beyazdır» diye varsaymak, koyu bir tabakada her şeyi
+içerik sanmak olurdu.
+
+Kopuk parçalar birleştirilir: simgenin altında ayrı duran bir yazı
+şeridi aynı logonun parçasıdır. Birleşme yarıçapı tabakanın kısa
+kenarının %2'sidir.
+
 ## Kaliteden ödün verilmez
 
 Varsayılan **kayıpsızdır**. Araç hiçbir pikseli değiştirmez, hiçbir

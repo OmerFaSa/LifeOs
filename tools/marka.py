@@ -195,6 +195,152 @@ def liste() -> int:
     return 0
 
 
+def _maske(im, esik=12):
+    """Icerik nerede — arka plandan FARKLI olan pikseller.
+
+    Iki durum var ve ikisi de olculur, tahmin edilmez:
+      · saydam zeminli gorsel  -> alfa kanali icerigi zaten soyler
+      · duz zeminli gorsel     -> zemin rengi DORT KOSEDEN okunur ve
+                                  ondan yeterince farkli olan piksel
+                                  icerik sayilir
+
+    Kose rengini okumak, «beyaz zemindir» diye varsaymaktan iyidir:
+    koyu bir tabaka gelirse varsayim her seyi icerik sanardi.
+    """
+    if im.mode in ("RGBA", "LA"):
+        a = im.convert("RGBA").getchannel("A")
+        return a.point(lambda v: 255 if v > 8 else 0)
+    rgb = im.convert("RGB")
+    g, y = rgb.size
+    koseler = [rgb.getpixel(k) for k in
+               ((0, 0), (g - 1, 0), (0, y - 1), (g - 1, y - 1))]
+    zemin = tuple(sum(c[i] for c in koseler) // 4 for i in range(3))
+    from PIL import Image, ImageChops
+    fark = ImageChops.difference(rgb, Image.new("RGB", rgb.size, zemin))
+    return fark.convert("L").point(lambda v: 255 if v > esik else 0)
+
+
+def _kutular(maske, en_az_oran=0.0015, yapistir=0.02):
+    """Maskedeki AYRI parcalarin kutulari (tam cozunurlukte).
+
+    `yapistir` bir logonun kopuk parcalarini (simge + altindaki yazi)
+    BIRLESTIRIR: maske once yayilir, sonra etiketlenir. Yayma olmadan
+    tek bir logo iki parca cikiyordu.
+
+    `en_az_oran`dan kucuk lekeler atilir: JPEG gurultusu ve tek piksel
+    artiklar bir logo degildir.
+    """
+    from PIL import Image
+    G, Y = maske.size
+    # Etiketleme KUCUK maskede yapilir: 4000x3000 bir tabakada piksel
+    # piksel gezmek olculebilir bir bedeldi, sonuc ayni.
+    olcek = max(1, max(G, Y) // 640)
+    k = maske.resize((max(1, G // olcek), max(1, Y // olcek)), Image.BOX)
+    g, y = k.size
+    r = max(1, int(round(min(g, y) * yapistir)))
+    # Yayma icin MaxFilter. Once `ImageChops.offset` ile kaydirma
+    # deneniyordu ve OLCULDU: offset KENARLARI SARIYOR — alttaki icerik
+    # uste dolaniyor ve olmayan yerde hayalet parca uretiyordu. Sahte
+    # bir tabakada sekiz logo dokuz parca cikti.
+    #
+    # MaxFilter sarmaz. Buyuk yaricapta yavastir ama maske zaten 640
+    # piksele indirilmis durumda, olculebilir bir bedeli yok.
+    from PIL import ImageFilter
+    yay = k.filter(ImageFilter.MaxFilter(2 * r + 1)) if r >= 1 else k
+    p = yay.load()
+
+    gorulen = bytearray(g * y)
+    kutular = []
+    for by in range(y):
+        for bx in range(g):
+            if p[bx, by] == 0 or gorulen[by * g + bx]:
+                continue
+            gorulen[by * g + bx] = 1
+            yigin = [(bx, by)]
+            x0 = x1 = bx
+            y0 = y1 = by
+            n = 0
+            while yigin:
+                cx, cy = yigin.pop()
+                n += 1
+                if cx < x0: x0 = cx
+                if cx > x1: x1 = cx
+                if cy < y0: y0 = cy
+                if cy > y1: y1 = cy
+                for nx, ny in ((cx+1,cy), (cx-1,cy), (cx,cy+1), (cx,cy-1)):
+                    if 0 <= nx < g and 0 <= ny < y \
+                       and not gorulen[ny * g + nx] and p[nx, ny]:
+                        gorulen[ny * g + nx] = 1
+                        yigin.append((nx, ny))
+            if n < en_az_oran * g * y:
+                continue
+            kutular.append((max(0, x0 * olcek), max(0, y0 * olcek),
+                            min(G, (x1 + 1) * olcek), min(Y, (y1 + 1) * olcek)))
+    # Soldan saga, yukaridan asagi — insanin okudugu sira.
+    kutular.sort(key=lambda b: (b[1] // max(1, (Y // 8) or 1), b[0]))
+    return kutular
+
+
+def kes(kaynak: Path, cikti: Path) -> int:
+    """Toplu tabakayi parcalara ayirir — TAM COZUNURLUKTE.
+
+    Kirpma yalniz KUTUYU bulur; kesilen parca ASIL dosyadan alinir ve
+    hicbir piksel yeniden orneklenmez. Kucultme yok, yeniden kodlama
+    yok — kalite kararinin depo sahibine ait oldugu bu depoda araca
+    dusen is, bulmaktir.
+
+    ADLANDIRMA YAPILMAZ. Parcalar `kesit-01`, `kesit-02` diye numaralanir
+    ve bir de temas tabakasi yazilir. Hangi parcanin hangi logo oldugunu
+    GOREREK soylemek insanin isi; araca «bu AYS'nin olmali» dedirtmek,
+    yanlis adla yerlesen bir dosya demekti.
+    """
+    try:
+        from PIL import Image, ImageDraw
+    except ImportError:
+        print("HATA: Pillow yok.  pip install pillow")
+        return 1
+    if not kaynak.is_file():
+        print("HATA: %s bir dosya degil" % kaynak)
+        return 1
+
+    im = Image.open(kaynak)
+    kutular = _kutular(_maske(im))
+    if not kutular:
+        print("Parca bulunamadi. Tabaka duz bir zemin uzerinde mi?")
+        return 1
+
+    cikti.mkdir(parents=True, exist_ok=True)
+    pay = max(2, min(im.width, im.height) // 200)
+    parcalar = []
+    for i, (x0, y0, x1, y1) in enumerate(kutular, 1):
+        kutu = (max(0, x0 - pay), max(0, y0 - pay),
+                min(im.width, x1 + pay), min(im.height, y1 + pay))
+        p = im.crop(kutu)
+        ad = "kesit-%02d.png" % i
+        p.save(cikti / ad)
+        parcalar.append((ad, p))
+        print("  ✓ %-14s %4dx%-4d   kaynakta (%d,%d)" %
+              (ad, p.width, p.height, kutu[0], kutu[1]))
+
+    # Temas tabakasi: hepsi tek karede, numarali. Bakip ad vermek icin.
+    H, C = 260, min(5, len(parcalar))
+    satir = (len(parcalar) + C - 1) // C
+    t = Image.new("RGB", (C * (H + 16), satir * (H + 34)), (250, 249, 247))
+    ciz = ImageDraw.Draw(t)
+    for i, (ad, p) in enumerate(parcalar):
+        k = p.convert("RGBA")
+        k.thumbnail((H, H), Image.LANCZOS)
+        x = (i % C) * (H + 16) + 8
+        y = (i // C) * (H + 34) + 6
+        t.paste(k, (x + (H - k.width) // 2, y + (H - k.height) // 2), k)
+        ciz.text((x, y + H + 6), ad, fill=(20, 20, 20))
+    t.save(cikti / "tabaka.png")
+    print("\n%d parca + tabaka.png -> %s" % (len(parcalar), cikti))
+    print("Once tabaka.png'e bak, sonra her parcayi adiyla yeniden adlandir")
+    print("ve `python3 tools/marka.py <klasor>` ile yerlestir.")
+    return 0
+
+
 def sina() -> int:
     """Ad kurali ve yol muhafizi — `--sina`.
 
@@ -284,6 +430,15 @@ def main() -> int:
 
     if "--liste" in sys.argv:
         return liste()
+    if "--kes" in sys.argv:
+        arg = [a for a in sys.argv[1:] if not a.startswith("-")]
+        if not arg:
+            print("Kullanim: python3 tools/marka.py <tabaka.png> --kes [cikti]")
+            return 1
+        kaynak = Path(arg[0]).expanduser().resolve()
+        cikti = Path(arg[1]).expanduser().resolve() if len(arg) > 1 \
+            else kaynak.parent / (kaynak.stem + "-parcalar")
+        return kes(kaynak, cikti)
     arg = [a for a in sys.argv[1:] if not a.startswith("-")]
     if not arg:
         print(__doc__)
