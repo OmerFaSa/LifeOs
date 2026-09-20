@@ -1377,6 +1377,31 @@ oldu ama gün kırılımı KORUNDU — `xp.js` artık biçim değişimi ile eşi
 değişimini ayırıyor; eskiden bir katalog düzenlemesi kullanıcının yüz
 yirmi günlük kırılımını siliyordu.
 
+**Zorluk eğrisi sertleşti.** Eğri DÜZDÜ ve depo sahibinin tarifini
+karşılamıyordu: Safir'e dört buçuk ayda, Kutsal'a altı ayda geliniyordu
+— «çok zor» ve «çok nadir» bunlar değildi. Tarif kelimesi kelimesine
+şuydu: «bronz çok kolay, gümüş gene kolay, altın orta seviye, yakut zor,
+safir çok zor, kutsal çok nadir».
+
+Yeni eğride her kademe bir öncekinin yaklaşık ÜÇ KATI emek istiyor
+(günde ~250 XP ile): Bronz 3 gün, Gümüş 16 gün, Altın 2,1 ay, Yakut
+7,2 ay, Safir 2,2 yıl, Kutsal'a giriş 3,3 yıl. K1000 hâlâ ulaşılamaz —
+günlük tavanın tamamını her gün alan biri için 210 yıl.
+
+Dört test eğriyi koruyor ve SAYIYI değil EĞRİYİ sınıyorlar: eşikler
+ayarlanabilir ama bir kademe bir öncekinden ucuza gelemez, ilk üç
+kademenin her basamağı tavanla bir ayda geçilmeli (basamak aylarca
+sürerse ilerleme durur), Bronz bir haftadan kısa, Kutsal bir yıldan
+uzun olmalı.
+
+Şema sürümü 3 → 4 oldu ama gün kırılımı KORUNDU: `xp.js` biçim
+değişimi ile eşik değişimini ayırıyor, eşik değiştiğinde yalnız yeniden
+türetme yapılıyor.
+
+K'NİN YERİ DÜZELTİLDİ. K merdiveni Kutsal'ın basamakları DEĞİL,
+Kutsal'a geçince açılan devamıdır: K100 girişin kendisi, K200'den
+itibaren Kutsal'ın içinde devam eder.
+
 **Rozet sistemi kuruldu.** Depo sahibi 53 görsel gönderdi (11'i `_a`/`_b`
 ikizi, md5 düzeyinde aynı) ve altı kademe videosu. Yedi aile, 37 rozet,
 5 mühür ve bir onur rozeti.

@@ -146,6 +146,51 @@
       expect(s.id).toBe('safir');
     });
 
+    it('zorluk eğrisi kademeden kademeye SERTLEŞİR', () => {
+      /* Depo sahibinin tarifi: «bronz çok kolay, gümüş gene kolay,
+         altın orta, yakut zor, safir çok zor, kutsal çok nadir».
+         Sayıyı değil EĞRİYİ sınıyoruz: eşikler ayarlanabilir, ama bir
+         kademe bir öncekinden ucuza gelemez. Önceki eğri düzdü ve
+         Safir'e dört buçuk ayda geliniyordu. */
+      const biten = n => {
+        const b = L.BASAMAKLAR.filter(x => x.kademe === n);
+        return b[b.length - 1].esik;
+      };
+      for(let n = 2; n <= 6; n++){
+        const bu = biten(n) - (n > 1 ? biten(n - 1) : 0);
+        const onceki = biten(n - 1) - (n > 2 ? biten(n - 2) : 0);
+        /* Her kademe bir öncekinden EN AZ iki kat pahalı. */
+        expect(bu >= onceki * 2).toBeTruthy();
+      }
+    });
+
+    it('bir basamak bir gün-hafta işidir, bir kademe değil', () => {
+      /* Kademeler arası fark hissedilmeli AMA basamaklar arası
+         hissedilmemeli: basamak aylarca sürerse ilerleme durur ve
+         merdiven işe yaramaz. İlk üç kademenin her basamağı, günlük
+         tavanla en çok bir ayda geçilmeli. */
+      const tavan = Math.max(L.GUNLUK_TAVAN('ays'), L.GUNLUK_TAVAN('spi'),
+        L.GUNLUK_TAVAN('esp'));
+      L.BASAMAKLAR.filter(b => b.kademe <= 3).forEach((b, i, hepsi) => {
+        const onceki = i > 0 ? hepsi[i - 1].esik : 0;
+        expect((b.esik - onceki) / tavan <= 31).toBeTruthy();
+      });
+    });
+
+    it('Bronz ÇOK KOLAY: günlük tavanla bir haftadan kısa', () => {
+      const tavan = Math.max(L.GUNLUK_TAVAN('ays'), L.GUNLUK_TAVAN('spi'),
+        L.GUNLUK_TAVAN('esp'));
+      const bronz = L.BASAMAKLAR.filter(b => b.kademe === 1);
+      expect(bronz[bronz.length - 1].esik / tavan < 7).toBeTruthy();
+    });
+
+    it('Kutsal ÇOK NADİR: günlük tavanla bir yıldan uzun', () => {
+      const tavan = Math.max(L.GUNLUK_TAVAN('ays'), L.GUNLUK_TAVAN('spi'),
+        L.GUNLUK_TAVAN('esp'));
+      const kutsal = L.BASAMAKLAR.filter(b => b.kademe === 6)[0];
+      expect(kutsal.esik / tavan / 365 > 1).toBeTruthy();
+    });
+
     it('K1000 bir ömürde ulaşılamaz — bilerek', () => {
       /* Ölçüt keyfi değil: bir sistemin GÜNLÜK TAVANI katalogdan
          okunur. Tavanın tamamını HER GÜN alan biri bile otuz yıldan

@@ -8184,7 +8184,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'afa2073', at:'2026-09-20 20:03', dirty:true };
+R.BUILD = { id:'1714926', at:'2026-09-20 20:36', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8281,7 +8281,7 @@ window.LIFEOS = window.LIFEOS || {};
 /* 2 → 3: beşinci kademe Hüküm iken Safir oldu ve Kutsal üç basamaktan
    on K basamağına çıktı. Defterin BİÇİMİ değişmedi; bu yüzden gün
    kırılımı korunur (bkz. core/xp.js, BICIM_SURUM). */
-LIFEOS.SEVIYE_SURUM = 3;
+LIFEOS.SEVIYE_SURUM = 4;
 
 /* NOKTALI kademelerde (1–5) kaç basamak var. Kutsal bu sayıya UYMAZ:
    kendi `etiketler` listesi kadar basamağı vardır. Motor zaten hiçbir
@@ -8304,25 +8304,52 @@ LIFEOS.BASAMAK_SAYISI = 3;
 
    DEĞİŞMEMESİ GEREKEN şey `LIFEOS.XP_ETKINLIK` içindeki `id`'lerdir:
    defterde yazılı olan odur. */
+/* ======================= ZORLUK EĞRİSİ =======================
+
+   Depo sahibinin tarifi, kelimesi kelimesine: «bronz çok kolay, gümüş
+   gene kolay, altın orta seviye, yakut zor, safir çok zor, kutsal çok
+   nadir». Eşikler buna göre ÖLÇÜLDÜ, uydurulmadı — günde ~250 XP'lik
+   gerçekçi bir tempoda:
+
+     Bronz    800 XP        3 gün      çok kolay
+     Gümüş  4 000 XP       16 gün      kolay
+     Altın 16 000 XP      2,1 ay       orta
+     Yakut 55 000 XP      7,2 ay       zor
+     Safir 200 000 XP     2,2 yıl      çok zor
+     Kutsal 300 000 XP    3,3 yıl      çok nadir  (K merdiveni açılır)
+
+   Önceki eğri DÜZDÜ ve tarifi karşılamıyordu: Safir'e 4,5 ayda,
+   Kutsal'a 6 ayda geliniyordu — «çok zor» ve «çok nadir» bunlar
+   değildi. Artık her kademe bir öncekinin yaklaşık üç katı emek
+   istiyor; fark kademeler arasında hissediliyor, basamaklar arasında
+   değil (basamak bir gün-hafta işi olmalı, yoksa ilerleme durur).
+
+   K MERDİVENİ KUTSAL'DAN SONRA. K100 Kutsal'a girişin kendisidir;
+   K200'den itibaren merdiven Kutsal'ın İÇİNDE devam eder. K1000 bir
+   ömürde ulaşılamaz ve bunu bir test koruyor: günlük tavanın tamamını
+   HER GÜN alan biri bile 210 yıl sürer.
+
+   Eşik değişimi gün kırılımını SİLMEZ: `xp.js` biçim değişimi ile eşik
+   değişimini ayırır (`BICIM_SURUM`), yalnız yeniden türetme yapar. */
 LIFEOS.KADEMELER = [
   { no:1, id:'bronz',  ad:'Bronz',      slogan:'Temeli oluştur',
-    renk:'#B87333', isik:'#E9A86A', basamak:[  300,   400,   500 ] },
+    renk:'#B87333', isik:'#E9A86A', basamak:[  150,   250,   400 ] },
 
   { no:2, id:'gumus',  ad:'Gümüş',      slogan:'Disiplini inşa et',
-    renk:'#C9CDD3', isik:'#F2F5F8', basamak:[  700,   900,  1100 ] },
+    renk:'#C9CDD3', isik:'#F2F5F8', basamak:[  700,  1000,  1500 ] },
 
   { no:3, id:'altin',  ad:'Altın',      slogan:'Potansiyelini açığa çıkar',
-    renk:'#E3B341', isik:'#FFDC8A', basamak:[ 1400,  1700,  2000 ] },
+    renk:'#E3B341', isik:'#FFDC8A', basamak:[ 3000,  4000,  5000 ] },
 
   { no:4, id:'yakut',  ad:'Yakut',      slogan:'Sınırlarını aş',
-    renk:'#B31432', isik:'#FF6B7E', basamak:[ 2500,  3000,  3500 ] },
+    renk:'#B31432', isik:'#FF6B7E', basamak:[ 9000, 13000, 17000 ] },
 
   /* Beşinci kademe önce «Nebula», sonra «Hüküm»dü; şimdi SAFİR. Ad
      rütbe kartlarıyla birlikte değişti — kartın üstünde yazan ne ise
      burada da o yazar, yoksa ekranla dosya iki ayrı şey söyler. Renk
      de kartın kendi mavisinden alındı. */
   { no:5, id:'safir',  ad:'Safir',      slogan:'Ustalığı berraklaştır',
-    renk:'#1E3FA8', isik:'#7FB0FF', basamak:[ 4500,  5500,  6500 ] },
+    renk:'#1E3FA8', isik:'#7FB0FF', basamak:[30000, 45000, 70000 ] },
 
   /* KUTSAL — noktasız ve sonsuz. Basamak adları `etiketler` listesinden
      okunur; o liste varsa «no.sıra» biçimi hiç üretilmez.
@@ -8348,8 +8375,8 @@ LIFEOS.KADEMELER = [
     renk:'#C9A227', isik:'#FFF1C4',
     etiketler:['K100', 'K200', 'K300', 'K400', 'K500',
                'K600', 'K700', 'K800', 'K900', 'K1000'],
-    basamak:[  12000,   22000,   40000,   75000,  140000,
-              260000,  480000,  900000, 1700000, 3200000 ] },
+    basamak:[  100000,   200000,   350000,   550000,  1000000,
+              1600000,  2800000,  4700000, 8000000, 13500000 ] },
 ];
 
 /* ======================= ETKİNLİKLER =======================

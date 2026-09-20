@@ -12,38 +12,55 @@ sistemin tek seviyesini besler.
 
 ## Merdiven
 
-| Kademe | Ad | Basamaklar | Bu kademeyi bitiren toplam XP |
-|---:|---|---|---:|
-| 1 | Bronz | 1.1 · 1.2 · 1.3 | 1 200 |
-| 2 | Gümüş | 2.1 · 2.2 · 2.3 | 3 900 |
-| 3 | Altın | 3.1 · 3.2 · 3.3 | 9 000 |
-| 4 | Yakut | 4.1 · 4.2 · 4.3 | 18 000 |
-| 5 | Safir | 5.1 · 5.2 · 5.3 | 34 500 |
-| 6 | **Kutsal** | K100 … K1000 | 6 863 500 |
+Altı kademe, her birinde üç basamak — Kutsal hariç. Zorluk kademeden
+kademeye **sertleşir** ve bu depo sahibinin tarifidir, kelimesi
+kelimesine: «bronz çok kolay, gümüş gene kolay, altın orta seviye,
+yakut zor, safir çok zor, kutsal çok nadir».
+
+| Kademe | Ad | Basamaklar | Bitiren XP | Günde ~250 XP ile | |
+|---:|---|---|---:|---|---|
+| 1 | Bronz | 1.1 · 1.2 · 1.3 | 800 | 3 gün | çok kolay |
+| 2 | Gümüş | 2.1 · 2.2 · 2.3 | 4 000 | 16 gün | kolay |
+| 3 | Altın | 3.1 · 3.2 · 3.3 | 16 000 | 2,1 ay | orta |
+| 4 | Yakut | 4.1 · 4.2 · 4.3 | 55 000 | 7,2 ay | zor |
+| 5 | Safir | 5.1 · 5.2 · 5.3 | 200 000 | 2,2 yıl | çok zor |
+| 6 | **Kutsal** | K100 … K1000 | 300 000'den başlar | 3,3 yıl | **çok nadir** |
+
+Her kademe bir öncekinin yaklaşık **üç katı** emek ister. Fark
+kademeler arasında hissedilir, basamaklar arasında değil: bir basamak
+bir gün-hafta işi olmalı, yoksa ilerleme durur ve merdiven işe yaramaz.
+İki test bunu koruyor — biri eğrinin sertleştiğini, öteki ilk üç
+kademenin her basamağının tavanla bir ayda geçildiğini denetler.
+
+> Önceki eğri DÜZDÜ: Safir'e dört buçuk ayda, Kutsal'a altı ayda
+> geliniyordu. «Çok zor» ve «çok nadir» bunlar değildi.
 
 ### Kutsal'da nokta yoktur
 
 Altıncı kademe bir varış değil bir devamdır; sahnesinde yazdığı gibi
 **«daima daha yükseğe»**. Basamakları `6.1` diye değil `K100`, `K200`,
-… `K1000` diye adlanır ve her biri bir öncekinin yaklaşık **1,85 katı**
-emek ister.
+… `K1000` diye adlanır.
+
+**K100 Kutsal'a girişin kendisidir**; K merdiveni oradan itibaren
+Kutsal'ın İÇİNDE devam eder ve her basamak bir öncekinin yaklaşık
+**1,7 katı** emek ister.
 
 | Rütbe | Kümülatif eşik | Günde ~250 XP ile |
 |---|---:|---|
-| K100 | 46 500 | ~6 ay |
-| K200 | 68 500 | ~9 ay |
-| K300 | 108 500 | ~1,2 yıl |
-| K400 | 183 500 | ~2 yıl |
-| K500 | 323 500 | ~3,5 yıl |
-| K600 | 583 500 | ~6,4 yıl |
-| K700 | 1 063 500 | ~11,7 yıl |
-| K800 | 1 963 500 | ~21,5 yıl |
-| K900 | 3 663 500 | ~40 yıl |
-| **K1000** | **6 863 500** | **~75 yıl** |
+| K100 | 300 000 | ~3,3 yıl |
+| K200 | 500 000 | ~5,5 yıl |
+| K300 | 850 000 | ~9,3 yıl |
+| K400 | 1 400 000 | ~15 yıl |
+| K500 | 2 400 000 | ~26 yıl |
+| K600 | 4 000 000 | ~44 yıl |
+| K700 | 6 800 000 | ~75 yıl |
+| K800 | 11 500 000 | ~126 yıl |
+| K900 | 19 500 000 | ~214 yıl |
+| **K1000** | **33 000 000** | **~362 yıl** |
 
 **K1000 bilerek ulaşılmaz.** Bir sistemin günlük tavanı ~430 XP; o
-tavanın tamamını **her gün, hiç atlamadan** alan biri için bile kırk üç
-yıl eder. Tepesi görünen bir merdiven, tepesine varıldığı gün biten bir
+tavanın tamamını **her gün, hiç atlamadan** alan biri için bile 210 yıl
+eder. Tepesi görünen bir merdiven, tepesine varıldığı gün biten bir
 merdivendir. Bir test bunu koruyor: eşik otuz yıldan yakına düşerse
 paket kırmızıya döner.
 

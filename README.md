@@ -62,10 +62,15 @@ konuşamadığı bir boşluğu buldu (tarayıcının CORS ön-isteği).
 
   Altı kademe: **Bronz · Gümüş · Altın · Yakut · Safir · Kutsal.** İlk
   beşinde üçer basamak vardır ve noktayla yazılır (`5.2`); her basamağın
-  kendi **rütbe kartı** vardır. Kutsal'da nokta yoktur: basamakları
-  `K100`'den `K1000`'e gider ve her biri bir öncekinin yaklaşık iki katı
-  emek ister — K1000 bilerek ulaşılmaz, çünkü tepesi görünen bir merdiven
-  varıldığı gün biter.
+  kendi **rütbe kartı** vardır. Zorluk kademeden kademeye sertleşir —
+  Bronz üç günde, Gümüş iki haftada, Altın iki ayda, Yakut yedi ayda,
+  Safir iki yılda biter; Kutsal'a üç yılda girilir. Her kademe bir
+  öncekinin yaklaşık üç katı emek ister.
+
+  Kutsal'da nokta yoktur: basamakları `K100`'den `K1000`'e gider ve
+  `K100` Kutsal'a girişin kendisidir. K1000 bilerek ulaşılmaz — günlük
+  tavanın tamamını her gün alan biri için bile 210 yıl eder, çünkü
+  tepesi görünen bir merdiven varıldığı gün biter.
 
   Rütbe kazanıldığında önce sağ üstte **üç saniyelik bir haberci** çıkar;
   **Space** o ekrana hiç sokmaz. Geçilmezse arka plan kararır, kademenin
