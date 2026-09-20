@@ -343,6 +343,19 @@ details.detay > summary:hover{ color:var(--fg); }
   width:26px; height:26px; margin:0; opacity:.9; }
 .serit__kutu{ position:relative; }
 
+
+/* MÜHÜR LİSTESİ — rozet ızgarasından AYRI durur ve bilerek: mührün
+   eşiği, sayacı, tarihi yoktur; onu bir ilerleme çubuğunun yanına
+   koymak kazanılan bir şey sanılmasına yol açardı. */
+.muhurler{ display:grid; gap:10px; margin:8px 0;
+  grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); }
+.muhur-sat{ display:flex; align-items:center; gap:10px;
+  padding:8px 12px; border:1px solid var(--line); border-radius:4px; }
+.muhur-sat .muhur{ width:30px; height:30px; margin:0; vertical-align:middle; }
+.muhur-sat__yazi{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+.muhur-sat__yazi b{ font-size:13px; }
+.muhur-sat__yazi span{ font-size:11px; }
+
 </style>
 </head>
 <body>
@@ -454,6 +467,7 @@ details.detay > summary:hover{ color:var(--fg); }
       <div class="card" id="profil-kademe"><p class="muted">Yükleniyor…</p></div>
       <div class="card" id="profil-sayac"></div>
       <div id="profil-rozet"></div>
+      <div class="card" id="profil-muhur"></div>
     </div>
 
     <!-- =========================== SİSTEMLER ========================= -->
@@ -2836,6 +2850,30 @@ details.detay > summary:hover{ color:var(--fg); }
     }).join('');
   }
 
+  /* MÜHÜRLER — kazanılmaz, BASILIR.
+
+     Profilde durmalarının sebebi «kazanıldı mı» değil: kullanıcı hangi
+     mührün hangi belgeye vurulduğunu tek yerde görsün diye. Eşiği,
+     sayacı, tarihi yoktur ve olmamalı — o yüzden rozetlerle aynı
+     ızgarada değil, kendi kartında ve açıklamalarıyla duruyor. */
+  function profilMuhurCiz(liste){
+    var k = $('profil-muhur');
+    if(!liste || !liste.length){ k.innerHTML = ''; return; }
+    k.innerHTML = '<div class="tag">Mühürler — kazanılmaz, basılır</div>'
+      + '<div class="muhurler">'
+      + liste.map(function(m){
+          return '<div class="muhur-sat">'
+            + muhurHtml(m.id)
+            + '<div class="muhur-sat__yazi">'
+            +   '<b>' + esc(m.ad) + '</b>'
+            +   '<span class="muted">' + esc(m.nerede) + '</span>'
+            + '</div></div>';
+        }).join('')
+      + '</div>'
+      + '<p class="muted small">Mühür bir başarı değil bir ETİKETTİR: '
+      + 'hangi belgeye baktığını başlığı okumadan söyler.</p>';
+  }
+
   async function yukleProfil(t){
     var p = await api('/api/profil?date=' + t);
     if(p.status !== 200){
@@ -2846,6 +2884,7 @@ details.detay > summary:hover{ color:var(--fg); }
     profilKademeCiz(p.body);
     profilSayacCiz(p.body);
     profilRozetCiz(p.body);
+    profilMuhurCiz(p.body.muhurler);
   }
 
   async function yukleSistemler(t){

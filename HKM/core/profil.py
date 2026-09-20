@@ -96,6 +96,28 @@ AILELER = [
      "alan": "badge_focus_hours", "esikler": list(range(1, 11))},
 ]
 
+# MUHURLER — kazanilmaz, BASILIR. Rozet bir esigi gecmenin kaydidir ve
+# KULLANICIYA aittir; muhur bir belgenin damgasidir ve BELGEYE aittir.
+# Profilde durmalarinin sebebi «kazanildi mi» degil: kullanici hangi
+# muhrun hangi belgeye vuruldugunu tek yerde gorsun diye. Esigi,
+# sayaci, tarihi YOKTUR ve olmamali.
+#
+# Liste `brand/seviye/basarimlar.js` icindeki `LIFEOS.MUHURLER` ile ayni
+# sirada ve ayni kimliklerle durur; iki taraf da ayni dosya adlarini
+# uretir (`muhur-<id>.webp`). Bir test ikisinin sayisini karsilastirir.
+MUHURLER = [
+    {"id": "egitim", "ad": "Eğitim", "mod": "ays",
+     "nerede": "AYS'nin raporu ve teklifleri"},
+    {"id": "saglik", "ad": "Sağlık", "mod": "spi",
+     "nerede": "SPİ'nin raporu ve teklifleri"},
+    {"id": "entelektuellik", "ad": "Entelektüellik", "mod": "esp",
+     "nerede": "ESP'nin raporu ve teklifleri"},
+    {"id": "yonetim", "ad": "Yönetim", "mod": "hkm",
+     "nerede": "Günlük özet, brifing ve haftalık rapor"},
+    {"id": "yonetici", "ad": "Yönetici", "mod": "hkm",
+     "nerede": "Karar ve teklif belgeleri"},
+]
+
 # Sistem Ustasi'nin sarti. Dordu birden — biri eksikse rozet yok.
 ONUR_SARTI = {
     "badge_hours": 1000,
@@ -227,5 +249,6 @@ def anlik(con, date):
         "konusan": toplam["konusan"],
         "eksik": toplam["eksik"],
         "rozetler": rozetler(toplam),
+        "muhurler": [dict(m, gorsel="muhur-" + m["id"]) for m in MUHURLER],
         "onur": onur(toplam),
     }

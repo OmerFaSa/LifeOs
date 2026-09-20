@@ -175,6 +175,27 @@ def t_kademe_kart_tasir():
     eq(p["kademeler"][0]["kart"], "rutbe-4-2")
 
 
+def t_muhurler():
+    """Bes muhur, hepsi bir module bagli ve gorsel adi tasiyor."""
+    con = _con()
+    p = profil.anlik(con, GUN)
+    eq(len(p["muhurler"]), 5)
+    for m in p["muhurler"]:
+        ok(m["gorsel"].startswith("muhur-"))
+        ok(m["mod"] in ("ays", "spi", "esp", "hkm"))
+        ok(len(m["nerede"]) > 0)
+
+
+def t_muhurun_esigi_yoktur():
+    """Muhur KAZANILMAZ. Esik, sayac ya da «kazanildi» alani tasirsa
+    bir ilerleme cubugunun yanina konur ve kazanilan bir sey sanilir."""
+    con = _con()
+    for m in profil.anlik(con, GUN)["muhurler"]:
+        no("esik" in m)
+        no("kazanildi" in m)
+        no("deger" in m)
+
+
 def run():
     suite("Profil — toplama")
     test("uc modulun saati toplanir", t_0_0)
@@ -195,3 +216,6 @@ def run():
     test("kart adi JS kuraliyla ayni", t_kart_adi)
     test("bozuk girdide ad uydurulmaz", t_kart_bozuk_girdide_uydurmaz)
     test("kademe kart adini tasir", t_kademe_kart_tasir)
+    suite("Profil — mühürler")
+    test("bes muhur, hepsi bir modulde", t_muhurler)
+    test("muhurun esigi ve sayaci yoktur", t_muhurun_esigi_yoktur)
