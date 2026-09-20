@@ -84,6 +84,60 @@ VIDEO = {".mp4", ".webm"}
 RUTBE = re.compile(r"^rutbe-(\d+-\d+|k\d+)$")
 SAHNE = re.compile(r"^sahne-(\d+)$")
 
+# ------------------------------------------------------------------
+# BAŞARIM ROZETLERİ, MÜHÜRLER VE ONUR
+#
+# Bunlar rütbe kartından BAŞKA bir şeydir ve karışmamaları önemlidir:
+#
+#   rutbe-5-2    seviye merdiveninin bir basamağı — XP ile gelinir
+#   basarim-…    bir eşiği geçmekle kazanılan rozet (500 saat, 100 gün…)
+#   muhur-…      kazanılmaz, BASILIR — raporun alan damgası
+#   onur-…       tüm alanların zirvesi (Sistem Ustası)
+#
+# ÖNEK NEDEN `basarim-`. `rozet-` denemezdi: `rozet-1.png` … `rozet-6.png`
+# zaten kademe rozetidir (bkz. `brand/seviye/xp.js`, `panelHtml`). İki
+# ayrı kavramı tek önekle adlandırmak, bir gün birinin diğerinin
+# dosyasını çağırması demekti. Kullanıcıya hâlâ «rozet» denir; ayrım
+# dosya adındadır, ekranda değil.
+#
+# ÜRETİCİNİN VERDİĞİ AD ile SERVİS EDİLEN AD farklıdır: gelen dosya
+# `saat_500_a.png` olabilir, servis edilen `basarim-saat-500.webp`
+# olur. Çeviri burada, TEK yerde yazılı; başka hiçbir yerde tekrar
+# edilmez.
+BASARIM_AILE = {
+    "gorev":     r"\d+",          # gorev_500      → basarim-gorev-500
+    "gun":       r"\d+",          # gun_100        → basarim-gun-100
+    "saat":      r"\d+",          # saat_2500_a    → basarim-saat-2500
+    "istikrar":  r"\d+",          # istikrar_12    → basarim-istikrar-12
+    "odak":      r"\d+[Hh]?",     # odak_7H        → basarim-odak-7
+    "kusursuz":  r"gun|hafta|ay",  # kusursuz_hafta → basarim-kusursuz-hafta
+}
+MUHUR = re.compile(r"^muhur[-_]([a-z]+)(?:[-_][ab])?$", re.I)
+ONUR = re.compile(r"^onur[-_]([a-z-]+)$", re.I)
+
+# `_a` ve `_b` AYNI dosyadır (depo sahibinin üreticisi ikisini birden
+# veriyor; md5 ile doğrulandı). İkincisi yazılmaz, atlandığı söylenir —
+# sessizce üstüne yazmak, ikisi bir gün FARKLILAŞTIĞINDA hangisinin
+# kazandığını kimsenin bilmemesi demekti.
+KOPYA_SON = re.compile(r"_[ab]$", re.I)
+
+
+def basarim_adi(govde: str):
+    """Üreticinin adını servis edilen ada çevirir. Uymuyorsa None."""
+    temiz = KOPYA_SON.sub("", govde).lower()
+    for aile, kalip in BASARIM_AILE.items():
+        m = re.match(r"^%s[-_](%s)$" % (aile, kalip), temiz)
+        if m:
+            # `7H` → `7`: birim adın içinde taşınmaz, katalogda yazılıdır.
+            return "basarim-%s-%s" % (aile, m.group(1).rstrip("Hh"))
+    m = MUHUR.match(govde)
+    if m:
+        return "muhur-" + m.group(1).lower()
+    m = ONUR.match(govde)
+    if m:
+        return "onur-" + m.group(1).lower().replace("_", "-")
+    return None
+
 
 def _boyut(yol: Path) -> int:
     return yol.stat().st_size if yol.exists() else 0
@@ -113,9 +167,10 @@ def isle(kaynak: Path, kayipli: bool = False) -> int:
             continue
         govde, uzanti = dosya.stem, dosya.suffix.lower()
         rutbe, sahne = RUTBE.match(govde), SAHNE.match(govde)
-        if not rutbe and not sahne:
-            print("  · %-34s ADI UYMUYOR — rutbe-5-2 / rutbe-k300 / sahne-4"
-                  % dosya.name[:34])
+        basarim = None if (rutbe or sahne) else basarim_adi(govde)
+        if not rutbe and not sahne and not basarim:
+            print("  · %-34s ADI UYMUYOR — rutbe-5-2 / sahne-4 / saat_500 / "
+                  "muhur_saglik" % dosya.name[:34])
             atlanan += 1
             continue
 
@@ -134,8 +189,14 @@ def isle(kaynak: Path, kayipli: bool = False) -> int:
             atlanan += 1
             continue
 
-        hedef = MEDYA / (govde + ".webp")
-        if rutbe:
+        hedef = MEDYA / ((basarim or govde) + ".webp")
+        # `_a`/`_b` ikizinin ikincisi: yazma, ama ATLADIĞINI SÖYLE.
+        if basarim and hedef.exists() and KOPYA_SON.search(govde):
+            print("  · %-34s ikiz (%s zaten yazıldı)"
+                  % (dosya.name[:34], hedef.name))
+            atlanan += 1
+            continue
+        if rutbe or basarim:
             im = Image.open(dosya).convert("RGBA")
             # Tam saydam kenar boşluğu atılır. Parıltı ALFASI SIFIR
             # DEĞİLDİR, yani kırpma ışığı kesmez — yalnız boşluğu alır.
