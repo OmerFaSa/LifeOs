@@ -143,6 +143,38 @@ def t_2_1():
     eq(len(p["kademeler"]), 1)
 
 
+def t_kart_adi():
+    """Kart adi kurali — JS tarafiyla AYNI ornekler.
+
+    Ayni ornekler `brand/seviye/xp.test.js` icinde de sinaniyor. Kural
+    tek kaynaktan yayiliyor (`brand/seviye/ortak_kart.py`) ama iki dil
+    iki ayri yerde kosuyor; ayrisirlarsa once bu iki test kirilir."""
+    eq(profil.rutbe_kart_adi(1, 1), "rutbe-1-1")
+    eq(profil.rutbe_kart_adi(3, 2), "rutbe-3-2")
+    eq(profil.rutbe_kart_adi(5, 3), "rutbe-5-3")
+    # KUTSAL'DA NOKTA YOKTUR: adim yuze carpilir.
+    eq(profil.rutbe_kart_adi(6, 1), "rutbe-k100")
+    eq(profil.rutbe_kart_adi(6, 3), "rutbe-k300")
+    eq(profil.rutbe_kart_adi(6, 10), "rutbe-k1000")
+
+
+def t_kart_bozuk_girdide_uydurmaz():
+    """Beklenmedik girdide None doner. Uydurma bir ad uretmek, olmayan
+    bir dosyayi istemektir."""
+    no(profil.rutbe_kart_adi(None, 2))
+    no(profil.rutbe_kart_adi(0, 1))
+    no(profil.rutbe_kart_adi(3, 0))
+    no(profil.rutbe_kart_adi("x", "y"))
+
+
+def t_kademe_kart_tasir():
+    con = _con()
+    _push(con, "ays", level_tier=metric(4, "computed"),
+          level_sub=metric(2, "computed"))
+    p = profil.anlik(con, GUN)
+    eq(p["kademeler"][0]["kart"], "rutbe-4-2")
+
+
 def run():
     suite("Profil — toplama")
     test("uc modulun saati toplanir", t_0_0)
@@ -159,3 +191,7 @@ def run():
     suite("Profil — merkezin kendi XP'si yoktur")
     test("kademe YAN YANA durur, toplanmaz", t_2_0)
     test("kademe gondermeyen modul listede hic gorunmez", t_2_1)
+    suite("Profil — rütbe kartı")
+    test("kart adi JS kuraliyla ayni", t_kart_adi)
+    test("bozuk girdide ad uydurulmaz", t_kart_bozuk_girdide_uydurmaz)
+    test("kademe kart adini tasir", t_kademe_kart_tasir)

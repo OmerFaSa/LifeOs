@@ -295,8 +295,12 @@ details.detay > summary:hover{ color:var(--fg); }
 
 /* KADEME — yan yana, toplanmadan. */
 .kademeler{ display:flex; flex-wrap:wrap; gap:10px; margin:8px 0; }
-.kademe{ display:flex; align-items:baseline; gap:8px;
-  padding:8px 14px; border:1px solid var(--line); border-radius:4px; }
+.kademe{ display:flex; align-items:center; gap:12px;
+  padding:10px 16px 10px 10px; border:1px solid var(--line); border-radius:4px; }
+/* Kart KÜÇÜK durur: profil bir kart vitrini değil, dört alanın özeti.
+   Büyütmek üç kartı yan yana koyduğunda sayfayı onlara çevirirdi. */
+.kademe__kart{ width:44px; height:auto; flex:none; display:block; }
+.kademe__yazi{ display:flex; align-items:baseline; gap:8px; min-width:0; }
 .kademe__ad{ font-size:13px; }
 .kademe__no{ font-size:18px; font-weight:600; }
 .kademe__xp{ font-size:12px; }
@@ -2754,11 +2758,24 @@ details.detay > summary:hover{ color:var(--fg); }
     k.innerHTML = '<div class="tag">Kademe — yan yana, toplanmadan</div>'
       + '<div class="kademeler">'
       + liste.map(function(x){
-          return '<div class="kademe"><b class="kademe__ad">' + esc(x.ad) + '</b>'
-            + '<span class="kademe__no num">' + x.tier + '.' + x.sub + '</span>'
-            + (x.xp_total != null
-                ? '<span class="kademe__xp muted num">' + sayiTr(x.xp_total) + ' XP</span>'
-                : '') + '</div>';
+          /* Rütbe KARTI — üç arayüzün gösterdiği görselin aynısı.
+             Kart adı merkezde uydurulmaz, `/api/profil` taşır (kural
+             tek kaynaktan: brand/seviye/ortak_kart.py). Henüz
+             üretilmemiş bir kart varsa `onerror` düğümü kaldırır ve
+             altındaki numara görünür kalır. */
+          return '<div class="kademe">'
+            + (x.kart
+                ? '<img class="kademe__kart" src="/img/seviye/' + esc(x.kart)
+                  + '.webp" alt="" aria-hidden="true" loading="lazy"'
+                  + ' onerror="this.remove()">'
+                : '')
+            + '<div class="kademe__yazi">'
+            +   '<b class="kademe__ad">' + esc(x.ad) + '</b>'
+            +   '<span class="kademe__no num">' + x.tier + '.' + x.sub + '</span>'
+            +   (x.xp_total != null
+                  ? '<span class="kademe__xp muted num">' + sayiTr(x.xp_total) + ' XP</span>'
+                  : '')
+            + '</div></div>';
         }).join('')
       + '</div>'
       + '<p class="muted small">Bu bir gözlemdir; seviye hiçbir kararı vermez.</p>';

@@ -100,6 +100,13 @@ DIST_BAS = "# SEVIYE:dist-bas"
 DIST_BIT = "# SEVIYE:dist-bit"
 DIST_HEDEFLER = ["AYS/build.py", "SPI/build.py", "ESP/build.py"]
 
+# Rutbe kartinin dosya adi. Merkez profili uc sistemin kartlarini
+# gosteriyor ve adi bilmek zorunda; kurali elle ikinci kez yazmak iki
+# kopyanin bir gun ayrismasi demekti.
+KART_BAS = "# SEVIYE:kart-bas"
+KART_BIT = "# SEVIYE:kart-bit"
+KART_HEDEFLER = ["HKM/core/profil.py"]
+
 
 def yol_govdesi() -> str:
     return (KAYNAK / "ortak_yol.py").read_text(encoding="utf-8")
@@ -107,6 +114,10 @@ def yol_govdesi() -> str:
 
 def dist_govdesi() -> str:
     return (KAYNAK / "dist_kopya.py").read_text(encoding="utf-8")
+
+
+def kart_govdesi() -> str:
+    return (KAYNAK / "ortak_kart.py").read_text(encoding="utf-8")
 
 
 def _isaret_arasi(metin: str, bas: str, bit: str):
@@ -218,6 +229,8 @@ def _bloklar():
         yield (g, YOL_BAS, YOL_BIT, yol_govdesi(), "ortak yol muhafizi")
     for g in DIST_HEDEFLER:
         yield (g, DIST_BAS, DIST_BIT, dist_govdesi(), "dist medya kopyasi")
+    for g in KART_HEDEFLER:
+        yield (g, KART_BAS, KART_BIT, kart_govdesi(), "rutbe kart adi")
 
 
 def yay() -> int:

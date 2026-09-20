@@ -194,6 +194,19 @@
       expect(kutsal.esik / tavan / 365 > 1).toBeTruthy();
     });
 
+    it('kart adı kuralı — merkezdeki Python kopyasıyla AYNI', () => {
+      /* Aynı örnekler `HKM/tests/test_profil.py` içinde de sınanıyor.
+         Kural tek kaynaktan yayılıyor (`brand/seviye/ortak_kart.py`)
+         ama iki dil iki ayrı yerde koşuyor; ayrışırlarsa önce bu iki
+         test kırılır. */
+      expect(L.MEDYA_ADI('1.1')).toBe('rutbe-1-1');
+      expect(L.MEDYA_ADI('3.2')).toBe('rutbe-3-2');
+      expect(L.MEDYA_ADI('5.3')).toBe('rutbe-5-3');
+      expect(L.MEDYA_ADI('K100')).toBe('rutbe-k100');
+      expect(L.MEDYA_ADI('K300')).toBe('rutbe-k300');
+      expect(L.MEDYA_ADI('K1000')).toBe('rutbe-k1000');
+    });
+
     it('K1000 bir ömürde ulaşılamaz — bilerek', () => {
       /* Ölçüt keyfi değil: bir sistemin GÜNLÜK TAVANI katalogdan
          okunur. Tavanın tamamını HER GÜN alan biri bile otuz yıldan
