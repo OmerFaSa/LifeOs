@@ -287,6 +287,27 @@ Dört ölçü türü ve dördü de ayrı: `toplam` ömür boyu birikir, `gunluk`
 BİR GÜNE ait en iyi değerdir, `seri` kesintisiz ay sayısıdır, `ozel`
 kendi kuralı olandır.
 
+### Ekranda nerede görünür
+
+| Nerede | Ne gösterir |
+|---|---|
+| Rütbe › **Şu an** | tek kart: kaç rozet, son kazanılan, sıradaki |
+| Rütbe › **Başarımlar** | «Sıradaki» üçlüsü + yedi ailenin tamamı |
+| **Günlük rapor** | o günün odak rozeti, eylemlerin yanında |
+| HKM › **Profil** | dört alanın toplamı ve onur rozeti |
+
+**«Sıradaki»** en çok yaklaşılan üç rozeti gösterir ve **orana** göre
+seçer, eşiğe göre değil: 90 saatlik biri için «100 saat» (%90),
+«250 görev» (%12) rozetinden daha yakındır. **Aile başına bir tane**
+alınır — sıralama tek başına bırakıldığında üçü de aynı aileden
+geliyordu («3 saat · 4 saat · 5 saat odak»), yani tek hedef ve beş aile
+gizli.
+
+**Rozete dokunmak** ayrıntısını kendi ailesinin altında açar: ne
+ölçtüğü, kazanıldıysa tarihi, kazanılmadıysa ne kadar kaldığı. Tekrar
+dokunmak kapatır. Önce `div` + `title` idi ve telefonda hiçbir
+karşılığı yoktu.
+
 ### Defter neden AY ÖZETİ üstüne kurulu
 
 XP defteri gün kırılımını 120 günde bir budar. XP için doğru: toplam

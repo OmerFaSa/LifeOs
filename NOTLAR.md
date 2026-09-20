@@ -1377,6 +1377,26 @@ oldu ama gün kırılımı KORUNDU — `xp.js` artık biçim değişimi ile eşi
 değişimini ayırıyor; eskiden bir katalog düzenlemesi kullanıcının yüz
 yirmi günlük kırılımını siliyordu.
 
+**Rozet ekranı üç turda oturdu ve her turda ekrana bakmak bir hata
+çıkardı.** Kutlama yazılmıştı ama bir kez bile çizdirilmemişti: perde
+zemini `rgba` ile yazıldığı için ortası saydam kalıyor ve arkadaki
+sayfa görünüyordu; motor `ozet` alanını dışarı taşımadığı için
+açıklama satırı gerçekte boştu; başlık «Saat 500 saat» diye aile adını
+iki kez yazıyordu. Işık halkasını eklerken dördüncü bir hata daha
+oldu — `z-index:-1` izolasyonsuz bırakılınca perdede halka biçiminde
+delik açtı.
+
+«Sıradaki» rozet ilk hâlinde üçünü de aynı aileden getiriyordu
+(«3 saat · 4 saat · 5 saat odak»); aile başına bir tane kuralı ekranda
+görülünce eklendi. Rozetler `div` + `title` idi ve telefonda dokunmanın
+hiçbir karşılığı yoktu; düğmeye çevrildi. «Şu an» sekmesi ise otuz
+yedi rozetten hiç bahsetmiyordu — özet kartı eklendi ve düğmesi `action`
+alanına konduğu için hiç çizilmiyordu (`K.Card` `actions` okuyor).
+
+Hepsinin ortak dersi şu: **testler geçiyordu.** Bu hataların hiçbirini
+test yakalayamazdı çünkü hepsi ekranda görülen şeylerdi. Artık her
+biri için bir test var, ama testler ancak bakılan şeyi koruyabiliyor.
+
 **Zorluk eğrisi sertleşti.** Eğri DÜZDÜ ve depo sahibinin tarifini
 karşılamıyordu: Safir'e dört buçuk ayda, Kutsal'a altı ayda geliniyordu
 — «çok zor» ve «çok nadir» bunlar değildi. Tarif kelimesi kelimesine
