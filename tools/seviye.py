@@ -60,12 +60,15 @@ SISTEMLER = [("AYS", "R", "ays"), ("SPI", "SP", "spi"), ("ESP", "ESP", "esp")]
 # (kaynak dosya, hedef goreli yol, ad alani degistirilsin mi)
 DOSYALAR = [
     ("kademeler.js", "src/js/data/kademeler.js", False),
+    ("basarimlar.js", "src/js/data/basarimlar.js", False),
     ("xp.js",        "src/js/core/xp.js",        True),
+    ("basarim.js",   "src/js/core/basarim.js",   True),
     ("perde.js",     "src/js/core/perde.js",     True),
     ("rutbe.js",     "src/js/screens/rutbe.js",  True),
     ("seviye.css",   "src/css/seviye.css",       False),
     ("xp.test.js",   "src/tests/xp.test.js",     True),
     ("perde.test.js", "src/tests/perde.test.js", True),
+    ("basarim.test.js", "src/tests/basarim.test.js", True),
 ]
 
 BASLIK = ("/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.\n"

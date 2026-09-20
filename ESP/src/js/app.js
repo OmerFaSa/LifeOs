@@ -1108,6 +1108,25 @@ ESP.App = (function(){
      Hareket azaltma tercihinde perde HİÇ açılmaz (bkz. core/perde.js):
      tam ekran bir katman açıp odağı çalmak, o tercihi isteyen kişinin
      istemediği şeydir. Bilgi yine verilir, yalnız sesi kısılır. */
+  /* Rozet kutlaması — sırayla, BİR SEFERDE BİR TANE.
+
+     Bir eşitleme birden çok rozet açabilir (ilk kurulumda geçmiş veri
+     bir anda yirmi rozet doldurabilir). Yirmi perdeyi arka arkaya
+     açmak kutlama değil ceza olurdu; kuyruk defterde durur, biri
+     kapanınca sıradaki gelir ve uygulama kapansa da kaybolmaz. */
+  function rozetKutla(){
+    if(!ESP.Basarim || !ESP.Perde) return;
+    const r = ESP.Basarim.bekleyen();
+    if(!r) return;
+    const damgala = () => ESP.Basarim.gorundu(r.kod)
+      .then(() => rozetKutla()).catch(() => {});
+    const sonuc = ESP.Perde.rozetKutla(r, { bitti:damgala });
+    if(sonuc && sonuc.sessiz){
+      UI.toast('Yeni rozet — ' + r.ad);
+      damgala();
+    }
+  }
+
   function kutla(y){
     if(!y || !ESP.Perde || !ESP.XP) return;
     const damgala = () => ESP.XP.kutlandi()
@@ -1136,6 +1155,17 @@ ESP.App = (function(){
            panel; bütün sayfayı çizmek, tıklanan öğeyi kullanıcının
            altından çekmek demekti (bkz. core/xp.js, tazele). */
         if(r && r.degisti) ESP.XP.tazele();
+
+        /* ROZETLER AYNI TETİKTE ama AYRI DEFTERDE. Aynı yerden
+           çağrılırlar çünkü ikisini de tetikleyen şey aynı: veri
+           değişti. Ayrı defterde dururlar çünkü ölçtükleri şey ayrı —
+           XP «hangi iş kaç puan», rozet «kaç saat, kaç gün, kaç görev».
+           Biri ötekinin eşiğini değiştirmez. */
+        if(ESP.Basarim){
+          const b = await ESP.Basarim.esitleCok(
+            ESP.BasarimSayim.gunler(ESP.XP.pencere()));
+          if(b && b.yeni.length) rozetKutla();
+        }
       }catch(e){ console.error('XP eşitlenemedi:', e); }
     }, 400);
   }
@@ -1463,6 +1493,7 @@ ESP.App = (function(){
          özellikti. */
       try{
         if(ESP.XP) await ESP.XP.yukle();
+        if(ESP.Basarim) await ESP.Basarim.yukle();
       }catch(e){
         console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
       }

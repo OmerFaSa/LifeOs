@@ -918,6 +918,25 @@ R.App = (function(){
      Hareket azaltma tercihinde perde HİÇ açılmaz (bkz. core/perde.js):
      tam ekran bir katman açıp odağı çalmak, o tercihi isteyen kişinin
      istemediği şeydir. Bilgi yine verilir, yalnız sesi kısılır. */
+  /* Rozet kutlaması — sırayla, BİR SEFERDE BİR TANE.
+
+     Bir eşitleme birden çok rozet açabilir (ilk kurulumda geçmiş veri
+     bir anda yirmi rozet doldurabilir). Yirmi perdeyi arka arkaya
+     açmak kutlama değil ceza olurdu; kuyruk defterde durur, biri
+     kapanınca sıradaki gelir ve uygulama kapansa da kaybolmaz. */
+  function rozetKutla(){
+    if(!R.Basarim || !R.Perde) return;
+    const r = R.Basarim.bekleyen();
+    if(!r) return;
+    const damgala = () => R.Basarim.gorundu(r.kod)
+      .then(() => rozetKutla()).catch(() => {});
+    const sonuc = R.Perde.rozetKutla(r, { bitti:damgala });
+    if(sonuc && sonuc.sessiz){
+      UI.toast('Yeni rozet — ' + r.ad);
+      damgala();
+    }
+  }
+
   function kutla(y){
     if(!y || !R.Perde || !R.XP) return;
     const damgala = () => R.XP.kutlandi()
@@ -946,6 +965,17 @@ R.App = (function(){
            panel; bütün sayfayı çizmek, tıklanan öğeyi kullanıcının
            altından çekmek demekti (bkz. core/xp.js, tazele). */
         if(r && r.degisti) R.XP.tazele();
+
+        /* ROZETLER AYNI TETİKTE ama AYRI DEFTERDE. Aynı yerden
+           çağrılırlar çünkü ikisini de tetikleyen şey aynı: veri
+           değişti. Ayrı defterde dururlar çünkü ölçtükleri şey ayrı —
+           XP «hangi iş kaç puan», rozet «kaç saat, kaç gün, kaç görev».
+           Biri ötekinin eşiğini değiştirmez. */
+        if(R.Basarim){
+          const b = await R.Basarim.esitleCok(
+            R.BasarimSayim.gunler(R.XP.pencere()));
+          if(b && b.yeni.length) rozetKutla();
+        }
       }catch(e){ console.error('XP eşitlenemedi:', e); }
     }, 400);
   }
@@ -1245,6 +1275,7 @@ R.App = (function(){
          özellikti. */
       try{
         if(R.XP) await R.XP.yukle();
+        if(R.Basarim) await R.Basarim.yukle();
       }catch(e){
         console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
       }

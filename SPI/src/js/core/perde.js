@@ -624,20 +624,38 @@ SP.Perde = (function(){
 
   /* --------------------------------------------------------- haberci */
 
-  function habercileAc(secenekler){
+  /* Habercinin TARİFİ — perdeyi açan şeyden bağımsız.
+
+     Önce bu işlev doğrudan `yukselme` okuyordu ve haberci yalnız rütbe
+     için çalışabiliyordu. Rozet kazanımı da aynı üç saniyeyi ve aynı
+     «Space geçer» sözleşmesini hak ediyor; iki ayrı haberci yazmak,
+     ikisinin bir gün farklı davranması demekti. Artık çağıran ne
+     yazacağını söyler, haberci NASIL yazacağını bilir. */
+  function haberciTarifi(secenekler){
+    if(secenekler.haberci) return secenekler.haberci;
     var y = secenekler.yukselme || {};
     var k = y.kademeBilgi || {};
-    var kutu = el('div', 'haberci' + (y.yeniKademe ? ' haberci--kademe' : ''));
+    return {
+      sinif:y.yeniKademe ? 'haberci--kademe' : '',
+      ustyazi:y.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe',
+      ad:k.ad || ('Kademe ' + y.kademe),
+      etiket:y.etiket || '',
+      renk:k.renk, isik:k.isik,
+    };
+  }
+
+  function habercileAc(secenekler){
+    var t = haberciTarifi(secenekler);
+    var kutu = el('div', 'haberci' + (t.sinif ? ' ' + t.sinif : ''));
     kutu.setAttribute('role', 'status');
     kutu.setAttribute('aria-live', 'polite');
-    if(k.renk) kutu.style.setProperty('--kademe-renk', k.renk);
-    if(k.isik) kutu.style.setProperty('--kademe-isik', k.isik);
+    if(t.renk) kutu.style.setProperty('--kademe-renk', t.renk);
+    if(t.isik) kutu.style.setProperty('--kademe-isik', t.isik);
 
     var sayiEl = el('span', 'haberci__sayi', String(Math.ceil(HABERCI_MS / 1000)));
-    kutu.appendChild(el('div', 'haberci__ust',
-      kacis(y.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe')));
+    kutu.appendChild(el('div', 'haberci__ust', kacis(t.ustyazi)));
     kutu.appendChild(el('div', 'haberci__ad',
-      kacis(k.ad || ('Kademe ' + y.kademe)) + ' <b>' + kacis(y.etiket || '') + '</b>'));
+      kacis(t.ad) + (t.etiket ? ' <b>' + kacis(t.etiket) + '</b>' : '')));
 
     var alt = el('div', 'haberci__alt');
     alt.appendChild(sayiEl);
@@ -780,6 +798,78 @@ SP.Perde = (function(){
     return habercileAc(sec);
   }
 
+  /* ------------------------------------------------------ rozet kutlaması */
+
+  function rozetGorseliYolu(rozet, kok){
+    if(!rozet || !rozet.gorsel) return null;
+    return (kok || 'img/seviye/') + rozet.gorsel + '.webp';
+  }
+
+  /* Rozet kazanımı — rütbeyle AYNI sözleşme, AYRI görünüm.
+
+     Aynı sözleşme: önce üç saniyelik haberci, Space o ekrana hiç
+     sokmaz, hareket azaltma tercihinde perde hiç açılmaz. Bunlar
+     kullanıcının öğrendiği davranış; rozet için ikinci bir davranış
+     icat etmek, öğrendiğini bozmak olurdu.
+
+     Ayrı görünüm: rozetin kademe rengi yoktur ve sahnesi yoktur —
+     kendisi bir madalyadır, bir manzara değil. Perde sade kalır,
+     ortada rozet durur.
+
+     SÜRE rütbeden kısa (4 sn): rozet daha sık kazanılır. Yedi saniyelik
+     bir kutlama, otuz yedi kez tekrarlandığında kutlama olmaktan çıkıp
+     engel olur. */
+  function rozetKutlamaSuresi(){ return 4000; }
+
+  function rozetKutla(rozet, secenekler){
+    if(!rozet) return null;
+    secenekler = secenekler || {};
+    var kok = secenekler.kok || 'img/seviye/';
+
+    if(az()){
+      return { sessiz:true, rozet:rozet, el:null,
+        kapat:function(){}, sirada:false };
+    }
+
+    var sec = {
+      sinif:'perde--rozet',
+      baslik:'Yeni rozet: ' + (rozet.ad || rozet.kod),
+      sahne:null,          /* rozetin manzarası yoktur */
+      kart:rozetGorseliYolu(rozet, kok),
+      kartVideo:null,
+      enAz:rozetKutlamaSuresi(),
+      banner:{
+        no:String(rozet.esik || ''),
+        rozet:null,
+        ustyazi:'Yeni rozet',
+        ad:rozet.ad || rozet.kod,
+        etiket:rozet.aileAd || '',
+        slogan:rozet.ozet || '',
+        renk:null, isik:null,
+      },
+      /* Haberci de rozetin dilini konuşur: «Yeni kademe» değil
+         «Yeni rozet», etiket yerine ailenin adı. */
+      haberci:{
+        sinif:'haberci--rozet',
+        ustyazi:'Yeni rozet',
+        ad:rozet.ad || rozet.kod,
+        etiket:'',
+      },
+      bitti:secenekler.bitti,
+      rozet:rozet,
+    };
+
+    if(document.querySelector('.perde')){
+      var bekleyen = { sec:sec, iptal:false, haberci:true };
+      kuyruk.push(bekleyen);
+      return {
+        kapat:function(){ bekleyen.iptal = true; },
+        el:null, sirada:true, rozet:rozet,
+      };
+    }
+    return habercileAc(sec);
+  }
+
   /* ACİL ÇIKIŞ — açık perdeyi hemen kaldırır ve sırayı boşaltır.
 
      İki yerde gerekli: testlerin birbirinin üstüne perde bırakmaması
@@ -801,6 +891,8 @@ SP.Perde = (function(){
     /* Saf kararlar — perde açmadan sınanabilsinler diye dışarıda. */
     kartYolu:kartYolu, kartVideoYolu:kartVideoYolu, sahneYolu:sahneYolu,
     kutlamaSuresi:kutlamaSuresi,
+    rozetKutla:rozetKutla, rozetGorseliYolu:rozetGorseliYolu,
+    rozetKutlamaSuresi:rozetKutlamaSuresi,
     GEC_ICI:GEC_ICI, SES_ANAHTAR:SES_ANAHTAR, HABERCI_MS:HABERCI_MS,
   };
 })();

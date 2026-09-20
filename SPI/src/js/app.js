@@ -944,6 +944,25 @@ SP.App = (function(){
      Hareket azaltma tercihinde perde HİÇ açılmaz (bkz. core/perde.js):
      tam ekran bir katman açıp odağı çalmak, o tercihi isteyen kişinin
      istemediği şeydir. Bilgi yine verilir, yalnız sesi kısılır. */
+  /* Rozet kutlaması — sırayla, BİR SEFERDE BİR TANE.
+
+     Bir eşitleme birden çok rozet açabilir (ilk kurulumda geçmiş veri
+     bir anda yirmi rozet doldurabilir). Yirmi perdeyi arka arkaya
+     açmak kutlama değil ceza olurdu; kuyruk defterde durur, biri
+     kapanınca sıradaki gelir ve uygulama kapansa da kaybolmaz. */
+  function rozetKutla(){
+    if(!SP.Basarim || !SP.Perde) return;
+    const r = SP.Basarim.bekleyen();
+    if(!r) return;
+    const damgala = () => SP.Basarim.gorundu(r.kod)
+      .then(() => rozetKutla()).catch(() => {});
+    const sonuc = SP.Perde.rozetKutla(r, { bitti:damgala });
+    if(sonuc && sonuc.sessiz){
+      UI.toast('Yeni rozet — ' + r.ad);
+      damgala();
+    }
+  }
+
   function kutla(y){
     if(!y || !SP.Perde || !SP.XP) return;
     const damgala = () => SP.XP.kutlandi()
@@ -972,6 +991,17 @@ SP.App = (function(){
            panel; bütün sayfayı çizmek, tıklanan öğeyi kullanıcının
            altından çekmek demekti (bkz. core/xp.js, tazele). */
         if(r && r.degisti) SP.XP.tazele();
+
+        /* ROZETLER AYNI TETİKTE ama AYRI DEFTERDE. Aynı yerden
+           çağrılırlar çünkü ikisini de tetikleyen şey aynı: veri
+           değişti. Ayrı defterde dururlar çünkü ölçtükleri şey ayrı —
+           XP «hangi iş kaç puan», rozet «kaç saat, kaç gün, kaç görev».
+           Biri ötekinin eşiğini değiştirmez. */
+        if(SP.Basarim){
+          const b = await SP.Basarim.esitleCok(
+            SP.BasarimSayim.gunler(SP.XP.pencere()));
+          if(b && b.yeni.length) rozetKutla();
+        }
       }catch(e){ console.error('XP eşitlenemedi:', e); }
     }, 400);
   }
@@ -1267,6 +1297,7 @@ SP.App = (function(){
          özellikti. */
       try{
         if(SP.XP) await SP.XP.yukle();
+        if(SP.Basarim) await SP.Basarim.yukle();
       }catch(e){
         console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
       }
