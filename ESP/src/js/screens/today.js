@@ -196,6 +196,11 @@ ESP.Screens.today = (function(){
     return K.Entry({
       label:'BUGÜNÜN OTURUMLARI',
       meta:rows.length + ' oturum · ' + U.fmtMin(toplam),
+      /* GÜNÜN ODAK ROZETİ — eylemlerin yanında, günün raporunda.
+         Başarımlar sekmesindeki odak rozeti ömürlük rekordur; bu ise
+         BU GÜNÜN kendisi (bkz. core/basarim.js, gununOdagi). Eşiğin
+         altındaki gün rozet almaz ve boş döner. */
+      action:raw(ESP.Basarim ? ESP.Basarim.odakHtml(toplam) : ''),
       body:K.Table({ tight:true,
         headers:['Disiplin', 'Süre', 'Sayım', 'Not', ''],
         rows:rows.map(s => {

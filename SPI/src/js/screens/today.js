@@ -145,12 +145,25 @@ SP.Screens.today = (function(){
     });
   }
 
+  /* O günün ÖLÇÜLMÜŞ antrenman süresi. `minutes` boş bırakılan bir
+     antrenman «sıfır dakika» değil «veri yok»tur ve sayılmaz. */
+  function OdakRozeti(d){
+    if(!SP.Basarim) return '';
+    const dk = (S.workouts || []).filter(w => w && w.date === d)
+      .reduce((t, w) => t + (w.minutes != null ? Number(w.minutes) || 0 : 0), 0);
+    return SP.Basarim.odakHtml(dk);
+  }
+
   function formEntry(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
     return K.Entry({
       label:'Günün ölçümü',
-      meta:U.fmtDate(d),
+      /* GÜNÜN ODAK ROZETİ — günün raporunda, tarihin yanında.
+         Başarımlar sekmesindeki odak rozeti ömürlük rekordur; bu ise
+         BU GÜNÜN kendisi (bkz. core/basarim.js, gununOdagi). Eşiğin
+         altındaki gün rozet almaz ve boş döner. */
+      meta:raw(SP.h.esc(U.fmtDate(d)) + OdakRozeti(d)),
       note:'Boş bıraktığın alan sıfır sayılmaz — hesaba hiç girmez. Uyku '
         + 'süresini yazman bile anlamlı bir sonuç üretir.',
       action:html`${dayNav(d)}

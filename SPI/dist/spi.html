@@ -4985,6 +4985,110 @@ body.is-dragging .drop.is-over{
   .rutbe-is__alt .btn{ margin-left:0; }
 }
 
+/* ==================================================================
+   BAŞARIM ROZETLERİ
+   ================================================================== */
+
+.rutbe-rozet__ozet{ margin:0 0 4px; }
+.rutbe-rozet__say{
+  float:right;
+  font:600 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.72;
+}
+
+.rutbe-rozetler{
+  display:flex; flex-wrap:wrap; gap:12px;
+}
+
+.rutbe-rozet{
+  display:grid; justify-items:center; gap:4px;
+  width:clamp(76px, 17vw, 104px);
+  text-align:center;
+}
+.rutbe-rozet__kutu{
+  position:relative;
+  width:100%; aspect-ratio:1 / 1;
+  display:grid; place-items:center;
+  border-radius:50%;
+  overflow:hidden;
+}
+.rutbe-rozet__kutu img{
+  position:absolute; inset:0;
+  width:100%; height:100%; object-fit:contain;
+}
+.rutbe-rozet__etiket{
+  position:relative;
+  font:600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.72;
+}
+/* Rozet varsa etiket görselin üstünde okunmaz; eşik zaten rozetin
+   üstünde yazılı. */
+.rutbe-rozet__kutu:has(img) .rutbe-rozet__etiket{ display:none; }
+
+/* KAZANILMAMIŞ ROZET — mühürlü daire, kesik çevre. Rozet çizilmez
+   (bkz. rutbe.js, rozetHtml); görünen yalnız merdivenin şeklidir. */
+.rutbe-rozet--kilitli .rutbe-rozet__kutu{
+  border:1px dashed color-mix(in srgb, currentColor 22%, transparent);
+  background:
+    repeating-linear-gradient(135deg,
+      color-mix(in srgb, currentColor 5%, transparent) 0 6px,
+      transparent 6px 12px);
+}
+.rutbe-rozet--kilitli .rutbe-rozet__ad{ opacity:.5; }
+.rutbe-rozet--acik .rutbe-rozet__kutu{
+  filter:drop-shadow(0 6px 16px color-mix(in srgb, currentColor 22%, transparent));
+}
+
+.rutbe-rozet__ad{
+  font-size:11px; line-height:1.25;
+  opacity:.82;
+  /* İki satırdan uzun ad kutuyu büyütmesin: otuz yedi rozet yan yana
+     dururken tek bir uzun ad bütün sırayı kaydırıyordu. */
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+/* Kilitli rozetin ne kadar yaklaştığı — ince bir çizgi, yüzde yazısı
+   değil. Sayıyı yazmak «%38 rozet» gibi anlamsız bir şey okutuyordu. */
+.rutbe-rozet__oran{
+  display:block; width:70%; height:3px; border-radius:2px;
+  background:color-mix(in srgb, currentColor 12%, transparent);
+  overflow:hidden;
+}
+.rutbe-rozet__oran i{
+  display:block; height:100%;
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 62%, transparent);
+}
+
+/* Sahne VİDEOSU, poster görselin durduğu yerde ve aynı kurallarla. */
+.rutbe-kart video.rutbe-kart__sahne{
+  object-fit:cover; object-position:center 42%;
+}
+
+/* GÜNÜN ODAK ROZETİ — günlük raporda, eylemlerin yanında.
+   Küçük ve satır içi: rapor bir rozet vitrini değil, rozet oradaki
+   sayının yanında duran bir işaret. */
+.odak-rozet{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:3px 10px 3px 3px;
+  border-radius:999px;
+  border:1px solid color-mix(in srgb, currentColor 14%, transparent);
+  background:color-mix(in srgb, currentColor 4%, transparent);
+  vertical-align:middle;
+}
+.odak-rozet__gorsel{
+  width:28px; height:28px; flex:none;
+  object-fit:contain; display:block;
+}
+.odak-rozet__yazi{
+  font:600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.odak-rozet__not{ font-weight:500; opacity:.62; }
+
 /* ==== css/designs.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/designs.css içine yazılır; burası bir sonraki
@@ -6271,20 +6375,38 @@ SP.Perde = (function(){
 
   /* --------------------------------------------------------- haberci */
 
-  function habercileAc(secenekler){
+  /* Habercinin TARİFİ — perdeyi açan şeyden bağımsız.
+
+     Önce bu işlev doğrudan `yukselme` okuyordu ve haberci yalnız rütbe
+     için çalışabiliyordu. Rozet kazanımı da aynı üç saniyeyi ve aynı
+     «Space geçer» sözleşmesini hak ediyor; iki ayrı haberci yazmak,
+     ikisinin bir gün farklı davranması demekti. Artık çağıran ne
+     yazacağını söyler, haberci NASIL yazacağını bilir. */
+  function haberciTarifi(secenekler){
+    if(secenekler.haberci) return secenekler.haberci;
     var y = secenekler.yukselme || {};
     var k = y.kademeBilgi || {};
-    var kutu = el('div', 'haberci' + (y.yeniKademe ? ' haberci--kademe' : ''));
+    return {
+      sinif:y.yeniKademe ? 'haberci--kademe' : '',
+      ustyazi:y.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe',
+      ad:k.ad || ('Kademe ' + y.kademe),
+      etiket:y.etiket || '',
+      renk:k.renk, isik:k.isik,
+    };
+  }
+
+  function habercileAc(secenekler){
+    var t = haberciTarifi(secenekler);
+    var kutu = el('div', 'haberci' + (t.sinif ? ' ' + t.sinif : ''));
     kutu.setAttribute('role', 'status');
     kutu.setAttribute('aria-live', 'polite');
-    if(k.renk) kutu.style.setProperty('--kademe-renk', k.renk);
-    if(k.isik) kutu.style.setProperty('--kademe-isik', k.isik);
+    if(t.renk) kutu.style.setProperty('--kademe-renk', t.renk);
+    if(t.isik) kutu.style.setProperty('--kademe-isik', t.isik);
 
     var sayiEl = el('span', 'haberci__sayi', String(Math.ceil(HABERCI_MS / 1000)));
-    kutu.appendChild(el('div', 'haberci__ust',
-      kacis(y.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe')));
+    kutu.appendChild(el('div', 'haberci__ust', kacis(t.ustyazi)));
     kutu.appendChild(el('div', 'haberci__ad',
-      kacis(k.ad || ('Kademe ' + y.kademe)) + ' <b>' + kacis(y.etiket || '') + '</b>'));
+      kacis(t.ad) + (t.etiket ? ' <b>' + kacis(t.etiket) + '</b>' : '')));
 
     var alt = el('div', 'haberci__alt');
     alt.appendChild(sayiEl);
@@ -6427,6 +6549,78 @@ SP.Perde = (function(){
     return habercileAc(sec);
   }
 
+  /* ------------------------------------------------------ rozet kutlaması */
+
+  function rozetGorseliYolu(rozet, kok){
+    if(!rozet || !rozet.gorsel) return null;
+    return (kok || 'img/seviye/') + rozet.gorsel + '.webp';
+  }
+
+  /* Rozet kazanımı — rütbeyle AYNI sözleşme, AYRI görünüm.
+
+     Aynı sözleşme: önce üç saniyelik haberci, Space o ekrana hiç
+     sokmaz, hareket azaltma tercihinde perde hiç açılmaz. Bunlar
+     kullanıcının öğrendiği davranış; rozet için ikinci bir davranış
+     icat etmek, öğrendiğini bozmak olurdu.
+
+     Ayrı görünüm: rozetin kademe rengi yoktur ve sahnesi yoktur —
+     kendisi bir madalyadır, bir manzara değil. Perde sade kalır,
+     ortada rozet durur.
+
+     SÜRE rütbeden kısa (4 sn): rozet daha sık kazanılır. Yedi saniyelik
+     bir kutlama, otuz yedi kez tekrarlandığında kutlama olmaktan çıkıp
+     engel olur. */
+  function rozetKutlamaSuresi(){ return 4000; }
+
+  function rozetKutla(rozet, secenekler){
+    if(!rozet) return null;
+    secenekler = secenekler || {};
+    var kok = secenekler.kok || 'img/seviye/';
+
+    if(az()){
+      return { sessiz:true, rozet:rozet, el:null,
+        kapat:function(){}, sirada:false };
+    }
+
+    var sec = {
+      sinif:'perde--rozet',
+      baslik:'Yeni rozet: ' + (rozet.ad || rozet.kod),
+      sahne:null,          /* rozetin manzarası yoktur */
+      kart:rozetGorseliYolu(rozet, kok),
+      kartVideo:null,
+      enAz:rozetKutlamaSuresi(),
+      banner:{
+        no:String(rozet.esik || ''),
+        rozet:null,
+        ustyazi:'Yeni rozet',
+        ad:rozet.ad || rozet.kod,
+        etiket:rozet.aileAd || '',
+        slogan:rozet.ozet || '',
+        renk:null, isik:null,
+      },
+      /* Haberci de rozetin dilini konuşur: «Yeni kademe» değil
+         «Yeni rozet», etiket yerine ailenin adı. */
+      haberci:{
+        sinif:'haberci--rozet',
+        ustyazi:'Yeni rozet',
+        ad:rozet.ad || rozet.kod,
+        etiket:'',
+      },
+      bitti:secenekler.bitti,
+      rozet:rozet,
+    };
+
+    if(document.querySelector('.perde')){
+      var bekleyen = { sec:sec, iptal:false, haberci:true };
+      kuyruk.push(bekleyen);
+      return {
+        kapat:function(){ bekleyen.iptal = true; },
+        el:null, sirada:true, rozet:rozet,
+      };
+    }
+    return habercileAc(sec);
+  }
+
   /* ACİL ÇIKIŞ — açık perdeyi hemen kaldırır ve sırayı boşaltır.
 
      İki yerde gerekli: testlerin birbirinin üstüne perde bırakmaması
@@ -6448,6 +6642,8 @@ SP.Perde = (function(){
     /* Saf kararlar — perde açmadan sınanabilsinler diye dışarıda. */
     kartYolu:kartYolu, kartVideoYolu:kartVideoYolu, sahneYolu:sahneYolu,
     kutlamaSuresi:kutlamaSuresi,
+    rozetKutla:rozetKutla, rozetGorseliYolu:rozetGorseliYolu,
+    rozetKutlamaSuresi:rozetKutlamaSuresi,
     GEC_ICI:GEC_ICI, SES_ANAHTAR:SES_ANAHTAR, HABERCI_MS:HABERCI_MS,
   };
 })();
@@ -6458,7 +6654,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'61df96d', at:'2026-09-18 21:52', dirty:true };
+SP.BUILD = { id:'e8da3d3', at:'2026-09-20 19:47', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -6800,6 +6996,196 @@ LIFEOS.GUNLUK_TAVAN = function(mod){
 };
 
 LIFEOS.MODULLER = ['ays', 'spi', 'esp'];
+
+/* ==== js/data/basarimlar.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/seviye/basarimlar.js içine yazılır; burası bir sonraki
+   `python3 tools/seviye.py --yay` ile yeniden üretilir. */
+/* BAŞARIM KATALOĞU — hangi rozet neyle kazanılır.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/seviye/basarimlar.js`; `python3 tools/seviye.py --yay`
+   ile AYS/SPİ/ESP'nin `src/js/data/` klasörüne kopyalanır. Kopyaları
+   elle düzenleme — bir sonraki yayında kaybolur.
+
+   ------------------------------------------------------------------
+   ROZET RÜTBE DEĞİLDİR
+
+   Rütbe (`kademeler.js`) TEK bir merdivendir: XP birikir, basamak
+   geçilir, geri dönüş yoktur. Rozet ise BİRBİRİNDEN BAĞIMSIZ eşiklerdir
+   ve farklı şeyleri ölçer: kaç saat, kaç gün, kaç görev, en uzun seri.
+   İkisi karışmasın diye rozetin XP ile hiçbir ilişkisi kurulmadı —
+   XP'yi çoğaltmaz, hızlandırmaz, eşiğini değiştirmez.
+
+   Doktrin aynen geçerli (AGENTS.md §1.6): ROZET DE HİÇBİR KARARI
+   VERMEZ. Ne plan, ne reçete, ne uyarı ona bakar. Rozet, kullanıcının
+   kendi emeğinin biriktiğini görmesidir.
+
+   ------------------------------------------------------------------
+   DÖRT ÖLÇÜ TÜRÜ — ve neden dördü ayrı
+
+   `toplam`   ömür boyu biriken sayı (100 gün, 500 saat, 1000 görev).
+              Asla düşmez… ama VERİ SİLİNİRSE düşer, çünkü sayım
+              veriden türetilir. Rozet geri alınmaz, sayaç düşer.
+   `gunluk`   BİR GÜNE ait en iyi değer (o gün 7 saat odak). Kümülatif
+              değildir; dün 7 saat yaptıysan bugün 1 saat yapman onu
+              geri almaz — ama bugünün rozeti bugünün değeridir.
+   `seri`     kesintisiz AY sayısı. Bir ay «etkin» sayılır: o ayda en az
+              bir gün kayıt var. Ay atlanırsa seri sıfırlanır.
+   `ozel`     kendi kuralı olan (kusursuz gün/hafta/ay).
+
+   ------------------------------------------------------------------
+   «KUSURSUZ» NE DEMEK — ve neden tavan değil
+
+   Kusursuz gün, o modülün GÜNLÜK BEKLENEN işlerinin hepsinin yapıldığı
+   gündür. Günlük beklenen işler katalogda `gunluk:true` ile işaretlidir
+   (`kademeler.js`, `XP_ETKINLIK`).
+
+   «XP tavanının dolması» denenmedi ve bilerek: tavan bir ÜST SINIRDIR,
+   hedef değil. «Bugün 420 XP'ye ulaş» demek, XP'yi bir hedefe çevirmek
+   ve §1.6'yı kırmak olurdu. «Bugün beklenen işleri yaptın» ise bir
+   gözlemdir.
+
+   Nadir işler (deneme, tahlil, yazı taslağı) kusursuzluğa GİRMEZ: her
+   gün deneme çözmek beklenmez, beklenmeyen bir şeyi kusursuzluk şartı
+   yapmak rozeti ulaşılamaz değil ANLAMSIZ yapardı.
+
+   ------------------------------------------------------------------
+   DOSYA ADI
+
+   `basarim-<aile>-<eşik>.webp`. Eşik sayıysa sayı, değilse kendisi:
+       gorev 500   → basarim-gorev-500.webp
+       odak 7      → basarim-odak-7.webp
+       kusursuz ay → basarim-kusursuz-ay.webp
+   Kural tek satırdır (`MEDYA_ADI`, aşağıda) ve başka yerde tekrar
+   edilmez. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+/* Kataloğun sürümü. Eşik ya da aile DEĞİŞİRSE artar ve motor
+   kazanımları yeniden türetir — defterde yazılı «kazandım» kaydı
+   katalogla çelişemez. */
+LIFEOS.BASARIM_SURUM = 1;
+
+LIFEOS.BASARIM_AILELER = [
+  {
+    id:'gorev', ad:'Görev', birim:'görev', olcu:'toplam',
+    ozet:'Tamamladığın işlerin toplamı',
+    aciklama:'Biten her kayıt bir görevdir: bir blok, bir antrenman, '
+      + 'bir kart, bir not. Bitmeyen sayılmaz.',
+    esikler:[100, 250, 500, 1000, 2500, 5000],
+  },
+  {
+    id:'gun', ad:'Gün', birim:'gün', olcu:'toplam',
+    ozet:'Kayıt girdiğin gün sayısı',
+    aciklama:'O güne dair BİR ŞEY girdiysen o gün sayılır. '
+      + 'Girilmemiş gün sıfır değil, hiç sayılmaz.',
+    esikler:[25, 50, 100, 250, 500, 1000],
+  },
+  {
+    id:'saat', ad:'Saat', birim:'saat', olcu:'toplam',
+    ozet:'Ölçülmüş çalışma saatinin toplamı',
+    aciklama:'Yalnız SÜRESİ GİRİLMİŞ kayıtlar sayılır. Süresi boş '
+      + 'bırakılan bir kayıt «0 dakika» değil, «veri yok»tur.',
+    esikler:[100, 250, 500, 1000, 2500, 5000],
+  },
+  {
+    id:'odak', ad:'Odak', birim:'saat', olcu:'gunluk',
+    ozet:'BİR GÜNDE ölçülen en uzun çalışma',
+    aciklama:'Kümülatif değildir: o günün toplam ölçülmüş süresi. '
+      + 'Bir kez kazanılan rozet defterde kalır.',
+    esikler:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  },
+  {
+    id:'istikrar', ad:'İstikrar', birim:'ay', olcu:'seri',
+    ozet:'Kesintisiz sürdürdüğün ay sayısı',
+    aciklama:'Bir ay, içinde en az bir kayıtlı gün varsa etkindir. '
+      + 'Boş geçen ay seriyi sıfırlar.',
+    esikler:[1, 3, 6, 9, 12, 24],
+  },
+  {
+    id:'kusursuz', ad:'Kusursuz', birim:null, olcu:'ozel',
+    ozet:'Beklenen her işin yapıldığı gün, hafta ve ay',
+    aciklama:'Günlük beklenen işlerin HEPSİ yapıldıysa gün kusursuzdur. '
+      + 'Yedi kusursuz gün üst üste bir hafta, ayın bütün günleri bir ay eder.',
+    esikler:['gun', 'hafta', 'ay'],
+    etiketler:{ gun:'Kusursuz gün', hafta:'Kusursuz hafta', ay:'Kusursuz ay' },
+  },
+];
+
+/* MÜHÜRLER — kazanılmaz, BASILIR.
+
+   Rozet bir eşiği geçmenin kaydıdır; mühür bir BELGENİN damgasıdır.
+   Aynı listede durmamalarının sebebi bu: birini kazanırsın, öbürünü
+   bir rapor taşır. Mühürün eşiği, sayacı, tarihi yoktur. */
+LIFEOS.MUHURLER = [
+  { id:'egitim',         ad:'Eğitim',          mod:'ays',
+    nerede:'AYS dönemsel raporu' },
+  { id:'saglik',         ad:'Sağlık',          mod:'spi',
+    nerede:'SPİ dönemsel raporu' },
+  { id:'entelektuellik', ad:'Entelektüellik',  mod:'esp',
+    nerede:'ESP dönemsel raporu' },
+  { id:'yonetim',        ad:'Yönetim',         mod:'hkm',
+    nerede:'HKM günlük ve dönemsel brifingi' },
+  { id:'yonetici',       ad:'Yönetici',        mod:'hkm',
+    nerede:'HKM karar ve teklif belgeleri' },
+];
+
+/* ONUR — tüm alanların zirvesi. Tek tanedir ve tek yerde durur: HKM
+   profili. Bir modülün kendi başına veremeyeceği rozettir, çünkü
+   tanımı gereği DÖRDÜNE birden bakar (AGENTS.md §1.4: üç arayüz
+   birbirini görmez, toplamı yalnız HKM alır). */
+LIFEOS.ONUR = {
+  id:'usta', ad:'Sistem Ustası',
+  slogan:'Daha iyi bir sen, mümkün.',
+  ozet:'LifeOS’un bütün alanlarında istikrarlı ilerleme',
+};
+
+/* Dosya adı — TEK kural. `tools/rutbe.py` de aynı adı üretir; ikisi
+   ayrışırsa görsel bulunamaz, bu yüzden bir test ikisini karşılaştırır. */
+LIFEOS.BASARIM_MEDYA_ADI = function(aile, esik){
+  return 'basarim-' + String(aile) + '-' + String(esik);
+};
+
+/* Aile ve rozet arama — üç arayüz de bunu kullanır, kendi döngüsünü
+   yazmaz (yazılan döngü bir gün diğerinden ayrışır). */
+LIFEOS.BASARIM_AILE_ILE = function(id){
+  var a = LIFEOS.BASARIM_AILELER;
+  for(var i = 0; i < a.length; i++) if(a[i].id === id) return a[i];
+  return null;
+};
+
+/* Bütün rozetlerin düz listesi — merdiven gibi, sırayla.
+   `kod` defterde yazılı olan anahtardır ve ASLA değişmemeli: değişirse
+   kullanıcının kazandığı rozet sahipsiz kalır. */
+LIFEOS.ROZETLER = (function(){
+  var out = [];
+  LIFEOS.BASARIM_AILELER.forEach(function(a){
+    a.esikler.forEach(function(e, i){
+      out.push({
+        kod:a.id + '-' + e,
+        aile:a.id, aileAd:a.ad, esik:e, sira:i,
+        birim:a.birim, olcu:a.olcu,
+        /* İKİ AD, İKİ YER. `ad` kutlamada ve ipucunda geçer ve ailesini
+           söylemek zorundadır («Saat 500 saat» değil «500 saat» dersek
+           kutlamada neyin rozeti olduğu kaybolur). `kisaAd` ise rozet
+           ızgarasında ailenin BAŞLIĞI zaten üstte dururken kullanılır;
+           orada aileyi tekrar yazmak «Görev 100 görev» okutuyordu. */
+        ad:(a.etiketler && a.etiketler[e])
+          || (a.ad + ' ' + e + (a.birim ? ' ' + a.birim : '')),
+        kisaAd:(a.etiketler && a.etiketler[e])
+          || (e + (a.birim ? ' ' + a.birim : '')),
+        /* Rozetin üstünde yazan eşik. Sayıysa sayı, değilse ailenin
+           kendi etiketi — `AY` diye bağırmak yerine «Ay». */
+        etiket:(a.etiketler && a.etiketler[e])
+          ? String(a.etiketler[e]).replace(/^Kusursuz\s*/, '')
+          : String(e),
+        gorsel:LIFEOS.BASARIM_MEDYA_ADI(a.id, e),
+      });
+    });
+  });
+  return out;
+})();
 
 /* ==== js/data/biomarkers.js ==== */
 /* Biyobelirtec sozlugu — Modul 1'in referans kaynagi.
@@ -12828,6 +13214,526 @@ SP.XP = (function(){
   };
 })();
 
+/* ==== js/core/basarim.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/seviye/basarim.js içine yazılır; burası bir sonraki
+   `python3 tools/seviye.py --yay` ile yeniden üretilir. */
+/* BAŞARIM MOTORU — rozet sayar, kazanımı yakalar, defteri tutar.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/seviye/basarim.js`; `python3 tools/seviye.py --yay` ile
+   üç arayüzün `src/js/core/` klasörüne kopyalanır. `SP` ve `spi`
+   yer tutucuları yayarken her sistemin kendi adıyla değişir.
+
+   ------------------------------------------------------------------
+   NEDEN AY ÖZETİ — ve neden gün kırılımı YETMEZ
+
+   XP defteri (`xp.js`) gün kırılımını 120 günde bir budar; eskiyen gün
+   arşive gider ve DETAYI silinir. XP için bu doğru: toplam ayrı bir
+   alanda durur, budama toplamı bozmaz.
+
+   Rozet için yetmez. «1000 gün» rozeti üç yıllık bir sayıdır, «24 ay
+   istikrar» iki yıllık bir seridir; ikisi de 120 günlük pencereden
+   okunamaz. Ham veriyi her açılışta baştan taramak ise ölçülen bir
+   bedeldi — beş yıllık defterde on binlerce satır (bkz. loadcheck).
+
+   Çözüm: AY ÖZETİ. Her ay için dört sayı saklanır
+
+       { gun: 21, dakika: 1870, gorev: 143, kusursuz: 9 }
+
+   ve bu özet ASLA budanmaz. Yirmi beş yıl = 300 satır ≈ 12 KB; bir
+   rozet görselinin yüzde biri etmez. Toplamlar özetin toplamıdır,
+   seri özetin sırasından okunur, kusursuz ay özetin kendisindedir.
+
+   Gün kırılımı yine de tutulur ama YALNIZ YAZILABİLİR PENCERE için
+   (bugün + 7 gün geri, XP ile aynı kural): dünkü kaydı bu sabah
+   girdiğinde o günün özeti düzeltilebilsin diye. Pencere dışına çıkan
+   gün özete işlenmiş ve kapanmıştır.
+
+   ------------------------------------------------------------------
+   ROZET TETİKLENMEZ, TÜRETİLİR
+
+   Hiçbir ekran «bana rozet ver» demez. Sayım o günün kendi verisinden
+   okunur (`SP.BasarimSayim`), özete EŞİTLENİR, rozetler eşiklerden
+   TÜRETİLİR. XP'nin doktrini neyse bunun da aynısı (AGENTS.md §1.6):
+
+     · Bir ekran unutulamaz — sayım verinin kendisinden gelir.
+     · Silinen kayıt rozetini bırakmaz — sayaç düşer.
+     · Tekrar çalışması zararsızdır — eşitleme iki kez çağrılabilir.
+
+   BİR İSTİSNA VE BİLEREK: kazanılmış rozet GERİ ALINMAZ. Sayaç
+   düşerse rozet listede «kazanıldı» kalır, tarihiyle birlikte. Sebep:
+   rozet bir DURUM değil bir OLAYdır — «şu gün 500 saate ulaştın»
+   cümlesi, sonradan veri silinse de doğru kalır. Sayacın düştüğünü
+   ekran zaten gösterir; kazanılmış bir anı geri almak ise kullanıcıya
+   yalan söylemek olurdu.
+
+   ------------------------------------------------------------------
+   ROZET HİÇBİR KARARI VERMEZ
+
+   XP gibi. Ne plan, ne reçete, ne uyarı, ne sıralama buna bakar.
+   Aranan tek şey: kullanıcı kendi emeğinin biriktiğini görsün. */
+
+window.SP = window.SP || {};
+
+SP.Basarim = (function(){
+  var MOD = 'spi';
+  var YOL = 'basarim';          /* depo anahtarı — `seviye`den AYRI */
+  var PENCERE_GUN = 7;          /* geriye yazılabilir gün — XP ile aynı */
+
+  var L = function(){ return window.LIFEOS; };
+  var U = function(){ return SP.U; };
+
+  var defter = null;
+  var yukleniyor = null;
+  var dinleyiciler = [];
+
+  /* ------------------------------------------------------- defter */
+
+  function bosDefter(){
+    return {
+      surum:L().BASARIM_SURUM,
+      /* Ay özeti: '2026-09' → { gun, dakika, gorev, kusursuz }.
+         BUDANMAZ. Bütün toplamlar buradan çıkar. */
+      aylar:{},
+      /* Yazılabilir penceredeki günler: '2026-09-20' → {dakika, gorev,
+         kusursuz:0|1}. Pencereden çıkınca silinir — özete zaten
+         işlenmiştir. */
+      gunler:{},
+      /* BİR GÜNDE görülen en iyi değerler. Ay özetine sığmaz çünkü
+         özet toplamdır, bu ise en yüksek olandır. */
+      enIyi:{ odakDakika:0 },
+      /* Kazanılmış rozetler: kod → kazanıldığı gün (YYYY-AA-GG).
+         Rozet geri alınmaz (yukarıdaki nota bakın). */
+      kazanilan:{},
+      /* Kullanıcıya HENÜZ GÖSTERİLMEMİŞ kazanımlar. Kutlama sırası
+         burada bekler; uygulama kapanıp açılsa da kaybolmaz. */
+      bekleyen:[],
+      guncellendi:null,
+    };
+  }
+
+  function ayinAdi(gun){ return String(gun || '').slice(0, 7); }
+
+  function isoMu(gun){
+    return /^\d{4}-\d{2}-\d{2}$/.test(String(gun || ''));
+  }
+
+  function bosAy(){ return { gun:0, dakika:0, gorev:0, kusursuz:0 }; }
+
+  /* Yazılabilir gün — XP ile AYNI kural ve bilerek: iki defterin iki
+     ayrı pencereye sahip olması, aynı günün birinde yazılıp ötekinde
+     yazılmaması demekti. */
+  function yazilabilirGun(gun){
+    if(!isoMu(gun)) return false;
+    var bugun = U().todayISO();
+    if(gun > bugun) return false;
+    var d = U().parse(gun), b = U().parse(bugun);
+    if(!d || !b) return false;
+    return Math.round((b - d) / 86400000) <= PENCERE_GUN;
+  }
+
+  /* --------------------------------------------------- normalize */
+
+  function sayi(x){
+    var n = Math.floor(Number(x));
+    return isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function normalize(ham){
+    var d = bosDefter();
+    if(!ham || typeof ham !== 'object') return d;
+
+    if(ham.aylar && typeof ham.aylar === 'object'){
+      Object.keys(ham.aylar).forEach(function(ay){
+        if(!/^\d{4}-\d{2}$/.test(ay)) return;
+        var s = ham.aylar[ay] || {};
+        d.aylar[ay] = { gun:sayi(s.gun), dakika:sayi(s.dakika),
+          gorev:sayi(s.gorev), kusursuz:sayi(s.kusursuz) };
+      });
+    }
+    if(ham.gunler && typeof ham.gunler === 'object'){
+      Object.keys(ham.gunler).forEach(function(g){
+        if(!isoMu(g)) return;
+        var s = ham.gunler[g] || {};
+        d.gunler[g] = { dakika:sayi(s.dakika), gorev:sayi(s.gorev),
+          kusursuz:s.kusursuz ? 1 : 0 };
+      });
+    }
+    if(ham.enIyi && typeof ham.enIyi === 'object'){
+      d.enIyi.odakDakika = sayi(ham.enIyi.odakDakika);
+    }
+    if(ham.kazanilan && typeof ham.kazanilan === 'object'){
+      Object.keys(ham.kazanilan).forEach(function(kod){
+        var g = ham.kazanilan[kod];
+        if(isoMu(g)) d.kazanilan[kod] = g;
+      });
+    }
+    if(Array.isArray(ham.bekleyen)){
+      d.bekleyen = ham.bekleyen.filter(function(k){
+        return typeof k === 'string' && d.kazanilan[k];
+      });
+    }
+    d.guncellendi = ham.guncellendi || null;
+
+    /* KATALOG SÜRÜMÜ ARTTIYSA kazanımlar yeniden türetilir. Eşik
+       değiştiğinde defterdeki «kazandım» kaydı katalogla çelişebilir;
+       çelişen iki kaynaktan biri yanlıştır ve doğru olan KATALOGtur.
+       Ay özeti KORUNUR — ölçülen veri, eşik değişse de ölçülendir. */
+    if(sayi(ham.surum) !== L().BASARIM_SURUM){
+      d.kazanilan = {};
+      d.bekleyen = [];
+    }
+    d.surum = L().BASARIM_SURUM;
+    return d;
+  }
+
+  /* Pencereden çıkan günleri sil. Özete zaten işlendiler; ikinci kez
+     saklamak, aynı sayıyı iki yerde tutmak demekti. */
+  function buda(d){
+    var bugun = U().todayISO();
+    Object.keys(d.gunler).forEach(function(g){
+      if(!yazilabilirGun(g) && g <= bugun) delete d.gunler[g];
+    });
+  }
+
+  /* ----------------------------------------------------- okuma */
+
+  /* Ömür boyu toplamlar — ay özetinin toplamı.
+
+     Ay özeti gün gün değil AY AY gezilir: yirmi beş yıl 300 satırdır,
+     aynı veri gün gün tutulsaydı 9 000 satır olacaktı ve her çizimde
+     gezilecekti. */
+  function toplamlar(){
+    var t = { gun:0, dakika:0, gorev:0, kusursuzGun:0 };
+    var d = defter;
+    if(!d) return t;
+    Object.keys(d.aylar).forEach(function(ay){
+      var s = d.aylar[ay];
+      t.gun += s.gun; t.dakika += s.dakika;
+      t.gorev += s.gorev; t.kusursuzGun += s.kusursuz;
+    });
+    /* Penceredeki günler henüz özete işlenmiş OLABİLİR de olmayabilir
+       de; `gunuUygula` ikisini birlikte yazdığı için burada tekrar
+       eklenmez — eklenseydi son yedi gün iki kez sayılırdı. */
+    return t;
+  }
+
+  /* Kesintisiz AY serisi — bugünden geriye.
+
+     «Kesintisiz» ayın İÇİNDE en az bir kayıtlı gün olması demektir,
+     ayın her günü değil. Her günü şart koşmak «istikrar»ı değil
+     «kusursuzluk»u ölçerdi; ikisi ayrı rozet. */
+  function seriAy(){
+    var d = defter;
+    if(!d) return 0;
+    var bugun = U().todayISO();
+    var yil = Number(bugun.slice(0, 4)), ay = Number(bugun.slice(5, 7));
+    var n = 0;
+    /* Bu ay henüz boş olabilir — seriyi kırmaz, çünkü ay daha bitmedi.
+       Sayıma bu aydan başlanır ama boşsa bir önceki aydan devam eder. */
+    var ilk = true;
+    while(n < 1000){
+      var anahtar = String(yil) + '-' + (ay < 10 ? '0' : '') + String(ay);
+      var s = d.aylar[anahtar];
+      if(s && s.gun > 0) n++;
+      else if(!ilk) break;
+      ilk = false;
+      ay--; if(ay === 0){ ay = 12; yil--; }
+    }
+    return n;
+  }
+
+  /* Kusursuz hafta: yedi ARDIŞIK kusursuz gün. Penceredeki günlerden
+     okunur; yedi günlük pencere tam bu yüzden yedi gün. */
+  function kusursuzHaftaVar(){
+    var d = defter;
+    if(!d) return false;
+    var gun = U().todayISO(), ardisik = 0;
+    for(var i = 0; i <= PENCERE_GUN; i++){
+      var s = d.gunler[gun];
+      if(s && s.kusursuz){ ardisik++; if(ardisik >= 7) return true; }
+      else ardisik = 0;
+      gun = U().iso(U().addDays(U().parse(gun), -1));
+    }
+    return false;
+  }
+
+  /* Kusursuz ay: BİTMİŞ bir ayın bütün günleri kusursuz. Süren ay
+     sayılmaz — daha bitmemiş bir ayı «kusursuz» ilan etmek, sonucu
+     bilinmeyen bir şeye not vermektir. */
+  function kusursuzAyVar(){
+    var d = defter;
+    if(!d) return false;
+    var buAy = ayinAdi(U().todayISO());
+    return Object.keys(d.aylar).some(function(ay){
+      if(ay >= buAy) return false;
+      var s = d.aylar[ay];
+      return s.gun > 0 && s.kusursuz === gunSayisi(ay);
+    });
+  }
+
+  function gunSayisi(ay){
+    var y = Number(ay.slice(0, 4)), a = Number(ay.slice(5, 7));
+    return new Date(y, a, 0).getDate();
+  }
+
+  /* Bir rozetin ÖLÇÜLEN değeri. Katalogdaki `olcu` hangi sayıya
+     bakılacağını söyler; ekran bunu bilmez, bilmemeli. */
+  function olcum(aile){
+    var t = toplamlar();
+    if(aile === 'gorev') return t.gorev;
+    if(aile === 'gun') return t.gun;
+    if(aile === 'saat') return Math.floor(t.dakika / 60);
+    if(aile === 'odak') return Math.floor((defter.enIyi.odakDakika || 0) / 60);
+    if(aile === 'istikrar') return seriAy();
+    return 0;
+  }
+
+  /* ---------------------------------------------------- kazanım */
+
+  /* Eşikleri gez, yeni geçilenleri bul. Bir rozet BİR KEZ kazanılır;
+     ikinci kez kutlanmaz. */
+  function kazanimlariTara(gun){
+    var yeni = [];
+    L().ROZETLER.forEach(function(r){
+      if(defter.kazanilan[r.kod]) return;
+      var hak = false;
+      if(r.olcu === 'ozel'){
+        if(r.esik === 'gun') hak = toplamlar().kusursuzGun > 0;
+        else if(r.esik === 'hafta') hak = kusursuzHaftaVar();
+        else if(r.esik === 'ay') hak = kusursuzAyVar();
+      }else{
+        hak = olcum(r.aile) >= r.esik;
+      }
+      if(hak){
+        defter.kazanilan[r.kod] = gun;
+        defter.bekleyen.push(r.kod);
+        yeni.push(r.kod);
+      }
+    });
+    return yeni;
+  }
+
+  /* ----------------------------------------------------- yazma */
+
+  function yukle(){
+    if(yukleniyor) return yukleniyor;
+    yukleniyor = (async function(){
+      var ham = null;
+      try{ ham = await SP.Store.get(YOL); }catch(e){ ham = null; }
+      defter = normalize(ham);
+      yukleniyor = null;
+      return defter;
+    })();
+    return yukleniyor;
+  }
+
+  function bosalt(){ defter = null; yukleniyor = null; }
+
+  async function yaz(){
+    buda(defter);
+    defter.guncellendi = new Date().toISOString();
+    try{ await SP.Store.set(YOL, defter); }catch(e){}
+    return defter;
+  }
+
+  /* Bir günün sayımını defterle eşitle. Aynı gün iki kez çağrılırsa
+     ikincisi FARK kadar düzeltir — üstüne eklemez. */
+  function gunuUygula(gun, sayim){
+    if(!yazilabilirGun(gun) || !sayim) return false;
+    var yeni = {
+      dakika:sayi(sayim.dakika),
+      gorev:sayi(sayim.gorev),
+      kusursuz:sayim.kusursuz ? 1 : 0,
+    };
+    var eski = defter.gunler[gun] || { dakika:0, gorev:0, kusursuz:0 };
+    var vardi = eski.dakika > 0 || eski.gorev > 0;
+    var var_ = yeni.dakika > 0 || yeni.gorev > 0;
+    if(eski.dakika === yeni.dakika && eski.gorev === yeni.gorev
+      && eski.kusursuz === yeni.kusursuz) return false;
+
+    var ay = ayinAdi(gun);
+    var s = defter.aylar[ay] || bosAy();
+    s.dakika += (yeni.dakika - eski.dakika);
+    s.gorev += (yeni.gorev - eski.gorev);
+    s.kusursuz += (yeni.kusursuz - eski.kusursuz);
+    s.gun += ((var_ ? 1 : 0) - (vardi ? 1 : 0));
+    /* Eksiye düşmek bir hatanın belirtisidir, sessizce taşınmaz. */
+    s.gun = Math.max(0, s.gun); s.dakika = Math.max(0, s.dakika);
+    s.gorev = Math.max(0, s.gorev); s.kusursuz = Math.max(0, s.kusursuz);
+    defter.aylar[ay] = s;
+
+    if(var_) defter.gunler[gun] = yeni; else delete defter.gunler[gun];
+    if(yeni.dakika > defter.enIyi.odakDakika) defter.enIyi.odakDakika = yeni.dakika;
+    return true;
+  }
+
+  /* Dışarıya açık tek yazma kapısı. Birden çok gün TEK yazmada
+     işlenir: sekiz günü sekiz kez depoya yazmak, sekiz kez
+     serileştirmek demekti. */
+  async function esitleCok(sayimlar){
+    if(!defter) await yukle();
+    if(!sayimlar || typeof sayimlar !== 'object'){
+      return { degisti:false, yeni:[] };
+    }
+    var degisti = false;
+    var gunler = Object.keys(sayimlar).sort();
+    gunler.forEach(function(g){
+      if(gunuUygula(g, sayimlar[g])) degisti = true;
+    });
+    if(!degisti) return { degisti:false, yeni:[] };
+
+    var yeni = kazanimlariTara(gunler[gunler.length - 1] || U().todayISO());
+    await yaz();
+    if(yeni.length) duyur(yeni);
+    return { degisti:true, yeni:yeni };
+  }
+
+  /* ------------------------------------------------- kutlama sırası */
+
+  /* Gösterilmemiş ilk kazanım. Perde bunu sorar, gösterir, `gorundu`
+     der. Kuyruk defterde durduğu için uygulama kapanıp açılsa da
+     kazanım kaybolmaz — kutlamayı kaçırmak, kazanımı kaçırmak gibi
+     hissettiriyordu. */
+  function bekleyen(){
+    if(!defter || !defter.bekleyen.length) return null;
+    return rozet(defter.bekleyen[0]);
+  }
+
+  async function gorundu(kod){
+    if(!defter) return;
+    var i = defter.bekleyen.indexOf(kod);
+    if(i < 0) return;
+    defter.bekleyen.splice(i, 1);
+    await yaz();
+  }
+
+  function rozet(kod){
+    var r = null;
+    L().ROZETLER.some(function(x){ if(x.kod === kod){ r = x; return true; } });
+    if(!r) return null;
+    return {
+      kod:r.kod, aile:r.aile, aileAd:r.aileAd, ad:r.ad,
+      kisaAd:r.kisaAd, etiket:r.etiket, esik:r.esik,
+      birim:r.birim, olcu:r.olcu, gorsel:r.gorsel,
+      kazanildi:(defter && defter.kazanilan[r.kod]) || null,
+    };
+  }
+
+  function dinle(fn){ if(typeof fn === 'function') dinleyiciler.push(fn); }
+  function duyur(yeni){
+    dinleyiciler.slice().forEach(function(fn){
+      try{ fn(yeni); }catch(e){}
+    });
+  }
+
+  /* -------------------------------------------------- ekran için */
+
+  /* Bütün rozetler, durumuyla. Ekran kendi döngüsünü yazmaz. */
+  function liste(){
+    if(!defter) return [];
+    return L().ROZETLER.map(function(r){
+      var kazanildi = defter.kazanilan[r.kod] || null;
+      var deger = r.olcu === 'ozel' ? null : olcum(r.aile);
+      return {
+        kod:r.kod, aile:r.aile, aileAd:r.aileAd, ad:r.ad,
+        kisaAd:r.kisaAd, etiket:r.etiket,
+        esik:r.esik, birim:r.birim, olcu:r.olcu, gorsel:r.gorsel,
+        kazanildi:kazanildi,
+        deger:deger,
+        oran:(deger == null || typeof r.esik !== 'number') ? null
+          : Math.max(0, Math.min(1, deger / r.esik)),
+      };
+    });
+  }
+
+  function durum(){
+    if(!defter) return null;
+    var t = toplamlar();
+    return {
+      gun:t.gun,
+      saat:Math.floor(t.dakika / 60),
+      dakika:t.dakika,
+      gorev:t.gorev,
+      odakSaat:Math.floor((defter.enIyi.odakDakika || 0) / 60),
+      seriAy:seriAy(),
+      kusursuzGun:t.kusursuzGun,
+      kazanilanSayisi:Object.keys(defter.kazanilan).length,
+      toplamRozet:L().ROZETLER.length,
+    };
+  }
+
+  /* ------------------------------------------- günün odak rozeti */
+
+  /* O GÜNÜN odağı — günlük raporda, eylemlerin yanında duran rozet.
+
+     Başarımlar sekmesindeki odak rozeti ÖMÜR BOYUNCA görülen en iyi
+     gündür; bu ise BU GÜNÜN kendisi. İkisi aynı görseli kullanır ama
+     aynı şeyi söylemez: biri «en iyin 7 saatti», öbürü «bugün 3
+     saat». Günlük rapora ömürlük rekoru basmak, o günün raporunu o
+     günden başka bir şey hakkında yapardı.
+
+     Eşiğin ALTINDA kalan gün rozet almaz ve bu bir eksiklik değil:
+     yarım saat çalışılan bir güne madalya vermek, madalyayı
+     anlamsızlaştırır. `null` döner, ekran hiçbir şey çizmez. */
+  function gununOdagi(dakika){
+    var saat = Math.floor((Number(dakika) || 0) / 60);
+    if(!(saat > 0)) return null;
+    var aile = L().BASARIM_AILE_ILE('odak');
+    if(!aile) return null;
+    /* Geçilen EN YÜKSEK eşik: 3 saat çalışıldıysa 3H rozeti, 1H değil. */
+    var esik = null;
+    aile.esikler.forEach(function(e){ if(saat >= e) esik = e; });
+    if(esik == null) return null;
+    return {
+      kod:'odak-' + esik, esik:esik, saat:saat,
+      ad:esik + ' saat odak',
+      gorsel:L().BASARIM_MEDYA_ADI('odak', esik),
+      /* Tavanı aşan gün en üst rozeti alır ve bunu SÖYLER: «10 saat»
+         yazıp 12 saati gizlemek, ölçülen şeyi saklamaktır. */
+      asti:saat > esik,
+    };
+  }
+
+  /* Günün odak rozetinin HTML'i. Üç uygulama da aynı işaretlemeyi
+     kullansın diye burada duruyor: üç ayrı yerde yazılan bir rozet,
+     bir gün üç farklı görünürdü. Görsel yoksa `onerror` düğümü
+     kaldırır, yazı kalır. */
+  function odakHtml(dakika){
+    var o = gununOdagi(dakika);
+    if(!o) return '';
+    var kac = (SP.h && SP.h.esc) ? SP.h.esc : function(x){ return x; };
+    return '<span class="odak-rozet" title="' + kac(o.ad) + '">'
+      + '<img class="odak-rozet__gorsel" src="img/seviye/' + kac(o.gorsel)
+      + '.webp" alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">'
+      + '<span class="odak-rozet__yazi">' + o.esik + ' saat odak'
+      + (o.asti ? '<span class="odak-rozet__not"> · bugün ' + o.saat + '</span>' : '')
+      + '</span></span>';
+  }
+
+  /* HKM'ye giden özet. Üç sistem birbirini görmez; toplamı yalnız
+     merkez alır (AGENTS.md §1.4) ve bu satır onun girdisidir. */
+  function isaret(){
+    var d = durum();
+    if(!d) return null;
+    return {
+      badge_days:d.gun, badge_hours:d.saat, badge_tasks:d.gorev,
+      badge_focus_hours:d.odakSaat, badge_streak_months:d.seriAy,
+      badge_count:d.kazanilanSayisi,
+    };
+  }
+
+  return {
+    yukle:yukle, bosalt:bosalt, esitleCok:esitleCok,
+    durum:durum, liste:liste, rozet:rozet, isaret:isaret,
+    bekleyen:bekleyen, gorundu:gorundu, dinle:dinle,
+    toplamlar:toplamlar, seriAy:seriAy, olcum:olcum,
+    gununOdagi:gununOdagi, odakHtml:odakHtml,
+    PENCERE_GUN:PENCERE_GUN,
+  };
+})();
+
 /* ==== js/core/xpsayim.js ==== */
 /* XP sayımları — «o gün ne yapıldı» sorusunun tek cevabı.
 
@@ -12891,6 +13797,69 @@ SP.XPSayim = (function(){
   }
 
   return { gunluk:gunluk, gunler:gunler, OLCUM:OLCUM };
+})();
+
+/* ==== js/core/basarimsayim.js ==== */
+/* BAŞARIM SAYIMI — «o gün ne kadar iş, ne kadar süre» sorusunun cevabı.
+
+   XP sayımından (`xpsayim.js`) AYRI durur ve bilerek: XP «hangi iş kaç
+   puan» sorusunu, bu ise «kaç görev, kaç dakika» sorusunu cevaplar.
+   İkisini tek yere koymak, bir gün birinin eşiği değişince ötekinin de
+   değişmesi demekti — oysa rozetin XP ile hiçbir ilişkisi yok
+   (bkz. brand/seviye/basarimlar.js).
+
+   Üç sayı döner ve üçü de VERİDEN TÜRETİLİR, hiçbir ekran tetiklemez:
+
+     dakika    ÖLÇÜLMÜŞ süre. Süresi girilmemiş kayıt «0 dakika» değil
+               «veri yok»tur ve sayılmaz (AGENTS.md §1.2).
+     gorev     biten iş sayısı.
+     kusursuz  o gün GÜNLÜK BEKLENEN işlerin hepsi yapıldı mı.
+
+   SPİ'DE NE SAYILIR
+
+     dakika    antrenmanların `minutes` toplamı — süresi girilmemiş
+               antrenman sayılmaz.
+     gorev     antrenman + öğün + tahlil + girilmiş ölçüm alanı.
+     kusursuz  öğün var + uyku girilmiş + en az bir ölçüm var.
+               Antrenman DAHİL DEĞİL ve bu bir sağlık kararıdır:
+               dinlenme günü eksiklik değildir, her gün antrenman
+               beklemek kusursuzluğu zararlı bir şeye çevirirdi. */
+
+window.SP = window.SP || {};
+
+SP.BasarimSayim = (function(){
+  const S = SP.S, M = SP.Model;
+  const OLCUM = SP.XPSayim.OLCUM;
+
+  function gunluk(gun){
+    const v = M.vitalsOf(gun);
+    const olcum = v ? OLCUM.filter(function(k){ return v[k] != null; }).length : 0;
+    const ogun = M.mealsOf(gun).length;
+    const antrenmanlar = (S.workouts || []).filter(function(w){ return w && w.date === gun; });
+    const tahlil = (S.labs || []).filter(function(l){ return l && l.date === gun; }).length;
+    const uyku = (v && v.sleep != null) ? 1 : 0;
+
+    /* Yalnız ÖLÇÜLMÜŞ süre: `minutes` boşsa o antrenman süresizdir. */
+    const dakika = antrenmanlar.reduce(function(t, w){
+      return t + (w && w.minutes != null ? Number(w.minutes) || 0 : 0);
+    }, 0);
+
+    return {
+      dakika:dakika,
+      gorev:antrenmanlar.length + ogun + tahlil + olcum,
+      kusursuz:(ogun > 0 && uyku && olcum > 0) ? 1 : 0,
+    };
+  }
+
+  /* Gün kümesi — yüzey üç sistemde AYNI (bkz. xpsayim.js). */
+  function gunler(liste){
+    const g = (liste && liste.length) ? liste : [SP.U.todayISO()];
+    const out = {};
+    g.forEach(function(gun){ out[gun] = gunluk(gun); });
+    return out;
+  }
+
+  return { gunluk:gunluk, gunler:gunler };
 })();
 
 /* ==== js/core/bio.js ==== */
@@ -24107,12 +25076,25 @@ SP.Screens.today = (function(){
     });
   }
 
+  /* O günün ÖLÇÜLMÜŞ antrenman süresi. `minutes` boş bırakılan bir
+     antrenman «sıfır dakika» değil «veri yok»tur ve sayılmaz. */
+  function OdakRozeti(d){
+    if(!SP.Basarim) return '';
+    const dk = (S.workouts || []).filter(w => w && w.date === d)
+      .reduce((t, w) => t + (w.minutes != null ? Number(w.minutes) || 0 : 0), 0);
+    return SP.Basarim.odakHtml(dk);
+  }
+
   function formEntry(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
     return K.Entry({
       label:'Günün ölçümü',
-      meta:U.fmtDate(d),
+      /* GÜNÜN ODAK ROZETİ — günün raporunda, tarihin yanında.
+         Başarımlar sekmesindeki odak rozeti ömürlük rekordur; bu ise
+         BU GÜNÜN kendisi (bkz. core/basarim.js, gununOdagi). Eşiğin
+         altındaki gün rozet almaz ve boş döner. */
+      meta:raw(SP.h.esc(U.fmtDate(d)) + OdakRozeti(d)),
       note:'Boş bıraktığın alan sıfır sayılmaz — hesaba hiç girmez. Uyku '
         + 'süresini yazman bile anlamlı bir sonuç üretir.',
       action:html`${dayNav(d)}
@@ -30307,6 +31289,7 @@ SP.Screens.rutbe = (function(){
   const TABS = [
     { id:'simdi',    label:'Şu an' },
     { id:'merdiven', label:'Merdiven' },
+    { id:'rozet',    label:'Başarımlar' },
     { id:'kazanc',   label:'XP nereden gelir' },
     { id:'defter',   label:'Defter' },
   ];
@@ -30332,6 +31315,13 @@ SP.Screens.rutbe = (function(){
   }
   function sahneYolu(no){
     return no ? 'img/seviye/sahne-' + no + '.webp' : null;
+  }
+  /* Kademenin idle VİDEOSU. Adı POSTER'in adıyla aynı, yalnız uzantısı
+     farklı: ikinci bir adlandırma şeması açmak, videonun hangi kademeye
+     ait olduğunu ikinci kez yazmaktı. Dosya yoksa `onerror` düğümü
+     kaldırır ve altındaki poster görünür kalır. */
+  function sahneVideoYolu(no){
+    return no ? 'img/seviye/sahne-' + no + '.mp4' : null;
   }
 
   function yok(){
@@ -30361,11 +31351,33 @@ SP.Screens.rutbe = (function(){
           text:d.icinde + ' / ' + d.gereken + ' XP',
           note:'Bir sonraki basamağa ' + d.kalan + ' XP' });
 
+    const sahneVideo = sahneVideoYolu(d.kademe);
+
+    /* KADEME SAHNESİ ARTIK OYNUYOR.
+
+       `poster` sahnenin durağan hâlidir ve videonun ilk karesi gelene
+       kadar o görünür. Video YÜKLENEMEZSE (dosya yok, tarayıcı H.264
+       çözemiyor, veri tasarrufu açık) poster OLDUĞU GİBİ KALIR ve ekran
+       hiç bozulmaz — bu yüzden burada `onerror` ile düğüm KALDIRILMAZ.
+       Kaldırılıyordu ve ölçüldü: video çözülemeyince poster de onunla
+       gidiyor, sahne bütünüyle kayboluyordu.
+
+       `data-dongu` çizimden sonra bağlanır (bkz. afterRender): video
+       sonuna gelince başa DEĞİL altıncı saniyeye sarar. İlk altı
+       saniye bir açılıştır ve her döngüde tekrar izlenmesi gerekmez;
+       kalan dört saniye ise kendi içinde kapanan bir harekettir. */
+    const sahneKatmani = sahneVideo
+      ? html`<video class="rutbe-kart__sahne" data-dongu="6"
+          src="${sahneVideo}" poster="${sahne || ''}"
+          muted playsinline autoplay preload="metadata"
+          aria-hidden="true" tabindex="-1"></video>`
+      : when(sahne, () => html`<img class="rutbe-kart__sahne" src="${sahne}"
+          alt="" aria-hidden="true" onerror="this.remove()">`);
+
     return K.Stack([
       renkli(k, html`
         <div class="rutbe-kart">
-          ${when(sahne, () => html`<img class="rutbe-kart__sahne" src="${sahne}"
-            alt="" aria-hidden="true" onerror="this.remove()">`)}
+          ${sahneKatmani}
           <div class="rutbe-kart__sol">
             ${gorsel}
             <span class="rutbe-kart__no" aria-hidden="true">${d.etiket}</span>
@@ -30488,6 +31500,91 @@ SP.Screens.rutbe = (function(){
       </div>`;
   }
 
+  /* ================================================ BAŞARIMLAR ====== */
+
+  function rozetTab(){
+    const B = SP.Basarim;
+    if(!B) return yok();
+    const d = B.durum();
+    if(!d) return yok();
+    const liste = B.liste();
+
+    /* Aile aile gruplanır: otuz yedi rozeti tek yığın hâlinde dökmek,
+       hangisinin neyi ölçtüğünü okunamaz yapardı. */
+    const aileler = (L().BASARIM_AILELER || []).map(a => ({
+      a:a, satir:liste.filter(r => r.aile === a.id),
+    }));
+
+    return K.Stack([
+      K.Grid([
+        K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
+          unit:'/ ' + d.toplamRozet }),
+        K.Stat({ label:'Toplam saat', value:d.saat, unit:'saat' }),
+        K.Stat({ label:'Toplam görev',
+          value:(d.gorev || 0).toLocaleString('tr-TR'), unit:'görev' }),
+        K.Stat({ label:'Kayıtlı gün', value:d.gun, unit:'gün' }),
+      ]),
+      ...aileler.map(x => aileKart(x.a, x.satir)),
+      K.Card({ title:'Rozet neyi söyler, neyi söylemez', body:html`
+        <ul class="rutbe-kural">
+          <li><b>Rozet hiçbir kararı vermez.</b> Ne plan, ne reçete, ne
+            uyarı ona bakar — XP gibi, yalnızca görünürlüktür.</li>
+          <li><b>Sayaç düşebilir, rozet düşmez.</b> Kaydı silersen saat
+            ve görev sayısı azalır; ama «şu gün ulaştın» cümlesi doğru
+            kalır, o yüzden kazanılmış rozet geri alınmaz.</li>
+          <li><b>Ölçülmemiş süre sayılmaz.</b> Süresi boş bırakılan bir
+            kayıt «sıfır dakika» değil, «veri yok»tur.</li>
+        </ul>` }),
+    ]);
+  }
+
+  function aileKart(a, satir){
+    const kazanilan = satir.filter(r => r.kazanildi).length;
+    /* Ailenin BUGÜNKÜ değeri ve sıradaki eşik — ekran hesaplamaz,
+       motordan okur. */
+    const deger = satir.length ? satir[0].deger : null;
+    const siradaki = satir.filter(r => !r.kazanildi)[0];
+
+    return K.Card({
+      title:a.ad,
+      body:K.Stack([
+        html`<p class="small dim rutbe-rozet__ozet">${a.ozet}${when(
+          deger != null, () => html` · <b>${deger.toLocaleString('tr-TR')} ${a.birim || ''}</b>`)}${when(
+          siradaki && typeof siradaki.esik === 'number',
+          () => html` · sıradaki ${siradaki.esik.toLocaleString('tr-TR')}`)}<span
+          class="rutbe-rozet__say">${kazanilan} / ${satir.length}</span></p>`,
+        html`<div class="rutbe-rozetler">${map(satir, r => rozetHtml(r))}</div>`,
+      ], 'sm'),
+    });
+  }
+
+  function rozetHtml(r){
+    /* KAZANILMAMIŞ ROZET GÖRÜNMEZ — rütbe kartındaki kuralın aynısı
+       (bkz. `basamakHtml`). Görülmemiş bir rozetin görüntüsünü önden
+       vermek, kazanıldığı gün onu değersizleştiriyor. Yerinde mühürlü
+       bir kutu durur; eşiği ve ne kadar yaklaşıldığı okunur. */
+    const gorsel = r.kazanildi
+      ? html`<img src="${'img/seviye/' + r.gorsel + '.webp'}" alt=""
+          aria-hidden="true" loading="lazy" onerror="this.remove()">`
+      : '';
+    const yuzde = r.oran == null ? null : Math.round(r.oran * 100);
+    const baslik = r.ad + (r.kazanildi ? ' · kazanıldı ' + r.kazanildi
+      : (yuzde == null ? ' · kilitli' : ' · %' + yuzde));
+
+    return html`
+      <div class="${'rutbe-rozet rutbe-rozet--' + (r.kazanildi ? 'acik' : 'kilitli')}"
+        title="${baslik}">
+        <div class="rutbe-rozet__kutu">
+          ${gorsel}
+          <span class="rutbe-rozet__etiket">${r.etiket || r.esik}</span>
+        </div>
+        <span class="rutbe-rozet__ad">${r.kisaAd || r.ad}</span>
+        ${when(!r.kazanildi && yuzde != null, () => html`<span
+          class="rutbe-rozet__oran" aria-hidden="true"><i
+          style="${'width:' + yuzde + '%'}"></i></span>`)}
+      </div>`;
+  }
+
   /* ============================================ XP NEREDEN GELİR ==== */
 
   function kazancTab(){
@@ -30552,8 +31649,52 @@ SP.Screens.rutbe = (function(){
   /* ================================================== ekran ========= */
 
   const TAB_BODY = {
-    simdi:simdiTab, merdiven:merdivenTab, kazanc:kazancTab, defter:defterTab,
+    simdi:simdiTab, merdiven:merdivenTab, rozet:rozetTab,
+    kazanc:kazancTab, defter:defterTab,
   };
+
+  /* VİDEO DÖNGÜSÜ — sonuna gelince başa değil `data-dongu` saniyesine.
+
+     `loop` özniteliği kullanılmadı ve kullanılamazdı: o, videoyu hep
+     SIFIRDAN başlatır. Sahnenin ilk altı saniyesi bir açılıştır —
+     kamera yaklaşır, kademe taşı belirir — ve her on saniyede bir
+     yeniden izlenmesi gereken bir şey değil. Kalan dört saniye ise
+     kendi içinde kapanan bir harekettir; döngü oradan döner.
+
+     `ended` yalnız `loop` YOKKEN tetiklenir, o yüzden ikisi bir arada
+     bulunamaz. `play()` sözü reddedilebilir (otomatik oynatma
+     engelliyse, H.264 çözülemiyorsa) ve bu bir hata değildir: poster
+     görünür kalır ve ekran hiç bozulmaz.
+
+     Hareket azaltma tercihinde video HİÇ oynatılmaz; poster yeterli
+     bilgidir ve dönen bir görüntü, o tercihi isteyen kişinin
+     istemediği şeydir. */
+  function videolariBagla(){
+    var az = false;
+    try{
+      az = window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }catch(e){}
+
+    var hepsi = document.querySelectorAll('#pane-rutbe video[data-dongu]');
+    Array.prototype.forEach.call(hepsi, function(v){
+      if(v.dataset.bagli) return;
+      v.dataset.bagli = '1';
+      if(az){ try{ v.pause(); v.removeAttribute('autoplay'); }catch(e){} return; }
+      var geri = Number(v.dataset.dongu) || 0;
+      v.addEventListener('ended', function(){
+        try{
+          v.currentTime = (isFinite(v.duration) && geri < v.duration) ? geri : 0;
+          var p = v.play();
+          if(p && p.catch) p.catch(function(){});
+        }catch(e){}
+      });
+      var p = v.play();
+      if(p && p.catch) p.catch(function(){});
+    });
+  }
+
+  function afterRender(){ videolariBagla(); }
 
   async function render(){
     const t = tab();
@@ -30582,7 +31723,7 @@ SP.Screens.rutbe = (function(){
       return d.kademeBilgi.ad + ' ' + d.etiket + ' · ' + (d.toplam || 0) + ' XP';
     },
     actions(){ return ''; },
-    render, handle,
+    render, afterRender, handle,
   };
 })();
 
@@ -32155,6 +33296,25 @@ SP.App = (function(){
      Hareket azaltma tercihinde perde HİÇ açılmaz (bkz. core/perde.js):
      tam ekran bir katman açıp odağı çalmak, o tercihi isteyen kişinin
      istemediği şeydir. Bilgi yine verilir, yalnız sesi kısılır. */
+  /* Rozet kutlaması — sırayla, BİR SEFERDE BİR TANE.
+
+     Bir eşitleme birden çok rozet açabilir (ilk kurulumda geçmiş veri
+     bir anda yirmi rozet doldurabilir). Yirmi perdeyi arka arkaya
+     açmak kutlama değil ceza olurdu; kuyruk defterde durur, biri
+     kapanınca sıradaki gelir ve uygulama kapansa da kaybolmaz. */
+  function rozetKutla(){
+    if(!SP.Basarim || !SP.Perde) return;
+    const r = SP.Basarim.bekleyen();
+    if(!r) return;
+    const damgala = () => SP.Basarim.gorundu(r.kod)
+      .then(() => rozetKutla()).catch(() => {});
+    const sonuc = SP.Perde.rozetKutla(r, { bitti:damgala });
+    if(sonuc && sonuc.sessiz){
+      UI.toast('Yeni rozet — ' + r.ad);
+      damgala();
+    }
+  }
+
   function kutla(y){
     if(!y || !SP.Perde || !SP.XP) return;
     const damgala = () => SP.XP.kutlandi()
@@ -32183,6 +33343,17 @@ SP.App = (function(){
            panel; bütün sayfayı çizmek, tıklanan öğeyi kullanıcının
            altından çekmek demekti (bkz. core/xp.js, tazele). */
         if(r && r.degisti) SP.XP.tazele();
+
+        /* ROZETLER AYNI TETİKTE ama AYRI DEFTERDE. Aynı yerden
+           çağrılırlar çünkü ikisini de tetikleyen şey aynı: veri
+           değişti. Ayrı defterde dururlar çünkü ölçtükleri şey ayrı —
+           XP «hangi iş kaç puan», rozet «kaç saat, kaç gün, kaç görev».
+           Biri ötekinin eşiğini değiştirmez. */
+        if(SP.Basarim){
+          const b = await SP.Basarim.esitleCok(
+            SP.BasarimSayim.gunler(SP.XP.pencere()));
+          if(b && b.yeni.length) rozetKutla();
+        }
       }catch(e){ console.error('XP eşitlenemedi:', e); }
     }, 400);
   }
@@ -32478,6 +33649,7 @@ SP.App = (function(){
          özellikti. */
       try{
         if(SP.XP) await SP.XP.yukle();
+        if(SP.Basarim) await SP.Basarim.yukle();
       }catch(e){
         console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
       }

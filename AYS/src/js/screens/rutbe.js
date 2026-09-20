@@ -45,6 +45,7 @@ R.Screens.rutbe = (function(){
   const TABS = [
     { id:'simdi',    label:'Şu an' },
     { id:'merdiven', label:'Merdiven' },
+    { id:'rozet',    label:'Başarımlar' },
     { id:'kazanc',   label:'XP nereden gelir' },
     { id:'defter',   label:'Defter' },
   ];
@@ -70,6 +71,13 @@ R.Screens.rutbe = (function(){
   }
   function sahneYolu(no){
     return no ? 'img/seviye/sahne-' + no + '.webp' : null;
+  }
+  /* Kademenin idle VİDEOSU. Adı POSTER'in adıyla aynı, yalnız uzantısı
+     farklı: ikinci bir adlandırma şeması açmak, videonun hangi kademeye
+     ait olduğunu ikinci kez yazmaktı. Dosya yoksa `onerror` düğümü
+     kaldırır ve altındaki poster görünür kalır. */
+  function sahneVideoYolu(no){
+    return no ? 'img/seviye/sahne-' + no + '.mp4' : null;
   }
 
   function yok(){
@@ -99,11 +107,33 @@ R.Screens.rutbe = (function(){
           text:d.icinde + ' / ' + d.gereken + ' XP',
           note:'Bir sonraki basamağa ' + d.kalan + ' XP' });
 
+    const sahneVideo = sahneVideoYolu(d.kademe);
+
+    /* KADEME SAHNESİ ARTIK OYNUYOR.
+
+       `poster` sahnenin durağan hâlidir ve videonun ilk karesi gelene
+       kadar o görünür. Video YÜKLENEMEZSE (dosya yok, tarayıcı H.264
+       çözemiyor, veri tasarrufu açık) poster OLDUĞU GİBİ KALIR ve ekran
+       hiç bozulmaz — bu yüzden burada `onerror` ile düğüm KALDIRILMAZ.
+       Kaldırılıyordu ve ölçüldü: video çözülemeyince poster de onunla
+       gidiyor, sahne bütünüyle kayboluyordu.
+
+       `data-dongu` çizimden sonra bağlanır (bkz. afterRender): video
+       sonuna gelince başa DEĞİL altıncı saniyeye sarar. İlk altı
+       saniye bir açılıştır ve her döngüde tekrar izlenmesi gerekmez;
+       kalan dört saniye ise kendi içinde kapanan bir harekettir. */
+    const sahneKatmani = sahneVideo
+      ? html`<video class="rutbe-kart__sahne" data-dongu="6"
+          src="${sahneVideo}" poster="${sahne || ''}"
+          muted playsinline autoplay preload="metadata"
+          aria-hidden="true" tabindex="-1"></video>`
+      : when(sahne, () => html`<img class="rutbe-kart__sahne" src="${sahne}"
+          alt="" aria-hidden="true" onerror="this.remove()">`);
+
     return K.Stack([
       renkli(k, html`
         <div class="rutbe-kart">
-          ${when(sahne, () => html`<img class="rutbe-kart__sahne" src="${sahne}"
-            alt="" aria-hidden="true" onerror="this.remove()">`)}
+          ${sahneKatmani}
           <div class="rutbe-kart__sol">
             ${gorsel}
             <span class="rutbe-kart__no" aria-hidden="true">${d.etiket}</span>
@@ -226,6 +256,91 @@ R.Screens.rutbe = (function(){
       </div>`;
   }
 
+  /* ================================================ BAŞARIMLAR ====== */
+
+  function rozetTab(){
+    const B = R.Basarim;
+    if(!B) return yok();
+    const d = B.durum();
+    if(!d) return yok();
+    const liste = B.liste();
+
+    /* Aile aile gruplanır: otuz yedi rozeti tek yığın hâlinde dökmek,
+       hangisinin neyi ölçtüğünü okunamaz yapardı. */
+    const aileler = (L().BASARIM_AILELER || []).map(a => ({
+      a:a, satir:liste.filter(r => r.aile === a.id),
+    }));
+
+    return K.Stack([
+      K.Grid([
+        K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
+          unit:'/ ' + d.toplamRozet }),
+        K.Stat({ label:'Toplam saat', value:d.saat, unit:'saat' }),
+        K.Stat({ label:'Toplam görev',
+          value:(d.gorev || 0).toLocaleString('tr-TR'), unit:'görev' }),
+        K.Stat({ label:'Kayıtlı gün', value:d.gun, unit:'gün' }),
+      ]),
+      ...aileler.map(x => aileKart(x.a, x.satir)),
+      K.Card({ title:'Rozet neyi söyler, neyi söylemez', body:html`
+        <ul class="rutbe-kural">
+          <li><b>Rozet hiçbir kararı vermez.</b> Ne plan, ne reçete, ne
+            uyarı ona bakar — XP gibi, yalnızca görünürlüktür.</li>
+          <li><b>Sayaç düşebilir, rozet düşmez.</b> Kaydı silersen saat
+            ve görev sayısı azalır; ama «şu gün ulaştın» cümlesi doğru
+            kalır, o yüzden kazanılmış rozet geri alınmaz.</li>
+          <li><b>Ölçülmemiş süre sayılmaz.</b> Süresi boş bırakılan bir
+            kayıt «sıfır dakika» değil, «veri yok»tur.</li>
+        </ul>` }),
+    ]);
+  }
+
+  function aileKart(a, satir){
+    const kazanilan = satir.filter(r => r.kazanildi).length;
+    /* Ailenin BUGÜNKÜ değeri ve sıradaki eşik — ekran hesaplamaz,
+       motordan okur. */
+    const deger = satir.length ? satir[0].deger : null;
+    const siradaki = satir.filter(r => !r.kazanildi)[0];
+
+    return K.Card({
+      title:a.ad,
+      body:K.Stack([
+        html`<p class="small dim rutbe-rozet__ozet">${a.ozet}${when(
+          deger != null, () => html` · <b>${deger.toLocaleString('tr-TR')} ${a.birim || ''}</b>`)}${when(
+          siradaki && typeof siradaki.esik === 'number',
+          () => html` · sıradaki ${siradaki.esik.toLocaleString('tr-TR')}`)}<span
+          class="rutbe-rozet__say">${kazanilan} / ${satir.length}</span></p>`,
+        html`<div class="rutbe-rozetler">${map(satir, r => rozetHtml(r))}</div>`,
+      ], 'sm'),
+    });
+  }
+
+  function rozetHtml(r){
+    /* KAZANILMAMIŞ ROZET GÖRÜNMEZ — rütbe kartındaki kuralın aynısı
+       (bkz. `basamakHtml`). Görülmemiş bir rozetin görüntüsünü önden
+       vermek, kazanıldığı gün onu değersizleştiriyor. Yerinde mühürlü
+       bir kutu durur; eşiği ve ne kadar yaklaşıldığı okunur. */
+    const gorsel = r.kazanildi
+      ? html`<img src="${'img/seviye/' + r.gorsel + '.webp'}" alt=""
+          aria-hidden="true" loading="lazy" onerror="this.remove()">`
+      : '';
+    const yuzde = r.oran == null ? null : Math.round(r.oran * 100);
+    const baslik = r.ad + (r.kazanildi ? ' · kazanıldı ' + r.kazanildi
+      : (yuzde == null ? ' · kilitli' : ' · %' + yuzde));
+
+    return html`
+      <div class="${'rutbe-rozet rutbe-rozet--' + (r.kazanildi ? 'acik' : 'kilitli')}"
+        title="${baslik}">
+        <div class="rutbe-rozet__kutu">
+          ${gorsel}
+          <span class="rutbe-rozet__etiket">${r.etiket || r.esik}</span>
+        </div>
+        <span class="rutbe-rozet__ad">${r.kisaAd || r.ad}</span>
+        ${when(!r.kazanildi && yuzde != null, () => html`<span
+          class="rutbe-rozet__oran" aria-hidden="true"><i
+          style="${'width:' + yuzde + '%'}"></i></span>`)}
+      </div>`;
+  }
+
   /* ============================================ XP NEREDEN GELİR ==== */
 
   function kazancTab(){
@@ -290,8 +405,52 @@ R.Screens.rutbe = (function(){
   /* ================================================== ekran ========= */
 
   const TAB_BODY = {
-    simdi:simdiTab, merdiven:merdivenTab, kazanc:kazancTab, defter:defterTab,
+    simdi:simdiTab, merdiven:merdivenTab, rozet:rozetTab,
+    kazanc:kazancTab, defter:defterTab,
   };
+
+  /* VİDEO DÖNGÜSÜ — sonuna gelince başa değil `data-dongu` saniyesine.
+
+     `loop` özniteliği kullanılmadı ve kullanılamazdı: o, videoyu hep
+     SIFIRDAN başlatır. Sahnenin ilk altı saniyesi bir açılıştır —
+     kamera yaklaşır, kademe taşı belirir — ve her on saniyede bir
+     yeniden izlenmesi gereken bir şey değil. Kalan dört saniye ise
+     kendi içinde kapanan bir harekettir; döngü oradan döner.
+
+     `ended` yalnız `loop` YOKKEN tetiklenir, o yüzden ikisi bir arada
+     bulunamaz. `play()` sözü reddedilebilir (otomatik oynatma
+     engelliyse, H.264 çözülemiyorsa) ve bu bir hata değildir: poster
+     görünür kalır ve ekran hiç bozulmaz.
+
+     Hareket azaltma tercihinde video HİÇ oynatılmaz; poster yeterli
+     bilgidir ve dönen bir görüntü, o tercihi isteyen kişinin
+     istemediği şeydir. */
+  function videolariBagla(){
+    var az = false;
+    try{
+      az = window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }catch(e){}
+
+    var hepsi = document.querySelectorAll('#pane-rutbe video[data-dongu]');
+    Array.prototype.forEach.call(hepsi, function(v){
+      if(v.dataset.bagli) return;
+      v.dataset.bagli = '1';
+      if(az){ try{ v.pause(); v.removeAttribute('autoplay'); }catch(e){} return; }
+      var geri = Number(v.dataset.dongu) || 0;
+      v.addEventListener('ended', function(){
+        try{
+          v.currentTime = (isFinite(v.duration) && geri < v.duration) ? geri : 0;
+          var p = v.play();
+          if(p && p.catch) p.catch(function(){});
+        }catch(e){}
+      });
+      var p = v.play();
+      if(p && p.catch) p.catch(function(){});
+    });
+  }
+
+  function afterRender(){ videolariBagla(); }
 
   async function render(){
     const t = tab();
@@ -320,6 +479,6 @@ R.Screens.rutbe = (function(){
       return d.kademeBilgi.ad + ' ' + d.etiket + ' · ' + (d.toplam || 0) + ' XP';
     },
     actions(){ return ''; },
-    render, handle,
+    render, afterRender, handle,
   };
 })();

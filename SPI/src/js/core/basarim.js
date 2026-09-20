@@ -397,7 +397,8 @@ SP.Basarim = (function(){
     L().ROZETLER.some(function(x){ if(x.kod === kod){ r = x; return true; } });
     if(!r) return null;
     return {
-      kod:r.kod, aile:r.aile, aileAd:r.aileAd, ad:r.ad, esik:r.esik,
+      kod:r.kod, aile:r.aile, aileAd:r.aileAd, ad:r.ad,
+      kisaAd:r.kisaAd, etiket:r.etiket, esik:r.esik,
       birim:r.birim, olcu:r.olcu, gorsel:r.gorsel,
       kazanildi:(defter && defter.kazanilan[r.kod]) || null,
     };
@@ -420,6 +421,7 @@ SP.Basarim = (function(){
       var deger = r.olcu === 'ozel' ? null : olcum(r.aile);
       return {
         kod:r.kod, aile:r.aile, aileAd:r.aileAd, ad:r.ad,
+        kisaAd:r.kisaAd, etiket:r.etiket,
         esik:r.esik, birim:r.birim, olcu:r.olcu, gorsel:r.gorsel,
         kazanildi:kazanildi,
         deger:deger,
@@ -445,6 +447,54 @@ SP.Basarim = (function(){
     };
   }
 
+  /* ------------------------------------------- günün odak rozeti */
+
+  /* O GÜNÜN odağı — günlük raporda, eylemlerin yanında duran rozet.
+
+     Başarımlar sekmesindeki odak rozeti ÖMÜR BOYUNCA görülen en iyi
+     gündür; bu ise BU GÜNÜN kendisi. İkisi aynı görseli kullanır ama
+     aynı şeyi söylemez: biri «en iyin 7 saatti», öbürü «bugün 3
+     saat». Günlük rapora ömürlük rekoru basmak, o günün raporunu o
+     günden başka bir şey hakkında yapardı.
+
+     Eşiğin ALTINDA kalan gün rozet almaz ve bu bir eksiklik değil:
+     yarım saat çalışılan bir güne madalya vermek, madalyayı
+     anlamsızlaştırır. `null` döner, ekran hiçbir şey çizmez. */
+  function gununOdagi(dakika){
+    var saat = Math.floor((Number(dakika) || 0) / 60);
+    if(!(saat > 0)) return null;
+    var aile = L().BASARIM_AILE_ILE('odak');
+    if(!aile) return null;
+    /* Geçilen EN YÜKSEK eşik: 3 saat çalışıldıysa 3H rozeti, 1H değil. */
+    var esik = null;
+    aile.esikler.forEach(function(e){ if(saat >= e) esik = e; });
+    if(esik == null) return null;
+    return {
+      kod:'odak-' + esik, esik:esik, saat:saat,
+      ad:esik + ' saat odak',
+      gorsel:L().BASARIM_MEDYA_ADI('odak', esik),
+      /* Tavanı aşan gün en üst rozeti alır ve bunu SÖYLER: «10 saat»
+         yazıp 12 saati gizlemek, ölçülen şeyi saklamaktır. */
+      asti:saat > esik,
+    };
+  }
+
+  /* Günün odak rozetinin HTML'i. Üç uygulama da aynı işaretlemeyi
+     kullansın diye burada duruyor: üç ayrı yerde yazılan bir rozet,
+     bir gün üç farklı görünürdü. Görsel yoksa `onerror` düğümü
+     kaldırır, yazı kalır. */
+  function odakHtml(dakika){
+    var o = gununOdagi(dakika);
+    if(!o) return '';
+    var kac = (SP.h && SP.h.esc) ? SP.h.esc : function(x){ return x; };
+    return '<span class="odak-rozet" title="' + kac(o.ad) + '">'
+      + '<img class="odak-rozet__gorsel" src="img/seviye/' + kac(o.gorsel)
+      + '.webp" alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">'
+      + '<span class="odak-rozet__yazi">' + o.esik + ' saat odak'
+      + (o.asti ? '<span class="odak-rozet__not"> · bugün ' + o.saat + '</span>' : '')
+      + '</span></span>';
+  }
+
   /* HKM'ye giden özet. Üç sistem birbirini görmez; toplamı yalnız
      merkez alır (AGENTS.md §1.4) ve bu satır onun girdisidir. */
   function isaret(){
@@ -462,6 +512,7 @@ SP.Basarim = (function(){
     durum:durum, liste:liste, rozet:rozet, isaret:isaret,
     bekleyen:bekleyen, gorundu:gorundu, dinle:dinle,
     toplamlar:toplamlar, seriAy:seriAy, olcum:olcum,
+    gununOdagi:gununOdagi, odakHtml:odakHtml,
     PENCERE_GUN:PENCERE_GUN,
   };
 })();

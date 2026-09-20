@@ -961,3 +961,107 @@
   .rutbe-kart__sag{ justify-items:center; }
   .rutbe-is__alt .btn{ margin-left:0; }
 }
+
+/* ==================================================================
+   BAŞARIM ROZETLERİ
+   ================================================================== */
+
+.rutbe-rozet__ozet{ margin:0 0 4px; }
+.rutbe-rozet__say{
+  float:right;
+  font:600 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.72;
+}
+
+.rutbe-rozetler{
+  display:flex; flex-wrap:wrap; gap:12px;
+}
+
+.rutbe-rozet{
+  display:grid; justify-items:center; gap:4px;
+  width:clamp(76px, 17vw, 104px);
+  text-align:center;
+}
+.rutbe-rozet__kutu{
+  position:relative;
+  width:100%; aspect-ratio:1 / 1;
+  display:grid; place-items:center;
+  border-radius:50%;
+  overflow:hidden;
+}
+.rutbe-rozet__kutu img{
+  position:absolute; inset:0;
+  width:100%; height:100%; object-fit:contain;
+}
+.rutbe-rozet__etiket{
+  position:relative;
+  font:600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.72;
+}
+/* Rozet varsa etiket görselin üstünde okunmaz; eşik zaten rozetin
+   üstünde yazılı. */
+.rutbe-rozet__kutu:has(img) .rutbe-rozet__etiket{ display:none; }
+
+/* KAZANILMAMIŞ ROZET — mühürlü daire, kesik çevre. Rozet çizilmez
+   (bkz. rutbe.js, rozetHtml); görünen yalnız merdivenin şeklidir. */
+.rutbe-rozet--kilitli .rutbe-rozet__kutu{
+  border:1px dashed color-mix(in srgb, currentColor 22%, transparent);
+  background:
+    repeating-linear-gradient(135deg,
+      color-mix(in srgb, currentColor 5%, transparent) 0 6px,
+      transparent 6px 12px);
+}
+.rutbe-rozet--kilitli .rutbe-rozet__ad{ opacity:.5; }
+.rutbe-rozet--acik .rutbe-rozet__kutu{
+  filter:drop-shadow(0 6px 16px color-mix(in srgb, currentColor 22%, transparent));
+}
+
+.rutbe-rozet__ad{
+  font-size:11px; line-height:1.25;
+  opacity:.82;
+  /* İki satırdan uzun ad kutuyu büyütmesin: otuz yedi rozet yan yana
+     dururken tek bir uzun ad bütün sırayı kaydırıyordu. */
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+/* Kilitli rozetin ne kadar yaklaştığı — ince bir çizgi, yüzde yazısı
+   değil. Sayıyı yazmak «%38 rozet» gibi anlamsız bir şey okutuyordu. */
+.rutbe-rozet__oran{
+  display:block; width:70%; height:3px; border-radius:2px;
+  background:color-mix(in srgb, currentColor 12%, transparent);
+  overflow:hidden;
+}
+.rutbe-rozet__oran i{
+  display:block; height:100%;
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 62%, transparent);
+}
+
+/* Sahne VİDEOSU, poster görselin durduğu yerde ve aynı kurallarla. */
+.rutbe-kart video.rutbe-kart__sahne{
+  object-fit:cover; object-position:center 42%;
+}
+
+/* GÜNÜN ODAK ROZETİ — günlük raporda, eylemlerin yanında.
+   Küçük ve satır içi: rapor bir rozet vitrini değil, rozet oradaki
+   sayının yanında duran bir işaret. */
+.odak-rozet{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:3px 10px 3px 3px;
+  border-radius:999px;
+  border:1px solid color-mix(in srgb, currentColor 14%, transparent);
+  background:color-mix(in srgb, currentColor 4%, transparent);
+  vertical-align:middle;
+}
+.odak-rozet__gorsel{
+  width:28px; height:28px; flex:none;
+  object-fit:contain; display:block;
+}
+.odak-rozet__yazi{
+  font:600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.odak-rozet__not{ font-weight:500; opacity:.62; }

@@ -166,8 +166,20 @@ LIFEOS.ROZETLER = (function(){
         kod:a.id + '-' + e,
         aile:a.id, aileAd:a.ad, esik:e, sira:i,
         birim:a.birim, olcu:a.olcu,
+        /* İKİ AD, İKİ YER. `ad` kutlamada ve ipucunda geçer ve ailesini
+           söylemek zorundadır («Saat 500 saat» değil «500 saat» dersek
+           kutlamada neyin rozeti olduğu kaybolur). `kisaAd` ise rozet
+           ızgarasında ailenin BAŞLIĞI zaten üstte dururken kullanılır;
+           orada aileyi tekrar yazmak «Görev 100 görev» okutuyordu. */
         ad:(a.etiketler && a.etiketler[e])
           || (a.ad + ' ' + e + (a.birim ? ' ' + a.birim : '')),
+        kisaAd:(a.etiketler && a.etiketler[e])
+          || (e + (a.birim ? ' ' + a.birim : '')),
+        /* Rozetin üstünde yazan eşik. Sayıysa sayı, değilse ailenin
+           kendi etiketi — `AY` diye bağırmak yerine «Ay». */
+        etiket:(a.etiketler && a.etiketler[e])
+          ? String(a.etiketler[e]).replace(/^Kusursuz\s*/, '')
+          : String(e),
         gorsel:LIFEOS.BASARIM_MEDYA_ADI(a.id, e),
       });
     });
