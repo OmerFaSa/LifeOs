@@ -470,8 +470,13 @@ R.Screens.guide = (function(){
         <div class="mt-12">
           <span class="mono-label">Bugün ne gidiyor</span>
           ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
-            rows:on.rows.map(r => [r.key,
-              r.value == null ? '—' : U.fmtNum(r.value), r.label]) })}
+              rows:on.rows.map(r => [r.key,
+              r.value == null ? '—' : U.fmtNum(r.value),
+              /* KAYNAK SÜTUNU — etiketin görseliyle birlikte.
+                 Metin `window.LIFEOS.KESINLIK`ten gelir, bu ekran
+                 kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
+                 aynı kelimeyi göstermek zorunda. */
+              raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
           <p class="tiny dim mt-8">Soru metni, hata defteri ve deneme ayrıntısı
             GİTMEZ. Giden şey bu dört beş sayıdır; değeri olmayan alan «veri yok»
             gider, sıfır değil.</p>

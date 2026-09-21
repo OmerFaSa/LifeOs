@@ -5814,6 +5814,78 @@ button.rutbe-rozet:focus-visible{
 .rutbe-ayrinti__ne{ margin:0 0 4px; }
 .rutbe-ayrinti__durum{ margin:0; font-size:13px; }
 
+/* ==== css/kesinlik.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/kesinlik.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KESİNLİK ETİKETİ — biçim.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/kesinlik.css`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/css/` klasörüne BİREBİR kopyalanır.
+   Markupı `brand/ortak/kesinlik.js` üretir (`LIFEOS.KESINLIK_HTML`).
+
+   ------------------------------------------------------------------
+   NEDEN KENDİ DOSYASI
+
+   `components.css` üç arayüzde KISMEN ortak ve bilerek yayılmıyor
+   (bkz. `tools/ortak.py`, «NE YAYILIR, NE YAYILMAZ»). Buradaki
+   biçim ise tamamen ortak: aynı etiket üç ekranda aynı görünmek
+   zorunda. Seviye sisteminin `seviye.css`'i de aynı sebeple ayrı
+   duruyor.
+
+   ------------------------------------------------------------------
+   ÖLÇÜ
+
+   Görsel 16 piksel: satır içinde, sayının yanında duran bir işaret
+   kadar. Daha büyüğü tabloda satır yüksekliğini büyütüyor ve
+   «Kaynak» sütunu «Değer» sütunundan baskın çıkıyordu — oysa
+   okunacak şey önce sayı, sonra sayının nereden geldiği.
+
+   Görsel ZEMİNİ KOYU bir sanat: açık temada kendi halkasıyla zaten
+   ayrışıyor, o yüzden ek bir çerçeve yok. */
+
+.kesinlik{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  white-space:nowrap;
+  line-height:1.2;
+}
+
+.kesinlik__im{
+  width:16px;
+  height:16px;
+  flex:0 0 16px;
+  object-fit:contain;
+  /* Yüklenene kadar yer tutar: satır zıplamaz. */
+  display:block;
+}
+
+/* «Veri yok» SÖNÜK yazılır — ama silik değil.
+
+   Sönük olması doğru: o satırda bir ölçüm yok. Silik olması yanlış
+   olurdu: okunmayan bir etiket, olmayan bir etikettir ve kural tam
+   da orada okunmalı. Kontrast denetimi (`palettecheck`) bu rengi de
+   ölçüyor. */
+.kesinlik--missing .kesinlik__ad{ color:var(--ink-2); }
+
+/* Dar ekranda görsel kalır, yazı gider — 390 pikselde «Alan / Değer /
+   Kaynak» üç sütunu ancak böyle sığıyor ve giden şey tekrar eden
+   kelime, taşınan şey anlam. Başlık (`title`) ve okuyucu metni
+   yerinde kalır. */
+@media (max-width:459.98px){
+  .kesinlik__ad{
+    position:absolute;
+    width:1px; height:1px;
+    padding:0; margin:-1px;
+    overflow:hidden;
+    clip-path:inset(50%);
+    white-space:nowrap;
+  }
+  .kesinlik__im{ width:18px; height:18px; flex-basis:18px; }
+}
+
 /* ==== css/designs.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/designs.css içine yazılır; burası bir sonraki
@@ -7451,7 +7523,108 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'bd5d2f3', at:'2026-09-21 09:54', dirty:true };
+SP.BUILD = { id:'2ec9b3a', at:'2026-09-21 16:09', dirty:true };
+
+/* ==== js/core/kesinlik.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/kesinlik.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KESİNLİK ETİKETİ — dört etiketin adı, görseli ve işaretlemesi.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/kesinlik.js`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   Kopyayı elle düzenleme: bir sonraki yayında kaybolur.
+   `python3 tools/ortak.py --denetle` ayrışmayı yakalar ve CI'da koşar.
+
+   ------------------------------------------------------------------
+   NEDEN BU DOSYA VAR
+
+   «Eksik veri sıfır değildir» bu deponun en çok tekrarlanan kuralı
+   (AGENTS.md §1.2) ve dört etiketi var:
+
+       ölçüldü · tahmin · hesaplandı · veri yok
+
+   Etiketler üç arayüzün `core/beacon.js` dosyalarında AYRI AYRI
+   yazılıydı. Üçü de bugün aynıydı; aynı kalacaklarını söyleyen
+   hiçbir şey yoktu. Aynı `measured` birinde «ölçüldü», öbüründe
+   başka bir şey gösterseydi, deponun en çok tekrarlanan kuralı
+   ekranda ikiye ayrılmış olurdu — ve bu ancak iki ekran yan yana
+   konunca fark edilirdi.
+
+   ------------------------------------------------------------------
+   GÖRSEL ANLAMI TAŞIR, SÜSLEMEZ
+
+   Dört görselin biçimi tesadüf değil; okunacak şey tam olarak şu:
+
+       ölçüldü      KESİKSİZ halka, dolu yıldız — sayı gerçekten
+                    ölçüldü, arkasında bir kayıt var
+       tahmin       KESİK halka ve «~» — yaklaşıklık işareti;
+                    kullanıcının kendi kestirimi
+       hesaplandı   katmanlar — başka sayılardan TÜREDİ, kendisi
+                    ölçülmedi
+       veri yok     BOŞ merkez, kesik halka — burada bir şey YOK;
+                    sıfır değil, yokluk
+
+   Bu yüzden «veri yok» görseli boş bırakılamaz: yokluğu göstermek,
+   yokluğu göstermemekten başka bir şeydir. Sıfır ile yokluğu aynı
+   çizen bir ekran, kuralın kendisini bozar.
+
+   ------------------------------------------------------------------
+   DOSYA YOKSA YAZI KALIR
+
+   `onerror` düğümü kaldırır ve etiketin YAZISI olduğu gibi görünür.
+   Görsel bir ektir; anlamı taşıyan şey hâlâ kelimedir. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+/* Sözleşmedeki kimlikler İNGİLİZCEDİR ve öyle kalır: `sync_engine.py`
+   ile `certainty.py` bu dört dizeyi bekler. Türkçe olan, ekrana çıkan
+   karşılıklarıdır. */
+LIFEOS.KESINLIK = [
+  { id:'measured',  ad:'ölçüldü',
+    ozet:'Gerçekten ölçüldü — arkasında bir kayıt var.',
+    gorsel:'etiket-olculdu' },
+  { id:'estimated', ad:'tahmin',
+    ozet:'Kullanıcının kendi kestirimi; ölçüm değil.',
+    gorsel:'etiket-tahmin' },
+  { id:'computed',  ad:'hesaplandı',
+    ozet:'Başka sayılardan türedi; kendisi ölçülmedi.',
+    gorsel:'etiket-hesaplandi' },
+  { id:'missing',   ad:'veri yok',
+    ozet:'Burada bir şey YOK. Sıfır değil, yokluk.',
+    gorsel:'etiket-veri-yok' },
+];
+
+LIFEOS.KESINLIK_ILE = function(id){
+  for(var i = 0; i < LIFEOS.KESINLIK.length; i++){
+    if(LIFEOS.KESINLIK[i].id === id) return LIFEOS.KESINLIK[i];
+  }
+  return null;
+};
+
+/* Etiketin ekrandaki hâli. Bilinmeyen bir kimlik gelirse — sözleşme
+   bir gün beşinci bir etiket eklerse — kimliğin KENDİSİ yazılır:
+   uydurma bir karşılık göstermek, anlamadığını anlamış gibi yapmaktır
+   (AGENTS.md §1.7). */
+LIFEOS.KESINLIK_HTML = function(id, secenekler){
+  secenekler = secenekler || {};
+  var kok = secenekler.kok || 'img/marka/';
+  var e = LIFEOS.KESINLIK_ILE(id);
+  var ad = e ? e.ad : String(id == null ? '' : id);
+  var kac = function(t){
+    return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
+      return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c];
+    });
+  };
+  var gorsel = e
+    ? '<img class="kesinlik__im" src="' + kac(kok + e.gorsel) + '.webp"'
+      + ' alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">'
+    : '';
+  return '<span class="kesinlik' + (e ? ' kesinlik--' + kac(e.id) : '') + '"'
+    + (e ? ' title="' + kac(e.ozet) + '"' : '') + '>'
+    + gorsel + '<span class="kesinlik__ad">' + kac(ad) + '</span></span>';
+};
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -17457,8 +17630,21 @@ SP.Beacon = (function(){
     return { module:MODULE, date:d, version:CONTRACT, metrics:collect(d) };
   }
 
-  const LABELS = { measured:'ölçüldü', estimated:'tahmin',
-    computed:'hesaplandı', missing:'veri yok' };
+  /* ETİKETİN TÜRKÇESİ BURADA YAZILMAZ.
+
+     Bu dört karşılık üç arayüzün `beacon.js` dosyasında AYRI AYRI
+     yazılıydı. Üçü de aynıydı; aynı kalacaklarını söyleyen hiçbir şey
+     yoktu — ve ayrıştıklarında fark ancak iki ekran yan yana konunca
+     görülürdü. Tek kaynak `brand/ortak/kesinlik.js`; oradan üçe
+     yayılır ve `tools/ortak.py --denetle` ayrışmayı CI'da yakalar.
+
+     Katalog yüklenmemişse KİMLİK yazılır, uydurma bir karşılık
+     değil (AGENTS.md §1.7). */
+  function etiketAdi(cert){
+    const L = window.LIFEOS;
+    const e = L && L.KESINLIK_ILE ? L.KESINLIK_ILE(cert) : null;
+    return e ? e.ad : String(cert);
+  }
 
   /* Kullanıcı ne gönderildiğini GÖRMEDEN açmamalı. */
   function preview(dateISO){
@@ -17466,7 +17652,7 @@ SP.Beacon = (function(){
     const satirlar = Object.keys(p.metrics).map(function(k){
       const m = p.metrics[k];
       return { key:k, value:m.value, cert:m.cert,
-        label:LABELS[m.cert] || m.cert };
+        label:etiketAdi(m.cert) };
     });
     return { payload:p, rows:satirlar, errors:contract(p) };
   }
@@ -17899,7 +18085,7 @@ SP.Beacon = (function(){
     INTENT_KINDS, APPLIABLE,
     resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
     intentDoubts, clearDoubt,
-    MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
+    MODULE, CONTRACT, ASGARI_ARA_DK };
 })();
 
 /* ==== js/core/audit.js ==== */
@@ -33624,7 +33810,12 @@ SP.Screens.guide = (function(){
         <div class="mt-12">${K.SectionTitle('Bugün ne gidiyor')}</div>
         ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
           rows:on.rows.map(r => [r.key,
-            r.value == null ? '—' : U.fmtNum(r.value), r.label]) })}
+            r.value == null ? '—' : U.fmtNum(r.value),
+            /* KAYNAK SÜTUNU — etiketin görseliyle birlikte.
+               Metin `window.LIFEOS.KESINLIK`ten gelir, bu ekran
+               kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
+               aynı kelimeyi göstermek zorunda. */
+            raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
         <p class="tiny dim mt-8">Tahlil değeri, ilaç adı, semptom ve öğün GİTMEZ.
           Giden şey yük kararını etkileyen dört sayıdır; değeri olmayan alan
           «veri yok» gider, sıfır değil. Klinik sınır burada da geçerlidir.</p>

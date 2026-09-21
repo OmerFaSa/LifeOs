@@ -236,7 +236,12 @@ SP.Screens.guide = (function(){
         <div class="mt-12">${K.SectionTitle('Bugün ne gidiyor')}</div>
         ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
           rows:on.rows.map(r => [r.key,
-            r.value == null ? '—' : U.fmtNum(r.value), r.label]) })}
+            r.value == null ? '—' : U.fmtNum(r.value),
+            /* KAYNAK SÜTUNU — etiketin görseliyle birlikte.
+               Metin `window.LIFEOS.KESINLIK`ten gelir, bu ekran
+               kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
+               aynı kelimeyi göstermek zorunda. */
+            raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
         <p class="tiny dim mt-8">Tahlil değeri, ilaç adı, semptom ve öğün GİTMEZ.
           Giden şey yük kararını etkileyen dört sayıdır; değeri olmayan alan
           «veri yok» gider, sıfır değil. Klinik sınır burada da geçerlidir.</p>

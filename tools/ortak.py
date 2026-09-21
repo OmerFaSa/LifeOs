@@ -38,7 +38,7 @@
 
    Ortak olan tek sey dongudur ve dongu bir mekanizma degildir.
 
-   NEDEN YALNIZ UC DOSYA
+   NE YAYILIR, NE YAYILMAZ
 
    `tokens.css` (78 satir fark), `palettes.css` (52) ve `components.css`
    (~50) KISMEN ortaktir: farklari ajan renkleri ve uygulamaya ozel
@@ -70,7 +70,23 @@ SISTEMLER = ["AYS", "SPI", "ESP"]
 
 # Kaynaktaki ad = hedefteki ad. Farkli olsalardi `index.html`'deki
 # <link> etiketleri de degismek zorunda kalirdi (bkz. SIRA ANLAMDIR).
-DOSYALAR = ["base.css", "layout.css", "designs.css"]
+#
+# Deger HEDEF KLASORDUR. Basta yalniz `css` vardi ve liste duz bir
+# diziydi; kesinlik etiketi gelince JS de yayilmasi gerekti. Dosya
+# turune gore ayri bir betik yazmak, ayni sozu ("tek kaynak, uc kopya,
+# ayrisma yakalanir") iki yerde tutmak olurdu.
+DOSYALAR = {
+    "base.css":     "css",
+    "layout.css":   "css",
+    "designs.css":  "css",
+    # KESINLIK ETIKETI — dort etiketin adi, gorseli ve isaretlemesi.
+    # Uc arayuzde de BIREBIR ayni olmak zorunda: ayni `measured`
+    # birinde «olculdu» birinde baska bir sey gosterirse, deponun en
+    # cok tekrarlanan kurali ekranda ikiye ayrilmis olur.
+    "kesinlik.js":   "js/core",
+    "kesinlik.css":  "css",
+    "kesinlik.test.js": "tests",
+}
 
 BASLIK = ("/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.\n"
           "   Düzeltme brand/ortak/%s içine yazılır; burası bir sonraki\n"
@@ -82,11 +98,12 @@ def uret(ad: str) -> str:
 
 
 def hedefler(ad: str):
+    klasor = DOSYALAR[ad]
     for sistem in SISTEMLER:
         kok = KOK / sistem
         if not (kok / "src").is_dir():
             continue
-        yield sistem, kok / "src" / "css" / ad
+        yield sistem, kok / "src" / Path(klasor) / ad
 
 
 def yay() -> int:
