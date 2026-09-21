@@ -51,6 +51,38 @@ describe('Başarım — katalog', () => {
     });
   });
 
+  it('merkezin beklediği rozet adları BU KATALOGTAN çıkar', () => {
+    /* HKM profili (`HKM/core/profil.py`, AILELER) aynı aileleri ve
+       aynı eşikleri elle taşır — taşımak zorunda: merkez Python,
+       katalog JS ve `tekkaynak` işinde node yok. İkisi ayrışırsa
+       merkez, hiçbir zaman üretilmeyecek bir görsel ister:
+
+         bu katalogda odak eşikleri [1,2,3,5,7,10] olsa
+         merkez hâlâ `basarim-odak-4.webp` isterdi
+         dosya hiçbir teslimatta gelmez — `tools/rutbe.py --eksik` de
+             onu görmez, çünkü o yalnız BU katalogu okur
+         merkez panosunda o rozet KALICI olarak görselsiz kalır
+
+       `rutbe_kart_adi`'nda seçilen yol burada da seçildi: iki tarafta
+       AYNI sayılar sınanır. Eşi `HKM/tests/test_profil.py` içinde. */
+    const merkez = {
+      saat:[100, 250, 500, 1000, 2500, 5000],
+      gorev:[100, 250, 500, 1000, 2500, 5000],
+      gun:[25, 50, 100, 250, 500, 1000],
+      istikrar:[1, 3, 6, 9, 12, 24],
+      odak:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    };
+    Object.keys(merkez).forEach(id => {
+      const a = L().BASARIM_AILE_ILE(id);
+      expect(a).toBeTruthy();
+      expect(a.esikler.join(',')).toBe(merkez[id].join(','));
+      /* Ad kuralı da aynı: merkez `basarim-<aile>-<eşik>` üretiyor. */
+      a.esikler.forEach(e => {
+        expect(L().BASARIM_MEDYA_ADI(id, e)).toBe('basarim-' + id + '-' + e);
+      });
+    });
+  });
+
   it('beş mühür vardır ve her biri bir modüle bağlıdır', () => {
     expect(L().MUHURLER.length).toBe(5);
     L().MUHURLER.forEach(m => {

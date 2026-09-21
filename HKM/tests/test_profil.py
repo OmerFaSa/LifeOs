@@ -196,6 +196,57 @@ def t_muhurun_esigi_yoktur():
         no("deger" in m)
 
 
+def t_rozet_ailelerini_modul_katalogu_belirler():
+    """Merkezin rozet gorselleri MODUL katalogunun URETTIGI dosyalardir.
+
+    `profil.AILELER` bu dosyada elle yaziliydi ve `brand/seviye/
+    basarimlar.js` icindeki ailelerin ikinci bir kopyasidir. Ikisi
+    ayrisirsa merkez, hicbir zaman uretilmeyecek bir gorsel ister:
+
+        modul katalogunda odak esikleri [1,2,3,5,7,10] olsa
+        merkez hala `basarim-odak-4.webp` isterdi
+        dosya hicbir teslimatta gelmez — `tools/rutbe.py --eksik` de
+            onu gormez, cunku o yalniz JS katalogunu okur
+        merkez panosunda o rozet KALICI olarak gorselsiz kalir
+
+    Kopyayi silmek mumkun degil (merkez Python, katalog JS ve
+    `tekkaynak` isinde node yok), o yuzden `rutbe_kart_adi`'nda
+    secilen yol burada da secildi: IKI TARAFTA AYNI ORNEKLER
+    sinanir. Esleri `brand/seviye/basarim.test.js` icinde; biri
+    degisirse once bu iki test kirilir.
+    """
+    beklenen = {
+        "saat": [100, 250, 500, 1000, 2500, 5000],
+        "gorev": [100, 250, 500, 1000, 2500, 5000],
+        "gun": [25, 50, 100, 250, 500, 1000],
+        "istikrar": [1, 3, 6, 9, 12, 24],
+        "odak": list(range(1, 11)),
+    }
+    eq({a["id"]: list(a["esikler"]) for a in profil.AILELER}, beklenen)
+
+    # Ve uretilen adlar gercekten o esiklerden cikiyor mu.
+    con = _con()
+    adlar = {r["gorsel"] for r in profil.anlik(con, GUN)["rozetler"]}
+    eq(len(adlar), sum(len(v) for v in beklenen.values()))
+    for aile, esikler in beklenen.items():
+        for e in esikler:
+            ok("basarim-%s-%s" % (aile, e) in adlar)
+
+
+def t_kusursuz_merkezde_YOK():
+    """Modul katalogunda altinci bir aile var: `kusursuz`. Merkezde
+    YOKTUR ve olmamali — «kusursuz gun» BIR modulun o gunune ait bir
+    olcudur; uc modulun toplaminda karsiligi olan bir sey degildir.
+    Toplanabilir bir alani da yoktur (`isaret()` gondermez).
+
+    Burada sinanmasinin sebebi: aile listesi elle yazili ve bir gun
+    «eksik kalmis» diye eklenebilir. Eklendigi an merkez, hicbir
+    modulun gondermedigi bir alandan rozet turetmeye calisirdi."""
+    no(any(a["id"] == "kusursuz" for a in profil.AILELER))
+    alanlar = {a["alan"] for a in profil.AILELER}
+    no(any(alan.startswith("badge_kusursuz") for alan in alanlar))
+
+
 def run():
     suite("Profil — toplama")
     test("uc modulun saati toplanir", t_0_0)
@@ -216,6 +267,10 @@ def run():
     test("kart adi JS kuraliyla ayni", t_kart_adi)
     test("bozuk girdide ad uydurulmaz", t_kart_bozuk_girdide_uydurmaz)
     test("kademe kart adini tasir", t_kademe_kart_tasir)
+    suite("Profil — rozet aileleri modul katalogundan gelir")
+    test("aileler ve esikler JS katalogu ile ayni",
+         t_rozet_ailelerini_modul_katalogu_belirler)
+    test("«kusursuz» ailesi merkezde yoktur", t_kusursuz_merkezde_YOK)
     suite("Profil — mühürler")
     test("bes muhur, hepsi bir modulde", t_muhurler)
     test("muhurun esigi ve sayaci yoktur", t_muhurun_esigi_yoktur)
