@@ -40,12 +40,34 @@
 
    NE YAYILIR, NE YAYILMAZ
 
+   Uc dosyayla basladi (base/layout/designs.css), on uce cikti. Eklenen
+   her dosya ayni olcutu gecti: UC ARAYUZDE BIREBIR AYNI olmak zorunda
+   mi? Oyleyse kaynak burada durur.
+
+     kesinlik.*   dort kesinlik etiketi. Ayni `measured` birinde
+                  «olculdu», oburunde baska bir sey gosterirse deponun
+                  en cok tekrarlanan kurali ekranda ikiye ayrilir.
+     tanitim.*    ilk kurulumun uc adimi. Sorular ucunde de ayni;
+                  ayri yazilsalardi bir gun birinde IKINCI adim
+                  duserdi ve o adim sistemin SINIRINI soyluyor.
+     simge.*      bir kimligi gorseline ceviren ad kurali. Her
+                  ekranin kendi kurmasi, biri bir gun `ders_tyt_turkce`
+                  yazmasi demekti.
+     medya.js     URETILMIS kunye (`tools/marka.py --kunye`): hangi
+                  gorselin gercekten var oldugu. Uc arayuzun de ayni
+                  kunyeye bakmasi gerekir.
+
    `tokens.css` (78 satir fark), `palettes.css` (52) ve `components.css`
    (~50) KISMEN ortaktir: farklari ajan renkleri ve uygulamaya ozel
    birkac bilesendir. Onlari paylasmak "ortak govde + uygulama kuyrugu"
    ayrimini gerektirir ve bu bir TASARIM KARARIDIR, bir kopyalama isi
-   degil. Tam ortak ucu zaten kazancin buyuk kismidir; kismi olanlar
+   degil. Tam ortak olanlar zaten kazancin buyuk kismidir; kismi olanlar
    ayri bir tur.
+
+   HKM'nin yuzu de YAYILMAZ ve bu bir eksik degil: HKM tek dosyadir ve
+   uc arayuzun yanINDA durur, icinde degil (AGENTS.md §1.4). Ortak olan
+   sozu tasir ama dosyayi tasimaz; `HKM/tests/test_yuz.py` iki tarafin
+   ayni cumleyi soyledigini sinar.
 
    `fonts.css` de ucunde ayni ama tasinmaz: gomulu yazi tipi
    tanimlarini `<APP>/tools/fonts.py` uretir ve o uretimin hedefi

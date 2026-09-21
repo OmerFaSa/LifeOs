@@ -16,11 +16,46 @@ hiçbir kodu kırmaz.
 | `kimlik/` | modül logoları — **marka girişinde** | `kimlik-ays` · `kimlik-hkm` |
 | `ajan/` | ajan portreleri, **daire ve kare** | `ajan-esp-patron` · `ajan-kare-esp-patron` |
 | `durum/` | durum illüstrasyonları | `durum-tamamlandi-gorev` |
-| `tanitim/` | **sisteme ilk giriş kartı**, modül başına bir tane | `tanitim-ays` … `tanitim-hkm` |
+| `tanitim/` | **ilk giriş şeridi**, modül başına ÜÇ adım | `tanitim-ays-1` … `tanitim-hkm-3` |
 | `doku/` | arka plan dokuları | `doku-kagit` · `doku-blueprint` |
 | `bos/` | boş durum illüstrasyonları | `bos-kayit-yok` · `bos-plan-yok` |
 | `kapak/` | rapor kapakları | `kapak-haftalik-ozet` · `kapak-saglik-raporu` |
-| `simge/` | LifeOS ikon ailesi | `simge-kaydet` · `simge-sil` |
+| `simge/` | genel ikon seti | `simge-takvim` · `simge-hedef` · `simge-uyku` |
+| `etiket/` | **kesinlik etiketleri** | `etiket-olculdu` · `etiket-veri-yok` |
+| `olcum/` | SPİ ölçüm ikonları | `olcum-sbp` · `olcum-hrv` · `olcum-sleep` |
+| `disiplin/` | ESP disiplin amblemleri | `disiplin-lang` · `disiplin-philo` |
+| `ders/` | AYS ders amblemleri | `ders-tyt-turkce` · `ders-ayt-fizik` |
+| `harita/` | sistem haritası ve posterler | `harita-sistem` |
+
+### Dört aile KATALOĞA bağlıdır
+
+`etiket/`, `olcum/`, `disiplin/` ve `ders/` ile `simge/` serbest
+değildir: adları bir kataloğun **kimliğinden** türer ve ekran o kimliği
+verir, dosya adını kurmaz (`brand/ortak/simge.js`).
+
+| Aile | Kaynak katalog | Kimlik |
+|---|---|---|
+| `olcum/` | `SPI/src/js/core/xpsayim.js` → `OLCUM` | `sbp`, `hrv`, `sleep`… |
+| `disiplin/` | `ESP/src/js/data/rules.js` → `DISCIPLINES` | `lang`, `philo`… |
+| `ders/` | `AYS/src/js/data/subjects.js` → `SUBJECTS` | `tyt-turkce`… |
+| `simge/` | `brand/seviye/kademeler.js` → `XP_ETKINLIK`, `basarimlar.js` → aileler | `takvim`, `hedef`… |
+| `etiket/` | `brand/ortak/kesinlik.js` | `measured` → `etiket-olculdu` |
+
+Katalogda olup **görseli gelmemiş** bir kimlik, her açılışta bir 404
+demektir. Bir kez yaşandı: ESP katalogunda yedi disiplin var, teslimatta
+altı geldi ve `disiplin-music.webp` her açılışta arandı. Bunun için
+**künye** var:
+
+```bash
+python3 tools/marka.py --kunye            # brand/ortak/medya.js uretir
+python3 tools/marka.py --kunye --denetle  # taze mi (CI'da kosar)
+python3 tools/ortak.py --yay              # uc arayuze dagit
+```
+
+Künye `brand/medya/` altında **gerçekten ne varsa** onu yazar. Listede
+olmayan bir kimlik için `SIMGE_ADI` `null` döner ve istek **hiç
+yapılmaz**; görsel yoksa yazı kalır. Yeni görsel eklediğinde künyeyi
+tazelemeyi unutma — CI hatırlatır.
 
 ### Daire ile kare aynı kişidir
 
@@ -43,9 +78,18 @@ aynı kişiyi birden fazla ajana verdi. «Hepsi gülümseyen, bulanık oda
 | Dosya | Nerede görünür |
 |---|---|
 | `kimlik-<mod>` | açılıştaki marka perdesi (üç saniye) ve HKM künyesi |
-| `tanitim-<mod>` | ilk kurulum sihirbazının en üstünde, **yalnız ilk açılışta** |
+| `tanitim-<mod>-1..3` | ilk kurulum şeridi — **üç adım**, yalnız ilk açılışta |
+| `etiket-<kesinlik>` | «Bugün ne gidiyor» tablosunun Kaynak sütununda |
+| `olcum-<alan>` | SPİ'nin günün ölçümü formunda, etiketin solunda |
+| `disiplin-<id>` | ESP'nin bölüm kartlarında ve rehber tablosunda |
+| `ders-<id>` | AYS'nin ders listesinde |
+| `simge-<id>` | «XP nereden gelir» satırlarında, rozet aile başlıklarında |
+| `harita-sistem` | README'nin başında — **marka görseli**, mimari çizim değil |
 | `durum-tamamlandi-<tur>` | «bekleyen iş yok» kartının arkasında |
 | `kapak-<rapor>` | raporun sağ üst köşesinde, kayan bir levha gibi |
+
+`tanitim-<mod>` (tek panelli eski afiş) artık **çağrılmıyor**: yerine
+üç adımlı şerit geçti (`brand/ortak/tanitim.js`). Dosya silinmedi.
 
 `tanitim-*` afişlerinin **alt şeridi kesildi**: orada görüntünün üzerine
 basılmış bir «Şimdi Başla» düğmesi vardı. Bir görüntüye basılmış düğme

@@ -303,8 +303,13 @@ async function rozetKuyrugu(page, base, errors){
    Küçük sayılarda görünmüyordu; XP büyüdükçe okunaksızlaştı. Denetim
    defteri BÜYÜK bir toplamla kurar — küçük sayıyla koşan bir denetim
    bu hatayı hiç göremezdi — ve ekranda beş haneden uzun, ayraçsız bir
-   sayı arar. Tarih ve saat dört haneyi geçmez, derleme damgası da
-   öyle; o yüzden beş hane eşiği yanlış alarm vermiyor. */
+   sayı arar.
+
+   ARANAN ŞEY TEK BAŞINA DURAN bir sayı: desenin iki yanında harf ya da
+   rakam olmamalı. İlk yazımda bu sınır yoktu ve denetim kendi kendine
+   kırmızıya döndü — künyedeki DERLEME DAMGASI bir git özetidir
+   (`4f18345+`) ve içinde beş haneli bir rakam dizisi çıkabiliyor.
+   «Damga dört haneyi geçmez» diye yazmıştım; geçiyormuş. */
 async function rutbeSayilari(page, base, errors){
   await page.goto(base + '/index.html', { waitUntil:'load' });
   await page.waitForSelector('.site', { timeout:15000 });
@@ -343,7 +348,7 @@ async function rutbeSayilari(page, base, errors){
     await wait(500);
     const kotu = await page.evaluate(() => {
       const n = document.querySelector('#view') || document.body;
-      const bulunan = (n.innerText.match(/\d{5,}/g) || []);
+      const bulunan = (n.innerText.match(/(?<![0-9A-Za-zçğıöşüÇĞİÖŞÜ])\d{5,}(?![0-9A-Za-zçğıöşüÇĞİÖŞÜ])/g) || []);
       return bulunan.slice(0, 5);
     });
     if(kotu.length){
@@ -352,7 +357,7 @@ async function rutbeSayilari(page, base, errors){
   }
   /* Üst başlık da aynı kurala tabi. */
   const alt = await page.evaluate(() => SP.Screens.rutbe.subtitle());
-  if(/\d{5,}/.test(alt)){
+  if(/(?<![0-9A-Za-z])\d{5,}(?![0-9A-Za-z])/.test(alt)){
     errors.push('rütbe alt başlığı: ayraçsız uzun sayı — ' + alt);
   }
   console.log('  akışlar → rütbe ekranındaki sayılar binlik ayraçlı');

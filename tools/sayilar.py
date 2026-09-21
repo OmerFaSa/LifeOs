@@ -81,7 +81,18 @@ def kok_araclar():
     # Marka adlandirmasi ve yol muhafizi. Bu arac bir teslimatta otuz
     # dosyayi tek seferde isimlendirip yerlestiriyor; kurali bozan bir
     # degisiklik sessizce yanlis yere yazabilir.
-    for ad, komut in (("marka.py", ["python3", "tools/marka.py", "--sina"]),):
+    #
+    # KUNYE ve TEK KAYNAK DENETIMLERI de burada: ucu de saf Python,
+    # saniyeler suruyor ve ucu de SESSIZ bir bozulmayi yakaliyor —
+    # kopyanin kaynaktan ayrismasi, kunyenin tazeligini yitirmesi,
+    # adin kurali bozmasi. Hicbiri ekranda gorunmuyor; ancak bir denetim
+    # soylerse bilinir.
+    for ad, komut in (
+            ("marka.py", ["python3", "tools/marka.py", "--sina"]),
+            ("marka kunyesi", ["python3", "tools/marka.py", "--kunye", "--denetle"]),
+            ("seviye.py", ["python3", "tools/seviye.py", "--denetle"]),
+            ("ortak.py", ["python3", "tools/ortak.py", "--denetle"]),
+    ):
         try:
             p = subprocess.run(komut, cwd=KOK, capture_output=True,
                                text=True, timeout=120)
