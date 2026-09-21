@@ -242,6 +242,56 @@ async function walkFlows(page, base, errors){
   console.log('  akışlar → kör net tahmini, deneme kaydı ve kalibrasyon çalıştı');
 }
 
+
+/* AÇILIŞTA BEKLEYEN ROZET KUTLAMASI — kuyruk boşalıyor mu.
+
+   Motor «kuyruk defterde durur, uygulama kapansa da kaybolmaz» diyor.
+   Kuyruk gerçekten duruyordu ama onu BOŞALTAN tek yer eşitlemeden
+   dönen yeni rozet listesiydi: perde kapanmadan sekmeyi kapatan biri
+   o rozeti bir daha hiç göremiyordu, ta ki aylar sonra başka bir rozet
+   kazanana kadar. XP'nin aynı hâli çözülmüştü (`bekleyenKutlama`),
+   rozet tarafı unutulmuştu.
+
+   Denetim BİLEREK önce defteri eşitler: eşitleme «değişen yok» derse
+   kuyruğu boşaltan başka hiçbir yol kalmaz, yani sınanan şey gerçekten
+   AÇILIŞ davranışıdır. Bu tarayıcı `reducedMotion:'reduce'` ile açılır,
+   yani perde değil sessiz yol koşar — kuyruk anında boşalmalı. */
+async function rozetKuyrugu(page, base, errors){
+  await page.goto(base + '/index.html', { waitUntil:'load' });
+  await page.waitForSelector('.site', { timeout:15000 });
+  await wait(900);
+
+  const kod = await page.evaluate(async () => {
+    if(!R.Basarim) return null;
+    /* Defteri eşitle ve kuyruğu boşalt: açılışta «değişen yok» çıksın. */
+    await R.Basarim.esitleCok(R.BasarimSayim.gunler(R.XP.pencere()));
+    let b;
+    while((b = R.Basarim.bekleyen())) await R.Basarim.gorundu(b.kod);
+    /* Kutlaması yarıda kalmış bir rozet bırak. */
+    const ham = await R.Store.get('basarim');
+    const k = window.LIFEOS.ROZETLER[0].kod;
+    ham.kazanilan[k] = R.U.todayISO();
+    ham.bekleyen = [k];
+    await R.Store.set('basarim', ham);
+    return k;
+  });
+  if(!kod){ errors.push('rozet kuyruğu: başarım motoru yüklenmedi'); return; }
+
+  await page.reload({ waitUntil:'load' });
+  await page.waitForSelector('.site', { timeout:15000 });
+  await wait(1500);
+
+  const kalan = await page.evaluate(() => {
+    const b = R.Basarim.bekleyen();
+    return b ? b.kod : null;
+  });
+  if(kalan === kod){
+    errors.push('rozet kuyruğu: açılışta bekleyen kutlama gösterilmedi ('
+      + kod + ' hâlâ kuyrukta)');
+  }
+  console.log('  akışlar → açılışta bekleyen rozet kutlaması boşaldı');
+}
+
 (async () => {
   const server = spawn('python3', [path.join(ROOT, 'devserver.py'), String(PORT)],
     { cwd:ROOT, stdio:'ignore' });
@@ -268,6 +318,7 @@ async function walkFlows(page, base, errors){
     await walkScreens(page, base, '/index.html', errors);
     await walkScreens(page, base, '/dist/rota.html', errors);
     await walkFlows(page, base, errors);
+    await rozetKuyrugu(page, base, errors);
 
     if(errors.length){
       console.log('\n' + errors.length + ' sorun:');

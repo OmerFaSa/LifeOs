@@ -950,12 +950,22 @@ SP.App = (function(){
      bir anda yirmi rozet doldurabilir). Yirmi perdeyi arka arkaya
      açmak kutlama değil ceza olurdu; kuyruk defterde durur, biri
      kapanınca sıradaki gelir ve uygulama kapansa da kaybolmaz. */
+  /* Aynı rozet için İKİ perde açılmasın. `rozetKutla` iki yerden
+     çağrılıyor (açılışta bir kez, eşitleme yeni rozet bulunca) ve
+     ikisi arka arkaya gelirse kuyruktaki rozet henüz damgalanmamış
+     olur: ikinci çağrı AYNI rozeti bir kez daha açardı. */
+  let rozetPerdede = false;
+
   function rozetKutla(){
-    if(!SP.Basarim || !SP.Perde) return;
+    if(!SP.Basarim || !SP.Perde || rozetPerdede) return;
     const r = SP.Basarim.bekleyen();
     if(!r) return;
-    const damgala = () => SP.Basarim.gorundu(r.kod)
-      .then(() => rozetKutla()).catch(() => {});
+    rozetPerdede = true;
+    const damgala = () => {
+      rozetPerdede = false;
+      return SP.Basarim.gorundu(r.kod)
+        .then(() => rozetKutla()).catch(() => {});
+    };
     const sonuc = SP.Perde.rozetKutla(r, { bitti:damgala });
     if(sonuc && sonuc.sessiz){
       UI.toast('Yeni rozet — ' + r.ad);
@@ -1323,6 +1333,19 @@ SP.App = (function(){
           const bekleyen = SP.XP.bekleyenKutlama();
           if(bekleyen) kutla(bekleyen);
         }
+        /* ROZET KUYRUĞU DA AÇILIŞTA BOŞALIR — ve bir süre boşalmıyordu.
+
+           Motor «kuyruk defterde durur, uygulama kapansa da kaybolmaz»
+           diyor ve kuyruk gerçekten duruyordu; onu boşaltan tek yer
+           `esitleCok`ten dönen YENİ rozet listesiydi. Yani kutlaması
+           yarıda kalan biri (perde kapanmadan sekmeyi kapatmak yeter)
+           o rozeti bir daha hiç göremiyordu — ta ki aylar sonra başka
+           bir rozet kazanana kadar.
+
+           XP'nin aynı hâli yukarıda çözülmüştü (`bekleyenKutlama`);
+           rozet tarafı unutulmuştu. Kuyruk boşsa bu çağrı hiçbir şey
+           yapmaz. */
+        rozetKutla();
       }catch(e){
         console.error('Seviye kutlaması açılamadı.', e);
       }
