@@ -5686,6 +5686,17 @@ body.is-dragging .drop.is-over{
 }
 .rutbe-rozet--sirada .rozet-kilit{ opacity:.78; }
 
+/* AYRINTI PANELİ — madalya solda, yazı sağda. Dokunulan şey bir
+   madalyaydı; açılan şey de onunla başlamalı. */
+.rutbe-ayrinti{
+  display:flex; align-items:flex-start; gap:14px;
+}
+.rutbe-ayrinti__yazi{ flex:1 1 auto; min-width:0; }
+.rutbe-ayrinti__rozet{
+  flex:none;
+  width:64px; height:64px; object-fit:contain;
+}
+
 /* SIRADAKİ KARTINDAKİ ROZET — satırın başında, küçük. */
 .rutbe-sirada__rozet{
   flex:none;
@@ -7412,7 +7423,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'df0d9d4', at:'2026-09-21 07:51', dirty:true };
+SP.BUILD = { id:'ee385ae', at:'2026-09-21 07:56', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -32579,9 +32590,20 @@ SP.Screens.rutbe = (function(){
   function bugunKart(){
     const liste = XP().bugunku().filter(r => r.kazanilan > 0);
     if(!liste.length){
+      /* BOŞ HÂL BİR ÇIKMAZ DEĞİL. Cümle doğru yeri söylüyordu ama
+         oraya gitmeyi kullanıcıya bırakıyordu: «XP nereden gelir»
+         yazısını okuyup sekmeyi elle bulmak gerekiyordu. Düğme o iki
+         adımı bire indirir.
+
+         Sekme değiştirmek bir KARAR DEĞİLDİR: hiçbir şey kaydedilmez,
+         hiçbir şey önerilmez. XP'nin karar vermediği kuralı (AGENTS.md
+         §1.6) burada kırılmıyor — ekranın kendi içinde bir bağlantı. */
       return K.Card({ title:'Bugün',
-        body:K.Empty({ text:'Bugün henüz XP yok. «XP nereden gelir» bölümü, '
-          + 'hangi işin ne kazandırdığını ve nerede yapıldığını söyler.' }) });
+        body:K.Empty({
+          text:'Bugün henüz XP yok. «XP nereden gelir» bölümü, hangi işin '
+             + 'ne kazandırdığını ve nerede yapıldığını söyler.',
+          action:K.Button({ label:'XP nereden gelir', size:'sm',
+            act:'rutbe-tab', data:{ 'data-tab':'kazanc' } }) }) });
     }
     liste.sort((a, b) => b.kazanilan - a.kazanilan);
     return K.Card({ title:'Bugün', sub:'İş başına kazanılan',
@@ -32896,10 +32918,31 @@ SP.Screens.rutbe = (function(){
           : html`<b>${sayi(Math.max(0, r.esik - r.deger))} ${r.birim || ''} kaldı</b>
               · şu an ${sayi(r.deger)} / ${sayi(r.esik)}`);
 
+    /* ROZETİN KENDİSİ DE PANELDE DURUR.
+
+       Panel bir süre yalnız yazıydı: ad, özet, kalan. Dokunulan şey
+       bir madalyaydı ve açılan şey bir paragraf — ikisinin arasında
+       görsel bir bağ yoktu ve «hangisine dokundum» sorusu yazıyı
+       okuyarak cevaplanıyordu.
+
+       Madalya BULUNDUĞU HÂLDE gösterilir: kazanılmışsa rengiyle,
+       kazanılmamışsa rengi alınmış (`.rozet-kilit`) — ızgaradaki
+       hâlinin aynısı, yani bağ doğrudan kuruluyor. */
+    const gorsel = r.gorsel
+      ? html`<img class="${'rutbe-ayrinti__rozet' + (r.kazanildi ? '' : ' rozet-kilit')}"
+          src="${'img/seviye/' + r.gorsel + '.webp'}" alt=""
+          aria-hidden="true" loading="lazy" onerror="this.remove()">`
+      : '';
+
     return K.Notice({ tone:r.kazanildi ? 'ok' : 'info',
       title:r.ad,
-      body:html`<p class="rutbe-ayrinti__ne">${r.ozet || ''}</p>
-        <p class="rutbe-ayrinti__durum">${durum}</p>` });
+      body:html`<div class="rutbe-ayrinti">
+          ${gorsel}
+          <div class="rutbe-ayrinti__yazi">
+            <p class="rutbe-ayrinti__ne">${r.ozet || ''}</p>
+            <p class="rutbe-ayrinti__durum">${durum}</p>
+          </div>
+        </div>` });
   }
 
   function rozetHtml(r, sirada){

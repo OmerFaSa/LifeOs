@@ -1512,6 +1512,17 @@
 }
 .rutbe-rozet--sirada .rozet-kilit{ opacity:.78; }
 
+/* AYRINTI PANELİ — madalya solda, yazı sağda. Dokunulan şey bir
+   madalyaydı; açılan şey de onunla başlamalı. */
+.rutbe-ayrinti{
+  display:flex; align-items:flex-start; gap:14px;
+}
+.rutbe-ayrinti__yazi{ flex:1 1 auto; min-width:0; }
+.rutbe-ayrinti__rozet{
+  flex:none;
+  width:64px; height:64px; object-fit:contain;
+}
+
 /* SIRADAKİ KARTINDAKİ ROZET — satırın başında, küçük. */
 .rutbe-sirada__rozet{
   flex:none;

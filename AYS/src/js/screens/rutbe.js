@@ -302,9 +302,20 @@ R.Screens.rutbe = (function(){
   function bugunKart(){
     const liste = XP().bugunku().filter(r => r.kazanilan > 0);
     if(!liste.length){
+      /* BOŞ HÂL BİR ÇIKMAZ DEĞİL. Cümle doğru yeri söylüyordu ama
+         oraya gitmeyi kullanıcıya bırakıyordu: «XP nereden gelir»
+         yazısını okuyup sekmeyi elle bulmak gerekiyordu. Düğme o iki
+         adımı bire indirir.
+
+         Sekme değiştirmek bir KARAR DEĞİLDİR: hiçbir şey kaydedilmez,
+         hiçbir şey önerilmez. XP'nin karar vermediği kuralı (AGENTS.md
+         §1.6) burada kırılmıyor — ekranın kendi içinde bir bağlantı. */
       return K.Card({ title:'Bugün',
-        body:K.Empty({ text:'Bugün henüz XP yok. «XP nereden gelir» bölümü, '
-          + 'hangi işin ne kazandırdığını ve nerede yapıldığını söyler.' }) });
+        body:K.Empty({
+          text:'Bugün henüz XP yok. «XP nereden gelir» bölümü, hangi işin '
+             + 'ne kazandırdığını ve nerede yapıldığını söyler.',
+          action:K.Button({ label:'XP nereden gelir', size:'sm',
+            act:'rutbe-tab', data:{ 'data-tab':'kazanc' } }) }) });
     }
     liste.sort((a, b) => b.kazanilan - a.kazanilan);
     return K.Card({ title:'Bugün', sub:'İş başına kazanılan',
@@ -619,10 +630,31 @@ R.Screens.rutbe = (function(){
           : html`<b>${sayi(Math.max(0, r.esik - r.deger))} ${r.birim || ''} kaldı</b>
               · şu an ${sayi(r.deger)} / ${sayi(r.esik)}`);
 
+    /* ROZETİN KENDİSİ DE PANELDE DURUR.
+
+       Panel bir süre yalnız yazıydı: ad, özet, kalan. Dokunulan şey
+       bir madalyaydı ve açılan şey bir paragraf — ikisinin arasında
+       görsel bir bağ yoktu ve «hangisine dokundum» sorusu yazıyı
+       okuyarak cevaplanıyordu.
+
+       Madalya BULUNDUĞU HÂLDE gösterilir: kazanılmışsa rengiyle,
+       kazanılmamışsa rengi alınmış (`.rozet-kilit`) — ızgaradaki
+       hâlinin aynısı, yani bağ doğrudan kuruluyor. */
+    const gorsel = r.gorsel
+      ? html`<img class="${'rutbe-ayrinti__rozet' + (r.kazanildi ? '' : ' rozet-kilit')}"
+          src="${'img/seviye/' + r.gorsel + '.webp'}" alt=""
+          aria-hidden="true" loading="lazy" onerror="this.remove()">`
+      : '';
+
     return K.Notice({ tone:r.kazanildi ? 'ok' : 'info',
       title:r.ad,
-      body:html`<p class="rutbe-ayrinti__ne">${r.ozet || ''}</p>
-        <p class="rutbe-ayrinti__durum">${durum}</p>` });
+      body:html`<div class="rutbe-ayrinti">
+          ${gorsel}
+          <div class="rutbe-ayrinti__yazi">
+            <p class="rutbe-ayrinti__ne">${r.ozet || ''}</p>
+            <p class="rutbe-ayrinti__durum">${durum}</p>
+          </div>
+        </div>` });
   }
 
   function rozetHtml(r, sirada){
