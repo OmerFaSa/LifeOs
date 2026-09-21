@@ -1,8 +1,3 @@
-/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
-   Düzeltme brand/ortak/quota.js içine yazılır; burası bir sonraki
-   `python3 tools/ortak.py --yay` ile yeniden üretilir.
-   Kaynak bir KALIPTIR: ad alanı ve depo öneki yayım
-   sırasında konur (__NS__, __DEPO__, __BASLIK__). */
 /* Istek sinir yoneticisi — ucretsiz modellerin kotasi asilmaz.
 
    Ucretsiz saglayicilarin uc sinirı vardir ve ucu de asilirsa istek reddedilir:
@@ -24,7 +19,7 @@
 
    ================== BU DOSYA TEK KAYNAKTIR ==================
    Kaynagi `brand/ortak/quota.js`; `python3 tools/ortak.py --yay` ile
-   UC arayuzun `src/js/core/` klasorune yayilir. `SP` ve `spi`
+   UC arayuzun `src/js/core/` klasorune yayilir. `__NS__` ve `__DEPO__`
    yer tutucudur, yayim sirasinda degistirilir.
 
    Neden tek kaynak: uc kopya 280 satirdi ve aralarindaki tek fark bu
@@ -32,11 +27,11 @@
    NULL doner" duzeltmesi SPI kopyasina yazildi, AYS ve ESP
    kopyalarinda unutuldu; hicbir denetim soylemedi. */
 
-window.SP = window.SP || {};
+window.__NS__ = window.__NS__ || {};
 
-SP.Quota = (function(){
+__NS__.Quota = (function(){
 
-  const STORE = 'spi.llm.quota';
+  const STORE = '__DEPO__.llm.quota';
   /* Saglayicinin bildirdigi sinirin tamami kullanilmaz: saat farki, ayni
      anahtarla acilmis baska sekme ve saglayicinin kendi yuvarlamasi icin pay. */
   const SAFETY = 0.85;
@@ -96,7 +91,7 @@ SP.Quota = (function(){
      Gunluk hak hesaba bagli olabilir (OpenRouter'da kredi yuklediysen 50 yerine
      1000). Kullanici gercek sinirini ayarlardan yazar; katalog degismez. */
 
-  const OVERRIDE_STORE = 'spi.llm.limits';
+  const OVERRIDE_STORE = '__DEPO__.llm.limits';
 
   function readOverrides(){
     try{ return JSON.parse(localStorage.getItem(OVERRIDE_STORE) || '{}'); }
@@ -124,7 +119,7 @@ SP.Quota = (function(){
   /* Modelin kendi siniri yoksa saglayicinin varsayilanina duser;
      kullanici duzeltmesi ikisinin de ustundedir. */
   function limitsFor(cfg){
-    const p = SP.PROVIDERS[cfg && cfg.provider];
+    const p = __NS__.PROVIDERS[cfg && cfg.provider];
     if(!p) return null;
     const m = (p.models || []).find(x => x.id === cfg.model);
     const l = Object.assign({}, p.limits || {}, (m && m.limits) || {}, getOverride(p.id));

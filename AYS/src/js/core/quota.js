@@ -1,3 +1,8 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/quota.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir.
+   Kaynak bir KALIPTIR: ad alanı ve depo öneki yayım
+   sırasında konur (__NS__, __DEPO__, __BASLIK__). */
 /* Istek sinir yoneticisi — ucretsiz modellerin kotasi asilmaz.
 
    Ucretsiz saglayicilarin uc sinirı vardir ve ucu de asilirsa istek reddedilir:
@@ -15,7 +20,17 @@
       kaybolmaz. Gun dolduysa beklemek yerine acik bir hata dondurur.
 
    Sayaclar saglayici+model basina ayri tutulur: Groq'ta sinira takilmak
-   Gemini'yi durdurmaz. */
+   Gemini'yi durdurmaz.
+
+   ================== BU DOSYA TEK KAYNAKTIR ==================
+   Kaynagi `brand/ortak/quota.js`; `python3 tools/ortak.py --yay` ile
+   UC arayuzun `src/js/core/` klasorune yayilir. `R` ve `rota`
+   yer tutucudur, yayim sirasinda degistirilir.
+
+   Neden tek kaynak: uc kopya 280 satirdi ve aralarindaki tek fark bu
+   iki yer tutucuydu. `status()` icindeki "sinir bilinmiyorsa alanlar
+   NULL doner" duzeltmesi SPI kopyasina yazildi, AYS ve ESP
+   kopyalarinda unutuldu; hicbir denetim soylemedi. */
 
 window.R = window.R || {};
 
@@ -144,15 +159,22 @@ R.Quota = (function(){
      gun dolduğu icin hic mi? UI bunu cagirarak "3 sn sonra" yazabilir. */
   function check(cfg, now){
     const eff = effective(cfg);
-    if(!eff) return { ok:true, waitMs:0, limited:false };
-
     const t = now == null ? Date.now() : now;
     rollDay();
-
     const k = key(cfg);
+    /* Sinir bilinmiyorsa alanlar EKSIK degil NULL doner — `status()`
+       ile ayni soz. `usedToday` gercek sayactir ve sinirsiz saglayicida
+       her zaman 0'dir: sistem yalnizca KENDI saydigi cagriyi bilir,
+       bunu bir sinir sanmaz. */
     const usedToday = daily.used[k] || 0;
+    if(!eff){
+      return { ok:true, reason:null, waitMs:0, limited:false,
+        usedToday, rpd:null, rpm:null };
+    }
+
     if(eff.rpd && usedToday >= eff.rpd){
-      return { ok:false, reason:'daily', waitMs:0, limited:true, usedToday, rpd:eff.rpd };
+      return { ok:false, reason:'daily', waitMs:0, limited:true,
+        usedToday, rpd:eff.rpd, rpm:eff.rpm };
     }
 
     const b = bucket(k);
@@ -162,7 +184,8 @@ R.Quota = (function(){
     if(eff.rpm && b.times.length >= eff.rpm){
       waitMs = Math.max(waitMs, 60000 - (t - b.times[0]) + 50);
     }
-    return { ok:waitMs === 0, waitMs, limited:waitMs > 0, usedToday, rpd:eff.rpd, rpm:eff.rpm };
+    return { ok:waitMs === 0, reason:waitMs > 0 ? 'rate' : null,
+      waitMs, limited:waitMs > 0, usedToday, rpd:eff.rpd, rpm:eff.rpm };
   }
 
   /* ---------- ayirma ---------- */
@@ -188,7 +211,8 @@ R.Quota = (function(){
   async function acquire(cfg, opts){
     const o = opts || {};
     const eff = effective(cfg);
-    if(!eff){ return { waited:0 }; }
+    /* Ayni soz: alanlar dusmez, bilinmeyen NULL olur. */
+    if(!eff){ rollDay(); return { waited:0, usedToday:daily.used[key(cfg)] || 0, rpd:null }; }
 
     const state = check(cfg);
     if(!state.ok && state.reason === 'daily'){
@@ -247,7 +271,16 @@ R.Quota = (function(){
     const k = key(cfg);
     rollDay();
     const usedToday = daily.used[k] || 0;
-    if(!eff) return { known:false, usedToday };
+    /* Limit BILINMIYORSA alanlar eksik degil NULL doner.
+
+       Eskiden burada yalnizca { known, usedToday } donuyordu; cagiran
+       taraf `String(st.lastMinute)` yazinca ekranda "undefined" gorunuyordu.
+       Eksik alan, sifir degildir — ama eksik alan ayni zamanda cagiranin
+       basina is acar. Sema her iki durumda da AYNI kalir. */
+    if(!eff){
+      return { known:false, rpm:null, rpd:null, gapMs:null,
+        lastMinute:null, usedToday, remainingToday:null, full:false };
+    }
     const b = bucket(k);
     prune(b, Date.now());
     return {

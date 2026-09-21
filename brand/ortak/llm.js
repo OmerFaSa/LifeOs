@@ -1,8 +1,3 @@
-/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
-   Düzeltme brand/ortak/llm.js içine yazılır; burası bir sonraki
-   `python3 tools/ortak.py --yay` ile yeniden üretilir.
-   Kaynak bir KALIPTIR: ad alanı ve depo öneki yayım
-   sırasında konur (__NS__, __DEPO__, __BASLIK__). */
 /* Model tasima katmani — ofis ajanlarini ucretsiz LLM uclarina baglar.
 
    Ilke: bu modul YALNIZCA tasir. Ne istem kurar, ne veri secer, ne karar verir.
@@ -13,7 +8,7 @@
      openai   POST /chat/completions (SSE)     — OpenRouter, Groq, ozel uc
      gemini   POST /models/x:streamGenerateContent — Google AI Studio
 
-   Anahtarlar 'esp.llm.keys' altinda, uygulama verisinden AYRI durur:
+   Anahtarlar '__DEPO__.llm.keys' altinda, uygulama verisinden AYRI durur:
    yedege girmez (Store.exportAll baska bir anahtari okur), buluta gitmez.
 
    ================== BU DOSYA TEK KAYNAKTIR ==================
@@ -26,11 +21,11 @@
    duzeltme buraya KENDILIGINDEN gelmez; iki taraf ayri ayri
    bakilir. */
 
-window.ESP = window.ESP || {};
+window.__NS__ = window.__NS__ || {};
 
-ESP.LLM = (function(){
+__NS__.LLM = (function(){
 
-  const KEY_STORE = 'esp.llm.keys';
+  const KEY_STORE = '__DEPO__.llm.keys';
   const TIMEOUT_MS = 90000;
 
   /* Turkce ayni cumleyi Ingilizceden belirgin daha cok token'la yazar:
@@ -161,7 +156,7 @@ ESP.LLM = (function(){
     if(!keys.length) return null;
     let best = null;
     for(let i = 0; i < keys.length; i++){
-      const state = ESP.Quota.check(Object.assign({}, cfg, { keyId:i }));
+      const state = __NS__.Quota.check(Object.assign({}, cfg, { keyId:i }));
       if(state.ok) return { key:keys[i], index:i, waitMs:0 };
       if(state.reason === 'daily') continue;              // bu anahtarin gunu bitti
       if(!best || state.waitMs < best.waitMs) best = { key:keys[i], index:i, waitMs:state.waitMs };
@@ -399,8 +394,8 @@ ESP.LLM = (function(){
     };
     /* OpenRouter kaynak basligi bekler; tarayicidan gonderilmesi serbesttir. */
     if(provider.id === 'openrouter'){
-      headers['HTTP-Referer'] = location.origin || 'https://esp.local';
-      headers['X-Title'] = 'ESP — entelektüel ofis';
+      headers['HTTP-Referer'] = location.origin || 'https://__DEPO__.local';
+      headers['X-Title'] = '__BASLIK__';
     }
 
     const stream = !!req.onText;
@@ -432,7 +427,7 @@ ESP.LLM = (function(){
       guard.done();
       /* Saglayici bizim saydigimizdan daha siki davraniyor: pencereyi kapat. */
       if(code === 'rate_limited'){
-        ESP.Quota.penalize({ provider:provider.id, model:req.model, keyId:req.keyId }, retryAfterSeconds(response));
+        __NS__.Quota.penalize({ provider:provider.id, model:req.model, keyId:req.keyId }, retryAfterSeconds(response));
       }
       throw fail(code, detail);
     }
@@ -527,7 +522,7 @@ ESP.LLM = (function(){
       const code = codeForStatus(response.status);
       guard.done();
       if(code === 'rate_limited'){
-        ESP.Quota.penalize({ provider:provider.id, model:req.model, keyId:req.keyId }, retryAfterSeconds(response));
+        __NS__.Quota.penalize({ provider:provider.id, model:req.model, keyId:req.keyId }, retryAfterSeconds(response));
       }
       throw fail(code, detail);
     }
@@ -581,7 +576,7 @@ ESP.LLM = (function(){
   /* Tek cagri. cfg: { provider, model, endpoint } — anahtar depodan okunur.
      req: { system, messages:[{role,text}], maxTokens, temperature, signal, onText } */
   async function chat(cfg, req){
-    const provider = ESP.PROVIDERS[cfg && cfg.provider];
+    const provider = __NS__.PROVIDERS[cfg && cfg.provider];
     if(!provider) throw fail('no_provider');
     if(!cfg.model && provider.kind !== 'builtin') throw fail('no_model');
 
@@ -641,7 +636,7 @@ ESP.LLM = (function(){
 
       /* Sira: kota yoneticisi izin verene kadar bekle. Boylece dakikalik
          sinir HIC asilmaz; gun dolduysa beklemek yerine acikca soylenir. */
-      slot = await ESP.Quota.acquire(quotaCfg, { signal:req && req.signal, onWait:req && req.onWait });
+      slot = await __NS__.Quota.acquire(quotaCfg, { signal:req && req.signal, onWait:req && req.onWait });
       waited += slot.waited || 0;
 
       let out;
@@ -653,7 +648,7 @@ ESP.LLM = (function(){
         /* Istek hic gonderilemediyse gunluk hakki tuketmis sayma. */
         if(err && (err.code === 'cancelled' || err.code === 'sandboxed'
                 || err.code === 'no_key' || err.code === 'offline')){
-          ESP.Quota.release(quotaCfg);
+          __NS__.Quota.release(quotaCfg);
         }
         if(err && err.code === 'cancelled') throw err;
         /* Devam istegi duserse ilk turun metni durur: hata gostermektense
@@ -734,7 +729,7 @@ ESP.LLM = (function(){
 
   /* Bir yapilandirmanin kullanilabilir olup olmadigi (cagri yapmadan). */
   function ready(cfg){
-    const provider = ESP.PROVIDERS[cfg && cfg.provider];
+    const provider = __NS__.PROVIDERS[cfg && cfg.provider];
     if(!provider) return false;
     if(provider.kind === 'builtin') return builtinReady();
     if(provider.needsKey && !getKeys(provider.id).length) return false;

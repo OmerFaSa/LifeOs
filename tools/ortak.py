@@ -74,6 +74,39 @@
    uygulamanin kendi klasorudur. Uretilmis bir dosyayi ikinci bir
    ureticinin altina koymak, iki sahipli bir dosya yapardi.
 
+   YER TUTUCU — AYNI GOVDE, BASKA AD ALANI
+
+   Bastaki on uc dosya ucunde BAYT DUZEYINDE aynidir. Ama bir dosya
+   ucunde ayni ISI yapip yalnizca AD ALANINDA ayrilabilir: `quota.js`
+   uc kopyasi 280 satirdir ve aralarindaki tek fark `R.` / `SP.` /
+   `ESP.` ile depo onekidir (`rota.llm.quota` / `spi...` / `esp...`).
+
+   Boyle bir dosya kaynakta YER TUTUCU tasir ve yayim sirasinda
+   degistirilir:
+
+     __NS__       ad alani       R      SP     ESP
+     __DEPO__     depo oneki     rota   spi    esp
+     __BASLIK__   saglayiciya gonderilen baslik (X-Title)
+
+   Bu, `seviye.py`'nin makinesini buraya tasimak DEGILDIR: orada
+   markup uretilir, HTML'e isaret arasina yazilir, dort sunucunun
+   icine Python blogu gomulur. Burada yapilan tek sey bir dize
+   degistirmedir ve onsuz bu dosyalar hic paylasilamazdi.
+
+   Bunun bir borc olmadigina dair kanit: `status()` icinde "sinir
+   bilinmiyorsa alanlar NULL doner" duzeltmesi SPI kopyasina yazildi,
+   AYS ve ESP kopyalarinda UNUTULDU. Uc ay boyunca hicbir denetim
+   soylemedi. Tek kaynak bunu imkansiz kilar.
+
+   HER DOSYA UC SISTEME GITMEZ
+
+   `YALNIZ` tablosunda adi gecen dosya orada yazan sistemlere yayilir.
+   `llm.js` boyledir: SPI ile ESP kopyalari ayni dosyanin iki
+   kopyasidir (737 satir, fark yalnizca ad alani), AYS'ninki ise BASKA
+   BIR SEYDIR — 1337 satir ve otuz fazla islev (`diagnose`,
+   `listModels`, `visionChain`, `stripThinking`...). Uc kopyayi zorla
+   birlestirmek, AYS'nin uc aylik gelisimini geri almak olurdu.
+
    SIRA ANLAMDIR
 
    CSS'te yukleme sirasi anlam tasir. Bu yuzden kopyalar arayuzlerin
@@ -124,20 +157,69 @@ DOSYALAR = {
     # Buradan yayılır çünkü üç arayüzün de aynı künyeye bakması
     # gerekir: birinde olan bir görsel ötekinde de vardır.
     "medya.js":      "js/core",
+    # KOTA — ucretsiz modellerin istek siniri. Uc kopya, tek fark ad
+    # alani. Ayrisma KANITLI: `status()` semasi duzeltmesi SPI'ye
+    # yazildi, oteki iki kopyada unutuldu.
+    "quota.js":      "js/core",
+    "quota.test.js": "tests",
+    # MODEL KATMANI — yalniz SPİ ve ESP (bkz. YALNIZ).
+    "llm.js":        "js/core",
+}
+
+# Yayim sirasinda yer tutucusu degistirilen dosyalar. Otekiler bayt
+# duzeyinde kopyalanir; burasi bir dize degistirmedir, sablon motoru
+# degil — kural: yer tutucu YALNIZ ad alani ve depo oneki icin.
+KALIPLAR = {"quota.js", "llm.js", "quota.test.js"}
+
+# Varsayilan UC sistemdir. Burada adi gecen dosya yalnizca listedeki
+# sistemlere yayilir; otekiler o dosyaya hic sahip olmaz.
+YALNIZ = {
+    # AYS'nin `llm.js`'i bu dosyanin kopyasi DEGIL, gelismis halidir.
+    # Ayrintisi ust taraftaki "HER DOSYA UC SISTEME GITMEZ" bolumunde.
+    "llm.js": ["SPI", "ESP"],
+}
+
+YERTUTUCU = {
+    "AYS": {"__NS__": "R",   "__DEPO__": "rota",
+            "__BASLIK__": "Rota — YKS ofisi"},
+    "SPI": {"__NS__": "SP",  "__DEPO__": "spi",
+            "__BASLIK__": "SPİ — sağlık ofisi"},
+    "ESP": {"__NS__": "ESP", "__DEPO__": "esp",
+            "__BASLIK__": "ESP — entelektüel ofis"},
 }
 
 BASLIK = ("/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.\n"
           "   Düzeltme brand/ortak/%s içine yazılır; burası bir sonraki\n"
           "   `python3 tools/ortak.py --yay` ile yeniden üretilir. */\n")
 
+KALIP_BASLIK = ("/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.\n"
+                "   Düzeltme brand/ortak/%s içine yazılır; burası bir sonraki\n"
+                "   `python3 tools/ortak.py --yay` ile yeniden üretilir.\n"
+                "   Kaynak bir KALIPTIR: ad alanı ve depo öneki yayım\n"
+                "   sırasında konur (__NS__, __DEPO__, __BASLIK__). */\n")
 
-def uret(ad: str) -> str:
-    return (BASLIK % ad) + (KAYNAK / ad).read_text(encoding="utf-8")
+
+def uret(ad: str, sistem: str) -> str:
+    """Kaynagi okur, kalipsa yer tutucularini degistirir, basina baslik koyar.
+
+    Yer tutucu degistirme DUZ bir dize degistirmedir ve oyle kalmali:
+    kosul, dongu, icerme yok. Bir gun bunlardan birine ihtiyac duyulursa
+    cozum sablon motoru eklemek degil, o dosyayi paylasmamaktir."""
+    govde = (KAYNAK / ad).read_text(encoding="utf-8")
+    if ad not in KALIPLAR:
+        return (BASLIK % ad) + govde
+    for yer, deger in YERTUTUCU[sistem].items():
+        govde = govde.replace(yer, deger)
+    kalan = [y for y in YERTUTUCU[sistem] if y in govde]
+    if kalan:  # degistirilememis yer tutucu sessizce gecmemeli
+        raise ValueError("%s (%s): degistirilmemis yer tutucu: %s"
+                         % (ad, sistem, ", ".join(kalan)))
+    return (KALIP_BASLIK % ad) + govde
 
 
 def hedefler(ad: str):
     klasor = DOSYALAR[ad]
-    for sistem in SISTEMLER:
+    for sistem in YALNIZ.get(ad, SISTEMLER):
         kok = KOK / sistem
         if not (kok / "src").is_dir():
             continue
@@ -153,8 +235,8 @@ def yay() -> int:
         if not (KAYNAK / ad).exists():
             print("  ! brand/ortak/%s yok, atlandi" % ad)
             continue
-        yeni = uret(ad)
-        for _sistem, hedef in hedefler(ad):
+        for sistem, hedef in hedefler(ad):
+            yeni = uret(ad, sistem)
             hedef.parent.mkdir(parents=True, exist_ok=True)
             eski = hedef.read_text(encoding="utf-8") if hedef.exists() else None
             if eski == yeni:
@@ -177,8 +259,8 @@ def denetle() -> int:
         if not (KAYNAK / ad).exists():
             hatalar.append("brand/ortak/%s yok — kaynak eksik" % ad)
             continue
-        yeni = uret(ad)
-        for _sistem, hedef in hedefler(ad):
+        for sistem, hedef in hedefler(ad):
+            yeni = uret(ad, sistem)
             if not hedef.exists():
                 hatalar.append("%s yok — `python3 tools/ortak.py --yay`"
                                % hedef.relative_to(KOK))
@@ -188,11 +270,13 @@ def denetle() -> int:
                                "brand/ortak/%s icine yazilir"
                                % (hedef.relative_to(KOK), ad))
     if hatalar:
-        print("Ortak CSS ayrismis:\n")
+        print("Ortak kaynak ayrismis:\n")
         for h in hatalar:
             print("  ✕ " + h)
         return 1
-    print("Ortak CSS: uc arayuzde de kaynakla ayni (%d dosya)." % len(DOSYALAR))
+    kopya = sum(len(list(hedefler(ad))) for ad in DOSYALAR)
+    print("Ortak kaynak: kopyalar kaynakla ayni (%d dosya, %d kopya)."
+          % (len(DOSYALAR), kopya))
     return 0
 
 
