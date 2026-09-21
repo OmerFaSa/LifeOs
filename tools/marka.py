@@ -65,6 +65,15 @@ AILELER = {
     "bos":     "boş durum illüstrasyonları",
     "kapak":   "rapor kapakları",
     "simge":   "ikon ailesi",
+    # AŞAĞIDAKİ DÖRT AİLE BİR KAVRAMA BAĞLIDIR, bir temaya değil —
+    # ve adları o kavramın KATALOGTAKİ kimliğinden türer, elle
+    # uydurulmaz. Bir katalog kimliği değişirse görsel bulunamaz
+    # olur; `tools/gorsel.py --denetle` tam bunu yakalar.
+    "etiket":   "kesinlik etiketleri (ölçüldü/tahmin/hesaplandı/veri yok)",
+    "ders":     "AYS ders amblemleri (subjects.js kimlikleri)",
+    "disiplin": "ESP disiplin amblemleri (rules.js kimlikleri)",
+    "olcum":    "SPİ ölçüm ikonları (xpsayim.js OLCUM alanları)",
+    "harita":   "sistem haritası ve posterler",
 }
 
 GORSEL = {".png", ".jpg", ".jpeg", ".webp", ".svg"}
