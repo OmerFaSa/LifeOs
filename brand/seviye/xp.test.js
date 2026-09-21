@@ -247,6 +247,37 @@
       expect(kutsal.kart).toBe('img/seviye/rutbe-k300.webp');
     });
 
+    it('nişan KADEME ve BASAMAK numarasından türer', () => {
+      /* Nişan kartın küçük kardeşidir ve merdivendeki yüz piksellik
+         kutu için çizilmiştir; kart orada ne taşı ne yazısı okunacak
+         kadar küçülüyordu. */
+      const m = XP.merdiven();
+      expect(m.filter(b => b.etiket === '1.1')[0].nisan)
+        .toBe('img/seviye/nisan-1-1.webp');
+      expect(m.filter(b => b.etiket === '5.3')[0].nisan)
+        .toBe('img/seviye/nisan-5-3.webp');
+    });
+
+    it('KUTSAL merdiveninde nişan YOKTUR ve olmaması doğrudur', () => {
+      /* K basamakları kademe içinde 1..10 diye sayılmaz, kendi
+         adlarıyla (K100, K200) durur. `null` dönmesi ekranın kartı
+         kullanması demektir — uydurma bir ad üretmek, olmayan bir
+         dosyayı istemek olurdu. */
+      const m = XP.merdiven();
+      m.filter(b => b.kademe === 6).forEach(b => {
+        expect(b.nisan).toBeNull();
+      });
+      /* Altıncı kademe DIŞINDA hepsinin nişanı vardır. */
+      m.filter(b => b.kademe !== 6).forEach(b => {
+        expect(typeof b.nisan).toBe('string');
+      });
+    });
+
+    it('nişan kökü de değiştirilebilir — tek dosya sürümü için', () => {
+      const m = XP.merdiven({ kok:'medya/' });
+      expect(m.filter(b => b.etiket === '3.2')[0].nisan).toBe('medya/nisan-3-2.webp');
+    });
+
     it('medya adı etiketten türer — nokta tireye döner, harf küçülür', () => {
       expect(L.MEDYA_ADI('5.2')).toBe('rutbe-5-2');
       expect(L.MEDYA_ADI('1.1')).toBe('rutbe-1-1');

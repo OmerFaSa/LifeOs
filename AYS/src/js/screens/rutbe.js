@@ -42,6 +42,13 @@ R.Screens.rutbe = (function(){
   const L = function(){ return window.LIFEOS; };
   const XP = function(){ return R.XP; };
 
+  /* Bu ekranın hangi sisteme ait olduğu. Yer tutucu yayarken değişir
+     (`tools/seviye.py`) — `xp.js` de aynı yer tutucuyu kullanır ve
+     modül kimliği tek yerden gelir. Mühür listesi bununla süzülür:
+     ESP'nin ekranında SPİ'nin mührünü göstermek, kullanıcının
+     basamayacağı bir damgayı vitrine koymaktı. */
+  const MOD_ADI = 'ays';
+
   const TABS = [
     { id:'simdi',    label:'Şu an' },
     { id:'merdiven', label:'Merdiven' },
@@ -159,15 +166,84 @@ R.Screens.rutbe = (function(){
           unit:'/ ' + (L().KADEMELER || []).length }),
         /* «Basamak» tek başına yanıltıcıydı: 1.1'in İÇİNDEYKEN sıfır
            yazıyor ve üstteki «Bronz 1.1» ile çelişiyordu. Sayılan şey
-           GEÇİLEN basamaktır; adı da onu söylemeli. */
-        K.Stat({ label:'Geçilen basamak', value:d.bitmisBasamak,
-          unit:'/ ' + (L().BASAMAKLAR || []).length }),
+           GEÇİLEN basamaktır; adı da onu söylemeli.
+           TEK PARÇA ve BÖLÜNMEZ yazılır: «Geçilen basamak» etiketi ve
+           «/ 25» birimi dört sayaçlık bir satırda ayrı ayrı sarıyor,
+           kutuyu komşularının iki katı yapıyordu. Aradaki boşluklar
+           bölünmez boşluktur (U+00A0); normal boşlukla «11 /» ve «25»
+           iki satıra düşüyordu. */
+        K.Stat({ label:'Basamak',
+          value:d.bitmisBasamak + '\u00a0/\u00a0' + (L().BASAMAKLAR || []).length,
+          note:'geçilen' }),
       ]),
 
       K.Card({ title:'İlerleme', body:ilerleme }),
+      kademeIciKart(d),
       rozetOzetKart(),
       bugunKart(),
     ]);
+  }
+
+  /* BU KADEMEDE NEREDESİN — kademenin kendi basamakları, tek şeritte.
+
+     Merdiven sekmesi ALTI kademeyi birden gösterir; orada kendi
+     kademeni bulmak için kaydırmak gerekiyordu. Burası yalnız içinde
+     olduğun kademeyi gösterir ve üç soruyu tek bakışta cevaplar:
+     hangisini geçtin, hangisindesin, sıradaki hangisi.
+
+     Şeritte nişan kullanılır, kart değil: kart burada da okunmayacak
+     kadar küçük kalırdı (bkz. `basamakHtml`).
+
+     ARMA şeridin başında durur — kademenin mührü, basamakların
+     başında. Safir ve Kutsal'ın arması henüz gelmedi; `onerror` düğümü
+     kaldırır ve şerit armasız başlar. */
+  function kademeIciKart(d){
+    const satir = (XP().merdiven() || []).filter(b => b.kademe === d.kademe);
+    if(satir.length < 2) return '';
+    const k = d.kademeBilgi || {};
+    const arma = armaYolu(d.kademe);
+
+    return K.Card({
+      title:'Bu kademede neredesin',
+      body:html`
+        <div class="rutbe-serit">
+          ${when(arma, () => html`<img class="rutbe-serit__arma" src="${arma}"
+            alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">`)}
+          <div class="rutbe-serit__basamaklar">
+            ${map(satir, b => basamakHtml(b))}
+          </div>
+        </div>
+        ${gecisSeridi(d, k)}`,
+    });
+  }
+
+  /* BURAYA NASIL GELDİN — kademe geçişinin tam ekran karesi, küçük.
+
+     O kare kutlamada BİR KEZ görünüyor ve bir daha hiç görünmüyordu:
+     altı güzel görsel, kullanıcı ömründe toplam altı saniye. Oysa
+     «hangi kademeden buraya geldim» sorusunun cevabı tam olarak o
+     karede yazılı — «ALTIN → YAKUT».
+
+     Kilitli bir şey göstermez: kullanıcı O KADEMEYE GELDİĞİ için o
+     kareyi zaten görmüştür. Burada ikinci kez, sakin hâlde durur.
+
+     `alt` DOLU ve cümle katalogdan kurulur: karenin üstünde iki
+     kademenin adı yazılı ve ekran okuyucuya söylenmeyen bir şey
+     olmamalı. */
+  function gecisSeridi(d, k){
+    if(!d.kademe) return '';
+    const onceki = d.kademe > 1 ? L().KADEME_ILE(d.kademe - 1) : null;
+    const yazi = onceki
+      ? (onceki.ad || '') + '\u2019dan ' + (k.ad || '') + '\u2019a ge\u00e7i\u015f'
+      : (k.ad || '') + ' \u2014 yolculu\u011fun ba\u015flang\u0131c\u0131';
+    return html`
+      <div class="rutbe-gecis">
+        <img class="rutbe-gecis__kare" src="${'img/seviye/gecis-' + d.kademe + '.webp'}"
+          alt="${yazi}" loading="lazy"
+          onerror="this.closest('.rutbe-gecis').remove()">
+        <p class="rutbe-gecis__yazi">${yazi}. Bu kareyi kademeye geçtiğin
+          gün tam ekran gördün; burada durmaya devam ediyor.</p>
+      </div>`;
   }
 
   /* «Şu an» sekmesinde ROZET ÖZETİ.
@@ -278,11 +354,64 @@ R.Screens.rutbe = (function(){
                 label:hal === 'kilitli' ? 'kilitli' : gecilen + ' / ' + satir.length })}
             </div>
           </div>
-          <div class="rutbe-basamaklar">
-            ${map(satir, b => basamakHtml(b))}
+          <div class="rutbe-kademe__ic">
+            <div class="rutbe-basamaklar">
+              ${map(satir, b => basamakHtml(b))}
+            </div>
+            ${kademeKunyesi(k, satir, hal, d)}
           </div>
         </div>`, 'rutbe--kademe');
     }));
+  }
+
+  /* KADEME KÜNYESİ — basamak sıralarının sağındaki boşluğu DOLDURUR.
+
+     Boşluk bir tasarım tercihi değildi: kademe başına üç kart var ve
+     geniş ekranda satırın sağı yarıya kadar boş kalıyordu. Oraya
+     kademenin kendi sayıları konur ve her hâl kendi cümlesini söyler:
+
+       geçilmiş   ne zaman ve kaç XP'ye bitti
+       içindesin  bu basamakta neredesin
+       kilitli    kaç XP kaldı — «bir gün» değil, SAYI
+
+     KİLİTLİ KADEMEYE SAYI YAZMAK kartı göstermek değildir. Eşik zaten
+     merdivende yazılı; burada yazılan, kullanıcının kendi toplamına
+     olan FARKTIR ve o fark kullanıcının kendi verisidir. */
+  function kademeKunyesi(k, satir, hal, d){
+    if(!satir.length) return '';
+    const ilk = satir[0], son = satir[satir.length - 1];
+    const sayi = n => Number(n || 0).toLocaleString('tr-TR');
+
+    if(hal === 'kilitli'){
+      const kalan = Math.max(0, ilk.esik - (d.toplam || 0));
+      return html`
+        <div class="rutbe-kunye rutbe-kunye--kilit">
+          <span class="rutbe-kunye__ust">Açılışa</span>
+          <b class="rutbe-kunye__sayi">${sayi(kalan)}</b>
+          <span class="rutbe-kunye__alt">XP · eşik ${sayi(ilk.esik)}</span>
+        </div>`;
+    }
+
+    if(hal === 'tamam'){
+      return html`
+        <div class="rutbe-kunye rutbe-kunye--tamam">
+          <span class="rutbe-kunye__ust">Tamamlandı</span>
+          <b class="rutbe-kunye__sayi">${satir.length}</b>
+          <span class="rutbe-kunye__alt">basamak · ${sayi(son.esik)} XP'de bitti</span>
+        </div>`;
+    }
+
+    /* İÇİNDESİN. Yüzde motordan gelir; ekran hesaplamaz. */
+    const yuzde = Math.round((d.oran || 0) * 100);
+    return html`
+      <div class="rutbe-kunye rutbe-kunye--simdi">
+        <span class="rutbe-kunye__ust">Bu basamakta</span>
+        <b class="rutbe-kunye__sayi">%${yuzde}</b>
+        <span class="rutbe-kunye__alt">${sayi(d.kalan)} XP sonra ${
+          d.tamam ? 'en üst' : 'sıradaki basamak'}</span>
+        <span class="rutbe-kunye__cubuk" aria-hidden="true"
+          ><i style="${'width:' + yuzde + '%'}"></i></span>
+      </div>`;
   }
 
   function basamakHtml(b){
@@ -298,11 +427,22 @@ R.Screens.rutbe = (function(){
        KART DEĞİL NİŞAN. Bu kutu yüz piksel; kart dokuz yüz piksellik
        bir portre ve burada ne taşı ne yazısı okunuyordu. Nişan aynı
        basamağın bu ölçek için çizilmiş amblemi. K merdiveninde nişan
-       yok, orada kart kullanılır (bkz. `xp.js`, `merdiven`). */
-    const kaynak = (b.nisan || b.kart);
-    const gorsel = (b.durum !== 'kilitli' && kaynak)
-      ? html`<img src="${kaynak}" alt="" aria-hidden="true" loading="lazy"
-          onerror="this.remove()">`
+       yok, orada kart kullanılır (bkz. `xp.js`, `merdiven`).
+
+       KİLİTLİ BASAMAK SİLUET DURUR — rozetteki kuralın aynısı. Nişanın
+       dış hattı görünür, taşı ve rengi görünmez. Kilitli basamağı
+       bütünüyle boş bırakmak merdiveni kuru bir tablo yapıyordu;
+       merdivenin ŞEKLİ görünmeli, içeriği görünmemeli.
+
+       SİLUET NİŞANDAN ÇİZİLİR, KARTTAN DEĞİL. Kartın üzerinde kademenin
+       ADI yazılı ve siluet alfayı korur: kilitli bir kartın silueti
+       «YAKUT» yazısını okunur hâlde bırakırdı. Nişanda yazı yoktur.
+       Nişanı olmayan basamakta (K merdiveni) siluet çizilmez. */
+    const acik = b.durum !== 'kilitli';
+    const kaynak = acik ? (b.nisan || b.kart) : b.nisan;
+    const gorsel = kaynak
+      ? html`<img class="${acik ? '' : 'siluet'}" src="${kaynak}" alt=""
+          aria-hidden="true" loading="lazy" onerror="this.remove()">`
       : '';
     return html`
       <div class="${'rutbe-basamak rutbe-basamak--' + b.durum}"
@@ -346,6 +486,7 @@ R.Screens.rutbe = (function(){
         K.Stat({ label:'Kayıtlı gün', value:d.gun, unit:'gün' }),
       ]),
       ...aileler.map(x => aileKart(x.a, x.satir)),
+      muhurKart(),
       K.Card({ title:'Rozet neyi söyler, neyi söylemez', body:html`
         <ul class="rutbe-kural">
           <li><b>Rozet hiçbir kararı vermez.</b> Ne plan, ne reçete, ne
@@ -371,9 +512,17 @@ R.Screens.rutbe = (function(){
   function siradakiKart(B){
     const liste = B.siradaki(3);
     if(!liste.length) return '';
+    /* ROZETİN KENDİSİ DE DURUR, yalnız adı değil. Satır bir süre üç
+       ince çubuktan ibaretti ve «hangi rozet» sorusunu okuyarak
+       cevaplatıyordu; madalya orada dururken onu yazıyla tarif etmek
+       gereksiz bir ara katman. Rengi alınmış hâlde durur — henüz
+       kazanılmadı (bkz. `rozetHtml`, `.rozet-kilit`). */
     return K.Card({ title:'Sıradaki', body:html`
       <div class="rutbe-sirada">${map(liste, r => html`
         <div class="rutbe-sirada__sat">
+          ${when(r.gorsel, () => html`<img class="rutbe-sirada__rozet rozet-kilit"
+            src="${'img/seviye/' + r.gorsel + '.webp'}" alt=""
+            aria-hidden="true" loading="lazy" onerror="this.remove()">`)}
           <span class="rutbe-sirada__ad">${r.kisaAd || r.ad}
             <span class="dim">· ${r.aileAd}</span></span>
           <span class="rutbe-sirada__kalan">${r.kalan.toLocaleString('tr-TR')}
@@ -382,6 +531,38 @@ R.Screens.rutbe = (function(){
             ><i style="${'width:' + Math.round(r.oran * 100) + '%'}"></i></span>
         </div>`)}
       </div>` });
+  }
+
+  /* BU SİSTEMİN MÜHRÜ — kazanılmaz, BASILIR.
+
+     Mühür listesi yalnız HKM profilinde duruyordu ve üç arayüzün
+     kullanıcısı kendi sisteminin hangi belgeye hangi mührü bastığını
+     hiç görmüyordu. Burada TEK SATIR yeter: mühür, adı ve nerede
+     basıldığı.
+
+     Rozetin YANINDA ama ONUNLA KARIŞMADAN durur — bu yüzden kendi
+     kartında ve kendi cümlesiyle: «kazanılmaz, basılır». */
+  function muhurKart(){
+    const hepsi = L().MUHURLER || [];
+    const benim = hepsi.filter(m => m.mod === MOD_ADI);
+    if(!benim.length) return '';
+    return K.Card({
+      title:'Bu sistemin mührü',
+      body:html`
+        <p class="small dim rutbe-rozet__ozet">Mühür kazanılmaz, basılır.
+          Eşiği, sayacı, tarihi yoktur: bir belgenin hangi alandan
+          geldiğini söyler.</p>
+        <div class="rutbe-muhurler">${map(benim, m => html`
+          <div class="rutbe-muhur">
+            <img class="rutbe-muhur__gorsel" src="${'img/seviye/muhur-' + m.id + '.webp'}"
+              alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">
+            <span class="rutbe-muhur__yazi">
+              <b>${m.ad}</b>
+              <span class="tiny dim">${m.nerede}</span>
+            </span>
+          </div>`)}
+        </div>`,
+    });
   }
 
   function aileKart(a, satir){
@@ -399,7 +580,8 @@ R.Screens.rutbe = (function(){
           siradaki && typeof siradaki.esik === 'number',
           () => html` · sıradaki ${siradaki.esik.toLocaleString('tr-TR')}`)}<span
           class="rutbe-rozet__say">${kazanilan} / ${satir.length}</span></p>`,
-        html`<div class="rutbe-rozetler">${map(satir, r => rozetHtml(r))}</div>`,
+        html`<div class="rutbe-rozetler">${map(satir,
+          r => rozetHtml(r, siradaki && r.kod === siradaki.kod))}</div>`,
         rozetAyrinti(satir),
       ], 'sm'),
     });
@@ -430,13 +612,29 @@ R.Screens.rutbe = (function(){
         <p class="rutbe-ayrinti__durum">${durum}</p>` });
   }
 
-  function rozetHtml(r){
-    /* KAZANILMAMIŞ ROZET GÖRÜNMEZ — rütbe kartındaki kuralın aynısı
-       (bkz. `basamakHtml`). Görülmemiş bir rozetin görüntüsünü önden
-       vermek, kazanıldığı gün onu değersizleştiriyor. Yerinde mühürlü
-       bir kutu durur; eşiği ve ne kadar yaklaşıldığı okunur. */
-    const gorsel = r.kazanildi
-      ? html`<img src="${'img/seviye/' + r.gorsel + '.webp'}" alt=""
+  function rozetHtml(r, sirada){
+    /* KAZANILMAMIŞ ROZET SOLUK DURUR — GİZLİ DEĞİL.
+
+       ROZET İLE RÜTBE KARTI AYNI ŞEY DEĞİLDİR ve burada ayrılırlar.
+
+       Rütbe kartı bir AÇILIŞTIR: kademe başına üç tane, büyük, tam
+       ekran bir kutlamayla gelir. Onu önden göstermek, geldiği günü
+       değersizleştirir — depo sahibinin kuralı budur ve basamaklarda
+       aynen uygulanır (bkz. `basamakHtml`, siluet).
+
+       Rozet bir HEDEFTİR: otuz yedi tane, yan yana duran bir duvar ve
+       kullanıcı o duvara bakarak nereye çalıştığını görür. Hedefi
+       gizlemek, hedefi ortadan kaldırmaktır. Bir süre gizliydi ve
+       ölçüldü: yeni bir kullanıcı otuz yedi boş tarama kutusu
+       görüyordu; ekran kazanılacak bir şey olduğunu bile söylemiyordu.
+
+       Bu yüzden kilitli rozet KENDİ GÖRSELİYLE ama renksiz ve soluk
+       durur (`.rozet-kilit`). Kazanıldığı gün rengine kavuşur ve o
+       fark hissedilir. Steam'den Duolingo'ya kadar herkesin yaptığı
+       şey bu değil; bu, hedefi görünür tutmanın tek dürüst yolu. */
+    const gorsel = r.gorsel
+      ? html`<img class="${r.kazanildi ? '' : 'rozet-kilit'}"
+          src="${'img/seviye/' + r.gorsel + '.webp'}" alt=""
           aria-hidden="true" loading="lazy" onerror="this.remove()">`
       : '';
     const yuzde = r.oran == null ? null : Math.round(r.oran * 100);
@@ -447,9 +645,14 @@ R.Screens.rutbe = (function(){
        ama telefonda hiç çalışmıyor — dokunmanın bir karşılığı yoktu.
        Düğme hem dokunulabilir hem klavyeyle gezilebilir. */
     const acik = S.ui.rutbeRozet === r.kod;
+    /* AİLENİN SIRADAKİ ROZETİ işaretlenir: altı rozetlik bir sırada
+       «hangisi bir sonraki» sorusu, eşikleri okuyarak cevaplanıyordu.
+       İşaret bir halka; renk ya da boyut değil — ikisi de kazanılmış
+       rozetin işaretiyle karışırdı. */
     return html`
       <button type="button"
         class="${'rutbe-rozet rutbe-rozet--' + (r.kazanildi ? 'acik' : 'kilitli')
+          + (sirada ? ' rutbe-rozet--sirada' : '')
           + (acik ? ' rutbe-rozet--secili' : '')}"
         data-act="rozet-ac" data-kod="${r.kod}"
         aria-expanded="${acik ? 'true' : 'false'}"

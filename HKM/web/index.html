@@ -321,13 +321,25 @@ details.detay > summary:hover{ color:var(--fg); }
 .rz__g{ position:absolute; inset:0; width:100%; height:100%;
   object-fit:contain; }
 .rz__e{ position:relative; font-size:11px; opacity:.7; }
-.rz--kilitli .rz__kutu{ border:1px dashed var(--line-strong);
-  background:repeating-linear-gradient(135deg,
-    color-mix(in srgb, currentColor 5%, transparent) 0 6px,
-    transparent 6px 12px); }
+.rz--kilitli .rz__kutu{ border:1px dashed var(--line-strong); }
 /* Rozet varsa esik yazisi gorselin ustunde okunmaz; esik zaten
-   rozetin uzerinde yazili. */
-.rz--acik .rz__e{ display:none; }
+   rozetin uzerinde yazili — kilitlide de. */
+.rz__kutu:has(.rz__g) .rz__e{ display:none; }
+
+/* KILITLI ROZET — rengi alinmis hali. Ayrimin gerekcesi
+   `brand/seviye/rutbe.js` icinde yazili. Karartma gerekli: bazi
+   rozetler saydam zemin ustunde ince altin cizgiler ve rengi alininca
+   acik temanin beyaz zemininde kayboluyorlardi. */
+.rozet-kilit{
+  filter:grayscale(1) brightness(.72) contrast(1.08);
+  opacity:.55;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-tema="acik"]) .rozet-kilit{
+    filter:grayscale(1) brightness(.9) contrast(1.05);
+    opacity:.44;
+  }
+}
 
 
 /* ============================== MÜHÜR ===========================
@@ -521,7 +533,6 @@ details.detay > summary:hover{ color:var(--fg); }
       <div class="card" id="profil-kimlik"></div>
       <div id="profil-onur"></div>
       <div class="card" id="profil-kademe"><p class="muted">Yükleniyor…</p></div>
-      <div class="card" id="profil-sayac"></div>
       <div id="profil-rozet"></div>
       <div class="card" id="profil-muhur"></div>
     </div>
@@ -2803,11 +2814,13 @@ details.detay > summary:hover{ color:var(--fg); }
         ile girmez ve kac modulun konustugu SAYFADA YAZAR.
      3. ROZET HICBIR KARARI VERMEZ. Burasi bir gozlem sayfasidir. */
 
-  function rozetGorsel(ad, alt){
-    return '<img class="rz__g" src="/img/seviye/' + esc(ad) + '.webp"'
+  /* `kilit` isaretliyse rozetin rengi alinir (bkz. `.rozet-kilit`):
+     kazanilmamis rozet gorunur ama «henuz senin degil» der. */
+  function rozetGorsel(ad, kilit){
+    return '<img class="rz__g' + (kilit ? ' rozet-kilit' : '') + '"'
+      + ' src="/img/seviye/' + esc(ad) + '.webp"'
       + ' alt="" aria-hidden="true" loading="lazy"'
-      + ' onerror="this.remove()">'
-      + (alt ? '' : '');
+      + ' onerror="this.remove()">';
   }
 
   /* KİMLİK KARTI — profilin başı.
@@ -2840,6 +2853,25 @@ details.detay > summary:hover{ color:var(--fg); }
     liste.forEach(function(x){ if(x.tier > enUst) enUst = x.tier; });
     var takili = cercevePik() && enUst > 0;
 
+    /* SAYAÇLAR AYRI BİR KARTTAN BURAYA TAŞINDI. İki kart art arda
+       duruyordu: biri «kimsin», öteki «kaç». Oysa profil tek bir
+       vitrindir ve sayı portrenin yanında durunca profil oluyor,
+       ayrı durunca tablo.
+
+       «KAÇ MODÜLDEN GELDİĞİ» satırı taşındı ve KALDI: iki modülden
+       gelen üç yüz saati «üç modülün toplamı» diye sunmak, ölçülmemiş
+       bir şeyi ölçülmüş gibi göstermekti (AGENTS.md §1.2). */
+    var t = veri.toplamlar || {};
+    var sira = ['badge_hours', 'badge_tasks', 'badge_days',
+                'badge_streak_months', 'badge_focus_hours', 'badge_count'];
+    var kac = (veri.konusan || []).length;
+    var not = kac === 3
+      ? 'Üç modülün toplamı.'
+      : (kac === 0
+          ? 'Hiçbir modül sayaç göndermedi — aşağıdaki sıfırlar bir ölçüm değildir.'
+          : kac + ' modülden geldi; ' + (veri.eksik || []).join(', ').toUpperCase()
+            + ' göndermedi ve toplama SIFIR ile girmedi.');
+
     k.innerHTML = '<div class="kimlik">'
       + '<div class="ppcerceve' + (takili ? ' ppcerceve--halkali' : '') + '">'
       +   '<img class="kimlik__pp" src="/img/marka/ajan-kare-kullanici.webp"'
@@ -2861,7 +2893,13 @@ details.detay > summary:hover{ color:var(--fg); }
       +     '> Çerçeve tak'
       +     (enUst > 0 ? '' : ' <span class="muted">(kademe gelmedi)</span>')
       +   '</label>'
-      + '</div></div>';
+      + '</div></div>'
+      + '<div class="sayaclar">'
+      + sira.map(function(a){
+          return '<div class="sayac"><span class="sayac__n num">' + sayiTr(t[a])
+            + '</span><span class="sayac__a">' + esc(adlandir(a)) + '</span></div>';
+        }).join('')
+      + '</div><p class="muted small">' + esc(not) + '</p>';
 
     var kutu = $('pp-cerceve');
     if(kutu){
@@ -2943,30 +2981,6 @@ details.detay > summary:hover{ color:var(--fg); }
       + '<p class="muted small">Bu bir gözlemdir; seviye hiçbir kararı vermez.</p>';
   }
 
-  function profilSayacCiz(veri){
-    var k = $('profil-sayac');
-    var t = veri.toplamlar || {};
-    var sira = ['badge_hours', 'badge_tasks', 'badge_days',
-                'badge_streak_months', 'badge_focus_hours', 'badge_count'];
-    var kac = (veri.konusan || []).length;
-    /* KAC MODULDEN geldigi yazilir. «Iki modulden gelen 300 saat»i
-       «uc modulun toplami» diye sunmak, olculmemis bir seyi olculmus
-       gibi gostermektir (AGENTS.md §1.2). */
-    var not = kac === 3
-      ? 'Üç modülün toplamı.'
-      : (kac === 0
-          ? 'Hiçbir modül sayaç göndermedi — aşağıdaki sıfırlar bir ölçüm değildir.'
-          : kac + ' modülden geldi; ' + (veri.eksik || []).join(', ').toUpperCase()
-            + ' göndermedi ve toplama SIFIR ile girmedi.');
-    k.innerHTML = '<div class="tag">Toplam</div>'
-      + '<div class="sayaclar">'
-      + sira.map(function(a){
-          return '<div class="sayac"><span class="sayac__n num">' + sayiTr(t[a])
-            + '</span><span class="sayac__a">' + esc(adlandir(a)) + '</span></div>';
-        }).join('')
-      + '</div><p class="muted small">' + esc(not) + '</p>';
-  }
-
   function profilRozetCiz(veri){
     var k = $('profil-rozet');
     var hepsi = veri.rozetler || [];
@@ -2985,12 +2999,15 @@ details.detay > summary:hover{ color:var(--fg); }
         + ' · ' + kazanilan + ' / ' + a.satir.length + '</span></div>'
         + '<div class="rozetler">'
         + a.satir.map(function(r){
-            /* KAZANILMAMIS ROZET GORUNMEZ — uc arayuzdeki kuralin
-               aynisi. Yerinde muhurlu bir daire durur, esigi okunur. */
+            /* KAZANILMAMIS ROZET SOLUK DURUR — GIZLI DEGIL. Uc
+               arayuzdeki kuralin aynisi ve gerekcesi orada yazili
+               (`brand/seviye/rutbe.js`, `rozetHtml`): rutbe karti bir
+               ACILISTIR ve gizlenir, rozet bir HEDEFTIR ve hedefi
+               gizlemek onu ortadan kaldirmaktir. */
             return '<div class="rz ' + (r.kazanildi ? 'rz--acik' : 'rz--kilitli')
               + '" title="' + esc(r.esik + ' ' + (r.birim || '')) + '">'
               + '<span class="rz__kutu">'
-              +   (r.kazanildi ? rozetGorsel(r.gorsel) : '')
+              +   (r.gorsel ? rozetGorsel(r.gorsel, !r.kazanildi) : '')
               +   '<span class="rz__e num">' + r.esik + '</span>'
               + '</span></div>';
           }).join('')
@@ -3031,7 +3048,6 @@ details.detay > summary:hover{ color:var(--fg); }
     profilKimlikCiz(p.body);
     profilOnurCiz(p.body.onur);
     profilKademeCiz(p.body);
-    profilSayacCiz(p.body);
     profilRozetCiz(p.body);
     profilMuhurCiz(p.body.muhurler);
   }

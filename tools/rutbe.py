@@ -259,6 +259,107 @@ def isle(kaynak: Path, kayipli: bool = False) -> int:
     return 0
 
 
+def _katalogdan_beklenen():
+    """Katalogun BEKLEDIGI butun medya adlari — kaynagi `brand/seviye/`.
+
+       NEDEN NODE ILE. Katalog gercek JavaScript'tir ve turetilmis
+       diziler tasir (`LIFEOS.BASAMAKLAR`, kademe sayisi, rozet
+       esikleri). Ayni yapiyi Python'da ikinci kez yazmak, iki kopyanin
+       bir gun ayrismasi demekti — bu depoda tam olarak bundan
+       kacinilir. Katalog TEK KAYNAKTIR; burasi onu OKUR.
+
+       Node yoksa None doner ve `--eksik` sebebini soyler. Arac bir
+       teshis aracidir, CI'nin parcasi degil; node'a bagimli olmasi
+       hicbir denetimi durdurmaz.
+    """
+    import json
+    import subprocess
+
+    betik = r"""
+      var window = globalThis; globalThis.window = window;
+      var fs = require('fs'), path = require('path');
+      /* Yol ORTAM DEGISKENINDEN gelir. `node -e` ile calisirken
+         `process.argv` betik adini tasimaz ve kullanici argumani
+         argv[1]'e kayar; iki farkli node surumunde iki farkli yerde
+         cikti. Ortam degiskeni her surumde ayni yerde. */
+      var kok = process.env.SEVIYE_KOK;
+      ['kademeler.js', 'basarimlar.js'].forEach(function(ad){
+        (0, eval)(fs.readFileSync(path.join(kok, ad), 'utf8'));
+      });
+      var L = window.LIFEOS, bekle = [];
+      (L.BASAMAKLAR || []).forEach(function(b){
+        bekle.push(['rutbe', L.MEDYA_ADI(b.etiket)]);
+        var k = L.KADEME_ILE(b.kademe);
+        if(!(k && k.etiketler)) bekle.push(['nisan', 'nisan-' + b.kademe + '-' + b.basamak]);
+      });
+      (L.KADEMELER || []).forEach(function(k){
+        ['sahne', 'gecis', 'bant', 'onay', 'cerceve'].forEach(function(aile){
+          bekle.push([aile, aile + '-' + k.no]);
+        });
+      });
+      (L.BASARIM_AILELER || []).forEach(function(a){
+        (a.esikler || []).forEach(function(e){
+          bekle.push(['basarim', L.BASARIM_MEDYA_ADI(a.id, e)]);
+        });
+      });
+      (L.MUHURLER || []).forEach(function(m){ bekle.push(['muhur', 'muhur-' + m.id]); });
+      if(L.ONUR) bekle.push(['onur', 'onur-' + L.ONUR.id]);
+      process.stdout.write(JSON.stringify(bekle));
+    """
+    try:
+        ortam = dict(os.environ, SEVIYE_KOK=str(KOK / "brand" / "seviye"))
+        r = subprocess.run(["node", "-e", betik], env=ortam,
+                           capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.SubprocessError) as e:
+        return None, "node calistirilamadi (%s)" % e
+    if r.returncode != 0:
+        return None, (r.stderr or "").strip().splitlines()[-1:] or "node hata verdi"
+    try:
+        return json.loads(r.stdout), None
+    except ValueError:
+        return None, "node ciktisi okunamadi"
+
+
+def eksik() -> int:
+    """Katalogun bekledigi ama `medya/` altinda OLMAYAN dosyalar.
+
+       `--liste` NE VAR der; bu NE YOK der. Ikisi ayri sorudur ve
+       ikincisi bir suredir cevapsizdi: eksik dosya hata degildir
+       (ekran kendini toparlar) ama hangi gorselin gelmedigini bilmek,
+       teslimat geldiginde neyin yerine oturdugunu gormeyi saglar.
+    """
+    bekle, hata = _katalogdan_beklenen()
+    if bekle is None:
+        print("Katalog okunamadi: %s" % hata)
+        print("(`--eksik` katalogu node ile okur; node kurulu degilse"
+              " calismaz. `--liste` node olmadan da calisir.)")
+        return 2
+
+    var = {d.stem for d in MEDYA.iterdir() if d.is_file()} if MEDYA.is_dir() else set()
+    gruplar = {}
+    for aile, ad in bekle:
+        if ad not in var:
+            gruplar.setdefault(aile, []).append(ad)
+
+    toplam = sum(len(v) for v in gruplar.values())
+    if not toplam:
+        print("Katalogun beklediği %d görselin hepsi yerinde." % len(bekle))
+        return 0
+
+    print("Katalog %d görsel bekliyor; %d tanesi yok.\n" % (len(bekle), toplam))
+    for aile in sorted(gruplar):
+        adlar = gruplar[aile]
+        print("%-10s %d eksik" % (aile.upper(), len(adlar)))
+        for ad in adlar:
+            print("   · %s.webp" % ad)
+        print("")
+    print("Eksik dosya HATA DEĞİLDİR: kart yoksa banner kendi dairesini")
+    print("çizer, sahne yoksa kademe renginden bir zemin kalır (bkz.")
+    print("brand/seviye/OKU.md). Bu liste yalnız «ne gelmedi» sorusunun")
+    print("cevabıdır.")
+    return 0
+
+
 def liste() -> int:
     """medya/ altında NE VAR. Eksiği söylemez — eksik dosya hata değildir
     (bkz. brand/seviye/OKU.md): rütbe kartı yoksa perde kartı kendisi
@@ -294,6 +395,8 @@ def liste() -> int:
 def main() -> int:
     if "--liste" in sys.argv:
         return liste()
+    if "--eksik" in sys.argv:
+        return eksik()
     arg = [a for a in sys.argv[1:] if not a.startswith("-")]
     if not arg:
         print(__doc__)

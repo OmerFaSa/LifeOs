@@ -162,6 +162,26 @@
     it('kök değiştirilebilir — tek dosya sürümü başka yerden okur', () => {
       expect(P.kartYolu({ etiket:'5.2', kademe:5 }, 'medya/')).toBe('medya/rutbe-5-2.webp');
       expect(P.sahneYolu({ etiket:'5.2', kademe:5 }, 'medya/')).toBe('medya/sahne-5.webp');
+      expect(P.gecisYolu({ etiket:'5.1', kademe:5, yeniKademe:true }, 'medya/'))
+        .toBe('medya/gecis-5.webp');
+    });
+
+    it('geçiş karesi YALNIZ yeni kademede istenir', () => {
+      /* Basamak (1.1 → 1.2) aynı kademenin içinde kalır ve bir geçiş
+         değildir: «Bronz → Bronz» diyen bir tam ekran kare, üç
+         basamakta üç kez aynı şeyi söylerdi. */
+      expect(P.gecisYolu({ etiket:'4.1', kademe:4, yeniKademe:true }))
+        .toBe('img/seviye/gecis-4.webp');
+      expect(P.gecisYolu({ etiket:'4.2', kademe:4, yeniKademe:false })).toBeNull();
+      expect(P.gecisYolu({ etiket:'4.2', kademe:4 })).toBeNull();
+      expect(P.gecisYolu(null)).toBeNull();
+    });
+
+    it('geçiş karesi KADEMEYE bağlıdır, basamağa değil', () => {
+      /* Altıncı kademenin basamağı K100 diye adlanır ama geçiş karesi
+         yine `gecis-6`: kare kademeye geçildiğinde basılır. */
+      expect(P.gecisYolu({ etiket:'K100', kademe:6, yeniKademe:true }))
+        .toBe('img/seviye/gecis-6.webp');
     });
 
     it('idle video bayrak KAPALIYKEN hiç istenmez', () => {

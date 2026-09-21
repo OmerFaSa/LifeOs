@@ -163,23 +163,52 @@ tireye döner. `5.2` → `rutbe-5-2`, `K300` → `rutbe-k300`.
 Sahne **kademeye** bağlıdır: 5.1, 5.2 ve 5.3 aynı `sahne-5.webp`
 önünde gösterilir.
 
+### Kilitli olan nasıl görünür — iki ayrı kural
+
+Depo sahibinin kuralı şuydu: **«gelmediğimiz rankları göremeyelim.»**
+Doğru kural, ama bir süre fazla ileri gitti: otuz yedi rozet ve on beş
+basamak boş tarama kutusuydu ve yeni bir kullanıcı sistemdeki **yüz
+görselden hiçbirini** görmüyordu. Ekran, kazanılacak bir şey olduğunu
+bile söylemiyordu.
+
+Şimdi ikisi ayrılıyor, çünkü **rozet ile rütbe kartı aynı şey değil**:
+
+| | Ne olduğu | Kilitliyken |
+|---|---|---|
+| **Rütbe kartı / basamak** | bir AÇILIŞ — kademe başına üç tane, tam ekran bir kutlamayla gelir | **siluet** (`.siluet`): yalnız dış hat; rengi, taşı, yazısı görünmez |
+| **Rozet** | bir HEDEF — otuz yedi tane, bakıp nereye çalıştığını gördüğün bir duvar | **rengi alınmış** (`.rozet-kilit`): madalya görünür, «henüz senin değil» der |
+
+Gerekçe tek cümle: bir açılışı önden göstermek onu geldiği gün
+değersizleştirir; bir hedefi gizlemek ise hedefi ortadan kaldırır.
+
+Siluet nişandan çizilir, karttan değil: kartın üzerinde kademenin ADI
+yazılı ve siluet alfayı korur — kilitli bir kartın silueti «YAKUT»
+yazısını okunur hâlde bırakırdı. Nişanda yazı yoktur.
+
 ### Şu an ne var
 
-| Dosya | Durum |
+Bu tablo **elle tutulmaz**; tek komutla sorulur:
+
+```bash
+python3 tools/rutbe.py --eksik    # katalog ne bekliyor, ne yok
+```
+
+Araç kataloğu (`kademeler.js`, `basarimlar.js`) node ile okur ve
+beklenen her adı `medya/` altındakiyle karşılaştırır. Yapıyı Python'da
+ikinci kez yazmak, iki kopyanın bir gün ayrışması demekti.
+
+Bu satırlar yazıldığında katalog **113 görsel** bekliyordu ve **8
+tanesi** eksikti:
+
+| Eksik | Ne oluyor |
 |---|---|
-| `rutbe-1-1 … rutbe-5-3` | **15'i de var** |
-| `nisan-1-1 … nisan-5-3` | **15'i de var** |
-| `sahne-1 … sahne-6` | **6'sı da var** (+ `sahne-N.mp4`) |
-| `gecis-1 … gecis-6` | **6'sı da var** |
-| `onay-1 … onay-6` | **6'sı da var** |
-| `cerceve-1 … cerceve-6` | **6'sı da var** |
-| `rutbe-k100 … rutbe-k500` | **5'i de var** |
-| `rutbe-k600 … rutbe-k1000` | yok — daire içinde etiket yazılıyor (K600) |
-| `bant-1 … bant-4` | Bronz, Gümüş, Altın, Yakut var |
-| `bant-5`, `bant-6` | **yok** — Safir ile Kutsal'ın arması gelmedi |
-| `bant-hukum` | var ama KULLANILMIYOR — aşağıya bak |
-| `onur-usta` | yok — Sistem Ustası rozeti gelmedi |
-| `rutbe-*.mp4` | yok — bkz. idle video |
+| `rutbe-k600 … rutbe-k1000` (5) | daire içinde etiket yazılıyor (K600) |
+| `bant-5`, `bant-6` | Safir ile Kutsal'ın arması gelmedi; bant armasız kalıyor |
+| `onur-usta` | Sistem Ustası rozeti gelmedi; HKM kartı görselsiz çiziliyor |
+
+`bant-hukum` ve `rutbe-*.mp4` katalogda BEKLENMEZ, o yüzden bu listede
+yoktur: birincisi adıyla saklanan bir teslimat (aşağıya bak), ikincisi
+bayrağı kapalı bir özellik (bkz. idle video).
 
 **`bant-hukum` neden ekranda yok.** Teslimatta beş arma geldi; dördünün
 üzerinde kademenin adı birebir yazıyor (BRONZ, GÜMÜŞ, ALTIN, YAKUT).

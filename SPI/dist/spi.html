@@ -4956,10 +4956,15 @@ body.is-dragging .drop.is-over{
    birkaç saniye. Burada kalıcı olarak duruyorlar. Okunabilirlik
    pahasına değil: sahne silik ve üstüne bir karartma biniyor, yazı
    kontrastı a11ycheck'in ölçtüğü yerde kalıyor. */
+/* ÇERÇEVELEME %24'TEN. Sahnenin ortasında kendi yazısı var
+   («KADEME 4 · YAKUT») ve hero tam oraya denk geliyordu: kartın kendi
+   «Yakut 4.3» başlığının yanında ikinci bir başlık gibi duruyordu. Üst
+   bölge gökyüzü ve amblem — dekor olması gereken şey orada dekor
+   olarak kalıyor. Aynı gerekçe merdiven bandında da yazılı. */
 .rutbe-kart__sahne{
   position:absolute; inset:0; z-index:-1;
   width:100%; height:100%;
-  object-fit:cover; object-position:center 42%;
+  object-fit:cover; object-position:center 24%;
   pointer-events:none;
 }
 /* Karartma soldan sağa açılır: yazı solda okunur, sahne sağda görünür.
@@ -5050,10 +5055,21 @@ body.is-dragging .drop.is-over{
   padding:16px;
   border-bottom:1px solid color-mix(in srgb, currentColor 10%, transparent);
 }
+/* ÇERÇEVELEME %22'DEN ALINIR, ortadan değil. Sahnelerin ortasında
+   kendi yazısı var («KADEME 3 · ALTIN») ve bant tam oraya denk
+   geliyordu: yarısı kesik bir yazı, bandın kendi başlığının yanında
+   ikinci bir başlık gibi duruyordu. Üst bölge gökyüzü ve amblem —
+   dekor olması gereken şey orada dekor olarak kalıyor.
+
+   Hafif bulanıklık: sahne bir DEKORDUR ve bu bandın kahramanı
+   kademenin adı ile arması. Bulanık bir dekor, keskin bir dekordan
+   daha iyi dekordur. */
 .rutbe-kademe__sahne{
   position:absolute; inset:0; z-index:-1;
   width:100%; height:100%;
-  object-fit:cover; object-position:center 46%;
+  object-fit:cover; object-position:center 22%;
+  filter:blur(1.5px) saturate(1.05);
+  transform:scale(1.04);
   pointer-events:none;
 }
 /* Karartma YAZININ altında ağır, sahnenin üstünde hafif. Her yere eşit
@@ -5111,15 +5127,77 @@ body.is-dragging .drop.is-over{
   flex:none;
   display:none;
   height:110px; width:auto;
-  filter:drop-shadow(0 6px 18px rgba(0,0,0,.55));
+  /* Kendi zemini VAR ve gerekli: sahnenin ortasındaki amblem ile
+     armanın amblemi üst üste biniyordu — iki amblem yan yana, ikisi de
+     okunmaz. Arma kendi dairesinin içinde durur ve sahne onun arkasında
+     kalır. */
+  padding:4px 10px;
+  border-radius:999px;
+  background:radial-gradient(60% 60% at 50% 45%,
+    color-mix(in srgb, var(--surface) 82%, transparent) 0%,
+    transparent 78%);
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.45));
 }
 @media (min-width:560px){
   .rutbe-kademe__arma{ display:block; }
 }
 
+/* İÇ — basamak sırası solda, kademe künyesi sağda. Künye satırın
+   SONUNA yapışır; basamaklar büyüdükçe o geri çekilir ve dar ekranda
+   alta iner. */
+.rutbe-kademe__ic{
+  display:flex; flex-wrap:wrap; align-items:flex-start;
+  gap:16px; padding:16px;
+}
 .rutbe-basamaklar{
   display:flex; flex-wrap:wrap; gap:12px;
-  padding:16px;
+  flex:1 1 auto; min-width:0;
+}
+
+/* KADEME KÜNYESİ — üç hâl, üç cümle.
+
+   Sayı BÜYÜK, çevresi küçük: bakışın önce düştüğü yer sayı olmalı.
+   «Açılışa 14.800 XP» bir hedeftir; «kilitli» bir kapıdır. İkisi aynı
+   bilgiyi taşımaz. */
+.rutbe-kunye{
+  flex:0 0 auto;
+  display:grid; gap:2px; align-content:start;
+  min-width:150px;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid color-mix(in srgb, var(--kademe-renk) 24%, transparent);
+  background:color-mix(in srgb, var(--kademe-renk) 6%, transparent);
+}
+.rutbe-kunye__ust{
+  font:700 10px/1 var(--font-ui, inherit);
+  letter-spacing:.14em; text-transform:uppercase;
+  opacity:.62;
+}
+.rutbe-kunye__sayi{
+  font:600 26px/1.05 ui-serif, Georgia, "Times New Roman", serif;
+  font-variant-numeric:tabular-nums;
+  color:color-mix(in srgb, var(--kademe-renk) 78%, var(--text-1, currentColor));
+}
+.rutbe-kunye__alt{ font-size:11px; opacity:.68; line-height:1.35; }
+.rutbe-kunye__cubuk{
+  display:block; margin-top:6px;
+  height:4px; border-radius:2px;
+  background:color-mix(in srgb, currentColor 12%, transparent);
+  overflow:hidden;
+}
+.rutbe-kunye__cubuk i{
+  display:block; height:100%;
+  background:var(--kademe-renk);
+}
+/* Kilitli künye sönük durur: orada bir kapı var ve kapı parlamaz. */
+.rutbe-kunye--kilit{
+  border-style:dashed;
+  background:transparent;
+}
+.rutbe-kunye--kilit .rutbe-kunye__sayi{ opacity:.72; }
+
+@media (max-width:640px){
+  .rutbe-kunye{ flex:1 1 100%; }
 }
 
 .rutbe-basamak{
@@ -5149,8 +5227,14 @@ body.is-dragging .drop.is-over{
   opacity:.8;
 }
 /* Kartı olan basamakta etiket görselin üstünde okunmaz; kart geldiğinde
-   etiket zaten kartın üstünde yazıyor. */
-.rutbe-basamak__kutu:has(img) .rutbe-basamak__etiket{ display:none; }
+   etiket zaten kartın üstünde yazıyor.
+
+   KİLİTLİ BASAMAKTA ETİKET KALIR: orada görünen şey siluettir ve
+   siluetin üstünde hiçbir yazı yoktur. Kural `:has(img)` diye
+   yazılmıştı; siluet gelince kilitli basamağın «4.1» etiketi de
+   kayboldu ve kutu bütünüyle okunmaz oldu. */
+.rutbe-basamak:not(.rutbe-basamak--kilitli) .rutbe-basamak__kutu:has(img)
+  .rutbe-basamak__etiket{ display:none; }
 
 .rutbe-basamak__esik{
   font:500 10px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -5176,10 +5260,60 @@ body.is-dragging .drop.is-over{
       transparent 6px 12px),
     color-mix(in srgb, currentColor 4%, transparent);
 }
+/* SİLUET VARSA TARAMA KALKAR: iki doku üst üste binince siluetin
+   kenarı okunmuyor, kutu bulanık bir leke oluyordu. Tarama yalnız
+   siluetsiz kutuda kalır — K merdiveninin nişanı yok ve orada bandın
+   tek dokusu odur. */
+.rutbe-basamak--kilitli .rutbe-basamak__kutu:has(img){
+  background:color-mix(in srgb, currentColor 3%, transparent);
+}
 
 
 .rutbe-basamak--gecildi .rutbe-basamak__kutu{
   border-color:color-mix(in srgb, var(--kademe-renk) 38%, transparent);
+}
+
+/* ================================================================
+   BU KADEMEDE NEREDESİN — şerit, arma ve geçiş karesi.
+
+   Merdiven sekmesi altı kademeyi birden gösterir; burası yalnız içinde
+   olunan kademeyi gösterir. Arma şeridin başında, mühür gibi.
+   ================================================================ */
+.rutbe-serit{
+  display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+}
+.rutbe-serit__arma{
+  flex:none;
+  height:96px; width:auto;
+  filter:drop-shadow(0 6px 16px color-mix(in srgb, var(--kademe-renk) 30%, transparent));
+}
+.rutbe-serit__basamaklar{
+  display:flex; flex-wrap:wrap; gap:12px;
+  flex:1 1 auto; min-width:0;
+}
+/* Şeritteki basamak merdivendekinden KÜÇÜK: burada bir kart vitrini
+   değil, bir konum göstergesi var. */
+.rutbe-serit .rutbe-basamak{ width:clamp(74px, 16vw, 104px); }
+
+/* GEÇİŞ KARESİ — kutlamada bir kez görülen kare, burada sakin hâlde.
+
+   Kare geniş ve yatay; `contain` ile tam hâli durur çünkü üstünde iki
+   kademenin adı yazılı ve kırpmak o yazıyı keser. */
+.rutbe-gecis{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+.rutbe-gecis__kare{
+  display:block;
+  width:100%; height:auto;
+  max-height:340px; object-fit:contain;
+  border-radius:12px;
+  background:color-mix(in srgb, var(--kademe-renk) 10%, #000);
+}
+.rutbe-gecis__yazi{
+  margin:8px 0 0;
+  font-size:12px; opacity:.66; line-height:1.45;
 }
 
 /* ---------- XP nereden gelir ---------- */
@@ -5350,19 +5484,91 @@ body.is-dragging .drop.is-over{
   opacity:.72;
 }
 /* Rozet varsa etiket görselin üstünde okunmaz; eşik zaten rozetin
-   üstünde yazılı. */
+   üstünde yazılı. KİLİTLİDE DE GEÇERLİ: kilitli rozet artık kendi
+   görseliyle duruyor ve eşiği onun üstünde yazıyor. Bir ara kilitlide
+   etiket gösterilmeye çalışıldı ve ölçüldü: madalyanın üzerindeki
+   «100» ile etiketteki «100» üst üste biniyordu. */
 .rutbe-rozet__kutu:has(img) .rutbe-rozet__etiket{ display:none; }
 
-/* KAZANILMAMIŞ ROZET — mühürlü daire, kesik çevre. Rozet çizilmez
-   (bkz. rutbe.js, rozetHtml); görünen yalnız merdivenin şeklidir. */
+/* KAZANILMAMIŞ ROZET — kesik çevre, rengi alınmış madalya.
+
+   Tarama dokusu KALKTI: rozetin kendisi çizildiği için doku onun
+   arkasında bir kirlilik olarak duruyordu. Kesik çerçeve kaldı, çünkü
+   «henüz değil»i söyleyen şey o. */
 .rutbe-rozet--kilitli .rutbe-rozet__kutu{
-  border:1px dashed color-mix(in srgb, currentColor 22%, transparent);
-  background:
-    repeating-linear-gradient(135deg,
-      color-mix(in srgb, currentColor 5%, transparent) 0 6px,
-      transparent 6px 12px);
+  border:1px dashed color-mix(in srgb, currentColor 20%, transparent);
 }
 .rutbe-rozet--kilitli .rutbe-rozet__ad{ opacity:.5; }
+
+/* ================================================================
+   SİLUET — kilitli olan şeklini gösterir, ayrıntısını göstermez.
+
+   NEDEN VAR. Kural şuydu: «gelmediğimiz rankları göremeyelim». Doğru
+   kural, ama uygulaması fazla ileri gitmişti — otuz yedi rozet ve on
+   beş basamak boş tarama kutusuydu ve yeni bir kullanıcı sistemdeki
+   yüz görselden HİÇBİRİNİ görmüyordu. Ekran, kazanılacak bir şey
+   olduğunu bile söylemiyordu.
+
+   NE YAPAR. `brightness(0)` bütün pikselleri karartır; alfa kanalına
+   DOKUNMAZ. Geriye tam olarak görselin dış hattı kalır: ne rengi, ne
+   taşı, ne üzerindeki yazı okunur. Hafif bulanıklık kenarı yumuşatır
+   ki bir şablon gibi değil, gölge gibi dursun.
+
+   Karanlık temada siluet zemine gömülür; o yüzden `invert(1)` ile
+   beyaza döner ve düşük opaklıkta kalır. İki temada da görünen şey
+   aynıdır: bir gölge.
+   ================================================================ */
+.siluet{
+  filter:brightness(0) blur(.4px);
+  opacity:.17;
+  transition:opacity .3s ease, filter .3s ease;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .siluet{
+    filter:brightness(0) invert(1) blur(.4px);
+    opacity:.2;
+  }
+}
+:root[data-theme="dark"] .siluet{
+  filter:brightness(0) invert(1) blur(.4px);
+  opacity:.2;
+}
+
+/* KİLİTLİ ROZET — siluet DEĞİL, rengi alınmış hâli.
+
+   Ayrımın gerekçesi `rutbe.js` → `rozetHtml` içinde yazılı: rütbe
+   kartı bir açılıştır ve gizlenir; rozet bir hedeftir ve hedefi
+   gizlemek onu ortadan kaldırmaktır.
+
+   `grayscale(1)` rengi alır, `contrast` ve `brightness` madalyayı
+   zeminden ayıracak kadar bırakır. Kazanıldığında filtre kalkar ve
+   rozet rengine kavuşur — geçiş görünür olsun diye yavaş. */
+.rozet-kilit{
+  /* KARARTMA GEREKLİ, ölçüldü: «Kusursuz» ailesinin rozetleri saydam
+     zemin üstünde İNCE ALTIN çizgiler. Rengi alınınca açık griye
+     dönüyor ve açık temanın beyaz zemininde bütünüyle kayboluyorlardı
+     — rozet konmuş ama gösterilmemiş oluyordu. `brightness(.72)` altını
+     orta griye indirir; kalın gövdeli rozetler bundan zarar görmez. */
+  filter:grayscale(1) brightness(.72) contrast(1.08);
+  opacity:.55;
+  transition:filter .5s ease, opacity .5s ease;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .rozet-kilit{
+    filter:grayscale(1) contrast(.9) brightness(.85);
+    opacity:.4;
+  }
+}
+:root[data-theme="dark"] .rozet-kilit{
+  filter:grayscale(1) contrast(.9) brightness(.85);
+  opacity:.4;
+}
+.rutbe-rozet:hover .rozet-kilit,
+.rutbe-rozet:focus-visible .rozet-kilit{ opacity:.66; }
+
+/* Üzerine gelince siluet de biraz belirginleşir — «burada bir şey
+   var» cümlesi bir kez daha söylenir. Ne olduğu yine söylenmez. */
+.rutbe-basamak:hover .siluet{ opacity:.26; }
 .rutbe-rozet--acik .rutbe-rozet__kutu{
   filter:drop-shadow(0 6px 16px color-mix(in srgb, currentColor 22%, transparent));
 }
@@ -5376,6 +5582,39 @@ body.is-dragging .drop.is-over{
   overflow:hidden;
 }
 
+/* AİLENİN SIRADAKİ ROZETİ — halka. Renk ya da boyut kullanılmadı:
+   ikisi de kazanılmış rozetin işaretiyle karışırdı. Halka «bir
+   sonraki bu» der, «bu senin» demez. */
+.rutbe-rozet--sirada .rutbe-rozet__kutu{
+  border:2px solid color-mix(in srgb, var(--kademe-renk, currentColor) 52%, transparent);
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--kademe-renk, currentColor) 12%, transparent);
+}
+.rutbe-rozet--sirada .rozet-kilit{ opacity:.78; }
+
+/* SIRADAKİ KARTINDAKİ ROZET — satırın başında, küçük. */
+.rutbe-sirada__rozet{
+  flex:none;
+  width:46px; height:46px; object-fit:contain;
+}
+
+/* MÜHÜR SATIRI — kazanılmaz, basılır. Rozet ızgarasından AYRI durur ve
+   bilerek: mührün eşiği, sayacı, tarihi yoktur; onu bir ilerleme
+   çubuğunun yanına koymak kazanılan bir şey sanılmasına yol açardı. */
+.rutbe-muhurler{
+  display:grid; gap:10px; margin-top:8px;
+  grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+}
+.rutbe-muhur{
+  display:flex; align-items:center; gap:12px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background:color-mix(in srgb, currentColor 3%, transparent);
+}
+.rutbe-muhur__gorsel{ flex:none; width:38px; height:38px; object-fit:contain; }
+.rutbe-muhur__yazi{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+.rutbe-muhur__yazi b{ font-size:13px; }
+
 /* Kilitli rozetin ne kadar yaklaştığı — ince bir çizgi, yüzde yazısı
    değil. Sayıyı yazmak «%38 rozet» gibi anlamsız bir şey okutuyordu. */
 .rutbe-rozet__oran{
@@ -5388,9 +5627,11 @@ body.is-dragging .drop.is-over{
   background:color-mix(in srgb, var(--kademe-renk, currentColor) 62%, transparent);
 }
 
-/* Sahne VİDEOSU, poster görselin durduğu yerde ve aynı kurallarla. */
+/* Sahne VİDEOSU, poster görselin durduğu yerde ve aynı kurallarla —
+   çerçeveleme dahil. İki değer ayrı yazılıydı ve biri değişince
+   video ile poster farklı yerden kırpılıyordu. */
 .rutbe-kart video.rutbe-kart__sahne{
-  object-fit:cover; object-position:center 42%;
+  object-fit:cover; object-position:center 24%;
 }
 
 /* GÜNÜN ODAK ROZETİ — günlük raporda, eylemlerin yanında.
@@ -5418,12 +5659,17 @@ body.is-dragging .drop.is-over{
 /* SIRADAKİ ROZET — en çok yaklaşılan üçü, Başarımlar'ın en üstünde.
    Satır satır ve dar: bu bir vitrin değil, bir yön işareti. */
 .rutbe-sirada{ display:grid; gap:10px; }
+/* Satır ÜÇ SÜTUN: rozet solda, ad ortada, kalan sağda; çubuk altta
+   ikisinin genişliğinde. Rozet yoksa (dosya gelmemiş) sütun daralır
+   ve satır eskisi gibi iki sütun kalır. */
 .rutbe-sirada__sat{
   display:grid;
-  grid-template-columns:1fr auto;
+  grid-template-columns:auto 1fr auto;
   gap:2px 12px;
-  align-items:baseline;
+  align-items:center;
 }
+.rutbe-sirada__rozet{ grid-row:1 / span 2; }
+.rutbe-sirada__cubuk{ grid-column:2 / -1; }
 .rutbe-sirada__ad{ font-size:13px; font-weight:600; }
 .rutbe-sirada__kalan{
   font:500 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -5431,7 +5677,6 @@ body.is-dragging .drop.is-over{
   opacity:.7; white-space:nowrap;
 }
 .rutbe-sirada__cubuk{
-  grid-column:1 / -1;
   display:block; height:4px; border-radius:2px; overflow:hidden;
   background:color-mix(in srgb, currentColor 10%, transparent);
 }
@@ -7072,7 +7317,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'edb7854', at:'2026-09-21 01:25', dirty:true };
+SP.BUILD = { id:'f9c1356', at:'2026-09-21 07:16', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -31962,6 +32207,13 @@ SP.Screens.rutbe = (function(){
   const L = function(){ return window.LIFEOS; };
   const XP = function(){ return SP.XP; };
 
+  /* Bu ekranın hangi sisteme ait olduğu. Yer tutucu yayarken değişir
+     (`tools/seviye.py`) — `xp.js` de aynı yer tutucuyu kullanır ve
+     modül kimliği tek yerden gelir. Mühür listesi bununla süzülür:
+     ESP'nin ekranında SPİ'nin mührünü göstermek, kullanıcının
+     basamayacağı bir damgayı vitrine koymaktı. */
+  const MOD_ADI = 'spi';
+
   const TABS = [
     { id:'simdi',    label:'Şu an' },
     { id:'merdiven', label:'Merdiven' },
@@ -32079,15 +32331,84 @@ SP.Screens.rutbe = (function(){
           unit:'/ ' + (L().KADEMELER || []).length }),
         /* «Basamak» tek başına yanıltıcıydı: 1.1'in İÇİNDEYKEN sıfır
            yazıyor ve üstteki «Bronz 1.1» ile çelişiyordu. Sayılan şey
-           GEÇİLEN basamaktır; adı da onu söylemeli. */
-        K.Stat({ label:'Geçilen basamak', value:d.bitmisBasamak,
-          unit:'/ ' + (L().BASAMAKLAR || []).length }),
+           GEÇİLEN basamaktır; adı da onu söylemeli.
+           TEK PARÇA ve BÖLÜNMEZ yazılır: «Geçilen basamak» etiketi ve
+           «/ 25» birimi dört sayaçlık bir satırda ayrı ayrı sarıyor,
+           kutuyu komşularının iki katı yapıyordu. Aradaki boşluklar
+           bölünmez boşluktur (U+00A0); normal boşlukla «11 /» ve «25»
+           iki satıra düşüyordu. */
+        K.Stat({ label:'Basamak',
+          value:d.bitmisBasamak + '\u00a0/\u00a0' + (L().BASAMAKLAR || []).length,
+          note:'geçilen' }),
       ]),
 
       K.Card({ title:'İlerleme', body:ilerleme }),
+      kademeIciKart(d),
       rozetOzetKart(),
       bugunKart(),
     ]);
+  }
+
+  /* BU KADEMEDE NEREDESİN — kademenin kendi basamakları, tek şeritte.
+
+     Merdiven sekmesi ALTI kademeyi birden gösterir; orada kendi
+     kademeni bulmak için kaydırmak gerekiyordu. Burası yalnız içinde
+     olduğun kademeyi gösterir ve üç soruyu tek bakışta cevaplar:
+     hangisini geçtin, hangisindesin, sıradaki hangisi.
+
+     Şeritte nişan kullanılır, kart değil: kart burada da okunmayacak
+     kadar küçük kalırdı (bkz. `basamakHtml`).
+
+     ARMA şeridin başında durur — kademenin mührü, basamakların
+     başında. Safir ve Kutsal'ın arması henüz gelmedi; `onerror` düğümü
+     kaldırır ve şerit armasız başlar. */
+  function kademeIciKart(d){
+    const satir = (XP().merdiven() || []).filter(b => b.kademe === d.kademe);
+    if(satir.length < 2) return '';
+    const k = d.kademeBilgi || {};
+    const arma = armaYolu(d.kademe);
+
+    return K.Card({
+      title:'Bu kademede neredesin',
+      body:html`
+        <div class="rutbe-serit">
+          ${when(arma, () => html`<img class="rutbe-serit__arma" src="${arma}"
+            alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">`)}
+          <div class="rutbe-serit__basamaklar">
+            ${map(satir, b => basamakHtml(b))}
+          </div>
+        </div>
+        ${gecisSeridi(d, k)}`,
+    });
+  }
+
+  /* BURAYA NASIL GELDİN — kademe geçişinin tam ekran karesi, küçük.
+
+     O kare kutlamada BİR KEZ görünüyor ve bir daha hiç görünmüyordu:
+     altı güzel görsel, kullanıcı ömründe toplam altı saniye. Oysa
+     «hangi kademeden buraya geldim» sorusunun cevabı tam olarak o
+     karede yazılı — «ALTIN → YAKUT».
+
+     Kilitli bir şey göstermez: kullanıcı O KADEMEYE GELDİĞİ için o
+     kareyi zaten görmüştür. Burada ikinci kez, sakin hâlde durur.
+
+     `alt` DOLU ve cümle katalogdan kurulur: karenin üstünde iki
+     kademenin adı yazılı ve ekran okuyucuya söylenmeyen bir şey
+     olmamalı. */
+  function gecisSeridi(d, k){
+    if(!d.kademe) return '';
+    const onceki = d.kademe > 1 ? L().KADEME_ILE(d.kademe - 1) : null;
+    const yazi = onceki
+      ? (onceki.ad || '') + '\u2019dan ' + (k.ad || '') + '\u2019a ge\u00e7i\u015f'
+      : (k.ad || '') + ' \u2014 yolculu\u011fun ba\u015flang\u0131c\u0131';
+    return html`
+      <div class="rutbe-gecis">
+        <img class="rutbe-gecis__kare" src="${'img/seviye/gecis-' + d.kademe + '.webp'}"
+          alt="${yazi}" loading="lazy"
+          onerror="this.closest('.rutbe-gecis').remove()">
+        <p class="rutbe-gecis__yazi">${yazi}. Bu kareyi kademeye geçtiğin
+          gün tam ekran gördün; burada durmaya devam ediyor.</p>
+      </div>`;
   }
 
   /* «Şu an» sekmesinde ROZET ÖZETİ.
@@ -32198,11 +32519,64 @@ SP.Screens.rutbe = (function(){
                 label:hal === 'kilitli' ? 'kilitli' : gecilen + ' / ' + satir.length })}
             </div>
           </div>
-          <div class="rutbe-basamaklar">
-            ${map(satir, b => basamakHtml(b))}
+          <div class="rutbe-kademe__ic">
+            <div class="rutbe-basamaklar">
+              ${map(satir, b => basamakHtml(b))}
+            </div>
+            ${kademeKunyesi(k, satir, hal, d)}
           </div>
         </div>`, 'rutbe--kademe');
     }));
+  }
+
+  /* KADEME KÜNYESİ — basamak sıralarının sağındaki boşluğu DOLDURUR.
+
+     Boşluk bir tasarım tercihi değildi: kademe başına üç kart var ve
+     geniş ekranda satırın sağı yarıya kadar boş kalıyordu. Oraya
+     kademenin kendi sayıları konur ve her hâl kendi cümlesini söyler:
+
+       geçilmiş   ne zaman ve kaç XP'ye bitti
+       içindesin  bu basamakta neredesin
+       kilitli    kaç XP kaldı — «bir gün» değil, SAYI
+
+     KİLİTLİ KADEMEYE SAYI YAZMAK kartı göstermek değildir. Eşik zaten
+     merdivende yazılı; burada yazılan, kullanıcının kendi toplamına
+     olan FARKTIR ve o fark kullanıcının kendi verisidir. */
+  function kademeKunyesi(k, satir, hal, d){
+    if(!satir.length) return '';
+    const ilk = satir[0], son = satir[satir.length - 1];
+    const sayi = n => Number(n || 0).toLocaleString('tr-TR');
+
+    if(hal === 'kilitli'){
+      const kalan = Math.max(0, ilk.esik - (d.toplam || 0));
+      return html`
+        <div class="rutbe-kunye rutbe-kunye--kilit">
+          <span class="rutbe-kunye__ust">Açılışa</span>
+          <b class="rutbe-kunye__sayi">${sayi(kalan)}</b>
+          <span class="rutbe-kunye__alt">XP · eşik ${sayi(ilk.esik)}</span>
+        </div>`;
+    }
+
+    if(hal === 'tamam'){
+      return html`
+        <div class="rutbe-kunye rutbe-kunye--tamam">
+          <span class="rutbe-kunye__ust">Tamamlandı</span>
+          <b class="rutbe-kunye__sayi">${satir.length}</b>
+          <span class="rutbe-kunye__alt">basamak · ${sayi(son.esik)} XP'de bitti</span>
+        </div>`;
+    }
+
+    /* İÇİNDESİN. Yüzde motordan gelir; ekran hesaplamaz. */
+    const yuzde = Math.round((d.oran || 0) * 100);
+    return html`
+      <div class="rutbe-kunye rutbe-kunye--simdi">
+        <span class="rutbe-kunye__ust">Bu basamakta</span>
+        <b class="rutbe-kunye__sayi">%${yuzde}</b>
+        <span class="rutbe-kunye__alt">${sayi(d.kalan)} XP sonra ${
+          d.tamam ? 'en üst' : 'sıradaki basamak'}</span>
+        <span class="rutbe-kunye__cubuk" aria-hidden="true"
+          ><i style="${'width:' + yuzde + '%'}"></i></span>
+      </div>`;
   }
 
   function basamakHtml(b){
@@ -32218,11 +32592,22 @@ SP.Screens.rutbe = (function(){
        KART DEĞİL NİŞAN. Bu kutu yüz piksel; kart dokuz yüz piksellik
        bir portre ve burada ne taşı ne yazısı okunuyordu. Nişan aynı
        basamağın bu ölçek için çizilmiş amblemi. K merdiveninde nişan
-       yok, orada kart kullanılır (bkz. `xp.js`, `merdiven`). */
-    const kaynak = (b.nisan || b.kart);
-    const gorsel = (b.durum !== 'kilitli' && kaynak)
-      ? html`<img src="${kaynak}" alt="" aria-hidden="true" loading="lazy"
-          onerror="this.remove()">`
+       yok, orada kart kullanılır (bkz. `xp.js`, `merdiven`).
+
+       KİLİTLİ BASAMAK SİLUET DURUR — rozetteki kuralın aynısı. Nişanın
+       dış hattı görünür, taşı ve rengi görünmez. Kilitli basamağı
+       bütünüyle boş bırakmak merdiveni kuru bir tablo yapıyordu;
+       merdivenin ŞEKLİ görünmeli, içeriği görünmemeli.
+
+       SİLUET NİŞANDAN ÇİZİLİR, KARTTAN DEĞİL. Kartın üzerinde kademenin
+       ADI yazılı ve siluet alfayı korur: kilitli bir kartın silueti
+       «YAKUT» yazısını okunur hâlde bırakırdı. Nişanda yazı yoktur.
+       Nişanı olmayan basamakta (K merdiveni) siluet çizilmez. */
+    const acik = b.durum !== 'kilitli';
+    const kaynak = acik ? (b.nisan || b.kart) : b.nisan;
+    const gorsel = kaynak
+      ? html`<img class="${acik ? '' : 'siluet'}" src="${kaynak}" alt=""
+          aria-hidden="true" loading="lazy" onerror="this.remove()">`
       : '';
     return html`
       <div class="${'rutbe-basamak rutbe-basamak--' + b.durum}"
@@ -32266,6 +32651,7 @@ SP.Screens.rutbe = (function(){
         K.Stat({ label:'Kayıtlı gün', value:d.gun, unit:'gün' }),
       ]),
       ...aileler.map(x => aileKart(x.a, x.satir)),
+      muhurKart(),
       K.Card({ title:'Rozet neyi söyler, neyi söylemez', body:html`
         <ul class="rutbe-kural">
           <li><b>Rozet hiçbir kararı vermez.</b> Ne plan, ne reçete, ne
@@ -32291,9 +32677,17 @@ SP.Screens.rutbe = (function(){
   function siradakiKart(B){
     const liste = B.siradaki(3);
     if(!liste.length) return '';
+    /* ROZETİN KENDİSİ DE DURUR, yalnız adı değil. Satır bir süre üç
+       ince çubuktan ibaretti ve «hangi rozet» sorusunu okuyarak
+       cevaplatıyordu; madalya orada dururken onu yazıyla tarif etmek
+       gereksiz bir ara katman. Rengi alınmış hâlde durur — henüz
+       kazanılmadı (bkz. `rozetHtml`, `.rozet-kilit`). */
     return K.Card({ title:'Sıradaki', body:html`
       <div class="rutbe-sirada">${map(liste, r => html`
         <div class="rutbe-sirada__sat">
+          ${when(r.gorsel, () => html`<img class="rutbe-sirada__rozet rozet-kilit"
+            src="${'img/seviye/' + r.gorsel + '.webp'}" alt=""
+            aria-hidden="true" loading="lazy" onerror="this.remove()">`)}
           <span class="rutbe-sirada__ad">${r.kisaAd || r.ad}
             <span class="dim">· ${r.aileAd}</span></span>
           <span class="rutbe-sirada__kalan">${r.kalan.toLocaleString('tr-TR')}
@@ -32302,6 +32696,38 @@ SP.Screens.rutbe = (function(){
             ><i style="${'width:' + Math.round(r.oran * 100) + '%'}"></i></span>
         </div>`)}
       </div>` });
+  }
+
+  /* BU SİSTEMİN MÜHRÜ — kazanılmaz, BASILIR.
+
+     Mühür listesi yalnız HKM profilinde duruyordu ve üç arayüzün
+     kullanıcısı kendi sisteminin hangi belgeye hangi mührü bastığını
+     hiç görmüyordu. Burada TEK SATIR yeter: mühür, adı ve nerede
+     basıldığı.
+
+     Rozetin YANINDA ama ONUNLA KARIŞMADAN durur — bu yüzden kendi
+     kartında ve kendi cümlesiyle: «kazanılmaz, basılır». */
+  function muhurKart(){
+    const hepsi = L().MUHURLER || [];
+    const benim = hepsi.filter(m => m.mod === MOD_ADI);
+    if(!benim.length) return '';
+    return K.Card({
+      title:'Bu sistemin mührü',
+      body:html`
+        <p class="small dim rutbe-rozet__ozet">Mühür kazanılmaz, basılır.
+          Eşiği, sayacı, tarihi yoktur: bir belgenin hangi alandan
+          geldiğini söyler.</p>
+        <div class="rutbe-muhurler">${map(benim, m => html`
+          <div class="rutbe-muhur">
+            <img class="rutbe-muhur__gorsel" src="${'img/seviye/muhur-' + m.id + '.webp'}"
+              alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">
+            <span class="rutbe-muhur__yazi">
+              <b>${m.ad}</b>
+              <span class="tiny dim">${m.nerede}</span>
+            </span>
+          </div>`)}
+        </div>`,
+    });
   }
 
   function aileKart(a, satir){
@@ -32319,7 +32745,8 @@ SP.Screens.rutbe = (function(){
           siradaki && typeof siradaki.esik === 'number',
           () => html` · sıradaki ${siradaki.esik.toLocaleString('tr-TR')}`)}<span
           class="rutbe-rozet__say">${kazanilan} / ${satir.length}</span></p>`,
-        html`<div class="rutbe-rozetler">${map(satir, r => rozetHtml(r))}</div>`,
+        html`<div class="rutbe-rozetler">${map(satir,
+          r => rozetHtml(r, siradaki && r.kod === siradaki.kod))}</div>`,
         rozetAyrinti(satir),
       ], 'sm'),
     });
@@ -32350,13 +32777,29 @@ SP.Screens.rutbe = (function(){
         <p class="rutbe-ayrinti__durum">${durum}</p>` });
   }
 
-  function rozetHtml(r){
-    /* KAZANILMAMIŞ ROZET GÖRÜNMEZ — rütbe kartındaki kuralın aynısı
-       (bkz. `basamakHtml`). Görülmemiş bir rozetin görüntüsünü önden
-       vermek, kazanıldığı gün onu değersizleştiriyor. Yerinde mühürlü
-       bir kutu durur; eşiği ve ne kadar yaklaşıldığı okunur. */
-    const gorsel = r.kazanildi
-      ? html`<img src="${'img/seviye/' + r.gorsel + '.webp'}" alt=""
+  function rozetHtml(r, sirada){
+    /* KAZANILMAMIŞ ROZET SOLUK DURUR — GİZLİ DEĞİL.
+
+       ROZET İLE RÜTBE KARTI AYNI ŞEY DEĞİLDİR ve burada ayrılırlar.
+
+       Rütbe kartı bir AÇILIŞTIR: kademe başına üç tane, büyük, tam
+       ekran bir kutlamayla gelir. Onu önden göstermek, geldiği günü
+       değersizleştirir — depo sahibinin kuralı budur ve basamaklarda
+       aynen uygulanır (bkz. `basamakHtml`, siluet).
+
+       Rozet bir HEDEFTİR: otuz yedi tane, yan yana duran bir duvar ve
+       kullanıcı o duvara bakarak nereye çalıştığını görür. Hedefi
+       gizlemek, hedefi ortadan kaldırmaktır. Bir süre gizliydi ve
+       ölçüldü: yeni bir kullanıcı otuz yedi boş tarama kutusu
+       görüyordu; ekran kazanılacak bir şey olduğunu bile söylemiyordu.
+
+       Bu yüzden kilitli rozet KENDİ GÖRSELİYLE ama renksiz ve soluk
+       durur (`.rozet-kilit`). Kazanıldığı gün rengine kavuşur ve o
+       fark hissedilir. Steam'den Duolingo'ya kadar herkesin yaptığı
+       şey bu değil; bu, hedefi görünür tutmanın tek dürüst yolu. */
+    const gorsel = r.gorsel
+      ? html`<img class="${r.kazanildi ? '' : 'rozet-kilit'}"
+          src="${'img/seviye/' + r.gorsel + '.webp'}" alt=""
           aria-hidden="true" loading="lazy" onerror="this.remove()">`
       : '';
     const yuzde = r.oran == null ? null : Math.round(r.oran * 100);
@@ -32367,9 +32810,14 @@ SP.Screens.rutbe = (function(){
        ama telefonda hiç çalışmıyor — dokunmanın bir karşılığı yoktu.
        Düğme hem dokunulabilir hem klavyeyle gezilebilir. */
     const acik = S.ui.rutbeRozet === r.kod;
+    /* AİLENİN SIRADAKİ ROZETİ işaretlenir: altı rozetlik bir sırada
+       «hangisi bir sonraki» sorusu, eşikleri okuyarak cevaplanıyordu.
+       İşaret bir halka; renk ya da boyut değil — ikisi de kazanılmış
+       rozetin işaretiyle karışırdı. */
     return html`
       <button type="button"
         class="${'rutbe-rozet rutbe-rozet--' + (r.kazanildi ? 'acik' : 'kilitli')
+          + (sirada ? ' rutbe-rozet--sirada' : '')
           + (acik ? ' rutbe-rozet--secili' : '')}"
         data-act="rozet-ac" data-kod="${r.kod}"
         aria-expanded="${acik ? 'true' : 'false'}"

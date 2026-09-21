@@ -51,6 +51,7 @@ python3 tools/ortak.py --yay         # brand/ortak/  -> uc arayuzun CSS'i
 python3 tools/ortak.py --denetle     # kopyalar kaynakla ayni mi (CI de kosar)
 python3 tools/rutbe.py <klasor>      # rutbe gorsellerini medya/'ya isler (kayipsiz)
 python3 tools/rutbe.py --liste       # medya/ altinda ne var
+python3 tools/rutbe.py --eksik       # katalog ne bekliyor da yok (node ile)
 
 # her sistem kendi dizininde
 node tools/runtests.js      # birim testleri
