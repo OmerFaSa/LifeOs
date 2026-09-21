@@ -49,6 +49,19 @@ R.Screens.rutbe = (function(){
      basamayacağı bir damgayı vitrine koymaktı. */
   const MOD_ADI = 'ays';
 
+  /* BİNLİK AYRACI — ekrandaki her XP sayısı bundan geçer.
+
+     Geçmiyordu ve tek ekranda İKİ BİÇİM yan yana duruyordu:
+
+       TOPLAM        1.500.000 XP     (K.Stat biçimliyor)
+       Bu basamakta    100000 / 1000000 XP
+       Bir sonraki basamağa 900000 XP
+
+     Küçük sayılarda fark edilmiyordu; XP büyüdükçe okunaksızlaştı.
+     Ekrana çıkan sayı düzgün Türkçe yazılır (AGENTS.md §1.8) ve
+     «düzgün» burada binlik ayracı demek. */
+  const tr = n => Number(n || 0).toLocaleString('tr-TR');
+
   const TABS = [
     { id:'simdi',    label:'Şu an' },
     { id:'merdiven', label:'Merdiven' },
@@ -114,8 +127,8 @@ R.Screens.rutbe = (function(){
       ? K.Notice({ tone:'ok', title:'En üst basamaktasın.',
           body:'XP birikmeye devam ediyor.' })
       : K.Meter({ label:'Bu basamakta', value:Math.round(d.oran * 100),
-          text:d.icinde + ' / ' + d.gereken + ' XP',
-          note:'Bir sonraki basamağa ' + d.kalan + ' XP' });
+          text:tr(d.icinde) + ' / ' + tr(d.gereken) + ' XP',
+          note:'Bir sonraki basamağa ' + tr(d.kalan) + ' XP' });
 
     const sahneVideo = sahneVideoYolu(d.kademe);
 
@@ -170,8 +183,8 @@ R.Screens.rutbe = (function(){
          `auto-fit` + `minmax`: yer varsa dördü yan yana, yoksa ikişer,
          en dar yerde tek sütun. */
       html`<div class="rutbe-sayaclar">${[
-        K.Stat({ label:'Bugün', value:d.bugun || 0, unit:'XP' }),
-        K.Stat({ label:'Toplam', value:(d.toplam || 0).toLocaleString('tr-TR'), unit:'XP' }),
+        K.Stat({ label:'Bugün', value:tr(d.bugun), unit:'XP' }),
+        K.Stat({ label:'Toplam', value:tr(d.toplam), unit:'XP' }),
         K.Stat({ label:'Kademe', value:d.kademe,
           unit:'/ ' + (L().KADEMELER || []).length }),
         /* «Basamak» tek başına yanıltıcıydı: 1.1'in İÇİNDEYKEN sıfır
@@ -284,14 +297,14 @@ R.Screens.rutbe = (function(){
         K.Grid([
           K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
             unit:'/ ' + d.toplamRozet }),
-          K.Stat({ label:'Toplam saat', value:d.saat, unit:'saat' }),
-          K.Stat({ label:'Kesintisiz', value:d.seriAy, unit:'ay' }),
+          K.Stat({ label:'Toplam saat', value:tr(d.saat), unit:'saat' }),
+          K.Stat({ label:'Kesintisiz', value:tr(d.seriAy), unit:'ay' }),
         ]),
         when(son, () => html`<p class="small dim">Son kazanılan:
           <b>${son.ad}</b> · ${son.kazanildi}</p>`),
         when(sirada, () => html`<p class="small dim">Sıradaki:
           <b>${sirada.kisaAd || sirada.ad}</b> —
-          ${sirada.kalan.toLocaleString('tr-TR')} ${sirada.birim || ''} kaldı</p>`),
+          ${tr(sirada.kalan)} ${sirada.birim || ''} kaldı</p>`),
         when(!son && !sirada, () => K.Empty({ text:'Rozetler kayıt girdikçe '
           + 'kendiliğinden açılır; hiçbirini elle almana gerek yok.' })),
       ], 'sm'),
@@ -322,7 +335,7 @@ R.Screens.rutbe = (function(){
       body:K.Stack(liste.map(r => K.Meter({
         label:r.ad + (r.adet ? ' · ' + r.adet + ' ' + r.birim : ''),
         value:Math.round(r.oran * 100),
-        text:r.kazanilan + ' / ' + r.tavan + ' XP',
+        text:tr(r.kazanilan) + ' / ' + tr(r.tavan) + ' XP',
         note:r.doldu ? 'Günlük tavan doldu — bu işten bugün daha fazla puan çıkmaz' : null,
         tone:r.doldu ? 'ok' : null,
       })), 'sm') });
@@ -401,7 +414,7 @@ R.Screens.rutbe = (function(){
   function kademeKunyesi(k, satir, hal, d){
     if(!satir.length) return '';
     const ilk = satir[0], son = satir[satir.length - 1];
-    const sayi = n => Number(n || 0).toLocaleString('tr-TR');
+    const sayi = tr;
 
     if(hal === 'kilitli'){
       /* AÇILIŞ, EŞİK DEĞİLDİR. `esik` basamağın BİTTİĞİ toplamdır;
@@ -478,12 +491,12 @@ R.Screens.rutbe = (function(){
       : '';
     return html`
       <div class="${'rutbe-basamak rutbe-basamak--' + b.durum}"
-        title="${b.etiket + ' · ' + b.esik.toLocaleString('tr-TR') + ' XP'}">
+        title="${b.etiket + ' · ' + tr(b.esik) + ' XP'}">
         <div class="rutbe-basamak__kutu">
           ${gorsel}
           <span class="rutbe-basamak__etiket">${b.etiket}</span>
         </div>
-        <span class="rutbe-basamak__esik">${b.esik.toLocaleString('tr-TR')}</span>
+        <span class="rutbe-basamak__esik">${tr(b.esik)}</span>
       </div>`;
   }
 
@@ -514,10 +527,9 @@ R.Screens.rutbe = (function(){
       html`<div class="rutbe-sayaclar">${[
         K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
           unit:'/ ' + d.toplamRozet }),
-        K.Stat({ label:'Toplam saat', value:d.saat, unit:'saat' }),
-        K.Stat({ label:'Toplam görev',
-          value:(d.gorev || 0).toLocaleString('tr-TR'), unit:'görev' }),
-        K.Stat({ label:'Kayıtlı gün', value:d.gun, unit:'gün' }),
+        K.Stat({ label:'Toplam saat', value:tr(d.saat), unit:'saat' }),
+        K.Stat({ label:'Toplam görev', value:tr(d.gorev), unit:'görev' }),
+        K.Stat({ label:'Kayıtlı gün', value:tr(d.gun), unit:'gün' }),
       ]}</div>`,
       ...aileler.map(x => aileKart(x.a, x.satir)),
       muhurKart(),
@@ -559,7 +571,7 @@ R.Screens.rutbe = (function(){
             aria-hidden="true" loading="lazy" onerror="this.remove()">`)}
           <span class="rutbe-sirada__ad">${r.kisaAd || r.ad}
             <span class="dim">· ${r.aileAd}</span></span>
-          <span class="rutbe-sirada__kalan">${r.kalan.toLocaleString('tr-TR')}
+          <span class="rutbe-sirada__kalan">${tr(r.kalan)}
             ${r.birim || ''} kaldı</span>
           <span class="rutbe-sirada__cubuk" aria-hidden="true"
             ><i style="${'width:' + Math.round(r.oran * 100) + '%'}"></i></span>
@@ -610,9 +622,9 @@ R.Screens.rutbe = (function(){
       title:a.ad,
       body:K.Stack([
         html`<p class="small dim rutbe-rozet__ozet">${a.ozet}${when(
-          deger != null, () => html` · <b>${deger.toLocaleString('tr-TR')} ${a.birim || ''}</b>`)}${when(
+          deger != null, () => html` · <b>${tr(deger)} ${a.birim || ''}</b>`)}${when(
           siradaki && typeof siradaki.esik === 'number',
-          () => html` · sıradaki ${siradaki.esik.toLocaleString('tr-TR')}`)}<span
+          () => html` · sıradaki ${tr(siradaki.esik)}`)}<span
           class="rutbe-rozet__say">${kazanilan} / ${satir.length}</span></p>`,
         html`<div class="rutbe-rozetler">${map(satir,
           r => rozetHtml(r, siradaki && r.kod === siradaki.kod))}</div>`,
@@ -632,7 +644,7 @@ R.Screens.rutbe = (function(){
     const r = satir.filter(x => x.kod === kod)[0];
     if(!r) return '';
 
-    const sayi = n => (n == null ? '—' : Number(n).toLocaleString('tr-TR'));
+    const sayi = n => (n == null ? '—' : tr(n));
     const durum = r.kazanildi
       ? html`<b>Kazanıldı</b> · ${r.kazanildi}`
       : (r.deger == null
@@ -865,7 +877,7 @@ R.Screens.rutbe = (function(){
     subtitle(){
       const d = R.XP && R.XP.durum();
       if(!d || !d.kademeBilgi) return 'Kademe, merdiven ve XP kaynakları';
-      return d.kademeBilgi.ad + ' ' + d.etiket + ' · ' + (d.toplam || 0) + ' XP';
+      return d.kademeBilgi.ad + ' ' + d.etiket + ' · ' + tr(d.toplam) + ' XP';
     },
     actions(){ return ''; },
     render, afterRender, handle,

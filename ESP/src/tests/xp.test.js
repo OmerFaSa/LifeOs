@@ -511,6 +511,26 @@
       expect(XP.rozetHtml()).toContain('1.1');
     });
 
+    it('rozetin başlığındaki XP binlik ayraçlı yazılır', async () => {
+      /* Ekrana çıkan sayı düzgün Türkçe yazılır (AGENTS.md §1.8) ve
+         «düzgün» burada binlik ayracı demek. Küçük sayılarda fark
+         edilmiyordu; XP büyüdükçe okunaksızlaştı — ve bu metin
+         yalnız `title` değil `aria-label` olarak da kullanılıyor,
+         yani ekran okuyucunun okuduğu cümle.
+
+         Aynı ayrışma rütbe ekranında da vardı: «TOPLAM 1.500.000 XP»
+         satırının hemen altında «100000 / 1000000 XP» yazıyordu. */
+      resetState();
+      XP.bosalt();
+      await ESP.Store.set('seviye',
+        { surum:L.SEVIYE_SURUM, toplam:1500000 });
+      await XP.yukle();
+      const h = XP.rozetHtml();
+      expect(h).toContain('100.000/1.000.000 XP');
+      /* Ayraçsız hâli GEÇMEMELİ. */
+      expect(h.indexOf('100000/1000000') >= 0).toBeFalsy();
+    });
+
     it('aynı anda iki yükleme tek defter üretir — biri diğerini ezmez', async () => {
       resetState();
       await XP.sifirla();

@@ -756,6 +756,9 @@ R.XP = (function(){
 
      Defter YÜKLENMEMİŞSE boş metin döner — «0 XP» çizmek, bilinmeyeni
      sıfır saymaktır. */
+  /* Binlik ayracı — kullanıcıya giden sayı düzgün Türkçe yazılır. */
+  function tr(n){ return Number(n || 0).toLocaleString('tr-TR'); }
+
   function rozetHtml(opt){
     var d = durum();
     if(!d || !d.kademeBilgi) return '';
@@ -764,8 +767,12 @@ R.XP = (function(){
     var k = d.kademeBilgi;
     var yuzde = Math.round(d.oran * 100);
 
+    /* Rozetin başlığı (title ve aria-label) da binlik ayraçlı yazılır:
+       ekran okuyucuya «yüz bin bölü bir milyon» dedirtmek ile
+       «yüzbinbölübirmilyon» dedirtmek arasındaki fark bu ayraç. */
     var baslik = 'Seviye ' + d.etiket + ' — ' + (k.ad || '') + ', '
-      + (d.tamam ? 'en üst basamak' : (d.icinde + '/' + d.gereken + ' XP'));
+      + (d.tamam ? 'en üst basamak'
+        : (tr(d.icinde) + '/' + tr(d.gereken) + ' XP'));
 
     return '<span class="seviye-rozet" data-seviye-rozet style="--kademe-renk:'
       + kac(k.renk || '#888')
@@ -947,7 +954,7 @@ R.XP = (function(){
         + kac(r.ad) + '</span>'
         + '<span class="seviye-panel__cubuk" aria-hidden="true"><i style="width:'
         + (enBuyuk ? Math.round(100 * r.xp / enBuyuk) : 0) + '%"></i></span>'
-        + '<span class="seviye-panel__xp">' + r.xp + '</span></li>';
+        + '<span class="seviye-panel__xp">' + tr(r.xp) + '</span></li>';
     });
     if(kir.arsiv > 0){
       govde += '<li class="seviye-panel__satir seviye-panel__satir--arsiv">'
@@ -955,7 +962,7 @@ R.XP = (function(){
         + 'kırılımı saklanmayan eski günler</span></span>'
         + '<span class="seviye-panel__cubuk" aria-hidden="true"><i style="width:'
         + (enBuyuk ? Math.round(100 * kir.arsiv / enBuyuk) : 0) + '%"></i></span>'
-        + '<span class="seviye-panel__xp">' + kir.arsiv + '</span></li>';
+        + '<span class="seviye-panel__xp">' + tr(kir.arsiv) + '</span></li>';
     }
     if(!govde){
       govde = '<li class="seviye-panel__bos">Henüz XP yok. '
@@ -971,13 +978,13 @@ R.XP = (function(){
     seri.forEach(function(g){
       var yuzde = (g.xp != null && tepe) ? Math.max(6, Math.round(100 * g.xp / tepe)) : 0;
       serit += '<span class="' + (g.xp == null ? 'seviye-serit__yok' : 'seviye-serit__gun')
-        + '" title="' + kac(g.gun + ' · ' + (g.xp == null ? 'kayıt yok' : g.xp + ' XP'))
+        + '" title="' + kac(g.gun + ' · ' + (g.xp == null ? 'kayıt yok' : tr(g.xp) + ' XP'))
         + '"><i style="height:' + yuzde + '%"></i></span>';
     });
 
     var sonrakiSatir = d.tamam
       ? 'En üst basamaktasın. XP birikmeye devam ediyor.'
-      : 'Bir sonraki basamağa <b>' + d.kalan + ' XP</b>';
+      : 'Bir sonraki basamağa <b>' + tr(d.kalan) + ' XP</b>';
 
     return '<div class="seviye-panel" data-seviye-panel style="--kademe-renk:'
       + kac(k.renk || '#888')
@@ -989,8 +996,8 @@ R.XP = (function(){
       + '<div class="seviye-serit" role="img" aria-label="Son on dört günün XP\'si">'
       +   serit + '</div>'
       + '<ul class="seviye-panel__liste">' + govde + '</ul>'
-      + '<p class="seviye-panel__sinir">Bugün <b>' + (d.bugun || 0) + ' XP</b>. '
-      + 'Toplam <b>' + d.toplam + '</b>. '
+      + '<p class="seviye-panel__sinir">Bugün <b>' + tr(d.bugun) + ' XP</b>. '
+      + 'Toplam <b>' + tr(d.toplam) + '</b>. '
       + 'XP hiçbir kararı vermez — ne plan, ne uyarı, ne teşhis ona bakar; '
       + 'yalnızca emeği görünür kılar.</p>'
       + isListesiHtml()
@@ -1006,9 +1013,9 @@ R.XP = (function(){
     isler.forEach(function(e){
       var tavan = gunlukTavan(e);
       satir += '<tr><td>' + kac(e.ad) + '</td>'
-        + '<td class="seviye-isler__sayi">' + e.xp + '</td>'
+        + '<td class="seviye-isler__sayi">' + tr(e.xp) + '</td>'
         + '<td class="seviye-isler__birim">/ ' + kac(e.birim) + '</td>'
-        + '<td class="seviye-isler__sayi">' + tavan + '</td></tr>';
+        + '<td class="seviye-isler__sayi">' + tr(tavan) + '</td></tr>';
     });
     return '<details class="seviye-isler">'
       + '<summary>Bu sistemde XP veren işler</summary>'

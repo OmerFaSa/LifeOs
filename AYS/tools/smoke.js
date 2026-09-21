@@ -292,6 +292,74 @@ async function rozetKuyrugu(page, base, errors){
   console.log('  akışlar → açılışta bekleyen rozet kutlaması boşaldı');
 }
 
+
+/* RÜTBE EKRANINDA AYRAÇSIZ UZUN SAYI OLMAMALI.
+
+   Tek ekranda iki biçim yan yana duruyordu ve ölçüldü:
+
+       TOPLAM         1.500.000 XP      (K.Stat biçimliyor)
+       Bu basamakta     100000 / 1000000 XP
+       Bir sonraki basamağa 900000 XP
+       (üst başlık)   Kutsal K500 · 1500000 XP
+
+   Küçük sayılarda görünmüyordu; XP büyüdükçe okunaksızlaştı. Denetim
+   defteri BÜYÜK bir toplamla kurar — küçük sayıyla koşan bir denetim
+   bu hatayı hiç göremezdi — ve ekranda beş haneden uzun, ayraçsız bir
+   sayı arar. Tarih ve saat dört haneyi geçmez, derleme damgası da
+   öyle; o yüzden beş hane eşiği yanlış alarm vermiyor. */
+async function rutbeSayilari(page, base, errors){
+  await page.goto(base + '/index.html', { waitUntil:'load' });
+  await page.waitForSelector('.site', { timeout:15000 });
+  await wait(700);
+
+  const kuruldu = await page.evaluate(async () => {
+    if(!R.XP || !R.Basarim) return false;
+    R.XP.bosalt();
+    await R.Store.set('seviye',
+      { surum:window.LIFEOS.SEVIYE_SURUM, toplam:1500000 });
+    await R.XP.yukle();
+    /* Başarım defteri de BÜYÜK olsun: «Toplam saat» ve «Toplam görev»
+       ancak beş haneye çıkınca ayraç gerektiriyor. */
+    R.Basarim.bosalt();
+    const aylar = {};
+    for(let i = 0; i < 40; i++){
+      const y = 2023 + Math.floor(i / 12), a = (i % 12) + 1;
+      aylar[y + '-' + String(a).padStart(2, '0')] =
+        { gun:28, dakika:33000, gorev:400, kusursuz:2 };
+    }
+    await R.Store.set('basarim', { surum:window.LIFEOS.BASARIM_SURUM,
+      aylar:aylar, gunler:{}, enIyi:{ odakDakika:600, odakTaban:600 },
+      kazanilan:{}, bekleyen:[] });
+    await R.Basarim.yukle();
+    R.App.go('rutbe');
+    return true;
+  });
+  if(!kuruldu){ errors.push('rütbe sayıları: seviye motoru yüklenmedi'); return; }
+  await wait(700);
+
+  for(const sekme of ['simdi', 'merdiven', 'rozet', 'kazanc', 'defter']){
+    await page.evaluate(t => {
+      const el = document.querySelector('[data-act="rutbe-tab"][data-tab="' + t + '"]');
+      if(el) el.click();
+    }, sekme);
+    await wait(500);
+    const kotu = await page.evaluate(() => {
+      const n = document.querySelector('#view') || document.body;
+      const bulunan = (n.innerText.match(/\d{5,}/g) || []);
+      return bulunan.slice(0, 5);
+    });
+    if(kotu.length){
+      errors.push('rütbe/' + sekme + ': ayraçsız uzun sayı — ' + kotu.join(', '));
+    }
+  }
+  /* Üst başlık da aynı kurala tabi. */
+  const alt = await page.evaluate(() => R.Screens.rutbe.subtitle());
+  if(/\d{5,}/.test(alt)){
+    errors.push('rütbe alt başlığı: ayraçsız uzun sayı — ' + alt);
+  }
+  console.log('  akışlar → rütbe ekranındaki sayılar binlik ayraçlı');
+}
+
 (async () => {
   const server = spawn('python3', [path.join(ROOT, 'devserver.py'), String(PORT)],
     { cwd:ROOT, stdio:'ignore' });
@@ -319,6 +387,7 @@ async function rozetKuyrugu(page, base, errors){
     await walkScreens(page, base, '/dist/rota.html', errors);
     await walkFlows(page, base, errors);
     await rozetKuyrugu(page, base, errors);
+    await rutbeSayilari(page, base, errors);
 
     if(errors.length){
       console.log('\n' + errors.length + ' sorun:');
