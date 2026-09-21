@@ -649,6 +649,31 @@ window.addEventListener('storage', e => {
 `storage` olayı yalnız **diğer** sekmelerde tetiklenir — tam da gereken
 şey. Testle kilitli.
 
+**AYS'ye ancak sonradan geldi.** İyileştirme SPİ ve ESP'de vardı, AYS'de
+yoktu — ve AYS en çok kayıt biriktiren sistem (dokuz aylık sınav yılında
+gün, blok, deneme, kart, hata). Fark `tools/kapsam.js` ile başka bir şey
+aranırken görüldü: AYS'nin `store.js` kapsamı %46'ydı ve **koşmayan
+işlevler `init`, `get`, `set`, `remove`, `list`, `clear`** — yani depo
+API'sinin tamamı. Öteki testler `mockStore` kullanıyordu; doğru, ama
+gerçek modül hiç denenmiyordu.
+
+Önce kapsam (`AYS/src/tests/store.test.js`, 28 test), sonra iyileştirme.
+Yazma başına ölçüldü:
+
+| kayıt | önce | sonra | kazanç |
+|---|---|---|---|
+| 50 | 0,067 ms | 0,030 ms | %55 |
+| 200 | 0,177 ms | 0,133 ms | %25 |
+| 500 | 0,590 ms | 0,245 ms | **%58** |
+| 1000 | 1,013 ms | 0,470 ms | **%54** |
+
+Kopyayı eklemek eski bir testi kırdı ve kırması DOĞRUYDU: test deponun
+arkasından doğrudan `localStorage`'a yazıyor, sonra `importAll`
+çağırıyordu. Bellek kopyası o yazmayı görmüyor — gerçek tarayıcıda olayı
+BAŞKA SEKME üretir, testte başka sekmeyi taklit eden testin kendisidir.
+Olay gönderilince düzeldi. Bu satır olmadan test yanlış bir şey ölçüyordu:
+geri alma kopyası bir önceki testin durumundan alınıyordu.
+
 ### 7.3 Açık borç: ölçeklenme
 
 Kalan maliyet tüm deponun **tek anahtarda** durmasından geliyor; yazma
