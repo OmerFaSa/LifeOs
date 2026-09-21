@@ -175,7 +175,11 @@ R.Screens.week = (function(){
       title:'Hafta özeti', sub:'Review yazmadan önce buna bak',
       badge:comp == null ? null : K.Badge({ label:'%'+comp,
         tone:comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' }),
-      body:html`
+      body:html`<div class="rapor-govde">
+        <!-- RAPOR KAPAĞI — belgenin yüzü. Mühür belgeyi imzalar, kapak
+             adlandırır; ikisi ayrı şeydir. Dosya yoksa düğüm kalkar. -->
+        <img class="rapor-kapak" src="img/marka/kapak-akademik-rapor.webp"
+          alt="Akademik rapor kapağı" loading="lazy" onerror="this.remove()">
         ${K.Cols(4, [
           K.Stat({ label:'Soru', value:U.fmtNum(solved), note:qr ? 'hedef '+qr.target : 'hedef yok' }),
           K.Stat({ label:'Doğruluk', value:acc == null ? '—' : '%'+acc,
@@ -188,7 +192,8 @@ R.Screens.week = (function(){
           K.Chip(U.plural(newErrors.length, 'yeni yanlış', 'yeni yanlış')),
           K.Chip(U.plural(notes.length, 'ders notu', 'ders notu')),
         ], { wrap:true })}
-        <ul class="bullets small muted mt-10">${map(lines, l => html`<li>${l}</li>`)}</ul>`,
+        <ul class="bullets small muted mt-10">${map(lines, l => html`<li>${l}</li>`)}</ul>
+      </div>`,
     });
   }
 

@@ -97,7 +97,8 @@ SP.Screens.office = (function(){
       box:true, class:'desk desk--' + agent.id,
       body:html`
         <div class="desk__head">
-          ${P.avatar(agent.id)}
+          ${html`<span class="${'agentkare agentkare--' + agent.id}"
+            aria-hidden="true">${SP.UI.ppKare(agent.id)}${agent.initial}</span>`}
           <div class="grow minw0">
             <b class="desk__name">${agent.name}</b>
             <span class="desk__role">${agent.role}</span>

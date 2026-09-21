@@ -13,14 +13,44 @@ hiçbir kodu kırmaz.
 
 | Klasör | Ne | Ad kalıbı |
 |---|---|---|
-| `kimlik/` | modül kapak ve hero görselleri | `kimlik-ays` · `kimlik-hkm` |
-| `ajan/` | ajan portreleri | `ajan-patron` · `ajan-bio` |
-| `durum/` | durum illüstrasyonları | `durum-basari` · `durum-veri-yok` |
-| `tanitim/` | ilk kurulum sahneleri | `tanitim-1` … `tanitim-5` |
+| `kimlik/` | modül logoları — **marka girişinde** | `kimlik-ays` · `kimlik-hkm` |
+| `ajan/` | ajan portreleri, **daire ve kare** | `ajan-esp-patron` · `ajan-kare-esp-patron` |
+| `durum/` | durum illüstrasyonları | `durum-tamamlandi-gorev` |
+| `tanitim/` | **sisteme ilk giriş kartı**, modül başına bir tane | `tanitim-ays` … `tanitim-hkm` |
 | `doku/` | arka plan dokuları | `doku-kagit` · `doku-blueprint` |
 | `bos/` | boş durum illüstrasyonları | `bos-kayit-yok` · `bos-plan-yok` |
-| `kapak/` | rapor kapakları | `kapak-haftalik` · `kapak-saglik` |
+| `kapak/` | rapor kapakları | `kapak-haftalik-ozet` · `kapak-saglik-raporu` |
 | `simge/` | LifeOS ikon ailesi | `simge-kaydet` · `simge-sil` |
+
+### Daire ile kare aynı kişidir
+
+Depo sahibinin sözü: «dairesel ve kareleri sistemin farklı yerlerinde
+kullan». Yirmi beş kişinin iki kırpımı var ve **aynı ajanda aynı yüz**
+görünmek zorunda:
+
+| Dosya | Nerede | Neden |
+|---|---|---|
+| `ajan-<mod>-<id>` (daire) | mesajın yanında, listenin solunda, toplantı turunda | küçük yerde bir İŞARET |
+| `ajan-kare-<mod>-<id>` | masanın kendi başlığında | orada bir PORTRE gerekir |
+
+Eşleme **gözle** yapıldı ve `tools/marka.py` içinde değil, kesim
+betiğinde sabitlendi: yüz benzerliğini ölçen iki betik denendi, ikisi de
+aynı kişiyi birden fazla ajana verdi. «Hepsi gülümseyen, bulanık oda
+önünde duran insanlar» bir ölçüte yetecek kadar farklılaşmıyor.
+
+### Neyin ne olduğu
+
+| Dosya | Nerede görünür |
+|---|---|
+| `kimlik-<mod>` | açılıştaki marka perdesi (üç saniye) ve HKM künyesi |
+| `tanitim-<mod>` | ilk kurulum sihirbazının en üstünde, **yalnız ilk açılışta** |
+| `durum-tamamlandi-<tur>` | «bekleyen iş yok» kartının arkasında |
+| `kapak-<rapor>` | raporun sağ üst köşesinde, kayan bir levha gibi |
+
+`tanitim-*` afişlerinin **alt şeridi kesildi**: orada görüntünün üzerine
+basılmış bir «Şimdi Başla» düğmesi vardı. Bir görüntüye basılmış düğme
+tıklanmaz ve tıklanmadığı anlaşılana kadar kullanıcı üç kere üstüne
+basar — hele gerçek «Başla» düğmesi bir karış aşağıdayken.
 
 Her ad **küçük harf, tire ile** yazılır ve Türkçe karakter içermez:
 dosya adı bir URL parçasıdır ve yüzde kodlaması gereken bir ad, bir gün

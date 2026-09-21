@@ -411,9 +411,20 @@ SP.C = (function(){
   }
 
   /* Siradaki hamle — her ekranda ayni merkez kart */
+  /* `sanat` — BİTTİĞİNİ SÖYLEYEN GÖRSEL, yalnız sakin hâlde.
+
+     «Bekleyen iş yok» bir boşluk değil, bir sonuçtur; kuru bir satır
+     olarak yazıldığında ikisi aynı görünüyordu. Görsel yalnız
+     `calm` iken istenir: bekleyen iş varken kutlama yapmak, yapılmamış
+     bir şeyi yapılmış göstermekti.
+
+     Dosya yoksa `onerror` düğümü kaldırır ve satır eskisi gibi kalır. */
   function NextUp(o){
     return html`
-      <div class="${cls('nextup', o.calm && 'nextup--calm')}">
+      <div class="${cls('nextup', o.calm && 'nextup--calm', o.sanat && 'nextup--sanat')}">
+        ${when(o.calm && o.sanat, () => html`<img class="nextup__sanat"
+          src="${'img/marka/durum-tamamlandi-' + o.sanat + '.webp'}"
+          alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">`)}
         <div class="nextup__icon">${icon(o.icon)}</div>
         <div class="nextup__body">
           <div class="nextup__label">${o.label}${when(o.hint, () => raw(SP.UI.hint(o.hint)))}</div>

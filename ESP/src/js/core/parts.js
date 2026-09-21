@@ -42,7 +42,7 @@ ESP.Parts = (function(){
     const a = ESP.AGENT_BY_ID[agentId];
     if(!a) return raw('');
     return html`<span class="${cls('agentav', size === 'sm' && 'agentav--sm')}"
-      style="background:${a.color}" title="${a.name}" aria-hidden="true">${a.initial}</span>`;
+      style="background:${a.color}" title="${a.name}" aria-hidden="true">${ESP.UI.pp(a.id)}${a.initial}</span>`;
   }
 
   function discChip(discId, opts){
@@ -499,7 +499,7 @@ ESP.Parts = (function(){
       const r = ESP.Lesson.result(s);
       return html`
         <div class="pracend">
-          ${K.NextUp({ icon:'check', calm:true, label:'Oturum bitti',
+          ${K.NextUp({ icon:'check', calm:true, sanat:'gorev', label:'Oturum bitti',
             title:r.right + '/' + r.asked + ' doğru',
             why:'İsabet bir not değil bir ölçümdür: yanlışlar destede başa döndü.' })}
           ${when(r.missed.length, () => html`

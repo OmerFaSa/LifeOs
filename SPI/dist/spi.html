@@ -893,6 +893,115 @@ table td, table th{
   .iconbtn:active, .mic:active{ transform:none; }
 }
 
+/* AJAN PORTRESİ — baş harfin ÜSTÜNE biner, onu silmez.
+
+   Portre yüklenemezse (dosya yok, yeni bir ajan eklendi) `onerror`
+   düğümü kaldırır ve altındaki harf görünür olur. İki ayrı düğüm
+   yerine tek yığın: iki durumu da tek kural çözer. */
+.agentav{ position:relative; overflow:hidden; }
+.agentav__pp{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  border-radius:inherit;
+}
+
+/* AYNI PORTRENİN KARE HÂLİ — masa başlığında.
+
+   Daire bir İŞARETTİR: mesajın yanında, listenin solunda, kim
+   konuşuyor onu söyler. Kare bir PORTREDİR: ajanın kendi başlığında
+   durur ve orada karşındaki kişidir. İkisi aynı yüzün iki kırpımı.
+
+   Oran 4:5 — vesikalık oranı. Kare yapmak yüzü, dikdörtgen yapmak
+   omuzları kesiyordu.
+
+   Baş harf aynı şekilde ALTTA kalır ve portre gelmezse görünür. */
+.agentkare{
+  position:relative; overflow:hidden;
+  flex:none;
+  width:60px; height:75px;
+  display:grid; place-items:center;
+  border-radius:12px;
+  font:600 22px/1 ui-serif, Georgia, serif;
+  color:#fff;
+  background:var(--line, #2a2a2a);
+  box-shadow:0 6px 18px rgba(0,0,0,.28);
+}
+.agentkare__pp{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  border-radius:inherit;
+}
+
+/* ONAY MÜHRÜ — bir saniye ortada durur, sonra kalkar.
+
+   `pointer-events:none`: mühür basılırken kullanıcı bir şeye
+   tıklamak istiyorsa engellenmemeli. Bir kutlama, bir tıklamayı
+   yutacak kadar önemli değildir.
+
+   Basma hareketi: yukarıdan gelir, sert durur, sonra solar — mürekkep
+   bir kere değer. `cubic-bezier` sonundaki geri sekme bilerek yok;
+   sekmiş bir mühür, basılmamış bir mühürdür. */
+.onaymuhur{
+  position:fixed; inset:0; z-index:96;
+  display:grid; place-items:center;
+  pointer-events:none;
+}
+.onaymuhur img{
+  width:min(42vw, 180px); height:auto;
+  filter:drop-shadow(0 18px 40px rgba(0,0,0,.45));
+  animation:onay-bas 1.1s cubic-bezier(.2,.9,.25,1) both;
+}
+@keyframes onay-bas{
+  0%{ opacity:0; transform:scale(1.9) rotate(-11deg); }
+  22%{ opacity:1; transform:scale(1) rotate(-4deg); }
+  70%{ opacity:1; transform:scale(1) rotate(-4deg); }
+  100%{ opacity:0; transform:scale(1.04) rotate(-4deg); }
+}
+
+/* RAPOR KAPAĞI — belgenin yüzü, sağ üst köşede.
+
+   Mühürle karıştırılmamalı: mühür belgeyi İMZALAR («bunu Yönetim
+   onayladı»), kapak belgeyi ADLANDIRIR («bu, haftalık rapordur»).
+   İkisi aynı kartta yan yana durabilir.
+
+   Dar ekranda gizlenir: 390 pikselde seksen piksellik bir kapak,
+   yanındaki sayı bloklarını iki satıra bölüyordu. */
+/* `flow-root`: kapak kayan (float) bir ogedir ve kapsayicisi bir blok
+   bicimlendirme baglami kurmazsa kartin ALTINA tasar — olculdu, ESP'nin
+   haftalik raporunda kapak bir sonraki satirin uzerine sarkiyordu. */
+.rapor-govde{ display:flow-root; }
+.rapor-kapak{ display:none; }
+@media (min-width:680px){
+  .rapor-kapak{
+    display:block; float:right;
+    width:86px; height:auto;
+    margin:0 0 12px 16px;
+    border-radius:8px;
+    box-shadow:0 10px 26px rgba(0,0,0,.3);
+  }
+}
+
+/* PROFİL ÇERÇEVESİ — isteyen takar, isteyen takmaz.
+
+   Fotoğrafın ÜSTÜNE biner ve onu küçültmez: çerçevenin ortası boştur,
+   yüz oradan görünür. Kapalıyken hiç çizilmez; varsayılan kapalıdır —
+   bir süsü varsayılan yapmak, istemeyene çıkarma işi yüklemekti. */
+.ppcerceve{ position:relative; display:inline-grid; place-items:center; }
+.ppcerceve__halka{
+  position:absolute;
+  /* %18 taşma: çerçevenin dış uçları fotoğrafın dışında kalmalı,
+     yoksa halka bir kenarlık gibi görünüp çerçeve olmaktan çıkar. */
+  inset:-18%;
+  width:136%; height:136%;
+  object-fit:contain;
+  pointer-events:none;
+}
+@media (prefers-reduced-motion: reduce){
+  .onaymuhur img{ animation:none; opacity:1; transform:none; }
+}
+
 /* ==== css/layout.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/layout.css içine yazılır; burası bir sonraki
@@ -2290,6 +2399,33 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .nextup__title{ font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); line-height:1.25; margin-top:1px; }
 .nextup__why{ font-size:var(--fs-sm); color:var(--text-2); margin-top:2px; }
 .nextup--calm{ background:var(--surface); border-color:var(--border); }
+/* BİTTİĞİNİ SÖYLEYEN GÖRSEL — yalnız sakin hâlde.
+
+   Arkada, kartın kendi zeminine karışır; üstündeki yazıyı bastırmaz.
+   Bu yüzden kontrast sabit bir opaklıkla değil, karta uyan bir
+   maskeyle düşürülür: açık temada görsel açılır, koyuda koyulur.
+
+   `object-position:center 38%` — teslimattaki beş karede de parlayan
+   halka üst üçte birdedir; ortadan hizalamak halkayı kesiyordu. */
+.nextup--sanat{ position:relative; overflow:hidden; isolation:isolate; }
+.nextup__sanat{
+  position:absolute; inset:0; z-index:-1;
+  width:100%; height:100%;
+  object-fit:cover; object-position:center 38%;
+  opacity:.5;
+  pointer-events:none;
+}
+.nextup--sanat::after{
+  content:''; position:absolute; inset:0; z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(100deg,
+    color-mix(in srgb, var(--surface) 88%, transparent),
+    color-mix(in srgb, var(--surface) 58%, transparent));
+}
+/* Görsel geldiğinde kutunun kendi zemini çekilir: iki zemin üst üste
+   binince yazı ikisinin arasında kalıyordu. */
+.nextup--sanat.nextup--calm{ background:var(--surface-2, var(--surface)); }
+
 .nextup--calm .nextup__icon{ background:var(--surface-3); color:var(--text-2); }
 .nextup--calm .nextup__label{ color:var(--text-3); }
 /* Dar ekranda eylem düğmesi gövdeyi sıkıştırmasın: alt satıra iner. */
@@ -3862,6 +3998,24 @@ body.is-dragging .drop.is-over{
    bu beş alan neyi açar. */
 .setup{ display:flex; flex-direction:column; gap:26px; }
 
+/* TANITIM AFİŞİ — sihirbazın en üstünde, ilk kurulumda.
+
+   `aspect-ratio` YOK ve `height:auto`: afişin kendi oranı neyse o
+   kalır. Sabit bir orana zorlamak, dört sistemin dört ayrı afişinden
+   birini keserdi.
+
+   Sayfanın ilk boyamasını geciktirmemesi için `loading="lazy"`
+   işaretlidir (işaretleme tarafında); burada yalnız yer ayrılır. */
+.setup__afis{
+  display:block;
+  width:100%; height:auto;
+  border-radius:14px;
+  border:1px solid var(--line);
+  /* Üstteki köşeler kağıdın kenarına değmesin diye küçük bir iç
+     boşluk değil, gölge kullanılır: iç boşluk afişi küçültürdü. */
+  box-shadow:0 10px 30px rgba(0,0,0,.22);
+}
+
 .setup__kicker{
   margin:0 0 6px; font-size:10px; font-weight:700; letter-spacing:.15em;
   text-transform:uppercase; color:var(--text-3);
@@ -4086,6 +4240,42 @@ body.is-dragging .drop.is-over{
   border-radius:10px;
   /* Kenarı yumuşat: bulanık zeminle birleşme noktası sert kalmasın. */
   box-shadow:0 30px 120px rgba(0,0,0,.65);
+}
+
+/* ---------- marka LOGOSU ----------
+
+   Video kalktı, yerine logo geldi. Logo videodan KÜÇÜK durur ve bu
+   kasıtlı: video bir sahneydi ve ekranı hak ediyordu; logo bir
+   imzadır. Ekranı kaplayan bir imza, imza olmaktan çıkar.
+
+   Gölge YOK: saydam zeminli bir logoya kutu gölgesi vermek, olmayan
+   bir dikdörtgenin kenarını çizmekti. */
+.perde__logo{
+  position:relative;
+  width:min(38vw, 300px);
+  height:auto;
+  object-fit:contain;
+  filter:drop-shadow(0 22px 60px rgba(0,0,0,.55));
+  animation:marka-logo-gir .9s cubic-bezier(.16,.84,.28,1) both;
+}
+@keyframes marka-logo-gir{
+  from{ opacity:0; transform:translateY(14px) scale(.94); }
+  to{ opacity:1; transform:none; }
+}
+
+/* Marka perdesinin zemini: logonun kendi rengi sızsın diye bulanık
+   kopya kalır, ama logo saydam olduğu için altına bir zemin gerekir. */
+.perde--marka{
+  background:radial-gradient(70% 55% at 50% 45%, #12131a 0%, #07080c 74%);
+}
+.perde--marka .perde__ortam{
+  /* Logo küçük ve saydam: %116'lık bir kopyayı bulanıklaştırmak
+     ekranı tek renge boyuyordu. Daha dar ve daha sönük. */
+  inset:18%;
+  width:64%; height:64%;
+  object-fit:contain;
+  filter:blur(72px) saturate(1.5);
+  opacity:.42;
 }
 
 /* ---------- araç şeridi ---------- */
@@ -4335,6 +4525,40 @@ body.is-dragging .drop.is-over{
 .perde[data-kart="var"] .perde__rozet{ display:none; }
 .perde[data-kart="var"] .perde__banner{ gap:10px; padding-top:0; }
 
+/* ---------- kademe geçiş karesi ---------- */
+
+/* «ALTIN → YAKUT». Bir kademeden ötekine geçerken basılan TEK kare;
+   kendi başına bitmiş bir gösterimdir — iki kartı, iki adı ve iki
+   sloganı zaten taşır.
+
+   `contain`, `cover` DEĞİL: karenin üstünde yazı var ve kırpmak o
+   yazıyı keser. Kenarda kalan boşluğu `.perde--rutbe` zemini doldurur,
+   yani siyah bir çerçeve değil kademenin kendi rengi görünür.
+
+   Karartma YOK: sahneden farkı budur. Sahne bir dekordur ve kartın
+   arkasında durur; geçiş karesi kahramanın kendisidir. */
+.perde__gecis{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:contain;
+  z-index:4;
+  pointer-events:none;
+  animation:perde-gecis-gir .9s cubic-bezier(.16,.84,.28,1) both;
+}
+@keyframes perde-gecis-gir{
+  from{ opacity:0; transform:scale(1.05); }
+  to{ opacity:1; transform:none; }
+}
+
+/* Kare GELDİĞİNDE kart, banner ve vinyet çekilir. Gelmezse hiçbiri
+   çekilmez; ekranda her hâlükârda bir gösterim kalır. */
+.perde[data-gecis="var"] .perde__kart,
+.perde[data-gecis="var"] .perde__banner{ display:none; }
+.perde[data-gecis="var"].perde--rutbe::after{ opacity:0; }
+/* Sahne geçiş karesinin arkasında kalır ve `contain` boşluğunu
+   doldurur — ama iyice karartılır, karenin kendi zemini kazansın. */
+.perde[data-gecis="var"] .perde__sahne{ filter:brightness(.18) saturate(1); }
+
 /* Rütbe perdesinde banner bir YEDEK değil, kartın yazısıdır.
 
    Kendi yumuşak karartması VAR ve gerekli: sahne bir fotoğraftır ve
@@ -4500,6 +4724,7 @@ body.is-dragging .drop.is-over{
      kartın girişi durur — kartın kendisi kalır, çünkü duran bir görsel
      hareket değildir. */
   .perde__kart{ animation:none; }
+  .perde__gecis{ animation:none; }
   .perde__sahne{ transform:none; }
   .haberci{ animation:none; }
   /* Marka girişi tercihte HİÇ görünmez. JavaScript de onu kaldırır ama
@@ -4872,6 +5097,25 @@ body.is-dragging .drop.is-over{
   font:500 20px/1.15 ui-serif, Georgia, "Times New Roman", serif;
 }
 .rutbe-kademe__slogan{ font-size:12px; opacity:.72; }
+
+/* ARMA — kademenin mührü, bandın sağ ucunda.
+
+   Sertifikadaki mühür gibi durur: adı yazan satırın YANINDA, onunla
+   yarışmadan. Armanın üzerinde de kademenin adı yazılıdır ve bu bir
+   tekrar değil, imzadır — 110 piksel boyunda o yazı okunur boyda
+   kalır, daha küçüğünde bulanıklasırdı.
+
+   Dar ekranda GİZLENİR: 390 pikselde ad, slogan ve rozetle aynı satırı
+   paylaşmaya kalkınca üçü de sıkışıyordu. */
+.rutbe-kademe__arma{
+  flex:none;
+  display:none;
+  height:110px; width:auto;
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.55));
+}
+@media (min-width:560px){
+  .rutbe-kademe__arma{ display:block; }
+}
 
 .rutbe-basamaklar{
   display:flex; flex-wrap:wrap; gap:12px;
@@ -5801,18 +6045,25 @@ button.rutbe-rozet:focus-visible{
      Gerçek açılışı (aşağıdaki .boot) ETKİLEMEZ: ayrı, üstte duran bir
      katmandır; ikisi paralel çalışır, biri diğerini beklemez.
 
-     Dosya `img/brand/intro.mp4`. Video ya da logo değişirse yalnız o
-     dosyalar değişir, burası değişmez. -->
+     LOGO, VİDEO DEĞİL. Önce `img/brand/intro.mp4` oynuyordu; depo
+     sahibi kaldırdı: «bölüm girişlerindeki o giriş videosunu kaldır,
+     bu logolar sadece». Video sekiz saniye tutuyordu, logo ÜÇ saniye
+     durur — bir açılış ekranı bilgilendirmez, yalnız kimliği söyler;
+     üç saniye onu söylemeye yeter, sekiz saniye beklemeye başlar.
+
+     Dosya `img/marka/kimlik-spi.webp` — her sistem kendi logosunu
+     gösterir ve ad yer tutucudan gelir, üç yerde ayrı yazılmaz. -->
 <div id="marka-perde" class="perde perde--marka" role="dialog" aria-modal="true"
   aria-label="Marka girişi">
-  <!-- Bulanık arka kopya: videonun kendi arka planı tam siyah olmasa da
-       kenarı görünmesin. -->
-  <video class="perde__ortam" src="img/brand/intro.mp4" muted autoplay playsinline
-    aria-hidden="true" tabindex="-1"></video>
-  <video class="perde__video" src="img/brand/intro.mp4" autoplay playsinline
-    aria-hidden="true"></video>
+  <!-- Bulanık arka kopya: logonun kendi rengi zemine sızsın, kenarı
+       keskin bir daire gibi durmasın. -->
+  <img class="perde__ortam" src="img/marka/kimlik-spi.webp" alt=""
+    aria-hidden="true" onerror="this.remove()">
+  <img class="perde__logo" src="img/marka/kimlik-spi.webp" alt=""
+    aria-hidden="true" onerror="this.remove()">
   <div class="perde__araclar">
-    <button class="perde__dugme perde__ses" type="button" aria-label="Sesi kapat"></button>
+    <!-- Ses düğmesi YOK: logonun sesi yoktur. Video kalkınca onunla
+         birlikte kalktı. -->
     <button class="perde__dugme perde__gec" type="button" aria-label="Geç (Esc)" title="Geç — Esc">
       <span class="perde__gec-halka" aria-hidden="true">
         <svg viewBox="0 0 32 32"><circle class="perde__gec-iz" cx="16" cy="16" r="14"/>
@@ -5852,7 +6103,7 @@ button.rutbe-rozet:focus-visible{
   (function bekle(){
     if(window.SP && SP.Perde){
       clearTimeout(kurtarma);
-      SP.Perde.baglan(el, { enAz:8000 });
+      SP.Perde.baglan(el, { enAz:3000 });
       return;
     }
     if(++deneme > 400) return;   /* ~12 sn; kurtarma zamanlayicisi devrede */
@@ -6315,6 +6566,30 @@ SP.Perde = (function(){
 
     if(secenekler.banner) perde.appendChild(bannerCiz(secenekler.banner));
 
+    /* KADEME GEÇİŞ KARESİ — «Altın → Yakut». Tam ekran, tek görsel;
+       eski kademeyle yenisini YAN YANA gösterir, ki kullanıcı neyi
+       bırakıp neye geçtiğini bir bakışta görsün.
+
+       Banner ve kart YİNE ÇİZİLİR ve geçiş karesi ancak YÜKLENDİĞİNDE
+       onları gizler (`data-gecis`). Kart için kurulan düzenin aynısı:
+       dosya gelmezse ekranda hiçbir an boşluk olmaz, olan gösterim
+       görülür. Sıra da bunun için: geçiş karesi banner'dan SONRA
+       eklenir, üstünde durur. */
+    if(secenekler.gecis){
+      var gecisEl = document.createElement('img');
+      gecisEl.className = 'perde__gecis';
+      gecisEl.alt = '';
+      gecisEl.setAttribute('aria-hidden', 'true');
+      gecisEl.addEventListener('load', function(){
+        perde.setAttribute('data-gecis', 'var');
+      });
+      gecisEl.addEventListener('error', function(){
+        if(gecisEl.parentNode) gecisEl.parentNode.removeChild(gecisEl);
+      });
+      gecisEl.src = secenekler.gecis;
+      perde.appendChild(gecisEl);
+    }
+
     /* RÜTBE KARTI — gösterimin kahramanı. Banner'dan ÖNCE değil SONRA
        eklenir: kart yüklenirse banner gizlenir, yüklenmezse banner
        zaten çizilmiş hâlde durur ve hiçbir an boş ekran olmaz. */
@@ -6496,6 +6771,14 @@ SP.Perde = (function(){
     return (kok || 'img/seviye/') + 'sahne-' + yukselme.kademe + '.webp';
   }
 
+  /* Geçiş karesi YALNIZ yeni kademede istenir. Basamak (1.1 → 1.2)
+     aynı kademenin içinde kalır; «Bronz → Bronz» diyen bir tam ekran
+     kare, üç basamakta üç kez aynı şeyi söylerdi. */
+  function gecisYolu(yukselme, kok){
+    if(!yukselme || !yukselme.yeniKademe || !yukselme.kademe) return null;
+    return (kok || 'img/seviye/') + 'gecis-' + yukselme.kademe + '.webp';
+  }
+
   /* Perde ne kadar dursun? Yeni bir kademe yeni bir ADDIR: okunacak bir
      slogan, bakılacak yeni bir kart vardır. Basamak ise bir ilerleme
      işaretidir, göz ucuyla görülür. İkisi de «Geç» ile kesilebilir. */
@@ -6645,6 +6928,7 @@ SP.Perde = (function(){
       baslik:(yukselme.yeniKademe ? 'Yeni kademe: ' : 'Yeni rütbe: ')
         + (k.ad || '') + ' ' + yukselme.etiket,
       sahne:sahneYolu(yukselme, kok),
+      gecis:gecisYolu(yukselme, kok),
       kart:kartYolu(yukselme, kok),
       kartVideo:kartVideoYolu(yukselme, kok),
       enAz:kutlamaSuresi(yukselme),
@@ -6774,6 +7058,7 @@ SP.Perde = (function(){
     kendiliginenAcilsinMi:kendiliginenAcilsinMi,
     /* Saf kararlar — perde açmadan sınanabilsinler diye dışarıda. */
     kartYolu:kartYolu, kartVideoYolu:kartVideoYolu, sahneYolu:sahneYolu,
+    gecisYolu:gecisYolu,
     kutlamaSuresi:kutlamaSuresi,
     rozetKutla:rozetKutla, rozetGorseliYolu:rozetGorseliYolu,
     rozetKutlamaSuresi:rozetKutlamaSuresi,
@@ -6787,7 +7072,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'45cd718', at:'2026-09-20 22:53', dirty:true };
+SP.BUILD = { id:'edb7854', at:'2026-09-21 01:25', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13131,15 +13416,25 @@ SP.XP = (function(){
          ve yazılı, bu ise 28 piksellik bir daire. Kartı buraya
          küçültmek, okunmayan bir şey göstermekti.
 
+         KADEME MÜHRÜ (`onay-N.webp`) kullanılır. Bir süre burada
+         `rozet-N.png` aranıyordu ve o dosya hiç üretilmedi: her
+         açılışta altı istek 404 dönüyor, rozet de hiç görünmüyordu.
+         Mühür zaten o kademenin yuvarlak amblemi — aynı şeyi ikinci
+         kez çizdirmek yerine olanı kullanmak doğrusu.
+
+         AYNI DOSYA ONAY MÜHRÜ OLARAK DA BASILIR (`UI.onayMuhru`) ve bu
+         bir karışıklık değil, tanımın kendisidir: bu görsel
+         KULLANICININ KADEME MÜHRÜDÜR. Künyede kim olduğunu söyler,
+         bir teklifi onaylarken de aynı şeyi söyler.
+
          Dosya yoksa katman hiç çizilmez ve altındaki kademe numarası
          görünür kalır — kırık resim simgesi de, boşluk da göstermeden.
-         Kullanıcı `img/seviye/rozet-N.png` bıraktığı an devreye girer.
 
          Adres MUTLAK verilir: özel bir CSS değişkeni içindeki göreli
          url(), değişkenin kullanıldığı yere değil TANIMLANDIĞI stil
          sayfasına göre çözülüyor ve `css/img/seviye/...` diye yanlış bir
          adres çıkıyordu. */
-      + ';--kademe-gorsel:url(&quot;' + kac(mutlak(kok + 'rozet-' + d.kademe + '.png')) + '&quot;)"'
+      + ';--kademe-gorsel:url(&quot;' + kac(mutlak(kok + 'onay-' + d.kademe + '.webp')) + '&quot;)"'
       + ' title="' + kac(baslik) + '" aria-label="' + kac(baslik) + '">'
       + '<span class="seviye-rozet__mark" aria-hidden="true">'
       +   '<span>' + d.kademe + '</span></span>'
@@ -13175,12 +13470,24 @@ SP.XP = (function(){
       var hal = 'kilitli';
       if(i < bitmis) hal = 'gecildi';
       else if(b.etiket === simdiki) hal = 'simdi';
+      var kb = L.KADEME_ILE(b.kademe);
       return {
         etiket:b.etiket, kademe:b.kademe, basamak:b.basamak,
         maliyet:b.maliyet, esik:b.esik,
-        kademeBilgi:L.KADEME_ILE(b.kademe),
+        kademeBilgi:kb,
         durum:hal,
         kart:L.MEDYA_ADI ? (kok + L.MEDYA_ADI(b.etiket) + '.webp') : null,
+        /* NİŞAN — aynı basamağın küçük amblemi. Kart bir SAYFA kaplar
+           (900 piksel boyunda bir portre); merdivende yüz piksellik
+           bir kutuda gösterilince ne taşı okunuyor ne yazısı. Nişan o
+           kutu için çizilmiş.
+
+           Kutsal'ın K merdiveninde nişan YOKTUR ve olmaması doğrudur:
+           K basamakları kademe içinde 1..10 diye sayılmaz, kendi
+           adlarıyla (K100, K200) durur. Orada `null` döner ve ekran
+           kartı kullanır. */
+        nisan:(kb && kb.etiketler) ? null
+          : (kok + 'nisan-' + b.kademe + '-' + b.basamak + '.webp'),
       };
     });
   }
@@ -21438,7 +21745,85 @@ SP.UI = (function(){
     SP.UI._confirm = onConfirm;
   }
 
-  return {
+  /* AJAN PORTRESI — `.agentav` kutusunun icine biner.
+
+     Depo sahibi yirmi bes portre gonderdi: «dairesel ve kareleri
+     sistemin farkli yerlerinde kullan». Her ajanin kendi yuzu var ve
+     dosya adi ajanin kimliginden turer — `ajan-spi-patron.webp`.
+
+     BAS HARF ALTTA KALIR. Portre yuklenemezse (dosya yok, yeni bir
+     ajan eklendi) `onerror` dugumu kaldirir ve altindaki harf gorunur
+     olur. Eksik portre hata degildir; kirik resim simgesi gostermek
+     hic gostermemekten kotudur.
+
+     Tek yerde durmasinin sebebi: ayni isaretleme on ayri ekranda
+     yaziliydi ve on kopya bir gun ayrisir. */
+  function pp(id){
+    if(!id) return '';
+    var t = String(id).replace(/[^a-z0-9_-]/gi, '');
+    if(!t) return '';
+    return SP.h.raw('<img class="agentav__pp" src="img/marka/ajan-spi-'
+      + t + '.webp" alt="" aria-hidden="true" loading="lazy"'
+      + ' onerror="this.remove()">');
+  }
+
+  /* AYNI AJANIN KARE PORTRESI — masa basliginda.
+
+     Daire ile kare AYNI KISIDIR; teslimattaki yirmi bes yuzun iki
+     kirpimi. Daire kucuk yerler icin: mesajin yaninda, listenin
+     solunda, toplanti turunun basinda. Kare, ajanin KENDI basligi
+     icin: orada portre bir isaret degil, karsindaki kisidir.
+
+     `pp` ile ayni sozlesme: yalniz goruntuyu dondurur, kutuyu cagiran
+     kurar; dosya yoksa `onerror` dugumu kaldirir ve bas harf gorunur
+     kalir. */
+  /* ONAY MUHRU — kullanici bir seyi onayladiginda BASILIR.
+
+     Toast «uygulandi» der ve gecer; muhur ONAYIN KENDISINI gosterir.
+     Ikisi birden durur: yazi ne olduğunu, muhur kimin onayladigini
+     soyler.
+
+     RENK KULLANICININ KENDI KADEMESINDEN gelir. Onay kullanicinin
+     imzasidir ve imza kime aitse onun rengini tasir. Kademe
+     okunamazsa (motor yuklenmemis) muhur HIC BASILMAZ — varsayilan bir
+     kademe uydurmak, olcmedigimiz bir seyi soylemekti.
+
+     BIR SANIYE, tek sefer, tiklanamaz. Hareket azaltma tercihinde hic
+     gorunmez: bilgi toast'ta zaten var, muhur onun susu. */
+  function onayMuhru(){
+    try{
+      if(window.matchMedia
+        && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    }catch(e){}
+    var d = (SP.XP && SP.XP.durum) ? SP.XP.durum() : null;
+    if(!d || !d.kademe) return;
+    var kutu = document.createElement('div');
+    kutu.className = 'onaymuhur';
+    kutu.setAttribute('aria-hidden', 'true');
+    var img = document.createElement('img');
+    img.alt = '';
+    img.src = 'img/seviye/onay-' + d.kademe + '.webp';
+    img.addEventListener('error', function(){
+      if(kutu.parentNode) kutu.parentNode.removeChild(kutu);
+    });
+    kutu.appendChild(img);
+    (document.body || document.documentElement).appendChild(kutu);
+    setTimeout(function(){
+      if(kutu.parentNode) kutu.parentNode.removeChild(kutu);
+    }, 1100);
+  }
+
+  function ppKare(id){
+    if(!id) return '';
+    var t = String(id).replace(/[^a-z0-9_-]/gi, '');
+    if(!t) return '';
+    return SP.h.raw('<img class="agentkare__pp" src="img/marka/ajan-kare-spi-'
+      + t + '.webp" alt="" aria-hidden="true" loading="lazy"'
+      + ' onerror="this.remove()">');
+  }
+
+
+  return { pp:pp, ppKare:ppKare, onayMuhru:onayMuhru,
     icon, trend, motif, gauge,
     lineChart, barChart, donut, sparkline, stackBar, heatmap, legend,
     rangeBar, macroSplit,
@@ -21862,9 +22247,20 @@ SP.C = (function(){
   }
 
   /* Siradaki hamle — her ekranda ayni merkez kart */
+  /* `sanat` — BİTTİĞİNİ SÖYLEYEN GÖRSEL, yalnız sakin hâlde.
+
+     «Bekleyen iş yok» bir boşluk değil, bir sonuçtur; kuru bir satır
+     olarak yazıldığında ikisi aynı görünüyordu. Görsel yalnız
+     `calm` iken istenir: bekleyen iş varken kutlama yapmak, yapılmamış
+     bir şeyi yapılmış göstermekti.
+
+     Dosya yoksa `onerror` düğümü kaldırır ve satır eskisi gibi kalır. */
   function NextUp(o){
     return html`
-      <div class="${cls('nextup', o.calm && 'nextup--calm')}">
+      <div class="${cls('nextup', o.calm && 'nextup--calm', o.sanat && 'nextup--sanat')}">
+        ${when(o.calm && o.sanat, () => html`<img class="nextup__sanat"
+          src="${'img/marka/durum-tamamlandi-' + o.sanat + '.webp'}"
+          alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">`)}
         <div class="nextup__icon">${icon(o.icon)}</div>
         <div class="nextup__body">
           <div class="nextup__label">${o.label}${when(o.hint, () => raw(SP.UI.hint(o.hint)))}</div>
@@ -22013,7 +22409,7 @@ SP.Parts = (function(){
     const a = SP.AGENT_BY_ID[agentId];
     if(!a) return raw('');
     return html`<span class="${cls('agentav', 'agentav--' + a.id, size === 'sm' && 'agentav--sm')}"
-      aria-hidden="true">${a.initial}</span>`;
+      aria-hidden="true">${SP.UI.pp(a.id)}${a.initial}</span>`;
   }
 
   /* Ajan konusma balonu kaynagi: model mi kural motoru mu? */
@@ -25058,6 +25454,26 @@ SP.Setup = (function(){
       wide:true, noClose:true,
       body:String(html`<div class="setup">
 
+        <!-- TANITIM AFISI — sisteme ILK giren burada durur.
+
+             ALT METNI BOS ve aria-hidden: afisin uzerinde yazan sey
+             (baslik, cumle, dort ozellik) hemen ALTINDA gercek metin
+             olarak zaten yaziyor. Ayni cumleyi bir de alt metinde
+             tekrarlamak, ekran okuyucuya her seyi iki kere okutmakti.
+             Afis burada bir SUSTUR ve susun alt metni bos olur.
+
+             Dosya yoksa onerror dugumu kaldirir; sihirbaz eskisi gibi
+             calisir.
+
+             NOT: bu yorum bir sablon dizesinin (template literal)
+             ICINDE duruyor — icinde TERS TIRNAK OLAMAZ. Ilk yazimda
+             alt sozcugu ters tirnak icine alinmisti ve dize orada
+             kapandi: butun dosya
+             ayrisamadi, SPI'nin dokuz yuz testi «SP.Setup tanimsiz»
+             diye dustu. -->
+        <img class="setup__afis" src="img/marka/tanitim-spi.webp"
+          alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">
+
         <div class="setup__hero">
           <p class="setup__kicker">İlk kurulum</p>
           <h2 class="setup__h">Beş alan yeter. Gerisi zamanla dolar.</h2>
@@ -25450,11 +25866,24 @@ SP.Screens.today = (function(){
   function minimumEntry(){
     const m = SP.Calc.minimumDay();
     const streak = SP.Calc.streak();
+    /* ASGARI GUN TAMAMLANDIGINDA bir satir degil bir SONUC yazilir.
+
+       «4 / 4» ile «3 / 4» arasindaki fark ekranda bir rakamdi; gunun
+       bittigini soyleyen sey o rakami okumak zorunda kalmaktı. Kart
+       yalniz hepsi tamamken cizilir — yarim bir gunu tamamlanmis
+       gostermek, olcmedigimiz bir seyi soylemek olurdu. */
+    const bitti = m.total > 0 && m.done >= m.total;
     return K.Entry({
       label:'Asgari gün', hint:'minimum-day',
       meta:m.done + ' / ' + m.total + ' · seri ' + streak + ' gün',
       note:m.note,
-      body:html`<div class="mt-2">${map(m.rows, P.minRow)}</div>`,
+      body:html`
+        ${when(bitti, () => K.NextUp({ icon:'check', calm:true, sanat:'saglik',
+          label:'Asgari gün tamam',
+          title:m.total + ' / ' + m.total + ' · seri ' + streak + ' gün',
+          why:'Bugünün asgarisi kapandı. Seri, girilmiş günlerden sayılır; '
+             + 'girilmemiş gün seriyi kırmaz, sayıya da katılmaz.' }))}
+        <div class="mt-2">${map(m.rows, P.minRow)}</div>`,
     });
   }
 
@@ -25764,6 +26193,10 @@ SP.Screens.today = (function(){
     const n = liste.filter(x => String(x.id) === String(id))[0];
     if(!n) return;
     const r = await SP.Beacon.resolveIntent(n, action);
+    /* MUHUR YALNIZ ONAYDA BASILIR. Reddetmek de bir cevaptir ama
+       onay degildir; ikisine ayni muhru basmak, muhru anlamsiz
+       kilardi. */
+    if(r.ok && action !== 'reject' && action !== 'dismiss') SP.UI.onayMuhru();
     if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
     S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
     const bas = r.state === 'acknowledged'
@@ -29774,7 +30207,11 @@ SP.Screens.analytics = (function(){
       sub:U.fmtRange(r.start, r.end),
       badge:K.Badge({ label:r.discipline.minDays + '/7 asgari gün',
         tone:r.discipline.minDays >= 5 ? 'ok' : 'warn' }),
-      body:html`
+      body:html`<div class="rapor-govde">
+        <!-- RAPOR KAPAĞI — belgenin yüzü. Mühür belgeyi imzalar, kapak
+             adlandırır; ikisi ayrı şeydir. Dosya yoksa düğüm kalkar. -->
+        <img class="rapor-kapak" src="img/marka/kapak-saglik-raporu.webp"
+          alt="Sağlık raporu kapağı" loading="lazy" onerror="this.remove()">
         ${K.Notice({ tone:'info', body:SP.Calc.headline(r) })}
         <div class="cols-4 mt-12">
           ${K.Stat({ label:'Toparlanma', value:r.readiness.avg == null ? '—' : String(r.readiness.avg),
@@ -29795,7 +30232,8 @@ SP.Screens.analytics = (function(){
         ${when(r.gaps.length, () => html`<div class="mt-12">
           <h3 class="section-h">Beslenme açıkları</h3>
           ${K.Table({ tight:true, headers:['Öğe', { label:'Kapsama', num:true }],
-            rows:r.gaps.map(g => [g.nutrient ? g.nutrient.name : g.id, '%' + g.pct]) })}</div>`)}`,
+            rows:r.gaps.map(g => [g.nutrient ? g.nutrient.name : g.id, '%' + g.pct]) })}</div>`)}
+      </div>`,
       foot:K.Button({ label:'Ofiste konuş', size:'sm', act:'go', data:{ 'data-route':'meeting' } }),
     });
   }
@@ -30255,7 +30693,8 @@ SP.Screens.office = (function(){
       box:true, class:'desk desk--' + agent.id,
       body:html`
         <div class="desk__head">
-          ${P.avatar(agent.id)}
+          ${html`<span class="${'agentkare agentkare--' + agent.id}"
+            aria-hidden="true">${SP.UI.ppKare(agent.id)}${agent.initial}</span>`}
           <div class="grow minw0">
             <b class="desk__name">${agent.name}</b>
             <span class="desk__role">${agent.role}</span>
@@ -31553,6 +31992,9 @@ SP.Screens.rutbe = (function(){
   function sahneYolu(no){
     return no ? 'img/seviye/sahne-' + no + '.webp' : null;
   }
+  function armaYolu(no){
+    return no ? 'img/seviye/bant-' + no + '.webp' : null;
+  }
   /* Kademenin idle VİDEOSU. Adı POSTER'in adıyla aynı, yalnız uzantısı
      farklı: ikinci bir adlandırma şeması açmak, videonun hangi kademeye
      ait olduğunu ikinci kez yazmaktı. Dosya yoksa `onerror` düğümü
@@ -31727,6 +32169,11 @@ SP.Screens.rutbe = (function(){
          dünyasıdır ve gelinmemiş bir dünyayı göstermek kartı
          göstermekle aynı şeydir. */
       const sahne = hal === 'kilitli' ? null : sahneYolu(k.no);
+      /* ARMA — kademenin adını taşıyan amblem, mührü gibi sağda durur.
+         Kilitli kademede çizilmez: sahneyle aynı gerekçe. Dosyası
+         olmayan kademede `onerror` düğümü kaldırır ve bant eskisi gibi
+         kalır — Safir ile Kutsal'ın arması henüz gelmedi. */
+      const arma = hal === 'kilitli' ? null : armaYolu(k.no);
       /* İKİ KATLI: üstte kademenin SAHNESİ bir bant olarak, altında
          kartlar temiz zeminde. Sahne kartların arkasına yayıldığında
          ikisi birbirini yiyordu — sahne bulanık, kart okunmaz. */
@@ -31743,6 +32190,8 @@ SP.Screens.rutbe = (function(){
                 <h2 class="rutbe-kademe__ad">${k.ad}</h2>
                 <span class="rutbe-kademe__slogan">${k.slogan || ''}</span>
               </div>
+              ${when(arma, () => html`<img class="rutbe-kademe__arma" src="${arma}"
+                alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">`)}
               ${K.Badge({
                 tone:hal === 'tamam' ? 'ok' : (hal === 'acik' ? 'info' : 'muted'),
                 icon:false,
@@ -31763,10 +32212,16 @@ SP.Screens.rutbe = (function(){
        okunur. Görülmemiş bir kartın görüntüsünü önden vermek, gelindiği
        gün onu değersizleştiriyordu.
 
-       Dosya yoksa `onerror` düğümü kaldırır (henüz üretilmemiş K
-       kartları böyle) ve altındaki etiket görünür kalır. */
-    const gorsel = (b.durum !== 'kilitli' && b.kart)
-      ? html`<img src="${b.kart}" alt="" aria-hidden="true" loading="lazy"
+       Dosya yoksa `onerror` düğümü kaldırır ve altındaki etiket görünür
+       kalır.
+
+       KART DEĞİL NİŞAN. Bu kutu yüz piksel; kart dokuz yüz piksellik
+       bir portre ve burada ne taşı ne yazısı okunuyordu. Nişan aynı
+       basamağın bu ölçek için çizilmiş amblemi. K merdiveninde nişan
+       yok, orada kart kullanılır (bkz. `xp.js`, `merdiven`). */
+    const kaynak = (b.nisan || b.kart);
+    const gorsel = (b.durum !== 'kilitli' && kaynak)
+      ? html`<img src="${kaynak}" alt="" aria-hidden="true" loading="lazy"
           onerror="this.remove()">`
       : '';
     return html`

@@ -72,6 +72,9 @@ SP.Screens.rutbe = (function(){
   function sahneYolu(no){
     return no ? 'img/seviye/sahne-' + no + '.webp' : null;
   }
+  function armaYolu(no){
+    return no ? 'img/seviye/bant-' + no + '.webp' : null;
+  }
   /* Kademenin idle VİDEOSU. Adı POSTER'in adıyla aynı, yalnız uzantısı
      farklı: ikinci bir adlandırma şeması açmak, videonun hangi kademeye
      ait olduğunu ikinci kez yazmaktı. Dosya yoksa `onerror` düğümü
@@ -246,6 +249,11 @@ SP.Screens.rutbe = (function(){
          dünyasıdır ve gelinmemiş bir dünyayı göstermek kartı
          göstermekle aynı şeydir. */
       const sahne = hal === 'kilitli' ? null : sahneYolu(k.no);
+      /* ARMA — kademenin adını taşıyan amblem, mührü gibi sağda durur.
+         Kilitli kademede çizilmez: sahneyle aynı gerekçe. Dosyası
+         olmayan kademede `onerror` düğümü kaldırır ve bant eskisi gibi
+         kalır — Safir ile Kutsal'ın arması henüz gelmedi. */
+      const arma = hal === 'kilitli' ? null : armaYolu(k.no);
       /* İKİ KATLI: üstte kademenin SAHNESİ bir bant olarak, altında
          kartlar temiz zeminde. Sahne kartların arkasına yayıldığında
          ikisi birbirini yiyordu — sahne bulanık, kart okunmaz. */
@@ -262,6 +270,8 @@ SP.Screens.rutbe = (function(){
                 <h2 class="rutbe-kademe__ad">${k.ad}</h2>
                 <span class="rutbe-kademe__slogan">${k.slogan || ''}</span>
               </div>
+              ${when(arma, () => html`<img class="rutbe-kademe__arma" src="${arma}"
+                alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">`)}
               ${K.Badge({
                 tone:hal === 'tamam' ? 'ok' : (hal === 'acik' ? 'info' : 'muted'),
                 icon:false,
@@ -282,10 +292,16 @@ SP.Screens.rutbe = (function(){
        okunur. Görülmemiş bir kartın görüntüsünü önden vermek, gelindiği
        gün onu değersizleştiriyordu.
 
-       Dosya yoksa `onerror` düğümü kaldırır (henüz üretilmemiş K
-       kartları böyle) ve altındaki etiket görünür kalır. */
-    const gorsel = (b.durum !== 'kilitli' && b.kart)
-      ? html`<img src="${b.kart}" alt="" aria-hidden="true" loading="lazy"
+       Dosya yoksa `onerror` düğümü kaldırır ve altındaki etiket görünür
+       kalır.
+
+       KART DEĞİL NİŞAN. Bu kutu yüz piksel; kart dokuz yüz piksellik
+       bir portre ve burada ne taşı ne yazısı okunuyordu. Nişan aynı
+       basamağın bu ölçek için çizilmiş amblemi. K merdiveninde nişan
+       yok, orada kart kullanılır (bkz. `xp.js`, `merdiven`). */
+    const kaynak = (b.nisan || b.kart);
+    const gorsel = (b.durum !== 'kilitli' && kaynak)
+      ? html`<img src="${kaynak}" alt="" aria-hidden="true" loading="lazy"
           onerror="this.remove()">`
       : '';
     return html`

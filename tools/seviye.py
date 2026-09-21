@@ -57,6 +57,11 @@ KAYNAK = KOK / "brand" / "seviye"
 # (klasor, ad alani, modul kimligi)
 SISTEMLER = [("AYS", "R", "ays"), ("SPI", "SP", "spi"), ("ESP", "ESP", "esp")]
 
+# Ad alani -> modul kimligi. `perde.html` marka logosunu `__MOD__` ile
+# adlandiriyor (`kimlik-ays.webp`); SISTEMLER zaten bu esleşmeyi tutuyor,
+# burada yalnizca aranabilir hale getiriliyor.
+MOD_ILE = {ad: mod for _, ad, mod in SISTEMLER}
+
 # (kaynak dosya, hedef goreli yol, ad alani degistirilsin mi)
 DOSYALAR = [
     ("kademeler.js", "src/js/data/kademeler.js", False),
@@ -160,8 +165,11 @@ def perde_govdesi(ad_alani: str) -> str:
     Uc index.html icinde elle duran bir markup, bir gun perde.js'in
     bekledigi yapidan ayrisir ve "Gec" dugmesi sessizce calismaz hale
     gelir. Dosyalar gibi markup da yayilir."""
+    # `__MOD__` de degisir: marka girisi her sistemin KENDI logosunu
+    # gosteriyor ve dosya adi ondan turer (`kimlik-ays.webp`).
     return (KAYNAK / "perde.html").read_text(encoding="utf-8") \
-        .replace("__NS__", ad_alani)
+        .replace("__NS__", ad_alani) \
+        .replace("__MOD__", MOD_ILE.get(ad_alani, ad_alani.lower()))
 
 
 def perde_yaz(yol: Path, ad_alani: str) -> bool:
@@ -206,10 +214,17 @@ def perde_siniflari() -> list:
                                  govde)))
 
 
-# Duragan MARKA perdesinde bulunmasi GEREKMEYEN siniflar. Banner yalniz
-# seviye kutlamasinda cizilir ve JavaScript kurar; marka girisinde
-# gosterilecek bir kademe yoktur.
-PERDE_ISTEGE_BAGLI = {"perde__banner"}
+# Duragan MARKA perdesinde bulunmasi GEREKMEYEN siniflar.
+#
+#   perde__banner   yalniz seviye kutlamasinda cizilir ve JavaScript
+#                   kurar; marka girisinde gosterilecek kademe yoktur.
+#   perde__video    marka girisi artik VIDEO DEGIL LOGO (depo sahibi:
+#   perde__ses      «bolum girislerindeki o giris videosunu kaldir, bu
+#                   logolar sadece»). perde.js video yolunu KORUYOR —
+#                   rutbe kutlamasinin idle videolari onu kullaniyor —
+#                   ama duragan markupta artik yok. Kod yolu yasiyor,
+#                   markup onu kullanmiyor: ikisi ayri sorulardir.
+PERDE_ISTEGE_BAGLI = {"perde__banner", "perde__video", "perde__ses"}
 
 
 def perde_markup_eksigi(ad_alani: str) -> list:

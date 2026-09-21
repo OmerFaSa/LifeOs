@@ -356,6 +356,61 @@ details.detay > summary:hover{ color:var(--fg); }
 .muhur-sat__yazi b{ font-size:13px; }
 .muhur-sat__yazi span{ font-size:11px; }
 
+
+/* ============================= KİMLİK ===========================
+   Portre ve çerçeve. Çerçeve fotoğrafın ÜSTÜNE biner ve onu
+   küçültmez: halkanın ortası boştur, yüz oradan görünür. */
+.kimlik{ display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; }
+.kimlik__yazi{ flex:1 1 240px; min-width:0; }
+.kimlik__pp{ display:block; width:104px; height:130px; object-fit:cover;
+  border-radius:12px; }
+.ppcerceve{ position:relative; display:inline-grid; place-items:center;
+  flex:none; }
+.ppcerceve__halka{ position:absolute; inset:-17%; width:134%; height:134%;
+  object-fit:contain; pointer-events:none; }
+/* Halka takılıyken portre de YUVARLANIR: çerçeve bir daire ve
+   dikdörtgen portrenin köşeleri halkanın dışına taşıyordu. Halka
+   yokken portre dikdörtgen kalır — kırpmak, çerçeve takmayanın
+   fotoğrafından bir şey eksiltmek olurdu. */
+.ppcerceve--halkali .kimlik__pp{ width:118px; height:118px;
+  border-radius:50%; }
+.kimlik__secim{ display:inline-flex; align-items:center; gap:8px;
+  margin-top:10px; font-size:13px; cursor:pointer; }
+/* 24x24 — DOKUNMA HEDEFİ. Tarayıcının varsayılan onay kutusu 16x16
+   geliyor ve `tools/yuz.js` bunu yakaladı: parmakla basılamayan bir
+   kutu, faresi olmayanda hiç açılamayan bir seçenektir. */
+.kimlik__secim input{ width:24px; height:24px; flex:none; }
+
+
+/* ============================== KAPAK ===========================
+   Raporun YÜZÜ. Mühürden farkı: mühür kimin imzaladığını, kapak neye
+   baktığını söyler; ikisi aynı kartta yan yana durabilir.
+
+   Sağ üst köşede, YAZIYI SARMADAN durur: kartın metni kapağın altına
+   akmaz, çünkü akan metin ile kapak arasındaki boşluk her kartta
+   farklı çıkıyordu. Kapak bir kitap gibi durur ve orada kalır.
+
+   Dar ekranda GİZLENİR: 380 pikselde 84 piksellik bir kapak, tablo
+   satırlarını okunamaz hâle getiriyordu. */
+.kapak{ display:none; }
+@media (min-width:640px){
+  /* `flow-root`: kapak KAYAN bir ögedir ve kartı bir blok
+     biçimlendirme bağlamı kurmazsa kartın dışına taşar.
+
+     Mutlak konumlandırma denendi ve bırakıldı: kapak kartın üstüne
+     BİNİYORDU — «Sistemler» kartında seviye şeridinin «3.2» sayısı
+     kapağın altında kalıyordu. Kayan öge yer AÇAR, mutlak olan
+     açmaz. */
+  .card{ display:flow-root; }
+  .kapak{
+    display:block; float:right;
+    width:84px; height:auto;
+    margin:0 0 12px 18px;
+    border-radius:6px;
+    box-shadow:0 8px 22px rgba(0,0,0,.35);
+  }
+}
+
 </style>
 </head>
 <body>
@@ -463,6 +518,7 @@ details.detay > summary:hover{ color:var(--fg); }
          kademesi yan yana durur, toplanmaz. -->
     <div data-bolme="profil" hidden>
       <div class="gun"><h1>Profil</h1></div>
+      <div class="card" id="profil-kimlik"></div>
       <div id="profil-onur"></div>
       <div class="card" id="profil-kademe"><p class="muted">Yükleniyor…</p></div>
       <div class="card" id="profil-sayac"></div>
@@ -636,6 +692,30 @@ details.detay > summary:hover{ color:var(--fg); }
       + ' loading="lazy" onerror="this.remove()">';
   }
 
+  /* RAPOR KAPAGI — belgenin yuzu.
+
+     Muhur ile karistirmamak gerekir ve ayni karta ikisi birden
+     girebilir: MUHUR belgenin damgasidir («bunu Yonetim imzaladi»),
+     KAPAK belgenin yuzudur («bu, haftalik ozettir»). Biri yetkiyi,
+     oteki kimligi soyler.
+
+     `alt` DOLU: kapagin uzerinde raporun adi yazili ve o ad kartin
+     baslik satirinda her zaman tekrarlanmiyor. Bos birakmak, ekran
+     okuyucuya raporun adini hic soylememek olurdu.
+
+     Dosya yoksa `onerror` dugumu kaldirir; kart eskisi gibi kalir. */
+  var KAPAK_AD = {
+    'haftalik-ozet':'Haftalık özet', 'aylik-gelisim':'Aylık gelişim',
+    'yasam-dengesi':'Yaşam dengesi', 'hedef-raporu':'Hedef raporu',
+    'finans-raporu':'Finans raporu',
+  };
+  function kapakHtml(ad){
+    if(!KAPAK_AD[ad]) return '';
+    return '<img class="kapak" src="/img/marka/kapak-' + esc(ad) + '.webp"'
+      + ' alt="' + esc(KAPAK_AD[ad]) + ' kapağı" loading="lazy"'
+      + ' onerror="this.remove()">';
+  }
+
   function brifingCiz(b){
     var h = '<div class="tag">' + muhurHtml('yonetim', 'sm')
       + esc(b.date) + ' · kural motoru</div>';
@@ -750,7 +830,8 @@ details.detay > summary:hover{ color:var(--fg); }
 
   function ikizCiz(t){
     var c = t.coverage || {};
-    var h = '<div class="tag">Dijital ikiz · son ' + esc(t.days) + ' gün</div>';
+    var h = kapakHtml('yasam-dengesi')
+      + '<div class="tag">Dijital ikiz · son ' + esc(t.days) + ' gün</div>';
     h += '<p class="muted">Bu resim ' + esc(c.total || 0) + ' metriğe dayanıyor: '
        + esc(c.measured || 0) + ' ölçüldü, ' + esc(c.computed || 0) + ' hesaplandı, '
        + esc(c.estimated || 0) + ' tahmin, ' + esc(c.missing || 0) + ' veri yok.</p>';
@@ -832,7 +913,8 @@ details.detay > summary:hover{ color:var(--fg); }
      yaradı» demez — «kabul edilen önerilerin ardından ölçü şöyle hareket
      etti» der, ve seçilim uyarısı hep yanındadır. */
   function etkiCiz(e){
-    var h = '<div class="tag">Etki · öneri sonrası</div>';
+    var h = kapakHtml('hedef-raporu')
+      + '<div class="tag">Etki · öneri sonrası</div>';
     h += '<p>' + esc((e.verdict || {}).note || '') + '</p>';
     var kurallar = Object.keys(e.rules || {});
     if(kurallar.length){
@@ -858,7 +940,8 @@ details.detay > summary:hover{ color:var(--fg); }
   /* Hafta, günün altındaki eğridir: bugün gürültülüdür, bir kötü gece ya
      da bir yoğun gün onu savurur. Ama hafta da önce KAPSAMINI söyler. */
   function haftaCiz(r){
-    var h = '<div class="tag">' + muhurHtml('yonetim', 'sm')
+    var h = kapakHtml('haftalik-ozet')
+      + '<div class="tag">' + muhurHtml('yonetim', 'sm')
       + 'Hafta · ' + esc(r.from) + ' → ' + esc(r.to) + '</div>';
     var g = r.days_seen || {};
     h += '<p>Kayıtlı gün: AYS ' + esc(g.ays || 0) + ' · SPİ ' + esc(g.spi || 0)
@@ -1169,7 +1252,8 @@ details.detay > summary:hover{ color:var(--fg); }
       var kayit = seri[k];
       (gruplar[kayit.module] = gruplar[kayit.module] || []).push(kayit);
     });
-    var h = '<div class="tag">Sistemler · son ' + esc(veri.days) + ' gün</div>'
+    var h = kapakHtml('aylik-gelisim')
+      + '<div class="tag">Sistemler · son ' + esc(veri.days) + ' gün</div>'
       + seviyeSeridi(gruplar);
     ['ays', 'spi', 'esp'].forEach(function(mod){
       var liste = gruplar[mod];
@@ -1529,7 +1613,8 @@ details.detay > summary:hover{ color:var(--fg); }
   function butceCiz(d){
     var a = d.month || {};
     var t = d.projection || {};
-    var h = '<div class="tag">Bütçe · bu ay</div>';
+    var h = kapakHtml('finans-raporu')
+      + '<div class="tag">Bütçe · bu ay</div>';
 
     var oran = a.pct == null ? null : a.pct;
     var sinif = oran == null ? '' : (oran >= 95 ? 'danger'
@@ -2725,6 +2810,69 @@ details.detay > summary:hover{ color:var(--fg); }
       + (alt ? '' : '');
   }
 
+  /* KİMLİK KARTI — profilin başı.
+
+     Merkezin kullanıcı hakkında BİLDİĞİ TEK ŞEY modüllerin gönderdiği
+     kademedir; bir ad, bir yaş, bir hedef cümlesi yoktur ve burada
+     uydurulmaz. Kart bu yüzden portre ile kademeleri yan yana koyar,
+     başka bir şey söylemez.
+
+     ÇERÇEVE İSTEĞE BAĞLI ve varsayılan KAPALI: depo sahibinin sözü,
+     «isteyen takar isteyen takmaz». Tercih tarayıcıda durur, merkeze
+     gitmez — bir süsün sunucuda kaydı tutulmaz.
+
+     Çerçevenin kademesi, modüllerin EN YÜKSEĞİDİR. Toplanmaz: üç
+     sistemin kademesi toplanmaz (bkz. profil-kademe kartı), ama
+     çerçeve tek bir halkadır ve bir tanesini seçmek gerekir; en
+     yükseği seçmek, kullanıcının geldiği yeri göstermektir. */
+  var CERCEVE_ANAHTAR = 'hkm.profil.cerceve';
+
+  function cercevePik(){
+    try{ return localStorage.getItem(CERCEVE_ANAHTAR) === '1'; }
+    catch(e){ return false; }
+  }
+
+  function profilKimlikCiz(veri){
+    var k = $('profil-kimlik');
+    if(!k) return;
+    var liste = veri.kademeler || [];
+    var enUst = 0;
+    liste.forEach(function(x){ if(x.tier > enUst) enUst = x.tier; });
+    var takili = cercevePik() && enUst > 0;
+
+    k.innerHTML = '<div class="kimlik">'
+      + '<div class="ppcerceve' + (takili ? ' ppcerceve--halkali' : '') + '">'
+      +   '<img class="kimlik__pp" src="/img/marka/ajan-kare-kullanici.webp"'
+      +     ' alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">'
+      +   (takili
+          ? '<img class="ppcerceve__halka" src="/img/seviye/cerceve-' + enUst
+            + '.webp" alt="" aria-hidden="true" loading="lazy"'
+            + ' onerror="this.remove()">'
+          : '')
+      + '</div>'
+      + '<div class="kimlik__yazi">'
+      +   '<div class="tag">LifeOS profili</div>'
+      +   '<p class="muted">Merkez senin hakkında yalnızca modüllerin '
+      +     'gönderdiğini bilir: ' + esc(liste.length) + ' sistem kademe '
+      +     'gönderdi. Ad, hedef ve ölçü her sistemin kendi ekranında durur; '
+      +     'burada tekrarlanmaz.</p>'
+      +   '<label class="kimlik__secim"><input type="checkbox" id="pp-cerceve"'
+      +     (takili ? ' checked' : '') + (enUst > 0 ? '' : ' disabled')
+      +     '> Çerçeve tak'
+      +     (enUst > 0 ? '' : ' <span class="muted">(kademe gelmedi)</span>')
+      +   '</label>'
+      + '</div></div>';
+
+    var kutu = $('pp-cerceve');
+    if(kutu){
+      kutu.addEventListener('change', function(){
+        try{ localStorage.setItem(CERCEVE_ANAHTAR, kutu.checked ? '1' : '0'); }
+        catch(e){}
+        profilKimlikCiz(veri);
+      });
+    }
+  }
+
   function profilOnurCiz(o){
     var k = $('profil-onur');
     if(!o){ k.innerHTML = ''; return; }
@@ -2880,6 +3028,7 @@ details.detay > summary:hover{ color:var(--fg); }
       $('profil-kademe').innerHTML = '<p class="muted">Profil okunamadı.</p>';
       return;
     }
+    profilKimlikCiz(p.body);
     profilOnurCiz(p.body.onur);
     profilKademeCiz(p.body);
     profilSayacCiz(p.body);

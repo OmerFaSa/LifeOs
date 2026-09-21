@@ -133,9 +133,28 @@ türer:
 | Ne | Ad | Nerede görünür |
 |---|---|---|
 | **Rütbe kartı** (dikey) | `rutbe-5-2.webp`, `rutbe-k300.webp` | gösterimin kahramanı |
+| **Nişan** (kartın küçük kardeşi) | `nisan-5-2.webp` | merdivendeki basamak kutusu |
 | **Kademe sahnesi** (yatay) | `sahne-5.webp` | gösterimin arka planı, karartılmış |
+| **Geçiş karesi** (tam ekran) | `gecis-5.webp` | kademe atlandığında, tek başına |
+| **Arma** (kademenin adını taşır) | `bant-4.webp` | merdivende kademe bandının sağında |
+| **Kademe mührü** (yuvarlak) | `onay-3.webp` | künyedeki küçük rozet + onay damgası |
+| **Profil çerçevesi** | `cerceve-3.webp` | HKM profilinde, **isteğe bağlı** |
 | Rütbe kartının idle videosu | `rutbe-5-2.mp4` | *ileride* — bkz. aşağıda |
-| Küçük rozet (kare) | `rozet-5.png` | künye ve alt bant; **yok**, numaraya düşüyor |
+
+**Kart ile nişan neden ayrı.** Kart dikey, yazılı ve bir sayfa kaplar;
+nişan yüz piksellik bir kutu için çizilmiş amblemdir. Kartı merdivene
+küçültmek, ne taşı ne yazısı okunan bir şey göstermekti.
+
+**Sahne ile geçiş karesi neden ayrı.** Sahne bir DEKORDUR: kartın
+arkasında durur, karartılır. Geçiş karesi gösterimin KENDİSİDİR —
+«Altın → Yakut» diye iki kademeyi yan yana gösterir ve yüklendiğinde
+kartı da banner'ı da gizler. Yalnız YENİ KADEMEDE istenir; basamak
+(1.1 → 1.2) aynı kademenin içinde kalır ve bir geçiş değildir.
+
+**Kademe mührü iki yerde, tek anlam.** `onay-N.webp` kullanıcının kademe
+mührüdür: künyede kim olduğunu söyler, bir teklifi onaylarken de aynı
+şeyi söyler (`UI.onayMuhru`). İki ayrı dosya tutmak, ikisinin bir gün
+farklı kademe göstermesi demekti.
 
 Adlandırma kuralı tek satırdır ve tek yerde yazılıdır
 (`kademeler.js` → `LIFEOS.MEDYA_ADI`): etiket küçük harfe iner, nokta
@@ -149,10 +168,24 @@ Sahne **kademeye** bağlıdır: 5.1, 5.2 ve 5.3 aynı `sahne-5.webp`
 | Dosya | Durum |
 |---|---|
 | `rutbe-1-1 … rutbe-5-3` | **15'i de var** |
-| `sahne-1 … sahne-6` | **6'sı da var** |
-| `rutbe-k100 … rutbe-k1000` | yok — daire içinde etiket yazılıyor (K300) |
-| `rozet-1 … rozet-6` | yok — künyede kademe numarası çiziliyor |
+| `nisan-1-1 … nisan-5-3` | **15'i de var** |
+| `sahne-1 … sahne-6` | **6'sı da var** (+ `sahne-N.mp4`) |
+| `gecis-1 … gecis-6` | **6'sı da var** |
+| `onay-1 … onay-6` | **6'sı da var** |
+| `cerceve-1 … cerceve-6` | **6'sı da var** |
+| `rutbe-k100 … rutbe-k500` | **5'i de var** |
+| `rutbe-k600 … rutbe-k1000` | yok — daire içinde etiket yazılıyor (K600) |
+| `bant-1 … bant-4` | Bronz, Gümüş, Altın, Yakut var |
+| `bant-5`, `bant-6` | **yok** — Safir ile Kutsal'ın arması gelmedi |
+| `bant-hukum` | var ama KULLANILMIYOR — aşağıya bak |
+| `onur-usta` | yok — Sistem Ustası rozeti gelmedi |
 | `rutbe-*.mp4` | yok — bkz. idle video |
+
+**`bant-hukum` neden ekranda yok.** Teslimatta beş arma geldi; dördünün
+üzerinde kademenin adı birebir yazıyor (BRONZ, GÜMÜŞ, ALTIN, YAKUT).
+Beşincisinin üzerinde **«HÜKÜM»** yazıyor, «SAFİR» değil. Safir'in
+yerine konsaydı ekranda kademenin adı yanlış yazardı; dosya adıyla
+saklanıyor ve Safir'in arması gelene kadar bekliyor.
 
 **Eksik dosya hata değildir.** Kart yoksa banner kendi dairesini çizer,
 sahne yoksa kademe renginden bir zemin kalır. Sistem hiçbir aşamada

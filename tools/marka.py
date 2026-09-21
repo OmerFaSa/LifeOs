@@ -281,13 +281,99 @@ def _kutular(maske, en_az_oran=0.0015, yapistir=0.02):
     return kutular
 
 
-def kes(kaynak: Path, cikti: Path) -> int:
+def bol(kaynak: Path, cikti: Path, sutun: int, satir: int) -> int:
+    """Duzgun bir izgarayi SABIT bolerek keser — tahmin yok.
+
+    Otomatik bulma (`--kes`) kopuk parcalari birlestirmek icin bir
+    yaricap kullanir ve o yaricap her tabakada AYNI olamaz: dort logoluk
+    bir seritte kurenin simgeyle birlesmesi icin buyuk olmali, yirmi bes
+    portrelik sikisik bir izgarada ise hepsini tek parcaya yapistirir.
+    Olculdu, ikisi de yasandi.
+
+    Tabakanin kac sutun kac satir oldugu GOZLE bellidir. Bilinen bir sayi
+    varken tahmin ettirmek, ayarlanacak bir yaricap demekti.
+
+    Her hucre kesildikten sonra saydam kenar bosluğu kirpilir: izgara
+    hucresi esit, icindeki simge esit degildir.
+    """
+    try:
+        from PIL import Image, ImageDraw
+    except ImportError:
+        print("HATA: Pillow yok.  pip install pillow")
+        return 1
+    if not kaynak.is_file():
+        print("HATA: %s bir dosya degil" % kaynak)
+        return 1
+    if sutun < 1 or satir < 1:
+        print("HATA: sutun ve satir en az 1 olmali")
+        return 1
+
+    im = Image.open(kaynak)
+    G, Y = im.size
+    cikti.mkdir(parents=True, exist_ok=True)
+    parcalar = []
+    n = 0
+    for r in range(satir):
+        for c in range(sutun):
+            kutu = (round(c * G / sutun), round(r * Y / satir),
+                    round((c + 1) * G / sutun), round((r + 1) * Y / satir))
+            p = im.crop(kutu)
+            # Hucrenin ICINDEKI bosluk atilir. Izgara hucresi esit,
+            # icindeki simge esit degil.
+            if p.mode in ("RGBA", "LA", "P"):
+                p = p.convert("RGBA")
+                kb = p.getchannel("A").getbbox()
+                if kb:
+                    p = p.crop(kb)
+            if p.width < 8 or p.height < 8:
+                continue        # bos hucre
+            n += 1
+            ad = "kesit-%02d.png" % n
+            p.save(cikti / ad)
+            parcalar.append((ad, p))
+            print("  ✓ %-14s %4dx%-4d   hucre (%d,%d)" % (ad, p.width, p.height, c, r))
+
+    if not parcalar:
+        print("Hicbir hucrede icerik yok.")
+        return 1
+    _tabaka(parcalar, cikti)
+    print("\n%d parca + tabaka.png -> %s" % (len(parcalar), cikti))
+    return 0
+
+
+def _tabaka(parcalar, cikti):
+    """Temas tabakasi — hepsi tek karede, numarali. Adlandirma GOREREK
+    yapilir; araca «bu AYS'nin olmali» dedirtmek yanlis adla yerlesen
+    bir dosya demekti."""
+    from PIL import Image, ImageDraw
+    H = 220
+    C = min(6, len(parcalar))
+    satir = (len(parcalar) + C - 1) // C
+    t = Image.new("RGB", (C * (H + 16), satir * (H + 34)), (250, 249, 247))
+    ciz = ImageDraw.Draw(t)
+    for i, (ad, p) in enumerate(parcalar):
+        k = p.convert("RGBA")
+        k.thumbnail((H, H), Image.LANCZOS)
+        x = (i % C) * (H + 16) + 8
+        y = (i // C) * (H + 34) + 6
+        t.paste(k, (x + (H - k.width) // 2, y + (H - k.height) // 2), k)
+        ciz.text((x, y + H + 6), ad, fill=(20, 20, 20))
+    t.save(cikti / "tabaka.png")
+
+
+def kes(kaynak: Path, cikti: Path, yapistir: float = 0.02) -> int:
     """Toplu tabakayi parcalara ayirir — TAM COZUNURLUKTE.
 
     Kirpma yalniz KUTUYU bulur; kesilen parca ASIL dosyadan alinir ve
     hicbir piksel yeniden orneklenmez. Kucultme yok, yeniden kodlama
     yok — kalite kararinin depo sahibine ait oldugu bu depoda araca
     dusen is, bulmaktir.
+
+    `yapistir` KOPUK PARCALARI birlestiren yaricaptir (kisa kenarin
+    orani). Varsayilan %2 bir simgenin altindaki yaziyi toplar; ama
+    sikisik bir izgarada (yan yana yirmi bes portre) hepsini TEK
+    parcaya yapistirir. Olculdu: 5x5 dairesel tabakada varsayilanla 1
+    parca cikti, `--yapistir 0` ile 25.
 
     ADLANDIRMA YAPILMAZ. Parcalar `kesit-01`, `kesit-02` diye numaralanir
     ve bir de temas tabakasi yazilir. Hangi parcanin hangi logo oldugunu
@@ -304,7 +390,7 @@ def kes(kaynak: Path, cikti: Path) -> int:
         return 1
 
     im = Image.open(kaynak)
-    kutular = _kutular(_maske(im))
+    kutular = _kutular(_maske(im), yapistir=yapistir)
     if not kutular:
         print("Parca bulunamadi. Tabaka duz bir zemin uzerinde mi?")
         return 1
@@ -322,19 +408,7 @@ def kes(kaynak: Path, cikti: Path) -> int:
         print("  ✓ %-14s %4dx%-4d   kaynakta (%d,%d)" %
               (ad, p.width, p.height, kutu[0], kutu[1]))
 
-    # Temas tabakasi: hepsi tek karede, numarali. Bakip ad vermek icin.
-    H, C = 260, min(5, len(parcalar))
-    satir = (len(parcalar) + C - 1) // C
-    t = Image.new("RGB", (C * (H + 16), satir * (H + 34)), (250, 249, 247))
-    ciz = ImageDraw.Draw(t)
-    for i, (ad, p) in enumerate(parcalar):
-        k = p.convert("RGBA")
-        k.thumbnail((H, H), Image.LANCZOS)
-        x = (i % C) * (H + 16) + 8
-        y = (i // C) * (H + 34) + 6
-        t.paste(k, (x + (H - k.width) // 2, y + (H - k.height) // 2), k)
-        ciz.text((x, y + H + 6), ad, fill=(20, 20, 20))
-    t.save(cikti / "tabaka.png")
+    _tabaka(parcalar, cikti)
     print("\n%d parca + tabaka.png -> %s" % (len(parcalar), cikti))
     print("Once tabaka.png'e bak, sonra her parcayi adiyla yeniden adlandir")
     print("ve `python3 tools/marka.py <klasor>` ile yerlestir.")
@@ -430,15 +504,43 @@ def main() -> int:
 
     if "--liste" in sys.argv:
         return liste()
-    if "--kes" in sys.argv:
-        arg = [a for a in sys.argv[1:] if not a.startswith("-")]
-        if not arg:
-            print("Kullanim: python3 tools/marka.py <tabaka.png> --kes [cikti]")
+    if "--bol" in sys.argv:
+        ham = sys.argv[1:]
+        arg = [a for i, a in enumerate(ham)
+               if not a.startswith("-") and not (i > 0 and ham[i - 1] == "--bol")]
+        olcu = None
+        for i, a in enumerate(sys.argv):
+            if a == "--bol" and i + 1 < len(sys.argv):
+                olcu = sys.argv[i + 1]
+        m = re.match(r"^(\d+)[xX](\d+)$", olcu or "")
+        if not arg or not m:
+            print("Kullanim: python3 tools/marka.py <tabaka.png> --bol 5x5 [cikti]")
             return 1
         kaynak = Path(arg[0]).expanduser().resolve()
         cikti = Path(arg[1]).expanduser().resolve() if len(arg) > 1 \
             else kaynak.parent / (kaynak.stem + "-parcalar")
-        return kes(kaynak, cikti)
+        return bol(kaynak, cikti, int(m.group(1)), int(m.group(2)))
+    if "--kes" in sys.argv:
+        ham = sys.argv[1:]
+        arg = [a for i, a in enumerate(ham)
+               if not a.startswith("-")
+               and not (i > 0 and ham[i - 1] == "--yapistir")]
+        if not arg:
+            print("Kullanim: python3 tools/marka.py <tabaka.png> --kes [cikti]"
+                  " [--yapistir 0.005]")
+            return 1
+        kaynak = Path(arg[0]).expanduser().resolve()
+        cikti = Path(arg[1]).expanduser().resolve() if len(arg) > 1 \
+            else kaynak.parent / (kaynak.stem + "-parcalar")
+        yap = 0.02
+        for i, a in enumerate(sys.argv):
+            if a == "--yapistir" and i + 1 < len(sys.argv):
+                try:
+                    yap = float(sys.argv[i + 1])
+                except ValueError:
+                    print("--yapistir bir sayi olmali (orn. 0.005)")
+                    return 1
+        return kes(kaynak, cikti, yap)
     arg = [a for a in sys.argv[1:] if not a.startswith("-")]
     if not arg:
         print(__doc__)

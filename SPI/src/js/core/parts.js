@@ -80,7 +80,7 @@ SP.Parts = (function(){
     const a = SP.AGENT_BY_ID[agentId];
     if(!a) return raw('');
     return html`<span class="${cls('agentav', 'agentav--' + a.id, size === 'sm' && 'agentav--sm')}"
-      aria-hidden="true">${a.initial}</span>`;
+      aria-hidden="true">${SP.UI.pp(a.id)}${a.initial}</span>`;
   }
 
   /* Ajan konusma balonu kaynagi: model mi kural motoru mu? */

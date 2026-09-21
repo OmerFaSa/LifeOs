@@ -762,7 +762,85 @@ SP.UI = (function(){
     SP.UI._confirm = onConfirm;
   }
 
-  return {
+  /* AJAN PORTRESI — `.agentav` kutusunun icine biner.
+
+     Depo sahibi yirmi bes portre gonderdi: «dairesel ve kareleri
+     sistemin farkli yerlerinde kullan». Her ajanin kendi yuzu var ve
+     dosya adi ajanin kimliginden turer — `ajan-spi-patron.webp`.
+
+     BAS HARF ALTTA KALIR. Portre yuklenemezse (dosya yok, yeni bir
+     ajan eklendi) `onerror` dugumu kaldirir ve altindaki harf gorunur
+     olur. Eksik portre hata degildir; kirik resim simgesi gostermek
+     hic gostermemekten kotudur.
+
+     Tek yerde durmasinin sebebi: ayni isaretleme on ayri ekranda
+     yaziliydi ve on kopya bir gun ayrisir. */
+  function pp(id){
+    if(!id) return '';
+    var t = String(id).replace(/[^a-z0-9_-]/gi, '');
+    if(!t) return '';
+    return SP.h.raw('<img class="agentav__pp" src="img/marka/ajan-spi-'
+      + t + '.webp" alt="" aria-hidden="true" loading="lazy"'
+      + ' onerror="this.remove()">');
+  }
+
+  /* AYNI AJANIN KARE PORTRESI — masa basliginda.
+
+     Daire ile kare AYNI KISIDIR; teslimattaki yirmi bes yuzun iki
+     kirpimi. Daire kucuk yerler icin: mesajin yaninda, listenin
+     solunda, toplanti turunun basinda. Kare, ajanin KENDI basligi
+     icin: orada portre bir isaret degil, karsindaki kisidir.
+
+     `pp` ile ayni sozlesme: yalniz goruntuyu dondurur, kutuyu cagiran
+     kurar; dosya yoksa `onerror` dugumu kaldirir ve bas harf gorunur
+     kalir. */
+  /* ONAY MUHRU — kullanici bir seyi onayladiginda BASILIR.
+
+     Toast «uygulandi» der ve gecer; muhur ONAYIN KENDISINI gosterir.
+     Ikisi birden durur: yazi ne olduğunu, muhur kimin onayladigini
+     soyler.
+
+     RENK KULLANICININ KENDI KADEMESINDEN gelir. Onay kullanicinin
+     imzasidir ve imza kime aitse onun rengini tasir. Kademe
+     okunamazsa (motor yuklenmemis) muhur HIC BASILMAZ — varsayilan bir
+     kademe uydurmak, olcmedigimiz bir seyi soylemekti.
+
+     BIR SANIYE, tek sefer, tiklanamaz. Hareket azaltma tercihinde hic
+     gorunmez: bilgi toast'ta zaten var, muhur onun susu. */
+  function onayMuhru(){
+    try{
+      if(window.matchMedia
+        && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    }catch(e){}
+    var d = (SP.XP && SP.XP.durum) ? SP.XP.durum() : null;
+    if(!d || !d.kademe) return;
+    var kutu = document.createElement('div');
+    kutu.className = 'onaymuhur';
+    kutu.setAttribute('aria-hidden', 'true');
+    var img = document.createElement('img');
+    img.alt = '';
+    img.src = 'img/seviye/onay-' + d.kademe + '.webp';
+    img.addEventListener('error', function(){
+      if(kutu.parentNode) kutu.parentNode.removeChild(kutu);
+    });
+    kutu.appendChild(img);
+    (document.body || document.documentElement).appendChild(kutu);
+    setTimeout(function(){
+      if(kutu.parentNode) kutu.parentNode.removeChild(kutu);
+    }, 1100);
+  }
+
+  function ppKare(id){
+    if(!id) return '';
+    var t = String(id).replace(/[^a-z0-9_-]/gi, '');
+    if(!t) return '';
+    return SP.h.raw('<img class="agentkare__pp" src="img/marka/ajan-kare-spi-'
+      + t + '.webp" alt="" aria-hidden="true" loading="lazy"'
+      + ' onerror="this.remove()">');
+  }
+
+
+  return { pp:pp, ppKare:ppKare, onayMuhru:onayMuhru,
     icon, trend, motif, gauge,
     lineChart, barChart, donut, sparkline, stackBar, heatmap, legend,
     rangeBar, macroSplit,

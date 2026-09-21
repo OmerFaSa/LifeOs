@@ -24,7 +24,7 @@ ESP.Screens.team = (function(){
 
   function avatar(a){
     return html`<span class="agentav" style="background:${a.color}"
-      aria-hidden="true">${a.initial}</span>`;
+      aria-hidden="true">${ESP.UI.pp(a.id)}${a.initial}</span>`;
   }
 
   function msgRow(m){
@@ -66,7 +66,9 @@ ESP.Screens.team = (function(){
             tone:hazir ? 'info' : 'muted' }),
           body:html`
             <div class="row">
-              ${avatar(a)}
+              ${html`<span class="${'agentkare agentkare--' + a.id}"
+                style="${'background:' + a.color}"
+                aria-hidden="true">${ESP.UI.ppKare(a.id)}${a.initial}</span>`}
               <div>
                 <b>${a.name}</b>
                 <p class="small muted">${a.scope}</p>

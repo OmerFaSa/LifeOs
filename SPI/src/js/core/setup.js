@@ -50,6 +50,26 @@ SP.Setup = (function(){
       wide:true, noClose:true,
       body:String(html`<div class="setup">
 
+        <!-- TANITIM AFISI — sisteme ILK giren burada durur.
+
+             ALT METNI BOS ve aria-hidden: afisin uzerinde yazan sey
+             (baslik, cumle, dort ozellik) hemen ALTINDA gercek metin
+             olarak zaten yaziyor. Ayni cumleyi bir de alt metinde
+             tekrarlamak, ekran okuyucuya her seyi iki kere okutmakti.
+             Afis burada bir SUSTUR ve susun alt metni bos olur.
+
+             Dosya yoksa onerror dugumu kaldirir; sihirbaz eskisi gibi
+             calisir.
+
+             NOT: bu yorum bir sablon dizesinin (template literal)
+             ICINDE duruyor — icinde TERS TIRNAK OLAMAZ. Ilk yazimda
+             alt sozcugu ters tirnak icine alinmisti ve dize orada
+             kapandi: butun dosya
+             ayrisamadi, SPI'nin dokuz yuz testi «SP.Setup tanimsiz»
+             diye dustu. -->
+        <img class="setup__afis" src="img/marka/tanitim-spi.webp"
+          alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">
+
         <div class="setup__hero">
           <p class="setup__kicker">İlk kurulum</p>
           <h2 class="setup__h">Beş alan yeter. Gerisi zamanla dolar.</h2>

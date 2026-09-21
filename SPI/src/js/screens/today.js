@@ -282,11 +282,24 @@ SP.Screens.today = (function(){
   function minimumEntry(){
     const m = SP.Calc.minimumDay();
     const streak = SP.Calc.streak();
+    /* ASGARI GUN TAMAMLANDIGINDA bir satir degil bir SONUC yazilir.
+
+       «4 / 4» ile «3 / 4» arasindaki fark ekranda bir rakamdi; gunun
+       bittigini soyleyen sey o rakami okumak zorunda kalmaktı. Kart
+       yalniz hepsi tamamken cizilir — yarim bir gunu tamamlanmis
+       gostermek, olcmedigimiz bir seyi soylemek olurdu. */
+    const bitti = m.total > 0 && m.done >= m.total;
     return K.Entry({
       label:'Asgari gün', hint:'minimum-day',
       meta:m.done + ' / ' + m.total + ' · seri ' + streak + ' gün',
       note:m.note,
-      body:html`<div class="mt-2">${map(m.rows, P.minRow)}</div>`,
+      body:html`
+        ${when(bitti, () => K.NextUp({ icon:'check', calm:true, sanat:'saglik',
+          label:'Asgari gün tamam',
+          title:m.total + ' / ' + m.total + ' · seri ' + streak + ' gün',
+          why:'Bugünün asgarisi kapandı. Seri, girilmiş günlerden sayılır; '
+             + 'girilmemiş gün seriyi kırmaz, sayıya da katılmaz.' }))}
+        <div class="mt-2">${map(m.rows, P.minRow)}</div>`,
     });
   }
 
@@ -596,6 +609,10 @@ SP.Screens.today = (function(){
     const n = liste.filter(x => String(x.id) === String(id))[0];
     if(!n) return;
     const r = await SP.Beacon.resolveIntent(n, action);
+    /* MUHUR YALNIZ ONAYDA BASILIR. Reddetmek de bir cevaptir ama
+       onay degildir; ikisine ayni muhru basmak, muhru anlamsiz
+       kilardi. */
+    if(r.ok && action !== 'reject' && action !== 'dismiss') SP.UI.onayMuhru();
     if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
     S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
     const bas = r.state === 'acknowledged'

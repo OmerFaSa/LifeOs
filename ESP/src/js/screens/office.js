@@ -21,7 +21,7 @@ ESP.Screens.office = (function(){
 
   function avatar(a){
     return html`<span class="agentav" style="background:${a.color}"
-      aria-hidden="true">${a.initial}</span>`;
+      aria-hidden="true">${ESP.UI.pp(a.id)}${a.initial}</span>`;
   }
 
   /* --------------------------------------------------------------- masalar */
@@ -86,6 +86,7 @@ ESP.Screens.office = (function(){
             data:{ 'data-agent':'patron' } }),
           body:html`
             ${K.NextUp({ icon:next.rank ? 'zap' : 'check', calm:!next.rank,
+              sanat:'istikrar',
               label:'Sıradaki tek iş', title:next.title, why:next.why })}
             <p class="rulesay mt-10">${ESP.Office.ruleText('patron', brf)}</p>`,
         }),

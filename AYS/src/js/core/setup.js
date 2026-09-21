@@ -240,6 +240,16 @@ R.Setup = (function(){
       subtitle:'Adım '+(step+1)+' / '+STEPS.length+' · '+s.note,
       wide:true,
       body:String(K.Stack([
+        /* TANITIM AFISI — yalniz ILK kurulumun ILK adiminda. Ayarlardan
+           yeniden acilan sihirbazda gosterilmez: orada kullanici zaten
+           sistemin icinde ve bir tanitim afisi, bildigi seyi anlatan
+           bir gecikmedir.
+
+           `alt` bos ve `aria-hidden`: afisteki cumleler adimlarin
+           icinde gercek metin olarak duruyor. */
+        when(isFirstRun && first, () => html`<img class="setup__afis"
+          src="img/marka/tanitim-ays.webp" alt="" aria-hidden="true"
+          loading="lazy" onerror="this.remove()">`),
         html`<div class="wizsteps">${map(STEPS, (x, i) => html`
           <span class="${i === step ? 'wizstep is-on' : i < step ? 'wizstep is-done' : 'wizstep'}"
             title="${x.title}"></span>`)}</div>`,

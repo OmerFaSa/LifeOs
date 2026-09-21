@@ -775,15 +775,25 @@ SP.XP = (function(){
          ve yazılı, bu ise 28 piksellik bir daire. Kartı buraya
          küçültmek, okunmayan bir şey göstermekti.
 
+         KADEME MÜHRÜ (`onay-N.webp`) kullanılır. Bir süre burada
+         `rozet-N.png` aranıyordu ve o dosya hiç üretilmedi: her
+         açılışta altı istek 404 dönüyor, rozet de hiç görünmüyordu.
+         Mühür zaten o kademenin yuvarlak amblemi — aynı şeyi ikinci
+         kez çizdirmek yerine olanı kullanmak doğrusu.
+
+         AYNI DOSYA ONAY MÜHRÜ OLARAK DA BASILIR (`UI.onayMuhru`) ve bu
+         bir karışıklık değil, tanımın kendisidir: bu görsel
+         KULLANICININ KADEME MÜHRÜDÜR. Künyede kim olduğunu söyler,
+         bir teklifi onaylarken de aynı şeyi söyler.
+
          Dosya yoksa katman hiç çizilmez ve altındaki kademe numarası
          görünür kalır — kırık resim simgesi de, boşluk da göstermeden.
-         Kullanıcı `img/seviye/rozet-N.png` bıraktığı an devreye girer.
 
          Adres MUTLAK verilir: özel bir CSS değişkeni içindeki göreli
          url(), değişkenin kullanıldığı yere değil TANIMLANDIĞI stil
          sayfasına göre çözülüyor ve `css/img/seviye/...` diye yanlış bir
          adres çıkıyordu. */
-      + ';--kademe-gorsel:url(&quot;' + kac(mutlak(kok + 'rozet-' + d.kademe + '.png')) + '&quot;)"'
+      + ';--kademe-gorsel:url(&quot;' + kac(mutlak(kok + 'onay-' + d.kademe + '.webp')) + '&quot;)"'
       + ' title="' + kac(baslik) + '" aria-label="' + kac(baslik) + '">'
       + '<span class="seviye-rozet__mark" aria-hidden="true">'
       +   '<span>' + d.kademe + '</span></span>'
@@ -819,12 +829,24 @@ SP.XP = (function(){
       var hal = 'kilitli';
       if(i < bitmis) hal = 'gecildi';
       else if(b.etiket === simdiki) hal = 'simdi';
+      var kb = L.KADEME_ILE(b.kademe);
       return {
         etiket:b.etiket, kademe:b.kademe, basamak:b.basamak,
         maliyet:b.maliyet, esik:b.esik,
-        kademeBilgi:L.KADEME_ILE(b.kademe),
+        kademeBilgi:kb,
         durum:hal,
         kart:L.MEDYA_ADI ? (kok + L.MEDYA_ADI(b.etiket) + '.webp') : null,
+        /* NİŞAN — aynı basamağın küçük amblemi. Kart bir SAYFA kaplar
+           (900 piksel boyunda bir portre); merdivende yüz piksellik
+           bir kutuda gösterilince ne taşı okunuyor ne yazısı. Nişan o
+           kutu için çizilmiş.
+
+           Kutsal'ın K merdiveninde nişan YOKTUR ve olmaması doğrudur:
+           K basamakları kademe içinde 1..10 diye sayılmaz, kendi
+           adlarıyla (K100, K200) durur. Orada `null` döner ve ekran
+           kartı kullanır. */
+        nisan:(kb && kb.etiketler) ? null
+          : (kok + 'nisan-' + b.kademe + '-' + b.basamak + '.webp'),
       };
     });
   }

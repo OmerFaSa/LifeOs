@@ -431,6 +431,30 @@ __NS__.Perde = (function(){
 
     if(secenekler.banner) perde.appendChild(bannerCiz(secenekler.banner));
 
+    /* KADEME GEÇİŞ KARESİ — «Altın → Yakut». Tam ekran, tek görsel;
+       eski kademeyle yenisini YAN YANA gösterir, ki kullanıcı neyi
+       bırakıp neye geçtiğini bir bakışta görsün.
+
+       Banner ve kart YİNE ÇİZİLİR ve geçiş karesi ancak YÜKLENDİĞİNDE
+       onları gizler (`data-gecis`). Kart için kurulan düzenin aynısı:
+       dosya gelmezse ekranda hiçbir an boşluk olmaz, olan gösterim
+       görülür. Sıra da bunun için: geçiş karesi banner'dan SONRA
+       eklenir, üstünde durur. */
+    if(secenekler.gecis){
+      var gecisEl = document.createElement('img');
+      gecisEl.className = 'perde__gecis';
+      gecisEl.alt = '';
+      gecisEl.setAttribute('aria-hidden', 'true');
+      gecisEl.addEventListener('load', function(){
+        perde.setAttribute('data-gecis', 'var');
+      });
+      gecisEl.addEventListener('error', function(){
+        if(gecisEl.parentNode) gecisEl.parentNode.removeChild(gecisEl);
+      });
+      gecisEl.src = secenekler.gecis;
+      perde.appendChild(gecisEl);
+    }
+
     /* RÜTBE KARTI — gösterimin kahramanı. Banner'dan ÖNCE değil SONRA
        eklenir: kart yüklenirse banner gizlenir, yüklenmezse banner
        zaten çizilmiş hâlde durur ve hiçbir an boş ekran olmaz. */
@@ -612,6 +636,14 @@ __NS__.Perde = (function(){
     return (kok || 'img/seviye/') + 'sahne-' + yukselme.kademe + '.webp';
   }
 
+  /* Geçiş karesi YALNIZ yeni kademede istenir. Basamak (1.1 → 1.2)
+     aynı kademenin içinde kalır; «Bronz → Bronz» diyen bir tam ekran
+     kare, üç basamakta üç kez aynı şeyi söylerdi. */
+  function gecisYolu(yukselme, kok){
+    if(!yukselme || !yukselme.yeniKademe || !yukselme.kademe) return null;
+    return (kok || 'img/seviye/') + 'gecis-' + yukselme.kademe + '.webp';
+  }
+
   /* Perde ne kadar dursun? Yeni bir kademe yeni bir ADDIR: okunacak bir
      slogan, bakılacak yeni bir kart vardır. Basamak ise bir ilerleme
      işaretidir, göz ucuyla görülür. İkisi de «Geç» ile kesilebilir. */
@@ -761,6 +793,7 @@ __NS__.Perde = (function(){
       baslik:(yukselme.yeniKademe ? 'Yeni kademe: ' : 'Yeni rütbe: ')
         + (k.ad || '') + ' ' + yukselme.etiket,
       sahne:sahneYolu(yukselme, kok),
+      gecis:gecisYolu(yukselme, kok),
       kart:kartYolu(yukselme, kok),
       kartVideo:kartVideoYolu(yukselme, kok),
       enAz:kutlamaSuresi(yukselme),
@@ -890,6 +923,7 @@ __NS__.Perde = (function(){
     kendiliginenAcilsinMi:kendiliginenAcilsinMi,
     /* Saf kararlar — perde açmadan sınanabilsinler diye dışarıda. */
     kartYolu:kartYolu, kartVideoYolu:kartVideoYolu, sahneYolu:sahneYolu,
+    gecisYolu:gecisYolu,
     kutlamaSuresi:kutlamaSuresi,
     rozetKutla:rozetKutla, rozetGorseliYolu:rozetGorseliYolu,
     rozetKutlamaSuresi:rozetKutlamaSuresi,

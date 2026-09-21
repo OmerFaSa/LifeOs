@@ -33,7 +33,7 @@ R.Screens.meeting = (function(){
 
   function Avatar(agent){
     return html`<span class="${cls('agentav', 'agentav--' + agent.id, 'agentav--sm')}"
-      aria-hidden="true">${agent.initial}</span>`;
+      aria-hidden="true">${R.UI.pp(agent.id)}${agent.initial}</span>`;
   }
 
   /* Metinde gecen ajan adlarini tiklanabilir yapar: "bu Tuna'nin alani"

@@ -158,6 +158,8 @@ R.Screens.today = (function(){
     const clickable = a.route || a.act;
     return c.NextUp({
       icon:a.icon, label:a.label, title:a.title, why:a.why, hint:'next-action', calm:a.tone === 'calm',
+      /* Yalniz sakin halde cizilir: AYS'nin isi hedeftir. */
+      sanat:'hedef',
       action:when(clickable, () => c.Button({ label:'Başla', tone:'primary', act:'next-action',
         data:{ 'data-route':a.route || '', 'data-next':a.act || '', 'data-block':a.blockId || '' } })),
     });
@@ -731,6 +733,10 @@ R.Screens.today = (function(){
     const n = liste.filter(x => String(x.id) === String(id))[0];
     if(!n) return;
     const r = await R.Beacon.resolveIntent(n, action);
+    /* MUHUR YALNIZ ONAYDA BASILIR. Reddetmek de bir cevaptir ama
+       onay degildir; ikisine ayni muhru basmak, muhru anlamsiz
+       kilardi. */
+    if(r.ok && action !== 'reject' && action !== 'dismiss') R.UI.onayMuhru();
     if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
     S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
     const bas = r.state === 'applied' ? (r.note || 'Uygulandı')

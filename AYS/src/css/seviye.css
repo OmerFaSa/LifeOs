@@ -68,6 +68,42 @@
   box-shadow:0 30px 120px rgba(0,0,0,.65);
 }
 
+/* ---------- marka LOGOSU ----------
+
+   Video kalktı, yerine logo geldi. Logo videodan KÜÇÜK durur ve bu
+   kasıtlı: video bir sahneydi ve ekranı hak ediyordu; logo bir
+   imzadır. Ekranı kaplayan bir imza, imza olmaktan çıkar.
+
+   Gölge YOK: saydam zeminli bir logoya kutu gölgesi vermek, olmayan
+   bir dikdörtgenin kenarını çizmekti. */
+.perde__logo{
+  position:relative;
+  width:min(38vw, 300px);
+  height:auto;
+  object-fit:contain;
+  filter:drop-shadow(0 22px 60px rgba(0,0,0,.55));
+  animation:marka-logo-gir .9s cubic-bezier(.16,.84,.28,1) both;
+}
+@keyframes marka-logo-gir{
+  from{ opacity:0; transform:translateY(14px) scale(.94); }
+  to{ opacity:1; transform:none; }
+}
+
+/* Marka perdesinin zemini: logonun kendi rengi sızsın diye bulanık
+   kopya kalır, ama logo saydam olduğu için altına bir zemin gerekir. */
+.perde--marka{
+  background:radial-gradient(70% 55% at 50% 45%, #12131a 0%, #07080c 74%);
+}
+.perde--marka .perde__ortam{
+  /* Logo küçük ve saydam: %116'lık bir kopyayı bulanıklaştırmak
+     ekranı tek renge boyuyordu. Daha dar ve daha sönük. */
+  inset:18%;
+  width:64%; height:64%;
+  object-fit:contain;
+  filter:blur(72px) saturate(1.5);
+  opacity:.42;
+}
+
 /* ---------- araç şeridi ---------- */
 .perde__araclar{
   position:absolute; right:clamp(14px, 3vw, 28px); bottom:clamp(14px, 3vw, 28px);
@@ -315,6 +351,40 @@
 .perde[data-kart="var"] .perde__rozet{ display:none; }
 .perde[data-kart="var"] .perde__banner{ gap:10px; padding-top:0; }
 
+/* ---------- kademe geçiş karesi ---------- */
+
+/* «ALTIN → YAKUT». Bir kademeden ötekine geçerken basılan TEK kare;
+   kendi başına bitmiş bir gösterimdir — iki kartı, iki adı ve iki
+   sloganı zaten taşır.
+
+   `contain`, `cover` DEĞİL: karenin üstünde yazı var ve kırpmak o
+   yazıyı keser. Kenarda kalan boşluğu `.perde--rutbe` zemini doldurur,
+   yani siyah bir çerçeve değil kademenin kendi rengi görünür.
+
+   Karartma YOK: sahneden farkı budur. Sahne bir dekordur ve kartın
+   arkasında durur; geçiş karesi kahramanın kendisidir. */
+.perde__gecis{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:contain;
+  z-index:4;
+  pointer-events:none;
+  animation:perde-gecis-gir .9s cubic-bezier(.16,.84,.28,1) both;
+}
+@keyframes perde-gecis-gir{
+  from{ opacity:0; transform:scale(1.05); }
+  to{ opacity:1; transform:none; }
+}
+
+/* Kare GELDİĞİNDE kart, banner ve vinyet çekilir. Gelmezse hiçbiri
+   çekilmez; ekranda her hâlükârda bir gösterim kalır. */
+.perde[data-gecis="var"] .perde__kart,
+.perde[data-gecis="var"] .perde__banner{ display:none; }
+.perde[data-gecis="var"].perde--rutbe::after{ opacity:0; }
+/* Sahne geçiş karesinin arkasında kalır ve `contain` boşluğunu
+   doldurur — ama iyice karartılır, karenin kendi zemini kazansın. */
+.perde[data-gecis="var"] .perde__sahne{ filter:brightness(.18) saturate(1); }
+
 /* Rütbe perdesinde banner bir YEDEK değil, kartın yazısıdır.
 
    Kendi yumuşak karartması VAR ve gerekli: sahne bir fotoğraftır ve
@@ -480,6 +550,7 @@
      kartın girişi durur — kartın kendisi kalır, çünkü duran bir görsel
      hareket değildir. */
   .perde__kart{ animation:none; }
+  .perde__gecis{ animation:none; }
   .perde__sahne{ transform:none; }
   .haberci{ animation:none; }
   /* Marka girişi tercihte HİÇ görünmez. JavaScript de onu kaldırır ama
@@ -852,6 +923,25 @@
   font:500 20px/1.15 ui-serif, Georgia, "Times New Roman", serif;
 }
 .rutbe-kademe__slogan{ font-size:12px; opacity:.72; }
+
+/* ARMA — kademenin mührü, bandın sağ ucunda.
+
+   Sertifikadaki mühür gibi durur: adı yazan satırın YANINDA, onunla
+   yarışmadan. Armanın üzerinde de kademenin adı yazılıdır ve bu bir
+   tekrar değil, imzadır — 110 piksel boyunda o yazı okunur boyda
+   kalır, daha küçüğünde bulanıklasırdı.
+
+   Dar ekranda GİZLENİR: 390 pikselde ad, slogan ve rozetle aynı satırı
+   paylaşmaya kalkınca üçü de sıkışıyordu. */
+.rutbe-kademe__arma{
+  flex:none;
+  display:none;
+  height:110px; width:auto;
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.55));
+}
+@media (min-width:560px){
+  .rutbe-kademe__arma{ display:block; }
+}
 
 .rutbe-basamaklar{
   display:flex; flex-wrap:wrap; gap:12px;

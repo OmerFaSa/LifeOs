@@ -84,6 +84,27 @@ VIDEO = {".mp4", ".webm"}
 RUTBE = re.compile(r"^rutbe-(\d+-\d+|k\d+)$")
 SAHNE = re.compile(r"^sahne-(\d+)$")
 
+# RÜTBE KARTININ YANINDAKİ DÖRT AİLE. Hepsi kademeye bağlıdır, hiçbiri
+# rütbe kartı DEĞİLDİR; ayrı adlandırılmalarının sebebi, bir gün
+# birinin diğerinin dosyasını çağırmaması:
+#
+#   rutbe-5-2    basamağın KARTI — bir sayfa kaplar, tek başına durur
+#   nisan-5-2    aynı basamağın AMBLEMİ — bir satırın yanına sığar
+#   gecis-5      o kademeye GEÇİLDİĞİNDE basılan tam ekran sahne
+#   bant-4       kademenin adını taşıyan yatay bant
+#   onay-3       kullanıcı bir şeyi onayladığında basılan mühür
+#   cerceve-3    profil fotoğrafının çevresine takılan halka
+#
+# `bant-hukum`: teslimatta beşinci bandın ÜZERİNDE «HÜKÜM» yazıyor,
+# «SAFİR» değil. Safir'in yerine konsaydı ekranda kademenin adı yanlış
+# yazardı; adıyla saklanır ve Safir bandı gelene kadar ekrana çıkmaz.
+NISAN = re.compile(r"^nisan-\d+-\d+$")
+GECIS = re.compile(r"^gecis-\d+$")
+BANT = re.compile(r"^bant-(\d+|hukum)$")
+ONAY = re.compile(r"^onay-\d+$")
+CERCEVE = re.compile(r"^cerceve-\d+$")
+SAYDAM = (NISAN, BANT, ONAY, CERCEVE)
+
 # ------------------------------------------------------------------
 # BAŞARIM ROZETLERİ, MÜHÜRLER VE ONUR
 #
@@ -167,9 +188,13 @@ def isle(kaynak: Path, kayipli: bool = False) -> int:
             continue
         govde, uzanti = dosya.stem, dosya.suffix.lower()
         rutbe, sahne = RUTBE.match(govde), SAHNE.match(govde)
-        basarim = None if (rutbe or sahne) else basarim_adi(govde)
-        if not rutbe and not sahne and not basarim:
-            print("  · %-34s ADI UYMUYOR — rutbe-5-2 / sahne-4 / saat_500 / "
+        saydam = any(k.match(govde) for k in SAYDAM)
+        gecis = GECIS.match(govde)
+        basarim = (None if (rutbe or sahne or saydam or gecis)
+                   else basarim_adi(govde))
+        if not (rutbe or sahne or saydam or gecis or basarim):
+            print("  · %-34s ADI UYMUYOR — rutbe-5-2 / nisan-5-2 / gecis-5 / "
+                  "bant-4 / onay-3 / cerceve-3 / sahne-4 / saat_500 / "
                   "muhur_saglik" % dosya.name[:34])
             atlanan += 1
             continue
@@ -196,7 +221,7 @@ def isle(kaynak: Path, kayipli: bool = False) -> int:
                   % (dosya.name[:34], hedef.name))
             atlanan += 1
             continue
-        if rutbe or basarim:
+        if rutbe or basarim or saydam:
             im = Image.open(dosya).convert("RGBA")
             # Tam saydam kenar boşluğu atılır. Parıltı ALFASI SIFIR
             # DEĞİLDİR, yani kırpma ışığı kesmez — yalnız boşluğu alır.
@@ -211,8 +236,8 @@ def isle(kaynak: Path, kayipli: bool = False) -> int:
             else:
                 im.save(hedef, "WEBP", lossless=True, quality=100, method=6)
         else:
-            # Sahnede saydamlık yok: RGB'ye indirilir, alfa kanalı
-            # taşımak bedava değildir.
+            # Sahnede ve geçiş karesinde saydamlık yok: RGB'ye indirilir,
+            # alfa kanalı taşımak bedava değildir.
             im = Image.open(dosya).convert("RGB")
             if kayipli:
                 if im.width > SAHNE_GENIS:
@@ -247,7 +272,7 @@ def liste() -> int:
             continue
         if RUTBE.match(d.stem):
             kartlar.append(d)
-        elif SAHNE.match(d.stem):
+        elif SAHNE.match(d.stem) or GECIS.match(d.stem):
             sahneler.append(d)
         else:
             ötekiler.append(d)

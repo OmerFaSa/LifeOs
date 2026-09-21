@@ -65,7 +65,7 @@ ESP.Screens.meeting = (function(){
       <div class="meetturn">
         <div class="meetturn__head">
           <span class="agentav" style="background:${a ? a.color : 'var(--agent-patron)'}"
-            aria-hidden="true">${a ? a.initial : '?'}</span>
+            aria-hidden="true">${a ? ESP.UI.pp(a.id) : ''}${a ? a.initial : '?'}</span>
           <b>${t.name}</b>
           ${K.Badge({ label:t.source === 'model' ? 'model' : 'kural motoru',
             tone:t.source === 'model' ? 'info' : 'muted', icon:false })}
