@@ -7,12 +7,12 @@
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/store.test.js`; `tools/ortak.py --yay` ile üç
-   arayüzün `src/tests/` klasörüne yayılır. `R` yer tutucudur.
+   arayüzün `src/tests/` klasörüne yayılır. `ESP` yer tutucudur.
 
    ------------------------------------------------------------------
    NEDEN BU PAKET VAR
 
-   Öteki testler `R.Store`'u bellek içi sahte bir depoyla
+   Öteki testler `ESP.Store`'u bellek içi sahte bir depoyla
    değiştirir (`mockStore`) ve bu DOĞRUDUR — onların konusu modelin
    mantığıdır. Ama sonuç şuydu: verinin gerçekten yazıldığı modül hiç
    denenmiyordu. `node tools/kapsam.js` bunu üç turda üç kez söyledi:
@@ -52,7 +52,7 @@
    gerekir. */
 
 (function(){
-  const { describe, it, expect, realStore } = R.Test;
+  const { describe, it, expect, realStore } = ESP.Test;
   const S = realStore;
 
   /* UYGULAMA KİMLİĞİ VE YEREL ANAHTAR SABİT YAZILMAZ.
@@ -174,7 +174,7 @@
       const yedek = S.exportAll();
       expect(yedek.__meta.app).toBe(uygulamaKimligi());
       expect(typeof yedek.__meta.app).toBe('string');
-      expect(yedek.__meta.schemaVersion).toBe(R.SCHEMA_VERSION);
+      expect(yedek.__meta.schemaVersion).toBe(ESP.SCHEMA_VERSION);
       expect(yedek.data[ON + 'y'].v).toBe('korunmalı');
       await temizle();
     });
@@ -186,7 +186,7 @@
       await temizle();
       await S.set(ON + 'eski', { v:1 });
       const oncekiTam = S.exportAll().data;
-      const yedek = { __meta:{ app:uygulamaKimligi(), schemaVersion:R.SCHEMA_VERSION },
+      const yedek = { __meta:{ app:uygulamaKimligi(), schemaVersion:ESP.SCHEMA_VERSION },
         data:Object.assign({}, oncekiTam, { [ON + 'yeni']:{ v:2 } }) };
       delete yedek.data[ON + 'eski'];
       await S.importAll(yedek);
@@ -196,7 +196,7 @@
     });
 
     it('daha yeni şemalı yedek reddedilir', function(){
-      const r = S.readBackup({ __meta:{ schemaVersion:R.SCHEMA_VERSION + 1 }, data:{} });
+      const r = S.readBackup({ __meta:{ schemaVersion:ESP.SCHEMA_VERSION + 1 }, data:{} });
       expect(r.ok).toBeFalsy();
       expect(r.error).toContain('güncelle');
     });
@@ -229,7 +229,7 @@
         expect(S.importUndoInfo()).toBeNull();
 
         const oncekiTam = S.exportAll().data;
-        await S.importAll({ __meta:{ app:uygulamaKimligi(), schemaVersion:R.SCHEMA_VERSION },
+        await S.importAll({ __meta:{ app:uygulamaKimligi(), schemaVersion:ESP.SCHEMA_VERSION },
           data:Object.assign({}, oncekiTam, { [ON + 'eski']:{ v:'YENI' } }) });
         expect((await S.get(ON + 'eski')).v).toBe('YENI');
         expect(S.importUndoInfo()).toBeTruthy();

@@ -40,7 +40,8 @@
 
    NE YAYILIR, NE YAYILMAZ
 
-   Uc dosyayla basladi (base/layout/designs.css), on uce cikti. Eklenen
+   Uc dosyayla basladi (base/layout/designs.css), on yediye cikti.
+   Eklenen
    her dosya ayni olcutu gecti: UC ARAYUZDE BIREBIR AYNI olmak zorunda
    mi? Oyleyse kaynak burada durur.
 
@@ -76,7 +77,7 @@
 
    YER TUTUCU — AYNI GOVDE, BASKA AD ALANI
 
-   Bastaki on uc dosya ucunde BAYT DUZEYINDE aynidir. Ama bir dosya
+   Ilk on uc dosya ucunde BAYT DUZEYINDE aynidir. Ama bir dosya
    ucunde ayni ISI yapip yalnizca AD ALANINDA ayrilabilir: `quota.js`
    uc kopyasi 280 satirdir ve aralarindaki tek fark `R.` / `SP.` /
    `ESP.` ile depo onekidir (`rota.llm.quota` / `spi...` / `esp...`).
@@ -162,6 +163,10 @@ DOSYALAR = {
     # yazildi, oteki iki kopyada unutuldu.
     "quota.js":      "js/core",
     "quota.test.js": "tests",
+    # DEPO TESTI — uc `store.js` ayni dosya DEGIL ama ayni YUZEYI acar.
+    # Paket o yuzeyin sozunu sinar; govdesini degil. AYS'de %46, ESP'de
+    # %54 olan kapsami olcum gosterdi ve ikisinde de paket yoktu.
+    "store.test.js": "tests",
     # MODEL KATMANI — yalniz SPİ ve ESP (bkz. YALNIZ).
     "llm.js":        "js/core",
 }
@@ -169,7 +174,7 @@ DOSYALAR = {
 # Yayim sirasinda yer tutucusu degistirilen dosyalar. Otekiler bayt
 # duzeyinde kopyalanir; burasi bir dize degistirmedir, sablon motoru
 # degil — kural: yer tutucu YALNIZ ad alani ve depo oneki icin.
-KALIPLAR = {"quota.js", "llm.js", "quota.test.js"}
+KALIPLAR = {"quota.js", "llm.js", "quota.test.js", "store.test.js"}
 
 # Varsayilan UC sistemdir. Burada adi gecen dosya yalnizca listedeki
 # sistemlere yayilir; otekiler o dosyaya hic sahip olmaz.

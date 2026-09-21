@@ -266,12 +266,12 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1298/1298 gecti | 1047/1047 gecti | 865/865 gecti |
+| `runtests.js` | 1342/1342 gecti | 1067/1067 gecti | 1107/1107 gecti |
 | `smoke.js` | Duman testi temiz — 2 hedefte 38 ekran, 46 sekme gezildi. | Duman testi temiz — 2 hedefte 26 ekran, 74 sekme gezildi. | Duman testi temiz — 2 hedefte 30 ekran, 192 sekme gezildi. |
 | `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
 | `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 42 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 50 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 111 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 44.8 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 27.2 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 47.7 ms (bütçe 100). |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 45 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 23.6 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 44.9 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | beş düzen temiz — 460 ekran/genişlik kombinasyonu bakıldı | — |
 | `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
@@ -285,7 +285,7 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 | `marka.py` | marka adlandirma ve yol muhafizi temiz (25 durum) |
 | `marka kunyesi` | Medya kunyesi taze (43 gorsel, 4 aile). |
 | `seviye.py` | Seviye sistemi: uc arayuzde de kaynakla ayni. |
-| `ortak.py` | Ortak CSS: uc arayuzde de kaynakla ayni (13 dosya). |
+| `ortak.py` | Ortak kaynak: kopyalar kaynakla ayni (17 dosya, 50 kopya). |
 | `entegre.js` | Butunlesme temiz: uc arayuz de HKM ile konustu, HKM kapaliyken hicbiri bozulmadi. |
 <!-- SAYILAR:bitis -->
 

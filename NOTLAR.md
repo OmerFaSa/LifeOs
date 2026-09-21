@@ -43,12 +43,12 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1298/1298 gecti | 1047/1047 gecti | 865/865 gecti |
+| `runtests.js` | 1342/1342 gecti | 1067/1067 gecti | 1107/1107 gecti |
 | `smoke.js` | Duman testi temiz — 2 hedefte 38 ekran, 46 sekme gezildi. | Duman testi temiz — 2 hedefte 26 ekran, 74 sekme gezildi. | Duman testi temiz — 2 hedefte 30 ekran, 192 sekme gezildi. |
 | `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
 | `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 42 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 50 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 111 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 44.8 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 27.2 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 47.7 ms (bütçe 100). |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 45 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 23.6 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 44.9 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | beş düzen temiz — 460 ekran/genişlik kombinasyonu bakıldı | — |
 | `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
@@ -62,7 +62,7 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 | `marka.py` | marka adlandirma ve yol muhafizi temiz (25 durum) |
 | `marka kunyesi` | Medya kunyesi taze (43 gorsel, 4 aile). |
 | `seviye.py` | Seviye sistemi: uc arayuzde de kaynakla ayni. |
-| `ortak.py` | Ortak CSS: uc arayuzde de kaynakla ayni (13 dosya). |
+| `ortak.py` | Ortak kaynak: kopyalar kaynakla ayni (17 dosya, 50 kopya). |
 | `entegre.js` | Butunlesme temiz: uc arayuz de HKM ile konustu, HKM kapaliyken hicbiri bozulmadi. |
 <!-- SAYILAR:bitis -->
 
@@ -795,12 +795,27 @@ yeniden denenmez** — tekrar denemek yalnız kota yakar.
 
 ### 9.4 Kota
 
+`brand/ortak/quota.js` **TEK KAYNAKTIR**; üç arayüze `tools/ortak.py
+--yay` ile dağıtılır, `--denetle` ayrışmayı yakalar. Bir düzeltme artık
+bir kez yazılır.
+
 ```js
-Quota.check(cfg)      // → { ok, reason:'daily'|…, waitMs, usedToday, rpd }
+Quota.check(cfg)      // → { ok, reason, waitMs, limited, usedToday, rpd, rpm }
 Quota.acquire(cfg) / release(cfg) / penalize(cfg, sn)
 Quota.limitsFor(cfg) / effective(cfg) / status(cfg)
 Quota.setOverride(p, {rpm, rpd}) / getOverride / clearOverrides
 ```
+
+**Şema sözü: alanlar DÜŞMEZ.** `check`, `acquire` ve `status`, sınır
+bilinsin bilinmesin AYNI alanları döner; bilinmeyen sayı eksik alan
+değil `null`'dur (§1.2). Bu bir tercih değil, yaşanmış bir hatanın
+yerine konmuş bir kuraldır: `status()` eskiden sınır bilinmediğinde
+yalnız `{ known, usedToday }` dönüyordu ve çağıran `String(st.lastMinute)`
+yazınca ekranda «undefined» görünüyordu. Düzeltme ÜÇ KOPYANIN BİRİNE
+yazıldı, ötekilerde unutuldu — bkz. §13.4.
+
+`usedToday` bilinmeyen sınırda da gerçek sayaçtır ve 0'dır: **sistem
+yalnızca kendi saydığı çağrıyı bilir**, bunu bir sınır sanmaz.
 
 **Güvenlik payı yalnız dakikalık sınıra uygulanır.** Günlük sayaçta pay
 YOKTUR ve olmamalıdır: bu bir zamanlama sorunu değil düz bir sayımdır;
@@ -957,23 +972,78 @@ satır değil — bu depoda bir işlev bir karardır ve «şu işlev hiç
 
 | katman | AYS | SPİ | ESP |
 |---|---|---|---|
-| `core/` | **%76** (885/1163) | **%77** (690/891) | **%74** (738/1000) |
+| `core/` | **%77** (896/1163) | **%78** (694/893) | **%81** (833/1024) |
 | `screens/` | %14 (25/184) | %35 (150/426) | — |
 
-> ESP %67 iken ölçüldü, sonra arayüz ve model katmanına test yazıldı:
-> %74. `components.js` %0 → %65, `llm.js` %5 → %50, `ui.js` %0 → %17.
+> Ölçümün beş turda ne yaptığı: ESP %67 → %74 → %79 → **%81**, AYS %76 →
+> %77 (`store.js` %46 → %88), SPİ %77 → %78. Her seferinde **ölçüm
+> hedefi seçti**, tahmin değil. ESP'nin son iki turu sekiz dosyayı
+> birden kaldırdı:
+>
+> | dosya | önce | sonra | ne yazıldı |
+> |---|---|---|---|
+> | `state.js` | %66 | %92 | `silme.test.js` — on üç silme ailesi |
+> | `components.js` | %65 | %97 | `components.test.js` ikinci tur |
+> | `store.js` | %54 | %86 | ortak `store.test.js` |
+> | `palette.js` | %0 | %41 | `palet.test.js` |
+> | `talk.js` | %0 | %50 | `ses.test.js` |
+> | `voice.js` | %0 | %67 | `ses.test.js` |
+> | `speak.js` | %6 | %50 | `ses.test.js` |
+> | `parts.js` | %10 | %33 | `parts.test.js` |
 
 En düşük `core` dosyaları (ölçüm, yargı değil — bazıları bilerek):
 
 | dosya | AYS | SPİ | ESP |
 |---|---|---|---|
-| `ui.js` | %15 | — | **%0** |
-| `components.js` | %68 | — | **%0** |
-| `parts.js` | — | %80 | **%0** |
-| `palette.js` | %8 | — | %0 *(kasıtlı: UI açar)* |
-| `setup.js` | %13 | — | %0 |
-| `store.js` | %46 | %85 | %54 |
-| `llm.js` | %91 | — | %5 |
+| `setup.js` | %13 | %20 | **%0** |
+| `palette.js` | **%8** | %13 | %41 |
+| `ui.js` | %15 | %50 | %19 |
+| `parts.js` | — | %80 | %33 |
+| `speak.js` / `talk.js` | — | — | %50 / %50 |
+| `llm.js` | %91 | %50 | %50 |
+| `voice.js` | — | — | %67 |
+| `store.js` | %88 | %85 | %86 |
+| `components.js` | %68 | %68 | %97 |
+| `state.js` | %76 | — | %92 |
+| `quota.js` | %96 | %96 | %96 |
+
+> `quota.js` ve `store.js` üçünde de birbirine yakın çünkü artık **aynı
+> testi** koşuyorlar: `brand/ortak/quota.test.js` ve
+> `brand/ortak/store.test.js` üç arayüze birden yayılıyor (§13.4).
+
+**ESP'de son tur ne buldu.** Ölçüm `state.js` için şunu yazdı:
+«koşmayan: addProfile, removeProfile, switchProfile, updateSession,
+deleteSession, deleteCard, deleteArgument, deleteBook…» — yani **on üç
+silme işlevinin neredeyse hiçbiri**. Silme bu sistemde geri alınamayan
+tek işlemdir ve on üçü kopyala-yapıştırla çoğalmış kardeşlerdir: hepsi
+önce bellekteki diziden çıkarmak, sonra **depodan da silmek** zorunda.
+İkincisinin unutulması sessiz bir hatadır — ekran doğru görünür, kayıt
+ertesi gün geri gelir. `ESP/src/tests/silme.test.js` on üçünü de aynı
+tabloyla sınıyor; on dördüncü aile eklendiğinde tabloya bir satır
+eklenir ve bir test bunu hatırlatır.
+
+**Palet %0'dı ve bu görünmez bir risktir.** Komut paleti Ctrl+K ile her
+yerden açılır; bozulduğunda görünür bir hata vermez — komut listede
+çıkmaz ya da yanlış ekrana gider. `palet.test.js` en çok şunu
+çiviliyor: **kapalı bir disiplinin ekranı palette görünmez.** Palet
+gezinme şeridinden ayrı bir kapıdır; oradan kapalı bir bölüme
+girilebilseydi kullanıcı kapattığı şeyi yine görürdü.
+
+**Ses katmanı da sınanmamış değildi — SPİ'ninki sınanıyordu.** İki
+`speak.js` aynı motordur (311'e 319 satır; fark ajan ses tablosu ve iki
+yorum) ve ikisinin aynı kaldığını hiçbir şey denetlemiyordu.
+`ESP/src/tests/ses.test.js` SPİ'ninkinden uyarlandı ve uyarlarken
+ESP'nin KENDİ farkı ortaya çıktı: SPİ'de en yavaş konuşan Patron'dur,
+ESP'de **Aristoteles** — «derin okuma acele kaldırmaz» dosyanın kendi
+cümlesidir. Kopyalanırken fark edilmeseydi test yanlış bir şeyi
+koruyor olurdu.
+
+`parts.js`'te de yazılı ama sınanmamış bir kural vardı: **«ölçülmemiş
+eksen sıfıra çekilmez.»** Radar altı disiplinin dengesini gösterir;
+ölçülmemiş bir ekseni sıfıra çekmek «hiç çalışılmadı» demektir, oysa
+doğrusu «girilmedi» — şekil içeri çöker ve kullanıcı olmayan bir
+dengesizliğe göre plan yapar. `parts.test.js` poligonun köşe sayısını
+sayarak bunu çiviliyor.
 
 **ESP'nin arayüz katmanı hiç sınanmıyordu** ve bunu ancak ölçüm
 söyledi: 865 test vardı ama `components.js`, `ui.js` ve `parts.js`'in
@@ -998,10 +1068,44 @@ Yani ESP'nin model katmanı sınanmamış değildi; **SPİ'nin kopyası**
 sınanıyordu ve ikisinin aynı kaldığını hiçbir şey denetlemiyordu.
 `ESP/src/tests/llm.test.js` bu boşluğu kapattı (35 test).
 
-Kopyaları tek kaynağa indirmek (`brand/ortak/` + ad alanı yer tutucusu,
-`tools/seviye.py`'deki gibi) açık bir borç — ama **ancak iki kopyanın
-da kapsamı varken güvenli**. «Önce kapsam, sonra bölme» kuralı
-birleştirme için de geçerli ve kapsam artık var.
+**Ve borç kapatılırken ayrışmanın GERÇEK olduğu görüldü.** Üç kopya yan
+yana konunca `status()` içinde şu fark çıktı:
+
+```
+SPI/…/quota.js:250   sınır bilinmiyorsa 8 alanın hepsi döner, sayılar null
+AYS/…/quota.js:250   { known:false, usedToday }   ← 6 alan düşmüş
+ESP/…/quota.js:250   { known:false, usedToday }   ← aynı
+```
+
+Düzeltme bir kopyaya yazılmış, ötekilerde unutulmuştu ve hiçbir denetim
+söylememişti. Bugün canlı bir hata değildi çünkü AYS'nin çağıranları
+`q.known` ile korunuyordu — ama bu depoda dosyalar uygulamalar
+ARASINDA kopyalanıyor; SPİ'ye göre yazılmış bir çağıran AYS'ye
+taşındığı gün ekranda «undefined» görünürdü.
+
+Birleştirme sırasında aynı sözün `check()` ve `acquire()` için de
+geçerli olduğu, ama oralarda hiç yapılmadığı görüldü — artık üçü de
+aynı şemayı döner (§9.4).
+
+**Borç kapandı:**
+
+| ne | nereye | not |
+|---|---|---|
+| `quota.js` x3 | `brand/ortak/quota.js` | `__NS__`, `__DEPO__` yer tutucu |
+| `llm.js` x2 | `brand/ortak/llm.js` | YALNIZ SPİ + ESP'ye yayılır |
+| kota testi | `brand/ortak/quota.test.js` | 20 test, üç arayüzde birden |
+| depo testi | `brand/ortak/store.test.js` | 24 test; üç `store.js` aynı dosya DEĞİL ama aynı YÜZEYİ açar — paket gövdeyi değil sözü sınar |
+
+`llm.js`'in üçüncü kopyası YOKTUR ve bu bilinçli: AYS'ninki 1337 satır
+ve otuz fazla işlev taşır (`diagnose`, `listModels`, `visionChain`,
+`stripThinking`, `keyProblem`, `classify`…). Üçünü zorla birleştirmek
+AYS'nin gelişimini geri almak olurdu. `tools/ortak.py` içindeki
+`YALNIZ` tablosu bunu söyler; ters yönü — AYS'nin fazlasını ortak
+kaynağa çekmek — §19'da yeni bir borç olarak duruyor.
+
+«Önce kapsam, sonra bölme» kuralı birleştirme için de geçerliydi ve
+kapsam vardı: birleşmeden önce `llm.js` %50/%50, `quota.js` %96/%14 idi;
+bugün `quota.js` üçünde de %96.
 
 **Kalıcılığa dokunmadan önce test yaz.** Depo modülünün on yedi
 işlevinden altısı deneniyordu; önce testleri yazdım, sonra optimize
@@ -1443,13 +1547,20 @@ yazmamış olurdum.
 | Depo ölçeklenmesi | `core/store.js` | orta | §7.3 — yaşayan veride göç, sormadan yapma |
 | `SPI/screens/labs.js` 1482 satır | — | orta | kapsam **%24** (`node tools/kapsam.js SPI`) |
 | `AYS/core/office.js` 2049 satır | — | düşük | kapsam **%84** — «%59» eskimiş bir sayıydı |
-| `AYS/core/store.js` kapsamı %46 | — | orta | kalıcılık; §13.3'ün kendi kuralı buraya bakar |
+| ~~`AYS/core/store.js` kapsamı %46~~ | — | — | **kapandı** — `store.test.js` 28 test, kapsam %88; §7.2'de ölçüm |
 | ~~ESP'de `ui.js`/`components.js` %0~~ | — | — | **kapandı** — `components.test.js`, 49 test |
-| `llm.js` SPİ ve ESP'de İKİ KOPYA | 737 satır | orta | §13.4 — 2 satır fark; kapsam artık var, birleştirme yapılabilir |
-| `quota.js` ÜÇ KOPYA | 280 satır | orta | §13.4 — AYS↔ESP 4 satır fark |
+| ~~`llm.js` SPİ ve ESP'de İKİ KOPYA~~ | — | — | **kapandı** — `brand/ortak/llm.js`, yalnız SPİ+ESP'ye yayılır |
+| ~~`quota.js` ÜÇ KOPYA~~ | — | — | **kapandı** — `brand/ortak/quota.js` + `quota.test.js` (20 test x3) |
+| `AYS/core/llm.js` ayrı yaşıyor | 1337 satır | orta | otuz fazla işlev; ortak kaynağa çekilirse SPİ/ESP'ye model listeleme, teşhis ve görsel zinciri gelir |
 | ~~Ortak CSS kopyaları~~ | — | — | **kapandı** — `brand/ortak/` + `tools/ortak.py` |
 | ~~Telefonda çalıştırma yolu~~ | — | — | **kapandı** — Seçenek B (tek dosya + elle yedek), README «Telefonda kullanım» |
-| `palette.js` kapsamı | ikisi | düşük | UI açan işlevler denenmiyor (kasıtlı) |
+| `palette.js` kapsamı | üçü | düşük | UI açan işlevler denenmiyor (kasıtlı) |
+| ~~ESP ses katmanı sınanmıyor~~ | — | — | **kapandı** — `ses.test.js`; %50 / %50 / %67. Kalanı gerçek mikrofon ister |
+| ~~ESP komut paleti %0~~ | — | — | **kapandı** — `palet.test.js`; %41. Kalanı `onayGoster`/`saveQuick`, gerçek alt sayfa ister |
+| `setup.js` üçünde de düşük | ilk kurulum | orta | AYS %13 · SPİ %20 · ESP **%0** — bir kez görülen ekran, ama YANLIŞ kurulum bütün veriyi eğriltir |
+| Ekran sözleşmesi yalnız SPİ'de | test sayfaları | orta | AYS 20 ekranın 4'ünü, ESP 15 ekranın 0'ını yüklüyor; SPİ'deki «Ekranlar — sözleşme» paketi taşınmalı |
+| ~~ESP `state.js` silme yolları~~ | — | — | **kapandı** — `silme.test.js`, on üç aile tek tabloda; %66 → %92 |
+| ~~ESP `store.js` kapsamı %54~~ | — | — | **kapandı** — ortak `store.test.js` üçüne birden yayılıyor; %86 |
 
 **Rütbe sistemi kuruldu.** Beşinci kademe Hüküm iken **Safir** oldu
 (rütbe kartlarının üstünde yazan ad neyse katalogda da o yazar) ve

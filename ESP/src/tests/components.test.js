@@ -384,4 +384,131 @@
     });
   });
 
+  /* ---------------------------------------------------------------- */
+
+  describe('Bileşen seti — ikinci tur: girdi, araç çubuğu ve düzen', () => {
+
+    /* İlk turda bu on iki işlev dışarıda kalmıştı ve ölçüm söyledi:
+       `Stat, IconButton, Toolbar, Mic, Drop, Textarea, Select, Grid,
+       Span, Stack, Cols, Row`. Hepsi ekranda her gün görünüyor. */
+
+    const t = x => String(x);
+
+    it('Stat ilerleme çubuğunu 0–100 arasına KIRPAR', () => {
+      /* Kırpılmasaydı %140 bir değer çubuğu kutusunun dışına taşardı. */
+      expect(t(K.Stat({ label:'a', value:1, progress:140 }))).toContain('width:100%');
+      expect(t(K.Stat({ label:'a', value:1, progress:-20 }))).toContain('width:0%');
+    });
+
+    it('Stat ilerleme VERİLMEZSE çubuk çizilmez', () => {
+      /* Sıfır uzunlukta bir çubuk «hiç ilerlemedin» der; oysa doğru
+         cümle «bu ölçünün bir hedefi yok». */
+      expect(t(K.Stat({ label:'a', value:1 }))).toContain('stat__value');
+      expect(t(K.Stat({ label:'a', value:1 })).indexOf('stat__bar')).toBe(-1);
+    });
+
+    it('Stat çubuğu okuyucuya görünmez — sayı zaten yanında', () => {
+      expect(t(K.Stat({ label:'a', value:1, progress:50 }))).toContain('aria-hidden="true"');
+    });
+
+    it('Stat etiketi ve değeri KAÇIRILIR', () => {
+      expect(t(K.Stat({ label:'<b>x</b>', value:'<i>y</i>' })).indexOf('<b>x')).toBe(-1);
+    });
+
+    it('IconButton bir AD taşır — yoksa okuyucu «düğme» der', () => {
+      /* Simge düğmesinde yazı yoktur; adı yalnızca `aria-label` söyler. */
+      expect(t(K.IconButton({ icon:'gear', label:'Ayarlar', act:'x' })))
+        .toContain('aria-label="Ayarlar"');
+      /* `aria` verilirse o kazanır: görünen ad ile okunan ad ayrılabilir. */
+      expect(t(K.IconButton({ icon:'gear', label:'Ayarlar', aria:'Ayarları aç', act:'x' })))
+        .toContain('aria-label="Ayarları aç"');
+    });
+
+    it('Toolbar eylem YOKSA boş bir kutu çizmez', () => {
+      expect(t(K.Toolbar({ tabs:'T' })).indexOf('toolbar__actions')).toBe(-1);
+      expect(t(K.Toolbar({ tabs:'T', actions:'A' }))).toContain('toolbar__actions');
+    });
+
+    it('Textarea satır sayısı verilmezse ÜÇ olur', () => {
+      expect(t(K.Textarea({ id:'a' }))).toContain('rows="3"');
+      expect(t(K.Textarea({ id:'a', rows:8 }))).toContain('rows="8"');
+    });
+
+    it('Textarea içeriği KAÇIRILIR — etiketin içi de HTML sayılır', () => {
+      expect(t(K.Textarea({ value:'</textarea><script>x</script>' }))
+        .indexOf('<script>')).toBe(-1);
+    });
+
+    it('Select etiketsiz bırakılmaz', () => {
+      /* `aria` alanı Input'ta vardı, Select'te yoktu: etiketsiz bir
+         seçici ekran okuyucuda yalnızca «açılır liste» diye anılır. */
+      expect(t(K.Select({ options:['a'], aria:'Disiplin' })))
+        .toContain('aria-label="Disiplin"');
+    });
+
+    it('Select seçili olanı işaretler — yalnız onu', () => {
+      const h = t(K.Select({ options:['a', 'b', 'c'], value:'b' }));
+      expect((h.match(/selected/g) || []).length).toBe(1);
+      expect(h).toContain('<option value="b" selected>b</option>');
+    });
+
+    it('Select düz dizi de nesne dizisi de kabul eder', () => {
+      expect(t(K.Select({ options:[{ value:1, label:'Bir' }], value:1 })))
+        .toContain('<option value="1" selected>Bir</option>');
+    });
+
+    it('Select karşılaştırmayı METİN üzerinden yapar', () => {
+      /* Sayı 1 ile metin "1" aynı seçenektir: `data-*` değerleri her
+         zaman metin olarak geri döner. */
+      expect(t(K.Select({ options:[{ value:1, label:'Bir' }], value:'1' })))
+        .toContain('selected');
+    });
+
+    it('Drop ipucu verilmezse kendi cümlesini kurar', () => {
+      expect(t(K.Drop({ act:'x', label:'Ses dosyası' })))
+        .toContain('Dosyayı buraya bırak');
+      expect(t(K.Drop({ act:'x', label:'a', hint:'Yalnız PDF' }))).toContain('Yalnız PDF');
+    });
+
+    it('Drop simgesi okuyucuya görünmez', () => {
+      expect(t(K.Drop({ act:'x', label:'a' }))).toContain('aria-hidden="true"');
+    });
+
+    it('Mic DESTEKLENMİYORSA hiç çizilmez', () => {
+      /* Basıldığında hiçbir şey yapmayan bir düğme, çalışmayan bir
+         özelliği var gibi gösterir. */
+      const gercek = ESP.Voice;
+      try{
+        ESP.Voice = { supported:() => false, isActive:() => false, activeTarget:() => null };
+        expect(t(K.Mic({ target:'not' }))).toBe('');
+        ESP.Voice = { supported:() => true, isActive:() => false, activeTarget:() => null };
+        const h = t(K.Mic({ target:'not' }));
+        expect(h).toContain('aria-pressed="false"');
+        expect(h).toContain('Sesle yaz');
+      }finally{ ESP.Voice = gercek; }
+    });
+
+    it('Mic DİNLERKEN basılı görünür ve başka cümle kurar', () => {
+      const gercek = ESP.Voice;
+      try{
+        ESP.Voice = { supported:() => true, isActive:() => true,
+          activeTarget:() => 'not' };
+        expect(t(K.Mic({ target:'not' }))).toContain('aria-pressed="true"');
+        expect(t(K.Mic({ target:'not' }))).toContain('Dinlemeyi durdur');
+        /* Başka bir alan dinleniyorsa BU düğme basılı görünmez. */
+        expect(t(K.Mic({ target:'baska' }))).toContain('aria-pressed="false"');
+      }finally{ ESP.Voice = gercek; }
+    });
+
+    it('düzen yardımcıları gövdeyi yutmaz', () => {
+      expect(t(K.Grid('x'))).toContain('x');
+      expect(t(K.Span(6, 'x'))).toContain('span-6');
+      expect(t(K.Cols(2, 'x'))).toContain('cols-2');
+      expect(t(K.Stack('x'))).toContain('stack');
+      expect(t(K.Stack('x', 'sm'))).toContain('stack-sm');
+      expect(t(K.Row('x', { between:true }))).toContain('between');
+      expect(t(K.Row('x')).indexOf('between')).toBe(-1);
+    });
+  });
+
 })();
