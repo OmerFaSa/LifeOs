@@ -219,8 +219,25 @@ SP.Basarim = (function(){
     /* KATALOG SÜRÜMÜ ARTTIYSA kazanımlar yeniden türetilir. Eşik
        değiştiğinde defterdeki «kazandım» kaydı katalogla çelişebilir;
        çelişen iki kaynaktan biri yanlıştır ve doğru olan KATALOGtur.
-       Ay özeti KORUNUR — ölçülen veri, eşik değişse de ölçülendir. */
+       Ay özeti KORUNUR — ölçülen veri, eşik değişse de ölçülendir.
+
+       AMA «SİLİNİR» İLE «YENİDEN TÜRETİLİR» AYNI ŞEY DEĞİL — ve bir
+       süre öyle sanıldı. Silme burada oluyordu, türetme ise yalnız
+       `esitleCok` içinde; o da hiçbir gün değişmediyse ilk satırda
+       dönüyor. Yani sürüm arttıktan sonra:
+
+         uygulama açılır → aynı sekiz gün eşitlenir → «değişen yok»
+         → tarama hiç koşmaz → rozetler YOK
+
+       ve veri değişene kadar öyle kalıyordu. Hiçbir şey girmeyen bir
+       kullanıcı için temelli. Motorun kendi sözünün tersi.
+
+       Artık silinen liste ATILMAZ, `gocEski`ye alınır ve `yukle`
+       göçü bitirir: eşikler KATALOGTAN yeniden ölçülür, hak edilen
+       rozet KENDİ TARİHİYLE geri gelir, hak edilmeyen gelmez. */
     if(sayi(ham.surum) !== L().BASARIM_SURUM){
+      d.gocEski = d.kazanilan;
+      d.goc = true;
       d.kazanilan = {};
       d.bekleyen = [];
     }
@@ -273,6 +290,22 @@ SP.Basarim = (function(){
   /* Bir günün dakikası — gün uzunluğuyla sınırlı. */
   function gunluk(dk){
     return Math.min(GUN_DAKIKA, Math.max(0, Number(dk) || 0));
+  }
+
+  /* O günde HATIRLANACAK bir şey var mı?
+
+     `kusursuz` da sayılır ve önce sayılmıyordu. Gün kaydı yalnız
+     dakika ya da göreve bakarak saklanınca, kusursuz ama sayısız bir
+     gün ay özetine işleniyor AMA gün kırılımında saklanmıyordu; ikinci
+     eşitlemede «eski» kayıt bulunamadığı için fark yeniden ekleniyor
+     ve kusursuz sayacı her eşitlemede bir artıyordu. Uygulama her
+     açılışta eşitler: artış kullanıcının bir şey yapmasını beklemez.
+
+     Bu, motorun kendi sözünü bozuyordu — «tekrar çalışması zararsızdır»
+     (dosya başlığı). Sözü tutan satır burasıdır: bir günün kaydı,
+     o günden SAKLANACAK bir şey varsa durur. */
+  function dolu(g){
+    return (g.dakika > 0) || (g.gorev > 0) || !!g.kusursuz;
   }
 
   /* ----------------------------------------------------- okuma */
@@ -372,7 +405,7 @@ SP.Basarim = (function(){
 
   /* Eşikleri gez, yeni geçilenleri bul. Bir rozet BİR KEZ kazanılır;
      ikinci kez kutlanmaz. */
-  function kazanimlariTara(gun){
+  function kazanimlariTara(gun, eski){
     var yeni = [];
     L().ROZETLER.forEach(function(r){
       if(defter.kazanilan[r.kod]) return;
@@ -384,16 +417,36 @@ SP.Basarim = (function(){
       }else{
         hak = olcum(r.aile) >= r.esik;
       }
-      if(hak){
-        defter.kazanilan[r.kod] = gun;
-        defter.bekleyen.push(r.kod);
-        yeni.push(r.kod);
-      }
+      if(!hak) return;
+      /* GÖÇ: bu rozet zaten kazanılmıştı. Tarihi korunur ve kuyruğa
+         GİRMEZ — kazanılmış bir anı ikinci kez kutlamak, ilkini
+         değersizleştirir. Kullanıcının gözünde olan biten tek şey
+         katalogda bir sürüm numarasının artmasıdır. */
+      var eskiGun = eski && eski[r.kod];
+      defter.kazanilan[r.kod] = eskiGun || gun;
+      if(eskiGun) return;
+      defter.bekleyen.push(r.kod);
+      yeni.push(r.kod);
     });
     return yeni;
   }
 
   /* ----------------------------------------------------- yazma */
+
+  /* Göçü bitir: eşikleri KATALOGTAN yeniden ölç.
+
+     Defterdeki eski liste körlemesine geri yazılmaz — o, katalogun
+     otoritesini göçün olmadığı bir yere taşımak olurdu. Ölçülür:
+     hak edilen rozet kendi tarihiyle döner, hak edilmeyen dönmez,
+     eşiği düşmüş yeni bir rozet varsa o KUTLANIR. */
+  async function gocuBitir(){
+    var eski = defter.gocEski || {};
+    delete defter.gocEski;
+    delete defter.goc;
+    var yeni = kazanimlariTara(U().todayISO(), eski);
+    await yaz();
+    if(yeni.length) duyur(yeni);
+  }
 
   function yukle(){
     if(yukleniyor) return yukleniyor;
@@ -401,6 +454,11 @@ SP.Basarim = (function(){
       var ham = null;
       try{ ham = await SP.Store.get(YOL); }catch(e){ ham = null; }
       defter = normalize(ham);
+      /* Göç burada BİTER, `esitleCok` beklenmez: eşitleme «değişen
+         yok» diye dönebilir ve o zaman rozetler geri gelmezdi. */
+      /* Göç patlarsa defter YİNE DE yüklenir: rozetlerin geri
+         gelmemesi kötüdür, hiçbir şeyin yüklenmemesi daha kötü. */
+      if(defter.goc){ try{ await gocuBitir(); }catch(e){} }
       yukleniyor = null;
       return defter;
     })();
@@ -426,8 +484,8 @@ SP.Basarim = (function(){
       kusursuz:sayim.kusursuz ? 1 : 0,
     };
     var eski = defter.gunler[gun] || { dakika:0, gorev:0, kusursuz:0 };
-    var vardi = eski.dakika > 0 || eski.gorev > 0;
-    var var_ = yeni.dakika > 0 || yeni.gorev > 0;
+    var vardi = dolu(eski);
+    var var_ = dolu(yeni);
     if(eski.dakika === yeni.dakika && eski.gorev === yeni.gorev
       && eski.kusursuz === yeni.kusursuz) return false;
 

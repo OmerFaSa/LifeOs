@@ -61,7 +61,15 @@ window.LIFEOS = window.LIFEOS || {};
 
 /* Kataloğun sürümü. Eşik ya da aile DEĞİŞİRSE artar ve motor
    kazanımları yeniden türetir — defterde yazılı «kazandım» kaydı
-   katalogla çelişemez. */
+   katalogla çelişemez.
+
+   BU SAYIYI ARTIRAN OKUSUN: türetme, uygulamanın ilk açılışında
+   `Basarim.yukle` içinde koşar (`gocuBitir`), eşitlemeyi beklemez.
+   Hak edilen rozet KENDİ TARİHİYLE geri gelir ve yeniden kutlanmaz;
+   yalnız eşiği bu sürümde düşüp yeni hak edilen rozet kutlanır.
+   Bir süre türetme yalnız `esitleCok` içinde vardı ve o «değişen gün
+   yok» diye dönüyordu: sürüm artınca rozetler siliniyor, veri
+   değişene kadar geri gelmiyordu. */
 LIFEOS.BASARIM_SURUM = 1;
 
 LIFEOS.BASARIM_AILELER = [

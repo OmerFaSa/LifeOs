@@ -145,6 +145,38 @@ describe('Başarım — motor', () => {
     expect(B().durum().dakika).toBe(1800);
   });
 
+  it('aynı gün İKİ KEZ eşitlenince kusursuz sayacı ŞİŞMEZ', async () => {
+    /* «Tekrar çalışması zararsızdır — eşitleme iki kez çağrılabilir»
+       bu motorun kendi başlığında yazılı bir SÖZ ve bir yerde
+       tutulmuyordu.
+
+       Gün kaydı YALNIZ dakika ya da görev varsa saklanıyordu. Kusursuz
+       ama sayısız bir gün saklanmıyor, ay özetine ise işleniyordu;
+       ikinci eşitlemede «eski» kayıt bulunamadığı için fark yeniden
+       ekleniyordu:
+
+         1. çağrı   kusursuz 0 → 1   ay özeti: 1
+         2. çağrı   kusursuz 0 → 1   ay özeti: 2   ← aynı gün, iki kez
+
+       Sayaç her eşitlemede bir artıyordu; uygulama her açılışta ve her
+       kayıtta eşitler, yani artış kullanıcının bir şey yapmasını bile
+       beklemiyordu. Ayda başka kayıtlı gün varsa sonucu şuydu: tek bir
+       gün, ayın gün sayısı kadar eşitlenince ay «kusursuz» ilan
+       ediliyordu — hiç yaşanmamış bir ay için rozet. */
+    await sifirla();
+    const gun = U().todayISO();
+    const sayim = { dakika:0, gorev:0, kusursuz:1 };
+    await B().esitleCok({ [gun]:sayim });
+    expect(B().durum().kusursuzGun).toBe(1);
+    /* Kusursuz bir gün, kayıtlı bir gündür: sayısı sıfır olsa da o gün
+       YAŞANMIŞTIR. Kaydı silmek, hem onu hem tutarlılığı siliyordu. */
+    expect(B().durum().gun).toBe(1);
+    await B().esitleCok({ [gun]:sayim });
+    await B().esitleCok({ [gun]:sayim });
+    expect(B().durum().kusursuzGun).toBe(1);
+    expect(B().durum().gun).toBe(1);
+  });
+
   it('yazılabilir pencere XP ile AYNI uzunluktadır', () => {
     /* Uygulama her eşitlemede `XP.pencere()` günlerini başarım
        defterine yazar (bkz. `app.js`). İki pencere ayrışırsa:
@@ -293,6 +325,66 @@ describe('Başarım — motor', () => {
     expect(B().durum().odakSaat).toBe(5);
     await B().esitleCok({ [gun]:{ dakika:30, gorev:2, kusursuz:0 } });
     expect(B().durum().odakSaat).toBe(5);
+  });
+
+  it('katalog sürümü değişince rozetler AÇILIŞTA geri gelir', async () => {
+    /* Sürüm artınca `normalize` kazanımları siler — doğru: eşik
+       değişmiş olabilir ve çelişen iki kaynaktan doğru olan
+       KATALOGtur. Ama silinen kazanımları YENİDEN TÜRETEN kimse
+       yoktu.
+
+       Türetmenin tek yolu `esitleCok` ve o, hiçbir gün değişmediyse
+       ilk satırda dönüyor:
+
+         uygulama açılır → aynı sekiz gün eşitlenir → «değişen yok»
+         → tarama hiç koşmaz → rozetler YOK
+
+       Veri değişene kadar da öyle kalıyordu; hiçbir şey girmeyen bir
+       kullanıcı için TEMELLİ. Motorun kendi sözünün tam tersi:
+       «kazanılmış rozet geri alınmaz». */
+    await sifirla();
+    const gun = U().todayISO();
+    const sayim = { dakika:600, gorev:200, kusursuz:1 };
+    await B().esitleCok({ [gun]:sayim });
+    /* Kutlama sırası boşaltılır: kazanımlar gösterilmiş sayılsın. */
+    let bek;
+    while((bek = B().bekleyen())) await B().gorundu(bek.kod);
+    const onceki = B().liste().filter(r => r.kazanildi)
+      .map(r => ({ kod:r.kod, gun:r.kazanildi }));
+    expect(onceki.length > 0).toBeTruthy();
+
+    /* Katalog sürümü artmış gibi yap. */
+    const ham = await ESP.Store.get('basarim');
+    ham.surum = window.LIFEOS.BASARIM_SURUM + 1;
+    await ESP.Store.set('basarim', ham);
+    B().bosalt();
+    await B().yukle();
+
+    /* Rozetler geri gelmiş olmalı — hem de KENDİ TARİHLERİYLE. */
+    expect(B().durum().kazanilanSayisi).toBe(onceki.length);
+    const simdi = {};
+    B().liste().forEach(r => { if(r.kazanildi) simdi[r.kod] = r.kazanildi; });
+    onceki.forEach(r => { expect(simdi[r.kod]).toBe(r.gun); });
+
+    /* Ve YENİDEN KUTLANMAMIŞ olmalı: kazanılmış bir anı ikinci kez
+       kutlamak, ilkini değersizleştirir. */
+    expect(B().bekleyen()).toBeNull();
+  });
+
+  it('göçte hak edilmeyen rozet geri GELMEZ', async () => {
+    /* Göç taraması kayıtlı listeyi körlemesine geri yazmaz; eşikleri
+       KATALOGTAN yeniden ölçer. Defterde duran ama bugünkü katalogda
+       karşılığı olmayan bir kod geri gelmemeli — yoksa «katalog
+       otoritedir» sözü, göçün olmadığı bir sözleşmeye dönerdi. */
+    const gun = U().todayISO();
+    B().bosalt();
+    await ESP.Store.set('basarim', {
+      surum:window.LIFEOS.BASARIM_SURUM + 1,
+      aylar:{}, gunler:{}, enIyi:{ odakDakika:0, odakTaban:0 },
+      kazanilan:{ 'yok-boyle-bir-rozet':gun }, bekleyen:[],
+    });
+    await B().yukle();
+    expect(B().durum().kazanilanSayisi).toBe(0);
   });
 
   it('kazanılmış rozet sayaç düşse de GERİ ALINMAZ', async () => {
