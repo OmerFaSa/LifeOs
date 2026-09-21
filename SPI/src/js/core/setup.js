@@ -12,7 +12,7 @@ window.SP = window.SP || {};
 SP.Setup = (function(){
   const U = SP.U;
   const K = SP.C;
-  const { html } = SP.h;
+  const { html, raw } = SP.h;
 
   /* Profilde hesap icin gereken alanlar eksikse sihirbaz gerekir. */
   function needed(){
@@ -67,8 +67,7 @@ SP.Setup = (function(){
              kapandi: butun dosya
              ayrisamadi, SPI'nin dokuz yuz testi «SP.Setup tanimsiz»
              diye dustu. -->
-        <img class="setup__afis" src="img/marka/tanitim-spi.webp"
-          alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">
+        ${raw(window.LIFEOS.TANITIM_HTML('spi'))}
 
         <div class="setup__hero">
           <p class="setup__kicker">İlk kurulum</p>

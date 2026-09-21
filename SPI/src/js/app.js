@@ -873,6 +873,13 @@ SP.App = (function(){
     },
     async 'setup-save'(){ await SP.Setup.save(); },
     async 'setup-skip'(){ SP.Setup.skip(); },
+    /* TANITIM ŞERİDİ — nokta basıldığında panel değişir.
+
+       Sihirbaz YENİDEN ÇİZİLMEZ: `TANITIM_ADIM` doğrudan DOM'a
+       dokunur. Yeniden çizmek, kullanıcının o ana kadar yazdığı
+       alanları silmek olurdu — bir süsü değiştirmek için formu
+       sıfırlamak. */
+    'tanitim-adim'(el){ window.LIFEOS.TANITIM_ADIM(el); },
     /* Herhangi bir ekrandan bir ajana soru sormak için. */
     async 'ask-agent'(el){
       S.ui.officeAgent = el.dataset.agent || 'patron';

@@ -8,7 +8,7 @@ window.R = window.R || {};
 
 R.Setup = (function(){
   const U = R.U, M = R.Model, UI = R.UI, S = R.S;
-  const { html, when, map } = R.h;
+  const { html, raw, when, map } = R.h;
   const K = R.C;
 
   const STEPS = [
@@ -247,9 +247,7 @@ R.Setup = (function(){
 
            `alt` bos ve `aria-hidden`: afisteki cumleler adimlarin
            icinde gercek metin olarak duruyor. */
-        when(isFirstRun && first, () => html`<img class="setup__afis"
-          src="img/marka/tanitim-ays.webp" alt="" aria-hidden="true"
-          loading="lazy" onerror="this.remove()">`),
+        when(isFirstRun && first, () => raw(window.LIFEOS.TANITIM_HTML('ays'))),
         html`<div class="wizsteps">${map(STEPS, (x, i) => html`
           <span class="${i === step ? 'wizstep is-on' : i < step ? 'wizstep is-done' : 'wizstep'}"
             title="${x.title}"></span>`)}</div>`,

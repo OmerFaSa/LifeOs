@@ -30,7 +30,7 @@ window.ESP = window.ESP || {};
 ESP.Setup = (function(){
   const U = ESP.U;
   const K = ESP.C;
-  const { html, map, when } = ESP.h;
+  const { html, raw, map, when } = ESP.h;
 
   /* Sihirbaz yalnizca ad yoksa gerekir. Odak ve dilin varsayilani vardir ve
      varsayilan dogru calisir — zorunlu soru sayisi bir tutulur. */
@@ -64,8 +64,7 @@ ESP.Setup = (function(){
              kapandi: butun dosya
              ayrisamadi, SPI'nin dokuz yuz testi «SP.Setup tanimsiz»
              diye dustu. -->
-        <img class="setup__afis" src="img/marka/tanitim-esp.webp"
-          alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">
+        ${raw(window.LIFEOS.TANITIM_HTML('esp'))}
 
         <div class="setup__hero">
           <p class="setup__kicker">İlk kurulum</p>

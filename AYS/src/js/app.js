@@ -749,6 +749,13 @@ R.App = (function(){
       location.replace(u.toString());
     },
     async 'setup-open'(){ R.Setup.open(); },
+    /* TANITIM ŞERİDİ — nokta basıldığında panel değişir.
+
+       Sihirbaz YENİDEN ÇİZİLMEZ: `TANITIM_ADIM` doğrudan DOM'a
+       dokunur. Yeniden çizmek, kullanıcının o ana kadar yazdığı
+       alanları silmek olurdu — bir süsü değiştirmek için formu
+       sıfırlamak. */
+    'tanitim-adim'(el){ window.LIFEOS.TANITIM_ADIM(el); },
     async 'setup-save'(){ await R.Setup.save(); },
     async 'setup-quick'(el){ R.Setup.quick(el.dataset.start); },
     async 'setup-next'(){ R.Setup.next(); },

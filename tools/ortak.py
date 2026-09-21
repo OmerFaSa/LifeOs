@@ -86,6 +86,12 @@ DOSYALAR = {
     "kesinlik.js":   "js/core",
     "kesinlik.css":  "css",
     "kesinlik.test.js": "tests",
+    # TANITIM ŞERİDİ — ilk kurulumun üç adımı. Sorular üçünde de aynı;
+    # ayrı ayrı yazılsalardı bir gün birinde İKİNCİ adım düşerdi ve
+    # düşecek olan, sistemin sınırını söyleyen adımdır.
+    "tanitim.js":    "js/core",
+    "tanitim.css":   "css",
+    "tanitim.test.js": "tests",
 }
 
 BASLIK = ("/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.\n"
