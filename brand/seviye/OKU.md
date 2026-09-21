@@ -193,6 +193,15 @@ kaynak **yazısız** olmak zorunda: siluet alfayı korur, yani kaynağın
 Rütbe kartı 1–5 arasında kaynak **olamaz**: üzerinde kademenin adı
 yazılı ve kilitli bir kartın silueti «YAKUT» yazısını okunur bırakırdı.
 
+**Telefonda kare akışa girer, geniş ekranda tam ekran olur.** Kare
+yatay (3:2), telefon dikey (1:2): `contain` ile ekranın ortasında
+390×260'lık bir şerit oluyor ve üstündeki yazı sekiz piksele iniyor.
+Orada sözü **banner taşır** — karenin RESMİ, banner'ın YAZISI. Geniş
+ekranda kare zaten okunuyor ve banner çekiliyor, yani bu bir tekrar
+değil. Telefonda sahne de çekilir: `object-position` orada işe
+yaramıyor (dikey kutuda `cover` yatayda kırpar) ve sahnenin kendi
+başlığı banner'ın arkasına düşüyordu.
+
 **Kutlama, grinin kalkmasıdır.** Kazanılmamış rozet haftalarca ekranda
 rengi alınmış hâlde durur; rozet kazanıldığında perde onu ÖNCE GRİ
 açar, çeyrek saniye bekler, sonra bir saniyede rengine döndürür

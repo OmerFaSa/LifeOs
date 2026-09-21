@@ -294,7 +294,12 @@
 .perde__sahne{
   position:absolute; inset:0;
   width:100%; height:100%;
-  object-fit:cover;
+  /* ÇERÇEVELEME %24'TEN — hero ve merdiven bandındaki gerekçenin
+     aynısı: sahnenin ortasında kendi yazısı var («KADEME 4 · YAKUT»).
+     GENİŞ EKRANDA işe yarar; telefonda yaramaz ve sebebi aşağıda
+     yazılı (dikey kutuda `cover` yatayda kırpar), orada sahne
+     bütünüyle çekilir. */
+  object-fit:cover; object-position:center 24%;
   z-index:0;
   /* Karartma + hafif büyütme. Büyütme, `object-fit:cover` kırpmasının
      kenarında kalan tek piksellik çizgiyi de alır. */
@@ -376,11 +381,53 @@
   to{ opacity:1; transform:none; }
 }
 
-/* Kare GELDİĞİNDE kart, banner ve vinyet çekilir. Gelmezse hiçbiri
-   çekilmez; ekranda her hâlükârda bir gösterim kalır. */
-.perde[data-gecis="var"] .perde__kart,
-.perde[data-gecis="var"] .perde__banner{ display:none; }
+/* Kare GELDİĞİNDE kart ve vinyet çekilir. Gelmezse hiçbiri çekilmez;
+   ekranda her hâlükârda bir gösterim kalır. */
+.perde[data-gecis="var"] .perde__kart{ display:none; }
 .perde[data-gecis="var"].perde--rutbe::after{ opacity:0; }
+
+/* BANNER GENİŞ EKRANDA ÇEKİLİR, TELEFONDA KALIR.
+
+   Kare yatay (3:2) ve telefon dikey (1:2): `contain` ile ekranın
+   ortasında 390×260'lık bir şerit oluyor, üstündeki yazı sekiz piksele
+   iniyor ve okunmuyor. Orada sözü taşıyacak olan banner'dır — karenin
+   RESMİ, banner'ın YAZISI. Bu bir tekrar değil: geniş ekranda kare
+   zaten okunuyor ve banner çekiliyor.
+
+   Telefonda kare akışa girer (mutlak değil) ve banner altına düşer;
+   böylece ekranın ortasında asılı bir şerit yerine tam bir gösterim
+   olur. */
+@media (min-width:760px){
+  .perde[data-gecis="var"] .perde__banner{ display:none; }
+}
+@media (max-width:759.98px){
+  .perde__gecis{
+    position:static;
+    width:100%; height:auto;
+    max-height:46vh;
+    order:-1;                    /* yazının ÜSTÜNDE durur */
+    border-radius:14px;
+  }
+  .perde[data-gecis="var"] .perde__banner{ padding-top:0; }
+  /* SATIRLAR BİRBİRİNE YAKLAŞIR. Perde bir ızgaradır ve `align-content`
+     varsayılanı satırları kabın boyuna GERER: iki satır (kare ve
+     banner) 780 pikseli paylaşınca aralarında iki yüz piksellik bir
+     boşluk kalıyordu. `center` satırları içeriklerine indirir ve ikisi
+     birlikte ortalanır. Araç çubuğu mutlak konumludur, bundan
+     etkilenmez. */
+  .perde[data-gecis="var"]{ align-content:center; }
+  /* SAHNE TELEFONDA ÇEKİLİR — geçiş karesi varken.
+
+     `object-position` burada işe YARAMAZ ve denendi: sahne yatay
+     (3:2), telefon dikey (1:2); `cover` görüntüyü boydan doldurur ve
+     yatayda kırpar, yani dikey hizalama hiçbir şeyi kaydırmaz.
+     Sahnenin ortasındaki «KADEME 4 · YAKUT» yazısı banner'ın tam
+     arkasına düşüyor ve iki başlık üst üste biniyordu.
+
+     Geriye kademenin kendi renginden zemin kalır (`.perde--rutbe`) ve
+     yeter: kahraman zaten geçiş karesidir. */
+  .perde[data-gecis="var"] .perde__sahne{ display:none; }
+}
 /* Sahne geçiş karesinin arkasında kalır ve `contain` boşluğunu
    doldurur — ama iyice karartılır, karenin kendi zemini kazansın. */
 .perde[data-gecis="var"] .perde__sahne{ filter:brightness(.18) saturate(1); }
