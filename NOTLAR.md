@@ -932,8 +932,11 @@ satır değil — bu depoda bir işlev bir karardır ve «şu işlev hiç
 
 | katman | AYS | SPİ | ESP |
 |---|---|---|---|
-| `core/` | **%76** (885/1163) | **%77** (690/891) | **%67** (663/996) |
+| `core/` | **%76** (885/1163) | **%77** (690/891) | **%74** (738/1000) |
 | `screens/` | %14 (25/184) | %35 (150/426) | — |
+
+> ESP %67 iken ölçüldü, sonra arayüz ve model katmanına test yazıldı:
+> %74. `components.js` %0 → %65, `llm.js` %5 → %50, `ui.js` %0 → %17.
 
 En düşük `core` dosyaları (ölçüm, yargı değil — bazıları bilerek):
 
@@ -948,9 +951,32 @@ En düşük `core` dosyaları (ölçüm, yargı değil — bazıları bilerek):
 | `llm.js` | %91 | — | %5 |
 
 **ESP'nin arayüz katmanı hiç sınanmıyordu** ve bunu ancak ölçüm
-söyledi: 865 test var ama `components.js`, `ui.js` ve `parts.js`'in
-tek bir işlevi bile koşmuyor. AYS'de `components.test.js` + `ux.test.js`,
-SPİ'de `ui.test.js` var; ESP'de ikisi de yoktu.
+söyledi: 865 test vardı ama `components.js`, `ui.js` ve `parts.js`'in
+tek bir işlevi bile koşmuyordu. AYS'de `components.test.js` +
+`ux.test.js`, SPİ'de `ui.test.js` var; ESP'de ikisi de yoktu.
+`ESP/src/tests/components.test.js` yazıldı (49 test) — en çok da şu
+yüzden: **kaçırma (escaping) o katmanda yaşıyor** ve hiç sınanmıyordu.
+
+### 13.4 ÖLÇÜLEN BİR ŞEY DAHA: model katmanı iki kez yazılmış
+
+ESP'de `llm.js` %5, `quota.js` %14 çıktı. Sebebi arandı: iki dosya
+zaten SPİ/AYS'dekinin kopyası.
+
+| dosya | çift | fark |
+|---|---|---|
+| `llm.js` | SPİ ↔ ESP | **737 satırın 2'si** (depo anahtarı + iki başlık dizesi) |
+| `quota.js` | AYS ↔ ESP | **280 satırın 4'ü** |
+| `quota.js` | AYS ↔ SPİ | 15 satır |
+| `llm.js` | AYS ↔ SPİ | 850 satır *(AYS'ninki ayrı bir modül, 1337 satır)* |
+
+Yani ESP'nin model katmanı sınanmamış değildi; **SPİ'nin kopyası**
+sınanıyordu ve ikisinin aynı kaldığını hiçbir şey denetlemiyordu.
+`ESP/src/tests/llm.test.js` bu boşluğu kapattı (35 test).
+
+Kopyaları tek kaynağa indirmek (`brand/ortak/` + ad alanı yer tutucusu,
+`tools/seviye.py`'deki gibi) açık bir borç — ama **ancak iki kopyanın
+da kapsamı varken güvenli**. «Önce kapsam, sonra bölme» kuralı
+birleştirme için de geçerli ve kapsam artık var.
 
 **Kalıcılığa dokunmadan önce test yaz.** Depo modülünün on yedi
 işlevinden altısı deneniyordu; önce testleri yazdım, sonra optimize
@@ -1393,7 +1419,9 @@ yazmamış olurdum.
 | `SPI/screens/labs.js` 1482 satır | — | orta | kapsam **%24** (`node tools/kapsam.js SPI`) |
 | `AYS/core/office.js` 2049 satır | — | düşük | kapsam **%84** — «%59» eskimiş bir sayıydı |
 | `AYS/core/store.js` kapsamı %46 | — | orta | kalıcılık; §13.3'ün kendi kuralı buraya bakar |
-| ESP'de `ui.js`/`components.js` %0 | — | orta | AYS ve SPİ'de karşılığı var, ESP'de yoktu |
+| ~~ESP'de `ui.js`/`components.js` %0~~ | — | — | **kapandı** — `components.test.js`, 49 test |
+| `llm.js` SPİ ve ESP'de İKİ KOPYA | 737 satır | orta | §13.4 — 2 satır fark; kapsam artık var, birleştirme yapılabilir |
+| `quota.js` ÜÇ KOPYA | 280 satır | orta | §13.4 — AYS↔ESP 4 satır fark |
 | ~~Ortak CSS kopyaları~~ | — | — | **kapandı** — `brand/ortak/` + `tools/ortak.py` |
 | ~~Telefonda çalıştırma yolu~~ | — | — | **kapandı** — Seçenek B (tek dosya + elle yedek), README «Telefonda kullanım» |
 | `palette.js` kapsamı | ikisi | düşük | UI açan işlevler denenmiyor (kasıtlı) |
