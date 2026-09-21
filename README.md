@@ -4,6 +4,16 @@
 
 Tek kişinin gündelik hayatını yöneten üç bağımsız sistem.
 
+<p align="center"><img src="brand/medya/harita/harita-sistem.webp" alt="AYS, SPİ, ESP ve yanlarında HKM" width="820"/></p>
+
+<!-- SISTEM HARITASI — bir MARKA gorselidir, bir mimari cizim DEGIL.
+     Dairelerin arasindaki oklar «once AYS sonra SPI» demez; dordunun
+     ayni butune ait oldugunu soyler. Mimarinin kendisi bu satirin
+     ALTINDAKI iki tabloda ve §Sinirlar'da yazili: uc sistem
+     BAGIMSIZDIR ve HKM ucunun USTUNDE degil YANINDA durur
+     (AGENTS.md §1.4). Gorsel ile metin celisirse dogru olan metindir;
+     gorsel bir gun degisir, sozlesme degismez. -->
+
 <!-- Her sistemin kendi marka gorseli kendi src/img/brand/logo.png dosyasindadir
      (bkz. brand/OKU.md); burada yalniz kucuk bir referans olarak gosterilir.
      Dosya degisirse bu satirlar hic dokunulmadan guncel kalir. -->
