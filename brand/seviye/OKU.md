@@ -449,9 +449,21 @@ Defterde iki alan durur:
 | `enIyi.odakDakika` | ekrana çıkan değer | **her yazmada** yeniden hesaplanır: penceredeki günlerin en büyüğü ile tabanın büyüğü |
 | `enIyi.odakTaban` | budanmış geçmişten kalan taban | bir gün pencereden çıkıp silinmeden **hemen önce** |
 
-Pencere 120 gün; ondan eskisi silinir ve o günlerin en büyüğü bir daha
+Gün kırılımı **yazılabilir pencere kadar** tutulur — `PENCERE_GUN`,
+yedi gün — ve ondan eskisi silinir; o günlerin en büyüğü bir daha
 bulunamaz. Silmeden önce tabana yazılır, böylece rekor düzeltilebilir
 ama **geçmişin altına düşemez**.
+
+**Düzeltme penceresi bir haftadır.** Bir hafta içinde fark edilen bir
+yanlış tam olarak düzelir; daha eskisi tabana yazılmış olur ve artık
+düşmez. Pencereyi büyütmek defteri büyütür; yedi gün, yanlış girilen
+bir günü fark etmeye yeten süre olarak seçildi ve XP defterinin
+yazılabilir penceresiyle aynıdır.
+
+> Bu, XP defterinin **120 günlük** gün kırılımıyla karıştırılmamalı:
+> o başka bir defterin başka bir penceresidir (`xp.js`, `DETAY_GUN`).
+> Başarım defterinde gün kırılımı yalnız yazılabilir pencere için
+> tutulur, çünkü ömür boyu toplam zaten AY ÖZETİNDE durur.
 
 Eski defterler göçerken taban **ölçülür, uydurulmaz**: rekoru tutan gün
 hâlâ pencerede bulunabiliyorsa taban 0'dır (düzeltme tam çalışır),

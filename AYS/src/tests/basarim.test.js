@@ -80,6 +80,19 @@ describe('Başarım — motor', () => {
     return out;
   }
 
+  it('yazılabilir pencere XP ile AYNI uzunluktadır', () => {
+    /* Uygulama her eşitlemede `XP.pencere()` günlerini başarım
+       defterine yazar (bkz. `app.js`). İki pencere ayrışırsa:
+
+         başarım penceresi DAHA KISA → XP'nin gönderdiği en eski
+             günler sessizce reddedilir, o günün rozetleri hiç sayılmaz
+         başarım penceresi DAHA UZUN → o günler hiç gönderilmez ve
+             defterde eskimiş bir kırılım birikir
+
+       İkisi de sessizdir; bu yüzden ilişki burada çivilenir. */
+    expect(R.Basarim.PENCERE_GUN + 1).toBe(R.XP.pencere().length);
+  });
+
   it('boş defterde hiçbir rozet kazanılmamıştır', async () => {
     await sifirla();
     const d = B().durum();

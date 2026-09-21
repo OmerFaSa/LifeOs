@@ -8262,7 +8262,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'18007f5', at:'2026-09-21 08:41', dirty:true };
+ESP.BUILD = { id:'6a56713', at:'2026-09-21 08:54', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -16147,10 +16147,17 @@ ESP.Basarim = (function(){
          saatlik rozet var olmayan bir veriyle kazanılmış kalıyordu.
          Ölçülmemiş bir şeyi ölçülmüş gibi göstermek (AGENTS.md §1.2).
 
-         `odakTaban` budanan günlerden kalan tabandır. Pencere 120 gün;
+         `odakTaban` budanan günlerden kalan tabandır. Gün kırılımı
+         YAZILABİLİR PENCERE kadar tutulur (`PENCERE_GUN`, yedi gün);
          ondan eskisi silinir ve o günlerin en büyüğü bir daha
          bulunamaz. Silmeden önce tabana yazılır, böylece rekor
-         düzeltilebilir ama GEÇMİŞİN ALTINA DÜŞEMEZ. */
+         düzeltilebilir ama GEÇMİŞİN ALTINA DÜŞEMEZ.
+
+         Yani düzeltme penceresi bir HAFTADIR: bir hafta içinde
+         fark edilen bir yanlış düzelir, daha eskisi tabana yazılmış
+         olur. Pencereyi büyütmek defteri büyütür; yedi gün, yanlış
+         girilen bir günü fark etmeye yeten süre olarak seçildi
+         (XP defterinin yazılabilir penceresiyle de aynı). */
       enIyi:{ odakDakika:0, odakTaban:0 },
       /* Kazanılmış rozetler: kod → kazanıldığı gün (YYYY-AA-GG).
          Rozet geri alınmaz (yukarıdaki nota bakın). */
@@ -16284,8 +16291,8 @@ ESP.Basarim = (function(){
   /* Ekrana çıkan rekoru yeniden hesaplar: penceredeki günlerin en
      büyüğü ile budanmış geçmişin tabanı, hangisi büyükse.
 
-     Pencere en çok 120 gün olduğu için bu gezinme ucuzdur ve her
-     yazmada bir kez koşar. */
+     Pencerede en çok sekiz gün durur (`PENCERE_GUN` + bugün), yani bu
+     gezinme ucuzdur ve her yazmada bir kez koşar. */
   function odagiTazele(d){
     var en = d.enIyi.odakTaban || 0;
     Object.keys(d.gunler).forEach(function(g){
