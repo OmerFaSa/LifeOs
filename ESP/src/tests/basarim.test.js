@@ -62,6 +62,7 @@ describe('Başarım — katalog', () => {
 
 describe('Başarım — motor', () => {
   const B = () => ESP.Basarim;
+  const L = () => window.LIFEOS;
   const U = () => ESP.U;
 
   /* Her test temiz defterle başlar: biri ötekinin sayacını miras
@@ -79,6 +80,70 @@ describe('Başarım — motor', () => {
     }
     return out;
   }
+
+  it('günün odak rozeti GEÇİLEN EN YÜKSEK eşiği gösterir', () => {
+    /* Üç saat çalışıldıysa 3H rozeti çıkar, 1H değil. Aksi hâlde
+       rozet hep en alttaki eşikte kalır ve ilerlemeyi hiç göstermez.
+
+       Bu yardımcı üç uygulamanın günlük raporunda kullanılıyor
+       («odak günün raporlarında, eylemlerin yanında») ama hiç
+       sınanmamıştı: rozet yalnız 60 dakikadan sonra çıktığı için
+       duman testi de onu hiç görmüyor. */
+    const B = ESP.Basarim;
+    expect(B.gununOdagi(0)).toBeNull();
+    expect(B.gununOdagi(59)).toBeNull();     /* saat dolmadı */
+    expect(B.gununOdagi(60).esik).toBe(1);
+    expect(B.gununOdagi(200).esik).toBe(3);  /* 3 saat 20 dk → 3H */
+  });
+
+  it('tavanı aşan gün EN ÜST rozeti alır ve aştığını SÖYLER', () => {
+    /* «10 saat» yazıp 13 saati gizlemek, ölçülen şeyi saklamaktır. */
+    const B = ESP.Basarim;
+    const ust = L().BASARIM_AILE_ILE('odak').esikler.slice(-1)[0];
+    const o = B.gununOdagi(800);             /* 13 saat 20 dk */
+    expect(o.esik).toBe(ust);
+    expect(o.saat).toBe(13);
+    expect(o.asti).toBeTruthy();
+    expect(B.gununOdagi(ust * 60).asti).toBeFalsy();   /* tam tavan: aşmadı */
+  });
+
+  it('odak rozetinin görsel adı katalog kuralıyla aynıdır', () => {
+    /* Ad ayrışırsa rapor sessizce görselsiz kalır. */
+    const B = ESP.Basarim;
+    expect(B.gununOdagi(200).gorsel).toBe(L().BASARIM_MEDYA_ADI('odak', 3));
+  });
+
+  it('rozet yokken HTML de BOŞTUR', () => {
+    /* Boş bir `<span>` döndürmek, raporda görünmez bir boşluk
+       bırakırdı — satır aralığı sebepsiz açılırdı. */
+    const B = ESP.Basarim;
+    expect(B.odakHtml(0)).toBe('');
+    expect(B.odakHtml(59)).toBe('');
+    expect(B.odakHtml(60).indexOf('odak-rozet') >= 0).toBeTruthy();
+  });
+
+  it('«en uzun odak» BİR GÜNÜ aşamaz — merkez sözleşmesi öyle diyor', async () => {
+    /* Bir gün 1440 dakikadır. Daha büyük bir sayı bir ölçüm değil bir
+       GİRİŞ HATASIDIR (48 yerine 480 yazmak gibi) ve dışarı çıkarsa
+       sonucu orantısız:
+
+         `isaret()` HKM'ye `badge_focus_hours` gönderir
+         HKM sözleşmesi bu alanı 0–24 ile sınırlar (`sync_engine.py`,
+             RANGES — «bir günde en uzun odak» olduğu için DOĞRU bir
+             sınır)
+         sınır aşılırsa HKM BÜTÜN gövdeyi 422 ile reddeder; o günün
+             saat, görev ve gün sayaçları da merkeze hiç ulaşmaz
+
+       Yani tek bir yanlış alan, günün tamamının eşitlemesini sessizce
+       düşürüyordu. Sınır fiziksel: günün uzunluğu. */
+    await sifirla();
+    const gun = U().todayISO();
+    await B().esitleCok({ [gun]:{ dakika:1800, gorev:3, kusursuz:0 } });
+    expect(B().durum().odakSaat).toBe(24);
+    expect(B().isaret().badge_focus_hours).toBe(24);
+    /* Toplam dakika KIRPILMAZ: orası bir gün değil, günlerin toplamı. */
+    expect(B().durum().dakika).toBe(1800);
+  });
 
   it('yazılabilir pencere XP ile AYNI uzunluktadır', () => {
     /* Uygulama her eşitlemede `XP.pencere()` günlerini başarım

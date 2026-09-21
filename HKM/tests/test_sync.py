@@ -41,6 +41,47 @@ def run():
         no(ok_)
     test("bilinmeyen modul reddedilir", t_unknown_module)
 
+    def t_badge_focus_is_a_day():
+        """`badge_focus_hours` BIR GUNUN olcusudur ve 0-24 ile sinirli.
+
+        Sinir dogru; onemli olan SONUCU: asilirsa HKM butun govdeyi
+        reddeder, yani o gunun saat/gorev/gun sayaclari da merkeze hic
+        ulasmaz. Modul bu yuzden gonderdigini gun uzunluguyla kirpar
+        (bkz. `brand/seviye/basarim.js`, GUN_DAKIKA) ve bu test o
+        kirpmanin NEDEN gerektigini yazili tutar."""
+        ok_, _ = sync_engine.validate(body(badge_focus_hours=metric(24)))
+        ok(ok_, "24 saat reddedildi")
+        ok_, errs = sync_engine.validate(body(badge_focus_hours=metric(30)))
+        no(ok_, "30 saatlik bir gun kabul edildi")
+        ok(any("badge_focus_hours" in e for e in errs))
+    test("badge_focus_hours bir gunu asamaz", t_badge_focus_is_a_day)
+
+    def t_one_bad_field_rejects_all():
+        """Tek bir alan sinir disiysa GOVDENIN TAMAMI reddedilir.
+
+        Modulun neden kendi tarafinda kirpmasi gerektigi budur: yanlis
+        alan tek basina dusmuyor, yanindaki dogru sayaclari da
+        goturuyor."""
+        ok_, errs = sync_engine.validate(body(
+            badge_hours=metric(500), badge_tasks=metric(900),
+            badge_focus_hours=metric(30)))
+        no(ok_)
+        eq(len(errs), 1, "birden fazla hata beklenmiyordu")
+        # Hata YALNIZ o alanda; ama govde butunuyle reddedildi.
+        ok("badge_focus_hours" in errs[0])
+    test("tek bozuk alan butun govdeyi dusurur", t_one_bad_field_rejects_all)
+
+    def t_lifetime_badges_are_generous():
+        """Omurluk sayaclar bir gunun olcusu DEGILDIR ve birim ekine
+        gore daraltilmamalidir: `badge_hours` bir sure once `hours`
+        sanilip 0-24 araligina sokuluyordu ve 100 saatlik bir toplam
+        422 ile geri donuyordu."""
+        ok_, errs = sync_engine.validate(body(
+            badge_hours=metric(5000), badge_tasks=metric(250000),
+            badge_days=metric(3650), badge_streak_months=metric(24)))
+        ok(ok_, errs)
+    test("omurluk rozet sayaclari saat sanilmaz", t_lifetime_badges_are_generous)
+
     def t_no_rewrite():
         # Dogrulama veriyi degistirmez: gonderilen govde aynen kalir.
         b = body(sleep_hours={"value": 7, "cert": "sanirim"})

@@ -8290,7 +8290,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'ce3d9bf', at:'2026-09-21 09:00', dirty:true };
+ESP.BUILD = { id:'e191dd8', at:'2026-09-21 09:07', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -16143,6 +16143,23 @@ ESP.Basarim = (function(){
   var YOL = 'basarim';          /* depo anahtarı — `seviye`den AYRI */
   var PENCERE_GUN = 7;          /* geriye yazılabilir gün — XP ile aynı */
 
+  /* BİR GÜNÜN UZUNLUĞU. «Bir günde en uzun odak» bundan büyük olamaz:
+     daha büyük bir sayı bir ölçüm değil bir GİRİŞ HATASIDIR (48 yerine
+     480 yazmak gibi) ve dışarı çıkarsa sonucu orantısız —
+
+       `isaret()` HKM'ye `badge_focus_hours` gönderir;
+       HKM sözleşmesi bu alanı 0–24 ile sınırlar (`sync_engine.py`,
+           RANGES) ve sınır DOĞRUDUR, çünkü alan bir günün ölçüsüdür;
+       sınır aşılırsa HKM BÜTÜN gövdeyi 422 ile reddeder — o günün
+           saat, görev ve gün sayaçları da merkeze hiç ulaşmaz.
+
+     Yani tek bir yanlış alan, günün tamamının eşitlemesini sessizce
+     düşürüyordu. Ölçüldü.
+
+     TOPLAM DAKİKA KIRPILMAZ: orası bir gün değil günlerin toplamıdır
+     ve hatalı bir giriş orada zaten şişmiş bir sayı olarak görünür. */
+  var GUN_DAKIKA = 1440;
+
   var L = function(){ return window.LIFEOS; };
   var U = function(){ return ESP.U; };
 
@@ -16245,7 +16262,7 @@ ESP.Basarim = (function(){
       });
     }
     if(ham.enIyi && typeof ham.enIyi === 'object'){
-      d.enIyi.odakDakika = sayi(ham.enIyi.odakDakika);
+      d.enIyi.odakDakika = gunluk(sayi(ham.enIyi.odakDakika));
       /* GÖÇ — eski defterde `odakTaban` yok ve UYDURULMAZ, ÖLÇÜLÜR.
 
          Soru şu: rekoru tutan gün hâlâ pencerede mi? Pencereyi
@@ -16295,10 +16312,12 @@ ESP.Basarim = (function(){
   function gocTabani(d){
     var en = 0;
     Object.keys(d.gunler).forEach(function(g){
-      var dk = (d.gunler[g] || {}).dakika || 0;
+      var dk = gunluk((d.gunler[g] || {}).dakika);
       if(dk > en) en = dk;
     });
-    return en >= d.enIyi.odakDakika ? 0 : d.enIyi.odakDakika;
+    /* Eski defterdeki rekor da gün uzunluğuyla sınırlanır: sınırsızken
+       yazılmış bir değer göçerken düzelir. */
+    return en >= gunluk(d.enIyi.odakDakika) ? 0 : gunluk(d.enIyi.odakDakika);
   }
 
   /* Pencereden çıkan günleri sil. Özete zaten işlendiler; ikinci kez
@@ -16309,7 +16328,7 @@ ESP.Basarim = (function(){
       if(yazilabilirGun(g) || g > bugun) return;
       /* SİLMEDEN ÖNCE TABANA YAZ. Bu gün bir daha okunamayacak; rekoru
          o tutuyorsa ve taban güncellenmezse rekor sessizce kaybolur. */
-      var dk = (d.gunler[g] || {}).dakika || 0;
+      var dk = gunluk((d.gunler[g] || {}).dakika);
       if(dk > d.enIyi.odakTaban) d.enIyi.odakTaban = dk;
       delete d.gunler[g];
     });
@@ -16322,12 +16341,17 @@ ESP.Basarim = (function(){
      Pencerede en çok sekiz gün durur (`PENCERE_GUN` + bugün), yani bu
      gezinme ucuzdur ve her yazmada bir kez koşar. */
   function odagiTazele(d){
-    var en = d.enIyi.odakTaban || 0;
+    var en = gunluk(d.enIyi.odakTaban);
     Object.keys(d.gunler).forEach(function(g){
-      var dk = (d.gunler[g] || {}).dakika || 0;
+      var dk = gunluk((d.gunler[g] || {}).dakika);
       if(dk > en) en = dk;
     });
     d.enIyi.odakDakika = en;
+  }
+
+  /* Bir günün dakikası — gün uzunluğuyla sınırlı. */
+  function gunluk(dk){
+    return Math.min(GUN_DAKIKA, Math.max(0, Number(dk) || 0));
   }
 
   /* ----------------------------------------------------- okuma */
