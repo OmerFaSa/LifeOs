@@ -7130,6 +7130,34 @@ SP.Perde = (function(){
     return (kok || 'img/seviye/') + 'gecis-' + yukselme.kademe + '.webp';
   }
 
+  /* VİDEO BİTİNCE NEREYE SARAR — saf karar, ayrı duruyor ki sınanabilsin.
+
+     Depo sahibinin isteği: «video 10. saniyede bittiği için bittiğinde
+     6. saniyesine sarsın». İlk altı saniye bir AÇILIŞTIR ve her
+     döngüde yeniden izlenmesi gerekmez; kalan dört saniye kendi içinde
+     kapanan bir harekettir.
+
+     BURADA, RÜTBE EKRANINDA DEĞİL: karar bir MEDYA kararıdır ve bu
+     dosya medya kararlarının durduğu yer (`sahneYolu`, `kartVideoYolu`
+     de burada). Ayrıca ekran modülleri test sayfasına yüklenmez;
+     orada yaşayan bir saf işlev sınanamazdı.
+
+     İki korumayla:
+
+       süre bilinmiyorsa (NaN/Infinity) BAŞA sarar. Tarayıcı H.264
+           çözemiyorsa `duration` NaN kalır; bilinmeyen bir süreye göre
+           altıncı saniyeye sarmak, videonun sonuna düşüp `ended`
+           olayını tekrar tetikleyebilir — saniyede yüz kez dönen bir
+           döngü demekti.
+       sarma noktası süreden BÜYÜKSE başa sarar. Bir gün altı saniyeden
+           kısa bir sahne gelirse, o sahne sonsuza kadar kendi sonunda
+           dönerdi. */
+  function donguNoktasi(geri, sure){
+    if(!(geri > 0)) return 0;
+    if(!isFinite(sure) || !(sure > 0)) return 0;
+    return geri < sure ? geri : 0;
+  }
+
   /* Perde ne kadar dursun? Yeni bir kademe yeni bir ADDIR: okunacak bir
      slogan, bakılacak yeni bir kart vardır. Basamak ise bir ilerleme
      işaretidir, göz ucuyla görülür. İkisi de «Geç» ile kesilebilir. */
@@ -7409,7 +7437,7 @@ SP.Perde = (function(){
     kendiliginenAcilsinMi:kendiliginenAcilsinMi,
     /* Saf kararlar — perde açmadan sınanabilsinler diye dışarıda. */
     kartYolu:kartYolu, kartVideoYolu:kartVideoYolu, sahneYolu:sahneYolu,
-    gecisYolu:gecisYolu,
+    gecisYolu:gecisYolu, donguNoktasi:donguNoktasi,
     kutlamaSuresi:kutlamaSuresi,
     rozetKutla:rozetKutla, rozetGorseliYolu:rozetGorseliYolu,
     rozetKutlamaSuresi:rozetKutlamaSuresi,
@@ -7423,7 +7451,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'6a56713', at:'2026-09-21 08:54', dirty:true };
+SP.BUILD = { id:'ce3d9bf', at:'2026-09-21 09:00', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -33174,7 +33202,7 @@ SP.Screens.rutbe = (function(){
       var geri = Number(v.dataset.dongu) || 0;
       v.addEventListener('ended', function(){
         try{
-          v.currentTime = (isFinite(v.duration) && geri < v.duration) ? geri : 0;
+          v.currentTime = SP.Perde.donguNoktasi(geri, v.duration);
           var p = v.play();
           if(p && p.catch) p.catch(function(){});
         }catch(e){}

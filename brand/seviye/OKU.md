@@ -262,6 +262,33 @@ bit düzeyinde aynı kalır, dosya %30 küçülür. Küçültme ya da yeniden
 kodlama YAPILMAZ; yer sorun olursa `--kayipli` vardır ve ölçüsü aracın
 başında yazılı.
 
+### Sahne videosu — denetim onu GÖREMEZ, ve bu bir hata değil
+
+`sahne-1.mp4 … sahne-6.mp4` **H.264**'tür (`avc1`). Playwright'in
+getirdiği başsız Chromium tescilli kodeksiz derlenmiştir:
+
+```
+canPlayType('video/mp4; codecs="avc1.42E01E")  →  ""      (hayır)
+video.error  →  4: DEMUXER_ERROR_NO_SUPPORTED_STREAMS
+```
+
+Yani **duman testi, düzen denetimi ve her ekran görüntüsü videoyu değil
+POSTERİ görür** (`sahne-N.webp`). Gerçek tarayıcıda (Chrome, Safari,
+Edge) video oynar.
+
+Bunu bilmek iki şeyi önler:
+
+1. **«Video çalışmıyor» diye bir hata aramak.** Çalışıyor; denetim
+   ortamı onu açamıyor.
+2. **Posteri `onerror` ile kaldırmak.** Bir kez denendi ve geri
+   alındı: video çözülemeyince poster de onunla gidiyor, sahne
+   bütünüyle kayboluyordu. Kod bilerek `onerror` KULLANMAZ — çözülemeyen
+   bir videonun posteri olduğu yerde kalır ve ekran hiç bozulmaz.
+
+Döngü noktası (`Perde.donguNoktasi`) süre bilinmiyorsa **başa** sarar;
+bilinmeyen bir süreye göre altıncı saniyeye sarmak, videonun sonuna
+düşüp `ended` olayını yeniden tetikleyebilirdi.
+
 ### İdle video — ileride
 
 Rütbe kartlarının yerinde kısa, sessiz, döngülü videolar oynayacak.

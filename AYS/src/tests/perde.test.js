@@ -166,6 +166,32 @@
         .toBe('medya/gecis-5.webp');
     });
 
+    it('sahne videosu ALTINCI saniyeye sarar, başa değil', () => {
+      /* Depo sahibinin isteği: «video 10. saniyede bittiği için
+         bittiğinde 6. saniyesine sarsın». İlk altı saniye bir
+         açılıştır ve her döngüde yeniden izlenmesi gerekmez. */
+      expect(P.donguNoktasi(6, 10)).toBe(6);
+      expect(P.donguNoktasi(6, 10.4)).toBe(6);
+    });
+
+    it('süre bilinmiyorsa BAŞA sarar', () => {
+      /* Tarayıcı H.264 çözemiyorsa `duration` NaN kalır. Bilinmeyen
+         bir süreye göre altıncı saniyeye sarmak, videonun sonuna
+         düşüp `ended` olayını yeniden tetikleyebilir — saniyede yüz
+         kez dönen bir döngü demekti. */
+      expect(P.donguNoktasi(6, NaN)).toBe(0);
+      expect(P.donguNoktasi(6, Infinity)).toBe(0);
+      expect(P.donguNoktasi(6, 0)).toBe(0);
+    });
+
+    it('sarma noktası süreden büyükse BAŞA sarar', () => {
+      /* Bir gün altı saniyeden kısa bir sahne gelirse, o sahne
+         sonsuza kadar kendi sonunda dönerdi. */
+      expect(P.donguNoktasi(6, 4)).toBe(0);
+      expect(P.donguNoktasi(6, 6)).toBe(0);
+      expect(P.donguNoktasi(0, 10)).toBe(0);
+    });
+
     it('geçiş karesi YALNIZ yeni kademede istenir', () => {
       /* Basamak (1.1 → 1.2) aynı kademenin içinde kalır ve bir geçiş
          değildir: «Bronz → Bronz» diyen bir tam ekran kare, üç

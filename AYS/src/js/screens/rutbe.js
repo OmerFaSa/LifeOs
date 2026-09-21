@@ -812,7 +812,7 @@ R.Screens.rutbe = (function(){
       var geri = Number(v.dataset.dongu) || 0;
       v.addEventListener('ended', function(){
         try{
-          v.currentTime = (isFinite(v.duration) && geri < v.duration) ? geri : 0;
+          v.currentTime = R.Perde.donguNoktasi(geri, v.duration);
           var p = v.play();
           if(p && p.catch) p.catch(function(){});
         }catch(e){}

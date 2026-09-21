@@ -644,6 +644,34 @@ __NS__.Perde = (function(){
     return (kok || 'img/seviye/') + 'gecis-' + yukselme.kademe + '.webp';
   }
 
+  /* VİDEO BİTİNCE NEREYE SARAR — saf karar, ayrı duruyor ki sınanabilsin.
+
+     Depo sahibinin isteği: «video 10. saniyede bittiği için bittiğinde
+     6. saniyesine sarsın». İlk altı saniye bir AÇILIŞTIR ve her
+     döngüde yeniden izlenmesi gerekmez; kalan dört saniye kendi içinde
+     kapanan bir harekettir.
+
+     BURADA, RÜTBE EKRANINDA DEĞİL: karar bir MEDYA kararıdır ve bu
+     dosya medya kararlarının durduğu yer (`sahneYolu`, `kartVideoYolu`
+     de burada). Ayrıca ekran modülleri test sayfasına yüklenmez;
+     orada yaşayan bir saf işlev sınanamazdı.
+
+     İki korumayla:
+
+       süre bilinmiyorsa (NaN/Infinity) BAŞA sarar. Tarayıcı H.264
+           çözemiyorsa `duration` NaN kalır; bilinmeyen bir süreye göre
+           altıncı saniyeye sarmak, videonun sonuna düşüp `ended`
+           olayını tekrar tetikleyebilir — saniyede yüz kez dönen bir
+           döngü demekti.
+       sarma noktası süreden BÜYÜKSE başa sarar. Bir gün altı saniyeden
+           kısa bir sahne gelirse, o sahne sonsuza kadar kendi sonunda
+           dönerdi. */
+  function donguNoktasi(geri, sure){
+    if(!(geri > 0)) return 0;
+    if(!isFinite(sure) || !(sure > 0)) return 0;
+    return geri < sure ? geri : 0;
+  }
+
   /* Perde ne kadar dursun? Yeni bir kademe yeni bir ADDIR: okunacak bir
      slogan, bakılacak yeni bir kart vardır. Basamak ise bir ilerleme
      işaretidir, göz ucuyla görülür. İkisi de «Geç» ile kesilebilir. */
@@ -923,7 +951,7 @@ __NS__.Perde = (function(){
     kendiliginenAcilsinMi:kendiliginenAcilsinMi,
     /* Saf kararlar — perde açmadan sınanabilsinler diye dışarıda. */
     kartYolu:kartYolu, kartVideoYolu:kartVideoYolu, sahneYolu:sahneYolu,
-    gecisYolu:gecisYolu,
+    gecisYolu:gecisYolu, donguNoktasi:donguNoktasi,
     kutlamaSuresi:kutlamaSuresi,
     rozetKutla:rozetKutla, rozetGorseliYolu:rozetGorseliYolu,
     rozetKutlamaSuresi:rozetKutlamaSuresi,
