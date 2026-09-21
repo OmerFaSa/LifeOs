@@ -65,6 +65,11 @@ node tools/palettecheck.js  # bütün paletlerde kontrast
 node tools/perfcheck.js     # dokuz aylık veriyle çizim bütçesi
 node tools/loadcheck.js     # BEŞ YILLIK veriyle çizim (ağır; haftalık CI işi)
 
+# depo koku: kapsam OLCULUR, elle yazilmaz
+node tools/kapsam.js                # uc arayuzun islev kapsami
+node tools/kapsam.js AYS --ayrinti  # hangi islev hic kosmadi
+node tools/kapsam.js --esik 40      # esigin alti KIRMIZI (cikis 1)
+
 # HKM
 cd HKM && python3 -m tests.run && python3 tools/perf.py && node tools/yuz.js
 

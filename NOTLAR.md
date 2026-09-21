@@ -908,15 +908,49 @@ it('günlük hak dolunca bekleme değil RET döner')
 
 Test listesi okunduğunda **sistemin sözleşmesi** okunmuş olmalı.
 
-### 13.3 Bugünkü kapsam
+### 13.3 Bugünkü kapsam — ARTIK ÖLÇÜLÜYOR
 
-| modül | AYS | SPİ |
-|---|---|---|
-| `llm.js` | %68 | %61 *(oturum başında %3)* |
-| `quota.js` | %84 | %76 *(%15)* |
-| `store.js` | %64 | %76 *(%35)* |
-| `office.js` | %59 | %84 |
-| `state.js` | %73 | %61 |
+Bu tablo uzun süre **elle** yazılıydı ve eskimişti: «`office.js` %59»
+diyordu, ölçünce %84 çıktı; «`llm.js` %68» diyordu, %91 çıktı;
+«`store.js` %64» diyordu, %46 çıktı. Yani yanlışlık iki yöndeydi ve
+tablo bir KARAR dayanağıydı — açık borçlar listesi «önce kapsam, sonra
+bölme» diyor.
+
+Bu deponun kendi kuralı da açıktı: **sayılar elle yazılmaz, bir araç
+üretir.** Kapsam o kuralın dışında kalmıştı; artık değil:
+
+```bash
+node tools/kapsam.js                # üç arayüz
+node tools/kapsam.js AYS --ayrinti  # koşmamış işlevleri de yazar
+node tools/kapsam.js --esik 40      # eşiğin altı kırmızı (çıkış 1)
+```
+
+Yeni bağımlılık yok, kaynak kod değişmiyor: Chromium'un kendi sayacı
+(V8 precise coverage) kullanılıyor. Ölçülen şey **işlev** sayısıdır,
+satır değil — bu depoda bir işlev bir karardır ve «şu işlev hiç
+çağrılmadı» cümlesi «şu satıra uğranmadı»dan çok daha fazlasını söyler.
+
+| katman | AYS | SPİ | ESP |
+|---|---|---|---|
+| `core/` | **%76** (885/1163) | **%77** (690/891) | **%67** (663/996) |
+| `screens/` | %14 (25/184) | %35 (150/426) | — |
+
+En düşük `core` dosyaları (ölçüm, yargı değil — bazıları bilerek):
+
+| dosya | AYS | SPİ | ESP |
+|---|---|---|---|
+| `ui.js` | %15 | — | **%0** |
+| `components.js` | %68 | — | **%0** |
+| `parts.js` | — | %80 | **%0** |
+| `palette.js` | %8 | — | %0 *(kasıtlı: UI açar)* |
+| `setup.js` | %13 | — | %0 |
+| `store.js` | %46 | %85 | %54 |
+| `llm.js` | %91 | — | %5 |
+
+**ESP'nin arayüz katmanı hiç sınanmıyordu** ve bunu ancak ölçüm
+söyledi: 865 test var ama `components.js`, `ui.js` ve `parts.js`'in
+tek bir işlevi bile koşmuyor. AYS'de `components.test.js` + `ux.test.js`,
+SPİ'de `ui.test.js` var; ESP'de ikisi de yoktu.
 
 **Kalıcılığa dokunmadan önce test yaz.** Depo modülünün on yedi
 işlevinden altısı deneniyordu; önce testleri yazdım, sonra optimize
@@ -1356,8 +1390,10 @@ yazmamış olurdum.
 |---|---|---|---|
 | ~~İçe aktarma geri alınamıyor~~ | — | — | **kapandı** — `undoImport` üç `core/store.js`'de de var |
 | Depo ölçeklenmesi | `core/store.js` | orta | §7.3 — yaşayan veride göç, sormadan yapma |
-| `SPI/screens/labs.js` 1482 satır | — | orta | testi yok; bölmeden önce kapsam ister |
-| `AYS/core/office.js` 2049 satır | — | orta | kapsam %59 |
+| `SPI/screens/labs.js` 1482 satır | — | orta | kapsam **%24** (`node tools/kapsam.js SPI`) |
+| `AYS/core/office.js` 2049 satır | — | düşük | kapsam **%84** — «%59» eskimiş bir sayıydı |
+| `AYS/core/store.js` kapsamı %46 | — | orta | kalıcılık; §13.3'ün kendi kuralı buraya bakar |
+| ESP'de `ui.js`/`components.js` %0 | — | orta | AYS ve SPİ'de karşılığı var, ESP'de yoktu |
 | ~~Ortak CSS kopyaları~~ | — | — | **kapandı** — `brand/ortak/` + `tools/ortak.py` |
 | ~~Telefonda çalıştırma yolu~~ | — | — | **kapandı** — Seçenek B (tek dosya + elle yedek), README «Telefonda kullanım» |
 | `palette.js` kapsamı | ikisi | düşük | UI açan işlevler denenmiyor (kasıtlı) |
