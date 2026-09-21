@@ -369,6 +369,18 @@ details.detay > summary:hover{ color:var(--fg); }
 .muhur-sat__yazi span{ font-size:11px; }
 
 
+/* TANITIM AFİŞİ — bağlanma kartının en üstünde, yalnız ilk ekranda.
+   Kartın kenarına değmesin diye iç boşluk değil negatif kenar boşluğu
+   kullanılır: afiş kartın tam genişliğini alır ve poster gibi durur. */
+.giris__afis{
+  display:block;
+  width:calc(100% + 2px);
+  margin:-1px -1px 16px;
+  height:auto;
+  border-radius:4px 4px 0 0;
+}
+
+
 /* ============================= KİMLİK ===========================
    Portre ve çerçeve. Çerçeve fotoğrafın ÜSTÜNE biner ve onu
    küçültmez: halkanın ortası boştur, yüz oradan görünür. */
@@ -448,6 +460,23 @@ details.detay > summary:hover{ color:var(--fg); }
 
 <div class="wrap">
   <div class="card" id="giris" hidden>
+    <!-- TANITIM AFİŞİ — sisteme ilk giren burada durur.
+
+         Üç arayüzün afişi ilk kurulum sihirbazında duruyor; HKM'nin
+         sihirbazı yok ve afişi hiçbir yerde görünmüyordu. Bağlanma
+         kartı HKM'nin ilk ekranıdır: anahtarı girmeden önce görülen
+         tek şey.
+
+         ALT METNİ BOŞ ve aria-hidden: afişin üzerinde yazan şey
+         («İletişim Sistemi — daha yakın, daha anlamlı, daha güçlü
+         bağlantılar») bir tanıtım cümlesidir; altındaki paragraf ise
+         asıl bilgiyi taşır. Aynı ekranı iki kere okutmak, ekran
+         okuyucuyu bir afişle oyalamaktır.
+
+         Dosya yoksa onerror düğümü kaldırır; kart eskisi gibi
+         çalışır. -->
+    <img class="giris__afis" src="/img/marka/tanitim-hkm.webp"
+      alt="" aria-hidden="true" onerror="this.remove()">
     <div class="tag">Bağlan</div>
     <p class="muted">HKM yalnız bu bilgisayarda çalışıyor. Bağlanmak için
       bir kez anahtar gerekiyor; <code>HKM/config.json</code> içindeki

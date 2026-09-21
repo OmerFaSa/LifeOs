@@ -213,12 +213,17 @@ karşılığını ödememek olurdu.
 Bu tablo **elle tutulmaz**; tek komutla sorulur:
 
 ```bash
-python3 tools/rutbe.py --eksik    # katalog ne bekliyor, ne yok
+python3 tools/rutbe.py --eksik    # katalog ne bekliyor, ne yok — ve ne fazla
 ```
 
 Araç kataloğu (`kademeler.js`, `basarimlar.js`) node ile okur ve
 beklenen her adı `medya/` altındakiyle karşılaştırır. Yapıyı Python'da
 ikinci kez yazmak, iki kopyanın bir gün ayrışması demekti.
+
+**İki yönü birden söyler.** Eksik dosya zararsızdır (ekran kendini
+toparlar); **fazla** dosya değildir: adı bir harf yanlış yazılmış bir
+görsel hem yerine oturmaz hem de «koydum ama görünmüyor» diye aranır.
+Katalogun istemediği dosyalar ayrı bir başlıkta listelenir.
 
 Bu satırlar yazıldığında katalog **113 görsel** bekliyordu ve **8
 tanesi** eksikti:

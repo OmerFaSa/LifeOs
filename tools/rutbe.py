@@ -342,21 +342,36 @@ def eksik() -> int:
             gruplar.setdefault(aile, []).append(ad)
 
     toplam = sum(len(v) for v in gruplar.values())
-    if not toplam:
+    if toplam:
+        print("Katalog %d görsel bekliyor; %d tanesi yok.\n" % (len(bekle), toplam))
+        for aile in sorted(gruplar):
+            adlar = gruplar[aile]
+            print("%-10s %d eksik" % (aile.upper(), len(adlar)))
+            for ad in adlar:
+                print("   · %s.webp" % ad)
+            print("")
+        print("Eksik dosya HATA DEĞİLDİR: kart yoksa banner kendi dairesini")
+        print("çizer, sahne yoksa kademe renginden bir zemin kalır (bkz.")
+        print("brand/seviye/OKU.md). Bu liste yalnız «ne gelmedi» sorusunun")
+        print("cevabıdır.")
+    else:
         print("Katalogun beklediği %d görselin hepsi yerinde." % len(bekle))
-        return 0
 
-    print("Katalog %d görsel bekliyor; %d tanesi yok.\n" % (len(bekle), toplam))
-    for aile in sorted(gruplar):
-        adlar = gruplar[aile]
-        print("%-10s %d eksik" % (aile.upper(), len(adlar)))
-        for ad in adlar:
-            print("   · %s.webp" % ad)
-        print("")
-    print("Eksik dosya HATA DEĞİLDİR: kart yoksa banner kendi dairesini")
-    print("çizer, sahne yoksa kademe renginden bir zemin kalır (bkz.")
-    print("brand/seviye/OKU.md). Bu liste yalnız «ne gelmedi» sorusunun")
-    print("cevabıdır.")
+    # TERS YON: diskte duran ama katalogun HIC istemedigi dosya.
+    #
+    # Eksik dosya zararsizdir; FAZLA dosya degildir. Adi bir harf yanlis
+    # yazilmis bir gorsel, hem yerine oturmaz hem de «koydum ama
+    # gorunmuyor» diye aranir. Bu liste o aramayi bir komuta indirir.
+    istenen = {ad for _, ad in bekle}
+    fazla = sorted(a for a in var if a not in istenen)
+    if fazla:
+        print("\nKatalogun İSTEMEDİĞİ %d dosya var:" % len(fazla))
+        for ad in fazla:
+            print("   · %s" % ad)
+        print("\nBir dosyanın burada olması hata demek değil — bilerek")
+        print("saklanan dosyalar var (örn. `bant-hukum`: üzerinde «HÜKÜM»")
+        print("yazıyor, «SAFİR» değil). Ama adı yanlış yazılmış bir görsel")
+        print("de tam olarak burada görünür.")
     return 0
 
 
