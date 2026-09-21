@@ -404,12 +404,22 @@ R.Screens.rutbe = (function(){
     const sayi = n => Number(n || 0).toLocaleString('tr-TR');
 
     if(hal === 'kilitli'){
-      const kalan = Math.max(0, ilk.esik - (d.toplam || 0));
+      /* AÇILIŞ, EŞİK DEĞİLDİR. `esik` basamağın BİTTİĞİ toplamdır;
+         kademe ilk basamağının BAŞLADIĞI toplamda açılır. Burada bir
+         süre `ilk.esik` yazılıydı ve sayı hep aynı yönde yanlıştı:
+
+           Yakut 16.000 XP'de açılır, künye 25.000 diyordu
+           4.000 XP'si olana «20.000 kaldı» — doğrusu 11.000
+
+         Sayı motordan gelir (`xp.js`, `merdiven` → `acilis`); ekranın
+         elinde yalnız bu kademenin satırı var, bir öncekinin son
+         basamağı yok. */
+      const kalan = Math.max(0, ilk.acilis - (d.toplam || 0));
       return html`
         <div class="rutbe-kunye rutbe-kunye--kilit">
           <span class="rutbe-kunye__ust">Açılışa</span>
           <b class="rutbe-kunye__sayi">${sayi(kalan)}</b>
-          <span class="rutbe-kunye__alt">XP · eşik ${sayi(ilk.esik)}</span>
+          <span class="rutbe-kunye__alt">XP · açılış ${sayi(ilk.acilis)}</span>
         </div>`;
     }
 

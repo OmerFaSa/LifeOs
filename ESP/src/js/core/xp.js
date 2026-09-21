@@ -833,6 +833,20 @@ ESP.XP = (function(){
       return {
         etiket:b.etiket, kademe:b.kademe, basamak:b.basamak,
         maliyet:b.maliyet, esik:b.esik,
+        /* AÇILIŞ — bu basamağın BAŞLADIĞI toplam. `esik` onun BİTTİĞİ
+           toplamdır ve ikisi karıştırılıyordu: merdivende kilitli
+           kademenin künyesi «Açılışa … XP» derken `esik` okuyor, yani
+           kademenin ilk basamağının BİTİŞİNİ açılış sanıyordu.
+
+             Yakut gerçekte 16.000 XP'de açılır
+             künye 25.000 diyordu — 4.000 XP'si olan birine
+                 «20.000 kaldı» yazıyordu; doğrusu 11.000
+
+           Hata hep aynı yöndeydi: hedef olduğundan uzak görünüyordu.
+           Sayıyı ekranın hesaplaması da doğru değildi — ekranın elinde
+           yalnız o kademenin satırı var, bir öncekinin son basamağı
+           yok. Karar burada, motorda durur. */
+        acilis:i > 0 ? ((L.BASAMAKLAR[i - 1] || {}).esik || 0) : 0,
         kademeBilgi:kb,
         durum:hal,
         kart:L.MEDYA_ADI ? (kok + L.MEDYA_ADI(b.etiket) + '.webp') : null,

@@ -242,6 +242,51 @@
       expect(m.filter(b => b.durum === 'simdi').length).toBeLessThan(2);
     });
 
+    it('basamağın AÇILIŞI eşiğinden başka bir sayıdır', () => {
+      /* `esik` basamağın BİTTİĞİ toplamdır, BAŞLADIĞI değil. İkisini
+         karıştırmak ekranda yanlış bir sayı yazdırıyordu: merdivende
+         kilitli kademenin künyesi «Açılışa … XP» derken `ilk.esik`
+         kullanıyordu, yani kademenin İLK BASAMAĞININ BİTİŞİNİ
+         açılış sanıyordu.
+
+           Yakut gerçekte 16.000 XP'de açılır
+           künye 25.000 diyordu — 4.000 XP'si olan birine
+               «20.000 kaldı» yazıyordu, doğrusu 11.000
+
+         Fark küçük değil ve hep AYNI yönde: hedef olduğundan uzak
+         görünüyordu. */
+      const m = XP.merdiven();
+      expect(m[0].acilis).toBe(0);
+      m.forEach((b, i) => {
+        expect(b.acilis).toBe(i > 0 ? m[i - 1].esik : 0);
+        /* Katalogun kendi tutarlılığı: açılış + maliyet = eşik. */
+        expect(b.acilis + b.maliyet).toBe(b.esik);
+      });
+      /* Ve ikisi GERÇEKTEN ayrı sayılar: birinci kademe dışında her
+         kademenin ilk basamağında açılış eşikten küçüktür. */
+      L.KADEMELER.filter(k => k.no > 1).forEach(k => {
+        const ilk = m.filter(b => b.kademe === k.no)[0];
+        expect(ilk.acilis < ilk.esik).toBeTruthy();
+        expect(ilk.acilis > 0).toBeTruthy();
+      });
+    });
+
+    it('kademe, ilk basamağının AÇILIŞINA varınca açılır', async () => {
+      /* «Açılış» uydurma bir alan değil: tam o toplamda kademenin ilk
+         basamağı «şimdi» olur. Künyenin okuduğu sayı ile merdivenin
+         gösterdiği hâl aynı yerden gelsin diye sınanıyor. */
+      for(const k of L.KADEMELER){
+        const ilk = XP.merdiven().filter(b => b.kademe === k.no)[0];
+        resetState();
+        XP.bosalt();
+        await R.Store.set('seviye',
+          { surum:L.SEVIYE_SURUM, toplam:ilk.acilis });
+        await XP.yukle();
+        const o = XP.merdiven().filter(b => b.etiket === ilk.etiket)[0];
+        expect(o.durum).toBe('simdi');
+      }
+    });
+
     it('merdivendeki kart adresi medya kuralıyla aynıdır', () => {
       const m = XP.merdiven();
       const safir = m.filter(b => b.etiket === '5.2')[0];
