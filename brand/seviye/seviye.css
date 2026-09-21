@@ -1096,6 +1096,19 @@
   border-color:color-mix(in srgb, var(--kademe-renk) 38%, transparent);
 }
 
+/* SAYAÇ SATIRI — dört kutu, yer kadar sütun.
+
+   `auto-fit` + `minmax(132px, 1fr)`: geniş ekranda dördü yan yana,
+   tablette ikişer, 390 pikselde yine ikişer (132 × 2 + boşluk = 288,
+   sığıyor). Genel `.grid` kullanılıyordu ve o on iki sütunludur —
+   span sınıfı verilmeyen çocuk BİR sütun kaplıyor, yani telefonda
+   ekranın on ikide biri. */
+.rutbe-sayaclar{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(132px, 1fr));
+  gap:12px;
+}
+
 /* ================================================================
    BU KADEMEDE NEREDESİN — şerit, arma ve geçiş karesi.
 

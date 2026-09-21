@@ -278,6 +278,34 @@
       expect(m.filter(b => b.etiket === '3.2')[0].nisan).toBe('medya/nisan-3-2.webp');
     });
 
+    it('siluet kaynağı YAZISIZ olanı seçer', () => {
+      /* Siluet alfayı korur: kaynağın üzerindeki yazı da okunur kalır.
+         Kademe 1–5'te kaynak nişandır (yazısız); altıncıda K
+         madalyonudur — üzerinde yalnız SAYI var ve o sayı zaten
+         kutunun altında yazılı.
+
+         Rütbe kartı 1–5 arasında kaynak OLAMAZ: üzerinde kademenin
+         adı yazılı ve kilitli bir kartın silueti «YAKUT» yazısını
+         okunur bırakırdı. */
+      const m = XP.merdiven();
+      const yakut = m.filter(b => b.etiket === '4.2')[0];
+      expect(yakut.siluet).toBe('img/seviye/nisan-4-2.webp');
+      /* Harness'ta `.not` yok; eşitliği doğrudan sınarız. */
+      expect(yakut.siluet === yakut.kart).toBeFalsy();
+
+      const kutsal = m.filter(b => b.etiket === 'K300')[0];
+      expect(kutsal.siluet).toBe('img/seviye/rutbe-k300.webp');
+      expect(kutsal.nisan).toBeNull();
+    });
+
+    it('her basamağın bir siluet kaynağı vardır', () => {
+      /* Kaynaksız bir kilitli basamak boş bir kutudur ve merdivenin
+         şekli orada kopar. */
+      XP.merdiven().forEach(b => {
+        expect(typeof b.siluet).toBe('string');
+      });
+    });
+
     it('medya adı etiketten türer — nokta tireye döner, harf küçülür', () => {
       expect(L.MEDYA_ADI('5.2')).toBe('rutbe-5-2');
       expect(L.MEDYA_ADI('1.1')).toBe('rutbe-1-1');

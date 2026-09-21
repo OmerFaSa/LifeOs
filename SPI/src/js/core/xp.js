@@ -847,6 +847,23 @@ SP.XP = (function(){
            kartı kullanır. */
         nisan:(kb && kb.etiketler) ? null
           : (kok + 'nisan-' + b.kademe + '-' + b.basamak + '.webp'),
+        /* SİLUET KAYNAĞI — kilitli basamakta ŞEKLİ çizilecek görsel.
+
+           Ayrı bir alan olmasının sebebi, kararın tek yerde durması:
+           siluet alfayı korur, yani kaynağın üzerindeki YAZI da okunur
+           hâlde kalır. Kaynak bu yüzden yazısız olmak zorunda.
+
+             kademe 1–5   nişan — üzerinde yazı yoktur
+             kademe 6     K madalyonu (kart) — üzerinde yalnız SAYI
+                          vardır («100») ve o sayı zaten kutunun
+                          altında yazılı; sır değil.
+
+           Rütbe kartı 1–5 arasında siluet kaynağı OLAMAZ: üzerinde
+           kademenin adı yazılı ve kilitli bir kartın silueti «YAKUT»
+           yazısını okunur bırakırdı. */
+        siluet:(kb && kb.etiketler)
+          ? (L.MEDYA_ADI ? (kok + L.MEDYA_ADI(b.etiket) + '.webp') : null)
+          : (kok + 'nisan-' + b.kademe + '-' + b.basamak + '.webp'),
       };
     });
   }

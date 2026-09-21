@@ -159,7 +159,17 @@ R.Screens.rutbe = (function(){
           </div>
         </div>`, 'rutbe--kart'),
 
-      K.Grid([
+      /* SAYAÇ SATIRI KENDİ IZGARASINDA.
+
+         Bir süre `K.Grid` kullanılıyordu ve yanlıştı: o ızgara on iki
+         sütunludur ve span sınıfı verilmeyen çocuk BİR sütun kaplar.
+         Geniş ekranda dört kutu tesadüfen doğru görünüyordu; 390
+         pikselde her kutu ekranın on ikide biri oluyor ve «BU / TO /
+         KA» diye kesilmiş etiketler üst üste biniyordu.
+
+         `auto-fit` + `minmax`: yer varsa dördü yan yana, yoksa ikişer,
+         en dar yerde tek sütun. */
+      html`<div class="rutbe-sayaclar">${[
         K.Stat({ label:'Bugün', value:d.bugun || 0, unit:'XP' }),
         K.Stat({ label:'Toplam', value:(d.toplam || 0).toLocaleString('tr-TR'), unit:'XP' }),
         K.Stat({ label:'Kademe', value:d.kademe,
@@ -175,7 +185,7 @@ R.Screens.rutbe = (function(){
         K.Stat({ label:'Basamak',
           value:d.bitmisBasamak + '\u00a0/\u00a0' + (L().BASAMAKLAR || []).length,
           note:'geçilen' }),
-      ]),
+      ]}</div>`,
 
       K.Card({ title:'İlerleme', body:ilerleme }),
       kademeIciKart(d),
@@ -434,12 +444,13 @@ R.Screens.rutbe = (function(){
        bütünüyle boş bırakmak merdiveni kuru bir tablo yapıyordu;
        merdivenin ŞEKLİ görünmeli, içeriği görünmemeli.
 
-       SİLUET NİŞANDAN ÇİZİLİR, KARTTAN DEĞİL. Kartın üzerinde kademenin
-       ADI yazılı ve siluet alfayı korur: kilitli bir kartın silueti
-       «YAKUT» yazısını okunur hâlde bırakırdı. Nişanda yazı yoktur.
-       Nişanı olmayan basamakta (K merdiveni) siluet çizilmez. */
+       SİLUETİN KAYNAĞINI MOTOR SEÇER (`xp.js`, `merdiven` → `siluet`):
+       siluet alfayı korur, yani kaynağın üzerindeki yazı da okunur
+       kalır. Kaynak bu yüzden yazısız olmak zorunda — nişan öyledir, K
+       madalyonu da öyledir (üzerinde yalnız sayı var), rütbe kartı
+       değildir. Karar orada tek yerde yazılı; ekran yalnız çizer. */
     const acik = b.durum !== 'kilitli';
-    const kaynak = acik ? (b.nisan || b.kart) : b.nisan;
+    const kaynak = acik ? (b.nisan || b.kart) : b.siluet;
     const gorsel = kaynak
       ? html`<img class="${acik ? '' : 'siluet'}" src="${kaynak}" alt=""
           aria-hidden="true" loading="lazy" onerror="this.remove()">`
@@ -477,14 +488,16 @@ R.Screens.rutbe = (function(){
 
     return renkli(kd, K.Stack([
       siradakiKart(B),
-      K.Grid([
+      /* Aynı gerekçe: `K.Grid` on iki sütunludur ve span'sız çocuk bir
+         sütun kaplar (bkz. `simdiTab`). */
+      html`<div class="rutbe-sayaclar">${[
         K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
           unit:'/ ' + d.toplamRozet }),
         K.Stat({ label:'Toplam saat', value:d.saat, unit:'saat' }),
         K.Stat({ label:'Toplam görev',
           value:(d.gorev || 0).toLocaleString('tr-TR'), unit:'görev' }),
         K.Stat({ label:'Kayıtlı gün', value:d.gun, unit:'gün' }),
-      ]),
+      ]}</div>`,
       ...aileler.map(x => aileKart(x.a, x.satir)),
       muhurKart(),
       K.Card({ title:'Rozet neyi söyler, neyi söylemez', body:html`
