@@ -1217,7 +1217,16 @@
 .rutbe-is__ust{
   display:flex; align-items:baseline; justify-content:space-between; gap:12px;
 }
-.rutbe-is__ad{ font-weight:600; }
+/* Simge ADIN İÇİNDE durur, yanında değil.
+
+   Önce kardeş bir düğüm olarak konuldu ve satır bozuldu:
+   `.rutbe-is__ust` bir `space-between` kutusu ve üçüncü çocuk gelince
+   ad ORTAYA kaydı, fiyat sağda kaldı. Simge adın parçası olunca satır
+   yine iki parçadır: solda «simge + ad», sağda fiyat. */
+.rutbe-is__ad{
+  font-weight:600;
+  display:inline-flex; align-items:center; gap:8px; min-width:0;
+}
 .rutbe-is__fiyat{
   flex:none;
   font:500 13px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

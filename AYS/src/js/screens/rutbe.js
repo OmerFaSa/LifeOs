@@ -619,7 +619,11 @@ R.Screens.rutbe = (function(){
     const siradaki = satir.filter(r => !r.kazanildi)[0];
 
     return K.Card({
-      title:a.ad,
+      /* AİLENİN SİMGESİ — katalogdan (`basarimlar.js`, BASARIM_AILELER).
+         Altı aile kartı altı düz başlıktı; rozetler renkliydi ama
+         başlıklar birbirinin aynısıydı ve ızgarada gözün tutunacağı
+         bir yer yoktu. */
+      title:raw(window.LIFEOS.SIMGELI('simge', a.simge, a.ad)),
       body:K.Stack([
         html`<p class="small dim rutbe-rozet__ozet">${a.ozet}${when(
           deger != null, () => html` · <b>${tr(deger)} ${a.birim || ''}</b>`)}${when(
@@ -771,7 +775,17 @@ R.Screens.rutbe = (function(){
     return html`
       <div class="${'rutbe-is' + (doldu ? ' rutbe-is--doldu' : '')}">
         <div class="rutbe-is__ust">
-          <span class="rutbe-is__ad">${r.ad}</span>
+          <!-- ISIN SIMGESI — katalogdan gelir (kademeler.js icindeki
+               XP_ETKINLIK listesi). Modul icinde BENZERSIZDIR: ayni
+               listede iki is ayni simgeyi tasisaydi simge ayirt etmeyi
+               birakirdi.
+
+               NOT: bu yorum bir sablon dizesinin ICINDE duruyor ve
+               icinde TERS TIRNAK OLAMAZ — dize orada kapanir ve butun
+               dosya ayrisamaz. Ayni tuzak SPI'nin setup.js dosyasinda
+               bir kez yasandi. -->
+          <span class="rutbe-is__ad"
+            >${raw(window.LIFEOS.SIMGE_HTML('simge', r.simge, { boy:'sm' }))}${r.ad}</span>
           <span class="rutbe-is__fiyat"><b>${r.xp}</b> XP / ${r.birim}</span>
         </div>
         ${when(r.nasil, () => html`<p class="rutbe-is__nasil">${r.nasil}</p>`)}

@@ -221,15 +221,15 @@ LIFEOS.KADEMELER = [
    yönü de denetler (bkz. src/tests/xp.test.js). */
 LIFEOS.XP_ETKINLIK = [
   /* --- AYS: sınav --- */
-  { id:'ays.soru',        mod:'ays', ad:'Soru çözümü',            xp: 2, tavan:120, birim:'soru',
+  { id:'ays.soru',        mod:'ays', ad:'Soru çözümü',            xp: 2, tavan:120, birim:'soru', simge:'liste',
     rota:'today',  nerede:'Günlük › Bugün',   nasil:'Blok sonuçlarına ve serbest soru alanına yazdığın her soru' },
-  { id:'ays.deneme',      mod:'ays', ad:'Deneme tamamlama',       xp:80, tavan:160, birim:'deneme',
+  { id:'ays.deneme',      mod:'ays', ad:'Deneme tamamlama',       xp:80, tavan:160, birim:'deneme', simge:'ekran',
     rota:'exams',  nerede:'Kayıt › Deneme',   nasil:'Kaydettiğin her deneme' },
-  { id:'ays.blok',        mod:'ays', ad:'Plan bloğu tamamlama',   xp:20, tavan: 80, birim:'blok',
+  { id:'ays.blok',        mod:'ays', ad:'Plan bloğu tamamlama',   xp:20, tavan: 80, birim:'blok', simge:'saat',
     rota:'today',  nerede:'Günlük › Bugün',   nasil:'«Bitti» işaretlediğin her plan bloğu' },
-  { id:'ays.kalibrasyon', mod:'ays', ad:'Tahmin kaydı',           xp:10, tavan: 30, birim:'tahmin',
+  { id:'ays.kalibrasyon', mod:'ays', ad:'Tahmin kaydı',           xp:10, tavan: 30, birim:'tahmin', simge:'hedef',
     rota:'exams',  nerede:'Kayıt › Deneme',   nasil:'Denemeden önce yazdığın kör net tahmini' },
-  { id:'ays.gun',         mod:'ays', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün',
+  { id:'ays.gun',         mod:'ays', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün', simge:'takvim',
     rota:'today',  nerede:'Günlük › Bugün',   nasil:'O güne dair bir şey girmen yeter — günde bir kez' },
 
   /* --- SPİ: sağlık ---
@@ -240,17 +240,17 @@ LIFEOS.XP_ETKINLIK = [
      sistem ona kendi sağlık verisini güzelleştirmesi için puan teklif
      ediyordu. SPİ'nin bütün değeri verinin dürüst olmasında; bozulursa
      geriye kalan şey, yalan söylenen bir defter. */
-  { id:'spi.antrenman',   mod:'spi', ad:'Antrenman kaydı',        xp:70, tavan:140, birim:'antrenman',
+  { id:'spi.antrenman',   mod:'spi', ad:'Antrenman kaydı',        xp:70, tavan:140, birim:'antrenman', simge:'agirlik',
     rota:'move',   nerede:'Hareket',          nasil:'Kaydettiğin her seans — kardiyo, kuvvet ya da esneklik' },
-  { id:'spi.ogun',        mod:'spi', ad:'Öğün kaydı',             xp:15, tavan: 60, birim:'öğün',
+  { id:'spi.ogun',        mod:'spi', ad:'Öğün kaydı',             xp:15, tavan: 60, birim:'öğün', simge:'yaprak',
     rota:'meals',  nerede:'Besin › Öğünler',  nasil:'Girdiğin her öğün' },
-  { id:'spi.uyku',        mod:'spi', ad:'Uyku kaydı',             xp:30, tavan: 30, birim:'gün',
+  { id:'spi.uyku',        mod:'spi', ad:'Uyku kaydı',             xp:30, tavan: 30, birim:'gün', simge:'uyku',
     rota:'today',  nerede:'Günlük',           nasil:'O günün uyku süresini yazman — günde bir kez' },
-  { id:'spi.olcum',       mod:'spi', ad:'Ölçüm kaydı',            xp:10, tavan: 60, birim:'ölçüm',
+  { id:'spi.olcum',       mod:'spi', ad:'Ölçüm kaydı',            xp:10, tavan: 60, birim:'ölçüm', simge:'kalp',
     rota:'today',  nerede:'Günlük',           nasil:'Doldurduğun her ölçüm alanı: kilo, nabız, HRV, adım…' },
-  { id:'spi.tahlil',      mod:'spi', ad:'Tahlil kaydı',           xp:40, tavan: 80, birim:'tahlil',
+  { id:'spi.tahlil',      mod:'spi', ad:'Tahlil kaydı',           xp:40, tavan: 80, birim:'tahlil', simge:'ekran',
     rota:'labs',   nerede:'Testler',          nasil:'Girdiğin her hastane tahlili' },
-  { id:'spi.gun',         mod:'spi', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün',
+  { id:'spi.gun',         mod:'spi', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün', simge:'takvim',
     rota:'today',  nerede:'Günlük',           nasil:'Yukarıdakilerden biri yeter — günde bir kez' },
 
   /* --- ESP: gelişim ---
@@ -258,15 +258,15 @@ LIFEOS.XP_ETKINLIK = [
      Tek bir «pratik dakikası» satırı var ve enstrüman da ona yazılır:
      ayrıca bir «gitar pratiği» satırı olsaydı aynı dakika iki kez
      sayılırdı. */
-  { id:'esp.kart',        mod:'esp', ad:'SRS kartı tekrarı',      xp: 1, tavan: 60, birim:'kart',
+  { id:'esp.kart',        mod:'esp', ad:'SRS kartı tekrarı',      xp: 1, tavan: 60, birim:'kart', simge:'yildiz',
     rota:'lang',   nerede:'Dil › Dil Stüdyosu', nasil:'Tekrarladığın her kart' },
-  { id:'esp.oturum',      mod:'esp', ad:'Pratik dakikası',        xp: 2, tavan:140, birim:'dakika',
+  { id:'esp.oturum',      mod:'esp', ad:'Pratik dakikası',        xp: 2, tavan:140, birim:'dakika', simge:'saat',
     rota:'today',  nerede:'Günlük › Bugün',   nasil:'Girdiğin her pratik dakikası — hangi disiplin olursa olsun' },
-  { id:'esp.okuma',       mod:'esp', ad:'Atomik not',             xp:15, tavan: 75, birim:'not',
+  { id:'esp.okuma',       mod:'esp', ad:'Atomik not',             xp:15, tavan: 75, birim:'not', simge:'kitap',
     rota:'library', nerede:'Okuma › Kütüphane', nasil:'Yazdığın her atomik not' },
-  { id:'esp.yazi',        mod:'esp', ad:'Yazı taslağı',           xp:35, tavan:105, birim:'taslak',
+  { id:'esp.yazi',        mod:'esp', ad:'Yazı taslağı',           xp:35, tavan:105, birim:'taslak', simge:'liste',
     rota:'writing', nerede:'Yazı › Yazı Laboratuvarı', nasil:'Oluşturduğun ya da üzerinden geçtiğin her taslak' },
-  { id:'esp.gun',         mod:'esp', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün',
+  { id:'esp.gun',         mod:'esp', ad:'Günü kaydetme',          xp:40, tavan:null, birim:'gün', simge:'takvim',
     rota:'today',  nerede:'Günlük › Bugün',   nasil:'O güne dair bir şey girmen yeter — günde bir kez' },
 
   /* HKM'nin XP'si YOKTUR ve olmamalı: HKM üçünün üstünde değil

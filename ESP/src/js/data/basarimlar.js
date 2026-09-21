@@ -77,42 +77,42 @@ LIFEOS.BASARIM_SURUM = 1;
 
 LIFEOS.BASARIM_AILELER = [
   {
-    id:'gorev', ad:'Görev', birim:'görev', olcu:'toplam',
+    id:'gorev', ad:'Görev', birim:'görev', olcu:'toplam', simge:'liste',
     ozet:'Tamamladığın işlerin toplamı',
     aciklama:'Biten her kayıt bir görevdir: bir blok, bir antrenman, '
       + 'bir kart, bir not. Bitmeyen sayılmaz.',
     esikler:[100, 250, 500, 1000, 2500, 5000],
   },
   {
-    id:'gun', ad:'Gün', birim:'gün', olcu:'toplam',
+    id:'gun', ad:'Gün', birim:'gün', olcu:'toplam', simge:'takvim',
     ozet:'Kayıt girdiğin gün sayısı',
     aciklama:'O güne dair BİR ŞEY girdiysen o gün sayılır. '
       + 'Girilmemiş gün sıfır değil, hiç sayılmaz.',
     esikler:[25, 50, 100, 250, 500, 1000],
   },
   {
-    id:'saat', ad:'Saat', birim:'saat', olcu:'toplam',
+    id:'saat', ad:'Saat', birim:'saat', olcu:'toplam', simge:'saat',
     ozet:'Ölçülmüş çalışma saatinin toplamı',
     aciklama:'Yalnız SÜRESİ GİRİLMİŞ kayıtlar sayılır. Süresi boş '
       + 'bırakılan bir kayıt «0 dakika» değil, «veri yok»tur.',
     esikler:[100, 250, 500, 1000, 2500, 5000],
   },
   {
-    id:'odak', ad:'Odak', birim:'saat', olcu:'gunluk',
+    id:'odak', ad:'Odak', birim:'saat', olcu:'gunluk', simge:'hedef',
     ozet:'BİR GÜNDE ölçülen en uzun çalışma',
     aciklama:'Kümülatif değildir: o günün toplam ölçülmüş süresi. '
       + 'Bir kez kazanılan rozet defterde kalır.',
     esikler:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   },
   {
-    id:'istikrar', ad:'İstikrar', birim:'ay', olcu:'seri',
+    id:'istikrar', ad:'İstikrar', birim:'ay', olcu:'seri', simge:'seri',
     ozet:'Kesintisiz sürdürdüğün ay sayısı',
     aciklama:'Bir ay, içinde en az bir kayıtlı gün varsa etkindir. '
       + 'Boş geçen ay seriyi sıfırlar.',
     esikler:[1, 3, 6, 9, 12, 24],
   },
   {
-    id:'kusursuz', ad:'Kusursuz', birim:null, olcu:'ozel',
+    id:'kusursuz', ad:'Kusursuz', birim:null, olcu:'ozel', simge:'yildiz',
     ozet:'Beklenen her işin yapıldığı gün, hafta ve ay',
     aciklama:'Günlük beklenen işlerin HEPSİ yapıldıysa gün kusursuzdur. '
       + 'Yedi kusursuz gün üst üste bir hafta, ayın bütün günleri bir ay eder.',

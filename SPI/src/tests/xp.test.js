@@ -217,6 +217,29 @@
       expect(gun / 365).toBeGreaterThan(30);
     });
 
+    it('her işin bir simgesi vardır ve o simge GERÇEKTEN vardır', () => {
+      /* Simge katalogda yazılı, ekran seçmez. Kimlik künyede yoksa
+         (`brand/ortak/medya.js`) istek hiç yapılmaz ve satır simgesiz
+         kalır — sessizce. Bu test o sessizliği gürültüye çevirir. */
+      L.XP_ETKINLIK.forEach(e => {
+        expect(typeof e.simge).toBe('string');
+        expect(window.LIFEOS.SIMGE_ADI('simge', e.simge)).toBe('simge-' + e.simge);
+      });
+    });
+
+    it('bir modülün işleri AYNI simgeyi paylaşmaz', () => {
+      /* Ekranda yan yana duran iki iş aynı simgeyi taşısaydı simge
+         ayırt etmeyi bırakırdı. Modüller ARASINDA paylaşım serbest:
+         üç liste hiçbir ekranda yan yana gelmiyor. */
+      L.MODULLER.forEach(m => {
+        const gorulen = {};
+        L.XP_ETKINLIK.filter(e => e.mod === m).forEach(e => {
+          expect(gorulen[e.simge]).toBeFalsy();
+          gorulen[e.simge] = 1;
+        });
+      });
+    });
+
     it('her etkinlik NEREDE yapıldığını söyler', () => {
       /* Rütbe ekranının «XP nereden gelir» bölümü bu alanlarla çalışır.
          Biri eksik kalırsa kullanıcı puanı görür ama nereye gideceğini

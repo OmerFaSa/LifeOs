@@ -906,6 +906,10 @@ R.XP = (function(){
       var tavan = gunlukTavan(e);
       return {
         id:e.id, ad:e.ad, birim:e.birim, xp:e.xp,
+        /* İşin simgesi — katalogda yazılı, ekran seçmez. On altı iş
+           üst üste on altı gri satırdı; hangisinin ne olduğu ancak
+           okunarak bulunuyordu. */
+        simge:e.simge || null,
         rota:e.rota || null, nerede:e.nerede || '', nasil:e.nasil || '',
         adet:gunAdedi(gun, e.id),
         kazanilan:xp,

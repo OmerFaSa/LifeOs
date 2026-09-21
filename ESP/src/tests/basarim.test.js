@@ -83,6 +83,19 @@ describe('Başarım — katalog', () => {
     });
   });
 
+  it('her ailenin bir simgesi vardır ve o simge GERÇEKTEN vardır', () => {
+    /* Altı aile kartı altı düz başlıktı. Simge katalogda yazılı;
+       künyede karşılığı yoksa başlık simgesiz kalır — sessizce. */
+    const gorulen = {};
+    L().BASARIM_AILELER.forEach(a => {
+      expect(typeof a.simge).toBe('string');
+      expect(window.LIFEOS.SIMGE_ADI('simge', a.simge)).toBe('simge-' + a.simge);
+      /* Altısı da ayrı: aynı ızgarada iki aynı simge ayırt etmez. */
+      expect(gorulen[a.simge]).toBeFalsy();
+      gorulen[a.simge] = 1;
+    });
+  });
+
   it('beş mühür vardır ve her biri bir modüle bağlıdır', () => {
     expect(L().MUHURLER.length).toBe(5);
     L().MUHURLER.forEach(m => {
