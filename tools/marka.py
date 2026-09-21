@@ -507,9 +507,103 @@ def sina() -> int:
     return 0
 
 
+# ------------------------------------------------------------------
+# MEDYA KUNYESI — ekranin NEYI isteyebilecegi
+#
+# Ekran bir kimlikten dosya adi turetiyor (`brand/ortak/simge.js`).
+# Kimlik katalogda var ama GORSELI gelmemisse istek her acilista 404
+# doner. Bir kez yasandi: ESP katalogunda yedi disiplin var, teslimatta
+# alti geldi ve `disiplin-music.webp` her acilista aranir oldu.
+#
+# Tek tek istisna yazmak cozum degil: gorsel geldigi gun o istisnanin
+# kaldirilmasini kimse hatirlamaz. Kunye `medya/` altinda GERCEKTEN ne
+# varsa onu yazar; simge yardimcisi listede olmayan kimlik icin bos
+# doner ve yazi olduğu gibi kalir.
+#
+# Yalniz SIMGE aileleri yazilir. Otekiler (kimlik, ajan, kapak...)
+# dogrudan `<img src>` ile cagriliyor ve adlari kodda sabit; onlari
+# kunyeye koymak, degismeyen bir seyi her teslimatta yeniden uretmek
+# olurdu.
+SIMGE_AILELERI = ("ders", "disiplin", "olcum", "simge")
+
+KUNYE_YOLU = KOK / "brand" / "ortak" / "medya.js"
+
+KUNYE_BASLIK = """/* MEDYA KUNYESI — URETILMIS DOSYA, ELLE DUZENLEME.
+
+   `python3 tools/marka.py --kunye` uretir, `--kunye --denetle` tazeligini
+   sinar (CI'da kosar). Iceriginin kaynagi `brand/medya/` altindaki
+   DOSYALARIN KENDISIDIR.
+
+   NE ISE YARAR: ekran bir kimlikten gorsel adi turetir
+   (`brand/ortak/simge.js`). Kimlik katalogda var ama gorseli gelmemisse
+   istek her acilista 404 doner. Kunye, `SIMGE_ADI`nin listede olmayan
+   kimlik icin bos donmesini saglar: gorsel yoksa yazi kalir, istek hic
+   yapilmaz. */
+
+window.LIFEOS = window.LIFEOS || {};
+"""
+
+
+def _kunye_metni() -> str:
+    satir = []
+    for aile in SIMGE_AILELERI:
+        klasor = MEDYA / aile
+        adlar = []
+        if klasor.is_dir():
+            onek = aile + "-"
+            for d in sorted(klasor.iterdir()):
+                if not d.is_file() or d.suffix.lower() not in GORSEL:
+                    continue
+                if d.stem.startswith(onek):
+                    adlar.append(d.stem[len(onek):])
+        satir.append("  %s:[%s]," % (aile, ",".join("'%s'" % a for a in adlar)))
+    return KUNYE_BASLIK + "\nLIFEOS.MEDYA = {\n" + "\n".join(satir) + "\n};\n"
+
+
+def kunye(denetle: bool = False) -> int:
+    yeni = _kunye_metni()
+    eski = KUNYE_YOLU.read_text(encoding="utf-8") if KUNYE_YOLU.exists() else None
+    if denetle:
+        if eski is None:
+            print("brand/ortak/medya.js YOK — `python3 tools/marka.py --kunye`")
+            return 1
+        if eski != yeni:
+            print("brand/ortak/medya.js TAZE DEGIL — medya/ degismis.")
+            print("Duzeltme: python3 tools/marka.py --kunye")
+            return 1
+        sayi = sum(len(x) for x in _kunye_sayim().values())
+        print("Medya kunyesi taze (%d gorsel, %d aile)."
+              % (sayi, len(SIMGE_AILELERI)))
+        return 0
+    if eski == yeni:
+        print("Medya kunyesi zaten guncel.")
+        return 0
+    KUNYE_YOLU.parent.mkdir(parents=True, exist_ok=True)
+    KUNYE_YOLU.write_text(yeni, encoding="utf-8")
+    for aile, adlar in _kunye_sayim().items():
+        print("  %-10s %d" % (aile, len(adlar)))
+    print("yazildi: %s" % KUNYE_YOLU.relative_to(KOK))
+    print("Unutma: `python3 tools/ortak.py --yay` ile uc arayuze dagit.")
+    return 0
+
+
+def _kunye_sayim():
+    out = {}
+    for aile in SIMGE_AILELERI:
+        klasor = MEDYA / aile
+        onek = aile + "-"
+        out[aile] = [d.stem[len(onek):] for d in sorted(klasor.iterdir())
+                     if d.is_file() and d.suffix.lower() in GORSEL
+                     and d.stem.startswith(onek)] if klasor.is_dir() else []
+    return out
+
+
 def main() -> int:
     if "--sina" in sys.argv:
         return sina()
+
+    if "--kunye" in sys.argv:
+        return kunye("--denetle" in sys.argv)
 
     if "--liste" in sys.argv:
         return liste()

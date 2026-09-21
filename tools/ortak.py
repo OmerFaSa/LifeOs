@@ -92,6 +92,16 @@ DOSYALAR = {
     "tanitim.js":    "js/core",
     "tanitim.css":   "css",
     "tanitim.test.js": "tests",
+    # KATALOG SİMGESİ — bir kimliği o kimliğin görseline çeviren tek
+    # yer. Ad kuralını her ekranın kendi kurması, biri bir gün
+    # `ders_tyt_turkce` yazması demekti.
+    "simge.js":      "js/core",
+    "simge.css":     "css",
+    "simge.test.js": "tests",
+    # MEDYA KÜNYESİ — üretilmiş dosya (`tools/marka.py --kunye`).
+    # Buradan yayılır çünkü üç arayüzün de aynı künyeye bakması
+    # gerekir: birinde olan bir görsel ötekinde de vardır.
+    "medya.js":      "js/core",
 }
 
 BASLIK = ("/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.\n"

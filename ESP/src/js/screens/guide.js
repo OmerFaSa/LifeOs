@@ -120,7 +120,9 @@ ESP.Screens.guide = (function(){
         body:K.Table({ tight:true,
           headers:['Disiplin', 'Ajan', { label:'Ağırlık', num:true }, 'Ne ölçülür'],
           rows:ESP.DISCIPLINES.map(d => [
-            d.label,
+            /* Amblem burada da: aynı disiplin iki ekranda aynı yüzle
+               görünsün (bkz. profile.js, BÖLÜMLER). */
+            raw(window.LIFEOS.SIMGELI('disiplin', d.id, d.label)),
             (ESP.AGENT_BY_ID[d.agent] || {}).name || d.agent,
             U.fmtNum(d.weight),
             d.note,

@@ -156,6 +156,14 @@ jobs:
       - name: Marka adlandırması ve yol muhafızı
         run: python3 tools/marka.py --sina
 
+      # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
+      # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
+      # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç
+      # kullanılmaz, ya da silinmiş bir görsel her açılışta 404 döner.
+      # Üretici saf Python — bu iş node istemez.
+      - name: Medya künyesi taze mi
+        run: python3 tools/marka.py --kunye --denetle
+
   hkm:
     name: HKM — testler, sorgu bütçesi, panonun yüzü
     runs-on: ubuntu-latest

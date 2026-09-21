@@ -6022,6 +6022,72 @@ button.rutbe-rozet:focus-visible{
   .tanitim__nokta::before{ transition:none; }
 }
 
+/* ==== css/simge.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/simge.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KATALOG SİMGESİ — biçim.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/simge.css`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/css/` klasörüne BİREBİR kopyalanır.
+   İşaretlemesi `brand/ortak/simge.js`.
+
+   ------------------------------------------------------------------
+   ÜÇ ÖLÇÜ, ÜÇ İŞ
+
+       sm  16px   satır içinde, yazının yanında
+       md  22px   form etiketi ve liste satırı (varsayılan)
+       lg  34px   kart başlığı
+
+   Ölçüyü çağıran yer seçer ama SERBEST bir sayı vermez: üç basamak
+   yeter ve dördüncüsü, listede iki satırın farklı hizalanması demek
+   olurdu.
+
+   ------------------------------------------------------------------
+   SİMGE YAZIYI İTMEZ
+
+   `.simgeli` bir esnek kutudur ve simge `flex:0 0 auto`. Dosya
+   yüklenmezse `onerror` düğümü kaldırır; kalan yazı SOLA kayar ve
+   hizalama bozulmaz. Görselin yerini boş bırakmak, yüklenmeyen her
+   satırda bir delik demekti. */
+
+.simge{
+  display:block;
+  width:22px; height:22px;
+  flex:0 0 22px;
+  object-fit:contain;
+}
+.simge--sm{ width:16px; height:16px; flex-basis:16px; }
+.simge--lg{ width:34px; height:34px; flex-basis:34px; }
+
+.simgeli{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.simgeli__yazi{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* FORM ETİKETİ. `.field > span` bir satırdır; simge oraya girince
+   yazının taban çizgisi kayıyordu. Etiketin kendisi esnek kutuya
+   dönüşünce ikisi ortadan hizalanır ve ipucu metni yanında kalır. */
+.field > span:has(.simge){
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+/* Koyu temada altın ve mavi ikonlar zeminle yeterince ayrışıyor;
+   yeşil sağlık ikonları da öyle. Bir filtre uygulamak, üretilen
+   rengi ikinci kez boyamak olurdu — görselin kendi rengi onun
+   anlamının parçası (SPO2 mavi, TEMP mor, LAB pembe). */
+
 /* ==== css/designs.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/designs.css içine yazılır; burası bir sonraki
@@ -8518,7 +8584,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'e41b106', at:'2026-09-21 16:21', dirty:true };
+ESP.BUILD = { id:'2bc2e84', at:'2026-09-21 16:29', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8761,6 +8827,137 @@ LIFEOS.TANITIM_ADIM = function(dugme){
   var cevaplar = LIFEOS.TANITIM_ADIMLARI(mod);
   if(yazi && cevaplar && cevaplar[no - 1]) yazi.textContent = cevaplar[no - 1];
   return true;
+};
+
+/* ==== js/core/medya.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/medya.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* MEDYA KUNYESI — URETILMIS DOSYA, ELLE DUZENLEME.
+
+   `python3 tools/marka.py --kunye` uretir, `--kunye --denetle` tazeligini
+   sinar (CI'da kosar). Iceriginin kaynagi `brand/medya/` altindaki
+   DOSYALARIN KENDISIDIR.
+
+   NE ISE YARAR: ekran bir kimlikten gorsel adi turetir
+   (`brand/ortak/simge.js`). Kimlik katalogda var ama gorseli gelmemisse
+   istek her acilista 404 doner. Kunye, `SIMGE_ADI`nin listede olmayan
+   kimlik icin bos donmesini saglar: gorsel yoksa yazi kalir, istek hic
+   yapilmaz. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.MEDYA = {
+  ders:['ayt-biyoloji','ayt-fizik','ayt-kimya','ayt-matematik','tyt-fen','tyt-matematik','tyt-sosyal','tyt-turkce'],
+  disiplin:['diction','history','lang','philo','reading','writing'],
+  olcum:['bodyfat','dbp','hrv','lab','ogun','rhr','sbp','sleep','spo2','temp','train','waist','weight'],
+  simge:['agirlik','artis','ayar','dinginlik','ekran','hedef','kalp','kitap','liste','saat','seri','takvim','topluluk','uyku','yaprak','yildiz'],
+};
+
+/* ==== js/core/simge.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/simge.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KATALOG SİMGESİ — bir kimliği, o kimliğin görseline çeviren tek yer.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/simge.js`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   Biçimi `brand/ortak/simge.css`.
+
+   ------------------------------------------------------------------
+   NE YAPAR
+
+   Üç ailenin görselleri KATALOGTAKİ KİMLİKLE adlandırıldı:
+
+       olcum-sbp.webp        SPİ  `xpsayim.js` → OLCUM
+       disiplin-lang.webp    ESP  `rules.js`   → DISCIPLINES
+       ders-tyt-turkce.webp  AYS  `subjects.js` → SUBJECTS
+
+   Yani ekranın yapması gereken tek şey kimliği vermek. Dosya adını
+   ekranın kurması, aynı kuralı her ekranda yeniden yazmak olurdu ve
+   biri bir gün `ders_tyt_turkce` yazardı.
+
+   ------------------------------------------------------------------
+   BİLİNMEYEN AİLE İÇİN GÖRSEL İSTENMEZ
+
+   `aile` tanınmıyorsa ya da kimlik bir dosya adı olamayacak
+   karakterler taşıyorsa BOŞ döner. Var olmayacağı bilinen bir dosyayı
+   istemek, her açılışta bir 404 demektir — bu depoda bir kez yaşandı
+   (`rozet-N.png`, altı istek, hiç üretilmemiş dosya).
+
+   ------------------------------------------------------------------
+   SİMGE BİR SÜSTÜR
+
+   `aria-hidden` ve `alt=""`: yanında duran YAZI zaten aynı şeyi
+   söylüyor. Ekran okuyucuya ikinci kez okutmak, listeyi iki katı
+   uzatmaktan başka bir şey yapmazdı. Dosya yoksa `onerror` düğümü
+   kaldırır ve yazı olduğu gibi kalır. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+/* Tanınan aileler ve ne oldukları. `tools/marka.py` içindeki AILELER
+   ile aynı adlar; oradaki liste dosyayı NEREYE koyacağını, buradaki
+   ekranın NEYİ isteyebileceğini söyler. */
+LIFEOS.SIMGE_AILE = {
+  olcum:    'SPİ ölçüm alanları',
+  disiplin: 'ESP disiplinleri',
+  ders:     'AYS dersleri',
+  simge:    'genel ikon seti',
+};
+
+/* Dosya adı olabilecek kimlik: küçük harf, rakam ve tire. Nokta,
+   eğik çizgi ve boşluk YOK — `img/marka/` ucu bir dizin gezinme
+   kapısı değildir (bkz. `_ortak_marka_yolu`). */
+var SIMGE_KIMLIK = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+LIFEOS.SIMGE_ADI = function(aile, id){
+  if(!LIFEOS.SIMGE_AILE[aile]) return null;
+  var k = String(id == null ? '' : id).toLowerCase();
+  if(!SIMGE_KIMLIK.test(k)) return null;
+  /* KÜNYE — dosya GERÇEKTEN var mı.
+
+     Katalogda olup görseli gelmemiş bir kimlik, her açılışta bir 404
+     demektir. Bir kez yaşandı: ESP katalogunda yedi disiplin var,
+     teslimatta altı geldi ve `disiplin-music.webp` her açılışta
+     arandı. Tek tek istisna yazmak çözüm değildi — görsel geldiği gün
+     o istisnanın kaldırılmasını kimse hatırlamaz.
+
+     Künye `brand/medya/` altında ne varsa onu yazar ve
+     `tools/marka.py --kunye` üretir. Künye hiç yüklenmemişse eski
+     davranış sürer: isteyen ister, `onerror` toplar. */
+  var kunye = LIFEOS.MEDYA;
+  if(kunye && kunye[aile] && kunye[aile].indexOf(k) < 0) return null;
+  return aile + '-' + k;
+};
+
+LIFEOS.SIMGE_HTML = function(aile, id, secenekler){
+  secenekler = secenekler || {};
+  var ad = LIFEOS.SIMGE_ADI(aile, id);
+  if(!ad) return '';
+  var kok = secenekler.kok || 'img/marka/';
+  var boy = secenekler.boy === 'lg' ? ' simge--lg'
+    : secenekler.boy === 'sm' ? ' simge--sm' : '';
+  var kac = function(t){
+    return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
+      return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c];
+    });
+  };
+  return '<img class="simge simge--' + kac(aile) + boy + '"'
+    + ' src="' + kac(kok + ad) + '.webp"'
+    + ' alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">';
+};
+
+/* Simge + yazı, yan yana. Yazı KAÇIRILIR; simge yoksa yalnız yazı
+   kalır ve hizalama bozulmaz (`.simgeli` bir esnek kutudur). */
+LIFEOS.SIMGELI = function(aile, id, yazi, secenekler){
+  var kac = function(t){
+    return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
+      return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c];
+    });
+  };
+  return '<span class="simgeli">' + LIFEOS.SIMGE_HTML(aile, id, secenekler)
+    + '<span class="simgeli__yazi">' + kac(yazi) + '</span></span>';
 };
 
 /* ==== js/data/kademeler.js ==== */
@@ -35801,7 +35998,15 @@ ESP.Screens.profile = (function(){
           wide:true,
           body:html`
             <div class="picks picks--disc">${map(ESP.DISCIPLINES, d => K.PickCard({
-              label:d.label, on:ESP.Mod.isOn(d.id),
+              /* DİSİPLİNİN AMBLEMİ — kimlikten türer (brand/ortak/simge.js).
+                 Yedi kart yan yana yedi kutuydu; hangisinin hangi alan
+                 olduğu yalnız yazıdan okunuyordu. Amblem kartı bir
+                 saniyede bulunur hâle getiriyor.
+
+                 Müziğin amblemi HENÜZ YOK: teslimatta altı disiplin geldi,
+                 katalogda yedi var. Simge boş döner, yazı kalır. */
+              label:raw(window.LIFEOS.SIMGELI('disiplin', d.id, d.label)),
+              on:ESP.Mod.isOn(d.id),
               meta:d.covers + ' · ' + (ESP.Mod.footprint(d.id) || '')
                 + (ESP.Mod.isOn(d.id) ? '' : ' · KAPALI'),
               act:'toggle-mod', data:{ 'data-id':d.id } }))}</div>
@@ -37152,7 +37357,9 @@ ESP.Screens.guide = (function(){
         body:K.Table({ tight:true,
           headers:['Disiplin', 'Ajan', { label:'Ağırlık', num:true }, 'Ne ölçülür'],
           rows:ESP.DISCIPLINES.map(d => [
-            d.label,
+            /* Amblem burada da: aynı disiplin iki ekranda aynı yüzle
+               görünsün (bkz. profile.js, BÖLÜMLER). */
+            raw(window.LIFEOS.SIMGELI('disiplin', d.id, d.label)),
             (ESP.AGENT_BY_ID[d.agent] || {}).name || d.agent,
             U.fmtNum(d.weight),
             d.note,

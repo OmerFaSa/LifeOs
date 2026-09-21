@@ -61,7 +61,15 @@ ESP.Screens.profile = (function(){
           wide:true,
           body:html`
             <div class="picks picks--disc">${map(ESP.DISCIPLINES, d => K.PickCard({
-              label:d.label, on:ESP.Mod.isOn(d.id),
+              /* DİSİPLİNİN AMBLEMİ — kimlikten türer (brand/ortak/simge.js).
+                 Yedi kart yan yana yedi kutuydu; hangisinin hangi alan
+                 olduğu yalnız yazıdan okunuyordu. Amblem kartı bir
+                 saniyede bulunur hâle getiriyor.
+
+                 Müziğin amblemi HENÜZ YOK: teslimatta altı disiplin geldi,
+                 katalogda yedi var. Simge boş döner, yazı kalır. */
+              label:raw(window.LIFEOS.SIMGELI('disiplin', d.id, d.label)),
+              on:ESP.Mod.isOn(d.id),
               meta:d.covers + ' · ' + (ESP.Mod.footprint(d.id) || '')
                 + (ESP.Mod.isOn(d.id) ? '' : ' · KAPALI'),
               act:'toggle-mod', data:{ 'data-id':d.id } }))}</div>

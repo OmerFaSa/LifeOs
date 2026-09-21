@@ -170,7 +170,21 @@ SP.Screens.today = (function(){
         ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}`,
       body:html`
         <div class="grid-form">${map(FIELDS, f => K.Field({
-          label:f.label,
+          /* ALANIN SİMGESİ — kimlikten türer, burada ad kurulmaz
+             (bkz. `brand/ortak/simge.js`). On bir alanlık bir ızgarada
+             etiketler birbirine benziyordu: «Büyük tansiyon», «Küçük
+             tansiyon», «İstirahat nabzı» üç satır aynı uzunlukta üç
+             gri yazıydı ve göz hangisine baktığını her seferinde
+             okuyarak buluyordu.
+
+             SİMGE `marker` ALANINDAN gelir, `id`den DEĞİL. İkisi
+             çoğu alanda aynı ama `water`ın `marker`ı bilerek `null`:
+             su bir biyobelirteç değil. `|| f.id` diye bir geri
+             düşüş yazılmıştı ve `olcum-water.webp` her açılışta 404
+             dönüyordu — var olmayacağı bilinen bir dosyayı istemek.
+             (Duman testi bunu yakaladı; her 404'te kırmızıya döner.)
+             Markersız alan simgesiz kalır, etiketi olduğu gibi. */
+          label:raw(window.LIFEOS.SIMGELI('olcum', f.marker, f.label)),
           input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
             min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
         }))}</div>
