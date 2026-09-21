@@ -181,9 +181,23 @@ bile söylemiyordu.
 Gerekçe tek cümle: bir açılışı önden göstermek onu geldiği gün
 değersizleştirir; bir hedefi gizlemek ise hedefi ortadan kaldırır.
 
-Siluet nişandan çizilir, karttan değil: kartın üzerinde kademenin ADI
-yazılı ve siluet alfayı korur — kilitli bir kartın silueti «YAKUT»
-yazısını okunur hâlde bırakırdı. Nişanda yazı yoktur.
+**Siluetin kaynağını motor seçer** (`xp.js`, `merdiven` → `siluet`) ve
+kaynak **yazısız** olmak zorunda: siluet alfayı korur, yani kaynağın
+üzerindeki yazı da okunur kalır.
+
+| Kademe | Kaynak | Neden |
+|---|---|---|
+| 1–5 | nişan | üzerinde yazı yoktur |
+| 6 (Kutsal) | K madalyonu | üzerinde yalnız SAYI var («100») ve o sayı zaten kutunun altında yazılı |
+
+Rütbe kartı 1–5 arasında kaynak **olamaz**: üzerinde kademenin adı
+yazılı ve kilitli bir kartın silueti «YAKUT» yazısını okunur bırakırdı.
+
+**Kutlama, grinin kalkmasıdır.** Kazanılmamış rozet haftalarca ekranda
+rengi alınmış hâlde durur; rozet kazanıldığında perde onu ÖNCE GRİ
+açar, çeyrek saniye bekler, sonra bir saniyede rengine döndürür
+(`@keyframes rozet-acil`). Madalyayı doğrudan renkli açmak, bekleyişin
+karşılığını ödememek olurdu.
 
 ### Şu an ne var
 

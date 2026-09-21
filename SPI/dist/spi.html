@@ -5424,8 +5424,39 @@ body.is-dragging .drop.is-over{
      Ölçüldü, ekran görüntüsünde yakalandı. */
   isolation:isolate;
 }
+/* AÇILMA — madalya GRİ gelir, sonra rengine kavuşur.
+
+   Kazanılmamış rozet ekranda rengi alınmış hâlde duruyor
+   (`.rozet-kilit`) ve kullanıcı ona haftalarca bakıyor. Kutlamanın
+   asıl ödülü o grinin kalkmasıdır; madalyayı doğrudan renkli açmak,
+   bekleyişin karşılığını ödememek olurdu.
+
+   Zamanlama: çeyrek saniye gri durur (göz «tanıdık gri»yi yakalasın),
+   sonra bir saniyede rengine döner. Kutlama dört saniye; kalan üç
+   saniye madalyanın kendisine kalır.
+
+   Hareket azaltma tercihinde perde zaten hiç açılmaz (bkz. perde.js),
+   o yüzden burada ayrı bir `prefers-reduced-motion` dalı yok. */
 .perde--rozet .perde__kart img{
   filter:drop-shadow(0 18px 48px rgba(255, 200, 120, .28));
+  animation:rozet-acil 1.35s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes rozet-acil{
+  0%{
+    filter:grayscale(1) brightness(.72) contrast(1.08)
+           drop-shadow(0 18px 48px rgba(255,200,120,.06));
+    transform:scale(.96);
+  }
+  18%{
+    filter:grayscale(1) brightness(.72) contrast(1.08)
+           drop-shadow(0 18px 48px rgba(255,200,120,.06));
+    transform:scale(.96);
+  }
+  100%{
+    filter:grayscale(0) brightness(1) contrast(1)
+           drop-shadow(0 18px 48px rgba(255,200,120,.28));
+    transform:none;
+  }
 }
 
 /* Işık halkası — madalyanın arkasında yavaşça nefes alır. Hareket
@@ -5533,7 +5564,11 @@ body.is-dragging .drop.is-over{
    ================================================================ */
 .siluet{
   filter:brightness(0) blur(.4px);
-  opacity:.17;
+  /* %13: ölçüldü. %17'de siluet, kazanılmış nişanla neredeyse aynı
+     ağırlıkta duruyordu ve satır «bir kazanılmış, iki kilitli» yerine
+     «üç şekil» diye okunuyordu. Siluet bir GÖLGEDİR; gölge kendi
+     nesnesinden ağır olamaz. */
+  opacity:.13;
   transition:opacity .3s ease, filter .3s ease;
 }
 @media (prefers-color-scheme: dark){
@@ -7330,7 +7365,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'345234e', at:'2026-09-21 07:31', dirty:true };
+SP.BUILD = { id:'0b11213', at:'2026-09-21 07:35', dirty:true };
 
 /* ==== js/data/kademeler.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
