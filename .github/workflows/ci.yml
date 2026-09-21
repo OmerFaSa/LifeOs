@@ -146,6 +146,16 @@ jobs:
       - name: Ortak CSS kaynakla aynı mı
         run: python3 tools/ortak.py --denetle
 
+      # MARKA ADLANDIRMASI VE YOL MUHAFIZI. Bu denetim bir suredir
+      # yalnizca `tools/sayilar.py --tam` icinden kosuyordu, yani
+      # birinin elle koşturmasina bagliydi. Sinadigi sey onemli:
+      # `_ortak_marka_yolu` gelen adda `/`, `\`, nokta dosyasi ya da
+      # tanimsiz bir aile gorurse REDDEDER — yani `img/marka/` ucu bir
+      # dizin gezinme kapisi degildir. Bir gun o muhafizi kiran bir
+      # degisiklik, ancak CI kirmizi olursa fark edilir.
+      - name: Marka adlandırması ve yol muhafızı
+        run: python3 tools/marka.py --sina
+
   hkm:
     name: HKM — testler, sorgu bütçesi, panonun yüzü
     runs-on: ubuntu-latest

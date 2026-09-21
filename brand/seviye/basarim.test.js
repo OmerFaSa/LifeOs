@@ -8,7 +8,7 @@
    tek şey, motorun katalogla ÇELİŞMESİdir. */
 
 (function(){
-  const { describe, it, expect } = __NS__.Test;
+  const { describe, it, expect, withTodayAsync } = __NS__.Test;
 
 describe('Başarım — katalog', () => {
   const L = () => window.LIFEOS;
@@ -112,6 +112,106 @@ describe('Başarım — motor', () => {
     const d = B().durum();
     expect(d.gun).toBe(1);
     expect(d.gorev).toBe(5);
+  });
+
+  it('yanlış girilen gün DÜZELTİLİNCE «en uzun odak» da düzelir', async () => {
+    /* «Bir günde en uzun odak» bir SAYAÇTIR ve sayaç düşebilir
+       (bkz. bir alttaki test: düşmeyen şey ROZETtir).
+
+       Bir süre düşmüyordu: `enIyi.odakDakika` yalnız büyüyen bir
+       işaretti. 70 dakika yerine 700 yazılan bir gün, düzeltilse bile
+       ekranda «bir günde en uzun odak: 11 saat» yazmaya devam ediyor
+       ve on saatlik rozet artık var olmayan bir veriyle kazanılmış
+       kalıyordu — ölçülmemiş bir şeyi ölçülmüş gibi göstermek
+       (AGENTS.md §1.2). */
+    await sifirla();
+    const gun = U().todayISO();
+    await B().esitleCok({ [gun]:{ dakika:700, gorev:1, kusursuz:0 } });
+    expect(B().durum().odakSaat).toBe(11);
+    await B().esitleCok({ [gun]:{ dakika:70, gorev:1, kusursuz:0 } });
+    expect(B().durum().odakSaat).toBe(1);
+  });
+
+  it('«en uzun odak» pencerenin EN BÜYÜĞÜdür, sonuncusu değil', async () => {
+    /* Düzeltme yapılan gün rekoru tutan gün DEĞİLSE, rekor yerinde
+       kalmalı: bugünü sıfırlamak dünkü altı saatlik oturumu silmez. */
+    await sifirla();
+    const bugun = U().todayISO();
+    const dun = U().iso(U().addDays(U().parse(bugun), -1));
+    await B().esitleCok({ [dun]:{ dakika:360, gorev:1, kusursuz:0 },
+                          [bugun]:{ dakika:120, gorev:1, kusursuz:0 } });
+    expect(B().durum().odakSaat).toBe(6);
+    await B().esitleCok({ [bugun]:{ dakika:0, gorev:0, kusursuz:0 } });
+    expect(B().durum().odakSaat).toBe(6);
+  });
+
+  it('budanan günün rekoru TABANDA saklanır', async () => {
+    /* Pencere 120 gün; ondan eskisi silinir ve bir daha okunamaz.
+       Rekoru o gün tutuyorsa, silmeden önce tabana yazılmalı — yoksa
+       rekor sessizce kaybolur ve ekran «en uzun odak 1 saat» der,
+       oysa beş saatlik bir gün yaşanmıştır. */
+    await sifirla();
+    await withTodayAsync('2026-01-10', async () => {
+      await B().esitleCok({ '2026-01-10':{ dakika:300, gorev:2, kusursuz:0 } });
+      expect(B().durum().odakSaat).toBe(5);
+    });
+    /* Sekiz ay sonra: o gün pencereden çıktı ve budandı. */
+    await withTodayAsync('2026-09-10', async () => {
+      await B().esitleCok({ '2026-09-10':{ dakika:60, gorev:1, kusursuz:0 } });
+      expect(B().durum().odakSaat).toBe(5);
+    });
+  });
+
+  it('rekor TABANIN altına düşemez', async () => {
+    /* Taban budanmış geçmişten gelir ve düzeltilemez: o günler artık
+       yok. Penceredeki bir düzeltme rekoru ancak tabana kadar
+       indirebilir. */
+    await sifirla();
+    await withTodayAsync('2026-01-10', async () => {
+      await B().esitleCok({ '2026-01-10':{ dakika:300, gorev:2, kusursuz:0 } });
+    });
+    await withTodayAsync('2026-09-10', async () => {
+      await B().esitleCok({ '2026-09-10':{ dakika:400, gorev:1, kusursuz:0 } });
+      expect(B().durum().odakSaat).toBe(6);         /* 400 dk */
+      await B().esitleCok({ '2026-09-10':{ dakika:30, gorev:1, kusursuz:0 } });
+      expect(B().durum().odakSaat).toBe(5);         /* tabana iner, altına DEĞİL */
+    });
+  });
+
+  it('eski defter göçerken taban ÖLÇÜLÜR, uydurulmaz', async () => {
+    /* `odakTaban` alanı olmayan bir defter iki hâlde olabilir ve
+       ikisi ayrı davranmalı:
+
+         rekoru tutan gün PENCEREDE  → taban yok, düzeltme çalışır
+         rekoru tutan gün BUDANMIŞ   → kayıtlı değer taban olur
+
+       Körlemesine «taban = rekor» yazmak kolaydı ama birinci hâli de
+       düzeltilemez yapıyordu. */
+    const gun = U().todayISO();
+
+    /* 1) Rekor pencerede: taban 0 olmalı, düzeltme tam çalışmalı. */
+    B().bosalt();
+    await __NS__.Store.set('basarim', {
+      surum:window.LIFEOS.BASARIM_SURUM, aylar:{}, kazanilan:{}, bekleyen:[],
+      gunler:{ [gun]:{ dakika:300, gorev:2, kusursuz:0 } },
+      enIyi:{ odakDakika:300 },
+    });
+    await B().yukle();
+    expect(B().durum().odakSaat).toBe(5);
+    await B().esitleCok({ [gun]:{ dakika:60, gorev:2, kusursuz:0 } });
+    expect(B().durum().odakSaat).toBe(1);
+
+    /* 2) Rekor pencerede YOK: kayıtlı değer taban olmalı. */
+    B().bosalt();
+    await __NS__.Store.set('basarim', {
+      surum:window.LIFEOS.BASARIM_SURUM, aylar:{}, kazanilan:{}, bekleyen:[],
+      gunler:{ [gun]:{ dakika:60, gorev:2, kusursuz:0 } },
+      enIyi:{ odakDakika:300 },
+    });
+    await B().yukle();
+    expect(B().durum().odakSaat).toBe(5);
+    await B().esitleCok({ [gun]:{ dakika:30, gorev:2, kusursuz:0 } });
+    expect(B().durum().odakSaat).toBe(5);
   });
 
   it('kazanılmış rozet sayaç düşse de GERİ ALINMAZ', async () => {

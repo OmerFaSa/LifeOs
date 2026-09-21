@@ -435,6 +435,28 @@ girmez** ve bu bir sağlık kararıdır: dinlenme günü eksiklik değildir.
 ömürlük rekoru basmak, o günün raporunu o günden başka bir şey hakkında
 yapardı.
 
+**Rekor DÜZELTİLEBİLİR — ama geçmişin altına düşemez.** «Ömür boyunca
+en iyi gün» bir sayaçtır ve sayaç düşebilir (düşmeyen şey rozettir).
+Bir süre düşmüyordu: yalnız büyüyen bir işaretti ve 70 dakika yerine
+700 yazılan bir gün düzeltilse bile ekranda «11 saat» yazmaya devam
+ediyor, on saatlik rozet artık var olmayan bir veriyle kazanılmış
+kalıyordu.
+
+Defterde iki alan durur:
+
+| Alan | Ne | Ne zaman değişir |
+|---|---|---|
+| `enIyi.odakDakika` | ekrana çıkan değer | **her yazmada** yeniden hesaplanır: penceredeki günlerin en büyüğü ile tabanın büyüğü |
+| `enIyi.odakTaban` | budanmış geçmişten kalan taban | bir gün pencereden çıkıp silinmeden **hemen önce** |
+
+Pencere 120 gün; ondan eskisi silinir ve o günlerin en büyüğü bir daha
+bulunamaz. Silmeden önce tabana yazılır, böylece rekor düzeltilebilir
+ama **geçmişin altına düşemez**.
+
+Eski defterler göçerken taban **ölçülür, uydurulmaz**: rekoru tutan gün
+hâlâ pencerede bulunabiliyorsa taban 0'dır (düzeltme tam çalışır),
+bulunamıyorsa kayıtlı değer taban olur (budanmış, korunur).
+
 ### HKM profili — toplamı yalnız merkez görür
 
 Üç arayüz birbirini görmez (AGENTS.md §1.4), o yüzden «bütün alanlarda

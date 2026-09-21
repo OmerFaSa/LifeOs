@@ -81,8 +81,23 @@ __NS__.Basarim = (function(){
          işlenmiştir. */
       gunler:{},
       /* BİR GÜNDE görülen en iyi değerler. Ay özetine sığmaz çünkü
-         özet toplamdır, bu ise en yüksek olandır. */
-      enIyi:{ odakDakika:0 },
+         özet toplamdır, bu ise en yüksek olandır.
+
+         İKİ ALAN, ÇÜNKÜ REKOR DÜZELTİLEBİLİR OLMALI.
+
+         `odakDakika` ekrana çıkan değerdir ve HER YAZMADA yeniden
+         hesaplanır: penceredeki günlerin en büyüğü ile `odakTaban`ın
+         büyüğü. Yalnız büyüyen bir işaret olarak tutuluyordu ve
+         ölçüldü: 70 dakika yerine 700 yazılan bir gün düzeltilse bile
+         «bir günde en uzun odak: 11 saat» yazmaya devam ediyor, on
+         saatlik rozet var olmayan bir veriyle kazanılmış kalıyordu.
+         Ölçülmemiş bir şeyi ölçülmüş gibi göstermek (AGENTS.md §1.2).
+
+         `odakTaban` budanan günlerden kalan tabandır. Pencere 120 gün;
+         ondan eskisi silinir ve o günlerin en büyüğü bir daha
+         bulunamaz. Silmeden önce tabana yazılır, böylece rekor
+         düzeltilebilir ama GEÇMİŞİN ALTINA DÜŞEMEZ. */
+      enIyi:{ odakDakika:0, odakTaban:0 },
       /* Kazanılmış rozetler: kod → kazanıldığı gün (YYYY-AA-GG).
          Rozet geri alınmaz (yukarıdaki nota bakın). */
       kazanilan:{},
@@ -142,6 +157,24 @@ __NS__.Basarim = (function(){
     }
     if(ham.enIyi && typeof ham.enIyi === 'object'){
       d.enIyi.odakDakika = sayi(ham.enIyi.odakDakika);
+      /* GÖÇ — eski defterde `odakTaban` yok ve UYDURULMAZ, ÖLÇÜLÜR.
+
+         Soru şu: rekoru tutan gün hâlâ pencerede mi? Pencereyi
+         gezeriz ve cevap oradadır.
+
+           pencerenin en büyüğü ≥ kayıtlı rekor
+               rekor pencerede duruyor; tabana gerek yok (0) ve
+               düzeltme tam olarak çalışır.
+           pencerenin en büyüğü < kayıtlı rekor
+               rekoru tutan gün budanmış; bir daha okunamaz, o yüzden
+               kayıtlı değer TABAN olur ve korunur.
+
+         Körlemesine `odakTaban = odakDakika` yazmak kolaydı ama
+         rekoru pencerede duran kullanıcıların düzeltmesini de
+         engelliyordu — düzeltilemeyen bir sayacı düzeltilebilir
+         sanmak, hatayı bir kat daha derine gömmek olurdu. */
+      d.enIyi.odakTaban = ham.enIyi.odakTaban == null
+        ? gocTabani(d) : sayi(ham.enIyi.odakTaban);
     }
     if(ham.kazanilan && typeof ham.kazanilan === 'object'){
       Object.keys(ham.kazanilan).forEach(function(kod){
@@ -168,13 +201,44 @@ __NS__.Basarim = (function(){
     return d;
   }
 
+  /* Göç tabanı: kayıtlı rekor pencerede bulunabiliyorsa taban yoktur.
+     Gerekçe `normalize` içinde yazılı. */
+  function gocTabani(d){
+    var en = 0;
+    Object.keys(d.gunler).forEach(function(g){
+      var dk = (d.gunler[g] || {}).dakika || 0;
+      if(dk > en) en = dk;
+    });
+    return en >= d.enIyi.odakDakika ? 0 : d.enIyi.odakDakika;
+  }
+
   /* Pencereden çıkan günleri sil. Özete zaten işlendiler; ikinci kez
      saklamak, aynı sayıyı iki yerde tutmak demekti. */
   function buda(d){
     var bugun = U().todayISO();
     Object.keys(d.gunler).forEach(function(g){
-      if(!yazilabilirGun(g) && g <= bugun) delete d.gunler[g];
+      if(yazilabilirGun(g) || g > bugun) return;
+      /* SİLMEDEN ÖNCE TABANA YAZ. Bu gün bir daha okunamayacak; rekoru
+         o tutuyorsa ve taban güncellenmezse rekor sessizce kaybolur. */
+      var dk = (d.gunler[g] || {}).dakika || 0;
+      if(dk > d.enIyi.odakTaban) d.enIyi.odakTaban = dk;
+      delete d.gunler[g];
     });
+    odagiTazele(d);
+  }
+
+  /* Ekrana çıkan rekoru yeniden hesaplar: penceredeki günlerin en
+     büyüğü ile budanmış geçmişin tabanı, hangisi büyükse.
+
+     Pencere en çok 120 gün olduğu için bu gezinme ucuzdur ve her
+     yazmada bir kez koşar. */
+  function odagiTazele(d){
+    var en = d.enIyi.odakTaban || 0;
+    Object.keys(d.gunler).forEach(function(g){
+      var dk = (d.gunler[g] || {}).dakika || 0;
+      if(dk > en) en = dk;
+    });
+    d.enIyi.odakDakika = en;
   }
 
   /* ----------------------------------------------------- okuma */
@@ -345,7 +409,10 @@ __NS__.Basarim = (function(){
     defter.aylar[ay] = s;
 
     if(var_) defter.gunler[gun] = yeni; else delete defter.gunler[gun];
-    if(yeni.dakika > defter.enIyi.odakDakika) defter.enIyi.odakDakika = yeni.dakika;
+    /* Rekor BURADA BÜYÜTÜLMEZ. Yalnız büyüten bir satır vardı ve
+       düzeltmeyi imkânsız kılıyordu; rekor artık `odagiTazele` ile
+       pencerenin tamamından hesaplanır (bkz. `enIyi`). */
+    odagiTazele(defter);
     return true;
   }
 

@@ -250,7 +250,7 @@ R.Screens.rutbe = (function(){
       <div class="rutbe-gecis">
         <img class="rutbe-gecis__kare" src="${'img/seviye/gecis-' + d.kademe + '.webp'}"
           alt="${yazi}" loading="lazy"
-          onerror="this.closest('.rutbe-gecis').remove()">
+          onerror="var k=this.closest('.rutbe-gecis'); if(k) k.remove(); else this.remove()">
         <p class="rutbe-gecis__yazi">${yazi}. Bu kareyi kademeye geçtiğin
           gün tam ekran gördün; burada durmaya devam ediyor.</p>
       </div>`;

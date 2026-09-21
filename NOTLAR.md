@@ -43,12 +43,12 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1237/1237 gecti | 986/986 gecti | 804/804 gecti |
+| `runtests.js` | 1242/1242 gecti | 991/991 gecti | 809/809 gecti |
 | `smoke.js` | Duman testi temiz — 2 hedefte 38 ekran, 46 sekme gezildi. | Duman testi temiz — 2 hedefte 26 ekran, 74 sekme gezildi. | Duman testi temiz — 2 hedefte 30 ekran, 192 sekme gezildi. |
 | `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
 | `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
 | `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 42 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 50 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 111 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 58.1 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 32.8 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 59 ms (bütçe 100). |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 65.3 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 33.2 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 57.3 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | beş düzen temiz — 460 ekran/genişlik kombinasyonu bakıldı | — |
 | `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |

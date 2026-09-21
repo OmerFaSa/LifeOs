@@ -313,7 +313,11 @@ def _katalogdan_beklenen():
     except (OSError, subprocess.SubprocessError) as e:
         return None, "node calistirilamadi (%s)" % e
     if r.returncode != 0:
-        return None, (r.stderr or "").strip().splitlines()[-1:] or "node hata verdi"
+        # SON SATIR, tek DİZE. Bir süre `splitlines()[-1:]` yazılıydı ve
+        # o bir LİSTE döndürüyordu: hata mesajı ekrana
+        # `['Node.js v22.22.2']` diye basılıyordu.
+        satir = (r.stderr or "").strip().splitlines()
+        return None, (satir[-1] if satir else "node hata verdi")
     try:
         return json.loads(r.stdout), None
     except ValueError:
