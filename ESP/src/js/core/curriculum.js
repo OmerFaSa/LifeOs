@@ -486,17 +486,42 @@ ESP.Curriculum = (function(){
 
   function overallRaw(){
     const hepsi = all().filter(Boolean);
-    if(!hepsi.length) return { rank:0, level:ESP.LEVEL_BY_RANK[0], cert:'missing' };
-    const ranks = hepsi.map(function(x){ return x.rank; });
+    if(!hepsi.length) return { rank:0, level:ESP.LEVEL_BY_RANK[0], cert:'missing',
+      measuredDisciplines:0, disciplines:0, mastery:0 };
+
+    /* OLCULMEMIS DISIPLIN HESABA GIRMEZ — ne ortalamaya ne EN DUSUGE.
+
+       Once yalnizca KAPALI disiplinler eleniyordu. Acilmis ama henuz
+       verisi olmayan bir disiplin `rank:0, cert:'missing'` ile hem
+       ortalamaya hem `min`e giriyordu; formul `floor((ort + min) / 2)`
+       oldugu icin `min` sifira dustugu anda genel kademe YARIYA
+       iniyordu. Bes disiplinde ilerlemis biri altinciyi ACTIGI AN
+       kademesini kaybediyordu — hicbir sey yapmadan.
+
+       Yukaridaki `all()` yorumu gerekceyi zaten yaziyor: «gitara hic
+       dokunmayacagini soylemis birinin ustatlik yuzdesini muzikten
+       dolayi dusurmek, olculmemis bir seyi olcmek olurdu.» Ayni sey
+       HENUZ dokunmamis biri icin de gecerli — kapali ile bos arasindaki
+       fark kullanicinin niyetidir, olcumun varligi degil.
+
+       Acik disiplin sayisi yine bildiriliyor (`disciplines`): ekran
+       «alti disiplinden biri olculdu» diyebilsin diye. Eksik olan sey
+       GIZLENMIYOR, yalnizca SIFIR SAYILMIYOR. */
+    const olculenler = hepsi.filter(function(x){ return x.cert !== 'missing'; });
+    if(!olculenler.length){
+      return { rank:0, level:ESP.LEVEL_BY_RANK[0], cert:'missing',
+        measuredDisciplines:0, disciplines:hepsi.length, mastery:0 };
+    }
+
+    const ranks = olculenler.map(function(x){ return x.rank; });
     const ort = ranks.reduce(function(a, b){ return a + b; }, 0) / ranks.length;
     const min = Math.min.apply(null, ranks);
     const rank = Math.floor((ort + min) / 2);
-    const olculen = hepsi.filter(function(x){ return x.cert !== 'missing'; }).length;
     return {
-      rank:rank, level:ESP.LEVEL_BY_RANK[rank],
-      cert:olculen ? 'derived' : 'missing',
-      measuredDisciplines:olculen, disciplines:hepsi.length,
-      mastery:Math.round(hepsi.reduce(function(a, x){ return a + x.mastery; }, 0) / hepsi.length),
+      rank:rank, level:ESP.LEVEL_BY_RANK[rank], cert:'derived',
+      measuredDisciplines:olculenler.length, disciplines:hepsi.length,
+      mastery:Math.round(olculenler.reduce(function(a, x){ return a + x.mastery; }, 0)
+        / olculenler.length),
     };
   }
 

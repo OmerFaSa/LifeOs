@@ -145,6 +145,46 @@
       });
     });
 
+    it('yeni acilan disiplin genel kademeyi DUSURMEZ', () => {
+      /* ACIK AMA OLCULMEMIS DISIPLIN SIFIRLA ORTALAMAYA GIRIYORDU.
+
+         `all()` yalnizca KAPALI disiplinleri eliyordu. Acilmis ama henuz
+         verisi olmayan bir disiplin `rank:0, mastery:0, cert:'missing'`
+         ile hem ortalamaya hem `min`e giriyor; formul
+         `floor((ort + min) / 2)` oldugu icin `min` sifira dustugu anda
+         genel kademe YARIYA iniyordu.
+
+         Yani bes disiplinde ilerlemis biri altinciyi ACTIGI AN
+         kademesini kaybediyordu — hicbir sey yapmadan, sadece bir
+         bolumu acarak.
+
+         Dosyanin kendi yorumu gerekceyi zaten yaziyor: «gitara hic
+         dokunmayacagini soylemis birinin ustatlik yuzdesini muzikten
+         dolayi dusurmek, olculmemis bir seyi olcmek olurdu.» Ayni sey
+         HENUZ dokunmamis biri icin de gecerli. */
+      resetState();
+      withToday('2026-09-12', () => {
+        const olcumlu = C().overall();
+        /* Once olculmemis disiplinlerin kademeye girmedigini kur: hicbir
+           veri yokken genel kademe «veri yok»tur, sifir degil. */
+        expect(olcumlu.cert).toBe('missing');
+        expect(olcumlu.measuredDisciplines).toBe(0);
+      });
+    });
+
+    it('olculmemis disiplin ortalamaya ve en dusuge girmez', () => {
+      resetState();
+      withToday('2026-09-12', () => {
+        for(let i = 0; i < 5000; i++) pushCard({ front:'a' + i, back:'b' });
+        const ov = C().overall();
+        /* Olculen disiplin sayisi, acik disiplin sayisindan AZ olabilir;
+           ikisi ayri ayri bildirilir ki ekran «6 disiplinden 1'i
+           olculdu» diyebilsin. Olculmemis olanlar kademeyi DUSURMEZ. */
+        expect(ov.disciplines >= ov.measuredDisciplines).toBeTruthy();
+        expect(ov.disciplines > 0).toBeTruthy();
+      });
+    });
+
     it('merdiven yuzdesi bilinmeyen kapiyi ilerleme saymaz', () => {
       resetState();
       const lv = C().levelOf('music');
