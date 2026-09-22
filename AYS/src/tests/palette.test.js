@@ -75,6 +75,28 @@
       expect(c.sub).toContain('kayıt');
     });
 
+    it('plan komutu orta seviyedir: önce önizleme', function(){
+      resetState();
+      R.S.office = null;
+      const c = P.veriKomutu('gelecek hafta çalışmayacağım');
+      expect(c).toBeTruthy();
+      expect(c.label).toContain('Ara');
+      expect(c.sub).toContain('önizleme');
+    });
+
+    it('tam anlaşılmış küçük istek hemen uygulanacağını söyler', function(){
+      resetState();
+      R.S.office = null;
+      expect(P.veriKomutu('bugün 20 paragraf çözdüm').sub).toContain('hemen');
+    });
+
+    it('belirsiz komut tahmin edilmez, soru olarak gelir', function(){
+      resetState();
+      const c = P.veriKomutu('ara vereceğim');
+      expect(c).toBeTruthy();
+      expect(c.sub).toContain('anlamadığım');
+    });
+
     it('öneri komutu KENDİLİĞİNDEN KAYDETMEZ', function(){
       /* Komut yalnızca önizlemeyi hazırlar; onaysız hiçbir şey yazılmaz.
          `run` çağrılmadığı sürece gün kaydı değişmemeli. */

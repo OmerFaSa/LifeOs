@@ -38,11 +38,93 @@ R.Screens.team = (function(){
           <span class="dim">${agent.role}</span>
           ${when(m.mode === 'kural', () => K.Badge({ label:'kural motoru', tone:'info' }))}
         </div>
-        <div class="msg__body">${raw(U.esc(m.text).replace(/\n/g, '<br/>'))}</div>
+        <div class="msg__body">${raw(U.esc(m.text).replace(/\n/g, '<br/>'))}${OnayDugmeleri(m)}</div>
         ${when(m.warnings && m.warnings.length, () => html`
           <div class="msg__warn">${raw(UI.icon('warn'))} ${m.warnings.join(' ')}</div>`)}
         ${when(m.error, () => html`<div class="msg__warn">${raw(UI.icon('warn'))} ${m.error}</div>`)}
       </div>`;
+  }
+
+  /* Mesajin biraktigi oneri hala bekliyorsa onay dugmeleri gorunur;
+     onaylanmis ya da reddedilmisse gorunmez — eski mesajda duran bir
+     «Onayla», ikinci kez uygulamaya davetiye olurdu. */
+  function bekleyenIds(m){
+    const ids = (m && m.oneriIds) || [];
+    const bek = R.Proposals.pending().map(p => p.id);
+    return ids.filter(id => bek.indexOf(id) >= 0);
+  }
+  function OnayDugmeleri(m){
+    const ids = bekleyenIds(m);
+    if(!ids.length) return '';
+    return html`<div class="row gap-8 mt-8">
+      ${K.Button({ label:'Onayla ve uygula', icon:'check', size:'sm', tone:'primary',
+        act:'chat-onayla', data:{ 'data-ids':ids.join(',') } })}
+      ${K.Button({ label:'Vazgeç', size:'sm', tone:'ghost',
+        act:'chat-vazgec', data:{ 'data-ids':ids.join(',') } })}
+    </div>`;
+  }
+
+  /* ---- konusarak plan degistirme ----------------------------------
+
+     Mesaj ajana gitmeden ONCE kural motoru bakar (core/komut.js). Bir
+     plan komutu ya da veri girisi ise model HIC cagrilmaz: aksiyon oneri
+     kutusundan gecer ve cevabi kural motoru yazar. Model «uyguladim»
+     deyip uygulamamis olamaz. «evet», «vazgec», «geri al» da burada
+     karsilanir — sesli sohbette dokunmadan onay budur. */
+  function sonBekleyenMesaj(agentId){
+    const l = O.chatOf(agentId);
+    for(let i = l.length - 1; i >= 0; i--){
+      if(l[i].role !== 'user' && bekleyenIds(l[i]).length) return l[i];
+    }
+    return null;
+  }
+
+  async function cevapYaz(agent, text, meta){
+    const onEk = agent.id === 'patron' ? '' : 'Patron’a ilettim. ';
+    await O.pushChat(agent.id, 'agent', onEk + text, Object.assign({ mode:'kural' }, meta || {}));
+  }
+
+  async function komutIsle(agent, question){
+    if(!R.Komut) return false;
+    const kisa = R.Komut.kisaCevap(question);
+    if(kisa === 'geri'){
+      const g = await R.Komut.geriAl();
+      await cevapYaz(agent, g ? 'Geri aldım: ' + ((R.ACTION_BY_ID[g.action] || {}).title || g.action) + '.'
+        : 'Geri alınacak bir değişikliğin yok.');
+      return true;
+    }
+    if(kisa === 'evet' || kisa === 'hayir'){
+      const son = sonBekleyenMesaj(agent.id);
+      if(son){
+        const ids = bekleyenIds(son);
+        if(kisa === 'evet'){
+          const r = await R.Komut.onayla(ids);
+          await cevapYaz(agent, r.n ? 'Uyguladım. Geri almak istersen «geri al» de.'
+            : 'Uygulayamadım: ' + (r.why.join(' · ') || 'öneri geçersizleşmiş.'));
+        }else{
+          await R.Komut.reddet(ids);
+          await cevapYaz(agent, 'Tamam, vazgeçtim; hiçbir şey değişmedi.');
+        }
+        return true;
+      }
+    }
+    const s = R.Komut.anla(question);
+    if(!s.komut) return false;
+    const islem = await R.Komut.isle(s, { metin:question });
+    await cevapYaz(agent, R.Komut.yanit(islem),
+      { oneriIds:islem.bekleyen.map(k => k.row.id) });
+    if(islem.yapilan.length){
+      const rows = islem.yapilan.map(k => k.row.id);
+      UI.toast(islem.yapilan.length === 1 ? islem.yapilan[0].baslik + ' uygulandı'
+        : islem.yapilan.length + ' değişiklik uygulandı', {
+        undo:async () => {
+          for(const id of rows) await R.Proposals.undo(id);
+          UI.toast('Geri alındı');
+          R.App.render();
+        },
+      });
+    }
+    return true;
   }
 
   /* Ajanin masasindaki sayilar — sohbetin ustunde sabit durur,
@@ -226,6 +308,16 @@ R.Screens.team = (function(){
 
     if(kind === 'ask'){
       await O.pushChat(agent.id, 'user', question);
+      let islendi = false;
+      try{ islendi = await komutIsle(agent, question); }
+      catch(e){ islendi = false; }
+      if(islendi){
+        busy = false;
+        controller = null;
+        await R.App.render();
+        scrollLog();
+        return;
+      }
       await R.App.render();
     }
     pendingBox(agent, kind === 'ask' ? 'Raporuna bakıyor…' : 'Brifingi hazırlıyor…');
@@ -260,6 +352,21 @@ R.Screens.team = (function(){
   }
 
   const handle = {
+    async 'chat-onayla'(el){
+      const ids = String(el.dataset.ids || '').split(',').filter(Boolean);
+      const r = await R.Komut.onayla(ids);
+      await cevapYaz(current(), r.n ? 'Uyguladım. Geri almak istersen «geri al» de.'
+        : 'Uygulayamadım: ' + (r.why.join(' · ') || 'öneri geçersizleşmiş.'));
+      await R.App.render();
+      scrollLog();
+    },
+    async 'chat-vazgec'(el){
+      const ids = String(el.dataset.ids || '').split(',').filter(Boolean);
+      await R.Komut.reddet(ids);
+      await cevapYaz(current(), 'Tamam, vazgeçtim; hiçbir şey değişmedi.');
+      await R.App.render();
+      scrollLog();
+    },
     async 'team-agent'(el){
       const id = el.dataset.value;
       if(!R.AGENT_BY_ID[id]) return;

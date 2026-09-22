@@ -240,19 +240,47 @@ R.Palette = (function(){
     const t = String(q || '').trim();
     if(t.length < 4 || !R.Entry) return null;
     let r;
-    try{ r = R.Entry.fromText(t, { date:R.U.todayISO() }); }catch(e){ return null; }
-    if(!r.oneriler.length) return null;
-    const adlar = r.oneriler.map(o => {
-      const e = R.Proposals.eylem ? R.Proposals.eylem(o.action) : null;
-      return (e && e.label) || ETIKET[o.action] || o.action;
-    });
+    try{
+      /* Plan komutu («bu hafta ara», «günde 4 saat») ve veri girişi
+         («40 soru çözdüm») birlikte çözülür — core/komut.js. */
+      r = R.Komut ? R.Komut.anla(t, { date:R.U.todayISO() })
+        : R.Entry.fromText(t, { date:R.U.todayISO() });
+    }catch(e){ return null; }
+    r.sorular = r.sorular || [];
+    r.anlasilmayan = r.anlasilmayan || [];
+    if(!r.oneriler.length && !r.sorular.length) return null;
+    const adlar = r.oneriler.map(o => ETIKET[o.action]
+      || (R.ACTION_BY_ID[o.action] || {}).title || o.action);
+    /* Küçük ve TAMAMEN anlaşılmış istek sormadan uygulanır (AGENTS.md
+       §1.9); orta seviye, soru ya da anlaşılmayan parça varsa önizleme. */
+    const hemen = r.oneriler.length && !r.sorular.length && !r.anlasilmayan.length
+      && r.oneriler.every(o => R.Proposals.otomatikMi(
+        { level:(R.ACTION_BY_ID[o.action] || {}).level, source:'istek' }, R.Proposals.ayar()));
     return {
       group:'Kayıt', icon:'zap',
-      label:adlar.join(' · '),
-      sub:r.oneriler.length === 1 ? '1 kayıt' : r.oneriler.length + ' kayıt',
+      label:adlar.length ? adlar.join(' · ') : 'Bir şey sormam gerek',
+      sub:r.sorular.length ? 'anlamadığım kısım var'
+        : r.oneriler.length + ' kayıt' + (hemen ? ' · hemen uygulanır, geri alınabilir' : ' · önce önizleme'),
       hint:'Enter',
-      run:() => onizle(r, t),
+      run:() => hemen ? hemenUygula(r, t) : onizle(r, t),
     };
+  }
+
+  async function hemenUygula(r, metin){
+    close();
+    const islem = await R.Komut.isle(r, { metin });
+    const ids = islem.yapilan.map(k => k.row.id);
+    const dusen = islem.dusen.length;
+    UI.toast(ids.length
+      ? (ids.length === 1 ? islem.yapilan[0].baslik : ids.length + ' kayıt') + ' uygulandı'
+        + (dusen ? ' · ' + dusen + ' tanesi uygulanamadı' : '')
+      : 'Uygulanamadı: ' + (islem.dusen.map(k => k.why).filter(Boolean).join(' · ') || 'geçersiz'),
+      ids.length ? { undo:async () => {
+        for(const id of ids) await R.Proposals.undo(id);
+        UI.toast('Geri alındı');
+        R.App.render();
+      } } : {});
+    R.App.render();
   }
 
   const ETIKET = {
@@ -266,7 +294,7 @@ R.Palette = (function(){
     const K = R.C;
     const bloklar = r.oneriler.map(o => {
       const pv = R.Proposals.preview({ action:o.action, agent:'patron', params:o.params });
-      const ad = ETIKET[o.action] || o.action;
+      const ad = ETIKET[o.action] || (R.ACTION_BY_ID[o.action] || {}).title || o.action;
       return html`
         <div class="qeblok">
           <div class="qeblok__bas"><b>${ad}</b>
@@ -280,23 +308,28 @@ R.Palette = (function(){
         </div>`;
     });
 
+    const sorular = r.sorular || [];
     close();
     UI.sheet({
-      title:r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
+      title:!r.oneriler.length ? 'Bir şey sormam gerek'
+        : r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
         : r.oneriler.length + ' kayıt anladım',
       subtitle:metin,
       body:String(html`
         <div class="qebloklar">${map(bloklar, b => b)}</div>
+        ${map(sorular, s => K.Notice({ tone:'warn', title:'Tahmin etmiyorum, soruyorum:', body:s.soru }))}
         ${when(r.anlasilmayan.length, () => K.Notice({ tone:'warn',
           title:'Çözemediğim kısım:',
           body:'«' + r.anlasilmayan.join('», «') + '» — bu kısım kaydedilmeyecek. '
             + 'Anlaşılmayan satır atılmaz, söylenir.' }))}
-        ${K.Notice({ tone:'info',
+        ${when(r.oneriler.length, () => K.Notice({ tone:'info',
           body:'Bu satırlar yorumlandı, KAYDEDİLMEDİ. Onaylayınca yazılır ve '
-            + 'her biri tek tek geri alınabilir.' })}`),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:r.oneriler.length === 1 ? 'Kaydet' : 'Hepsini kaydet',
-          tone:'primary', act:'veri-kaydet' })}`),
+            + 'her biri tek tek geri alınabilir.' }))}`),
+      footer:String(r.oneriler.length
+        ? html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+          ${K.Button({ label:r.oneriler.length === 1 ? 'Onayla' : 'Hepsini onayla',
+            tone:'primary', act:'veri-kaydet' })}`
+        : K.Button({ label:'Tamam', act:'sheet-close' })),
     });
     bekleyen = Object.assign({}, r, { metin });
   }
@@ -305,15 +338,23 @@ R.Palette = (function(){
     if(!bekleyen) return;
     const metinSon = bekleyen.metin || '';
     let yazilan = 0, dusen = 0;
-    for(const o of bekleyen.oneriler){
-      /* Yetki Patron'da: konustugun ajan odur. Gerekce alanina SENIN
-         cumlen yazilir — sayi koçun tahmininden degil senin sozunden
-         cikar. */
-      const kayit = await R.Proposals.propose({ action:o.action, agent:'patron',
-        params:o.params, reason:o.metin || metinSon, source:'istek' });
-      if(!kayit){ dusen++; continue; }
-      const res = await R.Proposals.approve(kayit.id);
-      if(res) yazilan++; else dusen++;
+    if(R.Komut){
+      /* Onizlemeyi gorup onaylayan kullanicidir: kucuk olan zaten
+         uygulanir, orta olan burada onaylanir. Yetki Patron'dadir,
+         gerekceye SENIN cumlen yazilir. */
+      const islem = await R.Komut.isle(bekleyen, { metin:metinSon });
+      const onay = await R.Komut.onayla(islem.bekleyen.map(k => k.row.id));
+      yazilan = islem.yapilan.length + onay.n;
+      dusen = islem.dusen.length + (islem.bekleyen.length - onay.n);
+    }else{
+      for(const o of bekleyen.oneriler){
+        const kayit = await R.Proposals.propose({ action:o.action, agent:'patron',
+          params:o.params, reason:o.metin || metinSon, source:'istek' });
+        if(!kayit){ dusen++; continue; }
+        /* approve bayatlamis oneride {ok:false} doner; «yazildi» sayilmaz. */
+        const res = await R.Proposals.approve(kayit.id);
+        if(res && res.ok) yazilan++; else dusen++;
+      }
     }
     bekleyen = null;
     UI.closeSheet();

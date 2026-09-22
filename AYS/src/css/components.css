@@ -1679,7 +1679,10 @@ button.minrow:hover{ background:var(--surface-2); }
   background:var(--primary-soft); border-color:var(--primary-soft);
   border-bottom-right-radius:5px;
 }
-.msg--agent{ align-self:flex-start; }
+/* Ekip sohbetinde ajan adi satiri (.msg__who) balonun USTUNDE durur.
+   Yan yana dururken 390 pikselde ad + rozet 213 px tutuyor, balon
+   109 px'e sikisip her satira tek kelime dusuyordu. */
+.msg--agent{ align-self:flex-start; flex-direction:column; gap:0; }
 .msg--agent .msg__body{ border-bottom-left-radius:5px; }
 
 /* Ajan sekmesi şeridi */
