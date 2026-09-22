@@ -1412,6 +1412,30 @@ ESP.App = (function(){
         UI.toast(error.message);
       }
     };
+    /* Baska sekme ayni kaydi degistirdi: otomatik birlestirme yapilmaz
+       (yarim kalmis bir form ustune yazilabilir), yalniz kullanici
+       uyarilir ki «son yazan kazanir» sessizce olmasin. Kendi zamanlayicisi
+       vardir, onError'unkiyle karismaz.
+
+       Olay tanim geregi GIZLI sekmeye gelir (kullanici o an obur
+       sekmededir). O an cizilen bir toast, kullanici donmeden solar;
+       bu yuzden uyari sekme GORUNUR olana kadar bekletilir. */
+    let lastExternalToastAt = 0;
+    let disaridanBekliyor = false;
+    function disaridanUyar(){
+      const now = Date.now();
+      if(now - lastExternalToastAt > 8000){
+        lastExternalToastAt = now;
+        UI.toast('Veriler başka bir sekmede değişti. Kaybolmasın diye bu sayfayı tazele.', { life:8000 });
+      }
+    }
+    ESP.Store.onExternalWrite = function(){
+      if(document.hidden){ disaridanBekliyor = true; return; }
+      disaridanUyar();
+    };
+    document.addEventListener('visibilitychange', () => {
+      if(!document.hidden && disaridanBekliyor){ disaridanBekliyor = false; disaridanUyar(); }
+    });
   }
 
   function storeHealthHtml(){

@@ -9284,7 +9284,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'8dcfee1', at:'2026-09-22 14:15', dirty:true };
+R.BUILD = { id:'2b3c5ce', at:'2026-09-22 18:59', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13590,10 +13590,31 @@ R.Store = (function(){
     }
   }
 
-  /* Baska sekme yazdiysa bellekteki kopya eskimistir. */
+  let onExternalWrite = null;   // app.js tarafindan baglanir
+
+  /* Baska sekme yazdiysa bellekteki kopya eskimistir.
+
+     ONCE YALNIZ `kopya` (bu dosyanin HAM JSON onbellegi) sifirlaniyordu.
+     Ama uygulamanin BELLEKTEKI MODELI (`R.S.days`, `R.S.exams`...) ayri
+     bir katmandir ve `kopya = null` onu HIC etkilemez — yalniz bir
+     SONRAKI `localAll()` cagrisinda diskten yeniden okunacagini
+     saglar. Iki sekme ayni gunu duzenlerse: B sekmesi yazar, A
+     sekmesinin `R.S.days[iso]`si BAYAT KALIR; A sonra kendi (bayat)
+     kopyasini kaydederse B'nin degisikligi SESSIZCE ezilir.
+
+     Tam bir birlestirme bu katmanda YAPILMAZ: hangi alanin kazanacagina
+     karar vermek uygulamanin isidir, deponun degil. Ama SESSIZCE
+     ezilmesi de kabul edilebilir degil — bu yuzden en azindan SOYLENIR.
+     `onExternalWrite` app.js'te bir uyariya baglanir; kullanici
+     sayfayi yenileyip GUNCEL veriyi gorebilir. */
   try{
     window.addEventListener('storage', e => {
-      if(!e || e.key === null || e.key === LOCAL_KEY) kopya = null;
+      if(!e || e.key === null || e.key === LOCAL_KEY){
+        kopya = null;
+        if(typeof onExternalWrite === 'function'){
+          try{ onExternalWrite(); }catch(err){}
+        }
+      }
     });
   }catch(e){ /* olay baglanamadiysa kopya yalniz bu sekmede yasar */ }
 
@@ -13900,6 +13921,7 @@ R.Store = (function(){
     exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
+    set onExternalWrite(fn){ onExternalWrite = fn; },
     get mode(){ return mode; },
   };
 })();
@@ -19915,7 +19937,7 @@ R.UI = (function(){
       el.appendChild(btn);
     }
     root.appendChild(el);
-    const life = o.undo ? 6000 : 1500;
+    const life = o.life || (o.undo ? 6000 : 1500);
     setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, life);
     setTimeout(() => el.remove(), life + 300);
     return el;
@@ -44290,6 +44312,30 @@ R.App = (function(){
       const badge = document.getElementById('store-health');
       if(badge) badge.classList.remove('hidden');
     };
+    /* Baska sekme ayni kaydi degistirdi: otomatik birlestirme yapilmaz
+       (yarim kalmis bir form ustune yazilabilir), yalniz kullanici
+       uyarilir ki «son yazan kazanir» sessizce olmasin. Kendi zamanlayicisi
+       vardir, onError'unkiyle karismaz.
+
+       Olay tanim geregi GIZLI sekmeye gelir (kullanici o an obur
+       sekmededir). O an cizilen bir toast, kullanici donmeden solar;
+       bu yuzden uyari sekme GORUNUR olana kadar bekletilir. */
+    let lastExternalToastAt = 0;
+    let disaridanBekliyor = false;
+    function disaridanUyar(){
+      const now = Date.now();
+      if(now - lastExternalToastAt > 8000){
+        lastExternalToastAt = now;
+        UI.toast('Veriler başka bir sekmede değişti. Kaybolmasın diye bu sayfayı tazele.', { life:8000 });
+      }
+    }
+    R.Store.onExternalWrite = function(){
+      if(document.hidden){ disaridanBekliyor = true; return; }
+      disaridanUyar();
+    };
+    document.addEventListener('visibilitychange', () => {
+      if(!document.hidden && disaridanBekliyor){ disaridanBekliyor = false; disaridanUyar(); }
+    });
   }
 
   function storeHealthHtml(){

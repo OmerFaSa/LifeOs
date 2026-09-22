@@ -90,10 +90,29 @@ SP.Store = (function(){
     }
   }
 
-  /* Başka sekme yazdıysa bellekteki kopya eskimiştir. */
+  let onExternalWrite = null;   // app.js tarafından bağlanır
+
+  /* Başka sekme yazdıysa bellekteki kopya eskimiştir.
+
+     ÖNCE YALNIZ `kopya` (bu dosyanın HAM JSON önbelleği) sıfırlanıyordu.
+     Ama uygulamanın BELLEKTEKİ MODELİ (`SP.S.vitals`, `SP.S.labs`...)
+     ayrı bir katmandır ve `kopya = null` onu HİÇ etkilemez — yalnız bir
+     SONRAKİ `localAll()` çağrısında diskten yeniden okunacağını sağlar.
+     İki sekme aynı günü düzenlerse: B sekmesi yazar, A sekmesinin
+     bellekteki modeli BAYAT KALIR; A sonra kendi (bayat) kopyasını
+     kaydederse B'nin değişikliği SESSİZCE ezilir.
+
+     Tam bir birleştirme bu katmanda YAPILMAZ — ama sessizce ezilmesi de
+     kabul edilebilir değil. `onExternalWrite` app.js'te bir uyarıya
+     bağlanır; kullanıcı sayfayı yenileyip GÜNCEL veriyi görebilir. */
   try{
     window.addEventListener('storage', e => {
-      if(!e || e.key === null || e.key === LOCAL_KEY) kopya = null;
+      if(!e || e.key === null || e.key === LOCAL_KEY){
+        kopya = null;
+        if(typeof onExternalWrite === 'function'){
+          try{ onExternalWrite(); }catch(err){}
+        }
+      }
     });
   }catch(e){ /* olay bağlanamadıysa kopya yalnız bu sekmede yaşar */ }
   function localWrite(all){
@@ -405,6 +424,7 @@ SP.Store = (function(){
     exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
+    set onExternalWrite(fn){ onExternalWrite = fn; },
     get mode(){ return mode; },
   };
 })();

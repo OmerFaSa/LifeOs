@@ -97,10 +97,31 @@ R.Store = (function(){
     }
   }
 
-  /* Baska sekme yazdiysa bellekteki kopya eskimistir. */
+  let onExternalWrite = null;   // app.js tarafindan baglanir
+
+  /* Baska sekme yazdiysa bellekteki kopya eskimistir.
+
+     ONCE YALNIZ `kopya` (bu dosyanin HAM JSON onbellegi) sifirlaniyordu.
+     Ama uygulamanin BELLEKTEKI MODELI (`R.S.days`, `R.S.exams`...) ayri
+     bir katmandir ve `kopya = null` onu HIC etkilemez — yalniz bir
+     SONRAKI `localAll()` cagrisinda diskten yeniden okunacagini
+     saglar. Iki sekme ayni gunu duzenlerse: B sekmesi yazar, A
+     sekmesinin `R.S.days[iso]`si BAYAT KALIR; A sonra kendi (bayat)
+     kopyasini kaydederse B'nin degisikligi SESSIZCE ezilir.
+
+     Tam bir birlestirme bu katmanda YAPILMAZ: hangi alanin kazanacagina
+     karar vermek uygulamanin isidir, deponun degil. Ama SESSIZCE
+     ezilmesi de kabul edilebilir degil — bu yuzden en azindan SOYLENIR.
+     `onExternalWrite` app.js'te bir uyariya baglanir; kullanici
+     sayfayi yenileyip GUNCEL veriyi gorebilir. */
   try{
     window.addEventListener('storage', e => {
-      if(!e || e.key === null || e.key === LOCAL_KEY) kopya = null;
+      if(!e || e.key === null || e.key === LOCAL_KEY){
+        kopya = null;
+        if(typeof onExternalWrite === 'function'){
+          try{ onExternalWrite(); }catch(err){}
+        }
+      }
     });
   }catch(e){ /* olay baglanamadiysa kopya yalniz bu sekmede yasar */ }
 
@@ -407,6 +428,7 @@ R.Store = (function(){
     exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
+    set onExternalWrite(fn){ onExternalWrite = fn; },
     get mode(){ return mode; },
   };
 })();

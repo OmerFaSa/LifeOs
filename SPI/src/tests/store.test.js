@@ -32,7 +32,7 @@
 
      init, get, set, remove, list, exportAll, importAll, readBackup,
      importUndoInfo, undoImport, clear, localSize, localQuota,
-     sizeByCollection, health, onError, mode
+     sizeByCollection, health, onError, onExternalWrite, mode
 
    Paket o yüzeyin sözünü sınar, gövdesini değil. Bu yüzden
    uygulamaya bağlanmaz: uygulama kimliği `exportAll().__meta.app`'ten,
@@ -356,6 +356,28 @@
       await S.set(ON + 'benimki', { v:2 });
       expect(await S.get(ON + 'yalnizOteki')).toBeTruthy();
       await temizle();
+    });
+
+    /* KOPYAYI TAZELEMEK YETMEZ — KULLANICI DA BİLMELİ.
+
+       Yukarıdaki test yalnız DEPONUN kopyasını korur. Uygulamanın
+       bellekteki modeli (günler, tahliller, kartlar) açılışta bir kez
+       yüklenir ve bu olaydan habersizdir: iki sekme aynı kaydı
+       düzenlerse son yazan, öbürünün değişikliğini SÖYLENMEDEN ezer.
+       Birleştirme bu katmanın işi değil; ama haber vermek öyle. */
+    it('başka sekmenin yazması onExternalWrite ile bildirilir', async function(){
+      let sayac = 0;
+      S.onExternalWrite = () => { sayac++; };
+      try{
+        await kopyayiTazele();
+        expect(sayac).toBe(1);
+        /* Başka bir uygulamanın ya da ilgisiz bir ayarın anahtarı
+           bildirim üretmez: yanlış alarm, uyarıyı değersizleştirir. */
+        window.dispatchEvent(new StorageEvent('storage', { key:'zz-ilgisiz-anahtar' }));
+        expect(sayac).toBe(1);
+      }finally{
+        S.onExternalWrite = null;
+      }
     });
 
     it('temizlemeden sonra bellekteki kopya da boşalır', async function(){

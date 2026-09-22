@@ -745,7 +745,7 @@ SP.UI = (function(){
       el.appendChild(btn);
     }
     root.appendChild(el);
-    const life = o.undo ? 6000 : 1500;
+    const life = o.life || (o.undo ? 6000 : 1500);
     setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, life);
     setTimeout(() => el.remove(), life + 300);
     return el;

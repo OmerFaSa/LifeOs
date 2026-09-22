@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'516910c', at:'2026-09-22 14:20', dirty:true };
+SP.BUILD = { id:'2b3c5ce', at:'2026-09-22 18:59', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -12583,10 +12583,29 @@ SP.Store = (function(){
     }
   }
 
-  /* Başka sekme yazdıysa bellekteki kopya eskimiştir. */
+  let onExternalWrite = null;   // app.js tarafından bağlanır
+
+  /* Başka sekme yazdıysa bellekteki kopya eskimiştir.
+
+     ÖNCE YALNIZ `kopya` (bu dosyanın HAM JSON önbelleği) sıfırlanıyordu.
+     Ama uygulamanın BELLEKTEKİ MODELİ (`SP.S.vitals`, `SP.S.labs`...)
+     ayrı bir katmandır ve `kopya = null` onu HİÇ etkilemez — yalnız bir
+     SONRAKİ `localAll()` çağrısında diskten yeniden okunacağını sağlar.
+     İki sekme aynı günü düzenlerse: B sekmesi yazar, A sekmesinin
+     bellekteki modeli BAYAT KALIR; A sonra kendi (bayat) kopyasını
+     kaydederse B'nin değişikliği SESSİZCE ezilir.
+
+     Tam bir birleştirme bu katmanda YAPILMAZ — ama sessizce ezilmesi de
+     kabul edilebilir değil. `onExternalWrite` app.js'te bir uyarıya
+     bağlanır; kullanıcı sayfayı yenileyip GÜNCEL veriyi görebilir. */
   try{
     window.addEventListener('storage', e => {
-      if(!e || e.key === null || e.key === LOCAL_KEY) kopya = null;
+      if(!e || e.key === null || e.key === LOCAL_KEY){
+        kopya = null;
+        if(typeof onExternalWrite === 'function'){
+          try{ onExternalWrite(); }catch(err){}
+        }
+      }
     });
   }catch(e){ /* olay bağlanamadıysa kopya yalnız bu sekmede yaşar */ }
   function localWrite(all){
@@ -12898,6 +12917,7 @@ SP.Store = (function(){
     exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
+    set onExternalWrite(fn){ onExternalWrite = fn; },
     get mode(){ return mode; },
   };
 })();
@@ -23236,7 +23256,7 @@ SP.UI = (function(){
       el.appendChild(btn);
     }
     root.appendChild(el);
-    const life = o.undo ? 6000 : 1500;
+    const life = o.life || (o.undo ? 6000 : 1500);
     setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, life);
     setTimeout(() => el.remove(), life + 300);
     return el;
@@ -36280,6 +36300,30 @@ SP.App = (function(){
         UI.toast(error.message);
       }
     };
+    /* Baska sekme ayni kaydi degistirdi: otomatik birlestirme yapilmaz
+       (yarim kalmis bir form ustune yazilabilir), yalniz kullanici
+       uyarilir ki «son yazan kazanir» sessizce olmasin. Kendi zamanlayicisi
+       vardir, onError'unkiyle karismaz.
+
+       Olay tanim geregi GIZLI sekmeye gelir (kullanici o an obur
+       sekmededir). O an cizilen bir toast, kullanici donmeden solar;
+       bu yuzden uyari sekme GORUNUR olana kadar bekletilir. */
+    let lastExternalToastAt = 0;
+    let disaridanBekliyor = false;
+    function disaridanUyar(){
+      const now = Date.now();
+      if(now - lastExternalToastAt > 8000){
+        lastExternalToastAt = now;
+        UI.toast('Veriler başka bir sekmede değişti. Kaybolmasın diye bu sayfayı tazele.', { life:8000 });
+      }
+    }
+    SP.Store.onExternalWrite = function(){
+      if(document.hidden){ disaridanBekliyor = true; return; }
+      disaridanUyar();
+    };
+    document.addEventListener('visibilitychange', () => {
+      if(!document.hidden && disaridanBekliyor){ disaridanBekliyor = false; disaridanUyar(); }
+    });
   }
 
   function storeHealthHtml(){

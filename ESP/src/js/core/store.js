@@ -35,6 +35,7 @@ ESP.Store = (function(){
   };
 
   let onError = null;   // app.js tarafindan baglanir
+  let onExternalWrite = null;   // app.js tarafindan baglanir
 
   function report(scope, err, userMessage){
     const code = (err && err.code) || (err && err.name) || 'unknown';
@@ -90,10 +91,29 @@ ESP.Store = (function(){
     }
   }
 
-  /* Başka sekme yazdıysa bellekteki kopya eskimiştir. */
+  /* Başka sekme yazdıysa bellekteki kopya eskimiştir.
+
+     ÖNCE YALNIZ `kopya` (ayrıştırılmış ham JSON önbelleği) sıfırlanıyordu.
+     Uygulamanın BELLEKTEKİ modeli (`S.days`, `S.cards` vb.) bu satırdan
+     habersizdir — o modeli dolduran `Model.loadAll()` yalnızca açılışta
+     çalışır. İki sekme aynı günü/kartı düzenlerse: B sekmesi yazar, A
+     sekmesinin belleği BAYAT KALIR; A daha sonra kaydettiğinde B'nin
+     yazdığı hiçbir yerde söylenmeden kaybolur.
+
+     Tam bir birleştirme bu katmanda YAPILMAZ: hangi alanın kazanacağına
+     bu dosya karar veremez, üstelik kullanıcı A sekmesinde yarım kalmış
+     bir form dolduruyor olabilir — otomatik yeniden yükleme onu da
+     silebilir. Ama sessizce ezilmesi de kabul edilebilir değil; bu yüzden
+     `onExternalWrite` app.js'te bir uyarıya bağlanır ve kullanıcı
+     kendi kararını verir (sayfayı tazele ya da göz ardı et). */
   try{
     window.addEventListener('storage', e => {
-      if(!e || e.key === null || e.key === LOCAL_KEY) kopya = null;
+      if(!e || e.key === null || e.key === LOCAL_KEY){
+        kopya = null;
+        if(typeof onExternalWrite === 'function'){
+          try{ onExternalWrite(); }catch(err){}
+        }
+      }
     });
   }catch(e){ /* olay bağlanamadıysa kopya yalnız bu sekmede yaşar */ }
   function localWrite(all){
@@ -412,6 +432,7 @@ ESP.Store = (function(){
     exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
+    set onExternalWrite(fn){ onExternalWrite = fn; },
     get mode(){ return mode; },
   };
 })();
