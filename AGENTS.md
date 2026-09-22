@@ -21,14 +21,21 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
 
 1. **Kural motoru otoritedir.** Sayıyı ve kararı kod üretir; dil modeli
    yalnızca cümleye çevirir. Model kapalıyken hiçbir sistem kapanmaz.
+   Ajan kullanıcının **tercihini** değiştirebilir (hedef, plan, açık
+   bölümler, üslup) — ama yalnız kapalı bir katalogdan tipli bir aksiyonla
+   ve kodun doğrulamasından geçerek. **Ölçülmüş ya da hesaplanmış** bir
+   sayıyı (net, uyku ortalaması, sıralama tahmini) hiçbir ajan değiştiremez.
 2. **Eksik veri sıfır değildir.** Dört etiket: `ölçüldü / tahmin /
    hesaplandı / veri yok`. Etiketsiz sayı hiçbir katmana girmez.
 3. **Sıfır çalışma zamanı bağımlılığı.** Üç arayüzde çerçeve, paket,
    derleyici yok; HKM'de yalnız Python standart kütüphanesi. Playwright
    yalnız denetim betikleri için.
-4. **HKM'ye bağımlılık tek yönlüdür.** AYS/SPİ/ESP, HKM'nin var olduğunu
-   bilmez ve o kapalıyken bozulmaz. HKM hiçbir modüle **yazmaz**; teklif
-   yazar, modül kendi koduyla uygular (`HKM/core/intents.py`).
+4. **Modüller HKM'yi bilir ama ona bağımlı değildir.** AYS/SPİ/ESP,
+   HKM'nin üst patron (King) olduğunu bilir ve onunla konuşabilir; ama HKM
+   kapalıyken, yanıt vermezken ya da hata verirken hiçbiri bozulmaz,
+   yavaşlamaz, veri kaybetmez. HKM hiçbir modüle **yazmaz**; teklif yazar,
+   modül kendi koduyla uygular (`HKM/core/intents.py`). BAM, HKM'nin alt
+   modülüdür; beşinci bir sistem değildir.
 5. **Sınırlar:** SPİ teşhis koymaz ve doz önermez; ESP/AYS sertifika
    vermez, yetenek yargısı kurmaz, sonuç garantisi etmez.
 6. **XP karar vermez.** Seviye sistemi (`brand/seviye/`) yalnızca
@@ -40,6 +47,16 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    sorulur. Ölçülmemiş bir şey «temiz» diye raporlanmaz.
 8. **Kullanıcıya giden metin düzgün Türkçe'dir.** Kod yorumları ASCII
    olabilir; ekranda görünen cümle olamaz.
+9. **Aksiyonların üç seviyesi vardır.** Seviyeyi katalog belirler, model
+   değil:
+   - **küçük** — tek gün, tek kayıt (hedef, bir bloğun saati). Sormadan
+     uygulanır, ekranda «Geri al» kalır.
+   - **orta** — bir hafta ya da bir dönem (ara haftası, geçici süre
+     değişikliği, bölüm kapatma). Önizleme + tek onay.
+   - **büyük** — sınav değiştirmek, planı baştan kurmak. Ayrıntılı
+     önizleme + onay + geri dönüş noktası.
+   Geri alınamayan hiçbir aksiyon küçük sayılamaz. Hangi küçük türlerin
+   sormadan uygulanacağını kullanıcı ayarlar; ayar kapalıysa küçük de sorar.
 
 ## 2. Denetimler — birleştirmeden önce koşar
 

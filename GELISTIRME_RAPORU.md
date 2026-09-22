@@ -1129,7 +1129,7 @@ Bunlar bilinçli olarak önerilmiyor. Bir sonraki oturum bunları
 | **XP'ye seri (streak) sayacı eklemek** | Tatile çıkanı cezalandırır; deponun dokuz aylık ufkuyla çelişir; insanı sisteme değil sayaca bağlar. |
 | **XP'ye sıralama / rozet duvarı** | Tek kullanıcılı bir sistemde kiminle yarışılacak? |
 | **«XP'n düşük» uyarısı** | §1.2/6'yı doğrudan kırar: XP karar vermez. |
-| **Beşinci bir sistem eklemek** | Dördü de daha dolmadı. |
+| **Beşinci bir sistem eklemek** | Dördü de daha dolmadı. BAM bu yüzden HKM'nin **alt modülüdür** (`AGENTS.md` §1.4). |
 | **Çerçeve, paket, derleyici getirmek** | `AGENTS.md` §1.3 sözleşme. |
 | **Üç uygulamayı tek kökene toplamak** | `sunucu.py` baş yorumu: veri «taşınmış» görünür ve üçü tek 5 MB kotayı paylaşır. Paylaşım **derleme zamanında** olur, çalışma zamanında değil. |
 | **Ortak CSS'i çalışma zamanında `@import` ile paylaşmak** | Aynı gerekçe + ek ağ isteği + sıra riski. |

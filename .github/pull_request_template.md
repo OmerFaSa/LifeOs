@@ -21,6 +21,7 @@
 - [ ] Kural motoru otoritedir; model sayı üretmiyor
 - [ ] Eksik veri sıfır sayılmıyor, etiketi taşınıyor
 - [ ] Yeni çalışma zamanı bağımlılığı **yok**
-- [ ] HKM'ye bağımlılık hâlâ tek yönlü
+- [ ] Hiçbir modül HKM'ye bağımlı değil (HKM kapalıyken çalışıyor)
+- [ ] Yeni aksiyonun seviyesi katalogda (küçük/orta/büyük) ve geri alınabiliyor
 - [ ] Kullanıcıya giden metin düzgün Türkçe
 - [ ] Yeni davranışın testi var / düzeltilen hatayı yakalayan test var
