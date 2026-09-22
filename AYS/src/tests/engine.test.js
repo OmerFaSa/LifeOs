@@ -72,6 +72,35 @@
         });
       });
     });
+    it('yalnız TYT verisiyle sıra AYT varsayımını açıkça söyler', async function(){
+      /* `kind:'TYT'` iken sira yine SAY tablosundan okunuyor —
+         AYT'nin TYT ile AYNI duzeyde gelecegini VARSAYIYOR. Once bu
+         varsayim yalniz ekranin kucuk alt yazisinda duruyordu; rozet
+         yine de kesin bir hukum ("Hedef bandinda" gibi) kuruyordu. */
+      await withTodayAsync('2026-11-20', async () => {
+        await withExams([45, 45, 45], () => {
+          const est = C.estimateScore();
+          expect(est.kind).toBe('TYT');
+          expect(est.assumption).toBeTruthy();
+          expect(est.assumption).toContain('AYT');
+        });
+      });
+    });
+
+    it('AYT verisi de varsa varsayım cümlesi çıkmaz', async function(){
+      resetState();
+      for(let i = 0; i < 3; i++){
+        const d = U.iso(U.addDays(U.parse('2026-11-01'), i * 7));
+        await M.saveExam(examWithNet(d, 45, 'TYT'));
+        await M.saveExam(examWithNet(d, 30, 'AYT'));
+      }
+      await withTodayAsync('2026-11-20', async () => {
+        const est = C.estimateScore();
+        expect(est.kind).toBe('SAY');
+        expect(est.assumption).toBeFalsy();
+      });
+    });
+
     it('konum etiketi tanımlı bir bandı gösterir', async function(){
       await withTodayAsync('2026-11-20', async () => {
         await withExams([45, 45, 45], () => {

@@ -104,6 +104,31 @@
       const row = A.topicValue().find(r => r.topicId === top.id);
       expect(row.gap).toBe(0);
     });
+
+    it('hiç çalışılmamış konu "measured" DEĞİL "missing" taşır', function(){
+      /* Once hic calisilmamis bir konunun (`practice.accuracy == null`)
+         "kazanilan" alani sessizce 0 yaziliyordu — olculmus %0 dogruluk
+         ile HIC denenmemis olmak ayni etikete giriyordu. Ekrandaki
+         manset ("~X net açık") bu ikisini ayirmadan topluyordu. */
+      resetState();
+      const sub = R.SUBJECTS[0], top = sub.topics[0];
+      const row = A.topicValue().find(r => r.subjectId === sub.id && r.topicId === top.id);
+      expect(row.cert).toBe('missing');
+    });
+
+    it('en az bir kez çözülen konu "measured" taşır', function(){
+      resetState();
+      const sub = R.SUBJECTS[0], top = sub.topics[0];
+      const iso = U.todayISO();
+      S.days[iso] = { date:iso, dow:0, ritual:null,
+        paragraphTarget:0, paragraphActual:0, problemTarget:0, problemActual:0,
+        checklist:{}, note:'', sleepHours:null,
+        blocks:[{ id:'b1', slot:'Ana ders', subjectId:sub.id, topicId:top.id,
+          targetMin:40, targetQ:20, status:'done',
+          actualMin:40, actualQ:20, correctQ:14, skipReason:null, startedAt:null }] };
+      const row = A.topicValue().find(r => r.subjectId === sub.id && r.topicId === top.id);
+      expect(row.cert).toBe('measured');
+    });
   });
 
   describe('Sıra geçmişi ve unutma eğrisi', function(){

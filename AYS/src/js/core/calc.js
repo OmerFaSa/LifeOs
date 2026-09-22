@@ -571,6 +571,18 @@ R.Calc = (function(){
       targetRank:target,
       position,
       meta:R.SCORING.positions.find(p => p.key === position) || R.SCORING.positions[4],
+      /* AYT denemesi yokken (`kind === 'TYT'`) sira yine de SAY
+         tablosundan okunuyor: `rawScore` TYT-only puanı SAY olcegine
+         tasiyor ve bu, AYT yarisinin TYT ile AYNI duzeyde gelecegini
+         VARSAYIYOR — hicbir yerde olculmemis bir varsayim. Once bunu
+         yalniz alt satirdaki kucuk «yalniz TYT» yazisi soyluyordu; ama
+         hemen ustunde duran rozet ("Hedef bandinda" gibi) yine de kesin
+         bir hukum kuruyordu. Ekran bu alani acikca gostermeli. */
+      assumption:raw.kind === 'TYT'
+        ? 'Bu bant yalnız TYT netinden çıktı; AYT netinin TYT ile aynı '
+          + 'düzeyde geleceği varsayıldı. AYT denemesi eklenince bant '
+          + 'gerçek karşılığını alır.'
+        : null,
     };
   }
 

@@ -274,11 +274,20 @@ R.Screens.analytics = (function(){
 
   function valueTab(){
     const rows = A().topicValue(16);
-    const totalGap = U.round(U.sum(rows.map(r => r.gap)), 1);
+    /* «~X net açık» ONCE etiketsizdi: hic calisilmamis bir konunun
+       ("veri yok") boslugu ile olculmus %0 dogrulugun boslugu AYNI
+       toplama giriyordu ve rozet bunu kesin bir sayiymis gibi
+       sunuyordu. Artik yalnizca DOKUNULMUS konular toplama girer;
+       dokunulmamis olanlarin sayisi ayrica soylenir. */
+    const dokunulmus = rows.filter(r => r.cert === 'measured');
+    const dokunulmamis = rows.length - dokunulmus.length;
+    const totalGap = U.round(U.sum(dokunulmus.map(r => r.gap)), 1);
     return K.Grid([
       K.Span(8, K.Card({
         title:'Konu net katkısı', sub:'Bu konu kapanırsa yaklaşık kaç net gelir',
-        badge:K.Badge({ label:'~'+U.fmtNet(totalGap)+' net açık', tone:'warn' }),
+        badge:K.Badge({ label:'~'+U.fmtNet(totalGap)+' net açık'
+          + (dokunulmamis ? ' · ' + dokunulmamis + ' konu hiç çalışılmadı' : ''),
+          tone:'warn' }),
         body:html`
           ${K.Table({ tight:true,
             headers:['Konu', 'Ders', { label:'Potansiyel', num:true },
@@ -287,13 +296,17 @@ R.Screens.analytics = (function(){
               html`<span class="small">${r.topicName}</span>`,
               html`<span class="tiny dim">${r.subjectName}</span>`,
               html`<span class="num dim">${U.fmtNet(r.potential)}</span>`,
-              html`<span class="num">${U.fmtNet(r.earned)}</span>`,
+              r.cert === 'missing'
+                ? html`<span class="num dim tiny">veri yok</span>`
+                : html`<span class="num">${U.fmtNet(r.earned)}</span>`,
               html`<b class="num ${r.gap > 1 ? 'is-down' : ''}">${U.fmtNet(r.gap)}</b>`,
             ]) })}
           <div class="mt-12">${K.Notice({ tone:'info',
             body:'Potansiyel, dersin soru sayısı ile konunun frekans payından çıkar. '
                + 'Kazanılan, kapanış durumu ve gerçek çözüm doğruluğundan gelir. '
-               + 'Aradaki fark, o konuya ayrılacak zamanın karşılığıdır.' })}</div>`,
+               + 'Aradaki fark, o konuya ayrılacak zamanın karşılığıdır. Manşetteki '
+               + 'toplam yalnız en az bir kez çalışılmış konuları sayar; hiç '
+               + 'çalışılmamış konunun boşluğu tahmindir ve toplama girmez.' })}</div>`,
       })),
       K.Span(4, raw(UI.rail(['closure', 'risk', 'second-check']))),
     ]);

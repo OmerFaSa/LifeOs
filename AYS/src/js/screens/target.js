@@ -98,6 +98,8 @@ R.Screens.target = (function(){
         </div>
 
         <div class="mt-12">${K.Notice({ tone:tone === 'ok' ? 'ok' : 'info', body:est.meta.note })}</div>
+        ${when(est.assumption, () => html`<div class="mt-8">${K.Notice({
+          tone:'warn', body:est.assumption })}</div>`)}
 
         ${K.Cols(3, [
           K.Stat({ label:'TYT medyan', value:U.fmtNet(est.tytMedian) }),

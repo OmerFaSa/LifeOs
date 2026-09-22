@@ -51,7 +51,14 @@ LIFEOS.TANITIM = {
     'Küçük adımlarla büyük bir sen — verini bağla, profilini kur, yola çık.',
   ],
   esp:[
-    'Görünmeyeni görür, potansiyeli keşfederiz.',
+    /* «Potansiyeli keşfederiz» bir yetenek YARGISIDIR — bir sonraki
+       cumle «etiketlemeyiz» diyor ve ikisi celisiyordu. Diger uc
+       sistemin ilk cumlesi (AYS «gelisimi olceriz», SPI «veride
+       gorunur», HKM «karara donusur») hicbiri bir HUKUM kurmuyor,
+       yalniz OLCUYOR. ESP'ninki de oyle olmali: gorunmeyen sey
+       potansiyel degil, ILERLEME — ve ilerleme olculur, tahmin
+       edilmez. */
+    'Görünmeyeni görür, gelişimini ölçeriz.',
     'Teşhis koymayız, sertifika vermeyiz, etiketlemeyiz, senin yerine karar almayız.',
     'Verini paylaş, keşfetmeye başla — bağla, çözümle, sonucu gör.',
   ],

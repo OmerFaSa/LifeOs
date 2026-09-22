@@ -9284,7 +9284,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'111c13a', at:'2026-09-22 10:11', dirty:true };
+R.BUILD = { id:'9a8cbdb', at:'2026-09-22 14:03', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -9546,7 +9546,14 @@ LIFEOS.TANITIM = {
     'Küçük adımlarla büyük bir sen — verini bağla, profilini kur, yola çık.',
   ],
   esp:[
-    'Görünmeyeni görür, potansiyeli keşfederiz.',
+    /* «Potansiyeli keşfederiz» bir yetenek YARGISIDIR — bir sonraki
+       cumle «etiketlemeyiz» diyor ve ikisi celisiyordu. Diger uc
+       sistemin ilk cumlesi (AYS «gelisimi olceriz», SPI «veride
+       gorunur», HKM «karara donusur») hicbiri bir HUKUM kurmuyor,
+       yalniz OLCUYOR. ESP'ninki de oyle olmali: gorunmeyen sey
+       potansiyel degil, ILERLEME — ve ilerleme olculur, tahmin
+       edilmez. */
+    'Görünmeyeni görür, gelişimini ölçeriz.',
     'Teşhis koymayız, sertifika vermeyiz, etiketlemeyiz, senin yerine karar almayız.',
     'Verini paylaş, keşfetmeye başla — bağla, çözümle, sonucu gör.',
   ],
@@ -18357,6 +18364,18 @@ R.Calc = (function(){
       targetRank:target,
       position,
       meta:R.SCORING.positions.find(p => p.key === position) || R.SCORING.positions[4],
+      /* AYT denemesi yokken (`kind === 'TYT'`) sira yine de SAY
+         tablosundan okunuyor: `rawScore` TYT-only puanı SAY olcegine
+         tasiyor ve bu, AYT yarisinin TYT ile AYNI duzeyde gelecegini
+         VARSAYIYOR — hicbir yerde olculmemis bir varsayim. Once bunu
+         yalniz alt satirdaki kucuk «yalniz TYT» yazisi soyluyordu; ama
+         hemen ustunde duran rozet ("Hedef bandinda" gibi) yine de kesin
+         bir hukum kuruyordu. Ekran bu alani acikca gostermeli. */
+      assumption:raw.kind === 'TYT'
+        ? 'Bu bant yalnız TYT netinden çıktı; AYT netinin TYT ile aynı '
+          + 'düzeyde geleceği varsayıldı. AYT denemesi eklenince bant '
+          + 'gerçek karşılığını alır.'
+        : null,
     };
   }
 
@@ -18902,12 +18921,20 @@ R.Analytics = (function(){
         const st = M.topicState(sub.id, t.id);
         const potential = U.round((sub.questions || 0) * ((W[t.freq] || 0.55) / weightSum), 2);
         const practice = calc.topicPractice(sub.id, t.id);
+        /* Hic calisilmamis konu (`practice.accuracy == null`) "kazanilan
+           sifir" SAYILMAZ — bu, olculmus %0 dogrulukla HICBIR ZAMAN
+           denenmemis olmayi ayni etikete koyardi. `earned` siralama icin
+           yine 0'dan turer (hic dokunulmamis konu, en cok boslugu olan
+           konudur ve bu SIRALAMADA dogru bir varsayimdir) ama satir
+           `cert:'missing'` tasir; ekran bunu TOPLAMA KATMADAN once
+           gorebilsin. */
+        const dokunuldu = st.state === 'closed' || practice.accuracy != null;
         const earned = st.state === 'closed' ? potential
           : practice.accuracy != null ? U.round(potential * practice.accuracy / 100, 2)
           : 0;
         out.push({
           subjectId:sub.id, subjectName:sub.name, topicId:t.id, topicName:t.name,
-          freq:t.freq, state:st.state,
+          freq:t.freq, state:st.state, cert:dokunuldu ? 'measured' : 'missing',
           potential, earned, gap:U.round(potential - earned, 2),
         });
       });
@@ -37132,6 +37159,8 @@ R.Screens.target = (function(){
         </div>
 
         <div class="mt-12">${K.Notice({ tone:tone === 'ok' ? 'ok' : 'info', body:est.meta.note })}</div>
+        ${when(est.assumption, () => html`<div class="mt-8">${K.Notice({
+          tone:'warn', body:est.assumption })}</div>`)}
 
         ${K.Cols(3, [
           K.Stat({ label:'TYT medyan', value:U.fmtNet(est.tytMedian) }),
@@ -37912,11 +37941,20 @@ R.Screens.analytics = (function(){
 
   function valueTab(){
     const rows = A().topicValue(16);
-    const totalGap = U.round(U.sum(rows.map(r => r.gap)), 1);
+    /* «~X net açık» ONCE etiketsizdi: hic calisilmamis bir konunun
+       ("veri yok") boslugu ile olculmus %0 dogrulugun boslugu AYNI
+       toplama giriyordu ve rozet bunu kesin bir sayiymis gibi
+       sunuyordu. Artik yalnizca DOKUNULMUS konular toplama girer;
+       dokunulmamis olanlarin sayisi ayrica soylenir. */
+    const dokunulmus = rows.filter(r => r.cert === 'measured');
+    const dokunulmamis = rows.length - dokunulmus.length;
+    const totalGap = U.round(U.sum(dokunulmus.map(r => r.gap)), 1);
     return K.Grid([
       K.Span(8, K.Card({
         title:'Konu net katkısı', sub:'Bu konu kapanırsa yaklaşık kaç net gelir',
-        badge:K.Badge({ label:'~'+U.fmtNet(totalGap)+' net açık', tone:'warn' }),
+        badge:K.Badge({ label:'~'+U.fmtNet(totalGap)+' net açık'
+          + (dokunulmamis ? ' · ' + dokunulmamis + ' konu hiç çalışılmadı' : ''),
+          tone:'warn' }),
         body:html`
           ${K.Table({ tight:true,
             headers:['Konu', 'Ders', { label:'Potansiyel', num:true },
@@ -37925,13 +37963,17 @@ R.Screens.analytics = (function(){
               html`<span class="small">${r.topicName}</span>`,
               html`<span class="tiny dim">${r.subjectName}</span>`,
               html`<span class="num dim">${U.fmtNet(r.potential)}</span>`,
-              html`<span class="num">${U.fmtNet(r.earned)}</span>`,
+              r.cert === 'missing'
+                ? html`<span class="num dim tiny">veri yok</span>`
+                : html`<span class="num">${U.fmtNet(r.earned)}</span>`,
               html`<b class="num ${r.gap > 1 ? 'is-down' : ''}">${U.fmtNet(r.gap)}</b>`,
             ]) })}
           <div class="mt-12">${K.Notice({ tone:'info',
             body:'Potansiyel, dersin soru sayısı ile konunun frekans payından çıkar. '
                + 'Kazanılan, kapanış durumu ve gerçek çözüm doğruluğundan gelir. '
-               + 'Aradaki fark, o konuya ayrılacak zamanın karşılığıdır.' })}</div>`,
+               + 'Aradaki fark, o konuya ayrılacak zamanın karşılığıdır. Manşetteki '
+               + 'toplam yalnız en az bir kez çalışılmış konuları sayar; hiç '
+               + 'çalışılmamış konunun boşluğu tahmindir ve toplama girmez.' })}</div>`,
       })),
       K.Span(4, raw(UI.rail(['closure', 'risk', 'second-check']))),
     ]);

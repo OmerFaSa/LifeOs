@@ -236,12 +236,20 @@ R.Analytics = (function(){
         const st = M.topicState(sub.id, t.id);
         const potential = U.round((sub.questions || 0) * ((W[t.freq] || 0.55) / weightSum), 2);
         const practice = calc.topicPractice(sub.id, t.id);
+        /* Hic calisilmamis konu (`practice.accuracy == null`) "kazanilan
+           sifir" SAYILMAZ — bu, olculmus %0 dogrulukla HICBIR ZAMAN
+           denenmemis olmayi ayni etikete koyardi. `earned` siralama icin
+           yine 0'dan turer (hic dokunulmamis konu, en cok boslugu olan
+           konudur ve bu SIRALAMADA dogru bir varsayimdir) ama satir
+           `cert:'missing'` tasir; ekran bunu TOPLAMA KATMADAN once
+           gorebilsin. */
+        const dokunuldu = st.state === 'closed' || practice.accuracy != null;
         const earned = st.state === 'closed' ? potential
           : practice.accuracy != null ? U.round(potential * practice.accuracy / 100, 2)
           : 0;
         out.push({
           subjectId:sub.id, subjectName:sub.name, topicId:t.id, topicName:t.name,
-          freq:t.freq, state:st.state,
+          freq:t.freq, state:st.state, cert:dokunuldu ? 'measured' : 'missing',
           potential, earned, gap:U.round(potential - earned, 2),
         });
       });
