@@ -28,18 +28,36 @@ R.Screens.solve = (function(){
   let checkBusy = false;
   let topicRef = '';       // seçili ders::konu
   let topicQuery = '';     // konu arama kutusuna yazılan
+  /* GÖNDERİLEN sorunun metni ve fotoğraftan mı geldiği. `#q-text`in
+     kendisine güvenilemez: `q-solve` sırasında `busy=true` olup
+     `R.App.render()` çağrılınca textarea DEĞER TAŞIMADAN yeniden
+     çizilir (K.Textarea'ya `value` verilmez) ve yazılan metin DOM'dan
+     silinir. O ana kadar `questionText()` metin yoksa çözümün kendi
+     metnine düşüyordu — ikinci modele soru yerine ÇÖZÜM gönderiliyor,
+     geçmişe de soru yerine çözüm kaydediliyordu. */
+  let submittedQuestion = '';
+  let submittedByImage = false;
   /* Hata EKRAN DURUMUNDA tutulur, DOM'a yazılmaz: #q-out'a yazılan uyarı,
      hemen ardından gelen R.App.render() ile siliniyordu ve her başarısız
      çözüm sessizce geçiyordu. */
   let failure = null;      // { code }
 
-  /* Denetime ve kayda giden soru metni: kullanıcı yazdıysa o, fotoğraftan
-     geldiyse modelin okuyup yazdığı ilk satırlar. */
+  /* Denetime ve kayda giden soru metni: kullanıcı ŞU AN yazıyorsa o,
+     yoksa ÇÖZÜLEN soruya GÖNDERİLDİĞİ AN kaydedilen metin, yoksa (yalnız
+     fotoğraftan çözüldüyse) modelin okuyup yazdığı ilk satırlar.
+
+     ÖNEMLİ: OCR yedeği (`result.text`ten "Soru:" satırını kesmek)
+     YALNIZ fotoğraftan çözülen sorularda anlamlıdır — orada model
+     gerçekten okuduğu soruyu geri yazar. Metin olarak gönderilmiş bir
+     soruda modelin YANITI "Soru:" diye başlamaz; `submittedByImage`
+     yanlışsa bu yedek hiç denenmez, çünkü denenirse çözümün kendisi
+     soru sanılır. */
   function questionText(){
     const el = document.getElementById('q-text');
     const typed = el ? el.value.trim() : '';
     if(typed) return typed;
-    if(!result) return '';
+    if(submittedQuestion) return submittedQuestion;
+    if(!result || !submittedByImage) return '';
     const m = result.text.match(/^\s*Soru[:\s][\s\S]{0,600}?(?=\n\s*\n)/);
     return m ? m[0].trim() : result.text.slice(0, 600);
   }
@@ -374,6 +392,24 @@ R.Screens.solve = (function(){
           input:K.Input({ id:'q-no', placeholder:'ör. 42' }) }),
       ]),
       when(m.trap, () => K.Notice({ tone:'info', title:'Tuzak:', body:m.trap })),
+
+      /* «Yanlış defterine de ekle» yalnız ETİKET SEÇİMİ ve KISA İLKE ile
+         çalışır — ikisi de once sessizce dolduruluyordu:
+           tag        HER ZAMAN 'K' (konu eksiği) yazılıyordu, hangi tür
+                      hata olursa olsun; `Calc.errorPareto()` bu yüzden
+                      hep aynı etiketi «baskın» buluyordu.
+           principle  `rec.solution`in ilk 400 karakteriydi — depo
+                      kuralı (`R.NOTEBOOK_FIELDS`) «en fazla 2-3 satır,
+                      tam çözüm kopyalanmaz» diyor; burada kopyalanıyordu.
+         İkisi de artık kullanıcıdan gelir. */
+      K.Field({ label:'Hata türü', hint:'yanlış defterine eklenecekse gerekir',
+        input:K.Select({ id:'q-tag', value:'K',
+          options:Object.keys(R.ERROR_TAGS).map(k => ({
+            value:k, label:k + ' — ' + R.ERROR_TAGS[k].name })) }) }),
+      K.Field({ label:'Doğru ilke', hint:'2-3 cümle yeter — tam çözüm buraya kopyalanmaz',
+        input:K.Textarea({ id:'q-principle', rows:2,
+          placeholder:'Bu tür bir soruda dikkat edilecek şey…' }) }),
+
       K.Row([
         K.Button({ label:'Kaydet', icon:'check', tone:'primary', act:'q-save' }),
         K.Button({ label:'Yanlış defterine de ekle', size:'sm', act:'q-save-error' }),
@@ -581,6 +617,7 @@ R.Screens.solve = (function(){
     async 'q-reset'(){
       image = null; result = null; failure = null;
       thread = []; check = null; topicRef = ''; topicQuery = '';
+      submittedQuestion = ''; submittedByImage = false;
       await R.App.render();
     },
 
@@ -598,6 +635,10 @@ R.Screens.solve = (function(){
         UI.toast('Önce soruyu yaz ya da fotoğrafını ekle');
         return;
       }
+      /* DOM re-render'dan ÖNCE, kalıcı degiskene alınır: busy=true'dan
+         sonraki render metni #q-text'ten siler. */
+      submittedQuestion = text.trim();
+      submittedByImage = !!image && !submittedQuestion;
       busy = true;
       thread = []; check = null; topicRef = ''; topicQuery = '';
       result = null; failure = null;
@@ -746,6 +787,28 @@ R.Screens.solve = (function(){
   async function saveRecord(alsoError){
     if(!result) return;
     const val = id => { const e = document.getElementById(id); return e ? String(e.value).trim() : ''; };
+
+    if(alsoError){
+      /* DENETİMİN «HATALI» DEDİĞİ ÇÖZÜM DOĞRU İLKE OLARAK GİREMEZ.
+         `check.durum==='ayrildi'` ayrılığı, `judge.winner` hakemi
+         söyler: 'A' bu çözümdür. 'A' değilse (B kazandı ya da hiçbiri)
+         bu çözüm BİLİNEN YANLIŞTIR — yine de "kaydet" ile geçmişe
+         yazılabilir ama yanlış defterine "doğru ilke" diye giremez. */
+      const j = check && check.durum === 'ayrildi' ? check.judge : null;
+      if(j && j.winner && j.winner !== 'A'){
+        UI.toast('Bağımsız denetim bu çözümü hatalı buldu; yanlış '
+          + 'defterine "doğru ilke" olarak eklenemez. Önce doğru çözümü bul.');
+        return;
+      }
+      /* Tam çözüm kopyalanmaz (`R.NOTEBOOK_FIELDS`): ilke kullanıcıdan
+         gelir, boşsa uydurulmaz. */
+      if(!val('q-principle')){
+        UI.toast('Yanlış defterine eklemek için kısa bir ilke yaz — '
+          + 'tam çözüm otomatik kopyalanmaz.');
+        return;
+      }
+    }
+
     /* Konu: senin seçimin varsa o, yoksa sistemin tahmini. */
     const guess = (result.meta && result.meta.topicId)
       ? result.meta.subjectId + '::' + result.meta.topicId : '';
@@ -782,14 +845,19 @@ R.Screens.solve = (function(){
 
     if(alsoError){
       /* Yanlis defteri ayri bir kayittir ve kendi semasi vardir; cozum
-         kaydindan turetilir ama onun yerine gecmez. */
+         kaydindan turetilir ama onun yerine gecmez.
+
+         `tag` ve `principle` ARTIK KULLANICIDAN gelir. Once tag hep 'K'
+         idi (hangi hata olursa olsun) ve `Calc.errorPareto()` bu yuzden
+         hep ayni etiketi "baskin" buluyordu; `principle` de cozumun ilk
+         400 karakteriydi — depo kurali "tam cozum kopyalanmaz" diyor. */
       const err = {
         id:U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
         examId:null, examDate:(rec.at || '').slice(0, 10), publisher:'',
         testName:rec.topicName || 'Soru çözümü', questionNo:'', status:'Yanlış',
-        tag:'K', seconds:rec.seconds,
+        tag:R.ERROR_TAGS[val('q-tag')] ? val('q-tag') : 'K', seconds:rec.seconds,
         rootCause:rec.trap || '',
-        principle:String(rec.solution || '').slice(0, 400),
+        principle:val('q-principle').slice(0, 400),
         similar:'', recipe:'',
         topicRef:ref, subjectId:rec.subjectId, topicId:rec.topicId,
         topic:rec.topicName || '',
