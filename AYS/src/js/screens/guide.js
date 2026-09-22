@@ -501,6 +501,29 @@ R.Screens.guide = (function(){
         <p class="tiny dim mt-8">${durum}</p>` });
   }
 
+  /* HAFIZAM — sistemin senin hakkinda hatirladiklari, katmaniyla.
+     Kimse gizli bir sey hatirlamaz: her kayit burada gorunur ve silinir. */
+  function hafizaCard(){
+    const H = window.LIFEOS.Hafiza;
+    const l = R.Hafizam.etkin();
+    return K.Card({ title:'Hafızam', sub:'Ofisin senin hakkında hatırladıkları — yalnız bu cihazda',
+      body:html`
+        ${when(!l.length, () => html`<p class="small dim">Henüz bir şey yok. Aşağıya yaz ya da
+          sohbette «hatırla: sabahları daha verimliyim» de.</p>`)}
+        <div class="stack-xs">${map(l, x => html`
+          <div class="row gap-8" style="justify-content:space-between;align-items:flex-start">
+            <span class="small"><span class="tiny dim">${H.KATMANLAR[x.katman].ad}</span><br/>${x.metin}</span>
+            ${K.Button({ label:'Unut', size:'sm', tone:'ghost', act:'hafiza-unut', data:{ 'data-id':x.id } })}
+          </div>`)}</div>
+        <div class="row gap-8 mt-10">
+          ${K.Input({ id:'hafiza-yeni', class:'grow', aria:'Hatırlanacak şey',
+            placeholder:'Örn. Pazar günleri çalışmam' })}
+          ${K.Button({ label:'Hatırla', size:'sm', tone:'primary', act:'hafiza-ekle' })}
+        </div>
+        <p class="tiny dim mt-8">Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın,
+          «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.</p>` });
+  }
+
   function settingsTab(){
     return K.Grid([
       K.Span(6, K.Stack([
@@ -524,6 +547,8 @@ R.Screens.guide = (function(){
               act:'bolum-toggle', data:{ 'data-id':b.id } }))}</div>
             <p class="tiny dim mt-8">Bugün, Hafta, Plan, Dersler, Deneme, Tekrar, İlerleme,
               Ofis ve Rehber gizlenemez. Patron’a da söyleyebilirsin: «sınama bölümünü kapat».</p>` })),
+
+        when(R.Hafizam, () => hafizaCard()),
 
         K.Card({ title:'Görünüm', sub:'Tema ve renk bu cihazda saklanır',
           body:html`
@@ -661,6 +686,17 @@ R.Screens.guide = (function(){
   }
 
   const handle = {
+    async 'hafiza-ekle'(){
+      const el = document.getElementById('hafiza-yeni');
+      const r = await R.Hafizam.ekle(el ? el.value : '', { katman:'soz', kaynak:'kullanici' });
+      UI.toast(r.ok ? 'Hatırlıyorum' : r.why);
+      if(r.ok) R.App.render();
+    },
+    async 'hafiza-unut'(el){
+      const r = await R.Hafizam.unut(el.dataset.id);
+      UI.toast(r.ok ? 'Unuttum' : r.why);
+      R.App.render();
+    },
     /* Ayarlardan elle acip kapatmak da oneri kutusundan gecer: ofiste
        «Geri al» ile geri alinabilir kalir. Kullanici kutuyu kendisi
        isaretledigi icin onay burada verilmis sayilir. */

@@ -1196,6 +1196,11 @@ R.Model = (function(){
        kurarken aradaysa bos kurmali. */
     if(R.Istisna) await R.Istisna.yukle();
     if(R.Bolum) await R.Bolum.yukle();
+    /* Hafiza bu modulun KENDI deposundadir: HKM kapaliyken de hatirlanir. */
+    if(window.LIFEOS && LIFEOS.Hafiza){
+      R.Hafizam = R.Hafizam || LIFEOS.Hafiza.kur({ store:() => R.Store, durum:() => R.S });
+      await R.Hafizam.yukle();
+    }
     if(R.Friction) await R.Friction.load();
     if(R.Calib) await R.Calib.load();
     if(R.Signals) await R.Signals.load();

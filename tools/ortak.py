@@ -174,6 +174,11 @@ DOSYALAR = {
     # kaynakta; damganin hangi anahtarda durdugu her sistemde kalir.
     "yedek.js":      "js/core",
     "yedek.test.js": "tests",
+    # HAFIZA — dort katman, yazma izni, komutlar. Uc arayuzde de ayni
+    # olmak zorunda: «model hafizaya yazamaz» sozu birinde gevserse,
+    # halusinasyon o arayuzde kalici olur.
+    "hafiza.js":      "js/core",
+    "hafiza.test.js": "tests",
     # MODEL KATMANI — yalniz SPİ ve ESP (bkz. YALNIZ).
     "llm.js":        "js/core",
 }

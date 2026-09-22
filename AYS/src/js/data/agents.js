@@ -317,7 +317,14 @@ R.OFFICE_PROMPTS = {
       + (tone ? R.PROMPTS.toneLine(tone) + '\n' : '')
       + '\n' + R.OFFICE_PROMPTS.SPEECH + '\n'
       + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin. Başlık, madde işareti ve emoji yok. '
-      + 'En fazla ' + limit + ' cümle. Sayıları verildiği gibi kullan, yeniden hesaplama.';
+      + 'En fazla ' + limit + ' cümle. Sayıları verildiği gibi kullan, yeniden hesaplama.'
+      /* HAFIZA (brand/ortak/hafiza.js): kullanicinin «hatirla» dedigi ve
+         kural motorunun kaydettigi tercihler, katman etiketiyle. Ajan
+         bunlari DIKKATE ALIR; degistiremez, hafizaya yazamaz. */
+      + (function(){
+        const h = R.Hafizam ? R.Hafizam.baglam() : '';
+        return h ? '\n\n' + h : '';
+      })();
   },
 
   /* ---------- sohbet ----------

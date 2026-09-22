@@ -85,6 +85,12 @@ R.Screens.team = (function(){
   }
 
   async function komutIsle(agent, question){
+    /* Hafiza komutu («hatirla: …», «hafizam», «3 unut») once: cevabi kural
+       motoru yazar, model cagrilmaz ve hafizaya model yazamaz. */
+    if(R.Hafizam){
+      const h = await R.Hafizam.komutIsle(question, { kapsam:'hepsi' });
+      if(h){ await cevapYaz(agent, h.text); return true; }
+    }
     if(!R.Komut) return false;
     const kisa = R.Komut.kisaCevap(question);
     if(kisa === 'geri'){
