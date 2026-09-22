@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'23386ac', at:'2026-09-22 20:44', dirty:true };
+SP.BUILD = { id:'4102d66', at:'2026-09-22 21:06', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13799,6 +13799,7 @@ SP.Model = (function(){
     /* Oneri kutusu: bekleyen bir oneri acilista gorunur kalmali,
        yoksa kullanici onayladigini sanip onaylamamis olur. */
     if(SP.Proposals) await SP.Proposals.load();
+    if(SP.Bolum) await SP.Bolum.yukle();
 
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
@@ -26278,6 +26279,99 @@ SP.Quick = (function(){
   return { parse, apply, parseVital, parseMove, VITAL_FIELDS };
 })();
 
+/* ==== js/core/bolum.js ==== */
+/* BÖLÜM GİZLEME — SPİ'yi kullanıcının hayatına göre daraltmak.
+
+   Herkes her alanı izlemez: bütçe tutmayan birine Finans'ı, mutfakla
+   ilgilenmeyene Mutfak'ı göstermek gezinmeyi uzatır ve boş ekran «yapmadığın
+   iş» gibi durur. Gizlenen bölüm:
+
+     · gezinmede, alt sekmelerde ve komut paletinde görünmez,
+     · adresi açılırsa Günlük'e yönlenir,
+     · ama VERİSİ SİLİNMEZ: geri açıldığında her şey yerindedir.
+
+   ÇEKİRDEK GİZLENEMEZ. Günlük (vital), Testler (tahlil), Ofis, Hane ve
+   Rehber sistemin kendisidir. Liste AÇIK yazılır.
+
+   Açıp kapamak ORTA seviyeli bir aksiyondur (AGENTS.md §1.9,
+   core/proposals.js `bolum-ac-kapa`). Konuşarak da istenebilir: «finans
+   bölümünü kapat»; hangi bölüm olduğu belli değilse SORULUR. */
+
+window.SP = window.SP || {};
+
+SP.Bolum = (function(){
+  const STORE = 'meta/bolumler';
+
+  const GIZLENEBILIR = [
+    { id:'meals',   ad:'Öğünler', takma:['öğün', 'beslenme', 'besin'] },
+    { id:'kitchen', ad:'Mutfak',  takma:['mutfak', 'tarif'] },
+    { id:'move',    ad:'Hareket', takma:['hareket', 'antrenman', 'spor', 'egzersiz'] },
+    { id:'basket',  ad:'Finans',  takma:['finans', 'bütçe', 'para'] },
+    { id:'rutbe',   ad:'Rütbe',   takma:['rütbe', 'seviye', 'xp'] },
+  ];
+  const BY_ID = GIZLENEBILIR.reduce((m, b) => { m[b.id] = b; return m; }, {});
+
+  function harita(){
+    const m = SP.S && SP.S.bolumGizli;
+    return (m && typeof m === 'object' && !Array.isArray(m)) ? m : {};
+  }
+
+  function gizli(route){ return !!BY_ID[route] && harita()[route] === true; }
+
+  async function yukle(){
+    let doc = null;
+    try{ doc = await SP.Store.get(STORE); }catch(e){ doc = null; }
+    const g = (doc && doc.gizli && typeof doc.gizli === 'object' && !Array.isArray(doc.gizli)) ? doc.gizli : {};
+    const temiz = {};
+    Object.keys(g).forEach(id => { if(BY_ID[id] && g[id] === true) temiz[id] = true; });
+    SP.S.bolumGizli = temiz;
+    return temiz;
+  }
+
+  async function set(route, acik){
+    if(!BY_ID[route]) return { ok:false, error:'Bu bölüm gizlenemez.' };
+    const m = Object.assign({}, harita());
+    if(acik) delete m[route]; else m[route] = true;
+    SP.S.bolumGizli = m;
+    await SP.Store.set(STORE, { gizli:m });
+    return { ok:true };
+  }
+
+  function liste(){ return GIZLENEBILIR.map(b => Object.assign({ acik:!gizli(b.id) }, b)); }
+
+  /* ----------------------------------------------------- konuşarak */
+
+  const HARF = 'a-zçğıöşü';
+  /* «istemiyorum» BİLEREK yok: «öğün atlamak istemiyorum», «para harcamak
+     istemiyorum» sağlık sohbetinde sık geçer ve bölüm isteği değildir. */
+  const KAPAT_RE = /(kapat|kapansın|gizle|gizlensin|kullanmıyorum|kullanmayacağım|kaldır)/;
+  const AC_RE = new RegExp('((?<![' + HARF + '])aç(?![' + HARF + '])|açılsın|geri getir|göster|tekrar aç|geri aç)');
+
+  function anla(text){
+    const metin = String(text || '').trim();
+    const t = metin.toLocaleLowerCase('tr');
+    const out = { oneriler:[], sorular:[], komut:false };
+    const kapat = KAPAT_RE.test(t);
+    const ac = !kapat && AC_RE.test(t);
+    if(!kapat && !ac) return out;
+    const idler = GIZLENEBILIR.filter(b => b.takma.some(a => t.indexOf(a) >= 0)).map(b => b.id);
+    if(!idler.length){
+      if(/bölüm/.test(t)){
+        out.sorular.push({ metin, soru:'Hangi bölümü ' + (kapat ? 'gizleyeyim' : 'açayım')
+          + '? «Öğünler», «Mutfak», «Hareket», «Finans» ya da «Rütbe» diyebilirsin.' });
+        out.komut = true;
+      }
+      return out;
+    }
+    idler.forEach(id => out.oneriler.push({ action:'bolum-ac-kapa',
+      params:{ bolum:id, acik:kapat ? 0 : 1 }, metin }));
+    out.komut = true;
+    return out;
+  }
+
+  return { STORE, GIZLENEBILIR, BY_ID, gizli, yukle, set, liste, anla };
+})();
+
 /* ==== js/core/proposals.js ==== */
 /* ÖNERİ KUTUSU — ofisin sisteme dokunabildiği tek kapı.
 
@@ -26287,10 +26381,13 @@ SP.Quick = (function(){
      ajan önerir → kural motoru DOĞRULAR → sen ONAYLARSIN
                  → motor uygular → geri alınabilir
 
-   Onaysız hiçbir şey değişmez. Bu dosyada «otomatik uygula» diye bir
-   yol YOKTUR ve olmamalıdır: ofisin değeri önerisinde, yetkisinde
-   değil. Sağlık verisinde yanlış bir kayıt, eksik bir kayıttan
-   kötüdür — çünkü eksik kayıt kendini belli eder, yanlış kayıt etmez.
+   SEVİYE (AGENTS.md §1.9): kullanıcının KENDİ cümlesinden kural
+   motorunun çıkardığı KÜÇÜK kayıt (tek ölçüm, bir öğün, bir seans)
+   sormadan yazılır ve geri alınabilir kalır. Tahlil değeri ve bölüm
+   gizleme ORTA'dır, her zaman sorulur; modelin yorumladığı cümle de
+   onay bekler. Sağlık verisinde yanlış bir kayıt, eksik bir kayıttan
+   kötüdür — eksik kayıt kendini belli eder, yanlış kayıt etmez. Karar
+   tek yerde verilir: otomatikMi().
 
    ─────────────────────────────────────────────────────────────────
 
@@ -26491,6 +26588,32 @@ SP.Proposals = (function(){
         });
         await M.saveLab(rec);
       },
+    },
+
+    /* ---------------------------------------------- bölüm aç / gizle */
+    'bolum-ac-kapa':{
+      level:'orta',
+      label:'Bölümü aç / gizle',
+      alanlar:['bolum', 'acik'],
+      check(p){
+        const b = SP.Bolum && SP.Bolum.BY_ID[p.bolum];
+        if(!b) return fail('Bu bölüm gizlenemez ya da sistemde yok.');
+        const acik = Number(p.acik) === 1;
+        if(acik === !SP.Bolum.gizli(p.bolum)) return fail(b.ad + ' zaten ' + (acik ? 'açık.' : 'gizli.'));
+        return pass({ b, acik });
+      },
+      preview(p, ctx){
+        return [
+          { alan:ctx.b.ad, once:ctx.acik ? 'gizli' : 'açık', sonra:ctx.acik ? 'açık' : 'gizli' },
+          { alan:'Verisi', once:'duruyor', sonra:'duruyor — silinmez' },
+        ];
+      },
+      async apply(p, ctx){
+        const r = await SP.Bolum.set(p.bolum, ctx.acik);
+        if(!r.ok) throw new Error(r.error);
+        return { bolum:p.bolum, acik:!ctx.acik };
+      },
+      async revert(geri){ await SP.Bolum.set(geri.bolum, geri.acik); },
     },
 
     /* ----------------------------------------------- semptom işaretle */
@@ -26823,7 +26946,7 @@ SP.Palette = (function(){
     /* ekranlar */
     (SP.App ? SP.App.SECTIONS : []).forEach(sec => {
       sec.views.forEach(v => {
-        out.push({ id:'go:' + v.route, kind:'Sayfa', label:v.label, hint:sec.label,
+        out.push({ id:'go:' + v.route, kind:'Sayfa', label:v.label, hint:sec.label, route:v.route,
           run:() => SP.App.go(v.route) });
       });
     });
@@ -26832,12 +26955,12 @@ SP.Palette = (function(){
     out.push({ id:'act:paste', kind:'Eylem', label:'Tahlil raporu yapıştır',
       hint:'Modül 1', run:() => { SP.App.go('labs'); setTimeout(() => {
         const fn = SP.Screens.labs.handle['open-paste']; if(fn) fn({ dataset:{} }); }, 120); } });
-    out.push({ id:'act:meal', kind:'Eylem', label:'Öğün ekle',
+    out.push({ id:'act:meal', kind:'Eylem', label:'Öğün ekle', route:'meals',
       hint:'Modül 2', run:() => { SP.App.go('meals'); setTimeout(() => {
         const el = document.getElementById('meal-text'); if(el) el.focus(); }, 160); } });
-    out.push({ id:'act:vitals', kind:'Eylem', label:'Günün ölçümünü gir',
+    out.push({ id:'act:vitals', kind:'Eylem', label:'Günün ölçümünü gir', route:'today',
       hint:'Toparlanma', run:() => SP.App.go('today') });
-    out.push({ id:'act:session', kind:'Eylem', label:'Antrenman seansı ekle',
+    out.push({ id:'act:session', kind:'Eylem', label:'Antrenman seansı ekle', route:'move',
       hint:'Modül 3', run:() => { SP.App.go('move'); setTimeout(() => {
         const fn = SP.Screens.move.handle['start-session'];
         if(fn) fn({ dataset:{ id:'' } }); }, 120); } });
@@ -26858,7 +26981,8 @@ SP.Palette = (function(){
         hint:a.title, run:() => { SP.S.ui.officeAgent = a.id; SP.App.go('team'); } });
     });
 
-    return out;
+    /* Gizlenmis bolumun sayfasi ve eylemi gorunmez (core/bolum.js). */
+    return SP.Bolum ? out.filter(c => !(c.route && SP.Bolum.gizli(c.route))) : out;
   }
 
   function iconFor(kind){
@@ -27008,7 +27132,7 @@ SP.Palette = (function(){
   /* Kayittan sonra nereye gidilir — kullanici yazdigini GORMELI. */
   const ROTA = {
     'vital-yaz':'today', 'ogun-ekle':'meals', 'seans-ekle':'move',
-    'olcum-gir':'labs', 'semptom-isaretle':'today',
+    'olcum-gir':'labs', 'semptom-isaretle':'today', 'bolum-ac-kapa':'guide',
   };
 
   function filtered(){
@@ -33058,6 +33182,71 @@ SP.Screens.team = (function(){
     return html`<div class="oneriler">${map(liste.slice(0, 6), oneriKarti)}</div>`;
   }
 
+  function kisaCevap(text){
+    const t = String(text || '').toLocaleLowerCase('tr').replace(/[.!?,]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if(!t || t.length > 25) return null;
+    if(/^(evet|onayla|onaylıyorum|uygula|tamam uygula|olur|tamam|tamamdır)$/.test(t)) return 'evet';
+    if(/^(hayır|hayir|vazgeç|vazgec|vazgeçtim|iptal|boş ver|boşver)$/.test(t)) return 'hayir';
+    if(/^(geri al|geri alsana|onu geri al|geri alır mısın|son değişikliği geri al)$/.test(t)) return 'geri';
+    return null;
+  }
+
+  async function sohbeteYaz(a, soru, cevap){
+    const list = S.officeChats[a.id] || (S.officeChats[a.id] = []);
+    const at = new Date().toISOString();
+    list.push({ role:'user', text:soru, at });
+    list.push({ role:'agent', source:'rules', at, text:cevap });
+    await SP.Store.set('chats/' + a.id, { agentId:a.id, messages:list });
+  }
+
+  /* Model cagrilmadan karsilanan istekler. Karsilanmadiysa false. */
+  async function kisaIstek(a, t){
+    const P = SP.Proposals;
+    const kisa = kisaCevap(t);
+    if(kisa === 'geri'){
+      const son = P.all().filter(p => p.source === 'istek' && p.status === 'applied')
+        .sort((x, y) => String(y.appliedAt || '').localeCompare(String(x.appliedAt || '')))[0];
+      if(!son){ await sohbeteYaz(a, t, 'Geri alınacak bir değişikliğin yok.'); return true; }
+      const u = await P.undo(son.id);
+      const e = P.eylem(son.action);
+      await sohbeteYaz(a, t, u.ok ? 'Geri aldım: ' + (e ? e.label : son.action) + '.' : 'Geri alamadım: ' + u.why);
+      return true;
+    }
+    if(kisa === 'evet' || kisa === 'hayir'){
+      const bek = P.pending().filter(p => p.source === 'istek');
+      if(bek.length){
+        if(kisa === 'hayir'){
+          for(const p of bek) await P.reject(p.id);
+          await sohbeteYaz(a, t, 'Tamam, vazgeçtim; hiçbir şey değişmedi.');
+          return true;
+        }
+        let n = 0; const why = [];
+        for(const p of bek){ const r = await P.approve(p.id); if(r.ok) n++; else if(r.why) why.push(r.why); }
+        await sohbeteYaz(a, t, n ? 'Uyguladım. Geri almak istersen «geri al» de.'
+          : 'Uygulayamadım: ' + (why.join(' · ') || 'istek geçersizleşmiş.'));
+        return true;
+      }
+    }
+    const b = SP.Bolum ? SP.Bolum.anla(t) : { komut:false };
+    if(!b.komut) return false;
+    const parca = [];
+    const bekleyen = [];
+    for(const o of b.oneriler){
+      const r = await P.talep(Object.assign({ source:'istek' }, o));
+      const bl = SP.Bolum.BY_ID[o.params.bolum] || {};
+      if(!r.row) parca.push('Bunu yapamadım: ' + (r.why || 'geçersiz'));
+      else if(r.otomatik) parca.push('Yaptım: ' + bl.ad + (o.params.acik ? ' açıldı.' : ' gizlendi.'));
+      else bekleyen.push(bl.ad + (o.params.acik ? ' açılsın' : ' gizlensin'));
+    }
+    if(bekleyen.length){
+      parca.push('Anladığım şu: ' + bekleyen.join(' · ') + '. Verisi silinmez; istediğinde geri açılır. '
+        + 'Onaylıyor musun? «evet» de ya da aşağıdaki kartta onayla.');
+    }
+    b.sorular.forEach(s => parca.push(s.soru));
+    await sohbeteYaz(a, t, parca.join('\n\n'));
+    return true;
+  }
+
   async function send(text){
     const t = String(text || '').trim();
     if(busy || !t) return;
@@ -33065,6 +33254,13 @@ SP.Screens.team = (function(){
     SP.App.render();
     try{
       const a = current();
+
+      /* 0) Kisa cevap ve bolum istegi — model gerekmez, cevabi kural
+         motoru yazar. «evet» bekleyen istegi onaylar, «vazgec» reddeder,
+         «geri al» son yazilani geri alir (sesli sohbette dokunmadan). */
+      const cevap = await kisaIstek(a, t);
+      if(cevap) return;
+
       /* 1) Kural motoru: cumlede veri var mi? Model gerekmez. */
       const r = SP.Proposals.fromText(t);
 
@@ -34688,6 +34884,22 @@ SP.Screens.guide = (function(){
     });
   }
 
+  /* Bolumler — kullanilmayan alani gizle; verisi silinmez (core/bolum.js). */
+  function bolumCard(){
+    if(!SP.Bolum) return null;
+    return K.Card({
+      title:'Bölümler', sub:'Kullanmadığın alanı gizle; verisi silinmez',
+      body:html`
+        <div class="stack-xs">${map(SP.Bolum.liste(), b => html`
+          <label class="${b.acik ? 'check is-done' : 'check'}">
+            <input type="checkbox" ${b.acik ? raw('checked') : ''} data-act="bolum-toggle" data-id="${b.id}"/>
+            <span>${b.ad}${b.acik ? '' : ' — gizli'}</span>
+          </label>`)}</div>
+        <p class="tiny dim mt-8">Günlük, Testler, Ofis, Hane ve Rehber gizlenemez.
+          Danışma’da da söyleyebilirsin: «finans bölümünü kapat».</p>`,
+    });
+  }
+
   function quotaCard(){
     const s = SP.Office.settings();
     const st = SP.Quota.status({ provider:s.provider, model:s.model });
@@ -35036,7 +35248,7 @@ SP.Screens.guide = (function(){
 
     if(tab === 'model'){
       return String(html`${head}
-        ${K.Ledger(() => [modelCard(), quotaCard()])}
+        ${K.Ledger(() => [modelCard(), bolumCard(), quotaCard()])}
         <div class="mt-24">${raw(UI.rail(['no-model', 'grounding', 'privacy']))}</div>`);
     }
     if(tab === 'veri'){
@@ -35060,6 +35272,19 @@ SP.Screens.guide = (function(){
   }
 
   const handle = {
+    /* Ayarlardan elle acip kapatmak da oneri kutusundan gecer ki Danisma'da
+       «geri al» ile geri alinabilsin. Kutuyu isaretleyen kullanicidir:
+       onay burada verilmis sayilir. */
+    async 'bolum-toggle'(el){
+      const id = el.dataset.id;
+      const acik = SP.Bolum.gizli(id) ? 1 : 0;
+      const t = await SP.Proposals.talep({ action:'bolum-ac-kapa', source:'istek', params:{ bolum:id, acik } });
+      let ok = !!(t.row && t.otomatik);
+      if(t.row && !t.otomatik){ const r = await SP.Proposals.approve(t.row.id); ok = !!r.ok; }
+      const ad = (SP.Bolum.BY_ID[id] || {}).ad || id;
+      UI.toast(ok ? ad + (acik ? ' açıldı' : ' gizlendi — verisi duruyor') : (t.why || 'Değiştirilemedi'));
+      SP.App.render();
+    },
     async 'hkm-toggle'(){
       const a = SP.Beacon.settings();
       await SP.Beacon.save({ enabled:!a.enabled });
@@ -35305,7 +35530,18 @@ SP.App = (function(){
   function sectionOf(route){ return SECTION_OF[route] || SECTIONS[0]; }
 
 
-  function screen(){ return SP.Screens[S.route] || SP.Screens.today; }
+  /* Gizlenen bolum (core/bolum.js) gezinmeden, alt sekmelerden ve
+     yonlendirmeden kalkar; bos kalan grup da gorunmez. */
+  function gizliMi(route){ return !!(SP.Bolum && SP.Bolum.gizli(route)); }
+  function sectionsGorunen(){
+    return SECTIONS.map(s => Object.assign({}, s, { views:s.views.filter(v => !gizliMi(v.route)) }))
+      .filter(s => s.views.length);
+  }
+
+  function screen(){
+    if(gizliMi(S.route)) S.route = 'today';
+    return SP.Screens[S.route] || SP.Screens.today;
+  }
 
   /* Kenar çubuğundaki sayaçlar — bekleyen işi gizlemez. */
   function badgeFor(id){
@@ -35411,7 +35647,7 @@ SP.App = (function(){
     const active = sectionOf(sc.id);
     return html`
       <nav class="sitenav" aria-label="Bölümler">
-        <div class="wrapc navlinks">${map(SECTIONS, sec => {
+        <div class="wrapc navlinks">${map(sectionsGorunen(), sec => {
           const on = sec.id === active.id;
           const b = sectionBadge(sec);
           return html`<button class="${cls('navlink', on && 'is-active')}"
@@ -35489,7 +35725,7 @@ SP.App = (function(){
     const aktif = sectionOf(sc.id);
     return html`
       <nav class="tabbar" aria-label="Hızlı gezinme">
-        ${map(TABBAR, t => {
+        ${map(TABBAR.filter(t => !gizliMi(t.route)), t => {
           const sec = sectionOf(t.route);
           const on = sec.id === aktif.id;
           const b = safe(() => badgeFor(t.route), null);
@@ -35549,7 +35785,7 @@ SP.App = (function(){
           ${SP.C.IconButton({ icon:'close', aria:'Kapat', act:'toggle-menu' })}
         </div>
         <div class="navsheet__body">
-          <div class="navsheet__grid">${map(SECTIONS, sec => html`
+          <div class="navsheet__grid">${map(sectionsGorunen(), sec => html`
             <button class="${cls('navsheet__item', sec.id === active.id && 'is-active')}"
               data-act="go" data-route="${sec.views[0].route}" data-num="${sec.num}">
               <b>${sec.label}</b>
@@ -35948,6 +36184,8 @@ SP.App = (function(){
        icin sonuc: tikladiginda hicbir sey olmayan bir dugme. (ESP'de duman
        testi bunu "olu dugme" olarak yakaladi.) */
     if(UI.isSheetOpen && UI.isSheetOpen()) UI.closeSheet();
+    /* Gizlenmis bolumun adresi Gunluk'e doner. */
+    if(gizliMi(route)) route = 'today';
     S.route = route;
     S.sidebarOpen = false;
     rotaDegisti = true;

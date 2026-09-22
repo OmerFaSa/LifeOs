@@ -857,6 +857,7 @@ SP.Model = (function(){
     /* Oneri kutusu: bekleyen bir oneri acilista gorunur kalmali,
        yoksa kullanici onayladigini sanip onaylamamis olur. */
     if(SP.Proposals) await SP.Proposals.load();
+    if(SP.Bolum) await SP.Bolum.yukle();
 
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);

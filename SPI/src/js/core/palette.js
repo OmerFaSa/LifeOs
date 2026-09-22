@@ -19,7 +19,7 @@ SP.Palette = (function(){
     /* ekranlar */
     (SP.App ? SP.App.SECTIONS : []).forEach(sec => {
       sec.views.forEach(v => {
-        out.push({ id:'go:' + v.route, kind:'Sayfa', label:v.label, hint:sec.label,
+        out.push({ id:'go:' + v.route, kind:'Sayfa', label:v.label, hint:sec.label, route:v.route,
           run:() => SP.App.go(v.route) });
       });
     });
@@ -28,12 +28,12 @@ SP.Palette = (function(){
     out.push({ id:'act:paste', kind:'Eylem', label:'Tahlil raporu yapıştır',
       hint:'Modül 1', run:() => { SP.App.go('labs'); setTimeout(() => {
         const fn = SP.Screens.labs.handle['open-paste']; if(fn) fn({ dataset:{} }); }, 120); } });
-    out.push({ id:'act:meal', kind:'Eylem', label:'Öğün ekle',
+    out.push({ id:'act:meal', kind:'Eylem', label:'Öğün ekle', route:'meals',
       hint:'Modül 2', run:() => { SP.App.go('meals'); setTimeout(() => {
         const el = document.getElementById('meal-text'); if(el) el.focus(); }, 160); } });
-    out.push({ id:'act:vitals', kind:'Eylem', label:'Günün ölçümünü gir',
+    out.push({ id:'act:vitals', kind:'Eylem', label:'Günün ölçümünü gir', route:'today',
       hint:'Toparlanma', run:() => SP.App.go('today') });
-    out.push({ id:'act:session', kind:'Eylem', label:'Antrenman seansı ekle',
+    out.push({ id:'act:session', kind:'Eylem', label:'Antrenman seansı ekle', route:'move',
       hint:'Modül 3', run:() => { SP.App.go('move'); setTimeout(() => {
         const fn = SP.Screens.move.handle['start-session'];
         if(fn) fn({ dataset:{ id:'' } }); }, 120); } });
@@ -54,7 +54,8 @@ SP.Palette = (function(){
         hint:a.title, run:() => { SP.S.ui.officeAgent = a.id; SP.App.go('team'); } });
     });
 
-    return out;
+    /* Gizlenmis bolumun sayfasi ve eylemi gorunmez (core/bolum.js). */
+    return SP.Bolum ? out.filter(c => !(c.route && SP.Bolum.gizli(c.route))) : out;
   }
 
   function iconFor(kind){
@@ -204,7 +205,7 @@ SP.Palette = (function(){
   /* Kayittan sonra nereye gidilir — kullanici yazdigini GORMELI. */
   const ROTA = {
     'vital-yaz':'today', 'ogun-ekle':'meals', 'seans-ekle':'move',
-    'olcum-gir':'labs', 'semptom-isaretle':'today',
+    'olcum-gir':'labs', 'semptom-isaretle':'today', 'bolum-ac-kapa':'guide',
   };
 
   function filtered(){

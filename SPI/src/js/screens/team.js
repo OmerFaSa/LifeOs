@@ -292,6 +292,71 @@ SP.Screens.team = (function(){
     return html`<div class="oneriler">${map(liste.slice(0, 6), oneriKarti)}</div>`;
   }
 
+  function kisaCevap(text){
+    const t = String(text || '').toLocaleLowerCase('tr').replace(/[.!?,]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if(!t || t.length > 25) return null;
+    if(/^(evet|onayla|onaylıyorum|uygula|tamam uygula|olur|tamam|tamamdır)$/.test(t)) return 'evet';
+    if(/^(hayır|hayir|vazgeç|vazgec|vazgeçtim|iptal|boş ver|boşver)$/.test(t)) return 'hayir';
+    if(/^(geri al|geri alsana|onu geri al|geri alır mısın|son değişikliği geri al)$/.test(t)) return 'geri';
+    return null;
+  }
+
+  async function sohbeteYaz(a, soru, cevap){
+    const list = S.officeChats[a.id] || (S.officeChats[a.id] = []);
+    const at = new Date().toISOString();
+    list.push({ role:'user', text:soru, at });
+    list.push({ role:'agent', source:'rules', at, text:cevap });
+    await SP.Store.set('chats/' + a.id, { agentId:a.id, messages:list });
+  }
+
+  /* Model cagrilmadan karsilanan istekler. Karsilanmadiysa false. */
+  async function kisaIstek(a, t){
+    const P = SP.Proposals;
+    const kisa = kisaCevap(t);
+    if(kisa === 'geri'){
+      const son = P.all().filter(p => p.source === 'istek' && p.status === 'applied')
+        .sort((x, y) => String(y.appliedAt || '').localeCompare(String(x.appliedAt || '')))[0];
+      if(!son){ await sohbeteYaz(a, t, 'Geri alınacak bir değişikliğin yok.'); return true; }
+      const u = await P.undo(son.id);
+      const e = P.eylem(son.action);
+      await sohbeteYaz(a, t, u.ok ? 'Geri aldım: ' + (e ? e.label : son.action) + '.' : 'Geri alamadım: ' + u.why);
+      return true;
+    }
+    if(kisa === 'evet' || kisa === 'hayir'){
+      const bek = P.pending().filter(p => p.source === 'istek');
+      if(bek.length){
+        if(kisa === 'hayir'){
+          for(const p of bek) await P.reject(p.id);
+          await sohbeteYaz(a, t, 'Tamam, vazgeçtim; hiçbir şey değişmedi.');
+          return true;
+        }
+        let n = 0; const why = [];
+        for(const p of bek){ const r = await P.approve(p.id); if(r.ok) n++; else if(r.why) why.push(r.why); }
+        await sohbeteYaz(a, t, n ? 'Uyguladım. Geri almak istersen «geri al» de.'
+          : 'Uygulayamadım: ' + (why.join(' · ') || 'istek geçersizleşmiş.'));
+        return true;
+      }
+    }
+    const b = SP.Bolum ? SP.Bolum.anla(t) : { komut:false };
+    if(!b.komut) return false;
+    const parca = [];
+    const bekleyen = [];
+    for(const o of b.oneriler){
+      const r = await P.talep(Object.assign({ source:'istek' }, o));
+      const bl = SP.Bolum.BY_ID[o.params.bolum] || {};
+      if(!r.row) parca.push('Bunu yapamadım: ' + (r.why || 'geçersiz'));
+      else if(r.otomatik) parca.push('Yaptım: ' + bl.ad + (o.params.acik ? ' açıldı.' : ' gizlendi.'));
+      else bekleyen.push(bl.ad + (o.params.acik ? ' açılsın' : ' gizlensin'));
+    }
+    if(bekleyen.length){
+      parca.push('Anladığım şu: ' + bekleyen.join(' · ') + '. Verisi silinmez; istediğinde geri açılır. '
+        + 'Onaylıyor musun? «evet» de ya da aşağıdaki kartta onayla.');
+    }
+    b.sorular.forEach(s => parca.push(s.soru));
+    await sohbeteYaz(a, t, parca.join('\n\n'));
+    return true;
+  }
+
   async function send(text){
     const t = String(text || '').trim();
     if(busy || !t) return;
@@ -299,6 +364,13 @@ SP.Screens.team = (function(){
     SP.App.render();
     try{
       const a = current();
+
+      /* 0) Kisa cevap ve bolum istegi — model gerekmez, cevabi kural
+         motoru yazar. «evet» bekleyen istegi onaylar, «vazgec» reddeder,
+         «geri al» son yazilani geri alir (sesli sohbette dokunmadan). */
+      const cevap = await kisaIstek(a, t);
+      if(cevap) return;
+
       /* 1) Kural motoru: cumlede veri var mi? Model gerekmez. */
       const r = SP.Proposals.fromText(t);
 

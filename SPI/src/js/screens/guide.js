@@ -106,6 +106,22 @@ SP.Screens.guide = (function(){
     });
   }
 
+  /* Bolumler — kullanilmayan alani gizle; verisi silinmez (core/bolum.js). */
+  function bolumCard(){
+    if(!SP.Bolum) return null;
+    return K.Card({
+      title:'Bölümler', sub:'Kullanmadığın alanı gizle; verisi silinmez',
+      body:html`
+        <div class="stack-xs">${map(SP.Bolum.liste(), b => html`
+          <label class="${b.acik ? 'check is-done' : 'check'}">
+            <input type="checkbox" ${b.acik ? raw('checked') : ''} data-act="bolum-toggle" data-id="${b.id}"/>
+            <span>${b.ad}${b.acik ? '' : ' — gizli'}</span>
+          </label>`)}</div>
+        <p class="tiny dim mt-8">Günlük, Testler, Ofis, Hane ve Rehber gizlenemez.
+          Danışma’da da söyleyebilirsin: «finans bölümünü kapat».</p>`,
+    });
+  }
+
   function quotaCard(){
     const s = SP.Office.settings();
     const st = SP.Quota.status({ provider:s.provider, model:s.model });
@@ -454,7 +470,7 @@ SP.Screens.guide = (function(){
 
     if(tab === 'model'){
       return String(html`${head}
-        ${K.Ledger(() => [modelCard(), quotaCard()])}
+        ${K.Ledger(() => [modelCard(), bolumCard(), quotaCard()])}
         <div class="mt-24">${raw(UI.rail(['no-model', 'grounding', 'privacy']))}</div>`);
     }
     if(tab === 'veri'){
@@ -478,6 +494,19 @@ SP.Screens.guide = (function(){
   }
 
   const handle = {
+    /* Ayarlardan elle acip kapatmak da oneri kutusundan gecer ki Danisma'da
+       «geri al» ile geri alinabilsin. Kutuyu isaretleyen kullanicidir:
+       onay burada verilmis sayilir. */
+    async 'bolum-toggle'(el){
+      const id = el.dataset.id;
+      const acik = SP.Bolum.gizli(id) ? 1 : 0;
+      const t = await SP.Proposals.talep({ action:'bolum-ac-kapa', source:'istek', params:{ bolum:id, acik } });
+      let ok = !!(t.row && t.otomatik);
+      if(t.row && !t.otomatik){ const r = await SP.Proposals.approve(t.row.id); ok = !!r.ok; }
+      const ad = (SP.Bolum.BY_ID[id] || {}).ad || id;
+      UI.toast(ok ? ad + (acik ? ' açıldı' : ' gizlendi — verisi duruyor') : (t.why || 'Değiştirilemedi'));
+      SP.App.render();
+    },
     async 'hkm-toggle'(){
       const a = SP.Beacon.settings();
       await SP.Beacon.save({ enabled:!a.enabled });

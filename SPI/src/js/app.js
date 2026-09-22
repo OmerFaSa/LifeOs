@@ -80,7 +80,18 @@ SP.App = (function(){
   function sectionOf(route){ return SECTION_OF[route] || SECTIONS[0]; }
 
 
-  function screen(){ return SP.Screens[S.route] || SP.Screens.today; }
+  /* Gizlenen bolum (core/bolum.js) gezinmeden, alt sekmelerden ve
+     yonlendirmeden kalkar; bos kalan grup da gorunmez. */
+  function gizliMi(route){ return !!(SP.Bolum && SP.Bolum.gizli(route)); }
+  function sectionsGorunen(){
+    return SECTIONS.map(s => Object.assign({}, s, { views:s.views.filter(v => !gizliMi(v.route)) }))
+      .filter(s => s.views.length);
+  }
+
+  function screen(){
+    if(gizliMi(S.route)) S.route = 'today';
+    return SP.Screens[S.route] || SP.Screens.today;
+  }
 
   /* Kenar çubuğundaki sayaçlar — bekleyen işi gizlemez. */
   function badgeFor(id){
@@ -186,7 +197,7 @@ SP.App = (function(){
     const active = sectionOf(sc.id);
     return html`
       <nav class="sitenav" aria-label="Bölümler">
-        <div class="wrapc navlinks">${map(SECTIONS, sec => {
+        <div class="wrapc navlinks">${map(sectionsGorunen(), sec => {
           const on = sec.id === active.id;
           const b = sectionBadge(sec);
           return html`<button class="${cls('navlink', on && 'is-active')}"
@@ -264,7 +275,7 @@ SP.App = (function(){
     const aktif = sectionOf(sc.id);
     return html`
       <nav class="tabbar" aria-label="Hızlı gezinme">
-        ${map(TABBAR, t => {
+        ${map(TABBAR.filter(t => !gizliMi(t.route)), t => {
           const sec = sectionOf(t.route);
           const on = sec.id === aktif.id;
           const b = safe(() => badgeFor(t.route), null);
@@ -324,7 +335,7 @@ SP.App = (function(){
           ${SP.C.IconButton({ icon:'close', aria:'Kapat', act:'toggle-menu' })}
         </div>
         <div class="navsheet__body">
-          <div class="navsheet__grid">${map(SECTIONS, sec => html`
+          <div class="navsheet__grid">${map(sectionsGorunen(), sec => html`
             <button class="${cls('navsheet__item', sec.id === active.id && 'is-active')}"
               data-act="go" data-route="${sec.views[0].route}" data-num="${sec.num}">
               <b>${sec.label}</b>
@@ -723,6 +734,8 @@ SP.App = (function(){
        icin sonuc: tikladiginda hicbir sey olmayan bir dugme. (ESP'de duman
        testi bunu "olu dugme" olarak yakaladi.) */
     if(UI.isSheetOpen && UI.isSheetOpen()) UI.closeSheet();
+    /* Gizlenmis bolumun adresi Gunluk'e doner. */
+    if(gizliMi(route)) route = 'today';
     S.route = route;
     S.sidebarOpen = false;
     rotaDegisti = true;

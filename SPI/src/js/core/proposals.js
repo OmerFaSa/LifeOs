@@ -6,10 +6,13 @@
      ajan önerir → kural motoru DOĞRULAR → sen ONAYLARSIN
                  → motor uygular → geri alınabilir
 
-   Onaysız hiçbir şey değişmez. Bu dosyada «otomatik uygula» diye bir
-   yol YOKTUR ve olmamalıdır: ofisin değeri önerisinde, yetkisinde
-   değil. Sağlık verisinde yanlış bir kayıt, eksik bir kayıttan
-   kötüdür — çünkü eksik kayıt kendini belli eder, yanlış kayıt etmez.
+   SEVİYE (AGENTS.md §1.9): kullanıcının KENDİ cümlesinden kural
+   motorunun çıkardığı KÜÇÜK kayıt (tek ölçüm, bir öğün, bir seans)
+   sormadan yazılır ve geri alınabilir kalır. Tahlil değeri ve bölüm
+   gizleme ORTA'dır, her zaman sorulur; modelin yorumladığı cümle de
+   onay bekler. Sağlık verisinde yanlış bir kayıt, eksik bir kayıttan
+   kötüdür — eksik kayıt kendini belli eder, yanlış kayıt etmez. Karar
+   tek yerde verilir: otomatikMi().
 
    ─────────────────────────────────────────────────────────────────
 
@@ -210,6 +213,32 @@ SP.Proposals = (function(){
         });
         await M.saveLab(rec);
       },
+    },
+
+    /* ---------------------------------------------- bölüm aç / gizle */
+    'bolum-ac-kapa':{
+      level:'orta',
+      label:'Bölümü aç / gizle',
+      alanlar:['bolum', 'acik'],
+      check(p){
+        const b = SP.Bolum && SP.Bolum.BY_ID[p.bolum];
+        if(!b) return fail('Bu bölüm gizlenemez ya da sistemde yok.');
+        const acik = Number(p.acik) === 1;
+        if(acik === !SP.Bolum.gizli(p.bolum)) return fail(b.ad + ' zaten ' + (acik ? 'açık.' : 'gizli.'));
+        return pass({ b, acik });
+      },
+      preview(p, ctx){
+        return [
+          { alan:ctx.b.ad, once:ctx.acik ? 'gizli' : 'açık', sonra:ctx.acik ? 'açık' : 'gizli' },
+          { alan:'Verisi', once:'duruyor', sonra:'duruyor — silinmez' },
+        ];
+      },
+      async apply(p, ctx){
+        const r = await SP.Bolum.set(p.bolum, ctx.acik);
+        if(!r.ok) throw new Error(r.error);
+        return { bolum:p.bolum, acik:!ctx.acik };
+      },
+      async revert(geri){ await SP.Bolum.set(geri.bolum, geri.acik); },
     },
 
     /* ----------------------------------------------- semptom işaretle */
