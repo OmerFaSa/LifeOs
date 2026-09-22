@@ -34,8 +34,15 @@ SISTEMLER = [('AYS', 'Akademik Yol Sistemi'),
              ('ESP', 'Entelektüel Seviye Planlayıcı')]
 
 HIZLI = ['runtests.js']
+# `loadcheck.js` bu listede: aracin var olmasi yetmez, RUTINE girmesi
+# gerekir. Uc sistemde de vardi ama hicbirinin rutin kosumunda yoktu —
+# yazildigi gun kosan, sonra unutulan bir denetim, yazilmamis bir
+# denetimle ayni sonucu verir. Agirdir (bes yillik veri uretir) ve bu
+# yuzden yalniz `--tam` kosumundadir; her PR'da degil, haftada bir CI
+# isinde de ayrica kosar (bkz. .github/workflows/ci.yml, `yuk`).
 TAM = ['runtests.js', 'smoke.js', 'a11ycheck.js', 'palettecheck.js',
-       'layoutcheck.js', 'perfcheck.js', 'ledgercheck.js', 'designcheck.js']
+       'layoutcheck.js', 'perfcheck.js', 'ledgercheck.js', 'designcheck.js',
+       'tasarimcheck.js', 'loadcheck.js']
 
 BASLANGIC = '<!-- SAYILAR:baslangic -->'
 BITIS = '<!-- SAYILAR:bitis -->'
@@ -71,6 +78,31 @@ def kok_araclar():
         satir = [s.strip() for s in p.stdout.splitlines() if s.strip()]
         out[ad] = ("gecti" if p.returncode == 0 else "KALDI",
                    satir[-1] if satir else "—")
+    # Marka adlandirmasi ve yol muhafizi. Bu arac bir teslimatta otuz
+    # dosyayi tek seferde isimlendirip yerlestiriyor; kurali bozan bir
+    # degisiklik sessizce yanlis yere yazabilir.
+    #
+    # KUNYE ve TEK KAYNAK DENETIMLERI de burada: ucu de saf Python,
+    # saniyeler suruyor ve ucu de SESSIZ bir bozulmayi yakaliyor —
+    # kopyanin kaynaktan ayrismasi, kunyenin tazeligini yitirmesi,
+    # adin kurali bozmasi. Hicbiri ekranda gorunmuyor; ancak bir denetim
+    # soylerse bilinir.
+    for ad, komut in (
+            ("marka.py", ["python3", "tools/marka.py", "--sina"]),
+            ("marka kunyesi", ["python3", "tools/marka.py", "--kunye", "--denetle"]),
+            ("seviye.py", ["python3", "tools/seviye.py", "--denetle"]),
+            ("ortak.py", ["python3", "tools/ortak.py", "--denetle"]),
+    ):
+        try:
+            p = subprocess.run(komut, cwd=KOK, capture_output=True,
+                               text=True, timeout=120)
+            satir = [s.strip() for s in (p.stdout + "\n" + p.stderr).splitlines()
+                     if s.strip()]
+            out[ad] = ("gecti" if p.returncode == 0 else "KALDI",
+                       satir[-1] if satir else "—")
+        except Exception as e:
+            out[ad] = ("KALDI", str(e))
+
     try:
         p = subprocess.run(["node", "tools/entegre.js"], cwd=KOK,
                            capture_output=True, text=True, timeout=1800)

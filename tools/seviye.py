@@ -21,7 +21,8 @@
 
      kademeler.js   kademe adlari, renkleri, XP esikleri, etkinlikler
      xp.js          motor (ad alani ve modul kimligi yerine konur)
-     perde.js       tam ekran video katmani
+     perde.js       tam ekran gosterim katmani
+     rutbe.js       RUTBE ekrani (kademe, merdiven, XP kaynaklari)
      seviye.css     perde ve rozet bicimleri
      xp.test.js     motorun sozlesmesi
      perde.test.js  perdenin sozlesmesi
@@ -56,14 +57,23 @@ KAYNAK = KOK / "brand" / "seviye"
 # (klasor, ad alani, modul kimligi)
 SISTEMLER = [("AYS", "R", "ays"), ("SPI", "SP", "spi"), ("ESP", "ESP", "esp")]
 
+# Ad alani -> modul kimligi. `perde.html` marka logosunu `__MOD__` ile
+# adlandiriyor (`kimlik-ays.webp`); SISTEMLER zaten bu esleşmeyi tutuyor,
+# burada yalnizca aranabilir hale getiriliyor.
+MOD_ILE = {ad: mod for _, ad, mod in SISTEMLER}
+
 # (kaynak dosya, hedef goreli yol, ad alani degistirilsin mi)
 DOSYALAR = [
     ("kademeler.js", "src/js/data/kademeler.js", False),
+    ("basarimlar.js", "src/js/data/basarimlar.js", False),
     ("xp.js",        "src/js/core/xp.js",        True),
+    ("basarim.js",   "src/js/core/basarim.js",   True),
     ("perde.js",     "src/js/core/perde.js",     True),
+    ("rutbe.js",     "src/js/screens/rutbe.js",  True),
     ("seviye.css",   "src/css/seviye.css",       False),
     ("xp.test.js",   "src/tests/xp.test.js",     True),
     ("perde.test.js", "src/tests/perde.test.js", True),
+    ("basarim.test.js", "src/tests/basarim.test.js", True),
 ]
 
 BASLIK = ("/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.\n"
@@ -84,13 +94,23 @@ def uret(ad: str, ad_alani: str, mod: str, degistir: bool) -> str:
 # denetimin Python tarafini disarida birakmasi tutarsizlikti.
 YOL_BAS = "# SEVIYE:yol-bas"
 YOL_BIT = "# SEVIYE:yol-bit"
+# HKM de listede: merkez profili ayni rozet gorsellerini gosteriyor ve
+# muhafizin ikinci bir kopyasini yazmak, iki kopyanin bir gun ayrismasi
+# demekti — bu ozellikte tam olarak bunu onlemek icin --denetle var.
 YOL_HEDEFLER = ["AYS/devserver.py", "SPI/devserver.py", "ESP/devserver.py",
-                "sunucu.py"]
+                "sunucu.py", "HKM/daemon.py"]
 
 # Tek dosya surumune medya kopyalayan blok — uc build.py'de ayni.
 DIST_BAS = "# SEVIYE:dist-bas"
 DIST_BIT = "# SEVIYE:dist-bit"
 DIST_HEDEFLER = ["AYS/build.py", "SPI/build.py", "ESP/build.py"]
+
+# Rutbe kartinin dosya adi. Merkez profili uc sistemin kartlarini
+# gosteriyor ve adi bilmek zorunda; kurali elle ikinci kez yazmak iki
+# kopyanin bir gun ayrismasi demekti.
+KART_BAS = "# SEVIYE:kart-bas"
+KART_BIT = "# SEVIYE:kart-bit"
+KART_HEDEFLER = ["HKM/core/profil.py"]
 
 
 def yol_govdesi() -> str:
@@ -99,6 +119,10 @@ def yol_govdesi() -> str:
 
 def dist_govdesi() -> str:
     return (KAYNAK / "dist_kopya.py").read_text(encoding="utf-8")
+
+
+def kart_govdesi() -> str:
+    return (KAYNAK / "ortak_kart.py").read_text(encoding="utf-8")
 
 
 def _isaret_arasi(metin: str, bas: str, bit: str):
@@ -141,8 +165,11 @@ def perde_govdesi(ad_alani: str) -> str:
     Uc index.html icinde elle duran bir markup, bir gun perde.js'in
     bekledigi yapidan ayrisir ve "Gec" dugmesi sessizce calismaz hale
     gelir. Dosyalar gibi markup da yayilir."""
+    # `__MOD__` de degisir: marka girisi her sistemin KENDI logosunu
+    # gosteriyor ve dosya adi ondan turer (`kimlik-ays.webp`).
     return (KAYNAK / "perde.html").read_text(encoding="utf-8") \
-        .replace("__NS__", ad_alani)
+        .replace("__NS__", ad_alani) \
+        .replace("__MOD__", MOD_ILE.get(ad_alani, ad_alani.lower()))
 
 
 def perde_yaz(yol: Path, ad_alani: str) -> bool:
@@ -187,10 +214,17 @@ def perde_siniflari() -> list:
                                  govde)))
 
 
-# Duragan MARKA perdesinde bulunmasi GEREKMEYEN siniflar. Banner yalniz
-# seviye kutlamasinda cizilir ve JavaScript kurar; marka girisinde
-# gosterilecek bir kademe yoktur.
-PERDE_ISTEGE_BAGLI = {"perde__banner"}
+# Duragan MARKA perdesinde bulunmasi GEREKMEYEN siniflar.
+#
+#   perde__banner   yalniz seviye kutlamasinda cizilir ve JavaScript
+#                   kurar; marka girisinde gosterilecek kademe yoktur.
+#   perde__video    marka girisi artik VIDEO DEGIL LOGO (depo sahibi:
+#   perde__ses      «bolum girislerindeki o giris videosunu kaldir, bu
+#                   logolar sadece»). perde.js video yolunu KORUYOR —
+#                   rutbe kutlamasinin idle videolari onu kullaniyor —
+#                   ama duragan markupta artik yok. Kod yolu yasiyor,
+#                   markup onu kullanmiyor: ikisi ayri sorulardir.
+PERDE_ISTEGE_BAGLI = {"perde__banner", "perde__video", "perde__ses"}
 
 
 def perde_markup_eksigi(ad_alani: str) -> list:
@@ -210,6 +244,8 @@ def _bloklar():
         yield (g, YOL_BAS, YOL_BIT, yol_govdesi(), "ortak yol muhafizi")
     for g in DIST_HEDEFLER:
         yield (g, DIST_BAS, DIST_BIT, dist_govdesi(), "dist medya kopyasi")
+    for g in KART_HEDEFLER:
+        yield (g, KART_BAS, KART_BIT, kart_govdesi(), "rutbe kart adi")
 
 
 def yay() -> int:

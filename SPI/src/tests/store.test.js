@@ -1,24 +1,83 @@
-/* GERÇEK DEPO TESTLERİ.
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/store.test.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir.
+   Kaynak bir KALIPTIR: ad alanı ve depo öneki yayım
+   sırasında konur (__NS__, __DEPO__, __BASLIK__). */
+/* GERÇEK DEPO TESTLERİ — verinin gerçekten yazıldığı katman.
 
-   Diğer testler `SP.Store`'u bellek içi sahte bir depoyla değiştirir;
-   bu doğrudur, çünkü onların konusu modelin mantığıdır. Ama sonuç şuydu:
-   verinin gerçekten yazıldığı modül neredeyse hiç denenmemişti — on yedi
-   işlevden altısı.
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/store.test.js`; `tools/ortak.py --yay` ile üç
+   arayüzün `src/tests/` klasörüne yayılır. `SP` yer tutucudur.
 
-   Depolama, verinin KAYBOLABİLECEĞİ tek yerdir. Bu paket gerçek modülü,
-   gerçek localStorage üzerinde çalıştırır ve şu üç şeyi korur:
+   ------------------------------------------------------------------
+   NEDEN BU PAKET VAR
+
+   Öteki testler `SP.Store`'u bellek içi sahte bir depoyla
+   değiştirir (`mockStore`) ve bu DOĞRUDUR — onların konusu modelin
+   mantığıdır. Ama sonuç şuydu: verinin gerçekten yazıldığı modül hiç
+   denenmiyordu. `node tools/kapsam.js` bunu üç turda üç kez söyledi:
+
+       AYS  store.js  %46   koşmayan: init, get, set, remove, list, clear
+       ESP  store.js  %54   paket hiç yoktu
+       SPİ  store.js  %85   paket vardı — ve tek yazılı olan oydu
+
+   Bu deponun en net kuralı da buraya bakar: **kalıcılığa dokunmadan
+   önce test yaz — verinin kaybolabileceği tek yer orası.**
+
+   ------------------------------------------------------------------
+   NEDEN ÜÇÜNE BİRDEN YAYILIYOR
+
+   Üç `store.js` AYNI DOSYA DEĞİLDİR (ESP'de profil katmanı var,
+   AYS'nin şema sürümü 5) ama AYNI YÜZEYİ açar:
+
+     init, get, set, remove, list, exportAll, importAll, readBackup,
+     importUndoInfo, undoImport, clear, localSize, localQuota,
+     sizeByCollection, health, onError, mode
+
+   Paket o yüzeyin sözünü sınar, gövdesini değil. Bu yüzden
+   uygulamaya bağlanmaz: uygulama kimliği `exportAll().__meta.app`'ten,
+   yerel anahtar çalışma zamanında bir imza yazılıp aranarak bulunur
+   (aşağıda). Elle yazılsaydı — ki SPİ'de öyleydi — ikinci uygulamaya
+   taşındığı gün üç test yanlış sebepten kırılırdı. Bir kez kırıldı.
+
+   ------------------------------------------------------------------
+   NE KORUR
 
      · yazılan okunur, silinen gider, listelenen eksiksiz gelir
-     · yedek alma/geri yükleme veriyi bozmaz
+     · yedek alma/geri yükleme veriyi bozmaz ve geri ALINABİLİR
      · yazma başarısız olduğunda SESSİZ KALINMAZ
 
-   Her test kendi ön ekini kullanır ve sonunda temizler; uygulamanın
+   Her test kendi ön ekini kullanır ve sonunda temizler: uygulamanın
    gerçek anahtarını paylaştıkları için birbirlerine bulaşmamaları
    gerekir. */
 
 (function(){
   const { describe, it, expect, realStore } = SP.Test;
   const S = realStore;
+
+  /* UYGULAMA KİMLİĞİ VE YEREL ANAHTAR SABİT YAZILMAZ.
+
+     Bu paket SPİ'den uyarlandı ve orada ikisi de elle yazılıydı
+     («spi-saglik», «spi.v1.ben»). Taşınınca üç test kırmızıya döndü —
+     doğru davranış, ama yanlış sebep: kod değil, testin varsayımı
+     taşınmıyordu. İkisi de artık ÇALIŞMA ZAMANINDA bulunur; paket
+     böylece dördüncü bir uygulamaya da taşınabilir kalır. */
+  function uygulamaKimligi(){ return (S.exportAll().__meta || {}).app; }
+
+  /* Deponun yerel anahtarı dışarı açılmıyor. Bilinen bir değer yazıp
+     hangi anahtarın içinde göründüğüne bakmak, adı tahmin etmekten
+     daha sağlamdır: ad değişse de test çalışır. */
+  async function yerelAnahtar(){
+    const imza = 'zzimza-' + Date.now();
+    await S.set(ON + 'imza', { v:imza });
+    let bulunan = null;
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if((localStorage.getItem(k) || '').indexOf(imza) >= 0){ bulunan = k; break; }
+    }
+    await S.remove(ON + 'imza');
+    return bulunan;
+  }
 
   /* Testin kendi alanı: her yol bu ön ekle başlar. */
   const ON = 'zztest/';
@@ -113,7 +172,8 @@
       await temizle();
       await S.set(ON + 'y', { v:'korunmalı' });
       const yedek = S.exportAll();
-      expect(yedek.__meta.app).toBe('spi-saglik');
+      expect(yedek.__meta.app).toBe(uygulamaKimligi());
+      expect(typeof yedek.__meta.app).toBe('string');
       expect(yedek.__meta.schemaVersion).toBe(SP.SCHEMA_VERSION);
       expect(yedek.data[ON + 'y'].v).toBe('korunmalı');
       await temizle();
@@ -126,7 +186,7 @@
       await temizle();
       await S.set(ON + 'eski', { v:1 });
       const oncekiTam = S.exportAll().data;
-      const yedek = { __meta:{ app:'spi-saglik', schemaVersion:SP.SCHEMA_VERSION },
+      const yedek = { __meta:{ app:uygulamaKimligi(), schemaVersion:SP.SCHEMA_VERSION },
         data:Object.assign({}, oncekiTam, { [ON + 'yeni']:{ v:2 } }) };
       delete yedek.data[ON + 'eski'];
       await S.importAll(yedek);
@@ -160,7 +220,7 @@
     });
 
     it('ice aktarma oncesi durumu saklar ve geri alinabilir', async function(){
-      const undoKey = 'spi.v1.ben.oncesi';
+      const undoKey = (await yerelAnahtar()) + '.oncesi';
       const oncekiUndo = localStorage.getItem(undoKey);
       try{
         localStorage.removeItem(undoKey);
@@ -169,7 +229,7 @@
         expect(S.importUndoInfo()).toBeNull();
 
         const oncekiTam = S.exportAll().data;
-        await S.importAll({ __meta:{ app:'spi-saglik', schemaVersion:SP.SCHEMA_VERSION },
+        await S.importAll({ __meta:{ app:uygulamaKimligi(), schemaVersion:SP.SCHEMA_VERSION },
           data:Object.assign({}, oncekiTam, { [ON + 'eski']:{ v:'YENI' } }) });
         expect((await S.get(ON + 'eski')).v).toBe('YENI');
         expect(S.importUndoInfo()).toBeTruthy();
@@ -185,7 +245,7 @@
     });
 
     it('gecersiz geri alma istegini reddeder', async function(){
-      const undoKey = 'spi.v1.ben.oncesi';
+      const undoKey = (await yerelAnahtar()) + '.oncesi';
       const onceki = localStorage.getItem(undoKey);
       try{
         localStorage.removeItem(undoKey);
@@ -251,18 +311,25 @@
        ayrıştırılmış kopya zaten doğrudur ve diskteki bozulmayı görmez —
        bu bir eksik değil, istenen davranıştır. Test o yüzden önce
        kopyayı geçersiz kılar (başka sekmenin yazması gibi). */
-    function kopyayiTazele(){
-      window.dispatchEvent(new StorageEvent('storage', { key:'spi.v1.ben' }));
+    /* BAŞKA SEKMENİN YAZMASINI TAKLİT ET.
+
+       `storage` olayı yalnız DİĞER sekmelerde tetiklenir; burada elle
+       gönderiliyor. Bellek kopyası tutmayan bir depoda bu çağrı
+       zararsızdır — her okuma zaten diske gider. */
+    let YEREL = null;
+    async function anahtar(){ return YEREL || (YEREL = await yerelAnahtar()); }
+    async function kopyayiTazele(){
+      window.dispatchEvent(new StorageEvent('storage', { key:await anahtar() }));
     }
 
-    it('bozuk yerel kayıt okunamazsa uygulama çökmez', function(){
+    it('bozuk yerel kayıt okunamazsa uygulama çökmez', async function(){
       const gercek = localStorage.getItem.bind(localStorage);
       let bildirildi = null;
       S.onError = (hata) => { bildirildi = hata; };
       localStorage.getItem = function(){ return '{bozuk json'; };
       let sonuc;
-      try{ kopyayiTazele(); sonuc = S.exportAll(); }
-      finally{ localStorage.getItem = gercek; S.onError = null; kopyayiTazele(); }
+      try{ await kopyayiTazele(); sonuc = S.exportAll(); }
+      finally{ localStorage.getItem = gercek; S.onError = null; await kopyayiTazele(); }
       expect(sonuc.data).toBeTruthy();
       expect(bildirildi.scope).toBe('local-read');
     });
@@ -278,11 +345,12 @@
       await temizle();
       await S.set(ON + 'ortak', { v:'benim' });
       /* İkinci sekmenin yazması: doğrudan localStorage'a dokunur. */
-      const ham = JSON.parse(localStorage.getItem('spi.v1.ben') || '{}');
+      const ak = await anahtar();
+      const ham = JSON.parse(localStorage.getItem(ak) || '{}');
       ham[ON + 'ortak'] = { v:'oteki' };
       ham[ON + 'yalnizOteki'] = { v:1 };
-      localStorage.setItem('spi.v1.ben', JSON.stringify(ham));
-      kopyayiTazele();
+      localStorage.setItem(ak, JSON.stringify(ham));
+      await kopyayiTazele();
       expect((await S.get(ON + 'ortak')).v).toBe('oteki');
       /* Ve bizim bir sonraki yazmamız onun kaydını götürmez. */
       await S.set(ON + 'benimki', { v:2 });

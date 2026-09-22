@@ -1,0 +1,61 @@
+/* KATALOG SİMGESİ — biçim.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/simge.css`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/css/` klasörüne BİREBİR kopyalanır.
+   İşaretlemesi `brand/ortak/simge.js`.
+
+   ------------------------------------------------------------------
+   ÜÇ ÖLÇÜ, ÜÇ İŞ
+
+       sm  16px   satır içinde, yazının yanında
+       md  22px   form etiketi ve liste satırı (varsayılan)
+       lg  34px   kart başlığı
+
+   Ölçüyü çağıran yer seçer ama SERBEST bir sayı vermez: üç basamak
+   yeter ve dördüncüsü, listede iki satırın farklı hizalanması demek
+   olurdu.
+
+   ------------------------------------------------------------------
+   SİMGE YAZIYI İTMEZ
+
+   `.simgeli` bir esnek kutudur ve simge `flex:0 0 auto`. Dosya
+   yüklenmezse `onerror` düğümü kaldırır; kalan yazı SOLA kayar ve
+   hizalama bozulmaz. Görselin yerini boş bırakmak, yüklenmeyen her
+   satırda bir delik demekti. */
+
+.simge{
+  display:block;
+  width:22px; height:22px;
+  flex:0 0 22px;
+  object-fit:contain;
+}
+.simge--sm{ width:16px; height:16px; flex-basis:16px; }
+.simge--lg{ width:34px; height:34px; flex-basis:34px; }
+
+.simgeli{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.simgeli__yazi{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* FORM ETİKETİ. `.field > span` bir satırdır; simge oraya girince
+   yazının taban çizgisi kayıyordu. Etiketin kendisi esnek kutuya
+   dönüşünce ikisi ortadan hizalanır ve ipucu metni yanında kalır. */
+.field > span:has(.simge){
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+/* Koyu temada altın ve mavi ikonlar zeminle yeterince ayrışıyor;
+   yeşil sağlık ikonları da öyle. Bir filtre uygulamak, üretilen
+   rengi ikinci kez boyamak olurdu — görselin kendi rengi onun
+   anlamının parçası (SPO2 mavi, TEMP mor, LAB pembe). */

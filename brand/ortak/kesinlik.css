@@ -1,0 +1,67 @@
+/* KESİNLİK ETİKETİ — biçim.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/kesinlik.css`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/css/` klasörüne BİREBİR kopyalanır.
+   Markupı `brand/ortak/kesinlik.js` üretir (`LIFEOS.KESINLIK_HTML`).
+
+   ------------------------------------------------------------------
+   NEDEN KENDİ DOSYASI
+
+   `components.css` üç arayüzde KISMEN ortak ve bilerek yayılmıyor
+   (bkz. `tools/ortak.py`, «NE YAYILIR, NE YAYILMAZ»). Buradaki
+   biçim ise tamamen ortak: aynı etiket üç ekranda aynı görünmek
+   zorunda. Seviye sisteminin `seviye.css`'i de aynı sebeple ayrı
+   duruyor.
+
+   ------------------------------------------------------------------
+   ÖLÇÜ
+
+   Görsel 16 piksel: satır içinde, sayının yanında duran bir işaret
+   kadar. Daha büyüğü tabloda satır yüksekliğini büyütüyor ve
+   «Kaynak» sütunu «Değer» sütunundan baskın çıkıyordu — oysa
+   okunacak şey önce sayı, sonra sayının nereden geldiği.
+
+   Görsel ZEMİNİ KOYU bir sanat: açık temada kendi halkasıyla zaten
+   ayrışıyor, o yüzden ek bir çerçeve yok. */
+
+.kesinlik{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  white-space:nowrap;
+  line-height:1.2;
+}
+
+.kesinlik__im{
+  width:16px;
+  height:16px;
+  flex:0 0 16px;
+  object-fit:contain;
+  /* Yüklenene kadar yer tutar: satır zıplamaz. */
+  display:block;
+}
+
+/* «Veri yok» SÖNÜK yazılır — ama silik değil.
+
+   Sönük olması doğru: o satırda bir ölçüm yok. Silik olması yanlış
+   olurdu: okunmayan bir etiket, olmayan bir etikettir ve kural tam
+   da orada okunmalı. Kontrast denetimi (`palettecheck`) bu rengi de
+   ölçüyor. */
+.kesinlik--missing .kesinlik__ad{ color:var(--ink-2); }
+
+/* Dar ekranda görsel kalır, yazı gider — 390 pikselde «Alan / Değer /
+   Kaynak» üç sütunu ancak böyle sığıyor ve giden şey tekrar eden
+   kelime, taşınan şey anlam. Başlık (`title`) ve okuyucu metni
+   yerinde kalır. */
+@media (max-width:459.98px){
+  .kesinlik__ad{
+    position:absolute;
+    width:1px; height:1px;
+    padding:0; margin:-1px;
+    overflow:hidden;
+    clip-path:inset(50%);
+    white-space:nowrap;
+  }
+  .kesinlik__im{ width:18px; height:18px; flex-basis:18px; }
+}

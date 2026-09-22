@@ -25,3 +25,10 @@ sunucu.log
 # build.py bunlari dist/img/seviye/ icine kopyalar; uc kopya daha depoya
 # girerse ayni videoyu dort kez tasimis oluruz.
 */dist/img/seviye/
+
+# Marka gorselleri de TEK KOPYA durur: brand/medya/. Ayni gerekce,
+# ayni buyukluk sirasi — uc dist klasoru 29 MB'lik bir kopya demekti.
+# ESP/dist altinda on tanesi bir sure takip edildi; kaynakla ayrisip
+# artik brand/medya'da BULUNMAYAN dosyalar hâline geldiler. Kayit
+# disi birakmak, o ayrismayi bir daha mumkun kilmamak icindir.
+*/dist/img/marka/

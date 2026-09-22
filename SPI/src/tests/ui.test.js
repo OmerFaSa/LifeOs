@@ -181,7 +181,7 @@
 
   describe('Ekranlar — sözleşme', () => {
     const ids = ['today', 'labs', 'meals', 'kitchen', 'move', 'basket',
-      'analytics', 'office', 'team', 'meeting', 'family', 'guide'];
+      'analytics', 'office', 'team', 'meeting', 'family', 'rutbe', 'guide'];
 
     it('bütün ekranlar kayıtlı', () => {
       ids.forEach(id => expect(SP.Screens[id]).toBeTruthy());
@@ -203,8 +203,8 @@
       }));
     });
 
-    it('yedi bölüm vardır ve her ekran tam bir bölüme aittir', () => {
-      expect(SP.App.SECTIONS.length).toBe(7);
+    it('sekiz bölüm vardır ve her ekran tam bir bölüme aittir', () => {
+      expect(SP.App.SECTIONS.length).toBe(8);
       const seen = {};
       SP.App.SECTIONS.forEach(sec => {
         expect(sec.views.length > 0).toBeTruthy();

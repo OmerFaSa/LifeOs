@@ -145,19 +145,46 @@ SP.Screens.today = (function(){
     });
   }
 
+  /* O günün ÖLÇÜLMÜŞ antrenman süresi. `minutes` boş bırakılan bir
+     antrenman «sıfır dakika» değil «veri yok»tur ve sayılmaz. */
+  function OdakRozeti(d){
+    if(!SP.Basarim) return '';
+    const dk = (S.workouts || []).filter(w => w && w.date === d)
+      .reduce((t, w) => t + (w.minutes != null ? Number(w.minutes) || 0 : 0), 0);
+    return SP.Basarim.odakHtml(dk);
+  }
+
   function formEntry(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
     return K.Entry({
       label:'Günün ölçümü',
-      meta:U.fmtDate(d),
+      /* GÜNÜN ODAK ROZETİ — günün raporunda, tarihin yanında.
+         Başarımlar sekmesindeki odak rozeti ömürlük rekordur; bu ise
+         BU GÜNÜN kendisi (bkz. core/basarim.js, gununOdagi). Eşiğin
+         altındaki gün rozet almaz ve boş döner. */
+      meta:raw(SP.h.esc(U.fmtDate(d)) + OdakRozeti(d)),
       note:'Boş bıraktığın alan sıfır sayılmaz — hesaba hiç girmez. Uyku '
         + 'süresini yazman bile anlamlı bir sonuç üretir.',
       action:html`${dayNav(d)}
         ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}`,
       body:html`
         <div class="grid-form">${map(FIELDS, f => K.Field({
-          label:f.label,
+          /* ALANIN SİMGESİ — kimlikten türer, burada ad kurulmaz
+             (bkz. `brand/ortak/simge.js`). On bir alanlık bir ızgarada
+             etiketler birbirine benziyordu: «Büyük tansiyon», «Küçük
+             tansiyon», «İstirahat nabzı» üç satır aynı uzunlukta üç
+             gri yazıydı ve göz hangisine baktığını her seferinde
+             okuyarak buluyordu.
+
+             SİMGE `marker` ALANINDAN gelir, `id`den DEĞİL. İkisi
+             çoğu alanda aynı ama `water`ın `marker`ı bilerek `null`:
+             su bir biyobelirteç değil. `|| f.id` diye bir geri
+             düşüş yazılmıştı ve `olcum-water.webp` her açılışta 404
+             dönüyordu — var olmayacağı bilinen bir dosyayı istemek.
+             (Duman testi bunu yakaladı; her 404'te kırmızıya döner.)
+             Markersız alan simgesiz kalır, etiketi olduğu gibi. */
+          label:raw(window.LIFEOS.SIMGELI('olcum', f.marker, f.label)),
           input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
             min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
         }))}</div>
@@ -269,11 +296,24 @@ SP.Screens.today = (function(){
   function minimumEntry(){
     const m = SP.Calc.minimumDay();
     const streak = SP.Calc.streak();
+    /* ASGARI GUN TAMAMLANDIGINDA bir satir degil bir SONUC yazilir.
+
+       «4 / 4» ile «3 / 4» arasindaki fark ekranda bir rakamdi; gunun
+       bittigini soyleyen sey o rakami okumak zorunda kalmaktı. Kart
+       yalniz hepsi tamamken cizilir — yarim bir gunu tamamlanmis
+       gostermek, olcmedigimiz bir seyi soylemek olurdu. */
+    const bitti = m.total > 0 && m.done >= m.total;
     return K.Entry({
       label:'Asgari gün', hint:'minimum-day',
       meta:m.done + ' / ' + m.total + ' · seri ' + streak + ' gün',
       note:m.note,
-      body:html`<div class="mt-2">${map(m.rows, P.minRow)}</div>`,
+      body:html`
+        ${when(bitti, () => K.NextUp({ icon:'check', calm:true, sanat:'saglik',
+          label:'Asgari gün tamam',
+          title:m.total + ' / ' + m.total + ' · seri ' + streak + ' gün',
+          why:'Bugünün asgarisi kapandı. Seri, girilmiş günlerden sayılır; '
+             + 'girilmemiş gün seriyi kırmaz, sayıya da katılmaz.' }))}
+        <div class="mt-2">${map(m.rows, P.minRow)}</div>`,
     });
   }
 
@@ -583,6 +623,10 @@ SP.Screens.today = (function(){
     const n = liste.filter(x => String(x.id) === String(id))[0];
     if(!n) return;
     const r = await SP.Beacon.resolveIntent(n, action);
+    /* MUHUR YALNIZ ONAYDA BASILIR. Reddetmek de bir cevaptir ama
+       onay degildir; ikisine ayni muhru basmak, muhru anlamsiz
+       kilardi. */
+    if(r.ok && action !== 'reject' && action !== 'dismiss') SP.UI.onayMuhru();
     if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
     S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
     const bas = r.state === 'acknowledged'

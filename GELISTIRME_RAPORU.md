@@ -21,6 +21,142 @@ yerde «göremedim» yazdım.
 
 ---
 
+# DURUM — bu rapordan SONRA ne yapıldı
+
+> Bu blok rapordan sonra eklendi. Raporun **bulguları (BÖLÜM 3) ve iş
+> paketleri (BÖLÜM 4) olduğu gibi duruyor**; yalnız §2.1'deki denetim
+> matrisi, §6'daki soru 1'in cevabı ve §7'deki sıra tablosu durum
+> bilgisiyle güncellendi — bir «bugün böyle» tablosunun eskimesi, bir
+> sonraki oturum için kurulmuş bir tuzaktır. Bir
+> öneriyle sonucu arasındaki fark, bir sonraki oturumun en çok işine
+> yarayan şeydir — o yüzden öneri silinmedi, üstüne yazıldı.
+
+| İş | Durum | Ölçüm |
+|---|---|---|
+| **İP-1** CI bütün denetimleri koşsun | ✅ bitti | `run:` 4 → 22; beş iş (arayüz ×3, seviye, HKM, bütünleşme, haftalık yük) |
+| **İP-2** Beş yıllık yük denetimi | ✅ bitti | üç sistemde de `tools/loadcheck.js`, `sayilar.py` TAM listesinde |
+| **İP-3** Ortak CSS tek kaynağa | ✅ bitti | `brand/ortak/` + `tools/ortak.py`; 4 365 satır tekrar kalktı |
+| **İP-4** Telefon sorusu | ✅ bitti | **Seçenek B** seçildi (depo sahibi); README «Telefonda kullanım» |
+| **İP-5.1** Rütbe görselleri | ◑ 15 kart + 6 sahne geldi | Kutsal'ın K kartları ve küçük rozetler bekliyor |
+| **İP-5.2** HKM brifinginde seviye | ✅ bitti | `manager._level_line`, iki test |
+| **İP-5.3** Defterin bir yıllık boyutu | ✅ ölçüldü | AYS 13 117 B · SPİ 15 157 B · ESP 12 397 B (tavan) |
+| **İP-5.4** Rütbe ekranı ve XP kaynakları | ✅ bitti | üç arayüzde Rütbe bölümü, dört sekme; katalogda `rota`·`nerede`·`nasil` |
+| **İP-5.5** Rozet sistemi | ✅ bitti | 37 rozet + 5 mühür + onur; ay özeti defteri, HKM profili |
+| **İP-6** `labs.js` kapsamı | ⏳ açık | 1 482 satır, hâlâ testsiz |
+
+## Rapor yazılırken bilinmeyen dört şey
+
+Bunlar İP-1 ve İP-2 yapılırken **ölçülerek** bulundu; raporun kendisi
+bunları göremezdi, çünkü ikisi de o denetimleri başka bir makineye
+taşımadan görünmüyordu.
+
+**1 · Dört denetim CI'da HİÇ koşamazdı.** Üç `palettecheck.js` ve
+`ledgercheck.js` tarayıcı yolunu (`/opt/pw-browsers/chromium`) ve sunucu
+klasörünü (`cwd:'/home/user/LifeOs/...'`) SABİT yazıyordu. İkisi de
+yalnız bir geliştirme ortamında var. İş akışına eklenseler, «Executable
+doesn't exist» ya da boş sayfa ölçümü verirlerdi. Dördü de artık
+`CHROMIUM_PATH || undefined` ve `__dirname` kullanıyor.
+
+**2 · Raporun önerdiği CI döngüsü iki aracı yanlış çağırıyordu.**
+`audit.py` hiçbir koşulda çıkış kodu 1 vermez (kırmızıya dönmeyen bir
+denetim, denetim değil bir ölçümdür) ve `evalagents.js` gerçek bir
+sağlayıcı anahtarı ister. İkisi de iş akışından çıkarıldı, gerekçeleri
+`ci.yml` başında yazılı.
+
+**3 · ESP beş yıllık hacimde GEÇMİYORDU.** Rapor «office 210,3 ms,
+geçiyor» diyor; aynı tohumlama `perfcheck.js` kalıbıyla yazıldığında
+ölçüm **475 ms** çıktı (eşik 400). Fark tohumlamanın taslak metinlerinin
+uzunluğundan geliyor — rapordaki ölçüm kısa metinlerle yapılmış olmalı.
+
+Kök neden ölçüldü: `writing.readability` ölçüsü **tek çizimde 214 ms**
+sürüyor, çünkü her karede 268 taslağın tamamı yeniden hecelere
+ayrılıyordu. `core/memo.js` kare önbelleği bunu çözmez — o yalnız aynı
+karedeki tekrarı kaldırır.
+
+Düzeltme, `memo.js`'in kalıcı önbelleğe karşı gerekçesini **kırmadan**
+yapıldı: o gerekçe «kalıcı önbellek *durum değişti mi* sorusunu sormak
+zorundadır» der; okunabilirlikte o soru sorulmaz, çünkü anahtar sürümü
+taşır (`d.id + d.updatedAt`, ve `saveDraft` her kayıtta `updatedAt`i
+yeniden yazar).
+
+```
+office   475 → 249 ms
+toplam  1988 → 866 ms
+```
+
+Üç test bunu koruyor. **Bu, İP-2'nin gerçekten bir duman dedektörü
+olduğunun kanıtı:** ilk koşumunda bir şey buldu.
+
+**4 · Tek dosya sürümü telefon için yazılmış her şeyi kaybediyordu.**
+İP-4'ün seçilen yolu «`dist/*.html`'i telefona kopyala, PWA olarak kur».
+Ama `build.py` `<head>`'i SIFIRDAN yazıyordu — dört etiket ve başlık — ve
+kaynaktaki beş satır sessizce düşüyordu: manifest düğümü, ikon, tema
+rengi ve iki `apple-mobile-web-app-*` etiketi. Sonucu ölçüldü:
+`installManifest()` `#pwa-manifest` düğümünü bulamayıp sessizce
+dönüyor, iOS'ta uygulama tam ekran açılmıyor, ikon hiç gelmiyordu.
+
+Yani seçilen yolu belgelemek, çalışmayan bir yolu belgelemek olacaktı.
+
+Etiketler artık kaynaktan **çıkarılarak** taşınıyor (elle yazılmıyor:
+yarın bir tane daha eklenirse o da taşınır) ve ikon **data URI olarak
+gömülüyor** — tek dosya tek dosyadır, yanındaki `img/` klasörü telefona
+gitmez. `app.js` de manifest ikonunu artık `<link rel="icon">`
+etiketinden okuyor, yola elle yazmıyor.
+
+Üç `smoke.js` her koşumda bunu arıyor; `build.py`'de tek satır kapatılıp
+denetimin kırmızıya döndüğü doğrulandı.
+
+## Rapordan sonra gelen iş — RÜTBE SİSTEMİ
+
+Bu rapor yazıldığında seviye sistemi «kademe + basamak» idi ve görselleri
+yoktu. Sonra depo sahibi on beş rütbe kartı ile altı kademe sahnesi
+üretti ve sistem onların etrafında yeniden kuruldu:
+
+- Beşinci kademe **Hüküm → Safir** (kartların üstünde yazan ad).
+- Altıncı kademe **Kutsal noktasızlaştı**: 6.1/6.2/6.3 yerine
+  K100 … K1000, her biri bir öncekinin ~1,85 katı. K1000 bilerek
+  ulaşılmaz ve bunu bir test koruyor.
+- Kutlama artık **haberci → perde** sırasıyla çalışıyor; Space o ekrana
+  hiç sokmuyor.
+- Görseller `brand/seviye/medya/` altında **kayıpsız** duruyor
+  (15,0 → 11,8 MB, piksel değişmedi) ve `tools/rutbe.py` ile işleniyor.
+
+Ardından rütbenin **durağan** bir evi oldu: üç arayüzde de gezinmede
+kendi **Rütbe** bölümü (Ayarlar ve Ofis gibi bir üst düzey bölüm) ve
+dört sekme — **Şu an**, **Merdiven**, **XP nereden gelir**, **Defter**.
+Üçüncü sekme bu işin sebebiydi: katalogdaki her satır artık `rota`,
+`nerede` ve `nasil` alanlarını taşıyor, yani her puanın hangi işten
+geldiği ve hangi ekranda kazanıldığı yazılı — «Git» düğmesi de oraya
+götürüyor. Motora iki erişimci eklendi (`XP.merdiven`, `XP.bugunku`);
+ikisi de hesaplamaz, defterde yazılı olanı okunabilir kılar. Ekran tek
+kaynaktan (`brand/seviye/rutbe.js`) yayılır; rehberdeki eski «Seviye»
+sekmesi kaldırıldı, çünkü aynı bilgi iki yerde durursa bir gün ikisi
+farklı şey söyler.
+
+Bu iş sırasında bir şey daha ölçüldü: **şema sürümü artışı gün
+kırılımını siliyordu.** `xp.js` biçim değişimi ile eşik değişimini ayırt
+etmiyordu, yani «beşinci kademenin adı Safir oldu» gibi bir katalog
+düzenlemesi kullanıcının yüz yirmi günlük kırılımını arşive atıyordu.
+Ayrıldı: biçim değiştiyse arşiv, eşik değiştiyse yalnız yeniden türetme.
+
+## Değişmeyenler
+
+- Rapordaki **B5** (cihazlar arası senkron yalnız Artifact çalışma
+  zamanında) artık README'de yazılı — kod değişmedi, çünkü davranış
+  zaten doğruydu; eksik olan cümleydi.
+- **BÖLÜM 5 — YAPILMAYACAKLAR** listesine dokunulmadı ve hiçbir maddesi
+  çiğnenmedi.
+- Büyük dosyalar bölünmedi, test sayısı için test yazılmadı, hiçbir
+  denetim eşiği «geçsin diye» gevşetilmedi. `perfcheck` ve `loadcheck`
+  için eklenen `PERF_PAY` bir eşik değişikliği değil bir ORTAM payıdır:
+  varsayılanı 1 (yerel koşum hep sıkı ölçer), yalnız CI 1,5 veriyor ve
+  araç bu payı çıktısına yazıyor — kimse gevşetilmiş bir bütçeyi sıkı
+  sanmasın.
+- `tasarimcheck.js` de `sayilar.py` TAM listesine girdi: CI'ın koştuğu
+  bir denetimin rutin yerel koşumda olmaması, B1'in aynısıydı.
+
+---
+
 # BÖLÜM 0 — BU BELGE NASIL OKUNUR
 
 | Sen kimsin | Nereden başla |
@@ -228,7 +364,7 @@ projenin üstünde bir disiplin. Aşağıdaki bulgular o disiplinin
 | `layoutcheck.js` | 390px taşma + dokunma hedefi | ✅ | ✅ | ✅ |
 | `palettecheck.js` | bütün paletlerde kontrast | ✅ | ✅ | ✅ |
 | `perfcheck.js` | 9 aylık veriyle çizim | ✅ | ✅ | ✅ |
-| `loadcheck.js` | **5 yıllık** veriyle çizim | ❌ | ✅ | ❌ |
+| `loadcheck.js` | **5 yıllık** veriyle çizim | ✅ | ✅ | ✅ |
 | `ledgercheck.js` | defter düzeni | ❌ | ✅ | ❌ |
 | `designcheck.js` | beş düzen × genişlik | ❌ | ✅ | ❌ |
 | `tasarimcheck.js` | tasarım örnekleri | ❌ | ✅ | ❌ |
@@ -238,6 +374,12 @@ projenin üstünde bir disiplin. Aşağıdaki bulgular o disiplinin
 `README.md:116` şunu vaat ediyor: *«Bir denetim bir sistemde bir hata
 bulduysa, aynı denetim ötekilere de taşınır.»* Matris bu sözün
 tutulmadığını gösteriyor.
+
+> **Sonradan:** `loadcheck.js` satırı üç ✅ oldu (İP-2). Kalan üç
+> SPİ-özel denetim hâlâ tek sistemde; ama artık **CI ikisini de
+> koşuyor** ve iş akışı onları `if: matrix.system == 'SPI'` ile değil
+> DOSYA VARLIĞIna bakarak çağırıyor — biri yarın AYS'ye taşınırsa CI'ı
+> düzenlemek gerekmez. Bkz. DURUM bölümü.
 
 ---
 
@@ -1000,13 +1142,21 @@ Bunlar bilinçli olarak önerilmiyor. Bir sonraki oturum bunları
 
 Bunları ajan karara bağlayamaz; depo sahibine ait.
 
-### Soru 1 — Bu sistemi telefonda kullanacak mısın?
+### Soru 1 — Bu sistemi telefonda kullanacak mısın? — **CEVAPLANDI**
 
 | Cevap | Sonuç |
 |---|---|
 | Evet, birincil | İP-4 **Seçenek A**, öncelik en üste çıkar |
-| Evet, ara sıra | İP-4 **Seçenek B**, yarım günlük belge işi |
+| **Evet, ara sıra** ← *seçilen* | İP-4 **Seçenek B**, yarım günlük belge işi |
 | Hayır | İP-4 **Seçenek C**, 390px denetimleri «dar pencere» olur |
+
+Depo sahibi **Seçenek B**'yi seçti: telefon ikincil cihaz. Yerel ağ modu
+(`--ag`) yazılmadı, `sunucu.py` bilerek `127.0.0.1`'de kaldı. Yol
+README'nin «Telefonda kullanım» bölümünde komut düzeyinde yazılı ve
+**iki cihazın iki ayrı defter** olduğu orada açıkça söyleniyor.
+
+Soru 2 (kaç cihaz) bununla birlikte kapandı: iki cihaz, tek yönlü
+taşıma, tek köprü yedek dosyası.
 
 ### Soru 2 — Kaç cihaz?
 
@@ -1028,14 +1178,22 @@ en görünür kazancı verir ama İP-1 (CI) olmadan yapılması risklidir.
 
 # BÖLÜM 7 — ÖNERİLEN SIRA VE ÖLÇÜT
 
-| Tur | İş | Süre | Bitince ne değişir |
-|---|---|---|---|
-| **1** | İP-1 CI | yarım gün | Bir değişiklik bir şeyi bozarsa **birleştirmeden önce** görünür |
-| **2** | İP-2 loadcheck | yarım–bir gün | «Bugün hızlı» ile «yarın da hızlı» ayrı ölçülür |
-| **3** | İP-3 ortak CSS | bir gün | 4 365 satırlık tekrar tek kaynağa iner, ayrışması yakalanır |
-| **4** | İP-4 telefon | karara bağlı | «Hedefliyoruz ama yolu yok» hâli biter |
-| **5** | İP-5 seviye | 2–4 saat | Seviye sistemi tamamlanır |
-| **6** | İP-6 labs kapsamı | bir gün+ | En büyük testsiz dosya korunmaya başlar |
+| Tur | İş | Süre | Bitince ne değişir | Durum |
+|---|---|---|---|---|
+| **1** | İP-1 CI | yarım gün | Bir değişiklik bir şeyi bozarsa **birleştirmeden önce** görünür | ✅ |
+| **2** | İP-2 loadcheck | yarım–bir gün | «Bugün hızlı» ile «yarın da hızlı» ayrı ölçülür | ✅ |
+| **3** | İP-3 ortak CSS | bir gün | 4 365 satırlık tekrar tek kaynağa iner, ayrışması yakalanır | ✅ |
+| **4** | İP-4 telefon | karara bağlı | «Hedefliyoruz ama yolu yok» hâli biter | ✅ Seçenek B |
+| **5** | İP-5 seviye | 2–4 saat | Seviye sistemi tamamlanır | ◑ 5.2 ve 5.3 bitti; 5.1 dosya bekliyor |
+| **6** | İP-6 labs kapsamı | bir gün+ | En büyük testsiz dosya korunmaya başlar | ⏳ açık |
+
+**Sırada ne var.** Beş turun dördü kapandı. Kalan iki iş:
+
+- **İP-5.1** — `brand/seviye/kademe-1..6.png` rozetleri ve
+  `kademe-2..6.mp4` videoları. Ajan tarafında yapılacak bir şey yok;
+  dosya gelince kendiliğinden devreye girer.
+- **İP-6** — `SPI/src/js/screens/labs.js` (1 482 satır, testsiz). Kural
+  aynı: **önce kapsam, sonra bölme.**
 
 **Turların üçü de yeni özellik getirmiyor.** Getirdikleri şey şu: bugün
 doğru olan şeylerin **yarın da doğru kalacağının güvencesi**.

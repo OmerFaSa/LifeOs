@@ -1,0 +1,151 @@
+/* TANITIM ŞERİDİ — ilk kurulumun en üstünde, üç adım.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/tanitim.css`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/css/` klasörüne BİREBİR kopyalanır.
+
+   ------------------------------------------------------------------
+   NEDEN ÜÇ ADIM
+
+   Önce tek bir afiş vardı ve bir şey anlatmıyordu: güzel bir kapaktı.
+   Üç adım bir CÜMLE kuruyor ve üçüncüsü olmadan ilk ikisi eksik:
+
+       1/3   ne ölçüyoruz
+       2/3   neye karar VERMİYORUZ      ← sistemin sınırı
+       3/3   nasıl başlıyoruz
+
+   İkinci adım en önemlisi. SPİ teşhis koymaz, ESP sertifika vermez,
+   AYS meslek seçmez (AGENTS.md §1.5) ve bu sözler bir belgede değil,
+   sistemin İLK ekranında durmalı.
+
+   ------------------------------------------------------------------
+   AFİŞ BİR SÜSTÜR, YAZI DEĞİL
+
+   Panellerin üzerinde yazı var ama o yazı EKRAN OKUYUCUYA GÖRÜNMEZ:
+   görseller `aria-hidden`. Adımın cümlesi altında GERÇEK metin olarak
+   durur (`.tanitim__yazi`) ve noktaların her biri kendi adını söyler.
+   Bir resmin içindeki yazıya güvenmek, o yazıyı okuyamayan herkesi
+   dışarıda bırakmaktır.
+
+   ------------------------------------------------------------------
+   YÜKSEKLİK SABİT DEĞİL
+
+   Paneller 1:3,6 oranında (telefon ekranı gibi). `aspect-ratio`
+   dayatmak dört sistemin panellerinden birini keserdi; kutu içeriğe
+   göre uzar. Adım değişince yükseklik zıplamasın diye üç panel de
+   ÜST ÜSTE durur — görünmeyen ikisi yer kaplamaya devam eder. */
+
+.tanitim{
+  display:grid;
+  gap:12px;
+  margin:0 0 4px;
+}
+
+/* PENCERE, AFİŞ DEĞİL — ve bu ölçülerek öğrenildi.
+
+   Paneller 1:3,6 oranında: telefon ekranından da uzun. Kutuyu
+   sayfanın genişliğine yaydığımızda 880 piksellik bir sayfada 3 200
+   piksel boyunda bir görsel çıktı; kullanıcı forma varmadan önce üç
+   ekran boyu kaydırıyordu.
+
+   Çözüm: panel TELEFON GENİŞLİĞİNDE durur (340 piksel) ve kutu bir
+   PENCEREDİR — panelin üst kısmını gösterir. Orada zaten okunması
+   gereken her şey var: kimlik, başlık ve giriş cümlesi. Alt kısım
+   (özellik rozetleri, imza) süstür ve altındaki gerçek metin onu
+   zaten söylüyor.
+
+   Alt kenardaki solma kırpmanın KASITLI olduğunu söyler: sert bir
+   kesik, yüklenmesi yarıda kalmış bir görsel gibi durur.
+
+   Üç panel aynı ızgara hücresinde (`grid-area:1/1`) üst üste durur;
+   adım değişince kutunun yüksekliği değişmez ve sayfa zıplamaz. */
+.tanitim__kare{
+  display:grid;
+  width:100%;
+  max-width:340px;
+  margin-inline:auto;
+  height:clamp(300px, 42vh, 460px);
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid var(--line, var(--border));
+  box-shadow:0 10px 30px rgba(0,0,0,.22);
+  -webkit-mask-image:linear-gradient(to bottom, #000 78%, transparent 100%);
+  mask-image:linear-gradient(to bottom, #000 78%, transparent 100%);
+}
+
+.tanitim__afis{
+  grid-area:1 / 1;
+  display:block;
+  width:100%; height:100%;
+  /* Üstten hizalı: başlık ve giriş cümlesi pencerenin içinde kalsın. */
+  object-fit:cover;
+  object-position:top center;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .28s ease;
+}
+.tanitim__afis.is-acik{ opacity:1; visibility:visible; }
+
+/* Hareket azaltma tercihinde geçiş YOK: bir süs için hareket
+   isteyen kişi hareketi istemediğini zaten söylemiş. */
+@media (prefers-reduced-motion: reduce){
+  .tanitim__afis{ transition:none; }
+}
+
+.tanitim__alt{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.tanitim__yazi{
+  margin:0;
+  flex:1 1 16ch;
+  min-width:0;
+  font-size:13px;
+  line-height:1.45;
+  color:var(--text-2, var(--ink-2));
+}
+
+.tanitim__noktalar{
+  display:flex;
+  align-items:center;
+  gap:2px;
+  flex:0 0 auto;
+}
+
+/* DOKUNMA HEDEFİ 28 PİKSEL, nokta 8. Noktayı büyütmek onu bir düğme
+   gibi gösterirdi; küçük bırakıp çevresini büyütmek ise `layoutcheck`
+   denetiminin (24px asgari) istediği şey. */
+.tanitim__nokta{
+  appearance:none;
+  width:28px; height:28px;
+  padding:0; margin:0;
+  border:0; background:none;
+  display:grid; place-items:center;
+  cursor:pointer;
+  border-radius:50%;
+}
+.tanitim__nokta::before{
+  content:'';
+  width:8px; height:8px;
+  border-radius:50%;
+  background:var(--text-3, var(--ink-2));
+  opacity:.38;
+  transition:opacity .2s ease, transform .2s ease;
+}
+.tanitim__nokta:hover::before{ opacity:.65; }
+.tanitim__nokta[aria-selected="true"]::before{
+  opacity:1;
+  transform:scale(1.35);
+  background:var(--primary, currentColor);
+}
+.tanitim__nokta:focus-visible{
+  outline:2px solid var(--primary, currentColor);
+  outline-offset:2px;
+}
+@media (prefers-reduced-motion: reduce){
+  .tanitim__nokta::before{ transition:none; }
+}

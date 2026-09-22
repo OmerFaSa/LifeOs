@@ -192,6 +192,11 @@ R.Screens.subjects = (function(){
       return html`
         <button class="${s.id === sid ? 'listitem listitem--tap is-on' : 'listitem listitem--tap'}"
                 data-act="open-subject" data-id="${s.id}">
+          <!-- DERSİN AMBLEMİ — kimlikten türer (bkz. brand/ortak/simge.js).
+               Sekiz ders üst üste sekiz gri satırdı ve göz hangisine
+               baktığını her seferinde okuyarak buluyordu; TYT ile AYT
+               matematiği ise yan yana ayırt edilmiyordu. -->
+          ${raw(window.LIFEOS.SIMGE_HTML('ders', s.id))}
           <div class="grow"><div class="small strong">${s.name}</div>
             <div class="tiny dim">${c.closed}/${c.total} konu kapandı</div></div>
           <div class="w-46">${K.Bar({ value:c.pct, tone:'' })}</div>

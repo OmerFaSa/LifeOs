@@ -35,11 +35,13 @@ try{
    duman testi ikinci hedefe (dist) gecince tarayici bu istegi net::ERR_ABORTED
    ile keser. Bu geculk sayfa gecisinin dogal sonucudur, gercek bir hata
    degildir — splash.js zaten error olayinda da kapaniyor. */
-/* img/seviye/* gormezden gelinir ve bu BILINCLI bir eksikliktir: kademe
-   rozetleri ve gecis videolari kullanici tarafindan tek tek eklenir
-   (bkz. brand/seviye/OKU.md). Dosya yokken rozet kademe numarasina,
-   kutlama da banner'a duser — yani 404 burada bir hata degil, sistemin
-   tasarlanmis ara halidir. Dosyalar eklendikce bu satirlar susar. */
+/* img/seviye/* gormezden gelinir ve bu BILINCLI bir eksikliktir. Onbes
+   rutbe karti ile alti kademe sahnesi yerinde; eksik olanlar Kutsal'in
+   K kartlari (`rutbe-k100 …`) ve kunyedeki kucuk rozet (`rozet-N.png`).
+   Dosya yokken kart yerine kademe/etiket dairesi cizilir, rozet yerine
+   kademe numarasi gorunur — yani 404 burada bir hata degil, sistemin
+   tasarlanmis ara halidir (bkz. brand/seviye/OKU.md). Dosyalar
+   eklendikce bu satirlar susar. */
 const IGNORE = [/fonts\.googleapis\.com/, /fonts\.gstatic\.com/, /favicon\.ico/,
   /img\/brand\/intro\.mp4/, /img\/seviye\//];
 function ignorable(url){ return IGNORE.some(re => re.test(url || '')); }
@@ -65,10 +67,49 @@ async function dismissSetup(page){
    de «temiz» yazar. Son satir bu yuzden ne gezildigini soyler. */
 const SAYAC = { hedef:0, ekran:0, sekme:0 };
 
+/* TELEFON ETIKETLERI — tek dosya surumunde de durmali.
+
+   Tek dosya surumu telefona kopyalanip «Ana ekrana ekle» ile kurulmak
+   icin var (README, «Telefonda kullanim»). `build.py` uzun sure <head>'i
+   sifirdan yaziyordu ve su bes satir sessizce dusuyordu: manifest
+   dugumu, ikon, tema rengi ve iki apple etiketi. Sonucu: `installManifest()`
+   dugumu bulamayip sessizce donuyor, iOS'ta uygulama tam ekran acilmiyor,
+   ikon hic gelmiyordu.
+
+   Sessizce dusen bir sey, ancak onu arayan bir denetim varsa gorulur. */
+async function checkPwa(page, target, errors){
+  const r = await page.evaluate(() => {
+    const el = document.getElementById('pwa-manifest');
+    const href = (el && el.getAttribute('href')) || '';
+    let man = null;
+    try{ man = JSON.parse(decodeURIComponent(href.split(',')[1] || '')); }catch(e){}
+    const ikon = document.querySelector('link[rel="icon"]');
+    return {
+      manifest:!!(man && man.name && man.icons && man.icons.length),
+      ikon:(ikon && ikon.getAttribute('href')) || '',
+      apple:!!document.querySelector('meta[name="apple-mobile-web-app-capable"]'),
+      baslik:!!document.querySelector('meta[name="apple-mobile-web-app-title"]'),
+    };
+  });
+  if(!r.manifest) errors.push(target + ': PWA manifesti kurulmadi (#pwa-manifest)');
+  if(!r.apple) errors.push(target + ': apple-mobile-web-app-capable etiketi yok');
+  if(!r.baslik) errors.push(target + ': apple-mobile-web-app-title etiketi yok');
+  if(!r.ikon) errors.push(target + ': <link rel="icon"> yok');
+  /* Tek dosya TEK DOSYADIR: yanindaki img/ klasoru telefona gitmez.
+     Goreli bir ikon yolu orada 404 verir. */
+  if(target.indexOf('/dist/') === 0 && r.ikon.indexOf('data:') !== 0){
+    errors.push(target + ': tek dosya surumunun ikonu gomulu degil (' 
+      + r.ikon.slice(0, 40) + ')');
+  }
+}
+
+
 async function walkScreens(page, base, target, errors){
   await page.goto(base + target, { waitUntil:'load' });
   await page.waitForSelector('.site', { timeout:15000 });
   await dismissSetup(page);
+
+  await checkPwa(page, target, errors);
 
   const routes = await page.evaluate(() =>
     SP.App.SECTIONS.reduce((acc, s) => acc.concat(s.views.map(v => v.route)), []));
@@ -199,6 +240,129 @@ async function walkFlows(page, base, errors){
   console.log('  akışlar → öğün, tahlil, laboratuvar bağı ve toparlanma çalıştı');
 }
 
+
+/* AÇILIŞTA BEKLEYEN ROZET KUTLAMASI — kuyruk boşalıyor mu.
+
+   Motor «kuyruk defterde durur, uygulama kapansa da kaybolmaz» diyor.
+   Kuyruk gerçekten duruyordu ama onu BOŞALTAN tek yer eşitlemeden
+   dönen yeni rozet listesiydi: perde kapanmadan sekmeyi kapatan biri
+   o rozeti bir daha hiç göremiyordu, ta ki aylar sonra başka bir rozet
+   kazanana kadar. XP'nin aynı hâli çözülmüştü (`bekleyenKutlama`),
+   rozet tarafı unutulmuştu.
+
+   Denetim BİLEREK önce defteri eşitler: eşitleme «değişen yok» derse
+   kuyruğu boşaltan başka hiçbir yol kalmaz, yani sınanan şey gerçekten
+   AÇILIŞ davranışıdır. Bu tarayıcı `reducedMotion:'reduce'` ile açılır,
+   yani perde değil sessiz yol koşar — kuyruk anında boşalmalı. */
+async function rozetKuyrugu(page, base, errors){
+  await page.goto(base + '/index.html', { waitUntil:'load' });
+  await page.waitForSelector('.site', { timeout:15000 });
+  await wait(900);
+
+  const kod = await page.evaluate(async () => {
+    if(!SP.Basarim) return null;
+    /* Defteri eşitle ve kuyruğu boşalt: açılışta «değişen yok» çıksın. */
+    await SP.Basarim.esitleCok(SP.BasarimSayim.gunler(SP.XP.pencere()));
+    let b;
+    while((b = SP.Basarim.bekleyen())) await SP.Basarim.gorundu(b.kod);
+    /* Kutlaması yarıda kalmış bir rozet bırak. */
+    const ham = await SP.Store.get('basarim');
+    const k = window.LIFEOS.ROZETLER[0].kod;
+    ham.kazanilan[k] = SP.U.todayISO();
+    ham.bekleyen = [k];
+    await SP.Store.set('basarim', ham);
+    return k;
+  });
+  if(!kod){ errors.push('rozet kuyruğu: başarım motoru yüklenmedi'); return; }
+
+  await page.reload({ waitUntil:'load' });
+  await page.waitForSelector('.site', { timeout:15000 });
+  await wait(1500);
+
+  const kalan = await page.evaluate(() => {
+    const b = SP.Basarim.bekleyen();
+    return b ? b.kod : null;
+  });
+  if(kalan === kod){
+    errors.push('rozet kuyruğu: açılışta bekleyen kutlama gösterilmedi ('
+      + kod + ' hâlâ kuyrukta)');
+  }
+  console.log('  akışlar → açılışta bekleyen rozet kutlaması boşaldı');
+}
+
+
+/* RÜTBE EKRANINDA AYRAÇSIZ UZUN SAYI OLMAMALI.
+
+   Tek ekranda iki biçim yan yana duruyordu ve ölçüldü:
+
+       TOPLAM         1.500.000 XP      (K.Stat biçimliyor)
+       Bu basamakta     100000 / 1000000 XP
+       Bir sonraki basamağa 900000 XP
+       (üst başlık)   Kutsal K500 · 1500000 XP
+
+   Küçük sayılarda görünmüyordu; XP büyüdükçe okunaksızlaştı. Denetim
+   defteri BÜYÜK bir toplamla kurar — küçük sayıyla koşan bir denetim
+   bu hatayı hiç göremezdi — ve ekranda beş haneden uzun, ayraçsız bir
+   sayı arar.
+
+   ARANAN ŞEY TEK BAŞINA DURAN bir sayı: desenin iki yanında harf ya da
+   rakam olmamalı. İlk yazımda bu sınır yoktu ve denetim kendi kendine
+   kırmızıya döndü — künyedeki DERLEME DAMGASI bir git özetidir
+   (`4f18345+`) ve içinde beş haneli bir rakam dizisi çıkabiliyor.
+   «Damga dört haneyi geçmez» diye yazmıştım; geçiyormuş. */
+async function rutbeSayilari(page, base, errors){
+  await page.goto(base + '/index.html', { waitUntil:'load' });
+  await page.waitForSelector('.site', { timeout:15000 });
+  await wait(700);
+
+  const kuruldu = await page.evaluate(async () => {
+    if(!SP.XP || !SP.Basarim) return false;
+    SP.XP.bosalt();
+    await SP.Store.set('seviye',
+      { surum:window.LIFEOS.SEVIYE_SURUM, toplam:1500000 });
+    await SP.XP.yukle();
+    /* Başarım defteri de BÜYÜK olsun: «Toplam saat» ve «Toplam görev»
+       ancak beş haneye çıkınca ayraç gerektiriyor. */
+    SP.Basarim.bosalt();
+    const aylar = {};
+    for(let i = 0; i < 40; i++){
+      const y = 2023 + Math.floor(i / 12), a = (i % 12) + 1;
+      aylar[y + '-' + String(a).padStart(2, '0')] =
+        { gun:28, dakika:33000, gorev:400, kusursuz:2 };
+    }
+    await SP.Store.set('basarim', { surum:window.LIFEOS.BASARIM_SURUM,
+      aylar:aylar, gunler:{}, enIyi:{ odakDakika:600, odakTaban:600 },
+      kazanilan:{}, bekleyen:[] });
+    await SP.Basarim.yukle();
+    SP.App.go('rutbe');
+    return true;
+  });
+  if(!kuruldu){ errors.push('rütbe sayıları: seviye motoru yüklenmedi'); return; }
+  await wait(700);
+
+  for(const sekme of ['simdi', 'merdiven', 'rozet', 'kazanc', 'defter']){
+    await page.evaluate(t => {
+      const el = document.querySelector('[data-act="rutbe-tab"][data-tab="' + t + '"]');
+      if(el) el.click();
+    }, sekme);
+    await wait(500);
+    const kotu = await page.evaluate(() => {
+      const n = document.querySelector('#view') || document.body;
+      const bulunan = (n.innerText.match(/(?<![0-9A-Za-zçğıöşüÇĞİÖŞÜ])\d{5,}(?![0-9A-Za-zçğıöşüÇĞİÖŞÜ])/g) || []);
+      return bulunan.slice(0, 5);
+    });
+    if(kotu.length){
+      errors.push('rütbe/' + sekme + ': ayraçsız uzun sayı — ' + kotu.join(', '));
+    }
+  }
+  /* Üst başlık da aynı kurala tabi. */
+  const alt = await page.evaluate(() => SP.Screens.rutbe.subtitle());
+  if(/(?<![0-9A-Za-z])\d{5,}(?![0-9A-Za-z])/.test(alt)){
+    errors.push('rütbe alt başlığı: ayraçsız uzun sayı — ' + alt);
+  }
+  console.log('  akışlar → rütbe ekranındaki sayılar binlik ayraçlı');
+}
+
 (async () => {
   const server = spawn('python3', [path.join(ROOT, 'devserver.py'), String(PORT)],
     { cwd:ROOT, stdio:'ignore' });
@@ -227,6 +391,8 @@ async function walkFlows(page, base, errors){
     await walkScreens(page, base, '/index.html', errors);
     await walkScreens(page, base, '/dist/spi.html', errors);
     await walkFlows(page, base, errors);
+    await rozetKuyrugu(page, base, errors);
+    await rutbeSayilari(page, base, errors);
 
     if(errors.length){
       console.log('\n' + errors.length + ' sorun:');

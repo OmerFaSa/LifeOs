@@ -65,11 +65,47 @@
   box-shadow:0 30px 120px rgba(0,0,0,.65);
 }
 
+/* ---------- marka LOGOSU ----------
+
+   Video kalktı, yerine logo geldi. Logo videodan KÜÇÜK durur ve bu
+   kasıtlı: video bir sahneydi ve ekranı hak ediyordu; logo bir
+   imzadır. Ekranı kaplayan bir imza, imza olmaktan çıkar.
+
+   Gölge YOK: saydam zeminli bir logoya kutu gölgesi vermek, olmayan
+   bir dikdörtgenin kenarını çizmekti. */
+.perde__logo{
+  position:relative;
+  width:min(38vw, 300px);
+  height:auto;
+  object-fit:contain;
+  filter:drop-shadow(0 22px 60px rgba(0,0,0,.55));
+  animation:marka-logo-gir .9s cubic-bezier(.16,.84,.28,1) both;
+}
+@keyframes marka-logo-gir{
+  from{ opacity:0; transform:translateY(14px) scale(.94); }
+  to{ opacity:1; transform:none; }
+}
+
+/* Marka perdesinin zemini: logonun kendi rengi sızsın diye bulanık
+   kopya kalır, ama logo saydam olduğu için altına bir zemin gerekir. */
+.perde--marka{
+  background:radial-gradient(70% 55% at 50% 45%, #12131a 0%, #07080c 74%);
+}
+.perde--marka .perde__ortam{
+  /* Logo küçük ve saydam: %116'lık bir kopyayı bulanıklaştırmak
+     ekranı tek renge boyuyordu. Daha dar ve daha sönük. */
+  inset:18%;
+  width:64%; height:64%;
+  object-fit:contain;
+  filter:blur(72px) saturate(1.5);
+  opacity:.42;
+}
+
 /* ---------- araç şeridi ---------- */
 .perde__araclar{
   position:absolute; right:clamp(14px, 3vw, 28px); bottom:clamp(14px, 3vw, 28px);
   display:flex; align-items:center; gap:10px;
-  z-index:2;
+  z-index:4;
 }
 
 /* Cam yüzey — iki düğme de aynı malzemeden. */
@@ -152,7 +188,7 @@
    tercihi) kutlama yine yapılır. Banner bir yedek değil, sistemin asıl
    cümlesidir: video onun üstüne gelen süstür. */
 .perde__banner{
-  position:relative; z-index:1;
+  position:relative; z-index:2;
   display:grid; justify-items:center; gap:18px;
   padding:clamp(24px, 6vw, 56px);
   text-align:center;
@@ -188,7 +224,13 @@
   width:100%; height:100%; object-fit:contain; border-radius:50%;
 }
 .perde__rozet-no{
-  font:600 clamp(30px, 8vw, 46px)/1 ui-serif, Georgia, "Times New Roman", serif;
+  /* «6» da yazabilir «K1000» de: tek harfe göre ayarlanmış bir punto,
+     beş karakterde daireyi taşırırdı. Genişlik sınırı ve küçülme payı
+     ikisini de aynı dairede tutar. */
+  max-width:82%;
+  font:600 clamp(22px, 6.4vw, 40px)/1 ui-serif, Georgia, "Times New Roman", serif;
+  letter-spacing:.02em;
+  white-space:nowrap;
   color:#12100c;
   text-shadow:0 1px 0 color-mix(in srgb, var(--kademe-isik, #fff) 70%, transparent);
 }
@@ -220,6 +262,324 @@
     color-mix(in srgb, var(--kademe-isik, #fff) 60%, transparent), transparent);
 }
 
+/* ================================================================
+   RÜTBE GÖSTERİMİ — sahne, kart, yazı.
+
+   Üç katman, hepsi isteğe bağlı:
+
+     .perde__sahne        o kademenin geniş görseli, arkada, karartılmış
+     .perde__kart         o rütbenin kendi kartı, ortada
+     .perde__banner       kademe adı, etiket ve slogan, kartın altında
+
+   Sahne bir DEKORDUR, kahraman değil: karartılır ve hafifçe
+   büyütülür ki kenarları görünmesin, kartın parıltısı onun üstünde
+   okunsun. Karartmadan bırakmak, kartı fotoğrafın içinde kaybetmekti.
+
+   Kart gelirse banner'ın yuvarlak rozeti gizlenir (`[data-kart]`):
+   kartın üstünde zaten o kademenin taşı duruyor ve aynı şeyi iki kez
+   söylemek, ikisini de zayıflatır.
+   ================================================================ */
+
+.perde--rutbe{
+  row-gap:clamp(14px, 3vh, 28px);
+  /* Zemin sahnesiz de boş kalmasın: kademenin kendi rengi. */
+  background:
+    radial-gradient(120% 90% at 50% 30%,
+      color-mix(in srgb, var(--kademe-renk, #222) 28%, #000) 0%, #000 72%);
+}
+
+.perde__sahne{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  /* ÇERÇEVELEME %24'TEN — hero ve merdiven bandındaki gerekçenin
+     aynısı: sahnenin ortasında kendi yazısı var («KADEME 4 · YAKUT»).
+     GENİŞ EKRANDA işe yarar; telefonda yaramaz ve sebebi aşağıda
+     yazılı (dikey kutuda `cover` yatayda kırpar), orada sahne
+     bütünüyle çekilir. */
+  object-fit:cover; object-position:center 24%;
+  z-index:0;
+  /* Karartma + hafif büyütme. Büyütme, `object-fit:cover` kırpmasının
+     kenarında kalan tek piksellik çizgiyi de alır. */
+  filter:brightness(.38) saturate(1.08);
+  transform:scale(1.04);
+  pointer-events:none;
+}
+
+/* Vinyet: kenarlar koyulaşır, merkez açılır. Kart nereye bakılacağını
+   söylemek zorunda kalmaz. */
+.perde--rutbe::after{
+  content:''; position:absolute; inset:0; z-index:1;
+  pointer-events:none;
+  background:
+    radial-gradient(70% 55% at 50% 42%, transparent 0%, rgba(0,0,0,.55) 100%),
+    linear-gradient(to bottom, rgba(0,0,0,.35), transparent 28%, rgba(0,0,0,.6));
+}
+
+/* ---------- kart ---------- */
+
+.perde__kart{
+  position:relative; z-index:3;
+  order:-1;                      /* yazının ÜSTÜNDE durur */
+  display:grid; place-items:center;
+  max-width:min(86vw, 420px);
+  animation:perde-kart-gir .72s cubic-bezier(.16,.84,.28,1) both;
+}
+@keyframes perde-kart-gir{
+  from{ opacity:0; transform:translateY(18px) scale(.94); }
+  to{ opacity:1; transform:none; }
+}
+
+.perde__kart-gorsel,
+.perde__kart-video{
+  display:block;
+  width:auto; height:auto;
+  max-width:min(86vw, 420px);
+  max-height:min(56vh, 640px);
+  object-fit:contain;
+  /* Kartın kendi kenarı yuvarlak; gölge onu zeminden ayırır. */
+  filter:drop-shadow(0 26px 60px rgba(0,0,0,.72))
+         drop-shadow(0 0 40px color-mix(in srgb, var(--kademe-isik, #fff) 26%, transparent));
+}
+
+/* İdle video geldiğinde kartın yerini alır. İkisi aynı hücrede durur;
+   video oynayabilir hâle gelene kadar görünen şey karttır — yani
+   boşluk hiç olmaz. */
+.perde__kart-video{ grid-area:1 / 1; opacity:0; transition:opacity .4s ease; }
+.perde__kart-gorsel{ grid-area:1 / 1; }
+.perde__kart[data-video="var"] .perde__kart-video{ opacity:1; }
+.perde__kart[data-video="var"] .perde__kart-gorsel{ opacity:0; }
+
+/* Kart geldiyse banner'daki yuvarlak rozet gereksizdir. */
+.perde[data-kart="var"] .perde__rozet{ display:none; }
+.perde[data-kart="var"] .perde__banner{ gap:10px; padding-top:0; }
+
+/* ---------- kademe geçiş karesi ---------- */
+
+/* «ALTIN → YAKUT». Bir kademeden ötekine geçerken basılan TEK kare;
+   kendi başına bitmiş bir gösterimdir — iki kartı, iki adı ve iki
+   sloganı zaten taşır.
+
+   `contain`, `cover` DEĞİL: karenin üstünde yazı var ve kırpmak o
+   yazıyı keser. Kenarda kalan boşluğu `.perde--rutbe` zemini doldurur,
+   yani siyah bir çerçeve değil kademenin kendi rengi görünür.
+
+   Karartma YOK: sahneden farkı budur. Sahne bir dekordur ve kartın
+   arkasında durur; geçiş karesi kahramanın kendisidir. */
+.perde__gecis{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:contain;
+  z-index:4;
+  pointer-events:none;
+  animation:perde-gecis-gir .9s cubic-bezier(.16,.84,.28,1) both;
+}
+@keyframes perde-gecis-gir{
+  from{ opacity:0; transform:scale(1.05); }
+  to{ opacity:1; transform:none; }
+}
+
+/* Kare GELDİĞİNDE kart ve vinyet çekilir. Gelmezse hiçbiri çekilmez;
+   ekranda her hâlükârda bir gösterim kalır. */
+.perde[data-gecis="var"] .perde__kart{ display:none; }
+.perde[data-gecis="var"].perde--rutbe::after{ opacity:0; }
+
+/* BANNER GENİŞ EKRANDA ÇEKİLİR, TELEFONDA KALIR.
+
+   Kare yatay (3:2) ve telefon dikey (1:2): `contain` ile ekranın
+   ortasında 390×260'lık bir şerit oluyor, üstündeki yazı sekiz piksele
+   iniyor ve okunmuyor. Orada sözü taşıyacak olan banner'dır — karenin
+   RESMİ, banner'ın YAZISI. Bu bir tekrar değil: geniş ekranda kare
+   zaten okunuyor ve banner çekiliyor.
+
+   Telefonda kare akışa girer (mutlak değil) ve banner altına düşer;
+   böylece ekranın ortasında asılı bir şerit yerine tam bir gösterim
+   olur. */
+@media (min-width:760px){
+  .perde[data-gecis="var"] .perde__banner{ display:none; }
+}
+@media (max-width:759.98px){
+  .perde__gecis{
+    position:static;
+    width:100%; height:auto;
+    max-height:46vh;
+    order:-1;                    /* yazının ÜSTÜNDE durur */
+    border-radius:14px;
+  }
+  .perde[data-gecis="var"] .perde__banner{ padding-top:0; }
+  /* SATIRLAR BİRBİRİNE YAKLAŞIR. Perde bir ızgaradır ve `align-content`
+     varsayılanı satırları kabın boyuna GERER: iki satır (kare ve
+     banner) 780 pikseli paylaşınca aralarında iki yüz piksellik bir
+     boşluk kalıyordu. `center` satırları içeriklerine indirir ve ikisi
+     birlikte ortalanır. Araç çubuğu mutlak konumludur, bundan
+     etkilenmez. */
+  .perde[data-gecis="var"]{ align-content:center; }
+  /* SAHNE TELEFONDA ÇEKİLİR — geçiş karesi varken.
+
+     `object-position` burada işe YARAMAZ ve denendi: sahne yatay
+     (3:2), telefon dikey (1:2); `cover` görüntüyü boydan doldurur ve
+     yatayda kırpar, yani dikey hizalama hiçbir şeyi kaydırmaz.
+     Sahnenin ortasındaki «KADEME 4 · YAKUT» yazısı banner'ın tam
+     arkasına düşüyor ve iki başlık üst üste biniyordu.
+
+     Geriye kademenin kendi renginden zemin kalır (`.perde--rutbe`) ve
+     yeter: kahraman zaten geçiş karesidir. */
+  .perde[data-gecis="var"] .perde__sahne{ display:none; }
+}
+/* Sahne geçiş karesinin arkasında kalır ve `contain` boşluğunu
+   doldurur — ama iyice karartılır, karenin kendi zemini kazansın. */
+.perde[data-gecis="var"] .perde__sahne{ filter:brightness(.18) saturate(1); }
+
+/* Rütbe perdesinde banner bir YEDEK değil, kartın yazısıdır.
+
+   Kendi yumuşak karartması VAR ve gerekli: sahne bir fotoğraftır ve
+   üstünde kendi yazısı olabilir. Ölçüldü — Kutsal sahnesinde «DAİMA
+   DAHA YÜKSEĞE» satırı tam da bizim etiketimizin altına düşüyordu ve
+   iki yazı birbirini okunmaz yapıyordu. Kart varken bu karartma
+   görünmez bile; kart yokken metni kurtaran şey odur. */
+.perde--rutbe .perde__banner{ animation-delay:.18s; }
+
+/* Karartma banner'ın KENDİ kutusuna değil, ondan taşan bir katmana
+   çizilir. Kutuya çizildiğinde gradyan kenara varmadan bitemiyor ve
+   ekranda soluk bir DİKDÖRTGEN beliriyordu — düzeltmek istediği şeyden
+   daha çok dikkat çeken bir leke. Taşan katmanda gradyan kendi
+   kenarından çok önce sıfırlanır, sınır diye bir şey kalmaz. */
+.perde--rutbe .perde__banner::before{
+  content:''; position:absolute; z-index:-1;
+  inset:-34% -26%;
+  pointer-events:none;
+  background:radial-gradient(50% 50% at 50% 50%,
+    rgba(0,0,0,.66) 0%, rgba(0,0,0,.3) 52%, transparent 74%);
+}
+.perde--rutbe .perde__etiket{
+  font-size:18px;
+  letter-spacing:.2em;
+  color:var(--kademe-isik, #fff);
+}
+
+@media (max-width:420px){
+  .perde__kart-gorsel,
+  .perde__kart-video{ max-height:44vh; }
+}
+
+/* ================================================================
+   HABERCİ — perdeden ÜÇ SANİYE ÖNCE çıkan bildirim.
+
+   Tam ekran bir katmanın habersiz açılması kullanıcıyı işinin
+   ortasında yakalar. Haberci ne olacağını söyler ve geçme şansı
+   verir: Space, ya da dokunmatikte kendi «Geç» düğmesi.
+
+   Sağ üstte durur — okunan metnin ve çoğu arayüzün ana ekseninin
+   dışında. Sol üstte olsaydı başlığın, altta olsaydı alt bandın
+   üstüne binerdi.
+   ================================================================ */
+
+.haberci{
+  position:fixed; z-index:10001;
+  top:clamp(12px, 2vw, 20px);
+  right:clamp(12px, 2vw, 20px);
+  width:min(330px, calc(100vw - 24px));
+  display:grid; gap:4px;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  padding:14px 16px 16px;
+  border-radius:16px;
+  border:1px solid color-mix(in srgb, var(--kademe-isik, #fff) 34%, transparent);
+  background:rgba(14,14,16,.82);
+  -webkit-backdrop-filter:blur(18px) saturate(1.2);
+  backdrop-filter:blur(18px) saturate(1.2);
+  box-shadow:0 18px 50px rgba(0,0,0,.5),
+    0 0 0 1px rgba(255,255,255,.05) inset,
+    0 0 34px color-mix(in srgb, var(--kademe-renk, #fff) 22%, transparent);
+  color:#fff;
+  animation:haberci-gir .38s cubic-bezier(.2,.8,.3,1) both;
+}
+@keyframes haberci-gir{
+  from{ opacity:0; transform:translateX(18px) scale(.97); }
+  to{ opacity:1; transform:none; }
+}
+.haberci--kapaniyor{
+  opacity:0; transform:translateX(12px);
+  transition:opacity .24s ease, transform .24s ease;
+}
+
+/* Üst yazı, ad ve çubuk bütün genişliği alır; sayaç satırı ile «Geç»
+   düğmesi yan yana durur. Düğmeyi mutlak konumlamak, uzun bir kademe
+   adının altına girmesi demekti. */
+.haberci__ust,
+.haberci__ad,
+.haberci__cubuk{ grid-column:1 / -1; }
+.haberci__alt{ grid-column:1; }
+.haberci__gec{ grid-column:2; justify-self:end; }
+
+.haberci__ust{
+  font:500 10px/1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing:.24em; text-transform:uppercase;
+  color:var(--kademe-isik, rgba(255,255,255,.7));
+}
+.haberci__ad{
+  font:500 17px/1.25 ui-serif, Georgia, "Times New Roman", serif;
+  letter-spacing:.03em;
+}
+.haberci__ad b{
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+  color:var(--kademe-isik, #fff);
+}
+.haberci__alt{
+  font:400 12px/1.3 ui-sans-serif, system-ui, sans-serif;
+  color:rgba(255,255,255,.62);
+}
+.haberci__sayi{
+  font-variant-numeric:tabular-nums;
+  font-weight:600; color:rgba(255,255,255,.86);
+}
+.haberci__tus{ display:none; }
+.haberci__tus kbd{
+  font:inherit; font-size:11px;
+  padding:1px 5px; border-radius:5px;
+  border:1px solid rgba(255,255,255,.34);
+  background:rgba(255,255,255,.14);
+  /* Tuş adı, çevresindeki cümleden AÇIK olmalı: ölçüldü, .62
+     opaklıkta cam zemin üstünde gri bir kutuya dönüşüyordu. */
+  color:rgba(255,255,255,.92);
+}
+@media (hover:hover) and (pointer:fine){
+  .haberci__tus{ display:inline; }
+}
+
+/* «Geç» — dokunmatikte Space yoktur. Düğme 36 pikseldir: bu depoda
+   dokunma hedefi 24 pikselin altına inmez. */
+.haberci__gec{
+  -webkit-appearance:none; appearance:none;
+  min-height:36px; padding:0 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.24);
+  background:rgba(255,255,255,.08);
+  color:#fff; cursor:pointer;
+  font:500 13px/1 ui-sans-serif, system-ui, sans-serif;
+  transition:background .18s ease, border-color .18s ease;
+}
+.haberci__gec:hover{
+  background:rgba(255,255,255,.18);
+  border-color:rgba(255,255,255,.42);
+}
+.haberci__gec:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+
+/* Geri sayım çubuğu: kaç saniye kaldığını sayıdan önce göz görür. */
+.haberci__cubuk{
+  margin-top:8px;
+  height:3px; border-radius:999px;
+  background:rgba(255,255,255,.14);
+  overflow:hidden;
+}
+.haberci__cubuk i{
+  display:block; height:100%; width:0;
+  border-radius:999px;
+  background:linear-gradient(90deg,
+    var(--kademe-renk, #888), var(--kademe-isik, #fff));
+  transition:width .1s linear;
+}
+
 /* ---------- hareket azaltma ----------
 
    Açılış perdesi tercihte HİÇ görünmez (bkz. base.css): marka videosu
@@ -229,7 +589,14 @@
   .perde{ transition:none; }
   .perde__banner{ animation:none; }
   .perde__ortam{ display:none; }
-  .perde--seviye .perde__video{ display:none; }
+  /* Rütbe perdesi bu tercihte HİÇ açılmaz (bkz. perde.js, `kutla`);
+     buraya yalnız doğrudan `ac()` çağıran bir perde düşer ve orada da
+     kartın girişi durur — kartın kendisi kalır, çünkü duran bir görsel
+     hareket değildir. */
+  .perde__kart{ animation:none; }
+  .perde__gecis{ animation:none; }
+  .perde__sahne{ transform:none; }
+  .haberci{ animation:none; }
   /* Marka girişi tercihte HİÇ görünmez. JavaScript de onu kaldırır ama
      kural burada da yazılıdır: betik geç çalışsa bile bir kare bile
      görünmesin. Otomasyon (Playwright, reducedMotion:'reduce') bundan
@@ -424,3 +791,857 @@
   font-variant-numeric:tabular-nums;
 }
 .seviye-isler__birim{ opacity:.55; font-size:11.5px; white-space:nowrap; }
+
+/* ================================================================
+   RÜTBE EKRANI — kademe, merdiven ve «XP nereden gelir».
+
+   Perde koyu zeminde durur ve kendi rengini seçebilir; bu ekran
+   UYGULAMANIN içinde yaşar, yani aydınlık ve karanlık temanın
+   ikisinde de okunmak zorunda. Bu yüzden sabit renk yoktur:
+   yüzeyler `currentColor` ile karışır, vurgu ise kademenin kendi
+   rengiyle (`--kademe-renk`) gelir. Tema değişince ekran da değişir,
+   kimse iki ayrı palet bakımı yapmaz.
+   ================================================================ */
+
+.rutbe{ --kademe-renk:currentColor; --kademe-isik:currentColor; }
+
+/* ---------- şu anki rütbe ---------- */
+
+.rutbe-kart{
+  position:relative; overflow:hidden; isolation:isolate;
+  min-height:clamp(180px, 26vw, 240px);
+  display:flex; align-items:center; gap:clamp(14px, 3vw, 26px);
+  padding:clamp(14px, 2.4vw, 22px);
+  border-radius:16px;
+  border:1px solid color-mix(in srgb, var(--kademe-renk) 26%, transparent);
+  background:
+    radial-gradient(120% 140% at 0% 0%,
+      color-mix(in srgb, var(--kademe-renk) 14%, transparent) 0%,
+      transparent 62%),
+    color-mix(in srgb, currentColor 4%, transparent);
+}
+
+/* KADEME SAHNESİ kartın ARKASINDA durur. Depo sahibi altı sahne
+   üretti ve bunlar yalnız kutlama perdesinde görünüyordu — yani yılda
+   birkaç saniye. Burada kalıcı olarak duruyorlar. Okunabilirlik
+   pahasına değil: sahne silik ve üstüne bir karartma biniyor, yazı
+   kontrastı a11ycheck'in ölçtüğü yerde kalıyor. */
+/* ÇERÇEVELEME %24'TEN. Sahnenin ortasında kendi yazısı var
+   («KADEME 4 · YAKUT») ve hero tam oraya denk geliyordu: kartın kendi
+   «Yakut 4.3» başlığının yanında ikinci bir başlık gibi duruyordu. Üst
+   bölge gökyüzü ve amblem — dekor olması gereken şey orada dekor
+   olarak kalıyor. Aynı gerekçe merdiven bandında da yazılı. */
+.rutbe-kart__sahne{
+  position:absolute; inset:0; z-index:-1;
+  width:100%; height:100%;
+  object-fit:cover; object-position:center 24%;
+  pointer-events:none;
+}
+/* Karartma soldan sağa açılır: yazı solda okunur, sahne sağda görünür.
+   Her yere eşit dağıtılan bir perde sahneyi bembeyaz ediyordu. */
+.rutbe-kart::after{
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:linear-gradient(to right,
+    color-mix(in srgb, var(--surface) 90%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 66%, transparent) 46%,
+    color-mix(in srgb, var(--surface) 30%, transparent) 100%);
+}
+/* SAHNE HARİÇ. `> *` derken sahne de yakalanıyordu: `position:relative`
+   mutlak konumu eziyor, resim normal bir kutu olup bütün paneli
+   kaplıyordu — kart ve yazı gözden kayboluyordu. */
+.rutbe-kart > *:not(.rutbe-kart__sahne){ position:relative; z-index:1; }
+
+.rutbe-kart__sol{
+  position:relative; flex:none;
+  width:clamp(104px, 21vw, 164px);
+  display:grid; place-items:center;
+}
+.rutbe-kart__gorsel{
+  width:100%; height:auto; display:block;
+  border-radius:10px;
+  filter:drop-shadow(0 10px 26px color-mix(in srgb, var(--kademe-renk) 38%, transparent));
+}
+/* Kart yoksa (henüz üretilmemiş bir rütbe) altındaki daire görünür.
+   Kart varsa onun ÜSTÜNE biner ve daire hiç görünmez — iki ayrı
+   düğüm yerine tek yığın, iki durumu da tek kuralla çözer. */
+.rutbe-kart__no{
+  grid-area:1 / 1;
+  width:72px; height:72px;
+  display:grid; place-items:center;
+  border-radius:50%;
+  font:600 clamp(15px, 3.4vw, 20px)/1 ui-serif, Georgia, serif;
+  color:#12100c;
+  background:
+    radial-gradient(circle at 50% 38%,
+      color-mix(in srgb, var(--kademe-isik) 62%, transparent) 0%, transparent 64%),
+    conic-gradient(from 210deg,
+      color-mix(in srgb, var(--kademe-renk) 82%, #000) 0%,
+      var(--kademe-isik) 45%,
+      color-mix(in srgb, var(--kademe-renk) 82%, #000) 100%);
+}
+.rutbe-kart__gorsel{ grid-area:1 / 1; z-index:1; }
+
+.rutbe-kart__sag{ min-width:0; display:grid; gap:2px; }
+.rutbe-kart__ust{
+  font-size:11px; letter-spacing:.2em; text-transform:uppercase; opacity:.62;
+}
+.rutbe-kart__ad{
+  margin:0;
+  font:500 clamp(22px, 4.4vw, 32px)/1.1 ui-serif, Georgia, "Times New Roman", serif;
+  letter-spacing:.02em;
+}
+.rutbe-kart__etiket{
+  font:600 14px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums; letter-spacing:.14em;
+  color:color-mix(in srgb, var(--kademe-renk) 82%, currentColor);
+}
+.rutbe-kart__slogan{ margin:6px 0 0; font-size:13px; opacity:.72; }
+
+/* ---------- merdiven ---------- */
+
+.rutbe-kademe{
+  position:relative; overflow:hidden;
+  border-radius:14px;
+  border:1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background:color-mix(in srgb, currentColor 3%, transparent);
+}
+/* Kilitli kademe silik kalır — ama SOLMA ARTIK BLOĞUN TAMAMINDA DEĞİL.
+   Bloğa toptan opaklık vermek kartların da üstünü örtüyordu; oysa depo
+   sahibinin görmek istediği tam olarak o kartlar. Şimdi yalnız başlık
+   ve sahne soluyor, kart kendi kuralıyla (aşağıda). */
+.rutbe-kademe--kilitli .rutbe-kademe__ust{ opacity:.68; }
+.rutbe-kademe--acik{
+  border-color:color-mix(in srgb, var(--kademe-renk) 42%, transparent);
+}
+
+/* SAHNE BANDI — kademenin kendi sahnesi BAŞLIĞIN arkasında durur,
+   kartların değil. Altı sahne, altı kademe, birebir. Sahne kartların
+   da arkasına yayıldığında ikisi birbirini yiyordu: sahne bulanık,
+   kart okunmaz. Bant ayrı kat, kartlar temiz zeminde. */
+.rutbe-kademe__bant{
+  position:relative; isolation:isolate;
+  min-height:104px;
+  display:flex; align-items:flex-end;
+  padding:16px;
+  border-bottom:1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+/* ÇERÇEVELEME %22'DEN ALINIR, ortadan değil. Sahnelerin ortasında
+   kendi yazısı var («KADEME 3 · ALTIN») ve bant tam oraya denk
+   geliyordu: yarısı kesik bir yazı, bandın kendi başlığının yanında
+   ikinci bir başlık gibi duruyordu. Üst bölge gökyüzü ve amblem —
+   dekor olması gereken şey orada dekor olarak kalıyor.
+
+   Hafif bulanıklık: sahne bir DEKORDUR ve bu bandın kahramanı
+   kademenin adı ile arması. Bulanık bir dekor, keskin bir dekordan
+   daha iyi dekordur. */
+.rutbe-kademe__sahne{
+  position:absolute; inset:0; z-index:-1;
+  width:100%; height:100%;
+  object-fit:cover; object-position:center 22%;
+  filter:blur(1.5px) saturate(1.05);
+  transform:scale(1.04);
+  pointer-events:none;
+}
+/* Karartma YAZININ altında ağır, sahnenin üstünde hafif. Her yere eşit
+   dağıtılan bir perde sahneyi bembeyaz ediyordu — sahne konmuş ama
+   gösterilmemiş oluyordu. Soldan sağa açılır: metin solda okunur,
+   sahne sağda görünür. Kontrast a11ycheck'in ölçtüğü yerde kalır. */
+.rutbe-kademe__bant::after{
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:linear-gradient(to right,
+    color-mix(in srgb, var(--surface) 92%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 70%, transparent) 34%,
+    color-mix(in srgb, var(--surface) 26%, transparent) 100%);
+}
+/* Kilitli kademenin sahnesi HİÇ ÇİZİLMEZ; bant yine de bir bant
+   kalsın diye kademe renginde ince bir zemin alır. */
+.rutbe-kademe--kilitli .rutbe-kademe__bant{
+  background:linear-gradient(to right,
+    color-mix(in srgb, var(--kademe-renk) 12%, transparent),
+    transparent 62%);
+}
+
+.rutbe-kademe__ust{
+  flex:1 1 auto; min-width:0;
+  display:flex; align-items:center; gap:12px;
+}
+.rutbe-kademe__ust > div{ flex:1 1 auto; min-width:0; }
+.rutbe-kademe__no{
+  flex:none;
+  width:34px; height:34px;
+  display:grid; place-items:center;
+  border-radius:50%;
+  font:600 15px/1 ui-serif, Georgia, serif;
+  color:#12100c;
+  background:conic-gradient(from 210deg,
+    color-mix(in srgb, var(--kademe-renk) 82%, #000) 0%,
+    var(--kademe-isik) 45%,
+    color-mix(in srgb, var(--kademe-renk) 82%, #000) 100%);
+}
+.rutbe-kademe__ad{
+  margin:0;
+  font:500 20px/1.15 ui-serif, Georgia, "Times New Roman", serif;
+}
+.rutbe-kademe__slogan{ font-size:12px; opacity:.72; }
+
+/* ARMA — kademenin mührü, bandın sağ ucunda.
+
+   Sertifikadaki mühür gibi durur: adı yazan satırın YANINDA, onunla
+   yarışmadan. Armanın üzerinde de kademenin adı yazılıdır ve bu bir
+   tekrar değil, imzadır — 110 piksel boyunda o yazı okunur boyda
+   kalır, daha küçüğünde bulanıklasırdı.
+
+   Dar ekranda GİZLENİR: 390 pikselde ad, slogan ve rozetle aynı satırı
+   paylaşmaya kalkınca üçü de sıkışıyordu. */
+.rutbe-kademe__arma{
+  flex:none;
+  display:none;
+  height:110px; width:auto;
+  /* Kendi zemini VAR ve gerekli: sahnenin ortasındaki amblem ile
+     armanın amblemi üst üste biniyordu — iki amblem yan yana, ikisi de
+     okunmaz. Arma kendi dairesinin içinde durur ve sahne onun arkasında
+     kalır. */
+  padding:4px 10px;
+  border-radius:999px;
+  background:radial-gradient(60% 60% at 50% 45%,
+    color-mix(in srgb, var(--surface) 82%, transparent) 0%,
+    transparent 78%);
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.45));
+}
+@media (min-width:560px){
+  .rutbe-kademe__arma{ display:block; }
+}
+
+/* İÇ — basamak sırası solda, kademe künyesi sağda. Künye satırın
+   SONUNA yapışır; basamaklar büyüdükçe o geri çekilir ve dar ekranda
+   alta iner. */
+.rutbe-kademe__ic{
+  display:flex; flex-wrap:wrap; align-items:flex-start;
+  gap:16px; padding:16px;
+}
+.rutbe-basamaklar{
+  display:flex; flex-wrap:wrap; gap:12px;
+  flex:1 1 auto; min-width:0;
+}
+
+/* KADEME KÜNYESİ — üç hâl, üç cümle.
+
+   Sayı BÜYÜK, çevresi küçük: bakışın önce düştüğü yer sayı olmalı.
+   «Açılışa 14.800 XP» bir hedeftir; «kilitli» bir kapıdır. İkisi aynı
+   bilgiyi taşımaz. */
+.rutbe-kunye{
+  flex:0 0 auto;
+  display:grid; gap:2px; align-content:start;
+  min-width:150px;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid color-mix(in srgb, var(--kademe-renk) 24%, transparent);
+  background:color-mix(in srgb, var(--kademe-renk) 6%, transparent);
+}
+.rutbe-kunye__ust{
+  font:700 10px/1 var(--font-ui, inherit);
+  letter-spacing:.14em; text-transform:uppercase;
+  opacity:.62;
+}
+.rutbe-kunye__sayi{
+  font:600 26px/1.05 ui-serif, Georgia, "Times New Roman", serif;
+  font-variant-numeric:tabular-nums;
+  color:color-mix(in srgb, var(--kademe-renk) 78%, var(--text-1, currentColor));
+}
+.rutbe-kunye__alt{ font-size:11px; opacity:.68; line-height:1.35; }
+.rutbe-kunye__cubuk{
+  display:block; margin-top:6px;
+  height:4px; border-radius:2px;
+  background:color-mix(in srgb, currentColor 12%, transparent);
+  overflow:hidden;
+}
+.rutbe-kunye__cubuk i{
+  display:block; height:100%;
+  background:var(--kademe-renk);
+}
+/* Kilitli künye sönük durur: orada bir kapı var ve kapı parlamaz. */
+.rutbe-kunye--kilit{
+  border-style:dashed;
+  background:transparent;
+}
+.rutbe-kunye--kilit .rutbe-kunye__sayi{ opacity:.72; }
+
+@media (max-width:640px){
+  .rutbe-kunye{ flex:1 1 100%; }
+}
+
+.rutbe-basamak{
+  display:grid; justify-items:center; gap:4px;
+  /* Kutu BÜYÜTÜLDÜ: 84 pikselde rütbe kartının üstündeki yazı
+     seçilmiyordu, yani kart konmuş ama gösterilmemiş oluyordu. Kademe
+     başına üç kart olduğu için geniş ekranda yer de boldu. */
+  width:clamp(96px, 21vw, 148px);
+}
+.rutbe-basamak__kutu{
+  position:relative;
+  width:100%; aspect-ratio:3 / 4;
+  display:grid; place-items:center;
+  border-radius:8px;
+  border:1px solid color-mix(in srgb, currentColor 16%, transparent);
+  background:color-mix(in srgb, currentColor 6%, transparent);
+  overflow:hidden;
+}
+.rutbe-basamak__kutu img{
+  position:absolute; inset:0;
+  width:100%; height:100%; object-fit:contain;
+}
+.rutbe-basamak__etiket{
+  position:relative;
+  font:600 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.8;
+}
+/* Kartı olan basamakta etiket görselin üstünde okunmaz; kart geldiğinde
+   etiket zaten kartın üstünde yazıyor.
+
+   KİLİTLİ BASAMAKTA ETİKET KALIR: orada görünen şey siluettir ve
+   siluetin üstünde hiçbir yazı yoktur. Kural `:has(img)` diye
+   yazılmıştı; siluet gelince kilitli basamağın «4.1» etiketi de
+   kayboldu ve kutu bütünüyle okunmaz oldu. */
+.rutbe-basamak:not(.rutbe-basamak--kilitli) .rutbe-basamak__kutu:has(img)
+  .rutbe-basamak__etiket{ display:none; }
+
+.rutbe-basamak__esik{
+  font:500 10px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.5;
+}
+
+.rutbe-basamak--simdi .rutbe-basamak__kutu{
+  border-color:var(--kademe-renk);
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--kademe-renk) 30%, transparent),
+    0 8px 22px color-mix(in srgb, var(--kademe-renk) 26%, transparent);
+}
+/* KİLİTLİ BASAMAK — kart çizilmez (bkz. `basamakHtml`). Boş bir kutu
+   bırakmak yerine MÜHÜRLÜ gösterilir: kademe renginde sönük bir doku,
+   kesik çerçeve, ortada etiketi. Merdivenin şekli görünür, içeriği
+   görünmez — istenen de buydu. */
+.rutbe-basamak--kilitli .rutbe-basamak__kutu{
+  border-style:dashed;
+  border-color:color-mix(in srgb, var(--kademe-renk) 30%, transparent);
+  background:
+    repeating-linear-gradient(135deg,
+      color-mix(in srgb, var(--kademe-renk) 7%, transparent) 0 6px,
+      transparent 6px 12px),
+    color-mix(in srgb, currentColor 4%, transparent);
+}
+/* SİLUET VARSA TARAMA KALKAR: iki doku üst üste binince siluetin
+   kenarı okunmuyor, kutu bulanık bir leke oluyordu. Tarama yalnız
+   siluetsiz kutuda kalır — K merdiveninin nişanı yok ve orada bandın
+   tek dokusu odur. */
+.rutbe-basamak--kilitli .rutbe-basamak__kutu:has(img){
+  background:color-mix(in srgb, currentColor 3%, transparent);
+}
+
+
+.rutbe-basamak--gecildi .rutbe-basamak__kutu{
+  border-color:color-mix(in srgb, var(--kademe-renk) 38%, transparent);
+}
+
+/* SAYAÇ SATIRI — dört kutu, yer kadar sütun.
+
+   `auto-fit` + `minmax(132px, 1fr)`: geniş ekranda dördü yan yana,
+   tablette ikişer, 390 pikselde yine ikişer (132 × 2 + boşluk = 288,
+   sığıyor). Genel `.grid` kullanılıyordu ve o on iki sütunludur —
+   span sınıfı verilmeyen çocuk BİR sütun kaplıyor, yani telefonda
+   ekranın on ikide biri. */
+.rutbe-sayaclar{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(132px, 1fr));
+  gap:12px;
+}
+
+/* ================================================================
+   BU KADEMEDE NEREDESİN — şerit, arma ve geçiş karesi.
+
+   Merdiven sekmesi altı kademeyi birden gösterir; burası yalnız içinde
+   olunan kademeyi gösterir. Arma şeridin başında, mühür gibi.
+   ================================================================ */
+.rutbe-serit{
+  display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+}
+.rutbe-serit__arma{
+  flex:none;
+  height:96px; width:auto;
+  filter:drop-shadow(0 6px 16px color-mix(in srgb, var(--kademe-renk) 30%, transparent));
+}
+.rutbe-serit__basamaklar{
+  display:flex; flex-wrap:wrap; gap:12px;
+  flex:1 1 auto; min-width:0;
+}
+/* Şeritteki basamak merdivendekinden KÜÇÜK: burada bir kart vitrini
+   değil, bir konum göstergesi var. */
+.rutbe-serit .rutbe-basamak{ width:clamp(74px, 16vw, 104px); }
+
+/* GEÇİŞ KARESİ — kutlamada bir kez görülen kare, burada sakin hâlde.
+
+   Kare geniş ve yatay; `contain` ile tam hâli durur çünkü üstünde iki
+   kademenin adı yazılı ve kırpmak o yazıyı keser. */
+.rutbe-gecis{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+.rutbe-gecis__kare{
+  display:block;
+  width:100%; height:auto;
+  max-height:340px; object-fit:contain;
+  border-radius:12px;
+  background:color-mix(in srgb, var(--kademe-renk) 10%, #000);
+}
+.rutbe-gecis__yazi{
+  margin:8px 0 0;
+  font-size:12px; opacity:.66; line-height:1.45;
+}
+
+/* ---------- XP nereden gelir ---------- */
+
+.rutbe-is{
+  display:grid; gap:6px;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background:color-mix(in srgb, currentColor 3%, transparent);
+}
+.rutbe-is--doldu{
+  border-color:color-mix(in srgb, var(--ok, #2e7d32) 38%, transparent);
+}
+.rutbe-is__ust{
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+}
+/* Simge ADIN İÇİNDE durur, yanında değil.
+
+   Önce kardeş bir düğüm olarak konuldu ve satır bozuldu:
+   `.rutbe-is__ust` bir `space-between` kutusu ve üçüncü çocuk gelince
+   ad ORTAYA kaydı, fiyat sağda kaldı. Simge adın parçası olunca satır
+   yine iki parçadır: solda «simge + ad», sağda fiyat. */
+.rutbe-is__ad{
+  font-weight:600;
+  display:inline-flex; align-items:center; gap:8px; min-width:0;
+}
+.rutbe-is__fiyat{
+  flex:none;
+  font:500 13px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.8;
+}
+.rutbe-is__fiyat b{ font-size:15px; }
+.rutbe-is__nasil{ margin:0; font-size:13px; opacity:.72; }
+.rutbe-is__alt{
+  display:flex; align-items:center; flex-wrap:wrap; gap:8px 12px;
+  font-size:12px;
+}
+/* «Nerede yapılır» — bu ekranın asıl cevabı. Kullanıcının sorduğu şey
+   «ne kazandırır» kadar «nereye gideyim»dir. */
+.rutbe-is__nerede{
+  padding:2px 8px; border-radius:999px;
+  border:1px solid color-mix(in srgb, currentColor 18%, transparent);
+  opacity:.82;
+}
+.rutbe-is__tavan{ opacity:.6; font-variant-numeric:tabular-nums; }
+.rutbe-is__alt .btn{ margin-left:auto; }
+
+.rutbe-kural{ margin:0; padding-left:18px; display:grid; gap:8px; font-size:13px; }
+.rutbe-kural li{ opacity:.86; }
+
+@media (max-width:420px){
+  .rutbe-kart{ flex-direction:column; text-align:center; }
+  .rutbe-kart__sag{ justify-items:center; }
+  .rutbe-is__alt .btn{ margin-left:0; }
+}
+
+/* ==================================================================
+   ROZET KUTLAMASI
+
+   Rütbe perdesiyle AYNI SÖZLEŞME, AYRI SAHNE. Rütbede bir manzara
+   vardır — kademenin kendi dünyası. Rozette yoktur ve olmamalı: rozet
+   bir madalyadır, bir yer değil. O yüzden zemin boş bırakılır ve tek
+   ışık kaynağı madalyanın kendisidir.
+
+   Önce hiç biçim yazılmamıştı ve perde düz siyah çıkıyordu: madalya
+   boşlukta duruyor, tören hissi olmuyordu.
+   ================================================================== */
+
+.perde--rozet{
+  row-gap:clamp(18px, 4vh, 34px);
+  /* Madalyanın ARKASINDAN gelen sıcak ışık. Rengi rozetin kendisinden
+     almıyoruz — otuz yedi rozetin otuz yedi rengi var ve her birine
+     ayrı zemin yazmak, birinin unutulması demekti. Nötr bir altın
+     hepsini taşır. */
+  /* Renkler OPAK olmak zorunda. Önce `rgba(255,214,140,.16)` yazılmıştı
+     ve perde ortasından saydam kalıyordu: arkadaki sayfa gradyanın
+     içinden görünüyordu. Perde bir KATMAN değil bir DUVARdır; ışığı
+     saydamlıkla değil, siyahla karıştırarak yaparız. */
+  background:
+    radial-gradient(58% 44% at 50% 38%,
+      color-mix(in srgb, #FFD68C 17%, #000) 0%,
+      color-mix(in srgb, #8A6428 12%, #000) 44%,
+      #000 78%);
+}
+
+/* Vinyet: kenarlar kapanır, göz ortada kalır. */
+.perde--rozet::after{
+  content:''; position:absolute; inset:0; z-index:1;
+  pointer-events:none;
+  background:
+    radial-gradient(64% 50% at 50% 38%, transparent 0%, rgba(0,0,0,.5) 100%);
+}
+
+/* Madalya rütbe kartından KÜÇÜK durur ve bu kasıtlı: rozet daha sık
+   kazanılır, her seferinde ekranı kaplayan bir şey kutlama olmaktan
+   çıkıp engel olur. */
+.perde--rozet .perde__kart{
+  max-width:min(58vw, 264px);
+  /* KENDİ YIĞIN BAĞLAMI. Halka `z-index:-1` ile çiziliyor; izolasyon
+     olmadan bu, PERDENİN ZEMİNİNİN DE ALTINA iniyor ve perdede halka
+     biçiminde bir delik açıyordu — arkadaki sayfa görünüyordu.
+     Ölçüldü, ekran görüntüsünde yakalandı. */
+  isolation:isolate;
+}
+/* AÇILMA — madalya GRİ gelir, sonra rengine kavuşur.
+
+   Kazanılmamış rozet ekranda rengi alınmış hâlde duruyor
+   (`.rozet-kilit`) ve kullanıcı ona haftalarca bakıyor. Kutlamanın
+   asıl ödülü o grinin kalkmasıdır; madalyayı doğrudan renkli açmak,
+   bekleyişin karşılığını ödememek olurdu.
+
+   Zamanlama: çeyrek saniye gri durur (göz «tanıdık gri»yi yakalasın),
+   sonra bir saniyede rengine döner. Kutlama dört saniye; kalan üç
+   saniye madalyanın kendisine kalır.
+
+   Hareket azaltma tercihinde perde zaten hiç açılmaz (bkz. perde.js),
+   o yüzden burada ayrı bir `prefers-reduced-motion` dalı yok. */
+.perde--rozet .perde__kart img{
+  filter:drop-shadow(0 18px 48px rgba(255, 200, 120, .28));
+  animation:rozet-acil 1.35s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes rozet-acil{
+  0%{
+    filter:grayscale(1) brightness(.72) contrast(1.08)
+           drop-shadow(0 18px 48px rgba(255,200,120,.06));
+    transform:scale(.96);
+  }
+  18%{
+    filter:grayscale(1) brightness(.72) contrast(1.08)
+           drop-shadow(0 18px 48px rgba(255,200,120,.06));
+    transform:scale(.96);
+  }
+  100%{
+    filter:grayscale(0) brightness(1) contrast(1)
+           drop-shadow(0 18px 48px rgba(255,200,120,.28));
+    transform:none;
+  }
+}
+
+/* Işık halkası — madalyanın arkasında yavaşça nefes alır. Hareket
+   azaltma tercihinde perde zaten hiç açılmaz (bkz. perde.js), o yüzden
+   burada ayrıca sormaya gerek yok. */
+.perde--rozet .perde__kart::before{
+  content:''; position:absolute; z-index:-1;
+  left:50%; top:50%; transform:translate(-50%, -50%);
+  width:124%; aspect-ratio:1 / 1;
+  border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(255, 216, 150, .20) 0%, transparent 58%);
+  animation:rozet-nefes 3.4s ease-in-out infinite;
+}
+@keyframes rozet-nefes{
+  0%, 100%{ opacity:.75; transform:translate(-50%, -50%) scale(1); }
+  50%{ opacity:1; transform:translate(-50%, -50%) scale(1.06); }
+}
+
+/* Üst yazı ailenin adını taşır ve o yüzden biraz daha görünür. */
+.perde--rozet .perde__ustyazi{
+  letter-spacing:.26em;
+  color:color-mix(in srgb, #FFD79A 72%, #fff);
+}
+
+/* HABERCİ — rozet için nötr altın. Kademe rengi yoktur; habercinin
+   kademe renkli çizgisi rozette yanıltıcı olurdu. */
+.haberci--rozet{
+  --kademe-renk:#C9A227;
+  --kademe-isik:#FFE9B0;
+}
+
+/* ==================================================================
+   BAŞARIM ROZETLERİ
+   ================================================================== */
+
+.rutbe-rozet__ozet{ margin:0 0 4px; }
+.rutbe-rozet__say{
+  float:right;
+  font:600 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.72;
+}
+
+.rutbe-rozetler{
+  display:flex; flex-wrap:wrap; gap:12px;
+}
+
+.rutbe-rozet{
+  display:grid; justify-items:center; gap:4px;
+  width:clamp(76px, 17vw, 104px);
+  text-align:center;
+}
+.rutbe-rozet__kutu{
+  position:relative;
+  width:100%; aspect-ratio:1 / 1;
+  display:grid; place-items:center;
+  border-radius:50%;
+  overflow:hidden;
+}
+.rutbe-rozet__kutu img{
+  position:absolute; inset:0;
+  width:100%; height:100%; object-fit:contain;
+}
+.rutbe-rozet__etiket{
+  position:relative;
+  font:600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.72;
+}
+/* Rozet varsa etiket görselin üstünde okunmaz; eşik zaten rozetin
+   üstünde yazılı. KİLİTLİDE DE GEÇERLİ: kilitli rozet artık kendi
+   görseliyle duruyor ve eşiği onun üstünde yazıyor. Bir ara kilitlide
+   etiket gösterilmeye çalışıldı ve ölçüldü: madalyanın üzerindeki
+   «100» ile etiketteki «100» üst üste biniyordu. */
+.rutbe-rozet__kutu:has(img) .rutbe-rozet__etiket{ display:none; }
+
+/* KAZANILMAMIŞ ROZET — kesik çevre, rengi alınmış madalya.
+
+   Tarama dokusu KALKTI: rozetin kendisi çizildiği için doku onun
+   arkasında bir kirlilik olarak duruyordu. Kesik çerçeve kaldı, çünkü
+   «henüz değil»i söyleyen şey o. */
+.rutbe-rozet--kilitli .rutbe-rozet__kutu{
+  border:1px dashed color-mix(in srgb, currentColor 20%, transparent);
+}
+.rutbe-rozet--kilitli .rutbe-rozet__ad{ opacity:.5; }
+
+/* ================================================================
+   SİLUET — kilitli olan şeklini gösterir, ayrıntısını göstermez.
+
+   NEDEN VAR. Kural şuydu: «gelmediğimiz rankları göremeyelim». Doğru
+   kural, ama uygulaması fazla ileri gitmişti — otuz yedi rozet ve on
+   beş basamak boş tarama kutusuydu ve yeni bir kullanıcı sistemdeki
+   yüz görselden HİÇBİRİNİ görmüyordu. Ekran, kazanılacak bir şey
+   olduğunu bile söylemiyordu.
+
+   NE YAPAR. `brightness(0)` bütün pikselleri karartır; alfa kanalına
+   DOKUNMAZ. Geriye tam olarak görselin dış hattı kalır: ne rengi, ne
+   taşı, ne üzerindeki yazı okunur. Hafif bulanıklık kenarı yumuşatır
+   ki bir şablon gibi değil, gölge gibi dursun.
+
+   Karanlık temada siluet zemine gömülür; o yüzden `invert(1)` ile
+   beyaza döner ve düşük opaklıkta kalır. İki temada da görünen şey
+   aynıdır: bir gölge.
+   ================================================================ */
+.siluet{
+  filter:brightness(0) blur(.4px);
+  /* %13: ölçüldü. %17'de siluet, kazanılmış nişanla neredeyse aynı
+     ağırlıkta duruyordu ve satır «bir kazanılmış, iki kilitli» yerine
+     «üç şekil» diye okunuyordu. Siluet bir GÖLGEDİR; gölge kendi
+     nesnesinden ağır olamaz. */
+  opacity:.13;
+  transition:opacity .3s ease, filter .3s ease;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .siluet{
+    filter:brightness(0) invert(1) blur(.4px);
+    opacity:.2;
+  }
+}
+:root[data-theme="dark"] .siluet{
+  filter:brightness(0) invert(1) blur(.4px);
+  opacity:.2;
+}
+
+/* KİLİTLİ ROZET — siluet DEĞİL, rengi alınmış hâli.
+
+   Ayrımın gerekçesi `rutbe.js` → `rozetHtml` içinde yazılı: rütbe
+   kartı bir açılıştır ve gizlenir; rozet bir hedeftir ve hedefi
+   gizlemek onu ortadan kaldırmaktır.
+
+   `grayscale(1)` rengi alır, `contrast` ve `brightness` madalyayı
+   zeminden ayıracak kadar bırakır. Kazanıldığında filtre kalkar ve
+   rozet rengine kavuşur — geçiş görünür olsun diye yavaş. */
+.rozet-kilit{
+  /* KARARTMA GEREKLİ, ölçüldü: «Kusursuz» ailesinin rozetleri saydam
+     zemin üstünde İNCE ALTIN çizgiler. Rengi alınınca açık griye
+     dönüyor ve açık temanın beyaz zemininde bütünüyle kayboluyorlardı
+     — rozet konmuş ama gösterilmemiş oluyordu. `brightness(.72)` altını
+     orta griye indirir; kalın gövdeli rozetler bundan zarar görmez. */
+  filter:grayscale(1) brightness(.72) contrast(1.08);
+  opacity:.55;
+  transition:filter .5s ease, opacity .5s ease;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .rozet-kilit{
+    filter:grayscale(1) contrast(.9) brightness(.85);
+    opacity:.4;
+  }
+}
+:root[data-theme="dark"] .rozet-kilit{
+  filter:grayscale(1) contrast(.9) brightness(.85);
+  opacity:.4;
+}
+.rutbe-rozet:hover .rozet-kilit,
+.rutbe-rozet:focus-visible .rozet-kilit{ opacity:.66; }
+
+/* Üzerine gelince siluet de biraz belirginleşir — «burada bir şey
+   var» cümlesi bir kez daha söylenir. Ne olduğu yine söylenmez. */
+.rutbe-basamak:hover .siluet{ opacity:.26; }
+.rutbe-rozet--acik .rutbe-rozet__kutu{
+  filter:drop-shadow(0 6px 16px color-mix(in srgb, currentColor 22%, transparent));
+}
+
+.rutbe-rozet__ad{
+  font-size:11px; line-height:1.25;
+  opacity:.82;
+  /* İki satırdan uzun ad kutuyu büyütmesin: otuz yedi rozet yan yana
+     dururken tek bir uzun ad bütün sırayı kaydırıyordu. */
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+/* AİLENİN SIRADAKİ ROZETİ — halka. Renk ya da boyut kullanılmadı:
+   ikisi de kazanılmış rozetin işaretiyle karışırdı. Halka «bir
+   sonraki bu» der, «bu senin» demez. */
+.rutbe-rozet--sirada .rutbe-rozet__kutu{
+  border:2px solid color-mix(in srgb, var(--kademe-renk, currentColor) 52%, transparent);
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--kademe-renk, currentColor) 12%, transparent);
+}
+.rutbe-rozet--sirada .rozet-kilit{ opacity:.78; }
+
+/* AYRINTI PANELİ — madalya solda, yazı sağda. Dokunulan şey bir
+   madalyaydı; açılan şey de onunla başlamalı. */
+.rutbe-ayrinti{
+  display:flex; align-items:flex-start; gap:14px;
+}
+.rutbe-ayrinti__yazi{ flex:1 1 auto; min-width:0; }
+.rutbe-ayrinti__rozet{
+  flex:none;
+  width:64px; height:64px; object-fit:contain;
+}
+
+/* SIRADAKİ KARTINDAKİ ROZET — satırın başında, küçük. */
+.rutbe-sirada__rozet{
+  flex:none;
+  width:46px; height:46px; object-fit:contain;
+}
+
+/* MÜHÜR SATIRI — kazanılmaz, basılır. Rozet ızgarasından AYRI durur ve
+   bilerek: mührün eşiği, sayacı, tarihi yoktur; onu bir ilerleme
+   çubuğunun yanına koymak kazanılan bir şey sanılmasına yol açardı. */
+.rutbe-muhurler{
+  display:grid; gap:10px; margin-top:8px;
+  grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+}
+.rutbe-muhur{
+  display:flex; align-items:center; gap:12px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background:color-mix(in srgb, currentColor 3%, transparent);
+}
+.rutbe-muhur__gorsel{ flex:none; width:38px; height:38px; object-fit:contain; }
+.rutbe-muhur__yazi{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+.rutbe-muhur__yazi b{ font-size:13px; }
+
+/* Kilitli rozetin ne kadar yaklaştığı — ince bir çizgi, yüzde yazısı
+   değil. Sayıyı yazmak «%38 rozet» gibi anlamsız bir şey okutuyordu. */
+.rutbe-rozet__oran{
+  display:block; width:70%; height:3px; border-radius:2px;
+  background:color-mix(in srgb, currentColor 12%, transparent);
+  overflow:hidden;
+}
+.rutbe-rozet__oran i{
+  display:block; height:100%;
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 62%, transparent);
+}
+
+/* Sahne VİDEOSU, poster görselin durduğu yerde ve aynı kurallarla —
+   çerçeveleme dahil. İki değer ayrı yazılıydı ve biri değişince
+   video ile poster farklı yerden kırpılıyordu. */
+.rutbe-kart video.rutbe-kart__sahne{
+  object-fit:cover; object-position:center 24%;
+}
+
+/* GÜNÜN ODAK ROZETİ — günlük raporda, eylemlerin yanında.
+   Küçük ve satır içi: rapor bir rozet vitrini değil, rozet oradaki
+   sayının yanında duran bir işaret. */
+.odak-rozet{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:3px 10px 3px 3px;
+  border-radius:999px;
+  border:1px solid color-mix(in srgb, currentColor 14%, transparent);
+  background:color-mix(in srgb, currentColor 4%, transparent);
+  vertical-align:middle;
+}
+.odak-rozet__gorsel{
+  width:28px; height:28px; flex:none;
+  object-fit:contain; display:block;
+}
+.odak-rozet__yazi{
+  font:600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.odak-rozet__not{ font-weight:500; opacity:.62; }
+
+/* SIRADAKİ ROZET — en çok yaklaşılan üçü, Başarımlar'ın en üstünde.
+   Satır satır ve dar: bu bir vitrin değil, bir yön işareti. */
+.rutbe-sirada{ display:grid; gap:10px; }
+/* Satır ÜÇ SÜTUN: rozet solda, ad ortada, kalan sağda; çubuk altta
+   ikisinin genişliğinde. Rozet yoksa (dosya gelmemiş) sütun daralır
+   ve satır eskisi gibi iki sütun kalır. */
+.rutbe-sirada__sat{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:2px 12px;
+  align-items:center;
+}
+.rutbe-sirada__rozet{ grid-row:1 / span 2; }
+.rutbe-sirada__cubuk{ grid-column:2 / -1; }
+.rutbe-sirada__ad{ font-size:13px; font-weight:600; }
+.rutbe-sirada__kalan{
+  font:500 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric:tabular-nums;
+  opacity:.7; white-space:nowrap;
+}
+.rutbe-sirada__cubuk{
+  display:block; height:4px; border-radius:2px; overflow:hidden;
+  background:color-mix(in srgb, currentColor 10%, transparent);
+}
+.rutbe-sirada__cubuk i{
+  display:block; height:100%;
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 58%, transparent);
+}
+
+/* ROZET DÜĞMESİ — dokunulabilir ve klavyeyle gezilebilir.
+   Önce `div` + `title` idi: masaüstünde iş görüyordu ama telefonda
+   dokunmanın hiçbir karşılığı yoktu. */
+button.rutbe-rozet{
+  appearance:none; background:none; border:0; padding:4px 2px;
+  font:inherit; color:inherit; text-align:center; cursor:pointer;
+  border-radius:10px;
+  transition:background-color .14s ease;
+}
+button.rutbe-rozet:hover{
+  background:color-mix(in srgb, currentColor 5%, transparent);
+}
+button.rutbe-rozet:focus-visible{
+  outline:2px solid var(--kademe-renk, currentColor);
+  outline-offset:2px;
+}
+.rutbe-rozet--secili{
+  background:color-mix(in srgb, var(--kademe-renk, currentColor) 12%, transparent) !important;
+}
+
+.rutbe-ayrinti__ne{ margin:0 0 4px; }
+.rutbe-ayrinti__durum{ margin:0; font-size:13px; }

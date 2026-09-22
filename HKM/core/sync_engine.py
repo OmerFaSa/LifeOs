@@ -54,6 +54,16 @@ RANGES = {
     "xp_today": (0, 100000), "xp_total": (0, 100000000),
     "level_step": (0, 1000), "level_tier": (0, 100),
     "level_sub": (0, 100),
+    # ROZET SAYACLARI — OMURLUK toplamlar, bir gunun degeri DEGIL.
+    # Acikca yazilmalari sart: birim eki `badge_hours`i `hours` sanip
+    # 0–24 araligina sokuyordu ve 100 saatlik bir toplam 422 ile geri
+    # donuyordu. Olculdu, sessiz degildi — ama neden oldugu ancak
+    # buraya bakinca anlasiliyordu.
+    "badge_days": (0, 36500), "badge_hours": (0, 500000),
+    "badge_tasks": (0, 10000000), "badge_count": (0, 1000),
+    "badge_streak_months": (0, 1200),
+    # Bunun tek gun olcusu olmasi DOGRU: «bir gunde en uzun odak».
+    "badge_focus_hours": (0, 24),
 }
 
 

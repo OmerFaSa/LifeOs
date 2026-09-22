@@ -718,6 +718,33 @@ td.num, th.num{ text-align:right; font-variant-numeric:tabular-nums; }
 .nextup__title{ font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); line-height:1.25; margin-top:1px; }
 .nextup__why{ font-size:var(--fs-sm); color:var(--text-2); margin-top:2px; }
 .nextup--calm{ background:var(--surface); border-color:var(--border); }
+/* BİTTİĞİNİ SÖYLEYEN GÖRSEL — yalnız sakin hâlde.
+
+   Arkada, kartın kendi zeminine karışır; üstündeki yazıyı bastırmaz.
+   Bu yüzden kontrast sabit bir opaklıkla değil, karta uyan bir
+   maskeyle düşürülür: açık temada görsel açılır, koyuda koyulur.
+
+   `object-position:center 38%` — teslimattaki beş karede de parlayan
+   halka üst üçte birdedir; ortadan hizalamak halkayı kesiyordu. */
+.nextup--sanat{ position:relative; overflow:hidden; isolation:isolate; }
+.nextup__sanat{
+  position:absolute; inset:0; z-index:-1;
+  width:100%; height:100%;
+  object-fit:cover; object-position:center 38%;
+  opacity:.5;
+  pointer-events:none;
+}
+.nextup--sanat::after{
+  content:''; position:absolute; inset:0; z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(100deg,
+    color-mix(in srgb, var(--surface) 88%, transparent),
+    color-mix(in srgb, var(--surface) 58%, transparent));
+}
+/* Görsel geldiğinde kutunun kendi zemini çekilir: iki zemin üst üste
+   binince yazı ikisinin arasında kalıyordu. */
+.nextup--sanat.nextup--calm{ background:var(--surface-2, var(--surface)); }
+
 .nextup--calm .nextup__icon{ background:var(--surface-3); color:var(--text-2); }
 .nextup--calm .nextup__label{ color:var(--text-3); }
 /* Dar ekranda eylem düğmesi gövdeyi sıkıştırmasın: alt satıra iner. */
@@ -2289,6 +2316,24 @@ body.is-dragging .drop.is-over{
    şey anlatır: sistem ne yapar (ve ne yapmaz), beş alan neden sorulur,
    bu beş alan neyi açar. */
 .setup{ display:flex; flex-direction:column; gap:26px; }
+
+/* TANITIM AFİŞİ — sihirbazın en üstünde, ilk kurulumda.
+
+   `aspect-ratio` YOK ve `height:auto`: afişin kendi oranı neyse o
+   kalır. Sabit bir orana zorlamak, dört sistemin dört ayrı afişinden
+   birini keserdi.
+
+   Sayfanın ilk boyamasını geciktirmemesi için `loading="lazy"`
+   işaretlidir (işaretleme tarafında); burada yalnız yer ayrılır. */
+.setup__afis{
+  display:block;
+  width:100%; height:auto;
+  border-radius:14px;
+  border:1px solid var(--line);
+  /* Üstteki köşeler kağıdın kenarına değmesin diye küçük bir iç
+     boşluk değil, gölge kullanılır: iç boşluk afişi küçültürdü. */
+  box-shadow:0 10px 30px rgba(0,0,0,.22);
+}
 
 .setup__kicker{
   margin:0 0 6px; font-size:10px; font-weight:700; letter-spacing:.15em;

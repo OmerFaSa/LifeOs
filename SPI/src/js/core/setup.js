@@ -12,7 +12,7 @@ window.SP = window.SP || {};
 SP.Setup = (function(){
   const U = SP.U;
   const K = SP.C;
-  const { html } = SP.h;
+  const { html, raw } = SP.h;
 
   /* Profilde hesap icin gereken alanlar eksikse sihirbaz gerekir. */
   function needed(){
@@ -49,6 +49,25 @@ SP.Setup = (function(){
       title:'SPİ', subtitle:'kişisel ve aile odaklı sağlık sistemi',
       wide:true, noClose:true,
       body:String(html`<div class="setup">
+
+        <!-- TANITIM AFISI — sisteme ILK giren burada durur.
+
+             ALT METNI BOS ve aria-hidden: afisin uzerinde yazan sey
+             (baslik, cumle, dort ozellik) hemen ALTINDA gercek metin
+             olarak zaten yaziyor. Ayni cumleyi bir de alt metinde
+             tekrarlamak, ekran okuyucuya her seyi iki kere okutmakti.
+             Afis burada bir SUSTUR ve susun alt metni bos olur.
+
+             Dosya yoksa onerror dugumu kaldirir; sihirbaz eskisi gibi
+             calisir.
+
+             NOT: bu yorum bir sablon dizesinin (template literal)
+             ICINDE duruyor — icinde TERS TIRNAK OLAMAZ. Ilk yazimda
+             alt sozcugu ters tirnak icine alinmisti ve dize orada
+             kapandi: butun dosya
+             ayrisamadi, SPI'nin dokuz yuz testi «SP.Setup tanimsiz»
+             diye dustu. -->
+        ${raw(window.LIFEOS.TANITIM_HTML('spi'))}
 
         <div class="setup__hero">
           <p class="setup__kicker">İlk kurulum</p>

@@ -1037,6 +1037,13 @@ ESP.App = (function(){
     },
     async 'setup-save'(){ await ESP.Setup.save(); },
     async 'setup-skip'(){ ESP.Setup.skip(); },
+    /* TANITIM ŞERİDİ — nokta basıldığında panel değişir.
+
+       Sihirbaz YENİDEN ÇİZİLMEZ: `TANITIM_ADIM` doğrudan DOM'a
+       dokunur. Yeniden çizmek, kullanıcının o ana kadar yazdığı
+       alanları silmek olurdu — bir süsü değiştirmek için formu
+       sıfırlamak. */
+    'tanitim-adim'(el){ window.LIFEOS.TANITIM_ADIM(el); },
     /* Herhangi bir ekrandan bir ajana soru sormak için. */
     async 'ask-agent'(el){
       S.ui.officeAgent = el.dataset.agent || 'patron';
@@ -1108,6 +1115,35 @@ ESP.App = (function(){
      Hareket azaltma tercihinde perde HİÇ açılmaz (bkz. core/perde.js):
      tam ekran bir katman açıp odağı çalmak, o tercihi isteyen kişinin
      istemediği şeydir. Bilgi yine verilir, yalnız sesi kısılır. */
+  /* Rozet kutlaması — sırayla, BİR SEFERDE BİR TANE.
+
+     Bir eşitleme birden çok rozet açabilir (ilk kurulumda geçmiş veri
+     bir anda yirmi rozet doldurabilir). Yirmi perdeyi arka arkaya
+     açmak kutlama değil ceza olurdu; kuyruk defterde durur, biri
+     kapanınca sıradaki gelir ve uygulama kapansa da kaybolmaz. */
+  /* Aynı rozet için İKİ perde açılmasın. `rozetKutla` iki yerden
+     çağrılıyor (açılışta bir kez, eşitleme yeni rozet bulunca) ve
+     ikisi arka arkaya gelirse kuyruktaki rozet henüz damgalanmamış
+     olur: ikinci çağrı AYNI rozeti bir kez daha açardı. */
+  let rozetPerdede = false;
+
+  function rozetKutla(){
+    if(!ESP.Basarim || !ESP.Perde || rozetPerdede) return;
+    const r = ESP.Basarim.bekleyen();
+    if(!r) return;
+    rozetPerdede = true;
+    const damgala = () => {
+      rozetPerdede = false;
+      return ESP.Basarim.gorundu(r.kod)
+        .then(() => rozetKutla()).catch(() => {});
+    };
+    const sonuc = ESP.Perde.rozetKutla(r, { bitti:damgala });
+    if(sonuc && sonuc.sessiz){
+      UI.toast('Yeni rozet — ' + r.ad);
+      damgala();
+    }
+  }
+
   function kutla(y){
     if(!y || !ESP.Perde || !ESP.XP) return;
     const damgala = () => ESP.XP.kutlandi()
@@ -1115,7 +1151,7 @@ ESP.App = (function(){
     const sonuc = ESP.Perde.kutla(y, { bitti:damgala });
     if(sonuc && sonuc.sessiz){
       const ad = (y.kademeBilgi && y.kademeBilgi.ad) || ('Kademe ' + y.kademe);
-      UI.toast('Seviye atladın — ' + ad + ' ' + y.etiket);
+      UI.toast('Yeni rütbe — ' + ad + ' ' + y.etiket);
       damgala();
     }
   }
@@ -1136,6 +1172,17 @@ ESP.App = (function(){
            panel; bütün sayfayı çizmek, tıklanan öğeyi kullanıcının
            altından çekmek demekti (bkz. core/xp.js, tazele). */
         if(r && r.degisti) ESP.XP.tazele();
+
+        /* ROZETLER AYNI TETİKTE ama AYRI DEFTERDE. Aynı yerden
+           çağrılırlar çünkü ikisini de tetikleyen şey aynı: veri
+           değişti. Ayrı defterde dururlar çünkü ölçtükleri şey ayrı —
+           XP «hangi iş kaç puan», rozet «kaç saat, kaç gün, kaç görev».
+           Biri ötekinin eşiğini değiştirmez. */
+        if(ESP.Basarim){
+          const b = await ESP.Basarim.esitleCok(
+            ESP.BasarimSayim.gunler(ESP.XP.pencere()));
+          if(b && b.yeni.length) rozetKutla();
+        }
       }catch(e){ console.error('XP eşitlenemedi:', e); }
     }, 400);
   }
@@ -1385,7 +1432,14 @@ ESP.App = (function(){
     /* Once "E" harfi ureten bir SVG'ydi; artik gercek marka gorseli
        (img/brand/favicon.png, kare kirpilmis logo). Dosya degisirse ikon
        da kendiliginden degisir, burasi hic dokunulmaz. */
-    const icon = new URL('img/brand/favicon.png', location.href).href;
+    /* Ikon <link rel="icon"> etiketinden OKUNUR, yola elle yazilmaz.
+       Tek dosya surumunde build.py o etiketin icine ikonu data URI
+       olarak gomer; kurulan uygulamanin ikonu da boylece dosyayla
+       birlikte gider. Kaynak surumde etiket goreli yolu tasir ve sonuc
+       degismez. Etiket hic yoksa eski davranis surer. */
+    const ikonEl = document.querySelector('link[rel="icon"]');
+    const ikonRef = ikonEl && ikonEl.getAttribute('href');
+    const icon = new URL(ikonRef || 'img/brand/favicon.png', location.href).href;
     const manifest = {
       name, short_name:'ESP', start_url:location.href, scope:'./',
       display:'standalone', background_color:'#F7F8FA', theme_color:'#2F5A8A',
@@ -1456,6 +1510,7 @@ ESP.App = (function(){
          özellikti. */
       try{
         if(ESP.XP) await ESP.XP.yukle();
+        if(ESP.Basarim) await ESP.Basarim.yukle();
       }catch(e){
         console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
       }
@@ -1481,6 +1536,19 @@ ESP.App = (function(){
           const bekleyen = ESP.XP.bekleyenKutlama();
           if(bekleyen) kutla(bekleyen);
         }
+        /* ROZET KUYRUĞU DA AÇILIŞTA BOŞALIR — ve bir süre boşalmıyordu.
+
+           Motor «kuyruk defterde durur, uygulama kapansa da kaybolmaz»
+           diyor ve kuyruk gerçekten duruyordu; onu boşaltan tek yer
+           `esitleCok`ten dönen YENİ rozet listesiydi. Yani kutlaması
+           yarıda kalan biri (perde kapanmadan sekmeyi kapatmak yeter)
+           o rozeti bir daha hiç göremiyordu — ta ki aylar sonra başka
+           bir rozet kazanana kadar.
+
+           XP'nin aynı hâli yukarıda çözülmüştü (`bekleyenKutlama`);
+           rozet tarafı unutulmuştu. Kuyruk boşsa bu çağrı hiçbir şey
+           yapmaz. */
+        rozetKutla();
       }catch(e){
         console.error('Seviye kutlaması açılamadı.', e);
       }

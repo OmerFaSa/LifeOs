@@ -212,6 +212,25 @@ SP.Beacon = (function(){
         out.level_sub = metric(sv.basamak, 'computed');
       }
     }
+
+    /* ROZET SAYAÇLARI — merkez profilinin girdisi.
+
+       Üç arayüz birbirini GÖRMEZ (AGENTS.md §1.4); «bütün alanların
+       toplamı 5000 saat» gibi bir rozet yalnız merkezde hesaplanabilir
+       ve bu satırlar onun girdisidir. Merkez bunları TOPLAR, kendi
+       rozetini kendi verir; modülün kendi rozetiyle karışmaz.
+
+       Kademe gibi bunlar da BUGÜNÜN durumudur ve geçmişe yazılmaz:
+       «üç ay önceki gün toplam 400 saatti» diye bir ölçüm yoktur,
+       olan tek şey bugünkü toplamdır. */
+    if(!gecmisMi(d) && SP.Basarim){
+      const rz = SP.Basarim.isaret();
+      if(rz){
+        Object.keys(rz).forEach(function(k){
+          out[k] = metric(rz[k], 'computed');
+        });
+      }
+    }
     if(levelOf() === 'gelismis') Object.assign(out, genis(d, v));
     return out;
   }
@@ -257,8 +276,21 @@ SP.Beacon = (function(){
     return { module:MODULE, date:d, version:CONTRACT, metrics:collect(d) };
   }
 
-  const LABELS = { measured:'ölçüldü', estimated:'tahmin',
-    computed:'hesaplandı', missing:'veri yok' };
+  /* ETİKETİN TÜRKÇESİ BURADA YAZILMAZ.
+
+     Bu dört karşılık üç arayüzün `beacon.js` dosyasında AYRI AYRI
+     yazılıydı. Üçü de aynıydı; aynı kalacaklarını söyleyen hiçbir şey
+     yoktu — ve ayrıştıklarında fark ancak iki ekran yan yana konunca
+     görülürdü. Tek kaynak `brand/ortak/kesinlik.js`; oradan üçe
+     yayılır ve `tools/ortak.py --denetle` ayrışmayı CI'da yakalar.
+
+     Katalog yüklenmemişse KİMLİK yazılır, uydurma bir karşılık
+     değil (AGENTS.md §1.7). */
+  function etiketAdi(cert){
+    const L = window.LIFEOS;
+    const e = L && L.KESINLIK_ILE ? L.KESINLIK_ILE(cert) : null;
+    return e ? e.ad : String(cert);
+  }
 
   /* Kullanıcı ne gönderildiğini GÖRMEDEN açmamalı. */
   function preview(dateISO){
@@ -266,7 +298,7 @@ SP.Beacon = (function(){
     const satirlar = Object.keys(p.metrics).map(function(k){
       const m = p.metrics[k];
       return { key:k, value:m.value, cert:m.cert,
-        label:LABELS[m.cert] || m.cert };
+        label:etiketAdi(m.cert) };
     });
     return { payload:p, rows:satirlar, errors:contract(p) };
   }
@@ -699,5 +731,5 @@ SP.Beacon = (function(){
     INTENT_KINDS, APPLIABLE,
     resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
     intentDoubts, clearDoubt,
-    MODULE, CONTRACT, LABELS, ASGARI_ARA_DK };
+    MODULE, CONTRACT, ASGARI_ARA_DK };
 })();

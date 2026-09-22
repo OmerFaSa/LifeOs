@@ -8,7 +8,7 @@ window.R = window.R || {};
 
 R.Setup = (function(){
   const U = R.U, M = R.Model, UI = R.UI, S = R.S;
-  const { html, when, map } = R.h;
+  const { html, raw, when, map } = R.h;
   const K = R.C;
 
   const STEPS = [
@@ -240,6 +240,14 @@ R.Setup = (function(){
       subtitle:'Adım '+(step+1)+' / '+STEPS.length+' · '+s.note,
       wide:true,
       body:String(K.Stack([
+        /* TANITIM AFISI — yalniz ILK kurulumun ILK adiminda. Ayarlardan
+           yeniden acilan sihirbazda gosterilmez: orada kullanici zaten
+           sistemin icinde ve bir tanitim afisi, bildigi seyi anlatan
+           bir gecikmedir.
+
+           `alt` bos ve `aria-hidden`: afisteki cumleler adimlarin
+           icinde gercek metin olarak duruyor. */
+        when(isFirstRun && first, () => raw(window.LIFEOS.TANITIM_HTML('ays'))),
         html`<div class="wizsteps">${map(STEPS, (x, i) => html`
           <span class="${i === step ? 'wizstep is-on' : i < step ? 'wizstep is-done' : 'wizstep'}"
             title="${x.title}"></span>`)}</div>`,

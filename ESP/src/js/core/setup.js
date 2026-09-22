@@ -30,7 +30,7 @@ window.ESP = window.ESP || {};
 ESP.Setup = (function(){
   const U = ESP.U;
   const K = ESP.C;
-  const { html, map, when } = ESP.h;
+  const { html, raw, map, when } = ESP.h;
 
   /* Sihirbaz yalnizca ad yoksa gerekir. Odak ve dilin varsayilani vardir ve
      varsayilan dogru calisir — zorunlu soru sayisi bir tutulur. */
@@ -46,6 +46,25 @@ ESP.Setup = (function(){
       title:'ESP', subtitle:'entelektüel seviye planlayıcı',
       wide:true, noClose:true,
       body:String(html`<div class="setup">
+
+        <!-- TANITIM AFISI — sisteme ILK giren burada durur.
+
+             ALT METNI BOS ve aria-hidden: afisin uzerinde yazan sey
+             (baslik, cumle, dort ozellik) hemen ALTINDA gercek metin
+             olarak zaten yaziyor. Ayni cumleyi bir de alt metinde
+             tekrarlamak, ekran okuyucuya her seyi iki kere okutmakti.
+             Afis burada bir SUSTUR ve susun alt metni bos olur.
+
+             Dosya yoksa onerror dugumu kaldirir; sihirbaz eskisi gibi
+             calisir.
+
+             NOT: bu yorum bir sablon dizesinin (template literal)
+             ICINDE duruyor — icinde TERS TIRNAK OLAMAZ. Ilk yazimda
+             alt sozcugu ters tirnak icine alinmisti ve dize orada
+             kapandi: butun dosya
+             ayrisamadi, SPI'nin dokuz yuz testi «SP.Setup tanimsiz»
+             diye dustu. -->
+        ${raw(window.LIFEOS.TANITIM_HTML('esp'))}
 
         <div class="setup__hero">
           <p class="setup__kicker">İlk kurulum</p>

@@ -57,15 +57,55 @@ R.Store = (function(){
       || /quota|storage.*full/i.test(e.message || '');
   }
 
+  /* ---------- ayristirilmis kopya ----------
+
+     HER YAZMA TUM DEPOYU AYRISTIRIYORDU. `lSet` once `localAll()` ile
+     butun kaydi JSON'dan cozuyor, tek anahtari degistirip yeniden
+     serilestiriyordu; yani bir kayit girmenin maliyeti, o gune kadar
+     girilmis HER SEYIN boyutuyla buyuyordu.
+
+     Bu iyilestirme SPI ve ESP'de vardi, AYS'de YOKTU — ve AYS en cok
+     kayit biriktiren sistem (dokuz aylik sinav yilinda gun, blok,
+     deneme, kart, hata). Fark olculdu, yazma basina:
+
+         kayit    once       sonra     kazanc
+           50   0,067 ms   0,030 ms      %55
+          200   0,177 ms   0,133 ms      %25
+          500   0,590 ms   0,245 ms      %58
+         1000   1,013 ms   0,470 ms      %54
+
+     Serilestirme KALIR — yazma yine aninda diske iner, ertelenmez.
+     Ertelenen bir yazma, sekmesini kapatan kullanicinin verisini
+     kaybeder ve burasi verinin kaybolabilecegi tek yerdir; hiz icin o
+     riski almayiz.
+
+     Kopya BASKA BIR SEKME yazdiginda gecersizlesir: `storage` olayi
+     yalnizca diger sekmelerde tetiklenir, tam da bize gereken sey.
+     Testle kilitli (`tests/store.test.js`). */
+  let kopya = null;
+
   function localAll(){
-    try{ return JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}'); }
-    catch(e){
+    if(kopya) return kopya;
+    try{
+      kopya = JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}');
+      return kopya;
+    }catch(e){
       report('local-read', e, 'Yerel kayıt okunamadı; veriler geçici olarak bellekte tutuluyor.');
       health.local = 'error';
-      return {};
+      kopya = {};
+      return kopya;
     }
   }
+
+  /* Baska sekme yazdiysa bellekteki kopya eskimistir. */
+  try{
+    window.addEventListener('storage', e => {
+      if(!e || e.key === null || e.key === LOCAL_KEY) kopya = null;
+    });
+  }catch(e){ /* olay baglanamadiysa kopya yalniz bu sekmede yasar */ }
+
   function localWrite(all){
+    kopya = all;
     try{
       localStorage.setItem(LOCAL_KEY, JSON.stringify(all));
       if(health.local === 'error'){ health.local = 'ok'; }
@@ -314,6 +354,12 @@ R.Store = (function(){
 
   async function clear(){
     const all = localAll();
+    /* KOPYA DA BOSALIR. `localStorage`'dan silmek yetmez: bellekteki
+       kopya duruyorsa `get` silinmis bir kaydi dondurmeye devam eder
+       ve kullanici «temizledim ama duruyor» goruntusuyle kalir.
+       Testle kilitli (store.test.js, «temizlemeden sonra bellekteki
+       kopya da bosalir»). */
+    kopya = {};
     try{ localStorage.removeItem(LOCAL_KEY); }catch(e){}
     if(db){
       for(const k of Object.keys(all)){

@@ -97,18 +97,28 @@
     return son;
   }
 
-  describe('seviye kataloğu — altı kademe, her kademede üç basamak', () => {
+  describe('seviye kataloğu — beşi noktalı, altıncısı sonsuz', () => {
 
     it('altı kademe vardır', () => {
       expect(L.KADEMELER).toHaveLength(6);
     });
 
-    it('her kademe üç basamak taşır', () => {
-      L.KADEMELER.forEach(k => expect(k.basamak).toHaveLength(L.BASAMAK_SAYISI));
+    it('noktalı kademeler üç basamak taşır', () => {
+      L.KADEMELER.filter(k => !k.etiketler)
+        .forEach(k => expect(k.basamak).toHaveLength(L.BASAMAK_SAYISI));
     });
 
-    it('toplam on sekiz basamak üretilir', () => {
-      expect(L.BASAMAKLAR).toHaveLength(18);
+    it('KUTSAL on K basamağı taşır ve her etiketin bir maliyeti vardır', () => {
+      const kutsal = L.KADEME_ILE(6);
+      expect(kutsal.etiketler).toHaveLength(10);
+      /* Etiket listesi ile maliyet listesi AYRI iki dizidir; biri
+         diğerinden uzun kalırsa adı olan ama fiyatı olmayan (ya da
+         tersi) bir basamak doğar ve merdiven sessizce eksilir. */
+      expect(kutsal.basamak).toHaveLength(kutsal.etiketler.length);
+    });
+
+    it('toplam yirmi beş basamak üretilir', () => {
+      expect(L.BASAMAKLAR).toHaveLength(25);
     });
 
     it('eşikler kesintisiz artar — bir basamak öncekinden ucuz olamaz', () => {
@@ -119,9 +129,263 @@
       });
     });
 
-    it('etiket kademe.basamak biçimindedir', () => {
+    it('etiket noktalı kademelerde kademe.basamak biçimindedir', () => {
       expect(L.BASAMAKLAR[0].etiket).toBe('1.1');
-      expect(L.BASAMAKLAR[17].etiket).toBe('6.3');
+      expect(L.BASAMAKLAR[14].etiket).toBe('5.3');
+    });
+
+    it('KUTSAL etiketleri noktasızdır — K100 ile başlar, K1000 ile biter', () => {
+      const k = L.BASAMAKLAR.filter(b => b.kademe === 6).map(b => b.etiket);
+      expect(k[0]).toBe('K100');
+      expect(k[k.length - 1]).toBe('K1000');
+      /* Kutsal'da nokta ARANMAZ: bir gün «6.1» üretilirse hem ekranda
+         hem dosya adında yanlış bir şey belirir. */
+      k.forEach(e => expect(e.indexOf('.')).toBe(-1));
+    });
+
+    it('beşinci kademe SAFİR\'dir', () => {
+      const s = L.KADEME_ILE(5);
+      expect(s.ad).toBe('Safir');
+      expect(s.id).toBe('safir');
+    });
+
+    it('zorluk eğrisi kademeden kademeye SERTLEŞİR', () => {
+      /* Depo sahibinin tarifi: «bronz çok kolay, gümüş gene kolay,
+         altın orta, yakut zor, safir çok zor, kutsal çok nadir».
+         Sayıyı değil EĞRİYİ sınıyoruz: eşikler ayarlanabilir, ama bir
+         kademe bir öncekinden ucuza gelemez. Önceki eğri düzdü ve
+         Safir'e dört buçuk ayda geliniyordu. */
+      const biten = n => {
+        const b = L.BASAMAKLAR.filter(x => x.kademe === n);
+        return b[b.length - 1].esik;
+      };
+      for(let n = 2; n <= 6; n++){
+        const bu = biten(n) - (n > 1 ? biten(n - 1) : 0);
+        const onceki = biten(n - 1) - (n > 2 ? biten(n - 2) : 0);
+        /* Her kademe bir öncekinden EN AZ iki kat pahalı. */
+        expect(bu >= onceki * 2).toBeTruthy();
+      }
+    });
+
+    it('bir basamak bir gün-hafta işidir, bir kademe değil', () => {
+      /* Kademeler arası fark hissedilmeli AMA basamaklar arası
+         hissedilmemeli: basamak aylarca sürerse ilerleme durur ve
+         merdiven işe yaramaz. İlk üç kademenin her basamağı, günlük
+         tavanla en çok bir ayda geçilmeli. */
+      const tavan = Math.max(L.GUNLUK_TAVAN('ays'), L.GUNLUK_TAVAN('spi'),
+        L.GUNLUK_TAVAN('esp'));
+      L.BASAMAKLAR.filter(b => b.kademe <= 3).forEach((b, i, hepsi) => {
+        const onceki = i > 0 ? hepsi[i - 1].esik : 0;
+        expect((b.esik - onceki) / tavan <= 31).toBeTruthy();
+      });
+    });
+
+    it('Bronz ÇOK KOLAY: günlük tavanla bir haftadan kısa', () => {
+      const tavan = Math.max(L.GUNLUK_TAVAN('ays'), L.GUNLUK_TAVAN('spi'),
+        L.GUNLUK_TAVAN('esp'));
+      const bronz = L.BASAMAKLAR.filter(b => b.kademe === 1);
+      expect(bronz[bronz.length - 1].esik / tavan < 7).toBeTruthy();
+    });
+
+    it('Kutsal ÇOK NADİR: günlük tavanla bir yıldan uzun', () => {
+      const tavan = Math.max(L.GUNLUK_TAVAN('ays'), L.GUNLUK_TAVAN('spi'),
+        L.GUNLUK_TAVAN('esp'));
+      const kutsal = L.BASAMAKLAR.filter(b => b.kademe === 6)[0];
+      expect(kutsal.esik / tavan / 365 > 1).toBeTruthy();
+    });
+
+    it('kart adı kuralı — merkezdeki Python kopyasıyla AYNI', () => {
+      /* Aynı örnekler `HKM/tests/test_profil.py` içinde de sınanıyor.
+         Kural tek kaynaktan yayılıyor (`brand/seviye/ortak_kart.py`)
+         ama iki dil iki ayrı yerde koşuyor; ayrışırlarsa önce bu iki
+         test kırılır. */
+      expect(L.MEDYA_ADI('1.1')).toBe('rutbe-1-1');
+      expect(L.MEDYA_ADI('3.2')).toBe('rutbe-3-2');
+      expect(L.MEDYA_ADI('5.3')).toBe('rutbe-5-3');
+      expect(L.MEDYA_ADI('K100')).toBe('rutbe-k100');
+      expect(L.MEDYA_ADI('K300')).toBe('rutbe-k300');
+      expect(L.MEDYA_ADI('K1000')).toBe('rutbe-k1000');
+    });
+
+    it('K1000 bir ömürde ulaşılamaz — bilerek', () => {
+      /* Ölçüt keyfi değil: bir sistemin GÜNLÜK TAVANI katalogdan
+         okunur. Tavanın tamamını HER GÜN alan biri bile otuz yıldan
+         önce göremiyorsa, merdivenin tepesi görünmüyor demektir. */
+      const tavan = Math.max(L.GUNLUK_TAVAN('ays'), L.GUNLUK_TAVAN('spi'),
+        L.GUNLUK_TAVAN('esp'));
+      const gun = L.TOPLAM_XP / tavan;
+      expect(gun / 365).toBeGreaterThan(30);
+    });
+
+    it('her işin bir simgesi vardır ve o simge GERÇEKTEN vardır', () => {
+      /* Simge katalogda yazılı, ekran seçmez. Kimlik künyede yoksa
+         (`brand/ortak/medya.js`) istek hiç yapılmaz ve satır simgesiz
+         kalır — sessizce. Bu test o sessizliği gürültüye çevirir. */
+      L.XP_ETKINLIK.forEach(e => {
+        expect(typeof e.simge).toBe('string');
+        expect(window.LIFEOS.SIMGE_ADI('simge', e.simge)).toBe('simge-' + e.simge);
+      });
+    });
+
+    it('bir modülün işleri AYNI simgeyi paylaşmaz', () => {
+      /* Ekranda yan yana duran iki iş aynı simgeyi taşısaydı simge
+         ayırt etmeyi bırakırdı. Modüller ARASINDA paylaşım serbest:
+         üç liste hiçbir ekranda yan yana gelmiyor. */
+      L.MODULLER.forEach(m => {
+        const gorulen = {};
+        L.XP_ETKINLIK.filter(e => e.mod === m).forEach(e => {
+          expect(gorulen[e.simge]).toBeFalsy();
+          gorulen[e.simge] = 1;
+        });
+      });
+    });
+
+    it('her etkinlik NEREDE yapıldığını söyler', () => {
+      /* Rütbe ekranının «XP nereden gelir» bölümü bu alanlarla çalışır.
+         Biri eksik kalırsa kullanıcı puanı görür ama nereye gideceğini
+         göremez — yani listenin yarısı işe yaramaz. */
+      L.XP_ETKINLIK.forEach(e => {
+        expect(typeof e.rota).toBe('string');
+        expect(e.rota.length).toBeGreaterThan(0);
+        expect(e.nerede.length).toBeGreaterThan(0);
+        expect(e.nasil.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('merdiven bütün basamakları durumuyla verir', () => {
+      const m = XP.merdiven();
+      expect(m).toHaveLength(L.BASAMAKLAR.length);
+      /* Her basamak üç durumdan birinde olmalı; dördüncü bir değer
+         ekranda sessizce sınıfsız bir kutu çizerdi. */
+      m.forEach(b => {
+        expect(['gecildi', 'simdi', 'kilitli'].indexOf(b.durum))
+          .toBeGreaterThan(-1);
+      });
+      /* İçinde bulunulan basamak EN ÇOK BİR tanedir. */
+      expect(m.filter(b => b.durum === 'simdi').length).toBeLessThan(2);
+    });
+
+    it('basamağın AÇILIŞI eşiğinden başka bir sayıdır', () => {
+      /* `esik` basamağın BİTTİĞİ toplamdır, BAŞLADIĞI değil. İkisini
+         karıştırmak ekranda yanlış bir sayı yazdırıyordu: merdivende
+         kilitli kademenin künyesi «Açılışa … XP» derken `ilk.esik`
+         kullanıyordu, yani kademenin İLK BASAMAĞININ BİTİŞİNİ
+         açılış sanıyordu.
+
+           Yakut gerçekte 16.000 XP'de açılır
+           künye 25.000 diyordu — 4.000 XP'si olan birine
+               «20.000 kaldı» yazıyordu, doğrusu 11.000
+
+         Fark küçük değil ve hep AYNI yönde: hedef olduğundan uzak
+         görünüyordu. */
+      const m = XP.merdiven();
+      expect(m[0].acilis).toBe(0);
+      m.forEach((b, i) => {
+        expect(b.acilis).toBe(i > 0 ? m[i - 1].esik : 0);
+        /* Katalogun kendi tutarlılığı: açılış + maliyet = eşik. */
+        expect(b.acilis + b.maliyet).toBe(b.esik);
+      });
+      /* Ve ikisi GERÇEKTEN ayrı sayılar: birinci kademe dışında her
+         kademenin ilk basamağında açılış eşikten küçüktür. */
+      L.KADEMELER.filter(k => k.no > 1).forEach(k => {
+        const ilk = m.filter(b => b.kademe === k.no)[0];
+        expect(ilk.acilis < ilk.esik).toBeTruthy();
+        expect(ilk.acilis > 0).toBeTruthy();
+      });
+    });
+
+    it('kademe, ilk basamağının AÇILIŞINA varınca açılır', async () => {
+      /* «Açılış» uydurma bir alan değil: tam o toplamda kademenin ilk
+         basamağı «şimdi» olur. Künyenin okuduğu sayı ile merdivenin
+         gösterdiği hâl aynı yerden gelsin diye sınanıyor. */
+      for(const k of L.KADEMELER){
+        const ilk = XP.merdiven().filter(b => b.kademe === k.no)[0];
+        resetState();
+        XP.bosalt();
+        await SP.Store.set('seviye',
+          { surum:L.SEVIYE_SURUM, toplam:ilk.acilis });
+        await XP.yukle();
+        const o = XP.merdiven().filter(b => b.etiket === ilk.etiket)[0];
+        expect(o.durum).toBe('simdi');
+      }
+    });
+
+    it('merdivendeki kart adresi medya kuralıyla aynıdır', () => {
+      const m = XP.merdiven();
+      const safir = m.filter(b => b.etiket === '5.2')[0];
+      expect(safir.kart).toBe('img/seviye/rutbe-5-2.webp');
+      const kutsal = m.filter(b => b.etiket === 'K300')[0];
+      expect(kutsal.kart).toBe('img/seviye/rutbe-k300.webp');
+    });
+
+    it('nişan KADEME ve BASAMAK numarasından türer', () => {
+      /* Nişan kartın küçük kardeşidir ve merdivendeki yüz piksellik
+         kutu için çizilmiştir; kart orada ne taşı ne yazısı okunacak
+         kadar küçülüyordu. */
+      const m = XP.merdiven();
+      expect(m.filter(b => b.etiket === '1.1')[0].nisan)
+        .toBe('img/seviye/nisan-1-1.webp');
+      expect(m.filter(b => b.etiket === '5.3')[0].nisan)
+        .toBe('img/seviye/nisan-5-3.webp');
+    });
+
+    it('KUTSAL merdiveninde nişan YOKTUR ve olmaması doğrudur', () => {
+      /* K basamakları kademe içinde 1..10 diye sayılmaz, kendi
+         adlarıyla (K100, K200) durur. `null` dönmesi ekranın kartı
+         kullanması demektir — uydurma bir ad üretmek, olmayan bir
+         dosyayı istemek olurdu. */
+      const m = XP.merdiven();
+      m.filter(b => b.kademe === 6).forEach(b => {
+        expect(b.nisan).toBeNull();
+      });
+      /* Altıncı kademe DIŞINDA hepsinin nişanı vardır. */
+      m.filter(b => b.kademe !== 6).forEach(b => {
+        expect(typeof b.nisan).toBe('string');
+      });
+    });
+
+    it('nişan kökü de değiştirilebilir — tek dosya sürümü için', () => {
+      const m = XP.merdiven({ kok:'medya/' });
+      expect(m.filter(b => b.etiket === '3.2')[0].nisan).toBe('medya/nisan-3-2.webp');
+    });
+
+    it('siluet kaynağı YAZISIZ olanı seçer', () => {
+      /* Siluet alfayı korur: kaynağın üzerindeki yazı da okunur kalır.
+         Kademe 1–5'te kaynak nişandır (yazısız); altıncıda K
+         madalyonudur — üzerinde yalnız SAYI var ve o sayı zaten
+         kutunun altında yazılı.
+
+         Rütbe kartı 1–5 arasında kaynak OLAMAZ: üzerinde kademenin
+         adı yazılı ve kilitli bir kartın silueti «YAKUT» yazısını
+         okunur bırakırdı. */
+      const m = XP.merdiven();
+      const yakut = m.filter(b => b.etiket === '4.2')[0];
+      expect(yakut.siluet).toBe('img/seviye/nisan-4-2.webp');
+      /* Harness'ta `.not` yok; eşitliği doğrudan sınarız. */
+      expect(yakut.siluet === yakut.kart).toBeFalsy();
+
+      const kutsal = m.filter(b => b.etiket === 'K300')[0];
+      expect(kutsal.siluet).toBe('img/seviye/rutbe-k300.webp');
+      expect(kutsal.nisan).toBeNull();
+    });
+
+    it('her basamağın bir siluet kaynağı vardır', () => {
+      /* Kaynaksız bir kilitli basamak boş bir kutudur ve merdivenin
+         şekli orada kopar. */
+      XP.merdiven().forEach(b => {
+        expect(typeof b.siluet).toBe('string');
+      });
+    });
+
+    it('medya adı etiketten türer — nokta tireye döner, harf küçülür', () => {
+      expect(L.MEDYA_ADI('5.2')).toBe('rutbe-5-2');
+      expect(L.MEDYA_ADI('1.1')).toBe('rutbe-1-1');
+      expect(L.MEDYA_ADI('K300')).toBe('rutbe-k300');
+    });
+
+    it('her basamağın medya adı benzersizdir', () => {
+      const adlar = L.BASAMAKLAR.map(b => L.MEDYA_ADI(b.etiket));
+      expect(new Set(adlar).size).toBe(adlar.length);
     });
 
     it('kademe kimlikleri benzersizdir — defter kimlikle yazılır', () => {
@@ -231,7 +495,7 @@
     it('en üst basamakta oran 1 kalır ve XP birikmeye devam eder', () => {
       const k = XP.konum(L.TOPLAM_XP + 50000);
       expect(k.tamam).toBe(true);
-      expect(k.etiket).toBe('6.3');
+      expect(k.etiket).toBe('K1000');
       expect(k.oran).toBe(1);
       expect(k.kalan).toBe(0);
       expect(k.toplam).toBeGreaterThan(L.TOPLAM_XP);
@@ -268,6 +532,26 @@
     it('rozet yüklü defterde etiketi taşır', async () => {
       await temiz();
       expect(XP.rozetHtml()).toContain('1.1');
+    });
+
+    it('rozetin başlığındaki XP binlik ayraçlı yazılır', async () => {
+      /* Ekrana çıkan sayı düzgün Türkçe yazılır (AGENTS.md §1.8) ve
+         «düzgün» burada binlik ayracı demek. Küçük sayılarda fark
+         edilmiyordu; XP büyüdükçe okunaksızlaştı — ve bu metin
+         yalnız `title` değil `aria-label` olarak da kullanılıyor,
+         yani ekran okuyucunun okuduğu cümle.
+
+         Aynı ayrışma rütbe ekranında da vardı: «TOPLAM 1.500.000 XP»
+         satırının hemen altında «100000 / 1000000 XP» yazıyordu. */
+      resetState();
+      XP.bosalt();
+      await SP.Store.set('seviye',
+        { surum:L.SEVIYE_SURUM, toplam:1500000 });
+      await XP.yukle();
+      const h = XP.rozetHtml();
+      expect(h).toContain('100.000/1.000.000 XP');
+      /* Ayraçsız hâli GEÇMEMELİ. */
+      expect(h.indexOf('100000/1000000') >= 0).toBeFalsy();
     });
 
     it('aynı anda iki yükleme tek defter üretir — biri diğerini ezmez', async () => {

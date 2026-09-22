@@ -4,7 +4,7 @@
    okunmus olmali. */
 
 (function(){
-  const { describe, it, expect, resetState, withToday, pushSession } = ESP.Test;
+  const { describe, it, expect, resetState, withToday, pushSession, withTodayAsync } = ESP.Test;
   const M = ESP.Model, S = ESP.S, U = ESP.U;
 
   describe('kesinlik — girilmemis alan sifir degildir', () => {
@@ -182,8 +182,17 @@
 
   describe('hedefler', () => {
 
-    it('tarihi gecmis hedef acik sayilmaz', () => {
-      withToday('2026-09-12', async () => {
+    /* `withToday` SENKRON bir kanca alir ve geri cagirmayi BEKLEMEZ.
+       Buraya `async` bir govde verilince sahte tarih, ilk `await`te
+       geri aliniyor ve dogrulama GERCEK tarihle kosuyordu: gunlerce
+       yesil kaldi, cunku gercek tarih de hedeflerden birini acik
+       birakiyordu. 2026-09-21 sabahi o gun gecti ve test yakalandi —
+       ama testin kendisi de o gune kadar hicbir sey ispat etmiyordu.
+
+       `withTodayAsync` geri cagirmayi bekler; sahte tarih dogrulama
+       bitene kadar yerinde kalir. */
+    it('tarihi gecmis hedef acik sayilmaz', async () => {
+      await withTodayAsync('2026-09-12', async () => {
         resetState();
         await M.saveGoal(M.newGoal({ label:'Sunum', date:'2026-09-01' }));
         await M.saveGoal(M.newGoal({ label:'Konser', date:'2026-09-20' }));

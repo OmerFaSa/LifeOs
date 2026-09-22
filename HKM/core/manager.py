@@ -47,6 +47,10 @@ VERDICT_TEXT = {
 }
 
 VP_LABEL = {"academic": "AYS", "bio": "SPİ", "intellect": "ESP"}
+# Isaret govdeleri MODUL kimligiyle gelir (ays/spi/esp), VP kimligiyle
+# degil. Ikisini tek sozlukte toplamak, bir gun birinin otekinin
+# anahtariyla aranmasi demekti.
+MODUL_LABEL = {"ays": "AYS", "spi": "SPİ", "esp": "ESP"}
 
 # KONSEY — kimin ne hakkinda konustugu.
 #
@@ -151,6 +155,49 @@ def _coverage_line(t):
         "coverage", **c)
 
 
+def _level_line(payloads):
+    """Uc sistemin kademesi — bir GOZLEM satiri.
+
+    Kademe bugune kadar yalniz panonun *Sistemler* sayfasinda goruluyordu;
+    gunluk brifing uc sistemin ozetini veriyor ama seviyeyi tasimiyordu.
+    Veri zaten ambarda: `level_tier`, `level_sub` ve `xp_total` isaretle
+    geliyor (bkz. core/adlar.py).
+
+    UC KURAL, ve ucu de bilerek:
+
+    1. HKM'nin KENDI XP'si YOKTUR ve olmamali — ucunun ustunde degil
+       yanindadir. Burada bir toplam, bir ortalama, bir siralama yok.
+    2. Bu satir bir HEDEF ya da UYARI degildir. "XP'n dusuk" demek,
+       AGENTS.md'nin "XP karar vermez" kuralini dogrudan kirardi.
+       Cumle bunu kendi icinde de soyler ki, bir gun baska bir satirla
+       karistirilmasin.
+    3. Kademe ADI yazilmaz, NUMARASI yazilir. Adlar
+       `brand/seviye/kademeler.js` icinde degisebilir; merkezde ikinci
+       bir kopya tutmak, iki kopyanin bir gun ayrismasi demekti.
+
+    Hicbir modul seviye gondermediyse satir HIC cizilmez: bos bir
+    "Seviye: —" satiri, bilgi degil gurultudur.
+    """
+    parca, kayitlar = [], []
+    for mod in ("ays", "spi", "esp"):
+        metrikler = payloads.get(mod) or {}
+        kademe = C.value_of(metrikler.get("level_tier"))
+        adim = C.value_of(metrikler.get("level_sub"))
+        if kademe is None or adim is None:
+            continue
+        ad = MODUL_LABEL.get(mod, mod.upper())
+        parca.append("%s %d.%d" % (ad, int(kademe), int(adim)))
+        kayitlar.append({"module": mod, "tier": int(kademe),
+                         "sub": int(adim),
+                         "xp_total": C.value_of(metrikler.get("xp_total"))})
+    if not parca:
+        return None
+    return _line("Seviye: " + " · ".join(parca)
+                 + ". Bu bir gözlemdir; seviye hiçbir kararı vermez ve "
+                   "bu brifingin sırasını değiştirmez.",
+                 "level", items=kayitlar)
+
+
 def _blind_line(t):
     kor = t["blind"]
     if not kor:
@@ -207,6 +254,9 @@ def brief(con, date, th=None, days=twin.WINDOW_DAYS):
     kor = _blind_line(resim)
     if kor:
         lines.append(kor)
+    seviye = _level_line(payloads)
+    if seviye:
+        lines.append(seviye)
 
     # Capraz bulgu: UC AMBAR YAN YANA konmadan gorunmeyen sey. Bu
     # satirlar bir oneri DEGILDIR ve onceligi degistirmez; bir

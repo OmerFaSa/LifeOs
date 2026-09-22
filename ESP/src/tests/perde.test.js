@@ -147,20 +147,186 @@
     });
   });
 
-  describe('kutlama — kademe atlamak ile basamak atlamak ayrı çizilir', () => {
+  describe('rütbe medyası — adlar etiketten türer', () => {
 
-    it('yeni kademede o kademenin videosu istenir', () => {
-      expect(P.kutlamaVideosu({ kademe:2, yeniKademe:true }))
-        .toBe('img/seviye/kademe-2.mp4');
+    it('kart adresi etiketten üretilir', () => {
+      expect(P.kartYolu({ etiket:'5.2', kademe:5 })).toBe('img/seviye/rutbe-5-2.webp');
+      expect(P.kartYolu({ etiket:'K300', kademe:6 })).toBe('img/seviye/rutbe-k300.webp');
     });
 
-    it('yalnız basamak atlandıysa video İSTENMEZ — her 1.2\'de video izletilmez', () => {
-      expect(P.kutlamaVideosu({ kademe:1, yeniKademe:false })).toBeNull();
+    it('sahne adresi KADEMEDEN üretilir — üç rütbe aynı sahneyi paylaşır', () => {
+      expect(P.sahneYolu({ etiket:'4.1', kademe:4 })).toBe('img/seviye/sahne-4.webp');
+      expect(P.sahneYolu({ etiket:'4.3', kademe:4 })).toBe('img/seviye/sahne-4.webp');
     });
 
-    it('video kökü değiştirilebilir — tek dosya sürümü başka yerden okur', () => {
-      expect(P.kutlamaVideosu({ kademe:5, yeniKademe:true }, 'medya/'))
-        .toBe('medya/kademe-5.mp4');
+    it('kök değiştirilebilir — tek dosya sürümü başka yerden okur', () => {
+      expect(P.kartYolu({ etiket:'5.2', kademe:5 }, 'medya/')).toBe('medya/rutbe-5-2.webp');
+      expect(P.sahneYolu({ etiket:'5.2', kademe:5 }, 'medya/')).toBe('medya/sahne-5.webp');
+      expect(P.gecisYolu({ etiket:'5.1', kademe:5, yeniKademe:true }, 'medya/'))
+        .toBe('medya/gecis-5.webp');
+    });
+
+    it('sahne videosu ALTINCI saniyeye sarar, başa değil', () => {
+      /* Depo sahibinin isteği: «video 10. saniyede bittiği için
+         bittiğinde 6. saniyesine sarsın». İlk altı saniye bir
+         açılıştır ve her döngüde yeniden izlenmesi gerekmez. */
+      expect(P.donguNoktasi(6, 10)).toBe(6);
+      expect(P.donguNoktasi(6, 10.4)).toBe(6);
+    });
+
+    it('süre bilinmiyorsa BAŞA sarar', () => {
+      /* Tarayıcı H.264 çözemiyorsa `duration` NaN kalır. Bilinmeyen
+         bir süreye göre altıncı saniyeye sarmak, videonun sonuna
+         düşüp `ended` olayını yeniden tetikleyebilir — saniyede yüz
+         kez dönen bir döngü demekti. */
+      expect(P.donguNoktasi(6, NaN)).toBe(0);
+      expect(P.donguNoktasi(6, Infinity)).toBe(0);
+      expect(P.donguNoktasi(6, 0)).toBe(0);
+    });
+
+    it('sarma noktası süreden büyükse BAŞA sarar', () => {
+      /* Bir gün altı saniyeden kısa bir sahne gelirse, o sahne
+         sonsuza kadar kendi sonunda dönerdi. */
+      expect(P.donguNoktasi(6, 4)).toBe(0);
+      expect(P.donguNoktasi(6, 6)).toBe(0);
+      expect(P.donguNoktasi(0, 10)).toBe(0);
+    });
+
+    it('geçiş karesi YALNIZ yeni kademede istenir', () => {
+      /* Basamak (1.1 → 1.2) aynı kademenin içinde kalır ve bir geçiş
+         değildir: «Bronz → Bronz» diyen bir tam ekran kare, üç
+         basamakta üç kez aynı şeyi söylerdi. */
+      expect(P.gecisYolu({ etiket:'4.1', kademe:4, yeniKademe:true }))
+        .toBe('img/seviye/gecis-4.webp');
+      expect(P.gecisYolu({ etiket:'4.2', kademe:4, yeniKademe:false })).toBeNull();
+      expect(P.gecisYolu({ etiket:'4.2', kademe:4 })).toBeNull();
+      expect(P.gecisYolu(null)).toBeNull();
+    });
+
+    it('geçiş karesi KADEMEYE bağlıdır, basamağa değil', () => {
+      /* Altıncı kademenin basamağı K100 diye adlanır ama geçiş karesi
+         yine `gecis-6`: kare kademeye geçildiğinde basılır. */
+      expect(P.gecisYolu({ etiket:'K100', kademe:6, yeniKademe:true }))
+        .toBe('img/seviye/gecis-6.webp');
+    });
+
+    it('idle video bayrak KAPALIYKEN hiç istenmez', () => {
+      /* Bayrak kapalıyken her kutlamada bulunamayacağı bilinen bir
+         dosya istenirdi. `null` dönmesi, hiç istek yapılmaması
+         demektir. */
+      const eski = L.RUTBE_VIDEO;
+      L.RUTBE_VIDEO = false;
+      expect(P.kartVideoYolu({ etiket:'5.2', kademe:5 })).toBeNull();
+      L.RUTBE_VIDEO = true;
+      expect(P.kartVideoYolu({ etiket:'5.2', kademe:5 })).toBe('img/seviye/rutbe-5-2.mp4');
+      L.RUTBE_VIDEO = eski;
+    });
+
+    it('yeni kademe daha uzun durur — okunacak bir ad ve slogan vardır', () => {
+      expect(P.kutlamaSuresi({ yeniKademe:true }))
+        .toBeGreaterThan(P.kutlamaSuresi({ yeniKademe:false }));
+    });
+  });
+
+  describe('haberci — perdeden ÖNCE çıkar, Space onu geçer', () => {
+
+    const yukselme = no => ({ kademe:no, basamak:1, etiket:no + '.1',
+      kademeBilgi:L.KADEME_ILE(no), yeniKademe:true });
+
+    function haberciler(){ return document.querySelectorAll('.haberci'); }
+
+    it('kutlama önce HABERCİ açar, perde AÇMAZ', () => {
+      temiz();
+      const az = !!(window.matchMedia
+        && matchMedia('(prefers-reduced-motion: reduce)').matches);
+      const r = P.kutla(yukselme(3));
+      if(az){
+        expect(r.sessiz).toBe(true);
+        expect(haberciler()).toHaveLength(0);
+      }else{
+        expect(r.haberci).toBe(true);
+        expect(haberciler()).toHaveLength(1);
+        /* ÖNEMLİ: bu anda perde YOKTUR. Kullanıcı hâlâ kendi
+           ekranında; üç saniyesi var. */
+        expect(perdeler()).toHaveLength(0);
+      }
+      temiz();
+    });
+
+    it('haberci hangi rütbe olduğunu söyler', () => {
+      temiz();
+      if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      P.kutla(yukselme(3));
+      const metin = document.querySelector('.haberci').textContent;
+      expect(metin).toContain('Altın');
+      expect(metin).toContain('3.1');
+      temiz();
+    });
+
+    it('SPACE perdeye HİÇ SOKMAZ ama kutlamayı damgalar', async () => {
+      temiz();
+      if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      let damga = 0;
+      P.kutla(yukselme(2), { bitti:() => { damga++; } });
+      document.dispatchEvent(new KeyboardEvent('keydown', { key:' ', bubbles:true }));
+      await bekle(320);
+      /* Perde hiç açılmadı — ve bir daha da açılmayacak. */
+      expect(perdeler()).toHaveLength(0);
+      expect(haberciler()).toHaveLength(0);
+      /* Ama rütbe KAZANILDI: `bitti` çağrılmazsa aynı kutlama her
+         açılışta yeniden çıkardı. */
+      expect(damga).toBe(1);
+      temiz();
+    });
+
+    it('«Geç» düğmesi de aynı şeyi yapar — dokunmatikte Space yoktur', async () => {
+      temiz();
+      if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      let damga = 0;
+      P.kutla(yukselme(2), { bitti:() => { damga++; } });
+      document.querySelector('.haberci__gec').click();
+      await bekle(320);
+      expect(perdeler()).toHaveLength(0);
+      expect(damga).toBe(1);
+      temiz();
+    });
+
+    it('iki kez geçilse bile damga BİR kez vurulur', async () => {
+      temiz();
+      if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      let damga = 0;
+      const r = P.kutla(yukselme(2), { bitti:() => { damga++; } });
+      r.kapat();
+      r.kapat();
+      await bekle(320);
+      expect(damga).toBe(1);
+      temiz();
+    });
+
+    it('geri sayım üç saniyedir', () => {
+      expect(P.HABERCI_MS).toBe(3000);
+    });
+  });
+
+  describe('rütbe perdesi — kart, sahne ve yazı', () => {
+
+    it('kart ve sahne katmanları kurulur', () => {
+      temiz();
+      P.ac({ sinif:'perde--rutbe', banner:banner(4), enAz:60000,
+        kart:'img/seviye/rutbe-4-1.webp', sahne:'img/seviye/sahne-4.webp' });
+      const el = acikPerde();
+      expect(!!el.querySelector('.perde__kart-gorsel')).toBe(true);
+      expect(!!el.querySelector('.perde__sahne')).toBe(true);
+      temiz();
+    });
+
+    it('kart YOKSA banner tek başına kutlamayı taşır', () => {
+      temiz();
+      P.ac({ sinif:'perde--rutbe', banner:banner(3), enAz:60000 });
+      const el = acikPerde();
+      expect(el.querySelector('.perde__kart')).toBeNull();
+      expect(el.querySelector('.perde__banner').textContent).toContain('Altın');
+      temiz();
     });
 
     it('banner kademenin adını, etiketini ve sloganını söyler', () => {
@@ -171,26 +337,6 @@
       expect(metin).toContain(L.KADEME_ILE(3).slogan);
       temiz();
     });
-
-    it('HAREKET AZALTMA tercihinde perde HİÇ açılmaz, sessiz döner', () => {
-      temiz();
-      const az = !!(window.matchMedia
-        && matchMedia('(prefers-reduced-motion: reduce)').matches);
-      const r = P.kutla({ kademe:2, basamak:1, etiket:'2.1',
-        kademeBilgi:L.KADEME_ILE(2), yeniKademe:true });
-      if(az){
-        /* Tam ekran bir katman açıp odağı çalmak, hareket azaltmak
-           isteyen birinin istemediği şeydir. Bilgi verilir, perde
-           açılmaz: uygulama sakin yoluyla söyler (bkz. app.js, kutla). */
-        expect(r.sessiz).toBe(true);
-        expect(perdeler()).toHaveLength(0);
-      }else{
-        expect(!!r.sessiz).toBe(false);
-        expect(perdeler()).toHaveLength(1);
-      }
-      temiz();
-    });
-
 
     it('rozet görseli yoksa kademe numarası çizilir', () => {
       temiz();
@@ -203,10 +349,90 @@
       temiz();
     });
 
-    it('kutlama yoksa perde açılmaz', () => {
+    it('kutlama yoksa ne haberci ne perde açılır', () => {
       temiz();
       expect(P.kutla(null)).toBeNull();
       expect(perdeler()).toHaveLength(0);
+      expect(document.querySelectorAll('.haberci')).toHaveLength(0);
+    });
+  });
+
+  describe('rozet perdesi — rütbeyle aynı sözleşme, ayrı sahne', () => {
+
+    /* Gerçek bir rozet kullanılır, uydurulmuş bir nesne değil: katalog
+       değişirse bu testler de onunla birlikte değişmeli. */
+    function rozet(){
+      const r = L.ROZETLER.filter(x => x.aile === 'saat')[2];
+      return { kod:r.kod, aile:r.aile, aileAd:r.aileAd, ad:r.ad,
+        kisaAd:r.kisaAd, esik:r.esik, birim:r.birim, olcu:r.olcu,
+        gorsel:r.gorsel, ozet:r.ozet };
+    }
+
+    it('rozetin görseli katalogdaki adla aranır', () => {
+      const y = P.rozetGorseliYolu(rozet(), 'img/seviye/');
+      expect(y).toBe('img/seviye/' + rozet().gorsel + '.webp');
+    });
+
+    it('rozetsiz çağrı hiçbir şey açmaz', () => {
+      temiz();
+      expect(P.rozetKutla(null)).toBeNull();
+      temiz();
+    });
+
+    it('kutlama ÖNCE haberci açar — rütbedeki kuralın aynısı', () => {
+      temiz();
+      const s = P.rozetKutla(rozet(), {});
+      /* Hareket azaltma tercihinde perde hiç açılmaz ve `sessiz` döner;
+         o durumda haberci de aranmaz. */
+      if(s && s.sessiz){ temiz(); return; }
+      expect(!!document.querySelector('.haberci')).toBe(true);
+      expect(!!document.querySelector('.haberci--rozet')).toBe(true);
+      s.kapat();
+      temiz();
+    });
+
+    it('habercide AİLE ve kazanılan şey birlikte yazar', () => {
+      temiz();
+      const s = P.rozetKutla(rozet(), {});
+      if(s && s.sessiz){ temiz(); return; }
+      const metin = document.querySelector('.haberci').textContent;
+      expect(metin).toContain(rozet().aileAd);
+      expect(metin).toContain(String(rozet().esik));
+      s.kapat();
+      temiz();
+    });
+
+    it('perde rozetin ÖZETİNİ taşır — boş bırakılmaz', () => {
+      /* Bu satır bir kez boş kalmıştı: katalogda `ozet` vardı ama motor
+         onu dışarı taşımıyordu, kutlamada açıklama hiç görünmüyordu. */
+      temiz();
+      const r = rozet();
+      expect(typeof r.ozet).toBe('string');
+      expect(r.ozet.length > 0).toBe(true);
+      P.ac({ sinif:'perde--rozet', enAz:60000, kart:'img/seviye/' + r.gorsel + '.webp',
+        banner:{ no:String(r.esik), ustyazi:'Yeni rozet · ' + r.aileAd,
+          ad:r.kisaAd, etiket:'', slogan:r.ozet } });
+      const metin = acikPerde().querySelector('.perde__banner').textContent;
+      expect(metin).toContain(r.ozet);
+      temiz();
+    });
+
+    it('rozet perdesi AİLEYİ başlıkta iki kez yazmaz', () => {
+      /* «Saat 500 saat» okunuyordu: aile hem üst yazıda hem başlıkta. */
+      temiz();
+      const r = rozet();
+      P.ac({ sinif:'perde--rozet', enAz:60000,
+        banner:{ no:String(r.esik), ustyazi:'Yeni rozet · ' + r.aileAd,
+          ad:r.kisaAd, etiket:'', slogan:r.ozet } });
+      const baslik = acikPerde().querySelector('.perde__ad').textContent;
+      expect(baslik.indexOf(r.aileAd)).toBe(-1);
+      temiz();
+    });
+
+    it('rozet kutlaması rütbeden KISA durur', () => {
+      /* Rozet daha sık kazanılır; yedi saniye otuz yedi kez
+         tekrarlanınca kutlama olmaktan çıkıp engel olur. */
+      expect(P.rozetKutlamaSuresi() < P.kutlamaSuresi({ yeniKademe:false })).toBe(true);
     });
   });
 

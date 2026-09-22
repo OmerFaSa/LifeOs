@@ -74,6 +74,11 @@ SP.S = {
     railOpen:false,
     undo:null,             // son yikici islemin geri alma kaydi
     dayTab:'giris',        // giris | ozet | gecmis
+    rutbeTab:'simdi',      // simdi | merdiven | rozet | kazanc | defter
+    /* Açık rozet ayrıntısı. `title` özniteliği masaüstünde iş
+       görüyordu ama TELEFONDA hiç çalışmıyor: dokunmanın bir
+       karşılığı yoktu. */
+    rutbeRozet:null,
     labTab:'sonuc',        // sonuc | giris | gecmis | trend
     labPanel:'vital',      // acik panel id'si
     labQuery:'',           // sonuc ve giris listesindeki arama

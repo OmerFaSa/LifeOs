@@ -103,12 +103,43 @@ def _guvenli_medya_adi(ad, izinli=None):
     return ad
 
 
-def _ortak_seviye_yolu(clean, kok):
-    """/img/seviye/<ad> -> <kok>/brand/seviye/<ad>, yoksa None.
+def _ortak_marka_yolu(clean, kok):
+    """/img/marka/<ad> -> <kok>/brand/medya/<aile>/<ad>, yoksa None.
 
-    Kademe videolari uc sistemin de AYNI dosyasidir; uc kez kopyalamak
-    depoyu yuz megabayta tasirdi. Sistemlerin bagimsizligi bozulmaz:
-    dosya yoksa kutlama banner'a duser, arayuzde hicbir sey kirilmaz.
+    AILE ADDAN TURER, yoldan degil: `kimlik-ays.webp` ->
+    `brand/medya/kimlik/kimlik-ays.webp`. Boylece URL duz kalir ve
+    muhafiz alt klasor gezmek zorunda kalmaz — bir gorsel kapisinin
+    dosya sistemine acilan bir pencereye donusmesi, bu depoda kabul
+    edilebilir bir bedel degil.
+
+    Marka medyasi seviye medyasindan AYRI durur (bkz. brand/medya/OKU.md):
+    seviye medyasi bir kataloga baglidir ve eksigi kod tarafindan
+    bilinir; marka medyasi serbesttir ve eksik gorsel hata degildir."""
+    onek = "/img/marka/"
+    if not clean.startswith(onek):
+        return None
+    ad = _guvenli_medya_adi(clean[len(onek):])
+    if not ad:
+        return None
+    aile = os.path.splitext(ad)[0].split("-", 1)[0]
+    if not aile or not aile.isalnum():
+        return None
+    return os.path.join(kok, "brand", "medya", aile, ad)
+
+
+def _ortak_seviye_yolu(clean, kok):
+    """/img/seviye/<ad> -> <kok>/brand/seviye/medya/<ad>, yoksa None.
+
+    Rutbe kartlari ve kademe sahneleri uc sistemin de AYNI dosyasidir;
+    uc kez kopyalamak depoyu buyutmekten baska bir sey yapmazdi.
+    Sistemlerin bagimsizligi bozulmaz: dosya yoksa perde karti kendisi
+    cizer, arayuzde hicbir sey kirilmaz.
+
+    MEDYA KENDI KLASORUNDE. Once gorseller `brand/seviye/` icinde,
+    `xp.js` ve `perde.js` ile yan yana duruyordu; yirmi bir dosya
+    eklenince o klasorde kodu bulmak zorlasti. Kaynak kod ve servis
+    edilen medya ayni yerde durmaz — `medya/` yalniz servis edilen
+    dosyalari tutar, `eski/` ise servis EDILMEYENLERI (bkz. OKU.md).
     """
     onek = "/img/seviye/"
     if not clean.startswith(onek):
@@ -116,7 +147,7 @@ def _ortak_seviye_yolu(clean, kok):
     ad = _guvenli_medya_adi(clean[len(onek):])
     if not ad:
         return None
-    return os.path.join(kok, "brand", "seviye", ad)
+    return os.path.join(kok, "brand", "seviye", "medya", ad)
 # ===== URETILMIS BLOK SONU =====
 # SEVIYE:yol-bit
 
@@ -138,7 +169,8 @@ class Sunucu(SimpleHTTPRequestHandler):
 
     def translate_path(self, path):
         clean = path.split("?", 1)[0].split("#", 1)[0]
-        ortak = _ortak_seviye_yolu(clean, KOK)
+        ortak = (_ortak_seviye_yolu(clean, KOK)
+                 or _ortak_marka_yolu(clean, KOK))
         if ortak:
             return ortak
         if clean == "/dist" or clean.startswith("/dist/"):

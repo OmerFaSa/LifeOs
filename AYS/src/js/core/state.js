@@ -51,6 +51,11 @@ R.S = {
     hkmIntents:[],
     hkmDoubts:[],
     examTab:'list',
+    rutbeTab:'simdi',      // simdi | merdiven | rozet | kazanc | defter
+    /* Açık rozet ayrıntısı. `title` özniteliği masaüstünde iş
+       görüyordu ama TELEFONDA hiç çalışmıyor: dokunmanın bir
+       karşılığı yoktu. */
+    rutbeRozet:null,
     examOpen:null,
     cardTab:'due',
     subjectOpen:'tyt-turkce',

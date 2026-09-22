@@ -35,6 +35,9 @@ ESP.Screens.today = (function(){
       body:K.NextUp({
         icon:n.rank ? 'zap' : 'check',
         calm:!n.rank,
+        /* Bekleyen iş kalmadığında görünür. ESP'nin işi bilgidir;
+           kartın üstündeki kitap onu söyler. */
+        sanat:'bilgi',
         label:n.rank ? 'Kural motorunun seçtiği tek iş' : 'Bekleyen iş yok',
         title:n.title,
         why:n.detail,
@@ -196,6 +199,11 @@ ESP.Screens.today = (function(){
     return K.Entry({
       label:'BUGÜNÜN OTURUMLARI',
       meta:rows.length + ' oturum · ' + U.fmtMin(toplam),
+      /* GÜNÜN ODAK ROZETİ — eylemlerin yanında, günün raporunda.
+         Başarımlar sekmesindeki odak rozeti ömürlük rekordur; bu ise
+         BU GÜNÜN kendisi (bkz. core/basarim.js, gununOdagi). Eşiğin
+         altındaki gün rozet almaz ve boş döner. */
+      action:raw(ESP.Basarim ? ESP.Basarim.odakHtml(toplam) : ''),
       body:K.Table({ tight:true,
         headers:['Disiplin', 'Süre', 'Sayım', 'Not', ''],
         rows:rows.map(s => {
@@ -592,6 +600,10 @@ ESP.Screens.today = (function(){
     const n = liste.filter(x => String(x.id) === String(id))[0];
     if(!n) return;
     const r = await ESP.Beacon.resolveIntent(n, action);
+    /* MUHUR YALNIZ ONAYDA BASILIR. Reddetmek de bir cevaptir ama
+       onay degildir; ikisine ayni muhru basmak, muhru anlamsiz
+       kilardi. */
+    if(r.ok && action !== 'reject' && action !== 'dismiss') ESP.UI.onayMuhru();
     if(!r.ok){ ESP.UI.toast(r.error || 'İşlenemedi'); return; }
     S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
     const bas = r.state === 'applied' ? (r.note || 'Uygulandı')

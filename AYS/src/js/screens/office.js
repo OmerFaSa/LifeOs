@@ -16,7 +16,7 @@ R.Screens.office = (function(){
 
   function Avatar(agent, size){
     return html`<span class="${cls('agentav', 'agentav--' + agent.id, size === 'sm' && 'agentav--sm')}"
-      aria-hidden="true">${agent.initial}</span>`;
+      aria-hidden="true">${R.UI.pp(agent.id)}${agent.initial}</span>`;
   }
 
   function findingRow(f){

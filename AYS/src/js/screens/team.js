@@ -23,7 +23,7 @@ R.Screens.team = (function(){
 
   function Avatar(agent){
     return html`<span class="${'agentav agentav--' + agent.id + ' agentav--sm'}"
-      aria-hidden="true">${agent.initial}</span>`;
+      aria-hidden="true">${R.UI.pp(agent.id)}${agent.initial}</span>`;
   }
 
   function Bubble(agent, m){
@@ -59,7 +59,7 @@ R.Screens.team = (function(){
       /* Sekmede de avatar durur: ofis kat planındaki kimlik rengi burada
          tekrarlanınca kimin masasında olduğun bakınca anlaşılır. */
       items:R.AGENTS.map(a => ({ value:a.id, label:html`<span class="agenttab">
-        <span class="${'agentav agentav--xs agentav--' + a.id}" aria-hidden="true">${a.initial}</span>
+        <span class="${'agentav agentav--xs agentav--' + a.id}" aria-hidden="true">${R.UI.pp(a.id)}${a.initial}</span>
         <span class="agenttab__name">${a.name}</span></span>` })),
     });
   }
@@ -134,7 +134,7 @@ R.Screens.team = (function(){
         K.Card({
           body:html`
             <div class="desk__head">
-              ${html`<span class="${'agentav agentav--' + agent.id}" aria-hidden="true">${agent.initial}</span>`}
+              ${html`<span class="${'agentkare agentkare--' + agent.id}" aria-hidden="true">${R.UI.ppKare(agent.id)}${agent.initial}</span>`}
               <div class="minw0">
                 <b class="desk__name">${agent.name}</b>
                 <span class="desk__role">${agent.role} — ${agent.desk}</span>

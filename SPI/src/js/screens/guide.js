@@ -14,7 +14,6 @@ SP.Screens.guide = (function(){
 
   const TABS = [
     { id:'kullanim', label:'Kullanım', icon:'guide' },
-    { id:'seviye',   label:'Seviye',   icon:'chart' },
     { id:'model',    label:'Model',    icon:'zap' },
     { id:'veri',     label:'Veri',     icon:'layers' },
     { id:'sinir',    label:'Sınırlar', icon:'shield' },
@@ -237,7 +236,12 @@ SP.Screens.guide = (function(){
         <div class="mt-12">${K.SectionTitle('Bugün ne gidiyor')}</div>
         ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
           rows:on.rows.map(r => [r.key,
-            r.value == null ? '—' : U.fmtNum(r.value), r.label]) })}
+            r.value == null ? '—' : U.fmtNum(r.value),
+            /* KAYNAK SÜTUNU — etiketin görseliyle birlikte.
+               Metin `window.LIFEOS.KESINLIK`ten gelir, bu ekran
+               kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
+               aynı kelimeyi göstermek zorunda. */
+            raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
         <p class="tiny dim mt-8">Tahlil değeri, ilaç adı, semptom ve öğün GİTMEZ.
           Giden şey yük kararını etkileyen dört sayıdır; değeri olmayan alan
           «veri yok» gider, sıfır değil. Klinik sınır burada da geçerlidir.</p>
@@ -427,18 +431,13 @@ SP.Screens.guide = (function(){
 
   /* --------------------------------------------------------------- ekran */
 
-  /* Seviye — «XP nereden geldi». Gövdeyi ortak motor üretir
-     (core/xp.js, panelHtml): üç sistemin üç ayrı seviye ekranı
-     çizmesi, üçünün bir gün ayrı şeyler söylemesi demekti. */
-  function seviyeCard(){
-    const govde = SP.XP ? SP.XP.panelHtml() : '';
-    if(!govde){
-      return K.Card({ title:'Seviye',
-        body:html`<p class="small dim">Seviye defteri henüz yüklenmedi.</p>` });
-    }
-    return K.Card({ title:'Seviye', sub:'Her sistemin kendi kademesi vardır',
-      body:raw(govde) });
-  }
+  /* SEVİYE SEKMESİ BURADAN KALKTI.
+
+     Rehber, sistemin nasıl çalıştığını anlatan yerdir; seviye ise
+     bakılacak bir yerdir. Aynı defteri iki ayrı sekmede göstermek
+     «hangisi gerçek» sorusunu doğuruyordu. Artık kendi bölümü var:
+     üst gezinmede «Rütbe» (screens/rutbe.js) — kademe, merdiven,
+     XP kaynakları ve defter orada. */
 
   async function render(){
     const tab = S.ui.guideTab;
@@ -454,9 +453,6 @@ SP.Screens.guide = (function(){
       return String(html`${head}
         ${K.Ledger(() => [dataCard(), storageHorizonCard(), storageCard(), hkmCard()])}
         <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`);
-    }
-    if(tab === 'seviye'){
-      return String(html`${head}${K.Ledger(() => [seviyeCard()])}`);
     }
     if(tab === 'sinir'){
       return String(html`${head}

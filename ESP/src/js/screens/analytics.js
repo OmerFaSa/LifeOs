@@ -192,7 +192,13 @@ ESP.Screens.analytics = (function(){
         meta:'kural motorundan',
         note:'İyi haber kötü haberin arkasına saklanmaz: kötü olan önce söylenir.',
         wide:true,
-        body:html`<p class="rulesay">${ESP.Office.ruleText('patron', brf)}</p>`,
+        body:html`<div class="rapor-govde">
+          <!-- RAPOR KAPAĞI — belgenin yüzü. Mühür belgeyi imzalar, kapak
+               adlandırır; ikisi ayrı şeydir. Dosya yoksa düğüm kalkar. -->
+          <img class="rapor-kapak" src="img/marka/kapak-performans-analizi.webp"
+            alt="Performans analizi kapağı" loading="lazy" onerror="this.remove()">
+          <p class="rulesay">${ESP.Office.ruleText('patron', brf)}</p>
+        </div>`,
       }),
 
       K.Entry({

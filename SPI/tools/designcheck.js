@@ -65,8 +65,13 @@ let BAKILAN = 0;
 
   try{
     await waitForServer(base + '/index.html');
+    /* Tarayici ikilisi: CHROMIUM_PATH verilmisse O, verilmemisse
+       Playwright'in kendi kurdugu. Burada bir yol SABIT yaziliydi ve o
+       yol yalnizca bir gelistirme ortaminda vardi: denetim CI'da
+       "Executable doesn't exist" ile duserdi — yani hicbir zaman
+       kosmayacak bir denetimdi. */
     const browser = await chromium.launch({
-      executablePath:process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium' });
+      executablePath:process.env.CHROMIUM_PATH || undefined });
     /* Görünüm geçişi (View Transitions) kapalı: açıkken tam sayfa
        görüntüsü eski kareyi yarı saydam yakalıyor ve ölçüm yanılıyor. */
     const page = await browser.newPage({ reducedMotion:'reduce' });

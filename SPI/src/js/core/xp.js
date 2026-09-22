@@ -76,6 +76,12 @@ SP.XP = (function(){
   var YOL = 'seviye';          /* depo anahtarı */
   var DETAY_GUN = 120;         /* gün kırılımı bu yaştan eskiyse silinir */
 
+  /* Defterin BİÇİMİ en son bu sürümde değişti. Katalogdaki şema sürümü
+     (`LIFEOS.SEVIYE_SURUM`) bundan büyük olabilir — eşikler ya da
+     kademe adları değiştiğinde o da artar, ama eşik değişimi defteri
+     BOZMAZ. Ayrım `normalize` içindeki göç bloğunda kullanılır. */
+  var BICIM_SURUM = 2;
+
   /* GERİYE YAZMA PENCERESİ.
 
      Dünkü antrenmanı bu sabah girmek olağandır; geçen ayın gününe puan
@@ -315,19 +321,30 @@ SP.XP = (function(){
 
     /* ---------------------------------------------------------- göç
 
-       SÜRÜM 1 → 2: gün kırılımı `{id: adet}` idi ve XP okunurken
-       katalogdan hesaplanıyordu. Yeni biçim `{id: [adet, xp]}`.
+       İKİ AYRI DEĞİŞİKLİK, İKİ AYRI SONUÇ. Şema sürümü iki sebeple
+       artar ve ikisi aynı şey değildir:
 
-       Eski kırılım TAŞINMAZ, ARŞİVE DÜŞER. Çünkü onu yeni biçime
-       çevirmenin tek yolu bugünün fiyatlarıyla yeniden fiyatlamaktır ve
-       o fiyatlar değişti: kırılım toplamı, o gün gerçekten kazanılmış
-       toplamı aşabilirdi. TOPLAM XP'ye dokunulmaz — yani seviye
-       değişmez, yalnızca «bu XP hangi işten geldi» sorusunun cevabı o
-       günler için «arşiv» olur.
+         BİÇİM değişti   defterin yazılış şekli başkalaştı; eski
+                         satırlar okunamaz, arşive düşer.
+         EŞİK değişti    kademe adları ya da XP eşikleri başkalaştı;
+                         defter aynen okunur, yalnız seviye yeniden
+                         TÜRETİLİR.
 
-       Kaybedilen şey bir kırılımdır, bir puan değil; ve göç, defterde
-       yazılı kalır. */
-    if(gelenSurum < K().SEVIYE_SURUM){
+       Bu ayrım pahalıya öğrenildi: ikisi tek koşula bağlıyken, «beşinci
+       kademenin adı Safir oldu» gibi bir katalog düzenlemesi
+       kullanıcının yüz yirmi günlük kırılımını siliyordu. Kaybedilen
+       şey bir puan değildi ama bir sebep de yoktu.
+
+       SÜRÜM 1 → 2 BİÇİM değişimiydi: gün kırılımı `{id: adet}` idi ve
+       XP okunurken katalogdan hesaplanıyordu; yeni biçim `{id: [adet,
+       xp]}`. Eski kırılım taşınamazdı, çünkü onu çevirmenin tek yolu
+       bugünün fiyatlarıyla yeniden fiyatlamaktı ve fiyatlar değişmişti.
+
+       SÜRÜM 2 → 3 EŞİK değişimidir: Hüküm → Safir, ve Kutsal üç
+       basamaktan on K basamağına çıktı. Defter olduğu gibi kalır.
+
+       Toplam XP'ye hiçbir durumda dokunulmaz. */
+    if(gelenSurum < BICIM_SURUM){
       var atilan = Object.keys(d.gunler);
       if(atilan.length){
         atilan.sort();
@@ -342,6 +359,13 @@ SP.XP = (function(){
         at:new Date().toISOString(),
         not:'gün kırılımı arşive alındı; toplam XP korundu',
         gun:atilan.length,
+      });
+    }else if(gelenSurum < K().SEVIYE_SURUM){
+      d.gocler.push({
+        from:gelenSurum, to:K().SEVIYE_SURUM,
+        at:new Date().toISOString(),
+        not:'eşikler değişti; defter korundu, seviye yeniden türetildi',
+        gun:0,
       });
     }
     d.surum = K().SEVIYE_SURUM;
@@ -732,6 +756,9 @@ SP.XP = (function(){
 
      Defter YÜKLENMEMİŞSE boş metin döner — «0 XP» çizmek, bilinmeyeni
      sıfır saymaktır. */
+  /* Binlik ayracı — kullanıcıya giden sayı düzgün Türkçe yazılır. */
+  function tr(n){ return Number(n || 0).toLocaleString('tr-TR'); }
+
   function rozetHtml(opt){
     var d = durum();
     if(!d || !d.kademeBilgi) return '';
@@ -740,22 +767,40 @@ SP.XP = (function(){
     var k = d.kademeBilgi;
     var yuzde = Math.round(d.oran * 100);
 
+    /* Rozetin başlığı (title ve aria-label) da binlik ayraçlı yazılır:
+       ekran okuyucuya «yüz bin bölü bir milyon» dedirtmek ile
+       «yüzbinbölübirmilyon» dedirtmek arasındaki fark bu ayraç. */
     var baslik = 'Seviye ' + d.etiket + ' — ' + (k.ad || '') + ', '
-      + (d.tamam ? 'en üst basamak' : (d.icinde + '/' + d.gereken + ' XP'));
+      + (d.tamam ? 'en üst basamak'
+        : (tr(d.icinde) + '/' + tr(d.gereken) + ' XP'));
 
     return '<span class="seviye-rozet" data-seviye-rozet style="--kademe-renk:'
       + kac(k.renk || '#888')
       + ';--kademe-isik:' + kac(k.isik || '#ccc')
-      /* Rozet görseli CSS katmanı olarak gelir. Dosya yoksa katman hiç
-         çizilmez ve altındaki kademe numarası görünür kalır — kırık
-         resim simgesi de, boşluk da göstermeden. Kullanıcı görseli
-         `img/seviye/kademe-N.png` olarak bıraktığı an devreye girer.
+      /* KÜÇÜK ROZET — künyedeki ve alt banttaki gösterge. Rütbe
+         kartından AYRI bir dosyadır ve olmak zorundadır: kart dikey
+         ve yazılı, bu ise 28 piksellik bir daire. Kartı buraya
+         küçültmek, okunmayan bir şey göstermekti.
+
+         KADEME MÜHRÜ (`onay-N.webp`) kullanılır. Bir süre burada
+         `rozet-N.png` aranıyordu ve o dosya hiç üretilmedi: her
+         açılışta altı istek 404 dönüyor, rozet de hiç görünmüyordu.
+         Mühür zaten o kademenin yuvarlak amblemi — aynı şeyi ikinci
+         kez çizdirmek yerine olanı kullanmak doğrusu.
+
+         AYNI DOSYA ONAY MÜHRÜ OLARAK DA BASILIR (`UI.onayMuhru`) ve bu
+         bir karışıklık değil, tanımın kendisidir: bu görsel
+         KULLANICININ KADEME MÜHRÜDÜR. Künyede kim olduğunu söyler,
+         bir teklifi onaylarken de aynı şeyi söyler.
+
+         Dosya yoksa katman hiç çizilmez ve altındaki kademe numarası
+         görünür kalır — kırık resim simgesi de, boşluk da göstermeden.
 
          Adres MUTLAK verilir: özel bir CSS değişkeni içindeki göreli
          url(), değişkenin kullanıldığı yere değil TANIMLANDIĞI stil
          sayfasına göre çözülüyor ve `css/img/seviye/...` diye yanlış bir
          adres çıkıyordu. */
-      + ';--kademe-gorsel:url(&quot;' + kac(mutlak(kok + 'kademe-' + d.kademe + '.png')) + '&quot;)"'
+      + ';--kademe-gorsel:url(&quot;' + kac(mutlak(kok + 'onay-' + d.kademe + '.webp')) + '&quot;)"'
       + ' title="' + kac(baslik) + '" aria-label="' + kac(baslik) + '">'
       + '<span class="seviye-rozet__mark" aria-hidden="true">'
       +   '<span>' + d.kademe + '</span></span>'
@@ -766,6 +811,113 @@ SP.XP = (function(){
       + '<span class="seviye-rozet__cubuk" aria-hidden="true">'
       +   '<i style="width:' + yuzde + '%"></i></span>'
       + '</span>';
+  }
+
+  /* ------------------------------------------------------- merdiven
+
+     BÜTÜN basamaklar, her birinin durumuyla. Rütbe ekranı bunu çizer.
+
+     Durum üç değerden biri:
+       gecildi   eşik aşıldı, rütbe kazanıldı
+       simdi     içinde bulunulan basamak
+       kilitli   henüz gelinmedi
+
+     Kart adresi burada üretilir çünkü kural katalogda tek satırdır
+     (`LIFEOS.MEDYA_ADI`); ekranın kendi adını kurması, bir gün perde
+     ile ekranın ayrı dosyalara bakması demekti. */
+  function merdiven(opt){
+    opt = opt || {};
+    var kok = opt.kok || 'img/seviye/';
+    var L = K();
+    var d = durum();
+    var bitmis = d ? d.bitmisBasamak : 0;
+    var simdiki = d ? d.etiket : null;
+    return (L.BASAMAKLAR || []).map(function(b, i){
+      var hal = 'kilitli';
+      if(i < bitmis) hal = 'gecildi';
+      else if(b.etiket === simdiki) hal = 'simdi';
+      var kb = L.KADEME_ILE(b.kademe);
+      return {
+        etiket:b.etiket, kademe:b.kademe, basamak:b.basamak,
+        maliyet:b.maliyet, esik:b.esik,
+        /* AÇILIŞ — bu basamağın BAŞLADIĞI toplam. `esik` onun BİTTİĞİ
+           toplamdır ve ikisi karıştırılıyordu: merdivende kilitli
+           kademenin künyesi «Açılışa … XP» derken `esik` okuyor, yani
+           kademenin ilk basamağının BİTİŞİNİ açılış sanıyordu.
+
+             Yakut gerçekte 16.000 XP'de açılır
+             künye 25.000 diyordu — 4.000 XP'si olan birine
+                 «20.000 kaldı» yazıyordu; doğrusu 11.000
+
+           Hata hep aynı yöndeydi: hedef olduğundan uzak görünüyordu.
+           Sayıyı ekranın hesaplaması da doğru değildi — ekranın elinde
+           yalnız o kademenin satırı var, bir öncekinin son basamağı
+           yok. Karar burada, motorda durur. */
+        acilis:i > 0 ? ((L.BASAMAKLAR[i - 1] || {}).esik || 0) : 0,
+        kademeBilgi:kb,
+        durum:hal,
+        kart:L.MEDYA_ADI ? (kok + L.MEDYA_ADI(b.etiket) + '.webp') : null,
+        /* NİŞAN — aynı basamağın küçük amblemi. Kart bir SAYFA kaplar
+           (900 piksel boyunda bir portre); merdivende yüz piksellik
+           bir kutuda gösterilince ne taşı okunuyor ne yazısı. Nişan o
+           kutu için çizilmiş.
+
+           Kutsal'ın K merdiveninde nişan YOKTUR ve olmaması doğrudur:
+           K basamakları kademe içinde 1..10 diye sayılmaz, kendi
+           adlarıyla (K100, K200) durur. Orada `null` döner ve ekran
+           kartı kullanır. */
+        nisan:(kb && kb.etiketler) ? null
+          : (kok + 'nisan-' + b.kademe + '-' + b.basamak + '.webp'),
+        /* SİLUET KAYNAĞI — kilitli basamakta ŞEKLİ çizilecek görsel.
+
+           Ayrı bir alan olmasının sebebi, kararın tek yerde durması:
+           siluet alfayı korur, yani kaynağın üzerindeki YAZI da okunur
+           hâlde kalır. Kaynak bu yüzden yazısız olmak zorunda.
+
+             kademe 1–5   nişan — üzerinde yazı yoktur
+             kademe 6     K madalyonu (kart) — üzerinde yalnız SAYI
+                          vardır («100») ve o sayı zaten kutunun
+                          altında yazılı; sır değil.
+
+           Rütbe kartı 1–5 arasında siluet kaynağı OLAMAZ: üzerinde
+           kademenin adı yazılı ve kilitli bir kartın silueti «YAKUT»
+           yazısını okunur bırakırdı. */
+        siluet:(kb && kb.etiketler)
+          ? (L.MEDYA_ADI ? (kok + L.MEDYA_ADI(b.etiket) + '.webp') : null)
+          : (kok + 'nisan-' + b.kademe + '-' + b.basamak + '.webp'),
+      };
+    });
+  }
+
+  /* ---------------------------------------------------- bugün ne oldu
+
+     Etkinlik başına BUGÜN: kaç kez yapıldı, kaç XP getirdi, tavanına
+     ne kadar kaldı. Defterden OKUNUR, katalogdan hesaplanmaz — o gün
+     kazanılan XP yazıldığı anda dondu (bkz. DEFTER NEDEN OLAY LİSTESİ
+     DEĞİL).
+
+     `tavan` alanı «bugün bu işten en çok kaç XP alınabilir» demektir;
+     `doldu` ise o tavana varıldığını söyler. İkisi birlikte, ekranın
+     «bugün buradan daha fazla puan çıkmaz» diyebilmesini sağlar. */
+  function bugunku(){
+    var gun = U().todayISO();
+    return etkinlikler().map(function(e){
+      var xp = gunXPsi(gun, e.id);
+      var tavan = gunlukTavan(e);
+      return {
+        id:e.id, ad:e.ad, birim:e.birim, xp:e.xp,
+        /* İşin simgesi — katalogda yazılı, ekran seçmez. On altı iş
+           üst üste on altı gri satırdı; hangisinin ne olduğu ancak
+           okunarak bulunuyordu. */
+        simge:e.simge || null,
+        rota:e.rota || null, nerede:e.nerede || '', nasil:e.nasil || '',
+        adet:gunAdedi(gun, e.id),
+        kazanilan:xp,
+        tavan:tavan,
+        doldu:tavan > 0 && xp >= tavan,
+        oran:tavan > 0 ? Math.min(1, xp / tavan) : 0,
+      };
+    });
   }
 
   /* ---------------------------------------------------------- panel
@@ -806,7 +958,7 @@ SP.XP = (function(){
         + kac(r.ad) + '</span>'
         + '<span class="seviye-panel__cubuk" aria-hidden="true"><i style="width:'
         + (enBuyuk ? Math.round(100 * r.xp / enBuyuk) : 0) + '%"></i></span>'
-        + '<span class="seviye-panel__xp">' + r.xp + '</span></li>';
+        + '<span class="seviye-panel__xp">' + tr(r.xp) + '</span></li>';
     });
     if(kir.arsiv > 0){
       govde += '<li class="seviye-panel__satir seviye-panel__satir--arsiv">'
@@ -814,7 +966,7 @@ SP.XP = (function(){
         + 'kırılımı saklanmayan eski günler</span></span>'
         + '<span class="seviye-panel__cubuk" aria-hidden="true"><i style="width:'
         + (enBuyuk ? Math.round(100 * kir.arsiv / enBuyuk) : 0) + '%"></i></span>'
-        + '<span class="seviye-panel__xp">' + kir.arsiv + '</span></li>';
+        + '<span class="seviye-panel__xp">' + tr(kir.arsiv) + '</span></li>';
     }
     if(!govde){
       govde = '<li class="seviye-panel__bos">Henüz XP yok. '
@@ -830,13 +982,13 @@ SP.XP = (function(){
     seri.forEach(function(g){
       var yuzde = (g.xp != null && tepe) ? Math.max(6, Math.round(100 * g.xp / tepe)) : 0;
       serit += '<span class="' + (g.xp == null ? 'seviye-serit__yok' : 'seviye-serit__gun')
-        + '" title="' + kac(g.gun + ' · ' + (g.xp == null ? 'kayıt yok' : g.xp + ' XP'))
+        + '" title="' + kac(g.gun + ' · ' + (g.xp == null ? 'kayıt yok' : tr(g.xp) + ' XP'))
         + '"><i style="height:' + yuzde + '%"></i></span>';
     });
 
     var sonrakiSatir = d.tamam
       ? 'En üst basamaktasın. XP birikmeye devam ediyor.'
-      : 'Bir sonraki basamağa <b>' + d.kalan + ' XP</b>';
+      : 'Bir sonraki basamağa <b>' + tr(d.kalan) + ' XP</b>';
 
     return '<div class="seviye-panel" data-seviye-panel style="--kademe-renk:'
       + kac(k.renk || '#888')
@@ -848,8 +1000,8 @@ SP.XP = (function(){
       + '<div class="seviye-serit" role="img" aria-label="Son on dört günün XP\'si">'
       +   serit + '</div>'
       + '<ul class="seviye-panel__liste">' + govde + '</ul>'
-      + '<p class="seviye-panel__sinir">Bugün <b>' + (d.bugun || 0) + ' XP</b>. '
-      + 'Toplam <b>' + d.toplam + '</b>. '
+      + '<p class="seviye-panel__sinir">Bugün <b>' + tr(d.bugun) + ' XP</b>. '
+      + 'Toplam <b>' + tr(d.toplam) + '</b>. '
       + 'XP hiçbir kararı vermez — ne plan, ne uyarı, ne teşhis ona bakar; '
       + 'yalnızca emeği görünür kılar.</p>'
       + isListesiHtml()
@@ -865,9 +1017,9 @@ SP.XP = (function(){
     isler.forEach(function(e){
       var tavan = gunlukTavan(e);
       satir += '<tr><td>' + kac(e.ad) + '</td>'
-        + '<td class="seviye-isler__sayi">' + e.xp + '</td>'
+        + '<td class="seviye-isler__sayi">' + tr(e.xp) + '</td>'
         + '<td class="seviye-isler__birim">/ ' + kac(e.birim) + '</td>'
-        + '<td class="seviye-isler__sayi">' + tavan + '</td></tr>';
+        + '<td class="seviye-isler__sayi">' + tr(tavan) + '</td></tr>';
     });
     return '<details class="seviye-isler">'
       + '<summary>Bu sistemde XP veren işler</summary>'
@@ -929,6 +1081,7 @@ SP.XP = (function(){
     tazele:tazele,
     gunToplami:gunToplami, gunuVar:gunuVar, sonGunler:sonGunler, kirilim:kirilim,
     etkinlikler:etkinlikler, gunlukTavan:gunlukTavan,
+    merdiven:merdiven, bugunku:bugunku,
     yazilabilirGun:yazilabilirGun, gunKaydir:gunKaydir,
     bekleyenKutlama:bekleyenKutlama, kutlandi:kutlandi, dinle:dinle,
     /* Test ve teşhis için ham defter; ekranlar buna DOKUNMAZ. */

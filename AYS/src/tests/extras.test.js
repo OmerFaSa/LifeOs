@@ -99,6 +99,17 @@
       try{
         localStorage.removeItem(undoKey);
         localStorage.setItem(key, JSON.stringify({ 'profile/main':{ name:'ESKI' } }));
+        /* DEPONUN ARKASINDAN YAZDIK — olayini da gondermek zorundayiz.
+
+           `store.js` ayristirilmis kopyayi bellekte tutuyor ve o kopya
+           yalniz `storage` olayiyla gecersizlesiyor. Gercek tarayicida
+           olayi BASKA SEKME uretir; burada baska sekmeyi taklit eden
+           biziz, o yuzden olayi da biz gonderiyoruz.
+
+           Bu satir olmadan test yanlis bir sey olcuyordu: `importAll`
+           geri alma kopyasini ESKI yerine bir onceki testin
+           durumundan aliyor, `undoImport` da oraya donuyordu. */
+        window.dispatchEvent(new StorageEvent('storage', { key:key }));
         expect(real.importUndoInfo()).toBeNull();
 
         const meta = await real.importAll({ __meta:{ app:'rota-84285', schemaVersion:R.SCHEMA_VERSION },
@@ -114,6 +125,9 @@
       }finally{
         if(oncekiVeri === null) localStorage.removeItem(key); else localStorage.setItem(key, oncekiVeri);
         if(oncekiUndo === null) localStorage.removeItem(undoKey); else localStorage.setItem(undoKey, oncekiUndo);
+        /* Temizlik de deponun arkasindan yapildi: kopya yine tazelensin,
+           yoksa bu testin durumu SONRAKI testlere sizar. */
+        window.dispatchEvent(new StorageEvent('storage', { key:key }));
       }
     });
     it('gecersiz geri alma istegini reddeder', async function(){

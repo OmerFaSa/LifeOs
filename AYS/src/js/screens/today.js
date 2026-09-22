@@ -73,6 +73,20 @@ R.Screens.today = (function(){
 
   const STATUSES = [['pending','Bekliyor'],['done','Tamamlandı'],['partial','Yarım'],['skipped','Atlandı']];
 
+  /* GÜNÜN ODAK ROZETİ — blokların başlığının yanında, o günün
+     raporunda. Başarımlar sekmesindeki odak rozeti ömürlük rekordur;
+     bu ise BU GÜNÜN kendisi (bkz. core/basarim.js, gununOdagi).
+     Yalnız ÖLÇÜLMÜŞ süre sayılır: `actualMin` boş bırakılan blok
+     «sıfır dakika» değil «veri yok»tur. Eşiğin altındaki gün rozet
+     almaz ve boş döner. */
+  function OdakRozeti(day){
+    if(!R.Basarim) return '';
+    const dk = ((day && day.blocks) || []).reduce(function(t, b){
+      return t + (b && b.actualMin != null ? Number(b.actualMin) || 0 : 0);
+    }, 0);
+    return R.Basarim.odakHtml(dk);
+  }
+
   function BlockCard(b){
     const running = !!b.startedAt;
     const done = b.status === 'done' || b.status === 'partial';
@@ -144,6 +158,8 @@ R.Screens.today = (function(){
     const clickable = a.route || a.act;
     return c.NextUp({
       icon:a.icon, label:a.label, title:a.title, why:a.why, hint:'next-action', calm:a.tone === 'calm',
+      /* Yalniz sakin halde cizilir: AYS'nin isi hedeftir. */
+      sanat:'hedef',
       action:when(clickable, () => c.Button({ label:'Başla', tone:'primary', act:'next-action',
         data:{ 'data-route':a.route || '', 'data-next':a.act || '', 'data-block':a.blockId || '' } })),
     });
@@ -680,7 +696,7 @@ R.Screens.today = (function(){
       ${c.Span(6, c.Stack(html`
         ${AutoCard()}
         <div id="pane-flow">${FlowCard()}</div>
-        ${c.SectionTitle(html`${wd.label} blokları${raw(UI.hint('block'))}`, html`<span class="small dim">${U.fmtDate(dateISO)}</span>`)}
+        ${c.SectionTitle(html`${wd.label} blokları${raw(UI.hint('block'))}`, html`${raw(OdakRozeti(day))}<span class="small dim">${U.fmtDate(dateISO)}</span>`)}
         ${map(day.blocks, BlockCard)}
         ${c.Card({ pad:'sm', body:c.Field({ label:'Günün notu',
           input:c.Textarea({ rows:2, value:day.note, change:'day-note', placeholder:'Bugün ne engelledi, ne kolaylaştırdı?' }) }) })}
@@ -717,6 +733,10 @@ R.Screens.today = (function(){
     const n = liste.filter(x => String(x.id) === String(id))[0];
     if(!n) return;
     const r = await R.Beacon.resolveIntent(n, action);
+    /* MUHUR YALNIZ ONAYDA BASILIR. Reddetmek de bir cevaptir ama
+       onay degildir; ikisine ayni muhru basmak, muhru anlamsiz
+       kilardi. */
+    if(r.ok && action !== 'reject' && action !== 'dismiss') R.UI.onayMuhru();
     if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
     S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
     const bas = r.state === 'applied' ? (r.note || 'Uygulandı')

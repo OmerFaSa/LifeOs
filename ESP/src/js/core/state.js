@@ -88,6 +88,11 @@ ESP.S = {
     railOpen:false,
     undo:null,              // son yikici islemin geri alma kaydi
     dayTab:'giris',         // giris | ozet | gecmis
+    rutbeTab:'simdi',      // simdi | merdiven | rozet | kazanc | defter
+    /* Açık rozet ayrıntısı. `title` özniteliği masaüstünde iş
+       görüyordu ama TELEFONDA hiç çalışmıyor: dokunmanın bir
+       karşılığı yoktu. */
+    rutbeRozet:null,
     dayDate:null,           // gorunen gun (null = bugun)
     sessionDisc:'lang',     // giris formunda secili disiplin
     langTab:'calis',        // calis | kartlar | ekle | ilerleme

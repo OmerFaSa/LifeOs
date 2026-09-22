@@ -61,7 +61,15 @@ ESP.Screens.profile = (function(){
           wide:true,
           body:html`
             <div class="picks picks--disc">${map(ESP.DISCIPLINES, d => K.PickCard({
-              label:d.label, on:ESP.Mod.isOn(d.id),
+              /* DİSİPLİNİN AMBLEMİ — kimlikten türer (brand/ortak/simge.js).
+                 Yedi kart yan yana yedi kutuydu; hangisinin hangi alan
+                 olduğu yalnız yazıdan okunuyordu. Amblem kartı bir
+                 saniyede bulunur hâle getiriyor.
+
+                 Müziğin amblemi HENÜZ YOK: teslimatta altı disiplin geldi,
+                 katalogda yedi var. Simge boş döner, yazı kalır. */
+              label:raw(window.LIFEOS.SIMGELI('disiplin', d.id, d.label)),
+              on:ESP.Mod.isOn(d.id),
               meta:d.covers + ' · ' + (ESP.Mod.footprint(d.id) || '')
                 + (ESP.Mod.isOn(d.id) ? '' : ' · KAPALI'),
               act:'toggle-mod', data:{ 'data-id':d.id } }))}</div>
@@ -240,8 +248,13 @@ ESP.Screens.profile = (function(){
         <div class="mt-12">
           <span class="mono-label">Bugün ne gidiyor</span>
           ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
-            rows:on.rows.map(r => [r.key,
-              r.value == null ? '—' : U.fmtNum(r.value), r.label]) })}
+              rows:on.rows.map(r => [r.key,
+              r.value == null ? '—' : U.fmtNum(r.value),
+              /* KAYNAK SÜTUNU — etiketin görseliyle birlikte.
+                 Metin `window.LIFEOS.KESINLIK`ten gelir, bu ekran
+                 kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
+                 aynı kelimeyi göstermek zorunda. */
+              raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
           <p class="small muted mt-8">Kart metni, not içeriği ve kitap adı GİTMEZ.
             Giden şey bu dört sayıdır; değeri olmayan alan «veri yok» gider,
             sıfır değil.</p>

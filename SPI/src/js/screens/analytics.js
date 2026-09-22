@@ -92,7 +92,11 @@ SP.Screens.analytics = (function(){
       sub:U.fmtRange(r.start, r.end),
       badge:K.Badge({ label:r.discipline.minDays + '/7 asgari gün',
         tone:r.discipline.minDays >= 5 ? 'ok' : 'warn' }),
-      body:html`
+      body:html`<div class="rapor-govde">
+        <!-- RAPOR KAPAĞI — belgenin yüzü. Mühür belgeyi imzalar, kapak
+             adlandırır; ikisi ayrı şeydir. Dosya yoksa düğüm kalkar. -->
+        <img class="rapor-kapak" src="img/marka/kapak-saglik-raporu.webp"
+          alt="Sağlık raporu kapağı" loading="lazy" onerror="this.remove()">
         ${K.Notice({ tone:'info', body:SP.Calc.headline(r) })}
         <div class="cols-4 mt-12">
           ${K.Stat({ label:'Toparlanma', value:r.readiness.avg == null ? '—' : String(r.readiness.avg),
@@ -113,7 +117,8 @@ SP.Screens.analytics = (function(){
         ${when(r.gaps.length, () => html`<div class="mt-12">
           <h3 class="section-h">Beslenme açıkları</h3>
           ${K.Table({ tight:true, headers:['Öğe', { label:'Kapsama', num:true }],
-            rows:r.gaps.map(g => [g.nutrient ? g.nutrient.name : g.id, '%' + g.pct]) })}</div>`)}`,
+            rows:r.gaps.map(g => [g.nutrient ? g.nutrient.name : g.id, '%' + g.pct]) })}</div>`)}
+      </div>`,
       foot:K.Button({ label:'Ofiste konuş', size:'sm', act:'go', data:{ 'data-route':'meeting' } }),
     });
   }

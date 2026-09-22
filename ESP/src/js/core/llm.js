@@ -1,3 +1,8 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/llm.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir.
+   Kaynak bir KALIPTIR: ad alanı ve depo öneki yayım
+   sırasında konur (__NS__, __DEPO__, __BASLIK__). */
 /* Model tasima katmani — ofis ajanlarini ucretsiz LLM uclarina baglar.
 
    Ilke: bu modul YALNIZCA tasir. Ne istem kurar, ne veri secer, ne karar verir.
@@ -9,7 +14,17 @@
      gemini   POST /models/x:streamGenerateContent — Google AI Studio
 
    Anahtarlar 'esp.llm.keys' altinda, uygulama verisinden AYRI durur:
-   yedege girmez (Store.exportAll baska bir anahtari okur), buluta gitmez. */
+   yedege girmez (Store.exportAll baska bir anahtari okur), buluta gitmez.
+
+   ================== BU DOSYA TEK KAYNAKTIR ==================
+   Kaynagi `brand/ortak/llm.js`; `python3 tools/ortak.py --yay` ile
+   YALNIZ SPI ve ESP'ye yayilir (`tools/ortak.py` icindeki `YALNIZ`).
+
+   AYS'nin `llm.js`'i bu dosyanin ucuncu kopyasi DEGILDIR: 1337 satir
+   ve otuz fazla islev tasir (`diagnose`, `listModels`, `visionChain`,
+   `stripThinking`, `keyProblem`, `classify`...). Oradaki bir
+   duzeltme buraya KENDILIGINDEN gelmez; iki taraf ayri ayri
+   bakilir. */
 
 window.ESP = window.ESP || {};
 
