@@ -1099,6 +1099,31 @@ R.Model = (function(){
     return { from, to:R.SCHEMA_VERSION, changed:true };
   }
 
+  /* KUNYE YOKSA SURUM BILINMIYOR — GUNCEL DEGIL.
+
+     Burasi once kaydi bulamayinca `schemaVersion`i GUNCEL surume
+     varsayiyordu ve `migrate()` hemen `changed:false` ile cikiyordu:
+     kunyesi olmayan bir ambar, hangi surumden gelirse gelsin, HIC goc
+     etmiyordu. Yani goc, tam da gerekli oldugu durumda atlaniyordu.
+
+     Bu teorik bir kenar durum degildi. ILK YEDEK KUNYE TASIMAZ:
+     `guide.js` once `exportAll()` cagirir, `markBackup()` ondan SONRA
+     yazar — v4 kullanicisinin ilk yedeginde `meta/backup` kaydi yoktur.
+     O yedek v5 kuruluma geri yuklendiginde v4→v5 «uydurma sifir»
+     onarimi hic kosmuyor, `blank:0` degerleri ortalamayi kirletmeye
+     devam ediyordu.
+
+     Bilinmeyen surum icin EN ESKI varsayilir. Iki yonun bedeli esit
+     degildir: gereksiz kosan bir goc hicbir sey bozmaz (goc yikici
+     degildir, yalniz eksik kaplari tamamlar ve KENDINI ELE VEREN
+     kayitlari onarir), atlanan bir goc ise veriyi sessizce bozuk
+     birakir. */
+  function metaKunyesi(kayit){
+    const m = Object.assign({ lastBackupAt:null }, kayit || {});
+    if(!m.schemaVersion) m.schemaVersion = 1;
+    return m;
+  }
+
   /* ---------- yukleme ---------- */
   async function loadAll(){
     await R.Store.init();
@@ -1107,7 +1132,7 @@ R.Model = (function(){
     if(!profile){ profile = defaultProfile(); await R.Store.set('profile/main', profile); }
     R.S.profile = profile;
 
-    R.S.meta = (await R.Store.get('meta/backup')) || { lastBackupAt:null, schemaVersion:R.SCHEMA_VERSION };
+    R.S.meta = metaKunyesi(await R.Store.get('meta/backup'));
 
     const [weeks, days, exams, errors, cards, reviews, decisions, protocols, prefs,
            videoNotes, activities, mood, breaks, plan, calendar, sessions, profiles,
@@ -1201,7 +1226,7 @@ R.Model = (function(){
     SEGMENT_TAGS, noteTopicName, cardFromSegment, splitTranscript, guessTag, noteQuality,
     activityCatalog, activityById, saveActivity, hideActivity,
     saveMood, moodOf, energyAverage, saveBreak, breaksOf,
-    markBackup, backupAgeDays, backupDue, dataFootprint,
+    markBackup, backupAgeDays, backupDue, dataFootprint, metaKunyesi,
     migrate, loadAll,
   };
 })();

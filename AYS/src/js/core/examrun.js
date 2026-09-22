@@ -19,6 +19,58 @@ R.ExamRun = (function(){
 
   let run = null;
 
+  /* OTURUM DISKE YAZILIR — 165 dakika bellekte durmaz.
+
+     `run` once yalnizca bir modul degiskeniydi ve hicbir yere
+     yazilmiyordu; depoda `beforeunload` uyarisi da yok. TYT provasinin
+     ortasinda sekme yenilenirse butun sureler ve isaretler gidiyordu —
+     tam olarak provanin degerli oldugu anda.
+
+     Sure DUVAR SAATINDEN gelir (`startedMs` ve `Date.now()` farki), tik
+     sayisindan degil; bu yuzden geri yuklenen oturum dogru sureyi
+     gosterir. Arka plan sekmesinde duran bir sayac burada olsaydi geri
+     yukleme de eksik olcerdi.
+
+     YAZMA BEKLENMEZ, AMA YUTULMAZ. Isaret koymak bir yazma isleminin
+     bitmesini beklerse sinav provasi tarayiciya bagli kalirdi; bu yuzden
+     yazma arka planda gider. Basarisiz olursa `writeError()` soyler —
+     ekran bunu gosterebilir ve kullanici oturumunun korunmadigini
+     BILIR. */
+  const ANAHTAR = 'meta/examrun';
+  let sonYazma = Promise.resolve();
+  let yazmaHatasi = null;
+
+  function kaydet(){
+    const is = run ? R.Store.set(ANAHTAR, run) : R.Store.remove(ANAHTAR);
+    sonYazma = Promise.resolve(is)
+      .then(function(){ yazmaHatasi = null; })
+      .catch(function(e){
+        yazmaHatasi = (e && e.message) || 'oturum diske yazılamadı';
+      });
+    return sonYazma;
+  }
+
+  /* Testler icin: bekleyen yazmanin bitmesini bekler. */
+  function flush(){ return sonYazma; }
+  function writeError(){ return yazmaHatasi; }
+
+  /* Sekmenin kapanmasini taklit eder: BELLEGI bosaltir, diski DEGIL. */
+  function unutDurum(){ run = null; }
+
+  /* Yarim kalmis oturumu diskten geri alir. Acilista bir kez cagrilir. */
+  async function restore(){
+    if(run) return run;
+    let k = null;
+    try{ k = await R.Store.get(ANAHTAR); }
+    catch(e){ return null; }
+    /* Bozuk ya da bos bir kayit oturum SAYILMAZ: yarim bir kayitla
+       acilan bir prova, olmayan bir sureyi olcmus gibi gorunurdu. */
+    if(!k || !Array.isArray(k.tests) || !k.tests.length) return null;
+    if(typeof k.startedMs !== 'number' || !isFinite(k.startedMs)) return null;
+    run = k;
+    return run;
+  }
+
   function active(){ return run; }
   function currentTest(){ return run ? run.tests[run.index] : null; }
 
@@ -48,6 +100,7 @@ R.ExamRun = (function(){
       pausedAt:null,
     };
     run.tests[0].startedMs = Date.now();
+    kaydet();
     return { ok:true, run };
   }
 
@@ -75,6 +128,7 @@ R.ExamRun = (function(){
       t.startedMs = null;
     }
     run.pausedAt = Date.now();
+    kaydet();
   }
   function resume(){
     if(!run || !run.pausedAt) return;
@@ -82,6 +136,7 @@ R.ExamRun = (function(){
     run.pausedAt = null;
     const t = currentTest();
     if(t) t.startedMs = Date.now();
+    kaydet();
   }
   function isPaused(){ return !!(run && run.pausedAt); }
 
@@ -101,11 +156,14 @@ R.ExamRun = (function(){
       spent:Math.max(0, secs - last),
     };
     run.marks.push(rec);
+    kaydet();
     return rec;
   }
   function undoMark(){
     if(!run || !run.marks.length) return null;
-    return run.marks.pop();
+    const m = run.marks.pop();
+    kaydet();
+    return m;
   }
 
   function stopClockOfCurrent(){
@@ -125,6 +183,7 @@ R.ExamRun = (function(){
     run.index++;
     const next = currentTest();
     if(!run.pausedAt) next.startedMs = Date.now();
+    kaydet();
     return next;
   }
   function gotoTest(i){
@@ -133,6 +192,7 @@ R.ExamRun = (function(){
     run.index = i;
     const next = currentTest();
     if(!run.pausedAt) next.startedMs = Date.now();
+    kaydet();
     return next;
   }
 
@@ -233,11 +293,13 @@ R.ExamRun = (function(){
     });
 
     run = null;
+    kaydet();                       // biten oturumun kaydi da silinir
     return { exam, session, summary:sum };
   }
 
-  function cancel(){ run = null; }
+  function cancel(){ run = null; kaydet(); }
 
   return { MARKS, start, active, currentTest, elapsedTotal, elapsedTest, remaining,
+    restore, flush, writeError, unutDurum,
     pause, resume, isPaused, mark, undoMark, nextTest, gotoTest, summary, finish, cancel };
 })();

@@ -246,6 +246,43 @@
       X.cancel();
       expect(X.start('yok').ok).toBeFalsy();
     });
+
+    it('oturum DİSKE yazılır — sekme yenilenince yaşar', async function(){
+      /* 165 DAKİKA BELLEKTE DURUYORDU.
+
+         `run` bir modül değişkeniydi ve hiçbir yere yazılmıyordu; depoda
+         `beforeunload` uyarısı da yok. TYT provasının ortasında sekme
+         yenilenirse bütün süreler ve işaretler gidiyordu — üstelik tam
+         olarak provanın değerli olduğu anda, sınav gününün provasında.
+
+         Süre DUVAR SAATİNDEN gelir (`startedMs`), tik sayısından değil;
+         bu yüzden geri yüklenen oturum doğru süreyi gösterir. */
+      X.cancel();
+      X.start('tyt-full');
+      X.mark('ok'); X.mark('slow');
+      const isaret = X.active().marks.length;
+      const basladi = X.active().startedMs;
+      await X.flush();
+
+      X.unutDurum();                       // sekme kapandı: bellek gitti
+      expect(X.active()).toBe(null);
+
+      const geri = await X.restore();       // sekme yeniden açıldı
+      expect(geri).toBeTruthy();
+      expect(X.active().marks).toHaveLength(isaret);
+      expect(X.active().startedMs).toBe(basladi);
+      X.cancel();
+    });
+
+    it('biten oturum geri yüklenmez', async function(){
+      X.cancel();
+      X.start('tyt-full');
+      await X.flush();
+      X.cancel();                           // iptal = kayıt da silinir
+      await X.flush();
+      X.unutDurum();
+      expect(await X.restore()).toBe(null);
+    });
     it('şablondan testleri kurar', function(){
       const r = X.start('tyt-full');
       expect(r.ok).toBeTruthy();

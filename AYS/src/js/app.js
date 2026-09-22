@@ -1277,6 +1277,18 @@ R.App = (function(){
       wireStoreErrors();
       await M.loadAll();
 
+      /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.
+
+         165 dakikalık TYT provası bir modül değişkeninde duruyordu ve
+         sekme yenilenince bütün süreler ile işaretler gidiyordu. Süre
+         duvar saatinden geldiği için geri yüklenen oturum doğru süreyi
+         gösterir.
+
+         KENDİ BAŞINA DÜŞER: bozuk bir kayıt uygulamayı açılışta
+         kilitlemez, oturum yokmuş gibi devam eder. */
+      try{ await R.ExamRun.restore(); }
+      catch(e){ /* oturum geri alınamadı; sistem oturumsuz açılır */ }
+
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
 
          Yükleme çizimden önce yapılır: rozet bir kare «veri yok» gösterip

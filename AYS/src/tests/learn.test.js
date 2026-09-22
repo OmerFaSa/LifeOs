@@ -229,5 +229,39 @@
       S.meta = { schemaVersion:R.SCHEMA_VERSION };
       expect((await M.migrate()).changed).toBeFalsy();
     });
+
+    it('künye YOKSA sürüm güncel SAYILMAZ — göç koşar', function(){
+      /* GÖÇÜN GEREKLİ OLDUĞU TEK DURUMDA ATLANIYORDU.
+
+         `loadAll` kaydı bulamayınca `schemaVersion`i GÜNCEL sürüme
+         varsayıyordu; `migrate()` de hemen `changed:false` ile çıkıyordu.
+         Yani künyesi olmayan bir ambar, hangi sürümden gelirse gelsin,
+         hiç göç etmiyordu.
+
+         Bu teorik değildi: İLK YEDEK künye TAŞIMIYOR. `guide.js` önce
+         `exportAll()` çağırıyor, `markBackup()` ondan SONRA yazıyor —
+         yani v4 kullanıcısının ilk yedeğinde `meta/backup` kaydı yok. O
+         yedek v5 kuruluma geri yüklendiğinde v4→v5 «uydurma sıfır»
+         onarımı hiç koşmuyor ve `blank:0` değerleri ortalamayı
+         kirletmeye devam ediyordu.
+
+         Testler yakalayamıyordu çünkü hepsi `S.meta`'yı ELLE kuruyor:
+         testte yaşayan, üretimde ölü bir yol. */
+      expect(M.metaKunyesi(null).schemaVersion).toBe(1);
+      expect(M.metaKunyesi({}).schemaVersion).toBe(1);
+      expect(M.metaKunyesi({ lastBackupAt:'2026-01-01T00:00:00.000Z' })
+        .schemaVersion).toBe(1);
+    });
+
+    it('künye sürüm taşıyorsa o sürüme güvenilir', function(){
+      expect(M.metaKunyesi({ schemaVersion:3 }).schemaVersion).toBe(3);
+      expect(M.metaKunyesi({ schemaVersion:R.SCHEMA_VERSION }).schemaVersion)
+        .toBe(R.SCHEMA_VERSION);
+    });
+
+    it('künyedeki öteki alanlar korunur', function(){
+      const m = M.metaKunyesi({ lastBackupAt:'2026-01-01T00:00:00.000Z' });
+      expect(m.lastBackupAt).toBe('2026-01-01T00:00:00.000Z');
+    });
   });
 })();
