@@ -9284,7 +9284,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'6fcd182', at:'2026-09-22 19:02', dirty:true };
+R.BUILD = { id:'3653307', at:'2026-09-22 20:17', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13090,6 +13090,10 @@ R.SOURCE_DELTA = 15;
       kural motorunda dogrulanamaz ve gecmez.
    3. GERI ALINABILIRLIK. Uygulanan her eylem oncesi durumun anlik goruntusunu
       birakir; kullanici tek dokunusla geri alir.
+   4. SEVIYE KATALOGDADIR (AGENTS.md §1.9). `level`: 'kucuk' | 'orta' |
+      'buyuk'. Seviyeyi oneren degil bu dosya belirler. Kucuk: tek gun,
+      tek kayit — kullanici istediyse sormadan uygulanir. Birden cok kaydi
+      birden degistiren eylem kucuk DEGILDIR; geri alinamayan hic yazilmaz.
 
    Yetki ayrimi burada da gecerlidir: Tuna AYT konusunu tekrara alamaz,
    Rana net ile ilgili bir eylem oneremez. `agents` alani bunu kilitler.
@@ -13102,6 +13106,7 @@ window.R = window.R || {};
 R.ACTIONS = [
   {
     id:'topic-review',
+    level:'kucuk',
     title:'Konuyu tekrara al',
     /* Kullaniciya "ne olacak" tek satirda soylenir. */
     summary:'Kapanmış görünen konunun durumu “çalışılıyor”a döner.',
@@ -13116,6 +13121,7 @@ R.ACTIONS = [
 
   {
     id:'block-add',
+    level:'kucuk',
     title:'Bugüne tekrar bloğu ekle',
     summary:'Günün planına yeni bir çalışma bloğu eklenir.',
     touches:'Bugünün planı',
@@ -13128,6 +13134,7 @@ R.ACTIONS = [
 
   {
     id:'cards-due-today',
+    level:'orta',
     title:'Geciken tekrarları bugüne çek',
     summary:'Tarihi geçmiş tekrar kartları bugüne alınır.',
     touches:'Tekrar kartları',
@@ -13140,6 +13147,7 @@ R.ACTIONS = [
 
   {
     id:'card-from-error',
+    level:'kucuk',
     title:'Açık yanlıştan kart üret',
     summary:'Yanlış defterindeki kayıttan bir tekrar kartı oluşturulur.',
     touches:'Tekrar kartları',
@@ -13153,6 +13161,7 @@ R.ACTIONS = [
 
   {
     id:'week-target',
+    level:'kucuk',
     title:'Haftalık soru hedefini güncelle',
     summary:'Bu haftanın soru hedefi değiştirilir.',
     touches:'Haftalık hedef',
@@ -13165,6 +13174,7 @@ R.ACTIONS = [
 
   {
     id:'decision-close',
+    level:'kucuk',
     title:'Açık kararı kapat',
     summary:'Takipteki karar “yapıldı” ya da “devredildi” olarak kapanır.',
     touches:'Karar takibi',
@@ -13192,6 +13202,7 @@ R.ACTIONS = [
      değil; önerinin gerekçesine SENİN cümlen yazılır. */
   {
     id:'soru-yaz',
+    level:'kucuk',
     title:'Çözülen soruyu yaz',
     summary:'Söylediğin soru sayısı o günün ilgili bloğuna eklenir.',
     touches:'Gün kaydı',
@@ -13204,6 +13215,7 @@ R.ACTIONS = [
   },
   {
     id:'paragraf-yaz',
+    level:'kucuk',
     title:'Paragraf sayısını yaz',
     summary:'Günün paragraf sayacına eklenir.',
     touches:'Gün kaydı',
@@ -13215,6 +13227,7 @@ R.ACTIONS = [
   },
   {
     id:'problem-yaz',
+    level:'kucuk',
     title:'Problem sayısını yaz',
     summary:'Günün problem sayacına eklenir.',
     touches:'Gün kaydı',
@@ -13226,6 +13239,7 @@ R.ACTIONS = [
   },
   {
     id:'uyku-yaz',
+    level:'kucuk',
     title:'Uyku süresini yaz',
     summary:'O günün uyku saati kaydedilir.',
     touches:'Gün kaydı',
@@ -13237,6 +13251,7 @@ R.ACTIONS = [
   },
   {
     id:'sure-yaz',
+    level:'kucuk',
     title:'Çalışma süresini yaz',
     summary:'Söylediğin süre o dersin bugünkü bloğuna eklenir.',
     touches:'Gün kaydı',
@@ -19950,7 +19965,14 @@ R.UI = (function(){
       btn.className = 'toast__undo';
       btn.textContent = 'Geri al';
       btn.setAttribute('data-act', 'undo');
-      btn.addEventListener('click', () => { el.remove(); });
+      /* `undo` bir islevse dugme gercekten geri alir; yalniz `true` ise
+         eski davranis: toast kapanir. */
+      btn.addEventListener('click', () => {
+        el.remove();
+        if(typeof o.undo === 'function'){
+          try{ Promise.resolve(o.undo()).catch(() => {}); }catch(e){}
+        }
+      });
       el.appendChild(btn);
     }
     root.appendChild(el);
@@ -27381,6 +27403,11 @@ R.Office = (function(){
       meetingVoice:false,     // toplantiyi sesli dinle (tercih kalicidir)
       voices:{},              // agentId -> voiceURI (kullanicinin ses eslestirmesi)
       perAgent:{},            // agentId -> { provider, model }
+      /* Kucuk aksiyon ne zaman sormadan uygulanir (AGENTS.md §1.9):
+         'istek'   yalniz kullanici istediginde (varsayilan)
+         'hepsi'   ajanin kendi buldugu kucuk aksiyon da
+         'hicbiri' her aksiyon onay bekler */
+      otomatikUygula:'istek',
       updatedAt:null,
       promptVersion:R.OFFICE_PROMPTS.version,
     };
@@ -28505,12 +28532,19 @@ R.Office = (function(){
          kutuya gider. */
       let said = res.text;
       let proposal = null;
+      let proposalApplied = false;
       if(catalog){
         const split = R.Proposals.splitAction(said);
         if(split.obj){
           said = split.text || said;
           const p = R.Proposals.fromModel(agentId, split.obj);
-          if(p) proposal = await R.Proposals.propose(p);
+          /* Ajanin kendi onerisi (source 'llm'): yalniz kullanici «hepsi»
+             ayarini actiysa ve eylem kucukse hemen uygulanir. */
+          if(p){
+            const t = await R.Proposals.talep(p);
+            proposal = t.row;
+            proposalApplied = t.otomatik;
+          }
         }
       }
 
@@ -28532,7 +28566,7 @@ R.Office = (function(){
         /* Devam istekleri de yetmediyse yanit kirpildi: ekran bunu soyler,
            kullanici eksik cumleyi sessizce okumaz. */
         truncated:!!res.truncated,
-        proposal:proposal || null };
+        proposal:proposal || null, proposalApplied };
     }catch(err){
       if(err && err.code === 'cancelled') throw err;
       const text = ruleText(agentId, kind, payload.ctx || {});
@@ -30186,10 +30220,23 @@ R.Sources = (function(){
      ajan onerir → kural motoru DOGRULAR → kullanici ONAYLAR → motor uygular
                                                             → geri alinabilir
 
-   Onaysiz hicbir sey degismez. Bu dosyada "otomatik uygula" diye bir yol
-   YOKTUR ve olmamalidir: ofisin degeri onerisinde, yetkisinde degil.
+   SEVIYE (AGENTS.md §1.9). Her eylemin seviyesi katalogdadir
+   (data/actions.js `level`), onerenin elinde degil:
 
-   Iki oneri kaynagi vardir ve ikisi de ayni kapidan gecer:
+     kucuk   kullanici ISTEDIYSE sormadan uygulanir, «Geri al» kalir.
+             Ajanin kendi buldugu kucuk oneri yalniz kullanici izin
+             verdiyse (ayar 'hepsi') uygulanir.
+     orta    her zaman onizleme + tek onay.
+     buyuk   her zaman ayrintili onizleme + onay.
+
+   Yani "otomatik uygula" artik VAR, ama yalniz kucuk, geri alinabilir
+   ve kullanicinin actigi durumda. Karar tek yerde verilir: otomatikMi().
+   Uygulama yine ayni kapidan gecer — dogrulama atlanmaz, geri alma
+   kaydi yine once alinir.
+
+   Uc kaynak vardir ve ucu de ayni kapidan gecer:
+
+     talep              KULLANICININ istegi (sohbet, palet): source 'istek'
 
      suggest()          kural motoru: veriden kendisi cikarir, model gerekmez,
                         cevrimdisi calisir, kota harcamaz
@@ -30210,7 +30257,12 @@ R.Proposals = (function(){
   const U = R.U, M = R.Model, S = R.S;
 
   const MAX = 40;             // saklanan oneri (uygulanan + reddedilen dahil)
+  const MAX_ANAHTAR = 500;    // tek-uygulama anahtarlari: oneriden uzun yasar
   const STORE = 'office/proposals';
+
+  const SEVIYELER = ['kucuk', 'orta', 'buyuk'];
+  const MODLAR = ['istek', 'hepsi', 'hicbiri'];
+  const KAYNAKLAR = ['istek', 'llm', 'kural'];
 
   /* ==================== eylem uygulamalari ====================
 
@@ -30671,13 +30723,15 @@ R.Proposals = (function(){
 
   async function save(){
     S.officeProposals = (S.officeProposals || []).slice(-MAX);
-    await R.Store.set(STORE, { items:S.officeProposals });
+    S.officeProposalKeys = (S.officeProposalKeys || []).slice(-MAX_ANAHTAR);
+    await R.Store.set(STORE, { items:S.officeProposals, anahtarlar:S.officeProposalKeys });
     return S.officeProposals;
   }
 
   async function load(){
     const doc = await R.Store.get(STORE);
     S.officeProposals = (doc && Array.isArray(doc.items)) ? doc.items : [];
+    S.officeProposalKeys = (doc && Array.isArray(doc.anahtarlar)) ? doc.anahtarlar : [];
     return S.officeProposals;
   }
 
@@ -30686,28 +30740,97 @@ R.Proposals = (function(){
     return p.action + '|' + JSON.stringify(p.params || {});
   }
 
+  /* TEK UYGULAMA ANAHTARI. Disaridan (HKM, BAM) gelen bir teklif ag
+     yuzunden iki kez gelebilir; ayni anahtar HICBIR durumda ikinci kez
+     kuyruga girmez — uygulanmis, geri alinmis ya da reddedilmis olsa
+     bile. Anahtarsiz oneri (ornegin «10 paragraf yaptim») tekrar
+     edilebilir: iki ayri oturum iki ayri kayittir. */
+  function anahtarOf(p){
+    const a = String((p && p.anahtar) || '').trim().slice(0, 120);
+    return a || null;
+  }
+
+  /* IZ — «bu degisiklik nereden geldi?» Yalniz {tur, id} ciftleri
+     tasinir, ikisi de kisa metne indirilir; gerisi atilir. */
+  function izOf(p){
+    const ham = Array.isArray(p && p.iz) ? p.iz : [];
+    return ham.filter(x => x && typeof x === 'object')
+      .map(x => ({ tur:String(x.tur || '').trim().slice(0, 24),
+                   id:String(x.id == null ? '' : x.id).trim().slice(0, 60) }))
+      .filter(x => x.tur && x.id)
+      .slice(0, 8);
+  }
+
   async function propose(p){
     const res = check(p);
     if(!res.ok) return null;
     S.officeProposals = S.officeProposals || [];
+    S.officeProposalKeys = S.officeProposalKeys || [];
     const fp = fingerprint(p);
     if(S.officeProposals.some(x => x.status === 'pending' && fingerprint(x) === fp)) return null;
+    const anahtar = anahtarOf(p);
+    if(anahtar && S.officeProposalKeys.indexOf(anahtar) >= 0) return null;
 
+    const def = R.ACTION_BY_ID[p.action];
     const row = {
       id:U.uid('p'),
       action:p.action,
       agent:p.agent,
       params:p.params || {},
       reason:String(p.reason || '').slice(0, 240),
-      source:p.source === 'llm' ? 'llm' : 'kural',
+      source:KAYNAKLAR.indexOf(p.source) >= 0 ? p.source : 'kural',
+      /* Seviye KATALOGDAN yazilir; onerenin gonderdigi deger okunmaz. */
+      level:SEVIYELER.indexOf(def.level) >= 0 ? def.level : 'orta',
+      anahtar,
+      iz:izOf(p),
       at:new Date().toISOString(),
       status:'pending',
       appliedAt:null,
       undo:null,
+      otomatik:false,
     };
     S.officeProposals.push(row);
+    if(anahtar) S.officeProposalKeys.push(anahtar);
     await save();
     return row;
+  }
+
+  /* ==================== otomatik uygulama ====================
+
+     Tek karar noktasi. Kucuk degilse asla; ayar bilinmiyorsa varsayilan
+     ('istek') gibi davranir — bozuk bir ayar kendiliginden «hepsi»ne
+     donmemeli. */
+  function otomatikMi(row, mod){
+    if(!row || row.level !== 'kucuk') return false;
+    const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
+    if(m === 'hicbiri') return false;
+    if(m === 'hepsi') return true;
+    return row.source === 'istek';
+  }
+
+  function ayar(){
+    try{
+      const st = R.Office && typeof R.Office.settings === 'function' ? R.Office.settings() : null;
+      return (st && st.otomatikUygula) || 'istek';
+    }catch(e){ return 'istek'; }
+  }
+
+  /* Oneriyi kuyruga alir; seviye ve ayar izin veriyorsa hemen uygular.
+     Donus: { row, otomatik, why }. row null ise hicbir sey yazilmadi. */
+  async function talep(p){
+    const res = check(p);
+    if(!res.ok) return { row:null, otomatik:false, why:res.why };
+    const row = await propose(p);
+    if(!row){
+      return { row:null, otomatik:false,
+        why:'Bu öneri zaten bekliyor ya da daha önce işlendi.' };
+    }
+    if(!otomatikMi(row, ayar())) return { row, otomatik:false, why:null };
+    const r = await approve(row.id);
+    if(!r || !r.ok) return { row, otomatik:false, why:(r && r.why) || null };
+    r.row.otomatik = true;
+    await save();
+    return { row:r.row, otomatik:true, why:null };
   }
 
   /* ==================== onay ==================== */
@@ -30907,6 +31030,7 @@ R.Proposals = (function(){
   return {
     all, pending, applied, actionable, check, preview,
     propose, approve, reject, undo, clearResolved,
+    talep, otomatikMi, ayar, SEVIYELER, MODLAR,
     suggest, refresh, fromModel, catalogPrompt, splitAction, stripTrailingJson,
     load, save, MAX,
   };
@@ -31451,7 +31575,7 @@ R.Palette = (function(){
          cumlen yazilir — sayi koçun tahmininden degil senin sozunden
          cikar. */
       const kayit = await R.Proposals.propose({ action:o.action, agent:'patron',
-        params:o.params, reason:o.metin || metinSon });
+        params:o.params, reason:o.metin || metinSon, source:'istek' });
       if(!kayit){ dusen++; continue; }
       const res = await R.Proposals.approve(kayit.id);
       if(res) yazilan++; else dusen++;
@@ -41011,6 +41135,9 @@ R.Screens.office = (function(){
       </div>`)}</div>`;
   }
 
+  const KAYNAK_ADI = { istek:'senin isteğin', llm:'ajanın önerisi', kural:'kural motoru buldu' };
+  const SEVIYE_ADI = { kucuk:'küçük değişiklik', orta:'orta değişiklik', buyuk:'büyük değişiklik' };
+
   function proposalRow(p){
     const def = R.ACTION_BY_ID[p.action];
     const agent = R.AGENT_BY_ID[p.agent];
@@ -41021,7 +41148,8 @@ R.Screens.office = (function(){
           <div class="prop__who">
             <b class="prop__title">${def.title}</b>
             <span class="prop__by">${agent.name} · ${def.touches}
-              · ${p.source === 'llm' ? 'ajanın önerisi' : 'kural motoru buldu'}</span>
+              · ${KAYNAK_ADI[p.source] || 'kural motoru buldu'}
+              · ${SEVIYE_ADI[p.level] || SEVIYE_ADI.orta}</span>
           </div>
         </div>
         <p class="prop__why">${p.reason || def.summary}</p>
@@ -41047,7 +41175,8 @@ R.Screens.office = (function(){
           <div class="prop__who">
             <b class="prop__title">${def.title}</b>
             <span class="prop__by">${agent.name} ·
-              ${U.relativeDay(String(p.appliedAt || '').slice(0, 10))} uygulandı</span>
+              ${U.relativeDay(String(p.appliedAt || '').slice(0, 10))}
+              ${p.otomatik ? 'sormadan uygulandı (küçük değişiklik)' : 'uygulandı'}</span>
           </div>
           ${K.Button({ label:'Geri al', icon:'undo', size:'sm', tone:'ghost',
             act:'office-undo', data:{ 'data-id':p.id } })}
@@ -41497,6 +41626,15 @@ R.Screens.office = (function(){
           act:'office-toggle-fallback' }),
         K.Checkbox({ label:'Sabah günün brifingini kendiliğinden üret (günde 1 istek)',
           checked:st.autoBriefing !== false, act:'office-toggle-briefing' }),
+        K.Field({ label:'Küçük değişiklikler sormadan uygulansın mı?',
+          hint:'Küçük: tek günü ya da tek kaydı değiştiren, geri alınabilen iş. '
+            + 'Orta ve büyük değişiklikler her zaman önce sorulur.',
+          input:K.Select({ id:'office-otomatik', value:st.otomatikUygula || 'istek',
+            change:'office-otomatik', options:[
+              { value:'istek', label:'Yalnız benim istediklerim (önerilir)' },
+              { value:'hepsi', label:'Ajanların kendi bulduğu küçük öneriler de' },
+              { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
+            ] }) }),
         html`<div id="office-notify">${notifyRow()}</div>`,
       ], 'sm'),
 
@@ -41941,6 +42079,14 @@ R.Screens.office = (function(){
       const box = document.getElementById('llm-key-warn');
       if(box) box.innerHTML = warn ? String(warn) : '';
     },
+    async 'office-otomatik'(el){
+      const v = R.Proposals.MODLAR.indexOf(el.value) >= 0 ? el.value : 'istek';
+      await O.saveSettings({ otomatikUygula:v });
+      UI.toast(v === 'hicbiri' ? 'Her değişiklik önce sorulacak'
+        : v === 'hepsi' ? 'Ajanların küçük önerileri de sormadan uygulanacak'
+        : 'Yalnız senin istediğin küçük değişiklikler sormadan uygulanacak');
+    },
+
     async 'office-voice'(el){
       const id = el.dataset.agent;
       const next = Object.assign({}, O.settings().voices || {});

@@ -310,7 +310,7 @@ R.Palette = (function(){
          cumlen yazilir — sayi koçun tahmininden degil senin sozunden
          cikar. */
       const kayit = await R.Proposals.propose({ action:o.action, agent:'patron',
-        params:o.params, reason:o.metin || metinSon });
+        params:o.params, reason:o.metin || metinSon, source:'istek' });
       if(!kayit){ dusen++; continue; }
       const res = await R.Proposals.approve(kayit.id);
       if(res) yazilan++; else dusen++;

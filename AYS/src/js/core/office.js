@@ -54,6 +54,11 @@ R.Office = (function(){
       meetingVoice:false,     // toplantiyi sesli dinle (tercih kalicidir)
       voices:{},              // agentId -> voiceURI (kullanicinin ses eslestirmesi)
       perAgent:{},            // agentId -> { provider, model }
+      /* Kucuk aksiyon ne zaman sormadan uygulanir (AGENTS.md §1.9):
+         'istek'   yalniz kullanici istediginde (varsayilan)
+         'hepsi'   ajanin kendi buldugu kucuk aksiyon da
+         'hicbiri' her aksiyon onay bekler */
+      otomatikUygula:'istek',
       updatedAt:null,
       promptVersion:R.OFFICE_PROMPTS.version,
     };
@@ -1178,12 +1183,19 @@ R.Office = (function(){
          kutuya gider. */
       let said = res.text;
       let proposal = null;
+      let proposalApplied = false;
       if(catalog){
         const split = R.Proposals.splitAction(said);
         if(split.obj){
           said = split.text || said;
           const p = R.Proposals.fromModel(agentId, split.obj);
-          if(p) proposal = await R.Proposals.propose(p);
+          /* Ajanin kendi onerisi (source 'llm'): yalniz kullanici «hepsi»
+             ayarini actiysa ve eylem kucukse hemen uygulanir. */
+          if(p){
+            const t = await R.Proposals.talep(p);
+            proposal = t.row;
+            proposalApplied = t.otomatik;
+          }
         }
       }
 
@@ -1205,7 +1217,7 @@ R.Office = (function(){
         /* Devam istekleri de yetmediyse yanit kirpildi: ekran bunu soyler,
            kullanici eksik cumleyi sessizce okumaz. */
         truncated:!!res.truncated,
-        proposal:proposal || null };
+        proposal:proposal || null, proposalApplied };
     }catch(err){
       if(err && err.code === 'cancelled') throw err;
       const text = ruleText(agentId, kind, payload.ctx || {});

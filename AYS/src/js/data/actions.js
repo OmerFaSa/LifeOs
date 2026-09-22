@@ -15,6 +15,10 @@
       kural motorunda dogrulanamaz ve gecmez.
    3. GERI ALINABILIRLIK. Uygulanan her eylem oncesi durumun anlik goruntusunu
       birakir; kullanici tek dokunusla geri alir.
+   4. SEVIYE KATALOGDADIR (AGENTS.md §1.9). `level`: 'kucuk' | 'orta' |
+      'buyuk'. Seviyeyi oneren degil bu dosya belirler. Kucuk: tek gun,
+      tek kayit — kullanici istediyse sormadan uygulanir. Birden cok kaydi
+      birden degistiren eylem kucuk DEGILDIR; geri alinamayan hic yazilmaz.
 
    Yetki ayrimi burada da gecerlidir: Tuna AYT konusunu tekrara alamaz,
    Rana net ile ilgili bir eylem oneremez. `agents` alani bunu kilitler.
@@ -27,6 +31,7 @@ window.R = window.R || {};
 R.ACTIONS = [
   {
     id:'topic-review',
+    level:'kucuk',
     title:'Konuyu tekrara al',
     /* Kullaniciya "ne olacak" tek satirda soylenir. */
     summary:'Kapanmış görünen konunun durumu “çalışılıyor”a döner.',
@@ -41,6 +46,7 @@ R.ACTIONS = [
 
   {
     id:'block-add',
+    level:'kucuk',
     title:'Bugüne tekrar bloğu ekle',
     summary:'Günün planına yeni bir çalışma bloğu eklenir.',
     touches:'Bugünün planı',
@@ -53,6 +59,7 @@ R.ACTIONS = [
 
   {
     id:'cards-due-today',
+    level:'orta',
     title:'Geciken tekrarları bugüne çek',
     summary:'Tarihi geçmiş tekrar kartları bugüne alınır.',
     touches:'Tekrar kartları',
@@ -65,6 +72,7 @@ R.ACTIONS = [
 
   {
     id:'card-from-error',
+    level:'kucuk',
     title:'Açık yanlıştan kart üret',
     summary:'Yanlış defterindeki kayıttan bir tekrar kartı oluşturulur.',
     touches:'Tekrar kartları',
@@ -78,6 +86,7 @@ R.ACTIONS = [
 
   {
     id:'week-target',
+    level:'kucuk',
     title:'Haftalık soru hedefini güncelle',
     summary:'Bu haftanın soru hedefi değiştirilir.',
     touches:'Haftalık hedef',
@@ -90,6 +99,7 @@ R.ACTIONS = [
 
   {
     id:'decision-close',
+    level:'kucuk',
     title:'Açık kararı kapat',
     summary:'Takipteki karar “yapıldı” ya da “devredildi” olarak kapanır.',
     touches:'Karar takibi',
@@ -117,6 +127,7 @@ R.ACTIONS = [
      değil; önerinin gerekçesine SENİN cümlen yazılır. */
   {
     id:'soru-yaz',
+    level:'kucuk',
     title:'Çözülen soruyu yaz',
     summary:'Söylediğin soru sayısı o günün ilgili bloğuna eklenir.',
     touches:'Gün kaydı',
@@ -129,6 +140,7 @@ R.ACTIONS = [
   },
   {
     id:'paragraf-yaz',
+    level:'kucuk',
     title:'Paragraf sayısını yaz',
     summary:'Günün paragraf sayacına eklenir.',
     touches:'Gün kaydı',
@@ -140,6 +152,7 @@ R.ACTIONS = [
   },
   {
     id:'problem-yaz',
+    level:'kucuk',
     title:'Problem sayısını yaz',
     summary:'Günün problem sayacına eklenir.',
     touches:'Gün kaydı',
@@ -151,6 +164,7 @@ R.ACTIONS = [
   },
   {
     id:'uyku-yaz',
+    level:'kucuk',
     title:'Uyku süresini yaz',
     summary:'O günün uyku saati kaydedilir.',
     touches:'Gün kaydı',
@@ -162,6 +176,7 @@ R.ACTIONS = [
   },
   {
     id:'sure-yaz',
+    level:'kucuk',
     title:'Çalışma süresini yaz',
     summary:'Söylediğin süre o dersin bugünkü bloğuna eklenir.',
     touches:'Gün kaydı',

@@ -350,7 +350,14 @@ async function rutbeSayilari(page, base, errors){
     await wait(500);
     const kotu = await page.evaluate(() => {
       const n = document.querySelector('#view') || document.body;
-      const bulunan = (n.innerText.match(/(?<![0-9A-Za-zçğıöşüÇĞİÖŞÜ])\d{5,}(?![0-9A-Za-zçğıöşüÇĞİÖŞÜ])/g) || []);
+      /* Derleme damgasi bir commit kimligidir, miktar degil: yedi hanesi
+         bazen yalniz rakamdan olusur (~%4) ve bu denetimi rastgele
+         kirardi. Damga metinden cikarilir. */
+      let metin = n.innerText;
+      document.querySelectorAll('.sitefoot__sha').forEach(el => {
+        metin = metin.split(el.innerText.replace(/\+$/, '')).join('');
+      });
+      const bulunan = (metin.match(/(?<![0-9A-Za-zçğıöşüÇĞİÖŞÜ])\d{5,}(?![0-9A-Za-zçğıöşüÇĞİÖŞÜ])/g) || []);
       return bulunan.slice(0, 5);
     });
     if(kotu.length){

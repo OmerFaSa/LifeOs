@@ -5,10 +5,23 @@
      ajan onerir → kural motoru DOGRULAR → kullanici ONAYLAR → motor uygular
                                                             → geri alinabilir
 
-   Onaysiz hicbir sey degismez. Bu dosyada "otomatik uygula" diye bir yol
-   YOKTUR ve olmamalidir: ofisin degeri onerisinde, yetkisinde degil.
+   SEVIYE (AGENTS.md §1.9). Her eylemin seviyesi katalogdadir
+   (data/actions.js `level`), onerenin elinde degil:
 
-   Iki oneri kaynagi vardir ve ikisi de ayni kapidan gecer:
+     kucuk   kullanici ISTEDIYSE sormadan uygulanir, «Geri al» kalir.
+             Ajanin kendi buldugu kucuk oneri yalniz kullanici izin
+             verdiyse (ayar 'hepsi') uygulanir.
+     orta    her zaman onizleme + tek onay.
+     buyuk   her zaman ayrintili onizleme + onay.
+
+   Yani "otomatik uygula" artik VAR, ama yalniz kucuk, geri alinabilir
+   ve kullanicinin actigi durumda. Karar tek yerde verilir: otomatikMi().
+   Uygulama yine ayni kapidan gecer — dogrulama atlanmaz, geri alma
+   kaydi yine once alinir.
+
+   Uc kaynak vardir ve ucu de ayni kapidan gecer:
+
+     talep              KULLANICININ istegi (sohbet, palet): source 'istek'
 
      suggest()          kural motoru: veriden kendisi cikarir, model gerekmez,
                         cevrimdisi calisir, kota harcamaz
@@ -29,7 +42,12 @@ R.Proposals = (function(){
   const U = R.U, M = R.Model, S = R.S;
 
   const MAX = 40;             // saklanan oneri (uygulanan + reddedilen dahil)
+  const MAX_ANAHTAR = 500;    // tek-uygulama anahtarlari: oneriden uzun yasar
   const STORE = 'office/proposals';
+
+  const SEVIYELER = ['kucuk', 'orta', 'buyuk'];
+  const MODLAR = ['istek', 'hepsi', 'hicbiri'];
+  const KAYNAKLAR = ['istek', 'llm', 'kural'];
 
   /* ==================== eylem uygulamalari ====================
 
@@ -490,13 +508,15 @@ R.Proposals = (function(){
 
   async function save(){
     S.officeProposals = (S.officeProposals || []).slice(-MAX);
-    await R.Store.set(STORE, { items:S.officeProposals });
+    S.officeProposalKeys = (S.officeProposalKeys || []).slice(-MAX_ANAHTAR);
+    await R.Store.set(STORE, { items:S.officeProposals, anahtarlar:S.officeProposalKeys });
     return S.officeProposals;
   }
 
   async function load(){
     const doc = await R.Store.get(STORE);
     S.officeProposals = (doc && Array.isArray(doc.items)) ? doc.items : [];
+    S.officeProposalKeys = (doc && Array.isArray(doc.anahtarlar)) ? doc.anahtarlar : [];
     return S.officeProposals;
   }
 
@@ -505,28 +525,97 @@ R.Proposals = (function(){
     return p.action + '|' + JSON.stringify(p.params || {});
   }
 
+  /* TEK UYGULAMA ANAHTARI. Disaridan (HKM, BAM) gelen bir teklif ag
+     yuzunden iki kez gelebilir; ayni anahtar HICBIR durumda ikinci kez
+     kuyruga girmez — uygulanmis, geri alinmis ya da reddedilmis olsa
+     bile. Anahtarsiz oneri (ornegin «10 paragraf yaptim») tekrar
+     edilebilir: iki ayri oturum iki ayri kayittir. */
+  function anahtarOf(p){
+    const a = String((p && p.anahtar) || '').trim().slice(0, 120);
+    return a || null;
+  }
+
+  /* IZ — «bu degisiklik nereden geldi?» Yalniz {tur, id} ciftleri
+     tasinir, ikisi de kisa metne indirilir; gerisi atilir. */
+  function izOf(p){
+    const ham = Array.isArray(p && p.iz) ? p.iz : [];
+    return ham.filter(x => x && typeof x === 'object')
+      .map(x => ({ tur:String(x.tur || '').trim().slice(0, 24),
+                   id:String(x.id == null ? '' : x.id).trim().slice(0, 60) }))
+      .filter(x => x.tur && x.id)
+      .slice(0, 8);
+  }
+
   async function propose(p){
     const res = check(p);
     if(!res.ok) return null;
     S.officeProposals = S.officeProposals || [];
+    S.officeProposalKeys = S.officeProposalKeys || [];
     const fp = fingerprint(p);
     if(S.officeProposals.some(x => x.status === 'pending' && fingerprint(x) === fp)) return null;
+    const anahtar = anahtarOf(p);
+    if(anahtar && S.officeProposalKeys.indexOf(anahtar) >= 0) return null;
 
+    const def = R.ACTION_BY_ID[p.action];
     const row = {
       id:U.uid('p'),
       action:p.action,
       agent:p.agent,
       params:p.params || {},
       reason:String(p.reason || '').slice(0, 240),
-      source:p.source === 'llm' ? 'llm' : 'kural',
+      source:KAYNAKLAR.indexOf(p.source) >= 0 ? p.source : 'kural',
+      /* Seviye KATALOGDAN yazilir; onerenin gonderdigi deger okunmaz. */
+      level:SEVIYELER.indexOf(def.level) >= 0 ? def.level : 'orta',
+      anahtar,
+      iz:izOf(p),
       at:new Date().toISOString(),
       status:'pending',
       appliedAt:null,
       undo:null,
+      otomatik:false,
     };
     S.officeProposals.push(row);
+    if(anahtar) S.officeProposalKeys.push(anahtar);
     await save();
     return row;
+  }
+
+  /* ==================== otomatik uygulama ====================
+
+     Tek karar noktasi. Kucuk degilse asla; ayar bilinmiyorsa varsayilan
+     ('istek') gibi davranir — bozuk bir ayar kendiliginden «hepsi»ne
+     donmemeli. */
+  function otomatikMi(row, mod){
+    if(!row || row.level !== 'kucuk') return false;
+    const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
+    if(m === 'hicbiri') return false;
+    if(m === 'hepsi') return true;
+    return row.source === 'istek';
+  }
+
+  function ayar(){
+    try{
+      const st = R.Office && typeof R.Office.settings === 'function' ? R.Office.settings() : null;
+      return (st && st.otomatikUygula) || 'istek';
+    }catch(e){ return 'istek'; }
+  }
+
+  /* Oneriyi kuyruga alir; seviye ve ayar izin veriyorsa hemen uygular.
+     Donus: { row, otomatik, why }. row null ise hicbir sey yazilmadi. */
+  async function talep(p){
+    const res = check(p);
+    if(!res.ok) return { row:null, otomatik:false, why:res.why };
+    const row = await propose(p);
+    if(!row){
+      return { row:null, otomatik:false,
+        why:'Bu öneri zaten bekliyor ya da daha önce işlendi.' };
+    }
+    if(!otomatikMi(row, ayar())) return { row, otomatik:false, why:null };
+    const r = await approve(row.id);
+    if(!r || !r.ok) return { row, otomatik:false, why:(r && r.why) || null };
+    r.row.otomatik = true;
+    await save();
+    return { row:r.row, otomatik:true, why:null };
   }
 
   /* ==================== onay ==================== */
@@ -726,6 +815,7 @@ R.Proposals = (function(){
   return {
     all, pending, applied, actionable, check, preview,
     propose, approve, reject, undo, clearResolved,
+    talep, otomatikMi, ayar, SEVIYELER, MODLAR,
     suggest, refresh, fromModel, catalogPrompt, splitAction, stripTrailingJson,
     load, save, MAX,
   };

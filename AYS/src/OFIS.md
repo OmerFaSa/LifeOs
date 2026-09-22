@@ -565,8 +565,24 @@ Ofis bugüne kadar yalnızca **okuyordu**. Artık yazabilir, ama tek bir yoldan:
 ajan önerir → kural motoru DOĞRULAR → SEN onaylarsın → motor uygular → geri alınabilir
 ```
 
-**Onaysız hiçbir şey değişmez.** `core/proposals.js` içinde "otomatik uygula"
-diye bir yol yoktur ve olmamalıdır: ofisin değeri önerisinde, yetkisinde değil.
+**Seviyeye göre onay** (`AGENTS.md` §1.9). Her eylemin seviyesi
+`data/actions.js`'te yazılıdır; öneren değiştiremez:
+
+| Seviye | Örnek | Ne olur |
+|---|---|---|
+| küçük | hedefi değiştir, bir konuyu tekrara al, bugüne blok ekle | **Sen istediysen** sormadan uygulanır, «Geri al» kalır |
+| orta | geciken 30 kartı bugüne çek, ara haftası | Önizleme + tek onay |
+| büyük | sınavı değiştir, planı baştan kur | Ayrıntılı önizleme + onay |
+
+Ajanın **kendi bulduğu** küçük öneri, yalnız Ofis ayarlarında «Ajanların
+kendi bulduğu küçük öneriler de» seçiliyse sormadan uygulanır. «Hiçbiri»
+seçiliyse her şey önce sorulur. Karar tek yerde verilir:
+`R.Proposals.otomatikMi()`; uygulama yine doğrulamadan ve geri alma
+kaydından geçer.
+
+Dışarıdan (HKM, BAM) gelen teklif bir **anahtar** taşır: aynı anahtar
+ikinci kez kuyruğa girmez. Her öneri bir **iz** (`[{tur, id}]`) taşıyabilir:
+«bu değişiklik nereden geldi?» sorusunun cevabı.
 
 ### Üç kural
 

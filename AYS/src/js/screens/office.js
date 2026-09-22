@@ -291,6 +291,9 @@ R.Screens.office = (function(){
       </div>`)}</div>`;
   }
 
+  const KAYNAK_ADI = { istek:'senin isteğin', llm:'ajanın önerisi', kural:'kural motoru buldu' };
+  const SEVIYE_ADI = { kucuk:'küçük değişiklik', orta:'orta değişiklik', buyuk:'büyük değişiklik' };
+
   function proposalRow(p){
     const def = R.ACTION_BY_ID[p.action];
     const agent = R.AGENT_BY_ID[p.agent];
@@ -301,7 +304,8 @@ R.Screens.office = (function(){
           <div class="prop__who">
             <b class="prop__title">${def.title}</b>
             <span class="prop__by">${agent.name} · ${def.touches}
-              · ${p.source === 'llm' ? 'ajanın önerisi' : 'kural motoru buldu'}</span>
+              · ${KAYNAK_ADI[p.source] || 'kural motoru buldu'}
+              · ${SEVIYE_ADI[p.level] || SEVIYE_ADI.orta}</span>
           </div>
         </div>
         <p class="prop__why">${p.reason || def.summary}</p>
@@ -327,7 +331,8 @@ R.Screens.office = (function(){
           <div class="prop__who">
             <b class="prop__title">${def.title}</b>
             <span class="prop__by">${agent.name} ·
-              ${U.relativeDay(String(p.appliedAt || '').slice(0, 10))} uygulandı</span>
+              ${U.relativeDay(String(p.appliedAt || '').slice(0, 10))}
+              ${p.otomatik ? 'sormadan uygulandı (küçük değişiklik)' : 'uygulandı'}</span>
           </div>
           ${K.Button({ label:'Geri al', icon:'undo', size:'sm', tone:'ghost',
             act:'office-undo', data:{ 'data-id':p.id } })}
@@ -777,6 +782,15 @@ R.Screens.office = (function(){
           act:'office-toggle-fallback' }),
         K.Checkbox({ label:'Sabah günün brifingini kendiliğinden üret (günde 1 istek)',
           checked:st.autoBriefing !== false, act:'office-toggle-briefing' }),
+        K.Field({ label:'Küçük değişiklikler sormadan uygulansın mı?',
+          hint:'Küçük: tek günü ya da tek kaydı değiştiren, geri alınabilen iş. '
+            + 'Orta ve büyük değişiklikler her zaman önce sorulur.',
+          input:K.Select({ id:'office-otomatik', value:st.otomatikUygula || 'istek',
+            change:'office-otomatik', options:[
+              { value:'istek', label:'Yalnız benim istediklerim (önerilir)' },
+              { value:'hepsi', label:'Ajanların kendi bulduğu küçük öneriler de' },
+              { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
+            ] }) }),
         html`<div id="office-notify">${notifyRow()}</div>`,
       ], 'sm'),
 
@@ -1221,6 +1235,14 @@ R.Screens.office = (function(){
       const box = document.getElementById('llm-key-warn');
       if(box) box.innerHTML = warn ? String(warn) : '';
     },
+    async 'office-otomatik'(el){
+      const v = R.Proposals.MODLAR.indexOf(el.value) >= 0 ? el.value : 'istek';
+      await O.saveSettings({ otomatikUygula:v });
+      UI.toast(v === 'hicbiri' ? 'Her değişiklik önce sorulacak'
+        : v === 'hepsi' ? 'Ajanların küçük önerileri de sormadan uygulanacak'
+        : 'Yalnız senin istediğin küçük değişiklikler sormadan uygulanacak');
+    },
+
     async 'office-voice'(el){
       const id = el.dataset.agent;
       const next = Object.assign({}, O.settings().voices || {});

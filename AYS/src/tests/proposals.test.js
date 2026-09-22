@@ -13,6 +13,7 @@
   function reset(){
     resetState();
     S.officeProposals = [];
+    S.officeProposalKeys = [];
     S.officeMeetings = [];
     S.office = null;
   }
@@ -499,6 +500,176 @@
       expect(prompt).toContain('cards-due-today');
       expect(prompt.indexOf('week-target')).toBe(-1);
       expect(prompt).toContain('onayına');
+    });
+  });
+
+  /* ==================== seviye ve otomatik uygulama ====================
+
+     AGENTS.md §1.9: aksiyonun seviyesini KATALOG belirler, model değil.
+     Küçük aksiyon, kullanıcı İSTEDİYSE sormadan uygulanır ve geri
+     alınabilir kalır; ajanın kendi bulduğu küçük aksiyon yalnız kullanıcı
+     buna izin verdiyse uygulanır. Orta ve büyük her zaman onay bekler. */
+
+  describe('Öneri — seviye', () => {
+    it('her eylemin geçerli bir seviyesi vardır', () => {
+      R.ACTIONS.forEach(a => {
+        expect(['kucuk', 'orta', 'buyuk'].indexOf(a.level) >= 0).toBeTruthy();
+      });
+    });
+
+    it('birden çok kaydı birden değiştiren eylem küçük değildir', () => {
+      expect(R.ACTION_BY_ID['cards-due-today'].level).toBe('orta');
+      expect(R.ACTION_BY_ID['topic-review'].level).toBe('kucuk');
+    });
+
+    it('seviye öneriye katalogdan yazılır; öneren değiştiremez', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        for(let i = 0; i < 3; i++) await M.saveCard(lateCard('c' + i, '2026-11-01'));
+        const row = await P.propose({ action:'cards-due-today', agent:'analist',
+          params:{ limit:3 }, level:'kucuk', seviye:'kucuk' });
+        expect(row.level).toBe('orta');
+      });
+    });
+  });
+
+  describe('Öneri — otomatik uygulama', () => {
+    async function kapaliKonu(){
+      await M.setTopicState(SUBJECT.id, TOPIC.id, { state:'closed' });
+      return { action:'topic-review', agent:'tyt',
+        params:{ subjectId:SUBJECT.id, topicId:TOPIC.id } };
+    }
+
+    it('karar tablosu: kaynak × seviye × ayar', () => {
+      const k = { level:'kucuk' }, o = { level:'orta' }, b = { level:'buyuk' };
+      const ist = s => Object.assign({ source:'istek' }, s);
+      const kur = s => Object.assign({ source:'kural' }, s);
+      const llm = s => Object.assign({ source:'llm' }, s);
+      /* varsayılan: yalnız istenen küçük */
+      expect(P.otomatikMi(ist(k), 'istek')).toBe(true);
+      expect(P.otomatikMi(kur(k), 'istek')).toBe(false);
+      expect(P.otomatikMi(llm(k), 'istek')).toBe(false);
+      /* hepsi: ajanın küçük önerisi de */
+      expect(P.otomatikMi(kur(k), 'hepsi')).toBe(true);
+      expect(P.otomatikMi(llm(k), 'hepsi')).toBe(true);
+      /* hiçbiri: istenen küçük de sorar */
+      expect(P.otomatikMi(ist(k), 'hicbiri')).toBe(false);
+      /* orta ve büyük hiçbir ayarda kendiliğinden uygulanmaz */
+      ['istek', 'hepsi', 'hicbiri'].forEach(m => {
+        expect(P.otomatikMi(ist(o), m)).toBe(false);
+        expect(P.otomatikMi(ist(b), m)).toBe(false);
+      });
+      /* bilinmeyen ayar güvenli tarafa düşer: varsayılan gibi davranır */
+      expect(P.otomatikMi(kur(k), 'bozuk')).toBe(false);
+      expect(P.otomatikMi(ist(k), undefined)).toBe(true);
+    });
+
+    it('istenen küçük aksiyon sormadan uygulanır ve geri alınabilir', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const p = await kapaliKonu();
+        const res = await P.talep(Object.assign({ source:'istek' }, p));
+        expect(res.otomatik).toBe(true);
+        expect(res.row.status).toBe('applied');
+        expect(M.topicState(SUBJECT.id, TOPIC.id).state).toBe('reopened');
+        await P.undo(res.row.id);
+        expect(M.topicState(SUBJECT.id, TOPIC.id).state).toBe('closed');
+      });
+    });
+
+    it('ajanın kendi bulduğu küçük aksiyon varsayılan ayarda onay bekler', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const p = await kapaliKonu();
+        const res = await P.talep(Object.assign({ source:'kural' }, p));
+        expect(res.otomatik).toBe(false);
+        expect(res.row.status).toBe('pending');
+        expect(M.topicState(SUBJECT.id, TOPIC.id).state).toBe('closed');
+      });
+    });
+
+    it('«hiçbiri» ayarında istenen küçük aksiyon da onay bekler', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        await R.Office.saveSettings({ otomatikUygula:'hicbiri' });
+        const p = await kapaliKonu();
+        const res = await P.talep(Object.assign({ source:'istek' }, p));
+        expect(res.otomatik).toBe(false);
+        expect(M.topicState(SUBJECT.id, TOPIC.id).state).toBe('closed');
+      });
+    });
+
+    it('istenen orta aksiyon sormadan uygulanmaz', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        for(let i = 0; i < 3; i++) await M.saveCard(lateCard('c' + i, '2026-11-01'));
+        const res = await P.talep({ action:'cards-due-today', agent:'analist',
+          params:{ limit:3 }, source:'istek' });
+        expect(res.otomatik).toBe(false);
+        expect(res.row.status).toBe('pending');
+        expect(S.cards.every(c => c.dueAt === '2026-11-01')).toBeTruthy();
+      });
+    });
+
+    it('geçersiz talep hiçbir şey yazmaz', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const res = await P.talep({ action:'topic-review', agent:'tyt', source:'istek',
+          params:{ subjectId:SUBJECT.id, topicId:'olmayan' } });
+        expect(res.row).toBe(null);
+        expect(res.why.length > 3).toBeTruthy();
+        expect(P.all()).toHaveLength(0);
+      });
+    });
+  });
+
+  /* ==================== iz ve tek uygulama ====================
+
+     Dışarıdan (HKM, BAM) gelen bir teklif ağ yüzünden iki kez gelebilir.
+     Aynı ANAHTAR ikinci kez kuyruğa girmez — uygulanmış, geri alınmış ya
+     da reddedilmiş olsa bile. İz, «bu değişiklik nereden geldi?»
+     sorusunun cevabıdır ve temizlenerek saklanır. */
+
+  describe('Öneri — iz ve tek uygulama', () => {
+    it('aynı anahtar ikinci kez kuyruğa girmez', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        await M.setTopicState(SUBJECT.id, TOPIC.id, { state:'closed' });
+        const p = { action:'topic-review', agent:'tyt', anahtar:'bam:teklif:91',
+          params:{ subjectId:SUBJECT.id, topicId:TOPIC.id } };
+        const ilk = await P.propose(p);
+        await P.approve(ilk.id);
+        await P.undo(ilk.id);
+        await M.setTopicState(SUBJECT.id, TOPIC.id, { state:'closed' });
+        expect(await P.propose(p)).toBe(null);
+      });
+    });
+
+    it('anahtarsız veri girişi tekrar edilebilir', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        await M.ensureDay(TODAY);
+        const p = { action:'paragraf-yaz', agent:'patron', source:'istek',
+          params:{ count:10, date:TODAY } };
+        const a = await P.talep(p);
+        const b = await P.talep(p);
+        expect(a.row.status).toBe('applied');
+        expect(b.row.status).toBe('applied');
+        expect(S.days[TODAY].paragraphActual).toBe(20);
+      });
+    });
+
+    it('iz temizlenerek saklanır', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        await M.setTopicState(SUBJECT.id, TOPIC.id, { state:'closed' });
+        const row = await P.propose({ action:'topic-review', agent:'tyt',
+          params:{ subjectId:SUBJECT.id, topicId:TOPIC.id },
+          iz:[{ tur:'arastirma', id:'184' }, { tur:'plan', id:52 },
+              'bozuk', { tur:'', id:'x' }, { tur:'teklif', id:'91', fazla:'alan' }] });
+        expect(row.iz).toEqual([{ tur:'arastirma', id:'184' }, { tur:'plan', id:'52' },
+          { tur:'teklif', id:'91' }]);
+      });
     });
   });
 })();
