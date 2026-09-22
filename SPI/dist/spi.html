@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'7c03460', at:'2026-09-21 20:29', dirty:true };
+SP.BUILD = { id:'76aff5e', at:'2026-09-22 09:55', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -7855,6 +7855,108 @@ LIFEOS.KESINLIK_HTML = function(id, secenekler){
   return '<span class="kesinlik' + (e ? ' kesinlik--' + kac(e.id) : '') + '"'
     + (e ? ' title="' + kac(e.ozet) + '"' : '') + '>'
     + gorsel + '<span class="kesinlik__ad">' + kac(ad) + '</span></span>';
+};
+
+/* ==== js/core/yedek.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/yedek.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* YEDEK HATIRLATMASI — kuralın kendisi.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/yedek.js`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   Kopyayı elle düzenleme: bir sonraki yayında kaybolur.
+   ==================================================================
+
+   NEDEN TEK KAYNAK
+
+   Üç arayüz aynı vaadi ÜÇ AYRI BİÇİMDE veriyordu ve bu ölçüldü:
+
+     AYS    7 gün · GÜNLÜK EKRANDA, her açılışta görünür
+     SPİ   30 gün · yalnız rehber sayfasındaki bir rozette
+     ESP   30 gün · yalnız profil sayfasında, üstelik yaşı UTC'den
+
+   Veri kaybı bu sistemde geri alınamayan TEK olaydır ve üç sistemin
+   verisi de aynı ölçüde geri alınamaz. Üç ayrı eşik, üçünün de ayrı
+   ayrı düşünüldüğü anlamına gelmiyordu: biri düşünülmüş, ikisi
+   kopyalanırken unutulmuştu. `quota.js`'te aynısı yaşandı — bir
+   düzeltme bir kopyaya yazıldı, iki kopyada unutuldu ve üç ay boyunca
+   hiçbir denetim söylemedi.
+
+   EŞİK NEDEN YEDİ
+
+   Bir haftalık kayıp yeniden girilebilir, bir aylık kayıp girilemez.
+   Otuz gün hatırlatmanın kendisini işe yaramaz kılıyordu: kullanıcı
+   uyarıyı gördüğünde zaten otuz günlük veri risk altında kalmış
+   oluyordu. Hatırlatma, kaybı ÖNLEYECEK kadar erken gelmelidir.
+
+   YAŞ YEREL TARİHTEN HESAPLANIR
+
+   ESP `Date.now() - new Date(at)` ile ölçüyordu. UTC damgası yerel
+   tarihten farklı bir güne düşebilir: UTC+3'te gece yarısından sonra
+   alınan bir yedek ertesi gün "iki gün önce" görünür. AYS'nin
+   `markBackup` yorumu tam bu tuzağı yazmıştı ama ESP kopyasına hiç
+   geçmemişti.
+
+   İki tarih de UTC'ye SABİTLENEREK çıkarılır. Amaç UTC'ye geçmek değil,
+   yaz saati geçişinde 23 ya da 25 saatlik bir günün sayıyı kaydırmasını
+   önlemek: iki takvim günü arasındaki fark, o günlerin kaç saat
+   sürdüğünden bağımsızdır.
+
+   HENÜZ KORUNACAK VERİ YOKKEN HATIRLATILMAZ
+
+   Sıfır kayıtlı bir sisteme «yedek al» demek, sistemi ilk gün açan
+   kullanıcıyı boş bir dosya indirmeye çağırmaktır. ESP `null` yaşı
+   doğrudan «gerekli» sayıyordu ve ilk açılışta uyarı gösteriyordu.
+   Eşik AYS'den geliyor ve ölçülmüş bir sayı değil bir karardır: beş
+   kayıt, «bu sistemi kullanmaya başladım» demenin en düşük karşılığı.
+
+   BU DOSYA DEPOYA DOKUNMAZ
+
+   Yalnız KURAL burada. Damganın hangi anahtarda durduğu (`lastBackupAt`,
+   `lastBackup`) ve kayıtların nasıl sayıldığı her sistemin kendi
+   `state.js`'inde kalır — üç sistemin verisi birbirine benzemez ve
+   benzetilmeye çalışılması, üçünü tek kalıba sokmak olurdu. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+/* Kaç günde bir hatırlatılır. */
+LIFEOS.YEDEK_GUN = 7;
+
+/* Bu kadar kayıt birikmeden hatırlatılmaz. */
+LIFEOS.YEDEK_ASGARI_KAYIT = 5;
+
+/* Son yedeğin yaşı GÜN olarak; damga yoksa null («hiç yedek alınmadı»).
+
+   `damga` bir ISO tarih (YYYY-MM-DD) ya da ISO zaman damgası olabilir;
+   ikisinde de yalnız tarih kısmı kullanılır. `bugun` çağıranın YEREL
+   bugünüdür (`U.todayISO()`); buraya elle bir tarih verilmesi testlerin
+   saatten bağımsız koşabilmesi içindir. */
+LIFEOS.yedekYasi = function(damga, bugun){
+  const gun = function(x){
+    const g = String(x || '').slice(0, 10);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(g)) return null;
+    const t = Date.UTC(+g.slice(0, 4), +g.slice(5, 7) - 1, +g.slice(8, 10));
+    /* Bozuk bir tarih (2026-02-31) sessizce kaymasın: geri çevirip
+       aynı günü gösterdiğini doğrula. Geçersiz bir damgayı "0 gün
+       önce" saymak, hiç yedek almamış birine yedeği varmış gibi
+       göstermek demekti. */
+    return new Date(t).toISOString().slice(0, 10) === g ? t : null;
+  };
+  const a = gun(damga);
+  const b = gun(bugun);
+  if(a === null || b === null) return null;
+  return Math.floor((b - a) / 86400000);
+};
+
+/* Hatırlatma gösterilsin mi.
+
+   `yas` null ise hiç yedek alınmamıştır — kayıt varsa bu en acil
+   durumdur. `kayit` sistemin kendi saydığı kayıt sayısıdır. */
+LIFEOS.yedekGerekli = function(yas, kayit){
+  if((kayit || 0) < LIFEOS.YEDEK_ASGARI_KAYIT) return false;
+  return yas === null || yas >= LIFEOS.YEDEK_GUN;
 };
 
 /* ==== js/core/tanitim.js ==== */
@@ -13583,23 +13685,29 @@ SP.Model = (function(){
     await SP.Store.set('meta', SP.S.meta);
   }
 
+  /* Yas ve esik ORTAK KURALDAN gelir (`brand/ortak/yedek.js`). Burada
+     esik OTUZ GUNDU ve hatirlatma yalniz rehber sayfasindaki bir
+     rozette duruyordu: kullanici uyariyi gordugunde zaten otuz gunluk
+     tahlil, olcum ve ogun kaydi risk altinda kalmis oluyordu. */
   function backupAgeDays(){
-    if(!SP.S.meta || !SP.S.meta.lastBackupAt) return null;
-    return U.diffDays(SP.S.meta.lastBackupAt.slice(0, 10), U.todayISO());
+    return LIFEOS.yedekYasi(SP.S.meta && SP.S.meta.lastBackupAt, U.todayISO());
   }
 
   function backupDue(){
-    const age = backupAgeDays();
-    return age == null || age >= 30;
+    return LIFEOS.yedekGerekli(backupAgeDays(), dataFootprint().total);
   }
 
   function dataFootprint(){
     const q = SP.Store.localQuota();
+    const labs = SP.S.labs.length;
+    const vitalDays = Object.keys(SP.S.vitals).length;
+    const mealDays = Object.keys(SP.S.meals).length;
+    const workouts = SP.S.workouts.length;
     return {
-      labs:SP.S.labs.length,
-      vitalDays:Object.keys(SP.S.vitals).length,
-      mealDays:Object.keys(SP.S.meals).length,
-      workouts:SP.S.workouts.length,
+      labs, vitalDays, mealDays, workouts,
+      /* `total` yedek kuralinin sordugu tek sey: korunacak bir sey var
+         mi. Bayt degil KAYIT sayar — bos bir sistemde de bayt vardir. */
+      total: labs + vitalDays + mealDays + workouts,
       bytes:q.bytes, pct:q.pct, near:q.near, full:q.full,
     };
   }
@@ -27480,12 +27588,34 @@ SP.Screens.today = (function(){
           ölçümler. Ham kayıt SPİ'de kalır.</p>` });
   }
 
+  /* YEDEK UYARISI — GÜNLÜK EKRANDA, rehberin içinde değil.
+
+     Uyarı daha önce yalnız Rehber → «Veri ve yedek» sekmesindeki bir
+     rozette duruyordu: yedek almayı unutan birinin GİTMEDİĞİ sayfada.
+     Eşik de otuz gündü. İkisi birleşince hatırlatma, kaybı önleyecek
+     olan şey değil kaybın yanında duran bir not oluyordu.
+
+     Kural ortak (`brand/ortak/yedek.js`): yedi gün, ve korunacak veri
+     yokken hiç çıkmaz — ilk gün açan kullanıcıyı boş bir dosya
+     indirmeye çağırmaz. */
+  function yedekUyarisi(){
+    if(!M.backupDue()) return '';
+    const yas = M.backupAgeDays();
+    return html`<div class="mb-16">${K.Notice({ tone:'info', title:'Yedekleme.',
+      body:html`${yas === null ? 'Henüz hiç yedek almadın.'
+        : 'Son yedeğin ' + yas + ' gün önce alındı.'} Tarayıcı verisi
+        silinirse tahlil, ölçüm ve öğün geçmişin kaybolur.
+        ${K.Button({ label:'Yedek al', size:'sm', act:'go',
+          data:{ 'data-route':'guide' } })}` })}</div>`;
+  }
+
   async function render(){
     const tab = S.ui.dayTab || 'giris';
     const flags = M.openFlags();
 
     const head = html`
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
+      ${yedekUyarisi()}
       ${bekleyenOneriler()}
       ${when((S.ui.hkmIntents || []).length, () => html`<div class="mb-16">${K.Ledger([hkmTeklifRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>

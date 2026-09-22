@@ -583,12 +583,34 @@ SP.Screens.today = (function(){
           ölçümler. Ham kayıt SPİ'de kalır.</p>` });
   }
 
+  /* YEDEK UYARISI — GÜNLÜK EKRANDA, rehberin içinde değil.
+
+     Uyarı daha önce yalnız Rehber → «Veri ve yedek» sekmesindeki bir
+     rozette duruyordu: yedek almayı unutan birinin GİTMEDİĞİ sayfada.
+     Eşik de otuz gündü. İkisi birleşince hatırlatma, kaybı önleyecek
+     olan şey değil kaybın yanında duran bir not oluyordu.
+
+     Kural ortak (`brand/ortak/yedek.js`): yedi gün, ve korunacak veri
+     yokken hiç çıkmaz — ilk gün açan kullanıcıyı boş bir dosya
+     indirmeye çağırmaz. */
+  function yedekUyarisi(){
+    if(!M.backupDue()) return '';
+    const yas = M.backupAgeDays();
+    return html`<div class="mb-16">${K.Notice({ tone:'info', title:'Yedekleme.',
+      body:html`${yas === null ? 'Henüz hiç yedek almadın.'
+        : 'Son yedeğin ' + yas + ' gün önce alındı.'} Tarayıcı verisi
+        silinirse tahlil, ölçüm ve öğün geçmişin kaybolur.
+        ${K.Button({ label:'Yedek al', size:'sm', act:'go',
+          data:{ 'data-route':'guide' } })}` })}</div>`;
+  }
+
   async function render(){
     const tab = S.ui.dayTab || 'giris';
     const flags = M.openFlags();
 
     const head = html`
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
+      ${yedekUyarisi()}
       ${bekleyenOneriler()}
       ${when((S.ui.hkmIntents || []).length, () => html`<div class="mb-16">${K.Ledger([hkmTeklifRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>

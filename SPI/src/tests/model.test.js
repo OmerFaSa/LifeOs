@@ -282,11 +282,20 @@
   });
 
   describe('Model — yedek ve ayak izi', () => {
-    it('hiç yedek alınmadıysa yedek gerekir', () => {
+    it('hiç yedek alınmadıysa ve korunacak veri varsa yedek gerekir', () => {
+      /* «Korunacak veri varsa» kısmı sonradan eklendi ve bir davranış
+         değişikliğidir: boş bir sisteme «yedek al» demek, ilk gün açan
+         kullanıcıyı boş bir dosya indirmeye çağırmaktı. Kural ortak
+         (`brand/ortak/yedek.js`) ve eşik `LIFEOS.YEDEK_ASGARI_KAYIT`. */
       resetState();
       SP.S.meta = { schemaVersion:SP.SCHEMA_VERSION };
       expect(SP.Model.backupAgeDays()).toBeNull();
-      expect(SP.Model.backupDue()).toBeTruthy();
+      expect(SP.Model.backupDue()).toBeFalsy();          // henüz veri yok
+
+      for(let i = 0; i < LIFEOS.YEDEK_ASGARI_KAYIT; i++){
+        SP.S.vitals['2026-09-' + String(i + 1).padStart(2, '0')] = { weight:70 };
+      }
+      expect(SP.Model.backupDue()).toBeTruthy();          // artık korunacak var
     });
 
     it('yeni yedek gerekliliği kaldırır', async () => {

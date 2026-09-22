@@ -787,23 +787,29 @@ SP.Model = (function(){
     await SP.Store.set('meta', SP.S.meta);
   }
 
+  /* Yas ve esik ORTAK KURALDAN gelir (`brand/ortak/yedek.js`). Burada
+     esik OTUZ GUNDU ve hatirlatma yalniz rehber sayfasindaki bir
+     rozette duruyordu: kullanici uyariyi gordugunde zaten otuz gunluk
+     tahlil, olcum ve ogun kaydi risk altinda kalmis oluyordu. */
   function backupAgeDays(){
-    if(!SP.S.meta || !SP.S.meta.lastBackupAt) return null;
-    return U.diffDays(SP.S.meta.lastBackupAt.slice(0, 10), U.todayISO());
+    return LIFEOS.yedekYasi(SP.S.meta && SP.S.meta.lastBackupAt, U.todayISO());
   }
 
   function backupDue(){
-    const age = backupAgeDays();
-    return age == null || age >= 30;
+    return LIFEOS.yedekGerekli(backupAgeDays(), dataFootprint().total);
   }
 
   function dataFootprint(){
     const q = SP.Store.localQuota();
+    const labs = SP.S.labs.length;
+    const vitalDays = Object.keys(SP.S.vitals).length;
+    const mealDays = Object.keys(SP.S.meals).length;
+    const workouts = SP.S.workouts.length;
     return {
-      labs:SP.S.labs.length,
-      vitalDays:Object.keys(SP.S.vitals).length,
-      mealDays:Object.keys(SP.S.meals).length,
-      workouts:SP.S.workouts.length,
+      labs, vitalDays, mealDays, workouts,
+      /* `total` yedek kuralinin sordugu tek sey: korunacak bir sey var
+         mi. Bayt degil KAYIT sayar — bos bir sistemde de bayt vardir. */
+      total: labs + vitalDays + mealDays + workouts,
       bytes:q.bytes, pct:q.pct, near:q.near, full:q.full,
     };
   }

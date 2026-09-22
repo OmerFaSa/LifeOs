@@ -167,6 +167,13 @@ DOSYALAR = {
     # Paket o yuzeyin sozunu sinar; govdesini degil. AYS'de %46, ESP'de
     # %54 olan kapsami olcum gosterdi ve ikisinde de paket yoktu.
     "store.test.js": "tests",
+    # YEDEK HATIRLATMASI — veri kaybi geri alinamayan TEK olaydir ve uc
+    # sistemin verisi de ayni olcude geri alinamaz. Uc arayuz ayni vaadi
+    # uc ayri bicimde veriyordu: AYS 7 gun ve gunluk ekranda, SPI 30 gun
+    # ve yalniz rehber rozetinde, ESP 30 gun ve yasi UTC'den. Kural tek
+    # kaynakta; damganin hangi anahtarda durdugu her sistemde kalir.
+    "yedek.js":      "js/core",
+    "yedek.test.js": "tests",
     # MODEL KATMANI — yalniz SPİ ve ESP (bkz. YALNIZ).
     "llm.js":        "js/core",
 }

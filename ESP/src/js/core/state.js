@@ -1177,15 +1177,20 @@ ESP.Model = (function(){
     await ESP.Store.set('meta', S.meta);
   }
 
+  /* Yas ve esik ORTAK KURALDAN gelir (`brand/ortak/yedek.js`). Burada
+     IKI hata birden vardi: esik otuz gundu, ve yas `Date.now()` ile
+     zaman damgasinin farkindan hesaplaniyordu — yani bir GUN SAYISI
+     saat farki tasiyordu. UTC+3'te gece yarisindan sonra alinan bir
+     yedek ertesi gun bir gun fazla eski gorunebiliyordu.
+
+     Ucuncusu de vardi: yas null iken dogrudan «gerekli» donuyordu, yani
+     sistemi ilk gun acan kullanici bos bir dosya indirmeye cagriliyordu. */
   function backupAgeDays(){
-    const at = S.meta && S.meta.lastBackup;
-    if(!at) return null;
-    return Math.floor((Date.now() - new Date(at).getTime()) / U.DAY_MS);
+    return LIFEOS.yedekYasi(S.meta && S.meta.lastBackup, U.todayISO());
   }
 
   function backupDue(){
-    const n = backupAgeDays();
-    return n == null ? true : n >= 30;
+    return LIFEOS.yedekGerekli(backupAgeDays(), dataFootprint().total);
   }
 
   /* Yerel depo ayak izi.
@@ -1198,7 +1203,12 @@ ESP.Model = (function(){
     const bytes = ESP.Store.localSize();
     const kota = ESP.Store.localQuota() || {};
     const pct = (typeof kota.pct === 'number' && isFinite(kota.pct)) ? kota.pct : null;
-    return { bytes, quota:kota, limit:kota.limit || null, pct:pct,
+    /* `total` yedek kuralinin sordugu tek sey: korunacak bir sey var mi.
+       Bayt degil KAYIT sayar — bos bir sistemde de bayt vardir. */
+    const total = Object.keys(S.days).length + S.cards.length + S.notes.length
+      + S.args.length + S.books.length + S.pieces.length
+      + S.drafts.length + S.recordings.length;
+    return { bytes, total, quota:kota, limit:kota.limit || null, pct:pct,
       near:!!kota.near, full:!!kota.full };
   }
 

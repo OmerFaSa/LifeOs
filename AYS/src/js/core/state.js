@@ -633,12 +633,13 @@ R.Model = (function(){
     R.S.meta.schemaVersion = R.SCHEMA_VERSION;
     await R.Store.set('meta/backup', R.S.meta);
   }
+  /* Yas ve esik ORTAK KURALDAN gelir (`brand/ortak/yedek.js`): uc arayuz
+     ayni vaadi uc ayri bicimde veriyordu ve ikisinde esik otuz gundu. */
   function backupAgeDays(){
     const meta = R.S.meta;
     if(!meta) return null;
-    const date = meta.lastBackupDate || (meta.lastBackupAt ? meta.lastBackupAt.slice(0,10) : null);
-    if(!date) return null;                          // hic yedek alinmamis
-    return U.diffDays(date, U.todayISO());
+    const date = meta.lastBackupDate || meta.lastBackupAt;
+    return LIFEOS.yedekYasi(date, U.todayISO());
   }
   /* Yedek hatirlatmasi: kayda deger veri var mi? */
   function dataFootprint(){
@@ -653,10 +654,7 @@ R.Model = (function(){
     };
   }
   function backupDue(){
-    const foot = dataFootprint();
-    if(foot.total < 5) return false;              // henuz korunacak veri yok
-    const age = backupAgeDays();
-    return age === null || age >= 7;
+    return LIFEOS.yedekGerekli(backupAgeDays(), dataFootprint().total);
   }
 
   /* ---------- video / ders notu ----------

@@ -574,13 +574,40 @@ ESP.Screens.today = (function(){
           ölçümler. Ham kayıt ESP'de kalır.</p>` });
   }
 
+  /* YEDEK UYARISI — GÜNLÜK EKRANDA ve HER SEKMEDE.
+
+     Uyarı daha önce yalnız Profil sayfasında duruyordu: yedek almayı
+     unutan birinin gitmediği yerde. Eşik de otuz gündü ve yaş UTC
+     damgasından hesaplanıyordu. Üçü birleşince hatırlatma, kaybı
+     önleyecek olan şey değil kaybın yanında duran bir not oluyordu.
+
+     Kural ortak (`brand/ortak/yedek.js`): yedi gün, yerel tarihten, ve
+     korunacak veri yokken hiç çıkmaz. */
+  function yedekRow(){
+    if(!M.backupDue()) return '';
+    const yas = M.backupAgeDays();
+    return K.Entry({ label:'YEDEK', hint:'backup', wide:true,
+      meta:yas === null ? 'hiç alınmadı' : yas + ' gün önce',
+      body:html`
+        ${K.Notice({ tone:'info', body:(yas === null
+          ? 'Henüz hiç yedek almadın.'
+          : 'Son yedeğin ' + yas + ' gün önce alındı.')
+          + ' Tarayıcı verisi silinirse oturum geçmişin, kartların ve '
+          + 'notların kaybolur.' })}
+        <div class="row gap-8 mt-8">
+          ${K.Button({ label:'Yedek al', size:'sm', tone:'primary',
+            act:'go', data:{ 'data-route':'profile' } })}
+        </div>` });
+  }
+
   function render(){
     const tab = S.ui.dayTab || 'giris';
-    const rows = tab === 'ozet' ? summaryRows()
+    const rows = [yedekRow()].concat(
+      tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
       : [hkmTeklifRow(), hkmSeritRow(), nextCard(), signalRow(), planRow(),
           planRowToday(), reminderRow(),
-          entryForm(), quickForm(), sessionList()]
+          entryForm(), quickForm(), sessionList()])
           .filter(Boolean);
 
     return K.Grid(html`
