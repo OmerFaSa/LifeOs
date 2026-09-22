@@ -65,7 +65,24 @@ SP.Parse = (function(){
     b12:{ 'pmol/l':v => v / 0.738 },
     ferritin:{ 'µg/l':v => v, 'ug/l':v => v },   /* ng/mL ile ayni buyukluk */
     iron_s:{ 'µmol/l':v => v * 5.587, 'umol/l':v => v * 5.587 },
+    /* IFCC (mmol/mol) → DCCT (%). Turk laboratuvarlarinin cogu % verir,
+       ama IFCC birimi de cikar ve ikisinin BUYUKLUGU tamamen farklidir:
+       42 mmol/mol = %6,0. Birim taninmadigi icin 42 dogrudan yuzde
+       sayiliyordu; kirmizi esik 6,5 oldugundan diyabet bayragi yaniyor
+       ve turetilmis eAG (28,7 × 42 − 46,7) 1158 mg/dL cikiyordu. */
+    hba1c:{ 'mmol/mol':v => v * 0.09148 + 2.152 },
   };
+
+  /* BOLU ISARETI TASIYAN BIR BELIRTEC BIR BIRIMDIR.
+
+     `UNIT_RE` bilinen birimleri tanir; tanimadigi her sey birimsiz
+     sayiliyordu ve birimsiz bir sayi KANONIK birimdeymis gibi kabul
+     ediliyordu. `mmol/mol` bunun bir orneğiydi ama sinifin tamami risk:
+     listeye girmemis her birim ayni yoldan sessizce gecerdi.
+
+     Turkce sozcukler bolu isareti tasimaz, bu yuzden bu desen yanlis
+     alarm uretmez. Tanimadigimiz bir birim uydurulmaz — SOYLENIR. */
+  const BIRIM_IZI = /(^|\s)([a-zµ°]{1,8}\/[a-zµ°]{1,8})(\s|$)/i;
 
   function convert(markerId, value, unitRaw){
     const b = SP.BIO_BY_ID[markerId];
@@ -99,7 +116,10 @@ SP.Parse = (function(){
   }
 
   const NUM_RE = /(-?\d+(?:[.,]\d+)?)/g;
-  const UNIT_RE = /(mg\/dl|g\/dl|ng\/ml|pg\/ml|µg\/dl|ug\/dl|µg\/l|ug\/l|miu\/l|mIU\/L|µiu\/ml|uiu\/ml|mmol\/l|µmol\/l|umol\/l|pmol\/l|nmol\/l|mm\/saat|u\/l|mmhg|10\^3\/µl|10\^3\/ul|fl|%|ms|°c)/i;
+  /* `mmol\/mol` `mmol\/l`den ONCE gelir: siralamada sonra olsaydi da
+     eslesmezdi ("mmol/mol" icinde "mmol/l" gecmiyor), ama bir gun
+     "mmol/lt" gibi bir varyant eklenirse sira anlam kazanir. */
+  const UNIT_RE = /(mg\/dl|g\/dl|ng\/ml|pg\/ml|µg\/dl|ug\/dl|µg\/l|ug\/l|miu\/l|mIU\/L|µiu\/ml|uiu\/ml|mmol\/mol|mmol\/l|µmol\/l|umol\/l|pmol\/l|nmol\/l|mm\/saat|u\/l|mmhg|10\^3\/µl|10\^3\/ul|fl|%|ms|°c)/i;
 
   function parseLab(text){
     const lines = String(text || '').split(/\r?\n/);
@@ -129,12 +149,19 @@ SP.Parse = (function(){
       const conv = convert(m.id, nums[0], unitHit ? unitHit[1] : null);
       const b = SP.BIO_BY_ID[m.id];
 
+      /* Birim tanindiysa `convert` karar verdi. Taninmadiysa satirda
+         birim GORUNUYOR olabilir ve o zaman sayi birimsiz DEGILDIR:
+         uyusmazlik bildirilir, deger kanonik birimdeymis gibi kabul
+         edilmez. */
+      const iz = unitHit ? null : tail.match(BIRIM_IZI);
+      const bilinmeyen = iz ? iz[2] : null;
+
       rows.push({
         markerId:m.id, marker:b,
         value:conv.value, raw:nums[0],
         unit:unitHit ? unitHit[1] : null,
         converted:!!conv.converted, from:conv.from, to:conv.to,
-        mismatch:conv.mismatch || null,
+        mismatch:conv.mismatch || bilinmeyen || null,
         /* Referans araligi satirda genelde ikinci ve ucuncu sayidir;
            yalnizca bilgi olarak tasinir, hesaba girmez. */
         othersInLine:nums.slice(1),

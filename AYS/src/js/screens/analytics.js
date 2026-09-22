@@ -531,11 +531,11 @@ R.Screens.analytics = (function(){
                 headers:['Tür', { label:'Tahmin', num:true }, { label:'Gerçek', num:true },
                   { label:'Sapma', num:true }],
                 rows:R.Calib.settled().slice(0, 10).map(fo => {
-                  const h = R.Calib.error(fo);
+                  /* Sapma TEK YERDE biçimlenir: burası `abs` hatasını
+                     (net farkı) oran sanıp 100 ile çarpıyordu. */
                   return [(R.Calib.kindOf(fo.kind) || {}).label || fo.kind,
                     U.fmtNum(fo.guess), U.fmtNum(fo.actual),
-                    h == null ? '—' : (h.type === 'brier' ? h.value.toFixed(2)
-                      : '%' + Math.round(h.value * 100))];
+                    R.Calib.errorText(fo) || '—'];
                 }) })}</div>`)}` }),
       ])),
     ]);
@@ -616,9 +616,10 @@ R.Screens.analytics = (function(){
       const inp = document.getElementById('ay-calib-actual-' + id);
       const r = await R.Calib.settle(id, inp ? inp.value : null);
       if(!r.ok){ UI.toast(r.error); return; }
-      const h = R.Calib.error(r.forecast);
-      UI.toast(h && h.type === 'ape'
-        ? 'Kapandı — sapma %' + Math.round(h.value * 100) : 'Kapandı');
+      /* Burası doğruydu ama yalnız `ape` türünü gösteriyordu: net
+         sapması hiç yazılmıyordu. Tek biçimlendirici üçünü de yazar. */
+      const yazi = R.Calib.errorText(r.forecast);
+      UI.toast(yazi ? ('Kapandı — sapma ' + yazi) : 'Kapandı');
       R.App.render();
     },
   };

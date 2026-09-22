@@ -597,9 +597,12 @@ R.Screens.exams = (function(){
         if(acik.ok){
           const kapali = await R.Calib.settle(acik.forecast.id, M.examNet(exam));
           if(kapali.ok){
-            const h = R.Calib.error(kapali.forecast);
-            kalibrasyonNotu = ' · tahmin sapması %' + Math.round(h.value * 100)
-              + (kor ? '' : ' (kör değil, puana girmez)');
+            /* Sapma TEK YERDE biçimlenir (`Calib.errorText`): burası
+               `exam-net`in `abs` hatasını oran sanıp 100 ile çarpıyordu
+               ve 62/58 tahmini «%400» diye yazıyordu. */
+            const yazi = R.Calib.errorText(kapali.forecast);
+            kalibrasyonNotu = yazi ? (' · tahmin sapması ' + yazi
+              + (kor ? '' : ' (kör değil, puana girmez)')) : '';
           }
         }
       }

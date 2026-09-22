@@ -9284,7 +9284,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'7bb2466', at:'2026-09-22 10:01', dirty:true };
+R.BUILD = { id:'111c13a', at:'2026-09-22 10:11', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -21581,6 +21581,29 @@ R.Calib = (function(){
       value:Math.abs(f.guess - f.actual) / Math.max(Math.abs(f.actual), 1) };
   }
 
+  /* SAPMANIN İNSAN DİLİNDEKİ KARŞILIĞI — TEK YERDE.
+
+     Üç ekran bunu ayrı ayrı biçimlendiriyordu ve ikisi yanlıştı.
+     `exam-net` hata ailesi `abs`tır, yani `error()` NET CİNSİNDEN
+     mutlak fark döner; ekranlar onu oran sanıp 100 ile çarpıyordu.
+     62 tahmin / 58 gerçek için ekranda «tahmin sapması %400» yazıyordu.
+
+     Üç tür, üç ayrı okuma ve birbirine ÇEVRİLEMEZLER:
+       abs    kendi biriminde bir fark   →  «4 net»
+       ape    orantılı sapma             →  «%33»
+       brier  olasılık puanı (0–1)       →  «0,18»
+
+     Bir sayının hangi türden olduğunu bilmeden yüzdeye çevirmek, ölçüyü
+     değil ölçünün ANLAMINI bozar: kullanıcı dört netlik bir sapmayı
+     felaket sanır ve kalibrasyonuna güvenmeyi bırakır. */
+  function errorText(f){
+    const e = error(f);
+    if(!e) return null;
+    if(e.type === 'brier') return e.value.toFixed(2);
+    if(e.type === 'ape') return '%' + Math.round(e.value * 100);
+    return U.fmtNum(U.round(e.value, 2)) + (e.unit ? ' ' + e.unit : '');
+  }
+
   /* Bir tahminin bandı (0 keskin … 3 uzak). Türü ne olursa olsun aynı
      dört basamak: aileler ortalanamaz ama bantlar karşılaştırılabilir. */
   function bandOf(f){
@@ -21705,7 +21728,8 @@ R.Calib = (function(){
   }
 
   return { open, settle, remove, load, norm, list, settled, openList, due,
-    error, bandOf, errKind, bias, score, kindOf, forExam, ASGARI, PENCERE };
+    error, errorText, bandOf, errKind, bias, score, kindOf, forExam,
+    ASGARI, PENCERE };
 })();
 
 /* ==== js/core/goodhart.js ==== */
@@ -33936,9 +33960,12 @@ R.Screens.exams = (function(){
         if(acik.ok){
           const kapali = await R.Calib.settle(acik.forecast.id, M.examNet(exam));
           if(kapali.ok){
-            const h = R.Calib.error(kapali.forecast);
-            kalibrasyonNotu = ' · tahmin sapması %' + Math.round(h.value * 100)
-              + (kor ? '' : ' (kör değil, puana girmez)');
+            /* Sapma TEK YERDE biçimlenir (`Calib.errorText`): burası
+               `exam-net`in `abs` hatasını oran sanıp 100 ile çarpıyordu
+               ve 62/58 tahmini «%400» diye yazıyordu. */
+            const yazi = R.Calib.errorText(kapali.forecast);
+            kalibrasyonNotu = yazi ? (' · tahmin sapması ' + yazi
+              + (kor ? '' : ' (kör değil, puana girmez)')) : '';
           }
         }
       }
@@ -38142,11 +38169,11 @@ R.Screens.analytics = (function(){
                 headers:['Tür', { label:'Tahmin', num:true }, { label:'Gerçek', num:true },
                   { label:'Sapma', num:true }],
                 rows:R.Calib.settled().slice(0, 10).map(fo => {
-                  const h = R.Calib.error(fo);
+                  /* Sapma TEK YERDE biçimlenir: burası `abs` hatasını
+                     (net farkı) oran sanıp 100 ile çarpıyordu. */
                   return [(R.Calib.kindOf(fo.kind) || {}).label || fo.kind,
                     U.fmtNum(fo.guess), U.fmtNum(fo.actual),
-                    h == null ? '—' : (h.type === 'brier' ? h.value.toFixed(2)
-                      : '%' + Math.round(h.value * 100))];
+                    R.Calib.errorText(fo) || '—'];
                 }) })}</div>`)}` }),
       ])),
     ]);
@@ -38227,9 +38254,10 @@ R.Screens.analytics = (function(){
       const inp = document.getElementById('ay-calib-actual-' + id);
       const r = await R.Calib.settle(id, inp ? inp.value : null);
       if(!r.ok){ UI.toast(r.error); return; }
-      const h = R.Calib.error(r.forecast);
-      UI.toast(h && h.type === 'ape'
-        ? 'Kapandı — sapma %' + Math.round(h.value * 100) : 'Kapandı');
+      /* Burası doğruydu ama yalnız `ape` türünü gösteriyordu: net
+         sapması hiç yazılmıyordu. Tek biçimlendirici üçünü de yazar. */
+      const yazi = R.Calib.errorText(r.forecast);
+      UI.toast(yazi ? ('Kapandı — sapma ' + yazi) : 'Kapandı');
       R.App.render();
     },
   };

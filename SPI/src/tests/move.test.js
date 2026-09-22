@@ -4,6 +4,15 @@
   const { describe, it, expect, resetState, withToday, pushVitals, pushWorkout } = SP.Test;
   const U = SP.U;
 
+  /* Yuku BILINMEYEN seans: ne zorluk ne taninan hareket.
+     `pushWorkout` rpe'yi 6'ya dusurdugu icin kayit dogrudan kurulur. */
+  function pushBilinmeyen(dateISO, minutes){
+    SP.S.workouts.push({ id:SP.U.uid('w'), date:dateISO, templateId:null,
+      name:'Yüzme', kind:'cardio', items:[], minutes:minutes || 45,
+      rpe:null, note:'', createdAt:new Date().toISOString() });
+    SP.S.workouts.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  }
+
   /* Taban cizgi icin gecmis gunlere olcum serper. */
   function baseline(endISO, key, value, days){
     for(let i = 1; i <= (days || 30); i++){
@@ -136,6 +145,50 @@
         expect(r.score >= 0 && r.score <= 100).toBeTruthy();
       });
     });
+
+    it('tek girdiyle kurulan skor YÜKÜ ARTIRAMAZ', () => {
+      /* `coverage` hesaplanıyor ama HİÇBİR ÇAĞIRAN OKUMUYORDU. Yalnız
+         `soreness=5` girilmiş bir günde skor 100, bant «yüksek» ve
+         `factor` 1,1 oluyordu: ağırlığın %15'inden türetilmiş bir sayı,
+         günün yükünü ARTIRMA emri veriyordu.
+
+         Dosyanın kendi kuralı zaten şunu diyor: ACWR ve indirme haftası
+         emri yalnızca DAHA TEMKİNLİ yapabilir, asla daha ağır. İnce
+         ölçüm için de aynısı geçerli olmalı. */
+      resetState();
+      withToday('2026-03-01', () => {
+        pushVitals('2026-03-01', { soreness:5 });
+        const r = SP.Move.readiness();
+        expect(r.coverage < 0.5).toBeTruthy();
+        expect(r.thin).toBeTruthy();
+        const p = SP.Move.prescription('2026-03-01');
+        expect(p.factor <= 1).toBeTruthy();       // 1,1 DEĞİL
+      });
+    });
+
+    it('ölçüm yeterliyken bant emrini olduğu gibi verir', () => {
+      resetState();
+      withToday('2026-03-01', () => {
+        baseline('2026-03-01', 'rhr', 50);
+        baseline('2026-03-01', 'hrv', 60);
+        pushVitals('2026-03-01', { sleep:8, hrv:70, rhr:48, soreness:5 });
+        const r = SP.Move.readiness();
+        expect(r.thin).toBeFalsy();
+        expect(r.coverage >= 0.5).toBeTruthy();
+      });
+    });
+
+    it('hiç ölçüm yokken sebep DOĞRU yazılır', () => {
+      /* Cümle «en az uyku süresi gerekir» diyordu; oysa dört girdinin
+         herhangi biri yeterli. Yanlış bir sebep, kullanıcıyı olmayan
+         bir şartı aramaya gönderir. */
+      resetState();
+      withToday('2026-03-01', () => {
+        const r = SP.Move.readiness();
+        expect(r.ok).toBeFalsy();
+        expect(r.note.indexOf('en az uyku süresi gerekir')).toBe(-1);
+      });
+    });
   });
 
   describe('Move — seans yükü', () => {
@@ -152,8 +205,22 @@
       expect(SP.Move.sessionLoad({ minutes:0, rpe:8 })).toBe(0);
     });
 
-    it('ne zorluk ne hareket varsa yük üretilmez', () => {
-      expect(SP.Move.sessionLoad({ minutes:40, rpe:null, items:[] })).toBe(0);
+    it('ne zorluk ne hareket varsa yük BİLİNMEZ — sıfır değil', () => {
+      /* Yorum «seans sayılmaz — uydurulmuş yük üretilmez» diyordu ama
+         kod 0 döndürüyordu ve 0 SAYILIR: «45 dk yüzme» gibi tanınmayan
+         bir hareketle yapılan seans, akut yükü DÜŞÜK gösteriyor ve ACWR
+         «yük az, artırabilirsin» diyordu. Bilinmeyen yük, sıfır yük
+         değildir — üstelik gerçeği HER ZAMAN daha yüksektir. */
+      expect(SP.Move.sessionLoad({ minutes:40, rpe:null, items:[] })).toBe(null);
+    });
+
+    it('tanınmayan seans günün yükünü düşürmez ve sayılır', () => {
+      resetState();
+      pushWorkout('2026-03-01', { minutes:30, rpe:5 });
+      pushBilinmeyen('2026-03-01', 45);
+      const g = SP.Move.loadInfo('2026-03-01');
+      expect(g.load).toBe(150);          // bilinen yük olduğu gibi
+      expect(g.unknown).toBe(1);         // ama bilinmeyen bir seans VAR
     });
 
     it('günün yükü seansların toplamıdır', () => {
@@ -168,6 +235,42 @@
     it('kayıt yoksa oran hesaplanmaz', () => {
       resetState();
       expect(SP.Move.acwr().ok).toBeFalsy();
+    });
+
+    it('kronik pencere VAR OLAN geçmiş kadardır', () => {
+      /* Kapı 21 günde açılıyordu ama kronik yük HER ZAMAN 28'e
+         bölünüyordu. 22 günlük geçmişte sabit yükle çalışan biri için
+         son 6 gün sıfır sayılıyor, kronik ortalama yapay olarak düşüyor
+         ve oran ~28/22 = 1,27 çıkıyordu: kırmızı uyarı ve yük kısıtlama.
+         Hiçbir şey değişmediği hâlde. */
+      resetState();
+      withToday('2026-04-01', () => {
+        /* 22 günlük geçmiş, her gün AYNI yük. */
+        for(let i = 0; i < 22; i++){
+          pushWorkout(U.iso(U.addDays(U.parse('2026-04-01'), -i)), { minutes:40, rpe:6 });
+        }
+        const a = SP.Move.acwr();
+        expect(a.ok).toBeTruthy();
+        expect(a.ratio).toBeCloseTo(1, 1);      // 1,27 DEĞİL
+        expect(a.zone).toBe('ok');
+      });
+    });
+
+    it('bilinmeyen yüklü seans varken «artırabilirsin» denmez', () => {
+      /* Bilinmeyen yük gerçeği yalnızca YUKARI çeker; «yük az» hükmü o
+         yüzden güvenli yönde değildir. */
+      resetState();
+      withToday('2026-04-01', () => {
+        for(let i = 7; i < 28; i++){
+          pushWorkout(U.iso(U.addDays(U.parse('2026-04-01'), -i)), { minutes:40, rpe:6 });
+        }
+        for(let i = 0; i < 7; i++){
+          pushBilinmeyen(U.iso(U.addDays(U.parse('2026-04-01'), -i)), 45);
+        }
+        const a = SP.Move.acwr();
+        expect(a.unknown > 0).toBeTruthy();
+        expect(a.zone === 'low').toBeFalsy();
+      });
     });
 
     it('üç haftadan kısa geçmişte oran hesaplanmaz', () => {

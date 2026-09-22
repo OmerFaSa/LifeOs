@@ -93,6 +93,53 @@
     });
   });
 
+  describe('Parse — IFCC birimi ve tanınmayan birim', () => {
+
+    it('HbA1c mmol/mol\'den yüzdeye çevrilir', () => {
+      /* EN PAHALI SESSIZ HATA BURADAYDI.
+
+         `mmol/mol` birim listesinde yoktu. Regex eşleşmeyince birim
+         NULL kalıyor, `convert()` ilk satırda çıkıyor ve uyuşmazlık
+         rozeti de ÇIKMIYORDU — çünkü uyuşmazlık «bilinmeyen birim»
+         değil «birim yok» sayılıyordu.
+
+         Sonuç: IFCC birimiyle yapıştırılan «HbA1c 42 mmol/mol» %42
+         olarak kaydediliyordu. Kırmızı eşik 6,5 olduğu için diyabet
+         bayrağı yanıyor ve türetilmiş eAG
+         (28,7 × 42 − 46,7) = 1158,7 mg/dL çıkıyordu.
+
+         Türk laboratuvarlarının çoğu % verir; tek satır sessizce
+         geçiyordu. IFCC → DCCT: % = mmol/mol × 0,09148 + 2,152. */
+      const r = SP.Parse.parseLab('HbA1c   42   mmol/mol');
+      expect(r.rows[0].markerId).toBe('hba1c');
+      expect(r.rows[0].converted).toBeTruthy();
+      expect(r.rows[0].value).toBeCloseTo(6.0, 1);
+      expect(r.rows[0].value < 10).toBeTruthy();   // %42 ASLA olmamalı
+    });
+
+    it('yüzde olarak verilen HbA1c çevrilmez', () => {
+      const r = SP.Parse.parseLab('HbA1c   5,4   %');
+      expect(r.rows[0].converted).toBeFalsy();
+      expect(r.rows[0].value).toBeCloseTo(5.4, 1);
+    });
+
+    it('TANINMAYAN birim sessizce birimsiz sayılmaz', () => {
+      /* Genel tuzak: listede olmayan HER birim aynı yoldan geçerdi.
+         Bölü işareti taşıyan bir belirteç bir birimdir; tanımadığımız
+         bir birimi «birim yok» saymak, sayıyı kanonik birimdeymiş gibi
+         kabul etmek demekti. Türkçe sözcükler bölü işareti taşımaz,
+         bu yüzden yanlış alarm üretmez. */
+      const r = SP.Parse.parseLab('Ferritin   28   qux/zud');
+      expect(r.rows[0].mismatch).toBeTruthy();
+      expect(r.rows[0].converted).toBeFalsy();
+    });
+
+    it('bilinen birim uyuşmazlığı hâlâ bildirilir', () => {
+      const r = SP.Parse.parseLab('Hemoglobin   14,2   mmhg');
+      expect(r.rows[0].mismatch).toBeTruthy();
+    });
+  });
+
   describe('Parse — birim çevirimi', () => {
     it('D vitamini nmol/L\'den ng/mL\'ye çevrilir', () => {
       const r = SP.Parse.parseLab('25-OH D   75   nmol/L');

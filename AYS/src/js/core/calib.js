@@ -180,6 +180,29 @@ R.Calib = (function(){
       value:Math.abs(f.guess - f.actual) / Math.max(Math.abs(f.actual), 1) };
   }
 
+  /* SAPMANIN İNSAN DİLİNDEKİ KARŞILIĞI — TEK YERDE.
+
+     Üç ekran bunu ayrı ayrı biçimlendiriyordu ve ikisi yanlıştı.
+     `exam-net` hata ailesi `abs`tır, yani `error()` NET CİNSİNDEN
+     mutlak fark döner; ekranlar onu oran sanıp 100 ile çarpıyordu.
+     62 tahmin / 58 gerçek için ekranda «tahmin sapması %400» yazıyordu.
+
+     Üç tür, üç ayrı okuma ve birbirine ÇEVRİLEMEZLER:
+       abs    kendi biriminde bir fark   →  «4 net»
+       ape    orantılı sapma             →  «%33»
+       brier  olasılık puanı (0–1)       →  «0,18»
+
+     Bir sayının hangi türden olduğunu bilmeden yüzdeye çevirmek, ölçüyü
+     değil ölçünün ANLAMINI bozar: kullanıcı dört netlik bir sapmayı
+     felaket sanır ve kalibrasyonuna güvenmeyi bırakır. */
+  function errorText(f){
+    const e = error(f);
+    if(!e) return null;
+    if(e.type === 'brier') return e.value.toFixed(2);
+    if(e.type === 'ape') return '%' + Math.round(e.value * 100);
+    return U.fmtNum(U.round(e.value, 2)) + (e.unit ? ' ' + e.unit : '');
+  }
+
   /* Bir tahminin bandı (0 keskin … 3 uzak). Türü ne olursa olsun aynı
      dört basamak: aileler ortalanamaz ama bantlar karşılaştırılabilir. */
   function bandOf(f){
@@ -304,5 +327,6 @@ R.Calib = (function(){
   }
 
   return { open, settle, remove, load, norm, list, settled, openList, due,
-    error, bandOf, errKind, bias, score, kindOf, forExam, ASGARI, PENCERE };
+    error, errorText, bandOf, errKind, bias, score, kindOf, forExam,
+    ASGARI, PENCERE };
 })();

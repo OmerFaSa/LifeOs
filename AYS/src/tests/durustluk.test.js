@@ -184,6 +184,43 @@
     });
   });
 
+  describe('Kalibrasyon — sapma yazısı', () => {
+
+    it('net sapması YÜZDE OLARAK yazılmaz', () => {
+      /* `exam-net` hata ailesi `abs`tir: `error()` NET CİNSİNDEN mutlak
+         fark döner (`calib.js`, CALIB_KINDS). İki ekran onu oran sanıp
+         100 ile çarpıyordu — 62 tahmin / 58 gerçek için ekranda
+         «tahmin sapması %400» yazıyordu.
+
+         `calib.js:130-150` tam bu hatayı düzeltmek için yazılmış; ekran
+         eski biçimi taşımaya devam ediyordu. Biçimlendirme artık TEK
+         YERDE: üç ekran aynı işi üç ayrı yerde yaparsa bir gün ikisi
+         farklı şey söyler — nitekim söylüyordu. */
+      resetState();
+      const f = R.Calib.norm({ kind:'exam-net', guess:62, actual:58,
+        at:'2026-03-01T10:00:00.000Z', settledAt:'2026-03-08T10:00:00.000Z' });
+      const yazi = R.Calib.errorText(f);
+      expect(yazi.indexOf('%')).toBe(-1);          // yüzde DEĞİL
+      expect(yazi).toContain('4');                 // dört net
+      expect(yazi).toContain('net');               // birimiyle
+    });
+
+    it('oransal türlerde yüzde yazılır', () => {
+      resetState();
+      const f = R.Calib.norm({ kind:'week-minutes', guess:900, actual:600,
+        at:'2026-03-01T10:00:00.000Z', settledAt:'2026-03-08T10:00:00.000Z' });
+      const yazi = R.Calib.errorText(f);
+      expect(yazi.indexOf('%')).toBe(0);
+    });
+
+    it('kapanmamış tahminin sapma yazısı yoktur', () => {
+      resetState();
+      const f = R.Calib.norm({ kind:'exam-net', guess:62, actual:null,
+        at:'2026-03-01T10:00:00.000Z' });
+      expect(R.Calib.errorText(f)).toBe(null);
+    });
+  });
+
   describe('Kalibrasyon — puan', () => {
 
     it('beşten az kayıtta puan verilmez', () => {

@@ -59,6 +59,10 @@ SP.Move = (function(){
     return U.clamp(80 - delta * 7, 0, 100);
   }
 
+  /* Toparlanma olcumunun «ince» sayildigi esik: agirligin yarisi.
+     Bkz. `readiness().thin`. */
+  const INCE_ESIK = 0.5;
+
   function sorenessScore(value){
     /* Kullanicinin 1-5 arasi bildirdigi his: 1 = cok yorgun, 5 = zinde. */
     if(value == null) return null;
@@ -81,8 +85,13 @@ SP.Move = (function(){
 
     const have = parts.filter(p => p.score != null);
     if(!have.length){
-      return { ok:false, score:null, band:null, parts,
-        note:'Bugün hiç ölçüm girilmemiş. Toparlanma skoru için en az uyku süresi gerekir.' };
+      /* Cumle once «en az uyku suresi gerekir» diyordu ve bu YANLISTI:
+         dort girdinin HERHANGI BIRI yeterli. Olmayan bir sarti soyleyen
+         bir uyari, kullaniciyi olmayan bir seyi aramaya gonderir. */
+      return { ok:false, score:null, band:null, parts, coverage:0, thin:true,
+        note:'Bugün hiç ölçüm girilmemiş. Toparlanma skoru için dört '
+           + 'girdiden en az biri gerekir: uyku, HRV, istirahat nabzı ya '
+           + 'da ağrı/enerji.' };
     }
 
     /* Eksik girdinin agirligi kalanlara dagitilir. */
@@ -105,6 +114,19 @@ SP.Move = (function(){
       ok:true, score, band:override ? override.band : band, override,
       parts, missing:parts.filter(p => p.score == null).map(p => p.label),
       coverage:U.round(wsum, 2),
+      /* INCE OLCUM: agirligin yarisindan azi olculmus.
+
+         `coverage` hesaplaniyordu ama HICBIR CAGIRAN OKUMUYORDU. Yalniz
+         `soreness=5` girilmis bir gunde skor 100, bant «yuksek» ve
+         `factor` 1,1 oluyordu: agirligin %15'inden turetilmis bir sayi
+         gunun yukunu ARTIRMA emri veriyordu.
+
+         Esik yaridir ve olculmus bir sayi degil bir karardir: uyku tek
+         basina 0,35 tasir ve dosyanin kendi notu onu «toparlanmanin tek
+         en guclu belirleyicisi» diye yaziyor — ama tek basina da olsa
+         yarinin altinda kalir. Ince bir olcum YOK SAYILMAZ; yalnizca
+         yuku artirmaya yetki vermez. */
+      thin:wsum < INCE_ESIK,
     };
   }
 
@@ -114,6 +136,13 @@ SP.Move = (function(){
      RPE'den (1-10 algilanan zorluk), yoksa hareketlerin MET ortalamasindan
      gelir. Ikisi de yoksa seans sayilmaz — uydurulmus yuk uretilmez. */
 
+  /* BILINMEYEN YUK SIFIR DEGILDIR — ve sifir saymak GUVENLI YON DEGIL.
+
+     Burasi once 0 donduruyordu ve yorumu «seans sayilmaz» diyordu; oysa
+     0 SAYILIR. «45 dk yuzme» gibi katalogda olmayan bir hareketle
+     yapilan seans akut yuku dusuk gosteriyor, ACWR «yuk az,
+     artirabilirsin» diyordu. Bilinmeyen yuk gercegi yalnizca YUKARI
+     ceker; o yuzden sifir saymak, hatanin tehlikeli yonuydu. */
   function sessionLoad(w){
     if(!w || !w.minutes) return 0;
     if(w.rpe != null && isFinite(w.rpe)) return Math.round(w.minutes * Number(w.rpe));
@@ -121,13 +150,23 @@ SP.Move = (function(){
       const ex = SP.EX_BY_ID[it.exId];
       return ex ? ex.met : null;
     }).filter(v => v != null);
-    if(!mets.length) return 0;
+    if(!mets.length) return null;               // BILINMIYOR
     const avg = U.sum(mets) / mets.length;
     return Math.round(w.minutes * avg);
   }
 
+  /* Gunun bilinen yuku VE kac seansin yukunun bilinmedigi. */
+  function loadInfo(dateISO){
+    let load = 0, unknown = 0;
+    SP.Model.workoutsOf(dateISO).forEach(w => {
+      const y = sessionLoad(w);
+      if(y == null) unknown++; else load += y;
+    });
+    return { load, unknown };
+  }
+
   function loadOn(dateISO){
-    return U.sum(SP.Model.workoutsOf(dateISO).map(sessionLoad));
+    return loadInfo(dateISO).load;
   }
 
   function loadWindow(days, endISO){
@@ -137,6 +176,16 @@ SP.Move = (function(){
       total += loadOn(U.iso(U.addDays(U.parse(end), -i)));
     }
     return total;
+  }
+
+  /* Penceredeki yuku bilinmeyen seans sayisi. */
+  function unknownWindow(days, endISO){
+    const end = endISO || U.todayISO();
+    let n = 0;
+    for(let i = 0; i < days; i++){
+      n += loadInfo(U.iso(U.addDays(U.parse(end), -i))).unknown;
+    }
+    return n;
   }
 
   /* Akut/kronik yuk orani. 28 gunluk gecmis yoksa oran hesaplanmaz;
@@ -149,17 +198,45 @@ SP.Move = (function(){
       return { ok:false, span,
         note:'Son haftayı son aya kıyaslamak için en az 3 haftalık geçmiş gerekir; şu an ' + (span + 1) + ' gün var.' };
     }
+    /* KRONIK PENCERE VAR OLAN GECMIS KADARDIR.
+
+       Kapi 21 gunde aciliyor ama kronik yuk HER ZAMAN 28'e
+       bolunuyordu. 22 gunluk gecmiste sabit yukle calisan biri icin son
+       alti gun sifir sayiliyor, kronik ortalama yapay olarak dusuyor ve
+       oran ~28/22 = 1,27 cikiyordu: kirmizi uyari ve yuk kisitlama —
+       hicbir sey degismedigi halde. Olmayan gunleri sifir saymak, eksik
+       veriyi sifir saymanin ta kendisiydi. */
+    const kronikGun = Math.min(28, span + 1);
     const acute = loadWindow(7, endISO) / 7;
-    const chronic = loadWindow(28, endISO) / 28;
+    const chronic = loadWindow(kronikGun, endISO) / kronikGun;
     if(!chronic) return { ok:false, note:'Son dört haftada yeterli yük kaydı yok.' };
 
+    const unknown = unknownWindow(kronikGun, endISO);
     const ratio = U.round(acute / chronic, 2);
     const r = SP.LOAD_RULES.acwr;
-    const zone = ratio < r.low ? 'low' : ratio > r.high ? 'high' : 'ok';
+    let zone = ratio < r.low ? 'low' : ratio > r.high ? 'high' : 'ok';
+
+    /* BILINMEYEN YUK «AZ YUK» HUKMUNU DUSURUR.
+
+       Yuku bilinmeyen bir seans gercegi yalnizca YUKARI ceker; «yuk az,
+       artirabilirsin» o yuzden guvenli yonde degildir. Yuksek bolge
+       hukmu ise ayakta kalir: o zaten temkinli yondedir. */
+    let ek = '';
+    if(unknown && zone === 'low'){
+      zone = 'ok';
+      ek = ' Bu pencerede ' + unknown + ' seansın yükü bilinmiyor '
+         + '(zorluk girilmemiş, hareket katalogda yok); gerçek yük bundan '
+         + 'yüksek olabilir, bu yüzden «yük az» denmiyor.';
+    }else if(unknown){
+      ek = ' Bu pencerede ' + unknown + ' seansın yükü bilinmiyor; '
+         + 'gerçek oran bundan yüksek olabilir.';
+    }
+
     return {
       ok:true, ratio, acute:Math.round(acute), chronic:Math.round(chronic), zone,
+      chronicDays:kronikGun, unknown,
       tone:zone === 'ok' ? 'ok' : zone === 'high' ? 'danger' : 'warn',
-      note:zone === 'ok' ? r.okNote : zone === 'high' ? r.highNote : r.lowNote,
+      note:(zone === 'ok' ? r.okNote : zone === 'high' ? r.highNote : r.lowNote) + ek,
     };
   }
 
@@ -219,6 +296,19 @@ SP.Move = (function(){
     /* Her gerekce kimliklidir: ekran skoru zaten buyuk yaziyorsa ayni cumleyi
        ikinci kez basmasin diye 'readiness' gerekcesini eleyebilir. */
     if(r.ok){
+      /* INCE OLCUM YUKU ARTIRAMAZ. Dosyanin kendi kurali «ACWR ve
+         indirme haftasi emri yalnizca DAHA TEMKINLI yapabilir, asla
+         daha agir» diyor; agirligin yarisindan azindan turetilmis bir
+         skor icin de ayni sey gecerli. Skor YOK SAYILMAZ — yalnizca
+         artirma yetkisi vermez. */
+      if(r.thin && factor > 1){
+        factor = 1;
+        reasons.push({ id:'thin', kind:'muted',
+          text:'Toparlanma skoru bugün yalnızca ' + r.parts.filter(p => p.score != null)
+               .map(p => p.label).join(', ') + ' ölçümünden türedi; yükü '
+             + 'artırmak için yeterli değil. Planlanan yük olduğu gibi kaldı.',
+          short:'Ölçüm ince; yük artırılmadı.' });
+      }
       reasons.push({ id:'readiness', kind:r.band.tone,
         text:'Toparlanma ' + r.score + '/100 — ' + r.band.label + '. ' + r.band.order,
         short:r.band.order });
@@ -314,7 +404,8 @@ SP.Move = (function(){
 
   return {
     baseline, sleepScore, hrvScore, rhrScore, sorenessScore, readiness,
-    sessionLoad, loadOn, loadWindow, acwr, deloadWeek, weeklyGrowth, prescription,
+    sessionLoad, loadInfo, loadOn, loadWindow, unknownWindow,
+    acwr, deloadWeek, weeklyGrowth, prescription,
     progressionCheck, patternBalance, loadSeries,
     ADVANCE_SESSIONS, ADVANCE_WINDOW,
   };
