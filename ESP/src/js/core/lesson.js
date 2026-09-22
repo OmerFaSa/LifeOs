@@ -365,14 +365,22 @@ ESP.Lesson = (function(){
     };
   }
 
-  /* Oturumu gün kaydına yazar: pratik de bir pratiktir ve dakikası sayılır. */
+  /* Oturumu gün kaydına yazar: pratik de bir pratiktir ve dakikası sayılır.
+
+     Gercek bir `minutes` verilmisse (kullanici zamanlayicidan geldi ya da
+     elle yazdi) OLCULMUS sayilir. Verilmemisse soru sayisindan (asked×0,5)
+     bir TAHMIN uretilir ve 'estimated' etiketiyle gonderilir — once ikisi
+     de 'measured' damgalaniyordu, turetilmis sayi mufredat kademesine ve
+     XP'ye olculmus gibi giriyordu. */
   async function log(session, minutes){
     const r = result(session);
     if(!r || !r.asked) return { ok:false, error:'Cevaplanmış soru yok.' };
     const disc = session.deck === ESP.HISTORY_DECK ? 'history' : 'lang';
+    const gercekSure = minutes != null;
     await ESP.Model.addSession(session.today || U.todayISO(), {
       disc:disc,
-      minutes:minutes != null ? minutes : Math.max(1, Math.round(r.asked * 0.5)),
+      minutes:gercekSure ? minutes : Math.max(1, Math.round(r.asked * 0.5)),
+      minutesCert:gercekSure ? 'measured' : 'estimated',
       count:r.right,
       note:'pratik · ' + r.right + '/' + r.asked,
     });

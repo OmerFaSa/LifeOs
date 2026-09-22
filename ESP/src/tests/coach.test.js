@@ -120,6 +120,28 @@
       });
     });
 
+    it('sure verilmeden islenirse katalogun PLANLANAN suresi TAHMIN sayilir', async () => {
+      /* Ekranda («log-drill») kullanicinin duzenleyebilecegi bir sure
+         alani yok — tek dugme. «Yaptim» demek, «tam d.minutes surdu»
+         demek DEGILDIR; once ikisi ayni sayilip 'measured' yaziliyordu. */
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        await Co().logDrill('lang-10kart');
+        const g = ESP.S.days['2026-09-12'].sessions[0];
+        expect(g.minutesCert).toBe('estimated');
+      });
+    });
+
+    it('gercek sure verilirse OLCULMUS sayilir', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        await Co().logDrill('lang-10kart', { minutes:3 });
+        const g = ESP.S.days['2026-09-12'].sessions[0];
+        expect(g.minutesCert).toBe('measured');
+        expect(g.minutes).toBe(3);
+      });
+    });
+
     it('bilinmeyen egzersiz islenmez', async () => {
       resetState();
       const res = await Co().logDrill('yok-boyle');

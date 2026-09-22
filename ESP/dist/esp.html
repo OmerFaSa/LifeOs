@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'ec12c23', at:'2026-09-22 13:31', dirty:true };
+ESP.BUILD = { id:'8af3734', at:'2026-09-22 13:55', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -14845,11 +14845,26 @@ ESP.Model = (function(){
 
      Donus `null` ise o gun o disipline HIC dokunulmamistir — sifir degil.
      Cagiran taraf ikisini ayirmak zorundadir; bu yuzden 0 donmuyoruz. */
-  function minutesOf(dateISO, discId){
+  /* Gunun dakikasi VE kesinligi. `minutesOf` geriye tek sayi dondugu
+     icin bir gunun icindeki oturumlardan biri TAHMIN olsa da toplam
+     sessizce 'measured' okunuyordu — dokuz cagiran sayiya bakiyor,
+     hicbiri kesinlige bakmiyordu. Bu, kesinligin ONEMLI oldugu tek yer
+     (`Intellect.hoursOfRaw`) icin ayri tutuldu. */
+  function minutesInfo(dateISO, discId){
     const rows = sessionsOf(dateISO)
       .filter(s => (!discId || s.disc === discId) && s.minutesCert !== 'missing' && s.minutes != null);
     if(!rows.length) return null;
-    return rows.reduce((a, s) => a + s.minutes, 0);
+    return {
+      minutes:rows.reduce((a, s) => a + s.minutes, 0),
+      // Karisik bir gun (bir olculmus + bir tahmin) TOPLAMDA tahmindir:
+      // hicbir parcasi kesin degilse butun de kesin degildir.
+      cert:rows.every(s => s.minutesCert === 'measured') ? 'measured' : 'estimated',
+    };
+  }
+
+  function minutesOf(dateISO, discId){
+    const info = minutesInfo(dateISO, discId);
+    return info ? info.minutes : null;
   }
 
   async function saveDay(dateISO){
@@ -14866,9 +14881,23 @@ ESP.Model = (function(){
     return rec;
   }
 
+  /* KESINLIK CAGIRANDAN GELIR — sessizce 'measured' VARSAYILMAZ.
+
+     Once dakika HER ZAMAN 'measured' etiketiyle giriyordu. Uc cagiran
+     (`lang.js`, `lesson.js`, `coach.js`) gercek bir sure OLCMEDEN kart
+     sayisindan, soru sayisindan ya da egzersizin PLANLANAN suresinden bir
+     dakika TURETIYOR ve buraya gonderiyordu; bu dosya da onu olculmus
+     gibi damgaliyordu. Turetilmis bir sayi `Intellect.hours` uzerinden
+     mufredat kademesine ve XP'ye giriyordu — doktrin kural 2'nin
+     ("dil modeli sayi uretmez, model kapaliyken sistem kapanmaz" ile
+     ayni ailede) dogrudan ihlaliydi.
+
+     `minutesCert` artik cagirandan gecebilir; verilmezse varsayilan yine
+     'measured'dir — gercek bir zamanlayicidan (`timer.js`) ya da elle
+     girilen bir degerden gelen dakika hala oldugu gibi olculmus sayilir. */
   async function addSession(dateISO, patch){
     const day = ensureDay(dateISO);
-    const m = numCert(patch && patch.minutes, 'measured');
+    const m = numCert(patch && patch.minutes, (patch && patch.minutesCert) || 'measured');
     const c = numCert(patch && patch.count, 'measured');
     const s = normSession(Object.assign({}, patch, {
       id:U.uid('s'),
@@ -15773,7 +15802,7 @@ ESP.Model = (function(){
     defaultProfile, saveProfile, defaultPrefs, savePrefs,
     profileList, addProfile, removeProfile, switchProfile, activeProfileId,
     /* gun ve oturum */
-    newDay, dayOf, ensureDay, saveDay, dayHasEntry, sessionsOf, minutesOf,
+    newDay, dayOf, ensureDay, saveDay, dayHasEntry, sessionsOf, minutesOf, minutesInfo,
     addSession, updateSession, deleteSession, recentDays, streak,
     /* dil */
     newCard, saveCard, deleteCard, cardsOf,
@@ -18151,18 +18180,24 @@ ESP.Intellect = (function(){
   function hoursOfRaw(discId, days){
     const n = days || 14;
     const gunler = U.lastDays(n);
-    let dakika = 0, girilen = 0;
+    let dakika = 0, girilen = 0, hepsiOlcum = true;
     gunler.forEach(d => {
-      const m = ESP.Model.minutesOf(d, discId);
-      if(m == null) return;                    // veri yok — sifir sayilmaz
-      dakika += m; girilen++;
+      const info = ESP.Model.minutesInfo(d, discId);
+      if(!info) return;                         // veri yok — sifir sayilmaz
+      dakika += info.minutes; girilen++;
+      // Kart sayisindan, soru sayisindan ya da PLANLANAN egzersiz
+      // suresinden turetilmis bir dakika artik 'estimated' geliyor
+      // (bkz. `state.js: addSession`). Pencerede TEK bir tahmin bile
+      // varsa toplam «olculdu» diye sunulamaz — turetilmis bir sayi
+      // kural motorunun urettigi sayiyla ayni kesinlikte degildir.
+      if(info.cert !== 'measured') hepsiOlcum = false;
     });
     return {
       hours:dakika / 60,
       minutes:dakika,
       enteredDays:girilen,
       windowDays:n,
-      cert:girilen ? 'measured' : 'missing',
+      cert:girilen ? (hepsiOlcum ? 'measured' : 'estimated') : 'missing',
     };
   }
 
@@ -23459,19 +23494,30 @@ ESP.Coach = (function(){
       cert:kez ? 'measured' : 'missing', windowDays:n };
   }
 
-  /* Bir egzersizi yapildi olarak isler. Sure verilmezse egzersizin kendi
-     suresi kullanilir ama etiket yine 'measured' olur — cunku kullanici
-     "yaptim" demistir; tahmin edilen sey sure degil, suresinin standarda
-     uydugudur. Kullanici degistirebilir. */
+  /* Bir egzersizi yapildi olarak isler.
+
+     ONCE burada "sure verilmezse etiket yine 'measured' olur, cunku
+     kullanici yaptim demistir" deniyordu. Ama ekranda (`app.js` `log-drill`)
+     tek bir dugme var — kullanicinin duzenleyebilecegi bir sure alani
+     YOK. Yani "yaptim demis olmak" ile "tam d.minutes surdugunu
+     dogrulamis olmak" ayni sey degil: kullanici egzersizi 2 dakikada
+     bitirse de katalogdaki 5 dakika 'measured' diye yaziliyordu.
+
+     Gercek bir sure verilmisse (`o.minutes`, ileride bir zamanlayicidan
+     ya da elle giristen) OLCULMUS sayilir. Verilmemisse katalogun
+     PLANLANAN suresi kullanilir ama 'estimated' damgalanir — veri hala
+     sayilir (kapatilmaz), yalniz gercekte olcmedigi kesinligi iddia
+     etmez. */
   async function logDrill(drillId, opts){
     const o = opts || {};
     const d = ESP.DRILL_BY_ID[drillId];
     if(!d) return { ok:false, error:'Bilinmeyen egzersiz.' };
     const gun = o.date || U.todayISO();
-    const dakika = o.minutes != null ? o.minutes : d.minutes;
+    const gercekSure = o.minutes != null;
+    const dakika = gercekSure ? o.minutes : d.minutes;
     const s = await ESP.Model.addSession(gun, {
-      disc:d.disc, minutes:dakika, ref:d.id,
-      note:o.note || d.label,
+      disc:d.disc, minutes:dakika, minutesCert:gercekSure ? 'measured' : 'estimated',
+      ref:d.id, note:o.note || d.label,
     });
     ESP.Memo.bitir();
     return { ok:true, session:s };
@@ -24129,14 +24175,22 @@ ESP.Lesson = (function(){
     };
   }
 
-  /* Oturumu gün kaydına yazar: pratik de bir pratiktir ve dakikası sayılır. */
+  /* Oturumu gün kaydına yazar: pratik de bir pratiktir ve dakikası sayılır.
+
+     Gercek bir `minutes` verilmisse (kullanici zamanlayicidan geldi ya da
+     elle yazdi) OLCULMUS sayilir. Verilmemisse soru sayisindan (asked×0,5)
+     bir TAHMIN uretilir ve 'estimated' etiketiyle gonderilir — once ikisi
+     de 'measured' damgalaniyordu, turetilmis sayi mufredat kademesine ve
+     XP'ye olculmus gibi giriyordu. */
   async function log(session, minutes){
     const r = result(session);
     if(!r || !r.asked) return { ok:false, error:'Cevaplanmış soru yok.' };
     const disc = session.deck === ESP.HISTORY_DECK ? 'history' : 'lang';
+    const gercekSure = minutes != null;
     await ESP.Model.addSession(session.today || U.todayISO(), {
       disc:disc,
-      minutes:minutes != null ? minutes : Math.max(1, Math.round(r.asked * 0.5)),
+      minutes:gercekSure ? minutes : Math.max(1, Math.round(r.asked * 0.5)),
+      minutesCert:gercekSure ? 'measured' : 'estimated',
       count:r.right,
       note:'pratik · ' + r.right + '/' + r.asked,
     });
@@ -31795,8 +31849,12 @@ ESP.Screens.lang = (function(){
 
     async 'log-review'(el){
       const n = Number(el.dataset.count) || 0;
+      /* Dakika kart sayisindan TURETILIR (n × 0,4), gercek bir sure
+         olculmez. `minutesCert:'estimated'` olmadan bu sayi
+         `Intellect.hours` uzerinden mufredat kademesine 'measured'
+         etiketiyle giriyordu — dogrudan doktrin ihlali. */
       await M.addSession(U.todayISO(), { disc:'lang', minutes:Math.max(1, Math.round(n * 0.4)),
-        count:n, note:'kart çalışması' });
+        minutesCert:'estimated', count:n, note:'kart çalışması' });
       S.ui.reviewQueue = null;
       ESP.Memo.bitir();
       ESP.UI.toast('Bugüne yazıldı');

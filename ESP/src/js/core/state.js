@@ -390,11 +390,26 @@ ESP.Model = (function(){
 
      Donus `null` ise o gun o disipline HIC dokunulmamistir — sifir degil.
      Cagiran taraf ikisini ayirmak zorundadir; bu yuzden 0 donmuyoruz. */
-  function minutesOf(dateISO, discId){
+  /* Gunun dakikasi VE kesinligi. `minutesOf` geriye tek sayi dondugu
+     icin bir gunun icindeki oturumlardan biri TAHMIN olsa da toplam
+     sessizce 'measured' okunuyordu — dokuz cagiran sayiya bakiyor,
+     hicbiri kesinlige bakmiyordu. Bu, kesinligin ONEMLI oldugu tek yer
+     (`Intellect.hoursOfRaw`) icin ayri tutuldu. */
+  function minutesInfo(dateISO, discId){
     const rows = sessionsOf(dateISO)
       .filter(s => (!discId || s.disc === discId) && s.minutesCert !== 'missing' && s.minutes != null);
     if(!rows.length) return null;
-    return rows.reduce((a, s) => a + s.minutes, 0);
+    return {
+      minutes:rows.reduce((a, s) => a + s.minutes, 0),
+      // Karisik bir gun (bir olculmus + bir tahmin) TOPLAMDA tahmindir:
+      // hicbir parcasi kesin degilse butun de kesin degildir.
+      cert:rows.every(s => s.minutesCert === 'measured') ? 'measured' : 'estimated',
+    };
+  }
+
+  function minutesOf(dateISO, discId){
+    const info = minutesInfo(dateISO, discId);
+    return info ? info.minutes : null;
   }
 
   async function saveDay(dateISO){
@@ -411,9 +426,23 @@ ESP.Model = (function(){
     return rec;
   }
 
+  /* KESINLIK CAGIRANDAN GELIR — sessizce 'measured' VARSAYILMAZ.
+
+     Once dakika HER ZAMAN 'measured' etiketiyle giriyordu. Uc cagiran
+     (`lang.js`, `lesson.js`, `coach.js`) gercek bir sure OLCMEDEN kart
+     sayisindan, soru sayisindan ya da egzersizin PLANLANAN suresinden bir
+     dakika TURETIYOR ve buraya gonderiyordu; bu dosya da onu olculmus
+     gibi damgaliyordu. Turetilmis bir sayi `Intellect.hours` uzerinden
+     mufredat kademesine ve XP'ye giriyordu — doktrin kural 2'nin
+     ("dil modeli sayi uretmez, model kapaliyken sistem kapanmaz" ile
+     ayni ailede) dogrudan ihlaliydi.
+
+     `minutesCert` artik cagirandan gecebilir; verilmezse varsayilan yine
+     'measured'dir — gercek bir zamanlayicidan (`timer.js`) ya da elle
+     girilen bir degerden gelen dakika hala oldugu gibi olculmus sayilir. */
   async function addSession(dateISO, patch){
     const day = ensureDay(dateISO);
-    const m = numCert(patch && patch.minutes, 'measured');
+    const m = numCert(patch && patch.minutes, (patch && patch.minutesCert) || 'measured');
     const c = numCert(patch && patch.count, 'measured');
     const s = normSession(Object.assign({}, patch, {
       id:U.uid('s'),
@@ -1318,7 +1347,7 @@ ESP.Model = (function(){
     defaultProfile, saveProfile, defaultPrefs, savePrefs,
     profileList, addProfile, removeProfile, switchProfile, activeProfileId,
     /* gun ve oturum */
-    newDay, dayOf, ensureDay, saveDay, dayHasEntry, sessionsOf, minutesOf,
+    newDay, dayOf, ensureDay, saveDay, dayHasEntry, sessionsOf, minutesOf, minutesInfo,
     addSession, updateSession, deleteSession, recentDays, streak,
     /* dil */
     newCard, saveCard, deleteCard, cardsOf,

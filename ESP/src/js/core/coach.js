@@ -161,19 +161,30 @@ ESP.Coach = (function(){
       cert:kez ? 'measured' : 'missing', windowDays:n };
   }
 
-  /* Bir egzersizi yapildi olarak isler. Sure verilmezse egzersizin kendi
-     suresi kullanilir ama etiket yine 'measured' olur — cunku kullanici
-     "yaptim" demistir; tahmin edilen sey sure degil, suresinin standarda
-     uydugudur. Kullanici degistirebilir. */
+  /* Bir egzersizi yapildi olarak isler.
+
+     ONCE burada "sure verilmezse etiket yine 'measured' olur, cunku
+     kullanici yaptim demistir" deniyordu. Ama ekranda (`app.js` `log-drill`)
+     tek bir dugme var — kullanicinin duzenleyebilecegi bir sure alani
+     YOK. Yani "yaptim demis olmak" ile "tam d.minutes surdugunu
+     dogrulamis olmak" ayni sey degil: kullanici egzersizi 2 dakikada
+     bitirse de katalogdaki 5 dakika 'measured' diye yaziliyordu.
+
+     Gercek bir sure verilmisse (`o.minutes`, ileride bir zamanlayicidan
+     ya da elle giristen) OLCULMUS sayilir. Verilmemisse katalogun
+     PLANLANAN suresi kullanilir ama 'estimated' damgalanir — veri hala
+     sayilir (kapatilmaz), yalniz gercekte olcmedigi kesinligi iddia
+     etmez. */
   async function logDrill(drillId, opts){
     const o = opts || {};
     const d = ESP.DRILL_BY_ID[drillId];
     if(!d) return { ok:false, error:'Bilinmeyen egzersiz.' };
     const gun = o.date || U.todayISO();
-    const dakika = o.minutes != null ? o.minutes : d.minutes;
+    const gercekSure = o.minutes != null;
+    const dakika = gercekSure ? o.minutes : d.minutes;
     const s = await ESP.Model.addSession(gun, {
-      disc:d.disc, minutes:dakika, ref:d.id,
-      note:o.note || d.label,
+      disc:d.disc, minutes:dakika, minutesCert:gercekSure ? 'measured' : 'estimated',
+      ref:d.id, note:o.note || d.label,
     });
     ESP.Memo.bitir();
     return { ok:true, session:s };

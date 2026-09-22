@@ -224,6 +224,28 @@
       });
     });
 
+    it('gercek sure verilince MEASURED, verilmeyince ESTIMATED yazilir', async () => {
+      /* Sure verilmezse soru sayisindan (asked×0,5) bir TAHMIN uretilir.
+         Once bu da 'measured' damgalaniyordu ve turetilmis sayi mufredat
+         kademesine olculmus gibi giriyordu — dogrudan doktrin ihlali. */
+      resetState();
+      deste(10);
+      await withTodayAsync('2026-09-12', async () => {
+        const s1 = L().start('en', { kinds:['recall'], length:4 });
+        for(const q of s1.questions.slice()) await L().answer(s1, q.answer);
+        await L().log(s1, 12);
+        const g1 = ESP.S.days['2026-09-12'].sessions[0];
+        expect(g1.minutesCert).toBe('measured');
+
+        resetState(); deste(10);
+        const s2 = L().start('en', { kinds:['recall'], length:4 });
+        for(const q of s2.questions.slice()) await L().answer(s2, q.answer);
+        await L().log(s2);                    // sure VERILMEDI
+        const g2 = ESP.S.days['2026-09-12'].sessions[0];
+        expect(g2.minutesCert).toBe('estimated');
+      });
+    });
+
     it('vadesi gelen kart oturumda once gelir', () => {
       resetState();
       withToday('2026-09-12', () => {

@@ -92,18 +92,24 @@ ESP.Intellect = (function(){
   function hoursOfRaw(discId, days){
     const n = days || 14;
     const gunler = U.lastDays(n);
-    let dakika = 0, girilen = 0;
+    let dakika = 0, girilen = 0, hepsiOlcum = true;
     gunler.forEach(d => {
-      const m = ESP.Model.minutesOf(d, discId);
-      if(m == null) return;                    // veri yok — sifir sayilmaz
-      dakika += m; girilen++;
+      const info = ESP.Model.minutesInfo(d, discId);
+      if(!info) return;                         // veri yok — sifir sayilmaz
+      dakika += info.minutes; girilen++;
+      // Kart sayisindan, soru sayisindan ya da PLANLANAN egzersiz
+      // suresinden turetilmis bir dakika artik 'estimated' geliyor
+      // (bkz. `state.js: addSession`). Pencerede TEK bir tahmin bile
+      // varsa toplam «olculdu» diye sunulamaz — turetilmis bir sayi
+      // kural motorunun urettigi sayiyla ayni kesinlikte degildir.
+      if(info.cert !== 'measured') hepsiOlcum = false;
     });
     return {
       hours:dakika / 60,
       minutes:dakika,
       enteredDays:girilen,
       windowDays:n,
-      cert:girilen ? 'measured' : 'missing',
+      cert:girilen ? (hepsiOlcum ? 'measured' : 'estimated') : 'missing',
     };
   }
 

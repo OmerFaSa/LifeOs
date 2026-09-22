@@ -511,8 +511,12 @@ ESP.Screens.lang = (function(){
 
     async 'log-review'(el){
       const n = Number(el.dataset.count) || 0;
+      /* Dakika kart sayisindan TURETILIR (n × 0,4), gercek bir sure
+         olculmez. `minutesCert:'estimated'` olmadan bu sayi
+         `Intellect.hours` uzerinden mufredat kademesine 'measured'
+         etiketiyle giriyordu — dogrudan doktrin ihlali. */
       await M.addSession(U.todayISO(), { disc:'lang', minutes:Math.max(1, Math.round(n * 0.4)),
-        count:n, note:'kart çalışması' });
+        minutesCert:'estimated', count:n, note:'kart çalışması' });
       S.ui.reviewQueue = null;
       ESP.Memo.bitir();
       ESP.UI.toast('Bugüne yazıldı');
