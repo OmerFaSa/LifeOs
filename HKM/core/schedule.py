@@ -168,26 +168,46 @@ def maintenance(con, cfg, now=None):
 
 
 def _bakim_vakti(cfg, now):
-    """Bakim penceresi: gunde BIR kez, tolerans icinde."""
+    """Bakim vakti geldi mi — hedef saatten SONRA, gunde bir kez.
+
+    Once pencere KATIYDI: hedef + `tolerance_minutes` (90 dk). Yani bakim
+    yalnizca 03:30-05:00 arasi makine ACIKSA kosuyordu. Geceleri kapatilan
+    bir dizustunde o pencere hic acilmiyor ve otomatik yedek HIC
+    alinmiyordu — dokuz aylik ambar tek bir disk hatasina bagli kaliyordu.
+
+    «Gecmis is kovalanmaz» bu depoda bir BILDIRIM kuralidir ve dogrudur:
+    sabah 08:00 hatirlaticisini aksam 20:00'de gostermek yanlistir, cunku
+    hatirlaticinin degeri ZAMANINDADIR. Yedegin degeri zamaninda degil
+    VARLIGINDADIR: gec alinan yedek, hic alinmayandan iyidir. Bu yuzden
+    kural burada tersine cevrildi.
+
+    Gunde bir kez guvencesi bu pencereden gelmiyor, `_bugun_bakim_yapildi`
+    dosyaya bakarak veriyor — o yuzden pencereyi acmak ikinci bir yedek
+    uretmez. `tolerance_minutes` bildirimlerde (`due`) kullanilmaya devam
+    ediyor."""
     a = settings(cfg)
     if not a.get("maintenance"):
         return False
     hedef = _dakika(a.get("maintenance_time") or "03:30")
     if hedef is None:
         return False
-    simdi = now.hour * 60 + now.minute
-    tolerans = int(a.get("tolerance_minutes") or 90)
-    return 0 <= simdi - hedef <= tolerans
+    return (now.hour * 60 + now.minute) >= hedef
 
 
-def _bugun_bakim_yapildi(now):
+def _bugun_bakim_yapildi(now, con=None):
     """Bugunun yedegi zaten alindi mi — DOSYADAN bakilir.
 
     Bellekteki bir bayrak, daemon yeniden baslatildiginda kaybolur ve ayni
     gun ikinci bir yedek alinir. Gunun kopyasi zaten diskte duruyor;
-    dogruyu oradan sormak, ayri bir kayit tutmaktan daha az yalan soyler."""
+    dogruyu oradan sormak, ayri bir kayit tutmaktan daha az yalan soyler.
+
+    HANGI klasore bakilacagi BAGLANTIDAN gelir: kopyalar ambarin yanina
+    yazilir (`db.kopya_kok`). Modul sabitine bakmak, ambari baska bir yere
+    koymus kullanicida «bugun yedek alinmadi» diye her tikta yeni bir
+    yedek aldirirdi."""
     from core import db
-    kok = os.path.dirname(db.DB_PATH)
+    kok = (db.kopya_kok(con) if con is not None else None) \
+        or os.path.dirname(db.DB_PATH)
     damga = now.strftime("%Y%m%d")
     try:
         return any(a.startswith("hkm-gunluk-%s" % damga)
@@ -208,7 +228,7 @@ def tick(con, cfg, now=None, th=None, transport=None):
         sonuc["flush"] = outbox.flush(con, cfg, now=now, transport=transport)
         # Bakim gunde BIR kez: ayni gun ikinci kez kosmaz. Isaret ambarda
         # degil bellekte tutulmaz — gunun kopyasi zaten dosyada durur.
-        if _bakim_vakti(cfg, now) and not _bugun_bakim_yapildi(now):
+        if _bakim_vakti(cfg, now) and not _bugun_bakim_yapildi(now, con):
             sonuc["maintenance"] = maintenance(con, cfg, now=now)
     except Exception as e:                      # noqa: BLE001
         sonuc["error"] = "%s: %s" % (type(e).__name__, e)

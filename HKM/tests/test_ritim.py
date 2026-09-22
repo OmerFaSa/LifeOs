@@ -327,18 +327,23 @@ def run_kurtarma():
     def t_rollback_copy_written():
         """«Geri alinamaz» bir islem, geri alinabilir hale gelmeli."""
         import os as _os
+        import tempfile as _tf
         a = db.connect(":memory:")
         sync_engine.ingest(a, {"module": "spi", "date": gun(0),
                                "metrics": {"sleep_hours": metric(7.0)}},
                            now=gun(0) + "T09:00:00")
         yedek = db.export_all(a)
-        b = db.connect(":memory:")
+        # Hedef ambar DOSYAYA bagli: geri donus kopyasi ambarin yanina
+        # yazilir. Bellekteki bir ambarin kopyasi gercek `HKM/db/` icine
+        # dusuyordu ve her test kosumu kullanicinin halkasindan yer yiyordu.
+        d = _tf.mkdtemp(prefix="hkm-geri-")
+        b = db.connect(_os.path.join(d, "hkm.db"))
         db.import_all(b, yedek)
         r = db.import_all(b, yedek, replace=True)
         ok(r["ok"])
         ok(r.get("rollback_copy"), "geri donus kopyasi yazilmadi")
         ok(_os.path.exists(r["rollback_copy"]))
-        _os.remove(r["rollback_copy"])
+        eq(_os.path.dirname(r["rollback_copy"]), d)
     test("ustune yazmadan once kopya alinir", t_rollback_copy_written)
 
 
@@ -350,23 +355,63 @@ def run_bakim():
 
     suite("bakim")
 
+    def _ambar():
+        """Dosyaya bagli bir ambar — KENDI gecici klasorunde.
+
+        Bu testler once `:memory:` kullaniyordu ve kopyalarini gercek
+        `HKM/db/` icine birakiyordu; yani her test kosumu kullanicinin
+        geri donus halkasindan (KOPYA_SAKLA=10) bir yer yiyordu. Testin
+        kendi ambari olmali."""
+        d = tempfile.mkdtemp(prefix="hkm-ambar-")
+        return db.connect(_os.path.join(d, "hkm.db")), d
+
+    def t_snapshot_yanina_yazilir():
+        """Kopya, BAGLANTININ KENDI dosyasinin yanina yazilir.
+
+        Yol once modul sabitinden (`db.DB_PATH`) geliyordu. Daemon gercek
+        yolu `config.json`daki `db_path`ten alip tasir, yani ambarini
+        baska bir yere koymus kullanicida kopya ambarinin yaninda DEGIL
+        `HKM/db/` icinde birikiyordu — ve on test kosumu kullanicinin
+        gercek geri donus kopyasini halkadan atiyordu."""
+        gercek = _os.path.dirname(db.DB_PATH)
+        oncesi = set(_os.listdir(gercek)) if _os.path.isdir(gercek) else set()
+        con, d = _ambar()
+        yol = db.snapshot_file(con, etiket="yan", sakla=3)
+        eq(_os.path.dirname(yol), d)            # kendi klasorune yazdi
+        sonrasi = set(_os.listdir(gercek)) if _os.path.isdir(gercek) else set()
+        eq(sonrasi - oncesi, set())             # gercek halkaya HIC dokunmadi
+    test("kopya kendi ambarinin yanina yazilir", t_snapshot_yanina_yazilir)
+
+    def t_snapshot_bellekte_soyler():
+        """Bellekteki bir veritabaninin dosyasi yoktur, kopyasinin dogal bir
+        evi de yoktur. Once gercek `HKM/db/` icine yaziliyordu: kullanicinin
+        ambarinin yanina, onun verisi OLMAYAN bir kopya. Sessizce yanlis
+        yere yazmaktansa soyler."""
+        gercek = _os.path.dirname(db.DB_PATH)
+        oncesi = set(_os.listdir(gercek)) if _os.path.isdir(gercek) else set()
+        con = db.connect(":memory:")
+        try:
+            db.snapshot_file(con, etiket="bellek", sakla=3)
+            ok(False, "bellekteki ambar icin hata bekleniyordu")
+        except ValueError:
+            pass
+        sonrasi = set(_os.listdir(gercek)) if _os.path.isdir(gercek) else set()
+        eq(sonrasi - oncesi, set())
+    test("bellekteki ambarin kopyasi gercek halkaya dusmez", t_snapshot_bellekte_soyler)
+
     def t_snapshot_rotation():
         """Sinirsiz kopya, diski dolduran ve hicbiri bakilmayan bir yigindir.
 
         Once hicbiri silinmiyordu: her geri yukleme bir dosya birakiyor ve
         dizin sessizce buyuyordu — dokuz aylik ufuk disiplinini kiran sey
         veritabani degil, yaninda biriken kopyalardi."""
-        con = db.connect(":memory:")
-        kok = _os.path.dirname(db.DB_PATH)
-        # Temiz bir etiketle calis: baska testlerin kopyalarina dokunma.
+        con, kok = _ambar()
         etiket = "test%d" % _os.getpid()
         yollar = [db.snapshot_file(con, etiket=etiket, sakla=3) for _ in range(5)]
         kalan = [a for a in _os.listdir(kok) if a.startswith("hkm-%s-" % etiket)]
         eq(len(kalan), 3)
         # EN YENILER kalir: eskiyi degil yeniyi saklamak istenir.
         ok(_os.path.basename(yollar[-1]) in kalan)
-        for a in kalan:
-            _os.remove(_os.path.join(kok, a))
     test("kopyalar sinirsiz birikmez", t_snapshot_rotation)
 
     def t_snapshot_rotation_kaba_mtime():
@@ -374,8 +419,7 @@ def run_bakim():
         katmanlari) mtime'i 1 saniyeye yuvarlar. Butun kopyalar AYNI
         mtime'i tasisa bile en yeni kopya kalmali — sira artik dosya
         adindaki damgadan gelir, diskten okunan mtime'dan degil."""
-        con = db.connect(":memory:")
-        kok = _os.path.dirname(db.DB_PATH)
+        con, kok = _ambar()
         etiket = "kaba%d" % _os.getpid()
         gercek_getmtime = _os.path.getmtime
         _os.path.getmtime = lambda p: 0.0   # butun dosyalar tek bir mtime'a dusuyor
@@ -387,14 +431,12 @@ def run_bakim():
         eq(len(kalan), 3)
         ok(_os.path.basename(yollar[-1]) in kalan)
         eq(len({_os.path.basename(y) for y in yollar}), 5)   # ad yeniden kullanimi yok
-        for a in kalan:
-            _os.remove(_os.path.join(kok, a))
     test("kaba mtime'da bile en yeni kopya kalir", t_snapshot_rotation_kaba_mtime)
 
     def t_maintenance_backs_up_and_prunes():
         """KURULUM.md «kopyalamamak dokuz aylik kaydi tek bir disk hatasina
         baglar» diyordu — ama kopyalayan yoktu."""
-        con = db.connect(":memory:")
+        con, _kok = _ambar()
         eski = (datetime.date.today() - datetime.timedelta(days=400)).isoformat()
         sync_engine.ingest(con, {"module": "spi", "date": eski,
                                  "metrics": {"sleep_hours": metric(7.0)}},
@@ -408,22 +450,45 @@ def run_bakim():
         eq(r["pruned_events"], 1)               # dokuz aydan eski olay gitti
         eq(r["pruned_inbox"], 1)                # eski mesaj kimligi gitti
         # KARARLAR KALIR: budama gecmisi degil ham olculeri siler.
-        _os.remove(r["backup"])
     test("bakim yedek alir ve eskiyi budar", t_maintenance_backs_up_and_prunes)
 
     def t_maintenance_runs_once_a_day():
         """Bellekteki bir bayrak, daemon yeniden baslatildiginda kaybolur ve
         ayni gun ikinci bir yedek alinir."""
-        con = db.connect(":memory:")
+        con, _kok = _ambar()
         simdi = datetime.datetime.now().replace(hour=3, minute=35)
         cfg = {"schedule": {"maintenance": True, "maintenance_time": "03:30"}}
         ok(schedule._bakim_vakti(cfg, simdi))
-        no(schedule._bakim_vakti(cfg, simdi.replace(hour=12)))
+        no(schedule._bakim_vakti(cfg, simdi.replace(hour=2)))   # hedeften ONCE
         no(schedule._bakim_vakti({"schedule": {"maintenance": False}}, simdi))
-        r = schedule.maintenance(con, cfg, now=simdi)
-        ok(schedule._bugun_bakim_yapildi(datetime.datetime.now()))
-        _os.remove(r["backup"])
+        no(schedule._bugun_bakim_yapildi(simdi, con))           # once: yok
+        schedule.maintenance(con, cfg, now=simdi)
+        ok(schedule._bugun_bakim_yapildi(simdi, con))           # sonra: var
     test("bakim gunde bir kez kosar", t_maintenance_runs_once_a_day)
+
+    def t_maintenance_kacirilan_gun_kovalanir():
+        """Geceleri kapali bir makinede otomatik yedek HIC alinmiyordu.
+
+        Pencere once hedef + 90 dakika ile KATIYDI: bakim yalnizca
+        03:30-05:00 arasi makine aciksa kosuyordu. Dizustunu geceleri
+        kapatan biri icin o pencere hic acilmiyor ve dokuz aylik ambar tek
+        bir disk hatasina bagli kaliyordu.
+
+        «Gecmis is kovalanmaz» bir BILDIRIM kuralidir ve dogrudur —
+        hatirlaticinin degeri zamanindadir. Yedegin degeri VARLIGINDADIR:
+        gec alinan yedek, hic alinmayandan iyidir."""
+        con, _kok = _ambar()
+        cfg = {"schedule": {"maintenance": True, "maintenance_time": "03:30"}}
+        oglen = datetime.datetime.now().replace(hour=12, minute=0)
+        ok(schedule._bakim_vakti(cfg, oglen), "kacirilan gun kovalanmali")
+        aksam = oglen.replace(hour=23, minute=30)
+        ok(schedule._bakim_vakti(cfg, aksam), "gec de olsa alinmali")
+        # Ama gunde BIR kez: kovalamak ikinci bir yedek uretmez.
+        r = schedule.tick(con, cfg, now=oglen)
+        ok(r["maintenance"], "kacirilan yedek oglen alinmaliydi")
+        r2 = schedule.tick(con, cfg, now=aksam)
+        eq(r2["maintenance"], None, "ayni gun ikinci yedek alinmamali")
+    test("kacirilan bakim gunu kovalanir", t_maintenance_kacirilan_gun_kovalanir)
 
     def t_log_rotation():
         """Donus yoktu: db/daemon.log her baslatmada uzuyordu ve aylar sonra
@@ -444,15 +509,24 @@ def run_bakim():
         """Geri donus kopyasi ISLEMIN DISINDA alinir: iceride alinirsa
         SQLite'in yedekleme API'si kendi baglantisinin actigi yazma kilidini
         beklerken sonsuza kadar kilitlenir."""
+        import tempfile as _tf
         a = db.connect(":memory:")
         sync_engine.ingest(a, {"module": "spi", "date": gun(0),
                                "metrics": {"sleep_hours": metric(7.0)}},
                            now=gun(0) + "T09:00:00")
         yedek = db.export_all(a)
-        b = db.connect(":memory:")
+        d = _tf.mkdtemp(prefix="hkm-kilit-")
+        b = db.connect(_os.path.join(d, "hkm.db"))
         db.import_all(b, yedek)
         r = db.import_all(b, yedek, replace=True)       # kilitlenirse test asilir
         ok(r["ok"])
         ok(r["rollback_copy"])
-        _os.remove(r["rollback_copy"])
+
+        # Bellekteki ambarda kopyanin evi yoktur: geri yukleme yine de
+        # DURMAZ, yalnizca kopya alinmadigini soyler.
+        c = db.connect(":memory:")
+        db.import_all(c, yedek)
+        r2 = db.import_all(c, yedek, replace=True)
+        ok(r2["ok"], "kopya alinamasa da geri yukleme olmali")
+        no(r2["rollback_copy"], "alinmayan kopya alinmis gibi gorunmemeli")
     test("ustune yazma kilitlenmez", t_restore_does_not_deadlock)

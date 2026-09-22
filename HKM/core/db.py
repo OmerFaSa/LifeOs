@@ -569,7 +569,30 @@ def set_intent_state(con, intent_id, state, at=None):
 KOPYA_SAKLA = 10
 
 
-def snapshot_file(con, etiket="oncesi", sakla=KOPYA_SAKLA):
+def kopya_kok(con):
+    """Bu BAGLANTININ dosyasi hangi klasorde — modul sabitine sorulmaz.
+
+    Yol once `DB_PATH`ten geliyordu ve bu sessizce yanlisti: daemon gercek
+    yolu `config.json`daki `db_path`ten alip tasir (`daemon.py`), yani
+    kullanici ambarini baska bir yere koyduysa kopyasi ambarinin yaninda
+    DEGIL `HKM/db/` icinde birikiyordu. Ayni hata test kosumunda da
+    yasandi: bellekteki bir veritabaninin kopyasi gercek `HKM/db/` icine
+    dusuyor ve `KOPYA_SAKLA=10` halkasi kullanicinin GERCEK geri donus
+    kopyasini disari itiyordu.
+
+    Baglanti kendi dosyasini bilir; dogruyu ondan sormak, ayri bir kayit
+    tutmaktan daha az yalan soyler. Bellekteki veritabaninda dosya yoktur
+    ve `None` doner."""
+    try:
+        for _sira, ad, dosya in con.execute("PRAGMA database_list"):
+            if ad == "main":
+                return os.path.dirname(os.path.abspath(dosya)) if dosya else None
+    except sqlite3.Error:
+        return None
+    return None
+
+
+def snapshot_file(con, etiket="oncesi", sakla=KOPYA_SAKLA, kok=None):
     """Geri yukleme ONCESI kopya — geri donusu olan bir islem.
 
     SQLite'in kendi yedekleme API'si kullanilir: dosyayi kopyalamak,
@@ -577,8 +600,18 @@ def snapshot_file(con, etiket="oncesi", sakla=KOPYA_SAKLA):
 
     ONEMLI: bu cagri, cagiran baglantinin ACIK BIR YAZMA ISLEMI OLMADIGI
     anda yapilmalidir. Yedekleme API'si kaynagin kilidini bekler; kendi
-    actigi kilidi bekleyen bir cagri sonsuza kadar kilitlenir."""
-    kok = os.path.dirname(DB_PATH)
+    actigi kilidi bekleyen bir cagri sonsuza kadar kilitlenir.
+
+    Kopya, baglantinin KENDI dosyasinin yanina yazilir (bkz. `kopya_kok`).
+    Bellekteki bir veritabaninin dogal bir evi yoktur: sessizce baska
+    birinin halkasina yazmaktansa HATA DONER. Iki cagiran da bu hatayi
+    zaten yakaliyor (`import_all`, `schedule.maintenance`)."""
+    kok = kok or kopya_kok(con)
+    if not kok:
+        raise ValueError(
+            "kopya nereye yazilacagi bilinmiyor: baglanti bellekte "
+            "(dosyasi yok). Acik bir hedef klasor ver ya da dosyaya bagli "
+            "bir baglanti kullan.")
     os.makedirs(kok, exist_ok=True)
     damga = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     # Sira, dosya adinin sonuna gomulu nanosaniyeden gelir — dosya
@@ -708,7 +741,11 @@ def import_all(con, veri, replace=False):
     if replace:
         try:
             kopya = snapshot_file(con)
-        except (sqlite3.Error, OSError):
+        except (sqlite3.Error, OSError, ValueError):
+            # ValueError: baglanti bellekte, kopyanin dogal bir evi yok
+            # (bkz. `kopya_kok`). Geri yukleme bu yuzden DURMAZ — kopya
+            # bir nezakettir, sarti degil; ama alinmadigi `rollback_copy`
+            # bos donerek SOYLENIR.
             kopya = None
     try:
         # Geri yukleme YA TAMAMEN OLUR YA HIC: yarim yazilmis bir ambar,
