@@ -40,7 +40,15 @@ SP.Quick = (function(){
       aliases:['kilo', 'agirlik', 'weight'] },
     water:{ id:'water', label:'Su', unit:'ml', min:0, max:10000,
       aliases:['su', 'water'] },
-    mood:{ id:'mood', label:'Enerji', unit:'/5', min:1, max:5,
+    /* ÖLÜ ALAN OLARAK BAŞLAMIŞTI: id `mood` idi, ama gunun tek gunluk
+       "his" alani `state.js`'te `soreness` adiyla duruyor (Today ekrani
+       "Bugun nasil hissediyorsun?" → SORENESS 1-5, 5 zinde) ve yalniz
+       `move.js readiness()` BUNU okuyor. Ctrl+K'ya "enerji 4" yazan
+       kullanici bir "kaydedildi" bildirimi goruyor, sayi `vitals.mood`a
+       yaziliyor — hicbir ekranda gorunmuyor, toparlanmaya hic girmiyor.
+       Ayni olcek (1-5, buyuk = iyi) oldugu icin dogru duzeltme yeni bir
+       alan acmak degil, VAR OLAN alana baglamaktı. */
+    soreness:{ id:'soreness', label:'Enerji', unit:'/5', min:1, max:5,
       aliases:['enerji', 'mod', 'ruh hali'] },
   };
 

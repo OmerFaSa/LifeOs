@@ -518,6 +518,25 @@
       });
     });
 
+    it('"enerji" ÖLÜ ALANA değil var olan soreness alanına yazar', async () => {
+      /* Once `mood` diye AYRI bir alana yaziliyordu: `vitals.mood`
+         hicbir ekranda gorunmuyor, `move.js readiness()` onu hic
+         okumuyordu. Ayni 1-5 olcegi (5 = zinde) Today ekraninin
+         "Bugun nasil hissediyorsun?" sorusuyla ZATEN vardi
+         (`vitals.soreness`) — Ctrl+K'nin "enerji"/"mod"/"ruh hali"
+         takma adlari o alana baglanmali. */
+      resetState();
+      await withTodayAsync('2026-03-01', async () => {
+        const r = SP.Proposals.fromText('enerji 4');
+        expect(r.oneriler).toHaveLength(1);
+        expect(r.oneriler[0].params.field).toBe('soreness');
+        const p = await SP.Proposals.propose(r.oneriler[0]);
+        await SP.Proposals.approve(p.id);
+        expect(SP.Model.vitalsOf('2026-03-01').soreness).toBe(4);
+        expect(SP.Model.vitalsOf('2026-03-01').mood).toBeUndefined();
+      });
+    });
+
     it('bekleyen öneri onaylanana kadar bekleyende kalır', async () => {
       resetState();
       await withTodayAsync('2026-03-01', async () => {
