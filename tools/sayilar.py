@@ -177,6 +177,8 @@ def main():
         metin += ('\n| Depo denetimi | Sonuç |\n|---|---|\n'
                   + ''.join('| `%s` | %s |\n' % (a, r[1].replace('|', '¦'))
                             for a, r in kok.items()))
+    kalan = [(s, a) for s in sonuc for a in sonuc[s] if sonuc[s][a][0] != 'geçti']
+    kalan += [('kök', a) for a, r in kok.items() if r[0] != 'gecti']
     if '--yaz' in sys.argv:
         # OLCULMEYEN SATIR SILINMEZ. Hizli kosum yalnizca birim testlerini
         # olcer; onunla yazmak, olculmemis satirlari belgeden KALDIRIRDI ve
@@ -187,13 +189,18 @@ def main():
                   'birim testlerini olcer; olculmeyen satirlari silmek, '
                   'belgeyi daha az sey olcuyormus gibi gosterirdi.')
             return 2
+        # KALAN VARKEN YAZILMAZ. Kalan bir aracin son satiri bir hata
+        # mesajidir; onu tabloya yazmak, belgeye olculmus bir sayi gibi
+        # girer ve bir onceki DOGRU olcumu siler.
+        if kalan:
+            print('yazilmadi: ' + ', '.join(s + '/' + a for s, a in kalan)
+                  + ' gecmedi; belgeler eski (dogru) olcumu korur.')
+            return 1
         for d in ['README.md', 'NOTLAR.md']:
             yaz(d, metin)
     else:
         print()
         print(metin)
-    kalan = [(s, a) for s in sonuc for a in sonuc[s] if sonuc[s][a][0] != 'geçti']
-    kalan += [('kök', a) for a, r in kok.items() if r[0] != 'gecti']
     if kalan:
         print('KALAN: ' + ', '.join(s + '/' + a for s, a in kalan))
         return 1

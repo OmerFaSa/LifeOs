@@ -135,8 +135,9 @@ Sunucu, systemd, tünel ve kanal kurulumu ayrı bir belgede:
 cd HKM
 cp config.example.json config.json    # local_token'ı uzun rastgele bir dizeyle değiştir
 python3 daemon.py                     # http://127.0.0.1:4200 (yüz de burada)
-python3 -m tests.run                  # 74 test: VP, sync, şema, öncelik,
-                                      # ikiz, Yönetici, daemon ve yüz
+python3 -m tests.run                  # VP, sync, şema, öncelik, ikiz,
+                                      # Yönetici, daemon, yüz, Hayat Mottosu
+                                      # (sayı README'de; sayilar.py yazar)
 node ../tools/entegre.js              # üç arayüz + HKM: uçtan uca
 ```
 
