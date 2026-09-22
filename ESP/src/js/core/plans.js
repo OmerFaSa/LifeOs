@@ -22,9 +22,11 @@
       ama dil ünitesi ekleyemez. `allowed()` bunu denetler ve bir ihlal bir
       hata değil bir IMKANSIZLIKTIR: kapsam dışı teklif hiç üretilmez.
 
-   2. HİÇBİR TEKLİF KENDİLİĞİNDEN UYGULANMAZ. Onaysız teklif bir öneridir;
-      reddedilen teklif kaydı SİLİNMEZ (aynı öneriyi yarın tekrar üretmemek
-      için hatırlanır).
+   2. AJANIN TEKLİFİ KENDİLİĞİNDEN UYGULANMAZ. Onaysız teklif bir
+      öneridir; reddedilen teklif kaydı SİLİNMEZ (aynı öneriyi yarın tekrar
+      üretmemek için hatırlanır). KULLANICININ İSTEĞİ ise (talep) seviyesi
+      KÜÇÜKSE hemen uygulanır — AGENTS.md §1.9; orta ve büyük yine onay
+      bekler.
 
    3. TEKLİF GERİ ALINABİLİR OLMALIDIR. Uygulanan her teklif ne yaptığını
       (`applied`) kaydeder; geri alınamayacak bir iş teklif edilmez. Bu
@@ -41,20 +43,24 @@ ESP.Plans = (function(){
      demektir. `scope:'coach'` yalnızca koç ve Patron içindir: merdiven ve
      tekrar bütün disiplinlerin ortak işi. */
   const KINDS = [
-    { id:'reminder', label:'Hatırlatıcı kur', scope:'own',
+    { id:'reminder', level:'kucuk', label:'Hatırlatıcı kur', scope:'own',
       note:'Bir tarihe bağlı hatırlatma. Kaçırılırsa ceza üretmez.' },
-    { id:'goal', label:'Zamana bağlı hedef', scope:'own',
+    { id:'goal', level:'kucuk', label:'Zamana bağlı hedef', scope:'own',
       note:'Takvimde tarihi olan bir hedef. Öncelik sırasında ikinci sıraya girer.' },
-    { id:'unit', label:'Ünite ekle', scope:'own',
+    { id:'unit', level:'orta', label:'Ünite ekle', scope:'own',
       note:'Bir öğrenme ünitesini desteye ekler. Kartlar «tohum» etiketiyle gelir.' },
-    { id:'drill', label:'Egzersiz işle', scope:'own',
+    { id:'drill', level:'kucuk', label:'Egzersiz işle', scope:'own',
       note:'Bugünün reçetesindeki bir egzersizi gün kaydına yazar.' },
-    { id:'weekplan', label:'Haftalık plan', scope:'coach',
+    { id:'weekplan', level:'orta', label:'Haftalık plan', scope:'coach',
       note:'Haftanın kalan günlerine disiplin dağıtır. Takvim değil sıradır.' },
-    { id:'focus', label:'Odağı değiştir', scope:'coach',
+    { id:'focus', level:'kucuk', label:'Odağı değiştir', scope:'coach',
       note:'Eşit skorlu iki iş çıkarsa hangisinin öne geçeceğini değiştirir.' },
-    { id:'base', label:'Günlük tabanı değiştir', scope:'coach',
+    { id:'base', level:'orta', label:'Günlük tabanı değiştir', scope:'coach',
       note:'Reçetenin sığdığı dakika. Hedef değil ölçüt.' },
+    /* Bölüm açma–kapama (core/modules.js). Orta seviye: bir disiplinin
+       bütün ekranlarını, masasını ve denge hesabını etkiler. Veri silinmez. */
+    { id:'bolum', level:'orta', label:'Bölümü aç / kapat', scope:'coach',
+      note:'Disiplin gezinmeden ve denge hesabından çıkar ya da geri gelir; verisi silinmez.' },
   ];
 
   const KIND_BY_ID = KINDS.reduce(function(m, k){ m[k.id] = k; return m; }, {});
@@ -239,9 +245,11 @@ ESP.Plans = (function(){
   /* Bütün açık masaların teklifleri. */
   function all(todayISO){
     return ESP.Memo.of('plans.all:' + (todayISO || U.todayISO()), function(){
-      return ESP.Mod.activeAgents().reduce(function(acc, a){
+      /* Kullanicinin onay bekleyen istekleri en ustte: onlari kullanici
+         kendisi istedi, ajanin kendi bulgularindan once gelir. */
+      return istekler().concat(ESP.Mod.activeAgents().reduce(function(acc, a){
         return acc.concat(proposalsFor(a.id, todayISO));
-      }, []);
+      }, []));
     });
   }
 
@@ -255,16 +263,54 @@ ESP.Plans = (function(){
 
      Uygulamayı KURAL MOTORU yapar. Model hiçbir aşamada veriye dokunmaz;
      bu fonksiyona bir metin değil TİPLİ bir nesne gelir. */
+  /* Kullanıcı isteğinin ve bölüm/taban/odak tekliflerinin UYGULANMADAN
+     ÖNCE denetimi. Hata değil RED: nedeni söylenir, hiçbir şey yazılmaz. */
+  function dogrula(p){
+    if(!p || !KIND_BY_ID[p.kind]) return { ok:false, error:'Bilinmeyen teklif türü.' };
+    if(!allowed(p.agentId, p.kind)) return { ok:false, error:'Bu masa bu teklifi veremez.' };
+    const y = p.payload || {};
+    if(p.kind === 'bolum'){
+      const d = (ESP.DISCIPLINE_BY_ID || {})[y.disc];
+      if(!d) return { ok:false, error:'Bilinmeyen bölüm.' };
+      const acik = ESP.Mod.isOn(y.disc);
+      if(acik === !!y.on) return { ok:false, error:d.label + ' zaten ' + (acik ? 'açık.' : 'kapalı.') };
+      if(!y.on){
+        const kalan = ESP.Mod.activeIds().filter(id => id !== y.disc);
+        if(!kalan.length) return { ok:false, error:'En az bir bölüm açık kalmalı. Önce başka bir bölümü aç.' };
+      }
+    }
+    if(p.kind === 'base'){
+      const dk = Number(y.minutes);
+      if(!isFinite(dk) || dk < 10 || dk > 600) return { ok:false, error:'Günlük taban 10–600 dakika arasında olmalı.' };
+      if(S.profile && S.profile.dailyMinutes === Math.round(dk)) return { ok:false, error:'Günlük taban zaten ' + Math.round(dk) + ' dakika.' };
+    }
+    if(p.kind === 'focus'){
+      if(!(ESP.DISCIPLINE_BY_ID || {})[y.focus]) return { ok:false, error:'Bilinmeyen bölüm.' };
+      if(!ESP.Mod.isOn(y.focus)) return { ok:false, error:'Kapalı bir bölüm odak olamaz; önce aç.' };
+    }
+    return { ok:true };
+  }
+
   async function accept(prop){
     const p = typeof prop === 'string' ? (record(prop) || bul(prop)) : prop;
     if(!p) return { ok:false, error:'Teklif bulunamadı.' };
     if(!allowed(p.agentId, p.kind)){
       return { ok:false, error:'Bu masa bu teklifi veremez.' };
     }
+    if(p.kind === 'bolum' || p.kind === 'base' || p.kind === 'focus'){
+      const v = dogrula(p);
+      if(!v.ok) return v;
+    }
 
     let uygulanan = null;
 
-    if(p.kind === 'reminder'){
+    if(p.kind === 'bolum'){
+      const onceki = ESP.Mod.isOn(p.payload.disc);
+      const res = await ESP.Mod.set(p.payload.disc, !!p.payload.on);
+      if(!res.ok) return res;
+      uygulanan = { kind:'bolum', disc:p.payload.disc, on:!!p.payload.on, onceki };
+
+    }else if(p.kind === 'reminder'){
       const res = await ESP.Model.saveReminder(ESP.Model.newReminder({
         disc:p.disc, text:p.payload.text, due:p.payload.due,
         repeat:p.payload.repeat || 'none' }));
@@ -286,20 +332,25 @@ ESP.Plans = (function(){
     }else if(p.kind === 'drill'){
       const res = await ESP.Coach.logDrill(p.payload.drillId);
       if(!res.ok) return res;
-      uygulanan = { kind:'drill', sessionId:res.session.id };
+      uygulanan = { kind:'drill', sessionId:res.session.id,
+        date:res.session.date || U.todayISO() };
 
     }else if(p.kind === 'base'){
-      await ESP.Model.saveProfile({ dailyMinutes:p.payload.minutes });
-      uygulanan = { kind:'base', minutes:p.payload.minutes };
+      /* Geri alma icin ONCEKI deger saklanir. */
+      const onceki = S.profile ? S.profile.dailyMinutes : null;
+      await ESP.Model.saveProfile({ dailyMinutes:Math.round(Number(p.payload.minutes)) });
+      uygulanan = { kind:'base', minutes:Math.round(Number(p.payload.minutes)), onceki };
 
     }else if(p.kind === 'focus'){
+      const onceki = S.profile ? S.profile.focus : null;
       await ESP.Model.saveProfile({ focus:p.payload.focus });
-      uygulanan = { kind:'focus', focus:p.payload.focus };
+      uygulanan = { kind:'focus', focus:p.payload.focus, onceki:onceki == null ? null : onceki };
 
     }else if(p.kind === 'weekplan'){
-      const plan = weekPlan(p.at);
-      await savePlan(plan);
-      uygulanan = { kind:'weekplan', days:plan.days.length };
+      const oncekiPlan = plan() ? JSON.parse(JSON.stringify(plan())) : null;
+      const yeni = weekPlan(p.at);
+      await savePlan(yeni);
+      uygulanan = { kind:'weekplan', days:yeni.days.length, oncekiPlan };
 
     }else{
       return { ok:false, error:'Bilinmeyen teklif türü.' };
@@ -309,6 +360,92 @@ ESP.Plans = (function(){
       decidedAt:new Date().toISOString(), applied:uygulanan }));
     if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
     return { ok:true, applied:uygulanan };
+  }
+
+  /* ------------------------------------------------------------ geri alma
+
+     Uygulanan her iş `applied` içinde NE YAPTIĞINI ve (değiştirdiyse)
+     ÖNCEKİ değeri taşır; geri alma o kayıttan yapılır. Ünite geri
+     alınamaz: eklenen kartlar o sırada tekrar edilmiş olabilir — bu
+     yüzden ünite ORTA seviyededir ve hiçbir koşulda sormadan uygulanmaz. */
+  async function geriAl(id){
+    const p = record(id);
+    if(!p || p.state !== 'accepted' || !p.applied) return { ok:false, error:'Geri alınacak bir şey yok.' };
+    const a = p.applied;
+    if(a.kind === 'reminder') await ESP.Model.deleteReminder(a.id);
+    else if(a.kind === 'goal') await ESP.Model.deleteGoal(a.id);
+    else if(a.kind === 'drill') await ESP.Model.deleteSession(a.date || U.todayISO(), a.sessionId);
+    else if(a.kind === 'base') await ESP.Model.saveProfile({ dailyMinutes:a.onceki });
+    else if(a.kind === 'focus') await ESP.Model.saveProfile({ focus:a.onceki });
+    else if(a.kind === 'weekplan'){ if(a.oncekiPlan) await savePlan(a.oncekiPlan); else await clearPlan(); }
+    else if(a.kind === 'bolum'){
+      const res = await ESP.Mod.set(a.disc, !!a.onceki);
+      if(!res.ok) return res;
+    }
+    else return { ok:false, error:'Bu iş geri alınamaz; elle düzeltmen gerekir.' };
+    await write(Object.assign({}, p, { state:'undone', undoneAt:new Date().toISOString() }));
+    if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+    return { ok:true, kind:a.kind };
+  }
+
+  /* ------------------------------------------------- kullanıcının isteği
+
+     «Diksiyon çalışmak istemiyorum», «günlük taban 45 dakika» — ajan
+     değil KULLANICI istiyor. İstek Patron'un masasından geçer (yetki
+     onundur), aynı doğrulamadan geçer ve seviyesi küçükse hemen
+     uygulanır (AGENTS.md §1.9). Orta ise «proposed» olarak durur ve
+     teklif listesinde onay bekler. */
+  const MODLAR = ['istek', 'hepsi', 'hicbiri'];
+
+  function otomatikMi(row, mod){
+    if(!row || row.level !== 'kucuk') return false;
+    const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
+    if(m === 'hicbiri') return false;
+    if(m === 'hepsi') return true;
+    return row.source === 'istek';
+  }
+
+  function ayar(){
+    try{
+      const st = ESP.Office && typeof ESP.Office.settings === 'function' ? ESP.Office.settings() : null;
+      return (st && st.otomatikUygula) || 'istek';
+    }catch(e){ return 'istek'; }
+  }
+
+  function baslik(kind, y){
+    const d = (ESP.DISCIPLINE_BY_ID || {})[y.disc || y.focus] || {};
+    if(kind === 'bolum') return (d.label || 'Bölüm') + ' bölümü ' + (y.on ? 'açılsın' : 'kapansın');
+    if(kind === 'base') return 'Günlük taban ' + Math.round(Number(y.minutes)) + ' dakika olsun';
+    if(kind === 'focus') return 'Odak ' + (d.label || y.focus) + ' olsun';
+    return (KIND_BY_ID[kind] || {}).label || kind;
+  }
+
+  async function talep(req){
+    const r = req || {};
+    const kind = KIND_BY_ID[r.kind];
+    const y = r.payload || {};
+    const p = {
+      id:'i:' + U.uid('t'), agentId:r.agentId || 'patron', kind:r.kind,
+      disc:y.disc || null, title:baslik(r.kind, y),
+      why:r.metin ? 'Senin isteğin: «' + String(r.metin).slice(0, 120) + '»' : 'Senin isteğin.',
+      payload:y, at:U.todayISO(), source:'istek', level:kind ? kind.level : 'orta',
+    };
+    const v = dogrula(p);
+    if(!v.ok) return { row:null, otomatik:false, why:v.error };
+    if(otomatikMi(p, ayar())){
+      const a = await accept(p);
+      if(!a.ok) return { row:null, otomatik:false, why:a.error };
+      return { row:record(p.id), otomatik:true, why:null };
+    }
+    await write(Object.assign({}, p, { state:'proposed' }));
+    if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+    return { row:record(p.id), otomatik:false, why:null };
+  }
+
+  /* Onay bekleyen kullanıcı istekleri — teklif listesinde görünür. */
+  function istekler(){
+    return (S.proposals || []).filter(function(p){
+      return p.source === 'istek' && p.state === 'proposed'; });
   }
 
   async function decline(prop){
@@ -385,5 +522,6 @@ ESP.Plans = (function(){
 
   return { KINDS, KIND_BY_ID, allowed, discOf, stillApplied,
     proposalsFor, all, open:open_, record, accept, decline,
+    dogrula, geriAl, talep, istekler, otomatikMi, ayar, MODLAR,
     weekPlan, savePlan, plan, clearPlan, today };
 })();

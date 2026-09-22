@@ -34,6 +34,7 @@ ESP.Screens.team = (function(){
     return html`
       <div class="${cls('msg', m.role === 'user' ? 'msg--me' : 'msg--agent')}">
         <p>${m.text}</p>
+        ${ESP.Parts.onayDugmeleri(m)}
         <div class="msg__foot">
           ${when(kaynak, () => K.Badge({ label:kaynak.label, tone:kaynak.tone, icon:false }))}
           ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
@@ -149,9 +150,11 @@ ESP.Screens.team = (function(){
       if(!soru) return;
       if(el) el.value = '';
       const a = agent();
-      await ESP.UI.withBusy(async () => {
+      /* withBusy(etiket, ipucu, fn) — once ters sirayla cagriliyordu ve
+         «Gonder» hicbir mesaji iletmiyordu. */
+      await ESP.UI.withBusy('Yanıt bekleniyor', null, async () => {
         await ESP.Office.send(a.id, soru);
-      }, 'Yanıt bekleniyor');
+      });
       ESP.App.render();
     },
 

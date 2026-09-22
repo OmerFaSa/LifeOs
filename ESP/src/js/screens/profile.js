@@ -74,7 +74,16 @@ ESP.Screens.profile = (function(){
                 + (ESP.Mod.isOn(d.id) ? '' : ' · KAPALI'),
               act:'toggle-mod', data:{ 'data-id':d.id } }))}</div>
             <p class="small muted mt-10">En az bir bölüm açık kalmak zorunda:
-              hepsi kapalı bir ESP, açılış ekranından ibaret bir kabuktur.</p>`,
+              hepsi kapalı bir ESP, açılış ekranından ibaret bir kabuktur.</p>
+            <p class="small muted mt-8">Patron’a da söyleyebilirsin: «diksiyon çalışmak
+              istemiyorum», «gitarı tekrar aç». Önce ne olacağını söyler, sonra onaylarsın.</p>
+            <div class="mt-10">${K.Field({ label:'Küçük istekler sormadan uygulansın mı?',
+              hint:'Küçük: hatırlatıcı, hedef, odak. Bölüm ve günlük taban her zaman önce sorulur.',
+              input:K.Select({ id:'pf-otomatik', value:ESP.Office.settings().otomatikUygula || 'istek',
+                change:'pick-otomatik', options:[
+                  { value:'istek', label:'Yalnız benim istediklerim (önerilir)' },
+                  { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
+                ] }) })}</div>`,
         }),
 
         /* GÖRÜNÜM — üç hata birden buradaydı ve üçü de sessizdi:
@@ -373,6 +382,13 @@ ESP.Screens.profile = (function(){
   };
 
   const change = {
+    async 'pick-otomatik'(el){
+      const v = el.value === 'hicbiri' ? 'hicbiri' : 'istek';
+      await ESP.Office.saveSettings({ otomatikUygula:v });
+      ESP.UI.toast(v === 'hicbiri' ? 'Her istek önce sorulacak'
+        : 'Senin istediğin küçük işler sormadan uygulanacak');
+    },
+
     async 'hkm-url'(el){ await ESP.Beacon.save({ url:el.value.trim() }); ESP.App.render(); },
     async 'hkm-token'(el){ await ESP.Beacon.save({ token:el.value.trim() }); },
     async 'hkm-interval'(el){

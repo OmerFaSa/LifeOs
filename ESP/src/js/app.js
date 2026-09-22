@@ -744,8 +744,7 @@ ESP.App = (function(){
       const soru = alan ? alan.value.trim() : '';
       if(!soru) return;
       if(alan) alan.value = '';
-      await UI.withBusy(async () => { await ESP.Desk.ask(disc, soru); },
-        'Yanıt bekleniyor');
+      await UI.withBusy('Yanıt bekleniyor', null, async () => { await ESP.Desk.ask(disc, soru); });
       render();
     },
 
@@ -914,9 +913,15 @@ ESP.App = (function(){
 
     /* --- teklif ve plan: tezgâhta, ofiste ve Bugün'de ortak --- */
     async 'prop-accept'(el){
-      const res = await ESP.Plans.accept(el.dataset.id);
+      const id = el.dataset.id;
+      const res = await ESP.Plans.accept(id);
       if(!res.ok){ UI.toast(res.error); return; }
-      UI.toast('Onaylandı — kural motoru uyguladı');
+      /* Uygulanan her is geri alinabilir (core/plans.js geriAl). */
+      UI.toast('Onaylandı — kural motoru uyguladı', { undo:async () => {
+        const g = await ESP.Plans.geriAl(id);
+        UI.toast(g.ok ? 'Geri alındı' : g.error);
+        render();
+      } });
       render();
     },
 

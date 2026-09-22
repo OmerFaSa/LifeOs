@@ -476,9 +476,9 @@ ESP.Screens.analytics = (function(){
 
     async 'gen-briefing'(){
       delete S.officeBriefings[U.todayISO()];
-      await ESP.UI.withBusy(async () => {
+      await ESP.UI.withBusy('Brifing üretiliyor', null, async () => {
         await ESP.Office.dailyBriefing();
-      }, 'Brifing üretiliyor');
+      });
       ESP.App.render();
     },
 

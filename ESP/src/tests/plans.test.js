@@ -234,4 +234,171 @@
       });
     });
   });
+
+  /* ==================== seviye, geri alma, kullanıcının isteği ====================
+
+     AGENTS.md §1.9. Seviyeyi tür belirler. Kullanıcı istediyse küçük iş
+     hemen uygulanır; ajanın kendi teklifi her zaman onay bekler. Her
+     uygulanan iş GERİ ALINABİLİR — geri alınamayan küçük sayılamaz. */
+
+  describe('teklif · seviye', () => {
+    it('her türün geçerli bir seviyesi vardır', () => {
+      P().KINDS.forEach(k => {
+        expect(['kucuk', 'orta', 'buyuk'].indexOf(k.level) >= 0).toBeTruthy();
+      });
+    });
+
+    it('bölüm açıp kapamak orta seviyedir ve yalnız koç/Patron işidir', () => {
+      resetState();
+      expect(P().KIND_BY_ID.bolum.level).toBe('orta');
+      expect(P().allowed('patron', 'bolum')).toBeTruthy();
+      expect(P().allowed('maestro', 'bolum')).toBeFalsy();
+    });
+  });
+
+  describe('teklif · geri alma', () => {
+    it('hedef geri alınınca silinir, teklif yeniden üretilebilir', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        const t = P().proposalsFor('montaigne').filter(p => p.kind === 'goal')[0];
+        await P().accept(t);
+        expect(ESP.S.goals.length).toBe(1);
+        const g = await P().geriAl(t.id);
+        expect(g.ok).toBeTruthy();
+        expect(ESP.S.goals.length).toBe(0);
+        expect(P().record(t.id).state).toBe('undone');
+      });
+    });
+
+    it('hatırlatıcı geri alınınca silinir', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        const t = P().proposalsFor('polyglot').filter(p => p.kind === 'reminder')[0];
+        await P().accept(t);
+        await P().geriAl(t.id);
+        expect(ESP.S.reminders.length).toBe(0);
+      });
+    });
+
+    it('günlük taban geri alınınca ESKİ değere döner', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        ESP.S.profile.dailyMinutes = 120;
+        ['2026-09-12', '2026-09-11', '2026-09-10', '2026-09-09']
+          .forEach(d => pushSession(d, 'lang', 20));
+        const t = P().proposalsFor('mnemosyne').filter(p => p.kind === 'base')[0];
+        await P().accept(t);
+        expect(ESP.S.profile.dailyMinutes < 120).toBeTruthy();
+        await P().geriAl(t.id);
+        expect(ESP.S.profile.dailyMinutes).toBe(120);
+      });
+    });
+
+    it('uygulanmamış teklif geri alınamaz', async () => {
+      resetState();
+      const r = await P().geriAl('yok');
+      expect(r.ok).toBeFalsy();
+    });
+  });
+
+  describe('teklif · kullanıcının isteği', () => {
+    it('bölüm kapatma istense de onay bekler; onaylanınca kapanır, geri alınır', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        const t = await P().talep({ kind:'bolum', payload:{ disc:'diction', on:false } });
+        expect(t.otomatik).toBe(false);
+        expect(ESP.Mod.isOn('diction')).toBe(true);
+        expect(P().istekler().map(x => x.id)).toContain(t.row.id);
+        const a = await P().accept(t.row.id);
+        expect(a.ok).toBeTruthy();
+        expect(ESP.Mod.isOn('diction')).toBe(false);
+        await P().geriAl(t.row.id);
+        expect(ESP.Mod.isOn('diction')).toBe(true);
+      });
+    });
+
+    it('son açık bölüm kapatılamaz: istek düşer, nedeni söylenir', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        await ESP.Mod.setAll(['lang']);
+        const t = await P().talep({ kind:'bolum', payload:{ disc:'lang', on:false } });
+        expect(t.row).toBe(null);
+        expect(t.why.length > 5).toBeTruthy();
+      });
+    });
+
+    it('küçük istek hemen uygulanır', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        const t = await P().talep({ kind:'focus', payload:{ focus:'music' } });
+        expect(t.otomatik).toBe(true);
+        expect(ESP.S.profile.focus).toBe('music');
+        await P().geriAl(t.row.id);
+        expect(ESP.S.profile.focus == null || ESP.S.profile.focus !== 'music').toBeTruthy();
+      });
+    });
+
+    it('«hiçbiri» ayarında küçük istek de bekler', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        await ESP.Office.saveSettings({ otomatikUygula:'hicbiri' });
+        const t = await P().talep({ kind:'focus', payload:{ focus:'music' } });
+        expect(t.otomatik).toBe(false);
+        expect(ESP.S.profile.focus !== 'music').toBeTruthy();
+      });
+    });
+  });
+
+  describe('komut · konuşarak', () => {
+    const K = () => ESP.Komut;
+
+    it('«diksiyon çalışmak istemiyorum» bölümü kapatma isteğidir', () => {
+      const r = K().anla('diksiyon çalışmak istemiyorum');
+      expect(r.oneriler).toHaveLength(1);
+      expect(r.oneriler[0]).toEqual({ kind:'bolum', payload:{ disc:'diction', on:false },
+        metin:'diksiyon çalışmak istemiyorum' });
+    });
+
+    it('açma, gitar ve dil takma adları tanınır', () => {
+      expect(K().anla('gitarı tekrar açmak istiyorum').oneriler[0].payload)
+        .toEqual({ disc:'music', on:true });
+      expect(K().anla('ingilizce bölümünü kapat').oneriler[0].payload)
+        .toEqual({ disc:'lang', on:false });
+      expect(K().anla('tarih bölümünü aç').oneriler[0].payload)
+        .toEqual({ disc:'history', on:true });
+    });
+
+    it('günlük taban cümlesi tabana dönüşür', () => {
+      expect(K().anla('günlük taban 45 dakika olsun').oneriler[0])
+        .toEqual({ kind:'base', payload:{ minutes:45 }, metin:'günlük taban 45 dakika olsun' });
+      expect(K().anla('günde 1 saat çalışacağım').oneriler[0].payload).toEqual({ minutes:60 });
+    });
+
+    it('hangi bölüm olduğu belli değilse sorulur', () => {
+      const r = K().anla('bu bölümü kapat');
+      expect(r.oneriler).toHaveLength(0);
+      expect(r.sorular.length).toBe(1);
+    });
+
+    it('sıradan sohbet komut değildir', () => {
+      ['bugün ne çalışayım', 'diksiyonda neden zorlanıyorum', 'merhaba']
+        .forEach(m => expect(K().anla(m).komut).toBe(false));
+    });
+
+    it('sohbet: istek → onay sorusu → «evet» → «geri al», model çağrılmadan', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        const r1 = await ESP.Office.send('patron', 'diksiyon çalışmak istemiyorum');
+        expect(r1.source).toBe('rules');
+        expect(r1.text).toContain('Anladığım şu');
+        expect(ESP.Mod.isOn('diction')).toBe(true);
+        const r2 = await ESP.Office.send('patron', 'evet');
+        expect(r2.source).toBe('rules');
+        expect(ESP.Mod.isOn('diction')).toBe(false);
+        const r3 = await ESP.Office.send('patron', 'geri al');
+        expect(r3.text).toContain('Geri aldım');
+        expect(ESP.Mod.isOn('diction')).toBe(true);
+      });
+    });
+  });
 })();

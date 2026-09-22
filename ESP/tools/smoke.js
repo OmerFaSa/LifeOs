@@ -294,7 +294,37 @@ async function walkFlows(page, base, errors){
     JSON.stringify(ESP.Office.patronBrief()).indexOf('Duman') >= 0);
   if(adSizdi) errors.push('mahremiyet: profil adı brifinge sızdı');
 
-  console.log('  akışlar → oturum, kart, SRS, planlayıcı, ofis ve brifing denetimi geçti');
+  /* 8 — SOHBETIN KENDI DUGMESI mesaji iletmeli. `withBusy(etiket, ipucu,
+     fn)` uc yerde `withBusy(fn, etiket)` diye cagriliyordu: «Gönder»,
+     masa sorusu ve «Brifing üret» hicbir sey yapmadan «fn is not a
+     function» ile dusuyordu. Cekirdek testleri geciyordu cunku dugmeye
+     kimse basmiyordu; bu akis basar. */
+  await page.evaluate(() => { ESP.S.ui.officeAgent = 'patron'; ESP.App.go('team'); });
+  await wait(400);
+  await page.fill('#chat-input', 'diksiyon çalışmak istemiyorum');
+  await page.click('[data-act="send-chat"]');
+  await wait(600);
+  const sohbet = await page.evaluate(() => {
+    const l = ESP.S.officeChats.patron || [];
+    return { n:l.length, son:(l[l.length - 1] || {}).text || '',
+      dugme:!!document.querySelector('.msg [data-act="prop-accept"]') };
+  });
+  if(sohbet.n < 2) errors.push('sohbet: «Gönder» mesajı iletmedi');
+  else if(sohbet.son.indexOf('Anladığım şu') < 0) errors.push('sohbet: bölüm isteği anlaşılmadı — ' + sohbet.son.slice(0, 60));
+  else if(!sohbet.dugme) errors.push('sohbet: bekleyen isteğin onay düğmesi yok');
+  if(sohbet.dugme){
+    await page.click('.msg [data-act="prop-accept"]');
+    await wait(400);
+    const kapali = await page.evaluate(() => !ESP.Mod.isOn('diction'));
+    if(!kapali) errors.push('sohbet: onaylanan bölüm kapanmadı');
+    const geri = await page.evaluate(async () => {
+      const son = ESP.S.proposals.filter(p => p.source === 'istek' && p.state === 'accepted')[0];
+      return son ? (await ESP.Plans.geriAl(son.id)).ok && ESP.Mod.isOn('diction') : false;
+    });
+    if(!geri) errors.push('sohbet: onaylanan bölüm geri alınamadı');
+  }
+
+  console.log('  akışlar → oturum, kart, SRS, planlayıcı, ofis, brifing ve sohbet (istek → onay → geri al) denetimi geçti');
 }
 
 

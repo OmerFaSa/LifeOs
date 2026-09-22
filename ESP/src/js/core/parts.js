@@ -226,6 +226,7 @@ ESP.Parts = (function(){
             ? map(mesajlar, m => html`
                 <div class="${cls('msg', m.role === 'user' ? 'msg--me' : 'msg--agent')}">
                   <p>${m.text}</p>
+                  ${onayDugmeleri(m)}
                   ${when(m.role !== 'user', () => html`<div class="msg__foot">
                     ${K.Badge({ label:m.source === 'model' ? 'model' : 'kural motoru',
                       tone:m.source === 'model' ? 'info' : 'muted', icon:false })}
@@ -572,6 +573,20 @@ ESP.Parts = (function(){
      kullanıcının verisine doğrudan yazması, halüsinasyon riskini kalıcı
      hâle getirirdi — yanlış bir çıkarım bir cümle olarak kalmaz, bir
      hatırlatıcıya ya da bir hedefe dönüşürdü. */
+  const SEVIYE_ADI = { kucuk:'küçük değişiklik', orta:'orta değişiklik', buyuk:'büyük değişiklik' };
+
+  /* Sohbet mesajinin biraktigi istek hala bekliyorsa onay dugmeleri.
+     Onaylanmis ya da reddedilmisse gorunmez. */
+  function onayDugmeleri(m){
+    const bek = (ESP.Plans.istekler ? ESP.Plans.istekler() : []).map(p => p.id);
+    const ids = ((m && m.oneriIds) || []).filter(id => bek.indexOf(id) >= 0);
+    if(!ids.length) return '';
+    return html`<div class="row gap-8 mt-8" style="flex-wrap:wrap">${map(ids, id => html`
+      ${K.Button({ label:'Onayla', icon:'check', tone:'primary', size:'sm', act:'prop-accept',
+        data:{ 'data-id':id } })}
+      ${K.Button({ label:'Vazgeç', size:'sm', act:'prop-decline', data:{ 'data-id':id } })}`)}</div>`;
+  }
+
   function proposalList(list, bos){
     if(!list.length) return K.Empty({ text:bos || 'Bekleyen teklif yok.' });
     return html`<ul class="props">${map(list, p => {
@@ -582,7 +597,8 @@ ESP.Parts = (function(){
         <span class="prop__body">
           <b>${p.title}</b>
           <span class="prop__why">${p.why}</span>
-          <span class="tiny dim">${a.short || a.name || p.agentId} · ${k.note || ''}</span>
+          <span class="tiny dim">${p.source === 'istek' ? 'senin isteğin' : (a.short || a.name || p.agentId)}
+            · ${SEVIYE_ADI[k.level] || ''} · ${k.note || ''}</span>
         </span>
         ${K.Button({ label:'Onayla', tone:'primary', size:'sm', act:'prop-accept',
           data:{ 'data-id':p.id } })}
@@ -714,6 +730,6 @@ ESP.Parts = (function(){
 
   return { cert, measure, avatar, discChip, radar, empty, desk, deskRx,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, deskAudit,
-    units, practice, proposalList, weekPlan, rx:rxList, topics };
+    units, practice, proposalList, onayDugmeleri, weekPlan, rx:rxList, topics };
 
 })();

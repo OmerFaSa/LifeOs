@@ -32,6 +32,9 @@ ESP.Office = (function(){
       perAgent:{},            // agentId -> { provider, model }
       autoBriefing:true,
       temperature:0.4,
+      /* Kucuk istek ne zaman sormadan uygulanir (AGENTS.md §1.9):
+         'istek' yalniz kullanicinin istegi (varsayilan), 'hepsi', 'hicbiri'. */
+      otomatikUygula:'istek',
     };
   }
 
@@ -613,6 +616,23 @@ ESP.Office = (function(){
      gecmise eklenip ask() sonra cagrilirsa soru sohbet gecmisinde iki kez
      gorunur ve model kendi kendine cevap vermis gibi olur. */
   async function send(agentId, question){
+    /* Istek mi? («diksiyon calismak istemiyorum», «evet», «geri al»)
+       Oyleyse model HIC cagrilmaz: teklif kural motorundan gecer ve
+       cevabi kural motoru yazar — core/komut.js. Sesli sohbet de bu
+       kapidan gectigi icin sesle de calisir. */
+    if(ESP.Komut){
+      let k = null;
+      try{ k = await ESP.Komut.sohbet(agentId, question); }catch(e){ k = null; }
+      if(k){
+        const at = new Date().toISOString();
+        S.officeChats[agentId] = (S.officeChats[agentId] || []).concat([
+          { role:'user', text:question, at },
+          { role:'agent', text:k.text, source:'rules', at, oneriIds:k.oneriIds || [] },
+        ]).slice(-40);
+        await ESP.Store.set('chats/' + agentId, { agentId, messages:S.officeChats[agentId] });
+        return k;
+      }
+    }
     const onceki = (S.officeChats[agentId] || []).slice();
     const res = await ask(agentId, question, { history:onceki });
 
