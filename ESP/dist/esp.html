@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'f4ed662', at:'2026-09-22 14:23', dirty:true };
+ESP.BUILD = { id:'37dc6c1', at:'2026-09-22 14:29', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -25896,32 +25896,49 @@ ESP.Talk = (function(){
     }, SESSIZLIK_MS);
   }
 
+  /* İKİ EŞZAMANLI TANIYICI — kapatıp hemen yeniden başlatınca.
+
+     Aşağıdaki dört `setTimeout` (ve `cevapla`'nın iki `await` sonrası
+     devamı) `if(oturum && !oturum.kapandi)` diye kontrol ediyordu — ama
+     `oturum` MODÜL DÜZEYİNDE bir değişkendir, çağrıyı başlatan SEÇENEĞİ
+     değil O ANKİ değerini okur. `stop()` eski oturumu `kapandi:true`
+     yapıp `oturum = null` yazar; kullanıcı 260-500 ms içinde YENİ bir
+     oturum başlatırsa `start()` `oturum`u o YENİ nesneye çevirir. Eski
+     çağrının bekleyen zamanlayıcısı uyandığında `oturum` artık YENİ
+     oturumu gösterir ve `!oturum.kapandi` DOĞRUdur — eski zamanlayıcı
+     `dinle()`yi YENİ oturumun üstüne bir daha çağırır: iki eşzamanlı
+     tanıyıcı.
+
+     Düzeltme: her çağrı KENDİ oturumunu `kendi` olarak yakalar ve
+     kontrol `oturum === kendi`e bakar — "hâlâ AÇIK mı" değil "hâlâ BU
+     oturum mu" sorusu sorulur. */
   function dinle(){
-    if(!oturum || oturum.kapandi) return;
+    const kendi = oturum;
+    if(!kendi || kendi.kapandi) return;
     durumaGec('dinliyor', { metin:'', hata:null });
 
     ESP.Voice.start({
       continuous:true,
       onText(text){
-        if(!oturum || oturum.durum !== 'dinliyor') return;
-        oturum.metin = text;
-        try{ oturum.onChange(snapshot()); }catch(e){}
+        if(oturum !== kendi || kendi.durum !== 'dinliyor') return;
+        kendi.metin = text;
+        try{ kendi.onChange(snapshot()); }catch(e){}
         sessizlikSay();
       },
       onEnd(final){
-        if(!oturum || oturum.kapandi) return;
-        clearTimeout(oturum.sessizlikSaat);
-        const soru = (final || oturum.metin || '').trim();
+        if(oturum !== kendi || kendi.kapandi) return;
+        clearTimeout(kendi.sessizlikSaat);
+        const soru = (final || kendi.metin || '').trim();
         if(!soru){
           /* Hiç konuşulmadı: döngü ölmez, yeniden dinler. */
-          setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, SIRA_GECIS_MS);
+          setTimeout(() => { if(oturum === kendi && !kendi.kapandi) dinle(); }, SIRA_GECIS_MS);
           return;
         }
         cevapla(soru);
       },
       onError(code){
-        if(!oturum || oturum.kapandi) return;
-        clearTimeout(oturum.sessizlikSaat);
+        if(oturum !== kendi || kendi.kapandi) return;
+        clearTimeout(kendi.sessizlikSaat);
         /* İzin sorunları döngüyü bitirir; geçici hatalar bitirmez. */
         if(code === 'not-allowed' || code === 'service-not-allowed' || code === 'unsupported'){
           durumaGec('kapalı', { hata:ESP.Voice.message(code) });
@@ -25929,7 +25946,7 @@ ESP.Talk = (function(){
           return;
         }
         durumaGec('dinliyor', { hata:ESP.Voice.message(code) });
-        setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, 500);
+        setTimeout(() => { if(oturum === kendi && !kendi.kapandi) dinle(); }, 500);
       },
     });
   }
@@ -25937,10 +25954,11 @@ ESP.Talk = (function(){
   /* ------------------------------------------------------- cevap turu */
 
   async function cevapla(soru){
-    if(!oturum || oturum.kapandi) return;
-    const agentId = oturum.agentId;
+    const kendi = oturum;
+    if(!kendi || kendi.kapandi) return;
+    const agentId = kendi.agentId;
     durumaGec('düşünüyor', { metin:soru });
-    try{ oturum.onTurn({ role:'user', text:soru }); }catch(e){}
+    try{ kendi.onTurn({ role:'user', text:soru }); }catch(e){}
 
     let res;
     try{
@@ -25950,25 +25968,25 @@ ESP.Talk = (function(){
     }catch(e){
       res = { text:'Cevap üretilemedi.', source:'rules', error:String(e && e.message || e) };
     }
-    if(!oturum || oturum.kapandi) return;
+    if(oturum !== kendi || kendi.kapandi) return;
 
-    oturum.sonCevap = res;
-    try{ oturum.onTurn({ role:'agent', text:res.text, source:res.source }); }catch(e){}
+    kendi.sonCevap = res;
+    try{ kendi.onTurn({ role:'agent', text:res.text, source:res.source }); }catch(e){}
 
     if(!sesliCevapVar()){
       /* Ses çıkışı yok: sıra yine geçer, cevap yazıyla okunur. */
-      setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, SIRA_GECIS_MS);
+      setTimeout(() => { if(oturum === kendi && !kendi.kapandi) dinle(); }, SIRA_GECIS_MS);
       return;
     }
 
     durumaGec('konuşuyor');
     const sonuc = await ESP.Speak.say(res.text, { agent:agentId });
-    if(!oturum || oturum.kapandi) return;
+    if(oturum !== kendi || kendi.kapandi) return;
 
     /* Söz kesildiyse mikrofon HEMEN açılır: kullanıcı kesmişse
        söyleyecek bir şeyi var demektir. */
     const bekle = sonuc.iptal ? 0 : SIRA_GECIS_MS;
-    setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, bekle);
+    setTimeout(() => { if(oturum === kendi && !kendi.kapandi) dinle(); }, bekle);
   }
 
   /* ----------------------------------------------------------- denetim */

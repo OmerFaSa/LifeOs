@@ -201,6 +201,53 @@ describe('Sesli sohbet — döngü sözleşmesi', () => {
     ESP.Talk.stop();
     expect(ESP.Talk.isActive()).toBeFalsy();
   });
+
+  it('KAPATIP HEMEN YENİDEN BAŞLATINCA eski zamanlayıcı yeni oturumu ikiye katlamaz', async () => {
+    /* Dört `setTimeout` `if(oturum && !oturum.kapandi)` diye
+       kontrol ediyordu — ama `oturum` MODÜL DÜZEYİNDE bir değişken,
+       çağrıyı başlatan oturumu değil O ANKİ değeri okur. `stop()`
+       eskisini `kapandi:true` yapıp `oturum`u `null`a çeker; kullanıcı
+       260-500 ms içinde YENİ bir oturum başlatırsa eski zamanlayıcı
+       uyandığında `oturum` artık YENİ oturumu gösterir ve
+       `!oturum.kapandi` DOĞRUdur — eski zamanlayıcı `dinle()`yi YENİ
+       oturumun üstüne bir daha çağırır: iki eşzamanlı tanıyıcı.
+
+       `ESP.Voice.start` burada BİLEREK sahteleniyor: gerçek tanıma
+       mikrofon ister ve zamanlaması denetlenemez; sahte sürüm `onEnd`i
+       elle tetiklemeyi ve `Voice.start`ın kaç kez çağrıldığını saymayı
+       sağlıyor. */
+    const gercekStart = ESP.Voice.start;
+    const gercekSupported = ESP.Voice.supported;
+    let cagri = 0;
+    const yakalanan = [];
+    try{
+      ESP.Voice.supported = () => true;
+      ESP.Voice.start = opts => { cagri++; yakalanan.push(opts); };
+
+      ESP.Talk.start('patron', {});
+      expect(cagri).toBe(1);
+
+      /* ESKİ oturum boş konuşmayla biter: SIRA_GECIS_MS sonra `dinle()`
+         planlanır. */
+      yakalanan[0].onEnd('');
+
+      /* Zamanlayıcı ateşlenmeden ESKİ oturum kapatılır ve HEMEN
+         yeni bir oturum başlatılır. */
+      ESP.Talk.stop();
+      ESP.Talk.start('patron', {});
+      expect(cagri).toBe(2);            // yeni start ikinci Voice.start'i tetikledi
+
+      /* Eski zamanlayıcının ateşlenmesini bekle. Düzeltmeden önce
+         burada `cagri` 3 olurdu: eski zamanlayıcı yeni oturumda bir
+         daha `dinle()` çağırırdı. */
+      await new Promise(r => setTimeout(r, ESP.Talk.SIRA_GECIS_MS + 80));
+      expect(cagri).toBe(2);
+    }finally{
+      ESP.Voice.start = gercekStart;
+      ESP.Voice.supported = gercekSupported;
+      ESP.Talk.stop();
+    }
+  });
 });
 
 describe('Dikte — mikrofon', () => {
