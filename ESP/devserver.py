@@ -116,8 +116,12 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
         # yerine uc kapidan ayni dosyaya bakilir. Dosya yoksa kutlama
         # banner'a duser; arayuz bozulmaz.
         clean = path.split("?", 1)[0].split("#", 1)[0]
-        ortak = (_ortak_seviye_yolu(clean, os.path.dirname(REPO))
-                 or _ortak_marka_yolu(clean, os.path.dirname(REPO)))
+        # dist sayfalari gorsellere GORECELI yolla bakar (`img/marka/...`);
+        # `/dist/esp.html` tabanindan bu `/dist/img/marka/...` cikar. Muhafiz
+        # onceki `/dist` on ekini atip AYNI kontrolu yapar.
+        altta = clean[len("/dist"):] if clean.startswith("/dist/") else clean
+        ortak = (_ortak_seviye_yolu(altta, os.path.dirname(REPO))
+                 or _ortak_marka_yolu(altta, os.path.dirname(REPO)))
         if ortak:
             return ortak
         if clean == "/dist" or clean.startswith("/dist/"):
