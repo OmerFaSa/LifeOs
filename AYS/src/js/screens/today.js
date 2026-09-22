@@ -665,6 +665,9 @@ R.Screens.today = (function(){
   function IstisnaKart(day, dateISO){
     const ist = R.Istisna ? R.Istisna.gunIcin(dateISO) : null;
     if(!ist) return '';
+    /* Takvim kaydı (tatil, okul sınavı…) buradan bitirilmez: Rehber ›
+       İstisnalar'da durur ve orada kaldırılır. */
+    const takvim = ist.kaynak === 'takvim';
     if(day.ara){
       const sonraki = U.iso(U.addDays(U.parse(ist.to), 1));
       return c.Notice({ tone:'info',
@@ -672,11 +675,15 @@ R.Screens.today = (function(){
         body:html`${R.Istisna.tanim(ist)}. Blok yok ve bu gün kaçırılmış sayılmaz;
           haftalık soru hedefi ara günleri oranında küçüldü. Plan ${U.fmtShort(sonraki)}
           günü kaldığı yerden sürer.
-          <div class="mt-8">${c.Button({ label:'Arayı bugün bitir', icon:'play', size:'sm',
-            tone:'ghost', act:'istisna-bitir', data:{ 'data-id':ist.id } })}</div>` });
+          ${takvim
+            ? html`<div class="tiny dim mt-8">Takvim kaydı — Rehber › İstisnalar'dan kaldırılır.</div>`
+            : html`<div class="mt-8">${c.Button({ label:'Arayı bugün bitir', icon:'play', size:'sm',
+              tone:'ghost', act:'istisna-bitir', data:{ 'data-id':ist.id } })}</div>`}` });
     }
     if(ist.tur === 'sure' && day.istisnaId === ist.id){
-      return c.Notice({ tone:'info', title:'Geçici süre: ders günlerinde ' + ist.dakika + ' dk',
+      return c.Notice({ tone:'info',
+        title:(takvim ? R.Istisna.tanim(ist).split(' · ')[0] + ': bugün ' : 'Geçici süre: ders günlerinde ')
+          + ist.dakika + ' dk',
         body:R.Istisna.tanim(ist) + '. Tarih bitince temel plana döner; deneme ve '
           + 'kapanış günleri değişmez.' });
     }

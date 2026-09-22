@@ -299,6 +299,7 @@ R.Screens.week = (function(){
     if(!I) return '';
     const temel = I.temelDakika();
     const liste = I.etkin();
+    const takvim = I.takvimde();
     return K.Card({ title:'Planın şekli', sub:'Temel plan + tarihli istisnalar',
       body:html`
         <div class="row gap-8" style="justify-content:space-between;align-items:center">
@@ -313,7 +314,10 @@ R.Screens.week = (function(){
             ${K.Button({ label:x.from > U.todayISO() ? 'Kaldır' : 'Bitir', size:'sm', tone:'ghost',
               act:'istisna-bitir', data:{ 'data-id':x.id } })}
           </div>`)}</div>`)}
-        ${when(!liste.length, () => html`<p class="small dim mt-8">Etkin istisna yok; plan temel düzeninde.</p>`)}
+        ${when(takvim.length, () => html`<div class="stack-xs mt-10">${map(takvim, x => html`
+          <div class="small">${I.tanim(x)}${when(x.neden, () => html` <span class="dim">· ${x.neden}</span>`)}
+            <span class="tiny dim">· takvim kaydı, Rehber › İstisnalar</span></div>`)}</div>`)}
+        ${when(!liste.length && !takvim.length, () => html`<p class="small dim mt-8">Etkin istisna yok; plan temel düzeninde.</p>`)}
         <div class="row gap-8 mt-10" style="flex-wrap:wrap">
           ${K.Button({ label:'Ara ver', icon:'pause', size:'sm', act:'istisna-ac', data:{ 'data-tur':'ara' } })}
           ${K.Button({ label:'Geçici süre', icon:'clock', size:'sm', act:'istisna-ac', data:{ 'data-tur':'sure' } })}

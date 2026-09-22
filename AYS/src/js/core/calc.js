@@ -123,12 +123,25 @@ R.Calc = (function(){
     const week = S.weeks[M.weekId(n)];
     if(!week) return null;
     const solved = U.sum(weekBlocks(n).map(b => b.actualQ || 0));
-    /* Ara gunleri hedeften dusulur: «bu hafta 2 gun ara» diyen birinin
-       haftasi tam hedefe gore «tutmadi» gorunmemeli. Butun hafta araysa
-       hedef yoktur ve gerceklesme olculemez — sifir degil, «veri yok». */
+    /* Hedef, haftanin GUNCEL yukune orantilanir: «bu hafta 2 gun ara»
+       diyen ya da takvime tatil yazan birinin haftasi tam hedefe gore
+       «tutmadi» gorunmemeli. Ama hedef yazilirken plan ureteci o tatili
+       zaten gormus olabilir (week.planLoad); ayni yuk iki kez dusulmez.
+       Butun hafta araysa hedef yoktur ve gerceklesme olculemez — sifir
+       degil, «veri yok». */
     const araGun = R.Istisna ? R.Istisna.haftaAraGunu(n) : 0;
-    const target = araGun ? Math.round(week.questionTarget * (7 - araGun) / 7) : week.questionTarget;
+    const yazilan = planLoadOf(n);
+    const simdi = U.sum(M.weekDates(n).map(d => M.dayLoad(U.iso(d)).load)) / 7;
+    const target = yazilan > 0 ? Math.round(week.questionTarget * simdi / yazilan) : week.questionTarget;
     return { solved, target, araGun, pct:target > 0 ? U.pct(solved, target) : null };
+  }
+  /* Haftalik hedefin yazildigi andaki yuk. Eski hafta kayitlarinda alan
+     yoktur: en iyi tahmin, haftanin plandaki (uretecin gordugu) yukudur. */
+  function planLoadOf(n){
+    const week = S.weeks[M.weekId(n)];
+    if(week && week.planLoad != null && isFinite(Number(week.planLoad))) return Number(week.planLoad);
+    const c = M.curriculumFor(n);
+    return c && c.load != null ? Number(c.load) : 1;
   }
   function timeRealization(n){
     const blocks = weekBlocks(n);
@@ -883,7 +896,7 @@ R.Calc = (function(){
     fullExams, comparableNets, medianTrend, examBase, testMedian, analysisDebt, examVolumeProgress,
     errorDistribution, errorPareto, topTags, openErrors,
     dueCards, overdueCards, cardDebt,
-    weekBlocks, planCompletion, questionRealization, timeRealization, plannedMinutes, capacityLoad,
+    weekBlocks, planCompletion, questionRealization, planLoadOf, timeRealization, plannedMinutes, capacityLoad,
     completionHistory, skipReasonCounts,
     subjectClosure, overallClosure, examClosure, pendingSecondChecks,
     sleepAverage, intensityGrid, testSeries,

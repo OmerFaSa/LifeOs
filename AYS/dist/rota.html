@@ -9287,7 +9287,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'a444e3c', at:'2026-09-22 21:15', dirty:true };
+R.BUILD = { id:'a814de2', at:'2026-09-22 21:21', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -14544,6 +14544,10 @@ R.Model = (function(){
             name:t, questionTarget:perTopic, accuracy:70, subjectId:null, topicId:null,
           }))),
       questionTarget:c.q,
+      /* Hedefin YAZILDIGI andaki yuk: plan ureteci takvimi zaten
+         hesaba katmis olabilir. Gerceklesme hedefi bu yukten guncel
+         yuke orantilanir, ayni tatil iki kez dusulmez (calc.js). */
+      planLoad:c.load == null ? 1 : c.load,
       examPlan:c.exam,
       checkpoint:c.check,
       capacityMin: Math.round(R.PROGRAM.capacityHoursPerWeek*60),
@@ -15144,8 +15148,11 @@ R.Model = (function(){
 
 
   /* ---------- takvim istisnalari ----------
-     Tatil, okul sinavi ya da yogun gun: plan bu gunleri gormezden gelmez,
-     yuku komsu gunlere dagitir. load 0..1 = o gun calisilabilecek oran. */
+     Tatil, okul sinavi ya da yogun gun. load = o gun calisilabilecek oran.
+     Kayit burada tutulur; gunlere UYGULANMASI core/istisna.js'tedir:
+     tatil ara gunu olur, oteki turler ders gununun suresini olcekler.
+     Kaydetmek ve silmek araliktaki kayitli gunleri hemen yeniler —
+     eskiden yalniz «yuk» sayisi degisiyor, gunler oldugu gibi kaliyordu. */
   const CALENDAR_KINDS = {
     tatil:      { label:'Tatil / izin',   load:0,    tone:'muted' },
     okulSinavi: { label:'Okul sınavı',    load:0.35, tone:'warn'  },
@@ -15157,20 +15164,30 @@ R.Model = (function(){
     const doc = Object.assign({ id:U.uid('k'), kind:'tatil', note:'' }, rec);
     if(doc.load == null) doc.load = (CALENDAR_KINDS[doc.kind] || CALENDAR_KINDS.tatil).load;
     const i = R.S.calendar.findIndex(x => x.id === doc.id);
+    const eski = i >= 0 ? R.S.calendar[i] : null;
     if(i >= 0) R.S.calendar[i] = doc; else R.S.calendar.push(doc);
     R.S.calendar.sort((a, b) => (a.from || '').localeCompare(b.from || ''));
     await R.Store.set('calendar/' + doc.id, doc);
+    if(R.Istisna){
+      if(eski) await R.Istisna.yenile(eski.from, eski.to || eski.from);
+      await R.Istisna.yenile(doc.from, doc.to || doc.from);
+    }
     return doc;
   }
   async function deleteCalendar(id){
+    const eski = R.S.calendar.find(x => x.id === id);
     R.S.calendar = R.S.calendar.filter(x => x.id !== id);
     await R.Store.remove('calendar/' + id);
+    if(eski && R.Istisna) await R.Istisna.yenile(eski.from, eski.to || eski.from);
   }
-  /* Bir gunun calisma carpani: istisna yoksa 1. */
+  /* Bir gunun calisma carpani: istisna yoksa 1. Takvim kaydi da kendi
+     istisnan da (ara, gecici sure) sayilir; sayiyi core/istisna.js verir
+     ki plan ureteci ve haftalik hedef gunun GERCEK halini gorsun. */
   function dayLoad(dateISO){
     const iso = dateISO || U.todayISO();
     const hit = R.S.calendar.find(x => iso >= x.from && iso <= (x.to || x.from));
-    return hit ? { load:hit.load, kind:hit.kind, note:hit.note, id:hit.id } : { load:1, kind:null, note:'', id:null };
+    const load = R.Istisna ? R.Istisna.gunYuku(iso) : (hit ? hit.load : 1);
+    return hit ? { load, kind:hit.kind, note:hit.note, id:hit.id } : { load, kind:null, note:'', id:null };
   }
   /* Haftanin kapasite carpani — plan ureteci ve otomasyon okur. */
   function weekLoad(n){
@@ -17900,7 +17917,17 @@ R.Planner = (function(){
         da yalniz bugun ve sonrasi yeniden kurulur. Gecmis bos bir gunu
         geriye donuk «kacirilmis» yapmak, cezalandirmak olurdu.
      3. SON EKLENEN KAZANIR. Ayni gune iki istisna dusuyorsa sonraki
-        gecerlidir; ikisi de kayitta durur. */
+        gecerlidir; ikisi de kayitta durur.
+
+   TAKVIM KAYITLARI (Rehber › Istisnalar: tatil, okul sinavi, yogun gun,
+   ekstra calisma) da bu modulden gecer. Eskiden yalniz haftanin «yuk»
+   sayisini degistiriyorlardi: ekran «plan yuku guncellendi» diyordu ama
+   tatil gunundeki bloklar oldugu gibi duruyordu. Simdi yuku 0 olan kayit
+   ARA gunudur; otekiler ders gununun suresini yuk oraninda olcekler
+   (deneme ve kapanis yine olceklenmez). Kendi istisnan takvim kaydinin
+   ONUNE gecer: «Carsamba 5 saat calisacagim» demek, o gunun takvimdeki
+   «yogun gun» isaretinden daha ozgul bir sozdur. Takvim kaydi burada
+   SAKLANMAZ; kaydi R.Model.saveCalendar tutar, bu modul yalniz okur. */
 
 window.R = window.R || {};
 
@@ -17969,9 +17996,51 @@ R.Istisna = (function(){
 
   /* ------------------------------------------------------------ hesaplar */
 
-  function gunIcin(iso){
+  function kendiIcin(iso){
     const l = liste().filter(x => x.from <= iso && iso <= x.to);
     return l.length ? l[l.length - 1] : null;
+  }
+
+  function takvimTuru(kind){
+    const K = (R.Model && R.Model.CALENDAR_KINDS) || {};
+    return K[kind] || K.tatil || { label:'Takvim' };
+  }
+
+  /* Takvim kaydini istisna bicimine cevirir. Gunluk dakika tarihe
+     baglidir (kalici sure bir tarihten sonra baslamis olabilir), o yuzden
+     `iso` verilince o gunun dakikasi hesaplanir. */
+  function takvimKaydi(c, iso){
+    const load = Number(c.load);
+    const kayit = { id:c.id, from:c.from, to:c.to || c.from, kaynak:'takvim', kind:c.kind,
+      neden:String(c.note || '').trim() || takvimTuru(c.kind).label };
+    if(!(load > 0)) return Object.assign(kayit, { tur:'ara' });
+    const temel = temelDakika(iso || c.from) || sablonDakikasi();
+    const dk = Math.round(temel * load / 5) * 5;
+    return Object.assign(kayit, { tur:'sure', carpan:load,
+      dakika:Math.min(DAKIKA.max, Math.max(DAKIKA.min, dk)) });
+  }
+
+  /* Takvim sirali tutulur (baslangica gore); cakisan kayitlarda ilk
+     baslayan gecerlidir — R.Model.dayLoad eskiden de boyle okuyordu. */
+  function takvimIcin(iso){
+    const c = ((R.S && R.S.calendar) || []).find(x => x && U.isISO(x.from)
+      && x.from <= iso && iso <= (x.to || x.from));
+    if(!c || Number(c.load) === 1) return null;
+    return takvimKaydi(c, iso);
+  }
+
+  function gunIcin(iso){
+    return kendiIcin(iso) || takvimIcin(iso);
+  }
+
+  /* Bugun ve sonrasini etkileyen takvim kayitlari — ekranda kendi
+     istisnalarinin yaninda, «bitir» dugmesi OLMADAN gosterilir: onlar
+     Rehber › Istisnalar'dan yonetilir. */
+  function takvimde(){
+    const bugun = U.todayISO();
+    return ((R.S && R.S.calendar) || [])
+      .filter(c => c && U.isISO(c.from) && (c.to || c.from) >= bugun && Number(c.load) !== 1)
+      .map(c => takvimKaydi(c));
   }
 
   function aralik(from, to){
@@ -18165,6 +18234,22 @@ R.Istisna = (function(){
 
   /* ------------------------------------------------------------- ozetler */
 
+  /* Bir gunun calisma orani: ara 0, olceklenmis ders gunu temel sureye
+     orani, dokunulmamis gun 1. Deneme ve kapanis gunleri olceklenmedigi
+     icin sure istisnasinda da 1'dir — oran, gunun GERCEKTE ne kadar
+     calisma icerdigini soyler. R.Model.dayLoad buradan okur; plan
+     ureteci ve haftalik soru hedefi ayni sayiyi gorur. */
+  function gunYuku(iso){
+    const x = gunIcin(iso);
+    if(!x) return 1;
+    if(x.tur === 'ara') return 0;
+    const tmpl = (R.WEEKDAYS || [])[U.weekdayIndex(iso)];
+    if(tmpl && SABIT_RITUEL.indexOf(tmpl.ritual) >= 0) return 1;
+    if(x.kaynak === 'takvim') return Number(x.carpan);
+    const temel = temelDakika(iso) || sablonDakikasi();
+    return temel ? U.round(Number(x.dakika) / temel, 2) : 1;
+  }
+
   function haftaAraGunu(n){
     return R.Model.weekDates(n).map(d => U.iso(d))
       .filter(iso => { const x = gunIcin(iso); return x && x.tur === 'ara'; }).length;
@@ -18181,6 +18266,10 @@ R.Istisna = (function(){
     if(!x) return '';
     const tarih = x.from === x.to ? U.fmtShort(x.from)
       : U.fmtShort(x.from) + ' – ' + U.fmtShort(x.to);
+    if(x.kaynak === 'takvim'){
+      return takvimTuru(x.kind).label + (x.tur === 'sure' ? ' · yük %' + Math.round(x.carpan * 100) : '')
+        + ' · ' + tarih;
+    }
     return x.tur === 'ara' ? 'Ara · ' + tarih
       : 'Günde ' + x.dakika + ' dk · ' + tarih;
   }
@@ -18189,7 +18278,8 @@ R.Istisna = (function(){
     TURLER, DAKIKA, STORE,
     liste, yukle, dogrula, dakikaGecerli, gunIcin, aralik, olcekle, gunuBicimle,
     dokunulmamis, etki, ekle, kaldir, bitir, temeliYenile, temelDakika, sablonDakikasi,
-    kapasiteSaati, haftaAraGunu, etkin, tanim,
+    kapasiteSaati, haftaAraGunu, gunYuku, etkin, takvimde, tanim,
+    yenile:araligiYenile,
   };
 })();
 
@@ -18655,12 +18745,25 @@ R.Calc = (function(){
     const week = S.weeks[M.weekId(n)];
     if(!week) return null;
     const solved = U.sum(weekBlocks(n).map(b => b.actualQ || 0));
-    /* Ara gunleri hedeften dusulur: «bu hafta 2 gun ara» diyen birinin
-       haftasi tam hedefe gore «tutmadi» gorunmemeli. Butun hafta araysa
-       hedef yoktur ve gerceklesme olculemez — sifir degil, «veri yok». */
+    /* Hedef, haftanin GUNCEL yukune orantilanir: «bu hafta 2 gun ara»
+       diyen ya da takvime tatil yazan birinin haftasi tam hedefe gore
+       «tutmadi» gorunmemeli. Ama hedef yazilirken plan ureteci o tatili
+       zaten gormus olabilir (week.planLoad); ayni yuk iki kez dusulmez.
+       Butun hafta araysa hedef yoktur ve gerceklesme olculemez — sifir
+       degil, «veri yok». */
     const araGun = R.Istisna ? R.Istisna.haftaAraGunu(n) : 0;
-    const target = araGun ? Math.round(week.questionTarget * (7 - araGun) / 7) : week.questionTarget;
+    const yazilan = planLoadOf(n);
+    const simdi = U.sum(M.weekDates(n).map(d => M.dayLoad(U.iso(d)).load)) / 7;
+    const target = yazilan > 0 ? Math.round(week.questionTarget * simdi / yazilan) : week.questionTarget;
     return { solved, target, araGun, pct:target > 0 ? U.pct(solved, target) : null };
+  }
+  /* Haftalik hedefin yazildigi andaki yuk. Eski hafta kayitlarinda alan
+     yoktur: en iyi tahmin, haftanin plandaki (uretecin gordugu) yukudur. */
+  function planLoadOf(n){
+    const week = S.weeks[M.weekId(n)];
+    if(week && week.planLoad != null && isFinite(Number(week.planLoad))) return Number(week.planLoad);
+    const c = M.curriculumFor(n);
+    return c && c.load != null ? Number(c.load) : 1;
   }
   function timeRealization(n){
     const blocks = weekBlocks(n);
@@ -19415,7 +19518,7 @@ R.Calc = (function(){
     fullExams, comparableNets, medianTrend, examBase, testMedian, analysisDebt, examVolumeProgress,
     errorDistribution, errorPareto, topTags, openErrors,
     dueCards, overdueCards, cardDebt,
-    weekBlocks, planCompletion, questionRealization, timeRealization, plannedMinutes, capacityLoad,
+    weekBlocks, planCompletion, questionRealization, planLoadOf, timeRealization, plannedMinutes, capacityLoad,
     completionHistory, skipReasonCounts,
     subjectClosure, overallClosure, examClosure, pendingSecondChecks,
     sleepAverage, intensityGrid, testSeries,
@@ -24604,6 +24707,7 @@ R.Auto = (function(){
         questionTarget:perTopic, accuracy:70, why:p.why,
       })),
       questionTarget:target,
+      planLoad:plan.q ? (plan.load == null ? 1 : plan.load) : 1,
       capacityMin:Math.round(cap * 60),
       behaviorGoal:week.behaviorGoal || suggestBehaviorGoal(),
       examPlan:plan.exam,
@@ -24633,6 +24737,7 @@ R.Auto = (function(){
       subjectId:t.subjectId, topicId:t.topicId,
     }));
     week.questionTarget = draft.questionTarget;
+    if(draft.planLoad != null) week.planLoad = draft.planLoad;
     week.capacityMin = draft.capacityMin;
     if(!week.behaviorGoal) week.behaviorGoal = draft.behaviorGoal;
     await M.saveWeek(n);
@@ -31133,21 +31238,29 @@ R.Proposals = (function(){
         return pass({ week, n, q });
       },
       preview(p, ctx){
+        /* «Önce» ekranda görülen hedeftir: ara ya da tatil varsa küçülmüş hali. */
+        const r = R.Calc ? R.Calc.questionRealization(ctx.n) : null;
         return [
           { label:'Hafta', before:'—', after:ctx.n + '. hafta' },
-          { label:'Soru hedefi', before:ctx.week.questionTarget + ' soru', after:ctx.q + ' soru' },
+          { label:'Soru hedefi', before:(r ? r.target : ctx.week.questionTarget) + ' soru',
+            after:ctx.q + ' soru' },
         ];
       },
+      /* Kullanicinin yazdigi hedef, haftanin O ANKI haliyle soylenmistir
+         («2 gun ara varken 300 soru»). Yuk de o anki yuk olarak yazilir ki
+         gerceklesme hedefi ayni arayi bir kez daha dusmesin (calc.js). */
       async apply(p, ctx){
-        const before = ctx.week.questionTarget;
+        const before = { questionTarget:ctx.week.questionTarget, planLoad:ctx.week.planLoad };
         ctx.week.questionTarget = ctx.q;
+        ctx.week.planLoad = U.sum(M.weekDates(ctx.n).map(d => M.dayLoad(U.iso(d)).load)) / 7;
         await M.saveWeek(ctx.n);
-        return { n:ctx.n, questionTarget:before };
+        return Object.assign({ n:ctx.n }, before);
       },
       async revert(s){
         const week = S.weeks[M.weekId(s.n)];
         if(!week) return;
         week.questionTarget = s.questionTarget;
+        if(s.planLoad == null) delete week.planLoad; else week.planLoad = s.planLoad;
         await M.saveWeek(s.n);
       },
     },
@@ -34072,6 +34185,9 @@ R.Screens.today = (function(){
   function IstisnaKart(day, dateISO){
     const ist = R.Istisna ? R.Istisna.gunIcin(dateISO) : null;
     if(!ist) return '';
+    /* Takvim kaydı (tatil, okul sınavı…) buradan bitirilmez: Rehber ›
+       İstisnalar'da durur ve orada kaldırılır. */
+    const takvim = ist.kaynak === 'takvim';
     if(day.ara){
       const sonraki = U.iso(U.addDays(U.parse(ist.to), 1));
       return c.Notice({ tone:'info',
@@ -34079,11 +34195,15 @@ R.Screens.today = (function(){
         body:html`${R.Istisna.tanim(ist)}. Blok yok ve bu gün kaçırılmış sayılmaz;
           haftalık soru hedefi ara günleri oranında küçüldü. Plan ${U.fmtShort(sonraki)}
           günü kaldığı yerden sürer.
-          <div class="mt-8">${c.Button({ label:'Arayı bugün bitir', icon:'play', size:'sm',
-            tone:'ghost', act:'istisna-bitir', data:{ 'data-id':ist.id } })}</div>` });
+          ${takvim
+            ? html`<div class="tiny dim mt-8">Takvim kaydı — Rehber › İstisnalar'dan kaldırılır.</div>`
+            : html`<div class="mt-8">${c.Button({ label:'Arayı bugün bitir', icon:'play', size:'sm',
+              tone:'ghost', act:'istisna-bitir', data:{ 'data-id':ist.id } })}</div>`}` });
     }
     if(ist.tur === 'sure' && day.istisnaId === ist.id){
-      return c.Notice({ tone:'info', title:'Geçici süre: ders günlerinde ' + ist.dakika + ' dk',
+      return c.Notice({ tone:'info',
+        title:(takvim ? R.Istisna.tanim(ist).split(' · ')[0] + ': bugün ' : 'Geçici süre: ders günlerinde ')
+          + ist.dakika + ' dk',
         body:R.Istisna.tanim(ist) + '. Tarih bitince temel plana döner; deneme ve '
           + 'kapanış günleri değişmez.' });
     }
@@ -34736,6 +34856,7 @@ R.Screens.week = (function(){
     if(!I) return '';
     const temel = I.temelDakika();
     const liste = I.etkin();
+    const takvim = I.takvimde();
     return K.Card({ title:'Planın şekli', sub:'Temel plan + tarihli istisnalar',
       body:html`
         <div class="row gap-8" style="justify-content:space-between;align-items:center">
@@ -34750,7 +34871,10 @@ R.Screens.week = (function(){
             ${K.Button({ label:x.from > U.todayISO() ? 'Kaldır' : 'Bitir', size:'sm', tone:'ghost',
               act:'istisna-bitir', data:{ 'data-id':x.id } })}
           </div>`)}</div>`)}
-        ${when(!liste.length, () => html`<p class="small dim mt-8">Etkin istisna yok; plan temel düzeninde.</p>`)}
+        ${when(takvim.length, () => html`<div class="stack-xs mt-10">${map(takvim, x => html`
+          <div class="small">${I.tanim(x)}${when(x.neden, () => html` <span class="dim">· ${x.neden}</span>`)}
+            <span class="tiny dim">· takvim kaydı, Rehber › İstisnalar</span></div>`)}</div>`)}
+        ${when(!liste.length && !takvim.length, () => html`<p class="small dim mt-8">Etkin istisna yok; plan temel düzeninde.</p>`)}
         <div class="row gap-8 mt-10" style="flex-wrap:wrap">
           ${K.Button({ label:'Ara ver', icon:'pause', size:'sm', act:'istisna-ac', data:{ 'data-tur':'ara' } })}
           ${K.Button({ label:'Geçici süre', icon:'clock', size:'sm', act:'istisna-ac', data:{ 'data-tur':'sure' } })}
@@ -41254,8 +41378,9 @@ R.Screens.guide = (function(){
   }
 
   /* ---------- takvim istisnaları ----------
-     Tatil, okul sınavı ya da yoğun gün: plan bu günleri görmezden gelmez,
-     haftanın yükünü otomatik düşürür. */
+     Tatil, okul sınavı ya da yoğun gün. Kaydetmek araliktaki günleri
+     hemen yeniden kurar (core/istisna.js): tatil ara günü olur, öteki
+     türler ders gününün süresini yük oranında ölçekler. */
 
   function exceptionRow(x){
     const kind = M.CALENDAR_KINDS[x.kind] || M.CALENDAR_KINDS.tatil;
@@ -41270,6 +41395,16 @@ R.Screens.guide = (function(){
         ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'kaldır',
           act:'cal-del', data:{ 'data-id':x.id } })}
       </div>`;
+  }
+
+  /* Takvim kaydı günleri gerçekten değiştirir; mesaj ne olduğunu söyler.
+     İlerlemesi başlamış gün yeniden kurulmaz ve bu SÖYLENİR. */
+  function takvimMesaji(bas, from, to){
+    const bugun = U.todayISO();
+    if(to < bugun) return bas + ' — geçmiş günlerin planı değişmez, haftalık hedef güncellendi';
+    const korunan = R.Istisna ? R.Istisna.etki(from, to).korunan.length : 0;
+    return bas + ' — günlerin planı güncellendi'
+      + (korunan ? '; ilerlemesi başlamış ' + U.plural(korunan, 'gün', 'gün') + ' olduğu gibi kaldı' : '');
   }
 
   function istisnaTab(){
@@ -41307,8 +41442,10 @@ R.Screens.guide = (function(){
                 rows:weekRows.map(r => ['H' + r.n, U.fmtRange(r.from, r.to),
                   html`<span class="${r.load < 1 ? 'num is-down' : 'num is-up'}">%${Math.round(r.load * 100)}</span>`]) })
             : K.Empty({ icon:'check', text:'Önümüzdeki sekiz hafta tam yükte.' }) }),
-        K.Notice({ tone:'info', body:'Yük çarpanı haftalık soru hedefini doğrudan etkiler. '
-          + 'Plan yeniden hesaplandığında bu istisnalar da hesaba katılır.' }),
+        K.Notice({ tone:'info', body:'Tatil günü ara günü olur: blok yok ve kaçırılmış sayılmaz. '
+          + 'Okul sınavı, yoğun gün ve ekstra çalışma ders gününün süresini yük oranında değiştirir; '
+          + 'deneme ve kapanış günleri kısalmaz. Haftalık soru hedefi güncel yüke göre ayarlanır. '
+          + 'İlerlemesi başlamış bir güne dokunulmaz.' }),
         K.Button({ label:'Planı yeniden hesapla', icon:'refresh', act:'auto-replan' }),
       ])),
     ]);
@@ -41865,12 +42002,13 @@ R.Screens.guide = (function(){
       if(!from){ UI.toast('Başlangıç tarihi gerekli'); return; }
       if(to && to < from){ UI.toast('Bitiş, başlangıçtan önce olamaz'); return; }
       await M.saveCalendar({ kind, from, to:to || from, note });
-      UI.toast('İstisna eklendi — plan yükü güncellendi');
+      UI.toast(takvimMesaji('İstisna eklendi', from, to || from));
       R.App.render();
     },
     async 'cal-del'(el){
+      const x = S.calendar.find(c => c.id === el.dataset.id);
       await M.deleteCalendar(el.dataset.id);
-      UI.toast('İstisna kaldırıldı');
+      UI.toast(x ? takvimMesaji('İstisna kaldırıldı', x.from, x.to || x.from) : 'İstisna kaldırıldı');
       R.App.render();
     },
     async 'set-tone'(el){

@@ -227,21 +227,29 @@ R.Proposals = (function(){
         return pass({ week, n, q });
       },
       preview(p, ctx){
+        /* «Önce» ekranda görülen hedeftir: ara ya da tatil varsa küçülmüş hali. */
+        const r = R.Calc ? R.Calc.questionRealization(ctx.n) : null;
         return [
           { label:'Hafta', before:'—', after:ctx.n + '. hafta' },
-          { label:'Soru hedefi', before:ctx.week.questionTarget + ' soru', after:ctx.q + ' soru' },
+          { label:'Soru hedefi', before:(r ? r.target : ctx.week.questionTarget) + ' soru',
+            after:ctx.q + ' soru' },
         ];
       },
+      /* Kullanicinin yazdigi hedef, haftanin O ANKI haliyle soylenmistir
+         («2 gun ara varken 300 soru»). Yuk de o anki yuk olarak yazilir ki
+         gerceklesme hedefi ayni arayi bir kez daha dusmesin (calc.js). */
       async apply(p, ctx){
-        const before = ctx.week.questionTarget;
+        const before = { questionTarget:ctx.week.questionTarget, planLoad:ctx.week.planLoad };
         ctx.week.questionTarget = ctx.q;
+        ctx.week.planLoad = U.sum(M.weekDates(ctx.n).map(d => M.dayLoad(U.iso(d)).load)) / 7;
         await M.saveWeek(ctx.n);
-        return { n:ctx.n, questionTarget:before };
+        return Object.assign({ n:ctx.n }, before);
       },
       async revert(s){
         const week = S.weeks[M.weekId(s.n)];
         if(!week) return;
         week.questionTarget = s.questionTarget;
+        if(s.planLoad == null) delete week.planLoad; else week.planLoad = s.planLoad;
         await M.saveWeek(s.n);
       },
     },

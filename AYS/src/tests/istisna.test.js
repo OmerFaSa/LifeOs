@@ -302,5 +302,140 @@
     });
   });
 
+  /* Rehber › İstisnalar'daki takvim kayıtları (tatil, okul sınavı, yoğun
+     gün, ekstra) eskiden yalnız haftanın «yük» sayısını değiştiriyordu:
+     ekran «plan yükü güncellendi» diyordu ama tatil gününde bloklar
+     olduğu gibi duruyordu. Bu paket o hatayı yakalar. */
+  describe('İstisna — takvim kayıtları', () => {
+    it('takvimdeki tatil günü ara günü olarak kurulur', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        await M.saveCalendar({ kind:'tatil', from:CAR, to:PER, note:'Bayram' });
+        const car = await taze(CAR);
+        expect(car.ara).toBe(true);
+        expect(car.blocks).toHaveLength(0);
+        expect(car.araNeden).toBe('Bayram');
+        expect(I.gunIcin(PER).kaynak).toBe('takvim');
+        expect(!!(await taze(CUM)).ara).toBe(false);
+      });
+    });
+
+    it('okul sınavı ders gününü yük oranında kısaltır, denemeye dokunmaz', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const tamCmt = calismaDakikasi(await taze(CMT));
+        await M.saveCalendar({ kind:'okulSinavi', from:CAR, to:CMT });
+        const car = calismaDakikasi(await taze(CAR));
+        expect(car).toBe(Math.round(I.sablonDakikasi() * 0.35 / 5) * 5);
+        expect(calismaDakikasi(await taze(CMT))).toBe(tamCmt);
+        expect(M.dayLoad(CMT).load).toBe(1);
+        expect(M.dayLoad(CAR).load).toBe(0.35);
+      });
+    });
+
+    it('takvime eklemek kayıtlı günü yeniler, ilerlemesi başlamış günü korur', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        await M.ensureDay(CAR);
+        const per = await M.ensureDay(PER);
+        per.blocks[0].actualMin = 30;
+        await M.saveDay(PER);
+        await M.saveCalendar({ kind:'tatil', from:CAR, to:PER });
+        expect(S.days[CAR].ara).toBe(true);
+        expect(S.days[CAR].blocks).toHaveLength(0);
+        expect(!!S.days[PER].ara).toBe(false);
+        expect(S.days[PER].blocks[0].actualMin).toBe(30);
+        expect(I.etki(CAR, PER).korunan).toEqual([PER]);
+      });
+    });
+
+    it('takvim kaydı silinince günler plana döner', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const rec = await M.saveCalendar({ kind:'tatil', from:CAR, to:CAR });
+        await M.ensureDay(CAR);
+        expect(S.days[CAR].ara).toBe(true);
+        await M.deleteCalendar(rec.id);
+        expect(!!S.days[CAR].ara).toBe(false);
+        expect(S.days[CAR].blocks.length > 0).toBeTruthy();
+      });
+    });
+
+    it('kendi istisnan takvim kaydının önüne geçer', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        await M.saveCalendar({ kind:'okulSinavi', from:CAR, to:CAR });
+        await I.ekle({ tur:'sure', from:CAR, to:CAR, dakika:300 });
+        expect(calismaDakikasi(await taze(CAR))).toBe(300);
+        expect(I.gunIcin(CAR).kaynak == null).toBeTruthy();
+      });
+    });
+
+    it('takvim kaydı istisna listesinde durmaz; «bitir» yalnız kendi kaydındır', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const rec = await M.saveCalendar({ kind:'tatil', from:CAR, to:CAR });
+        expect(I.liste()).toHaveLength(0);
+        expect((await I.bitir(rec.id)).ok).toBe(false);
+        expect(I.takvimde().map(x => x.id)).toEqual([rec.id]);
+        expect(I.tanim(I.takvimde()[0])).toContain('Tatil');
+      });
+    });
+  });
+
+  describe('İstisna — haftalık hedef ve yük', () => {
+    it('sonradan eklenen tatil hedefi güncel yüke göre küçültür', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const n = M.weekOf(U_parse(CAR));
+        const week = await M.ensureWeek(n);
+        expect(week.planLoad).toBe(1);
+        await M.saveCalendar({ kind:'tatil', from:CAR, to:PER });
+        const r = R.Calc.questionRealization(n);
+        expect(r.target).toBe(Math.round(week.questionTarget * 5 / 7));
+        expect(r.araGun).toBe(2);
+      });
+    });
+
+    it('planın zaten hesaba kattığı yük ikinci kez düşülmez', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const n = M.weekOf(U_parse(CAR));
+        const week = await M.ensureWeek(n);
+        await M.saveCalendar({ kind:'tatil', from:CAR, to:PER });
+        week.planLoad = 5 / 7;         // plan üreteci bu tatili görmüş
+        expect(R.Calc.questionRealization(n).target).toBe(week.questionTarget);
+      });
+    });
+
+    it('geçici süre de yük sayılır; deneme günü ölçeklenmediği için tam sayılır', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const temel = I.sablonDakikasi();
+        await I.ekle({ tur:'sure', from:CAR, to:CMT, dakika:temel / 2 });
+        expect(M.dayLoad(CAR).load).toBe(0.5);
+        expect(M.dayLoad(CMT).load).toBe(1);
+        expect(M.dayLoad(PAZ).load).toBe(1);
+      });
+    });
+
+    it('kullanıcının yazdığı hedef o günkü yüke göredir; geri alınınca eski hale döner', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const n = M.weekOf(U_parse(CAR));
+        const week = await M.ensureWeek(n);
+        await I.ekle({ tur:'ara', from:CAR, to:PER });
+        const t = await P.talep({ action:'week-target', agent:'patron', source:'istek',
+          params:{ weekN:n, questionTarget:300 } });
+        /* Hedef değişikliği küçük aksiyondur: istenince kendiliğinden uygulanır. */
+        if(!t.otomatik) expect((await P.approve(t.row.id)).ok).toBeTruthy();
+        expect(R.Calc.questionRealization(n).target).toBe(300);
+        await P.undo(t.row.id);
+        expect(week.planLoad).toBe(1);
+        expect(R.Calc.questionRealization(n).target).toBe(Math.round(week.questionTarget * 5 / 7));
+      });
+    });
+  });
+
   function U_parse(iso){ return R.U.parse(iso); }
 })();

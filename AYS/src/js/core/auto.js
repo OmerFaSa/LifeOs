@@ -53,6 +53,7 @@ R.Auto = (function(){
         questionTarget:perTopic, accuracy:70, why:p.why,
       })),
       questionTarget:target,
+      planLoad:plan.q ? (plan.load == null ? 1 : plan.load) : 1,
       capacityMin:Math.round(cap * 60),
       behaviorGoal:week.behaviorGoal || suggestBehaviorGoal(),
       examPlan:plan.exam,
@@ -82,6 +83,7 @@ R.Auto = (function(){
       subjectId:t.subjectId, topicId:t.topicId,
     }));
     week.questionTarget = draft.questionTarget;
+    if(draft.planLoad != null) week.planLoad = draft.planLoad;
     week.capacityMin = draft.capacityMin;
     if(!week.behaviorGoal) week.behaviorGoal = draft.behaviorGoal;
     await M.saveWeek(n);

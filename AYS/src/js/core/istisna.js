@@ -27,7 +27,17 @@
         da yalniz bugun ve sonrasi yeniden kurulur. Gecmis bos bir gunu
         geriye donuk «kacirilmis» yapmak, cezalandirmak olurdu.
      3. SON EKLENEN KAZANIR. Ayni gune iki istisna dusuyorsa sonraki
-        gecerlidir; ikisi de kayitta durur. */
+        gecerlidir; ikisi de kayitta durur.
+
+   TAKVIM KAYITLARI (Rehber › Istisnalar: tatil, okul sinavi, yogun gun,
+   ekstra calisma) da bu modulden gecer. Eskiden yalniz haftanin «yuk»
+   sayisini degistiriyorlardi: ekran «plan yuku guncellendi» diyordu ama
+   tatil gunundeki bloklar oldugu gibi duruyordu. Simdi yuku 0 olan kayit
+   ARA gunudur; otekiler ders gununun suresini yuk oraninda olcekler
+   (deneme ve kapanis yine olceklenmez). Kendi istisnan takvim kaydinin
+   ONUNE gecer: «Carsamba 5 saat calisacagim» demek, o gunun takvimdeki
+   «yogun gun» isaretinden daha ozgul bir sozdur. Takvim kaydi burada
+   SAKLANMAZ; kaydi R.Model.saveCalendar tutar, bu modul yalniz okur. */
 
 window.R = window.R || {};
 
@@ -96,9 +106,51 @@ R.Istisna = (function(){
 
   /* ------------------------------------------------------------ hesaplar */
 
-  function gunIcin(iso){
+  function kendiIcin(iso){
     const l = liste().filter(x => x.from <= iso && iso <= x.to);
     return l.length ? l[l.length - 1] : null;
+  }
+
+  function takvimTuru(kind){
+    const K = (R.Model && R.Model.CALENDAR_KINDS) || {};
+    return K[kind] || K.tatil || { label:'Takvim' };
+  }
+
+  /* Takvim kaydini istisna bicimine cevirir. Gunluk dakika tarihe
+     baglidir (kalici sure bir tarihten sonra baslamis olabilir), o yuzden
+     `iso` verilince o gunun dakikasi hesaplanir. */
+  function takvimKaydi(c, iso){
+    const load = Number(c.load);
+    const kayit = { id:c.id, from:c.from, to:c.to || c.from, kaynak:'takvim', kind:c.kind,
+      neden:String(c.note || '').trim() || takvimTuru(c.kind).label };
+    if(!(load > 0)) return Object.assign(kayit, { tur:'ara' });
+    const temel = temelDakika(iso || c.from) || sablonDakikasi();
+    const dk = Math.round(temel * load / 5) * 5;
+    return Object.assign(kayit, { tur:'sure', carpan:load,
+      dakika:Math.min(DAKIKA.max, Math.max(DAKIKA.min, dk)) });
+  }
+
+  /* Takvim sirali tutulur (baslangica gore); cakisan kayitlarda ilk
+     baslayan gecerlidir — R.Model.dayLoad eskiden de boyle okuyordu. */
+  function takvimIcin(iso){
+    const c = ((R.S && R.S.calendar) || []).find(x => x && U.isISO(x.from)
+      && x.from <= iso && iso <= (x.to || x.from));
+    if(!c || Number(c.load) === 1) return null;
+    return takvimKaydi(c, iso);
+  }
+
+  function gunIcin(iso){
+    return kendiIcin(iso) || takvimIcin(iso);
+  }
+
+  /* Bugun ve sonrasini etkileyen takvim kayitlari — ekranda kendi
+     istisnalarinin yaninda, «bitir» dugmesi OLMADAN gosterilir: onlar
+     Rehber › Istisnalar'dan yonetilir. */
+  function takvimde(){
+    const bugun = U.todayISO();
+    return ((R.S && R.S.calendar) || [])
+      .filter(c => c && U.isISO(c.from) && (c.to || c.from) >= bugun && Number(c.load) !== 1)
+      .map(c => takvimKaydi(c));
   }
 
   function aralik(from, to){
@@ -292,6 +344,22 @@ R.Istisna = (function(){
 
   /* ------------------------------------------------------------- ozetler */
 
+  /* Bir gunun calisma orani: ara 0, olceklenmis ders gunu temel sureye
+     orani, dokunulmamis gun 1. Deneme ve kapanis gunleri olceklenmedigi
+     icin sure istisnasinda da 1'dir — oran, gunun GERCEKTE ne kadar
+     calisma icerdigini soyler. R.Model.dayLoad buradan okur; plan
+     ureteci ve haftalik soru hedefi ayni sayiyi gorur. */
+  function gunYuku(iso){
+    const x = gunIcin(iso);
+    if(!x) return 1;
+    if(x.tur === 'ara') return 0;
+    const tmpl = (R.WEEKDAYS || [])[U.weekdayIndex(iso)];
+    if(tmpl && SABIT_RITUEL.indexOf(tmpl.ritual) >= 0) return 1;
+    if(x.kaynak === 'takvim') return Number(x.carpan);
+    const temel = temelDakika(iso) || sablonDakikasi();
+    return temel ? U.round(Number(x.dakika) / temel, 2) : 1;
+  }
+
   function haftaAraGunu(n){
     return R.Model.weekDates(n).map(d => U.iso(d))
       .filter(iso => { const x = gunIcin(iso); return x && x.tur === 'ara'; }).length;
@@ -308,6 +376,10 @@ R.Istisna = (function(){
     if(!x) return '';
     const tarih = x.from === x.to ? U.fmtShort(x.from)
       : U.fmtShort(x.from) + ' – ' + U.fmtShort(x.to);
+    if(x.kaynak === 'takvim'){
+      return takvimTuru(x.kind).label + (x.tur === 'sure' ? ' · yük %' + Math.round(x.carpan * 100) : '')
+        + ' · ' + tarih;
+    }
     return x.tur === 'ara' ? 'Ara · ' + tarih
       : 'Günde ' + x.dakika + ' dk · ' + tarih;
   }
@@ -316,6 +388,7 @@ R.Istisna = (function(){
     TURLER, DAKIKA, STORE,
     liste, yukle, dogrula, dakikaGecerli, gunIcin, aralik, olcekle, gunuBicimle,
     dokunulmamis, etki, ekle, kaldir, bitir, temeliYenile, temelDakika, sablonDakikasi,
-    kapasiteSaati, haftaAraGunu, etkin, tanim,
+    kapasiteSaati, haftaAraGunu, gunYuku, etkin, takvimde, tanim,
+    yenile:araligiYenile,
   };
 })();

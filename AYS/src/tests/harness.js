@@ -170,7 +170,7 @@ R.Test = (function(){
     S.exams = []; S.errors = []; S.cards = []; S.protocols = [];
     S.prefs = R.Model.defaultPrefs();
     S.videoNotes = []; S.activities = []; S.mood = {}; S.breaks = []; S.plan = null;
-    S.calendar = []; S.sessions = []; S.profiles = [];
+    S.calendar = []; S.sessions = []; S.profiles = []; S.istisnalar = [];
     S.usage = null; S.forecasts = []; S.signals = []; S.storage = null;
     S.meta = { lastBackupAt:null, schemaVersion:R.SCHEMA_VERSION };
     S.ui = { weekView:null, examTab:'list', examOpen:null, cardTab:'due',

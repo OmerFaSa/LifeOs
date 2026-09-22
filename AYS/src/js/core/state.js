@@ -304,6 +304,10 @@ R.Model = (function(){
             name:t, questionTarget:perTopic, accuracy:70, subjectId:null, topicId:null,
           }))),
       questionTarget:c.q,
+      /* Hedefin YAZILDIGI andaki yuk: plan ureteci takvimi zaten
+         hesaba katmis olabilir. Gerceklesme hedefi bu yukten guncel
+         yuke orantilanir, ayni tatil iki kez dusulmez (calc.js). */
+      planLoad:c.load == null ? 1 : c.load,
       examPlan:c.exam,
       checkpoint:c.check,
       capacityMin: Math.round(R.PROGRAM.capacityHoursPerWeek*60),
@@ -904,8 +908,11 @@ R.Model = (function(){
 
 
   /* ---------- takvim istisnalari ----------
-     Tatil, okul sinavi ya da yogun gun: plan bu gunleri gormezden gelmez,
-     yuku komsu gunlere dagitir. load 0..1 = o gun calisilabilecek oran. */
+     Tatil, okul sinavi ya da yogun gun. load = o gun calisilabilecek oran.
+     Kayit burada tutulur; gunlere UYGULANMASI core/istisna.js'tedir:
+     tatil ara gunu olur, oteki turler ders gununun suresini olcekler.
+     Kaydetmek ve silmek araliktaki kayitli gunleri hemen yeniler —
+     eskiden yalniz «yuk» sayisi degisiyor, gunler oldugu gibi kaliyordu. */
   const CALENDAR_KINDS = {
     tatil:      { label:'Tatil / izin',   load:0,    tone:'muted' },
     okulSinavi: { label:'Okul sınavı',    load:0.35, tone:'warn'  },
@@ -917,20 +924,30 @@ R.Model = (function(){
     const doc = Object.assign({ id:U.uid('k'), kind:'tatil', note:'' }, rec);
     if(doc.load == null) doc.load = (CALENDAR_KINDS[doc.kind] || CALENDAR_KINDS.tatil).load;
     const i = R.S.calendar.findIndex(x => x.id === doc.id);
+    const eski = i >= 0 ? R.S.calendar[i] : null;
     if(i >= 0) R.S.calendar[i] = doc; else R.S.calendar.push(doc);
     R.S.calendar.sort((a, b) => (a.from || '').localeCompare(b.from || ''));
     await R.Store.set('calendar/' + doc.id, doc);
+    if(R.Istisna){
+      if(eski) await R.Istisna.yenile(eski.from, eski.to || eski.from);
+      await R.Istisna.yenile(doc.from, doc.to || doc.from);
+    }
     return doc;
   }
   async function deleteCalendar(id){
+    const eski = R.S.calendar.find(x => x.id === id);
     R.S.calendar = R.S.calendar.filter(x => x.id !== id);
     await R.Store.remove('calendar/' + id);
+    if(eski && R.Istisna) await R.Istisna.yenile(eski.from, eski.to || eski.from);
   }
-  /* Bir gunun calisma carpani: istisna yoksa 1. */
+  /* Bir gunun calisma carpani: istisna yoksa 1. Takvim kaydi da kendi
+     istisnan da (ara, gecici sure) sayilir; sayiyi core/istisna.js verir
+     ki plan ureteci ve haftalik hedef gunun GERCEK halini gorsun. */
   function dayLoad(dateISO){
     const iso = dateISO || U.todayISO();
     const hit = R.S.calendar.find(x => iso >= x.from && iso <= (x.to || x.from));
-    return hit ? { load:hit.load, kind:hit.kind, note:hit.note, id:hit.id } : { load:1, kind:null, note:'', id:null };
+    const load = R.Istisna ? R.Istisna.gunYuku(iso) : (hit ? hit.load : 1);
+    return hit ? { load, kind:hit.kind, note:hit.note, id:hit.id } : { load, kind:null, note:'', id:null };
   }
   /* Haftanin kapasite carpani — plan ureteci ve otomasyon okur. */
   function weekLoad(n){

@@ -133,8 +133,9 @@ R.Screens.guide = (function(){
   }
 
   /* ---------- takvim istisnaları ----------
-     Tatil, okul sınavı ya da yoğun gün: plan bu günleri görmezden gelmez,
-     haftanın yükünü otomatik düşürür. */
+     Tatil, okul sınavı ya da yoğun gün. Kaydetmek araliktaki günleri
+     hemen yeniden kurar (core/istisna.js): tatil ara günü olur, öteki
+     türler ders gününün süresini yük oranında ölçekler. */
 
   function exceptionRow(x){
     const kind = M.CALENDAR_KINDS[x.kind] || M.CALENDAR_KINDS.tatil;
@@ -149,6 +150,16 @@ R.Screens.guide = (function(){
         ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'kaldır',
           act:'cal-del', data:{ 'data-id':x.id } })}
       </div>`;
+  }
+
+  /* Takvim kaydı günleri gerçekten değiştirir; mesaj ne olduğunu söyler.
+     İlerlemesi başlamış gün yeniden kurulmaz ve bu SÖYLENİR. */
+  function takvimMesaji(bas, from, to){
+    const bugun = U.todayISO();
+    if(to < bugun) return bas + ' — geçmiş günlerin planı değişmez, haftalık hedef güncellendi';
+    const korunan = R.Istisna ? R.Istisna.etki(from, to).korunan.length : 0;
+    return bas + ' — günlerin planı güncellendi'
+      + (korunan ? '; ilerlemesi başlamış ' + U.plural(korunan, 'gün', 'gün') + ' olduğu gibi kaldı' : '');
   }
 
   function istisnaTab(){
@@ -186,8 +197,10 @@ R.Screens.guide = (function(){
                 rows:weekRows.map(r => ['H' + r.n, U.fmtRange(r.from, r.to),
                   html`<span class="${r.load < 1 ? 'num is-down' : 'num is-up'}">%${Math.round(r.load * 100)}</span>`]) })
             : K.Empty({ icon:'check', text:'Önümüzdeki sekiz hafta tam yükte.' }) }),
-        K.Notice({ tone:'info', body:'Yük çarpanı haftalık soru hedefini doğrudan etkiler. '
-          + 'Plan yeniden hesaplandığında bu istisnalar da hesaba katılır.' }),
+        K.Notice({ tone:'info', body:'Tatil günü ara günü olur: blok yok ve kaçırılmış sayılmaz. '
+          + 'Okul sınavı, yoğun gün ve ekstra çalışma ders gününün süresini yük oranında değiştirir; '
+          + 'deneme ve kapanış günleri kısalmaz. Haftalık soru hedefi güncel yüke göre ayarlanır. '
+          + 'İlerlemesi başlamış bir güne dokunulmaz.' }),
         K.Button({ label:'Planı yeniden hesapla', icon:'refresh', act:'auto-replan' }),
       ])),
     ]);
@@ -744,12 +757,13 @@ R.Screens.guide = (function(){
       if(!from){ UI.toast('Başlangıç tarihi gerekli'); return; }
       if(to && to < from){ UI.toast('Bitiş, başlangıçtan önce olamaz'); return; }
       await M.saveCalendar({ kind, from, to:to || from, note });
-      UI.toast('İstisna eklendi — plan yükü güncellendi');
+      UI.toast(takvimMesaji('İstisna eklendi', from, to || from));
       R.App.render();
     },
     async 'cal-del'(el){
+      const x = S.calendar.find(c => c.id === el.dataset.id);
       await M.deleteCalendar(el.dataset.id);
-      UI.toast('İstisna kaldırıldı');
+      UI.toast(x ? takvimMesaji('İstisna kaldırıldı', x.from, x.to || x.from) : 'İstisna kaldırıldı');
       R.App.render();
     },
     async 'set-tone'(el){
