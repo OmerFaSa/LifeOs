@@ -4,7 +4,7 @@
    okunmus olmali. */
 
 (function(){
-  const { describe, it, expect, resetState, withToday, pushSession, withTodayAsync } = ESP.Test;
+  const { describe, it, expect, resetState, withToday, pushSession, withTodayAsync, pushCard } = ESP.Test;
   const M = ESP.Model, S = ESP.S, U = ESP.U;
 
   describe('kesinlik — girilmemis alan sifir degildir', () => {
@@ -123,6 +123,28 @@
         resetState();
         pushSession('2026-09-11', 'lang', 20);
         pushSession('2026-09-09', 'lang', 20);
+        expect(M.streak()).toBe(1);
+      });
+    });
+
+    it('yalnız kart çalışılan gün de seriye girer', () => {
+      /* `grade-card` (ekran) SRS'e yazar, OTURUM açmaz. Kullanıcı o gün
+         yalnız kart çalışıp `log-review`e hiç basmasa, gün "dokunulmamış"
+         sayılıp seri kırılıyordu — kullanıcı gerçekten çalışmış olsa
+         bile. Kartın kendi `history`si bağımsız bir kanıttır. */
+      withToday('2026-09-12', () => {
+        resetState();
+        pushCard({ history:[{ at:'2026-09-12T09:00:00.000Z', grade:'again', box:1, interval:1 }] });
+        pushSession('2026-09-11', 'lang', 20);
+        expect(M.streak()).toBe(2);
+      });
+    });
+
+    it('yalnız kart çalışılan gün seriyi TIKAMAZ — arada gerçek boşluk hâlâ durur', () => {
+      withToday('2026-09-12', () => {
+        resetState();
+        pushCard({ history:[{ at:'2026-09-12T09:00:00.000Z', grade:'again', box:1, interval:1 }] });
+        pushSession('2026-09-09', 'lang', 20);   // 10 ve 11 boş
         expect(M.streak()).toBe(1);
       });
     });

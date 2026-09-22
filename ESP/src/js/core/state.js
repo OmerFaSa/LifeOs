@@ -491,13 +491,38 @@ ESP.Model = (function(){
 
      Bugun henuz girilmemisse seri KIRILMIS sayilmaz — gun bitmedi.
      Sayim dunden baslar, bugun varsa ona eklenir. */
+  /* KART ÇALIŞMASI SERİYİ BESLEMİYORDU.
+
+     `dayHasEntry` yalnız OTURUM sayar (`days[d].sessions`). Ama karta
+     cevap veren ekran eylemi (`grade-card`) doğrudan `ESP.SRS.answer`
+     çağırır ve SRS'e yazar — oturum AÇMAZ. Kullanıcı o gün yalnız kart
+     çalışıp `log-review`e hiç basmazsa (ya da `end-review` ile
+     kapatırsa), o gün "dokunulmamış" sayılıyor ve seri kırılıyordu —
+     kullanıcı gerçekten çalışmış olmasına rağmen.
+
+     Kartın kendi `history`si (her cevapta damgalanır, `core/srs.js`)
+     BAĞIMSIZ bir kanıttır: bir kart o gün cevaplandıysa, o gün
+     dokunulmuştur. Bu düzeltme yalnız SERİ içindir — `dayHasEntry`nin
+     kendisi (XP gün sayacı, müfredatın "dokunuldu" izi) bilerek
+     DEĞİŞTİRİLMEDİ: o, ayrı ve daha geniş bir karardır. */
+  function _kartGunleri(){
+    const gunler = {};
+    S.cards.forEach(c => (c.history || []).forEach(h => {
+      const d = (h.at || '').slice(0, 10);
+      if(d) gunler[d] = true;
+    }));
+    return gunler;
+  }
+
   function streak(){
     let n = 0;
     const bugun = U.todayISO();
-    if(dayHasEntry(S.days[bugun])) n = 1;
+    const kartGunleri = _kartGunleri();
+    const dokunuldu = d => dayHasEntry(S.days[d]) || kartGunleri[d] === true;
+    if(dokunuldu(bugun)) n = 1;
     for(let i = 1; i < 400; i++){
       const d = U.iso(U.addDays(U.parse(bugun), -i));
-      if(dayHasEntry(S.days[d])) n++;
+      if(dokunuldu(d)) n++;
       else break;
     }
     return n;
