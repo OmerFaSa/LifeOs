@@ -28,7 +28,13 @@ R.Screens.week = (function(){
     const planned = day ? day.blocks.filter(b => b.slot !== 'Dinlenme').length : 0;
     const done = day ? day.blocks.filter(b => b.status === 'done').length : 0;
 
-    const blocks = day
+    /* Ara gunu — kaydi olsun ya da olmasin — «ara» diye gorunur; sablonun
+       onizlemesi gosterilirse plan bozulmus gibi okunur. */
+    const ist = R.Istisna ? R.Istisna.gunIcin(iso) : null;
+    const araGunu = (day && day.ara) || (!day && ist && ist.tur === 'ara');
+    const blocks = araGunu
+      ? html`<div class="daycol__block is-preview"><b>Ara</b><br/>${(ist && ist.neden) || 'plan boş'}</div>`
+      : day
       ? map(day.blocks, b => html`<div class="${b.status === 'done' ? 'daycol__block is-done'
           : b.status === 'skipped' ? 'daycol__block is-skipped' : 'daycol__block'}">
           <b>${b.slot}</b><br/>${b.topic}</div>`)
@@ -127,7 +133,7 @@ R.Screens.week = (function(){
         <div class="cols-2 mb-10">
           ${K.Stat({ label:'Plan tamamlama', value:comp == null ? '—' : '%'+comp,
             tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' })}
-          ${K.Stat({ label:'Soru gerçekleşme', value:qr ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target : 'hedef yok' })}
+          ${K.Stat({ label:'Soru gerçekleşme', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target : 'hedef yok' })}
         </div>
         ${reasonChips(reasons) || html`<p class="small dim">Bu hafta atlanan blok yok.</p>`}
         ${when(rev && rev.decision, () => html`<div class="mt-10">${K.Notice({ tone:'ok', title:'Düzeltme:', body:rev.decision })}</div>`)}
@@ -212,7 +218,7 @@ R.Screens.week = (function(){
         + 'Yeni haftaya yalnız en yüksek etkili iki eksik taşınır.' }),
       K.Cols(4, [
         K.Stat({ label:'Plan', value:comp == null ? '—' : '%'+comp }),
-        K.Stat({ label:'Soru', value:qr ? '%'+qr.pct : '—' }),
+        K.Stat({ label:'Soru', value:qr && qr.pct != null ? '%'+qr.pct : '—' }),
         K.Stat({ label:'Son 3 medyan', value:tyt.last3 == null ? '—' : U.fmtNet(tyt.last3) }),
         K.Stat({ label:'Taban', value:base == null ? '—' : U.fmtNet(base) }),
       ]),
@@ -282,6 +288,82 @@ R.Screens.week = (function(){
     ], { between:true, wrap:true }));
   }
 
+  /* ---------- planin sekli: temel + tarihli istisna ----------
+
+     Degisiklikler oneri kutusundan gecer (core/proposals.js): hepsi ORTA
+     seviyededir, once onizleme gorulur, sonra tek dokunusla uygulanir ve
+     ofis ekraninda «Geri al» ile geri alinabilir. */
+
+  function istisnaCard(){
+    const I = R.Istisna;
+    if(!I) return '';
+    const temel = I.temelDakika();
+    const liste = I.etkin();
+    return K.Card({ title:'Planın şekli', sub:'Temel plan + tarihli istisnalar',
+      body:html`
+        <div class="row gap-8" style="justify-content:space-between;align-items:center">
+          <span class="small">Ders günü: <b>${temel || I.sablonDakikasi()} dk</b>
+            <span class="dim">${temel ? '(kalıcı ayar)' : '(şablon)'}</span></span>
+          ${K.Button({ label:'Değiştir', size:'sm', tone:'ghost', act:'istisna-ac',
+            data:{ 'data-tur':'gunluk' } })}
+        </div>
+        ${when(liste.length, () => html`<div class="stack-xs mt-10">${map(liste, x => html`
+          <div class="row gap-8" style="justify-content:space-between;align-items:center">
+            <span class="small">${I.tanim(x)}${when(x.neden, () => html` <span class="dim">· ${x.neden}</span>`)}</span>
+            ${K.Button({ label:x.from > U.todayISO() ? 'Kaldır' : 'Bitir', size:'sm', tone:'ghost',
+              act:'istisna-bitir', data:{ 'data-id':x.id } })}
+          </div>`)}</div>`)}
+        ${when(!liste.length, () => html`<p class="small dim mt-8">Etkin istisna yok; plan temel düzeninde.</p>`)}
+        <div class="row gap-8 mt-10" style="flex-wrap:wrap">
+          ${K.Button({ label:'Ara ver', icon:'pause', size:'sm', act:'istisna-ac', data:{ 'data-tur':'ara' } })}
+          ${K.Button({ label:'Geçici süre', icon:'clock', size:'sm', act:'istisna-ac', data:{ 'data-tur':'sure' } })}
+        </div>` });
+  }
+
+  const ISTISNA_EYLEM = { ara:'ara-ver', sure:'gecici-sure', gunluk:'gunluk-sure' };
+  let istisnaTaslak = null;
+
+  function istisnaParams(tur){
+    const v = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+    if(tur === 'gunluk') return { dakika:Number(v('ist-dakika')) };
+    const p = { from:v('ist-from'), to:v('ist-to') };
+    if(tur === 'sure') p.dakika = Number(v('ist-dakika'));
+    return p;
+  }
+
+  function istisnaForm(tur, p){
+    const bugun = U.todayISO();
+    const tarih = (id, label, value) => K.Field({ label,
+      input:K.Input({ id, type:'date', value:value || bugun }) });
+    const dakika = value => K.Field({ label:'Ders günü süresi (dakika)',
+      hint:R.Istisna.DAKIKA.min + '–' + R.Istisna.DAKIKA.max,
+      input:K.Input({ id:'ist-dakika', type:'number', numeric:true, value:value || '' }) });
+    return html`<div class="stack-sm">
+      ${when(tur !== 'gunluk', () => tarih('ist-from', 'Başlangıç', p.from))}
+      ${when(tur !== 'gunluk', () => tarih('ist-to', 'Bitiş', p.to))}
+      ${when(tur !== 'ara', () => dakika(p.dakika))}
+    </div>`;
+  }
+
+  function istisnaSheet(tur, p, pv){
+    const baslik = { ara:'Ara ver', sure:'Geçici günlük süre', gunluk:'Günlük çalışma süresi' }[tur];
+    const alt = { ara:'Seçtiğin günlerde plan boş kalır; ara bitince kaldığı yerden sürer.',
+      sure:'Ders günlerinin süresi yalnız bu tarihlerde değişir; sonra temel plana döner.',
+      gunluk:'Kalıcı değişiklik: kapasite ve plan bu haftadan itibaren yeniden dağıtılır.' }[tur];
+    UI.sheet({ title:baslik, subtitle:alt,
+      body:String(html`${istisnaForm(tur, p || {})}
+        ${when(pv && !pv.ok, () => html`<div class="mt-10">${K.Notice({ tone:'warn', body:pv.why })}</div>`)}
+        ${when(pv && pv.ok, () => html`<div class="diff mt-10">${map(pv.rows, r => html`
+          <div class="diff__row"><span class="diff__label">${r.label}</span>
+            <span class="diff__before">${r.before}</span><span class="diff__arrow" aria-hidden="true">→</span>
+            <span class="diff__after">${r.after}</span></div>`)}</div>`)}`),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${pv && pv.ok
+          ? K.Button({ label:'Uygula', tone:'primary', act:'istisna-uygula' })
+          : K.Button({ label:'Önizle', tone:'primary', act:'istisna-onizle' })}`),
+    });
+  }
+
   async function render(){
     const n = viewN();
     await M.ensureWeek(n);
@@ -301,6 +383,7 @@ R.Screens.week = (function(){
       ])),
 
       K.Span(4, K.Stack([
+        istisnaCard(),
         digestCard(n),
         reviewCard(n),
         K.Card({ title:'Müfredat referansı', sub:'Bu haftanın plandaki karşılığı', body:html`
@@ -320,6 +403,53 @@ R.Screens.week = (function(){
   }
 
   const handle = {
+    'istisna-ac'(el){
+      const tur = el.dataset.tur;
+      istisnaTaslak = { tur, p:{} };
+      istisnaSheet(tur, {}, null);
+    },
+    'istisna-onizle'(){
+      if(!istisnaTaslak) return;
+      const tur = istisnaTaslak.tur;
+      const p = istisnaParams(tur);
+      istisnaTaslak.p = p;
+      const pv = R.Proposals.preview({ action:ISTISNA_EYLEM[tur], agent:'patron', params:p });
+      istisnaSheet(tur, p, pv);
+    },
+    async 'istisna-uygula'(){
+      if(!istisnaTaslak) return;
+      const { tur, p } = istisnaTaslak;
+      /* Kullanicinin kendi istegi: oneri kutusundan gecer ki ofiste
+         «Geri al» ile geri alinabilsin. Orta seviye oldugu icin talep
+         bekler; kullanici onizlemeyi gorup «Uygula»ya bastigi icin burada
+         onaylanir. */
+      const t = await R.Proposals.talep({ action:ISTISNA_EYLEM[tur], agent:'patron',
+        source:'istek', params:p, reason:'Hafta ekranından.' });
+      let ok = false, why = t.why;
+      if(t.row){
+        const r = t.otomatik ? { ok:true } : await R.Proposals.approve(t.row.id);
+        ok = !!(r && r.ok);
+        if(!ok) why = r && r.why;
+      }
+      istisnaTaslak = null;
+      UI.closeSheet();
+      UI.toast(ok ? 'Plan güncellendi · ofiste geri alınabilir' : (why || 'Uygulanamadı'));
+      R.App.render();
+    },
+    'istisna-bitir'(el){
+      const id = el.dataset.id;
+      const x = R.Istisna.liste().find(i => i.id === id);
+      if(!x) return;
+      const basladi = x.from <= U.todayISO();
+      UI.confirmSheet(basladi ? 'İstisnayı bugün bitir' : 'İstisnayı kaldır',
+        basladi ? 'Bugün ve sonraki günler temel plana göre yeniden kurulur. Geçmiş günler olduğu gibi kalır.'
+          : 'Bu istisna hiç uygulanmamış gibi kalkar.',
+        async () => {
+          const r = await R.Istisna.bitir(id);
+          UI.toast(r.ok ? 'Plan temel düzenine döndü' : r.why);
+          R.App.render();
+        });
+    },
     async 'week-nav'(el){
       S.ui.weekView = U.clamp(Number(el.dataset.n), 1, R.PLAN.totalWeeks);
       await M.ensureWeek(S.ui.weekView);

@@ -123,7 +123,12 @@ R.Calc = (function(){
     const week = S.weeks[M.weekId(n)];
     if(!week) return null;
     const solved = U.sum(weekBlocks(n).map(b => b.actualQ || 0));
-    return { solved, target:week.questionTarget, pct:U.pct(solved, week.questionTarget) };
+    /* Ara gunleri hedeften dusulur: «bu hafta 2 gun ara» diyen birinin
+       haftasi tam hedefe gore «tutmadi» gorunmemeli. Butun hafta araysa
+       hedef yoktur ve gerceklesme olculemez — sifir degil, «veri yok». */
+    const araGun = R.Istisna ? R.Istisna.haftaAraGunu(n) : 0;
+    const target = araGun ? Math.round(week.questionTarget * (7 - araGun) / 7) : week.questionTarget;
+    return { solved, target, araGun, pct:target > 0 ? U.pct(solved, target) : null };
   }
   function timeRealization(n){
     const blocks = weekBlocks(n);
@@ -334,9 +339,10 @@ R.Calc = (function(){
         }else if(!future && iso >= R.PLAN.startISO){
           missed = true;
         }
+        const ara = !!(day && day.ara);
         cells.push({
           value, future, missed, iso,
-          label:U.fmtDate(iso) + (value != null ? ' · %'+Math.round(value*100)+' yük' : future ? ' · planlandı' : missed ? ' · kayıt yok' : ''),
+          label:U.fmtDate(iso) + (ara ? ' · ara' : value != null ? ' · %'+Math.round(value*100)+' yük' : future ? ' · planlandı' : missed ? ' · kayıt yok' : ''),
         });
       });
     }

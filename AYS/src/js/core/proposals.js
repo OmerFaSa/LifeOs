@@ -266,6 +266,112 @@ R.Proposals = (function(){
       async revert(s){ await R.Office.closeDecision(s.id, 'open'); },
     },
 
+    /* ==================== PLANIN ŞEKLİ ====================
+       Temel plan + tarihli istisna — core/istisna.js. */
+
+    'ara-ver':{
+      check(p){
+        const v = R.Istisna.dogrula({ tur:'ara', from:p.from, to:p.to });
+        if(!v.ok) return v;
+        return pass({ gun:v.gun, etki:R.Istisna.etki(p.from, p.to) });
+      },
+      preview(p, ctx){
+        const rows = [
+          { label:'Ara', before:'plan', after:tarihAraligi(p.from, p.to) + ' · ' + ctx.gun + ' gün' },
+          { label:'Günün blokları', before:'plana göre', after:'boş' },
+          { label:'Haftalık soru hedefi', before:'tam', after:'ara günleri oranında küçülür' },
+        ];
+        if(ctx.etki.korunan.length){
+          rows.push({ label:'İlerlemesi başlamış gün', before:'—',
+            after:ctx.etki.korunan.length + ' gün, dokunulmaz' });
+        }
+        return rows;
+      },
+      async apply(p){
+        const r = await R.Istisna.ekle({ tur:'ara', from:p.from, to:p.to });
+        if(!r.ok) throw new Error(r.why);
+        return { id:r.id };
+      },
+      async revert(s){ if(s && s.id) await R.Istisna.kaldir(s.id); },
+    },
+
+    'gecici-sure':{
+      check(p){
+        const v = R.Istisna.dogrula({ tur:'sure', from:p.from, to:p.to, dakika:p.dakika });
+        if(!v.ok) return v;
+        return pass({ gun:v.gun, dk:Math.round(Number(p.dakika)), etki:R.Istisna.etki(p.from, p.to) });
+      },
+      preview(p, ctx){
+        const temel = R.Istisna.temelDakika(p.from) || R.Istisna.sablonDakikasi();
+        const rows = [
+          { label:'Ders günü süresi', before:temel + ' dk', after:ctx.dk + ' dk' },
+          { label:'Tarih', before:'—', after:tarihAraligi(p.from, p.to) + ' · ' + ctx.gun + ' gün' },
+          { label:'Deneme ve kapanış günleri', before:'olduğu gibi', after:'değişmez' },
+          { label:'Tarih bitince', before:'—', after:'temel plana döner' },
+        ];
+        if(ctx.etki.korunan.length){
+          rows.push({ label:'İlerlemesi başlamış gün', before:'—',
+            after:ctx.etki.korunan.length + ' gün, dokunulmaz' });
+        }
+        return rows;
+      },
+      async apply(p){
+        const r = await R.Istisna.ekle({ tur:'sure', from:p.from, to:p.to, dakika:p.dakika });
+        if(!r.ok) throw new Error(r.why);
+        return { id:r.id };
+      },
+      async revert(s){ if(s && s.id) await R.Istisna.kaldir(s.id); },
+    },
+
+    'gunluk-sure':{
+      check(p){
+        const dk = Math.round(Number(p.dakika));
+        if(!R.Istisna.dakikaGecerli(dk)){
+          return fail('Günlük süre ' + R.Istisna.DAKIKA.min + '–' + R.Istisna.DAKIKA.max
+            + ' dakika arasında olmalı.');
+        }
+        const simdi = R.Istisna.temelDakika() || R.Istisna.sablonDakikasi();
+        if(simdi === dk) return fail('Günlük süre zaten ' + dk + ' dakika.');
+        return pass({ dk, simdi, eskiKapasite:S.profile.capacityHoursPerWeek,
+          yeniKapasite:R.Istisna.kapasiteSaati(dk) });
+      },
+      preview(p, ctx){
+        return [
+          { label:'Ders günü süresi', before:ctx.simdi + ' dk', after:ctx.dk + ' dk' },
+          { label:'Haftalık kapasite', before:ctx.eskiKapasite + ' sa', after:ctx.yeniKapasite + ' sa' },
+          { label:'Plan', before:'eski kapasiteye göre', after:'bu haftadan itibaren yeniden dağıtılır' },
+          { label:'Geçmiş haftalar', before:'—', after:'değişmez' },
+        ];
+      },
+      async apply(p, ctx){
+        const pr = S.profile;
+        const geri = {
+          gunlukDakika:pr.gunlukDakika == null ? null : pr.gunlukDakika,
+          gunlukDakikaFrom:pr.gunlukDakikaFrom == null ? null : pr.gunlukDakikaFrom,
+          kapasite:pr.capacityHoursPerWeek,
+          plan:S.plan ? JSON.parse(JSON.stringify(S.plan)) : null,
+        };
+        pr.gunlukDakika = ctx.dk;
+        pr.gunlukDakikaFrom = U.todayISO();
+        pr.capacityHoursPerWeek = ctx.yeniKapasite;
+        await M.saveProfile();
+        if(pr.setupDone || S.plan) await M.replanFrom(M.currentWeek());
+        await R.Istisna.temeliYenile();
+        return geri;
+      },
+      async revert(s){
+        const pr = S.profile;
+        if(s.gunlukDakika == null) delete pr.gunlukDakika; else pr.gunlukDakika = s.gunlukDakika;
+        if(s.gunlukDakikaFrom == null) delete pr.gunlukDakikaFrom; else pr.gunlukDakikaFrom = s.gunlukDakikaFrom;
+        pr.capacityHoursPerWeek = s.kapasite;
+        await M.saveProfile();
+        S.plan = s.plan;
+        if(s.plan) await R.Store.set('plan/main', s.plan);
+        else await R.Store.remove('plan/main');
+        await R.Istisna.temeliYenile();
+      },
+    },
+
     /* ==================== KONUŞARAK VERİ GİRİŞİ ====================
 
        Yukarıdaki eylemler PLAN eylemleridir: konuyu tekrara al, blok
@@ -456,6 +562,10 @@ R.Proposals = (function(){
       },
     },
   };
+
+  function tarihAraligi(from, to){
+    return from === to ? U.fmtShort(from) : U.fmtShort(from) + ' – ' + U.fmtShort(to);
+  }
 
   function cardFront(err){
     const head = err.topic || err.testName || 'Yanlış';

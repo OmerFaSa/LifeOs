@@ -9284,7 +9284,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'3653307', at:'2026-09-22 20:17', dirty:true };
+R.BUILD = { id:'22a1d6b', at:'2026-09-22 20:28', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13185,6 +13185,51 @@ R.ACTIONS = [
     why:'Kapanmayan karar bir sonraki toplantının önüne düşer.',
   },
 
+  /* ==================== PLANIN ŞEKLİ ====================
+
+     Temel plan + tarihli istisna (core/istisna.js). Üçü de ORTA
+     seviyededir: bir haftayı ya da bir dönemi değiştirirler; kullanıcı
+     istemiş olsa bile önizlemeyi görüp tek dokunuşla onaylar. İlerlemesi
+     başlamış güne hiçbiri dokunmaz. */
+  {
+    id:'ara-ver',
+    level:'orta',
+    title:'Ara ver',
+    summary:'Seçilen günlerin çalışma blokları boşalır; ara bitince plan kaldığı yerden sürer.',
+    touches:'Günlük plan',
+    icon:'pause',
+    route:'today',
+    agents:['patron', 'rehber'],
+    params:{ from:'string', to:'string' },
+    why:'Hastalık, yolculuk, bayram: gerçek bir ara «kaçırılmış gün» diye '
+      + 'birikmemeli; plan onu bilmeli.',
+  },
+  {
+    id:'gecici-sure',
+    level:'orta',
+    title:'Geçici günlük süre',
+    summary:'Seçilen günlerde ders günlerinin toplam süresi değişir; tarih bitince temele döner.',
+    touches:'Günlük plan',
+    icon:'clock',
+    route:'today',
+    agents:['patron', 'rehber'],
+    params:{ from:'string', to:'string', dakika:'number' },
+    why:'«Sadece bu hafta 4 saat» temel planı ezmemeli; tarihi geçince plan '
+      + 'kendiliğinden eski hâline dönmeli.',
+  },
+  {
+    id:'gunluk-sure',
+    level:'orta',
+    title:'Günlük çalışma süresini değiştir',
+    summary:'Ders günlerinin süresi kalıcı olarak değişir; kapasite ve plan bu haftadan itibaren yeniden dağıtılır.',
+    touches:'Temel plan',
+    icon:'clock',
+    route:'plan',
+    agents:['patron', 'rehber'],
+    params:{ dakika:'number' },
+    why:'Kapasite değiştiyse plan eski kapasiteye göre kurulmuş kalmamalı.',
+  },
+
   /* ==================== KONUŞARAK VERİ GİRİŞİ ====================
 
      Yukarıdakiler PLAN eylemleridir: konuyu tekrara al, blok ekle,
@@ -14331,10 +14376,15 @@ R.Model = (function(){
     if(!doc){
       const week = await ensureWeek(weekOf(d));
       doc = defaultDay(d, week);
+      /* Tarihli istisna (ara, gecici sure) ve kalici gunluk sure gun
+         KURULURKEN uygulanir — core/istisna.js. */
+      if(R.Istisna) R.Istisna.gunuBicimle(doc, id);
       await R.Store.set('days/'+id, doc);
-    }else if(!Array.isArray(doc.blocks) || !doc.blocks.length){
+    }else if(!doc.ara && (!Array.isArray(doc.blocks) || !doc.blocks.length)){
+      /* Ara gunu BILEREK bostur; yeniden doldurulmaz. */
       const week = await ensureWeek(weekOf(d));
       doc.blocks = defaultDay(d, week).blocks;
+      if(R.Istisna) R.Istisna.gunuBicimle(doc, id);
     }
     R.S.days[id] = normDay(doc);
     return R.S.days[id];
@@ -15148,6 +15198,9 @@ R.Model = (function(){
 
     await migrate();
 
+    /* Istisnalar gun kurulmadan ONCE yuklenir: asagidaki ensureDay bugunu
+       kurarken aradaysa bos kurmali. */
+    if(R.Istisna) await R.Istisna.yukle();
     if(R.Friction) await R.Friction.load();
     if(R.Calib) await R.Calib.load();
     if(R.Signals) await R.Signals.load();
@@ -17577,6 +17630,329 @@ R.Planner = (function(){
     scenarios, checkPrerequisites, energyByWeekday };
 })();
 
+/* ==== js/core/istisna.js ==== */
+/* PLAN ISTISNALARI — temel plan + tarihli istisna.
+
+   Kullanici «sadece gelecek hafta gunde 4 saat» ya da «bu hafta ara»
+   dediginde TEMEL plan degismez. Degisiklik bitis tarihi olan bir
+   istisna olarak durur; tarihi gecince plan kendiliginden temele doner.
+   Temeli ezmek, «bir haftaligina» denen seyi kalici yapardi ve bunu
+   geri almak kullanicinin isi olurdu.
+
+   Iki tur:
+     ara    araliktaki gunlerin bloklari bos; paragraf/problem hedefi 0.
+            Ara gunu «kacirilmis gun» degildir ve haftalik soru hedefi
+            ara gunleri oraninda kuculur (calc.js questionRealization).
+     sure   aralikta ders gunlerinin toplam dakikasi degisir. Deneme
+            (Cmt) ve kapanis (Paz) gunleri OLCEKLENMEZ: 165 dakikalik bir
+            denemeyi «gunde 2 saat» diye kisaltmak onu deneme olmaktan
+            cikarir.
+
+   Kalici gunluk sure (profil.gunlukDakika) istisna degil TEMELdir;
+   ayni olcekleme kuralini kullanir, istisna onu gecer.
+
+   Degismezler:
+     1. ILERLEMESI BASLAMIS GUNE DOKUNULMAZ. Blokta sure/soru girilmis,
+        paragraf/problem sayilmis bir gun yeniden kurulmaz; onizleme bunu
+        «korunan» diye soyler. Gercek ilerleme bir plan degisikligiyle
+        kaybolmaz.
+     2. GECMISE YAZILMAZ. Istisna bugunden once baslayamaz; kaldirilinca
+        da yalniz bugun ve sonrasi yeniden kurulur. Gecmis bos bir gunu
+        geriye donuk «kacirilmis» yapmak, cezalandirmak olurdu.
+     3. SON EKLENEN KAZANIR. Ayni gune iki istisna dusuyorsa sonraki
+        gecerlidir; ikisi de kayitta durur. */
+
+window.R = window.R || {};
+
+R.Istisna = (function(){
+  const U = R.U;
+
+  const STORE = 'plan/istisnalar';
+  const MAX = 60;
+  const TURLER = {
+    ara:{ ad:'Ara', maxGun:21 },
+    sure:{ ad:'Geçici süre', maxGun:42 },
+  };
+  const DAKIKA = { min:30, max:720 };
+  /* Olceklenmeyen gun turleri — curriculum.js R.WEEKDAYS `ritual`. */
+  const SABIT_RITUEL = ['exam', 'review'];
+  const MIN_BLOK = 10;
+  const YENILEME_UFKU = 60;   // kalici sure degisince kac gun ileriye bakilir
+
+  function fail(why){ return { ok:false, why }; }
+
+  function liste(){ return ((R.S && R.S.istisnalar) || []).slice(); }
+
+  async function yukle(){
+    let doc = null;
+    try{ doc = await R.Store.get(STORE); }catch(e){ doc = null; }
+    const items = (doc && Array.isArray(doc.items)) ? doc.items : [];
+    R.S.istisnalar = items.filter(x => x && TURLER[x.tur] && U.isISO(x.from) && U.isISO(x.to));
+    return R.S.istisnalar;
+  }
+
+  async function kaydet(){
+    R.S.istisnalar = liste().slice(-MAX);
+    await R.Store.set(STORE, { items:R.S.istisnalar });
+  }
+
+  /* ---------------------------------------------------------- dogrulama */
+
+  function dogrula(ist){
+    const x = ist || {};
+    const tur = TURLER[x.tur];
+    if(!tur) return fail('Bilinmeyen istisna türü.');
+    if(!U.isISO(x.from) || !U.isISO(x.to)) return fail('Başlangıç ve bitiş tarihi anlaşılmadı.');
+    if(x.to < x.from) return fail('Bitiş tarihi başlangıçtan önce olamaz.');
+    if(x.from < U.todayISO()){
+      return fail('Geçmiş günler değiştirilemez; istisna bugünden ya da sonrasından başlamalı.');
+    }
+    const gun = U.diffDays(x.from, x.to) + 1;
+    if(gun > tur.maxGun){
+      return fail(tur.ad + ' en fazla ' + tur.maxGun + ' gün sürebilir; daha uzunu '
+        + 'temel planın değişmesi demektir.');
+    }
+    if(x.tur === 'sure'){
+      const dk = Number(x.dakika);
+      if(x.dakika == null || x.dakika === '' || !isFinite(dk)) return fail('Günlük süre yazılmamış.');
+      if(dk < DAKIKA.min || dk > DAKIKA.max){
+        return fail('Günlük süre ' + DAKIKA.min + '–' + DAKIKA.max + ' dakika arasında olmalı.');
+      }
+    }
+    return { ok:true, gun };
+  }
+
+  function dakikaGecerli(dk){
+    const n = Number(dk);
+    return isFinite(n) && n >= DAKIKA.min && n <= DAKIKA.max;
+  }
+
+  /* ------------------------------------------------------------ hesaplar */
+
+  function gunIcin(iso){
+    const l = liste().filter(x => x.from <= iso && iso <= x.to);
+    return l.length ? l[l.length - 1] : null;
+  }
+
+  function aralik(from, to){
+    const out = [];
+    if(!U.isISO(from) || !U.isISO(to) || to < from) return out;
+    let d = U.parse(from);
+    const son = U.parse(to);
+    while(d <= son && out.length < 400){
+      out.push(U.iso(d));
+      d = U.addDays(d, 1);
+    }
+    return out;
+  }
+
+  /* Sablondaki ders gunu toplami (Pzt–Cum). Kalici sure yoksa temel budur. */
+  function sablonDakikasi(){
+    const gun = (R.WEEKDAYS || []).find(w => SABIT_RITUEL.indexOf(w.ritual) < 0);
+    return gun ? gun.blocks.filter(b => b.slot !== 'Dinlenme')
+      .reduce((a, b) => a + (Number(b.min) || 0), 0) : 0;
+  }
+
+  function temelDakika(iso){
+    const p = (R.S && R.S.profile) || {};
+    if(!dakikaGecerli(p.gunlukDakika)) return null;
+    if(p.gunlukDakikaFrom && iso && iso < p.gunlukDakikaFrom) return null;
+    return Math.round(Number(p.gunlukDakika));
+  }
+
+  /* Ders gunu dakikalarindan haftalik kapasite (saat, yarimlik).
+     Sabit gunler (deneme + kapanis) oldugu gibi eklenir. */
+  function kapasiteSaati(gunlukDakika){
+    const W = R.WEEKDAYS || [];
+    const dersGunu = W.filter(w => SABIT_RITUEL.indexOf(w.ritual) < 0).length;
+    const sabit = W.filter(w => SABIT_RITUEL.indexOf(w.ritual) >= 0)
+      .reduce((a, w) => a + w.blocks.filter(b => b.slot !== 'Dinlenme')
+        .reduce((x, b) => x + (Number(b.min) || 0), 0), 0);
+    return Math.round((gunlukDakika * dersGunu + sabit) / 60 * 2) / 2;
+  }
+
+  /* Calisma bloklarini hedef toplam dakikaya orantili olcekler. Her blok
+     5'in katina yuvarlanir, en az MIN_BLOK olur; artik son bloga yazilir
+     ki toplam hedefi tutsun. */
+  function olcekle(blocks, hedef){
+    const out = (blocks || []).map(b => Object.assign({}, b));
+    const is = out.map((b, i) => ({ b, i }))
+      .filter(x => x.b.slot !== 'Dinlenme' && (Number(x.b.targetMin) || 0) > 0);
+    const toplam = is.reduce((a, x) => a + Number(x.b.targetMin), 0);
+    if(!toplam || !(hedef > 0)) return out;
+    let kalan = Math.round(hedef);
+    is.forEach((x, k) => {
+      let dk;
+      if(k === is.length - 1) dk = kalan;
+      else dk = Math.round(Number(x.b.targetMin) * hedef / toplam / 5) * 5;
+      dk = Math.max(MIN_BLOK, dk);
+      out[x.i].targetMin = dk;
+      kalan -= dk;
+    });
+    return out;
+  }
+
+  /* Yeni kurulmus (ya da yeniden kurulan) bir gune gecerli istisnayi ve
+     temel sureyi uygular. Gunu yerinde degistirir ve dondurur. */
+  function gunuBicimle(day, iso){
+    if(!day) return day;
+    const tarih = iso || day.date;
+    const ist = gunIcin(tarih);
+    delete day.ara; delete day.araNeden; delete day.istisnaId;
+    if(ist && ist.tur === 'ara'){
+      day.blocks = [];
+      day.ara = true;
+      day.araNeden = ist.neden || '';
+      day.istisnaId = ist.id;
+      day.paragraphTarget = 0;
+      day.problemTarget = 0;
+      return day;
+    }
+    const tmpl = (R.WEEKDAYS || [])[day.dow];
+    const sabit = !!tmpl && SABIT_RITUEL.indexOf(tmpl.ritual) >= 0;
+    if(sabit) return day;
+    const hedef = (ist && ist.tur === 'sure') ? Number(ist.dakika) : temelDakika(tarih);
+    if(hedef){
+      day.blocks = olcekle(day.blocks, hedef);
+      if(ist) day.istisnaId = ist.id;
+    }
+    return day;
+  }
+
+  /* Ilerleme baslamis mi? Uyku, not ve kontrol listesi ilerleme sayilmaz
+     ama yeniden kurulurken KORUNUR (yalniz bloklar ve hedefler yenilenir). */
+  function dokunulmamis(day){
+    if(!day) return true;
+    const bloklar = (day.blocks || []).every(b => (b.status || 'pending') === 'pending'
+      && b.actualMin == null && b.actualQ == null && b.correctQ == null
+      && !b.startedAt && !b.skipReason);
+    return bloklar && !Number(day.paragraphActual) && !Number(day.problemActual)
+      && !Number(day.freeQ);
+  }
+
+  async function kayitliGun(iso){
+    if(R.S.days[iso]) return R.S.days[iso];
+    let doc = null;
+    try{ doc = await R.Store.get('days/' + iso); }catch(e){ doc = null; }
+    return doc ? await R.Model.ensureDay(iso) : null;
+  }
+
+  /* Araliktaki KAYITLI gunleri yeniden kurar (bugun ve sonrasi). Kaydi
+     olmayan gun dokunulmaz: acildiginda zaten dogru kurulur. */
+  async function araligiYenile(from, to){
+    const bugun = U.todayISO();
+    const yenilenen = [], korunan = [];
+    for(const iso of aralik(from < bugun ? bugun : from, to)){
+      const day = await kayitliGun(iso);
+      if(!day) continue;
+      if(!dokunulmamis(day)){ korunan.push(iso); continue; }
+      const d = U.parse(iso);
+      const week = await R.Model.ensureWeek(R.Model.weekOf(d));
+      const taze = R.Model.defaultDay(d, week);
+      day.blocks = taze.blocks;
+      day.paragraphTarget = taze.paragraphTarget;
+      day.problemTarget = taze.problemTarget;
+      gunuBicimle(day, iso);
+      await R.Model.saveDay(iso);
+      yenilenen.push(iso);
+    }
+    return { yenilenen, korunan };
+  }
+
+  /* Onizleme icin: kayitli gunlerden hangisi korunacak, hangisi yenilenecek.
+     Hicbir sey yazmaz. */
+  function etki(from, to){
+    const bugun = U.todayISO();
+    const gunler = aralik(from < bugun ? bugun : from, to);
+    const korunan = gunler.filter(iso => R.S.days[iso] && !dokunulmamis(R.S.days[iso]));
+    return { gun:gunler.length, korunan };
+  }
+
+  /* ------------------------------------------------------------- yazma */
+
+  async function ekle(ist){
+    const v = dogrula(ist);
+    if(!v.ok) return v;
+    const rec = {
+      id:U.uid('ist'),
+      tur:ist.tur,
+      from:ist.from,
+      to:ist.to,
+      dakika:ist.tur === 'sure' ? Math.round(Number(ist.dakika)) : null,
+      neden:String(ist.neden || '').trim().slice(0, 160),
+      at:new Date().toISOString(),
+    };
+    R.S.istisnalar = liste().concat([rec]);
+    await kaydet();
+    const e = await araligiYenile(rec.from, rec.to);
+    return { ok:true, id:rec.id, kayit:rec, yenilenen:e.yenilenen, korunan:e.korunan };
+  }
+
+  async function kaldir(id){
+    const rec = liste().find(x => x.id === id);
+    if(!rec) return fail('İstisna bulunamadı.');
+    R.S.istisnalar = liste().filter(x => x.id !== id);
+    await kaydet();
+    const e = await araligiYenile(rec.from, rec.to);
+    return { ok:true, yenilenen:e.yenilenen, korunan:e.korunan };
+  }
+
+  /* «Arayi bitir» — kaldir()dan FARKLIDIR. Kaldirmak istisnayi hic
+     olmamis sayar: gecmisteki ara gunleri de «ara degil» olur ve o
+     haftanin soru hedefi geriye donuk tam hedefe doner, yani hafta
+     «tutmadi» gorunur. Bitirmek gecmisi korur: istisnanin sonu dune
+     cekilir, bugun ve sonrasi plana doner. Henuz baslamamis bir istisna
+     bitirilince tamamen kalkar. */
+  async function bitir(id){
+    const rec = liste().find(x => x.id === id);
+    if(!rec) return fail('İstisna bulunamadı.');
+    const bugun = U.todayISO();
+    if(rec.from >= bugun) return await kaldir(id);
+    if(rec.to < bugun) return { ok:true, yenilenen:[], korunan:[] };
+    const eskiSon = rec.to;
+    const dun = U.iso(U.addDays(U.parse(bugun), -1));
+    R.S.istisnalar = liste().map(x => x.id === id ? Object.assign({}, x, { to:dun }) : x);
+    await kaydet();
+    const e = await araligiYenile(bugun, eskiSon);
+    return { ok:true, yenilenen:e.yenilenen, korunan:e.korunan };
+  }
+
+  /* Kalici sure degisince bugunden ileriye kayitli gunler yenilenir. */
+  async function temeliYenile(){
+    const bugun = U.todayISO();
+    return await araligiYenile(bugun, U.iso(U.addDays(U.parse(bugun), YENILEME_UFKU)));
+  }
+
+  /* ------------------------------------------------------------- ozetler */
+
+  function haftaAraGunu(n){
+    return R.Model.weekDates(n).map(d => U.iso(d))
+      .filter(iso => { const x = gunIcin(iso); return x && x.tur === 'ara'; }).length;
+  }
+
+  /* Bugun ve sonrasini etkileyen istisnalar — ekranda listelenir. */
+  function etkin(){
+    const bugun = U.todayISO();
+    return liste().filter(x => x.to >= bugun)
+      .sort((a, b) => String(a.from).localeCompare(String(b.from)));
+  }
+
+  function tanim(x){
+    if(!x) return '';
+    const tarih = x.from === x.to ? U.fmtShort(x.from)
+      : U.fmtShort(x.from) + ' – ' + U.fmtShort(x.to);
+    return x.tur === 'ara' ? 'Ara · ' + tarih
+      : 'Günde ' + x.dakika + ' dk · ' + tarih;
+  }
+
+  return {
+    TURLER, DAKIKA, STORE,
+    liste, yukle, dogrula, dakikaGecerli, gunIcin, aralik, olcekle, gunuBicimle,
+    dokunulmamis, etki, ekle, kaldir, bitir, temeliYenile, temelDakika, sablonDakikasi,
+    kapasiteSaati, haftaAraGunu, etkin, tanim,
+  };
+})();
+
 /* ==== js/core/evidence.js ==== */
 /* Kanit motoru — bir esigin ne soylemeye yetkili oldugunu belirler.
 
@@ -17970,7 +18346,12 @@ R.Calc = (function(){
     const week = S.weeks[M.weekId(n)];
     if(!week) return null;
     const solved = U.sum(weekBlocks(n).map(b => b.actualQ || 0));
-    return { solved, target:week.questionTarget, pct:U.pct(solved, week.questionTarget) };
+    /* Ara gunleri hedeften dusulur: «bu hafta 2 gun ara» diyen birinin
+       haftasi tam hedefe gore «tutmadi» gorunmemeli. Butun hafta araysa
+       hedef yoktur ve gerceklesme olculemez — sifir degil, «veri yok». */
+    const araGun = R.Istisna ? R.Istisna.haftaAraGunu(n) : 0;
+    const target = araGun ? Math.round(week.questionTarget * (7 - araGun) / 7) : week.questionTarget;
+    return { solved, target, araGun, pct:target > 0 ? U.pct(solved, target) : null };
   }
   function timeRealization(n){
     const blocks = weekBlocks(n);
@@ -18181,9 +18562,10 @@ R.Calc = (function(){
         }else if(!future && iso >= R.PLAN.startISO){
           missed = true;
         }
+        const ara = !!(day && day.ara);
         cells.push({
           value, future, missed, iso,
-          label:U.fmtDate(iso) + (value != null ? ' · %'+Math.round(value*100)+' yük' : future ? ' · planlandı' : missed ? ' · kayıt yok' : ''),
+          label:U.fmtDate(iso) + (ara ? ' · ara' : value != null ? ' · %'+Math.round(value*100)+' yük' : future ? ' · planlandı' : missed ? ' · kayıt yok' : ''),
         });
       });
     }
@@ -30481,6 +30863,112 @@ R.Proposals = (function(){
       async revert(s){ await R.Office.closeDecision(s.id, 'open'); },
     },
 
+    /* ==================== PLANIN ŞEKLİ ====================
+       Temel plan + tarihli istisna — core/istisna.js. */
+
+    'ara-ver':{
+      check(p){
+        const v = R.Istisna.dogrula({ tur:'ara', from:p.from, to:p.to });
+        if(!v.ok) return v;
+        return pass({ gun:v.gun, etki:R.Istisna.etki(p.from, p.to) });
+      },
+      preview(p, ctx){
+        const rows = [
+          { label:'Ara', before:'plan', after:tarihAraligi(p.from, p.to) + ' · ' + ctx.gun + ' gün' },
+          { label:'Günün blokları', before:'plana göre', after:'boş' },
+          { label:'Haftalık soru hedefi', before:'tam', after:'ara günleri oranında küçülür' },
+        ];
+        if(ctx.etki.korunan.length){
+          rows.push({ label:'İlerlemesi başlamış gün', before:'—',
+            after:ctx.etki.korunan.length + ' gün, dokunulmaz' });
+        }
+        return rows;
+      },
+      async apply(p){
+        const r = await R.Istisna.ekle({ tur:'ara', from:p.from, to:p.to });
+        if(!r.ok) throw new Error(r.why);
+        return { id:r.id };
+      },
+      async revert(s){ if(s && s.id) await R.Istisna.kaldir(s.id); },
+    },
+
+    'gecici-sure':{
+      check(p){
+        const v = R.Istisna.dogrula({ tur:'sure', from:p.from, to:p.to, dakika:p.dakika });
+        if(!v.ok) return v;
+        return pass({ gun:v.gun, dk:Math.round(Number(p.dakika)), etki:R.Istisna.etki(p.from, p.to) });
+      },
+      preview(p, ctx){
+        const temel = R.Istisna.temelDakika(p.from) || R.Istisna.sablonDakikasi();
+        const rows = [
+          { label:'Ders günü süresi', before:temel + ' dk', after:ctx.dk + ' dk' },
+          { label:'Tarih', before:'—', after:tarihAraligi(p.from, p.to) + ' · ' + ctx.gun + ' gün' },
+          { label:'Deneme ve kapanış günleri', before:'olduğu gibi', after:'değişmez' },
+          { label:'Tarih bitince', before:'—', after:'temel plana döner' },
+        ];
+        if(ctx.etki.korunan.length){
+          rows.push({ label:'İlerlemesi başlamış gün', before:'—',
+            after:ctx.etki.korunan.length + ' gün, dokunulmaz' });
+        }
+        return rows;
+      },
+      async apply(p){
+        const r = await R.Istisna.ekle({ tur:'sure', from:p.from, to:p.to, dakika:p.dakika });
+        if(!r.ok) throw new Error(r.why);
+        return { id:r.id };
+      },
+      async revert(s){ if(s && s.id) await R.Istisna.kaldir(s.id); },
+    },
+
+    'gunluk-sure':{
+      check(p){
+        const dk = Math.round(Number(p.dakika));
+        if(!R.Istisna.dakikaGecerli(dk)){
+          return fail('Günlük süre ' + R.Istisna.DAKIKA.min + '–' + R.Istisna.DAKIKA.max
+            + ' dakika arasında olmalı.');
+        }
+        const simdi = R.Istisna.temelDakika() || R.Istisna.sablonDakikasi();
+        if(simdi === dk) return fail('Günlük süre zaten ' + dk + ' dakika.');
+        return pass({ dk, simdi, eskiKapasite:S.profile.capacityHoursPerWeek,
+          yeniKapasite:R.Istisna.kapasiteSaati(dk) });
+      },
+      preview(p, ctx){
+        return [
+          { label:'Ders günü süresi', before:ctx.simdi + ' dk', after:ctx.dk + ' dk' },
+          { label:'Haftalık kapasite', before:ctx.eskiKapasite + ' sa', after:ctx.yeniKapasite + ' sa' },
+          { label:'Plan', before:'eski kapasiteye göre', after:'bu haftadan itibaren yeniden dağıtılır' },
+          { label:'Geçmiş haftalar', before:'—', after:'değişmez' },
+        ];
+      },
+      async apply(p, ctx){
+        const pr = S.profile;
+        const geri = {
+          gunlukDakika:pr.gunlukDakika == null ? null : pr.gunlukDakika,
+          gunlukDakikaFrom:pr.gunlukDakikaFrom == null ? null : pr.gunlukDakikaFrom,
+          kapasite:pr.capacityHoursPerWeek,
+          plan:S.plan ? JSON.parse(JSON.stringify(S.plan)) : null,
+        };
+        pr.gunlukDakika = ctx.dk;
+        pr.gunlukDakikaFrom = U.todayISO();
+        pr.capacityHoursPerWeek = ctx.yeniKapasite;
+        await M.saveProfile();
+        if(pr.setupDone || S.plan) await M.replanFrom(M.currentWeek());
+        await R.Istisna.temeliYenile();
+        return geri;
+      },
+      async revert(s){
+        const pr = S.profile;
+        if(s.gunlukDakika == null) delete pr.gunlukDakika; else pr.gunlukDakika = s.gunlukDakika;
+        if(s.gunlukDakikaFrom == null) delete pr.gunlukDakikaFrom; else pr.gunlukDakikaFrom = s.gunlukDakikaFrom;
+        pr.capacityHoursPerWeek = s.kapasite;
+        await M.saveProfile();
+        S.plan = s.plan;
+        if(s.plan) await R.Store.set('plan/main', s.plan);
+        else await R.Store.remove('plan/main');
+        await R.Istisna.temeliYenile();
+      },
+    },
+
     /* ==================== KONUŞARAK VERİ GİRİŞİ ====================
 
        Yukarıdaki eylemler PLAN eylemleridir: konuyu tekrara al, blok
@@ -30671,6 +31159,10 @@ R.Proposals = (function(){
       },
     },
   };
+
+  function tarihAraligi(from, to){
+    return from === to ? U.fmtShort(from) : U.fmtShort(from) + ' – ' + U.fmtShort(to);
+  }
 
   function cardFront(err){
     const head = err.topic || err.testName || 'Yanlış';
@@ -32393,7 +32885,7 @@ R.Screens.today = (function(){
               <span class="tiny dim num">${t.questionTarget} soru · %${t.accuracy}</span></div>`)}
           </div>
           ${when(comp != null, () => c.Meter({ label:'Plan tamamlama', value:comp }))}
-          ${when(qr, () => c.Meter({ label:'Soru gerçekleşme', value:qr.pct, text:qr.solved+' / '+qr.target }))}
+          ${when(qr && qr.pct != null, () => c.Meter({ label:'Soru gerçekleşme', value:qr.pct, text:qr.solved+' / '+qr.target }))}
           ${c.Notice({ body:week.checkpoint, tone:'info' })}
         </div>` });
   }
@@ -32775,6 +33267,30 @@ R.Screens.today = (function(){
           ölçümler. Ham veri AYS\u2019te kalır.</p>` });
   }
 
+  /* Bugun bir istisnanin icindeyse ekranda SOYLENIR: bos bir blok listesi
+     «plan bozuldu» diye okunur, 240 dakikalik bloklar da «neden bu kadar
+     uzun» sorusunu dogurur. */
+  function IstisnaKart(day, dateISO){
+    const ist = R.Istisna ? R.Istisna.gunIcin(dateISO) : null;
+    if(!ist) return '';
+    if(day.ara){
+      const sonraki = U.iso(U.addDays(U.parse(ist.to), 1));
+      return c.Notice({ tone:'info',
+        title:'Bugün ara günü' + (ist.neden ? ' — ' + ist.neden : ''),
+        body:html`${R.Istisna.tanim(ist)}. Blok yok ve bu gün kaçırılmış sayılmaz;
+          haftalık soru hedefi ara günleri oranında küçüldü. Plan ${U.fmtShort(sonraki)}
+          günü kaldığı yerden sürer.
+          <div class="mt-8">${c.Button({ label:'Arayı bugün bitir', icon:'play', size:'sm',
+            tone:'ghost', act:'istisna-bitir', data:{ 'data-id':ist.id } })}</div>` });
+    }
+    if(ist.tur === 'sure' && day.istisnaId === ist.id){
+      return c.Notice({ tone:'info', title:'Geçici süre: ders günlerinde ' + ist.dakika + ' dk',
+        body:R.Istisna.tanim(ist) + '. Tarih bitince temel plana döner; deneme ve '
+          + 'kapanış günleri değişmez.' });
+    }
+    return '';
+  }
+
   async function render(){
     const dateISO = U.todayISO();
     const n = M.currentWeek();
@@ -32801,8 +33317,10 @@ R.Screens.today = (function(){
           note:wd.label+' düzeni',
           tone:planBlocks && doneBlocks >= planBlocks ? 'ok' : null,
           progress:planBlocks ? (100 * doneBlocks / planBlocks) : null })}
-        ${c.Stat({ label:'Minimum gün', value:minMet ? 'Tamam' : 'Açık', tone:minMet ? 'ok' : 'warn',
-          note:'45 dk · 15 paragraf · kart', progress:minMet ? 100 : 0 })}
+        ${day.ara
+          ? c.Stat({ label:'Minimum gün', value:'Ara', note:'bugün plan boş', progress:null })
+          : c.Stat({ label:'Minimum gün', value:minMet ? 'Tamam' : 'Açık', tone:minMet ? 'ok' : 'warn',
+              note:'45 dk · 15 paragraf · kart', progress:minMet ? 100 : 0 })}
         ${c.Stat({ label:'Due kart', value:C.dueCards().length, tone:debt > 10 ? 'warn' : null,
           note:'borç %'+debt, progress:debt })}
         ${c.Stat({ label:'Sınava kalan', value:U.diffDays(dateISO, R.PLAN.examTytISO), unit:' gün',
@@ -32813,6 +33331,7 @@ R.Screens.today = (function(){
         ${AutoCard()}
         <div id="pane-flow">${FlowCard()}</div>
         ${c.SectionTitle(html`${wd.label} blokları${raw(UI.hint('block'))}`, html`${raw(OdakRozeti(day))}<span class="small dim">${U.fmtDate(dateISO)}</span>`)}
+        ${IstisnaKart(day, dateISO)}
         ${map(day.blocks, BlockCard)}
         ${c.Card({ pad:'sm', body:c.Field({ label:'Günün notu',
           input:c.Textarea({ rows:2, value:day.note, change:'day-note', placeholder:'Bugün ne engelledi, ne kolaylaştırdı?' }) }) })}
@@ -32867,6 +33386,17 @@ R.Screens.today = (function(){
 
   /* ---------- eylemler ---------- */
   const handle = {
+    'istisna-bitir'(el){
+      const id = el.dataset.id;
+      UI.confirmSheet('Arayı bugün bitir',
+        'Bugün ve sonraki günler yeniden plana göre kurulur. Geçmiş ara günleri ara olarak kalır.',
+        async () => {
+          const r = await R.Istisna.bitir(id);
+          UI.toast(r.ok ? 'Ara bitti; bugünün planı kuruldu' : r.why);
+          R.App.render();
+        });
+    },
+
     /* HKM teklifleri: uygulayan AYS'in kendi kodudur. */
     /* Uc dugmenin ucu de TEK kapidan gecer: uygulama, yerel kayit ve
        merkeze bildirim tek sirada olur. «Uygulandı ama merkeze
@@ -33136,7 +33666,13 @@ R.Screens.week = (function(){
     const planned = day ? day.blocks.filter(b => b.slot !== 'Dinlenme').length : 0;
     const done = day ? day.blocks.filter(b => b.status === 'done').length : 0;
 
-    const blocks = day
+    /* Ara gunu — kaydi olsun ya da olmasin — «ara» diye gorunur; sablonun
+       onizlemesi gosterilirse plan bozulmus gibi okunur. */
+    const ist = R.Istisna ? R.Istisna.gunIcin(iso) : null;
+    const araGunu = (day && day.ara) || (!day && ist && ist.tur === 'ara');
+    const blocks = araGunu
+      ? html`<div class="daycol__block is-preview"><b>Ara</b><br/>${(ist && ist.neden) || 'plan boş'}</div>`
+      : day
       ? map(day.blocks, b => html`<div class="${b.status === 'done' ? 'daycol__block is-done'
           : b.status === 'skipped' ? 'daycol__block is-skipped' : 'daycol__block'}">
           <b>${b.slot}</b><br/>${b.topic}</div>`)
@@ -33235,7 +33771,7 @@ R.Screens.week = (function(){
         <div class="cols-2 mb-10">
           ${K.Stat({ label:'Plan tamamlama', value:comp == null ? '—' : '%'+comp,
             tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' })}
-          ${K.Stat({ label:'Soru gerçekleşme', value:qr ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target : 'hedef yok' })}
+          ${K.Stat({ label:'Soru gerçekleşme', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target : 'hedef yok' })}
         </div>
         ${reasonChips(reasons) || html`<p class="small dim">Bu hafta atlanan blok yok.</p>`}
         ${when(rev && rev.decision, () => html`<div class="mt-10">${K.Notice({ tone:'ok', title:'Düzeltme:', body:rev.decision })}</div>`)}
@@ -33320,7 +33856,7 @@ R.Screens.week = (function(){
         + 'Yeni haftaya yalnız en yüksek etkili iki eksik taşınır.' }),
       K.Cols(4, [
         K.Stat({ label:'Plan', value:comp == null ? '—' : '%'+comp }),
-        K.Stat({ label:'Soru', value:qr ? '%'+qr.pct : '—' }),
+        K.Stat({ label:'Soru', value:qr && qr.pct != null ? '%'+qr.pct : '—' }),
         K.Stat({ label:'Son 3 medyan', value:tyt.last3 == null ? '—' : U.fmtNet(tyt.last3) }),
         K.Stat({ label:'Taban', value:base == null ? '—' : U.fmtNet(base) }),
       ]),
@@ -33390,6 +33926,82 @@ R.Screens.week = (function(){
     ], { between:true, wrap:true }));
   }
 
+  /* ---------- planin sekli: temel + tarihli istisna ----------
+
+     Degisiklikler oneri kutusundan gecer (core/proposals.js): hepsi ORTA
+     seviyededir, once onizleme gorulur, sonra tek dokunusla uygulanir ve
+     ofis ekraninda «Geri al» ile geri alinabilir. */
+
+  function istisnaCard(){
+    const I = R.Istisna;
+    if(!I) return '';
+    const temel = I.temelDakika();
+    const liste = I.etkin();
+    return K.Card({ title:'Planın şekli', sub:'Temel plan + tarihli istisnalar',
+      body:html`
+        <div class="row gap-8" style="justify-content:space-between;align-items:center">
+          <span class="small">Ders günü: <b>${temel || I.sablonDakikasi()} dk</b>
+            <span class="dim">${temel ? '(kalıcı ayar)' : '(şablon)'}</span></span>
+          ${K.Button({ label:'Değiştir', size:'sm', tone:'ghost', act:'istisna-ac',
+            data:{ 'data-tur':'gunluk' } })}
+        </div>
+        ${when(liste.length, () => html`<div class="stack-xs mt-10">${map(liste, x => html`
+          <div class="row gap-8" style="justify-content:space-between;align-items:center">
+            <span class="small">${I.tanim(x)}${when(x.neden, () => html` <span class="dim">· ${x.neden}</span>`)}</span>
+            ${K.Button({ label:x.from > U.todayISO() ? 'Kaldır' : 'Bitir', size:'sm', tone:'ghost',
+              act:'istisna-bitir', data:{ 'data-id':x.id } })}
+          </div>`)}</div>`)}
+        ${when(!liste.length, () => html`<p class="small dim mt-8">Etkin istisna yok; plan temel düzeninde.</p>`)}
+        <div class="row gap-8 mt-10" style="flex-wrap:wrap">
+          ${K.Button({ label:'Ara ver', icon:'pause', size:'sm', act:'istisna-ac', data:{ 'data-tur':'ara' } })}
+          ${K.Button({ label:'Geçici süre', icon:'clock', size:'sm', act:'istisna-ac', data:{ 'data-tur':'sure' } })}
+        </div>` });
+  }
+
+  const ISTISNA_EYLEM = { ara:'ara-ver', sure:'gecici-sure', gunluk:'gunluk-sure' };
+  let istisnaTaslak = null;
+
+  function istisnaParams(tur){
+    const v = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+    if(tur === 'gunluk') return { dakika:Number(v('ist-dakika')) };
+    const p = { from:v('ist-from'), to:v('ist-to') };
+    if(tur === 'sure') p.dakika = Number(v('ist-dakika'));
+    return p;
+  }
+
+  function istisnaForm(tur, p){
+    const bugun = U.todayISO();
+    const tarih = (id, label, value) => K.Field({ label,
+      input:K.Input({ id, type:'date', value:value || bugun }) });
+    const dakika = value => K.Field({ label:'Ders günü süresi (dakika)',
+      hint:R.Istisna.DAKIKA.min + '–' + R.Istisna.DAKIKA.max,
+      input:K.Input({ id:'ist-dakika', type:'number', numeric:true, value:value || '' }) });
+    return html`<div class="stack-sm">
+      ${when(tur !== 'gunluk', () => tarih('ist-from', 'Başlangıç', p.from))}
+      ${when(tur !== 'gunluk', () => tarih('ist-to', 'Bitiş', p.to))}
+      ${when(tur !== 'ara', () => dakika(p.dakika))}
+    </div>`;
+  }
+
+  function istisnaSheet(tur, p, pv){
+    const baslik = { ara:'Ara ver', sure:'Geçici günlük süre', gunluk:'Günlük çalışma süresi' }[tur];
+    const alt = { ara:'Seçtiğin günlerde plan boş kalır; ara bitince kaldığı yerden sürer.',
+      sure:'Ders günlerinin süresi yalnız bu tarihlerde değişir; sonra temel plana döner.',
+      gunluk:'Kalıcı değişiklik: kapasite ve plan bu haftadan itibaren yeniden dağıtılır.' }[tur];
+    UI.sheet({ title:baslik, subtitle:alt,
+      body:String(html`${istisnaForm(tur, p || {})}
+        ${when(pv && !pv.ok, () => html`<div class="mt-10">${K.Notice({ tone:'warn', body:pv.why })}</div>`)}
+        ${when(pv && pv.ok, () => html`<div class="diff mt-10">${map(pv.rows, r => html`
+          <div class="diff__row"><span class="diff__label">${r.label}</span>
+            <span class="diff__before">${r.before}</span><span class="diff__arrow" aria-hidden="true">→</span>
+            <span class="diff__after">${r.after}</span></div>`)}</div>`)}`),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${pv && pv.ok
+          ? K.Button({ label:'Uygula', tone:'primary', act:'istisna-uygula' })
+          : K.Button({ label:'Önizle', tone:'primary', act:'istisna-onizle' })}`),
+    });
+  }
+
   async function render(){
     const n = viewN();
     await M.ensureWeek(n);
@@ -33409,6 +34021,7 @@ R.Screens.week = (function(){
       ])),
 
       K.Span(4, K.Stack([
+        istisnaCard(),
         digestCard(n),
         reviewCard(n),
         K.Card({ title:'Müfredat referansı', sub:'Bu haftanın plandaki karşılığı', body:html`
@@ -33428,6 +34041,53 @@ R.Screens.week = (function(){
   }
 
   const handle = {
+    'istisna-ac'(el){
+      const tur = el.dataset.tur;
+      istisnaTaslak = { tur, p:{} };
+      istisnaSheet(tur, {}, null);
+    },
+    'istisna-onizle'(){
+      if(!istisnaTaslak) return;
+      const tur = istisnaTaslak.tur;
+      const p = istisnaParams(tur);
+      istisnaTaslak.p = p;
+      const pv = R.Proposals.preview({ action:ISTISNA_EYLEM[tur], agent:'patron', params:p });
+      istisnaSheet(tur, p, pv);
+    },
+    async 'istisna-uygula'(){
+      if(!istisnaTaslak) return;
+      const { tur, p } = istisnaTaslak;
+      /* Kullanicinin kendi istegi: oneri kutusundan gecer ki ofiste
+         «Geri al» ile geri alinabilsin. Orta seviye oldugu icin talep
+         bekler; kullanici onizlemeyi gorup «Uygula»ya bastigi icin burada
+         onaylanir. */
+      const t = await R.Proposals.talep({ action:ISTISNA_EYLEM[tur], agent:'patron',
+        source:'istek', params:p, reason:'Hafta ekranından.' });
+      let ok = false, why = t.why;
+      if(t.row){
+        const r = t.otomatik ? { ok:true } : await R.Proposals.approve(t.row.id);
+        ok = !!(r && r.ok);
+        if(!ok) why = r && r.why;
+      }
+      istisnaTaslak = null;
+      UI.closeSheet();
+      UI.toast(ok ? 'Plan güncellendi · ofiste geri alınabilir' : (why || 'Uygulanamadı'));
+      R.App.render();
+    },
+    'istisna-bitir'(el){
+      const id = el.dataset.id;
+      const x = R.Istisna.liste().find(i => i.id === id);
+      if(!x) return;
+      const basladi = x.from <= U.todayISO();
+      UI.confirmSheet(basladi ? 'İstisnayı bugün bitir' : 'İstisnayı kaldır',
+        basladi ? 'Bugün ve sonraki günler temel plana göre yeniden kurulur. Geçmiş günler olduğu gibi kalır.'
+          : 'Bu istisna hiç uygulanmamış gibi kalkar.',
+        async () => {
+          const r = await R.Istisna.bitir(id);
+          UI.toast(r.ok ? 'Plan temel düzenine döndü' : r.why);
+          R.App.render();
+        });
+    },
     async 'week-nav'(el){
       S.ui.weekView = U.clamp(Number(el.dataset.n), 1, R.PLAN.totalWeeks);
       await M.ensureWeek(S.ui.weekView);
@@ -37623,7 +38283,7 @@ R.Screens.progress = (function(){
       { key:'planCompletion', value:comp == null ? '—' : '%'+comp, spark:history, note:'bu hafta',
         progress:comp, target:85,
         tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' },
-      { key:'questionRate', value:qr ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
+      { key:'questionRate', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
         progress:qr ? qr.pct : null, target:90,
         tone:qr && qr.pct >= 90 ? 'ok' : qr && qr.pct >= 70 ? 'warn' : null },
       { key:'topicClosure', value:'%'+closure.pct, tone:closure.pct >= 55 ? 'ok' : 'warn',

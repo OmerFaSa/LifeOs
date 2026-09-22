@@ -370,10 +370,15 @@ R.Model = (function(){
     if(!doc){
       const week = await ensureWeek(weekOf(d));
       doc = defaultDay(d, week);
+      /* Tarihli istisna (ara, gecici sure) ve kalici gunluk sure gun
+         KURULURKEN uygulanir — core/istisna.js. */
+      if(R.Istisna) R.Istisna.gunuBicimle(doc, id);
       await R.Store.set('days/'+id, doc);
-    }else if(!Array.isArray(doc.blocks) || !doc.blocks.length){
+    }else if(!doc.ara && (!Array.isArray(doc.blocks) || !doc.blocks.length)){
+      /* Ara gunu BILEREK bostur; yeniden doldurulmaz. */
       const week = await ensureWeek(weekOf(d));
       doc.blocks = defaultDay(d, week).blocks;
+      if(R.Istisna) R.Istisna.gunuBicimle(doc, id);
     }
     R.S.days[id] = normDay(doc);
     return R.S.days[id];
@@ -1187,6 +1192,9 @@ R.Model = (function(){
 
     await migrate();
 
+    /* Istisnalar gun kurulmadan ONCE yuklenir: asagidaki ensureDay bugunu
+       kurarken aradaysa bos kurmali. */
+    if(R.Istisna) await R.Istisna.yukle();
     if(R.Friction) await R.Friction.load();
     if(R.Calib) await R.Calib.load();
     if(R.Signals) await R.Signals.load();

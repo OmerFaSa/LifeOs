@@ -110,6 +110,51 @@ R.ACTIONS = [
     why:'Kapanmayan karar bir sonraki toplantının önüne düşer.',
   },
 
+  /* ==================== PLANIN ŞEKLİ ====================
+
+     Temel plan + tarihli istisna (core/istisna.js). Üçü de ORTA
+     seviyededir: bir haftayı ya da bir dönemi değiştirirler; kullanıcı
+     istemiş olsa bile önizlemeyi görüp tek dokunuşla onaylar. İlerlemesi
+     başlamış güne hiçbiri dokunmaz. */
+  {
+    id:'ara-ver',
+    level:'orta',
+    title:'Ara ver',
+    summary:'Seçilen günlerin çalışma blokları boşalır; ara bitince plan kaldığı yerden sürer.',
+    touches:'Günlük plan',
+    icon:'pause',
+    route:'today',
+    agents:['patron', 'rehber'],
+    params:{ from:'string', to:'string' },
+    why:'Hastalık, yolculuk, bayram: gerçek bir ara «kaçırılmış gün» diye '
+      + 'birikmemeli; plan onu bilmeli.',
+  },
+  {
+    id:'gecici-sure',
+    level:'orta',
+    title:'Geçici günlük süre',
+    summary:'Seçilen günlerde ders günlerinin toplam süresi değişir; tarih bitince temele döner.',
+    touches:'Günlük plan',
+    icon:'clock',
+    route:'today',
+    agents:['patron', 'rehber'],
+    params:{ from:'string', to:'string', dakika:'number' },
+    why:'«Sadece bu hafta 4 saat» temel planı ezmemeli; tarihi geçince plan '
+      + 'kendiliğinden eski hâline dönmeli.',
+  },
+  {
+    id:'gunluk-sure',
+    level:'orta',
+    title:'Günlük çalışma süresini değiştir',
+    summary:'Ders günlerinin süresi kalıcı olarak değişir; kapasite ve plan bu haftadan itibaren yeniden dağıtılır.',
+    touches:'Temel plan',
+    icon:'clock',
+    route:'plan',
+    agents:['patron', 'rehber'],
+    params:{ dakika:'number' },
+    why:'Kapasite değiştiyse plan eski kapasiteye göre kurulmuş kalmamalı.',
+  },
+
   /* ==================== KONUŞARAK VERİ GİRİŞİ ====================
 
      Yukarıdakiler PLAN eylemleridir: konuyu tekrara al, blok ekle,

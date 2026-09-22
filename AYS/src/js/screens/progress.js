@@ -41,7 +41,7 @@ R.Screens.progress = (function(){
       { key:'planCompletion', value:comp == null ? '—' : '%'+comp, spark:history, note:'bu hafta',
         progress:comp, target:85,
         tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' },
-      { key:'questionRate', value:qr ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
+      { key:'questionRate', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
         progress:qr ? qr.pct : null, target:90,
         tone:qr && qr.pct >= 90 ? 'ok' : qr && qr.pct >= 70 ? 'warn' : null },
       { key:'topicClosure', value:'%'+closure.pct, tone:closure.pct >= 55 ? 'ok' : 'warn',

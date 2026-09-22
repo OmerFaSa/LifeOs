@@ -277,7 +277,7 @@ R.Screens.today = (function(){
               <span class="tiny dim num">${t.questionTarget} soru · %${t.accuracy}</span></div>`)}
           </div>
           ${when(comp != null, () => c.Meter({ label:'Plan tamamlama', value:comp }))}
-          ${when(qr, () => c.Meter({ label:'Soru gerçekleşme', value:qr.pct, text:qr.solved+' / '+qr.target }))}
+          ${when(qr && qr.pct != null, () => c.Meter({ label:'Soru gerçekleşme', value:qr.pct, text:qr.solved+' / '+qr.target }))}
           ${c.Notice({ body:week.checkpoint, tone:'info' })}
         </div>` });
   }
@@ -659,6 +659,30 @@ R.Screens.today = (function(){
           ölçümler. Ham veri AYS\u2019te kalır.</p>` });
   }
 
+  /* Bugun bir istisnanin icindeyse ekranda SOYLENIR: bos bir blok listesi
+     «plan bozuldu» diye okunur, 240 dakikalik bloklar da «neden bu kadar
+     uzun» sorusunu dogurur. */
+  function IstisnaKart(day, dateISO){
+    const ist = R.Istisna ? R.Istisna.gunIcin(dateISO) : null;
+    if(!ist) return '';
+    if(day.ara){
+      const sonraki = U.iso(U.addDays(U.parse(ist.to), 1));
+      return c.Notice({ tone:'info',
+        title:'Bugün ara günü' + (ist.neden ? ' — ' + ist.neden : ''),
+        body:html`${R.Istisna.tanim(ist)}. Blok yok ve bu gün kaçırılmış sayılmaz;
+          haftalık soru hedefi ara günleri oranında küçüldü. Plan ${U.fmtShort(sonraki)}
+          günü kaldığı yerden sürer.
+          <div class="mt-8">${c.Button({ label:'Arayı bugün bitir', icon:'play', size:'sm',
+            tone:'ghost', act:'istisna-bitir', data:{ 'data-id':ist.id } })}</div>` });
+    }
+    if(ist.tur === 'sure' && day.istisnaId === ist.id){
+      return c.Notice({ tone:'info', title:'Geçici süre: ders günlerinde ' + ist.dakika + ' dk',
+        body:R.Istisna.tanim(ist) + '. Tarih bitince temel plana döner; deneme ve '
+          + 'kapanış günleri değişmez.' });
+    }
+    return '';
+  }
+
   async function render(){
     const dateISO = U.todayISO();
     const n = M.currentWeek();
@@ -685,8 +709,10 @@ R.Screens.today = (function(){
           note:wd.label+' düzeni',
           tone:planBlocks && doneBlocks >= planBlocks ? 'ok' : null,
           progress:planBlocks ? (100 * doneBlocks / planBlocks) : null })}
-        ${c.Stat({ label:'Minimum gün', value:minMet ? 'Tamam' : 'Açık', tone:minMet ? 'ok' : 'warn',
-          note:'45 dk · 15 paragraf · kart', progress:minMet ? 100 : 0 })}
+        ${day.ara
+          ? c.Stat({ label:'Minimum gün', value:'Ara', note:'bugün plan boş', progress:null })
+          : c.Stat({ label:'Minimum gün', value:minMet ? 'Tamam' : 'Açık', tone:minMet ? 'ok' : 'warn',
+              note:'45 dk · 15 paragraf · kart', progress:minMet ? 100 : 0 })}
         ${c.Stat({ label:'Due kart', value:C.dueCards().length, tone:debt > 10 ? 'warn' : null,
           note:'borç %'+debt, progress:debt })}
         ${c.Stat({ label:'Sınava kalan', value:U.diffDays(dateISO, R.PLAN.examTytISO), unit:' gün',
@@ -697,6 +723,7 @@ R.Screens.today = (function(){
         ${AutoCard()}
         <div id="pane-flow">${FlowCard()}</div>
         ${c.SectionTitle(html`${wd.label} blokları${raw(UI.hint('block'))}`, html`${raw(OdakRozeti(day))}<span class="small dim">${U.fmtDate(dateISO)}</span>`)}
+        ${IstisnaKart(day, dateISO)}
         ${map(day.blocks, BlockCard)}
         ${c.Card({ pad:'sm', body:c.Field({ label:'Günün notu',
           input:c.Textarea({ rows:2, value:day.note, change:'day-note', placeholder:'Bugün ne engelledi, ne kolaylaştırdı?' }) }) })}
@@ -751,6 +778,17 @@ R.Screens.today = (function(){
 
   /* ---------- eylemler ---------- */
   const handle = {
+    'istisna-bitir'(el){
+      const id = el.dataset.id;
+      UI.confirmSheet('Arayı bugün bitir',
+        'Bugün ve sonraki günler yeniden plana göre kurulur. Geçmiş ara günleri ara olarak kalır.',
+        async () => {
+          const r = await R.Istisna.bitir(id);
+          UI.toast(r.ok ? 'Ara bitti; bugünün planı kuruldu' : r.why);
+          R.App.render();
+        });
+    },
+
     /* HKM teklifleri: uygulayan AYS'in kendi kodudur. */
     /* Uc dugmenin ucu de TEK kapidan gecer: uygulama, yerel kayit ve
        merkeze bildirim tek sirada olur. «Uygulandı ama merkeze
