@@ -179,6 +179,50 @@
       await temizle();
     });
 
+    /* HKM BAĞLANTISI CİHAZA AİTTİR, YEDEĞE DEĞİL.
+
+       `hkm` anahtarı adresi, AÇIK/KAPALI durumunu ve Bearer JETONUNU
+       tutar. Yedek bütün depoyu kopyaladığı için jeton düz metin
+       olarak dosyaya giriyordu (e-postayla gönderilen, buluta atılan
+       bir dosyaya); geri yükleme de eski cihazın «açık» ayarını
+       sormadan geri getiriyordu. */
+    async function hkmIle(fn){
+      const onceki = await S.get('hkm');
+      try{ await fn(); }
+      finally{ if(onceki === null) await S.remove('hkm'); else await S.set('hkm', onceki); }
+    }
+
+    it('HKM jetonu yedeğe girmez', async function(){
+      await hkmIle(async function(){
+        await S.set('hkm', { url:'http://127.0.0.1:8765', token:'gizli-jeton-123', enabled:true });
+        const yedek = S.exportAll();
+        expect(yedek.data.hkm).toBeFalsy();
+        expect(JSON.stringify(yedek).indexOf('gizli-jeton-123')).toBe(-1);
+        /* Dışa aktarım bu cihazın kendi ayarına dokunmaz. */
+        expect((await S.get('hkm')).token).toBe('gizli-jeton-123');
+      });
+    });
+
+    it('geri yükleme bu cihazın HKM ayarını değiştirmez', async function(){
+      await hkmIle(async function(){
+        const eskiCihaz = { url:'http://10.0.0.9:8765', token:'eski-jeton', enabled:true };
+        const yedekle = () => ({ __meta:{ app:uygulamaKimligi(), schemaVersion:R.SCHEMA_VERSION },
+          data:Object.assign({}, S.exportAll().data, { hkm:eskiCihaz }) });
+
+        /* Bu cihazda HKM kapalıysa yedek onu AÇAMAZ. */
+        await S.set('hkm', { url:'', token:'', enabled:false });
+        await S.importAll(yedekle());
+        const sonra = await S.get('hkm');
+        expect(sonra.enabled).toBeFalsy();
+        expect(sonra.token).toBe('');
+
+        /* Hiç kurulmamışsa kurulmamış kalır. */
+        await S.remove('hkm');
+        await S.importAll(yedekle());
+        expect(await S.get('hkm')).toBeNull();
+      });
+    });
+
     it('geri yükleme eski kayıtları TAMAMEN değiştirir', async function(){
       /* Birleştirme değil değiştirme: yedek bir anın tam kopyasıdır,
          yarısını tutup yarısını yazmak iki farklı anın karışımını

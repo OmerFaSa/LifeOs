@@ -252,6 +252,20 @@ SP.Store = (function(){
 
   /* ---------- yedekleme ---------- */
 
+  /* CIHAZA AIT anahtarlar yedege girmez, yedekten de gelmez.
+
+     `hkm`: HKM adresi, acik/kapali durumu ve Bearer JETONU. Yedek
+     dosyasi e-postaya, buluta, baska bir diske gider; jeton oraya duz
+     metin girmemeli. Geri yukleme de baska bir cihazin (ya da eski bir
+     donemin) «acik» ayarini sormadan geri getirmemeli: bu cihazin
+     ayari neyse o kalir, hic kurulmamissa kurulmamis kalir. */
+  const CIHAZA_AIT = ['hkm'];
+  function cihazsiz(data){
+    const out = Object.assign({}, data);
+    CIHAZA_AIT.forEach(k => { delete out[k]; });
+    return out;
+  }
+
   function exportAll(){
     return {
       __meta:{
@@ -260,7 +274,7 @@ SP.Store = (function(){
         exportedAt:new Date().toISOString(),
         mode,
       },
-      data:localAll(),
+      data:cihazsiz(localAll()),
     };
   }
 
@@ -308,7 +322,10 @@ SP.Store = (function(){
        yutuluyordu: kota dolu bir tarayicida hicbir sey yazilmadigi halde
        cagri normal bitiyor, ekran «Yedek yuklendi» diyordu. Basarisiz bir
        kaydi basari gibi gostermek, bu depodaki en pahali hata tipidir. */
-    const yerel = localWrite(parsed.data);
+    const mevcut = localAll();
+    const veri = cihazsiz(parsed.data);
+    CIHAZA_AIT.forEach(k => { if(mevcut[k] !== undefined) veri[k] = mevcut[k]; });
+    const yerel = localWrite(veri);
     if(!yerel){
       const e = new Error('Yedek bu cihaza yazılamadı; mevcut kayıt '
         + 'korundu. Depolama alanı dolu olabilir: Ayarlar → Veri '
@@ -321,8 +338,8 @@ SP.Store = (function(){
        verilmez. */
     let bulutYazilan = 0, bulutHata = 0;
     if(db){
-      for(const k of Object.keys(parsed.data)){
-        try{ await db.doc(k).set(parsed.data[k]); bulutYazilan++; }
+      for(const k of Object.keys(veri)){
+        try{ await db.doc(k).set(veri[k]); bulutYazilan++; }
         catch(e){ bulutHata++; health.cloud = 'error'; }
       }
     }
