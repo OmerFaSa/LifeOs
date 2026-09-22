@@ -25,6 +25,10 @@ SP.Office = (function(){
       perAgent:{},            // agentId -> { provider, model }
       autoBriefing:true,
       temperature:0.4,
+      /* Kucuk aksiyon ne zaman sormadan uygulanir (AGENTS.md §1.9):
+         'istek' yalniz kullanicinin kendi cumlesi (varsayilan),
+         'hepsi' modelin okudugu kucuk kayit da, 'hicbiri' her sey sorar. */
+      otomatikUygula:'istek',
     };
   }
 

@@ -182,7 +182,7 @@ SP.Test = (function(){
     S.profiles = [];
     S.prefs = SP.Model.defaultPrefs();
     S.labs = []; S.vitals = {}; S.meals = {}; S.workouts = []; S.progress = {};
-    S.meds = []; S.foods = []; S.proposals = [];
+    S.meds = []; S.foods = []; S.proposals = []; S.proposalKeys = [];
     if(SP.Model.mountFoods) SP.Model.mountFoods();
     S.basket = SP.Model.defaultBasket();
     S.prices = {}; S.flags = []; S.decisions = [];

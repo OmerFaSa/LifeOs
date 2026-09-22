@@ -61,6 +61,7 @@ SP.Proposals = (function(){
 
     /* ---------------------------------------------------- vital yaz */
     'vital-yaz':{
+      level:'kucuk',
       label:'Günlük ölçüm',
       alanlar:['field', 'value', 'date'],
       check(p){
@@ -97,6 +98,7 @@ SP.Proposals = (function(){
 
     /* ----------------------------------------------------- öğün ekle */
     'ogun-ekle':{
+      level:'kucuk',
       label:'Öğün',
       alanlar:['items', 'slot', 'date'],
       check(p){
@@ -129,6 +131,7 @@ SP.Proposals = (function(){
 
     /* ---------------------------------------------------- seans ekle */
     'seans-ekle':{
+      level:'kucuk',
       label:'Antrenman',
       alanlar:['minutes', 'exerciseId', 'date'],
       check(p){
@@ -161,6 +164,7 @@ SP.Proposals = (function(){
 
     /* --------------------------------------------------- ölçüm gir */
     'olcum-gir':{
+      level:'orta',
       label:'Tahlil ölçümü',
       alanlar:['rows', 'date'],
       check(p){
@@ -210,6 +214,7 @@ SP.Proposals = (function(){
 
     /* ----------------------------------------------- semptom işaretle */
     'semptom-isaretle':{
+      level:'kucuk',
       label:'Şikâyet',
       alanlar:['symptomId', 'severity', 'date'],
       check(p){
@@ -360,14 +365,89 @@ SP.Proposals = (function(){
   function pending(){ return liste().filter(p => p.status === 'pending'); }
   function all(){ return liste(); }
 
+  /* ------------------------------------------------ seviye ve kaynak
+
+     SEVIYE KATALOGDAN yazilir (AGENTS.md §1.9); onerenin gonderdigi
+     `level` okunmaz. KAYNAK: 'istek' = kullanicinin kendi cumlesinden
+     kural motorunun cikardigi; 'model' = modelin yorumu; 'kural' =
+     sistemin kendi bulgusu. */
+  const SEVIYELER = ['kucuk', 'orta', 'buyuk'];
+  const MODLAR = ['istek', 'hepsi', 'hicbiri'];
+  const KAYNAKLAR = ['istek', 'model', 'kural'];
+  const MAX_ANAHTAR = 500;
+
+  function kaynakOf(p){
+    if(KAYNAKLAR.indexOf(p && p.source) >= 0) return p.source;
+    return p && p.kaynak === 'model' ? 'model' : 'kural';
+  }
+
+  function izOf(p){
+    const ham = Array.isArray(p && p.iz) ? p.iz : [];
+    return ham.filter(x => x && typeof x === 'object')
+      .map(x => ({ tur:String(x.tur || '').trim().slice(0, 24),
+                   id:String(x.id == null ? '' : x.id).trim().slice(0, 60) }))
+      .filter(x => x.tur && x.id)
+      .slice(0, 8);
+  }
+
+  function anahtarlar(){ return SP.S.proposalKeys || (SP.S.proposalKeys = []); }
+
+  /* Tek uygulama anahtari: disaridan (HKM) gelen ayni teklif hicbir
+     durumda ikinci kez kuyruga girmez. Anahtarsiz kayit tekrar edilebilir:
+     iki ayri «uyku 7 saat» iki ayri gunun kaydi olabilir. */
   async function propose(p){
+    const anahtar = String((p && p.anahtar) || '').trim().slice(0, 120) || null;
+    if(anahtar && anahtarlar().indexOf(anahtar) >= 0) return null;
+    const e = eylem(p && p.action);
     const kayit = Object.assign({
       id:U.uid('pr'), at:new Date().toISOString(), status:'pending',
-    }, p);
+    }, p, {
+      level:e && SEVIYELER.indexOf(e.level) >= 0 ? e.level : 'orta',
+      source:kaynakOf(p),
+      anahtar,
+      iz:izOf(p),
+      otomatik:false,
+    });
     liste().unshift(kayit);
     if(liste().length > MAX) liste().length = MAX;
+    if(anahtar){
+      anahtarlar().push(anahtar);
+      if(anahtarlar().length > MAX_ANAHTAR) SP.S.proposalKeys = anahtarlar().slice(-MAX_ANAHTAR);
+    }
     await save();
     return kayit;
+  }
+
+  /* Tek karar noktasi. Kucuk degilse asla; bilinmeyen ayar varsayilan
+     gibi davranir — bozuk bir ayar kendiliginden «hepsi»ne donmemeli. */
+  function otomatikMi(row, mod){
+    if(!row || row.level !== 'kucuk') return false;
+    const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
+    if(m === 'hicbiri') return false;
+    if(m === 'hepsi') return true;
+    return row.source === 'istek';
+  }
+
+  function ayar(){
+    try{
+      const st = SP.Office && typeof SP.Office.settings === 'function' ? SP.Office.settings() : null;
+      return (st && st.otomatikUygula) || 'istek';
+    }catch(e){ return 'istek'; }
+  }
+
+  /* Oneriyi kuyruga alir; seviye ve ayar izin veriyorsa hemen uygular.
+     Donus: { row, otomatik, why }. row null ise hicbir sey yazilmadi. */
+  async function talep(p){
+    const c = check(p);
+    if(!c.ok) return { row:null, otomatik:false, why:c.why };
+    const row = await propose(p);
+    if(!row) return { row:null, otomatik:false, why:'Bu öneri daha önce işlendi.' };
+    if(!otomatikMi(row, ayar())) return { row, otomatik:false, why:null };
+    const r = await approve(row.id);
+    if(!r.ok) return { row, otomatik:false, why:r.why };
+    row.otomatik = true;
+    await save();
+    return { row, otomatik:true, why:null };
   }
 
   async function approve(id){
@@ -419,9 +499,14 @@ SP.Proposals = (function(){
     await save();
   }
 
-  async function save(){ await SP.Store.set(STORE, liste()); }
+  async function save(){
+    await SP.Store.set(STORE, liste());
+    await SP.Store.set(STORE + '-anahtar', { items:anahtarlar() });
+  }
   async function load(){
     SP.S.proposals = (await SP.Store.get(STORE)) || [];
+    const k = await SP.Store.get(STORE + '-anahtar');
+    SP.S.proposalKeys = (k && Array.isArray(k.items)) ? k.items : [];
     return SP.S.proposals;
   }
 
@@ -430,6 +515,7 @@ SP.Proposals = (function(){
     check, preview,
     fromText, fromModel, yanCumleler, quickToAction,
     propose, approve, reject, undo, clearResolved,
+    talep, otomatikMi, ayar, SEVIYELER, MODLAR,
     pending, all, load, save, MAX,
   };
 })();

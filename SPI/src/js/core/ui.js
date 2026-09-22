@@ -741,7 +741,14 @@ SP.UI = (function(){
       btn.className = 'toast__undo';
       btn.textContent = 'Geri al';
       btn.setAttribute('data-act', 'undo');
-      btn.addEventListener('click', () => { el.remove(); });
+      /* `undo` bir islevse dugme gercekten geri alir; yalniz `true` ise
+         eski davranis: toast kapanir. */
+      btn.addEventListener('click', () => {
+        el.remove();
+        if(typeof o.undo === 'function'){
+          try{ Promise.resolve(o.undo()).catch(() => {}); }catch(e){}
+        }
+      });
       el.appendChild(btn);
     }
     root.appendChild(el);

@@ -85,6 +85,14 @@ SP.Screens.guide = (function(){
               options:models.map(m => ({ value:m.id, label:m.label })) }) })}
         </div>
         ${when(provider && provider.note, () => html`<p class="small muted mt-8">${provider.note}</p>`)}
+        <div class="mt-12">${K.Field({ label:'Küçük kayıtlar sormadan yazılsın mı?',
+          hint:'Küçük: tek ölçüm, bir öğün, bir seans. Tahlil değerleri her zaman önce sorulur.',
+          input:K.Select({ id:'m-otomatik', value:s.otomatikUygula || 'istek', change:'pick-otomatik',
+            options:[
+              { value:'istek', label:'Yalnız benim yazdıklarım (önerilir)' },
+              { value:'hepsi', label:'Modelin okuduğu küçük kayıtlar da' },
+              { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
+            ] }) })}</div>
         ${when(provider && provider.needsKey, () => html`<div class="mt-12">
           ${K.Field({ label:'API anahtarı', hint:provider.keyHint || '',
             input:K.Input({ id:'m-key', type:'password',
@@ -602,6 +610,14 @@ SP.Screens.guide = (function(){
       await SP.Beacon.save({ intervalMinutes:n });
     },
     async 'hkm-level'(el){ await SP.Beacon.save({ level:el.value }); SP.App.render(); },
+    async 'pick-otomatik'(el){
+      const v = SP.Proposals.MODLAR.indexOf(el.value) >= 0 ? el.value : 'istek';
+      await SP.Office.saveSettings({ otomatikUygula:v });
+      SP.UI.toast(v === 'hicbiri' ? 'Her kayıt önce sorulacak'
+        : v === 'hepsi' ? 'Modelin okuduğu küçük kayıtlar da sormadan yazılacak'
+        : 'Yalnız senin yazdığın küçük kayıtlar sormadan yazılacak');
+    },
+
     async 'pick-provider'(el){
       const p = SP.PROVIDERS[el.value];
       const first = p && p.models && p.models[0] ? p.models[0].id : '';

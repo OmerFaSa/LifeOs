@@ -307,14 +307,26 @@ SP.Screens.team = (function(){
         const list = S.officeChats[a.id] || (S.officeChats[a.id] = []);
         list.push({ role:'user', text:t, at:new Date().toISOString() });
 
-        for(const o of r.oneriler) await SP.Proposals.propose(o);
+        /* Kullanicinin KENDI cumlesi, kural motoru cozdu: kaynak 'istek'.
+           Kucuk kayit (AGENTS.md §1.9) hemen yazilir ve geri alinabilir;
+           tahlil gibi orta kayit onay bekler. */
+        let yazilan = 0, bekleyen = 0, dusen = 0;
+        for(const o of r.oneriler){
+          const t = await SP.Proposals.talep(Object.assign({ source:'istek' }, o));
+          if(!t.row) dusen++;
+          else if(t.otomatik) yazilan++;
+          else bekleyen++;
+        }
 
-        const ne = r.oneriler.length === 1 ? 'Bir kayıt' : r.oneriler.length + ' kayıt';
-        const kuyruk = r.anlasilmayan.length
-          ? ' Şunu çözemedim: «' + r.anlasilmayan.join('», «') + '».'
-          : '';
+        const parca = [];
+        if(yazilan) parca.push((yazilan === 1 ? 'Bir kayıt' : yazilan + ' kayıt')
+          + ' yazdım; yanlışsa aşağıdan geri al.');
+        if(bekleyen) parca.push((bekleyen === 1 ? 'Bir kayıt' : bekleyen + ' kayıt')
+          + ' hazırladım, onayına bakıyor.');
+        if(dusen) parca.push(dusen + ' kaydı uygulayamadım.');
+        if(r.anlasilmayan.length) parca.push('Şunu çözemedim: «' + r.anlasilmayan.join('», «') + '».');
         list.push({ role:'agent', source:'rules', at:new Date().toISOString(),
-          text:ne + ' hazırladım, onayına bakıyor. Kaydet dersen yazarım.' + kuyruk });
+          text:parca.join(' ') });
         await SP.Store.set('chats/' + a.id, { agentId:a.id, messages:list });
         return;
       }

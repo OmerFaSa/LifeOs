@@ -549,4 +549,96 @@
       });
     });
   });
+
+  /* ==================== seviye ve otomatik uygulama ====================
+
+     AGENTS.md §1.9. Seviyeyi katalog belirler. Kullanicinin KENDI
+     cumlesinden kural motorunun cikardigi kucuk kayit sormadan yazilir
+     ve geri alinabilir kalir. Tahlil degeri ORTAdir: yanlis okunmus bir
+     birim ya da ondalik, saglik verisinde eksik kayittan kotudur. Modelin
+     yorumladigi cumle de onay bekler — sayiyi model okudu. */
+
+  describe('Öneri — seviye', () => {
+    it('her eylemin geçerli bir seviyesi vardır', () => {
+      SP.Proposals.katalogIdleri().forEach(id => {
+        expect(['kucuk', 'orta', 'buyuk'].indexOf(SP.Proposals.eylem(id).level) >= 0).toBeTruthy();
+      });
+    });
+
+    it('tahlil girişi orta seviyedir', () => {
+      expect(SP.Proposals.eylem('olcum-gir').level).toBe('orta');
+      expect(SP.Proposals.eylem('vital-yaz').level).toBe('kucuk');
+    });
+
+    it('seviye öneriye katalogdan yazılır', async () => {
+      resetState();
+      const p = await SP.Proposals.propose({ action:'olcum-gir', level:'kucuk',
+        params:{ rows:[{ markerId:'ldl', value:120 }], date:'2026-03-01' }, kaynak:'rules' });
+      expect(p.level).toBe('orta');
+    });
+  });
+
+  describe('Öneri — otomatik uygulama', () => {
+    it('karar tablosu', () => {
+      const P = SP.Proposals;
+      expect(P.otomatikMi({ level:'kucuk', source:'istek' }, 'istek')).toBe(true);
+      expect(P.otomatikMi({ level:'kucuk', source:'model' }, 'istek')).toBe(false);
+      expect(P.otomatikMi({ level:'kucuk', source:'model' }, 'hepsi')).toBe(true);
+      expect(P.otomatikMi({ level:'kucuk', source:'istek' }, 'hicbiri')).toBe(false);
+      expect(P.otomatikMi({ level:'orta', source:'istek' }, 'hepsi')).toBe(false);
+      expect(P.otomatikMi({ level:'kucuk', source:'model' }, 'bozuk')).toBe(false);
+    });
+
+    it('kullanıcının kendi cümlesi küçükse hemen yazılır, geri alınır', async () => {
+      resetState();
+      await withTodayAsync('2026-03-01', async () => {
+        const r = SP.Proposals.fromText('uyku 7,5 saat');
+        const t = await SP.Proposals.talep(Object.assign({ source:'istek' }, r.oneriler[0]));
+        expect(t.otomatik).toBe(true);
+        expect(SP.Model.vitalsOf('2026-03-01').sleep).toBe(7.5);
+        await SP.Proposals.undo(t.row.id);
+        const v = SP.Model.vitalsOf('2026-03-01');
+        expect(v == null || v.sleep == null).toBeTruthy();
+      });
+    });
+
+    it('tahlil değeri istense de onay bekler', async () => {
+      resetState();
+      await withTodayAsync('2026-03-01', async () => {
+        const t = await SP.Proposals.talep({ action:'olcum-gir', source:'istek', kaynak:'rules',
+          params:{ rows:[{ markerId:'ldl', value:120 }], date:'2026-03-01' } });
+        expect(t.otomatik).toBe(false);
+        expect(t.row.status).toBe('pending');
+        expect((SP.S.labs || []).length).toBe(0);
+      });
+    });
+
+    it('«hiçbiri» ayarında küçük kayıt da onay bekler', async () => {
+      resetState();
+      await withTodayAsync('2026-03-01', async () => {
+        await SP.Office.saveSettings({ otomatikUygula:'hicbiri' });
+        const r = SP.Proposals.fromText('nabız 58');
+        const t = await SP.Proposals.talep(Object.assign({ source:'istek' }, r.oneriler[0]));
+        expect(t.otomatik).toBe(false);
+        const v = SP.Model.vitalsOf('2026-03-01');
+        expect(v == null || v.rhr == null).toBeTruthy();
+      });
+    });
+
+    it('geçersiz talep hiçbir şey yazmaz', async () => {
+      resetState();
+      const t = await SP.Proposals.talep({ action:'vital-yaz', source:'istek',
+        params:{ field:'yok', value:1, date:'2026-03-01' } });
+      expect(t.row).toBe(null);
+      expect(SP.Proposals.all()).toHaveLength(0);
+    });
+
+    it('aynı anahtar ikinci kez kuyruğa girmez', async () => {
+      resetState();
+      const p = { action:'vital-yaz', anahtar:'hkm:teklif:7',
+        params:{ field:'sleep', value:7, date:'2026-03-01' }, kaynak:'rules' };
+      expect(await SP.Proposals.propose(p)).toBeTruthy();
+      expect(await SP.Proposals.propose(p)).toBe(null);
+    });
+  });
 })();

@@ -93,13 +93,38 @@ SP.Palette = (function(){
       const e = SP.Proposals.eylem(o.action);
       return e ? e.label : o.action;
     });
+    /* Kucuk ve TAMAMEN anlasilmis istek sormadan yazilir (AGENTS.md
+       §1.9); orta seviye (tahlil) ya da anlasilmayan parca varsa onizleme. */
+    const P = SP.Proposals;
+    const hemen = !r.anlasilmayan.length && r.oneriler.every(o => P.otomatikMi(
+      { level:(P.eylem(o.action) || {}).level, source:'istek' }, P.ayar()));
     return {
       id:'quick:' + r.oneriler.map(o => o.action).join('+'),
       kind:'Hızlı giriş',
       label:adlar.join(' · '),
-      hint:r.oneriler.length === 1 ? '1 kayıt' : r.oneriler.length + ' kayıt',
-      run:() => confirmQuick(r, t),
+      hint:(r.oneriler.length === 1 ? '1 kayıt' : r.oneriler.length + ' kayıt')
+        + (hemen ? ' · hemen yazılır, geri alınabilir' : ' · önce önizleme'),
+      run:() => hemen ? hemenYaz(r) : confirmQuick(r, t),
     };
+  }
+
+  async function hemenYaz(r){
+    close();
+    const ids = [];
+    let dusen = 0, rota = null;
+    for(const o of r.oneriler){
+      const t = await SP.Proposals.talep(Object.assign({ source:'istek' }, o));
+      if(t.row && t.otomatik){ ids.push(t.row.id); rota = rota || ROTA[o.action] || null; }
+      else dusen++;
+    }
+    SP.UI.toast((ids.length === 1 ? '1 kayıt' : ids.length + ' kayıt') + ' yazıldı'
+      + (dusen ? ' · ' + dusen + ' tanesi onay bekliyor ya da yazılamadı' : ''),
+      ids.length ? { undo:async () => {
+        for(const id of ids) await SP.Proposals.undo(id);
+        SP.UI.toast('Geri alındı');
+        SP.App.render();
+      } } : {});
+    if(rota) SP.App.go(rota); else SP.App.render();
   }
 
   /* Onizleme: NE anlasildi, nereye yazilacak ve ne degisecek.
@@ -159,7 +184,7 @@ SP.Palette = (function(){
     let yazilan = 0, dusen = 0, rota = null;
     for(const o of bekleyen.oneriler){
       /* Tarih alt sayfada degistirilmis olabilir. */
-      const oneri = Object.assign({}, o, {
+      const oneri = Object.assign({}, o, { source:'istek',
         params:Object.assign({}, o.params, { date:tarih }) });
       const kayit = await SP.Proposals.propose(oneri);
       const res = await SP.Proposals.approve(kayit.id);
