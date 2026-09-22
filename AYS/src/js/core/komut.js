@@ -84,8 +84,26 @@ R.Komut = (function(){
     return l[l.length - 1].dk;
   }
 
+  /* Bölüm gizleme: gizlenebilir bir bölümün adı + aç/kapat fiili.
+     Bir bölüm HAKKINDA konuşmak («sınamada neden düşük çıkıyorum») istek
+     değildir; fiil yoksa komut sayılmaz. */
+  const BOLUM_KAPAT_RE = /(kapat|kapansın|gizle|gizlensin|istemiyorum|kullanmıyorum|kullanmayacağım|kaldır)/;
+  const BOLUM_AC_RE = new RegExp('(' + SINIR_ONCE + 'aç' + SINIR_SONRA + '|açılsın|geri getir|göster|tekrar aç|geri aç)');
+
+  function bolumBul(t){
+    const l = (R.Bolum ? R.Bolum.GIZLENEBILIR : []);
+    const bulunan = [];
+    l.forEach(b => { if(b.takma.some(a => t.indexOf(a) >= 0)) bulunan.push(b.id); });
+    return bulunan;
+  }
+
   function turler(t){
     const out = [];
+    if((BOLUM_KAPAT_RE.test(t) || BOLUM_AC_RE.test(t))
+      && (bolumBul(t).length || /bölüm/.test(t))){
+      out.push('bolum');
+      return out;
+    }
     const gecmis = GECMIS_RE.test(t);
     if(HEDEF_RE.test(t) && /(soru|haftalık|hafta)/.test(t) && /\d/.test(t)) out.push('hedef');
     else if(!gecmis && sureler(t).length && (GELECEK_RE.test(t) || GUNLUK_RE.test(t))) out.push('sure');
@@ -192,6 +210,19 @@ R.Komut = (function(){
     const t = kucult(metin);
     const out = { oneriler:[], sorular:[] };
     const tr = tarih(t, bugun) || tasinanTarih || null;
+
+    if(tur === 'bolum'){
+      const idler = bolumBul(t);
+      const kapat = BOLUM_KAPAT_RE.test(t);
+      if(!idler.length){
+        out.sorular.push({ metin, soru:'Hangi bölümü ' + (kapat ? 'gizleyeyim' : 'açayım')
+          + '? «Sınama», «Öğrenme», «Soru çöz», «Telafi», «Analiz» ya da «Rütbe» diyebilirsin.' });
+        return out;
+      }
+      idler.forEach(id => out.oneriler.push({ action:'bolum-ac-kapa',
+        params:{ bolum:id, acik:kapat ? 0 : 1 }, metin }));
+      return out;
+    }
 
     if(tur === 'hedef'){
       const sayilar = (t.match(/\d+/g) || []).map(Number);

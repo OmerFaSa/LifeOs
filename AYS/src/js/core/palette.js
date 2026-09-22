@@ -14,7 +14,7 @@ R.Palette = (function(){
     const M = R.Model, C = R.Calc;
     const list = [];
 
-    const go = (id, label, icon, group) => ({ group, label, icon, run(){ R.App.go(id); } });
+    const go = (id, label, icon, group) => ({ group, label, icon, route:id, run(){ R.App.go(id); } });
 
     list.push(go('today','Bugün','today','Git'));
     list.push(go('week','Hafta — sözleşme ve review','week','Git'));
@@ -34,9 +34,9 @@ R.Palette = (function(){
 
     list.push({ group:'Kayıt', label:'Deneme ekle', icon:'plus', hint:'Cmt', run(){ R.App.go('exams'); setTimeout(()=>R.Screens.exams.handle['new-exam']({dataset:{}}), 60); } });
     list.push({ group:'Kayıt', label:'Tekrar kartı ekle', icon:'plus', run(){ R.App.go('cards'); setTimeout(()=>R.Screens.cards.handle['new-card']({dataset:{}}), 60); } });
-    list.push({ group:'Kayıt', label:'Ders ekle (video / not)', icon:'plus', run(){ R.App.go('learn'); setTimeout(()=>R.Screens.learn.handle['note-new']({dataset:{}}), 60); } });
+    list.push({ group:'Kayıt', label:'Ders ekle (video / not)', icon:'plus', route:'learn', run(){ R.App.go('learn'); setTimeout(()=>R.Screens.learn.handle['note-new']({dataset:{}}), 60); } });
     list.push({ group:'Kayıt', label:'Süreli deneme oturumu', icon:'clock', run(){ R.App.go('exams'); setTimeout(()=>R.Screens.exams.handle['run-open']({dataset:{}}), 60); } });
-    list.push({ group:'Kayıt', label:'Sınamayı başlat', icon:'play', run(){ R.App.go('quiz'); setTimeout(()=>R.Screens.quiz.handle['quiz-start']({dataset:{}}), 60); } });
+    list.push({ group:'Kayıt', label:'Sınamayı başlat', icon:'play', route:'quiz', run(){ R.App.go('quiz'); setTimeout(()=>R.Screens.quiz.handle['quiz-start']({dataset:{}}), 60); } });
     list.push({ group:'Kayıt', label:'Weekly review’u aç', icon:'check', hint:'Paz', run(){ R.App.go('week'); setTimeout(()=>R.Screens.week.openReview(), 60); } });
 
     const day = S.days[U.todayISO()];
@@ -86,7 +86,8 @@ R.Palette = (function(){
     list.push({ group:'Sistem', label:'Yedek al (JSON)', icon:'download', run(){ R.Screens.guide.handle['export-data']({dataset:{}}); } });
     list.push({ group:'Sistem', label:'Kısayolları göster', icon:'guide', run(){ showShortcuts(); } });
 
-    return list;
+    /* Gizlenmis bolumun «Git» komutu gorunmez (core/bolum.js). */
+    return R.Bolum ? list.filter(c => !(c.route && R.Bolum.gizli(c.route))) : list;
   }
 
   /* Turkce karakterleri normalize eder: "ogrenme" ile "öğrenme" eslesir. */

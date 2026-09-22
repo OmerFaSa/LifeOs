@@ -1195,6 +1195,7 @@ R.Model = (function(){
     /* Istisnalar gun kurulmadan ONCE yuklenir: asagidaki ensureDay bugunu
        kurarken aradaysa bos kurmali. */
     if(R.Istisna) await R.Istisna.yukle();
+    if(R.Bolum) await R.Bolum.yukle();
     if(R.Friction) await R.Friction.load();
     if(R.Calib) await R.Calib.load();
     if(R.Signals) await R.Signals.load();

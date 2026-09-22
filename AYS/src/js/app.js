@@ -63,7 +63,24 @@ R.App = (function(){
 
   const MOBILE_TABS = ['today','learn','cards','quiz','progress'];
 
-  function screen(){ return R.Screens[S.route] || R.Screens.today; }
+  /* Gizlenen bolum (core/bolum.js) gezinmeden, mobil sekmelerden ve
+     yonlendirmeden kalkar. Bos kalan grup da gorunmez. */
+  function gizliMi(route){ return !!(R.Bolum && R.Bolum.gizli(route)); }
+  function navGorunen(){
+    return NAV.map(g => Object.assign({}, g, { items:g.items.filter(i => !gizliMi(i.id)) }))
+      .filter(g => g.items.length);
+  }
+  function mobilSekmeler(){
+    const l = MOBILE_TABS.filter(id => !gizliMi(id));
+    /* Gizlenen sekmenin yerini bir cekirdek ekran doldurur. */
+    ['week', 'exams', 'plan'].forEach(id => { if(l.length < MOBILE_TABS.length && l.indexOf(id) < 0) l.push(id); });
+    return l;
+  }
+
+  function screen(){
+    if(gizliMi(S.route)) S.route = 'today';
+    return R.Screens[S.route] || R.Screens.today;
+  }
 
   function badgeFor(id){
     if(id === 'cards'){
@@ -156,7 +173,7 @@ R.App = (function(){
     const aktif = bolumOf(sc.id);
     return html`
       <nav class="sitenav" aria-label="Bölümler">
-        <div class="wrapc navlinks">${map(NAV, sec => {
+        <div class="wrapc navlinks">${map(navGorunen(), sec => {
           const on = sec.id === aktif.id;
           const b = bolumBadge(sec);
           return html`<button class="${cls('navlink', on && 'is-active')}"
@@ -240,7 +257,7 @@ R.App = (function(){
             <b>Bölümler</b>
             ${R.C.IconButton({ icon:'close', plain:true, aria:'Kapat', act:'toggle-sidebar' })}
           </div>
-          <div class="navsheet__list">${map(NAV, sec => html`
+          <div class="navsheet__list">${map(navGorunen(), sec => html`
             <div class="navsheet__sec">
               <div class="navsheet__num">${sec.num}</div>
               <div class="minw0">
@@ -297,7 +314,7 @@ R.App = (function(){
   }
 
   function tabbarHtml(){
-    return html`<nav class="tabbar" aria-label="Hızlı gezinme">${map(MOBILE_TABS, id => {
+    return html`<nav class="tabbar" aria-label="Hızlı gezinme">${map(mobilSekmeler(), id => {
       const item = NAV.reduce((f, g) => f || g.items.find(i => i.id === id), null)
         || { label:id, icon:'right' };
       const on = S.route === id;
@@ -629,6 +646,9 @@ R.App = (function(){
        icin sonuc: tikladiginda hicbir sey olmayan bir dugme. (ESP'de duman
        testi bunu "olu dugme" olarak yakaladi.) */
     if(UI.isSheetOpen && UI.isSheetOpen()) UI.closeSheet();
+    /* Gizlenmis bolumun adresi (eski bir baglanti, palet gecmisi) Bugun'e
+       doner: gizlenen bolum «acilmayan bos ekran» olarak gorunmemeli. */
+    if(gizliMi(route)) route = 'today';
     S.route = route;
     rotaDegisti = true;
     applySection(route);

@@ -155,6 +155,20 @@ R.ACTIONS = [
     why:'Kapasite değiştiyse plan eski kapasiteye göre kurulmuş kalmamalı.',
   },
 
+  {
+    id:'bolum-ac-kapa',
+    level:'orta',
+    title:'Bölümü aç / gizle',
+    summary:'Bölüm gezinmeden kalkar ya da geri gelir; verisi silinmez.',
+    touches:'Gezinme',
+    icon:'layers',
+    route:'guide',
+    agents:['patron'],
+    /* acik: 1 aç, 0 gizle — katalog parametreleri yalnız metin ve sayı. */
+    params:{ bolum:'string', acik:'number' },
+    why:'Kullanılmayan bölüm gezinmeyi uzatır ve boş ekranı «yapmadığın iş» gibi gösterir.',
+  },
+
   /* ==================== KONUŞARAK VERİ GİRİŞİ ====================
 
      Yukarıdakiler PLAN eylemleridir: konuyu tekrara al, blok ekle,

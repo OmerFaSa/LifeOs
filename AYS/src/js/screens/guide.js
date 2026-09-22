@@ -516,6 +516,15 @@ R.Screens.guide = (function(){
               Üslup ev kurallarını geçersiz kılmaz: garanti, tıbbi tavsiye ve uykudan feda
               her üslupta yasaktır.</p>` }),
 
+        when(R.Bolum, () => K.Card({ title:'Bölümler',
+          sub:'Kullanmadığın bölümü gizle; verisi silinmez',
+          body:html`
+            <div class="stack-xs">${map(R.Bolum.liste(), b => K.Checkbox({
+              label:b.ad + (b.acik ? '' : ' — gizli'), checked:b.acik,
+              act:'bolum-toggle', data:{ 'data-id':b.id } }))}</div>
+            <p class="tiny dim mt-8">Bugün, Hafta, Plan, Dersler, Deneme, Tekrar, İlerleme,
+              Ofis ve Rehber gizlenemez. Patron’a da söyleyebilirsin: «sınama bölümünü kapat».</p>` })),
+
         K.Card({ title:'Görünüm', sub:'Tema ve renk bu cihazda saklanır',
           body:html`
             ${K.Segmented({ items:THEMES, value:S.profile.theme || 'system', act:'set-theme',
@@ -652,6 +661,23 @@ R.Screens.guide = (function(){
   }
 
   const handle = {
+    /* Ayarlardan elle acip kapatmak da oneri kutusundan gecer: ofiste
+       «Geri al» ile geri alinabilir kalir. Kullanici kutuyu kendisi
+       isaretledigi icin onay burada verilmis sayilir. */
+    async 'bolum-toggle'(el){
+      const id = el.dataset.id;
+      const acik = R.Bolum.gizli(id) ? 1 : 0;
+      const t = await R.Proposals.talep({ action:'bolum-ac-kapa', agent:'patron', source:'istek',
+        params:{ bolum:id, acik }, reason:'Rehber → Bölümler' });
+      let ok = !!(t.row && t.otomatik);
+      if(t.row && !t.otomatik){
+        const r = await R.Proposals.approve(t.row.id);
+        ok = !!(r && r.ok);
+      }
+      const ad = (R.Bolum.BY_ID[id] || {}).ad || id;
+      UI.toast(ok ? ad + (acik ? ' açıldı' : ' gizlendi — verisi duruyor') : (t.why || 'Değiştirilemedi'));
+      R.App.render();
+    },
     async 'guide-tab'(el){ S.ui.guideTab = el.dataset.tab; R.App.render(); },
 
     /* Budama. Motor kullanicinin girdigi veriyi reddeder; ekran da

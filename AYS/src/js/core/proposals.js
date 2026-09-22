@@ -372,6 +372,28 @@ R.Proposals = (function(){
       },
     },
 
+    'bolum-ac-kapa':{
+      check(p){
+        const b = R.Bolum && R.Bolum.BY_ID[p.bolum];
+        if(!b) return fail('Bu bölüm gizlenemez ya da sistemde yok.');
+        const acik = Number(p.acik) === 1;
+        if(acik === !R.Bolum.gizli(p.bolum)) return fail(b.ad + ' zaten ' + (acik ? 'açık.' : 'gizli.'));
+        return pass({ b, acik });
+      },
+      preview(p, ctx){
+        return [
+          { label:ctx.b.ad, before:ctx.acik ? 'gizli' : 'açık', after:ctx.acik ? 'açık' : 'gizli' },
+          { label:'Verisi', before:'duruyor', after:'duruyor — silinmez' },
+        ];
+      },
+      async apply(p, ctx){
+        const r = await R.Bolum.set(p.bolum, ctx.acik);
+        if(!r.ok) throw new Error(r.error);
+        return { bolum:p.bolum, acik:!ctx.acik };
+      },
+      async revert(s){ await R.Bolum.set(s.bolum, s.acik); },
+    },
+
     /* ==================== KONUŞARAK VERİ GİRİŞİ ====================
 
        Yukarıdaki eylemler PLAN eylemleridir: konuyu tekrara al, blok
