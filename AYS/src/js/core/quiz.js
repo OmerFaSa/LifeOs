@@ -269,12 +269,20 @@ R.Quiz = (function(){
     return { done:false, next:current() };
   }
 
-  function skip(){
+  /* Son maddeyi atlamak da oturumu BİTİRİR — önce bitirmiyordu. `answer()`
+     son maddede `finish()`i çağırırken `skip()` yalnız `index`i ileri
+     alıyordu; sınırda `index === items.length` olunca `current()` `null`
+     dönüyor, ekran kuruluma dönüyor ama oturum bellekte ASILI kalıyordu.
+     Kaybolan şey özet değildi yalnız: o oturumdaki "bilmiyordum"
+     maddeleri için kart açan `ensureCards()` hiç çalışmıyordu — tekrar
+     döngüsü sessizce kapanmıyordu, hiç açılmıyordu. */
+  async function skip(){
     if(!session) return null;
     session.revealed = false;
     session.picked = null;
     session.questionStartedMs = Date.now();
     session.index = Math.min(session.index + 1, session.items.length);
+    if(session.index >= session.items.length) return await finish();
     return current();
   }
 

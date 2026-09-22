@@ -482,6 +482,32 @@
       expect(res.summary.perQuestion).toBe(20);
       expect(res.summary.medianTime != null).toBeTruthy();
     });
+
+    it('SON maddeyi atlamak da oturumu BİTİRİR', async function(){
+      /* `answer()` son maddede `finish()`i cagiriyordu, `skip()` yalniz
+         `index`i ileri aliyordu. Sinirda `current()` null donuyor, ekran
+         kuruluma donuyor ama oturum bellekte ASILI kaliyordu — ozet,
+         zayif konular ve o oturumdaki "bilmiyordum" maddeleri icin kart
+         acan `ensureCards()` hic calismiyordu. */
+      await seedCards(2);
+      Q.start({ mode:'due', size:2, format:'none' });
+      await Q.skip();                       // ilk madde — bitirmemeli
+      expect(Q.active()).toBeTruthy();
+      const res = await Q.skip();           // SON madde — bitirmeli
+      expect(Q.active()).toBeFalsy();
+      expect(res.done).toBeTruthy();
+      expect(res.summary).toBeTruthy();
+    });
+
+    it('atlanan maddeler puanlamaya girmez ama oturumu tıkamaz', async function(){
+      await seedCards(3);
+      Q.start({ mode:'due', size:3, format:'none' });
+      await Q.answer('known');
+      await Q.skip();
+      const res = await Q.skip();           // son madde atlanarak biter
+      expect(res.done).toBeTruthy();
+      expect(res.summary.total).toBe(1);    // yalniz cevaplanan sayilir
+    });
   });
 
   describe('Kart önceliği', function(){

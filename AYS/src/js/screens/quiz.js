@@ -243,7 +243,7 @@ R.Screens.quiz = (function(){
       }
       R.App.render();
     },
-    async 'quiz-skip'(){ Q.skip(); R.App.render(); },
+    async 'quiz-skip'(){ await Q.skip(); R.App.render(); },
     async 'quiz-cancel'(){
       UI.confirmSheet('Oturumu bitir',
         'Yarım oturum kaydedilmez; verdiğin cevaplar kart aralıklarına zaten işlendi.', async () => {
