@@ -271,6 +271,11 @@ details.detay > summary:hover{ color:var(--fg); }
   .tabs button{ padding:10px 10px 8px; }
   .gez a{ padding:9px 10px; font-size:13px; }
   .balon{ max-width:88%; }
+  /* Alti baglanti telefon genisliginde sigmiyor: kirpip gizlemek yerine
+     yatay KAYDIRMA — hicbir bolume erisim gorunmez kilinmaz. Diger
+     tablolarda kullanilan `.scroll` ile ayni ilke. */
+  .gez{ overflow-x:auto; flex-wrap:nowrap; max-width:100%; }
+  .gez a{ flex:none; white-space:nowrap; }
 }
 
 /* ============================== PROFİL ==========================
@@ -501,6 +506,7 @@ details.detay > summary:hover{ color:var(--fg); }
       <a href="#/sohbet" data-yol="sohbet">Sohbetler</a>
       <a href="#/sistemler" data-yol="sistemler">Sistemler</a>
       <a href="#/profil" data-yol="profil">Profil</a>
+      <a href="#/motto" data-yol="motto">Motto</a>
       <a href="#/teklifler" data-yol="teklifler">Teklifler</a>
     </nav>
     <div class="bosluk"></div>
@@ -660,6 +666,47 @@ details.detay > summary:hover{ color:var(--fg); }
         <summary>Karar geçmişi</summary>
         <div id="gecmis"></div>
       </details>
+    </div>
+
+    <!-- ========================= HAYAT MOTTOSU =======================
+
+         HKM'nin geri kalanı ÖLÇER: veri gelir, kural motoru karar üretir,
+         ekranda bir sayı durur. Burası ölçmez. Burası kişinin hayat
+         hakkında ne düşündüğünü YAZDIĞI yerdir; o yüzden bu ekranda
+         hiçbir yerde bir puan, bir band ya da bir «şunu yapmalısın»
+         cümlesi yoktur ve olmayacaktır. -->
+    <div data-bolme="motto" hidden>
+      <div class="gun"><h1>Hayat Mottosu</h1></div>
+      <p class="sub" style="margin-bottom:16px">Kendi düşüncelerin.
+        Sistem burada bir şey ölçmez ve sana ne düşüneceğini söylemez;
+        yazdığın kalır, değiştirdiğinde eskisi kaybolmaz.</p>
+
+      <div class="card" id="motto-ilkeler"></div>
+
+      <div class="tabs" id="motto-sekmeler">
+        <button data-motto="agac" class="on">Ağaç</button>
+        <button data-motto="harita">Harita</button>
+        <button data-motto="ara">Ara</button>
+      </div>
+
+      <div data-motto-bolme="agac">
+        <div class="card" id="motto-agac"><p class="muted">Yükleniyor…</p></div>
+      </div>
+      <div data-motto-bolme="harita" hidden>
+        <div class="card" id="motto-harita"></div>
+      </div>
+      <div data-motto-bolme="ara" hidden>
+        <div class="card">
+          <div class="row">
+            <input id="motto-q" type="text" placeholder="düşüncelerinde ara…"
+                   style="flex:1" aria-label="Düşüncelerde ara"/>
+            <button id="motto-ara-btn">Ara</button>
+          </div>
+          <div id="motto-sonuc"></div>
+        </div>
+      </div>
+
+      <div class="card" id="motto-detay" hidden></div>
     </div>
 
     <!-- =========================== TEKLİFLER ========================= -->
@@ -2757,13 +2804,344 @@ details.detay > summary:hover{ color:var(--fg); }
     teklifListeCiz(r.body);
   }
 
+  /* ====================== HAYAT MOTTOSU ======================
+
+     Kullanicinin KENDI dusunce agi. Bu ekranda hicbir yerde puan, band
+     ya da «sunu yapmalisin» cumlesi yoktur: burasi olcmez.
+
+     Iki sey gorunur olmak zorunda ve ikisi de bu bolumun var olma
+     sebebidir: dusuncenin GECMISI (ne zaman ne dusunuyordun) ve her
+     cumlenin KIMIN SOZU oldugu (sen mi yazdin, uretildi mi). */
+  var MOTTO = { agac:[], ilkeler:[], secili:null, sekme:'agac' };
+
+  function mottoSekmesi(ad){
+    MOTTO.sekme = ad;
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#motto-sekmeler button'), function(b){
+        b.className = b.dataset.motto === ad ? 'on' : '';
+      });
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-motto-bolme]'), function(el){
+        el.hidden = el.dataset.mottoBolme !== ad;
+      });
+    if(ad === 'harita') mottoHaritaCiz();
+  }
+
+  function mottoRozet(tur){
+    if(tur === 'ilke') return '<span class="etiket">TEMEL İLKE</span>';
+    if(tur === 'motto') return '<span class="etiket">MOTTO</span>';
+    return '';
+  }
+
+  async function yukleMotto(){
+    var r = await api('/api/motto');
+    if(r.status !== 200){
+      $('motto-agac').innerHTML = '<p class="danger">Düşünceler alınamadı ('
+        + esc(r.status) + ').</p>';
+      return;
+    }
+    MOTTO.agac = r.body.tree || [];
+    MOTTO.ilkeler = r.body.principles || [];
+    mottoIlkelerCiz();
+    mottoAgacCiz();
+    if(MOTTO.sekme === 'harita') mottoHaritaCiz();
+  }
+
+  /* Motto ve ilkeler ana ekranda AYRICA durur: kullanicinin en cok
+     hatirlamak istedigi cumleleri, yuz dusuncenin arasinda aratmak
+     onlari hatirlanmaz kilardi. */
+  function mottoIlkelerCiz(){
+    if(!MOTTO.ilkeler.length){
+      $('motto-ilkeler').innerHTML = '<p class="muted">Henüz motto ya da '
+        + 'temel ilke işaretlemedin. Bir düşünceyi açıp türünü '
+        + '«motto» ya da «temel ilke» yapabilirsin.</p>';
+      return;
+    }
+    var h = '<h3>Mottoların ve ilkelerin</h3>';
+    MOTTO.ilkeler.forEach(function(x){
+      h += '<div class="satir" data-motto-ac="' + esc(x.id) + '">'
+        + mottoRozet(x.kind) + ' <b>' + esc(x.title) + '</b>'
+        + (x.body ? '<p class="sub">' + esc(x.body) + '</p>' : '')
+        + '</div>';
+    });
+    $('motto-ilkeler').innerHTML = h;
+  }
+
+  function mottoAgacCiz(){
+    if(!MOTTO.agac.length){
+      $('motto-agac').innerHTML = '<p class="muted">Ağacın boş. İlk '
+        + 'düşünceni ekleyerek başla — başlıkların hiçbiri zorunlu '
+        + 'değil, ağacı tamamen sen kurarsın.</p>'
+        + mottoEklemeFormu(null);
+      return;
+    }
+    var cocuk = {};
+    MOTTO.agac.forEach(function(d){
+      var k = d.parent_id == null ? 'kok' : String(d.parent_id);
+      (cocuk[k] = cocuk[k] || []).push(d);
+    });
+    function dal(anahtar, derinlik){
+      var liste = cocuk[anahtar] || [];
+      var h = '';
+      liste.forEach(function(d){
+        h += '<div class="satir" style="padding-left:' + (derinlik * 18) + 'px">'
+          + '<a href="#" data-motto-ac="' + esc(d.id) + '">' + esc(d.title) + '</a> '
+          + mottoRozet(d.kind)
+          + (d.tags && d.tags.length
+              ? ' <span class="muted tiny">#' + d.tags.map(esc).join(' #') + '</span>'
+              : '')
+          + '</div>';
+        h += dal(String(d.id), derinlik + 1);
+      });
+      return h;
+    }
+    $('motto-agac').innerHTML = dal('kok', 0) + mottoEklemeFormu(null);
+  }
+
+  function mottoEklemeFormu(ustId){
+    return '<div class="row" style="margin-top:12px">'
+      + '<input id="motto-yeni" type="text" placeholder="yeni düşünce başlığı…" '
+      + 'style="flex:1" aria-label="Yeni düşünce başlığı"/>'
+      + '<button id="motto-ekle" data-ust="' + (ustId == null ? '' : esc(ustId))
+      + '">Ekle</button></div>';
+  }
+
+  /* Dusunce haritasi — dal ile bag AYRI cizilir.
+
+     Ikisini ayni cizgi yapmak, kullanicinin kendi SINIFLANDIRMASI ile
+     dusuncenin AKRABALIGINI ayni sey gostermek olurdu; oysa haritanin
+     anlatmaya calistigi sey tam olarak bu ikisinin farkli olmasi. */
+  async function mottoHaritaCiz(){
+    var r = await api('/api/motto/map');
+    if(r.status !== 200){
+      $('motto-harita').innerHTML = '<p class="danger">Harita alınamadı.</p>';
+      return;
+    }
+    var n = r.body.nodes || [], e = r.body.edges || [];
+    if(!n.length){
+      $('motto-harita').innerHTML = '<p class="muted">Haritada gösterilecek '
+        + 'düşünce yok.</p>';
+      return;
+    }
+    var G = 640, Y = Math.max(260, Math.min(520, 60 + n.length * 26));
+    var yer = {};
+    /* Yerlesim DAIRESELDIR ve bu bilerek: kuvvet benzetimi calistirmak
+       her acilista baska bir resim uretirdi ve kullanici kendi
+       haritasini taniyamazdi. Ayni dusunceler, ayni yerde. */
+    n.forEach(function(d, i){
+      var a = (2 * Math.PI * i) / n.length - Math.PI / 2;
+      yer[d.id] = { x:G / 2 + Math.cos(a) * (G / 2 - 90),
+                    y:Y / 2 + Math.sin(a) * (Y / 2 - 40) };
+    });
+    var s = '<svg viewBox="0 0 ' + G + ' ' + Y + '" width="100%" '
+      + 'style="max-height:' + Y + 'px" role="img" '
+      + 'aria-label="Düşünce haritası: ' + n.length + ' düşünce, '
+      + e.length + ' bağlantı">';
+    e.forEach(function(k){
+      var a = yer[k.a], b = yer[k.b];
+      if(!a || !b) return;
+      s += '<line x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y
+        + '" stroke="currentColor" stroke-opacity="' + (k.tur === 'dal' ? '.28' : '.5')
+        + '" stroke-width="' + (k.tur === 'dal' ? 1 : 1.5) + '"'
+        + (k.tur === 'bag' ? ' stroke-dasharray="4 3"' : '') + '/>';
+    });
+    n.forEach(function(d){
+      var p = yer[d.id];
+      var buyuk = d.kind === 'ilke' || d.kind === 'motto';
+      s += '<g class="motto-node" data-motto-ac="' + esc(d.id) + '" role="button" '
+        + 'tabindex="0" aria-label="' + esc(d.title) + '">'
+        + '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + (buyuk ? 7 : 4.5) + '" '
+        + 'fill="currentColor" fill-opacity="' + (buyuk ? '.95' : '.55') + '"/>'
+        + '<text x="' + p.x + '" y="' + (p.y - 11) + '" text-anchor="middle" '
+        + 'font-size="11" fill="currentColor">' + esc(d.title) + '</text></g>';
+    });
+    s += '</svg>';
+    s += '<p class="muted tiny" style="margin-top:8px">Düz çizgi: ağaçtaki dal. '
+      + 'Kesik çizgi: düşünceler arası bağ. İkisi ayrı şeydir — dal senin '
+      + 'sıralaman, bağ düşüncenin akrabalığı.</p>';
+    $('motto-harita').innerHTML = s;
+  }
+
+  async function mottoAra(){
+    var q = $('motto-q').value || '';
+    var r = await api('/api/motto/search?q=' + encodeURIComponent(q));
+    if(r.status !== 200){
+      $('motto-sonuc').innerHTML = '<p class="danger">Arama başarısız.</p>';
+      return;
+    }
+    var liste = r.body.results || [];
+    if(!liste.length){
+      $('motto-sonuc').innerHTML = '<p class="muted">Eşleşen düşünce yok.</p>';
+      return;
+    }
+    var h = '';
+    liste.forEach(function(x){
+      h += '<div class="satir"><a href="#" data-motto-ac="' + esc(x.id) + '">'
+        + esc(x.title) + '</a> ' + mottoRozet(x.kind)
+        + (x.ozet ? '<p class="sub">' + esc(x.ozet) + '</p>' : '') + '</div>';
+    });
+    $('motto-sonuc').innerHTML = h;
+  }
+
+  async function mottoAc(id){
+    var r = await api('/api/motto/node/' + id);
+    if(r.status !== 200){
+      $('motto-detay').hidden = false;
+      $('motto-detay').innerHTML = '<p class="danger">Düşünce açılamadı.</p>';
+      return;
+    }
+    MOTTO.secili = r.body;
+    mottoDetayCiz();
+  }
+
+  function mottoDetayCiz(){
+    var d = MOTTO.secili;
+    if(!d){ $('motto-detay').hidden = true; return; }
+    var h = '<div class="row"><h3 style="flex:1">' + esc(d.title) + '</h3>'
+      + mottoRozet(d.kind)
+      + '<button data-motto-kapat="1" aria-label="Kapat">×</button></div>';
+
+    /* BEKLEYEN ONERI en ustte ve acikca isaretli: uretilen bir cumlenin
+       kullanicinin kendi ilkesi gibi gorunmesi, bu bolumun onlemek icin
+       var oldugu tek sey. */
+    if(d.pending){
+      h += '<div class="card" style="border-color:var(--line-strong)">'
+        + '<p class="tiny"><b>ÜRETİLEN ÖNERİ — senin sözün değil.</b> '
+        + 'Düşüncen değişmedi; onaylarsan uygulanır.</p>'
+        + '<p class="sub">' + esc(d.pending.body) + '</p>'
+        + '<button data-motto-onay="' + esc(d.pending.id) + '">Onayla</button>'
+        + '</div>';
+    }
+
+    h += '<textarea id="motto-govde" rows="6" style="width:100%" '
+      + 'aria-label="Düşünce metni">' + esc(d.body) + '</textarea>';
+    h += '<div class="row" style="margin-top:8px">'
+      + '<input id="motto-etiket" type="text" style="flex:1" '
+      + 'aria-label="Etiketler" placeholder="etiketler: disiplin, gelecek" value="'
+      + esc((d.tags || []).join(', ')) + '"/>'
+      + '<select id="motto-tur" aria-label="Düşünce türü">'
+      + '<option value="dusunce"' + (d.kind === 'dusunce' ? ' selected' : '') + '>düşünce</option>'
+      + '<option value="motto"' + (d.kind === 'motto' ? ' selected' : '') + '>motto</option>'
+      + '<option value="ilke"' + (d.kind === 'ilke' ? ' selected' : '') + '>temel ilke</option>'
+      + '</select>'
+      + '<button data-motto-kaydet="' + esc(d.id) + '">Kaydet</button></div>';
+
+    h += '<div class="row" style="margin-top:12px">'
+      + '<input id="motto-bag" type="text" style="flex:1" '
+      + 'aria-label="Bağlanacak düşünce kimliği" placeholder="bağlanacak düşünce no"/>'
+      + '<button data-motto-bagla="' + esc(d.id) + '">Bağla</button></div>';
+
+    if(d.links && d.links.length){
+      h += '<p class="tiny" style="margin-top:10px">Bağlı düşünceler:</p>';
+      d.links.forEach(function(l){
+        h += '<div class="satir"><a href="#" data-motto-ac="' + esc(l.id) + '">'
+          + esc(l.title) + '</a> ' + mottoRozet(l.kind) + '</div>';
+      });
+    }
+
+    /* GECMIS: «basari benim icin X» ile «artik Y diyorum» arasindaki
+       fark, dusuncenin kendisi kadar degerlidir. */
+    if(d.versions && d.versions.length > 1){
+      h += '<details class="detay" style="margin-top:12px">'
+        + '<summary>Düşüncenin geçmişi (' + d.versions.length + ' sürüm)</summary>';
+      d.versions.forEach(function(v, i){
+        h += '<div class="satir"><span class="muted tiny">'
+          + esc((v.created_at || '').slice(0, 10)) + ' · '
+          + (v.author === 'uretilen' ? 'ÜRETİLEN' : 'sen') + '</span>'
+          + '<p class="sub">' + esc(v.body || '(boş)') + '</p>'
+          + (i === 0 ? '' : '<button data-motto-onay="' + esc(v.id)
+              + '">Bu hâle dön</button>')
+          + '</div>';
+      });
+      h += '</details>';
+    }
+
+    h += '<div class="row" style="margin-top:12px">'
+      + '<input id="motto-alt" type="text" style="flex:1" '
+      + 'aria-label="Alt düşünce başlığı" placeholder="altına yeni düşünce…"/>'
+      + '<button data-motto-alt="' + esc(d.id) + '">Alt dal ekle</button>'
+      + '<button data-motto-arsiv="' + esc(d.id) + '">Arşivle</button></div>';
+
+    $('motto-detay').hidden = false;
+    $('motto-detay').innerHTML = h;
+  }
+
+  async function mottoYaz(yol, govde, sonra){
+    var r = await api(yol, { method:'POST', body:JSON.stringify(govde) });
+    if(r.status !== 200){
+      alert((r.body && r.body.note) || 'İşlem yapılamadı.');
+      return false;
+    }
+    await yukleMotto();
+    if(sonra) await sonra(r.body);
+    return true;
+  }
+
+  /* Tek dinleyici: ekran her cizildiginde yeniden baglanan dinleyiciler
+     ayni tiklamayi iki kez isletiyordu. */
+  document.addEventListener('click', async function(ev){
+    var el = ev.target.closest ? ev.target.closest('[data-motto-ac],'
+      + '[data-motto-kapat],[data-motto-kaydet],[data-motto-bagla],'
+      + '[data-motto-alt],[data-motto-arsiv],[data-motto-onay],'
+      + '#motto-ekle,#motto-ara-btn,#motto-sekmeler button') : null;
+    if(!el) return;
+    if(el.dataset && el.dataset.mottoAc != null){
+      ev.preventDefault(); return mottoAc(el.dataset.mottoAc);
+    }
+    if(el.dataset && el.dataset.mottoKapat){
+      MOTTO.secili = null; $('motto-detay').hidden = true; return;
+    }
+    if(el.id === 'motto-sekmeler') return;
+    if(el.parentElement && el.parentElement.id === 'motto-sekmeler'){
+      return mottoSekmesi(el.dataset.motto);
+    }
+    if(el.id === 'motto-ara-btn') return mottoAra();
+    if(el.id === 'motto-ekle'){
+      var ad = ($('motto-yeni') || {}).value || '';
+      if(!ad.trim()) return;
+      return mottoYaz('/api/motto/node', { title:ad });
+    }
+    if(el.dataset && el.dataset.mottoKaydet){
+      return mottoYaz('/api/motto/edit', {
+        id:Number(el.dataset.mottoKaydet),
+        body:$('motto-govde').value,
+        kind:$('motto-tur').value,
+        tags:$('motto-etiket').value,
+      }, function(){ return mottoAc(el.dataset.mottoKaydet); });
+    }
+    if(el.dataset && el.dataset.mottoBagla){
+      var hedef = ($('motto-bag') || {}).value || '';
+      if(!hedef.trim()) return;
+      return mottoYaz('/api/motto/link',
+        { a:Number(el.dataset.mottoBagla), b:Number(hedef) },
+        function(){ return mottoAc(el.dataset.mottoBagla); });
+    }
+    if(el.dataset && el.dataset.mottoAlt){
+      var alt = ($('motto-alt') || {}).value || '';
+      if(!alt.trim()) return;
+      return mottoYaz('/api/motto/node',
+        { title:alt, parent_id:Number(el.dataset.mottoAlt) });
+    }
+    if(el.dataset && el.dataset.mottoArsiv){
+      return mottoYaz('/api/motto/archive', { id:Number(el.dataset.mottoArsiv) },
+        function(){ MOTTO.secili = null; $('motto-detay').hidden = true; });
+    }
+    if(el.dataset && el.dataset.mottoOnay){
+      var nid = MOTTO.secili ? MOTTO.secili.id : null;
+      return mottoYaz('/api/motto/accept',
+        { version_id:Number(el.dataset.mottoOnay) },
+        function(){ if(nid) return mottoAc(nid); });
+    }
+  });
+
   /* ---------- gezinme
 
      Adres cubugunda yol tutulur: yenilendiginde ayni yerde kalirsin ve
      bir ekrani baskasina gonderebilirsin. Gorunum degistiginde YALNIZ o
      gorunumun verisi cekilir — her sekmede butun ambari sorgulamak,
      acilisi bekletmekten baska is yapmiyordu. */
-  var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'teklifler', 'ayarlar'];
+  var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'motto',
+                    'teklifler', 'ayarlar'];
   var gorunum = 'bugun';
 
   function yolOku(){
@@ -2870,6 +3248,7 @@ details.detay > summary:hover{ color:var(--fg); }
     if(gorunum === 'sohbet') return yukleSohbet();
     if(gorunum === 'profil') return yukleProfil(t);
     if(gorunum === 'sistemler') return yukleSistemler(t);
+    if(gorunum === 'motto') return yukleMotto();
     if(gorunum === 'teklifler') return yukleTeklifler();
     if(gorunum === 'ayarlar') return yukleAyarlar();
   }

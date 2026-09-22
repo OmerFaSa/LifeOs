@@ -212,6 +212,81 @@ CREATE TABLE IF NOT EXISTS conversations (
   audio_retained INTEGER NOT NULL DEFAULT 0,
   created_at    TEXT NOT NULL
 );
+
+/* HAYAT MOTTOSU — kullanicinin KENDI dusunce ve yasam felsefesi agi.
+
+   Bu tablolar HKM'nin geri kalanindan bir seyde ayrilir: buradaki
+   icerigi SISTEM URETMEZ, kullanici yazar. Butun HKM kayitlari bir
+   olcumden ya da bir modelden turer; burasi tek istisnadir ve o yuzden
+   kurallari da farklidir.
+
+   UC DEGISMEZ
+
+   1. ESKI DUSUNCE KAYBOLMAZ. Her duzenleme oncekini `motto_versions`
+      icine yazar. Bir insanin «basari benim icin X» dedigi gun ile «artik
+      Y diyorum» dedigi gun arasindaki fark, dusuncenin KENDISI kadar
+      degerlidir — ustune yazmak o farki siler.
+
+   2. KULLANICININ SOZU ILE URETILEN AYRI DURUR. `author` alani her
+      surumde kimin yazdigini tasir ('ben' ya da bir uretici). Bir dil
+      modelinin cumlesi kullanicinin ilkesi gibi gorunurse, kisi bir sure
+      sonra kendi dusuncesi ile kendisine soylenen seyi ayirt edemez. Bu
+      alan gorsel bir ayrinti degil, bu bolumun var olma sebebi.
+
+   3. BASKA MODUL BURAYA YAZMAZ. AYS, SPI ve ESP bu tablolari hic
+      gormez; HKM'nin kendi icinde de yalniz `core/motto.py` yazar.
+
+   AGAC VE AG AYNI ANDA
+
+   `parent_id` bir AGAC kurar (Hayat → Zaman), `motto_links` ise agactan
+   BAGIMSIZ bir ag (Disiplin ↔ Ozgurluk). Ikisi ayri seydir: agac
+   kullanicinin siniflandirmasi, ag ise dusuncenin gercek akrabaligi.
+   Tek yapiya indirgenseydi biri otekini bozardi — ya her bag bir dal
+   olurdu ve agac okunmaz hale gelirdi, ya da akrabalik hic yazilamazdi. */
+CREATE TABLE IF NOT EXISTS motto_nodes (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user        TEXT NOT NULL DEFAULT 'ben',
+  parent_id   INTEGER,                   -- NULL = kok dal
+  title       TEXT NOT NULL,
+  body        TEXT NOT NULL DEFAULT '',
+  kind        TEXT NOT NULL DEFAULT 'dusunce',   -- dusunce | motto | ilke
+  sort        INTEGER NOT NULL DEFAULT 0,
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL,
+  archived_at TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_motto_parent ON motto_nodes(user, parent_id, sort);
+CREATE INDEX IF NOT EXISTS ix_motto_kind ON motto_nodes(user, kind, archived_at);
+
+CREATE TABLE IF NOT EXISTS motto_versions (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  node_id     INTEGER NOT NULL,
+  title       TEXT NOT NULL,
+  body        TEXT NOT NULL,
+  kind        TEXT NOT NULL,
+  author      TEXT NOT NULL DEFAULT 'ben',   -- ben | uretilen
+  created_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_motto_ver ON motto_versions(node_id, id);
+
+CREATE TABLE IF NOT EXISTS motto_links (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  a_id        INTEGER NOT NULL,
+  b_id        INTEGER NOT NULL,
+  note        TEXT,
+  created_at  TEXT NOT NULL,
+  UNIQUE(a_id, b_id)
+);
+CREATE INDEX IF NOT EXISTS ix_motto_link_a ON motto_links(a_id);
+CREATE INDEX IF NOT EXISTS ix_motto_link_b ON motto_links(b_id);
+
+CREATE TABLE IF NOT EXISTS motto_tags (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  node_id     INTEGER NOT NULL,
+  tag         TEXT NOT NULL,
+  UNIQUE(node_id, tag)
+);
+CREATE INDEX IF NOT EXISTS ix_motto_tag ON motto_tags(tag);
 """
 
 
@@ -266,6 +341,27 @@ def _migrate(con):
 #   WAL          okuyucu ile yazari birbirine engellemez
 #   busy_timeout kilitli bir an icin BEKLER, hemen hata vermez
 #   NORMAL       WAL ile birlikte guvenli; her yazmada diske fsync yapmaz
+# Turkce kucultme — iki ayri tuzak birden.
+#
+# 1. SQLite'in `LOWER`i yalniz ASCII'yi kucultur: «Çalışmak» → «çalişmak».
+#    Turkce harfler oldugu gibi kalir ve «çalışmak» arayan kullanici
+#    kendi notunu bulamaz.
+# 2. Python'un `.lower()`i de tek basina dogru degildir: «İ» kucultulunce
+#    «i̇» olur (i + birlesen nokta) ve «i» ile eslesmez.
+#
+# Ikisi de ayni sonucu verir: kullanici aradigi seyi BULAMAZ ve sistem
+# ona «boyle bir not yok» der. Olmayan bir seyi yok diye bildirmek
+# dogrudur; VAR OLANI yok diye bildirmek degil.
+_TR_KUCUK = str.maketrans({"I": "ı", "İ": "i", "Ş": "ş", "Ğ": "ğ",
+                           "Ü": "ü", "Ö": "ö", "Ç": "ç"})
+
+
+def tr_kucuk(s):
+    if s is None:
+        return None
+    return str(s).translate(_TR_KUCUK).lower()
+
+
 PRAGMALAR = (
     "PRAGMA journal_mode=WAL",
     "PRAGMA busy_timeout=5000",
@@ -290,6 +386,11 @@ def connect(path=None):
     # yazili bir guvence.
     con = sqlite3.connect(p, isolation_level=None)
     con.row_factory = sqlite3.Row
+    # TURKCE KUCULTME — SQLite'in `LOWER`i yalniz ASCII'yi kucultur.
+    # «Çalışmak» LOWER'dan «çalişmak» diye gecer ve «çalışmak» arayan
+    # kullanici kendi notunu bulamaz. Python'un `.lower()`i de tek
+    # basina yetmez: «İ» nokta birakir. Ikisi de `tr_kucuk` ile cozulur.
+    con.create_function("tr_kucuk", 1, tr_kucuk)
     for pragma in PRAGMALAR:
         try:
             con.execute(pragma)

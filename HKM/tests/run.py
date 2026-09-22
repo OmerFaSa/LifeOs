@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tests import (harness, test_baslat, test_butce, test_channels,  # noqa: E402
                    test_cross,
                    test_daemon, test_dil, test_impact, test_intents,
-                   test_manager, test_media, test_memory, test_models,
+                   test_manager, test_media, test_memory, test_models, test_motto,
                    test_precedence, test_profil, test_ritim,
                    test_sohbet, test_streak, test_sync, test_twin,
                    test_vps, test_yoklama, test_yuz)
@@ -19,7 +19,8 @@ def main():
     for mod in (test_vps, test_sync, test_precedence, test_twin,
                 test_cross, test_impact, test_dil, test_intents,
                 test_manager, test_profil, test_ritim, test_streak, test_channels,
-                test_daemon, test_models, test_butce, test_media, test_memory, test_yoklama,
+                test_daemon, test_models, test_butce, test_media, test_memory,
+                test_motto, test_yoklama,
                 test_sohbet, test_baslat, test_yuz):
         mod.run()
     test_channels.run_bot()

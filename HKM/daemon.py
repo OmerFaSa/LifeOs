@@ -68,7 +68,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (ai, butce, channels, cross, db, gelen,  # noqa: E402
                   impact,
-                  intents, manager, media, memory, models, outbox, patron,
+                  intents, manager, media, memory, models, motto, outbox, patron,
                   profil, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
                   weekly, yoklama)
@@ -639,6 +639,34 @@ class Handler(BaseHTTPRequestHandler):
             scope = (q.get("scope") or [None])[0]
             return self._send(200, {"memories": memory.list_active(
                 self.con, user=user, scope=scope)})
+
+        # ---- Hayat Mottosu: kullanicinin KENDI dusunce agi ----
+        #
+        # Butun HKM uclari bir olcumden ya da bir modelden turer; bunlar
+        # tek istisnadir. Okuma uclari yargi tasimaz, yalniz kullanicinin
+        # yazdigini geri verir.
+        if u.path == "/api/motto":
+            return self._send(200, {
+                "tree": motto.agac(self.con),
+                "principles": motto.ilkeler(self.con),
+                "tags": motto.etiketler(self.con),
+                "summary": motto.ozet(self.con)})
+        if u.path == "/api/motto/map":
+            return self._send(200, motto.harita(self.con))
+        if u.path == "/api/motto/search":
+            return self._send(200, {"results": motto.ara(
+                self.con, (q.get("q") or [""])[0],
+                tag=(q.get("tag") or [None])[0],
+                kind=(q.get("kind") or [None])[0])})
+        if u.path.startswith("/api/motto/node/"):
+            try:
+                nid = int(u.path.rsplit("/", 1)[-1])
+            except ValueError:
+                return self._send(400, {"error": "dusunce kimligi sayi olmali"})
+            d = motto.dugum(self.con, nid)
+            if not d:
+                return self._send(404, {"error": "dusunce bulunamadi"})
+            return self._send(200, d)
         if u.path.startswith("/api/intents/"):
             mod = u.path.rsplit("/", 1)[-1]
             if mod not in intents.MODULES:
@@ -758,6 +786,53 @@ class Handler(BaseHTTPRequestHandler):
             r = memory.add(self.con, body.get("text"), body.get("user") or "ben",
                            body.get("scope") or "all", expires=body.get("expires"))
             return self._send(200 if r.get("ok") else 422, r)
+        # ---- Hayat Mottosu yazma uclari ----
+        #
+        # Butun yazmalar KULLANICININDIR (`author='ben'`). Uretilen bir
+        # metin bu uclardan GIREMEZ: onun tek yolu `oner`dir ve o da
+        # dugumu degistirmez, onay bekleyen bir surum birakir.
+        if u.path.startswith("/api/motto"):
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+
+            if u.path == "/api/motto/node":
+                r = motto.ekle(self.con, body.get("title"),
+                               parent_id=body.get("parent_id"),
+                               body=body.get("body") or "",
+                               kind=body.get("kind") or "dusunce",
+                               tags=body.get("tags"))
+                return self._send(200 if r.get("ok") else 422, r)
+            if u.path == "/api/motto/edit":
+                r = motto.duzenle(self.con, body.get("id"),
+                                  title=body.get("title"), body=body.get("body"),
+                                  kind=body.get("kind"), tags=body.get("tags"))
+                return self._send(200 if r.get("ok") else 422, r)
+            if u.path == "/api/motto/move":
+                r = motto.tasi(self.con, body.get("id"), body.get("parent_id"))
+                return self._send(200 if r.get("ok") else 422, r)
+            if u.path == "/api/motto/archive":
+                r = motto.arsivle(self.con, body.get("id"))
+                return self._send(200 if r.get("ok") else 422, r)
+            if u.path == "/api/motto/link":
+                r = motto.bagla(self.con, body.get("a"), body.get("b"),
+                                note=body.get("note"))
+                return self._send(200 if r.get("ok") else 422, r)
+            if u.path == "/api/motto/unlink":
+                r = motto.bagi_kaldir(self.con, body.get("a"), body.get("b"))
+                return self._send(200 if r.get("ok") else 404, r)
+            if u.path == "/api/motto/accept":
+                # Eski bir hale donmek ve uretilen bir oneriyi kabul
+                # etmek AYNI YOLDAN gecer: ikisi de «su surum artik
+                # gecerli olsun» demektir.
+                r = motto.onayla(self.con, body.get("version_id"))
+                return self._send(200 if r.get("ok") else 404, r)
+            return self._send(404, {"error": "bilinmeyen motto ucu"})
+
         if u.path.startswith("/api/memory/") and u.path.endswith("/forget"):
             parca = u.path.strip("/").split("/")
             try:
