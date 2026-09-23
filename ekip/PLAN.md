@@ -453,3 +453,56 @@ teklifi → onay → modüle monte edilen tipli çıktı (DEVIR Part 8).
 | Maliyet patlaması | depo önce, değişiklik araştırması, kademeli model, BAM tavanı, maliyet onayı |
 | Üç ajanın birbirini ezmesi | dosya sahipliği, sözleşme tek elden, dal + PR, tur sonu raporu |
 | Aşırı karmaşıklık (ufuk 9 ay) | dikey dilim: her tur tek örneği bitirir; genişleme sonra |
+
+---
+
+## Öneriler — Claude'un değerlendirmesi (2026-09-23) · ONAY BEKLER
+
+Bu bölüm bir karar değil, önerilerin listesidir. Her madde uygulanmadan önce
+kullanıcıya bir cümleyle sorulur (AGENTS.md: «kendi fikrini geliştirmeden önce söyle»).
+Dayanak: 8b-2 ve 8c-1 yapılırken kodda görülenler.
+
+### A. Değişmesi gerekenler (borç — sessiz hata riski)
+1. **İş türü tek kayıtta.** Yeni bir King türü 6–7 dosyaya dağılıyor (`king.py`'de türe
+   göre 23 dal; `bam.py`, `teklif.py`, `intents.py`, güncellik turu). `spi.bilgi`
+   eklenirken güncellik turu dalı yalnız okuyarak bulundu; unutulsaydı yanlış bir
+   `bam.arastirma` açılacaktı. Öneri: her tür kendi kancalarını tek kayıtta taşısın
+   (temizle, anahtar, talep, birim, adım, teklif, güncellik) + «her tür bütün kancaları
+   tanımlıyor mu» testi. 8d `unite.add`'den ÖNCE yapılırsa en ucuzudur.
+2. **Kesinlik etiketi tek sözlük.** Ekran `measured/estimated/computed/missing`
+   (`brand/ortak/kesinlik.js`), HKM ve bazı modül verisi `olculdu/tahmin/hesaplandi/
+   veri_yok`. `KESINLIK_HTML('olculdu')` ham kimliği yazar. Öneri: `KESINLIK_ILE` iki
+   sözlüğü de tanısın; `tools/ortak.py --denetle`'ye eşleme denetimi. 8b-2'nin elle
+   yazdığı etiketler de bu işlevden geçsin.
+3. **Eski yorumlar bugünün kuralı gibi okunuyor.** `HKM/core/intents.py` başlığı hâlâ
+   «modül HKM'yi BİLMEZ» der (AGENTS §1.4 «bilir ama bağımlı değil»); SPİ `beacon.js`'te
+   üst üste çelişen yorum blokları var. Ajanlar yorumu kural sanar; temizlenmeli.
+4. **Bir işin iki onayı tek akış görünsün.** Maliyet onayı (King teklifi kartı) ve sonuç
+   onayı (HKM teklifi kartı) iki ayrı kart, iki ayrı dil. Kural değişmez; ikinci kart
+   «#12'nin sonucu geldi — eklensin mi?» diye aynı işin devamı olarak çizilsin.
+5. **MIMARI §10'daki «dürüst soru» cevaplansın:** Part 8 ile HKM'nin rolü netleşti —
+   modüllerin AĞ ve PARA kapısı; modüller bu sayede çevrimdışı ve bağımlılıksız kalır.
+
+### B. Olması gerekenler (sırada olan + eksik)
+1. Sıradakiler (DEVIR): 8c-2 SPİ montajı (besin/fiyat/yer önizle-onayla-yaz, Mutfak'ta
+   «bulunamadı → BAM'dan iste» tek düğme), 8c-3 diyete otomatik işleme, 8d ESP ünite,
+   8e depo önce + tazelik + kullanım takibi.
+2. **Kütüphanem SPİ ve ESP'de de** (Part 8 madde 8): ne üretildi, kaynağı, ölçülen
+   maliyeti, ne kadar kullanıldı. AYS'deki kart (8b-2) örnek; `depo.kayit_depo.maliyet`
+   hazır.
+3. **Kullanım uyarısı teklifte** (8e): «geçen haftaki kitabın %10'u çözüldü; önce onu
+   bitirmek ister misin?» — sayı ölçümden, cümle koddan.
+
+### C. Kullanıcının hayatını kolaylaştıracaklar (günlük sürtünme)
+1. **Onay yorgunluğu:** «düşük sınıfı sormadan yap» var; buna TÜR bazında kural eklensin
+   («fiyat tazelemeyi her zaman onayla», ay tavanıyla). Orta ve üstü yine sorar.
+2. **Tek dokunuş Telegram:** teklif ve sonucu aynı mesaj zincirinde «1» / «ekle» ile
+   bitirmek; modülü açmadan iş kapanabilsin (yazım yine modülde, açılışta).
+3. **Yanlış defterinde toplu etiket:** test kitabından gelen etiketsiz yanlışlar için
+   «hepsine aynı türü ver» + tek tek düzeltme; etiket yine kullanıcıdan.
+4. **Boş ve hata ekranlarında «şimdi ne yapmalıyım» cümlesi:** örn. fiyat işi web kapalı
+   diye bittiğinde «Ayarlar › Web'i aç, sonra yeniden iste» düğmesi.
+5. **Tazelik kendiliğinden:** eskiyen fiyat/yer kaydı için King'in düşük sınıf «tazele»
+   teklifi (8e) — kullanıcı hatırlamak zorunda kalmasın.
+
+Yapılmayacaklar: çerçeve, veritabanı değişikliği, HKM'yi servislere bölmek (ufuk dokuz ay).
