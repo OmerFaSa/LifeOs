@@ -161,6 +161,13 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
   `bam.arastirma` iş emri olur. King'in web'e tek çıkışı **güncellik turu**dur:
   ritimde, tikte en çok bir kaynaklı kayda `web.guncellik_gun` (7) günde bir
   bakar; değişen kayıt için Araştırma Bürosu'na yeni sürüm emri verir.
+- **Kuruldu (Tur 5b — Araştırma Bürosu alt ajanları):** her aşamanın ajanı
+  adıma iz bırakır (Mimar, Tarayıcı, Akademik Kaynak Uzmanı, Birincil Kaynak
+  Uzmanı, Yazar, Doğrulayıcı, Kanıt ve Çelişki Analisti). Kaynak türü
+  (resmî/akademik/ansiklopedi/kurum) ve bulgunun kanıt gücü **kodla** ölçülür.
+  Yazar «açık kalan» bırakırsa Derin Araştırmacı tek bir ek tur yapar (en çok
+  2 sorgu, 3 yeni kaynak). Güncellemede plan modeli çağrılmaz; yazar önceki
+  sürümü görür ve «bu sürümde değişen»i yazar.
 
 ### D. Planlama Ofisi
 - Deterministik planlayıcı: kapasite, takvim, istisnalar, önkoşul sırası,

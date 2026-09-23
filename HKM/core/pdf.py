@@ -480,13 +480,19 @@ def _blok(d, blok):
         d.y += 8
 
 
+KAYNAK_TUR_AD = {"resmi": "resmî", "akademik": "akademik", "ansiklopedi": "ansiklopedi",
+                 "kurum": "kurum"}        # core/cikti.py ile ayni (dongusel ice aktarim yok)
+
+
 def _kaynaklar(d, b):
     if not b["kaynaklar"]:
         return
     _bolum_basligi(d, "Kaynaklar")
     for k in b["kaynaklar"]:
-        d.paragraf("[%d] %s — %s (erişim %s)" % (k["n"], k.get("baslik", ""), k.get("url", ""),
-                                                 k.get("erisim", "")), 9, sonra=3)
+        tur = KAYNAK_TUR_AD.get(k.get("tur"))
+        d.paragraf("[%d] %s — %s (%serişim %s)" % (k["n"], k.get("baslik", ""), k.get("url", ""),
+                                                   (tur + ", ") if tur else "",
+                                                   k.get("erisim", "")), 9, sonra=3)
 
 
 def _bolum_basligi(d, metin):

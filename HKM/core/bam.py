@@ -52,9 +52,12 @@ OFISLER = {
                     "Sürüm Uzmanı", "Kayıt Doğrulama Uzmanı"]},
     "arastirma": {
         "ad": "Araştırma Bürosu", "patron": "Araştırma Patronu", "durum": "hazir",
-        "gorev": "Talebi alt sorulara böler, web'de arar, sayfaları okur ve bulguları "
-                 "numaralı kaynaklarla yazar; her alıntı kodla kaynağında aranır. Web "
-                 "kapalıysa ya da sonuç yoksa kayıt «doğrulanmadı» kalır.",
+        "gorev": "Detaylı araştırma burada yapılır. Mimar talebi alt sorulara böler, "
+                 "tarayıcı web'de arar (resmî ve akademik kaynak öne alınır), sayfalar "
+                 "okunur, yazar bulguları numaralı kaynaklarla yazar; her alıntı kodla "
+                 "kaynağında aranır ve kanıt gücü ölçülür. Açık kalan varsa Derin "
+                 "Araştırmacı bir tur daha arar. Güncellemede önceki sürümle farkı yazar. "
+                 "Web kapalıysa ya da sonuç yoksa kayıt «doğrulanmadı» kalır.",
         "ajanlar": ["Araştırma Mimarı", "Kaynak Tarayıcı", "Derin Araştırmacı",
                     "Birincil Kaynak Uzmanı", "Akademik Kaynak Uzmanı",
                     "Kaynak Doğrulayıcı", "Çelişki Analisti", "Kanıt Analisti",
@@ -348,9 +351,17 @@ def _model_hatasi(r):
     return {"durum": "hata", "not": r.get("note") or "Model cevap vermedi."}
 
 
+def _iz(adim, *yeni):
+    """Adimin ajan izi birikir: her asama kendi satirini ekler."""
+    return list(adim.get("iz") or []) + list(yeni)
+
+
 def _kaynak_topla(con, cfg, j, ofis, sorgu_kur, transport, now):
     """Kaynakli isin ilk uc asamasi, HER TIKTE BIR ASAMA (core/kaynakli.py):
-    plan -> tarama -> okuma. Ara durum adimda durur.
+    plan -> tarama -> okuma. Ara durum ve ajan izi adimda durur.
+
+    `sorgu_kur()` -> (sorgular, alt_sorular[, iz_metni]) ya da model
+    hatasinda (hata_sonucu, []).
 
     Doner: ("devam", adim_sonucu) | ("hazir", kaynaklar, metinler)
          | ("yok", neden). «yok»ta cagiran is kaynaksiz yola duser ve bunu
@@ -361,13 +372,17 @@ def _kaynak_topla(con, cfg, j, ofis, sorgu_kur, transport, now):
         return ("yok", "Web kapalı")
     rol = "bam." + ofis
     if st is None:
-        sorgular, alt = sorgu_kur()
+        kur = sorgu_kur()
+        sorgular, alt = kur[0], kur[1]
         if isinstance(sorgular, dict):          # model hatasi
             return ("devam", sorgular)
         if not sorgular:
             return ("yok", "Aranacak sorgu çıkmadı")
+        yapti = kur[2] if len(kur) > 2 and kur[2] else \
+            "%d alt soru, %d arama sorgusu yazdı." % (len(alt), len(sorgular))
         return ("devam", {"durum": "bekliyor", "kaynakli": {"asama": "tarama", "sorgular": sorgular,
                                                               "alt_sorular": alt},
+                          "iz": _iz(adim, kaynakli.iz("mimar", yapti)),
                           "not": "Arama sorguları hazır: %s." % "; ".join(sorgular)})
     if st["asama"] == "tarama":
         sonuclar, notlar = [], []
@@ -380,33 +395,51 @@ def _kaynak_topla(con, cfg, j, ofis, sorgu_kur, transport, now):
         if not adaylar:
             return ("yok", "Web'de sonuç bulunamadı" + (" (%s)" % "; ".join(notlar[:2])
                                                          if notlar else ""))
+        nitelikli = sum(1 for a in adaylar if kaynakli.kaynak_turu(a["alan"]) in
+                        ("resmi", "akademik"))
         return ("devam", {"durum": "bekliyor", "kaynakli": dict(st, asama="okuma", adaylar=adaylar),
+                          "iz": _iz(adim, kaynakli.iz("tarayici", "%d sorgu arandı, %d sonuç geldi."
+                                                      % (len(st["sorgular"]), len(sonuclar))),
+                                    kaynakli.iz("akademik", "%d aday seçildi; %d'i resmi ya da "
+                                                "akademik, öne alındı." % (len(adaylar),
+                                                                          nitelikli))),
                           "not": "%d aday kaynak bulundu." % len(adaylar)})
     if st["asama"] == "okuma":
-        kaynaklar = []
-        for a in st["adaylar"]:
-            if len(kaynaklar) >= kaynakli.MAX_KAYNAK:
-                break
-            s = web.getir(con, cfg, rol, a["url"], tasiyici=web_tasiyici, now=now)
-            if s.get("ok"):
-                kaynaklar.append({"n": len(kaynaklar) + 1, "url": a["url"],
-                                  "baslik": s["baslik"], "alan": s["alan"],
-                                  "erisim": s["erisim"], "yayin": s.get("yayin") or a.get("yayin")})
+        kaynaklar = _oku(con, cfg, rol, st["adaylar"], kaynakli.MAX_KAYNAK, 1, now)
         if not kaynaklar:
             return ("yok", "Bulunan sayfaların hiçbiri okunamadı")
         return ("devam", {"durum": "bekliyor",
                           "kaynakli": dict(st, asama="yazim", kaynaklar=kaynaklar, adaylar=None),
+                          "iz": _iz(adim, kaynakli.iz("birincil", "%d sayfa okundu (%d aday)."
+                                                      % (len(kaynaklar), len(st["adaylar"])))),
                           "not": "%d kaynak okundu." % len(kaynaklar)})
     # yazim: metinler web onbelleginden gelir — yeniden aga cikilmaz.
-    metinler = {}
-    for k in st["kaynaklar"]:
-        s = web.getir(con, cfg, rol, k["url"], tasiyici=web_tasiyici, now=now)
-        if s.get("ok"):
-            metinler[k["n"]] = s["metin"]
-    kaynaklar = [k for k in st["kaynaklar"] if k["n"] in metinler]
+    kaynaklar, metinler = _onbellekten(con, cfg, rol, st["kaynaklar"], now)
     if not kaynaklar:
         return ("yok", "Okunan kaynaklar önbellekte bulunamadı")
     return ("hazir", kaynaklar, metinler)
+
+
+def _oku(con, cfg, rol, adaylar, en_cok, ilk_n, now):
+    kaynaklar = []
+    for a in adaylar:
+        if len(kaynaklar) >= en_cok:
+            break
+        s = web.getir(con, cfg, rol, a["url"], tasiyici=web_tasiyici, now=now)
+        if s.get("ok"):
+            kaynaklar.append({"n": ilk_n + len(kaynaklar), "url": a["url"],
+                              "baslik": s["baslik"], "alan": s["alan"],
+                              "erisim": s["erisim"], "yayin": s.get("yayin") or a.get("yayin")})
+    return kaynaklar
+
+
+def _onbellekten(con, cfg, rol, kaynaklar, now):
+    metinler = {}
+    for k in kaynaklar:
+        s = web.getir(con, cfg, rol, k["url"], tasiyici=web_tasiyici, now=now)
+        if s.get("ok"):
+            metinler[k["n"]] = s["metin"]
+    return [k for k in kaynaklar if k["n"] in metinler], metinler
 
 
 def _izli_kaynakca(kaynaklar, metinler):
@@ -445,8 +478,9 @@ def _mufredat_adimi(con, cfg, j, g, transport, now):
     «dogrulanmadi» kalir. Web yoksa model bilgisiyle yazilir ve bu soylenir."""
     def sorgu_kur():
         ad = g["sinav"] + (" " + g["bolum"] if g.get("bolum") else "")
-        return kaynakli.sorgular({"sorgular": ["%s konuları" % ad, "%s müfredatı ÖSYM kılavuz" % ad]},
-                                 ad), []
+        return (kaynakli.sorgular({"sorgular": ["%s konuları" % ad,
+                                                "%s müfredatı ÖSYM kılavuz" % ad]}, ad), [],
+                "Sorgular kuralla kuruldu: sınav adı + konular / resmi kılavuz.")
     t = _kaynak_topla(con, cfg, j, "arastirma", sorgu_kur, transport, now)
     if t[0] == "devam":
         return t[1]
@@ -479,18 +513,52 @@ def _mufredat_adimi(con, cfg, j, g, transport, now):
                       "Derslerin yarısından azı kaynakla doğrulandı; resmi kılavuzla karşılaştır.")
     k = kayit_ekle(con, "arastirma", "%s müfredatı" % g["sinav"], govde, dogruluk=etiket,
                    etiketler=j["talep"][:300], is_id=j["id"], now=now, **_depo_yaz(j))
+    adim = next(a for a in j["adimlar"] if a["ofis"] == "arastirma")
     return {"durum": "tamam", "kayit_id": k["id"],
+            "iz": _iz(adim, kaynakli.iz("yazar", "%d ders, %d konu yazdı." % (
+                govde["ders_sayisi"], govde["konu_sayisi"])),
+                kaynakli.iz("dogrulayici", "%d dersin %d'i alıntıyla kaynağına bağlandı."
+                            % (len(govde["dersler"]), dogru))),
             "kaynakli": {"asama": "bitti", "kaynak": len(kaynaklar)},
             "not": "Müfredat raporu: %d ders, %d konu, %d kaynak; %d ders alıntıyla doğrulandı (%s)."
                    % (govde["ders_sayisi"], govde["konu_sayisi"], len(kaynaklar), dogru,
                       "kaynaklı" if etiket == "kaynakli" else "doğrulanmadı")}
 
 
+def _onceki_surum(con, j):
+    """Depolama «guncelle» dediyse yeni surumun oncesi."""
+    d = _depo_karari(j)
+    if d.get("karar") == "guncelle" and d.get("kayit_id"):
+        return kayit_getir(con, d["kayit_id"])
+    return None
+
+
+def _yazar(con, cfg, j, kaynaklar, metinler, transport, ek=""):
+    r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
+               [{"role": "user", "content": "Araştırma talebi: " + j["talep"]
+                 + ("\n\n" + ek if ek else "")
+                 + "\n\nKAYNAKLAR\n" + kaynakli.blok(kaynaklar, metinler)}],
+               sistem=kaynakli.YAZIM_SISTEM, transport=transport, duzeltme=False,
+               denetim="belge")
+    if not r.get("ok"):
+        return None, _model_hatasi(r)
+    return _json_ayikla(r["text"]) or {}, None
+
+
 def _arastirma_kaynakli(con, cfg, j, transport, now):
-    """Kaynakli arastirma (core/kaynakli.py). None donerse web yok:
-    cagiran model bilgisiyle yazar ve nedenini kayda koyar."""
+    """Kaynakli arastirma (core/kaynakli.py). ("yok", neden) donerse web
+    yok: cagiran model bilgisiyle yazar ve nedenini kayda koyar."""
+    adim = next(a for a in j["adimlar"] if a["ofis"] == "arastirma")
+    onceki = _onceki_surum(con, j)
+    st = adim.get("kaynakli") if isinstance(adim.get("kaynakli"), dict) else {}
+    if st.get("asama") in ("derin_okuma", "derin_yazim"):
+        return ("devam", _derin_adimi(con, cfg, j, adim, st, onceki, transport, now))
 
     def sorgu_kur():
+        og = (onceki or {}).get("govde") or {}
+        if og.get("sorgular"):
+            return (og["sorgular"][:kaynakli.MAX_SORGU], og.get("alt_sorular") or [],
+                    "Güncelleme: önceki sürümün sorguları yeniden kullanıldı (model çağrılmadı).")
         r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
                    [{"role": "user", "content": "Araştırma talebi: " + j["talep"]}],
                    sistem=kaynakli.PLAN_SISTEM, transport=transport, duzeltme=False,
@@ -504,35 +572,107 @@ def _arastirma_kaynakli(con, cfg, j, transport, now):
     if t[0] != "hazir":
         return t
     kaynaklar, metinler = t[1], t[2]
-    adim = next(a for a in j["adimlar"] if a["ofis"] == "arastirma")
-    st = adim.get("kaynakli") or {}
-    r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
-               [{"role": "user", "content": "Araştırma talebi: " + j["talep"]
-                 + "\n\nKAYNAKLAR\n" + kaynakli.blok(kaynaklar, metinler)}],
-               sistem=kaynakli.YAZIM_SISTEM, transport=transport, duzeltme=False,
-               denetim="belge")
-    if not r.get("ok"):
-        return ("devam", _model_hatasi(r))
-    d = _json_ayikla(r["text"]) or {}
+    d, hata = _yazar(con, cfg, j, kaynaklar, metinler, transport,
+                     ek=kaynakli.onceki_blogu(onceki) if onceki else "")
+    if hata:
+        return ("devam", hata)
+    izler = _iz(adim, kaynakli.iz("yazar", "Taslak: %d bulgu, %d açık kalan." % (
+        len(d.get("bulgular") or []), len(d.get("acik_kalanlar") or []))))
+    # Derin Arastirmaci: acik kalan varsa AYNI tikte ek arama; yeni kaynak
+    # cikarsa iki tik daha (okuma, yeniden yazim). Tek tur.
+    ds = kaynakli.derin_sorgular(d, st.get("sorgular"))
+    if ds:
+        sonuclar = []
+        for s_ in ds:
+            sonuclar += web.ara(con, cfg, "bam.arastirma", s_, n=5, tasiyici=web_tasiyici,
+                                now=now).get("sonuclar") or []
+        bilinen = {k["url"] for k in st.get("kaynaklar") or []}
+        yeni = [a for a in kaynakli.aday_sec(sonuclar) if a["url"] not in bilinen]
+        yeni = yeni[:kaynakli.MAX_DERIN_KAYNAK * 2]
+        if yeni:
+            izler.append(kaynakli.iz("derin", "Açık kalanlar için %d sorgu arandı; %d yeni aday."
+                                     % (len(ds), len(yeni))))
+            return ("devam", {"durum": "bekliyor", "iz": izler,
+                              "kaynakli": dict(st, asama="derin_okuma", taslak=d,
+                                               derin_sorgular=ds, derin_adaylar=yeni),
+                              "not": "Derin Araştırmacı açık kalanlar için %d yeni aday buldu."
+                                     % len(yeni)})
+        izler.append(kaynakli.iz("derin", "Açık kalanlar arandı; yeni kaynak çıkmadı."))
+    return ("devam", _arastirma_yaz(con, j, st, d, kaynaklar, metinler, onceki, izler, now))
+
+
+def _derin_adimi(con, cfg, j, adim, st, onceki, transport, now):
+    """Derinlestirme turunun iki tiki: yeni kaynaklari oku, sonra taslagi
+    butun kaynaklarla yeniden yazdir. Yeni kaynak okunamazsa ilk taslak yazilir."""
+    if st["asama"] == "derin_okuma":
+        ilk = len(st["kaynaklar"]) + 1
+        yeni = _oku(con, cfg, "bam.arastirma", st["derin_adaylar"], kaynakli.MAX_DERIN_KAYNAK,
+                    ilk, now)
+        if yeni:
+            return {"durum": "bekliyor",
+                    "kaynakli": dict(st, asama="derin_yazim", derin_adaylar=None,
+                                     ilk_kaynak=len(st["kaynaklar"]),
+                                     kaynaklar=st["kaynaklar"] + yeni),
+                    "iz": _iz(adim, kaynakli.iz("birincil", "Derinleştirme: %d yeni sayfa okundu."
+                                                % len(yeni))),
+                    "not": "Derinleştirme: %d yeni kaynak okundu." % len(yeni)}
+        izler = _iz(adim, kaynakli.iz("birincil", "Derinleştirme adayları okunamadı; ilk taslak "
+                                                  "yazılıyor."))
+    else:
+        izler = None
+    kaynaklar, metinler = _onbellekten(con, cfg, "bam.arastirma", st["kaynaklar"], now)
+    if not kaynaklar:
+        return {"durum": "hata", "not": "Kaynaklar önbellekte bulunamadı; araştırma yazılamadı."}
+    if izler is not None:
+        return _arastirma_yaz(con, j, st, st["taslak"], kaynaklar, metinler, onceki, izler, now)
+    ek = kaynakli.taslak_blogu(st["taslak"])
+    if onceki:
+        ek = kaynakli.onceki_blogu(onceki) + "\n\n" + ek
+    d, hata = _yazar(con, cfg, j, kaynaklar, metinler, transport, ek=ek)
+    if hata:
+        return hata
+    izler = _iz(adim, kaynakli.iz("yazar", "Yeni kaynaklarla yeniden yazdı: %d bulgu, %d açık "
+                                           "kalan." % (len(d.get("bulgular") or []),
+                                                       len(d.get("acik_kalanlar") or []))))
+    return _arastirma_yaz(con, j, st, d, kaynaklar, metinler, onceki, izler, now)
+
+
+def _arastirma_yaz(con, j, st, d, kaynaklar, metinler, onceki, izler, now):
+    """Kaynak Dogrulayici, Kanit ve Celiski Analisti (hepsi KOD) ve kayit."""
     bulgular, say = kaynakli.bulgular(d, metinler)
+    kanit = kaynakli.kanit(bulgular, kaynaklar)
     celiskiler = kaynakli.liste(d, "celiskiler", 8)
     etiket = kaynakli.dogruluk(bulgular, celiskiler)
+    izler = list(izler) + [
+        kaynakli.iz("dogrulayici", "%d bulgunun %d'inin alıntısı kaynağında bulundu."
+                    % (say["toplam"], say["dogrulanan"])),
+        kaynakli.iz("kanit", "Kanıt gücü: %d güçlü, %d orta, %d zayıf." % (
+            kanit["guclu"], kanit["orta"], kanit["zayif"])),
+        kaynakli.iz("celiski", "%d çelişki kaydedildi." % len(celiskiler) if celiskiler
+                    else "Kaynaklar arasında çelişki bildirilmedi.")]
     govde = {"ozet": str(d.get("ozet") or "").strip()[:1500],
              "alt_sorular": st.get("alt_sorular") or [], "sorgular": st.get("sorgular") or [],
              "bulgular": bulgular, "celiskiler": celiskiler,
              "acik_kalanlar": kaynakli.liste(d, "acik_kalanlar"),
              "kaynaklar": _izli_kaynakca(kaynaklar, metinler), "dogrulama": say,
-             "konu": arastirma_konusu(j).strip()}
+             "kanit": kanit, "konu": arastirma_konusu(j).strip()}
+    if st.get("derin_sorgular"):
+        ilk = st.get("ilk_kaynak") or len(st.get("kaynaklar") or [])
+        govde["derinlestirme"] = {"sorgular": st["derin_sorgular"],
+                                  "yeni_kaynak": sum(1 for k in kaynaklar if k["n"] > ilk)}
+    if onceki:
+        govde["degisiklikler"] = kaynakli.liste(d, "degisiklikler", 12)
+        govde["onceki_surum"] = {"id": onceki["id"], "tarih": str(onceki["created_at"])[:10]}
     baslik = str(d.get("baslik") or j["talep"]).strip()[:200]
     k = kayit_ekle(con, "arastirma", baslik, govde, dogruluk=etiket,
                    etiketler=j["talep"][:300], is_id=j["id"], now=now, **_depo_yaz(j))
-    return ("devam", {"durum": "tamam", "kayit_id": k["id"],
-                      "kaynakli": {"asama": "bitti", "kaynak": len(kaynaklar)},
-                      "not": "Kaynaklı araştırma: %d kaynak, %d bulgunun %d'i alıntıyla "
-                             "doğrulandı (%s)." % (len(kaynaklar), say["toplam"], say["dogrulanan"],
-                                                  {"kaynakli": "kaynaklı",
-                                                   "celiskili": "çelişkili",
-                                                   "dogrulanmadi": "doğrulanmadı"}[etiket])})
+    return {"durum": "tamam", "kayit_id": k["id"], "iz": izler,
+            "kaynakli": {"asama": "bitti", "kaynak": len(kaynaklar)},
+            "not": "Kaynaklı araştırma%s: %d kaynak, %d bulgunun %d'i alıntıyla doğrulandı (%s)."
+                   % (" (sürüm %d)" % k["surum"] if onceki else "", len(kaynaklar),
+                      say["toplam"], say["dogrulanan"],
+                      {"kaynakli": "kaynaklı", "celiskili": "çelişkili",
+                       "dogrulanmadi": "doğrulanmadı"}[etiket])}
 
 
 def _arastirma_adimi(con, cfg, j, transport, now):

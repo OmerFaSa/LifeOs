@@ -39,16 +39,28 @@ def _p(m):
     return {"t": "p", "metin": m}
 
 
+KANIT_AD = {"guclu": "güçlü kanıt", "orta": "orta kanıt", "zayif": "zayıf kanıt"}
+KAYNAK_TUR_AD = {"resmi": "resmî", "akademik": "akademik", "ansiklopedi": "ansiklopedi",
+                 "kurum": "kurum"}
+
+
 def _arastirma(k, g):
     bol = []
+    if g.get("onceki_surum"):
+        o = g["onceki_surum"]
+        bol.append({"baslik": "Bu sürümde değişen", "bloklar": [
+            {"t": "not", "metin": "Sürüm %s — kayıt #%s (%s) kaynakları değiştiği için yeniden "
+                                  "araştırıldı." % (k.get("surum") or "?", o.get("id"), o.get("tarih"))}]
+            + ([{"t": "liste", "maddeler": g["degisiklikler"]}] if g.get("degisiklikler") else [])})
     if g.get("ozet"):
         bol.append({"baslik": "Özet", "bloklar": [_p(g["ozet"])]})
     if g.get("bulgular"):
         ms = []
         for b in g["bulgular"]:
             n = "".join("[%d]" % x for x in b.get("kaynaklar") or [])
-            durum = "" if "dogrulandi" not in b else (" (doğrulandı)" if b["dogrulandi"]
-                                                      else " (doğrulanamadı)")
+            durum = "" if "dogrulandi" not in b else (
+                " (doğrulandı%s)" % (", " + KANIT_AD[b["kanit"]] if b.get("kanit") in KANIT_AD
+                                     else "") if b["dogrulandi"] else " (doğrulanamadı)")
             ms.append("%s %s%s" % (b.get("iddia", ""), n, durum))
         bol.append({"baslik": "Bulgular", "bloklar": [{"t": "liste", "maddeler": ms}]})
     for alan, ad in (("celiskiler", "Çelişkiler"), ("acik_kalanlar", "Açık kalanlar")):
@@ -398,9 +410,11 @@ def html_belge(b):
     if b["kaynaklar"]:
         govde.append('<section><h2>Kaynaklar</h2><ol class="kaynak">%s</ol></section>' % "".join(
             '<li id="k%d"><a href="%s" rel="noopener noreferrer" target="_blank">%s</a> — %s '
-            '(erişim %s%s)</li>' % (
+            '(%serişim %s%s)</li>' % (
                 k["n"], _e(k["url"]) if re.match(r"^https?://", str(k.get("url"))) else "#",
-                _e(k.get("baslik")), _e(k.get("alan")), _e(k.get("erisim")),
+                _e(k.get("baslik")), _e(k.get("alan")),
+                (_e(KAYNAK_TUR_AD[k["tur"]]) + ", ") if k.get("tur") in KAYNAK_TUR_AD else "",
+                _e(k.get("erisim")),
                 (", yayın " + _e(str(k["yayin"])[:10])) if k.get("yayin") else "")
             for k in b["kaynaklar"]))
     uyari = ("Kaynaklı: bilgiler numaralı kaynaklara dayanır ve alıntılar kodla denetlendi."
