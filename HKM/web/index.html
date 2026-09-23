@@ -731,6 +731,7 @@ details.detay > summary:hover{ color:var(--fg); }
       <div class="card" id="ofis-isler"></div>
       <div class="card" id="ofis-kayit" hidden></div>
       <div class="card" id="ofis-kayitlar"></div>
+      <div class="card" id="ofis-depo"></div>
       <div class="card" id="ofis-bam"></div>
     </div>
 
@@ -766,6 +767,7 @@ details.detay > summary:hover{ color:var(--fg); }
       <div class="tabs" id="ayar-sekmeler">
         <button data-ayar="yapayzeka" class="on">Yapay zekâ</button>
         <button data-ayar="butce">Bütçe</button>
+        <button data-ayar="web">Web</button>
         <button data-ayar="kanallar">Sohbet kanalları</button>
         <button data-ayar="cihazlar">Cihazlar</button>
         <button data-ayar="esikler">Eşikler</button>
@@ -779,6 +781,10 @@ details.detay > summary:hover{ color:var(--fg); }
       </div>
       <div data-ayar-bolme="butce" hidden>
         <div class="card" id="butce"></div>
+      </div>
+      <div data-ayar-bolme="web" hidden>
+        <div class="card" id="web-ayar"></div>
+        <div class="card" id="web-dene"></div>
       </div>
       <div data-ayar-bolme="kanallar" hidden>
         <div class="card" id="kanallar"></div>
@@ -3039,7 +3045,11 @@ details.detay > summary:hover{ color:var(--fg); }
             + esc(BAM_OFIS_AD[a.ofis] || a.ofis) + ': ' + esc(ADIM_DURUM[a.durum] || a.durum)
             + '</span>' + (a.not ? ' — ' + esc(a.not) : '')
             + (a.kayit_id ? ' <a href="#" data-bam-kayit="' + esc(a.kayit_id)
-              + '">kaydı aç</a>' : '') + '</li>';
+              + '">kaydı aç</a>' : '')
+            + ((a.iz && a.iz.length) ? '<details class="detay"><summary>Ajan izi ('
+              + esc(a.iz.length) + ')</summary><ul style="margin:4px 0 0 18px">'
+              + a.iz.map(function(z){ return '<li><b>' + esc(z.ajan) + '</b>: ' + esc(z.yapti)
+                + '</li>'; }).join('') + '</ul></details>' : '') + '</li>';
         }).join('') + '</ul>'
         + (acik ? '<div class="row" style="margin-top:6px">'
           + (j.durum === 'beklemede' ? '<button data-bam-devam="' + esc(j.id)
@@ -3099,6 +3109,7 @@ details.detay > summary:hover{ color:var(--fg); }
           + ' · ' + esc(b.dayanak) + '</span></li>'; })
       + liste('Açık kalanlar', g.acik_kalanlar, function(x){ return '<li>' + esc(x) + '</li>'; })
       + (g.metin ? '<p style="white-space:pre-wrap">' + esc(g.metin) + '</p>' : '')
+      + kayitIndirSatiri(k)
       + '<p class="muted" style="margin-top:10px">Neden var: ' + (r.body.iz.length
         ? r.body.iz.map(function(z){ return (z.tur === 'is' ? 'iş #' : 'kayıt #') + esc(z.id); })
           .join(' ← ') : 'kök kayıt') + ' · sürüm ' + esc(k.surum) + '</p>';
@@ -3131,6 +3142,7 @@ details.detay > summary:hover{ color:var(--fg); }
             + '): ' + h.gorevler.map(function(x){ return esc(x.metin); })
             .join(' ') + '</li>'; }).join('') + '</ul></details>';
       }).join('')
+      + kayitIndirSatiri(k)
       + '<p class="muted" style="margin-top:10px">Neden var: ' + (iz.length
         ? iz.map(function(z){ return ({ is:'iş #', kayit:'kayıt #', emir:'iş emri #',
           motto:'düşünce #' }[z.tur] || z.tur + ' #') + esc(z.id); }).join(' ← ')
@@ -3140,6 +3152,186 @@ details.detay > summary:hover{ color:var(--fg); }
   }
 
   var OFIS_ACILACAK = null;       // Hayat Mottosu'ndan acilmak istenen kayit
+
+  /* Kaydin basili hali (core/cikti.py): PDF, HTML ve gorselse SVG. Indirme
+     jetonla yapilir (fetch + blob): adres satirina jeton yazilmaz. */
+  function kayitIndirSatiri(k){
+    var g = k.govde || {};
+    var bicimler = ['pdf', 'html'].concat(g.aile === 'gorsel' ? ['svg'] : []);
+    return '<div class="row" style="margin-top:10px">' + bicimler.map(function(b){
+      return '<button data-kayit-indir="' + esc(k.id) + '" data-bicim="' + b + '">'
+        + b.toUpperCase() + ' indir</button>'; }).join('')
+      + '<span class="muted" id="kayit-indir-not"></span></div>';
+  }
+
+  document.addEventListener('click', async function(ev){
+    var el = ev.target.closest ? ev.target.closest('[data-kayit-indir]') : null;
+    if(!el) return;
+    ev.preventDefault();
+    var not = $('kayit-indir-not');
+    if(not) not.textContent = 'hazırlanıyor…';
+    var r = await fetch('/api/bam/kayit/' + encodeURIComponent(el.dataset.kayitIndir)
+      + '/cikti?bicim=' + encodeURIComponent(el.dataset.bicim) + '&indir=1',
+      { headers:{ 'Authorization':'Bearer ' + token } });
+    if(r.status !== 200){
+      var g = {};
+      try{ g = await r.json(); }catch(e){ g = {}; }
+      if(not) not.textContent = g.note || ('İndirilemedi (' + r.status + ').');
+      return;
+    }
+    var ad = ((r.headers.get('Content-Disposition') || '').match(/filename\*=UTF-8''([^;]+)/) || [])[1];
+    var blob = await r.blob();
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = ad ? decodeURIComponent(ad) : 'bam-kayit-' + el.dataset.kayitIndir + '.' + el.dataset.bicim;
+    document.body.appendChild(a); a.click(); a.remove();
+    if(not) not.textContent = 'İndirildi.';
+  });
+
+  /* Depo denetimi (core/depo.py): sayilari KOD olcer; hicbir kayit silinmez.
+     Istek atildiginda kosar — her ekran acilisinda degil. */
+  var DEPO_TUR = { arastirma:'araştırma', materyal:'materyal', plan:'plan' };
+  function ofisDepoCiz(r){
+    var h = '<div class="row" style="justify-content:space-between"><span class="tag">Bilgi Deposu'
+      + ' · denetim</span><button id="depo-denetle">Depoyu denetle</button></div>';
+    if(!r){
+      h += '<p class="muted">Depo her gün kendiliğinden denetlenir. Şimdi görmek istersen '
+        + '«Depoyu denetle»ye bas: kopya sürümler bağlanır, eskiyen ve kaynaksız kayıt '
+        + 'sayılır; hiçbir kayıt silinmez.</p>';
+    }else{
+      h += '<p>' + esc(r.toplam) + ' kayıt (' + Object.keys(r.tur || {}).map(function(t){
+          return esc(r.tur[t]) + ' ' + esc(DEPO_TUR[t] || t); }).join(', ') + ') · geçerli '
+        + esc(r.gecerli) + ' · eski sürüm ' + esc((r.eski_surum || []).length)
+        + ' · eskiyen ' + esc((r.eskiyen || []).length) + ' · kaynaksız ' + esc(r.kaynaksiz)
+        + (r.kaynakli_yuzde == null ? '' : ' · kaynaklı oranı %' + esc(r.kaynakli_yuzde))
+        + ' <span class="muted">(ölçüldü)</span></p>'
+        + '<ul class="muted" style="margin:4px 0 0 18px">' + (r.iz || []).map(function(z){
+          return '<li><b>' + esc(z.ajan) + '</b>: ' + esc(z.yapti) + '</li>'; }).join('')
+        + '</ul>';
+    }
+    $('ofis-depo').innerHTML = h;
+  }
+
+  document.addEventListener('click', async function(ev){
+    var el = ev.target.closest ? ev.target.closest('#depo-denetle') : null;
+    if(!el) return;
+    ev.preventDefault();
+    el.disabled = true;
+    var r = await api('/api/bam/depo');
+    el.disabled = false;
+    if(r.status === 200) ofisDepoCiz(r.body.rapor);
+    else $('ofis-depo').insertAdjacentHTML('beforeend', '<p class="danger">Denetim alınamadı ('
+      + esc(r.status) + ').</p>');
+  });
+
+  /* ---------- WEB (core/web.py) ----------
+     BAM ofislerinin ve King'in internete TEK kapisi. Anahtarlar MASKELI
+     gelir; maskeli deger geri yollanirsa sunucu ona dokunmaz, bos metin
+     anahtari siler. Siralama kullanicinindir: secili saglayicilar yazildigi
+     sirayla denenir. */
+  function webCiz(c, d){
+    var w = c.web || {}, kat = w.katalog || {}, ah = w.anahtarlar || {};
+    var secili = w.saglayicilar || [];
+    var h = '<div class="tag">Web · BAM ve King’in internete kapısı</div>'
+      + '<p class="muted">Yalnız BAM ofisleri ve King web’e çıkar; modüller çıkmaz. Kişisel '
+      + 'veri (e-posta, telefon, kimlik no) sorguya girmez; yerel ağ adresleri açılmaz.</p>';
+    if(d && d.bugun){
+      h += '<p class="muted">Bugün ' + esc(d.bugun.cagri) + ' çağrı · önbellek sayesinde '
+        + esc(d.bugun.kacinilan) + ' çağrıdan kaçınıldı · günlük sınır ' + esc(d.bugun.sinir)
+        + ' (ölçüldü) · önbellekte ' + esc(d.onbellek) + ' kayıt</p>';
+    }
+    h += '<div class="metric"><div class="metric__name">Web açık<div class="muted" '
+      + 'style="font-size:11px">Kapalıyken araştırma «kaynaksız» kalır; model tahmine dönmez</div>'
+      + '</div><div class="metric__val"><input type="checkbox" id="web-acik"'
+      + (w.acik ? ' checked' : '') + ' aria-label="Web açık"/></div></div>';
+    Object.keys(kat).forEach(function(id){
+      var s = kat[id];
+      h += '<div class="metric"><div class="metric__name">' + esc(s.ad)
+        + '<div class="' + (s.hazir ? 'ok' : 'muted') + '" style="font-size:11px">'
+        + (s.hazir ? 'hazır' : (s.anahtar ? 'anahtar girilmemiş' : esc(s.not || 'ayar bekliyor')))
+        + (secili.indexOf(id) >= 0 ? ' · sıra ' + esc(secili.indexOf(id) + 1) : '') + '</div></div>'
+        + '<div class="metric__val">'
+        + (s.anahtar ? '<input id="web-k-' + esc(id) + '" type="password" value="'
+          + esc(ah[id] || '') + '" placeholder="anahtar" class="alan alan--dar" autocomplete="off"'
+          + ' aria-label="' + esc(s.ad) + ' anahtarı"/> ' : '')
+        + '<input type="checkbox" data-web-saglayici="' + esc(id) + '"'
+        + (secili.indexOf(id) >= 0 ? ' checked' : '') + ' aria-label="' + esc(s.ad) + ' kullanılsın"/>'
+        + '</div></div>';
+    });
+    h += webAlan('web-cx', 'Google arama motoru kimliği (cx)', 'Google Programmable Search için',
+        w.google_cx, 'text')
+      + webAlan('web-searx', 'SearXNG adresi', 'http:// ya da https:// ile; JSON biçimi açık olmalı',
+        w.searxng_url, 'text')
+      + webAlan('web-sinir', 'Günlük çağrı sınırı', 'Aşılınca web durur ve bu söylenir (0–5000)',
+        w.gunluk_sinir, 'number')
+      + webAlan('web-guncel', 'Güncellik turu (gün)', 'King aynı kaynaklı kayda kaç günde bir bakar; '
+        + '0 kapatır (0–90)', w.guncellik_gun, 'number')
+      + '<div class="row" style="margin-top:12px"><button class="primary" id="web-kaydet">Kaydet'
+      + '</button></div><p class="muted" id="web-not"></p>';
+    $('web-ayar').innerHTML = h;
+    $('web-dene').innerHTML = '<div class="tag">Aramayı dene</div>'
+      + '<p class="muted">King adına tek bir arama yapar; günlük sınırdan düşer ve önbelleğe yazılır.</p>'
+      + '<div class="row"><input id="web-sorgu" class="alan" placeholder="ör. fotosentez" '
+      + 'aria-label="Deneme sorgusu"/><button id="web-dene-btn">Dene</button></div>'
+      + '<div id="web-dene-sonuc"></div>';
+  }
+
+  function webAlan(id, ad, not, deger, tip){
+    return '<div class="metric"><div class="metric__name">' + esc(ad)
+      + '<div class="muted" style="font-size:11px">' + esc(not) + '</div></div>'
+      + '<div class="metric__val"><input id="' + id + '" type="' + tip + '" value="'
+      + esc(deger == null ? '' : deger) + '" class="alan alan--dar" aria-label="' + esc(ad)
+      + '"/></div></div>';
+  }
+
+  async function webYukle(c){
+    var d = await api('/api/web');
+    webCiz(c, d.status === 200 ? d.body : null);
+  }
+
+  document.addEventListener('click', async function(ev){
+    var el = ev.target.closest ? ev.target.closest('#web-kaydet, #web-dene-btn') : null;
+    if(!el) return;
+    ev.preventDefault();
+    if(el.id === 'web-dene-btn'){
+      var sorgu = ($('web-sorgu').value || '').trim();
+      if(!sorgu) return;
+      $('web-dene-sonuc').innerHTML = '<p class="muted">aranıyor…</p>';
+      var r = await api('/api/web/dene', { method:'POST', body:JSON.stringify({ sorgu:sorgu }) });
+      var g = r.body || {};
+      $('web-dene-sonuc').innerHTML = (g.sonuclar && g.sonuclar.length)
+        ? '<ul style="margin:6px 0 0 18px">' + g.sonuclar.map(function(x){
+          return '<li><b>' + esc(x.baslik) + '</b> <span class="muted">· ' + esc(x.alan)
+            + ' · ' + esc(x.saglayici) + '</span></li>'; }).join('') + '</ul>'
+          + '<p class="muted">' + (g.onbellekten ? 'Önbellekten geldi.' : 'Web’den geldi.') + '</p>'
+        : '<p class="warn">' + esc(g.note || ('Arama yapılamadı (' + r.status + ').')) + '</p>';
+      return;
+    }
+    var onceki = [], yeni = [];
+    Array.prototype.forEach.call(document.querySelectorAll('[data-web-saglayici]'), function(k){
+      if(k.checked) yeni.push(k.dataset.webSaglayici);
+    });
+    /* Sira korunur: once secili olanlar eski sirasiyla, yeni isaretlenen sona. */
+    (WEB_SON.saglayicilar || []).forEach(function(x){ if(yeni.indexOf(x) >= 0) onceki.push(x); });
+    yeni.forEach(function(x){ if(onceki.indexOf(x) < 0) onceki.push(x); });
+    var anahtarlar = {};
+    Array.prototype.forEach.call(document.querySelectorAll('[id^="web-k-"]'), function(k){
+      anahtarlar[k.id.slice(6)] = k.value.trim();
+    });
+    var yama = { web:{ acik:$('web-acik').checked, saglayicilar:onceki, anahtarlar:anahtarlar,
+      google_cx:$('web-cx').value.trim(), searxng_url:$('web-searx').value.trim(),
+      gunluk_sinir:parseInt($('web-sinir').value, 10), guncellik_gun:parseInt($('web-guncel').value, 10) } };
+    var s = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
+    if(s.status === 200){
+      WEB_SON = s.body.config.web || {};
+      await webYukle(s.body.config);
+      $('web-not').textContent = 'Kaydedildi.';
+    }else{
+      $('web-not').textContent = 'Kaydedilmedi — ' + ((s.body && s.body.errors)
+        ? s.body.errors.join(' · ') : s.status);
+    }
+  });
+  var WEB_SON = {};
 
   /* ---------- HEDEFLER (core/hedefag.py) ---------- */
   var BUTCE_TON = { sigar:'ok', sikisik:'warn', sigmaz:'danger' };
@@ -3238,6 +3430,7 @@ details.detay > summary:hover{ color:var(--fg); }
     ofisIslerCiz(o.body);
     ofisKayitlarCiz(o.body);
     ofisBamCiz(o.body);
+    if(!$('depo-denetle')) ofisDepoCiz(null);
     var b = await api('/api/briefing?date=' + t);
     ofisKatlarCiz(b.status === 200 ? b.body : null);
     if(OFIS_ACILACAK){ var ac = OFIS_ACILACAK; OFIS_ACILACAK = null; ofisKayitAc(ac); }
@@ -3688,7 +3881,7 @@ details.detay > summary:hover{ color:var(--fg); }
      o sekmeye acilir. Bir hatanin yanina konulan baglantinin, sozunu
      ettigi ekrani ACMASI gerekir; kullaniciyi Ayarlar'a birakip alti
      sekmeden dogrusunu ARATMAK yardim degildir. */
-  var AYAR_SEKMELERI = ['yapayzeka', 'butce', 'kanallar', 'cihazlar',
+  var AYAR_SEKMELERI = ['yapayzeka', 'butce', 'web', 'kanallar', 'cihazlar',
                         'esikler', 'sunucu'];
 
   function altYolOku(){
@@ -4158,7 +4351,11 @@ details.detay > summary:hover{ color:var(--fg); }
 
   async function yukleAyarlar(){
     var ay = await api('/api/config');
-    if(ay.status === 200){ ayarlariCiz(ay.body); ritimCiz(ay.body); }
+    if(ay.status === 200){
+      ayarlariCiz(ay.body); ritimCiz(ay.body);
+      WEB_SON = ay.body.web || {};
+      await webYukle(ay.body);
+    }
     var kt = await api('/api/outbox');
     if(kt.status === 200) kutuCiz(kt.body);
     await butceYukle();

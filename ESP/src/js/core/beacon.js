@@ -461,7 +461,8 @@ ESP.Beacon = (function(){
      2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
-  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'kayit.add'];
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'kayit.add',
+    'urun.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -622,7 +623,7 @@ ESP.Beacon = (function(){
      ESP'de bir «oturum» ölçülmüş bir çalışmadır; ileriye dönük bir teklif
      oturum olarak yazılamaz — yazılsaydı yapılmamış bir çalışma ölçülmüş
      görünürdü. Teklif bu yüzden bir HATIRLATICI olur. */
-  const APPLIABLE = ['plan.add', 'material.add', 'kayit.add'];
+  const APPLIABLE = ['plan.add', 'material.add', 'kayit.add', 'urun.add'];
 
   function canApply(n){
     if(!n || APPLIABLE.indexOf(n.kind) < 0) return false;
@@ -748,6 +749,15 @@ ESP.Beacon = (function(){
 
   async function applyIntent(n){
     if(n && n.kind === 'kayit.add') return await kayitUygula(n);
+    if(n && n.kind === 'urun.add'){
+      /* BAM ürünü (özet, rapor, sunum, pankart…): kayıt HKM'den çekilir,
+         modülün KENDİ koduyla sınanır, kendi deposuna yazılır
+         (core/urun.js, ortak). Ofis ekranındaki BAM ürünlerinden açılır. */
+      ESP.Urunler = ESP.Urunler || (window.LIFEOS && LIFEOS.Urun
+        ? LIFEOS.Urun.kur({ store:() => ESP.Store, hkm:() => ESP.Beacon }) : null);
+      if(!ESP.Urunler) return { ok:false, error:'Ürün modülü yüklenmedi.' };
+      return await ESP.Urunler.uygula(n.payload || {});
+    }
     if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
     if(n.kind === 'material.add') return await materyalUygula(n.payload || {});
     const p = n.payload || {};

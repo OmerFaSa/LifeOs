@@ -59,6 +59,7 @@ Ucnoktalar:
     GET  /api/yedek/<modul>/<tarih> sakli bir yedegin kendisi (indirme)
     POST /api/yedek/<modul>         modulun gunluk yedegi (yaz, geri oku, dogrula)
     POST /api/web/dene              web aramasini King adina dener (sorgu)
+    POST /api/king/urun             modul sohbetindeki urun istegi -> King emri (modul adina)
     GET  /api/health                token istemez
     GET  /                          tek dosyalik yerel yuz (token istemez;
                                     jetonu kullanici girer, veri yine korumali)
@@ -1058,6 +1059,22 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "gecersiz JSON"})
             r = web.ara(self.con, self.server.config, "king", (body or {}).get("sorgu"), n=5)
             return self._send(200, r)
+        # Modul sohbetindeki urun istegi: taniyici HKM'dedir (core/sohbet.py
+        # urun_istegi). Taninmazsa `tanindi: False` doner; modul kendi
+        # sohbetine devam eder. Emir modul adina acilir, urun ona teklif olur.
+        if u.path == "/api/king/urun":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            if not isinstance(body, dict) or not str(body.get("metin") or "").strip():
+                return self._send(400, {"error": "metin gerekli"})
+            r = sohbet.urun_modulden(self.con, self.server.config, body.get("modul"),
+                                     str(body.get("metin")))
+            return self._send(200 if r.get("ok") else 422, r)
         if u.path == "/api/bam/ilerlet":
             r = bam.ilerlet(self.con, self.server.config)
             king.esitle(self.con)

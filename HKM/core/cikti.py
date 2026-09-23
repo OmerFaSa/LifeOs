@@ -509,8 +509,14 @@ def dayanak(b):
 BICIMLER = ("html", "svg", "pdf")
 
 
+# Dosya adi ASCII: Chromium `download` ozniteligindeki Turkce harfi gorunce
+# dosyayi «download» adiyla ve uzantisiz indiriyordu.
+ASCII = str.maketrans("çğıöşüâîûÇĞİÖŞÜÂÎÛ", "cgiosuaiuCGIOSUAIU")
+
+
 def dosya_adi(b, bicim):
-    ad = re.sub(r"[^\w\-]+", "-", str(b["baslik"]).lower(), flags=re.UNICODE).strip("-")[:60]
+    ad = str(b["baslik"]).translate(ASCII).lower()
+    ad = re.sub(r"[^a-z0-9\-]+", "-", ad).strip("-")[:60].strip("-")
     return "%s-%s.%s" % (ad or "bam", b.get("kimlik") or "kayit", bicim)
 
 

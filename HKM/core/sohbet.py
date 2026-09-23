@@ -181,12 +181,23 @@ def arastirma_konusu(metin):
     return re.sub(r"\s+", " ", konu).strip(" .,!?:;'\"«»")
 
 
+def _eksikler(e):
+    """Gecmeyen maddeler, TEKRARSIZ: iki kademede ayni eksik (model
+    atanmamis) iki kez yazilmaz; cumleler kendi noktasiyla ayrilir."""
+    notlar = []
+    for m in e["kontrol"]:
+        n = str(m["not"] or "").strip()
+        if not m["ok"] and n and n not in notlar:
+            notlar.append(n)
+    return " ".join(n if n.endswith((".", "!", "?")) else n + "." for n in notlar)
+
+
 def _emir_cevabi(con, r, is_ad, ek):
     """Is emrinin sonucunu kullaniciya: cumleyi KOD kurar."""
     from core import king
     e = r["emir"]
     if e["durum"] == "reddedildi":
-        return "Bu işi açamadım: %s" % "; ".join(m["not"] for m in e["kontrol"] if not m["ok"])
+        return "Bu işi açamadım: %s" % _eksikler(e)
     if e["durum"] == "bitti":
         return "«%s» depoda hazırdı ve güncel.%s%s" % (
             e["konu"], king._teklif(con, e, e["sonuc"]["kayit_id"]),
@@ -195,13 +206,18 @@ def _emir_cevabi(con, r, is_ad, ek):
         return "«%s» zaten hazırlanıyor (iş emri #%d). Bitince haber veririm." % (
             e["konu"], e["id"])
     t = e.get("tahmin") or {}
-    eksik = [m["not"] for m in e["kontrol"] if not m["ok"]]
+    eksik = _eksikler(e)
     teslim = {"telegram": "Bitince sonucu ve belgesini buraya yollarım.",
               "whatsapp": "Bitince sonucu buraya yazarım; belgeyi HKM › Ofis’ten indirirsin."
               }.get(e.get("kanal"), "Bitince bildirim düşer; HKM › Ofis’ten açabilirsin.")
+    if e.get("tur") == "bam.urun" and e.get("modul") in ("ays", "spi", "esp") \
+            and not e.get("kanal"):
+        # Modulden istenen urun o module TEKLIF olarak doner (urun.add).
+        teslim = ("Bitince ürün %s’ye teklif olarak gelir; onaylarsan Ofis ekranındaki "
+                  "BAM ürünlerine eklenir." % king.MODUL_AD[e["modul"]])
     return ("%s (iş emri #%d). %s Tahmini süre %s (tahmin). %s%s" % (
                 is_ad % e["konu"], e["id"], ek, t.get("metin") or "bilinmiyor", teslim,
-                (" Eksik: " + "; ".join(eksik)) if eksik else ""))
+                (" Eksik: " + eksik) if eksik else ""))
 
 
 def plani_devret(con, cfg, metin, istek, now=None, kanal=None, hedef=None):
@@ -254,7 +270,7 @@ def urun_istegi(metin):
     return u
 
 
-def urunu_devret(con, cfg, metin, u, now=None, kanal=None, hedef=None):
+def urunu_devret(con, cfg, metin, u, now=None, kanal=None, hedef=None, modul="hkm"):
     from core import king
     ad = urunler.URUNLER[u["tur"]]["ad"]
     if len(u["konu"]) < 3:
@@ -262,16 +278,32 @@ def urunu_devret(con, cfg, metin, u, now=None, kanal=None, hedef=None):
     g = {"tur": u["tur"], "konu": u["konu"][:200], "uzunluk": u["uzunluk"]}
     if u["kaynakli"]:
         g["kaynakli"] = True
-    r = king.emir_ac(con, cfg, "hkm", "bam.urun", {"urun": g},
+    r = king.emir_ac(con, cfg, modul, "bam.urun", {"urun": g},
                      neden="Sohbetten: " + metin[:300], now=now, kanal=kanal, hedef=hedef)
     if not r.get("ok"):
         return "Ürün emri açılamadı: %s" % "; ".join(r.get("errors") or ["bilinmeyen hata"])
     kaynakli = (r["emir"].get("govde") or {}).get("urun", {}).get("kaynakli")
-    return _emir_cevabi(con, r, ad + ": «%s» işini Üretim Bürosu’na verdim",
+    return _emir_cevabi(con, r, "«%s» işini Üretim Bürosu’na verdim",
                         "Önce Depolama Bürosu depoya bakacak%s; yazıyı model yazar, biçimi, "
                         "düzeltmeyi ve kalite ölçümünü kod yapar." % (
                             ", sonra Araştırma Bürosu web’de kaynak arayacak" if kaynakli
                             else "; bu konuda güncel araştırma varsa üretim ona dayanır"))
+
+
+def urun_modulden(con, cfg, modul, metin, now=None):
+    """Modul sohbetindeki urun istegi («türev hakkında özet hazırla»).
+
+    Taniyici TEK YERDEDIR (bu dosya ve core/urunler.py): modul cumleyi
+    buraya yollar, tanimazsak `tanindi: False` doner ve modul kendi
+    sohbetine devam eder. Emir MODUL ADINA acilir; bitince urun o module
+    `urun.add` teklifi olarak doner (core/king.py `_teklif_urun`)."""
+    if modul not in ("ays", "spi", "esp"):
+        return {"ok": False, "note": "Modül AYS, SPİ ya da ESP olmalı."}
+    u = urun_istegi(metin)
+    if u is None:
+        return {"ok": True, "tanindi": False}
+    return {"ok": True, "tanindi": True, "tur": u["tur"], "konu": u["konu"],
+            "metin": urunu_devret(con, cfg, str(metin)[:600], u, now=now, modul=modul)}
 
 
 def arastirmayi_devret(con, cfg, metin, konu, now=None, kanal=None, hedef=None):

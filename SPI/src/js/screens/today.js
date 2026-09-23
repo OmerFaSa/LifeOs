@@ -679,7 +679,7 @@ SP.Screens.today = (function(){
           ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
           <div class="row gap-8 mt-8">
             ${SP.Beacon.canApply(n)
-              ? K.Button({ label:n.kind === 'kayit.add' ? 'Kaydet' : 'Planına ekle',
+              ? K.Button({ label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle' })[n.kind] || 'Planına ekle',
                 size:'sm', tone:'primary',
                 act:'hkm-intent-apply', data:{ 'data-id':String(n.id) } })
               : K.Button({ label:'Gördüm', size:'sm', tone:'primary',

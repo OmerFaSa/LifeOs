@@ -634,7 +634,7 @@ ESP.Screens.today = (function(){
           ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
           <div class="row gap-8 mt-8">
             ${when(ESP.Beacon.canApply(n), () => K.Button({
-              label:n.kind === 'kayit.add' ? 'Kaydet' : 'Uygula',
+              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle' })[n.kind] || 'Uygula',
               size:'sm', tone:'primary', act:'hkm-intent-yes',
               data:{ 'data-id':String(n.id) } }))}
             ${when(!ESP.Beacon.canApply(n), () => K.Button({ label:'Gördüm',

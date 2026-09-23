@@ -199,6 +199,8 @@ DOSYALAR = {
     # Uyari metni ve kosulu uc arayuzde ayni olmali.
     "gorsel.js":      "js/core",
     "gorsel.test.js": "tests",
+    "urun.js":        "js/core",
+    "urun.test.js":   "tests",
     # MODEL KATMANI — yalniz SPİ ve ESP (bkz. YALNIZ).
     "llm.js":        "js/core",
 }

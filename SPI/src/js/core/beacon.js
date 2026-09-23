@@ -466,7 +466,8 @@ SP.Beacon = (function(){
      2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
-  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'plan.apply', 'kayit.add'];
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'plan.apply', 'kayit.add',
+    'urun.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -645,7 +646,12 @@ SP.Beacon = (function(){
      fromText), kullanıcı neyin yazılacağını görür ve «Kaydet»e KENDİSİ
      basar; yazım öneri kapısından geçer ve geri alınabilir kalır. Bu,
      komut paletine aynı cümleyi yazmakla aynı yoldur. */
-  const APPLIABLE = ['plan.apply', 'kayit.add'];
+  /* ÜÇÜNCÜ İSTİSNA: `urun.add` — BAM'ın ürettiği özet, rapor, pankart.
+     Ölçüm de yük de değil, okunacak bir BELGEDİR; SPİ'nin verisine
+     dokunmaz. HKM'nin Editörü SPİ için doz cümlesini zaten çıkarır; ürün
+     yine de teşhis ya da doz önerisi değildir ve «doğrulanmadı» etiketi
+     taşıyabilir. */
+  const APPLIABLE = ['plan.apply', 'kayit.add', 'urun.add'];
 
   function canApply(n){
     if(!n || APPLIABLE.indexOf(n.kind) < 0) return false;
@@ -710,6 +716,15 @@ SP.Beacon = (function(){
 
   async function applyIntent(n){
     if(n && n.kind === 'kayit.add') return await kayitUygula(n);
+    if(n && n.kind === 'urun.add'){
+      /* BAM ürünü (özet, rapor, sunum, pankart…): kayıt HKM'den çekilir,
+         modülün KENDİ koduyla sınanır, kendi deposuna yazılır
+         (core/urun.js, ortak). Ofis ekranındaki BAM ürünlerinden açılır. */
+      SP.Urunler = SP.Urunler || (window.LIFEOS && LIFEOS.Urun
+        ? LIFEOS.Urun.kur({ store:() => SP.Store, hkm:() => SP.Beacon }) : null);
+      if(!SP.Urunler) return { ok:false, error:'Ürün modülü yüklenmedi.' };
+      return await SP.Urunler.uygula(n.payload || {});
+    }
     if(canApply(n) && n.kind === 'plan.apply' && SP.Plan) return await SP.Plan.programUygula(n);
     return { ok:false,
       error:'SPİ bir teklifi kendiliğinden uygulamaz: ölçüm de yük de senin '

@@ -872,6 +872,12 @@ SP.Model = (function(){
         hkm:() => SP.Beacon });
       await SP.Hafizam.yukle();
     }
+    /* BAM urunleri (ozet, rapor, sunum, pankart…) bu modulun KENDI
+       deposundadir: HKM kapaliyken de acilir (core/urun.js, ortak). */
+    if(window.LIFEOS && LIFEOS.Urun){
+      SP.Urunler = SP.Urunler || LIFEOS.Urun.kur({ store:() => SP.Store, hkm:() => SP.Beacon });
+      await SP.Urunler.yukle();
+    }
 
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);

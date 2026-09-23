@@ -246,11 +246,17 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
   sonu), SPİ «7 saat uyudum»u uyku olarak okuyor (önce antrenmandı), `/api/chat`
   gövdesinde tarih yokken düşmüyor, `dil.olumsuz` «çalışmadım»ı görüyor.
 
+- **Kuruldu (W6):** modül sohbetindeki ürün isteği King'e modül adına gider
+  (`POST /api/king/urun`); `urun.add` modülün kendi koduyla sınanır, kendi
+  deposuna yazılır, Ofis'te sandbox iframe'de açılır (`brand/ortak/urun.js`).
+
 ### H. HKM arayüzü
 - Ofis ekranı: canlı iş akışı (hangi katta, hangi ofiste), King kuyruğu.
 - Bilgi Deposu tarayıcısı (raporlar, kaynaklar, tazelik, sürümler).
 - Hedefler panosu (üç modül ve zaman bütçesi), BAM maliyet paneli.
 - İz görünümü: «bu görev neden var».
+- **Kuruldu (W6):** Ofis'te kayıt indirme (PDF/HTML/SVG), adımların ajan izi, depo
+  denetimi; Ayarlar › Web (sağlayıcı sırası, maskeli anahtarlar, sınır, güncellik, dene).
 
 ### I. Verimlilik ve maliyet
 - Depo öncelikli çalışma, değişiklik araştırması, önbellek.

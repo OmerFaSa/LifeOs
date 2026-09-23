@@ -335,7 +335,10 @@ def denetim(con, now=None):
     return {"at": at, "toplam": len(satir), "tur": tur, "gecerli": len(gecerli),
             "eski_surum": kopya, "yeni_baglanan": bagli, "eskiyen": eski,
             "kaynaksiz": len(kaynaksiz), "kaynakli_oran": round(kaynakli / float(len(gecerli)), 2)
-            if gecerli else None, "etiket": "olculdu",
+            if gecerli else None,
+            # Yuzde de KODDAN gelir: yuz sayi uretmez (HKM/web kurali).
+            "kaynakli_yuzde": int(round(100.0 * kaynakli / len(gecerli))) if gecerli else None,
+            "etiket": "olculdu",
             "iz": [iz("arsiv", "%d kayıt tarandı; %d eski sürüm bağlandı." % (len(satir), bagli)),
                    iz("indeks", "%d kayıt eskimiş, %d kayıt kaynaksız." % (len(eski),
                                                                           len(kaynaksiz)))]}

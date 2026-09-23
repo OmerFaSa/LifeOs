@@ -257,6 +257,53 @@ def run():
     test("King sohbeti urun istegini emre cevirir; brifing kelimeleri urun degildir",
          t_sohbet_urun)
 
+    def t_dosya_adi_ascii():
+        """Chromium, `download` ozniteligindeki Turkce harfi («türev-1.pdf»)
+        gorunce dosyayi «download» adiyla ve UZANTISIZ indiriyordu. Ad
+        ASCII'ye katlanir; kanal ve tarayici her birinde ayni gorunur."""
+        eq(cikti.dosya_adi({"baslik": "Türev ve Şekil Çizimi: Ağaç, Göl, Işık", "kimlik": 3}, "pdf"),
+           "turev-ve-sekil-cizimi-agac-gol-isik-3.pdf")
+        eq(cikti.dosya_adi({"baslik": "!!!", "kimlik": 4}, "svg"), "bam-4.svg")
+    test("indirilen dosyanin adi ASCII", t_dosya_adi_ascii)
+
+    def t_modulden_urun():
+        """W6 — modul sohbetindeki urun istegi King'e MODUL ADINA gider;
+        bitince urun o module `urun.add` teklifi olur. Taniyici HKM'dedir:
+        taninmayan cumle `tanindi: False` ile doner ve emir acilmaz."""
+        con = db.connect(":memory:")
+        cfg, m = _cfg(), _UrunModel()
+        r = sohbet.urun_modulden(con, cfg, "spi", "Su içmenin yararları hakkında pankart hazırla",
+                                 now=AN)
+        eq((r["ok"], r["tanindi"], r["tur"]), (True, True, "pankart"))
+        ok("SPİ’ye teklif olarak gelir" in r["metin"], r["metin"])
+        e = king.emirler(con)[0]
+        eq((e["modul"], e["tur"]), ("spi", "bam.urun"))
+        _tik(con, cfg, m, 2)
+        n = intents.take(con, "spi")["intents"]
+        eq([x["kind"] for x in n], ["urun.add"])
+        eq(n[0]["payload"]["urun"], "pankart")
+        eq(sohbet.urun_modulden(con, cfg, "spi", "bugün ne yapmalıyım"),
+           {"ok": True, "tanindi": False})
+        no(sohbet.urun_modulden(con, cfg, "hkm", "türev özeti hazırla")["ok"])
+        eq(len(king.emirler(con)), 1)
+    test("modulden istenen urun King'e modul adina gider, teklif olarak doner", t_modulden_urun)
+
+    def t_on_suzgec_ayni():
+        """Modullerin on suzgeci (brand/ortak/urun.js) katalogla AYNI kelimeleri
+        tasir: iki liste ayrisirsa bir urun modulde hic taninmazdi."""
+        import os
+        import re
+        yol = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.abspath(__file__)))), "brand", "ortak", "urun.js")
+        with open(yol, encoding="utf-8") as f:
+            js = f.read()
+        blok = re.search(r"const KELIMELER = \[(.*?)\];", js, re.S).group(1)
+        kelimeler = set(re.findall(r"'([^']+)'", blok))
+        eq(kelimeler, {w for u in urunler.URUNLER.values() for w in u["kelime"]})
+        fiil = re.search(r"const FIIL = /(.*?)/;", js).group(1)
+        eq(fiil, sohbet.URUN_FIIL.pattern)
+    test("modul on suzgeci katalogla ayni kelimeleri tasir", t_on_suzgec_ayni)
+
     # W5 — Telegram'dan gelen is, sonucunu Telegram'a birakir.
     def _telegram_cfg():
         cfg = _cfg()

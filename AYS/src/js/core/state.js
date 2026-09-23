@@ -1229,6 +1229,12 @@ R.Model = (function(){
         hkm:() => R.Beacon });
       await R.Hafizam.yukle();
     }
+    /* BAM urunleri (ozet, rapor, sunum, pankart…) bu modulun KENDI
+       deposundadir: HKM kapaliyken de acilir (core/urun.js, ortak). */
+    if(window.LIFEOS && LIFEOS.Urun){
+      R.Urunler = R.Urunler || LIFEOS.Urun.kur({ store:() => R.Store, hkm:() => R.Beacon });
+      await R.Urunler.yukle();
+    }
     if(R.Friction) await R.Friction.load();
     if(R.Calib) await R.Calib.load();
     if(R.Signals) await R.Signals.load();

@@ -86,10 +86,14 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   «… şöyle okudu» gösterir, «Kaydet» ile kendi koduyla yazar (HKM/MIMARI.md §8.25).
   Yan düzeltmeler: geçmiş kip plan isteği sanılmıyor, SPİ «7 saat uyudum» = uyku,
   `/api/chat` tarihsiz gövdede düşmüyor, `dil.olumsuz` «çalışmadım»ı görüyor.
-- 🔜 5 / W6 Modüller `urun.add` alır; HKM Ofis: indirme, ajan izi, depo raporu, web ayarları.
+- ✅ 5 / W6 Modüller ürün ister ve `urun.add` alır (`brand/ortak/urun.js`: ön süzgeç,
+  kendi denetimi, kendi deposu, Ofis › BAM ürünleri, sandbox iframe; HKM
+  `POST /api/king/urun`). HKM Ofis: PDF/HTML/SVG indirme, ajan izi, depo denetimi;
+  Ayarlar › Web. Dosya adları ASCII (Chromium Türkçe adı «download» yapıyordu).
+  HKM/MIMARI.md §8.26.
 
 ### Part 5 — Yeni kollar I
-- ⏳ Y2 Alışkanlık kolu (motorda `aliskanlik` türü var, paketi yok).
+- 🔜 Y2 Alışkanlık kolu (motorda `aliskanlik` türü var, paketi yok).
 - ⏳ Y3 Takvim: .ics dışa aktarma ve içe alma (tatil / okul sınavı → istisna).
 - ⏳ Y4 Telefon uygulaması (PWA: manifest + service worker; yalnız sunucuyla açılınca).
 - ❓ Y5 Sağlık verisi içe aktarma (Apple Sağlık export.xml ya da Health Connect).
@@ -139,6 +143,6 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
 - Bürolar B1–B4: Depolama, Araştırma (kaynaklı, web), Planlama v2, Üretim (Editör + Kalite).
 - W5: Telegram / WhatsApp'tan gelen işin sonucu aynı sohbete; Telegram'a belge (PDF).
   `king._teslim`, testler `HKM/tests/test_urun.py`.
-- Part 1–4 (Y7'ye kadar): HKM 503/503, AYS 1598, SPİ 1242, ESP 1283; `tools/entegre.js`
-  temiz (§0.6 ve §2.75 akşam yoklaması).
+- Part 1–4 bitti: HKM 507/507, AYS 1609, SPİ 1253, ESP 1294; `tools/entegre.js` temiz
+  (§0.6/§2.75 akşam yoklaması, §0.7/§2.76 BAM ürünü, §7 Ofis indirme + Web ayarı).
 - Ortam notu: modül testleri için `cd <SYS> && npm ci` (Playwright; node_modules depoda yok).

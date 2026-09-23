@@ -228,6 +228,10 @@ LIFEOS.Ofis = (function(){
   }
   function bamIstegi(metin){
     const k = kucuk(metin);
+    /* Katalog ürünü («türev hakkında özet hazırla»): önce o sınanır, çünkü
+       «kaynaklı rapor hazırla, araştırarak» bir araştırma değil üründür —
+       HKM sohbeti de bu sırayla bakar (core/sohbet.py). */
+    if(window.LIFEOS && LIFEOS.Urun && LIFEOS.Urun.istekMi(metin)) return { tur:'urun' };
     if(/araştır(?:\b|ır mısın|sana|mani|manı)/.test(k)) return { tur:'arastirma' };
     if(/(hazırla|üret)/.test(k) && /(soru|test|kart|flashcard|alıştırma)/.test(k)){
       return { tur:'uretim' };
@@ -281,6 +285,12 @@ LIFEOS.Ofis = (function(){
   function bamKur(ortam){
     async function ilet(talep){
       const istek = bamIstegi(talep) || { tur:'uretim' };
+      /* Ürün King'in iş emriyle yapılır (modül adına); bitince modüle
+         `urun.add` teklifi olarak döner (brand/ortak/urun.js). */
+      if(istek.tur === 'urun' && window.LIFEOS && LIFEOS.Urun){
+        return await LIFEOS.Urun.kur({ hkm:ortam.hkm, fetch:ortam.fetch,
+          store:() => null }).iste(talep);
+      }
       const b = ortam.hkm ? ortam.hkm() : null;
       const a = b && typeof b.settings === 'function' ? (b.settings() || {}) : {};
       if(!b || !a.enabled || !a.token || !b.urlOk(a.url)){

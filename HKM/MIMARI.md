@@ -842,6 +842,31 @@ kayıt yazılmaz. Testler: `tests/test_dil.py`, `tests/test_intents.py`,
 `tests/test_ritim.py`, `tests/test_sohbet.py`, modüllerin `beacon.test.js`,
 `tools/entegre.js` §0.6 ve §2.75.
 
+## 8.26 Ürün modüle, Ofis ekranı — W6
+
+**Modülden ürün isteği.** Modül sohbetinde «türev hakkında özet hazırla»:
+ön süzgeç (`brand/ortak/urun.js`, katalogla AYNI kelimeler — `tests/test_urun.py`
+sınar) cümleyi `POST /api/king/urun`'a yollar; tanıyıcı HKM'dedir
+(`sohbet.urun_istegi`). Tanınmazsa `tanindi: False` döner ve emir açılmaz.
+Tanınırsa King `bam.urun` emrini **modül adına** açar; bitince ürün o modüle
+`urun.add` teklifi olur (`king._teklif_urun`).
+
+**Modülde ürün.** `urun.add` onaylanınca modül kaydı (`/api/bam/kayit/<id>`) ve
+basılı hâlini (`…/cikti?bicim=html`) çeker, KENDİ koduyla sınar (tür, aile, ürün
+adı teklifle tutmalı; belge bölümsüz, sunum slaytsız olamaz; HTML belgesi ve
+300 000 karakter sınırı) ve kendi deposuna yazar (`meta/bamUrunleri`, en çok 20).
+Ofis ekranındaki «BAM ürünleri» listesinden `sandbox=""` iframe'de açılır (betik
+çalışmaz); HKM kapalıyken de okunur.
+
+**HKM yüzü › Ofis.** Kayıt PDF / HTML (görselse SVG) olarak indirilir (jetonla,
+fetch + blob; dosya adı ASCII — Chromium Türkçe harfli adı «download» yapıyordu),
+her adımın **ajan izi** (`adimlar[].iz`) açılır, «Depoyu denetle» depo denetimini
+(`GET /api/bam/depo`; yüzdeyi kod verir) gösterir. **Ayarlar › Web:** açık/kapalı,
+sağlayıcı sırası, anahtarlar (maskeli döner, maskeli değer geri gelirse dokunulmaz),
+Google cx, SearXNG adresi, günlük sınır, güncellik turu ve «Dene»
+(`POST /api/web/dene`). Testler: `tests/test_urun.py`, `tests/test_daemon.py`,
+`brand/ortak/urun.test.js`, `tools/entegre.js` §0.7, §2.76 ve §7.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

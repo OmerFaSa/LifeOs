@@ -477,7 +477,7 @@ R.Beacon = (function(){
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
   const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'mufredat.add',
-    'kitap.add', 'kayit.add'];
+    'kitap.add', 'kayit.add', 'urun.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -645,7 +645,8 @@ R.Beacon = (function(){
      Once kabul listesi uc tur sayiyor ama uygulama yalnizca plan.add
      yapiyordu: gorunur bir «Uygula» dugmesi, basildiginda «bu teklif turu
      uygulanmaz» diyordu. Gorunen eylem, yapilabilen eylemle ayni olmali. */
-  const APPLIABLE = ['plan.add', 'material.add', 'mufredat.add', 'kitap.add', 'kayit.add'];
+  const APPLIABLE = ['plan.add', 'material.add', 'mufredat.add', 'kitap.add', 'kayit.add',
+    'urun.add'];
 
   /* Gunun kaydi ancak AYS ondan yazilacak bir sey OKUYABILDIYSE
      uygulanabilir: okunamayan bir cumleye «Kaydet» dugmesi, basilinca
@@ -767,6 +768,15 @@ R.Beacon = (function(){
 
   async function applyIntent(n){
     if(n && n.kind === 'kayit.add') return await kayitUygula(n);
+    if(n && n.kind === 'urun.add'){
+      /* BAM ürünü (özet, rapor, sunum, pankart…): kayıt HKM'den çekilir,
+         modülün KENDİ koduyla sınanır, kendi deposuna yazılır
+         (core/urun.js, ortak). Ofis ekranındaki BAM ürünlerinden açılır. */
+      R.Urunler = R.Urunler || (window.LIFEOS && LIFEOS.Urun
+        ? LIFEOS.Urun.kur({ store:() => R.Store, hkm:() => R.Beacon }) : null);
+      if(!R.Urunler) return { ok:false, error:'Ürün modülü yüklenmedi.' };
+      return await R.Urunler.uygula(n.payload || {});
+    }
     if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
     if(n.kind === 'material.add') return await materyalUygula(n.payload || {});
     /* BAM'ın müfredat raporu → sınav profili (core/sinavprofil.js). Kayıt

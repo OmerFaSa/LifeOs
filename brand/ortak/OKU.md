@@ -27,6 +27,7 @@ python3 tools/ortak.py --denetle   # kopyalar kaynakla aynı mı
 | `quota.test.js` | `tests` | kotanın 20 testi — **kalıp** |
 | `llm.js` | `js/core` | model taşıma katmanı — **kalıp**, yalnız SPİ + ESP |
 | `store.test.js` | `tests` | gerçek deponun 24 testi — **kalıp** |
+| `urun.*` | `js/core`, `tests` | BAM ürünleri (özet, rapor, sunum, pankart): ön süzgeç, modülün kendi denetimi, sandbox iframe, kendi deposu |
 
 Kopyalar «ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME» başlığı taşır. Elle
 düzenlenen bir kopya bir sonraki yayında kaybolur; `--denetle` bunu

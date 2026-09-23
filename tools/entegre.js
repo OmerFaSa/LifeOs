@@ -18,7 +18,7 @@
  * Cikis kodu: 0 temiz, 1 sorun, 2 arac eksik.
  */
 
-const { spawn } = require('child_process');
+const { spawn, execFileSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -127,6 +127,24 @@ async function main(){
       console.log('  HKM → yoklama cevabi uc kuyruga bolundu: ' + kayitlar.join(' · '));
     }
 
+
+    /* 0.7 — BAM URUNU (W6): model gerektirmeden bir urun kaydi yazilir
+       (Uretim Burosu'nun ciktisiyla ayni govde). Asil sinanan, modulun
+       HKM'nin GERCEK basili halini kendi koduyla kabul edip etmedigidir. */
+    let urunKaydi = null;
+    try{
+      urunKaydi = Number(execFileSync('python3', ['-c', [
+        'import sys',
+        'from core import db, bam',
+        'con = db.connect(sys.argv[1])',
+        'g = {"tur": "urun", "urun": "ozet", "aile": "belge", "urun_ad": "Konu özeti",',
+        '     "baslik": "Türev", "kaynaklar": [], "bolumler": [{"baslik": "Giriş",',
+        '     "bloklar": [{"t": "p", "metin": "Türev, bir değişim hızıdır."}]}]}',
+        'k = bam.kayit_ekle(con, "materyal", "Türev", g)',
+        'con.commit()',
+        'print(k["id"])'].join('\n'), path.join(tmp, 'hkm.db')],
+      { cwd:path.join(ROOT, 'HKM') }).toString().trim());
+    }catch(e){ hatalar.push('urun kaydi yazilamadi: ' + e.message); }
 
     for(const s of SISTEMLER){
       const srv = spawn('python3', [path.join(ROOT, s.id, 'devserver.py'), String(s.port)],
@@ -378,6 +396,66 @@ async function main(){
           + '»), onayla yazdi');
       }
 
+      /* 2.76 — BAM URUNU (W6): `urun.add` teklifi modulun kendi koduyla
+         sinanir, basili hal modulun deposuna yazilir ve Ofis ekraninda
+         sandbox iframe'de acilir. */
+      if(urunKaydi){
+        const bir = await (await hkmFetch('/api/intents/' + s.mod, { method:'POST',
+          body:JSON.stringify({ kind:'urun.add', source:'bam',
+            payload:{ kayit_id:urunKaydi, urun:'ozet', baslik:'Türev' } }) })).json();
+        if(!bir.ok) hatalar.push(s.id + ': urun teklifi birakilamadi — ' + (bir.errors || []).join('; '));
+        const urun = await page.evaluate(async ([ns]) => {
+          const N = window[ns];
+          const n = (await N.Beacon.intents()).find(x => x.kind === 'urun.add');
+          if(!n) return { yok:true };
+          const r = await N.Beacon.resolveIntent(n, 'apply');
+          const l = N.Urunler ? N.Urunler.liste() : [];
+          return { ok:r.ok, not:r.note || r.error, bildirildi:r.reported, adet:l.length,
+            id:l.length ? l[0].id : null };
+        }, [s.ns]);
+        if(urun.yok) hatalar.push(s.id + ': urun teklifi modulde gorunmedi');
+        else if(!urun.ok || urun.adet !== 1) hatalar.push(s.id + ': urun eklenemedi — ' + urun.not);
+        else{
+          if(!urun.bildirildi) hatalar.push(s.id + ': urun cevabi merkeze bildirilemedi');
+          await page.evaluate(([ns]) => window[ns].App.go('office'), [s.ns]);
+          await wait(600);
+          const dugme = await page.$('[data-act="urun-ac"][data-id="' + urun.id + '"]');
+          if(!dugme) hatalar.push(s.id + ': Ofis ekraninda BAM urunu gorunmedi');
+          else{
+            await dugme.click();
+            await wait(400);
+            const kutu = await page.evaluate(() => {
+              const f = document.querySelector('#sheet iframe.urun-cerceve');
+              return f ? { sandbox:f.getAttribute('sandbox'), turev:(f.getAttribute('srcdoc') || '')
+                .indexOf('Türev') >= 0 } : null;
+            });
+            if(!kutu || kutu.sandbox !== '' || !kutu.turev){
+              hatalar.push(s.id + ': urun sandbox iframe’de acilmadi');
+            }else{
+              console.log('  ' + s.id + ' → BAM urunu kendi koduyla sinandi, depoya yazildi, '
+                + 'Ofis’te sandbox iframe’de acildi');
+            }
+            await page.evaluate(([ns]) => window[ns].UI.closeSheet(), [s.ns]);
+          }
+          await page.evaluate(([ns]) => window[ns].App.go('today'), [s.ns]);
+          await wait(300);
+        }
+      }
+      /* Sohbetteki urun istegi: modulun on suzgeci tanir, HKM karar verir,
+         King is emrini MODUL ADINA acar (brand/ortak/ofis.js → urun.js). */
+      const sohbetUrun = await page.evaluate(async ([ns]) => {
+        const O = window.LIFEOS.Ofis;
+        if(!O.bamIstegi('Türev hakkında özet hazırla')) return { tanimadi:true };
+        return await O.bamKur({ hkm:() => window[ns].Beacon }).ilet('Türev hakkında özet hazırla');
+      }, [s.ns]);
+      const adAd = { AYS:'AYS', SPI:'SPİ', ESP:'ESP' }[s.id];
+      if(sohbetUrun.tanimadi) hatalar.push(s.id + ': sohbet urun istegini tanimadi');
+      else if(!sohbetUrun.ok || sohbetUrun.metin.indexOf(adAd + '’ye teklif') < 0){
+        hatalar.push(s.id + ': urun istegi King’e modul adina gitmedi — ' + sohbetUrun.metin);
+      }else{
+        console.log('  ' + s.id + ' → sohbetteki urun istegi King’e modul adina gitti');
+      }
+
       /* 2.8 — HEDEFTEN PLANA (ekip/PLAN.md Tur 2). Yalniz SPI: plan motoru
          orada. Zincir: SPI plani KENDI koduyla uygular -> King'e is emri ->
          King imkan kontrolu -> BAM Kayit + Planlama -> program kaydi ->
@@ -599,6 +677,51 @@ async function main(){
       console.log('  HKM yuzu → sistemler sekmesi: ' + sistemler.satir
         + ' metrik, ' + sistemler.cizgi + ' seri cizgisi');
     }
+    /* W6 — Ofis: depo denetimi olculur, kayit PDF olarak INDIRILIR (jetonla,
+       adres satirina jeton yazilmadan), adimlarin ajan izi gorunur. */
+    await yuz.click('#gez a[data-yol="ofis"]');
+    await wait(500);
+    await yuz.click('#depo-denetle');
+    await wait(400);
+    const depoMetin = await yuz.evaluate(() => (document.querySelector('#ofis-depo') || {}).textContent || '');
+    if(!/kayıt/.test(depoMetin) || !/ölçüldü/.test(depoMetin)) hatalar.push('HKM yuzu: depo denetimi cizilmedi');
+    if(urunKaydi){
+      await yuz.evaluate(id => { const a = document.querySelector('[data-bam-kayit="' + id + '"]');
+        if(a) a.click(); }, urunKaydi);
+      await wait(500);
+      const indir = await Promise.all([
+        yuz.waitForEvent('download', { timeout:10000 }).catch(() => null),
+        yuz.click('[data-kayit-indir="' + urunKaydi + '"][data-bicim="pdf"]').catch(() => null),
+      ]);
+      const ad = indir[0] ? indir[0].suggestedFilename() : '';
+      if(!/\.pdf$/.test(ad)) hatalar.push('HKM yuzu: kayit PDF olarak indirilemedi (' + ad + ')');
+      else console.log('  HKM yuzu → Ofis: depo denetlendi, kayit PDF indi (' + ad + ')');
+    }
+    const izVar = await yuz.evaluate(() => /Ajan izi/.test((document.querySelector('#ofis-isler') || {}).textContent || ''));
+    if(!izVar) hatalar.push('HKM yuzu: islerde ajan izi gorunmedi');
+
+    /* W6 — Web ayarlari: kaydedilir, anahtar MASKELI doner ve geri okunmaz. */
+    await yuz.click('#ayar-bag');
+    await wait(400);
+    await yuz.click('[data-ayar="web"]');
+    await wait(500);
+    await yuz.fill('#web-sinir', '150');
+    await yuz.fill('#web-k-brave', 'BSA-entegre-anahtar-9876');
+    await yuz.click('[data-web-saglayici="brave"]');
+    await yuz.click('#web-kaydet');
+    await wait(600);
+    const webAyar = await (await hkmFetch('/api/config')).json();
+    const w = webAyar.web || {};
+    const webAlan = await yuz.evaluate(() => (document.querySelector('#web-k-brave') || {}).value || '');
+    if(w.gunluk_sinir !== 150 || (w.saglayicilar || []).indexOf('brave') < 0){
+      hatalar.push('HKM yuzu: web ayari kaydedilmedi');
+    }else if(webAlan.indexOf('9876') < 0 || webAlan.indexOf('entegre') >= 0
+      || JSON.stringify(webAyar).indexOf('BSA-entegre') >= 0){
+      hatalar.push('HKM yuzu: web anahtari maskelenmedi');
+    }else{
+      console.log('  HKM yuzu → Web: sınır 150, Brave sıraya girdi; anahtar maskeli (' + webAlan + ')');
+    }
+
     /* Yonetim sekmesi: esik kaydi GERCEKTEN yaziliyor ve bozuk deger
        REDDEDILIYOR mu? */
     await yuz.click('#ayar-bag');

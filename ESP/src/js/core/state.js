@@ -1351,6 +1351,12 @@ ESP.Model = (function(){
         hkm:() => ESP.Beacon });
       await ESP.Hafizam.yukle();
     }
+    /* BAM urunleri (ozet, rapor, sunum, pankart…) bu modulun KENDI
+       deposundadir: HKM kapaliyken de acilir (core/urun.js, ortak). */
+    if(window.LIFEOS && LIFEOS.Urun){
+      ESP.Urunler = ESP.Urunler || LIFEOS.Urun.kur({ store:() => ESP.Store, hkm:() => ESP.Beacon });
+      await ESP.Urunler.yukle();
+    }
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(ESP.Hedefler) await ESP.Hedefler.yukle();

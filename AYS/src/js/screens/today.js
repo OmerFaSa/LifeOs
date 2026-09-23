@@ -721,7 +721,7 @@ R.Screens.today = (function(){
             ${/* Uygulanamayan turde «Uygula» CIKMAZ: gorunen eylem,
                   yapilabilen eylemle ayni olmali. */''}
             ${when(R.Beacon.canApply(n), () => c.Button({
-              label:n.kind === 'kayit.add' ? 'Kaydet' : 'Uygula',
+              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle' })[n.kind] || 'Uygula',
               size:'sm', tone:'primary', act:'hkm-intent-yes',
               data:{ 'data-id':String(n.id) } }))}
             ${when(!R.Beacon.canApply(n), () => c.Button({ label:'Gördüm',

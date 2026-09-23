@@ -67,6 +67,24 @@ ESP.Screens.office = (function(){
     });
   }
 
+  /* ---------- BAM ürünleri (core/urun.js, ortak) ----------
+     HKM'nin Üretim Bürosu'ndan gelen ve onaylanan özet, rapor, sunum,
+     pankart. Basılı hâl bu modülün deposundadır: HKM kapalıyken de açılır.
+     Liste boşsa bölüm çizilmez. */
+  function urunlerKart(){
+    const l = ESP.Urunler ? ESP.Urunler.liste() : [];
+    if(!l.length) return '';
+    const govde = html`<div class="stack-xs">${map(l, u => html`<div class="row gap-8 wrap">
+      <span class="minw0"><b>${u.baslik}</b> <span class="tiny dim">· ${u.urunAd}
+        · ${LIFEOS.Urun.etiketAdi(u.dogruluk)}</span></span>
+      ${K.Button({ label:'Aç', size:'sm', act:'urun-ac', data:{ 'data-id':u.id } })}
+      ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
+    </div>`)}</div>`;
+    return K.Entry({ label:'BAM ÜRÜNLERİ', hint:'hkm', meta:l.length + ' ürün', wide:true,
+      note:'Sohbette «… hakkında özet hazırla» dersen King’e iletilir; bitince teklif olarak gelir.',
+      body:html`${govde}` });
+  }
+
   function render(){
     const patron = ESP.AGENT_BY_ID.patron;
     const uzmanlar = ESP.Mod.activeAgents().filter(a => a.id !== 'patron');
@@ -130,6 +148,8 @@ ESP.Screens.office = (function(){
             'Bekleyen teklif yok: masaların bulgusu eylem gerektirmiyor.'),
         }),
 
+        urunlerKart(),
+
         K.Entry({
           label:'HAFTALIK PLAN', hint:'weekplan',
           meta:ESP.Plans.plan() ? 'kurulu' : 'yok',
@@ -152,6 +172,21 @@ ESP.Screens.office = (function(){
   }
 
   const handle = {
+    /* Ürün KUTUDA açılır: sandbox iframe, betik çalışmaz (core/urun.js). */
+    async 'urun-ac'(el){
+      const u = ESP.Urunler && ESP.Urunler.bul(el.dataset.id);
+      if(!u) return;
+      ESP.UI.sheet({ title:u.baslik, wide:true,
+        subtitle:u.urunAd + ' · ' + LIFEOS.Urun.etiketAdi(u.dogruluk),
+        note:u.dogruluk === 'dogrulanmadi' ? 'Doğrulanmadı: kaynaksız, modelin bilgisidir. '
+          + 'Karar vermeden önce bir kaynağa bak.' : null,
+        body:LIFEOS.Urun.cerceve(u) });
+    },
+    async 'urun-sil'(el){
+      const id = el.dataset.id;
+      ESP.UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
+        async () => { await ESP.Urunler.sil(id); ESP.UI.toast('Silindi'); ESP.App.render(); }, true);
+    },
     async 'open-agent'(el){
       S.ui.officeAgent = el.dataset.agent;
       ESP.App.go('team');

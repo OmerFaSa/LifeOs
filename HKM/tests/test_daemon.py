@@ -323,6 +323,16 @@ def run():
             ok("adimlar" in r)
         test("sohbet govdesinde tarih yoksa bugun sayilir", t_chat_without_date)
 
+        def t_king_urun_ucu():
+            """Modulun urun istegi: metinsiz 400, bilinmeyen modul 422,
+            taninmayan cumle emir acmadan `tanindi: False`, jetonsuz 401."""
+            eq(S.call("/api/king/urun", body={"modul": "ays"})[0], 400)
+            eq(S.call("/api/king/urun", body={"modul": "xyz", "metin": "türev özeti hazırla"})[0], 422)
+            kod, r = S.call("/api/king/urun", body={"modul": "ays", "metin": "merhaba"})
+            eq((kod, r["tanindi"]), (200, False))
+            eq(S.call("/api/king/urun", body={"modul": "ays", "metin": "x"}, token=None)[0], 401)
+        test("modul urun istegi ucu", t_king_urun_ucu)
+
         def t_message_needs_token():
             eq(S.call("/api/message", body={"text": "durum"}, token=None)[0], 401)
             eq(S.call("/api/conversation", token=None)[0], 401)
