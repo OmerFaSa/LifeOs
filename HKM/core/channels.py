@@ -30,6 +30,7 @@
 import hashlib
 import hmac
 import json
+import re
 import urllib.error
 import urllib.request
 
@@ -163,6 +164,62 @@ def send(cfg, name, text, to=None, transport=None):
     return {"ok": 200 <= durum < 300, "status": durum, "to": hedef,
             "note": aciklama,
             # Sir loglanmaz: yanit govdesi kirpilir ve jeton hicbir yerde gecmez.
+            "detail": (yanit or "")[:200]}
+
+
+def _post_ham(url, bayt, headers=None):
+    """Cok parcali govde icin tasima. Firlatmaz: (durum, govde)."""
+    req = urllib.request.Request(url, data=bayt, method="POST")
+    for k, v in (headers or {}).items():
+        req.add_header(k, v)
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT * 3) as r:
+            return r.status, (r.read() or b"").decode("utf-8", "replace")
+    except urllib.error.HTTPError as e:
+        return e.code, (e.read() or b"").decode("utf-8", "replace")
+    except Exception as e:                      # noqa: BLE001
+        return 0, type(e).__name__
+
+
+BELGE_SINIRI = 20 * 1024 * 1024        # Telegram 50 MB kabul eder; biz daha azini yollariz
+
+
+def send_document(cfg, name, dosya_adi, bayt, mime, caption="", to=None, transport=None):
+    """Belge gonderimi — yalniz Telegram (sendDocument, multipart).
+
+    WhatsApp'ta belge once medya olarak yuklenmeli; o yol yok ve bu
+    SOYLENIR: sessizce «gonderildi» denmez. `transport(url, bayt,
+    basliklar) -> (durum, metin)` testler icin."""
+    a = settings(cfg, name)
+    if not enabled(cfg, name):
+        return {"ok": False, "status": 0, "reason": "off",
+                "note": "Kanal kapalı; gönderim denenmedi."}
+    if name != "telegram":
+        return {"ok": False, "status": 0, "reason": "unsupported",
+                "note": "Bu kanala belge gönderilemiyor; HKM › Ofis’ten indir."}
+    hedef = str(to or (a.get("allow_from") or [""])[0] or "")
+    if not hedef:
+        return {"ok": False, "status": 0, "reason": "no-target", "note": "Alıcı yok."}
+    if not allowed(cfg, name, hedef):
+        return {"ok": False, "status": 0, "reason": "not-allowed",
+                "note": "Alıcı izin listesinde değil; gönderim yapılmadı."}
+    if not bayt or len(bayt) > BELGE_SINIRI:
+        return {"ok": False, "status": 0, "reason": "too-large", "note": "Belge boş ya da çok büyük."}
+    sinir = "----lifeos%s" % hashlib.sha1(bayt[:4096] + dosya_adi.encode("utf-8")).hexdigest()[:24]
+    guvenli_ad = re.sub(r'["\r\n]', "_", dosya_adi)
+    parca = []
+    for alan, deger in (("chat_id", hedef), ("caption", (caption or "")[:1024])):
+        parca.append(("--%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n"
+                      % (sinir, alan, deger)).encode("utf-8"))
+    parca.append(("--%s\r\nContent-Disposition: form-data; name=\"document\"; filename=\"%s\"\r\n"
+                  "Content-Type: %s\r\n\r\n" % (sinir, guvenli_ad, mime)).encode("utf-8"))
+    govde = b"".join(parca) + bayt + ("\r\n--%s--\r\n" % sinir).encode("utf-8")
+    url = "%s/bot%s/sendDocument" % (a["api_base"].rstrip("/"), a["bot_token"])
+    durum, yanit = (transport or _post_ham)(
+        url, govde, {"Content-Type": "multipart/form-data; boundary=" + sinir})
+    return {"ok": 200 <= durum < 300, "status": durum, "to": hedef,
+            "note": "Belge gönderildi." if 200 <= durum < 300 else
+            ("Kanala ulaşılamadı (ağ ya da adres)." if not durum else "Kanal yanıtı: %s" % durum),
             "detail": (yanit or "")[:200]}
 
 

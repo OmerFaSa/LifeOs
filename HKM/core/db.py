@@ -424,6 +424,13 @@ MIGRATIONS = [
     # guncellik denetimi. Eski kayitlarda bostur; bos anahtar «eslesmez».
     ("bam_kayitlar", "anahtar", "TEXT"),
     ("bam_kayitlar", "denetim", "TEXT"),
+    # Is emrinin geldigi kanal ve alici (Telegram sohbeti): sonuc AYNI
+    # kanaldan teslim edilir. HKM ekranindan gelen emirde bostur.
+    ("is_emirleri", "kanal", "TEXT"),
+    ("is_emirleri", "hedef", "TEXT"),
+    # Giden kutusunda belge satiri: {"kayit_id", "bicim"}. Bayt ambara
+    # yazilmaz; gonderim aninda kayittan uretilir.
+    ("outbox", "ek", "TEXT"),
 ]
 
 

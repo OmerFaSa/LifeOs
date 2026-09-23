@@ -23,8 +23,26 @@
 """
 
 import datetime
+import json
 
 from core import channels, db
+
+
+def _belge_gonder(con, cfg, row, transport):
+    """Belge satiri: kayit gonderim aninda PDF'e (olmazsa HTML'e) basilir."""
+    from core import bam, cikti
+    try:
+        ek = json.loads(row["ek"])
+        k = bam.kayit_getir(con, int(ek["kayit_id"]))
+    except (TypeError, ValueError, KeyError):
+        k = None
+    if not k:
+        return {"ok": False, "status": 0, "reason": "no-target", "note": "Kayıt bulunamadı."}
+    bayt, mime, ad = cikti.uret(k, ek.get("bicim") or "pdf")
+    if bayt is None:
+        bayt, mime, ad = cikti.uret(k, "html")
+    return channels.send_document(cfg, row["channel"], ad, bayt, mime.split(";")[0],
+                                  caption=row["text"], to=row["target"], transport=transport)
 
 GERI_CEKILME = (60, 300, 900, 3600)      # saniye
 ASGARI_DENEME = len(GERI_CEKILME) + 1    # sonra vazgecilir
@@ -51,8 +69,11 @@ def reply_kind(msg_id):
     return "reply:%s" % (msg_id or "bilinmeyen")
 
 
-def enqueue(con, channel, kind, day, text, target=None, now=None):
-    """Kuyruga koyar. Ayni kimlik varsa YENISINI YAZMAZ."""
+def enqueue(con, channel, kind, day, text, target=None, now=None, ek=None):
+    """Kuyruga koyar. Ayni kimlik varsa YENISINI YAZMAZ.
+
+    `ek` = {"kayit_id", "bicim"}: satir bir BELGEDIR; `text` aciklamasidir.
+    Belgenin bayti ambara yazilmaz, gonderim aninda kayittan uretilir."""
     t = _now(now)
     var = con.execute(
         "SELECT * FROM outbox WHERE channel=? AND kind=? AND day=?",
@@ -60,9 +81,10 @@ def enqueue(con, channel, kind, day, text, target=None, now=None):
     if var:
         return {"ok": True, "row": dict(var), "duplicate": True}
     cur = con.execute(
-        "INSERT INTO outbox(channel, target, kind, day, text, next_at, created_at) "
-        "VALUES (?,?,?,?,?,?,?)",
-        (channel, target, kind, day, text, _iso(t), _iso(t)))
+        "INSERT INTO outbox(channel, target, kind, day, text, next_at, created_at, ek) "
+        "VALUES (?,?,?,?,?,?,?,?)",
+        (channel, target, kind, day, text, _iso(t), _iso(t),
+         json.dumps(ek, ensure_ascii=False) if ek else None))
     con.commit()
     row = con.execute("SELECT * FROM outbox WHERE id=?", (cur.lastrowid,)).fetchone()
     return {"ok": True, "row": dict(row), "duplicate": False}
@@ -107,8 +129,11 @@ def flush(con, cfg, now=None, transport=None, limit=20):
             # Kanal kapaliyken denemek anlamsiz: satir bekler.
             ozet["skipped"] += 1
             continue
-        r = channels.send(cfg, row["channel"], row["text"],
-                          to=row["target"], transport=transport)
+        if row.get("ek"):
+            r = _belge_gonder(con, cfg, row, transport)
+        else:
+            r = channels.send(cfg, row["channel"], row["text"],
+                              to=row["target"], transport=transport)
         deneme = row["attempts"] + 1
         if r.get("ok"):
             _mark(con, row["id"], state="sent", attempts=deneme,
@@ -121,9 +146,11 @@ def flush(con, cfg, now=None, transport=None, limit=20):
         # Ikisinden biri secilmek zorunda ve gec gelen bir mesaj, hic
         # gelmeyenden iyidir — ama bu BELIRSIZLIK kayda gecer.
         belirsiz = durum == 0 and r.get("reason") not in (
-            "not-allowed", "no-target", "unsafe-url", "unknown-channel", "off")
+            "not-allowed", "no-target", "unsafe-url", "unknown-channel", "off", "unsupported",
+            "too-large")
         kalici = durum in KALICI_HATALAR or r.get("reason") in (
-            "not-allowed", "no-target", "unsafe-url", "unknown-channel")
+            "not-allowed", "no-target", "unsafe-url", "unknown-channel", "unsupported",
+            "too-large")
         if kalici or deneme >= ASGARI_DENEME:
             # Sonsuz yeniden deneme, bir hatayi gizlemenin yavas bicimidir.
             _mark(con, row["id"], state="given_up", attempts=deneme,
