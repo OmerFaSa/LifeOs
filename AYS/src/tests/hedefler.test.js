@@ -78,6 +78,27 @@
     });
   });
 
+  describe('AYS hedef — alışkanlık', () => {
+    it('ders çalışma alışkanlığı blokların gerçekleşen dakikasından ölçülür', () => {
+      resetState();
+      const t = tani('Her gün 2 saat ders çalışma alışkanlığı kazanmak istiyorum');
+      expect([t.paket, t.alan, t.kapasite.haftalik_gun, t.kapasite.gunluk_dk])
+        .toEqual(['aliskanlik', 'calisma', 7, 120]);
+      const h = Object.assign(H().yeni(t, 'ays', BUGUN), { son_tarih:'2026-11-18', durum:'aktif' });
+      const blok = dk => ({ id:R.U.uid('b'), slot:'Ders', subject:'Matematik', targetMin:60,
+        status:'done', actualMin:dk, actualQ:null, correctQ:null });
+      ['2026-09-22', '2026-09-21', '2026-09-16', '2026-09-15', '2026-09-14', '2026-09-08', '2026-09-01']
+        .forEach(d => { R.S.days[d] = { date:d, blocks:[blok(70), blok(60)] }; });
+      R.S.days['2026-09-20'] = { date:'2026-09-20', blocks:[blok(30)] };   // 120'yi tutmaz
+      const g = H().gerceklik(h, Hd().PAKET_BY_ID.aliskanlik, {}, BUGUN);
+      /* Taban: 22 ve 21 bu hafta; 16, 15, 14, 8, 1 önceki haftalar → 28 günde 7 gün. */
+      expect([g.tipik, g.bant]).toEqual([1.8, 'gercekci_degil']);
+      expect(Hd().ALISKANLIK.ilerleme(h, BUGUN).bu).toBe(2);
+      /* Net hedefi cümlesi yine net paketine gider. */
+      expect(tani('TYT\'de 90 nete çıkmak istiyorum').paket).toBe('net');
+    });
+  });
+
   describe('AYS hedef — konu bitirme kapasitesi', () => {
     it('kalan konuların süresi müfredattan hesaplanır ve karar «tahmin»dir', () => {
       resetState();

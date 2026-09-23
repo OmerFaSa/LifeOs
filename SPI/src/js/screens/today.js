@@ -491,6 +491,15 @@ SP.Screens.today = (function(){
       </div></div>`;
   }
 
+  /* ALIŞKANLIK (brand/ortak/aliskanlik.js): planı yoktur; ilerleme doğrudan
+     KAYITTAN sayılır. «Kayıt yok» «yapılmadı» demek değildir. */
+  function aliskanlikOzeti(h){
+    const il = SP.Hedefler.ALISKANLIK.ilerleme(h, SP.U.todayISO());
+    return html`<div class="stack-sm mt-8">
+      ${K.Notice({ tone:il.durum === 'geride' ? 'warn' : 'info', body:il.metin })}
+      <div class="row gap-8" style="flex-wrap:wrap">${durumDugmeleri(h)}</div></div>`;
+  }
+
   function hedefSatir(h){
     const g = h.gerceklik || {};
     const H = window.LIFEOS.Hedef;
@@ -501,7 +510,8 @@ SP.Screens.today = (function(){
         <div class="tiny dim">${h.durum === 'askida' ? 'askıda · ' : ''}${h.son_tarih
           ? 'son tarih ' + H.tarihYaz(h.son_tarih) : 'tarihsiz'}${g.bant ? ' · ' + BANT[g.bant]
           + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
-      ${pl ? planOzeti(h, pl) : onizle ? planOnizleme(h) : html`
+      ${h.paket === 'aliskanlik' && SP.Hedefler.ALISKANLIK ? aliskanlikOzeti(h)
+        : pl ? planOzeti(h, pl) : onizle ? planOnizleme(h) : html`
         <div class="row gap-8 mt-6" style="flex-wrap:wrap">
           ${when(SP.Plan && h.durum === 'aktif' && h.paket === 'kilo', () => K.Button({ label:'Planı gör',
             size:'sm', tone:'primary', act:'hedef-plan-onizle', data:{ 'data-id':h.id } }))}
@@ -526,7 +536,8 @@ SP.Screens.today = (function(){
       body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
         : html`<p class="small dim">Henüz hedefin yok. Danışma’da «3 ay içinde 3 kilo vermek
           istiyorum» ya da «VKİ’mi 24’e indirmek istiyorum» gibi yazabilirsin; gerçekçi olup
-          olmadığını ve güvenli temposunu söylerim.</p>`,
+          olmadığını ve güvenli temposunu söylerim. Alışkanlık da kurabilirsin: «haftada 3 gün
+          30 dakika düzenli spor yapmak istiyorum».</p>`,
     });
   }
 

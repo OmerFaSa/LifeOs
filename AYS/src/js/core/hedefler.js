@@ -380,13 +380,32 @@ R.Hedefler = (function(){
     },
   };
 
-  const PAKETLER = [NET, KONU];
+  /* ========================================================= ALIŞKANLIK
+
+     «Her gün 2 saat ders çalışma alışkanlığı» (brand/ortak/aliskanlik.js).
+     Taban AYS'nin KENDİ gün kaydından: blokların gerçekleşen dakikası hedef
+     dakikayı tutan gün. Plansız çalışma blok açmadığı için sayılmaz. */
+  const ALISKANLIK = window.LIFEOS && LIFEOS.Aliskanlik ? LIFEOS.Aliskanlik.kur({
+    alanlar:[
+      { id:'calisma', ad:'Ders çalışma', kelime:/(ders|çalış|soru çöz|matematik|türkçe|fizik|kimya|biyoloji|tarih|coğrafya|geometri|paragraf|tyt|ayt)/ },
+    ],
+    dakika:(alan, iso) => {
+      const d = (R.S.days || {})[iso];
+      const l = d ? (d.blocks || []).filter(b => b && b.actualMin != null) : [];
+      if(!l.length) return null;
+      return l.reduce((a, b) => a + (Number(b.actualMin) || 0), 0);
+    },
+  }) : null;
+
+  const PAKETLER = (ALISKANLIK ? [ALISKANLIK.paket] : []).concat([NET, KONU]);
   const PAKET_BY_ID = { konu:KONU, net:NET };
+  if(ALISKANLIK) PAKET_BY_ID.aliskanlik = ALISKANLIK.paket;
 
   /* ------------------------------------------------------ sohbet notları */
 
   function notlar(h, g){
     const out = [];
+    if(h.paket === 'aliskanlik' && ALISKANLIK) return ALISKANLIK.notlar(h);
     if(h.paket === 'konu' && g && g.bant){
       const kalan = kalanKonular(h.dersler).length;
       const cap = Number(R.S.profile && R.S.profile.capacityHoursPerWeek);
@@ -431,6 +450,7 @@ R.Hedefler = (function(){
 
   /* Hedefin kısa adı — ekranda ve plan önizlemesinde. */
   function ozet(h){
+    if(h.paket === 'aliskanlik' && ALISKANLIK) return ALISKANLIK.ozet(h);
     if(h.paket === 'konu') return (h.kapsam || 'Konular') + ': ' + (h.fark != null ? h.fark + ' konu bitir'
       : h.hedefDeger + ' konunun hepsini bitir');
     if(h.paket === 'net'){
@@ -445,6 +465,11 @@ R.Hedefler = (function(){
      zaman bütçesinin cümlesi geri. HKM kapalıysa hiçbir şey olmaz. */
   function ozetler(){
     return aktifler().map(h => {
+      /* Alışkanlığın planı yoktur; ilerlemesi doğrudan kayıttan sayılır. */
+      if(h.paket === 'aliskanlik' && ALISKANLIK){
+        return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:{ bitis:h.son_tarih || null },
+          ilerleme:ALISKANLIK.ilerleme(h, U().todayISO()) });
+      }
       const p = R.HedefPlan ? R.HedefPlan.aktif(h.id) : null;
       return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:p ? { bitis:p.bitis } : null,
         ilerleme:p ? R.HedefPlan.ilerleme(p, U().todayISO()) : null });
@@ -461,7 +486,7 @@ R.Hedefler = (function(){
     baskaIs:m => !!(R.Komut && R.Komut.anla(m).komut) || !!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi && LIFEOS.Ofis.bamIstegi(m)),
   }) : null;
 
-  return { PAKETLER, PAKET_BY_ID, KONU, NET, SAAT_GUN, DERS_TEST, EN_AZ_DENEME,
+  return { PAKETLER, PAKET_BY_ID, KONU, NET, ALISKANLIK, SAAT_GUN, DERS_TEST, EN_AZ_DENEME,
     dersleriBul, kapsamBul, konular, kalanKonular, siraliKalan, durumOf, konuSaati, seri, netHizi, azami, netAdi, sinavTarihi,
     notlar, yukle, kaydet, liste, aktifler, durumDegistir, ozet, sohbet, ozetler, ag };
 })();

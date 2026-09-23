@@ -61,6 +61,35 @@
     });
   });
 
+  describe('ESP hedef — alışkanlık', () => {
+    it('açık alışkanlık sözü okuma hedefi değil alışkanlıktır; «her gün» tek başına değil', () => {
+      kur();
+      const t = tani('Her gün 20 dakika kitap okuma alışkanlığı kazanmak istiyorum');
+      expect([t.paket, t.alan, t.kapasite.haftalik_gun, t.kapasite.gunluk_dk])
+        .toEqual(['aliskanlik', 'reading', 7, 20]);
+      expect(tani('Her gün 30 dakika çalışarak iki ayda İngilizcede B1\'e çıkmak istiyorum').paket).toBe('dil');
+      expect(tani('Haftada 4 gün 15 dakika düzenli gitar çalmak istiyorum').alan).toBe('music');
+    });
+
+    it('taban ve ilerleme ESP’nin kendi oturum kaydından sayılır', () => {
+      kur();
+      ['2026-09-20', '2026-09-18', '2026-09-13', '2026-09-11', '2026-09-06', '2026-09-04',
+        '2026-08-30', '2026-08-28'].forEach(d => pushSession(d, 'reading', 25));
+      pushSession('2026-09-22', 'reading', 30);
+      pushSession('2026-09-22', 'music', 60);             // başka disiplin sayılmaz
+      const h = hedef('Haftada 3 gün 20 dakika okuma alışkanlığı kazanmak istiyorum',
+        { son_tarih:'2026-11-18' });
+      const g = H().gerceklik(h, paket(h), {}, BUGUN);
+      /* Dünden geriye 28 gün: 20+ dakikalık 9 kayıtlı gün → haftada 2,3. */
+      expect([g.bant, g.tipik, g.etiket]).toEqual(['gercekci', 2.3, 'tahmin']);
+      const il = HD().ALISKANLIK.ilerleme(h, BUGUN);
+      expect([il.bu, il.durum]).toEqual([1, 'yolunda']);
+      expect(HD().ozet(h)).toBe('Alışkanlık: Okuma · haftada 3 gün × 20 dk');
+      const o = HD().ozetler().find(x => x.id === h.id);
+      expect(o.plan.ilerleme.durum).toBe('yolunda');
+    });
+  });
+
   describe('ESP hedef — gerçekçilik', () => {
     it('dil: vakit yetmezse «bu sürede olmaz» ve olacağı tarih; karar tahmin', () => {
       kur();

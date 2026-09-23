@@ -253,13 +253,38 @@ ESP.Hedefler = (function(){
     },
   };
 
-  const PAKETLER = [DIL, ENSTRUMAN, OKUMA];
+  /* ========================================================= ALIŞKANLIK
+
+     «Her gün 20 dakika kitap okuma alışkanlığı» (brand/ortak/aliskanlik.js).
+     Taban ESP'nin KENDİ oturum kaydından: o disiplinde hedef dakikayı tutan
+     kayıtlı gün. İlk sırada durur: açık alışkanlık sözü («alışkanlık»,
+     «rutin», «düzenli») taşıyan cümle okuma ya da dil HEDEFİ değildir. */
+  const ALISKANLIK = window.LIFEOS && LIFEOS.Aliskanlik ? LIFEOS.Aliskanlik.kur({
+    alanlar:[
+      { id:'diction', ad:'Diksiyon', kelime:/(diksiyon|tekerleme|sesli okuma)/ },
+      { id:'reading', ad:'Okuma', kelime:/(kitap|okuma|okumak)/ },
+      { id:'lang', ad:'Dil', kelime:/(ingilizce|almanca|fransızca|ispanyolca|italyanca|rusça|japonca|arapça|korece|çince|portekizce|farsça|yabancı dil|dil çalış|dil öğren|kelime)/ },
+      { id:'music', ad:'Müzik', kelime:/(gitar|piyano|keman|bateri|enstrüman|müzik|metronom|çalgı)/ },
+      { id:'writing', ad:'Yazı', kelime:/(yazı|yazmak|yazma|günlük tut)/ },
+      { id:'philo', ad:'Felsefe', kelime:/(felsefe)/ },
+    ],
+    dakika:(disc, iso) => {
+      const d = (ESP.S.days || {})[iso];
+      if(!d) return null;
+      return (d.sessions || []).filter(s => s && s.disc === disc)
+        .reduce((a, s) => a + (Number(s.minutes) || 0), 0);
+    },
+  }) : null;
+
+  const PAKETLER = (ALISKANLIK ? [ALISKANLIK.paket] : []).concat([DIL, ENSTRUMAN, OKUMA]);
   const PAKET_BY_ID = { dil:DIL, enstruman:ENSTRUMAN, okuma:OKUMA };
+  if(ALISKANLIK) PAKET_BY_ID.aliskanlik = ALISKANLIK.paket;
 
   /* ------------------------------------------------------ sohbet notları */
 
   function notlar(h, g){
     const out = [];
+    if(h.paket === 'aliskanlik' && ALISKANLIK) return ALISKANLIK.notlar(h);
     if(h.paket === 'dil'){
       out.push('Seviye bir öz-değerlendirmedir: CEFR bandı ESP merdiveniyle aynı ölçek değildir '
         + 've sertifika yerine geçmez.');
@@ -311,6 +336,7 @@ ESP.Hedefler = (function(){
 
   /* Hedefin kısa adı — ekranda ve plan önizlemesinde. */
   function ozet(h){
+    if(h.paket === 'aliskanlik' && ALISKANLIK) return ALISKANLIK.ozet(h);
     if(h.paket === 'dil') return (h.dil || 'Yabancı dil') + ': ' + (h.simdi && h.simdi.deger
       ? (h.simdi.deger === '0' ? 'sıfır' : h.simdi.deger) + ' → ' : '') + h.hedefSeviye;
     if(h.paket === 'okuma') return (h.fark || h.hedefDeger) + ' kitap';
@@ -323,6 +349,11 @@ ESP.Hedefler = (function(){
      zaman bütçesinin cümlesi geri. HKM kapalıysa hiçbir şey olmaz. */
   function ozetler(){
     return aktifler().map(h => {
+      /* Alışkanlığın planı yoktur; ilerlemesi doğrudan kayıttan sayılır. */
+      if(h.paket === 'aliskanlik' && ALISKANLIK){
+        return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:{ bitis:h.son_tarih || null },
+          ilerleme:ALISKANLIK.ilerleme(h, U().todayISO()) });
+      }
       const p = ESP.HedefPlan ? ESP.HedefPlan.aktif(h.id) : null;
       return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:p ? { bitis:p.bitis } : null,
         ilerleme:p ? ESP.HedefPlan.ilerleme(p, U().todayISO()) : null });
@@ -338,7 +369,7 @@ ESP.Hedefler = (function(){
     baskaIs:m => !!(ESP.Komut && ESP.Komut.anla(m).komut) || !!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi && LIFEOS.Ofis.bamIstegi(m)),
   }) : null;
 
-  return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, CEFR, CEFR_SAAT, KITAP_SAAT_TAHMIN,
+  return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, ALISKANLIK, CEFR, CEFR_SAAT, KITAP_SAAT_TAHMIN,
     kitapSaati, temizHiz, kademeBpm, kademeAdi, notlar, yukle, kaydet, liste, aktifler,
     durumDegistir, ozet, sohbet , ozetler, ag };
 })();

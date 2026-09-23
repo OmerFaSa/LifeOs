@@ -309,6 +309,15 @@ ESP.Screens.today = (function(){
       </div></div>`;
   }
 
+  /* ALIŞKANLIK (brand/ortak/aliskanlik.js): planı yoktur; ilerleme doğrudan
+     KAYITTAN sayılır. «Kayıt yok» «yapılmadı» demek değildir. */
+  function aliskanlikOzeti(h){
+    const il = ESP.Hedefler.ALISKANLIK.ilerleme(h, U.todayISO());
+    return html`<div class="stack-sm mt-8">
+      ${K.Notice({ tone:il.durum === 'geride' ? 'warn' : 'info', body:il.metin })}
+      <div class="row gap-8" style="flex-wrap:wrap">${hedefDugmeleri(h)}</div></div>`;
+  }
+
   function hedefSatir(h){
     const g = h.gerceklik || {};
     const p = ESP.HedefPlan ? ESP.HedefPlan.aktif(h.id) : null;
@@ -319,7 +328,8 @@ ESP.Screens.today = (function(){
           ? 'son tarih ' + U.fmtDate(h.son_tarih) : 'tarihsiz'}${h.kapasite && h.kapasite.gunluk_dk
           ? ' · günde ' + h.kapasite.gunluk_dk + ' dk' : ''}${g.bant ? ' · ' + BANT[g.bant]
           + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
-      ${p ? hedefPlanOzeti(h, p) : onizle ? hedefOnizleme(h) : html`
+      ${h.paket === 'aliskanlik' && ESP.Hedefler.ALISKANLIK ? aliskanlikOzeti(h)
+        : p ? hedefPlanOzeti(h, p) : onizle ? hedefOnizleme(h) : html`
         <div class="row gap-8 mt-6" style="flex-wrap:wrap">
           ${when(ESP.HedefPlan && h.durum === 'aktif', () => K.Button({ label:'Planı gör', size:'sm',
             tone:'primary', act:'hedef-plan-onizle', data:{ 'data-id':h.id } }))}
@@ -346,7 +356,8 @@ ESP.Screens.today = (function(){
         : html`<p class="small dim">Henüz hedefin yok. Danışma’da «Bir yılda gitarda Kalfa’ya
           gelmek istiyorum», «Bir ayda İngilizcede A2’ye gelmek istiyorum» ya da «bu yıl 24 kitap
           okumak istiyorum» gibi yazabilirsin; vaktine göre olup olmadığını ve olacağı tarihi
-          söylerim.</p>`,
+          söylerim. Alışkanlık da kurabilirsin: «her gün 20 dakika kitap okuma alışkanlığı
+          kazanmak istiyorum».</p>`,
     });
   }
 

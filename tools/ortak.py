@@ -188,6 +188,8 @@ DOSYALAR = {
     # Alan paketleri her modulun kendisindedir; motor ortak.
     "hedef.js":       "js/core",
     "hedef.test.js":  "tests",
+    "aliskanlik.js":      "js/core",
+    "aliskanlik.test.js": "tests",
     # HEDEF AGI — etkin hedeflerin ozeti HKM'ye, zaman butcesi geri
     # (HKM core/hedefag.py). Ozetin alanlari uc arayuzde ayni olmali.
     "hedefag.js":      "js/core",

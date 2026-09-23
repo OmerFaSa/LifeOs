@@ -29,6 +29,30 @@
     return h;
   }
 
+  describe('SPİ hedef — alışkanlık', () => {
+    it('düzenli spor alışkanlığı SPİ’nin antrenman kaydından ölçülür', () => {
+      kur();
+      const { pushWorkout } = SP.Test;
+      const t = H().cumleden('Haftada 3 gün 30 dakika düzenli yürüyüş yapmak istiyorum', P().PAKETLER, BUGUN);
+      expect([t.paket, t.alan, t.kapasite.haftalik_gun, t.kapasite.gunluk_dk])
+        .toEqual(['aliskanlik', 'hareket', 3, 30]);
+      const h = Object.assign(H().yeni(t, 'spi', BUGUN), { son_tarih:'2026-11-18', durum:'aktif' });
+      SP.S.hedefler = [h];
+      /* Kayıt yokken karar yok; «sıfır» sayılmaz. */
+      expect(H().gerceklik(h, P().PAKETLER[0], {}, BUGUN).bant).toBe(null);
+      ['2026-09-21', '2026-09-16', '2026-09-09', '2026-09-02', '2026-08-27'].forEach(d =>
+        pushWorkout(d, { minutes:40 }));
+      pushWorkout('2026-09-19', { minutes:10 });           // 30 dakikayı tutmaz
+      const g = H().gerceklik(h, P().PAKETLER[0], {}, BUGUN);
+      /* Dünden geriye 28 gün: 30+ dakikalık 5 kayıtlı gün → haftada 1,3. */
+      expect([g.bant, g.tipik]).toEqual(['gercekci', 1.3]);
+      expect(P().ALISKANLIK.ilerleme(h, BUGUN).bu).toBe(1);
+      expect(P().ozet(h)).toBe('Alışkanlık: Hareket · haftada 3 gün × 30 dk');
+      /* Kilo cümlesi yine kilo paketine gider. */
+      expect(H().cumleden('3 ay içinde 3 kilo vermek istiyorum', P().PAKETLER, BUGUN).paket).toBe('kilo');
+    });
+  });
+
   describe('SPİ hedef — şu anki kilo', () => {
     it('son ölçüm kullanılır, etiketiyle', () => {
       kur();

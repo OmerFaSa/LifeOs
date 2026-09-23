@@ -9292,7 +9292,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'7682e85', at:'2026-09-23 17:57', dirty:true };
+R.BUILD = { id:'9ad5acc', at:'2026-09-23 18:17', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10332,6 +10332,9 @@ LIFEOS.Urun = (function(){
      guvenlik(hedef, durum, s)? { red:true, neden } — bandı ezer
      ekSorular(hedef, durum)?  [{ alan, soru }]
      kapasiteGerekir?          true ise günlük vakit sorulur
+     karar(hedef, durum, bugun)? paketin KENDİ kararı (ör. alışkanlık: taban
+                               kendi kaydından). { bant, etiket, dayanak, metin?,
+                               mod? } döner; `metin` varsa kararın cümlesi odur.
      dogrula(hedef, durum)?    metin | null — hedef OLAMAZ (ör. TYT'de 130 net):
                                karar sorulmadan söylenir, «yine de kaydedeyim
                                mi?» denmez. Bilmediği alanda null döner.
@@ -10481,9 +10484,14 @@ LIFEOS.Hedef = (function(){
     if(typeof paket.tani === 'function'){
       const ozel = paket.tani(k2, bugun);
       if(ozel){
+        /* Vakit iki yerden gelebilir: genel ayrıştırıcı («günde 30 dk»,
+           «haftada 3 gün») ve paketin kendi okuması («her gün 20 dakika»).
+           Biri ötekini SİLMEZ, birleşir. */
+        const kap = (ka.kapasite || ozel.kapasite)
+          ? Object.assign({}, ka.kapasite || {}, ozel.kapasite || {}) : null;
         return Object.assign({ paket:paket.id, yon:'ulas', egilim, fark:null, hedefDeger:null,
           birim:paket.olcut ? paket.olcut.birim : null, son_tarih:tarihAyikla(k2, bugun),
-          kapasite:ka.kapasite, cumle:String(metin).trim() }, ozel);
+          cumle:String(metin).trim() }, ozel, { kapasite:kap });
       }
     }
     const birim = paket.birimler || new RegExp(paket.anahtar.source.replace(/\\b/g, ''));
@@ -10694,6 +10702,8 @@ LIFEOS.Hedef = (function(){
   function gerceklik(h, paket, durum, bugun){
     const d = dogrulaOf(h, paket, durum);
     if(d) return { bant:null, etiket:'veri_yok', hata:d };
+    if(paket && typeof paket.karar === 'function') return paket.karar(h, durum || {}, bugun) || {
+      bant:null, etiket:'veri_yok', neden:'Bu hedef için karar hesaplanamadı.' };
     if(paket && typeof paket.gerekenSaat === 'function') return kapasiteKarari(h, paket, durum, bugun);
     if(!paket || typeof paket.hiz !== 'function'){
       return { bant:null, etiket:'veri_yok',
@@ -10773,6 +10783,7 @@ LIFEOS.Hedef = (function(){
   function kararMetni(g){
     if(g.hata) return g.hata;
     if(g.bant == null) return g.neden;
+    if(g.metin) return g.metin;          // paketin kendi kararı cümlesini de KODLA kurar
     if(g.mod === 'kapasite') return kapasiteMetni(g);
     const k = hizYaz(g.gerekli, g.birim);
     const parca = {
@@ -10862,6 +10873,8 @@ LIFEOS.Hedef = (function(){
             ? 'Hedefi yine de kaydedeyim mi? «evet» ya da «vazgeç».'
             : g.mod === 'kapasite'
               ? 'Bir seçenek seç (numarasını yaz), ya da «evet» dersen kendi tarihin ve vaktinle kaydederim.'
+              : g.mod === 'aliskanlik'
+                ? 'Bir seçenek seç (numarasını yaz), ya da «evet» dersen kendi sıklığınla kaydederim.'
               : 'Bir tempo seç («1» ya da «2»), ya da «evet» dersen kendi tarihinle kaydederim.');
       if(g.hata){
         bekleyen = null;
@@ -11024,6 +11037,256 @@ LIFEOS.Hedef = (function(){
     uyarla, uyarlamaUygula,
     senaryolar, gecis, kararMetni, sohbetKur, tarihYaz, sayiYaz, gunEkle, ayEkle, gunFarki,
     haftalikSaat, ZORLAYICI_KAT };
+})();
+
+/* ==== js/core/aliskanlik.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/aliskanlik.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ALIŞKANLIK — hedef motorunun (brand/ortak/hedef.js) alışkanlık paketi.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/aliskanlik.js`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   ==================================================================
+
+   «Her gün 20 dakika kitap okuma alışkanlığı kazanmak istiyorum»,
+   «haftada 3 gün düzenli spor yapmak istiyorum». Motor alanı bilmez;
+   modül bu dosyaya iki şey verir: alanlarını (okuma, dil, hareket…) ve
+   bir günün o alandaki ÖLÇÜLMÜŞ dakikasını (`dakika(alan, gün)`).
+
+   Sözler:
+   1. KARARI KOD VERİR. Taban modülün KENDİ kaydından ölçülür: son dört
+      haftada o alanda hedef dakikayı tutan kayıtlı gün sayısı. İstenen
+      sıklık tabandan en çok 2 gün/hafta fazlaysa «gerçekçi», 4'e kadar
+      «zorlayıcı», ötesi «birden bu kadar artış zor». Bu artış kuralı bir iş
+      kuralıdır ve kaynağı bağlanmadı: karar «tahmin»dir.
+   2. KAYIT YOKSA KARAR YOK. Son dört haftada o alanda hiç kayıt yoksa taban
+      bilinmez; «sıfır» sayılmaz, karar verilmez ve bu SÖYLENİR.
+   3. İLERLEME KAYITTAN SAYILIR. «Bu hafta 3/5 gün» kayıtlı günlerdir;
+      kaydı olmayan gün «yapılmadı» diye değil «kayıt yok» diye okunur.
+   4. OTOMATİKLEŞME SÜRESİ SÖZ DEĞİLDİR. Kişiden kişiye çok değişir; hedef
+      tarihi gelince alışkanlık «oldu» sayılmaz, sürdürülür. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.Aliskanlik = (function(){
+  const H = () => window.LIFEOS.Hedef;
+  /* Açık alışkanlık sözü: «alışkanlık», «rutin», «düzenli». Yalnız «her gün»
+     yetmez — «her gün 30 dakika çalışarak B2'ye» bir dil hedefidir. */
+  const ANAHTAR = /(alışkanl|rutin|düzenli)/;
+  const RAHAT = 2;             // gün/hafta artış — iş kuralı, kaynak bekliyor
+  const UST = 4;
+  const PENCERE_HAFTA = 4;
+  const SAYI = '(\\d+(?:[.,]\\d+)?|yarım|bir|iki|üç|dört|beş|altı|yedi|on|on beş|yirmi|otuz|kırk|elli)';
+  const SAYILAR = { 'yarım':0.5, bir:1, iki:2, 'üç':3, 'dört':4, 'beş':5, 'altı':6, yedi:7, on:10,
+    'on beş':15, yirmi:20, otuz:30, 'kırk':40, elli:50 };
+
+  function kucuk(s){
+    return String(s || '').replace(/I/g, 'ı').replace(/İ/g, 'i').toLocaleLowerCase('tr');
+  }
+  function sayi(t){
+    const s = String(t || '').trim();
+    if(/^\d/.test(s)) return Number(s.replace(',', '.'));
+    return SAYILAR[s] != null ? SAYILAR[s] : null;
+  }
+  function yuvarla(x, n){ const k = Math.pow(10, n == null ? 1 : n); return Math.round(x * k) / k; }
+  function sayiYaz(x){ return String(yuvarla(x, 1)).replace('.', ','); }
+
+  /* Sıklık: «her gün» 7, «hafta içi» 5, «hafta sonu» 2, «gün aşırı» 3,
+     «haftada 4 gün / kez». Bulamazsa null — tahmin edilmez, sorulur. */
+  function siklikOku(metin){
+    const k = kucuk(metin);
+    const h = new RegExp('haftada\\s+' + SAYI + '\\s*(gün|kez|kere|defa|sefer)').exec(k);
+    if(h){ const n = sayi(h[1]); return n >= 1 && n <= 7 ? Math.round(n) : null; }
+    if(/hafta\s*içi/.test(k)) return 5;
+    if(/hafta\s*sonu/.test(k)) return 2;
+    if(/gün\s*aşırı/.test(k)) return 3;
+    if(/(her\s*gün|hergün|her\s+sabah|her\s+akşam|her\s+gece|günlük|her\s+öğle)/.test(k)) return 7;
+    return null;
+  }
+
+  /* Her seferin süresi: «20 dakika», «yarım saat», «1 saat». */
+  function dakikaOku(metin){
+    const m = new RegExp(SAYI + '\\s*(dk|dakika|saat)').exec(kucuk(metin));
+    if(!m) return null;
+    const n = sayi(m[1]);
+    if(n == null || n <= 0) return null;
+    const dk = Math.round(m[2] === 'saat' ? n * 60 : n);
+    return dk >= 1 && dk <= 600 ? dk : null;
+  }
+
+  function isoOku(iso){
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])) : null;
+  }
+  function gunEkle(iso, n){
+    const d = isoOku(iso); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10);
+  }
+  /* Pazartesi = 0. */
+  function haftaGunu(iso){ return (isoOku(iso).getUTCDay() + 6) % 7; }
+
+  /* `kur({ alanlar:[{ id, ad, kelime:RegExp }], dakika:(alanId, 'YYYY-MM-DD') => sayı|null })`
+     → motor paketi + { ilerleme(h, bugun), ozet(h), alanOf(h) } */
+  function kur(o){
+    const alanlar = o.alanlar || [];
+
+    function alanBul(metin){
+      const k = kucuk(metin);
+      return alanlar.find(a => a.kelime.test(k)) || null;
+    }
+    function alanOf(h){
+      if(!h) return null;
+      return alanlar.find(a => a.id === h.alan)
+        || (h.cevaplar && h.cevaplar.alan ? alanBul(h.cevaplar.alan) : null);
+    }
+    function siklikOf(h){
+      return (h.kapasite && h.kapasite.haftalik_gun)
+        || (h.cevaplar && h.cevaplar.siklik ? siklikOku(h.cevaplar.siklik) : null) || null;
+    }
+    function dkOf(h){ return (h.kapasite && h.kapasite.gunluk_dk) || null; }
+
+    /* O gün hedef dakikayı tutan bir kayıt var mı? Ölçülmemiş gün sayılmaz. */
+    function tuttu(alan, iso, dk){
+      const m = o.dakika(alan.id, iso);
+      return m != null && m >= dk;
+    }
+    function kayitVar(alan, iso){
+      const m = o.dakika(alan.id, iso);
+      return m != null && m > 0;
+    }
+
+    /* Taban: dünden geriye dört hafta. Bugün yarım bir gündür, sayılmaz. */
+    function taban(alan, dk, bugun){
+      let tutan = 0, kayitli = 0;
+      for(let i = 1; i <= PENCERE_HAFTA * 7; i++){
+        const g = gunEkle(bugun, -i);
+        if(kayitVar(alan, g)) kayitli++;
+        if(tuttu(alan, g, dk)) tutan++;
+      }
+      return { tutan, kayitli, gunHafta:yuvarla(tutan / PENCERE_HAFTA, 1) };
+    }
+
+    function dayanak(t, alan, dk){
+      return { durum:'kaynak_bekliyor', metin:'son ' + PENCERE_HAFTA + ' haftanın kaydı: ' + alan.ad
+        + ' için ' + dk + '+ dakikalık ' + t.tutan + ' gün (ölçüldü); haftada en çok '
+        + RAHAT + ' gün artış kuralı bir iş kuralıdır, kaynağı bağlanmadı' };
+    }
+
+    function karar(h, durum, bugun){
+      const alan = alanOf(h), n = siklikOf(h), dk = dkOf(h);
+      if(!alan) return { bant:null, etiket:'veri_yok', neden:'Hangi alışkanlık olduğu bilinmeden karar verilemez.' };
+      if(!n) return { bant:null, etiket:'veri_yok', neden:'Haftada kaç gün olduğu bilinmeden karar verilemez.' };
+      if(!dk) return { bant:null, etiket:'veri_yok', neden:'Her seferin süresi bilinmeden karar verilemez.' };
+      if(h.son_tarih && h.son_tarih <= bugun) return { bant:null, etiket:'veri_yok', hata:'Hedef tarihi geçmişte.' };
+      const t = taban(alan, dk, bugun);
+      const ne = alan.ad + ': haftada ' + n + ' gün, her seferinde ' + dk + ' dakika';
+      if(!t.kayitli){
+        return { mod:'aliskanlik', bant:null, etiket:'veri_yok',
+          neden:'Son ' + PENCERE_HAFTA + ' haftada ' + alan.ad + ' kaydın yok; tabanını bilmeden karar '
+            + 'vermem (kayıt olmaması «hiç yapmadım» demek değildir). ' + ne + ' olarak kaydedebilirim; '
+            + 'birkaç gün kayıt girince ilerlemeyi ölçerim.' };
+      }
+      const artis = yuvarla(n - t.gunHafta, 1);
+      const bant = artis <= RAHAT ? 'gercekci' : artis <= UST ? 'zorlayici' : 'gercekci_degil';
+      const tabanMetni = 'son ' + PENCERE_HAFTA + ' haftada ' + dk + '+ dakikalık kaydın haftada '
+        + sayiYaz(t.gunHafta) + ' gün';
+      const metin = {
+        gercekci:'Bu alışkanlık gerçekçi görünüyor (' + ne + '): ' + tabanMetni + ', artış küçük.',
+        zorlayici:'Bu alışkanlık zorlayıcı (' + ne + '): ' + tabanMetni + '. Kademeli başlamak daha kolay olabilir.',
+        gercekci_degil:'Birden bu kadar artış zor (' + ne + '): ' + tabanMetni + '. Daha az günle başlayıp '
+          + 'artırmak daha gerçekçi.',
+      }[bant] + ' Bu karar tahmindir (dayanak: ' + dayanak(t, alan, dk).metin + ').';
+      return { mod:'aliskanlik', bant, gerekli:n, tipik:t.gunHafta, ust:yuvarla(t.gunHafta + UST, 1),
+        birim:'gün/hafta', dayanak:dayanak(t, alan, dk), etiket:'tahmin', metin, taban:t };
+    }
+
+    /* Kademeli seçenekler: tabanın 2 ve 4 gün fazlası (istenenden azsa). */
+    function senaryolar(h, durum, bugun){
+      const alan = alanOf(h), n = siklikOf(h), dk = dkOf(h);
+      if(!alan || !n || !dk) return [];
+      const t = taban(alan, dk, bugun);
+      if(!t.kayitli) return [];
+      const bas = Math.max(1, Math.round(t.gunHafta));
+      const out = [];
+      [[RAHAT, 'rahat artış'], [UST, 'zorlayıcı artış']].forEach(x => {
+        const g = Math.min(7, bas + x[0]);
+        if(g < n && !out.some(s => s.hiz === g)){
+          out.push({ ad:'Haftada ' + g + ' gün (' + x[1] + ')', hiz:g, birim:'gün/hafta',
+            son_tarih:h.son_tarih, kapasite:{ haftalik_gun:g } });
+        }
+      });
+      return out;
+    }
+
+    /* Bu hafta (pazartesiden bugüne) ve son dört hafta: kayıtlı gün sayısı. */
+    function ilerleme(h, bugun){
+      const alan = alanOf(h), n = siklikOf(h), dk = dkOf(h);
+      if(!alan || !n || !dk) return { durum:'veri_yok', metin:'Alışkanlığın alanı ya da sıklığı eksik.' };
+      const hg = haftaGunu(bugun);
+      const pzt = gunEkle(bugun, -hg);
+      let bu = 0;
+      for(let i = 0; i <= hg; i++) if(tuttu(alan, gunEkle(pzt, i), dk)) bu++;
+      const onceki = [];
+      for(let w = 1; w <= PENCERE_HAFTA; w++){
+        let c = 0;
+        for(let i = 0; i < 7; i++) if(tuttu(alan, gunEkle(pzt, -7 * w + i), dk)) c++;
+        onceki.push(c);
+      }
+      let seri = 0;
+      for(const c of onceki){ if(c >= n) seri++; else break; }
+      const kalan = 6 - hg;
+      const durum = bu >= n ? 'onde' : bu + kalan >= n ? 'yolunda' : 'geride';
+      const metin = 'Bu hafta ' + bu + '/' + n + ' gün (' + dk + '+ dakikalık kayıt)'
+        + (durum === 'geride' ? '; bu hafta hedef tutmayacak' : durum === 'onde' ? '; bu haftanın hedefi tuttu'
+          : '; ' + (n - bu) + ' gün daha, ' + kalan + ' gün kaldı')
+        + '. Önceki haftalar: ' + onceki.join(', ') + ' gün.'
+        + (seri ? ' ' + seri + ' haftadır üst üste tuttu.' : '');
+      return { durum, bu, hedef:n, onceki, seri, metin, etiket:'olculdu' };
+    }
+
+    function ozet(h){
+      const alan = alanOf(h), n = siklikOf(h), dk = dkOf(h);
+      return 'Alışkanlık: ' + (alan ? alan.ad : 'alan belirsiz') + (n ? ' · haftada ' + n + ' gün' : '')
+        + (dk ? ' × ' + dk + ' dk' : '');
+    }
+
+    function notlar(h){
+      return ['Alışkanlığın kendiliğinden olması kişiden kişiye çok değişir (bir çalışmada ortanca 66 gün, '
+        + '18–254 gün aralığı; Lally ve ark., 2010 — kaynak henüz depoya bağlanmadı). Hedef tarihi '
+        + 'gelince «oldu» sayılmaz; sürdürmek asıl iştir.'];
+    }
+
+    const paket = {
+      id:o.id || 'aliskanlik', ad:'Alışkanlık', olcut:{ ad:'haftada gün', birim:'gün/hafta' },
+      anahtar:ANAHTAR, yonler:['aliskanlik'], kapasiteGerekir:true,
+      tani(k){
+        const alan = alanBul(k), n = siklikOku(k), dk = dakikaOku(k);
+        const kap = {};
+        if(n) kap.haftalik_gun = n;
+        if(dk) kap.gunluk_dk = dk;
+        return { yon:'aliskanlik', alan:alan ? alan.id : null, birim:'gün/hafta',
+          kapasite:Object.keys(kap).length ? kap : null };
+      },
+      tarihSoru:'Bu alışkanlığı ne zamana kadar sürdürmek istiyorsun? «8 hafta» ya da «3 ay» gibi yazabilirsin.',
+      ekSorular(h){
+        const out = [];
+        if(!alanOf(h)){
+          out.push({ alan:'alan', soru:'Hangi alışkanlık? ' + alanlar.map(a => a.ad).join(', ')
+            + ' gibi yazabilirsin.' });
+        }
+        if(!siklikOf(h)){
+          out.push({ alan:'siklik', soru:'Haftada kaç gün? «her gün» ya da «haftada 4 gün» gibi yazabilirsin.' });
+        }
+        return out;
+      },
+      karar, senaryolar,
+    };
+
+    return { paket, ilerleme, ozet, notlar, alanOf, siklikOf, taban, siklikOku, dakikaOku };
+  }
+
+  return { kur, siklikOku, dakikaOku, ANAHTAR, RAHAT, UST, PENCERE_HAFTA };
 })();
 
 /* ==== js/core/hedefag.js ==== */
@@ -34246,13 +34509,32 @@ R.Hedefler = (function(){
     },
   };
 
-  const PAKETLER = [NET, KONU];
+  /* ========================================================= ALIŞKANLIK
+
+     «Her gün 2 saat ders çalışma alışkanlığı» (brand/ortak/aliskanlik.js).
+     Taban AYS'nin KENDİ gün kaydından: blokların gerçekleşen dakikası hedef
+     dakikayı tutan gün. Plansız çalışma blok açmadığı için sayılmaz. */
+  const ALISKANLIK = window.LIFEOS && LIFEOS.Aliskanlik ? LIFEOS.Aliskanlik.kur({
+    alanlar:[
+      { id:'calisma', ad:'Ders çalışma', kelime:/(ders|çalış|soru çöz|matematik|türkçe|fizik|kimya|biyoloji|tarih|coğrafya|geometri|paragraf|tyt|ayt)/ },
+    ],
+    dakika:(alan, iso) => {
+      const d = (R.S.days || {})[iso];
+      const l = d ? (d.blocks || []).filter(b => b && b.actualMin != null) : [];
+      if(!l.length) return null;
+      return l.reduce((a, b) => a + (Number(b.actualMin) || 0), 0);
+    },
+  }) : null;
+
+  const PAKETLER = (ALISKANLIK ? [ALISKANLIK.paket] : []).concat([NET, KONU]);
   const PAKET_BY_ID = { konu:KONU, net:NET };
+  if(ALISKANLIK) PAKET_BY_ID.aliskanlik = ALISKANLIK.paket;
 
   /* ------------------------------------------------------ sohbet notları */
 
   function notlar(h, g){
     const out = [];
+    if(h.paket === 'aliskanlik' && ALISKANLIK) return ALISKANLIK.notlar(h);
     if(h.paket === 'konu' && g && g.bant){
       const kalan = kalanKonular(h.dersler).length;
       const cap = Number(R.S.profile && R.S.profile.capacityHoursPerWeek);
@@ -34297,6 +34579,7 @@ R.Hedefler = (function(){
 
   /* Hedefin kısa adı — ekranda ve plan önizlemesinde. */
   function ozet(h){
+    if(h.paket === 'aliskanlik' && ALISKANLIK) return ALISKANLIK.ozet(h);
     if(h.paket === 'konu') return (h.kapsam || 'Konular') + ': ' + (h.fark != null ? h.fark + ' konu bitir'
       : h.hedefDeger + ' konunun hepsini bitir');
     if(h.paket === 'net'){
@@ -34311,6 +34594,11 @@ R.Hedefler = (function(){
      zaman bütçesinin cümlesi geri. HKM kapalıysa hiçbir şey olmaz. */
   function ozetler(){
     return aktifler().map(h => {
+      /* Alışkanlığın planı yoktur; ilerlemesi doğrudan kayıttan sayılır. */
+      if(h.paket === 'aliskanlik' && ALISKANLIK){
+        return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:{ bitis:h.son_tarih || null },
+          ilerleme:ALISKANLIK.ilerleme(h, U().todayISO()) });
+      }
       const p = R.HedefPlan ? R.HedefPlan.aktif(h.id) : null;
       return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:p ? { bitis:p.bitis } : null,
         ilerleme:p ? R.HedefPlan.ilerleme(p, U().todayISO()) : null });
@@ -34327,7 +34615,7 @@ R.Hedefler = (function(){
     baskaIs:m => !!(R.Komut && R.Komut.anla(m).komut) || !!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi && LIFEOS.Ofis.bamIstegi(m)),
   }) : null;
 
-  return { PAKETLER, PAKET_BY_ID, KONU, NET, SAAT_GUN, DERS_TEST, EN_AZ_DENEME,
+  return { PAKETLER, PAKET_BY_ID, KONU, NET, ALISKANLIK, SAAT_GUN, DERS_TEST, EN_AZ_DENEME,
     dersleriBul, kapsamBul, konular, kalanKonular, siraliKalan, durumOf, konuSaati, seri, netHizi, azami, netAdi, sinavTarihi,
     notlar, yukle, kaydet, liste, aktifler, durumDegistir, ozet, sohbet, ozetler, ag };
 })();
@@ -37116,6 +37404,15 @@ R.Screens.today = (function(){
       </div></div>`;
   }
 
+  /* ALIŞKANLIK (brand/ortak/aliskanlik.js): planı yoktur; ilerleme doğrudan
+     KAYITTAN sayılır. «Kayıt yok» «yapılmadı» demek değildir. */
+  function aliskanlikOzeti(h){
+    const il = R.Hedefler.ALISKANLIK.ilerleme(h, U.todayISO());
+    return html`<div class="stack-sm mt-8">
+      ${c.Notice({ tone:il.durum === 'geride' ? 'warn' : 'info', body:il.metin })}
+      <div class="row gap-8" style="flex-wrap:wrap">${hedefDugmeleri(h)}</div></div>`;
+  }
+
   function hedefSatir(h){
     const g = h.gerceklik || {};
     const p = R.HedefPlan ? R.HedefPlan.aktif(h.id) : null;
@@ -37126,7 +37423,8 @@ R.Screens.today = (function(){
           ? 'son tarih ' + U.fmtDate(h.son_tarih) : 'tarihsiz'}${h.kapasite && h.kapasite.gunluk_dk
           ? ' · günde ' + h.kapasite.gunluk_dk + ' dk' : ''}${g.bant ? ' · ' + BANT[g.bant]
           + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
-      ${p ? hedefPlanOzeti(h, p) : onizle ? hedefOnizleme(h) : html`
+      ${h.paket === 'aliskanlik' && R.Hedefler.ALISKANLIK ? aliskanlikOzeti(h)
+        : p ? hedefPlanOzeti(h, p) : onizle ? hedefOnizleme(h) : html`
         <div class="row gap-8 mt-6" style="flex-wrap:wrap">
           ${when(R.HedefPlan && h.durum === 'aktif', () => c.Button({ label:'Planı gör', size:'sm',
             tone:'primary', act:'hedef-plan-onizle', data:{ 'data-id':h.id } }))}
@@ -37152,7 +37450,8 @@ R.Screens.today = (function(){
       body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
         : html`<p class="small dim">Henüz hedefin yok. Ekip sohbetinde Patron’a «TYT matematiği 100 günde bitirmek
           istiyorum» ya da «TYT’de 90 nete çıkmak istiyorum» gibi yazabilirsin; vaktine ve kendi
-          denemelerine göre olup olmadığını, olmuyorsa olacağı tarihi söylerim.</p>` });
+          denemelerine göre olup olmadığını, olmuyorsa olacağı tarihi söylerim. Alışkanlık da
+          kurabilirsin: «her gün 2 saat ders çalışma alışkanlığı kazanmak istiyorum».</p>` });
   }
 
   /* ---------- uyarilar ---------- */

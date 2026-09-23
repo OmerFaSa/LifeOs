@@ -122,6 +122,13 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
 - Var olanın üstüne kurulur: SPİ `SP.GOALS` (cut/gain/maintain) ve enerji
   hesabı (`nutri.js`), ESP günlük taban (`ESP.Coach.dailyBase`) ve seviye merdiveni
   (`ESP.Curriculum`), AYS planlayıcı, müfredat ve istisnalar (`R.Istisna`).
+- **Kuruldu (Part 5 — alışkanlık, `brand/ortak/aliskanlik.js`):** «her gün 20 dakika
+  kitap okuma alışkanlığı», «haftada 3 gün düzenli spor». Açık alışkanlık sözü
+  («alışkanlık», «rutin», «düzenli») ister. Taban modülün kendi kaydından (son 4 hafta,
+  hedef dakikayı tutan gün); artış kuralı (haftada +2 gün rahat, +4 zorlayıcı) kaynaksız,
+  karar «tahmin»; kayıt yoksa karar yok. Kademeli seçenekler sıklığı düşürür. Planı yok;
+  ilerleme kayıtlı günden sayılır ve HKM'ye eşitlenir. Motora paketin kendi kararı
+  (`karar`) kancası eklendi.
 - **Kuruldu (Part 2 — zaman bütçesi, `HKM/core/hedefag.py`):** Kullanıcının günde
   toplam N saati var. AYS, SPİ ve ESP hedefleri aynı zamanı paylaşır; çakışmayı
   King görür ve «bu üç hedef haftada 17,5 saat istiyor, senin 14 saatin var» der.

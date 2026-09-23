@@ -381,6 +381,15 @@ R.Screens.today = (function(){
       </div></div>`;
   }
 
+  /* ALIŞKANLIK (brand/ortak/aliskanlik.js): planı yoktur; ilerleme doğrudan
+     KAYITTAN sayılır. «Kayıt yok» «yapılmadı» demek değildir. */
+  function aliskanlikOzeti(h){
+    const il = R.Hedefler.ALISKANLIK.ilerleme(h, U.todayISO());
+    return html`<div class="stack-sm mt-8">
+      ${c.Notice({ tone:il.durum === 'geride' ? 'warn' : 'info', body:il.metin })}
+      <div class="row gap-8" style="flex-wrap:wrap">${hedefDugmeleri(h)}</div></div>`;
+  }
+
   function hedefSatir(h){
     const g = h.gerceklik || {};
     const p = R.HedefPlan ? R.HedefPlan.aktif(h.id) : null;
@@ -391,7 +400,8 @@ R.Screens.today = (function(){
           ? 'son tarih ' + U.fmtDate(h.son_tarih) : 'tarihsiz'}${h.kapasite && h.kapasite.gunluk_dk
           ? ' · günde ' + h.kapasite.gunluk_dk + ' dk' : ''}${g.bant ? ' · ' + BANT[g.bant]
           + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
-      ${p ? hedefPlanOzeti(h, p) : onizle ? hedefOnizleme(h) : html`
+      ${h.paket === 'aliskanlik' && R.Hedefler.ALISKANLIK ? aliskanlikOzeti(h)
+        : p ? hedefPlanOzeti(h, p) : onizle ? hedefOnizleme(h) : html`
         <div class="row gap-8 mt-6" style="flex-wrap:wrap">
           ${when(R.HedefPlan && h.durum === 'aktif', () => c.Button({ label:'Planı gör', size:'sm',
             tone:'primary', act:'hedef-plan-onizle', data:{ 'data-id':h.id } }))}
@@ -417,7 +427,8 @@ R.Screens.today = (function(){
       body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
         : html`<p class="small dim">Henüz hedefin yok. Ekip sohbetinde Patron’a «TYT matematiği 100 günde bitirmek
           istiyorum» ya da «TYT’de 90 nete çıkmak istiyorum» gibi yazabilirsin; vaktine ve kendi
-          denemelerine göre olup olmadığını, olmuyorsa olacağı tarihi söylerim.</p>` });
+          denemelerine göre olup olmadığını, olmuyorsa olacağı tarihi söylerim. Alışkanlık da
+          kurabilirsin: «her gün 2 saat ders çalışma alışkanlığı kazanmak istiyorum».</p>` });
   }
 
   /* ---------- uyarilar ---------- */

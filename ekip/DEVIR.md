@@ -93,8 +93,11 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   HKM/MIMARI.md §8.26.
 
 ### Part 5 — Yeni kollar I
-- 🔜 Y2 Alışkanlık kolu (motorda `aliskanlik` türü var, paketi yok).
-- ⏳ Y3 Takvim: .ics dışa aktarma ve içe alma (tatil / okul sınavı → istisna).
+- ✅ Y2 Alışkanlık kolu: `brand/ortak/aliskanlik.js` (üç modülde: ESP disiplinleri,
+  SPİ hareket, AYS ders çalışma). Taban kendi kaydından, karar «tahmin», kayıt yoksa
+  karar yok; Hedeflerim'de «Bu hafta 3/5 gün» ilerlemesi; motorda `karar` kancası ve
+  vaktin birleşmesi (genel + paket).
+- 🔜 Y3 Takvim: .ics dışa aktarma ve içe alma (tatil / okul sınavı → istisna).
 - ⏳ Y4 Telefon uygulaması (PWA: manifest + service worker; yalnız sunucuyla açılınca).
 - ❓ Y5 Sağlık verisi içe aktarma (Apple Sağlık export.xml ya da Health Connect).
 

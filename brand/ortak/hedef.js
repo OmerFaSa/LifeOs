@@ -27,6 +27,9 @@
      guvenlik(hedef, durum, s)? { red:true, neden } — bandı ezer
      ekSorular(hedef, durum)?  [{ alan, soru }]
      kapasiteGerekir?          true ise günlük vakit sorulur
+     karar(hedef, durum, bugun)? paketin KENDİ kararı (ör. alışkanlık: taban
+                               kendi kaydından). { bant, etiket, dayanak, metin?,
+                               mod? } döner; `metin` varsa kararın cümlesi odur.
      dogrula(hedef, durum)?    metin | null — hedef OLAMAZ (ör. TYT'de 130 net):
                                karar sorulmadan söylenir, «yine de kaydedeyim
                                mi?» denmez. Bilmediği alanda null döner.
@@ -176,9 +179,14 @@ LIFEOS.Hedef = (function(){
     if(typeof paket.tani === 'function'){
       const ozel = paket.tani(k2, bugun);
       if(ozel){
+        /* Vakit iki yerden gelebilir: genel ayrıştırıcı («günde 30 dk»,
+           «haftada 3 gün») ve paketin kendi okuması («her gün 20 dakika»).
+           Biri ötekini SİLMEZ, birleşir. */
+        const kap = (ka.kapasite || ozel.kapasite)
+          ? Object.assign({}, ka.kapasite || {}, ozel.kapasite || {}) : null;
         return Object.assign({ paket:paket.id, yon:'ulas', egilim, fark:null, hedefDeger:null,
           birim:paket.olcut ? paket.olcut.birim : null, son_tarih:tarihAyikla(k2, bugun),
-          kapasite:ka.kapasite, cumle:String(metin).trim() }, ozel);
+          cumle:String(metin).trim() }, ozel, { kapasite:kap });
       }
     }
     const birim = paket.birimler || new RegExp(paket.anahtar.source.replace(/\\b/g, ''));
@@ -389,6 +397,8 @@ LIFEOS.Hedef = (function(){
   function gerceklik(h, paket, durum, bugun){
     const d = dogrulaOf(h, paket, durum);
     if(d) return { bant:null, etiket:'veri_yok', hata:d };
+    if(paket && typeof paket.karar === 'function') return paket.karar(h, durum || {}, bugun) || {
+      bant:null, etiket:'veri_yok', neden:'Bu hedef için karar hesaplanamadı.' };
     if(paket && typeof paket.gerekenSaat === 'function') return kapasiteKarari(h, paket, durum, bugun);
     if(!paket || typeof paket.hiz !== 'function'){
       return { bant:null, etiket:'veri_yok',
@@ -468,6 +478,7 @@ LIFEOS.Hedef = (function(){
   function kararMetni(g){
     if(g.hata) return g.hata;
     if(g.bant == null) return g.neden;
+    if(g.metin) return g.metin;          // paketin kendi kararı cümlesini de KODLA kurar
     if(g.mod === 'kapasite') return kapasiteMetni(g);
     const k = hizYaz(g.gerekli, g.birim);
     const parca = {
@@ -557,6 +568,8 @@ LIFEOS.Hedef = (function(){
             ? 'Hedefi yine de kaydedeyim mi? «evet» ya da «vazgeç».'
             : g.mod === 'kapasite'
               ? 'Bir seçenek seç (numarasını yaz), ya da «evet» dersen kendi tarihin ve vaktinle kaydederim.'
+              : g.mod === 'aliskanlik'
+                ? 'Bir seçenek seç (numarasını yaz), ya da «evet» dersen kendi sıklığınla kaydederim.'
               : 'Bir tempo seç («1» ya da «2»), ya da «evet» dersen kendi tarihinle kaydederim.');
       if(g.hata){
         bekleyen = null;

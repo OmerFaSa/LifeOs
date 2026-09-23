@@ -163,7 +163,23 @@ SP.Hedefler = (function(){
     },
   };
 
-  const PAKETLER = [KILO];
+  /* ========================================================= ALIŞKANLIK
+
+     «Haftada 3 gün 30 dakika düzenli spor» (brand/ortak/aliskanlik.js).
+     Taban SPİ'nin KENDİ antrenman kaydından: hedef dakikayı tutan kayıtlı
+     gün. Hareket bir yük değil bir süredir; tanı ya da doz söylenmez. */
+  const ALISKANLIK = window.LIFEOS && LIFEOS.Aliskanlik ? LIFEOS.Aliskanlik.kur({
+    alanlar:[
+      { id:'hareket', ad:'Hareket', kelime:/(spor|egzersiz|antrenman|yürüyüş|yürümek|koşu|koşmak|bisiklet|yüzme|yoga|pilates|hareket|fitness|salon|esneme)/ },
+    ],
+    dakika:(alan, iso) => {
+      const l = (SP.S.workouts || []).filter(w => w && w.date === iso);
+      if(!l.length) return null;
+      return l.reduce((a, w) => a + (Number(w.minutes) || 0), 0);
+    },
+  }) : null;
+
+  const PAKETLER = (ALISKANLIK ? [ALISKANLIK.paket] : []).concat([KILO]);
 
   function normalize(h){
     if(h && h.hedefVki && h.hedefDeger == null){
@@ -213,6 +229,7 @@ SP.Hedefler = (function(){
   function sayiYaz(x){ return String(yuvarla(x, 1)).replace('.', ','); }
 
   function notlar(h){
+    if(h.paket === 'aliskanlik' && ALISKANLIK) return ALISKANLIK.notlar(h);
     const out = [];
     if(h.hedefVki && h.hedefDeger != null){
       out.push('VKİ ' + sayiYaz(h.hedefVki) + ' hedefi boyuna göre ' + sayiYaz(h.hedefDeger) + ' kg eder.');
@@ -251,6 +268,7 @@ SP.Hedefler = (function(){
      özetidir, ilk cümle değil: tempo seçilince tarih değişir ve «3 ay
      içinde…» cümlesi eskimiş bilgi olurdu. */
   function ozet(h){
+    if(h.paket === 'aliskanlik' && ALISKANLIK) return ALISKANLIK.ozet(h);
     const ne = h.hedefDeger != null ? h.hedefDeger + ' kg'
       : h.fark != null ? (h.yon === 'azalt' ? '−' : '+') + h.fark + ' kg' : h.cumle;
     return h.paket === 'kilo' ? 'Kilo hedefi: ' + ne : h.cumle || ne;
@@ -277,6 +295,11 @@ SP.Hedefler = (function(){
      «vakti bilinmiyor» diye adıyla söyler. */
   function ozetler(){
     return aktifler().map(h => {
+      /* Alışkanlığın planı yoktur; ilerlemesi doğrudan kayıttan sayılır. */
+      if(h.paket === 'aliskanlik' && ALISKANLIK){
+        return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:{ bitis:h.son_tarih || null },
+          ilerleme:ALISKANLIK.ilerleme(h, SP.U.todayISO()) });
+      }
       const p = SP.Plan ? SP.Plan.aktif(h.id) : null;
       return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:p ? { bitis:p.bitis } : null,
         ilerleme:p ? SP.Plan.ilerleme(p, SP.U.todayISO()) : null });
@@ -293,7 +316,7 @@ SP.Hedefler = (function(){
     baskaIs:m => !!(SP.Bolum && SP.Bolum.anla(m).komut) || !!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi && LIFEOS.Ofis.bamIstegi(m)),
   }) : null;
 
-  return { PAKETLER, KILO, VKI, sonKilo, boyCm, hekimKapisi, normalize, notlar,
+  return { PAKETLER, KILO, VKI, ALISKANLIK, sonKilo, boyCm, hekimKapisi, normalize, notlar,
     talimatlar, talimatEkle, talimatSil, yukle, kaydet, liste, aktifler, durumDegistir, sohbet,
     ozet, ozetler, ag };
 })();
