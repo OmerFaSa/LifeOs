@@ -718,6 +718,23 @@ def run_extra(S):
         S.call("/api/hedef/sync/ays", body={"hedefler": []})
     test("hedef agi uclari: esitleme, zaman, pano — yetkili", t_hedef_endpoints)
 
+    def t_yedek_endpoints():
+        govde = {"__meta": {"app": "spi-saglik", "schemaVersion": 3}, "data": {"meta": {"x": 1}}}
+        eq(S.call("/api/yedek/spi", body=govde, token=None)[0], 401)
+        eq(S.call("/api/yedek", token=None)[0], 401)
+        eq(S.call("/api/yedek/ays", body=govde)[0], 422)      # baska modulun dosyasi
+        kod, r = S.call("/api/yedek/spi", body=govde)
+        eq((kod, r["ok"]), (200, True))
+        kod, l = S.call("/api/yedek")
+        eq((kod, [x["tarih"] for x in l["moduller"]["spi"]]), (200, [r["tarih"]]))
+        kod, ham = S.ham("/api/yedek/spi/" + r["tarih"], None,
+                         {"Authorization": "Bearer " + TOKEN}, method="GET")
+        eq((kod, json.loads(ham)), (200, govde))
+        eq(len(ham.encode("utf-8")), r["bayt"])
+        eq(S.call("/api/yedek/spi/2026-02-31")[0], 404)
+        eq(S.call("/api/yedek/spi/..%2Fays")[0], 404)
+    test("yedek uclari: yazar, listeler, indirir — yetkili ve modulune ait", t_yedek_endpoints)
+
     def t_web_endpoints():
         eq(S.call("/api/web", token=None)[0], 401)
         kod, d = S.call("/api/web")

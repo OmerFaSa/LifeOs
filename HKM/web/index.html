@@ -811,6 +811,7 @@ details.detay > summary:hover{ color:var(--fg); }
         <div class="card" id="ritim"></div>
         <div class="card" id="kutu"></div>
         <div class="card" id="bakim"></div>
+        <div class="card" id="modul-yedek"></div>
       </div>
     </div>
   </div>
@@ -2366,6 +2367,57 @@ details.detay > summary:hover{ color:var(--fg); }
     document.body.appendChild(a); a.click(); a.remove();
     $('bakim-not').textContent = 'Yedek indirildi.';
   }
+
+  /* Modül yedekleri (core/yedek.py): üç arayüz HKM'ye bağlıyken günde bir
+     kez kendi yedeğini yollar. Cümleyi ve boyutu HKM kurar; bu sayfa yalnız
+     gösterir ve indirir. Geri yükleme modülün kendi ekranındadır (HKM
+     modüle yazmaz). */
+  function modulYedekCiz(v){
+    var h = '<div class="tag">Modül yedekleri</div>'
+      + '<p class="muted">AYS, SPİ ve ESP bu bilgisayarda HKM’ye bağlıyken her gün '
+      + 'kendi yedeğini buraya yollar; HKM dosyayı geri okuyup doğrulamadan modül '
+      + 'yedeği «alındı» saymaz. ' + esc(v.kural) + '</p>';
+    ['ays', 'spi', 'esp'].forEach(function(m){
+      var l = (v.moduller || {})[m] || [];
+      h += '<div style="margin:10px 0 0"><strong>' + esc(MODUL[m]) + '</strong> '
+        + '<span class="muted">' + esc((v.metin || {})[m] || '') + '</span>';
+      if(l.length){
+        h += '<div class="row" style="margin-top:6px">' + l.slice(0, 3).map(function(x){
+          return '<button data-modul-yedek="' + esc(m) + '/' + esc(x.tarih) + '">'
+            + esc(x.tarih_yazi) + ' · ' + esc(x.boyut) + '</button>';
+        }).join('') + '</div>';
+      }
+      h += '</div>';
+    });
+    h += '<p class="muted" id="modul-yedek-not" style="margin-top:10px">Geri yüklemek için '
+      + 'dosyayı indir, modülün Rehber › Veri bölümündeki yedek yükleme düğmesiyle seç.</p>';
+    $('modul-yedek').innerHTML = h;
+  }
+
+  async function modulYedekYukle(){
+    var r = await api('/api/yedek');
+    if(r.status === 200) modulYedekCiz(r.body);
+    else $('modul-yedek').innerHTML = '<p class="danger">Modül yedekleri alınamadı ('
+      + esc(r.status) + ').</p>';
+  }
+
+  document.addEventListener('click', async function(ev){
+    var el = ev.target.closest ? ev.target.closest('[data-modul-yedek]') : null;
+    if(!el) return;
+    ev.preventDefault();
+    var yol = el.dataset.modulYedek;
+    var r = await fetch('/api/yedek/' + yol, { headers:{ 'Authorization':'Bearer ' + token } });
+    if(r.status !== 200){
+      $('modul-yedek-not').textContent = 'Yedek indirilemedi (' + r.status + ').';
+      return;
+    }
+    var blob = await r.blob();
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = yol.replace('/', '-yedek-') + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    $('modul-yedek-not').textContent = 'İndirildi. Modülün Rehber › Veri bölümünden yükleyebilirsin.';
+  });
 
   /* Geri yükleme ÜSTÜNE YAZMAK demektir ve öyle sorulur. */
   async function geriYukle(e){
@@ -4074,6 +4126,7 @@ details.detay > summary:hover{ color:var(--fg); }
     if(kt.status === 200) kutuCiz(kt.body);
     await butceYukle();
     bakimCiz();
+    await modulYedekYukle();
   }
 
   /* Mesaj: iki yerden de ayni kapidan gecer (Bugun ekrani ve Sohbetler).

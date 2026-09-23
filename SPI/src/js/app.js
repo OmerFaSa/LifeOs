@@ -1367,6 +1367,14 @@ SP.App = (function(){
       if(SP.Hedefler && SP.Hedefler.ag){
         SP.Hedefler.ag.gonder().then(r => { if(r && r.butce) render(); }).catch(() => {});
       }
+      /* Otomatik yedek: HKM açıksa günde bir, doğrulanınca hatırlatma
+         kapanır (brand/ortak/yedekag.js). HKM kapalıysa hiçbir şey olmaz. */
+      if(window.LIFEOS && LIFEOS.YedekAg){
+        LIFEOS.YedekAg.kur({ hkm:() => SP.Beacon, modul:'spi',
+          disaAktar:() => SP.Store.exportAll(), kayit:() => M.dataFootprint().total,
+          yas:() => M.backupAgeDays(), isaretle:() => M.markBackup(),
+          bildir:m => UI.toast(m, { life:12000 }) }).baslat();
+      }
 
       /* Seviye kutlaması. İki yol da buraya çıkar:
 

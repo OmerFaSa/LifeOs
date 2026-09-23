@@ -772,6 +772,30 @@ toplam vakit bilinmiyorsa karar verilmez. Karar kullanıcının beyanına dayand
 için «tahmin»dir. HKM › Hedefler sekmesi ve modüllerin Hedeflerim kartı aynı
 cümleyi gösterir. Testler: `tests/test_hedefag.py`, `tools/entegre.js` §2.9 ve §4.5.
 
+## 8.23 Otomatik modül yedeği — `core/yedek.py`
+
+Üç arayüzün verisi tarayıcının deposundadır; site verisi silinirse geri
+gelmez. HKM açıksa her modül **günde bir kez** kendi yedeğini yollar
+(`POST /api/yedek/<modül>`; istemci `brand/ortak/yedekag.js`). Gövde
+ayrıştırılıp yeniden yazılmaz: saklanan, modülün ürettiği baytların kendisidir
+ve `db/yedek/<modül>/<tarih>.json` olarak ambarın yanında durur (depoya girmez).
+
+- **Yazıldı demek, geri okundu demektir.** Geçici ada yaz, diske indir, adı
+  değiştir, geri oku; bayt ve SHA-256 tutmazsa «yazıldı» denmez. Modül yedek
+  hatırlatmasını ancak HKM aynı baytı (ve tarayıcı hesaplayabiliyorsa aynı
+  özeti) söylerse kapatır.
+- **Başka modülün dosyası kabul edilmez** (`__meta.app` yolun modülüne ait
+  olmalı).
+- **Silinmiş bir tarayıcı iyi yedekleri sildiremez.** Son 14 gün + son 6
+  ayın her birinden ayın son yedeği kalır; bir öncekinin yarısından küçük
+  yedek uyarıyla döner ve modül bunu gösterir. İstemci, hatırlatmanın kayıt
+  eşiğinin (`YEDEK_ASGARI_KAYIT`) altında hiçbir şey yollamaz.
+- **HKM modüle yazmaz.** Geri yükleme modülün kendi Rehber › Veri yolundan
+  geçer; HKM › Ayarlar › Sunucu › Modül yedekleri yalnız listeler ve indirir.
+
+Testler: `tests/test_yedek.py`, `tests/test_daemon.py` (uçlar),
+`brand/ortak/yedekag.test.js`, `tools/entegre.js` §2.95.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

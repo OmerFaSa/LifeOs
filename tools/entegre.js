@@ -404,6 +404,30 @@ async function main(){
       else if(!ag.ok || !vardi || !ag.metin) hatalar.push(s.id + ': hedef ozeti HKM\'ye ulasmadi');
       else console.log('  ' + s.id + ' → hedef ozeti HKM panosunda; butce cumlesi geri geldi');
 
+      /* 2.95 — OTOMATIK YEDEK (brand/ortak/yedekag.js, HKM core/yedek.py):
+         modulun yedegi HKM'nin klasorune yazilir, HKM geri okuyup baytini
+         soyler; modul hatirlatmayi ancak ondan sonra kapatir. Taze profilde
+         kayit az oldugu icin burada kayit sayisi elle verilir. */
+      const yd = await page.evaluate(async ([ns, mod]) => {
+        const N = window[ns];
+        if(!window.LIFEOS.YedekAg) return { yok:true };
+        const ag = window.LIFEOS.YedekAg.kur({ hkm:() => N.Beacon, modul:mod,
+          disaAktar:() => N.Store.exportAll(), kayit:() => 99, yas:() => null,
+          isaretle:() => N.Model.markBackup() });
+        const r = await ag.dene();
+        return { ok:r.ok, neden:r.neden, tarih:r.tarih, bayt:r.bayt, yas:N.Model.backupAgeDays() };
+      }, [s.ns, s.mod]);
+      const yl = await (await hkmFetch('/api/yedek')).json();
+      const kayitli = ((yl.moduller || {})[s.mod] || []).find(x => x.tarih === yd.tarih);
+      const inen = kayitli ? await (await hkmFetch('/api/yedek/' + s.mod + '/' + yd.tarih)).text() : '';
+      if(yd.yok) hatalar.push(s.id + ': otomatik yedek kurulmamis');
+      else if(!yd.ok) hatalar.push(s.id + ': otomatik yedek HKM\'ye yazilmadi (' + yd.neden + ')');
+      else if(!kayitli || kayitli.bayt !== yd.bayt || Buffer.byteLength(inen) !== yd.bayt){
+        hatalar.push(s.id + ': HKM\'deki yedek modulun yolladigiyla ayni degil');
+      }else if(yd.yas !== 0) hatalar.push(s.id + ': yedek dogrulandi ama hatirlatma kapanmadi');
+      else console.log('  ' + s.id + ' → yedek HKM\'ye yazildi, ' + yd.bayt + ' bayt geri okundu; '
+        + 'hatirlatma kapandi');
+
       /* 3 — jeton yanlisken 401, ve bu arayuzu bozmaz. */
       const yanlis = await page.evaluate(async ([ns, url]) => {
         const B = window[ns].Beacon;

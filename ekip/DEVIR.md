@@ -73,8 +73,9 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   ESP 12 cümle; tehlikeli hedeflerin hepsi «güvensiz»).
 
 ### Part 4 — Güvence ve teslim
-- 🔜 15 Otomatik yedek: HKM açıkken üç modül her gün HKM'ye yedeklenir.
-- ⏳ Y6 Haftalık rapor PDF olarak Telegram'a (W5 altyapısı hazır).
+- ✅ 15 Otomatik yedek: HKM açıkken üç modül her gün HKM'ye yedeklenir (`HKM/core/yedek.py`,
+  `brand/ortak/yedekag.js`; geri okuyarak doğrular, 14 gün + 6 ay sonu saklar).
+- 🔜 Y6 Haftalık rapor PDF olarak Telegram'a (W5 altyapısı hazır).
 - ⏳ Y7 Akşam yoklaması: bot sorar, cevap modüle TEKLİF olur (HKM modüle yazmaz).
 - ⏳ 5 / W6 Modüller `urun.add` alır; HKM Ofis: indirme, ajan izi, depo raporu, web ayarları.
 

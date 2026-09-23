@@ -192,6 +192,9 @@ DOSYALAR = {
     # (HKM core/hedefag.py). Ozetin alanlari uc arayuzde ayni olmali.
     "hedefag.js":      "js/core",
     "hedefag.test.js": "tests",
+    # Otomatik yedek istemcisi (HKM core/yedek.py): HKM acikken gunde bir.
+    "yedekag.js":      "js/core",
+    "yedekag.test.js": "tests",
     # GORSEL DENETIMI — tek dosya gorselsiz acildiginda bunu soylemek.
     # Uyari metni ve kosulu uc arayuzde ayni olmali.
     "gorsel.js":      "js/core",

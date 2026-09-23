@@ -53,6 +53,9 @@ Ucnoktalar:
     GET  /api/hedefler              uc modulun etkin hedefleri ve zaman butcesi (kod)
     POST /api/hedef/sync/<modul>    modulun hedef ozetlerinin anlik goruntusu
     POST /api/zaman                 kullanicinin gunluk toplam vakti (gunluk_dk, haftalik_gun)
+    GET  /api/yedek                 uc modulun HKM'de sakli otomatik yedekleri
+    GET  /api/yedek/<modul>/<tarih> sakli bir yedegin kendisi (indirme)
+    POST /api/yedek/<modul>         modulun gunluk yedegi (yaz, geri oku, dogrula)
     POST /api/web/dene              web aramasini King adina dener (sorgu)
     GET  /api/health                token istemez
     GET  /                          tek dosyalik yerel yuz (token istemez;
@@ -79,7 +82,7 @@ from core import (ai, bam, butce, channels, cikti, cross, db, depo, gelen,  # no
                   intents, kanal, king, manager, media, memory, models, motto, outbox, patron,
                   profil, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
-                  urunler, weekly, web, yoklama)
+                  urunler, weekly, web, yedek, yoklama)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -709,6 +712,18 @@ class Handler(BaseHTTPRequestHandler):
         # Hedef agi (core/hedefag.py): uc modulun etkin hedefleri ve zaman butcesi.
         if u.path == "/api/hedefler":
             return self._send(200, hedefag.pano(self.con))
+        # Otomatik yedek (core/yedek.py): liste ve indirme. Ad disaridan
+        # kurulmaz; modul ve tarih dogrulanmazsa dosyaya hic bakilmaz.
+        if u.path == "/api/yedek":
+            return self._send(200, yedek.liste(yedek.kok(self.server.db_path)))
+        if u.path.startswith("/api/yedek/"):
+            parca = u.path.strip("/").split("/")
+            ham = (yedek.oku(yedek.kok(self.server.db_path), parca[2], parca[3])
+                   if len(parca) == 4 else None)
+            if ham is None:
+                return self._send(404, {"error": "yedek yok"})
+            return self._send_bytes(200, ham, "application/json; charset=utf-8",
+                                    dosya="%s-yedek-%s.json" % (parca[2], parca[3]), indir=True)
         if u.path == "/api/king":
             return self._send(200, king.ozet(self.con))
         if u.path.startswith("/api/king/emir/"):
@@ -950,6 +965,16 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200 if r.get("ok") else 404, r)
             return self._send(404, {"error": "bilinmeyen motto ucu"})
 
+        # Modulun gunluk yedegi (core/yedek.py). Govde AYRISTIRILIP yeniden
+        # yazilmaz: saklanan, modulun urettigi baytlarin kendisidir. Sinir
+        # geri yuklemeyle aynidir — modulun yedegi kendi yolundan gecebilmeli.
+        if u.path.startswith("/api/yedek/"):
+            self._body_limit = RESTORE_BODY
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            r = yedek.kaydet(yedek.kok(self.server.db_path), u.path.rsplit("/", 1)[-1], ham)
+            return self._send(200 if r.get("ok") else 422, r)
         # Modul hedeflerinin anlik goruntusu (core/hedefag.py). Hafizayla ayni
         # kural: modul tamamini yollar, HKM kopyasini esitler.
         if u.path.startswith("/api/hedef/sync/") or u.path == "/api/zaman":
