@@ -171,33 +171,49 @@ def esitle(con, modul, kayitlar, user="ben", now=None):
     if len(kayitlar) > MAX_ESITLE:
         return {"ok": False, "note": "Bir modül en fazla %d hafıza kaydı yollayabilir." % MAX_ESITLE}
     at = _simdi(now)
-    var = {r["dis_id"]: dict(r) for r in con.execute(
-        "SELECT id,dis_id,text,COALESCE(katman,'soz') AS katman,state FROM memories "
-        "WHERE user=? AND modul=? AND dis_id IS NOT NULL", (user, modul)).fetchall()}
-    eklenen = guncellenen = reddedilen = dusen = 0
-    gelen = set()
-    for ham in kayitlar:
-        k = _gecerli_kayit(ham)
-        if not k or k["dis_id"] in gelen:
-            reddedilen += 1
-            continue
-        gelen.add(k["dis_id"])
-        onceki = var.get(k["dis_id"])
-        if onceki is None:
-            con.execute("INSERT INTO memories(user,scope,text,source,state,created_at,"
-                        "katman,modul,dis_id) VALUES (?,?,?,?, 'active',?,?,?,?)",
-                        (user, modul, k["metin"], k["kaynak"], k["at"] or at,
-                         k["katman"], modul, k["dis_id"]))
-            eklenen += 1
-        elif onceki["state"] == "active" and (onceki["text"] != k["metin"]
-                                              or onceki["katman"] != k["katman"]):
-            con.execute("UPDATE memories SET text=?,katman=? WHERE id=?",
-                        (k["metin"], k["katman"], onceki["id"]))
-            guncellenen += 1
-    for dis_id, r in var.items():
-        if r["state"] == "active" and dis_id not in gelen:
-            con.execute("UPDATE memories SET state='forgotten',forgotten_at=? WHERE id=?",
-                        (at, r["id"]))
-            dusen += 1
+    # OKU-SONRA-YAZ TEK ISLEMDIR. Modul kaydi ekler eklemez arka planda bir
+    # esitleme yollar; hemen ardindan ikincisi gelebilir. Iki istek ayri
+    # is parcaciklarinda ayni anda «bu dis_id yok» gorurse ayni hafiza IKI
+    # KEZ yazilirdi (tools/entegre.js bunu arada bir yakaliyordu). BEGIN
+    # IMMEDIATE yazma kilidini okumadan ONCE alir: ikinci istek bekler
+    # (busy_timeout) ve birincinin yazdigini gorur.
+    kendi = not con.in_transaction
+    if kendi:
+        con.execute("BEGIN IMMEDIATE")
+    try:
+        var = {r["dis_id"]: dict(r) for r in con.execute(
+            "SELECT id,dis_id,text,COALESCE(katman,'soz') AS katman,state FROM memories "
+            "WHERE user=? AND modul=? AND dis_id IS NOT NULL", (user, modul)).fetchall()}
+        eklenen = guncellenen = reddedilen = dusen = 0
+        gelen = set()
+        for ham in kayitlar:
+            k = _gecerli_kayit(ham)
+            if not k or k["dis_id"] in gelen:
+                reddedilen += 1
+                continue
+            gelen.add(k["dis_id"])
+            onceki = var.get(k["dis_id"])
+            if onceki is None:
+                con.execute("INSERT INTO memories(user,scope,text,source,state,created_at,"
+                            "katman,modul,dis_id) VALUES (?,?,?,?, 'active',?,?,?,?)",
+                            (user, modul, k["metin"], k["kaynak"], k["at"] or at,
+                             k["katman"], modul, k["dis_id"]))
+                eklenen += 1
+            elif onceki["state"] == "active" and (onceki["text"] != k["metin"]
+                                                  or onceki["katman"] != k["katman"]):
+                con.execute("UPDATE memories SET text=?,katman=? WHERE id=?",
+                            (k["metin"], k["katman"], onceki["id"]))
+                guncellenen += 1
+        for dis_id, r in var.items():
+            if r["state"] == "active" and dis_id not in gelen:
+                con.execute("UPDATE memories SET state='forgotten',forgotten_at=? WHERE id=?",
+                            (at, r["id"]))
+                dusen += 1
+        if kendi:
+            con.execute("COMMIT")
+    except Exception:
+        if kendi:
+            con.execute("ROLLBACK")
+        raise
     return {"ok": True, "modul": modul, "eklenen": eklenen, "guncellenen": guncellenen,
             "dusen": dusen, "reddedilen": reddedilen}

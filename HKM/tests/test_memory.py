@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+import os
+import tempfile
+import threading
+import time
+
 from core import db, memory, sohbet
 from tests.harness import eq, no, ok, suite, test
 
@@ -129,6 +134,42 @@ def run():
         metinler = [x["text"] for x in memory.list_active(con, scope="spi")]
         eq(metinler, ["laktoz dokunuyor"])
     test("modulde degisen ve silinen kayit HKM'ye yansir", t_module_sync_follows_module)
+
+    def t_module_sync_concurrent():
+        """Modul kaydi ekler eklemez arka planda esitler; hemen ardindan
+        ikinci esitleme gelir. Iki istek ayri baglantilarda AYNI ANDA
+        «yok» gorurse ayni hafiza iki kez yazilir. Pencere bilerek
+        genisletilir: dogrulama adimi yavaslatilir ki ikinci istek
+        birincinin okumasiyla yazmasi arasina girsin."""
+        yol = os.path.join(tempfile.mkdtemp(prefix="hkm-hafiza-"), "hkm.db")
+        db.connect(yol).close()
+        asil = memory._gecerli_kayit
+
+        def yavas(k):
+            time.sleep(0.15)
+            return asil(k)
+        memory._gecerli_kayit = yavas
+        sonuc = []
+
+        def esitle():
+            c = db.connect(yol)
+            try:
+                sonuc.append(memory.esitle(c, "ays", [_kayit("h1", "Pazar çalışmam")]))
+            finally:
+                c.close()
+        try:
+            isler = [threading.Thread(target=esitle) for _ in range(2)]
+            for t in isler:
+                t.start()
+            for t in isler:
+                t.join()
+        finally:
+            memory._gecerli_kayit = asil
+        eq(sorted(r["eklenen"] for r in sonuc), [0, 1])
+        c = db.connect(yol)
+        eq(len(memory.list_active(c, scope="ays")), 1, "ayni hafiza iki kez yazildi")
+        c.close()
+    test("es zamanli iki esitleme ayni hafizayi iki kez yazmaz", t_module_sync_concurrent)
 
     def t_forgotten_in_hkm_stays_forgotten():
         con = db.connect(":memory:")
