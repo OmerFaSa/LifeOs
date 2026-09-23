@@ -442,7 +442,8 @@ haritası ve açık sorular `ekip/DEVIR.md` §3–§4'te. Soru 2 ve 4 hâlâ aç
 **2026-09-23 (cevaplar):** Web araması esnek (her sağlayıcı, Ayarlar'dan); sağlık
 eşikleri kaynaklı araştırma + kişinin kendi geçmişi, ikisi birden. Bütün cevaplar ve
 sonuçları `ekip/DEVIR.md` §4'te; altyapı bitince tek, sade bir tasarıma geçilecek
-(DEVIR Part 8).
+(DEVIR Part 9). Önce akıllı iş sistemi: istek → yoğunluk sınıfı → King'in maliyet/süre
+teklifi → onay → modüle monte edilen tipli çıktı (DEVIR Part 8).
 
 ## 8. Riskler
 

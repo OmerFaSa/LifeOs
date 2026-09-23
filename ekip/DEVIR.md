@@ -143,7 +143,118 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   desteklediği hepsi (Vikipedi, Brave, Tavily, Google PSE, SearXNG) seçilebilir ve
   değiştirilebilir kalır, hiçbirine kilitlenme. Bütçe sabit sayı değil, Ayarlar'dan.
 
-### Part 8 — Tek tasarım (ALTYAPI BİTİNCE; şimdi BAŞLAMA)
+### Part 8 — Akıllı iş sistemi: iste → King'in fiyat/süre teklifi → onay → modüle monte edilen çıktı
+Kullanıcının fikri (2026-09-23), yön ONAYLI. Altyapıdır; Part 9 tasarımdan ÖNCE yapılır.
+Amaç kullanım kolaylığı: kullanıcı ne isterse istesin, sistem işin büyüklüğünü anlar,
+bedelini ve süresini önceden söyler, onay alır, çıktıyı serbest metin olarak değil
+modülün içinde KULLANILABİLİR biçimde teslim eder.
+
+**Kullanıcının örnekleri (yoğunluk sınıfıyla):**
+- AYS: bir test fasikülü, 30–40 soru (düşük) · bir test kitabı (yüksek) · bir branşın
+  bütün derslerinin bütün konularına test ya da özet (ekstra).
+- SPİ: bitkisel proteinlerin besin değerleri, güncel market fiyatları, nereden alınır
+  (orta/yüksek) · Adana'daki spor salonları fiyatlarıyla (düşük/orta) · hastalığa göre
+  destek: hekimin tahlilleri + kullanıcının hisleri + sohbetleri (veri girişi çok esnek).
+- ESP: gitar almak için araştırma (düşük) · gitar repertuvarı (orta) · bütün akorlar ya
+  da bir şarkı hakkında her şey (yüksek) · Rusça A1–A2'nin bütün konu dersleri, her
+  konunun altında 10–20 soru (ekstra).
+
+**Akış — sekiz adım:**
+1. İSTEK her yerden gelir: modül sohbeti, HKM sohbeti, Telegram, akşam yoklaması.
+   Modülün ön süzgeci (bugünkü `brand/ortak/urun.js › istekMi` gibi) King'e yollar.
+2. KING TANIR: iş türü ve KAPSAM (bölüm, konu, soru, kaynak, kelime sayısı). Kapsamı
+   kod çıkarır; model yalnız belirsiz cümleyi tipli bir forma çevirir, kod doğrular.
+   Anlaşılmayan tahmin edilmez, SORULUR («Rusça A1–A2 mi, A1–C1 mi?»).
+3. YOĞUNLUK SINIFI KODLA: düşük / orta / yüksek / ekstra. Ölçü «iş birimi»: tahmini
+   model çağrısı + web araması sayısı (bölüm × soru, kaynak sayısı). Eşikler tek bir
+   tabloda (ör. düşük ≤ 3 çağrı ve web yok; orta ≤ 10; yüksek ≤ 40; ekstra > 40 ya da
+   parçalı teslim). Sınıfı model DEĞİL kod verir; tablo ölçümle ayarlanır.
+4. TEKLİF (maliyet + süre + seçenek):
+   - Maliyet ÖLÇÜMDEN: `usage` tablosundaki `usd` (HKM/core/db.py) ile aynı tür + sınıftaki
+     son işlerin ortancası ve p90'ı; geçmiş yoksa jeton tahmini × fiyat tarifesi.
+     Etiket «tahmin», dayanağı yazılır (bugünkü `king.tahmini_sure` gibi).
+   - Süre: `king.tahmini_sure` sınıfa göre genişletilir.
+   - Bütçeden payı: «aylık bütçenin %X'i, kalan Y» (`core/butce.py`).
+   - Kullanıcının durumuna göre akıl: bütçe azsa daha küçük seçenek önerir (test kitabı
+     yerine fasikül ya da yalnız 1. bölüm); acil değilse ay başına ya da gündüze alır.
+   - Her teklifte en çok üç seçenek: tam · küçük · parça parça (her parçada ara onay).
+5. ONAY: kullanıcı kabul etmeden BAM'da iş AÇILMAZ. Bugün King imkan kontrolünden
+   geçen işi doğrudan açıyor; yeni ara durum `teklif` (onay bekliyor) gerekir. Onay
+   HKM web'den, modülden ve Telegram'dan verilebilir («1 tam · 2 yalnız A1 · 3 iptal»).
+   AGENTS.md §1.9 ile uyumlu: kullanıcı Ayarlar'da «düşük işleri sormadan yap»
+   diyebilir; orta ve üstü her zaman sorar, ekstra ayrıntılı önizlemeyle.
+6. ÜRETİM PARÇALI: yüksek ve ekstra işler bölümlere bölünür (bugünkü `core/kitap.py`
+   her tikte bir bölüm üretiyor). İlk bölüm gelince kullanıcı görür, «devam / dur»
+   der; maliyet kontrolde kalır. Gerçek maliyet ve süre yazılır; tahminle sapma
+   ölçülür (bugünkü `king.sure_sapmasi`nın maliyet eşi). Bilgisayar gece kapalı
+   (cevap 5): uzun işler gündüz kuyruğuna, yarım kalan iş sabah kaldığı yerden sürer.
+7. MONTAJ: çıktı modülün anladığı TİPLİ PAKET olarak gelir, her paketin bir niyet türü
+   (`HKM/core/intents.py` KINDS) ve modülün kendi sınayıcısı vardır. HKM modüle yazmaz;
+   modül kendi koduyla yeniden sınar, önizletir, onayla yazar (orta aksiyon).
+   - **AYS:** `kitap.add` var. Fasikül = tek bölümlü kitap. Test kitabında sayfa/bölüm
+     gezinme, çözdüklerini görme, orada çözme (`AYS/src/js/core/testkitabi.js`'de
+     bölüm bölüm çözme var; sayfa aktarma ve «çözdüklerim» görünümü eklenecek).
+     Yanlışlar yanlış defterine / tekrar kartına (madde 9). Konu özeti Dersler'de o
+     konunun altında durur (bugün `urun.add` genel materyal listesine gidiyor; konuya
+     bağlanacak). Branşın tüm konuları: sınav profilinin (`sinavprofil.js`) konu
+     ağacına bağlı özet + test. 60 soru tavanı (`kitap.py MAX_TOPLAM`) sınıfa göre ve
+     parçalı teslimle genişler.
+   - **SPİ:** yeni `besin.add` — `SPI/src/js/data/foods.js` şemasında (100 g; p/f/c,
+     micro, portions, aliases) kullanıcı besini; kaynaklı; eksik mikro «bilinmiyor»,
+     sıfır değil. Yeni `fiyat.add` — tarihli, kaynaklı market fiyatı «tahmin»; fiş
+     girilince `money.js` kuralıyla «ölçüldü» ezer. Yeni `yer.add` — spor salonu gibi
+     yerler (ad, semt, fiyat, kaynak, tarih) SPİ › Bilgiler'e. Diyet programı istenince
+     besin değerleri OTOMATİK işlenir: hesap `nutri.js`, model değil. Sağlık bağlamı
+     (hastalık, hekim tahlili `biomarkers.js` + `parse.js`, semptom `symptom.js`,
+     sohbetler) isteğe bağlam olarak gider; SPİ teşhis koymaz, doz önermez, kırmızı
+     bayrakta hekime yönlendirir.
+   - **ESP:** yeni `unite.add` — `ESP/src/js/data/lessons.js` ünite şeması (konu,
+     ölçülebilir hedef, öğeler) + SRS kartları (`srs.js`) + pratik soruları
+     (`lesson.js` pratik motoru). Rusça A1–A2 → merdivene (`curriculum.js`) bağlı
+     üniteler, her konunun altında 10–20 soru. Gitar akorları ve repertuvar
+     `guitar_tabs.js` şemasında (tempo «referans» etiketiyle). Alışveriş araştırması
+     (gitar almak) → karşılaştırma raporu (`urun.add`, `urunler.py › karsilastirma`).
+8. GÖRÜNÜRLÜK: her modülde tek bir «Kütüphanem»: ne üretildi, ne zaman, kaynakları,
+   maliyeti (ölçüldü), ne kadar kullanıldı (kitabın %kaçı çözüldü, kaç kart öğrenildi).
+   HKM Ofis'te iş geçmişi: tahmin ve gerçek maliyet/süre yan yana.
+
+**Bir tık ötesi (yapmadan önce kullanıcıya bir cümleyle teyit):**
+- DEPO ÖNCE: benzer iş daha önce yapıldıysa (`core/depo.py`, Y9 depo tarayıcısı)
+  King «zaten var, güncel, bedava» ya da «3 ay önce yapıldı, fiyatlar eskimiş olabilir;
+  yalnız fiyatları tazeleyeyim mi? (düşük)» der. Aynı iş iki kez ödenmez.
+- KİŞİYE GÖRE BOYUT: AYS'de zayıf konular (ölçüm) test kitabının konu ve zorluk
+  dağılımını belirler; ESP'de kademe; SPİ'de hedef ve bütçe («bitkisel protein»
+  listesi gram protein başına maliyete göre sıralı: `money.js › costPerNutrient`).
+- TAZELİK: fiyat ve yer gibi eskiyen veri tarihlidir; süresi geçince «tazele» teklifi.
+- KULLANIM TAKİBİ: üretilip hiç açılmayan çıktı, King'in bir sonraki pahalı teklifinde
+  söylenir («geçen haftaki kitabın %10'u çözüldü; önce onu bitirmek ister misin?»).
+- GERÇEK ZORLUK GERİ BESLER: soruların çözülme verisi (ölçüldü) sonraki üretimin
+  zorluk dağılımını ayarlar.
+- AYNI İSTEK İKİ MODÜLE: «Rusça çalışırken uyku düzenim» gibi çapraz istek King'de
+  bölünür (akşam yoklamasındaki `dil.rapor` gibi), her modüle kendi paketi.
+
+**Doktrin sınırları:** sınıf, maliyet, süre ve bütün sayılar KODDAN; model yalnız
+yapılandırır ve üretir. Tahmin her yerde «tahmin» etiketli ve dayanaklı. Kişisel veri
+istemlere varsayılan olarak gitmez (`kitap.py` kural 5); sağlık bağlamı gidecekse
+kullanıcı onaylar ve en az bilgi gider. Montaj orta aksiyondur: önizleme + onay.
+
+**Zaten var olan (yeniden yazma, üstüne kur):** `king.TURLER / imkan / tahmini_sure /
+sure_sapmasi`, `butce.guard`, `usage` tablosu, `is_emirleri.tahmin`, `kitap.py`,
+`urunler.py` kataloğu, `depo.py`, niyetler `kitap.add / urun.add / material.add /
+mufredat.add`, AYS `testkitabi.js`, SPİ `foods / prices / money / nutri / biomarkers /
+symptom`, ESP `lessons / lesson / srs / curriculum / guitar_tabs`, `brand/ortak/urun.js`.
+
+**Eksik olan (yapılacak):** yoğunluk tablosu; ölçümden maliyet tahmini; `teklif` ara
+durumu ve üç kanaldan onay; seçenekler; parçalı teslim + ara onay; yeni niyetler
+`besin.add`, `fiyat.add`, `yer.add`, `unite.add`; modüllerin montaj ekranları ve
+Kütüphanem; tahmin–gerçek maliyet sapması.
+
+**Dilimler (sırayla, her biri test + commit + push):** 8a teklif (sınıf + maliyet +
+süre + onay) mevcut iş türleri için → 8b AYS fasikül/kitap parçalı + çözdüklerim +
+Kütüphanem → 8c SPİ besin/fiyat/yer + diyete otomatik işleme → 8d ESP ünite/ders paketi
+→ 8e depo önce + tazelik + kullanım takibi.
+
+### Part 9 — Tek tasarım (ALTYAPI BİTİNCE; şimdi BAŞLAMA)
 - ⏳ Dört-beş tasarım dili (SPİ `designs.css` beş düzen, `designcheck.js`) yerine
   **tek, sade ve modern** bir tasarım. Kullanıcı bunu altyapı işleri bittikten sonra
   yapacak. O zamana kadar: yeni bir tasarım diline özel iş ekleme; yeni ekranlar
@@ -220,7 +331,9 @@ teyit; telefonun bilgisayara ağdan bağlanıp bağlanmayacağı.
   (kabuk adımı dahil). **Kalan:** Part 5 sonu tam koşum henüz YAPILMADI (kullanıcının
   limiti doldu) — sıradaki Claude önce bunu koşsun, sayıları yazsın:
   `CHROMIUM_PATH=/opt/pw-browsers/chromium python3 tools/sayilar.py --tam --yaz`
-  (koşarken dosya düzenleme). Sonra sırayla: Y9 (Part 6), Part 7'nin 9, 14, 16, 17,
-  18'i; ardından cevapları gelen Y5, Y1, Y10, Y11, 10, 11 (§4). Part 8 (tek tasarım)
-  EN SON, altyapı bitince.
+  (koşarken dosya düzenleme). Sonra sırayla: Y9 (Part 6; depo tarayıcısı Part 8'in
+  «depo önce» adımına da temel), Part 8 akıllı iş sistemi (kullanıcının önceliği:
+  kullanım kolaylığı buna bağlı), Part 7'nin 9, 14, 16, 17, 18'i, ardından cevapları
+  gelen Y5, Y1, Y10, Y11, 10, 11 (§4). Part 9 (tek tasarım) EN SON, altyapı bitince.
+  Sırayı değiştirmek istersen kullanıcıya bir cümleyle sor.
 - Ortam notu: modül testleri için `cd <SYS> && npm ci` (Playwright; node_modules depoda yok).
