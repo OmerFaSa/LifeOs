@@ -344,7 +344,15 @@ SP.Screens.team = (function(){
       }
     }
     const b = SP.Bolum ? SP.Bolum.anla(t) : { komut:false };
-    if(!b.komut) return false;
+    if(!b.komut){
+      /* «… arastir» — is HKM'deki BAM'a gider (brand/ortak/ofis.js). */
+      if(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi(t)){
+        SP.Bam = SP.Bam || LIFEOS.Ofis.bamKur({ hkm:() => SP.Beacon });
+        await sohbeteYaz(a, t, (await SP.Bam.ilet(t)).metin);
+        return true;
+      }
+      return false;
+    }
     const parca = [];
     const bekleyen = [];
     for(const o of b.oneriler){

@@ -217,5 +217,76 @@ LIFEOS.Ofis = (function(){
     return { cek, guncel, brifingIcin };
   }
 
-  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, kanalKur };
+  /* ----------------------------------------------------- BAM'a iş iletmek
+
+     Modül sohbetinde «10 soru hazırla» ya da «… araştır» denirse iş
+     HKM'deki BAM'a gider (HKM core/bam.py): modül → modül Patronu → BAM
+     Patronu → ofisler. Sonuç teklif olarak geri döner; modül kendi koduyla
+     uygular. Karar kurallıdır. HKM kapalıysa iş açılmaz ve bu SÖYLENİR. */
+  function kucuk(s){
+    return String(s || '').replace(/I/g, 'ı').replace(/İ/g, 'i').toLocaleLowerCase('tr');
+  }
+  function bamIstegi(metin){
+    const k = kucuk(metin);
+    if(/araştır(?:\b|ır mısın|sana|mani|manı)/.test(k)) return { tur:'arastirma' };
+    if(/(hazırla|üret)/.test(k) && /(soru|test|kart|flashcard|alıştırma)/.test(k)){
+      return { tur:'uretim' };
+    }
+    return null;
+  }
+
+  const BAM_SONRASI = {
+    uretim:'Maddeler kalite kontrolünden geçince burada teklif olarak görünür; '
+      + 'onaylarsan kart olarak eklenir.',
+    arastirma:'Araştırma bitince HKM › Ofis’te okursun. Kaynağa erişim henüz olmadığı '
+      + 'için «doğrulanmadı» diye işaretli olur.',
+  };
+  const OFIS_ADI = { kayit:'Kayıt', arastirma:'Araştırma', planlama:'Planlama', uretim:'Üretim' };
+
+  /* `bamKur({ hkm:() => R.Beacon })` → { ilet(talep) } */
+  function bamKur(ortam){
+    async function ilet(talep){
+      const istek = bamIstegi(talep) || { tur:'uretim' };
+      const b = ortam.hkm ? ortam.hkm() : null;
+      const a = b && typeof b.settings === 'function' ? (b.settings() || {}) : {};
+      if(!b || !a.enabled || !a.token || !b.urlOk(a.url)){
+        return { ok:false, metin:'Bunu HKM’deki BAM hazırlar ama HKM bağlı değil. '
+          + 'Rehber › HKM’den bağlanınca yeniden iste.' };
+      }
+      const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
+      try{
+        const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+        const zaman = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;
+        let res, g;
+        try{
+          res = await f(String(a.url).replace(/\/$/, '') + '/api/bam/is', {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + a.token },
+            body:JSON.stringify({ talep:String(talep || '').slice(0, 2000),
+              hedef_modul:b.MODULE, kaynak:b.MODULE }),
+            signal:ctrl ? ctrl.signal : undefined,
+          });
+          g = await res.json();
+        }finally{
+          if(zaman) clearTimeout(zaman);
+        }
+        if(res.status === 200 && g && g.ok){
+          const yol = (g.ofisler || []).map(o => OFIS_ADI[o] || o).join(' → ');
+          /* Materyali kart olarak alabilen yalniz AYS (material.add). Oteki
+             modul icin «burada gorunur» demek yalan olurdu. */
+          const sonra = istek.tur === 'uretim' && b.MODULE !== 'ays'
+            ? 'Materyal HKM › Ofis’te hazır olur; bu sistem onu henüz kart olarak alamıyor.'
+            : BAM_SONRASI[istek.tur];
+          return { ok:true, id:g.id, metin:(g.yeni ? 'BAM’a ilettim (iş #' + g.id + ': ' + yol + '). '
+            : 'Bu iş BAM’da zaten açık (#' + g.id + '). ') + sonra };
+        }
+        return { ok:false, metin:(g && (g.soru || g.note)) || 'BAM işi açamadı.' };
+      }catch(e){
+        return { ok:false, metin:'HKM’ye ulaşılamadı; iş açılmadı. HKM açıkken yeniden iste.' };
+      }
+    }
+    return { ilet };
+  }
+
+  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, kanalKur, bamIstegi, bamKur };
 })();

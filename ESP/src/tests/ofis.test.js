@@ -145,4 +145,56 @@
       expect(await kur(ACIK, 'bozuk').k.cek()).toBe(null);
     });
   });
+  /* BAM'a iş iletmek: modül sohbetindeki üretim ya da araştırma isteği
+     HKM'deki BAM'a iş olarak gider (HKM core/bam.py). Karar kuralladır;
+     HKM kapalıysa iş açılmaz ve bu SÖYLENİR, hiçbir şey fırlatmaz. */
+  describe('Ofis — BAM\'a iş iletmek', () => {
+    it('üretim ve araştırma isteği tanınır, sıradan cümle tanınmaz', () => {
+      expect(O().bamIstegi('Üslü sayılardan 10 soru hazırla')).toEqual({ tur:'uretim' });
+      expect(O().bamIstegi('biyoloji için kart üret')).toEqual({ tur:'uretim' });
+      expect(O().bamIstegi('Ferritin neden düşer, araştır')).toEqual({ tur:'arastirma' });
+      ['bugün 40 soru çözdüm', 'yarın ara', 'soru çözerken sıkılıyorum', 'kahvaltı hazırla']
+        .forEach(m => expect(O().bamIstegi(m)).toBe(null));
+    });
+
+    function kur(ayar, cevap){
+      const giden = [];
+      const b = O().bamKur({
+        hkm:() => ({ MODULE:'ays', settings:() => ayar, urlOk:u => /^https?:\/\//.test(u || '') }),
+        fetch:async (url, o) => { giden.push({ url, o });
+          if(cevap instanceof Error) throw cevap;
+          return { status:cevap.status, json:async () => cevap.body }; },
+      });
+      return { b, giden };
+    }
+    const ACIK = { enabled:true, token:'jeton', url:'http://127.0.0.1:8787/' };
+
+    it('iş BAM\'a hedef modül ve kaynakla gider', async () => {
+      const a = kur(ACIK, { status:200, body:{ ok:true, id:4, yeni:true, ofisler:['kayit', 'uretim'] } });
+      const r = await a.b.ilet('Üslü sayılardan 10 soru hazırla');
+      expect(r.ok).toBe(true);
+      expect(r.metin).toContain('#4');
+      expect(r.metin).toContain('kart');
+      expect(a.giden[0].url).toBe('http://127.0.0.1:8787/api/bam/is');
+      const g = JSON.parse(a.giden[0].o.body);
+      expect(g.hedef_modul).toBe('ays');
+      expect(g.kaynak).toBe('ays');
+    });
+
+    it('HKM kapalıysa iş açılmaz ve söylenir; ağ hatası fırlatmaz', async () => {
+      const kapali = kur({ enabled:false }, { status:200, body:{} });
+      const r = await kapali.b.ilet('10 soru hazırla');
+      expect(r.ok).toBe(false);
+      expect(r.metin).toContain('HKM bağlı değil');
+      expect(kapali.giden).toHaveLength(0);
+      const kopuk = await kur(ACIK, new Error('kapalı')).b.ilet('10 soru hazırla');
+      expect(kopuk.ok).toBe(false);
+      expect(kopuk.metin).toContain('ulaşılamadı');
+    });
+
+    it('BAM Patronu\'nun sorusu kullanıcıya aynen gelir', async () => {
+      const a = kur(ACIK, { status:422, body:{ ok:false, soru:'Araştırmamı mı, üretmemi mi?' } });
+      expect((await a.b.ilet('şunu hallet')).metin).toBe('Araştırmamı mı, üretmemi mi?');
+    });
+  });
 })();

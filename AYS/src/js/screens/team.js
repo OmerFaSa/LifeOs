@@ -115,7 +115,16 @@ R.Screens.team = (function(){
       }
     }
     const s = R.Komut.anla(question);
-    if(!s.komut) return false;
+    if(!s.komut){
+      /* «10 soru hazirla», «… arastir» — is HKM'deki BAM'a gider; sonuc
+         teklif olarak doner (brand/ortak/ofis.js). Model cagrilmaz. */
+      if(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi(question)){
+        R.Bam = R.Bam || LIFEOS.Ofis.bamKur({ hkm:() => R.Beacon });
+        await cevapYaz(agent, (await R.Bam.ilet(question)).metin);
+        return true;
+      }
+      return false;
+    }
     const islem = await R.Komut.isle(s, { metin:question });
     await cevapYaz(agent, R.Komut.yanit(islem),
       { oneriIds:islem.bekleyen.map(k => k.row.id) });

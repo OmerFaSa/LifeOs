@@ -192,7 +192,15 @@ ESP.Komut = (function(){
     }
 
     const s = anla(text);
-    if(!s.komut) return null;
+    if(!s.komut){
+      /* «… arastir», «alistirma hazirla» — is HKM'deki BAM'a gider
+         (brand/ortak/ofis.js). Model cagrilmaz. */
+      if(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi(text)){
+        ESP.Bam = ESP.Bam || LIFEOS.Ofis.bamKur({ hkm:() => ESP.Beacon });
+        return cevap((await ESP.Bam.ilet(text)).metin);
+      }
+      return null;
+    }
     const islem = await isle(s, { metin:text });
     return cevap(yanit(islem), islem.bekleyen.map(function(k){ return k.row.id; }));
   }
