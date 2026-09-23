@@ -377,3 +377,89 @@ teyit; telefonun bilgisayara ağdan bağlanıp bağlanmayacağı.
   gelen Y5, Y1, Y10, Y11, 10, 11 (§4). Part 9 (tek tasarım) EN SON, altyapı bitince.
   Sırayı değiştirmek istersen kullanıcıya bir cümleyle sor.
 - Ortam notu: modül testleri için `cd <SYS> && npm ci` (Playwright; node_modules depoda yok).
+
+## Kullanıcı kolaylığı fikirleri (2026-09-23) · ÖNERİ, ONAY BEKLER
+
+Claude'un listesi; hiçbiri onaylanmadı. Uygulamadan önce: (1) depoda zaten var mı bak
+(AGENTS §5.1), (2) kullanıcıya bir cümleyle sor. Doktrin sınırları geçerli (teşhis/doz
+yok, HKM modüle yazmaz, eksik veri sıfır değil, XP karar vermez). Mimari borç önerileri
+`ekip/PLAN.md` › «Öneriler»de.
+Boy: **K** küçük (~yarım gün) · **O** orta (~1–2 gün) · **B** büyük (~3 gün); testler dahil, tahmin.
+
+**Veri girişi — yazmadan kayıt**
+1. O Sesle tek cümle günlük kayıt; üç modül kendi payını önizler (`kayit.add` üstüne).
+2. B Fiş fotoğrafından fiyat → önizle → onayla «ölçüldü».
+3. B Ambalaj besin etiketi fotoğrafından kullanıcı gıdası.
+4. O Barkodla daha önce eklenmiş ürünü tanıma.
+5. K «Dünkünün aynısı» (kahvaltı, ilaç, antrenman).
+6. O Şablon gün: okul / tatil / sınav haftası tek dokunuşla plan + öğün iskeleti.
+7. B Deneme sonucunu optik form / ekran görüntüsünden okuma, önizleme.
+8. K Telegram tek kelime kayıt: «su 2», «uyku 7», «soru 40».
+9. K Eksik veriyi tek soruyla toplama («Dün uyku: 6 · 7 · 8 · bilmiyorum»).
+
+**Onay ve bildirim yorgunluğu**
+10. O Tek onay kutusu: üç modül + HKM bekleyen onaylar tek listede.
+11. K Toplu onay (küçük teklifler), geri alma açık.
+12. K Sessiz saatler: gece/sınav saati bildirimsiz, sabah tek özet.
+13. K Günlük bildirim bütçesi; fazlası özete.
+14. K «Bunu bir daha sorma» → tür kuralı, ayarlardan geri açılır.
+15. K Cevapsız teklif 3 gün sonra söylenerek kapanır.
+
+**Planlama ve gün**
+16. O Kötü gün modu üç modülde ortak (AYS `badDay` var).
+17. B Takvim içe aktarma; dolu saate plan konmaz.
+18. O «15 dakikam var»: o anın en değerli küçük işi.
+19. K Akşam «yarın şu üç şey var» mesajı, tek dokunuş değiştir.
+20. O Sınava kalan gün + gerçekçilik tahmini (dayanaklı).
+21. B Verimli saate göre plan (saat ölçümden bulunur).
+
+**AYS**
+22. K Etiket seçilince yanlıştan tekrar kartı tek dokunuş.
+23. O Zayıf 3 konudan mini test (kitap ya da BAM).
+24. K Son iki deneme konu bazında net farkı.
+25. O Süre analizi: hangi soru türünde vakit kaybı (ölçüm).
+26. O Yanlışın yanında konu notu / video zaman damgası.
+27. K Test kitabında kaldığın sorudan devam.
+28. O Paylaşılabilir haftalık ilerleme (veri seçilerek).
+
+**SPİ**
+29. B «Evde şunlar var» → hedefe uyan tarif, değerler `nutri.js`'ten.
+30. O Öğün planından alışveriş listesi + fiyat tahmini + bütçe payı.
+31. K Sepette pahalı ürüne ucuz muadil (kaybedilen besin de yazılır).
+32. K Tahlil yaşı hatırlatması («hekiminle konuşup yeniden ölçtürmek ister misin?»).
+33. O Tahlilleri referans aralığı ve kaynağıyla tek grafikte izleme.
+34. O İlaç/takviye hatırlatması — yalnız kullanıcının girdiği ad ve saat.
+35. K Su ve hareket dürtmesi, ölçüme göre, sessiz saat dışı.
+36. O Doktora gidecek özet PDF: ölçüm, semptom, sorular — yorum yok.
+37. K Spor salonu karşılaştırma tablosu (`yer.add` sonrası).
+
+**ESP**
+38. O Günlük 5 dakika dil kartı Telegram'dan, cevap oradan.
+39. K Okuma takibi: sayfa/hız ölçüm, bitiş tahmini.
+40. O Gitar tempo hedefi, ölçülen tempo, ilerleme çizgisi.
+41. O Ünite sonu mini sınav; geçilemezse tekrar planına.
+42. B Haftalık sesli «öğrendiğini anlat»; eksik kavram listesi.
+
+**HKM / King / BAM**
+43. B Tek cümleden çok modüllü iş; King böler, her modüle paket.
+44. O İş geçmişi zaman çizelgesi: istek, çıktı, maliyet, kullanım.
+45. K Tahmin–gerçek maliyet şaşma oranı; King tahminini düzeltir.
+46. K «Önce depo» teklifi en üstte («2 ay önce yapıldı, bedava»).
+47. K Aylık bütçe dağılımı: modül başına harcama ve kullanım.
+48. O Bozuk olanı söyleyen tek ekran + düzeltme düğmesi.
+
+**Motivasyon / görünürlük**
+49. K Haftalık «neler kazandın»: ölçülmüş üç iyi şey.
+50. K Seri dondurma (hasta gün, kullanıcı işaretler).
+51. O Ay sonu mektubu, «geçen ay bugün» karşılaştırmalı.
+52. K Kişisel rekorlar (odak, net, uyku haftası).
+
+**Güven / süreklilik**
+53. O Her şeyi tek zip'e okunur dışa aktarma.
+54. O Yeni cihaza taşıma sihirbazı.
+55. O Gizlilik panosu: modele ne gitti, ne zaman; sağlık verisi gitmediyse o da yazılır.
+56. K Tatil modu: bir hafta sorusuz, seri korunur, dönüş planı.
+57. B Aile profili AYS ve ESP'de de (SPİ'de hane var).
+
+**Toplam tahmin:** 24 K + 24 O + 9 B ≈ 75 odaklı iş günü (tahmin; tam koşum denetimleri
++%10–15). Hızlı kazanç: 5, 8, 9, 11–15, 19, 22, 27, 31, 46, 49, 50, 56 (~7 gün).
