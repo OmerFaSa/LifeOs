@@ -205,6 +205,7 @@ ESP.Test = (function(){
     S.prefs = ESP.Model.defaultPrefs();
     S.days = {}; S.cards = []; S.args = []; S.notes = []; S.books = [];
     S.pieces = []; S.recordings = []; S.drafts = []; S.goals = [];
+    S.hedefler = []; S.hedefPlanlar = [];
     S.events = []; S.sources = []; S.chains = [];
     S.assets = []; S.reminders = [];
     S.proposals = []; S.weekPlan = null;

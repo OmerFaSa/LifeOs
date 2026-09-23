@@ -227,6 +227,98 @@ ESP.Screens.today = (function(){
 
   /* ------------------------------------------------------------------ ozet */
 
+  /* HEDEFLERİM (core/hedefler.js + core/hedefplan.js). Hedef Danışma'da
+     konuşarak kurulur: «Bir yılda gitarda Kalfa'ya», «Bir ayda İngilizcede
+     A2'ye», «bu yıl 24 kitap». Burada görünür, planı kurulur, askıya
+     alınır, bırakılır. PLAN BÜYÜK AKSİYONDUR (AGENTS.md §1.9): önce
+     ayrıntılı önizleme, sonra «Planı uygula» — önizleme onayın kendisidir —
+     ve her zaman «Planı geri al». */
+  const BANT = { gercekci:'gerçekçi', zorlayici:'zorlayıcı',
+    gercekci_degil:'bu sürede olmaz', guvensiz:'güvenli değil' };
+
+  function hedefDugmeleri(h){
+    return html`
+      ${h.durum === 'aktif'
+        ? K.Button({ label:'Askıya al', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'askida' } })
+        : K.Button({ label:'Sürdür', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'aktif' } })}
+      ${K.Button({ label:'Tamamlandı', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'tamam' } })}
+      ${K.Button({ label:'Bırak', size:'sm', tone:'ghost', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'birakildi' } })}`;
+  }
+
+  function hedefOnizleme(h){
+    const r = ESP.HedefPlan.kur(h, U.todayISO());
+    if(!r.ok){
+      return html`<div class="mt-8">${K.Notice({ tone:'warn', title:'Plan kurulamadı.', body:r.why })}
+        <div class="row gap-8 mt-8">${K.Button({ label:'Kapat', size:'sm', act:'hedef-plan-kapat' })}</div></div>`;
+    }
+    const p = r.plan;
+    return html`<div class="mt-8">
+      <p class="tiny dim"><b>Plan önizlemesi</b> — onaylanana kadar hiçbir şey değişmez.</p>
+      ${K.Table({ tight:true, headers:['', 'Şimdi', 'Plandan sonra'],
+        rows:ESP.HedefPlan.onizleme(p).map(x => [x.alan, x.once, x.sonra]) })}
+      ${when(p.calisma, () => html`<p class="tiny mt-8"><b>Çalışılacaklar</b> (merdiven:
+        ${p.calisma.basamak}): ${p.calisma.liste.join(' · ')}</p>`)}
+      ${when(p.uyarilar.length, () => html`<div class="stack-sm mt-8">${map(p.uyarilar, u =>
+        K.Notice({ tone:'info', body:u }))}</div>`)}
+      <p class="tiny dim mt-8">Kontrol noktaları dört haftada birdir; beklenen değer
+        ${p.etiket === 'hesaplandi' ? 'kendi ölçümünden hesaplandı' : 'tahmindir'}. Plan geri
+        alınabilir; geri alınca odak ve taban bugünkü haline döner.</p>
+      <div class="row gap-8 mt-8" style="flex-wrap:wrap">
+        ${K.Button({ label:'Planı uygula', size:'sm', tone:'primary', act:'hedef-plan-uygula',
+          data:{ 'data-id':h.id } })}
+        ${K.Button({ label:'Şimdilik değil', size:'sm', act:'hedef-plan-kapat' })}
+      </div></div>`;
+  }
+
+  function hedefPlanOzeti(h, p){
+    const il = ESP.HedefPlan.ilerleme(p, U.todayISO());
+    return html`<div class="stack-sm mt-8">
+      <p class="small">Plan uygulandı · günde ${p.gunlukDk} dk${p.haftalikGun < 7
+        ? ', haftada ' + p.haftalikGun + ' gün' : ''} · odak ${(ESP.DISCIPLINE_BY_ID[p.disc] || {}).label || p.disc}</p>
+      ${when(il.sonraki, () => html`<p class="tiny">Sonraki kontrol: <b>${U.fmtDate(il.sonraki.tarih)}</b>
+        — beklenen ${String(il.sonraki.beklenen).replace('.', ',')} ${p.birim}</p>`)}
+      ${K.Notice({ tone:il.durum === 'geride' ? 'warn' : 'info', body:il.metin })}
+      ${when(p.calisma, () => html`<p class="tiny dim">Çalışılacaklar (${p.calisma.basamak}):
+        ${p.calisma.liste.join(' · ')}</p>`)}
+      <div class="row gap-8" style="flex-wrap:wrap">
+        ${K.Button({ label:'Planı geri al', size:'sm', act:'hedef-plan-geri', data:{ 'data-id':h.id } })}
+        ${hedefDugmeleri(h)}
+      </div></div>`;
+  }
+
+  function hedefSatir(h){
+    const g = h.gerceklik || {};
+    const p = ESP.HedefPlan ? ESP.HedefPlan.aktif(h.id) : null;
+    const onizle = !p && S.ui.planOnizle === h.id && h.durum === 'aktif';
+    return html`<div>
+      <div><b class="small">${ESP.Hedefler.ozet(h)}</b>
+        <div class="tiny dim">${h.durum === 'askida' ? 'askıda · ' : ''}${h.son_tarih
+          ? 'son tarih ' + U.fmtDate(h.son_tarih) : 'tarihsiz'}${h.kapasite && h.kapasite.gunluk_dk
+          ? ' · günde ' + h.kapasite.gunluk_dk + ' dk' : ''}${g.bant ? ' · ' + BANT[g.bant]
+          + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
+      ${p ? hedefPlanOzeti(h, p) : onizle ? hedefOnizleme(h) : html`
+        <div class="row gap-8 mt-6" style="flex-wrap:wrap">
+          ${when(ESP.HedefPlan && h.durum === 'aktif', () => K.Button({ label:'Planı gör', size:'sm',
+            tone:'primary', act:'hedef-plan-onizle', data:{ 'data-id':h.id } }))}
+          ${hedefDugmeleri(h)}
+        </div>`}
+    </div>`;
+  }
+
+  function hedefRow(){
+    if(!ESP.Hedefler) return null;
+    const l = ESP.Hedefler.aktifler();
+    return K.Entry({
+      label:'HEDEFLERİM', meta:l.length ? l.length + ' etkin' : 'yok',
+      action:K.Button({ label:'Danışma’da hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
+      body:l.length ? html`<div class="stack-sm">${map(l, hedefSatir)}</div>`
+        : html`<p class="small dim">Henüz hedefin yok. Danışma’da «Bir yılda gitarda Kalfa’ya
+          gelmek istiyorum», «Bir ayda İngilizcede A2’ye gelmek istiyorum» ya da «bu yıl 24 kitap
+          okumak istiyorum» gibi yazabilirsin; vaktine göre olup olmadığını ve olacağı tarihi
+          söylerim.</p>`,
+    });
+  }
+
   function summaryRows(){
     const bugun = gun();
     const rows = M.sessionsOf(bugun);
@@ -236,6 +328,7 @@ ESP.Screens.today = (function(){
     const denge = ESP.Planner.balance(7);
 
     return [
+      hedefRow(),
       K.Entry({
         label:'GÜNÜN TOPLAMI',
         meta:rows.length ? U.fmtMin(toplam) : 'veri yok',
@@ -667,6 +760,27 @@ ESP.Screens.today = (function(){
     },
 
     async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; ESP.App.render(); },
+
+    async 'hedef-durum'(el){
+      const r = await ESP.Hedefler.durumDegistir(el.dataset.id, el.dataset.durum);
+      ESP.UI.toast(r.ok ? 'Hedef güncellendi' + (r.not ? '. ' + r.not : '') : r.why);
+      ESP.App.render();
+    },
+    async 'hedef-plan-onizle'(el){ S.ui.planOnizle = el.dataset.id; ESP.App.render(); },
+    async 'hedef-plan-kapat'(){ S.ui.planOnizle = null; ESP.App.render(); },
+    async 'hedef-plan-uygula'(el){
+      const r = await ESP.HedefPlan.uygulaHedef(el.dataset.id);
+      S.ui.planOnizle = null;
+      if(r.ok) ESP.UI.onayMuhru();
+      ESP.UI.toast(r.ok ? 'Plan uygulandı. Geri almak istersen «Planı geri al».' : r.why);
+      ESP.App.render();
+    },
+    async 'hedef-plan-geri'(el){
+      const r = await ESP.HedefPlan.geriAlHedef(el.dataset.id);
+      ESP.UI.toast(r.ok ? 'Plan geri alındı; odak ve taban plandan önceki haline döndü.'
+        : (r.why || 'Geri alınamadı'));
+      ESP.App.render();
+    },
 
     async 'signal-answer'(el){
       const inp = document.getElementById('sig-answer');

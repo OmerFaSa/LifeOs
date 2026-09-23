@@ -461,7 +461,7 @@ ESP.Beacon = (function(){
      2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
-  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce'];
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -617,14 +617,84 @@ ESP.Beacon = (function(){
      ESP'de bir «oturum» ölçülmüş bir çalışmadır; ileriye dönük bir teklif
      oturum olarak yazılamaz — yazılsaydı yapılmamış bir çalışma ölçülmüş
      görünürdü. Teklif bu yüzden bir HATIRLATICI olur. */
-  const APPLIABLE = ['plan.add'];
+  const APPLIABLE = ['plan.add', 'material.add'];
 
   function canApply(n){
     return !!(n && APPLIABLE.indexOf(n.kind) >= 0);
   }
 
+  /* BAM MATERYALİ — Üretim Ofisi'nin kalite kontrolünden geçen set (HKM
+     core/bam.py). Kayıt HKM'den ÇEKİLİR, maddeler ESP'nin KENDİ koduyla
+     yeniden doğrulanır (LIFEOS.Ofis.bamMadde) ve kart olarak eklenir.
+
+     HANGİ DESTE? ESP'nin iki tür destesi var: dil desteleri ve tarih
+     destesi. Deste setin başlığından ve konusundan KURALLA okunur: bir dil
+     adı geçiyorsa o dilin destesi, tarih konusuysa tarih destesi. İkisi de
+     değilse set EKLENMEZ ve bu söylenir — felsefe kartlarını İngilizce
+     destesine koymak, desteyi bozmak olurdu (AGENTS.md §1.7).
+
+     Aynı set iki kez eklenmez; HKM'ye ulaşılamazsa hiçbir kart yazılmaz.
+     Kartlar «bam» etiketi taşır ve kaynağı doğrulanmadı sayılır. */
+  const TARIH_RE = /(tarih|yüzyıl|imparatorluk|savaş|devrim|antlaşma|hanedan|osmanlı|selçuklu|roma|bizans)/;
+  function desteOf(kayit){
+    const k = String((kayit.baslik || '') + ' ' + ((kayit.govde || {}).konu || ''))
+      .replace(/I/g, 'ı').replace(/İ/g, 'i').toLocaleLowerCase('tr');
+    /* Dil adı TAM hâliyle aranır («rusça», «ingilizce»): kökten aramak
+       «Rus Devrimi»ni Rusça destesine koyardı. */
+    const dil = (ESP.LANGS || []).find(function(l){
+      const ad = String(l.label || '').replace(/İ/g, 'i').toLocaleLowerCase('tr');
+      return (ad && k.indexOf(ad) >= 0) || k.indexOf(String(l.native || '').toLowerCase()) >= 0;
+    });
+    if(dil) return { deck:dil.id, ad:dil.label + ' destesi' };
+    if(TARIH_RE.test(k)) return { deck:ESP.HISTORY_DECK || 'history', ad:'tarih destesi' };
+    return null;
+  }
+
+  async function materyalUygula(p){
+    const kid = Number(p.kayit_id);
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:'Materyal kimliği geçersiz.' };
+    const etiket = 'bam:' + kid;
+    if((ESP.S.cards || []).some(function(c){ return (c.tags || []).indexOf(etiket) >= 0; })){
+      return { ok:false, error:'Bu set zaten eklenmiş.' };
+    }
+    const a = settings();
+    if(!a.token || !urlOk(a.url)) return { ok:false, error:'HKM bağlantısı kurulmamış; materyal alınamaz.' };
+    let kayit = null;
+    try{
+      const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      const zaman = ctrl ? setTimeout(function(){ ctrl.abort(); }, 4000) : null;
+      const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/bam/kayit/' + kid, {
+        headers:{ 'Authorization':'Bearer ' + a.token },
+        signal:ctrl ? ctrl.signal : undefined,
+      });
+      if(zaman) clearTimeout(zaman);
+      if(res.status === 200){ const g = await res.json(); kayit = g && g.kayit; }
+    }catch(e){ kayit = null; }
+    if(!kayit || kayit.tur !== 'materyal' || !kayit.govde){
+      return { ok:false, error:'Materyal HKM’den alınamadı; HKM açıkken yeniden dene.' };
+    }
+    const deste = desteOf(kayit);
+    if(!deste){
+      return { ok:false, error:'Bu setin hangi desteye gireceğini anlayamadım: başlığında bir dil '
+        + 'ya da tarih konusu yok. ESP şimdilik yalnız dil ve tarih destelerine kart alır.' };
+    }
+    const tur = kayit.govde.tur;
+    const kartlar = (Array.isArray(kayit.govde.maddeler) ? kayit.govde.maddeler : [])
+      .slice(0, 50).map(function(m){ return window.LIFEOS.Ofis.bamMadde(tur, m); }).filter(Boolean);
+    if(!kartlar.length) return { ok:false, error:'Setteki maddelerin hiçbiri ESP’nin denetimini geçmedi.' };
+    for(const k of kartlar){
+      await ESP.Model.saveCard(ESP.Model.newCard({ front:k.front, back:k.back, lang:deste.deck,
+        context:'BAM #' + kid + ' — kaynağı doğrulanmadı', tags:['bam', etiket] }));
+    }
+    if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+    return { ok:true, note:kartlar.length + ' kart ' + deste.ad + 'ne eklendi («'
+      + String(kayit.baslik || '').slice(0, 60) + '», BAM #' + kid + '). Kaynağı doğrulanmadı; '
+      + 'yanlış bulduğun kartı sil.' };
+  }
+
   async function applyIntent(n){
     if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
+    if(n.kind === 'material.add') return await materyalUygula(n.payload || {});
     const p = n.payload || {};
     if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };
     /* Gecersiz sure sinirlandirilmaz, REDDEDILIR: -5 dakikayi 5 dakikaya
@@ -719,7 +789,7 @@ ESP.Beacon = (function(){
 
   return { load, save, settings, collect, payload, preview, contract, metric,
     urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
-    intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE,
+    intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE, desteOf,
     resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
     intentDoubts, clearDoubt,
     MODULE, CONTRACT, ASGARI_ARA_DK };

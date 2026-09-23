@@ -61,7 +61,7 @@ KINDS = {
     # BAM Uretim Ofisi'nin kalite kontrolunden gecen materyali (core/bam.py).
     # Modul kaydi HKM'den ceker, KENDI koduyla dogrular ve kart olarak ekler.
     "material.add": {
-        "modules": ("ays",),
+        "modules": ("ays", "esp"),
         "required": ("kayit_id", "adet"),
         "optional": ("baslik", "why"),
         "note": "BAM'ın ürettiği ve denetlediği materyali kart olarak ekleme teklifi.",

@@ -211,6 +211,41 @@ motoru üretir; model yalnızca cümleye çevirir. Her teklif ajanın kendi
 alanındadır (`allowed()`), hiçbiri kendiliğinden uygulanmaz, hiçbiri silme
 önermez ve uygulanan her teklif ne yaptığını kaydeder.
 
+### Modül 0.7 — Hedef ve hedef planı (`core/hedefler.js`, `core/hedefplan.js`)
+
+Danışma'da «Bir yılda gitarda Kalfa'ya», «Bir ayda İngilizcede A2'ye» ya da
+«bu yıl 24 kitap» denir; genel hedef motoru (`brand/ortak/hedef.js`) cümleyi
+tanır, eksikleri tek tek sorar ve kararı KOD verir. Üç paket:
+
+| Paket | Karar neyle verilir | Dayanak |
+|---|---|---|
+| Dil (CEFR) | **Vakitle**: seviyeler arası toplam saat ÷ haftalık vaktin | yaygın aktarılan rehberli öğrenme saati tahminleri → «tahmin» |
+| Okuma | **Vakitle**: kitap × kitap başına saat ÷ haftalık vaktin | kendi ölçümün (en az iki kitap) → «hesaplandı»; yoksa 6 saat tahmini |
+| Enstrüman | **Hızla**: merdiven basamağının temiz tempo kapısı ÷ kendi temiz tempo artış hızın | senin kayıtların; «temiz» beyan olduğu için «tahmin». Kayıt yoksa karar verilmez |
+
+Vakit yetmezse cevap «bu sürede olmaz» değil yalnız: **bu vakitle hangi
+tarihte olacağı** ve günde 30 dakika / 1 saat / senin vaktin senaryoları da
+söylenir; seçilen senaryo tarihi ve vakti birlikte kaydeder.
+
+CEFR bandı ESP merdiveniyle aynı ölçek değildir ve birbirine çevrilmez
+(`lang.cefr`): dil hedefi merdiven kademesi değil, bir öz-değerlendirmedir.
+Paketlerin anahtarı dardır: «gitarı tekrar aç» bir bölüm isteğidir, hedef
+değil — CEFR seviyesi ya da basamak adı geçmeyen cümle hedef sayılmaz.
+
+**Plan** (Bugün › Özet › Hedeflerim) BÜYÜK aksiyondur: `hedefplan` türü,
+ayrıntılı önizleme + onay + geri dönüş noktası; model öneremez. Plan hedefin
+disiplinini odağa alır, günlük tabanı vakte göre **yükseltir** (küçültmez),
+kapalı bölümü açar, son tarihte bir tarihli hedef kurar ve dört haftada bir
+kontrol noktası koyar (beklenen ↔ ölçülen: pratik saati, bitirilen kitap,
+temiz tempo). Çalışılacaklar merdivenin bir üst basamağından gelir; plan
+yeni içerik uydurmaz. Geri alma yalnız planın yazdığını geri alır.
+
+**BAM materyali** (`material.add`): HKM'nin Üretim Ofisi'nin kalite
+kontrolünden geçen set HKM'den çekilir, ESP'nin kendi denetiminden geçer
+(`LIFEOS.Ofis.bamMadde`, AYS ile aynı kural) ve kart olarak eklenir. Deste
+setin başlığından kuralla okunur: dil adı → o dilin destesi, tarih konusu →
+tarih destesi; ikisi de değilse set eklenmez ve bu söylenir.
+
 ### Modül 1 — Aralıklı tekrar (`core/srs.js`)
 
 Leitner kutuları, SM-2 ile yumuşatılmış. İki yapı birlikte çalışır:

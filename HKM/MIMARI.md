@@ -713,7 +713,9 @@ kuralla: 3–30). Her madde önce biçim denetiminden, sonra **ikinci bir
 baştan çözülür, tutmayan düşer; alıştırma ve kart yargıyla denetlenir. Kayıt
 kalite raporunu taşır (üretilen / geçen / düşen ve nedeni). Hedef AYS ise
 geçen maddeler `material.add` teklifi olur: AYS kaydı çeker, **kendi koduyla**
-yeniden doğrular ve kart olarak ekler; aynı set iki kez eklenmez.
+yeniden doğrular ve kart olarak ekler; aynı set iki kez eklenmez. Hedef ESP
+ise aynı teklif ESP'ye gider: ESP seti yalnız dil ya da tarih destesine alır
+ve hangisi olduğunu kendi kuralıyla okur.
 
 **Planlama Ofisi v1** (`core/planlama.py`) kuralla çalışır, model kullanmaz.
 Yalnız modülün gönderdiği **yapılandırılmış** hedefi alır (şimdilik SPİ kilo

@@ -162,6 +162,14 @@ ESP.Komut = (function(){
       const h = await ESP.Hafizam.komutIsle(text);
       if(h) return { text:h.text, source:'rules', oneriIds:[] };
     }
+    /* Hedef sohbeti (core/hedefler.js): hedef cümlesi, sorulan eksiklerin
+       cevabı ve seçenek seçimi. Hedef değilse null döner, sıradakine geçilir.
+       Paketlerin anahtarı dar tutuldu: «gitarı tekrar açmak istiyorum» bir
+       bölüm isteğidir, hedef değil. */
+    if(ESP.Hedefler && ESP.Hedefler.sohbet){
+      const hd = await ESP.Hedefler.sohbet.isle(text);
+      if(hd) return { text:hd.text, source:'rules', oneriIds:[] };
+    }
     const onEk = agentId === 'patron' ? '' : 'Patron’a ilettim. ';
     const cevap = function(m, ids){ return { text:onEk + m, source:'rules', oneriIds:ids || [] }; };
     const kisa = kisaCevap(text);

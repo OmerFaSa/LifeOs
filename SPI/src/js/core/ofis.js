@@ -235,6 +235,40 @@ LIFEOS.Ofis = (function(){
     return null;
   }
 
+  /* BAM maddesini karta çevirir — modülün KENDİ doğrulaması. HKM'nin
+     kalite kontrolüne güvenip bozuk maddeyi yazmak, sözleşmeyi karşı
+     tarafa devretmek olurdu. Soru: beş farklı şık ve tek doğru harf;
+     alıştırma: yönerge + madde + cevap; kart: ön + arka. Bozuk madde düşer.
+     AYS ve ESP aynı kuralı kullanır (iki kopya bir gün ayrışırdı). */
+  const HARF = 'ABCDE';
+  function bamMadde(tur, m){
+    const t = (x, n) => {
+      const v = String(x == null ? '' : x).trim();
+      return v && v.length <= n ? v : null;
+    };
+    if(!m || typeof m !== 'object') return null;
+    if(tur === 'soru'){
+      const soru = t(m.soru, 1500), cozum = t(m.cozum, 2000);
+      const sec = Array.isArray(m.secenekler) && m.secenekler.length === 5
+        ? m.secenekler.map(x => t(x, 300)) : null;
+      if(!soru || !cozum || !sec || sec.indexOf(null) >= 0) return null;
+      if(new Set(sec.map(x => x.toLocaleLowerCase('tr'))).size !== 5) return null;
+      const i = typeof m.dogru === 'string' && m.dogru.length === 1 ? HARF.indexOf(m.dogru) : -1;
+      if(i < 0) return null;
+      return { front:soru + '\n\n' + sec.map((x, k) => HARF[k] + ') ' + x).join('\n'),
+        back:'Doğru: ' + HARF[i] + ') ' + sec[i] + '\n\n' + cozum };
+    }
+    if(tur === 'alistirma'){
+      const y = t(m.yonerge, 300), md = t(m.madde, 500), c = t(m.cevap, 200);
+      return y && md && c ? { front:y + '\n' + md, back:c } : null;
+    }
+    if(tur === 'kart'){
+      const on = t(m.on, 500), arka = t(m.arka, 500);
+      return on && arka ? { front:on, back:arka } : null;
+    }
+    return null;
+  }
+
   const BAM_SONRASI = {
     uretim:'Maddeler kalite kontrolünden geçince burada teklif olarak görünür; '
       + 'onaylarsan kart olarak eklenir.',
@@ -272,11 +306,14 @@ LIFEOS.Ofis = (function(){
         }
         if(res.status === 200 && g && g.ok){
           const yol = (g.ofisler || []).map(o => OFIS_ADI[o] || o).join(' → ');
-          /* Materyali kart olarak alabilen yalniz AYS (material.add). Oteki
-             modul icin «burada gorunur» demek yalan olurdu. */
-          const sonra = istek.tur === 'uretim' && b.MODULE !== 'ays'
+          /* Materyali kart olarak alabilen AYS ve ESP (material.add). Oteki
+             modul icin «burada gorunur» demek yalan olurdu. ESP seti yalniz
+             dil ya da tarih destesine alir. */
+          const sonra = istek.tur === 'uretim' && ['ays', 'esp'].indexOf(b.MODULE) < 0
             ? 'Materyal HKM › Ofis’te hazır olur; bu sistem onu henüz kart olarak alamıyor.'
-            : BAM_SONRASI[istek.tur];
+            : istek.tur === 'uretim' && b.MODULE === 'esp'
+              ? BAM_SONRASI.uretim + ' Kartlar setin konusuna göre dil ya da tarih destesine girer.'
+              : BAM_SONRASI[istek.tur];
           return { ok:true, id:g.id, metin:(g.yeni ? 'BAM’a ilettim (iş #' + g.id + ': ' + yol + '). '
             : 'Bu iş BAM’da zaten açık (#' + g.id + '). ') + sonra };
         }
@@ -288,5 +325,5 @@ LIFEOS.Ofis = (function(){
     return { ilet };
   }
 
-  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, kanalKur, bamIstegi, bamKur };
+  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, kanalKur, bamIstegi, bamKur, bamMadde };
 })();

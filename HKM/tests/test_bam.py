@@ -239,6 +239,28 @@ def run():
         eq(g["kalite"]["dusen"][0]["neden"], "Düzensiz fiil.")
     test("alistirma yargiyla denetlenir, yanlis cevapli madde duser", t_exercise_judged)
 
+    def t_esp_material_offer():
+        """ESP de materyali kart olarak alir (dil ya da tarih destesi):
+        hedef ESP ise gecen maddeler ESP'ye teklif olur; SPI'ye olmaz."""
+        con = db.connect(":memory:")
+        uretim = {"baslik": "İngilizce fiiller", "konu": "İngilizce", "kartlar": [
+            {"on": "to go", "arka": "gitmek"}, {"on": "to see", "arka": "görmek"}]}
+        kalite = {"yargilar": [{"no": 1, "dogru_mu": True}, {"no": 2, "dogru_mu": True}]}
+        t = _uretim_tasiyici(uretim, kalite)
+        bam.is_ac(con, "İngilizce 5 kart hazırla", hedef_modul="esp", now=AN)
+        bam.ilerlet(con, _cfg(), now=AN)
+        r = bam.ilerlet(con, _cfg(), transport=t, now=AN)
+        ok("ESP'ye teklif" in r["not"])
+        n = con.execute("SELECT * FROM intents WHERE module='esp'").fetchall()
+        eq([x["kind"] for x in n], ["material.add"])
+        eq(json.loads(n[0]["payload"])["adet"], 2)
+        u = _uretim_tasiyici(uretim, kalite)
+        bam.is_ac(con, "Demir için 5 kart hazırla", hedef_modul="spi", now=AN)
+        bam.ilerlet(con, _cfg(), now=AN)
+        bam.ilerlet(con, _cfg(), transport=u, now=AN)
+        eq(con.execute("SELECT COUNT(*) FROM intents WHERE module='spi'").fetchone()[0], 0)
+    test("hedef ESP ise materyal ESP'ye teklif olur; SPI kart almaz", t_esp_material_offer)
+
     def t_production_rules():
         eq(bam.uretim_istegi("TYT matematikten 20 soruluk test hazırla"), ("soru", 20))
         eq(bam.uretim_istegi("İngilizce 15 alıştırmalık çalışma kitabı hazırla"),

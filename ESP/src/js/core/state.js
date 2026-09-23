@@ -47,6 +47,8 @@ ESP.S = {
   recordings:[],       // diksiyon olcumleri
   drafts:[],           // yazi taslaklari
   goals:[],            // zamana bagli hedefler
+  hedefler:[],         // hedef motoru kayitlari (core/hedefler.js)
+  hedefPlanlar:[],     // hedeflerin planlari (core/hedefplan.js)
 
   timer:null,          // acik pratik zamanlayicisi (core/timer.js)
   usage:null,          // surtunme olcumu (core/friction.js)
@@ -85,6 +87,7 @@ ESP.S = {
        kaynagi HKM'dir ve tek gercek orada olmali. */
     hkmIntents:[],
     hkmDoubts:[],
+    planOnizle:null,        // Hedeflerim'de onizlemesi acik hedefin kimligi
     railOpen:false,
     undo:null,              // son yikici islemin geri alma kaydi
     dayTab:'giris',         // giris | ozet | gecmis
@@ -1349,6 +1352,9 @@ ESP.Model = (function(){
       await ESP.Hafizam.yukle();
     }
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
+    /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
+    if(ESP.Hedefler) await ESP.Hedefler.yukle();
+    if(ESP.HedefPlan) await ESP.HedefPlan.yukle();
 
     S.assets = ((await ESP.Store.list('assets')) || []).map(normAsset)
       .sort((a, b) => (b.at || '') < (a.at || '') ? -1 : 1);

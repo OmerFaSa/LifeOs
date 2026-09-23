@@ -475,8 +475,10 @@ SP.Screens.today = (function(){
       : h.fark != null ? (h.yon === 'azalt' ? '−' : '+') + h.fark + ' kg' : h.cumle;
     const pl = SP.Plan ? SP.Plan.aktif(h.id) : null;
     const onizle = !pl && S.ui.planOnizle === h.id && h.durum === 'aktif';
+    /* Başlık hedefin GÜNCEL özetidir, ilk cümle değil: tempo seçilince
+       tarih değişir ve «3 ay içinde…» cümlesi eskimiş bilgi olurdu. */
     return html`<div>
-      <div><b class="small">${h.cumle || ne}</b>
+      <div><b class="small">${h.paket === 'kilo' ? 'Kilo hedefi: ' + ne : h.cumle || ne}</b>
         <div class="tiny dim">${h.durum === 'askida' ? 'askıda · ' : ''}${h.son_tarih
           ? 'son tarih ' + H.tarihYaz(h.son_tarih) : 'tarihsiz'}${g.bant ? ' · ' + BANT[g.bant]
           + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>

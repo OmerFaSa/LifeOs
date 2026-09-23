@@ -650,35 +650,9 @@ R.Beacon = (function(){
      ÇEKİLİR ve AYS'nin KENDİ koduyla yeniden doğrulanır: HKM'nin denetimine
      güvenip bozuk maddeyi yazmak, sözleşmeyi karşı tarafa devretmek olurdu.
      Aynı set iki kez eklenmez; HKM'ye ulaşılamazsa hiçbir kart yazılmaz. */
-  const HARF = 'ABCDE';
-
-  function bamMadde(tur, m){
-    const t = (x, n) => {
-      const v = String(x == null ? '' : x).trim();
-      return v && v.length <= n ? v : null;
-    };
-    if(!m || typeof m !== 'object') return null;
-    if(tur === 'soru'){
-      const soru = t(m.soru, 1500), cozum = t(m.cozum, 2000);
-      const sec = Array.isArray(m.secenekler) && m.secenekler.length === 5
-        ? m.secenekler.map(x => t(x, 300)) : null;
-      if(!soru || !cozum || !sec || sec.indexOf(null) >= 0) return null;
-      if(new Set(sec.map(x => x.toLocaleLowerCase('tr'))).size !== 5) return null;
-      const i = typeof m.dogru === 'string' && m.dogru.length === 1 ? HARF.indexOf(m.dogru) : -1;
-      if(i < 0) return null;
-      return { front:soru + '\n\n' + sec.map((x, k) => HARF[k] + ') ' + x).join('\n'),
-        back:'Doğru: ' + HARF[i] + ') ' + sec[i] + '\n\n' + cozum };
-    }
-    if(tur === 'alistirma'){
-      const y = t(m.yonerge, 300), md = t(m.madde, 500), c = t(m.cevap, 200);
-      return y && md && c ? { front:y + '\n' + md, back:c } : null;
-    }
-    if(tur === 'kart'){
-      const on = t(m.on, 500), arka = t(m.arka, 500);
-      return on && arka ? { front:on, back:arka } : null;
-    }
-    return null;
-  }
+  /* Madde → kart çevirisi ve doğrulaması TEK YERDE: brand/ortak/ofis.js
+     (`LIFEOS.Ofis.bamMadde`). ESP de aynısını kullanır. */
+  function bamMadde(tur, m){ return window.LIFEOS.Ofis.bamMadde(tur, m); }
 
   async function materyalUygula(p){
     const kid = Number(p.kayit_id);

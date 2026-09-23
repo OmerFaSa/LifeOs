@@ -506,13 +506,15 @@ def _uretim_adimi(con, cfg, j, transport, now):
     k = kayit_ekle(con, "materyal", baslik, govde, dogruluk="dogrulanmadi",
                    etiketler=j["talep"][:300], is_id=j["id"], now=now)
     not_ = "%d madde üretildi, %d kalite kontrolünü geçti." % (len(temiz), len(maddeler))
-    if maddeler and j.get("hedef_modul") == "ays":
-        n = intents.create(con, "ays", "material.add",
+    # Kart olarak alabilen iki modul: AYS ve ESP (ESP seti dil ya da tarih
+    # destesine alir; hangisi oldugunu KENDI kuralıyla okur).
+    if maddeler and j.get("hedef_modul") in ("ays", "esp"):
+        n = intents.create(con, j["hedef_modul"], "material.add",
                            {"kayit_id": k["id"], "adet": len(maddeler), "baslik": baslik},
                            None, source="bam")
         if n.get("ok"):
             iz_ekle(con, "kayit", k["id"], "niyet", n["intent"]["id"], now=now)
-            not_ += " AYS'ye teklif bırakıldı."
+            not_ += " %s'ye teklif bırakıldı." % {"ays": "AYS", "esp": "ESP"}[j["hedef_modul"]]
     return {"durum": "tamam", "kayit_id": k["id"], "not": not_}
 
 

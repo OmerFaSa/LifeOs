@@ -61,6 +61,13 @@ ESP.Plans = (function(){
        bütün ekranlarını, masasını ve denge hesabını etkiler. Veri silinmez. */
     { id:'bolum', level:'orta', label:'Bölümü aç / kapat', scope:'coach',
       note:'Disiplin gezinmeden ve denge hesabından çıkar ya da geri gelir; verisi silinmez.' },
+    /* Hedef planı (core/hedefplan.js). BÜYÜK aksiyon (AGENTS.md §1.9):
+       odak, günlük taban, gerekirse bölüm ve tarihli hedef birlikte
+       değişir. Ayrıntılı önizleme + onay + geri dönüş noktası. Yalnız
+       kullanıcının Hedeflerim'deki düğmesinden gelir; kural motoru bu
+       türü kendiliğinden üretmez, model hiç öneremez. */
+    { id:'hedefplan', level:'buyuk', label:'Hedef planı', scope:'coach', modelYok:true,
+      note:'Hedefin disiplini odağa alınır, taban vakte göre yükselir, tarihli hedef ve kontrol noktaları kurulur.' },
   ];
 
   const KIND_BY_ID = KINDS.reduce(function(m, k){ m[k.id] = k; return m; }, {});
@@ -346,6 +353,18 @@ ESP.Plans = (function(){
       await ESP.Model.saveProfile({ focus:p.payload.focus });
       uygulanan = { kind:'focus', focus:p.payload.focus, onceki:onceki == null ? null : onceki };
 
+    }else if(p.kind === 'hedefplan'){
+      /* Plan UYGULAMA ANINDA yeniden kurulur: önizlemeden bu yana veri
+         değişmiş olabilir. */
+      if(p.source !== 'istek') return { ok:false, error:'Hedef planı yalnız senin onayınla uygulanır.' };
+      const h = ESP.Hedefler && ESP.Hedefler.liste().find(function(x){ return x.id === (p.payload || {}).hedefId; });
+      if(!h || !ESP.HedefPlan) return { ok:false, error:'Hedef bulunamadı.' };
+      if(ESP.HedefPlan.aktif(h.id)) return { ok:false, error:'Bu hedefin uygulanmış bir planı var; önce onu geri al.' };
+      const kr = ESP.HedefPlan.kur(h, U.todayISO());
+      if(!kr.ok) return { ok:false, error:kr.why };
+      try{ uygulanan = await ESP.HedefPlan.uygula(kr.plan); }
+      catch(e){ return { ok:false, error:String(e && e.message || e) }; }
+
     }else if(p.kind === 'weekplan'){
       const oncekiPlan = plan() ? JSON.parse(JSON.stringify(plan())) : null;
       const yeni = weekPlan(p.at);
@@ -378,6 +397,7 @@ ESP.Plans = (function(){
     else if(a.kind === 'base') await ESP.Model.saveProfile({ dailyMinutes:a.onceki });
     else if(a.kind === 'focus') await ESP.Model.saveProfile({ focus:a.onceki });
     else if(a.kind === 'weekplan'){ if(a.oncekiPlan) await savePlan(a.oncekiPlan); else await clearPlan(); }
+    else if(a.kind === 'hedefplan' && ESP.HedefPlan) await ESP.HedefPlan.geriAl(a);
     else if(a.kind === 'bolum'){
       const res = await ESP.Mod.set(a.disc, !!a.onceki);
       if(!res.ok) return res;

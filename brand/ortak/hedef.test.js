@@ -223,6 +223,113 @@
     });
   });
 
+  /* KAPASİTE MODELİ: karar hızdan değil kullanıcının vaktinden çıkar.
+     Sahte dil paketi — motor CEFR'i bilmez, yalnız «toplam kaç saat». */
+  const SAAT = { '0':0, A1:100, A2:200, B1:400 };
+  const DIL = {
+    id:'dil', ad:'Dil', olcut:{ ad:'seviye', birim:'saat' }, anahtar:/\b(ingilizce|dil)\b/,
+    yonler:['seviye'], kapasiteGerekir:true,
+    tani(k){
+      const m = /(?:^|[^a-zçğıöşü])([abc][12])(?![0-9])/.exec(k);
+      return m ? { yon:'seviye', hedefSeviye:m[1].toUpperCase(),
+        hedefHam:{ deger:m[1].toUpperCase(), birim:'CEFR' } } : null;
+    },
+    simdiSoru:'Şu anki seviyen ne? A1, A2 ya da «sıfır».',
+    simdiOku(t){
+      const m = /([abc][12])/i.exec(t);
+      if(m) return { deger:m[1].toUpperCase(), etiket:'tahmin' };
+      if(/sıfır/.test(t)) return { deger:'0', etiket:'tahmin' };
+      return null;
+    },
+    simdiHata:'Seviyeyi anlayamadım; A1, A2 ya da «sıfır» yaz.',
+    gerekenSaat(h){
+      if(!h.simdi) return { neden:'Şu anki seviye bilinmeden süre hesaplanamaz.' };
+      return { saat:SAAT[h.hedefSeviye] - SAAT[h.simdi.deger],
+        dayanak:{ metin:'deneme saat tablosu', durum:'kaynak_bekliyor' } };
+    },
+  };
+  function dilHedefi(cumle, simdi){
+    const h = H().yeni(H().cumleden(cumle, [DIL], BUGUN), 'esp', BUGUN);
+    if(simdi) h.simdi = { deger:simdi, etiket:'tahmin' };
+    return h;
+  }
+
+  describe('Hedef — kapasite modeli', () => {
+    it('hedef, tarih ve günlük vakit tek cümleden tanınır', () => {
+      const h = dilHedefi('Bir ayda İngilizcede A2\'ye gelmek istiyorum, günde yarım saat ayırabilirim');
+      expect([h.paket, h.hedefSeviye, h.son_tarih, h.kapasite.gunluk_dk])
+        .toEqual(['dil', 'A2', '2026-10-23', 30]);
+    });
+
+    it('şu anki değer paketin kendi sorusuyla sorulur ve kendi okuyucusuyla okunur', () => {
+      const h = dilHedefi('Bir ayda İngilizcede A2\'ye gelmek istiyorum, günde yarım saat ayırabilirim');
+      const e = H().eksikler(h, DIL, {});
+      expect(e[0]).toEqual({ alan:'simdi', soru:'Şu anki seviyen ne? A1, A2 ya da «sıfır».' });
+      const r = H().cevapla(h, 'simdi', 'A1 sanırım', BUGUN, DIL);
+      expect([r.ok, r.hedef.simdi.deger, r.hedef.simdi.etiket]).toEqual([true, 'A1', 'tahmin']);
+      expect(H().cevapla(h, 'simdi', 'bilmem ki', BUGUN, DIL).why).toContain('A1, A2');
+    });
+
+    it('vakit yetmiyorsa «bu sürede olmaz» der ve bu vakitle olacağı tarihi söyler', () => {
+      const h = dilHedefi('Bir ayda İngilizcede A2\'ye gelmek istiyorum, günde yarım saat ayırabilirim', 'A1');
+      const g = H().gerceklik(h, DIL, {}, BUGUN);
+      expect([g.mod, g.bant, g.saat, g.tipik, g.etiket]).toEqual(['kapasite', 'gercekci_degil', 100, 3.5, 'tahmin']);
+      expect(g.karsi.son_tarih).toBe('2027-04-14');
+      const t = H().kararMetni(g);
+      expect(t).toContain('Bu sürede olmaz');
+      expect(t).toContain('14 Nisan 2027');
+      expect(t).toContain('haftada 3,5 saat');
+    });
+
+    it('vakit yetiyorsa gerçekçi; 1,5 katına kadar zorlayıcı', () => {
+      const a = dilHedefi('Bir yılda İngilizcede A2\'ye gelmek istiyorum, günde 1 saat ayırabilirim', 'A1');
+      expect(H().gerceklik(a, DIL, {}, BUGUN).bant).toBe('gercekci');
+      const b = dilHedefi('6 ayda İngilizcede A2\'ye gelmek istiyorum, günde 30 dakika, haftada 4 gün', 'A1');
+      const g = H().gerceklik(b, DIL, {}, BUGUN);
+      expect([g.tipik, g.bant]).toEqual([2, 'gercekci_degil']);
+      const c = dilHedefi('4 ayda İngilizcede A2\'ye gelmek istiyorum, günde 40 dakika', 'A1');
+      expect(H().gerceklik(c, DIL, {}, BUGUN).bant).toBe('zorlayici');
+    });
+
+    it('dayanak kullanıcının kendi ölçümüyse karar «hesaplandı»dır', () => {
+      const p = Object.assign({}, DIL, { gerekenSaat:() => ({ saat:50,
+        dayanak:{ metin:'kendi ölçümün', durum:'olculdu' } }) });
+      const h = dilHedefi('Bir yılda İngilizcede A2\'ye gelmek istiyorum, günde 1 saat', 'A1');
+      expect(H().gerceklik(h, p, {}, BUGUN).etiket).toBe('hesaplandi');
+      expect(H().kararMetni(H().gerceklik(h, p, {}, BUGUN))).toContain('hesaplandı');
+    });
+
+    it('senaryolar günde 30 dk, 1 saat ve kullanıcının kendi vaktidir', () => {
+      const h = dilHedefi('Bir ayda İngilizcede A2\'ye gelmek istiyorum, günde 45 dakika', 'A1');
+      const s = H().senaryolar(h, DIL, {}, BUGUN);
+      expect(s.map(x => x.kapasite.gunluk_dk)).toEqual([30, 45, 60]);
+      expect(s[1].ad).toContain('senin vaktin');
+      expect(s[2].son_tarih < s[0].son_tarih).toBe(true);
+    });
+
+    it('vakit ya da şu anki değer yoksa karar verilmez ve bu söylenir', () => {
+      const h = dilHedefi('Bir ayda İngilizcede A2\'ye gelmek istiyorum', 'A1');
+      expect(H().gerceklik(h, DIL, {}, BUGUN).neden).toContain('vakit');
+      const k = dilHedefi('Bir ayda İngilizcede A2\'ye gelmek istiyorum, günde 1 saat');
+      expect(H().gerceklik(k, DIL, {}, BUGUN).neden).toContain('seviye');
+    });
+
+    it('sohbette seçilen senaryo tarihi VE vakti birlikte kaydeder', async () => {
+      const kayit = {};
+      const s = H().sohbetKur({ paketler:[DIL], modul:'esp', durum:() => ({}), bugun:() => BUGUN,
+        kaydet:async h => { kayit[h.id] = h; } });
+      expect((await s.isle('Bir ayda İngilizcede A2\'ye gelmek istiyorum, günde yarım saat ayırabilirim')).text)
+        .toContain('Şu anki seviyen');
+      const k = await s.isle('A1');
+      expect(k.text).toContain('Bu sürede olmaz');
+      expect(k.text).toContain('Günde 1 saat');
+      expect(k.text).toContain('seçenek');
+      await s.isle('2');
+      const h = Object.values(kayit)[0];
+      expect([h.durum, h.kapasite.gunluk_dk, h.gerceklik.mod]).toEqual(['aktif', 60, 'kapasite']);
+    });
+  });
+
   describe('Hedef — yaşam döngüsü', () => {
     it('izinli geçişler yapılır, yasak geçiş reddedilir', () => {
       const h = H().yeni(H().cumleden('3 kilo vermek istiyorum', PAKETLER, BUGUN), 'spi', BUGUN);

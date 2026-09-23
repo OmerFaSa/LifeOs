@@ -241,7 +241,7 @@ uca çalıştırır.
 |---|---|---|---|
 | **1** | hedef çerçevesi, tanıma ve netleştirme, gerçekçilik çerçevesi, senaryolar, durum profili, hekim talimatı ve güvenlik kapısı, «Hedeflerim» | SPİ: kilo ver / al, VKİ | **bitti** |
 | **2** | King onay zinciri, tahmini süre, bildirim, BAM'a durum profiliyle iş, Planlama Ofisi v1, `plan.apply` | SPİ | **bitti** — ayrıntı §4.1 |
-| **3** | kapasiteye göre senaryolar, seviye merdivenleri, ESP'de plan ve materyal içe alma | ESP: enstrüman, dil, okuma | |
+| **3** | kapasiteye göre senaryolar, seviye merdivenleri, ESP'de plan ve materyal içe alma | ESP: enstrüman, dil, okuma | **bitti** — ayrıntı §4.2 |
 | **4** | sınav profilleri, bölümlü test kitabı, müfredat raporu | AYS | |
 | **5** | Bilgi Deposu tazeliği, değişiklik araştırması (web kararına bağlı), uyarlama döngüsü, zaman bütçesi (onaylanırsa) | hepsi | |
 | **6** | değerlendirme seti, cilalama, üyelik hazırlığı | — | |
@@ -274,6 +274,30 @@ uca çalıştırır.
   talimatlar plana «uyulacak talimat» olarak yazılır ama beslenme hedefine
   henüz kodla uygulanmaz.
 - ESP ve AYS'de plan: Tur 3 ve 4.
+
+### 4.2 Tur 3 — ne kuruldu, ne bilerek bekliyor
+
+**Kuruldu**
+
+| Parça | Yer | Söz |
+|---|---|---|
+| Kapasite modeli | `brand/ortak/hedef.js` | paket toplam saati verir; karar haftalık vakitle, vaktin 1,5 katına kadar «zorlayıcı»; «bu sürede olmaz» + bu vakitle olacağı tarih; senaryolar günde 30 dk / 1 saat / senin vaktin, seçim vakti de kaydeder |
+| Şu anki değer kancaları | `brand/ortak/hedef.js` | paket kendi sorusunu sorar ve cevabı kendisi okur («A1», «sıfır», «bilmiyorum») |
+| Kendi ölçümün | `brand/ortak/hedef.js` | dayanak kullanıcının ölçülmüş verisiyse karar «hesaplandı» |
+| ESP paketleri | `ESP/src/js/core/hedefler.js` | dil (CEFR, saat tahmini), okuma (kitap başına saat: kendi ölçümün ya da tahmin), enstrüman (merdiven basamağının temiz tempo kapısı, hız kendi kayıtlarından) |
+| ESP planı | `ESP/src/js/core/hedefplan.js` | odak, taban (yalnız yükselir), bölüm, tarihli hedef, dört haftalık kontrol; büyük aksiyon, geri alınabilir |
+| ESP sohbeti ve Hedeflerim | `ESP/src/js/core/komut.js`, `screens/today.js` | Danışma'da hedef kurulur; Bugün › Özet'te önizleme, uygula, ilerleme, geri al |
+| BAM → ESP materyali | `HKM/core/bam.py`, `intents.py`, `ESP/src/js/core/beacon.js` | material.add ESP'ye açıldı; deste kuralla okunur; belirsizse eklenmez |
+| Ortak madde denetimi | `brand/ortak/ofis.js` `bamMadde` | AYS ve ESP aynı kuralla doğrular |
+
+**Bilerek bekliyor**
+
+- ESP planının King'e iletilmesi ve Planlama Ofisi'nin ESP paketleri
+  (şimdilik yalnız SPİ kilo planı).
+- Enstrümanda «şu parçayı çalmak» gibi repertuar hedefi; yazı, felsefe,
+  diksiyon ve tarih paketleri.
+- CEFR saat tablosunun ve kitap tahmininin kaynağının bağlanması
+  (Araştırma Ofisi, web kararına bağlı).
 
 ## 5. İş bölümü — şimdilik tek Opus; ek Opus gelirse bu sahiplik tablosu
 

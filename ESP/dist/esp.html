@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'1bfc69f', at:'2026-09-23 09:44', dirty:true };
+ESP.BUILD = { id:'3499a07', at:'2026-09-23 11:14', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -9282,6 +9282,40 @@ LIFEOS.Ofis = (function(){
     return null;
   }
 
+  /* BAM maddesini karta çevirir — modülün KENDİ doğrulaması. HKM'nin
+     kalite kontrolüne güvenip bozuk maddeyi yazmak, sözleşmeyi karşı
+     tarafa devretmek olurdu. Soru: beş farklı şık ve tek doğru harf;
+     alıştırma: yönerge + madde + cevap; kart: ön + arka. Bozuk madde düşer.
+     AYS ve ESP aynı kuralı kullanır (iki kopya bir gün ayrışırdı). */
+  const HARF = 'ABCDE';
+  function bamMadde(tur, m){
+    const t = (x, n) => {
+      const v = String(x == null ? '' : x).trim();
+      return v && v.length <= n ? v : null;
+    };
+    if(!m || typeof m !== 'object') return null;
+    if(tur === 'soru'){
+      const soru = t(m.soru, 1500), cozum = t(m.cozum, 2000);
+      const sec = Array.isArray(m.secenekler) && m.secenekler.length === 5
+        ? m.secenekler.map(x => t(x, 300)) : null;
+      if(!soru || !cozum || !sec || sec.indexOf(null) >= 0) return null;
+      if(new Set(sec.map(x => x.toLocaleLowerCase('tr'))).size !== 5) return null;
+      const i = typeof m.dogru === 'string' && m.dogru.length === 1 ? HARF.indexOf(m.dogru) : -1;
+      if(i < 0) return null;
+      return { front:soru + '\n\n' + sec.map((x, k) => HARF[k] + ') ' + x).join('\n'),
+        back:'Doğru: ' + HARF[i] + ') ' + sec[i] + '\n\n' + cozum };
+    }
+    if(tur === 'alistirma'){
+      const y = t(m.yonerge, 300), md = t(m.madde, 500), c = t(m.cevap, 200);
+      return y && md && c ? { front:y + '\n' + md, back:c } : null;
+    }
+    if(tur === 'kart'){
+      const on = t(m.on, 500), arka = t(m.arka, 500);
+      return on && arka ? { front:on, back:arka } : null;
+    }
+    return null;
+  }
+
   const BAM_SONRASI = {
     uretim:'Maddeler kalite kontrolünden geçince burada teklif olarak görünür; '
       + 'onaylarsan kart olarak eklenir.',
@@ -9319,11 +9353,14 @@ LIFEOS.Ofis = (function(){
         }
         if(res.status === 200 && g && g.ok){
           const yol = (g.ofisler || []).map(o => OFIS_ADI[o] || o).join(' → ');
-          /* Materyali kart olarak alabilen yalniz AYS (material.add). Oteki
-             modul icin «burada gorunur» demek yalan olurdu. */
-          const sonra = istek.tur === 'uretim' && b.MODULE !== 'ays'
+          /* Materyali kart olarak alabilen AYS ve ESP (material.add). Oteki
+             modul icin «burada gorunur» demek yalan olurdu. ESP seti yalniz
+             dil ya da tarih destesine alir. */
+          const sonra = istek.tur === 'uretim' && ['ays', 'esp'].indexOf(b.MODULE) < 0
             ? 'Materyal HKM › Ofis’te hazır olur; bu sistem onu henüz kart olarak alamıyor.'
-            : BAM_SONRASI[istek.tur];
+            : istek.tur === 'uretim' && b.MODULE === 'esp'
+              ? BAM_SONRASI.uretim + ' Kartlar setin konusuna göre dil ya da tarih destesine girer.'
+              : BAM_SONRASI[istek.tur];
           return { ok:true, id:g.id, metin:(g.yeni ? 'BAM’a ilettim (iş #' + g.id + ': ' + yol + '). '
             : 'Bu iş BAM’da zaten açık (#' + g.id + '). ') + sonra };
         }
@@ -9335,7 +9372,7 @@ LIFEOS.Ofis = (function(){
     return { ilet };
   }
 
-  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, kanalKur, bamIstegi, bamKur };
+  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, kanalKur, bamIstegi, bamKur, bamMadde };
 })();
 
 /* ==== js/core/hedef.js ==== */
@@ -9358,8 +9395,13 @@ LIFEOS.Ofis = (function(){
      id, ad, olcut:{ ad, birim }, anahtar:RegExp, yonler:[…]
      birimler:RegExp?          miktarın yanındaki birim (yoksa anahtar)
      tani(metin, bugun)?       özel kalıp («VKİ'mi 24'e») — varsa önce o
-     simdi(durum)?             şu anki değer, etiketiyle
+     simdi(durum, hedef)?      şu anki değer, etiketiyle
+     simdiSoru?                şu anki değeri sormanın kendi cümlesi (metin ya da fn(h))
+     simdiOku(metin, hedef)?   o cevabı okur → { deger, birim, etiket } | { hata } | null
      hiz(hedef, durum)?        { tipik, ust, birim, dayanak:{ metin, durum } }
+     gerekenSaat(hedef, durum)? { saat, dayanak } — KAPASİTE MODELİ: hedefin
+                               toplam kaç saat pratik istediği. Varsa karar
+                               hızla değil kullanıcının VAKTİYLE verilir.
      guvenlik(hedef, durum, s)? { red:true, neden } — bandı ezer
      ekSorular(hedef, durum)?  [{ alan, soru }]
      kapasiteGerekir?          true ise günlük vakit sorulur
@@ -9547,7 +9589,7 @@ LIFEOS.Hedef = (function(){
 
   function simdiOf(h, paket, durum){
     if(h.simdi) return h.simdi;
-    return (paket && typeof paket.simdi === 'function') ? (paket.simdi(durum || {}) || null) : null;
+    return (paket && typeof paket.simdi === 'function') ? (paket.simdi(durum || {}, h) || null) : null;
   }
 
   /* ---------------------------------------------------- netleştirme */
@@ -9567,7 +9609,8 @@ LIFEOS.Hedef = (function(){
         soru:'Ne zamana kadar? «3 ay içinde» ya da «31 Aralık’a kadar» gibi yazabilirsin.' });
     }
     if(!simdiOf(h, paket, durum) && h.yon !== 'aliskanlik'){
-      out.push({ alan:'simdi', soru:'Şu anki ' + olcut + ' değerin ne? Bilmiyorsan «bilmiyorum» yaz.' });
+      const ozel = typeof paket.simdiSoru === 'function' ? paket.simdiSoru(h) : paket.simdiSoru;
+      out.push({ alan:'simdi', soru:ozel || ('Şu anki ' + olcut + ' değerin ne? Bilmiyorsan «bilmiyorum» yaz.') });
     }
     if(paket.kapasiteGerekir && !(h.kapasite && h.kapasite.gunluk_dk)){
       out.push({ alan:'kapasite',
@@ -9583,7 +9626,9 @@ LIFEOS.Hedef = (function(){
 
   const BILMIYORUM = /(bilmiyorum|bilmem|ölçmedim|yok)/;
 
-  function cevapla(h, alan, metin, bugun){
+  /* `paket` verilirse şu anki değer paketin kendi okuyucusuyla okunur
+     («B1», «hiç bilmiyorum» gibi sayı olmayan cevaplar). */
+  function cevapla(h, alan, metin, bugun, paket){
     const k = kucuk(metin).trim();
     const yeniH = Object.assign({}, h, { cevaplar:Object.assign({}, h.cevaplar),
       guncelleme:bugun });
@@ -9595,6 +9640,11 @@ LIFEOS.Hedef = (function(){
       const ka = kapasiteAyikla(k, true).kapasite;
       if(!ka || !ka.gunluk_dk) return { ok:false, why:'Vakti anlayamadım. «Günde 30 dakika» ya da «günde 1 saat» gibi yazabilirsin.' };
       yeniH.kapasite = Object.assign({}, h.kapasite || {}, ka);
+    }else if(alan === 'simdi' && paket && typeof paket.simdiOku === 'function'){
+      const r = paket.simdiOku(metin, h);
+      if(!r) return { ok:false, why:paket.simdiHata || 'Değeri anlayamadım; yeniden yazar mısın?' };
+      if(r.hata) return { ok:false, why:r.hata };
+      yeniH.simdi = Object.assign({ birim:h.birim, tarih:bugun }, r);
     }else if(alan === 'simdi'){
       const m = new RegExp(SAYI).exec(k);
       if(m && sayiOku(m[1]) != null){
@@ -9628,7 +9678,70 @@ LIFEOS.Hedef = (function(){
     return { fark:Math.abs(d) };
   }
 
+  /* KAPASİTE MODELİ. Dil, okuma, enstrüman gibi alanlarda karar bir hız
+     bandından değil KULLANICININ VAKTİNDEN çıkar: hedef toplam kaç saat
+     istiyor, sen haftada kaç saat veriyorsun. Haftalık vakit = günlük
+     dakika × haftada gün (verilmediyse 7). Vaktinin 1,5 katına kadar
+     «zorlayıcı»dır; ötesi bu sürede olmaz — ve bu vakitle hangi tarihte
+     olacağı söylenir. Toplam saatin dayanağı paketindir; kaynaklı değilse
+     karar «tahmin»dir. */
+  const ZORLAYICI_KAT = 1.5;
+  /* Kaynaklı eşik ya da kullanıcının KENDİ ÖLÇÜLMÜŞ verisi «hesaplandı»dır;
+     kaynağı beklenen eşik ya da beyana dayanan veri «tahmin». */
+  function hesaplandiMi(d){ return !!(d && (d.durum === 'kaynakli' || d.durum === 'olculdu')); }
+  function haftalikSaat(kap){
+    if(!kap || !(kap.gunluk_dk > 0)) return null;
+    return yuvarla(kap.gunluk_dk * (kap.haftalik_gun || 7) / 60, 2);
+  }
+
+  function kapasiteKarari(h, paket, durum, bugun){
+    if(!h.son_tarih) return { bant:null, etiket:'veri_yok', neden:'Tarih olmadan hesaplanamaz.' };
+    const gun = gunFarki(bugun, h.son_tarih);
+    if(!(gun > 0)) return { bant:null, etiket:'veri_yok', hata:'Hedef tarihi geçmişte.' };
+    const haftalik = haftalikSaat(h.kapasite);
+    if(haftalik == null){
+      return { bant:null, etiket:'veri_yok', neden:'Günde ne kadar vakit ayıracağın bilinmeden karar verilemez.' };
+    }
+    const g = paket.gerekenSaat(h, durum || {}) || {};
+    if(!(g.saat > 0)) return { bant:null, etiket:'veri_yok', neden:g.neden || 'Gereken süre hesaplanamadı.' };
+    const hafta = gun / 7;
+    const gerekli = yuvarla(g.saat / hafta);
+    const eps = 1e-9;
+    const bant = gerekli <= haftalik + eps ? 'gercekci'
+      : gerekli <= haftalik * ZORLAYICI_KAT + eps ? 'zorlayici' : 'gercekci_degil';
+    const out = { mod:'kapasite', bant, gerekli, saat:yuvarla(g.saat, 1), hafta:yuvarla(hafta, 1),
+      birim:'saat/hafta', tipik:haftalik, ust:yuvarla(haftalik * ZORLAYICI_KAT), dayanak:g.dayanak || null,
+      etiket:hesaplandiMi(g.dayanak) ? 'hesaplandi' : 'tahmin' };
+    if(bant !== 'gercekci'){
+      out.karsi = { son_tarih:gunEkle(bugun, Math.ceil(g.saat / haftalik - eps) * 7),
+        ulasilabilir:yuvarla(haftalik * hafta, 1) };
+    }
+    return out;
+  }
+
+  /* Kapasiteye göre senaryolar: günde 30 dakika, 1 saat ve kullanıcının
+     kendi vakti — her birinde hedefin hangi tarihte olacağı. «Bu olmaz,
+     şu olur» cümlesinin ikinci yarısı budur. */
+  const KAPASITE_SENARYO = [30, 60];
+  function kapasiteSenaryolari(h, paket, durum, bugun){
+    const g = paket.gerekenSaat(h, durum || {}) || {};
+    if(!(g.saat > 0)) return [];
+    const gunler = (h.kapasite && h.kapasite.haftalik_gun) || 7;
+    const dkler = KAPASITE_SENARYO.slice();
+    const kendi = h.kapasite && h.kapasite.gunluk_dk;
+    if(kendi && dkler.indexOf(kendi) < 0) dkler.push(kendi);
+    dkler.sort((a, b) => a - b);
+    return dkler.map(dk => {
+      const haftalik = yuvarla(dk * gunler / 60, 2);
+      const ad = (dk % 60 === 0 ? 'Günde ' + (dk / 60) + ' saat' : 'Günde ' + dk + ' dakika')
+        + (gunler < 7 ? ', haftada ' + gunler + ' gün' : '') + (dk === kendi ? ' (senin vaktin)' : '');
+      return { ad, hiz:haftalik, birim:'saat/hafta', kapasite:{ gunluk_dk:dk },
+        son_tarih:gunEkle(bugun, Math.ceil(g.saat / haftalik - 1e-9) * 7) };
+    });
+  }
+
   function gerceklik(h, paket, durum, bugun){
+    if(paket && typeof paket.gerekenSaat === 'function') return kapasiteKarari(h, paket, durum, bugun);
     if(!paket || typeof paket.hiz !== 'function'){
       return { bant:null, etiket:'veri_yok',
         neden:'Bu alan için bir gerçekçilik kuralı yok; kod karar veremez. İstersen BAM '
@@ -9656,7 +9769,7 @@ LIFEOS.Hedef = (function(){
       : gerekli <= hz.ust + eps ? 'zorlayici' : 'gercekci_degil';
     const out = { bant, gerekli, fark:f.fark, hafta:yuvarla(hafta, 1), birim:hz.birim,
       tipik:hz.tipik, ust:hz.ust, dayanak:hz.dayanak || null,
-      etiket:hz.dayanak && hz.dayanak.durum === 'kaynakli' ? 'hesaplandi' : 'tahmin' };
+      etiket:hesaplandiMi(hz.dayanak) ? 'hesaplandi' : 'tahmin' };
     const g = typeof paket.guvenlik === 'function'
       ? paket.guvenlik(h, durum || {}, { gerekli, fark:f.fark, hafta, simdi }) : null;
     if(g && g.red){ out.bant = 'guvensiz'; out.neden = g.neden; bant = 'guvensiz'; }
@@ -9671,6 +9784,7 @@ LIFEOS.Hedef = (function(){
      senaryosu varsa (ör. kapasiteye göre saat modeli) o kullanılır. */
   function senaryolar(h, paket, durum, bugun){
     if(paket && typeof paket.senaryolar === 'function') return paket.senaryolar(h, durum || {}, bugun);
+    if(paket && typeof paket.gerekenSaat === 'function') return kapasiteSenaryolari(h, paket, durum, bugun);
     if(!paket || typeof paket.hiz !== 'function') return [];
     const f = farkOf(h, simdiOf(h, paket, durum));
     if(f.fark == null) return [];
@@ -9706,6 +9820,7 @@ LIFEOS.Hedef = (function(){
   function kararMetni(g){
     if(g.hata) return g.hata;
     if(g.bant == null) return g.neden;
+    if(g.mod === 'kapasite') return kapasiteMetni(g);
     const k = hizYaz(g.gerekli, g.birim);
     const parca = {
       gercekci:'Bu hedef gerçekçi görünüyor: ' + k + ' gerekiyor; tipik tempo '
@@ -9717,6 +9832,21 @@ LIFEOS.Hedef = (function(){
         + (g.karsi ? ' Bu tarihe kadar tipik tempoyla ' + sayiYaz(g.karsi.ulasilabilir) + ' '
           + String(g.birim || '').replace(/\/hafta$/, '') + ' mümkün.' : ''),
       guvensiz:'Bu hedef bu haliyle güvenli değil: ' + (g.neden || '') ,
+    }[g.bant];
+    return parca + ' Bu karar ' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmindir')
+      + (g.dayanak ? ' (dayanak: ' + g.dayanak.metin + ')' : '') + '.';
+  }
+
+  function kapasiteMetni(g){
+    const ger = hizYaz(g.gerekli, g.birim), vakit = hizYaz(g.tipik, g.birim);
+    const parca = {
+      gercekci:'Bu hedef gerçekçi görünüyor: toplam yaklaşık ' + sayiYaz(g.saat) + ' saat, yani '
+        + ger + ' gerekiyor; senin vaktin ' + vakit + '.',
+      zorlayici:'Bu hedef zorlayıcı: ' + ger + ' gerekiyor, senin vaktin ' + vakit
+        + '. Vaktini biraz artırman gerekir.',
+      gercekci_degil:'Bu sürede olmaz: toplam yaklaşık ' + sayiYaz(g.saat) + ' saat, yani ' + ger
+        + ' gerekiyor; senin vaktin ' + vakit + '.'
+        + (g.karsi ? ' Bu vakitle ' + tarihYaz(g.karsi.son_tarih) + ' tarihinde olur.' : ''),
     }[g.bant];
     return parca + ' Bu karar ' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmindir')
       + (g.dayanak ? ' (dayanak: ' + g.dayanak.metin + ')' : '') + '.';
@@ -9767,7 +9897,9 @@ LIFEOS.Hedef = (function(){
           ? 'Onaylıyor musun? «evet» dersen hedef aktif olur; «vazgeç» dersen bırakırım.'
           : g.bant == null
             ? 'Hedefi yine de kaydedeyim mi? «evet» ya da «vazgeç».'
-            : 'Bir tempo seç («1» ya da «2»), ya da «evet» dersen kendi tarihinle kaydederim.');
+            : g.mod === 'kapasite'
+              ? 'Bir seçenek seç (numarasını yaz), ya da «evet» dersen kendi tarihin ve vaktinle kaydederim.'
+              : 'Bir tempo seç («1» ya da «2»), ya da «evet» dersen kendi tarihinle kaydederim.');
       if(g.hata){
         bekleyen = null;
         return { text:g.hata + ' Hedefi yeniden yazabilirsin.', hedef:h };
@@ -9800,8 +9932,11 @@ LIFEOS.Hedef = (function(){
       const secim = /^\d$/.test(k) ? Number(k) : null;
       if(secim != null){
         const x = b.senaryolar[secim - 1];
-        if(!x) return { text:'Böyle bir tempo yok; listedeki numaralardan birini yaz.', hedef:h };
+        if(!x) return { text:'Böyle bir seçenek yok; listedeki numaralardan birini yaz.', hedef:h };
         h.son_tarih = x.son_tarih;
+        /* Kapasite senaryosu vakti de değiştirir: «günde 1 saat» seçildiyse
+           hedef o vakitle kaydedilir. */
+        if(x.kapasite) h.kapasite = Object.assign({}, h.kapasite || {}, x.kapasite);
       }else if(EVET.test(k)){
         if(b.karar.bant === 'guvensiz'){
           return { text:'Bu tarihle kaydedemem; güvenli bir tempo seç («1» ya da «2») ya da «vazgeç» de.',
@@ -9815,7 +9950,8 @@ LIFEOS.Hedef = (function(){
          istediği hedefin kararı da ayrıca saklanır («3 haftada istedin,
          6 haftaya çektik» görünsün). */
       h.gerceklik = { bant:g.bant, gerekli:g.gerekli, tipik:g.tipik, ust:g.ust, birim:g.birim,
-        etiket:g.etiket, dayanak:g.dayanak || null, tarih:bugun() };
+        etiket:g.etiket, dayanak:g.dayanak || null, tarih:bugun(), mod:g.mod || 'hiz',
+        saat:g.saat == null ? null : g.saat };
       h.ilkKarar = b.karar.bant || null;
       const r = gecis(h, 'aktif', bugun());
       bekleyen = null;
@@ -9829,7 +9965,7 @@ LIFEOS.Hedef = (function(){
       const k = kucuk(metin).trim();
       if(bekleyen && bekleyen.asama === 'soru'){
         if(VAZGEC.test(k.replace(/[.!]+$/, ''))) return await birak(bekleyen.hedef);
-        const r = cevapla(bekleyen.hedef, bekleyen.alan, metin, bugun());
+        const r = cevapla(bekleyen.hedef, bekleyen.alan, metin, bugun(), paketOf(bekleyen.hedef));
         if(!r.ok) return { text:r.why, hedef:bekleyen.hedef };
         const h = normal(r.hedef);
         await kaydet(h);
@@ -9860,7 +9996,637 @@ LIFEOS.Hedef = (function(){
   }
 
   return { YONLER, DURUMLAR, BANT_ADI, cumleden, yeni, eksikler, cevapla, gerceklik,
-    senaryolar, gecis, kararMetni, sohbetKur, tarihYaz, sayiYaz, gunEkle, ayEkle, gunFarki };
+    senaryolar, gecis, kararMetni, sohbetKur, tarihYaz, sayiYaz, gunEkle, ayEkle, gunFarki,
+    haftalikSaat, ZORLAYICI_KAT };
+})();
+
+/* ==== js/core/hedefler.js ==== */
+/* ESP HEDEFLERİ — genel hedef motorunun (brand/ortak/hedef.js) ESP paketleri.
+
+   Motor alanı bilmez; ESP'nin bildiği şunlardır:
+
+     DİL (CEFR)    «Bir ayda İngilizcede A2'ye». Karar KAPASİTEYLE verilir:
+                   seviyeler arası toplam saat ÷ haftalık vaktin. Saat tablosu
+                   yaygın aktarılan rehberli öğrenme saati tahminleridir,
+                   kaynağı bağlanmadı: karar «tahmin». CEFR bandı ESP
+                   merdiveniyle aynı ölçek DEĞİLDİR ve birbirine çevrilmez
+                   (data/evidence.js, lang.cefr); seviye bir öz-değerlendirmedir,
+                   sertifika yerine geçmez.
+     OKUMA         «Bu yıl 24 kitap». Kitap başına saat KENDİ ÖLÇÜMÜNDEN gelir
+                   (bitirdiğin kitapların dönemindeki ölçülmüş okuma dakikası ÷
+                   bitirilen kitap, en az iki kitap): karar «hesaplandı». Yoksa
+                   ortalama bir kitap için 6 saat tahmini kullanılır.
+     ENSTRÜMAN     «Bir yılda gitarda Kalfa'ya». Hedef, merdiven basamağının
+                   TEMİZ TEMPO kapısıdır (data/curriculum.js). Hız KENDİ
+                   KAYITLARINDAN gelir: son haftalarda temiz tempon haftada kaç
+                   BPM arttı. «Temiz» kararı senin beyanın olduğu için karar
+                   «tahmin»dir. Geçmiş yoksa karar verilmez ve SÖYLENİR.
+
+   ESP sertifika vermez, yetenek yargısı kurmaz, sonuç garantisi etmez
+   (AGENTS.md §1.5). */
+
+window.ESP = window.ESP || {};
+
+ESP.Hedefler = (function(){
+  const H = () => window.LIFEOS.Hedef;
+  const U = () => ESP.U;
+  const HARF = 'a-zçğıöşü';
+  const ONCE = '(?:^|[^' + HARF + '])';
+
+  function kucuk(s){
+    return String(s || '').replace(/I/g, 'ı').replace(/İ/g, 'i').toLocaleLowerCase('tr');
+  }
+  function yuvarla(x, n){ const k = Math.pow(10, n == null ? 2 : n); return Math.round(x * k) / k; }
+  function sayiYaz(x, n){ return String(yuvarla(x, n == null ? 1 : n)).replace('.', ','); }
+
+  /* ================================================================ DİL */
+
+  const CEFR = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+  /* Toplam (sıfırdan) rehberli öğrenme saati — yaygın aktarılan aralıkların
+     ÜST ucu: A1 90–100, A2 180–200, B1 350–400, B2 500–600, C1 700–800,
+     C2 1000–1200. Üst uç seçildi: iyimser bir tablo, «olur» deyip
+     olmayacak bir tarihe söz vermek demekti. */
+  const CEFR_SAAT = { '0':0, A1:100, A2:200, B1:400, B2:600, C1:800, C2:1200 };
+  const DILLER = [['ingilizce', 'İngilizce'], ['almanca', 'Almanca'], ['fransızca', 'Fransızca'],
+    ['ispanyolca', 'İspanyolca'], ['italyanca', 'İtalyanca'], ['rusça', 'Rusça'],
+    ['japonca', 'Japonca'], ['arapça', 'Arapça'], ['korece', 'Korece'], ['çince', 'Çince'],
+    ['portekizce', 'Portekizce'], ['farsça', 'Farsça']];
+  const CEFR_RE = new RegExp(ONCE + '([abc][12])(?![0-9])');
+
+  function dilAdi(k){
+    const d = DILLER.find(x => k.indexOf(x[0]) >= 0);
+    return d ? d[1] : null;
+  }
+
+  const DIL = {
+    id:'dil', ad:'Dil seviyesi', disc:'lang', olcut:{ ad:'seviye', birim:'saat' },
+    /* CEFR seviyesi geçmeyen cümle dil HEDEFİ değildir: «İngilizceyi tekrar
+       açmak istiyorum» bir bölüm isteğidir (core/komut.js). */
+    anahtar:CEFR_RE,
+    yonler:['seviye'], kapasiteGerekir:true,
+    tani(k){
+      const m = CEFR_RE.exec(k);
+      if(!m) return null;
+      const hedef = m[1].toUpperCase();
+      return { yon:'seviye', hedefSeviye:hedef, dil:dilAdi(k) || 'Yabancı dil',
+        hedefHam:{ deger:hedef, birim:'CEFR' }, birim:'saat' };
+    },
+    simdiSoru(h){
+      return (h.dil || 'Bu dil') + ' için şu anki seviyen ne? A1, A2, B1… yaz; hiç '
+        + 'başlamadıysan «sıfır» de. Bu bir öz-değerlendirmedir, sınav sonucu gerekmez.';
+    },
+    simdiOku(metin, h){
+      const k = kucuk(metin);
+      const m = /([abc][12])/.exec(k);
+      let d = m ? m[1].toUpperCase() : /(sıfır|hiç|başlamadım|yeni başlıyorum|başlangıç)/.test(k) ? '0' : null;
+      if(d == null) return null;
+      if(CEFR_SAAT[d] >= CEFR_SAAT[h.hedefSeviye]){
+        return { hata:'Şu anki seviyen hedefinle aynı ya da üstünde. Daha üst bir seviye yazarak '
+          + 'hedefi yeniden kurabilirsin.' };
+      }
+      return { deger:d, birim:'CEFR', etiket:'tahmin' };
+    },
+    simdiHata:'Seviyeyi anlayamadım; A1, A2, B1, B2, C1, C2 ya da «sıfır» yaz.',
+    gerekenSaat(h){
+      if(!h.simdi || h.simdi.deger == null) return { neden:'Şu anki seviyen bilinmeden süre hesaplanamaz.' };
+      const saat = CEFR_SAAT[h.hedefSeviye] - CEFR_SAAT[h.simdi.deger];
+      if(!(saat > 0)) return { neden:'Hedef seviye şu anki seviyenin üstünde olmalı.' };
+      return { saat, dayanak:{ durum:'kaynak_bekliyor', metin:'CEFR seviyeleri için yaygın aktarılan '
+        + 'rehberli öğrenme saati tahminleri (sıfırdan A1 ≈ 100, A2 ≈ 200, B1 ≈ 400, B2 ≈ 600, '
+        + 'C1 ≈ 800, C2 ≈ 1.200 saat); dile ve kişiye göre değişir, kaynağı henüz bağlanmadı' } };
+    },
+  };
+
+  /* ============================================================== OKUMA */
+
+  const KITAP_SAAT_TAHMIN = 6;
+  const KITAP_PENCERE = 365;
+
+  function bitenKitaplar(bugun){
+    const alt = U().iso(U().addDays(U().parse(bugun), -KITAP_PENCERE));
+    return (ESP.S.books || []).filter(b => b && b.finishedAt && b.finishedAt >= alt
+      && b.finishedAt <= bugun && b.startedAt && b.startedAt <= b.finishedAt);
+  }
+
+  /* Kitap başına saat: bitirilen kitapların kapsadığı dönemdeki ÖLÇÜLMÜŞ
+     okuma dakikası ÷ kitap sayısı. Oturumlar kitaba bağlı değil; bu yüzden
+     tek tek kitap değil DÖNEM ölçülür. En az iki kitap: tek kitap bir hız
+     değil bir örnektir. */
+  function kitapSaati(bugunISO){
+    const bugun = bugunISO || U().todayISO();
+    const l = bitenKitaplar(bugun);
+    if(l.length >= 2){
+      const bas = l.map(b => b.startedAt).sort()[0];
+      const bit = l.map(b => b.finishedAt).sort().slice(-1)[0];
+      let dk = 0;
+      Object.keys(ESP.S.days || {}).forEach(d => {
+        if(d < bas || d > bit) return;
+        (ESP.S.days[d].sessions || []).forEach(s => {
+          if(s && s.disc === 'reading' && s.minutesCert === 'measured' && s.minutes > 0) dk += s.minutes;
+        });
+      });
+      if(dk > 0){
+        const saat = yuvarla(dk / 60 / l.length, 1);
+        return { saat, etiket:'hesaplandi', dayanak:{ durum:'olculdu', metin:'bitirdiğin ' + l.length
+          + ' kitabın döneminde ölçülen okuma süresi: kitap başına yaklaşık ' + sayiYaz(saat) + ' saat' } };
+      }
+    }
+    return { saat:KITAP_SAAT_TAHMIN, etiket:'tahmin', dayanak:{ durum:'kaynak_bekliyor',
+      metin:'ortalama bir kitap için yaklaşık 6 saat (≈ 80 bin kelime, dakikada ≈ 230 kelime '
+        + 'sessiz okuma; yaygın tahmin, kaynağı bağlanmadı). Birkaç kitap bitirince kendi '
+        + 'hızından hesaplanır' } };
+  }
+
+  const OKUMA = {
+    id:'okuma', ad:'Okuma', disc:'reading', olcut:{ ad:'kitap', birim:'kitap' },
+    anahtar:/kitap/, birimler:/kitap/,
+    yonler:['artir'], kapasiteGerekir:true,
+    /* «yılda 24 kitap», «bu yıl 20 kitap»: sayı ve dönem birlikte söylenir.
+       Tarih YALNIZ bulunduysa verilir; bulunmazsa motorun genel ayrıştırıcısı
+       ya da sorusu devreye girer. */
+    tani(k, bugun){
+      const m = /(\d{1,3})\s*kitap/.exec(k);
+      if(!m) return null;
+      const out = { yon:'artir', fark:Number(m[1]), birim:'kitap' };
+      /* «3 ayda», «bir yılda» süreyi sayıyla söyler: onu genel ayrıştırıcı
+         okur. Yalnız çıplak «yılda / ayda» dönem demektir. */
+      const sayili = /(\d+|bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|on)\s*(gün|hafta|ay|yıl)/.test(k);
+      if(/bu yıl|yıl sonuna/.test(k)) out.son_tarih = bugun.slice(0, 4) + '-12-31';
+      else if(!sayili && /(?:^|[^a-zçğıöşü])yılda/.test(k)) out.son_tarih = H().ayEkle(bugun, 12);
+      else if(!sayili && /(?:^|[^a-zçğıöşü])ayda/.test(k)) out.son_tarih = H().ayEkle(bugun, 1);
+      return out;
+    },
+    /* Sayım bu andan başlar: «24 kitap» bundan sonra okunacak 24 kitaptır. */
+    simdi:() => ({ deger:0, birim:'kitap', etiket:'hesaplandi', tarih:null }),
+    gerekenSaat(h){
+      const n = h.fark != null ? h.fark : h.hedefDeger;
+      if(!(n > 0)) return { neden:'Kaç kitap okumak istediğin bilinmeden süre hesaplanamaz.' };
+      const k = kitapSaati();
+      return { saat:yuvarla(n * k.saat, 1), dayanak:k.dayanak, kitapSaat:k.saat };
+    },
+  };
+
+  /* ========================================================= ENSTRÜMAN */
+
+  const KADEME = [['acemi', 1], ['çırak', 2], ['kalfa', 3], ['usta', 4], ['üstat', 5]];
+  const CALGI = '(gitar|enstrüman|müzik|piyano|keman|bağlama|bateri|çalgı)';
+  const KADEME_RE = new RegExp(ONCE + '(acemi|çırak|kalfa|usta|üstat)');
+  /* Basamağın temiz tempo eşiği MERDİVENDEN okunur (tek kaynak). 1.
+     basamakta tempo kapısı yok; kapanış işi «60 BPM'de temiz» der. */
+  function kademeBpm(rank){
+    const l = ESP.LADDERS && ESP.LADDERS.music;
+    const b = l && (l.levels || []).find(x => x.rank === rank);
+    const g = b && (b.gates || []).find(x => x.metric === 'music.cleanBpm');
+    return g ? g.min : rank === 1 ? 60 : null;
+  }
+  function kademeAdi(rank){ return (ESP.LEVEL_BY_RANK && ESP.LEVEL_BY_RANK[rank] || {}).label || String(rank); }
+
+  function temizDenemeler(){
+    const out = [];
+    (ESP.S.pieces || []).forEach(p => (p.attempts || []).forEach(a => {
+      if(a && a.clean && a.bpm > 0 && a.date) out.push({ date:a.date, bpm:a.bpm });
+    }));
+    return out.sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  /* Kendi hızın: ilk haftadaki en yüksek temiz tempo ile bugüne kadarki
+     en yüksek temiz tempo arasındaki fark ÷ geçen hafta. En az üç temiz
+     deneme ve iki hafta gerekir: daha azı bir hız değil bir andır. */
+  function temizHiz(){
+    const l = temizDenemeler();
+    if(l.length < 3) return { neden:l.length ? 'Yalnız ' + l.length + ' temiz deneme kaydın var' : 'Temiz tempo kaydın yok' };
+    const ilk = l[0].date, son = l[l.length - 1].date;
+    const gun = U().diffDays(ilk, son);
+    if(gun < 14) return { neden:'Temiz tempo kayıtların ' + gun + ' günü kapsıyor; en az iki hafta gerekir' };
+    const ilkHafta = U().iso(U().addDays(U().parse(ilk), 6));
+    const bas = Math.max.apply(null, l.filter(x => x.date <= ilkHafta).map(x => x.bpm));
+    const tepe = Math.max.apply(null, l.map(x => x.bpm));
+    const hiz = yuvarla((tepe - bas) / (gun / 7), 1);
+    if(!(hiz > 0)) return { neden:'Son ' + Math.round(gun / 7) + ' haftada temiz tempon artmadı (tıkanma)' };
+    return { hiz, deneme:l.length, hafta:yuvarla(gun / 7, 1), artis:tepe - bas, tepe };
+  }
+
+  const ENSTRUMAN = {
+    id:'enstruman', ad:'Enstrüman', disc:'music', olcut:{ ad:'temiz tempo', birim:'BPM' },
+    /* Basamak adı ya da BPM geçmeyen cümle hedef değildir: «gitarı tekrar
+       açmak istiyorum» bir bölüm isteğidir. */
+    anahtar:new RegExp(CALGI + '[^.?!]*?' + ONCE + '(acemi|çırak|kalfa|usta|üstat|\\d+\\s*bpm)|'
+      + ONCE + '(acemi|çırak|kalfa|usta|üstat|\\d+\\s*bpm)[^.?!]*?' + CALGI),
+    birimler:/bpm/,
+    yonler:['ulas'], kapasiteGerekir:true,
+    tani(k){
+      const b = /(\d{2,3})\s*bpm/.exec(k);
+      if(b){
+        const n = Number(b[1]);
+        return n >= 30 && n <= 300 ? { yon:'ulas', egilim:'artir', hedefDeger:n, birim:'BPM' } : null;
+      }
+      const m = KADEME_RE.exec(k);
+      if(!m) return null;
+      const rank = (KADEME.find(x => x[0] === m[1]) || [])[1];
+      const bpm = kademeBpm(rank);
+      if(!bpm) return null;
+      return { yon:'ulas', egilim:'artir', hedefDeger:bpm, hedefKademe:rank, birim:'BPM',
+        hedefHam:{ deger:kademeAdi(rank), birim:'kademe' } };
+    },
+    simdi(){
+      const l = temizDenemeler();
+      if(!l.length) return null;
+      const son = l[l.length - 1];
+      return { deger:Math.max.apply(null, l.map(x => x.bpm)), birim:'BPM', etiket:'tahmin', tarih:son.date };
+    },
+    simdiSoru:'Temiz çalabildiğin en yüksek tempo kaç BPM? Bilmiyorsan «bilmiyorum» yaz; '
+      + 'Stüdyo’da metronomla ölçebilirsin.',
+    simdiOku(metin){
+      const k = kucuk(metin);
+      const m = /(\d{2,3})/.exec(k);
+      if(m && Number(m[1]) >= 30 && Number(m[1]) <= 300) return { deger:Number(m[1]), birim:'BPM', etiket:'tahmin' };
+      if(/(bilmiyorum|bilmem|ölçmedim)/.test(k)) return { deger:null, birim:'BPM', etiket:'veri_yok' };
+      return null;
+    },
+    simdiHata:'Tempoyu anlayamadım; sayıyla yaz (ör. 90) ya da «bilmiyorum» de.',
+    hiz(){
+      const t = temizHiz();
+      if(!t.hiz){
+        return { neden:t.neden + '. Hızını senin kayıtlarından hesaplıyorum; Stüdyo’da iki hafta '
+          + 'metronomla temiz tempo kaydet, sonra kararı veririm.' };
+      }
+      return { tipik:t.hiz, ust:yuvarla(t.hiz * 1.5, 1), birim:'BPM/hafta',
+        dayanak:{ durum:'kendi_beyanin', metin:'senin temiz tempo kayıtların: ' + t.deneme + ' deneme, '
+          + sayiYaz(t.hafta) + ' haftada +' + t.artis + ' BPM; «temiz» kararı senin beyanın' } };
+    },
+  };
+
+  const PAKETLER = [DIL, ENSTRUMAN, OKUMA];
+  const PAKET_BY_ID = { dil:DIL, enstruman:ENSTRUMAN, okuma:OKUMA };
+
+  /* ------------------------------------------------------ sohbet notları */
+
+  function notlar(h, g){
+    const out = [];
+    if(h.paket === 'dil'){
+      out.push('Seviye bir öz-değerlendirmedir: CEFR bandı ESP merdiveniyle aynı ölçek değildir '
+        + 've sertifika yerine geçmez.');
+    }
+    if(h.paket === 'enstruman' && h.hedefKademe){
+      const l = ESP.LADDERS.music.levels.find(x => x.rank === h.hedefKademe);
+      const oteki = (l ? l.gates : []).filter(x => x.metric !== 'music.cleanBpm').map(x => x.label);
+      if(oteki.length){
+        out.push(kademeAdi(h.hedefKademe) + ' basamağının öteki kapıları: ' + oteki.join(', ')
+          + '. Tempo tek başına basamağı açmaz.');
+      }
+    }
+    if(h.paket === 'okuma' && g && g.bant){
+      const k = kitapSaati();
+      out.push('Kitap başına ' + sayiYaz(k.saat) + ' saat hesaplandı ('
+        + (k.etiket === 'hesaplandi' ? 'kendi ölçümün' : 'tahmin') + ').');
+    }
+    return out;
+  }
+
+  /* ------------------------------------------------------------- depo */
+
+  function gecerli(h){ return !!(h && h.id && H().DURUMLAR.indexOf(h.durum) >= 0); }
+
+  async function yukle(){
+    ESP.S.hedefler = ((await ESP.Store.list('hedefler')) || []).filter(gecerli);
+  }
+
+  async function kaydet(h){
+    ESP.S.hedefler = (ESP.S.hedefler || []).filter(x => x.id !== h.id).concat([h]);
+    await ESP.Store.set('hedefler/' + h.id, h);
+    return h;
+  }
+
+  function liste(){ return (ESP.S.hedefler || []).slice(); }
+  function aktifler(){ return liste().filter(h => h.durum === 'aktif' || h.durum === 'askida'); }
+
+  async function durumDegistir(id, yeni){
+    const h = liste().find(x => x.id === id);
+    if(!h) return { ok:false, why:'Hedef bulunamadı.' };
+    const r = H().gecis(h, yeni, U().todayISO());
+    if(r.ok) await kaydet(r.hedef);
+    if(r.ok && (yeni === 'tamam' || yeni === 'birakildi') && ESP.HedefPlan){
+      r.not = await ESP.HedefPlan.hedefKapandi(id);
+    }
+    return r;
+  }
+
+  /* Hedefin kısa adı — ekranda ve plan önizlemesinde. */
+  function ozet(h){
+    if(h.paket === 'dil') return (h.dil || 'Yabancı dil') + ': ' + (h.simdi && h.simdi.deger
+      ? (h.simdi.deger === '0' ? 'sıfır' : h.simdi.deger) + ' → ' : '') + h.hedefSeviye;
+    if(h.paket === 'okuma') return (h.fark || h.hedefDeger) + ' kitap';
+    if(h.paket === 'enstruman') return 'Temiz tempo ' + (h.simdi && h.simdi.deger ? h.simdi.deger + ' → ' : '')
+      + h.hedefDeger + ' BPM' + (h.hedefKademe ? ' (' + kademeAdi(h.hedefKademe) + ')' : '');
+    return h.cumle;
+  }
+
+  const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
+    paketler:PAKETLER, modul:'esp', durum:() => ({}), bugun:() => U().todayISO(),
+    kaydet, notlar,
+  }) : null;
+
+  return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, CEFR, CEFR_SAAT, KITAP_SAAT_TAHMIN,
+    kitapSaati, temizHiz, kademeBpm, kademeAdi, notlar, yukle, kaydet, liste, aktifler,
+    durumDegistir, ozet, sohbet };
+})();
+
+/* ==== js/core/hedefplan.js ==== */
+/* ESP HEDEF PLANI — aktif bir hedefi günlük düzene çevirir.
+   (ekip/PLAN.md §3.D; Tur 3)
+
+   Plan KODDUR; model yok. ESP'nin kendi araçlarını kullanır, yenisini
+   icat etmez:
+
+     odak          hedefin disiplini `profile.focus` olur: eşit iki iş
+                   çıkarsa sıradaki iş bu disiplinden seçilir (planner.js).
+     günlük taban  `profile.dailyMinutes` hedefin istediği vakitten
+                   AZSA ona yükselir; fazlaysa dokunulmaz — taban bütün
+                   disiplinlerin ortak vaktidir, plan onu küçültmez.
+     bölüm         hedefin disiplini kapalıysa açılır (verisi hiç
+                   silinmemişti; modules.js).
+     tarihli hedef hedefin son tarihinde bir hedef kaydı (goals/): öncelik
+                   sırasında ikinci sıraya girer.
+     kontrol       dört haftada bir: o güne kadar BEKLENEN ile ÖLÇÜLEN
+                   (dil: pratik saati · okuma: bitirilen kitap ·
+                   enstrüman: temiz tempo).
+     çalışma       merdivenin bir üst basamağının çalışma listesi
+                   (data/curriculum.js) — plan yeni içerik uydurmaz.
+
+   Uygulama BÜYÜK aksiyondur (AGENTS.md §1.9): ayrıntılı önizleme + onay +
+   geri dönüş noktası. `ESP.Plans` içinde `hedefplan` türü; model bu türü
+   öneremez. Geri alma yalnız planın yazdığını geri alır: kullanıcı arada
+   odağı ya da tabanı kendisi değiştirdiyse ezilmez. */
+
+window.ESP = window.ESP || {};
+
+ESP.HedefPlan = (function(){
+  const STORE = 'hedefplan';
+  const KONTROL_HAFTA = 4;
+  const U = () => ESP.U;
+  const HD = () => ESP.Hedefler;
+
+  function yuvarla(x, n){ const k = Math.pow(10, n == null ? 2 : n); return Math.round(x * k) / k; }
+  function sayiYaz(x, n){ return String(yuvarla(x, n == null ? 1 : n)).replace('.', ','); }
+  function gunEkle(iso, n){ return U().iso(U().addDays(U().parse(iso), n)); }
+  function discAdi(id){ return ((ESP.DISCIPLINE_BY_ID || {})[id] || {}).label || id; }
+
+  /* ------------------------------------------------------------ depo */
+
+  function liste(){ return ESP.S.hedefPlanlar || (ESP.S.hedefPlanlar = []); }
+  async function yukle(){
+    ESP.S.hedefPlanlar = ((await ESP.Store.list(STORE)) || []).filter(p => p && p.id && p.hedefId);
+  }
+  async function kaydet(p){
+    ESP.S.hedefPlanlar = liste().filter(x => x.id !== p.id).concat([p]);
+    await ESP.Store.set(STORE + '/' + p.id, p);
+    return p;
+  }
+  function aktif(hedefId){
+    return liste().filter(p => p.hedefId === hedefId && p.durum === 'uygulandi')
+      .sort((a, b) => String(b.olusturma).localeCompare(String(a.olusturma)))[0] || null;
+  }
+
+  /* ----------------------------------------------------------- ölçü
+
+     Her paketin ölçtüğü şey ve planın başından bu yana ölçülen değer.
+     «Veri yok» sıfır değildir: hiç ölçüm yoksa `null` döner. */
+  function olculen(plan, bugun){
+    if(plan.paket === 'dil'){
+      let dk = 0, var_ = false;
+      Object.keys(ESP.S.days || {}).forEach(d => {
+        if(d < plan.baslangic || d > bugun) return;
+        (ESP.S.days[d].sessions || []).forEach(s => {
+          if(s && s.disc === 'lang' && s.minutesCert === 'measured' && s.minutes > 0){ dk += s.minutes; var_ = true; }
+        });
+      });
+      return var_ ? { deger:yuvarla(dk / 60, 1), birim:'saat', etiket:'olculdu' } : null;
+    }
+    if(plan.paket === 'okuma'){
+      const n = (ESP.S.books || []).filter(b => b && b.finishedAt && b.finishedAt >= plan.baslangic
+        && b.finishedAt <= bugun).length;
+      return { deger:n, birim:'kitap', etiket:'olculdu' };
+    }
+    if(plan.paket === 'enstruman'){
+      const l = [];
+      (ESP.S.pieces || []).forEach(p => (p.attempts || []).forEach(a => {
+        if(a && a.clean && a.bpm > 0 && a.date && a.date > plan.baslangic && a.date <= bugun) l.push(a.bpm);
+      }));
+      return l.length ? { deger:Math.max.apply(null, l), birim:'BPM', etiket:'tahmin' } : null;
+    }
+    return null;
+  }
+
+  /* Beklenen değer: başlangıçtan hedefe doğrusal. Dil ve okumada toplam
+     iş, enstrümanda tempo. */
+  function beklenenAt(plan, tarih){
+    const gun = Math.max(0, U().diffDays(plan.baslangic, tarih));
+    const oran = Math.min(1, gun / Math.max(1, U().diffDays(plan.baslangic, plan.bitis)));
+    if(plan.paket === 'enstruman') return yuvarla(plan.bas + (plan.hedef - plan.bas) * oran, 0);
+    return yuvarla(plan.hedef * oran, 1);
+  }
+
+  /* ------------------------------------------------------------- kur */
+
+  function kur(hedef, bugunISO){
+    const bugun = bugunISO || U().todayISO();
+    const h = hedef;
+    if(!h) return { ok:false, why:'Hedef bulunamadı.' };
+    const paket = HD().PAKET_BY_ID[h.paket];
+    if(!paket) return { ok:false, why:'Bu hedef için plan motoru henüz yok.' };
+    if(h.durum !== 'aktif') return { ok:false, why:'Plan yalnız aktif bir hedef için kurulur.' };
+    if(!h.son_tarih || !(h.son_tarih > bugun)) return { ok:false, why:'Hedefin son tarihi geçmiş ya da yok.' };
+    const dk = h.kapasite && h.kapasite.gunluk_dk;
+    if(!(dk > 0)) return { ok:false, why:'Günde ne kadar vakit ayıracağın bilinmeden plan kurulamaz.' };
+    const gunler = (h.kapasite && h.kapasite.haftalik_gun) || 7;
+    const disc = paket.disc;
+
+    let bas = 0, hedefDeger = null, birim = null, saat = null;
+    if(h.paket === 'dil'){
+      const g = paket.gerekenSaat(h, {});
+      if(!(g.saat > 0)) return { ok:false, why:g.neden || 'Gereken süre hesaplanamadı.' };
+      hedefDeger = g.saat; birim = 'saat'; saat = g.saat;
+    }else if(h.paket === 'okuma'){
+      hedefDeger = h.fark != null ? h.fark : h.hedefDeger; birim = 'kitap';
+      if(!(hedefDeger > 0)) return { ok:false, why:'Kaç kitap okumak istediğin bilinmiyor.' };
+      saat = paket.gerekenSaat(h, {}).saat;
+    }else{
+      const s = h.simdi && h.simdi.deger;
+      if(!(s > 0)) return { ok:false, why:'Şu anki temiz tempon bilinmeden plan kurulamaz; '
+        + 'Stüdyo’da metronomla ölç.' };
+      if(!(h.hedefDeger > s)) return { ok:false, why:'Hedef tempo şu anki temiz tempondan yüksek olmalı.' };
+      bas = s; hedefDeger = h.hedefDeger; birim = 'BPM';
+    }
+
+    const p = ESP.S.profile || {};
+    const taban = p.dailyMinutes || 60;
+    const toplamGun = U().diffDays(bugun, h.son_tarih);
+    const kontrol = [];
+    const plan0 = { paket:h.paket, baslangic:bugun, bitis:h.son_tarih, bas, hedef:hedefDeger };
+    for(let hf = KONTROL_HAFTA; hf * 7 < toplamGun; hf += KONTROL_HAFTA){
+      const t = gunEkle(bugun, hf * 7);
+      kontrol.push({ tarih:t, hafta:hf, beklenen:beklenenAt(plan0, t) });
+    }
+    kontrol.push({ tarih:h.son_tarih, hafta:yuvarla(toplamGun / 7, 1), beklenen:hedefDeger });
+
+    const seviye = ESP.Curriculum ? ESP.Curriculum.levelOf(disc) : null;
+    const sonraki = seviye ? ESP.Curriculum.stepOf(disc, Math.min(5, seviye.rank + 1)) : null;
+    const uyarilar = [];
+    if(h.gerceklik && h.gerceklik.bant && h.gerceklik.bant !== 'gercekci'){
+      uyarilar.push('Hedefin kararı «' + (window.LIFEOS.Hedef.BANT_ADI[h.gerceklik.bant] || h.gerceklik.bant)
+        + '» idi; plan senin tarihinle kuruldu.');
+    }
+    if(dk * gunler / 7 > taban){
+      uyarilar.push('Bu hedef günde ortalama ' + Math.round(dk * gunler / 7) + ' dakika istiyor; günlük '
+        + 'taban ' + taban + ' dakikadan yükseltilir. Taban bütün disiplinlerin ortak vaktidir.');
+    }
+
+    return { ok:true, plan:{
+      id:U().uid('hp'), hedefId:h.id, paket:h.paket, disc, durum:'taslak',
+      olusturma:bugun, baslangic:bugun, bitis:h.son_tarih,
+      gunlukDk:dk, haftalikGun:gunler, haftalikSaat:yuvarla(dk * gunler / 60, 1),
+      bas, hedef:hedefDeger, birim, saat, ozet:HD().ozet(h),
+      odak:{ once:p.focus || null, sonra:disc },
+      taban:{ once:taban, sonra:Math.max(taban, Math.round(dk * gunler / 7)) },
+      bolumAc:ESP.Mod ? !ESP.Mod.isOn(disc) : false,
+      kontrol, calisma:sonraki ? { basamak:sonraki.title, rank:sonraki.rank,
+        liste:(sonraki.study || []).slice(0, 5) } : null,
+      uyarilar, etiket:h.gerceklik && h.gerceklik.etiket || 'tahmin', goalId:null,
+    } };
+  }
+
+  /* -------------------------------------------------------- önizleme */
+
+  function focusAdi(id){
+    const f = (ESP.FOCUS || []).find(x => x.id === id);
+    return f ? f.label : id ? discAdi(id) + ' ağırlıklı' : 'Dengeli';
+  }
+
+  function onizleme(plan){
+    const rows = [
+      { alan:'Hedef', once:'—', sonra:plan.ozet + ' · ' + U().fmtDate(plan.bitis) },
+      { alan:'Günlük vakit', once:'—', sonra:plan.gunlukDk + ' dk'
+        + (plan.haftalikGun < 7 ? ', haftada ' + plan.haftalikGun + ' gün' : ', her gün')
+        + ' (haftada ' + sayiYaz(plan.haftalikSaat) + ' saat)' },
+      { alan:'Odak', once:focusAdi(plan.odak.once), sonra:focusAdi(plan.odak.sonra) },
+      { alan:'Günlük taban', once:plan.taban.once + ' dk', sonra:plan.taban.sonra + ' dk'
+        + (plan.taban.sonra === plan.taban.once ? ' (değişmez)' : '') },
+    ];
+    if(plan.bolumAc) rows.push({ alan:discAdi(plan.disc) + ' bölümü', once:'kapalı', sonra:'açık' });
+    const ilk = plan.kontrol[0];
+    rows.push({ alan:'Kontrol noktaları', once:'yok', sonra:plan.kontrol.length + ' nokta · ilk '
+      + U().fmtDate(ilk.tarih) + ': beklenen ' + sayiYaz(ilk.beklenen) + ' ' + plan.birim });
+    rows.push({ alan:'Tarihli hedef', once:'—', sonra:U().fmtDate(plan.bitis) + ' (öncelik sırasına girer)' });
+    return rows;
+  }
+
+  /* -------------------------------------------------- uygula / geri al
+
+     Geri dönüş noktası UYGULAMADAN ÖNCE alınır. */
+  async function uygula(plan){
+    const p = ESP.S.profile || {};
+    const geri = { kind:'hedefplan', planId:plan.id, hedefId:plan.hedefId,
+      focus:p.focus == null ? null : p.focus, dailyMinutes:p.dailyMinutes == null ? null : p.dailyMinutes,
+      bolumAcildi:false, goalId:null };
+    if(plan.bolumAc && ESP.Mod){
+      const r = await ESP.Mod.set(plan.disc, true);
+      if(!r.ok) throw new Error(r.error || 'Bölüm açılamadı.');
+      geri.bolumAcildi = true;
+    }
+    const patch = { focus:plan.odak.sonra };
+    if(plan.taban.sonra !== plan.taban.once) patch.dailyMinutes = plan.taban.sonra;
+    await ESP.Model.saveProfile(patch);
+    const g = await ESP.Model.saveGoal(ESP.Model.newGoal({ label:plan.ozet, disc:plan.disc,
+      date:plan.bitis, note:'Hedef motoru planı — kontrol noktaları Bugün › Özet › Hedeflerim’de.' }));
+    geri.goalId = g.id;
+    await kaydet(Object.assign({}, plan, { durum:'uygulandi', goalId:g.id,
+      uygulanma:new Date().toISOString() }));
+    return geri;
+  }
+
+  async function geriAl(a, durum){
+    const plan = liste().find(x => x.id === a.planId);
+    const p = ESP.S.profile || {};
+    const patch = {};
+    if(plan && p.focus === plan.odak.sonra) patch.focus = a.focus;
+    if(plan && plan.taban.sonra !== plan.taban.once && p.dailyMinutes === plan.taban.sonra){
+      patch.dailyMinutes = a.dailyMinutes;
+    }
+    if(Object.keys(patch).length) await ESP.Model.saveProfile(patch);
+    if(a.goalId) await ESP.Model.deleteGoal(a.goalId);
+    if(a.bolumAcildi && ESP.Mod && plan){
+      const kalan = ESP.Mod.activeIds().filter(id => id !== plan.disc);
+      if(kalan.length) await ESP.Mod.set(plan.disc, false);
+    }
+    if(plan) await kaydet(Object.assign({}, plan, { durum:durum || 'geri_alindi',
+      kapanis:new Date().toISOString() }));
+  }
+
+  function uygulamaOf(hedefId){
+    return (ESP.S.proposals || []).find(x => x.kind === 'hedefplan' && x.state === 'accepted'
+      && x.payload && x.payload.hedefId === hedefId) || null;
+  }
+
+  /* «Planı uygula» düğmesi: teklif yazılır ve aynı anda kabul edilir —
+     önizleme onayın kendisidir. Yetki Patron'undur (koç kapsamı). */
+  async function uygulaHedef(hedefId){
+    const h = HD().liste().find(x => x.id === hedefId);
+    const r = kur(h, U().todayISO());
+    if(!r.ok) return { ok:false, why:r.why };
+    if(aktif(hedefId)) return { ok:false, why:'Bu hedefin uygulanmış bir planı var; önce onu geri al.' };
+    const p = { id:'h:' + U().uid('hp'), agentId:'patron', kind:'hedefplan', disc:r.plan.disc,
+      title:'Hedef planı: ' + r.plan.ozet, why:'Senin isteğin: Hedeflerim › Planı uygula.',
+      payload:{ hedefId }, at:U().todayISO(), source:'istek', level:'buyuk' };
+    const a = await ESP.Plans.accept(p);
+    return a.ok ? { ok:true, plan:aktif(hedefId) } : { ok:false, why:a.error };
+  }
+
+  async function geriAlHedef(hedefId){
+    const u = uygulamaOf(hedefId);
+    if(!u) return { ok:false, why:'Geri alınacak bir plan yok.' };
+    const r = await ESP.Plans.geriAl(u.id);
+    return r.ok ? { ok:true } : { ok:false, why:r.error };
+  }
+
+  async function hedefKapandi(hedefId){
+    const plan = aktif(hedefId);
+    if(!plan) return null;
+    const u = uygulamaOf(hedefId);
+    if(u && u.applied) await geriAl(u.applied, 'kapandi');
+    else await kaydet(Object.assign({}, plan, { durum:'kapandi', kapanis:new Date().toISOString() }));
+    if(u){
+      u.state = 'undone'; u.undoneAt = new Date().toISOString();
+      await ESP.Store.set('proposals/' + encodeURIComponent(u.id), u);
+    }
+    return 'Hedefin planı da kapandı; odak ve günlük taban plandan önceki haline döndü.';
+  }
+
+  /* -------------------------------------------------------- ilerleme */
+
+  function ilerleme(plan, bugunISO){
+    const bugun = bugunISO || U().todayISO();
+    const sonraki = (plan.kontrol || []).find(k => k.tarih >= bugun) || null;
+    const o = olculen(plan, bugun);
+    const gecen = U().diffDays(plan.baslangic, bugun);
+    if(!o || (plan.paket === 'okuma' && gecen <= 0)){
+      return { durum:'veri_yok', sonraki, metin:plan.paket === 'enstruman'
+        ? 'Plan başladığından beri temiz tempo kaydı yok; ilerleme ölçülemiyor.'
+        : 'Plan başladığından beri ölçülmüş çalışma yok; ilerleme ölçülemiyor.' };
+    }
+    const beklenen = beklenenAt(plan, bugun);
+    const fark = yuvarla(o.deger - beklenen, 1);
+    const tol = plan.paket === 'enstruman' ? 3 : plan.paket === 'okuma' ? 0.5 : Math.max(0.5, plan.haftalikSaat * 0.25);
+    const durum = Math.abs(fark) <= tol ? 'yolunda' : fark > 0 ? 'onde' : 'geride';
+    const ad = { yolunda:'Plan yolunda', onde:'Planın önündesin', geride:'Planın gerisindesin' }[durum];
+    const ne = plan.paket === 'dil' ? 'ölçülen pratik ' + sayiYaz(o.deger) + ' saat'
+      : plan.paket === 'okuma' ? 'bitirilen kitap ' + o.deger
+        : 'en yüksek temiz tempo ' + o.deger + ' BPM (beyan)';
+    return { durum, sonraki, olculen:o, beklenen, fark,
+      metin:ad + ': ' + ne + ', bugüne kadar beklenen ' + sayiYaz(beklenen) + ' ' + plan.birim + '.' };
+  }
+
+  return { KONTROL_HAFTA, kur, onizleme, uygula, geriAl, uygulaHedef, geriAlHedef, hedefKapandi,
+    aktif, liste, yukle, kaydet, uygulamaOf, ilerleme, olculen, beklenenAt };
 })();
 
 /* ==== js/core/tanitim.js ==== */
@@ -15667,6 +16433,8 @@ ESP.S = {
   recordings:[],       // diksiyon olcumleri
   drafts:[],           // yazi taslaklari
   goals:[],            // zamana bagli hedefler
+  hedefler:[],         // hedef motoru kayitlari (core/hedefler.js)
+  hedefPlanlar:[],     // hedeflerin planlari (core/hedefplan.js)
 
   timer:null,          // acik pratik zamanlayicisi (core/timer.js)
   usage:null,          // surtunme olcumu (core/friction.js)
@@ -15705,6 +16473,7 @@ ESP.S = {
        kaynagi HKM'dir ve tek gercek orada olmali. */
     hkmIntents:[],
     hkmDoubts:[],
+    planOnizle:null,        // Hedeflerim'de onizlemesi acik hedefin kimligi
     railOpen:false,
     undo:null,              // son yikici islemin geri alma kaydi
     dayTab:'giris',         // giris | ozet | gecmis
@@ -16969,6 +17738,9 @@ ESP.Model = (function(){
       await ESP.Hafizam.yukle();
     }
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
+    /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
+    if(ESP.Hedefler) await ESP.Hedefler.yukle();
+    if(ESP.HedefPlan) await ESP.HedefPlan.yukle();
 
     S.assets = ((await ESP.Store.list('assets')) || []).map(normAsset)
       .sort((a, b) => (b.at || '') < (a.at || '') ? -1 : 1);
@@ -23662,7 +24434,7 @@ ESP.Beacon = (function(){
      2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
-  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce'];
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -23818,14 +24590,84 @@ ESP.Beacon = (function(){
      ESP'de bir «oturum» ölçülmüş bir çalışmadır; ileriye dönük bir teklif
      oturum olarak yazılamaz — yazılsaydı yapılmamış bir çalışma ölçülmüş
      görünürdü. Teklif bu yüzden bir HATIRLATICI olur. */
-  const APPLIABLE = ['plan.add'];
+  const APPLIABLE = ['plan.add', 'material.add'];
 
   function canApply(n){
     return !!(n && APPLIABLE.indexOf(n.kind) >= 0);
   }
 
+  /* BAM MATERYALİ — Üretim Ofisi'nin kalite kontrolünden geçen set (HKM
+     core/bam.py). Kayıt HKM'den ÇEKİLİR, maddeler ESP'nin KENDİ koduyla
+     yeniden doğrulanır (LIFEOS.Ofis.bamMadde) ve kart olarak eklenir.
+
+     HANGİ DESTE? ESP'nin iki tür destesi var: dil desteleri ve tarih
+     destesi. Deste setin başlığından ve konusundan KURALLA okunur: bir dil
+     adı geçiyorsa o dilin destesi, tarih konusuysa tarih destesi. İkisi de
+     değilse set EKLENMEZ ve bu söylenir — felsefe kartlarını İngilizce
+     destesine koymak, desteyi bozmak olurdu (AGENTS.md §1.7).
+
+     Aynı set iki kez eklenmez; HKM'ye ulaşılamazsa hiçbir kart yazılmaz.
+     Kartlar «bam» etiketi taşır ve kaynağı doğrulanmadı sayılır. */
+  const TARIH_RE = /(tarih|yüzyıl|imparatorluk|savaş|devrim|antlaşma|hanedan|osmanlı|selçuklu|roma|bizans)/;
+  function desteOf(kayit){
+    const k = String((kayit.baslik || '') + ' ' + ((kayit.govde || {}).konu || ''))
+      .replace(/I/g, 'ı').replace(/İ/g, 'i').toLocaleLowerCase('tr');
+    /* Dil adı TAM hâliyle aranır («rusça», «ingilizce»): kökten aramak
+       «Rus Devrimi»ni Rusça destesine koyardı. */
+    const dil = (ESP.LANGS || []).find(function(l){
+      const ad = String(l.label || '').replace(/İ/g, 'i').toLocaleLowerCase('tr');
+      return (ad && k.indexOf(ad) >= 0) || k.indexOf(String(l.native || '').toLowerCase()) >= 0;
+    });
+    if(dil) return { deck:dil.id, ad:dil.label + ' destesi' };
+    if(TARIH_RE.test(k)) return { deck:ESP.HISTORY_DECK || 'history', ad:'tarih destesi' };
+    return null;
+  }
+
+  async function materyalUygula(p){
+    const kid = Number(p.kayit_id);
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:'Materyal kimliği geçersiz.' };
+    const etiket = 'bam:' + kid;
+    if((ESP.S.cards || []).some(function(c){ return (c.tags || []).indexOf(etiket) >= 0; })){
+      return { ok:false, error:'Bu set zaten eklenmiş.' };
+    }
+    const a = settings();
+    if(!a.token || !urlOk(a.url)) return { ok:false, error:'HKM bağlantısı kurulmamış; materyal alınamaz.' };
+    let kayit = null;
+    try{
+      const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      const zaman = ctrl ? setTimeout(function(){ ctrl.abort(); }, 4000) : null;
+      const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/bam/kayit/' + kid, {
+        headers:{ 'Authorization':'Bearer ' + a.token },
+        signal:ctrl ? ctrl.signal : undefined,
+      });
+      if(zaman) clearTimeout(zaman);
+      if(res.status === 200){ const g = await res.json(); kayit = g && g.kayit; }
+    }catch(e){ kayit = null; }
+    if(!kayit || kayit.tur !== 'materyal' || !kayit.govde){
+      return { ok:false, error:'Materyal HKM’den alınamadı; HKM açıkken yeniden dene.' };
+    }
+    const deste = desteOf(kayit);
+    if(!deste){
+      return { ok:false, error:'Bu setin hangi desteye gireceğini anlayamadım: başlığında bir dil '
+        + 'ya da tarih konusu yok. ESP şimdilik yalnız dil ve tarih destelerine kart alır.' };
+    }
+    const tur = kayit.govde.tur;
+    const kartlar = (Array.isArray(kayit.govde.maddeler) ? kayit.govde.maddeler : [])
+      .slice(0, 50).map(function(m){ return window.LIFEOS.Ofis.bamMadde(tur, m); }).filter(Boolean);
+    if(!kartlar.length) return { ok:false, error:'Setteki maddelerin hiçbiri ESP’nin denetimini geçmedi.' };
+    for(const k of kartlar){
+      await ESP.Model.saveCard(ESP.Model.newCard({ front:k.front, back:k.back, lang:deste.deck,
+        context:'BAM #' + kid + ' — kaynağı doğrulanmadı', tags:['bam', etiket] }));
+    }
+    if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+    return { ok:true, note:kartlar.length + ' kart ' + deste.ad + 'ne eklendi («'
+      + String(kayit.baslik || '').slice(0, 60) + '», BAM #' + kid + '). Kaynağı doğrulanmadı; '
+      + 'yanlış bulduğun kartı sil.' };
+  }
+
   async function applyIntent(n){
     if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
+    if(n.kind === 'material.add') return await materyalUygula(n.payload || {});
     const p = n.payload || {};
     if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };
     /* Gecersiz sure sinirlandirilmaz, REDDEDILIR: -5 dakikayi 5 dakikaya
@@ -23920,7 +24762,7 @@ ESP.Beacon = (function(){
 
   return { load, save, settings, collect, payload, preview, contract, metric,
     urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
-    intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE,
+    intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE, desteOf,
     resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
     intentDoubts, clearDoubt,
     MODULE, CONTRACT, ASGARI_ARA_DK };
@@ -25472,6 +26314,13 @@ ESP.Plans = (function(){
        bütün ekranlarını, masasını ve denge hesabını etkiler. Veri silinmez. */
     { id:'bolum', level:'orta', label:'Bölümü aç / kapat', scope:'coach',
       note:'Disiplin gezinmeden ve denge hesabından çıkar ya da geri gelir; verisi silinmez.' },
+    /* Hedef planı (core/hedefplan.js). BÜYÜK aksiyon (AGENTS.md §1.9):
+       odak, günlük taban, gerekirse bölüm ve tarihli hedef birlikte
+       değişir. Ayrıntılı önizleme + onay + geri dönüş noktası. Yalnız
+       kullanıcının Hedeflerim'deki düğmesinden gelir; kural motoru bu
+       türü kendiliğinden üretmez, model hiç öneremez. */
+    { id:'hedefplan', level:'buyuk', label:'Hedef planı', scope:'coach', modelYok:true,
+      note:'Hedefin disiplini odağa alınır, taban vakte göre yükselir, tarihli hedef ve kontrol noktaları kurulur.' },
   ];
 
   const KIND_BY_ID = KINDS.reduce(function(m, k){ m[k.id] = k; return m; }, {});
@@ -25757,6 +26606,18 @@ ESP.Plans = (function(){
       await ESP.Model.saveProfile({ focus:p.payload.focus });
       uygulanan = { kind:'focus', focus:p.payload.focus, onceki:onceki == null ? null : onceki };
 
+    }else if(p.kind === 'hedefplan'){
+      /* Plan UYGULAMA ANINDA yeniden kurulur: önizlemeden bu yana veri
+         değişmiş olabilir. */
+      if(p.source !== 'istek') return { ok:false, error:'Hedef planı yalnız senin onayınla uygulanır.' };
+      const h = ESP.Hedefler && ESP.Hedefler.liste().find(function(x){ return x.id === (p.payload || {}).hedefId; });
+      if(!h || !ESP.HedefPlan) return { ok:false, error:'Hedef bulunamadı.' };
+      if(ESP.HedefPlan.aktif(h.id)) return { ok:false, error:'Bu hedefin uygulanmış bir planı var; önce onu geri al.' };
+      const kr = ESP.HedefPlan.kur(h, U.todayISO());
+      if(!kr.ok) return { ok:false, error:kr.why };
+      try{ uygulanan = await ESP.HedefPlan.uygula(kr.plan); }
+      catch(e){ return { ok:false, error:String(e && e.message || e) }; }
+
     }else if(p.kind === 'weekplan'){
       const oncekiPlan = plan() ? JSON.parse(JSON.stringify(plan())) : null;
       const yeni = weekPlan(p.at);
@@ -25789,6 +26650,7 @@ ESP.Plans = (function(){
     else if(a.kind === 'base') await ESP.Model.saveProfile({ dailyMinutes:a.onceki });
     else if(a.kind === 'focus') await ESP.Model.saveProfile({ focus:a.onceki });
     else if(a.kind === 'weekplan'){ if(a.oncekiPlan) await savePlan(a.oncekiPlan); else await clearPlan(); }
+    else if(a.kind === 'hedefplan' && ESP.HedefPlan) await ESP.HedefPlan.geriAl(a);
     else if(a.kind === 'bolum'){
       const res = await ESP.Mod.set(a.disc, !!a.onceki);
       if(!res.ok) return res;
@@ -26101,6 +26963,14 @@ ESP.Komut = (function(){
     if(ESP.Hafizam){
       const h = await ESP.Hafizam.komutIsle(text);
       if(h) return { text:h.text, source:'rules', oneriIds:[] };
+    }
+    /* Hedef sohbeti (core/hedefler.js): hedef cümlesi, sorulan eksiklerin
+       cevabı ve seçenek seçimi. Hedef değilse null döner, sıradakine geçilir.
+       Paketlerin anahtarı dar tutuldu: «gitarı tekrar açmak istiyorum» bir
+       bölüm isteğidir, hedef değil. */
+    if(ESP.Hedefler && ESP.Hedefler.sohbet){
+      const hd = await ESP.Hedefler.sohbet.isle(text);
+      if(hd) return { text:hd.text, source:'rules', oneriIds:[] };
     }
     const onEk = agentId === 'patron' ? '' : 'Patron’a ilettim. ';
     const cevap = function(m, ids){ return { text:onEk + m, source:'rules', oneriIds:ids || [] }; };
@@ -32375,6 +33245,98 @@ ESP.Screens.today = (function(){
 
   /* ------------------------------------------------------------------ ozet */
 
+  /* HEDEFLERİM (core/hedefler.js + core/hedefplan.js). Hedef Danışma'da
+     konuşarak kurulur: «Bir yılda gitarda Kalfa'ya», «Bir ayda İngilizcede
+     A2'ye», «bu yıl 24 kitap». Burada görünür, planı kurulur, askıya
+     alınır, bırakılır. PLAN BÜYÜK AKSİYONDUR (AGENTS.md §1.9): önce
+     ayrıntılı önizleme, sonra «Planı uygula» — önizleme onayın kendisidir —
+     ve her zaman «Planı geri al». */
+  const BANT = { gercekci:'gerçekçi', zorlayici:'zorlayıcı',
+    gercekci_degil:'bu sürede olmaz', guvensiz:'güvenli değil' };
+
+  function hedefDugmeleri(h){
+    return html`
+      ${h.durum === 'aktif'
+        ? K.Button({ label:'Askıya al', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'askida' } })
+        : K.Button({ label:'Sürdür', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'aktif' } })}
+      ${K.Button({ label:'Tamamlandı', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'tamam' } })}
+      ${K.Button({ label:'Bırak', size:'sm', tone:'ghost', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'birakildi' } })}`;
+  }
+
+  function hedefOnizleme(h){
+    const r = ESP.HedefPlan.kur(h, U.todayISO());
+    if(!r.ok){
+      return html`<div class="mt-8">${K.Notice({ tone:'warn', title:'Plan kurulamadı.', body:r.why })}
+        <div class="row gap-8 mt-8">${K.Button({ label:'Kapat', size:'sm', act:'hedef-plan-kapat' })}</div></div>`;
+    }
+    const p = r.plan;
+    return html`<div class="mt-8">
+      <p class="tiny dim"><b>Plan önizlemesi</b> — onaylanana kadar hiçbir şey değişmez.</p>
+      ${K.Table({ tight:true, headers:['', 'Şimdi', 'Plandan sonra'],
+        rows:ESP.HedefPlan.onizleme(p).map(x => [x.alan, x.once, x.sonra]) })}
+      ${when(p.calisma, () => html`<p class="tiny mt-8"><b>Çalışılacaklar</b> (merdiven:
+        ${p.calisma.basamak}): ${p.calisma.liste.join(' · ')}</p>`)}
+      ${when(p.uyarilar.length, () => html`<div class="stack-sm mt-8">${map(p.uyarilar, u =>
+        K.Notice({ tone:'info', body:u }))}</div>`)}
+      <p class="tiny dim mt-8">Kontrol noktaları dört haftada birdir; beklenen değer
+        ${p.etiket === 'hesaplandi' ? 'kendi ölçümünden hesaplandı' : 'tahmindir'}. Plan geri
+        alınabilir; geri alınca odak ve taban bugünkü haline döner.</p>
+      <div class="row gap-8 mt-8" style="flex-wrap:wrap">
+        ${K.Button({ label:'Planı uygula', size:'sm', tone:'primary', act:'hedef-plan-uygula',
+          data:{ 'data-id':h.id } })}
+        ${K.Button({ label:'Şimdilik değil', size:'sm', act:'hedef-plan-kapat' })}
+      </div></div>`;
+  }
+
+  function hedefPlanOzeti(h, p){
+    const il = ESP.HedefPlan.ilerleme(p, U.todayISO());
+    return html`<div class="stack-sm mt-8">
+      <p class="small">Plan uygulandı · günde ${p.gunlukDk} dk${p.haftalikGun < 7
+        ? ', haftada ' + p.haftalikGun + ' gün' : ''} · odak ${(ESP.DISCIPLINE_BY_ID[p.disc] || {}).label || p.disc}</p>
+      ${when(il.sonraki, () => html`<p class="tiny">Sonraki kontrol: <b>${U.fmtDate(il.sonraki.tarih)}</b>
+        — beklenen ${String(il.sonraki.beklenen).replace('.', ',')} ${p.birim}</p>`)}
+      ${K.Notice({ tone:il.durum === 'geride' ? 'warn' : 'info', body:il.metin })}
+      ${when(p.calisma, () => html`<p class="tiny dim">Çalışılacaklar (${p.calisma.basamak}):
+        ${p.calisma.liste.join(' · ')}</p>`)}
+      <div class="row gap-8" style="flex-wrap:wrap">
+        ${K.Button({ label:'Planı geri al', size:'sm', act:'hedef-plan-geri', data:{ 'data-id':h.id } })}
+        ${hedefDugmeleri(h)}
+      </div></div>`;
+  }
+
+  function hedefSatir(h){
+    const g = h.gerceklik || {};
+    const p = ESP.HedefPlan ? ESP.HedefPlan.aktif(h.id) : null;
+    const onizle = !p && S.ui.planOnizle === h.id && h.durum === 'aktif';
+    return html`<div>
+      <div><b class="small">${ESP.Hedefler.ozet(h)}</b>
+        <div class="tiny dim">${h.durum === 'askida' ? 'askıda · ' : ''}${h.son_tarih
+          ? 'son tarih ' + U.fmtDate(h.son_tarih) : 'tarihsiz'}${h.kapasite && h.kapasite.gunluk_dk
+          ? ' · günde ' + h.kapasite.gunluk_dk + ' dk' : ''}${g.bant ? ' · ' + BANT[g.bant]
+          + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
+      ${p ? hedefPlanOzeti(h, p) : onizle ? hedefOnizleme(h) : html`
+        <div class="row gap-8 mt-6" style="flex-wrap:wrap">
+          ${when(ESP.HedefPlan && h.durum === 'aktif', () => K.Button({ label:'Planı gör', size:'sm',
+            tone:'primary', act:'hedef-plan-onizle', data:{ 'data-id':h.id } }))}
+          ${hedefDugmeleri(h)}
+        </div>`}
+    </div>`;
+  }
+
+  function hedefRow(){
+    if(!ESP.Hedefler) return null;
+    const l = ESP.Hedefler.aktifler();
+    return K.Entry({
+      label:'HEDEFLERİM', meta:l.length ? l.length + ' etkin' : 'yok',
+      action:K.Button({ label:'Danışma’da hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
+      body:l.length ? html`<div class="stack-sm">${map(l, hedefSatir)}</div>`
+        : html`<p class="small dim">Henüz hedefin yok. Danışma’da «Bir yılda gitarda Kalfa’ya
+          gelmek istiyorum», «Bir ayda İngilizcede A2’ye gelmek istiyorum» ya da «bu yıl 24 kitap
+          okumak istiyorum» gibi yazabilirsin; vaktine göre olup olmadığını ve olacağı tarihi
+          söylerim.</p>`,
+    });
+  }
+
   function summaryRows(){
     const bugun = gun();
     const rows = M.sessionsOf(bugun);
@@ -32384,6 +33346,7 @@ ESP.Screens.today = (function(){
     const denge = ESP.Planner.balance(7);
 
     return [
+      hedefRow(),
       K.Entry({
         label:'GÜNÜN TOPLAMI',
         meta:rows.length ? U.fmtMin(toplam) : 'veri yok',
@@ -32815,6 +33778,27 @@ ESP.Screens.today = (function(){
     },
 
     async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; ESP.App.render(); },
+
+    async 'hedef-durum'(el){
+      const r = await ESP.Hedefler.durumDegistir(el.dataset.id, el.dataset.durum);
+      ESP.UI.toast(r.ok ? 'Hedef güncellendi' + (r.not ? '. ' + r.not : '') : r.why);
+      ESP.App.render();
+    },
+    async 'hedef-plan-onizle'(el){ S.ui.planOnizle = el.dataset.id; ESP.App.render(); },
+    async 'hedef-plan-kapat'(){ S.ui.planOnizle = null; ESP.App.render(); },
+    async 'hedef-plan-uygula'(el){
+      const r = await ESP.HedefPlan.uygulaHedef(el.dataset.id);
+      S.ui.planOnizle = null;
+      if(r.ok) ESP.UI.onayMuhru();
+      ESP.UI.toast(r.ok ? 'Plan uygulandı. Geri almak istersen «Planı geri al».' : r.why);
+      ESP.App.render();
+    },
+    async 'hedef-plan-geri'(el){
+      const r = await ESP.HedefPlan.geriAlHedef(el.dataset.id);
+      ESP.UI.toast(r.ok ? 'Plan geri alındı; odak ve taban plandan önceki haline döndü.'
+        : (r.why || 'Geri alınamadı'));
+      ESP.App.render();
+    },
 
     async 'signal-answer'(el){
       const inp = document.getElementById('sig-answer');
