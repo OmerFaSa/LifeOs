@@ -20,7 +20,7 @@
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
 **Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · ✅ Grup 4 ·
-🔜 8c-2 (inceleme bitti, kod YOK — aşağıda «KALDIĞIM YER») · ⏳ 8c-3 · ⏳ 8d · ⏳ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
+✅ 8c-2 · 🔜 8c-3 · ⏳ 8d · ⏳ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
 
@@ -89,58 +89,12 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   açık: 60 soru tavanı `kitap.MAX_TOPLAM` parçalıda da sabit) · ✅ 8c-1 HKM `spi.bilgi`
   (besin · fiyat · yer; `core/spibilgi.py`, MIMARI §8.30; niyetler `besin.add`,
   `fiyat.add`, `yer.add`).
-- 🔜 8c-2 SPİ tarafı: niyetleri çek → kendi koduyla sına → önizle → onayla yaz (besin
-  kullanıcı gıdası, fiyat «tahmin» fişin altında, yer listesi); Mutfak'tan istek.
-
-  **KALDIĞIM YER (2026-09-23 gece, önceki oturum):** inceleme bitti, KOD YAZILMADI;
-  çalışma ağacı temiz, son commit `5ef1124` (Grup 4). Bir sonraki Claude buradan başlar:
-  1. **Yeni `SPI/src/js/core/bilgi.js` (`SP.Bilgi`)** — `index.html`, `tests/index.html`,
-     `js/data/build.js` listelerine `dunku.js`'in yanına ekle; test `src/tests/bilgi.test.js`.
-     - `NIYET = {'besin.add':'besin','fiyat.add':'fiyat','yer.add':'yer'}`.
-     - `iste({tur, ad, semt, sehir})` → `POST /api/king/emir` gövdesi
-       `{modul:'spi', tur:'spi.bilgi', govde:{bilgi:{tur, ad, semt?, sehir?}}}`. HKM
-       `spibilgi.temizle` ile aynı kurallar: ad 2–60, yer için semt ya da şehir. İstek
-       yardımcısı `SPI/src/js/core/plan.js` `istek()` gibi (Beacon ayarı + 5 sn zaman aşımı).
-     - `kayitCek(kid)` → `GET /api/bam/kayit/<kid>` → `{kayit:{id, baslik, dogruluk, govde}}`.
-       Örnek: AYS `beacon.js` `materyalUygula`, `brand/ortak/urun.js` `uygula`.
-     - `sina(kind, kayit, payload)` SAF fonksiyon (test edilir). `kayit.id === payload.kayit_id`
-       ve `govde.tur === NIYET[kind]` olmalı. Gövde şemaları `HKM/core/spibilgi.py`
-       `_besin/_fiyat/_yer` içinde:
-       · **besin** `{ad, deger:{kcal,p,f,c,sat,fib,sugar}, micro:{…}, porsiyonlar:[{ad,g}],
-         bilinmeyen_mikro, kaynak?, alinti?}`. SPİ YENİDEN sınar: kcal/p/f/c zorunlu +
-         aralık, |4p+4c+9f−kcal| ≤ max(40, %25), p+f+c ≤ 101, sat>f ya da sugar>c → boş;
-         mikro yalnız `SP.Nutri` MICROS anahtarları (eksik = YOK, sıfır değil);
-         porsiyon `{ad,g}` → `{label,g}` (1–2000 g, en çok 6). Yazılacak: `M.newFood()` +
-         değerler + `bam:{kayitId, dogruluk, at}`; aynı `kayitId` varsa «zaten eklenmiş»;
-         yerleşik tabloda aynı ad varsa UYARI (engel değil).
-       · **fiyat** `{ad, sehir, fiyatlar:[{market, tl, miktar_g, tl_kg, tarih, kaynak,
-         alinti}], tl_kg, etiket:'tahmin'}`. SPİ TL/kg'yi ve ortancayı KENDİSİ hesaplar;
-         gıda `SP.Parse.matchFood(ad)` ile bulunur, bulunamazsa yazılmaz («önce gıdayı
-         ekle»). Kullanıcının fişi varsa uyarı: «kendi fişin önce gelir».
-       · **yer** `{ad, semt, sehir, yerler:[{ad, semt, adres, fiyat_tl, donem, kaynak,
-         alinti}]}` → yer listesi kaydı `{id:'bam-'+kid, kayitId, baslik, semt, sehir,
-         yerler, at, etiket:'tahmin'}`.
-     - `uygula(kind, payload)`: onay anında YENİDEN çek + sına + yaz; `geriAl(tur, id)`.
-     - Depo: fiyat `meta/bamFiyat` (foodId → `{tl, at, kayitId, n}`), yer `meta/yerler`.
-       `core/state.js`: `S` varsayılanına `bamPrices:{}`, `yerler:[]`; yükleyicide
-       (`S.prices` satırının yanında) oku; `tests/harness.js` `resetState`'e ekle.
-  2. **`core/money.js` `priceOf`**: kullanıcı fişi > BAM (`source:'bam'`,
-     `cert:'estimated'`, etiket «BAM araştırması (tahmin)», yaş bandı `at`'tan) > seed.
-     `estimateShare` BAM'ı zaten tahmin sayar (`source !== 'user'`).
-  3. **`core/beacon.js`**: `INTENT_KINDS` ve `APPLIABLE`'a üç tür; `intents()` içinde
-     bu türler için önizleme `n.bilgi = await SP.Bilgi.onizle(n)` (kayit.add'in
-     `n.okuma`'sı gibi); `canApply` → `n.bilgi && n.bilgi.ok`; `applyIntent` →
-     `SP.Bilgi.uygula`.
-  4. **`screens/today.js` `hkmTeklifRow`**: `kayitOkuma` gibi `bilgiOnizleme(n)`
-     (başlık, satırlar, uyarılar ya da neden); düğme adı «Ekle».
-  5. **`screens/kitchen.js` (Mutfak)**: «Kendi gıdaların» satırında BAM etiketi
-     («BAM · kaynaklı» / «BAM · doğrulanmadı — ambalajla karşılaştır»); yeni kart
-     «Bilgi iste» (tür · ad · semt · şehir → `SP.Bilgi.iste`); yeni kart «Yerler»
-     (liste + Sil, «Geri al»).
-  6. Denetim: SPİ `runtests` + `smoke`, `tools/entegre.js` (yeni adım: HKM'de `spi.bilgi`
-     kaydı → SPİ teklifi → Ekle → gıda/fiyat/yer yazıldı → geri al). MIMARI §8.30'a SPİ
-     tarafı notu. Sonra DEVIR ✅ + commit + push (dal + main).
-
+- ✅ 8c-2 SPİ tarafı (`SPI/src/js/core/bilgi.js`, HKM MIMARI §8.30 «SPİ tarafı»): Mutfak ›
+  «Bilgi iste» → King onay kapısı; teklif Bugün'de SPİ'nin kendi önizlemesiyle; «Ekle»
+  yeniden çeker + sınar + yazar (besin → kullanıcı gıdası `bam` etiketli; fiyat →
+  `meta/bamFiyat`, `priceOf`: fiş > BAM tahmini > tohum; yer → Mutfak › Yerler); geri
+  alınır. SPİ 1290/1290, duman + a11y + 390px düzen, `tools/entegre.js` §2.80 temiz.
+- 🔜 8c-3 Diyete otomatik işleme — aşağıdaki iki açık + önizlemede hedef payı.
   **8c-3 için bulunan iki şey (önce test, sonra düzelt):**
   - `SPI/src/js/core/money.js` `costPerNutrient` yalnız `f.micro[id]` okur: «gram protein
     başına maliyet» (kullanıcının örneği: bitkisel protein listesi) boş döner. `protein`
@@ -151,7 +105,6 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   - 8c-3'ün geri kalanı: eklenen BAM gıdası `SP.FOODS`'a katıldığı için öğün, açık
     (`gaps`), `sourcesFor` hesabına kendiliğinden girer; ek iş gerekirse yalnız bu
     ikisi ve önizlemede «100 g'da protein hedefinin %N'i» (hesap `nutri.js`).
-- ⏳ 8c-3 Diyete otomatik işleme (`nutri.js` hesaplar, model değil).
 - ⏳ 8d ESP ünite/ders paketi: `unite.add` — `lessons.js` ünite şeması + SRS kartları +
   pratik soruları; merdivene (`curriculum.js`) bağlı; gitar verisi `guitar_tabs.js` şemasında.
 - ⏳ 8e Depo önce (King teklifinde «zaten var, bedava» / «tazeleyeyim mi?»), tazelik,

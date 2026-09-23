@@ -467,7 +467,7 @@ SP.Beacon = (function(){
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
   const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'plan.apply', 'kayit.add',
-    'urun.add'];
+    'urun.add', 'besin.add', 'fiyat.add', 'yer.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -583,6 +583,12 @@ SP.Beacon = (function(){
       if(n.kind !== 'kayit.add') continue;
       try{ n.okuma = kayitOku(n); }catch(e){ n.okuma = null; }
     }
+    /* BAM bilgisi (besin, fiyat, yer) de ONAYDAN ONCE sinanir: kart «SPİ
+       şunu ekleyecek» der ya da neden ekleyemeyecegini soyler. */
+    for(const n of gosterilecek){
+      if(!SP.Bilgi || !SP.Bilgi.NIYET[n.kind]) continue;
+      try{ n.bilgi = await SP.Bilgi.onizle(n); }catch(e){ n.bilgi = null; }
+    }
     flushIntentReports().catch(function(){});
     return gosterilecek;
   }
@@ -651,11 +657,16 @@ SP.Beacon = (function(){
      dokunmaz. HKM'nin Editörü SPİ için doz cümlesini zaten çıkarır; ürün
      yine de teşhis ya da doz önerisi değildir ve «doğrulanmadı» etiketi
      taşıyabilir. */
-  const APPLIABLE = ['plan.apply', 'kayit.add', 'urun.add'];
+  /* DÖRDÜNCÜ İSTİSNA: `besin.add` / `fiyat.add` / `yer.add` — BAM'ın
+     kaynaktan çıkardığı bilgi (core/bilgi.js). Ölçüm değildir: besin
+     kullanıcı gıdası olur, fiyat fişin ALTINDA «tahmin» durur, yer listesi
+     Mutfak'a girer. Kayıt HKM'den çekilir ve SPİ'nin kendi koduyla sınanır. */
+  const APPLIABLE = ['plan.apply', 'kayit.add', 'urun.add', 'besin.add', 'fiyat.add', 'yer.add'];
 
   function canApply(n){
     if(!n || APPLIABLE.indexOf(n.kind) < 0) return false;
     if(n.kind === 'kayit.add') return !!(n.okuma && n.okuma.yazilacak.length);
+    if(SP.Bilgi && SP.Bilgi.NIYET[n.kind]) return !!(n.bilgi && n.bilgi.ok);
     return true;
   }
 
@@ -716,6 +727,7 @@ SP.Beacon = (function(){
 
   async function applyIntent(n){
     if(n && n.kind === 'kayit.add') return await kayitUygula(n);
+    if(n && SP.Bilgi && SP.Bilgi.NIYET[n.kind]) return await SP.Bilgi.uygula(n.kind, n.payload || {});
     if(n && n.kind === 'urun.add'){
       /* BAM ürünü (özet, rapor, sunum, pankart…): kayıt HKM'den çekilir,
          modülün KENDİ koduyla sınanır, kendi deposuna yazılır
@@ -760,6 +772,7 @@ SP.Beacon = (function(){
         : (action === 'seen' ? 'acknowledged' : 'dismissed');
       let not = '';
       let uygulandi = false;
+      let geriAl = null;
       if(action === 'apply'){
         if(onceki && (onceki.state === 'applied' || onceki.state === 'applying')){
           /* En fazla BIR KEZ: daha once uygulanmis (ya da uygulanmis
@@ -773,6 +786,7 @@ SP.Beacon = (function(){
             return { ok:false, error:r.error };
           }
           not = r.note;
+          geriAl = r.geriAl || null;
           uygulandi = true;
         }
       }
@@ -786,7 +800,7 @@ SP.Beacon = (function(){
       const bildirim = await answerIntent(n.id, durum);
       if(bildirim.ok) await markIntent(n.id, durum, true, not);
       return { ok:true, applied:uygulandi, state:durum,
-        reported:!!bildirim.ok, note:not };
+        reported:!!bildirim.ok, note:not, geriAl };
     }finally{
       delete ISLEMDE[anahtar];
     }

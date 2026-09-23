@@ -146,6 +146,25 @@ async function main(){
       { cwd:path.join(ROOT, 'HKM') }).toString().trim());
     }catch(e){ hatalar.push('urun kaydi yazilamadi: ' + e.message); }
 
+    /* 0.8 — SPİ BILGISI (Part 8c-2): Arastirma Burosu'nun besin kaydiyla ayni
+       govde, model gerektirmeden yazilir. Sinanan: SPİ kaydi HKM'den cekip
+       KENDI koduyla sinar, onaydan once onizler, onayla yazar, geri alir. */
+    let bilgiKaydi = null;
+    try{
+      bilgiKaydi = Number(execFileSync('python3', ['-c', [
+        'import sys',
+        'from core import db, bam',
+        'con = db.connect(sys.argv[1])',
+        'g = {"tur": "besin", "ad": "Kinoa (çiğ)", "istenen": "kinoa",',
+        '     "deger": {"kcal": 368, "p": 14.1, "f": 6.1, "c": 64.2, "sat": 0.7, "fib": 7,',
+        '               "sugar": None}, "micro": {"iron": 4.6}, "porsiyonlar": [],',
+        '     "bilinmeyen_mikro": [], "kaynaklar": [{"n": 1, "url": "https://ornek.org"}]}',
+        'k = bam.kayit_ekle(con, "arastirma", "Kinoa besin değerleri", g, dogruluk="kaynakli")',
+        'con.commit()',
+        'print(k["id"])'].join('\n'), path.join(tmp, 'hkm.db')],
+      { cwd:path.join(ROOT, 'HKM') }).toString().trim());
+    }catch(e){ hatalar.push('spi bilgi kaydi yazilamadi: ' + e.message); }
+
     for(const s of SISTEMLER){
       const srv = spawn('python3', [path.join(ROOT, s.id, 'devserver.py'), String(s.port)],
         { cwd:path.join(ROOT, s.id), stdio:'ignore' });
@@ -527,6 +546,42 @@ async function main(){
       else if(s.id === 'AYS' && !yarinIs.length) hatalar.push('AYS: yarinin plan bloklari gelmedi');
       else console.log('  ' + s.id + ' → yarinin isleri HKM\'de (' + yarinIs.length + ' is'
         + (yarinIs[0] ? ': «' + yarinIs[0].metin + '»' : '') + ')');
+
+      /* 2.80 — SPİ BILGISI (Part 8c-2): `besin.add` teklifi Bugun kartinda
+         SPİ'nin KENDI onizlemesiyle gorunur; «Ekle» kaydi yeniden ceker,
+         sinar ve kullanici gidasi yazar; «Geri al» siler. Mutfak'taki istek
+         King'in onay kapisina `spi.bilgi` is emri olarak gider. */
+      if(s.id === 'SPI' && bilgiKaydi){
+        const bir = await (await hkmFetch('/api/intents/spi', { method:'POST',
+          body:JSON.stringify({ kind:'besin.add', source:'bam',
+            payload:{ kayit_id:bilgiKaydi, ad:'kinoa', baslik:'Kinoa besin değerleri' } }) })).json();
+        if(!bir.ok) hatalar.push('SPI: besin teklifi birakilamadi — ' + (bir.errors || []).join('; '));
+        const bi = await page.evaluate(async () => {
+          const n = (await SP.Beacon.intents()).find(x => x.kind === 'besin.add');
+          if(!n) return { yok:true };
+          SP.S.ui.hkmIntents = [n];
+          SP.App.go('today');
+          await new Promise(r => setTimeout(r, 400));
+          const kart = document.body.textContent.indexOf('SPİ şunu ekleyecek') >= 0;
+          const r = await SP.Beacon.resolveIntent(n, 'apply');
+          const f = (SP.S.foods || []).find(x => x.bam && x.bam.kayitId === n.payload.kayit_id);
+          const hesapta = !!(f && SP.FOOD_BY_ID[f.id]);
+          if(r.geriAl) await SP.Bilgi.geriAl(r.geriAl);
+          const kaldi = (SP.S.foods || []).some(x => x.bam && x.bam.kayitId === n.payload.kayit_id);
+          const ist = await SP.Bilgi.iste({ tur:'yer', ad:'spor salonu', sehir:'Adana' });
+          SP.S.ui.hkmIntents = [];
+          return { onizleme:n.bilgi && n.bilgi.ok, kart, ok:r.ok, not:r.note || r.error,
+            bildirildi:r.reported, hesapta, kaldi, istek:ist.ok, istMetin:ist.metin };
+        });
+        if(bi.yok) hatalar.push('SPI: besin teklifi modulde gorunmedi');
+        else if(!bi.onizleme || !bi.kart) hatalar.push('SPI: besin teklifi onaydan once onizlenmedi');
+        else if(!bi.ok || !bi.hesapta) hatalar.push('SPI: besin eklenemedi — ' + bi.not);
+        else if(bi.kaldi) hatalar.push('SPI: besin geri alinamadi');
+        else if(!bi.bildirildi) hatalar.push('SPI: besin cevabi merkeze bildirilemedi');
+        else if(!bi.istek) hatalar.push('SPI: bilgi istegi King’e gitmedi — ' + bi.istMetin);
+        else console.log('  SPI → BAM besin kaydi kendi koduyla sinandi, onizlendi, eklendi, geri alindi; '
+          + 'Mutfak istegi King’e gitti');
+      }
 
       /* 2.8 — HEDEFTEN PLANA (ekip/PLAN.md Tur 2). Yalniz SPI: plan motoru
          orada. Zincir: SPI plani KENDI koduyla uygular -> King'e is emri ->

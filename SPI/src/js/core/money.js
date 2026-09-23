@@ -35,6 +35,14 @@ SP.Money = (function(){
       return { tl:own.tl, source:'user', at:own.at, months, age:ageBand(months),
         cert:'measured', label:'kendi fişin' };
     }
+    /* BAM araştırması (core/bilgi.js): kaynaklı ama yine TAHMİN — fişin
+       altında, tohum tablosunun üstünde durur; tarihi kendi araştırmasıdır. */
+    const bam = SP.S.bamPrices ? SP.S.bamPrices[foodId] : null;
+    if(bam && bam.tl){
+      const months = monthsSince(bam.at);
+      return { tl:bam.tl, source:'bam', at:bam.at, months, age:ageBand(months),
+        cert:'estimated', label:'BAM araştırması (tahmin)' };
+    }
     const seed = SP.PRICE_SEED.perKg[foodId];
     if(seed == null) return { tl:null, source:'none', cert:'missing', label:'fiyat yok' };
     const months = monthsSince(SP.PRICE_SEED.seededAt);

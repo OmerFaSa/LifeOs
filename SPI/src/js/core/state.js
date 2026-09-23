@@ -46,6 +46,8 @@ SP.S = {
 
   basket:null,        // { items, weeklyLimit, monthlyLimit, testFee, equipment, updatedAt }
   prices:{},          // foodId -> { tl, at, source }
+  bamPrices:{},       // foodId -> { tl, at, kayitId, n } — BAM fiyati, tahmin (core/bilgi.js)
+  yerler:[],          // BAM yer listeleri (spor salonu vb.), tahmin (core/bilgi.js)
 
   flags:[],           // kirmizi bayrak kayitlari
   usage:null,         // surtunme olcumu (core/friction.js)
@@ -891,6 +893,7 @@ SP.Model = (function(){
     S.progress = (await SP.Store.get('progress')) || {};
     S.basket = Object.assign(defaultBasket(), await SP.Store.get('basket'));
     S.prices = (await SP.Store.get('prices')) || {};
+    if(SP.Bilgi) await SP.Bilgi.yukle();
     S.flags = (await SP.Store.get('flags')) || [];
     S.decisions = ((await SP.Store.list('decisions')) || [])
       .sort((a, b) => (a.at || '') < (b.at || '') ? 1 : -1);

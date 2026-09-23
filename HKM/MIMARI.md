@@ -979,6 +979,15 @@ yazılabilir ama «doğrulanmadı» ve uyarılıdır. Biten kayıt SPİ'ye niyet
 güncelse yeniden aranmaz (Depolama Bürosu, konu anahtarı `spibilgi.konu`). King'in
 güncellik turu değişen kaynağı SPİ'ye bildirir. Testler: `tests/test_spibilgi.py`.
 
+**SPİ tarafı (8c-2, `SPI/src/js/core/bilgi.js`):** Mutfak › «Bilgi iste» (tür · ad · semt ·
+şehir; sağlık verisi yok) → `POST /api/king/emir` (`spi.bilgi`, onay kapısı). Gelen teklif
+Bugün kartında SPİ'nin KENDİ önizlemesiyle görünür (`n.bilgi`); «Ekle» kaydı yeniden çeker,
+yeniden sınar (enerji tutarlılığı, aralıklar, yalnız SPİ'nin mikro anahtarları; eksik boş
+kalır), sonra yazar: besin → kullanıcı gıdası (`bam` etiketiyle; `SP.FOODS`'a katılır),
+fiyat → `meta/bamFiyat` (TL/kg ve ortancayı SPİ hesaplar; `money.priceOf` sırası: fiş >
+BAM tahmini > tohum), yer → `meta/yerler` (Mutfak › Yerler). Tabloda olmayan gıdanın fiyatı
+yazılmaz. Hepsi «Geri al»lı. Testler: `SPI/src/tests/bilgi.test.js`, `tools/entegre.js` §2.80.
+
 ## 8.31 Bildirim politikası ve kolaylıklar — `core/bildirim.py`, `core/eksik.py` (Grup 1)
 
 Kullanıcının dikkati korunur, hiçbir mesaj kaybolmaz:

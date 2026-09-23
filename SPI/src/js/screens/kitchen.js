@@ -156,6 +156,9 @@ SP.Screens.kitchen = (function(){
               <b class="small">${f.name}</b>
               <div class="tiny dim">100 g · ${U.fmtNum(f.kcal)} kcal ·
                 P ${U.fmtNum(f.p)} · Y ${U.fmtNum(f.f)} · K ${U.fmtNum(f.c)}</div>
+              ${when(f.bam, () => html`<div class="tiny dim">${f.bam && f.bam.dogruluk === 'kaynakli'
+                ? 'BAM · kaynaklı · ' + f.bam.at
+                : 'BAM · doğrulanmadı — ambalaj etiketiyle karşılaştır'}</div>`)}
             </div>
             ${K.Button({ label:'Düzelt', size:'sm', act:'edit-food',
               data:{ 'data-id':f.id } })}
@@ -165,6 +168,54 @@ SP.Screens.kitchen = (function(){
       foot:html`${K.Button({ label:'Etiketten oku', icon:'camera', tone:'primary',
           act:'open-label' })}
         ${K.Button({ label:'Elle ekle', act:'add-food' })}`,
+    });
+  }
+
+  /* ==================================================== BAM'dan bilgi
+
+     Besin değeri, market fiyatı ya da yer listesi HKM'nin Araştırma
+     Bürosu'ndan istenir (core/bilgi.js). İstek King'in teklifinden ve
+     onaydan geçer; sonuç Bugün'e TEKLİF olarak gelir ve SPİ kendi koduyla
+     sınamadan hiçbir şey yazılmaz. İsteğe sağlık verisi GİTMEZ. */
+  function bilgiCard(){
+    const tur = S.ui.bilgiTur || 'besin';
+    return K.Card({
+      title:'Bilgi iste', sub:'HKM · Araştırma Bürosu',
+      body:html`
+        <p class="small muted">Besin değerleri, market fiyatı ya da bir semtteki yerler
+          (spor salonu gibi) kaynaktan araştırılır. King önce maliyet ve süre teklifi
+          yapar; sonuç Bugün’e teklif olarak gelir.</p>
+        <div class="cols-2 mt-10">
+          ${K.Field({ label:'Ne?', input:K.Select({ id:'bilgi-tur', value:tur, change:'bilgi-tur',
+            options:[{ value:'besin', label:'Besin değerleri' }, { value:'fiyat', label:'Market fiyatı' },
+              { value:'yer', label:'Yer listesi' }] }) })}
+          ${K.Field({ label:tur === 'yer' ? 'Ne tür yer?' : 'Gıda', input:K.Input({ id:'bilgi-ad',
+            placeholder:tur === 'yer' ? 'spor salonu' : 'kinoa' }) })}
+        </div>
+        ${when(tur !== 'besin', () => html`<div class="cols-2 mt-10">
+          ${K.Field({ label:'Semt', hint:'isteğe bağlı', input:K.Input({ id:'bilgi-semt' }) })}
+          ${K.Field({ label:'Şehir', hint:tur === 'yer' ? 'semt ya da şehir gerekli' : 'isteğe bağlı',
+            input:K.Input({ id:'bilgi-sehir' }) })}
+        </div>`)}`,
+      foot:K.Button({ label:'King’e ilet', tone:'primary', act:'bilgi-iste' }),
+    });
+  }
+
+  function yerCard(){
+    const liste = SP.Bilgi ? SP.Bilgi.yerler() : [];
+    if(!liste.length) return '';
+    return K.Card({
+      title:'Yerler', sub:liste.length + ' liste · tahmin',
+      body:html`${map(liste, l => html`<div class="mt-10">
+        <div class="row gap-8">
+          <b class="small grow minw0">${l.baslik}${l.konum ? ' · ' + l.konum : ''}</b>
+          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Listeyi sil',
+            act:'yer-sil', data:{ 'data-id':l.id } })}
+        </div>
+        <ul class="tiny mt-4">${map(l.yerler, y => html`<li>${y.ad}${y.semt ? ' · ' + y.semt : ''}${
+          y.tl != null ? ' · ' + U.fmtNum(y.tl) + ' TL' + (y.donem ? ' ' + y.donem : '') : ' · fiyat bilinmiyor'}</li>`)}</ul>
+        <p class="tiny dim">BAM araştırması, ${l.at}. Fiyat ve adres değişmiş olabilir; gitmeden teyit et.</p>
+      </div>`)}`,
     });
   }
 
@@ -195,7 +246,8 @@ SP.Screens.kitchen = (function(){
 
   async function render(){
     return String(html`
-      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), customCard(), dishInfoCard()])}
+      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), customCard(), bilgiCard(), yerCard(),
+        dishInfoCard()])}
       <div class="mt-24">${raw(UI.rail(['household', 'portion', 'profiles']))}</div>`);
   }
 
@@ -264,6 +316,22 @@ SP.Screens.kitchen = (function(){
       SP.App.render();
     },
 
+    async 'bilgi-iste'(){
+      const v = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+      const r = await SP.Bilgi.iste({ tur:S.ui.bilgiTur || 'besin', ad:v('bilgi-ad'),
+        semt:v('bilgi-semt'), sehir:v('bilgi-sehir') });
+      UI.toast(r.metin);
+      if(r.ok) SP.App.render();
+    },
+
+    async 'yer-sil'(el){
+      const l = SP.Bilgi.yerler().find(x => x.id === el.dataset.id);
+      if(!l) return;
+      await SP.Bilgi.yerSil(l.id);
+      UI.toast(l.baslik + ' silindi', { undo:async () => { await SP.Bilgi.yerGeri(l); SP.App.render(); } });
+      SP.App.render();
+    },
+
     async 'del-food'(el){
       const f = (S.foods || []).find(x => x.id === el.dataset.id);
       if(!f) return;
@@ -282,6 +350,7 @@ SP.Screens.kitchen = (function(){
       if(g) g.textContent = labelFile ? labelFile.name : '';
     },
     async 'pick-dish'(el){ S.ui.kitchenDish = el.value; SP.App.render(); },
+    async 'bilgi-tur'(el){ S.ui.bilgiTur = el.value; SP.App.render(); },
     async 'set-grams'(el){
       const v = Number(el.value);
       S.ui.kitchenGrams = isFinite(v) && v > 0 ? v : 1000;

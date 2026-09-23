@@ -778,9 +778,11 @@ SP.Screens.today = (function(){
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
           ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
+          ${when(SP.Bilgi && SP.Bilgi.NIYET[n.kind], () => bilgiOnizleme(n))}
           <div class="row gap-8 mt-8">
             ${SP.Beacon.canApply(n)
-              ? K.Button({ label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle' })[n.kind] || 'Planına ekle',
+              ? K.Button({ label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'besin.add':'Ekle',
+                'fiyat.add':'Ekle', 'yer.add':'Ekle' })[n.kind] || 'Planına ekle',
                 size:'sm', tone:'primary',
                 act:'hkm-intent-apply', data:{ 'data-id':String(n.id) } })
               : K.Button({ label:'Gördüm', size:'sm', tone:'primary',
@@ -797,6 +799,20 @@ SP.Screens.today = (function(){
 
   /* Gunun kaydi: SPİ cumleyi NASIL OKUDU. Onaydan once gorunur; yazilamayan
      ve anlasilmayan parca da SEBEBIYLE yazilir. */
+  /* BAM bilgisi: SPİ kaydı KENDİ koduyla sınadı; ne ekleneceği ya da neden
+     eklenemeyeceği onaydan ÖNCE görünür (core/bilgi.js). */
+  function bilgiOnizleme(n){
+    const b = n.bilgi;
+    if(!b) return html`<p class="tiny dim mt-8">SPİ bu kaydı sınayamadı.</p>`;
+    if(!b.ok) return html`<p class="tiny dim mt-8">Eklenmeyecek: ${b.why}</p>`;
+    const o = b.onizleme;
+    return html`<div class="mt-8">
+      <p class="tiny"><b>SPİ şunu ekleyecek:</b> ${o.baslik}</p>
+      <ul class="tiny mt-4">${map(o.satirlar, s => html`<li>${s}</li>`)}</ul>
+      ${map(o.uyari || [], u => html`<p class="tiny dim">${u}</p>`)}
+    </div>`;
+  }
+
   function kayitOkuma(n){
     const o = n.okuma;
     if(!o) return html`<p class="tiny dim mt-8">SPİ bu kaydı okuyamadı.</p>`;
@@ -968,8 +984,14 @@ SP.Screens.today = (function(){
       : r.state === 'acknowledged'
         ? (r.note || 'Görüldü olarak işaretlendi')
         : 'İstenmedi olarak işaretlendi';
-    UI.toast(r.reported ? bas
-      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.');
+    const metin = r.reported ? bas
+      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.';
+    /* BAM bilgisi geri alınır: gıda silinir, tahmin fiyat eski hâline döner. */
+    if(r.geriAl && SP.Bilgi){
+      UI.toast(metin, { undo:async () => { await SP.Bilgi.geriAl(r.geriAl); SP.App.render(); } });
+    }else{
+      UI.toast(metin);
+    }
     SP.App.render();
   }
 

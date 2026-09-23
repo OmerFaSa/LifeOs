@@ -186,7 +186,7 @@ SP.Test = (function(){
     S.hedefler = []; S.hekim = []; S.planlar = [];
     if(SP.Model.mountFoods) SP.Model.mountFoods();
     S.basket = SP.Model.defaultBasket();
-    S.prices = {}; S.flags = []; S.decisions = [];
+    S.prices = {}; S.bamPrices = {}; S.yerler = []; S.flags = []; S.decisions = [];
     S.usage = null; S.forecasts = []; S.signals = []; S.storage = null;
     S.office = null; S.officeChats = {}; S.officeMeetings = []; S.officeBriefings = {}; S.journal = {};
     S.meta = { schemaVersion:SP.SCHEMA_VERSION, lastBackupAt:null };
