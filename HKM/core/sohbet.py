@@ -25,7 +25,8 @@
 
 import re
 
-from core import ai, butce, cross, dil, manager, memory, models, motto, patron, streak
+from core import (ai, butce, cross, dil, manager, memory, models, motto, patron, program,
+                  streak)
 
 # Kademeler: kullanici kiminle konusuyor.
 GOREVLILER = {
@@ -180,6 +181,50 @@ def arastirma_konusu(metin):
     return re.sub(r"\s+", " ", konu).strip(" .,!?:;'\"«»")
 
 
+def _emir_cevabi(con, r, is_ad, ek):
+    """Is emrinin sonucunu kullaniciya: cumleyi KOD kurar."""
+    from core import king
+    e = r["emir"]
+    if e["durum"] == "reddedildi":
+        return "Bu işi açamadım: %s" % "; ".join(m["not"] for m in e["kontrol"] if not m["ok"])
+    if e["durum"] == "bitti":
+        return "«%s» depoda hazırdı ve güncel.%s" % (
+            e["konu"], king._teklif(con, e, e["sonuc"]["kayit_id"]))
+    if not r.get("yeni"):
+        return "«%s» zaten hazırlanıyor (iş emri #%d). Bitince haber veririm." % (
+            e["konu"], e["id"])
+    t = e.get("tahmin") or {}
+    eksik = [m["not"] for m in e["kontrol"] if not m["ok"]]
+    return ("%s (iş emri #%d). %s Tahmini süre %s (tahmin). Bitince bildirim düşer; "
+            "HKM › Ofis’ten açabilirsin.%s" % (
+                is_ad % e["konu"], e["id"], ek, t.get("metin") or "bilinmiyor",
+                (" Eksik: " + "; ".join(eksik)) if eksik else ""))
+
+
+def plani_devret(con, cfg, metin, istek, now=None):
+    """«X icin N haftalik plan yap, haftada M saat» -> bam.plan emri.
+    Hafta ya da sure yoksa SORULUR; tahminle plan kurulmaz."""
+    from core import king
+    if istek["eksik"]:
+        return program.eksik_sorusu(istek["eksik"])
+    if istek["hafta"] > program.HAFTA[1]:
+        return "En çok 52 haftalık plan kurabiliyorum; süreyi kısaltır mısın?"
+    if not program.HAFTALIK_DK[0] <= istek["haftalik_dk"] <= program.HAFTALIK_DK[1]:
+        return "Haftalık süre 30 dakika ile 40 saat arasında olmalı."
+    g = {k: istek[k] for k in ("konu", "hafta", "haftalik_dk", "gunler") if k in istek}
+    g["konu"] = g["konu"][:200]
+    g["kaynakli"] = bool(ARASTIR_TETIK.search(metin))
+    r = king.emir_ac(con, cfg, "hkm", "bam.plan", {"program": g},
+                     neden="Sohbetten: " + metin[:300], now=now)
+    if not r.get("ok"):
+        return "Plan emri açılamadı: %s" % "; ".join(r.get("errors") or ["bilinmeyen hata"])
+    return _emir_cevabi(con, r, "«%s» planını Planlama Bürosu’na verdim",
+                        "Hedef Analisti konuyu birimlere bölecek; haftalar, süreler ve "
+                        "senaryolar kodla hesaplanacak%s." % (
+                            "; önce Araştırma Bürosu konuyu araştıracak" if g["kaynakli"]
+                            else ""))
+
+
 def arastirmayi_devret(con, cfg, metin, konu, now=None):
     """King'in cevabi: is emri acilir; cumleyi kod kurar."""
     from core import king          # king -> bam -> ... ; dongusel ice aktarimi onler
@@ -189,24 +234,10 @@ def arastirmayi_devret(con, cfg, metin, konu, now=None):
                      neden="Sohbetten: " + metin[:300], now=now)
     if not r.get("ok"):
         return "Araştırma emri açılamadı: %s" % "; ".join(r.get("errors") or ["bilinmeyen hata"])
-    e = r["emir"]
-    if e["durum"] == "reddedildi":
-        return "Bu araştırmayı açamadım: %s" % "; ".join(
-            m["not"] for m in e["kontrol"] if not m["ok"])
-    if e["durum"] == "bitti":
-        return "«%s» depoda hazırdı ve güncel.%s" % (
-            e["konu"], king._teklif_arastirma(con, e, e["sonuc"]["kayit_id"]))
-    if not r.get("yeni"):
-        return "«%s» zaten araştırılıyor (iş emri #%d). Bitince haber veririm." % (
-            e["konu"], e["id"])
-    t = e.get("tahmin") or {}
-    eksik = [m["not"] for m in e["kontrol"] if not m["ok"]]
-    return ("Araştırmayı ben yapmıyorum; «%s» konusunu Araştırma Bürosu’na verdim (iş emri #%d). "
-            "Önce Depolama Bürosu depoya bakacak: kayıt varsa kaynakları açılıp güncel mi diye "
-            "denetlenecek, yoksa ajanlar web’de araştıracak. Tahmini süre %s (tahmin). "
-            "Bitince bildirim düşer; HKM › Ofis’ten açabilirsin.%s" % (
-                e["konu"], e["id"], t.get("metin") or "bilinmiyor",
-                (" Eksik: " + "; ".join(eksik)) if eksik else ""))
+    return _emir_cevabi(con, r, "Araştırmayı ben yapmıyorum; «%s» konusunu Araştırma Bürosu’na "
+                                "verdim",
+                        "Önce Depolama Bürosu depoya bakacak: kayıt varsa kaynakları açılıp "
+                        "güncel mi diye denetlenecek, yoksa ajanlar web’de araştıracak.")
 
 
 def _yedek_metin(r, yedek):
@@ -241,7 +272,15 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         return {"ok": True, "mode": "memory", "command": "memory",
                 "text": hafiza_komutu["text"], "agent": gorevli}
 
-    # 0b — ARASTIRMA ISTEGI King'in degil burolarin isidir: emir acilir.
+    # 0b — PROGRAM ve ARASTIRMA ISTEGI King'in degil burolarin isidir:
+    # emir acilir. «arastirip plan yap» planin kaynakli olmasidir.
+    pl = program.tani(metin) if gorevli == "king" else None
+    if pl is not None:
+        govde = plani_devret(con, cfg, metin, pl)
+        if kayit:
+            patron.log(con, kanal, "user", metin, agent=gorevli)
+            patron.log(con, kanal, "manager", govde, agent=gorevli)
+        return {"ok": True, "mode": "emir", "command": "plan", "text": govde, "agent": gorevli}
     konu = arastirma_konusu(metin) if gorevli == "king" else None
     if konu is not None:
         govde = arastirmayi_devret(con, cfg, metin, konu)

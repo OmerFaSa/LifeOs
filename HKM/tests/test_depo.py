@@ -189,7 +189,7 @@ def run():
             eq((e["tur"], e["modul"], e["konu"]), ("bam.arastirma", "hkm", "Osmanlı kuruluşunu"))
             r2 = sohbet.konus(con, _cfg_web(), "internette Osmanlı kuruluşunu araştır",
                               "2026-09-23", gorevli="king", transport=_Model(), kayit=False)
-            ok("zaten araştırılıyor" in r2["text"])
+            ok("zaten hazırlanıyor" in r2["text"])
             eq(len(king.emirler(con)), 1)
             r3 = sohbet.konus(con, _cfg_web(), "araştır", "2026-09-23", gorevli="king",
                               transport=_Model(), kayit=False)

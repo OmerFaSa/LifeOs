@@ -32,7 +32,8 @@ import datetime
 import json
 import statistics
 
-from core import ai, bam, butce, depo, intents, kaynakli, kitap, mufredat, planlama, urunler, web
+from core import (ai, bam, butce, depo, intents, kaynakli, kitap, mufredat, planlama, program,
+                  urunler, web)
 
 # «hkm»: kullanicinin HKM'nin kendisinden (Telegram, HKM ekrani) verdigi is.
 # O yolda modul kocu ve Patronu yoktur: kullanici dogrudan King'e yazar.
@@ -56,7 +57,7 @@ TURLER = {
         "moduller": ("spi",),
         "ofisler": ["kayit", "planlama"],
         "model": False,
-        "not": "Planlama Bürosu v1 kuralla çalışır: program, simülasyon, plan denetimi.",
+        "not": "Planlama Bürosu (v1, SPİ) kuralla çalışır: program, simülasyon, plan denetimi.",
     },
     # Sinav profilinin iskeleti (core/mufredat.py). Rapor kaynaksizsa
     # «dogrulanmadi»dir; AYS kullanicinin onayiyla profil olarak saklar.
@@ -88,6 +89,16 @@ TURLER = {
         "ofisler": ["kayit", "arastirma"],
         "model": True,
         "not": "Önce Depolama Bürosu bakar; gerekirse Araştırma Bürosu web'de araştırır.",
+    },
+    # Herhangi bir konu icin haftalik program (core/program.py). Hafta ve
+    # haftalik sure ZORUNLUDUR; «arastirarak» istenirse once Depolama ve
+    # Arastirma, sonra Planlama.
+    "bam.plan": {
+        "ad": "Haftalık program (her konu)",
+        "moduller": ("ays", "spi", "esp", "hkm"),
+        "ofisler": ["kayit", "arastirma", "planlama"],
+        "model": True,
+        "not": "Hedef Analisti birimleri yazar; kapasite, program ve denetim koddur.",
     },
     "test.kitabi": {
         "ad": "Bölümlü test kitabı",
@@ -245,6 +256,9 @@ def ofisler_of(tur, govde=None):
     """Isin gececegi ofisler. Cogu turde sabit; urunde isteğe bagli."""
     if tur == "bam.urun" and govde and govde.get("urun"):
         return ["kayit"] + (["arastirma"] if govde["urun"].get("kaynakli") else []) + ["uretim"]
+    if tur == "bam.plan" and govde and govde.get("program"):
+        return ["kayit"] + (["arastirma"] if govde["program"].get("kaynakli") else []) + \
+            ["planlama"]
     return list(TURLER[tur]["ofisler"])
 
 
@@ -283,6 +297,10 @@ def imkan(con, cfg, tur, govde=None):
                                else g["note"], etki="kismi"))
     else:
         maddeler.append(_madde("model", True, "Model gerekmez: %s" % t["not"]))
+    if tur == "bam.plan" and govde and govde.get("program"):
+        kirik = program.on_denetim(govde["program"])
+        maddeler.append(_madde("guvenlik", not kirik, "; ".join(kirik) if kirik else
+                               "Günlük süre sınırın içinde."))
     if tur == "hedef.plan" and govde and govde.get("plan"):
         kirik = [d["not"] for d in planlama.denetle(govde["plan"]) if d["kritik"] and not d["ok"]]
         maddeler.append(_madde("guvenlik", not kirik, "; ".join(kirik) if kirik else
@@ -349,6 +367,11 @@ def _govde_temizle(tur, govde):
         if hatalar:
             return None, hatalar
         return {"arastirma": g}, []
+    if tur == "bam.plan":
+        g, hatalar = program.temizle((govde or {}).get("program"))
+        if hatalar:
+            return None, hatalar
+        return {"program": g}, []
     return None, ["tanimsiz tur"]
 
 
@@ -356,6 +379,7 @@ def _govde_temizle(tur, govde):
 # ve bosluk farki ayni sinavdir.
 ANAHTAR = {"hedef.plan": planlama.anahtar, "sinav.mufredat": mufredat.anahtar,
            "test.kitabi": planlama.anahtar, "bam.urun": planlama.anahtar,
+           "bam.plan": program.anahtar,
            "bam.arastirma": lambda t: depo.konu_anahtari(
                "%s %s" % (t["arastirma"]["konu"], t["arastirma"].get("ayrinti") or ""))}
 
@@ -378,6 +402,8 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
         konu = urunler.talep(temiz["urun"])
     if tur == "bam.arastirma" and not str(konu or "").strip():
         konu = kaynakli.istek_talebi(temiz["arastirma"])
+    if tur == "bam.plan" and not str(konu or "").strip():
+        konu = program.talep(temiz["program"])
     if tur == "test.kitabi" and not str(konu or "").strip():
         konu = "«%s» — %d bölümlük test kitabı" % (temiz["kitap"]["baslik"],
                                                   len(temiz["kitap"]["bolumler"]))
@@ -544,8 +570,26 @@ def _teklif_arastirma(con, e, kayit_id, now=None):
         (" Özet: " + ozet_) if ozet_ else "")
 
 
+def _teklif_program(con, e, kayit_id, now=None):
+    """Genel program modulun planina dogrudan girmez: modulun kendi plan
+    motoru vardir. Bildirim programin ozetini tasir; tamami HKM › Ofis'te."""
+    k = bam.kayit_getir(con, kayit_id) or {}
+    g = k.get("govde") or {}
+    if g.get("tur") != "program":
+        return " Kayıt program biçiminde değil."
+    if not g.get("gecti"):
+        return " Plan denetçisi geçirmedi: %s" % "; ".join(
+            d["not"] for d in g.get("denetim") or [] if d.get("kritik") and not d["ok"])
+    s = (g.get("simulasyon") or {}).get("senaryolar") or [{}]
+    return " %d birim, günde %s; %s HKM › Ofis’ten açılabilir ve indirilebilir." % (
+        len(g.get("birimler") or []), program.sure_yaz((g.get("kapasite") or {}).get("gunluk_dk") or 0),
+        s[0].get("metin", ""))
+
+
 def _teklif(con, e, kayit_id, now=None):
     """Burosun urettigi kaydi module teklif eder. Cevap ayni yoldan doner."""
+    if e["tur"] == "bam.plan":
+        return _teklif_program(con, e, kayit_id, now=now)
     if e["tur"] == "bam.arastirma":
         return _teklif_arastirma(con, e, kayit_id, now=now)
     if e["tur"] == "bam.urun":

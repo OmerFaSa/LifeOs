@@ -38,7 +38,7 @@ import datetime
 import json
 import re
 
-from core import ai, depo, intents, kaynakli, kitap, mufredat, planlama, urunler, web
+from core import ai, depo, intents, kaynakli, kitap, mufredat, planlama, program, urunler, web
 
 OFISLER = {
     "kayit": {
@@ -64,9 +64,10 @@ OFISLER = {
                     "Araştırma Yazarı"]},
     "planlama": {
         "ad": "Planlama Bürosu", "patron": "Planlama Patronu", "durum": "hazir",
-        "gorev": "Hedefi haftalık bir yol haritasına çevirir: program, simülasyon ve plan "
-                 "denetimi. v1 kuralla çalışır ve yalnız modülün gönderdiği yapılandırılmış "
-                 "hedefi alır (şimdilik SPİ kilo planı); serbest cümleden plan kurmaz.",
+        "gorev": "Hedefi haftalık bir yol haritasına çevirir. Hedef Analisti konuyu sıralı "
+                 "birimlere böler; kapasite, haftalık program, tekrar payı, simülasyon ve "
+                 "plan denetimi koddur. Hafta ve haftalık süre sorulur, tahmin edilmez. "
+                 "Araştırma istenirse birimler doğrulanmış bulgulara dayanır.",
         "ajanlar": ["Hedef Analisti", "Durum Analisti", "Kısıt Analisti",
                     "Bağımlılık Analisti", "Kapasite Analisti", "Program Mimarı",
                     "Simülasyon Uzmanı", "Optimizasyon Uzmanı", "Plan Denetçisi"]},
@@ -282,6 +283,8 @@ def arastirma_konusu(j):
         return "%s %s" % (a["konu"], a.get("ayrinti") or "")
     if g.get("urun"):
         return g["urun"]["konu"]
+    if g.get("program"):
+        return g["program"]["konu"]
     return j["talep"]
 
 
@@ -724,15 +727,67 @@ def _arastirma_adimi(con, cfg, j, transport, now):
             "not": "Araştırma kaydedildi — kaynaksız, doğrulanmadı (%s)." % web_neden}
 
 
+def _program_adimi(con, cfg, j, g, transport, now):
+    """Planlama Burosu v2 (core/program.py). Hedef Analisti (model) birimleri
+    yazar; kapasite, program, simulasyon ve denetim KODDUR."""
+    hazir = ai.hazir_mi(cfg, "bam.planlama")
+    if not hazir["ok"]:
+        return {"durum": "beklemede", "not": hazir["note"]}
+    adim = next(a for a in j["adimlar"] if a["ofis"] == "planlama")
+    blok, kaynaklar, ar_etiket = _arastirma_bulgulari(con, j)
+    r = ai.ask(con, cfg, "bam.planlama", "planlama",
+               [{"role": "user", "content": program.istem(g, blok)}], sistem=program.SISTEM,
+               transport=transport, duzeltme=False, denetim="belge")
+    if not r.get("ok"):
+        return _model_hatasi(r)
+    birimler, notlar, hata = program.ayikla(_json_ayikla(r["text"]))
+    if hata:
+        return {"durum": "hata", "not": "Program kurulmadı: " + hata}
+    bugun = datetime.date.fromisoformat(_simdi(now)[:10])
+    ar = next((x.get("kayit_id") for x in j["adimlar"] if x["ofis"] == "arastirma"), None)
+    govde = program.kur(g, birimler, notlar, bugun, dayanak=ar)
+    if kaynaklar:
+        govde["kaynaklar"] = kaynaklar
+    k_ = govde["kapasite"]
+    kirik = [d["not"] for d in govde["denetim"] if not d["ok"]]
+    izler = _iz(adim,
+                depo.iz("Hedef Analisti", "%d çalışma birimi yazdı%s." % (
+                    len(birimler), " (doğrulanmış araştırmaya dayanarak)" if blok else "")),
+                depo.iz("Kapasite Analisti", "Toplam %s: öğrenme %s, tekrar %s%s." % (
+                    program.sure_yaz(k_["toplam_dk"]), program.sure_yaz(k_["ogrenme_dk"]),
+                    program.sure_yaz(k_["tekrar_dk"]),
+                    ("; ihtiyacı karşılama oranı %%%d (tahmin)" % (k_["oran"] * 100))
+                    if "oran" in k_ else "")),
+                depo.iz("Program Mimarı", "%d haftaya yerleştirdi; günde %s." % (
+                    g["hafta"], program.sure_yaz(k_["gunluk_dk"]))),
+                depo.iz("Simülasyon Uzmanı", govde["simulasyon"]["senaryolar"][1]["metin"]),
+                depo.iz("Plan Denetçisi", "Geçti." if not kirik else "; ".join(kirik)))
+    etiket = ar_etiket if (kaynaklar and ar_etiket in ("kaynakli", "celiskili")) else "dogrulanmadi"
+    baslik = "%s — %d haftalık program" % (g["konu"], g["hafta"])
+    k = kayit_ekle(con, "plan", baslik, govde, dogruluk=etiket, etiketler=j["talep"][:300],
+                   is_id=j["id"], now=now)
+    if not govde["gecti"]:
+        return {"durum": "tamam", "kayit_id": k["id"], "iz": izler,
+                "not": "Plan denetçisi programı geçirmedi: %s" % "; ".join(
+                    d["not"] for d in govde["denetim"] if d["kritik"] and not d["ok"])}
+    return {"durum": "tamam", "kayit_id": k["id"], "iz": izler,
+            "not": "%d haftalık program kuruldu (%d birim, günde %s)%s." % (
+                g["hafta"], len(birimler), program.sure_yaz(k_["gunluk_dk"]),
+                (" — uyarı: %s" % "; ".join(kirik)) if kirik else "")}
+
+
 def _planlama_adimi(con, cfg, j, transport, now):
-    """Planlama Burosu v1 (core/planlama.py). Yapilandirilmis hedef yoksa
-    plan UYDURULMAZ: serbest bir cumleden program kurmak, kullanicinin
-    kapasitesini, kilosunu ve tarihini tahmin etmek olurdu."""
+    """Planlama Burosu. v2: `program` govdesi (core/program.py); v1: SPI
+    kilo plani (core/planlama.py). Yapilandirilmis girdi yoksa plan
+    UYDURULMAZ: serbest cumleden program kurmak, kapasiteyi ve tarihi
+    tahmin etmek olurdu."""
+    if (j.get("govde") or {}).get("program"):
+        return _program_adimi(con, cfg, j, j["govde"]["program"], transport, now)
     girdi = (j.get("govde") or {}).get("plan")
     if not girdi:
         return {"durum": "ertelendi",
-                "not": "Planlama Bürosu v1 yalnız modülün gönderdiği yapılandırılmış hedefle "
-                       "(şimdilik SPİ kilo planı) çalışır; serbest cümleden plan kurmaz."}
+                "not": "Planlama Bürosu serbest cümleden plan kurmaz: konu, hafta ve haftalık "
+                       "süre gerekir (King’e «X için N haftalık plan, haftada M saat» yaz)."}
     p = planlama.kur(girdi)
     if not p["ok"]:
         return {"durum": "hata", "not": "Plan girdisi geçersiz: " + "; ".join(p["hatalar"])}

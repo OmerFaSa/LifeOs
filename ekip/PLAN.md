@@ -180,6 +180,15 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
   çalmam» gibi bir çizgiye isteğe bağlı kural eklenir (ör. «24:00 sonrası blok
   yok»). Plan denetçisi bunu kodla uygular.
 
+- **Kuruldu (Tur 5c — Planlama Bürosu v2, `HKM/core/program.py`):** her konu
+  için haftalık program (`bam.plan`): Hedef Analisti (model) konuyu sıralı
+  birimlere böler; Kapasite Analisti, Program Mimarı, Simülasyon Uzmanı ve
+  Plan Denetçisi koddur (dakika, hafta, tarih, %15 tekrar payı, son hafta genel
+  tekrar, %100/%75/%50 senaryo). Hafta ve haftalık süre **sorulur**; günlük 6
+  saati aşan plan King'in kapısında reddedilir. «Araştırarak» istenirse önce
+  Depolama ve Araştırma çalışır, birimler doğrulanmış bulguya dayanır. King
+  sohbeti «X için N haftalık plan yap, haftada M saat» cümlesini emre çevirir.
+
 ### E. Üretim Ofisi — genişleme
 - Mevcut türler: soru seti, alıştırma, kart.
 - Yeni türler:

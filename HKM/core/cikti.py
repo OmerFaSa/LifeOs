@@ -78,6 +78,61 @@ def _arastirma(k, g):
     return bol
 
 
+def _sure(dk):
+    from core import program
+    return program.sure_yaz(dk or 0)
+
+
+def _program(g):
+    """Planlama Burosu v2 programi: ozet, haftalar, birimler, simulasyon,
+    denetim. Her sayinin etiketi yazilir."""
+    gi = g.get("girdi") or {}
+    k = g.get("kapasite") or {}
+    hs = g.get("haftalar") or []
+    bol = [{"baslik": "Özet", "bloklar": [
+        _p("%d hafta · haftada %s · günde %s (%s) · başlangıç %s." % (
+            gi.get("hafta", len(hs)), _sure(gi.get("haftalik_dk")), _sure(k.get("gunluk_dk")),
+            ", ".join(g.get("gunler") or []), hs[0]["baslangic"] if hs else "?")),
+        {"t": "not", "metin": "Dakikalar, haftalar ve senaryolar hesaplandı; birimlerin saat "
+                              "tahmini Hedef Analisti’nin tahminidir."}]}]
+    if not g.get("gecti"):
+        bol[0]["bloklar"].append({"t": "not", "metin": "Plan denetçisi bu programı geçirmedi; "
+                                                       "aşağıdaki denetime bak."})
+    satir = []
+    for h in hs:
+        cal = "; ".join("%s%s" % (c["ad"], " (%d. kısım)" % c["parca"] if c["parca"] > 1 or
+                                  c.get("devam") else "") for c in h["calisma"]) or "—"
+        satir.append(["%d" % h["no"], h["baslangic"], cal, "; ".join(h["tekrar"]) or "—",
+                      _sure(h["ogrenme_dk"] + h.get("tekrar_dk", 0))])
+    bol.append({"baslik": "Haftalar", "bloklar": [{"t": "tablo", "basliklar": [
+        "Hafta", "Başlangıç", "Çalışma", "Tekrar", "Süre"], "satirlar": satir}]})
+    birim = [["%d" % (i + 1), b["ad"], "%d" % b["agirlik"], _sure(b.get("dk")),
+              ("%s sa" % ("%g" % b["tahmini_saat"]).replace(".", ",")) if b.get("tahmini_saat")
+              else "—", ", ".join(map(str, b.get("onkosul") or [])) or "—"]
+             for i, b in enumerate(g.get("birimler") or [])]
+    bol.append({"baslik": "Çalışma birimleri", "bloklar": [{"t": "tablo", "basliklar": [
+        "#", "Birim", "Ağırlık", "Pay", "Tahmin", "Önkoşul"], "satirlar": birim}]
+        + ([{"t": "liste", "maddeler": ["%s — %s" % (b["ad"], b["cikti"])
+                                        for b in g["birimler"] if b.get("cikti")]}]
+           if any(b.get("cikti") for b in g.get("birimler") or []) else [])})
+    kap = ["Toplam %s: öğrenme %s, tekrar %s (hesaplandı)." % (
+        _sure(k.get("toplam_dk")), _sure(k.get("ogrenme_dk")), _sure(k.get("tekrar_dk")))]
+    if k.get("ihtiyac_dk"):
+        kap.append("Tahmini ihtiyaç %s; karşılama oranı %%%d (tahmin)." % (
+            _sure(k["ihtiyac_dk"]), k["oran"] * 100))
+    if k.get("gereken_hafta"):
+        kap.append("Bu tahminle yaklaşık %d hafta gerekir (tahmin)." % k["gereken_hafta"])
+    bol.append({"baslik": "Kapasite ve simülasyon", "bloklar": [
+        {"t": "liste", "maddeler": kap + [x["metin"] for x in (g.get("simulasyon") or {})
+                                          .get("senaryolar") or []]}]})
+    bol.append({"baslik": "Plan denetimi", "bloklar": [{"t": "liste", "maddeler": [
+        "%s — %s" % ("Tamam" if d["ok"] else ("Kritik" if d["kritik"] else "Uyarı"), d["not"])
+        for d in g.get("denetim") or []]}]})
+    if g.get("notlar"):
+        bol.append({"baslik": "Notlar", "bloklar": [{"t": "liste", "maddeler": g["notlar"]}]})
+    return bol
+
+
 def _soru_bolumu(baslik, sorular, bas=0):
     bloklar = []
     for i, s in enumerate(sorular):
@@ -139,6 +194,9 @@ def belge(k):
             b["gorsel"] = sahne(g)
     elif k.get("tur") == "arastirma":
         b["bolumler"] = _arastirma(k, g)
+    elif k.get("tur") == "plan" and g.get("tur") == "program":
+        b["tur_ad"] = "Haftalık program"
+        b["bolumler"] = _program(g)
     elif k.get("tur") == "materyal":
         b["bolumler"] = _materyal(k, g)
         if g.get("tur") == "kitap":
