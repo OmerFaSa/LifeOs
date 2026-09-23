@@ -75,6 +75,15 @@ KINDS = {
         "optional": ("hafta", "baslik", "why"),
         "note": "Planlama Ofisi'nin kurduğu haftalık programı hedefin planına ekleme teklifi.",
     },
+    # BAM Arastirma Ofisi'nin mufredat raporu (core/mufredat.py). AYS kaydi
+    # HKM'den ceker, KENDI koduyla dogrular ve kullanici onaylarsa sinav
+    # profili olarak saklar. Rapor kaynaksizsa «dogrulanmadi» kalir.
+    "mufredat.add": {
+        "modules": ("ays",),
+        "required": ("kayit_id", "ders", "konu"),
+        "optional": ("baslik", "why"),
+        "note": "BAM'ın çıkardığı müfredatı sınav profili olarak ekleme teklifi.",
+    },
     "measure.ask": {
         "modules": ("spi",),
         "required": ("date", "metric"),
@@ -94,6 +103,7 @@ FIELD_RULES = {
     "disc": ("str", 1, 24), "metric": ("str", 1, 40), "why": ("str", 1, 200),
     "kayit_id": ("int", 1, 10 ** 9), "adet": ("int", 1, 50), "baslik": ("str", 1, 120),
     "hedef_id": ("str", 1, 40), "hafta": ("int", 1, 104),
+    "ders": ("int", 1, 30), "konu": ("int", 1, 2000),
 }
 
 
@@ -180,6 +190,10 @@ def _cumle(module, kind, payload):
         return ("%s: Planlama Ofisi «%s» için %s haftalık programı hazırladı; "
                 "planına eklensin mi?" % (ad, p.get("baslik") or "hedefin",
                                           p.get("hafta") or "bir"))
+    if kind == "mufredat.add":
+        return ("%s: BAM «%s» müfredatını çıkardı (%s ders, %s konu). Sınav profili olarak "
+                "eklensin mi? Kaynaksız — resmi kılavuzla karşılaştır."
+                % (ad, p.get("baslik") or "sınav", p.get("ders"), p.get("konu")))
     if kind == "measure.ask":
         return "%s: %s günü için «%s» ölçümünü girmeyi unutma." % (
             ad, gun, p.get("metric"))

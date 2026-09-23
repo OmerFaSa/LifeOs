@@ -35,7 +35,7 @@ import datetime
 import json
 import re
 
-from core import ai, intents, planlama
+from core import ai, intents, mufredat, planlama
 
 OFISLER = {
     "kayit": {
@@ -279,10 +279,33 @@ def _json_ayikla(metin):
     return d if isinstance(d, dict) else None
 
 
+def _mufredat_adimi(con, cfg, j, g, transport, now):
+    """Mufredat raporu (core/mufredat.py): model DERS -> KONU agacini yazar,
+    kod suzer. Hic ders gecmezse kayit yazilmaz; uydurulmus mufredat yasak."""
+    r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
+               [{"role": "user", "content": mufredat.istem(g)}],
+               sistem=mufredat.SISTEM, transport=transport, duzeltme=False, denetim="belge")
+    if not r.get("ok"):
+        if r.get("reason") == "budget":
+            return {"durum": "beklemede", "not": r.get("note")}
+        return {"durum": "hata", "not": r.get("note") or "Model cevap vermedi."}
+    govde, neden = mufredat.ayikla(_json_ayikla(r["text"]), g)
+    if neden:
+        return {"durum": "hata", "not": "Müfredat raporu yazılmadı: " + neden}
+    k = kayit_ekle(con, "arastirma", "%s müfredatı" % g["sinav"], govde,
+                   dogruluk="dogrulanmadi", etiketler=j["talep"][:300], is_id=j["id"], now=now)
+    return {"durum": "tamam", "kayit_id": k["id"],
+            "not": "Müfredat raporu kaydedildi: %d ders, %d konu — kaynaksız, doğrulanmadı."
+                   % (govde["ders_sayisi"], govde["konu_sayisi"])}
+
+
 def _arastirma_adimi(con, cfg, j, transport, now):
     hazir = ai.hazir_mi(cfg, "bam.arastirma")
     if not hazir["ok"]:
         return {"durum": "beklemede", "not": hazir["note"]}
+    g = (j.get("govde") or {}).get("mufredat")
+    if g:
+        return _mufredat_adimi(con, cfg, j, g, transport, now)
     r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
                [{"role": "user", "content": "Araştırma talebi: " + j["talep"]}],
                sistem=ARASTIRMA_SISTEM, transport=transport,

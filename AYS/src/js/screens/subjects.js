@@ -247,6 +247,49 @@ R.Screens.subjects = (function(){
       })), { wrap:true }) }));
   }
 
+  /* Sınav profilleri (core/sinavprofil.js): yerleşik YKS SAY ve BAM'ın
+     çıkarıp kullanıcının onayladığı ek profiller. Ek profil kaynaksızsa
+     «doğrulanmadı» yazar; puan hesabı yoktur. Müfredat uydurulmaz: yeni
+     profil yalnız King'e iş emriyle istenir. */
+  function profilSatiri(p){
+    const SP = R.SinavProfil, s = SP.sayilar(p);
+    const ek = p.kaynak !== 'yerlesik';
+    const biten = p.bitenler || [];
+    return html`<div>
+      <div class="row between wrap"><b class="small">${p.ad}${p.bolum ? ' · ' + p.bolum : ''}</b>
+        ${K.Badge({ label:ek ? (p.dogruluk === 'kaynakli' ? 'kaynaklı' : 'doğrulanmadı') : 'yerleşik',
+          tone:ek && p.dogruluk !== 'kaynakli' ? 'warn' : 'ok' })}</div>
+      <div class="tiny dim">${s.ders} ders · ${s.konu} konu${ek ? ' · ' + s.biten + ' konu bitti · BAM #'
+        + p.kayitId + ' · puanlama: veri yok' : ' · kapanış ölçümleri yukarıda'}</div>
+      ${when(ek, () => html`<details class="mt-6"><summary class="tiny">Dersler ve konular</summary>
+        ${map(p.dersler, d => html`<div class="mt-6">
+          <div class="tiny"><b>${d.ad}</b>${d.soru ? ' · ' + d.soru + ' soru' : ''}</div>
+          ${K.Row(map(d.konular, k => K.Chip({ label:k.ad, act:'sp-konu', on:biten.indexOf(k.id) >= 0,
+            data:{ 'data-profil':p.id, 'data-konu':k.id } })), { wrap:true })}</div>`)}
+        ${when(p.acikKalanlar && p.acikKalanlar.length, () => html`<p class="tiny dim mt-6">Açık
+          kalanlar: ${p.acikKalanlar.join(' · ')}</p>`)}
+        <div class="mt-6">${K.Button({ label:'Profili kaldır', size:'sm', act:'sp-sil',
+          data:{ 'data-id':p.id } })}</div>
+      </details>`)}
+    </div>`;
+  }
+
+  function profilKarti(){
+    if(!R.SinavProfil) return null;
+    const l = R.SinavProfil.liste();
+    return K.Span(12, K.Card({ title:'Sınav profilleri',
+      sub:l.length + ' profil · müfredatı BAM çıkarır, sen onaylarsın',
+      body:html`<div class="stack-sm">
+        ${map(l, profilSatiri)}
+        <div class="row wrap mt-8">
+          ${K.Field({ label:'Başka bir sınav', input:K.Input({ id:'sp-sinav',
+            placeholder:'ör. KPSS genel kültür', size:'sm' }) })}
+          ${K.Button({ label:'Müfredatını iste', size:'sm', tone:'primary', act:'sp-iste' })}
+        </div>
+        ${when(S.ui.spNot, () => html`<p class="tiny">${S.ui.spNot}</p>`)}
+      </div>` }));
+  }
+
   async function render(){
     const sid = openId();
     const subject = R.SUBJECTS.find(s => s.id === sid);
@@ -268,6 +311,7 @@ R.Screens.subjects = (function(){
         riskCard(),
       ])),
       K.Span(7, subjectPanel(subject)),
+      profilKarti(),
       K.Span(12, raw(UI.rail(['closure', 'second-check', 'source-arch']))),
     ]));
   }
@@ -276,6 +320,27 @@ R.Screens.subjects = (function(){
     async 'topic-filter'(el){ S.ui.topicFilter = el.dataset.value; R.App.render(); },
     async 'topic-reset'(){ S.ui.topicFilter = 'all'; S.ui.topicQuery = ''; R.App.render(); },
     async 'open-subject'(el){ S.ui.subjectOpen = el.dataset.id; R.App.render(); },
+    async 'sp-iste'(){
+      const inp = document.getElementById('sp-sinav');
+      const r = await R.SinavProfil.iste(inp ? inp.value : '');
+      S.ui.spNot = r.metin;
+      R.App.render();
+    },
+    async 'sp-konu'(el){
+      const r = await R.SinavProfil.konuIsaretle(el.dataset.profil, el.dataset.konu);
+      if(!r.ok) UI.toast(r.why);
+      R.App.render();
+    },
+    async 'sp-sil'(el){
+      const p = R.SinavProfil.bul(el.dataset.id);
+      if(!p) return;
+      UI.confirmSheet('Profili kaldır', '«' + p.ad + '» profili ve konu işaretlerin silinecek. '
+        + 'YKS planın değişmez.', async () => {
+        const r = await R.SinavProfil.sil(p.id);
+        UI.toast(r.ok ? 'Profil kaldırıldı' : r.why);
+        R.App.render();
+      });
+    },
     async 'open-topic'(el){ topicSheet(el.dataset.subject, el.dataset.topic); },
     async 'topic-open'(el){
       S.ui.topicSubject = el.dataset.subject;

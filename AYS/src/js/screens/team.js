@@ -91,6 +91,12 @@ R.Screens.team = (function(){
       const h = await R.Hafizam.komutIsle(question, { kapsam:'hepsi' });
       if(h){ await cevapYaz(agent, h.text); return true; }
     }
+    /* «KPSS genel kültür müfredatını çıkar» — King'e iş emri
+       (core/sinavprofil.js). Müfredat uydurulmaz: BAM çıkarır, sen onaylarsın. */
+    if(R.SinavProfil){
+      const sp = await R.SinavProfil.sohbet(question);
+      if(sp){ await cevapYaz(agent, sp.text); return true; }
+    }
     /* Hedef sohbeti (core/hedefler.js): hedef cümlesi, sorulan eksiklerin
        cevabı ve seçenek seçimi. Hedef değilse null döner, sıradakine geçilir.
        Kararı kod verir; model çağrılmaz. */

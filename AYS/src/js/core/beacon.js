@@ -476,7 +476,7 @@ R.Beacon = (function(){
      2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
-  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add'];
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'mufredat.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -638,7 +638,7 @@ R.Beacon = (function(){
      Once kabul listesi uc tur sayiyor ama uygulama yalnizca plan.add
      yapiyordu: gorunur bir «Uygula» dugmesi, basildiginda «bu teklif turu
      uygulanmaz» diyordu. Gorunen eylem, yapilabilen eylemle ayni olmali. */
-  const APPLIABLE = ['plan.add', 'material.add'];
+  const APPLIABLE = ['plan.add', 'material.add', 'mufredat.add'];
 
   function canApply(n){
     return !!(n && APPLIABLE.indexOf(n.kind) >= 0);
@@ -695,6 +695,12 @@ R.Beacon = (function(){
   async function applyIntent(n){
     if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
     if(n.kind === 'material.add') return await materyalUygula(n.payload || {});
+    /* BAM'ın müfredat raporu → sınav profili (core/sinavprofil.js). Kayıt
+       HKM'den çekilir ve AYS'nin kendi sınırlarıyla süzülür. */
+    if(n.kind === 'mufredat.add'){
+      if(!R.SinavProfil) return { ok:false, error:'Sınav profili modülü yüklenmedi.' };
+      return await R.SinavProfil.teklifUygula(n.payload || {});
+    }
     const p = n.payload || {};
     if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };
 

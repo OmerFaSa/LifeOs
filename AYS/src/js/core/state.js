@@ -35,6 +35,7 @@ R.S = {
   storeHealth:null,// son depolama hatasi (varsa)
   hedefler:[],     // hedef motorunun AYS kayitlari (core/hedefler.js)
   hedefPlanlar:[], // hedeflerin planlari ve geri donus noktalari (core/hedefplan.js)
+  sinavProfilleri:[], // BAM'dan gelen ek sinav profilleri (core/sinavprofil.js)
 
   /* Seviye — bu sistemin KENDI kademesi (core/xp.js).
      `null` YUKLENMEDI demektir, "sifir XP" demek DEGIL: rozet o halde
@@ -1218,6 +1219,7 @@ R.Model = (function(){
     if(R.Bolum) await R.Bolum.yukle();
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(R.Hedefler) await R.Hedefler.yukle();
+    if(R.SinavProfil) await R.SinavProfil.yukle();
     if(R.HedefPlan) await R.HedefPlan.yukle();
     /* Hafiza bu modulun KENDI deposundadir: HKM kapaliyken de hatirlanir. */
     if(window.LIFEOS && LIFEOS.Hafiza){

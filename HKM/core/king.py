@@ -32,7 +32,7 @@ import datetime
 import json
 import statistics
 
-from core import ai, bam, butce, intents, planlama
+from core import ai, bam, butce, intents, mufredat, planlama
 
 MODULLER = ("ays", "spi", "esp")
 MODUL_AD = {"ays": "AYS", "spi": "SPİ", "esp": "ESP"}
@@ -55,6 +55,15 @@ TURLER = {
         "ofisler": ["kayit", "planlama"],
         "model": False,
         "not": "Planlama Ofisi v1 kuralla çalışır: program, simülasyon, plan denetimi.",
+    },
+    # Sinav profilinin iskeleti (core/mufredat.py). Rapor kaynaksizsa
+    # «dogrulanmadi»dir; AYS kullanicinin onayiyla profil olarak saklar.
+    "sinav.mufredat": {
+        "ad": "Sınav müfredat raporu",
+        "moduller": ("ays",),
+        "ofisler": ["kayit", "arastirma"],
+        "model": True,
+        "not": "Araştırma Ofisi müfredatı ders ve konu olarak yazar; kod süzer.",
     },
 }
 
@@ -276,7 +285,17 @@ def _govde_temizle(tur, govde):
         if hatalar:
             return None, hatalar
         return {"plan": g}, []
+    if tur == "sinav.mufredat":
+        g, hatalar = mufredat.temizle((govde or {}).get("mufredat"))
+        if hatalar:
+            return None, hatalar
+        return {"mufredat": g}, []
     return None, ["tanimsiz tur"]
+
+
+# Ayni girdi -> ayni anahtar («once depo»). Mufredatta buyuk-kucuk harf
+# ve bosluk farki ayni sinavdir.
+ANAHTAR = {"hedef.plan": planlama.anahtar, "sinav.mufredat": mufredat.anahtar}
 
 
 def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
@@ -291,9 +310,11 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
     temiz, hatalar = _govde_temizle(tur, govde)
     if hatalar:
         return {"ok": False, "errors": hatalar}
+    if tur == "sinav.mufredat" and not str(konu or "").strip():
+        konu = mufredat.talep(temiz["mufredat"])
     konu = (str(konu or "").strip() or t["ad"])[:MAX_KONU]
     neden = str(neden or "").strip()[:MAX_NEDEN]
-    anahtar = "%s:%s:%s" % (modul, tur, planlama.anahtar(temiz))
+    anahtar = "%s:%s:%s" % (modul, tur, ANAHTAR[tur](temiz))
     at = _simdi(now)
 
     # Ayni emir acik ise ikincisi YAZILMAZ: tekrar, bilgi degil gurultudur.
@@ -376,8 +397,26 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
     return {"ok": True, "yeni": True, "emir": emir(con, e["id"]), "karar": karar}
 
 
+def _teklif_mufredat(con, e, kayit_id, now=None):
+    """Mufredat raporunu AYS'ye sinav profili teklifi olarak birakir."""
+    g = (bam.kayit_getir(con, kayit_id) or {}).get("govde") or {}
+    dersler = g.get("dersler") or []
+    if g.get("tur") != "mufredat" or not dersler:
+        return " Kayıt müfredat biçiminde değil; teklif bırakılmadı."
+    payload = {"kayit_id": int(kayit_id), "ders": len(dersler),
+               "konu": sum(len(d.get("konular") or []) for d in dersler),
+               "baslik": str(g.get("sinav") or e.get("konu") or "Sınav")[:120]}
+    n = intents.create(con, e["modul"], "mufredat.add", payload, None, source="bam")
+    if n.get("ok"):
+        bam.iz_ekle(con, "kayit", kayit_id, "niyet", n["intent"]["id"], now=now)
+        return " Müfredat sınav profili teklifi olarak %s’ye bırakıldı." % MODUL_AD[e["modul"]]
+    return ""
+
+
 def _teklif(con, e, kayit_id, now=None):
-    """Planlama Ofisi'nin urettigi kaydi module teklif eder (hedef.plan)."""
+    """Ofisin urettigi kaydi module teklif eder. Cevap ayni yoldan doner."""
+    if e["tur"] == "sinav.mufredat":
+        return _teklif_mufredat(con, e, kayit_id, now=now)
     if e["tur"] != "hedef.plan":
         return ""
     k = bam.kayit_getir(con, kayit_id) or {}
