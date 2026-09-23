@@ -19,10 +19,17 @@ Hedef: hızlı kazançlar 1–2 günde biter. Bu bölüm aşağıdaki her şeyde
      burada yalnız «şimdi + sıradaki» kalsın; **(b)** onaylı 16 maddeyi depoda tara
      («var / kısmen / yok», dosya:satır) ve sonucu bu bölümün altına yaz. Var olan
      yeniden yazılmaz.
+   - **ÖNCE KULLANIMA HAZIRLIK — hedef: kullanıcı 28 Eylül 2026 Pazartesi günlük kullanıma
+     başlar (3–4 gün).** Sırayla: **(K1)** 8c-2 SPİ montajı (yarım yol kalmasın) ·
+     **(K2)** Part 7 madde 16 ilk kurulum testleri (sıfırdan kurulum: HKM ayarı, Telegram,
+     model anahtarı, web ayarı, yedek) · **(K3)** Part 7 madde 14 depo göçü (veri birikmeden;
+     yedek 15 bitti) · **(K4)** kullanıcıya bir sayfalık «ilk gün» kurulum notu
+     (`ekip/ILK-GUN.md`). Bunlar bitmeden aşağıdaki gruplara geçilmez.
    - Grup 1 HKM + Telegram: 8, 9, 11, 12, 13, 14, 15, 19, 46.
    - Grup 2 AYS: 22, 27. · Grup 3 SPİ: 31. · Grup 4 ortak: 5, 49, 50, 56.
    - Sonra planlı iş: 8c-2 → 8c-3 → 8d → 8e.
-   - **EN SON: Part 9 tek tasarım + çekmece düzeni** (bkz. Part 9). Her şey bitmeden başlanmaz.
+   - **EN SON: Part 9 tek tasarım + çekmece düzeni** (bkz. Part 9). Her şey bitmeden başlanmaz;
+     kullanıcının ilk haftalık gerçek kullanımından sonra (çekmece haritası o deneyime dayanır).
 3. **DENETİM ÖLÇÜSÜ:** her madde yalnız dokunduğu sistemin testleri + duman testi.
    Ekran görüntüsü yalnız arayüz belirgin değiştiyse. Tam koşum (`tools/sayilar.py --tam
    --yaz`) yalnız dört grup bitince BİR KEZ. Hata düzeltmesinde önce hatayı yakalayan test
@@ -36,7 +43,7 @@ Hedef: hızlı kazançlar 1–2 günde biter. Bu bölüm aşağıdaki her şeyde
 6. **GEREKSİZ İŞ YOK:** keşif ve deneme betikleri scratchpad'de kalır; belgeye yalnız
    yapılanın özeti girer (MIMARI bölümü + bu listede tek satır).
 
-**Durum:** ⏳ 2a arşiv · ⏳ 2b tarama · ⏳ Grup 1 · ⏳ Grup 2 · ⏳ Grup 3 · ⏳ Grup 4 · ⏳ tam koşum · ⏳ Part 9 tasarım (en son)
+**Durum:** ⏳ 2a arşiv · ⏳ 2b tarama · ⏳ K1 8c-2 · ⏳ K2 kurulum · ⏳ K3 depo göçü · ⏳ K4 ilk gün notu · ⏳ Grup 1 · ⏳ Grup 2 · ⏳ Grup 3 · ⏳ Grup 4 · ⏳ tam koşum · ⏳ Part 9 tasarım (en son)
 
 ## 0. Önce oku
 
