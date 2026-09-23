@@ -270,6 +270,27 @@ ESP.Screens.today = (function(){
       </div></div>`;
   }
 
+  /* UYARLAMA DÖNGÜSÜ (brand/ortak/hedef.js `uyarla`). Plan kontrolde geride
+     kalınca hedef BUGÜNÜN verisiyle yeniden değerlendirilir; yetişmiyorsa
+     seçenekler sunulur. Seçim yapana kadar hiçbir şey değişmez; seçince eski
+     plan geri alınır, hedef güncellenir ve yeni plan yine önizleme ve
+     onaydan geçer (büyük aksiyon). */
+  function uyarlamaKutusu(h){
+    const H = window.LIFEOS.Hedef;
+    const u = H.uyarla(h, ESP.Hedefler.PAKET_BY_ID[h.paket], {}, U.todayISO());
+    return html`<div class="mt-8">
+      <p class="tiny dim"><b>Bugünün verisiyle yeniden hesap</b> — seçim yapana kadar hiçbir şey değişmez.</p>
+      <p class="small">${u.metin}</p>
+      ${u.senaryolar.length ? html`<div class="row gap-8 mt-8" style="flex-wrap:wrap">${map(u.senaryolar, (x, i) =>
+        K.Button({ label:x.ad + ' · ' + H.tarihYaz(x.son_tarih), size:'sm', act:'hedef-uyarla-sec',
+          data:{ 'data-id':h.id, 'data-i':String(i) } }))}</div>
+        <p class="tiny dim mt-8">Seçince eski plan geri alınır, hedef yeni tarih ve vakitle güncellenir;
+          yeni planı önizleyip onaylarsın. Eski tarih hedefin geçmişinde kalır.</p>`
+        : K.Notice({ tone:'info', body:'Bu tarihe hâlâ yetişilebilir; plan olduğu gibi kalabilir.' })}
+      <div class="row gap-8 mt-8">${K.Button({ label:'Kapat', size:'sm', act:'hedef-uyarla-kapat' })}</div>
+    </div>`;
+  }
+
   function hedefPlanOzeti(h, p){
     const il = ESP.HedefPlan.ilerleme(p, U.todayISO());
     return html`<div class="stack-sm mt-8">
@@ -278,6 +299,8 @@ ESP.Screens.today = (function(){
       ${when(il.sonraki, () => html`<p class="tiny">Sonraki kontrol: <b>${U.fmtDate(il.sonraki.tarih)}</b>
         — beklenen ${String(il.sonraki.beklenen).replace('.', ',')} ${p.birim}</p>`)}
       ${K.Notice({ tone:il.durum === 'geride' ? 'warn' : 'info', body:il.metin })}
+      ${S.ui.uyarla === h.id ? uyarlamaKutusu(h) : when(il.durum === 'geride', () => K.Button({
+        label:'Yeniden hesapla', size:'sm', tone:'primary', act:'hedef-uyarla-ac', data:{ 'data-id':h.id } }))}
       ${when(p.calisma, () => html`<p class="tiny dim">Çalışılacaklar (${p.calisma.basamak}):
         ${p.calisma.liste.join(' · ')}</p>`)}
       <div class="row gap-8" style="flex-wrap:wrap">
@@ -781,6 +804,25 @@ ESP.Screens.today = (function(){
       S.ui.planOnizle = null;
       if(r.ok) ESP.UI.onayMuhru();
       ESP.UI.toast(r.ok ? 'Plan uygulandı. Geri almak istersen «Planı geri al».' : r.why);
+      ESP.App.render();
+    },
+    async 'hedef-uyarla-ac'(el){ S.ui.uyarla = el.dataset.id; ESP.App.render(); },
+    async 'hedef-uyarla-kapat'(){ S.ui.uyarla = null; ESP.App.render(); },
+    async 'hedef-uyarla-sec'(el){
+      const H = window.LIFEOS.Hedef;
+      const h = ESP.Hedefler.liste().find(x => x.id === el.dataset.id);
+      if(!h) return;
+      const paket = ESP.Hedefler.PAKET_BY_ID[h.paket];
+      const bugun = U.todayISO();
+      const u = H.uyarla(h, paket, {}, bugun);
+      const x = u.senaryolar[Number(el.dataset.i)];
+      if(!x){ ESP.UI.toast('Bu seçenek artık geçerli değil; yeniden hesapla.'); return; }
+      const g = await ESP.HedefPlan.geriAlHedef(h.id);
+      if(!g.ok && ESP.HedefPlan.aktif(h.id)){ ESP.UI.toast(g.why || 'Eski plan geri alınamadı; hedef değişmedi.'); return; }
+      await ESP.Hedefler.kaydet(H.uyarlamaUygula(u.hedef, x, paket, {}, bugun));
+      S.ui.uyarla = null;
+      S.ui.planOnizle = h.id;
+      ESP.UI.toast('Hedef yeni tarihle güncellendi; yeni planı önizleyip onayla.');
       ESP.App.render();
     },
     async 'hedef-plan-geri'(el){

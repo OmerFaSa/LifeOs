@@ -116,6 +116,11 @@ R.Hedefler = (function(){
      büyük ölçüde yapılmış, kalan iş test ve kapanıştır. */
   const SAAT_GUN = 3.5;
   const BASLANMIS_KAT = 0.5;
+  /* Plan (core/hedefplan.js) biten her konuya 1 ve 3 hafta sonra 30'ar
+     dakika tekrar koyar, iki haftada bir de deneme günü. Karar planla AYNI
+     hesabı yapmalı: yoksa seçenek «Mayıs'ta biter» derken plan «Haziran»
+     derdi. Tekrar konu süresine eklenir, deneme haftalık sabit yüktür. */
+  const TEKRAR_SAAT = 1;
   const RUTIN_RE = /(sürekli|surekli|rutin)/i;
 
   function konular(dersler){
@@ -213,12 +218,19 @@ R.Hedefler = (function(){
       if(!kalan.length) return { neden:'Kalan konu yok.' };
       /* Sayı söylendiyse SIRADAKİ o kadar konu (ders içi önkoşul sırası). */
       const l = h.fark != null ? kalan.slice(0, h.fark) : kalan;
-      const saat = yuvarla(l.reduce((a, k) => a + konuSaati(k), 0), 1);
+      const saat = yuvarla(l.reduce((a, k) => a + konuSaati(k), 0) + l.length * TEKRAR_SAAT, 1);
       const t = tempo();
       return { saat, kalan:l.length, dayanak:{ durum:'kaynak_bekliyor', metin:'AYS müfredatındaki '
         + 'konu süreleri (günde 3–4 saatlik düzene göre öğretim ve ilk soru; planlama varsayımı, '
         + 'kaynağı bağlanmadı) × seviyen («' + t.ad + '» ×' + sayiYaz(t.kat, 2) + '); başlanmış konu '
-        + 'yarım sayıldı' } };
+        + 'yarım sayıldı; her konuya 2 × 30 dk tekrar eklendi' } };
+    },
+    /* İki haftada bir deneme günü (çözüm + analiz) planın haftalık bütçesinden
+       düşer; karar da düşer. */
+    haftalikEk(h){
+      const d = R.HedefPlan && R.HedefPlan.denemeOf ? R.HedefPlan.denemeOf(h.dersler) : null;
+      if(!d) return null;
+      return { saat:d.dk / 60 / R.HedefPlan.DENEME_ARALIK, metin:'iki haftada bir ' + d.ad };
     },
   };
 

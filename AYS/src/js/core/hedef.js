@@ -24,6 +24,9 @@
      gerekenSaat(hedef, durum)? { saat, dayanak } — KAPASİTE MODELİ: hedefin
                                toplam kaç saat pratik istediği. Varsa karar
                                hızla değil kullanıcının VAKTİYLE verilir.
+     haftalikEk(hedef, durum)? { saat, metin } — her hafta vaktinden SABİT düşen
+                               iş (ör. deneme günü). Karar ve senaryolar
+                               planla aynı hesabı yapsın diye.
      guvenlik(hedef, durum, s)? { red:true, neden } — bandı ezer
      ekSorular(hedef, durum)?  [{ alan, soru }]
      kapasiteGerekir?          true ise günlük vakit sorulur
@@ -324,6 +327,11 @@ LIFEOS.Hedef = (function(){
     return yuvarla(kap.gunluk_dk * (kap.haftalik_gun || 7) / 60, 2);
   }
 
+  function sabitYuk(h, paket, durum){
+    const e = typeof paket.haftalikEk === 'function' ? (paket.haftalikEk(h, durum || {}) || {}) : {};
+    return e.saat > 0 ? { saat:yuvarla(e.saat), metin:e.metin || '' } : null;
+  }
+
   function kapasiteKarari(h, paket, durum, bugun){
     if(!h.son_tarih) return { bant:null, etiket:'veri_yok', neden:'Tarih olmadan hesaplanamaz.' };
     const gun = gunFarki(bugun, h.son_tarih);
@@ -335,16 +343,18 @@ LIFEOS.Hedef = (function(){
     const g = paket.gerekenSaat(h, durum || {}) || {};
     if(!(g.saat > 0)) return { bant:null, etiket:'veri_yok', neden:g.neden || 'Gereken süre hesaplanamadı.' };
     const hafta = gun / 7;
-    const gerekli = yuvarla(g.saat / hafta);
+    const ek = sabitYuk(h, paket, durum);
+    const gerekli = yuvarla(g.saat / hafta + (ek ? ek.saat : 0));
     const eps = 1e-9;
     const bant = gerekli <= haftalik + eps ? 'gercekci'
       : gerekli <= haftalik * ZORLAYICI_KAT + eps ? 'zorlayici' : 'gercekci_degil';
     const out = { mod:'kapasite', bant, gerekli, saat:yuvarla(g.saat, 1), hafta:yuvarla(hafta, 1),
       birim:'saat/hafta', tipik:haftalik, ust:yuvarla(haftalik * ZORLAYICI_KAT), dayanak:g.dayanak || null,
-      etiket:hesaplandiMi(g.dayanak) ? 'hesaplandi' : 'tahmin' };
+      etiket:hesaplandiMi(g.dayanak) ? 'hesaplandi' : 'tahmin', ek };
     if(bant !== 'gercekci'){
-      out.karsi = { son_tarih:gunEkle(bugun, Math.ceil(g.saat / haftalik - eps) * 7),
-        ulasilabilir:yuvarla(haftalik * hafta, 1) };
+      const etkili = haftalik - (ek ? ek.saat : 0);
+      out.karsi = etkili > eps ? { son_tarih:gunEkle(bugun, Math.ceil(g.saat / etkili - eps) * 7),
+        ulasilabilir:yuvarla(etkili * hafta, 1) } : null;
     }
     return out;
   }
@@ -356,6 +366,7 @@ LIFEOS.Hedef = (function(){
   function kapasiteSenaryolari(h, paket, durum, bugun){
     const g = paket.gerekenSaat(h, durum || {}) || {};
     if(!(g.saat > 0)) return [];
+    const ek = sabitYuk(h, paket, durum);
     const gunler = (h.kapasite && h.kapasite.haftalik_gun) || 7;
     const dkler = KAPASITE_SENARYO.slice();
     const kendi = h.kapasite && h.kapasite.gunluk_dk;
@@ -363,11 +374,13 @@ LIFEOS.Hedef = (function(){
     dkler.sort((a, b) => a - b);
     return dkler.map(dk => {
       const haftalik = yuvarla(dk * gunler / 60, 2);
+      const etkili = haftalik - (ek ? ek.saat : 0);
+      if(!(etkili > 1e-9)) return null;          // bu vakit sabit işe bile yetmiyor
       const ad = (dk % 60 === 0 ? 'Günde ' + (dk / 60) + ' saat' : 'Günde ' + dk + ' dakika')
         + (gunler < 7 ? ', haftada ' + gunler + ' gün' : '') + (dk === kendi ? ' (senin vaktin)' : '');
       return { ad, hiz:haftalik, birim:'saat/hafta', kapasite:{ gunluk_dk:dk },
-        son_tarih:gunEkle(bugun, Math.ceil(g.saat / haftalik - 1e-9) * 7) };
-    });
+        son_tarih:gunEkle(bugun, Math.ceil(g.saat / etkili - 1e-9) * 7) };
+    }).filter(Boolean);
   }
 
   /* Olamayacak hedef (alanın kendi sınırı: TYT'de 120 netten fazlası,
@@ -476,7 +489,8 @@ LIFEOS.Hedef = (function(){
   }
 
   function kapasiteMetni(g){
-    const ger = hizYaz(g.gerekli, g.birim), vakit = hizYaz(g.tipik, g.birim);
+    const ger = hizYaz(g.gerekli, g.birim) + (g.ek ? ' (' + (g.ek.metin || 'sabit iş') + ' dahil)' : '');
+    const vakit = hizYaz(g.tipik, g.birim);
     const parca = {
       gercekci:'Bu hedef gerçekçi görünüyor: toplam yaklaşık ' + sayiYaz(g.saat) + ' saat, yani '
         + ger + ' gerekiyor; senin vaktin ' + vakit + '.',
@@ -484,7 +498,8 @@ LIFEOS.Hedef = (function(){
         + '. Vaktini biraz artırman gerekir.',
       gercekci_degil:'Bu sürede olmaz: toplam yaklaşık ' + sayiYaz(g.saat) + ' saat, yani ' + ger
         + ' gerekiyor; senin vaktin ' + vakit + '.'
-        + (g.karsi ? ' Bu vakitle ' + tarihYaz(g.karsi.son_tarih) + ' tarihinde olur.' : ''),
+        + (g.karsi ? ' Bu vakitle ' + tarihYaz(g.karsi.son_tarih) + ' tarihinde olur.'
+          : g.ek ? ' Bu vakit ' + (g.ek.metin || 'sabit işlere') + ' bile yetmiyor.' : ''),
     }[g.bant];
     return parca + ' Bu karar ' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmindir')
       + (g.dayanak ? ' (dayanak: ' + g.dayanak.metin + ')' : '') + '.';
@@ -650,6 +665,49 @@ LIFEOS.Hedef = (function(){
     return { isle, bekleyen:() => bekleyen, sifirla:() => { bekleyen = null; } };
   }
 
+  /* ------------------------------------------------------------ uyarlama
+
+     UYARLAMA DÖNGÜSÜ (ekip/PLAN.md §2 adım 9). Plan kontrolde geride
+     kalınca hedef BUGÜNÜN verisiyle yeniden değerlendirilir: paket şu
+     anki değeri kendisi ölçebiliyorsa (tartı, deneme neti, kapanan konu)
+     saklanan eski değer yerine o kullanılır. Karar yine koddur; «bu
+     tarihe yetişmez» ise seçenekler sunulur (tarihi uzat ya da vakti
+     artır). Seçim kullanıcınındır ve hedefin geçmişine yazılır: «3 ayda
+     istedin, 4 aya çektik» her zaman görünür. Plan kendiliğinden
+     değişmez; modül eski planı geri alır, yeni plan yine önizleme ve
+     onaydan geçer (AGENTS.md §1.9). */
+  function uyarla(h, paket, durum, bugun){
+    const taze = Object.assign({}, h);
+    if(paket && typeof paket.simdi === 'function'){
+      const s = paket.simdi(durum || {}, h);
+      if(s && s.deger != null) taze.simdi = s;
+    }
+    const g = gerceklik(taze, paket, durum, bugun);
+    let sen = (g.bant && g.bant !== 'gercekci') ? senaryolar(taze, paket, durum, bugun) : [];
+    if(paket && typeof paket.guvenlik === 'function'){
+      sen = sen.filter(x => {
+        const r = paket.guvenlik(taze, durum || {}, { gerekli:x.hiz, fark:null, hafta:null });
+        return !(r && r.red);
+      });
+    }
+    return { hedef:taze, karar:g, metin:kararMetni(g), senaryolar:sen };
+  }
+
+  /* Seçilen senaryo hedefe yazılır; eski tarih ve vakit geçmişte kalır. */
+  function uyarlamaUygula(h, senaryo, paket, durum, bugun){
+    const eski = { son_tarih:h.son_tarih || null, kapasite:h.kapasite || null };
+    const yeniH = Object.assign({}, h, { guncelleme:bugun });
+    if(senaryo && senaryo.son_tarih) yeniH.son_tarih = senaryo.son_tarih;
+    if(senaryo && senaryo.kapasite) yeniH.kapasite = Object.assign({}, h.kapasite || {}, senaryo.kapasite);
+    const g = gerceklik(yeniH, paket, durum, bugun);
+    yeniH.gerceklik = { bant:g.bant, gerekli:g.gerekli, tipik:g.tipik, ust:g.ust, birim:g.birim,
+      etiket:g.etiket, dayanak:g.dayanak || null, tarih:bugun, mod:g.mod || 'hiz',
+      saat:g.saat == null ? null : g.saat };
+    yeniH.uyarlamalar = (h.uyarlamalar || []).concat([{ tarih:bugun, eski,
+      yeni:{ son_tarih:yeniH.son_tarih, kapasite:yeniH.kapasite || null }, bant:g.bant || null }]).slice(-20);
+    return yeniH;
+  }
+
   /* ------------------------------------------------------- yaşam döngüsü */
 
   function gecis(h, yeniDurum, bugun){
@@ -661,6 +719,7 @@ LIFEOS.Hedef = (function(){
   }
 
   return { YONLER, DURUMLAR, BANT_ADI, cumleden, yeni, eksikler, cevapla, gerceklik, dogrulaOf,
+    uyarla, uyarlamaUygula,
     senaryolar, gecis, kararMetni, sohbetKur, tarihYaz, sayiYaz, gunEkle, ayEkle, gunFarki,
     haftalikSaat, ZORLAYICI_KAT };
 })();

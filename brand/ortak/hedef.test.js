@@ -325,6 +325,21 @@
       expect(H().kararMetni(H().gerceklik(h, p, {}, BUGUN))).toContain('hesaplandı');
     });
 
+    it('haftalık sabit iş (ör. deneme günü) karara ve senaryolara aynı hesapla girer', () => {
+      const p = Object.assign({}, DIL, { haftalikEk:() => ({ saat:2, metin:'haftada bir deneme' }) });
+      const h = dilHedefi('Bir yılda İngilizcede A2\'ye gelmek istiyorum, günde yarım saat', 'A1');
+      const g = H().gerceklik(h, p, {}, BUGUN);
+      expect(g.gerekli).toBeCloseTo(100 / (365 / 7) + 2, 2);
+      expect(g.bant).toBe('zorlayici');
+      expect(H().kararMetni(g)).toContain('haftada bir deneme dahil');
+      /* 3,5 saatlik vaktin 2 saati sabit işe gider: 100 saat 1,5 saatle 67 haftada biter. */
+      expect(g.karsi.son_tarih).toBe(H().gunEkle(BUGUN, 67 * 7));
+      const s = H().senaryolar(h, p, {}, BUGUN);
+      expect(s[0].son_tarih).toBe(H().gunEkle(BUGUN, 67 * 7));
+      const az = Object.assign({}, DIL, { haftalikEk:() => ({ saat:5, metin:'deneme' }) });
+      expect(H().senaryolar(h, az, {}, BUGUN).map(x => x.kapasite.gunluk_dk)).toEqual([60]);
+    });
+
     it('senaryolar günde 30 dk, 1 saat ve kullanıcının kendi vaktidir', () => {
       const h = dilHedefi('Bir ayda İngilizcede A2\'ye gelmek istiyorum, günde 45 dakika', 'A1');
       const s = H().senaryolar(h, DIL, {}, BUGUN);
@@ -394,6 +409,41 @@
       const h = H().yeni(H().cumleden('60 puana çıkmak istiyorum', [PUAN], BUGUN), 'ays', BUGUN);
       const r = H().cevapla(h, 'son_tarih', '3 ay içinde', BUGUN, PUAN);
       expect(r.hedef.son_tarih).toBe('2026-12-23');
+    });
+  });
+
+  describe('Hedef — uyarlama döngüsü', () => {
+    /* Tartı: 80'den başladı, şimdi 79,5; 2 haftada 77 kilo hedefi. */
+    const OLCEN = Object.assign({}, KILO, { simdi:() => ({ deger:79.5, birim:'kg', etiket:'olculdu',
+      tarih:BUGUN }) });
+
+    it('bugünün ölçümüyle yeniden değerlendirir; yetişmiyorsa seçenek sunar', () => {
+      const h = H().yeni(H().cumleden('80 kiloya 2 hafta içinde inmek istiyorum', [KILO], BUGUN), 'spi', BUGUN);
+      h.hedefDeger = 77; h.simdi = { deger:80, etiket:'olculdu' };
+      const u = H().uyarla(h, OLCEN, {}, BUGUN);
+      expect(u.hedef.simdi.deger).toBe(79.5);
+      expect(u.karar.bant).toBe('gercekci_degil');
+      expect(u.senaryolar.length).toBe(2);
+      expect(u.metin).toContain('gerçekçi değil');
+    });
+
+    it('yetişiyorsa seçenek yoktur', () => {
+      const h = H().yeni(H().cumleden('80 kiloya 6 ay içinde inmek istiyorum', [KILO], BUGUN), 'spi', BUGUN);
+      h.hedefDeger = 77;
+      const u = H().uyarla(h, OLCEN, {}, BUGUN);
+      expect([u.karar.bant, u.senaryolar.length]).toEqual(['gercekci', 0]);
+    });
+
+    it('seçilen senaryo hedefe yazılır; eski tarih geçmişte kalır', () => {
+      const h = H().yeni(H().cumleden('80 kiloya 2 hafta içinde inmek istiyorum', [KILO], BUGUN), 'spi', BUGUN);
+      h.hedefDeger = 77; h.durum = 'aktif';
+      const u = H().uyarla(h, OLCEN, {}, BUGUN);
+      const y = H().uyarlamaUygula(u.hedef, u.senaryolar[0], OLCEN, {}, BUGUN);
+      expect(y.son_tarih).toBe(u.senaryolar[0].son_tarih);
+      expect(y.gerceklik.bant).toBe('gercekci');
+      expect(y.uyarlamalar[0].eski.son_tarih).toBe(h.son_tarih);
+      expect(y.uyarlamalar[0].yeni.son_tarih).toBe(y.son_tarih);
+      expect(y.durum).toBe('aktif');
     });
   });
 

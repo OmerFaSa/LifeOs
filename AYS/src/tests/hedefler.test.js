@@ -83,8 +83,11 @@
       resetState();
       const h = hedef('TYT matematiği 100 günde bitirmek istiyorum, günde 2 saat ayırabilirim');
       const g = withToday(BUGUN, () => H().gerceklik(h, Hd().KONU, {}, BUGUN));
-      expect([g.mod, g.saat, g.tipik, g.bant, g.etiket]).toEqual(['kapasite', 336, 14, 'gercekci_degil', 'tahmin']);
+      expect([g.mod, g.saat, g.tipik, g.bant, g.etiket]).toEqual(['kapasite', 371, 14, 'gercekci_degil', 'tahmin']);
       expect(g.dayanak.metin).toContain('planlama varsayımı');
+      expect(g.dayanak.metin).toContain('2 × 30 dk tekrar');
+      expect(g.ek.metin).toBe('iki haftada bir Branş — TYT Matematik');
+      expect(g.ek.saat).toBeCloseTo(100 / 60 / 2, 2);
       const t = H().kararMetni(g);
       expect(t).toContain('Bu sürede olmaz');
       expect(t).toContain('tahmindir');
@@ -106,7 +109,7 @@
       await R.Model.setTopicState('tyt-matematik', 'tm-02', { first:50, firstAt:'2026-09-10' });
       const h = hedef('TYT matematiği 100 günde bitirmek istiyorum, günde 4 saat');
       const g = H().gerceklik(h, Hd().KONU, {}, BUGUN);
-      const beklenen = (96 - R.Planner.topicDays(k1.days) - R.Planner.topicDays(k2.days) / 2) * 3.5;
+      const beklenen = (96 - R.Planner.topicDays(k1.days) - R.Planner.topicDays(k2.days) / 2) * 3.5 + 34;
       expect(g.saat).toBeCloseTo(beklenen, 1);
       expect(Hd().KONU.simdi({}, h).deger).toBe(1);
       expect(Hd().siraliKalan(['tyt-matematik'])[0].topicId).toBe('tm-02');
@@ -116,7 +119,7 @@
       resetState();
       R.S.profile.level = 'baslangic';
       const h = hedef('AYT kimyayı 6 ayda bitirmek istiyorum, günde 1 saat');
-      expect(Hd().KONU.gerekenSaat(h).saat).toBeCloseTo(49 * 3.5 * 1.35, 1);
+      expect(Hd().KONU.gerekenSaat(h).saat).toBeCloseTo(49 * 3.5 * 1.35 + 13, 1);
     });
 
     it('sayı söylenirse sıradaki o kadar konu hesaplanır', () => {
@@ -124,7 +127,7 @@
       const h = hedef('TYT matematikten 3 konu bitirmek istiyorum');
       expect([h.fark, h.hedefDeger]).toEqual([3, null]);
       const l = Hd().siraliKalan(['tyt-matematik']).slice(0, 3);
-      expect(Hd().KONU.gerekenSaat(h).saat).toBeCloseTo(l.reduce((a, k) => a + k.gun * 3.5, 0), 1);
+      expect(Hd().KONU.gerekenSaat(h).saat).toBeCloseTo(l.reduce((a, k) => a + k.gun * 3.5, 0) + 3, 1);
     });
 
     it('bütün konular kapanmışsa hedef kurulmaz', async () => {

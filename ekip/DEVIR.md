@@ -63,11 +63,17 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   Zincir testi `tools/entegre.js` §2.9 ve §4.5.
 
 ### Part 3 — Uyarlama ve değerlendirme
-- 🔜 7 Uyarlama döngüsü: plan kontrolde geride kalınca yeni tempo / tarih önerisi.
-- ⏳ 13 Değerlendirme seti: 30–50 örnek hedef ve beklenen bant.
+- ✅ 7 Uyarlama döngüsü: `brand/ortak/hedef.js` `uyarla` (hedef bugünün ölçümüyle
+  yeniden değerlendirilir) ve `uyarlamaUygula` (seçilen tarih/vakit hedefe yazılır,
+  eski değer `uyarlamalar` geçmişinde). Üç modülde plan «geride»yken Hedeflerim'de
+  «Yeniden hesapla»; seçimde eski plan geri alınır, yeni plan önizleme + onayla.
+  Motorda `haftalikEk` kancası: AYS'de deneme günü haftalık sabit yük, konu süresine
+  2 × 30 dk tekrar eklendi — karar ile plan artık aynı tarihi söylüyor.
+- ✅ 13 Değerlendirme seti: `<SYS>/src/tests/degerlendirme.test.js` (AYS 13, SPİ 13,
+  ESP 12 cümle; tehlikeli hedeflerin hepsi «güvensiz»).
 
 ### Part 4 — Güvence ve teslim
-- ⏳ 15 Otomatik yedek: HKM açıkken üç modül her gün HKM'ye yedeklenir.
+- 🔜 15 Otomatik yedek: HKM açıkken üç modül her gün HKM'ye yedeklenir.
 - ⏳ Y6 Haftalık rapor PDF olarak Telegram'a (W5 altyapısı hazır).
 - ⏳ Y7 Akşam yoklaması: bot sorar, cevap modüle TEKLİF olur (HKM modüle yazmaz).
 - ⏳ 5 / W6 Modüller `urun.add` alır; HKM Ofis: indirme, ajan izi, depo raporu, web ayarları.

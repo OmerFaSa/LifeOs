@@ -256,8 +256,11 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
   kısıtları, kırmızı bayrak → hekim.
 - Mahremiyet: modele giden kişisel veri en aza indirilir.
 - **Zincir testi:** `entegre.js`'e uçtan uca «hedeften plana» yolu.
-- **(Öneri) Değerlendirme seti:** 30–50 örnek hedef ve beklenen bantlar. Kural
-  değişince hangi kararın değiştiği görünür.
+- **Kuruldu (Part 3 — değerlendirme seti):** `<SYS>/src/tests/degerlendirme.test.js`;
+  AYS 13, SPİ 13, ESP 12 örnek hedef ve beklenen bant, her cümle ayrı test. Kural
+  değişince hangi kararın değiştiği adıyla görünür; SPİ'nin tehlikeli hedeflerinin
+  hepsi «güvensiz» çıkmak zorunda. Uyarlama döngüsü (`brand/ortak/hedef.js`
+  `uyarla`, `uyarlamaUygula`) ve haftalık sabit yük (`haftalikEk`) de bu turda.
 
 ### K. Üyelik hazırlığı
 - Veri modelinde kullanıcı ve kapsam ayrımı; genel deponun paylaşımı; yetki.
