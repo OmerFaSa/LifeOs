@@ -184,6 +184,10 @@ DOSYALAR = {
     # King'i bilmezse o arayuzun Patron'u modulun ustunu bilmez.
     "ofis.js":        "js/core",
     "ofis.test.js":   "tests",
+    # HEDEF MOTORU — herhangi bir hedefi alan genel cerceve (ekip/PLAN.md).
+    # Alan paketleri her modulun kendisindedir; motor ortak.
+    "hedef.js":       "js/core",
+    "hedef.test.js":  "tests",
     # MODEL KATMANI — yalniz SPİ ve ESP (bkz. YALNIZ).
     "llm.js":        "js/core",
 }
