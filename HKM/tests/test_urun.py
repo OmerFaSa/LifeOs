@@ -20,6 +20,7 @@
 import json
 
 from core import bam, cikti, db, editor, gelen, intents, king, outbox, sohbet, urunler
+from tests.yardim import onayla
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
 from tests.test_kaynakli import _Ag, _Model
@@ -139,8 +140,9 @@ def run():
     def t_hkm_zinciri():
         con = db.connect(":memory:")
         cfg, m = _cfg(), _UrunModel()
-        r = king.emir_ac(con, cfg, "hkm", "bam.urun",
-                         {"urun": {"tur": "pankart", "konu": "Su içmenin yararları"}}, now=AN)
+        r = onayla(con, cfg, king.emir_ac(
+            con, cfg, "hkm", "bam.urun",
+            {"urun": {"tur": "pankart", "konu": "Su içmenin yararları"}}, now=AN), now=AN)
         e = r["emir"]
         eq((r["karar"], [z["kat"] for z in e["iz"]][:3]), ("onay", ["kullanici", "king", "bam"]))
         eq(bam.is_getir(con, e["bam_is_id"])["ofisler"], ["kayit", "uretim"])
@@ -162,9 +164,10 @@ def run():
         eski = bam.web_tasiyici
         bam.web_tasiyici = _Ag()
         try:
-            e = king.emir_ac(con, cfg, "ays", "bam.urun",
-                             {"urun": {"tur": "ozet", "konu": "Osmanlı Devleti'nin kuruluşu"}},
-                             now=AN)["emir"]
+            e = onayla(con, cfg, king.emir_ac(
+                con, cfg, "ays", "bam.urun",
+                {"urun": {"tur": "ozet", "konu": "Osmanlı Devleti'nin kuruluşu"}},
+                now=AN), now=AN)["emir"]
             eq(bam.is_getir(con, e["bam_is_id"])["ofisler"], ["kayit", "arastirma", "uretim"])
             _tik(con, cfg, m, 6)          # kayit, plan, tarama, okuma, yazim, uretim
         finally:
@@ -215,12 +218,14 @@ def run():
         eski = bam.web_tasiyici
         bam.web_tasiyici = _Ag()
         try:
-            king.emir_ac(con, cfg, "hkm", "bam.arastirma",
-                         {"arastirma": {"konu": "Su içmenin yararları"}}, now=AN)
+            onayla(con, cfg, king.emir_ac(con, cfg, "hkm", "bam.arastirma",
+                                          {"arastirma": {"konu": "Su içmenin yararları"}},
+                                          now=AN), now=AN)
             _tik(con, cfg, m, 5)
-            e = king.emir_ac(con, cfg, "hkm", "bam.urun",
-                             {"urun": {"tur": "pankart", "konu": "Su içmenin yararları"}},
-                             now=AN)["emir"]
+            e = onayla(con, cfg, king.emir_ac(
+                con, cfg, "hkm", "bam.urun",
+                {"urun": {"tur": "pankart", "konu": "Su içmenin yararları"}},
+                now=AN), now=AN)["emir"]
             eq(bam.is_getir(con, e["bam_is_id"])["ofisler"], ["kayit", "uretim"])
             _tik(con, cfg, m, 2)
         finally:
@@ -242,7 +247,10 @@ def run():
         r = sohbet.konus(con, _cfg(), "Osmanlı kuruluşu hakkında pankart hazırla", "2026-09-23",
                          gorevli="king", transport=_UrunModel(), kayit=False)
         eq((r["mode"], r["command"]), ("emir", "urun"))
-        ok("Üretim Bürosu" in r["text"] and "iş emri #" in r["text"], r["text"])
+        # Onay kapisi (8a-3): cevap King'in teklifidir; is onaysiz acilmaz.
+        ok("teklif" in r["text"] and "iş emri #" in r["text"] and "«1»" in r["text"],
+           r["text"])
+        eq(king.emirler(con)[0]["durum"], "teklif")
         e = king.emirler(con)[0]
         eq((e["tur"], e["govde"]["urun"]["tur"], e["govde"]["urun"]["konu"]),
            ("bam.urun", "pankart", "Osmanlı kuruluşu"))
@@ -276,8 +284,10 @@ def run():
                                  now=AN)
         eq((r["ok"], r["tanindi"], r["tur"]), (True, True, "pankart"))
         ok("SPİ’ye teklif olarak gelir" in r["metin"], r["metin"])
+        ok("SPİ’nin Bugün ekranındaki King teklifi kartından" in r["metin"], r["metin"])
         e = king.emirler(con)[0]
-        eq((e["modul"], e["tur"]), ("spi", "bam.urun"))
+        eq((e["modul"], e["tur"], e["durum"]), ("spi", "bam.urun", "teklif"))
+        king.teklif_onayla(con, cfg, e["id"], now=AN)       # kullanicinin onayi
         _tik(con, cfg, m, 2)
         n = intents.take(con, "spi")["intents"]
         eq([x["kind"] for x in n], ["urun.add"])
@@ -325,8 +335,15 @@ def run():
                        transport=tas, date="2026-09-23")
         eq((r["command"], r["sent"]), ("urun", 1))
         e = king.emirler(con)[0]
-        eq((e["tur"], e["kanal"], e["hedef"]), ("bam.urun", "telegram", "7"))
+        eq((e["tur"], e["kanal"], e["hedef"], e["durum"]), ("bam.urun", "telegram", "7", "teklif"))
+        ok("«1»" in json.dumps(giden[0][1], ensure_ascii=False), giden[0][1])
+        # Kullanici teklifi ayni sohbetten onaylar (8a-3).
+        del giden[:]
+        r = gelen.isle(con, cfg, "telegram", {"from": "7", "id": "1b", "text": "1"},
+                       transport=tas, date="2026-09-23")
+        eq(r["command"], "teklif")
         ok("buraya yollarım" in json.dumps(giden[0][1], ensure_ascii=False), giden[0][1])
+        eq(king.emir(con, e["id"])["durum"], "onaylandi")
         del giden[:]
         _tik(con, cfg, m, 2)
         eq(king.emir(con, e["id"])["durum"], "bitti")
@@ -361,12 +378,12 @@ def run():
     def t_teslim_kanallari():
         con = db.connect(":memory:")
         cfg, m = _cfg(), _UrunModel()
-        a = king.emir_ac(con, cfg, "hkm", "bam.urun",
-                         {"urun": {"tur": "pankart", "konu": "Su içmenin yararları"}},
-                         now=AN, kanal="whatsapp", hedef="905551112233")["emir"]
-        b = king.emir_ac(con, cfg, "hkm", "bam.urun",
-                         {"urun": {"tur": "pankart", "konu": "Uyku düzeni"}},
-                         now=AN, kanal="local", hedef="x")["emir"]
+        a = onayla(con, cfg, king.emir_ac(
+            con, cfg, "hkm", "bam.urun", {"urun": {"tur": "pankart", "konu": "Su içmenin yararları"}},
+            now=AN, kanal="whatsapp", hedef="905551112233"), now=AN)["emir"]
+        b = onayla(con, cfg, king.emir_ac(
+            con, cfg, "hkm", "bam.urun", {"urun": {"tur": "pankart", "konu": "Uyku düzeni"}},
+            now=AN, kanal="local", hedef="x"), now=AN)["emir"]
         eq((a["kanal"], b["kanal"], b["hedef"]), ("whatsapp", None, None))
         _tik(con, cfg, m, 4)
         satir = [dict(x) for x in con.execute("SELECT * FROM outbox").fetchall()]

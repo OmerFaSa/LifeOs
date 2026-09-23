@@ -909,9 +909,20 @@ bölüm, kaynaklı ürün/program → kaynaksız). Öneri koddan: tam seçenek k
 sığmıyorsa ya da tavanın %25'inden fazlasını yiyorsa küçük önerilir, gerekçesi
 yazılır. Seçeneklerin gövdesi sunucuda kalır; ekrana ve bildirime yalnız sayı ve
 cümle gider. HKM › Ofis › King kuyruğu teklifi, gerçek maliyeti ve tahmin–ölçüm
-sapmasını (`king.maliyet_sapmasi`) gösterir. Onay kapısı (işin teklifte bekleyip
-kullanıcı onayıyla açılması) 8a-3'tedir. Testler: `tests/test_teklif.py`,
-`tests/test_butce.py`, `tests/test_urun.py`.
+sapmasını (`king.maliyet_sapmasi`) gösterir.
+
+**Onay kapısı (8a-3).** Ücretli iş `teklif` durumunda bekler; BAM'da iş AÇILMAZ.
+Onay üç yoldan gelir ve hepsi `king.teklif_onayla(emir, secenek)`'ten geçer:
+HKM › Ofis › King kuyruğundaki seçenek düğmeleri (`POST /api/king/emir/<id>/onayla`),
+sohbet kanalı («1», «2», «iptal»; `king.teklif_cevap` — yalnız aynı kanal ve alıcının
+en yeni teklifi, yerel sohbette HKM'den açılan) ve modülün teklif kartı. Onay anında
+imkân kontrolü YENİDEN yapılır (bütçe ya da kuyruk değişmiş olabilir). Küçük seçenek
+gövdeyi `KUCULT` ile yeniden kurar, konu bunu söyler. Kural işi (model yok, bedava)
+sorulmaz; düşük sınıfı kullanıcı Ayarlar › Bütçe › «Düşük sınıf işleri sormadan yap»
+ile açabilir (`king.sormadan_dusuk`); orta ve üstü her zaman sorar. King'in güncellik
+turunun açtığı yeni sürüm araştırması da teklif olarak bekler.
+Testler: `tests/test_teklif.py`, `tests/test_butce.py`, `tests/test_urun.py`,
+`tests/test_daemon.py`; üretimi sınayan testler onayı `tests/yardim.py onayla` ile verir.
 
 ## 9. Fazlar
 

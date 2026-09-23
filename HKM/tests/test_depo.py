@@ -17,6 +17,7 @@ import json
 import urllib.parse
 
 from core import bam, db, depo, king, sohbet, web
+from tests.yardim import onayla
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
 from tests.test_kaynakli import _Model
@@ -65,8 +66,8 @@ def _tik(con, cfg, m, n, now):
 
 
 def _arastir(con, cfg, m, konu, now, tik):
-    e = king.emir_ac(con, cfg, "hkm", "bam.arastirma", {"arastirma": {"konu": konu}},
-                     now=now)["emir"]
+    e = onayla(con, cfg, king.emir_ac(con, cfg, "hkm", "bam.arastirma",
+                                      {"arastirma": {"konu": konu}}, now=now), now=now)["emir"]
     _tik(con, cfg, m, tik, now)
     return king.emir(con, e["id"])
 
@@ -134,14 +135,16 @@ def run():
         bam.web_tasiyici = ag
         try:
             g = {"urun": {"tur": "ozet", "konu": "Osmanlı kuruluşu"}}
-            e1 = king.emir_ac(con, cfg, "hkm", "bam.urun", g, now=AN)["emir"]
+            e1 = onayla(con, cfg, king.emir_ac(con, cfg, "hkm", "bam.urun", g, now=AN),
+                        now=AN)["emir"]
             _tik(con, cfg, m, 6, AN)
             e1 = king.emir(con, e1["id"])
             eq(e1["durum"], "bitti")
             u1 = bam.kayit_getir(con, e1["sonuc"]["kayit_id"])
             ok(u1["govde"].get("dayanak"))
             model = len(m.sistemler)
-            e2 = king.emir_ac(con, cfg, "hkm", "bam.urun", g, now=IKI_GUN)["emir"]
+            e2 = onayla(con, cfg, king.emir_ac(con, cfg, "hkm", "bam.urun", g, now=IKI_GUN),
+                        now=IKI_GUN)["emir"]
             eq(e2["durum"], "onaylandi", "guncelligi olculmemis urun hemen gonderilmez")
             _tik(con, cfg, m, 1, IKI_GUN)
             e2 = king.emir(con, e2["id"])
@@ -189,7 +192,8 @@ def run():
             eq((e["tur"], e["modul"], e["konu"]), ("bam.arastirma", "hkm", "Osmanlı kuruluşunu"))
             r2 = sohbet.konus(con, _cfg_web(), "internette Osmanlı kuruluşunu araştır",
                               "2026-09-23", gorevli="king", transport=_Model(), kayit=False)
-            ok("zaten hazırlanıyor" in r2["text"])
+            # Ayni istek: teklif zaten onay bekliyor (8a-3); ikinci emir acilmaz.
+            ok("zaten onayını bekliyor" in r2["text"], r2["text"])
             eq(len(king.emirler(con)), 1)
             r3 = sohbet.konus(con, _cfg_web(), "araştır", "2026-09-23", gorevli="king",
                               transport=_Model(), kayit=False)

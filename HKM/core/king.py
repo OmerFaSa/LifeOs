@@ -30,6 +30,7 @@
       soyler; kendi plani yine calisir."""
 import datetime
 import json
+import re
 import statistics
 
 from core import (ai, bam, butce, depo, intents, kaynakli, kitap, mufredat, planlama, program,
@@ -110,11 +111,13 @@ TURLER = {
     },
 }
 
-DURUMLAR = ("onaylandi", "kismen_onay", "basladi", "bekliyor", "bitti", "kismen",
+# «teklif»: King teklifini sundu, kullanici onaylamadan BAM'da is ACILMAZ
+# (Part 8a-3). Acik sayilir: ayni istek ikinci teklif acmaz, iptal edilir.
+DURUMLAR = ("teklif", "onaylandi", "kismen_onay", "basladi", "bekliyor", "bitti", "kismen",
             "reddedildi", "iptal", "hata")
-ACIK = ("onaylandi", "kismen_onay", "basladi", "bekliyor")
-BILDIRIM_TURLERI = ("onaylandi", "kismen_onay", "basladi", "bekliyor", "bitti", "kismen",
-                    "reddedildi", "iptal", "hata", "guncellik")
+ACIK = ("teklif", "onaylandi", "kismen_onay", "basladi", "bekliyor")
+BILDIRIM_TURLERI = ("teklif", "onaylandi", "kismen_onay", "basladi", "bekliyor", "bitti",
+                    "kismen", "reddedildi", "iptal", "hata", "guncellik")
 
 
 def _simdi(now=None):
@@ -170,11 +173,13 @@ def emirler(con, limit=30, modul=None):
 
 def _yaz(con, e, now=None):
     con.execute("UPDATE is_emirleri SET durum=?, karar=?, kontrol=?, tahmin=?, bam_is_id=?, "
-                "sonuc=?, updated_at=? WHERE id=?",
+                "sonuc=?, konu=?, govde=?, teklif=?, updated_at=? WHERE id=?",
                 (e["durum"], e["karar"], json.dumps(e["kontrol"], ensure_ascii=False),
                  json.dumps(e["tahmin"], ensure_ascii=False) if e.get("tahmin") else None,
                  e.get("bam_is_id"),
                  json.dumps(e["sonuc"], ensure_ascii=False) if e.get("sonuc") else None,
+                 e["konu"], json.dumps(e.get("govde") or {}, ensure_ascii=False),
+                 json.dumps(e["teklif"], ensure_ascii=False) if e.get("teklif") else None,
                  _simdi(now), e["id"]))
 
 
@@ -504,6 +509,11 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
                           metin=tk["secenekler"][0]["sure"]["metin"],
                           dayanak=tk["secenekler"][0]["sure"]["dayanak"])
     durum = {"onay": "onaylandi", "kismi": "kismen_onay", "ret": "reddedildi"}[karar]
+    ozet_ = tkl.ozet(tk) if tk else None
+    if tk and teklif_gerekli(cfg, tur, tk):
+        # ONAY KAPISI: ucretli is, kullanici teklifi gormeden acilmaz.
+        durum = "teklif"
+        ozet_["depo_aday"] = aday
     cur = con.execute("INSERT INTO is_emirleri(modul,tur,konu,neden,govde,anahtar,iz,karar,"
                       "kontrol,tahmin,durum,created_at,updated_at,kanal,hedef,teklif) VALUES "
                       "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -512,8 +522,13 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
                        json.dumps(kontrol, ensure_ascii=False),
                        json.dumps(tahmin, ensure_ascii=False) if tahmin else None, durum, at, at,
                        kanal, hedef,
-                       json.dumps(tkl.ozet(tk), ensure_ascii=False) if tk else None))
+                       json.dumps(ozet_, ensure_ascii=False) if ozet_ else None))
     e = emir(con, cur.lastrowid)
+
+    if durum == "teklif":
+        bildir(con, modul, e["id"], "teklif", teklif_metni(e), now=at)
+        return {"ok": True, "yeni": True, "emir": emir(con, e["id"]), "karar": karar,
+                "teklif": True}
 
     if karar == "ret":
         sebep = "; ".join(m["not"] for m in kontrol if not m["ok"])
@@ -533,6 +548,13 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
         _teslim(con, e, "", depo_["kayit_id"], yalniz_belge=True, now=at)
         return {"ok": True, "yeni": True, "emir": emir(con, e["id"]), "karar": karar}
 
+    return _bam_ac(con, e, temiz, karar, kontrol, aday, at)
+
+
+def _bam_ac(con, e, temiz, karar, kontrol, aday, at):
+    """Onaylanan isi BAM'da acar ve bildirir. emir_ac ve teklif_onayla
+    ayni kapidan gecer: ikinci bir acma yolu, bir gun ayrisirdi."""
+    modul, tur, konu = e["modul"], e["tur"], e["konu"]
     j = bam.is_ac(con, konu, kaynak="kullanici" if modul == "hkm" else modul,
                   hedef_modul=None if modul == "hkm" else modul, ofisler=ofisler_of(tur, temiz),
                   govde=dict(temiz, emir_id=e["id"], **({"depo_aday": aday} if aday else {})),
@@ -544,18 +566,138 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
         bildir(con, modul, e["id"], "hata", "«%s» BAM’da açılamadı: %s"
                % (konu, e["sonuc"]["not"]), now=at)
         return {"ok": True, "yeni": True, "emir": emir(con, e["id"]), "karar": karar}
+    e["durum"] = {"onay": "onaylandi", "kismi": "kismen_onay"}[karar]
+    e["karar"] = karar
     e["bam_is_id"] = j["id"]
     _yaz(con, e, at)
     bam.iz_ekle(con, "emir", e["id"], "is", j["id"], now=at)
-    bildir(con, modul, e["id"], durum,
+    tahmin = e.get("tahmin") or {}
+    t = e.get("teklif") or {}
+    sec = next((x for x in t.get("secenekler") or [] if x.get("id") == t.get("secilen", "tam")),
+               None)
+    bildir(con, modul, e["id"], e["durum"],
            "King «%s» işini %s. Tahmini süre %s (tahmin: %s).%s"
-           % (konu, "onayladı" if karar == "onay" else "kısmen onayladı", tahmin["metin"],
-              tahmin["dayanak"], (" Sınıf %s, maliyet %s (tahmin)." % (
-                  tk["secenekler"][0]["sinif_ad"], tk["secenekler"][0]["maliyet"]["metin"]))
-              if tk else "")
+           % (konu, "onayladı" if karar == "onay" else "kısmen onayladı", tahmin.get("metin"),
+              tahmin.get("dayanak"), (" Sınıf %s, maliyet %s (tahmin)." % (
+                  sec["sinif_ad"], sec["maliyet"]["metin"])) if sec else "")
            + ("" if karar == "onay" else " Eksik: " + "; ".join(
                m["not"] for m in kontrol if not m["ok"])), now=at)
     return {"ok": True, "yeni": True, "emir": emir(con, e["id"]), "karar": karar}
+
+
+# ------------------------------------------------------------ onay kapisi
+#
+# Part 8a-3: ucretli is, kullanici King'in teklifini gorup onaylamadan BAM'da
+# ACILMAZ. Onay uc yoldan gelir — HKM ekrani, modulun teklif karti, sohbet
+# kanali («1 · 2 · iptal») — ve hepsi AYNI islevden gecer.
+
+def teklif_gerekli(cfg, tur, tk):
+    """Onay sorulur mu? Kural isi (model yok, bedel yok) sorulmaz: bedava ve
+    kisa bir isi sormak surtunmedir. Dusuk sinifi kullanici «sormadan yap»
+    diyebilir (AGENTS.md §1.9); ayar kapaliyken dusuk de sorar. Orta ve
+    ustu HER ZAMAN sorar."""
+    if not TURLER[tur]["model"]:
+        return False
+    if tk["sinif"] == "dusuk" and bool(((cfg or {}).get("king") or {}).get("sormadan_dusuk")):
+        return False
+    return True
+
+
+def teklif_metni(e, kanal=None):
+    """Teklifin kullaniciya giden cumlesi: secenekler ve nasil onaylanacagi."""
+    t = e.get("teklif") or {}
+    n = len(t.get("secenekler") or [])
+    yaz = "«1»" + (" ya da «2»" if n > 1 else "")
+    if kanal in TESLIM_KANALLARI or kanal == "local":
+        yol = "Onaylamak için %s yaz; vazgeçmek için «iptal»." % yaz
+    else:
+        yol = ("Onay: %s’nin Bugün ekranındaki King teklifi kartından ya da HKM › Ofis › King "
+               "kuyruğundan." % MODUL_AD.get(e["modul"], "modül"))
+    konu = e["konu"] if e["konu"].startswith("«") else "«%s»" % e["konu"]
+    return "King %s için teklif hazırladı (iş emri #%d). %s Onaylamadan iş açılmaz. %s" % (
+        konu, e["id"], t.get("metin") or "", yol)
+
+
+def teklif_onayla(con, cfg, id_, secenek=None, now=None):
+    """Kullanici teklifi onayladi: secilen secenekle is BAM'da acilir.
+
+    Imkan kontrolu YENIDEN yapilir: teklif ile onay arasinda butce ya da
+    kuyruk degismis olabilir; eski karara guvenmek, bugun yapilamayacak
+    bir isi acmak olurdu."""
+    e = emir(con, id_)
+    if not e or e["durum"] != "teklif":
+        return {"ok": False, "note": "Onay bekleyen bir teklif yok."}
+    t = e.get("teklif") or {}
+    ids = [x["id"] for x in t.get("secenekler") or []]
+    secenek = secenek or t.get("oneri") or "tam"
+    if secenek not in ids:
+        return {"ok": False, "note": "Bu teklifte «%s» seçeneği yok." % secenek}
+    temiz = e["govde"]
+    if secenek != "tam":
+        k = tkl.KUCULT.get(e["tur"])
+        r = k(temiz) if k else None
+        if not r:
+            return {"ok": False, "note": "Bu seçenek artık kurulamıyor."}
+        temiz = r[0]
+        e["govde"] = temiz
+        e["konu"] = ("%s — %s" % (e["konu"], r[1]))[:MAX_KONU]
+    at = _simdi(now)
+    karar, kontrol = imkan(con, cfg, e["tur"], temiz)
+    sec = next(x for x in t["secenekler"] if x["id"] == secenek)
+    t["secilen"], t["onay_at"] = secenek, at
+    e["teklif"], e["kontrol"], e["karar"] = t, kontrol, karar
+    e["tahmin"] = sec.get("sure") or e.get("tahmin")
+    if karar == "ret":
+        e["durum"] = "reddedildi"
+        _yaz(con, e, at)
+        sebep = "; ".join(m["not"] for m in kontrol if not m["ok"])
+        bildir(con, e["modul"], e["id"], "reddedildi",
+               "«%s» onaylandı ama açılamadı: %s" % (e["konu"], sebep), now=at)
+        return {"ok": True, "emir": emir(con, e["id"]), "karar": karar,
+                "note": "Açılamadı: %s" % sebep}
+    return _bam_ac(con, e, temiz, karar, kontrol, t.get("depo_aday"), at)
+
+
+CEVAP = re.compile(r"^\s*(1|2|tam|küçük|kucuk|iptal|vazgeç|vazgec)\s*[.!]?\s*$", re.I)
+
+
+def teklif_cevap(con, cfg, metin, kanal="local", hedef=None, now=None):
+    """Sohbet kanalinda teklife cevap («1», «2», «iptal»). Acik teklif
+    yoksa None: kelime olagan sohbete doner.
+
+    Hangi teklif? AYNI kanal ve alicinin en yeni acik teklifi; yerel
+    sohbette HKM'den acilan. Baskasinin teklifi bu yoldan onaylanmaz."""
+    m = CEVAP.match(str(metin or ""))
+    if not m:
+        return None
+    if kanal in TESLIM_KANALLARI:
+        r = con.execute("SELECT id FROM is_emirleri WHERE durum='teklif' AND kanal=? AND "
+                        "(hedef=? OR hedef IS NULL) ORDER BY id DESC LIMIT 1",
+                        (kanal, hedef)).fetchone()
+    else:
+        r = con.execute("SELECT id FROM is_emirleri WHERE durum='teklif' AND kanal IS NULL "
+                        "AND modul='hkm' ORDER BY id DESC LIMIT 1").fetchone()
+    if not r:
+        return None
+    e = emir(con, r["id"])
+    k = m.group(1).lower()
+    if k in ("iptal", "vazgeç", "vazgec"):
+        iptal(con, e["id"], now=now)
+        return "«%s» teklifi iptal edildi; iş açılmadı." % e["konu"]
+    ids = [x["id"] for x in (e.get("teklif") or {}).get("secenekler") or []]
+    i = 0 if k in ("1", "tam") else 1
+    if i >= len(ids):
+        return "Bu teklifte 2. seçenek yok. «1» ya da «iptal» yazabilirsin."
+    r = teklif_onayla(con, cfg, e["id"], ids[i], now=now)
+    if not r.get("ok"):
+        return r.get("note") or "Onaylanamadı."
+    e2 = r["emir"]
+    if e2["durum"] == "reddedildi":
+        return "Onayladın ama iş açılamadı: %s" % r.get("note", "")
+    return "Onaylandı: «%s» (iş emri #%d) BAM’da açıldı. Tahmini süre %s (tahmin). %s" % (
+        e2["konu"], e2["id"], (e2.get("tahmin") or {}).get("metin") or "bilinmiyor",
+        "Bitince sonucu buraya yollarım." if kanal == "telegram" else
+        "Bitince bildirim düşer; HKM › Ofis’ten açabilirsin.")
 
 
 def _teklif_mufredat(con, e, kayit_id, now=None):

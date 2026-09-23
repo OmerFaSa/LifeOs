@@ -95,6 +95,7 @@ def read(cfg):
     out["media"] = media.settings(cfg)
     # Web katmani (core/web.py): arama anahtarlari MASKELI.
     out["web"] = web.read(cfg)
+    out["king"] = {"sormadan_dusuk": bool(((cfg or {}).get("king") or {}).get("sormadan_dusuk"))}
     return out
 
 
@@ -105,8 +106,21 @@ def validate(patch):
         return False, ["gövde bir nesne olmalı"]
     for k in patch:
         if k not in ("thresholds", "channels", "schedule", "models",
-                     "budget", "media", "web"):
+                     "budget", "media", "web", "king"):
             hata.append("bilinmeyen alan: %s" % k)
+
+    # King'in onay kapisi (core/king.py teklif_gerekli): yalniz DUSUK sinif
+    # sormadan acilabilir; orta ve ustu her zaman sorar (AGENTS.md §1.9).
+    if patch.get("king") is not None:
+        kg = patch["king"]
+        if not isinstance(kg, dict):
+            hata.append("king bir nesne olmalı")
+        else:
+            for ad, deger in kg.items():
+                if ad != "sormadan_dusuk":
+                    hata.append("bilinmeyen King ayarı: %s" % ad)
+                elif not isinstance(deger, bool):
+                    hata.append("king.sormadan_dusuk true ya da false olmalı")
 
     if patch.get("models") is not None:
         ok_m, hata_m = models.validate(patch["models"])
@@ -227,6 +241,8 @@ def apply(cfg, patch):
         yeni.setdefault("media", {}).update(patch["media"])
     if patch.get("web") is not None:
         yeni = web.apply(yeni, patch["web"])
+    if patch.get("king") is not None:
+        yeni.setdefault("king", {}).update(patch["king"])
     yeni["local_token"] = cfg.get("local_token")
     return yeni
 

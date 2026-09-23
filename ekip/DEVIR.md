@@ -265,13 +265,12 @@ Kütüphanem; tahmin–gerçek maliyet sapması.
 - ✅ 8a-2 Teklif hesabı (`HKM/core/teklif.py`, HKM/MIMARI.md §8.28): sınıf, maliyet
   (ölçümden → çağrı başına → tarife), süre, bütçe payı, seçenekler (`KUCULT`), öneri.
   Her iş emrine yazılır, King kuyruğunda ve bildirimde görünür. İş HENÜZ onaysız açılır.
-- 🔜 8a-3 Onay kapısı: `teklif` durumu (BAM'da iş açılmaz), `king.teklif_onayla(emir,
-  secenek)` / `teklif_reddet`; HKM web düğmeleri, modül bildiriminde «Onayla», Telegram'da
-  «1 · 2 · iptal». Kural motoru işi (model yok, bedava) teklif beklemez. Ayar:
-  «düşük işleri sormadan yap» (varsayılan kapalı → düşük de sorar). Etkilenen testler
-  ~34 çağrı (test_king, test_urun, test_kitap, test_depo, test_program, test_daemon…)
-  ve `tools/entegre.js` §0.7/§2.76; modül ön yüzleri (`brand/ortak/urun.js`, SPİ plan)
-  «teklif bekliyor» durumunu göstermeli.
+- ✅ 8a-3a Onay kapısı, HKM tarafı: `teklif` durumu (BAM'da iş açılmaz),
+  `king.teklif_onayla` / `iptal`, `POST /api/king/emir/<id>/onayla`, sohbette ve
+  Telegram'da «1 · 2 · iptal» (`king.teklif_cevap`), HKM › Ofis düğmeleri, Ayarlar ›
+  Bütçe › «Düşük sınıf işleri sormadan yap». Kural işi sorulmaz. §8.28.
+- 🔜 8a-3b Modülün teklif kartı: AYS/SPİ/ESP Bugün'de «King teklifi» (seçenekler +
+  onayla/iptal), `GET` ile açık teklifler; `brand/ortak` tek kaynak. Sonra 8b.
 
 **Dilimler (sırayla, her biri test + commit + push):** 8a teklif (sınıf + maliyet +
 süre + onay) mevcut iş türleri için → 8b AYS fasikül/kitap parçalı + çözdüklerim +

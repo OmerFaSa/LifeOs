@@ -13,6 +13,7 @@
 import json
 
 from core import bam, db, intents, king, kitap
+from tests.yardim import onayla
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
 
@@ -53,7 +54,8 @@ class _Tasiyici(object):
 
 
 def _emir(con, cfg, govde=None, modul="ays"):
-    return king.emir_ac(con, cfg, modul, "test.kitabi", {"kitap": govde or _govde()}, now=AN)
+    return onayla(con, cfg, king.emir_ac(con, cfg, modul, "test.kitabi",
+                                         {"kitap": govde or _govde()}, now=AN), now=AN)
 
 
 def _tik(con, cfg, t, n=1):

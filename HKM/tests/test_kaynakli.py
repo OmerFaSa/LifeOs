@@ -19,6 +19,7 @@ import json
 import urllib.parse
 
 from core import bam, cikti, db, kaynakli, king
+from tests.yardim import onayla
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
 
@@ -214,8 +215,9 @@ def run():
         eski = bam.web_tasiyici
         bam.web_tasiyici = _Ag()
         try:
-            e = king.emir_ac(con, _cfg_web(), "ays", "sinav.mufredat",
-                             {"mufredat": {"sinav": "KPSS Genel Kültür"}}, now=AN)["emir"]
+            e = onayla(con, _cfg_web(), king.emir_ac(
+                con, _cfg_web(), "ays", "sinav.mufredat",
+                {"mufredat": {"sinav": "KPSS Genel Kültür"}}, now=AN), now=AN)["emir"]
             _tik(con, _cfg_web(), _Model(), 5)
         finally:
             bam.web_tasiyici = eski
@@ -288,16 +290,18 @@ def run():
         global METIN
         eski_metin = dict(METIN)
         try:
-            e1 = king.emir_ac(con, cfg, "hkm", "bam.arastirma",
-                              {"arastirma": {"konu": "Osmanlı kuruluşu"}}, now=AN)["emir"]
+            e1 = onayla(con, cfg, king.emir_ac(con, cfg, "hkm", "bam.arastirma",
+                                               {"arastirma": {"konu": "Osmanlı kuruluşu"}},
+                                               now=AN), now=AN)["emir"]
             _tik(con, cfg, m, 5)
             k1 = king.emir(con, e1["id"])["sonuc"]["kayit_id"]
             METIN["Söğüt"] = "Bu sayfa tamamen yeniden yazıldı ve içeriği başka bir konuya " \
                              "geçti; eski cümlelerin hiçbiri artık yer almıyor. " * 6
             plan_once = sum(1 for x in m.sistemler if "Araştırma Mimarı" in x)
-            e2 = king.emir_ac(con, cfg, "hkm", "bam.arastirma",
-                              {"arastirma": {"konu": "Osmanlı kuruluşu"}},
-                              now="2026-09-27T10:00:00")["emir"]
+            e2 = onayla(con, cfg, king.emir_ac(con, cfg, "hkm", "bam.arastirma",
+                                               {"arastirma": {"konu": "Osmanlı kuruluşu"}},
+                                               now="2026-09-27T10:00:00"),
+                        now="2026-09-27T10:00:00")["emir"]
             for _ in range(5):
                 bam.ilerlet(con, cfg, transport=m, now="2026-09-27T10:00:00")
                 king.esitle(con, now="2026-09-27T10:00:00")

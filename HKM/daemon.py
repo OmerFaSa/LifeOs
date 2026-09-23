@@ -61,6 +61,7 @@ Ucnoktalar:
     POST /api/yedek/<modul>         modulun gunluk yedegi (yaz, geri oku, dogrula)
     POST /api/web/dene              web aramasini King adina dener (sorgu)
     POST /api/king/urun             modul sohbetindeki urun istegi -> King emri (modul adina)
+    POST /api/king/emir/<id>/onayla King'in teklifini onaylar (secenek: tam|kucuk)
     GET  /api/health                token istemez
     GET  /                          tek dosyalik yerel yuz (token istemez;
                                     jetonu kullanici girer, veri yine korumali)
@@ -1112,6 +1113,21 @@ class Handler(BaseHTTPRequestHandler):
             r = king.emir_ac(self.con, self.server.config, body.get("modul"), body.get("tur"),
                              body.get("govde"), konu=body.get("konu"), neden=body.get("neden"))
             return self._send(200 if r.get("ok") else 422, r)
+        # Teklif onayi (Part 8a-3): secilen secenekle is BAM'da acilir. Uc
+        # kanalin (HKM ekrani, modulun karti, sohbet) hepsi bu isleve gelir.
+        if u.path.startswith("/api/king/emir/") and u.path.endswith("/onayla"):
+            parca = u.path.strip("/").split("/")
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                eid = int(parca[3])
+                body = json.loads(ham or b"{}")
+            except (ValueError, IndexError):
+                return self._send(400, {"error": "gecersiz istek"})
+            r = king.teklif_onayla(self.con, self.server.config, eid,
+                                   (body or {}).get("secenek") or None)
+            return self._send(200 if r.get("ok") else 409, r)
         if u.path.startswith("/api/king/emir/") and u.path.endswith("/iptal"):
             parca = u.path.strip("/").split("/")
             try:

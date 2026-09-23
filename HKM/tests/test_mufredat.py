@@ -12,6 +12,7 @@
 import json
 
 from core import bam, db, intents, king, mufredat
+from tests.yardim import onayla
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
 
@@ -43,8 +44,8 @@ def _yasak(*a):
 
 
 def _emir(con, cfg, sinav="KPSS Genel Kültür", modul="ays", now=AN):
-    return king.emir_ac(con, cfg, modul, "sinav.mufredat", {"mufredat": {"sinav": sinav}},
-                        now=now)
+    return onayla(con, cfg, king.emir_ac(con, cfg, modul, "sinav.mufredat",
+                                         {"mufredat": {"sinav": sinav}}, now=now), now=now)
 
 
 def _kostur(con, cfg, transport, now=AN):

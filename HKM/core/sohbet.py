@@ -202,11 +202,6 @@ def _emir_cevabi(con, r, is_ad, ek):
         return "«%s» depoda hazırdı ve güncel.%s%s" % (
             e["konu"], king._teklif(con, e, e["sonuc"]["kayit_id"]),
             " Belgesini buraya yolluyorum." if e.get("kanal") == "telegram" else "")
-    if not r.get("yeni"):
-        return "«%s» zaten hazırlanıyor (iş emri #%d). Bitince haber veririm." % (
-            e["konu"], e["id"])
-    t = e.get("tahmin") or {}
-    eksik = _eksikler(e)
     teslim = {"telegram": "Bitince sonucu ve belgesini buraya yollarım.",
               "whatsapp": "Bitince sonucu buraya yazarım; belgeyi HKM › Ofis’ten indirirsin."
               }.get(e.get("kanal"), "Bitince bildirim düşer; HKM › Ofis’ten açabilirsin.")
@@ -215,6 +210,22 @@ def _emir_cevabi(con, r, is_ad, ek):
         # Modulden istenen urun o module TEKLIF olarak doner (urun.add).
         teslim = ("Bitince ürün %s’ye teklif olarak gelir; onaylarsan Ofis ekranındaki "
                   "BAM ürünlerine eklenir." % king.MODUL_AD[e["modul"]])
+    kanal = e.get("kanal") or ("local" if e["modul"] == "hkm" else None)
+    if e["durum"] == "teklif":
+        # ONAY KAPISI (Part 8a-3): is teklifte bekler; hangi buroya gidecegi
+        # ve sonucun nereye gelecegi de soylenir.
+        if not r.get("yeni"):
+            return ("«%s» için teklif zaten onayını bekliyor (iş emri #%d). %s"
+                    % (e["konu"], e["id"], king.teklif_metni(e, kanal=kanal).split(
+                        "Onaylamadan iş açılmaz. ", 1)[-1]))
+        return "%s Onaylarsan %s. %s" % (king.teklif_metni(e, kanal=kanal),
+                                         (is_ad % e["konu"]).replace("verdim", "veririm"),
+                                         teslim)
+    if not r.get("yeni"):
+        return "«%s» zaten hazırlanıyor (iş emri #%d). Bitince haber veririm." % (
+            e["konu"], e["id"])
+    t = e.get("tahmin") or {}
+    eksik = _eksikler(e)
     return ("%s (iş emri #%d). %s Tahmini süre %s (tahmin). %s%s" % (
                 is_ad % e["konu"], e["id"], ek, t.get("metin") or "bilinmiyor", teslim,
                 (" Eksik: " + eksik) if eksik else ""))
@@ -315,8 +326,8 @@ def arastirmayi_devret(con, cfg, metin, konu, now=None, kanal=None, hedef=None):
                      neden="Sohbetten: " + metin[:300], now=now, kanal=kanal, hedef=hedef)
     if not r.get("ok"):
         return "Araştırma emri açılamadı: %s" % "; ".join(r.get("errors") or ["bilinmeyen hata"])
-    return _emir_cevabi(con, r, "Araştırmayı ben yapmıyorum; «%s» konusunu Araştırma Bürosu’na "
-                                "verdim",
+    return _emir_cevabi(con, r, "«%s» konusunu Araştırma Bürosu’na verdim; araştırmayı ben "
+                                "yapmıyorum",
                         "Önce Depolama Bürosu depoya bakacak: kayıt varsa kaynakları açılıp "
                         "güncel mi diye denetlenecek, yoksa ajanlar web’de araştıracak.")
 
@@ -352,6 +363,18 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             patron.log(con, kanal, "manager", hafiza_komutu["text"], agent=gorevli)
         return {"ok": True, "mode": "memory", "command": "memory",
                 "text": hafiza_komutu["text"], "agent": gorevli}
+
+    # 0a — TEKLIFE CEVAP (core/king.py teklif_cevap): «1», «2», «iptal».
+    # Acik teklif yoksa None doner ve kelime olagan sohbete gecer.
+    if gorevli == "king":
+        from core import king
+        tc = king.teklif_cevap(con, cfg, metin, kanal=kanal, hedef=hedef)
+        if tc is not None:
+            if kayit:
+                patron.log(con, kanal, "user", metin, agent=gorevli)
+                patron.log(con, kanal, "manager", tc, agent=gorevli)
+            return {"ok": True, "mode": "komut", "command": "teklif", "text": tc,
+                    "agent": gorevli}
 
     # 0b — PROGRAM ve ARASTIRMA ISTEGI King'in degil burolarin isidir:
     # emir acilir. «arastirip plan yap» planin kaynakli olmasidir.

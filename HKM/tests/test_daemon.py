@@ -760,6 +760,23 @@ def run_extra(S):
         no("parmak" in r["depo"]["kaynaklar"][0])
     test("depo tarayicisi ucu: arama, suzgec, kayit gorunumu — yetkili", t_depo_tara)
 
+    def t_teklif_onay_ucu():
+        kod, r = S.call("/api/king/emir", body={"modul": "ays", "tur": "test.kitabi", "govde": {
+            "kitap": {"baslik": "Uç deneme kitabı", "bolumler": [
+                {"ad": "Tarih", "konular": [], "adet": 3},
+                {"ad": "Coğrafya", "konular": [], "adet": 3}]}}})
+        eq((kod, r["emir"]["durum"]), (200, "teklif"))
+        eid = r["emir"]["id"]
+        eq(S.call("/api/king/emir/%d/onayla" % eid, body={}, token=None)[0], 401)
+        kod, o = S.call("/api/king/emir/%d/onayla" % eid, body={"secenek": "kucuk"})
+        # Test sunucusunda model atanmamis: karar «kismi» olur, is yine acilir.
+        eq((kod, o["emir"]["teklif"]["secilen"]), (200, "kucuk"))
+        ok(o["emir"]["durum"] in ("onaylandi", "kismen_onay") and o["emir"]["bam_is_id"])
+        eq(S.call("/api/king/emir/%d/onayla" % eid, body={})[0], 409)
+        kod, cfgv = S.call("/api/config")
+        eq(cfgv["king"], {"sormadan_dusuk": False})
+    test("teklif onay ucu: yetkili, secenekli, bir kez", t_teklif_onay_ucu)
+
     def t_yedek_endpoints():
         govde = {"__meta": {"app": "spi-saglik", "schemaVersion": 3}, "data": {"meta": {"x": 1}}}
         eq(S.call("/api/yedek/spi", body=govde, token=None)[0], 401)

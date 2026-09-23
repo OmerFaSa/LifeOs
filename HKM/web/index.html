@@ -782,6 +782,7 @@ details.detay > summary:hover{ color:var(--fg); }
       </div>
       <div data-ayar-bolme="butce" hidden>
         <div class="card" id="butce"></div>
+        <div class="card" id="king-ayar"></div>
       </div>
       <div data-ayar-bolme="web" hidden>
         <div class="card" id="web-ayar"></div>
@@ -1988,6 +1989,26 @@ details.detay > summary:hover{ color:var(--fg); }
     }
   }
 
+  /* King'in onay kapısı (core/king.py teklif_gerekli): yalnız DÜŞÜK sınıf
+     sormadan açılabilir; orta ve üstü her zaman sorar (AGENTS.md §1.9). */
+  function kingAyarCiz(k){
+    $('king-ayar').innerHTML = '<div class="tag">King’in onay kapısı</div>'
+      + '<p class="muted">Ücretli bir iş BAM’da açılmadan önce King sınıfını, tahmini '
+      + 'maliyetini ve süresini söyler; sen onaylayınca açılır. Kural motoruyla yapılan '
+      + 'bedava işler sorulmaz. Orta ve üstü sınıf her zaman sorar.</p>'
+      + '<label class="row" style="gap:8px"><input type="checkbox" id="king-dusuk"'
+      + ((k && k.sormadan_dusuk) ? ' checked' : '') + '/> Düşük sınıf işleri sormadan yap</label>'
+      + '<p class="muted" id="king-ayar-not"></p>';
+  }
+
+  document.addEventListener('change', async function(ev){
+    if(!ev.target || ev.target.id !== 'king-dusuk') return;
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify({
+      king:{ sormadan_dusuk:!!ev.target.checked } }) });
+    $('king-ayar-not').textContent = r.status === 200 ? 'Kaydedildi.'
+      : ('Kaydedilemedi (' + r.status + ').');
+  });
+
   async function butceYukle(){
     var r = await api('/api/budget?date=' + ($('tarih').value || bugun()));
     if(r.status === 200) butceCiz(r.body);
@@ -2976,12 +2997,13 @@ details.detay > summary:hover{ color:var(--fg); }
   /* KING KUYRUĞU (core/king.py). Modüllerin iş emirleri: King'in kararı,
      imkân kontrolünün maddeleri, tahmini süre ve dayanağı, katların
      zinciri. Karar kuraldır; bu ekran yalnız gösterir ve iptal eder. */
-  var EMIR_DURUM = { onaylandi:'onaylandı', kismen_onay:'kısmen onaylandı', basladi:'başladı',
+  var EMIR_DURUM = { teklif:'teklif — onayını bekliyor', onaylandi:'onaylandı',
+    kismen_onay:'kısmen onaylandı', basladi:'başladı',
     bekliyor:'bekliyor — model ya da bütçe', bitti:'bitti', kismen:'kısmen bitti',
     reddedildi:'reddedildi', iptal:'iptal', hata:'hata' };
-  var EMIR_TON = { onaylandi:'ok', kismen_onay:'warn', basladi:'ok', bekliyor:'warn', bitti:'ok',
+  var EMIR_TON = { teklif:'warn', onaylandi:'ok', kismen_onay:'warn', basladi:'ok', bekliyor:'warn', bitti:'ok',
     kismen:'warn', reddedildi:'danger', iptal:'muted', hata:'danger' };
-  var EMIR_ACIK = ['onaylandi', 'kismen_onay', 'basladi', 'bekliyor'];
+  var EMIR_ACIK = ['teklif', 'onaylandi', 'kismen_onay', 'basladi', 'bekliyor'];
 
   function ofisKingCiz(k){
     var h = '<div class="tag"><span lang="en">King</span> kuyruğu · iş emirleri</div>'
@@ -3016,6 +3038,12 @@ details.detay > summary:hover{ color:var(--fg); }
             + '">' + (m.ok ? '✓' : '✕') + '</span> ' + esc(m.not) + '</li>'; }).join('')
         + '</ul></details>'
         + (s.kayit_id ? '<a href="#" data-bam-kayit="' + esc(s.kayit_id) + '">programı aç</a>' : '')
+        /* Onay kapısı (Part 8a-3): teklifteki iş, seçilen seçenekle açılır. */
+        + (e.durum === 'teklif' ? '<div class="row" style="margin-top:6px">'
+          + ((e.teklif && e.teklif.secenekler) || []).map(function(x, i){
+            return '<button data-king-onayla="' + esc(e.id) + '" data-secenek="' + esc(x.id)
+              + '">' + (i + 1) + ') ' + esc(x.ad) + ' — onayla</button>'; }).join('')
+          + '</div>' : '')
         + (EMIR_ACIK.indexOf(e.durum) >= 0 ? ' <button data-king-iptal="' + esc(e.id)
           + '">İptal</button>' : '')
         + '</div>';
@@ -3549,9 +3577,16 @@ details.detay > summary:hover{ color:var(--fg); }
 
   document.addEventListener('click', async function(ev){
     var el = ev.target.closest ? ev.target.closest('#bam-gonder,#bam-ilerlet,[data-bam-iptal],'
-      + '[data-bam-devam],[data-bam-kayit],[data-bam-kapat],[data-king-iptal]') : null;
+      + '[data-bam-devam],[data-bam-kayit],[data-bam-kapat],[data-king-iptal],'
+      + '[data-king-onayla]') : null;
     if(!el) return;
     ev.preventDefault();
+    if(el.dataset.kingOnayla){
+      el.disabled = true;
+      await api('/api/king/emir/' + encodeURIComponent(el.dataset.kingOnayla) + '/onayla',
+        { method:'POST', body:JSON.stringify({ secenek:el.dataset.secenek }) });
+      return yukle();
+    }
     if(el.dataset.kingIptal){
       await api('/api/king/emir/' + encodeURIComponent(el.dataset.kingIptal) + '/iptal',
         { method:'POST', body:'{}' });
@@ -4463,7 +4498,7 @@ details.detay > summary:hover{ color:var(--fg); }
   async function yukleAyarlar(){
     var ay = await api('/api/config');
     if(ay.status === 200){
-      ayarlariCiz(ay.body); ritimCiz(ay.body);
+      ayarlariCiz(ay.body); ritimCiz(ay.body); kingAyarCiz(ay.body.king);
       WEB_SON = ay.body.web || {};
       await webYukle(ay.body);
     }

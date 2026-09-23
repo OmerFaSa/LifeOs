@@ -171,9 +171,11 @@ def butce_payi(con, cfg, m):
                 "metin": "Tavan TL ama kur girilmemiş; payı söylenemez."}
     kalan = max(0.0, tavan - float(d.get("spent") or 0))
     pay = int(round(100.0 * tutar / tavan))
+    # Turkce ek sayiya gore degisir («%5’i», «%10’u»); ek kullanmayan kalip.
     return {"pay_yuzde": pay, "sigar": tutar <= kalan,
-            "metin": "Aylık bütçenin %%%d’i; kalan %s %s." % (
-                pay, ("%.2f" % kalan).replace(".", ","), d.get("currency_label") or "")}
+            "metin": "bütçe payı %s (bu ay kalan %s %s)." % (
+                "%1’den az" if pay < 1 else "%%%d" % pay,
+                ("%.2f" % kalan).replace(".", ","), d.get("currency_label") or "")}
 
 
 # ------------------------------------------------------------ secenekler
@@ -244,7 +246,7 @@ def kur(con, cfg, tur, govde, ofisler_of, tahmini_sure):
 def secenek_metni(s):
     p = ["%s: %s sınıf" % (s["ad"], s["sinif_ad"]),
          "maliyet %s" % s["maliyet"]["metin"],
-         "süre ~%s" % s["sure"]["metin"]]
+         "süre %s" % s["sure"]["metin"]]
     if s["butce"].get("metin") and s["maliyet"].get("usd"):
         p.append(s["butce"]["metin"].rstrip("."))
     return " · ".join(p)

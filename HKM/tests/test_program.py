@@ -15,6 +15,7 @@ import datetime
 import json
 
 from core import bam, cikti, db, king, program, sohbet
+from tests.yardim import onayla
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
 from tests.test_kaynakli import _Ag, _Model
@@ -125,8 +126,8 @@ def run():
 
     def t_zincir():
         con, cfg, m = db.connect(":memory:"), _cfg(), _PlanModel()
-        r = king.emir_ac(con, cfg, "hkm", "bam.plan", {"program": {
-            "konu": "Python", "hafta": 6, "haftalik_dk": 300}}, now=AN)
+        r = onayla(con, cfg, king.emir_ac(con, cfg, "hkm", "bam.plan", {"program": {
+            "konu": "Python", "hafta": 6, "haftalik_dk": 300}}, now=AN), now=AN)
         e = r["emir"]
         eq(r["karar"], "onay")
         eq(bam.is_getir(con, e["bam_is_id"])["ofisler"], ["kayit", "planlama"])
@@ -155,9 +156,9 @@ def run():
         eski = bam.web_tasiyici
         bam.web_tasiyici = _Ag()
         try:
-            e = king.emir_ac(con, cfg, "hkm", "bam.plan", {"program": {
+            e = onayla(con, cfg, king.emir_ac(con, cfg, "hkm", "bam.plan", {"program": {
                 "konu": "Osmanlı kuruluşu", "hafta": 4, "haftalik_dk": 180, "kaynakli": True}},
-                now=AN)["emir"]
+                now=AN), now=AN)["emir"]
             eq(bam.is_getir(con, e["bam_is_id"])["ofisler"], ["kayit", "arastirma", "planlama"])
             _tik(con, cfg, m, 6)            # kayit, plan, tarama, okuma, yazim, planlama
         finally:
