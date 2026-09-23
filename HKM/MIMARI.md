@@ -937,6 +937,26 @@ Testler: `tests/test_teklif.py`, `tests/test_butce.py`, `tests/test_urun.py`,
 `tests/test_kitap.py`, `tests/test_daemon.py`; üretimi sınayan testler onayı
 `tests/yardim.py onayla` ile verir.
 
+## 8.29 Kütüphanem — AYS test kitabı ekranı (Part 8b)
+
+Kayıt görünümü (`GET /api/bam/kayit/<id>` → `depo`) kaydı üreten işin ÖLÇÜLEN
+maliyetini taşır (`depo._kayit_maliyeti`: `usage.is_id` toplamı, `butce.is_maliyeti`).
+İşsiz kayıtta alan boştur; çağrısı bağlanmamış iş (`usage.is_id` sonradan geldi)
+sıfır maliyetli sayılmaz, **veri yok** der. AYS kitabı eklerken bu ölçümü kitaba
+yazar (`testkitabi.maliyetOku`), kendisi hesaplamaz.
+
+AYS › Sınama › «Kütüphanem · test kitapları»: her kitabın kaynağı (kaynaklı /
+kaynaksız), çözülen bölüm ve soru oranı (hesaplandı), ölçülen maliyeti; bölüm
+başına «Çöz / Yeniden çöz» ve çözülmüşse «Gözden geçir» (son sonucun cevaplı
+incelemesi, `ozetAc`). Çözme ekranında soru şeridi her soruya tek dokunuşla
+gider; cevaplı soru dolu görünür, doğru/yanlış bölüm bitene kadar görünmez.
+Sonuçta «Yanlışları deftere ekle» (Part 7 madde 9): yalnız YANLIŞ cevaplar (boş ve
+hatalı işaretli sorular hariç) yanlış defterine yazılır, aynı soru ikinci kez
+girmez, «Geri al» kalır. Hata etiketi UYDURULMAZ: kayıt etiketsiz gelir, defterde
+«etiket yok» rozetiyle durur, türü (K/İ/Y/S/D) kullanıcı seçer; seçilene kadar
+hata dağılımına ve reçeteye girmez. Testler: `AYS/src/tests/testkitabi.test.js`,
+`tests/test_depo.py`.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

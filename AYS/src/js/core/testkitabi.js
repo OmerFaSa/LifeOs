@@ -103,6 +103,16 @@ R.TestKitabi = (function(){
       zorluk:ZORLUKLAR.indexOf(s.zorluk) >= 0 ? s.zorluk : 'belirsiz' };
   }
 
+  /* Kitabı üreten işin maliyeti HKM'nin ÖLÇÜMÜDÜR (depo.kayit_depo);
+     AYS hesaplamaz. Ölçüm yoksa «veri yok» kalır, sıfır yazılmaz. */
+  function maliyetOku(m){
+    if(!m || typeof m !== 'object') return null;
+    const usd = typeof m.usd === 'number' && isFinite(m.usd) && m.usd >= 0 ? m.usd : null;
+    const cagri = Number.isInteger(m.cagri) && m.cagri >= 0 ? m.cagri : null;
+    const etiket = ['olculdu', 'tahmin'].indexOf(m.etiket) >= 0 && usd != null ? m.etiket : 'veri_yok';
+    return { usd:etiket === 'veri_yok' ? null : usd, cagri, etiket };
+  }
+
   function kayittan(kayit){
     const g = kayit && kayit.govde;
     if(!kayit || kayit.tur !== 'materyal' || !g || g.tur !== 'kitap'){
@@ -123,7 +133,8 @@ R.TestKitabi = (function(){
     return { ok:true, kitap:{ id:'kitap-' + kid, kayitId:kid,
       baslik:bosluk(g.baslik || kayit.baslik).slice(0, 120) || 'Test kitabı',
       dogruluk:kayit.dogruluk === 'kaynakli' ? 'kaynakli' : 'dogrulanmadi',
-      bolumler, sonuclar:{}, hatali:[], eklenme:R.U.todayISO(), dusen } };
+      bolumler, sonuclar:{}, hatali:[], eklenme:R.U.todayISO(), dusen,
+      maliyet:maliyetOku(kayit.maliyet) } };
   }
 
   /* ------------------------------------------------------------ depo */
@@ -153,7 +164,8 @@ R.TestKitabi = (function(){
     if(kitaplar().some(k => k.kayitId === kid)) return { ok:false, error:'Bu kitap zaten eklenmiş.' };
     const kayit = await (cek || (async id => {
       const r = await R.SinavProfil.istek('/api/bam/kayit/' + id);
-      return r.ok && r.govde ? r.govde.kayit || null : null;
+      const k = r.ok && r.govde ? r.govde.kayit || null : null;
+      return k ? Object.assign({}, k, { maliyet:(r.govde.depo || {}).maliyet || null }) : null;
     }))(kid);
     if(!kayit) return { ok:false, error:'Kitap HKM’den alınamadı; HKM açıkken yeniden dene.' };
     const r = kayittan(kayit);
@@ -183,7 +195,7 @@ R.TestKitabi = (function(){
     if(!b) return null;
     return { kitap:k, bolum:b, index:oturum.index, toplam:b.sorular.length,
       soru:b.sorular[oturum.index], secili:oturum.cevaplar[oturum.index],
-      cevapli:oturum.cevaplar.filter(x => x != null).length };
+      cevaplar:oturum.cevaplar.slice(), cevapli:oturum.cevaplar.filter(x => x != null).length };
   }
 
   /* Aynı şıkka ikinci dokunuş seçimi kaldırır: boş bırakmak bir seçimdir. */
@@ -196,6 +208,13 @@ R.TestKitabi = (function(){
     const m = mevcut();
     if(!m) return;
     oturum.index = Math.max(0, Math.min(m.toplam - 1, oturum.index + fark));
+  }
+
+  /* Soruya atla (Part 8b): kitapta sayfa çevirir gibi. */
+  function gitNo(i){
+    const m = mevcut();
+    if(!m || !(i >= 0 && i < m.toplam)) return;
+    oturum.index = i;
   }
 
   function vazgec(){ oturum = null; }
@@ -241,6 +260,71 @@ R.TestKitabi = (function(){
   }
   function ozetKapat(){ ozet = null; }
 
+  /* Çözdüklerim (Part 8b): kayıtlı bir bölüm sonucunu yeniden gözden geçir. */
+  function ozetAc(kitapId, no){
+    const k = bul(kitapId);
+    if(!k || !(k.sonuclar || {})[Number(no)]) return { ok:false, why:'Bu bölüm henüz çözülmedi.' };
+    ozet = { kitapId, no:Number(no) };
+    return { ok:true };
+  }
+
+  /* Kitabın kullanımı — HESAPLANDI: çözülen bölüm ve o bölümlerin soruları.
+     Çözülmemiş bölüm sıfır doğru sayılmaz; yalnız «çözülmedi»dir. */
+  function ilerleme(k){
+    const b = (k && k.bolumler) || [];
+    const cozulen = b.filter(x => (k.sonuclar || {})[x.no]);
+    const soru = b.reduce((a, x) => a + x.sorular.length, 0);
+    const cozulenSoru = cozulen.reduce((a, x) => a + x.sorular.length, 0);
+    return { bolum:cozulen.length, toplamBolum:b.length, soru:cozulenSoru, toplamSoru:soru,
+      yuzde:soru ? Math.round(100 * cozulenSoru / soru) : 0, etiket:'hesaplandi' };
+  }
+
+  /* Yanlışlar yanlış defterine (Part 7 madde 9). Yalnız YANLIŞ cevaplar
+     (boş ve hatalı işaretli sorular hariç); aynı soru ikinci kez eklenmez.
+     Hata ETİKETİ uydurulmaz: boş kalır, kullanıcı defterde seçer —
+     etiketsiz kayıt hata dağılımına girmez (calc.js errorDistribution). */
+  function yanlislar(kitapId, no){
+    const k = bul(kitapId), b = bolumOf(k, Number(no));
+    const s = k && (k.sonuclar || {})[Number(no)];
+    if(!b || !s) return [];
+    return b.sorular.map((q, i) => ({ q, i, c:(s.cevaplar || [])[i] }))
+      .filter(x => x.c != null && x.c !== x.q.dogru
+        && (k.hatali || []).indexOf(anahtar(b.no, x.i)) < 0);
+  }
+
+  function deftereEklendi(kitapId, no, i){
+    return (R.S.errors || []).some(e => e.kaynak && e.kaynak.tur === 'testkitabi'
+      && e.kaynak.kitapId === kitapId && e.kaynak.no === Number(no) && e.kaynak.i === i);
+  }
+
+  async function yanlislariDeftere(kitapId, no){
+    const k = bul(kitapId), b = bolumOf(k, Number(no));
+    const s = k && (k.sonuclar || {})[Number(no)];
+    if(!b || !s) return { ok:false, why:'Bu bölümün sonucu yok.' };
+    const yeni = yanlislar(kitapId, no).filter(x => !deftereEklendi(kitapId, b.no, x.i));
+    const ids = [];
+    for(const x of yeni){
+      const err = {
+        id:R.U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
+        examId:null, examDate:s.tarih || R.U.todayISO(), publisher:'BAM test kitabı',
+        testName:(k.baslik + ' · ' + b.ad).slice(0, 160), questionNo:String(x.i + 1),
+        status:'Yanlış', tag:null, seconds:null, rootCause:'', principle:'', similar:'',
+        recipe:'', topicRef:'', subjectId:null, topicId:null,
+        topic:(b.konular && b.konular[0]) || b.ad,
+        soru:String(x.q.soru).slice(0, 600), senin:HARF[x.c], anahtar:HARF[x.q.dogru],
+        kaynak:{ tur:'testkitabi', kitapId, no:b.no, i:x.i },
+      };
+      await R.Model.saveError(err);
+      ids.push(err.id);
+    }
+    return { ok:true, eklenen:ids.length, ids,
+      zaten:yanlislar(kitapId, no).length - ids.length };
+  }
+
+  async function defterdenGeriAl(ids){
+    for(const id of ids || []) await R.Model.deleteError(id);
+  }
+
   /* Hatalı soru: işaret açılıp kapanır; bölümün son sonucu yeniden sayılır. */
   async function hataliIsaretle(kitapId, no, i){
     const k = bul(kitapId), b = bolumOf(k, Number(no));
@@ -278,6 +362,7 @@ R.TestKitabi = (function(){
   }
 
   return { ZORLUKLAR, VARSAYILAN, SINIR, kitaplar, bul, istekGovdesi, iste, kayittan,
-    yukle, kaydet, sil, teklifUygula, baslat, aktif, mevcut, sec, git, vazgec, bitir,
-    sonOzet, ozetKapat, hataliIsaretle, hesapla, sohbet, HARF };
+    yukle, kaydet, sil, teklifUygula, baslat, aktif, mevcut, sec, git, gitNo, vazgec, bitir,
+    sonOzet, ozetKapat, ozetAc, ilerleme, yanlislar, yanlislariDeftere, defterdenGeriAl,
+    hataliIsaretle, hesapla, sohbet, maliyetOku, HARF };
 })();

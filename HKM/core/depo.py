@@ -26,7 +26,7 @@ import hashlib
 import json
 import re
 
-from core import kaynakli, web
+from core import butce, kaynakli, web
 
 BURO = "Depolama Bürosu"
 AJAN = {"kabul": "Kayıt Kabul Uzmanı", "arama": "Arama Uzmanı",
@@ -423,7 +423,7 @@ def _tazelik(r, son, arastirma, at):
 def _satirlar(con):
     return [dict(r) for r in con.execute(
         "SELECT id, tur, baslik, dogruluk, surum, anahtar, onceki_id, created_at, denetim, "
-        "govde, etiketler FROM bam_kayitlar ORDER BY id DESC LIMIT ?", (TARA_EN_COK,))]
+        "govde, etiketler, is_id FROM bam_kayitlar ORDER BY id DESC LIMIT ?", (TARA_EN_COK,))]
 
 
 def _eslesir(r, kelimeler):
@@ -464,6 +464,19 @@ def tarayici(con, sorgu="", tur=None, durum=None, limit=50, now=None):
                      % (ESKI_GUN["arastirma"], ESKI_GUN["plan"], ESKI_GUN["materyal"])}
 
 
+def _kayit_maliyeti(con, is_id):
+    """Kaydi ureten isin OLCULEN maliyeti (Kutuphanem). Issiz kayitta soru
+    yok (None). Cagri yazilmamis is sifir maliyetli SAYILMAZ: usage.is_id
+    sonradan geldi; eski islerin cagrisi baglanmadi."""
+    if not is_id:
+        return None
+    m = butce.is_maliyeti(con, is_id)
+    if not m["cagri"]:
+        return {"is_id": int(is_id), "cagri": 0, "usd": None, "etiket": "veri_yok",
+                "metin": "bu iş için ölçülmüş çağrı yok"}
+    return dict(m, is_id=int(is_id))
+
+
 def kayit_depo(con, kayit_id, now=None):
     """Tek kaydin depo gorunumu: tazelik, surum zinciri, kaynaklar."""
     at = _simdi(now)
@@ -490,6 +503,7 @@ def kayit_depo(con, kayit_id, now=None):
             x = sonraki.get(x["id"])
     g = _json(r["govde"], {})
     return {"tazelik": _tazelik(r, son, arastirma, at),
+            "maliyet": _kayit_maliyeti(con, r["is_id"]),
             "surumler": [{"id": x["id"], "surum": x["surum"], "tarih": str(x["created_at"])[:10],
                           "bu": x["id"] == r["id"]} for x in zincir],
             "kaynaklar": [{"n": k.get("n"), "baslik": k.get("baslik"), "url": k.get("url"),

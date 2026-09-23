@@ -137,7 +137,8 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   `AYS/src/js/core/sinavprofil.js`); öneri gerekçeli, karar kullanıcının.
 
 ### Part 7 — Öğrenme bağları ve borçlar
-- ⏳ 9 Test kitabındaki yanlış → yanlış defteri / tekrar kartı teklifi.
+- ✅ 9 Test kitabındaki yanlış → yanlış defteri (8b-2). Tekrar kartı teklifi mevcut
+  kuraldan gelir: etiket seçilince reçete yazılır, `proposals.js` «card-from-error» önerir.
 - ⏳ 10 Ek sınav profilini ana sınav yapmak — cevap 6: şimdilik ana sınav **YKS**,
   ileride değişebilir (üniversite sınavları da). Ana sınav değiştirilebilir olmalı
   (büyük aksiyon: ayrıntılı önizleme + onay + geri dönüş noktası) ve kullanıcı
@@ -275,9 +276,12 @@ Kütüphanem; tahmin–gerçek maliyet sapması.
   Zincir testi `tools/entegre.js` §2.77 (sohbetten ürün → kart → modülden onay → BAM).
 - ✅ 8b-1 Parça parça + ara onay (HKM): teklifte üçüncü seçenek (`teklif.SECENEK`),
   BAM `ara_onay`, `king.parca`, «devam / dur» (HKM, sohbet/Telegram, modül kartı). §8.28.
-- 🔜 8b-2 AYS test kitabı ekranı: sayfa/bölüm gezinme, «çözdüklerim» görünümü,
-  Kütüphanem (üretilenler, kaynak, ölçülen maliyet, kullanım yüzdesi); 60 soru tavanı
-  parça parça seçeneğinde genişleyebilir (şimdilik `kitap.MAX_TOPLAM` sabit).
+- ✅ 8b-2 AYS test kitabı ekranı (HKM/MIMARI.md §8.29): soru şeridi, «Gözden geçir»
+  (çözdüklerim), Kütüphanem (kaynak, kullanım yüzdesi, ölçülen maliyet —
+  `depo.kayit_depo` → `maliyet`, çağrısız iş «veri yok»), yanlışları yanlış defterine
+  ekleme (Part 7 madde 9; etiket uydurulmaz, defterde kullanıcı seçer, «Geri al»).
+  Açık kalan: 60 soru tavanı parça parça seçeneğinde hâlâ sabit (`kitap.MAX_TOPLAM`).
+- 🔜 8c SPİ `besin.add` / `fiyat.add` / `yer.add` + diyete otomatik işleme.
 
 **Dilimler (sırayla, her biri test + commit + push):** 8a teklif (sınıf + maliyet +
 süre + onay) mevcut iş türleri için → 8b AYS fasikül/kitap parçalı + çözdüklerim +

@@ -159,7 +159,7 @@ R.Palette = (function(){
     S2.errors.forEach(e => {
       if(hit(e.rootCause) || hit(e.topic) || hit(e.principle)){
         out.push({ group:'Yanlış', label:(e.topic || e.testName || 'Yanlış')+' — '+(e.rootCause||''),
-          sub:e.tag+' · '+(e.closedAt ? 'kapandı' : 'açık'), icon:'edit', weight:4,
+          sub:(e.tag || 'etiketsiz')+' · '+(e.closedAt ? 'kapandı' : 'açık'), icon:'edit', weight:4,
           run(){ S2.ui.cardTab = 'notebook'; R.App.go('cards'); } });
       }
     });

@@ -104,15 +104,24 @@ R.Screens.cards = (function(){
     const exam = S.exams.find(x => x.id === e.examId);
     const base = e.createdAt ? e.createdAt.slice(0, 10) : U.todayISO();
     const dueDates = R.SRS_INTERVALS.map(d => U.fmtShort(U.addDays(U.parse(base), d))).join(' · ');
-    const source = exam ? exam.type+' · '+U.fmtShort(e.examDate || exam.date) : '—';
+    const source = exam ? exam.type+' · '+U.fmtShort(e.examDate || exam.date) : (e.testName || '—');
 
     return K.Card({ flat:true, pad:'sm', class:'stack-xs', body:html`
       <div class="row between wrap gap-6">
         <div class="row-sm">${raw(UI.tagDot(e.tag))}<b class="small">${e.topic || e.testName || 'Yanlış'}</b>
-          ${K.Badge({ label:e.tag+' · '+R.ERROR_TAGS[e.tag].name, tone:'muted' })}
+          ${R.ERROR_TAGS[e.tag]
+            ? K.Badge({ label:e.tag+' · '+R.ERROR_TAGS[e.tag].name, tone:'muted' })
+            : K.Badge({ label:'etiket yok', tone:'warn' })}
           ${when(e.status, () => K.Badge({ label:e.status, tone:'muted' }))}</div>
         <span class="tiny dim">${source}${e.questionNo ? ' · soru '+e.questionNo : ''}</span>
       </div>
+      ${when(e.soru, () => html`<div class="small">${String(e.soru).slice(0, 240)}</div>`)}
+      ${when(e.senin && e.anahtar, () => html`<div class="tiny dim">Senin cevabın ${e.senin} · doğru cevap ${e.anahtar}</div>`)}
+      ${when(!R.ERROR_TAGS[e.tag], () => html`<div class="stack-xs">
+        <div class="tiny dim">Hatanın türünü sen seç; seçmeden reçeteye ve hata dağılımına girmez.</div>
+        ${K.Row(Object.keys(R.ERROR_TAGS).map(k => K.Button({ label:k + ' · ' + R.ERROR_TAGS[k].name,
+          size:'sm', tone:'ghost', act:'error-tag', data:{ 'data-id':e.id, 'data-tag':k } })), { wrap:true })}
+      </div>`)}
       ${when(e.rootCause, () => html`<div class="small"><span class="dim">Kök neden:</span> ${e.rootCause}</div>`)}
       ${when(e.principle, () => html`<div class="small"><span class="dim">Doğru ilke:</span> ${e.principle}</div>`)}
       ${K.Row([
@@ -293,6 +302,17 @@ R.Screens.cards = (function(){
       err.closedAt = new Date().toISOString();
       await M.saveError(err);
       UI.toast('Yanlış kapatıldı');
+      R.App.render();
+    },
+    /* Etiketsiz yanlış (test kitabından gelen): türü kullanıcı seçer. */
+    async 'error-tag'(el){
+      const err = S.errors.find(e => e.id === el.dataset.id);
+      const t = R.ERROR_TAGS[el.dataset.tag];
+      if(!err || !t) return;
+      err.tag = el.dataset.tag;
+      if(!err.recipe) err.recipe = t.recipe;
+      await M.saveError(err);
+      UI.toast('Etiket: ' + t.name);
       R.App.render();
     },
     async 'repair-done'(el){

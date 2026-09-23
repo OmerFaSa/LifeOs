@@ -1510,3 +1510,13 @@ tbody tr:hover{ background:var(--surface-2); }
 
 .dsgn--map::after{ inset:4px 4px 8px auto; width:7px; border-radius:2px;
   background:var(--border-strong); }
+
+/* Test kitabı soru şeridi (Part 8b): bölümdeki her soruya tek dokunuş.
+   Cevaplı soru dolu, bulunulan soru ana renkte; doğru/yanlış GÖSTERİLMEZ,
+   cevaplar bölüm bitince açılır. */
+.kitap-serit{ display:flex; flex-wrap:wrap; gap:6px; }
+.kitap-serit button{ min-width:32px; min-height:32px; padding:0 6px; border-radius:8px;
+  border:1px solid var(--border); background:var(--surface); color:var(--text-2);
+  font:inherit; font-size:var(--fs-sm); font-variant-numeric:tabular-nums; cursor:pointer; }
+.kitap-serit button.is-cevapli{ background:var(--surface-2); color:var(--text); border-color:var(--text-3); }
+.kitap-serit button.is-simdi{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); }

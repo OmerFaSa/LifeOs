@@ -142,7 +142,8 @@ R.Screens.exams = (function(){
         ${raw(UI.tagDot(e.tag))}
         <div class="grow">
           <div class="row-sm"><b class="small">${label}</b>
-            ${K.Badge({ label:e.tag+' · '+R.ERROR_TAGS[e.tag].name, tone:'muted' })}
+            ${R.ERROR_TAGS[e.tag] ? K.Badge({ label:e.tag+' · '+R.ERROR_TAGS[e.tag].name, tone:'muted' })
+              : K.Badge({ label:'etiket yok', tone:'warn' })}
             ${when(e.status, () => K.Badge({ label:e.status, tone:'muted' }))}</div>
           <div class="tiny dim">${e.rootCause || 'kök neden yazılmadı'}</div>
           ${when(e.principle, () => html`<div class="tiny">İlke: ${e.principle}</div>`)}

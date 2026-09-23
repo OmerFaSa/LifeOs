@@ -6,7 +6,12 @@
      2. İstek profilden kurulur: en çok 6 bölüm, bitmemiş konular önce.
      3. Sınav biçimi: cevap bölüm bitince görünür; sonuç «ölçüldü»dür,
         net/puan hesaplanmaz. Vazgeçilen bölüm sonuç yazmaz.
-     4. Hatalı işaretlenen soru sonuca sayılmaz. */
+     4. Hatalı işaretlenen soru sonuca sayılmaz.
+     5. Kütüphanem (Part 8b): soruya atlanır, çözülen bölüm yeniden gözden
+        geçirilir; kullanım hesaplanır, maliyet HKM'nin ölçümüdür (yoksa
+        «veri yok», sıfır değil).
+     6. Yanlışlar yanlış defterine gider (Part 7 madde 9): yalnız yanlış
+        cevap, etiket UYDURULMAZ, aynı soru iki kez eklenmez, geri alınır. */
 
 (function(){
   const { describe, it, expect, resetState } = R.Test;
@@ -63,6 +68,20 @@
         expect((await R.Store.get('testkitabi/kitap-77')).bolumler).toHaveLength(1);
         expect((await B().applyIntent(n)).ok).toBe(false);
       }, { status:200, json:async () => ({ kayit:kayit() }) });
+      /* Maliyet ölçümü yoksa «veri yok»: sıfır yazılmaz. */
+      expect(T().bul('kitap-77').maliyet).toBe(null);
+    });
+
+    it('kitabın maliyeti HKM’nin ölçümüdür; bozuk ölçüm veri yok olur', async () => {
+      resetState();
+      await ayarla();
+      await withFetch(async () => {
+        expect((await B().applyIntent({ id:6, kind:'kitap.add', payload:{ kayit_id:77 } })).ok).toBe(true);
+      }, { status:200, json:async () => ({ kayit:kayit(),
+        depo:{ maliyet:{ is_id:9, cagri:12, usd:0.0431, etiket:'olculdu' } } }) });
+      expect(T().bul('kitap-77').maliyet).toEqual({ usd:0.0431, cagri:12, etiket:'olculdu' });
+      expect(T().maliyetOku({ cagri:0, usd:null, etiket:'veri_yok' })).toEqual({ usd:null, cagri:0, etiket:'veri_yok' });
+      expect(T().maliyetOku({ usd:-1, etiket:'olculdu' }).etiket).toBe('veri_yok');
     });
   });
 
@@ -134,6 +153,47 @@
       expect([s.yanlis, s.bos, s.sayilmayan]).toEqual([0, 2, 1]);
       await T().hataliIsaretle('kitap-77', 1, 2);
       expect(T().bul('kitap-77').sonuclar[1].yanlis).toBe(1);
+    });
+
+    it('soruya atlanır; çözülen bölüm yeniden açılır; kullanım hesaplanır', async () => {
+      await kur();
+      expect(T().ilerleme(T().bul('kitap-77'))).toEqual({ bolum:0, toplamBolum:1, soru:0,
+        toplamSoru:3, yuzde:0, etiket:'hesaplandi' });
+      expect(T().ozetAc('kitap-77', 1).ok).toBe(false);   /* çözülmemiş bölüm */
+      T().baslat('kitap-77', 1);
+      T().gitNo(2); expect(T().mevcut().index).toBe(2);
+      T().gitNo(9); expect(T().mevcut().index).toBe(2);    /* olmayan soru: yerinde kalır */
+      T().sec(0);
+      expect(T().mevcut().cevaplar).toEqual([null, null, 0]);
+      await T().bitir();
+      T().ozetKapat();
+      expect(T().sonOzet()).toBe(null);
+      expect(T().ozetAc('kitap-77', 1).ok).toBe(true);
+      expect(T().sonOzet().sonuc.dogru).toBe(1);
+      expect(T().ilerleme(T().bul('kitap-77')).yuzde).toBe(100);
+    });
+
+    it('yanlışlar deftere: etiket uydurulmaz, iki kez eklenmez, geri alınır', async () => {
+      await kur();
+      T().baslat('kitap-77', 1);
+      T().sec(0);                         /* 1: A — yanlış (anahtar B) */
+      T().git(1); T().sec(3);             /* 2: D — yanlış (anahtar C) */
+      /* 3: boş — deftere girmez */
+      await T().bitir();
+      await T().hataliIsaretle('kitap-77', 1, 1);   /* 2. soru hatalı: girmez */
+      expect(T().yanlislar('kitap-77', 1).map(x => x.i)).toEqual([0]);
+      const r = await T().yanlislariDeftere('kitap-77', 1);
+      expect([r.ok, r.eklenen]).toEqual([true, 1]);
+      const e = R.S.errors.find(x => x.id === r.ids[0]);
+      expect([e.tag, e.questionNo, e.senin, e.anahtar, e.status]).toEqual([null, '1', 'A', 'B', 'Yanlış']);
+      expect(e.testName).toBe('KPSS Genel Kültür test kitabı · Tarih');
+      expect(await R.Store.get('errors/' + e.id)).toBeTruthy();
+      /* Etiketsiz kayıt hata dağılımına girmez. */
+      expect(Object.values(R.Calc.errorDistribution()).reduce((a, b) => a + b, 0)).toBe(0);
+      expect((await T().yanlislariDeftere('kitap-77', 1)).eklenen).toBe(0);
+      await T().defterdenGeriAl(r.ids);
+      expect(R.S.errors).toHaveLength(0);
+      expect((await T().yanlislariDeftere('kitap-77', 9)).ok).toBe(false);
     });
   });
 })();

@@ -214,23 +214,50 @@ R.Screens.quiz = (function(){
   const TK = () => R.TestKitabi;
   const HARF = 'ABCDE';
 
+  /* Kütüphanem: BAM'ın ürettiği kitaplar, kaynağı, ölçülen maliyeti ve
+     ne kadarının çözüldüğü. Maliyet HKM'nin ölçümü (kitap eklenirken
+     alınır); kullanım AYS'nin hesabı. İkisi de etiketiyle yazılır. */
+  function maliyetYazi(m){
+    if(!m || m.etiket === 'veri_yok' || m.usd == null) return 'maliyet: veri yok';
+    const d = m.usd < 0.01 ? 4 : 2;
+    return 'maliyet ' + m.usd.toLocaleString('tr-TR', { minimumFractionDigits:d, maximumFractionDigits:d }) + ' USD'
+      + (m.cagri ? ' · ' + m.cagri + ' çağrı' : '') + (m.etiket === 'tahmin' ? ' (tahmin)' : ' (ölçüldü)');
+  }
+
   function kitapKarti(){
     const l = TK() ? TK().kitaplar() : [];
     if(!l.length) return null;
-    return K.Card({ title:'Test kitapları',
-      sub:'BAM üretti, her soru bağımsız çözümle denetlendi · kaynaksız',
-      body:html`<div class="stack-sm">${map(l, k => html`<div>
+    return K.Card({ title:'Kütüphanem · test kitapları',
+      sub:'BAM üretti, her soru bağımsız çözümle denetlendi',
+      body:html`<div class="stack-sm">${map(l, k => {
+        const il = TK().ilerleme(k);
+        return html`<div>
         <div class="row between wrap"><b class="small">${k.baslik}</b>
-          ${K.Badge({ label:k.dogruluk === 'kaynakli' ? 'kaynaklı' : 'doğrulanmadı',
+          ${K.Badge({ label:k.dogruluk === 'kaynakli' ? 'kaynaklı' : 'kaynaksız · doğrulanmadı',
             tone:k.dogruluk === 'kaynakli' ? 'ok' : 'warn' })}</div>
+        <div class="tiny dim">${il.bolum}/${il.toplamBolum} bölüm çözüldü · ${il.soru}/${il.toplamSoru}
+          soru (%${il.yuzde}, hesaplandı) · ${maliyetYazi(k.maliyet)}${k.eklenme
+          ? ' · eklendi ' + U.fmtShort(k.eklenme) : ''}</div>
         ${map(k.bolumler, b => {
           const s = (k.sonuclar || {})[b.no];
           return html`<div class="row between wrap mt-6">
             <span class="small">${b.no}. ${b.ad} · ${b.sorular.length} soru${s
               ? ' · son: ' + s.dogru + ' doğru, ' + s.yanlis + ' yanlış, ' + s.bos + ' boş' : ''}</span>
+            <span class="row-sm wrap">${when(s, () => K.Button({ label:'Gözden geçir', size:'sm',
+              tone:'ghost', act:'kitap-ozet', data:{ 'data-id':k.id, 'data-no':String(b.no) } }))}
             ${K.Button({ label:s ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'kitap-baslat',
-              data:{ 'data-id':k.id, 'data-no':String(b.no) } })}</div>`;
-        })}</div>`)}</div>` });
+              data:{ 'data-id':k.id, 'data-no':String(b.no) } })}</span></div>`;
+        })}</div>`;
+      })}</div>` });
+  }
+
+  /* Soru şeridi: bölümdeki her soruya tek dokunuş; cevaplılar dolu görünür.
+     Doğru/yanlış GÖSTERİLMEZ: cevaplar bölüm bitince açılır. */
+  function soruSeridi(m){
+    return html`<nav class="kitap-serit mb-10" aria-label="Sorular">${map(m.cevaplar, (c, i) => html`<button
+      class="${(c != null ? 'is-cevapli' : '') + (i === m.index ? ' is-simdi' : '')}"
+      data-act="kitap-no" data-i="${i}" aria-label="${'Soru ' + (i + 1) + (c != null ? ', cevaplı' : ', boş')}"
+      ${i === m.index ? raw('aria-current="step"') : ''}>${i + 1}</button>`)}</nav>`;
   }
 
   function kitapView(){
@@ -241,6 +268,7 @@ R.Screens.quiz = (function(){
       sub:'Soru ' + (m.index + 1) + ' / ' + m.toplam + ' · ' + m.cevapli
         + ' cevaplı · cevaplar bölüm bitince görünür',
       body:html`
+        ${soruSeridi(m)}
         <p class="mb-10">${s.soru}</p>
         <div class="choices">${map(s.secenekler, (x, i) => html`<button
           class="${'choice' + (m.secili === i ? ' is-picked' : '')}" data-act="kitap-sec"
@@ -257,6 +285,19 @@ R.Screens.quiz = (function(){
           ${K.Button({ label:'Bölümü bitir', size:'sm', tone:'primary', act:'kitap-bitir' })}
           ${K.Button({ label:'Vazgeç', size:'sm', act:'kitap-vazgec' })}
         </div>` }))]);
+  }
+
+  /* Yanlış defteri bağı (Part 7 madde 9): bölümün yanlışları deftere
+     tek dokunuşla gider; «Geri al» kalır. Etiket seçimi defterde. */
+  function defterSatiri(kitap, bolum){
+    const y = TK().yanlislar(kitap.id, bolum.no);
+    if(!y.length) return html`<p class="tiny dim mt-8">Bu bölümde yanlış yok; deftere eklenecek soru yok.</p>`;
+    const yeni = y.filter(x => !(S.errors || []).some(e => e.kaynak && e.kaynak.tur === 'testkitabi'
+      && e.kaynak.kitapId === kitap.id && e.kaynak.no === bolum.no && e.kaynak.i === x.i)).length;
+    if(!yeni) return html`<p class="tiny dim mt-8">${y.length} yanlışın hepsi yanlış defterinde.</p>`;
+    return html`<div class="row wrap mt-8">${K.Button({ label:'Yanlışları deftere ekle (' + yeni + ')',
+      size:'sm', act:'kitap-deftere', data:{ 'data-id':kitap.id, 'data-no':String(bolum.no) } })}
+      <span class="tiny dim">Hata türünü (K/İ/Y/S/D) defterde sen seçersin.</span></div>`;
   }
 
   function kitapSonucView(o){
@@ -276,6 +317,7 @@ R.Screens.quiz = (function(){
         ${when(zorluklar.length, () => html`<p class="tiny mt-6">Zorluğa göre (etiket modelin
           beyanı, doğru sayısı senin ölçümün): ${zorluklar.map(z => z + ' ' + sonuc.zorluk[z].dogru
           + '/' + sonuc.zorluk[z].toplam).join(' · ')}</p>`)}
+        ${defterSatiri(kitap, bolum)}
         <div class="mt-8">${K.Button({ label:'Kapat', size:'sm', tone:'primary', act:'kitap-kapat' })}</div>` }),
       K.Card({ title:'Gözden geçir', sub:'Anahtarı yanlış bulduğun soruyu işaretle; sonuca sayılmaz.',
         body:html`<div class="stack-sm">${map(bolum.sorular, (s, i) => {
@@ -322,6 +364,20 @@ R.Screens.quiz = (function(){
     },
     async 'kitap-sec'(el){ TK().sec(Number(el.dataset.i)); R.App.render(); },
     async 'kitap-git'(el){ TK().git(Number(el.dataset.d)); R.App.render(); },
+    async 'kitap-no'(el){ TK().gitNo(Number(el.dataset.i)); R.App.render(); },
+    async 'kitap-ozet'(el){
+      const r = TK().ozetAc(el.dataset.id, Number(el.dataset.no));
+      if(!r.ok){ UI.toast(r.why); return; }
+      R.App.render();
+    },
+    async 'kitap-deftere'(el){
+      const r = await TK().yanlislariDeftere(el.dataset.id, Number(el.dataset.no));
+      if(!r.ok){ UI.toast(r.why); return; }
+      R.App.render();
+      UI.toast(r.eklenen + ' soru yanlış defterine eklendi', { undo:async () => {
+        await TK().defterdenGeriAl(r.ids); R.App.render();
+      } });
+    },
     async 'kitap-bitir'(){
       const m = TK().mevcut();
       const bos = m ? m.toplam - m.cevapli : 0;

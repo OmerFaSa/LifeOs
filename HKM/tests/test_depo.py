@@ -16,7 +16,7 @@
 import json
 import urllib.parse
 
-from core import bam, db, depo, king, sohbet, web
+from core import bam, butce, db, depo, king, sohbet, web
 from tests.yardim import onayla
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
@@ -313,3 +313,21 @@ def run():
         p2 = bam.kayit_ekle(con, "plan", "Eski plan", {}, onceki_id=p, now=AN)["id"]
         eq([s["id"] for s in depo.kayit_depo(con, p, now=AN)["surumler"]], [p, p2])
     test("kayit gorunumu: surum zinciri ve kaynaklar (iz parmagi disari cikmaz)", t_kayit_depo)
+
+    def t_kayit_maliyet():
+        # Kutuphanem (Part 8b): kaydi ureten isin OLCULEN maliyeti. Cagri
+        # yazilmamis is sifir maliyetli sayilmaz: veri yok.
+        con = db.connect(":memory:")
+        j = 77                                  # kaydi ureten BAM isi
+        kid = bam.kayit_ekle(con, "materyal", "Kitap", {}, is_id=j, now=AN)["id"]
+        eq(depo.kayit_depo(con, kid, now=AN)["maliyet"]["etiket"], "veri_yok")
+        butce.record(con, role="uretim", task="kitap", provider="p", model="m",
+                     in_tok=100, out_tok=50, usd=0.012, is_id=j)
+        butce.record(con, role="uretim", task="kitap", provider="p", model="m",
+                     in_tok=100, out_tok=50, usd=0.008, is_id=j)
+        m = depo.kayit_depo(con, kid, now=AN)["maliyet"]
+        eq((m["cagri"], m["usd"], m["etiket"]), (2, 0.02, "olculdu"))
+        # Issiz kayit (elle eklenmis): maliyet sorusu yok.
+        el = bam.kayit_ekle(con, "plan", "El", {}, now=AN)["id"]
+        eq(depo.kayit_depo(con, el, now=AN)["maliyet"], None)
+    test("kayit gorunumu: ureten isin olculen maliyeti; cagrisiz is veri yok", t_kayit_maliyet)
