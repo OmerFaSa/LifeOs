@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Urun katalogu — Uretim Ofisi'nin yapabildigi her sey (ekip/PLAN.md §3.E).
+"""Urun katalogu — Uretim Burosu'nun yapabildigi her sey (ekip/PLAN.md §3.E).
 
    Test kitabi yalniz bir ornekti. Ofis «ne istenirse» uretecek sekilde
    KATALOGLA calisir: her urun turu bir kayittir, motor ayni kalir.
@@ -97,7 +97,7 @@ BICIM = {
 {"baslik": "...", "olaylar": [{"tarih": "...", "baslik": "...", "aciklama": "..."}]}""",
 }
 
-URUN_BAS = """Sen HKM'deki BAM'ın Üretim Ofisisin. Üretim Patronu adına çalışırsın; onun
+URUN_BAS = """Sen HKM'deki BAM'ın Üretim Bürosusun. Üretim Patronu adına çalışırsın; onun
 üstünde BAM Patronu, onun da üstünde King var. İstenen ürünün METNİNİ yazarsın; biçimi ve
 çizimi sistem yapar.
 

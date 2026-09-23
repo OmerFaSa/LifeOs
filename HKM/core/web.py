@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Web katmani — BAM ofislerinin ve King'in internete TEK kapisi.
 
-   Arastirma Ofisi artik yalniz kendi bilgisiyle yazmaz: arar, sayfayi
+   Arastirma Burosu artik yalniz kendi bilgisiyle yazmaz: arar, sayfayi
    okur, iddiayi kaynagina baglar. Bu dosya o kapidir; baska hicbir yer
    internete kendi basina cikmaz.
 
@@ -50,8 +50,11 @@ SAGLAYICILAR = {
     "searxng": {"ad": "SearXNG (kendi sunucun)", "anahtar": False,
                 "not": "Kendi çalıştırdığın SearXNG adresi; JSON biçimi açık olmalı."},
 }
+# guncellik_gun: King'in guncellik turu kac gunde bir ayni kayda bakar
+# (core/king.py bekci). 0 -> tur kapali; arastirma istegindeki denetim yine calisir.
 DEFAULTS = {"acik": True, "saglayicilar": ["wikipedia"], "anahtarlar": {},
-            "google_cx": "", "searxng_url": "", "gunluk_sinir": 200, "dil": "tr"}
+            "google_cx": "", "searxng_url": "", "gunluk_sinir": 200, "dil": "tr",
+            "guncellik_gun": 7}
 GIZLI = ("anahtarlar",)
 AJAN = "LifeOS-HKM/1.0 (yerel kisisel asistan; +https://github.com/OmerFaSa/LifeOs)"
 
@@ -128,6 +131,9 @@ def validate(patch):
         elif k == "gunluk_sinir" and (isinstance(v, bool) or not isinstance(v, int)
                                       or not 0 <= v <= 5000):
             hata.append("web.gunluk_sinir 0–5000 arasında bir tam sayı olmalı")
+        elif k == "guncellik_gun" and (isinstance(v, bool) or not isinstance(v, int)
+                                       or not 0 <= v <= 90):
+            hata.append("web.guncellik_gun 0–90 arasında bir tam sayı olmalı")
         elif k == "dil" and v not in ("tr", "en"):
             hata.append("web.dil tr ya da en olmalı")
     return not hata, hata
@@ -524,9 +530,12 @@ def _wiki_metin(url, tasiyici):
             "son_url": sayfa.get("fullurl") or url}
 
 
-def getir(con, cfg, rol, url, tasiyici=None, now=None):
+def getir(con, cfg, rol, url, tasiyici=None, now=None, taze=False):
     """Sayfayi okur ve metne cevirir. Doner: {ok, url, son_url, baslik,
-    metin, alan, erisim, yayin, onbellekten, note}."""
+    metin, alan, erisim, yayin, onbellekten, note}.
+
+    `taze=True` onbellegi OKUMAZ (guncellik denetimi: «degisti mi» sorusu
+    onbellekten cevaplanamaz); okunan sayfa yine onbellege yazilir."""
     if not izinli(rol):
         return {"ok": False, "note": "Bu görevlinin web erişimi yok."}
     if not settings(cfg)["acik"]:
@@ -536,7 +545,7 @@ def getir(con, cfg, rol, url, tasiyici=None, now=None):
     if not ok:
         return {"ok": False, "note": neden}
     ak = _anahtar("sayfa", url)
-    var = _onbellek_oku(con, "sayfa", ak, now)
+    var = None if taze else _onbellek_oku(con, "sayfa", ak, now)
     if var is not None:
         return dict(var, onbellekten=True)
     izin, neden = _harca(con, cfg, now)

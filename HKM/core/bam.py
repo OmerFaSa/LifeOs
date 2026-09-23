@@ -5,8 +5,11 @@ sistem degildir (AGENTS.md §1.4).
    BAM bilgiyi uretir ve uygulanabilir aksiyona donusturur. Dort ofisi
    vardir; her iste hepsi calismaz, BAM Patronu gerekenleri secer:
 
-     Kayit       «bu daha once yapildi mi?» — her is ONCE buradan gecer.
-                 Model gerektirmez; tekrar isi ve bosa harcamayi keser.
+     Depolama    (id: kayit) her is ONCE buradan gecer. Var olan bilgiyi
+                 denetler ve duzenler; arastirilacak konu depoda varsa
+                 kaynaklarini canli acip GUNCEL MI diye olcer: guncelse
+                 kaydi gonderir (arastirma yapilmaz), degistiyse yeni surum
+                 ister (core/depo.py). Model gerektirmez.
      Arastirma   alt sorular, web aramasi, sayfa okuma ve numarali kaynakli
                  bulgular (core/kaynakli.py); her alinti KODLA kaynaginda aranir.
                  Web kapaliysa ya da sonuc yoksa kayit «dogrulanmadi» kalir.
@@ -35,18 +38,20 @@ import datetime
 import json
 import re
 
-from core import ai, intents, kaynakli, kitap, mufredat, planlama, urunler, web
+from core import ai, depo, intents, kaynakli, kitap, mufredat, planlama, urunler, web
 
 OFISLER = {
     "kayit": {
-        "ad": "Kayıt Ofisi", "patron": "Kayıt Patronu", "durum": "hazir",
-        "gorev": "Üretilen bilgiyi düzenli, aranabilir ve sürümlü tutar; yeni işe "
-                 "başlamadan önce «bu daha önce yapıldı mı?» sorusunu cevaplar.",
+        "ad": "Depolama Bürosu", "patron": "Depolama Patronu", "durum": "hazir",
+        "gorev": "Var olan bilgiyi denetler ve düzenler; her iş önce buradan geçer. "
+                 "Araştırılacak konu depoda varsa kaynakları yeniden açılır ve güncel mi "
+                 "diye ölçülür: güncelse kayıt araştırma yapılmadan gönderilir, değiştiyse "
+                 "Araştırma Bürosu yeni sürüm yazar. Kopya ve eskiyen kaydı raporlar; silmez.",
         "ajanlar": ["Kayıt Kabul Uzmanı", "Sınıflandırma Uzmanı", "Arşiv Uzmanı",
                     "İndeksleme Uzmanı", "İlişkilendirme Uzmanı", "Arama Uzmanı",
                     "Sürüm Uzmanı", "Kayıt Doğrulama Uzmanı"]},
     "arastirma": {
-        "ad": "Araştırma Ofisi", "patron": "Araştırma Patronu", "durum": "hazir",
+        "ad": "Araştırma Bürosu", "patron": "Araştırma Patronu", "durum": "hazir",
         "gorev": "Talebi alt sorulara böler, web'de arar, sayfaları okur ve bulguları "
                  "numaralı kaynaklarla yazar; her alıntı kodla kaynağında aranır. Web "
                  "kapalıysa ya da sonuç yoksa kayıt «doğrulanmadı» kalır.",
@@ -55,7 +60,7 @@ OFISLER = {
                     "Kaynak Doğrulayıcı", "Çelişki Analisti", "Kanıt Analisti",
                     "Araştırma Yazarı"]},
     "planlama": {
-        "ad": "Planlama Ofisi", "patron": "Planlama Patronu", "durum": "hazir",
+        "ad": "Planlama Bürosu", "patron": "Planlama Patronu", "durum": "hazir",
         "gorev": "Hedefi haftalık bir yol haritasına çevirir: program, simülasyon ve plan "
                  "denetimi. v1 kuralla çalışır ve yalnız modülün gönderdiği yapılandırılmış "
                  "hedefi alır (şimdilik SPİ kilo planı); serbest cümleden plan kurmaz.",
@@ -63,7 +68,7 @@ OFISLER = {
                     "Bağımlılık Analisti", "Kapasite Analisti", "Program Mimarı",
                     "Simülasyon Uzmanı", "Optimizasyon Uzmanı", "Plan Denetçisi"]},
     "uretim": {
-        "ad": "Üretim Ofisi", "patron": "Üretim Patronu", "durum": "hazir",
+        "ad": "Üretim Bürosu", "patron": "Üretim Patronu", "durum": "hazir",
         "gorev": "Soru seti, alıştırma ve tekrar kartı üretir. Her madde ikinci bir "
                  "çözümle denetlenir; tutmayan madde düşer, geçenler teklif olur.",
         "ajanlar": ["Üretim Mimarı", "Metin Uzmanı", "Eğitim Materyali Uzmanı",
@@ -90,7 +95,7 @@ ANAHTAR = {
 BELIRSIZ = ("Bunu araştırmamı mı, bir plana dönüştürmemi mi, yoksa bir materyal "
             "(soru seti, alıştırma, kart) üretmemi mi istiyorsun?")
 
-ARASTIRMA_SISTEM = """Sen HKM'deki BAM'ın Araştırma Ofisisin. Araştırma Patronu adına
+ARASTIRMA_SISTEM = """Sen HKM'deki BAM'ın Araştırma Bürosusun. Araştırma Patronu adına
 çalışırsın; onun üstünde BAM Patronu, onun da üstünde King var.
 
 KONUMUN VE SINIRIN
@@ -262,11 +267,64 @@ def ilerlet(con, cfg, transport=None, now=None):
 
 # -------------------------------------------------------------- ofis adimlari
 
+def arastirma_konusu(j):
+    """Isin arastirma konusu — Depolama Burosu'nun anahtari buradan cikar.
+    Ayni konu ayni anahtardir: ozet ve sunum ayni arastirmayi paylasir."""
+    g = j.get("govde") or {}
+    if g.get("mufredat"):
+        m = g["mufredat"]
+        return "müfredat %s %s" % (m["sinav"], m.get("bolum") or "")
+    if g.get("arastirma"):
+        a = g["arastirma"]
+        return "%s %s" % (a["konu"], a.get("ayrinti") or "")
+    if g.get("urun"):
+        return g["urun"]["konu"]
+    return j["talep"]
+
+
+def _depo_karari(j):
+    a = next((x for x in j["adimlar"] if x["ofis"] == "kayit"), None)
+    return (a or {}).get("depo") or {}
+
+
+def _depo_yaz(j):
+    """Arastirma kaydinin depo alanlari: anahtar ve (guncellemede) onceki surum."""
+    d = _depo_karari(j)
+    return {"anahtar": depo.konu_anahtari(arastirma_konusu(j)),
+            "onceki_id": d.get("kayit_id") if d.get("karar") == "guncelle" else None}
+
+
 def _kayit_adimi(con, cfg, j, transport, now):
+    """Depolama Burosu. Arastirma gerektiren iste karar verir (core/depo.py);
+    digerlerinde yalniz benzer kayitlari bulur."""
     bulunan = [r["id"] for r in kayit_ara(con, j["talep"])]
-    return {"durum": "tamam", "bulunan": bulunan,
-            "not": ("%d önceki kayıt bulundu; işe bunlarla başlanır." % len(bulunan))
-            if bulunan else "Bu konuda önceki kayıt yok."}
+    izler = [depo.iz("arama", "%d benzer kayıt bulundu." % len(bulunan) if bulunan
+                     else "Benzer kayıt yok.")]
+    if "arastirma" not in j["ofisler"]:
+        return {"durum": "tamam", "bulunan": bulunan, "iz": izler,
+                "not": ("%d önceki kayıt bulundu; işe bunlarla başlanır." % len(bulunan))
+                if bulunan else "Bu konuda önceki kayıt yok."}
+    d = depo.karar(con, cfg, depo.konu_anahtari(arastirma_konusu(j)), now=now,
+                   tasiyici=web_tasiyici)
+    sonuc = {"durum": "tamam", "bulunan": bulunan, "iz": izler + d["iz"], "not": d["not"],
+             "depo": {k: d.get(k) for k in ("karar", "kayit_id", "denetlenemedi") if d.get(k)}}
+    aday = (j.get("govde") or {}).get("depo_aday")
+    if d["karar"] == "guncel" and aday:
+        # King eski urunu «guncelligi olculmedi» diye gondermediyse ve urun
+        # hala EN SON arastirmaya dayaniyorsa butun is depodan kapanir.
+        ak = kayit_getir(con, aday) or {}
+        dayanak = ak.get("id") if ak.get("tur") == "arastirma" else \
+            (ak.get("govde") or {}).get("dayanak")
+        if dayanak and dayanak == d["kayit_id"]:
+            for a in j["adimlar"]:
+                if a["ofis"] != "kayit" and a["durum"] == "bekliyor":
+                    a.update({"durum": "tamam", "depodan": True, "at": _simdi(now),
+                              "not": "Depodaki kayıt #%d güncel araştırmaya dayanıyor; "
+                                     "yeniden yapılmadı." % aday})
+            j["adimlar"][-1]["kayit_id"] = aday
+            sonuc["iz"].append(depo.iz("surum", "Ürün #%d güncel araştırmaya dayanıyor; iş "
+                                                "depodan kapandı." % aday))
+    return sonuc
 
 
 def _json_ayikla(metin):
@@ -351,6 +409,14 @@ def _kaynak_topla(con, cfg, j, ofis, sorgu_kur, transport, now):
     return ("hazir", kaynaklar, metinler)
 
 
+def _izli_kaynakca(kaynaklar, metinler):
+    """Kaynakca + her kaynagin cumle izi: Depolama Burosu guncelligi bununla olcer."""
+    out = kaynakli.kaynakca(kaynaklar)
+    for x in out:
+        x["parmak"] = depo.parmak(metinler.get(x["n"]) or "")
+    return out
+
+
 def _mufredat_modelden(con, cfg, j, g, transport, now, neden=None):
     r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
                [{"role": "user", "content": mufredat.istem(g)}],
@@ -362,8 +428,10 @@ def _mufredat_modelden(con, cfg, j, g, transport, now, neden=None):
         return {"durum": "hata", "not": "Müfredat raporu yazılmadı: " + hata}
     if neden:
         govde["web"] = neden
+    govde["konu"] = arastirma_konusu(j).strip()
     k = kayit_ekle(con, "arastirma", "%s müfredatı" % g["sinav"], govde,
-                   dogruluk="dogrulanmadi", etiketler=j["talep"][:300], is_id=j["id"], now=now)
+                   dogruluk="dogrulanmadi", etiketler=j["talep"][:300], is_id=j["id"], now=now,
+                   **_depo_yaz(j))
     return {"durum": "tamam", "kayit_id": k["id"], "kaynakli": {"asama": "bitti", "kaynak": 0},
             "not": "Müfredat raporu kaydedildi: %d ders, %d konu — kaynaksız, doğrulanmadı.%s"
                    % (govde["ders_sayisi"], govde["konu_sayisi"],
@@ -401,15 +469,16 @@ def _mufredat_adimi(con, cfg, j, g, transport, now):
         d["dogrulandi"] = bool(n in metinler and kaynakli.alinti_dogru_mu(d.get("alinti"),
                                                                           metinler[n]))
         dogru += d["dogrulandi"]
-    govde["kaynaklar"] = kaynakli.kaynakca(kaynaklar)
+    govde["kaynaklar"] = _izli_kaynakca(kaynaklar, metinler)
     govde["dogrulama"] = {"ders": len(govde["dersler"]), "dogrulanan": dogru}
+    govde["konu"] = arastirma_konusu(j).strip()
     etiket = "kaynakli" if dogru * 2 >= len(govde["dersler"]) else "dogrulanmadi"
     govde["uyari"] = ("Kaynaklı: %d dersin %d'i alıntıyla kaynağına bağlandı. Yine de resmi "
                       "kılavuzla karşılaştır." % (len(govde["dersler"]), dogru)
                       if etiket == "kaynakli" else
                       "Derslerin yarısından azı kaynakla doğrulandı; resmi kılavuzla karşılaştır.")
     k = kayit_ekle(con, "arastirma", "%s müfredatı" % g["sinav"], govde, dogruluk=etiket,
-                   etiketler=j["talep"][:300], is_id=j["id"], now=now)
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now, **_depo_yaz(j))
     return {"durum": "tamam", "kayit_id": k["id"],
             "kaynakli": {"asama": "bitti", "kaynak": len(kaynaklar)},
             "not": "Müfredat raporu: %d ders, %d konu, %d kaynak; %d ders alıntıyla doğrulandı (%s)."
@@ -452,10 +521,11 @@ def _arastirma_kaynakli(con, cfg, j, transport, now):
              "alt_sorular": st.get("alt_sorular") or [], "sorgular": st.get("sorgular") or [],
              "bulgular": bulgular, "celiskiler": celiskiler,
              "acik_kalanlar": kaynakli.liste(d, "acik_kalanlar"),
-             "kaynaklar": kaynakli.kaynakca(kaynaklar), "dogrulama": say}
+             "kaynaklar": _izli_kaynakca(kaynaklar, metinler), "dogrulama": say,
+             "konu": arastirma_konusu(j).strip()}
     baslik = str(d.get("baslik") or j["talep"]).strip()[:200]
     k = kayit_ekle(con, "arastirma", baslik, govde, dogruluk=etiket,
-                   etiketler=j["talep"][:300], is_id=j["id"], now=now)
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now, **_depo_yaz(j))
     return ("devam", {"durum": "tamam", "kayit_id": k["id"],
                       "kaynakli": {"asama": "bitti", "kaynak": len(kaynaklar)},
                       "not": "Kaynaklı araştırma: %d kaynak, %d bulgunun %d'i alıntıyla "
@@ -466,6 +536,12 @@ def _arastirma_kaynakli(con, cfg, j, transport, now):
 
 
 def _arastirma_adimi(con, cfg, j, transport, now):
+    d = _depo_karari(j)
+    if d.get("karar") == "guncel" and d.get("kayit_id"):
+        return {"durum": "tamam", "kayit_id": d["kayit_id"], "depodan": True,
+                "not": "Depodaki araştırma #%d kullanıldı%s; yeniden araştırılmadı." % (
+                    d["kayit_id"], " (güncelliği denetlenemedi)" if d.get("denetlenemedi")
+                    else "")}
     hazir = ai.hazir_mi(cfg, "bam.arastirma")
     if not hazir["ok"]:
         return {"durum": "beklemede", "not": hazir["note"]}
@@ -500,21 +576,22 @@ def _arastirma_adimi(con, cfg, j, transport, now):
     if not bulgular and not govde["ozet"]:
         govde["metin"] = str(r["text"])[:6000]        # bicim tutmadi: ham metin
     govde["web"] = web_neden
+    govde["konu"] = arastirma_konusu(j).strip()
     baslik = str(d.get("baslik") or j["talep"]).strip()[:200]
     k = kayit_ekle(con, "arastirma", baslik, govde, dogruluk="dogrulanmadi",
-                   etiketler=j["talep"][:300], is_id=j["id"], now=now)
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now, **_depo_yaz(j))
     return {"durum": "tamam", "kayit_id": k["id"], "kaynakli": {"asama": "bitti", "kaynak": 0},
             "not": "Araştırma kaydedildi — kaynaksız, doğrulanmadı (%s)." % web_neden}
 
 
 def _planlama_adimi(con, cfg, j, transport, now):
-    """Planlama Ofisi v1 (core/planlama.py). Yapilandirilmis hedef yoksa
+    """Planlama Burosu v1 (core/planlama.py). Yapilandirilmis hedef yoksa
     plan UYDURULMAZ: serbest bir cumleden program kurmak, kullanicinin
     kapasitesini, kilosunu ve tarihini tahmin etmek olurdu."""
     girdi = (j.get("govde") or {}).get("plan")
     if not girdi:
         return {"durum": "ertelendi",
-                "not": "Planlama Ofisi v1 yalnız modülün gönderdiği yapılandırılmış hedefle "
+                "not": "Planlama Bürosu v1 yalnız modülün gönderdiği yapılandırılmış hedefle "
                        "(şimdilik SPİ kilo planı) çalışır; serbest cümleden plan kurmaz."}
     p = planlama.kur(girdi)
     if not p["ok"]:
@@ -543,7 +620,7 @@ def _planlama_adimi(con, cfg, j, transport, now):
 
 # ------------------------------------------------------------ uretim
 
-URETIM_BAS = """Sen HKM'deki BAM'ın Üretim Ofisisin. Üretim Patronu adına çalışırsın;
+URETIM_BAS = """Sen HKM'deki BAM'ın Üretim Bürosusun. Üretim Patronu adına çalışırsın;
 onun üstünde BAM Patronu, onun da üstünde King var. Ürettiğin her madde, senden
 BAĞIMSIZ bir kalite kontrolünden geçecek; tutmayan madde atılır.
 
@@ -571,12 +648,12 @@ yok; çeldiriciler makul ve tipik hatalardan gelsin; şıklara harf yazma.""",
  "arka": "kısa ve kesin cevap"}]}""",
 }
 
-KALITE_SORU = """Sen BAM Üretim Ofisi'nin Kalite Kontrol Uzmanısın. Sana CEVAP ANAHTARI
+KALITE_SORU = """Sen BAM Üretim Bürosu'nun Kalite Kontrol Uzmanısın. Sana CEVAP ANAHTARI
 OLMADAN çoktan seçmeli sorular verilecek. Her soruyu kendin baştan çöz; başkasının
 cevabını tahmin etmeye çalışma. Şıklar sırasıyla A, B, C, D, E'dir.
 ÇIKTI: Yalnız şu JSON: {"cevaplar": [{"no": 1, "secim": "A", "emin": true}]}"""
 
-KALITE_YARGI = """Sen BAM Üretim Ofisi'nin Kalite Kontrol Uzmanısın. Sana maddeler ve
+KALITE_YARGI = """Sen BAM Üretim Bürosu'nun Kalite Kontrol Uzmanısın. Sana maddeler ve
 önerilen cevapları verilecek. Her maddede önerilen cevabın doğru, tek ve kesin olup
 olmadığını denetle. Şüpheliyse «dogru_mu»yu false yaz ve nedenini kısaca söyle.
 ÇIKTI: Yalnız şu JSON: {"yargilar": [{"no": 1, "dogru_mu": true, "neden": "..."}]}"""
@@ -771,6 +848,9 @@ def _urun_adimi(con, cfg, j, g, transport, now):
     if kaynaklar and ar_etiket in ("kaynakli", "celiskili"):
         etiket = ar_etiket
     govde["istek"] = {"konu": g["konu"], "uzunluk": g["uzunluk"], "kaynakli": g["kaynakli"]}
+    ar = next((x.get("kayit_id") for x in j["adimlar"] if x["ofis"] == "arastirma"), None)
+    if ar:
+        govde["dayanak"] = ar                 # Depolama Burosu guncelligi bununla izler
     k = kayit_ekle(con, "materyal", govde["baslik"], govde, dogruluk=etiket,
                    etiketler=j["talep"][:300], is_id=j["id"], now=now)
     return {"durum": "tamam", "kayit_id": k["id"],
@@ -837,7 +917,7 @@ ADIM = {"kayit": _kayit_adimi, "arastirma": _arastirma_adimi,
 # ----------------------------------------------------------------- kayitlar
 
 def kayit_ekle(con, tur, baslik, govde, dogruluk="dogrulanmadi", etiketler="",
-               is_id=None, onceki_id=None, now=None):
+               is_id=None, onceki_id=None, now=None, anahtar=None):
     if tur not in TURLER:
         return {"ok": False, "note": "Bilinmeyen kayıt türü."}
     if dogruluk not in DOGRULUK:
@@ -854,11 +934,11 @@ def kayit_ekle(con, tur, baslik, govde, dogruluk="dogrulanmadi", etiketler="",
         surum = o["surum"] + 1
     at = _simdi(now)
     cur = con.execute("INSERT INTO bam_kayitlar(tur,baslik,govde,dogruluk,etiketler,surum,"
-                      "onceki_id,is_id,created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+                      "onceki_id,is_id,created_at,anahtar) VALUES (?,?,?,?,?,?,?,?,?,?)",
                       (tur, b[:200], json.dumps(govde or {}, ensure_ascii=False),
                        dogruluk, str(etiketler or "")[:300], surum,
                        int(onceki_id) if onceki_id else None,
-                       int(is_id) if is_id else None, at))
+                       int(is_id) if is_id else None, at, anahtar or None))
     kid = cur.lastrowid
     if is_id:
         iz_ekle(con, "is", is_id, "kayit", kid, now=at)
@@ -873,12 +953,16 @@ def kayit_getir(con, id_):
         return None
     d = dict(r)
     d["govde"] = json.loads(d["govde"] or "{}")
+    try:
+        d["denetim"] = json.loads(d.get("denetim") or "null")
+    except ValueError:
+        d["denetim"] = None
     return d
 
 
 def kayit_listesi(con, limit=30):
     return [dict(r) for r in con.execute(
-        "SELECT id,tur,baslik,dogruluk,surum,is_id,created_at FROM bam_kayitlar "
+        "SELECT id,tur,baslik,dogruluk,surum,onceki_id,is_id,created_at FROM bam_kayitlar "
         "ORDER BY id DESC LIMIT ?", (max(1, min(int(limit), 200)),)).fetchall()]
 
 

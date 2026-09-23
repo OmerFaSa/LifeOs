@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Kaynakli arastirma — Arastirma Ofisi v2 (ekip/PLAN.md §3.C).
+"""Kaynakli arastirma — Arastirma Burosu v2 (ekip/PLAN.md §3.C).
 
    Ofis artik yalniz kendi bilgisiyle yazmaz. Is, ritim tiklerine bolunmus
    dort asamadan gecer (core/bam.py):
@@ -178,3 +178,29 @@ def kaynakca(kaynaklar):
 
 def liste(d, alan, n=10, uzun=300):
     return [_bosluk(x)[:uzun] for x in ((d or {}).get(alan) or []) if _bosluk(x)][:n]
+
+
+# ------------------------------------------------- arastirma istegi (King)
+#
+# King'in `bam.arastirma` emrinin govdesi. King arastirma YAPMAZ; konuyu
+# Depolama Burosu'na, oradan (gerekirse) Arastirma Burosu'na verir.
+
+def istek_temizle(g):
+    """{"konu", "ayrinti"?} -> (temiz, hatalar). Kapali girdi."""
+    if not isinstance(g, dict):
+        return None, ["arastirma bir nesne olmali"]
+    fazla = sorted(set(g) - {"konu", "ayrinti"})
+    if fazla:
+        return None, ["bilinmeyen alan: %s" % ", ".join(fazla)]
+    konu = _bosluk(g.get("konu"))
+    if not 3 <= len(konu) <= 200:
+        return None, ["konu 3-200 karakter olmali"]
+    temiz = {"konu": konu}
+    ayrinti = _bosluk(g.get("ayrinti"))
+    if ayrinti:
+        temiz["ayrinti"] = ayrinti[:400]
+    return temiz, []
+
+
+def istek_talebi(g):
+    return g["konu"] + (" — " + g["ayrinti"] if g.get("ayrinti") else "")

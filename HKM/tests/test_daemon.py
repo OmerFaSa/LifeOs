@@ -734,3 +734,11 @@ def run_extra(S):
         kod, r = S.call("/api/urunler")
         ok(kod == 200 and any(x["id"] == "zihin_haritasi" for x in r["urunler"]))
     test("cikti ucu: yetki, kacislanmis SVG/HTML, bicim ve kayit denetimi", t_cikti_endpoints)
+
+    def t_depo_endpoint():
+        eq(S.call("/api/bam/depo", token=None)[0], 401)
+        kod, r = S.call("/api/bam/depo")
+        eq(kod, 200)
+        ok(r["rapor"]["etiket"] == "olculdu" and r["rapor"]["toplam"] >= 1)
+        ok(any(i["ajan"] == "Arşiv Uzmanı" for i in r["rapor"]["iz"]))
+    test("depo ucu: yetki ister, olculmus raporu doner", t_depo_endpoint)

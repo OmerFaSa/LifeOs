@@ -46,8 +46,9 @@ Ucnoktalar:
     POST /api/tg/webhook            Telegram — gizli baslikla dogrulanir
     POST /api/decision/<id>/accept  oneriyi kabul et
     POST /api/decision/<id>/decline oneriyi reddet — kayit silinmez
-    GET  /api/urunler               Uretim Ofisi'nin urun katalogu
+    GET  /api/urunler               Uretim Burosu'nun urun katalogu
     GET  /api/bam/kayit/<id>/cikti?bicim=html|svg|pdf  kaydin basilir hali
+    GET  /api/bam/depo              Depolama Burosu'nun depo denetimi (kod; model yok)
     GET  /api/web                   web katmaninin durumu: saglayicilar, bugunku cagri
     POST /api/web/dene              web aramasini King adina dener (sorgu)
     GET  /api/health                token istemez
@@ -70,7 +71,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import (ai, bam, butce, channels, cikti, cross, db, gelen,  # noqa: E402
+from core import (ai, bam, butce, channels, cikti, cross, db, depo, gelen,  # noqa: E402
                   impact,
                   intents, kanal, king, manager, media, memory, models, motto, outbox, patron,
                   profil, schedule,
@@ -664,6 +665,10 @@ class Handler(BaseHTTPRequestHandler):
         # ---- BAM (core/bam.py): ofisler, isler, kayitlar ----
         if u.path == "/api/bam":
             return self._send(200, bam.ozet(self.con))
+        if u.path == "/api/bam/depo":
+            # Olcum her istekte tazedir ve koddur: kopya surumler baglanir,
+            # eskiyen ve kaynaksiz kayit sayilir; hicbir kayit silinmez.
+            return self._send(200, {"rapor": depo.denetim(self.con)})
         if u.path == "/api/bam/ara":
             return self._send(200, {"kayitlar": bam.kayit_ara(
                 self.con, (q.get("q") or [""])[0], limit=20)})
@@ -1249,6 +1254,10 @@ def _ritim(srv, aralik=60):
             bam.ilerlet(con, srv.config)
             # King: isin durumu emre tasinir, DEGISIM bildirilir.
             king.esitle(con)
+            # Depolama Burosu: gunluk depo denetimi (kod, gunde bir kez).
+            depo.bakim(con)
+            # King'in guncellik turu: arada bir, tikte en cok bir kayit.
+            king.bekci(con, srv.config)
         except Exception as e:                  # noqa: BLE001
             sys.stderr.write("[hkm] ritim hatasi: %s\n" % e)
         srv.dur.wait(aralik)

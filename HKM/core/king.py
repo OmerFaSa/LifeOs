@@ -32,7 +32,7 @@ import datetime
 import json
 import statistics
 
-from core import ai, bam, butce, intents, kitap, mufredat, planlama, urunler
+from core import ai, bam, butce, depo, intents, kaynakli, kitap, mufredat, planlama, urunler, web
 
 # «hkm»: kullanicinin HKM'nin kendisinden (Telegram, HKM ekrani) verdigi is.
 # O yolda modul kocu ve Patronu yoktur: kullanici dogrudan King'e yazar.
@@ -56,7 +56,7 @@ TURLER = {
         "moduller": ("spi",),
         "ofisler": ["kayit", "planlama"],
         "model": False,
-        "not": "Planlama Ofisi v1 kuralla çalışır: program, simülasyon, plan denetimi.",
+        "not": "Planlama Bürosu v1 kuralla çalışır: program, simülasyon, plan denetimi.",
     },
     # Sinav profilinin iskeleti (core/mufredat.py). Rapor kaynaksizsa
     # «dogrulanmadi»dir; AYS kullanicinin onayiyla profil olarak saklar.
@@ -65,7 +65,7 @@ TURLER = {
         "moduller": ("ays",),
         "ofisler": ["kayit", "arastirma"],
         "model": True,
-        "not": "Araştırma Ofisi müfredatı ders ve konu olarak yazar; kod süzer.",
+        "not": "Araştırma Bürosu müfredatı ders ve konu olarak yazar; kod süzer.",
     },
     # Bolumlu test kitabi (core/kitap.py): her tikte bir bolum, bagimsiz
     # cozumle denetim. Zorluk dagilimini kod hesaplar.
@@ -77,14 +77,24 @@ TURLER = {
         "moduller": ("ays", "spi", "esp", "hkm"),
         "ofisler": ["kayit", "arastirma", "uretim"],
         "model": True,
-        "not": "Üretim Ofisi katalogdaki ürünü yazar; biçim ve çizim koddur.",
+        "not": "Üretim Bürosu katalogdaki ürünü yazar; biçim ve çizim koddur.",
+    },
+    # Arastirma istegi (Telegram, HKM sohbeti, modul). King ARASTIRMAZ:
+    # Depolama Burosu konuya depoda bakar, guncel mi diye olcer; yoksa ya
+    # da degistiyse Arastirma Burosu web'de arastirir (core/depo.py).
+    "bam.arastirma": {
+        "ad": "Kaynaklı araştırma",
+        "moduller": ("ays", "spi", "esp", "hkm"),
+        "ofisler": ["kayit", "arastirma"],
+        "model": True,
+        "not": "Önce Depolama Bürosu bakar; gerekirse Araştırma Bürosu web'de araştırır.",
     },
     "test.kitabi": {
         "ad": "Bölümlü test kitabı",
         "moduller": ("ays",),
         "ofisler": ["kayit", "uretim"],
         "model": True,
-        "not": "Üretim Ofisi bölüm bölüm üretir; her soru bağımsız çözümle denetlenir.",
+        "not": "Üretim Bürosu bölüm bölüm üretir; her soru bağımsız çözümle denetlenir.",
     },
 }
 
@@ -92,7 +102,7 @@ DURUMLAR = ("onaylandi", "kismen_onay", "basladi", "bekliyor", "bitti", "kismen"
             "reddedildi", "iptal", "hata")
 ACIK = ("onaylandi", "kismen_onay", "basladi", "bekliyor")
 BILDIRIM_TURLERI = ("onaylandi", "kismen_onay", "basladi", "bekliyor", "bitti", "kismen",
-                    "reddedildi", "iptal", "hata")
+                    "reddedildi", "iptal", "hata", "guncellik")
 
 
 def _simdi(now=None):
@@ -334,13 +344,20 @@ def _govde_temizle(tur, govde):
         if hatalar:
             return None, hatalar
         return {"urun": g}, []
+    if tur == "bam.arastirma":
+        g, hatalar = kaynakli.istek_temizle((govde or {}).get("arastirma"))
+        if hatalar:
+            return None, hatalar
+        return {"arastirma": g}, []
     return None, ["tanimsiz tur"]
 
 
 # Ayni girdi -> ayni anahtar («once depo»). Mufredatta buyuk-kucuk harf
 # ve bosluk farki ayni sinavdir.
 ANAHTAR = {"hedef.plan": planlama.anahtar, "sinav.mufredat": mufredat.anahtar,
-           "test.kitabi": planlama.anahtar, "bam.urun": planlama.anahtar}
+           "test.kitabi": planlama.anahtar, "bam.urun": planlama.anahtar,
+           "bam.arastirma": lambda t: depo.konu_anahtari(
+               "%s %s" % (t["arastirma"]["konu"], t["arastirma"].get("ayrinti") or ""))}
 
 
 def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
@@ -359,6 +376,8 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
         konu = mufredat.talep(temiz["mufredat"])
     if tur == "bam.urun" and not str(konu or "").strip():
         konu = urunler.talep(temiz["urun"])
+    if tur == "bam.arastirma" and not str(konu or "").strip():
+        konu = kaynakli.istek_talebi(temiz["arastirma"])
     if tur == "test.kitabi" and not str(konu or "").strip():
         konu = "«%s» — %d bölümlük test kitabı" % (temiz["kitap"]["baslik"],
                                                   len(temiz["kitap"]["bolumler"]))
@@ -382,23 +401,36 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
     # kurulmaz; ayni kayit yeniden teklif edilir.
     onceki = con.execute("SELECT id, sonuc FROM is_emirleri WHERE anahtar=? AND durum='bitti' "
                          "ORDER BY id DESC LIMIT 1", (anahtar,)).fetchone()
-    depo = None
+    #
+    # Arastirmaya dayanan kayit ise «depoda var» yetmez: guncelligi YAKIN
+    # ZAMANDA OLCULMUS olmali (core/depo.py taze_mi; aga cikmaz). Degilse
+    # is Depolama Burosu'na gider, olcum orada yapilir ve kayit hala
+    # guncelse is yine depodan kapanir (depo_aday).
+    depo_ = None
+    aday = None
     if onceki and karar != "ret":
         try:
             s = json.loads(onceki["sonuc"] or "{}")
         except ValueError:
             s = {}
         if s.get("kayit_id") and bam.kayit_getir(con, s["kayit_id"]):
-            depo = {"emir_id": onceki["id"], "kayit_id": s["kayit_id"]}
-            kontrol.append(_madde("depo", True, "Depoda aynı girdiyle kurulmuş program var "
-                                  "(kayıt #%d); yeniden kurulmaz." % s["kayit_id"]))
-    if not depo:
+            taze, tnot = (depo.taze_mi(con, s["kayit_id"], now=at)
+                          if "arastirma" in ofisler_of(tur, temiz) else (True, ""))
+            if taze:
+                depo_ = {"emir_id": onceki["id"], "kayit_id": s["kayit_id"]}
+                kontrol.append(_madde("depo", True, "Depoda aynı girdiyle kurulmuş kayıt var "
+                                      "(#%d); yeniden kurulmaz.%s" % (
+                                          s["kayit_id"], (" " + tnot) if tnot else "")))
+            else:
+                aday = s["kayit_id"]
+                kontrol.append(_madde("depo", True, "Depoda kayıt #%d var. %s" % (aday, tnot)))
+    if not depo_ and not aday:
         kontrol.append(_madde("depo", True, "Depoda aynı girdiyle kurulmuş bir kayıt yok."))
 
     tahmin = None
     if karar != "ret":
         tahmin = ({"sn": 0, "etiket": "hesaplandi", "metin": "hemen",
-                   "dayanak": "depodaki kayıt yeniden kullanıldı"} if depo
+                   "dayanak": "depodaki kayıt yeniden kullanıldı"} if depo_
                   else tahmini_sure(con, ofisler_of(tur, temiz)))
     durum = {"onay": "onaylandi", "kismi": "kismen_onay", "ret": "reddedildi"}[karar]
     cur = con.execute("INSERT INTO is_emirleri(modul,tur,konu,neden,govde,anahtar,iz,karar,"
@@ -416,19 +448,20 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
                "King «%s» işini reddetti: %s" % (konu, sebep), now=at)
         return {"ok": True, "yeni": True, "emir": emir(con, e["id"]), "karar": karar}
 
-    if depo:
+    if depo_:
         e["durum"] = "bitti"
-        e["sonuc"] = {"kayit_id": depo["kayit_id"], "depodan": depo["emir_id"], "gercek_sn": 0,
+        e["sonuc"] = {"kayit_id": depo_["kayit_id"], "depodan": depo_["emir_id"], "gercek_sn": 0,
                       "gercek_metin": "hemen (depodan)"}
         _yaz(con, e, at)
-        teklif = _teklif(con, e, depo["kayit_id"], now=at)
+        teklif = _teklif(con, e, depo_["kayit_id"], now=at)
         bildir(con, modul, e["id"], "bitti", "«%s» depoda hazırdı; yeniden kurulmadı.%s"
                % (konu, teklif), now=at)
         return {"ok": True, "yeni": True, "emir": emir(con, e["id"]), "karar": karar}
 
     j = bam.is_ac(con, konu, kaynak="kullanici" if modul == "hkm" else modul,
                   hedef_modul=None if modul == "hkm" else modul, ofisler=ofisler_of(tur, temiz),
-                  govde=dict(temiz, emir_id=e["id"]), emir_id=e["id"], now=at)
+                  govde=dict(temiz, emir_id=e["id"], **({"depo_aday": aday} if aday else {})),
+                  emir_id=e["id"], now=at)
     if not j.get("ok"):
         e["durum"], e["karar"] = "hata", karar
         e["sonuc"] = {"not": j.get("note") or "BAM işi açamadı."}
@@ -496,8 +529,25 @@ def _teklif_urun(con, e, kayit_id, now=None):
     return ""
 
 
+def _teklif_arastirma(con, e, kayit_id, now=None):
+    """Arastirma kaydi modulun verisi degildir: teklif birakilmaz. Bildirim
+    ozeti, etiketi ve kaynak sayisini tasir; kaydin tamami HKM › Ofis'te."""
+    k = bam.kayit_getir(con, kayit_id) or {}
+    g = k.get("govde") or {}
+    etiket = {"kaynakli": "kaynaklı", "celiskili": "çelişkili",
+              "dogrulanmadi": "doğrulanmadı"}.get(k.get("dogruluk"), "?")
+    ozet_ = str(g.get("ozet") or "").strip()
+    if len(ozet_) > 280:
+        ozet_ = ozet_[:280].rsplit(" ", 1)[0] + "…"
+    return " Kayıt #%d (%s, %d kaynak, sürüm %s).%s HKM › Ofis’ten açılabilir." % (
+        int(kayit_id), etiket, len(g.get("kaynaklar") or []), k.get("surum") or 1,
+        (" Özet: " + ozet_) if ozet_ else "")
+
+
 def _teklif(con, e, kayit_id, now=None):
-    """Ofisin urettigi kaydi module teklif eder. Cevap ayni yoldan doner."""
+    """Burosun urettigi kaydi module teklif eder. Cevap ayni yoldan doner."""
+    if e["tur"] == "bam.arastirma":
+        return _teklif_arastirma(con, e, kayit_id, now=now)
     if e["tur"] == "bam.urun":
         return _teklif_urun(con, e, kayit_id, now=now)
     if e["tur"] == "sinav.mufredat":
@@ -580,6 +630,58 @@ def esitle(con, now=None):
             bildir(con, e["modul"], e["id"], yeni, metin, now=now)
         degisen += 1
     return degisen
+
+
+# ------------------------------------------------------ guncellik bekcisi
+#
+# King ARASTIRMA YAPMAZ: arastirmayi Arastirma Burosu'nun ajanlari yapar.
+# King'in web'e tek cikisi, sistemi guncel tutmak icin ARADA BIR bakmaktir:
+# depodaki kaynakli arastirmalardan guncelligi en uzun suredir olculmemis
+# olani secer, kaynaklarini acar (core/depo.py tazelik_denetle) ve
+# degistiyse Arastirma Burosu'na yeni surum emri verir. Her tikte en cok
+# BIR kayit; ayni kayda `guncellik_gun` gun dolmadan yeniden bakilmaz.
+# Kaynaksiz kayitlara bakmaz: onlari kaynakli arastirmaya cevirmek model
+# harcar ve kullanici istemeden harcanmaz.
+
+def bekci(con, cfg, now=None, tasiyici=None):
+    """Doner: None (is yok / kapali) ya da {kayit_id, durum, emir_id?}."""
+    ws = web.settings(cfg)
+    gun = ws.get("guncellik_gun")
+    if not ws["acik"] or not isinstance(gun, int) or gun <= 0:
+        return None
+    at = _simdi(now)
+    sinir = (_zaman(at) - datetime.timedelta(days=gun)).isoformat(timespec="seconds")
+    r = con.execute(
+        "SELECT id FROM bam_kayitlar k WHERE tur='arastirma' AND anahtar IS NOT NULL "
+        "AND created_at <= ? AND govde LIKE '%\"parmak\"%' "
+        "AND id = (SELECT MAX(id) FROM bam_kayitlar WHERE tur='arastirma' AND anahtar=k.anahtar) "
+        "AND (denetim IS NULL OR json_extract(denetim, '$.at') <= ?) "
+        "ORDER BY COALESCE(json_extract(denetim, '$.at'), created_at), id LIMIT 1",
+        (sinir, sinir)).fetchone()
+    if not r:
+        return None
+    k = bam.kayit_getir(con, r["id"])
+    d = depo.tazelik_denetle(con, cfg, "king", k, now=at, tasiyici=tasiyici)
+    out = {"kayit_id": k["id"], "durum": d["durum"]}
+    if d["durum"] != "degisti":
+        return out
+    g = k["govde"]
+    neden = "King’in güncellik turu: kayıt #%d’in kaynakları değişti (%s)." % (
+        k["id"], ", ".join(["[%d]" % n for n in d["degisen"]] + d["kaybolan"]))
+    if g.get("tur") == "mufredat":
+        bildir(con, "ays", None, "guncellik", "«%s» kaynakları değişti. Sınav profilini "
+               "yeniden isteyerek yeni sürümü alabilirsin." % k["baslik"], now=at)
+        bildir(con, "hkm", None, "guncellik", neden, now=at)
+        return out
+    konu = str(g.get("konu") or "").strip()[:MAX_KONU]
+    if len(konu) < 3:
+        bildir(con, "hkm", None, "guncellik", neden + " Konusu kayıtlı değil; yeniden "
+               "araştırma açılmadı.", now=at)
+        return out
+    e = emir_ac(con, cfg, "hkm", "bam.arastirma", {"arastirma": {"konu": konu}},
+                neden=neden, now=at)
+    out["emir_id"] = (e.get("emir") or {}).get("id")
+    return out
 
 
 def iptal(con, id_, now=None):

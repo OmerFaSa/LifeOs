@@ -58,7 +58,7 @@ KINDS = {
         "optional": ("ratio", "why"),
         "note": "Gunun yukunu azaltma teklifi (oran verilmezse modul karar verir).",
     },
-    # BAM Uretim Ofisi'nin kalite kontrolunden gecen materyali (core/bam.py).
+    # BAM Uretim Burosu'nun kalite kontrolunden gecen materyali (core/bam.py).
     # Modul kaydi HKM'den ceker, KENDI koduyla dogrular ve kart olarak ekler.
     "material.add": {
         "modules": ("ays", "esp"),
@@ -66,16 +66,16 @@ KINDS = {
         "optional": ("baslik", "why"),
         "note": "BAM'ın ürettiği ve denetlediği materyali kart olarak ekleme teklifi.",
     },
-    # Planlama Ofisi'nin haftalik programi (core/planlama.py) — King'in
+    # Planlama Burosu'nun haftalik programi (core/planlama.py) — King'in
     # onayladigi bir is emrinin sonucu. Modul kaydi HKM'den ceker, KENDI
     # plan motoruyla karsilastirir ve kullanici onaylarsa planina ekler.
     "plan.apply": {
         "modules": ("spi",),
         "required": ("kayit_id", "hedef_id"),
         "optional": ("hafta", "baslik", "why"),
-        "note": "Planlama Ofisi'nin kurduğu haftalık programı hedefin planına ekleme teklifi.",
+        "note": "Planlama Bürosu'nun kurduğu haftalık programı hedefin planına ekleme teklifi.",
     },
-    # BAM Arastirma Ofisi'nin mufredat raporu (core/mufredat.py). AYS kaydi
+    # BAM Arastirma Burosu'nun mufredat raporu (core/mufredat.py). AYS kaydi
     # HKM'den ceker, KENDI koduyla dogrular ve kullanici onaylarsa sinav
     # profili olarak saklar. Rapor kaynaksizsa «dogrulanmadi» kalir.
     "mufredat.add": {
@@ -84,7 +84,7 @@ KINDS = {
         "optional": ("baslik", "why"),
         "note": "BAM'ın çıkardığı müfredatı sınav profili olarak ekleme teklifi.",
     },
-    # BAM Uretim Ofisi'nin bolumlu test kitabi (core/kitap.py). AYS kaydi
+    # BAM Uretim Burosu'nun bolumlu test kitabi (core/kitap.py). AYS kaydi
     # ceker, her soruyu KENDI koduyla yeniden sinar ve cozme ekranina alir.
     "kitap.add": {
         "modules": ("ays",),
@@ -204,7 +204,7 @@ def _cumle(module, kind, payload):
         return ("%s: BAM'ın hazırladığı «%s» setinden kalite kontrolünü geçen %s madde "
                 "kart olarak eklensin mi?" % (ad, p.get("baslik") or "materyal", p.get("adet")))
     if kind == "plan.apply":
-        return ("%s: Planlama Ofisi «%s» için %s haftalık programı hazırladı; "
+        return ("%s: Planlama Bürosu «%s» için %s haftalık programı hazırladı; "
                 "planına eklensin mi?" % (ad, p.get("baslik") or "hedefin",
                                           p.get("hafta") or "bir"))
     if kind == "mufredat.add":

@@ -31,7 +31,7 @@ BELGE = {"baslik": "Kurtuluş Savaşı", "alt_baslik": "Kısa özet", "bolumler"
 
 class _UrunModel(_Model):
     def __call__(self, provider, anahtar, model, sistem, gecmis):
-        if "Üretim Ofisisin" in sistem:
+        if "Üretim Bürosusun" in sistem:
             self.sistemler.append(sistem)
             self.icerikler.append(gecmis[-1]["content"])
             if '"vurgu"' in sistem:

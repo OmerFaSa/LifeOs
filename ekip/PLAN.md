@@ -149,6 +149,18 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
 - `genel` / `kisisel` ayrımı: genel raporlar ileride üyeler arasında paylaşılır;
   kişisel veri o depoya asla girmez.
 - Rapor şablonları: besin raporu, egzersiz raporu, konu özeti, müfredat raporu.
+- **Kuruldu (Tur 5a — Depolama Bürosu, `HKM/core/depo.py`):** her iş önce
+  Depolama'dan geçer. Konu anahtara çevrilir; depoda kayıt varsa Kayıt
+  Doğrulama Uzmanı kaynakları **canlı** açar (önbellek okunmaz), cümle izini
+  ve kaynağa bağlı alıntıları karşılaştırır: güncelse kayıt araştırma
+  yapılmadan gönderilir (model çağrılmaz), değiştiyse Araştırma Bürosu yeni
+  **sürüm** yazar (`onceki_id`). Okunamayan kaynak «denetlenemedi»dir, «güncel»
+  değil. Günlük depo denetimi kopya sürümleri bağlar, eskiyen ve kaynaksız
+  kaydı sayar; hiçbir kaydı silmez (`GET /api/bam/depo`).
+- **King araştırmaz** (kullanıcı kararı): «şunu araştır» diyen mesaj
+  `bam.arastirma` iş emri olur. King'in web'e tek çıkışı **güncellik turu**dur:
+  ritimde, tikte en çok bir kaynaklı kayda `web.guncellik_gun` (7) günde bir
+  bakar; değişen kayıt için Araştırma Bürosu'na yeni sürüm emri verir.
 
 ### D. Planlama Ofisi
 - Deterministik planlayıcı: kapasite, takvim, istisnalar, önkoşul sırası,

@@ -25,8 +25,7 @@
 
 import re
 
-from core import (ai, butce, cross, dil, kaynakli, manager, memory, models, motto, patron,
-                  streak, web)
+from core import ai, butce, cross, dil, manager, memory, models, motto, patron, streak
 
 # Kademeler: kullanici kiminle konusuyor.
 GOREVLILER = {
@@ -150,63 +149,64 @@ YEDEK_METIN = {
 }
 
 
-# ------------------------------------------------------------ King'in web araci
+# ------------------------------------------------ arastirma istegi -> büro
 #
-# Web YALNIZ King'indir (core/web.py). Tetik KURALDIR: «internette bak»,
-# «araştır», «güncel», «kaynak göster»… Model aramaya kendisi karar
-# vermez; kullanici istemediyse web'e cikilmaz. Cevap yalniz bulunan
-# kaynaklara dayanir ve kaynak listesini MODEL DEGIL KOD ekler: listede
-# olmayan bir adres cevaba giremez.
-WEB_TETIK = re.compile(r"(internet|web'?(?:de|den|e)\b|webde|araştır|ara bakalım|arar mısın|"
-                       r"güncel|son dakika|son durum|kaynak göster|kaynaklı|kaynağı ne|googlela)",
-                       re.I)
-WEB_DOLGU = re.compile(r"(?:^|\s)(internet(?:te|ten|e)?|web'?(?:de|den|e)|webde|araştır\w*|"
-                       r"ara bakalım|arar mısın|bak(?:ar mısın|sana|)|lütfen|king|bana|bir|"
-                       r"kaynak göster\w*|kaynaklı|güncel(?:\s+olarak)?)(?=\s|$|[.,!?:;])", re.I)
-WEB_KURAL = """
+# King ARASTIRMA YAPMAZ (kullanicinin karari): «şunu araştır», «internette
+# bak» diyen mesaj sohbet cevabi degil bir IS EMRIDIR. King konuyu
+# `bam.arastirma` emriyle BAM'a verir: once Depolama Burosu depoya bakar
+# ve kayit varsa guncel mi diye kaynaklarini acar; yoksa ya da degistiyse
+# Arastirma Burosu'nun ajanlari web'de arastirir. Tetik KURALDIR; model
+# «arastirayim mi» diye karar vermez. Cevap metnini KOD yazar.
+ARASTIR_TETIK = re.compile(
+    r"(araştır(?:\s|$|[.,!?:;]|sana|ır mısın|abilir misin|ıp|ın\b|mak|manı|masını)"
+    r"|araştırma(?:sı)? yap|internet(?:te|ten)\s+(?:ara|bak)|web'?(?:de|den)\s+(?:ara|bak)"
+    r"|webde\s+(?:ara|bak)|googlela|kaynaklı bilgi)", re.I)
+ARASTIR_DOLGU = re.compile(
+    r"(?:^|\s)(internet(?:te|ten)?|web'?(?:de|den)?|webde|araştırma(?:sı)?\s+yap\w*|"
+    r"araştır\w*(?:\s+m[ıi]s[ıi]n)?|ara(?:r mısın|yabilir misin|)|bak(?:ar mısın|sana|)|"
+    r"lütfen|king|bana|benim için|bir|"
+    r"hakkında|konusunu|konusu|kaynaklı(?:\s+bilgi)?|detaylı(?:ca)?|güncel(?:\s+olarak)?|"
+    r"ver|getir|googlela)(?=\s|$|[.,!?:;])", re.I)
 
-WEB KAYNAKLARI VERİLDİYSE
-- Cevabını YALNIZ o kaynaklara dayandır; her bilginin sonuna kaynak numarasını [n] yaz.
-- Kaynaklarda olmayanı söyleme; «bulduğum kaynaklarda yok» de.
-- Kaynak listesini sen yazma; sistem ekler."""
 
-
-def web_baglami(con, cfg, metin, gorevli="king", now=None):
-    """Tetik varsa ara ve oku. Doner: None (tetik yok) ya da
-    {kaynaklar, blok, not}. Web yalniz King'indir."""
-    if gorevli != "king" or not WEB_TETIK.search(metin or ""):
+def arastirma_konusu(metin):
+    """Tetik yoksa None; varsa dolgusu atilmis konu ("" olabilir)."""
+    m = str(metin or "").strip()
+    if not m or m.startswith("/") or not ARASTIR_TETIK.search(m):
         return None
-    sorgu = re.sub(r"\s+", " ", WEB_DOLGU.sub(" ", metin)).strip(" .,!?:;") or metin
-    r = web.ara(con, cfg, "king", sorgu[:150], n=5, now=now)
+    konu = m
+    for _ in range(3):                  # «internette araştır» gibi art arda dolgu
+        konu = ARASTIR_DOLGU.sub(" ", konu)
+    return re.sub(r"\s+", " ", konu).strip(" .,!?:;'\"«»")
+
+
+def arastirmayi_devret(con, cfg, metin, konu, now=None):
+    """King'in cevabi: is emri acilir; cumleyi kod kurar."""
+    from core import king          # king -> bam -> ... ; dongusel ice aktarimi onler
+    if len(konu) < 3:
+        return "Neyi araştırmamı istiyorsun? Konuyu bir cümleyle yaz; Araştırma Bürosu’na vereyim."
+    r = king.emir_ac(con, cfg, "hkm", "bam.arastirma", {"arastirma": {"konu": konu[:200]}},
+                     neden="Sohbetten: " + metin[:300], now=now)
     if not r.get("ok"):
-        return {"kaynaklar": [], "blok": "", "not": r.get("note") or "Sonuç yok."}
-    kaynaklar, metinler = [], {}
-    for x in r["sonuclar"]:
-        if len(kaynaklar) >= 3:
-            break
-        s = web.getir(con, cfg, "king", x["url"], now=now)
-        if s.get("ok"):
-            n = len(kaynaklar) + 1
-            kaynaklar.append({"n": n, "baslik": s["baslik"], "url": x["url"], "alan": s["alan"],
-                              "erisim": s["erisim"], "yayin": s.get("yayin")})
-            metinler[n] = s["metin"]
-    if not kaynaklar:
-        # Sayfa okunamadiysa arama ozetleri kaynak olur — ve oyle soylenir.
-        for x in r["sonuclar"][:3]:
-            n = len(kaynaklar) + 1
-            kaynaklar.append({"n": n, "baslik": x["baslik"], "url": x["url"], "alan": x["alan"],
-                              "erisim": (now or "")[:10] or "bugün", "yayin": x.get("yayin"),
-                              "yalniz_ozet": True})
-            metinler[n] = x.get("ozet") or ""
-    return {"kaynaklar": kaynaklar, "blok": kaynakli.blok(kaynaklar, metinler), "not": None,
-            "sorgu": r.get("sorgu")}
-
-
-def kaynak_listesi(wb):
-    return "Kaynaklar:\n" + "\n".join(
-        "[%d] %s — %s%s" % (k["n"], k["baslik"], k["url"],
-                            " (yalnız arama özeti)" if k.get("yalniz_ozet") else "")
-        for k in wb["kaynaklar"])
+        return "Araştırma emri açılamadı: %s" % "; ".join(r.get("errors") or ["bilinmeyen hata"])
+    e = r["emir"]
+    if e["durum"] == "reddedildi":
+        return "Bu araştırmayı açamadım: %s" % "; ".join(
+            m["not"] for m in e["kontrol"] if not m["ok"])
+    if e["durum"] == "bitti":
+        return "«%s» depoda hazırdı ve güncel.%s" % (
+            e["konu"], king._teklif_arastirma(con, e, e["sonuc"]["kayit_id"]))
+    if not r.get("yeni"):
+        return "«%s» zaten araştırılıyor (iş emri #%d). Bitince haber veririm." % (
+            e["konu"], e["id"])
+    t = e.get("tahmin") or {}
+    eksik = [m["not"] for m in e["kontrol"] if not m["ok"]]
+    return ("Araştırmayı ben yapmıyorum; «%s» konusunu Araştırma Bürosu’na verdim (iş emri #%d). "
+            "Önce Depolama Bürosu depoya bakacak: kayıt varsa kaynakları açılıp güncel mi diye "
+            "denetlenecek, yoksa ajanlar web’de araştıracak. Tahmini süre %s (tahmin). "
+            "Bitince bildirim düşer; HKM › Ofis’ten açabilirsin.%s" % (
+                e["konu"], e["id"], t.get("metin") or "bilinmiyor",
+                (" Eksik: " + "; ".join(eksik)) if eksik else ""))
 
 
 def _yedek_metin(r, yedek):
@@ -240,6 +240,16 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             patron.log(con, kanal, "manager", hafiza_komutu["text"], agent=gorevli)
         return {"ok": True, "mode": "memory", "command": "memory",
                 "text": hafiza_komutu["text"], "agent": gorevli}
+
+    # 0b — ARASTIRMA ISTEGI King'in degil burolarin isidir: emir acilir.
+    konu = arastirma_konusu(metin) if gorevli == "king" else None
+    if konu is not None:
+        govde = arastirmayi_devret(con, cfg, metin, konu)
+        if kayit:
+            patron.log(con, kanal, "user", metin, agent=gorevli)
+            patron.log(con, kanal, "manager", govde, agent=gorevli)
+        return {"ok": True, "mode": "emir", "command": "arastirma", "text": govde,
+                "agent": gorevli}
 
     # 1 — ONCE KOMUT. Ucretsiz, kesin ve her zaman ayni olan yol.
     komut = patron.parse(metin)
@@ -286,11 +296,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         bg += ("\nKullanıcı hakkında hatırlananlar (etiketiyle; «tahmin» kesin "
                "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
                "sen yazamazsın):\n" + hb)
-    wb = web_baglami(con, cfg, metin, gorevli)
-    if wb and wb["blok"]:
-        bg += ("\n\nWeb kaynakları (King'in araması, «%s»; numaralı):\n" % wb.get("sorgu")
-               + wb["blok"])
-    sistem = sistem_metni(gorevli, bg) + (WEB_KURAL if wb and wb["blok"] else "")
+    sistem = sistem_metni(gorevli, bg)
     mesajlar = list(gecmis or []) + [{"role": "user", "content": metin}]
 
     r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
@@ -321,10 +327,6 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         # oldugunu fark ettirmeden eksik bilgi vermektir.
         govde += "\n\n(Cevap uzunluk sınırına takıldı, son tam cümlede "
         govde += "kesildi. Daha dar bir soru sorarsan tamamını yazabilirim.)"
-    if wb and wb["blok"]:
-        govde += "\n\n" + kaynak_listesi(wb)
-    elif wb:
-        govde += "\n\n(Web'e bakamadım: %s)" % wb["not"]
     if kayit:
         patron.log(con, kanal, "user", metin, agent=gorevli)
         patron.log(con, kanal, "manager", govde, agent=gorevli)

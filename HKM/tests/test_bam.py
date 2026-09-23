@@ -3,7 +3,7 @@
 
    Kanitladigi sozler:
      1. BAM Patronu talebi KURALLA yonlendirir; anlamadigini sorar.
-     2. Her is once Kayit Ofisi'nden gecer: «bu daha once yapildi mi?»
+     2. Her is once Depolama Burosu'ndan gecer: «bu daha once yapildi mi?»
      3. Hazir olmayan ofis «yaptim» demez: adimi «ertelendi» diye kapatir.
      4. Model yoksa is BEKLER, uydurulmaz; kaynaksiz arastirma hep
         «dogrulanmadi»dir.
@@ -68,7 +68,7 @@ def run():
         adim = bam.is_getir(con, i["id"])["adimlar"][0]
         eq(adim["durum"], "tamam")
         eq(adim["bulunan"], [k["id"]])
-    test("her is once Kayit Ofisi'nden gecer", t_record_office_first)
+    test("her is once Depolama Burosu'ndan gecer", t_record_office_first)
 
     def t_no_model_waits():
         con = db.connect(":memory:")
@@ -137,7 +137,7 @@ def run():
         no(bam.iptal(con, i["id"], now=AN)["ok"])
     test("iptal edilen is ilerlemez", t_cancel)
 
-    # ---- Uretim Ofisi ------------------------------------------------
+    # ---- Uretim Burosu ------------------------------------------------
     #
     # Uretilen her coktan secmeli soru, cevap anahtari GOSTERILMEDEN ikinci
     # bir cagriyla bastan cozulur; cozum anahtarla tutmazsa soru DUSER.

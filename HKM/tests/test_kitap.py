@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Bolumlu test kitabi (core/kitap.py, BAM Uretim Ofisi).
+"""Bolumlu test kitabi (core/kitap.py, BAM Uretim Burosu).
 
    Kanitladigi sozler:
      1. Girdi kapalidir: en cok 6 bolum, bolum basina 3-15 soru, toplam en

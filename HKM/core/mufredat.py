@@ -2,7 +2,7 @@
 """Mufredat raporu — sinav profilinin iskeleti (ekip/PLAN.md §3.L; Tur 4).
 
    AYS «KPSS genel kultur» gibi bir sinavin mufredatini ister. Is King'in
-   onayindan gecer, BAM Arastirma Ofisi mufredati DERS -> KONU agaci olarak
+   onayindan gecer, BAM Arastirma Burosu mufredati DERS -> KONU agaci olarak
    yazar, AYS'ye teklif olarak doner; kullanici onaylarsa AYS onu KENDI
    koduyla dogrulayip sinav profili olarak saklar.
 
@@ -31,7 +31,7 @@ MAX_KONU_DERS = 80
 MAX_KONU_TOPLAM = 1000
 SORU_ARALIK = (1, 200)
 
-SISTEM = """Sen HKM'deki BAM'ın Araştırma Ofisisin ve bir sınavın müfredatını çıkarıyorsun.
+SISTEM = """Sen HKM'deki BAM'ın Araştırma Bürosusun ve bir sınavın müfredatını çıkarıyorsun.
 Araştırma Patronu adına çalışırsın; onun üstünde BAM Patronu, onun da üstünde King var.
 
 KONUMUN VE SINIRIN

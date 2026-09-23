@@ -193,7 +193,9 @@ CREATE TABLE IF NOT EXISTS bam_kayitlar (
   surum       INTEGER NOT NULL DEFAULT 1,
   onceki_id   INTEGER,
   is_id       INTEGER,
-  created_at  TEXT NOT NULL
+  created_at  TEXT NOT NULL,
+  anahtar     TEXT,                               -- konu anahtari (core/depo.py)
+  denetim     TEXT                                -- son guncellik denetimi, JSON
 );
 
 /* Web katmani (core/web.py): onbellek ve gunluk sayac. Yedege girmez:
@@ -210,6 +212,13 @@ CREATE TABLE IF NOT EXISTS web_sayac (
   gun         TEXT PRIMARY KEY,                   -- YYYY-MM-DD
   cagri       INTEGER NOT NULL DEFAULT 0,
   kacinilan   INTEGER NOT NULL DEFAULT 0          -- onbellek sayesinde yapilmayan
+);
+
+/* Depolama Burosu'nun gunluk denetim raporu (core/depo.py). Turetilmistir:
+   yedege girmez, yeniden uretilir. */
+CREATE TABLE IF NOT EXISTS bam_depo_rapor (
+  gun    TEXT PRIMARY KEY,
+  rapor  TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS bam_iz (
@@ -411,6 +420,10 @@ MIGRATIONS = [
     # ve isi acan emrin kimligi. Serbest cumleyle acilan islerde bostur.
     ("bam_isler", "govde", "TEXT"),
     ("bam_isler", "emir_id", "INTEGER"),
+    # Depolama Burosu (core/depo.py): ayni konunun anahtari ve son
+    # guncellik denetimi. Eski kayitlarda bostur; bos anahtar «eslesmez».
+    ("bam_kayitlar", "anahtar", "TEXT"),
+    ("bam_kayitlar", "denetim", "TEXT"),
 ]
 
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Planlama Ofisi v1 — hedefi haftalik bir yol haritasina ceviren KURAL.
+"""Planlama Burosu v1 — hedefi haftalik bir yol haritasina ceviren KURAL.
 
    BAM'in dort ofisinden biri (core/bam.py). v1 model kullanmaz: modulun
    kendi plan motorunun (SPI src/js/core/plan.js) kurdugu planin OZETINI

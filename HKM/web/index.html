@@ -2959,7 +2959,7 @@ details.detay > summary:hover{ color:var(--fg); }
   function ofisBamCiz(o){
     var h = '<div class="tag">BAM · Bilgi ve Aksiyon Modülü</div>'
       + '<p class="muted">King’in altında BAM Patronu, onun altında dört ofis. Her işte '
-      + 'yalnız gereken ofisler çalışır ve her iş önce Kayıt Ofisi’nden geçer.</p>';
+      + 'yalnız gereken ofisler çalışır ve her iş önce Depolama Bürosu’ndan geçer.</p>';
     o.ofisler.forEach(function(f){
       h += '<details class="detay"><summary>' + esc(f.ad) + ' <span class="'
         + (f.durum === 'hazir' ? 'ok' : 'warn') + '">· ' + esc(OFIS_DURUM[f.durum] || f.durum)
@@ -2999,7 +2999,7 @@ details.detay > summary:hover{ color:var(--fg); }
     if(k$.scrollIntoView) k$.scrollIntoView({ block:'nearest' });
   }
 
-  /* Planlama Ofisi'nin programı: denetim, simülasyon, haftalar. Sayıları
+  /* Planlama Bürosu'nun programı: denetim, simülasyon, haftalar. Sayıları
      modül (SPİ) hesapladı; Planlama yalnız takvime yerleştirdi ve sınadı. */
   function ofisPlanKaydi(k, iz){
     var g = k.govde || {}, pr = g.program || {};

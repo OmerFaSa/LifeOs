@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""King onay zinciri ve Planlama Ofisi v1 (core/king.py, core/planlama.py).
+"""King onay zinciri ve Planlama Burosu v1 (core/king.py, core/planlama.py).
 
    Kanitladigi sozler:
      1. Is emri katalog disiysa, yetkisiz modulden geliyorsa ya da govdesi
@@ -48,7 +48,7 @@ def _bitir(con):
 def run():
     suite("king")
 
-    # ---- Planlama Ofisi v1 -----------------------------------------------
+    # ---- Planlama Burosu v1 -----------------------------------------------
 
     def t_girdi_temizlenir():
         g, h = planlama.temizle(_plan(ilac="metformin", tahlil={"hba1c": 7}))
@@ -246,7 +246,7 @@ def run():
         eq(con.execute("SELECT COUNT(*) FROM bam_isler").fetchone()[0], 0)
         b = king.bildirimler(con, "spi")["bildirimler"][0]
         eq(b["tur"], "reddedildi")
-        ok("Planlama Ofisi henüz açılmadı" in b["metin"])
+        ok("Planlama Bürosu henüz açılmadı" in b["metin"])
     test("isi yapacak ofis kapaliysa King reddeder ve nedenini yazar", t_ofis_kapaliysa_ret)
 
     def t_kuyruk_dolu():

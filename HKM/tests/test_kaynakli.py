@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Kaynakli arastirma (core/kaynakli.py, core/bam.py) ve King'in web araci.
+"""Kaynakli arastirma (core/kaynakli.py, core/bam.py).
 
    Kanitladigi sozler:
      1. Sorgular suzulur; ayni alan en cok iki kez; resmi alan once.
@@ -8,11 +8,11 @@
         cikmaz, metin onbellekten gelir. Kayitin etiketi olculur.
      4. Web sonuc vermezse is kaynaksiz yola duser ve NEDENINI yazar.
      5. Mufredat web aciksa ders ders kaynagina baglanir.
-     6. King web'e bakar ve kaynak listesini KOD ekler; alt patron bakamaz."""
+   (King artik arastirmaz; o soz tests/test_depo.py'de.)"""
 import json
 import urllib.parse
 
-from core import bam, db, kaynakli, king, sohbet, web
+from core import bam, db, kaynakli, king
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
 
@@ -175,26 +175,3 @@ def run():
         eq(len(k["govde"]["kaynaklar"]), 2)
     test("mufredat web aciksa ders ders kaynagina baglanir", t_mufredat)
 
-    def t_king_web():
-        con = db.connect(":memory:")
-        ag, m = _Ag(), _Model()
-        eski = web.VARSAYILAN_TASIYICI
-        web.VARSAYILAN_TASIYICI = ag
-        try:
-            r = sohbet.konus(con, _cfg_web(), "internette Osmanlı kuruluşuna bak", "2026-09-23",
-                             gorevli="king", transport=m, kayit=False)
-            eq(r["mode"], "model")
-            ok("Kaynaklar:\n[1] Osmanlı İmparatorluğu — https://tr.wikipedia.org/wiki/" in r["text"])
-            ok("WEB KAYNAKLARI VERİLDİYSE" in m.sistemler[-1])
-            ok("Osmanlı Devleti 1299" in m.sistemler[-1])
-            once = len(ag.cagri)
-            sohbet.konus(con, _cfg_web(), "internette Osmanlı kuruluşuna bak", "2026-09-23",
-                         gorevli="bio", transport=m, kayit=False)
-            eq(len(ag.cagri), once, "alt patron web'e cikmamali")
-            r3 = sohbet.konus(con, _cfg_web(), "uykum nasıl", "2026-09-23", gorevli="king",
-                              transport=m, kayit=False)
-            no("Kaynaklar:" in r3["text"])
-            eq(len(ag.cagri), once, "tetik yoksa web'e cikilmaz")
-        finally:
-            web.VARSAYILAN_TASIYICI = eski
-    test("King web'e bakar, kaynak listesini kod ekler; alt patron bakamaz", t_king_web)

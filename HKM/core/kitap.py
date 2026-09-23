@@ -2,7 +2,7 @@
 """Bolumlu test kitabi (ekip/PLAN.md §3.E ve §3.L; Tur 4).
 
    AYS bir sinav profilinden (ders -> konu) test kitabi ister. Is King'in
-   onayindan gecer; BAM Uretim Ofisi her ritim tikinde BIR bolum uretir ve
+   onayindan gecer; BAM Uretim Burosu her ritim tikinde BIR bolum uretir ve
    o bolumu cevap anahtarini gormeyen bagimsiz bir cozumle denetler.
 
    Bes kural:
