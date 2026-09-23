@@ -149,6 +149,13 @@ Amaç kullanım kolaylığı: kullanıcı ne isterse istesin, sistem işin büy�
 bedelini ve süresini önceden söyler, onay alır, çıktıyı serbest metin olarak değil
 modülün içinde KULLANILABİLİR biçimde teslim eder.
 
+**ÖNEMLİ — aşağıdakiler yalnız ÖRNEKTİR, liste değildir.** Sistem GENEL olmalı:
+kullanıcı hangi modülde, hangi konuda, hangi işi isterse istesin (burada adı geçmeyen
+bir ders, spor, enstrüman, dil, sağlık konusu, ürün…) aynı akış çalışır. Yoğunluk
+sınıfı, teklif ve montaj örneğe özel kodla değil genel kuralla yapılır; yeni bir çıktı
+türü gerekince katalog ve niyet listesi GENİŞLETİLİR (tek yerde), akış değişmez.
+Aşağıdaki niyet adları (`besin.add` vb.) da ilk ihtiyaçlardır, sınır değildir.
+
 **Kullanıcının örnekleri (yoğunluk sınıfıyla):**
 - AYS: bir test fasikülü, 30–40 soru (düşük) · bir test kitabı (yüksek) · bir branşın
   bütün derslerinin bütün konularına test ya da özet (ekstra).
