@@ -453,6 +453,11 @@ async function cevrimdisi(browser, base, hedefler, durdur, errors){
     await walkFlows(page, base, errors);
     await rozetKuyrugu(page, base, errors);
     await rutbeSayilari(page, base, errors);
+    /* Gezinti sayfasi, sunucu BILEREK durdurulmadan once kapanir. Acik
+       kalirsa sonradan yaptigi her istek (baslikta yeniden cizilen marka
+       gorseli gibi) «istek basarisiz» sayiliyordu: uygulama hatasi degil,
+       denetimin kendi yarisi. Tam kosumda zamanlamaya bagli kaliyordu. */
+    await page.close();
     await cevrimdisi(browser, base, ['/index.html', '/dist/spi.html'],
       async () => { server.kill(); await wait(400); }, errors);
 
