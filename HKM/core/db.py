@@ -167,6 +167,45 @@ CREATE TABLE IF NOT EXISTS memories (
 );
 CREATE INDEX IF NOT EXISTS ix_memories_user_state ON memories(user,state,scope);
 
+/* BAM — Bilgi ve Aksiyon Modulu (core/bam.py). Is kuyrugu, kayitlar
+   ve «bu neden var» iz zinciri. BAM hicbir module YAZMAZ; teklifi
+   niyet kuyruguna (intents) birakir. */
+CREATE TABLE IF NOT EXISTS bam_isler (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  talep       TEXT NOT NULL,
+  kaynak      TEXT NOT NULL DEFAULT 'kullanici',  -- kullanici|ays|spi|esp|motto
+  hedef_modul TEXT,                               -- ays|spi|esp|NULL
+  ofisler     TEXT NOT NULL,                      -- JSON dizi
+  adimlar     TEXT NOT NULL DEFAULT '[]',         -- JSON: ofis basina durum
+  durum       TEXT NOT NULL DEFAULT 'bekliyor',   -- bekliyor|beklemede|tamam|kismen|hata|iptal
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_bam_isler_durum ON bam_isler(durum, id);
+
+CREATE TABLE IF NOT EXISTS bam_kayitlar (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  tur         TEXT NOT NULL,                      -- arastirma|plan|materyal
+  baslik      TEXT NOT NULL,
+  govde       TEXT NOT NULL,                      -- JSON
+  dogruluk    TEXT NOT NULL,                      -- dogrulanmadi|kaynakli|celiskili
+  etiketler   TEXT NOT NULL DEFAULT '',
+  surum       INTEGER NOT NULL DEFAULT 1,
+  onceki_id   INTEGER,
+  is_id       INTEGER,
+  created_at  TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS bam_iz (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  kaynak_tur  TEXT NOT NULL,
+  kaynak_id   TEXT NOT NULL,
+  hedef_tur   TEXT NOT NULL,
+  hedef_id    TEXT NOT NULL,
+  created_at  TEXT NOT NULL,
+  UNIQUE(kaynak_tur, kaynak_id, hedef_tur, hedef_id)
+);
+
 /* Kullanim defteri — PARANIN kaydi.
 
    Bir model cagrisinin maliyeti ancak KAYDEDILIRSE bilinir. Fatura ay
@@ -539,7 +578,7 @@ def decision(con, decision_id):
 # «yedek aldim» diyen kullanicinin islem durumu eksik kaliyordu.
 BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
                  "conversations", "attachments", "memories", "intents", "outbox", "usage",
-                 "inbox_seen")
+                 "inbox_seen", "bam_isler", "bam_kayitlar", "bam_iz")
 BACKUP_SCHEMA = 4
 
 

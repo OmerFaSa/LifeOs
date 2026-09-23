@@ -27,7 +27,7 @@ const PORT = 4296;
 const TOKEN = 'yuz-denetimi-icin-gecici-jeton';
 /* Ana gorunumler ve Ayarlar'in alt sekmeleri AYRI gezilir: teknik
  * yonetim artik gunluk ekranin icinde degil, kendi sayfasinda. */
-const GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'teklifler'];
+const GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'ofis', 'teklifler'];
 const AYAR_SEKMELERI = ['yapayzeka', 'butce', 'kanallar', 'cihazlar',
   'esikler', 'sunucu'];
 const MIN_TAP = 24;
@@ -75,6 +75,12 @@ async function tohum(){
   await api('/api/memory/sync/ays', { method:'POST', body:JSON.stringify({ items:[
     { id:'h1', metin:'Pazar günleri çalışmam', katman:'soz', kaynak:'kullanici' },
     { id:'h2', metin:'Deneme haftalarında uyku düşüyor', katman:'cikarim', kaynak:'kural' }] }) });
+  /* BAM: bir is (kayit adimi tamam, arastirma model bekliyor) — Ofis
+     ekranindaki dugmeler ve uzun talep satiri olculsun. */
+  await api('/api/bam/is', { method:'POST', body:JSON.stringify({
+    talep:'Ferritin neden düşer, demir emilimini neler etkiler? Araştır', hedef_modul:'spi' }) });
+  await api('/api/bam/ilerlet', { method:'POST', body:'{}' });
+  await api('/api/bam/ilerlet', { method:'POST', body:'{}' });
   await api('/api/briefing?date=' + bugun.toISOString().slice(0, 10));
 }
 

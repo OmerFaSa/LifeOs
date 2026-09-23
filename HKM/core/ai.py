@@ -217,6 +217,12 @@ def uydurma_sayilar(cevap, baglam):
     return sorted(out)
 
 
+def _belge(cevap):
+    """Belge denetimi: yalniz bos cevap dusurulur."""
+    metin = (cevap or "").strip()
+    return (metin, None) if metin else (None, "Model boş cevap döndü.")
+
+
 def _temizle(cevap, baglam):
     """(metin, dusurulen_sebep). Dusurulen cevap YUTULMAZ, soylenir."""
     metin = (cevap or "").strip()
@@ -315,8 +321,14 @@ DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
 
 
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
-        transport=None, now=None, duzeltme=True):
+        transport=None, now=None, duzeltme=True, denetim="olcum"):
     """Bir kademe adina model cagirir.
+
+    `denetim`: «olcum» (varsayilan) kullaniciya konusan cevaptir: dayanaksiz
+    sayi ve buyurgan kip DUSURULUR. «belge» BAM'in urettigi belgedir
+    (arastirma, soru seti): dunya hakkindaki sayilar ve «hesaplayiniz» gibi
+    kalip serbesttir, ama belge HER ZAMAN «dogrulanmadi» etiketiyle
+    saklanir — kullanicinin olcumu gibi sunulmaz (core/bam.py).
 
     `baglam`: kural motorunun urettigi olculer. Modelin gorecegi TEK
     gercek budur ve cevaptaki sayilar bununla denetlenir.
@@ -393,7 +405,8 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         elif r2["ok"]:
             r = r2                       # yine kesildi; asagida isaretlenir
 
-    temiz, dusme = _temizle(r["raw"], baglam)
+    temiz, dusme = (_temizle(r["raw"], baglam) if denetim != "belge"
+                    else _belge(r["raw"]))
 
     if dusme and duzeltme:
         # IKINCI VE SON DENEME. Sinir yumusatilmaz — modele NEYI ihlal
@@ -403,7 +416,8 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                   mesajlar + [{"role": "assistant", "content": r["raw"]},
                               {"role": "user", "content": DUZELTME % dusme}])
         if r2["ok"]:
-            temiz2, dusme2 = _temizle(r2["raw"], baglam)
+            temiz2, dusme2 = (_temizle(r2["raw"], baglam) if denetim != "belge"
+                              else _belge(r2["raw"]))
             if not dusme2:
                 r, temiz, dusme = r2, temiz2, None
             else:

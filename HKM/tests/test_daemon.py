@@ -645,3 +645,22 @@ def run_extra(S):
         ok(any(m["modul"] == "ays" and m["text"] == "Pazar çalışmam" for m in r["memories"]))
     test("modul hafizasi esitleme ucu yetki ister ve idempotenttir",
          t_memory_sync_endpoint)
+
+    def t_bam_endpoints():
+        eq(S.call("/api/bam/is", body={"talep": "Demir emilimi araştır"}, token=None)[0], 401)
+        kod, r = S.call("/api/bam/is", body={"talep": "Demir emilimi araştır",
+                                             "hedef_modul": "spi"})
+        eq((kod, r["ofisler"]), (200, ["kayit", "arastirma"]))
+        kod, r = S.call("/api/bam/is", body={"talep": "şunu bir hallet"})
+        eq(kod, 422)
+        ok("araştır" in r["soru"])
+        kod, r = S.call("/api/bam/ilerlet", body={})
+        eq((kod, r["ofis"]), (200, "kayit"))
+        kod, o = S.call("/api/bam")
+        eq(kod, 200)
+        eq([x["id"] for x in o["ofisler"]], ["kayit", "arastirma", "planlama", "uretim"])
+        iid = o["isler"][0]["id"]
+        eq(S.call("/api/bam/is/%d/iptal" % iid, body={})[0], 200)
+        eq(S.call("/api/bam/is/%d/iptal" % iid, body={})[0], 409)
+        eq(S.call("/api/bam/kayit/999")[0], 404)
+    test("BAM uclari yetki ister, belirsiz talebi sorar", t_bam_endpoints)

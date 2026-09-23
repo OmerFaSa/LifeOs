@@ -1,0 +1,404 @@
+# -*- coding: utf-8 -*-
+"""BAM — Bilgi ve Aksiyon Modulu. HKM'nin alt moduludur; besinci bir
+sistem degildir (AGENTS.md §1.4).
+
+   BAM bilgiyi uretir ve uygulanabilir aksiyona donusturur. Dort ofisi
+   vardir; her iste hepsi calismaz, BAM Patronu gerekenleri secer:
+
+     Kayit       «bu daha once yapildi mi?» — her is ONCE buradan gecer.
+                 Model gerektirmez; tekrar isi ve bosa harcamayi keser.
+     Arastirma   alt sorular, bulgular, guven duzeyi. Internete erisim
+                 henuz yok: bulgular modelin bilgisidir ve kayit HER
+                 ZAMAN «dogrulanmadi» etiketini tasir.
+     Planlama    hedef motoruyla birlikte acilacak (kullaniciyla beraber
+                 tasarlanacak). Simdilik adim «ertelendi» diye kapanir.
+     Uretim      soru seti, alistirma, kart — bir sonraki asama.
+
+   Degismezler:
+   1. BAM HICBIR MODULE YAZMAZ. Sonuc teklif olarak niyet kuyruguna
+      gider (core/intents.py); modul kendi koduyla uygular.
+   2. HAZIR OLMAYAN OFIS «YAPTIM» DEMEZ. Adim «ertelendi» diye kapanir
+      ve is «kismen» biter; sessizce «tamam» sayilmaz.
+   3. MODEL YOKSA IS BEKLER. Uydurulmaz, bos kayit yazilmaz; kullanici
+      modeli baglayip «devam» dediginde kaldigi yerden surer.
+   4. HER KAYDIN KOKU BELLIDIR (bam_iz): «bu neden var» sorusu is ->
+      kayit -> teklif zinciriyle cevaplanir.
+   5. YONLENDIRME KURALLADIR. Anlasilmayan talep tahmin edilmez, sorulur
+      (AGENTS.md §1.7)."""
+import datetime
+import json
+import re
+
+from core import ai
+
+OFISLER = {
+    "kayit": {
+        "ad": "Kayıt Ofisi", "patron": "Kayıt Patronu", "durum": "hazir",
+        "gorev": "Üretilen bilgiyi düzenli, aranabilir ve sürümlü tutar; yeni işe "
+                 "başlamadan önce «bu daha önce yapıldı mı?» sorusunu cevaplar.",
+        "ajanlar": ["Kayıt Kabul Uzmanı", "Sınıflandırma Uzmanı", "Arşiv Uzmanı",
+                    "İndeksleme Uzmanı", "İlişkilendirme Uzmanı", "Arama Uzmanı",
+                    "Sürüm Uzmanı", "Kayıt Doğrulama Uzmanı"]},
+    "arastirma": {
+        "ad": "Araştırma Ofisi", "patron": "Araştırma Patronu", "durum": "hazir",
+        "gorev": "Talebi alt sorulara böler, bulguları güven düzeyiyle yazar. "
+                 "Kaynağa erişim henüz yok: her kayıt «doğrulanmadı» etiketini taşır.",
+        "ajanlar": ["Araştırma Mimarı", "Kaynak Tarayıcı", "Derin Araştırmacı",
+                    "Birincil Kaynak Uzmanı", "Akademik Kaynak Uzmanı",
+                    "Kaynak Doğrulayıcı", "Çelişki Analisti", "Kanıt Analisti",
+                    "Araştırma Yazarı"]},
+    "planlama": {
+        "ad": "Planlama Ofisi", "patron": "Planlama Patronu", "durum": "ertelendi",
+        "gorev": "Hedefi ölçülebilir bir yol haritasına çevirir. Hedef motoruyla "
+                 "birlikte açılacak.",
+        "ajanlar": ["Hedef Analisti", "Durum Analisti", "Kısıt Analisti",
+                    "Bağımlılık Analisti", "Kapasite Analisti", "Program Mimarı",
+                    "Simülasyon Uzmanı", "Optimizasyon Uzmanı", "Plan Denetçisi"]},
+    "uretim": {
+        "ad": "Üretim Ofisi", "patron": "Üretim Patronu", "durum": "ertelendi",
+        "gorev": "Soru seti, alıştırma ve tekrar kartı gibi doğrudan kullanılacak "
+                 "materyal üretir; her materyal kalite kontrolünden geçer.",
+        "ajanlar": ["Üretim Mimarı", "Metin Uzmanı", "Eğitim Materyali Uzmanı",
+                    "Görsel Üretim Uzmanı", "Belge ve Rapor Uzmanı",
+                    "Veri ve Tablo Uzmanı", "Teknik Üretim Uzmanı", "Editör",
+                    "Kalite Kontrol Uzmanı"]},
+}
+SIRA = ("kayit", "arastirma", "planlama", "uretim")
+MODULLER = ("ays", "spi", "esp")
+KAYNAKLAR = ("kullanici", "ays", "spi", "esp", "motto")
+TURLER = ("arastirma", "plan", "materyal")
+DOGRULUK = ("dogrulanmadi", "kaynakli", "celiskili")
+MAX_TALEP = 2000
+
+# BAM Patronu'nun kurallari. Bir kelime birden cok ofisi cagirabilir;
+# hicbiri eslesmezse talep SORULUR.
+ANAHTAR = {
+    "arastirma": ("araştır", "nedir", "neden", "nasıl", "kanıt", "kaynak",
+                  "doğru mu", "karşılaştır", "incele"),
+    "planlama": ("plan", "program", "takvim", "günde", "haftada", "yol haritası"),
+    "uretim": ("soru", "test", "flashcard", "kart", "alıştırma", "materyal",
+               "hazırla", "üret", "çalışma kitabı"),
+}
+BELIRSIZ = ("Bunu araştırmamı mı, bir plana dönüştürmemi mi, yoksa bir materyal "
+            "(soru seti, alıştırma, kart) üretmemi mi istiyorsun?")
+
+ARASTIRMA_SISTEM = """Sen HKM'deki BAM'ın Araştırma Ofisisin. Araştırma Patronu adına
+çalışırsın; onun üstünde BAM Patronu, onun da üstünde King var.
+
+KONUMUN VE SINIRIN
+- İnternete ve kaynaklara erişimin YOK; yalnız kendi bilgin var. Bu yüzden hiçbir
+  iddiayı doğrulanmış gibi sunamazsın. Ürettiğin belge «doğrulanmadı» etiketiyle
+  saklanır ve öyle gösterilir.
+- Kullanıcı hakkında hiçbir şey varsayma; kişisel ölçüm yazma.
+- Teşhis koyma, ilaç ya da doz önerme, sonuç garantisi verme.
+
+NASIL ÇALIŞIRSIN
+1. Talebi araştırılabilir 2–5 alt soruya böl.
+2. Her alt soru için bildiğini kısa ve kesin bulgular halinde yaz.
+3. Her bulgunun güven düzeyini dürüstçe belirt: düşük, orta ya da yüksek.
+   Tartışmalı ya da emin olmadığın şeyi yüksek güvenle yazma.
+4. Bilmediğini, tartışmalı olanı ve kaynak gerektireni «acik_kalanlar»a yaz.
+5. Türkçe yaz; teknik terimi ilk geçtiği yerde kısaca açıkla.
+
+ÇIKTI: Yalnız şu biçimde tek bir JSON nesnesi döndür, başka hiçbir şey yazma:
+{"baslik": "...", "ozet": "...", "alt_sorular": ["..."],
+ "bulgular": [{"iddia": "...", "guven": "düşük|orta|yüksek"}],
+ "acik_kalanlar": ["..."]}"""
+
+
+def _simdi(now=None):
+    return now or datetime.datetime.now().isoformat(timespec="seconds")
+
+
+def _kucuk(s):
+    return str(s or "").replace("I", "ı").replace("İ", "i").lower()
+
+
+# ---------------------------------------------------------------- yonlendirme
+
+def yonlendir(talep):
+    k = _kucuk(talep)
+    ofisler = [o for o in ("arastirma", "planlama", "uretim")
+               if any(w in k for w in ANAHTAR[o])]
+    if not ofisler:
+        return {"ok": False, "soru": BELIRSIZ}
+    return {"ok": True, "ofisler": ["kayit"] + ofisler}
+
+
+# ------------------------------------------------------------------- isler
+
+def _is_satiri(r):
+    d = dict(r)
+    d["ofisler"] = json.loads(d["ofisler"] or "[]")
+    d["adimlar"] = json.loads(d["adimlar"] or "[]")
+    return d
+
+
+def is_getir(con, id_):
+    r = con.execute("SELECT * FROM bam_isler WHERE id=?", (int(id_),)).fetchone()
+    return _is_satiri(r) if r else None
+
+
+def is_listesi(con, limit=30):
+    return [_is_satiri(r) for r in con.execute(
+        "SELECT * FROM bam_isler ORDER BY id DESC LIMIT ?",
+        (max(1, min(int(limit), 200)),)).fetchall()]
+
+
+def is_ac(con, talep, kaynak="kullanici", hedef_modul=None, now=None):
+    metin = str(talep or "").strip()
+    if not metin:
+        return {"ok": False, "note": "Talep boş."}
+    if len(metin) > MAX_TALEP:
+        return {"ok": False, "note": "Talep %d karakteri geçemez." % MAX_TALEP}
+    if kaynak not in KAYNAKLAR:
+        return {"ok": False, "note": "Bilinmeyen kaynak."}
+    if hedef_modul not in (None, "") and hedef_modul not in MODULLER:
+        return {"ok": False, "note": "Hedef modül AYS, SPİ ya da ESP olmalı."}
+    y = yonlendir(metin)
+    if not y["ok"]:
+        return {"ok": False, "soru": y["soru"], "note": y["soru"]}
+    acik = con.execute("SELECT id FROM bam_isler WHERE talep=? AND durum IN "
+                       "('bekliyor','beklemede') ORDER BY id DESC LIMIT 1",
+                       (metin,)).fetchone()
+    if acik:
+        return {"ok": True, "id": acik["id"], "yeni": False, "ofisler": y["ofisler"]}
+    at = _simdi(now)
+    adimlar = [{"ofis": o, "durum": "bekliyor"} for o in y["ofisler"]]
+    cur = con.execute("INSERT INTO bam_isler(talep,kaynak,hedef_modul,ofisler,adimlar,"
+                      "durum,created_at,updated_at) VALUES (?,?,?,?,?, 'bekliyor',?,?)",
+                      (metin, kaynak, hedef_modul or None, json.dumps(y["ofisler"]),
+                       json.dumps(adimlar, ensure_ascii=False), at, at))
+    return {"ok": True, "id": cur.lastrowid, "yeni": True, "ofisler": y["ofisler"]}
+
+
+def iptal(con, id_, now=None):
+    cur = con.execute("UPDATE bam_isler SET durum='iptal', updated_at=? WHERE id=? "
+                      "AND durum IN ('bekliyor','beklemede')", (_simdi(now), int(id_)))
+    return {"ok": cur.rowcount == 1,
+            "note": "İş iptal edildi." if cur.rowcount else "İptal edilecek açık iş yok."}
+
+
+def devam(con, id_, now=None):
+    """Bekleyen isi (model yoktu, butce dolmustu) yeniden kuyruga koyar."""
+    j = is_getir(con, id_)
+    if not j or j["durum"] != "beklemede":
+        return {"ok": False, "note": "Bekleyen bir iş değil."}
+    for a in j["adimlar"]:
+        if a["durum"] == "beklemede":
+            a["durum"] = "bekliyor"
+    _kaydet(con, j, now)
+    return {"ok": True}
+
+
+def _is_durumu(adimlar):
+    d = [a["durum"] for a in adimlar]
+    if "beklemede" in d:
+        return "beklemede"
+    if "hata" in d:
+        return "hata"
+    if all(x in ("tamam", "ertelendi") for x in d):
+        return "tamam" if all(x == "tamam" for x in d) else "kismen"
+    return "bekliyor"
+
+
+def _kaydet(con, j, now=None):
+    j["durum"] = _is_durumu(j["adimlar"])
+    con.execute("UPDATE bam_isler SET adimlar=?, durum=?, updated_at=? WHERE id=?",
+                (json.dumps(j["adimlar"], ensure_ascii=False), j["durum"],
+                 _simdi(now), j["id"]))
+
+
+def ilerlet(con, cfg, transport=None, now=None):
+    """Kuyruktaki en eski isin siradaki adimini kosar. Is yoksa None.
+    Ritim her tikte bir adim ilerletir: uzun is sunucuyu kilitlemez."""
+    r = con.execute("SELECT * FROM bam_isler WHERE durum='bekliyor' "
+                    "ORDER BY id LIMIT 1").fetchone()
+    if not r:
+        return None
+    j = _is_satiri(r)
+    adim = next((a for a in j["adimlar"] if a["durum"] == "bekliyor"), None)
+    if adim is None:
+        _kaydet(con, j, now)
+        return None
+    try:
+        sonuc = ADIM[adim["ofis"]](con, cfg, j, transport, now)
+    except Exception as e:                      # noqa: BLE001
+        sonuc = {"durum": "hata", "not": "%s: %s" % (type(e).__name__, e)}
+    adim.update(sonuc)
+    adim["at"] = _simdi(now)
+    _kaydet(con, j, now)
+    return {"ok": adim["durum"] in ("tamam", "ertelendi"), "is_id": j["id"],
+            "ofis": adim["ofis"], "durum": adim["durum"], "not": adim.get("not")}
+
+
+# -------------------------------------------------------------- ofis adimlari
+
+def _kayit_adimi(con, cfg, j, transport, now):
+    bulunan = [r["id"] for r in kayit_ara(con, j["talep"])]
+    return {"durum": "tamam", "bulunan": bulunan,
+            "not": ("%d önceki kayıt bulundu; işe bunlarla başlanır." % len(bulunan))
+            if bulunan else "Bu konuda önceki kayıt yok."}
+
+
+def _json_ayikla(metin):
+    m = re.search(r"\{.*\}", metin or "", re.S)
+    if not m:
+        return None
+    try:
+        d = json.loads(m.group(0))
+    except ValueError:
+        return None
+    return d if isinstance(d, dict) else None
+
+
+def _arastirma_adimi(con, cfg, j, transport, now):
+    hazir = ai.hazir_mi(cfg, "bam.arastirma")
+    if not hazir["ok"]:
+        return {"durum": "beklemede", "not": hazir["note"]}
+    r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
+               [{"role": "user", "content": "Araştırma talebi: " + j["talep"]}],
+               sistem=ARASTIRMA_SISTEM, transport=transport,
+               duzeltme=False, denetim="belge")
+    if not r.get("ok"):
+        if r.get("reason") == "budget":
+            return {"durum": "beklemede", "not": r.get("note")}
+        return {"durum": "hata", "not": r.get("note") or "Model cevap vermedi."}
+    d = _json_ayikla(r["text"]) or {}
+    guvenler = ("düşük", "orta", "yüksek")
+    bulgular = []
+    for b in d.get("bulgular") or []:
+        if isinstance(b, dict) and str(b.get("iddia") or "").strip():
+            bulgular.append({"iddia": str(b["iddia"]).strip()[:600],
+                             "guven": b.get("guven") if b.get("guven") in guvenler
+                             else "belirsiz",
+                             "dayanak": "model bilgisi — kaynak yok"})
+    govde = {"ozet": str(d.get("ozet") or "").strip()[:1500],
+             "alt_sorular": [str(x)[:300] for x in (d.get("alt_sorular") or [])][:8],
+             "bulgular": bulgular[:20],
+             "acik_kalanlar": [str(x)[:300] for x in (d.get("acik_kalanlar") or [])][:10]}
+    if not bulgular and not govde["ozet"]:
+        govde["metin"] = str(r["text"])[:6000]        # bicim tutmadi: ham metin
+    baslik = str(d.get("baslik") or j["talep"]).strip()[:200]
+    k = kayit_ekle(con, "arastirma", baslik, govde, dogruluk="dogrulanmadi",
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now)
+    return {"durum": "tamam", "kayit_id": k["id"],
+            "not": "Araştırma kaydedildi — kaynaksız, doğrulanmadı."}
+
+
+def _planlama_adimi(con, cfg, j, transport, now):
+    return {"durum": "ertelendi",
+            "not": "Planlama Ofisi hedef motoruyla birlikte açılacak; bu iş plan üretmedi."}
+
+
+def _uretim_adimi(con, cfg, j, transport, now):
+    return {"durum": "ertelendi",
+            "not": "Üretim Ofisi henüz açılmadı; bu iş materyal üretmedi."}
+
+
+ADIM = {"kayit": _kayit_adimi, "arastirma": _arastirma_adimi,
+        "planlama": _planlama_adimi, "uretim": _uretim_adimi}
+
+
+# ----------------------------------------------------------------- kayitlar
+
+def kayit_ekle(con, tur, baslik, govde, dogruluk="dogrulanmadi", etiketler="",
+               is_id=None, onceki_id=None, now=None):
+    if tur not in TURLER:
+        return {"ok": False, "note": "Bilinmeyen kayıt türü."}
+    if dogruluk not in DOGRULUK:
+        return {"ok": False, "note": "Bilinmeyen doğruluk etiketi."}
+    b = str(baslik or "").strip()
+    if not b:
+        return {"ok": False, "note": "Başlık boş."}
+    surum = 1
+    if onceki_id:
+        o = con.execute("SELECT surum FROM bam_kayitlar WHERE id=?",
+                        (int(onceki_id),)).fetchone()
+        if not o:
+            return {"ok": False, "note": "Önceki sürüm bulunamadı."}
+        surum = o["surum"] + 1
+    at = _simdi(now)
+    cur = con.execute("INSERT INTO bam_kayitlar(tur,baslik,govde,dogruluk,etiketler,surum,"
+                      "onceki_id,is_id,created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+                      (tur, b[:200], json.dumps(govde or {}, ensure_ascii=False),
+                       dogruluk, str(etiketler or "")[:300], surum,
+                       int(onceki_id) if onceki_id else None,
+                       int(is_id) if is_id else None, at))
+    kid = cur.lastrowid
+    if is_id:
+        iz_ekle(con, "is", is_id, "kayit", kid, now=at)
+    if onceki_id:
+        iz_ekle(con, "kayit", onceki_id, "kayit", kid, now=at)
+    return {"ok": True, "id": kid, "surum": surum}
+
+
+def kayit_getir(con, id_):
+    r = con.execute("SELECT * FROM bam_kayitlar WHERE id=?", (int(id_),)).fetchone()
+    if not r:
+        return None
+    d = dict(r)
+    d["govde"] = json.loads(d["govde"] or "{}")
+    return d
+
+
+def kayit_listesi(con, limit=30):
+    return [dict(r) for r in con.execute(
+        "SELECT id,tur,baslik,dogruluk,surum,is_id,created_at FROM bam_kayitlar "
+        "ORDER BY id DESC LIMIT ?", (max(1, min(int(limit), 200)),)).fetchall()]
+
+
+def kayit_ara(con, sorgu, limit=5):
+    """Kelime ortusmesiyle arama. Model gerektirmez."""
+    kelimeler = [w for w in re.split(r"[^\wçğıöşü]+", _kucuk(sorgu)) if len(w) >= 3]
+    if not kelimeler:
+        return []
+    puanli = []
+    for r in con.execute("SELECT id,tur,baslik,etiketler,govde,dogruluk,surum "
+                         "FROM bam_kayitlar ORDER BY id DESC LIMIT 500").fetchall():
+        metin = _kucuk(" ".join((r["baslik"], r["etiketler"], r["govde"])))
+        puan = sum(1 for w in kelimeler if w in metin)
+        if puan:
+            puanli.append((puan, r["id"], r))
+    puanli.sort(key=lambda x: (-x[0], -x[1]))
+    return [{"id": r["id"], "tur": r["tur"], "baslik": r["baslik"],
+             "dogruluk": r["dogruluk"], "surum": r["surum"]}
+            for _, _, r in puanli[:max(1, int(limit))]]
+
+
+# ---------------------------------------------------------------------- iz
+
+def iz_ekle(con, kaynak_tur, kaynak_id, hedef_tur, hedef_id, now=None):
+    con.execute("INSERT OR IGNORE INTO bam_iz(kaynak_tur,kaynak_id,hedef_tur,hedef_id,"
+                "created_at) VALUES (?,?,?,?,?)",
+                (kaynak_tur, str(kaynak_id), hedef_tur, str(hedef_id), _simdi(now)))
+
+
+def iz_zinciri(con, tur, id_, derinlik=10):
+    """«Bu neden var?» — geriye dogru kokler, yakindan uzaga."""
+    out, bak, gorulen = [], [(tur, str(id_))], set()
+    for _ in range(derinlik):
+        yeni = []
+        for t, i in bak:
+            for r in con.execute("SELECT kaynak_tur,kaynak_id FROM bam_iz WHERE "
+                                 "hedef_tur=? AND hedef_id=? ORDER BY id", (t, i)):
+                k = (r["kaynak_tur"], r["kaynak_id"])
+                if k not in gorulen:
+                    gorulen.add(k)
+                    out.append({"tur": k[0], "id": k[1]})
+                    yeni.append(k)
+        if not yeni:
+            break
+        bak = yeni
+    return out
+
+
+# -------------------------------------------------------------------- ozet
+
+def ozet(con):
+    """Ofis ekrani icin: ofisler, isler, son kayitlar."""
+    sayac = {r["durum"]: r["n"] for r in con.execute(
+        "SELECT durum, COUNT(*) AS n FROM bam_isler GROUP BY durum")}
+    return {"ofisler": [dict(OFISLER[o], id=o) for o in SIRA],
+            "isler": is_listesi(con, 20), "kayitlar": kayit_listesi(con, 20),
+            "sayac": sayac}

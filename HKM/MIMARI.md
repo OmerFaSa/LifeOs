@@ -680,6 +680,39 @@ Yazıldığı ilk koşumda üç gerçek kusur buldu:
 3. **Tarih alanı etiketsiz** — ekran okuyucuda yalnızca «düzenleme kutusu»
    diye anılıyordu.
 
+## 8.20 Hafıza, kanal ve BAM
+
+**Hafıza** (`core/memory.py`) modüllerle aynı sözleşmeyi taşır
+(`brand/ortak/hafiza.js`): *senin sözün* · *sohbetten* · *tahmin*. Model hiçbir
+katmana yazamaz. Modüller hafızalarının **anlık görüntüsünü**
+`POST /api/memory/sync/<modül>` ile yollar; HKM kopyasını eşitler (modülde
+silinen düşer, HKM'de unutulan geri gelmez). King bütün kapsamları görür,
+alt görevli yalnız kendi modülününkini. Profil › «King senin hakkında ne biliyor?»
+
+**Patronlar arası kanal** (`core/kanal.py`, `GET /api/kanal/<modül>`): öteki
+iki modülün bugünkü denetim hükmü ve King'in önerisi. **Yalnız okur** —
+brifing gibi öneri kaydı yazmaz. Modül bunu Patron brifingine koyar.
+
+**BAM — Bilgi ve Aksiyon Modülü** (`core/bam.py`). HKM'nin alt modülüdür,
+beşinci bir sistem değildir. King'in altında BAM Patronu, onun altında dört
+ofis: Kayıt · Araştırma · Planlama · Üretim.
+
+| Kural | Neden |
+|---|---|
+| Yönlendirme kurallıdır; anlaşılmayan talep **sorulur** | AGENTS.md §1.7 |
+| Her iş önce Kayıt Ofisi'nden geçer | aynı işi iki kez yapmamak, boşa harcamamak |
+| Hazır olmayan ofis «ertelendi» der, iş «kısmen» biter | sessiz «tamam» yalandır |
+| Model ya da bütçe yoksa iş **bekler**, uydurulmaz | «Devam et» ile kaldığı yerden |
+| Kaynaksız araştırma her zaman «doğrulanmadı» | internete erişim henüz yok |
+| BAM hiçbir modüle yazmaz; teklif bırakır | AGENTS.md §1.4 |
+| Her kaydın kökü `bam_iz`'dedir | «bu neden var?» |
+
+Planlama Ofisi **hedef motoruyla birlikte** açılacak; Üretim Ofisi bir
+sonraki aşamadadır. İş kuyruğu ritimde her tikte **en fazla bir adım**
+ilerler. Model rolleri `bam`, `bam.arastirma`… King'den miras alır.
+Belge denetimi (`ai.ask(..., denetim="belge")`) dünya hakkındaki sayılara
+izin verir; belge kullanıcının ölçümü gibi sunulmaz. Yüz: **Ofis** sekmesi.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

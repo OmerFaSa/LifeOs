@@ -158,6 +158,18 @@ for _vp, _ad, _mod, _alan in (
          "HKM konseyi — %s. Hükmü kural motoru verir; model yalnız cümleyi kurar."
          % _alan, parent="king", layer="konsey", module=_mod)
 
+# BAM — Bilgi ve Aksiyon Modulu (core/bam.py). King'in altinda ayri bir
+# kol: Patronu ve dort ofisi. Atama yoksa King'den miras alir.
+_rol("bam", "BAM Patronu",
+     "Talebi ofislere yönlendirir; sonucu modüle teklif olarak bırakır.",
+     parent="king", layer="bam")
+for _ofis, _ad, _not in (
+        ("arastirma", "Araştırma", "Alt sorular, bulgular, güven düzeyi — kaynaksızsa «doğrulanmadı»."),
+        ("planlama", "Planlama", "Hedef motoruyla birlikte açılacak."),
+        ("uretim", "Üretim", "Soru seti, alıştırma, kart — bağımsız çözümle denetlenir."),
+        ("kayit", "Kayıt", "Arama ve sınıflandırma; çoğu iş model gerektirmez.")):
+    _rol("bam.%s" % _ofis, "BAM · %s" % _ad, _not, parent="bam", layer="bam")
+
 for _mod, _ad in MODULLER.items():
     _ust = {"spi": "vp_bio", "ays": "vp_academic", "esp": "vp_intellect"}[_mod]
     for _yet, _not in YETENEKLER.items():
@@ -168,13 +180,14 @@ LAYER_LABEL = {
     "king": "En üst — King",
     "konsey": "HKM konseyi — üç alt patron",
     "modul": "Modül yetenekleri",
+    "bam": "BAM — Bilgi ve Aksiyon Modülü",
 }
 
 
 def layers():
     """Ekranin cizecegi sira: ustten alta, her kademe kendi grubunda."""
     out = []
-    for kat in ("king", "konsey", "modul"):
+    for kat in ("king", "konsey", "modul", "bam"):
         uyeler = [r for r in ROLES.values() if r["layer"] == kat]
         uyeler.sort(key=lambda r: r["key"])
         out.append({"layer": kat, "label": LAYER_LABEL[kat], "roles": uyeler})

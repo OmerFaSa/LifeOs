@@ -66,7 +66,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import (ai, butce, channels, cross, db, gelen,  # noqa: E402
+from core import (ai, bam, butce, channels, cross, db, gelen,  # noqa: E402
                   impact,
                   intents, kanal, manager, media, memory, models, motto, outbox, patron,
                   profil, schedule,
@@ -634,6 +634,21 @@ class Handler(BaseHTTPRequestHandler):
                 "FROM attachments ORDER BY id DESC LIMIT ?",
                 (limit,)).fetchall()
             return self._send(200, {"attachments": [dict(r) for r in rows]})
+        # ---- BAM (core/bam.py): ofisler, isler, kayitlar ----
+        if u.path == "/api/bam":
+            return self._send(200, bam.ozet(self.con))
+        if u.path == "/api/bam/ara":
+            return self._send(200, {"kayitlar": bam.kayit_ara(
+                self.con, (q.get("q") or [""])[0], limit=20)})
+        if u.path.startswith("/api/bam/kayit/"):
+            try:
+                kid = int(u.path.rsplit("/", 1)[-1])
+            except ValueError:
+                return self._send(400, {"error": "kayit kimligi sayi olmali"})
+            k = bam.kayit_getir(self.con, kid)
+            if not k:
+                return self._send(404, {"error": "kayit yok"})
+            return self._send(200, {"kayit": k, "iz": bam.iz_zinciri(self.con, "kayit", kid)})
         # Patronlar arasi kanal (core/kanal.py): YALNIZ OKUR.
         if u.path.startswith("/api/kanal/"):
             r = kanal.modul_icin(self.con, u.path.rsplit("/", 1)[-1], date)
@@ -856,6 +871,31 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             r = memory.esitle(self.con, u.path.rsplit("/", 1)[-1], body.get("items"))
             return self._send(200 if r.get("ok") else 422, r)
+        # ---- BAM: is ac, ilerlet, iptal, devam ----
+        if u.path == "/api/bam/is":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            if not isinstance(body, dict):
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
+            r = bam.is_ac(self.con, body.get("talep"), kaynak=body.get("kaynak") or "kullanici",
+                          hedef_modul=body.get("hedef_modul") or None)
+            return self._send(200 if r.get("ok") else 422, r)
+        if u.path == "/api/bam/ilerlet":
+            r = bam.ilerlet(self.con, self.server.config)
+            return self._send(200, r or {"ok": False, "note": "Kuyrukta bekleyen iş yok."})
+        if u.path.startswith("/api/bam/is/") and u.path.rsplit("/", 1)[-1] in ("iptal", "devam"):
+            parca = u.path.strip("/").split("/")
+            try:
+                iid = int(parca[3])
+            except (ValueError, IndexError):
+                return self._send(400, {"error": "is kimligi sayi olmali"})
+            r = (bam.iptal if parca[4] == "iptal" else bam.devam)(self.con, iid)
+            return self._send(200 if r.get("ok") else 409, r)
         if u.path.startswith("/api/memory/") and u.path.endswith("/forget"):
             parca = u.path.strip("/").split("/")
             try:
@@ -1074,6 +1114,8 @@ def _ritim(srv, aralik=60):
         try:
             schedule.tick(con, srv.config, th=srv.thresholds)
             media.process_next(con, srv.config)
+            # BAM: her tikte EN FAZLA bir adim — uzun is sunucuyu kilitlemez.
+            bam.ilerlet(con, srv.config)
         except Exception as e:                  # noqa: BLE001
             sys.stderr.write("[hkm] ritim hatasi: %s\n" % e)
         srv.dur.wait(aralik)

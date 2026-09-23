@@ -507,6 +507,7 @@ details.detay > summary:hover{ color:var(--fg); }
       <a href="#/sistemler" data-yol="sistemler">Sistemler</a>
       <a href="#/profil" data-yol="profil">Profil</a>
       <a href="#/motto" data-yol="motto">Motto</a>
+      <a href="#/ofis" data-yol="ofis">Ofis</a>
       <a href="#/teklifler" data-yol="teklifler">Teklifler</a>
     </nav>
     <div class="bosluk"></div>
@@ -711,6 +712,25 @@ details.detay > summary:hover{ color:var(--fg); }
     </div>
 
     <!-- =========================== TEKLİFLER ========================= -->
+    <!-- ============================= OFİS ============================
+
+         Kim kime bağlı ve BAM ne üzerinde çalışıyor. Kat şeması modüllerle
+         AYNIDIR (brand/ortak/ofis.js): King > modül Patronları > uzmanlar;
+         BAM King'in altında ayrı bir koldur (core/bam.py). BAM hiçbir
+         sisteme yazmaz; sonucu teklif olarak bırakır. -->
+    <div data-bolme="ofis" hidden>
+      <div class="gun"><h1>Ofis</h1></div>
+      <p class="sub" style="margin-bottom:16px">Kim kime bağlı ve BAM ne
+        üzerinde çalışıyor. BAM hiçbir sisteme yazmaz: sonucu teklif olarak
+        bırakır, <b>onaylarsan o sistemin kendi kodu uygular</b>.</p>
+      <div class="card" id="ofis-katlar"><p class="muted">Yükleniyor…</p></div>
+      <div class="card" id="ofis-is-ver"></div>
+      <div class="card" id="ofis-isler"></div>
+      <div class="card" id="ofis-kayit" hidden></div>
+      <div class="card" id="ofis-kayitlar"></div>
+      <div class="card" id="ofis-bam"></div>
+    </div>
+
     <div data-bolme="teklifler" hidden>
       <div class="gun"><h1>Teklifler</h1></div>
       <p class="sub" style="margin-bottom:16px">HKM sistemlere doğrudan
@@ -2794,6 +2814,193 @@ details.detay > summary:hover{ color:var(--fg); }
     }
   }
 
+  /* ============================ OFİS ============================
+
+     Kat şeması King'in bugünkü önerisini ve üç alt patronun hükmünü
+     brifingten okur. BAM kolu ofisleri, iş kuyruğunu ve kayıtları
+     gösterir. Kaynaksız kayıt HER ZAMAN «doğrulanmadı» diye görünür. */
+  var OFIS_KAT = [['bio', 'SPİ', 'Biyolojik sermaye'], ['academic', 'AYS', 'Akademik hedef'],
+                  ['intellect', 'ESP', 'Entelektüel gelişim']];
+  var HUKUM_AD = { ANOMALY:'eşik kırıldı', INCOMPLETE:'eksik veri', APPROVED:'eşikler içinde' };
+  var HUKUM_TON = { ANOMALY:'danger', INCOMPLETE:'warn', APPROVED:'ok' };
+  var BAM_OFIS_AD = { kayit:'Kayıt', arastirma:'Araştırma', planlama:'Planlama', uretim:'Üretim' };
+  var OFIS_DURUM = { hazir:'hazır', ertelendi:'henüz açılmadı' };
+  var IS_DURUM = { bekliyor:'kuyrukta', beklemede:'bekliyor — model ya da bütçe',
+    tamam:'tamam', kismen:'kısmen', hata:'hata', iptal:'iptal' };
+  var ADIM_DURUM = { bekliyor:'sırada', beklemede:'bekliyor', tamam:'tamam',
+    ertelendi:'ertelendi', hata:'hata' };
+  var ADIM_TON = { tamam:'ok', ertelendi:'warn', beklemede:'warn', hata:'danger' };
+  var DOGRULUK_AD = { dogrulanmadi:'doğrulanmadı', kaynakli:'kaynaklı', celiskili:'çelişkili' };
+  var SISTEM_AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+  var CIZGI = 'padding:8px 0;border-top:1px solid var(--line)';
+
+  function ofisKatlarCiz(brif){
+    var vp = {};
+    ((brif && brif.lines) || []).forEach(function(l){ if(l.kind === 'vp') vp[l.vp] = l; });
+    var d = brif && brif.decision;
+    var h = '<div class="tag"><span lang="en">King</span> · baş patron</div>'
+      + '<p>' + (d ? esc(d.proposal)
+        : '<span class="muted">Bugün King’in bir önerisi yok.</span>') + '</p>'
+      + '<p class="muted">Üç modülün Patronu King’e bağlıdır; her Patron’un altında '
+      + 'kendi uzmanları çalışır. Patron değişmez, uzmanlar değişebilir.</p>';
+    OFIS_KAT.forEach(function(k){
+      var l = vp[k[0]];
+      var ton = l && HUKUM_TON[l.verdict];
+      h += '<div class="row" style="justify-content:space-between;flex-wrap:nowrap;'
+        + 'align-items:flex-start;' + CIZGI + '">'
+        + '<span><b>' + esc(k[1]) + ' Patronu</b> <span class="muted">· ' + esc(k[2])
+        + '</span><br/><span class="muted">' + esc(l ? l.text : 'Bugün veri gelmedi.')
+        + '</span></span><span class="' + (ton || 'muted') + '" style="white-space:nowrap">'
+        + esc((l && HUKUM_AD[l.verdict]) || 'veri yok') + '</span></div>';
+    });
+    $('ofis-katlar').innerHTML = h;
+  }
+
+  function ofisIsVerCiz(){
+    $('ofis-is-ver').innerHTML = '<div class="tag">BAM’a iş ver</div>'
+      + '<div class="row"><input id="bam-talep" type="text" maxlength="2000" style="flex:1"'
+      + ' placeholder="Örn. Ferritin neden düşer, araştır" aria-label="BAM’a verilecek iş"/>'
+      + '<select id="bam-hedef" aria-label="Hangi sistem için"><option value="">Genel</option>'
+      + '<option value="ays">AYS</option><option value="spi">SPİ</option>'
+      + '<option value="esp">ESP</option></select>'
+      + '<button id="bam-gonder">İşi aç</button></div>'
+      + '<p class="muted" id="bam-not">BAM Patronu talebi kuralla yönlendirir; '
+      + 'anlamazsa sorar.</p>';
+  }
+
+  function ofisIslerCiz(o){
+    var h = '<div class="row" style="justify-content:space-between"><span class="tag">İşler</span>'
+      + '<button id="bam-ilerlet">Sıradaki adımı çalıştır</button></div>';
+    if(!o.isler.length) h += '<p class="muted">Henüz iş yok.</p>';
+    o.isler.forEach(function(j){
+      var acik = j.durum === 'bekliyor' || j.durum === 'beklemede';
+      h += '<div style="' + CIZGI + '"><b>#' + esc(j.id) + '</b> ' + esc(j.talep)
+        + ' <span class="muted">· ' + esc(IS_DURUM[j.durum] || j.durum)
+        + (j.hedef_modul ? ' · ' + esc(SISTEM_AD[j.hedef_modul] || j.hedef_modul) : '')
+        + '</span><ul class="muted" style="margin:4px 0 0 18px">'
+        + j.adimlar.map(function(a){
+          return '<li><span class="' + (ADIM_TON[a.durum] || '') + '">'
+            + esc(BAM_OFIS_AD[a.ofis] || a.ofis) + ': ' + esc(ADIM_DURUM[a.durum] || a.durum)
+            + '</span>' + (a.not ? ' — ' + esc(a.not) : '')
+            + (a.kayit_id ? ' <a href="#" data-bam-kayit="' + esc(a.kayit_id)
+              + '">kaydı aç</a>' : '') + '</li>';
+        }).join('') + '</ul>'
+        + (acik ? '<div class="row" style="margin-top:6px">'
+          + (j.durum === 'beklemede' ? '<button data-bam-devam="' + esc(j.id)
+            + '">Devam et</button>' : '')
+          + '<button data-bam-iptal="' + esc(j.id) + '">İptal</button></div>' : '')
+        + '</div>';
+    });
+    $('ofis-isler').innerHTML = h;
+  }
+
+  function ofisKayitlarCiz(o){
+    var h = '<div class="tag">Kayıtlar</div>';
+    if(!o.kayitlar.length) h += '<p class="muted">Henüz kayıt yok.</p>';
+    o.kayitlar.forEach(function(k){
+      h += '<div class="row" style="justify-content:space-between;flex-wrap:nowrap;' + CIZGI + '">'
+        + '<a href="#" data-bam-kayit="' + esc(k.id) + '">' + esc(k.baslik) + '</a>'
+        + '<span class="' + (k.dogruluk === 'kaynakli' ? 'ok' : 'warn')
+        + '" style="white-space:nowrap">' + esc(DOGRULUK_AD[k.dogruluk] || k.dogruluk)
+        + (k.surum > 1 ? ' · sürüm ' + esc(k.surum) : '') + '</span></div>';
+    });
+    $('ofis-kayitlar').innerHTML = h;
+  }
+
+  function ofisBamCiz(o){
+    var h = '<div class="tag">BAM · Bilgi ve Aksiyon Modülü</div>'
+      + '<p class="muted">King’in altında BAM Patronu, onun altında dört ofis. Her işte '
+      + 'yalnız gereken ofisler çalışır ve her iş önce Kayıt Ofisi’nden geçer.</p>';
+    o.ofisler.forEach(function(f){
+      h += '<details class="detay"><summary>' + esc(f.ad) + ' <span class="'
+        + (f.durum === 'hazir' ? 'ok' : 'warn') + '">· ' + esc(OFIS_DURUM[f.durum] || f.durum)
+        + '</span></summary><p class="muted">' + esc(f.gorev) + '</p>'
+        + '<p class="muted"><b>' + esc(f.patron) + '</b> · ' + f.ajanlar.map(esc).join(', ')
+        + '</p></details>';
+    });
+    $('ofis-bam').innerHTML = h;
+  }
+
+  async function ofisKayitAc(id){
+    var r = await api('/api/bam/kayit/' + encodeURIComponent(id));
+    var k$ = $('ofis-kayit');
+    if(r.status !== 200){ k$.innerHTML = '<p class="danger">Kayıt açılamadı.</p>'; k$.hidden = false; return; }
+    var k = r.body.kayit, g = k.govde || {};
+    var liste = function(baslik, l, fn){
+      return (l && l.length) ? '<p class="muted" style="margin-top:10px"><b>' + baslik + '</b></p><ul>'
+        + l.map(fn).join('') + '</ul>' : '';
+    };
+    k$.innerHTML = '<div class="row" style="justify-content:space-between">'
+      + '<span class="tag">' + esc(k.baslik) + '</span><button data-bam-kapat="1">Kapat</button></div>'
+      + '<p class="warn">' + (k.dogruluk === 'dogrulanmadi'
+        ? 'Doğrulanmadı: bu belge kaynaksız, modelin bilgisidir. Karar vermeden önce bir kaynağa bak.'
+        : esc(DOGRULUK_AD[k.dogruluk] || k.dogruluk)) + '</p>'
+      + (g.ozet ? '<p>' + esc(g.ozet) + '</p>' : '')
+      + liste('Alt sorular', g.alt_sorular, function(x){ return '<li>' + esc(x) + '</li>'; })
+      + liste('Bulgular', g.bulgular, function(b){
+        return '<li>' + esc(b.iddia) + ' <span class="muted">· güven: ' + esc(b.guven)
+          + ' · ' + esc(b.dayanak) + '</span></li>'; })
+      + liste('Açık kalanlar', g.acik_kalanlar, function(x){ return '<li>' + esc(x) + '</li>'; })
+      + (g.metin ? '<p style="white-space:pre-wrap">' + esc(g.metin) + '</p>' : '')
+      + '<p class="muted" style="margin-top:10px">Neden var: ' + (r.body.iz.length
+        ? r.body.iz.map(function(z){ return (z.tur === 'is' ? 'iş #' : 'kayıt #') + esc(z.id); })
+          .join(' ← ') : 'kök kayıt') + ' · sürüm ' + esc(k.surum) + '</p>';
+    k$.hidden = false;
+    if(k$.scrollIntoView) k$.scrollIntoView({ block:'nearest' });
+  }
+
+  async function yukleOfis(t){
+    var o = await api('/api/bam');
+    if(o.status !== 200){
+      $('ofis-katlar').innerHTML = '<p class="danger">Ofis alınamadı (' + esc(o.status) + ').</p>';
+      return;
+    }
+    if(!$('bam-talep')) ofisIsVerCiz();       // yazilan talep yenilemede kaybolmasin
+    ofisIslerCiz(o.body);
+    ofisKayitlarCiz(o.body);
+    ofisBamCiz(o.body);
+    var b = await api('/api/briefing?date=' + t);
+    ofisKatlarCiz(b.status === 200 ? b.body : null);
+  }
+
+  document.addEventListener('click', async function(ev){
+    var el = ev.target.closest ? ev.target.closest('#bam-gonder,#bam-ilerlet,[data-bam-iptal],'
+      + '[data-bam-devam],[data-bam-kayit],[data-bam-kapat]') : null;
+    if(!el) return;
+    ev.preventDefault();
+    if(el.id === 'bam-gonder'){
+      var talep = (($('bam-talep') || {}).value || '').trim();
+      if(!talep) return;
+      var r = await api('/api/bam/is', { method:'POST', body:JSON.stringify({
+        talep:talep, hedef_modul:$('bam-hedef').value || null }) });
+      if(r.status === 200){
+        $('bam-talep').value = '';
+        $('bam-not').textContent = r.body.yeni
+          ? 'İş #' + r.body.id + ' açıldı: ' + r.body.ofisler.map(function(x){
+            return BAM_OFIS_AD[x]; }).join(' → ') + '.'
+          : 'Bu iş zaten açık (#' + r.body.id + ').';
+      }else{
+        $('bam-not').textContent = (r.body && (r.body.soru || r.body.note)) || 'İş açılamadı.';
+      }
+      return yukle();
+    }
+    if(el.id === 'bam-ilerlet'){
+      var i = await api('/api/bam/ilerlet', { method:'POST', body:'{}' });
+      if(i.body && i.body.note && !i.body.ofis) $('bam-not').textContent = i.body.note;
+      return yukle();
+    }
+    if(el.dataset.bamIptal){
+      await api('/api/bam/is/' + el.dataset.bamIptal + '/iptal', { method:'POST', body:'{}' });
+      return yukle();
+    }
+    if(el.dataset.bamDevam){
+      await api('/api/bam/is/' + el.dataset.bamDevam + '/devam', { method:'POST', body:'{}' });
+      return yukle();
+    }
+    if(el.dataset.bamKayit) return ofisKayitAc(el.dataset.bamKayit);
+    if(el.dataset.bamKapat){ $('ofis-kayit').hidden = true; }
+  });
+
   async function yukleTeklifler(){
     var r = await api('/api/intents/' + TEKLIF_MODUL);
     if(r.status !== 200){
@@ -3142,7 +3349,7 @@ details.detay > summary:hover{ color:var(--fg); }
      gorunumun verisi cekilir — her sekmede butun ambari sorgulamak,
      acilisi bekletmekten baska is yapmiyordu. */
   var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'motto',
-                    'teklifler', 'ayarlar'];
+                    'ofis', 'teklifler', 'ayarlar'];
   var gorunum = 'bugun';
 
   function yolOku(){
@@ -3250,6 +3457,7 @@ details.detay > summary:hover{ color:var(--fg); }
     if(gorunum === 'profil') return yukleProfil(t);
     if(gorunum === 'sistemler') return yukleSistemler(t);
     if(gorunum === 'motto') return yukleMotto();
+    if(gorunum === 'ofis') return yukleOfis(t);
     if(gorunum === 'teklifler') return yukleTeklifler();
     if(gorunum === 'ayarlar') return yukleAyarlar();
   }
