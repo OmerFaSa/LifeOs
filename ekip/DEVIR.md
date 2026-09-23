@@ -22,6 +22,7 @@ Hedef: hızlı kazançlar 1–2 günde biter. Bu bölüm aşağıdaki her şeyde
    - Grup 1 HKM + Telegram: 8, 9, 11, 12, 13, 14, 15, 19, 46.
    - Grup 2 AYS: 22, 27. · Grup 3 SPİ: 31. · Grup 4 ortak: 5, 49, 50, 56.
    - Sonra planlı iş: 8c-2 → 8c-3 → 8d → 8e.
+   - **EN SON: Part 9 tek tasarım + çekmece düzeni** (bkz. Part 9). Her şey bitmeden başlanmaz.
 3. **DENETİM ÖLÇÜSÜ:** her madde yalnız dokunduğu sistemin testleri + duman testi.
    Ekran görüntüsü yalnız arayüz belirgin değiştiyse. Tam koşum (`tools/sayilar.py --tam
    --yaz`) yalnız dört grup bitince BİR KEZ. Hata düzeltmesinde önce hatayı yakalayan test
@@ -35,7 +36,7 @@ Hedef: hızlı kazançlar 1–2 günde biter. Bu bölüm aşağıdaki her şeyde
 6. **GEREKSİZ İŞ YOK:** keşif ve deneme betikleri scratchpad'de kalır; belgeye yalnız
    yapılanın özeti girer (MIMARI bölümü + bu listede tek satır).
 
-**Durum:** ⏳ 2a arşiv · ⏳ 2b tarama · ⏳ Grup 1 · ⏳ Grup 2 · ⏳ Grup 3 · ⏳ Grup 4 · ⏳ tam koşum
+**Durum:** ⏳ 2a arşiv · ⏳ 2b tarama · ⏳ Grup 1 · ⏳ Grup 2 · ⏳ Grup 3 · ⏳ Grup 4 · ⏳ tam koşum · ⏳ Part 9 tasarım (en son)
 
 ## 0. Önce oku
 
@@ -327,6 +328,26 @@ Kütüphanem → 8c SPİ besin/fiyat/yer + diyete otomatik işleme → 8d ESP ü
 → 8e depo önce + tazelik + kullanım takibi.
 
 ### Part 9 — Tek tasarım (ALTYAPI BİTİNCE; şimdi BAŞLAMA)
+**EN SON YAPILIR — bütün işlerin (hız kuralları grupları, 8c–8e, Part 7, cevaplı maddeler)
+sonunda. Kullanıcı isteği (2026-09-23):**
+- **Hedef:** bütün sistem (AYS, SPİ, ESP, HKM web) **modern, sade, minimalist** tek bir
+  tasarıma geçer. Bugünkü sorun: her şey İÇ İÇE (kart içinde sekme, sekme içinde alt
+  sekme, aynı şey birkaç yerde); neyin nerede olduğu bilinmiyor.
+- **Çekmece düzeni (bu bir DÜZEN örneğidir, görsel değil — ekrana çekmece çizilmez):**
+  her şeyin TEK ve öngörülebilir bir yeri olur, dolap çekmecesi gibi sıralı. Kurallar:
+  1. Üç modülde AYNI iskelet ve AYNI çekmece adları (kullanıcı bir modülü öğrenince
+     ötekini bilir). Çekmece sayısı az; her birinin adı içindekini söyler.
+  2. İç içelik en çok İKİ kat (çekmece → içindeki bölüm). Kart içinde sekme içinde alt
+     sekme yok.
+  3. Aynı şey İKİ YERDE durmaz; başka yerden yalnız bağlantı verilir.
+  4. Her çekmecenin içi aynı sırada: başlık · kısa özet · liste · eylem.
+  5. Her ekran hangi çekmecede olduğunu söyler; komut paleti/arama her şeye ulaşır.
+  6. Onaylar tek çekmecede toplanır (fikir 10 ile birlikte).
+- **Süreç:** Part 9 başlarken ÖNCE «çekmece haritası» çıkarılır (her modülün her ekranı ve
+  kartı hangi çekmeceye gider, ne kalkar, ne birleşir) ve kullanıcıya onaylatılır; sonra
+  uygulanır. Kod: ortak bileşenler (`components.js`, `base.css`, `brand/ortak/`), SPİ
+  `designs.css` beş düzen ve tasarım seçici kalkar. Denetimler: smoke, a11ycheck,
+  layoutcheck (390 px, 24 px), palettecheck, perfcheck; haritaya uymayan ekran kalmaz.
 - ⏳ Dört-beş tasarım dili (SPİ `designs.css` beş düzen, `designcheck.js`) yerine
   **tek, sade ve modern** bir tasarım. Kullanıcı bunu altyapı işleri bittikten sonra
   yapacak. O zamana kadar: yeni bir tasarım diline özel iş ekleme; yeni ekranlar
