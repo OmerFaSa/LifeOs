@@ -15,6 +15,34 @@ ESP.Screens.profile = (function(){
   const { html, raw, when, map } = ESP.h;
   const K = ESP.C;
 
+  /* HAFIZAM — ofisin senin hakkinda hatirladiklari (core/hafiza.js, ortak).
+     Model yazamaz; «senin sozun»u yalniz sen yazarsin. */
+  function hafizaEntry(){
+    if(!ESP.Hafizam) return '';
+    const H = window.LIFEOS.Hafiza;
+    const l = ESP.Hafizam.etkin();
+    return K.Entry({
+      label:'HAFIZAM',
+      meta:l.length ? l.length + ' kayıt' : 'boş',
+      note:'Ofisin senin hakkında hatırladıkları; yalnız bu cihazda durur. '
+         + 'Danışma’da «hatırla: …» diye de yazabilirsin.',
+      wide:true,
+      body:html`
+        <div class="stack-xs">${map(l, x => html`
+          <div class="row gap-8" style="justify-content:space-between;align-items:flex-start">
+            <span class="small"><span class="tiny muted">${H.KATMANLAR[x.katman].ad}</span><br/>${x.metin}</span>
+            ${K.Button({ label:'Unut', size:'sm', tone:'ghost', act:'hafiza-unut', data:{ 'data-id':x.id } })}
+          </div>`)}</div>
+        <div class="row gap-8 mt-10">
+          ${K.Input({ id:'hafiza-yeni', class:'grow', aria:'Hatırlanacak şey',
+            placeholder:'Örn. Sabahları daha iyi okurum' })}
+          ${K.Button({ label:'Hatırla', size:'sm', tone:'primary', act:'hafiza-ekle' })}
+        </div>
+        <p class="small muted mt-8">Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın,
+          «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.</p>`,
+    });
+  }
+
   function render(){
     const p = S.profile || {};
     const ayak = M.dataFootprint();
@@ -85,6 +113,8 @@ ESP.Screens.profile = (function(){
                   { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
                 ] }) })}</div>`,
         }),
+
+        hafizaEntry(),
 
         /* GÖRÜNÜM — üç hata birden buradaydı ve üçü de sessizdi:
 
@@ -291,6 +321,17 @@ ESP.Screens.profile = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'hafiza-ekle'(){
+      const el = document.getElementById('hafiza-yeni');
+      const r = await ESP.Hafizam.ekle(el ? el.value : '', { katman:'soz', kaynak:'kullanici' });
+      ESP.UI.toast(r.ok ? 'Hatırlıyorum' : r.why);
+      if(r.ok) ESP.App.render();
+    },
+    async 'hafiza-unut'(el){
+      const r = await ESP.Hafizam.unut(el.dataset.id);
+      ESP.UI.toast(r.ok ? 'Unuttum' : r.why);
+      ESP.App.render();
+    },
     async 'hkm-toggle'(){
       const a = ESP.Beacon.settings();
       await ESP.Beacon.save({ enabled:!a.enabled });

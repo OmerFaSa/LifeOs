@@ -858,6 +858,11 @@ SP.Model = (function(){
        yoksa kullanici onayladigini sanip onaylamamis olur. */
     if(SP.Proposals) await SP.Proposals.load();
     if(SP.Bolum) await SP.Bolum.yukle();
+    /* Hafiza: senin sozun, sohbetten, cikarim — core/hafiza.js (ortak). */
+    if(window.LIFEOS && LIFEOS.Hafiza){
+      SP.Hafizam = SP.Hafizam || LIFEOS.Hafiza.kur({ store:() => SP.Store, durum:() => SP.S });
+      await SP.Hafizam.yukle();
+    }
 
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);

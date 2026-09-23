@@ -79,6 +79,20 @@
       expect(sys.indexOf(R.PROMPTS.houseRules[0]) > 0).toBeTruthy();
       expect(sys.indexOf('en fazla') > 0 || sys.indexOf('En fazla') > 0).toBeTruthy();
     });
+
+    /* Hafıza istemde ETİKETİYLE durur; boşsa başlığı bile yoktur. */
+    it('istem hafızayı etiketiyle taşır; model hafızaya yazamaz', async () => {
+      R.Test.resetState();
+      R.Hafizam = R.Hafizam || LIFEOS.Hafiza.kur({ store:() => R.Store, durum:() => R.S });
+      await R.Hafizam.yukle();
+      const bos = R.OFFICE_PROMPTS.system(R.AGENT_BY_ID.tyt, 'dengeli');
+      expect(bos.indexOf('HATIRLANANLAR')).toBe(-1);
+      expect(bos).toContain('hafızasına yazamazsın');
+      await R.Hafizam.ekle('Pazar günleri çalışmam', { katman:'soz', kaynak:'kullanici' });
+      const sys = R.OFFICE_PROMPTS.system(R.AGENT_BY_ID.tyt, 'dengeli');
+      expect(sys).toContain('(senin sözün) Pazar günleri çalışmam');
+      R.S.hafiza = [];
+    });
   });
 
   /* ==================== brifingler ==================== */

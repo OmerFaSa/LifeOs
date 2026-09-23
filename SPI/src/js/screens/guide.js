@@ -122,6 +122,30 @@ SP.Screens.guide = (function(){
     });
   }
 
+  function hafizaCard(){
+    if(!SP.Hafizam) return null;
+    const H = window.LIFEOS.Hafiza;
+    const l = SP.Hafizam.etkin();
+    return K.Card({
+      title:'Hafızam', sub:'Ofisin senin hakkında hatırladıkları — yalnız bu cihazda',
+      body:html`
+        ${when(!l.length, () => html`<p class="small dim">Henüz bir şey yok. Aşağıya yaz ya da
+          Danışma’da «hatırla: laktoz bana dokunuyor» de.</p>`)}
+        <div class="stack-xs">${map(l, x => html`
+          <div class="row gap-8" style="justify-content:space-between;align-items:flex-start">
+            <span class="small"><span class="tiny dim">${H.KATMANLAR[x.katman].ad}</span><br/>${x.metin}</span>
+            ${K.Button({ label:'Unut', size:'sm', tone:'ghost', act:'hafiza-unut', data:{ 'data-id':x.id } })}
+          </div>`)}</div>
+        <div class="row gap-8 mt-10">
+          ${K.Input({ id:'hafiza-yeni', class:'grow', aria:'Hatırlanacak şey',
+            placeholder:'Örn. Akşam 8’den sonra yemem' })}
+          ${K.Button({ label:'Hatırla', size:'sm', tone:'primary', act:'hafiza-ekle' })}
+        </div>
+        <p class="tiny dim mt-8">Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın,
+          «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.</p>`,
+    });
+  }
+
   function quotaCard(){
     const s = SP.Office.settings();
     const st = SP.Quota.status({ provider:s.provider, model:s.model });
@@ -470,7 +494,7 @@ SP.Screens.guide = (function(){
 
     if(tab === 'model'){
       return String(html`${head}
-        ${K.Ledger(() => [modelCard(), bolumCard(), quotaCard()])}
+        ${K.Ledger(() => [modelCard(), bolumCard(), hafizaCard(), quotaCard()])}
         <div class="mt-24">${raw(UI.rail(['no-model', 'grounding', 'privacy']))}</div>`);
     }
     if(tab === 'veri'){
@@ -497,6 +521,17 @@ SP.Screens.guide = (function(){
     /* Ayarlardan elle acip kapatmak da oneri kutusundan gecer ki Danisma'da
        «geri al» ile geri alinabilsin. Kutuyu isaretleyen kullanicidir:
        onay burada verilmis sayilir. */
+    async 'hafiza-ekle'(){
+      const el = document.getElementById('hafiza-yeni');
+      const r = await SP.Hafizam.ekle(el ? el.value : '', { katman:'soz', kaynak:'kullanici' });
+      UI.toast(r.ok ? 'Hatırlıyorum' : r.why);
+      if(r.ok) SP.App.render();
+    },
+    async 'hafiza-unut'(el){
+      const r = await SP.Hafizam.unut(el.dataset.id);
+      UI.toast(r.ok ? 'Unuttum' : r.why);
+      SP.App.render();
+    },
     async 'bolum-toggle'(el){
       const id = el.dataset.id;
       const acik = SP.Bolum.gizli(id) ? 1 : 0;

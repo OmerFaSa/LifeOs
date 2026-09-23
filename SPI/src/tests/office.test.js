@@ -276,6 +276,20 @@
       const p = SP.Office.systemPrompt('patron', SP.Office.patronBrief());
       expect(p).toContain('Teşhis koyma');
     });
+
+    /* Hafıza istemde ETİKETİYLE durur: ajan «tahmin»i kesin, «senin
+       sözün»ü kendi yorumu sanmasın. Hafıza boşsa istemde başlık da yok. */
+    it('istem hafızayı etiketiyle taşır; boşsa hiç anmaz', async () => {
+      resetState();
+      SP.Hafizam = SP.Hafizam || LIFEOS.Hafiza.kur({ store:() => SP.Store, durum:() => SP.S });
+      await SP.Hafizam.yukle();
+      expect(SP.Office.systemPrompt('patron', SP.Office.patronBrief()).indexOf('HATIRLANANLAR')).toBe(-1);
+      await SP.Hafizam.ekle('Laktoz dokunuyor', { katman:'soz', kaynak:'kullanici' });
+      const p = SP.Office.systemPrompt('patron', SP.Office.patronBrief());
+      expect(p).toContain('(senin sözün) Laktoz dokunuyor');
+      expect(p).toContain('hafızasına yazamazsın');
+      SP.S.hafiza = [];
+    });
   });
 
   describe('Ofis — masa notları', () => {

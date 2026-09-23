@@ -155,6 +155,13 @@ ESP.Komut = (function(){
 
   /* Sohbet girişi. İstek değilse null döner ve mesaj ajana gider. */
   async function sohbet(agentId, text){
+    /* Hafiza komutlari («hatırla: …», «hafızam», «3 unut») HKM ve oteki
+       iki uygulamayla ayni dildir. Patron'a iletilmez: hafiza ajanin
+       degil senindir, hangi masada soylersen orada yazilir. */
+    if(ESP.Hafizam){
+      const h = await ESP.Hafizam.komutIsle(text);
+      if(h) return { text:h.text, source:'rules', oneriIds:[] };
+    }
     const onEk = agentId === 'patron' ? '' : 'Patron’a ilettim. ';
     const cevap = function(m, ids){ return { text:onEk + m, source:'rules', oneriIds:ids || [] }; };
     const kisa = kisaCevap(text);

@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'6a532da', at:'2026-09-22 20:57', dirty:true };
+ESP.BUILD = { id:'862b538', at:'2026-09-23 06:55', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8797,6 +8797,216 @@ LIFEOS.yedekGerekli = function(yas, kayit){
   if((kayit || 0) < LIFEOS.YEDEK_ASGARI_KAYIT) return false;
   return yas === null || yas >= LIFEOS.YEDEK_GUN;
 };
+
+/* ==== js/core/hafiza.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/hafiza.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* HAFIZA — sistemin seni hatırlama biçimi.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/hafiza.js`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   Kopyayı elle düzenleme: bir sonraki yayında kaybolur.
+   ==================================================================
+
+   DÖRT KATMAN
+
+   Sistemin senin hakkında bildiği her şey dört katmandan birindedir ve
+   katman HER ZAMAN görünür:
+
+     ölçülen   modüllerin verisi (uyku, net, dakika). Burada SAKLANMAZ:
+               modülün kendi kaydıdır ve zaten etiketlidir.
+     soz       SENİN SÖZÜN — «hatırla: sabahları daha verimliyim».
+               Yalnız sen yazarsın; hiçbir ajan değiştiremez.
+     sohbet    SOHBETTEN — seçimlerinden ve konuşmalarından kural
+               motorunun kaydettiği tercih («diksiyonu kapattı»).
+     cikarim   ÇIKARIM — kural motorunun örüntü bulgusu. Her zaman
+               «tahmin» etiketiyle görünür; yanlışsa silersin.
+
+   MODEL HAFIZAYA YAZAMAZ. Bir dil modelinin «kullanıcı X'i sever»
+   diye kalıcı kayıt bırakması, halüsinasyonu kalıcı yapmak olurdu
+   (AGENTS.md §1.1). `kaynak:'model'` olan kayıt reddedilir; «senin
+   sözün»e yalnız `kullanici`, «çıkarım»a yalnız `kural` yazar.
+
+   HER MODÜL KENDİ HAFIZASINI TUTAR. HKM kapalıyken de hatırlanır
+   (AGENTS.md §1.4); HKM'ye bildirim ayrı bir iştir.
+
+   KOMUTLAR HKM ile aynıdır — iki yerde iki ayrı dil öğrenilmesin:
+     «hatırla: …» · «bunu hatırla: …» · «unutma: …» · «aklında tut: …»
+     «hafızam» · «neyi hatırlıyorsun» · «benim hakkımda ne biliyorsun»
+     «3 unut» · «#3 unut» · «3 numarayı unut» */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.Hafiza = (function(){
+  const KATMANLAR = {
+    soz:{ ad:'Senin sözün', etiket:'senin sözün',
+      not:'Senin yazdığın. Hiçbir ajan değiştiremez.' },
+    sohbet:{ ad:'Sohbetten', etiket:'sohbetten',
+      not:'Seçimlerinden ve konuşmalarından kural motorunun kaydettiği tercih.' },
+    cikarim:{ ad:'Çıkarım', etiket:'tahmin',
+      not:'Kural motorunun örüntü bulgusu. Tahmindir; yanlışsa sil.' },
+  };
+  const KAYNAK_IZNI = { soz:['kullanici'], sohbet:['kullanici', 'kural'], cikarim:['kural'] };
+  const MAX_METIN = 600;
+  const MAX_KAYIT = 200;
+  const ANAHTAR = 'meta/hafiza';
+
+  function temizMetin(s){ return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+
+  function yeniId(){
+    return 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  /* Geçerli kayıt mı? Depodan gelen bozuk kayıt sessizce düşer. */
+  function gecerli(k){
+    return !!(k && typeof k === 'object' && typeof k.id === 'string'
+      && KATMANLAR[k.katman] && temizMetin(k.metin));
+  }
+
+  function ekle(liste, kayit){
+    const l = (liste || []).filter(gecerli);
+    const k = kayit || {};
+    const metin = temizMetin(k.metin);
+    const katman = KATMANLAR[k.katman] ? k.katman : 'soz';
+    const kaynak = k.kaynak || 'kullanici';
+    if(!metin) return { ok:false, why:'Hatırlanacak bir şey yazılmamış.' };
+    if(metin.length > MAX_METIN) return { ok:false, why:'Hafıza kaydı ' + MAX_METIN + ' karakteri geçemez.' };
+    if(KAYNAK_IZNI[katman].indexOf(kaynak) < 0){
+      return { ok:false, why:kaynak === 'model'
+        ? 'Model hafızaya yazamaz; yalnız sen ve kural motoru yazar.'
+        : 'Bu katmana bu kaynak yazamaz.' };
+    }
+    const ayni = l.filter(x => x.durum !== 'unutuldu' && x.katman === katman
+      && x.metin.toLocaleLowerCase('tr') === metin.toLocaleLowerCase('tr'))[0];
+    if(ayni) return { ok:false, why:'Bunu zaten hatırlıyorum.', kayit:ayni };
+    const yeni = {
+      id:k.id || yeniId(), metin, katman, kaynak,
+      kapsam:String(k.kapsam || 'hepsi').slice(0, 24),
+      at:k.at || new Date().toISOString(), durum:'etkin',
+    };
+    let sonuc = l.concat([yeni]);
+    /* Sınır aşılırsa EN ESKİ çıkarım önce gider, sonra en eski sohbet;
+       senin sözün en son gider — o senin yazdığındır. */
+    ['cikarim', 'sohbet', 'soz'].forEach(kt => {
+      while(sonuc.filter(x => x.durum !== 'unutuldu').length > MAX_KAYIT){
+        const i = sonuc.findIndex(x => x.durum !== 'unutuldu' && x.katman === kt && x.id !== yeni.id);
+        if(i < 0) break;
+        sonuc = sonuc.slice(0, i).concat(sonuc.slice(i + 1));
+      }
+    });
+    return { ok:true, liste:sonuc, kayit:yeni };
+  }
+
+  function unut(liste, id){
+    const l = (liste || []).filter(gecerli);
+    const k = l.filter(x => x.id === id && x.durum !== 'unutuldu')[0];
+    if(!k) return { ok:false, why:'Böyle bir hafıza kaydı yok.' };
+    return { ok:true, liste:l.filter(x => x.id !== id), kayit:k };
+  }
+
+  /* Etkin kayıtlar, eskiden yeniye. Kapsam verilirse o kapsam + 'hepsi'. */
+  function etkin(liste, kapsam){
+    return (liste || []).filter(gecerli).filter(x => x.durum !== 'unutuldu')
+      .filter(x => !kapsam || x.kapsam === 'hepsi' || x.kapsam === kapsam)
+      .sort((a, b) => String(a.at).localeCompare(String(b.at)));
+  }
+
+  /* Ajan istemine girecek metin. Her satır katman etiketini taşır:
+     ajan «tahmin»i gerçek, «sohbetten»i senin sözün sanmasın. */
+  function baglam(liste, opts){
+    const o = opts || {};
+    const l = etkin(liste, o.kapsam).slice(-(o.limit || 12));
+    if(!l.length) return '';
+    return 'KULLANICI HAKKINDA HATIRLANANLAR (etiketiyle; «tahmin» kesin değildir, '
+      + '«senin sözün» kullanıcının kendi cümlesidir, değiştirme):\n'
+      + l.map(x => '- (' + KATMANLAR[x.katman].etiket + ') ' + x.metin).join('\n');
+  }
+
+  /* ------------------------------------------------------- komutlar */
+
+  const EKLE_ONEK = ['bunu hatırla:', 'hatırla:', 'bunu hatirla:', 'hatirla:', 'unutma:',
+    'aklında tut:', 'aklinda tut:'];
+  const LISTE = ['hafızam', 'hafizam', 'neyi hatırlıyorsun', 'neyi hatirliyorsun',
+    'benim hakkımda ne biliyorsun', 'benim hakkımda neyi hatırlıyorsun'];
+
+  function komut(metin){
+    const ham = String(metin || '').trim();
+    const k = ham.toLocaleLowerCase('tr').replace(/[?!.]+$/, '').trim();
+    for(const on of EKLE_ONEK){
+      if(k.indexOf(on) === 0) return { tur:'ekle', metin:ham.slice(on.length).trim() };
+    }
+    if(LISTE.indexOf(k) >= 0) return { tur:'liste' };
+    const m = k.match(/^#?(\d+)\s*(?:numarayı|numaralı hafızayı|nolu|\.)?\s*(unut|sil)$/);
+    if(m) return { tur:'unut', sira:Number(m[1]) };
+    return null;
+  }
+
+  function listeMetni(liste){
+    const l = etkin(liste);
+    if(!l.length) return 'Henüz hatırladığım bir şey yok. «hatırla: …» diye yazarsan tutarım.';
+    return l.map((x, i) => (i + 1) + '. (' + KATMANLAR[x.katman].etiket + ') ' + x.metin).join('\n')
+      + '\n\nBirini silmek için «3 unut» gibi yaz.';
+  }
+
+  /* --------------------------------------------------------- depo
+
+     Her uygulama kendi deposunu verir: `kur({ store:() => R.Store,
+     durum:() => R.S })`. Getter kullanılır çünkü testler depoyu her
+     seferinde değiştirir. */
+  function kur(ortam){
+    const store = () => ortam.store();
+    const durum = () => ortam.durum();
+    function liste(){ return (durum().hafiza || []).slice(); }
+
+    async function yukle(){
+      let doc = null;
+      try{ doc = await store().get(ANAHTAR); }catch(e){ doc = null; }
+      durum().hafiza = (doc && Array.isArray(doc.items)) ? doc.items.filter(gecerli) : [];
+      return durum().hafiza;
+    }
+    async function yaz(l){
+      durum().hafiza = l;
+      await store().set(ANAHTAR, { items:l });
+    }
+    async function ekleK(metin, opts){
+      const r = ekle(liste(), Object.assign({ metin }, opts || {}));
+      if(r.ok) await yaz(r.liste);
+      return r;
+    }
+    async function unutK(id){
+      const r = unut(liste(), id);
+      if(r.ok) await yaz(r.liste);
+      return r;
+    }
+    /* Sohbet cümlesi bir hafıza komutuysa işler ve cevabı döndürür;
+       değilse null. Cevabı kural motoru yazar. */
+    async function komutIsle(metin, opts){
+      const c = komut(metin);
+      if(!c) return null;
+      if(c.tur === 'liste') return { text:listeMetni(liste()) };
+      if(c.tur === 'ekle'){
+        const r = await ekleK(c.metin, Object.assign({ katman:'soz', kaynak:'kullanici' }, opts || {}));
+        return { text:r.ok ? 'Hatırlıyorum: «' + r.kayit.metin + '». Silmek istersen «hafızam» de.'
+          : r.why, kayit:r.kayit || null };
+      }
+      if(c.tur === 'unut'){
+        const k = etkin(liste())[c.sira - 1];
+        if(!k) return { text:c.sira + ' numaralı bir hafıza kaydı yok. «hafızam» diye bakabilirsin.' };
+        await unutK(k.id);
+        return { text:'Unuttum: «' + k.metin + '».' };
+      }
+      return null;
+    }
+    return { yukle, liste, ekle:ekleK, unut:unutK,
+      etkin:kapsam => etkin(liste(), kapsam),
+      baglam:opts => baglam(liste(), opts), komutIsle };
+  }
+
+  return { KATMANLAR, KAYNAK_IZNI, MAX_METIN, MAX_KAYIT, ANAHTAR,
+    ekle, unut, etkin, baglam, komut, listeMetni, gecerli, kur };
+})();
 
 /* ==== js/core/tanitim.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -15842,6 +16052,11 @@ ESP.Model = (function(){
     S.decisions = ((await ESP.Store.list('decisions')) || []);
 
     S.proposals = ((await ESP.Store.list('proposals')) || []);
+    /* Hafiza: senin sozun, sohbetten, cikarim — core/hafiza.js (ortak). */
+    if(window.LIFEOS && LIFEOS.Hafiza){
+      ESP.Hafizam = ESP.Hafizam || LIFEOS.Hafiza.kur({ store:() => ESP.Store, durum:() => ESP.S });
+      await ESP.Hafizam.yukle();
+    }
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
 
     S.assets = ((await ESP.Store.list('assets')) || []).map(normAsset)
@@ -24960,6 +25175,13 @@ ESP.Komut = (function(){
 
   /* Sohbet girişi. İstek değilse null döner ve mesaj ajana gider. */
   async function sohbet(agentId, text){
+    /* Hafiza komutlari («hatırla: …», «hafızam», «3 unut») HKM ve oteki
+       iki uygulamayla ayni dildir. Patron'a iletilmez: hafiza ajanin
+       degil senindir, hangi masada soylersen orada yazilir. */
+    if(ESP.Hafizam){
+      const h = await ESP.Hafizam.komutIsle(text);
+      if(h) return { text:h.text, source:'rules', oneriIds:[] };
+    }
     const onEk = agentId === 'patron' ? '' : 'Patron’a ilettim. ';
     const cevap = function(m, ids){ return { text:onEk + m, source:'rules', oneriIds:ids || [] }; };
     const kisa = kisaCevap(text);
@@ -30038,12 +30260,23 @@ ESP.Office = (function(){
       '5. Estetik otorite iddia etme («kusursuz», «yayımlanmaya hazır»).',
       '6. Bir metrik «veri yok» ise onu sıfır gibi yorumlama; ölçülmediğini söyle.',
       '',
+      '7. Kullanıcının hafızasına yazamazsın. «Bunu hatırlayacağım» deme; kullanıcı isterse «hatırla: …» yazar.',
+      '',
       'ÜSLUP: Türkçe, kısa, somut. En fazla üç cümle. Kötü haberi iyi haberin arkasına saklama.',
       'Soru sorabilirsin ama aynı anda en fazla bir tane.',
       '',
+    ].concat(hafizaBaglami()).concat([
       'BRİFİNG (tek veri kaynağın):',
       JSON.stringify(b || brief(agentId)),
-    ].join('\n');
+    ]).join('\n');
+  }
+
+  /* Hafiza istemde ETIKETIYLE durur (LIFEOS.Hafiza.baglam). Bos ise
+     basligi bile yoktur: «hatirlanan bir sey yok» cumlesi ajani
+     uydurmaya iter. */
+  function hafizaBaglami(){
+    const m = ESP.Hafizam ? ESP.Hafizam.baglam() : '';
+    return m ? [m, ''] : [];
   }
 
   /* ---------------------------------------------------------------- denetim
@@ -36703,6 +36936,34 @@ ESP.Screens.profile = (function(){
   const { html, raw, when, map } = ESP.h;
   const K = ESP.C;
 
+  /* HAFIZAM — ofisin senin hakkinda hatirladiklari (core/hafiza.js, ortak).
+     Model yazamaz; «senin sozun»u yalniz sen yazarsin. */
+  function hafizaEntry(){
+    if(!ESP.Hafizam) return '';
+    const H = window.LIFEOS.Hafiza;
+    const l = ESP.Hafizam.etkin();
+    return K.Entry({
+      label:'HAFIZAM',
+      meta:l.length ? l.length + ' kayıt' : 'boş',
+      note:'Ofisin senin hakkında hatırladıkları; yalnız bu cihazda durur. '
+         + 'Danışma’da «hatırla: …» diye de yazabilirsin.',
+      wide:true,
+      body:html`
+        <div class="stack-xs">${map(l, x => html`
+          <div class="row gap-8" style="justify-content:space-between;align-items:flex-start">
+            <span class="small"><span class="tiny muted">${H.KATMANLAR[x.katman].ad}</span><br/>${x.metin}</span>
+            ${K.Button({ label:'Unut', size:'sm', tone:'ghost', act:'hafiza-unut', data:{ 'data-id':x.id } })}
+          </div>`)}</div>
+        <div class="row gap-8 mt-10">
+          ${K.Input({ id:'hafiza-yeni', class:'grow', aria:'Hatırlanacak şey',
+            placeholder:'Örn. Sabahları daha iyi okurum' })}
+          ${K.Button({ label:'Hatırla', size:'sm', tone:'primary', act:'hafiza-ekle' })}
+        </div>
+        <p class="small muted mt-8">Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın,
+          «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.</p>`,
+    });
+  }
+
   function render(){
     const p = S.profile || {};
     const ayak = M.dataFootprint();
@@ -36773,6 +37034,8 @@ ESP.Screens.profile = (function(){
                   { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
                 ] }) })}</div>`,
         }),
+
+        hafizaEntry(),
 
         /* GÖRÜNÜM — üç hata birden buradaydı ve üçü de sessizdi:
 
@@ -36979,6 +37242,17 @@ ESP.Screens.profile = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'hafiza-ekle'(){
+      const el = document.getElementById('hafiza-yeni');
+      const r = await ESP.Hafizam.ekle(el ? el.value : '', { katman:'soz', kaynak:'kullanici' });
+      ESP.UI.toast(r.ok ? 'Hatırlıyorum' : r.why);
+      if(r.ok) ESP.App.render();
+    },
+    async 'hafiza-unut'(el){
+      const r = await ESP.Hafizam.unut(el.dataset.id);
+      ESP.UI.toast(r.ok ? 'Unuttum' : r.why);
+      ESP.App.render();
+    },
     async 'hkm-toggle'(){
       const a = ESP.Beacon.settings();
       await ESP.Beacon.save({ enabled:!a.enabled });

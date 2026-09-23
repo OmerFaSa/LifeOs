@@ -321,6 +321,8 @@ R.OFFICE_PROMPTS = {
       /* HAFIZA (brand/ortak/hafiza.js): kullanicinin «hatirla» dedigi ve
          kural motorunun kaydettigi tercihler, katman etiketiyle. Ajan
          bunlari DIKKATE ALIR; degistiremez, hafizaya yazamaz. */
+      + '\nHAFIZA: Kullanıcının hafızasına yazamazsın; «bunu hatırlayacağım» deme. '
+      + 'Kullanıcı isterse «hatırla: …» yazar.'
       + (function(){
         const h = R.Hafizam ? R.Hafizam.baglam() : '';
         return h ? '\n\n' + h : '';

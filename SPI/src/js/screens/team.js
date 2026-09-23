@@ -312,6 +312,12 @@ SP.Screens.team = (function(){
   /* Model cagrilmadan karsilanan istekler. Karsilanmadiysa false. */
   async function kisaIstek(a, t){
     const P = SP.Proposals;
+    /* Hafiza komutlari («hatırla: …», «hafızam», «3 unut») HKM ve öteki
+       iki uygulamayla aynıdır; cevabı kural motoru yazar. */
+    if(SP.Hafizam){
+      const h = await SP.Hafizam.komutIsle(t);
+      if(h){ await sohbeteYaz(a, t, h.text); return true; }
+    }
     const kisa = kisaCevap(t);
     if(kisa === 'geri'){
       const son = P.all().filter(p => p.source === 'istek' && p.status === 'applied')

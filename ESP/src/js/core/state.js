@@ -1342,6 +1342,11 @@ ESP.Model = (function(){
     S.decisions = ((await ESP.Store.list('decisions')) || []);
 
     S.proposals = ((await ESP.Store.list('proposals')) || []);
+    /* Hafiza: senin sozun, sohbetten, cikarim — core/hafiza.js (ortak). */
+    if(window.LIFEOS && LIFEOS.Hafiza){
+      ESP.Hafizam = ESP.Hafizam || LIFEOS.Hafiza.kur({ store:() => ESP.Store, durum:() => ESP.S });
+      await ESP.Hafizam.yukle();
+    }
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
 
     S.assets = ((await ESP.Store.list('assets')) || []).map(normAsset)

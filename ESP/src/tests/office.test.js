@@ -247,4 +247,34 @@
       expect(/sertifika|seviye/i.test(p)).toBe(true);
     });
   });
+
+  /* Hafıza: komutlar HKM ve öteki iki uygulamayla aynı; cevabı kural
+     motoru yazar, model çağrılmaz. İstemde hafıza ETİKETİYLE durur. */
+  describe('Ofis — hafıza', () => {
+    async function hazirla(){
+      resetState();
+      ESP.Hafizam = ESP.Hafizam || LIFEOS.Hafiza.kur({ store:() => ESP.Store, durum:() => ESP.S });
+      await ESP.Hafizam.yukle();
+    }
+
+    it('sohbette «hatırla / hafızam / unut» kural motorunca karşılanır', async () => {
+      await hazirla();
+      const a = await ESP.Komut.sohbet('polyglot', 'hatırla: sabahları daha iyi okurum');
+      expect(a.source).toBe('rules');
+      expect(a.text).toContain('Hatırlıyorum');
+      expect(a.text.indexOf('Patron')).toBe(-1);
+      expect((await ESP.Komut.sohbet('patron', 'hafızam')).text).toContain('(senin sözün) sabahları');
+      await ESP.Komut.sohbet('patron', '1 unut');
+      expect(ESP.Hafizam.etkin()).toHaveLength(0);
+    });
+
+    it('istem hafızayı etiketiyle taşır; boşsa hiç anmaz', async () => {
+      await hazirla();
+      expect(O.systemPrompt('patron').indexOf('HATIRLANANLAR')).toBe(-1);
+      expect(O.systemPrompt('patron')).toContain('hafızasına yazamazsın');
+      await ESP.Hafizam.ekle('Diksiyonu sevmiyorum', { katman:'soz', kaynak:'kullanici' });
+      expect(O.systemPrompt('patron')).toContain('(senin sözün) Diksiyonu sevmiyorum');
+      ESP.S.hafiza = [];
+    });
+  });
 })();

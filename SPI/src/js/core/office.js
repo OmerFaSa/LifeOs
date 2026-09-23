@@ -444,10 +444,20 @@ SP.Office = (function(){
       '3. ' + SP.CLINICAL.disclaimer,
       '4. Türkçe yaz. Kısa cümle kur. En fazla 4 cümle.',
       '5. Bilmediğin bir şey sorulursa "bu benim alanımda değil" ya da "bu veri girilmemiş" de.',
+      '6. Kullanıcının hafızasına yazamazsın. «Bunu hatırlayayım» deme; kullanıcı isterse «hatırla: …» yazar.',
       '',
+    ].concat(hafizaBaglami()).concat([
       'BRİFİNG (JSON, kural motorundan geldi):',
       JSON.stringify(b),
-    ].join('\n');
+    ]).join('\n');
+  }
+
+  /* Hafiza istemde ETIKETIYLE durur (LIFEOS.Hafiza.baglam). Bos ise
+     istemde basligi bile yoktur: «hatirlanan bir sey yok» cumlesi ajani
+     uydurmaya iter. */
+  function hafizaBaglami(){
+    const m = SP.Hafizam ? SP.Hafizam.baglam() : '';
+    return m ? [m, ''] : [];
   }
 
   /* Ajan yaniti. Model yoksa ya da cagri basarisiz olursa kural motorunun

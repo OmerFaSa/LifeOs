@@ -479,12 +479,23 @@ ESP.Office = (function(){
       '5. Estetik otorite iddia etme («kusursuz», «yayımlanmaya hazır»).',
       '6. Bir metrik «veri yok» ise onu sıfır gibi yorumlama; ölçülmediğini söyle.',
       '',
+      '7. Kullanıcının hafızasına yazamazsın. «Bunu hatırlayacağım» deme; kullanıcı isterse «hatırla: …» yazar.',
+      '',
       'ÜSLUP: Türkçe, kısa, somut. En fazla üç cümle. Kötü haberi iyi haberin arkasına saklama.',
       'Soru sorabilirsin ama aynı anda en fazla bir tane.',
       '',
+    ].concat(hafizaBaglami()).concat([
       'BRİFİNG (tek veri kaynağın):',
       JSON.stringify(b || brief(agentId)),
-    ].join('\n');
+    ]).join('\n');
+  }
+
+  /* Hafiza istemde ETIKETIYLE durur (LIFEOS.Hafiza.baglam). Bos ise
+     basligi bile yoktur: «hatirlanan bir sey yok» cumlesi ajani
+     uydurmaya iter. */
+  function hafizaBaglami(){
+    const m = ESP.Hafizam ? ESP.Hafizam.baglam() : '';
+    return m ? [m, ''] : [];
   }
 
   /* ---------------------------------------------------------------- denetim
