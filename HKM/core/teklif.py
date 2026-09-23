@@ -25,7 +25,7 @@
 import json
 import statistics
 
-from core import ai, butce, models
+from core import ai, butce, kaynakli, models
 
 SINIFLAR = (
     # (ad, en cok model cagrisi, web izni)
@@ -55,6 +55,11 @@ def birim(tur, govde, ofisler):
     (bam.py'deki cagri yerleri); dayanagi yazilir."""
     g = govde or {}
     m, w, parca = 0, 0, []
+    if tur == "spi.bilgi":
+        # Sorgular kuralla (model yok): 2 arama + en cok MAX_KAYNAK okuma, 1 yazim.
+        return {"model": 1, "web": 2 + kaynakli.MAX_KAYNAK, "etiket": "tahmin",
+                "dayanak": "kurallı 2 arama + en çok %d sayfa okuma; yazım 1 çağrı"
+                           % kaynakli.MAX_KAYNAK}
     if _arastirma_var(ofisler):
         m += ARASTIRMA["model"]
         w += ARASTIRMA["web"]

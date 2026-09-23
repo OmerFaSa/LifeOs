@@ -110,6 +110,28 @@ KINDS = {
         "optional": ("why",),
         "note": "Sohbette bildirilen günün kaydı; modül kendi ayrıştırıcısıyla okur, önizler, onayla yazar.",
     },
+    # SPİ bilgisi (core/spibilgi.py, Part 8c). SPİ kaydi HKM'den ceker, KENDI
+    # koduyla sinar ve onizletir; onaylanirsa kendi deposuna yazar: besin
+    # kullanici gidasi olur, fiyat «tahmin» olarak fisin altinda durur, yer
+    # Mutfak'taki yer listesine girer. Olculmus hicbir sayiyi ezmez.
+    "besin.add": {
+        "modules": ("spi",),
+        "required": ("kayit_id", "ad"),
+        "optional": ("baslik", "why"),
+        "note": "BAM'ın kaynaktan çıkardığı besin değerlerini kendi gıdan olarak ekleme teklifi.",
+    },
+    "fiyat.add": {
+        "modules": ("spi",),
+        "required": ("kayit_id", "ad"),
+        "optional": ("baslik", "why"),
+        "note": "BAM'ın kaynaktan topladığı market fiyatını tahmin olarak ekleme teklifi.",
+    },
+    "yer.add": {
+        "modules": ("spi",),
+        "required": ("kayit_id", "ad"),
+        "optional": ("baslik", "why"),
+        "note": "BAM'ın kaynaktan topladığı yer listesini (spor salonu vb.) ekleme teklifi.",
+    },
     "measure.ask": {
         "modules": ("spi",),
         "required": ("date", "metric"),
@@ -131,7 +153,7 @@ FIELD_RULES = {
     "hedef_id": ("str", 1, 40), "hafta": ("int", 1, 104),
     "ders": ("int", 1, 30), "konu": ("int", 1, 2000),
     "bolum": ("int", 1, 10), "soru": ("int", 1, 200), "urun": ("str", 1, 40),
-    "metin": ("str", 3, 400),
+    "metin": ("str", 3, 400), "ad": ("str", 1, 80),
 }
 
 
@@ -233,6 +255,15 @@ def _cumle(module, kind, payload):
         return ("%s: %s günü için yazdığın «%s» kayda geçsin mi? %s kendi okuduğunu "
                 "gösterecek; onaylarsan kendi koduyla yazar." % (
                     ad, gun, p.get("metin"), ad))
+    if kind == "besin.add":
+        return ("%s: BAM «%s» için 100 gramın besin değerlerini çıkardı. Kendi gıdan olarak "
+                "eklensin mi? %s okuduğunu gösterecek." % (ad, p.get("ad"), ad))
+    if kind == "fiyat.add":
+        return ("%s: BAM «%s» için market fiyatlarını topladı. Tahmin olarak eklensin mi? "
+                "Kendi fişin her zaman önce gelir." % (ad, p.get("ad")))
+    if kind == "yer.add":
+        return ("%s: BAM «%s» listesini çıkardı. Yer listene eklensin mi?"
+                % (ad, p.get("baslik") or p.get("ad")))
     if kind == "measure.ask":
         return "%s: %s günü için «%s» ölçümünü girmeyi unutma." % (
             ad, gun, p.get("metric"))

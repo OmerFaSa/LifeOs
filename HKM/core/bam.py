@@ -38,7 +38,7 @@ import datetime
 import json
 import re
 
-from core import (ai, butce, depo, editor, intents, kaynakli, kitap, mufredat, planlama,
+from core import (ai, butce, depo, editor, intents, kaynakli, kitap, mufredat, planlama, spibilgi,
                   program, urunler, web)
 
 OFISLER = {
@@ -301,6 +301,8 @@ def arastirma_konusu(j):
     if g.get("mufredat"):
         m = g["mufredat"]
         return "müfredat %s %s" % (m["sinav"], m.get("bolum") or "")
+    if g.get("bilgi"):
+        return spibilgi.konu(g["bilgi"])
     if g.get("arastirma"):
         a = g["arastirma"]
         return "%s %s" % (a["konu"], a.get("ayrinti") or "")
@@ -568,6 +570,49 @@ def _mufredat_adimi(con, cfg, j, g, transport, now):
                       "kaynaklı" if etiket == "kaynakli" else "doğrulanmadı")}
 
 
+def _spibilgi_adimi(con, cfg, j, g, transport, now):
+    """SPİ bilgisi (core/spibilgi.py): besin degeri, market fiyati, yer.
+    Sorgular kuralla kurulur. Web yoksa ya da kaynak cikmazsa fiyat ve yer
+    MODEL CAGRILMADAN biter; besin model bilgisiyle «dogrulanmadi» yazilir."""
+    ad = spibilgi.TUR_AD[g["tur"]]
+    t = _kaynak_topla(con, cfg, j, "arastirma",
+                      lambda: (spibilgi.sorgular(g), [],
+                               "Sorgular kuralla kuruldu: ad + %s." % ad), transport, now)
+    if t[0] == "devam":
+        return t[1]
+    kaynaklar, metinler = ([], {}) if t[0] == "yok" else (t[1], t[2])
+    if not kaynaklar and g["tur"] != "besin":
+        return {"durum": "hata", "not": "%s yazılmadı: %s. Fiyat ve yer model bilgisinden "
+                                        "yazılmaz; web açıkken yeniden iste." % (ad.capitalize(), t[1])}
+    icerik = spibilgi.istem(g)
+    if kaynaklar:
+        icerik += "\n\nKAYNAKLAR\n" + kaynakli.blok(kaynaklar, metinler)
+    r = ai.ask(con, cfg, "bam.arastirma", "arastirma", [{"role": "user", "content": icerik}],
+               sistem=spibilgi.sistem(g["tur"], bool(kaynaklar)), transport=transport,
+               duzeltme=False, denetim="belge")
+    if not r.get("ok"):
+        return _model_hatasi(r)
+    govde, hata = spibilgi.ayikla(_json_ayikla(r["text"]), g)
+    if not hata and kaynaklar:
+        etiket, hata = spibilgi.dogrula(govde, metinler, kaynakli.alinti_dogru_mu)
+    if hata:
+        return {"durum": "hata", "not": "%s yazılmadı: %s" % (ad.capitalize(), hata)}
+    if kaynaklar:
+        govde["kaynaklar"] = _izli_kaynakca(kaynaklar, metinler)
+    else:
+        etiket = "dogrulanmadi"
+        govde["web"] = t[1]
+        govde["uyari"] = ("Kaynaksız: model bilgisinden yazıldı. Ambalajdaki besin "
+                          "etiketiyle karşılaştır.")
+    govde["konu"] = arastirma_konusu(j).strip()
+    k = kayit_ekle(con, "arastirma", spibilgi.baslik(g), govde, dogruluk=etiket,
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now, **_depo_yaz(j))
+    return {"durum": "tamam", "kayit_id": k["id"],
+            "kaynakli": {"asama": "bitti", "kaynak": len(kaynaklar)},
+            "not": spibilgi.ozet(govde) + (" %d kaynak." % len(kaynaklar) if kaynaklar
+                                           else " Kaynaksız, doğrulanmadı (%s)." % t[1])}
+
+
 def _onceki_surum(con, j):
     """Depolama «guncelle» dediyse yeni surumun oncesi."""
     d = _depo_karari(j)
@@ -731,6 +776,9 @@ def _arastirma_adimi(con, cfg, j, transport, now):
     g = (j.get("govde") or {}).get("mufredat")
     if g:
         return _mufredat_adimi(con, cfg, j, g, transport, now)
+    g = (j.get("govde") or {}).get("bilgi")
+    if g:
+        return _spibilgi_adimi(con, cfg, j, g, transport, now)
     t = _arastirma_kaynakli(con, cfg, j, transport, now)
     if t[0] == "devam":
         return t[1]

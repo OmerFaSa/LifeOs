@@ -281,7 +281,13 @@ Kütüphanem; tahmin–gerçek maliyet sapması.
   `depo.kayit_depo` → `maliyet`, çağrısız iş «veri yok»), yanlışları yanlış defterine
   ekleme (Part 7 madde 9; etiket uydurulmaz, defterde kullanıcı seçer, «Geri al»).
   Açık kalan: 60 soru tavanı parça parça seçeneğinde hâlâ sabit (`kitap.MAX_TOPLAM`).
-- 🔜 8c SPİ `besin.add` / `fiyat.add` / `yer.add` + diyete otomatik işleme.
+- ✅ 8c-1 HKM tarafı (HKM/MIMARI.md §8.30): King iş türü `spi.bilgi` (besin · fiyat ·
+  yer), `core/spibilgi.py` kurallı sorgu + tek yazım çağrısı + kod süzgeci (enerji
+  tutarlılığı, alıntıda sayı), fiyat/yer web'siz yazılmaz; niyetler `besin.add`,
+  `fiyat.add`, `yer.add`. Test `tests/test_spibilgi.py`.
+- 🔜 8c-2 SPİ tarafı: niyetleri çek → kendi koduyla sına → önizle → onayla yaz (besin
+  kullanıcı gıdası, fiyat «tahmin» fişin altında, yer listesi); Mutfak'tan istek.
+- ⏳ 8c-3 Diyete otomatik işleme (`nutri.js`).
 
 **Dilimler (sırayla, her biri test + commit + push):** 8a teklif (sınıf + maliyet +
 süre + onay) mevcut iş türleri için → 8b AYS fasikül/kitap parçalı + çözdüklerim +

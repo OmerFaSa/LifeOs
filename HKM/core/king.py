@@ -33,7 +33,7 @@ import json
 import re
 import statistics
 
-from core import (ai, bam, butce, depo, intents, kaynakli, kitap, mufredat, planlama, program,
+from core import (ai, bam, butce, depo, intents, kaynakli, kitap, mufredat, planlama, program, spibilgi,
                   urunler, web)
 from core import teklif as tkl
 
@@ -101,6 +101,16 @@ TURLER = {
         "ofisler": ["kayit", "arastirma", "planlama"],
         "model": True,
         "not": "Hedef Analisti birimleri yazar; kapasite, program ve denetim koddur.",
+    },
+    # SPİ bilgisi (core/spibilgi.py, Part 8c): besin degeri, market fiyati,
+    # yer listesi. Sorgular kuralla, sayilar kaynaktan, sinama koddan; fiyat ve
+    # yer web olmadan yazilmaz. SPİ kaydi kendi koduyla sinar ve onayla yazar.
+    "spi.bilgi": {
+        "ad": "SPİ bilgisi (besin, fiyat, yer)",
+        "moduller": ("spi",),
+        "ofisler": ["kayit", "arastirma"],
+        "model": True,
+        "not": "Araştırma Bürosu kaynaktan tipli kayıt yazar; alıntı ve sayı kodla denetlenir.",
     },
     "test.kitabi": {
         "ad": "Bölümlü test kitabı",
@@ -400,6 +410,11 @@ def _govde_temizle(tur, govde):
         if hatalar:
             return None, hatalar
         return {"program": g}, []
+    if tur == "spi.bilgi":
+        g, hatalar = spibilgi.temizle((govde or {}).get("bilgi"))
+        if hatalar:
+            return None, hatalar
+        return {"bilgi": g}, []
     return None, ["tanimsiz tur"]
 
 
@@ -407,7 +422,7 @@ def _govde_temizle(tur, govde):
 # ve bosluk farki ayni sinavdir.
 ANAHTAR = {"hedef.plan": planlama.anahtar, "sinav.mufredat": mufredat.anahtar,
            "test.kitabi": planlama.anahtar, "bam.urun": planlama.anahtar,
-           "bam.plan": program.anahtar,
+           "bam.plan": program.anahtar, "spi.bilgi": spibilgi.anahtar,
            "bam.arastirma": lambda t: depo.konu_anahtari(
                "%s %s" % (t["arastirma"]["konu"], t["arastirma"].get("ayrinti") or ""))}
 
@@ -443,6 +458,8 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
         konu = kaynakli.istek_talebi(temiz["arastirma"])
     if tur == "bam.plan" and not str(konu or "").strip():
         konu = program.talep(temiz["program"])
+    if tur == "spi.bilgi" and not str(konu or "").strip():
+        konu = spibilgi.talep(temiz["bilgi"])
     if tur == "test.kitabi" and not str(konu or "").strip():
         konu = "«%s» — %d bölümlük test kitabı" % (temiz["kitap"]["baslik"],
                                                   len(temiz["kitap"]["bolumler"]))
@@ -774,6 +791,24 @@ def _teklif_mufredat(con, e, kayit_id, now=None):
     return ""
 
 
+def _teklif_spibilgi(con, e, kayit_id, now=None):
+    """Besin, fiyat ya da yer kaydini SPİ'ye niyet olarak birakir. SPİ kaydi
+    ceker, KENDI koduyla sinar, onizletir ve onayla yazar."""
+    k = bam.kayit_getir(con, kayit_id) or {}
+    g = k.get("govde") or {}
+    tur = g.get("tur")
+    if tur not in spibilgi.TURLER:
+        return " Kayıt SPİ bilgisi biçiminde değil; teklif bırakılmadı."
+    payload = {"kayit_id": int(kayit_id), "ad": str(g.get("ad") or e.get("konu") or "?")[:80],
+               "baslik": str(k.get("baslik") or e.get("konu") or "")[:120] or "SPİ bilgisi"}
+    n = intents.create(con, e["modul"], spibilgi.NIYET[tur], payload, None, source="bam")
+    if n.get("ok"):
+        bam.iz_ekle(con, "kayit", kayit_id, "niyet", n["intent"]["id"], now=now)
+        return " %s SPİ’ye teklif olarak bırakıldı; SPİ kendi koduyla sınayıp onayınla yazar." % (
+            spibilgi.TUR_AD[tur].capitalize())
+    return ""
+
+
 def _teklif_kitap(con, e, kayit_id, now=None):
     """Test kitabini AYS'ye teklif olarak birakir."""
     g = (bam.kayit_getir(con, kayit_id) or {}).get("govde") or {}
@@ -849,6 +884,8 @@ def _teklif(con, e, kayit_id, now=None):
         return _teklif_mufredat(con, e, kayit_id, now=now)
     if e["tur"] == "test.kitabi":
         return _teklif_kitap(con, e, kayit_id, now=now)
+    if e["tur"] == "spi.bilgi":
+        return _teklif_spibilgi(con, e, kayit_id, now=now)
     if e["tur"] != "hedef.plan":
         return ""
     k = bam.kayit_getir(con, kayit_id) or {}
@@ -1013,6 +1050,11 @@ def bekci(con, cfg, now=None, tasiyici=None):
     if g.get("tur") == "mufredat":
         bildir(con, "ays", None, "guncellik", "«%s» kaynakları değişti. Sınav profilini "
                "yeniden isteyerek yeni sürümü alabilirsin." % k["baslik"], now=at)
+        bildir(con, "hkm", None, "guncellik", neden, now=at)
+        return out
+    if g.get("tur") in spibilgi.TURLER:
+        bildir(con, "spi", None, "guncellik", "«%s» kaynakları değişti. Yeniden isteyerek "
+               "güncel değeri alabilirsin." % k["baslik"], now=at)
         bildir(con, "hkm", None, "guncellik", neden, now=at)
         return out
     konu = str(g.get("konu") or "").strip()[:MAX_KONU]

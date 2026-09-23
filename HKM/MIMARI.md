@@ -957,6 +957,28 @@ girmez, «Geri al» kalır. Hata etiketi UYDURULMAZ: kayıt etiketsiz gelir, def
 hata dağılımına ve reçeteye girmez. Testler: `AYS/src/tests/testkitabi.test.js`,
 `tests/test_depo.py`.
 
+## 8.30 SPİ bilgisi — `core/spibilgi.py` (Part 8c)
+
+King iş türü `spi.bilgi` (yalnız SPİ): **besin** değerleri (100 g), **market fiyatı**,
+**yer** listesi (spor salonu vb.; semt ya da şehir zorunlu). Girdi kapalıdır: tür, ad,
+konum; sağlık verisi bu işe gitmez. Teklif: 1 yazım çağrısı + kurallı 2 arama + en çok
+5 sayfa okuma (`teklif.birim`), orta sınıf; onaysız açılmaz.
+
+Araştırma Bürosu sorguları KURALLA kurar (model yok), kaynakları okur, model tek
+çağrıda tipli JSON yazar. Kod süzer: makrolar enerjiyle tutmazsa (|4p+4c+9f − kcal| >
+max(40, %25)) ya da toplamı 100 g'ı aşarsa kayıt YAZILMAZ; aralık dışı ve bilinmeyen
+mikro besin boş kalır (`bilinmeyen_mikro`), sıfır yazılmaz; doymuş yağ toplam yağı,
+şeker karbonhidratı aşamaz. Alıntı kaynakta, SAYI alıntıda aranır
+(`spibilgi.sayi_alintida`: 14,1 / 14.1 / 1.299,90 biçimleri). Besinde en az bir makro
+alıntıda geçmezse kayıt «doğrulanmadı»dır; fiyatta ve yerde doğrulanmayan satır düşer,
+birim fiyatı (TL/kg) ve ortancayı kod hesaplar, etiket «tahmin». Yerin fiyatı alıntıda
+yoksa fiyat boş kalır. **Fiyat ve yer model bilgisinden yazılmaz:** web kapalıysa ya da
+kaynak çıkmazsa iş model çağırmadan «hata» ile biter ve nedenini söyler; besin web'siz
+yazılabilir ama «doğrulanmadı» ve uyarılıdır. Biten kayıt SPİ'ye niyet olarak bırakılır
+(`besin.add` / `fiyat.add` / `yer.add`, `king._teklif_spibilgi`); aynı konu depoda
+güncelse yeniden aranmaz (Depolama Bürosu, konu anahtarı `spibilgi.konu`). King'in
+güncellik turu değişen kaynağı SPİ'ye bildirir. Testler: `tests/test_spibilgi.py`.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |
