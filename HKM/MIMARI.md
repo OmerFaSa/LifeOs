@@ -886,6 +886,33 @@ ve kaynaklar görünür; kaynağın iz parmağı sunucudan çıkmaz. Tarayıcı 
 çıkmaz, model çağırmaz, kayıt silmez; tazeleme eylemi Part 8e'dedir.
 Testler: `tests/test_depo.py`, `tests/test_daemon.py`.
 
+## 8.28 King'in teklifi — `core/teklif.py` (Part 8a)
+
+İş BAM'da açılmadan önce King üç şeyi kodla hesaplar ve iş emrine yazar
+(`is_emirleri.teklif`):
+
+- **Yoğunluk sınıfı.** Ölçü «iş birimi»: tahmini model çağrısı + web isteği,
+  ofislerin gerçek çağrı yerlerinden sayılır (araştırma ~4 çağrı + ~8 web; kitapta
+  bölüm × 2: üretim + bağımsız çözüm; ürün 1; program 1; kural işi 0). Eşikler TEK
+  tabloda (`SINIFLAR`): düşük ≤ 3 çağrı ve web yok · orta ≤ 10 · yüksek ≤ 40 · ekstra.
+- **Maliyet, önce ölçümden.** Model çağrısı ait olduğu BAM işine yazılır
+  (`usage.is_id`; `butce.is_baglami` iş parçacığına özel bağlam, `bam.ilerlet`
+  kurar). Biten işin ölçülen maliyeti `sonuc.maliyet`'tedir. Teklif: aynı tür ve
+  sınıfta ≥ 3 biten işin ortancası ve p90 → yoksa ölçülen çağrı başına ortanca ×
+  tahmini çağrı → yoksa jeton tahmini × modelin tarifesi. Üçü de «tahmin» ve
+  dayanaklı. Model atanmamışsa maliyet uydurulmaz: «hesaplanamadı».
+- **Süre** `king.tahmini_sure` (kitabın ek bölümleri ek tik); **bütçe payı** aylık
+  tavandan («aylık bütçenin %X’i; kalan Y»), tavan yoksa söylenir.
+
+Seçenekler genel kuralla: tür başına bir küçültücü (`KUCULT`: kitap → yalnız 1.
+bölüm, kaynaklı ürün/program → kaynaksız). Öneri koddan: tam seçenek kalan bütçeye
+sığmıyorsa ya da tavanın %25'inden fazlasını yiyorsa küçük önerilir, gerekçesi
+yazılır. Seçeneklerin gövdesi sunucuda kalır; ekrana ve bildirime yalnız sayı ve
+cümle gider. HKM › Ofis › King kuyruğu teklifi, gerçek maliyeti ve tahmin–ölçüm
+sapmasını (`king.maliyet_sapmasi`) gösterir. Onay kapısı (işin teklifte bekleyip
+kullanıcı onayıyla açılması) 8a-3'tedir. Testler: `tests/test_teklif.py`,
+`tests/test_butce.py`, `tests/test_urun.py`.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

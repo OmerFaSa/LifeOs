@@ -259,9 +259,19 @@ durumu ve üç kanaldan onay; seçenekler; parçalı teslim + ara onay; yeni niy
 `besin.add`, `fiyat.add`, `yer.add`, `unite.add`; modüllerin montaj ekranları ve
 Kütüphanem; tahmin–gerçek maliyet sapması.
 
-**Sıradaki: 🔜 8a.** İlk bulgu (2026-09-23): `usage` defterinde çağrının hangi BAM
-işine ait olduğu yazılmıyor; «maliyet ölçümden» için önce bu bağ kurulmalı (BAM
-adımı koşarken iş kimliği iş parçacığına özel bağlamda, `butce.record` onu yazar).
+**8a ilerleyişi:**
+- ✅ 8a-1 Model çağrısı ait olduğu BAM işine yazılır (`usage.is_id`, `butce.is_baglami`);
+  biten işin ölçülen maliyeti `sonuc.maliyet`.
+- ✅ 8a-2 Teklif hesabı (`HKM/core/teklif.py`, HKM/MIMARI.md §8.28): sınıf, maliyet
+  (ölçümden → çağrı başına → tarife), süre, bütçe payı, seçenekler (`KUCULT`), öneri.
+  Her iş emrine yazılır, King kuyruğunda ve bildirimde görünür. İş HENÜZ onaysız açılır.
+- 🔜 8a-3 Onay kapısı: `teklif` durumu (BAM'da iş açılmaz), `king.teklif_onayla(emir,
+  secenek)` / `teklif_reddet`; HKM web düğmeleri, modül bildiriminde «Onayla», Telegram'da
+  «1 · 2 · iptal». Kural motoru işi (model yok, bedava) teklif beklemez. Ayar:
+  «düşük işleri sormadan yap» (varsayılan kapalı → düşük de sorar). Etkilenen testler
+  ~34 çağrı (test_king, test_urun, test_kitap, test_depo, test_program, test_daemon…)
+  ve `tools/entegre.js` §0.7/§2.76; modül ön yüzleri (`brand/ortak/urun.js`, SPİ plan)
+  «teklif bekliyor» durumunu göstermeli.
 
 **Dilimler (sırayla, her biri test + commit + push):** 8a teklif (sınıf + maliyet +
 süre + onay) mevcut iş türleri için → 8b AYS fasikül/kitap parçalı + çözdüklerim +

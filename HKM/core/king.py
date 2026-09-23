@@ -34,6 +34,7 @@ import statistics
 
 from core import (ai, bam, butce, depo, intents, kaynakli, kitap, mufredat, planlama, program,
                   urunler, web)
+from core import teklif as tkl
 
 # «hkm»: kullanicinin HKM'nin kendisinden (Telegram, HKM ekrani) verdigi is.
 # O yolda modul kocu ve Patronu yoktur: kullanici dogrudan King'e yazar.
@@ -144,7 +145,7 @@ def _sure_yaz(sn):
 def _satir(r):
     d = dict(r)
     for k, bos in (("govde", {}), ("iz", []), ("kontrol", []), ("tahmin", None),
-                   ("sonuc", None)):
+                   ("sonuc", None), ("teklif", None)):
         try:
             d[k] = json.loads(d[k]) if d.get(k) else bos
         except ValueError:
@@ -209,9 +210,10 @@ def okundu(con, id_, now=None):
 
 # ----------------------------------------------------------- tahmini sure
 
-def tahmini_sure(con, ofisler):
+def tahmini_sure(con, ofisler, ek_adim=0):
     """Ayni ofis dizisinden gecmis ve bitmis islerin gercek surelerinin
-    ortancasi; yetmezse adim sayisi x ritim araligi. Ikisi de «tahmin»."""
+    ortancasi; yetmezse adim sayisi x ritim araligi. Ikisi de «tahmin».
+    `ek_adim`: bir ofisin birden cok tikte bittigi is (kitabin bolumleri)."""
     anahtar = json.dumps(list(ofisler))
     sureler = []
     for r in con.execute("SELECT created_at, updated_at FROM bam_isler WHERE ofisler=? AND "
@@ -223,10 +225,29 @@ def tahmini_sure(con, ofisler):
         sn = statistics.median(sureler)
         return {"sn": int(round(sn)), "etiket": "tahmin", "metin": _sure_yaz(sn),
                 "dayanak": "son %d benzer işin gerçek sürelerinin ortancası" % len(sureler)}
-    sn = len(ofisler) * RITIM_SN
+    n = len(ofisler) + int(ek_adim or 0)
+    sn = n * RITIM_SN
     return {"sn": sn, "etiket": "tahmin", "metin": _sure_yaz(sn),
-            "dayanak": "yeterli geçmiş iş yok: %d adım × %d saniyelik ritim"
-                       % (len(ofisler), RITIM_SN)}
+            "dayanak": "yeterli geçmiş iş yok: %d adım × %d saniyelik ritim" % (n, RITIM_SN)}
+
+
+def maliyet_sapmasi(con, limit=50):
+    """Teklifteki maliyet tahmini ile olculen maliyet — olculur (Part 8a)."""
+    out = []
+    for e in emirler(con, limit):
+        t, s = e.get("teklif") or {}, e.get("sonuc") or {}
+        sec = next((x for x in t.get("secenekler") or [] if x.get("id") == t.get("secilen", "tam")),
+                   None)
+        tah = ((sec or {}).get("maliyet") or {}).get("usd")
+        ger = (s.get("maliyet") or {}).get("usd")
+        if tah is not None and ger is not None and (s.get("maliyet") or {}).get("cagri"):
+            out.append({"id": e["id"], "tahmin_usd": tah, "gercek_usd": ger})
+    if not out:
+        return {"n": 0, "ortalama_sapma_usd": None, "metin": None, "isler": []}
+    sapma = sum(abs(x["gercek_usd"] - x["tahmin_usd"]) for x in out) / len(out)
+    return {"n": len(out), "ortalama_sapma_usd": round(sapma, 6), "isler": out[:20],
+            "metin": "Tahmin ile ölçülen maliyet arasındaki ortalama sapma %s (%d iş, ölçüldü)."
+                     % (tkl._usd(sapma), len(out))}
 
 
 def sure_sapmasi(con, limit=50):
@@ -470,19 +491,28 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
         kontrol.append(_madde("depo", True, "Depoda aynı girdiyle kurulmuş bir kayıt yok."))
 
     tahmin = None
+    tk = None
     if karar != "ret":
         tahmin = ({"sn": 0, "etiket": "hesaplandi", "metin": "hemen",
                    "dayanak": "depodaki kayıt yeniden kullanıldı"} if depo_
                   else tahmini_sure(con, ofisler_of(tur, temiz)))
+        # King'in teklifi (core/teklif.py): sinif, maliyet, sure, secenekler.
+        # Depodan kapanan is bedavadir; teklif gerekmez.
+        if not depo_:
+            tk = tkl.kur(con, cfg, tur, temiz, ofisler_of, tahmini_sure)
+            tahmin = dict(tahmin, sn=tk["secenekler"][0]["sure"]["sn"],
+                          metin=tk["secenekler"][0]["sure"]["metin"],
+                          dayanak=tk["secenekler"][0]["sure"]["dayanak"])
     durum = {"onay": "onaylandi", "kismi": "kismen_onay", "ret": "reddedildi"}[karar]
     cur = con.execute("INSERT INTO is_emirleri(modul,tur,konu,neden,govde,anahtar,iz,karar,"
-                      "kontrol,tahmin,durum,created_at,updated_at,kanal,hedef) VALUES "
-                      "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                      "kontrol,tahmin,durum,created_at,updated_at,kanal,hedef,teklif) VALUES "
+                      "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                       (modul, tur, konu, neden, json.dumps(temiz, ensure_ascii=False), anahtar,
                        json.dumps(iz, ensure_ascii=False), karar,
                        json.dumps(kontrol, ensure_ascii=False),
                        json.dumps(tahmin, ensure_ascii=False) if tahmin else None, durum, at, at,
-                       kanal, hedef))
+                       kanal, hedef,
+                       json.dumps(tkl.ozet(tk), ensure_ascii=False) if tk else None))
     e = emir(con, cur.lastrowid)
 
     if karar == "ret":
@@ -518,9 +548,11 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
     _yaz(con, e, at)
     bam.iz_ekle(con, "emir", e["id"], "is", j["id"], now=at)
     bildir(con, modul, e["id"], durum,
-           "King «%s» işini %s. Tahmini süre %s (tahmin: %s)."
+           "King «%s» işini %s. Tahmini süre %s (tahmin: %s).%s"
            % (konu, "onayladı" if karar == "onay" else "kısmen onayladı", tahmin["metin"],
-              tahmin["dayanak"])
+              tahmin["dayanak"], (" Sınıf %s, maliyet %s (tahmin)." % (
+                  tk["secenekler"][0]["sinif_ad"], tk["secenekler"][0]["maliyet"]["metin"]))
+              if tk else "")
            + ("" if karar == "onay" else " Eksik: " + "; ".join(
                m["not"] for m in kontrol if not m["ok"])), now=at)
     return {"ok": True, "yeni": True, "emir": emir(con, e["id"]), "karar": karar}
@@ -710,7 +742,7 @@ def esitle(con, now=None):
             e["sonuc"] = {"kayit_id": kid, "gercek_sn": gercek,
                           "gercek_metin": _sure_yaz(gercek) if gercek is not None else None,
                           # Olculen maliyet (usage.is_id): teklifin ogrendigi sayi.
-                          "maliyet": butce.is_maliyeti(con, e["bam_is_id"])}
+                          "maliyet": tkl.olculen(butce.is_maliyeti(con, e["bam_is_id"]))}
             notlar = [a.get("not") for a in j["adimlar"] if a.get("ofis") != "kayit"
                       and a.get("not")]
             _yaz(con, e, now)
@@ -810,4 +842,5 @@ def ozet(con):
     return {"turler": {k: {"ad": v["ad"], "moduller": list(v["moduller"]),
                            "ofisler": v["ofisler"], "model": v["model"]}
                        for k, v in TURLER.items()},
-            "emirler": emirler(con, 30), "sayac": sayac, "sure_sapmasi": sure_sapmasi(con)}
+            "emirler": emirler(con, 30), "sayac": sayac, "sure_sapmasi": sure_sapmasi(con),
+            "maliyet_sapmasi": maliyet_sapmasi(con)}

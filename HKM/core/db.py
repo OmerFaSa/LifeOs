@@ -453,6 +453,8 @@ MIGRATIONS = [
     # gercek maliyeti buradan OLCULUR; King'in teklifi ondan ogrenir.
     # Bos: sohbet, yoklama gibi bir ise ait olmayan cagri.
     ("usage", "is_id", "INTEGER"),
+    # King'in teklifi (core/teklif.py): sinif, maliyet, sure, secenekler.
+    ("is_emirleri", "teklif", "TEXT"),
 ]
 
 

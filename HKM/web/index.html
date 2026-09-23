@@ -3004,6 +3004,12 @@ details.detay > summary:hover{ color:var(--fg); }
           + ' <span title="' + esc(t.dayanak || '') + '">(tahmin · ' + esc(t.dayanak || '')
           + ')</span>' + (s.gercek_metin ? ' · gerçek: ' + esc(s.gercek_metin) : '')
           + '</p>' : '')
+        /* King'in teklifi (core/teklif.py) ve ölçülen maliyet: cümleyi
+           sunucu kurar, bu sayfa yalnız yazar. */
+        + (e.teklif && e.teklif.metin ? '<p class="muted" style="margin:4px 0 0">'
+          + esc(e.teklif.metin) + '</p>' : '')
+        + (s.maliyet && s.maliyet.metin ? '<p class="muted" style="margin:4px 0 0">Gerçek '
+          + 'maliyet: ' + esc(s.maliyet.metin) + '</p>' : '')
         + '<details class="detay"><summary>İmkân kontrolü</summary><ul class="muted" '
         + 'style="margin:4px 0 0 18px">' + (e.kontrol || []).map(function(m){
           return '<li><span class="' + (m.ok ? 'ok' : (m.etki === 'ret' ? 'danger' : 'warn'))
@@ -3016,6 +3022,8 @@ details.detay > summary:hover{ color:var(--fg); }
     });
     var sp = k && k.sure_sapmasi;
     if(sp && sp.metin) h += '<p class="muted" style="margin-top:8px">' + esc(sp.metin) + '</p>';
+    var mp = k && k.maliyet_sapmasi;
+    if(mp && mp.metin) h += '<p class="muted">' + esc(mp.metin) + '</p>';
     $('ofis-king').innerHTML = h;
   }
 
