@@ -91,7 +91,7 @@ def isle(con, cfg, kanal, m, th=None, transport=None, date=None):
               for x in patron.history(con, limit=12, agent="king")
               if x["role"] in ("user", "manager")]
     r = sohbet.konus(con, cfg, m.get("text"), gun, gorevli="king",
-                     gecmis=gecmis, th=th, kanal=kanal)
+                     gecmis=gecmis, th=th, kanal=kanal, hedef=m.get("from"))
     satir = outbox.enqueue(con, kanal, outbox.reply_kind(kimlik), gun,
                            r["text"], target=m.get("from"))
     ozet = outbox.flush(con, cfg, limit=5, transport=transport)

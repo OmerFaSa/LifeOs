@@ -188,20 +188,23 @@ def _emir_cevabi(con, r, is_ad, ek):
     if e["durum"] == "reddedildi":
         return "Bu işi açamadım: %s" % "; ".join(m["not"] for m in e["kontrol"] if not m["ok"])
     if e["durum"] == "bitti":
-        return "«%s» depoda hazırdı ve güncel.%s" % (
-            e["konu"], king._teklif(con, e, e["sonuc"]["kayit_id"]))
+        return "«%s» depoda hazırdı ve güncel.%s%s" % (
+            e["konu"], king._teklif(con, e, e["sonuc"]["kayit_id"]),
+            " Belgesini buraya yolluyorum." if e.get("kanal") == "telegram" else "")
     if not r.get("yeni"):
         return "«%s» zaten hazırlanıyor (iş emri #%d). Bitince haber veririm." % (
             e["konu"], e["id"])
     t = e.get("tahmin") or {}
     eksik = [m["not"] for m in e["kontrol"] if not m["ok"]]
-    return ("%s (iş emri #%d). %s Tahmini süre %s (tahmin). Bitince bildirim düşer; "
-            "HKM › Ofis’ten açabilirsin.%s" % (
-                is_ad % e["konu"], e["id"], ek, t.get("metin") or "bilinmiyor",
+    teslim = {"telegram": "Bitince sonucu ve belgesini buraya yollarım.",
+              "whatsapp": "Bitince sonucu buraya yazarım; belgeyi HKM › Ofis’ten indirirsin."
+              }.get(e.get("kanal"), "Bitince bildirim düşer; HKM › Ofis’ten açabilirsin.")
+    return ("%s (iş emri #%d). %s Tahmini süre %s (tahmin). %s%s" % (
+                is_ad % e["konu"], e["id"], ek, t.get("metin") or "bilinmiyor", teslim,
                 (" Eksik: " + "; ".join(eksik)) if eksik else ""))
 
 
-def plani_devret(con, cfg, metin, istek, now=None):
+def plani_devret(con, cfg, metin, istek, now=None, kanal=None, hedef=None):
     """«X icin N haftalik plan yap, haftada M saat» -> bam.plan emri.
     Hafta ya da sure yoksa SORULUR; tahminle plan kurulmaz."""
     from core import king
@@ -215,7 +218,7 @@ def plani_devret(con, cfg, metin, istek, now=None):
     g["konu"] = g["konu"][:200]
     g["kaynakli"] = bool(ARASTIR_TETIK.search(metin))
     r = king.emir_ac(con, cfg, "hkm", "bam.plan", {"program": g},
-                     neden="Sohbetten: " + metin[:300], now=now)
+                     neden="Sohbetten: " + metin[:300], now=now, kanal=kanal, hedef=hedef)
     if not r.get("ok"):
         return "Plan emri açılamadı: %s" % "; ".join(r.get("errors") or ["bilinmeyen hata"])
     return _emir_cevabi(con, r, "«%s» planını Planlama Bürosu’na verdim",
@@ -251,7 +254,7 @@ def urun_istegi(metin):
     return u
 
 
-def urunu_devret(con, cfg, metin, u, now=None):
+def urunu_devret(con, cfg, metin, u, now=None, kanal=None, hedef=None):
     from core import king
     ad = urunler.URUNLER[u["tur"]]["ad"]
     if len(u["konu"]) < 3:
@@ -260,7 +263,7 @@ def urunu_devret(con, cfg, metin, u, now=None):
     if u["kaynakli"]:
         g["kaynakli"] = True
     r = king.emir_ac(con, cfg, "hkm", "bam.urun", {"urun": g},
-                     neden="Sohbetten: " + metin[:300], now=now)
+                     neden="Sohbetten: " + metin[:300], now=now, kanal=kanal, hedef=hedef)
     if not r.get("ok"):
         return "Ürün emri açılamadı: %s" % "; ".join(r.get("errors") or ["bilinmeyen hata"])
     kaynakli = (r["emir"].get("govde") or {}).get("urun", {}).get("kaynakli")
@@ -271,13 +274,13 @@ def urunu_devret(con, cfg, metin, u, now=None):
                             else "; bu konuda güncel araştırma varsa üretim ona dayanır"))
 
 
-def arastirmayi_devret(con, cfg, metin, konu, now=None):
+def arastirmayi_devret(con, cfg, metin, konu, now=None, kanal=None, hedef=None):
     """King'in cevabi: is emri acilir; cumleyi kod kurar."""
     from core import king          # king -> bam -> ... ; dongusel ice aktarimi onler
     if len(konu) < 3:
         return "Neyi araştırmamı istiyorsun? Konuyu bir cümleyle yaz; Araştırma Bürosu’na vereyim."
     r = king.emir_ac(con, cfg, "hkm", "bam.arastirma", {"arastirma": {"konu": konu[:200]}},
-                     neden="Sohbetten: " + metin[:300], now=now)
+                     neden="Sohbetten: " + metin[:300], now=now, kanal=kanal, hedef=hedef)
     if not r.get("ok"):
         return "Araştırma emri açılamadı: %s" % "; ".join(r.get("errors") or ["bilinmeyen hata"])
     return _emir_cevabi(con, r, "Araştırmayı ben yapmıyorum; «%s» konusunu Araştırma Bürosu’na "
@@ -301,7 +304,7 @@ def _yedek_metin(r, yedek):
 
 
 def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
-          user="ben", transport=None, kayit=True, kanal="local"):
+          user="ben", transport=None, kayit=True, kanal="local", hedef=None):
     """Bir mesaja cevap. Once komut, sonra model, sonra durust bir «yok».
 
     Doner: {"mode": komut|model|yok, "text": ..., ...}
@@ -322,21 +325,21 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     # emir acilir. «arastirip plan yap» planin kaynakli olmasidir.
     pl = program.tani(metin) if gorevli == "king" else None
     if pl is not None:
-        govde = plani_devret(con, cfg, metin, pl)
+        govde = plani_devret(con, cfg, metin, pl, kanal=kanal, hedef=hedef)
         if kayit:
             patron.log(con, kanal, "user", metin, agent=gorevli)
             patron.log(con, kanal, "manager", govde, agent=gorevli)
         return {"ok": True, "mode": "emir", "command": "plan", "text": govde, "agent": gorevli}
     u = urun_istegi(metin) if gorevli == "king" else None
     if u is not None:
-        govde = urunu_devret(con, cfg, metin, u)
+        govde = urunu_devret(con, cfg, metin, u, kanal=kanal, hedef=hedef)
         if kayit:
             patron.log(con, kanal, "user", metin, agent=gorevli)
             patron.log(con, kanal, "manager", govde, agent=gorevli)
         return {"ok": True, "mode": "emir", "command": "urun", "text": govde, "agent": gorevli}
     konu = arastirma_konusu(metin) if gorevli == "king" else None
     if konu is not None:
-        govde = arastirmayi_devret(con, cfg, metin, konu)
+        govde = arastirmayi_devret(con, cfg, metin, konu, kanal=kanal, hedef=hedef)
         if kayit:
             patron.log(con, kanal, "user", metin, agent=gorevli)
             patron.log(con, kanal, "manager", govde, agent=gorevli)

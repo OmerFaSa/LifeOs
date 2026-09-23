@@ -19,7 +19,7 @@
         «rapor ver» brifing olarak kalir."""
 import json
 
-from core import bam, cikti, db, editor, intents, king, sohbet, urunler
+from core import bam, cikti, db, editor, gelen, intents, king, outbox, sohbet, urunler
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
 from tests.test_kaynakli import _Ag, _Model
@@ -256,3 +256,69 @@ def run():
         eq(len(king.emirler(con)), 1)
     test("King sohbeti urun istegini emre cevirir; brifing kelimeleri urun degildir",
          t_sohbet_urun)
+
+    # W5 — Telegram'dan gelen is, sonucunu Telegram'a birakir.
+    def _telegram_cfg():
+        cfg = _cfg()
+        cfg["channels"] = {"telegram": {"enabled": True, "bot_token": "B", "allow_from": ["7"]}}
+        return cfg
+
+    def _tasiyici(giden):
+        def t(url, govde, basliklar=None):
+            giden.append((url, govde))
+            return 200, '{"ok": true, "result": {"message_id": 1}}'
+        return t
+
+    def t_telegram_teslim():
+        con = db.connect(":memory:")
+        cfg, m, giden = _telegram_cfg(), _UrunModel(), []
+        tas = _tasiyici(giden)
+        r = gelen.isle(con, cfg, "telegram", {"from": "7", "id": "1",
+                       "text": "Osmanlı kuruluşu hakkında pankart hazırla"},
+                       transport=tas, date="2026-09-23")
+        eq((r["command"], r["sent"]), ("urun", 1))
+        e = king.emirler(con)[0]
+        eq((e["tur"], e["kanal"], e["hedef"]), ("bam.urun", "telegram", "7"))
+        ok("buraya yollarım" in json.dumps(giden[0][1], ensure_ascii=False), giden[0][1])
+        del giden[:]
+        _tik(con, cfg, m, 2)
+        eq(king.emir(con, e["id"])["durum"], "bitti")
+        eq(outbox.flush(con, cfg, transport=tas)["sent"], 2)
+        eq(sorted(u.rsplit("/", 1)[1] for u, _ in giden), ["sendDocument", "sendMessage"])
+        mesaj = next(g for u, g in giden if u.endswith("sendMessage"))
+        ok("bitti" in json.dumps(mesaj, ensure_ascii=False), mesaj)
+        belge = next(g for u, g in giden if u.endswith("sendDocument"))
+        ok(b"%PDF" in belge or b"filename=" in belge)
+        ok(b'name="chat_id"\r\n\r\n7' in belge)
+        # Ayni durum iki kez gitmez: esitleme tekrar kossa da kuyruk bostur.
+        _tik(con, cfg, m, 1)
+        eq(outbox.flush(con, cfg, transport=tas)["sent"], 0)
+        # Ayni istek yeniden gelirse is depodan kapanir; yalniz belge gider.
+        del giden[:]
+        r2 = gelen.isle(con, cfg, "telegram", {"from": "7", "id": "2",
+                        "text": "Osmanlı kuruluşu hakkında pankart hazırla"},
+                        transport=tas, date="2026-09-23")
+        eq(r2["sent"], 2)
+        ok("depoda hazırdı" in json.dumps(giden, ensure_ascii=False, default=str))
+        eq(len([u for u, _ in giden if u.endswith("sendDocument")]), 1)
+    test("Telegram'dan istenen isin sonucu ve belgesi ayni sohbete teslim edilir",
+         t_telegram_teslim)
+
+    def t_teslim_kanallari():
+        con = db.connect(":memory:")
+        cfg, m = _cfg(), _UrunModel()
+        a = king.emir_ac(con, cfg, "hkm", "bam.urun",
+                         {"urun": {"tur": "pankart", "konu": "Su içmenin yararları"}},
+                         now=AN, kanal="whatsapp", hedef="905551112233")["emir"]
+        b = king.emir_ac(con, cfg, "hkm", "bam.urun",
+                         {"urun": {"tur": "pankart", "konu": "Uyku düzeni"}},
+                         now=AN, kanal="local", hedef="x")["emir"]
+        eq((a["kanal"], b["kanal"], b["hedef"]), ("whatsapp", None, None))
+        _tik(con, cfg, m, 4)
+        satir = [dict(x) for x in con.execute("SELECT * FROM outbox").fetchall()]
+        eq([(x["channel"], x["target"], x["ek"]) for x in satir],
+           [("whatsapp", "905551112233", None)])
+        ok("belge gönderilemiyor" in satir[0]["text"] and "bitti" in satir[0]["text"],
+           satir[0]["text"])
+    test("belge yolu olmayan kanala metin gider ve bu soylenir; ekrandan gelen emre mesaj gitmez",
+         t_teslim_kanallari)

@@ -221,6 +221,14 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
   eşiğin üstündeyse kullanıcı onaylar.
 - Bildirim kuyruğu (onaylandı, başladı, bitti, bekliyor, reddedildi), iş durumu,
   iptal ve devam, öncelik.
+- **Kuruldu (W5 — kanaldan istek ve teslim):** Telegram ya da WhatsApp'tan
+  gelen araştırma, plan ve ürün isteği iş emrine kanalı ve alıcısıyla yazılır
+  (`is_emirleri.kanal/hedef`). Eşitleme durum değiştiğinde (bitti, kısmen,
+  bekliyor, hata) sonucu giden kutusuyla aynı sohbete bırakır; bitmiş işin
+  kaydı Telegram'a belge olarak gider (gönderim anında PDF, olmazsa HTML).
+  WhatsApp'a belge yolu yok ve mesajda söylenir. Aynı durum iki kez gitmez;
+  depodan hemen kapanan işte yalnız belge gider. Aynı iş zaten açıksa ve
+  kanalsızsa, soranın kanalı ona yazılır. «başladı» ve «iptal» kanala gitmez.
 
 ### G. Modül entegrasyonu (AYS, SPİ, ESP)
 - Hedef sohbeti ve netleştirme kartları; senaryo seçimi arayüzü.

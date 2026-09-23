@@ -384,8 +384,19 @@ ANAHTAR = {"hedef.plan": planlama.anahtar, "sinav.mufredat": mufredat.anahtar,
                "%s %s" % (t["arastirma"]["konu"], t["arastirma"].get("ayrinti") or ""))}
 
 
-def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
-    """Modulun is emri. Doner: {ok, emir, karar, ...} ya da {ok:False, errors}."""
+# Sonucu gelen kanala TESLIM edilen kanallar (W5). «local» (HKM ekrani) ve
+# moduller bildirim kuyrugunu okur; onlara ayrica mesaj gitmez.
+TESLIM_KANALLARI = ("telegram", "whatsapp")
+MAX_HEDEF = 80
+
+
+def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None, hedef=None):
+    """Modulun is emri. Doner: {ok, emir, karar, ...} ya da {ok:False, errors}.
+
+    `kanal`/`hedef`: emir Telegram ya da WhatsApp sohbetinden geldiyse o
+    kanal ve alici. Is bitince sonuc AYNI kanaldan teslim edilir (_teslim)."""
+    kanal = kanal if kanal in TESLIM_KANALLARI else None
+    hedef = (str(hedef).strip()[:MAX_HEDEF] or None) if (kanal and hedef) else None
     if modul not in MODULLER:
         return {"ok": False, "errors": ["bilinmeyen modul"]}
     t = TURLER.get(tur)
@@ -417,6 +428,11 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
                       "ORDER BY id DESC LIMIT 1" % ",".join("?" * len(ACIK)),
                       (anahtar,) + ACIK).fetchone()
     if var:
+        # Ayni is Telegram'dan da istendiyse sonuc oraya da gitsin: kanalsiz
+        # acik emre kanal yazilir (kanalli emrin alicisi degistirilmez).
+        if kanal:
+            con.execute("UPDATE is_emirleri SET kanal=?, hedef=? WHERE id=? AND kanal IS NULL",
+                        (kanal, hedef, var["id"]))
         return {"ok": True, "emir": emir(con, var["id"]), "yeni": False,
                 "note": "Bu iş emri zaten açık (#%d)." % var["id"]}
 
@@ -460,12 +476,13 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
                   else tahmini_sure(con, ofisler_of(tur, temiz)))
     durum = {"onay": "onaylandi", "kismi": "kismen_onay", "ret": "reddedildi"}[karar]
     cur = con.execute("INSERT INTO is_emirleri(modul,tur,konu,neden,govde,anahtar,iz,karar,"
-                      "kontrol,tahmin,durum,created_at,updated_at) VALUES "
-                      "(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                      "kontrol,tahmin,durum,created_at,updated_at,kanal,hedef) VALUES "
+                      "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                       (modul, tur, konu, neden, json.dumps(temiz, ensure_ascii=False), anahtar,
                        json.dumps(iz, ensure_ascii=False), karar,
                        json.dumps(kontrol, ensure_ascii=False),
-                       json.dumps(tahmin, ensure_ascii=False) if tahmin else None, durum, at, at))
+                       json.dumps(tahmin, ensure_ascii=False) if tahmin else None, durum, at, at,
+                       kanal, hedef))
     e = emir(con, cur.lastrowid)
 
     if karar == "ret":
@@ -482,6 +499,8 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
         teklif = _teklif(con, e, depo_["kayit_id"], now=at)
         bildir(con, modul, e["id"], "bitti", "«%s» depoda hazırdı; yeniden kurulmadı.%s"
                % (konu, teklif), now=at)
+        # Metin zaten sohbetin cevabidir; kanala yalniz BELGE gider.
+        _teslim(con, e, "", depo_["kayit_id"], yalniz_belge=True, now=at)
         return {"ok": True, "yeni": True, "emir": emir(con, e["id"]), "karar": karar}
 
     j = bam.is_ac(con, konu, kaynak="kullanici" if modul == "hkm" else modul,
@@ -616,6 +635,44 @@ def _teklif(con, e, kayit_id, now=None):
     return ""
 
 
+# ------------------------------------------------------------- teslim
+#
+# Telegram'dan gelen is, sonucunu Telegram'a birakir (W5). Iki satir:
+# durum metni (bitti, kismen, hata, bekliyor) ve — kayit varsa ve kanal
+# belge alabiliyorsa — kaydin kendisi (giden kutusu gonderim aninda PDF,
+# olmazsa HTML basar; core/outbox.py). Satir kimligi (emir, durum) ciftidir:
+# ayni durum iki kez gitmez. Gonderimi giden kutusu yapar; burasi yalniz
+# kuyruga yazar, aga cikmaz.
+
+def _teslim(con, e, metin, kayit_id=None, yalniz_belge=False, now=None):
+    """Kuyruga yazilan outbox satirlarinin kimlikleri; kanal yoksa None."""
+    kanal = e.get("kanal")
+    if kanal not in TESLIM_KANALLARI:
+        return None
+    from core import outbox
+    gun = str(now or _simdi())[:10]
+    hedef = e.get("hedef") or None
+    belge = bool(kayit_id) and e["durum"] in ("bitti", "kismen")
+    yazilan = []
+    if belge and kanal != "telegram":
+        # Bu kanala belge yolu yok (channels.send_document); bu SOYLENIR.
+        yok = "Bu kanala belge gönderilemiyor; HKM › Ofis’ten indirebilirsin."
+        metin = (str(metin) + " " + yok) if (metin and not yalniz_belge) else (
+            "«%s» hazır. %s" % (e["konu"], yok))
+        yalniz_belge, belge = False, False
+    if not yalniz_belge and metin:
+        r = outbox.enqueue(con, kanal, "emir:%d:%s" % (e["id"], e["durum"]), gun,
+                           str(metin)[:3500], target=hedef)
+        yazilan.append(r["row"]["id"])
+    if belge:
+        k = bam.kayit_getir(con, int(kayit_id)) or {}
+        aciklama = "«%s» — iş emri #%d" % (k.get("baslik") or e["konu"], e["id"])
+        r = outbox.enqueue(con, kanal, "emir:%d:belge" % e["id"], gun, aciklama[:1024],
+                           target=hedef, ek={"kayit_id": int(kayit_id), "bicim": "pdf"})
+        yazilan.append(r["row"]["id"])
+    return yazilan
+
+
 # ---------------------------------------------------------- esitleme
 
 IS_TO_EMIR = {"bekliyor": "onaylandi", "beklemede": "bekliyor", "tamam": "bitti",
@@ -659,9 +716,11 @@ def esitle(con, now=None):
             # modul adina King birakir. intents.create ayni govdeyi iki kez
             # yazmaz; esitleme tekrar kossa da teklif tektir.
             ek = _teklif(con, e, kid, now=now) if kid and yeni == "bitti" else ""
-            bildir(con, e["modul"], e["id"], yeni, "«%s» %s.%s%s" % (
+            metin = "«%s» %s.%s%s" % (
                 konu, "bitti" if yeni == "bitti" else "kısmen bitti",
-                (" " + " ".join(notlar)) if notlar else "", ek), now=now)
+                (" " + " ".join(notlar)) if notlar else "", ek)
+            bildir(con, e["modul"], e["id"], yeni, metin, now=now)
+            _teslim(con, e, metin, kid, now=now)
         else:
             _yaz(con, e, now)
             metin = {"basladi": "«%s» işi başladı: BAM ofisleri çalışıyor." % konu,
@@ -672,6 +731,9 @@ def esitle(con, now=None):
                          (a.get("not") for a in j["adimlar"] if a["durum"] == "hata"), "")),
                      "iptal": "«%s» iptal edildi." % konu}.get(yeni, "«%s»: %s" % (konu, yeni))
             bildir(con, e["modul"], e["id"], yeni, metin, now=now)
+            # «basladi» gurultudur; «iptal»i kullanici zaten kendisi yapti.
+            if yeni in ("bekliyor", "hata"):
+                _teslim(con, e, metin, now=now)
         degisen += 1
     return degisen
 
