@@ -318,6 +318,12 @@ SP.Screens.team = (function(){
       const h = await SP.Hafizam.komutIsle(t);
       if(h){ await sohbeteYaz(a, t, h.text); return true; }
     }
+    /* Hedef sohbeti (core/hedefler.js): hedef cümlesi, sorulan eksiklerin
+       cevabı ve tempo seçimi. Hedef değilse null döner, sıradakine geçilir. */
+    if(SP.Hedefler && SP.Hedefler.sohbet){
+      const hd = await SP.Hedefler.sohbet.isle(t);
+      if(hd){ await sohbeteYaz(a, t, hd.text); return true; }
+    }
     const kisa = kisaCevap(t);
     if(kisa === 'geri'){
       const son = P.all().filter(p => p.source === 'istek' && p.status === 'applied')

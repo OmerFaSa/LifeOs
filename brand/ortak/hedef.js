@@ -152,17 +152,23 @@ LIFEOS.Hedef = (function(){
     if(!k || !NIYET.test(k)) return null;
     const paket = paketBul(k, paketler);
     if(!paket) return null;
-    if(typeof paket.tani === 'function'){
-      const ozel = paket.tani(k, bugun);
-      if(ozel) return Object.assign({ paket:paket.id, cumle:String(metin).trim() }, ozel);
-    }
     const ka = kapasiteAyikla(k, false);
     const k2 = ka.kalan;
-    const birim = paket.birimler || new RegExp(paket.anahtar.source.replace(/\\b/g, ''));
-    const miktar = new RegExp(SAYI + '\\s*(?:' + birim.source + ')([a-zçğıöşü\']*)').exec(k2);
     let yon = null, egilim = null, fark = null, hedefDeger = null;
     if(AZALT.test(k2)) egilim = 'azalt';
     else if(ARTIR.test(k2)) egilim = 'artir';
+    /* Paketin özel kalıbı yalnız KENDİNE özgü alanı verir; tarih, vakit
+       ve yön genel ayrıştırıcıdan tamamlanır. */
+    if(typeof paket.tani === 'function'){
+      const ozel = paket.tani(k2, bugun);
+      if(ozel){
+        return Object.assign({ paket:paket.id, yon:'ulas', egilim, fark:null, hedefDeger:null,
+          birim:paket.olcut ? paket.olcut.birim : null, son_tarih:tarihAyikla(k2, bugun),
+          kapasite:ka.kapasite, cumle:String(metin).trim() }, ozel);
+      }
+    }
+    const birim = paket.birimler || new RegExp(paket.anahtar.source.replace(/\\b/g, ''));
+    const miktar = new RegExp(SAYI + '\\s*(?:' + birim.source + ')([a-zçğıöşü\']*)').exec(k2);
     if(miktar){
       const n = sayiOku(miktar[1]);
       const ek = miktar[miktar.length - 1] || '';
@@ -181,15 +187,18 @@ LIFEOS.Hedef = (function(){
 
   function yeniId(){ return 'hd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
+  /* Paketin özel alanları (ör. `hedefVki`) korunur; ortak alanlar
+     üstüne yazılır. */
   function yeni(tani, modul, bugun){
     const t = tani || {};
-    return {
+    return Object.assign({}, t, {
       id:yeniId(), modul, paket:t.paket || null, yon:t.yon || null, egilim:t.egilim || null,
       cumle:t.cumle || '', fark:t.fark == null ? null : t.fark,
       hedefDeger:t.hedefDeger == null ? null : t.hedefDeger, birim:t.birim || null,
       son_tarih:t.son_tarih || null, kapasite:t.kapasite || null, simdi:null,
+      hedefHam:t.hedefHam || null,
       kisitlar:[], cevaplar:{}, durum:'taslak', olusturma:bugun, guncelleme:bugun,
-    };
+    });
   }
 
   function simdiOf(h, paket, durum){
@@ -203,7 +212,10 @@ LIFEOS.Hedef = (function(){
     if(!paket) return [{ alan:'alan', soru:'Bu hedef hangi alanda? Biraz daha açar mısın?' }];
     const out = [];
     const olcut = (paket.olcut && paket.olcut.ad) || 'değer';
-    if(['azalt', 'artir', 'ulas'].indexOf(h.yon) >= 0 && h.fark == null && h.hedefDeger == null){
+    /* `hedefHam`: başka birimde verilmiş hedef («VKİ 24»); paket onu
+       `normalize` ile çevirene kadar «ne kadar?» sorulmaz. */
+    if(['azalt', 'artir', 'ulas'].indexOf(h.yon) >= 0 && h.fark == null && h.hedefDeger == null
+      && h.hedefHam == null){
       out.push({ alan:'hedef', soru:'Ne kadar? Sayıyla yazar mısın?' });
     }
     if(!h.son_tarih && h.yon !== 'koru'){

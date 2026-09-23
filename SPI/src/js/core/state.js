@@ -37,6 +37,8 @@ SP.S = {
   meals:{},           // YYYY-MM-DD -> ogun dizisi
   workouts:[],        // antrenman kayitlari
   meds:[],            // ilac ve takviye kayitlari, en yeni ustte
+  hedefler:[],        // hedef motoru kayitlari (core/hedefler.js)
+  hekim:[],           // hekim talimatlari — en yuksek oncelikli kisit
   proposals:[],       // ofisin onerileri — onaysiz hicbiri uygulanmaz
   foods:[],           // kullanicinin ekledigi gidalar (SP.FOODS'a katilir)
   progress:{},        // exId -> { levelId, achievedAt }
@@ -858,6 +860,8 @@ SP.Model = (function(){
        yoksa kullanici onayladigini sanip onaylamamis olur. */
     if(SP.Proposals) await SP.Proposals.load();
     if(SP.Bolum) await SP.Bolum.yukle();
+    /* Hedefler ve hekim talimatlari (core/hedefler.js). */
+    if(SP.Hedefler) await SP.Hedefler.yukle();
     /* Hafiza: senin sozun, sohbetten, cikarim — core/hafiza.js (ortak). */
     if(window.LIFEOS && LIFEOS.Hafiza){
       SP.Hafizam = SP.Hafizam || LIFEOS.Hafiza.kur({ store:() => SP.Store, durum:() => SP.S,

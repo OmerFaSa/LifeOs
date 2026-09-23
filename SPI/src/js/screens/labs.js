@@ -823,6 +823,8 @@ SP.Screens.labs = (function(){
         body:html`<div class="medlist">${map(gecmis, r => satir(r, false))}</div>`,
       })),
 
+      hekimEntry(),
+
       K.Entry({
         label:'Sınır', meta:'ne yapar, ne yapmaz',
         body:K.Notice({ tone:'warn', title:'Sistem doz önermez.',
@@ -831,6 +833,36 @@ SP.Screens.labs = (function(){
             + 'dozunu değiştirmez ve bunları önermez. İlaç kararları hekimindir.' }),
       }),
     ]);
+  }
+
+  /* HEKİM TALİMATLARI (core/hedefler.js). Hekimin yazılı talimatı en
+     yüksek öncelikli kısıttır: hedef ve plan ona uyar. Sistem talimatı
+     yorumlamaz, değiştirmez; yalnız saklar ve uyulacağını söyler. */
+  function hekimEntry(){
+    if(!SP.Hedefler) return null;
+    const l = SP.Hedefler.talimatlar();
+    return K.Entry({
+      label:'Hekim talimatları', meta:l.length ? l.length + ' kayıt' : 'yok',
+      note:'Hekiminin yazdığı talimatı buraya ekle. Hedeflerin ve planların ona uyar; '
+        + 'talimatla çelişen kısım hazırlanmaz ve bu sana söylenir.',
+      body:html`
+        ${when(!l.length, () => P.empty('Kayıtlı hekim talimatı yok.'))}
+        ${when(l.length, () => html`<div class="medlist">${map(l, t => html`
+          <div class="medrow">
+            <div class="medrow__ana"><div class="tiny dim">${U.fmtDate(t.tarih)}</div>
+              <p class="small">${t.metin}</p></div>
+            <div class="medrow__ey">${K.IconButton({ icon:'trash', size:'sm', plain:true,
+              aria:'Talimatı sil', act:'hekim-sil', data:{ 'data-id':t.id } })}</div>
+          </div>`)}</div>`)}
+        <div class="stack-sm mt-10">
+          ${K.Textarea({ id:'hk-metin', rows:3, aria:'Hekim talimatı',
+            placeholder:'Ör. Günlük tuz tüketimi sınırlı olmalı; öğün atlanmamalı.' })}
+          <div class="row gap-8">
+            ${K.Input({ id:'hk-tarih', type:'date', value:U.todayISO(), aria:'Talimat tarihi' })}
+            ${K.Button({ label:'Talimatı ekle', tone:'primary', act:'hekim-ekle' })}
+          </div>
+        </div>`,
+    });
   }
 
   function medSheetBody(rec){
@@ -1178,6 +1210,18 @@ SP.Screens.labs = (function(){
   }
 
   const handle = {
+    async 'hekim-ekle'(){
+      const m = document.getElementById('hk-metin');
+      const t = document.getElementById('hk-tarih');
+      const r = await SP.Hedefler.talimatEkle(m ? m.value : '', t ? t.value : '');
+      UI.toast(r.ok ? 'Hekim talimatı eklendi' : r.why);
+      if(r.ok) SP.App.render();
+    },
+    async 'hekim-sil'(el){
+      await SP.Hedefler.talimatSil(el.dataset.id);
+      UI.toast('Talimat silindi');
+      SP.App.render();
+    },
     async 'lab-tab'(el){ S.ui.labTab = el.dataset.tab; S.ui.labQuery = ''; SP.App.render(); },
     async 'lab-filter'(el){ S.ui.labFilter = el.dataset.tab; SP.App.render(); },
     async 'toggle-empty'(){ S.ui.labShowEmpty = !S.ui.labShowEmpty; SP.App.render(); },

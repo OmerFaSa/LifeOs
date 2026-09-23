@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'90ed803', at:'2026-09-23 07:41', dirty:true };
+SP.BUILD = { id:'1bfc69f', at:'2026-09-23 09:40', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8497,6 +8497,801 @@ LIFEOS.Ofis = (function(){
   }
 
   return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, kanalKur, bamIstegi, bamKur };
+})();
+
+/* ==== js/core/hedef.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/hedef.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* HEDEF MOTORU — herhangi bir hedefi alan genel çerçeve.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/hedef.js`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   Kopyayı elle düzenleme: bir sonraki yayında kaybolur.
+   ==================================================================
+
+   Motor örneklere göre değil, söylenebilecek HER hedef için kurulur.
+   Alanı bilmez: alanı modülün PAKETİ bilir. Paket eklemek motoru
+   değiştirmez. (ekip/PLAN.md §3.0)
+
+   PAKET — modülün verdiği nesne:
+     id, ad, olcut:{ ad, birim }, anahtar:RegExp, yonler:[…]
+     birimler:RegExp?          miktarın yanındaki birim (yoksa anahtar)
+     tani(metin, bugun)?       özel kalıp («VKİ'mi 24'e») — varsa önce o
+     simdi(durum)?             şu anki değer, etiketiyle
+     hiz(hedef, durum)?        { tipik, ust, birim, dayanak:{ metin, durum } }
+     guvenlik(hedef, durum, s)? { red:true, neden } — bandı ezer
+     ekSorular(hedef, durum)?  [{ alan, soru }]
+     kapasiteGerekir?          true ise günlük vakit sorulur
+
+   Sözler:
+   1. KARARI KOD VERİR. Model yalnız anlatır (AGENTS.md §1.1).
+   2. DAYANAĞI OLMAYAN EŞİĞİN KARARI «TAHMİN»DİR. Kaynaklı eşik
+      «hesaplandı» olur; kaynağı beklenen eşik bunu saklamaz.
+   3. KURALI OLMAYAN ALAN REDDEDİLMEZ. Karar veremediği söylenir;
+      Araştırma Ofisi değerlendirme önerebilir.
+   4. EKSİK SORULUR, TAHMİN EDİLMEZ (AGENTS.md §1.7).
+   5. GÜVENLİK REDDİ BANDI EZER ama güvenli karşı teklif bırakır. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.Hedef = (function(){
+  const YONLER = { azalt:'azalt', artir:'artır', ulas:'ulaş', koru:'koru',
+    seviye:'seviye', aliskanlik:'alışkanlık' };
+  const DURUMLAR = ['taslak', 'aktif', 'askida', 'tamam', 'birakildi'];
+  const GECISLER = { taslak:['aktif', 'birakildi'], aktif:['askida', 'tamam', 'birakildi'],
+    askida:['aktif', 'birakildi'], tamam:[], birakildi:[] };
+  const BANT_ADI = { gercekci:'gerçekçi', zorlayici:'zorlayıcı',
+    gercekci_degil:'bu sürede gerçekçi değil', guvensiz:'güvenli değil' };
+
+  /* ---------------------------------------------------------- yardımcılar */
+
+  function kucuk(s){
+    return String(s || '').replace(/I/g, 'ı').replace(/İ/g, 'i').toLocaleLowerCase('tr');
+  }
+  function isoOku(iso){
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])) : null;
+  }
+  function isoYaz(d){ return d.toISOString().slice(0, 10); }
+  function gunEkle(iso, n){
+    const d = isoOku(iso); d.setUTCDate(d.getUTCDate() + n); return isoYaz(d);
+  }
+  function ayEkle(iso, n){
+    const d = isoOku(iso);
+    const gun = d.getUTCDate();
+    d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() + n);
+    const son = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+    d.setUTCDate(Math.min(gun, son));
+    return isoYaz(d);
+  }
+  function gunFarki(a, b){ return Math.round((isoOku(b) - isoOku(a)) / 86400000); }
+  function yuvarla(x, n){ const k = Math.pow(10, n == null ? 2 : n); return Math.round(x * k) / k; }
+
+  /* Sayı: rakam ya da yazı. «yarım», «bir buçuk», «on beş» de sayıdır. */
+  const BIRLER = { bir:1, iki:2, 'üç':3, 'dört':4, 'beş':5, 'altı':6, yedi:7, sekiz:8, dokuz:9 };
+  const ONLAR = { on:10, yirmi:20, otuz:30, 'kırk':40, elli:50 };
+  const SAYI = '(\\d+(?:[.,]\\d+)?|yarım|(?:on|yirmi|otuz|kırk|elli)(?:\\s+(?:bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz))?'
+    + '|(?:bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz)(?:\\s+buçuk)?)';
+  function sayiOku(t){
+    const s = String(t || '').trim();
+    if(/^\d/.test(s)) return Number(s.replace(',', '.'));
+    if(s === 'yarım') return 0.5;
+    const p = s.split(/\s+/);
+    if(ONLAR[p[0]] != null) return ONLAR[p[0]] + (BIRLER[p[1]] || 0);
+    if(BIRLER[p[0]] != null) return BIRLER[p[0]] + (p[1] === 'buçuk' ? 0.5 : 0);
+    return null;
+  }
+
+  /* --------------------------------------------------- tarih ve kapasite */
+
+  const AYLAR = ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran', 'temmuz', 'ağustos',
+    'eylül', 'ekim', 'kasım', 'aralık'];
+
+  /* Kapasite: «günde yarım saat», «günde 45 dakika», «haftada 4 gün».
+     Eşleşen parça metinden SİLİNİR ki «4 gün» süre sanılmasın. */
+  function kapasiteAyikla(k, cevapMi){
+    const out = {};
+    let kalan = k;
+    const gun = new RegExp((cevapMi ? '(?:günde\\s+)?' : 'günde\\s+') + SAYI + '\\s*(dk|dakika|saat)');
+    const g = gun.exec(kalan);
+    if(g){
+      const n = sayiOku(g[1]);
+      if(n != null) out.gunluk_dk = Math.round(g[2] === 'saat' ? n * 60 : n);
+      kalan = kalan.replace(g[0], ' ');
+    }
+    const h = new RegExp('haftada\\s+' + SAYI + '\\s*gün').exec(kalan);
+    if(h){
+      const n = sayiOku(h[1]);
+      if(n != null && n >= 1 && n <= 7) out.haftalik_gun = n;
+      kalan = kalan.replace(h[0], ' ');
+    }
+    return { kapasite:Object.keys(out).length ? out : null, kalan };
+  }
+
+  function tarihAyikla(k, bugun){
+    if(/yıl sonuna kadar/.test(k)) return bugun.slice(0, 4) + '-12-31';
+    if(/ay sonuna kadar/.test(k)){
+      const d = isoOku(bugun);
+      return isoYaz(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)));
+    }
+    const ad = new RegExp('(\\d{1,2})\\s+(' + AYLAR.join('|') + ')').exec(k);
+    if(ad){
+      const yil = Number(bugun.slice(0, 4));
+      const ay = AYLAR.indexOf(ad[2]) + 1;
+      let t = yil + '-' + String(ay).padStart(2, '0') + '-' + String(Number(ad[1])).padStart(2, '0');
+      if(!isoOku(t)) return null;
+      if(t <= bugun) t = (yil + 1) + t.slice(4);
+      return t;
+    }
+    const s = new RegExp(SAYI + '\\s*(gün|hafta|ay|yıl)(?=da|de|ta|te|\\s+içinde|\\s+sonra|\\b)').exec(k);
+    if(!s) return null;
+    const n = sayiOku(s[1]);
+    if(n == null || n <= 0) return null;
+    if(s[2] === 'gün') return gunEkle(bugun, Math.round(n));
+    if(s[2] === 'hafta') return gunEkle(bugun, Math.round(n * 7));
+    if(s[2] === 'ay') return ayEkle(bugun, Math.round(n));
+    return ayEkle(bugun, Math.round(n * 12));
+  }
+
+  /* ---------------------------------------------------------- tanıma */
+
+  /* Hedef işareti olmayan cümle hedef değildir: «bugün 80 kiloyum»,
+     «dün 3 kilo verdim» bir ölçüm ya da geçmiş cümlesidir. */
+  const NIYET = /(istiyorum|isterim|hedefim|hedefliyorum|planlıyorum|niyetindeyim|amacım|olmak istiyorum)/;
+  /* Kelime BAŞINDA aranır: «kalmak» içindeki «almak» artırma değildir. */
+  const BAS = '(?:^|[^a-zçğıöşü])';
+  const AZALT = new RegExp(BAS + '(vermek|vermeyi|ver(?![a-zçğıöşü])|düşür|azalt|zayıfla|inmek|inmeyi|indir)');
+  const ARTIR = new RegExp(BAS + '(almak|almayı|al(?![a-zçğıöşü])|artır|arttır|kazan|çıkmak|çıkarmak|yüksel)');
+
+  /* Türkçe eklemeli bir dildir: «kilo», «kiloya», «kilomu» aynı kelimedir.
+     Anahtarın yalnız BAŞI sabitlenir; sonundaki \b atılır. */
+  function eksiz(re){ return new RegExp(re.source.replace(/\\b$/, ''), re.flags); }
+  function paketBul(k, paketler){
+    return (paketler || []).find(p => p.anahtar && eksiz(p.anahtar).test(k)) || null;
+  }
+
+  function cumleden(metin, paketler, bugun){
+    const k = kucuk(metin).trim();
+    if(!k || !NIYET.test(k)) return null;
+    const paket = paketBul(k, paketler);
+    if(!paket) return null;
+    const ka = kapasiteAyikla(k, false);
+    const k2 = ka.kalan;
+    let yon = null, egilim = null, fark = null, hedefDeger = null;
+    if(AZALT.test(k2)) egilim = 'azalt';
+    else if(ARTIR.test(k2)) egilim = 'artir';
+    /* Paketin özel kalıbı yalnız KENDİNE özgü alanı verir; tarih, vakit
+       ve yön genel ayrıştırıcıdan tamamlanır. */
+    if(typeof paket.tani === 'function'){
+      const ozel = paket.tani(k2, bugun);
+      if(ozel){
+        return Object.assign({ paket:paket.id, yon:'ulas', egilim, fark:null, hedefDeger:null,
+          birim:paket.olcut ? paket.olcut.birim : null, son_tarih:tarihAyikla(k2, bugun),
+          kapasite:ka.kapasite, cumle:String(metin).trim() }, ozel);
+      }
+    }
+    const birim = paket.birimler || new RegExp(paket.anahtar.source.replace(/\\b/g, ''));
+    const miktar = new RegExp(SAYI + '\\s*(?:' + birim.source + ')([a-zçğıöşü\']*)').exec(k2);
+    if(miktar){
+      const n = sayiOku(miktar[1]);
+      const ek = miktar[miktar.length - 1] || '';
+      /* «80 kiloya», «24'e»: yönelme eki hedef DEĞERİ anlatır. */
+      if(/^'?y?[ae]$/.test(ek)){ yon = 'ulas'; hedefDeger = n; }
+      else fark = n;
+    }
+    if(!yon) yon = egilim || (paket.yonler && paket.yonler[0]) || 'artir';
+    if(paket.yonler && paket.yonler.indexOf(yon) < 0) yon = paket.yonler[0];
+    return { paket:paket.id, yon, egilim, fark, hedefDeger,
+      birim:paket.olcut ? paket.olcut.birim : null,
+      son_tarih:tarihAyikla(k2, bugun), kapasite:ka.kapasite, cumle:String(metin).trim() };
+  }
+
+  /* ------------------------------------------------------- hedef kaydı */
+
+  function yeniId(){ return 'hd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  /* Paketin özel alanları (ör. `hedefVki`) korunur; ortak alanlar
+     üstüne yazılır. */
+  function yeni(tani, modul, bugun){
+    const t = tani || {};
+    return Object.assign({}, t, {
+      id:yeniId(), modul, paket:t.paket || null, yon:t.yon || null, egilim:t.egilim || null,
+      cumle:t.cumle || '', fark:t.fark == null ? null : t.fark,
+      hedefDeger:t.hedefDeger == null ? null : t.hedefDeger, birim:t.birim || null,
+      son_tarih:t.son_tarih || null, kapasite:t.kapasite || null, simdi:null,
+      hedefHam:t.hedefHam || null,
+      kisitlar:[], cevaplar:{}, durum:'taslak', olusturma:bugun, guncelleme:bugun,
+    });
+  }
+
+  function simdiOf(h, paket, durum){
+    if(h.simdi) return h.simdi;
+    return (paket && typeof paket.simdi === 'function') ? (paket.simdi(durum || {}) || null) : null;
+  }
+
+  /* ---------------------------------------------------- netleştirme */
+
+  function eksikler(h, paket, durum){
+    if(!paket) return [{ alan:'alan', soru:'Bu hedef hangi alanda? Biraz daha açar mısın?' }];
+    const out = [];
+    const olcut = (paket.olcut && paket.olcut.ad) || 'değer';
+    /* `hedefHam`: başka birimde verilmiş hedef («VKİ 24»); paket onu
+       `normalize` ile çevirene kadar «ne kadar?» sorulmaz. */
+    if(['azalt', 'artir', 'ulas'].indexOf(h.yon) >= 0 && h.fark == null && h.hedefDeger == null
+      && h.hedefHam == null){
+      out.push({ alan:'hedef', soru:'Ne kadar? Sayıyla yazar mısın?' });
+    }
+    if(!h.son_tarih && h.yon !== 'koru'){
+      out.push({ alan:'son_tarih',
+        soru:'Ne zamana kadar? «3 ay içinde» ya da «31 Aralık’a kadar» gibi yazabilirsin.' });
+    }
+    if(!simdiOf(h, paket, durum) && h.yon !== 'aliskanlik'){
+      out.push({ alan:'simdi', soru:'Şu anki ' + olcut + ' değerin ne? Bilmiyorsan «bilmiyorum» yaz.' });
+    }
+    if(paket.kapasiteGerekir && !(h.kapasite && h.kapasite.gunluk_dk)){
+      out.push({ alan:'kapasite',
+        soru:'Bu hedefe günde ne kadar vakit ayırabilirsin? «Günde 30 dakika» gibi yazabilirsin.' });
+    }
+    if(typeof paket.ekSorular === 'function'){
+      (paket.ekSorular(h, durum || {}) || []).forEach(s => {
+        if(s && s.alan && !(s.alan in (h.cevaplar || {}))) out.push(s);
+      });
+    }
+    return out;
+  }
+
+  const BILMIYORUM = /(bilmiyorum|bilmem|ölçmedim|yok)/;
+
+  function cevapla(h, alan, metin, bugun){
+    const k = kucuk(metin).trim();
+    const yeniH = Object.assign({}, h, { cevaplar:Object.assign({}, h.cevaplar),
+      guncelleme:bugun });
+    if(alan === 'son_tarih'){
+      const t = tarihAyikla(k, bugun);
+      if(!t || t <= bugun) return { ok:false, why:'Tarihi anlayamadım. «3 ay içinde» ya da «31 Aralık’a kadar» gibi yazabilirsin.' };
+      yeniH.son_tarih = t;
+    }else if(alan === 'kapasite'){
+      const ka = kapasiteAyikla(k, true).kapasite;
+      if(!ka || !ka.gunluk_dk) return { ok:false, why:'Vakti anlayamadım. «Günde 30 dakika» ya da «günde 1 saat» gibi yazabilirsin.' };
+      yeniH.kapasite = Object.assign({}, h.kapasite || {}, ka);
+    }else if(alan === 'simdi'){
+      const m = new RegExp(SAYI).exec(k);
+      if(m && sayiOku(m[1]) != null){
+        yeniH.simdi = { deger:sayiOku(m[1]), birim:h.birim, etiket:'olculdu', tarih:bugun };
+      }else if(BILMIYORUM.test(k)){
+        yeniH.simdi = { deger:null, birim:h.birim, etiket:'veri_yok', tarih:bugun };
+      }else{
+        return { ok:false, why:'Değeri anlayamadım; sayıyla yaz ya da «bilmiyorum» de.' };
+      }
+    }else if(alan === 'hedef'){
+      const m = new RegExp(SAYI).exec(k);
+      const n = m ? sayiOku(m[1]) : null;
+      if(n == null || n <= 0) return { ok:false, why:'Miktarı anlayamadım; sayıyla yazar mısın?' };
+      if(h.yon === 'ulas') yeniH.hedefDeger = n; else yeniH.fark = n;
+    }else{
+      yeniH.cevaplar[alan] = String(metin || '').trim().slice(0, 1000);
+    }
+    return { ok:true, hedef:yeniH };
+  }
+
+  /* ---------------------------------------------------- gerçekçilik */
+
+  function farkOf(h, simdi){
+    if(h.fark != null) return { fark:Math.abs(h.fark) };
+    if(h.hedefDeger == null || !simdi || simdi.deger == null) return { fark:null };
+    const d = h.hedefDeger - simdi.deger;
+    const istenen = h.yon === 'ulas' ? h.egilim : h.yon;
+    if((istenen === 'azalt' && d > 0) || (istenen === 'artir' && d < 0)){
+      return { hata:'Hedef değer yönle çelişiyor: şu an ' + simdi.deger + ', hedef ' + h.hedefDeger + '.' };
+    }
+    return { fark:Math.abs(d) };
+  }
+
+  function gerceklik(h, paket, durum, bugun){
+    if(!paket || typeof paket.hiz !== 'function'){
+      return { bant:null, etiket:'veri_yok',
+        neden:'Bu alan için bir gerçekçilik kuralı yok; kod karar veremez. İstersen BAM '
+          + 'araştırıp bir değerlendirme önerir, o da «tahmin» olarak gelir.' };
+    }
+    if(!h.son_tarih) return { bant:null, etiket:'veri_yok', neden:'Tarih olmadan hız hesaplanamaz.' };
+    const gun = gunFarki(bugun, h.son_tarih);
+    if(!(gun > 0)) return { bant:null, etiket:'veri_yok', hata:'Hedef tarihi geçmişte.' };
+    const simdi = simdiOf(h, paket, durum);
+    const f = farkOf(h, simdi);
+    if(f.hata) return { bant:null, etiket:'veri_yok', hata:f.hata };
+    if(f.fark == null){
+      return { bant:null, etiket:'veri_yok',
+        neden:'Şu anki değer bilinmeden gereken hız hesaplanamaz.' };
+    }
+    const hafta = gun / 7;
+    const hz = paket.hiz(h, durum || {}) || {};
+    if(!(hz.tipik > 0)){
+      return { bant:null, etiket:'veri_yok',
+        neden:hz.neden || 'Bu hedef için hız eşiği hesaplanamadı.' };
+    }
+    const gerekli = yuvarla(f.fark / hafta);
+    const eps = 1e-9;
+    let bant = gerekli <= hz.tipik + eps ? 'gercekci'
+      : gerekli <= hz.ust + eps ? 'zorlayici' : 'gercekci_degil';
+    const out = { bant, gerekli, fark:f.fark, hafta:yuvarla(hafta, 1), birim:hz.birim,
+      tipik:hz.tipik, ust:hz.ust, dayanak:hz.dayanak || null,
+      etiket:hz.dayanak && hz.dayanak.durum === 'kaynakli' ? 'hesaplandi' : 'tahmin' };
+    const g = typeof paket.guvenlik === 'function'
+      ? paket.guvenlik(h, durum || {}, { gerekli, fark:f.fark, hafta, simdi }) : null;
+    if(g && g.red){ out.bant = 'guvensiz'; out.neden = g.neden; bant = 'guvensiz'; }
+    if(bant !== 'gercekci' && hz.tipik > 0){
+      out.karsi = { son_tarih:gunEkle(bugun, Math.ceil(f.fark / hz.tipik - eps) * 7),
+        ulasilabilir:yuvarla(hz.tipik * hafta) };
+    }
+    return out;
+  }
+
+  /* İki tempo: tipik hız (rahat) ve üst sınır (zorlayıcı). Paketin kendi
+     senaryosu varsa (ör. kapasiteye göre saat modeli) o kullanılır. */
+  function senaryolar(h, paket, durum, bugun){
+    if(paket && typeof paket.senaryolar === 'function') return paket.senaryolar(h, durum || {}, bugun);
+    if(!paket || typeof paket.hiz !== 'function') return [];
+    const f = farkOf(h, simdiOf(h, paket, durum));
+    if(f.fark == null) return [];
+    const hz = paket.hiz(h, durum || {}) || {};
+    const out = [];
+    if(hz.tipik > 0){
+      out.push({ ad:'Rahat tempo (tipik hız)', hiz:hz.tipik, birim:hz.birim,
+        son_tarih:gunEkle(bugun, Math.ceil(f.fark / hz.tipik - 1e-9) * 7) });
+    }
+    if(hz.ust > 0 && hz.ust !== hz.tipik){
+      out.push({ ad:'Hızlı tempo (zorlayıcı)', hiz:hz.ust, birim:hz.birim,
+        son_tarih:gunEkle(bugun, Math.ceil(f.fark / hz.ust - 1e-9) * 7) });
+    }
+    return out;
+  }
+
+  /* ------------------------------------------------------------ metin */
+
+  const AY_ADI = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos',
+    'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  function sayiYaz(x){ return String(yuvarla(x, 2)).replace('.', ','); }
+  function tarihYaz(iso){
+    const d = isoOku(iso);
+    return d ? d.getUTCDate() + ' ' + AY_ADI[d.getUTCMonth()] + ' ' + d.getUTCFullYear() : '';
+  }
+  function hizYaz(x, birim){
+    const b = String(birim || '');
+    return /\/hafta$/.test(b) ? 'haftada ' + sayiYaz(x) + ' ' + b.replace(/\/hafta$/, '')
+      : sayiYaz(x) + ' ' + b;
+  }
+
+  /* Kararı cümleye çeviren KOD'dur; model değil. */
+  function kararMetni(g){
+    if(g.hata) return g.hata;
+    if(g.bant == null) return g.neden;
+    const k = hizYaz(g.gerekli, g.birim);
+    const parca = {
+      gercekci:'Bu hedef gerçekçi görünüyor: ' + k + ' gerekiyor; tipik tempo '
+        + hizYaz(g.tipik, g.birim) + '.',
+      zorlayici:'Bu hedef zorlayıcı: ' + k + ' gerekiyor; tipik tempo ' + hizYaz(g.tipik, g.birim)
+        + ', üst sınır ' + hizYaz(g.ust, g.birim) + '.',
+      gercekci_degil:'Bu hedef bu sürede gerçekçi değil: ' + k + ' gerekiyor, üst sınır '
+        + hizYaz(g.ust, g.birim) + '.'
+        + (g.karsi ? ' Bu tarihe kadar tipik tempoyla ' + sayiYaz(g.karsi.ulasilabilir) + ' '
+          + String(g.birim || '').replace(/\/hafta$/, '') + ' mümkün.' : ''),
+      guvensiz:'Bu hedef bu haliyle güvenli değil: ' + (g.neden || '') ,
+    }[g.bant];
+    return parca + ' Bu karar ' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmindir')
+      + (g.dayanak ? ' (dayanak: ' + g.dayanak.metin + ')' : '') + '.';
+  }
+
+  /* ------------------------------------------------------------ sohbet
+
+     `sohbetKur({ paketler, modul, durum:()=>…, bugun:()=>'YYYY-MM-DD',
+       kaydet:async h=>…, normalize?(h, durum), notlar?(h, g, durum)=>[metin],
+       sonrasi?(h)=>metin })` → { isle(metin) → {text, hedef} | null }
+
+     Hedef cümlesi gelince eksik alanlar TEK TEK sorulur, sonra karar ve
+     tempolar verilir, onayla hedef aktif olur. Hedef olmayan cümleye
+     karışılmaz (null): modülün öteki kapıları işini yapar. */
+  const EVET = /^(evet|tamam|olur|onaylıyorum|onayla|kaydet)$/;
+  const VAZGEC = /^(vazgeç|vazgeçtim|hayır|iptal|boşver|bırak)$/;
+
+  function sohbetKur(o){
+    let bekleyen = null;
+    const bugun = () => o.bugun();
+    const durum = () => (o.durum ? o.durum() : {}) || {};
+    const paketOf = h => (o.paketler || []).find(p => p.id === h.paket) || null;
+    const normal = h => (typeof o.normalize === 'function' ? (o.normalize(h, durum()) || h) : h);
+
+    async function kaydet(h){ if(o.kaydet) await o.kaydet(h); return h; }
+
+    function guvenliSenaryolar(h, paket){
+      return senaryolar(h, paket, durum(), bugun()).filter(x => {
+        if(typeof paket.guvenlik !== 'function') return true;
+        const g = paket.guvenlik(h, durum(), { gerekli:x.hiz, fark:null, hafta:null });
+        return !(g && g.red);
+      });
+    }
+
+    async function degerlendir(h){
+      const paket = paketOf(h);
+      const g = gerceklik(h, paket, durum(), bugun());
+      const sen = (g.bant && g.bant !== 'gercekci') ? guvenliSenaryolar(h, paket) : [];
+      const satir = [kararMetni(g)];
+      if(sen.length){
+        satir.push(sen.map((x, i) => (i + 1) + ') ' + x.ad + ': son tarih ' + tarihYaz(x.son_tarih)
+          + ' (' + hizYaz(x.hiz, x.birim) + ')').join('\n'));
+      }
+      if(typeof o.notlar === 'function') (o.notlar(h, g, durum()) || []).forEach(n => n && satir.push(n));
+      satir.push(g.bant === 'guvensiz'
+        ? 'Bu tarihle kaydedemem. Bir tempo seç («1» ya da «2») ya da «vazgeç» de.'
+        : g.bant === 'gercekci'
+          ? 'Onaylıyor musun? «evet» dersen hedef aktif olur; «vazgeç» dersen bırakırım.'
+          : g.bant == null
+            ? 'Hedefi yine de kaydedeyim mi? «evet» ya da «vazgeç».'
+            : 'Bir tempo seç («1» ya da «2»), ya da «evet» dersen kendi tarihinle kaydederim.');
+      if(g.hata){
+        bekleyen = null;
+        return { text:g.hata + ' Hedefi yeniden yazabilirsin.', hedef:h };
+      }
+      bekleyen = { hedef:h, asama:'onay', senaryolar:sen, karar:g };
+      return { text:satir.join('\n\n'), hedef:h };
+    }
+
+    async function sor(h){
+      const e = eksikler(h, paketOf(h), durum());
+      if(e.length){
+        bekleyen = { hedef:h, asama:'soru', alan:e[0].alan };
+        return { text:e[0].soru, hedef:h };
+      }
+      return await degerlendir(h);
+    }
+
+    async function birak(h){
+      const r = gecis(h, 'birakildi', bugun());
+      bekleyen = null;
+      if(r.ok) await kaydet(r.hedef);
+      return { text:'Tamam, bu hedefi bıraktım.', hedef:r.hedef || h };
+    }
+
+    async function onayla(metin){
+      const b = bekleyen;
+      let h = Object.assign({}, b.hedef);
+      const k = kucuk(metin).trim().replace(/[.!]+$/, '');
+      if(VAZGEC.test(k)) return await birak(h);
+      const secim = /^\d$/.test(k) ? Number(k) : null;
+      if(secim != null){
+        const x = b.senaryolar[secim - 1];
+        if(!x) return { text:'Böyle bir tempo yok; listedeki numaralardan birini yaz.', hedef:h };
+        h.son_tarih = x.son_tarih;
+      }else if(EVET.test(k)){
+        if(b.karar.bant === 'guvensiz'){
+          return { text:'Bu tarihle kaydedemem; güvenli bir tempo seç («1» ya da «2») ya da «vazgeç» de.',
+            hedef:h };
+        }
+      }else{
+        return null;
+      }
+      const g = gerceklik(h, paketOf(h), durum(), bugun());
+      /* Kaydedilen karar SEÇİLEN tarihin kararıdır; kullanıcının ilk
+         istediği hedefin kararı da ayrıca saklanır («3 haftada istedin,
+         6 haftaya çektik» görünsün). */
+      h.gerceklik = { bant:g.bant, gerekli:g.gerekli, tipik:g.tipik, ust:g.ust, birim:g.birim,
+        etiket:g.etiket, dayanak:g.dayanak || null, tarih:bugun() };
+      h.ilkKarar = b.karar.bant || null;
+      const r = gecis(h, 'aktif', bugun());
+      bekleyen = null;
+      await kaydet(r.hedef);
+      const son = typeof o.sonrasi === 'function' ? o.sonrasi(r.hedef) : '';
+      return { text:'Hedefin kaydedildi ve aktif' + (r.hedef.son_tarih ? ': son tarih '
+        + tarihYaz(r.hedef.son_tarih) : '') + '.' + (son ? ' ' + son : ''), hedef:r.hedef };
+    }
+
+    async function isle(metin){
+      const k = kucuk(metin).trim();
+      if(bekleyen && bekleyen.asama === 'soru'){
+        if(VAZGEC.test(k.replace(/[.!]+$/, ''))) return await birak(bekleyen.hedef);
+        const r = cevapla(bekleyen.hedef, bekleyen.alan, metin, bugun());
+        if(!r.ok) return { text:r.why, hedef:bekleyen.hedef };
+        const h = normal(r.hedef);
+        await kaydet(h);
+        return await sor(h);
+      }
+      if(bekleyen && bekleyen.asama === 'onay'){
+        const r = await onayla(metin);
+        if(r) return r;
+      }
+      const t = cumleden(metin, o.paketler, bugun());
+      if(!t) return null;
+      const h = normal(yeni(t, o.modul, bugun()));
+      await kaydet(h);
+      return await sor(h);
+    }
+
+    return { isle, bekleyen:() => bekleyen, sifirla:() => { bekleyen = null; } };
+  }
+
+  /* ------------------------------------------------------- yaşam döngüsü */
+
+  function gecis(h, yeniDurum, bugun){
+    if(DURUMLAR.indexOf(yeniDurum) < 0) return { ok:false, why:'Bilinmeyen hedef durumu.' };
+    if((GECISLER[h.durum] || []).indexOf(yeniDurum) < 0){
+      return { ok:false, why:'Bu hedef «' + h.durum + '» durumunda; «' + yeniDurum + '» yapılamaz.' };
+    }
+    return { ok:true, hedef:Object.assign({}, h, { durum:yeniDurum, guncelleme:bugun }) };
+  }
+
+  return { YONLER, DURUMLAR, BANT_ADI, cumleden, yeni, eksikler, cevapla, gerceklik,
+    senaryolar, gecis, kararMetni, sohbetKur, tarihYaz, sayiYaz, gunEkle, ayEkle, gunFarki };
+})();
+
+/* ==== js/core/hedefler.js ==== */
+/* SPİ HEDEFLERİ — genel hedef motorunun (brand/ortak/hedef.js) SPİ paketi.
+
+   Motor alanı bilmez; SPİ'nin bildiği şunlardır:
+
+     ŞU ANKİ KİLO   son ölçümden, etiketiyle. Ölçüm yoksa profildeki değer
+                    «tahmin» olarak kullanılır — tarihi bilinmeyen bir
+                    değer ölçüm değildir.
+     HIZ BANTLARI   kişinin KENDİ ağırlığına oranlı: kayıpta haftada
+                    %0,5 (tipik) ve %1 (üst), alımda %0,25 ve %0,5.
+                    Bu yaygın bir kılavuz aralığıdır ama kaynağı henüz
+                    Araştırma Ofisi'yle bağlanmadı: dayanak «kaynak
+                    bekliyor», karar «tahmin»dir (motor sözü 2).
+     GÜVENLİK       kodla reddedilir: 18 yaş altı, haftada %1,5'ten hızlı
+                    kayıp, VKİ 18,5'in altına inen ya da 30'un üstüne
+                    çıkan hedef. 18,5 ve 30, DSÖ'nün VKİ sınıf sınırlarıdır.
+     HEKİM KAPISI   riskli bir durum (gebelik, diyabet, böbrek…), aktif bir
+                    ilaç ya da sağlık cevabında böyle bir işaret varsa
+                    planın hekimle kurulacağı SÖYLENİR. SPİ teşhis koymaz,
+                    doz önermez (AGENTS.md §1.5).
+     HEKİM TALİMATI kullanıcının getirdiği talimat en yüksek öncelikli
+                    kısıttır (ekip/PLAN.md §3.0); plan ona uyar. */
+
+window.SP = window.SP || {};
+
+SP.Hedefler = (function(){
+  const H = () => window.LIFEOS.Hedef;
+
+  const RISK = /(gebe|hamile|emzir|yeme bozukluğu|anoreksi|bulimi|böbrek|diyaliz|diyabet|şeker hastalığı|insülin|kalp|kanser|kemoterapi|tiroid|karaciğer|ameliyat)/;
+  const KAYIP = { tipik:0.005, ust:0.01, sinir:0.015 };
+  const ALIM = { tipik:0.0025, ust:0.005 };
+  const VKI = { zayif:18.5, obez:30 };
+
+  function kucuk(s){
+    return String(s || '').replace(/I/g, 'ı').replace(/İ/g, 'i').toLocaleLowerCase('tr');
+  }
+  function yuvarla(x, n){ const k = Math.pow(10, n == null ? 2 : n); return Math.round(x * k) / k; }
+
+  /* ---------------------------------------------------- durum profili */
+
+  function sonKilo(){
+    const gunler = Object.keys(SP.S.vitals || {}).sort().reverse();
+    for(const d of gunler){
+      const v = SP.S.vitals[d];
+      if(v && v.weight != null && isFinite(Number(v.weight))){
+        return { deger:Number(v.weight), birim:'kg', etiket:'olculdu', tarih:d };
+      }
+    }
+    const p = SP.S.profile || {};
+    if(p.weightKg != null && isFinite(Number(p.weightKg))){
+      return { deger:Number(p.weightKg), birim:'kg', etiket:'tahmin', tarih:null };
+    }
+    return null;
+  }
+
+  function boyCm(h){
+    const p = SP.S.profile || {};
+    if(p.heightCm) return Number(p.heightCm);
+    const c = h && h.cevaplar && h.cevaplar.boy;
+    const m = c && /(\d{3})/.exec(c);
+    const n = m ? Number(m[1]) : null;
+    return n && n >= 100 && n <= 230 ? n : null;
+  }
+
+  function yas(){
+    const p = SP.S.profile || {};
+    return p.birthYear ? new Date().getFullYear() - Number(p.birthYear) : null;
+  }
+
+  function aktifIlaclar(){
+    const bugun = SP.U.todayISO();
+    return (SP.S.meds || []).filter(m => m && (!m.endDate || m.endDate >= bugun));
+  }
+
+  /* Hedefin yönü: azalt ya da artır (ulaş ise şimdiki değere göre). */
+  function yonOf(h, simdi){
+    if(h.yon === 'azalt' || h.yon === 'artir') return h.yon;
+    if(h.egilim) return h.egilim;
+    if(h.hedefDeger != null && simdi && simdi.deger != null){
+      return h.hedefDeger < simdi.deger ? 'azalt' : 'artir';
+    }
+    return 'azalt';
+  }
+
+  function hedefKilo(h, simdi){
+    if(h.hedefDeger != null) return h.hedefDeger;
+    if(h.fark != null && simdi && simdi.deger != null){
+      return yonOf(h, simdi) === 'azalt' ? simdi.deger - h.fark : simdi.deger + h.fark;
+    }
+    return null;
+  }
+
+  /* ------------------------------------------------------------ paket */
+
+  const KILO = {
+    id:'kilo', ad:'Kilo', olcut:{ ad:'kilo', birim:'kg' },
+    anahtar:/\b(kilo|kg|vki|vücut kitle|bmi)\b/,
+    birimler:/(?:kilo|kg)/,
+    yonler:['azalt', 'artir', 'ulas', 'koru'],
+
+    /* «VKİ'mi 24'e indirmek», «VKİ 24 olsun»: hedef VKİ biriminde gelir;
+       `normalize` onu boyla kiloya çevirir. */
+    tani(k){
+      const i = k.search(/(vki|vücut kitle|bmi)/);
+      if(i < 0) return null;
+      const arka = k.slice(i);
+      const m = /(\d+(?:[.,]\d+)?)\s*'?y?[ae](?![a-zçğıöşü])/.exec(arka)
+        || /^(?:vki|vücut kitle|bmi)[^0-9]{0,12}(\d+(?:[.,]\d+)?)(?!\s*(?:gün|hafta|ay|yıl))/.exec(arka);
+      const n = m ? Number(m[1].replace(',', '.')) : null;
+      if(!(n >= 12 && n <= 60)) return null;
+      return { yon:'ulas', hedefVki:n, hedefHam:{ deger:n, birim:'VKİ' }, birim:'kg' };
+    },
+
+    simdi:() => sonKilo(),
+
+    hiz(h){
+      const s = h.simdi || sonKilo();
+      if(!s || s.deger == null) return { neden:'Şu anki kilon bilinmeden güvenli hız hesaplanamaz.' };
+      const kayip = yonOf(h, s) === 'azalt';
+      const b = kayip ? KAYIP : ALIM;
+      return { tipik:yuvarla(s.deger * b.tipik), ust:yuvarla(s.deger * b.ust), birim:'kg/hafta',
+        dayanak:{ durum:'kaynak_bekliyor', metin:kayip
+          ? 'haftada vücut ağırlığının %0,5–1’i; yaygın kılavuz aralığı, kaynağı henüz bağlanmadı'
+          : 'haftada vücut ağırlığının %0,25–0,5’i; yaygın kılavuz aralığı, kaynağı henüz bağlanmadı' } };
+    },
+
+    guvenlik(h, durum, x){
+      const y = yas();
+      if(y != null && y < 18){
+        return { red:true, neden:'18 yaşından küçükler için kilo hedefi hekim ya da diyetisyenle '
+          + 'birlikte kurulmalı; bu hedefi ben kuramam.' };
+      }
+      const s = h.simdi || sonKilo();
+      const kayip = yonOf(h, s) === 'azalt';
+      if(kayip && s && s.deger != null && x && x.gerekli != null && x.gerekli > s.deger * KAYIP.sinir){
+        return { red:true, neden:'haftada vücut ağırlığının %1,5’inden hızlı kilo kaybı güvenli '
+          + 'kabul edilmez.' };
+      }
+      const b = boyCm(h);
+      const hk = hedefKilo(h, s);
+      if(b && hk != null){
+        const vki = hk / Math.pow(b / 100, 2);
+        if(kayip && vki < VKI.zayif){
+          return { red:true, neden:'hedef kilo boyuna göre VKİ ' + String(yuvarla(vki, 1)).replace('.', ',')
+            + ' eder; bu, zayıflık sınırı olan VKİ 18,5’in altıdır.' };
+        }
+        if(!kayip && vki >= VKI.obez){
+          return { red:true, neden:'hedef kilo boyuna göre VKİ ' + String(yuvarla(vki, 1)).replace('.', ',')
+            + ' eder; bu, obezite sınırı olan VKİ 30’un üstüdür.' };
+        }
+      }
+      return null;
+    },
+
+    ekSorular(h){
+      const out = [];
+      if(h.hedefHam && h.hedefDeger == null && !boyCm(h)){
+        out.push({ alan:'boy', soru:'VKİ hedefini kiloya çevirmem için boyunu bilmem gerek. '
+          + 'Boyun kaç santimetre?' });
+      }
+      out.push({ alan:'saglik', soru:'Bilinen bir sağlık durumun, kullandığın bir ilaç ya da '
+        + 'hekiminin verdiği bir talimat var mı? Yoksa «yok» yaz.' });
+      return out;
+    },
+  };
+
+  const PAKETLER = [KILO];
+
+  function normalize(h){
+    if(h && h.hedefVki && h.hedefDeger == null){
+      const b = boyCm(h);
+      if(b) return Object.assign({}, h, { hedefDeger:yuvarla(h.hedefVki * Math.pow(b / 100, 2), 1) });
+    }
+    return h;
+  }
+
+  /* ---------------------------------------------------- hekim kapısı */
+
+  function hekimKapisi(h){
+    const p = SP.S.profile || {};
+    const nedenler = [];
+    const durumlar = (p.conditions || []).map(String).filter(c => RISK.test(kucuk(c)));
+    if(durumlar.length) nedenler.push('bildirdiğin durum (' + durumlar.join(', ') + ')');
+    const ilac = aktifIlaclar();
+    if(ilac.length) nedenler.push('kullandığın ilaç');
+    const cevap = kucuk(h && h.cevaplar && h.cevaplar.saglik);
+    if(cevap && RISK.test(cevap)) nedenler.push('sağlık cevabın');
+    return { gerekli:nedenler.length > 0, nedenler };
+  }
+
+  /* ------------------------------------------------- hekim talimatları */
+
+  function talimatlar(){ return (SP.S.hekim || []).slice().sort((a, b) =>
+    String(b.tarih || '').localeCompare(String(a.tarih || ''))); }
+
+  async function talimatEkle(metin, tarih){
+    const m = String(metin || '').trim();
+    if(!m) return { ok:false, why:'Talimat metni boş.' };
+    if(m.length > 2000) return { ok:false, why:'Talimat 2000 karakteri geçemez.' };
+    const kayit = { id:SP.U.uid('hk'), metin:m, tarih:SP.U.isISO(tarih) ? tarih : SP.U.todayISO(),
+      kaynak:'kullanici', eklenme:new Date().toISOString() };
+    SP.S.hekim = (SP.S.hekim || []).concat([kayit]);
+    await SP.Store.set('hekim/' + kayit.id, kayit);
+    return { ok:true, kayit };
+  }
+
+  async function talimatSil(id){
+    SP.S.hekim = (SP.S.hekim || []).filter(x => x.id !== id);
+    await SP.Store.remove('hekim/' + id);
+  }
+
+  /* ---------------------------------------------------- sohbet notları */
+
+  function sayiYaz(x){ return String(yuvarla(x, 1)).replace('.', ','); }
+
+  function notlar(h){
+    const out = [];
+    if(h.hedefVki && h.hedefDeger != null){
+      out.push('VKİ ' + sayiYaz(h.hedefVki) + ' hedefi boyuna göre ' + sayiYaz(h.hedefDeger) + ' kg eder.');
+    }
+    const k = hekimKapisi(h);
+    if(k.gerekli){
+      out.push('Bu hedefin planını hekiminle birlikte kurmalıyız (' + k.nedenler.join(', ') + '). '
+        + 'Hekimin bir talimat verdiyse «Tahliller › Hekim talimatları»na ekle; plan ona uyar. '
+        + 'Teşhis koymam, ilaç ya da doz önermem.');
+    }
+    const t = talimatlar();
+    if(t.length){
+      out.push('Kayıtlı ' + t.length + ' hekim talimatın var; hazırlanacak plan onlara uyar.');
+    }
+    return out;
+  }
+
+  /* ------------------------------------------------------------ depo */
+
+  function gecerli(h){ return !!(h && h.id && H().DURUMLAR.indexOf(h.durum) >= 0); }
+
+  async function yukle(){
+    SP.S.hedefler = ((await SP.Store.list('hedefler')) || []).filter(gecerli);
+    SP.S.hekim = ((await SP.Store.list('hekim')) || []).filter(x => x && x.id && x.metin);
+  }
+
+  async function kaydet(h){
+    const l = (SP.S.hedefler || []).filter(x => x.id !== h.id);
+    SP.S.hedefler = l.concat([h]);
+    await SP.Store.set('hedefler/' + h.id, h);
+    return h;
+  }
+
+  function liste(){ return (SP.S.hedefler || []).slice(); }
+  function aktifler(){ return liste().filter(h => h.durum === 'aktif' || h.durum === 'askida'); }
+
+  async function durumDegistir(id, yeni){
+    const h = liste().find(x => x.id === id);
+    if(!h) return { ok:false, why:'Hedef bulunamadı.' };
+    const r = H().gecis(h, yeni, SP.U.todayISO());
+    if(r.ok) await kaydet(r.hedef);
+    return r;
+  }
+
+  /* Motorun sohbet akışı SPİ paketiyle. Model çağrılmaz. */
+  const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
+    paketler:PAKETLER, modul:'spi', durum:() => ({}), bugun:() => SP.U.todayISO(),
+    kaydet, normalize, notlar,
+  }) : null;
+
+  return { PAKETLER, KILO, VKI, sonKilo, boyCm, hekimKapisi, normalize, notlar,
+    talimatlar, talimatEkle, talimatSil, yukle, kaydet, liste, aktifler, durumDegistir, sohbet };
 })();
 
 /* ==== js/core/tanitim.js ==== */
@@ -13550,6 +14345,8 @@ SP.S = {
   meals:{},           // YYYY-MM-DD -> ogun dizisi
   workouts:[],        // antrenman kayitlari
   meds:[],            // ilac ve takviye kayitlari, en yeni ustte
+  hedefler:[],        // hedef motoru kayitlari (core/hedefler.js)
+  hekim:[],           // hekim talimatlari — en yuksek oncelikli kisit
   proposals:[],       // ofisin onerileri — onaysiz hicbiri uygulanmaz
   foods:[],           // kullanicinin ekledigi gidalar (SP.FOODS'a katilir)
   progress:{},        // exId -> { levelId, achievedAt }
@@ -14371,6 +15168,8 @@ SP.Model = (function(){
        yoksa kullanici onayladigini sanip onaylamamis olur. */
     if(SP.Proposals) await SP.Proposals.load();
     if(SP.Bolum) await SP.Bolum.yukle();
+    /* Hedefler ve hekim talimatlari (core/hedefler.js). */
+    if(SP.Hedefler) await SP.Hedefler.yukle();
     /* Hafiza: senin sozun, sohbetten, cikarim — core/hafiza.js (ortak). */
     if(window.LIFEOS && LIFEOS.Hafiza){
       SP.Hafizam = SP.Hafizam || LIFEOS.Hafiza.kur({ store:() => SP.Store, durum:() => SP.S,
@@ -28411,6 +29210,42 @@ SP.Screens.today = (function(){
     });
   }
 
+  /* HEDEFLERİM (core/hedefler.js + brand/ortak/hedef.js). Hedef Danışma
+     sohbetinde kurulur; burada görünür, askıya alınır, bırakılır. Karar
+     etiketiyle yazılır: dayanağı bağlanmamış eşiğin kararı «tahmin»dir. */
+  const BANT = { gercekci:'gerçekçi', zorlayici:'zorlayıcı',
+    gercekci_degil:'bu sürede gerçekçi değil', guvensiz:'güvenli değil' };
+  function hedefSatir(h){
+    const g = h.gerceklik || {};
+    const H = window.LIFEOS.Hedef;
+    const ne = h.hedefDeger != null ? h.hedefDeger + ' kg'
+      : h.fark != null ? (h.yon === 'azalt' ? '−' : '+') + h.fark + ' kg' : h.cumle;
+    return html`<div>
+      <div><b class="small">${h.cumle || ne}</b>
+        <div class="tiny dim">${h.durum === 'askida' ? 'askıda · ' : ''}${h.son_tarih
+          ? 'son tarih ' + H.tarihYaz(h.son_tarih) : 'tarihsiz'}${g.bant ? ' · ' + BANT[g.bant]
+          + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
+      <div class="row gap-8 mt-6" style="flex-wrap:wrap">
+        ${h.durum === 'aktif'
+          ? K.Button({ label:'Askıya al', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'askida' } })
+          : K.Button({ label:'Sürdür', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'aktif' } })}
+        ${K.Button({ label:'Tamamlandı', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'tamam' } })}
+        ${K.Button({ label:'Bırak', size:'sm', tone:'ghost', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'birakildi' } })}
+      </div></div>`;
+  }
+  function hedefEntry(){
+    if(!SP.Hedefler) return null;
+    const l = SP.Hedefler.aktifler();
+    return K.Entry({
+      label:'Hedeflerim', meta:l.length ? l.length + ' etkin' : 'yok',
+      action:K.Button({ label:'Danışma’da hedef koy', act:'go', data:{ 'data-route':'team' } }),
+      body:l.length ? html`<div class="stack-sm">${map(l, hedefSatir)}</div>`
+        : html`<p class="small dim">Henüz hedefin yok. Danışma’da «3 ay içinde 3 kilo vermek
+          istiyorum» ya da «VKİ’mi 24’e indirmek istiyorum» gibi yazabilirsin; gerçekçi olup
+          olmadığını ve güvenli temposunu söylerim.</p>`,
+    });
+  }
+
   function officeEntry(){
     const d = U.todayISO();
     const b = S.officeBriefings[d];
@@ -28640,8 +29475,8 @@ SP.Screens.today = (function(){
 
     if(tab === 'ozet'){
       return String(html`${head}${K.Ledger([
-        readinessEntry(), nutritionEntry(), minimumEntry(), officeEntry(), moneyEntry(),
-      ])}
+        hedefEntry(), readinessEntry(), nutritionEntry(), minimumEntry(), officeEntry(), moneyEntry(),
+      ].filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['next-action', 'minimum-day', 'readiness', 'certainty']))}</div>`);
     }
 
@@ -28682,6 +29517,11 @@ SP.Screens.today = (function(){
   }
 
   const handle = {
+    async 'hedef-durum'(el){
+      const r = await SP.Hedefler.durumDegistir(el.dataset.id, el.dataset.durum);
+      UI.toast(r.ok ? 'Hedef güncellendi' : r.why);
+      SP.App.render();
+    },
     /* Elle gonderim: kullanicinin ACIKCA istedigi an. Kapaliyken
        zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
        olmasini anlamsiz kilardi. */
@@ -29679,6 +30519,8 @@ SP.Screens.labs = (function(){
         body:html`<div class="medlist">${map(gecmis, r => satir(r, false))}</div>`,
       })),
 
+      hekimEntry(),
+
       K.Entry({
         label:'Sınır', meta:'ne yapar, ne yapmaz',
         body:K.Notice({ tone:'warn', title:'Sistem doz önermez.',
@@ -29687,6 +30529,36 @@ SP.Screens.labs = (function(){
             + 'dozunu değiştirmez ve bunları önermez. İlaç kararları hekimindir.' }),
       }),
     ]);
+  }
+
+  /* HEKİM TALİMATLARI (core/hedefler.js). Hekimin yazılı talimatı en
+     yüksek öncelikli kısıttır: hedef ve plan ona uyar. Sistem talimatı
+     yorumlamaz, değiştirmez; yalnız saklar ve uyulacağını söyler. */
+  function hekimEntry(){
+    if(!SP.Hedefler) return null;
+    const l = SP.Hedefler.talimatlar();
+    return K.Entry({
+      label:'Hekim talimatları', meta:l.length ? l.length + ' kayıt' : 'yok',
+      note:'Hekiminin yazdığı talimatı buraya ekle. Hedeflerin ve planların ona uyar; '
+        + 'talimatla çelişen kısım hazırlanmaz ve bu sana söylenir.',
+      body:html`
+        ${when(!l.length, () => P.empty('Kayıtlı hekim talimatı yok.'))}
+        ${when(l.length, () => html`<div class="medlist">${map(l, t => html`
+          <div class="medrow">
+            <div class="medrow__ana"><div class="tiny dim">${U.fmtDate(t.tarih)}</div>
+              <p class="small">${t.metin}</p></div>
+            <div class="medrow__ey">${K.IconButton({ icon:'trash', size:'sm', plain:true,
+              aria:'Talimatı sil', act:'hekim-sil', data:{ 'data-id':t.id } })}</div>
+          </div>`)}</div>`)}
+        <div class="stack-sm mt-10">
+          ${K.Textarea({ id:'hk-metin', rows:3, aria:'Hekim talimatı',
+            placeholder:'Ör. Günlük tuz tüketimi sınırlı olmalı; öğün atlanmamalı.' })}
+          <div class="row gap-8">
+            ${K.Input({ id:'hk-tarih', type:'date', value:U.todayISO(), aria:'Talimat tarihi' })}
+            ${K.Button({ label:'Talimatı ekle', tone:'primary', act:'hekim-ekle' })}
+          </div>
+        </div>`,
+    });
   }
 
   function medSheetBody(rec){
@@ -30034,6 +30906,18 @@ SP.Screens.labs = (function(){
   }
 
   const handle = {
+    async 'hekim-ekle'(){
+      const m = document.getElementById('hk-metin');
+      const t = document.getElementById('hk-tarih');
+      const r = await SP.Hedefler.talimatEkle(m ? m.value : '', t ? t.value : '');
+      UI.toast(r.ok ? 'Hekim talimatı eklendi' : r.why);
+      if(r.ok) SP.App.render();
+    },
+    async 'hekim-sil'(el){
+      await SP.Hedefler.talimatSil(el.dataset.id);
+      UI.toast('Talimat silindi');
+      SP.App.render();
+    },
     async 'lab-tab'(el){ S.ui.labTab = el.dataset.tab; S.ui.labQuery = ''; SP.App.render(); },
     async 'lab-filter'(el){ S.ui.labFilter = el.dataset.tab; SP.App.render(); },
     async 'toggle-empty'(){ S.ui.labShowEmpty = !S.ui.labShowEmpty; SP.App.render(); },
@@ -33808,6 +34692,12 @@ SP.Screens.team = (function(){
     if(SP.Hafizam){
       const h = await SP.Hafizam.komutIsle(t);
       if(h){ await sohbeteYaz(a, t, h.text); return true; }
+    }
+    /* Hedef sohbeti (core/hedefler.js): hedef cümlesi, sorulan eksiklerin
+       cevabı ve tempo seçimi. Hedef değilse null döner, sıradakine geçilir. */
+    if(SP.Hedefler && SP.Hedefler.sohbet){
+      const hd = await SP.Hedefler.sohbet.isle(t);
+      if(hd){ await sohbeteYaz(a, t, hd.text); return true; }
     }
     const kisa = kisaCevap(t);
     if(kisa === 'geri'){

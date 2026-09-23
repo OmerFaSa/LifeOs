@@ -389,6 +389,42 @@ SP.Screens.today = (function(){
     });
   }
 
+  /* HEDEFLERİM (core/hedefler.js + brand/ortak/hedef.js). Hedef Danışma
+     sohbetinde kurulur; burada görünür, askıya alınır, bırakılır. Karar
+     etiketiyle yazılır: dayanağı bağlanmamış eşiğin kararı «tahmin»dir. */
+  const BANT = { gercekci:'gerçekçi', zorlayici:'zorlayıcı',
+    gercekci_degil:'bu sürede gerçekçi değil', guvensiz:'güvenli değil' };
+  function hedefSatir(h){
+    const g = h.gerceklik || {};
+    const H = window.LIFEOS.Hedef;
+    const ne = h.hedefDeger != null ? h.hedefDeger + ' kg'
+      : h.fark != null ? (h.yon === 'azalt' ? '−' : '+') + h.fark + ' kg' : h.cumle;
+    return html`<div>
+      <div><b class="small">${h.cumle || ne}</b>
+        <div class="tiny dim">${h.durum === 'askida' ? 'askıda · ' : ''}${h.son_tarih
+          ? 'son tarih ' + H.tarihYaz(h.son_tarih) : 'tarihsiz'}${g.bant ? ' · ' + BANT[g.bant]
+          + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
+      <div class="row gap-8 mt-6" style="flex-wrap:wrap">
+        ${h.durum === 'aktif'
+          ? K.Button({ label:'Askıya al', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'askida' } })
+          : K.Button({ label:'Sürdür', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'aktif' } })}
+        ${K.Button({ label:'Tamamlandı', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'tamam' } })}
+        ${K.Button({ label:'Bırak', size:'sm', tone:'ghost', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'birakildi' } })}
+      </div></div>`;
+  }
+  function hedefEntry(){
+    if(!SP.Hedefler) return null;
+    const l = SP.Hedefler.aktifler();
+    return K.Entry({
+      label:'Hedeflerim', meta:l.length ? l.length + ' etkin' : 'yok',
+      action:K.Button({ label:'Danışma’da hedef koy', act:'go', data:{ 'data-route':'team' } }),
+      body:l.length ? html`<div class="stack-sm">${map(l, hedefSatir)}</div>`
+        : html`<p class="small dim">Henüz hedefin yok. Danışma’da «3 ay içinde 3 kilo vermek
+          istiyorum» ya da «VKİ’mi 24’e indirmek istiyorum» gibi yazabilirsin; gerçekçi olup
+          olmadığını ve güvenli temposunu söylerim.</p>`,
+    });
+  }
+
   function officeEntry(){
     const d = U.todayISO();
     const b = S.officeBriefings[d];
@@ -618,8 +654,8 @@ SP.Screens.today = (function(){
 
     if(tab === 'ozet'){
       return String(html`${head}${K.Ledger([
-        readinessEntry(), nutritionEntry(), minimumEntry(), officeEntry(), moneyEntry(),
-      ])}
+        hedefEntry(), readinessEntry(), nutritionEntry(), minimumEntry(), officeEntry(), moneyEntry(),
+      ].filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['next-action', 'minimum-day', 'readiness', 'certainty']))}</div>`);
     }
 
@@ -660,6 +696,11 @@ SP.Screens.today = (function(){
   }
 
   const handle = {
+    async 'hedef-durum'(el){
+      const r = await SP.Hedefler.durumDegistir(el.dataset.id, el.dataset.durum);
+      UI.toast(r.ok ? 'Hedef güncellendi' : r.why);
+      SP.App.render();
+    },
     /* Elle gonderim: kullanicinin ACIKCA istedigi an. Kapaliyken
        zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
        olmasini anlamsiz kilardi. */
