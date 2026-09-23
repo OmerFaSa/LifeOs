@@ -53,6 +53,27 @@ NASIL YAZARSIN
  "konular": ["..."]}], "puanlama_notu": "", "acik_kalanlar": ["..."]}"""
 
 
+# Web acikken: model numarali kaynaklarla yazar; her ders icin dayandigi
+# kaynak ve BIREBIR alinti verir. Kod alintiyi kaynakta arar (core/kaynakli.py).
+SISTEM_KAYNAKLI = SISTEM.split("KONUMUN VE SINIRIN")[0] + """KONUMUN VE SINIRIN
+- Sana numaralı web kaynakları verilecek. YALNIZ onlara dayan; kaynaklarda olmayan dersi ya
+  da konuyu UYDURMA, «acik_kalanlar»a yaz.
+- Her ders için «kaynak» (numara) ve «alinti»: o kaynaktan BİREBİR kopyalanmış 20–300
+  karakterlik bir parça. Kod bu parçayı kaynağın metninde arayacak.
+- Soru sayısını yalnız kaynakta yazıyorsa ver; değilse null. Puan hesabı yazma.
+- Kaynağın hangi yılın kılavuzu olduğunu belirt; bilinmiyorsa «acik_kalanlar»a yaz.
+
+NASIL YAZARSIN
+1. Sınavı (ve verilmişse bölümünü) derslere ayır.
+2. Her dersin konularını kısa, öğretilebilir birimler olarak sırala; bir derste en fazla 60 konu.
+3. Türkçe yaz.
+
+ÇIKTI: Yalnız şu biçimde tek bir JSON nesnesi döndür, başka hiçbir şey yazma:
+{"baslik": "...", "sinav": "...", "dersler": [{"ad": "...", "soru_sayisi": 27,
+ "konular": ["..."], "kaynak": 1, "alinti": "..."}], "puanlama_notu": "",
+ "acik_kalanlar": ["..."]}"""
+
+
 def _bosluk(s):
     return re.sub(r"\s+", " ", str(s or "")).strip()
 
@@ -148,7 +169,11 @@ def ayikla(d, g):
             continue
         gorulen.add(_kucuk(ad))
         toplam += len(konular)
-        dersler.append({"ad": ad, "soru_sayisi": soru, "konular": konular})
+        d_ = {"ad": ad, "soru_sayisi": soru, "konular": konular}
+        if isinstance(x.get("kaynak"), int) and not isinstance(x.get("kaynak"), bool):
+            d_["kaynak"] = x["kaynak"]
+            d_["alinti"] = _bosluk(x.get("alinti"))[:400]
+        dersler.append(d_)
     if not dersler:
         return None, "Raporun hiçbir dersi biçim denetimini geçmedi."
     ham_acik = d.get("acik_kalanlar") if isinstance(d.get("acik_kalanlar"), list) else []

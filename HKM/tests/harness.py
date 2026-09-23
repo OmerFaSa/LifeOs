@@ -1,7 +1,22 @@
 """Kucuk test kosucusu — cerceve yok, stdlib bile az."""
 
+import urllib.error
+
 RESULTS = []
 _SUITE = ["genel"]
+
+
+def _ag_kapali(url, *a, **k):
+    raise urllib.error.URLError("test: ag kapali (%s)" % url)
+
+
+# HICBIR TEST AGA CIKMAZ. Web kullanan bir test kendi sahte tasiyicisini
+# verir; vermeyen her yol burada «ag kapali» ile karsilanir.
+try:
+    from core import web as _web
+    _web.VARSAYILAN_TASIYICI = _ag_kapali
+except ImportError:                                  # pragma: no cover
+    pass
 
 
 def suite(name):

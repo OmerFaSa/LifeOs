@@ -7,9 +7,9 @@ sistem degildir (AGENTS.md §1.4).
 
      Kayit       «bu daha once yapildi mi?» — her is ONCE buradan gecer.
                  Model gerektirmez; tekrar isi ve bosa harcamayi keser.
-     Arastirma   alt sorular, bulgular, guven duzeyi. Internete erisim
-                 henuz yok: bulgular modelin bilgisidir ve kayit HER
-                 ZAMAN «dogrulanmadi» etiketini tasir.
+     Arastirma   alt sorular, web aramasi, sayfa okuma ve numarali kaynakli
+                 bulgular (core/kaynakli.py); her alinti KODLA kaynaginda aranir.
+                 Web kapaliysa ya da sonuc yoksa kayit «dogrulanmadi» kalir.
      Planlama    v1 (core/planlama.py): modulun gonderdigi YAPILANDIRILMIS
                  hedefi (simdilik SPI kilo plani) haftalik programa,
                  simulasyona ve plan denetimine cevirir. Model kullanmaz.
@@ -35,7 +35,7 @@ import datetime
 import json
 import re
 
-from core import ai, intents, kitap, mufredat, planlama
+from core import ai, intents, kaynakli, kitap, mufredat, planlama, web
 
 OFISLER = {
     "kayit": {
@@ -47,8 +47,9 @@ OFISLER = {
                     "Sürüm Uzmanı", "Kayıt Doğrulama Uzmanı"]},
     "arastirma": {
         "ad": "Araştırma Ofisi", "patron": "Araştırma Patronu", "durum": "hazir",
-        "gorev": "Talebi alt sorulara böler, bulguları güven düzeyiyle yazar. "
-                 "Kaynağa erişim henüz yok: her kayıt «doğrulanmadı» etiketini taşır.",
+        "gorev": "Talebi alt sorulara böler, web'de arar, sayfaları okur ve bulguları "
+                 "numaralı kaynaklarla yazar; her alıntı kodla kaynağında aranır. Web "
+                 "kapalıysa ya da sonuç yoksa kayıt «doğrulanmadı» kalır.",
         "ajanlar": ["Araştırma Mimarı", "Kaynak Tarayıcı", "Derin Araştırmacı",
                     "Birincil Kaynak Uzmanı", "Akademik Kaynak Uzmanı",
                     "Kaynak Doğrulayıcı", "Çelişki Analisti", "Kanıt Analisti",
@@ -279,24 +280,189 @@ def _json_ayikla(metin):
     return d if isinstance(d, dict) else None
 
 
-def _mufredat_adimi(con, cfg, j, g, transport, now):
-    """Mufredat raporu (core/mufredat.py): model DERS -> KONU agacini yazar,
-    kod suzer. Hic ders gecmezse kayit yazilmaz; uydurulmus mufredat yasak."""
+# Web tasiyicisi: None ise gercek ag (core/web.py). Testler sahte tasiyici koyar.
+web_tasiyici = None
+
+
+def _model_hatasi(r):
+    if r.get("reason") == "budget":
+        return {"durum": "beklemede", "not": r.get("note")}
+    return {"durum": "hata", "not": r.get("note") or "Model cevap vermedi."}
+
+
+def _kaynak_topla(con, cfg, j, ofis, sorgu_kur, transport, now):
+    """Kaynakli isin ilk uc asamasi, HER TIKTE BIR ASAMA (core/kaynakli.py):
+    plan -> tarama -> okuma. Ara durum adimda durur.
+
+    Doner: ("devam", adim_sonucu) | ("hazir", kaynaklar, metinler)
+         | ("yok", neden). «yok»ta cagiran is kaynaksiz yola duser ve bunu
+    SOYLER; web'in kapali olmasi isi durdurmaz."""
+    adim = next(a for a in j["adimlar"] if a["ofis"] == ofis)
+    st = adim.get("kaynakli") if isinstance(adim.get("kaynakli"), dict) else None
+    if not web.settings(cfg)["acik"]:
+        return ("yok", "Web kapalı")
+    rol = "bam." + ofis
+    if st is None:
+        sorgular, alt = sorgu_kur()
+        if isinstance(sorgular, dict):          # model hatasi
+            return ("devam", sorgular)
+        if not sorgular:
+            return ("yok", "Aranacak sorgu çıkmadı")
+        return ("devam", {"durum": "bekliyor", "kaynakli": {"asama": "tarama", "sorgular": sorgular,
+                                                              "alt_sorular": alt},
+                          "not": "Arama sorguları hazır: %s." % "; ".join(sorgular)})
+    if st["asama"] == "tarama":
+        sonuclar, notlar = [], []
+        for s in st["sorgular"]:
+            r = web.ara(con, cfg, rol, s, n=5, tasiyici=web_tasiyici, now=now)
+            sonuclar += r.get("sonuclar") or []
+            if not r.get("ok") and r.get("note"):
+                notlar.append(r["note"])
+        adaylar = kaynakli.aday_sec(sonuclar)
+        if not adaylar:
+            return ("yok", "Web'de sonuç bulunamadı" + (" (%s)" % "; ".join(notlar[:2])
+                                                         if notlar else ""))
+        return ("devam", {"durum": "bekliyor", "kaynakli": dict(st, asama="okuma", adaylar=adaylar),
+                          "not": "%d aday kaynak bulundu." % len(adaylar)})
+    if st["asama"] == "okuma":
+        kaynaklar = []
+        for a in st["adaylar"]:
+            if len(kaynaklar) >= kaynakli.MAX_KAYNAK:
+                break
+            s = web.getir(con, cfg, rol, a["url"], tasiyici=web_tasiyici, now=now)
+            if s.get("ok"):
+                kaynaklar.append({"n": len(kaynaklar) + 1, "url": a["url"],
+                                  "baslik": s["baslik"], "alan": s["alan"],
+                                  "erisim": s["erisim"], "yayin": s.get("yayin") or a.get("yayin")})
+        if not kaynaklar:
+            return ("yok", "Bulunan sayfaların hiçbiri okunamadı")
+        return ("devam", {"durum": "bekliyor",
+                          "kaynakli": dict(st, asama="yazim", kaynaklar=kaynaklar, adaylar=None),
+                          "not": "%d kaynak okundu." % len(kaynaklar)})
+    # yazim: metinler web onbelleginden gelir — yeniden aga cikilmaz.
+    metinler = {}
+    for k in st["kaynaklar"]:
+        s = web.getir(con, cfg, rol, k["url"], tasiyici=web_tasiyici, now=now)
+        if s.get("ok"):
+            metinler[k["n"]] = s["metin"]
+    kaynaklar = [k for k in st["kaynaklar"] if k["n"] in metinler]
+    if not kaynaklar:
+        return ("yok", "Okunan kaynaklar önbellekte bulunamadı")
+    return ("hazir", kaynaklar, metinler)
+
+
+def _mufredat_modelden(con, cfg, j, g, transport, now, neden=None):
     r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
                [{"role": "user", "content": mufredat.istem(g)}],
                sistem=mufredat.SISTEM, transport=transport, duzeltme=False, denetim="belge")
     if not r.get("ok"):
-        if r.get("reason") == "budget":
-            return {"durum": "beklemede", "not": r.get("note")}
-        return {"durum": "hata", "not": r.get("note") or "Model cevap vermedi."}
-    govde, neden = mufredat.ayikla(_json_ayikla(r["text"]), g)
+        return _model_hatasi(r)
+    govde, hata = mufredat.ayikla(_json_ayikla(r["text"]), g)
+    if hata:
+        return {"durum": "hata", "not": "Müfredat raporu yazılmadı: " + hata}
     if neden:
-        return {"durum": "hata", "not": "Müfredat raporu yazılmadı: " + neden}
+        govde["web"] = neden
     k = kayit_ekle(con, "arastirma", "%s müfredatı" % g["sinav"], govde,
                    dogruluk="dogrulanmadi", etiketler=j["talep"][:300], is_id=j["id"], now=now)
+    return {"durum": "tamam", "kayit_id": k["id"], "kaynakli": {"asama": "bitti", "kaynak": 0},
+            "not": "Müfredat raporu kaydedildi: %d ders, %d konu — kaynaksız, doğrulanmadı.%s"
+                   % (govde["ders_sayisi"], govde["konu_sayisi"],
+                      (" (%s.)" % neden) if neden else "")}
+
+
+def _mufredat_adimi(con, cfg, j, g, transport, now):
+    """Mufredat raporu (core/mufredat.py). Web aciksa sinavin resmi
+    sayfalari aranir ve her ders bir alintiyla kaynagina baglanir; kod
+    alintiyi kaynakta arar. Dogrulanan ders yarinin altindaysa kayit
+    «dogrulanmadi» kalir. Web yoksa model bilgisiyle yazilir ve bu soylenir."""
+    def sorgu_kur():
+        ad = g["sinav"] + (" " + g["bolum"] if g.get("bolum") else "")
+        return kaynakli.sorgular({"sorgular": ["%s konuları" % ad, "%s müfredatı ÖSYM kılavuz" % ad]},
+                                 ad), []
+    t = _kaynak_topla(con, cfg, j, "arastirma", sorgu_kur, transport, now)
+    if t[0] == "devam":
+        return t[1]
+    if t[0] == "yok":
+        return _mufredat_modelden(con, cfg, j, g, transport, now, neden=t[1])
+    kaynaklar, metinler = t[1], t[2]
+    r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
+               [{"role": "user", "content": mufredat.istem(g) + "\n\nKAYNAKLAR\n"
+                 + kaynakli.blok(kaynaklar, metinler)}],
+               sistem=mufredat.SISTEM_KAYNAKLI, transport=transport, duzeltme=False,
+               denetim="belge")
+    if not r.get("ok"):
+        return _model_hatasi(r)
+    govde, hata = mufredat.ayikla(_json_ayikla(r["text"]), g)
+    if hata:
+        return {"durum": "hata", "not": "Müfredat raporu yazılmadı: " + hata}
+    dogru = 0
+    for d in govde["dersler"]:
+        n = d.get("kaynak")
+        d["dogrulandi"] = bool(n in metinler and kaynakli.alinti_dogru_mu(d.get("alinti"),
+                                                                          metinler[n]))
+        dogru += d["dogrulandi"]
+    govde["kaynaklar"] = kaynakli.kaynakca(kaynaklar)
+    govde["dogrulama"] = {"ders": len(govde["dersler"]), "dogrulanan": dogru}
+    etiket = "kaynakli" if dogru * 2 >= len(govde["dersler"]) else "dogrulanmadi"
+    govde["uyari"] = ("Kaynaklı: %d dersin %d'i alıntıyla kaynağına bağlandı. Yine de resmi "
+                      "kılavuzla karşılaştır." % (len(govde["dersler"]), dogru)
+                      if etiket == "kaynakli" else
+                      "Derslerin yarısından azı kaynakla doğrulandı; resmi kılavuzla karşılaştır.")
+    k = kayit_ekle(con, "arastirma", "%s müfredatı" % g["sinav"], govde, dogruluk=etiket,
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now)
     return {"durum": "tamam", "kayit_id": k["id"],
-            "not": "Müfredat raporu kaydedildi: %d ders, %d konu — kaynaksız, doğrulanmadı."
-                   % (govde["ders_sayisi"], govde["konu_sayisi"])}
+            "kaynakli": {"asama": "bitti", "kaynak": len(kaynaklar)},
+            "not": "Müfredat raporu: %d ders, %d konu, %d kaynak; %d ders alıntıyla doğrulandı (%s)."
+                   % (govde["ders_sayisi"], govde["konu_sayisi"], len(kaynaklar), dogru,
+                      "kaynaklı" if etiket == "kaynakli" else "doğrulanmadı")}
+
+
+def _arastirma_kaynakli(con, cfg, j, transport, now):
+    """Kaynakli arastirma (core/kaynakli.py). None donerse web yok:
+    cagiran model bilgisiyle yazar ve nedenini kayda koyar."""
+
+    def sorgu_kur():
+        r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
+                   [{"role": "user", "content": "Araştırma talebi: " + j["talep"]}],
+                   sistem=kaynakli.PLAN_SISTEM, transport=transport, duzeltme=False,
+                   denetim="belge")
+        if not r.get("ok"):
+            return _model_hatasi(r), []
+        d = _json_ayikla(r["text"]) or {}
+        return kaynakli.sorgular(d, j["talep"]), kaynakli.alt_sorular(d)
+
+    t = _kaynak_topla(con, cfg, j, "arastirma", sorgu_kur, transport, now)
+    if t[0] != "hazir":
+        return t
+    kaynaklar, metinler = t[1], t[2]
+    adim = next(a for a in j["adimlar"] if a["ofis"] == "arastirma")
+    st = adim.get("kaynakli") or {}
+    r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
+               [{"role": "user", "content": "Araştırma talebi: " + j["talep"]
+                 + "\n\nKAYNAKLAR\n" + kaynakli.blok(kaynaklar, metinler)}],
+               sistem=kaynakli.YAZIM_SISTEM, transport=transport, duzeltme=False,
+               denetim="belge")
+    if not r.get("ok"):
+        return ("devam", _model_hatasi(r))
+    d = _json_ayikla(r["text"]) or {}
+    bulgular, say = kaynakli.bulgular(d, metinler)
+    celiskiler = kaynakli.liste(d, "celiskiler", 8)
+    etiket = kaynakli.dogruluk(bulgular, celiskiler)
+    govde = {"ozet": str(d.get("ozet") or "").strip()[:1500],
+             "alt_sorular": st.get("alt_sorular") or [], "sorgular": st.get("sorgular") or [],
+             "bulgular": bulgular, "celiskiler": celiskiler,
+             "acik_kalanlar": kaynakli.liste(d, "acik_kalanlar"),
+             "kaynaklar": kaynakli.kaynakca(kaynaklar), "dogrulama": say}
+    baslik = str(d.get("baslik") or j["talep"]).strip()[:200]
+    k = kayit_ekle(con, "arastirma", baslik, govde, dogruluk=etiket,
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now)
+    return ("devam", {"durum": "tamam", "kayit_id": k["id"],
+                      "kaynakli": {"asama": "bitti", "kaynak": len(kaynaklar)},
+                      "not": "Kaynaklı araştırma: %d kaynak, %d bulgunun %d'i alıntıyla "
+                             "doğrulandı (%s)." % (len(kaynaklar), say["toplam"], say["dogrulanan"],
+                                                  {"kaynakli": "kaynaklı",
+                                                   "celiskili": "çelişkili",
+                                                   "dogrulanmadi": "doğrulanmadı"}[etiket])})
 
 
 def _arastirma_adimi(con, cfg, j, transport, now):
@@ -306,6 +472,10 @@ def _arastirma_adimi(con, cfg, j, transport, now):
     g = (j.get("govde") or {}).get("mufredat")
     if g:
         return _mufredat_adimi(con, cfg, j, g, transport, now)
+    t = _arastirma_kaynakli(con, cfg, j, transport, now)
+    if t[0] == "devam":
+        return t[1]
+    web_neden = t[1]
     r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
                [{"role": "user", "content": "Araştırma talebi: " + j["talep"]}],
                sistem=ARASTIRMA_SISTEM, transport=transport,
@@ -329,11 +499,12 @@ def _arastirma_adimi(con, cfg, j, transport, now):
              "acik_kalanlar": [str(x)[:300] for x in (d.get("acik_kalanlar") or [])][:10]}
     if not bulgular and not govde["ozet"]:
         govde["metin"] = str(r["text"])[:6000]        # bicim tutmadi: ham metin
+    govde["web"] = web_neden
     baslik = str(d.get("baslik") or j["talep"]).strip()[:200]
     k = kayit_ekle(con, "arastirma", baslik, govde, dogruluk="dogrulanmadi",
                    etiketler=j["talep"][:300], is_id=j["id"], now=now)
-    return {"durum": "tamam", "kayit_id": k["id"],
-            "not": "Araştırma kaydedildi — kaynaksız, doğrulanmadı."}
+    return {"durum": "tamam", "kayit_id": k["id"], "kaynakli": {"asama": "bitti", "kaynak": 0},
+            "not": "Araştırma kaydedildi — kaynaksız, doğrulanmadı (%s)." % web_neden}
 
 
 def _planlama_adimi(con, cfg, j, transport, now):

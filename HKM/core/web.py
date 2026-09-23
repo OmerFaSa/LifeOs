@@ -62,6 +62,8 @@ MAX_METIN = 60000
 SORGU_UZUNLUK = (3, 160)
 ONBELLEK_GUN = {"ara": 1, "sayfa": 7}
 METIN_TURLERI = ("text/html", "text/plain", "application/xhtml+xml")
+# Testler bunu «ag kapali» bir tasiyiciyla degistirir: hicbir test aga cikmaz.
+VARSAYILAN_TASIYICI = None
 
 KISISEL = (re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+"),            # e-posta
            re.compile(r"(?:\+?90|0)?\s*5\d{2}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}"),  # cep
@@ -468,7 +470,7 @@ def ara(con, cfg, rol, sorgu, n=5, tasiyici=None, now=None):
     var = _onbellek_oku(con, "ara", ak, now)
     if var is not None:
         return dict(var, onbellekten=True)
-    tasiyici = tasiyici or _ag
+    tasiyici = tasiyici or VARSAYILAN_TASIYICI or _ag
     sonuclar, kullanilan, hatalar, gorulen = [], [], [], set()
     for ad in a["saglayicilar"]:
         if len(sonuclar) >= n:
@@ -529,6 +531,7 @@ def getir(con, cfg, rol, url, tasiyici=None, now=None):
         return {"ok": False, "note": "Bu görevlinin web erişimi yok."}
     if not settings(cfg)["acik"]:
         return {"ok": False, "note": "Web kapalı (Ayarlar › Web)."}
+    tasiyici = tasiyici or VARSAYILAN_TASIYICI
     ok, neden = url_uygun_mu(url, cozumle=tasiyici is None)
     if not ok:
         return {"ok": False, "note": neden}

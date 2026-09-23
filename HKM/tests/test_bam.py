@@ -23,8 +23,9 @@ def _arastirma_tasiyici(metin):
 
 
 def _cfg():
-    """Model King'e atanir; BAM rolleri King'den miras alir."""
-    cfg = {"local_token": "x",
+    """Model King'e atanir; BAM rolleri King'den miras alir. Web KAPALI:
+    bu testler kaynaksiz yolu sinar; kaynakli yol tests/test_kaynakli.py'de."""
+    cfg = {"local_token": "x", "web": {"acik": False},
            "budget": {"monthly_try": 850.0, "usd_try": 48.6,
                       "rate_date": "2026-09-23", "ceiling_currency": "try"}}
     return models.apply(cfg, {"keys": {"google": "AIza-test"},
