@@ -179,6 +179,11 @@ DOSYALAR = {
     # halusinasyon o arayuzde kalici olur.
     "hafiza.js":      "js/core",
     "hafiza.test.js": "tests",
+    # OFIS KATLARI — King > Patron > uzman zinciri ve istem iskeleti.
+    # «Kim kimin denetiminde konusur» uc arayuzde ayni olmali; biri
+    # King'i bilmezse o arayuzun Patron'u modulun ustunu bilmez.
+    "ofis.js":        "js/core",
+    "ofis.test.js":   "tests",
     # MODEL KATMANI — yalniz SPİ ve ESP (bkz. YALNIZ).
     "llm.js":        "js/core",
 }

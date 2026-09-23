@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'1b5360a', at:'2026-09-23 07:04', dirty:true };
+SP.BUILD = { id:'9567ace', at:'2026-09-23 07:17', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8203,6 +8203,144 @@ LIFEOS.Hafiza = (function(){
 
   return { KATMANLAR, KAYNAK_IZNI, MAX_METIN, MAX_KAYIT, ANAHTAR,
     ekle, unut, etkin, baglam, komut, listeMetni, gecerli, kur };
+})();
+
+/* ==== js/core/ofis.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/ofis.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* OFİS — kim kime bağlı, istem nasıl kurulur.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/ofis.js`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   Kopyayı elle düzenleme: bir sonraki yayında kaybolur.
+   ==================================================================
+
+   ÜÇ KAT
+
+     0  King      HKM'deki baş patron. Üç modülü birlikte görür, modüller
+                  arası bağı kurar. Hiçbir modüle YAZMAZ; teklif bırakır
+                  (AGENTS.md §1.4). Kapalıyken hiçbir modül durmaz.
+     1  Patron    Modülün baş danışmanı. Uzmanların raporunu okur, tek
+                  karar çıkarır. Profil, sınav ya da kadro değişse de
+                  DEĞİŞMEZ: uzmanlar gelir gider, Patron kalır.
+     2  Uzman     Kendi masasından sorumludur. Raporu Patron'a gider.
+
+   Kullanıcının üstünde kimse yoktur: orta ve büyük değişiklik onun
+   onayı olmadan uygulanmaz (AGENTS.md §1.9).
+
+   Her ajan istemi aynı iskeletle kurulur (`istem`). Sıra sabittir:
+   kimlik → konum → yöntem → ortak ilkeler → modül kuralları → üslup →
+   hafıza → brifing. Boş bölüm hiç yazılmaz. Brifing EN SONDADIR: model
+   veriyi, kuralları okuduktan sonra görür. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.Ofis = (function(){
+  const MODULLER = {
+    ays:{ ad:'AYS', tam:'Akademik Yol Sistemi', alan:'sınav hazırlığı',
+      sinir:['Sonuç garantisi vermezsin: «kesin kazanırsın» cümlesi kurulmaz.',
+        'Yetenek yargısı kurmazsın; süreç ve davranış hakkında konuşursun.',
+        'Sertifika ya da resmî derece vermezsin.'] },
+    spi:{ ad:'SPİ', tam:'Sağlık Performans İzleyicisi', alan:'sağlık ve performans',
+      sinir:['Teşhis koymazsın.',
+        'İlaç ya da doz önermezsin; tedaviyi bırakmayı önermezsin.',
+        'Kırmızı bayrakta yorum yapmadan hekime yönlendirirsin.'] },
+    esp:{ ad:'ESP', tam:'Entelektüel Seviye Planlayıcı', alan:'entelektüel gelişim',
+      sinir:['Sertifika ya da resmî seviye vermezsin.',
+        'Mutlak yetenek yargısı kurmazsın («yeteneklisin / yeteneksizsin»).',
+        'Sonuç garantisi vermezsin; estetik otorite iddia etmezsin.'] },
+  };
+
+  const KATLAR = {
+    king:{ kat:0, ad:'King', yer:'HKM' },
+    patron:{ kat:1, ad:'Patron' },
+    uzman:{ kat:2, ad:'Uzman' },
+  };
+
+  /* Üç modülün her ajanına aynı. Modülün kendi kuralları bunların
+     ÜSTÜNE eklenir, yerine geçmez. */
+  const ILKELER = [
+    'Kullanıcının durumu hakkındaki sayıyı ve kararı kural motoru üretir; sen onu cümleye '
+      + 'çevirirsin. Brifingde olmayan bir durum sayısı yazmazsın, verilen sayıyı yeniden '
+      + 'hesaplamazsın. Konu anlatırken verdiğin örnekler bunun dışındadır.',
+    'Her sayının bir etiketi vardır: ölçüldü, tahmin, hesaplandı, veri yok. «Veri yok» '
+      + 'sıfır değildir; ölçülmediğini açıkça söylersin, tahmini ölçüm gibi sunmazsın.',
+    'Bir şeyin değişmesi gerekiyorsa (hedef, plan, açık bölümler) doğrudan değiştirmezsin: '
+      + 'kapalı bir katalogdan öneri yaparsın, kod doğrular, kullanıcı onaylar. Ölçülmüş ya da '
+      + 'hesaplanmış bir sayıyı hiçbir koşulda değiştiremezsin.',
+    'Anlamadığın bir şeyi anlamış gibi yapmazsın; belirsizse tek bir netleştirme sorusu sorarsın.',
+    'Kullanıcının hafızasına yazamazsın; «bunu hatırlayacağım» demezsin. Kullanıcı isterse '
+      + '«hatırla: …» diye kendisi yazar.',
+    'Kararı kullanıcı verir. Gerekçeyi ve seçeneği açık söylersin; baskı kurmazsın, suçlamazsın, '
+      + 'kötü haberi iyi haberin arkasına saklamazsın.',
+  ];
+
+  function katOf(ajan){
+    return ajan && (ajan.lead || ajan.id === 'patron') ? 'patron' : 'uzman';
+  }
+
+  /* Ajanın zincirdeki yeri — istemin KONUMUN bölümü. */
+  function konum(modul, ajan, opts){
+    const m = MODULLER[modul];
+    if(!m || !ajan) return [];
+    const o = opts || {};
+    const out = [];
+    if(katOf(ajan) === 'patron'){
+      out.push('Sen ' + m.ad + ' (' + m.tam + ') ofisinin Patronusun'
+        + (o.uzmanSayisi ? ': ' + o.uzmanSayisi + ' uzmanın raporunu okur, çelişkiyi çözer '
+          + 've tek karar çıkarırsın.' : '.'));
+      out.push('Senin üstünde King var: HKM’deki baş patron. King üç modülü (AYS, SPİ, ESP) '
+        + 'birlikte görür ve aralarındaki bağı kurar; hiçbir modüle yazmaz, teklif bırakır. '
+        + 'King’in ya da öteki modüllerin notu brifingde gelirse onu hesaba katarsın. '
+        + 'King kapalıysa karar yine sendedir; onun yokluğu ofisi durdurmaz.');
+      out.push('Profil, sınav ya da uzman kadrosu değişse de sen değişmezsin: uzmanlar gelir '
+        + 'gider, Patron kalır. Ofisin sürekliliği sensin.');
+    }else{
+      out.push('Sen ' + m.ad + ' ofisinde ' + (ajan.role || 'uzman') + ' masasındasın ('
+        + ajan.name + '). Raporun Patron’a gider; Patron uzmanların raporlarını birleştirip '
+        + 'tek karar çıkarır.');
+      out.push('Patron’un üstünde King var (HKM’deki baş patron). İki kat denetim altında '
+        + 'konuşursun: söylediğin, Patron’un ve King’in okuyacağı bir kayıttır.');
+      out.push('Kendi masanın dışına çıkmazsın; dışındaki soruyu ilgili uzmana ya da Patron’a '
+        + 'yönlendirirsin. Başka bir uzmanla çelişirsen bunu saklamaz, Patron’a bırakırsın.');
+    }
+    out.push('Kullanıcının üstünde kimse yoktur: orta ve büyük değişiklikler onun onayı '
+      + 'olmadan uygulanmaz.');
+    out.push(m.ad + ' sınırı: ' + m.sinir.join(' '));
+    return out;
+  }
+
+  function liste(l, numarali){
+    return (l || []).filter(Boolean)
+      .map((x, i) => (numarali ? (i + 1) + '. ' : '- ') + x).join('\n');
+  }
+
+  /* İstemin iskeleti. `o`:
+       modul, ajan         zorunlu (konum için)
+       kimlik              ajanın kim olduğu (serbest metin)
+       yontem              adım adım nasıl düşünür (dizi)
+       kurallar            modülün kendi kuralları (dizi)
+       kurallarAdi         başlık (varsayılan «KURALLAR»)
+       uslup, hafiza, brifing, uzmanSayisi */
+  function istem(o){
+    const b = [];
+    const bolum = (ad, govde) => {
+      if(govde && String(govde).trim()) b.push(ad + ':\n' + String(govde).trim());
+    };
+    bolum('KİMLİK', o.kimlik);
+    bolum('KONUMUN', liste(konum(o.modul, o.ajan, o), false));
+    bolum('NASIL ÇALIŞIRSIN', liste(o.yontem, true));
+    bolum('ORTAK İLKELER (tartışılmaz)', liste(ILKELER, true));
+    bolum(o.kurallarAdi || 'KURALLAR', liste(o.kurallar, true));
+    bolum('ÜSLUP', o.uslup);
+    if(o.hafiza && String(o.hafiza).trim()) b.push(String(o.hafiza).trim());
+    bolum('BRİFİNG (kural motorundan; tek veri kaynağın)', o.brifing);
+    return b.join('\n\n');
+  }
+
+  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem };
 })();
 
 /* ==== js/core/tanitim.js ==== */
@@ -11713,6 +11851,13 @@ window.SP = window.SP || {};
 
 SP.AGENTS = [
   { id:'patron', name:'Patron', role:'Baş danışman',
+    yontem:[
+      'Önce dört masanın raporuna bak: kırmızı bayrak var mı? Varsa her şeyin önüne o geçer ve hekime yönlendirme söylenir.',
+      'Masalar çelişiyorsa öncelik sırasını uygula: güvenlik (kırmızı bayrak), toparlanma, beslenme açığı, bütçe.',
+      'Bu haftanın tek işini seç: ölçümün en çok iyileşeceği ve kullanıcının gerçekten yapabileceği iş.',
+      'Kararı gerekçesiyle söyle: hangi ölçüm, hangi masa, neden şimdi.',
+      'Eksik ölçüm varsa kararı ölçümsüz kurma; önce neyin ölçülmesi gerektiğini söyle.',
+    ],
     color:'var(--agent-patron)', initial:'P',
     title:'Orkestratör',
     scope:'Dört uzmanın raporu, çelişkilerin çözümü, haftalık konsolide rapor ve seninle istişare.',
@@ -11722,6 +11867,12 @@ SP.AGENTS = [
     redirect:'Bu soru bir uzmanın alanında; ona bağlıyorum.' },
 
   { id:'lab', name:'Kerem', role:'Laboratuvar ve biyometri',
+    yontem:[
+      'Tahlili önce kişinin kendi geçmişiyle karşılaştır, sonra referans aralığıyla: eğilim tek ölçümden çok şey söyler.',
+      'Kırmızı bayrak ölçütüne uyan bir değer varsa yorum yapmadan hekime yönlendir.',
+      'Değerin ne zaman ölçüldüğüne bak; eski bir tahlili bugünün durumu gibi konuşma.',
+      'Bulguyu açıkla ve ne anlama gelebileceğini söyle; teşhis adı koyma.',
+    ],
     color:'var(--agent-lab)', initial:'K',
     title:'Modül 1',
     scope:'Kan ve idrar biyokimyası, hormon panelleri, vital bulgular, tahlil trendleri ve kırmızı bayraklar.',
@@ -11734,6 +11885,12 @@ SP.AGENTS = [
     keywords:['tahlil', 'ferritin', 'hormon', 'biyokimya', 'kırmızı bayrak', 'referans aralığ'] },
 
   { id:'nutri', name:'Nesrin', role:'Beslenme ve biyoyararlanım',
+    yontem:[
+      'Önce kalori ve makro dengesine, sonra süreklileşen mikro besin açığına bak; tek günlük açık gürültüdür.',
+      'Emilim etkileşimlerini hesaba kat (ör. demirli öğünle aynı anda çay ya da kahve).',
+      'Öneriyi hane mutfağına indir: hangi öğün, hangi besin.',
+      'Takviye ya da doz önerme; açık süreklileşirse Kerem’e ve hekime yönlendir.',
+    ],
     color:'var(--agent-nutri)', initial:'N',
     title:'Modül 2',
     scope:'Kalori ve makro dengesi, mikro besin açıkları, emilim etkileşimleri ve hane mutfağı uyarlaması.',
@@ -11746,6 +11903,12 @@ SP.AGENTS = [
     keywords:['öğün', 'kalori', 'makro', 'mikro besin', 'emilim', 'mutfak'] },
 
   { id:'move', name:'Barış', role:'Hareket ve toparlanma',
+    yontem:[
+      'Önce toparlanma skoruna ve uykuya bak: günün yükünü istek değil toparlanma belirler.',
+      'Haftalık yük artışını kademeli tut; ani sıçramayı aşırı yüklenme işareti say.',
+      'Ağrı ya da sakatlık belirtisinde yük önermeyi bırak, hekime ya da fizyoterapiste yönlendir.',
+      'Tek bir somut ayar öner: bugünkü yük, set sayısı ya da dinlenme.',
+    ],
     color:'var(--agent-move)', initial:'B',
     title:'Modül 3',
     scope:'Antrenman yükü, kademeli ilerleme, toparlanma skoru, uyku ve aşırı antrenman koruması.',
@@ -11757,6 +11920,12 @@ SP.AGENTS = [
     keywords:['antrenman', 'toparlanma', 'egzersiz', 'aşırı antrenman', 'set', 'tekrar sayısı'] },
 
   { id:'money', name:'Sedef', role:'Sağlık ekonomisi',
+    yontem:[
+      'Önce haftalık sepet maliyetini bütçeyle karşılaştır; fiyat verisi eskiyse bunu söyle.',
+      'Sağlık hedefini indirme: aynı besin değerini veren daha ucuz eşdeğeri ara.',
+      'Tasarrufu brifingdeki tutarla söyle; kendin hesaplama.',
+      'Tek bir değişiklik öner: hangi ürün, hangi eşdeğer.',
+    ],
     color:'var(--agent-money)', initial:'S',
     title:'Modül 4',
     scope:'Haftalık sepet maliyeti, eşdeğer besin ikamesi, toplu alım tasarrufu ve bütçe sürdürülebilirliği.',
@@ -25786,33 +25955,29 @@ SP.Office = (function(){
 
   /* --------------------------------------------------------------- model */
 
+  /* Istem iskeleti LIFEOS.Ofis.istem'dedir (brand/ortak/ofis.js):
+     kimlik -> konum (King > Patron > uzman) -> yontem -> ortak ilkeler ->
+     SPI kurallari -> uslup -> hafiza -> brifing. */
   function systemPrompt(agentId, b){
     const a = SP.AGENT_BY_ID[agentId] || SP.AGENT_BY_ID.patron;
-    return [
-      'Sen ' + a.name + ' adında bir sağlık asistanı ajanısın. Rolün: ' + a.role + '.',
-      'Alanın: ' + a.scope,
-      'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
-      '',
-      'KURALLAR (bunlar tartışılmaz):',
-      '1. Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
-      '2. Teşhis koyma. İlaç ya da doz önerme. Tedaviyi bırakmayı önerme. Sonuç garantisi verme.',
-      '3. ' + SP.CLINICAL.disclaimer,
-      '4. Türkçe yaz. Kısa cümle kur. En fazla 4 cümle.',
-      '5. Bilmediğin bir şey sorulursa "bu benim alanımda değil" ya da "bu veri girilmemiş" de.',
-      '6. Kullanıcının hafızasına yazamazsın. «Bunu hatırlayayım» deme; kullanıcı isterse «hatırla: …» yazar.',
-      '',
-    ].concat(hafizaBaglami()).concat([
-      'BRİFİNG (JSON, kural motorundan geldi):',
-      JSON.stringify(b),
-    ]).join('\n');
-  }
-
-  /* Hafiza istemde ETIKETIYLE durur (LIFEOS.Hafiza.baglam). Bos ise
-     istemde basligi bile yoktur: «hatirlanan bir sey yok» cumlesi ajani
-     uydurmaya iter. */
-  function hafizaBaglami(){
-    const m = SP.Hafizam ? SP.Hafizam.baglam() : '';
-    return m ? [m, ''] : [];
+    return LIFEOS.Ofis.istem({
+      modul:'spi', ajan:a, yontem:a.yontem,
+      kimlik:'Sen ' + a.name + ' adında bir sağlık asistanı ajanısın. Rolün: ' + a.role + '.\n'
+        + 'Alanın: ' + a.scope + '\n'
+        + 'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
+      uzmanSayisi:SP.AGENTS.filter(x => x.id !== 'patron').length,
+      kurallarAdi:'KURALLAR (bunlar tartışılmaz)',
+      kurallar:[
+        'Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
+        'Teşhis koyma. İlaç ya da doz önerme. Tedaviyi bırakmayı önerme. Sonuç garantisi verme.',
+        SP.CLINICAL.disclaimer,
+        'Bilmediğin bir şey sorulursa "bu benim alanımda değil" ya da "bu veri girilmemiş" de.',
+      ],
+      uslup:'Türkçe yaz. Kısa cümle kur. En fazla 4 cümle.',
+      /* Hafiza ETIKETIYLE gelir (LIFEOS.Hafiza.baglam); bos ise bolum yok. */
+      hafiza:SP.Hafizam ? SP.Hafizam.baglam() : '',
+      brifing:JSON.stringify(b),
+    });
   }
 
   /* Ajan yaniti. Model yoksa ya da cagri basarisiz olursa kural motorunun

@@ -80,6 +80,22 @@
       expect(sys.indexOf('en fazla') > 0 || sys.indexOf('En fazla') > 0).toBeTruthy();
     });
 
+    /* Katlar (brand/ortak/ofis.js): her ajan kimin denetiminde konuştuğunu
+       bilir; Patron King'i bilir ve değişmeyeceğini bilir. */
+    it('her ajanın istemi konumunu ve yöntemini taşır', () => {
+      R.AGENTS.forEach(a => {
+        expect(Array.isArray(a.yontem) && a.yontem.length >= 3).toBeTruthy();
+        const sys = R.OFFICE_PROMPTS.system(a, 'dengeli');
+        expect(sys).toContain('KONUMUN');
+        expect(sys).toContain('NASIL ÇALIŞIRSIN');
+        expect(sys).toContain('King');
+        expect(sys).toContain('garanti');
+        expect(sys.length < 9000).toBeTruthy();
+      });
+      expect(R.OFFICE_PROMPTS.system(R.AGENT_BY_ID.patron, 'dengeli')).toContain('değişmezsin');
+      expect(R.OFFICE_PROMPTS.system(R.AGENT_BY_ID.tyt, 'dengeli')).toContain('Raporun Patron’a gider');
+    });
+
     /* Hafıza istemde ETİKETİYLE durur; boşsa başlığı bile yoktur. */
     it('istem hafızayı etiketiyle taşır; model hafızaya yazamaz', async () => {
       R.Test.resetState();

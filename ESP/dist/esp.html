@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'1b5360a', at:'2026-09-23 07:04', dirty:true };
+ESP.BUILD = { id:'9567ace', at:'2026-09-23 07:17', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -9042,6 +9042,144 @@ LIFEOS.Hafiza = (function(){
 
   return { KATMANLAR, KAYNAK_IZNI, MAX_METIN, MAX_KAYIT, ANAHTAR,
     ekle, unut, etkin, baglam, komut, listeMetni, gecerli, kur };
+})();
+
+/* ==== js/core/ofis.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/ofis.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* OFİS — kim kime bağlı, istem nasıl kurulur.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/ofis.js`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   Kopyayı elle düzenleme: bir sonraki yayında kaybolur.
+   ==================================================================
+
+   ÜÇ KAT
+
+     0  King      HKM'deki baş patron. Üç modülü birlikte görür, modüller
+                  arası bağı kurar. Hiçbir modüle YAZMAZ; teklif bırakır
+                  (AGENTS.md §1.4). Kapalıyken hiçbir modül durmaz.
+     1  Patron    Modülün baş danışmanı. Uzmanların raporunu okur, tek
+                  karar çıkarır. Profil, sınav ya da kadro değişse de
+                  DEĞİŞMEZ: uzmanlar gelir gider, Patron kalır.
+     2  Uzman     Kendi masasından sorumludur. Raporu Patron'a gider.
+
+   Kullanıcının üstünde kimse yoktur: orta ve büyük değişiklik onun
+   onayı olmadan uygulanmaz (AGENTS.md §1.9).
+
+   Her ajan istemi aynı iskeletle kurulur (`istem`). Sıra sabittir:
+   kimlik → konum → yöntem → ortak ilkeler → modül kuralları → üslup →
+   hafıza → brifing. Boş bölüm hiç yazılmaz. Brifing EN SONDADIR: model
+   veriyi, kuralları okuduktan sonra görür. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.Ofis = (function(){
+  const MODULLER = {
+    ays:{ ad:'AYS', tam:'Akademik Yol Sistemi', alan:'sınav hazırlığı',
+      sinir:['Sonuç garantisi vermezsin: «kesin kazanırsın» cümlesi kurulmaz.',
+        'Yetenek yargısı kurmazsın; süreç ve davranış hakkında konuşursun.',
+        'Sertifika ya da resmî derece vermezsin.'] },
+    spi:{ ad:'SPİ', tam:'Sağlık Performans İzleyicisi', alan:'sağlık ve performans',
+      sinir:['Teşhis koymazsın.',
+        'İlaç ya da doz önermezsin; tedaviyi bırakmayı önermezsin.',
+        'Kırmızı bayrakta yorum yapmadan hekime yönlendirirsin.'] },
+    esp:{ ad:'ESP', tam:'Entelektüel Seviye Planlayıcı', alan:'entelektüel gelişim',
+      sinir:['Sertifika ya da resmî seviye vermezsin.',
+        'Mutlak yetenek yargısı kurmazsın («yeteneklisin / yeteneksizsin»).',
+        'Sonuç garantisi vermezsin; estetik otorite iddia etmezsin.'] },
+  };
+
+  const KATLAR = {
+    king:{ kat:0, ad:'King', yer:'HKM' },
+    patron:{ kat:1, ad:'Patron' },
+    uzman:{ kat:2, ad:'Uzman' },
+  };
+
+  /* Üç modülün her ajanına aynı. Modülün kendi kuralları bunların
+     ÜSTÜNE eklenir, yerine geçmez. */
+  const ILKELER = [
+    'Kullanıcının durumu hakkındaki sayıyı ve kararı kural motoru üretir; sen onu cümleye '
+      + 'çevirirsin. Brifingde olmayan bir durum sayısı yazmazsın, verilen sayıyı yeniden '
+      + 'hesaplamazsın. Konu anlatırken verdiğin örnekler bunun dışındadır.',
+    'Her sayının bir etiketi vardır: ölçüldü, tahmin, hesaplandı, veri yok. «Veri yok» '
+      + 'sıfır değildir; ölçülmediğini açıkça söylersin, tahmini ölçüm gibi sunmazsın.',
+    'Bir şeyin değişmesi gerekiyorsa (hedef, plan, açık bölümler) doğrudan değiştirmezsin: '
+      + 'kapalı bir katalogdan öneri yaparsın, kod doğrular, kullanıcı onaylar. Ölçülmüş ya da '
+      + 'hesaplanmış bir sayıyı hiçbir koşulda değiştiremezsin.',
+    'Anlamadığın bir şeyi anlamış gibi yapmazsın; belirsizse tek bir netleştirme sorusu sorarsın.',
+    'Kullanıcının hafızasına yazamazsın; «bunu hatırlayacağım» demezsin. Kullanıcı isterse '
+      + '«hatırla: …» diye kendisi yazar.',
+    'Kararı kullanıcı verir. Gerekçeyi ve seçeneği açık söylersin; baskı kurmazsın, suçlamazsın, '
+      + 'kötü haberi iyi haberin arkasına saklamazsın.',
+  ];
+
+  function katOf(ajan){
+    return ajan && (ajan.lead || ajan.id === 'patron') ? 'patron' : 'uzman';
+  }
+
+  /* Ajanın zincirdeki yeri — istemin KONUMUN bölümü. */
+  function konum(modul, ajan, opts){
+    const m = MODULLER[modul];
+    if(!m || !ajan) return [];
+    const o = opts || {};
+    const out = [];
+    if(katOf(ajan) === 'patron'){
+      out.push('Sen ' + m.ad + ' (' + m.tam + ') ofisinin Patronusun'
+        + (o.uzmanSayisi ? ': ' + o.uzmanSayisi + ' uzmanın raporunu okur, çelişkiyi çözer '
+          + 've tek karar çıkarırsın.' : '.'));
+      out.push('Senin üstünde King var: HKM’deki baş patron. King üç modülü (AYS, SPİ, ESP) '
+        + 'birlikte görür ve aralarındaki bağı kurar; hiçbir modüle yazmaz, teklif bırakır. '
+        + 'King’in ya da öteki modüllerin notu brifingde gelirse onu hesaba katarsın. '
+        + 'King kapalıysa karar yine sendedir; onun yokluğu ofisi durdurmaz.');
+      out.push('Profil, sınav ya da uzman kadrosu değişse de sen değişmezsin: uzmanlar gelir '
+        + 'gider, Patron kalır. Ofisin sürekliliği sensin.');
+    }else{
+      out.push('Sen ' + m.ad + ' ofisinde ' + (ajan.role || 'uzman') + ' masasındasın ('
+        + ajan.name + '). Raporun Patron’a gider; Patron uzmanların raporlarını birleştirip '
+        + 'tek karar çıkarır.');
+      out.push('Patron’un üstünde King var (HKM’deki baş patron). İki kat denetim altında '
+        + 'konuşursun: söylediğin, Patron’un ve King’in okuyacağı bir kayıttır.');
+      out.push('Kendi masanın dışına çıkmazsın; dışındaki soruyu ilgili uzmana ya da Patron’a '
+        + 'yönlendirirsin. Başka bir uzmanla çelişirsen bunu saklamaz, Patron’a bırakırsın.');
+    }
+    out.push('Kullanıcının üstünde kimse yoktur: orta ve büyük değişiklikler onun onayı '
+      + 'olmadan uygulanmaz.');
+    out.push(m.ad + ' sınırı: ' + m.sinir.join(' '));
+    return out;
+  }
+
+  function liste(l, numarali){
+    return (l || []).filter(Boolean)
+      .map((x, i) => (numarali ? (i + 1) + '. ' : '- ') + x).join('\n');
+  }
+
+  /* İstemin iskeleti. `o`:
+       modul, ajan         zorunlu (konum için)
+       kimlik              ajanın kim olduğu (serbest metin)
+       yontem              adım adım nasıl düşünür (dizi)
+       kurallar            modülün kendi kuralları (dizi)
+       kurallarAdi         başlık (varsayılan «KURALLAR»)
+       uslup, hafiza, brifing, uzmanSayisi */
+  function istem(o){
+    const b = [];
+    const bolum = (ad, govde) => {
+      if(govde && String(govde).trim()) b.push(ad + ':\n' + String(govde).trim());
+    };
+    bolum('KİMLİK', o.kimlik);
+    bolum('KONUMUN', liste(konum(o.modul, o.ajan, o), false));
+    bolum('NASIL ÇALIŞIRSIN', liste(o.yontem, true));
+    bolum('ORTAK İLKELER (tartışılmaz)', liste(ILKELER, true));
+    bolum(o.kurallarAdi || 'KURALLAR', liste(o.kurallar, true));
+    bolum('ÜSLUP', o.uslup);
+    if(o.hafiza && String(o.hafiza).trim()) b.push(String(o.hafiza).trim());
+    bolum('BRİFİNG (kural motorundan; tek veri kaynağın)', o.brifing);
+    return b.join('\n\n');
+  }
+
+  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem };
 })();
 
 /* ==== js/core/tanitim.js ==== */
@@ -10190,6 +10328,13 @@ window.ESP = window.ESP || {};
 
 ESP.AGENTS = [
   { id:'patron', name:'Patron', role:'Baş danışman',
+    yontem:[
+      'Önce sekiz masanın raporuna bak: hangi disiplin ilerliyor, hangisi durdu, hangisinde veri yok.',
+      'Açık bölümlere bak; kullanıcının kapattığı bir disiplini önerme.',
+      'Haftanın rotası için tek işi seç: birikmiş tekrar borcu, duran bir disiplin ya da merdivendeki sıradaki kapı.',
+      'Kararı gerekçesiyle söyle; kademeyi kişiye değil üretime ver ve tarih aralığıyla söyle.',
+      'Bölüm açıp kapamak ya da günlük tabanı değiştirmek gerekiyorsa öneri olarak söyle; onay kullanıcınındır.',
+    ],
     color:'var(--agent-patron)', initial:'P',
     title:'Orkestrasyon',
     scope:'Yedi uzmanın ve bir koçun raporu, çelişkilerin çözümü, haftalık rota, '
@@ -10201,6 +10346,12 @@ ESP.AGENTS = [
     redirect:'Bu soru bir uzmanın alanında; ona bağlıyorum.' },
 
   { id:'polyglot', name:'Polyglot Mentor', short:'Polyglot', role:'Yabancı dil',
+    yontem:[
+      'Önce aralıklı tekrar retansiyonuna bak: kelimeyi öğrendiği gün değil unutmaya başladığı gün önemlidir.',
+      'Tekrar borcu birikmişse yeni kelime önermeden önce borcu erit.',
+      'Üretim düzeyini i+1 ile ayarla: bildiğinin bir adım ötesi.',
+      'Tek bir alıştırma öner: hangi deste, kaç kart, kaç dakika shadowing.',
+    ],
     color:'var(--agent-lang)', initial:'Pg',
     title:'Disiplin 1',
     scope:'Aktif kelime dağarcığı, aralıklı tekrar (SRS) retansiyonu, shadowing '
@@ -10213,6 +10364,12 @@ ESP.AGENTS = [
     owns:['lang'] },
 
   { id:'socrates', name:'Socrates', role:'Felsefe ve diyalektik',
+    yontem:[
+      'Önce açık kalan tezleri ve cevapsız itirazları bul.',
+      'Argümanın yapısını ayır: öncül, çıkarım, sonuç; safsata varsa adını ve yerini söyle.',
+      'Cevabı sen verme; kullanıcıyı bir sonraki itiraza götüren tek bir soru sor.',
+      'Primer metne dön: hangi pasaj, hangi iddia.',
+    ],
     color:'var(--agent-philo)', initial:'S',
     title:'Disiplin 2',
     scope:'Argüman tutarlılığı, mantık safsataları, açık kalan tezler ve okunan '
@@ -10225,6 +10382,12 @@ ESP.AGENTS = [
     owns:['symposium'] },
 
   { id:'maestro', name:'Maestro', role:'Müzik ve gitar',
+    yontem:[
+      'Önce metronom eşiğine bak: temiz çalınan en yüksek tempo nerede?',
+      'Tıkanılan geçişi bul ve onu eşiğin biraz altında, küçük parçalar halinde çalıştır.',
+      'Akor ve mod deşifresini repertuardaki bir parçaya bağla; teoriyi kulakla birlikte ver.',
+      'Tek bir çalışma öner: hangi geçiş, hangi tempo, kaç dakika.',
+    ],
     color:'var(--agent-music)', initial:'M',
     title:'Disiplin 3',
     scope:'Metronom BPM eşiği, akor ve mod deşifresi, tıkanılan geçişler, '
@@ -10237,6 +10400,12 @@ ESP.AGENTS = [
     owns:['studio'] },
 
   { id:'demosthenes', name:'Demosthenes', short:'Demosthenes', role:'Diksiyon ve hitabet',
+    yontem:[
+      'Önce kullanıcının kayıt üzerinde kendi işaretlediği hata oranına bak; kulağına değil kaydına güven.',
+      'Artikülasyon, nefes, vurgu ve hızdan (WPM) hangisinin en çok kaydığını bul.',
+      'Tek bir egzersiz öner ve bir sonraki kayıtta neye bakılacağını söyle.',
+      'Kişinin sesini ya da aksanını yargılama; ölçülebilir olanı konuş.',
+    ],
     color:'var(--agent-diction)', initial:'D',
     title:'Disiplin 4',
     scope:'Artikülasyon temizliği, nefes, vurgu ve konuşma hızı (WPM); '
@@ -10248,6 +10417,12 @@ ESP.AGENTS = [
     owns:['studio'] },
 
   { id:'aristoteles', name:'Aristoteles', role:'Derin okuma',
+    yontem:[
+      'Önce bağlanmamış atomik notlara bak: bağlanmayan not bilgi değil birikintidir.',
+      'Kavram bağlantılarında kopuk kümeleri ve tek yazara yaslanan alanları bul.',
+      'Sentez için iki notu yan yana koydur: aralarındaki bağı kullanıcı yazsın.',
+      'Tek bir okuma adımı öner: hangi metin, hangi kavram, hangi not.',
+    ],
     color:'var(--agent-reading)', initial:'A',
     title:'Disiplin 5',
     scope:'Atomik not sayısı, kavram bağlantı matrisi, sentopik sentez katsayısı '
@@ -10260,6 +10435,12 @@ ESP.AGENTS = [
     owns:['library'] },
 
   { id:'montaigne', name:'Montaigne', role:'Yazı ve üslup',
+    yontem:[
+      'Önce haftalık üretime ve taslak–revizyon oranına bak: yazmadan üslup gelişmez.',
+      'Cümle uzunluğu dağılımında, tekrarda ve gereksiz dolaylamada en belirgin örüntüyü bul.',
+      'Bir paragraf üzerinden göster: ne kalsın, ne kısalsın; metni kullanıcının yerine yeniden yazma.',
+      'Estetik hüküm verme; okura etkisini söyle.',
+    ],
     color:'var(--agent-writing)', initial:'Mt',
     title:'Disiplin 6',
     scope:'Haftalık kelime üretimi, cümle uzunluğu dağılımı, tekrar ve gereksiz '
@@ -10272,6 +10453,12 @@ ESP.AGENTS = [
     owns:['writing'] },
 
   { id:'herodot', name:'Herodot', role:'Tarih ve kaynak eleştirisi',
+    yontem:[
+      'Önce kronoloji kapsamına bak: hangi dönem, bölge ya da yüzyıl boş kalmış?',
+      'Nedensellik zincirlerinin dengesine ve kaynakların birincil–ikincil dağılımına bak.',
+      'Tek bir kaynak eleştirisi alıştırması öner: kim yazdı, ne zaman, kime, neden.',
+      'Bir yorumu dayatma; kanıtın neyi taşıyıp neyi taşımadığını göster.',
+    ],
     color:'var(--agent-history)', initial:'H',
     title:'Disiplin 7',
     scope:'Kronoloji kapsamı (dönem, bölge, alan), yüzyıl boşlukları, nedensellik '
@@ -10286,6 +10473,12 @@ ESP.AGENTS = [
     owns:['history'] },
 
   { id:'mnemosyne', name:'Mnemosyne', short:'Mnemosyne', role:'Hafıza ve tekrar koçu',
+    yontem:[
+      'Önce vadesi geçen kartlara bak: bugünün tekrarı yeni içerikten önce gelir.',
+      'Destelerin unutma eğrisini karşılaştır; en hızlı unutulan desteyi söyle.',
+      'Tekrar yükünü güne yay; bir günde erimeyecek borcu parçala.',
+      'İçeriğe karışma: hangi kartın doğru olduğunu değil, ne zaman tekrar edileceğini söyle.',
+    ],
     color:'var(--agent-memory)', initial:'Ω',
     title:'Koç',
     scope:'Bütün destelerin aralıklı tekrar durumu, vadesi geçen kartlar, '
@@ -30284,39 +30477,33 @@ ESP.Office = (function(){
 
   /* --------------------------------------------------------------- model */
 
+  /* Istem iskeleti LIFEOS.Ofis.istem'dedir (brand/ortak/ofis.js):
+     kimlik -> konum (King > Patron > uzman) -> yontem -> ortak ilkeler ->
+     ESP kurallari -> uslup -> hafiza -> brifing. */
   function systemPrompt(agentId, b){
     const a = ESP.AGENT_BY_ID[agentId] || ESP.AGENT_BY_ID.patron;
-    return [
-      'Sen ' + a.name + ' adında bir entelektüel pratik ajanısın. Rolün: ' + a.role + '.',
-      'Alanın: ' + a.scope,
-      'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
-      '',
-      'KURALLAR (bunlar tartışılmaz):',
-      '1. Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
-      '2. Sertifika ya da resmî seviye verme. Seviye etiketini kişiye değil ÜRETİME ver ve '
-        + 'daima tarih aralığıyla birlikte: «son 30 günlük üretimin şu bandın kriterlerini karşılıyor».',
-      '3. Mutlak yetenek yargısı kurma («yeteneklisin / yeteneksizsin»). Yalnızca süreç hakkında konuş.',
-      '4. Sonuç garantisi verme. Yön ve olasılık söylenir, garanti verilmez.',
-      '5. Estetik otorite iddia etme («kusursuz», «yayımlanmaya hazır»).',
-      '6. Bir metrik «veri yok» ise onu sıfır gibi yorumlama; ölçülmediğini söyle.',
-      '',
-      '7. Kullanıcının hafızasına yazamazsın. «Bunu hatırlayacağım» deme; kullanıcı isterse «hatırla: …» yazar.',
-      '',
-      'ÜSLUP: Türkçe, kısa, somut. En fazla üç cümle. Kötü haberi iyi haberin arkasına saklama.',
-      'Soru sorabilirsin ama aynı anda en fazla bir tane.',
-      '',
-    ].concat(hafizaBaglami()).concat([
-      'BRİFİNG (tek veri kaynağın):',
-      JSON.stringify(b || brief(agentId)),
-    ]).join('\n');
-  }
-
-  /* Hafiza istemde ETIKETIYLE durur (LIFEOS.Hafiza.baglam). Bos ise
-     basligi bile yoktur: «hatirlanan bir sey yok» cumlesi ajani
-     uydurmaya iter. */
-  function hafizaBaglami(){
-    const m = ESP.Hafizam ? ESP.Hafizam.baglam() : '';
-    return m ? [m, ''] : [];
+    return LIFEOS.Ofis.istem({
+      modul:'esp', ajan:a, yontem:a.yontem,
+      kimlik:'Sen ' + a.name + ' adında bir entelektüel pratik ajanısın. Rolün: ' + a.role + '.\n'
+        + 'Alanın: ' + a.scope + '\n'
+        + 'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
+      uzmanSayisi:ESP.AGENTS.filter(x => x.id !== 'patron').length,
+      kurallarAdi:'KURALLAR (bunlar tartışılmaz)',
+      kurallar:[
+        'Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
+        'Sertifika ya da resmî seviye verme. Seviye etiketini kişiye değil ÜRETİME ver ve '
+          + 'daima tarih aralığıyla birlikte: «son 30 günlük üretimin şu bandın kriterlerini karşılıyor».',
+        'Mutlak yetenek yargısı kurma («yeteneklisin / yeteneksizsin»). Yalnızca süreç hakkında konuş.',
+        'Sonuç garantisi verme. Yön ve olasılık söylenir, garanti verilmez.',
+        'Estetik otorite iddia etme («kusursuz», «yayımlanmaya hazır»).',
+        'Bir metrik «veri yok» ise onu sıfır gibi yorumlama; ölçülmediğini söyle.',
+      ],
+      uslup:'Türkçe, kısa, somut. En fazla üç cümle. Kötü haberi iyi haberin arkasına saklama.\n'
+        + 'Soru sorabilirsin ama aynı anda en fazla bir tane.',
+      /* Hafiza ETIKETIYLE gelir (LIFEOS.Hafiza.baglam); bos ise bolum yok. */
+      hafiza:ESP.Hafizam ? ESP.Hafizam.baglam() : '',
+      brifing:JSON.stringify(b || brief(agentId)),
+    });
   }
 
   /* ---------------------------------------------------------------- denetim

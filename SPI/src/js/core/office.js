@@ -431,33 +431,29 @@ SP.Office = (function(){
 
   /* --------------------------------------------------------------- model */
 
+  /* Istem iskeleti LIFEOS.Ofis.istem'dedir (brand/ortak/ofis.js):
+     kimlik -> konum (King > Patron > uzman) -> yontem -> ortak ilkeler ->
+     SPI kurallari -> uslup -> hafiza -> brifing. */
   function systemPrompt(agentId, b){
     const a = SP.AGENT_BY_ID[agentId] || SP.AGENT_BY_ID.patron;
-    return [
-      'Sen ' + a.name + ' adında bir sağlık asistanı ajanısın. Rolün: ' + a.role + '.',
-      'Alanın: ' + a.scope,
-      'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
-      '',
-      'KURALLAR (bunlar tartışılmaz):',
-      '1. Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
-      '2. Teşhis koyma. İlaç ya da doz önerme. Tedaviyi bırakmayı önerme. Sonuç garantisi verme.',
-      '3. ' + SP.CLINICAL.disclaimer,
-      '4. Türkçe yaz. Kısa cümle kur. En fazla 4 cümle.',
-      '5. Bilmediğin bir şey sorulursa "bu benim alanımda değil" ya da "bu veri girilmemiş" de.',
-      '6. Kullanıcının hafızasına yazamazsın. «Bunu hatırlayayım» deme; kullanıcı isterse «hatırla: …» yazar.',
-      '',
-    ].concat(hafizaBaglami()).concat([
-      'BRİFİNG (JSON, kural motorundan geldi):',
-      JSON.stringify(b),
-    ]).join('\n');
-  }
-
-  /* Hafiza istemde ETIKETIYLE durur (LIFEOS.Hafiza.baglam). Bos ise
-     istemde basligi bile yoktur: «hatirlanan bir sey yok» cumlesi ajani
-     uydurmaya iter. */
-  function hafizaBaglami(){
-    const m = SP.Hafizam ? SP.Hafizam.baglam() : '';
-    return m ? [m, ''] : [];
+    return LIFEOS.Ofis.istem({
+      modul:'spi', ajan:a, yontem:a.yontem,
+      kimlik:'Sen ' + a.name + ' adında bir sağlık asistanı ajanısın. Rolün: ' + a.role + '.\n'
+        + 'Alanın: ' + a.scope + '\n'
+        + 'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
+      uzmanSayisi:SP.AGENTS.filter(x => x.id !== 'patron').length,
+      kurallarAdi:'KURALLAR (bunlar tartışılmaz)',
+      kurallar:[
+        'Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
+        'Teşhis koyma. İlaç ya da doz önerme. Tedaviyi bırakmayı önerme. Sonuç garantisi verme.',
+        SP.CLINICAL.disclaimer,
+        'Bilmediğin bir şey sorulursa "bu benim alanımda değil" ya da "bu veri girilmemiş" de.',
+      ],
+      uslup:'Türkçe yaz. Kısa cümle kur. En fazla 4 cümle.',
+      /* Hafiza ETIKETIYLE gelir (LIFEOS.Hafiza.baglam); bos ise bolum yok. */
+      hafiza:SP.Hafizam ? SP.Hafizam.baglam() : '',
+      brifing:JSON.stringify(b),
+    });
   }
 
   /* Ajan yaniti. Model yoksa ya da cagri basarisiz olursa kural motorunun

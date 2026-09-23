@@ -41,7 +41,27 @@ GOREVLILER = {
 # Her gorevli YALNIZ kendi alanina bakar: baglami da o kadardir.
 ALAN = {"bio": "bio", "academic": "academic", "intellect": "intellect"}
 
+# Kat zinciri — modullerle ayni (brand/ortak/ofis.js): King > modul
+# Patronu > uzman. King modullere YAZMAZ, teklif birakir; moduller King
+# kapaliyken de calisir (AGENTS.md §1.4).
+KONUM = {
+    "king": ("Sen baş patronsun. AYS, SPİ ve ESP'nin Patronları senin altındadır; "
+             "her birinin kendi uzman kadrosu vardır. Modüllere yazamazsın, "
+             "teklif bırakırsın; onlar sen kapalıyken de çalışır. Senin işin "
+             "modüller arasındaki bağı görmek: birinin yükü ötekini nasıl etkiliyor."),
+    "bio": ("King'e bağlısın. Alanın SPİ'nin verisidir; SPİ'nin kendi Patronu ve "
+            "uzmanları vardır, onların yerine karar vermezsin. Teşhis koymaz, "
+            "ilaç ya da doz önermezsin."),
+    "academic": ("King'e bağlısın. Alanın AYS'nin verisidir; AYS'nin kendi Patronu "
+                 "ve uzmanları vardır, onların yerine karar vermezsin. Sonuç "
+                 "garantisi vermezsin."),
+    "intellect": ("King'e bağlısın. Alanın ESP'nin verisidir; ESP'nin kendi Patronu "
+                  "ve uzmanları vardır, onların yerine karar vermezsin. Sertifika "
+                  "ya da yetenek yargısı vermezsin."),
+}
+
 SISTEM_METNI = """Sen HKM'nin %(ad)s görevlisisin. %(is)s
+%(konum)s
 
 Kesin kurallar:
 - ÖLÇÜM UYDURMA. Kullanıcının uykusu, soru sayısı, neti, kalıcılığı gibi
@@ -61,6 +81,12 @@ Kesin kurallar:
 
 Bugünün ölçümleri:
 %(baglam)s"""
+
+
+def sistem_metni(gorevli, bg):
+    g = GOREVLILER[gorevli]
+    return SISTEM_METNI % {"ad": g["ad"], "is": g["is"], "konum": KONUM[gorevli],
+                           "baglam": bg}
 
 
 def baglam(con, date, gorevli="king", th=None):
@@ -191,8 +217,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         bg += ("\nKullanıcı hakkında hatırlananlar (etiketiyle; «tahmin» kesin "
                "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
                "sen yazamazsın):\n" + hb)
-    g = GOREVLILER[gorevli]
-    sistem = SISTEM_METNI % {"ad": g["ad"], "is": g["is"], "baglam": bg}
+    sistem = sistem_metni(gorevli, bg)
     mesajlar = list(gecmis or []) + [{"role": "user", "content": metin}]
 
     r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
@@ -285,8 +310,7 @@ def tani(con, cfg, date, gorevli="king", th=None, transport=None):
     ekle("Kural motoru bağlamı", bool(bg.strip()),
          "%d satır ölçüme dayanıyor" % len(bg.splitlines()))
 
-    g = GOREVLILER[gorevli]
-    sistem = SISTEM_METNI % {"ad": g["ad"], "is": g["is"], "baglam": bg}
+    sistem = sistem_metni(gorevli, bg)
     r = ai.ask(con, cfg, rol, "tani",
                [{"role": "user", "content": "Tek cümleyle merhaba de."}],
                baglam=bg, sistem=sistem, transport=transport)

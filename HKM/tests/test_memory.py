@@ -146,3 +146,12 @@ def run():
         r = memory.esitle(con, "ays", [None, {"id": "", "metin": "x"}, _kayit("k", "")])
         eq((r["eklenen"], r["reddedilen"]), (0, 3))
     test("esitleme bozuk girdiyi reddeder", t_module_sync_rejects_bad_input)
+
+    # ---- kat zinciri (brand/ortak/ofis.js ile ayni) -----------------
+
+    def t_king_knows_the_chain():
+        k = sohbet.sistem_metni("king", "")
+        ok("baş patron" in k and "teklif" in k)
+        for g in ("bio", "academic", "intellect"):
+            ok("King'e bağlısın" in sohbet.sistem_metni(g, ""))
+    test("King ve gorevliler kat zincirini bilir", t_king_knows_the_chain)

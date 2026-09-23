@@ -241,6 +241,24 @@
       });
     });
 
+    /* Katlar (brand/ortak/ofis.js): her ajan kimin denetiminde konuştuğunu
+       bilir; Patron King'i ve değişmeyeceğini bilir. */
+    it('her ajanın istemi konumunu, yöntemini ve sınırı taşır', () => {
+      resetState();
+      ESP.AGENTS.forEach(a => {
+        expect(Array.isArray(a.yontem) && a.yontem.length >= 3).toBe(true);
+        const p = O.systemPrompt(a.id);
+        expect(p.indexOf('KONUMUN') >= 0).toBe(true);
+        expect(p.indexOf('NASIL ÇALIŞIRSIN') >= 0).toBe(true);
+        expect(p.indexOf('King') >= 0).toBe(true);
+        expect(p.indexOf('Sertifika') >= 0).toBe(true);
+        expect(p.indexOf('BRİFİNG') > p.indexOf('KONUMUN')).toBe(true);
+        expect(p.length < 12000).toBe(true);
+      });
+      expect(O.systemPrompt('patron').indexOf('değişmezsin') >= 0).toBe(true);
+      expect(O.systemPrompt('socrates').indexOf('Raporun Patron’a gider') >= 0).toBe(true);
+    });
+
     it('istem pedagojik siniri yazar', () => {
       resetState();
       const p = O.systemPrompt('polyglot', O.langBrief());

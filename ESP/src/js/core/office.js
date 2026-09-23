@@ -463,39 +463,33 @@ ESP.Office = (function(){
 
   /* --------------------------------------------------------------- model */
 
+  /* Istem iskeleti LIFEOS.Ofis.istem'dedir (brand/ortak/ofis.js):
+     kimlik -> konum (King > Patron > uzman) -> yontem -> ortak ilkeler ->
+     ESP kurallari -> uslup -> hafiza -> brifing. */
   function systemPrompt(agentId, b){
     const a = ESP.AGENT_BY_ID[agentId] || ESP.AGENT_BY_ID.patron;
-    return [
-      'Sen ' + a.name + ' adında bir entelektüel pratik ajanısın. Rolün: ' + a.role + '.',
-      'Alanın: ' + a.scope,
-      'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
-      '',
-      'KURALLAR (bunlar tartışılmaz):',
-      '1. Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
-      '2. Sertifika ya da resmî seviye verme. Seviye etiketini kişiye değil ÜRETİME ver ve '
-        + 'daima tarih aralığıyla birlikte: «son 30 günlük üretimin şu bandın kriterlerini karşılıyor».',
-      '3. Mutlak yetenek yargısı kurma («yeteneklisin / yeteneksizsin»). Yalnızca süreç hakkında konuş.',
-      '4. Sonuç garantisi verme. Yön ve olasılık söylenir, garanti verilmez.',
-      '5. Estetik otorite iddia etme («kusursuz», «yayımlanmaya hazır»).',
-      '6. Bir metrik «veri yok» ise onu sıfır gibi yorumlama; ölçülmediğini söyle.',
-      '',
-      '7. Kullanıcının hafızasına yazamazsın. «Bunu hatırlayacağım» deme; kullanıcı isterse «hatırla: …» yazar.',
-      '',
-      'ÜSLUP: Türkçe, kısa, somut. En fazla üç cümle. Kötü haberi iyi haberin arkasına saklama.',
-      'Soru sorabilirsin ama aynı anda en fazla bir tane.',
-      '',
-    ].concat(hafizaBaglami()).concat([
-      'BRİFİNG (tek veri kaynağın):',
-      JSON.stringify(b || brief(agentId)),
-    ]).join('\n');
-  }
-
-  /* Hafiza istemde ETIKETIYLE durur (LIFEOS.Hafiza.baglam). Bos ise
-     basligi bile yoktur: «hatirlanan bir sey yok» cumlesi ajani
-     uydurmaya iter. */
-  function hafizaBaglami(){
-    const m = ESP.Hafizam ? ESP.Hafizam.baglam() : '';
-    return m ? [m, ''] : [];
+    return LIFEOS.Ofis.istem({
+      modul:'esp', ajan:a, yontem:a.yontem,
+      kimlik:'Sen ' + a.name + ' adında bir entelektüel pratik ajanısın. Rolün: ' + a.role + '.\n'
+        + 'Alanın: ' + a.scope + '\n'
+        + 'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
+      uzmanSayisi:ESP.AGENTS.filter(x => x.id !== 'patron').length,
+      kurallarAdi:'KURALLAR (bunlar tartışılmaz)',
+      kurallar:[
+        'Sayı üretme. Bütün sayılar aşağıdaki brifingden gelir. Brifingde olmayan bir sayıyı yazma.',
+        'Sertifika ya da resmî seviye verme. Seviye etiketini kişiye değil ÜRETİME ver ve '
+          + 'daima tarih aralığıyla birlikte: «son 30 günlük üretimin şu bandın kriterlerini karşılıyor».',
+        'Mutlak yetenek yargısı kurma («yeteneklisin / yeteneksizsin»). Yalnızca süreç hakkında konuş.',
+        'Sonuç garantisi verme. Yön ve olasılık söylenir, garanti verilmez.',
+        'Estetik otorite iddia etme («kusursuz», «yayımlanmaya hazır»).',
+        'Bir metrik «veri yok» ise onu sıfır gibi yorumlama; ölçülmediğini söyle.',
+      ],
+      uslup:'Türkçe, kısa, somut. En fazla üç cümle. Kötü haberi iyi haberin arkasına saklama.\n'
+        + 'Soru sorabilirsin ama aynı anda en fazla bir tane.',
+      /* Hafiza ETIKETIYLE gelir (LIFEOS.Hafiza.baglam); bos ise bolum yok. */
+      hafiza:ESP.Hafizam ? ESP.Hafizam.baglam() : '',
+      brifing:JSON.stringify(b || brief(agentId)),
+    });
   }
 
   /* ---------------------------------------------------------------- denetim

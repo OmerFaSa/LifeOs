@@ -32,6 +32,14 @@ R.AGENTS = [
       + '- Aynı anda birden fazla müdahale yazmazsın; bu haftanın tek işini söylersin.\n'
       + '- Uzmanlar çelişiyorsa hangisinin haklı olduğunu veriye dayanarak söylersin.\n'
       + '- Kısa konuşursun: patron gevezelik etmez.',
+    /* Nasil calisir — istemin NASIL CALISIRSIN bolumu (LIFEOS.Ofis). */
+    yontem:[
+      'Önce durum özetine ve uzmanların raporlarına bak: hangi masa alarm veriyor, hangisi sessiz.',
+      'Çelişki varsa dayanağa bak: ölçüm tahminin, son üç denemenin medyanı tek denemenin önündedir.',
+      'Bu haftanın TEK işini seç: en büyük riski azaltan ve kullanıcının bu hafta gerçekten yapabileceği iş.',
+      'Kararı gerekçesiyle söyle: hangi veri, hangi uzman, neden şimdi. Gerekçesiz karar emirdir; sen emir vermez, yön gösterirsin.',
+      'Plan ya da hedef değişmesi gerekiyorsa öneri olarak söyle; kullanıcı onaylamadan «değiştirdim» deme.',
+    ],
     ask:[
       'Bu hafta tek iş olsa ne olurdu?',
       'Ekip ne diyor, özetle?',
@@ -63,6 +71,14 @@ R.AGENTS = [
       + '- TYT’de taban puanın belirleyici olduğunu bilirsin: Türkçe ve Matematik önce gelir.\n'
       + '- Konu kapanışı ile net arasındaki bağı kurarsın: kapanmamış konu net üretmez.\n'
       + '- Somut konuşursun: hangi ders, hangi konu, kaç net.',
+    /* Nasil calisir — istemin NASIL CALISIRSIN bolumu (LIFEOS.Ofis). */
+    yontem:[
+      'Konu kapanışından başla: kapanmamış konu net üretmez.',
+      'TYT denemelerinde ders bazlı açığa bak (Türkçe, Temel Matematik, Fen, Sosyal); en büyük açığı ve taban puana etkisini bul.',
+      'Açığı konuya indir: hangi konu, kaç soru, hangi hafta.',
+      'Tek bir somut adım öner; aynı anda iki derse müdahale yazma.',
+      'Konu sorusu gelirse öğret: tanımı, bir örneği ve en sık yapılan hatayı kısaca anlat.',
+    ],
     ask:[
       'TYT’de en çok net kaybettiğim yer neresi?',
       'Türkçe netim neden oturmuyor?',
@@ -94,6 +110,14 @@ R.AGENTS = [
       + '- AYT’de sıralamayı alan derslerinin belirlediğini, matematiğin ağırlık taşıdığını bilirsin.\n'
       + '- TYT tabanı oturmadan AYT hacmini artırmayı önermezsin.\n'
       + '- Somut konuşursun: hangi ders, hangi konu, kaç net.',
+    /* Nasil calisir — istemin NASIL CALISIRSIN bolumu (LIFEOS.Ofis). */
+    yontem:[
+      'Önce TYT tabanına bak: taban oturmadan AYT hacmini artırmayı önerme.',
+      'Alan derslerinde konu kapanışını son denemelerin ders bazlı netiyle karşılaştır; matematiğin ağırlığını unutma.',
+      'Açığı konuya ve sıraya indir: hangi ders önce, hangi konu, kaç soru.',
+      'Tek bir somut adım öner.',
+      'Konu sorusu gelirse öğret: kavramı, bir çözüm yolunu ve tipik tuzağı kısaca anlat.',
+    ],
     ask:[
       'AYT’de hangi ders beni geride tutuyor?',
       'AYT matematiğe ne zaman ağırlık vermeliyim?',
@@ -129,6 +153,14 @@ R.AGENTS = [
       + '- Tıbbi ya da psikiyatrik değerlendirme yapmazsın; gerekirse okul rehberliğine '
       + 'ya da hekime yönlendirirsin.\n'
       + '- Klişe motivasyon cümlesi kurmazsın.',
+    /* Nasil calisir — istemin NASIL CALISIRSIN bolumu (LIFEOS.Ofis). */
+    yontem:[
+      'Önce planın tutup tutmadığına bak: tamamlama oranı, atlanan bloklar ve atlama nedenleri.',
+      'Uykuyu ve enerjiyi davranışla birlikte oku: kayma uykuyla mı başlıyor, planın ağırlığıyla mı?',
+      'Tutan bir davranışı ve kayan bir davranışı adıyla söyle; övgü değil gözlem.',
+      'Tek bir davranış değişikliği öner (ör. sabah bloğunu yirmi dakika öne almak); net ya da konu önerme.',
+      'Tükenmişlik ya da ruh sağlığı işareti görürsen yorum yapmadan okul rehberliğine ya da hekime yönlendir.',
+    ],
     ask:[
       'Bu hafta planım neden kaydı?',
       'Uykum çalışmamı nasıl etkiliyor?',
@@ -161,6 +193,14 @@ R.AGENTS = [
       + '- Tek denemeye bakmazsın; her zaman son üç denemenin medyanını konuşursun.\n'
       + '- Veri yetersizse "karar için yeterli kayıt yok" dersin, tahmin yürütmezsin.\n'
       + '- Sıra ve puan bir banttır; kesin sıra söylemezsin.',
+    /* Nasil calisir — istemin NASIL CALISIRSIN bolumu (LIFEOS.Ofis). */
+    yontem:[
+      'Önce kayıt sayısına bak: karar için yeterli deneme var mı? Yoksa bunu söyle ve dur.',
+      'Son üç denemenin medyanını ve eğilimini oku; tek deneme dalgalanmadır.',
+      'Hata dağılımına bak (K/İ/Y/S/D): kayıp bilgi eksiğinden mi, işlemden mi, süreden mi?',
+      'Risk sıralamasının en üstündeki konuları ve analiz ile tekrar borcunu bildir.',
+      'Bulguyu bildir, tavsiyeyi Patron’a bırak; sırayı ve puanı bant olarak söyle.',
+    ],
     ask:[
       'Hata dağılımımda tekrar eden kalıp var mı?',
       'Son denemelerimde trend ne yönde?',
@@ -197,6 +237,14 @@ R.AGENTS = [
       + 'okursun: etikette "orta" yazan bir kitap adaya zor gelebilir.\n'
       + '- Tek ölçümle karar vermezsin; az kayıtta "henüz yeterli soru yok" dersin.\n'
       + '- Somut konuşursun: hangi konu, hangi yayın, kaç soru.',
+    /* Nasil calisir — istemin NASIL CALISIRSIN bolumu (LIFEOS.Ofis). */
+    yontem:[
+      'Önce çözüm kayıtlarının hacmine bak: az kayıtta «henüz yeterli soru yok» de.',
+      'Konu başına kendi çözdüğü oranı oku; «çözüme baktım» doğru sayılmaz.',
+      'Kaynağın zorluğunu etiketinden değil adayın o kaynaktaki oranından oku.',
+      'Zorlanılan konu–kaynak ikilisini bul, bir sonraki seti söyle: hangi konu, hangi yayın, kaç soru.',
+      'Soru sorulursa çözüm yolunu adım adım göster; cevabı değil yöntemi öğret.',
+    ],
     ask:[
       'Hangi konuda en çok zorlanıyorum?',
       'Hangi yayın bana zor geliyor?',
@@ -280,7 +328,7 @@ R.MEETING_ORDER = ['analist', 'tyt', 'ayt', 'rehber', 'koc'];
 /* Ofis istemleri — tek kaynak, surumlu.
    Surum artinca onbellekteki brifingler gecersiz olur. */
 R.OFFICE_PROMPTS = {
-  version:2,
+  version:3,
 
   /* Her ajanin istemine eklenen ortak kurallar. Koc katmaniyla ayni ev kurallari
      kullanilir; iki yerde iki farkli doktrin olmaz. */
@@ -306,27 +354,26 @@ R.OFFICE_PROMPTS = {
     + 'söylediğin şeyi değiştiriyorsa söyle.\n'
     + '- Karşındaki bir insan: soruyu cevapla, konuyu değiştirme, aynı şeyi tekrar etme.',
 
-  /* Ajan istemi: kimlik + ev kurallari + konusma kaydi + uzunluk.
-     opts.sentences verilirse ajanin varsayilan uzunlugunun yerine gecer;
-     toplanti turlari sohbetten kisadir. */
+  /* Ajan istemi — iskelet LIFEOS.Ofis.istem'dedir (brand/ortak/ofis.js):
+     kimlik -> konum (King > Patron > uzman) -> yontem -> ortak ilkeler ->
+     ofis kurallari -> uslup -> hafiza. opts.sentences verilirse ajanin
+     varsayilan uzunlugunun yerine gecer; toplanti turlari sohbetten
+     kisadir. Brifing bu isteme GIRMEZ: kullanici mesajiyla gider. */
   system(agent, tone, opts){
     const o = opts || {};
     const limit = o.sentences || agent.maxSentences;
-    return agent.system + '\n\n'
-      + 'OFİS KURALLARI:\n' + R.PROMPTS.houseRules.map(r => '- ' + r).join('\n') + '\n'
-      + (tone ? R.PROMPTS.toneLine(tone) + '\n' : '')
-      + '\n' + R.OFFICE_PROMPTS.SPEECH + '\n'
-      + '\nYAZIM: Türkçe, ikinci tekil şahıs, düz metin. Başlık, madde işareti ve emoji yok. '
-      + 'En fazla ' + limit + ' cümle. Sayıları verildiği gibi kullan, yeniden hesaplama.'
-      /* HAFIZA (brand/ortak/hafiza.js): kullanicinin «hatirla» dedigi ve
-         kural motorunun kaydettigi tercihler, katman etiketiyle. Ajan
-         bunlari DIKKATE ALIR; degistiremez, hafizaya yazamaz. */
-      + '\nHAFIZA: Kullanıcının hafızasına yazamazsın; «bunu hatırlayacağım» deme. '
-      + 'Kullanıcı isterse «hatırla: …» yazar.'
-      + (function(){
-        const h = R.Hafizam ? R.Hafizam.baglam() : '';
-        return h ? '\n\n' + h : '';
-      })();
+    const uslup = [tone ? R.PROMPTS.toneLine(tone) : '', R.OFFICE_PROMPTS.SPEECH,
+      'YAZIM: Türkçe, ikinci tekil şahıs, düz metin. Başlık, madde işareti ve emoji yok. '
+        + 'En fazla ' + limit + ' cümle. Sayıları verildiği gibi kullan, yeniden hesaplama.']
+      .filter(Boolean).join('\n\n');
+    return LIFEOS.Ofis.istem({
+      modul:'ays', ajan:agent, kimlik:agent.system, yontem:agent.yontem,
+      uzmanSayisi:R.AGENTS.filter(a => !a.lead).length,
+      kurallar:R.PROMPTS.houseRules, kurallarAdi:'OFİS KURALLARI', uslup,
+      /* HAFIZA (brand/ortak/hafiza.js): etiketli; ajan dikkate alir,
+         degistiremez, yazamaz. */
+      hafiza:R.Hafizam ? R.Hafizam.baglam() : '',
+    });
   },
 
   /* ---------- sohbet ----------

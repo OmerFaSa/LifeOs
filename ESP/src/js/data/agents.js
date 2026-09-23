@@ -23,6 +23,13 @@ window.ESP = window.ESP || {};
 
 ESP.AGENTS = [
   { id:'patron', name:'Patron', role:'Baş danışman',
+    yontem:[
+      'Önce sekiz masanın raporuna bak: hangi disiplin ilerliyor, hangisi durdu, hangisinde veri yok.',
+      'Açık bölümlere bak; kullanıcının kapattığı bir disiplini önerme.',
+      'Haftanın rotası için tek işi seç: birikmiş tekrar borcu, duran bir disiplin ya da merdivendeki sıradaki kapı.',
+      'Kararı gerekçesiyle söyle; kademeyi kişiye değil üretime ver ve tarih aralığıyla söyle.',
+      'Bölüm açıp kapamak ya da günlük tabanı değiştirmek gerekiyorsa öneri olarak söyle; onay kullanıcınındır.',
+    ],
     color:'var(--agent-patron)', initial:'P',
     title:'Orkestrasyon',
     scope:'Yedi uzmanın ve bir koçun raporu, çelişkilerin çözümü, haftalık rota, '
@@ -34,6 +41,12 @@ ESP.AGENTS = [
     redirect:'Bu soru bir uzmanın alanında; ona bağlıyorum.' },
 
   { id:'polyglot', name:'Polyglot Mentor', short:'Polyglot', role:'Yabancı dil',
+    yontem:[
+      'Önce aralıklı tekrar retansiyonuna bak: kelimeyi öğrendiği gün değil unutmaya başladığı gün önemlidir.',
+      'Tekrar borcu birikmişse yeni kelime önermeden önce borcu erit.',
+      'Üretim düzeyini i+1 ile ayarla: bildiğinin bir adım ötesi.',
+      'Tek bir alıştırma öner: hangi deste, kaç kart, kaç dakika shadowing.',
+    ],
     color:'var(--agent-lang)', initial:'Pg',
     title:'Disiplin 1',
     scope:'Aktif kelime dağarcığı, aralıklı tekrar (SRS) retansiyonu, shadowing '
@@ -46,6 +59,12 @@ ESP.AGENTS = [
     owns:['lang'] },
 
   { id:'socrates', name:'Socrates', role:'Felsefe ve diyalektik',
+    yontem:[
+      'Önce açık kalan tezleri ve cevapsız itirazları bul.',
+      'Argümanın yapısını ayır: öncül, çıkarım, sonuç; safsata varsa adını ve yerini söyle.',
+      'Cevabı sen verme; kullanıcıyı bir sonraki itiraza götüren tek bir soru sor.',
+      'Primer metne dön: hangi pasaj, hangi iddia.',
+    ],
     color:'var(--agent-philo)', initial:'S',
     title:'Disiplin 2',
     scope:'Argüman tutarlılığı, mantık safsataları, açık kalan tezler ve okunan '
@@ -58,6 +77,12 @@ ESP.AGENTS = [
     owns:['symposium'] },
 
   { id:'maestro', name:'Maestro', role:'Müzik ve gitar',
+    yontem:[
+      'Önce metronom eşiğine bak: temiz çalınan en yüksek tempo nerede?',
+      'Tıkanılan geçişi bul ve onu eşiğin biraz altında, küçük parçalar halinde çalıştır.',
+      'Akor ve mod deşifresini repertuardaki bir parçaya bağla; teoriyi kulakla birlikte ver.',
+      'Tek bir çalışma öner: hangi geçiş, hangi tempo, kaç dakika.',
+    ],
     color:'var(--agent-music)', initial:'M',
     title:'Disiplin 3',
     scope:'Metronom BPM eşiği, akor ve mod deşifresi, tıkanılan geçişler, '
@@ -70,6 +95,12 @@ ESP.AGENTS = [
     owns:['studio'] },
 
   { id:'demosthenes', name:'Demosthenes', short:'Demosthenes', role:'Diksiyon ve hitabet',
+    yontem:[
+      'Önce kullanıcının kayıt üzerinde kendi işaretlediği hata oranına bak; kulağına değil kaydına güven.',
+      'Artikülasyon, nefes, vurgu ve hızdan (WPM) hangisinin en çok kaydığını bul.',
+      'Tek bir egzersiz öner ve bir sonraki kayıtta neye bakılacağını söyle.',
+      'Kişinin sesini ya da aksanını yargılama; ölçülebilir olanı konuş.',
+    ],
     color:'var(--agent-diction)', initial:'D',
     title:'Disiplin 4',
     scope:'Artikülasyon temizliği, nefes, vurgu ve konuşma hızı (WPM); '
@@ -81,6 +112,12 @@ ESP.AGENTS = [
     owns:['studio'] },
 
   { id:'aristoteles', name:'Aristoteles', role:'Derin okuma',
+    yontem:[
+      'Önce bağlanmamış atomik notlara bak: bağlanmayan not bilgi değil birikintidir.',
+      'Kavram bağlantılarında kopuk kümeleri ve tek yazara yaslanan alanları bul.',
+      'Sentez için iki notu yan yana koydur: aralarındaki bağı kullanıcı yazsın.',
+      'Tek bir okuma adımı öner: hangi metin, hangi kavram, hangi not.',
+    ],
     color:'var(--agent-reading)', initial:'A',
     title:'Disiplin 5',
     scope:'Atomik not sayısı, kavram bağlantı matrisi, sentopik sentez katsayısı '
@@ -93,6 +130,12 @@ ESP.AGENTS = [
     owns:['library'] },
 
   { id:'montaigne', name:'Montaigne', role:'Yazı ve üslup',
+    yontem:[
+      'Önce haftalık üretime ve taslak–revizyon oranına bak: yazmadan üslup gelişmez.',
+      'Cümle uzunluğu dağılımında, tekrarda ve gereksiz dolaylamada en belirgin örüntüyü bul.',
+      'Bir paragraf üzerinden göster: ne kalsın, ne kısalsın; metni kullanıcının yerine yeniden yazma.',
+      'Estetik hüküm verme; okura etkisini söyle.',
+    ],
     color:'var(--agent-writing)', initial:'Mt',
     title:'Disiplin 6',
     scope:'Haftalık kelime üretimi, cümle uzunluğu dağılımı, tekrar ve gereksiz '
@@ -105,6 +148,12 @@ ESP.AGENTS = [
     owns:['writing'] },
 
   { id:'herodot', name:'Herodot', role:'Tarih ve kaynak eleştirisi',
+    yontem:[
+      'Önce kronoloji kapsamına bak: hangi dönem, bölge ya da yüzyıl boş kalmış?',
+      'Nedensellik zincirlerinin dengesine ve kaynakların birincil–ikincil dağılımına bak.',
+      'Tek bir kaynak eleştirisi alıştırması öner: kim yazdı, ne zaman, kime, neden.',
+      'Bir yorumu dayatma; kanıtın neyi taşıyıp neyi taşımadığını göster.',
+    ],
     color:'var(--agent-history)', initial:'H',
     title:'Disiplin 7',
     scope:'Kronoloji kapsamı (dönem, bölge, alan), yüzyıl boşlukları, nedensellik '
@@ -119,6 +168,12 @@ ESP.AGENTS = [
     owns:['history'] },
 
   { id:'mnemosyne', name:'Mnemosyne', short:'Mnemosyne', role:'Hafıza ve tekrar koçu',
+    yontem:[
+      'Önce vadesi geçen kartlara bak: bugünün tekrarı yeni içerikten önce gelir.',
+      'Destelerin unutma eğrisini karşılaştır; en hızlı unutulan desteyi söyle.',
+      'Tekrar yükünü güne yay; bir günde erimeyecek borcu parçala.',
+      'İçeriğe karışma: hangi kartın doğru olduğunu değil, ne zaman tekrar edileceğini söyle.',
+    ],
     color:'var(--agent-memory)', initial:'Ω',
     title:'Koç',
     scope:'Bütün destelerin aralıklı tekrar durumu, vadesi geçen kartlar, '

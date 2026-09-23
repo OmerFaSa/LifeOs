@@ -64,7 +64,7 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
 # depo koku: tek kaynaktan yayilan iki sey
 python3 tools/seviye.py --yay        # brand/seviye/ -> uc arayuz
 python3 tools/seviye.py --denetle    # kopyalar kaynakla ayni mi (CI de kosar)
-python3 tools/ortak.py --yay         # brand/ortak/  -> uc arayuze (17 dosya)
+python3 tools/ortak.py --yay         # brand/ortak/  -> uc arayuze
 python3 tools/ortak.py --denetle     # kopyalar kaynakla ayni mi (CI de kosar)
 python3 tools/marka.py --kunye       # brand/medya/ -> brand/ortak/medya.js
 python3 tools/marka.py --kunye --denetle   # kunye taze mi (CI de kosar)

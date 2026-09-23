@@ -277,6 +277,24 @@
       expect(p).toContain('Teşhis koyma');
     });
 
+    /* Katlar (brand/ortak/ofis.js): her ajan kimin denetiminde konuştuğunu
+       bilir; Patron King'i ve değişmeyeceğini bilir. */
+    it('her ajanın istemi konumunu, yöntemini ve klinik sınırı taşır', () => {
+      resetState();
+      SP.AGENTS.forEach(a => {
+        expect(Array.isArray(a.yontem) && a.yontem.length >= 3).toBeTruthy();
+        const p = SP.Office.systemPrompt(a.id, {});
+        expect(p).toContain('KONUMUN');
+        expect(p).toContain('NASIL ÇALIŞIRSIN');
+        expect(p).toContain('King');
+        expect(p).toContain('Teşhis koyma');
+        expect(p.indexOf('BRİFİNG') > p.indexOf('KONUMUN')).toBeTruthy();
+        expect(p.length < 9000).toBeTruthy();
+      });
+      expect(SP.Office.systemPrompt('patron', {})).toContain('değişmezsin');
+      expect(SP.Office.systemPrompt('lab', {})).toContain('Raporun Patron’a gider');
+    });
+
     /* Hafıza istemde ETİKETİYLE durur: ajan «tahmin»i kesin, «senin
        sözün»ü kendi yorumu sanmasın. Hafıza boşsa istemde başlık da yok. */
     it('istem hafızayı etiketiyle taşır; boşsa hiç anmaz', async () => {
