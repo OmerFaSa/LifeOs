@@ -410,6 +410,73 @@
     });
   });
 
+  /* BAM materyali (HKM core/bam.py): kalite kontrolünden geçen set kart
+     olarak teklif edilir. AYS kaydı HKM'den ÇEKER, KENDİ koduyla doğrular,
+     kendi kart sistemine yazar. HKM AYS'ye yazmaz. */
+  describe('HKM teklifi — BAM materyali', () => {
+    const teklif = (patch) => Object.assign({
+      id:7, kind:'material.add', payload:{ kayit_id:12, adet:2, baslik:'Üslü sayılar' },
+    }, patch || {});
+    const soru = (metin, dogru, extra) => Object.assign({ soru:metin,
+      secenekler:['6', '8', '9', '12', '16'], dogru, cozum:'Tabanı üs kadar çarp.' }, extra || {});
+    const cevap = (govde) => ({ status:200, json:async () => ({ kayit:{ id:12, tur:'materyal',
+      baslik:'Üslü sayılar', dogruluk:'dogrulanmadi', govde } }) });
+
+    it('set kart olarak eklenir; ön yüz şıklı, arka yüz doğru şık ve çözüm', async () => {
+      resetState();
+      await ayarla();
+      await withFetch(async (cagri) => {
+        const r = await B().applyIntent(teklif());
+        expect(r.ok).toBe(true);
+        expect(cagri[0].url).toBe('http://127.0.0.1:4200/api/bam/kayit/12');
+        const kartlar = R.S.cards.filter(c => c.source === 'bam');
+        expect(kartlar).toHaveLength(2);
+        expect(kartlar[0].front).toContain('2^3 kaçtır?');
+        expect(kartlar[0].front).toContain('B) 8');
+        expect(kartlar[0].back).toContain('Doğru: B) 8');
+        expect(kartlar[0].back).toContain('Tabanı üs kadar çarp.');
+        expect(kartlar[0].sourceRef).toBe('bam:12');
+      }, cevap({ tur:'soru', konu:'TYT Matematik', maddeler:[soru('2^3 kaçtır?', 'B'),
+        soru('2^4 kaçtır?', 'E')] }));
+    });
+
+    it('AYS kendi doğrulamasıyla bozuk maddeyi eler, aynı seti iki kez eklemez', async () => {
+      resetState();
+      await ayarla();
+      await withFetch(async () => {
+        expect((await B().applyIntent(teklif())).ok).toBe(true);
+        expect(R.S.cards.filter(c => c.source === 'bam')).toHaveLength(1);
+        const ikinci = await B().applyIntent(teklif());
+        expect(ikinci.ok).toBe(false);
+        expect(R.S.cards.filter(c => c.source === 'bam')).toHaveLength(1);
+      }, cevap({ tur:'soru', maddeler:[soru('Sağlam', 'A'), soru('Anahtar yok', 'F'),
+        soru('Dört şık', 'A', { secenekler:['1', '2', '3', '4'] })] }));
+    });
+
+    it('HKM\'ye ulaşılamazsa hiçbir kart yazılmaz ve söylenir', async () => {
+      resetState();
+      await ayarla();
+      await withFetch(async () => {
+        const r = await B().applyIntent(teklif());
+        expect(r.ok).toBe(false);
+        expect(r.error).toContain('HKM');
+        expect(R.S.cards).toHaveLength(0);
+      }, new Error('kopuk'));
+    });
+
+    it('alıştırma ve kart türü de karta döner', async () => {
+      resetState();
+      await ayarla();
+      await withFetch(async () => {
+        expect((await B().applyIntent(teklif())).ok).toBe(true);
+        const k = R.S.cards.filter(c => c.source === 'bam');
+        expect(k[0].front).toContain('I ___ (see) it.');
+        expect(k[0].back).toBe('have seen');
+      }, cevap({ tur:'alistirma', maddeler:[{ yonerge:'Boşluğu doldur.',
+        madde:'I ___ (see) it.', cevap:'have seen' }] }));
+    });
+  });
+
   /* ------------------------------------------------------------- B04
 
      Dis inceleme: «teslim edilen teklif yeniden acilista kayboluyor».

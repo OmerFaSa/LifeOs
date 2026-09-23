@@ -707,8 +707,15 @@ ofis: Kayıt · Araştırma · Planlama · Üretim.
 | BAM hiçbir modüle yazmaz; teklif bırakır | AGENTS.md §1.4 |
 | Her kaydın kökü `bam_iz`'dedir | «bu neden var?» |
 
-Planlama Ofisi **hedef motoruyla birlikte** açılacak; Üretim Ofisi bir
-sonraki aşamadadır. İş kuyruğu ritimde her tikte **en fazla bir adım**
+**Üretim Ofisi** soru seti, alıştırma ya da kart üretir (tür ve adet
+kuralla: 3–30). Her madde önce biçim denetiminden, sonra **ikinci bir
+çağrıdan** geçer: çoktan seçmeli soru cevap anahtarı ve çözüm GÖSTERİLMEDEN
+baştan çözülür, tutmayan düşer; alıştırma ve kart yargıyla denetlenir. Kayıt
+kalite raporunu taşır (üretilen / geçen / düşen ve nedeni). Hedef AYS ise
+geçen maddeler `material.add` teklifi olur: AYS kaydı çeker, **kendi koduyla**
+yeniden doğrular ve kart olarak ekler; aynı set iki kez eklenmez.
+
+Planlama Ofisi **hedef motoruyla birlikte** açılacak. İş kuyruğu ritimde her tikte **en fazla bir adım**
 ilerler. Model rolleri `bam`, `bam.arastirma`… King'den miras alır.
 Belge denetimi (`ai.ask(..., denetim="belge")`) dünya hakkındaki sayılara
 izin verir; belge kullanıcının ölçümü gibi sunulmaz. Yüz: **Ofis** sekmesi.

@@ -58,6 +58,14 @@ KINDS = {
         "optional": ("ratio", "why"),
         "note": "Gunun yukunu azaltma teklifi (oran verilmezse modul karar verir).",
     },
+    # BAM Uretim Ofisi'nin kalite kontrolunden gecen materyali (core/bam.py).
+    # Modul kaydi HKM'den ceker, KENDI koduyla dogrular ve kart olarak ekler.
+    "material.add": {
+        "modules": ("ays",),
+        "required": ("kayit_id", "adet"),
+        "optional": ("baslik", "why"),
+        "note": "BAM'ın ürettiği ve denetlediği materyali kart olarak ekleme teklifi.",
+    },
     "measure.ask": {
         "modules": ("spi",),
         "required": ("date", "metric"),
@@ -75,6 +83,7 @@ FIELD_RULES = {
     "date": "date", "minutes": ("int", 5, 480), "ratio": ("float", 0.05, 1.0),
     "focus": ("str", 1, 40), "subject": ("str", 1, 40), "topic": ("str", 1, 80),
     "disc": ("str", 1, 24), "metric": ("str", 1, 40), "why": ("str", 1, 200),
+    "kayit_id": ("int", 1, 10 ** 9), "adet": ("int", 1, 50), "baslik": ("str", 1, 120),
 }
 
 
@@ -154,6 +163,9 @@ def _cumle(module, kind, payload):
         oran = p.get("ratio")
         nicelik = ("%d%% " % round(float(oran) * 100)) if oran else ""
         return "%s için %s gününün yükü %sazaltılsın mı?" % (ad, gun, nicelik)
+    if kind == "material.add":
+        return ("%s: BAM'ın hazırladığı «%s» setinden kalite kontrolünü geçen %s madde "
+                "kart olarak eklensin mi?" % (ad, p.get("baslik") or "materyal", p.get("adet")))
     if kind == "measure.ask":
         return "%s: %s günü için «%s» ölçümünü girmeyi unutma." % (
             ad, gun, p.get("metric"))

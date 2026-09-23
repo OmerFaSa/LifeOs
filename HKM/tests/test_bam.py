@@ -106,10 +106,10 @@ def run():
 
     def t_unready_offices_postpone():
         con = db.connect(":memory:")
-        i = bam.is_ac(con, "TYT matematikten test hazırla", hedef_modul="ays", now=AN)
+        i = bam.is_ac(con, "Gitar için altı aylık program çıkar", hedef_modul="esp", now=AN)
         bam.ilerlet(con, {}, now=AN)
         r = bam.ilerlet(con, {}, now=AN)
-        eq(r["ofis"], "uretim")
+        eq(r["ofis"], "planlama")
         j = bam.is_getir(con, i["id"])
         eq(j["adimlar"][1]["durum"], "ertelendi")
         eq(j["durum"], "kismen")
@@ -134,3 +134,115 @@ def run():
         eq(bam.ilerlet(con, {}, now=AN), None)
         no(bam.iptal(con, i["id"], now=AN)["ok"])
     test("iptal edilen is ilerlemez", t_cancel)
+
+    # ---- Uretim Ofisi ------------------------------------------------
+    #
+    # Uretilen her coktan secmeli soru, cevap anahtari GOSTERILMEDEN ikinci
+    # bir cagriyla bastan cozulur; cozum anahtarla tutmazsa soru DUSER.
+    # Bicimi bozuk madde modele hic gitmeden duser. Hedef AYS ise gecen
+    # maddeler niyet kuyruguna teklif olarak birakilir — BAM yazmaz.
+
+    def _uretim_tasiyici(uretim, kalite):
+        cagrilar = []
+
+        def cagir(provider, anahtar, model, sistem, gecmis):
+            cagrilar.append(sistem + "\n" + json.dumps(gecmis, ensure_ascii=False))
+            icerik = kalite if "Kalite Kontrol" in sistem else uretim
+            return json.dumps(icerik, ensure_ascii=False), 100, 200
+        cagir.cagrilar = cagrilar
+        return cagir
+
+    def _soru(metin, dogru, secenek=None):
+        return {"soru": metin, "secenekler": secenek or ["1", "2", "3", "4", "5"],
+                "dogru": dogru, "cozum": "Adım adım çözüm."}
+
+    def t_production_qc():
+        con = db.connect(":memory:")
+        uretim = {"baslik": "Üslü sayılar", "konu": "TYT Matematik · Üslü sayılar",
+                  "sorular": [_soru("2^3 kaçtır?", "B", ["6", "8", "9", "12", "16"]),
+                              _soru("3^2 kaçtır?", "C", ["6", "8", "9", "12", "16"]),
+                              _soru("2^4 kaçtır?", "E", ["6", "8", "9", "12", "16"])]}
+        kalite = {"cevaplar": [{"no": 1, "secim": "B", "emin": True},
+                               {"no": 2, "secim": "D", "emin": True},
+                               {"no": 3, "secim": "E", "emin": True}]}
+        t = _uretim_tasiyici(uretim, kalite)
+        i = bam.is_ac(con, "TYT matematikten 3 soruluk test hazırla", hedef_modul="ays", now=AN)
+        bam.ilerlet(con, _cfg(), now=AN)
+        r = bam.ilerlet(con, _cfg(), transport=t, now=AN)
+        ok(r["ok"])
+        eq(len(t.cagrilar), 2)
+        j = bam.is_getir(con, i["id"])
+        eq(j["durum"], "tamam")
+        k = bam.kayit_getir(con, j["adimlar"][1]["kayit_id"])
+        eq((k["tur"], k["dogruluk"]), ("materyal", "dogrulanmadi"))
+        g = k["govde"]
+        eq(g["tur"], "soru")
+        eq([m["soru"] for m in g["maddeler"]], ["2^3 kaçtır?", "2^4 kaçtır?"])
+        eq((g["kalite"]["uretilen"], g["kalite"]["gecen"]), (3, 2))
+        eq(g["kalite"]["dusen"][0]["no"], 2)
+        n = con.execute("SELECT * FROM intents WHERE module='ays'").fetchall()
+        eq(len(n), 1)
+        eq(n[0]["kind"], "material.add")
+        p = json.loads(n[0]["payload"])
+        eq((p["kayit_id"], p["adet"]), (k["id"], 2))
+        ok({"tur": "kayit", "id": str(k["id"])} in bam.iz_zinciri(con, "niyet", n[0]["id"]))
+    test("uretilen soru bagimsiz cozumle denetlenir, tutmayan duser", t_production_qc)
+
+    def t_answer_key_hidden_from_qc():
+        con = db.connect(":memory:")
+        uretim = {"baslik": "x", "sorular": [_soru("Gizli soru?", "D")]}
+        kalite = {"cevaplar": [{"no": 1, "secim": "D", "emin": True}]}
+        t = _uretim_tasiyici(uretim, kalite)
+        bam.is_ac(con, "3 soru hazırla", now=AN)
+        bam.ilerlet(con, _cfg(), now=AN)
+        bam.ilerlet(con, _cfg(), transport=t, now=AN)
+        kalite_istemi = t.cagrilar[1]
+        no("Adım adım çözüm" in kalite_istemi)
+        no("dogru" in kalite_istemi or "cozum" in kalite_istemi)
+    test("kalite kontrolu cevap anahtarini ve cozumu gormez", t_answer_key_hidden_from_qc)
+
+    def t_bad_format_dropped_before_qc():
+        con = db.connect(":memory:")
+        uretim = {"baslik": "x", "sorular": [
+            _soru("Dört şık", "A", ["1", "2", "3", "4"]),
+            _soru("Anahtar yok", "F"),
+            _soru("Aynı şık", "A", ["1", "1", "2", "3", "4"]),
+            _soru("Sağlam", "A")]}
+        kalite = {"cevaplar": [{"no": 1, "secim": "A", "emin": True}]}
+        t = _uretim_tasiyici(uretim, kalite)
+        i = bam.is_ac(con, "5 soru hazırla", now=AN)
+        bam.ilerlet(con, _cfg(), now=AN)
+        bam.ilerlet(con, _cfg(), transport=t, now=AN)
+        j = bam.is_getir(con, i["id"])
+        g = bam.kayit_getir(con, j["adimlar"][1]["kayit_id"])["govde"]
+        eq([m["soru"] for m in g["maddeler"]], ["Sağlam"])
+        eq(g["kalite"]["bicim_dusen"], 3)
+        eq(con.execute("SELECT COUNT(*) FROM intents").fetchone()[0], 0)   # hedef yok
+    test("bicimi bozuk madde denetime gitmeden duser", t_bad_format_dropped_before_qc)
+
+    def t_exercise_judged():
+        con = db.connect(":memory:")
+        uretim = {"baslik": "Present perfect", "maddeler": [
+            {"yonerge": "Boşluğu doldur.", "madde": "I ___ (see) it.", "cevap": "have seen"},
+            {"yonerge": "Boşluğu doldur.", "madde": "She ___ (go) home.", "cevap": "goed"}]}
+        kalite = {"yargilar": [{"no": 1, "dogru_mu": True}, {"no": 2, "dogru_mu": False,
+                                                              "neden": "Düzensiz fiil."}]}
+        t = _uretim_tasiyici(uretim, kalite)
+        i = bam.is_ac(con, "İngilizce 5 alıştırma hazırla", hedef_modul="ays", now=AN)
+        bam.ilerlet(con, _cfg(), now=AN)
+        bam.ilerlet(con, _cfg(), transport=t, now=AN)
+        j = bam.is_getir(con, i["id"])
+        g = bam.kayit_getir(con, j["adimlar"][1]["kayit_id"])["govde"]
+        eq(g["tur"], "alistirma")
+        eq([m["cevap"] for m in g["maddeler"]], ["have seen"])
+        eq(g["kalite"]["dusen"][0]["neden"], "Düzensiz fiil.")
+    test("alistirma yargiyla denetlenir, yanlis cevapli madde duser", t_exercise_judged)
+
+    def t_production_rules():
+        eq(bam.uretim_istegi("TYT matematikten 20 soruluk test hazırla"), ("soru", 20))
+        eq(bam.uretim_istegi("İngilizce 15 alıştırmalık çalışma kitabı hazırla"),
+           ("alistirma", 15))
+        eq(bam.uretim_istegi("biyoloji flashcard üret"), ("kart", 10))
+        eq(bam.uretim_istegi("200 soru hazırla"), ("soru", 30))
+        eq(bam.uretim_istegi("1 soru hazırla"), ("soru", 3))
+    test("uretim turu ve adedi kuralla cikar, sinirlanir", t_production_rules)

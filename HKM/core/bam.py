@@ -12,7 +12,11 @@ sistem degildir (AGENTS.md §1.4).
                  ZAMAN «dogrulanmadi» etiketini tasir.
      Planlama    hedef motoruyla birlikte acilacak (kullaniciyla beraber
                  tasarlanacak). Simdilik adim «ertelendi» diye kapanir.
-     Uretim      soru seti, alistirma, kart — bir sonraki asama.
+     Uretim      soru seti, alistirma, kart. Her madde uretildikten sonra
+                 IKINCI bir cagriyla denetlenir: coktan secmeli soru cevap
+                 anahtari gosterilmeden bastan cozulur, tutmayan duser;
+                 alistirma ve kart yargiyla denetlenir. Hedef AYS ise
+                 gecen maddeler niyet kuyruguna teklif olarak birakilir.
 
    Degismezler:
    1. BAM HICBIR MODULE YAZMAZ. Sonuc teklif olarak niyet kuyruguna
@@ -29,7 +33,7 @@ import datetime
 import json
 import re
 
-from core import ai
+from core import ai, intents
 
 OFISLER = {
     "kayit": {
@@ -55,9 +59,9 @@ OFISLER = {
                     "Bağımlılık Analisti", "Kapasite Analisti", "Program Mimarı",
                     "Simülasyon Uzmanı", "Optimizasyon Uzmanı", "Plan Denetçisi"]},
     "uretim": {
-        "ad": "Üretim Ofisi", "patron": "Üretim Patronu", "durum": "ertelendi",
-        "gorev": "Soru seti, alıştırma ve tekrar kartı gibi doğrudan kullanılacak "
-                 "materyal üretir; her materyal kalite kontrolünden geçer.",
+        "ad": "Üretim Ofisi", "patron": "Üretim Patronu", "durum": "hazir",
+        "gorev": "Soru seti, alıştırma ve tekrar kartı üretir. Her madde ikinci bir "
+                 "çözümle denetlenir; tutmayan madde düşer, geçenler teklif olur.",
         "ajanlar": ["Üretim Mimarı", "Metin Uzmanı", "Eğitim Materyali Uzmanı",
                     "Görsel Üretim Uzmanı", "Belge ve Rapor Uzmanı",
                     "Veri ve Tablo Uzmanı", "Teknik Üretim Uzmanı", "Editör",
@@ -291,9 +295,173 @@ def _planlama_adimi(con, cfg, j, transport, now):
             "not": "Planlama Ofisi hedef motoruyla birlikte açılacak; bu iş plan üretmedi."}
 
 
+# ------------------------------------------------------------ uretim
+
+URETIM_BAS = """Sen HKM'deki BAM'ın Üretim Ofisisin. Üretim Patronu adına çalışırsın;
+onun üstünde BAM Patronu, onun da üstünde King var. Ürettiğin her madde, senden
+BAĞIMSIZ bir kalite kontrolünden geçecek; tutmayan madde atılır.
+
+NASIL ÜRETİRSİN
+1. Talepteki konuyu, düzeyi ve adedi al; düzey yazılmamışsa orta düzey üret.
+2. Her maddenin TEK ve KESİN bir doğru cevabı olsun; tartışmalı madde yazma.
+3. Özgün yaz: yayınlanmış bir kitaptan ya da sınavdan soru kopyalama.
+4. Kullanıcı hakkında varsayım yapma; kişisel bilgi yazma.
+5. Yönergeler Türkçe olsun; dil alıştırmasında madde hedef dilde olabilir.
+
+ÇIKTI: Yalnız tek bir JSON nesnesi döndür, başka hiçbir şey yazma."""
+
+URETIM_BICIM = {
+    "soru": """
+{"baslik": "...", "konu": "...", "sorular": [{"soru": "...",
+ "secenekler": ["...", "...", "...", "...", "..."], "dogru": "A|B|C|D|E",
+ "cozum": "adım adım çözüm"}]}
+Kurallar: tam beş şık, şıklar birbirinden farklı; «hepsi» ya da «hiçbiri» şıkkı
+yok; çeldiriciler makul ve tipik hatalardan gelsin; şıklara harf yazma.""",
+    "alistirma": """
+{"baslik": "...", "konu": "...", "maddeler": [{"yonerge": "...", "madde": "...",
+ "cevap": "kısa ve tek cevap"}]}""",
+    "kart": """
+{"baslik": "...", "konu": "...", "kartlar": [{"on": "soru ya da kavram",
+ "arka": "kısa ve kesin cevap"}]}""",
+}
+
+KALITE_SORU = """Sen BAM Üretim Ofisi'nin Kalite Kontrol Uzmanısın. Sana CEVAP ANAHTARI
+OLMADAN çoktan seçmeli sorular verilecek. Her soruyu kendin baştan çöz; başkasının
+cevabını tahmin etmeye çalışma. Şıklar sırasıyla A, B, C, D, E'dir.
+ÇIKTI: Yalnız şu JSON: {"cevaplar": [{"no": 1, "secim": "A", "emin": true}]}"""
+
+KALITE_YARGI = """Sen BAM Üretim Ofisi'nin Kalite Kontrol Uzmanısın. Sana maddeler ve
+önerilen cevapları verilecek. Her maddede önerilen cevabın doğru, tek ve kesin olup
+olmadığını denetle. Şüpheliyse «dogru_mu»yu false yaz ve nedenini kısaca söyle.
+ÇIKTI: Yalnız şu JSON: {"yargilar": [{"no": 1, "dogru_mu": true, "neden": "..."}]}"""
+
+HARFLER = "ABCDE"
+ADET = {"varsayilan": 10, "en_az": 3, "en_cok": 30}
+
+
+def uretim_istegi(talep):
+    """(tur, adet) — kuralla. Model karar vermez."""
+    k = _kucuk(talep)
+    if "kart" in k or "flashcard" in k:
+        tur = "kart"
+    elif "alıştırma" in k or "çalışma kitabı" in k:
+        tur = "alistirma"
+    else:
+        tur = "soru"
+    m = re.search(r"(\d{1,4})\s*(?:soru|tane|adet|alıştırma|kart|madde)", k)
+    adet = int(m.group(1)) if m else ADET["varsayilan"]
+    return tur, max(ADET["en_az"], min(ADET["en_cok"], adet))
+
+
+def _metin(x, en_cok):
+    t = str(x or "").strip()
+    return t if 0 < len(t) <= en_cok else None
+
+
+def _bicim(tur, m):
+    """Maddeyi dogrular ve temiz halini dondurur; bozuksa None."""
+    if not isinstance(m, dict):
+        return None
+    if tur == "soru":
+        soru, cozum = _metin(m.get("soru"), 1500), _metin(m.get("cozum"), 2000)
+        sec = m.get("secenekler")
+        if not (soru and cozum and isinstance(sec, list) and len(sec) == 5):
+            return None
+        sec = [_metin(x, 300) for x in sec]
+        if None in sec or len({x.lower() for x in sec}) != 5:
+            return None
+        if m.get("dogru") not in tuple(HARFLER):
+            return None
+        return {"soru": soru, "secenekler": sec, "dogru": m["dogru"], "cozum": cozum}
+    if tur == "alistirma":
+        y, md, c = (_metin(m.get("yonerge"), 300), _metin(m.get("madde"), 500),
+                    _metin(m.get("cevap"), 200))
+        return {"yonerge": y, "madde": md, "cevap": c} if (y and md and c) else None
+    on, arka = _metin(m.get("on"), 500), _metin(m.get("arka"), 500)
+    return {"on": on, "arka": arka} if (on and arka) else None
+
+
+def _cagri(con, cfg, gorev, sistem, icerik, transport):
+    return ai.ask(con, cfg, "bam.uretim", gorev, [{"role": "user", "content": icerik}],
+                  sistem=sistem, transport=transport, duzeltme=False, denetim="belge")
+
+
+def _denetle(con, cfg, tur, maddeler, transport):
+    """(gecen_indeksler, dusen) ya da hata metni. Soru anahtarsiz cozulur."""
+    if tur == "soru":
+        gorunen = [{"no": i + 1, "soru": m["soru"], "secenekler": m["secenekler"]}
+                   for i, m in enumerate(maddeler)]
+        r = _cagri(con, cfg, "kalite", KALITE_SORU,
+                   json.dumps({"sorular": gorunen}, ensure_ascii=False), transport)
+    else:
+        r = _cagri(con, cfg, "kalite", KALITE_YARGI,
+                   json.dumps({"maddeler": [dict(m, no=i + 1) for i, m in enumerate(maddeler)]},
+                              ensure_ascii=False), transport)
+    if not r.get("ok"):
+        return None, r.get("note") or "Kalite kontrolü cevap vermedi."
+    d = _json_ayikla(r["text"]) or {}
+    gecen, dusen = [], []
+    if tur == "soru":
+        secim = {c.get("no"): c.get("secim") for c in (d.get("cevaplar") or [])
+                 if isinstance(c, dict)}
+        for i, m in enumerate(maddeler):
+            s_ = secim.get(i + 1)
+            if s_ == m["dogru"]:
+                gecen.append(i)
+            else:
+                dusen.append({"no": i + 1, "neden": "Bağımsız çözüm «%s» buldu, anahtar «%s»."
+                              % (s_ or "cevapsız", m["dogru"])})
+    else:
+        yargi = {y.get("no"): y for y in (d.get("yargilar") or []) if isinstance(y, dict)}
+        for i in range(len(maddeler)):
+            y = yargi.get(i + 1) or {}
+            if y.get("dogru_mu") is True:
+                gecen.append(i)
+            else:
+                dusen.append({"no": i + 1, "neden": str(y.get("neden") or "Yargı yok.")[:300]})
+    return (gecen, dusen), None
+
+
 def _uretim_adimi(con, cfg, j, transport, now):
-    return {"durum": "ertelendi",
-            "not": "Üretim Ofisi henüz açılmadı; bu iş materyal üretmedi."}
+    hazir = ai.hazir_mi(cfg, "bam.uretim")
+    if not hazir["ok"]:
+        return {"durum": "beklemede", "not": hazir["note"]}
+    tur, adet = uretim_istegi(j["talep"])
+    r = _cagri(con, cfg, "uretim", URETIM_BAS + URETIM_BICIM[tur],
+               "Üretim talebi: %s\nAdet: %d" % (j["talep"], adet), transport)
+    if not r.get("ok"):
+        if r.get("reason") == "budget":
+            return {"durum": "beklemede", "not": r.get("note")}
+        return {"durum": "hata", "not": r.get("note") or "Model cevap vermedi."}
+    d = _json_ayikla(r["text"]) or {}
+    ham = d.get({"soru": "sorular", "alistirma": "maddeler", "kart": "kartlar"}[tur]) or []
+    temiz = [x for x in (_bicim(tur, m) for m in ham[:ADET["en_cok"]]) if x]
+    bicim_dusen = min(len(ham), ADET["en_cok"]) - len(temiz)
+    if not temiz:
+        return {"durum": "hata", "not": "Üretilen maddelerin hiçbiri biçim denetimini geçmedi."}
+    sonuc, hata = _denetle(con, cfg, tur, temiz, transport)
+    if hata:
+        return {"durum": "beklemede", "not": "Kalite kontrolü yapılamadı; set teklif "
+                "edilmedi. " + hata}
+    gecen, dusen = sonuc
+    maddeler = [temiz[i] for i in gecen]
+    baslik = str(d.get("baslik") or j["talep"]).strip()[:120]
+    govde = {"tur": tur, "konu": str(d.get("konu") or "").strip()[:200],
+             "maddeler": maddeler,
+             "kalite": {"kontrol": "bağımsız çözüm" if tur == "soru" else "yargı",
+                        "uretilen": len(temiz), "gecen": len(maddeler),
+                        "dusen": dusen, "bicim_dusen": bicim_dusen}}
+    k = kayit_ekle(con, "materyal", baslik, govde, dogruluk="dogrulanmadi",
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now)
+    not_ = "%d madde üretildi, %d kalite kontrolünü geçti." % (len(temiz), len(maddeler))
+    if maddeler and j.get("hedef_modul") == "ays":
+        n = intents.create(con, "ays", "material.add",
+                           {"kayit_id": k["id"], "adet": len(maddeler), "baslik": baslik},
+                           None, source="bam")
+        if n.get("ok"):
+            iz_ekle(con, "kayit", k["id"], "niyet", n["intent"]["id"], now=now)
+            not_ += " AYS'ye teklif bırakıldı."
+    return {"durum": "tamam", "kayit_id": k["id"], "not": not_}
 
 
 ADIM = {"kayit": _kayit_adimi, "arastirma": _arastirma_adimi,
