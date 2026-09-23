@@ -1245,6 +1245,7 @@ details.detay > summary:hover{ color:var(--fg); }
      sey olmaz. */
   function ritimCiz(c){
     var z = c.schedule || {};
+    var n = c.bildirim || {};
     var kanallar = c.channels || {};
     var acik = ['telegram', 'whatsapp'].filter(function(a){
       return (kanallar[a] || {}).ready; });
@@ -1280,12 +1281,56 @@ details.detay > summary:hover{ color:var(--fg); }
       + ritimSaat('ritim-hgun', 'Haftalık rapor',
           'Gün adı yaz (pazartesi, salı…). Boş bırakırsan gönderilmez',
           z.weekly_day, 'pazartesi', 'text')
+      + '<div class="tag" style="margin-top:14px">Sessizlik ve sınır</div>'
+      + '<p class="muted">Sessiz saatte ve günlük sınır dolunca gelen mesajlar '
+      + '<b>kaybolmaz</b>: bekler, sabah tek bir özet olarak gelir. Senin yazdığın '
+      + 'mesaja verilen cevap hiç beklemez.</p>'
+      + ritimSaat('ritim-sbas', 'Sessiz saat başı', 'Boş: kapalı', n.sessiz_bas, '23:00')
+      + ritimSaat('ritim-sbit', 'Sessiz saat sonu', 'Bekleyenler bu saatte tek özet olur',
+          n.sessiz_bit, '08:00')
+      + ritimSaat('ritim-sinir', 'Günde en çok bildirim',
+          '0: sınır yok. Fazlası ertesi sabahın özetine', String(n.gunluk_en_cok || 0), '6', 'number')
+      + ritimSaat('ritim-omur', 'Cevapsız teklif kaç günde kapansın',
+          'Kapanan teklif sana söylenir', String(n.teklif_omru_gun || 3), '3', 'number')
+      + '<div class="metric"><div class="metric__name">Akşam «yarın şunlar var»'
+      + '<div class="muted" style="font-size:11px">Akşam kapanışına yarının ilk üç işi eklenir'
+      + '</div></div><div class="metric__val"><input type="checkbox" id="ritim-yarin"'
+      + (n.yarin !== false ? ' checked' : '') + ' aria-label="Akşam yarın özeti"/></div></div>'
       + '<div class="row" style="margin-top:12px">'
       + '<button class="primary" id="ritim-kaydet">Kaydet</button></div>'
       + '<p class="muted" id="ritim-not">Boş bırakılan saat, o mesajın '
-      + 'kapalı olduğu anlamına gelir.</p>';
+      + 'kapalı olduğu anlamına gelir.</p>'
+      + '<div class="tag" style="margin-top:14px">Bir daha sorulmayanlar</div>'
+      + '<div id="ritim-sustur"><p class="muted">Yükleniyor…</p></div>';
     $('ritim').innerHTML = h;
     $('ritim-kaydet').addEventListener('click', ritimKaydet);
+    susturulanCiz();
+  }
+
+  /* «Bunu bir daha sorma» ile susturulan türler. Satır silinince tür
+     yeniden sorulur. Liste sunucudan gelir; ekran sayı üretmez. */
+  async function susturulanCiz(){
+    var el = $('ritim-sustur');
+    if(!el) return;
+    var r = await api('/api/bildirim');
+    if(r.status !== 200){ el.innerHTML = '<p class="muted">Okunamadı.</p>'; return; }
+    var l = r.body.susturulanlar || [];
+    if(!l.length){
+      el.innerHTML = '<p class="muted">Susturulmuş bir tür yok. Telegram’da bir soruya '
+        + '«bir daha sorma» yazarsan o tür buraya düşer.</p>';
+      return;
+    }
+    el.innerHTML = l.map(function(x){
+      return '<div class="line"><span>' + esc(x.ad) + '</span> '
+        + '<button data-sustur-ac="' + esc(x.anahtar) + '">Yeniden sor</button></div>';
+    }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('[data-sustur-ac]'), function(b){
+      b.addEventListener('click', async function(){
+        await api('/api/bildirim/ac', { method:'POST',
+          body:JSON.stringify({ anahtar:b.getAttribute('data-sustur-ac') }) });
+        susturulanCiz();
+      });
+    });
   }
 
   function ritimSaat(id, ad, not, deger, ornek, tip){
@@ -1304,6 +1349,12 @@ details.detay > summary:hover{ color:var(--fg); }
       evening:$('ritim-aksam').value.trim(),
       checkin:$('ritim-yoklama').value.trim(),
       weekly_day:$('ritim-hgun').value.trim().toLowerCase(),
+    }, bildirim:{
+      sessiz_bas:$('ritim-sbas').value.trim(),
+      sessiz_bit:$('ritim-sbit').value.trim(),
+      gunluk_en_cok:parseInt($('ritim-sinir').value, 10) || 0,
+      teklif_omru_gun:parseInt($('ritim-omur').value, 10) || 3,
+      yarin:$('ritim-yarin').checked,
     } };
     var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
     $('ritim-not').textContent = r.status === 200 ? 'Kaydedildi.'

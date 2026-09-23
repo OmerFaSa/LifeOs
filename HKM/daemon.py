@@ -23,6 +23,8 @@ Ucnoktalar:
     GET  /api/weekly/belge?date=&bicim=pdf|html  haftalik raporun basilir hali
     POST /api/weekly/gonder         haftalik raporu simdi kanala kuyruga koyar (Telegram'a PDF)
     GET  /api/outbox                giden kutusu durumu
+    GET  /api/bildirim              sessiz saat, gunluk sinir, susturulanlar
+    POST /api/bildirim/ac|sustur    «bir daha sorma» turunu ac / sustur ({anahtar, ad})
     GET  /api/intents/<modul>       modulun acik niyetleri (teklifler)
     POST /api/intents/<modul>       yeni teklif olusturur (tur + govde)
     POST /api/intents/<modul>/take  kuyrugu alir (delivered isaretler)
@@ -84,7 +86,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import (ai, bam, butce, channels, cikti, cross, db, depo, gelen,  # noqa: E402
+from core import (ai, bam, bildirim, butce, channels, cikti, cross, db, depo, gelen,  # noqa: E402
                   hedefag, impact,
                   intents, kanal, king, manager, media, memory, models, motto, outbox, patron,
                   profil, schedule,
@@ -884,6 +886,15 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_bytes(200, bayt, mime, dosya=ad, indir=True)
         if u.path == "/api/outbox":
             return self._send(200, outbox.status(self.con))
+        if u.path == "/api/bildirim":
+            # Sessiz saat, gunluk sinir ve susturulanlar (core/bildirim.py).
+            # Sayi ekranda uretilmez: bugun giden ve simdi sessiz mi burada.
+            an = datetime.datetime.now()
+            return self._send(200, {
+                "ayar": bildirim.settings(self.server.config),
+                "susturulanlar": bildirim.susturulanlar(self.con),
+                "bugun_giden": bildirim.bugun_giden(self.con, an),
+                "sessiz_mi": bildirim.sessiz_mi(self.server.config, an)})
         if u.path == "/api/impact":
             return self._send(200, impact.summary(self.con))
         if u.path == "/api/decisions":
@@ -1099,6 +1110,22 @@ class Handler(BaseHTTPRequestHandler):
             r = sohbet.urun_modulden(self.con, self.server.config, body.get("modul"),
                                      str(body.get("metin")))
             return self._send(200 if r.get("ok") else 422, r)
+        if u.path in ("/api/bildirim/ac", "/api/bildirim/sustur"):
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            anahtar = str((body or {}).get("anahtar") or "").strip()
+            if not anahtar:
+                return self._send(422, {"ok": False, "note": "anahtar gerekli"})
+            if u.path.endswith("/ac"):
+                r = bildirim.ac(self.con, anahtar)
+            else:
+                r = bildirim.sustur(self.con, anahtar, str(body.get("ad") or anahtar))
+            return self._send(200 if r.get("ok") else 404, r)
         if u.path == "/api/bam/ilerlet":
             r = bam.ilerlet(self.con, self.server.config)
             king.esitle(self.con)

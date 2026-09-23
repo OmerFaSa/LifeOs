@@ -401,6 +401,18 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         return {"ok": True, "mode": "emir", "command": "arastirma", "text": govde,
                 "agent": gorevli}
 
+    # 0c — SISTEMIN SORDUGU SORUYA CEVAP (core/eksik.py): «7», «bilmiyorum»,
+    # «bir daha sorma». Acik soru yoksa None doner ve konusma olagan akar.
+    if gorevli == "king":
+        from core import eksik
+        ec = eksik.cevap(con, metin, date)
+        if ec:
+            if kayit:
+                patron.log(con, kanal, "user", metin, agent=gorevli)
+                patron.log(con, kanal, "manager", ec, agent=gorevli)
+            return {"ok": True, "mode": "komut", "command": "soru", "text": ec,
+                    "agent": gorevli}
+
     # 1 — ONCE KOMUT. Ucretsiz, kesin ve her zaman ayni olan yol.
     komut = patron.parse(metin)
 

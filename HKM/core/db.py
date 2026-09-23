@@ -106,6 +106,30 @@ CREATE TABLE IF NOT EXISTS outbox (
 );
 CREATE INDEX IF NOT EXISTS ix_outbox_state ON outbox(state, next_at);
 
+/* SUSTURMALAR — «bunu bir daha sorma» (core/bildirim.py). Anahtar bir TURU
+   susturur (eksik:sleep_hours, oneri:<kural>, yarin); tek bir mesaji degil.
+   Ayarlar'dan geri acilir: satir silinir. */
+CREATE TABLE IF NOT EXISTS susturmalar (
+  anahtar     TEXT PRIMARY KEY,
+  ad          TEXT NOT NULL,               -- kullaniciya gorunen ad
+  created_at  TEXT NOT NULL
+);
+
+/* SISTEMIN SORDUGU SORULAR (core/eksik.py): «dun uyku kaydi yok, kac saat
+   uyudun?». Cevap tek sayi olabilir («7»); hangi soruya ait oldugu bu
+   satirdan bilinir. Ayni soru ayni gun icin iki kez sorulmaz. */
+CREATE TABLE IF NOT EXISTS sorular (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  anahtar     TEXT NOT NULL,               -- eksik:sleep_hours
+  gun         TEXT NOT NULL,               -- sorunun ait oldugu gun
+  kanal       TEXT,
+  govde       TEXT NOT NULL DEFAULT '{}',  -- JSON: modul, kalip, secenekler
+  durum       TEXT NOT NULL DEFAULT 'acik',-- acik|cevaplandi|bilinmiyor|susturuldu
+  created_at  TEXT NOT NULL,
+  answered_at TEXT,
+  UNIQUE(anahtar, gun)
+);
+
 /* Gelen mesaj defteri — AYNI MESAJI IKI KEZ ISLEMEMEK icin.
 
    WhatsApp ve Telegram, cevap alamadiklarinda ayni webhook'u TEKRAR
@@ -449,6 +473,9 @@ MIGRATIONS = [
     # Giden kutusunda belge satiri: {"kayit_id", "bicim"}. Bayt ambara
     # yazilmaz; gonderim aninda kayittan uretilir.
     ("outbox", "ek", "TEXT"),
+    # Sessiz saat ya da gunluk sinir yuzunden BEKLETILEN satir
+    # (core/bildirim.py): sure dolunca birlesik ozete girer.
+    ("outbox", "ertelendi", "INTEGER NOT NULL DEFAULT 0"),
     # Model cagrisinin ait oldugu BAM isi (core/butce.py is_baglami). Isin
     # gercek maliyeti buradan OLCULUR; King'in teklifi ondan ogrenir.
     # Bos: sohbet, yoklama gibi bir ise ait olmayan cagri.

@@ -28,7 +28,7 @@ import json
 import os
 import re
 
-from core import adlar, butce, channels, media, models, schedule, thresholds, web
+from core import adlar, bildirim, butce, channels, media, models, schedule, thresholds, web
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -96,6 +96,8 @@ def read(cfg):
     # Web katmani (core/web.py): arama anahtarlari MASKELI.
     out["web"] = web.read(cfg)
     out["king"] = {"sormadan_dusuk": bool(((cfg or {}).get("king") or {}).get("sormadan_dusuk"))}
+    # Sessiz saat, gunluk sinir, teklif omru (core/bildirim.py).
+    out["bildirim"] = bildirim.settings(cfg)
     return out
 
 
@@ -106,7 +108,7 @@ def validate(patch):
         return False, ["gövde bir nesne olmalı"]
     for k in patch:
         if k not in ("thresholds", "channels", "schedule", "models",
-                     "budget", "media", "web", "king"):
+                     "budget", "media", "web", "king", "bildirim"):
             hata.append("bilinmeyen alan: %s" % k)
 
     # King'in onay kapisi (core/king.py teklif_gerekli): yalniz DUSUK sinif
@@ -121,6 +123,11 @@ def validate(patch):
                     hata.append("bilinmeyen King ayarı: %s" % ad)
                 elif not isinstance(deger, bool):
                     hata.append("king.sormadan_dusuk true ya da false olmalı")
+
+    if patch.get("bildirim") is not None:
+        ok_n, hata_n = bildirim.validate(patch["bildirim"])
+        if not ok_n:
+            hata.extend(hata_n)
 
     if patch.get("models") is not None:
         ok_m, hata_m = models.validate(patch["models"])
@@ -243,6 +250,8 @@ def apply(cfg, patch):
         yeni = web.apply(yeni, patch["web"])
     if patch.get("king") is not None:
         yeni.setdefault("king", {}).update(patch["king"])
+    if patch.get("bildirim") is not None:
+        yeni.setdefault("bildirim", {}).update(patch["bildirim"])
     yeni["local_token"] = cfg.get("local_token")
     return yeni
 

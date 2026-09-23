@@ -25,7 +25,7 @@
 import datetime
 import json
 
-from core import channels, db
+from core import bildirim, channels, db
 
 
 def _belge_gonder(con, cfg, row, transport):
@@ -138,11 +138,20 @@ def flush(con, cfg, now=None, transport=None, limit=20):
     """Vadesi gelmis satirlari gonderir. Sonuc ozetini dondurur."""
     t = _now(now)
     ozet = {"sent": 0, "failed": 0, "given_up": 0, "skipped": 0,
-            "uncertain": 0}
+            "uncertain": 0, "deferred": 0}
+    # Sessiz saat / gunluk sinir yuzunden bekleyenler, vadesi gelince TEK
+    # ozette gider (core/bildirim.py). Ozet de bir satirdir; asagida gider.
+    bildirim.birlestir(con, cfg, t)
     for row in due(con, t)[:limit]:
         if not channels.enabled(cfg, row["channel"]):
             # Kanal kapaliyken denemek anlamsiz: satir bekler.
             ozet["skipped"] += 1
+            continue
+        ertele, ne_zaman, _neden = bildirim.ertele_mi(con, cfg, row, t)
+        if ertele:
+            # Kaybolmaz, bekler: vadesi sabaha kayar (bildirim kurali 2).
+            _mark(con, row["id"], next_at=_iso(ne_zaman), ertelendi=1)
+            ozet["deferred"] += 1
             continue
         if row.get("ek"):
             r = _belge_gonder(con, cfg, row, transport)

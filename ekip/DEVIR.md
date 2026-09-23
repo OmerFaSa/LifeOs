@@ -152,6 +152,16 @@ Hâlâ açık: Y10 alıcısı · Y1'in yeri (HKM içi öneri) · telefonun ağda
     «soru 40» okur, ESP `parse.js` «gitar 30» = 30 dk («kelime 15» sorulur). **Hata
     düzeltmesi:** SPİ `quickentry.js` «su 2»yi 2 ml yazıyordu, «2 litre su içtim»i hiç
     okumuyordu — artık litre/ml/bardak; birimsiz <20 litre, ≥50 ml, 20–49 sorulur.
+  - ✅ 12 Sessiz saatler + 13 günlük bildirim sınırı: `HKM/core/bildirim.py` giden kutusunun
+    kapısında (`outbox.flush`). Cevap («reply:») beklemez; bekleyen kaybolmaz, sabah TEK
+    özette gider (`birlestir`, satır «birlesti»). Varsayılan kapalı; HKM › Ayarlar ›
+    Otomatik mesajlar. `GET /api/bildirim`. Test `tests/test_bildirim.py`.
+  - ✅ 9 Eksik veri tek soru: `HKM/core/eksik.py` — sabah brifingi dünün eksik TEK ölçümünü
+    sorar (uyku, sonra AYS soru; son 7 günde kullanılan modül). «7» → `kayit.add` (dünün
+    tarihiyle), «bilmiyorum» → veri yok kalır. Tablo `sorular`.
+  - ✅ 14 «Bir daha sorma»: soru türünü ya da günün öneri kuralını susturur (`susturmalar`
+    tablosu; brifing susturulan öneriyi üretmez). **bio_red susturulamaz.** Ayarlar'da
+    «Yeniden sor». `POST /api/bildirim/ac|sustur`.
 
 ## Kullanıcı kolaylığı fikirleri · 16 hızlı kazanç ONAYLI, gerisi ÖNERİ
 

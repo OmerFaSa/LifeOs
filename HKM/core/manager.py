@@ -274,6 +274,14 @@ def brief(con, date, th=None, days=twin.WINDOW_DAYS):
                            cert=f["cert"], n=f["n"], question=f["question"]))
 
     karar = None
+    if prop and prop.get("key") not in ("bio_red",):
+        # «Bir daha sorma» ile susturulan oneri turu URETILMEZ (core/bildirim.py).
+        # Saglik kirmizi bayragi susturulamaz: o bir tercih degil guvenliktir.
+        from core import bildirim
+        if bildirim.susturuldu_mu(con, "oneri:" + str(prop.get("key"))):
+            dropped.append({"text": prop["proposal"], "words": [],
+                            "note": "Bu öneri türü «bir daha sorma» ile susturuldu."})
+            prop = None
     if prop:
         suc = imperatives(prop["proposal"])
         if suc:

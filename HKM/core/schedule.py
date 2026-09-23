@@ -126,6 +126,12 @@ def run(con, cfg, job, now=None, th=None):
         if not m["ok"]:
             return {"ok": False, "reason": "imperative", "note": m["error"]}
         metin = m["text"]
+        # Dunun eksik kalan TEK olcumu sorulur (core/eksik.py); cevap «7»
+        # gibi tek sayi olabilir ve ilgili module teklif olur.
+        from core import eksik
+        soru = eksik.sor(con, gun, kanal=kanal, now=now)
+        if soru:
+            metin += "\n\n" + soru
 
     if manager.imperatives(metin):
         # Reddet-ve-dus: zamanlanmis bir mesaj da emir kipi tasiyamaz.
