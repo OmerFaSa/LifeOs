@@ -1,520 +1,179 @@
 # Talimat raporu — sıradaki Claude için
 
-> Son güncelleme: 2026-09-23 · bu oturum (`claude/epic-keller-uz103z-y09gx6`; önceki
-> oturum `claude/epic-keller-uz103z`, Y7'nin ortasında sınırda kaldı — o iş push
-> edilmemişti, bu oturumda baştan kuruldu).
-> Bu dosya her Part bitince güncellenir. Yarıda kalan oturum buradan devam eder.
+> Son güncelleme: 2026-09-23 gece · yalnız «şimdi + sıradaki». Bitmiş işlerin ayrıntısı,
+> eski sorular ve eski özetler: `ekip/arsiv/DEVIR-2026-09.md` (tam metin).
+> Her madde bitince bu dosya güncellenir; limit ortada biterse sonraki oturum buradan sürer.
 
 ## ⚡ HIZ KURALLARI (2026-09-23, kullanıcı: «sürenin kısalması için tüm koşulları uygula»)
 
-Hedef: hızlı kazançlar 1–2 günde biter. Bu bölüm aşağıdaki her şeyden önce okunur.
+1. **ONAY VERİLDİ — sormadan yap.** Kolaylık fikirlerinden hızlı kazançlar ONAYLI:
+   **5, 8, 9, 11, 12, 13, 14, 15, 19, 22, 27, 31, 46, 49, 50, 56.** Diğer 41 fikir hâlâ
+   onay bekler (liste en altta). Doktrin (AGENTS.md §1) onayla değişmez: teşhis/doz yok,
+   HKM modüle yazmaz, eksik veri sıfır değil, XP karar vermez.
+2. **SIRA:** Grup 1 HKM + Telegram: 8, 9, 11, 12, 13, 14, 15, 19, 46 · Grup 2 AYS: 22, 27 ·
+   Grup 3 SPİ: 31 · Grup 4 ortak: 5, 49, 50, 56 → sonra planlı iş 8c-2 → 8c-3 → 8d → 8e →
+   tam koşum → **EN SON Part 9 tek tasarım** (önce çekmece haritası kullanıcıya onaylatılır).
+3. **DENETİM ÖLÇÜSÜ:** her madde yalnız dokunduğu sistemin testleri + duman testi. Tam koşum
+   (`tools/sayilar.py --tam --yaz`) dört grup + Part 8 bitince BİR KEZ. Önce hatayı
+   yakalayan test; yeni davranış testsiz gelmez.
+4. **KAYIP YOK:** her grup (ya da büyük madde) bitince commit + push (`main`) + burada ✅.
+5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
-1. **ONAY VERİLDİ — sormadan yap.** «Kullanıcı kolaylığı fikirleri» listesindeki hızlı
-   kazançlar ONAYLI: **5, 8, 9, 11, 12, 13, 14, 15, 19, 22, 27, 31, 46, 49, 50, 56.**
-   Bunlar için ayrıca soru sorulmaz. Diğer 41 madde hâlâ onay bekler. Doktrin
-   (AGENTS.md §1) onayla değişmez: teşhis/doz yok, HKM modüle yazmaz, eksik veri sıfır
-   değil, XP karar vermez.
-2. **SIRA (aynı dosyalar bir kez okunsun):**
-   - Oturum başı (bir kez): **(a)** bitmiş bölümleri `ekip/arsiv/DEVIR-2026-09.md`'ye taşı,
-     burada yalnız «şimdi + sıradaki» kalsın; **(b)** onaylı 16 maddeyi depoda tara
-     («var / kısmen / yok», dosya:satır) ve sonucu bu bölümün altına yaz. Var olan
-     yeniden yazılmaz.
-   - Grup 1 HKM + Telegram: 8, 9, 11, 12, 13, 14, 15, 19, 46.
-   - Grup 2 AYS: 22, 27. · Grup 3 SPİ: 31. · Grup 4 ortak: 5, 49, 50, 56.
-   - Sonra planlı iş: 8c-2 → 8c-3 → 8d → 8e.
-   - **EN SON: Part 9 tek tasarım + çekmece düzeni** (bkz. Part 9). Her şey bitmeden başlanmaz.
-3. **DENETİM ÖLÇÜSÜ:** her madde yalnız dokunduğu sistemin testleri + duman testi.
-   Ekran görüntüsü yalnız arayüz belirgin değiştiyse. Tam koşum (`tools/sayilar.py --tam
-   --yaz`) yalnız dört grup bitince BİR KEZ. Hata düzeltmesinde önce hatayı yakalayan test
-   kuralı geçerli; yeni davranış testsiz gelmez.
-4. **KAYIP YOK:** her GRUP bitince commit + `git push origin main` + bu bölümde ✅. Limit
-   ortada biterse sonraki oturum buradan devam eder.
-5. **KULLANIM TASARRUFU:** DEVIR kısa tutulur (madde 2a). Küçük, tek dosyalık, tarifi
-   açık işler daha hafif bir modelle yapılabilir; mimari karar isteyen işler güçlü
-   modelde. Aynı hesapta paralel oturum limiti hızlandırmaz, yalnız daha çabuk bitirir;
-   paralel yalnız limit darboğaz değilse ya da iş Codex'e (`gpt/<konu>` dalı, PR) verilirse.
-6. **GEREKSİZ İŞ YOK:** keşif ve deneme betikleri scratchpad'de kalır; belgeye yalnız
-   yapılanın özeti girer (MIMARI bölümü + bu listede tek satır).
+**Durum:** ✅ 2a arşiv · ✅ 2b tarama · 🔜 Grup 1 · ⏳ Grup 2 · ⏳ Grup 3 · ⏳ Grup 4 ·
+⏳ 8c-2 · ⏳ 8c-3 · ⏳ 8d · ⏳ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
 
-**Durum:** ⏳ 2a arşiv · ⏳ 2b tarama · ⏳ Grup 1 · ⏳ Grup 2 · ⏳ Grup 3 · ⏳ Grup 4 · ⏳ tam koşum · ⏳ Part 9 tasarım (en son)
+### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
+
+| # | Fikir | Durum | Nerede / ne eksik |
+|---|---|---|---|
+| 5 | «Dünkünün aynısı» | yok | kopyalama yolu yok; SPİ öğün/ilaç, ESP oturum, AYS blok |
+| 8 | Telegram tek kelime kayıt («su 2») | kısmen | `HKM/core/dil.py › rapor` yalnız geçmiş kip cümleyi okur («7 saat uyudum»); «su 2», «uyku 7», «soru 40» `None` |
+| 9 | Eksik veri tek soru | kısmen | `intents.py:135 measure.ask` (SPİ); `schedule.yoklama_metni` kaydı gelmeyen modülü söyler; seçenekli tek soru yok |
+| 11 | Toplu onay | kısmen | AYS `palette.js:331` «Hepsini onayla» yalnız komut önerisinde; HKM teklif kuyruğunda toplu yok |
+| 12 | Sessiz saatler | yok | `outbox.flush` saate bakmaz |
+| 13 | Günlük bildirim bütçesi | kısmen | `outbox` kimliği (kanal, tür, gün) tekrarı önler; günlük üst sınır yok |
+| 14 | «Bunu bir daha sorma» | yok | — |
+| 15 | Cevapsız teklif 3 gün sonra kapanır | yok | `intents` bekleyen niyet süresiz |
+| 19 | Akşam «yarın şu üç şey» | yok | `schedule` evening = gün kapanışı |
+| 22 | Yanlıştan tekrar kartı tek dokunuş | kısmen | AYS `proposals.js` «card-from-error» (etiket seçilince öneri) |
+| 27 | Test kitabında kaldığın sorudan devam | kısmen | AYS `testkitabi.js:28` oturum bellekte; sayfa yenilenince kaybolur |
+| 31 | Sepette ucuz muadil + düşen besin | **VAR** | SPİ `screens/basket.js:116 swapCard` + `money.js:138 substitutesFor` (Korunan / Düşen, «Değiştir»). Kısıt: yalnız `SP.SUBSTITUTES` tablosundaki kalemler |
+| 46 | «Önce depo» teklifi en üstte | kısmen | `depo.py` Depolama Bürosu araştırmadan önce bakar; King teklifinde (`teklif.py`) görünmez |
+| 49 | Haftalık «neler kazandın» | yok | `weekly.py` karşılaştırma var, «ölçülmüş üç iyi şey» yok |
+| 50 | Seri dondurma | yok | seriler: AYS `calc.js behaviorStreak`, SPİ `calc.js streak`, ESP `Model.streak`, HKM `streak.py` (eşik kırığı) |
+| 56 | Tatil modu | yok | AYS takvim istisnası «tatil» ve `badDay` var; üç modülde ortak mod yok |
 
 ## 0. Önce oku
 
-1. `AGENTS.md` — doktrin. Kısaca: sayıyı ve kararı KOD verir, model yalnız
-   cümle kurar; eksik veri sıfır değildir (ölçüldü / tahmin / hesaplandı /
-   veri yok); sıfır bağımlılık; HKM hiçbir modüle yazmaz, teklif bırakır;
-   aksiyonların üç seviyesi (küçük / orta / büyük); ekrandaki metin düzgün Türkçe.
-2. Bu dosyanın §2 yol haritası — sıradaki iş orada «sıradaki» diye işaretli.
-3. `ekip/PLAN.md` — büyük plan; §4 turlar, §7 kullanıcı kararları.
+1. `AGENTS.md` — doktrin: sayıyı ve kararı KOD verir, model yalnız cümle kurar; eksik
+   veri sıfır değildir (ölçüldü / tahmin / hesaplandı / veri yok); sıfır bağımlılık; HKM
+   hiçbir modüle yazmaz, teklif bırakır; aksiyonların üç seviyesi; ekranda düzgün Türkçe.
+2. Bu dosya (sıra yukarıda). 3. `ekip/PLAN.md` — büyük plan.
 
 ## 1. Kullanıcının kuralları
 
 - Türkçe konuşur, sesle yazar: kelimeler bozuk gelebilir, anlamı çıkar.
-- **Yavaş yavaş, sindire sindire.** Her şeyi aynı anda açma; bir Part'ı bitir,
-  test et, commit + push et, bu dosyayı güncelle, sonra sıradakine geç.
-- **Gereksiz test yapma:** yalnız dokunduğun sistemin birim testleri, gerekiyorsa
-  bir duman testi. Tam koşum (`tools/sayilar.py --tam`) yalnız büyük bir Part'ın sonunda.
-- **Kendi fikrini geliştirmeden önce söyle.** Aşağıdaki 29 madde ONAYLANDI;
-  listede olmayan yeni bir KOL (yeni özellik alanı) önce kullanıcıya sorulur.
-- **Hata ve eksikte kendini kısıtlama (2026-09-23):** sistemin herhangi bir yerinde
-  bir hata ya da atlanmış bir eksik görürsen düzelt — önceki model atlamış olabilir,
-  analiz edip tamamla. Doktrin (AGENTS.md) ve test kuralı yine geçerli: önce hatayı
-  yakalayan test, sonra düzeltme; commit mesajında ve bu dosyada ne olduğunu yaz.
-- **Lokal ağa karışma.** Ağdan erişilen paylaşım, tünel, port açma yok.
-- Şirket / YouTube ofisi başka bir Claude'un işi; dokunma.
-- PR açma (istenmedi). **`main`'e birleştirmek serbest** (kullanıcı onayı): yalnız
-  ileri sarma, asla zorla yazma.
-- Token bitmeye yaklaşınca: bu dosyayı güncelle, kullanıcıya gönder, sorulacakları sor.
+- Bir işi bitir, test et, commit + push et, bu dosyayı güncelle, sonra sıradakine geç.
+- Gereksiz test yapma: dokunduğun sistemin birim testleri + gerekiyorsa duman testi.
+- Listede olmayan yeni bir KOL önce kullanıcıya sorulur. **Hata ve eksikte kendini
+  kısıtlama:** görürsen düzelt (önce hatayı yakalayan test; commit'te ve burada yaz).
+- **Lokal ağa karışma** (paylaşım, tünel, port açma yok). Şirket / YouTube ofisi başka
+  bir Claude'un işi; dokunma. PR açma. `main`'e yalnız ileri sarma, asla zorla yazma.
+- **Her güncellemeyi bu dosyaya yaz.** Birden çok Claude sırayla çalışır: biri limitte
+  durunca öteki `main`'deki bu dosyayı okuyup devam eder. Başlarken `git fetch origin
+  main` ve ileri sar; bitince push et.
+- Token bitmeye yaklaşınca: bu dosyayı güncelle, push et, sorulacakları sor.
 
 ## 2. Dal düzeni
 
-- **Doğrudan `main` (kullanıcı, 2026-09-23):** «main üzerinden çalış». Yerel `main`
-  `origin/main`'i izler; her madde bitince commit + `git push origin main` (yalnız
-  ileri sarma, asla zorla yazma). Oturum dalı varsa ayrıca ilerletmek gerekmez.
-- Uzun bir koşum (`sayilar.py --tam`) sürerken iş ayrı bir `git worktree`'de yapılır,
-  koşum bitince main'e alınır: koşum ölçtüğü dosyanın değişmediğinden emin olur.
-- **Push edilmemiş iş kaybolur** (konteyner geçicidir): her madde bitince push et.
-- Commit sonu: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` ve
-  `Claude-Session: <oturum bağlantısı>` satırları.
+- Doğrudan `main` («main üzerinden çalış»). Oturum dalı varsa ikisine de push edilir:
+  `git push origin HEAD:main` ve oturum dalı. Push'tan önce `git fetch`; `main` ilerlediyse
+  kendi yayımlanmamış commit'lerini onun üstüne al (rebase), sonra ileri sar.
+- Uzun koşum (`sayilar.py --tam`) sürerken dosya düzenleme (ya da ayrı `git worktree`).
+- Push edilmemiş iş kaybolur (konteyner geçicidir). Commit sonu:
+  `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` + `Claude-Session: <bağlantı>`.
 
-## 3. Yol haritası — onaylı 29 madde
+## 3. Açık işler
 
-Numaralar kullanıcıya verilen listenin numaralarıdır (1. kısım 1–18, 2. kısım Y1–Y11).
-Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı gerekiyor.
+### Part 8 — Akıllı iş sistemi (sürüyor)
+İste → King tanır → yoğunluk sınıfı (kod) → teklif (maliyet ölçümden, süre, bütçe payı,
+seçenek) → **onay** → parçalı üretim → modüle TİPLİ PAKET olarak montaj → Kütüphanem.
+Kullanıcının örnekleri (fasikül, test kitabı, bitkisel protein, spor salonu, gitar, Rusça
+A1–A2) **yalnız örnektir**: akış genel kalır; yeni çıktı türü gerekince katalog ve niyet
+listesi tek yerde genişler. Tam plan: arşiv § Part 8.
 
-### Part 1 — Toparlama
-- ✅ 3 Dallar toplandı; `main` ileri sarıldı (62cfd55).
-- ✅ 12 Hedef sohbeti: soru beklerken okunamayan cevap; yeni hedef cümlesiyse
-  yarım hedef bırakılır, soru / uzun cümle / modülün kendi komutu (`baskaIs`
-  kancası) cevap sanılmaz. `brand/ortak/hedef.js`, testleri `hedef.test.js`.
-- ✅ 2 Başlık, sekme, açılış işareti ve telefon kısayolu simgesi: modülün kimlik
-  logosu (`brand/medya/kimlik/`) 192 px kareye yerleştirildi, dosya adı aynı
-  (`<SYS>/src/img/brand/favicon.png`, `HKM/brand/favicon.png`). Eski altın monogramlar
-  git geçmişinde; LifeOS «LF» logosu (`brand/life/`) giriş sayfasında kaldı.
-- ✅ 1 Tek dosya görselsiz açılınca (ZIP'ten indirilmiş dist, `file://`) oturumda
-  bir kez nasıl düzeleceği söylenir: `brand/ortak/gorsel.js`. 81 MB'lık rütbe
-  medyası gömülmez; kalıcı çözüm Y4 (PWA).
-
-### Part 2 — Hedef ağı
-- ✅ 8 Modüller etkin hedef + plan özetini HKM'ye eşitler: `brand/ortak/hedefag.js`
-  (istemci), `HKM/core/hedefag.py`, `POST /api/hedef/sync/<modül>`. Kayıtta 600 ms
-  gecikmeli gönderim, açılışta bir kez. AYS ve ESP planları artık King'e görünür.
-- ✅ 6 Zaman bütçesi: `POST /api/zaman` (günlük dk, haftada gün); karar ve cümle
-  HKM kodu; modüllerin Hedeflerim kartında «Zaman bütçesi (King)» satırı.
-- ✅ Y8 HKM web › Hedefler sekmesi: bütçe, günlük vakit formu, üç modülün hedefleri.
-  Zincir testi `tools/entegre.js` §2.9 ve §4.5.
-
-### Part 3 — Uyarlama ve değerlendirme
-- ✅ 7 Uyarlama döngüsü: `brand/ortak/hedef.js` `uyarla` (hedef bugünün ölçümüyle
-  yeniden değerlendirilir) ve `uyarlamaUygula` (seçilen tarih/vakit hedefe yazılır,
-  eski değer `uyarlamalar` geçmişinde). Üç modülde plan «geride»yken Hedeflerim'de
-  «Yeniden hesapla»; seçimde eski plan geri alınır, yeni plan önizleme + onayla.
-  Motorda `haftalikEk` kancası: AYS'de deneme günü haftalık sabit yük, konu süresine
-  2 × 30 dk tekrar eklendi — karar ile plan artık aynı tarihi söylüyor.
-- ✅ 13 Değerlendirme seti: `<SYS>/src/tests/degerlendirme.test.js` (AYS 13, SPİ 13,
-  ESP 12 cümle; tehlikeli hedeflerin hepsi «güvensiz»).
-
-### Part 4 — Güvence ve teslim
-- ✅ 15 Otomatik yedek: HKM açıkken üç modül her gün HKM'ye yedeklenir (`HKM/core/yedek.py`,
-  `brand/ortak/yedekag.js`; geri okuyarak doğrular, 14 gün + 6 ay sonu saklar).
-- ✅ Y6 Haftalık rapor PDF olarak Telegram'a (`weekly.belge`, «hesaplandı» etiketi; HKM ›
-  Sistemler'de PDF indir + kanala gönder).
-- ✅ Y7 Akşam yoklaması: `schedule.checkin` sorar; cevap `dil.rapor` ile modüllere
-  bölünür, her parça `kayit.add` teklifi olur; modül kendi ayrıştırıcısıyla okur,
-  «… şöyle okudu» gösterir, «Kaydet» ile kendi koduyla yazar (HKM/MIMARI.md §8.25).
-  Yan düzeltmeler: geçmiş kip plan isteği sanılmıyor, SPİ «7 saat uyudum» = uyku,
-  `/api/chat` tarihsiz gövdede düşmüyor, `dil.olumsuz` «çalışmadım»ı görüyor.
-- ✅ 5 / W6 Modüller ürün ister ve `urun.add` alır (`brand/ortak/urun.js`: ön süzgeç,
-  kendi denetimi, kendi deposu, Ofis › BAM ürünleri, sandbox iframe; HKM
-  `POST /api/king/urun`). HKM Ofis: PDF/HTML/SVG indirme, ajan izi, depo denetimi;
-  Ayarlar › Web. Dosya adları ASCII (Chromium Türkçe adı «download» yapıyordu).
-  HKM/MIMARI.md §8.26.
-
-### Part 5 — Yeni kollar I
-- ✅ Y2 Alışkanlık kolu: `brand/ortak/aliskanlik.js` (üç modülde: ESP disiplinleri,
-  SPİ hareket, AYS ders çalışma). Taban kendi kaydından, karar «tahmin», kayıt yoksa
-  karar yok; Hedeflerim'de «Bu hafta 3/5 gün» ilerlemesi; motorda `karar` kancası ve
-  vaktin birleşmesi (genel + paket).
-- ✅ Y3 Takvim (AYS): Rehber › İstisnalar'da .ics içe alma (önizleme, tür yalnız
-  önerilir, geçmiş / 60 günden uzun / kayıtlı alınmaz, yalnız seçilen yazılır) ve
-  dışa aktarma (istisnalar, TYT/AYT günü, hedef son günleri). `AYS/src/js/core/takvim.js`.
-- ✅ Y4 Telefon uygulaması (PWA): üç modülde çevrimdışı kabuk (`brand/ortak/pwa.js` +
-  `sw.js`), yalnız http(s) ile açılınca; ağ önce, ağ yoksa son kopya; ilk açılışın
-  dosyaları da kasaya girer; `build.py` `sw.js`'i `dist/` yanına koyar. Gömülü
-  manifestin kapsamı artık mutlak adres (göreli olan yok sayılıyordu). Duman testi
-  sunucuyu durdurup sayfayı yeniden açar. Telefon için bir http(s) adresi gerekir;
-  yerel ağa açmak kullanıcının kararı (bkz. §4 soru 5).
-- ⏳ Y5 Sağlık verisi içe aktarma — **İKİSİ DE** (cevap 4): iPhone için Apple Sağlık
-  `export.xml`, Android için Health Connect dışa aktarımı. Aynı önizleme + onay
-  yolu (Y3 .ics gibi): okunan kayıt ölçüldü etiketiyle, kullanıcı seçer, SPİ kendi
-  koduyla yazar.
-
-### Part 6 — Yeni kollar II
-- ⏳ Y1 Para kolu (gelir-gider, abonelik, birikim hedefi) — cevap 3: giriş kanalları
-  Telegram'dan yazmak («150 TL market»), King / akşam yoklaması sohbeti («bugün ne
-  yaptın») ve Telegram'a **fiş fotoğrafı** atmak. Kanalların hepsi HKM'de olduğu için
-  öneri HKM içinde bir bölüm; ilk adımda kullanıcıya bir cümleyle teyit et. Fişten
-  okunan tutar/kalem **tahmin**dir: kayda geçmeden önizlenir, kullanıcı onaylar
-  (belirsiz girdi sorulur). Tutarı ve toplamı kod hesaplar.
-- ✅ Y9 Bilgi Deposu tarayıcısı: HKM › Ofis › Bilgi Deposu — arama, tür ve tazelik
-  süzgeci; tazelik kodla ve etiketli (ölçüldü / hesaplandı / veri yok), sürüm zinciri
-  ve kaynaklar kaydın içinde (`depo.tarayici`, `depo.kayit_depo`; HKM/MIMARI.md §8.27).
-- ⏳ Y10 Veli / koç özeti — DOSYA (PDF). Cevap 7: haftada BİR ya da İKİ PDF; sıklığı
-  **kod** karar verir: kullanım yoğunluğu, karar / değişiklik yoğunluğu, aciliyet,
-  sağlık durumu, ders durumunun kararlılığı (sabit mi, yükselen mi, düşen mi). Karar
-  cümlesi «hesaplandı» etiketli ve gerekçeli. Alıcının kim olduğu henüz söylenmedi;
-  şimdilik dosya kullanıcıya (HKM + Telegram) gider, alıcıyı ilk adımda sor.
-- ⏳ Y11 Kariyer / proje kolu — cevap 8: esnek; eğitim, staj, proje, iş başvurusu
-  hepsi olabilir. **İlk adım: akademi kısmı** — kullanıcının durumuna göre LGS, YKS,
-  KPSS, DGS, ALES, YDS gibi sınavların ÖNERİLMESİ (sınav profilleri zaten var:
-  `AYS/src/js/core/sinavprofil.js`); öneri gerekçeli, karar kullanıcının.
-
-### Part 7 — Öğrenme bağları ve borçlar
-- ✅ 9 Test kitabındaki yanlış → yanlış defteri (8b-2). Tekrar kartı teklifi mevcut
-  kuraldan gelir: etiket seçilince reçete yazılır, `proposals.js` «card-from-error» önerir.
-- ⏳ 10 Ek sınav profilini ana sınav yapmak — cevap 6: şimdilik ana sınav **YKS**,
-  ileride değişebilir (üniversite sınavları da). Ana sınav değiştirilebilir olmalı
-  (büyük aksiyon: ayrıntılı önizleme + onay + geri dönüş noktası) ve kullanıcı
-  ileride **üniversite müfredatı** yükleyebilmeli; sistem ona uyarlanır.
-- ⏳ 11 Tahmin tablolarını kaynağa bağlamak — cevap 1: sağlayıcı **esnek**; HKM'nin
-  desteklediği hepsi (Vikipedi, Brave, Tavily, Google PSE, SearXNG) seçilebilir ve
-  değiştirilebilir kalır, hiçbirine kilitlenme. Bütçe sabit sayı değil, Ayarlar'dan.
-
-### Part 8 — Akıllı iş sistemi: iste → King'in fiyat/süre teklifi → onay → modüle monte edilen çıktı
-Kullanıcının fikri (2026-09-23), yön ONAYLI. Altyapıdır; Part 9 tasarımdan ÖNCE yapılır.
-Amaç kullanım kolaylığı: kullanıcı ne isterse istesin, sistem işin büyüklüğünü anlar,
-bedelini ve süresini önceden söyler, onay alır, çıktıyı serbest metin olarak değil
-modülün içinde KULLANILABİLİR biçimde teslim eder.
-
-**ÖNEMLİ — aşağıdakiler yalnız ÖRNEKTİR, liste değildir.** Sistem GENEL olmalı:
-kullanıcı hangi modülde, hangi konuda, hangi işi isterse istesin (burada adı geçmeyen
-bir ders, spor, enstrüman, dil, sağlık konusu, ürün…) aynı akış çalışır. Yoğunluk
-sınıfı, teklif ve montaj örneğe özel kodla değil genel kuralla yapılır; yeni bir çıktı
-türü gerekince katalog ve niyet listesi GENİŞLETİLİR (tek yerde), akış değişmez.
-Aşağıdaki niyet adları (`besin.add` vb.) da ilk ihtiyaçlardır, sınır değildir.
-
-**Kullanıcının örnekleri (yoğunluk sınıfıyla):**
-- AYS: bir test fasikülü, 30–40 soru (düşük) · bir test kitabı (yüksek) · bir branşın
-  bütün derslerinin bütün konularına test ya da özet (ekstra).
-- SPİ: bitkisel proteinlerin besin değerleri, güncel market fiyatları, nereden alınır
-  (orta/yüksek) · Adana'daki spor salonları fiyatlarıyla (düşük/orta) · hastalığa göre
-  destek: hekimin tahlilleri + kullanıcının hisleri + sohbetleri (veri girişi çok esnek).
-- ESP: gitar almak için araştırma (düşük) · gitar repertuvarı (orta) · bütün akorlar ya
-  da bir şarkı hakkında her şey (yüksek) · Rusça A1–A2'nin bütün konu dersleri, her
-  konunun altında 10–20 soru (ekstra).
-
-**Akış — sekiz adım:**
-1. İSTEK her yerden gelir: modül sohbeti, HKM sohbeti, Telegram, akşam yoklaması.
-   Modülün ön süzgeci (bugünkü `brand/ortak/urun.js › istekMi` gibi) King'e yollar.
-2. KING TANIR: iş türü ve KAPSAM (bölüm, konu, soru, kaynak, kelime sayısı). Kapsamı
-   kod çıkarır; model yalnız belirsiz cümleyi tipli bir forma çevirir, kod doğrular.
-   Anlaşılmayan tahmin edilmez, SORULUR («Rusça A1–A2 mi, A1–C1 mi?»).
-3. YOĞUNLUK SINIFI KODLA: düşük / orta / yüksek / ekstra. Ölçü «iş birimi»: tahmini
-   model çağrısı + web araması sayısı (bölüm × soru, kaynak sayısı). Eşikler tek bir
-   tabloda (ör. düşük ≤ 3 çağrı ve web yok; orta ≤ 10; yüksek ≤ 40; ekstra > 40 ya da
-   parçalı teslim). Sınıfı model DEĞİL kod verir; tablo ölçümle ayarlanır.
-4. TEKLİF (maliyet + süre + seçenek):
-   - Maliyet ÖLÇÜMDEN: `usage` tablosundaki `usd` (HKM/core/db.py) ile aynı tür + sınıftaki
-     son işlerin ortancası ve p90'ı; geçmiş yoksa jeton tahmini × fiyat tarifesi.
-     Etiket «tahmin», dayanağı yazılır (bugünkü `king.tahmini_sure` gibi).
-   - Süre: `king.tahmini_sure` sınıfa göre genişletilir.
-   - Bütçeden payı: «aylık bütçenin %X'i, kalan Y» (`core/butce.py`).
-   - Kullanıcının durumuna göre akıl: bütçe azsa daha küçük seçenek önerir (test kitabı
-     yerine fasikül ya da yalnız 1. bölüm); acil değilse ay başına ya da gündüze alır.
-   - Her teklifte en çok üç seçenek: tam · küçük · parça parça (her parçada ara onay).
-5. ONAY: kullanıcı kabul etmeden BAM'da iş AÇILMAZ. Bugün King imkan kontrolünden
-   geçen işi doğrudan açıyor; yeni ara durum `teklif` (onay bekliyor) gerekir. Onay
-   HKM web'den, modülden ve Telegram'dan verilebilir («1 tam · 2 yalnız A1 · 3 iptal»).
-   AGENTS.md §1.9 ile uyumlu: kullanıcı Ayarlar'da «düşük işleri sormadan yap»
-   diyebilir; orta ve üstü her zaman sorar, ekstra ayrıntılı önizlemeyle.
-6. ÜRETİM PARÇALI: yüksek ve ekstra işler bölümlere bölünür (bugünkü `core/kitap.py`
-   her tikte bir bölüm üretiyor). İlk bölüm gelince kullanıcı görür, «devam / dur»
-   der; maliyet kontrolde kalır. Gerçek maliyet ve süre yazılır; tahminle sapma
-   ölçülür (bugünkü `king.sure_sapmasi`nın maliyet eşi). Bilgisayar gece kapalı
-   (cevap 5): uzun işler gündüz kuyruğuna, yarım kalan iş sabah kaldığı yerden sürer.
-7. MONTAJ: çıktı modülün anladığı TİPLİ PAKET olarak gelir, her paketin bir niyet türü
-   (`HKM/core/intents.py` KINDS) ve modülün kendi sınayıcısı vardır. HKM modüle yazmaz;
-   modül kendi koduyla yeniden sınar, önizletir, onayla yazar (orta aksiyon).
-   - **AYS:** `kitap.add` var. Fasikül = tek bölümlü kitap. Test kitabında sayfa/bölüm
-     gezinme, çözdüklerini görme, orada çözme (`AYS/src/js/core/testkitabi.js`'de
-     bölüm bölüm çözme var; sayfa aktarma ve «çözdüklerim» görünümü eklenecek).
-     Yanlışlar yanlış defterine / tekrar kartına (madde 9). Konu özeti Dersler'de o
-     konunun altında durur (bugün `urun.add` genel materyal listesine gidiyor; konuya
-     bağlanacak). Branşın tüm konuları: sınav profilinin (`sinavprofil.js`) konu
-     ağacına bağlı özet + test. 60 soru tavanı (`kitap.py MAX_TOPLAM`) sınıfa göre ve
-     parçalı teslimle genişler.
-   - **SPİ:** yeni `besin.add` — `SPI/src/js/data/foods.js` şemasında (100 g; p/f/c,
-     micro, portions, aliases) kullanıcı besini; kaynaklı; eksik mikro «bilinmiyor»,
-     sıfır değil. Yeni `fiyat.add` — tarihli, kaynaklı market fiyatı «tahmin»; fiş
-     girilince `money.js` kuralıyla «ölçüldü» ezer. Yeni `yer.add` — spor salonu gibi
-     yerler (ad, semt, fiyat, kaynak, tarih) SPİ › Bilgiler'e. Diyet programı istenince
-     besin değerleri OTOMATİK işlenir: hesap `nutri.js`, model değil. Sağlık bağlamı
-     (hastalık, hekim tahlili `biomarkers.js` + `parse.js`, semptom `symptom.js`,
-     sohbetler) isteğe bağlam olarak gider; SPİ teşhis koymaz, doz önermez, kırmızı
-     bayrakta hekime yönlendirir.
-   - **ESP:** yeni `unite.add` — `ESP/src/js/data/lessons.js` ünite şeması (konu,
-     ölçülebilir hedef, öğeler) + SRS kartları (`srs.js`) + pratik soruları
-     (`lesson.js` pratik motoru). Rusça A1–A2 → merdivene (`curriculum.js`) bağlı
-     üniteler, her konunun altında 10–20 soru. Gitar akorları ve repertuvar
-     `guitar_tabs.js` şemasında (tempo «referans» etiketiyle). Alışveriş araştırması
-     (gitar almak) → karşılaştırma raporu (`urun.add`, `urunler.py › karsilastirma`).
-8. GÖRÜNÜRLÜK: her modülde tek bir «Kütüphanem»: ne üretildi, ne zaman, kaynakları,
-   maliyeti (ölçüldü), ne kadar kullanıldı (kitabın %kaçı çözüldü, kaç kart öğrenildi).
-   HKM Ofis'te iş geçmişi: tahmin ve gerçek maliyet/süre yan yana.
-
-**Bir tık ötesi (yapmadan önce kullanıcıya bir cümleyle teyit):**
-- DEPO ÖNCE: benzer iş daha önce yapıldıysa (`core/depo.py`, Y9 depo tarayıcısı)
-  King «zaten var, güncel, bedava» ya da «3 ay önce yapıldı, fiyatlar eskimiş olabilir;
-  yalnız fiyatları tazeleyeyim mi? (düşük)» der. Aynı iş iki kez ödenmez.
-- KİŞİYE GÖRE BOYUT: AYS'de zayıf konular (ölçüm) test kitabının konu ve zorluk
-  dağılımını belirler; ESP'de kademe; SPİ'de hedef ve bütçe («bitkisel protein»
-  listesi gram protein başına maliyete göre sıralı: `money.js › costPerNutrient`).
-- TAZELİK: fiyat ve yer gibi eskiyen veri tarihlidir; süresi geçince «tazele» teklifi.
-- KULLANIM TAKİBİ: üretilip hiç açılmayan çıktı, King'in bir sonraki pahalı teklifinde
-  söylenir («geçen haftaki kitabın %10'u çözüldü; önce onu bitirmek ister misin?»).
-- GERÇEK ZORLUK GERİ BESLER: soruların çözülme verisi (ölçüldü) sonraki üretimin
-  zorluk dağılımını ayarlar.
-- AYNI İSTEK İKİ MODÜLE: «Rusça çalışırken uyku düzenim» gibi çapraz istek King'de
-  bölünür (akşam yoklamasındaki `dil.rapor` gibi), her modüle kendi paketi.
-
-**Doktrin sınırları:** sınıf, maliyet, süre ve bütün sayılar KODDAN; model yalnız
-yapılandırır ve üretir. Tahmin her yerde «tahmin» etiketli ve dayanaklı. Kişisel veri
-istemlere varsayılan olarak gitmez (`kitap.py` kural 5); sağlık bağlamı gidecekse
-kullanıcı onaylar ve en az bilgi gider. Montaj orta aksiyondur: önizleme + onay.
-
-**Zaten var olan (yeniden yazma, üstüne kur):** `king.TURLER / imkan / tahmini_sure /
-sure_sapmasi`, `butce.guard`, `usage` tablosu, `is_emirleri.tahmin`, `kitap.py`,
-`urunler.py` kataloğu, `depo.py`, niyetler `kitap.add / urun.add / material.add /
-mufredat.add`, AYS `testkitabi.js`, SPİ `foods / prices / money / nutri / biomarkers /
-symptom`, ESP `lessons / lesson / srs / curriculum / guitar_tabs`, `brand/ortak/urun.js`.
-
-**Eksik olan (yapılacak):** yoğunluk tablosu; ölçümden maliyet tahmini; `teklif` ara
-durumu ve üç kanaldan onay; seçenekler; parçalı teslim + ara onay; yeni niyetler
-`besin.add`, `fiyat.add`, `yer.add`, `unite.add`; modüllerin montaj ekranları ve
-Kütüphanem; tahmin–gerçek maliyet sapması.
-
-**8a ilerleyişi:**
-- ✅ 8a-1 Model çağrısı ait olduğu BAM işine yazılır (`usage.is_id`, `butce.is_baglami`);
-  biten işin ölçülen maliyeti `sonuc.maliyet`.
-- ✅ 8a-2 Teklif hesabı (`HKM/core/teklif.py`, HKM/MIMARI.md §8.28): sınıf, maliyet
-  (ölçümden → çağrı başına → tarife), süre, bütçe payı, seçenekler (`KUCULT`), öneri.
-  Her iş emrine yazılır, King kuyruğunda ve bildirimde görünür. İş HENÜZ onaysız açılır.
-- ✅ 8a-3a Onay kapısı, HKM tarafı: `teklif` durumu (BAM'da iş açılmaz),
-  `king.teklif_onayla` / `iptal`, `POST /api/king/emir/<id>/onayla`, sohbette ve
-  Telegram'da «1 · 2 · iptal» (`king.teklif_cevap`), HKM › Ofis düğmeleri, Ayarlar ›
-  Bütçe › «Düşük sınıf işleri sormadan yap». Kural işi sorulmaz. §8.28.
-- ✅ 8a-3b Modülün teklif kartı: AYS/SPİ/ESP Bugün › «King teklifi» (seçenekler +
-  «N. seçeneği onayla» / İptal); `brand/ortak/kingteklif.js`, `GET /api/king/teklifler/<m>`;
-  AYS müfredat ve test kitabı istekleri artık «King onayladı» değil «teklif hazırladı» der.
-  Zincir testi `tools/entegre.js` §2.77 (sohbetten ürün → kart → modülden onay → BAM).
-- ✅ 8b-1 Parça parça + ara onay (HKM): teklifte üçüncü seçenek (`teklif.SECENEK`),
-  BAM `ara_onay`, `king.parca`, «devam / dur» (HKM, sohbet/Telegram, modül kartı). §8.28.
-- ✅ 8b-2 AYS test kitabı ekranı (HKM/MIMARI.md §8.29): soru şeridi, «Gözden geçir»
-  (çözdüklerim), Kütüphanem (kaynak, kullanım yüzdesi, ölçülen maliyet —
-  `depo.kayit_depo` → `maliyet`, çağrısız iş «veri yok»), yanlışları yanlış defterine
-  ekleme (Part 7 madde 9; etiket uydurulmaz, defterde kullanıcı seçer, «Geri al»).
-  Açık kalan: 60 soru tavanı parça parça seçeneğinde hâlâ sabit (`kitap.MAX_TOPLAM`).
-- ✅ 8c-1 HKM tarafı (HKM/MIMARI.md §8.30): King iş türü `spi.bilgi` (besin · fiyat ·
-  yer), `core/spibilgi.py` kurallı sorgu + tek yazım çağrısı + kod süzgeci (enerji
-  tutarlılığı, alıntıda sayı), fiyat/yer web'siz yazılmaz; niyetler `besin.add`,
-  `fiyat.add`, `yer.add`. Test `tests/test_spibilgi.py`.
-- 🔜 8c-2 SPİ tarafı: niyetleri çek → kendi koduyla sına → önizle → onayla yaz (besin
+- ✅ 8a-1 çağrı → iş maliyeti · ✅ 8a-2 teklif (`HKM/core/teklif.py`, MIMARI §8.28) ·
+  ✅ 8a-3a onay kapısı (`teklif` durumu, «1 · 2 · iptal», düşük sınıf sormadan ayarı) ·
+  ✅ 8a-3b modül teklif kartı (`brand/ortak/kingteklif.js`) · ✅ 8b-1 parça parça + ara
+  onay · ✅ 8b-2 AYS test kitabı ekranı + Kütüphanem + yanlış defteri (MIMARI §8.29;
+  açık: 60 soru tavanı `kitap.MAX_TOPLAM` parçalıda da sabit) · ✅ 8c-1 HKM `spi.bilgi`
+  (besin · fiyat · yer; `core/spibilgi.py`, MIMARI §8.30; niyetler `besin.add`,
+  `fiyat.add`, `yer.add`).
+- ⏳ 8c-2 SPİ tarafı: niyetleri çek → kendi koduyla sına → önizle → onayla yaz (besin
   kullanıcı gıdası, fiyat «tahmin» fişin altında, yer listesi); Mutfak'tan istek.
-- ⏳ 8c-3 Diyete otomatik işleme (`nutri.js`).
+- ⏳ 8c-3 Diyete otomatik işleme (`nutri.js` hesaplar, model değil).
+- ⏳ 8d ESP ünite/ders paketi: `unite.add` — `lessons.js` ünite şeması + SRS kartları +
+  pratik soruları; merdivene (`curriculum.js`) bağlı; gitar verisi `guitar_tabs.js` şemasında.
+- ⏳ 8e Depo önce (King teklifinde «zaten var, bedava» / «tazeleyeyim mi?»), tazelik,
+  kullanım takibi (açılmamış çıktı bir sonraki pahalı teklifte söylenir).
 
-**Dilimler (sırayla, her biri test + commit + push):** 8a teklif (sınıf + maliyet +
-süre + onay) mevcut iş türleri için → 8b AYS fasikül/kitap parçalı + çözdüklerim +
-Kütüphanem → 8c SPİ besin/fiyat/yer + diyete otomatik işleme → 8d ESP ünite/ders paketi
-→ 8e depo önce + tazelik + kullanım takibi.
+### Cevabı gelen maddeler (sıra: Part 8'den sonra)
+- ⏳ Y5 Sağlık verisi içe aktarma — iPhone `export.xml` + Android Health Connect; önizleme
+  + onay (Y3 .ics yolu gibi), ölçüldü etiketi, SPİ kendi koduyla yazar.
+- ⏳ Y1 Para kolu — girişler Telegram yazışması, King/akşam sohbeti, fiş fotoğrafı; öneri
+  HKM içinde bir bölüm (ilk adımda bir cümleyle teyit). Fişten okunan «tahmin», önizleme +
+  onay; tutarı kod hesaplar.
+- ⏳ Y10 Veli / koç özeti — haftada 1–2 PDF, sıklığa kod karar verir (kullanım, karar
+  yoğunluğu, aciliyet, sağlık, ders kararlılığı); alıcıyı ilk adımda sor.
+- ⏳ Y11 Kariyer / proje — esnek; ilk adım akademi: LGS, YKS, KPSS, DGS, ALES, YDS
+  önerisi (`AYS/src/js/core/sinavprofil.js` üstüne), gerekçeli, karar kullanıcının.
+- ⏳ 10 Ana sınavı değiştirebilmek (büyük aksiyon) + üniversite müfredatı yükleme.
+- ⏳ 11 Tahmin tablolarını kaynağa bağlamak — sağlayıcı esnek, bütçe Ayarlar'dan.
+- ⏳ 14 Depo göçü (her kayıt kendi anahtarında; yedek 15 bitti) · 16 ilk kurulum testleri ·
+  17 ekran sözleşmesi AYS/ESP · 18 labs.js ve AYS llm.js.
 
-### Part 9 — Tek tasarım (ALTYAPI BİTİNCE; şimdi BAŞLAMA)
-**EN SON YAPILIR — bütün işlerin (hız kuralları grupları, 8c–8e, Part 7, cevaplı maddeler)
-sonunda. Kullanıcı isteği (2026-09-23):**
-- **Hedef:** bütün sistem (AYS, SPİ, ESP, HKM web) **modern, sade, minimalist** tek bir
-  tasarıma geçer. Bugünkü sorun: her şey İÇ İÇE (kart içinde sekme, sekme içinde alt
-  sekme, aynı şey birkaç yerde); neyin nerede olduğu bilinmiyor.
-- **Çekmece düzeni (bu bir DÜZEN örneğidir, görsel değil — ekrana çekmece çizilmez):**
-  her şeyin TEK ve öngörülebilir bir yeri olur, dolap çekmecesi gibi sıralı. Kurallar:
-  1. Üç modülde AYNI iskelet ve AYNI çekmece adları (kullanıcı bir modülü öğrenince
-     ötekini bilir). Çekmece sayısı az; her birinin adı içindekini söyler.
-  2. İç içelik en çok İKİ kat (çekmece → içindeki bölüm). Kart içinde sekme içinde alt
-     sekme yok.
-  3. Aynı şey İKİ YERDE durmaz; başka yerden yalnız bağlantı verilir.
-  4. Her çekmecenin içi aynı sırada: başlık · kısa özet · liste · eylem.
-  5. Her ekran hangi çekmecede olduğunu söyler; komut paleti/arama her şeye ulaşır.
-  6. Onaylar tek çekmecede toplanır (fikir 10 ile birlikte).
-- **Süreç:** Part 9 başlarken ÖNCE «çekmece haritası» çıkarılır (her modülün her ekranı ve
-  kartı hangi çekmeceye gider, ne kalkar, ne birleşir) ve kullanıcıya onaylatılır; sonra
-  uygulanır. Kod: ortak bileşenler (`components.js`, `base.css`, `brand/ortak/`), SPİ
-  `designs.css` beş düzen ve tasarım seçici kalkar. Denetimler: smoke, a11ycheck,
-  layoutcheck (390 px, 24 px), palettecheck, perfcheck; haritaya uymayan ekran kalmaz.
-- ⏳ Dört-beş tasarım dili (SPİ `designs.css` beş düzen, `designcheck.js`) yerine
-  **tek, sade ve modern** bir tasarım. Kullanıcı bunu altyapı işleri bittikten sonra
-  yapacak. O zamana kadar: yeni bir tasarım diline özel iş ekleme; yeni ekranlar
-  ortak bileşenlerle (`components.js`, `base.css`) yazılsın ki geçiş kolay olsun.
-- ⏳ 14 Depo göçü (her kayıt kendi anahtarında) — ÖNCE 15 (yedek) bitmeli.
-- ⏳ 16 İlk kurulum testleri · 17 ekran sözleşmesi AYS/ESP · 18 labs.js ve AYS llm.js.
+### Part 9 — Tek tasarım + çekmece düzeni (EN SON)
+Her şey bitince. Bütün sistem (AYS, SPİ, ESP, HKM web) **modern, sade, minimalist** tek
+tasarıma geçer; bugünkü sorun iç içelik (kart içinde sekme içinde alt sekme). Çekmece
+düzeni (görsel değil, DÜZEN): üç modülde aynı iskelet ve aynı çekmece adları; iç içelik
+en çok iki kat; aynı şey iki yerde durmaz; her çekmecenin içi başlık · kısa özet · liste ·
+eylem; her ekran hangi çekmecede olduğunu söyler; onaylar tek çekmecede. **Önce çekmece
+haritası çıkarılır ve kullanıcıya onaylatılır**, sonra uygulanır; SPİ `designs.css` beş
+düzen ve tasarım seçici kalkar. O zamana kadar yeni ekranlar ortak bileşenlerle yazılır.
 
-## 4. Kullanıcıya sorulanlar ve CEVAPLARI (2026-09-23)
+## 4. Kullanıcının cevapları (2026-09-23; ayrıntı arşivde)
 
-Cevaplar sesle yazıldı; aşağıdaki özet onların anlamıdır. §3'teki maddeler bunlara
-göre ❓ → ⏳ oldu.
-
-1. **Web araması:** esnek olsun, değiştirilebilsin, hepsine uyarlanabilsin. Anahtar
-   adı verilmedi → sağlayıcı ve bütçe Ayarlar'da; hiçbirine kilitlenme.
-2. **Sağlık eşiklerinin dayanağı:** HEPSİ — kaynaklı araştırma + kullanıcının kendi
-   verisi ve geçmişi (spor geçmişi, yeme geçmişi vb.). Eşik = kaynaklı genel sınır +
-   kişinin kendi tabanı; hangisinden geldiği etiketle söylenir. SPİ teşhis koymaz,
-   doz önermez (AGENTS.md §1.5).
-3. **Para kolu:** girişler Telegram yazışması, King sohbeti («bugün ne yaptın» gibi)
-   ve Telegram'a atılan fiş fotoğrafıyla olacak (bkz. Y1).
-4. **Telefon:** hem iPhone hem Android desteklenecek (Y5 ikisi; PWA ikisinde de).
-5. **Günlük açılış:** sunucu TEK bilgisayardan başlatılır, sabahtan akşama açık, gece
-   kapalı; araştırma sürerken açık bırakılabilir. Başlatmak zahmetli olmamalı.
-   Sonuçları: (a) tek tıkla başlatma korunur/kolaylaşır; (b) HKM'nin gece işleri
-   bilgisayar kapalıyken kaçar → sabah açılışta **kaçırılanı yakala** davranışı
-   denetlenmeli; (c) telefonun bu bilgisayara ağdan bağlanması hâlâ «lokal ağa
-   karışma» kuralına takılır — açılmadı, kullanıcı ayrıca karar verecek; telefon
-   kanalı şimdilik Telegram.
-6. **Ana sınav:** şimdilik YKS; ileride değişebilir, üniversite sınavları ve
-   üniversite müfredatı da gelebilir → sistem uyarlanabilir olmalı (madde 10).
-7. **Veli / koç özeti:** haftada 1 ya da 2 PDF; sıklığa kod karar verir (Y10). Alıcı
-   henüz söylenmedi — sor.
-8. **Kariyer / proje:** esnek (eğitim, staj, proje…). Şimdilik akademi: LGS, YKS,
-   KPSS gibi sınavların önerilmesi (Y11).
-
-Hâlâ açık (ilgili iş başlarken sor): Y10'un alıcısı; Y1'in yeri (HKM içi öneri) için
-teyit; telefonun bilgisayara ağdan bağlanıp bağlanmayacağı.
-
-### Eski sorular (kayıt için)
-
-1. İnternet araması: HKM Vikipedi (anahtarsız), Brave, Tavily, Google Programmable
-   Search ve kendi SearXNG'ni destekliyor. Hangisinin anahtarı var, BAM'ın aylık
-   bütçesi ne olsun? (madde 11 ve kaynaklı araştırma buna bağlı)
-2. Sağlık eşiklerinin dayanağı: kaynaklı araştırma mı, senin / hekiminin girişi mi, ikisi mi?
-3. Para kolu nerede olsun: HKM'nin içinde bir bölüm (öneri: tek yerde, Telegram'dan
-   «150 TL market» yazılabilir) mi, yoksa AYS / SPİ / ESP gibi ayrı bir uygulama mı?
-4. Telefonun iPhone mu, Android mi? (sağlık verisi içe aktarma ve PWA için)
-5. Sistemi her gün nasıl açıyorsun: bilgisayarda `BASLAT.bat` ile mi, telefonda
-   tek dosya olarak mı?
-6. Ana sınavın hangisi, hangi yıl: YKS mi, KPSS mi, ikisi mi? (madde 10)
-7. Veli / koç özeti kime gidecek; haftada bir PDF yeterli mi?
-8. Kariyer / proje kolunda neyi izlemek istiyorsun (proje bitirme, staj / iş başvurusu, portföy)?
+1 Web araması esnek, sağlayıcı ve bütçe Ayarlar'da · 2 Sağlık eşikleri: kaynaklı araştırma
++ kişinin kendi geçmişi, hangisinden geldiği etiketli · 3 Para girişleri: Telegram, sohbet,
+fiş fotoğrafı · 4 iPhone + Android · 5 Sunucu tek bilgisayardan, sabah–akşam açık, gece
+kapalı; başlatmak kolay olmalı; gece kaçan iş sabah yakalanmalı; telefon şimdilik Telegram
+(ağdan bağlanma ayrı karar) · 6 Ana sınav şimdilik YKS, ileride değişebilir · 7 Veli/koç
+PDF haftada 1–2, sıklığa kod karar verir · 8 Kariyer esnek, önce sınav önerisi.
+Hâlâ açık: Y10 alıcısı · Y1'in yeri (HKM içi öneri) · telefonun ağdan bağlanması.
 
 ## 5. Komutlar
 
-- HKM: `cd HKM && python3 -m tests.run` · web yüzü:
-  `NODE_PATH=/home/user/LifeOs/AYS/node_modules node tools/yuz.js`
-- Modül: `cd <SYS> && python3 build.py` · `CHROMIUM_PATH=/opt/pw-browsers/chromium node tools/runtests.js`
-  · gerekirse `node tools/smoke.js`
-- Ortak kaynak: `python3 tools/ortak.py --yay` (brand/ortak değişince) · `--denetle`
-- Tam koşum (yalnız büyük Part sonu): `CHROMIUM_PATH=/opt/pw-browsers/chromium python3 tools/sayilar.py --tam --yaz`
+- HKM: `cd HKM && python3 -m tests.run` · yüz: `NODE_PATH=/home/user/LifeOs/AYS/node_modules
+  CHROMIUM_PATH=/opt/pw-browsers/chromium node tools/yuz.js`
+- Modül: `cd <SYS> && python3 build.py` · `CHROMIUM_PATH=/opt/pw-browsers/chromium node
+  tools/runtests.js` · `node tools/smoke.js` (ilk kez: `npm ci`)
+- Ortak: `python3 tools/ortak.py --yay` · `--denetle` · Entegre: `node tools/entegre.js`
+- Tam koşum: `CHROMIUM_PATH=/opt/pw-browsers/chromium python3 tools/sayilar.py --tam --yaz`
 - Açık sunucu ve `HKM/config.json` bırakma; test portlarını kilitler.
 
-## 6. Son biten işler (özet)
+## 6. Son durum (tek satırlar)
 
-- Hedef motoru Tur 1–4: SPİ kilo/VKİ, King onay zinciri, ESP dil/okuma/enstrüman,
-  AYS konu bitirme / net hedefi, sınav profilleri, müfredat raporu, bölümlü test kitabı.
-- Bürolar B1–B4: Depolama, Araştırma (kaynaklı, web), Planlama v2, Üretim (Editör + Kalite).
-- W5: Telegram / WhatsApp'tan gelen işin sonucu aynı sohbete; Telegram'a belge (PDF).
-  `king._teslim`, testler `HKM/tests/test_urun.py`.
-- Part 1–4 bitti: HKM 507/507, AYS 1609, SPİ 1253, ESP 1294; `tools/entegre.js` temiz
-  (§0.6/§2.75 akşam yoklaması, §0.7/§2.76 BAM ürünü, §7 Ofis indirme + Web ayarı).
-- Part 5 (Y2, Y3, Y4) bitti: AYS 1632, SPİ 1267, ESP 1309 birim testi, üç duman testi temiz
-  (kabuk adımı dahil). **Kalan:** Part 5 sonu tam koşum henüz YAPILMADI (kullanıcının
-  limiti doldu) — sıradaki Claude önce bunu koşsun, sayıları yazsın:
-  `CHROMIUM_PATH=/opt/pw-browsers/chromium python3 tools/sayilar.py --tam --yaz`
-  (koşarken dosya düzenleme). Sonra sırayla: Y9 (Part 6; depo tarayıcısı Part 8'in
-  «depo önce» adımına da temel), Part 8 akıllı iş sistemi (kullanıcının önceliği:
-  kullanım kolaylığı buna bağlı), Part 7'nin 9, 14, 16, 17, 18'i, ardından cevapları
-  gelen Y5, Y1, Y10, Y11, 10, 11 (§4). Part 9 (tek tasarım) EN SON, altyapı bitince.
-  Sırayı değiştirmek istersen kullanıcıya bir cümleyle sor.
-- Ortam notu: modül testleri için `cd <SYS> && npm ci` (Playwright; node_modules depoda yok).
+- Part 1–5 ✅ (hedef ağı, uyarlama, yedek, akşam yoklaması, BAM ürünü, alışkanlık, .ics,
+  PWA) · Part 6 Y9 depo tarayıcısı ✅ · Part 7 madde 9 yanlış defteri ✅ · Part 5 sonu tam
+  koşum ✅ (a410e31). Ayrıntı: arşiv.
+- Grup ilerleyişi aşağıya, her madde bitince tek satır:
 
-## Kullanıcı kolaylığı fikirleri (2026-09-23) · 16 hızlı kazanç ONAYLI, gerisi ÖNERİ
+## Kullanıcı kolaylığı fikirleri · 16 hızlı kazanç ONAYLI, gerisi ÖNERİ
 
-Onaylı (bkz. «⚡ HIZ KURALLARI»): 5, 8, 9, 11–15, 19, 22, 27, 31, 46, 49, 50, 56.
+Onaylı: 5, 8, 9, 11–15, 19, 22, 27, 31, 46, 49, 50, 56. Gerisini uygulamadan önce: depoda
+var mı bak, kullanıcıya bir cümleyle sor. Boy: **K** küçük · **O** orta · **B** büyük.
 
-Claude'un listesi; hiçbiri onaylanmadı. Uygulamadan önce: (1) depoda zaten var mı bak
-(AGENTS §5.1), (2) kullanıcıya bir cümleyle sor. Doktrin sınırları geçerli (teşhis/doz
-yok, HKM modüle yazmaz, eksik veri sıfır değil, XP karar vermez). Mimari borç önerileri
-`ekip/PLAN.md` › «Öneriler»de.
-Boy: **K** küçük (~yarım gün) · **O** orta (~1–2 gün) · **B** büyük (~3 gün); testler dahil, tahmin.
-
-**Veri girişi — yazmadan kayıt**
-1. O Sesle tek cümle günlük kayıt; üç modül kendi payını önizler (`kayit.add` üstüne).
-2. B Fiş fotoğrafından fiyat → önizle → onayla «ölçüldü».
-3. B Ambalaj besin etiketi fotoğrafından kullanıcı gıdası.
-4. O Barkodla daha önce eklenmiş ürünü tanıma.
-5. K «Dünkünün aynısı» (kahvaltı, ilaç, antrenman).
-6. O Şablon gün: okul / tatil / sınav haftası tek dokunuşla plan + öğün iskeleti.
-7. B Deneme sonucunu optik form / ekran görüntüsünden okuma, önizleme.
-8. K Telegram tek kelime kayıt: «su 2», «uyku 7», «soru 40».
-9. K Eksik veriyi tek soruyla toplama («Dün uyku: 6 · 7 · 8 · bilmiyorum»).
-
-**Onay ve bildirim yorgunluğu**
-10. O Tek onay kutusu: üç modül + HKM bekleyen onaylar tek listede.
-11. K Toplu onay (küçük teklifler), geri alma açık.
-12. K Sessiz saatler: gece/sınav saati bildirimsiz, sabah tek özet.
-13. K Günlük bildirim bütçesi; fazlası özete.
-14. K «Bunu bir daha sorma» → tür kuralı, ayarlardan geri açılır.
-15. K Cevapsız teklif 3 gün sonra söylenerek kapanır.
-
-**Planlama ve gün**
-16. O Kötü gün modu üç modülde ortak (AYS `badDay` var).
-17. B Takvim içe aktarma; dolu saate plan konmaz.
-18. O «15 dakikam var»: o anın en değerli küçük işi.
-19. K Akşam «yarın şu üç şey var» mesajı, tek dokunuş değiştir.
-20. O Sınava kalan gün + gerçekçilik tahmini (dayanaklı).
-21. B Verimli saate göre plan (saat ölçümden bulunur).
-
-**AYS**
-22. K Etiket seçilince yanlıştan tekrar kartı tek dokunuş.
-23. O Zayıf 3 konudan mini test (kitap ya da BAM).
-24. K Son iki deneme konu bazında net farkı.
-25. O Süre analizi: hangi soru türünde vakit kaybı (ölçüm).
-26. O Yanlışın yanında konu notu / video zaman damgası.
-27. K Test kitabında kaldığın sorudan devam.
-28. O Paylaşılabilir haftalık ilerleme (veri seçilerek).
-
-**SPİ**
-29. B «Evde şunlar var» → hedefe uyan tarif, değerler `nutri.js`'ten.
-30. O Öğün planından alışveriş listesi + fiyat tahmini + bütçe payı.
-31. K Sepette pahalı ürüne ucuz muadil (kaybedilen besin de yazılır).
-32. K Tahlil yaşı hatırlatması («hekiminle konuşup yeniden ölçtürmek ister misin?»).
-33. O Tahlilleri referans aralığı ve kaynağıyla tek grafikte izleme.
-34. O İlaç/takviye hatırlatması — yalnız kullanıcının girdiği ad ve saat.
-35. K Su ve hareket dürtmesi, ölçüme göre, sessiz saat dışı.
-36. O Doktora gidecek özet PDF: ölçüm, semptom, sorular — yorum yok.
-37. K Spor salonu karşılaştırma tablosu (`yer.add` sonrası).
-
-**ESP**
-38. O Günlük 5 dakika dil kartı Telegram'dan, cevap oradan.
-39. K Okuma takibi: sayfa/hız ölçüm, bitiş tahmini.
-40. O Gitar tempo hedefi, ölçülen tempo, ilerleme çizgisi.
-41. O Ünite sonu mini sınav; geçilemezse tekrar planına.
-42. B Haftalık sesli «öğrendiğini anlat»; eksik kavram listesi.
-
-**HKM / King / BAM**
-43. B Tek cümleden çok modüllü iş; King böler, her modüle paket.
-44. O İş geçmişi zaman çizelgesi: istek, çıktı, maliyet, kullanım.
-45. K Tahmin–gerçek maliyet şaşma oranı; King tahminini düzeltir.
-46. K «Önce depo» teklifi en üstte («2 ay önce yapıldı, bedava»).
-47. K Aylık bütçe dağılımı: modül başına harcama ve kullanım.
-48. O Bozuk olanı söyleyen tek ekran + düzeltme düğmesi.
-
-**Motivasyon / görünürlük**
-49. K Haftalık «neler kazandın»: ölçülmüş üç iyi şey.
-50. K Seri dondurma (hasta gün, kullanıcı işaretler).
-51. O Ay sonu mektubu, «geçen ay bugün» karşılaştırmalı.
-52. K Kişisel rekorlar (odak, net, uyku haftası).
-
-**Güven / süreklilik**
-53. O Her şeyi tek zip'e okunur dışa aktarma.
-54. O Yeni cihaza taşıma sihirbazı.
-55. O Gizlilik panosu: modele ne gitti, ne zaman; sağlık verisi gitmediyse o da yazılır.
-56. K Tatil modu: bir hafta sorusuz, seri korunur, dönüş planı.
-57. B Aile profili AYS ve ESP'de de (SPİ'de hane var).
-
-**Toplam tahmin:** 24 K + 24 O + 9 B ≈ 75 odaklı iş günü (tahmin; tam koşum denetimleri
-+%10–15). Hızlı kazanç: 5, 8, 9, 11–15, 19, 22, 27, 31, 46, 49, 50, 56 (~7 gün).
+**Veri girişi** — 1 O sesle tek cümle günlük kayıt · 2 B fiş fotoğrafından fiyat · 3 B ambalaj
+etiketi fotoğrafından gıda · 4 O barkod · 5 K dünkünün aynısı · 6 O şablon gün · 7 B deneme
+sonucunu optik formdan okuma · 8 K Telegram tek kelime kayıt · 9 K eksik veriyi tek soruyla.
+**Onay ve bildirim** — 10 O tek onay kutusu · 11 K toplu onay · 12 K sessiz saatler · 13 K günlük
+bildirim bütçesi · 14 K «bunu bir daha sorma» · 15 K cevapsız teklif 3 günde kapanır.
+**Planlama** — 16 O kötü gün modu üç modülde · 17 B takvim içe aktarma, dolu saate plan konmaz ·
+18 O «15 dakikam var» · 19 K akşam «yarın şu üç şey» · 20 O sınava kalan gün + gerçekçilik ·
+21 B verimli saate göre plan.
+**AYS** — 22 K yanlıştan tekrar kartı tek dokunuş · 23 O zayıf 3 konudan mini test · 24 K son iki
+deneme konu farkı · 25 O süre analizi · 26 O yanlışın yanında konu notu · 27 K kaldığın sorudan
+devam · 28 O paylaşılabilir haftalık ilerleme.
+**SPİ** — 29 B «evde şunlar var» tarif · 30 O öğün planından alışveriş listesi · 31 K ucuz muadil ·
+32 K tahlil yaşı hatırlatması · 33 O tahlil grafiği · 34 O ilaç/takviye hatırlatması (yalnız
+kullanıcının girdiği) · 35 K su ve hareket dürtmesi · 36 O doktora özet PDF (yorum yok) ·
+37 K spor salonu karşılaştırma.
+**ESP** — 38 O günlük 5 dk dil kartı Telegram'dan · 39 K okuma takibi · 40 O gitar tempo ·
+41 O ünite sonu mini sınav · 42 B sesli «öğrendiğini anlat».
+**HKM** — 43 B tek cümleden çok modüllü iş · 44 O iş geçmişi zaman çizelgesi · 45 K tahmin–gerçek
+maliyet şaşması · 46 K «önce depo» teklifi · 47 K aylık bütçe dağılımı · 48 O bozuk olanı söyleyen
+tek ekran.
+**Motivasyon** — 49 K haftalık «neler kazandın» · 50 K seri dondurma · 51 O ay sonu mektubu ·
+52 K kişisel rekorlar.
+**Güven** — 53 O tek zip dışa aktarma · 54 O yeni cihaza taşıma · 55 O gizlilik panosu ·
+56 K tatil modu · 57 B aile profili AYS ve ESP'de.
