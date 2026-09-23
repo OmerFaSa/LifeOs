@@ -1,10 +1,10 @@
 # LifeOS — Büyük Plan: Esnek Hedef Sistemi
 
-> **TASLAK — kullanıcı onayı bekliyor.** Bu belge üç Opus'un (Opus-1 bu
-> oturum, Opus-2, Opus-3) birlikte yürüteceği işin ana planıdır. Onaylanınca
-> iş bölümü ve iletişim metinleri (`ekip/KOORDINASYON.md`) bundan türetilir.
-> «(Öneri)» işaretli maddeler Claude'un kendi fikridir; kullanıcı «yap»
-> demeden uygulanmaz.
+> **Durum:** Kullanıcı yönü verdi: işin hepsini bu oturum (Claude) yürütür.
+> Ek Opus gelirse §5'teki sahiplik tablosuyla bölünür. «(Öneri)» işaretli
+> maddeler Claude'un kendi fikridir; kullanıcı «yap» demeden uygulanmaz.
+> **Örnekler yalnız örnektir:** sistem örneklere göre değil, herhangi bir
+> hedefi alabilecek GENEL bir motor olarak kurulur (§3.0).
 
 ## 0. Mentalite — tek cümlede
 
@@ -64,6 +64,53 @@ sürekli uyarlanan bir yola çevirir. Karar kodundur, onay kullanıcınındır.*
 ```
 
 ## 3. İş kolları
+
+### 3.0 Genel motor — örneklerden bağımsız
+
+Sistem «3 kilo ver» için değil, **söylenebilecek her hedef** için kurulur:
+10 kilo almak, bir hastalıkla yaşarken hekimin talimatına uyan bir plan,
+koşuda ilk 5 km, uykuyu düzeltmek, bir dilde B1, bir sınav profili, bir
+kitap listesi… ve kullanıcının henüz saymadığı hepsi.
+
+- **Hedef çerçevesi (ortak):** alan, yön (azalt / artır / ulaş / koru / seviye /
+  alışkanlık), ölçüt, şimdi, hedef, tarih, kapasite, kısıtlar, tercihler, durum.
+  Her modül aynı çerçeveyi kullanır (`brand/ortak/hedef.js`).
+- **Alan paketleri:** Her alanın ölçütü, veri kaynağı, gerçekçilik kuralı (ve
+  dayanağı), görev şablonları, materyal türleri ve güvenlik kuralları bir
+  pakettir. Paket eklemek motoru değiştirmez.
+- **Paketi olmayan hedef reddedilmez:** Kod karar veremiyorsa bunu SÖYLER
+  («bu alan için gerçekçilik kuralı yok»). Araştırma Ofisi kaynaklı bir
+  değerlendirme ve plan önerir, hepsi «tahmin» etiketiyle gelir, karar
+  kullanıcınındır.
+- **Hedef tanıma:** Yaygın cümleler kuralla tanınır. Tanınmayanda model,
+  cümleyi çerçeveye çevirmeyi ÖNERİR (tahlil okuyucusunun yaptığı gibi); kod
+  doğrular, kullanıcı onaylar. Eksik alan sorulur.
+- **Durum profili:** Modül kişi hakkında bildiği her şeyi etiketiyle toplar:
+  ölçümler, tahliller, ilaçlar, bildirilen durumlar, hekim talimatları,
+  tercihler, kapasite, geçmiş. Araştırma ve plan buna göre kişiselleşir;
+  modele yalnız gereken kadarı gider.
+- **Hekim belgesi katmanı (SPİ):** Kullanıcı hekim raporunu ya da talimatını
+  getirir. Talimat en yüksek öncelikli kısıttır. Öncelik sırası: hekim
+  talimatı > kullanıcının kırmızı çizgisi > kaynaklı kılavuz > genel bilgi >
+  model tahmini.
+  - Yapılandırılabilen talimat («tuz sınırlı», «protein üst sınırı») plan
+    denetçisinde kodla uygulanır.
+  - Yapılandırılamayan talimat araştırmaya ve plana «uyulacak hekim talimatı»
+    olarak gider.
+  - Çelişki varsa o kısım üretilmez ve «hekiminle konuş» denir. SPİ teşhis
+    koymaz, doz önermez.
+- **Esneklik:** Kapasite, tarih ya da kısıt her an değişebilir; plan fark
+  olarak yeniden kurulur. Askıya alma, hastalık ve tatil araları
+  (`R.Istisna` benzeri) planı kaydırır, ilerlemeyi silmez.
+
+**Alan paketi kataloğu (başlangıç; açık uçlu):**
+
+| Modül | Paketler |
+|---|---|
+| SPİ | kilo ver / al, VKİ, vücut kompozisyonu, kondisyon (koşu, yürüyüş), kuvvet, uyku, beslenme alışkanlığı, su, klinik değer izleme (yalnız hekim talimatıyla) |
+| ESP | enstrüman, yabancı dil, okuma, yazı, felsefe, diksiyon, tarih |
+| AYS | sınav hedefi (net, sıralama), konu bitirme, soru hacmi, sınav profilleri (YKS, KPSS, DGS, LGS…) |
+
 
 ### A. Hedef çekirdeği (ortak)
 - Tek hedef şeması: `alan`, `tür` (azalt / artır / ulaş / seviye / alışkanlık),
@@ -187,18 +234,19 @@ sürekli uyarlanan bir yola çevirir. Karar kodundur, onay kullanıcınındır.*
 
 ## 4. Turlar — sıra sıra
 
-Her tur bir **dikey dilimdir**: bir örneği uçtan uca çalıştırır, sonra genişletir.
+Her tur genel motordan bir katmanı bitirir ve en az bir alan paketiyle uçtan
+uca çalıştırır.
 
-| Tur | Altın yol | Kazanılan |
+| Tur | Kazanılan | İlk paketler |
 |---|---|---|
-| **0** | — | sözleşmeler, iletişim düzeni, iskelet |
-| **1** | SPİ «3 kilo ver» | hedef çekirdeği, gerçekçilik (SPİ), King onayı + tahmini süre + bildirim, web araştırması + depo, plan v1, özet kartı + alışveriş listesi, SPİ'de uygulama |
-| **2** | ESP «bir yılda gitar, günde 30 dk» | seviye merdiveni, senaryolar, kapasiteye göre plan, egzersiz kartı ve deste, ESP'de içe alma |
-| **3** | AYS «KPSS genel kültür test kitabı» | sınav profili paketi, bölümlü test kitabı, müfredat raporu (kaynaklı) |
-| **4** | üç modül birlikte | uyarlama döngüsü, zaman bütçesi, değişiklik araştırması ölçümü |
-| **5** | — | cilalama, değerlendirme seti, üyelik hazırlığı |
+| **1** | hedef çerçevesi, tanıma ve netleştirme, gerçekçilik çerçevesi, senaryolar, durum profili, hekim talimatı ve güvenlik kapısı, «Hedeflerim» | SPİ: kilo ver / al, VKİ |
+| **2** | King onay zinciri, tahmini süre, bildirim, BAM'a durum profiliyle iş, Planlama Ofisi v1, `plan.apply` | SPİ |
+| **3** | kapasiteye göre senaryolar, seviye merdivenleri, ESP'de plan ve materyal içe alma | ESP: enstrüman, dil, okuma |
+| **4** | sınav profilleri, bölümlü test kitabı, müfredat raporu | AYS |
+| **5** | Bilgi Deposu tazeliği, değişiklik araştırması (web kararına bağlı), uyarlama döngüsü, zaman bütçesi (onaylanırsa) | hepsi |
+| **6** | değerlendirme seti, cilalama, üyelik hazırlığı | — |
 
-## 5. Üç Opus — iş bölümü (her turda aynı katman sahipliği)
+## 5. İş bölümü — şimdilik tek Opus; ek Opus gelirse bu sahiplik tablosu
 
 | | Sahip olduğu iş kolları | Dokunduğu yer |
 |---|---|---|
