@@ -458,6 +458,59 @@ async function rutbeSayilari(page, base, errors){
   console.log('  akışlar → rütbe ekranındaki sayılar binlik ayraçlı');
 }
 
+/* ÇEVRİMDIŞI KABUK (brand/ortak/sw.js, Y4) — sunucuyla açılan sayfa,
+   sunucu kapanınca da açılmalı. Kabuk kaydedilmese ya da ilk açılışın
+   dosyaları kasaya girmese bu adım bunu görür.
+
+   Ağ gerçekten kesilir: sunucu DURDURULUR. `context.setOffline` kabuğun
+   kendi isteklerine uygulanmıyor; onunla geçen bir denetim, kasayı hiç
+   denemeden geçerdi. Bu yüzden bu adım EN SONDA koşar. Kesinti de
+   ölçülür: kasada olmayan bir adres «ağ yok» ile düşmeli. */
+async function cevrimdisi(browser, base, hedefler, durdur, errors){
+  const ctx = await browser.newContext({ reducedMotion:'reduce' });
+  const sayfalar = [];
+  try{
+    for(const hedef of hedefler){
+      const page = await ctx.newPage();
+      page.on('pageerror', e => errors.push('kabuk ' + hedef + ': sayfa hatası — ' + (e && e.message || e)));
+      await page.goto(base + hedef, { waitUntil:'load' });
+      await page.waitForSelector('.site', { timeout:15000 });
+      let d = null;
+      for(let i = 0; i < 80; i++){
+        d = await page.evaluate(async () => {
+          if(!navigator.serviceWorker || !navigator.serviceWorker.controller) return { kontrol:false };
+          const k = await caches.open('lifeos-kabuk-v1');
+          const adres = [location.href.split('#')[0]]
+            .concat(Array.from(document.querySelectorAll('script[src]')).map(s => s.src));
+          let eksik = 0;
+          for(const a of adres) if(!(await k.match(a))) eksik++;
+          return { kontrol:true, eksik, toplam:(await k.keys()).length };
+        });
+        if(d.kontrol && d.eksik === 0) break;
+        await wait(250);
+      }
+      if(!d.kontrol) errors.push('kabuk ' + hedef + ': service worker sayfayı devralmadı');
+      else if(d.eksik) errors.push('kabuk ' + hedef + ': ' + d.eksik + ' dosya kasaya girmedi');
+      sayfalar.push({ hedef, page, toplam:d.toplam || 0 });
+    }
+    await durdur();
+    for(const s of sayfalar){
+      await s.page.reload({ waitUntil:'load' });
+      await s.page.waitForSelector('.site', { timeout:15000 });
+      const ag = await s.page.evaluate(() => fetch('kasada-yok-' + Date.now() + '.txt')
+        .then(r => 'sunucu ' + r.status, () => 'ağ yok'));
+      const boy = await s.page.$eval('#main', el => el.innerHTML.length);
+      if(ag !== 'ağ yok') errors.push('kabuk ' + s.hedef + ': ağ kesilmedi (' + ag + '), denetim geçersiz');
+      else if(boy < 50) errors.push('kabuk ' + s.hedef + ': ağ yokken ekran boş çizildi');
+      else console.log('  kabuk → ' + s.hedef + ' sunucu kapalıyken açıldı (' + s.toplam + ' dosya kasada)');
+    }
+  }catch(e){
+    errors.push('kabuk: ' + (e && e.message || e));
+  }finally{
+    await ctx.close();
+  }
+}
+
 (async () => {
   const server = spawn('python3', [path.join(ROOT, 'devserver.py'), String(PORT)],
     { cwd:ROOT, stdio:'ignore' });
@@ -488,6 +541,8 @@ async function rutbeSayilari(page, base, errors){
     await walkFlows(page, base, errors);
     await rozetKuyrugu(page, base, errors);
     await rutbeSayilari(page, base, errors);
+    await cevrimdisi(browser, base, ['/index.html', '/dist/esp.html'],
+      async () => { server.kill(); await wait(400); }, errors);
 
     if(errors.length){
       console.log('\n' + errors.length + ' sorun:');

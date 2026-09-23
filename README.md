@@ -190,6 +190,17 @@ ara sıra bakmak için. Kod yok, altyapı yok — üç adım.
    yalnız bir kısayol oluşturur. Uygulamanın kendisi iki durumda da
    eksiksiz çalışır — fark yalnız kabuğundadır.
 
+   **Sunucuyla açılınca çevrimdışı kabuk.** Sistem `http(s)` ile açılınca
+   (`baslat.py`, ya da `dist/` klasörünü servis eden herhangi bir sunucu)
+   bir service worker kaydedilir (`brand/ortak/pwa.js` + `sw.js`). Kural
+   **ağ önce**: sunucu cevap verirse her zaman yeni sürüm gelir (sunucunun
+   «önbellek yok» kuralı bozulmaz), sunucu kapalıysa son açılan kopya
+   açılır. Görseller ve videolar da açıldıkça saklanır; tek dosyaya
+   gömülmeyen rütbe medyası bu yolla çevrimdışı da görünür. Kasa yalnız
+   uygulamanın dosyalarını tutar; verin her zamanki gibi tarayıcı
+   deposundadır. Duman testi bunu her koşumda sunucuyu **durdurup**
+   sayfayı yeniden açarak dener.
+
    (Tek dosya sürümü uzun süre bu etiketlerin hepsini kaybediyordu;
    `build.py` artık onları kaynaktan taşıyor ve duman testi her koşumda
    arıyor.)

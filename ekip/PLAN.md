@@ -264,6 +264,11 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
   güncellenir. Dışa aktarma: istisnalar, TYT/AYT günü ve etkin hedeflerin son
   günleri tüm gün etkinliği (75 oktet katlama, RRULE okunmaz ve söylenir).
 
+- **Kuruldu (Y4 — çevrimdışı kabuk):** üç modülde service worker (`brand/ortak/sw.js`,
+  kaydı `pwa.js`), yalnız http(s) ile açılınca. Ağ önce: sunucu cevap verirse yeni
+  sürüm, kapalıysa son kopya; görsel ve videolar açıldıkça saklanır. Duman testi
+  sunucuyu durdurup sayfayı yeniden açarak dener.
+
 ### H. HKM arayüzü
 - Ofis ekranı: canlı iş akışı (hangi katta, hangi ofiste), King kuyruğu.
 - Bilgi Deposu tarayıcısı (raporlar, kaynaklar, tazelik, sürümler).

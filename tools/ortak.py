@@ -203,6 +203,11 @@ DOSYALAR = {
     "gorsel.test.js": "tests",
     "urun.js":        "js/core",
     "urun.test.js":   "tests",
+    # CEVRIMDISI KABUK — yalniz sunucuyla acilinca (http/https). Kabuk
+    # `src/` kokunde durur: kapsami sayfanin klasorudur.
+    "pwa.js":         "js/core",
+    "pwa.test.js":    "tests",
+    "sw.js":          ".",
     # MODEL KATMANI — yalniz SPİ ve ESP (bkz. YALNIZ).
     "llm.js":        "js/core",
 }

@@ -9292,7 +9292,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'afe2502', at:'2026-09-23 18:26', dirty:true };
+R.BUILD = { id:'56fdbe2', at:'2026-09-23 18:36', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -11729,6 +11729,73 @@ LIFEOS.Gorsel = (function(){
   }
 
   return { METIN, karar, denetle };
+})();
+
+/* ==== js/core/pwa.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/pwa.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* PWA — çevrimdışı kabuğun kaydı (service worker: `sw.js`).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/pwa.js`; `tools/ortak.py --yay` ile üç arayüzün
+   `src/js/core/` klasörüne birebir kopyalanır.
+
+   Sözler:
+     1. YALNIZ SUNUCUYLA. `http(s)` ile açılınca kaydedilir; `file://`
+        ile açılan tek dosyada hiçbir şey denenmez (tarayıcı izin vermez).
+     2. SESSİZ. Kayıt olmazsa uygulama eskisi gibi çalışır; hata
+        kullanıcıya taşınmaz, sonuç döner.
+     3. İLK AÇILIŞ DA SAKLANIR. Kabuk devreye girmeden yüklenen dosyaların
+        adresi (yalnız aynı kökenden) kabuğa gönderilir.
+
+   Manifest ayrı dosya değildir: `app.js › installManifest` onu gömülü
+   üretir (tek dosya sürümüyle aynı yol). */
+
+(function(){
+  const L = window.LIFEOS = window.LIFEOS || {};
+  const EN_COK = 400;
+
+  function uygun(loc, nav){
+    return !!loc && /^https?:$/.test(loc.protocol || '') && !!nav && ('serviceWorker' in nav);
+  }
+
+  /* Sayfanın yüklediği aynı kökenli dosyalar; ilki sayfanın kendisi. */
+  function adresler(loc, perf){
+    const out = [String(loc.href).split('#')[0]];
+    const kaynaklar = (perf && typeof perf.getEntriesByType === 'function')
+      ? perf.getEntriesByType('resource') : [];
+    kaynaklar.forEach(k => {
+      try{
+        const u = new URL(k.name, loc.href);
+        if(u.origin !== loc.origin) return;
+        const a = u.href.split('#')[0];
+        if(out.indexOf(a) < 0) out.push(a);
+      }catch(e){}
+    });
+    return out.slice(0, EN_COK);
+  }
+
+  async function kaydet(o){
+    o = o || {};
+    const loc = o.location || (typeof location !== 'undefined' ? location : null);
+    const nav = o.navigator || (typeof navigator !== 'undefined' ? navigator : null);
+    if(!uygun(loc, nav)){
+      return { ok:false, neden:loc && loc.protocol === 'file:' ? 'dosya' : 'desteklenmiyor' };
+    }
+    try{
+      const kayit = await nav.serviceWorker.register(o.yol || 'sw.js', { scope:'./' });
+      const hazir = await nav.serviceWorker.ready;
+      const isci = (hazir && hazir.active) || kayit.active;
+      const perf = o.performance || (typeof performance !== 'undefined' ? performance : null);
+      if(isci) isci.postMessage({ tur:'onbellek', adresler:adresler(loc, perf) });
+      return { ok:true };
+    }catch(e){
+      return { ok:false, neden:'kayit', hata:String((e && e.message) || e) };
+    }
+  }
+
+  L.Pwa = { uygun, adresler, kaydet, EN_COK };
 })();
 
 /* ==== js/core/medya.js ==== */
@@ -50547,8 +50614,10 @@ R.App = (function(){
   }
 
   /* ---------- telefona kurulum (PWA) ----------
-     Tek dosya olarak çalıştığı için manifest de gömülü üretilir; ayrı dosya
-     ya da service worker gerekmez. Uygulama zaten çevrimdışı çalışıyor. */
+     Manifest gömülü üretilir (tek dosya sürümüyle aynı yol). Sunucuyla
+     (http/https) açılınca bir de çevrimdışı kabuk kaydedilir
+     (brand/ortak/pwa.js + sw.js): ağ önce, ağ yoksa son kopya. `file://`
+     ile açılan tek dosyada kabuk olmaz; uygulama orada da eksiksiz çalışır. */
   let installPrompt = null;
 
   function installManifest(){
@@ -50568,7 +50637,9 @@ R.App = (function(){
     const ikonRef = ikonEl && ikonEl.getAttribute('href');
     const icon = new URL(ikonRef || 'img/brand/favicon.png', location.href).href;
     const manifest = {
-      name, short_name:'Rota', start_url:location.href, scope:'./',
+      name, short_name:'Rota', start_url:location.href,
+      /* Göreli kapsam gömülü (data:) manifestte çözülemez ve yok sayılır. */
+      scope:new URL('./', location.href).href,
       display:'standalone', background_color:'#F7F8FA', theme_color:'#3D3F8F',
       lang:'tr', description:'Kişisel YKS çalışma sistemi',
       icons:[{ src:icon, sizes:'192x192', type:'image/png', purpose:'any maskable' }],
@@ -50689,6 +50760,8 @@ R.App = (function(){
 
       // AI koc yetenegi acilisi bloklamaz; hazir olunca panelleri gostermek icin yeniden ciz.
       installManifest();
+      /* Çevrimdışı kabuk: yalnız sunucuyla açılınca (brand/ortak/pwa.js). */
+      if(window.LIFEOS && LIFEOS.Pwa) LIFEOS.Pwa.kaydet().catch(() => {});
       /* Tek dosya görselsiz açıldıysa bunu söyle (brand/ortak/gorsel.js). */
       if(window.LIFEOS && LIFEOS.Gorsel) LIFEOS.Gorsel.denetle('ays', m => UI.toast(m, { life:12000 }));
       /* Hedef ağı: etkin hedeflerin özeti HKM'ye, zaman bütçesi geri

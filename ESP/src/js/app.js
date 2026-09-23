@@ -1452,8 +1452,10 @@ ESP.App = (function(){
   }
 
   /* ---------------------------------------------------- telefona kurulum (PWA)
-     Tek dosya olarak çalıştığı için manifest de gömülü üretilir; ayrı dosya
-     ya da service worker gerekmez. Uygulama zaten çevrimdışı çalışır. */
+     Manifest gömülü üretilir (tek dosya sürümüyle aynı yol). Sunucuyla
+     (http/https) açılınca bir de çevrimdışı kabuk kaydedilir
+     (brand/ortak/pwa.js + sw.js): ağ önce, ağ yoksa son kopya. `file://`
+     ile açılan tek dosyada kabuk olmaz; uygulama orada da eksiksiz çalışır. */
   function installManifest(){
     const el = document.getElementById('pwa-manifest');
     if(!el) return;
@@ -1471,7 +1473,9 @@ ESP.App = (function(){
     const ikonRef = ikonEl && ikonEl.getAttribute('href');
     const icon = new URL(ikonRef || 'img/brand/favicon.png', location.href).href;
     const manifest = {
-      name, short_name:'ESP', start_url:location.href, scope:'./',
+      name, short_name:'ESP', start_url:location.href,
+      /* Göreli kapsam gömülü (data:) manifestte çözülemez ve yok sayılır. */
+      scope:new URL('./', location.href).href,
       display:'standalone', background_color:'#F7F8FA', theme_color:'#2F5A8A',
       lang:'tr', description:'Dil, felsefe, müzik, diksiyon, okuma ve yazı pratiğinin kaydı',
       icons:[{ src:icon, sizes:'192x192', type:'image/png', purpose:'any maskable' }],
@@ -1548,6 +1552,8 @@ ESP.App = (function(){
       applySection(S.route);
       await render();
       installManifest();
+      /* Çevrimdışı kabuk: yalnız sunucuyla açılınca (brand/ortak/pwa.js). */
+      if(window.LIFEOS && LIFEOS.Pwa) LIFEOS.Pwa.kaydet().catch(() => {});
       /* Tek dosya görselsiz açıldıysa bunu söyle (brand/ortak/gorsel.js). */
       if(window.LIFEOS && LIFEOS.Gorsel) LIFEOS.Gorsel.denetle('esp', m => UI.toast(m, { life:12000 }));
       /* Hedef ağı: etkin hedeflerin özeti HKM'ye, zaman bütçesi geri

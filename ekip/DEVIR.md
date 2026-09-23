@@ -100,12 +100,17 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
 - ✅ Y3 Takvim (AYS): Rehber › İstisnalar'da .ics içe alma (önizleme, tür yalnız
   önerilir, geçmiş / 60 günden uzun / kayıtlı alınmaz, yalnız seçilen yazılır) ve
   dışa aktarma (istisnalar, TYT/AYT günü, hedef son günleri). `AYS/src/js/core/takvim.js`.
-- 🔜 Y4 Telefon uygulaması (PWA: manifest + service worker; yalnız sunucuyla açılınca).
+- ✅ Y4 Telefon uygulaması (PWA): üç modülde çevrimdışı kabuk (`brand/ortak/pwa.js` +
+  `sw.js`), yalnız http(s) ile açılınca; ağ önce, ağ yoksa son kopya; ilk açılışın
+  dosyaları da kasaya girer; `build.py` `sw.js`'i `dist/` yanına koyar. Gömülü
+  manifestin kapsamı artık mutlak adres (göreli olan yok sayılıyordu). Duman testi
+  sunucuyu durdurup sayfayı yeniden açar. Telefon için bir http(s) adresi gerekir;
+  yerel ağa açmak kullanıcının kararı (bkz. §4 soru 5).
 - ❓ Y5 Sağlık verisi içe aktarma (Apple Sağlık export.xml ya da Health Connect).
 
 ### Part 6 — Yeni kollar II
 - ❓ Y1 Para kolu (gelir-gider, abonelik, birikim hedefi).
-- ⏳ Y9 Bilgi Deposu tarayıcısı (HKM web).
+- 🔜 Y9 Bilgi Deposu tarayıcısı (HKM web).
 - ❓ Y10 Veli / koç özeti — lokal ağa karışmamak için DOSYA (PDF) olarak.
 - ❓ Y11 Kariyer / proje kolu.
 
@@ -150,4 +155,10 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   `king._teslim`, testler `HKM/tests/test_urun.py`.
 - Part 1–4 bitti: HKM 507/507, AYS 1609, SPİ 1253, ESP 1294; `tools/entegre.js` temiz
   (§0.6/§2.75 akşam yoklaması, §0.7/§2.76 BAM ürünü, §7 Ofis indirme + Web ayarı).
+- Part 5 (Y2, Y3, Y4) bitti: AYS 1632, SPİ 1267, ESP 1309 birim testi, üç duman testi temiz
+  (kabuk adımı dahil). **Kalan:** Part 5 sonu tam koşum henüz YAPILMADI (kullanıcının
+  limiti doldu) — sıradaki Claude önce bunu koşsun, sayıları yazsın:
+  `CHROMIUM_PATH=/opt/pw-browsers/chromium python3 tools/sayilar.py --tam --yaz`
+  (koşarken dosya düzenleme). Sonra Part 6–7'nin ⏳ maddeleri: 9, 14, 16, 17, 18 ve
+  Y9 (Part 6). ❓ maddeler §4'teki cevaplara bağlı.
 - Ortam notu: modül testleri için `cd <SYS> && npm ci` (Playwright; node_modules depoda yok).

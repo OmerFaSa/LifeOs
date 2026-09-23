@@ -165,6 +165,16 @@ def stamp() -> str:
     (SRC / "js" / "data" / "build.js").write_text(body, encoding="utf-8")
     return sha
 
+def copy_service_worker() -> None:
+    """Cevrimdisi kabuk (src/sw.js, kaynagi brand/ortak/sw.js) tek dosyanin
+    YANINA gider: dist/ klasoru bir sunucudan (http/https) servis edilirse
+    `pwa.js` onu `sw.js` adiyla kaydeder. `file://` ile acilista kullanilmaz;
+    tek dosya yine tek basina calisir."""
+    kaynak = SRC / "sw.js"
+    if kaynak.exists():
+        shutil.copy2(kaynak, DIST / "sw.js")
+
+
 def copy_brand_assets() -> None:
     """Marka gorselleri/videosu METNE gomulmez — HTML'e kopyalanirsa dosya
     boyutu megabaytlarca sisiyor (video ~1.8MB). Bunun yerine dist/ yaninda
@@ -341,6 +351,7 @@ def build(minify: bool = False) -> None:
     out_path.write_text(output, encoding="utf-8")
     copy_brand_assets()
     copy_level_assets()
+    copy_service_worker()
 
     size_kb = len(output.encode("utf-8")) / 1024
     mode = "minify" if minify else "okunabilir"
