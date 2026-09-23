@@ -46,6 +46,8 @@ Ucnoktalar:
     POST /api/tg/webhook            Telegram — gizli baslikla dogrulanir
     POST /api/decision/<id>/accept  oneriyi kabul et
     POST /api/decision/<id>/decline oneriyi reddet — kayit silinmez
+    GET  /api/web                   web katmaninin durumu: saglayicilar, bugunku cagri
+    POST /api/web/dene              web aramasini King adina dener (sorgu)
     GET  /api/health                token istemez
     GET  /                          tek dosyalik yerel yuz (token istemez;
                                     jetonu kullanici girer, veri yine korumali)
@@ -71,7 +73,7 @@ from core import (ai, bam, butce, channels, cross, db, gelen,  # noqa: E402
                   intents, kanal, king, manager, media, memory, models, motto, outbox, patron,
                   profil, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
-                  weekly, yoklama)
+                  weekly, web, yoklama)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -634,6 +636,9 @@ class Handler(BaseHTTPRequestHandler):
                 "FROM attachments ORDER BY id DESC LIMIT ?",
                 (limit,)).fetchall()
             return self._send(200, {"attachments": [dict(r) for r in rows]})
+        # ---- Web katmani (core/web.py): yalniz BAM ve King kullanir ----
+        if u.path == "/api/web":
+            return self._send(200, web.durum(self.con, self.server.config))
         # ---- BAM (core/bam.py): ofisler, isler, kayitlar ----
         if u.path == "/api/bam":
             return self._send(200, bam.ozet(self.con))
@@ -920,6 +925,18 @@ class Handler(BaseHTTPRequestHandler):
             r = bam.is_ac(self.con, body.get("talep"), kaynak=body.get("kaynak") or "kullanici",
                           hedef_modul=body.get("hedef_modul") or None)
             return self._send(200 if r.get("ok") else 422, r)
+        # Web aramasini King adina DENER: Ayarlar ekranindaki «dene» dugmesi.
+        # Rol sunucuda sabittir; istemci rol secemez.
+        if u.path == "/api/web/dene":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            r = web.ara(self.con, self.server.config, "king", (body or {}).get("sorgu"), n=5)
+            return self._send(200, r)
         if u.path == "/api/bam/ilerlet":
             r = bam.ilerlet(self.con, self.server.config)
             king.esitle(self.con)

@@ -701,3 +701,15 @@ def run_extra(S):
                for x in n["intents"]))
     test("King uclari: emir, bildirim, okundu, iptal — yetkili ve kodlu",
          t_king_endpoints)
+
+    def t_web_endpoints():
+        eq(S.call("/api/web", token=None)[0], 401)
+        kod, d = S.call("/api/web")
+        eq(kod, 200)
+        eq([x["id"] for x in d["saglayicilar"]], ["wikipedia"])
+        eq(d["bugun"]["etiket"], "olculdu")
+        eq(S.call("/api/web/dene", body={"sorgu": "a"}, token=None)[0], 401)
+        kod, r = S.call("/api/web/dene", body={"sorgu": "ali@ornek.com kim"})
+        eq((kod, r["ok"]), (200, False))       # ag'a cikmadan reddedilir
+        ok("kişisel" in r["note"])
+    test("web uclari yetki ister; kisisel sorgu aga cikmaz", t_web_endpoints)

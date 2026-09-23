@@ -196,6 +196,22 @@ CREATE TABLE IF NOT EXISTS bam_kayitlar (
   created_at  TEXT NOT NULL
 );
 
+/* Web katmani (core/web.py): onbellek ve gunluk sayac. Yedege girmez:
+   onbellek yeniden uretilebilir, sayac yalniz bugunu korur. */
+CREATE TABLE IF NOT EXISTS web_onbellek (
+  anahtar     TEXT NOT NULL,
+  tur         TEXT NOT NULL,                      -- ara|sayfa
+  govde       TEXT NOT NULL,                      -- JSON
+  alindi      TEXT NOT NULL,
+  PRIMARY KEY (anahtar, tur)
+);
+
+CREATE TABLE IF NOT EXISTS web_sayac (
+  gun         TEXT PRIMARY KEY,                   -- YYYY-MM-DD
+  cagri       INTEGER NOT NULL DEFAULT 0,
+  kacinilan   INTEGER NOT NULL DEFAULT 0          -- onbellek sayesinde yapilmayan
+);
+
 CREATE TABLE IF NOT EXISTS bam_iz (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   kaynak_tur  TEXT NOT NULL,

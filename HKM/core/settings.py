@@ -28,7 +28,7 @@ import json
 import os
 import re
 
-from core import adlar, butce, channels, media, models, schedule, thresholds
+from core import adlar, butce, channels, media, models, schedule, thresholds, web
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -93,6 +93,8 @@ def read(cfg):
     out["models"] = models.read(cfg)
     out["budget"] = butce.settings(cfg)
     out["media"] = media.settings(cfg)
+    # Web katmani (core/web.py): arama anahtarlari MASKELI.
+    out["web"] = web.read(cfg)
     return out
 
 
@@ -103,7 +105,7 @@ def validate(patch):
         return False, ["gövde bir nesne olmalı"]
     for k in patch:
         if k not in ("thresholds", "channels", "schedule", "models",
-                     "budget", "media"):
+                     "budget", "media", "web"):
             hata.append("bilinmeyen alan: %s" % k)
 
     if patch.get("models") is not None:
@@ -120,6 +122,11 @@ def validate(patch):
         ok_m, hata_m = media.validate(patch["media"])
         if not ok_m:
             hata.extend(hata_m)
+
+    if patch.get("web") is not None:
+        ok_w, hata_w = web.validate(patch["web"])
+        if not ok_w:
+            hata.extend(hata_w)
 
     for grup, alanlar in (patch.get("thresholds") or {}).items():
         if grup not in THRESHOLD_RANGE:
@@ -218,6 +225,8 @@ def apply(cfg, patch):
         yeni = butce.apply(yeni, patch["budget"])
     if patch.get("media") is not None:
         yeni.setdefault("media", {}).update(patch["media"])
+    if patch.get("web") is not None:
+        yeni = web.apply(yeni, patch["web"])
     yeni["local_token"] = cfg.get("local_token")
     return yeni
 
