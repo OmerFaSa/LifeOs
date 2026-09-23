@@ -242,7 +242,7 @@ uca çalıştırır.
 | **1** | hedef çerçevesi, tanıma ve netleştirme, gerçekçilik çerçevesi, senaryolar, durum profili, hekim talimatı ve güvenlik kapısı, «Hedeflerim» | SPİ: kilo ver / al, VKİ | **bitti** |
 | **2** | King onay zinciri, tahmini süre, bildirim, BAM'a durum profiliyle iş, Planlama Ofisi v1, `plan.apply` | SPİ | **bitti** — ayrıntı §4.1 |
 | **3** | kapasiteye göre senaryolar, seviye merdivenleri, ESP'de plan ve materyal içe alma | ESP: enstrüman, dil, okuma | **bitti** — ayrıntı §4.2 |
-| **4** | sınav profilleri, bölümlü test kitabı, müfredat raporu | AYS | |
+| **4** | sınav profilleri, bölümlü test kitabı, müfredat raporu | AYS | **bitti** — ayrıntı §4.3 |
 | **5** | Bilgi Deposu tazeliği, değişiklik araştırması (web kararına bağlı), uyarlama döngüsü, zaman bütçesi (onaylanırsa) | hepsi | |
 | **6** | değerlendirme seti, cilalama, üyelik hazırlığı | — | |
 
@@ -298,6 +298,33 @@ uca çalıştırır.
   diksiyon ve tarih paketleri.
 - CEFR saat tablosunun ve kitap tahmininin kaynağının bağlanması
   (Araştırma Ofisi, web kararına bağlı).
+
+### 4.3 Tur 4 — ne kuruldu, ne bilerek bekliyor
+
+**Kuruldu**
+
+| Parça | Yer | Söz |
+|---|---|---|
+| AYS hedef paketleri | `AYS/src/js/core/hedefler.js` | konu bitirme (kapasite modeli, karar «tahmin»), net hedefi (kendi denemelerinin eğimi, «hesaplandı»; deneme yoksa karar yok) |
+| AYS hedef planı | `AYS/src/js/core/hedefplan.js` | konu sırası, deneme günleri, 1 ve 3 hafta sonra tekrar; büyük aksiyon, geri alınabilir |
+| Müfredat raporu | `HKM/core/mufredat.py`, `bam.py` | `sinav.mufredat` iş emri; Araştırma Ofisi ders → konu ağacı yazar, kod süzer; kaynaksız rapor «doğrulanmadı»; aynı sınav ikinci kez depodan |
+| Sınav profilleri | `AYS/src/js/core/sinavprofil.js`, Dersler ekranı | yerleşik YKS SAY + onaylanan ek profiller; `mufredat.add` teklifi AYS'nin kendi sınırlarıyla yeniden süzülür; HKM yoksa profil kurulmaz; konu takibi |
+| Bölümlü test kitabı | `HKM/core/kitap.py`, `bam.py` | `test.kitabi` iş emri; her tikte bir bölüm, bağımsız çözümle denetim; zorluk dağılımını kod hesaplar, modelin zorluk etiketi «tahmin»; yarıda kalan iş kaldığı yerden sürer |
+| Kitabı çözmek | `AYS/src/js/core/testkitabi.js`, Sınama ekranı | `kitap.add` teklifi; her soru AYS'nin kodunca yeniden sınanır; sınav biçimi (cevap bölüm sonunda); sonuç «ölçüldü», zorluğa göre döküm; net ve puan yok; hatalı işaretlenen soru sayılmaz |
+| Sohbet | `AYS/src/js/screens/team.js` | «KPSS genel kültür müfredatını çıkar», «… test kitabı hazırla» King'e iş emri olur |
+
+**Bilerek bekliyor**
+
+- **Puanlama**: ek profillerde net → puan hesabı yok; resmi kaynak
+  bağlanınca kural motoruna girer (web kararı, §7.2).
+- **Koç kadrosu**: profile göre değişen koçlar (§3.L) henüz yok; Patron ve
+  YKS koçları sabit.
+- Ek profili **ana sınav** yapmak (planı ve Bugün'ü o sınava göre kurmak):
+  şimdilik ek profil yalnız konu takibi ve test kitabı içindir.
+- Zincir testinde AYS yolu: müfredat ve kitap model ister; `entegre.js`
+  modelsiz koştuğu için bu iki yol HKM birim testlerinde sahte taşıyıcıyla
+  sınanıyor.
+- Kitaptan zayıf konuya tekrar kartı ya da yanlış defteri kaydı: sonraki tur.
 
 ## 5. İş bölümü — şimdilik tek Opus; ek Opus gelirse bu sahiplik tablosu
 
