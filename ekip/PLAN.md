@@ -398,6 +398,10 @@ Ayrıntılı sınırlar, dal düzeni, rapor biçimi ve iletişim kuralı
 3. Tur 1'in altın yolu SPİ «3 kilo ver» olsun mu?
 4. Sağlık eşiklerinin dayanağı: araştırma (kaynaklı) mı, kullanıcı/hekim girişi mi, ikisi mi?
 
+**2026-09-23:** Kullanıcı 29 maddelik öneri listesini (sistem içi 18 düzeltme, 11 yeni
+kol; zaman bütçesi ve değerlendirme seti dahil) ONAYLADI. Parçalara bölünmüş yol
+haritası ve açık sorular `ekip/DEVIR.md` §3–§4'te. Soru 2 ve 4 hâlâ açık.
+
 ## 8. Riskler
 
 | Risk | Önlem |
