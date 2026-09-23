@@ -62,6 +62,8 @@ Ucnoktalar:
     POST /api/web/dene              web aramasini King adina dener (sorgu)
     POST /api/king/urun             modul sohbetindeki urun istegi -> King emri (modul adina)
     POST /api/king/emir/<id>/onayla King'in teklifini onaylar (secenek: tam|kucuk)
+    GET  /api/king/teklifler/<modul> modulun onay bekleyen teklifleri (teklif karti)
+    POST /api/king/emir/<id>/devam|dur  parca parca uretimde ara onaya cevap
     GET  /api/health                token istemez
     GET  /                          tek dosyalik yerel yuz (token istemez;
                                     jetonu kullanici girer, veri yine korumali)
@@ -745,6 +747,12 @@ class Handler(BaseHTTPRequestHandler):
                                     dosya="%s-yedek-%s.json" % (parca[2], parca[3]), indir=True)
         if u.path == "/api/king":
             return self._send(200, king.ozet(self.con))
+        # Modulun onay bekleyen teklifleri (Part 8a-3b): modulun teklif karti.
+        if u.path.startswith("/api/king/teklifler/"):
+            mod = u.path.rsplit("/", 1)[-1]
+            if mod not in king.MODULLER:
+                return self._send(404, {"error": "bilinmeyen modul"})
+            return self._send(200, {"teklifler": king.teklifler(self.con, mod)})
         if u.path.startswith("/api/king/emir/"):
             try:
                 eid = int(u.path.rsplit("/", 1)[-1])
@@ -1127,6 +1135,15 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "gecersiz istek"})
             r = king.teklif_onayla(self.con, self.server.config, eid,
                                    (body or {}).get("secenek") or None)
+            return self._send(200 if r.get("ok") else 409, r)
+        # Ara onay (Part 8b): parca parca uretimde «devam» ya da «dur».
+        if u.path.startswith("/api/king/emir/") and u.path.rsplit("/", 1)[-1] in ("devam", "dur"):
+            parca = u.path.strip("/").split("/")
+            try:
+                eid = int(parca[3])
+            except (ValueError, IndexError):
+                return self._send(400, {"error": "emir kimligi sayi olmali"})
+            r = king.parca(self.con, eid, parca[4])
             return self._send(200 if r.get("ok") else 409, r)
         if u.path.startswith("/api/king/emir/") and u.path.endswith("/iptal"):
             parca = u.path.strip("/").split("/")

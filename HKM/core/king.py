@@ -113,11 +113,13 @@ TURLER = {
 
 # «teklif»: King teklifini sundu, kullanici onaylamadan BAM'da is ACILMAZ
 # (Part 8a-3). Acik sayilir: ayni istek ikinci teklif acmaz, iptal edilir.
-DURUMLAR = ("teklif", "onaylandi", "kismen_onay", "basladi", "bekliyor", "bitti", "kismen",
-            "reddedildi", "iptal", "hata")
-ACIK = ("teklif", "onaylandi", "kismen_onay", "basladi", "bekliyor")
-BILDIRIM_TURLERI = ("teklif", "onaylandi", "kismen_onay", "basladi", "bekliyor", "bitti",
-                    "kismen", "reddedildi", "iptal", "hata", "guncellik")
+# «ara_onay»: parca parca uretimde bir bolum bitti, devam icin onay bekleniyor
+# (Part 8b). Acik sayilir; «devam» sonrakini uretir, «dur» uretilenle bitirir.
+DURUMLAR = ("teklif", "onaylandi", "kismen_onay", "basladi", "ara_onay", "bekliyor", "bitti",
+            "kismen", "reddedildi", "iptal", "hata")
+ACIK = ("teklif", "onaylandi", "kismen_onay", "basladi", "ara_onay", "bekliyor")
+BILDIRIM_TURLERI = ("teklif", "onaylandi", "kismen_onay", "basladi", "ara_onay", "bekliyor",
+                    "bitti", "kismen", "reddedildi", "iptal", "hata", "guncellik")
 
 
 def _simdi(now=None):
@@ -607,7 +609,7 @@ def teklif_metni(e, kanal=None):
     """Teklifin kullaniciya giden cumlesi: secenekler ve nasil onaylanacagi."""
     t = e.get("teklif") or {}
     n = len(t.get("secenekler") or [])
-    yaz = "«1»" + (" ya da «2»" if n > 1 else "")
+    yaz = ", ".join("«%d»" % (i + 1) for i in range(max(1, n)))
     if kanal in TESLIM_KANALLARI or kanal == "local":
         yol = "Onaylamak için %s yaz; vazgeçmek için «iptal»." % yaz
     else:
@@ -634,8 +636,7 @@ def teklif_onayla(con, cfg, id_, secenek=None, now=None):
         return {"ok": False, "note": "Bu teklifte «%s» seçeneği yok." % secenek}
     temiz = e["govde"]
     if secenek != "tam":
-        k = tkl.KUCULT.get(e["tur"])
-        r = k(temiz) if k else None
+        r = tkl.uygula(e["tur"], secenek, temiz)
         if not r:
             return {"ok": False, "note": "Bu seçenek artık kurulamıyor."}
         temiz = r[0]
@@ -658,7 +659,59 @@ def teklif_onayla(con, cfg, id_, secenek=None, now=None):
     return _bam_ac(con, e, temiz, karar, kontrol, t.get("depo_aday"), at)
 
 
-CEVAP = re.compile(r"^\s*(1|2|tam|küçük|kucuk|iptal|vazgeç|vazgec)\s*[.!]?\s*$", re.I)
+def teklifler(con, modul, limit=10):
+    """Modulun ONAY BEKLEYEN teklifleri — modulun teklif karti icin. Yalniz
+    ekrana gereken alanlar: secenek govdesi sunucuda kalir."""
+    out = []
+    for r in con.execute("SELECT * FROM is_emirleri WHERE durum IN ('teklif','ara_onay') AND "
+                         "modul=? ORDER BY id DESC LIMIT ?",
+                         (modul, max(1, min(int(limit), 30)))):
+        e = _satir(r)
+        t = e.get("teklif") or {}
+        if e["durum"] == "ara_onay":
+            # Parca parca uretim: bolum bitti, «devam / dur» bekleniyor.
+            out.append({"id": e["id"], "konu": e["konu"], "tur": e["tur"], "durum": "ara_onay",
+                        "metin": ara_onay_metni(con, e), "secenekler": []})
+            continue
+        out.append({"id": e["id"], "konu": e["konu"], "tur": e["tur"], "durum": "teklif",
+                    "ad": TURLER.get(e["tur"], {}).get("ad"), "created_at": e["created_at"],
+                    "oneri": t.get("oneri"), "neden": t.get("neden"),
+                    "secenekler": [{"id": x["id"], "ad": x["ad"], "metin": tkl.secenek_metni(x)}
+                                   for x in t.get("secenekler") or []]})
+    return out
+
+
+# ------------------------------------------------------ ara onay (Part 8b)
+
+def ara_onay_metni(con, e, j=None):
+    """Parca parca uretimde bolum bitti: ne uretildi, ne harcandi, ne sorulur."""
+    j = j or (bam.is_getir(con, e["bam_is_id"]) if e.get("bam_is_id") else None) or {}
+    a = next((x for x in j.get("adimlar") or [] if x.get("durum") == "ara_onay"), {})
+    m = tkl.olculen(butce.is_maliyeti(con, j["id"])) if j.get("id") else {}
+    return ("«%s»: %s Şimdiye kadar ölçülen maliyet: %s. Devam edeyim mi? «devam» sıradaki "
+            "bölümü üretir; «dur» kitabı üretilen bölümlerle bitirir." % (
+                e["konu"], a.get("not") or "bir bölüm üretildi.", m.get("metin") or "—"))
+
+
+def parca(con, id_, karar, now=None):
+    """Ara onaya cevap: «devam» ya da «dur». Uretilen hicbir bolum kaybolmaz."""
+    e = emir(con, id_)
+    if not e or e["durum"] != "ara_onay" or not e.get("bam_is_id"):
+        return {"ok": False, "note": "Ara onay bekleyen bir iş yok."}
+    if karar not in ("devam", "dur"):
+        return {"ok": False, "note": "Cevap «devam» ya da «dur» olmalı."}
+    r = (bam.devam if karar == "devam" else bam.kes)(con, e["bam_is_id"], now=now)
+    if not r.get("ok"):
+        return r
+    e["durum"] = "basladi"
+    _yaz(con, e, now)
+    return {"ok": True, "emir": emir(con, e["id"]),
+            "note": ("Devam: sıradaki bölüm üretiliyor." if karar == "devam" else
+                     "Durduruldu: kitap üretilen bölümlerle bitiyor; teklif olarak gelir.")}
+
+
+CEVAP = re.compile(r"^\s*(1|2|3|tam|küçük|kucuk|iptal|vazgeç|vazgec|devam|dur)\s*[.!]?\s*$",
+                   re.I)
 
 
 def teklif_cevap(con, cfg, metin, kanal="local", hedef=None, now=None):
@@ -670,24 +723,29 @@ def teklif_cevap(con, cfg, metin, kanal="local", hedef=None, now=None):
     m = CEVAP.match(str(metin or ""))
     if not m:
         return None
+    k = m.group(1).lower()
+    durum = "ara_onay" if k in ("devam", "dur") else "teklif"
     if kanal in TESLIM_KANALLARI:
-        r = con.execute("SELECT id FROM is_emirleri WHERE durum='teklif' AND kanal=? AND "
+        r = con.execute("SELECT id FROM is_emirleri WHERE durum=? AND kanal=? AND "
                         "(hedef=? OR hedef IS NULL) ORDER BY id DESC LIMIT 1",
-                        (kanal, hedef)).fetchone()
+                        (durum, kanal, hedef)).fetchone()
     else:
-        r = con.execute("SELECT id FROM is_emirleri WHERE durum='teklif' AND kanal IS NULL "
-                        "AND modul='hkm' ORDER BY id DESC LIMIT 1").fetchone()
+        r = con.execute("SELECT id FROM is_emirleri WHERE durum=? AND kanal IS NULL "
+                        "AND modul='hkm' ORDER BY id DESC LIMIT 1", (durum,)).fetchone()
     if not r:
         return None
     e = emir(con, r["id"])
-    k = m.group(1).lower()
+    if durum == "ara_onay":
+        p = parca(con, e["id"], k, now=now)
+        return p.get("note") or "İşlenemedi."
     if k in ("iptal", "vazgeç", "vazgec"):
         iptal(con, e["id"], now=now)
         return "«%s» teklifi iptal edildi; iş açılmadı." % e["konu"]
     ids = [x["id"] for x in (e.get("teklif") or {}).get("secenekler") or []]
-    i = 0 if k in ("1", "tam") else 1
+    i = {"1": 0, "tam": 0, "2": 1, "3": 2}.get(k, ids.index("kucuk") if "kucuk" in ids else 9)
     if i >= len(ids):
-        return "Bu teklifte 2. seçenek yok. «1» ya da «iptal» yazabilirsin."
+        return ("Bu teklifte o seçenek yok. %s ya da «iptal» yazabilirsin."
+                % " ".join("«%d»" % (n + 1) for n in range(len(ids))))
     r = teklif_onayla(con, cfg, e["id"], ids[i], now=now)
     if not r.get("ok"):
         return r.get("note") or "Onaylanamadı."
@@ -850,7 +908,7 @@ def _teslim(con, e, metin, kayit_id=None, yalniz_belge=False, now=None):
 # ---------------------------------------------------------- esitleme
 
 IS_TO_EMIR = {"bekliyor": "onaylandi", "beklemede": "bekliyor", "tamam": "bitti",
-              "kismen": "kismen", "hata": "hata", "iptal": "iptal"}
+              "kismen": "kismen", "hata": "hata", "iptal": "iptal", "ara_onay": "ara_onay"}
 
 
 def esitle(con, now=None):
@@ -900,6 +958,7 @@ def esitle(con, now=None):
         else:
             _yaz(con, e, now)
             metin = {"basladi": "«%s» işi başladı: BAM ofisleri çalışıyor." % konu,
+                     "ara_onay": ara_onay_metni(con, e, j),
                      "bekliyor": "«%s» bekliyor: %s" % (konu, next(
                          (a.get("not") for a in j["adimlar"] if a["durum"] == "beklemede"),
                          "model ya da bütçe")),
@@ -908,7 +967,8 @@ def esitle(con, now=None):
                      "iptal": "«%s» iptal edildi." % konu}.get(yeni, "«%s»: %s" % (konu, yeni))
             bildir(con, e["modul"], e["id"], yeni, metin, now=now)
             # «basladi» gurultudur; «iptal»i kullanici zaten kendisi yapti.
-            if yeni in ("bekliyor", "hata"):
+            # Ara onay bir SORUDUR: kanala gider.
+            if yeni in ("bekliyor", "hata", "ara_onay"):
                 _teslim(con, e, metin, now=now)
         degisen += 1
     return degisen

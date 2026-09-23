@@ -1380,6 +1380,20 @@ R.App = (function(){
           yas:() => M.backupAgeDays(), isaretle:() => M.markBackup(),
           bildir:m => UI.toast(m, { life:12000 }) }).baslat();
       }
+      /* King'in teklifleri (brand/ortak/kingteklif.js): onay bekleyen ücretli
+         işler Bugün'de. Modül King'e iş verince hemen, yoksa dakikada bir
+         tazelenir; HKM kapalıysa liste boş kalır ve kart çizilmez. */
+      if(window.LIFEOS && LIFEOS.KingTeklif){
+        R.KingTeklif = LIFEOS.KingTeklif.kur({ hkm:() => R.Beacon, modul:'ays' });
+        const kingTazele = () => R.KingTeklif.cek().then(l => {
+          const once = JSON.stringify(S.ui.kingTeklifler || []);
+          S.ui.kingTeklifler = l;
+          if(JSON.stringify(l) !== once) render();
+        }).catch(() => {});
+        kingTazele();
+        window.addEventListener(LIFEOS.KingTeklif.OLAY, kingTazele);
+        setInterval(kingTazele, 60000);
+      }
 
       /* Seviye kutlaması. İki yol da buraya çıkar:
 

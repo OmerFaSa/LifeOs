@@ -215,25 +215,41 @@ def is_ac(con, talep, kaynak="kullanici", hedef_modul=None, now=None,
 
 def iptal(con, id_, now=None):
     cur = con.execute("UPDATE bam_isler SET durum='iptal', updated_at=? WHERE id=? "
-                      "AND durum IN ('bekliyor','beklemede')", (_simdi(now), int(id_)))
+                      "AND durum IN ('bekliyor','beklemede','ara_onay')", (_simdi(now), int(id_)))
     return {"ok": cur.rowcount == 1,
             "note": "İş iptal edildi." if cur.rowcount else "İptal edilecek açık iş yok."}
 
 
 def devam(con, id_, now=None):
-    """Bekleyen isi (model yoktu, butce dolmustu) yeniden kuyruga koyar."""
+    """Bekleyen isi (model yoktu, butce dolmustu) ya da ara onaydaki isi
+    (parca parca, Part 8b) yeniden kuyruga koyar."""
     j = is_getir(con, id_)
-    if not j or j["durum"] != "beklemede":
+    if not j or j["durum"] not in ("beklemede", "ara_onay"):
         return {"ok": False, "note": "Bekleyen bir iş değil."}
     for a in j["adimlar"]:
-        if a["durum"] == "beklemede":
+        if a["durum"] in ("beklemede", "ara_onay"):
             a["durum"] = "bekliyor"
+    _kaydet(con, j, now)
+    return {"ok": True}
+
+
+def kes(con, id_, now=None):
+    """Ara onaydaki isi DURDURUR: uretilen bolumlerle biter (Part 8b).
+    Uretilen kaybolmaz; kalan bolum icin model cagrilmaz."""
+    j = is_getir(con, id_)
+    if not j or j["durum"] != "ara_onay":
+        return {"ok": False, "note": "Ara onayda bekleyen bir iş değil."}
+    for a in j["adimlar"]:
+        if a["durum"] == "ara_onay":
+            a["durum"], a["kes"] = "bekliyor", True
     _kaydet(con, j, now)
     return {"ok": True}
 
 
 def _is_durumu(adimlar):
     d = [a["durum"] for a in adimlar]
+    if "ara_onay" in d:
+        return "ara_onay"
     if "beklemede" in d:
         return "beklemede"
     if "hata" in d:
@@ -1000,15 +1016,24 @@ def _kitap_adimi(con, cfg, j, g, transport, now):
     adim = next(a for a in j["adimlar"] if a["ofis"] == "uretim")
     ilerleme = adim.get("kitap") if isinstance(adim.get("kitap"), dict) else {"bolumler": []}
     sira = len(ilerleme["bolumler"])
-    if sira < len(g["bolumler"]):
+    # «Dur» (Part 8b): kullanici ara onayda durdurdu; kitap uretilen
+    # bolumlerle biter, kalan bolum icin model cagrilmaz.
+    if sira < len(g["bolumler"]) and not adim.get("kes"):
         bolum, dur = _kitap_bolumu(con, cfg, g, g["bolumler"][sira], transport)
         if dur:
             return dict(dur, kitap=ilerleme)
         ilerleme = {"bolumler": ilerleme["bolumler"] + [bolum]}
         if len(ilerleme["bolumler"]) < len(g["bolumler"]):
+            n, top = len(ilerleme["bolumler"]), len(g["bolumler"])
+            if (j.get("govde") or {}).get("parcali"):
+                # Parca parca (Part 8b): her bolumden sonra ONAY beklenir.
+                return {"durum": "ara_onay", "kitap": ilerleme,
+                        "not": "%d / %d bölüm üretildi («%s»: %d sorudan %d'i kalite "
+                               "kontrolünü geçti). Devam için onayını bekliyor."
+                               % (n, top, bolum["ad"], bolum["kalite"]["uretilen"],
+                                  bolum["kalite"]["gecen"])}
             return {"durum": "bekliyor", "kitap": ilerleme,
-                    "not": "%d / %d bölüm üretildi." % (len(ilerleme["bolumler"]),
-                                                     len(g["bolumler"]))}
+                    "not": "%d / %d bölüm üretildi." % (n, top)}
     dolu = [b for b in ilerleme["bolumler"] if b["sorular"]]
     bos = [b["ad"] for b in ilerleme["bolumler"] if not b["sorular"]]
     if not dolu:

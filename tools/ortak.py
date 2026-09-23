@@ -197,6 +197,9 @@ DOSYALAR = {
     # Otomatik yedek istemcisi (HKM core/yedek.py): HKM acikken gunde bir.
     "yedekag.js":      "js/core",
     "yedekag.test.js": "tests",
+    # King'in onay kapisi (HKM core/king.py): modulun teklif karti (Part 8a-3b).
+    "kingteklif.js":      "js/core",
+    "kingteklif.test.js": "tests",
     # GORSEL DENETIMI — tek dosya gorselsiz acildiginda bunu soylemek.
     # Uyari metni ve kosulu uc arayuzde ayni olmali.
     "gorsel.js":      "js/core",

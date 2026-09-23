@@ -2998,12 +2998,13 @@ details.detay > summary:hover{ color:var(--fg); }
      imkân kontrolünün maddeleri, tahmini süre ve dayanağı, katların
      zinciri. Karar kuraldır; bu ekran yalnız gösterir ve iptal eder. */
   var EMIR_DURUM = { teklif:'teklif — onayını bekliyor', onaylandi:'onaylandı',
+    ara_onay:'ara onay — devam için onayını bekliyor',
     kismen_onay:'kısmen onaylandı', basladi:'başladı',
     bekliyor:'bekliyor — model ya da bütçe', bitti:'bitti', kismen:'kısmen bitti',
     reddedildi:'reddedildi', iptal:'iptal', hata:'hata' };
-  var EMIR_TON = { teklif:'warn', onaylandi:'ok', kismen_onay:'warn', basladi:'ok', bekliyor:'warn', bitti:'ok',
+  var EMIR_TON = { teklif:'warn', ara_onay:'warn', onaylandi:'ok', kismen_onay:'warn', basladi:'ok', bekliyor:'warn', bitti:'ok',
     kismen:'warn', reddedildi:'danger', iptal:'muted', hata:'danger' };
-  var EMIR_ACIK = ['teklif', 'onaylandi', 'kismen_onay', 'basladi', 'bekliyor'];
+  var EMIR_ACIK = ['teklif', 'onaylandi', 'kismen_onay', 'basladi', 'ara_onay', 'bekliyor'];
 
   function ofisKingCiz(k){
     var h = '<div class="tag"><span lang="en">King</span> kuyruğu · iş emirleri</div>'
@@ -3043,6 +3044,11 @@ details.detay > summary:hover{ color:var(--fg); }
           + ((e.teklif && e.teklif.secenekler) || []).map(function(x, i){
             return '<button data-king-onayla="' + esc(e.id) + '" data-secenek="' + esc(x.id)
               + '">' + (i + 1) + ') ' + esc(x.ad) + ' — onayla</button>'; }).join('')
+          + '</div>' : '')
+        /* Ara onay (Part 8b): parça parça üretimde bölüm bitti. */
+        + (e.durum === 'ara_onay' ? '<div class="row" style="margin-top:6px">'
+          + '<button data-king-parca="' + esc(e.id) + '" data-karar="devam">Devam</button>'
+          + '<button data-king-parca="' + esc(e.id) + '" data-karar="dur">Dur ve bitir</button>'
           + '</div>' : '')
         + (EMIR_ACIK.indexOf(e.durum) >= 0 ? ' <button data-king-iptal="' + esc(e.id)
           + '">İptal</button>' : '')
@@ -3578,9 +3584,15 @@ details.detay > summary:hover{ color:var(--fg); }
   document.addEventListener('click', async function(ev){
     var el = ev.target.closest ? ev.target.closest('#bam-gonder,#bam-ilerlet,[data-bam-iptal],'
       + '[data-bam-devam],[data-bam-kayit],[data-bam-kapat],[data-king-iptal],'
-      + '[data-king-onayla]') : null;
+      + '[data-king-onayla],[data-king-parca]') : null;
     if(!el) return;
     ev.preventDefault();
+    if(el.dataset.kingParca){
+      el.disabled = true;
+      await api('/api/king/emir/' + encodeURIComponent(el.dataset.kingParca) + '/'
+        + el.dataset.karar, { method:'POST', body:'{}' });
+      return yukle();
+    }
     if(el.dataset.kingOnayla){
       el.disabled = true;
       await api('/api/king/emir/' + encodeURIComponent(el.dataset.kingOnayla) + '/onayla',

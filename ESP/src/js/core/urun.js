@@ -172,6 +172,8 @@ LIFEOS.Urun = (function(){
             + '«Türev hakkında özet hazırla» ya da «fotosentez zihin haritası çiz» gibi '
             + 'yazarsan King’e iletirim.' };
         }
+        /* King işi teklifte bekletir (onay kapısı): kart hemen tazelensin. */
+        if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
         return { ok:true, tanindi:true, metin:g.metin };
       }catch(e){
         return { ok:false, metin:'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden iste.' };

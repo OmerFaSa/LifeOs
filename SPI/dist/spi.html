@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'56fdbe2', at:'2026-09-23 18:36', dirty:true };
+SP.BUILD = { id:'658f9f7', at:'2026-09-23 20:55', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8721,6 +8721,8 @@ LIFEOS.Urun = (function(){
             + '«Türev hakkında özet hazırla» ya da «fotosentez zihin haritası çiz» gibi '
             + 'yazarsan King’e iletirim.' };
         }
+        /* King işi teklifte bekletir (onay kapısı): kart hemen tazelensin. */
+        if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
         return { ok:true, tanindi:true, metin:g.metin };
       }catch(e){
         return { ok:false, metin:'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden iste.' };
@@ -9982,6 +9984,133 @@ LIFEOS.YedekAg = (function(){
   }
 
   return { kur };
+})();
+
+/* ==== js/core/kingteklif.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/kingteklif.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KING TEKLİFİ — onay bekleyen işler modülün kendi ekranında.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/kingteklif.js`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   ==================================================================
+
+   Modül King'den ücretli bir iş istediğinde (ürün, test kitabı, müfredat)
+   King işi BAM'da AÇMAZ: sınıfını, tahmini maliyetini ve süresini söyleyen
+   bir teklif hazırlar (HKM `core/teklif.py`, `core/king.py` onay kapısı).
+   Bu dosya o teklifleri modülün Bugün ekranına getirir ve onayı ya da
+   iptali HKM'ye iletir.
+
+   Sözler:
+   1. SAYI VE CÜMLE HKM'DEN. Modül maliyet ya da sınıf hesaplamaz; gelen
+      seçenek metnini gösterir (yüz kendi sayısını üretmez).
+   2. ONAY AYNI KAPIDAN. Onay `POST /api/king/emir/<id>/onayla` ile gider;
+      HKM ekranı ve sohbet kanalı da o işleve gelir. İkinci bir yol yok.
+   3. HKM KAPALIYKEN HİÇBİR ŞEY OLMAZ. Bağlantı yoksa liste boş gelir; kart
+      çizilmez, modül yavaşlamaz.
+   4. İSTEK SONRASI TAZELENİR. Modül King'e iş verdiğinde `lifeos:king`
+      olayını yayar; kart hemen tazelenir. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.KingTeklif = (function(){
+  const OLAY = 'lifeos:king';
+
+  function kur(ortam){
+    let son = [];
+
+    function baglanti(){
+      const b = ortam.hkm ? ortam.hkm() : null;
+      if(!b || typeof b.settings !== 'function') return null;
+      const a = b.settings() || {};
+      if(!a.enabled || !a.token || !b.urlOk(a.url)) return null;
+      const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
+      return f ? { url:String(a.url).replace(/\/$/, ''), token:a.token, f } : null;
+    }
+
+    async function istek(yol, govde){
+      const k = baglanti();
+      if(!k) return { baglanti:false };
+      const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      const t = ctrl ? setTimeout(() => ctrl.abort(), 6000) : null;
+      try{
+        /* fetch bir nesnenin yöntemi olarak çağrılamaz («Illegal invocation»). */
+        const f = k.f;
+        const res = await f(k.url + yol, {
+          method:govde === undefined ? 'GET' : 'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+          body:govde === undefined ? undefined : JSON.stringify(govde),
+          signal:ctrl ? ctrl.signal : undefined,
+        });
+        let g = null;
+        try{ g = await res.json(); }catch(e){ g = null; }
+        return { baglanti:true, status:res.status, govde:g };
+      }catch(e){
+        return { baglanti:true, status:0, govde:null };
+      }finally{
+        if(t) clearTimeout(t);
+      }
+    }
+
+    /* Onay bekleyen teklifler. Bağlantı ya da cevap yoksa BOŞ liste: kart
+       çizilmez. Önceki liste de düşer — bilmediğimiz bir teklifi bekliyor
+       göstermek, olmayan bir işi var göstermek olurdu. */
+    async function cek(){
+      const r = await istek('/api/king/teklifler/' + ortam.modul);
+      son = (r.status === 200 && r.govde && Array.isArray(r.govde.teklifler))
+        ? r.govde.teklifler.slice(0, 10) : [];
+      return son;
+    }
+
+    async function onayla(id, secenek){
+      const r = await istek('/api/king/emir/' + encodeURIComponent(id) + '/onayla',
+        { secenek:secenek || null });
+      if(!r.baglanti) return { ok:false, metin:'HKM bağlı değil; teklif onaylanamadı.' };
+      const g = r.govde || {};
+      if(r.status !== 200 || !g.ok){
+        return { ok:false, metin:g.note || 'Teklif onaylanamadı (' + (r.status || 'bağlantı') + ').' };
+      }
+      son = son.filter(x => String(x.id) !== String(id));
+      const e = g.emir || {};
+      if(e.durum === 'reddedildi'){
+        return { ok:false, metin:'Onayladın ama iş açılamadı: ' + (g.note || 'imkân kontrolü geçmedi.') };
+      }
+      return { ok:true, metin:'Onaylandı: iş emri #' + e.id + ' BAM’da açıldı'
+        + (e.tahmin && e.tahmin.metin ? '; tahmini süre ' + e.tahmin.metin + ' (tahmin)' : '')
+        + '. Bitince sonuç teklif olarak gelir.' };
+    }
+
+    /* Ara onay (Part 8b): parça parça üretimde bölüm bitti; «devam» ya da
+       «dur». Dur, üretilenle bitirir; hiçbir bölüm kaybolmaz. */
+    async function parca(id, karar){
+      if(karar !== 'devam' && karar !== 'dur') return { ok:false, metin:'Geçersiz cevap.' };
+      const r = await istek('/api/king/emir/' + encodeURIComponent(id) + '/' + karar, {});
+      if(!r.baglanti) return { ok:false, metin:'HKM bağlı değil; cevap iletilemedi.' };
+      const g = r.govde || {};
+      if(r.status !== 200 || !g.ok) return { ok:false, metin:g.note || 'İletilemedi.' };
+      son = son.filter(x => String(x.id) !== String(id));
+      return { ok:true, metin:g.note };
+    }
+
+    async function iptal(id){
+      const r = await istek('/api/king/emir/' + encodeURIComponent(id) + '/iptal', {});
+      if(!r.baglanti) return { ok:false, metin:'HKM bağlı değil; teklif iptal edilemedi.' };
+      if(r.status !== 200) return { ok:false, metin:'İptal edilemedi (' + (r.status || 'bağlantı') + ').' };
+      son = son.filter(x => String(x.id) !== String(id));
+      return { ok:true, metin:'Teklif iptal edildi; iş açılmadı.' };
+    }
+
+    return { cek, onayla, parca, iptal, liste:() => son.slice() };
+  }
+
+  /* Modül King'e iş verdiğinde çağırır: kart hemen tazelenir. */
+  function haberVer(){
+    try{ window.dispatchEvent(new CustomEvent(OLAY)); }catch(e){ /* eski tarayıcı */ }
+  }
+
+  return { kur, haberVer, OLAY };
 })();
 
 /* ==== js/core/hedefler.js ==== */
@@ -31334,6 +31463,46 @@ SP.Screens.today = (function(){
      HKM bu sisteme YAZMAZ: kuyruktan gelen her satir bir TEKLIFTIR ve
      kullanici gormeden hicbir sey uygulanmaz. Uygulayan da HKM degil,
      SPİ'in kendi kodudur. Kuyruk bossa hic cizilmez. */
+  /* ---------- King teklifi (Part 8a-3b) ----------
+
+     Ücretli iş King'in onay kapısında bekler (HKM core/king.py). Seçenek
+     metni ve sayılar HKM'den gelir; satır yalnız yazar ve onayı iletir. */
+  function kingTeklifRow(){
+    const liste = S.ui.kingTeklifler || [];
+    if(!liste.length) return '';
+    return K.Entry({ label:'KING TEKLİFİ', hint:'hkm', meta:liste.length + ' iş', wide:true,
+      body:html`
+        ${map(liste.filter(t => t.durum === 'ara_onay'), t => html`<div class="mt-8">
+          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
+          <div class="tiny mt-4">${t.metin}</div>
+          <div class="row wrap gap-8 mt-8">
+            ${K.Button({ label:'Devam', size:'sm', tone:'primary', act:'king-parca',
+              data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
+            ${K.Button({ label:'Dur ve bitir', size:'sm', act:'king-parca',
+              data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}
+          </div>
+        </div>`)}
+        ${map(liste.filter(t => t.durum !== 'ara_onay'), t => html`<div class="mt-8">
+          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
+          ${map(t.secenekler, (x, i) => html`<div class="tiny mt-4">${i + 1}) ${x.metin}</div>`)}
+          ${when(t.neden, () => K.Notice({ tone:'info', class:'mt-8',
+            body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
+              + ' — ' + t.neden + '.' }))}
+          <div class="row wrap gap-8 mt-8">
+            ${/* Düğme kısa: seçeneğin adı ve sayıları yukarıdaki satırda yazılı;
+                  uzun ad 390 pikselde satırdan taşıyordu. */''}
+            ${map(t.secenekler, (x, i) => K.Button({ label:(i + 1) + '. seçeneği onayla',
+              size:'sm', tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla',
+              data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
+            ${K.Button({ label:'İptal', size:'sm', act:'king-iptal',
+              data:{ 'data-id':String(t.id) } })}
+          </div>
+        </div>`)}
+        <p class="tiny dim mt-10">King ücretli bir işi onayın olmadan açmaz. Sınıf, maliyet
+          ve süre King’in hesabıdır (tahmin); sen onaylayınca iş BAM’da başlar ve sonucu
+          teklif olarak buraya gelir.</p>` });
+  }
+
   function hkmTeklifRow(){
     const liste = S.ui.hkmIntents || [];
     if(!liste.length) return '';
@@ -31456,6 +31625,7 @@ SP.Screens.today = (function(){
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${yedekUyarisi()}
       ${bekleyenOneriler()}
+      ${when((S.ui.kingTeklifler || []).length, () => html`<div class="mb-16">${K.Ledger([kingTeklifRow()])}</div>`)}
       ${when((S.ui.hkmIntents || []).length, () => html`<div class="mb-16">${K.Ledger([hkmTeklifRow()])}</div>`)}
       ${when((S.ui.hkmBildirim || []).length, () => html`<div class="mb-16">${K.Ledger([kingBildirimRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>
@@ -31568,6 +31738,31 @@ SP.Screens.today = (function(){
       SP.App.render();
     },
 
+    /* King'in teklifi (brand/ortak/kingteklif.js): onay ve iptal HKM'nin
+       tek kapısına gider; cevabı HKM kurar. */
+    async 'king-onayla'(el){
+      if(!SP.KingTeklif) return;
+      el.disabled = true;
+      const r = await SP.KingTeklif.onayla(el.dataset.id, el.dataset.secenek);
+      UI.toast(r.metin);
+      S.ui.kingTeklifler = SP.KingTeklif.liste();
+      SP.App.render();
+    },
+    async 'king-parca'(el){
+      if(!SP.KingTeklif) return;
+      el.disabled = true;
+      const r = await SP.KingTeklif.parca(el.dataset.id, el.dataset.karar);
+      UI.toast(r.metin);
+      S.ui.kingTeklifler = SP.KingTeklif.liste();
+      SP.App.render();
+    },
+    async 'king-iptal'(el){
+      if(!SP.KingTeklif) return;
+      const r = await SP.KingTeklif.iptal(el.dataset.id);
+      UI.toast(r.metin);
+      S.ui.kingTeklifler = SP.KingTeklif.liste();
+      SP.App.render();
+    },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-apply'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
@@ -40439,6 +40634,20 @@ SP.App = (function(){
           disaAktar:() => SP.Store.exportAll(), kayit:() => M.dataFootprint().total,
           yas:() => M.backupAgeDays(), isaretle:() => M.markBackup(),
           bildir:m => UI.toast(m, { life:12000 }) }).baslat();
+      }
+      /* King'in teklifleri (brand/ortak/kingteklif.js): onay bekleyen ücretli
+         işler Bugün'de. Modül King'e iş verince hemen, yoksa dakikada bir
+         tazelenir; HKM kapalıysa liste boş kalır ve kart çizilmez. */
+      if(window.LIFEOS && LIFEOS.KingTeklif){
+        SP.KingTeklif = LIFEOS.KingTeklif.kur({ hkm:() => SP.Beacon, modul:'spi' });
+        const kingTazele = () => SP.KingTeklif.cek().then(l => {
+          const once = JSON.stringify(S.ui.kingTeklifler || []);
+          S.ui.kingTeklifler = l;
+          if(JSON.stringify(l) !== once) render();
+        }).catch(() => {});
+        kingTazele();
+        window.addEventListener(LIFEOS.KingTeklif.OLAY, kingTazele);
+        setInterval(kingTazele, 60000);
       }
 
       /* Seviye kutlaması. İki yol da buraya çıkar:

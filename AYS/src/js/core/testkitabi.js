@@ -68,6 +68,14 @@ R.TestKitabi = (function(){
         + ((g.errors || []).join('; ') || g.note || ('HTTP ' + r.status)) };
     }
     const e = g.emir || {};
+    /* Onay kapısı: ücretli iş teklifte bekler; Bugün'deki kart tazelensin. */
+    if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
+    if(e.durum === 'teklif'){
+      return { ok:true, karar:g.karar, emirId:e.id, teklif:true,
+        metin:'King bu kitap için teklif hazırladı (iş emri #' + e.id + '). Bugün’deki King '
+          + 'teklifi kartında maliyeti, süreyi ve seçenekleri (tam kitap ya da yalnız 1. bölüm) '
+          + 'görüp onayla; onaylamadan iş açılmaz.' };
+    }
     const eksik = (e.kontrol || []).filter(m => !m.ok).map(m => m.not).join('; ');
     const soru = govde.bolumler.reduce((a, b) => a + b.adet, 0);
     return { ok:g.karar !== 'ret', karar:g.karar, emirId:e.id,

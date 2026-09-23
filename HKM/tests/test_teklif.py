@@ -104,8 +104,10 @@ def run():
         con = db.connect(":memory:")
         cfg = _cfg()
         t = teklif.kur(con, cfg, "test.kitabi", _kitap(3), king.ofisler_of, king.tahmini_sure)
-        eq([s["id"] for s in t["secenekler"]], ["tam", "kucuk"])
+        eq([s["id"] for s in t["secenekler"]], ["tam", "kucuk", "parca"])
         eq(len(t["secenekler"][1]["govde"]["kitap"]["bolumler"]), 1)
+        # Parca parca: ayni kitap, her bolumde durur; sinifi tamin aynisi.
+        eq((t["secenekler"][2]["govde"]["parcali"], t["secenekler"][2]["sinif"]), (True, "orta"))
         eq((t["secenekler"][0]["sinif"], t["secenekler"][1]["sinif"]), ("orta", "dusuk"))
         # Kitap her tikte bir bolum: uc bolum iki ek tik.
         ok(t["secenekler"][0]["sure"]["sn"] > t["secenekler"][1]["sure"]["sn"])
@@ -126,7 +128,7 @@ def run():
         r = king.emir_ac(con, _cfg(), "ays", "test.kitabi", _kitap(2), now=AN)
         e = r["emir"]
         t = e["teklif"]
-        eq((t["sinif"], [s["id"] for s in t["secenekler"]]), ("orta", ["tam", "kucuk"]))
+        eq((t["sinif"], [s["id"] for s in t["secenekler"]]), ("orta", ["tam", "kucuk", "parca"]))
         no(any("govde" in s for s in t["secenekler"]))
         eq(e["tahmin"]["sn"], t["secenekler"][0]["sure"]["sn"])
         # Onay kapisi (8a-3): is teklifte bekler; BAM'da is YOK.
@@ -194,7 +196,7 @@ def run():
         e = king.emir_ac(con, cfg, "hkm", "bam.arastirma", {"arastirma": {"konu": "Söğüt"}},
                          now=AN)["emir"]
         eq(king.teklif_cevap(con, cfg, "merhaba"), None)
-        ok("2. seçenek yok" in king.teklif_cevap(con, cfg, "2"))
+        ok("o seçenek yok" in king.teklif_cevap(con, cfg, "2"))
         t = king.teklif_cevap(con, cfg, "1", now=AN)
         ok(t.startswith("Onaylandı:") and "#%d" % e["id"] in t, t)
         eq(king.emir(con, e["id"])["durum"], "onaylandi")

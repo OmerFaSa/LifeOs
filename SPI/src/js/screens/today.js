@@ -679,6 +679,46 @@ SP.Screens.today = (function(){
      HKM bu sisteme YAZMAZ: kuyruktan gelen her satir bir TEKLIFTIR ve
      kullanici gormeden hicbir sey uygulanmaz. Uygulayan da HKM degil,
      SPİ'in kendi kodudur. Kuyruk bossa hic cizilmez. */
+  /* ---------- King teklifi (Part 8a-3b) ----------
+
+     Ücretli iş King'in onay kapısında bekler (HKM core/king.py). Seçenek
+     metni ve sayılar HKM'den gelir; satır yalnız yazar ve onayı iletir. */
+  function kingTeklifRow(){
+    const liste = S.ui.kingTeklifler || [];
+    if(!liste.length) return '';
+    return K.Entry({ label:'KING TEKLİFİ', hint:'hkm', meta:liste.length + ' iş', wide:true,
+      body:html`
+        ${map(liste.filter(t => t.durum === 'ara_onay'), t => html`<div class="mt-8">
+          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
+          <div class="tiny mt-4">${t.metin}</div>
+          <div class="row wrap gap-8 mt-8">
+            ${K.Button({ label:'Devam', size:'sm', tone:'primary', act:'king-parca',
+              data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
+            ${K.Button({ label:'Dur ve bitir', size:'sm', act:'king-parca',
+              data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}
+          </div>
+        </div>`)}
+        ${map(liste.filter(t => t.durum !== 'ara_onay'), t => html`<div class="mt-8">
+          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
+          ${map(t.secenekler, (x, i) => html`<div class="tiny mt-4">${i + 1}) ${x.metin}</div>`)}
+          ${when(t.neden, () => K.Notice({ tone:'info', class:'mt-8',
+            body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
+              + ' — ' + t.neden + '.' }))}
+          <div class="row wrap gap-8 mt-8">
+            ${/* Düğme kısa: seçeneğin adı ve sayıları yukarıdaki satırda yazılı;
+                  uzun ad 390 pikselde satırdan taşıyordu. */''}
+            ${map(t.secenekler, (x, i) => K.Button({ label:(i + 1) + '. seçeneği onayla',
+              size:'sm', tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla',
+              data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
+            ${K.Button({ label:'İptal', size:'sm', act:'king-iptal',
+              data:{ 'data-id':String(t.id) } })}
+          </div>
+        </div>`)}
+        <p class="tiny dim mt-10">King ücretli bir işi onayın olmadan açmaz. Sınıf, maliyet
+          ve süre King’in hesabıdır (tahmin); sen onaylayınca iş BAM’da başlar ve sonucu
+          teklif olarak buraya gelir.</p>` });
+  }
+
   function hkmTeklifRow(){
     const liste = S.ui.hkmIntents || [];
     if(!liste.length) return '';
@@ -801,6 +841,7 @@ SP.Screens.today = (function(){
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${yedekUyarisi()}
       ${bekleyenOneriler()}
+      ${when((S.ui.kingTeklifler || []).length, () => html`<div class="mb-16">${K.Ledger([kingTeklifRow()])}</div>`)}
       ${when((S.ui.hkmIntents || []).length, () => html`<div class="mb-16">${K.Ledger([hkmTeklifRow()])}</div>`)}
       ${when((S.ui.hkmBildirim || []).length, () => html`<div class="mb-16">${K.Ledger([kingBildirimRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>
@@ -913,6 +954,31 @@ SP.Screens.today = (function(){
       SP.App.render();
     },
 
+    /* King'in teklifi (brand/ortak/kingteklif.js): onay ve iptal HKM'nin
+       tek kapısına gider; cevabı HKM kurar. */
+    async 'king-onayla'(el){
+      if(!SP.KingTeklif) return;
+      el.disabled = true;
+      const r = await SP.KingTeklif.onayla(el.dataset.id, el.dataset.secenek);
+      UI.toast(r.metin);
+      S.ui.kingTeklifler = SP.KingTeklif.liste();
+      SP.App.render();
+    },
+    async 'king-parca'(el){
+      if(!SP.KingTeklif) return;
+      el.disabled = true;
+      const r = await SP.KingTeklif.parca(el.dataset.id, el.dataset.karar);
+      UI.toast(r.metin);
+      S.ui.kingTeklifler = SP.KingTeklif.liste();
+      SP.App.render();
+    },
+    async 'king-iptal'(el){
+      if(!SP.KingTeklif) return;
+      const r = await SP.KingTeklif.iptal(el.dataset.id);
+      UI.toast(r.metin);
+      S.ui.kingTeklifler = SP.KingTeklif.liste();
+      SP.App.render();
+    },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-apply'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },

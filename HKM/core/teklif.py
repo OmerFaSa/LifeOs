@@ -180,8 +180,8 @@ def butce_payi(con, cfg, m):
 
 # ------------------------------------------------------------ secenekler
 #
-# Tur basina bir kucultucu: (govde) -> (kucuk govde, ad) ya da None.
-# Yeni bir is turu tek satirla katilir; akis degismez.
+# Tur basina secenekler: {id: (govde) -> (yeni govde, ad) ya da None}.
+# Yeni bir is turu ya da secenek tek satirla katilir; akis degismez.
 
 def _kitap_kucuk(g):
     k = dict(g.get("kitap") or {})
@@ -189,6 +189,14 @@ def _kitap_kucuk(g):
         return None
     k["bolumler"] = k["bolumler"][:1]
     return dict(g, kitap=k), "yalnız 1. bölüm (fasikül)"
+
+
+def _kitap_parca(g):
+    """Parca parca: ayni kitap, her bolumden sonra durur ve onay bekler
+    (bam.py `_kitap_adimi`, ara_onay). Maliyet kontrolde kalir."""
+    if len((g.get("kitap") or {}).get("bolumler") or []) < 2:
+        return None
+    return dict(g, parcali=True), "bölüm bölüm, her bölümden sonra onayınla"
 
 
 def _kaynaksiz(anahtar):
@@ -201,11 +209,21 @@ def _kaynaksiz(anahtar):
     return f
 
 
-KUCULT = {
-    "test.kitabi": _kitap_kucuk,
-    "bam.urun": _kaynaksiz("urun"),
-    "bam.plan": _kaynaksiz("program"),
+SECENEK = {
+    "test.kitabi": {"kucuk": _kitap_kucuk, "parca": _kitap_parca},
+    "bam.urun": {"kucuk": _kaynaksiz("urun")},
+    "bam.plan": {"kucuk": _kaynaksiz("program")},
 }
+# Geriye uyum: tek kucultucu soran eski cagrilar.
+KUCULT = {t: d["kucuk"] for t, d in SECENEK.items() if "kucuk" in d}
+
+
+def uygula(tur, secenek, govde):
+    """Secenegin govdesi: (govde, ad) ya da None. «tam» govdeyi degistirmez."""
+    if secenek == "tam":
+        return govde, "tam"
+    f = (SECENEK.get(tur) or {}).get(secenek)
+    return f(govde) if f else None
 
 
 def _hesap(con, cfg, tur, govde, ofisler_of, tahmini_sure):
@@ -226,19 +244,31 @@ def kur(con, cfg, tur, govde, ofisler_of, tahmini_sure):
     tam = dict(_hesap(con, cfg, tur, govde, ofisler_of, tahmini_sure), id="tam",
                ad="tam", govde=govde)
     secenekler = [tam]
-    k = KUCULT.get(tur)
-    kucuk = k(govde) if k else None
-    if kucuk:
-        secenekler.append(dict(_hesap(con, cfg, tur, kucuk[0], ofisler_of, tahmini_sure),
-                               id="kucuk", ad=kucuk[1], govde=kucuk[0]))
+    for sid, f in (SECENEK.get(tur) or {}).items():
+        r = f(govde)
+        if not r:
+            continue
+        h = _hesap(con, cfg, tur, r[0], ofisler_of, tahmini_sure)
+        if sid == "parca":
+            # Parca parca TAM kitaptir; farki her bolumde durmasidir. Sinif ve
+            # maliyet tam secenegin aynisidir, bolum basina pay soylenir.
+            n = len((govde.get("kitap") or {}).get("bolumler") or []) or 1
+            h = dict(tam, butce=tam["butce"])
+            if tam["maliyet"].get("usd") is not None:
+                h["maliyet"] = dict(tam["maliyet"], metin="%s (bölüm başı ~%s)" % (
+                    tam["maliyet"]["metin"], _usd(tam["maliyet"]["usd"] / n)))
+        secenekler.append(dict(h, id=sid, ad=r[1], govde=r[0]))
+    ids = [x["id"] for x in secenekler]
     oneri, neden = "tam", None
-    if len(secenekler) > 1:
-        b = tam["butce"]
-        if b.get("sigar") is False:
-            oneri, neden = "kucuk", "tam seçenek bu ayın kalan bütçesine sığmıyor"
-        elif (b.get("pay_yuzde") or 0) > PAY_ESIGI:
-            oneri, neden = "kucuk", ("tam seçenek aylık bütçenin %%%d’inden fazlasını harcar"
-                                     % PAY_ESIGI)
+    b = tam["butce"]
+    if "kucuk" in ids and b.get("sigar") is False:
+        oneri, neden = "kucuk", "tam seçenek bu ayın kalan bütçesine sığmıyor"
+    elif "kucuk" in ids and (b.get("pay_yuzde") or 0) > PAY_ESIGI:
+        oneri, neden = "kucuk", ("tam seçenek aylık bütçenin %%%d’inden fazlasını harcar"
+                                 % PAY_ESIGI)
+    elif "parca" in ids and tam["sinif"] in ("yuksek", "ekstra"):
+        oneri, neden = "parca", ("%s sınıf bir iş: ilk bölümü görüp devam edersin, maliyet "
+                                 "kontrolde kalır" % tam["sinif_ad"])
     return {"sinif": tam["sinif"], "secenekler": secenekler, "oneri": oneri, "neden": neden,
             "metin": metin(secenekler, oneri, neden)}
 

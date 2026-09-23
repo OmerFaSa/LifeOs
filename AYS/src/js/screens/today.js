@@ -705,6 +705,46 @@ R.Screens.today = (function(){
      HKM bu sisteme YAZMAZ: kuyruktan gelen her satir bir TEKLIFTIR ve
      kullanici gormeden hicbir sey uygulanmaz. Uygulayan da HKM degil,
      AYS'in kendi kodudur. Kuyruk bossa bu kart hic cizilmez. */
+  /* ---------- King teklifi (Part 8a-3b) ----------
+
+     Ücretli iş King'in onay kapısında bekler (HKM core/king.py). Seçenek
+     metni ve sayılar HKM'den gelir; kart yalnız yazar ve onayı iletir. */
+  function KingTeklifKart(){
+    const liste = S.ui.kingTeklifler || [];
+    if(!liste.length) return '';
+    return c.Card({ title:'King teklifi', hint:'hkm', sub:liste.length + ' iş onayını bekliyor',
+      body:html`
+        ${map(liste.filter(t => t.durum === 'ara_onay'), t => html`<div class="mt-8">
+          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
+          <div class="tiny mt-4">${t.metin}</div>
+          <div class="row wrap gap-8 mt-8">
+            ${c.Button({ label:'Devam', size:'sm', tone:'primary', act:'king-parca',
+              data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
+            ${c.Button({ label:'Dur ve bitir', size:'sm', act:'king-parca',
+              data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}
+          </div>
+        </div>`)}
+        ${map(liste.filter(t => t.durum !== 'ara_onay'), t => html`<div class="mt-8">
+          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
+          ${map(t.secenekler, (x, i) => html`<div class="tiny mt-4">${i + 1}) ${x.metin}</div>`)}
+          ${when(t.neden, () => c.Notice({ tone:'info', class:'mt-8',
+            body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
+              + ' — ' + t.neden + '.' }))}
+          <div class="row wrap gap-8 mt-8">
+            ${/* Düğme kısa: seçeneğin adı ve sayıları yukarıdaki satırda yazılı;
+                  uzun ad 390 pikselde satırdan taşıyordu. */''}
+            ${map(t.secenekler, (x, i) => c.Button({ label:(i + 1) + '. seçeneği onayla',
+              size:'sm', tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla',
+              data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
+            ${c.Button({ label:'İptal', size:'sm', act:'king-iptal',
+              data:{ 'data-id':String(t.id) } })}
+          </div>
+        </div>`)}
+        <p class="tiny dim mt-10">King ücretli bir işi onayın olmadan açmaz. Sınıf, maliyet
+          ve süre King’in hesabıdır (tahmin); sen onaylayınca iş BAM’da başlar ve sonucu
+          teklif olarak buraya gelir.</p>` });
+  }
+
   function HkmTeklifKart(){
     const liste = S.ui.hkmIntents || [];
     const supheli = S.ui.hkmDoubts || [];
@@ -877,6 +917,7 @@ R.Screens.today = (function(){
       ${when(banners.length, () => c.Span(12, html`<div class="stack-sm">${banners}</div>`))}
       ${c.Span(12, R.Setup.needed() ? raw(R.Setup.card()) : NextUpCard())}
       ${when(R.Signals && R.Signals.current(), () => c.Span(12, SignalCard()))}
+      ${when((S.ui.kingTeklifler || []).length, () => c.Span(12, KingTeklifKart()))}
       ${when((S.ui.hkmIntents || []).length, () => c.Span(12, HkmTeklifKart()))}
       ${c.Span(12, HkmSerit())}
 
@@ -1006,6 +1047,31 @@ R.Screens.today = (function(){
     async 'hedef-plan-geri'(el){
       const r = await R.HedefPlan.geriAlHedef(el.dataset.id);
       UI.toast(r.ok ? 'Plan geri alındı; hafta taslağı eski sırasına döndü.' : (r.why || 'Geri alınamadı'));
+      R.App.render();
+    },
+    /* King'in teklifi (brand/ortak/kingteklif.js): onay ve iptal HKM'nin
+       tek kapısına gider; cevabı HKM kurar. */
+    async 'king-onayla'(el){
+      if(!R.KingTeklif) return;
+      el.disabled = true;
+      const r = await R.KingTeklif.onayla(el.dataset.id, el.dataset.secenek);
+      UI.toast(r.metin);
+      S.ui.kingTeklifler = R.KingTeklif.liste();
+      R.App.render();
+    },
+    async 'king-parca'(el){
+      if(!R.KingTeklif) return;
+      el.disabled = true;
+      const r = await R.KingTeklif.parca(el.dataset.id, el.dataset.karar);
+      UI.toast(r.metin);
+      S.ui.kingTeklifler = R.KingTeklif.liste();
+      R.App.render();
+    },
+    async 'king-iptal'(el){
+      if(!R.KingTeklif) return;
+      const r = await R.KingTeklif.iptal(el.dataset.id);
+      UI.toast(r.metin);
+      S.ui.kingTeklifler = R.KingTeklif.liste();
       R.App.render();
     },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },

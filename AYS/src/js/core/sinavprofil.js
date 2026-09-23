@@ -207,6 +207,14 @@ R.SinavProfil = (function(){
         + ((g.errors || []).join('; ') || g.note || ('HTTP ' + r.status)) };
     }
     const e = g.emir || {};
+    /* Onay kapısı: ücretli iş teklifte bekler; Bugün'deki kart tazelensin. */
+    if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
+    if(e.durum === 'teklif'){
+      return { ok:true, karar:g.karar, emirId:e.id, teklif:true,
+        metin:'King bu iş için teklif hazırladı (iş emri #' + e.id + '). Bugün’deki King teklifi '
+          + 'kartında maliyeti ve süreyi görüp onayla; onaylamadan iş açılmaz. Rapor gelince '
+          + 'Bugün’de teklif olarak görünür; onaylarsan profil eklenir.' };
+    }
     const hazir = e.durum === 'bitti';
     const eksik = (e.kontrol || []).filter(m => !m.ok).map(m => m.not).join('; ');
     return { ok:g.karar !== 'ret', karar:g.karar, emirId:e.id,

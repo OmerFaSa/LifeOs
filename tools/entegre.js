@@ -456,6 +456,31 @@ async function main(){
         console.log('  ' + s.id + ' → sohbetteki urun istegi King’e modul adina gitti');
       }
 
+      /* 2.77 — KING TEKLIFI (Part 8a-3b): ucretli is King'in onay kapisinda
+         bekler; modulun Bugun kartinda gorunur ve MODULDEN onaylanir. Onay
+         HKM'nin tek kapisina gider (POST /api/king/emir/<id>/onayla). */
+      const kt = await page.evaluate(async ([ns]) => {
+        const N = window[ns];
+        if(!N.KingTeklif) return { yok:true };
+        const l = await N.KingTeklif.cek();
+        N.S.ui.kingTeklifler = l;
+        N.App.go('today');
+        await new Promise(r => setTimeout(r, 500));
+        const dugme = document.querySelector('[data-act="king-onayla"]');
+        if(!dugme) return { kartYok:true, n:l.length };
+        const id = dugme.getAttribute('data-id');
+        dugme.click();
+        await new Promise(r => setTimeout(r, 1500));
+        return { n:l.length, id, kalan:(N.S.ui.kingTeklifler || []).length };
+      }, [s.ns]);
+      const ktEmir = kt.id ? (await (await hkmFetch('/api/king/emir/' + kt.id)).json()).emir : null;
+      if(kt.yok) hatalar.push(s.id + ': King teklifi istemcisi kurulmamis');
+      else if(kt.kartYok) hatalar.push(s.id + ': King teklifi kartta gorunmedi (' + kt.n + ' teklif)');
+      else if(!ktEmir || ['onaylandi', 'kismen_onay'].indexOf(ktEmir.durum) < 0 || kt.kalan){
+        hatalar.push(s.id + ': moduldeki onay isi acmadi (' + (ktEmir && ktEmir.durum) + ')');
+      }else console.log('  ' + s.id + ' → King teklifi Bugun kartinda goruldu, modulden onaylandi, '
+        + 'is #' + kt.id + ' BAM’da acildi');
+
       /* 2.8 — HEDEFTEN PLANA (ekip/PLAN.md Tur 2). Yalniz SPI: plan motoru
          orada. Zincir: SPI plani KENDI koduyla uygular -> King'e is emri ->
          King imkan kontrolu -> BAM Kayit + Planlama -> program kaydi ->

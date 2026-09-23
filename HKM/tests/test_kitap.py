@@ -142,3 +142,55 @@ def run():
         eq(con.execute("SELECT COUNT(*) FROM bam_kayitlar").fetchone()[0], 0)
         eq(intents.take(con, "ays")["intents"], [])
     test("hic soru gecmezse kitap yazilmaz, teklif birakilmaz", t_hepsi_duserse)
+
+    # Part 8b — parca parca: her bolumden sonra ara onay; «dur» uretilenle bitirir.
+    def t_parca_parca():
+        con, cfg, t = db.connect(":memory:"), _cfg(), _Tasiyici()
+        g = _govde(bolumler=[{"ad": "Tarih", "konular": [], "adet": 3},
+                             {"ad": "Coğrafya", "konular": [], "adet": 3},
+                             {"ad": "Vatandaşlık", "konular": [], "adet": 3}])
+        r = king.emir_ac(con, cfg, "ays", "test.kitabi", {"kitap": g}, now=AN)
+        eq(r["emir"]["durum"], "teklif")
+        e = king.teklif_onayla(con, cfg, r["emir"]["id"], "parca", now=AN)["emir"]
+        ok(e["konu"].endswith("her bölümden sonra onayınla"), e["konu"])
+        _tik(con, cfg, t, 2)                      # kayit + 1. bolum
+        e = king.emir(con, e["id"])
+        eq(e["durum"], "ara_onay")
+        eq(t.uretim, 1)
+        b = king.bildirimler(con, "ays")["bildirimler"][0]
+        eq(b["tur"], "ara_onay")
+        ok("1 / 3 bölüm" in b["metin"] and "«devam»" in b["metin"] and "ölçülen maliyet" in b["metin"],
+           b["metin"])
+        # Onaysiz ilerlemez: tik gecse de model cagrilmaz.
+        _tik(con, cfg, t, 2)
+        eq((king.emir(con, e["id"])["durum"], t.uretim), ("ara_onay", 1))
+        # Modulun karti ara onayi gosterir.
+        eq([x["durum"] for x in king.teklifler(con, "ays")], ["ara_onay"])
+        ok(king.parca(con, e["id"], "devam", now=AN)["ok"])
+        _tik(con, cfg, t, 1)
+        eq((king.emir(con, e["id"])["durum"], t.uretim), ("ara_onay", 2))
+        # «dur»: kitap uretilen IKI bolumle biter; ucuncu icin model cagrilmaz.
+        ok(king.parca(con, e["id"], "dur", now=AN)["ok"])
+        _tik(con, cfg, t, 2)
+        son = king.emir(con, e["id"])
+        eq((son["durum"], t.uretim), ("bitti", 2))
+        k = bam.kayit_getir(con, son["sonuc"]["kayit_id"])
+        eq([x["ad"] for x in k["govde"]["bolumler"]], ["Tarih", "Coğrafya"])
+        eq(intents.take(con, "ays")["intents"][0]["payload"]["bolum"], 2)
+        no(king.parca(con, e["id"], "devam", now=AN)["ok"])
+    test("parca parca: her bolumde ara onay; «dur» uretilenle bitirir", t_parca_parca)
+
+    def t_parca_sohbet():
+        con, cfg, t = db.connect(":memory:"), _cfg(), _Tasiyici()
+        kw = dict(kanal="telegram", hedef="7")
+        r = king.emir_ac(con, cfg, "ays", "test.kitabi", {"kitap": _govde()}, now=AN, **kw)
+        ok("«1», «2», «3»" in king.teklif_metni(r["emir"], kanal="telegram"))
+        ok(king.teklif_cevap(con, cfg, "3", now=AN, **kw).startswith("Onaylandı"))
+        _tik(con, cfg, t, 2)
+        eq(king.emir(con, r["emir"]["id"])["durum"], "ara_onay")
+        eq(king.teklif_cevap(con, cfg, "devam", kanal="telegram", hedef="8"), None)
+        ok("Devam" in king.teklif_cevap(con, cfg, "devam", now=AN, **kw))
+        _tik(con, cfg, t, 2)
+        eq(king.emir(con, r["emir"]["id"])["durum"], "bitti")
+        eq(king.teklif_cevap(con, cfg, "dur", **kw), None)   # acik ara onay yok
+    test("parca parca sohbetten: «3» secer, «devam» der", t_parca_sohbet)

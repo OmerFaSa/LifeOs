@@ -269,8 +269,15 @@ Kütüphanem; tahmin–gerçek maliyet sapması.
   `king.teklif_onayla` / `iptal`, `POST /api/king/emir/<id>/onayla`, sohbette ve
   Telegram'da «1 · 2 · iptal» (`king.teklif_cevap`), HKM › Ofis düğmeleri, Ayarlar ›
   Bütçe › «Düşük sınıf işleri sormadan yap». Kural işi sorulmaz. §8.28.
-- 🔜 8a-3b Modülün teklif kartı: AYS/SPİ/ESP Bugün'de «King teklifi» (seçenekler +
-  onayla/iptal), `GET` ile açık teklifler; `brand/ortak` tek kaynak. Sonra 8b.
+- ✅ 8a-3b Modülün teklif kartı: AYS/SPİ/ESP Bugün › «King teklifi» (seçenekler +
+  «N. seçeneği onayla» / İptal); `brand/ortak/kingteklif.js`, `GET /api/king/teklifler/<m>`;
+  AYS müfredat ve test kitabı istekleri artık «King onayladı» değil «teklif hazırladı» der.
+  Zincir testi `tools/entegre.js` §2.77 (sohbetten ürün → kart → modülden onay → BAM).
+- ✅ 8b-1 Parça parça + ara onay (HKM): teklifte üçüncü seçenek (`teklif.SECENEK`),
+  BAM `ara_onay`, `king.parca`, «devam / dur» (HKM, sohbet/Telegram, modül kartı). §8.28.
+- 🔜 8b-2 AYS test kitabı ekranı: sayfa/bölüm gezinme, «çözdüklerim» görünümü,
+  Kütüphanem (üretilenler, kaynak, ölçülen maliyet, kullanım yüzdesi); 60 soru tavanı
+  parça parça seçeneğinde genişleyebilir (şimdilik `kitap.MAX_TOPLAM` sabit).
 
 **Dilimler (sırayla, her biri test + commit + push):** 8a teklif (sınıf + maliyet +
 süre + onay) mevcut iş türleri için → 8b AYS fasikül/kitap parçalı + çözdüklerim +

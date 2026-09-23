@@ -775,6 +775,21 @@ def run_extra(S):
         eq(S.call("/api/king/emir/%d/onayla" % eid, body={})[0], 409)
         kod, cfgv = S.call("/api/config")
         eq(cfgv["king"], {"sormadan_dusuk": False})
+        # Modulun teklif karti: yalniz acik teklifler, govdesiz.
+        kod, r2 = S.call("/api/king/emir", body={"modul": "esp", "tur": "bam.urun", "govde": {
+            "urun": {"tur": "pankart", "konu": "Gitar bakımı"}}})
+        eq(r2["emir"]["durum"], "teklif")
+        eq(S.call("/api/king/teklifler/esp", token=None)[0], 401)
+        eq(S.call("/api/king/teklifler/king")[0], 404)
+        kod, l = S.call("/api/king/teklifler/esp")
+        eq((kod, [x["id"] for x in l["teklifler"]]), (200, [r2["emir"]["id"]]))
+        ok(l["teklifler"][0]["secenekler"][0]["metin"].startswith("tam: düşük sınıf"))
+        no("govde" in l["teklifler"][0]["secenekler"][0])
+        eq(S.call("/api/king/teklifler/ays")[1]["teklifler"], [])
+        # Ara onay ucu (8b): ara onayda olmayan is icin 409; yetki ister.
+        eq(S.call("/api/king/emir/%d/devam" % eid, body={}, token=None)[0], 401)
+        eq(S.call("/api/king/emir/%d/devam" % eid, body={})[0], 409)
+        eq(S.call("/api/king/emir/x/dur", body={})[0], 400)
     test("teklif onay ucu: yetkili, secenekli, bir kez", t_teklif_onay_ucu)
 
     def t_yedek_endpoints():

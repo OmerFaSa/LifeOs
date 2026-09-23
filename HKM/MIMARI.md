@@ -915,14 +915,27 @@ sapmasını (`king.maliyet_sapmasi`) gösterir.
 Onay üç yoldan gelir ve hepsi `king.teklif_onayla(emir, secenek)`'ten geçer:
 HKM › Ofis › King kuyruğundaki seçenek düğmeleri (`POST /api/king/emir/<id>/onayla`),
 sohbet kanalı («1», «2», «iptal»; `king.teklif_cevap` — yalnız aynı kanal ve alıcının
-en yeni teklifi, yerel sohbette HKM'den açılan) ve modülün teklif kartı. Onay anında
+en yeni teklifi, yerel sohbette HKM'den açılan) ve modülün teklif kartı (AYS/SPİ/ESP
+Bugün › «King teklifi»; `brand/ortak/kingteklif.js`, `GET /api/king/teklifler/<modül>`;
+modül King'e iş verince `lifeos:king` olayıyla hemen, yoksa dakikada bir tazelenir). Onay anında
 imkân kontrolü YENİDEN yapılır (bütçe ya da kuyruk değişmiş olabilir). Küçük seçenek
 gövdeyi `KUCULT` ile yeniden kurar, konu bunu söyler. Kural işi (model yok, bedava)
 sorulmaz; düşük sınıfı kullanıcı Ayarlar › Bütçe › «Düşük sınıf işleri sormadan yap»
 ile açabilir (`king.sormadan_dusuk`); orta ve üstü her zaman sorar. King'in güncellik
 turunun açtığı yeni sürüm araştırması da teklif olarak bekler.
+**Parça parça ve ara onay (8b).** Seçenekler tür başına bir sözlüktür
+(`teklif.SECENEK`: tam · küçük · parça). Test kitabında «bölüm bölüm, her bölümden
+sonra onayınla» seçeneği tam kitabın aynısıdır (sınıf ve maliyet aynı, bölüm başı
+pay söylenir); yüksek ve ekstra sınıfta önerilir. Seçilirse iş gövdesi `parcali`
+taşır; BAM her bölümden sonra `ara_onay`da durur (`bam._kitap_adimi`), tik geçse de
+model çağrılmaz. King bölümün kalite sonucunu ve o ana kadarki ölçülen maliyeti
+bildirir (Telegram'a da gider). «devam» (`bam.devam`) sıradaki bölümü üretir, «dur»
+(`bam.kes`) kitabı üretilen bölümlerle bitirip modüle teklif eder; hiçbir bölüm
+kaybolmaz. Yollar: `king.parca`, `POST /api/king/emir/<id>/devam|dur`, sohbette
+«devam» / «dur», HKM King kuyruğu ve modül kartı düğmeleri.
 Testler: `tests/test_teklif.py`, `tests/test_butce.py`, `tests/test_urun.py`,
-`tests/test_daemon.py`; üretimi sınayan testler onayı `tests/yardim.py onayla` ile verir.
+`tests/test_kitap.py`, `tests/test_daemon.py`; üretimi sınayan testler onayı
+`tests/yardim.py onayla` ile verir.
 
 ## 9. Fazlar
 
