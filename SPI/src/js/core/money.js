@@ -114,7 +114,7 @@ SP.Money = (function(){
     rows.forEach(r => {
       const c = SP.Nutri.contribution(r.item.foodId, (Number(r.item.kg) || 0) * 1000);
       if(!c) return;
-      kcal += c.kcal; protein += c.protein; fiber += c.fiber;
+      kcal += c.kcal; protein += c.protein; if(c.fiber != null) fiber += c.fiber;
       SP.Nutri.MICROS.forEach(id => { if(c.micro[id] != null) got[id] += c.micro[id]; });
     });
 
@@ -180,7 +180,7 @@ SP.Money = (function(){
      ayni tabloda bulusturur. Birim: bir birim besin ogesi basina TL. */
   function costPerNutrient(nutrientId, limit){
     const rows = SP.FOODS.map(f => {
-      const per100 = f.micro ? f.micro[nutrientId] : null;
+      const per100 = SP.Nutri.per100Of(f, nutrientId);
       if(per100 == null || per100 <= 0) return null;
       const p = priceOf(f.id);
       if(p.tl == null) return null;

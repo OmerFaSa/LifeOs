@@ -69,7 +69,7 @@
       expect('calcium' in f.micro).toBe(false);
       expect(f.portions).toEqual([{ label:'1 su bardağı', g:170 }]);
       expect([f.bam.kayitId, f.bam.dogruluk, f.id.slice(0, 2)]).toEqual([7, 'kaynakli', 'u-']);
-      expect(s.onizleme.satirlar[1]).toContain('11 tanesi bilinmiyor');
+      expect(s.onizleme.satirlar.join(' | ')).toContain('11 tanesi bilinmiyor');
     });
 
     it('besin: tutmayan enerji, yanlış kimlik ve yanlış tür reddedilir', () => {

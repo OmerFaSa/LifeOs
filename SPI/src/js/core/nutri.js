@@ -235,8 +235,10 @@ SP.Nutri = (function(){
     const k = (Number(grams) || 0) / 100;
     const out = {
       food:f, grams:Number(grams) || 0,
-      kcal:f.kcal * k, protein:f.p * k, fat:f.f * k, sat:(f.sat || 0) * k,
-      carb:f.c * k, fiber:(f.fib || 0) * k,
+      /* Bilinmeyen doymuş yağ ve lif SIFIR DEĞİLDİR (kullanıcı ya da BAM
+         gıdasında boş kalabilir): null döner, toplayan «bilinmiyor» sayar. */
+      kcal:f.kcal * k, protein:f.p * k, fat:f.f * k, sat:f.sat == null ? null : f.sat * k,
+      carb:f.c * k, fiber:f.fib == null ? null : f.fib * k,
       micro:{}, flags:f.flags || [], ironType:f.ironType || 'nonheme',
     };
     MICROS.forEach(id => {
@@ -268,14 +270,19 @@ SP.Nutri = (function(){
     const raw = { kcal:0, protein:0, fat:0, sat:0, carb:0, fiber:0, micro:{} };
     MICROS.forEach(id => { raw.micro[id] = 0; });
     const unknown = {};
+    /* Tanınmayan GIDA (silinmiş kullanıcı gıdası, eski kimlik) ayrı sayılır:
+       `unknown` değeri bilinmeyen besin öğesidir, gıda değil. */
+    const unknownFoods = [];
     let hemeIron = 0, nonHemeIron = 0;
     const flags = {};
 
     items.forEach(it => {
       const c = contribution(it.foodId, it.g);
-      if(!c) return;
+      if(!c){ unknownFoods.push(it.foodId); return; }
       raw.kcal += c.kcal; raw.protein += c.protein; raw.fat += c.fat;
-      raw.sat += c.sat; raw.carb += c.carb; raw.fiber += c.fiber;
+      raw.carb += c.carb;
+      if(c.sat == null) unknown.sat = (unknown.sat || 0) + 1; else raw.sat += c.sat;
+      if(c.fiber == null) unknown.fiber = (unknown.fiber || 0) + 1; else raw.fiber += c.fiber;
       MICROS.forEach(id => {
         if(c.micro[id] == null){ unknown[id] = (unknown[id] || 0) + 1; return; }
         raw.micro[id] += c.micro[id];
@@ -346,7 +353,7 @@ SP.Nutri = (function(){
     absorbed.iodine = raw.micro.iodine * 0.9;
 
     return {
-      raw, absorbed, notes, unknown,
+      raw, absorbed, notes, unknown, unknownFoods,
       iron:{ heme:hemeIron, nonHeme:nonHemeIron, nonHemeFactor:U.round(nonHemeFactor, 3) },
     };
   }
@@ -359,6 +366,7 @@ SP.Nutri = (function(){
     MICROS.forEach(id => { total.micro[id] = 0; total.absorbed[id] = 0; });
     const notes = [];
     const unknown = {};
+    const unknownFoods = [];
 
     rows.forEach(meal => {
       const a = absorbMeal(meal.items || []);
@@ -370,11 +378,13 @@ SP.Nutri = (function(){
       });
       a.notes.forEach(n => notes.push(Object.assign({ slot:meal.slot }, n)));
       Object.keys(a.unknown).forEach(k => { unknown[k] = (unknown[k] || 0) + a.unknown[k]; });
+      a.unknownFoods.forEach(id => unknownFoods.push(id));
     });
 
     total.meals = rows.length;
     total.notes = notes;
     total.unknown = unknown;
+    total.unknownFoods = unknownFoods;
     total.empty = rows.length === 0;
     return total;
   }
@@ -455,9 +465,17 @@ SP.Nutri = (function(){
   /* Bir acigi kapatmak icin en verimli gidalar — 100 gramda en cok o ogeyi
      tasiyanlar. Emilim tipi de dikkate alinir: demir icin hayvansal kaynak
      one gecer. */
+  /* Protein ve lif MAKRODUR: gıdada `micro` altında değil `p` ve `fib`
+     alanındadır. Önceden `micro` altında aranıyor ve liste boş dönüyordu. */
+  function per100Of(f, nutrientId){
+    if(nutrientId === 'protein') return f.p;
+    if(nutrientId === 'fiber') return f.fib;
+    return f.micro ? f.micro[nutrientId] : null;
+  }
+
   function sourcesFor(nutrientId, limit){
     const rows = SP.FOODS.map(f => {
-      const v = f.micro ? f.micro[nutrientId] : null;
+      const v = per100Of(f, nutrientId);
       if(v == null || v <= 0) return null;
       const bonus = nutrientId === 'iron' && f.ironType === 'heme' ? 2.5 : 1;
       return { food:f, per100:v, score:v * bonus };
@@ -516,6 +534,6 @@ SP.Nutri = (function(){
     MICROS, LAB_LINKS, ABSORB_BASE,
     bmr, tdee, activityFactor, baseRda, labAdjust, targets,
     contribution, portionGrams, absorbMeal, dayTotals, windowAverage,
-    gaps, sourcesFor, householdSplit,
+    gaps, sourcesFor, per100Of, householdSplit,
   };
 })();

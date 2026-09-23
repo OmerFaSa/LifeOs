@@ -206,13 +206,19 @@ SP.Bilgi = (function(){
         kcal:s.v.kcal, p:s.v.p, f:s.v.f, c:s.v.c, sat:s.v.sat, sugar:s.v.sugar, fib:s.v.fib,
         micro:s.micro, portions:s.portions,
         bam:{ kayitId:kid, dogruluk:dogrulandi ? 'kaynakli' : 'dogrulanmadi', at, kaynak } });
+      /* DİYETE İŞLEME (8c-3): hedef payını nutri.js hesaplar; profil eksikse
+         pay yazılmaz, uydurulmaz. */
+      const t = SP.Nutri && SP.Nutri.targets ? SP.Nutri.targets() : null;
+      const pay = t && t.ok && t.protein && t.protein.min
+        ? ['100 g, günlük protein hedefinin (' + Math.round(t.protein.min) + ' g) %'
+          + Math.round(s.v.p / t.protein.min * 100) + '’ini karşılar (hesaplandı)'] : [];
       return { ok:true, tur, yazilacak:{ food },
-        onizleme:{ baslik:s.ad + ' — 100 g', satirlar:[
+        onizleme:{ baslik:s.ad + ' — 100 g', satirlar:pay.concat([
           yaz(s.v.kcal) + ' kcal · protein ' + yaz(s.v.p) + ' g · yağ ' + yaz(s.v.f)
             + ' g · karbonhidrat ' + yaz(s.v.c) + ' g',
           (Object.keys(s.micro).length + ' mikro besin kaynaklı; ' + s.eksikMikro
             + ' tanesi bilinmiyor (sıfır sayılmaz)'),
-          dogrulandi ? 'Etiket: BAM · kaynaklı (' + kaynak + ' kaynak)' : 'Etiket: BAM · doğrulanmadı'],
+          dogrulandi ? 'Etiket: BAM · kaynaklı (' + kaynak + ' kaynak)' : 'Etiket: BAM · doğrulanmadı']),
         uyari } };
     }
 
@@ -229,11 +235,15 @@ SP.Bilgi = (function(){
       const uyari = [];
       const kendi = SP.S.prices && SP.S.prices[foodId];
       if(kendi && kendi.tl) uyari.push('Kendi fişin (' + yaz(kendi.tl) + ' TL/kg) önce gelir; bu tahmin onun altında durur.');
+      /* Gram protein başına maliyet (8c-3): «en ucuz protein» listesiyle aynı
+         formül (money.js costPerNutrient): TL/kg ÷ (100 g'daki protein × 10). */
+      const proteinTl = food.p > 0 ? ['Gram protein başına ' + U().fmtNet(U().round(s.tlKg / (food.p * 10), 3))
+        + ' TL (hesaplandı; fiyat tahmin)'] : [];
       return { ok:true, tur, yazilacak:{ foodId, fiyat:{ tl:s.tlKg, at:s.tarih || at, kayitId:kid,
           n:s.satir.length, source:'bam' } },
         onizleme:{ baslik:food.name + ' — ortanca ' + yaz(s.tlKg) + ' TL/kg (tahmin)',
-          satirlar:s.satir.map(x => (x.market || 'market') + ': ' + yaz(x.tl) + ' TL / '
-            + yaz(x.g) + ' g = ' + yaz(x.tlKg) + ' TL/kg' + (x.tarih ? ' · ' + x.tarih : '')),
+          satirlar:proteinTl.concat(s.satir.map(x => (x.market || 'market') + ': ' + yaz(x.tl) + ' TL / '
+            + yaz(x.g) + ' g = ' + yaz(x.tlKg) + ' TL/kg' + (x.tarih ? ' · ' + x.tarih : ''))),
           uyari } };
     }
 

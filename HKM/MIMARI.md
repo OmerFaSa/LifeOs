@@ -988,6 +988,15 @@ fiyat → `meta/bamFiyat` (TL/kg ve ortancayı SPİ hesaplar; `money.priceOf` s�
 BAM tahmini > tohum), yer → `meta/yerler` (Mutfak › Yerler). Tabloda olmayan gıdanın fiyatı
 yazılmaz. Hepsi «Geri al»lı. Testler: `SPI/src/tests/bilgi.test.js`, `tools/entegre.js` §2.80.
 
+**Diyete işleme (8c-3):** eklenen gıda `SP.FOODS`'a katıldığı için öğün, açık, kaynak ve
+sepet hesabına kendiliğinden girer; hesap `nutri.js`/`money.js`, model değil. Önizleme
+«100 g, günlük protein hedefinin %N'i» ve «gram protein başına X TL» der (profil eksikse
+pay yazılmaz). Yolda düzeltilen üç hata: protein ve lif «en yoğun / en ucuz kaynak»
+listelerinde boştu (`micro` altında aranıyordu → `Nutri.per100Of`); bilinmeyen doymuş yağ
+ve lif sıfır sayılıyordu (artık `unknown.sat/fiber`); denetimin «N kalem tanınmadı»
+uyarısı değeri bilinmeyen mikroyu gıda sanıyordu (artık `dayTotals().unknownFoods`).
+Test: `SPI/src/tests/diyet.test.js`.
+
 ## 8.31 Bildirim politikası ve kolaylıklar — `core/bildirim.py`, `core/eksik.py` (Grup 1)
 
 Kullanıcının dikkati korunur, hiçbir mesaj kaybolmaz:

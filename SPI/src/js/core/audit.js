@@ -126,10 +126,13 @@ SP.Audit = (function(){
     let bilinmeyen = 0;
     const ornek = [];
     kayitli.forEach(function(d){
+      /* `unknown` değeri bilinmeyen BESİN ÖĞESİDİR (BAM gıdasında boş kalan
+         mikro); tanınmayan GIDA `unknownFoods`tadır. İkisini karıştırmak
+         «calcium tanınmadı» gibi anlamsız bir uyarı üretiyordu. */
       const t = SP.Nutri.dayTotals(d);
-      Object.keys((t && t.unknown) || {}).forEach(function(k){
+      ((t && t.unknownFoods) || []).forEach(function(k){
         bilinmeyen++;
-        if(ornek.length < 5) ornek.push(k);
+        if(ornek.indexOf(k) < 0 && ornek.length < 5) ornek.push(k);
       });
     });
     if(bilinmeyen >= 3){

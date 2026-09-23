@@ -20,7 +20,7 @@
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
 **Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · ✅ Grup 4 ·
-✅ 8c-2 · 🔜 8c-3 · ⏳ 8d · ⏳ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
+✅ 8c-2 · ✅ 8c-3 · 🔜 8d · ⏳ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
 
@@ -94,17 +94,11 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   yeniden çeker + sınar + yazar (besin → kullanıcı gıdası `bam` etiketli; fiyat →
   `meta/bamFiyat`, `priceOf`: fiş > BAM tahmini > tohum; yer → Mutfak › Yerler); geri
   alınır. SPİ 1290/1290, duman + a11y + 390px düzen, `tools/entegre.js` §2.80 temiz.
-- 🔜 8c-3 Diyete otomatik işleme — aşağıdaki iki açık + önizlemede hedef payı.
-  **8c-3 için bulunan iki şey (önce test, sonra düzelt):**
-  - `SPI/src/js/core/money.js` `costPerNutrient` yalnız `f.micro[id]` okur: «gram protein
-    başına maliyet» (kullanıcının örneği: bitkisel protein listesi) boş döner. `protein`
-    → `f.p`, `fiber` → `f.fib` okunmalı.
-  - `core/nutri.js` `contribution`: `sat:(f.sat || 0)`, `fiber:(f.fib || 0)` — kullanıcı/BAM
-    gıdasında bilinmeyen doymuş yağ ve lif SIFIR sayılıyor (AGENTS §1.2). Mikrolar için
-    `unknown` sayacı zaten var; bu ikisi de bilinmiyor diye sayılmalı.
-  - 8c-3'ün geri kalanı: eklenen BAM gıdası `SP.FOODS`'a katıldığı için öğün, açık
-    (`gaps`), `sourcesFor` hesabına kendiliğinden girer; ek iş gerekirse yalnız bu
-    ikisi ve önizlemede «100 g'da protein hedefinin %N'i» (hesap `nutri.js`).
+- ✅ 8c-3 Diyete otomatik işleme (HKM MIMARI §8.30 «Diyete işleme»): eklenen gıda öğün,
+  açık, kaynak ve sepet hesabına kendiliğinden girer; önizleme protein hedef payını ve gram
+  protein maliyetini söyler. Düzeltilen üç hata (önce testleri): protein/lif kaynak ve
+  «en ucuz» listeleri boştu; bilinmeyen doymuş yağ/lif sıfır sayılıyordu; «N kalem
+  tanınmadı» denetimi bilinmeyen mikroyu gıda sanıyordu. SPİ 1294/1294, duman temiz.
 - ⏳ 8d ESP ünite/ders paketi: `unite.add` — `lessons.js` ünite şeması + SRS kartları +
   pratik soruları; merdivene (`curriculum.js`) bağlı; gitar verisi `guitar_tabs.js` şemasında.
 - ⏳ 8e Depo önce (King teklifinde «zaten var, bedava» / «tazeleyeyim mi?»), tazelik,
