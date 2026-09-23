@@ -19,7 +19,7 @@
 4. **KAYIP YOK:** her grup (ya da büyük madde) bitince commit + push (`main`) + burada ✅.
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
-**Durum:** ✅ 2a arşiv · ✅ 2b tarama · 🔜 Grup 1 · ⏳ Grup 2 · ⏳ Grup 3 · ⏳ Grup 4 ·
+**Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · 🔜 Grup 2 · ⏳ Grup 3 · ⏳ Grup 4 ·
 ⏳ 8c-2 · ⏳ 8c-3 · ⏳ 8d · ⏳ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
@@ -162,6 +162,19 @@ Hâlâ açık: Y10 alıcısı · Y1'in yeri (HKM içi öneri) · telefonun ağda
   - ✅ 14 «Bir daha sorma»: soru türünü ya da günün öneri kuralını susturur (`susturmalar`
     tablosu; brifing susturulan öneriyi üretmez). **bio_red susturulamaz.** Ayarlar'da
     «Yeniden sor». `POST /api/bildirim/ac|sustur`.
+  - ✅ 15 Cevapsız teklif `teklif_omru_gun` (3) gün sonra kapanır ve tek mesajla söylenir
+    (`bildirim.bayatlari_kapat`, niyet durumu `expired`, King teklifi `iptal`).
+  - ✅ 19 Akşam «yarın şunlar var»: modüller yarının işlerini kendi seçer (`hedefag.js`
+    `yarin` kancası; AYS plan blokları, ESP sıradaki eylem, üçünde alışkanlık) → HKM
+    `yarin_ozet`; akşam kapanışı (yoksa yoklama) en çok 3 işi dizer. «yarın hafif» →
+    `load.reduce` teklifi. `GET /api/hedefler` → `yarin`.
+  - ✅ 46 Önce depo: aynı konuda depo kaydı King teklifinin en üstünde (ücretsiz, hemen;
+    ≤90 gün ise önerilir; seçilirse iş açılmaz). `teklif.depo_secenegi`, `king._depodan_ver`.
+    Sohbette rakam SIRADIR («1» = en üstteki), ad seçeneğin kendisidir («tam»).
+  - ✅ 11 Toplu onay: modüllerin HKM teklifi kartında «Hepsini kaydet (N)» (yalnız okunabilen
+    `kayit.add`; her biri modülün kendi yolundan geri alınır).
+  - Grup 1 denetimi: HKM 553/553, AYS 1645, SPİ 1275, ESP 1317; üç duman testi, HKM yüzü ve
+    `tools/entegre.js` (yeni §2.78 kısa kayıt + toplu onay, §2.79 yarın) temiz. MIMARI §8.31.
 
 ## Kullanıcı kolaylığı fikirleri · 16 hızlı kazanç ONAYLI, gerisi ÖNERİ
 

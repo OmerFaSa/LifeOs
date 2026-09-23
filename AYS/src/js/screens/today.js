@@ -765,6 +765,11 @@ R.Screens.today = (function(){
               act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } })}
           </div>
         </div>`)}
+        ${when(topluKayitlar().length >= 2, () => html`<div class="row gap-8 mt-8">
+          ${c.Button({ label:'Hepsini kaydet (' + topluKayitlar().length + ')', size:'sm',
+            tone:'primary', act:'hkm-toplu' })}
+          <span class="tiny dim">Yalnız okunabilen günlük kayıtlar; her biri Ofis ekranından geri alınır.</span>
+        </div>`)}
         ${map(liste, n => html`<div class="mt-8">
           ${c.Notice({ tone:'info', body:n.note })}
           ${when(n.kind === 'kayit.add', () => KayitOkuma(n))}
@@ -972,6 +977,30 @@ R.Screens.today = (function(){
     if(runningBlock()) startTick(); else stopTick();
   }
 
+  /* TOPLU ONAY yalniz KUCUK tekliflerde: gunluk kayit (kayit.add), AYS'nin
+     okuyabildigi ve Ofis'ten geri alinabilen. Plan, materyal, kitap gibi
+     orta aksiyonlar tek tek onaylanir (AGENTS.md §1.9). */
+  function topluKayitlar(){
+    return (S.ui.hkmIntents || []).filter(n => n.kind === 'kayit.add'
+      && n.okuma && n.okuma.yazilacak && n.okuma.yazilacak.length && R.Beacon.canApply(n));
+  }
+
+  async function hkmToplu(){
+    const l = topluKayitlar();
+    let yazilan = 0, kalan = 0;
+    for(const n of l){
+      const r = await R.Beacon.resolveIntent(n, 'apply');
+      if(r.ok){
+        yazilan++;
+        S.ui.hkmIntents = (S.ui.hkmIntents || []).filter(x => x.id !== n.id);
+      }else kalan++;
+    }
+    if(yazilan) R.UI.onayMuhru();
+    UI.toast(yazilan + ' kayıt yazıldı' + (kalan ? ', ' + kalan + ' tanesi yazılamadı (kartta duruyor)' : '')
+      + '. Yanlış olanı Ofis ekranından geri alabilirsin.');
+    R.App.render();
+  }
+
   /* HKM teklifine verilen cevabin TEK yolu. */
   async function hkmCevap(id, action){
     const liste = S.ui.hkmIntents || [];
@@ -1074,6 +1103,7 @@ R.Screens.today = (function(){
       S.ui.kingTeklifler = R.KingTeklif.liste();
       R.App.render();
     },
+    async 'hkm-toplu'(){ await hkmToplu(); },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-seen'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },

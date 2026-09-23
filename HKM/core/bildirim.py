@@ -197,3 +197,46 @@ def susturuldu_mu(con, anahtar):
 def susturulanlar(con):
     return [dict(r) for r in con.execute(
         "SELECT anahtar, ad, created_at FROM susturmalar ORDER BY created_at DESC")]
+
+
+# ------------------------------------------------------- cevapsiz teklif
+
+MODUL_AD = {"ays": "AYS", "spi": "SPİ", "esp": "ESP", "hkm": "HKM"}
+
+
+def bayatlari_kapat(con, cfg, now):
+    """N gunden eski CEVAPSIZ teklifleri kapatir ve bunu SOYLER (fikir 15).
+
+    Modul teklifi «expired» olur (uygulanmadi, istenmedi de sayilmaz);
+    King'in onay bekleyen teklifi iptal olur, BAM'da is acilmamistir.
+    Kapananlar tek mesajda soylenir; kanal yoksa HKM sohbetine yazilir.
+    Donus: kapananlarin satirlari."""
+    from core import db, king, outbox, patron, schedule
+    gun = int(settings(cfg).get("teklif_omru_gun") or 3)
+    sinir = (now - datetime.timedelta(days=gun)).isoformat(timespec="seconds")
+    t = now.isoformat(timespec="seconds")
+    kapanan, ilk = [], None
+    for r in con.execute("SELECT * FROM intents WHERE state IN ('pending','delivered') "
+                         "AND created_at < ? ORDER BY id", (sinir,)).fetchall():
+        db.set_intent_state(con, r["id"], "expired", t)
+        kapanan.append("%s: %s" % (MODUL_AD.get(r["module"], r["module"]), str(r["note"])[:90]))
+        ilk = ilk or ("n%d" % r["id"])
+    for r in con.execute("SELECT id FROM is_emirleri WHERE durum='teklif' AND updated_at < ? "
+                         "ORDER BY id", (sinir,)).fetchall():
+        e = king.emir(con, r["id"])
+        e["durum"] = "iptal"
+        king._yaz(con, e, now)
+        king.bildir(con, e["modul"], e["id"], "iptal",
+                    "«%s» teklifi %d gün cevapsız kaldığı için kapandı; iş açılmadı."
+                    % (e["konu"], gun), now=now)
+        kapanan.append("King teklifi: «%s»" % e["konu"])
+        ilk = ilk or ("e%d" % r["id"])
+    if not kapanan:
+        return []
+    metin = ("%d gündür cevaplanmayan %d teklif kapandı:\n%s\nHiçbiri uygulanmadı; istersen "
+             "yeniden isteyebilirsin." % (gun, len(kapanan), "\n".join("• " + k for k in kapanan)))
+    patron.log(con, "local", "manager", metin, agent="king")
+    kanal = schedule.acik_kanal(cfg)
+    if kanal:
+        outbox.enqueue(con, kanal, "kapanan:%s" % ilk, now.date().isoformat(), metin, now=now)
+    return kapanan

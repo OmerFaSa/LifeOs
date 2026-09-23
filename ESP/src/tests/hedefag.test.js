@@ -62,6 +62,30 @@
       expect(bu === undefined || bu === window).toBe(true);
     });
 
+    it('yarının ilk işleri de gider; kanca bozuksa hedefler yine gider', async () => {
+      /* Akşam «yarın şunlar var» mesajı (HKM schedule): işleri modülün KENDİ
+         kodu seçer; HKM yalnız dizer. Metin kısalır, dakika tam sayı olur. */
+      const giden = [];
+      const f = async (url, o) => { giden.push(JSON.parse(o.body));
+        return { status:200, json:async () => ({ ok:true }) }; };
+      const ag = A().kur({ hkm:() => beacon(true), modul:'ays', ozetler:() => [],
+        yarin:async () => ({ gun:'2026-09-24', isler:[
+          { metin:'Matematik · Türev '.repeat(10), dk:90.4 }, { metin:'Paragraf', dk:null },
+          { metin:'', dk:5 }] }), fetch:f });
+      await ag.gonder();
+      const y = giden[0].yarin;
+      expect(y.gun).toBe('2026-09-24');
+      expect(y.isler.length).toBe(2);
+      expect(y.isler[0].metin.length <= 80).toBe(true);
+      expect(y.isler[0].dk).toBe(90);
+      expect(y.isler[1].dk).toBe(null);
+      const bozuk = A().kur({ hkm:() => beacon(true), modul:'ays', ozetler:() => [A().ozet(H)],
+        yarin:async () => { throw new Error('x'); }, fetch:f });
+      expect((await bozuk.gonder()).ok).toBe(true);
+      expect(giden[1].yarin).toBe(undefined);
+      expect(giden[1].hedefler.length).toBe(1);
+    });
+
     it('HKM hata verirse sessizce düşer', async () => {
       const ag = A().kur({ hkm:() => beacon(true), modul:'spi', ozetler:() => [],
         fetch:async () => { throw new Error('ağ yok'); } });

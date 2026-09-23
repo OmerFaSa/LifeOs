@@ -208,6 +208,13 @@ def respond(con, text, date=None, th=None, channel="local", now=None,
     # 7 saat uyudum». Aksam yoklamasinin cevabi budur. HKM kaydi YAZMAZ ve
     # sayisini OKUMAZ: her parca ilgili modulun kuyruguna teklif olur, modul
     # kendi ayristiricisiyla okur ve onayla yazar.
+    # «Yarin hafif»: aksam ozetine tek kelimelik cevap (core/schedule.py).
+    if komut is None and dil.yarin_hafif(text):
+        cevap = _kirp(_hafiflet(con, date))
+        if kayit:
+            log(con, channel, "manager", cevap, now, agent=agent)
+        return {"command": "hafif", "text": cevap, "date": date}
+
     if komut is None:
         bildirim = dil.rapor(text) or dil.kisa_kayit(text)
         if bildirim:
@@ -309,6 +316,26 @@ def respond(con, text, date=None, th=None, channel="local", now=None,
     if kayit:
         log(con, channel, "manager", cevap, now, agent=agent)
     return {"command": komut, "text": cevap, "date": date}
+
+
+def _hafiflet(con, date):
+    """Yarin icin modullere yuk azaltma TEKLIFI. Oran verilmez: ne kadar
+    azalacagina modul kendi kuraliyla karar verir (intents load.reduce)."""
+    from core import hedefag
+    yarin = (datetime.date.fromisoformat(date) + datetime.timedelta(days=1)).isoformat()
+    moduller = [m for m in ("ays", "spi", "esp") if m in hedefag.yarin_oku(con, yarin)] \
+        or ["ays", "spi", "esp"]
+    birakilan = []
+    for m in moduller:
+        r = intents.create(con, m, "load.reduce",
+                           {"date": yarin, "why": "Akşam özetinden: yarını hafiflet."}, "",
+                           source="patron")
+        if r.get("ok"):
+            birakilan.append(MODUL_AD[m])
+    if not birakilan:
+        return "Yük azaltma teklifi kurulamadı."
+    return ("Yarın (%s) için yük azaltma teklifini %s’ye bıraktım. Ne kadar azalacağına "
+            "modül karar verir; sen onaylamadan hiçbir şey değişmez." % (yarin, ", ".join(birakilan)))
 
 
 def _niyet_kur(con, talep, ham):

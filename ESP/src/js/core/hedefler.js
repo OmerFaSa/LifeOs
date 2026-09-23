@@ -359,8 +359,25 @@ ESP.Hedefler = (function(){
         ilerleme:p ? ESP.HedefPlan.ilerleme(p, U().todayISO()) : null });
     });
   }
+  /* Yarının ilk işleri (akşam «yarın şunlar var», HKM): planlayıcının
+     sıradaki eylemi (ESP takvim kurmaz; rota öncelik söyler) ve bu hafta
+     tutmamış alışkanlıklar. */
+  function yarin(){
+    const u = U(), bugun = u.todayISO();
+    const tarih = u.iso(u.addDays(u.parse(bugun), 1));
+    const isler = [];
+    try{
+      const a = ESP.Planner && ESP.Planner.nextAction(tarih);
+      if(a && a.title) isler.push({ metin:a.title, dk:null });
+    }catch(e){ /* planlayıcı veri bekliyorsa yarın satırı yazılmaz */ }
+    if(ALISKANLIK) aktifler().filter(h => h.paket === 'aliskanlik').forEach(h => {
+      const x = ALISKANLIK.yarinIsi(h, bugun);
+      if(x) isler.push(x);
+    });
+    return { gun:tarih, isler };
+  }
   const ag = window.LIFEOS && LIFEOS.HedefAg
-    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler }) : null;
+    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler, yarin }) : null;
 
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'esp', durum:() => ({}), bugun:() => U().todayISO(),
@@ -371,5 +388,5 @@ ESP.Hedefler = (function(){
 
   return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, ALISKANLIK, CEFR, CEFR_SAAT, KITAP_SAAT_TAHMIN,
     kitapSaati, temizHiz, kademeBpm, kademeAdi, notlar, yukle, kaydet, liste, aktifler,
-    durumDegistir, ozet, sohbet , ozetler, ag };
+    durumDegistir, ozet, sohbet, ozetler, yarin, ag };
 })();

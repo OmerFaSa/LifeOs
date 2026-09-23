@@ -220,3 +220,115 @@ def run_eksik():
         metin = con.execute("SELECT text FROM outbox WHERE kind='daily'").fetchone()["text"]
         ok("Dün uyku kaydı yok." in metin)
     test("sabah brifingi soruyu tasir", t_morning_brief_carries_question)
+
+
+def run_bayat():
+    from core import king, schedule
+    suite("cevapsiz teklif kapanir")
+
+    def _emir(con, konu, durum, gun):
+        t = "2026-09-%02dT10:00:00" % gun
+        return con.execute(
+            "INSERT INTO is_emirleri(modul,tur,konu,karar,durum,created_at,updated_at) "
+            "VALUES ('hkm','bam.urun',?,'onay',?,?,?)", (konu, durum, t, t)).lastrowid
+
+    def t_stale_offers_close_and_are_told():
+        """N gunden eski cevapsiz modul teklifi «expired», King teklifi «iptal» olur;
+        kapananlar TEK mesajla soylenir. Taze teklif ve cevaplanmis teklif kalir."""
+        con = db.connect(":memory:")
+        eski = db.insert_intent(con, "spi", "kayit.add", {"date": "2026-09-19", "metin": "su 2"},
+                                "SPİ: su 2 kaydı", "patron", created_at="2026-09-19T09:00:00")
+        taze = db.insert_intent(con, "ays", "kayit.add", {"date": "2026-09-23", "metin": "soru 40"},
+                                "AYS: soru 40", "patron", created_at="2026-09-23T09:00:00")
+        cevapli = db.insert_intent(con, "esp", "kayit.add", {"date": "2026-09-18", "metin": "gitar 30"},
+                                   "ESP: gitar 30", "patron", created_at="2026-09-18T09:00:00")
+        db.set_intent_state(con, cevapli, "applied")
+        e_eski = _emir(con, "Rusça A1 paketi", "teklif", 19)
+        e_taze = _emir(con, "Gitar repertuvarı", "teklif", 23)
+        r = bildirim.bayatlari_kapat(con, CFG, datetime.datetime(2026, 9, 23, 12, 0))
+        eq(len(r), 2)
+        eq(db.intent(con, eski)["state"], "expired")
+        eq(db.intent(con, taze)["state"], "pending")
+        eq(db.intent(con, cevapli)["state"], "applied")
+        eq(king.emir(con, e_eski)["durum"], "iptal")
+        eq(king.emir(con, e_taze)["durum"], "teklif")
+        m = con.execute("SELECT text FROM outbox WHERE kind LIKE 'kapanan:%'").fetchone()["text"]
+        ok("2 teklif kapandı" in m and "Rusça A1 paketi" in m and "su 2" in m)
+        # Ikinci tur bir sey kapatmaz, ikinci mesaj yazmaz.
+        eq(bildirim.bayatlari_kapat(con, CFG, datetime.datetime(2026, 9, 23, 12, 5)), [])
+        eq(con.execute("SELECT COUNT(*) FROM outbox").fetchone()[0], 1)
+        # Modul artik bu teklifi almaz.
+        eq([n["id"] for n in db.intents_for(con, "spi", ("pending", "delivered"))], [])
+    test("bayat teklif kapanir ve soylenir", t_stale_offers_close_and_are_told)
+
+    def t_tick_runs_it():
+        con = db.connect(":memory:")
+        db.insert_intent(con, "spi", "kayit.add", {"date": "2026-09-01", "metin": "su 2"},
+                         "SPİ: su 2", "patron", created_at="2026-09-01T09:00:00")
+        schedule.tick(con, {"bildirim": {"teklif_omru_gun": 5}},
+                      now=datetime.datetime(2026, 9, 23, 12, 0), transport=lambda *a: (200, "{}"))
+        eq(con.execute("SELECT state FROM intents").fetchone()["state"], "expired")
+    test("dakikalik tik kapatir", t_tick_runs_it)
+
+
+def run_yarin():
+    import json
+    from core import dil, hedefag, patron, schedule, sohbet
+    suite("aksam yarin su uc sey")
+
+    def t_snapshot_is_validated():
+        con = db.connect(":memory:")
+        ok(hedefag.yarin_yaz(con, "ays", {"gun": "2026-09-24", "isler": [
+            {"metin": "Matematik · Türev", "dk": 90}, {"metin": "", "dk": 5},
+            {"metin": "Paragraf", "dk": True}, "bozuk"]})["ok"])
+        eq(hedefag.yarin_oku(con, "2026-09-24"),
+           {"ays": [{"metin": "Matematik · Türev", "dk": 90}, {"metin": "Paragraf", "dk": None}]})
+        no(hedefag.yarin_yaz(con, "ays", {"gun": "yarin", "isler": []})["ok"])
+        no(hedefag.yarin_yaz(con, "xyz", {"gun": "2026-09-24", "isler": []})["ok"])
+        eq(hedefag.yarin_oku(con, "2026-09-25"), {})
+    test("yarin goruntusu dogrulanir", t_snapshot_is_validated)
+
+    def t_evening_lists_three_in_module_order():
+        """En cok uc is, AYS-SPI-ESP sirasiyla; eski gunun listesi soylenmez."""
+        con = db.connect(":memory:")
+        hedefag.yarin_yaz(con, "ays", {"gun": "2026-09-24", "isler": [
+            {"metin": "Matematik · Türev", "dk": 90}, {"metin": "Fizik · Kuvvet", "dk": 60}]})
+        hedefag.yarin_yaz(con, "esp", {"gun": "2026-09-24", "isler": [
+            {"metin": "Gitar", "dk": 20}, {"metin": "Okuma", "dk": 30}]})
+        hedefag.yarin_yaz(con, "spi", {"gun": "2026-09-20", "isler": [{"metin": "Eski", "dk": 1}]})
+        m = schedule.yarin_metni(con, "2026-09-23")
+        eq(m.split("\n")[1:4], ["• AYS — Matematik · Türev (90 dk)", "• ESP — Gitar (20 dk)",
+                                "• AYS — Fizik · Kuvvet (60 dk)"])
+        ok("Eski" not in m and "«yarın hafif»" in m)
+        eq(schedule.yarin_metni(con, "2026-09-25"), None)
+        cfg = {"channels": {"telegram": {"enabled": True, "bot_token": "T", "allow_from": ["7"]}},
+               "schedule": {"enabled": True, "evening": "21:00"}}
+        schedule.run(con, cfg, {"kind": "evening"}, now=datetime.datetime(2026, 9, 23, 21, 1))
+        ok("Yarın şunlar var:" in con.execute("SELECT text FROM outbox").fetchone()["text"])
+        # Susturulursa eklenmez; yoklamaya ancak aksam kapanisi kapaliysa eklenir.
+        con2 = db.connect(":memory:")
+        hedefag.yarin_yaz(con2, "ays", {"gun": "2026-09-24", "isler": [{"metin": "Mat", "dk": 30}]})
+        bildirim.sustur(con2, "yarin", "Akşam yarın özeti")
+        schedule.run(con2, cfg, {"kind": "evening"}, now=datetime.datetime(2026, 9, 23, 21, 1))
+        ok("Yarın şunlar var" not in con2.execute("SELECT text FROM outbox").fetchone()["text"])
+        con3 = db.connect(":memory:")
+        hedefag.yarin_yaz(con3, "ays", {"gun": "2026-09-24", "isler": [{"metin": "Mat", "dk": 30}]})
+        cfg3 = dict(cfg, schedule={"enabled": True, "checkin": "21:30"})
+        schedule.run(con3, cfg3, {"kind": "checkin"}, now=datetime.datetime(2026, 9, 23, 21, 31))
+        ok("Yarın şunlar var" in con3.execute("SELECT text FROM outbox").fetchone()["text"])
+    test("aksam en cok uc is, modul sirasiyla", t_evening_lists_three_in_module_order)
+
+    def t_one_word_change():
+        """«yarın hafif» yarini olan modullere yuk azaltma TEKLIFI birakir; oran yok."""
+        ok(dil.yarin_hafif("Yarın hafif"))
+        ok(dil.yarin_hafif("yarını hafiflet"))
+        ok(dil.yarin_hafif("yarın daha hafif olsun") is False)
+        no(dil.yarin_hafif("yarın 2 saat matematik"))
+        con = db.connect(":memory:")
+        hedefag.yarin_yaz(con, "ays", {"gun": "2026-09-24", "isler": [{"metin": "Mat", "dk": 30}]})
+        r = sohbet.konus(con, {}, "yarın hafif", "2026-09-23")
+        eq(r["command"], "hafif")
+        rows = [(x["module"], x["kind"], json.loads(x["payload"])) for x in
+                con.execute("SELECT module, kind, payload FROM intents")]
+        eq(rows, [("ays", "load.reduce", {"date": "2026-09-24", "why": "Akşam özetinden: yarını hafiflet."})])
+    test("yarin hafif tek kelime", t_one_word_change)

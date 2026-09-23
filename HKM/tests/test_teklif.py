@@ -213,6 +213,44 @@ def run():
         eq(king.emir(con, e3["id"])["durum"], "onaylandi")
     test("sohbette «1 · 2 · iptal»; baskasinin teklifi onaylanamaz", t_sohbet_cevabi)
 
+    def t_once_depo():
+        """Fikir 46: ayni konuda depoda kayit varsa teklifin EN USTUNDE durur,
+        bedava ve hemen; 90 gunden yeniyse onerilir. Secilirse BAM'da is
+        acilmaz; «tam» secilirse is Depolama Burosu'na aday kayitla gider."""
+        from core import depo
+        con, cfg = db.connect(":memory:"), _cfg()
+        k = bam.kayit_ekle(con, "arastirma", "Söğüt araştırması", {"ozet": "x"},
+                           anahtar=depo.konu_anahtari("Söğüt"), now="2026-07-20T10:00:00")["id"]
+        e = king.emir_ac(con, cfg, "hkm", "bam.arastirma", {"arastirma": {"konu": "Söğüt"}},
+                         now=AN)["emir"]
+        t = e["teklif"]
+        eq([x["id"] for x in t["secenekler"]], ["depo", "tam"])
+        eq(t["oneri"], "depo")
+        ok("depodaki kayıt (2 ay önce yapıldı)" in t["metin"] and "ücretsiz" in t["metin"],
+           t["metin"])
+        eq(t["secenekler"][0]["kayit_id"], k)
+        cevap = king.teklif_cevap(con, cfg, "1", now=AN)
+        ok(cevap.startswith("Depodaki kayıt verildi"), cevap)
+        e = king.emir(con, e["id"])
+        eq((e["durum"], e["sonuc"]["kayit_id"], e["sonuc"]["depodan"]), ("bitti", k, True))
+        eq(con.execute("SELECT COUNT(*) FROM bam_isler").fetchone()[0], 0)
+        # «tam» secilirse is acilir ve depo adayi BAM'a gider.
+        e2 = king.emir_ac(con, cfg, "hkm", "bam.arastirma",
+                          {"arastirma": {"konu": "Söğüt", "ayrinti": ""}}, now=AN)["emir"]
+        r = king.teklif_onayla(con, cfg, e2["id"], "tam", now=AN)
+        eq(bam.is_getir(con, r["emir"]["bam_is_id"])["govde"].get("depo_aday"), k)
+        # Eski kayit (bir yildan fazla): secenek durur, onerilmez.
+        con2 = db.connect(":memory:")
+        bam.kayit_ekle(con2, "arastirma", "Bilecik", {"ozet": "x"},
+                       anahtar=depo.konu_anahtari("Bilecik"), now="2025-01-10T10:00:00")
+        t2 = king.emir_ac(con2, cfg, "hkm", "bam.arastirma", {"arastirma": {"konu": "Bilecik"}},
+                          now=AN)["emir"]["teklif"]
+        eq(([x["id"] for x in t2["secenekler"]], t2["oneri"]), (["depo", "tam"], "tam"))
+        ok("1 yıl önce yapıldı" in t2["metin"], t2["metin"])
+        # Ad ile cevap: «tam» sira degil secenegin kendisidir.
+        ok(king.teklif_cevap(con2, cfg, "tam", now=AN).startswith("Onaylandı:"))
+    test("once depo: teklifin en ustunde, bedava ve hemen", t_once_depo)
+
     def t_ne_zaman_sorulur():
         con = db.connect(":memory:")
         # Kural isi (model yok) sorulmaz: bedava.

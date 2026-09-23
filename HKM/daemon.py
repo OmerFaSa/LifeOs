@@ -1052,6 +1052,10 @@ class Handler(BaseHTTPRequestHandler):
             r = hedefag.esitle(self.con, u.path.rsplit("/", 1)[-1], body.get("hedefler"))
             if r.get("ok"):
                 r["butce"] = hedefag.butce(self.con)
+                if body.get("yarin") is not None:
+                    # Aksam «yarin sunlar var» (core/schedule.py): modulun sectigi isler.
+                    r["yarin"] = hedefag.yarin_yaz(self.con, u.path.rsplit("/", 1)[-1],
+                                                   body.get("yarin"))
             return self._send(200 if r.get("ok") else 422, r)
         # Modul hafizasinin anlik goruntusu (core/memory.py esitle). Modul
         # TAMAMINI yollar, HKM kendi kopyasini esitler; ayni goruntu iki

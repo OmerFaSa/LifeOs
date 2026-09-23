@@ -475,8 +475,32 @@ R.Hedefler = (function(){
         ilerleme:p ? R.HedefPlan.ilerleme(p, U().todayISO()) : null });
     });
   }
+  /* Yarının ilk işleri (akşam «yarın şunlar var», HKM): planın yarınki
+     blokları ve bu hafta tutmamış alışkanlıklar. İşleri AYS'nin KENDİ planı
+     seçer; yarın henüz kurulmadıysa kaydedilmeden kurulur (istisna dahil). */
+  async function yarin(){
+    const u = U(), bugun = u.todayISO();
+    const tarih = u.iso(u.addDays(u.parse(bugun), 1));
+    const isler = [];
+    let gun = R.S.days[tarih] || null;
+    if(!gun && R.Model && R.Model.defaultDay){
+      const d = u.parse(tarih);
+      gun = R.Model.defaultDay(d, await R.Model.ensureWeek(R.Model.weekOf(d)));
+      if(R.Istisna) R.Istisna.gunuBicimle(gun, tarih);
+    }
+    if(gun && !gun.ara){
+      (gun.blocks || []).filter(b => b.slot !== 'Dinlenme' && b.targetMin > 0).slice(0, 3)
+        .forEach(b => isler.push({ metin:b.topic && b.topic !== b.subject ? b.subject + ' · ' + b.topic
+          : b.subject, dk:b.targetMin }));
+    }
+    if(ALISKANLIK) aktifler().filter(h => h.paket === 'aliskanlik').forEach(h => {
+      const x = ALISKANLIK.yarinIsi(h, bugun);
+      if(x) isler.push(x);
+    });
+    return { gun:tarih, isler };
+  }
   const ag = window.LIFEOS && LIFEOS.HedefAg
-    ? LIFEOS.HedefAg.kur({ hkm:() => R.Beacon, modul:'ays', ozetler }) : null;
+    ? LIFEOS.HedefAg.kur({ hkm:() => R.Beacon, modul:'ays', ozetler, yarin }) : null;
 
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'ays', durum:() => ({}), bugun:() => U().todayISO(),
@@ -488,5 +512,5 @@ R.Hedefler = (function(){
 
   return { PAKETLER, PAKET_BY_ID, KONU, NET, ALISKANLIK, SAAT_GUN, DERS_TEST, EN_AZ_DENEME,
     dersleriBul, kapsamBul, konular, kalanKonular, siraliKalan, durumOf, konuSaati, seri, netHizi, azami, netAdi, sinavTarihi,
-    notlar, yukle, kaydet, liste, aktifler, durumDegistir, ozet, sohbet, ozetler, ag };
+    notlar, yukle, kaydet, liste, aktifler, durumDegistir, ozet, sohbet, ozetler, yarin, ag };
 })();

@@ -295,6 +295,16 @@ CREATE INDEX IF NOT EXISTS ix_bildirimler_modul ON bildirimler(modul, okundu_at,
 
 -- Hedef agi (core/hedefag.py): modullerin etkin hedeflerinin ANLIK GORUNTUSU.
 -- Modul tamamini yollar; HKM kopyasini esitler. HKM modullere yazmaz.
+/* Modulun YARIN icin ilk isleri (brand/ortak/hedefag.js `yarin` kancasi).
+   Isleri modulun KENDI kodu secer; HKM aksam «yarin sunlar var» mesajinda
+   yalniz dizer (core/schedule.py). Anlik goruntudur: modul basina tek satir. */
+CREATE TABLE IF NOT EXISTS yarin_ozet (
+  modul       TEXT PRIMARY KEY,
+  gun         TEXT NOT NULL,
+  isler       TEXT NOT NULL,               -- JSON: [{metin, dk}]
+  guncelleme  TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS hedef_ozet (
   modul       TEXT NOT NULL,
   dis_id      TEXT NOT NULL,
@@ -792,8 +802,10 @@ def prune_inbox(con, days=INBOX_TUTMA_GUN, now=None):
 
 # ------------------------------------------------------------- niyetler
 
+# «expired»: cevapsiz kaldigi icin KAPANDI (core/bildirim.py bayatlari_kapat).
+# Uygulanmadi, istenmedi de sayilmaz; kullaniciya soylenir.
 INTENT_STATES = ("pending", "delivered", "applied", "acknowledged",
-                 "dismissed", "unknown")
+                 "dismissed", "unknown", "expired")
 
 
 def insert_intent(con, module, kind, payload, note, source, created_at=None):

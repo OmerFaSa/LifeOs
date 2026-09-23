@@ -979,6 +979,39 @@ yazılabilir ama «doğrulanmadı» ve uyarılıdır. Biten kayıt SPİ'ye niyet
 güncelse yeniden aranmaz (Depolama Bürosu, konu anahtarı `spibilgi.konu`). King'in
 güncellik turu değişen kaynağı SPİ'ye bildirir. Testler: `tests/test_spibilgi.py`.
 
+## 8.31 Bildirim politikası ve kolaylıklar — `core/bildirim.py`, `core/eksik.py` (Grup 1)
+
+Kullanıcının dikkati korunur, hiçbir mesaj kaybolmaz:
+
+- **Sessiz saat + günlük sınır** (fikir 12, 13): `outbox.flush` her satırı göndermeden
+  önce `bildirim.ertele_mi`'ye sorar. Cevap («reply:») hiç beklemez. Bekleyen satır
+  `ertelendi=1` olur, vadesi sabaha kayar; vadesi gelen birden çok bekleyen `birlestir`
+  ile TEK özet satırında gider (orijinaller «birlesti», silinmez). Varsayılan kapalı;
+  Ayarlar › Otomatik mesajlar (`bildirim.sessiz_bas/bit`, `gunluk_en_cok`).
+- **Eksik veri tek soru** (9): sabah brifingi dünün eksik TEK ölçümünü sorar (uyku, sonra
+  AYS soru; son 7 günde kullanılan modül). Tablo `sorular`. «7» → dünün tarihiyle
+  `kayit.add` (sayıyı modül okur), «bilmiyorum» → veri yok kalır.
+- **Bir daha sorma** (14): tablo `susturmalar`; soru türünü (`eksik:*`), günün öneri
+  kuralını (`oneri:<key>`) ya da akşam yarın özetini (`yarin`) susturur. `bio_red`
+  susturulamaz. Ayarlar'da «Yeniden sor»; `POST /api/bildirim/ac|sustur`.
+- **Cevapsız teklif kapanır** (15): `bayatlari_kapat` her tikte; `teklif_omru_gun`
+  (3) günden eski cevapsız modül teklifi `expired`, King teklifi `iptal` olur; kapananlar
+  tek mesajla söylenir.
+- **Tek kelime kayıt** (8): `dil.kisa_kayit` — «su 2, uyku 7, soru 40» (yalnız «alan sayı
+  [birim]») rapor gibi `kayit.add` olur.
+- **Akşam «yarın şunlar var»** (19): modüller yarının ilk işlerini KENDİ koduyla seçip
+  hedef eşitlemesiyle yollar (`brand/ortak/hedefag.js` `yarin` kancası → tablo
+  `yarin_ozet`); akşam kapanışı (yoksa yoklama) en çok üç işi AYS-SPİ-ESP sırasıyla
+  dizer. «yarın hafif» → modüllere `load.reduce` teklifi (oranı modül seçer).
+- **Önce depo** (46): aynı konuda depoda kayıt varsa King'in teklifinde EN ÜSTTE «depodaki
+  kayıt (2 ay önce yapıldı) · ücretsiz · hemen»; 90 günden yeniyse önerilir, seçilirse BAM'da
+  iş açılmaz (`king._depodan_ver`). Güncelliği bu yolda denetlenmez ve bu söylenir.
+- **Toplu onay** (11, modüller): Bugün › HKM teklifi kartında «Hepsini kaydet (N)» —
+  yalnız okunabilen günlük kayıtlar (küçük aksiyon); her biri modülün kendi yolundan geri alınır.
+
+Testler: `tests/test_bildirim.py`, `tests/test_teklif.py` (önce depo), `tools/entegre.js`
+§2.78–2.79.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

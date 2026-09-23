@@ -481,6 +481,53 @@ async function main(){
       }else console.log('  ' + s.id + ' → King teklifi Bugun kartinda goruldu, modulden onaylandi, '
         + 'is #' + kt.id + ' BAM’da acildi');
 
+      /* 2.78 — KISA KAYIT + TOPLU ONAY (fikir 8 ve 11): Telegram'dan tek kelime
+         kayit («su 2») HKM'de kayit.add olur; modul iki kaydi TEK dugmeyle
+         («Hepsini kaydet») kendi koduyla yazar. */
+      const KISA = { AYS:['soru 40', 'paragraf 20'], SPI:['su 2', 'uyku 6'], ESP:['gitar 30', 'okuma 25'] }[s.id];
+      let kisaOk = true;
+      for(const t of KISA){
+        const c = await (await hkmFetch('/api/chat', { method:'POST', body:JSON.stringify({ text:t }) })).json();
+        if(c.command !== 'kayit'){ kisaOk = false; hatalar.push(s.id + ': «' + t + '» kisa kayit sayilmadi (' + c.command + ')'); }
+      }
+      if(kisaOk){
+        const tk = await page.evaluate(async ([ns]) => {
+          const N = window[ns];
+          N.S.ui.hkmIntents = await N.Beacon.intents();
+          N.App.go('today');
+          await new Promise(r => setTimeout(r, 500));
+          const d = document.querySelector('[data-act="hkm-toplu"]');
+          if(!d) return { dugmeYok:true, n:N.S.ui.hkmIntents.length,
+            okunan:N.S.ui.hkmIntents.map(x => x.kind + ':' + ((x.okuma && x.okuma.yazilacak) || []).length) };
+          const etiket = d.textContent.trim();
+          d.click();
+          await new Promise(r => setTimeout(r, 1500));
+          const bugun = N.U.todayISO();
+          let yazildi = false;
+          if(ns === 'R') yazildi = ((N.S.days[bugun] || {}).paragraphActual || 0) >= 20;
+          if(ns === 'SP') yazildi = (N.Model.vitalsOf(bugun) || {}).water === 2000;
+          if(ns === 'ESP') yazildi = N.Model.sessionsOf(bugun).some(x => x.disc === 'reading' && x.minutes === 25);
+          const kalan = (await N.Beacon.intents()).filter(x => x.kind === 'kayit.add').length;
+          return { etiket, yazildi, kalan };
+        }, [s.ns]);
+        if(tk.dugmeYok) hatalar.push(s.id + ': «Hepsini kaydet» dugmesi cikmadi (' + tk.n + ' teklif: '
+          + (tk.okunan || []).join(', ') + ')');
+        else if(!tk.yazildi || tk.kalan) hatalar.push(s.id + ': toplu onay yazmadi ya da teklif kaldi ('
+          + tk.etiket + ', kalan ' + tk.kalan + ')');
+        else console.log('  ' + s.id + ' → kisa kayitlar («' + KISA.join('», «') + '») tek dugmeyle yazildi ('
+          + tk.etiket + ')');
+      }
+
+      /* 2.79 — YARIN (fikir 19): modul yarinin ilk islerini KENDI kodu secip
+         HKM'ye yollar; aksam ozeti yalniz dizer. */
+      await page.evaluate(async ([ns]) => { const N = window[ns]; if(N.Hedefler && N.Hedefler.ag) await N.Hedefler.ag.gonder(); }, [s.ns]);
+      const yPano = await (await hkmFetch('/api/hedefler')).json();
+      const yarinIs = ((yPano.yarin || {}).isler || {})[s.mod];
+      if(!Array.isArray(yarinIs)) hatalar.push(s.id + ': yarinin isleri HKM\'ye ulasmadi');
+      else if(s.id === 'AYS' && !yarinIs.length) hatalar.push('AYS: yarinin plan bloklari gelmedi');
+      else console.log('  ' + s.id + ' → yarinin isleri HKM\'de (' + yarinIs.length + ' is'
+        + (yarinIs[0] ? ': «' + yarinIs[0].metin + '»' : '') + ')');
+
       /* 2.8 — HEDEFTEN PLANA (ekip/PLAN.md Tur 2). Yalniz SPI: plan motoru
          orada. Zincir: SPI plani KENDI koduyla uygular -> King'e is emri ->
          King imkan kontrolu -> BAM Kayit + Planlama -> program kaydi ->

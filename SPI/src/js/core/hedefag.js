@@ -44,7 +44,7 @@ LIFEOS.HedefAg = (function(){
     };
   }
 
-  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…] })`
+  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…], yarin?:async () => ({gun, isler}) })`
      → { gonder(), planla(), cek(), butce() } */
   function kur(ortam){
     let zaman = null;
@@ -83,10 +83,30 @@ LIFEOS.HedefAg = (function(){
       }
     }
 
+    /* Yarının ilk işleri (akşam «yarın şunlar var», HKM schedule). İşleri
+       modülün KENDİ kodu seçer; kanca yoksa ya da bozuksa gönderilmez. */
+    async function yarin(){
+      if(typeof ortam.yarin !== 'function') return undefined;
+      try{
+        const y = await ortam.yarin();
+        if(!y || !/^\d{4}-\d{2}-\d{2}$/.test(String(y.gun || ''))) return undefined;
+        const isler = (Array.isArray(y.isler) ? y.isler : []).map(x => ({
+          metin:String((x && x.metin) || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+          dk:x && typeof x.dk === 'number' && isFinite(x.dk) && x.dk > 0 ? Math.round(x.dk) : null,
+        })).filter(x => x.metin).slice(0, 5);
+        return { gun:y.gun, isler };
+      }catch(e){
+        return undefined;
+      }
+    }
+
     async function gonder(){
       let l = [];
       try{ l = (ortam.ozetler() || []).slice(0, 30); }catch(e){ return { ok:false }; }
-      const g = await istek('/api/hedef/sync/' + ortam.modul, { hedefler:l });
+      const govde = { hedefler:l };
+      const y = await yarin();
+      if(y) govde.yarin = y;
+      const g = await istek('/api/hedef/sync/' + ortam.modul, govde);
       if(g && g.butce) son = g.butce;
       return { ok:!!(g && g.ok), butce:son };
     }

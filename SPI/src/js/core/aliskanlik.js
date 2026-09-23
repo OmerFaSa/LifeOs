@@ -241,7 +241,18 @@ LIFEOS.Aliskanlik = (function(){
       karar, senaryolar,
     };
 
-    return { paket, ilerleme, ozet, notlar, alanOf, siklikOf, taban, siklikOku, dakikaOku };
+    /* Yarının işi (akşam «yarın şunlar var», HKM): bu haftanın hedefi
+       henüz tutmadıysa bir satır. Yarın yeni hafta başlıyorsa sayaç sıfırdan. */
+    function yarinIsi(h, bugun){
+      const alan = alanOf(h), n = siklikOf(h), dk = dkOf(h);
+      if(!alan || !n || !dk) return null;
+      if(haftaGunu(bugun) === 6) return { metin:alan.ad + ' alışkanlığı (yeni hafta: 0/' + n + ' gün)', dk };
+      const il = ilerleme(h, bugun);
+      if(il.bu >= n) return null;
+      return { metin:alan.ad + ' alışkanlığı (bu hafta ' + il.bu + '/' + n + ' gün)', dk };
+    }
+
+    return { paket, ilerleme, ozet, notlar, alanOf, siklikOf, taban, siklikOku, dakikaOku, yarinIsi };
   }
 
   return { kur, siklikOku, dakikaOku, ANAHTAR, RAHAT, UST, PENCERE_HAFTA };

@@ -22,6 +22,7 @@
       bir is turu tek satirla katilir; akis degismez.
    5. ONERI KODDAN: tam secenek butceye sigmiyorsa ya da tavanin dortte
       birinden fazlasini yiyorsa kucuk secenek onerilir; gerekcesi yazilir."""
+import datetime
 import json
 import statistics
 
@@ -276,6 +277,55 @@ def kur(con, cfg, tur, govde, ofisler_of, tahmini_sure):
                                  "kontrolde kalır" % tam["sinif_ad"])
     return {"sinif": tam["sinif"], "secenekler": secenekler, "oneri": oneri, "neden": neden,
             "metin": metin(secenekler, oneri, neden)}
+
+
+# ------------------------------------------------------------ once depo
+#
+# Fikir 46: ayni konuda depoda bir kayit varsa King'in teklifinde EN USTTE
+# durur: bedava ve hemen. Yeterince yeniyse onerilir. Guncelligi bu
+# teklifte DENETLENMEZ ve bu soylenir; «tam» secenek yine Depolama
+# Burosu'ndan gecer ve kaynaklari acar (bam depo_aday).
+DEPO_TAZE_GUN = 90
+
+
+def _gun_farki(a, b):
+    try:
+        return max(0, (datetime.datetime.fromisoformat(str(b)[:19])
+                       - datetime.datetime.fromisoformat(str(a)[:19])).days)
+    except (TypeError, ValueError):
+        return None
+
+
+def yas_metni(gun):
+    if gun is None:
+        return "tarihi bilinmiyor"
+    if gun == 0:
+        return "bugün yapıldı"
+    if gun < 31:
+        return "%d gün önce yapıldı" % gun
+    if gun < 365:
+        return "%d ay önce yapıldı" % max(1, gun // 30)
+    return "%d yıl önce yapıldı" % (gun // 365)
+
+
+def depo_secenegi(t, kayit, simdi):
+    """Teklifin en ustune depodaki kaydi koyar; oneriyi ve cumleyi yeniden kurar."""
+    gun = _gun_farki(kayit.get("created_at"), simdi)
+    yas = yas_metni(gun)
+    s = {"id": "depo", "ad": "depodaki kayıt (%s)" % yas, "sinif": "dusuk",
+         "sinif_ad": SINIF_AD["dusuk"], "kayit_id": kayit["id"],
+         "birim": {"model": 0, "web": 0, "etiket": "hesaplandi", "dayanak": "depodan"},
+         "maliyet": {"usd": 0.0, "usd_p90": 0.0, "etiket": "hesaplandi", "metin": "ücretsiz",
+                     "dayanak": "depodaki kayıt #%d yeniden kullanılır" % kayit["id"]},
+         "sure": {"sn": 0, "etiket": "hesaplandi", "metin": "hemen", "dayanak": "depodan"},
+         "butce": {"pay_yuzde": 0, "sigar": True, "metin": "Bütçeden bir şey harcamaz."}}
+    t["secenekler"] = [s] + [x for x in t["secenekler"] if x["id"] != "depo"]
+    if gun is not None and gun <= DEPO_TAZE_GUN:
+        t["oneri"] = "depo"
+        t["neden"] = ("aynı konu %s; bedava ve hemen gelir (güncelliği bu teklifte "
+                      "denetlenmedi, «tam» seçenek kaynaklarını açar)" % yas)
+    t["metin"] = metin(t["secenekler"], t["oneri"], t["neden"])
+    return t
 
 
 def secenek_metni(s):

@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'aa2515e', at:'2026-09-23 22:28', dirty:true };
+ESP.BUILD = { id:'a6581f7', at:'2026-09-23 22:48', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10586,7 +10586,18 @@ LIFEOS.Aliskanlik = (function(){
       karar, senaryolar,
     };
 
-    return { paket, ilerleme, ozet, notlar, alanOf, siklikOf, taban, siklikOku, dakikaOku };
+    /* Yarının işi (akşam «yarın şunlar var», HKM): bu haftanın hedefi
+       henüz tutmadıysa bir satır. Yarın yeni hafta başlıyorsa sayaç sıfırdan. */
+    function yarinIsi(h, bugun){
+      const alan = alanOf(h), n = siklikOf(h), dk = dkOf(h);
+      if(!alan || !n || !dk) return null;
+      if(haftaGunu(bugun) === 6) return { metin:alan.ad + ' alışkanlığı (yeni hafta: 0/' + n + ' gün)', dk };
+      const il = ilerleme(h, bugun);
+      if(il.bu >= n) return null;
+      return { metin:alan.ad + ' alışkanlığı (bu hafta ' + il.bu + '/' + n + ' gün)', dk };
+    }
+
+    return { paket, ilerleme, ozet, notlar, alanOf, siklikOf, taban, siklikOku, dakikaOku, yarinIsi };
   }
 
   return { kur, siklikOku, dakikaOku, ANAHTAR, RAHAT, UST, PENCERE_HAFTA };
@@ -10639,7 +10650,7 @@ LIFEOS.HedefAg = (function(){
     };
   }
 
-  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…] })`
+  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…], yarin?:async () => ({gun, isler}) })`
      → { gonder(), planla(), cek(), butce() } */
   function kur(ortam){
     let zaman = null;
@@ -10678,10 +10689,30 @@ LIFEOS.HedefAg = (function(){
       }
     }
 
+    /* Yarının ilk işleri (akşam «yarın şunlar var», HKM schedule). İşleri
+       modülün KENDİ kodu seçer; kanca yoksa ya da bozuksa gönderilmez. */
+    async function yarin(){
+      if(typeof ortam.yarin !== 'function') return undefined;
+      try{
+        const y = await ortam.yarin();
+        if(!y || !/^\d{4}-\d{2}-\d{2}$/.test(String(y.gun || ''))) return undefined;
+        const isler = (Array.isArray(y.isler) ? y.isler : []).map(x => ({
+          metin:String((x && x.metin) || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+          dk:x && typeof x.dk === 'number' && isFinite(x.dk) && x.dk > 0 ? Math.round(x.dk) : null,
+        })).filter(x => x.metin).slice(0, 5);
+        return { gun:y.gun, isler };
+      }catch(e){
+        return undefined;
+      }
+    }
+
     async function gonder(){
       let l = [];
       try{ l = (ortam.ozetler() || []).slice(0, 30); }catch(e){ return { ok:false }; }
-      const g = await istek('/api/hedef/sync/' + ortam.modul, { hedefler:l });
+      const govde = { hedefler:l };
+      const y = await yarin();
+      if(y) govde.yarin = y;
+      const g = await istek('/api/hedef/sync/' + ortam.modul, govde);
       if(g && g.butce) son = g.butce;
       return { ok:!!(g && g.ok), butce:son };
     }
@@ -11314,8 +11345,25 @@ ESP.Hedefler = (function(){
         ilerleme:p ? ESP.HedefPlan.ilerleme(p, U().todayISO()) : null });
     });
   }
+  /* Yarının ilk işleri (akşam «yarın şunlar var», HKM): planlayıcının
+     sıradaki eylemi (ESP takvim kurmaz; rota öncelik söyler) ve bu hafta
+     tutmamış alışkanlıklar. */
+  function yarin(){
+    const u = U(), bugun = u.todayISO();
+    const tarih = u.iso(u.addDays(u.parse(bugun), 1));
+    const isler = [];
+    try{
+      const a = ESP.Planner && ESP.Planner.nextAction(tarih);
+      if(a && a.title) isler.push({ metin:a.title, dk:null });
+    }catch(e){ /* planlayıcı veri bekliyorsa yarın satırı yazılmaz */ }
+    if(ALISKANLIK) aktifler().filter(h => h.paket === 'aliskanlik').forEach(h => {
+      const x = ALISKANLIK.yarinIsi(h, bugun);
+      if(x) isler.push(x);
+    });
+    return { gun:tarih, isler };
+  }
   const ag = window.LIFEOS && LIFEOS.HedefAg
-    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler }) : null;
+    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler, yarin }) : null;
 
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'esp', durum:() => ({}), bugun:() => U().todayISO(),
@@ -11326,7 +11374,7 @@ ESP.Hedefler = (function(){
 
   return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, ALISKANLIK, CEFR, CEFR_SAAT, KITAP_SAAT_TAHMIN,
     kitapSaati, temizHiz, kademeBpm, kademeAdi, notlar, yukle, kaydet, liste, aktifler,
-    durumDegistir, ozet, sohbet , ozetler, ag };
+    durumDegistir, ozet, sohbet, ozetler, yarin, ag };
 })();
 
 /* ==== js/core/hedefplan.js ==== */
@@ -34910,6 +34958,11 @@ ESP.Screens.today = (function(){
               act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } })}
           </div>
         </div>`)}
+        ${when(topluKayitlar().length >= 2, () => html`<div class="row gap-8 mt-8">
+          ${K.Button({ label:'Hepsini kaydet (' + topluKayitlar().length + ')', size:'sm',
+            tone:'primary', act:'hkm-toplu' })}
+          <span class="tiny dim">Yalnız okunabilen günlük kayıtlar; yanlışsa o günün oturumlarından silinir.</span>
+        </div>`)}
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
           ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
@@ -35046,6 +35099,29 @@ ESP.Screens.today = (function(){
   /* HKM teklifine verilen cevabin TEK yolu: uygulama, yerel kayit ve
      merkeze bildirim tek sirada olur. «Uygulandı ama merkeze
      bildirilemedi» hali yutulmaz, SOYLENIR. */
+  /* TOPLU ONAY yalniz KUCUK tekliflerde: gunluk kayit (kayit.add), ESP'nin
+     okuyabildigi; yanlissa o gunun oturumlarindan silinir (AGENTS.md §1.9). */
+  function topluKayitlar(){
+    return (S.ui.hkmIntents || []).filter(n => n.kind === 'kayit.add'
+      && n.okuma && n.okuma.yazilacak && n.okuma.yazilacak.length && ESP.Beacon.canApply(n));
+  }
+
+  async function hkmToplu(){
+    const l = topluKayitlar();
+    let yazilan = 0, kalan = 0;
+    for(const n of l){
+      const r = await ESP.Beacon.resolveIntent(n, 'apply');
+      if(r.ok){
+        yazilan++;
+        S.ui.hkmIntents = (S.ui.hkmIntents || []).filter(x => x.id !== n.id);
+      }else kalan++;
+    }
+    if(yazilan) ESP.UI.onayMuhru();
+    ESP.UI.toast(yazilan + ' kayıt yazıldı' + (kalan ? ', ' + kalan + ' tanesi yazılamadı (kartta duruyor)' : '')
+      + '. Yanlışsa o günün oturumlarından silebilirsin.');
+    ESP.App.render();
+  }
+
   async function hkmCevap(id, action){
     const liste = S.ui.hkmIntents || [];
     const n = liste.filter(x => String(x.id) === String(id))[0];
@@ -35102,6 +35178,7 @@ ESP.Screens.today = (function(){
       S.ui.kingTeklifler = ESP.KingTeklif.liste();
       ESP.App.render();
     },
+    async 'hkm-toplu'(){ await hkmToplu(); },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-seen'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },

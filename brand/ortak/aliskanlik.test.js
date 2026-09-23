@@ -123,6 +123,16 @@
       expect(a.ozet(h)).toBe('Alışkanlık: Okuma · haftada 3 gün × 20 dk');
     });
 
+    it('yarının işi: hedef tutmadıysa bir satır, tuttuysa yok, yeni haftada sıfırdan', () => {
+      const h = Hd().yeni({ paket:'aliskanlik', yon:'aliskanlik', alan:'reading',
+        kapasite:{ haftalik_gun:3, gunluk_dk:20 } }, 'esp', BUGUN);
+      const k = {}; k[gun(-2)] = 30;                        /* bu hafta 1 gün */
+      expect(kur(k).yarinIsi(h, BUGUN)).toEqual({ metin:'Okuma alışkanlığı (bu hafta 1/3 gün)', dk:20 });
+      const t = {}; t[gun(-2)] = 30; t[gun(-1)] = 30; t[gun(0)] = 30;
+      expect(kur(t).yarinIsi(h, BUGUN)).toBe(null);
+      expect(kur(t).yarinIsi(h, gun(4)).metin).toContain('yeni hafta: 0/3');   /* pazar */
+    });
+
     it('sohbet eksik tarihi sorar, seçilen seçenekle sıklığı değiştirir', async () => {
       const a = kur(taban(1, 30));
       const kayit = [];

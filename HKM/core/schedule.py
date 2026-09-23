@@ -117,10 +117,14 @@ def run(con, cfg, job, now=None, th=None):
         metin = weekly.message(con, gun, th=th)
     elif job["kind"] == "checkin":
         metin = yoklama_metni(con, gun)
+        # Aksam kapanisi kapaliysa «yarin sunlar var» yoklamaya eklenir.
+        if not _dakika(a.get("evening")):
+            metin = _yarin_ekle(con, cfg, gun, metin)
     elif job["kind"] == "evening":
         b = manager.brief(con, gun, th=th)
         kapanis = [l["text"] for l in b["lines"] if l["kind"] in ("vp", "coverage")]
         metin = "HKM · %s · gün kapanışı\n%s" % (gun, "\n".join("• " + x for x in kapanis))
+        metin = _yarin_ekle(con, cfg, gun, metin)
     else:
         m = patron.daily_message(con, gun, th=th)
         if not m["ok"]:
@@ -151,6 +155,49 @@ def run(con, cfg, job, now=None, th=None):
                            ek={"haftalik": gun, "bicim": "pdf"})
         out["belge"] = not d["duplicate"]
     return out
+
+
+YARIN_EN_COK = 3
+YARIN_SIRA = (("ays", "AYS"), ("spi", "SPİ"), ("esp", "ESP"))
+
+
+def yarin_metni(con, gun):
+    """Aksam «yarin sunlar var» — en cok UC is, modullerin KENDI sectigi.
+
+    HKM is secmez ve sayi uretmez: her modulun yolladigi ilk isler sirayla
+    (AYS, SPI, ESP) dizilir. Yarina ait goruntu yoksa hicbir sey soylenmez
+    — eski bir gunun listesi yarinin listesi gibi gosterilmez."""
+    from core import hedefag
+    yarin = (datetime.date.fromisoformat(gun) + datetime.timedelta(days=1)).isoformat()
+    kume = hedefag.yarin_oku(con, yarin)
+    if not kume:
+        return None
+    secilen, tur = [], 0
+    while len(secilen) < YARIN_EN_COK:
+        eklendi = False
+        for mod, ad in YARIN_SIRA:
+            isler = kume.get(mod) or []
+            if tur < len(isler) and len(secilen) < YARIN_EN_COK:
+                x = isler[tur]
+                secilen.append("• %s — %s%s" % (ad, x["metin"],
+                                                 " (%d dk)" % x["dk"] if x.get("dk") else ""))
+                eklendi = True
+        if not eklendi:
+            break
+        tur += 1
+    if not secilen:
+        return None
+    return ("Yarın şunlar var:\n%s\nDeğiştirmek istersen «yarın hafif» yaz (yük azaltma "
+            "teklifi modüllere gider) ya da «yarın 1 saat matematik» gibi yaz."
+            % "\n".join(secilen))
+
+
+def _yarin_ekle(con, cfg, gun, metin):
+    from core import bildirim
+    if not bildirim.settings(cfg).get("yarin") or bildirim.susturuldu_mu(con, "yarin"):
+        return metin
+    y = yarin_metni(con, gun)
+    return metin + "\n\n" + y if y else metin
 
 
 def yoklama_metni(con, gun):
@@ -267,6 +314,10 @@ def tick(con, cfg, now=None, th=None, transport=None):
     now = now or datetime.datetime.now()
     sonuc = {"jobs": [], "flush": None, "maintenance": None}
     try:
+        # Cevapsiz teklif N gun sonra soylenerek kapanir (core/bildirim.py).
+        # Otomatik mesajlar kapaliyken de: bu bir bakimdir, mesaj degil.
+        from core import bildirim
+        sonuc["kapanan"] = len(bildirim.bayatlari_kapat(con, cfg, now))
         for job in due(cfg, now):
             sonuc["jobs"].append(run(con, cfg, job, now=now, th=th))
         sonuc["flush"] = outbox.flush(con, cfg, now=now, transport=transport)

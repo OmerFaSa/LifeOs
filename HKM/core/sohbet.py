@@ -435,8 +435,9 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     # Model bu cumleye yalniz laf donseydi kayit hic dogmazdi.
     # Kisa kayit («su 2, uyku 7») da bir rapordur (Telegram'dan tek kelime).
     rapor = None if (komut or istek) else (dil.rapor(metin) or dil.kisa_kayit(metin))
+    hafif = not (komut or istek or rapor) and dil.yarin_hafif(metin)
 
-    if (komut or istek or rapor) and gorevli == "king":
+    if (komut or istek or rapor or hafif) and gorevli == "king":
         r = patron.respond(con, metin, date=date, th=th, channel=kanal,
                            agent=gorevli, kayit=kayit)
         return {"ok": True, "mode": "komut", "command": r["command"],

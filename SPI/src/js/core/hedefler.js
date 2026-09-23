@@ -305,8 +305,19 @@ SP.Hedefler = (function(){
         ilerleme:p ? SP.Plan.ilerleme(p, SP.U.todayISO()) : null });
     });
   }
+  /* Yarının işi (akşam «yarın şunlar var», HKM): bu hafta tutmamış
+     alışkanlıklar. SPİ gün planı kurmaz; başka bir şey uydurulmaz. */
+  function yarin(){
+    const u = SP.U, bugun = u.todayISO();
+    const isler = [];
+    if(ALISKANLIK) aktifler().filter(h => h.paket === 'aliskanlik').forEach(h => {
+      const x = ALISKANLIK.yarinIsi(h, bugun);
+      if(x) isler.push(x);
+    });
+    return { gun:u.iso(u.addDays(u.parse(bugun), 1)), isler };
+  }
   const ag = window.LIFEOS && LIFEOS.HedefAg
-    ? LIFEOS.HedefAg.kur({ hkm:() => SP.Beacon, modul:'spi', ozetler }) : null;
+    ? LIFEOS.HedefAg.kur({ hkm:() => SP.Beacon, modul:'spi', ozetler, yarin }) : null;
 
   /* Motorun sohbet akışı SPİ paketiyle. Model çağrılmaz. */
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
@@ -318,5 +329,5 @@ SP.Hedefler = (function(){
 
   return { PAKETLER, KILO, VKI, ALISKANLIK, sonKilo, boyCm, hekimKapisi, normalize, notlar,
     talimatlar, talimatEkle, talimatSil, yukle, kaydet, liste, aktifler, durumDegistir, sohbet,
-    ozet, ozetler, ag };
+    ozet, ozetler, yarin, ag };
 })();

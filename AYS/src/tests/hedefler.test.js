@@ -99,6 +99,37 @@
     });
   });
 
+  describe('AYS hedef — yarının işleri (HKM akşam özeti)', () => {
+    it('yarının plan blokları ve tutmamış alışkanlık gider; dinlenme gitmez', async () => {
+      await withTodayAsync(BUGUN, async () => {
+        resetState();
+        R.S.days['2026-09-24'] = { date:'2026-09-24', blocks:[
+          { slot:'Ders', subject:'Matematik', topic:'Türev', targetMin:90 },
+          { slot:'Dinlenme', subject:'Mola', topic:'Mola', targetMin:15 },
+          { slot:'Ders', subject:'Paragraf', topic:'Paragraf', targetMin:40 }] };
+        const t = tani('Haftada 5 gün 60 dakika ders çalışma alışkanlığı kazanmak istiyorum');
+        R.S.hedefler = [Object.assign(H().yeni(t, 'ays', BUGUN), { durum:'aktif', son_tarih:'2026-12-01' })];
+        const y = await Hd().yarin();
+        expect(y.gun).toBe('2026-09-24');
+        expect(y.isler).toEqual([{ metin:'Matematik · Türev', dk:90 }, { metin:'Paragraf', dk:40 },
+          { metin:'Ders çalışma alışkanlığı (bu hafta 0/5 gün)', dk:60 }]);
+        /* Ara günü plan bloğu gitmez. */
+        R.S.days['2026-09-24'].ara = true;
+        R.S.hedefler = [];
+        expect((await Hd().yarin()).isler).toEqual([]);
+      });
+    });
+
+    it('yarın henüz kurulmadıysa kaydedilmeden kurulur', async () => {
+      await withTodayAsync(BUGUN, async () => {
+        resetState();
+        const y = await Hd().yarin();
+        expect(y.isler.length > 0).toBe(true);
+        expect(!(await R.Store.get('days/2026-09-24'))).toBe(true);
+      });
+    });
+  });
+
   describe('AYS hedef — konu bitirme kapasitesi', () => {
     it('kalan konuların süresi müfredattan hesaplanır ve karar «tahmin»dir', () => {
       resetState();

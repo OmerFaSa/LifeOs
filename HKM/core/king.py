@@ -511,6 +511,14 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
             else:
                 aday = s["kayit_id"]
                 kontrol.append(_madde("depo", True, "Depoda kayıt #%d var. %s" % (aday, tnot)))
+    if not depo_ and not aday and tur == "bam.arastirma" and karar != "ret":
+        # Ayni KONU baska bir girdiyle (baska modulden, baska gun) arastirilmis
+        # olabilir: Depolama Burosu'nun anahtariyla bakilir (fikir 46).
+        k = depo.eslesen(con, ANAHTAR[tur](temiz))
+        if k:
+            aday = k["id"]
+            kontrol.append(_madde("depo", True, "Depoda aynı konuda araştırma kaydı #%d var "
+                                  "(%s)." % (aday, str(k.get("created_at"))[:10])))
     if not depo_ and not aday:
         kontrol.append(_madde("depo", True, "Depoda aynı girdiyle kurulmuş bir kayıt yok."))
 
@@ -524,6 +532,10 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
         # Depodan kapanan is bedavadir; teklif gerekmez.
         if not depo_:
             tk = tkl.kur(con, cfg, tur, temiz, ofisler_of, tahmini_sure)
+            # ONCE DEPO teklifte EN USTTE: bedava ve hemen (fikir 46).
+            kd = bam.kayit_getir(con, aday) if aday else None
+            if kd:
+                tk = tkl.depo_secenegi(tk, kd, at)
             tahmin = dict(tahmin, sn=tk["secenekler"][0]["sure"]["sn"],
                           metin=tk["secenekler"][0]["sure"]["metin"],
                           dayanak=tk["secenekler"][0]["sure"]["dayanak"])
@@ -651,6 +663,8 @@ def teklif_onayla(con, cfg, id_, secenek=None, now=None):
     secenek = secenek or t.get("oneri") or "tam"
     if secenek not in ids:
         return {"ok": False, "note": "Bu teklifte «%s» seçeneği yok." % secenek}
+    if secenek == "depo":
+        return _depodan_ver(con, e, t, now)
     temiz = e["govde"]
     if secenek != "tam":
         r = tkl.uygula(e["tur"], secenek, temiz)
@@ -674,6 +688,26 @@ def teklif_onayla(con, cfg, id_, secenek=None, now=None):
         return {"ok": True, "emir": emir(con, e["id"]), "karar": karar,
                 "note": "Açılamadı: %s" % sebep}
     return _bam_ac(con, e, temiz, karar, kontrol, t.get("depo_aday"), at)
+
+
+def _depodan_ver(con, e, t, now=None):
+    """«Depodaki kayit» secildi: BAM'da is ACILMAZ, ucret yok. Kayit modulun
+    kuyruguna teklif olur ve kanala belge gider (emir_ac'in depo yolu gibi)."""
+    sec = next((x for x in t.get("secenekler") or [] if x.get("id") == "depo"), {})
+    kid = sec.get("kayit_id")
+    if not kid or not bam.kayit_getir(con, kid):
+        return {"ok": False, "note": "Depodaki kayıt artık yok; başka bir seçenek seç."}
+    at = _simdi(now)
+    t["secilen"], t["onay_at"] = "depo", at
+    e["teklif"], e["durum"], e["karar"] = t, "bitti", "onay"
+    e["sonuc"] = {"kayit_id": kid, "depodan": True, "gercek_sn": 0,
+                  "gercek_metin": "hemen (depodan)"}
+    _yaz(con, e, at)
+    ek = _teklif(con, e, kid, now=at)
+    bildir(con, e["modul"], e["id"], "bitti", "«%s» depodaki kayıttan verildi; iş açılmadı, "
+           "ücret yok.%s" % (e["konu"], ek), now=at)
+    _teslim(con, e, "", kid, yalniz_belge=True, now=at)
+    return {"ok": True, "emir": emir(con, e["id"]), "karar": "onay", "depodan": True}
 
 
 def teklifler(con, modul, limit=10):
@@ -727,7 +761,7 @@ def parca(con, id_, karar, now=None):
                      "Durduruldu: kitap üretilen bölümlerle bitiyor; teklif olarak gelir.")}
 
 
-CEVAP = re.compile(r"^\s*(1|2|3|tam|küçük|kucuk|iptal|vazgeç|vazgec|devam|dur)\s*[.!]?\s*$",
+CEVAP = re.compile(r"^\s*(1|2|3|4|tam|küçük|kucuk|depo|iptal|vazgeç|vazgec|devam|dur)\s*[.!]?\s*$",
                    re.I)
 
 
@@ -759,7 +793,9 @@ def teklif_cevap(con, cfg, metin, kanal="local", hedef=None, now=None):
         iptal(con, e["id"], now=now)
         return "«%s» teklifi iptal edildi; iş açılmadı." % e["konu"]
     ids = [x["id"] for x in (e.get("teklif") or {}).get("secenekler") or []]
-    i = {"1": 0, "tam": 0, "2": 1, "3": 2}.get(k, ids.index("kucuk") if "kucuk" in ids else 9)
+    # Rakam SIRADIR (depo secenegi varsa «1» odur); ad, secenegin kendisidir.
+    ad = {"tam": "tam", "küçük": "kucuk", "kucuk": "kucuk", "depo": "depo"}.get(k)
+    i = (int(k) - 1) if k.isdigit() else (ids.index(ad) if ad in ids else 9)
     if i >= len(ids):
         return ("Bu teklifte o seçenek yok. %s ya da «iptal» yazabilirsin."
                 % " ".join("«%d»" % (n + 1) for n in range(len(ids))))
@@ -767,6 +803,9 @@ def teklif_cevap(con, cfg, metin, kanal="local", hedef=None, now=None):
     if not r.get("ok"):
         return r.get("note") or "Onaylanamadı."
     e2 = r["emir"]
+    if r.get("depodan"):
+        return ("Depodaki kayıt verildi: «%s» (iş emri #%d). Ücret yok; BAM’da iş açılmadı.%s"
+                % (e2["konu"], e2["id"], " Belgesi buraya geliyor." if kanal == "telegram" else ""))
     if e2["durum"] == "reddedildi":
         return "Onayladın ama iş açılamadı: %s" % r.get("note", "")
     return "Onaylandı: «%s» (iş emri #%d) BAM’da açıldı. Tahmini süre %s (tahmin). %s" % (

@@ -30,6 +30,8 @@ def main():
         mod.run()
     test_channels.run_bot()
     test_bildirim.run_eksik()
+    test_bildirim.run_bayat()
+    test_bildirim.run_yarin()
 
     suite = None
     fails = 0

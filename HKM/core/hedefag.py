@@ -141,6 +141,41 @@ def esitle(con, modul, hedefler, now=None):
             "toplam": len(gelen)}
 
 
+def yarin_yaz(con, modul, yarin, now=None):
+    """Modulun yarin icin ilk islerinin anlik goruntusu. Bozuksa YAZILMAZ."""
+    if modul not in MODULLER or not isinstance(yarin, dict):
+        return {"ok": False, "note": "Yarın özeti bir nesne olmalı."}
+    gun = str(yarin.get("gun") or "")
+    try:
+        datetime.date.fromisoformat(gun)
+    except ValueError:
+        return {"ok": False, "note": "Yarın özetinin günü geçersiz."}
+    isler = []
+    ham = yarin.get("isler") if isinstance(yarin.get("isler"), list) else []
+    for x in ham[:5]:
+        if not isinstance(x, dict):
+            continue
+        metin = _metin(x.get("metin"), 80)
+        dk = x.get("dk")
+        dk = dk if isinstance(dk, int) and not isinstance(dk, bool) and 0 < dk <= 960 else None
+        if metin:
+            isler.append({"metin": metin, "dk": dk})
+    con.execute("INSERT OR REPLACE INTO yarin_ozet(modul, gun, isler, guncelleme) VALUES (?,?,?,?)",
+                (modul, gun, json.dumps(isler, ensure_ascii=False), _simdi(now)))
+    return {"ok": True, "adet": len(isler)}
+
+
+def yarin_oku(con, gun):
+    """{modul: [isler]} — yalniz o GUNE ait goruntu; eskisi yok sayilir."""
+    out = {}
+    for r in con.execute("SELECT modul, isler FROM yarin_ozet WHERE gun=?", (gun,)).fetchall():
+        try:
+            out[r["modul"]] = json.loads(r["isler"])
+        except ValueError:
+            continue
+    return out
+
+
 def hedefler(con):
     out = []
     for r in con.execute("SELECT modul, govde, guncelleme FROM hedef_ozet "
@@ -229,8 +264,12 @@ def butce(con):
     return out
 
 
-def pano(con):
-    """HKM › Hedefler: uc modulun etkin hedefleri ve butce."""
+def pano(con, bugun=None):
+    """HKM › Hedefler: uc modulun etkin hedefleri, butce ve YARININ isleri
+    (modullerin sectigi; aksam ozetinin kaynagi)."""
     l = hedefler(con)
+    gun = datetime.date.fromisoformat(bugun) if bugun else datetime.date.today()
+    yarin = (gun + datetime.timedelta(days=1)).isoformat()
     return {"hedefler": l, "butce": butce(con),
-            "moduller": {m: len([h for h in l if h["modul"] == m]) for m in MODULLER}}
+            "moduller": {m: len([h for h in l if h["modul"] == m]) for m in MODULLER},
+            "yarin": {"gun": yarin, "isler": yarin_oku(con, yarin)}}

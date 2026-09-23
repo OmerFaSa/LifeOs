@@ -680,6 +680,11 @@ ESP.Screens.today = (function(){
               act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } })}
           </div>
         </div>`)}
+        ${when(topluKayitlar().length >= 2, () => html`<div class="row gap-8 mt-8">
+          ${K.Button({ label:'Hepsini kaydet (' + topluKayitlar().length + ')', size:'sm',
+            tone:'primary', act:'hkm-toplu' })}
+          <span class="tiny dim">Yalnız okunabilen günlük kayıtlar; yanlışsa o günün oturumlarından silinir.</span>
+        </div>`)}
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
           ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
@@ -816,6 +821,29 @@ ESP.Screens.today = (function(){
   /* HKM teklifine verilen cevabin TEK yolu: uygulama, yerel kayit ve
      merkeze bildirim tek sirada olur. «Uygulandı ama merkeze
      bildirilemedi» hali yutulmaz, SOYLENIR. */
+  /* TOPLU ONAY yalniz KUCUK tekliflerde: gunluk kayit (kayit.add), ESP'nin
+     okuyabildigi; yanlissa o gunun oturumlarindan silinir (AGENTS.md §1.9). */
+  function topluKayitlar(){
+    return (S.ui.hkmIntents || []).filter(n => n.kind === 'kayit.add'
+      && n.okuma && n.okuma.yazilacak && n.okuma.yazilacak.length && ESP.Beacon.canApply(n));
+  }
+
+  async function hkmToplu(){
+    const l = topluKayitlar();
+    let yazilan = 0, kalan = 0;
+    for(const n of l){
+      const r = await ESP.Beacon.resolveIntent(n, 'apply');
+      if(r.ok){
+        yazilan++;
+        S.ui.hkmIntents = (S.ui.hkmIntents || []).filter(x => x.id !== n.id);
+      }else kalan++;
+    }
+    if(yazilan) ESP.UI.onayMuhru();
+    ESP.UI.toast(yazilan + ' kayıt yazıldı' + (kalan ? ', ' + kalan + ' tanesi yazılamadı (kartta duruyor)' : '')
+      + '. Yanlışsa o günün oturumlarından silebilirsin.');
+    ESP.App.render();
+  }
+
   async function hkmCevap(id, action){
     const liste = S.ui.hkmIntents || [];
     const n = liste.filter(x => String(x.id) === String(id))[0];
@@ -872,6 +900,7 @@ ESP.Screens.today = (function(){
       S.ui.kingTeklifler = ESP.KingTeklif.liste();
       ESP.App.render();
     },
+    async 'hkm-toplu'(){ await hkmToplu(); },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-seen'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },

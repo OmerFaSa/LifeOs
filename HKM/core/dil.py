@@ -494,6 +494,16 @@ def kisa_kayit(metin):
             "belirsiz": belirsiz, "kisa": True}
 
 
+# «Yarin hafif» — aksam «yarin sunlar var» mesajina tek kelimelik cevap:
+# modullere yarin icin YUK AZALTMA teklifi (`load.reduce`). Ne kadar
+# azalacagina modul karar verir; HKM oran uydurmaz.
+YARIN_HAFIF = re.compile(r"^yar[ıi]n[ıi]?\s+(?:daha\s+)?(?:hafif|hafiflet\w*|azalt\w*)[.!]*$")
+
+
+def yarin_hafif(metin):
+    return bool(YARIN_HAFIF.match(" ".join(kucult(metin).split())))
+
+
 def cozum_tarihi(bugun, ayrinti):
     """Zaman parametresinden tarih. Ileri tarihe GITMEZ."""
     t = datetime.date.fromisoformat(bugun)

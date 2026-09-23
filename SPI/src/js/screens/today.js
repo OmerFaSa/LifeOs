@@ -725,6 +725,11 @@ SP.Screens.today = (function(){
     return K.Entry({ label:'HKM TEKLİFİ', hint:'hkm',
       meta:liste.length + ' teklif', wide:true,
       body:html`
+        ${when(topluKayitlar().length >= 2, () => html`<div class="row gap-8 mt-8">
+          ${K.Button({ label:'Hepsini kaydet (' + topluKayitlar().length + ')', size:'sm',
+            tone:'primary', act:'hkm-toplu' })}
+          <span class="tiny dim">Yalnız okunabilen günlük kayıtlar; her biri Danışma ekranından geri alınır.</span>
+        </div>`)}
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
           ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
@@ -871,6 +876,29 @@ SP.Screens.today = (function(){
 
      SPİ'de «Gördüm» bir UYGULAMA değildir: ölçüm de yük de kullanıcının
      kararıdır. Merkeze de öyle bildirilir — «uygulandı» değil «görüldü». */
+  /* TOPLU ONAY yalniz KUCUK tekliflerde: gunluk kayit (kayit.add), SPI'nin
+     okuyabildigi ve Danisma'dan geri alinabilen (AGENTS.md §1.9). */
+  function topluKayitlar(){
+    return (S.ui.hkmIntents || []).filter(n => n.kind === 'kayit.add'
+      && n.okuma && n.okuma.yazilacak && n.okuma.yazilacak.length && SP.Beacon.canApply(n));
+  }
+
+  async function hkmToplu(){
+    const l = topluKayitlar();
+    let yazilan = 0, kalan = 0;
+    for(const n of l){
+      const r = await SP.Beacon.resolveIntent(n, 'apply');
+      if(r.ok){
+        yazilan++;
+        S.ui.hkmIntents = (S.ui.hkmIntents || []).filter(x => x.id !== n.id);
+      }else kalan++;
+    }
+    if(yazilan) SP.UI.onayMuhru();
+    UI.toast(yazilan + ' kayıt yazıldı' + (kalan ? ', ' + kalan + ' tanesi yazılamadı (kartta duruyor)' : '')
+      + '. Yanlış olanı Danışma ekranından geri alabilirsin.');
+    SP.App.render();
+  }
+
   async function hkmCevap(id, action){
     const liste = S.ui.hkmIntents || [];
     const n = liste.filter(x => String(x.id) === String(id))[0];
@@ -979,6 +1007,7 @@ SP.Screens.today = (function(){
       S.ui.kingTeklifler = SP.KingTeklif.liste();
       SP.App.render();
     },
+    async 'hkm-toplu'(){ await hkmToplu(); },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-apply'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
