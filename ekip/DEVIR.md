@@ -35,10 +35,11 @@
 
 ## 2. Dal düzeni
 
-- Geliştirme dalı: oturumun verdiği dal (bu oturum `claude/epic-keller-uz103z-y09gx6`)
-  → `git push -u origin <dal>`. Kullanıcı: «commit edeceğin yer main olsun».
-- `main` bu dalın atası; her Part (ve her madde) sonunda `git push origin HEAD:main`
-  (yalnız ileri sarma, asla zorla yazma). Eski dalları ayrıca ilerletmek gerekmez.
+- **Doğrudan `main` (kullanıcı, 2026-09-23):** «main üzerinden çalış». Yerel `main`
+  `origin/main`'i izler; her madde bitince commit + `git push origin main` (yalnız
+  ileri sarma, asla zorla yazma). Oturum dalı varsa ayrıca ilerletmek gerekmez.
+- Uzun bir koşum (`sayilar.py --tam`) sürerken iş ayrı bir `git worktree`'de yapılır,
+  koşum bitince main'e alınır: koşum ölçtüğü dosyanın değişmediğinden emin olur.
 - **Push edilmemiş iş kaybolur** (konteyner geçicidir): her madde bitince push et.
 - Commit sonu: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` ve
   `Claude-Session: <oturum bağlantısı>` satırları.
@@ -122,7 +123,9 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   öneri HKM içinde bir bölüm; ilk adımda kullanıcıya bir cümleyle teyit et. Fişten
   okunan tutar/kalem **tahmin**dir: kayda geçmeden önizlenir, kullanıcı onaylar
   (belirsiz girdi sorulur). Tutarı ve toplamı kod hesaplar.
-- 🔜 Y9 Bilgi Deposu tarayıcısı (HKM web).
+- ✅ Y9 Bilgi Deposu tarayıcısı: HKM › Ofis › Bilgi Deposu — arama, tür ve tazelik
+  süzgeci; tazelik kodla ve etiketli (ölçüldü / hesaplandı / veri yok), sürüm zinciri
+  ve kaynaklar kaydın içinde (`depo.tarayici`, `depo.kayit_depo`; HKM/MIMARI.md §8.27).
 - ⏳ Y10 Veli / koç özeti — DOSYA (PDF). Cevap 7: haftada BİR ya da İKİ PDF; sıklığı
   **kod** karar verir: kullanım yoğunluğu, karar / değişiklik yoğunluğu, aciliyet,
   sağlık durumu, ders durumunun kararlılığı (sabit mi, yükselen mi, düşen mi). Karar
@@ -255,6 +258,10 @@ symptom`, ESP `lessons / lesson / srs / curriculum / guitar_tabs`, `brand/ortak/
 durumu ve üç kanaldan onay; seçenekler; parçalı teslim + ara onay; yeni niyetler
 `besin.add`, `fiyat.add`, `yer.add`, `unite.add`; modüllerin montaj ekranları ve
 Kütüphanem; tahmin–gerçek maliyet sapması.
+
+**Sıradaki: 🔜 8a.** İlk bulgu (2026-09-23): `usage` defterinde çağrının hangi BAM
+işine ait olduğu yazılmıyor; «maliyet ölçümden» için önce bu bağ kurulmalı (BAM
+adımı koşarken iş kimliği iş parçacığına özel bağlamda, `butce.record` onu yazar).
 
 **Dilimler (sırayla, her biri test + commit + push):** 8a teklif (sınıf + maliyet +
 süre + onay) mevcut iş türleri için → 8b AYS fasikül/kitap parçalı + çözdüklerim +

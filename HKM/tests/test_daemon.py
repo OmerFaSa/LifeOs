@@ -740,6 +740,26 @@ def run_extra(S):
         S.call("/api/hedef/sync/ays", body={"hedefler": []})
     test("hedef agi uclari: esitleme, zaman, pano — yetkili", t_hedef_endpoints)
 
+    def t_depo_tara():
+        from core import bam as _bam
+        con = db.connect(S.db_path)
+        kid = _bam.kayit_ekle(con, "arastirma", "Tarayıcı deneme konusu",
+                              {"ozet": "x", "kaynaklar": [{"n": 1, "url": "https://ornek.org/a",
+                                                           "alan": "ornek.org", "parmak": ["p"]}]},
+                              dogruluk="kaynakli")["id"]
+        con.close()
+        eq(S.call("/api/bam/depo/tara", token=None)[0], 401)
+        from urllib.parse import quote
+        kod, v = S.call("/api/bam/depo/tara?q=%s&tur=arastirma&durum=yok-boyle" % quote("tarayıcı"))
+        eq(kod, 200)
+        eq([x["id"] for x in v["kayitlar"]], [kid])     # gecersiz durum suzgeci yok sayilir
+        eq((v["kayitlar"][0]["kaynak"], v["kayitlar"][0]["tazelik"]["durum"]), (1, "yeni"))
+        ok(v["adlar"]["guncel"] == "güncel" and v["kural"])
+        kod, r = S.call("/api/bam/kayit/%d" % kid)
+        eq((r["depo"]["surumler"][0]["bu"], r["depo"]["kaynaklar"][0]["alan"]), (True, "ornek.org"))
+        no("parmak" in r["depo"]["kaynaklar"][0])
+    test("depo tarayicisi ucu: arama, suzgec, kayit gorunumu — yetkili", t_depo_tara)
+
     def t_yedek_endpoints():
         govde = {"__meta": {"app": "spi-saglik", "schemaVersion": 3}, "data": {"meta": {"x": 1}}}
         eq(S.call("/api/yedek/spi", body=govde, token=None)[0], 401)

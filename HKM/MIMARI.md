@@ -867,6 +867,25 @@ Google cx, SearXNG adresi, günlük sınır, güncellik turu ve «Dene»
 (`POST /api/web/dene`). Testler: `tests/test_urun.py`, `tests/test_daemon.py`,
 `brand/ortak/urun.test.js`, `tools/entegre.js` §0.7, §2.76 ve §7.
 
+## 8.27 Bilgi Deposu tarayıcısı — `core/depo.py` `tarayici()` (Y9)
+
+HKM › Ofis › Bilgi Deposu: bütün BAM kayıtları (araştırma, materyal, plan) tek
+listede; arama, tür ve tazelik süzgeci (`GET /api/bam/depo/tara?q=&tur=&durum=`).
+Sayım süzgeçten ÖNCE yapılır, seçim kutusu neyin kalacağını söyler. Her kaydın
+tazeliği KODLA verilir ve etiketlidir:
+
+- **ölçüldü:** eski sürüm (aynı konunun yeni sürümü var) · güncel / kaynağı
+  değişti / denetlenemedi (Kayıt Doğrulama Uzmanı'nın son canlı denetimi).
+- **hesaplandı:** eskiyen (tür süresi geçti: araştırma 90, plan 180, materyal 365
+  gün) · yeni (bugün yazıldı) · araştırmaya dayanmıyor.
+- **veri yok:** ölçülmedi — ölçülmemiş kayıt «güncel» diye gösterilmez.
+
+Materyal ve plan kaydı, dayandığı araştırmanın tazeliğini taşır. Kaydı açınca
+tazelik, sürüm zinciri (aynı konu anahtarı ya da `onceki_id` bağları, iki yöne)
+ve kaynaklar görünür; kaynağın iz parmağı sunucudan çıkmaz. Tarayıcı ağa
+çıkmaz, model çağırmaz, kayıt silmez; tazeleme eylemi Part 8e'dedir.
+Testler: `tests/test_depo.py`, `tests/test_daemon.py`.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

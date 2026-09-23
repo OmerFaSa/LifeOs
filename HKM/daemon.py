@@ -51,6 +51,7 @@ Ucnoktalar:
     GET  /api/urunler               Uretim Burosu'nun urun katalogu
     GET  /api/bam/kayit/<id>/cikti?bicim=html|svg|pdf  kaydin basilir hali
     GET  /api/bam/depo              Depolama Burosu'nun depo denetimi (kod; model yok)
+    GET  /api/bam/depo/tara?q=&tur=&durum=  Bilgi Deposu tarayicisi: tazelik, surum, kaynak
     GET  /api/web                   web katmaninin durumu: saglayicilar, bugunku cagri
     GET  /api/hedefler              uc modulun etkin hedefleri ve zaman butcesi (kod)
     POST /api/hedef/sync/<modul>    modulun hedef ozetlerinin anlik goruntusu
@@ -678,6 +679,19 @@ class Handler(BaseHTTPRequestHandler):
             # Olcum her istekte tazedir ve koddur: kopya surumler baglanir,
             # eskiyen ve kaynaksiz kayit sayilir; hicbir kayit silinmez.
             return self._send(200, {"rapor": depo.denetim(self.con)})
+        # Bilgi Deposu tarayicisi (core/depo.py tarayici): arama, tur ve
+        # tazelik suzgeci. Tazelik ve sayim koddur; aga cikilmaz.
+        if u.path == "/api/bam/depo/tara":
+            tur = (q.get("tur") or [""])[0]
+            durum = (q.get("durum") or [""])[0]
+            try:
+                limit = int((q.get("limit") or ["50"])[0])
+            except ValueError:
+                limit = 50
+            return self._send(200, depo.tarayici(
+                self.con, sorgu=(q.get("q") or [""])[0][:120],
+                tur=tur if tur in bam.TURLER else None,
+                durum=durum if durum in depo.TAZELIK_DURUM else None, limit=limit))
         if u.path == "/api/bam/ara":
             return self._send(200, {"kayitlar": bam.kayit_ara(
                 self.con, (q.get("q") or [""])[0], limit=20)})
@@ -710,7 +724,8 @@ class Handler(BaseHTTPRequestHandler):
             k = bam.kayit_getir(self.con, kid)
             if not k:
                 return self._send(404, {"error": "kayit yok"})
-            return self._send(200, {"kayit": k, "iz": bam.iz_zinciri(self.con, "kayit", kid)})
+            return self._send(200, {"kayit": k, "iz": bam.iz_zinciri(self.con, "kayit", kid),
+                                    "depo": depo.kayit_depo(self.con, kid)})
         # ---- King onay zinciri (core/king.py): is emirleri ve bildirimler ----
         # Hedef agi (core/hedefag.py): uc modulun etkin hedefleri ve zaman butcesi.
         if u.path == "/api/hedefler":

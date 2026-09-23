@@ -342,3 +342,156 @@ def denetim(con, now=None):
             "iz": [iz("arsiv", "%d kayıt tarandı; %d eski sürüm bağlandı." % (len(satir), bagli)),
                    iz("indeks", "%d kayıt eskimiş, %d kayıt kaynaksız." % (len(eski),
                                                                           len(kaynaksiz)))]}
+
+
+# ------------------------------------------------------------ tarayici
+#
+# Bilgi Deposu tarayicisi (ekip/PLAN.md §3.H, DEVIR Y9): raporlar,
+# kaynaklar, tazelik, surumler TEK listede. Her durum ve her sayi KODDAN
+# gelir; yuz yalniz yazar. Model cagrilmaz, aga cikilmaz, kayit silinmez.
+
+TAZELIK_DURUM = ("guncel", "degisti", "denetlenemedi", "eski_surum", "eskiyen",
+                 "olculmedi", "yeni", "soru_yok")
+TAZELIK_AD = {"guncel": "güncel", "degisti": "kaynağı değişti", "denetlenemedi": "denetlenemedi",
+              "eski_surum": "eski sürüm", "eskiyen": "eskiyen", "olculmedi": "ölçülmedi",
+              "yeni": "yeni", "soru_yok": "araştırmaya dayanmıyor"}
+TARA_EN_COK = 500
+
+
+def _json(x, bos):
+    try:
+        return json.loads(x) if x else bos
+    except ValueError:
+        return bos
+
+
+def _gun(a, b):
+    s = _saat(a, b)
+    return None if s is None else int(s // 24)
+
+
+def _son_surumler(satir):
+    """Konu anahtari -> en yeni arastirma kimligi."""
+    son = {}
+    for r in satir:
+        if r["tur"] == "arastirma" and r["anahtar"]:
+            son[r["anahtar"]] = max(son.get(r["anahtar"], 0), r["id"])
+    return son
+
+
+def _tazelik(r, son, arastirma, at):
+    """Bir kaydin tazeligi: {durum, metin, etiket}. Kod karar verir.
+
+    Arastirma kaydinin kendi denetimine, materyal ve plan kaydinin
+    dayandigi arastirmaya bakilir. Olculmemis tazelik «guncel» sayilmaz."""
+    if r["tur"] == "arastirma" and r["anahtar"] and son.get(r["anahtar"], r["id"]) != r["id"]:
+        return {"durum": "eski_surum", "etiket": "olculdu",
+                "metin": "Yeni sürümü var (#%d); bu kayıt geçmiş için duruyor." % son[r["anahtar"]]}
+    if r["tur"] != "arastirma":
+        dayanak = _json(r["govde"], {}).get("dayanak")
+        if not dayanak or int(dayanak) not in arastirma:
+            yas = _gun(r["created_at"], at)
+            sinir = ESKI_GUN.get(r["tur"], 365)
+            if yas is not None and yas > sinir:
+                return {"durum": "eskiyen", "etiket": "hesaplandi",
+                        "metin": "%d gün önce yazıldı; bu tür için süre %d gün." % (yas, sinir)}
+            return {"durum": "soru_yok", "etiket": "hesaplandi",
+                    "metin": "Bir araştırmaya dayanmıyor; güncellik sorusu yok."}
+        a = arastirma[int(dayanak)]
+        t = _tazelik(a, son, arastirma, at)
+        t = dict(t)
+        t["metin"] = "Dayandığı araştırma (#%d): %s" % (a["id"], t["metin"][0].lower() + t["metin"][1:])
+        return t
+    d = _json(r["denetim"], None) or {}
+    if d.get("durum") in ("guncel", "degisti", "denetlenemedi"):
+        ne = {"guncel": "kaynakları açıldı, güncel",
+              "degisti": "kaynağı değişti; yeni sürüm gerekir",
+              "denetlenemedi": "kaynakları açılamadı (%s)" % (d.get("neden") or "okunamadı")}
+        return {"durum": d["durum"], "etiket": "olculdu",
+                "metin": "%s tarihinde %s." % (str(d.get("at") or "")[:10], ne[d["durum"]])}
+    yas = _gun(r["created_at"], at)
+    sinir = ESKI_GUN.get("arastirma", 90)
+    if yas is not None and yas > sinir:
+        return {"durum": "eskiyen", "etiket": "hesaplandi",
+                "metin": "%d gündür güncelliği ölçülmedi; araştırma için süre %d gün." % (yas, sinir)}
+    if yas is not None and yas * 24 < YENI_SAYILIR_SAAT:
+        return {"durum": "yeni", "etiket": "hesaplandi", "metin": "Bugün yazıldı."}
+    return {"durum": "olculmedi", "etiket": "veri_yok",
+            "metin": "Güncelliği henüz ölçülmedi (%d gün önce yazıldı)." % (yas or 0)}
+
+
+def _satirlar(con):
+    return [dict(r) for r in con.execute(
+        "SELECT id, tur, baslik, dogruluk, surum, anahtar, onceki_id, created_at, denetim, "
+        "govde, etiketler FROM bam_kayitlar ORDER BY id DESC LIMIT ?", (TARA_EN_COK,))]
+
+
+def _eslesir(r, kelimeler):
+    if not kelimeler:
+        return True
+    metin = normal(" ".join((r["baslik"] or "", r["etiketler"] or "", r["govde"] or "")))
+    return all(w in metin for w in kelimeler)
+
+
+def tarayici(con, sorgu="", tur=None, durum=None, limit=50, now=None):
+    """Depo tarayicisi: aranir, ture ve tazelige gore suzulur.
+
+    Sayim (cipler icin) SORGUYA gore yapilir, tur/durum suzgecinden once:
+    kullanici suzgeci degistirince neyin kalacagini onceden gorur."""
+    at = _simdi(now)
+    satir = _satirlar(con)
+    son = _son_surumler(satir)
+    arastirma = {r["id"]: r for r in satir if r["tur"] == "arastirma"}
+    kelimeler = [w for w in normal(sorgu).split() if len(w) >= 2]
+    out, sayim = [], {"tur": {}, "durum": {}}
+    for r in satir:
+        if not _eslesir(r, kelimeler):
+            continue
+        t = _tazelik(r, son, arastirma, at)
+        sayim["tur"][r["tur"]] = sayim["tur"].get(r["tur"], 0) + 1
+        sayim["durum"][t["durum"]] = sayim["durum"].get(t["durum"], 0) + 1
+        if (tur and r["tur"] != tur) or (durum and t["durum"] != durum):
+            continue
+        g = _json(r["govde"], {})
+        out.append({"id": r["id"], "tur": r["tur"], "baslik": r["baslik"],
+                    "dogruluk": r["dogruluk"], "surum": r["surum"],
+                    "tarih": str(r["created_at"])[:10], "yas_gun": _gun(r["created_at"], at),
+                    "kaynak": len(g.get("kaynaklar") or []), "tazelik": t})
+    return {"kayitlar": out[:max(1, min(int(limit or 50), 200))], "toplam": len(out),
+            "sayim": sayim, "at": at, "etiket": "olculdu", "adlar": TAZELIK_AD,
+            "kural": "Tazelik kaynakların canlı açılmasıyla ölçülür; ölçülmemiş kayıt «güncel» "
+                     "sayılmaz. Süreler: araştırma %d, plan %d, materyal %d gün."
+                     % (ESKI_GUN["arastirma"], ESKI_GUN["plan"], ESKI_GUN["materyal"])}
+
+
+def kayit_depo(con, kayit_id, now=None):
+    """Tek kaydin depo gorunumu: tazelik, surum zinciri, kaynaklar."""
+    at = _simdi(now)
+    satir = _satirlar(con)
+    r = next((x for x in satir if x["id"] == int(kayit_id)), None)
+    if not r:
+        return None
+    son = _son_surumler(satir)
+    arastirma = {x["id"]: x for x in satir if x["tur"] == "arastirma"}
+    if r["anahtar"]:
+        zincir = sorted([x for x in satir if x["anahtar"] == r["anahtar"]
+                         and x["tur"] == r["tur"]], key=lambda x: x["id"])
+    else:
+        # Anahtarsiz kayit: onceki_id baglarini iki yone izle.
+        byid = {x["id"]: x for x in satir}
+        zincir, x = [], r
+        while x and x["id"] not in [z["id"] for z in zincir]:
+            zincir.insert(0, x)
+            x = byid.get(x["onceki_id"]) if x["onceki_id"] else None
+        sonraki = {x["onceki_id"]: x for x in satir if x["onceki_id"]}
+        x = sonraki.get(r["id"])
+        while x and x["id"] not in [z["id"] for z in zincir]:
+            zincir.append(x)
+            x = sonraki.get(x["id"])
+    g = _json(r["govde"], {})
+    return {"tazelik": _tazelik(r, son, arastirma, at),
+            "surumler": [{"id": x["id"], "surum": x["surum"], "tarih": str(x["created_at"])[:10],
+                          "bu": x["id"] == r["id"]} for x in zincir],
+            "kaynaklar": [{"n": k.get("n"), "baslik": k.get("baslik"), "url": k.get("url"),
+                           "alan": k.get("alan"), "tur": k.get("tur"), "erisim": k.get("erisim")}
+                          for k in g.get("kaynaklar") or []]}

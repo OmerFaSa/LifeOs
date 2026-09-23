@@ -731,6 +731,7 @@ details.detay > summary:hover{ color:var(--fg); }
       <div class="card" id="ofis-isler"></div>
       <div class="card" id="ofis-kayit" hidden></div>
       <div class="card" id="ofis-kayitlar"></div>
+      <div class="card" id="ofis-depo-tara"></div>
       <div class="card" id="ofis-depo"></div>
       <div class="card" id="ofis-bam"></div>
     </div>
@@ -3109,6 +3110,7 @@ details.detay > summary:hover{ color:var(--fg); }
           + ' · ' + esc(b.dayanak) + '</span></li>'; })
       + liste('Açık kalanlar', g.acik_kalanlar, function(x){ return '<li>' + esc(x) + '</li>'; })
       + (g.metin ? '<p style="white-space:pre-wrap">' + esc(g.metin) + '</p>' : '')
+      + kayitDepoSatiri(r.body.depo)
       + kayitIndirSatiri(k)
       + '<p class="muted" style="margin-top:10px">Neden var: ' + (r.body.iz.length
         ? r.body.iz.map(function(z){ return (z.tur === 'is' ? 'iş #' : 'kayıt #') + esc(z.id); })
@@ -3191,6 +3193,106 @@ details.detay > summary:hover{ color:var(--fg); }
   /* Depo denetimi (core/depo.py): sayilari KOD olcer; hicbir kayit silinmez.
      Istek atildiginda kosar — her ekran acilisinda degil. */
   var DEPO_TUR = { arastirma:'araştırma', materyal:'materyal', plan:'plan' };
+
+  /* ---------- BİLGİ DEPOSU TARAYICISI (core/depo.py tarayici; DEVIR Y9) ----------
+     Raporlar, kaynaklar, tazelik ve sürümler tek listede. Durum, cümle ve
+     sayım SUNUCUDAN gelir: bu sayfa tazelik hesaplamaz, yalnız süzer ve
+     yazar. Ölçülmemiş bir kayıt «güncel» diye boyanmaz. */
+  var DEPO_TON = { guncel:'ok', yeni:'ok', soru_yok:'muted', olculmedi:'warn', eskiyen:'warn',
+    denetlenemedi:'warn', degisti:'danger', eski_surum:'muted' };
+  var DEPO_SUZ = { q:'', tur:'', durum:'' };
+
+  function depoSecim(id, bos, sozluk, sayim, secili, ad){
+    return '<select id="' + id + '" aria-label="' + esc(ad) + '"><option value="">' + esc(bos)
+      + '</option>' + Object.keys(sozluk).map(function(k){
+        return '<option value="' + esc(k) + '"' + (k === secili ? ' selected' : '') + '>'
+          + esc(sozluk[k]) + ' (' + esc((sayim || {})[k] || 0) + ')</option>'; }).join('')
+      + '</select>';
+  }
+
+  function depoTaraCiz(v){
+    var h = '<div class="tag">Bilgi Deposu</div>'
+      + '<p class="muted">' + esc(v.kural) + '</p>'
+      + '<div class="row"><input id="depo-q" type="search" placeholder="Başlık ya da konu ara"'
+      + ' aria-label="Depoda ara" value="' + esc(DEPO_SUZ.q) + '"/>'
+      + depoSecim('depo-tur', 'Bütün türler', DEPO_TUR, v.sayim.tur, DEPO_SUZ.tur, 'Tür')
+      + depoSecim('depo-durum', 'Bütün durumlar', v.adlar || {}, v.sayim.durum, DEPO_SUZ.durum,
+        'Tazelik')
+      + '<button id="depo-ara">Ara</button></div>';
+    if(!v.kayitlar.length) h += '<p class="muted">Bu süzgeçte kayıt yok.</p>';
+    v.kayitlar.forEach(function(k){
+      h += '<div style="' + CIZGI + '"><a href="#" data-bam-kayit="' + esc(k.id) + '">'
+        + esc(k.baslik) + '</a><p class="muted" style="margin:2px 0 0">'
+        + esc(DEPO_TUR[k.tur] || k.tur) + ' · ' + esc(DOGRULUK_AD[k.dogruluk] || k.dogruluk)
+        + ' · sürüm ' + esc(k.surum) + ' · ' + esc(k.kaynak) + ' kaynak · ' + esc(k.tarih)
+        + '</p><p class="' + (DEPO_TON[k.tazelik.durum] || 'muted') + '" style="margin:2px 0 0">'
+        + esc(k.tazelik.metin) + '</p></div>';
+    });
+    if(v.toplam > v.kayitlar.length){
+      h += '<p class="muted">' + esc(v.toplam) + ' kayıttan ' + esc(v.kayitlar.length)
+        + ' tanesi gösteriliyor; aramayı daralt.</p>';
+    }
+    $('ofis-depo-tara').innerHTML = h;
+  }
+
+  async function depoTara(){
+    var p = [];
+    ['q', 'tur', 'durum'].forEach(function(k){
+      if(DEPO_SUZ[k]) p.push(k + '=' + encodeURIComponent(DEPO_SUZ[k])); });
+    var r = await api('/api/bam/depo/tara' + (p.length ? '?' + p.join('&') : ''));
+    if(r.status === 200) depoTaraCiz(r.body);
+    else $('ofis-depo-tara').innerHTML = '<p class="danger">Depo alınamadı ('
+      + esc(r.status) + ').</p>';
+  }
+
+  function depoSuzgecOku(){
+    DEPO_SUZ.q = (($('depo-q') || {}).value || '').trim();
+    DEPO_SUZ.tur = ($('depo-tur') || {}).value || '';
+    DEPO_SUZ.durum = ($('depo-durum') || {}).value || '';
+  }
+
+  document.addEventListener('click', function(ev){
+    var el = ev.target.closest ? ev.target.closest('#depo-ara') : null;
+    if(!el) return;
+    ev.preventDefault();
+    depoSuzgecOku();
+    depoTara();
+  });
+  document.addEventListener('change', function(ev){
+    if(!ev.target || (ev.target.id !== 'depo-tur' && ev.target.id !== 'depo-durum')) return;
+    depoSuzgecOku();
+    depoTara();
+  });
+  document.addEventListener('keydown', function(ev){
+    if(ev.key !== 'Enter' || !ev.target || ev.target.id !== 'depo-q') return;
+    ev.preventDefault();
+    depoSuzgecOku();
+    depoTara();
+  });
+
+  /* Kaydın depo görünümü: tazelik, sürüm zinciri, kaynaklar. Bağlantı
+     yalnız http(s) ise açılır; iz parmağı sunucudan hiç gelmez. */
+  function kayitDepoSatiri(d){
+    if(!d) return '';
+    var h = '<p class="' + (DEPO_TON[d.tazelik.durum] || 'muted') + '" style="margin-top:10px">'
+      + '<b>Tazelik:</b> ' + esc(d.tazelik.metin) + '</p>';
+    if(d.surumler.length > 1){
+      h += '<p class="muted">Sürümler: ' + d.surumler.map(function(s){
+        return s.bu ? '<b>' + esc(s.surum) + ' (' + esc(s.tarih) + ')</b>'
+          : '<a href="#" data-bam-kayit="' + esc(s.id) + '">' + esc(s.surum) + ' ('
+            + esc(s.tarih) + ')</a>'; }).join(' → ') + '</p>';
+    }
+    if(d.kaynaklar.length){
+      h += '<p class="muted" style="margin-top:10px"><b>Kaynaklar</b></p><ol>'
+        + d.kaynaklar.map(function(k){
+          var url = /^https?:\/\//.test(String(k.url || '')) ? k.url : null;
+          return '<li>' + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">'
+            + esc(k.baslik || url) + '</a>' : esc(k.baslik || '—')) + ' <span class="muted">· '
+            + esc(k.alan || '') + (k.erisim ? ' · erişim ' + esc(k.erisim) : '') + '</span></li>';
+        }).join('') + '</ol>';
+    }
+    return h;
+  }
   function ofisDepoCiz(r){
     var h = '<div class="row" style="justify-content:space-between"><span class="tag">Bilgi Deposu'
       + ' · denetim</span><button id="depo-denetle">Depoyu denetle</button></div>';
@@ -3431,6 +3533,7 @@ details.detay > summary:hover{ color:var(--fg); }
     ofisKayitlarCiz(o.body);
     ofisBamCiz(o.body);
     if(!$('depo-denetle')) ofisDepoCiz(null);
+    await depoTara();
     var b = await api('/api/briefing?date=' + t);
     ofisKatlarCiz(b.status === 200 ? b.body : null);
     if(OFIS_ACILACAK){ var ac = OFIS_ACILACAK; OFIS_ACILACAK = null; ofisKayitAc(ac); }

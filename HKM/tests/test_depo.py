@@ -251,3 +251,61 @@ def run():
         eq(depo.bakim(con, now=AN), None, "gunde bir kez")
         eq(depo.son_rapor(con)["toplam"], 3)
     test("depo denetimi surumleri baglar, kayit silmez", t_depo_denetim)
+
+    # Y9 — Bilgi Deposu tarayicisi: tazelik, surum zinciri, kaynaklar.
+    def _depo_con():
+        con = db.connect(":memory:")
+        k = [{"n": 1, "baslik": "Söğüt", "url": "https://tr.wikipedia.org/wiki/S%C3%B6%C4%9F%C3%BCt",
+              "alan": "tr.wikipedia.org", "tur": "ansiklopedi", "erisim": "2026-06-01",
+              "parmak": ["x"]}]
+        anahtar = depo.konu_anahtari("Osmanlı kuruluşu")
+        a1 = bam.kayit_ekle(con, "arastirma", "Osmanlı kuruluşu", {"ozet": "Söğüt", "kaynaklar": k},
+                            dogruluk="kaynakli", now="2026-06-01T10:00:00", anahtar=anahtar)["id"]
+        a2 = bam.kayit_ekle(con, "arastirma", "Osmanlı kuruluşu", {"ozet": "Söğüt 2", "kaynaklar": k},
+                            dogruluk="kaynakli", onceki_id=a1, now="2026-09-01T10:00:00",
+                            anahtar=anahtar)["id"]
+        m = bam.kayit_ekle(con, "materyal", "Osmanlı kartları", {"dayanak": a2},
+                           now="2026-09-02T10:00:00")["id"]
+        p = bam.kayit_ekle(con, "plan", "Eski plan", {}, now="2026-01-01T10:00:00")["id"]
+        return con, a1, a2, m, p
+
+    def t_tarayici_tazelik():
+        con, a1, a2, m, p = _depo_con()
+        t = depo.tarayici(con, now=AN)
+        d = {x["id"]: x["tazelik"]["durum"] for x in t["kayitlar"]}
+        # Eski surum; olculmemis arastirma «guncel» DEGIL; plan suresi gecti.
+        eq((d[a1], d[a2], d[p]), ("eski_surum", "olculmedi", "eskiyen"))
+        eq(d[m], "olculmedi")                   # dayandigi arastirmanin durumu
+        ok("#%d" % a2 in next(x for x in t["kayitlar"] if x["id"] == m)["tazelik"]["metin"])
+        eq(t["sayim"]["durum"]["eski_surum"], 1)
+        eq(next(x for x in t["kayitlar"] if x["id"] == a2)["kaynak"], 1)
+        # Denetim sonucu okunur: kaynaklar acildi ve guncel.
+        con.execute("UPDATE bam_kayitlar SET denetim=? WHERE id=?",
+                    (json.dumps({"durum": "guncel", "at": "2026-09-20T09:00:00"}), a2))
+        t = depo.tarayici(con, now=AN)
+        x = next(x for x in t["kayitlar"] if x["id"] == a2)
+        eq((x["tazelik"]["durum"], x["tazelik"]["etiket"]), ("guncel", "olculdu"))
+        ok("2026-09-20" in x["tazelik"]["metin"])
+    test("tarayici: tazelik koddan; olculmemis kayit guncel sayilmaz", t_tarayici_tazelik)
+
+    def t_tarayici_suzgec():
+        con, a1, a2, m, p = _depo_con()
+        eq([x["id"] for x in depo.tarayici(con, sorgu="kartları", now=AN)["kayitlar"]], [m])
+        eq([x["id"] for x in depo.tarayici(con, tur="arastirma", now=AN)["kayitlar"]], [a2, a1])
+        r = depo.tarayici(con, durum="eski_surum", now=AN)
+        eq([x["id"] for x in r["kayitlar"]], [a1])
+        # Sayim suzgecten ONCE yapilir: cipler neyin kalacagini soyler.
+        eq(r["sayim"]["tur"], {"arastirma": 2, "materyal": 1, "plan": 1})
+        eq(depo.tarayici(con, sorgu="yokboylebirsey", now=AN)["toplam"], 0)
+    test("tarayici: arama, tur ve tazelik suzgeci", t_tarayici_suzgec)
+
+    def t_kayit_depo():
+        con, a1, a2, m, p = _depo_con()
+        v = depo.kayit_depo(con, a1, now=AN)
+        eq([(s["id"], s["surum"], s["bu"]) for s in v["surumler"]], [(a1, 1, True), (a2, 2, False)])
+        eq((v["kaynaklar"][0]["alan"], "parmak" in v["kaynaklar"][0]), ("tr.wikipedia.org", False))
+        eq(depo.kayit_depo(con, 999, now=AN), None)
+        # Anahtarsiz kayitta onceki_id zinciri iki yone izlenir.
+        p2 = bam.kayit_ekle(con, "plan", "Eski plan", {}, onceki_id=p, now=AN)["id"]
+        eq([s["id"] for s in depo.kayit_depo(con, p, now=AN)["surumler"]], [p, p2])
+    test("kayit gorunumu: surum zinciri ve kaynaklar (iz parmagi disari cikmaz)", t_kayit_depo)
