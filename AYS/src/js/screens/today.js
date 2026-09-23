@@ -282,6 +282,112 @@ R.Screens.today = (function(){
         </div>` });
   }
 
+  /* ---------- hedeflerim ----------
+     HEDEFLERİM (core/hedefler.js + core/hedefplan.js). Hedef Ekip sohbetinde
+     Patron'la konuşarak kurulur: «TYT matematiği 100 günde bitirmek istiyorum»,
+     «TYT'de 90 nete çıkmak istiyorum». Burada görünür, planı kurulur,
+     askıya alınır, bırakılır. PLAN BÜYÜK AKSİYONDUR (AGENTS.md §1.9): önce
+     ayrıntılı önizleme, sonra «Planı uygula» — önizleme onayın kendisidir —
+     ve her zaman «Planı geri al». Sayılar ve cümleler motorundur; ekran
+     yalnız çizer. */
+  const BANT = { gercekci:'gerçekçi', zorlayici:'zorlayıcı',
+    gercekci_degil:'bu sürede olmaz', guvensiz:'güvenli değil' };
+
+  function hedefDugmeleri(h){
+    return html`
+      ${h.durum === 'aktif'
+        ? c.Button({ label:'Askıya al', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'askida' } })
+        : c.Button({ label:'Sürdür', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'aktif' } })}
+      ${c.Button({ label:'Tamamlandı', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'tamam' } })}
+      ${c.Button({ label:'Bırak', size:'sm', tone:'ghost', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'birakildi' } })}`;
+  }
+
+  function haftaSatiri(w){
+    const P = R.HedefPlan;
+    const parca = w.konular.map(k => k.name + (k.bitti ? '' : ' (sürüyor)'));
+    return html`<div class="stack-xs">
+      ${when(parca.length, () => html`<p class="tiny"><b>Konular:</b> ${parca.join(' · ')}</p>`)}
+      ${when(w.deneme, () => html`<p class="tiny"><b>Deneme günü:</b> ${w.deneme.ad} (çözüm + analiz ${P.dkYaz(w.deneme.dk)})</p>`)}
+      ${when(w.tekrar.length, () => html`<p class="tiny"><b>Tekrar:</b> ${w.tekrar.join(' · ')}</p>`)}
+    </div>`;
+  }
+
+  function hedefOnizleme(h){
+    const r = R.HedefPlan.kur(h, U.todayISO());
+    if(!r.ok){
+      return html`<div class="mt-8">${c.Notice({ tone:'warn', title:'Plan kurulamadı.', body:r.why })}
+        <div class="row gap-8 mt-8">${c.Button({ label:'Kapat', size:'sm', act:'hedef-plan-kapat' })}</div></div>`;
+    }
+    const p = r.plan;
+    return html`<div class="mt-8">
+      <p class="tiny dim"><b>Plan önizlemesi</b> — onaylanana kadar hiçbir şey değişmez.</p>
+      ${c.Table({ tight:true, headers:['', 'Şimdi', 'Plandan sonra'],
+        rows:R.HedefPlan.onizleme(p).map(x => [x.alan, x.once, x.sonra]) })}
+      ${when(p.paket === 'konu' && p.haftalar.length, () => html`<p class="tiny mt-8"><b>İlk hafta</b>
+        (${U.fmtShort(p.haftalar[0].bas)} – ${U.fmtShort(p.haftalar[0].bit)})</p>${haftaSatiri(p.haftalar[0])}`)}
+      ${when(p.paket === 'net', () => html`<p class="tiny mt-8"><b>Kontrol noktaları:</b>
+        ${p.kontroller.map(k => U.fmtShort(k.tarih) + ' → ' + U.fmtNet(k.beklenen)).join(' · ')}</p>`)}
+      ${when(p.uyarilar.length, () => html`<div class="stack-sm mt-8">${map(p.uyarilar, u =>
+        c.Notice({ tone:'info', body:u }))}</div>`)}
+      <p class="tiny dim mt-8">Plan ${p.etiket === 'hesaplandi' ? 'kendi denemelerinden hesaplandı'
+        : 'müfredatın süre tahminlerine dayanır (tahmin)'}. Geri alınabilir; geri alınca hafta
+        taslağı eski sırasına döner.</p>
+      <div class="row gap-8 mt-8" style="flex-wrap:wrap">
+        ${c.Button({ label:'Planı uygula', size:'sm', tone:'primary', act:'hedef-plan-uygula',
+          data:{ 'data-id':h.id } })}
+        ${c.Button({ label:'Şimdilik değil', size:'sm', act:'hedef-plan-kapat' })}
+      </div></div>`;
+  }
+
+  function hedefPlanOzeti(h, p){
+    const bugun = U.todayISO();
+    const il = R.HedefPlan.ilerleme(p, bugun);
+    const w = p.paket === 'konu' ? R.HedefPlan.haftaOf(p, bugun) : null;
+    return html`<div class="stack-sm mt-8">
+      <p class="small">Plan uygulandı${p.paket === 'konu' ? ' · günde ' + p.gunlukDk + ' dk'
+        + (p.haftalikGun < 7 ? ', haftada ' + p.haftalikGun + ' gün' : '') : ''}</p>
+      ${when(w, () => html`<p class="tiny dim">Bu hafta (${U.fmtShort(w.bas)} – ${U.fmtShort(w.bit)})</p>${haftaSatiri(w)}`)}
+      ${when(p.paket === 'net' && il.sonraki, () => html`<p class="tiny">Sonraki kontrol: <b>${U.fmtDate(il.sonraki.tarih)}</b>
+        — beklenen ${U.fmtNet(il.sonraki.beklenen)} net</p>`)}
+      ${when(p.paket === 'net' && p.odak.length, () => html`<p class="tiny dim">Odak konuları:
+        ${p.odak.map(k => k.name).join(' · ')}</p>`)}
+      ${c.Notice({ tone:il.durum === 'geride' ? 'warn' : 'info', body:il.metin })}
+      <div class="row gap-8" style="flex-wrap:wrap">
+        ${c.Button({ label:'Planı geri al', size:'sm', act:'hedef-plan-geri', data:{ 'data-id':h.id } })}
+        ${hedefDugmeleri(h)}
+      </div></div>`;
+  }
+
+  function hedefSatir(h){
+    const g = h.gerceklik || {};
+    const p = R.HedefPlan ? R.HedefPlan.aktif(h.id) : null;
+    const onizle = !p && S.ui.planOnizle === h.id && h.durum === 'aktif';
+    return html`<div>
+      <div><b class="small">${R.Hedefler.ozet(h)}</b>
+        <div class="tiny dim">${h.durum === 'askida' ? 'askıda · ' : ''}${h.son_tarih
+          ? 'son tarih ' + U.fmtDate(h.son_tarih) : 'tarihsiz'}${h.kapasite && h.kapasite.gunluk_dk
+          ? ' · günde ' + h.kapasite.gunluk_dk + ' dk' : ''}${g.bant ? ' · ' + BANT[g.bant]
+          + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
+      ${p ? hedefPlanOzeti(h, p) : onizle ? hedefOnizleme(h) : html`
+        <div class="row gap-8 mt-6" style="flex-wrap:wrap">
+          ${when(R.HedefPlan && h.durum === 'aktif', () => c.Button({ label:'Planı gör', size:'sm',
+            tone:'primary', act:'hedef-plan-onizle', data:{ 'data-id':h.id } }))}
+          ${hedefDugmeleri(h)}
+        </div>`}
+    </div>`;
+  }
+
+  function HedefKart(){
+    if(!R.Hedefler) return '';
+    const l = R.Hedefler.aktifler();
+    return c.Card({ title:'Hedeflerim', badge:l.length ? c.Badge({ label:l.length + ' etkin', tone:'info' }) : null,
+      actions:c.Button({ label:'Ekip sohbetinde hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
+      body:l.length ? html`<div class="stack-sm">${map(l, hedefSatir)}</div>`
+        : html`<p class="small dim">Henüz hedefin yok. Ekip sohbetinde Patron’a «TYT matematiği 100 günde bitirmek
+          istiyorum» ya da «TYT’de 90 nete çıkmak istiyorum» gibi yazabilirsin; vaktine ve kendi
+          denemelerine göre olup olmadığını, olmuyorsa olacağı tarihi söylerim.</p>` });
+  }
+
   /* ---------- uyarilar ---------- */
   /* Denetim sorusu — AYRI EKRAN DEĞİL, Bugün akışının içinde tek kart.
 
@@ -737,6 +843,7 @@ R.Screens.today = (function(){
       `))}
 
       ${c.Span(4, c.Stack(html`
+        ${HedefKart()}
         ${OfficeCard()}
         <div id="pane-anchors">${AnchorPane(day)}</div>
         <div id="pane-energy">${EnergyCard()}</div>
@@ -800,6 +907,25 @@ R.Screens.today = (function(){
     /* Uc dugmenin ucu de TEK kapidan gecer: uygulama, yerel kayit ve
        merkeze bildirim tek sirada olur. «Uygulandı ama merkeze
        bildirilemedi» hali yutulmaz, SOYLENIR. */
+    async 'hedef-durum'(el){
+      const r = await R.Hedefler.durumDegistir(el.dataset.id, el.dataset.durum);
+      UI.toast(r.ok ? 'Hedef güncellendi' + (r.not ? '. ' + r.not : '') : r.why);
+      R.App.render();
+    },
+    async 'hedef-plan-onizle'(el){ S.ui.planOnizle = el.dataset.id; R.App.render(); },
+    async 'hedef-plan-kapat'(){ S.ui.planOnizle = null; R.App.render(); },
+    async 'hedef-plan-uygula'(el){
+      const r = await R.HedefPlan.uygulaHedef(el.dataset.id);
+      S.ui.planOnizle = null;
+      if(r.ok) R.UI.onayMuhru();
+      UI.toast(r.ok ? 'Plan uygulandı. Geri almak istersen «Planı geri al».' : r.why);
+      R.App.render();
+    },
+    async 'hedef-plan-geri'(el){
+      const r = await R.HedefPlan.geriAlHedef(el.dataset.id);
+      UI.toast(r.ok ? 'Plan geri alındı; hafta taslağı eski sırasına döndü.' : (r.why || 'Geri alınamadı'));
+      R.App.render();
+    },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-seen'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },

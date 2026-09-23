@@ -215,6 +215,30 @@ R.Proposals = (function(){
       async revert(s){ await M.deleteCard(s.cardId); },
     },
 
+    /* Hedef planı: plan HER doğrulamada yeniden kurulur (kural motoru,
+       bugünün verisiyle); önizleme onu gösterir, apply onu yazar. */
+    'hedef-plan':{
+      check(p){
+        if(!R.Hedefler || !R.HedefPlan) return fail('Hedef motoru yüklenmedi.');
+        const h = R.Hedefler.liste().find(x => x.id === p.hedefId);
+        if(!h) return fail('Hedef bulunamadı.');
+        if(R.HedefPlan.aktif(h.id)) return fail('Bu hedefin uygulanmış bir planı var; önce onu geri al.');
+        const r = R.HedefPlan.kur(h, U.todayISO());
+        if(!r.ok) return fail(r.why);
+        return pass({ hedef:h, plan:r.plan });
+      },
+      preview(p, ctx){
+        return R.HedefPlan.onizleme(ctx.plan).map(x => ({ label:x.alan, before:x.once, after:x.sonra }));
+      },
+      async apply(p, ctx){
+        const plan = await R.HedefPlan.uygula(ctx.plan);
+        return { planId:plan.id };
+      },
+      async revert(s){
+        if(s && s.planId) await R.HedefPlan.geriAl(s.planId);
+      },
+    },
+
     'week-target':{
       check(p){
         const n = Math.round(Number(p.weekN) || 0);
@@ -879,6 +903,8 @@ R.Proposals = (function(){
     if(!obj || typeof obj !== 'object') return null;
     const def = R.ACTION_BY_ID[obj.eylem || obj.action];
     if(!def) return null;
+    /* Büyük aksiyonların bir kısmını YALNIZ kullanıcı başlatır. */
+    if(def.modelYok) return null;
     if(def.agents.indexOf(agentId) < 0) return null;
 
     /* Parametreler semadan okunur: fazladan alan tasinmaz. */
@@ -909,7 +935,7 @@ R.Proposals = (function(){
   /* Ajana katalogu anlatan istem parcasi. Ekran degil motor kurar:
      katalog degisirse istem kendiliginden degisir. */
   function catalogPrompt(agentId){
-    const list = R.actionsFor(agentId);
+    const list = R.actionsFor(agentId).filter(a => !a.modelYok);
     if(!list.length) return '';
     return 'SİSTEME MÜDAHALE (isteğe bağlı):\n'
       + 'Aşağıdaki eylemlerden biri durumu düzeltecekse yanıtının SONUNA tek bir '

@@ -36,6 +36,13 @@ R.Auto = (function(){
     };
 
     carry.forEach(name => push(name, null, null, 'geçen haftadan devir'));
+    /* Uygulanmış hedef planı (core/hedefplan.js) plandaki sıranın ÖNÜNE
+       geçer: kullanıcı onu onaylayarak uyguladı. Taslak yine taslaktır. */
+    if(R.HedefPlan){
+      const bas = U.iso(M.weekStart(n)), bit = U.iso(M.weekEnd(n)), bugun = U.todayISO();
+      R.HedefPlan.haftaKonulari(bugun >= bas && bugun <= bit ? bugun : bas)
+        .forEach(k => push(k.name, k.subjectId, k.topicId, k.why));
+    }
     items.forEach(it => push(it.name, it.subjectId, it.topicId, 'plandaki sıra'));
     risky.forEach(r => {
       if(picked.length >= 3) return;

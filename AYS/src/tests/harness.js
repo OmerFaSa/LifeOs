@@ -171,6 +171,8 @@ R.Test = (function(){
     S.prefs = R.Model.defaultPrefs();
     S.videoNotes = []; S.activities = []; S.mood = {}; S.breaks = []; S.plan = null;
     S.calendar = []; S.sessions = []; S.profiles = []; S.istisnalar = [];
+    S.hedefler = []; S.hedefPlanlar = [];
+    if(R.Hedefler && R.Hedefler.sohbet) R.Hedefler.sohbet.sifirla();
     S.usage = null; S.forecasts = []; S.signals = []; S.storage = null;
     S.meta = { lastBackupAt:null, schemaVersion:R.SCHEMA_VERSION };
     S.ui = { weekView:null, examTab:'list', examOpen:null, cardTab:'due',
@@ -178,7 +180,8 @@ R.Test = (function(){
       noteOpen:null, learnFilter:'all', learnQuery:'', learnPage:1, transcriptOpen:false,
       quizMode:'due', quizSize:10, quizSubject:null, quizTopic:null,
       quizFormat:'open', quizSeconds:0, quizVoice:false, droppedOpen:false,
-      topicOpen:null, topicSubject:null, analyticsTab:'compare', compareA:null, compareB:null };
+      topicOpen:null, topicSubject:null, analyticsTab:'compare', compareA:null, compareB:null,
+      planOnizle:null };
     R.Store = mockStore();
   }
 

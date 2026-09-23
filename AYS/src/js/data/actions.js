@@ -169,6 +169,23 @@ R.ACTIONS = [
     why:'Kullanılmayan bölüm gezinmeyi uzatır ve boş ekranı «yapmadığın iş» gibi gösterir.',
   },
 
+  /* HEDEF PLANI (core/hedefplan.js) — BÜYÜK aksiyon: birden çok haftayı
+     birden etkiler. Yalnız KULLANICI başlatır (Hedeflerim › Planı uygula);
+     `modelYok`: ajan bu eylemi öneremez, istem kataloğunda da görünmez. */
+  {
+    id:'hedef-plan',
+    level:'buyuk',
+    modelYok:true,
+    title:'Hedef planını uygula',
+    summary:'Hedefin haftalık programı etkin olur; hafta taslağı önce hedefin konularını alır.',
+    touches:'Hedef programı ve hafta taslağı',
+    icon:'target',
+    route:'today',
+    agents:['patron'],
+    params:{ hedefId:'string' },
+    why:'Hedef ancak haftalara bölündüğünde izlenebilir; plan geri alınabilir.',
+  },
+
   /* ==================== KONUŞARAK VERİ GİRİŞİ ====================
 
      Yukarıdakiler PLAN eylemleridir: konuyu tekrara al, blok ekle,

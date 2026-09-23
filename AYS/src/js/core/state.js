@@ -33,6 +33,8 @@ R.S = {
   breaks:[],       // alinan molalar
   meta:null,       // { lastBackupAt, schemaVersion }
   storeHealth:null,// son depolama hatasi (varsa)
+  hedefler:[],     // hedef motorunun AYS kayitlari (core/hedefler.js)
+  hedefPlanlar:[], // hedeflerin planlari ve geri donus noktalari (core/hedefplan.js)
 
   /* Seviye — bu sistemin KENDI kademesi (core/xp.js).
      `null` YUKLENMEDI demektir, "sifir XP" demek DEGIL: rozet o halde
@@ -46,6 +48,7 @@ R.S = {
   officeBriefings:{},// YYYY-MM-DD -> gunluk brifing (gunde tek model cagrisi)
   ui:{
     weekView:null,     // gorunen hafta no
+    planOnizle:null,   // Hedeflerim'de onizlemesi acik hedefin kimligi
     /* HKM'nin bekleyen teklifleri — bellekte durur, depoya YAZILMAZ:
        kaynagi HKM'dir ve tek gercek orada olmali. */
     hkmIntents:[],
@@ -1213,6 +1216,9 @@ R.Model = (function(){
        kurarken aradaysa bos kurmali. */
     if(R.Istisna) await R.Istisna.yukle();
     if(R.Bolum) await R.Bolum.yukle();
+    /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
+    if(R.Hedefler) await R.Hedefler.yukle();
+    if(R.HedefPlan) await R.HedefPlan.yukle();
     /* Hafiza bu modulun KENDI deposundadir: HKM kapaliyken de hatirlanir. */
     if(window.LIFEOS && LIFEOS.Hafiza){
       R.Hafizam = R.Hafizam || LIFEOS.Hafiza.kur({ store:() => R.Store, durum:() => R.S,

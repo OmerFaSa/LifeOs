@@ -333,6 +333,47 @@
     });
   });
 
+  /* Alanın kendi sınırı ve kendi tarih dili: paket söyler, motor uygular. */
+  const PUAN = {
+    id:'puan', ad:'Puan', olcut:{ ad:'puan', birim:'puan' },
+    anahtar:/puan/, birimler:/puan/, yonler:['ulas'],
+    simdi:() => ({ deger:40, birim:'puan', etiket:'olculdu', tarih:BUGUN }),
+    hiz:() => ({ tipik:2, ust:3, birim:'puan/hafta', dayanak:{ metin:'kendi kayıtların', durum:'olculdu' } }),
+    dogrula:h => h.hedefDeger != null && h.hedefDeger > 100 ? 'En fazla 100 puan alınabilir.' : null,
+    tarihSoru:'Ne zamana kadar? «sınava kadar» da diyebilirsin.',
+    tarihOku:k => /sınava kadar/.test(k) ? '2027-06-20' : null,
+  };
+
+  describe('Hedef — paketin sınırı ve tarih dili', () => {
+    it('olamayacak hedef karara gitmeden söylenir, eksik sorulmaz', async () => {
+      const kayit = {};
+      const s = H().sohbetKur({ paketler:[PUAN], modul:'ays', durum:() => ({}), bugun:() => BUGUN,
+        kaydet:async h => { kayit[h.id] = h; } });
+      const r = await s.isle('120 puana çıkmak istiyorum');
+      expect(r.text).toContain('En fazla 100 puan');
+      expect(r.text).toContain('yeniden yazabilirsin');
+      expect(s.bekleyen()).toBe(null);
+      const h = H().yeni(H().cumleden('120 puana çıkmak istiyorum', [PUAN], BUGUN), 'ays', BUGUN);
+      h.son_tarih = '2027-01-01';
+      expect(H().gerceklik(h, PUAN, {}, BUGUN).hata).toBe('En fazla 100 puan alınabilir.');
+    });
+
+    it('son tarih paketin kendi cümlesiyle sorulur ve kendi okuyucusuyla okunur', async () => {
+      const s = H().sohbetKur({ paketler:[PUAN], modul:'ays', durum:() => ({}), bugun:() => BUGUN,
+        kaydet:async () => {} });
+      expect((await s.isle('60 puana çıkmak istiyorum')).text).toBe('Ne zamana kadar? «sınava kadar» da diyebilirsin.');
+      const k = await s.isle('Sınava kadar');
+      expect(k.text).toContain('gerçekçi');
+      expect(k.hedef.son_tarih).toBe('2027-06-20');
+    });
+
+    it('paket okuyamazsa genel tarih okuyucusu devreye girer', () => {
+      const h = H().yeni(H().cumleden('60 puana çıkmak istiyorum', [PUAN], BUGUN), 'ays', BUGUN);
+      const r = H().cevapla(h, 'son_tarih', '3 ay içinde', BUGUN, PUAN);
+      expect(r.hedef.son_tarih).toBe('2026-12-23');
+    });
+  });
+
   describe('Hedef — yaşam döngüsü', () => {
     it('izinli geçişler yapılır, yasak geçiş reddedilir', () => {
       const h = H().yeni(H().cumleden('3 kilo vermek istiyorum', PAKETLER, BUGUN), 'spi', BUGUN);

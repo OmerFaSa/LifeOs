@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'3499a07', at:'2026-09-23 11:14', dirty:true };
+SP.BUILD = { id:'b4026b8', at:'2026-09-23 11:45', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8566,6 +8566,12 @@ LIFEOS.Ofis = (function(){
      guvenlik(hedef, durum, s)? { red:true, neden } — bandı ezer
      ekSorular(hedef, durum)?  [{ alan, soru }]
      kapasiteGerekir?          true ise günlük vakit sorulur
+     dogrula(hedef, durum)?    metin | null — hedef OLAMAZ (ör. TYT'de 130 net):
+                               karar sorulmadan söylenir, «yine de kaydedeyim
+                               mi?» denmez. Bilmediği alanda null döner.
+     tarihSoru?                son tarihi sormanın kendi cümlesi (metin ya da fn(h))
+     tarihOku(metin, h, bugun)? son tarih cevabını paket okur («sınava kadar»)
+                               → 'YYYY-MM-DD' | null (null ise genel okuyucu)
 
    Sözler:
    1. KARARI KOD VERİR. Model yalnız anlatır (AGENTS.md §1.1).
@@ -8766,8 +8772,9 @@ LIFEOS.Hedef = (function(){
       out.push({ alan:'hedef', soru:'Ne kadar? Sayıyla yazar mısın?' });
     }
     if(!h.son_tarih && h.yon !== 'koru'){
+      const ozel = typeof paket.tarihSoru === 'function' ? paket.tarihSoru(h) : paket.tarihSoru;
       out.push({ alan:'son_tarih',
-        soru:'Ne zamana kadar? «3 ay içinde» ya da «31 Aralık’a kadar» gibi yazabilirsin.' });
+        soru:ozel || 'Ne zamana kadar? «3 ay içinde» ya da «31 Aralık’a kadar» gibi yazabilirsin.' });
     }
     if(!simdiOf(h, paket, durum) && h.yon !== 'aliskanlik'){
       const ozel = typeof paket.simdiSoru === 'function' ? paket.simdiSoru(h) : paket.simdiSoru;
@@ -8794,7 +8801,8 @@ LIFEOS.Hedef = (function(){
     const yeniH = Object.assign({}, h, { cevaplar:Object.assign({}, h.cevaplar),
       guncelleme:bugun });
     if(alan === 'son_tarih'){
-      const t = tarihAyikla(k, bugun);
+      const ozel = paket && typeof paket.tarihOku === 'function' ? paket.tarihOku(k, h, bugun) : null;
+      const t = ozel || tarihAyikla(k, bugun);
       if(!t || t <= bugun) return { ok:false, why:'Tarihi anlayamadım. «3 ay içinde» ya da «31 Aralık’a kadar» gibi yazabilirsin.' };
       yeniH.son_tarih = t;
     }else if(alan === 'kapasite'){
@@ -8901,7 +8909,15 @@ LIFEOS.Hedef = (function(){
     });
   }
 
+  /* Olamayacak hedef (alanın kendi sınırı: TYT'de 120 netten fazlası,
+     bütün konuları zaten kapanmış bir ders) bir BANT değil bir HATADIR. */
+  function dogrulaOf(h, paket, durum){
+    return (paket && typeof paket.dogrula === 'function') ? (paket.dogrula(h, durum || {}) || null) : null;
+  }
+
   function gerceklik(h, paket, durum, bugun){
+    const d = dogrulaOf(h, paket, durum);
+    if(d) return { bant:null, etiket:'veri_yok', hata:d };
     if(paket && typeof paket.gerekenSaat === 'function') return kapasiteKarari(h, paket, durum, bugun);
     if(!paket || typeof paket.hiz !== 'function'){
       return { bant:null, etiket:'veri_yok',
@@ -9070,6 +9086,12 @@ LIFEOS.Hedef = (function(){
     }
 
     async function sor(h){
+      /* Olamayacak hedef için eksik sorulmaz: önce söylenir. */
+      const d = dogrulaOf(h, paketOf(h), durum());
+      if(d){
+        bekleyen = null;
+        return { text:d + ' Hedefi yeniden yazabilirsin.', hedef:h };
+      }
       const e = eksikler(h, paketOf(h), durum());
       if(e.length){
         bekleyen = { hedef:h, asama:'soru', alan:e[0].alan };
@@ -9156,7 +9178,7 @@ LIFEOS.Hedef = (function(){
     return { ok:true, hedef:Object.assign({}, h, { durum:yeniDurum, guncelleme:bugun }) };
   }
 
-  return { YONLER, DURUMLAR, BANT_ADI, cumleden, yeni, eksikler, cevapla, gerceklik,
+  return { YONLER, DURUMLAR, BANT_ADI, cumleden, yeni, eksikler, cevapla, gerceklik, dogrulaOf,
     senaryolar, gecis, kararMetni, sohbetKur, tarihYaz, sayiYaz, gunEkle, ayEkle, gunFarki,
     haftalikSaat, ZORLAYICI_KAT };
 })();

@@ -91,6 +91,13 @@ R.Screens.team = (function(){
       const h = await R.Hafizam.komutIsle(question, { kapsam:'hepsi' });
       if(h){ await cevapYaz(agent, h.text); return true; }
     }
+    /* Hedef sohbeti (core/hedefler.js): hedef cümlesi, sorulan eksiklerin
+       cevabı ve seçenek seçimi. Hedef değilse null döner, sıradakine geçilir.
+       Kararı kod verir; model çağrılmaz. */
+    if(R.Hedefler && R.Hedefler.sohbet){
+      const hd = await R.Hedefler.sohbet.isle(question);
+      if(hd){ await cevapYaz(agent, hd.text); return true; }
+    }
     if(!R.Komut) return false;
     const kisa = R.Komut.kisaCevap(question);
     if(kisa === 'geri'){
