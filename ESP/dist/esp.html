@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'9567ace', at:'2026-09-23 07:17', dirty:true };
+ESP.BUILD = { id:'68ab21d', at:'2026-09-23 07:22', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -9179,7 +9179,92 @@ LIFEOS.Ofis = (function(){
     return b.join('\n\n');
   }
 
-  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem };
+  /* ---------------------------------------------- patronlar arası kanal
+
+     Üç Patron birbirini doğrudan tanımaz; aralarındaki bağ King'dir.
+     HKM /api/kanal/<modül> öteki iki modülün BUGÜNKÜ denetim hükmünü ve
+     King'in önerisini verir (HKM core/kanal.py; yalnız okur). Modül onu
+     Patron brifingine koyar.
+
+     - Bellekte durur, yedeğe girmez; bugüne ait değilse kullanılmaz.
+     - HKM kapalıysa kanal yoktur: Patron kararı yine kendisi verir.
+     - Hiçbir koşulda fırlatmaz, beklenmez (AGENTS.md §1.4).
+     - Gelen metin süzülür: bilinmeyen alan, etiketsiz bulgu, boş satır
+       brifinge girmez. */
+  const HUKUM = { ANOMALY:'eşik kırıldı', INCOMPLETE:'eksik veri', APPROVED:'eşikler içinde' };
+  const ETIKET = { measured:'ölçüldü', estimated:'tahmin', computed:'hesaplandı', missing:'veri yok' };
+
+  function kanalTemizle(g, modul){
+    if(!g || typeof g !== 'object' || !g.ok || typeof g.date !== 'string'
+      || !g.moduller || typeof g.moduller !== 'object') return null;
+    const moduller = {};
+    Object.keys(MODULLER).filter(m => m !== modul && g.moduller[m]).forEach(m => {
+      const x = g.moduller[m] || {};
+      moduller[m] = {
+        verdict:HUKUM[x.verdict] ? x.verdict : null,
+        bulgular:(Array.isArray(x.bulgular) ? x.bulgular : []).slice(0, 5)
+          .filter(b => b && typeof b.text === 'string' && b.text.trim())
+          .map(b => ({ text:b.text.trim().slice(0, 300), cert:ETIKET[b.cert] ? b.cert : null })),
+      };
+    });
+    const k = g.king && typeof g.king.text === 'string' && g.king.text.trim()
+      ? { text:g.king.text.trim().slice(0, 400), state:String(g.king.state || '') } : null;
+    return { date:g.date, king:k, moduller };
+  }
+
+  /* `kanalKur({ hkm:() => R.Beacon, bugun:() => R.U.todayISO() })` */
+  function kanalKur(ortam){
+    let son = null;
+    async function cek(){
+      try{
+        const b = ortam.hkm ? ortam.hkm() : null;
+        if(!b || typeof b.settings !== 'function') return null;
+        const a = b.settings() || {};
+        if(!a.enabled || !a.token || !b.urlOk(a.url)) return null;
+        const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
+        if(!f) return null;
+        const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+        const zaman = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;
+        try{
+          const res = await f(String(a.url).replace(/\/$/, '') + '/api/kanal/' + b.MODULE
+            + '?date=' + encodeURIComponent(ortam.bugun()), {
+            headers:{ 'Authorization':'Bearer ' + a.token },
+            signal:ctrl ? ctrl.signal : undefined,
+          });
+          if(res.status !== 200) return null;
+          const temiz = kanalTemizle(await res.json(), b.MODULE);
+          if(temiz) son = temiz;
+          return temiz;
+        }finally{
+          if(zaman) clearTimeout(zaman);
+        }
+      }catch(e){
+        return null;
+      }
+    }
+    function guncel(){ return son && son.date === ortam.bugun() ? son : null; }
+    /* Patron brifingine girecek biçim: Türkçe hüküm, etiketli bulgu. */
+    function brifingIcin(){
+      const k = guncel();
+      if(!k) return null;
+      const out = { kaynak:'HKM (King) · ' + k.date, moduller:{} };
+      if(k.king){
+        out.king_onerisi = k.king.text
+          + (k.king.state === 'proposed' ? ' (kullanıcının onayını bekliyor)' : '');
+      }
+      Object.keys(k.moduller).forEach(m => {
+        const x = k.moduller[m];
+        out.moduller[MODULLER[m].ad] = x.verdict
+          ? { hukum:HUKUM[x.verdict],
+            bulgular:x.bulgular.map(b => b.text + (b.cert ? ' (' + ETIKET[b.cert] + ')' : '')) }
+          : { hukum:'bugün veri gelmedi' };
+      });
+      return out;
+    }
+    return { cek, guncel, brifingIcin };
+  }
+
+  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, kanalKur };
 })();
 
 /* ==== js/core/tanitim.js ==== */
@@ -16309,6 +16394,12 @@ ESP.Model = (function(){
     /* Hafizanin anlik goruntusu HKM'ye (bagliysa). BEKLENMEZ: HKM kapaliyken
        acilis bir milisaniye bile yavaslamaz (AGENTS.md §1.4). */
     if(ESP.Hafizam) ESP.Hafizam.hkmeGonder();
+    /* Patronlar arasi kanal: King'in notu ve oteki modullerin bugunku hukmu.
+       BEKLENMEZ; HKM kapaliysa kanal yoktur (brand/ortak/ofis.js). */
+    if(window.LIFEOS && LIFEOS.Ofis){
+      ESP.Kanal = ESP.Kanal || LIFEOS.Ofis.kanalKur({ hkm:() => ESP.Beacon, bugun:() => ESP.U.todayISO() });
+      ESP.Kanal.cek();
+    }
     if(ESP.Storage){ await ESP.Storage.load(); await ESP.Storage.sample(); }
 
     S.storeHealth = ESP.Store.health();
@@ -30269,7 +30360,11 @@ ESP.Office = (function(){
   }
 
   function patronBrief(){
-    return ESP.Memo.of('office.b:patron', patronBriefRaw);
+    const out = ESP.Memo.of('office.b:patron', patronBriefRaw);
+    /* Patronlar arasi kanal (brand/ortak/ofis.js) — onbellegin DISINDA:
+       kanal HKM'den sonradan gelir, veri degisikligi degildir. */
+    const king = ESP.Kanal ? ESP.Kanal.brifingIcin() : null;
+    return king ? Object.assign({}, out, { king }) : out;
   }
 
   function patronBriefRaw(){

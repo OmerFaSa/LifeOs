@@ -1228,6 +1228,12 @@ R.Model = (function(){
     /* Hafizanin anlik goruntusu HKM'ye (bagliysa). BEKLENMEZ: HKM kapaliyken
        acilis bir milisaniye bile yavaslamaz (AGENTS.md §1.4). */
     if(R.Hafizam) R.Hafizam.hkmeGonder();
+    /* Patronlar arasi kanal: King'in notu ve oteki modullerin bugunku hukmu.
+       BEKLENMEZ; HKM kapaliysa kanal yoktur (brand/ortak/ofis.js). */
+    if(window.LIFEOS && LIFEOS.Ofis){
+      R.Kanal = R.Kanal || LIFEOS.Ofis.kanalKur({ hkm:() => R.Beacon, bugun:() => R.U.todayISO() });
+      R.Kanal.cek();
+    }
     if(R.Storage){ await R.Storage.load(); await R.Storage.sample(); }
 
     for(const s of R.SUBJECTS){ await ensureTopics(s.id); }

@@ -826,6 +826,10 @@ R.Office = (function(){
         defterim:journal.map(j => j.text),
       });
     }
+    /* Patronlar arasi kanal (brand/ortak/ofis.js): oteki modullerin bugunku
+       hukmu ve King'in onerisi. HKM kapaliysa ya da bugune ait degilse yok. */
+    const king = agentId === 'patron' && R.Kanal ? R.Kanal.brifingIcin() : null;
+    if(king) out.data = Object.assign({}, out.data, { king });
     briefCache.set(agentId, out);
     return out;
   }

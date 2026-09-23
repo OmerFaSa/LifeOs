@@ -74,12 +74,75 @@
       expect(t).toContain('ORTAK İLKELER');
     });
 
+    it('Patron istemi King\'in notunun nereden geleceğini bilir', () => {
+      expect(O().konum('ays', PATRON).join(' ')).toContain('brifingde');
+    });
+
     it('ortak ilkeler kural motorunu, etiketleri ve hafızayı söyler', () => {
       const t = O().ILKELER.join(' ');
       expect(t).toContain('kural motoru');
       expect(t).toContain('veri yok');
       expect(t).toContain('hafızasına yazamazsın');
       expect(t).toContain('katalog');
+    });
+  });
+
+  /* Patronlar arası kanal: HKM /api/kanal/<modül>. Bellekte durur, bugüne
+     ait değilse kullanılmaz; HKM kapalıyken kanal yoktur ve hiçbir şey
+     fırlatmaz (AGENTS.md §1.4). */
+  describe('Ofis — patronlar arası kanal', () => {
+    const BUGUN = '2026-09-23';
+    const CEVAP = { ok:true, date:BUGUN, modul:'ays',
+      king:{ text:'Bugünkü ağır yükün yarına ertelenmesini öneririm.', state:'proposed', rank:1 },
+      moduller:{
+        spi:{ verdict:'ANOMALY', bulgular:[{ text:'Uyku 4.5 saat — kritik eşiğin altında.', cert:'measured' },
+          { text:'', cert:'measured' }] },
+        esp:{ verdict:null, bulgular:[], not:'Bugün bu modülden veri gelmedi.' },
+        ays:{ verdict:'APPROVED', bulgular:[] },
+      } };
+    function kur(ayar, cevap, bugun){
+      const giden = [];
+      const k = O().kanalKur({
+        hkm:() => ({ MODULE:'ays', settings:() => ayar, urlOk:u => /^https?:\/\//.test(u || '') }),
+        bugun:() => bugun || BUGUN,
+        fetch:async (url, o) => { giden.push({ url, o });
+          if(cevap instanceof Error) throw cevap;
+          return { status:200, json:async () => cevap }; },
+      });
+      return { k, giden };
+    }
+    const ACIK = { enabled:true, token:'jeton', url:'http://127.0.0.1:8787' };
+
+    it('HKM kapalıyken hiçbir şey istenmez, kanal yoktur', async () => {
+      const a = kur({ enabled:false }, CEVAP);
+      expect(await a.k.cek()).toBe(null);
+      expect(a.giden).toHaveLength(0);
+      expect(a.k.brifingIcin()).toBe(null);
+    });
+
+    it('öteki modüllerin hükmü etiketiyle, King\'in önerisi onay durumuyla gelir', async () => {
+      const a = kur(ACIK, CEVAP);
+      await a.k.cek();
+      expect(a.giden[0].url).toBe('http://127.0.0.1:8787/api/kanal/ays?date=' + BUGUN);
+      expect(a.giden[0].o.headers.Authorization).toBe('Bearer jeton');
+      const b = a.k.brifingIcin();
+      expect(b.moduller['SPİ'].hukum).toBe('eşik kırıldı');
+      expect(b.moduller['SPİ'].bulgular).toEqual(['Uyku 4.5 saat — kritik eşiğin altında. (ölçüldü)']);
+      expect(b.moduller.ESP.hukum).toBe('bugün veri gelmedi');
+      expect(b.moduller.AYS).toBe(undefined);
+      expect(b.king_onerisi).toContain('onayını bekliyor');
+    });
+
+    it('dünün kanalı bugün kullanılmaz', async () => {
+      const a = kur(ACIK, CEVAP, '2026-09-24');
+      await a.k.cek();
+      expect(a.k.brifingIcin()).toBe(null);
+    });
+
+    it('ağ hatası ve bozuk cevap fırlatmaz', async () => {
+      expect(await kur(ACIK, new Error('kapalı')).k.cek()).toBe(null);
+      expect(await kur(ACIK, { ok:true, date:BUGUN }).k.cek()).toBe(null);
+      expect(await kur(ACIK, 'bozuk').k.cek()).toBe(null);
     });
   });
 })();

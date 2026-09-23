@@ -240,6 +240,24 @@ async function main(){
         }
       }
 
+      /* 2.65 — KANAL: Patron brifingi oteki iki modulun bugunku hukmunu
+         ve King'in onerisini HKM'den alir (brand/ortak/ofis.js). */
+      const kanalS = await page.evaluate(async ([ns]) => {
+        const N = window[ns];
+        if(!N.Kanal) return { yok:true };
+        await N.Kanal.cek();
+        if(N.Office.resetBriefs) N.Office.resetBriefs();
+        const b = N.Office.brief('patron');
+        const k = (b.data && b.data.king) || b.king || null;
+        return { king:!!k, moduller:k ? Object.keys(k.moduller).sort() : [] };
+      }, [s.ns]);
+      if(kanalS.yok) hatalar.push(s.id + ': kanal kurulmamis');
+      else if(!kanalS.king || kanalS.moduller.length !== 2){
+        hatalar.push(s.id + ': Patron brifingine King kanali girmedi (' + kanalS.moduller.join(',') + ')');
+      }else{
+        console.log('  ' + s.id + ' → Patron brifingi King kanalini tasiyor: ' + kanalS.moduller.join(', '));
+      }
+
       /* 2.7 — NIYET: arayuz kuyrugu alir, UYGULAYAN kendi kodudur.
          Yalniz AYS icin denenir: teklif oraya birakildi. */
       if(s.id === 'AYS'){

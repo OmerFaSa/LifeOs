@@ -255,7 +255,11 @@ ESP.Office = (function(){
   }
 
   function patronBrief(){
-    return ESP.Memo.of('office.b:patron', patronBriefRaw);
+    const out = ESP.Memo.of('office.b:patron', patronBriefRaw);
+    /* Patronlar arasi kanal (brand/ortak/ofis.js) — onbellegin DISINDA:
+       kanal HKM'den sonradan gelir, veri degisikligi degildir. */
+    const king = ESP.Kanal ? ESP.Kanal.brifingIcin() : null;
+    return king ? Object.assign({}, out, { king }) : out;
   }
 
   function patronBriefRaw(){

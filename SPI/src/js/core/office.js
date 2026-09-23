@@ -170,6 +170,15 @@ SP.Office = (function(){
   }
 
   function patronBrief(){
+    const out = patronBriefRaw();
+    /* Patronlar arasi kanal (brand/ortak/ofis.js): oteki modullerin bugunku
+       hukmu ve King'in onerisi. HKM kapaliysa ya da bugune ait degilse yok. */
+    const king = SP.Kanal ? SP.Kanal.brifingIcin() : null;
+    if(king) out.king = king;
+    return out;
+  }
+
+  function patronBriefRaw(){
     const report = SP.Calc.weeklyReport();
     return {
       agent:'patron',

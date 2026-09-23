@@ -68,7 +68,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (ai, butce, channels, cross, db, gelen,  # noqa: E402
                   impact,
-                  intents, manager, media, memory, models, motto, outbox, patron,
+                  intents, kanal, manager, media, memory, models, motto, outbox, patron,
                   profil, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
                   weekly, yoklama)
@@ -634,6 +634,10 @@ class Handler(BaseHTTPRequestHandler):
                 "FROM attachments ORDER BY id DESC LIMIT ?",
                 (limit,)).fetchall()
             return self._send(200, {"attachments": [dict(r) for r in rows]})
+        # Patronlar arasi kanal (core/kanal.py): YALNIZ OKUR.
+        if u.path.startswith("/api/kanal/"):
+            r = kanal.modul_icin(self.con, u.path.rsplit("/", 1)[-1], date)
+            return self._send(200 if r.get("ok") else 422, r)
         if u.path == "/api/memory":
             user = (q.get("user") or ["ben"])[0]
             scope = (q.get("scope") or [None])[0]
