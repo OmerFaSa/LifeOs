@@ -46,6 +46,7 @@ ESP.HedefPlan = (function(){
   async function kaydet(p){
     ESP.S.hedefPlanlar = liste().filter(x => x.id !== p.id).concat([p]);
     await ESP.Store.set(STORE + '/' + p.id, p);
+    if(ESP.Hedefler && ESP.Hedefler.ag) ESP.Hedefler.ag.planla();
     return p;
   }
   function aktif(hedefId){

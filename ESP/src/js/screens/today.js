@@ -305,13 +305,21 @@ ESP.Screens.today = (function(){
     </div>`;
   }
 
+  /* Zaman bütçesi (HKM core/hedefag.py): cümleyi HKM'nin kodu kurar;
+     burası yalnız gösterir. HKM kapalıysa satır hiç çizilmez. */
+  function butceSatiri(){
+    const b = ESP.Hedefler.ag ? ESP.Hedefler.ag.butce() : null;
+    if(!b || !b.metin) return '';
+    return K.Notice({ tone:{ sigar:'info', sikisik:'warn', sigmaz:'warn' }[b.bant] || 'info', title:'Zaman bütçesi (King):', body:b.metin });
+  }
+
   function hedefRow(){
     if(!ESP.Hedefler) return null;
     const l = ESP.Hedefler.aktifler();
     return K.Entry({
       label:'HEDEFLERİM', meta:l.length ? l.length + ' etkin' : 'yok',
       action:K.Button({ label:'Danışma’da hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
-      body:l.length ? html`<div class="stack-sm">${map(l, hedefSatir)}</div>`
+      body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
         : html`<p class="small dim">Henüz hedefin yok. Danışma’da «Bir yılda gitarda Kalfa’ya
           gelmek istiyorum», «Bir ayda İngilizcede A2’ye gelmek istiyorum» ya da «bu yıl 24 kitap
           okumak istiyorum» gibi yazabilirsin; vaktine göre olup olmadığını ve olacağı tarihi

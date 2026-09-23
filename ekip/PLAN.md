@@ -122,9 +122,10 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
 - Var olanın üstüne kurulur: SPİ `SP.GOALS` (cut/gain/maintain) ve enerji
   hesabı (`nutri.js`), ESP günlük taban (`ESP.Coach.dailyBase`) ve seviye merdiveni
   (`ESP.Curriculum`), AYS planlayıcı, müfredat ve istisnalar (`R.Istisna`).
-- **(Öneri) Zaman bütçesi:** Kullanıcının günde toplam N saati var. AYS, SPİ ve
-  ESP hedefleri aynı zamanı paylaşır; çakışmayı King görür ve «bu üç hedef
-  günde 4 saat istiyor, senin 2,5 saatin var» der. Seçimi kullanıcı yapar.
+- **Kuruldu (Part 2 — zaman bütçesi, `HKM/core/hedefag.py`):** Kullanıcının günde
+  toplam N saati var. AYS, SPİ ve ESP hedefleri aynı zamanı paylaşır; çakışmayı
+  King görür ve «bu üç hedef haftada 17,5 saat istiyor, senin 14 saatin var» der.
+  Seçimi kullanıcı yapar. Modüller hedef özetini eşitler; HKM › Hedefler panosu.
 
 ### B. Gerçekçilik ve senaryo motoru (kod)
 - Alan kural paketleri:

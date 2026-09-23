@@ -269,6 +269,24 @@ CREATE TABLE IF NOT EXISTS bildirimler (
 );
 CREATE INDEX IF NOT EXISTS ix_bildirimler_modul ON bildirimler(modul, okundu_at, id);
 
+-- Hedef agi (core/hedefag.py): modullerin etkin hedeflerinin ANLIK GORUNTUSU.
+-- Modul tamamini yollar; HKM kopyasini esitler. HKM modullere yazmaz.
+CREATE TABLE IF NOT EXISTS hedef_ozet (
+  modul       TEXT NOT NULL,
+  dis_id      TEXT NOT NULL,
+  govde       TEXT NOT NULL,
+  guncelleme  TEXT NOT NULL,
+  PRIMARY KEY (modul, dis_id)
+);
+
+-- Zaman butcesi: kullanicinin KENDI beyani (gunde kac dakika, haftada kac gun).
+CREATE TABLE IF NOT EXISTS zaman_butcesi (
+  id            INTEGER PRIMARY KEY CHECK (id = 1),
+  gunluk_dk     INTEGER NOT NULL,
+  haftalik_gun  INTEGER NOT NULL,
+  updated_at    TEXT NOT NULL
+);
+
 /* Kullanim defteri — PARANIN kaydi.
 
    Bir model cagrisinin maliyeti ancak KAYDEDILIRSE bilinir. Fatura ay
@@ -657,7 +675,7 @@ def decision(con, decision_id):
 BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
                  "conversations", "attachments", "memories", "intents", "outbox", "usage",
                  "inbox_seen", "bam_isler", "bam_kayitlar", "bam_iz",
-                 "is_emirleri", "bildirimler")
+                 "is_emirleri", "bildirimler", "hedef_ozet", "zaman_butcesi")
 BACKUP_SCHEMA = 4
 
 

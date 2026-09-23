@@ -755,6 +755,23 @@ hiçbir şey değişmez. HKM kapalıyken modülün planı çalışır; iş emri 
 bu söylenir. Yüz: **Ofis › King kuyruğu** (karar, imkân maddeleri, yol, tahmini
 ve gerçek süre, iptal).
 
+## 8.22 Hedef ağı ve zaman bütçesi — `core/hedefag.py`
+
+Üç modül hedefini kendi kuralıyla kurar ve birbirini görmez; ama üç hedef
+aynı günü paylaşır. Modül etkin hedeflerinin **özetini** yollar
+(`POST /api/hedef/sync/<modül>`, anlık görüntü; istemci `brand/ortak/hedefag.js`).
+HKM özeti kurala göre süzer: kimlik, kısa ad, durum, son tarih, vakit,
+kararın bandı, planın ilerlemesi. Hedefin cümlesi ve kişisel ölçümler gelmez.
+
+Zaman bütçesi kodla kurulur: talep = etkin hedeflerin haftalık vakti
+(günlük dakika × haftada gün), vakit = kullanıcının beyanı (`POST /api/zaman`).
+Sığar / sıkışık (vaktin 1,25 katına kadar) / sığmaz; cümle koddur ve
+seçenekleri sayar (askıya al, tarihi uzat, vakti artır), seçim kullanıcınındır.
+Vakti bilinmeyen hedef (SPİ kilo) toplama 0 ile girmez, adıyla söylenir;
+toplam vakit bilinmiyorsa karar verilmez. Karar kullanıcının beyanına dayandığı
+için «tahmin»dir. HKM › Hedefler sekmesi ve modüllerin Hedeflerim kartı aynı
+cümleyi gösterir. Testler: `tests/test_hedefag.py`, `tools/entegre.js` §2.9 ve §4.5.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

@@ -377,12 +377,21 @@ R.Screens.today = (function(){
     </div>`;
   }
 
+  /* Zaman bütçesi (HKM core/hedefag.py): üç modülün hedefleri aynı günü
+     paylaşır. Cümleyi HKM'nin kodu kurar; burası yalnız gösterir. HKM
+     kapalıysa satır hiç çizilmez. */
+  function butceSatiri(){
+    const b = R.Hedefler.ag ? R.Hedefler.ag.butce() : null;
+    if(!b || !b.metin) return '';
+    return c.Notice({ tone:{ sigar:'info', sikisik:'warn', sigmaz:'warn' }[b.bant] || 'info', title:'Zaman bütçesi (King):', body:b.metin });
+  }
+
   function HedefKart(){
     if(!R.Hedefler) return '';
     const l = R.Hedefler.aktifler();
     return c.Card({ title:'Hedeflerim', badge:l.length ? c.Badge({ label:l.length + ' etkin', tone:'info' }) : null,
       actions:c.Button({ label:'Ekip sohbetinde hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
-      body:l.length ? html`<div class="stack-sm">${map(l, hedefSatir)}</div>`
+      body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
         : html`<p class="small dim">Henüz hedefin yok. Ekip sohbetinde Patron’a «TYT matematiği 100 günde bitirmek
           istiyorum» ya da «TYT’de 90 nete çıkmak istiyorum» gibi yazabilirsin; vaktine ve kendi
           denemelerine göre olup olmadığını, olmuyorsa olacağı tarihi söylerim.</p>` });

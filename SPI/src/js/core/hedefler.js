@@ -243,7 +243,17 @@ SP.Hedefler = (function(){
     const l = (SP.S.hedefler || []).filter(x => x.id !== h.id);
     SP.S.hedefler = l.concat([h]);
     await SP.Store.set('hedefler/' + h.id, h);
+    if(ag) ag.planla();
     return h;
+  }
+
+  /* Hedefin kısa adı — ekranda ve HKM panosunda. Başlık hedefin GÜNCEL
+     özetidir, ilk cümle değil: tempo seçilince tarih değişir ve «3 ay
+     içinde…» cümlesi eskimiş bilgi olurdu. */
+  function ozet(h){
+    const ne = h.hedefDeger != null ? h.hedefDeger + ' kg'
+      : h.fark != null ? (h.yon === 'azalt' ? '−' : '+') + h.fark + ' kg' : h.cumle;
+    return h.paket === 'kilo' ? 'Kilo hedefi: ' + ne : h.cumle || ne;
   }
 
   function liste(){ return (SP.S.hedefler || []).slice(); }
@@ -262,6 +272,19 @@ SP.Hedefler = (function(){
     return r;
   }
 
+  /* Hedef ağı (brand/ortak/hedefag.js): etkin hedeflerin ÖZETİ HKM'ye,
+     zaman bütçesinin cümlesi geri. Kilo hedefi saat istemez; HKM onu
+     «vakti bilinmiyor» diye adıyla söyler. */
+  function ozetler(){
+    return aktifler().map(h => {
+      const p = SP.Plan ? SP.Plan.aktif(h.id) : null;
+      return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:p ? { bitis:p.bitis } : null,
+        ilerleme:p ? SP.Plan.ilerleme(p, SP.U.todayISO()) : null });
+    });
+  }
+  const ag = window.LIFEOS && LIFEOS.HedefAg
+    ? LIFEOS.HedefAg.kur({ hkm:() => SP.Beacon, modul:'spi', ozetler }) : null;
+
   /* Motorun sohbet akışı SPİ paketiyle. Model çağrılmaz. */
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'spi', durum:() => ({}), bugun:() => SP.U.todayISO(),
@@ -271,5 +294,6 @@ SP.Hedefler = (function(){
   }) : null;
 
   return { PAKETLER, KILO, VKI, sonKilo, boyCm, hekimKapisi, normalize, notlar,
-    talimatlar, talimatEkle, talimatSil, yukle, kaydet, liste, aktifler, durumDegistir, sohbet };
+    talimatlar, talimatEkle, talimatSil, yukle, kaydet, liste, aktifler, durumDegistir, sohbet,
+    ozet, ozetler, ag };
 })();

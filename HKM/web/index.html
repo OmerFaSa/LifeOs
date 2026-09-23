@@ -508,6 +508,7 @@ details.detay > summary:hover{ color:var(--fg); }
       <a href="#/sistemler" data-yol="sistemler">Sistemler</a>
       <a href="#/profil" data-yol="profil">Profil</a>
       <a href="#/motto" data-yol="motto">Motto</a>
+      <a href="#/hedefler" data-yol="hedefler">Hedefler</a>
       <a href="#/ofis" data-yol="ofis">Ofis</a>
       <a href="#/teklifler" data-yol="teklifler">Teklifler</a>
     </nav>
@@ -731,6 +732,22 @@ details.detay > summary:hover{ color:var(--fg); }
       <div class="card" id="ofis-kayit" hidden></div>
       <div class="card" id="ofis-kayitlar"></div>
       <div class="card" id="ofis-bam"></div>
+    </div>
+
+    <!-- ============================ HEDEFLER ========================
+
+         Üç modülün etkin hedefleri ve ZAMAN BÜTÇESİ (core/hedefag.py).
+         Modüller hedeflerinin özetini yollar; HKM hiçbir modüle yazmaz.
+         Bütçenin kararını ve cümlesini sunucunun kodu kurar; bu yüz
+         yalnız gösterir. -->
+    <div data-bolme="hedefler" hidden>
+      <div class="gun"><h1>Hedefler</h1></div>
+      <p class="sub" style="margin-bottom:16px">Üç sistemin etkin hedefleri aynı günü
+        paylaşır. Hedefi o sistemde kurarsın; burada hepsini ve <b>toplam vaktinle
+        karşılaştırmasını</b> görürsün. Seçim yine senin.</p>
+      <div class="card" id="hedef-butce"><p class="muted">Yükleniyor…</p></div>
+      <div class="card" id="hedef-zaman"></div>
+      <div class="card" id="hedef-liste"></div>
     </div>
 
     <div data-bolme="teklifler" hidden>
@@ -3035,6 +3052,91 @@ details.detay > summary:hover{ color:var(--fg); }
 
   var OFIS_ACILACAK = null;       // Hayat Mottosu'ndan acilmak istenen kayit
 
+  /* ---------- HEDEFLER (core/hedefag.py) ---------- */
+  var BUTCE_TON = { sigar:'ok', sikisik:'warn', sigmaz:'danger' };
+  var HEDEF_BANT = { gercekci:'gerçekçi', zorlayici:'zorlayıcı',
+    gercekci_degil:'bu sürede olmaz', guvensiz:'güvenli değil' };
+  var ILERLEME_TON = { yolunda:'ok', onde:'ok', geride:'warn', veri_yok:'muted' };
+  /* Son tarih başka bir yıldaysa yıl da yazılır: «20 Haziran» 2027'yi
+     bu yıl sandırırdı. */
+  function sonTarihYaz(iso){
+    return tarihYaz(iso) + (String(iso).slice(0, 4) !== bugun().slice(0, 4) ? ' ' + String(iso).slice(0, 4) : '');
+  }
+
+  function hedefButceCiz(b){
+    b = b || {};
+    $('hedef-butce').innerHTML = '<div class="tag">Zaman bütçesi · King</div>'
+      + '<p class="' + (BUTCE_TON[b.bant] || '') + '">' + esc(b.metin || '') + '</p>';
+  }
+
+  function hedefZamanCiz(z){
+    $('hedef-zaman').innerHTML = '<div class="tag">Günlük toplam vaktin</div>'
+      + '<p class="muted">Üç sistemin hedeflerine ayırabileceğin toplam vakit. Senin beyanın; '
+      + 'karar bu yüzden «tahmin» etiketini taşır.</p>'
+      + '<div class="row"><label>Günde <input id="zaman-dk" type="number" min="15" max="1200"'
+      + ' step="5" style="width:90px" value="' + esc(z ? z.gunluk_dk : '') + '"'
+      + ' aria-label="Günde kaç dakika"/> dakika</label>'
+      + '<label>haftada <input id="zaman-gun" type="number" min="1" max="7" style="width:60px"'
+      + ' value="' + esc(z ? z.haftalik_gun : 7) + '" aria-label="Haftada kaç gün"/> gün</label>'
+      + '<button id="zaman-kaydet">Kaydet</button></div>'
+      + '<p class="muted" id="zaman-not"></p>';
+  }
+
+  function hedefListeCiz(l){
+    var h = '<div class="tag">Etkin hedefler</div>';
+    if(!l.length) h += '<p class="muted">Henüz eşitlenmiş hedef yok. Hedefini AYS, SPİ ya da '
+      + 'ESP’nin sohbetinde kurarsın; sistem HKM’ye bağlıyken buraya gelir.</p>';
+    ['ays', 'spi', 'esp'].forEach(function(m){
+      var ml = l.filter(function(x){ return x.modul === m; });
+      if(!ml.length) return;
+      h += '<p style="margin:10px 0 4px"><b>' + esc(MODUL[m]) + '</b></p>';
+      ml.forEach(function(x){
+        var g = x.gerceklik || {}, p = x.plan, il = p && p.ilerleme;
+        h += '<div style="' + CIZGI + '"><b>' + esc(x.ozet) + '</b>'
+          + (x.durum === 'askida' ? ' <span class="muted">· askıda</span>' : '')
+          + '<p class="muted" style="margin:4px 0 0">'
+          + (x.son_tarih ? 'son tarih ' + esc(sonTarihYaz(x.son_tarih)) : 'tarihsiz')
+          + (x.kapasite ? ' · günde ' + esc(x.kapasite.gunluk_dk) + ' dk'
+            + (x.kapasite.haftalik_gun < 7 ? ', haftada ' + esc(x.kapasite.haftalik_gun) + ' gün' : '')
+            : ' · vakti bilinmiyor')
+          + (g.bant ? ' · ' + esc(HEDEF_BANT[g.bant] || g.bant) + ' (' + esc(g.etiket === 'hesaplandi'
+            ? 'hesaplandı' : 'tahmin') + ')' : '') + '</p>'
+          + (p ? '<p style="margin:4px 0 0"><span class="' + (ILERLEME_TON[il && il.durum] || 'muted')
+            + '">Plan: ' + esc((il && il.metin) || 'ilerleme ölçülmedi') + '</span>'
+            + (p.bitis ? ' <span class="muted">· bitiş ' + esc(sonTarihYaz(p.bitis)) + '</span>' : '')
+            + '</p>' : '<p class="muted" style="margin:4px 0 0">Planı uygulanmadı.</p>')
+          + '</div>';
+      });
+    });
+    $('hedef-liste').innerHTML = h;
+  }
+
+  async function yukleHedefler(){
+    var r = await api('/api/hedefler');
+    if(r.status === 401){ girisGoster('Anahtar kabul edilmedi.'); return; }
+    if(r.status !== 200){
+      $('hedef-butce').innerHTML = '<p class="danger">Hedefler alınamadı (' + esc(r.status) + ').</p>';
+      return;
+    }
+    hedefButceCiz(r.body.butce);
+    if(!$('zaman-dk') || document.activeElement !== $('zaman-dk')) hedefZamanCiz(r.body.butce.zaman);
+    hedefListeCiz(r.body.hedefler || []);
+  }
+
+  document.addEventListener('click', async function(ev){
+    var el = ev.target.closest ? ev.target.closest('#zaman-kaydet') : null;
+    if(!el) return;
+    ev.preventDefault();
+    var r = await api('/api/zaman', { method:'POST', body:JSON.stringify({
+      gunluk_dk:$('zaman-dk').value, haftalik_gun:$('zaman-gun').value }) });
+    if(r.status !== 200){
+      $('zaman-not').textContent = (r.body && r.body.note) || 'Kaydedilemedi.';
+      return;
+    }
+    hedefButceCiz(r.body.butce);
+    $('zaman-not').textContent = 'Kaydedildi.';
+  });
+
   async function yukleOfis(t){
     var o = await api('/api/bam');
     if(o.status !== 200){
@@ -3485,7 +3587,7 @@ details.detay > summary:hover{ color:var(--fg); }
      gorunumun verisi cekilir — her sekmede butun ambari sorgulamak,
      acilisi bekletmekten baska is yapmiyordu. */
   var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'motto',
-                    'ofis', 'teklifler', 'ayarlar'];
+                    'hedefler', 'ofis', 'teklifler', 'ayarlar'];
   var gorunum = 'bugun';
 
   function yolOku(){
@@ -3593,6 +3695,7 @@ details.detay > summary:hover{ color:var(--fg); }
     if(gorunum === 'profil') return yukleProfil(t);
     if(gorunum === 'sistemler') return yukleSistemler(t);
     if(gorunum === 'motto') return yukleMotto();
+    if(gorunum === 'hedefler') return yukleHedefler();
     if(gorunum === 'ofis') return yukleOfis(t);
     if(gorunum === 'teklifler') return yukleTeklifler();
     if(gorunum === 'ayarlar') return yukleAyarlar();

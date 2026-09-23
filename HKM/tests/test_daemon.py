@@ -702,6 +702,22 @@ def run_extra(S):
     test("King uclari: emir, bildirim, okundu, iptal — yetkili ve kodlu",
          t_king_endpoints)
 
+    def t_hedef_endpoints():
+        h = {"id": "a1", "ozet": "AYT Fizik", "durum": "aktif", "paket": "konu",
+             "kapasite": {"gunluk_dk": 60}}
+        eq(S.call("/api/hedef/sync/ays", body={"hedefler": [h]}, token=None)[0], 401)
+        eq(S.call("/api/hedef/sync/king", body={"hedefler": []})[0], 422)
+        kod, r = S.call("/api/hedef/sync/ays", body={"hedefler": [h]})
+        eq((kod, r["yazilan"], r["butce"]["talep"]), (200, 1, 7.0))
+        eq(S.call("/api/zaman", body={"gunluk_dk": 3})[0], 422)
+        kod, r = S.call("/api/zaman", body={"gunluk_dk": 120, "haftalik_gun": 6})
+        eq((kod, r["butce"]["bant"]), (200, "sigar"))
+        kod, p = S.call("/api/hedefler")
+        eq((kod, p["moduller"]["ays"], p["butce"]["vakit"]), (200, 1, 12.0))
+        eq(S.call("/api/hedefler", token=None)[0], 401)
+        S.call("/api/hedef/sync/ays", body={"hedefler": []})
+    test("hedef agi uclari: esitleme, zaman, pano — yetkili", t_hedef_endpoints)
+
     def t_web_endpoints():
         eq(S.call("/api/web", token=None)[0], 401)
         kod, d = S.call("/api/web")

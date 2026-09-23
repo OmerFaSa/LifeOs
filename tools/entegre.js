@@ -384,6 +384,26 @@ async function main(){
         }
       }
 
+      /* 2.9 — HEDEF AGI (brand/ortak/hedefag.js, HKM core/hedefag.py): modulun
+         etkin hedefinin OZETI HKM'ye gider, zaman butcesinin cumlesi geri
+         doner. HKM modulun hedefine yazmaz; hedefin cumlesi gitmez. */
+      const ag = await page.evaluate(async ([ns, mod]) => {
+        const N = window[ns];
+        if(!N.Hedefler || !N.Hedefler.ag) return { yok:true };
+        const H = window.LIFEOS.Hedef;
+        const bugun = N.U.todayISO();
+        const h = Object.assign(H.yeni({ paket:'deneme', yon:'ulas', cumle:mod + ' ağ denemesi',
+          son_tarih:H.gunEkle(bugun, 60), kapasite:{ gunluk_dk:30 } }, mod, bugun), { durum:'aktif' });
+        await N.Hedefler.kaydet(h);
+        const r = await N.Hedefler.ag.gonder();
+        return { ok:r.ok, metin:r.butce && r.butce.metin, id:h.id };
+      }, [s.ns, s.mod]);
+      const pano = await (await hkmFetch('/api/hedefler')).json();
+      const vardi = (pano.hedefler || []).some(h => h.id === ag.id && h.modul === s.mod);
+      if(ag.yok) hatalar.push(s.id + ': hedef agi kurulmamis');
+      else if(!ag.ok || !vardi || !ag.metin) hatalar.push(s.id + ': hedef ozeti HKM\'ye ulasmadi');
+      else console.log('  ' + s.id + ' → hedef ozeti HKM panosunda; butce cumlesi geri geldi');
+
       /* 3 — jeton yanlisken 401, ve bu arayuzu bozmaz. */
       const yanlis = await page.evaluate(async ([ns, url]) => {
         const B = window[ns].Beacon;
@@ -410,6 +430,18 @@ async function main(){
 
       await page.close();
     }
+
+    /* 4.5 — ZAMAN BUTCESI: uc modulun hedefleri tek resimde; karar ve
+       cumle HKM'nin kodudur. Vakti bilinmeyen hedef (SPI kilo) adiyla
+       soylenir, toplama 0 ile girmez. */
+    await hkmFetch('/api/zaman', { method:'POST', body:JSON.stringify({ gunluk_dk:60, haftalik_gun:7 }) });
+    const butce = (await (await hkmFetch('/api/hedefler')).json()).butce || {};
+    const mods = Object.keys(butce.modul_saat || {}).sort().join(',');
+    if(!butce.bant || mods !== 'ays,esp,spi') hatalar.push('zaman butcesi uc modulu toplamadi (' + mods + ')');
+    else if((butce.bilinmeyen || []).length && butce.metin.indexOf('hesaba katılmadı') < 0){
+      hatalar.push('vakti bilinmeyen hedef butce cumlesinde soylenmedi');
+    }else console.log('  HKM → zaman butcesi: ' + butce.bant + ' · haftada ' + butce.talep
+      + ' saat talep, ' + butce.vakit + ' saat vakit');
 
     /* 5 — HKM tarafi: uc modul de ambarda mi, brifing ayakta mi? */
     const b = await (await hkmFetch('/api/briefing?date=' + BUGUN)).json();

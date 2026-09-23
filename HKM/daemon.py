@@ -50,6 +50,9 @@ Ucnoktalar:
     GET  /api/bam/kayit/<id>/cikti?bicim=html|svg|pdf  kaydin basilir hali
     GET  /api/bam/depo              Depolama Burosu'nun depo denetimi (kod; model yok)
     GET  /api/web                   web katmaninin durumu: saglayicilar, bugunku cagri
+    GET  /api/hedefler              uc modulun etkin hedefleri ve zaman butcesi (kod)
+    POST /api/hedef/sync/<modul>    modulun hedef ozetlerinin anlik goruntusu
+    POST /api/zaman                 kullanicinin gunluk toplam vakti (gunluk_dk, haftalik_gun)
     POST /api/web/dene              web aramasini King adina dener (sorgu)
     GET  /api/health                token istemez
     GET  /                          tek dosyalik yerel yuz (token istemez;
@@ -72,7 +75,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (ai, bam, butce, channels, cikti, cross, db, depo, gelen,  # noqa: E402
-                  impact,
+                  hedefag, impact,
                   intents, kanal, king, manager, media, memory, models, motto, outbox, patron,
                   profil, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
@@ -703,6 +706,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(404, {"error": "kayit yok"})
             return self._send(200, {"kayit": k, "iz": bam.iz_zinciri(self.con, "kayit", kid)})
         # ---- King onay zinciri (core/king.py): is emirleri ve bildirimler ----
+        # Hedef agi (core/hedefag.py): uc modulun etkin hedefleri ve zaman butcesi.
+        if u.path == "/api/hedefler":
+            return self._send(200, hedefag.pano(self.con))
         if u.path == "/api/king":
             return self._send(200, king.ozet(self.con))
         if u.path.startswith("/api/king/emir/"):
@@ -944,6 +950,27 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200 if r.get("ok") else 404, r)
             return self._send(404, {"error": "bilinmeyen motto ucu"})
 
+        # Modul hedeflerinin anlik goruntusu (core/hedefag.py). Hafizayla ayni
+        # kural: modul tamamini yollar, HKM kopyasini esitler.
+        if u.path.startswith("/api/hedef/sync/") or u.path == "/api/zaman":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            if not isinstance(body, dict):
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
+            if u.path == "/api/zaman":
+                r = hedefag.zaman_yaz(self.con, body.get("gunluk_dk"), body.get("haftalik_gun"))
+                if r.get("ok"):
+                    r["butce"] = hedefag.butce(self.con)
+                return self._send(200 if r.get("ok") else 422, r)
+            r = hedefag.esitle(self.con, u.path.rsplit("/", 1)[-1], body.get("hedefler"))
+            if r.get("ok"):
+                r["butce"] = hedefag.butce(self.con)
+            return self._send(200 if r.get("ok") else 422, r)
         # Modul hafizasinin anlik goruntusu (core/memory.py esitle). Modul
         # TAMAMINI yollar, HKM kendi kopyasini esitler; ayni goruntu iki
         # kez gelirse hicbir sey degismez.

@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'efc1b76', at:'2026-09-23 16:28', dirty:true };
+ESP.BUILD = { id:'5f422e5', at:'2026-09-23 16:39', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10043,6 +10043,118 @@ LIFEOS.Hedef = (function(){
     haftalikSaat, ZORLAYICI_KAT };
 })();
 
+/* ==== js/core/hedefag.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/hedefag.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* HEDEF AĞI — modülün etkin hedeflerinin ÖZETİ HKM'ye; zaman bütçesi geri.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/hedefag.js`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   ==================================================================
+
+   Üç modül birbirini görmez; ama üç hedef AYNI GÜNÜ paylaşır. Zaman
+   bütçesini yalnız merkez hesaplayabilir (HKM `core/hedefag.py`).
+
+   Sözler:
+   1. HKM MODÜLE YAZMAZ. Modül yalnız ÖZET yollar: kimlik, kısa ad,
+      durum, son tarih, vakit, kararın bandı, planın ilerlemesi. Hedefin
+      kendisi (cümle, cevaplar, kişisel ölçümler) gitmez.
+   2. ANLIK GÖRÜNTÜ. Her gönderim TAMAMINI yollar; aynı görüntü iki kez
+      gelirse HKM'de hiçbir şey değişmez.
+   3. HKM KAPALIYKEN HİÇBİR ŞEY OLMAZ. Bağlantı yoksa, yavaşsa ya da
+      hata verirse gönderim sessizce düşer; modül yavaşlamaz.
+   4. BÜTÇENİN CÜMLESİNİ HKM KURAR. Modül sayı hesaplamaz, gelen metni
+      gösterir (yüz kendi sayısını üretmez). */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.HedefAg = (function(){
+  const GECIKME = 600;
+
+  /* Hedef + (varsa) plan → HKM'nin beklediği özet. */
+  function ozet(h, o){
+    const x = o || {};
+    const k = h.kapasite && h.kapasite.gunluk_dk > 0
+      ? { gunluk_dk:Math.round(h.kapasite.gunluk_dk), haftalik_gun:h.kapasite.haftalik_gun || 7 } : null;
+    const g = h.gerceklik && h.gerceklik.bant
+      ? { bant:h.gerceklik.bant, etiket:h.gerceklik.etiket || 'tahmin' } : null;
+    const il = x.ilerleme || null;
+    return {
+      id:String(h.id), ozet:String(x.ozet || h.cumle || '').slice(0, 160), paket:h.paket || null,
+      durum:h.durum, son_tarih:h.son_tarih || null, kapasite:k, gerceklik:g,
+      plan:x.plan ? { bitis:x.plan.bitis || null,
+        ilerleme:il ? { durum:il.durum, metin:typeof il.metin === 'string' ? il.metin.slice(0, 300) : null }
+          : { durum:'veri_yok', metin:null } } : null,
+    };
+  }
+
+  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…] })`
+     → { gonder(), planla(), cek(), butce() } */
+  function kur(ortam){
+    let zaman = null;
+    let son = null;
+
+    function baglanti(){
+      const b = ortam.hkm ? ortam.hkm() : null;
+      if(!b || typeof b.settings !== 'function') return null;
+      const a = b.settings() || {};
+      if(!a.enabled || !a.token || !b.urlOk(a.url)) return null;
+      const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
+      return f ? { url:String(a.url).replace(/\/$/, ''), token:a.token, f } : null;
+    }
+
+    async function istek(yol, govde){
+      const k = baglanti();
+      if(!k) return null;
+      const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      const t = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;
+      try{
+        /* fetch bir nesnenin yöntemi olarak çağrılamaz («Illegal invocation»):
+           yerel değişkenden çağrılır. */
+        const f = k.f;
+        const res = await f(k.url + yol, {
+          method:govde === undefined ? 'GET' : 'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+          body:govde === undefined ? undefined : JSON.stringify(govde),
+          signal:ctrl ? ctrl.signal : undefined,
+        });
+        if(res.status !== 200) return null;
+        return await res.json();
+      }catch(e){
+        return null;
+      }finally{
+        if(t) clearTimeout(t);
+      }
+    }
+
+    async function gonder(){
+      let l = [];
+      try{ l = (ortam.ozetler() || []).slice(0, 30); }catch(e){ return { ok:false }; }
+      const g = await istek('/api/hedef/sync/' + ortam.modul, { hedefler:l });
+      if(g && g.butce) son = g.butce;
+      return { ok:!!(g && g.ok), butce:son };
+    }
+
+    /* Art arda gelen değişiklikler TEK gönderim olur. */
+    function planla(){
+      if(zaman) clearTimeout(zaman);
+      zaman = setTimeout(() => { zaman = null; gonder(); }, GECIKME);
+    }
+
+    async function cek(){
+      const g = await istek('/api/hedefler');
+      if(g && g.butce) son = g.butce;
+      return son;
+    }
+
+    return { gonder, planla, cek, butce:() => son };
+  }
+
+  return { ozet, kur };
+})();
+
 /* ==== js/core/hedefler.js ==== */
 /* ESP HEDEFLERİ — genel hedef motorunun (brand/ortak/hedef.js) ESP paketleri.
 
@@ -10337,6 +10449,7 @@ ESP.Hedefler = (function(){
   async function kaydet(h){
     ESP.S.hedefler = (ESP.S.hedefler || []).filter(x => x.id !== h.id).concat([h]);
     await ESP.Store.set('hedefler/' + h.id, h);
+    if(ag) ag.planla();
     return h;
   }
 
@@ -10364,6 +10477,18 @@ ESP.Hedefler = (function(){
     return h.cumle;
   }
 
+  /* Hedef ağı (brand/ortak/hedefag.js): etkin hedeflerin ÖZETİ HKM'ye,
+     zaman bütçesinin cümlesi geri. HKM kapalıysa hiçbir şey olmaz. */
+  function ozetler(){
+    return aktifler().map(h => {
+      const p = ESP.HedefPlan ? ESP.HedefPlan.aktif(h.id) : null;
+      return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:p ? { bitis:p.bitis } : null,
+        ilerleme:p ? ESP.HedefPlan.ilerleme(p, U().todayISO()) : null });
+    });
+  }
+  const ag = window.LIFEOS && LIFEOS.HedefAg
+    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler }) : null;
+
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'esp', durum:() => ({}), bugun:() => U().todayISO(),
     kaydet, notlar,
@@ -10373,7 +10498,7 @@ ESP.Hedefler = (function(){
 
   return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, CEFR, CEFR_SAAT, KITAP_SAAT_TAHMIN,
     kitapSaati, temizHiz, kademeBpm, kademeAdi, notlar, yukle, kaydet, liste, aktifler,
-    durumDegistir, ozet, sohbet };
+    durumDegistir, ozet, sohbet , ozetler, ag };
 })();
 
 /* ==== js/core/hedefplan.js ==== */
@@ -10425,6 +10550,7 @@ ESP.HedefPlan = (function(){
   async function kaydet(p){
     ESP.S.hedefPlanlar = liste().filter(x => x.id !== p.id).concat([p]);
     await ESP.Store.set(STORE + '/' + p.id, p);
+    if(ESP.Hedefler && ESP.Hedefler.ag) ESP.Hedefler.ag.planla();
     return p;
   }
   function aktif(hedefId){
@@ -33428,13 +33554,21 @@ ESP.Screens.today = (function(){
     </div>`;
   }
 
+  /* Zaman bütçesi (HKM core/hedefag.py): cümleyi HKM'nin kodu kurar;
+     burası yalnız gösterir. HKM kapalıysa satır hiç çizilmez. */
+  function butceSatiri(){
+    const b = ESP.Hedefler.ag ? ESP.Hedefler.ag.butce() : null;
+    if(!b || !b.metin) return '';
+    return K.Notice({ tone:{ sigar:'info', sikisik:'warn', sigmaz:'warn' }[b.bant] || 'info', title:'Zaman bütçesi (King):', body:b.metin });
+  }
+
   function hedefRow(){
     if(!ESP.Hedefler) return null;
     const l = ESP.Hedefler.aktifler();
     return K.Entry({
       label:'HEDEFLERİM', meta:l.length ? l.length + ' etkin' : 'yok',
       action:K.Button({ label:'Danışma’da hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
-      body:l.length ? html`<div class="stack-sm">${map(l, hedefSatir)}</div>`
+      body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
         : html`<p class="small dim">Henüz hedefin yok. Danışma’da «Bir yılda gitarda Kalfa’ya
           gelmek istiyorum», «Bir ayda İngilizcede A2’ye gelmek istiyorum» ya da «bu yıl 24 kitap
           okumak istiyorum» gibi yazabilirsin; vaktine göre olup olmadığını ve olacağı tarihi
@@ -42439,6 +42573,11 @@ ESP.App = (function(){
       installManifest();
       /* Tek dosya görselsiz açıldıysa bunu söyle (brand/ortak/gorsel.js). */
       if(window.LIFEOS && LIFEOS.Gorsel) LIFEOS.Gorsel.denetle('esp', m => UI.toast(m, { life:12000 }));
+      /* Hedef ağı: etkin hedeflerin özeti HKM'ye, zaman bütçesi geri
+         (brand/ortak/hedefag.js). HKM kapalıysa hiçbir şey olmaz. */
+      if(ESP.Hedefler && ESP.Hedefler.ag){
+        ESP.Hedefler.ag.gonder().then(r => { if(r && r.butce) render(); }).catch(() => {});
+      }
 
       /* Seviye kutlaması. İki yol da buraya çıkar:
 

@@ -399,6 +399,7 @@ R.Hedefler = (function(){
   async function kaydet(h){
     R.S.hedefler = (R.S.hedefler || []).filter(x => x.id !== h.id).concat([h]);
     await R.Store.set('hedefler/' + h.id, h);
+    if(ag) ag.planla();
     return h;
   }
 
@@ -428,6 +429,18 @@ R.Hedefler = (function(){
     return h.cumle;
   }
 
+  /* Hedef ağı (brand/ortak/hedefag.js): etkin hedeflerin ÖZETİ HKM'ye,
+     zaman bütçesinin cümlesi geri. HKM kapalıysa hiçbir şey olmaz. */
+  function ozetler(){
+    return aktifler().map(h => {
+      const p = R.HedefPlan ? R.HedefPlan.aktif(h.id) : null;
+      return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:p ? { bitis:p.bitis } : null,
+        ilerleme:p ? R.HedefPlan.ilerleme(p, U().todayISO()) : null });
+    });
+  }
+  const ag = window.LIFEOS && LIFEOS.HedefAg
+    ? LIFEOS.HedefAg.kur({ hkm:() => R.Beacon, modul:'ays', ozetler }) : null;
+
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'ays', durum:() => ({}), bugun:() => U().todayISO(),
     kaydet, notlar,
@@ -438,5 +451,5 @@ R.Hedefler = (function(){
 
   return { PAKETLER, PAKET_BY_ID, KONU, NET, SAAT_GUN, DERS_TEST, EN_AZ_DENEME,
     dersleriBul, kapsamBul, konular, kalanKonular, siraliKalan, durumOf, konuSaati, seri, netHizi, azami, netAdi, sinavTarihi,
-    notlar, yukle, kaydet, liste, aktifler, durumDegistir, ozet, sohbet };
+    notlar, yukle, kaydet, liste, aktifler, durumDegistir, ozet, sohbet, ozetler, ag };
 })();

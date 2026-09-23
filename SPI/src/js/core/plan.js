@@ -60,6 +60,7 @@ SP.Plan = (function(){
   async function kaydet(p){
     SP.S.planlar = liste().filter(x => x.id !== p.id).concat([p]);
     await SP.Store.set(STORE + '/' + p.id, p);
+    if(SP.Hedefler && SP.Hedefler.ag) SP.Hedefler.ag.planla();
     return p;
   }
   function aktif(hedefId){

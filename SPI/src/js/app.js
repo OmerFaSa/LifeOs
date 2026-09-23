@@ -1362,6 +1362,11 @@ SP.App = (function(){
       installManifest();
       /* Tek dosya görselsiz açıldıysa bunu söyle (brand/ortak/gorsel.js). */
       if(window.LIFEOS && LIFEOS.Gorsel) LIFEOS.Gorsel.denetle('spi', m => UI.toast(m, { life:12000 }));
+      /* Hedef ağı: etkin hedeflerin özeti HKM'ye, zaman bütçesi geri
+         (brand/ortak/hedefag.js). HKM kapalıysa hiçbir şey olmaz. */
+      if(SP.Hedefler && SP.Hedefler.ag){
+        SP.Hedefler.ag.gonder().then(r => { if(r && r.butce) render(); }).catch(() => {});
+      }
 
       /* Seviye kutlaması. İki yol da buraya çıkar:
 

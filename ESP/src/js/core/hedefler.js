@@ -291,6 +291,7 @@ ESP.Hedefler = (function(){
   async function kaydet(h){
     ESP.S.hedefler = (ESP.S.hedefler || []).filter(x => x.id !== h.id).concat([h]);
     await ESP.Store.set('hedefler/' + h.id, h);
+    if(ag) ag.planla();
     return h;
   }
 
@@ -318,6 +319,18 @@ ESP.Hedefler = (function(){
     return h.cumle;
   }
 
+  /* Hedef ağı (brand/ortak/hedefag.js): etkin hedeflerin ÖZETİ HKM'ye,
+     zaman bütçesinin cümlesi geri. HKM kapalıysa hiçbir şey olmaz. */
+  function ozetler(){
+    return aktifler().map(h => {
+      const p = ESP.HedefPlan ? ESP.HedefPlan.aktif(h.id) : null;
+      return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:p ? { bitis:p.bitis } : null,
+        ilerleme:p ? ESP.HedefPlan.ilerleme(p, U().todayISO()) : null });
+    });
+  }
+  const ag = window.LIFEOS && LIFEOS.HedefAg
+    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler }) : null;
+
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'esp', durum:() => ({}), bugun:() => U().todayISO(),
     kaydet, notlar,
@@ -327,5 +340,5 @@ ESP.Hedefler = (function(){
 
   return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, CEFR, CEFR_SAAT, KITAP_SAAT_TAHMIN,
     kitapSaati, temizHiz, kademeBpm, kademeAdi, notlar, yukle, kaydet, liste, aktifler,
-    durumDegistir, ozet, sohbet };
+    durumDegistir, ozet, sohbet , ozetler, ag };
 })();

@@ -1,0 +1,236 @@
+# -*- coding: utf-8 -*-
+"""Hedef agi — uc modulun etkin hedefleri tek resimde ve ZAMAN BUTCESI.
+   (ekip/PLAN.md §3.A «Zaman butcesi», §3.H «Hedefler panosu»)
+
+   Uc modul kendi hedefini kendi kuraliyla kurar ve birbirini gormez
+   (AGENTS.md §1.4). Ama uc hedef AYNI GUNU paylasir: AYS konu bitirme
+   haftada 7 saat, ESP dil hedefi haftada 5 saat isterken kullanicinin
+   haftada 10 saati varsa, bunu yalniz merkez gorebilir.
+
+   Bes kural:
+
+   1. HKM MODULE YAZMAZ. Modul etkin hedeflerinin OZETINI yollar
+      (anlik goruntu, tamami); HKM kopyasini esitler. Ayni goruntu iki
+      kez gelirse hicbir sey degismez.
+   2. OZET, HEDEFIN KENDISI DEGILDIR. Yalniz pano ve butce icin gereken
+      alanlar gelir, kurala gore suzulur; fazlasi atilir.
+   3. KARARI KOD VERIR. Talep = etkin hedeflerin haftalik vakti (gunluk
+      dakika x haftada gun); vakit = kullanicinin beyan ettigi toplam.
+      Sigar / sikisik (vaktin 1,25 katina kadar) / sigmaz. Cumle koddur.
+   4. EKSIK VERI SIFIR DEGILDIR. Vakti bilinmeyen hedef (SPI kilo hedefi
+      gibi saat istemeyen) toplama 0 ile girmez; «hesaba katilmadi» diye
+      ADIYLA soylenir. Kullanicinin toplam vakti bilinmiyorsa karar
+      verilmez ve bu soylenir.
+   5. SECIM KULLANICININDIR. Sigmiyorsa secenekler sayilir (askiya al,
+      tarihi uzat, vakti artir); King hicbirini kendisi yapmaz."""
+import datetime
+import json
+import re
+
+MODULLER = ("ays", "spi", "esp")
+MODUL_AD = {"ays": "AYS", "spi": "SPİ", "esp": "ESP"}
+MAX_HEDEF = 30
+SIKISIK_KAT = 1.25
+DURUMLAR = ("aktif", "askida")
+BANTLAR = ("gercekci", "zorlayici", "gercekci_degil", "guvensiz")
+ETIKETLER = ("olculdu", "tahmin", "hesaplandi", "veri_yok")
+ILERLEME = ("yolunda", "onde", "geride", "veri_yok")
+ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+GUNLUK_DK = (15, 1200)
+
+
+def _simdi(now=None):
+    return now or datetime.datetime.now().isoformat(timespec="seconds")
+
+
+def _metin(x, en_cok):
+    t = str(x or "").strip()
+    return t[:en_cok] if t else None
+
+
+def _tam(x, alt, ust):
+    try:
+        n = int(x)
+    except (TypeError, ValueError):
+        return None
+    return n if alt <= n <= ust else None
+
+
+def _yaz(x):
+    """Sayiyi Turkce yazar: 3.5 -> «3,5», 7.0 -> «7»."""
+    s = ("%.1f" % x).rstrip("0").rstrip(".")
+    return s.replace(".", ",")
+
+
+# ------------------------------------------------------------ esitleme
+
+def temizle(h):
+    """Modulden gelen ozeti kurala gore suzer; bozuksa None."""
+    if not isinstance(h, dict):
+        return None
+    id_ = _metin(h.get("id"), 40)
+    ozet = _metin(h.get("ozet"), 160)
+    if not id_ or not ozet or h.get("durum") not in DURUMLAR:
+        return None
+    out = {"id": id_, "ozet": ozet, "durum": h["durum"],
+           "paket": _metin(h.get("paket"), 20) or "?"}
+    t = str(h.get("son_tarih") or "")
+    out["son_tarih"] = t if ISO.match(t) else None
+    k = h.get("kapasite") if isinstance(h.get("kapasite"), dict) else {}
+    dk = _tam(k.get("gunluk_dk"), 1, 1440)
+    out["kapasite"] = ({"gunluk_dk": dk, "haftalik_gun": _tam(k.get("haftalik_gun"), 1, 7) or 7}
+                       if dk else None)
+    g = h.get("gerceklik") if isinstance(h.get("gerceklik"), dict) else {}
+    out["gerceklik"] = ({"bant": g["bant"], "etiket": g.get("etiket")
+                         if g.get("etiket") in ETIKETLER else "tahmin"}
+                        if g.get("bant") in BANTLAR else None)
+    p = h.get("plan") if isinstance(h.get("plan"), dict) else None
+    if p:
+        il = p.get("ilerleme") if isinstance(p.get("ilerleme"), dict) else {}
+        b = str(p.get("bitis") or "")
+        out["plan"] = {"bitis": b if ISO.match(b) else None,
+                       "ilerleme": {"durum": il.get("durum") if il.get("durum") in ILERLEME
+                                    else "veri_yok",
+                                    "metin": _metin(il.get("metin"), 300)}}
+    else:
+        out["plan"] = None
+    return out
+
+
+def esitle(con, modul, hedefler, now=None):
+    """Modulun hedef ozetlerinin ANLIK GORUNTUSUNU esitler.
+
+    Modulde olmayan ozet duser (hedef bitti ya da birakildi). Bozuk ozet
+    reddedilir ve SAYILIR. Oku-sonra-yaz tek islemdir (bkz. memory.esitle)."""
+    if modul not in MODULLER:
+        return {"ok": False, "note": "Bilinmeyen modül."}
+    if not isinstance(hedefler, list):
+        return {"ok": False, "note": "Hedefler liste olmalı."}
+    if len(hedefler) > MAX_HEDEF:
+        return {"ok": False, "note": "Bir modül en fazla %d hedef yollayabilir." % MAX_HEDEF}
+    at = _simdi(now)
+    kendi = not con.in_transaction
+    if kendi:
+        con.execute("BEGIN IMMEDIATE")
+    try:
+        var = {r["dis_id"]: r["govde"] for r in con.execute(
+            "SELECT dis_id, govde FROM hedef_ozet WHERE modul=?", (modul,)).fetchall()}
+        gelen, yazilan, reddedilen = set(), 0, 0
+        for ham in hedefler:
+            h = temizle(ham)
+            if not h or h["id"] in gelen:
+                reddedilen += 1
+                continue
+            gelen.add(h["id"])
+            govde = json.dumps(h, ensure_ascii=False, sort_keys=True)
+            if var.get(h["id"]) == govde:
+                continue
+            con.execute("INSERT OR REPLACE INTO hedef_ozet(modul, dis_id, govde, guncelleme) "
+                        "VALUES (?,?,?,?)", (modul, h["id"], govde, at))
+            yazilan += 1
+        dusen = [d for d in var if d not in gelen]
+        for d in dusen:
+            con.execute("DELETE FROM hedef_ozet WHERE modul=? AND dis_id=?", (modul, d))
+        if kendi:
+            con.execute("COMMIT")
+    except Exception:
+        if kendi:
+            con.execute("ROLLBACK")
+        raise
+    return {"ok": True, "yazilan": yazilan, "reddedilen": reddedilen, "dusen": len(dusen),
+            "toplam": len(gelen)}
+
+
+def hedefler(con):
+    out = []
+    for r in con.execute("SELECT modul, govde, guncelleme FROM hedef_ozet "
+                         "ORDER BY modul, guncelleme").fetchall():
+        try:
+            h = json.loads(r["govde"])
+        except ValueError:
+            continue
+        h["modul"], h["guncelleme"] = r["modul"], r["guncelleme"]
+        out.append(h)
+    return out
+
+
+# ------------------------------------------------------------ zaman
+
+def zaman(con):
+    r = con.execute("SELECT gunluk_dk, haftalik_gun, updated_at FROM zaman_butcesi "
+                    "WHERE id=1").fetchone()
+    return dict(r) if r else None
+
+
+def zaman_yaz(con, gunluk_dk, haftalik_gun=7, now=None):
+    dk = _tam(gunluk_dk, *GUNLUK_DK)
+    gun = _tam(haftalik_gun if haftalik_gun is not None else 7, 1, 7)
+    if dk is None:
+        return {"ok": False, "note": "Günlük vakit %d ile %d dakika arasında olmalı." % GUNLUK_DK}
+    if gun is None:
+        return {"ok": False, "note": "Haftada gün 1 ile 7 arasında olmalı."}
+    con.execute("INSERT OR REPLACE INTO zaman_butcesi(id, gunluk_dk, haftalik_gun, updated_at) "
+                "VALUES (1,?,?,?)", (dk, gun, _simdi(now)))
+    return {"ok": True, "zaman": zaman(con)}
+
+
+def _haftalik(kap):
+    return kap["gunluk_dk"] * (kap.get("haftalik_gun") or 7) / 60.0
+
+
+def butce(con):
+    """Zaman butcesinin kararini ve cumlesini KOD kurar."""
+    etkin = [h for h in hedefler(con) if h["durum"] == "aktif"]
+    askida = [h for h in hedefler(con) if h["durum"] == "askida"]
+    sayilan = [h for h in etkin if h.get("kapasite")]
+    bilinmeyen = [h for h in etkin if not h.get("kapasite")]
+    modul_saat = {}
+    for h in sayilan:
+        modul_saat[h["modul"]] = modul_saat.get(h["modul"], 0) + _haftalik(h["kapasite"])
+    talep = round(sum(modul_saat.values()), 2)
+    z = zaman(con)
+    out = {"talep": talep, "vakit": None, "bant": None, "etiket": "veri_yok",
+           "modul_saat": {m: round(v, 2) for m, v in modul_saat.items()},
+           "sayilan": len(sayilan), "bilinmeyen": [
+               {"modul": h["modul"], "ozet": h["ozet"]} for h in bilinmeyen],
+           "askida": len(askida), "zaman": z}
+    parca = []
+    dagilim = " · ".join("%s %s" % (MODUL_AD[m], _yaz(v)) for m, v in sorted(modul_saat.items()))
+    if not etkin:
+        out["metin"] = "Etkin bir hedefin yok; zaman bütçesi hesaplanacak bir şey yok."
+        return out
+    if sayilan:
+        parca.append("Etkin %d hedefin haftada %s saat istiyor (%s)." % (
+            len(sayilan), _yaz(talep), dagilim))
+    if not z:
+        parca.append("Günde toplam ne kadar vaktin olduğunu bilmiyorum; bilmeden «sığar» ya da "
+                     "«sığmaz» diyemem. HKM › Hedefler’de günlük vaktini yazabilirsin.")
+    elif sayilan:
+        vakit = round(_haftalik(z), 2)
+        out["vakit"], out["etiket"] = vakit, "tahmin"
+        fark = round(vakit - talep, 2)
+        if talep <= vakit + 1e-9:
+            out["bant"] = "sigar"
+            parca.append("Senin vaktin haftada %s saat; sığıyor%s." % (
+                _yaz(vakit), (", %s saat payın var" % _yaz(fark)) if fark > 0 else ""))
+        else:
+            out["bant"] = "sikisik" if talep <= vakit * SIKISIK_KAT + 1e-9 else "sigmaz"
+            parca.append("Senin vaktin haftada %s saat; %s: %s saat açık var." % (
+                _yaz(vakit), "sıkışık" if out["bant"] == "sikisik" else "sığmıyor", _yaz(-fark)))
+            parca.append("Seçenekler: bir hedefi askıya al, bir hedefin tarihini uzat ya da "
+                         "günlük vaktini artır. Seçim senin.")
+    if bilinmeyen:
+        parca.append("%d hedefin haftalık vakti bilinmiyor, hesaba katılmadı: %s." % (
+            len(bilinmeyen), "; ".join("%s: %s" % (MODUL_AD[h["modul"]], h["ozet"])
+                                       for h in bilinmeyen[:4])))
+    if z and sayilan:
+        parca.append("Vakit senin beyanın olduğu için karar «tahmin»dir.")
+    out["metin"] = " ".join(parca)
+    return out
+
+
+def pano(con):
+    """HKM › Hedefler: uc modulun etkin hedefleri ve butce."""
+    l = hedefler(con)
+    return {"hedefler": l, "butce": butce(con),
+            "moduller": {m: len([h for h in l if h["modul"] == m]) for m in MODULLER}}

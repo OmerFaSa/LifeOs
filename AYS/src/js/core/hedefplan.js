@@ -204,6 +204,7 @@ R.HedefPlan = (function(){
   async function kaydet(p){
     R.S.hedefPlanlar = (R.S.hedefPlanlar || []).filter(x => x.id !== p.id).concat([p]);
     await R.Store.set('hedefPlanlar/' + p.id, p);
+    if(R.Hedefler && R.Hedefler.ag) R.Hedefler.ag.planla();
     return p;
   }
   function liste(){ return (R.S.hedefPlanlar || []).slice(); }

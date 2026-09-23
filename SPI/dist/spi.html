@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'efc1b76', at:'2026-09-23 16:28', dirty:true };
+SP.BUILD = { id:'5f422e5', at:'2026-09-23 16:39', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -9204,6 +9204,118 @@ LIFEOS.Hedef = (function(){
     haftalikSaat, ZORLAYICI_KAT };
 })();
 
+/* ==== js/core/hedefag.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/hedefag.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* HEDEF AĞI — modülün etkin hedeflerinin ÖZETİ HKM'ye; zaman bütçesi geri.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/hedefag.js`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   ==================================================================
+
+   Üç modül birbirini görmez; ama üç hedef AYNI GÜNÜ paylaşır. Zaman
+   bütçesini yalnız merkez hesaplayabilir (HKM `core/hedefag.py`).
+
+   Sözler:
+   1. HKM MODÜLE YAZMAZ. Modül yalnız ÖZET yollar: kimlik, kısa ad,
+      durum, son tarih, vakit, kararın bandı, planın ilerlemesi. Hedefin
+      kendisi (cümle, cevaplar, kişisel ölçümler) gitmez.
+   2. ANLIK GÖRÜNTÜ. Her gönderim TAMAMINI yollar; aynı görüntü iki kez
+      gelirse HKM'de hiçbir şey değişmez.
+   3. HKM KAPALIYKEN HİÇBİR ŞEY OLMAZ. Bağlantı yoksa, yavaşsa ya da
+      hata verirse gönderim sessizce düşer; modül yavaşlamaz.
+   4. BÜTÇENİN CÜMLESİNİ HKM KURAR. Modül sayı hesaplamaz, gelen metni
+      gösterir (yüz kendi sayısını üretmez). */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.HedefAg = (function(){
+  const GECIKME = 600;
+
+  /* Hedef + (varsa) plan → HKM'nin beklediği özet. */
+  function ozet(h, o){
+    const x = o || {};
+    const k = h.kapasite && h.kapasite.gunluk_dk > 0
+      ? { gunluk_dk:Math.round(h.kapasite.gunluk_dk), haftalik_gun:h.kapasite.haftalik_gun || 7 } : null;
+    const g = h.gerceklik && h.gerceklik.bant
+      ? { bant:h.gerceklik.bant, etiket:h.gerceklik.etiket || 'tahmin' } : null;
+    const il = x.ilerleme || null;
+    return {
+      id:String(h.id), ozet:String(x.ozet || h.cumle || '').slice(0, 160), paket:h.paket || null,
+      durum:h.durum, son_tarih:h.son_tarih || null, kapasite:k, gerceklik:g,
+      plan:x.plan ? { bitis:x.plan.bitis || null,
+        ilerleme:il ? { durum:il.durum, metin:typeof il.metin === 'string' ? il.metin.slice(0, 300) : null }
+          : { durum:'veri_yok', metin:null } } : null,
+    };
+  }
+
+  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…] })`
+     → { gonder(), planla(), cek(), butce() } */
+  function kur(ortam){
+    let zaman = null;
+    let son = null;
+
+    function baglanti(){
+      const b = ortam.hkm ? ortam.hkm() : null;
+      if(!b || typeof b.settings !== 'function') return null;
+      const a = b.settings() || {};
+      if(!a.enabled || !a.token || !b.urlOk(a.url)) return null;
+      const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
+      return f ? { url:String(a.url).replace(/\/$/, ''), token:a.token, f } : null;
+    }
+
+    async function istek(yol, govde){
+      const k = baglanti();
+      if(!k) return null;
+      const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      const t = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;
+      try{
+        /* fetch bir nesnenin yöntemi olarak çağrılamaz («Illegal invocation»):
+           yerel değişkenden çağrılır. */
+        const f = k.f;
+        const res = await f(k.url + yol, {
+          method:govde === undefined ? 'GET' : 'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+          body:govde === undefined ? undefined : JSON.stringify(govde),
+          signal:ctrl ? ctrl.signal : undefined,
+        });
+        if(res.status !== 200) return null;
+        return await res.json();
+      }catch(e){
+        return null;
+      }finally{
+        if(t) clearTimeout(t);
+      }
+    }
+
+    async function gonder(){
+      let l = [];
+      try{ l = (ortam.ozetler() || []).slice(0, 30); }catch(e){ return { ok:false }; }
+      const g = await istek('/api/hedef/sync/' + ortam.modul, { hedefler:l });
+      if(g && g.butce) son = g.butce;
+      return { ok:!!(g && g.ok), butce:son };
+    }
+
+    /* Art arda gelen değişiklikler TEK gönderim olur. */
+    function planla(){
+      if(zaman) clearTimeout(zaman);
+      zaman = setTimeout(() => { zaman = null; gonder(); }, GECIKME);
+    }
+
+    async function cek(){
+      const g = await istek('/api/hedefler');
+      if(g && g.butce) son = g.butce;
+      return son;
+    }
+
+    return { gonder, planla, cek, butce:() => son };
+  }
+
+  return { ozet, kur };
+})();
+
 /* ==== js/core/hedefler.js ==== */
 /* SPİ HEDEFLERİ — genel hedef motorunun (brand/ortak/hedef.js) SPİ paketi.
 
@@ -9450,7 +9562,17 @@ SP.Hedefler = (function(){
     const l = (SP.S.hedefler || []).filter(x => x.id !== h.id);
     SP.S.hedefler = l.concat([h]);
     await SP.Store.set('hedefler/' + h.id, h);
+    if(ag) ag.planla();
     return h;
+  }
+
+  /* Hedefin kısa adı — ekranda ve HKM panosunda. Başlık hedefin GÜNCEL
+     özetidir, ilk cümle değil: tempo seçilince tarih değişir ve «3 ay
+     içinde…» cümlesi eskimiş bilgi olurdu. */
+  function ozet(h){
+    const ne = h.hedefDeger != null ? h.hedefDeger + ' kg'
+      : h.fark != null ? (h.yon === 'azalt' ? '−' : '+') + h.fark + ' kg' : h.cumle;
+    return h.paket === 'kilo' ? 'Kilo hedefi: ' + ne : h.cumle || ne;
   }
 
   function liste(){ return (SP.S.hedefler || []).slice(); }
@@ -9469,6 +9591,19 @@ SP.Hedefler = (function(){
     return r;
   }
 
+  /* Hedef ağı (brand/ortak/hedefag.js): etkin hedeflerin ÖZETİ HKM'ye,
+     zaman bütçesinin cümlesi geri. Kilo hedefi saat istemez; HKM onu
+     «vakti bilinmiyor» diye adıyla söyler. */
+  function ozetler(){
+    return aktifler().map(h => {
+      const p = SP.Plan ? SP.Plan.aktif(h.id) : null;
+      return LIFEOS.HedefAg.ozet(h, { ozet:ozet(h), plan:p ? { bitis:p.bitis } : null,
+        ilerleme:p ? SP.Plan.ilerleme(p, SP.U.todayISO()) : null });
+    });
+  }
+  const ag = window.LIFEOS && LIFEOS.HedefAg
+    ? LIFEOS.HedefAg.kur({ hkm:() => SP.Beacon, modul:'spi', ozetler }) : null;
+
   /* Motorun sohbet akışı SPİ paketiyle. Model çağrılmaz. */
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'spi', durum:() => ({}), bugun:() => SP.U.todayISO(),
@@ -9478,7 +9613,8 @@ SP.Hedefler = (function(){
   }) : null;
 
   return { PAKETLER, KILO, VKI, sonKilo, boyCm, hekimKapisi, normalize, notlar,
-    talimatlar, talimatEkle, talimatSil, yukle, kaydet, liste, aktifler, durumDegistir, sohbet };
+    talimatlar, talimatEkle, talimatSil, yukle, kaydet, liste, aktifler, durumDegistir, sohbet,
+    ozet, ozetler, ag };
 })();
 
 /* ==== js/core/plan.js ==== */
@@ -9544,6 +9680,7 @@ SP.Plan = (function(){
   async function kaydet(p){
     SP.S.planlar = liste().filter(x => x.id !== p.id).concat([p]);
     await SP.Store.set(STORE + '/' + p.id, p);
+    if(SP.Hedefler && SP.Hedefler.ag) SP.Hedefler.ag.planla();
     return p;
   }
   function aktif(hedefId){
@@ -30138,14 +30275,10 @@ SP.Screens.today = (function(){
   function hedefSatir(h){
     const g = h.gerceklik || {};
     const H = window.LIFEOS.Hedef;
-    const ne = h.hedefDeger != null ? h.hedefDeger + ' kg'
-      : h.fark != null ? (h.yon === 'azalt' ? '−' : '+') + h.fark + ' kg' : h.cumle;
     const pl = SP.Plan ? SP.Plan.aktif(h.id) : null;
     const onizle = !pl && S.ui.planOnizle === h.id && h.durum === 'aktif';
-    /* Başlık hedefin GÜNCEL özetidir, ilk cümle değil: tempo seçilince
-       tarih değişir ve «3 ay içinde…» cümlesi eskimiş bilgi olurdu. */
     return html`<div>
-      <div><b class="small">${h.paket === 'kilo' ? 'Kilo hedefi: ' + ne : h.cumle || ne}</b>
+      <div><b class="small">${SP.Hedefler.ozet(h)}</b>
         <div class="tiny dim">${h.durum === 'askida' ? 'askıda · ' : ''}${h.son_tarih
           ? 'son tarih ' + H.tarihYaz(h.son_tarih) : 'tarihsiz'}${g.bant ? ' · ' + BANT[g.bant]
           + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
@@ -30157,13 +30290,21 @@ SP.Screens.today = (function(){
         </div>`}
     </div>`;
   }
+  /* Zaman bütçesi (HKM core/hedefag.py): cümleyi HKM'nin kodu kurar;
+     burası yalnız gösterir. HKM kapalıysa satır hiç çizilmez. */
+  function butceSatiri(){
+    const b = SP.Hedefler.ag ? SP.Hedefler.ag.butce() : null;
+    if(!b || !b.metin) return '';
+    return K.Notice({ tone:{ sigar:'info', sikisik:'warn', sigmaz:'warn' }[b.bant] || 'info', title:'Zaman bütçesi (King):', body:b.metin });
+  }
+
   function hedefEntry(){
     if(!SP.Hedefler) return null;
     const l = SP.Hedefler.aktifler();
     return K.Entry({
       label:'Hedeflerim', meta:l.length ? l.length + ' etkin' : 'yok',
       action:K.Button({ label:'Danışma’da hedef koy', act:'go', data:{ 'data-route':'team' } }),
-      body:l.length ? html`<div class="stack-sm">${map(l, hedefSatir)}</div>`
+      body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
         : html`<p class="small dim">Henüz hedefin yok. Danışma’da «3 ay içinde 3 kilo vermek
           istiyorum» ya da «VKİ’mi 24’e indirmek istiyorum» gibi yazabilirsin; gerçekçi olup
           olmadığını ve güvenli temposunu söylerim.</p>`,
@@ -39324,6 +39465,11 @@ SP.App = (function(){
       installManifest();
       /* Tek dosya görselsiz açıldıysa bunu söyle (brand/ortak/gorsel.js). */
       if(window.LIFEOS && LIFEOS.Gorsel) LIFEOS.Gorsel.denetle('spi', m => UI.toast(m, { life:12000 }));
+      /* Hedef ağı: etkin hedeflerin özeti HKM'ye, zaman bütçesi geri
+         (brand/ortak/hedefag.js). HKM kapalıysa hiçbir şey olmaz. */
+      if(SP.Hedefler && SP.Hedefler.ag){
+        SP.Hedefler.ag.gonder().then(r => { if(r && r.butce) render(); }).catch(() => {});
+      }
 
       /* Seviye kutlaması. İki yol da buraya çıkar:
 

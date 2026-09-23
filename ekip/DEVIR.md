@@ -54,13 +54,16 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   medyası gömülmez; kalıcı çözüm Y4 (PWA).
 
 ### Part 2 — Hedef ağı
-- 🔜 8 Modüller etkin hedef + plan özetini HKM'ye eşitler (AYS ve ESP planları King'e görünür).
-- ⏳ 6 Zaman bütçesi: günlük toplam vakit ↔ hedeflerin haftalık saati; kod kararı,
-  King cümlesi; modül Hedeflerim'de bütçe satırı.
-- ⏳ Y8 HKM web'de Hedefler panosu.
+- ✅ 8 Modüller etkin hedef + plan özetini HKM'ye eşitler: `brand/ortak/hedefag.js`
+  (istemci), `HKM/core/hedefag.py`, `POST /api/hedef/sync/<modül>`. Kayıtta 600 ms
+  gecikmeli gönderim, açılışta bir kez. AYS ve ESP planları artık King'e görünür.
+- ✅ 6 Zaman bütçesi: `POST /api/zaman` (günlük dk, haftada gün); karar ve cümle
+  HKM kodu; modüllerin Hedeflerim kartında «Zaman bütçesi (King)» satırı.
+- ✅ Y8 HKM web › Hedefler sekmesi: bütçe, günlük vakit formu, üç modülün hedefleri.
+  Zincir testi `tools/entegre.js` §2.9 ve §4.5.
 
 ### Part 3 — Uyarlama ve değerlendirme
-- ⏳ 7 Uyarlama döngüsü: plan kontrolde geride kalınca yeni tempo / tarih önerisi.
+- 🔜 7 Uyarlama döngüsü: plan kontrolde geride kalınca yeni tempo / tarih önerisi.
 - ⏳ 13 Değerlendirme seti: 30–50 örnek hedef ve beklenen bant.
 
 ### Part 4 — Güvence ve teslim

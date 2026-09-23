@@ -471,14 +471,10 @@ SP.Screens.today = (function(){
   function hedefSatir(h){
     const g = h.gerceklik || {};
     const H = window.LIFEOS.Hedef;
-    const ne = h.hedefDeger != null ? h.hedefDeger + ' kg'
-      : h.fark != null ? (h.yon === 'azalt' ? '−' : '+') + h.fark + ' kg' : h.cumle;
     const pl = SP.Plan ? SP.Plan.aktif(h.id) : null;
     const onizle = !pl && S.ui.planOnizle === h.id && h.durum === 'aktif';
-    /* Başlık hedefin GÜNCEL özetidir, ilk cümle değil: tempo seçilince
-       tarih değişir ve «3 ay içinde…» cümlesi eskimiş bilgi olurdu. */
     return html`<div>
-      <div><b class="small">${h.paket === 'kilo' ? 'Kilo hedefi: ' + ne : h.cumle || ne}</b>
+      <div><b class="small">${SP.Hedefler.ozet(h)}</b>
         <div class="tiny dim">${h.durum === 'askida' ? 'askıda · ' : ''}${h.son_tarih
           ? 'son tarih ' + H.tarihYaz(h.son_tarih) : 'tarihsiz'}${g.bant ? ' · ' + BANT[g.bant]
           + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
@@ -490,13 +486,21 @@ SP.Screens.today = (function(){
         </div>`}
     </div>`;
   }
+  /* Zaman bütçesi (HKM core/hedefag.py): cümleyi HKM'nin kodu kurar;
+     burası yalnız gösterir. HKM kapalıysa satır hiç çizilmez. */
+  function butceSatiri(){
+    const b = SP.Hedefler.ag ? SP.Hedefler.ag.butce() : null;
+    if(!b || !b.metin) return '';
+    return K.Notice({ tone:{ sigar:'info', sikisik:'warn', sigmaz:'warn' }[b.bant] || 'info', title:'Zaman bütçesi (King):', body:b.metin });
+  }
+
   function hedefEntry(){
     if(!SP.Hedefler) return null;
     const l = SP.Hedefler.aktifler();
     return K.Entry({
       label:'Hedeflerim', meta:l.length ? l.length + ' etkin' : 'yok',
       action:K.Button({ label:'Danışma’da hedef koy', act:'go', data:{ 'data-route':'team' } }),
-      body:l.length ? html`<div class="stack-sm">${map(l, hedefSatir)}</div>`
+      body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
         : html`<p class="small dim">Henüz hedefin yok. Danışma’da «3 ay içinde 3 kilo vermek
           istiyorum» ya da «VKİ’mi 24’e indirmek istiyorum» gibi yazabilirsin; gerçekçi olup
           olmadığını ve güvenli temposunu söylerim.</p>`,
