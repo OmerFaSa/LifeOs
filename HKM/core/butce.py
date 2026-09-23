@@ -28,7 +28,9 @@
       p50 (ortanca gun) ve p90 (yogun gun) ayri ayri verilir.
 """
 
+import contextlib
 import datetime
+import threading
 
 VARSAYILAN = {
     "monthly_try": 850.0,       # ust sinir — harcanmasi gereken tutar DEGIL
@@ -120,22 +122,55 @@ def apply(cfg, patch):
 
 # ---------------------------------------------------------------- kayit
 
+# Cagri hangi BAM isine ait? BAM bir adimi kosarken isin kimligini BU IS
+# PARCACIGINA yazar (bam.ilerlet); defter onu cagriyla birlikte kaydeder.
+# Modul duzeyinde tek bir degisken olsaydi, ayni anda sohbet eden bir HTTP
+# is parcacigi kendi cagrisini ritimdeki ise yazdirirdi.
+_BAGLAM = threading.local()
+
+
+@contextlib.contextmanager
+def is_baglami(is_id):
+    onceki = getattr(_BAGLAM, "is_id", None)
+    _BAGLAM.is_id = int(is_id) if is_id else None
+    try:
+        yield
+    finally:
+        _BAGLAM.is_id = onceki
+
+
 def record(con, *, role, task, provider, model, user="ben", in_tok=0, out_tok=0,
            image_tok=0, reason_tok=0, usd=0.0, rate=0.0, cached=False,
-           escalated=False, ok=True, note="", now=None):
+           escalated=False, ok=True, note="", now=None, is_id=None):
     """Bir cagriyi deftere yazar. BASARISIZ CAGRI DA YAZILIR: para, cevap
-    alinmadan da harcanmis olabilir."""
+    alinmadan da harcanmis olabilir. `is_id` verilmezse is parcaciginin
+    baglamindaki BAM isi yazilir (is_baglami)."""
     t = now or datetime.datetime.now()
+    if is_id is None:
+        is_id = getattr(_BAGLAM, "is_id", None)
     con.execute(
         "INSERT INTO usage(created_at, day, user, role, task, provider, model,"
         " in_tok, out_tok, image_tok, reason_tok, usd, try_, rate, cached,"
-        " escalated, ok, note) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        " escalated, ok, note, is_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (t.isoformat(timespec="seconds"), t.date().isoformat(), user, role, task,
          provider, model, int(in_tok), int(out_tok), int(image_tok),
          int(reason_tok), float(usd), float(usd) * float(rate), float(rate),
-         1 if cached else 0, 1 if escalated else 0, 1 if ok else 0, note or ""))
+         1 if cached else 0, 1 if escalated else 0, 1 if ok else 0, note or "",
+         int(is_id) if is_id else None))
     con.commit()
     return {"ok": True}
+
+
+def is_maliyeti(con, is_id):
+    """Bir BAM isinin OLCULEN maliyeti: o ise yazilmis cagrilarin toplami.
+    Basarisiz cagri da sayilir; para cevapsiz da harcanmis olabilir."""
+    r = con.execute("SELECT COUNT(*) n, COALESCE(SUM(usd),0) usd, COALESCE(SUM(in_tok),0) gir, "
+                    "COALESCE(SUM(out_tok),0) cik, COALESCE(SUM(CASE WHEN note='tahmini-fiyat' "
+                    "THEN 1 ELSE 0 END),0) tahmini FROM usage WHERE is_id=?",
+                    (int(is_id),)).fetchone()
+    return {"cagri": r["n"], "usd": round(r["usd"], 6), "in_tok": r["gir"], "out_tok": r["cik"],
+            # Tarifesi bilinmeyen modelde fiyat tahmindir; bu soylenir.
+            "etiket": "tahmin" if r["tahmini"] else "olculdu"}
 
 
 # ----------------------------------------------------------------- okuma

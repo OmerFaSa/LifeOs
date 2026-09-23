@@ -449,6 +449,10 @@ MIGRATIONS = [
     # Giden kutusunda belge satiri: {"kayit_id", "bicim"}. Bayt ambara
     # yazilmaz; gonderim aninda kayittan uretilir.
     ("outbox", "ek", "TEXT"),
+    # Model cagrisinin ait oldugu BAM isi (core/butce.py is_baglami). Isin
+    # gercek maliyeti buradan OLCULUR; King'in teklifi ondan ogrenir.
+    # Bos: sohbet, yoklama gibi bir ise ait olmayan cagri.
+    ("usage", "is_id", "INTEGER"),
 ]
 
 

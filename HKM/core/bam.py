@@ -38,8 +38,8 @@ import datetime
 import json
 import re
 
-from core import (ai, depo, editor, intents, kaynakli, kitap, mufredat, planlama, program,
-                  urunler, web)
+from core import (ai, butce, depo, editor, intents, kaynakli, kitap, mufredat, planlama,
+                  program, urunler, web)
 
 OFISLER = {
     "kayit": {
@@ -263,7 +263,10 @@ def ilerlet(con, cfg, transport=None, now=None):
         _kaydet(con, j, now)
         return None
     try:
-        sonuc = ADIM[adim["ofis"]](con, cfg, j, transport, now)
+        # Adimin model cagrilari bu ise yazilir (butce.is_baglami):
+        # isin gercek maliyeti defterden olculur.
+        with butce.is_baglami(j["id"]):
+            sonuc = ADIM[adim["ofis"]](con, cfg, j, transport, now)
     except Exception as e:                      # noqa: BLE001
         sonuc = {"durum": "hata", "not": "%s: %s" % (type(e).__name__, e)}
     adim.update(sonuc)

@@ -330,6 +330,13 @@ def run():
         del giden[:]
         _tik(con, cfg, m, 2)
         eq(king.emir(con, e["id"])["durum"], "bitti")
+        # 8a-1: isin model cagrilari ISE yazilir; maliyet defterden olculur.
+        m_ = king.emir(con, e["id"])["sonuc"]["maliyet"]
+        bam_is = king.emir(con, e["id"])["bam_is_id"]
+        n_ = con.execute("SELECT COUNT(*) FROM usage WHERE is_id=?", (bam_is,)).fetchone()[0]
+        ok(n_ >= 1 and m_["cagri"] == n_, (m_, n_))
+        eq(con.execute("SELECT COUNT(*) FROM usage WHERE is_id IS NOT NULL AND is_id<>?",
+                       (bam_is,)).fetchone()[0], 0)
         eq(outbox.flush(con, cfg, transport=tas)["sent"], 2)
         eq(sorted(u.rsplit("/", 1)[1] for u, _ in giden), ["sendDocument", "sendMessage"])
         mesaj = next(g for u, g in giden if u.endswith("sendMessage"))

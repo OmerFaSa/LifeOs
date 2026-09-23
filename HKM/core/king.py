@@ -708,7 +708,9 @@ def esitle(con, now=None):
             a, b = _zaman(e["created_at"]), _zaman(j["updated_at"])
             gercek = int((b - a).total_seconds()) if a and b else None
             e["sonuc"] = {"kayit_id": kid, "gercek_sn": gercek,
-                          "gercek_metin": _sure_yaz(gercek) if gercek is not None else None}
+                          "gercek_metin": _sure_yaz(gercek) if gercek is not None else None,
+                          # Olculen maliyet (usage.is_id): teklifin ogrendigi sayi.
+                          "maliyet": butce.is_maliyeti(con, e["bam_is_id"])}
             notlar = [a.get("not") for a in j["adimlar"] if a.get("ofis") != "kayit"
                       and a.get("not")]
             _yaz(con, e, now)

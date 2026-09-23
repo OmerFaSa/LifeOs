@@ -219,3 +219,30 @@ def run():
         ok(p["note"])
         ok(len(p["models"]) >= 5)
     test("onerilen saglayici ve adresi ekranda", t_openrouter_is_offered)
+
+    def t_is_baglami():
+        """8a-1: cagri ait oldugu BAM isine yazilir; baglam is parcacigina
+        ozeldir ve cikista eski haline doner. Isin maliyeti defterden."""
+        import threading
+        con = db.connect(":memory:")
+        kw = dict(role="bam.uretim", task="urun", provider="p", model="m", usd=0.25)
+        butce.record(con, **kw)
+        with butce.is_baglami(7):
+            butce.record(con, **kw)
+            with butce.is_baglami(9):
+                butce.record(con, **kw)
+            butce.record(con, **kw)
+            # Baska is parcacigi (sohbet) baglami GORMEZ.
+            goren = []
+            t = threading.Thread(target=lambda: goren.append(
+                getattr(butce._BAGLAM, "is_id", None)))
+            t.start()
+            t.join()
+            eq(goren, [None])
+        butce.record(con, **kw)
+        eq([r[0] for r in con.execute("SELECT is_id FROM usage ORDER BY id")],
+           [None, 7, 9, 7, None])
+        m = butce.is_maliyeti(con, 7)
+        eq((m["cagri"], m["usd"], m["etiket"]), (2, 0.5, "olculdu"))
+        eq(butce.is_maliyeti(con, 99)["cagri"], 0)
+    test("cagri isine yazilir; isin maliyeti olculur", t_is_baglami)
