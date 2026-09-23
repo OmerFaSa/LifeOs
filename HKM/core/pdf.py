@@ -407,7 +407,8 @@ def _yuvarlak(x, y, w, h, r):
 
 RENK = {"yazi": "#1F2A2E", "ikincil": "#4A5A5E", "vurgu": "#2F6B5E", "vurgu2": "#9A5B12",
         "cizgi": "#B9C2BF", "yumusak": "#E7EFEC"}
-ETIKET = {"kaynakli": "kaynaklı", "dogrulanmadi": "doğrulanmadı", "celiskili": "çelişkili"}
+ETIKET = {"kaynakli": "kaynaklı", "dogrulanmadi": "doğrulanmadı", "celiskili": "çelişkili",
+          "hesaplandi": "hesaplandı"}
 HARF = "ABCDE"
 
 
@@ -560,8 +561,8 @@ def _alt_bilgi(d, b):
     for i, s in enumerate(d.sayfalar):
         d.s = s
         d.cizgi(KENAR, s.h - KENAR - 14, s.w - KENAR, s.h - KENAR - 14, RENK["cizgi"], 0.6)
-        sol = " · ".join(x for x in ("LifeOS · HKM", "BAM kayıt #%s" % b.get("kimlik"),
-                                     b.get("tarih"), et) if x)
+        sol = " · ".join(x for x in ("LifeOS · HKM", b.get("dayanak") or
+                                     "BAM kayıt #%s" % b.get("kimlik"), b.get("tarih"), et) if x)
         d.yazi(KENAR, s.h - KENAR, sol, 7.5, RENK["ikincil"])
         d.yazi(s.w - KENAR, s.h - KENAR, "sayfa %d/%d" % (i + 1, n), 7.5, RENK["ikincil"],
                hiza="sag")

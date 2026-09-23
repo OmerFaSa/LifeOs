@@ -123,3 +123,83 @@ def message(con, date, th=None):
     if manager.imperatives(metin):
         return "Haftalık rapor buyurgan kip taşıdığı için düşürüldü."
     return metin
+
+
+# ------------------------------------------------------------ belge
+#
+# Haftalik rapor BASILIR (core/cikti.py belge modeli): Telegram'a PDF
+# olarak gider, HKM yuzunden indirilir. Belgenin her sayisi report()'tan
+# gelir; burada yeni bir sayi uretilmez, yalniz yazilir.
+
+DURUM_ETIKET = {"compared": "hesaplandı", "alone": "hesaplandı", "missing": "veri yok"}
+
+
+def _degisim(s):
+    """«+%36», «−%5», «%0»: Turkcede yuzde isareti sayinin ONUNDEDIR."""
+    if s.get("change_pct") is None:
+        return "—"
+    n = s["change_pct"]
+    return "%s%%%d" % ("+" if n > 0 else "−" if n < 0 else "", abs(n))
+
+
+def belge(con, date, th=None):
+    """Haftalik rapor -> belge modeli (baslik, bolumler, etiket)."""
+    from core import adlar, hedefag
+    r = report(con, date, th=th)
+    gun = r["days_seen"]
+    bol = [{"baslik": "Kapsam", "bloklar": [
+        {"t": "tablo", "basliklar": ["Sistem", "Kayıtlı gün (7 günde)"],
+         "satirlar": [[adlar.modul(m), "%d" % gun.get(m, 0)] for m in ("ays", "spi", "esp")]},
+        {"t": "not", "metin": r["note"]}]}]
+
+    satir = [[adlar.metrik(s["metric"]), adlar.modul(s["module"]), "%d" % s["n"],
+              _fmt(s.get("median")), _fmt(s.get("previous")), _degisim(s),
+              DURUM_ETIKET.get(s["status"], "veri yok")] for s in r["rows"]]
+    if satir:
+        bol.append({"baslik": "Ölçüler", "bloklar": [
+            {"t": "tablo", "basliklar": ["Ölçü", "Sistem", "Gün", "Ortanca", "Önceki",
+                                         "Değişim", "Etiket"], "satirlar": satir},
+            {"t": "not", "metin": "Ortanca en az %d ölçülen günden hesaplanır; önceki hafta da "
+                                  "ölçüldüyse karşılaştırılır. Sıralama: en çok hareket eden "
+                                  "ölçü önce." % ASGARI_GUN}]})
+    else:
+        bol.append({"baslik": "Ölçüler", "bloklar": [
+            {"t": "p", "metin": "Bu hafta ölçü gelmedi. Bu, «kötü hafta» demek değildir."}]})
+
+    p = hedefag.pano(con)
+    etkin = [h for h in p["hedefler"] if h["durum"] == "aktif"]
+    if etkin:
+        ms = []
+        for h in etkin:
+            il = ((h.get("plan") or {}).get("ilerleme") or {})
+            ms.append("%s · %s%s" % (adlar.modul(h["modul"]), h["ozet"],
+                                      (" — " + il["metin"]) if il.get("metin") else
+                                      " — plan ilerlemesi ölçülmedi" if h.get("plan") else ""))
+        bol.append({"baslik": "Hedefler", "bloklar": [
+            {"t": "liste", "maddeler": ms}, {"t": "not", "metin": p["butce"]["metin"]}]})
+
+    ek = [("Çapraz: " + c["note"]) for c in r["cross"]]
+    if (r["impact"] or {}).get("note"):
+        ek.append("Etki: " + r["impact"]["note"])
+    if ek:
+        bol.append({"baslik": "Bağlantılar", "bloklar": [{"t": "liste", "maddeler": ek}]})
+
+    return {"baslik": "Haftalık rapor", "alt": "%s → %s" % (r["from"], r["to"]),
+            "tur_ad": "Haftalık rapor", "dogruluk": "hesaplandi", "tarih": r["to"],
+            "kimlik": r["to"], "dayanak": "Haftalık rapor %s → %s" % (r["from"], r["to"]),
+            "bolumler": bol, "kaynaklar": [], "gorsel": None, "slaytlar": None,
+            "kavramlar": [], "kalite": []}
+
+
+def dosya(con, date, bicim="pdf", th=None):
+    """(bayt, mime, dosya_adi) — PDF cizilemezse (yazi tipi yok) HTML'e duser
+    ve bu, dosyanin uzantisiyla SOYLENIR."""
+    from core import cikti
+    b = belge(con, date, th=th)
+    bayt, mime, ad = cikti.uret_belge(b, bicim)
+    if bayt is None and bicim != "html":
+        bayt, mime, ad = cikti.uret_belge(b, "html")
+    if bayt is None:
+        return None, None, ad
+    # Ad ASCII: kanal ve tarayici her birinde ayni gorunsun.
+    return bayt, mime, "hkm-haftalik-rapor-%s.%s" % (b["tarih"], ad.rsplit(".", 1)[-1])

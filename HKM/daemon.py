@@ -20,6 +20,8 @@ Ucnoktalar:
     POST /api/restore               yedegi geri yukler (replace acik karar)
     GET  /api/streak?date=&days=    ust uste suren esik kiriklari
     GET  /api/weekly?date=          haftalik rapor
+    GET  /api/weekly/belge?date=&bicim=pdf|html  haftalik raporun basilir hali
+    POST /api/weekly/gonder         haftalik raporu simdi kanala kuyruga koyar (Telegram'a PDF)
     GET  /api/outbox                giden kutusu durumu
     GET  /api/intents/<modul>       modulun acik niyetleri (teklifler)
     POST /api/intents/<modul>       yeni teklif olusturur (tur + govde)
@@ -845,6 +847,16 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/weekly":
             return self._send(200, weekly.report(self.con, date,
                                                  th=self.server.thresholds))
+        if u.path == "/api/weekly/belge":
+            # Haftalik raporun basilir hali. PDF cizilemezse HTML'e duser ve
+            # bu dosyanin adiyla (uzantisiyla) soylenir.
+            bicim = (q.get("bicim") or ["pdf"])[0]
+            if bicim not in ("pdf", "html"):
+                return self._send(400, {"error": "bicim pdf ya da html olmali"})
+            bayt, mime, ad = weekly.dosya(self.con, date, bicim, th=self.server.thresholds)
+            if bayt is None:
+                return self._send(422, {"error": ad or "rapor uretilemedi"})
+            return self._send_bytes(200, bayt, mime, dosya=ad, indir=True)
         if u.path == "/api/outbox":
             return self._send(200, outbox.status(self.con))
         if u.path == "/api/impact":
@@ -965,6 +977,15 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200 if r.get("ok") else 404, r)
             return self._send(404, {"error": "bilinmeyen motto ucu"})
 
+        # Haftalik rapor elle: zamanlanmis isin AYNISI (metin + Telegram'a
+        # PDF). Giden kutusunun kimligi (kanal, tur, gun) ayni gun ikinci
+        # gonderimi engeller; bu soylenir.
+        if u.path == "/api/weekly/gonder":
+            r = schedule.run(self.con, self.server.config, {"kind": "weekly"},
+                             th=self.server.thresholds)
+            if r.get("ok") and not r.get("queued"):
+                r["note"] = "Bugünün haftalık raporu zaten kuyrukta ya da gönderildi."
+            return self._send(200 if r.get("ok") else 409, r)
         # Modulun gunluk yedegi (core/yedek.py). Govde AYRISTIRILIP yeniden
         # yazilmaz: saklanan, modulun urettigi baytlarin kendisidir. Sinir
         # geri yuklemeyle aynidir — modulun yedegi kendi yolundan gecebilmeli.

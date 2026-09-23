@@ -124,9 +124,21 @@ def run(con, cfg, job, now=None, th=None):
     if manager.imperatives(metin):
         # Reddet-ve-dus: zamanlanmis bir mesaj da emir kipi tasiyamaz.
         return {"ok": False, "reason": "imperative"}
+    belge = job["kind"] == "weekly" and kanal == "telegram"
+    if job["kind"] == "weekly" and not belge:
+        # Bu kanala belge yolu yok (channels.send_document); bu SOYLENIR.
+        metin += "\nRaporun PDF’i: HKM › Sistemler › Haftalık karşılaştırma’dan indirebilirsin."
     r = outbox.enqueue(con, kanal, job["kind"], gun, metin, now=now)
-    return {"ok": True, "queued": not r["duplicate"], "kind": job["kind"],
-            "chars": len(metin)}
+    out = {"ok": True, "queued": not r["duplicate"], "kind": job["kind"],
+           "chars": len(metin)}
+    if belge:
+        # Haftalik rapor PDF olarak da gider. Bayt ambara yazilmaz: giden
+        # kutusu gonderim aninda raporun KENDI haftasini basar.
+        d = outbox.enqueue(con, kanal, "weekly:belge", gun,
+                           "Haftalık rapor · %s haftası (PDF)" % gun, now=now,
+                           ek={"haftalik": gun, "bicim": "pdf"})
+        out["belge"] = not d["duplicate"]
+    return out
 
 
 # Bakim: yedek + budama. Mesaj uretmez, giden kutusuna dokunmaz.

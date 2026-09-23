@@ -1173,8 +1173,40 @@ details.detay > summary:hover{ color:var(--fg); }
          + esc(az.length) + ' ölçü haftalık ortanca için az gün taşıyor.</p>';
     }
     h += '<p class="muted">' + esc(r.note || '') + '</p>';
+    /* Basılır hâli ve kanala gönderim (core/weekly.py belge): rakamlar aynı
+       rapordan gelir; bu sayfa yalnız indirir ya da kuyruğa koydurur. */
+    h += '<div class="row"><button data-hafta-belge="' + esc(r.to) + '">PDF indir</button>'
+       + '<button id="hafta-gonder">Sohbet kanalına gönder</button></div>'
+       + '<p class="muted" id="hafta-not">Telegram’a metin ve PDF gider; WhatsApp’a yalnız '
+       + 'metin gider, PDF buradan indirilir.</p>';
     $('hafta').innerHTML = h;
   }
+
+  document.addEventListener('click', async function(ev){
+    var el = ev.target.closest ? ev.target.closest('[data-hafta-belge],#hafta-gonder') : null;
+    if(!el) return;
+    ev.preventDefault();
+    if(el.id === 'hafta-gonder'){
+      var g = await api('/api/weekly/gonder', { method:'POST', body:'{}' });
+      $('hafta-not').textContent = g.status === 200
+        ? ((g.body && g.body.note) || 'Kuyruğa kondu; bir dakika içinde gönderilir.')
+        : ((g.body && g.body.note) || 'Gönderilemedi (' + g.status + ').');
+      return;
+    }
+    var r = await fetch('/api/weekly/belge?date=' + encodeURIComponent(el.dataset.haftaBelge),
+      { headers:{ 'Authorization':'Bearer ' + token } });
+    if(r.status !== 200){
+      $('hafta-not').textContent = 'Rapor indirilemedi (' + r.status + ').';
+      return;
+    }
+    var ad = ((r.headers.get('Content-Disposition') || '').match(/filename\*=UTF-8''([^;]+)/) || [])[1];
+    var blob = await r.blob();
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = ad ? decodeURIComponent(ad) : 'hkm-haftalik-rapor.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    $('hafta-not').textContent = 'İndirildi.';
+  });
 
   /* Giden kutusu: bir mesajın sessizce kaybolmadığını gösterir. */
   function kutuCiz(k){

@@ -198,6 +198,62 @@ def run():
         ok("Kayıtlı gün" in metin)
     test("haftalik mesaj emir kipi tasimaz", t_weekly_message_is_advisory)
 
+    # Y6 — haftalik rapor basilir: Telegram'a PDF, WhatsApp'a indirme yolu.
+    def _hafta_con():
+        con = _con()
+        for i in range(14):
+            sync_engine.ingest(con, {"module": "ays", "date": gun(i),
+                                     "metrics": {"questions": metric(50 + i)}},
+                               now=gun(i) + "T09:00:00")
+        return con
+
+    def t_weekly_belge():
+        from core import cikti
+        con = _hafta_con()
+        b = weekly.belge(con, gun(13))
+        eq((b["dogruluk"], b["tarih"], b["baslik"]), ("hesaplandi", gun(13), "Haftalık rapor"))
+        olcu = next(x for x in b["bolumler"] if x["baslik"] == "Ölçüler")["bloklar"][0]
+        ok(olcu["satirlar"][0][0] != "questions", olcu["satirlar"][0])   # ekran adi
+        eq(olcu["satirlar"][0][6], "hesaplandı")
+        # Rakam report()'tan gelir; belge yeni sayi uretmez.
+        r = weekly.report(con, gun(13))
+        eq(olcu["satirlar"][0][5], "+%%%d" % r["rows"][0]["change_pct"])
+        h = cikti.html_belge(b)
+        ok("Hesaplandı: sayılar ölçülmüş kayıtlardan" in h and "BAM kayıt" not in h)
+        bayt, mime, ad = weekly.dosya(con, gun(13))
+        eq(ad.rsplit(".", 1)[0], "hkm-haftalik-rapor-" + gun(13))
+        ok(bayt[:4] == b"%PDF" if mime == "application/pdf" else b"<!doctype" in bayt[:20])
+    test("haftalik rapor belgesi: hesaplandi etiketi, rakam rapordan", t_weekly_belge)
+
+    def t_weekly_telegram_pdf():
+        con = _hafta_con()
+        cfg = {"channels": {"telegram": {"enabled": True, "bot_token": "B",
+                                         "allow_from": ["7"], "chat_id": "7"}},
+               "schedule": {"enabled": True, "weekly_day": "pazartesi"}}
+        an = datetime.datetime(2026, 9, 14, 9, 5)
+        r = schedule.run(con, cfg, {"kind": "weekly"}, now=an)
+        eq((r["ok"], r["belge"]), (True, True))
+        eq(schedule.run(con, cfg, {"kind": "weekly"}, now=an)["belge"], False)   # gunde bir
+        giden = []
+
+        def tas(url, govde, basliklar=None):
+            giden.append((url, govde))
+            return 200, '{"ok": true, "result": {"message_id": 1}}'
+        eq(outbox.flush(con, cfg, now=an, transport=tas)["sent"], 2)
+        eq(sorted(u.rsplit("/", 1)[1] for u, _ in giden), ["sendDocument", "sendMessage"])
+        belge = next(g for u, g in giden if u.endswith("sendDocument"))
+        ok(b"hkm-haftalik-rapor-2026-09-14" in belge)
+    test("haftalik rapor Telegram'a metin ve PDF olarak gider", t_weekly_telegram_pdf)
+
+    def t_weekly_whatsapp_yolu():
+        con = _hafta_con()
+        r = schedule.run(con, CFG, {"kind": "weekly"}, now=datetime.datetime(2026, 9, 14, 9, 5))
+        no("belge" in r)
+        satir = con.execute("SELECT kind, text FROM outbox").fetchall()
+        eq([x["kind"] for x in satir], ["weekly"])
+        ok("Sistemler › Haftalık karşılaştırma" in satir[0]["text"])
+    test("WhatsApp'a belge gitmez; PDF'in yeri soylenir", t_weekly_whatsapp_yolu)
+
     run_cli()
     run_kurtarma()
     run_bakim()

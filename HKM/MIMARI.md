@@ -796,6 +796,23 @@ ve `db/yedek/<modül>/<tarih>.json` olarak ambarın yanında durur (depoya girme
 Testler: `tests/test_yedek.py`, `tests/test_daemon.py` (uçlar),
 `brand/ortak/yedekag.test.js`, `tools/entegre.js` §2.95.
 
+## 8.24 Haftalık rapor basılır — `core/weekly.py` `belge()`
+
+Haftalık rapor, BAM kayıtlarıyla aynı belge modeline çevrilir (`cikti.uret_belge`)
+ve aynı çizicilerden (HTML, PDF) geçer. Belgenin her sayısı `report()`'tan gelir;
+belge yeni sayı üretmez. Etiketi **«hesaplandı»**dır (kaynaktan değil ölçümden
+gelir); alt bilgide BAM kayıt numarası yerine haftanın kendisi yazar
+(`dayanak`). Bölümler: kapsam (kayıtlı gün), ölçüler (ortanca, önceki, değişim,
+etiket), etkin hedefler ve zaman bütçesi (`core/hedefag.py`), çapraz bulgu ve etki.
+
+Zamanlanmış haftalık iş Telegram'a metnin yanında PDF'i de koyar (`weekly:belge`
+satırı; bayt ambara yazılmaz, giden kutusu gönderim anında raporun **kendi**
+haftasını basar). WhatsApp'a belge yolu yoktur; metin PDF'in yerini söyler.
+HKM › Sistemler › Haftalık karşılaştırma: «PDF indir» (`GET /api/weekly/belge`)
+ve «Sohbet kanalına gönder» (`POST /api/weekly/gonder`, zamanlanmış işin aynısı;
+aynı gün ikinci kez kuyruğa girmez). Testler: `tests/test_ritim.py`,
+`tests/test_daemon.py`.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

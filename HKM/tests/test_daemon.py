@@ -735,6 +735,18 @@ def run_extra(S):
         eq(S.call("/api/yedek/spi/..%2Fays")[0], 404)
     test("yedek uclari: yazar, listeler, indirir — yetkili ve modulune ait", t_yedek_endpoints)
 
+    def t_weekly_belge_endpoints():
+        eq(S.call("/api/weekly/belge?date=2026-09-14", token=None)[0], 401)
+        eq(S.call("/api/weekly/belge?date=2026-09-14&bicim=svg")[0], 400)
+        req = urllib.request.Request(S.url("/api/weekly/belge?date=2026-09-14&bicim=html"))
+        req.add_header("Authorization", "Bearer " + TOKEN)
+        with urllib.request.urlopen(req, timeout=10) as r:
+            eq(r.status, 200)
+            ok("hkm-haftalik-rapor-2026-09-14.html" in r.headers.get("Content-Disposition"))
+            ok(b"Haftal" in r.read())
+        eq(S.call("/api/weekly/gonder", body={}, token=None)[0], 401)
+    test("haftalik rapor belgesi yetki ister ve indirilir", t_weekly_belge_endpoints)
+
     def t_web_endpoints():
         eq(S.call("/api/web", token=None)[0], 401)
         kod, d = S.call("/api/web")

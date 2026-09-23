@@ -29,10 +29,25 @@ from core import channels, db
 
 
 def _belge_gonder(con, cfg, row, transport):
-    """Belge satiri: kayit gonderim aninda PDF'e (olmazsa HTML'e) basilir."""
+    """Belge satiri: kayit gonderim aninda PDF'e (olmazsa HTML'e) basilir.
+
+    Iki kaynak var: BAM kaydi (`kayit_id`) ve haftalik rapor (`haftalik` =
+    haftanin son gunu). Ikisinde de bayt ambara yazilmaz; gonderim aninda
+    uretilir — bekleyen satir, gonderildigi gunun rakamini degil, raporun
+    kendi haftasini basar."""
     from core import bam, cikti
     try:
         ek = json.loads(row["ek"])
+    except (TypeError, ValueError):
+        ek = {}
+    if isinstance(ek, dict) and ek.get("haftalik"):
+        from core import weekly
+        bayt, mime, ad = weekly.dosya(con, ek["haftalik"], ek.get("bicim") or "pdf")
+        if bayt is None:
+            return {"ok": False, "status": 0, "reason": "no-target", "note": ad or "Rapor üretilemedi."}
+        return channels.send_document(cfg, row["channel"], ad, bayt, mime.split(";")[0],
+                                      caption=row["text"], to=row["target"], transport=transport)
+    try:
         k = bam.kayit_getir(con, int(ek["kayit_id"]))
     except (TypeError, ValueError, KeyError):
         k = None

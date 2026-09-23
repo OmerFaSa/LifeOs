@@ -22,7 +22,10 @@ import re
 
 RENK = {"kagit": "#F7F4EE", "yazi": "#1F2A2E", "ikincil": "#4A5A5E", "vurgu": "#2F6B5E",
         "vurgu2": "#9A5B12", "cizgi": "#B9C2BF", "yumusak": "#E7EFEC", "beyaz": "#FFFFFF"}
-ETIKET = {"kaynakli": "kaynaklı", "dogrulanmadi": "doğrulanmadı", "celiskili": "çelişkili"}
+# «hesaplandi»: kaynaktan degil OLCUMDEN gelen belge (haftalik rapor) —
+# sayilari kod hesapladi, olculmeyen gun sifir sayilmadi.
+ETIKET = {"kaynakli": "kaynaklı", "dogrulanmadi": "doğrulanmadı", "celiskili": "çelişkili",
+          "hesaplandi": "hesaplandı"}
 HARF = "ABCDE"
 
 
@@ -483,6 +486,8 @@ def html_belge(b):
              if b["dogruluk"] == "kaynakli" else
              "Doğrulanmadı: bu içerik kaynakla doğrulanmadı; önemli bilgiyi resmî kaynaktan "
              "kontrol et." if b["dogruluk"] == "dogrulanmadi" else
+             "Hesaplandı: sayılar ölçülmüş kayıtlardan kodla hesaplandı; ölçülmeyen gün sıfır "
+             "sayılmadı." if b["dogruluk"] == "hesaplandi" else
              "Çelişkili: kaynaklar bazı noktalarda birbiriyle çelişiyor.")
     return ('<!doctype html><html lang="tr"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -491,8 +496,12 @@ def html_belge(b):
             '%s<footer>%s</footer></main></body></html>') % (
         _e(b["baslik"]), CSS, _e(b["tur_ad"]), _e(b["dogruluk"]), _e(et), _e(b["baslik"]),
         '<p class="alt">%s</p>' % _e(b["alt"]) if b.get("alt") else "", "".join(govde),
-        " · ".join(_e(x) for x in ("LifeOS · HKM", "BAM kayıt #%s" % b.get("kimlik"),
-                                    b.get("tarih"), uyari) if x))
+        " · ".join(_e(x) for x in ("LifeOS · HKM", dayanak(b), b.get("tarih"), uyari) if x))
+
+
+def dayanak(b):
+    """Alt bilgideki kaynak satiri: BAM kaydi ya da belgenin kendi dayanagi."""
+    return b.get("dayanak") or "BAM kayıt #%s" % b.get("kimlik")
 
 
 # ============================================================ disa acik
@@ -507,7 +516,12 @@ def dosya_adi(b, bicim):
 
 def uret(k, bicim):
     """Kayit -> (bayt, mime, dosya_adi) ya da (None, None, neden)."""
-    b = belge(k)
+    return uret_belge(belge(k), bicim)
+
+
+def uret_belge(b, bicim):
+    """Belge modeli -> (bayt, mime, dosya_adi) ya da (None, None, neden).
+    Kayittan gelmeyen belgeler (haftalik rapor) de ayni cizicilerden gecer."""
     if bicim == "html":
         return html_belge(b).encode("utf-8"), "text/html; charset=utf-8", dosya_adi(b, "html")
     if bicim == "svg":
