@@ -162,6 +162,47 @@ R.Screens.guide = (function(){
       + (korunan ? '; ilerlemesi başlamış ' + U.plural(korunan, 'gün', 'gün') + ' olduğu gibi kaldı' : '');
   }
 
+  /* ---------- takvim dosyası (.ics) — core/takvim.js ----------
+     Önizleme bellekte durur (S.ui.icsOnizleme): dosya seçilince okunur,
+     satır satır gösterilir, tür kullanıcı seçer. Onaylanmayan hiçbir
+     etkinlik yazılmaz. */
+  function icsOnizleme(){
+    const o = S.ui.icsOnizleme;
+    if(!o) return '';
+    const secenek = [{ value:'', label:'Atla' }].concat(Object.keys(M.CALENDAR_KINDS)
+      .map(k => ({ value:k, label:M.CALENDAR_KINDS[k].label })));
+    const yeni = o.satirlar.filter(s => s.durum === 'yeni');
+    return html`<div class="mt-12">
+      <p class="tiny"><b>${o.dosya || 'Takvim'}</b> — ${o.satirlar.length} etkinlik okundu,
+        ${yeni.length} yeni. Türü önerilir; tanınmayan «Atla» ile gelir.</p>
+      ${map(o.notlar || [], n => K.Notice({ tone:'info', body:n }))}
+      <div class="list mt-8">${map(o.satirlar, s => html`<div class="row gap-8 wrap mt-4">
+        <span class="minw0 small"><b>${s.baslik}</b> <span class="tiny dim">· ${s.bas === s.bit ? U.fmtShort(s.bas) : U.fmtRange(s.bas, s.bit)}</span></span>
+        ${s.durum === 'yeni'
+          ? K.Select({ size:'sm', options:secenek, value:s.tur || '', aria:s.baslik + ' türü',
+            data:{ 'data-ics':s.uid } })
+          : html`<span class="tiny dim">${R.Takvim.DURUM_ADI[s.durum]}</span>`}
+      </div>`)}</div>
+      <div class="row gap-8 mt-12">
+        ${K.Button({ label:'Seçilenleri ekle', tone:'primary', icon:'plus', act:'ics-ekle',
+          disabled:!yeni.length })}
+        ${K.Button({ label:'Vazgeç', act:'ics-vazgec' })}
+      </div>
+    </div>`;
+  }
+
+  function icsKarti(){
+    return K.Card({ title:'Takvim dosyası', sub:'.ics — okulun ya da telefonunun takvimiyle',
+      body:html`
+        ${K.Drop({ act:'ics-sec', accept:'.ics,text/calendar', icon:'upload', label:'.ics dosyası seç',
+          hint:'Tatil ve okul sınavları istisna olur; önce önizlersin' })}
+        ${icsOnizleme()}
+        <div class="row gap-8 mt-12">${K.Button({ label:'Takvime aktar (.ics)', icon:'download',
+          act:'ics-disa' })}</div>
+        <p class="tiny dim mt-8">Dışa aktarımda istisnalar, TYT ve AYT günü ve etkin hedeflerinin son
+          tarihleri tüm gün etkinliği olarak gelir; telefonunun takvimine ekleyebilirsin.</p>` });
+  }
+
   function istisnaTab(){
     const list = S.calendar.slice();
     const kinds = Object.keys(M.CALENDAR_KINDS).map(k => ({ value:k, label:M.CALENDAR_KINDS[k].label }));
@@ -183,6 +224,8 @@ R.Screens.guide = (function(){
             ])}
             ${K.Field({ label:'Not', input:K.Input({ id:'cal-note', placeholder:'ör. dönem sonu sınavları' }) })}
             ${K.Button({ label:'Ekle', icon:'plus', tone:'primary', class:'mt-12', act:'cal-add' })}` }),
+
+        icsKarti(),
 
         K.Card({ title:'Kayıtlı istisnalar', sub:U.plural(list.length, 'kayıt', 'kayıt'),
           body:list.length
@@ -760,6 +803,30 @@ R.Screens.guide = (function(){
       UI.toast(takvimMesaji('İstisna eklendi', from, to || from));
       R.App.render();
     },
+    async 'ics-ekle'(){
+      const o = S.ui.icsOnizleme;
+      if(!o) return;
+      const secim = {};
+      document.querySelectorAll('[data-ics]').forEach(el => { secim[el.dataset.ics] = el.value || null; });
+      const r = await R.Takvim.iceAl(o, secim);
+      S.ui.icsOnizleme = null;
+      UI.toast(r.eklenen ? r.eklenen + ' istisna eklendi; günlerin planı güncellendi'
+        : 'Hiçbir etkinlik seçilmedi; hiçbir şey değişmedi');
+      R.App.render();
+    },
+    async 'ics-vazgec'(){ S.ui.icsOnizleme = null; R.App.render(); },
+    async 'ics-disa'(){
+      const d = R.Takvim.disa();
+      if(!d.adet){ UI.toast('Aktarılacak bir tarih yok'); return; }
+      try{
+        const url = URL.createObjectURL(new Blob([d.metin], { type:'text/calendar;charset=utf-8' }));
+        const a = document.createElement('a');
+        a.href = url; a.download = 'ays-takvim-' + U.todayISO() + '.ics';
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+        UI.toast(d.adet + ' etkinlik takvim dosyasına yazıldı');
+      }catch(e){ UI.toast('Takvim dosyası indirilemedi'); }
+    },
     async 'cal-del'(el){
       const x = S.calendar.find(c => c.id === el.dataset.id);
       await M.deleteCalendar(el.dataset.id);
@@ -929,6 +996,15 @@ R.Screens.guide = (function(){
   };
 
   const change = {
+    async 'ics-sec'(el){
+      const f = el.files && el.files[0];
+      if(!f) return;
+      if(f.size > 2 * 1024 * 1024){ UI.toast('Dosya çok büyük (en çok 2 MB)'); return; }
+      const r = R.Takvim.onizle(await f.text());
+      if(!r.ok){ UI.toast(r.why); return; }
+      S.ui.icsOnizleme = Object.assign(r, { dosya:f.name });
+      R.App.render();
+    },
     async 'hkm-url'(el){ await R.Beacon.save({ url:el.value.trim() }); R.App.render(); },
     async 'hkm-token'(el){ await R.Beacon.save({ token:el.value.trim() }); },
     async 'hkm-interval'(el){

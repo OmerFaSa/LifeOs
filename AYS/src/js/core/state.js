@@ -51,6 +51,7 @@ R.S = {
   ui:{
     weekView:null,     // gorunen hafta no
     planOnizle:null,   // Hedeflerim'de onizlemesi acik hedefin kimligi
+    icsOnizleme:null,  // Rehber › İstisnalar'da okunan .ics dosyasının önizlemesi (depoya yazılmaz)
     /* HKM'nin bekleyen teklifleri — bellekte durur, depoya YAZILMAZ:
        kaynagi HKM'dir ve tek gercek orada olmali. */
     hkmIntents:[],

@@ -257,6 +257,13 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
   (`POST /api/king/urun`); `urun.add` modülün kendi koduyla sınanır, kendi
   deposuna yazılır, Ofis'te sandbox iframe'de açılır (`brand/ortak/urun.js`).
 
+- **Kuruldu (Y3 — takvim dosyası, AYS `core/takvim.js`):** Rehber › İstisnalar'da
+  .ics içe alma: etkinlik satır satır önizlenir, tür yalnız önerilir (tatil /
+  okul sınavı; tanınmayan «Atla»), geçmiş, 60 günden uzun ve zaten kayıtlı olan
+  alınmaz, seçilen satır takvim istisnası olur ve günler `istisna.js` kuralıyla
+  güncellenir. Dışa aktarma: istisnalar, TYT/AYT günü ve etkin hedeflerin son
+  günleri tüm gün etkinliği (75 oktet katlama, RRULE okunmaz ve söylenir).
+
 ### H. HKM arayüzü
 - Ofis ekranı: canlı iş akışı (hangi katta, hangi ofiste), King kuyruğu.
 - Bilgi Deposu tarayıcısı (raporlar, kaynaklar, tazelik, sürümler).
