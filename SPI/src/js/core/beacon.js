@@ -466,7 +466,7 @@ SP.Beacon = (function(){
      2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
-  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce'];
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'plan.apply'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -629,9 +629,14 @@ SP.Beacon = (function(){
      Önceki hâlde bu düğme her durumda ok:false döndüren applyIntent()
      yoluna bağlıydı: görünür bir düğme, basıldığında hata veriyordu.
      Ayrım artık açık — uygulanan bir şey yok, ONAYLANAN bir şey var. */
-  const APPLIABLE = [];
+  /* TEK İSTİSNA: `plan.apply` — Planlama Ofisi'nin haftalık programı.
+     Ölçüm de değil yük de değil: takvimdir. Kullanıcı «Planına ekle»
+     dediğinde program HKM'den çekilir, SPİ'nin KENDİ planıyla sınanır
+     (core/plan.js programSina) ve tutarsa öneri kapısından (orta seviye,
+     geri alınabilir) yazılır. Tutmazsa eklenmez ve sebebi söylenir. */
+  const APPLIABLE = ['plan.apply'];
 
-  function canApply(){ return false; }
+  function canApply(n){ return !!(n && APPLIABLE.indexOf(n.kind) >= 0); }
 
   async function acknowledgeIntent(n){
     if(!n) return { ok:false, error:'Teklif yok.' };
@@ -641,6 +646,7 @@ SP.Beacon = (function(){
   }
 
   async function applyIntent(n){
+    if(canApply(n) && n.kind === 'plan.apply' && SP.Plan) return await SP.Plan.programUygula(n);
     return { ok:false,
       error:'SPİ bir teklifi kendiliğinden uygulamaz: ölçüm de yük de senin '
           + 'kararın. Teklif gösterildi, gerisi sende.' };

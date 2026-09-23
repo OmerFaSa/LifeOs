@@ -1430,6 +1430,13 @@ SP.App = (function(){
         SP.Beacon.intents().then(liste => {
           if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
         }).catch(() => {});
+        /* King'in bildirimleri (core/plan.js) — ayni kural: acilista BIR KEZ,
+           HKM kapaliysa bos gelir ve hicbir sey cizilmez. */
+        if(SP.Plan){
+          SP.Plan.bildirimleriCek().then(l => {
+            if(l && l.length){ S.ui.hkmBildirim = l; render(); }
+          }).catch(() => {});
+        }
         /* Uygulamasi yarida kalmis teklifler: kuyruktan bagimsiz, YEREL
            defterden gelir. HKM kapali olsa da gosterilir — cunku belirsiz
            kalan is bizim tarafimizdadir. */
@@ -1450,6 +1457,11 @@ SP.App = (function(){
           SP.Beacon.intents().then(liste => {
             if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
           }).catch(() => {});
+          if(SP.Plan){
+            SP.Plan.bildirimleriCek().then(l => {
+              if(l){ S.ui.hkmBildirim = l; render(); }
+            }).catch(() => {});
+          }
         });
       }
 

@@ -165,7 +165,7 @@ _rol("bam", "BAM Patronu",
      parent="king", layer="bam")
 for _ofis, _ad, _not in (
         ("arastirma", "Araştırma", "Alt sorular, bulgular, güven düzeyi — kaynaksızsa «doğrulanmadı»."),
-        ("planlama", "Planlama", "Hedef motoruyla birlikte açılacak."),
+        ("planlama", "Planlama", "v1 kuralla çalışır: program, simülasyon, plan denetimi; model gerekmez."),
         ("uretim", "Üretim", "Soru seti, alıştırma, kart — bağımsız çözümle denetlenir."),
         ("kayit", "Kayıt", "Arama ve sınıflandırma; çoğu iş model gerektirmez.")):
     _rol("bam.%s" % _ofis, "BAM · %s" % _ad, _not, parent="bam", layer="bam")

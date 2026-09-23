@@ -10,8 +10,10 @@ sistem degildir (AGENTS.md §1.4).
      Arastirma   alt sorular, bulgular, guven duzeyi. Internete erisim
                  henuz yok: bulgular modelin bilgisidir ve kayit HER
                  ZAMAN «dogrulanmadi» etiketini tasir.
-     Planlama    hedef motoruyla birlikte acilacak (kullaniciyla beraber
-                 tasarlanacak). Simdilik adim «ertelendi» diye kapanir.
+     Planlama    v1 (core/planlama.py): modulun gonderdigi YAPILANDIRILMIS
+                 hedefi (simdilik SPI kilo plani) haftalik programa,
+                 simulasyona ve plan denetimine cevirir. Model kullanmaz.
+                 Serbest cumleden plan kurmaz: o is «ertelendi» diye kapanir.
      Uretim      soru seti, alistirma, kart. Her madde uretildikten sonra
                  IKINCI bir cagriyla denetlenir: coktan secmeli soru cevap
                  anahtari gosterilmeden bastan cozulur, tutmayan duser;
@@ -33,7 +35,7 @@ import datetime
 import json
 import re
 
-from core import ai, intents
+from core import ai, intents, planlama
 
 OFISLER = {
     "kayit": {
@@ -52,9 +54,10 @@ OFISLER = {
                     "Kaynak Doğrulayıcı", "Çelişki Analisti", "Kanıt Analisti",
                     "Araştırma Yazarı"]},
     "planlama": {
-        "ad": "Planlama Ofisi", "patron": "Planlama Patronu", "durum": "ertelendi",
-        "gorev": "Hedefi ölçülebilir bir yol haritasına çevirir. Hedef motoruyla "
-                 "birlikte açılacak.",
+        "ad": "Planlama Ofisi", "patron": "Planlama Patronu", "durum": "hazir",
+        "gorev": "Hedefi haftalık bir yol haritasına çevirir: program, simülasyon ve plan "
+                 "denetimi. v1 kuralla çalışır ve yalnız modülün gönderdiği yapılandırılmış "
+                 "hedefi alır (şimdilik SPİ kilo planı); serbest cümleden plan kurmaz.",
         "ajanlar": ["Hedef Analisti", "Durum Analisti", "Kısıt Analisti",
                     "Bağımlılık Analisti", "Kapasite Analisti", "Program Mimarı",
                     "Simülasyon Uzmanı", "Optimizasyon Uzmanı", "Plan Denetçisi"]},
@@ -135,6 +138,10 @@ def _is_satiri(r):
     d = dict(r)
     d["ofisler"] = json.loads(d["ofisler"] or "[]")
     d["adimlar"] = json.loads(d["adimlar"] or "[]")
+    try:
+        d["govde"] = json.loads(d.get("govde") or "null")
+    except ValueError:
+        d["govde"] = None
     return d
 
 
@@ -149,7 +156,11 @@ def is_listesi(con, limit=30):
         (max(1, min(int(limit), 200)),)).fetchall()]
 
 
-def is_ac(con, talep, kaynak="kullanici", hedef_modul=None, now=None):
+def is_ac(con, talep, kaynak="kullanici", hedef_modul=None, now=None,
+          ofisler=None, govde=None, emir_id=None):
+    """Is acar. `ofisler` verilirse yonlendirme KURALLA degil, King'in
+    is turu katalogundan gelir (core/king.py); `govde` o isin
+    yapilandirilmis girdisidir (durum profili dahil, en az veriyle)."""
     metin = str(talep or "").strip()
     if not metin:
         return {"ok": False, "note": "Talep boş."}
@@ -159,20 +170,32 @@ def is_ac(con, talep, kaynak="kullanici", hedef_modul=None, now=None):
         return {"ok": False, "note": "Bilinmeyen kaynak."}
     if hedef_modul not in (None, "") and hedef_modul not in MODULLER:
         return {"ok": False, "note": "Hedef modül AYS, SPİ ya da ESP olmalı."}
-    y = yonlendir(metin)
-    if not y["ok"]:
-        return {"ok": False, "soru": y["soru"], "note": y["soru"]}
-    acik = con.execute("SELECT id FROM bam_isler WHERE talep=? AND durum IN "
-                       "('bekliyor','beklemede') ORDER BY id DESC LIMIT 1",
-                       (metin,)).fetchone()
-    if acik:
-        return {"ok": True, "id": acik["id"], "yeni": False, "ofisler": y["ofisler"]}
+    if ofisler is not None:
+        if (not ofisler or ofisler[0] != "kayit"
+                or any(o not in OFISLER for o in ofisler)):
+            return {"ok": False, "note": "Ofis dizisi Kayıt ile başlamalı ve tanımlı olmalı."}
+        y = {"ok": True, "ofisler": list(ofisler)}
+    else:
+        y = yonlendir(metin)
+        if not y["ok"]:
+            return {"ok": False, "soru": y["soru"], "note": y["soru"]}
+    # Yapilandirilmis is (govde) talep metniyle degil emriyle tekillesir:
+    # ayni cumleyle iki farkli hedefin plani istenebilir.
+    if emir_id is None:
+        acik = con.execute("SELECT id FROM bam_isler WHERE talep=? AND durum IN "
+                           "('bekliyor','beklemede') AND emir_id IS NULL "
+                           "ORDER BY id DESC LIMIT 1", (metin,)).fetchone()
+        if acik:
+            return {"ok": True, "id": acik["id"], "yeni": False, "ofisler": y["ofisler"]}
     at = _simdi(now)
     adimlar = [{"ofis": o, "durum": "bekliyor"} for o in y["ofisler"]]
     cur = con.execute("INSERT INTO bam_isler(talep,kaynak,hedef_modul,ofisler,adimlar,"
-                      "durum,created_at,updated_at) VALUES (?,?,?,?,?, 'bekliyor',?,?)",
+                      "durum,created_at,updated_at,govde,emir_id) "
+                      "VALUES (?,?,?,?,?, 'bekliyor',?,?,?,?)",
                       (metin, kaynak, hedef_modul or None, json.dumps(y["ofisler"]),
-                       json.dumps(adimlar, ensure_ascii=False), at, at))
+                       json.dumps(adimlar, ensure_ascii=False), at, at,
+                       json.dumps(govde, ensure_ascii=False) if govde else None,
+                       int(emir_id) if emir_id else None))
     return {"ok": True, "id": cur.lastrowid, "yeni": True, "ofisler": y["ofisler"]}
 
 
@@ -291,8 +314,37 @@ def _arastirma_adimi(con, cfg, j, transport, now):
 
 
 def _planlama_adimi(con, cfg, j, transport, now):
-    return {"durum": "ertelendi",
-            "not": "Planlama Ofisi hedef motoruyla birlikte açılacak; bu iş plan üretmedi."}
+    """Planlama Ofisi v1 (core/planlama.py). Yapilandirilmis hedef yoksa
+    plan UYDURULMAZ: serbest bir cumleden program kurmak, kullanicinin
+    kapasitesini, kilosunu ve tarihini tahmin etmek olurdu."""
+    girdi = (j.get("govde") or {}).get("plan")
+    if not girdi:
+        return {"durum": "ertelendi",
+                "not": "Planlama Ofisi v1 yalnız modülün gönderdiği yapılandırılmış hedefle "
+                       "(şimdilik SPİ kilo planı) çalışır; serbest cümleden plan kurmaz."}
+    p = planlama.kur(girdi)
+    if not p["ok"]:
+        return {"durum": "hata", "not": "Plan girdisi geçersiz: " + "; ".join(p["hatalar"])}
+    g = p["girdi"]
+    # PLAN SURUMLERI: ayni hedefin onceki programi varsa bu onun yeni surumudur.
+    etiket = "plan %s %s hedef:%s" % (j.get("hedef_modul") or "", g["paket"], g["hedef_id"])
+    onceki = con.execute("SELECT id FROM bam_kayitlar WHERE tur='plan' AND etiketler=? "
+                         "ORDER BY id DESC LIMIT 1", (etiket,)).fetchone()
+    kalan = [d["not"] for d in p["denetim"] if not d["ok"]]
+    govde = {"girdi": g, "program": p["program"], "simulasyon": p["simulasyon"],
+             "denetim": p["denetim"], "gecti": p["gecti"], "etiket": p["etiket"],
+             "anahtar": p["anahtar"]}
+    baslik = "%d haftalık program — %s %s kg → %s kg" % (
+        g["hafta"], "kilo ver" if g["yon"] == "azalt" else "kilo al",
+        planlama._yaz(g["simdi"]["deger"]), planlama._yaz(g["hedef_deger"]))
+    k = kayit_ekle(con, "plan", baslik, govde, dogruluk="dogrulanmadi", etiketler=etiket,
+                   is_id=j["id"], onceki_id=onceki["id"] if onceki else None, now=now)
+    if not p["gecti"]:
+        return {"durum": "tamam", "kayit_id": k["id"],
+                "not": "Plan denetçisi programı geçirmedi: %s" % "; ".join(kalan)}
+    return {"durum": "tamam", "kayit_id": k["id"],
+            "not": "%d haftalık program kuruldu%s." % (
+                g["hafta"], (" (uyarı: %s)" % "; ".join(kalan)) if kalan else "")}
 
 
 # ------------------------------------------------------------ uretim

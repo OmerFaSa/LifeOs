@@ -249,11 +249,16 @@ SP.Hedefler = (function(){
   function liste(){ return (SP.S.hedefler || []).slice(); }
   function aktifler(){ return liste().filter(h => h.durum === 'aktif' || h.durum === 'askida'); }
 
+  /* Hedef kapanınca (tamam / bırakıldı) uygulanmış planı da kapanır
+     (core/plan.js); bu sessiz değildir, dönen `not` ekranda gösterilir. */
   async function durumDegistir(id, yeni){
     const h = liste().find(x => x.id === id);
     if(!h) return { ok:false, why:'Hedef bulunamadı.' };
     const r = H().gecis(h, yeni, SP.U.todayISO());
     if(r.ok) await kaydet(r.hedef);
+    if(r.ok && (yeni === 'tamam' || yeni === 'birakildi') && SP.Plan){
+      r.not = await SP.Plan.hedefKapandi(id);
+    }
     return r;
   }
 

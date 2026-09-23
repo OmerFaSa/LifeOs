@@ -241,6 +241,67 @@ SP.Proposals = (function(){
       async revert(geri){ await SP.Bolum.set(geri.bolum, geri.acik); },
     },
 
+    /* ---------------------------------------------------- planı uygula
+
+       BÜYÜK aksiyon (AGENTS.md §1.9): beslenme hedefini ve günlük enerji
+       hedefini birlikte değiştirir, haftalar sürecek bir yol kurar.
+       Ayrıntılı önizleme + onay + geri dönüş noktası. MODEL ÖNEREMEZ:
+       katalog tarifinde yoktur ve modelden gelirse düşer. */
+    'plan-uygula':{
+      level:'buyuk',
+      label:'Planı uygula',
+      alanlar:['hedefId'],
+      modelYok:true,
+      check(p){
+        if(!SP.Plan || !SP.Hedefler) return fail('Plan motoru yüklü değil.');
+        const h = SP.Hedefler.liste().find(x => x.id === p.hedefId);
+        if(!h) return fail('Hedef bulunamadı.');
+        if(SP.Plan.aktif(h.id)) return fail('Bu hedefin uygulanmış bir planı var; önce onu geri al.');
+        const r = SP.Plan.kur(h, U.todayISO());
+        if(!r.ok) return fail(r.why);
+        return pass({ plan:r.plan });
+      },
+      preview(p, ctx){ return SP.Plan.onizleme(ctx.plan); },
+      async apply(p, ctx){ return await SP.Plan.uygula(ctx.plan); },
+      async revert(geri){ await SP.Plan.geriAl(geri); },
+    },
+
+    /* ------------------------------------------------ programı ekle
+
+       ORTA aksiyon: Planlama Ofisi'nin (HKM) haftalık programını
+       uygulanmış plana ekler. Program önce SPİ'nin kendi kontrol
+       noktalarıyla sınanır (SP.Plan.programSina); tutmuyorsa eklenmez.
+       Beslenme ya da enerji hedefini DEĞİŞTİRMEZ — yalnız takvimi
+       gösterir. Model öneremez. */
+    'program-ekle':{
+      level:'orta',
+      label:'Haftalık programı ekle',
+      alanlar:['hedefId', 'program'],
+      modelYok:true,
+      check(p){
+        const plan = SP.Plan && SP.Plan.aktif(p.hedefId);
+        if(!plan) return fail('Bu hedefin uygulanmış bir planı yok.');
+        const pr = p.program;
+        if(!pr || !Array.isArray(pr.haftalar) || pr.haftalar.length !== plan.kontrol.length){
+          return fail('Program bu planla tutmuyor.');
+        }
+        return pass({ plan, pr });
+      },
+      preview(p, ctx){
+        return [{ alan:'Haftalık program', once:ctx.plan.program ? 'sürüm ' + ctx.plan.program.surum : 'yok',
+          sonra:ctx.pr.haftalar.length + ' hafta · tartı günü ' + (ctx.pr.tartiGunu || ctx.plan.tartiGunu.ad) }];
+      },
+      async apply(p, ctx){
+        const geri = { planId:ctx.plan.id, program:ctx.plan.program || null };
+        await SP.Plan.kaydet(Object.assign({}, ctx.plan, { program:ctx.pr }));
+        return geri;
+      },
+      async revert(geri){
+        const plan = SP.Plan.liste().find(x => x.id === geri.planId);
+        if(plan) await SP.Plan.kaydet(Object.assign({}, plan, { program:geri.program }));
+      },
+    },
+
     /* ----------------------------------------------- semptom işaretle */
     'semptom-isaretle':{
       level:'kucuk',
@@ -369,6 +430,7 @@ SP.Proposals = (function(){
 
     liste.forEach(x => {
       if(!x || !eylem(x.action)){ dusen.push({ x, why:'Katalog dışı eylem.' }); return; }
+      if(eylem(x.action).modelYok){ dusen.push({ x, why:'Bu eylemi model öneremez.' }); return; }
       const p = { action:x.action,
         params:Object.assign({ date }, x.params || {}),
         kaynak:'model', metin:x.metin || '' };
@@ -382,7 +444,7 @@ SP.Proposals = (function(){
   /* Modele verilecek katalog tarifi. Eylem adları ve alanları
      buradan çıkar — elle yazılmaz, katalog değişirse tarif de değişir. */
   function catalogPrompt(){
-    return Object.keys(KATALOG).map(id => {
+    return Object.keys(KATALOG).filter(id => !KATALOG[id].modelYok).map(id => {
       const e = KATALOG[id];
       return '- ' + id + ' (' + e.label + '): ' + e.alanlar.join(', ');
     }).join('\n');
@@ -428,6 +490,9 @@ SP.Proposals = (function(){
     const anahtar = String((p && p.anahtar) || '').trim().slice(0, 120) || null;
     if(anahtar && anahtarlar().indexOf(anahtar) >= 0) return null;
     const e = eylem(p && p.action);
+    /* Modelin öneremeyeceği eylem (büyük aksiyon) model kaynağıyla hiç
+       kuyruğa girmez — onayı beklerken bile. */
+    if(e && e.modelYok && kaynakOf(p) === 'model') return null;
     const kayit = Object.assign({
       id:U.uid('pr'), at:new Date().toISOString(), status:'pending',
     }, p, {

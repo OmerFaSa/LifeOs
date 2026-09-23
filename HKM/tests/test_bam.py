@@ -113,7 +113,8 @@ def run():
         j = bam.is_getir(con, i["id"])
         eq(j["adimlar"][1]["durum"], "ertelendi")
         eq(j["durum"], "kismen")
-    test("hazir olmayan ofis «yaptim» demez, erteler", t_unready_offices_postpone)
+    test("Planlama serbest cumleden plan kurmaz, «yaptim» demez, erteler",
+         t_unready_offices_postpone)
 
     def t_versions_and_search():
         con = db.connect(":memory:")

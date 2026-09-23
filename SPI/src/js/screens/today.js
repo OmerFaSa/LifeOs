@@ -389,28 +389,104 @@ SP.Screens.today = (function(){
     });
   }
 
-  /* HEDEFLERİM (core/hedefler.js + brand/ortak/hedef.js). Hedef Danışma
-     sohbetinde kurulur; burada görünür, askıya alınır, bırakılır. Karar
-     etiketiyle yazılır: dayanağı bağlanmamış eşiğin kararı «tahmin»dir. */
+  /* HEDEFLERİM (core/hedefler.js + brand/ortak/hedef.js + core/plan.js).
+     Hedef Danışma sohbetinde kurulur; burada görünür, planı kurulur,
+     askıya alınır, bırakılır. Karar etiketiyle yazılır: dayanağı
+     bağlanmamış eşiğin kararı «tahmin»dir.
+
+     PLAN BÜYÜK AKSİYONDUR (AGENTS.md §1.9): önce ayrıntılı önizleme,
+     sonra «Planı uygula» — önizleme onayın kendisidir — ve her zaman
+     «Planı geri al». Önizleme açıkken hiçbir şey yazılmamıştır. */
   const BANT = { gercekci:'gerçekçi', zorlayici:'zorlayıcı',
     gercekci_degil:'bu sürede gerçekçi değil', guvensiz:'güvenli değil' };
+  const KARAR_AD = { onay:'King onayladı', kismi:'King kısmen onayladı', ret:'King reddetti' };
+  const EMIR_DURUM = { onaylandi:'sırada', kismen_onay:'sırada', basladi:'BAM çalışıyor',
+    bekliyor:'bekliyor (model ya da bütçe)', bitti:'bitti', kismen:'kısmen bitti',
+    reddedildi:'reddedildi', iptal:'iptal edildi', hata:'hata verdi' };
+  function kg(x){ return String(Math.round(x * 10) / 10).replace('.', ',') + ' kg'; }
+
+  function durumDugmeleri(h){
+    return html`
+      ${h.durum === 'aktif'
+        ? K.Button({ label:'Askıya al', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'askida' } })
+        : K.Button({ label:'Sürdür', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'aktif' } })}
+      ${K.Button({ label:'Tamamlandı', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'tamam' } })}
+      ${K.Button({ label:'Bırak', size:'sm', tone:'ghost', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'birakildi' } })}`;
+  }
+
+  function planOnizleme(h){
+    const r = SP.Plan.kur(h, U.todayISO());
+    if(!r.ok){
+      return html`<div class="mt-8">${K.Notice({ tone:'warn', title:'Plan kurulamadı.', body:r.why })}
+        <div class="row gap-8 mt-8">${K.Button({ label:'Kapat', size:'sm', act:'hedef-plan-kapat' })}</div></div>`;
+    }
+    const pl = r.plan;
+    const satirlar = SP.Plan.onizleme(pl);
+    const notlar = [].concat(pl.enerjiNeden ? [pl.enerjiNeden] : [], pl.hekim.notlar, pl.uyarilar);
+    return html`<div class="mt-8">
+      <p class="tiny dim"><b>Plan önizlemesi</b> — onaylanana kadar hiçbir şey değişmez.</p>
+      ${K.Table({ tight:true, headers:['', 'Şimdi', 'Plandan sonra'],
+        rows:satirlar.map(x => [x.alan, x.once, x.sonra]) })}
+      ${when(notlar.length, () => html`<div class="stack-sm mt-8">${map(notlar, n =>
+        K.Notice({ tone:'info', body:n }))}</div>`)}
+      <p class="tiny dim mt-8">Enerji ve tempo tahmindir: «1 kg ≈ 7700 kcal» yaygın bir
+        yaklaşımdır, kaynağı henüz bağlanmadı. Plan geri alınabilir; geri alınca beslenme
+        hedefin bugünkü haline döner.</p>
+      <div class="row gap-8 mt-8" style="flex-wrap:wrap">
+        ${K.Button({ label:'Planı uygula', size:'sm', tone:'primary', act:'hedef-plan-uygula',
+          data:{ 'data-id':h.id } })}
+        ${K.Button({ label:'Şimdilik değil', size:'sm', act:'hedef-plan-kapat' })}
+      </div></div>`;
+  }
+
+  function planOzeti(h, pl){
+    const il = SP.Plan.ilerleme(pl, U.todayISO());
+    const hafta = SP.Plan.buHafta(pl, U.todayISO());
+    const e = pl.emir;
+    const bas = 'Plan uygulandı · ' + pl.hafta + ' hafta, haftada ' + String(pl.tempo).replace('.', ',')
+      + ' kg' + (pl.enerji ? ' · ' + Number(pl.enerji.kcal).toLocaleString('tr-TR') + ' kcal (tahmin)' : '')
+      + (pl.protein ? ' · protein ' + pl.protein.min + '–' + pl.protein.max + ' g' : '');
+    return html`<div class="stack-sm mt-8">
+      <p class="small">${bas}</p>
+      ${when(il.sonraki, () => html`<p class="tiny">Sonraki kontrol: <b>${U.fmtDate(il.sonraki.tarih)}</b>
+        (${pl.tartiGunu.ad}, ${pl.tartiGunu.not}) — beklenen ${kg(il.sonraki.beklenen)}</p>`)}
+      ${K.Notice({ tone:il.durum === 'geride' ? 'warn' : 'info', body:il.metin })}
+      ${when(pl.enerjiNeden, () => html`<p class="tiny dim">${pl.enerjiNeden}</p>`)}
+      ${when(pl.hekim.talimatlar.length, () => html`<p class="tiny dim">${pl.hekim.talimatlar.length}
+        hekim talimatına uyuluyor.${pl.hekim.notlar.length ? ' ' + pl.hekim.notlar.join(' ') : ''}</p>`)}
+      ${when(hafta, () => html`<div><p class="tiny"><b>Bu hafta (${hafta.no}. hafta)</b> —
+        Planlama Ofisi programı, sürüm ${pl.program.surum}</p>
+        <ul class="tiny dim" style="margin:4px 0 0 18px">${map(hafta.gorevler, g => html`<li>${g.metin}</li>`)}</ul></div>`)}
+      ${when(e, () => html`<p class="tiny dim">İş emri #${e.id}: ${KARAR_AD[e.karar] || e.karar}${e.durum
+        && EMIR_DURUM[e.durum] ? ' · ' + EMIR_DURUM[e.durum] : ''}${e.tahmin && e.tahmin.metin
+        && e.durum !== 'bitti' ? ' · tahmini süre ' + e.tahmin.metin + ' (tahmin)' : ''}</p>`)}
+      <div class="row gap-8" style="flex-wrap:wrap">
+        ${K.Button({ label:'Planı geri al', size:'sm', act:'hedef-plan-geri', data:{ 'data-id':h.id } })}
+        ${when(!e || e.karar === 'ret', () => K.Button({ label:'King’e ilet', size:'sm',
+          act:'hedef-plan-king', data:{ 'data-id':h.id } }))}
+        ${durumDugmeleri(h)}
+      </div></div>`;
+  }
+
   function hedefSatir(h){
     const g = h.gerceklik || {};
     const H = window.LIFEOS.Hedef;
     const ne = h.hedefDeger != null ? h.hedefDeger + ' kg'
       : h.fark != null ? (h.yon === 'azalt' ? '−' : '+') + h.fark + ' kg' : h.cumle;
+    const pl = SP.Plan ? SP.Plan.aktif(h.id) : null;
+    const onizle = !pl && S.ui.planOnizle === h.id && h.durum === 'aktif';
     return html`<div>
       <div><b class="small">${h.cumle || ne}</b>
         <div class="tiny dim">${h.durum === 'askida' ? 'askıda · ' : ''}${h.son_tarih
           ? 'son tarih ' + H.tarihYaz(h.son_tarih) : 'tarihsiz'}${g.bant ? ' · ' + BANT[g.bant]
           + ' (' + (g.etiket === 'hesaplandi' ? 'hesaplandı' : 'tahmin') + ')' : ''}</div></div>
-      <div class="row gap-8 mt-6" style="flex-wrap:wrap">
-        ${h.durum === 'aktif'
-          ? K.Button({ label:'Askıya al', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'askida' } })
-          : K.Button({ label:'Sürdür', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'aktif' } })}
-        ${K.Button({ label:'Tamamlandı', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'tamam' } })}
-        ${K.Button({ label:'Bırak', size:'sm', tone:'ghost', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'birakildi' } })}
-      </div></div>`;
+      ${pl ? planOzeti(h, pl) : onizle ? planOnizleme(h) : html`
+        <div class="row gap-8 mt-6" style="flex-wrap:wrap">
+          ${when(SP.Plan && h.durum === 'aktif' && h.paket === 'kilo', () => K.Button({ label:'Planı gör',
+            size:'sm', tone:'primary', act:'hedef-plan-onizle', data:{ 'data-id':h.id } }))}
+          ${durumDugmeleri(h)}
+        </div>`}
+    </div>`;
   }
   function hedefEntry(){
     if(!SP.Hedefler) return null;
@@ -423,6 +499,21 @@ SP.Screens.today = (function(){
           istiyorum» ya da «VKİ’mi 24’e indirmek istiyorum» gibi yazabilirsin; gerçekçi olup
           olmadığını ve güvenli temposunu söylerim.</p>`,
     });
+  }
+
+  /* KING BİLDİRİMLERİ (HKM core/king.py). İş emrinin yolu: onaylandı,
+     başladı, bitti, reddedildi… HKM kapalıysa hiç gelmez ve kart çizilmez;
+     «Okundu» bildirimi merkezde silmez, yalnız işaretler. */
+  const BILDIRIM_TON = { reddedildi:'warn', hata:'warn', bekliyor:'warn', kismen_onay:'warn' };
+  function kingBildirimRow(){
+    const l = S.ui.hkmBildirim || [];
+    if(!l.length) return '';
+    return K.Entry({ label:'KİNG BİLDİRİMİ', hint:'hkm', meta:l.length + ' yeni', wide:true,
+      body:html`${map(l.slice(0, 5), b => html`<div class="mt-8">
+        ${K.Notice({ tone:BILDIRIM_TON[b.tur] || 'info', body:b.metin })}
+        <div class="row gap-8 mt-6">${K.Button({ label:'Okundu', size:'sm',
+          act:'king-bildirim-okundu', data:{ 'data-id':String(b.id) } })}</div></div>`)}
+        ${when(l.length > 5, () => html`<p class="tiny dim mt-8">${l.length - 5} bildirim daha — HKM › Ofis’te.</p>`)}` });
   }
 
   function officeEntry(){
@@ -557,8 +648,11 @@ SP.Screens.today = (function(){
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
           <div class="row gap-8 mt-8">
-            ${K.Button({ label:'Gördüm', size:'sm', tone:'primary',
-              act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
+            ${SP.Beacon.canApply(n)
+              ? K.Button({ label:'Planına ekle', size:'sm', tone:'primary',
+                act:'hkm-intent-apply', data:{ 'data-id':String(n.id) } })
+              : K.Button({ label:'Gördüm', size:'sm', tone:'primary',
+                act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
             ${K.Button({ label:'İstemiyorum', size:'sm',
               act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
           </div>
@@ -649,6 +743,7 @@ SP.Screens.today = (function(){
       ${yedekUyarisi()}
       ${bekleyenOneriler()}
       ${when((S.ui.hkmIntents || []).length, () => html`<div class="mb-16">${K.Ledger([hkmTeklifRow()])}</div>`)}
+      ${when((S.ui.hkmBildirim || []).length, () => html`<div class="mb-16">${K.Ledger([kingBildirimRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>
       <div class="mb-8">${tabs()}</div>`;
 
@@ -687,9 +782,10 @@ SP.Screens.today = (function(){
     if(r.ok && action !== 'reject' && action !== 'dismiss') SP.UI.onayMuhru();
     if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
     S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
-    const bas = r.state === 'acknowledged'
-      ? (r.note || 'Görüldü olarak işaretlendi')
-      : 'İstenmedi olarak işaretlendi';
+    const bas = r.state === 'applied' ? (r.note || 'Uygulandı')
+      : r.state === 'acknowledged'
+        ? (r.note || 'Görüldü olarak işaretlendi')
+        : 'İstenmedi olarak işaretlendi';
     UI.toast(r.reported ? bas
       : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.');
     SP.App.render();
@@ -698,8 +794,35 @@ SP.Screens.today = (function(){
   const handle = {
     async 'hedef-durum'(el){
       const r = await SP.Hedefler.durumDegistir(el.dataset.id, el.dataset.durum);
-      UI.toast(r.ok ? 'Hedef güncellendi' : r.why);
+      UI.toast(r.ok ? 'Hedef güncellendi' + (r.not ? '. ' + r.not : '') : r.why);
       SP.App.render();
+    },
+    async 'hedef-plan-onizle'(el){ S.ui.planOnizle = el.dataset.id; SP.App.render(); },
+    async 'hedef-plan-kapat'(){ S.ui.planOnizle = null; SP.App.render(); },
+    async 'hedef-plan-uygula'(el){
+      const r = await SP.Plan.uygulaHedef(el.dataset.id);
+      S.ui.planOnizle = null;
+      if(r.ok) SP.UI.onayMuhru();
+      UI.toast(r.ok ? 'Plan uygulandı. Geri almak istersen «Planı geri al».' : r.why);
+      SP.App.render();
+    },
+    async 'hedef-plan-geri'(el){
+      const r = await SP.Plan.geriAlHedef(el.dataset.id);
+      UI.toast(r.ok ? 'Plan geri alındı; beslenme hedefin plandan önceki haline döndü.'
+        : (r.why || 'Geri alınamadı'));
+      SP.App.render();
+    },
+    async 'hedef-plan-king'(el){
+      const r = await SP.Plan.kingeIlet(el.dataset.id);
+      UI.toast(r.metin);
+      SP.App.render();
+    },
+    async 'king-bildirim-okundu'(el){
+      const id = el.dataset.id;
+      S.ui.hkmBildirim = (S.ui.hkmBildirim || []).filter(b => String(b.id) !== String(id));
+      SP.App.render();
+      const r = await SP.Plan.okundu(id);
+      if(!r.ok) UI.toast('Okundu işareti merkeze bildirilemedi; bildirim HKM’de okunmamış kalır.');
     },
     /* Elle gonderim: kullanicinin ACIKCA istedigi an. Kapaliyken
        zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
@@ -713,6 +836,7 @@ SP.Screens.today = (function(){
     },
 
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'seen'); },
+    async 'hkm-intent-apply'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
 
     async 'signal-answer'(el){

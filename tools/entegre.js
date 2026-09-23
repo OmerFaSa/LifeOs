@@ -322,6 +322,68 @@ async function main(){
         }
       }
 
+      /* 2.8 — HEDEFTEN PLANA (ekip/PLAN.md Tur 2). Yalniz SPI: plan motoru
+         orada. Zincir: SPI plani KENDI koduyla uygular -> King'e is emri ->
+         King imkan kontrolu -> BAM Kayit + Planlama -> program kaydi ->
+         King SPI'ye plan.apply teklifi birakir -> SPI programi HKM'den
+         ceker, KENDI kontrol noktalariyla sinar ve ekler. Her halka
+         bildirim yazar; SPI bildirimleri okur. */
+      if(s.id === 'SPI'){
+        const kur = await page.evaluate(async () => {
+          const bugun = SP.U.todayISO();
+          await SP.Model.saveProfile({ weightKg:84, heightCm:178, birthYear:1996, sex:'male',
+            activity:'moderate', goal:'health', conditions:[] });
+          await SP.Model.saveVitals(bugun, { weight:84 });
+          const H = window.LIFEOS.Hedef;
+          const h = Object.assign(H.yeni({ paket:'kilo', yon:'ulas', egilim:'azalt', hedefDeger:80,
+            birim:'kg', son_tarih:H.gunEkle(bugun, 91), cumle:'3 ay içinde 80 kiloya inmek istiyorum' },
+          'spi', bugun), { durum:'aktif', cevaplar:{ saglik:'yok' } });
+          await SP.Hedefler.kaydet(h);
+          const u = await SP.Plan.uygulaHedef(h.id);
+          const k = await SP.Plan.kingeIlet(h.id);
+          const p = SP.Plan.aktif(h.id);
+          return { hedef:h.id, uyg:u.ok, why:u.why, king:k.ok, karar:k.karar, metin:k.metin,
+            emir:p && p.emir ? p.emir.id : null, hafta:p ? p.hafta : null };
+        });
+        if(!kur.uyg) hatalar.push('SPI: plan uygulanamadi — ' + kur.why);
+        else if(!kur.king || kur.karar !== 'onay') hatalar.push('SPI: King is emrini onaylamadi — ' + kur.metin);
+        else{
+          console.log('  SPI → plan uygulandi, King onayladi (is emri #' + kur.emir + ')');
+          let emir = null;
+          for(let i = 0; i < 6; i++){
+            await hkmFetch('/api/bam/ilerlet', { method:'POST', body:'{}' });
+            emir = (await (await hkmFetch('/api/king/emir/' + kur.emir)).json()).emir;
+            if(emir && emir.durum === 'bitti') break;
+          }
+          if(!emir || emir.durum !== 'bitti'){
+            hatalar.push('SPI: Planlama Ofisi isi bitirmedi (' + (emir && emir.durum) + ')');
+          }else{
+            const son = await page.evaluate(async hedefId => {
+              const bildirim = await SP.Plan.bildirimleriCek();
+              const liste = await SP.Beacon.intents();
+              const n = liste.find(x => x.kind === 'plan.apply' && x.payload.hedef_id === hedefId);
+              if(!n) return { bildirim:(bildirim || []).map(b => b.tur), teklif:false };
+              const r = await SP.Beacon.resolveIntent(n, 'apply');
+              const p = SP.Plan.aktif(hedefId);
+              return { bildirim:(bildirim || []).map(b => b.tur), teklif:true, ok:r.ok,
+                not:r.note || r.error, bildirildi:r.reported,
+                hafta:p && p.program ? p.program.haftalar.length : 0 };
+            }, kur.hedef);
+            if(son.bildirim.indexOf('bitti') < 0 || son.bildirim.indexOf('onaylandi') < 0){
+              hatalar.push('SPI: King bildirimleri gelmedi (' + son.bildirim.join(', ') + ')');
+            }
+            if(!son.teklif) hatalar.push('SPI: plan.apply teklifi kuyruga dusmedi');
+            else if(!son.ok) hatalar.push('SPI: program eklenemedi — ' + son.not);
+            else if(son.hafta !== kur.hafta) hatalar.push('SPI: program hafta sayisi tutmadi');
+            else{
+              if(!son.bildirildi) hatalar.push('SPI: program cevabi merkeze bildirilemedi');
+              console.log('  SPI → Planlama Ofisi ' + son.hafta + ' haftalik programi kurdu, SPI '
+                + 'kendi kontrol noktalariyla sinayip ekledi · bildirimler: ' + son.bildirim.join(' ← '));
+            }
+          }
+        }
+      }
+
       /* 3 — jeton yanlisken 401, ve bu arayuzu bozmaz. */
       const yanlis = await page.evaluate(async ([ns, url]) => {
         const B = window[ns].Beacon;

@@ -68,7 +68,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (ai, bam, butce, channels, cross, db, gelen,  # noqa: E402
                   impact,
-                  intents, kanal, manager, media, memory, models, motto, outbox, patron,
+                  intents, kanal, king, manager, media, memory, models, motto, outbox, patron,
                   profil, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
                   weekly, yoklama)
@@ -649,6 +649,25 @@ class Handler(BaseHTTPRequestHandler):
             if not k:
                 return self._send(404, {"error": "kayit yok"})
             return self._send(200, {"kayit": k, "iz": bam.iz_zinciri(self.con, "kayit", kid)})
+        # ---- King onay zinciri (core/king.py): is emirleri ve bildirimler ----
+        if u.path == "/api/king":
+            return self._send(200, king.ozet(self.con))
+        if u.path.startswith("/api/king/emir/"):
+            try:
+                eid = int(u.path.rsplit("/", 1)[-1])
+            except ValueError:
+                return self._send(400, {"error": "emir kimligi sayi olmali"})
+            e = king.emir(self.con, eid)
+            if not e:
+                return self._send(404, {"error": "is emri yok"})
+            j = bam.is_getir(self.con, e["bam_is_id"]) if e.get("bam_is_id") else None
+            return self._send(200, {"emir": e, "is": j})
+        if u.path.startswith("/api/bildirim/"):
+            mod = u.path.rsplit("/", 1)[-1]
+            if mod not in king.MODULLER:
+                return self._send(404, {"error": "bilinmeyen modul"})
+            return self._send(200, dict(king.bildirimler(
+                self.con, mod, hepsi=(q.get("hepsi") or ["0"])[0] == "1"), modul=mod))
         # Patronlar arasi kanal (core/kanal.py): YALNIZ OKUR.
         if u.path.startswith("/api/kanal/"):
             r = kanal.modul_icin(self.con, u.path.rsplit("/", 1)[-1], date)
@@ -903,7 +922,42 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200 if r.get("ok") else 422, r)
         if u.path == "/api/bam/ilerlet":
             r = bam.ilerlet(self.con, self.server.config)
+            king.esitle(self.con)
             return self._send(200, r or {"ok": False, "note": "Kuyrukta bekleyen iş yok."})
+        # ---- King: is emri (modulden), iptal, bildirim okundu ----
+        #
+        # Modul yalniz KENDI adina is emri yazar; zincirin HKM tarafini
+        # sunucu kurar (core/king.py). Karar kuralladir ve cevapta durur:
+        # 200 + karar=ret, «reddedildi» bir hata degil bir KARARDIR.
+        if u.path == "/api/king/emir":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            if not isinstance(body, dict):
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
+            r = king.emir_ac(self.con, self.server.config, body.get("modul"), body.get("tur"),
+                             body.get("govde"), konu=body.get("konu"), neden=body.get("neden"))
+            return self._send(200 if r.get("ok") else 422, r)
+        if u.path.startswith("/api/king/emir/") and u.path.endswith("/iptal"):
+            parca = u.path.strip("/").split("/")
+            try:
+                eid = int(parca[3])
+            except (ValueError, IndexError):
+                return self._send(400, {"error": "emir kimligi sayi olmali"})
+            r = king.iptal(self.con, eid)
+            return self._send(200 if r.get("ok") else 409, r)
+        if u.path.startswith("/api/bildirim/") and u.path.endswith("/okundu"):
+            parca = u.path.strip("/").split("/")
+            try:
+                bid = int(parca[2])
+            except (ValueError, IndexError):
+                return self._send(400, {"error": "bildirim kimligi sayi olmali"})
+            r = king.okundu(self.con, bid)
+            return self._send(200 if r.get("ok") else 404, r)
         if u.path.startswith("/api/bam/is/") and u.path.rsplit("/", 1)[-1] in ("iptal", "devam"):
             parca = u.path.strip("/").split("/")
             try:
@@ -911,6 +965,7 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, IndexError):
                 return self._send(400, {"error": "is kimligi sayi olmali"})
             r = (bam.iptal if parca[4] == "iptal" else bam.devam)(self.con, iid)
+            king.esitle(self.con)
             return self._send(200 if r.get("ok") else 409, r)
         if u.path.startswith("/api/memory/") and u.path.endswith("/forget"):
             parca = u.path.strip("/").split("/")
@@ -1132,6 +1187,8 @@ def _ritim(srv, aralik=60):
             media.process_next(con, srv.config)
             # BAM: her tikte EN FAZLA bir adim — uzun is sunucuyu kilitlemez.
             bam.ilerlet(con, srv.config)
+            # King: isin durumu emre tasinir, DEGISIM bildirilir.
+            king.esitle(con)
         except Exception as e:                  # noqa: BLE001
             sys.stderr.write("[hkm] ritim hatasi: %s\n" % e)
         srv.dur.wait(aralik)

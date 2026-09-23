@@ -177,6 +177,14 @@ SP.Nutri = (function(){
     const goal = SP.GOALS.find(g => g.id === (p.goal || 'health')) || SP.GOALS[0];
     out.goal = goal;
     out.kcal = Math.round(energy * (1 + goal.deficit));
+    /* Uygulanmış bir plan enerji hedefini kendisi koyar (core/plan.js):
+       tempo kişinin kendi hedefinden gelir, sabit yüzdeden değil. Plan
+       geri alınınca alan silinir ve hedef yeniden kurala döner. */
+    const kh = p.kcalHedef;
+    if(kh && isFinite(Number(kh.kcal)) && Number(kh.kcal) > 0){
+      out.kcal = Math.round(Number(kh.kcal));
+      out.kcalKaynak = 'plan';
+    }
 
     /* protein: g/kg araligi, hedefe gore */
     const pr = SP.MACRO_RULES.protein.byGoal[goal.id] || SP.MACRO_RULES.protein.byGoal.health;

@@ -664,3 +664,40 @@ def run_extra(S):
         eq(S.call("/api/bam/is/%d/iptal" % iid, body={})[0], 409)
         eq(S.call("/api/bam/kayit/999")[0], 404)
     test("BAM uclari yetki ister, belirsiz talebi sorar", t_bam_endpoints)
+
+    def t_king_endpoints():
+        plan = {"paket": "kilo", "yon": "azalt", "hedef_id": "hdX", "baslangic": "2026-09-23",
+                "bitis": "2026-12-23", "hafta": 13, "tempo": 0.31,
+                "simdi": {"deger": 84.0, "etiket": "olculdu"}, "hedef_deger": 80.0,
+                "enerji": None, "protein": None, "kapasite": None,
+                "hekim_kapisi": False, "talimat": 0}
+        govde = {"modul": "spi", "tur": "hedef.plan", "konu": "Kilo planı",
+                 "govde": {"plan": plan}}
+        eq(S.call("/api/king/emir", body=govde, token=None)[0], 401)
+        kod, r = S.call("/api/king/emir", body=dict(govde, tur="uzaktan.komut"))
+        eq(kod, 422)
+        kod, r = S.call("/api/king/emir", body=govde)
+        eq((kod, r["karar"], r["emir"]["durum"]), (200, "onay", "onaylandi"))
+        eid = r["emir"]["id"]
+        kod, g = S.call("/api/king/emir/%d" % eid)
+        eq((kod, g["is"]["ofisler"]), (200, ["kayit", "planlama"]))
+        eq(S.call("/api/king/emir/9999")[0], 404)
+        kod, b = S.call("/api/bildirim/spi")
+        eq((kod, b["okunmamis"]), (200, 1))
+        eq(S.call("/api/bildirim/king")[0], 404)
+        S.call("/api/bam/ilerlet", body={})
+        S.call("/api/bam/ilerlet", body={})
+        kod, k = S.call("/api/king")
+        eq((kod, k["emirler"][0]["durum"]), (200, "bitti"))
+        ok("hedef.plan" in k["turler"])
+        kod, b = S.call("/api/bildirim/spi")
+        eq([x["tur"] for x in b["bildirimler"]], ["bitti", "basladi", "onaylandi"])
+        eq(S.call("/api/bildirim/%d/okundu" % b["bildirimler"][0]["id"], body={})[0], 200)
+        eq(S.call("/api/bildirim/999999/okundu", body={})[0], 404)
+        eq(S.call("/api/bildirim/spi")[1]["okunmamis"], 2)
+        eq(S.call("/api/king/emir/%d/iptal" % eid, body={})[0], 409)
+        kod, n = S.call("/api/intents/spi")
+        ok(any(x["kind"] == "plan.apply" and x["payload"]["hedef_id"] == "hdX"
+               for x in n["intents"]))
+    test("King uclari: emir, bildirim, okundu, iptal — yetkili ve kodlu",
+         t_king_endpoints)

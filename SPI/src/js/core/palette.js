@@ -206,6 +206,8 @@ SP.Palette = (function(){
   const ROTA = {
     'vital-yaz':'today', 'ogun-ekle':'meals', 'seans-ekle':'move',
     'olcum-gir':'labs', 'semptom-isaretle':'today', 'bolum-ac-kapa':'guide',
+    /* Plan ve programı Bugün › Özet › Hedeflerim gösterir. */
+    'plan-uygula':'today', 'program-ekle':'today',
   };
 
   function filtered(){

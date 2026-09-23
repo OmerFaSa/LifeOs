@@ -154,10 +154,13 @@
       expect(typeof r.hata).toBe('string');
     });
 
-    it('katalog tarifi her eylemi sayar', () => {
+    /* Modelin öneremeyeceği (büyük) eylem tarifte YOKTUR: tarifte duran
+       bir eylemi model önerir; önermemesi gerekeni ona göstermemek gerekir. */
+    it('katalog tarifi modelin önerebileceği her eylemi sayar, öneremeyeceğini saymaz', () => {
       const t = SP.Proposals.catalogPrompt();
       SP.Proposals.katalogIdleri().forEach(id => {
-        expect(t.indexOf(id) >= 0).toBeTruthy();
+        const yok = !!SP.Proposals.eylem(id).modelYok;
+        expect(t.indexOf('- ' + id + ' ') >= 0).toBe(!yok);
       });
     });
   });
@@ -497,7 +500,8 @@
     it('her önerinin bir hedef ekranı vardır', () => {
       /* Kullanıcı yazdığını GÖRMELİ: kayıttan sonra bir yere gidilir. */
       const rota = { 'vital-yaz':'today', 'ogun-ekle':'meals', 'seans-ekle':'move',
-        'olcum-gir':'labs', 'semptom-isaretle':'today', 'bolum-ac-kapa':'guide' };
+        'olcum-gir':'labs', 'semptom-isaretle':'today', 'bolum-ac-kapa':'guide',
+        'plan-uygula':'today', 'program-ekle':'today' };
       SP.Proposals.katalogIdleri().forEach(id => {
         expect(typeof rota[id]).toBe('string');
         expect(Boolean(SP.Screens[rota[id]])).toBeTruthy();

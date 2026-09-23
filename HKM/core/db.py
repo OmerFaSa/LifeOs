@@ -206,6 +206,44 @@ CREATE TABLE IF NOT EXISTS bam_iz (
   UNIQUE(kaynak_tur, kaynak_id, hedef_tur, hedef_id)
 );
 
+/* KING ONAY ZINCIRI (core/king.py). Modulun is emri King'e gelir;
+   King imkan kontrolunu yapar, onaylarsa isi BAM'da acar. `iz` katlarin
+   zinciridir ve SUNUCUDA kurulur. `govde` yalniz dogrulanmis alanlari
+   tasir: modulun fazladan gonderdigi hicbir sey ambara girmez. */
+CREATE TABLE IF NOT EXISTS is_emirleri (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  modul       TEXT NOT NULL,                      -- ays|spi|esp
+  tur         TEXT NOT NULL,                      -- hedef.plan ...
+  konu        TEXT NOT NULL,
+  neden       TEXT NOT NULL DEFAULT '',
+  govde       TEXT NOT NULL DEFAULT '{}',         -- JSON
+  anahtar     TEXT,                               -- ayni is tekrar acilmaz
+  iz          TEXT NOT NULL DEFAULT '[]',         -- JSON: kat zinciri
+  karar       TEXT NOT NULL,                      -- onay|kismi|ret
+  kontrol     TEXT NOT NULL DEFAULT '[]',         -- JSON: imkan maddeleri
+  tahmin      TEXT,                               -- JSON: {sn, etiket, dayanak}
+  durum       TEXT NOT NULL,                      -- core/king.py DURUMLAR
+  bam_is_id   INTEGER,
+  sonuc       TEXT,                               -- JSON: kayit_id, gercek_sn
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_is_emirleri_durum ON is_emirleri(durum, id);
+CREATE INDEX IF NOT EXISTS ix_is_emirleri_anahtar ON is_emirleri(anahtar);
+
+/* Bildirim kuyrugu: onaylandi, basladi, bekliyor, bitti, reddedildi...
+   Modul acilista sorar. «Okundu» bildirimi SILMEZ. */
+CREATE TABLE IF NOT EXISTS bildirimler (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  modul       TEXT NOT NULL,
+  emir_id     INTEGER,
+  tur         TEXT NOT NULL,
+  metin       TEXT NOT NULL,
+  created_at  TEXT NOT NULL,
+  okundu_at   TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_bildirimler_modul ON bildirimler(modul, okundu_at, id);
+
 /* Kullanim defteri — PARANIN kaydi.
 
    Bir model cagrisinin maliyeti ancak KAYDEDILIRSE bilinir. Fatura ay
@@ -353,6 +391,10 @@ MIGRATIONS = [
     ("memories", "katman", "TEXT"),
     ("memories", "modul", "TEXT"),
     ("memories", "dis_id", "TEXT"),
+    # BAM'a durum profiliyle is (King'in is emri): yapilandirilmis govde
+    # ve isi acan emrin kimligi. Serbest cumleyle acilan islerde bostur.
+    ("bam_isler", "govde", "TEXT"),
+    ("bam_isler", "emir_id", "INTEGER"),
 ]
 
 
@@ -578,7 +620,8 @@ def decision(con, decision_id):
 # «yedek aldim» diyen kullanicinin islem durumu eksik kaliyordu.
 BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
                  "conversations", "attachments", "memories", "intents", "outbox", "usage",
-                 "inbox_seen", "bam_isler", "bam_kayitlar", "bam_iz")
+                 "inbox_seen", "bam_isler", "bam_kayitlar", "bam_iz",
+                 "is_emirleri", "bildirimler")
 BACKUP_SCHEMA = 4
 
 

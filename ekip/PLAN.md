@@ -237,14 +237,43 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
 Her tur genel motordan bir katmanı bitirir ve en az bir alan paketiyle uçtan
 uca çalıştırır.
 
-| Tur | Kazanılan | İlk paketler |
+| Tur | Kazanılan | İlk paketler | Durum |
+|---|---|---|---|
+| **1** | hedef çerçevesi, tanıma ve netleştirme, gerçekçilik çerçevesi, senaryolar, durum profili, hekim talimatı ve güvenlik kapısı, «Hedeflerim» | SPİ: kilo ver / al, VKİ | **bitti** |
+| **2** | King onay zinciri, tahmini süre, bildirim, BAM'a durum profiliyle iş, Planlama Ofisi v1, `plan.apply` | SPİ | **bitti** — ayrıntı §4.1 |
+| **3** | kapasiteye göre senaryolar, seviye merdivenleri, ESP'de plan ve materyal içe alma | ESP: enstrüman, dil, okuma | |
+| **4** | sınav profilleri, bölümlü test kitabı, müfredat raporu | AYS | |
+| **5** | Bilgi Deposu tazeliği, değişiklik araştırması (web kararına bağlı), uyarlama döngüsü, zaman bütçesi (onaylanırsa) | hepsi | |
+| **6** | değerlendirme seti, cilalama, üyelik hazırlığı | — | |
+
+### 4.1 Tur 2 — ne kuruldu, ne bilerek bekliyor
+
+**Kuruldu**
+
+| Parça | Yer | Söz |
 |---|---|---|
-| **1** | hedef çerçevesi, tanıma ve netleştirme, gerçekçilik çerçevesi, senaryolar, durum profili, hekim talimatı ve güvenlik kapısı, «Hedeflerim» | SPİ: kilo ver / al, VKİ |
-| **2** | King onay zinciri, tahmini süre, bildirim, BAM'a durum profiliyle iş, Planlama Ofisi v1, `plan.apply` | SPİ |
-| **3** | kapasiteye göre senaryolar, seviye merdivenleri, ESP'de plan ve materyal içe alma | ESP: enstrüman, dil, okuma |
-| **4** | sınav profilleri, bölümlü test kitabı, müfredat raporu | AYS |
-| **5** | Bilgi Deposu tazeliği, değişiklik araştırması (web kararına bağlı), uyarlama döngüsü, zaman bütçesi (onaylanırsa) | hepsi |
-| **6** | değerlendirme seti, cilalama, üyelik hazırlığı | — |
+| SPİ plan motoru | `SPI/src/js/core/plan.js` | tempo tarihten, enerji tempodan; bazal metabolizma tabanı; hekim kapısında enerji yazılmaz; talimat çelişkisi aranır |
+| `plan-uygula` | `SPI/src/js/core/proposals.js` | büyük aksiyon: önizleme + onay + geri dönüş noktası; model öneremez |
+| Hedeflerim | `SPI/src/js/screens/today.js` | önizleme, uygula, özet (sonraki kontrol, ilerleme, hekim), geri al, King'e ilet |
+| King onay zinciri | `HKM/core/king.py` | iş emri, zinciri sunucu kurar, imkân kontrolü (ofis, model, bütçe, güvenlik, depo, kuyruk), onay / kısmi / ret |
+| Tahmini süre | `HKM/core/king.py` | geçmiş işlerin ortancası ya da adım × ritim; «tahmin» + dayanak; gerçek süre ve sapma ölçülür |
+| Bildirim kuyruğu | `HKM/core/king.py`, `bildirimler` tablosu | durum değişimi başına bir bildirim; SPİ Bugün'de gösterir |
+| Planlama Ofisi v1 | `HKM/core/planlama.py` | program (dönem → hafta → görev), simülasyon, plan denetimi; sürümlü kayıt |
+| `plan.apply` | `HKM/core/intents.py`, `SPI/src/js/core/beacon.js` | SPİ programı çeker, kendi kontrol noktalarıyla sınar, onayla ekler (`program-ekle`, geri alınabilir) |
+| Zincir testi | `tools/entegre.js` §2.8 | SPİ → King → BAM → teklif → SPİ, gerçek tarayıcı ve gerçek HKM |
+
+**Bilerek bekliyor** (kullanıcı kararı ya da sonraki tur)
+
+- Tahmini **maliyet** (§3.F, «Öneri»): Planlama v1 model kullanmıyor; maliyet
+  ilk model isteyen iş türüyle anlamlı olur.
+- Zaman bütçesi (§3.A, «Öneri») ve iş önceliği: Tur 5.
+- Hedeften **Araştırma** işi (kaynaklı beslenme/hareket raporu): web kararına
+  bağlı (§7.2).
+- Hekim talimatının yapılandırılması: v1 yalnız **protein** kısıtını ve
+  **enerji**den söz eden talimatı kodla tanır; «tuz sınırlı» gibi öteki
+  talimatlar plana «uyulacak talimat» olarak yazılır ama beslenme hedefine
+  henüz kodla uygulanmaz.
+- ESP ve AYS'de plan: Tur 3 ve 4.
 
 ## 5. İş bölümü — şimdilik tek Opus; ek Opus gelirse bu sahiplik tablosu
 

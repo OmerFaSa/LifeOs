@@ -715,10 +715,43 @@ kalite raporunu taşır (üretilen / geçen / düşen ve nedeni). Hedef AYS ise
 geçen maddeler `material.add` teklifi olur: AYS kaydı çeker, **kendi koduyla**
 yeniden doğrular ve kart olarak ekler; aynı set iki kez eklenmez.
 
-Planlama Ofisi **hedef motoruyla birlikte** açılacak. İş kuyruğu ritimde her tikte **en fazla bir adım**
+**Planlama Ofisi v1** (`core/planlama.py`) kuralla çalışır, model kullanmaz.
+Yalnız modülün gönderdiği **yapılandırılmış** hedefi alır (şimdilik SPİ kilo
+planı); serbest bir cümleden plan kurmaz, o iş «ertelendi» diye kapanır.
+Üç şey üretir: **program** (dönem → hafta → görev: tartı günü, enerji ve
+protein — SPİ'nin kendi sayıları, yeniden hesaplanmaz —, kullanıcının verdiği
+vakit, dört haftada bir değerlendirme), **simülasyon** (plan temposu, dörtte
+üçü, yarısı; hepsi «tahmin») ve **plan denetimi** (kilonun %1,5 güvenlik
+sınırı, bazal metabolizma tabanı, hekim kapısında enerji yazılmaması). Kritik
+bir madde geçmezse program teklif edilmez. Aynı hedefin yeni programı eski
+kaydın **yeni sürümüdür**. Kişisel veri en az: hekim talimatının metni
+gelmez, yalnız sayısı; tanımsız alan ambara girmez.
+
+İş kuyruğu ritimde her tikte **en fazla bir adım**
 ilerler. Model rolleri `bam`, `bam.arastirma`… King'den miras alır.
 Belge denetimi (`ai.ask(..., denetim="belge")`) dünya hakkındaki sayılara
 izin verir; belge kullanıcının ölçümü gibi sunulmaz. Yüz: **Ofis** sekmesi.
+
+## 8.21 King onay zinciri — `core/king.py` (Hedef motoru, Tur 2)
+
+Modül bir iş için King'e **iş emri** verir (`POST /api/king/emir`). Zincir
+katları atlamaz: modül koçu → modül Patronu → HKM alt patronu → King → BAM
+Patronu → ofisler. Modül yalnız kendi adına yazar; zincirin HKM tarafını
+**sunucu kurar** — istemcinin gönderdiği bir zincir saklanmaz.
+
+| Adım | Ne olur |
+|---|---|
+| Tür kataloğu | `hedef.plan` (yalnız SPİ). Katalog dışı tür reddedilir; King serbest bir komut kanalı değildir |
+| İmkân kontrolü | ofis hazır mı · model gerekiyorsa atanmış mı · bütçe · güvenlik (plan denetçisinin kritik maddeleri) · depo · kuyruk. Karar **onay / kısmi / ret**, her maddenin notuyla |
+| Önce depo | Aynı girdiyle bitmiş iş yeniden kurulmaz; kayıt yeniden teklif edilir |
+| Tahmini süre | En az üç benzer geçmiş işin ortancası, yoksa adım × ritim. Her zaman «tahmin» ve dayanağıyla; iş bitince gerçek süre yazılır, sapma ölçülür |
+| Bildirim | `bildirimler` tablosu: onaylandı · başladı · bekliyor · bitti · reddedildi · iptal · hata. Bildirim **durum değişimidir**; aynı durum iki kez yazılmaz. `GET /api/bildirim/<modül>`, `POST /api/bildirim/<id>/okundu` (okundu silmez) |
+| Cevap | İş bitince King modüle `plan.apply` teklifi bırakır (`core/intents.py`). Modül programı `GET /api/bam/kayit/<id>` ile çeker, **kendi kontrol noktalarıyla sınar** ve kullanıcı onaylarsa ekler |
+
+King **uygulamaz, onaylar**: onay işin BAM'da açılmasıdır, hiçbir modülde
+hiçbir şey değişmez. HKM kapalıyken modülün planı çalışır; iş emri açılmaz ve
+bu söylenir. Yüz: **Ofis › King kuyruğu** (karar, imkân maddeleri, yol, tahmini
+ve gerçek süre, iptal).
 
 ## 9. Fazlar
 

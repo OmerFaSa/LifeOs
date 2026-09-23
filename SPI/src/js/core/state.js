@@ -39,6 +39,7 @@ SP.S = {
   meds:[],            // ilac ve takviye kayitlari, en yeni ustte
   hedefler:[],        // hedef motoru kayitlari (core/hedefler.js)
   hekim:[],           // hekim talimatlari — en yuksek oncelikli kisit
+  planlar:[],         // hedeflerin planlari (core/plan.js) — uygulanan, geri alinan
   proposals:[],       // ofisin onerileri — onaysiz hicbiri uygulanmaz
   foods:[],           // kullanicinin ekledigi gidalar (SP.FOODS'a katilir)
   progress:{},        // exId -> { levelId, achievedAt }
@@ -73,6 +74,8 @@ SP.S = {
        kaynagi HKM'dir ve tek gercek orada olmali. */
     hkmIntents:[],
     hkmDoubts:[],
+    hkmBildirim:[],        // King'in bildirimleri (HKM core/king.py) — yalniz bellekte
+    planOnizle:null,       // Hedeflerim'de onizlemesi acik hedefin kimligi
     railOpen:false,
     undo:null,             // son yikici islemin geri alma kaydi
     dayTab:'giris',        // giris | ozet | gecmis
@@ -862,6 +865,7 @@ SP.Model = (function(){
     if(SP.Bolum) await SP.Bolum.yukle();
     /* Hedefler ve hekim talimatlari (core/hedefler.js). */
     if(SP.Hedefler) await SP.Hedefler.yukle();
+    if(SP.Plan) await SP.Plan.yukle();
     /* Hafiza: senin sozun, sohbetten, cikarim — core/hafiza.js (ortak). */
     if(window.LIFEOS && LIFEOS.Hafiza){
       SP.Hafizam = SP.Hafizam || LIFEOS.Hafiza.kur({ store:() => SP.Store, durum:() => SP.S,

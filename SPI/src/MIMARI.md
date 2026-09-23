@@ -125,6 +125,33 @@ hedefin yüzde kaçını taşıdığı (%35, ana öğün varsayımı) gizli bir 
 değildir, ekranda yazar. Porsiyon protein hedefinin altında kalıyorsa yan
 gıda önerilir.
 
+**Hedef planı** (`SP.Plan`, Hedef motoru Tur 2). Danışma'da kurulan aktif
+bir kilo hedefi Bugün › Özet › Hedeflerim'de **plana** çevrilir. Plan koddur:
+tempo hedefin tarihinden gelir, günlük enerji hedefi günlük ihtiyaçtan tempo
+× 7700 ÷ 7 düşülerek (ya da eklenerek) kurulur ve **bazal metabolizmanın
+altına inmez** — taban bağlarsa tempo yavaşlar ve bu yazılır. 7700 kcal/kg
+yaygın bir yaklaşımdır, kaynağı bağlanmadı: enerji ve tempo «tahmin»dir.
+Tartı günü planın başladığı gündür; kontrol noktaları haftalıktır ve
+başlangıç günündeki tartı **taban** sayılır, ilerleme değil.
+
+Hekim kapısında (riskli durum, etkin ilaç, gebelik) enerji ve beslenme hedefi
+**yazılmaz**; plan yalnız tartıyı ve kontrol noktalarını kurar. Hekim talimatı
+proteini kısıtlıyorsa protein bandı yükseltilmez; enerjiden söz ediyorsa
+enerji kısmı üretilmez. Talimatın metni yorumlanmaz, yalnız çelişki aranır.
+
+Uygulama **büyük aksiyondur** (`plan-uygula`, AGENTS.md §1.9): ayrıntılı
+önizleme (şimdi → plandan sonra), onay ve geri dönüş noktası. Model bu eylemi
+öneremez. Geri alma yalnız planın yazdığını geri alır; kullanıcı arada
+beslenme hedefini kendisi değiştirdiyse ezilmez. Hedef kapanınca plan da
+kapanır ve bu söylenir. Uygulanmış plan `SP.Nutri.targets()`'ın enerji
+hedefini koyar (`profile.kcalHedef`).
+
+Plan istenirse **King'e iletilir** (HKM `core/king.py`): giden yalnız planın
+özetidir, hekim talimatının metni gitmez. King onaylarsa BAM Planlama Ofisi
+haftalık programı kurar ve `plan.apply` teklifi döner; SPİ programı kendi
+kontrol noktalarıyla sınar, tutmuyorsa eklemez. King'in bildirimleri Bugün'de
+görünür. HKM kapalıyken plan olduğu gibi çalışır.
+
 ### Modül 3 — Hareketlilik, yük yönetimi ve toparlanma
 
 Tek dogma: **günün yükünü istek değil toparlanma belirler.**
@@ -376,6 +403,8 @@ src/
       state.js          SP.S durumu ve SP.Model veri modeli
       bio.js            Modül 1 kural motoru
       nutri.js          Modül 2 kural motoru
+      hedefler.js       hedef motorunun SPİ paketi: kilo / VKİ, güvenlik, hekim kapısı
+      plan.js           hedeften plan: enerji, protein, tartı günü, kontrol noktaları
       move.js           Modül 3 kural motoru
       money.js          Modül 4 kural motoru
       calc.js           orkestratör: sıradaki hamle, çapraz çıkarım

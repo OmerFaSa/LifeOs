@@ -66,6 +66,15 @@ KINDS = {
         "optional": ("baslik", "why"),
         "note": "BAM'ın ürettiği ve denetlediği materyali kart olarak ekleme teklifi.",
     },
+    # Planlama Ofisi'nin haftalik programi (core/planlama.py) — King'in
+    # onayladigi bir is emrinin sonucu. Modul kaydi HKM'den ceker, KENDI
+    # plan motoruyla karsilastirir ve kullanici onaylarsa planina ekler.
+    "plan.apply": {
+        "modules": ("spi",),
+        "required": ("kayit_id", "hedef_id"),
+        "optional": ("hafta", "baslik", "why"),
+        "note": "Planlama Ofisi'nin kurduğu haftalık programı hedefin planına ekleme teklifi.",
+    },
     "measure.ask": {
         "modules": ("spi",),
         "required": ("date", "metric"),
@@ -84,6 +93,7 @@ FIELD_RULES = {
     "focus": ("str", 1, 40), "subject": ("str", 1, 40), "topic": ("str", 1, 80),
     "disc": ("str", 1, 24), "metric": ("str", 1, 40), "why": ("str", 1, 200),
     "kayit_id": ("int", 1, 10 ** 9), "adet": ("int", 1, 50), "baslik": ("str", 1, 120),
+    "hedef_id": ("str", 1, 40), "hafta": ("int", 1, 104),
 }
 
 
@@ -166,6 +176,10 @@ def _cumle(module, kind, payload):
     if kind == "material.add":
         return ("%s: BAM'ın hazırladığı «%s» setinden kalite kontrolünü geçen %s madde "
                 "kart olarak eklensin mi?" % (ad, p.get("baslik") or "materyal", p.get("adet")))
+    if kind == "plan.apply":
+        return ("%s: Planlama Ofisi «%s» için %s haftalık programı hazırladı; "
+                "planına eklensin mi?" % (ad, p.get("baslik") or "hedefin",
+                                          p.get("hafta") or "bir"))
     if kind == "measure.ask":
         return "%s: %s günü için «%s» ölçümünü girmeyi unutma." % (
             ad, gun, p.get("metric"))
