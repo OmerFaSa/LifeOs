@@ -9,10 +9,17 @@
         cevap anahtari SONDA.
      4. Gorsel urunun yerlesimi kodundur ve SVG'ye basilir.
      5. HKM'den istenen urun modul teklifine donusmez; modulden istenen
-        `urun.add` olur. Kaynakli istekte Arastirma ofisi araya girer."""
+        `urun.add` olur. Kaynakli istekte Arastirma ofisi araya girer.
+     6. Editor (KOD) bosluk, tekrar madde ve doz cumlesini duzeltir; Kalite
+        Kontrol (KOD) uzunluk, atif orani ve kaynakta gecmeyen sayiyi olcer
+        ve belge bunu soyler.
+     7. Arastirma istenmese de depoda guncel arastirma varsa urun ona
+        dayanir; her masanin ajani iz birakir.
+     8. King sohbeti urun istegini emre cevirir; «özet» tek kelimesi ve
+        «rapor ver» brifing olarak kalir."""
 import json
 
-from core import bam, cikti, db, intents, king, urunler
+from core import bam, cikti, db, editor, intents, king, sohbet, urunler
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
 from tests.test_kaynakli import _Ag, _Model
@@ -174,3 +181,78 @@ def run():
         eq([x["kind"] for x in n], ["urun.add"])
         eq(n[0]["payload"]["urun"], "ozet")
     test("kaynakli istek: Arastirma araya girer; urun dogrulanmis bulguya dayanir", t_kaynakli_zincir)
+
+    def t_editor():
+        g = {"tur": "urun", "aile": "belge", "baslik": "D vitamini", "bolumler": [
+            {"baslik": "Giriş", "bloklar": [
+                {"t": "p", "metin": "D vitamini  güneşle üretilir [1] . Günde 1000 IU alınmalıdır. "
+                                    "Kemik için önemlidir,kalsiyum emilimini artırır."},
+                {"t": "liste", "maddeler": ["Balık yağı", "balık yağı", "Yumurta 1453'ten beri"]}]}],
+            "kaynaklar": [{"n": 1, "baslik": "K", "url": "https://k.org"}]}
+        y, say = editor.duzenle(g)
+        bl = y["bolumler"][0]["bloklar"]
+        eq(bl[0]["metin"], "D vitamini güneşle üretilir [1]. Kemik için önemlidir, kalsiyum "
+                           "emilimini artırır.")
+        eq(bl[1]["maddeler"], ["Balık yağı", "Yumurta 1453'ten beri"])
+        eq((say["doz"], say["tekrar_dusen"]), (1, 1))
+        eq(y["kaynaklar"], g["kaynaklar"], "kaynak listesine dokunulmaz")
+        eq(editor.duzenle({"x": "Radyasyon dozu ölçülür."})[1]["doz"], 0, "fizikte doz serbest")
+        eq(editor.duzenle({"x": "Radyasyon dozu ölçülür."}, spi=True)[1]["doz"], 1)
+        k = editor.olc(y, {"uzunluk": "kisa"}, g["kaynaklar"], "güneşle üretilir", say)
+        eq((k["uyum"], k["kaynaksiz_sayilar"], k["etiket"]), (False, ["1453"], "hesaplandi"))
+        ok(any("1453" in n for n in k["notlar"]) and any("doz" in n for n in k["notlar"]))
+        h = cikti.html_belge(cikti.belge({"id": 5, "tur": "materyal", "baslik": "x",
+                                          "dogruluk": "dogrulanmadi",
+                                          "govde": dict(y, kalite=k)}))
+        ok("<h2>Kalite kontrolü</h2>" in h and "1453" in h)
+    test("editor duzeltir, kalite olcer; belge kalite notunu tasir", t_editor)
+
+    def t_depodaki_bilgi():
+        con = db.connect(":memory:")
+        cfg = _cfg()
+        cfg["web"] = {"acik": True}
+        m = _UrunModel()
+        eski = bam.web_tasiyici
+        bam.web_tasiyici = _Ag()
+        try:
+            king.emir_ac(con, cfg, "hkm", "bam.arastirma",
+                         {"arastirma": {"konu": "Su içmenin yararları"}}, now=AN)
+            _tik(con, cfg, m, 5)
+            e = king.emir_ac(con, cfg, "hkm", "bam.urun",
+                             {"urun": {"tur": "pankart", "konu": "Su içmenin yararları"}},
+                             now=AN)["emir"]
+            eq(bam.is_getir(con, e["bam_is_id"])["ofisler"], ["kayit", "uretim"])
+            _tik(con, cfg, m, 2)
+        finally:
+            bam.web_tasiyici = eski
+        son = king.emir(con, e["id"])
+        eq(son["durum"], "bitti")
+        j = bam.is_getir(con, e["bam_is_id"])
+        eq(j["adimlar"][0]["depo"]["karar"], "bilgi")
+        k = bam.kayit_getir(con, son["sonuc"]["kayit_id"])
+        eq((k["dogruluk"], k["govde"]["dayanak"]), ("kaynakli", j["adimlar"][0]["depo"]["kayit_id"]))
+        ok("ARAŞTIRMA BULGULARI" in m.icerikler[-1])
+        eq([x["ajan"] for x in j["adimlar"][1]["iz"]],
+           ["Üretim Mimarı", "Görsel Üretim Uzmanı", "Editör", "Kalite Kontrol Uzmanı"])
+        ok(k["govde"]["kalite"]["etiket"] == "hesaplandi")
+    test("depodaki guncel arastirma uretime bilgi olur; masalar iz birakir", t_depodaki_bilgi)
+
+    def t_sohbet_urun():
+        con = db.connect(":memory:")
+        r = sohbet.konus(con, _cfg(), "Osmanlı kuruluşu hakkında pankart hazırla", "2026-09-23",
+                         gorevli="king", transport=_UrunModel(), kayit=False)
+        eq((r["mode"], r["command"]), ("emir", "urun"))
+        ok("Üretim Bürosu" in r["text"] and "iş emri #" in r["text"], r["text"])
+        e = king.emirler(con)[0]
+        eq((e["tur"], e["govde"]["urun"]["tur"], e["govde"]["urun"]["konu"]),
+           ("bam.urun", "pankart", "Osmanlı kuruluşu"))
+        ok("Hangi konuda" in sohbet.konus(con, _cfg(), "pankart hazırla", "2026-09-23",
+                                          gorevli="king", transport=_UrunModel(),
+                                          kayit=False)["text"])
+        for brifing in ("özet", "rapor ver", "bugünün özetini çıkar"):
+            eq(sohbet.urun_istegi(brifing), None, brifing)
+        u = sohbet.urun_istegi("internetten araştırarak yapay zekâ etiği raporu yaz")
+        eq((u["tur"], u["konu"], u["kaynakli"]), ("rapor", "yapay zekâ etiği", True))
+        eq(len(king.emirler(con)), 1)
+    test("King sohbeti urun istegini emre cevirir; brifing kelimeleri urun degildir",
+         t_sohbet_urun)

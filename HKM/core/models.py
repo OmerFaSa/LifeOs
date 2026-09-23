@@ -164,10 +164,10 @@ _rol("bam", "BAM Patronu",
      "Talebi ofislere yönlendirir; sonucu modüle teklif olarak bırakır.",
      parent="king", layer="bam")
 for _ofis, _ad, _not in (
-        ("arastirma", "Araştırma", "Alt sorular, bulgular, güven düzeyi — kaynaksızsa «doğrulanmadı»."),
+        ("arastirma", "Araştırma", "Web'de kaynaklı araştırma; alıntı kodla doğrulanır."),
         ("planlama", "Planlama", "Hedef Analisti konuyu birimlere böler; program, simülasyon ve denetim koddur."),
-        ("uretim", "Üretim", "Soru seti, alıştırma, kart — bağımsız çözümle denetlenir."),
-        ("kayit", "Kayıt", "Arama ve sınıflandırma; çoğu iş model gerektirmez.")):
+        ("uretim", "Üretim", "Özet, rapor, sunum, görsel, soru seti — editör ve kalite kodla."),
+        ("kayit", "Depolama", "Depo, güncellik denetimi, sürüm; model gerektirmez.")):
     _rol("bam.%s" % _ofis, "BAM · %s" % _ad, _not, parent="bam", layer="bam")
 
 for _mod, _ad in MODULLER.items():

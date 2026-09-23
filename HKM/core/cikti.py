@@ -178,7 +178,8 @@ def belge(k):
                                         "plan": "Plan"}.get(k.get("tur"), "Kayıt"),
          "dogruluk": k.get("dogruluk") or "dogrulanmadi", "tarih": str(k.get("created_at") or "")[:10],
          "kimlik": k.get("id"), "bolumler": [], "kaynaklar": g.get("kaynaklar") or [],
-         "gorsel": None, "slaytlar": None, "kavramlar": g.get("anahtar_kavramlar") or []}
+         "gorsel": None, "slaytlar": None, "kavramlar": g.get("anahtar_kavramlar") or [],
+         "kalite": list((g.get("kalite") or {}).get("notlar") or [])}
     if g.get("tur") == "mufredat":
         b["tur_ad"] = "Müfredat raporu"
     if g.get("tur") == "urun":
@@ -465,6 +466,9 @@ def html_belge(b):
         govde.append("<section><h2>Anahtar kavramlar</h2><ul>%s</ul></section>" % "".join(
             "<li><b>%s</b>: %s</li>" % (_e(k["terim"]), _satir_ici(k["tanim"], n_ler))
             for k in b["kavramlar"]))
+    if b.get("kalite"):
+        govde.append('<section><h2>Kalite kontrolü</h2><ul>%s</ul></section>' % "".join(
+            "<li>%s</li>" % _e(x) for x in b["kalite"]))
     if b["kaynaklar"]:
         govde.append('<section><h2>Kaynaklar</h2><ol class="kaynak">%s</ol></section>' % "".join(
             '<li id="k%d"><a href="%s" rel="noopener noreferrer" target="_blank">%s</a> — %s '

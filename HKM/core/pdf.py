@@ -604,6 +604,10 @@ def diz(b, normal, kalin):
         _bolum_basligi(d, "Anahtar kavramlar")
         for k in b["kavramlar"]:
             d.paragraf("%s: %s" % (k["terim"], k["tanim"]), 10.5, sonra=3)
+    if b.get("kalite"):
+        _bolum_basligi(d, "Kalite kontrolü")
+        for x in b["kalite"]:
+            d.paragraf("• " + x, 9.5, sonra=3)
     _kaynaklar(d, b)
     if len(d.sayfalar) > 1 and not d.sayfalar[-1].ops:
         d.sayfalar.pop()

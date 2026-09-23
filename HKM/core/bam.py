@@ -38,7 +38,8 @@ import datetime
 import json
 import re
 
-from core import ai, depo, intents, kaynakli, kitap, mufredat, planlama, program, urunler, web
+from core import (ai, depo, editor, intents, kaynakli, kitap, mufredat, planlama, program,
+                  urunler, web)
 
 OFISLER = {
     "kayit": {
@@ -73,8 +74,11 @@ OFISLER = {
                     "Simülasyon Uzmanı", "Optimizasyon Uzmanı", "Plan Denetçisi"]},
     "uretim": {
         "ad": "Üretim Bürosu", "patron": "Üretim Patronu", "durum": "hazir",
-        "gorev": "Soru seti, alıştırma ve tekrar kartı üretir. Her madde ikinci bir "
-                 "çözümle denetlenir; tutmayan madde düşer, geçenler teklif olur.",
+        "gorev": "Katalogdaki ürünü (özet, rapor, ders notu, sunum, pankart, zihin haritası, "
+                 "zaman çizelgesi, soru seti, test kitabı…) üretir. Konunun doğrulanmış "
+                 "araştırması (bu işten ya da depodan) varsa ürün ona dayanır. Editör "
+                 "düzeltir, Kalite Kontrol uzunluğu, atıfı ve kaynakta geçmeyen sayıyı ölçer; "
+                 "soru her zaman bağımsız çözümle denetlenir.",
         "ajanlar": ["Üretim Mimarı", "Metin Uzmanı", "Eğitim Materyali Uzmanı",
                     "Görsel Üretim Uzmanı", "Belge ve Rapor Uzmanı",
                     "Veri ve Tablo Uzmanı", "Teknik Üretim Uzmanı", "Editör",
@@ -307,9 +311,26 @@ def _kayit_adimi(con, cfg, j, transport, now):
     izler = [depo.iz("arama", "%d benzer kayıt bulundu." % len(bulunan) if bulunan
                      else "Benzer kayıt yok.")]
     if "arastirma" not in j["ofisler"]:
-        return {"durum": "tamam", "bulunan": bulunan, "iz": izler,
-                "not": ("%d önceki kayıt bulundu; işe bunlarla başlanır." % len(bulunan))
-                if bulunan else "Bu konuda önceki kayıt yok."}
+        sonuc = {"durum": "tamam", "bulunan": bulunan, "iz": izler,
+                 "not": ("%d önceki kayıt bulundu; işe bunlarla başlanır." % len(bulunan))
+                 if bulunan else "Bu konuda önceki kayıt yok."}
+        g = j.get("govde") or {}
+        if (g.get("urun") or g.get("program")) and depo.eslesen(
+                con, depo.konu_anahtari(arastirma_konusu(j))):
+            # Arastirma istenmedi ama depoda bu konunun arastirmasi var:
+            # guncelse uretim ona dayanir («bilgiler esliginde»).
+            d = depo.karar(con, cfg, depo.konu_anahtari(arastirma_konusu(j)), now=now,
+                           tasiyici=web_tasiyici)
+            sonuc["iz"] = izler + d["iz"][1:-1]
+            if d["karar"] == "guncel":
+                sonuc["depo"] = {"karar": "bilgi", "kayit_id": d["kayit_id"]}
+                sonuc["iz"].append(depo.iz("surum", "Araştırma #%d Üretim’e bilgi olarak "
+                                                    "verildi." % d["kayit_id"]))
+                sonuc["not"] = "Depodaki araştırma #%d bu işe bilgi olarak verildi." % d["kayit_id"]
+            else:
+                sonuc["iz"].append(depo.iz("surum", "Depodaki araştırma kullanılmadı: %s"
+                                           % d["not"]))
+        return sonuc
     d = depo.karar(con, cfg, depo.konu_anahtari(arastirma_konusu(j)), now=now,
                    tasiyici=web_tasiyici)
     sonuc = {"durum": "tamam", "bulunan": bulunan, "iz": izler + d["iz"], "not": d["not"],
@@ -744,8 +765,7 @@ def _program_adimi(con, cfg, j, g, transport, now):
     if hata:
         return {"durum": "hata", "not": "Program kurulmadı: " + hata}
     bugun = datetime.date.fromisoformat(_simdi(now)[:10])
-    ar = next((x.get("kayit_id") for x in j["adimlar"] if x["ofis"] == "arastirma"), None)
-    govde = program.kur(g, birimler, notlar, bugun, dayanak=ar)
+    govde = program.kur(g, birimler, notlar, bugun, dayanak=_dayanak_id(j))
     if kaynaklar:
         govde["kaynaklar"] = kaynaklar
     k_ = govde["kapasite"]
@@ -1009,13 +1029,24 @@ def _kitap_adimi(con, cfg, j, g, transport, now):
                 (" Sorusu kalmayan bölüm: %s." % ", ".join(bos)) if bos else "")}
 
 
+def _dayanak_id(j):
+    """Isin dayandigi arastirma kaydi: ayni isin Arastirma adimi ya da
+    Depolama'nin «bilgi» olarak verdigi guncel kayit."""
+    a = next((x.get("kayit_id") for x in j["adimlar"]
+              if x["ofis"] == "arastirma" and x.get("kayit_id")), None)
+    if a:
+        return a
+    d = _depo_karari(j)
+    return d.get("kayit_id") if d.get("karar") == "bilgi" else None
+
+
 def _arastirma_bulgulari(con, j):
-    """Ayni isin Arastirma adimi kaydindan YALNIZ dogrulanmis bulgular ve
+    """Isin dayandigi arastirma kaydindan YALNIZ dogrulanmis bulgular ve
     onlarin kaynaklari. Doner: (blok, kaynaklar, arastirma_etiketi)."""
-    a = next((x for x in j["adimlar"] if x["ofis"] == "arastirma" and x.get("kayit_id")), None)
-    if not a:
+    kid = _dayanak_id(j)
+    if not kid:
         return "", [], None
-    k = kayit_getir(con, a["kayit_id"]) or {}
+    k = kayit_getir(con, kid) or {}
     g = k.get("govde") or {}
     satir = ["- %s %s" % (b["iddia"], "".join("[%d]" % n for n in b["dogrulayan"]))
              for b in g.get("bulgular") or [] if b.get("dogrulandi") and b.get("dogrulayan")]
@@ -1028,28 +1059,52 @@ def _arastirma_bulgulari(con, j):
     return blok, kaynaklar, k.get("dogruluk")
 
 
+URETIM_UZMANI = {"ozet": "Belge ve Rapor Uzmanı", "rapor": "Belge ve Rapor Uzmanı",
+                 "ders_notu": "Eğitim Materyali Uzmanı", "calisma_kagidi": "Eğitim Materyali Uzmanı",
+                 "sss": "Eğitim Materyali Uzmanı", "sozluk": "Veri ve Tablo Uzmanı",
+                 "karsilastirma": "Veri ve Tablo Uzmanı", "sunum": "Belge ve Rapor Uzmanı",
+                 "pankart": "Görsel Üretim Uzmanı", "zihin_haritasi": "Görsel Üretim Uzmanı",
+                 "zaman_cizelgesi": "Görsel Üretim Uzmanı"}
+
+
 def _urun_adimi(con, cfg, j, g, transport, now):
-    """Katalogdaki urun (core/urunler.py). Model metni yazar; kod suzer.
-    Arastirmadan dogrulanmis bulgu geldiyse urun onlara dayanir ve
-    kaynak listesini tasir; gelmediyse «dogrulanmadi»dir."""
+    """Katalogdaki urun (core/urunler.py). Model metni yazar; kod suzer,
+    Editor duzeltir, Kalite Kontrol olcer (core/editor.py). Arastirmadan
+    ya da depodan dogrulanmis bulgu geldiyse urun onlara dayanir ve kaynak
+    listesini tasir; gelmediyse «dogrulanmadi»dir."""
+    adim = next(a for a in j["adimlar"] if a["ofis"] == "uretim")
+    u = urunler.URUNLER[g["tur"]]
     blok, kaynaklar, ar_etiket = _arastirma_bulgulari(con, j)
+    dayanak = _dayanak_id(j)
+    izler = _iz(adim, depo.iz("Üretim Mimarı", "%s (%s ailesi, %s); %s." % (
+        u["ad"], u["aile"], g["uzunluk"],
+        ("araştırma #%d, %d kaynak" % (dayanak, len(kaynaklar))) if kaynaklar else
+        "doğrulanmış bulgu yok, model bilgisiyle")))
     r = _cagri(con, cfg, "uretim", urunler.sistem(g), urunler.istem(g, blok), transport)
     if not r.get("ok"):
         return _model_hatasi(r)
     govde, neden = urunler.ayikla(g["tur"], _json_ayikla(r["text"]), kaynaklar)
     if neden:
         return {"durum": "hata", "not": "Ürün yazılmadı: " + neden}
+    izler.append(depo.iz(URETIM_UZMANI.get(g["tur"], "Metin Uzmanı"), "Taslağı yazdı: «%s»."
+                         % govde["baslik"][:80]))
+    govde, say = editor.duzenle(govde, spi=j.get("hedef_modul") == "spi")
+    izler.append(depo.iz("Editör", "%d düzeltme, %d tekrar madde, %d doz cümlesi çıkarıldı." % (
+        say["duzeltilen"], say["tekrar_dusen"], say["doz"])))
+    kalite = editor.olc(govde, g, kaynaklar, blok, say)
+    izler.append(depo.iz("Kalite Kontrol Uzmanı", "; ".join(kalite["notlar"]) or
+                         "%d kelime; sorun bulunmadı." % kalite["kelime"]))
     etiket = "dogrulanmadi"
     if kaynaklar and ar_etiket in ("kaynakli", "celiskili"):
         etiket = ar_etiket
     govde["istek"] = {"konu": g["konu"], "uzunluk": g["uzunluk"], "kaynakli": g["kaynakli"]}
-    ar = next((x.get("kayit_id") for x in j["adimlar"] if x["ofis"] == "arastirma"), None)
-    if ar:
-        govde["dayanak"] = ar                 # Depolama Burosu guncelligi bununla izler
+    govde["kalite"] = kalite
+    if dayanak:
+        govde["dayanak"] = dayanak            # Depolama Burosu guncelligi bununla izler
     k = kayit_ekle(con, "materyal", govde["baslik"], govde, dogruluk=etiket,
                    etiketler=j["talep"][:300], is_id=j["id"], now=now)
-    return {"durum": "tamam", "kayit_id": k["id"],
-            "not": "%s hazır — %s%s." % (urunler.URUNLER[g["tur"]]["ad"],
+    return {"durum": "tamam", "kayit_id": k["id"], "iz": izler,
+            "not": "%s hazır — %s%s." % (u["ad"],
                                         {"kaynakli": "kaynaklı", "celiskili": "çelişkili",
                                          "dogrulanmadi": "doğrulanmadı"}[etiket],
                                         (", %d kaynak" % len(kaynaklar)) if kaynaklar else "")}

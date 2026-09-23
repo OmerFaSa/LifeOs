@@ -190,6 +190,13 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
   sohbeti «X için N haftalık plan yap, haftada M saat» cümlesini emre çevirir.
 
 ### E. Üretim Ofisi — genişleme
+- **Kuruldu (Tur 5d — Üretim Bürosu masaları, `HKM/core/editor.py`):** Üretim
+  Mimarı (katalog, aile, dayanak) → ürün uzmanı (model) → **Editör** (kod:
+  boşluk/noktalama, tekrar madde, ilaç dozu cümlesi) → **Kalite Kontrol** (kod:
+  uzunluk, atıf oranı, kaynakta geçmeyen sayı; belgeye «Kalite kontrolü» notu).
+  Araştırma istenmese de depoda güncel araştırma varsa ürün ona dayanır. King
+  sohbeti «X hakkında pankart hazırla» cümlesini emre çevirir; «özet» tek
+  kelimesi brifing olarak kalır.
 - Mevcut türler: soru seti, alıştırma, kart.
 - Yeni türler:
   - bölümlü **test kitabı** (zorluk dağılımlı)

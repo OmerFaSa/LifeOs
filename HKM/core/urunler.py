@@ -122,6 +122,7 @@ def _bosluk(s):
 
 
 DOLGU = re.compile(r"(?:^|\s)(hazırla\w*|oluştur\w*|çıkar\w*|yap(?:ar mısın|abilir misin|sana|)|"
+                   r"yaz\w*|çiz\w*|tasarla\w*|üret\w*|m[ıi]s[ıi]n|konu(?:su)?:?|"
                    r"istiyorum|ister misin|lütfen|bana|bir|pdf(?:'?(?:i|ini|le|olarak))?|olarak|"
                    r"hakkında|ile ilgili|için|konusunda|kaynaklı|internetten|araştırarak|"
                    r"kısa|uzun|detaylı|ayrıntılı)(?=\s|$|[.,!?:;])", re.I)
@@ -142,11 +143,15 @@ def tani(metin):
     if not tur:
         return None
     i = k.find(kelime)
-    ham = (metin[:i] + " " + metin[i + len(kelime):])
+    son = i + len(kelime)
+    while son < len(k) and (k[son].isalpha() or k[son] == "'"):
+        son += 1                    # «raporu», «özetini»: ek de kelimeyle gider
+    ham = (metin[:i] + " " + metin[son:])
     ham = re.sub(r"[«»\"“”]", " ", ham)
     ham = re.sub(r"^\s*[\w ]{0,20}?:\s*", "", ham) if ":" in ham[:25] else ham
     konu = _bosluk(DOLGU.sub(" ", ham)).strip(" .,!?:;-")
     konu = re.sub(r"(?i)^(?:(?:ın|in|un|ün|nın|nin|nun|nün|ı|i|u|ü|sı|si|su|sü)\s+)", "", konu)
+    konu = re.sub(r"['’](?:n?[ıiuü]n)$", "", konu)      # «Savaşı'nın özeti» -> Savaşı
     uzunluk = "kisa" if re.search(r"\bkısa\b", k) else "uzun" if re.search(
         r"\b(uzun|detaylı|ayrıntılı)\b", k) else "orta"
     return {"tur": tur, "konu": konu, "uzunluk": uzunluk,

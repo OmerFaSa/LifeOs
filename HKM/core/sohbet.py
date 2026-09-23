@@ -26,7 +26,7 @@
 import re
 
 from core import (ai, butce, cross, dil, manager, memory, models, motto, patron, program,
-                  streak)
+                  streak, urunler)
 
 # Kademeler: kullanici kiminle konusuyor.
 GOREVLILER = {
@@ -225,6 +225,52 @@ def plani_devret(con, cfg, metin, istek, now=None):
                             else ""))
 
 
+# Urun istegi: katalog kelimesi (ozet, pankart, sunum…) TEK BASINA yetmez —
+# «özet» tek kelimesi gunun brifingidir (core/patron.py). Uretim fiili ya
+# da «ürün: konu» bicimi gerekir; zaman sozcugu konu sayilmaz.
+URUN_FIIL = re.compile(r"(hazırla|oluştur|çıkar|üret|yaz\b|yazar mısın|yap\b|yapar mısın|"
+                       r"istiyorum|lazım|tasarla|çiz)", re.I)
+ZAMAN_KONU = ("bugün", "bugünün", "günün", "dünün", "yarının", "haftanın", "bu haftanın",
+              "ayın", "bu ayın", "sabahın", "akşamın")
+
+
+def urun_istegi(metin):
+    """Doner: None ya da {tur, konu, uzunluk, kaynakli} (konu "" olabilir)."""
+    m = str(metin or "").strip()
+    if not m or m.startswith("/"):
+        return None
+    u = urunler.tani(m)
+    if not u:
+        return None
+    bicim = re.match(r"^\s*[\wçğıöşüÇĞİÖŞÜ ]{2,25}:\s*\S", m)
+    if not (URUN_FIIL.search(m) or bicim):
+        return None
+    if u["konu"].lower() in ZAMAN_KONU:
+        return None
+    u["kaynakli"] = bool(u.get("kaynakli") or ARASTIR_TETIK.search(m))
+    return u
+
+
+def urunu_devret(con, cfg, metin, u, now=None):
+    from core import king
+    ad = urunler.URUNLER[u["tur"]]["ad"]
+    if len(u["konu"]) < 3:
+        return "Hangi konuda %s hazırlayayım? Konuyu bir cümleyle yaz." % ad.lower()
+    g = {"tur": u["tur"], "konu": u["konu"][:200], "uzunluk": u["uzunluk"]}
+    if u["kaynakli"]:
+        g["kaynakli"] = True
+    r = king.emir_ac(con, cfg, "hkm", "bam.urun", {"urun": g},
+                     neden="Sohbetten: " + metin[:300], now=now)
+    if not r.get("ok"):
+        return "Ürün emri açılamadı: %s" % "; ".join(r.get("errors") or ["bilinmeyen hata"])
+    kaynakli = (r["emir"].get("govde") or {}).get("urun", {}).get("kaynakli")
+    return _emir_cevabi(con, r, ad + ": «%s» işini Üretim Bürosu’na verdim",
+                        "Önce Depolama Bürosu depoya bakacak%s; yazıyı model yazar, biçimi, "
+                        "düzeltmeyi ve kalite ölçümünü kod yapar." % (
+                            ", sonra Araştırma Bürosu web’de kaynak arayacak" if kaynakli
+                            else "; bu konuda güncel araştırma varsa üretim ona dayanır"))
+
+
 def arastirmayi_devret(con, cfg, metin, konu, now=None):
     """King'in cevabi: is emri acilir; cumleyi kod kurar."""
     from core import king          # king -> bam -> ... ; dongusel ice aktarimi onler
@@ -281,6 +327,13 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             patron.log(con, kanal, "user", metin, agent=gorevli)
             patron.log(con, kanal, "manager", govde, agent=gorevli)
         return {"ok": True, "mode": "emir", "command": "plan", "text": govde, "agent": gorevli}
+    u = urun_istegi(metin) if gorevli == "king" else None
+    if u is not None:
+        govde = urunu_devret(con, cfg, metin, u)
+        if kayit:
+            patron.log(con, kanal, "user", metin, agent=gorevli)
+            patron.log(con, kanal, "manager", govde, agent=gorevli)
+        return {"ok": True, "mode": "emir", "command": "urun", "text": govde, "agent": gorevli}
     konu = arastirma_konusu(metin) if gorevli == "king" else None
     if konu is not None:
         govde = arastirmayi_devret(con, cfg, metin, konu)
