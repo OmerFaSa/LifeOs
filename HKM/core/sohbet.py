@@ -23,7 +23,7 @@
       «Yapay zeka yok» ile «sistem bozuk» ayri seylerdir.
 """
 
-from core import ai, butce, cross, dil, manager, memory, models, patron, streak
+from core import ai, butce, cross, dil, manager, memory, models, motto, patron, streak
 
 # Kademeler: kullanici kiminle konusuyor.
 GOREVLILER = {
@@ -117,6 +117,13 @@ def baglam(con, date, gorevli="king", th=None):
     if b.get("decision"):
         satir.append("- Bugünün önerisi «%s» ve durumu: %s"
                      % (b["decision"]["proposal"], b["decision"]["state"]))
+    if gorevli == "king":
+        # Hayat Mottosu: YALNIZ one cikarilan kayitlar (core/motto.py).
+        hm = motto.king_baglami(con)
+        if hm:
+            satir.append("Kullanıcının kendi ilkeleri (senin sözün; dikkate al, "
+                         "değiştirme, kırmızı çizgiyi çiğneyen öneri yapma):")
+            satir.append(hm)
     return "\n".join(satir)
 
 

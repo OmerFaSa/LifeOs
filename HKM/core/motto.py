@@ -63,7 +63,13 @@ import re
 # Bir dugumun turu. `motto` ve `ilke` normal dusunceden ayrilir ve ana
 # ekranda ayrica gosterilir; ayrim kullanicinindir, sistem bir dusunceyi
 # kendiliginden ilkeye yukseltmez.
-TURLER = ("dusunce", "motto", "ilke")
+TURLER = ("dusunce", "motto", "ilke", "kirmizi_cizgi", "fikir")
+# kirmizi_cizgi — «asla»: kullanicinin gecmeyecegi sinir («uykumdan calmam»).
+# fikir         — sonra dusunulecek bir kivilcim; ilke degildir.
+# King yalniz ONE CIKARILAN turleri gorur (king_baglami); siradan dusunce
+# ve fikir karti hicbir modele gitmez.
+ONE_CIKAN = ("kirmizi_cizgi", "ilke", "motto")
+TUR_ADI = {"kirmizi_cizgi": "kırmızı çizgi", "ilke": "temel ilke", "motto": "motto"}
 
 # Kullanicinin yazdigi ile uretilenin ayrildigi tek yer.
 YAZARLAR = ("ben", "uretilen")
@@ -431,11 +437,33 @@ def agac(con, user="ben", archived=False):
 
 
 def ilkeler(con, user="ben"):
-    """Motto ve temel ilkeler — ana ekranda ayrica gosterilenler."""
+    """Kirmizi cizgiler, temel ilkeler ve mottolar — ana ekranda ayrica
+    gosterilenler. Sira: once kirmizi cizgi (asla), sonra ilke, sonra motto."""
     return [dict(r) for r in con.execute(
         "SELECT id,title,body,kind,updated_at FROM motto_nodes "
-        "WHERE user=? AND archived_at IS NULL AND kind IN ('motto','ilke') "
-        "ORDER BY kind, updated_at DESC", (user,)).fetchall()]
+        "WHERE user=? AND archived_at IS NULL AND kind IN ('kirmizi_cizgi','ilke','motto') "
+        "ORDER BY CASE kind WHEN 'kirmizi_cizgi' THEN 0 WHEN 'ilke' THEN 1 ELSE 2 END, "
+        "updated_at DESC", (user,)).fetchall()]
+
+
+def fikirler(con, user="ben"):
+    """Fikir kartlari — sonra dusunulecek kivilcimlar, yeniden eskiye."""
+    return [dict(r) for r in con.execute(
+        "SELECT id,title,body,updated_at FROM motto_nodes WHERE user=? AND "
+        "archived_at IS NULL AND kind='fikir' ORDER BY updated_at DESC, id DESC",
+        (user,)).fetchall()]
+
+
+def king_baglami(con, user="ben", limit=10):
+    """King'in sohbet baglamina giren satirlar. YALNIZ kullanicinin one
+    cikardigi kayitlar gider ve her biri «senin sozun» diye etiketlenir:
+    King onlari dikkate alir, degistirmez, cignemez. Siradan dusunce ve
+    fikir karti modele GITMEZ — bu alanin mahremiyeti buna baglidir."""
+    satir = []
+    for r in ilkeler(con, user)[:limit]:
+        govde = (" — " + r["body"].strip()[:200]) if (r["body"] or "").strip() else ""
+        satir.append("- (%s) %s%s" % (TUR_ADI.get(r["kind"], r["kind"]), r["title"], govde))
+    return "\n".join(satir)
 
 
 def harita(con, user="ben"):

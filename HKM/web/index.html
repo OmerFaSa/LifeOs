@@ -2951,6 +2951,8 @@ details.detay > summary:hover{ color:var(--fg); }
     if(k$.scrollIntoView) k$.scrollIntoView({ block:'nearest' });
   }
 
+  var OFIS_ACILACAK = null;       // Hayat Mottosu'ndan acilmak istenen kayit
+
   async function yukleOfis(t){
     var o = await api('/api/bam');
     if(o.status !== 200){
@@ -2963,6 +2965,7 @@ details.detay > summary:hover{ color:var(--fg); }
     ofisBamCiz(o.body);
     var b = await api('/api/briefing?date=' + t);
     ofisKatlarCiz(b.status === 200 ? b.body : null);
+    if(OFIS_ACILACAK){ var ac = OFIS_ACILACAK; OFIS_ACILACAK = null; ofisKayitAc(ac); }
   }
 
   document.addEventListener('click', async function(ev){
@@ -3038,6 +3041,8 @@ details.detay > summary:hover{ color:var(--fg); }
   }
 
   function mottoRozet(tur){
+    if(tur === 'kirmizi_cizgi') return '<span class="etiket danger">KIRMIZI ÇİZGİ</span>';
+    if(tur === 'fikir') return '<span class="etiket">FİKİR</span>';
     if(tur === 'ilke') return '<span class="etiket">TEMEL İLKE</span>';
     if(tur === 'motto') return '<span class="etiket">MOTTO</span>';
     return '';
@@ -3052,6 +3057,7 @@ details.detay > summary:hover{ color:var(--fg); }
     }
     MOTTO.agac = r.body.tree || [];
     MOTTO.ilkeler = r.body.principles || [];
+    MOTTO.fikirler = r.body.ideas || [];
     mottoIlkelerCiz();
     mottoAgacCiz();
     if(MOTTO.sekme === 'harita') mottoHaritaCiz();
@@ -3061,13 +3067,21 @@ details.detay > summary:hover{ color:var(--fg); }
      hatirlamak istedigi cumleleri, yuz dusuncenin arasinda aratmak
      onlari hatirlanmaz kilardi. */
   function mottoIlkelerCiz(){
+    var fikir = (MOTTO.fikirler || []).length
+      ? '<details class="detay" style="margin-top:10px"><summary>Fikir kartların ('
+        + MOTTO.fikirler.length + ')</summary>' + MOTTO.fikirler.map(function(x){
+          return '<div class="satir" data-motto-ac="' + esc(x.id) + '">' + mottoRozet('fikir')
+            + ' <b>' + esc(x.title) + '</b></div>'; }).join('') + '</details>' : '';
+    var king = '<p class="muted tiny" style="margin-top:8px">Kırmızı çizgilerini, ilkelerini '
+      + 've mottolarını <span lang="en">King</span> sohbette dikkate alır. Öteki '
+      + 'düşüncelerin ve fikir kartların hiçbir modele gitmez.</p>';
     if(!MOTTO.ilkeler.length){
-      $('motto-ilkeler').innerHTML = '<p class="muted">Henüz motto ya da '
-        + 'temel ilke işaretlemedin. Bir düşünceyi açıp türünü '
-        + '«motto» ya da «temel ilke» yapabilirsin.</p>';
+      $('motto-ilkeler').innerHTML = '<p class="muted">Henüz motto, temel ilke ya da '
+        + 'kırmızı çizgi işaretlemedin. Bir düşünceyi açıp türünü değiştirebilirsin.</p>'
+        + fikir + king;
       return;
     }
-    var h = '<h3>Mottoların ve ilkelerin</h3>';
+    var h = '<h3>Kırmızı çizgilerin, ilkelerin ve mottoların</h3>';
     MOTTO.ilkeler.forEach(function(x){
       h += '<div class="satir" data-motto-ac="' + esc(x.id) + '">'
         + mottoRozet(x.kind) + ' <b>' + esc(x.title) + '</b>'
@@ -3157,7 +3171,7 @@ details.detay > summary:hover{ color:var(--fg); }
     });
     n.forEach(function(d){
       var p = yer[d.id];
-      var buyuk = d.kind === 'ilke' || d.kind === 'motto';
+      var buyuk = d.kind === 'ilke' || d.kind === 'motto' || d.kind === 'kirmizi_cizgi';
       s += '<g class="motto-node" data-motto-ac="' + esc(d.id) + '" role="button" '
         + 'tabindex="0" aria-label="' + esc(d.title) + '">'
         + '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + (buyuk ? 7 : 4.5) + '" '
@@ -3233,6 +3247,9 @@ details.detay > summary:hover{ color:var(--fg); }
       + '<option value="dusunce"' + (d.kind === 'dusunce' ? ' selected' : '') + '>düşünce</option>'
       + '<option value="motto"' + (d.kind === 'motto' ? ' selected' : '') + '>motto</option>'
       + '<option value="ilke"' + (d.kind === 'ilke' ? ' selected' : '') + '>temel ilke</option>'
+      + '<option value="kirmizi_cizgi"' + (d.kind === 'kirmizi_cizgi' ? ' selected' : '')
+      + '>kırmızı çizgi</option>'
+      + '<option value="fikir"' + (d.kind === 'fikir' ? ' selected' : '') + '>fikir kartı</option>'
       + '</select>'
       + '<button data-motto-kaydet="' + esc(d.id) + '">Kaydet</button></div>';
 
@@ -3266,6 +3283,21 @@ details.detay > summary:hover{ color:var(--fg); }
       h += '</details>';
     }
 
+    /* BAM: bu dusunceden is. Uretilen AYRI durur ve «senin düşüncen değil»
+       diye SÖYLENİR (core/bam.py mottodan_is). */
+    h += '<div style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px">'
+      + '<div class="row" style="justify-content:space-between">'
+      + '<span class="tiny muted">BAM’ın bu düşünceden ürettikleri — senin düşüncen değil</span>'
+      + '<button data-motto-bam="' + esc(d.id) + '">BAM’a araştırt</button></div>'
+      + ((d.bam && d.bam.length) ? d.bam.map(function(j){
+        return '<div class="satir"><span class="muted tiny">iş #' + esc(j.is_id) + ' · '
+          + esc(IS_DURUM[j.durum] || j.durum) + '</span>' + j.kayitlar.map(function(k){
+            return ' <a href="#" data-motto-bam-kayit="' + esc(k.id) + '">' + esc(k.baslik)
+              + '</a> <span class="warn tiny">' + esc(DOGRULUK_AD[k.dogruluk] || k.dogruluk)
+              + '</span>'; }).join('') + '</div>'; }).join('')
+        : '<p class="muted tiny">Henüz yok.</p>')
+      + '</div>';
+
     h += '<div class="row" style="margin-top:12px">'
       + '<input id="motto-alt" type="text" style="flex:1" '
       + 'aria-label="Alt düşünce başlığı" placeholder="altına yeni düşünce…"/>'
@@ -3293,8 +3325,21 @@ details.detay > summary:hover{ color:var(--fg); }
     var el = ev.target.closest ? ev.target.closest('[data-motto-ac],'
       + '[data-motto-kapat],[data-motto-kaydet],[data-motto-bagla],'
       + '[data-motto-alt],[data-motto-arsiv],[data-motto-onay],'
+      + '[data-motto-bam],[data-motto-bam-kayit],'
       + '#motto-ekle,#motto-ara-btn,#motto-sekmeler button') : null;
     if(!el) return;
+    if(el.dataset && el.dataset.mottoBam){
+      var br = await api('/api/motto/node/' + el.dataset.mottoBam + '/bam',
+        { method:'POST', body:JSON.stringify({ istek:'arastir' }) });
+      if(br.status !== 200) alert((br.body && br.body.note) || 'İş açılamadı.');
+      return mottoAc(el.dataset.mottoBam);
+    }
+    if(el.dataset && el.dataset.mottoBamKayit){
+      ev.preventDefault();
+      OFIS_ACILACAK = el.dataset.mottoBamKayit;
+      location.hash = '#/ofis';
+      return;
+    }
     if(el.dataset && el.dataset.mottoAc != null){
       ev.preventDefault(); return mottoAc(el.dataset.mottoAc);
     }

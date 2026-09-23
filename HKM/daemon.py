@@ -672,6 +672,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {
                 "tree": motto.agac(self.con),
                 "principles": motto.ilkeler(self.con),
+                "ideas": motto.fikirler(self.con),
                 "tags": motto.etiketler(self.con),
                 "summary": motto.ozet(self.con)})
         if u.path == "/api/motto/map":
@@ -689,6 +690,9 @@ class Handler(BaseHTTPRequestHandler):
             d = motto.dugum(self.con, nid)
             if not d:
                 return self._send(404, {"error": "dusunce bulunamadi"})
+            # BAM'in bu dusunceden urettikleri AYRI alanda: kullanicinin
+            # sozu ile uretilen hicbir yerde karismaz.
+            d["bam"] = bam.mottonun_isleri(self.con, nid)
             return self._send(200, d)
         if u.path.startswith("/api/intents/"):
             mod = u.path.rsplit("/", 1)[-1]
@@ -814,6 +818,18 @@ class Handler(BaseHTTPRequestHandler):
         # Butun yazmalar KULLANICININDIR (`author='ben'`). Uretilen bir
         # metin bu uclardan GIREMEZ: onun tek yolu `oner`dir ve o da
         # dugumu degistirmez, onay bekleyen bir surum birakir.
+        # Bir dusunceden BAM'a is (core/bam.py). BAM dusunceyi OKUR, yazmaz.
+        if u.path.startswith("/api/motto/node/") and u.path.endswith("/bam"):
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = json.loads(ham or b"{}")
+                nid = int(u.path.strip("/").split("/")[3])
+            except (ValueError, IndexError):
+                return self._send(400, {"error": "gecersiz istek"})
+            r = bam.mottodan_is(self.con, nid, (body or {}).get("istek") or "arastir")
+            return self._send(200 if r.get("ok") else 422, r)
         if u.path.startswith("/api/motto"):
             ham, hata = self._read_body()
             if hata:

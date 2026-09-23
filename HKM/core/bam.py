@@ -561,6 +561,50 @@ def iz_zinciri(con, tur, id_, derinlik=10):
     return out
 
 
+# ------------------------------------------------------ Hayat Mottosu'ndan
+
+# Kullanici bir dusunceden BAM'a is verebilir. BAM dusunceyi OKUR, ona
+# YAZMAZ: sonuc BAM'in kendi kaydidir ve dusuncenin yaninda «uretilen»
+# diye, ayri gosterilir (core/motto.py «kullanicinin sozu ile uretilen
+# ayri durur»). Simdilik yalniz arastirma; plan ve belge ilgili ofisler
+# acilinca eklenecek.
+MOTTO_ISTEK = {"arastir": "«%s» düşüncesini araştır. Düşüncenin metni: %s"}
+
+
+def mottodan_is(con, node_id, istek, user="ben", now=None):
+    from core import motto
+    if istek not in MOTTO_ISTEK:
+        return {"ok": False, "note": "Bu düşünceyle şimdilik yalnız araştırma istenebilir."}
+    try:
+        n = motto.dugum(con, int(node_id), user=user)
+    except (TypeError, ValueError):
+        n = None
+    if not n:
+        return {"ok": False, "note": "Düşünce bulunamadı."}
+    talep = MOTTO_ISTEK[istek] % (n["title"], (n["body"] or "").strip()[:800] or "(metin yok)")
+    r = is_ac(con, talep, kaynak="motto", now=now)
+    if r.get("ok"):
+        iz_ekle(con, "motto", n["id"], "is", r["id"], now=now)
+    return r
+
+
+def mottonun_isleri(con, node_id):
+    """Bir dusunceden dogan isler ve urettikleri kayitlar."""
+    out = []
+    for z in con.execute("SELECT hedef_id FROM bam_iz WHERE kaynak_tur='motto' AND "
+                         "kaynak_id=? AND hedef_tur='is' ORDER BY id DESC",
+                         (str(int(node_id)),)).fetchall():
+        j = is_getir(con, int(z["hedef_id"]))
+        if not j:
+            continue
+        kayitlar = [dict(r) for r in con.execute(
+            "SELECT id,baslik,dogruluk,tur FROM bam_kayitlar WHERE is_id=? ORDER BY id",
+            (j["id"],)).fetchall()]
+        out.append({"is_id": j["id"], "talep": j["talep"], "durum": j["durum"],
+                    "kayitlar": kayitlar})
+    return out
+
+
 # -------------------------------------------------------------------- ozet
 
 def ozet(con):

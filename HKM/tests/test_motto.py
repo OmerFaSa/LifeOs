@@ -255,3 +255,51 @@ def run():
         eq(o["bag"], 0)
         eq(o["surum"], 1)
     test("ozet yalniz sayar", t_ozet_yargi_tasimaz)
+
+    # ---- kirmizi cizgi, fikir karti, King ve BAM ---------------------
+    #
+    # Kirmizi cizgi «asla»dir; fikir karti sonra dusunulecek bir kivilcim.
+    # King yalniz kullanicinin ONE CIKARDIGI kayitlari (motto, ilke,
+    # kirmizi cizgi) gorur ve onlari «senin sozun» diye tasir; siradan
+    # dusunce ve fikir karti King'e gitmez. BAM bir dusunceden is alabilir
+    # ama dusuncenin kendisine YAZAMAZ.
+
+    def t_new_kinds():
+        con = db.connect(":memory:")
+        k = motto.ekle(con, "Uykumdan çalmam", kind="kirmizi_cizgi",
+                       body="Sınav haftası bile olsa gece yarısını geçmem.")
+        ok(k["ok"])
+        f = motto.ekle(con, "Stoacılık üzerine yazı", kind="fikir")
+        ok(f["ok"])
+        eq([x["kind"] for x in motto.ilkeler(con)], ["kirmizi_cizgi"])
+        eq([x["id"] for x in motto.fikirler(con)], [f["id"]])
+    test("kirmizi cizgi ilkelerle, fikir karti ayri durur", t_new_kinds)
+
+    def t_king_reads_only_elevated():
+        from core import sohbet
+        con = db.connect(":memory:")
+        motto.ekle(con, "Uykumdan çalmam", kind="kirmizi_cizgi", body="Gece yarısı sınırım.")
+        motto.ekle(con, "Önce sağlık", kind="ilke")
+        motto.ekle(con, "Gizli günlük notu", kind="dusunce", body="Bu kimseye gitmez.")
+        motto.ekle(con, "Bir fikir", kind="fikir")
+        king = sohbet.baglam(con, "2026-09-23", "king")
+        ok("Uykumdan çalmam" in king and "kırmızı çizgi" in king)
+        ok("Önce sağlık" in king)
+        no("Gizli günlük" in king or "Bir fikir" in king)
+        no("Uykumdan" in sohbet.baglam(con, "2026-09-23", "bio"))
+    test("King yalniz one cikarilan kayitlari gorur", t_king_reads_only_elevated)
+
+    def t_bam_from_thought():
+        from core import bam
+        con = db.connect(":memory:")
+        n = motto.ekle(con, "Disiplin", body="Motivasyona bağlı olmayan davranış.")
+        r = bam.mottodan_is(con, n["id"], "arastir")
+        ok(r["ok"])
+        j = bam.is_getir(con, r["id"])
+        eq(j["kaynak"], "motto")
+        ok("Disiplin" in j["talep"])
+        eq([x["is_id"] for x in bam.mottonun_isleri(con, n["id"])], [r["id"]])
+        eq(motto.dugum(con, n["id"])["body"], "Motivasyona bağlı olmayan davranış.")
+        no(bam.mottodan_is(con, 999, "arastir")["ok"])
+        no(bam.mottodan_is(con, n["id"], "sil")["ok"])
+    test("dusunceden BAM'a is verilir, dusunce degismez", t_bam_from_thought)
