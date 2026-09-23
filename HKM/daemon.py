@@ -46,6 +46,8 @@ Ucnoktalar:
     POST /api/tg/webhook            Telegram — gizli baslikla dogrulanir
     POST /api/decision/<id>/accept  oneriyi kabul et
     POST /api/decision/<id>/decline oneriyi reddet — kayit silinmez
+    GET  /api/urunler               Uretim Ofisi'nin urun katalogu
+    GET  /api/bam/kayit/<id>/cikti?bicim=html|svg|pdf  kaydin basilir hali
     GET  /api/web                   web katmaninin durumu: saglayicilar, bugunku cagri
     POST /api/web/dene              web aramasini King adina dener (sorgu)
     GET  /api/health                token istemez
@@ -68,12 +70,12 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import (ai, bam, butce, channels, cross, db, gelen,  # noqa: E402
+from core import (ai, bam, butce, channels, cikti, cross, db, gelen,  # noqa: E402
                   impact,
                   intents, kanal, king, manager, media, memory, models, motto, outbox, patron,
                   profil, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
-                  weekly, web, yoklama)
+                  urunler, weekly, web, yoklama)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -256,6 +258,26 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
+        self._cors()
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _send_bytes(self, code, body, ctype, dosya=None, indir=False):
+        """Uretilen belge (HTML, SVG, PDF). HTML ve SVG kati bir icerik
+        politikasiyla gider: metin zaten kacislanir; bu ikinci kilittir —
+        belge dogrudan acilsa bile betik calismaz."""
+        self.send_response(code)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("X-Content-Type-Options", "nosniff")
+        if ctype.startswith(("text/html", "image/svg")):
+            self.send_header("Content-Security-Policy",
+                             "default-src 'none'; style-src 'unsafe-inline'; img-src data:; "
+                             "font-src 'none'; base-uri 'none'; form-action 'none'")
+        if dosya:
+            from urllib.parse import quote
+            self.send_header("Content-Disposition", "%s; filename*=UTF-8''%s" % (
+                "attachment" if indir else "inline", quote(dosya)))
         self._cors()
         self.end_headers()
         self.wfile.write(body)
@@ -645,6 +667,27 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/bam/ara":
             return self._send(200, {"kayitlar": bam.kayit_ara(
                 self.con, (q.get("q") or [""])[0], limit=20)})
+        if u.path == "/api/urunler":
+            return self._send(200, {"urunler": [
+                {"id": k, "ad": v["ad"], "aile": v["aile"], "kaynak": v["kaynak"]}
+                for k, v in urunler.URUNLER.items()]})
+        # Kaydin basilir hali (core/cikti.py): HTML, SVG, PDF.
+        if u.path.startswith("/api/bam/kayit/") and u.path.endswith("/cikti"):
+            parca = u.path.strip("/").split("/")
+            try:
+                kid = int(parca[3])
+            except (ValueError, IndexError):
+                return self._send(400, {"error": "kayit kimligi sayi olmali"})
+            k = bam.kayit_getir(self.con, kid)
+            if not k:
+                return self._send(404, {"error": "kayit yok"})
+            bicim = (q.get("bicim") or ["html"])[0]
+            if bicim not in cikti.BICIMLER:
+                return self._send(422, {"ok": False, "note": "Biçim html, svg ya da pdf olmalı."})
+            bayt, mime, ad = cikti.uret(k, bicim)
+            if bayt is None:
+                return self._send(422, {"ok": False, "note": ad})
+            return self._send_bytes(200, bayt, mime, ad, indir=(q.get("indir") or [""])[0] == "1")
         if u.path.startswith("/api/bam/kayit/"):
             try:
                 kid = int(u.path.rsplit("/", 1)[-1])

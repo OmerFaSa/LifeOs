@@ -32,10 +32,12 @@ import datetime
 import json
 import statistics
 
-from core import ai, bam, butce, intents, kitap, mufredat, planlama
+from core import ai, bam, butce, intents, kitap, mufredat, planlama, urunler
 
-MODULLER = ("ays", "spi", "esp")
-MODUL_AD = {"ays": "AYS", "spi": "SPİ", "esp": "ESP"}
+# «hkm»: kullanicinin HKM'nin kendisinden (Telegram, HKM ekrani) verdigi is.
+# O yolda modul kocu ve Patronu yoktur: kullanici dogrudan King'e yazar.
+MODULLER = ("ays", "spi", "esp", "hkm")
+MODUL_AD = {"ays": "AYS", "spi": "SPİ", "esp": "ESP", "hkm": "HKM"}
 # HKM alt patronu: modulun King'e giden kapisi (core/kanal.py ile ayni).
 ALT_PATRON = {"spi": ("bio", "Biyolojik sermaye"), "ays": ("academic", "Akademik hedef"),
               "esp": ("intellect", "Entelektüel gelişim")}
@@ -67,6 +69,16 @@ TURLER = {
     },
     # Bolumlu test kitabi (core/kitap.py): her tikte bir bolum, bagimsiz
     # cozumle denetim. Zorluk dagilimini kod hesaplar.
+    # Katalogdaki HER urun (core/urunler.py): ozet, rapor, ders notu, sunum,
+    # pankart, zihin haritasi, zaman cizelgesi… Ofisler istege gore secilir:
+    # kaynakli ise Kayit -> Arastirma -> Uretim, degilse Kayit -> Uretim.
+    "bam.urun": {
+        "ad": "Ürün (özet, rapor, sunum, görsel…)",
+        "moduller": ("ays", "spi", "esp", "hkm"),
+        "ofisler": ["kayit", "arastirma", "uretim"],
+        "model": True,
+        "not": "Üretim Ofisi katalogdaki ürünü yazar; biçim ve çizim koddur.",
+    },
     "test.kitabi": {
         "ad": "Bölümlü test kitabı",
         "moduller": ("ays",),
@@ -219,6 +231,13 @@ def _madde(ad, ok_, metin, etki="ret"):
     return {"ad": ad, "ok": bool(ok_), "not": metin, "etki": etki}
 
 
+def ofisler_of(tur, govde=None):
+    """Isin gececegi ofisler. Cogu turde sabit; urunde isteğe bagli."""
+    if tur == "bam.urun" and govde and govde.get("urun"):
+        return ["kayit"] + (["arastirma"] if govde["urun"].get("kaynakli") else []) + ["uretim"]
+    return list(TURLER[tur]["ofisler"])
+
+
 def imkan(con, cfg, tur, govde=None):
     """King'in kontrolu. (karar, maddeler). Karar kuralladir.
 
@@ -232,7 +251,7 @@ def imkan(con, cfg, tur, govde=None):
     reddedilir: acilsa bile «ertelendi» diye kapanacak bir isi onaylamak,
     yapilmayacak bir isi yapilacak gibi gostermek olurdu. Bazilari hazirsa
     karar «kismi»dir ve eksik olan soylenir."""
-    t = TURLER[tur]
+    t = dict(TURLER[tur], ofisler=ofisler_of(tur, govde))
     maddeler = []
     isciler = [o for o in t["ofisler"] if o != "kayit"]
     hazirlar = [o for o in isciler if (bam.OFISLER.get(o) or {}).get("durum") == "hazir"]
@@ -273,10 +292,16 @@ def imkan(con, cfg, tur, govde=None):
 
 # ------------------------------------------------------------------- iz
 
-def zincir(modul, tur):
+def zincir(modul, tur, govde=None):
     """Katlar atlanmaz: is emrinin yolu. Sunucu kurar."""
+    ofisler = ofisler_of(tur, govde)
+    if modul == "hkm":
+        return ([{"kat": "kullanici", "ad": "Sen"}, {"kat": "king", "ad": "King"},
+                 {"kat": "bam", "ad": "BAM Patronu"}]
+                + [{"kat": "ofis", "ad": (bam.OFISLER.get(o) or {}).get("ad", o), "id": o}
+                   for o in ofisler])
     alt, alt_ad = ALT_PATRON[modul]
-    t = TURLER[tur]
+    t = dict(TURLER[tur], ofisler=ofisler)
     return ([{"kat": "koc", "ad": "%s koçu" % MODUL_AD[modul]},
              {"kat": "patron", "ad": "%s Patronu" % MODUL_AD[modul]},
              {"kat": "alt_patron", "ad": alt_ad, "id": alt},
@@ -304,13 +329,18 @@ def _govde_temizle(tur, govde):
         if hatalar:
             return None, hatalar
         return {"kitap": g}, []
+    if tur == "bam.urun":
+        g, hatalar = urunler.temizle((govde or {}).get("urun"))
+        if hatalar:
+            return None, hatalar
+        return {"urun": g}, []
     return None, ["tanimsiz tur"]
 
 
 # Ayni girdi -> ayni anahtar («once depo»). Mufredatta buyuk-kucuk harf
 # ve bosluk farki ayni sinavdir.
 ANAHTAR = {"hedef.plan": planlama.anahtar, "sinav.mufredat": mufredat.anahtar,
-           "test.kitabi": planlama.anahtar}
+           "test.kitabi": planlama.anahtar, "bam.urun": planlama.anahtar}
 
 
 def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
@@ -327,6 +357,8 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
         return {"ok": False, "errors": hatalar}
     if tur == "sinav.mufredat" and not str(konu or "").strip():
         konu = mufredat.talep(temiz["mufredat"])
+    if tur == "bam.urun" and not str(konu or "").strip():
+        konu = urunler.talep(temiz["urun"])
     if tur == "test.kitabi" and not str(konu or "").strip():
         konu = "«%s» — %d bölümlük test kitabı" % (temiz["kitap"]["baslik"],
                                                   len(temiz["kitap"]["bolumler"]))
@@ -344,7 +376,7 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
                 "note": "Bu iş emri zaten açık (#%d)." % var["id"]}
 
     karar, kontrol = imkan(con, cfg, tur, temiz)
-    iz = zincir(modul, tur)
+    iz = zincir(modul, tur, temiz)
 
     # ONCE DEPO (PLAN §1.5): ayni girdiyle bitmis bir is varsa yeniden
     # kurulmaz; ayni kayit yeniden teklif edilir.
@@ -367,7 +399,7 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
     if karar != "ret":
         tahmin = ({"sn": 0, "etiket": "hesaplandi", "metin": "hemen",
                    "dayanak": "depodaki kayıt yeniden kullanıldı"} if depo
-                  else tahmini_sure(con, t["ofisler"]))
+                  else tahmini_sure(con, ofisler_of(tur, temiz)))
     durum = {"onay": "onaylandi", "kismi": "kismen_onay", "ret": "reddedildi"}[karar]
     cur = con.execute("INSERT INTO is_emirleri(modul,tur,konu,neden,govde,anahtar,iz,karar,"
                       "kontrol,tahmin,durum,created_at,updated_at) VALUES "
@@ -394,7 +426,8 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
                % (konu, teklif), now=at)
         return {"ok": True, "yeni": True, "emir": emir(con, e["id"]), "karar": karar}
 
-    j = bam.is_ac(con, konu, kaynak=modul, hedef_modul=modul, ofisler=t["ofisler"],
+    j = bam.is_ac(con, konu, kaynak="kullanici" if modul == "hkm" else modul,
+                  hedef_modul=None if modul == "hkm" else modul, ofisler=ofisler_of(tur, temiz),
                   govde=dict(temiz, emir_id=e["id"]), emir_id=e["id"], now=at)
     if not j.get("ok"):
         e["durum"], e["karar"] = "hata", karar
@@ -447,8 +480,26 @@ def _teklif_kitap(con, e, kayit_id, now=None):
     return ""
 
 
+def _teklif_urun(con, e, kayit_id, now=None):
+    """Urunu module teklif eder; HKM'den istendiyse teklif yok — urun
+    HKM'nin Ofis ekranindan ve (varsa) Telegram'dan teslim edilir."""
+    g = (bam.kayit_getir(con, kayit_id) or {}).get("govde") or {}
+    if g.get("tur") != "urun":
+        return " Kayıt ürün biçiminde değil; teklif bırakılmadı."
+    if e["modul"] == "hkm":
+        return " HKM › Ofis’ten açılabilir ve indirilebilir."
+    payload = {"kayit_id": int(kayit_id), "urun": g["urun"], "baslik": str(g.get("baslik"))[:120]}
+    n = intents.create(con, e["modul"], "urun.add", payload, None, source="bam")
+    if n.get("ok"):
+        bam.iz_ekle(con, "kayit", kayit_id, "niyet", n["intent"]["id"], now=now)
+        return " Ürün teklif olarak %s’ye bırakıldı." % MODUL_AD[e["modul"]]
+    return ""
+
+
 def _teklif(con, e, kayit_id, now=None):
     """Ofisin urettigi kaydi module teklif eder. Cevap ayni yoldan doner."""
+    if e["tur"] == "bam.urun":
+        return _teklif_urun(con, e, kayit_id, now=now)
     if e["tur"] == "sinav.mufredat":
         return _teklif_mufredat(con, e, kayit_id, now=now)
     if e["tur"] == "test.kitabi":

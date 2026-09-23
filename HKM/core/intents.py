@@ -92,6 +92,14 @@ KINDS = {
         "optional": ("baslik", "why"),
         "note": "BAM'ın ürettiği ve denetlediği bölümlü test kitabını ekleme teklifi.",
     },
+    # Katalogdaki her urun (core/urunler.py): ozet, rapor, sunum, pankart…
+    # Modul kaydi ceker, KENDI koduyla sinar ve kendi materyal listesine ekler.
+    "urun.add": {
+        "modules": ("ays", "spi", "esp"),
+        "required": ("kayit_id", "urun"),
+        "optional": ("baslik", "why"),
+        "note": "BAM'ın ürettiği ürünü (özet, rapor, sunum, görsel…) materyal olarak ekleme teklifi.",
+    },
     "measure.ask": {
         "modules": ("spi",),
         "required": ("date", "metric"),
@@ -112,7 +120,7 @@ FIELD_RULES = {
     "kayit_id": ("int", 1, 10 ** 9), "adet": ("int", 1, 50), "baslik": ("str", 1, 120),
     "hedef_id": ("str", 1, 40), "hafta": ("int", 1, 104),
     "ders": ("int", 1, 30), "konu": ("int", 1, 2000),
-    "bolum": ("int", 1, 10), "soru": ("int", 1, 200),
+    "bolum": ("int", 1, 10), "soru": ("int", 1, 200), "urun": ("str", 1, 40),
 }
 
 
@@ -207,6 +215,9 @@ def _cumle(module, kind, payload):
         return ("%s: BAM «%s» test kitabını hazırladı (%s bölüm, kalite kontrolünü geçen %s "
                 "soru). Eklensin mi? Kaynaksız; hatalı bulduğun soruyu işaretle."
                 % (ad, p.get("baslik") or "test", p.get("bolum"), p.get("soru")))
+    if kind == "urun.add":
+        return ("%s: BAM «%s» hazırladı. Materyal olarak eklensin mi?"
+                % (ad, p.get("baslik") or p.get("urun")))
     if kind == "measure.ask":
         return "%s: %s günü için «%s» ölçümünü girmeyi unutma." % (
             ad, gun, p.get("metric"))

@@ -35,7 +35,7 @@ import datetime
 import json
 import re
 
-from core import ai, intents, kaynakli, kitap, mufredat, planlama, web
+from core import ai, intents, kaynakli, kitap, mufredat, planlama, urunler, web
 
 OFISLER = {
     "kayit": {
@@ -737,10 +737,56 @@ def _kitap_adimi(con, cfg, j, g, transport, now):
                 (" Sorusu kalmayan bölüm: %s." % ", ".join(bos)) if bos else "")}
 
 
+def _arastirma_bulgulari(con, j):
+    """Ayni isin Arastirma adimi kaydindan YALNIZ dogrulanmis bulgular ve
+    onlarin kaynaklari. Doner: (blok, kaynaklar, arastirma_etiketi)."""
+    a = next((x for x in j["adimlar"] if x["ofis"] == "arastirma" and x.get("kayit_id")), None)
+    if not a:
+        return "", [], None
+    k = kayit_getir(con, a["kayit_id"]) or {}
+    g = k.get("govde") or {}
+    satir = ["- %s %s" % (b["iddia"], "".join("[%d]" % n for n in b["dogrulayan"]))
+             for b in g.get("bulgular") or [] if b.get("dogrulandi") and b.get("dogrulayan")]
+    if not satir:
+        return "", [], k.get("dogruluk")
+    kullanilan = sorted({n for b in g["bulgular"] if b.get("dogrulandi") for n in b["dogrulayan"]})
+    kaynaklar = [x for x in g.get("kaynaklar") or [] if x["n"] in kullanilan]
+    blok = "\n".join(satir) + "\n\nKaynak listesi:\n" + "\n".join(
+        "[%d] %s — %s" % (x["n"], x["baslik"], x["alan"]) for x in kaynaklar)
+    return blok, kaynaklar, k.get("dogruluk")
+
+
+def _urun_adimi(con, cfg, j, g, transport, now):
+    """Katalogdaki urun (core/urunler.py). Model metni yazar; kod suzer.
+    Arastirmadan dogrulanmis bulgu geldiyse urun onlara dayanir ve
+    kaynak listesini tasir; gelmediyse «dogrulanmadi»dir."""
+    blok, kaynaklar, ar_etiket = _arastirma_bulgulari(con, j)
+    r = _cagri(con, cfg, "uretim", urunler.sistem(g), urunler.istem(g, blok), transport)
+    if not r.get("ok"):
+        return _model_hatasi(r)
+    govde, neden = urunler.ayikla(g["tur"], _json_ayikla(r["text"]), kaynaklar)
+    if neden:
+        return {"durum": "hata", "not": "Ürün yazılmadı: " + neden}
+    etiket = "dogrulanmadi"
+    if kaynaklar and ar_etiket in ("kaynakli", "celiskili"):
+        etiket = ar_etiket
+    govde["istek"] = {"konu": g["konu"], "uzunluk": g["uzunluk"], "kaynakli": g["kaynakli"]}
+    k = kayit_ekle(con, "materyal", govde["baslik"], govde, dogruluk=etiket,
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now)
+    return {"durum": "tamam", "kayit_id": k["id"],
+            "not": "%s hazır — %s%s." % (urunler.URUNLER[g["tur"]]["ad"],
+                                        {"kaynakli": "kaynaklı", "celiskili": "çelişkili",
+                                         "dogrulanmadi": "doğrulanmadı"}[etiket],
+                                        (", %d kaynak" % len(kaynaklar)) if kaynaklar else "")}
+
+
 def _uretim_adimi(con, cfg, j, transport, now):
     hazir = ai.hazir_mi(cfg, "bam.uretim")
     if not hazir["ok"]:
         return {"durum": "beklemede", "not": hazir["note"]}
+    u = (j.get("govde") or {}).get("urun")
+    if u:
+        return _urun_adimi(con, cfg, j, u, transport, now)
     g = (j.get("govde") or {}).get("kitap")
     if g:
         return _kitap_adimi(con, cfg, j, g, transport, now)

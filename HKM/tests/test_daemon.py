@@ -713,3 +713,24 @@ def run_extra(S):
         eq((kod, r["ok"]), (200, False))       # ag'a cikmadan reddedilir
         ok("kişisel" in r["note"])
     test("web uclari yetki ister; kisisel sorgu aga cikmaz", t_web_endpoints)
+
+    def t_cikti_endpoints():
+        from core import bam as _bam, urunler as _u
+        con = db.connect(S.db_path)
+        g, _ = _u.ayikla("pankart", {"baslik": "Su <iç>", "maddeler": ["Bir", "İki"]})
+        kid = _bam.kayit_ekle(con, "materyal", "Su", g)["id"]
+        con.close()
+        eq(S.call("/api/bam/kayit/%d/cikti" % kid, token=None)[0], 401)
+        kod, govde = S.ham("/api/bam/kayit/%d/cikti?bicim=svg" % kid, None,
+                           {"Authorization": "Bearer " + TOKEN}, method="GET")
+        eq(kod, 200)
+        ok(govde.startswith("<svg") and "&lt;iç&gt;" in govde)
+        kod, govde = S.ham("/api/bam/kayit/%d/cikti?bicim=html&indir=1" % kid, None,
+                           {"Authorization": "Bearer " + TOKEN}, method="GET")
+        eq(kod, 200)
+        ok("<!doctype html>" in govde)
+        eq(S.call("/api/bam/kayit/%d/cikti?bicim=exe" % kid)[0], 422)
+        eq(S.call("/api/bam/kayit/999999/cikti")[0], 404)
+        kod, r = S.call("/api/urunler")
+        ok(kod == 200 and any(x["id"] == "zihin_haritasi" for x in r["urunler"]))
+    test("cikti ucu: yetki, kacislanmis SVG/HTML, bicim ve kayit denetimi", t_cikti_endpoints)
