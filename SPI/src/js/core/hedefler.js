@@ -266,6 +266,8 @@ SP.Hedefler = (function(){
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'spi', durum:() => ({}), bugun:() => SP.U.todayISO(),
     kaydet, normalize, notlar,
+    /* Soru beklerken gelen bölüm komutu ya da BAM isteği cevap sanılmaz. */
+    baskaIs:m => !!(SP.Bolum && SP.Bolum.anla(m).komut) || !!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi && LIFEOS.Ofis.bamIstegi(m)),
   }) : null;
 
   return { PAKETLER, KILO, VKI, sonKilo, boyCm, hekimKapisi, normalize, notlar,

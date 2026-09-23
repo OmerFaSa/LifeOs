@@ -1297,7 +1297,8 @@ SP.App = (function(){
     if(!el) return;
     const name = (S.profile && S.profile.name) ? 'SPİ — ' + S.profile.name : 'SPİ';
     /* Once "S" harfi ureten bir SVG'ydi; artik gercek marka gorseli
-       (img/brand/favicon.png, kare kirpilmis logo). Dosya degisirse ikon
+       (img/brand/favicon.png: modülün kimlik logosu,
+       brand/medya/kimlik/, 192 px kareye yerleştirilmiş). Dosya degisirse ikon
        da kendiliginden degisir, burasi hic dokunulmaz. */
     /* Ikon <link rel="icon"> etiketinden OKUNUR, yola elle yazilmaz.
        Tek dosya surumunde build.py o etiketin icine ikonu data URI
@@ -1359,6 +1360,8 @@ SP.App = (function(){
       applySection(S.route);
       await render();
       installManifest();
+      /* Tek dosya görselsiz açıldıysa bunu söyle (brand/ortak/gorsel.js). */
+      if(window.LIFEOS && LIFEOS.Gorsel) LIFEOS.Gorsel.denetle('spi', m => UI.toast(m, { life:12000 }));
 
       /* Seviye kutlaması. İki yol da buraya çıkar:
 

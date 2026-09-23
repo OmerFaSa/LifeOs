@@ -188,6 +188,10 @@ DOSYALAR = {
     # Alan paketleri her modulun kendisindedir; motor ortak.
     "hedef.js":       "js/core",
     "hedef.test.js":  "tests",
+    # GORSEL DENETIMI — tek dosya gorselsiz acildiginda bunu soylemek.
+    # Uyari metni ve kosulu uc arayuzde ayni olmali.
+    "gorsel.js":      "js/core",
+    "gorsel.test.js": "tests",
     # MODEL KATMANI — yalniz SPİ ve ESP (bkz. YALNIZ).
     "llm.js":        "js/core",
 }

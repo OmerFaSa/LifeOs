@@ -321,6 +321,8 @@ ESP.Hedefler = (function(){
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'esp', durum:() => ({}), bugun:() => U().todayISO(),
     kaydet, notlar,
+    /* Soru beklerken gelen plan komutu ya da BAM isteği cevap sanılmaz. */
+    baskaIs:m => !!(ESP.Komut && ESP.Komut.anla(m).komut) || !!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi && LIFEOS.Ofis.bamIstegi(m)),
   }) : null;
 
   return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, CEFR, CEFR_SAAT, KITAP_SAAT_TAHMIN,

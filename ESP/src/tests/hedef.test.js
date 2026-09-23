@@ -169,12 +169,38 @@
   /* Sohbet akışı: hedef cümlesi → eksik soruları → karar ve tempo →
      onay. Model çağrılmaz; cevabı kural motoru yazar. */
   describe('Hedef — sohbet', () => {
-    function kur(){
+    function kur(baskaIs){
       const kayit = {};
       const s = H().sohbetKur({ paketler:PAKETLER, modul:'spi', durum:() => ({}),
-        bugun:() => BUGUN, kaydet:async h => { kayit[h.id] = h; } });
+        bugun:() => BUGUN, kaydet:async h => { kayit[h.id] = h; }, baskaIs });
       return { s, kayit };
     }
+
+    it('soru beklerken gelen yeni hedef cümlesi yarım hedefi bırakır, yenisine geçer', async () => {
+      const { s, kayit } = kur();
+      await s.isle('3 kilo vermek istiyorum');
+      const r = await s.isle('Günde 20 sayfa kitap okumak istiyorum');
+      expect(r.text).toContain('Yarım kalan önceki hedefi bıraktım');
+      const l = Object.values(kayit);
+      expect(l.find(h => h.paket === 'kilo').durum).toBe('birakildi');
+      expect(r.hedef.paket).toBe('okuma');
+    });
+
+    it('soru beklerken gelen soru ya da uzun cümle cevap sanılmaz; soru bekler', async () => {
+      const { s } = kur();
+      await s.isle('3 kilo vermek istiyorum');
+      expect(await s.isle('Bugün öğlen ne yesem daha iyi olur?')).toBe(null);
+      expect(await s.isle('dün akşam koşuya çıktım ve çok iyi hissettim bence')).toBe(null);
+      expect(s.bekleyen().asama).toBe('soru');
+      expect((await s.isle('2 ay içinde')).text).toContain('gerçekçi');
+    });
+
+    it('modülün kendi komutu cevap sanılmaz; kısa ve okunamayan cevapta yine sorulur', async () => {
+      const { s } = kur(m => /ara ver/.test(m));
+      await s.isle('3 kilo vermek istiyorum');
+      expect(await s.isle('yarın ara ver')).toBe(null);
+      expect((await s.isle('bilmem ki')).text).toContain('Tarihi anlayamadım');
+    });
 
     it('eksik alanı sorar, cevapla ilerler, karar ve tempo verir, seçimle aktif eder', async () => {
       const { s, kayit } = kur();

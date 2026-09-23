@@ -494,12 +494,20 @@ LIFEOS.Hedef = (function(){
 
      `sohbetKur({ paketler, modul, durum:()=>…, bugun:()=>'YYYY-MM-DD',
        kaydet:async h=>…, normalize?(h, durum), notlar?(h, g, durum)=>[metin],
-       sonrasi?(h)=>metin })` → { isle(metin) → {text, hedef} | null }
+       sonrasi?(h)=>metin, baskaIs?(metin)=>bool })` → { isle(metin) → {text, hedef} | null }
+
+     Soru beklerken gelen cümle CEVAP SANILMAZ, eğer okunamıyorsa ve:
+       - yeni bir hedef cümlesiyse: yarım hedef bırakılır, yenisine geçilir;
+       - soru ya da uzun bir cümleyse ya da modül onu kendi işi sayıyorsa
+         (`baskaIs`): null döner, modülün öteki kapıları işini yapar ve
+         soru bekler. Kısa ve okunamayan cevapta yine «anlayamadım» denir.
 
      Hedef cümlesi gelince eksik alanlar TEK TEK sorulur, sonra karar ve
      tempolar verilir, onayla hedef aktif olur. Hedef olmayan cümleye
      karışılmaz (null): modülün öteki kapıları işini yapar. */
   const EVET = /^(evet|tamam|olur|onaylıyorum|onayla|kaydet)$/;
+  /* Cevap denemesi değil: soru cümlesi ya da yedi kelimeden uzun cümle. */
+  function cevapDegil(k){ return /\?\s*$/.test(k) || k.split(/\s+/).filter(Boolean).length >= 7; }
   const VAZGEC = /^(vazgeç|vazgeçtim|hayır|iptal|boşver|bırak)$/;
 
   function sohbetKur(o){
@@ -610,7 +618,20 @@ LIFEOS.Hedef = (function(){
       if(bekleyen && bekleyen.asama === 'soru'){
         if(VAZGEC.test(k.replace(/[.!]+$/, ''))) return await birak(bekleyen.hedef);
         const r = cevapla(bekleyen.hedef, bekleyen.alan, metin, bugun(), paketOf(bekleyen.hedef));
-        if(!r.ok) return { text:r.why, hedef:bekleyen.hedef };
+        if(!r.ok){
+          const t = cumleden(metin, o.paketler, bugun());
+          if(t){
+            const eski = gecis(bekleyen.hedef, 'birakildi', bugun());
+            bekleyen = null;
+            if(eski.ok) await kaydet(eski.hedef);
+            const h = normal(yeni(t, o.modul, bugun()));
+            await kaydet(h);
+            const c = await sor(h);
+            return { text:'Yarım kalan önceki hedefi bıraktım; yenisine geçiyorum. ' + c.text, hedef:c.hedef };
+          }
+          if(cevapDegil(k) || (typeof o.baskaIs === 'function' && o.baskaIs(metin))) return null;
+          return { text:r.why, hedef:bekleyen.hedef };
+        }
         const h = normal(r.hedef);
         await kaydet(h);
         return await sor(h);

@@ -431,6 +431,9 @@ R.Hedefler = (function(){
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'ays', durum:() => ({}), bugun:() => U().todayISO(),
     kaydet, notlar,
+    /* Soru beklerken gelen plan komutu («bu hafta ara») ya da BAM isteği
+       cevap sanılmaz. */
+    baskaIs:m => !!(R.Komut && R.Komut.anla(m).komut) || !!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi && LIFEOS.Ofis.bamIstegi(m)),
   }) : null;
 
   return { PAKETLER, PAKET_BY_ID, KONU, NET, SAAT_GUN, DERS_TEST, EN_AZ_DENEME,

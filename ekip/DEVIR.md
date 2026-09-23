@@ -42,15 +42,19 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
 
 ### Part 1 — Toparlama
 - ✅ 3 Dallar toplandı; `main` ileri sarıldı (62cfd55).
-- 🔜 12 Hedef sohbeti: bekleyen soruya başka bir cümle yazılınca cevap sanılıyor.
-  `brand/ortak/hedef.js` `sohbetKur.isle` — cevap okunamazsa ve cümle başka bir
-  komuta benziyorsa soru bırakılmadan null dönmeli.
-- ⏳ 2 Başlık ve sekme simgesi yeni kimlik logosuna.
-- ⏳ 1 Tek dosyada (dist) rütbe / ajan / logo görselleri görünmüyor (dist/img
-  gitignore'da). Seçenek: küçültülmüş gömme; Y4 (PWA) de çözer.
+- ✅ 12 Hedef sohbeti: soru beklerken okunamayan cevap; yeni hedef cümlesiyse
+  yarım hedef bırakılır, soru / uzun cümle / modülün kendi komutu (`baskaIs`
+  kancası) cevap sanılmaz. `brand/ortak/hedef.js`, testleri `hedef.test.js`.
+- ✅ 2 Başlık, sekme, açılış işareti ve telefon kısayolu simgesi: modülün kimlik
+  logosu (`brand/medya/kimlik/`) 192 px kareye yerleştirildi, dosya adı aynı
+  (`<SYS>/src/img/brand/favicon.png`, `HKM/brand/favicon.png`). Eski altın monogramlar
+  git geçmişinde; LifeOS «LF» logosu (`brand/life/`) giriş sayfasında kaldı.
+- ✅ 1 Tek dosya görselsiz açılınca (ZIP'ten indirilmiş dist, `file://`) oturumda
+  bir kez nasıl düzeleceği söylenir: `brand/ortak/gorsel.js`. 81 MB'lık rütbe
+  medyası gömülmez; kalıcı çözüm Y4 (PWA).
 
 ### Part 2 — Hedef ağı
-- ⏳ 8 Modüller etkin hedef + plan özetini HKM'ye eşitler (AYS ve ESP planları King'e görünür).
+- 🔜 8 Modüller etkin hedef + plan özetini HKM'ye eşitler (AYS ve ESP planları King'e görünür).
 - ⏳ 6 Zaman bütçesi: günlük toplam vakit ↔ hedeflerin haftalık saati; kod kararı,
   King cümlesi; modül Hedeflerim'de bütçe satırı.
 - ⏳ Y8 HKM web'de Hedefler panosu.
