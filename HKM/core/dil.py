@@ -452,6 +452,48 @@ def rapor(metin):
             "miktarsiz": miktarsiz, "belirsiz": belirsiz}
 
 
+# ------------------------------------------------------------ kisa kayit
+#
+# Telegram'dan tek kelime kayit: «su 2», «uyku 7», «soru 40», «gitar 30».
+# Rapordaki gibi HKM sayiyi OKUMAZ: parcayi alan kelimesine gore modulun
+# kuyruguna birakir; birimi (su litre mi ml mi, gitar dakika mi) modulun
+# KENDI ayristiricisi bilir ve onizlemede gosterir.
+#
+# Bicim DARDIR, cunku serbest sohbeti kayit sanmak kayit kacirmaktan pahali:
+# her parca «alan sayi [birim]» olmali (en cok iki kelimelik alan). Sayi
+# once gelirse («2 saat matematik») bu bir PLAN istegi de olabilir; kisa
+# kayit sayilmaz. Bir parca bile bu bicimde degilse mesaj kisa kayit
+# degildir. Hicbir parca bir module gitmiyorsa da degildir: «onayla 2»
+# gibi mesajlar kendi yoluna gider.
+KISA_PARCA = re.compile(r"^([^\W\d_]+(?: [^\W\d_]+)?) (\d+(?:[.,]\d+)?)(?: ?([^\W\d_]+))?$")
+KISA_GUN = ("dün", "dun", "bugün", "bugun")
+
+
+def kisa_kayit(metin):
+    """Kisa kayit mi? rapor() ile ayni sozluk; degilse None."""
+    if soru_mu(metin) or gun_kaydirma(metin):
+        return None
+    parcalar, belirsiz = [], []
+    for ham in RAPOR_AYRAC.split(str(metin or "")):
+        p = " ".join(k for k in kucult(ham).strip(" .!").split()
+                     if k not in KISA_GUN)
+        if not p:
+            continue
+        if not KISA_PARCA.match(p):
+            return None
+        mod, _puan = rapor_modulu(p)
+        if mod is None:
+            belirsiz.append(p)
+        elif parcalar and parcalar[-1]["modul"] == mod:
+            parcalar[-1]["metin"] += ", " + p
+        else:
+            parcalar.append({"modul": mod, "metin": p})
+    if not parcalar:
+        return None
+    return {"offset": rapor_gunu(metin), "parcalar": parcalar, "miktarsiz": [],
+            "belirsiz": belirsiz, "kisa": True}
+
+
 def cozum_tarihi(bugun, ayrinti):
     """Zaman parametresinden tarih. Ileri tarihe GITMEZ."""
     t = datetime.date.fromisoformat(bugun)

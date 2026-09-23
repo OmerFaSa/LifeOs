@@ -8224,6 +8224,16 @@ tbody tr:hover{ background:var(--surface-2); }
 
 .dsgn--map::after{ inset:4px 4px 8px auto; width:7px; border-radius:2px;
   background:var(--border-strong); }
+
+/* Test kitabı soru şeridi (Part 8b): bölümdeki her soruya tek dokunuş.
+   Cevaplı soru dolu, bulunulan soru ana renkte; doğru/yanlış GÖSTERİLMEZ,
+   cevaplar bölüm bitince açılır. */
+.kitap-serit{ display:flex; flex-wrap:wrap; gap:6px; }
+.kitap-serit button{ min-width:32px; min-height:32px; padding:0 6px; border-radius:8px;
+  border:1px solid var(--border); background:var(--surface); color:var(--text-2);
+  font:inherit; font-size:var(--fs-sm); font-variant-numeric:tabular-nums; cursor:pointer; }
+.kitap-serit button.is-cevapli{ background:var(--surface-2); color:var(--text); border-color:var(--text-3); }
+.kitap-serit button.is-simdi{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -9292,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'658f9f7', at:'2026-09-23 20:55', dirty:true };
+R.BUILD = { id:'aa2515e', at:'2026-09-23 22:27', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -35716,6 +35726,16 @@ R.TestKitabi = (function(){
       zorluk:ZORLUKLAR.indexOf(s.zorluk) >= 0 ? s.zorluk : 'belirsiz' };
   }
 
+  /* Kitabı üreten işin maliyeti HKM'nin ÖLÇÜMÜDÜR (depo.kayit_depo);
+     AYS hesaplamaz. Ölçüm yoksa «veri yok» kalır, sıfır yazılmaz. */
+  function maliyetOku(m){
+    if(!m || typeof m !== 'object') return null;
+    const usd = typeof m.usd === 'number' && isFinite(m.usd) && m.usd >= 0 ? m.usd : null;
+    const cagri = Number.isInteger(m.cagri) && m.cagri >= 0 ? m.cagri : null;
+    const etiket = ['olculdu', 'tahmin'].indexOf(m.etiket) >= 0 && usd != null ? m.etiket : 'veri_yok';
+    return { usd:etiket === 'veri_yok' ? null : usd, cagri, etiket };
+  }
+
   function kayittan(kayit){
     const g = kayit && kayit.govde;
     if(!kayit || kayit.tur !== 'materyal' || !g || g.tur !== 'kitap'){
@@ -35736,7 +35756,8 @@ R.TestKitabi = (function(){
     return { ok:true, kitap:{ id:'kitap-' + kid, kayitId:kid,
       baslik:bosluk(g.baslik || kayit.baslik).slice(0, 120) || 'Test kitabı',
       dogruluk:kayit.dogruluk === 'kaynakli' ? 'kaynakli' : 'dogrulanmadi',
-      bolumler, sonuclar:{}, hatali:[], eklenme:R.U.todayISO(), dusen } };
+      bolumler, sonuclar:{}, hatali:[], eklenme:R.U.todayISO(), dusen,
+      maliyet:maliyetOku(kayit.maliyet) } };
   }
 
   /* ------------------------------------------------------------ depo */
@@ -35766,7 +35787,8 @@ R.TestKitabi = (function(){
     if(kitaplar().some(k => k.kayitId === kid)) return { ok:false, error:'Bu kitap zaten eklenmiş.' };
     const kayit = await (cek || (async id => {
       const r = await R.SinavProfil.istek('/api/bam/kayit/' + id);
-      return r.ok && r.govde ? r.govde.kayit || null : null;
+      const k = r.ok && r.govde ? r.govde.kayit || null : null;
+      return k ? Object.assign({}, k, { maliyet:(r.govde.depo || {}).maliyet || null }) : null;
     }))(kid);
     if(!kayit) return { ok:false, error:'Kitap HKM’den alınamadı; HKM açıkken yeniden dene.' };
     const r = kayittan(kayit);
@@ -35796,7 +35818,7 @@ R.TestKitabi = (function(){
     if(!b) return null;
     return { kitap:k, bolum:b, index:oturum.index, toplam:b.sorular.length,
       soru:b.sorular[oturum.index], secili:oturum.cevaplar[oturum.index],
-      cevapli:oturum.cevaplar.filter(x => x != null).length };
+      cevaplar:oturum.cevaplar.slice(), cevapli:oturum.cevaplar.filter(x => x != null).length };
   }
 
   /* Aynı şıkka ikinci dokunuş seçimi kaldırır: boş bırakmak bir seçimdir. */
@@ -35809,6 +35831,13 @@ R.TestKitabi = (function(){
     const m = mevcut();
     if(!m) return;
     oturum.index = Math.max(0, Math.min(m.toplam - 1, oturum.index + fark));
+  }
+
+  /* Soruya atla (Part 8b): kitapta sayfa çevirir gibi. */
+  function gitNo(i){
+    const m = mevcut();
+    if(!m || !(i >= 0 && i < m.toplam)) return;
+    oturum.index = i;
   }
 
   function vazgec(){ oturum = null; }
@@ -35854,6 +35883,71 @@ R.TestKitabi = (function(){
   }
   function ozetKapat(){ ozet = null; }
 
+  /* Çözdüklerim (Part 8b): kayıtlı bir bölüm sonucunu yeniden gözden geçir. */
+  function ozetAc(kitapId, no){
+    const k = bul(kitapId);
+    if(!k || !(k.sonuclar || {})[Number(no)]) return { ok:false, why:'Bu bölüm henüz çözülmedi.' };
+    ozet = { kitapId, no:Number(no) };
+    return { ok:true };
+  }
+
+  /* Kitabın kullanımı — HESAPLANDI: çözülen bölüm ve o bölümlerin soruları.
+     Çözülmemiş bölüm sıfır doğru sayılmaz; yalnız «çözülmedi»dir. */
+  function ilerleme(k){
+    const b = (k && k.bolumler) || [];
+    const cozulen = b.filter(x => (k.sonuclar || {})[x.no]);
+    const soru = b.reduce((a, x) => a + x.sorular.length, 0);
+    const cozulenSoru = cozulen.reduce((a, x) => a + x.sorular.length, 0);
+    return { bolum:cozulen.length, toplamBolum:b.length, soru:cozulenSoru, toplamSoru:soru,
+      yuzde:soru ? Math.round(100 * cozulenSoru / soru) : 0, etiket:'hesaplandi' };
+  }
+
+  /* Yanlışlar yanlış defterine (Part 7 madde 9). Yalnız YANLIŞ cevaplar
+     (boş ve hatalı işaretli sorular hariç); aynı soru ikinci kez eklenmez.
+     Hata ETİKETİ uydurulmaz: boş kalır, kullanıcı defterde seçer —
+     etiketsiz kayıt hata dağılımına girmez (calc.js errorDistribution). */
+  function yanlislar(kitapId, no){
+    const k = bul(kitapId), b = bolumOf(k, Number(no));
+    const s = k && (k.sonuclar || {})[Number(no)];
+    if(!b || !s) return [];
+    return b.sorular.map((q, i) => ({ q, i, c:(s.cevaplar || [])[i] }))
+      .filter(x => x.c != null && x.c !== x.q.dogru
+        && (k.hatali || []).indexOf(anahtar(b.no, x.i)) < 0);
+  }
+
+  function deftereEklendi(kitapId, no, i){
+    return (R.S.errors || []).some(e => e.kaynak && e.kaynak.tur === 'testkitabi'
+      && e.kaynak.kitapId === kitapId && e.kaynak.no === Number(no) && e.kaynak.i === i);
+  }
+
+  async function yanlislariDeftere(kitapId, no){
+    const k = bul(kitapId), b = bolumOf(k, Number(no));
+    const s = k && (k.sonuclar || {})[Number(no)];
+    if(!b || !s) return { ok:false, why:'Bu bölümün sonucu yok.' };
+    const yeni = yanlislar(kitapId, no).filter(x => !deftereEklendi(kitapId, b.no, x.i));
+    const ids = [];
+    for(const x of yeni){
+      const err = {
+        id:R.U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
+        examId:null, examDate:s.tarih || R.U.todayISO(), publisher:'BAM test kitabı',
+        testName:(k.baslik + ' · ' + b.ad).slice(0, 160), questionNo:String(x.i + 1),
+        status:'Yanlış', tag:null, seconds:null, rootCause:'', principle:'', similar:'',
+        recipe:'', topicRef:'', subjectId:null, topicId:null,
+        topic:(b.konular && b.konular[0]) || b.ad,
+        soru:String(x.q.soru).slice(0, 600), senin:HARF[x.c], anahtar:HARF[x.q.dogru],
+        kaynak:{ tur:'testkitabi', kitapId, no:b.no, i:x.i },
+      };
+      await R.Model.saveError(err);
+      ids.push(err.id);
+    }
+    return { ok:true, eklenen:ids.length, ids,
+      zaten:yanlislar(kitapId, no).length - ids.length };
+  }
+
+  async function defterdenGeriAl(ids){
+    for(const id of ids || []) await R.Model.deleteError(id);
+  }
+
   /* Hatalı soru: işaret açılıp kapanır; bölümün son sonucu yeniden sayılır. */
   async function hataliIsaretle(kitapId, no, i){
     const k = bul(kitapId), b = bolumOf(k, Number(no));
@@ -35891,8 +35985,9 @@ R.TestKitabi = (function(){
   }
 
   return { ZORLUKLAR, VARSAYILAN, SINIR, kitaplar, bul, istekGovdesi, iste, kayittan,
-    yukle, kaydet, sil, teklifUygula, baslat, aktif, mevcut, sec, git, vazgec, bitir,
-    sonOzet, ozetKapat, hataliIsaretle, hesapla, sohbet, HARF };
+    yukle, kaydet, sil, teklifUygula, baslat, aktif, mevcut, sec, git, gitNo, vazgec, bitir,
+    sonOzet, ozetKapat, ozetAc, ilerleme, yanlislar, yanlislariDeftere, defterdenGeriAl,
+    hataliIsaretle, hesapla, sohbet, maliyetOku, HARF };
 })();
 
 /* ==== js/core/entry.js ==== */
@@ -35990,10 +36085,23 @@ R.Entry = (function(){
      hem paragraf sayacıdır hem genel soru sayısı gibi görünür;
      paragraf önce bakılır. */
 
+  /* Sayaçta sayı kelimeden önce («40 soru») ya da SONRA («soru 40»: kısa
+     kayıt, HKM'den Telegram'la gelir) durur. Sonra geliyorsa ardında süre
+     birimi olmamalı: «soru 40 dakika» bir sayaç değildir. */
+  const SONRA = '\\s+(\\d+)(?![\\d.,]|\\s*(?:dk|dakika|saat|sa)\\b)';
+  const sayac = ad => new RegExp('(\\d+|[a-zçğıöşü]+)\\s*(?:tane\\s*)?' + ad + '|' + ad + SONRA, 'i');
   const UYKU_RE  = /(\d+(?:[.,]\d+)?)\s*(saat|sa)\b[^.]*uyu/i;
-  const PARAGRAF_RE = /(\d+|[a-zçğıöşü]+)\s*(?:tane\s*)?paragraf/i;
-  const PROBLEM_RE  = /(\d+|[a-zçğıöşü]+)\s*(?:tane\s*)?problem/i;
-  const SORU_RE     = /(\d+|[a-zçğıöşü]+)\s*(?:tane\s*)?soru/i;
+  const PARAGRAF_RE = sayac('paragraf');
+  const PROBLEM_RE  = sayac('problem');
+  const SORU_RE     = sayac('soru');
+  /* Önce «40 soru» biçimi; oradaki kelime sayı değilse («matematik soru
+     30»da «matematik») sayı sonraki biçimden okunur. */
+  function sayacSayisi(m, text, ad){
+    const n = sayi(m[1] != null ? m[1] : m[2]);
+    if(n != null) return n;
+    const s = String(text).match(new RegExp(ad + SONRA, 'i'));
+    return s ? sayi(s[1]) : null;
+  }
   const DOGRU_RE    = /(\d+)\s*(?:'?[sy]i\s*)?(?:tane\s*)?(?:doğru|dogru|net)/i;
   const DAKIKA_RE   = /(\d+(?:[.,]\d+)?)\s*(dakika|dk|saat|sa)\b/i;
 
@@ -36008,7 +36116,7 @@ R.Entry = (function(){
   function parseParagraf(text){
     const m = String(text).match(PARAGRAF_RE);
     if(!m) return null;
-    const n = sayi(m[1]);
+    const n = sayacSayisi(m, text, 'paragraf');
     if(n == null || n <= 0 || n > 500) return null;
     return { kind:'paragraf', count:Math.round(n) };
   }
@@ -36016,7 +36124,7 @@ R.Entry = (function(){
   function parseProblem(text){
     const m = String(text).match(PROBLEM_RE);
     if(!m) return null;
-    const n = sayi(m[1]);
+    const n = sayacSayisi(m, text, 'problem');
     if(n == null || n <= 0 || n > 500) return null;
     return { kind:'problem', count:Math.round(n) };
   }
@@ -36024,7 +36132,7 @@ R.Entry = (function(){
   function parseSoru(text){
     const m = String(text).match(SORU_RE);
     if(!m) return null;
-    const n = sayi(m[1]);
+    const n = sayacSayisi(m, text, 'soru');
     if(n == null || n <= 0 || n > 1000) return null;
 
     const d = String(text).match(DOGRU_RE);
@@ -36709,7 +36817,7 @@ R.Palette = (function(){
     S2.errors.forEach(e => {
       if(hit(e.rootCause) || hit(e.topic) || hit(e.principle)){
         out.push({ group:'Yanlış', label:(e.topic || e.testName || 'Yanlış')+' — '+(e.rootCause||''),
-          sub:e.tag+' · '+(e.closedAt ? 'kapandı' : 'açık'), icon:'edit', weight:4,
+          sub:(e.tag || 'etiketsiz')+' · '+(e.closedAt ? 'kapandı' : 'açık'), icon:'edit', weight:4,
           run(){ S2.ui.cardTab = 'notebook'; R.App.go('cards'); } });
       }
     });
@@ -39483,7 +39591,8 @@ R.Screens.exams = (function(){
         ${raw(UI.tagDot(e.tag))}
         <div class="grow">
           <div class="row-sm"><b class="small">${label}</b>
-            ${K.Badge({ label:e.tag+' · '+R.ERROR_TAGS[e.tag].name, tone:'muted' })}
+            ${R.ERROR_TAGS[e.tag] ? K.Badge({ label:e.tag+' · '+R.ERROR_TAGS[e.tag].name, tone:'muted' })
+              : K.Badge({ label:'etiket yok', tone:'warn' })}
             ${when(e.status, () => K.Badge({ label:e.status, tone:'muted' }))}</div>
           <div class="tiny dim">${e.rootCause || 'kök neden yazılmadı'}</div>
           ${when(e.principle, () => html`<div class="tiny">İlke: ${e.principle}</div>`)}
@@ -40184,15 +40293,24 @@ R.Screens.cards = (function(){
     const exam = S.exams.find(x => x.id === e.examId);
     const base = e.createdAt ? e.createdAt.slice(0, 10) : U.todayISO();
     const dueDates = R.SRS_INTERVALS.map(d => U.fmtShort(U.addDays(U.parse(base), d))).join(' · ');
-    const source = exam ? exam.type+' · '+U.fmtShort(e.examDate || exam.date) : '—';
+    const source = exam ? exam.type+' · '+U.fmtShort(e.examDate || exam.date) : (e.testName || '—');
 
     return K.Card({ flat:true, pad:'sm', class:'stack-xs', body:html`
       <div class="row between wrap gap-6">
         <div class="row-sm">${raw(UI.tagDot(e.tag))}<b class="small">${e.topic || e.testName || 'Yanlış'}</b>
-          ${K.Badge({ label:e.tag+' · '+R.ERROR_TAGS[e.tag].name, tone:'muted' })}
+          ${R.ERROR_TAGS[e.tag]
+            ? K.Badge({ label:e.tag+' · '+R.ERROR_TAGS[e.tag].name, tone:'muted' })
+            : K.Badge({ label:'etiket yok', tone:'warn' })}
           ${when(e.status, () => K.Badge({ label:e.status, tone:'muted' }))}</div>
         <span class="tiny dim">${source}${e.questionNo ? ' · soru '+e.questionNo : ''}</span>
       </div>
+      ${when(e.soru, () => html`<div class="small">${String(e.soru).slice(0, 240)}</div>`)}
+      ${when(e.senin && e.anahtar, () => html`<div class="tiny dim">Senin cevabın ${e.senin} · doğru cevap ${e.anahtar}</div>`)}
+      ${when(!R.ERROR_TAGS[e.tag], () => html`<div class="stack-xs">
+        <div class="tiny dim">Hatanın türünü sen seç; seçmeden reçeteye ve hata dağılımına girmez.</div>
+        ${K.Row(Object.keys(R.ERROR_TAGS).map(k => K.Button({ label:k + ' · ' + R.ERROR_TAGS[k].name,
+          size:'sm', tone:'ghost', act:'error-tag', data:{ 'data-id':e.id, 'data-tag':k } })), { wrap:true })}
+      </div>`)}
       ${when(e.rootCause, () => html`<div class="small"><span class="dim">Kök neden:</span> ${e.rootCause}</div>`)}
       ${when(e.principle, () => html`<div class="small"><span class="dim">Doğru ilke:</span> ${e.principle}</div>`)}
       ${K.Row([
@@ -40373,6 +40491,17 @@ R.Screens.cards = (function(){
       err.closedAt = new Date().toISOString();
       await M.saveError(err);
       UI.toast('Yanlış kapatıldı');
+      R.App.render();
+    },
+    /* Etiketsiz yanlış (test kitabından gelen): türü kullanıcı seçer. */
+    async 'error-tag'(el){
+      const err = S.errors.find(e => e.id === el.dataset.id);
+      const t = R.ERROR_TAGS[el.dataset.tag];
+      if(!err || !t) return;
+      err.tag = el.dataset.tag;
+      if(!err.recipe) err.recipe = t.recipe;
+      await M.saveError(err);
+      UI.toast('Etiket: ' + t.name);
       R.App.render();
     },
     async 'repair-done'(el){
@@ -41231,23 +41360,50 @@ R.Screens.quiz = (function(){
   const TK = () => R.TestKitabi;
   const HARF = 'ABCDE';
 
+  /* Kütüphanem: BAM'ın ürettiği kitaplar, kaynağı, ölçülen maliyeti ve
+     ne kadarının çözüldüğü. Maliyet HKM'nin ölçümü (kitap eklenirken
+     alınır); kullanım AYS'nin hesabı. İkisi de etiketiyle yazılır. */
+  function maliyetYazi(m){
+    if(!m || m.etiket === 'veri_yok' || m.usd == null) return 'maliyet: veri yok';
+    const d = m.usd < 0.01 ? 4 : 2;
+    return 'maliyet ' + m.usd.toLocaleString('tr-TR', { minimumFractionDigits:d, maximumFractionDigits:d }) + ' USD'
+      + (m.cagri ? ' · ' + m.cagri + ' çağrı' : '') + (m.etiket === 'tahmin' ? ' (tahmin)' : ' (ölçüldü)');
+  }
+
   function kitapKarti(){
     const l = TK() ? TK().kitaplar() : [];
     if(!l.length) return null;
-    return K.Card({ title:'Test kitapları',
-      sub:'BAM üretti, her soru bağımsız çözümle denetlendi · kaynaksız',
-      body:html`<div class="stack-sm">${map(l, k => html`<div>
+    return K.Card({ title:'Kütüphanem · test kitapları',
+      sub:'BAM üretti, her soru bağımsız çözümle denetlendi',
+      body:html`<div class="stack-sm">${map(l, k => {
+        const il = TK().ilerleme(k);
+        return html`<div>
         <div class="row between wrap"><b class="small">${k.baslik}</b>
-          ${K.Badge({ label:k.dogruluk === 'kaynakli' ? 'kaynaklı' : 'doğrulanmadı',
+          ${K.Badge({ label:k.dogruluk === 'kaynakli' ? 'kaynaklı' : 'kaynaksız · doğrulanmadı',
             tone:k.dogruluk === 'kaynakli' ? 'ok' : 'warn' })}</div>
+        <div class="tiny dim">${il.bolum}/${il.toplamBolum} bölüm çözüldü · ${il.soru}/${il.toplamSoru}
+          soru (%${il.yuzde}, hesaplandı) · ${maliyetYazi(k.maliyet)}${k.eklenme
+          ? ' · eklendi ' + U.fmtShort(k.eklenme) : ''}</div>
         ${map(k.bolumler, b => {
           const s = (k.sonuclar || {})[b.no];
           return html`<div class="row between wrap mt-6">
             <span class="small">${b.no}. ${b.ad} · ${b.sorular.length} soru${s
               ? ' · son: ' + s.dogru + ' doğru, ' + s.yanlis + ' yanlış, ' + s.bos + ' boş' : ''}</span>
+            <span class="row-sm wrap">${when(s, () => K.Button({ label:'Gözden geçir', size:'sm',
+              tone:'ghost', act:'kitap-ozet', data:{ 'data-id':k.id, 'data-no':String(b.no) } }))}
             ${K.Button({ label:s ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'kitap-baslat',
-              data:{ 'data-id':k.id, 'data-no':String(b.no) } })}</div>`;
-        })}</div>`)}</div>` });
+              data:{ 'data-id':k.id, 'data-no':String(b.no) } })}</span></div>`;
+        })}</div>`;
+      })}</div>` });
+  }
+
+  /* Soru şeridi: bölümdeki her soruya tek dokunuş; cevaplılar dolu görünür.
+     Doğru/yanlış GÖSTERİLMEZ: cevaplar bölüm bitince açılır. */
+  function soruSeridi(m){
+    return html`<nav class="kitap-serit mb-10" aria-label="Sorular">${map(m.cevaplar, (c, i) => html`<button
+      class="${(c != null ? 'is-cevapli' : '') + (i === m.index ? ' is-simdi' : '')}"
+      data-act="kitap-no" data-i="${i}" aria-label="${'Soru ' + (i + 1) + (c != null ? ', cevaplı' : ', boş')}"
+      ${i === m.index ? raw('aria-current="step"') : ''}>${i + 1}</button>`)}</nav>`;
   }
 
   function kitapView(){
@@ -41258,6 +41414,7 @@ R.Screens.quiz = (function(){
       sub:'Soru ' + (m.index + 1) + ' / ' + m.toplam + ' · ' + m.cevapli
         + ' cevaplı · cevaplar bölüm bitince görünür',
       body:html`
+        ${soruSeridi(m)}
         <p class="mb-10">${s.soru}</p>
         <div class="choices">${map(s.secenekler, (x, i) => html`<button
           class="${'choice' + (m.secili === i ? ' is-picked' : '')}" data-act="kitap-sec"
@@ -41274,6 +41431,19 @@ R.Screens.quiz = (function(){
           ${K.Button({ label:'Bölümü bitir', size:'sm', tone:'primary', act:'kitap-bitir' })}
           ${K.Button({ label:'Vazgeç', size:'sm', act:'kitap-vazgec' })}
         </div>` }))]);
+  }
+
+  /* Yanlış defteri bağı (Part 7 madde 9): bölümün yanlışları deftere
+     tek dokunuşla gider; «Geri al» kalır. Etiket seçimi defterde. */
+  function defterSatiri(kitap, bolum){
+    const y = TK().yanlislar(kitap.id, bolum.no);
+    if(!y.length) return html`<p class="tiny dim mt-8">Bu bölümde yanlış yok; deftere eklenecek soru yok.</p>`;
+    const yeni = y.filter(x => !(S.errors || []).some(e => e.kaynak && e.kaynak.tur === 'testkitabi'
+      && e.kaynak.kitapId === kitap.id && e.kaynak.no === bolum.no && e.kaynak.i === x.i)).length;
+    if(!yeni) return html`<p class="tiny dim mt-8">${y.length} yanlışın hepsi yanlış defterinde.</p>`;
+    return html`<div class="row wrap mt-8">${K.Button({ label:'Yanlışları deftere ekle (' + yeni + ')',
+      size:'sm', act:'kitap-deftere', data:{ 'data-id':kitap.id, 'data-no':String(bolum.no) } })}
+      <span class="tiny dim">Hata türünü (K/İ/Y/S/D) defterde sen seçersin.</span></div>`;
   }
 
   function kitapSonucView(o){
@@ -41293,6 +41463,7 @@ R.Screens.quiz = (function(){
         ${when(zorluklar.length, () => html`<p class="tiny mt-6">Zorluğa göre (etiket modelin
           beyanı, doğru sayısı senin ölçümün): ${zorluklar.map(z => z + ' ' + sonuc.zorluk[z].dogru
           + '/' + sonuc.zorluk[z].toplam).join(' · ')}</p>`)}
+        ${defterSatiri(kitap, bolum)}
         <div class="mt-8">${K.Button({ label:'Kapat', size:'sm', tone:'primary', act:'kitap-kapat' })}</div>` }),
       K.Card({ title:'Gözden geçir', sub:'Anahtarı yanlış bulduğun soruyu işaretle; sonuca sayılmaz.',
         body:html`<div class="stack-sm">${map(bolum.sorular, (s, i) => {
@@ -41339,6 +41510,20 @@ R.Screens.quiz = (function(){
     },
     async 'kitap-sec'(el){ TK().sec(Number(el.dataset.i)); R.App.render(); },
     async 'kitap-git'(el){ TK().git(Number(el.dataset.d)); R.App.render(); },
+    async 'kitap-no'(el){ TK().gitNo(Number(el.dataset.i)); R.App.render(); },
+    async 'kitap-ozet'(el){
+      const r = TK().ozetAc(el.dataset.id, Number(el.dataset.no));
+      if(!r.ok){ UI.toast(r.why); return; }
+      R.App.render();
+    },
+    async 'kitap-deftere'(el){
+      const r = await TK().yanlislariDeftere(el.dataset.id, Number(el.dataset.no));
+      if(!r.ok){ UI.toast(r.why); return; }
+      R.App.render();
+      UI.toast(r.eklenen + ' soru yanlış defterine eklendi', { undo:async () => {
+        await TK().defterdenGeriAl(r.ids); R.App.render();
+      } });
+    },
     async 'kitap-bitir'(){
       const m = TK().mevcut();
       const bos = m ? m.toplam - m.cevapli : 0;

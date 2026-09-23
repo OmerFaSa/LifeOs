@@ -92,10 +92,23 @@ R.Entry = (function(){
      hem paragraf sayacıdır hem genel soru sayısı gibi görünür;
      paragraf önce bakılır. */
 
+  /* Sayaçta sayı kelimeden önce («40 soru») ya da SONRA («soru 40»: kısa
+     kayıt, HKM'den Telegram'la gelir) durur. Sonra geliyorsa ardında süre
+     birimi olmamalı: «soru 40 dakika» bir sayaç değildir. */
+  const SONRA = '\\s+(\\d+)(?![\\d.,]|\\s*(?:dk|dakika|saat|sa)\\b)';
+  const sayac = ad => new RegExp('(\\d+|[a-zçğıöşü]+)\\s*(?:tane\\s*)?' + ad + '|' + ad + SONRA, 'i');
   const UYKU_RE  = /(\d+(?:[.,]\d+)?)\s*(saat|sa)\b[^.]*uyu/i;
-  const PARAGRAF_RE = /(\d+|[a-zçğıöşü]+)\s*(?:tane\s*)?paragraf/i;
-  const PROBLEM_RE  = /(\d+|[a-zçğıöşü]+)\s*(?:tane\s*)?problem/i;
-  const SORU_RE     = /(\d+|[a-zçğıöşü]+)\s*(?:tane\s*)?soru/i;
+  const PARAGRAF_RE = sayac('paragraf');
+  const PROBLEM_RE  = sayac('problem');
+  const SORU_RE     = sayac('soru');
+  /* Önce «40 soru» biçimi; oradaki kelime sayı değilse («matematik soru
+     30»da «matematik») sayı sonraki biçimden okunur. */
+  function sayacSayisi(m, text, ad){
+    const n = sayi(m[1] != null ? m[1] : m[2]);
+    if(n != null) return n;
+    const s = String(text).match(new RegExp(ad + SONRA, 'i'));
+    return s ? sayi(s[1]) : null;
+  }
   const DOGRU_RE    = /(\d+)\s*(?:'?[sy]i\s*)?(?:tane\s*)?(?:doğru|dogru|net)/i;
   const DAKIKA_RE   = /(\d+(?:[.,]\d+)?)\s*(dakika|dk|saat|sa)\b/i;
 
@@ -110,7 +123,7 @@ R.Entry = (function(){
   function parseParagraf(text){
     const m = String(text).match(PARAGRAF_RE);
     if(!m) return null;
-    const n = sayi(m[1]);
+    const n = sayacSayisi(m, text, 'paragraf');
     if(n == null || n <= 0 || n > 500) return null;
     return { kind:'paragraf', count:Math.round(n) };
   }
@@ -118,7 +131,7 @@ R.Entry = (function(){
   function parseProblem(text){
     const m = String(text).match(PROBLEM_RE);
     if(!m) return null;
-    const n = sayi(m[1]);
+    const n = sayacSayisi(m, text, 'problem');
     if(n == null || n <= 0 || n > 500) return null;
     return { kind:'problem', count:Math.round(n) };
   }
@@ -126,7 +139,7 @@ R.Entry = (function(){
   function parseSoru(text){
     const m = String(text).match(SORU_RE);
     if(!m) return null;
-    const n = sayi(m[1]);
+    const n = sayacSayisi(m, text, 'soru');
     if(n == null || n <= 0 || n > 1000) return null;
 
     const d = String(text).match(DOGRU_RE);

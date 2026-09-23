@@ -158,7 +158,8 @@ def yoklama_metni(con, gun):
                                 ("intellect", "ESP")) if not denetim.get(vp)]
     satir = ["HKM · %s · akşam yoklaması" % gun,
              "Bugün ne yaptın? Tek cümle yeter: «2 saat matematik çalıştım, "
-             "7 saat uyudum, 30 dakika gitar çaldım»."]
+             "7 saat uyudum, 30 dakika gitar çaldım» ya da kısaca «soru 40, "
+             "uyku 7, gitar 30»."]
     if sessiz:
         satir.append("Bugün kaydı görünmeyen: %s." % ", ".join(sessiz))
     satir.append("Yazdığını ilgili modüle teklif olarak bırakırım; modülde sen "

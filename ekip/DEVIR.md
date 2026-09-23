@@ -147,6 +147,11 @@ Hâlâ açık: Y10 alıcısı · Y1'in yeri (HKM içi öneri) · telefonun ağda
   PWA) · Part 6 Y9 depo tarayıcısı ✅ · Part 7 madde 9 yanlış defteri ✅ · Part 5 sonu tam
   koşum ✅ (a410e31). Ayrıntı: arşiv.
 - Grup ilerleyişi aşağıya, her madde bitince tek satır:
+  - ✅ 8 Telegram tek kelime kayıt: `dil.kisa_kayit` («su 2, uyku 7, soru 40, gitar 30»;
+    yalnız «alan sayı [birim]», soru/plan/ileri gün değil) → `kayit.add`. AYS `entry.js`
+    «soru 40» okur, ESP `parse.js` «gitar 30» = 30 dk («kelime 15» sorulur). **Hata
+    düzeltmesi:** SPİ `quickentry.js` «su 2»yi 2 ml yazıyordu, «2 litre su içtim»i hiç
+    okumuyordu — artık litre/ml/bardak; birimsiz <20 litre, ≥50 ml, 20–49 sorulur.
 
 ## Kullanıcı kolaylığı fikirleri · 16 hızlı kazanç ONAYLI, gerisi ÖNERİ
 

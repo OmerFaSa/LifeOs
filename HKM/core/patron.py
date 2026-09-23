@@ -209,7 +209,7 @@ def respond(con, text, date=None, th=None, channel="local", now=None,
     # sayisini OKUMAZ: her parca ilgili modulun kuyruguna teklif olur, modul
     # kendi ayristiricisiyla okur ve onayla yazar.
     if komut is None:
-        bildirim = dil.rapor(text)
+        bildirim = dil.rapor(text) or dil.kisa_kayit(text)
         if bildirim:
             cevap = _kirp(_kayit_kur(con, bildirim, date, now))
             if kayit:
@@ -254,7 +254,8 @@ def respond(con, text, date=None, th=None, channel="local", now=None,
                  + "\n\n«yarın 2 saat matematik» gibi bir cümle yazarsan "
                    "ilgili sisteme teklif bırakırım. «bugün 2 saat matematik "
                    "çalıştım, 7 saat uyudum» gibi yaptığını yazarsan kaydını "
-                   "ilgili modüle teklif ederim.")
+                   "ilgili modüle teklif ederim; kısaca «su 2, uyku 7, soru 40» "
+                   "de olur.")
     elif komut == "yardim":
         cevap = "\n".join("«%s» — %s" % (c["id"], c["note"])
                           for c in COMMANDS)

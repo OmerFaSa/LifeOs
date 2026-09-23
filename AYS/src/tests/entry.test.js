@@ -59,6 +59,21 @@
       expect(R.Entry.parseOne('20 paragraf çözdüm').kind).toBe('paragraf');
     });
 
+    it('kısa kayıt: sayı sayaçtan SONRA da gelir («soru 40»)', () => {
+      /* Telegram'dan tek kelime kayıt (HKM kısa kayıt). Birim kelimenin
+         kendisidir: «soru 40» kırk soru demektir, tahmin yoktur. */
+      expect(R.Entry.parseOne('soru 40').count).toBe(40);
+      expect(R.Entry.parseOne('paragraf 20').kind).toBe('paragraf');
+      expect(R.Entry.parseOne('problem 5').count).toBe(5);
+      const m = R.Entry.parseOne('matematik soru 30');
+      expect(m.count).toBe(30);
+      expect(m.subject && m.subject.id).toBe(R.Entry.dersBul('matematik').id);
+      /* Ardından süre birimi gelen sayı sayaç değildir. */
+      expect(R.Entry.parseOne('soru 40 dakika')).toBeNull();
+      /* Dersle çıplak sayı («matematik 90») dakika mı soru mu bilinmez: okunmaz. */
+      expect(R.Entry.parseOne('matematik 90')).toBeNull();
+    });
+
     it('uyku saati ondalıklı olabilir', () => {
       expect(R.Entry.parseOne('7,5 saat uyudum').hours).toBe(7.5);
     });

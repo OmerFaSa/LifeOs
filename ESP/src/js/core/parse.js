@@ -121,6 +121,21 @@ ESP.Parse = (function(){
           minutes:dakika });
         return;
       }
+      /* KISA KAYIT: «gitar 30» (HKM'den Telegram'la gelir). Birimsiz sayi
+         yalniz disiplin + sayidan ibaret kisa parcada dakika sayilir; kayit
+         yine onizlenir ve onayla yazilir. Takma ad bir SAYIM kelimesiyse
+         («kelime 15») sayi dakika mi adet mi bilinmez: sorulur. */
+      const kisa = dakika == null && count == null
+        ? n.trim().match(/^([a-z ]{2,24}?)\s+(\d{1,3})$/) : null;
+      if(kisa && hit.alias === kisa[1].trim()){
+        if(/^(kelime|kart|sayfa|tekrar)$/.test(hit.alias)){
+          unmatched.push({ text:parca, disc:hit.disc,
+            why:'Sayının birimi yok: «' + kisa[2] + ' dakika» mı, «' + kisa[2] + ' ' + hit.alias + '» mı?' });
+          return;
+        }
+        const dk = Number(kisa[2]);
+        if(dk > 0 && dk <= 600) dakika = dk;
+      }
       if(dakika == null){
         /* Disiplin taniniyor ama sure yok: satir ATILMAZ, suresi eksik bir
            oneri olarak doner. Kullanici sureyi yazar. */

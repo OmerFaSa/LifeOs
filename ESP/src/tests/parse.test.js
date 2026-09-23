@@ -57,6 +57,22 @@
       expect(r.unmatched[0].disc).toBe('music');
     });
 
+    it('kisa kayit: «gitar 30» 30 dakikadir; sayim kelimesinde birimsiz sayi okunmaz', () => {
+      /* HKM'den Telegram'la gelen tek kelime kayit. Birimsiz sayi yalniz
+         KISA parcada (disiplin + sayi) dakika sayilir; onizleme gosterir,
+         kullanici onaylar. «kelime 15» 15 dakika mi 15 kelime mi: sorulur. */
+      const r = P.parseSession('gitar 30');
+      expect(r.rows.length).toBe(1);
+      expect(r.rows[0].disc).toBe('music');
+      expect(r.rows[0].minutes).toBe(30);
+      expect(P.parseSession('okuma 25').rows[0].minutes).toBe(25);
+      const k = P.parseSession('kelime 15');
+      expect(k.rows.length).toBe(0);
+      expect(k.unmatched[0].why).toContain('birimi');
+      /* Uzun cumledeki birimsiz sayi dakika sayilmaz. */
+      expect(P.parseSession('bugün gitarda 3 parça çalıştım').rows.length).toBe(0);
+    });
+
     it('sure var ama disiplin yoksa satir kaydedilmez, sorulur', () => {
       const r = P.parseSession('30 dakika uğraştım');
       expect(r.rows.length).toBe(0);

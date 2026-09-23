@@ -300,6 +300,20 @@
       expect(SP.Quick.parseVital('20 dakika uyudum')).toBeNull();
       expect(SP.Quick.parseVital('3 kere uyudum')).toBeNull();
     });
+
+    it('su birimiyle okunur; «su 2» 2 ml değildir', () => {
+      /* Alan ml tutar. Çıplak sayı eskiden olduğu gibi yazılıyordu
+         («su 2» → 2 ml) ve «2 litre su içtim» hiç okunmuyordu. */
+      const v = t => { const r = SP.Quick.parseVital(t); return r && r.field.id === 'water' ? r.value : null; };
+      expect(v('su 2')).toBe(2000);
+      expect(v('2 litre su içtim')).toBe(2000);
+      expect(v('1,5 lt su')).toBe(1500);
+      expect(v('su 500 ml')).toBe(500);
+      expect(v('su 750')).toBe(750);
+      expect(v('3 bardak su içtim')).toBe(600);
+      /* 20–49: ne makul litre ne makul ml — okunmaz, sorulur. */
+      expect(v('su 30')).toBe(null);
+    });
   });
 
   describe('Hareket — takma ad eşleşmesi', () => {

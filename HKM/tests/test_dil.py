@@ -168,6 +168,39 @@ def run():
         eq(dil.rapor("bugün çok yoruldum"), None)
     test("rapor tahmin etmez", t_report_never_guesses)
 
+    def t_short_entry():
+        """Telegram'dan tek kelime kayit («su 2», «uyku 7», «soru 40»): alan +
+        sayi. HKM sayiyi OKUMAZ, yalniz yonlendirir; birimi modul bilir. Ilk
+        kelimesi bir alan olmayan ya da soru/plan olan mesaj kayit sayilmaz."""
+        r = dil.kisa_kayit("su 2, uyku 7, soru 40")
+        eq([(p["modul"], p["metin"]) for p in r["parcalar"]],
+           [("spi", "su 2, uyku 7"), ("ays", "soru 40")])
+        eq(r["offset"], None)
+        r = dil.kisa_kayit("dün uyku 6 ve gitar 30")
+        eq(r["offset"], 1)
+        eq([(p["modul"], p["metin"]) for p in r["parcalar"]],
+           [("spi", "uyku 6"), ("esp", "gitar 30")])
+        eq(dil.kisa_kayit("su 500 ml")["parcalar"], [{"modul": "spi", "metin": "su 500 ml"}])
+        eq(dil.kisa_kayit("su 2 ve abc 5")["belirsiz"], ["abc 5"])
+        for t in ("merhaba", "yarın su 2", "su 2 mi?", "kaç soru 40", "2 saat matematik",
+                  "bugün hava çok güzel", "özet", "1", "abc 5", "onayla 2",
+                  "su 2 ve bugün çok yoruldum"):
+            eq(dil.kisa_kayit(t), None)
+    test("kisa kayit: alan + sayi", t_short_entry)
+
+    def t_short_entry_reaches_modules():
+        """Kisa kayit rapor gibi modul kuyruguna `kayit.add` teklifi birakir."""
+        con = _con()
+        r = patron.respond(con, "su 2, soru 40", date=BUGUN,
+                           now=BUGUN + "T12:00:00")
+        eq(r["command"], "kayit")
+        ok("SPİ" in r["text"] and "AYS" in r["text"])
+        kinds = [(x["module"], x["kind"], x["payload"]["metin"]) for x in
+                 [dict(row, payload=__import__("json").loads(row["payload"]))
+                  for row in con.execute("SELECT module, kind, payload FROM intents")]]
+        eq(sorted(kinds), [("ays", "kayit.add", "soru 40"), ("spi", "kayit.add", "su 2")])
+    test("kisa kayit modullere teklif olur", t_short_entry_reaches_modules)
+
     def t_negation_seen_through_dotless_i():
         """«çalışmadım» katlanmadan «madım» tasir; desen «madim» ariyordu
         ve olumsuz gecmisi hic gormuyordu."""
