@@ -204,6 +204,18 @@ def respond(con, text, date=None, th=None, channel="local", now=None,
     if kayit:
         log(con, channel, "user", text, now, agent=agent)
 
+    # Bir SORU degil bir RAPOR olabilir: «bugun 2 saat matematik calistim,
+    # 7 saat uyudum». Aksam yoklamasinin cevabi budur. HKM kaydi YAZMAZ ve
+    # sayisini OKUMAZ: her parca ilgili modulun kuyruguna teklif olur, modul
+    # kendi ayristiricisiyla okur ve onayla yazar.
+    if komut is None:
+        bildirim = dil.rapor(text)
+        if bildirim:
+            cevap = _kirp(_kayit_kur(con, bildirim, date, now))
+            if kayit:
+                log(con, channel, "manager", cevap, now, agent=agent)
+            return {"command": "kayit", "text": cevap, "date": date}
+
     # Bir SORU degil bir ISTEK olabilir: «yarin iki saat matematik».
     # HKM bunu modullere YAZMAZ; bir niyet kuyruga birakir ve modul
     # acilista sorar. Yazan yine moduldur.
@@ -240,7 +252,9 @@ def respond(con, text, date=None, th=None, channel="local", now=None,
                  + "\n".join("• %s — %s" % (c["id"], c["note"])
                              for c in COMMANDS if c["id"] != "basla")
                  + "\n\n«yarın 2 saat matematik» gibi bir cümle yazarsan "
-                   "ilgili sisteme teklif bırakırım.")
+                   "ilgili sisteme teklif bırakırım. «bugün 2 saat matematik "
+                   "çalıştım, 7 saat uyudum» gibi yaptığını yazarsan kaydını "
+                   "ilgili modüle teklif ederim.")
     elif komut == "yardim":
         cevap = "\n".join("«%s» — %s" % (c["id"], c["note"])
                           for c in COMMANDS)
@@ -319,6 +333,76 @@ def _niyet_kur(con, talep, ham):
             "HKM senin adına hiçbir yere yazmaz."
             % (modul.upper(), talep["date"], talep["minutes"], alan,
                modul.upper()))
+
+
+MODUL_AD = {"ays": "AYS", "spi": "SPİ", "esp": "ESP"}
+
+# Aksam yoklamasi (core/schedule.py `checkin`) gece yarisindan sonra
+# cevaplanabilir. Gun SOYLENMEMISSE ve dunun yoklamasi sorulmussa, cevap
+# DUNUN kaydidir: 00:30'da «2 saat calistim» diyen, biten gunu anlatir.
+YOKLAMA_GECE_SAATI = 4
+
+
+def _yoklama_soruldu_mu(con, gun):
+    return bool(con.execute(
+        "SELECT 1 FROM outbox WHERE kind='checkin' AND day=? LIMIT 1",
+        (gun,)).fetchone())
+
+
+def rapor_tarihi(con, date, now, offset):
+    """Kaydin gunu: soylendiyse o gun; soylenmediyse bugun — gece 04:00'e
+    kadar ve dunun yoklamasi sorulmussa dun. Ileri tarih yoktur."""
+    gun = datetime.date.fromisoformat(date)
+    if offset is not None:
+        return (gun - datetime.timedelta(days=max(0, int(offset)))).isoformat()
+    try:
+        an = datetime.datetime.fromisoformat(str(now))
+    except (TypeError, ValueError):
+        an = None
+    dun = (gun - datetime.timedelta(days=1)).isoformat()
+    if an is not None and an.date() == gun and an.hour < YOKLAMA_GECE_SAATI \
+            and _yoklama_soruldu_mu(con, dun):
+        return dun
+    return date
+
+
+def _kayit_kur(con, bildirim, date, now):
+    """Raporu modul kuyruklarina TEKLIF olarak birakir; cumleyi kod kurar.
+
+    Sayi okunmaz ve yazilmaz: modul okur, gosterir, onayla yazar. Miktari
+    ya da modulu anlasilmayan parca TAHMIN EDILMEZ, kullaniciya sorulur."""
+    gun = rapor_tarihi(con, date, now, bildirim.get("offset"))
+    birakilan, tekrar, hata = [], [], []
+    for p in bildirim.get("parcalar") or []:
+        metin = p["metin"][:400]
+        r = intents.create(con, p["modul"], "kayit.add",
+                           {"date": gun, "metin": metin}, "", source="patron")
+        ad = MODUL_AD.get(p["modul"], p["modul"].upper())
+        if not r.get("ok"):
+            hata.append("%s: %s" % (ad, "; ".join(r.get("errors") or [])))
+        elif r.get("duplicate"):
+            tekrar.append(ad)
+        else:
+            birakilan.append("%s («%s»)" % (ad, metin))
+    parca = []
+    if birakilan:
+        parca.append("%s günü için kaydını teklif olarak bıraktım: %s."
+                     % (gun, ", ".join(birakilan)))
+        parca.append("Modül açıldığında neyi nasıl okuduğunu gösterecek; "
+                     "onaylarsan KENDİ koduyla yazacak. HKM senin adına "
+                     "hiçbir yere yazmaz.")
+    if tekrar:
+        parca.append("%s için aynı kayıt zaten kuyrukta; ikinci kez "
+                     "bırakmadım." % ", ".join(tekrar))
+    for m in bildirim.get("miktarsiz") or []:
+        parca.append("«%s» — ne kadar olduğunu yazmadın; «2 saat», «40 soru» "
+                     "gibi miktarı da yazarsan teklif bırakırım." % m)
+    for m in bildirim.get("belirsiz") or []:
+        parca.append("«%s» — hangi modülün kaydı olduğunu anlamadım. Başına "
+                     "«AYS», «SPİ» ya da «ESP» yazarsan oraya bırakırım." % m)
+    for h in hata:
+        parca.append("Teklif kurulamadı — " + h)
+    return "\n".join(parca) or "Kayda geçecek bir şey bulamadım."
 
 
 def log(con, channel, role, text, now=None, agent="king"):

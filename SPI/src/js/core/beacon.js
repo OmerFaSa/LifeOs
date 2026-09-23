@@ -466,7 +466,7 @@ SP.Beacon = (function(){
      2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
-  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'plan.apply'];
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'plan.apply', 'kayit.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -577,6 +577,11 @@ SP.Beacon = (function(){
       if(!n || INTENT_KINDS.indexOf(n.kind) < 0 || !n.payload) return false;
       return !defter[String(n.id)];
     });
+    /* Gunun kaydi ONAYDAN ONCE okunur: kart «SPİ şöyle okudu» der. */
+    for(const n of gosterilecek){
+      if(n.kind !== 'kayit.add') continue;
+      try{ n.okuma = kayitOku(n); }catch(e){ n.okuma = null; }
+    }
     flushIntentReports().catch(function(){});
     return gosterilecek;
   }
@@ -634,9 +639,67 @@ SP.Beacon = (function(){
      dediğinde program HKM'den çekilir, SPİ'nin KENDİ planıyla sınanır
      (core/plan.js programSina) ve tutarsa öneri kapısından (orta seviye,
      geri alınabilir) yazılır. Tutmazsa eklenmez ve sebebi söylenir. */
-  const APPLIABLE = ['plan.apply'];
+  /* İKİNCİ İSTİSNA: `kayit.add` — kullanıcının KENDİ cümlesi («7 saat
+     uyudum»). HKM onu yalnız yönlendirir; ölçümü uyduran da yazan da HKM
+     değildir. Cümle SPİ'nin kendi ayrıştırıcısıyla okunur (core/proposals.js
+     fromText), kullanıcı neyin yazılacağını görür ve «Kaydet»e KENDİSİ
+     basar; yazım öneri kapısından geçer ve geri alınabilir kalır. Bu,
+     komut paletine aynı cümleyi yazmakla aynı yoldur. */
+  const APPLIABLE = ['plan.apply', 'kayit.add'];
 
-  function canApply(n){ return !!(n && APPLIABLE.indexOf(n.kind) >= 0); }
+  function canApply(n){
+    if(!n || APPLIABLE.indexOf(n.kind) < 0) return false;
+    if(n.kind === 'kayit.add') return !!(n.okuma && n.okuma.yazilacak.length);
+    return true;
+  }
+
+  function kayitOku(n){
+    const p = (n && n.payload) || {};
+    const gun = String(p.date || '');
+    const metin = String(p.metin || '').trim().slice(0, 400);
+    const out = { gun, yazilacak:[], yazilamaz:[], anlasilmayan:[] };
+    if(!U.isISO(gun) || gun > U.todayISO()){
+      out.yazilamaz.push({ metin, why:'Tarih geçersiz ya da ileri bir gün; kayıt ancak geçmiş bir güne yazılır.' });
+      return out;
+    }
+    if(!metin || !SP.Proposals){ out.anlasilmayan.push(metin); return out; }
+    const v = SP.Proposals.fromText(metin, { date:gun });
+    v.oneriler.forEach(function(x){
+      const pv = SP.Proposals.preview({ action:x.action, params:x.params });
+      const e = SP.Proposals.eylem(x.action) || {};
+      if(pv.ok){
+        out.yazilacak.push({ baslik:e.label || x.action, metin:x.metin,
+          satirlar:pv.rows.map(function(r){ return r.alan + ': ' + r.once + ' → ' + r.sonra; }),
+          action:x.action, params:x.params });
+      }else{
+        out.yazilamaz.push({ metin:x.metin, why:pv.why });
+      }
+    });
+    out.anlasilmayan = (v.anlasilmayan || []).slice();
+    return out;
+  }
+
+  async function kayitUygula(n){
+    const o = kayitOku(n);     /* onay aninda YENIDEN okunur */
+    if(!o.yazilacak.length){
+      return { ok:false, error:'SPİ bu kayıttan yazılacak bir şey çıkaramadı.' };
+    }
+    const yazilan = [];
+    for(let i = 0; i < o.yazilacak.length; i++){
+      const y = o.yazilacak[i];
+      const row = await SP.Proposals.propose({ action:y.action, params:y.params,
+        source:'istek', kaynak:'rules', metin:y.metin,
+        anahtar:'hkm-kayit:' + n.id + ':' + i, iz:[{ tur:'hkm-niyet', id:n.id }] });
+      if(!row) continue;
+      const r = await SP.Proposals.approve(row.id);
+      if(r && r.ok) yazilan.push(y.baslik);
+    }
+    if(!yazilan.length){
+      return { ok:false, error:'Kayıt yazılamadı; veriler arada değişmiş olabilir.' };
+    }
+    return { ok:true, note:yazilan.length + ' kayıt yazıldı (' + o.gun + ': ' + yazilan.join(', ')
+      + '). Danışma ekranından geri alabilirsin.' };
+  }
 
   async function acknowledgeIntent(n){
     if(!n) return { ok:false, error:'Teklif yok.' };
@@ -646,6 +709,7 @@ SP.Beacon = (function(){
   }
 
   async function applyIntent(n){
+    if(n && n.kind === 'kayit.add') return await kayitUygula(n);
     if(canApply(n) && n.kind === 'plan.apply' && SP.Plan) return await SP.Plan.programUygula(n);
     return { ok:false,
       error:'SPİ bir teklifi kendiliğinden uygulamaz: ölçüm de yük de senin '
@@ -734,7 +798,7 @@ SP.Beacon = (function(){
   return { load, save, settings, collect, payload, preview, contract, metric,
     urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
     intents, answerIntent, applyIntent, acknowledgeIntent, canApply,
-    INTENT_KINDS, APPLIABLE,
+    INTENT_KINDS, APPLIABLE, kayitOku,
     resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
     intentDoubts, clearDoubt,
     MODULE, CONTRACT, ASGARI_ARA_DK };

@@ -88,7 +88,9 @@ FARK = 1          # ilk iki aday arasinda en az bu fark
 #   · olumsuzluk + «kabul»  → BELIRSIZ, sorulur (bir kelimelik maliyet)
 #   · olumsuzluk + «ret»    → ret kalir (olumsuzluk reddi pekistirir)
 OLUMSUZ_KELIME = ("degil", "yok", "olmaz", "vazgectim", "hayir", "istemem")
-OLUMSUZ_EK = re.compile(r"m[iıuü]yor|maz\b|mez\b|madim|medim")
+# Desen KATLANMIS metinde aranir: «çalışmadım» katlanmadan «madım» tasir
+# ve «madim» deseni onu hic gormuyordu.
+OLUMSUZ_EK = re.compile(r"m[iu]yor|maz\b|mez\b|madim|medim|mamis|memis")
 
 ZAMAN = [
     (("bugun",), 0, 1),
@@ -175,7 +177,7 @@ def puanla(metin):
 
 
 def olumsuz(metin):
-    d = kucult(metin)
+    d = "".join(KATLA.get(c, c) for c in kucult(metin))
     if OLUMSUZ_EK.search(d):
         return True
     ks = terimler(metin)
@@ -260,17 +262,194 @@ def alan(metin):
     return None
 
 
+# ------------------------------------------------------------ gecmis kip
+#
+# «Bugun 2 saat matematik calistim» bir ISTEK degil bir RAPORDUR: olmus bir
+# isi haber verir. Istek sayilirsa HKM bugune 2 saatlik bir plan blogu
+# teklif ediyordu — kullanicinin bitirdigi isi, yapacagi is gibi.
+#
+# Yalniz 1. TEKIL sahsin gecmis eki aranir (katlanmis bicimde -dim/-tim,
+# -dum/-tum; «-mistim» da -tim ile biter). Cogul (-dik/-tik) ARANMAZ:
+# «matematik», «fizik», «pratik» o ekle biter ve «bugun 2 saat matematik»
+# cumlesini gecmis sandirirdi. Ayni sonla biten yaygin isimler ayrica
+# dislanir; kok en az bes harf olmali («tüm», «adım»).
+GECMIS_EK = re.compile(r"[dt][iu]m$")
+GECMIS_DEGIL = frozenset((
+    "yardim", "kendim", "derdim", "kaydim", "tadim", "kadim", "hadim",
+    "tutum", "umudum", "yurdum", "ordum", "maksadim", "muradim", "evladim",
+    "ustadim", "didim", "adimim"))
+
+
+def gecmis(metin):
+    """Cumlede 1. tekil sahsin gecmis kipinde bir fiil var mi?"""
+    for k in kelimeler(metin):
+        if len(k) >= 5 and k not in GECMIS_DEGIL and GECMIS_EK.search(k):
+            return True
+    return False
+
+
 def istek(metin, bugun):
     """Bir plan istegi mi? (varsa sozluk, yoksa None).
 
     Uc parca aranir: gun, sure, alan. Gun ve sure YOKSA istek kurulmaz;
-    eksigi tahmin etmek, kullanicinin plani ustunde tahmin yurutmektir."""
+    eksigi tahmin etmek, kullanicinin plani ustunde tahmin yurutmektir.
+    Gecmis kipteki cumle istek DEGILDIR, rapordur (`rapor`)."""
+    if gecmis(metin):
+        return None
     kayma = gun_kaydirma(metin)
     dakika = sure_dakika(metin)
     if kayma is None or dakika is None:
         return None
     t = datetime.date.fromisoformat(bugun) + datetime.timedelta(days=kayma)
     return {"date": t.isoformat(), "minutes": dakika, "field": alan(metin)}
+
+
+# ----------------------------------------------------------------- rapor
+#
+# «Bugun 2 saat matematik calistim, 7 saat uyudum ve 30 dk gitar caldim»
+# UC modulun kaydidir. HKM bu kaydi YAZMAZ ve sayilarini da OKUMAZ: cumleyi
+# yan cumlelerine boler, her birini hangi modulun isi oldugunu soyleyen
+# kelimeye gore o modulun kuyruguna TEKLIF olarak birakir (`kayit.add`).
+# Sayiyi modulun KENDI ayristiricisi okur ve kullanici onaylamadan yazmaz.
+#
+# Yonlendirme puanla yapilir: ders ve disiplin adlari (3) genel fiillerden
+# (1) agir basar — «2 saat tarih okudum» AYS'dir, ESP'nin okumasi degil.
+# Esitlikte TAHMIN EDILMEZ: parca «anlasilmayan» olarak kullaniciya doner.
+RAPOR_AYRAC = re.compile(r"\s+(?:ve|ayrıca|ayrica|bir de|sonra|artı|arti)\s+|;|,(?!\d)",
+                         re.IGNORECASE)
+
+RAPOR_ALAN = {
+    "ays": {"matematik": 3, "mat": 2, "turkce": 3, "paragraf": 3,
+            "fizik": 3, "kimya": 3, "biyoloji": 3, "tarih": 3, "cografya": 3,
+            "geometri": 3, "edebiyat": 3, "soru": 3, "problem": 3, "tyt": 3,
+            "ayt": 3, "deneme": 2, "felsefe": 2, "din": 2, "fen": 2,
+            "sosyal": 2, "net": 2},
+    "spi": {"uyku": 3, "uyudum": 3, "uyuyabildim": 3, "kilo": 3,
+            "kg": 3, "tarti": 3, "tartildim": 3, "su": 3, "litre": 2,
+            "bardak": 1, "nabiz": 3, "hrv": 3, "yuruyus": 3, "yurudum": 3,
+            "kosu": 3, "kostum": 3, "km": 2, "adim": 3, "spor": 3,
+            "antrenman": 3, "egzersiz": 3, "bisiklet": 3, "yuzme": 3,
+            "yuzdum": 3, "fitness": 3, "salon": 2, "yoga": 3, "pilates": 3,
+            "esneme": 3, "mekik": 3, "yedim": 2, "ictim": 1,
+            "kahvalti": 3, "ogun": 3, "kalori": 3, "protein": 3},
+    "esp": {"dil": 3, "ingilizce": 3, "almanca": 3,
+            "fransizca": 3, "ispanyolca": 3, "italyanca": 3, "rusca": 3,
+            "arapca": 3, "japonca": 3, "kelime": 3, "shadowing": 3,
+            "gitar": 3, "piyano": 3, "keman": 3, "bateri": 3, "muzik": 3,
+            "enstruman": 3, "metronom": 3, "gam": 2, "caldim": 1, "kitap": 3,
+            "sayfa": 2, "okudum": 1, "okuma": 2, "yazi": 3, "yazdim": 1,
+            "taslak": 3, "diksiyon": 3, "tekerleme": 3, "felsefe": 2,
+            "arguman": 3},
+}
+
+# Modul adi yazilmissa («ESP'ye 30 dk dil») yonlendirme ondan gelir.
+RAPOR_MODUL_AD = {"ays": ("ays", "aysde", "aysye", "aysa"),
+                  "spi": ("spi", "spide", "spiye", "spiya"),
+                  "esp": ("esp", "espde", "espye", "espe")}
+
+
+def rapor_modulu(parca):
+    """Parca hangi modulun kaydi: (modul, puanlar). Esitlikte modul None."""
+    ks = terimler(parca)
+    puan = {}
+    for mod, sozluk in RAPOR_ALAN.items():
+        p = sum(agirlik for kelime, agirlik in sozluk.items() if kelime in ks)
+        if any(a in ks for a in RAPOR_MODUL_AD[mod]):
+            p += 10
+        if p:
+            puan[mod] = p
+    if not puan:
+        return None, puan
+    sirali = sorted(puan.items(), key=lambda x: -x[1])
+    if len(sirali) > 1 and sirali[0][1] == sirali[1][1]:
+        return None, puan
+    return sirali[0][0], puan
+
+
+def _miktarli(parca):
+    """Kaydedilecek bir MIKTAR var mi: rakam, «iki saat», «yarim saat».
+    «bir» tek basina miktar sayilmaz: «bir kitap okudum» sayfa soylemez."""
+    if re.search(r"\d", str(parca or "")):
+        return True
+    if sure_dakika(parca) is not None:
+        return True
+    return any(k in YAZI_SAYI and k != "bir" for k in kelimeler(parca))
+
+
+def rapor_gunu(metin):
+    """«dun» → 1 gun once. Soylenmemisse None: varsayilani cagiran bilir
+    (gece yarisindan sonra gelen yoklama cevabi dunun kaydidir)."""
+    ks = terimler(metin)
+    if "evvelsi" in ks or "onceki gun" in " ".join(kelimeler(metin)):
+        return 2
+    if "dun" in ks:
+        return 1
+    if "bugun" in ks:
+        return 0
+    return None
+
+
+# Soru bir kayit degildir: «dun kac saat uyudum?» gecmis kiptedir ama bir
+# SORUDUR; rapor sanilsaydi «ne kadar oldugunu yazmadin» diye geri sorulurdu.
+SORU_KELIME = frozenset(("mi", "mu", "misin", "miyim", "midir", "miydi", "musun",
+                         "kac", "kacta", "nasil", "neden", "niye", "nicin",
+                         "hangi", "nerede", "ne"))
+
+
+def soru_mu(metin):
+    if "?" in str(metin or ""):
+        return True
+    return any(k in SORU_KELIME for k in kelimeler(metin))
+
+
+def rapor(metin):
+    """Gecmis kipteki bir kayit bildirimi mi? (varsa sozluk, yoksa None).
+
+    Doner: {"offset": gun farki ya da None, "parcalar": [{"modul", "metin"}],
+            "miktarsiz": [metin], "belirsiz": [metin]}
+
+    Ileri bir gun soylenmisse («yarin 2 saat calistim») rapor KURULMAZ:
+    celiskili cumle tahminle cozulmez."""
+    if not gecmis(metin) or soru_mu(metin):
+        return None
+    ileri = gun_kaydirma(metin)
+    if ileri:
+        return None
+    parcalar, miktarsiz, belirsiz = [], [], []
+    onceki = None
+    for ham in RAPOR_AYRAC.split(str(metin or "")):
+        p = (ham or "").strip(" .!?")
+        if len(p) < 3:
+            continue
+        if olumsuz(p):
+            # «bugun matematik calismadim» bir kayit degildir: yazilacak
+            # bir miktar yok, sorulacak bir sey de yok.
+            onceki = None
+            continue
+        mod, puan = rapor_modulu(p)
+        if not _miktarli(p):
+            # Miktari olmayan parca bir kayit degildir; alani biliniyorsa
+            # sorulur, bilinmiyorsa («bugun yorgundum») sessizce gecer.
+            if mod or puan:
+                miktarsiz.append(p)
+            continue
+        if mod is None and not puan and onceki:
+            # «40 soru cozdum, 32'si dogru»: alan soylemeyen miktar,
+            # onceki parcanin devamidir.
+            mod = onceki
+        if mod is None:
+            belirsiz.append(p)
+            onceki = None
+            continue
+        if parcalar and parcalar[-1]["modul"] == mod:
+            parcalar[-1]["metin"] += ", " + p
+        else:
+            parcalar.append({"modul": mod, "metin": p})
+        onceki = mod
+    if not (parcalar or miktarsiz or belirsiz):
+        return None
+    return {"offset": rapor_gunu(metin), "parcalar": parcalar,
+            "miktarsiz": miktarsiz, "belirsiz": belirsiz}
 
 
 def cozum_tarihi(bugun, ayrinti):

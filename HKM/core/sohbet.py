@@ -363,8 +363,12 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     # gun ve sure birlikte gecmiyorsa None doner — bu yuzden olagan
     # sohbeti kacirmaz.
     istek = None if komut else dil.istek(metin, date)
+    # 1c — RAPOR. «Bugun 2 saat matematik calistim» olmus bir isin haberidir
+    # (aksam yoklamasinin cevabi): ilgili modullere kayit teklifi olur.
+    # Model bu cumleye yalniz laf donseydi kayit hic dogmazdi.
+    rapor = None if (komut or istek) else dil.rapor(metin)
 
-    if (komut or istek) and gorevli == "king":
+    if (komut or istek or rapor) and gorevli == "king":
         r = patron.respond(con, metin, date=date, th=th, channel=kanal,
                            agent=gorevli, kayit=kayit)
         return {"ok": True, "mode": "komut", "command": r["command"],

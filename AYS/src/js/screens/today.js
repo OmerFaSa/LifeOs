@@ -716,10 +716,12 @@ R.Screens.today = (function(){
         </div>`)}
         ${map(liste, n => html`<div class="mt-8">
           ${c.Notice({ tone:'info', body:n.note })}
+          ${when(n.kind === 'kayit.add', () => KayitOkuma(n))}
           <div class="row gap-8 mt-8">
             ${/* Uygulanamayan turde «Uygula» CIKMAZ: gorunen eylem,
                   yapilabilen eylemle ayni olmali. */''}
-            ${when(R.Beacon.canApply(n), () => c.Button({ label:'Uygula',
+            ${when(R.Beacon.canApply(n), () => c.Button({
+              label:n.kind === 'kayit.add' ? 'Kaydet' : 'Uygula',
               size:'sm', tone:'primary', act:'hkm-intent-yes',
               data:{ 'data-id':String(n.id) } }))}
             ${when(!R.Beacon.canApply(n), () => c.Button({ label:'Gördüm',
@@ -733,6 +735,24 @@ R.Screens.today = (function(){
           AYS kendi planına yazar; reddedersen HKM kaydı siler değil
           «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş
           bir teklif ayrı şeylerdir.</p>` });
+  }
+
+  /* Gunun kaydi: AYS cumleyi NASIL OKUDU. Onaydan once gorunur; yazilamayan
+     ve anlasilmayan parca da SEBEBIYLE yazilir — sessizce dusen bir parca,
+     kullanicinin yazildigini sandigi bir kayit olurdu. */
+  function KayitOkuma(n){
+    const o = n.okuma;
+    if(!o) return html`<p class="tiny dim mt-8">AYS bu kaydı okuyamadı.</p>`;
+    return html`<div class="mt-8">
+      <p class="tiny"><b>AYS şöyle okudu</b> (${o.gun}):</p>
+      <ul class="tiny mt-4">
+        ${map(o.yazilacak, y => html`<li>${y.baslik}: ${y.satirlar.join('; ')}</li>`)}
+        ${map(o.yazilamaz, y => html`<li class="dim">«${y.metin}» — yazılmayacak: ${y.why}</li>`)}
+        ${map(o.anlasilmayan, m => html`<li class="dim">«${m}» — anlaşılmadı, yazılmayacak.</li>`)}
+      </ul>
+      ${when(!o.yazilacak.length, () => html`<p class="tiny dim">Bu cümleden AYS'ye
+        yazılacak bir şey çıkmadı; istersen kaydı elle gir.</p>`)}
+    </div>`;
   }
 
   /* ---------- HKM seridi: KUCUK ve HER GUN ORADA

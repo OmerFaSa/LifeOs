@@ -49,7 +49,7 @@ THRESHOLD_RANGE = {
 
 SCHEDULE_FIELDS = {
     "enabled": bool, "channel": str, "morning": str, "evening": str,
-    "weekly_day": str, "weekly_time": str, "tolerance_minutes": int,
+    "checkin": str, "weekly_day": str, "weekly_time": str, "tolerance_minutes": int,
     "maintenance": bool, "maintenance_time": str, "keep_days": int,
 }
 
@@ -163,7 +163,7 @@ def validate(patch):
                     hata.append("schedule.%s bir sayı olmalı" % k)
                 elif tip is str and not isinstance(v, str):
                     hata.append("schedule.%s bir dize olmalı" % k)
-                elif k in ("morning", "evening", "weekly_time",
+                elif k in ("morning", "evening", "checkin", "weekly_time",
                            "maintenance_time") and v and not SAAT.match(v):
                     # «8» ya da «25:00» sessizce kabul edilirse, is hic
                     # calismaz ve kullanici sebebini bulamaz.

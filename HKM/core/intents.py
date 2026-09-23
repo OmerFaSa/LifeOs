@@ -100,6 +100,16 @@ KINDS = {
         "optional": ("baslik", "why"),
         "note": "BAM'ın ürettiği ürünü (özet, rapor, sunum, görsel…) materyal olarak ekleme teklifi.",
     },
+    # Kullanicinin sohbette bildirdigi GUNUN KAYDI («2 saat matematik
+    # calistim», «7 saat uyudum»). HKM cumleyi yalniz yan cumlelerine boler
+    # ve ilgili modulun kuyruguna birakir; SAYIYI OKUMAZ. Modul metni KENDI
+    # ayristiricisiyla okur, ne yazacagini gosterir ve onayla yazar.
+    "kayit.add": {
+        "modules": ("ays", "spi", "esp"),
+        "required": ("date", "metin"),
+        "optional": ("why",),
+        "note": "Sohbette bildirilen günün kaydı; modül kendi ayrıştırıcısıyla okur, önizler, onayla yazar.",
+    },
     "measure.ask": {
         "modules": ("spi",),
         "required": ("date", "metric"),
@@ -121,6 +131,7 @@ FIELD_RULES = {
     "hedef_id": ("str", 1, 40), "hafta": ("int", 1, 104),
     "ders": ("int", 1, 30), "konu": ("int", 1, 2000),
     "bolum": ("int", 1, 10), "soru": ("int", 1, 200), "urun": ("str", 1, 40),
+    "metin": ("str", 3, 400),
 }
 
 
@@ -218,6 +229,10 @@ def _cumle(module, kind, payload):
     if kind == "urun.add":
         return ("%s: BAM «%s» hazırladı. Materyal olarak eklensin mi?"
                 % (ad, p.get("baslik") or p.get("urun")))
+    if kind == "kayit.add":
+        return ("%s: %s günü için yazdığın «%s» kayda geçsin mi? %s kendi okuduğunu "
+                "gösterecek; onaylarsan kendi koduyla yazar." % (
+                    ad, gun, p.get("metin"), ad))
     if kind == "measure.ask":
         return "%s: %s günü için «%s» ölçümünü girmeyi unutma." % (
             ad, gun, p.get("metric"))

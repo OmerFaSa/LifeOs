@@ -417,6 +417,58 @@
        2. is en fazla BIR KEZ yapilir (cift tiklama, yeniden yukleme),
        3. «uygulandi ama merkeze bildirilemedi» hali KAYBOLMAZ,
        4. yarida kalan uygulama «olmus» da «olmamis» da sayilmaz. */
+  /* Akşam yoklaması: «7 saat uyudum» kullanıcının KENDİ cümlesidir. HKM
+     onu yalnız yönlendirir; SPİ kendi ayrıştırıcısıyla okur, neyin
+     yazılacağını gösterir ve kullanıcı «Kaydet» derse öneri kapısından
+     yazar. Sağlıkta ölçümü uyduran da yazan da HKM olamaz. */
+  describe('HKM teklifi — günün kaydı (akşam yoklaması)', () => {
+    const teklif = (metin, patch) => Object.assign({ id:51, kind:'kayit.add', note:'not',
+      payload:{ date:DUN, metin } }, patch || {});
+
+    it('SPİ cümleyi kendi okur; onaydan önce hiçbir şey yazılmaz', () => {
+      resetState();
+      const o = B().kayitOku(teklif('7 saat uyudum ve 30 dakika yürüdüm'));
+      expect(o.yazilacak.map(y => y.action)).toEqual(['vital-yaz', 'seans-ekle']);
+      expect(o.yazilacak[0].satirlar[0]).toContain('7 saat');
+      expect(SP.Model.vitalsOf(DUN)).toBeNull();
+      expect(SP.S.workouts.length).toBe(0);
+    });
+
+    it('«Kaydet» o günün kaydına yazar ve geri alınabilir', async () => {
+      resetState(); await ayarla({}); await B().load();
+      const n = teklif('7 saat uyudum');
+      n.okuma = B().kayitOku(n);
+      expect(B().canApply(n)).toBe(true);
+      await withFetch(async () => {
+        const r = await B().resolveIntent(n, 'apply');
+        expect(r.ok).toBe(true);
+        expect(r.applied).toBe(true);
+      }, { status:200 });
+      expect(SP.Model.vitalsOf(DUN).sleep).toBe(7);
+      const row = SP.Proposals.all().find(p => p.action === 'vital-yaz' && p.status === 'applied');
+      expect(Boolean(row)).toBe(true);
+      await SP.Proposals.undo(row.id);
+      expect(SP.Model.vitalsOf(DUN).sleep == null).toBe(true);
+    });
+
+    it('okunamayan cümleye «Kaydet» çıkmaz', async () => {
+      resetState();
+      const n = teklif('bugün çok güzel bir gündü');
+      n.okuma = B().kayitOku(n);
+      expect(n.okuma.yazilacak.length).toBe(0);
+      expect(n.okuma.anlasilmayan.length).toBe(1);
+      expect(B().canApply(n)).toBe(false);
+      expect((await B().applyIntent(n)).ok).toBe(false);
+    });
+
+    it('ileri bir güne kayıt yazılmaz', () => {
+      resetState();
+      const yarin = SP.U.iso(SP.U.addDays(SP.U.parse(BUGUN), 1));
+      const o = B().kayitOku(teklif('x', { payload:{ date:yarin, metin:'7 saat uyudum' } }));
+      expect(o.yazilacak.length).toBe(0);
+    });
+  });
+
   describe('HKM teklifi — yaşam döngüsü', () => {
 
     const TEKLIF = { id:7, kind:'plan.add', note:'not',

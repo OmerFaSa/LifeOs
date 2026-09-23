@@ -477,7 +477,7 @@ R.Beacon = (function(){
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
   const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'mufredat.add',
-    'kitap.add'];
+    'kitap.add', 'kayit.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -588,6 +588,12 @@ R.Beacon = (function(){
       if(!n || INTENT_KINDS.indexOf(n.kind) < 0 || !n.payload) return false;
       return !defter[String(n.id)];
     });
+    /* Gunun kaydi ONAYDAN ONCE okunur: kart «AYS şöyle okudu» der ve
+       kullanici neyin yazilacagini gorerek karar verir. */
+    for(const n of gosterilecek){
+      if(n.kind !== 'kayit.add') continue;
+      try{ n.okuma = await kayitOku(n); }catch(e){ n.okuma = null; }
+    }
     flushIntentReports().catch(function(){});
     return gosterilecek;
   }
@@ -639,10 +645,76 @@ R.Beacon = (function(){
      Once kabul listesi uc tur sayiyor ama uygulama yalnizca plan.add
      yapiyordu: gorunur bir «Uygula» dugmesi, basildiginda «bu teklif turu
      uygulanmaz» diyordu. Gorunen eylem, yapilabilen eylemle ayni olmali. */
-  const APPLIABLE = ['plan.add', 'material.add', 'mufredat.add', 'kitap.add'];
+  const APPLIABLE = ['plan.add', 'material.add', 'mufredat.add', 'kitap.add', 'kayit.add'];
 
+  /* Gunun kaydi ancak AYS ondan yazilacak bir sey OKUYABILDIYSE
+     uygulanabilir: okunamayan bir cumleye «Kaydet» dugmesi, basilinca
+     «yazılacak bir şey yok» diyen bir dugme olurdu. */
   function canApply(n){
-    return !!(n && APPLIABLE.indexOf(n.kind) >= 0);
+    if(!n || APPLIABLE.indexOf(n.kind) < 0) return false;
+    if(n.kind === 'kayit.add') return !!(n.okuma && n.okuma.yazilacak.length);
+    return true;
+  }
+
+  /* ---------- günün kaydı (kayit.add) — akşam yoklamasının cevabı
+
+     HKM cümleyi yalnız YÖNLENDİRİR; sayısını okumaz. «2 saat matematik
+     çalıştım» burada AYS'nin KENDİ ayrıştırıcısıyla okunur (core/entry.js),
+     her parça öneri kapısından geçer (core/proposals.js) ve kullanıcı neyin
+     yazılacağını ONAYDAN ÖNCE görür. Yazılamayan parça (o gün o dersin
+     bloğu yok gibi) sebebiyle gösterilir: uydurma blok açılmaz. Yazılan
+     kayıt Ofis ekranından geri alınabilir. */
+  async function kayitOku(n){
+    const p = (n && n.payload) || {};
+    const gun = String(p.date || '');
+    const metin = String(p.metin || '').trim().slice(0, 400);
+    const out = { gun, yazilacak:[], yazilamaz:[], anlasilmayan:[] };
+    if(!U.isISO(gun) || gun > U.todayISO()){
+      out.yazilamaz.push({ metin, why:'Tarih geçersiz ya da ileri bir gün; kayıt ancak geçmiş bir güne yazılır.' });
+      return out;
+    }
+    if(!metin || !R.Entry || !R.Proposals){ out.anlasilmayan.push(metin); return out; }
+    await R.Model.ensureDay(gun);
+    const v = R.Entry.fromText(metin, { date:gun });
+    v.oneriler.forEach(function(x){
+      const pv = R.Proposals.preview({ action:x.action, agent:'patron', params:x.params });
+      const def = R.ACTION_BY_ID[x.action] || {};
+      if(pv.ok){
+        out.yazilacak.push({ baslik:def.title || x.action, metin:x.metin,
+          satirlar:pv.rows.map(function(r){ return r.label + ': ' + r.before + ' → ' + r.after; }),
+          action:x.action, params:x.params });
+      }else{
+        out.yazilamaz.push({ metin:x.metin, why:pv.why });
+      }
+    });
+    out.anlasilmayan = (v.anlasilmayan || []).slice();
+    return out;
+  }
+
+  async function kayitUygula(n){
+    /* Onay aninda YENIDEN okunur: kart cizildikten sonra veri degismis
+       olabilir (blok bitmis, gun acilmis). */
+    const o = await kayitOku(n);
+    if(!o.yazilacak.length){
+      return { ok:false, error:'AYS bu kayıttan yazılacak bir şey çıkaramadı.' };
+    }
+    const yazilan = [];
+    for(let i = 0; i < o.yazilacak.length; i++){
+      const y = o.yazilacak[i];
+      /* Tek uygulama anahtari: ag yuzunden ikinci kez gelen ayni kayit
+         ikinci kez yazilmaz. */
+      const row = await R.Proposals.propose({ action:y.action, agent:'patron', source:'istek',
+        params:y.params, reason:'HKM akşam kaydı: ' + y.metin,
+        anahtar:'hkm-kayit:' + n.id + ':' + i, iz:[{ tur:'hkm-niyet', id:n.id }] });
+      if(!row) continue;
+      const r = await R.Proposals.approve(row.id);
+      if(r && r.ok) yazilan.push(y.baslik);
+    }
+    if(!yazilan.length){
+      return { ok:false, error:'Kayıt yazılamadı; veriler arada değişmiş olabilir.' };
+    }
+    return { ok:true, note:yazilan.length + ' kayıt yazıldı (' + o.gun + ': ' + yazilan.join(', ')
+      + '). Ofis ekranından geri alabilirsin.' };
   }
 
   /* ---------- BAM materyali (HKM core/bam.py)
@@ -694,6 +766,7 @@ R.Beacon = (function(){
   }
 
   async function applyIntent(n){
+    if(n && n.kind === 'kayit.add') return await kayitUygula(n);
     if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
     if(n.kind === 'material.add') return await materyalUygula(n.payload || {});
     /* BAM'ın müfredat raporu → sınav profili (core/sinavprofil.js). Kayıt
@@ -815,7 +888,7 @@ R.Beacon = (function(){
   return { load, save, settings, collect, payload, preview, contract, metric,
     urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
     intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE,
-    resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
+    kayitOku, resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
     intentDoubts, clearDoubt,
     MODULE, CONTRACT, ASGARI_ARA_DK };
 })();

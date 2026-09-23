@@ -813,6 +813,35 @@ ve «Sohbet kanalına gönder» (`POST /api/weekly/gonder`, zamanlanmış işin 
 aynı gün ikinci kez kuyruğa girmez). Testler: `tests/test_ritim.py`,
 `tests/test_daemon.py`.
 
+## 8.25 Akşam yoklaması — `core/dil.py` `rapor()`, niyet `kayit.add`
+
+Bot akşam **sorar** (`schedule.checkin`, örnek «21:30»; boş = kapalı; HKM ›
+Ayarlar › Otomatik mesajlar › «Akşam yoklaması»): «Bugün ne yaptın?» ve o gün
+kaydı gelmeyen modüllerin adı. Soru sayı söylemez, emir kipi taşımaz.
+
+Cevap sohbete gelir (Telegram, WhatsApp ya da HKM yüzü — tek yol,
+`sohbet.konus`). **Geçmiş kip** (`dil.gecmis`: yalnız 1. tekil şahıs -dım/-tım,
+-mıştım; «matematik»in -tik sonu geçmiş sayılmaz, «yardım» gibi isimler
+dışlanır) bir **rapordur**, plan isteği değildir: `dil.istek` artık geçmiş
+kipte `None` döner. `dil.rapor` cümleyi yan cümlelerine böler ve her parçayı
+modülün kelimesine göre yönlendirir (ders adı genel fiilden ağır basar;
+eşitlikte tahmin edilmez). Miktarı olmayan («matematik çalıştım») ya da
+modülü belirsiz parça sorulur; olumsuz cümle («çalışmadım») kayıt değildir.
+
+HKM **sayıyı okumaz ve hiçbir modüle yazmaz**: her parça `kayit.add`
+(`date`, `metin`) teklifi olur. Modül metni KENDİ ayrıştırıcısıyla okur
+(AYS `core/entry.js`, SPİ `core/proposals.js` `fromText`, ESP `core/parse.js`),
+teklif kartında «… şöyle okudu» satırlarını onaydan ÖNCE gösterir; «Kaydet»
+AYS ve SPİ'de öneri kapısından geçer (geri alınabilir), ESP'de oturum yazar.
+Okunamayan parça sebebiyle gösterilir; AYS o gün planlanmış bloğu olmayan
+derse uydurma blok açmaz.
+
+Gün söylenmemişse bugündür; gece 04:00'e kadar gelen ve dünün yoklaması
+sorulmuş cevap **dünün** kaydıdır (`patron.rapor_tarihi`). İleri tarihli
+kayıt yazılmaz. Testler: `tests/test_dil.py`, `tests/test_intents.py`,
+`tests/test_ritim.py`, `tests/test_sohbet.py`, modüllerin `beacon.test.js`,
+`tools/entegre.js` §0.6 ve §2.75.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

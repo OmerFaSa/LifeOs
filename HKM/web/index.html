@@ -1266,6 +1266,9 @@ details.detay > summary:hover{ color:var(--fg); }
           'Günün özeti ve varsa tek öneri', z.morning, '08:00')
       + ritimSaat('ritim-aksam', 'Akşam kapanışı',
           'Günün sonunda ne ölçüldü', z.evening, '21:00')
+      + ritimSaat('ritim-yoklama', 'Akşam yoklaması',
+          '«Bugün ne yaptın?» diye sorar; cevabın ilgili modüle teklif olur',
+          z.checkin, '21:30')
       + ritimSaat('ritim-hgun', 'Haftalık rapor',
           'Gün adı yaz (pazartesi, salı…). Boş bırakırsan gönderilmez',
           z.weekly_day, 'pazartesi', 'text')
@@ -1291,6 +1294,7 @@ details.detay > summary:hover{ color:var(--fg); }
       enabled:$('ritim-acik').checked,
       morning:$('ritim-sabah').value.trim(),
       evening:$('ritim-aksam').value.trim(),
+      checkin:$('ritim-yoklama').value.trim(),
       weekly_day:$('ritim-hgun').value.trim().toLowerCase(),
     } };
     var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
@@ -2735,12 +2739,13 @@ details.detay > summary:hover{ color:var(--fg); }
     date:'Tarih', minutes:'Süre (dakika)', subject:'Ders',
     topic:'Konu', disc:'Disiplin', focus:'Odak', ratio:'Oran (0–1)',
     metric:'Ölçüm adı', why:'Neden', kayit_id:'BAM kayıt no', adet:'Madde sayısı',
-    baslik:'Başlık',
+    baslik:'Başlık', metin:'Kaydın cümlesi (modül okur)',
   };
   var TUR_ADI = {
     'plan.add':'Plana blok ekle', 'focus.set':'Günün odağını değiştir',
     'load.reduce':'Günün yükünü azalt', 'measure.ask':'Ölçüm hatırlat',
     'material.add':'BAM materyalini kart olarak ekle',
+    'kayit.add':'Günün kaydı (modül kendi okur, onayla yazar)',
   };
 
   function teklifAlani(ad, zorunlu, kural){

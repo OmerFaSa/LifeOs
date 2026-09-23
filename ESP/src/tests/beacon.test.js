@@ -417,6 +417,47 @@
        2. is en fazla BIR KEZ yapilir (cift tiklama, yeniden yukleme),
        3. «uygulandi ama merkeze bildirilemedi» hali KAYBOLMAZ,
        4. yarida kalan uygulama «olmus» da «olmamis» da sayilmaz. */
+  /* Akşam yoklaması: «30 dakika gitar çaldım» kullanıcının YAPTIM dediği
+     iştir. `plan.add`in tersine oturum olarak yazılır — ama yalnız ESP'nin
+     kendi ayrıştırıcısı okuyabildiyse ve kullanıcı «Kaydet» dediyse. */
+  describe('HKM teklifi — günün kaydı (akşam yoklaması)', () => {
+    const teklif = (metin, patch) => Object.assign({ id:61, kind:'kayit.add', note:'not',
+      payload:{ date:DUN, metin } }, patch || {});
+
+    it('ESP cümleyi kendi okur; onaydan önce oturum yazılmaz', () => {
+      resetState();
+      const o = B().kayitOku(teklif('30 dakika gitar çaldım ve 20 dk kelime çalıştım'));
+      expect(o.yazilacak.map(y => y.disc)).toEqual(['music', 'lang']);
+      expect(ESP.Model.sessionsOf(DUN).length).toBe(0);
+    });
+
+    it('«Kaydet» o güne oturum yazar, ikinci kez yazmaz', async () => {
+      resetState(); await ayarla({}); await B().load();
+      const n = teklif('30 dakika gitar çaldım');
+      n.okuma = B().kayitOku(n);
+      expect(B().canApply(n)).toBe(true);
+      await withFetch(async () => {
+        expect((await B().resolveIntent(n, 'apply')).applied).toBe(true);
+        expect((await B().resolveIntent(n, 'apply')).applied).toBe(false);
+      }, { status:200 });
+      const s = ESP.Model.sessionsOf(DUN);
+      expect(s.length).toBe(1);
+      expect(s[0].disc).toBe('music');
+      expect(s[0].minutes).toBe(30);
+    });
+
+    it('süresi olmayan parça yazılmaz, sebebi söylenir', async () => {
+      resetState();
+      const n = teklif('kitap okudum');
+      n.okuma = B().kayitOku(n);
+      expect(n.okuma.yazilacak.length).toBe(0);
+      expect(n.okuma.yazilamaz[0].why).toContain('süre');
+      expect(B().canApply(n)).toBe(false);
+      expect((await B().applyIntent(n)).ok).toBe(false);
+      expect(ESP.Model.sessionsOf(DUN).length).toBe(0);
+    });
+  });
+
   describe('HKM teklifi — yaşam döngüsü', () => {
 
     const TEKLIF = { id:7, kind:'plan.add', note:'not',

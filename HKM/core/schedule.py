@@ -32,6 +32,9 @@ VARSAYILAN = {
     "channel": "",
     "morning": "08:00",      # gunun brifingi
     "evening": "",           # bos: kapali
+    # Aksam yoklamasi: bot «bugun ne yaptin?» diye SORAR. Cevap bir rapordur
+    # (core/dil.py `rapor`) ve ilgili modullere kayit teklifi olur.
+    "checkin": "",           # bos: kapali — ornek "21:30"
     "weekly_day": "",        # ornek: "pazartesi" — bos: kapali
     "weekly_time": "09:00",
     "tolerance_minutes": 90,
@@ -83,7 +86,8 @@ def due(cfg, now):
     tolerans = max(5, int(a.get("tolerance_minutes") or 90))
     isler = []
 
-    for tur, alan in (("daily", "morning"), ("evening", "evening")):
+    for tur, alan in (("daily", "morning"), ("evening", "evening"),
+                      ("checkin", "checkin")):
         dk = _dakika(a.get(alan))
         if dk is None:
             continue
@@ -111,6 +115,8 @@ def run(con, cfg, job, now=None, th=None):
     if job["kind"] == "weekly":
         from core import weekly
         metin = weekly.message(con, gun, th=th)
+    elif job["kind"] == "checkin":
+        metin = yoklama_metni(con, gun)
     elif job["kind"] == "evening":
         b = manager.brief(con, gun, th=th)
         kapanis = [l["text"] for l in b["lines"] if l["kind"] in ("vp", "coverage")]
@@ -139,6 +145,25 @@ def run(con, cfg, job, now=None, th=None):
                            ek={"haftalik": gun, "bicim": "pdf"})
         out["belge"] = not d["duplicate"]
     return out
+
+
+def yoklama_metni(con, gun):
+    """Aksam yoklamasi — bir SORU. Cevap sohbete gelir, bir rapor olarak
+    okunur (core/dil.py `rapor`) ve ilgili modulun kuyruguna teklif olur.
+    HKM hicbir module yazmaz; soru da bir sayi soylemez, yalniz o gun
+    HANGI modulden kayit gelmedigini soyler (etiketsiz bir yargi degil)."""
+    from core import sync_engine
+    denetim = sync_engine.latest_audits(con, gun)
+    sessiz = [ad for vp, ad in (("academic", "AYS"), ("bio", "SPİ"),
+                                ("intellect", "ESP")) if not denetim.get(vp)]
+    satir = ["HKM · %s · akşam yoklaması" % gun,
+             "Bugün ne yaptın? Tek cümle yeter: «2 saat matematik çalıştım, "
+             "7 saat uyudum, 30 dakika gitar çaldım»."]
+    if sessiz:
+        satir.append("Bugün kaydı görünmeyen: %s." % ", ".join(sessiz))
+    satir.append("Yazdığını ilgili modüle teklif olarak bırakırım; modülde sen "
+                 "onaylamadan hiçbir yere yazılmaz.")
+    return "\n".join(satir)
 
 
 # Bakim: yedek + budama. Mesaj uretmez, giden kutusuna dokunmaz.

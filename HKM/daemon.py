@@ -1233,9 +1233,12 @@ class Handler(BaseHTTPRequestHandler):
             gorevli = (govde or {}).get("agent") or "king"
             if gorevli not in sohbet.GOREVLILER:
                 return self._send(404, {"error": "bilinmeyen gorevli"})
+            # `date` bu yolda TANIMLI DEGIL (yalniz do_GET'te); govdesiz
+            # istek NameError ile baglantiyi dusuruyordu.
             return self._send(200, sohbet.tani(
                 self.con, self.server.config,
-                (govde or {}).get("date") or date, gorevli=gorevli,
+                (govde or {}).get("date") or datetime.date.today().isoformat(),
+                gorevli=gorevli,
                 th=self.server.thresholds))
         if u.path == "/api/chat":
             # Sohbet: once komut, sonra model, sonra durust bir «yok».
@@ -1252,7 +1255,7 @@ class Handler(BaseHTTPRequestHandler):
             gorevli = (govde or {}).get("agent") or "king"
             if gorevli not in sohbet.GOREVLILER:
                 return self._send(404, {"error": "bilinmeyen gorevli"})
-            gun = (govde or {}).get("date") or date
+            gun = (govde or {}).get("date") or datetime.date.today().isoformat()
             # Gecmis AMBARDAN gelir, istemciden degil: istemcinin
             # gonderdigi bir gecmis, modele istedigini soyletmenin en
             # kisa yoludur.

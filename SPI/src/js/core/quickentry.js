@@ -75,7 +75,15 @@ SP.Quick = (function(){
         const sonra = n[at + a.length] || ' ';
         if(/[a-z0-9]/.test(once) || /[a-z0-9]/.test(sonra)) continue;
         const kuyruk = text.slice(Math.min(text.length, at + a.length));
-        const m = kuyruk.match(/(\d+(?:[.,]\d+)?)/);
+        let m = kuyruk.match(/(\d+(?:[.,]\d+)?)/);
+        /* SAYI KELIMEDEN ONCE DE GELIR: «7 saat uyudum». Yalniz ardinda
+           aranirsa bu cumle «7 saat» sureli bir ANTRENMAN oluyordu (420
+           dakikalik serbest seans). Onde yalniz UYKU ve yalniz «saat»
+           birimiyle okunur: «20 dakika uyudum» ya da «72 kilo kaldirdim»
+           gibi birimi baska olan sayiyi bu alana yazmak uydurmak olurdu. */
+        if(!m && f.id === 'sleep'){
+          m = n.slice(0, at).match(/(\d+(?:[.,]\d+)?)\s*(?:saat|sa)(?:lik)?\s+(?:[a-z]+\s+){0,2}$/);
+        }
         if(!m) continue;
         const v = sayi(m[1]);
         if(v == null || v < f.min || v > f.max) continue;

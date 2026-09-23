@@ -1,6 +1,8 @@
 # Talimat raporu — sıradaki Claude için
 
-> Son güncelleme: 2026-09-23 · bu oturum (`claude/epic-keller-uz103z`).
+> Son güncelleme: 2026-09-23 · bu oturum (`claude/epic-keller-uz103z-y09gx6`; önceki
+> oturum `claude/epic-keller-uz103z`, Y7'nin ortasında sınırda kaldı — o iş push
+> edilmemişti, bu oturumda baştan kuruldu).
 > Bu dosya her Part bitince güncellenir. Yarıda kalan oturum buradan devam eder.
 
 ## 0. Önce oku
@@ -29,9 +31,11 @@
 
 ## 2. Dal düzeni
 
-- Geliştirme dalı: `claude/epic-keller-uz103z` → `git push -u origin claude/epic-keller-uz103z`.
-- `main` ve `claude/remove-videos-use-images-9bmd1f` bu dalın ataları; her Part sonunda
-  `git push origin HEAD:main` (yalnız ileri sarma). Eski dalı ayrıca ilerletmek gerekmez.
+- Geliştirme dalı: oturumun verdiği dal (bu oturum `claude/epic-keller-uz103z-y09gx6`)
+  → `git push -u origin <dal>`. Kullanıcı: «commit edeceğin yer main olsun».
+- `main` bu dalın atası; her Part (ve her madde) sonunda `git push origin HEAD:main`
+  (yalnız ileri sarma, asla zorla yazma). Eski dalları ayrıca ilerletmek gerekmez.
+- **Push edilmemiş iş kaybolur** (konteyner geçicidir): her madde bitince push et.
 - Commit sonu: `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` ve
   `Claude-Session: <oturum bağlantısı>` satırları.
 
@@ -77,8 +81,12 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   `brand/ortak/yedekag.js`; geri okuyarak doğrular, 14 gün + 6 ay sonu saklar).
 - ✅ Y6 Haftalık rapor PDF olarak Telegram'a (`weekly.belge`, «hesaplandı» etiketi; HKM ›
   Sistemler'de PDF indir + kanala gönder).
-- 🔜 Y7 Akşam yoklaması: bot sorar, cevap modüle TEKLİF olur (HKM modüle yazmaz).
-- ⏳ 5 / W6 Modüller `urun.add` alır; HKM Ofis: indirme, ajan izi, depo raporu, web ayarları.
+- ✅ Y7 Akşam yoklaması: `schedule.checkin` sorar; cevap `dil.rapor` ile modüllere
+  bölünür, her parça `kayit.add` teklifi olur; modül kendi ayrıştırıcısıyla okur,
+  «… şöyle okudu» gösterir, «Kaydet» ile kendi koduyla yazar (HKM/MIMARI.md §8.25).
+  Yan düzeltmeler: geçmiş kip plan isteği sanılmıyor, SPİ «7 saat uyudum» = uyku,
+  `/api/chat` tarihsiz gövdede düşmüyor, `dil.olumsuz` «çalışmadım»ı görüyor.
+- 🔜 5 / W6 Modüller `urun.add` alır; HKM Ofis: indirme, ajan izi, depo raporu, web ayarları.
 
 ### Part 5 — Yeni kollar I
 - ⏳ Y2 Alışkanlık kolu (motorda `aliskanlik` türü var, paketi yok).
@@ -130,4 +138,7 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   AYS konu bitirme / net hedefi, sınav profilleri, müfredat raporu, bölümlü test kitabı.
 - Bürolar B1–B4: Depolama, Araştırma (kaynaklı, web), Planlama v2, Üretim (Editör + Kalite).
 - W5: Telegram / WhatsApp'tan gelen işin sonucu aynı sohbete; Telegram'a belge (PDF).
-  `king._teslim`, testler `HKM/tests/test_urun.py`. HKM 476/476.
+  `king._teslim`, testler `HKM/tests/test_urun.py`.
+- Part 1–4 (Y7'ye kadar): HKM 503/503, AYS 1598, SPİ 1242, ESP 1283; `tools/entegre.js`
+  temiz (§0.6 ve §2.75 akşam yoklaması).
+- Ortam notu: modül testleri için `cd <SYS> && npm ci` (Playwright; node_modules depoda yok).

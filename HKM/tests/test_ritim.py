@@ -134,6 +134,38 @@ def run():
         eq(satirlar[0]["state"], "sent")
     test("tik gun icinde tek mesaj birakir", t_tick_is_idempotent_within_day)
 
+    def t_evening_checkin_asks():
+        """Aksam yoklamasi bir SORUDUR: kendi saatinde gunde bir kez gider,
+        emir kipi tasimaz ve o gun kaydi gelmeyen modulu adiyla soyler —
+        sayi soylemez. Varsayilan kapalidir."""
+        eq(schedule.settings({})["checkin"], "")
+        cfg = {"channels": CFG["channels"],
+               "schedule": {"enabled": True, "channel": "whatsapp", "morning": "",
+                            "checkin": "21:30"}}
+        eq([i["kind"] for i in schedule.due(cfg, _an(0, 21, 40))], ["checkin"])
+        eq(schedule.due(cfg, _an(0, 20, 0)), [])
+        con = _con()
+        sync_engine.ingest(con, {"module": "spi", "date": gun(0),
+                                 "metrics": {"sleep_hours": metric(7.0)}},
+                           now=gun(0) + "T07:00:00")
+        for dakika in (40, 41):
+            schedule.tick(con, cfg, now=_an(0, 21, dakika), transport=_basarili)
+        satir = [dict(r) for r in con.execute("SELECT * FROM outbox")]
+        eq(len(satir), 1)
+        eq(satir[0]["kind"], "checkin")
+        metin = satir[0]["text"]
+        ok("akşam yoklaması" in metin and "Bugün ne yaptın?" in metin)
+        ok("Bugün kaydı görünmeyen: AYS, ESP." in metin)
+        no("SPİ," in metin)
+        eq(schedule.manager.imperatives(metin), [])
+    test("aksam yoklamasi sorar, gunde bir kez", t_evening_checkin_asks)
+
+    def t_checkin_time_is_validated():
+        from core import settings
+        no(settings.validate({"schedule": {"checkin": "25:00"}})[0])
+        ok(settings.validate({"schedule": {"checkin": "21:30"}})[0])
+    test("yoklama saati SS:DD olmali", t_checkin_time_is_validated)
+
     def t_tick_never_raises():
         """Bir zamanlayici hatasi daemon'u durduramaz."""
         con = _con()

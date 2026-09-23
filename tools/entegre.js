@@ -105,6 +105,28 @@ async function main(){
     else console.log('  HKM → istek niyete cevrildi: ' + kuyruk.intents[0].kind
       + ' (' + kuyruk.intents[0].payload.minutes + ' dk)');
 
+    /* 0.6 — AKSAM YOKLAMASI (Y7): yoklamanin cevabi sohbete yazilir. HKM
+       cumleyi yalniz YONLENDIRIR — sayiyi okumaz, hicbir module yazmaz —
+       her modulun kuyruguna `kayit.add` duser. Govdede tarih YOK: HKM yuzu
+       disindaki istemci tarih yollamayabilir ve bu yol bir sure NameError
+       ile dusuyordu. */
+    const yoklama = await (await hkmFetch('/api/chat', {
+      method:'POST',
+      body:JSON.stringify({ text:'bugün 40 soru çözdüm, 7 saat uyudum ve 30 dakika gitar çaldım' }),
+    })).json();
+    if(yoklama.command !== 'kayit') hatalar.push('HKM yoklama cevabini kayit teklifine cevirmedi ('
+      + yoklama.command + ')');
+    else{
+      const kayitlar = [];
+      for(const s of SISTEMLER){
+        const q = await (await hkmFetch('/api/intents/' + s.mod)).json();
+        const n = (q.intents || []).find(x => x.kind === 'kayit.add');
+        if(!n) hatalar.push(s.id + ': kayit teklifi kuyruga dusmedi');
+        else kayitlar.push(s.id + ' «' + n.payload.metin + '»');
+      }
+      console.log('  HKM → yoklama cevabi uc kuyruga bolundu: ' + kayitlar.join(' · '));
+    }
+
 
     for(const s of SISTEMLER){
       const srv = spawn('python3', [path.join(ROOT, s.id, 'devserver.py'), String(s.port)],
@@ -263,7 +285,10 @@ async function main(){
       if(s.id === 'AYS'){
         const niyet = await page.evaluate(async ([ns]) => {
           const B = window[ns].Beacon;
-          const liste = await B.intents();
+          /* Kuyrukta gunun kaydi (2.75) da bekliyor: burada yalniz plan
+             teklifi sayilir. */
+          const planlar = async () => (await B.intents()).filter(x => x.kind === 'plan.add');
+          const liste = await planlar();
           if(!liste.length) return { alindi:0 };
           const n = liste[0];
           /* Gun kaydi henuz yoksa ensureDay() sablon bloklari da kurar;
@@ -284,12 +309,12 @@ async function main(){
                   baglanma): ikinci kez UYGULANMAMALI,
                d) cevaptan sonra kuyrugu yine sor: teklif ARTIK
                   gosterilmemeli. */
-          const yenilendi = (await B.intents()).length;
+          const yenilendi = (await planlar()).length;
           const r = await B.resolveIntent(n, 'apply');
           const sonrakiBlok = say();
           const tekrar = await B.resolveIntent(n, 'apply');
           const tekrarBlok = say();
-          const kalan = (await B.intents()).length;
+          const kalan = (await planlar()).length;
           return { alindi:liste.length, ok:r.ok, oncekiBlok, sonrakiBlok,
             yenilendi, tekrarBlok, kalan, bildirildi:r.reported,
             tekrarUyguladi:tekrar.applied, not:r.note || r.error };
@@ -320,6 +345,37 @@ async function main(){
             console.log('  AYS → cevaplanan teklif bir daha gosterilmedi');
           }
         }
+      }
+
+      /* 2.75 — GUNUN KAYDI (Y7): modul yoklama cevabini KENDI ayristiricisiyla
+         okur, kart neyi yazacagini onaydan ONCE gosterir, «Kaydet» ile kendi
+         kaydina yazar ve cevabi merkeze bildirir. */
+      const kayit = await page.evaluate(async ([ns]) => {
+        const N = window[ns];
+        const B = N.Beacon;
+        const n = (await B.intents()).find(x => x.kind === 'kayit.add');
+        if(!n) return { yok:true };
+        const okunan = ((n.okuma && n.okuma.yazilacak) || []).map(y => y.satirlar.join('; '));
+        const r = await B.resolveIntent(n, 'apply');
+        const bugun = N.U.todayISO();
+        let yazildi = false;
+        if(ns === 'R') yazildi = ((N.S.days[bugun] || {}).freeQ || 0) >= 40
+          || ((N.S.days[bugun] || {}).blocks || []).some(b => Number(b.actualQ) >= 40);
+        if(ns === 'SP') yazildi = (N.Model.vitalsOf(bugun) || {}).sleep === 7;
+        if(ns === 'ESP') yazildi = N.Model.sessionsOf(bugun).some(x => x.disc === 'music' && x.minutes === 30);
+        const kalan = (await B.intents()).filter(x => x.kind === 'kayit.add').length;
+        return { okunan, ok:r.ok, uyguladi:r.applied, bildirildi:r.reported,
+          not:r.note || r.error, yazildi, kalan };
+      }, [s.ns]);
+      if(kayit.yok) hatalar.push(s.id + ': gunun kaydi teklifi modulde gorunmedi');
+      else if(!kayit.okunan.length) hatalar.push(s.id + ': gunun kaydini okuyamadi');
+      else if(!kayit.ok || !kayit.uyguladi || !kayit.yazildi){
+        hatalar.push(s.id + ': gunun kaydi yazilamadi — ' + kayit.not);
+      }else{
+        if(!kayit.bildirildi) hatalar.push(s.id + ': gunun kaydi cevabi merkeze bildirilemedi');
+        if(kayit.kalan) hatalar.push(s.id + ': yazilan kayit teklifi hala gosteriliyor');
+        console.log('  ' + s.id + ' → yoklama cevabini kendi okudu («' + kayit.okunan.join(' · ')
+          + '»), onayla yazdi');
       }
 
       /* 2.8 — HEDEFTEN PLANA (ekip/PLAN.md Tur 2). Yalniz SPI: plan motoru

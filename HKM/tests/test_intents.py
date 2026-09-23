@@ -161,6 +161,62 @@ def run():
         eq(db.intents_for(con, "ays", ("pending",)), [])
     test("istek dogru modulun kuyruguna duser", t_esp_request_goes_to_esp)
 
+    def t_report_becomes_record_offers():
+        """Aksam yoklamasinin cevabi: her parca ilgili modulun kuyruguna
+        `kayit.add` olur. HKM sayiyi okumaz ve PLAN teklifi KURMAZ."""
+        con = _con()
+        r = patron.respond(con, "bugün 2 saat matematik çalıştım, 7 saat uyudum "
+                                "ve 30 dakika gitar çaldım", date=BUGUN)
+        eq(r["command"], "kayit")
+        for mod, metin in (("ays", "bugün 2 saat matematik çalıştım"),
+                           ("spi", "7 saat uyudum"), ("esp", "30 dakika gitar çaldım")):
+            n = db.intents_for(con, mod, ("pending",))
+            eq(len(n), 1, mod)
+            eq(n[0]["kind"], "kayit.add")
+            eq(n[0]["payload"], {"date": BUGUN, "metin": metin})
+            ok(metin in n[0]["note"])
+        no(any(n["kind"] == "plan.add" for n in db.intents_for(con, "ays", ("pending",))))
+        ok("AYS" in r["text"] and "SPİ" in r["text"] and "ESP" in r["text"])
+        ok("HKM senin adına hiçbir yere yazmaz" in r["text"])
+        # Ayni cumle ikinci kez: kuyruk buyumez, soylenir.
+        r2 = patron.respond(con, "7 saat uyudum", date=BUGUN)
+        eq(len(db.intents_for(con, "spi", ("pending",))), 1)
+        ok("zaten kuyrukta" in r2["text"])
+    test("rapor modullere kayit teklifi olur", t_report_becomes_record_offers)
+
+    def t_report_asks_what_it_cannot_route():
+        con = _con()
+        r = patron.respond(con, "bugün matematik çalıştım, 3 saat telefonla oynadım",
+                           date=BUGUN)
+        eq(r["command"], "kayit")
+        ok("ne kadar olduğunu yazmadın" in r["text"])
+        ok("hangi modülün kaydı olduğunu anlamadım" in r["text"])
+        eq(con.execute("SELECT COUNT(*) n FROM intents").fetchone()["n"], 0)
+    test("rapor anlamadigini sorar, uydurmaz", t_report_asks_what_it_cannot_route)
+
+    def t_report_day():
+        """«dun» dunun kaydidir. Gun soylenmeden gece 00:30'da gelen cevap,
+        dunun yoklamasi sorulduysa DUNUN kaydidir; sorulmadiysa bugunun."""
+        con = _con()
+        patron.respond(con, "dün 40 soru çözdüm", date=BUGUN)
+        eq(db.intents_for(con, "ays", ("pending",))[0]["payload"]["date"], "2026-09-13")
+        eq(patron.rapor_tarihi(con, BUGUN, BUGUN + "T00:30:00", None), BUGUN)
+        from core import outbox
+        outbox.enqueue(con, "telegram", "checkin", "2026-09-13", "soru")
+        eq(patron.rapor_tarihi(con, BUGUN, BUGUN + "T00:30:00", None), "2026-09-13")
+        eq(patron.rapor_tarihi(con, BUGUN, BUGUN + "T09:00:00", None), BUGUN)
+        eq(patron.rapor_tarihi(con, BUGUN, BUGUN + "T00:30:00", 0), BUGUN)
+    test("raporun gunu soylenen gundur; gece yoklama cevabi dune yazilir", t_report_day)
+
+    def t_record_contract():
+        """`kayit.add` uc modulde tanimli; metin sinirli ve tarih gercek."""
+        for mod in ("ays", "spi", "esp"):
+            ok(intents.validate(mod, "kayit.add", {"date": BUGUN, "metin": "7 saat uyudum"})[0])
+        no(intents.validate("ays", "kayit.add", {"date": BUGUN})[0])
+        no(intents.validate("ays", "kayit.add", {"date": BUGUN, "metin": "x" * 401})[0])
+        no(intents.validate("ays", "kayit.add", {"date": "dun", "metin": "40 soru"})[0])
+    test("kayit.add sozlesmesi", t_record_contract)
+
     def t_empty_note_gets_a_sentence():
         """Modulde bos bir teklif satiri, ne oldugunu soylemeyen bir
         dugmedir. Cumle SUNUCUDA kurulur: ekranin kendi metni olsaydi iki

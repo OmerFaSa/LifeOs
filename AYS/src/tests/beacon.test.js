@@ -487,6 +487,84 @@
        2. is en fazla BIR KEZ yapilir (cift tiklama, yeniden yukleme),
        3. «uygulandi ama merkeze bildirilemedi» hali KAYBOLMAZ,
        4. yarida kalan uygulama «olmus» da «olmamis» da sayilmaz. */
+  /* Akşam yoklaması (HKM core/dil.py `rapor`): kullanıcı «2 saat matematik
+     çalıştım» der, HKM cümleyi YALNIZ yönlendirir. Sayıyı AYS'nin kendi
+     ayrıştırıcısı okur, kart neyin yazılacağını ONAYDAN ÖNCE gösterir ve
+     yazım öneri kapısından geçer (geri alınabilir). */
+  describe('HKM teklifi — günün kaydı (akşam yoklaması)', () => {
+    const mat = () => (R.SUBJECTS || []).find(s => (s.aliases || []).indexOf('matematik') >= 0);
+    function gunuKur(){
+      resetState();
+      R.S.officeProposals = []; R.S.officeProposalKeys = [];
+      R.S.days[BUGUN] = { date:BUGUN, checklist:{}, paragraphActual:0, problemActual:0,
+        freeQ:0, freeCorrect:0, note:'', blocks:[{ id:'b1', slot:'Ders', subject:mat().name,
+          subjectId:mat().id, topic:'Türev', topicId:null, targetMin:60, targetQ:0,
+          status:'pending', actualMin:null, actualQ:null, correctQ:null }] };
+    }
+    const teklif = (metin, patch) => Object.assign({ id:41, kind:'kayit.add', note:'not',
+      payload:{ date:BUGUN, metin } }, patch || {});
+
+    it('AYS cümleyi kendi okur; onaydan önce hiçbir şey yazılmaz', async () => {
+      gunuKur();
+      const o = await B().kayitOku(teklif('2 saat matematik çalıştım, 20 paragraf yaptım'));
+      expect(o.yazilacak.length).toBe(2);
+      expect(o.yazilacak[0].satirlar[0]).toContain('120 dk');
+      expect(R.S.days[BUGUN].blocks[0].actualMin).toBeNull();
+      expect(R.S.days[BUGUN].paragraphActual).toBe(0);
+    });
+
+    it('«Kaydet» öneri kapısından yazar ve geri alınabilir', async () => {
+      gunuKur(); await ayarla({}); await B().load();
+      const n = teklif('2 saat matematik çalıştım ve 20 paragraf yaptım');
+      n.okuma = await B().kayitOku(n);
+      expect(B().canApply(n)).toBe(true);
+      await withFetch(async () => {
+        const r = await B().resolveIntent(n, 'apply');
+        expect(r.ok).toBe(true);
+        expect(r.applied).toBe(true);
+        /* Ikinci «Kaydet» ikinci kez yazmaz. */
+        const iki = await B().resolveIntent(n, 'apply');
+        expect(iki.applied).toBe(false);
+      }, { status:200 });
+      expect(R.S.days[BUGUN].blocks[0].actualMin).toBe(120);
+      expect(R.S.days[BUGUN].paragraphActual).toBe(20);
+      const row = R.Proposals.applied().find(p => p.action === 'sure-yaz');
+      expect(Boolean(row)).toBe(true);
+      await R.Proposals.undo(row.id);
+      expect(R.S.days[BUGUN].blocks[0].actualMin).toBeNull();
+    });
+
+    it('yazılamayan parça sebebiyle gösterilir; uydurma blok açılmaz', async () => {
+      gunuKur();
+      const n = teklif('1 saat fizik çalıştım');
+      n.okuma = await B().kayitOku(n);
+      expect(n.okuma.yazilacak.length).toBe(0);
+      expect(n.okuma.yazilamaz[0].why).toContain('blok yok');
+      expect(B().canApply(n)).toBe(false);
+      expect((await B().applyIntent(n)).ok).toBe(false);
+      expect(R.S.days[BUGUN].blocks.length).toBe(1);
+    });
+
+    it('ileri bir güne kayıt yazılmaz', async () => {
+      gunuKur();
+      const yarin = R.U.iso(R.U.addDays(R.U.parse(BUGUN), 1));
+      const o = await B().kayitOku(teklif('40 soru çözdüm',
+        { payload:{ date:yarin, metin:'40 soru çözdüm' } }));
+      expect(o.yazilacak.length).toBe(0);
+      expect(o.yazilamaz.length).toBe(1);
+    });
+
+    it('kuyruktan gelen kayıt kart çizilmeden okunmuş olur', async () => {
+      gunuKur(); await ayarla({}); await B().load();
+      await withFetch(async () => {
+        const l = await B().intents();
+        expect(l.length).toBe(1);
+        expect(l[0].okuma.yazilacak.length).toBe(1);
+        expect(B().canApply(l[0])).toBe(true);
+      }, { status:200, json:() => Promise.resolve({ intents:[teklif('40 soru çözdüm')] }) });
+    });
+  });
+
   describe('HKM teklifi — yaşam döngüsü', () => {
 
     const TEKLIF = { id:7, kind:'plan.add', note:'not',

@@ -448,6 +448,27 @@ def run():
     test("model baglaninca teklif yolu kaybolmaz",
          t_request_still_becomes_a_proposal)
 
+    def t_report_reaches_modules_before_model():
+        """Aksam yoklamasinin cevabi modele laf olarak gitmez: kayit
+        teklifi olur. Planlama, urun ve arastirma tetikleri onu yutmaz."""
+        con = _con()
+        cagri = []
+
+        def izle(*a):
+            cagri.append(1)
+            return "Güzel bir gün geçirmişsin.", 300, 40
+
+        r = sohbet.konus(con, _cfg(), "bugün 2 saat matematik çalıştım, 7 saat "
+                                      "uyudum ve 30 dakika gitar çaldım", BUGUN,
+                         transport=izle)
+        eq(r["mode"], "komut")
+        eq(r["command"], "kayit")
+        no(cagri, "rapor oldugu halde model cagrildi")
+        turler = [x["kind"] for x in (dict(y) for y in con.execute(
+            "SELECT kind FROM intents"))]
+        eq(turler, ["kayit.add"] * 3)
+    test("rapor modelden once modullere gider", t_report_reaches_modules_before_model)
+
     def t_truncated_answer_never_shows_half_a_sentence():
         """YARIM BIR CEVABI TAM GIBI GOSTERMEK, olculmemis bir seyi
         olculmus gibi gostermekle ayni aileden bir yanlistir.

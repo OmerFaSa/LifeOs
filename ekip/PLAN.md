@@ -237,6 +237,14 @@ kitap listesi… ve kullanıcının henüz saymadığı hepsi.
 - `plan.apply` (büyük aksiyon: ayrıntılı önizleme ve geri dönüş noktası).
 - Her tür materyali içe alma (bugün yalnız AYS kart alıyor).
 - «Hedeflerim» ekranı; ilerlemenin HKM'ye bildirilmesi; uyarlama önerisi arayüzü.
+- **Kuruldu (Part 4 — akşam yoklaması, Y7):** bot akşam «bugün ne yaptın?» diye
+  sorar (`schedule.checkin`). Cevap (geçmiş kip: «2 saat matematik çalıştım,
+  7 saat uyudum») `dil.rapor` ile yan cümlelerine bölünür ve her parça ilgili
+  modüle `kayit.add` teklifi olur; HKM sayıyı okumaz. Modül kendi ayrıştırıcısıyla
+  okur, «… şöyle okudu» önizlemesini gösterir, «Kaydet» ile kendi koduyla yazar.
+  Yan düzeltmeler: geçmiş kip artık plan isteği sanılmıyor («matematik»in -tik
+  sonu), SPİ «7 saat uyudum»u uyku olarak okuyor (önce antrenmandı), `/api/chat`
+  gövdesinde tarih yokken düşmüyor, `dil.olumsuz` «çalışmadım»ı görüyor.
 
 ### H. HKM arayüzü
 - Ofis ekranı: canlı iş akışı (hangi katta, hangi ofiste), King kuyruğu.

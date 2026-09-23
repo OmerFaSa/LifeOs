@@ -676,9 +676,11 @@ SP.Screens.today = (function(){
       body:html`
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
+          ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
           <div class="row gap-8 mt-8">
             ${SP.Beacon.canApply(n)
-              ? K.Button({ label:'Planına ekle', size:'sm', tone:'primary',
+              ? K.Button({ label:n.kind === 'kayit.add' ? 'Kaydet' : 'Planına ekle',
+                size:'sm', tone:'primary',
                 act:'hkm-intent-apply', data:{ 'data-id':String(n.id) } })
               : K.Button({ label:'Gördüm', size:'sm', tone:'primary',
                 act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
@@ -690,6 +692,23 @@ SP.Screens.today = (function(){
           SPİ kendi kaydına yazar; reddedersen HKM kaydı silmez,
           «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş
           bir teklif ayrı şeylerdir.</p>` });
+  }
+
+  /* Gunun kaydi: SPİ cumleyi NASIL OKUDU. Onaydan once gorunur; yazilamayan
+     ve anlasilmayan parca da SEBEBIYLE yazilir. */
+  function kayitOkuma(n){
+    const o = n.okuma;
+    if(!o) return html`<p class="tiny dim mt-8">SPİ bu kaydı okuyamadı.</p>`;
+    return html`<div class="mt-8">
+      <p class="tiny"><b>SPİ şöyle okudu</b> (${o.gun}):</p>
+      <ul class="tiny mt-4">
+        ${map(o.yazilacak, y => html`<li>${y.baslik}: ${y.satirlar.join('; ')}</li>`)}
+        ${map(o.yazilamaz, y => html`<li class="dim">«${y.metin}» — yazılmayacak: ${y.why}</li>`)}
+        ${map(o.anlasilmayan, m => html`<li class="dim">«${m}» — anlaşılmadı, yazılmayacak.</li>`)}
+      </ul>
+      ${when(!o.yazilacak.length, () => html`<p class="tiny dim">Bu cümleden SPİ'ye
+        yazılacak bir şey çıkmadı; istersen kaydı elle gir.</p>`)}
+    </div>`;
   }
 
   /* ---------- HKM seridi: KUCUK ve HER GUN ORADA

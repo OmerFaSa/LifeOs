@@ -110,6 +110,73 @@ def run():
         ok("HKM · " + BUGUN in r["text"])
     test("serbest cumle kural motoruna ulasir", t_free_sentence_reaches_the_engine)
 
+    def t_past_tense_is_a_report_not_a_request():
+        """«Bugun 2 saat matematik calistim» olmus bir isin haberidir.
+        Istek sayilirsa HKM bitirilmis isi bugune PLAN blogu diye teklif
+        ediyordu. «matematik»in «-tik» sonu da gecmis sanilmamali."""
+        ok(dil.gecmis("bugün 2 saat matematik çalıştım"))
+        ok(dil.gecmis("7 saat uyudum"))
+        ok(dil.gecmis("dün 40 soru çözmüştüm"))
+        for cumle in ("bugün 2 saat matematik", "fizik pratik", "yardım",
+                      "yarın 2 saat matematik çalışacağım",
+                      "kendim çalışacağım", "tüm gün"):
+            no(dil.gecmis(cumle), cumle)
+        eq(dil.istek("bugün 2 saat matematik çalıştım", BUGUN), None)
+        # Istek yolu bozulmaz.
+        eq(dil.istek("bugün 2 saat matematik", BUGUN)["minutes"], 120)
+        eq(dil.istek("yarın 2 saat matematik çalışacağım", BUGUN)["date"],
+           "2026-09-15")
+    test("gecmis kip istek degil rapordur", t_past_tense_is_a_report_not_a_request)
+
+    def t_report_is_split_by_module():
+        """Rapor yan cumlelerine bolunur ve her parca KENDI modulune gider.
+        Sayi OKUNMAZ: HKM yalniz yonlendirir."""
+        r = dil.rapor("bugün 2 saat matematik çalıştım, 7 saat uyudum ve "
+                      "30 dakika gitar çaldım")
+        eq(r["offset"], 0)
+        eq([(p["modul"], p["metin"]) for p in r["parcalar"]],
+           [("ays", "bugün 2 saat matematik çalıştım"), ("spi", "7 saat uyudum"),
+            ("esp", "30 dakika gitar çaldım")])
+        # Ders adi genel fiilden agir basar; alan soylemeyen miktar oncekine
+        # baglanir.
+        eq(dil.rapor("2 saat tarih okudum")["parcalar"][0]["modul"], "ays")
+        eq(dil.rapor("30 sayfa kitap okudum")["parcalar"][0]["modul"], "esp")
+        r = dil.rapor("dün 40 soru çözdüm, 32si doğru")
+        eq(r["offset"], 1)
+        eq(r["parcalar"], [{"modul": "ays", "metin": "dün 40 soru çözdüm, 32si doğru"}])
+        # Modul adi yazilirsa ondan gider.
+        eq(dil.rapor("ESP'ye 20 dk kelime çalıştım")["parcalar"][0]["modul"], "esp")
+    test("rapor modullere bolunur", t_report_is_split_by_module)
+
+    def t_report_never_guesses():
+        """Miktari ya da modulu belirsiz parca TAHMIN EDILMEZ; olumsuz cumle
+        ve ileri tarihli celiski kayit degildir."""
+        r = dil.rapor("bugün matematik çalıştım")
+        eq(r["parcalar"], [])
+        eq(r["miktarsiz"], ["bugün matematik çalıştım"])
+        r = dil.rapor("1 saat felsefe çalıştım")        # AYS mi ESP mi?
+        eq(r["belirsiz"], ["1 saat felsefe çalıştım"])
+        eq(dil.rapor("3 saat telefonla oynadım")["belirsiz"],
+           ["3 saat telefonla oynadım"])
+        eq(dil.rapor("bugün matematik çalışmadım"), None)
+        eq(dil.rapor("yarın 2 saat çalıştım"), None)
+        eq(dil.rapor("dün ne yaptım"), None)         # soru: durum komutu kalir
+        # Gecmis kipte SORU da kayit degildir.
+        eq(dil.rapor("dün kaç saat uyudum?"), None)
+        eq(dil.rapor("dün kaç saat uyudum"), None)
+        eq(dil.rapor("dün 3 saat çalıştım mı"), None)
+        eq(dil.rapor("bugün çok yoruldum"), None)
+    test("rapor tahmin etmez", t_report_never_guesses)
+
+    def t_negation_seen_through_dotless_i():
+        """«çalışmadım» katlanmadan «madım» tasir; desen «madim» ariyordu
+        ve olumsuz gecmisi hic gormuyordu."""
+        ok(dil.olumsuz("bugün matematik çalışmadım"))
+        ok(dil.olumsuz("hiç uyumadım"))
+        ok(dil.olumsuz("gitmemiştim"))
+        no(dil.olumsuz("kabul ediyorum"))
+    test("olumsuz gecmis noktasiz i ile de gorulur", t_negation_seen_through_dotless_i)
+
     def t_model_hook_is_optional_and_safe():
         """Ifade katmani bir cumlenin KAYBOLMASINA sebep olamaz."""
         eq(dil.ifade("merhaba"), "merhaba")

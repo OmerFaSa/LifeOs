@@ -631,8 +631,10 @@ ESP.Screens.today = (function(){
         </div>`)}
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
+          ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
           <div class="row gap-8 mt-8">
-            ${when(ESP.Beacon.canApply(n), () => K.Button({ label:'Uygula',
+            ${when(ESP.Beacon.canApply(n), () => K.Button({
+              label:n.kind === 'kayit.add' ? 'Kaydet' : 'Uygula',
               size:'sm', tone:'primary', act:'hkm-intent-yes',
               data:{ 'data-id':String(n.id) } }))}
             ${when(!ESP.Beacon.canApply(n), () => K.Button({ label:'Gördüm',
@@ -646,6 +648,23 @@ ESP.Screens.today = (function(){
           ESP kendi kaydına yazar; reddedersen HKM kaydı silmez,
           «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş
           bir teklif ayrı şeylerdir.</p>` });
+  }
+
+  /* Gunun kaydi: ESP cumleyi NASIL OKUDU. Onaydan once gorunur; suresi ya
+     da disiplini tanınmayan parca da SEBEBIYLE yazilir. */
+  function kayitOkuma(n){
+    const o = n.okuma;
+    if(!o) return html`<p class="tiny dim mt-8">ESP bu kaydı okuyamadı.</p>`;
+    return html`<div class="mt-8">
+      <p class="tiny"><b>ESP şöyle okudu</b> (${o.gun}):</p>
+      <ul class="tiny mt-4">
+        ${map(o.yazilacak, y => html`<li>${y.baslik}: ${y.satirlar.join('; ')}</li>`)}
+        ${map(o.yazilamaz, y => html`<li class="dim">«${y.metin}» — yazılmayacak: ${y.why}</li>`)}
+        ${map(o.anlasilmayan, m => html`<li class="dim">«${m}» — anlaşılmadı, yazılmayacak.</li>`)}
+      </ul>
+      ${when(!o.yazilacak.length, () => html`<p class="tiny dim">Bu cümleden ESP'ye
+        yazılacak bir şey çıkmadı; istersen oturumu elle gir.</p>`)}
+    </div>`;
   }
 
   /* ---------- HKM seridi: KUCUK ve HER GUN ORADA

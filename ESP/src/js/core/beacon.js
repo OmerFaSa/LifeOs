@@ -461,7 +461,7 @@ ESP.Beacon = (function(){
      2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
-  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add'];
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'kayit.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -572,6 +572,11 @@ ESP.Beacon = (function(){
       if(!n || INTENT_KINDS.indexOf(n.kind) < 0 || !n.payload) return false;
       return !defter[String(n.id)];
     });
+    /* Gunun kaydi ONAYDAN ONCE okunur: kart «ESP şöyle okudu» der. */
+    for(const n of gosterilecek){
+      if(n.kind !== 'kayit.add') continue;
+      try{ n.okuma = kayitOku(n); }catch(e){ n.okuma = null; }
+    }
     flushIntentReports().catch(function(){});
     return gosterilecek;
   }
@@ -617,10 +622,59 @@ ESP.Beacon = (function(){
      ESP'de bir «oturum» ölçülmüş bir çalışmadır; ileriye dönük bir teklif
      oturum olarak yazılamaz — yazılsaydı yapılmamış bir çalışma ölçülmüş
      görünürdü. Teklif bu yüzden bir HATIRLATICI olur. */
-  const APPLIABLE = ['plan.add', 'material.add'];
+  const APPLIABLE = ['plan.add', 'material.add', 'kayit.add'];
 
   function canApply(n){
-    return !!(n && APPLIABLE.indexOf(n.kind) >= 0);
+    if(!n || APPLIABLE.indexOf(n.kind) < 0) return false;
+    if(n.kind === 'kayit.add') return !!(n.okuma && n.okuma.yazilacak.length);
+    return true;
+  }
+
+  /* GÜNÜN KAYDI (kayit.add) — akşam yoklamasının cevabı.
+
+     Hatırlatıcı kuralının tersi burada geçerlidir ve sebebi aynıdır:
+     `plan.add` YAPILACAK bir işti, oturum olarak yazılsaydı yapılmamış
+     çalışma ölçülmüş görünürdü. `kayit.add` ise kullanıcının YAPTIM dediği
+     iştir; komut paletine «30 dakika gitar çaldım» yazmakla aynı yoldan
+     oturum olur. HKM cümleyi yalnız yönlendirir: ESP onu KENDİ
+     ayrıştırıcısıyla okur (core/parse.js), neyin yazılacağını gösterir ve
+     kullanıcı «Kaydet» derse yazar. Süresi ya da disiplini tanınmayan
+     parça sebebiyle gösterilir, uydurulmaz. */
+  function kayitOku(n){
+    const p = (n && n.payload) || {};
+    const gun = String(p.date || '');
+    const metin = String(p.metin || '').trim().slice(0, 400);
+    const out = { gun, yazilacak:[], yazilamaz:[], anlasilmayan:[] };
+    if(!U.isISO(gun) || gun > U.todayISO()){
+      out.yazilamaz.push({ metin, why:'Tarih geçersiz ya da ileri bir gün; kayıt ancak geçmiş bir güne yazılır.' });
+      return out;
+    }
+    if(!metin || !ESP.Parse){ out.anlasilmayan.push(metin); return out; }
+    const r = ESP.Parse.parseSession(metin);
+    r.rows.forEach(function(x){
+      const d = ESP.DISCIPLINE_BY_ID[x.disc];
+      out.yazilacak.push({ baslik:'Oturum', metin:x.note,
+        satirlar:[(d ? d.label : x.disc) + ': ' + U.fmtMin(x.minutes)
+          + (x.count != null ? ' · ' + U.fmtNum(x.count) + ' ' + (x.countWhat || '') : '')],
+        disc:x.disc, minutes:x.minutes, count:x.count });
+    });
+    r.unmatched.forEach(function(u){ out.yazilamaz.push({ metin:u.text, why:u.why }); });
+    return out;
+  }
+
+  async function kayitUygula(n){
+    const o = kayitOku(n);     /* onay aninda YENIDEN okunur */
+    if(!o.yazilacak.length){
+      return { ok:false, error:'ESP bu kayıttan yazılacak bir şey çıkaramadı.' };
+    }
+    const yazilan = [];
+    for(const y of o.yazilacak){
+      await ESP.Model.addSession(o.gun, { disc:y.disc, minutes:y.minutes, count:y.count,
+        note:'HKM kaydı' });
+      yazilan.push(y.satirlar[0]);
+    }
+    return { ok:true, note:yazilan.length + ' oturum yazıldı (' + o.gun + ': '
+      + yazilan.join(', ') + '). Yanlışsa o günün oturumlarından silebilirsin.' };
   }
 
   /* BAM MATERYALİ — Üretim Ofisi'nin kalite kontrolünden geçen set (HKM
@@ -693,6 +747,7 @@ ESP.Beacon = (function(){
   }
 
   async function applyIntent(n){
+    if(n && n.kind === 'kayit.add') return await kayitUygula(n);
     if(!canApply(n)) return { ok:false, error:'Bu teklif türü uygulanmaz.' };
     if(n.kind === 'material.add') return await materyalUygula(n.payload || {});
     const p = n.payload || {};
@@ -789,7 +844,7 @@ ESP.Beacon = (function(){
 
   return { load, save, settings, collect, payload, preview, contract, metric,
     urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
-    intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE, desteOf,
+    intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE, desteOf, kayitOku,
     resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
     intentDoubts, clearDoubt,
     MODULE, CONTRACT, ASGARI_ARA_DK };

@@ -277,6 +277,31 @@
 (function(){
   const { describe, it, expect } = SP.Test;
 
+  describe('Uyku — sayı fiilden ÖNCE', () => {
+    /* «7 saat uyudum» sayıyı kelimeden önce söyler. Ayrıştırıcı sayıyı
+       yalnız kelimenin ARDINDA arıyordu; bulamayınca cümle «7 saat» süreli
+       bir ANTRENMAN oluyordu: 420 dakikalık serbest seans. */
+    it('«7 saat uyudum» uykudur, antrenman değil', () => {
+      const p = SP.Quick.parse('7 saat uyudum');
+      expect(p.kind).toBe('vital');
+      expect(p.data.field.id).toBe('sleep');
+      expect(p.data.value).toBe(7);
+      expect(SP.Quick.parse('dün gece 6,5 saat güzel uyudum').data.value).toBe(6.5);
+      expect(SP.Quick.parse('8 saatlik uyku').data.value).toBe(8);
+    });
+
+    it('bileşik cümlede uyku ve yürüyüş ayrı kalır', () => {
+      const r = SP.Proposals.fromText('7 saat uyudum ve 30 dakika yürüdüm');
+      expect(r.oneriler.map(o => o.action)).toEqual(['vital-yaz', 'seans-ekle']);
+    });
+
+    it('birimi saat olmayan sayı uyku sayılmaz', () => {
+      /* «uyudum» önündeki çıplak sayı saat mi dakika mı bilinmez. */
+      expect(SP.Quick.parseVital('20 dakika uyudum')).toBeNull();
+      expect(SP.Quick.parseVital('3 kere uyudum')).toBeNull();
+    });
+  });
+
   describe('Hareket — takma ad eşleşmesi', () => {
     const bekle = (cumle, exId) => {
       const m = SP.Quick.parseMove(cumle);

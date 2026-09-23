@@ -311,6 +311,18 @@ def run():
             ok(len(g["messages"]) >= 2)
         test("yerel mesaj ucnoktasi Patron'a baglar", t_local_message_endpoint)
 
+        def t_chat_without_date():
+            """HKM yuzu her istekte tarih yollar; baska bir istemci (entegre
+            denetimi, modul) yollamayabilir. Govdede `date` yokken bu yol
+            NameError ile baglantiyi dusuruyordu — bugun varsayilmali."""
+            kod, r = S.call("/api/chat", body={"text": "yardim"})
+            eq(kod, 200)
+            eq(r["command"], "yardim")
+            kod, r = S.call("/api/chat/tani", body={})
+            eq(kod, 200)
+            ok("adimlar" in r)
+        test("sohbet govdesinde tarih yoksa bugun sayilir", t_chat_without_date)
+
         def t_message_needs_token():
             eq(S.call("/api/message", body={"text": "durum"}, token=None)[0], 401)
             eq(S.call("/api/conversation", token=None)[0], 401)
