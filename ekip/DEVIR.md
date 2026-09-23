@@ -5,6 +5,38 @@
 > edilmemişti, bu oturumda baştan kuruldu).
 > Bu dosya her Part bitince güncellenir. Yarıda kalan oturum buradan devam eder.
 
+## ⚡ HIZ KURALLARI (2026-09-23, kullanıcı: «sürenin kısalması için tüm koşulları uygula»)
+
+Hedef: hızlı kazançlar 1–2 günde biter. Bu bölüm aşağıdaki her şeyden önce okunur.
+
+1. **ONAY VERİLDİ — sormadan yap.** «Kullanıcı kolaylığı fikirleri» listesindeki hızlı
+   kazançlar ONAYLI: **5, 8, 9, 11, 12, 13, 14, 15, 19, 22, 27, 31, 46, 49, 50, 56.**
+   Bunlar için ayrıca soru sorulmaz. Diğer 41 madde hâlâ onay bekler. Doktrin
+   (AGENTS.md §1) onayla değişmez: teşhis/doz yok, HKM modüle yazmaz, eksik veri sıfır
+   değil, XP karar vermez.
+2. **SIRA (aynı dosyalar bir kez okunsun):**
+   - Oturum başı (bir kez): **(a)** bitmiş bölümleri `ekip/arsiv/DEVIR-2026-09.md`'ye taşı,
+     burada yalnız «şimdi + sıradaki» kalsın; **(b)** onaylı 16 maddeyi depoda tara
+     («var / kısmen / yok», dosya:satır) ve sonucu bu bölümün altına yaz. Var olan
+     yeniden yazılmaz.
+   - Grup 1 HKM + Telegram: 8, 9, 11, 12, 13, 14, 15, 19, 46.
+   - Grup 2 AYS: 22, 27. · Grup 3 SPİ: 31. · Grup 4 ortak: 5, 49, 50, 56.
+   - Sonra planlı iş: 8c-2 → 8c-3 → 8d → 8e.
+3. **DENETİM ÖLÇÜSÜ:** her madde yalnız dokunduğu sistemin testleri + duman testi.
+   Ekran görüntüsü yalnız arayüz belirgin değiştiyse. Tam koşum (`tools/sayilar.py --tam
+   --yaz`) yalnız dört grup bitince BİR KEZ. Hata düzeltmesinde önce hatayı yakalayan test
+   kuralı geçerli; yeni davranış testsiz gelmez.
+4. **KAYIP YOK:** her GRUP bitince commit + `git push origin main` + bu bölümde ✅. Limit
+   ortada biterse sonraki oturum buradan devam eder.
+5. **KULLANIM TASARRUFU:** DEVIR kısa tutulur (madde 2a). Küçük, tek dosyalık, tarifi
+   açık işler daha hafif bir modelle yapılabilir; mimari karar isteyen işler güçlü
+   modelde. Aynı hesapta paralel oturum limiti hızlandırmaz, yalnız daha çabuk bitirir;
+   paralel yalnız limit darboğaz değilse ya da iş Codex'e (`gpt/<konu>` dalı, PR) verilirse.
+6. **GEREKSİZ İŞ YOK:** keşif ve deneme betikleri scratchpad'de kalır; belgeye yalnız
+   yapılanın özeti girer (MIMARI bölümü + bu listede tek satır).
+
+**Durum:** ⏳ 2a arşiv · ⏳ 2b tarama · ⏳ Grup 1 · ⏳ Grup 2 · ⏳ Grup 3 · ⏳ Grup 4 · ⏳ tam koşum
+
 ## 0. Önce oku
 
 1. `AGENTS.md` — doktrin. Kısaca: sayıyı ve kararı KOD verir, model yalnız
@@ -378,7 +410,9 @@ teyit; telefonun bilgisayara ağdan bağlanıp bağlanmayacağı.
   Sırayı değiştirmek istersen kullanıcıya bir cümleyle sor.
 - Ortam notu: modül testleri için `cd <SYS> && npm ci` (Playwright; node_modules depoda yok).
 
-## Kullanıcı kolaylığı fikirleri (2026-09-23) · ÖNERİ, ONAY BEKLER
+## Kullanıcı kolaylığı fikirleri (2026-09-23) · 16 hızlı kazanç ONAYLI, gerisi ÖNERİ
+
+Onaylı (bkz. «⚡ HIZ KURALLARI»): 5, 8, 9, 11–15, 19, 22, 27, 31, 46, 49, 50, 56.
 
 Claude'un listesi; hiçbiri onaylanmadı. Uygulamadan önce: (1) depoda zaten var mı bak
 (AGENTS §5.1), (2) kullanıcıya bir cümleyle sor. Doktrin sınırları geçerli (teşhis/doz
