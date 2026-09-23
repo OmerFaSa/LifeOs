@@ -439,6 +439,11 @@ Ayrıntılı sınırlar, dal düzeni, rapor biçimi ve iletişim kuralı
 kol; zaman bütçesi ve değerlendirme seti dahil) ONAYLADI. Parçalara bölünmüş yol
 haritası ve açık sorular `ekip/DEVIR.md` §3–§4'te. Soru 2 ve 4 hâlâ açık.
 
+**2026-09-23 (cevaplar):** Web araması esnek (her sağlayıcı, Ayarlar'dan); sağlık
+eşikleri kaynaklı araştırma + kişinin kendi geçmişi, ikisi birden. Bütün cevaplar ve
+sonuçları `ekip/DEVIR.md` §4'te; altyapı bitince tek, sade bir tasarıma geçilecek
+(DEVIR Part 8).
+
 ## 8. Riskler
 
 | Risk | Önlem |

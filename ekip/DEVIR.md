@@ -22,7 +22,11 @@
 - **Gereksiz test yapma:** yalnız dokunduğun sistemin birim testleri, gerekiyorsa
   bir duman testi. Tam koşum (`tools/sayilar.py --tam`) yalnız büyük bir Part'ın sonunda.
 - **Kendi fikrini geliştirmeden önce söyle.** Aşağıdaki 29 madde ONAYLANDI;
-  listede olmayan yeni bir fikir önce kullanıcıya sorulur.
+  listede olmayan yeni bir KOL (yeni özellik alanı) önce kullanıcıya sorulur.
+- **Hata ve eksikte kendini kısıtlama (2026-09-23):** sistemin herhangi bir yerinde
+  bir hata ya da atlanmış bir eksik görürsen düzelt — önceki model atlamış olabilir,
+  analiz edip tamamla. Doktrin (AGENTS.md) ve test kuralı yine geçerli: önce hatayı
+  yakalayan test, sonra düzeltme; commit mesajında ve bu dosyada ne olduğunu yaz.
 - **Lokal ağa karışma.** Ağdan erişilen paylaşım, tünel, port açma yok.
 - Şirket / YouTube ofisi başka bir Claude'un işi; dokunma.
 - PR açma (istenmedi). **`main`'e birleştirmek serbest** (kullanıcı onayı): yalnız
@@ -106,22 +110,79 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   manifestin kapsamı artık mutlak adres (göreli olan yok sayılıyordu). Duman testi
   sunucuyu durdurup sayfayı yeniden açar. Telefon için bir http(s) adresi gerekir;
   yerel ağa açmak kullanıcının kararı (bkz. §4 soru 5).
-- ❓ Y5 Sağlık verisi içe aktarma (Apple Sağlık export.xml ya da Health Connect).
+- ⏳ Y5 Sağlık verisi içe aktarma — **İKİSİ DE** (cevap 4): iPhone için Apple Sağlık
+  `export.xml`, Android için Health Connect dışa aktarımı. Aynı önizleme + onay
+  yolu (Y3 .ics gibi): okunan kayıt ölçüldü etiketiyle, kullanıcı seçer, SPİ kendi
+  koduyla yazar.
 
 ### Part 6 — Yeni kollar II
-- ❓ Y1 Para kolu (gelir-gider, abonelik, birikim hedefi).
+- ⏳ Y1 Para kolu (gelir-gider, abonelik, birikim hedefi) — cevap 3: giriş kanalları
+  Telegram'dan yazmak («150 TL market»), King / akşam yoklaması sohbeti («bugün ne
+  yaptın») ve Telegram'a **fiş fotoğrafı** atmak. Kanalların hepsi HKM'de olduğu için
+  öneri HKM içinde bir bölüm; ilk adımda kullanıcıya bir cümleyle teyit et. Fişten
+  okunan tutar/kalem **tahmin**dir: kayda geçmeden önizlenir, kullanıcı onaylar
+  (belirsiz girdi sorulur). Tutarı ve toplamı kod hesaplar.
 - 🔜 Y9 Bilgi Deposu tarayıcısı (HKM web).
-- ❓ Y10 Veli / koç özeti — lokal ağa karışmamak için DOSYA (PDF) olarak.
-- ❓ Y11 Kariyer / proje kolu.
+- ⏳ Y10 Veli / koç özeti — DOSYA (PDF). Cevap 7: haftada BİR ya da İKİ PDF; sıklığı
+  **kod** karar verir: kullanım yoğunluğu, karar / değişiklik yoğunluğu, aciliyet,
+  sağlık durumu, ders durumunun kararlılığı (sabit mi, yükselen mi, düşen mi). Karar
+  cümlesi «hesaplandı» etiketli ve gerekçeli. Alıcının kim olduğu henüz söylenmedi;
+  şimdilik dosya kullanıcıya (HKM + Telegram) gider, alıcıyı ilk adımda sor.
+- ⏳ Y11 Kariyer / proje kolu — cevap 8: esnek; eğitim, staj, proje, iş başvurusu
+  hepsi olabilir. **İlk adım: akademi kısmı** — kullanıcının durumuna göre LGS, YKS,
+  KPSS, DGS, ALES, YDS gibi sınavların ÖNERİLMESİ (sınav profilleri zaten var:
+  `AYS/src/js/core/sinavprofil.js`); öneri gerekçeli, karar kullanıcının.
 
 ### Part 7 — Öğrenme bağları ve borçlar
 - ⏳ 9 Test kitabındaki yanlış → yanlış defteri / tekrar kartı teklifi.
-- ❓ 10 Ek sınav profilini ana sınav yapmak (KPSS vb.).
-- ❓ 11 Tahmin tablolarını kaynağa bağlamak (web sağlayıcısı kararına bağlı).
+- ⏳ 10 Ek sınav profilini ana sınav yapmak — cevap 6: şimdilik ana sınav **YKS**,
+  ileride değişebilir (üniversite sınavları da). Ana sınav değiştirilebilir olmalı
+  (büyük aksiyon: ayrıntılı önizleme + onay + geri dönüş noktası) ve kullanıcı
+  ileride **üniversite müfredatı** yükleyebilmeli; sistem ona uyarlanır.
+- ⏳ 11 Tahmin tablolarını kaynağa bağlamak — cevap 1: sağlayıcı **esnek**; HKM'nin
+  desteklediği hepsi (Vikipedi, Brave, Tavily, Google PSE, SearXNG) seçilebilir ve
+  değiştirilebilir kalır, hiçbirine kilitlenme. Bütçe sabit sayı değil, Ayarlar'dan.
+
+### Part 8 — Tek tasarım (ALTYAPI BİTİNCE; şimdi BAŞLAMA)
+- ⏳ Dört-beş tasarım dili (SPİ `designs.css` beş düzen, `designcheck.js`) yerine
+  **tek, sade ve modern** bir tasarım. Kullanıcı bunu altyapı işleri bittikten sonra
+  yapacak. O zamana kadar: yeni bir tasarım diline özel iş ekleme; yeni ekranlar
+  ortak bileşenlerle (`components.js`, `base.css`) yazılsın ki geçiş kolay olsun.
 - ⏳ 14 Depo göçü (her kayıt kendi anahtarında) — ÖNCE 15 (yedek) bitmeli.
 - ⏳ 16 İlk kurulum testleri · 17 ekran sözleşmesi AYS/ESP · 18 labs.js ve AYS llm.js.
 
-## 4. Kullanıcıya sorulanlar (cevap gelince buraya yaz)
+## 4. Kullanıcıya sorulanlar ve CEVAPLARI (2026-09-23)
+
+Cevaplar sesle yazıldı; aşağıdaki özet onların anlamıdır. §3'teki maddeler bunlara
+göre ❓ → ⏳ oldu.
+
+1. **Web araması:** esnek olsun, değiştirilebilsin, hepsine uyarlanabilsin. Anahtar
+   adı verilmedi → sağlayıcı ve bütçe Ayarlar'da; hiçbirine kilitlenme.
+2. **Sağlık eşiklerinin dayanağı:** HEPSİ — kaynaklı araştırma + kullanıcının kendi
+   verisi ve geçmişi (spor geçmişi, yeme geçmişi vb.). Eşik = kaynaklı genel sınır +
+   kişinin kendi tabanı; hangisinden geldiği etiketle söylenir. SPİ teşhis koymaz,
+   doz önermez (AGENTS.md §1.5).
+3. **Para kolu:** girişler Telegram yazışması, King sohbeti («bugün ne yaptın» gibi)
+   ve Telegram'a atılan fiş fotoğrafıyla olacak (bkz. Y1).
+4. **Telefon:** hem iPhone hem Android desteklenecek (Y5 ikisi; PWA ikisinde de).
+5. **Günlük açılış:** sunucu TEK bilgisayardan başlatılır, sabahtan akşama açık, gece
+   kapalı; araştırma sürerken açık bırakılabilir. Başlatmak zahmetli olmamalı.
+   Sonuçları: (a) tek tıkla başlatma korunur/kolaylaşır; (b) HKM'nin gece işleri
+   bilgisayar kapalıyken kaçar → sabah açılışta **kaçırılanı yakala** davranışı
+   denetlenmeli; (c) telefonun bu bilgisayara ağdan bağlanması hâlâ «lokal ağa
+   karışma» kuralına takılır — açılmadı, kullanıcı ayrıca karar verecek; telefon
+   kanalı şimdilik Telegram.
+6. **Ana sınav:** şimdilik YKS; ileride değişebilir, üniversite sınavları ve
+   üniversite müfredatı da gelebilir → sistem uyarlanabilir olmalı (madde 10).
+7. **Veli / koç özeti:** haftada 1 ya da 2 PDF; sıklığa kod karar verir (Y10). Alıcı
+   henüz söylenmedi — sor.
+8. **Kariyer / proje:** esnek (eğitim, staj, proje…). Şimdilik akademi: LGS, YKS,
+   KPSS gibi sınavların önerilmesi (Y11).
+
+Hâlâ açık (ilgili iş başlarken sor): Y10'un alıcısı; Y1'in yeri (HKM içi öneri) için
+teyit; telefonun bilgisayara ağdan bağlanıp bağlanmayacağı.
+
+### Eski sorular (kayıt için)
 
 1. İnternet araması: HKM Vikipedi (anahtarsız), Brave, Tavily, Google Programmable
    Search ve kendi SearXNG'ni destekliyor. Hangisinin anahtarı var, BAM'ın aylık
@@ -159,6 +220,7 @@ Durum: ✅ bitti · 🔜 sıradaki · ⏳ bekliyor · ❓ kullanıcı cevabı ge
   (kabuk adımı dahil). **Kalan:** Part 5 sonu tam koşum henüz YAPILMADI (kullanıcının
   limiti doldu) — sıradaki Claude önce bunu koşsun, sayıları yazsın:
   `CHROMIUM_PATH=/opt/pw-browsers/chromium python3 tools/sayilar.py --tam --yaz`
-  (koşarken dosya düzenleme). Sonra Part 6–7'nin ⏳ maddeleri: 9, 14, 16, 17, 18 ve
-  Y9 (Part 6). ❓ maddeler §4'teki cevaplara bağlı.
+  (koşarken dosya düzenleme). Sonra sırayla: Y9 (Part 6), Part 7'nin 9, 14, 16, 17,
+  18'i; ardından cevapları gelen Y5, Y1, Y10, Y11, 10, 11 (§4). Part 8 (tek tasarım)
+  EN SON, altyapı bitince.
 - Ortam notu: modül testleri için `cd <SYS> && npm ci` (Playwright; node_modules depoda yok).
