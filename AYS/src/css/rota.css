@@ -617,6 +617,11 @@ tbody tr:hover{ background:var(--surface-2); }
 
 .choice.is-off{ opacity:.5; }
 
+/* Test kitabı: cevap bölüm sonunda gösterilir; seçim yalnız işaretlenir. */
+.choice.is-picked{ border-color:var(--primary); background:var(--surface-2); }
+
+.choice.is-picked .choice__key{ background:var(--primary); color:var(--primary-ink); }
+
 .choice:disabled{ cursor:default; }
 
 .agentav--tyt    { background:var(--agent-tyt);     color:var(--agent-ink); }

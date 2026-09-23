@@ -476,7 +476,8 @@ R.Beacon = (function(){
      2. Tanimadigimiz bir tur SESSIZCE ATLANIR — uzaktan gelen bir sozluk,
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
-  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'mufredat.add'];
+  const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'mufredat.add',
+    'kitap.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -638,7 +639,7 @@ R.Beacon = (function(){
      Once kabul listesi uc tur sayiyor ama uygulama yalnizca plan.add
      yapiyordu: gorunur bir «Uygula» dugmesi, basildiginda «bu teklif turu
      uygulanmaz» diyordu. Gorunen eylem, yapilabilen eylemle ayni olmali. */
-  const APPLIABLE = ['plan.add', 'material.add', 'mufredat.add'];
+  const APPLIABLE = ['plan.add', 'material.add', 'mufredat.add', 'kitap.add'];
 
   function canApply(n){
     return !!(n && APPLIABLE.indexOf(n.kind) >= 0);
@@ -700,6 +701,12 @@ R.Beacon = (function(){
     if(n.kind === 'mufredat.add'){
       if(!R.SinavProfil) return { ok:false, error:'Sınav profili modülü yüklenmedi.' };
       return await R.SinavProfil.teklifUygula(n.payload || {});
+    }
+    /* BAM'ın bölümlü test kitabı (core/testkitabi.js): her soru AYS'nin
+       kendi koduyla yeniden sınanır. */
+    if(n.kind === 'kitap.add'){
+      if(!R.TestKitabi) return { ok:false, error:'Test kitabı modülü yüklenmedi.' };
+      return await R.TestKitabi.teklifUygula(n.payload || {});
     }
     const p = n.payload || {};
     if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };

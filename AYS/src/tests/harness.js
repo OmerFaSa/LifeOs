@@ -171,7 +171,7 @@ R.Test = (function(){
     S.prefs = R.Model.defaultPrefs();
     S.videoNotes = []; S.activities = []; S.mood = {}; S.breaks = []; S.plan = null;
     S.calendar = []; S.sessions = []; S.profiles = []; S.istisnalar = [];
-    S.hedefler = []; S.hedefPlanlar = []; S.sinavProfilleri = [];
+    S.hedefler = []; S.hedefPlanlar = []; S.sinavProfilleri = []; S.testKitaplari = [];
     if(R.Hedefler && R.Hedefler.sohbet) R.Hedefler.sohbet.sifirla();
     S.usage = null; S.forecasts = []; S.signals = []; S.storage = null;
     S.meta = { lastBackupAt:null, schemaVersion:R.SCHEMA_VERSION };

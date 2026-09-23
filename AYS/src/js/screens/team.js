@@ -93,6 +93,10 @@ R.Screens.team = (function(){
     }
     /* «KPSS genel kültür müfredatını çıkar» — King'e iş emri
        (core/sinavprofil.js). Müfredat uydurulmaz: BAM çıkarır, sen onaylarsın. */
+    if(R.TestKitabi){
+      const tk = await R.TestKitabi.sohbet(question);
+      if(tk){ await cevapYaz(agent, tk.text); return true; }
+    }
     if(R.SinavProfil){
       const sp = await R.SinavProfil.sohbet(question);
       if(sp){ await cevapYaz(agent, sp.text); return true; }

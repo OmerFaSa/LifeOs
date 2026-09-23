@@ -85,6 +85,7 @@ R.Screens.quiz = (function(){
         }),
 
         when(lastSummary, () => summaryCard(lastSummary)),
+        kitapKarti(),
       ])),
 
       K.Span(5, K.Stack([
@@ -205,7 +206,101 @@ R.Screens.quiz = (function(){
     });
   }
 
+  /* ---------- test kitapları (core/testkitabi.js) ----------
+
+     BAM'ın bölümlü kitabı SINAV BİÇİMİNDE çözülür: cevaplar bölüm bitene
+     kadar gösterilmez, boş bırakmak serbesttir. Sonuç ölçümdür; zorluk
+     etiketi modelin beyanıdır (tahmin). Net ya da puan hesaplanmaz. */
+  const TK = () => R.TestKitabi;
+  const HARF = 'ABCDE';
+
+  function kitapKarti(){
+    const l = TK() ? TK().kitaplar() : [];
+    if(!l.length) return null;
+    return K.Card({ title:'Test kitapları',
+      sub:'BAM üretti, her soru bağımsız çözümle denetlendi · kaynaksız',
+      body:html`<div class="stack-sm">${map(l, k => html`<div>
+        <div class="row between wrap"><b class="small">${k.baslik}</b>
+          ${K.Badge({ label:k.dogruluk === 'kaynakli' ? 'kaynaklı' : 'doğrulanmadı',
+            tone:k.dogruluk === 'kaynakli' ? 'ok' : 'warn' })}</div>
+        ${map(k.bolumler, b => {
+          const s = (k.sonuclar || {})[b.no];
+          return html`<div class="row between wrap mt-6">
+            <span class="small">${b.no}. ${b.ad} · ${b.sorular.length} soru${s
+              ? ' · son: ' + s.dogru + ' doğru, ' + s.yanlis + ' yanlış, ' + s.bos + ' boş' : ''}</span>
+            ${K.Button({ label:s ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'kitap-baslat',
+              data:{ 'data-id':k.id, 'data-no':String(b.no) } })}</div>`;
+        })}</div>`)}</div>` });
+  }
+
+  function kitapView(){
+    const m = TK().mevcut();
+    if(!m){ TK().vazgec(); return setupView(); }
+    const s = m.soru;
+    return K.Grid([K.Span(12, K.Card({ pad:'sm', title:m.kitap.baslik + ' · ' + m.bolum.ad,
+      sub:'Soru ' + (m.index + 1) + ' / ' + m.toplam + ' · ' + m.cevapli
+        + ' cevaplı · cevaplar bölüm bitince görünür',
+      body:html`
+        <p class="mb-10">${s.soru}</p>
+        <div class="choices">${map(s.secenekler, (x, i) => html`<button
+          class="${'choice' + (m.secili === i ? ' is-picked' : '')}" data-act="kitap-sec"
+          data-i="${i}" aria-pressed="${m.secili === i ? 'true' : 'false'}">
+          <span class="choice__key">${HARF[i]}</span>
+          <span class="choice__text">${x}</span></button>`)}</div>
+        <p class="tiny dim mt-8">Zorluk: ${s.zorluk} (modelin beyanı, tahmin). Seçili şıkka
+          yeniden dokunursan boş bırakırsın.</p>
+        <div class="row wrap mt-12">
+          ${K.Button({ label:'Önceki', size:'sm', act:'kitap-git', data:{ 'data-d':'-1' },
+            disabled:m.index === 0 })}
+          ${K.Button({ label:'Sonraki', size:'sm', act:'kitap-git', data:{ 'data-d':'1' },
+            disabled:m.index === m.toplam - 1 })}
+          ${K.Button({ label:'Bölümü bitir', size:'sm', tone:'primary', act:'kitap-bitir' })}
+          ${K.Button({ label:'Vazgeç', size:'sm', act:'kitap-vazgec' })}
+        </div>` }))]);
+  }
+
+  function kitapSonucView(o){
+    const { kitap, bolum, sonuc } = o;
+    const hatali = kitap.hatali || [];
+    const zorluklar = Object.keys(sonuc.zorluk).filter(z => sonuc.zorluk[z].toplam);
+    return K.Grid([K.Span(12, K.Stack([
+      K.Card({ title:bolum.ad + ' · sonuç', sub:kitap.baslik + ' · ölçüldü', body:html`
+        ${K.Cols(3, [
+          K.Stat({ label:'Doğru', value:String(sonuc.dogru) }),
+          K.Stat({ label:'Yanlış', value:String(sonuc.yanlis) }),
+          K.Stat({ label:'Boş', value:String(sonuc.bos) }),
+        ])}
+        <p class="tiny dim mt-8">${Math.round(sonuc.sure_sn / 60) || 1} dakika${sonuc.sayilmayan
+          ? ' · hatalı işaretlenen ' + sonuc.sayilmayan + ' soru sayılmadı' : ''}. Net ve puan
+          hesaplanmaz: kuralı sınavdan sınava değişir.</p>
+        ${when(zorluklar.length, () => html`<p class="tiny mt-6">Zorluğa göre (etiket modelin
+          beyanı, doğru sayısı senin ölçümün): ${zorluklar.map(z => z + ' ' + sonuc.zorluk[z].dogru
+          + '/' + sonuc.zorluk[z].toplam).join(' · ')}</p>`)}
+        <div class="mt-8">${K.Button({ label:'Kapat', size:'sm', tone:'primary', act:'kitap-kapat' })}</div>` }),
+      K.Card({ title:'Gözden geçir', sub:'Anahtarı yanlış bulduğun soruyu işaretle; sonuca sayılmaz.',
+        body:html`<div class="stack-sm">${map(bolum.sorular, (s, i) => {
+          const c = (sonuc.cevaplar || [])[i];
+          const isaretli = hatali.indexOf(bolum.no + '-' + i) >= 0;
+          return html`<div>
+            <p class="small"><b>${i + 1}.</b> ${s.soru}</p>
+            <div class="choices mt-6">${map(s.secenekler, (x, j) => html`<button disabled
+              class="${'choice' + (j === s.dogru ? ' is-correct' : j === c ? ' is-wrong' : ' is-off')}">
+              <span class="choice__key">${HARF[j]}</span><span class="choice__text">${x}</span></button>`)}</div>
+            <p class="tiny dim mt-6">${c == null ? 'Boş bıraktın.' : c === s.dogru ? 'Doğru.'
+              : 'Senin cevabın ' + HARF[c] + ', anahtar ' + HARF[s.dogru] + '.'}${s.cozum
+              ? ' Çözüm: ' + s.cozum : ''}</p>
+            ${K.Chip({ label:isaretli ? 'Hatalı işaretli — geri al' : 'Bu soru hatalı',
+              act:'kitap-hatali', on:isaretli,
+              data:{ 'data-id':kitap.id, 'data-no':String(bolum.no), 'data-i':String(i) } })}
+          </div>`;
+        })}</div>` }),
+    ]))]);
+  }
+
   async function render(){
+    if(TK() && TK().aktif()) return String(kitapView());
+    const oz = TK() ? TK().sonOzet() : null;
+    if(oz && !Q.active()) return String(kitapSonucView(oz));
     return String(Q.active() ? runView() : setupView());
   }
 
@@ -220,6 +315,28 @@ R.Screens.quiz = (function(){
       R.App.render();
     },
     async 'quiz-say'(){ speak(); },
+    async 'kitap-baslat'(el){
+      const r = TK().baslat(el.dataset.id, Number(el.dataset.no));
+      if(!r.ok){ UI.toast(r.why); return; }
+      R.App.render();
+    },
+    async 'kitap-sec'(el){ TK().sec(Number(el.dataset.i)); R.App.render(); },
+    async 'kitap-git'(el){ TK().git(Number(el.dataset.d)); R.App.render(); },
+    async 'kitap-bitir'(){
+      const m = TK().mevcut();
+      const bos = m ? m.toplam - m.cevapli : 0;
+      const bitir = async () => { await TK().bitir(); R.App.render(); };
+      if(bos) UI.confirmSheet('Bölümü bitir', bos + ' soru boş. Yine de bitirilsin mi? Boşlar '
+        + 'boş olarak sayılır.', bitir);
+      else await bitir();
+    },
+    async 'kitap-vazgec'(){ TK().vazgec(); UI.toast('Bölüm bırakıldı; sonuç yazılmadı.'); R.App.render(); },
+    async 'kitap-kapat'(){ TK().ozetKapat(); R.App.render(); },
+    async 'kitap-hatali'(el){
+      const r = await TK().hataliIsaretle(el.dataset.id, Number(el.dataset.no), Number(el.dataset.i));
+      if(!r.ok) UI.toast(r.why);
+      R.App.render();
+    },
     async 'quiz-start'(){
       const res = Q.start({
         mode:S.ui.quizMode || 'due',
@@ -334,6 +451,8 @@ R.Screens.quiz = (function(){
     id:'quiz',
     title:'Sınama',
     subtitle(){
+      const m = R.TestKitabi ? R.TestKitabi.mevcut() : null;
+      if(m) return m.bolum.ad + ' · ' + (m.index + 1) + ' / ' + m.toplam + ' · test kitabı';
       const p = Q.progress();
       if(p) return p.index + 1 + ' / ' + p.total + ' · geri çağırma testi';
       const av = Q.availability();

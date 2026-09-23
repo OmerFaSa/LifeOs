@@ -237,5 +237,5 @@ R.SinavProfil = (function(){
   }
 
   return { YERLESIK, SINIR, liste, ekler, bul, sayilar, kayittan, yukle, kaydet, sil,
-    konuIsaretle, teklifUygula, iste, sinavAdi, sohbet };
+    konuIsaretle, teklifUygula, iste, sinavAdi, sohbet, istek };
 })();

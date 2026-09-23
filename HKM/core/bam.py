@@ -35,7 +35,7 @@ import datetime
 import json
 import re
 
-from core import ai, intents, mufredat, planlama
+from core import ai, intents, kitap, mufredat, planlama
 
 OFISLER = {
     "kayit": {
@@ -497,10 +497,82 @@ def _denetle(con, cfg, tur, maddeler, transport):
     return (gecen, dusen), None
 
 
+def _kitap_bolumu(con, cfg, g, b, transport):
+    """Bir bolum: uret, bicimi sina, bagimsiz cozumle denetle.
+    Doner: (bolum, None) ya da (None, {durum, not})."""
+    d = kitap.dagilim(b["adet"], g["zorluk"])
+    r = _cagri(con, cfg, "uretim", URETIM_BAS + kitap.BICIM, kitap.istem(g, b, d), transport)
+    if not r.get("ok"):
+        return None, {"durum": "beklemede" if r.get("reason") == "budget" else "hata",
+                      "not": r.get("note") or "Model cevap vermedi."}
+    ham = (_json_ayikla(r["text"]) or {}).get("sorular") or []
+    temiz = []
+    for m in ham[:b["adet"] * 2]:
+        x = _bicim("soru", m)
+        if x and len(temiz) < b["adet"]:
+            # Zorluk modelin BEYANIDIR; gercegi cozumle olculur (AYS).
+            x["zorluk"] = m.get("zorluk") if m.get("zorluk") in kitap.ZORLUKLAR else "belirsiz"
+            temiz.append(x)
+    sorular, dusen = [], []
+    if temiz:
+        sonuc, hata = _denetle(con, cfg, "soru", temiz, transport)
+        if hata:
+            return None, {"durum": "beklemede",
+                          "not": "Kalite kontrolü yapılamadı; bölüm yazılmadı. " + hata}
+        gecen, dusen = sonuc
+        sorular = [temiz[i] for i in gecen]
+    return {"ad": b["ad"], "konular": b["konular"], "istenen": b["adet"], "hedef_dagilim": d,
+            "sorular": sorular,
+            "kalite": {"uretilen": len(temiz), "gecen": len(sorular), "dusen": dusen,
+                       "bicim_dusen": max(0, min(len(ham), b["adet"]) - len(temiz))}}, None
+
+
+def _kitap_adimi(con, cfg, j, g, transport, now):
+    """Bolumlu test kitabi (core/kitap.py). Her tikte BIR bolum: adim
+    «bekliyor» kalir ve ara sonuc adimda durur; uzun is sunucuyu kilitlemez.
+    Model ya da butce yarida biterse uretilen bolumler kaybolmaz."""
+    adim = next(a for a in j["adimlar"] if a["ofis"] == "uretim")
+    ilerleme = adim.get("kitap") if isinstance(adim.get("kitap"), dict) else {"bolumler": []}
+    sira = len(ilerleme["bolumler"])
+    if sira < len(g["bolumler"]):
+        bolum, dur = _kitap_bolumu(con, cfg, g, g["bolumler"][sira], transport)
+        if dur:
+            return dict(dur, kitap=ilerleme)
+        ilerleme = {"bolumler": ilerleme["bolumler"] + [bolum]}
+        if len(ilerleme["bolumler"]) < len(g["bolumler"]):
+            return {"durum": "bekliyor", "kitap": ilerleme,
+                    "not": "%d / %d bölüm üretildi." % (len(ilerleme["bolumler"]),
+                                                     len(g["bolumler"]))}
+    dolu = [b for b in ilerleme["bolumler"] if b["sorular"]]
+    bos = [b["ad"] for b in ilerleme["bolumler"] if not b["sorular"]]
+    if not dolu:
+        return {"durum": "hata", "kitap": {"bolum": 0},
+                "not": "Hiçbir bölümün sorusu kalite kontrolünü geçmedi; kitap yazılmadı."}
+    zorluk = {z: 0 for z in kitap.ZORLUKLAR + ("belirsiz",)}
+    for b in dolu:
+        for s_ in b["sorular"]:
+            zorluk[s_["zorluk"]] += 1
+    uretilen = sum(b["kalite"]["uretilen"] for b in ilerleme["bolumler"])
+    gecen = sum(len(b["sorular"]) for b in dolu)
+    govde = {"tur": "kitap", "baslik": g["baslik"], "bolumler": dolu,
+             "zorluk_hedef": g["zorluk"], "zorluk_beyan": zorluk, "zorluk_etiketi": "tahmin",
+             "kalite": {"kontrol": "bağımsız çözüm", "uretilen": uretilen, "gecen": gecen},
+             "bos_bolumler": bos}
+    k = kayit_ekle(con, "materyal", g["baslik"], govde, dogruluk="dogrulanmadi",
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now)
+    return {"durum": "tamam", "kayit_id": k["id"], "kitap": {"bolum": len(dolu), "soru": gecen},
+            "not": "%d bölümlük kitap: %d soru üretildi, %d kalite kontrolünü geçti.%s" % (
+                len(dolu), uretilen, gecen,
+                (" Sorusu kalmayan bölüm: %s." % ", ".join(bos)) if bos else "")}
+
+
 def _uretim_adimi(con, cfg, j, transport, now):
     hazir = ai.hazir_mi(cfg, "bam.uretim")
     if not hazir["ok"]:
         return {"durum": "beklemede", "not": hazir["note"]}
+    g = (j.get("govde") or {}).get("kitap")
+    if g:
+        return _kitap_adimi(con, cfg, j, g, transport, now)
     tur, adet = uretim_istegi(j["talep"])
     r = _cagri(con, cfg, "uretim", URETIM_BAS + URETIM_BICIM[tur],
                "Üretim talebi: %s\nAdet: %d" % (j["talep"], adet), transport)

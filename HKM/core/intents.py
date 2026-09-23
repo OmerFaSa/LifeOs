@@ -84,6 +84,14 @@ KINDS = {
         "optional": ("baslik", "why"),
         "note": "BAM'ın çıkardığı müfredatı sınav profili olarak ekleme teklifi.",
     },
+    # BAM Uretim Ofisi'nin bolumlu test kitabi (core/kitap.py). AYS kaydi
+    # ceker, her soruyu KENDI koduyla yeniden sinar ve cozme ekranina alir.
+    "kitap.add": {
+        "modules": ("ays",),
+        "required": ("kayit_id", "bolum", "soru"),
+        "optional": ("baslik", "why"),
+        "note": "BAM'ın ürettiği ve denetlediği bölümlü test kitabını ekleme teklifi.",
+    },
     "measure.ask": {
         "modules": ("spi",),
         "required": ("date", "metric"),
@@ -104,6 +112,7 @@ FIELD_RULES = {
     "kayit_id": ("int", 1, 10 ** 9), "adet": ("int", 1, 50), "baslik": ("str", 1, 120),
     "hedef_id": ("str", 1, 40), "hafta": ("int", 1, 104),
     "ders": ("int", 1, 30), "konu": ("int", 1, 2000),
+    "bolum": ("int", 1, 10), "soru": ("int", 1, 200),
 }
 
 
@@ -194,6 +203,10 @@ def _cumle(module, kind, payload):
         return ("%s: BAM «%s» müfredatını çıkardı (%s ders, %s konu). Sınav profili olarak "
                 "eklensin mi? Kaynaksız — resmi kılavuzla karşılaştır."
                 % (ad, p.get("baslik") or "sınav", p.get("ders"), p.get("konu")))
+    if kind == "kitap.add":
+        return ("%s: BAM «%s» test kitabını hazırladı (%s bölüm, kalite kontrolünü geçen %s "
+                "soru). Eklensin mi? Kaynaksız; hatalı bulduğun soruyu işaretle."
+                % (ad, p.get("baslik") or "test", p.get("bolum"), p.get("soru")))
     if kind == "measure.ask":
         return "%s: %s günü için «%s» ölçümünü girmeyi unutma." % (
             ad, gun, p.get("metric"))

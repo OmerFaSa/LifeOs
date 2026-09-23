@@ -32,7 +32,7 @@ import datetime
 import json
 import statistics
 
-from core import ai, bam, butce, intents, mufredat, planlama
+from core import ai, bam, butce, intents, kitap, mufredat, planlama
 
 MODULLER = ("ays", "spi", "esp")
 MODUL_AD = {"ays": "AYS", "spi": "SPİ", "esp": "ESP"}
@@ -64,6 +64,15 @@ TURLER = {
         "ofisler": ["kayit", "arastirma"],
         "model": True,
         "not": "Araştırma Ofisi müfredatı ders ve konu olarak yazar; kod süzer.",
+    },
+    # Bolumlu test kitabi (core/kitap.py): her tikte bir bolum, bagimsiz
+    # cozumle denetim. Zorluk dagilimini kod hesaplar.
+    "test.kitabi": {
+        "ad": "Bölümlü test kitabı",
+        "moduller": ("ays",),
+        "ofisler": ["kayit", "uretim"],
+        "model": True,
+        "not": "Üretim Ofisi bölüm bölüm üretir; her soru bağımsız çözümle denetlenir.",
     },
 }
 
@@ -290,12 +299,18 @@ def _govde_temizle(tur, govde):
         if hatalar:
             return None, hatalar
         return {"mufredat": g}, []
+    if tur == "test.kitabi":
+        g, hatalar = kitap.temizle((govde or {}).get("kitap"))
+        if hatalar:
+            return None, hatalar
+        return {"kitap": g}, []
     return None, ["tanimsiz tur"]
 
 
 # Ayni girdi -> ayni anahtar («once depo»). Mufredatta buyuk-kucuk harf
 # ve bosluk farki ayni sinavdir.
-ANAHTAR = {"hedef.plan": planlama.anahtar, "sinav.mufredat": mufredat.anahtar}
+ANAHTAR = {"hedef.plan": planlama.anahtar, "sinav.mufredat": mufredat.anahtar,
+           "test.kitabi": planlama.anahtar}
 
 
 def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
@@ -312,6 +327,9 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None):
         return {"ok": False, "errors": hatalar}
     if tur == "sinav.mufredat" and not str(konu or "").strip():
         konu = mufredat.talep(temiz["mufredat"])
+    if tur == "test.kitabi" and not str(konu or "").strip():
+        konu = "«%s» — %d bölümlük test kitabı" % (temiz["kitap"]["baslik"],
+                                                  len(temiz["kitap"]["bolumler"]))
     konu = (str(konu or "").strip() or t["ad"])[:MAX_KONU]
     neden = str(neden or "").strip()[:MAX_NEDEN]
     anahtar = "%s:%s:%s" % (modul, tur, ANAHTAR[tur](temiz))
@@ -413,10 +431,28 @@ def _teklif_mufredat(con, e, kayit_id, now=None):
     return ""
 
 
+def _teklif_kitap(con, e, kayit_id, now=None):
+    """Test kitabini AYS'ye teklif olarak birakir."""
+    g = (bam.kayit_getir(con, kayit_id) or {}).get("govde") or {}
+    bolumler = g.get("bolumler") or []
+    if g.get("tur") != "kitap" or not bolumler:
+        return " Kayıt test kitabı biçiminde değil; teklif bırakılmadı."
+    payload = {"kayit_id": int(kayit_id), "bolum": len(bolumler),
+               "soru": sum(len(b.get("sorular") or []) for b in bolumler),
+               "baslik": str(g.get("baslik") or e.get("konu") or "Test kitabı")[:120]}
+    n = intents.create(con, e["modul"], "kitap.add", payload, None, source="bam")
+    if n.get("ok"):
+        bam.iz_ekle(con, "kayit", kayit_id, "niyet", n["intent"]["id"], now=now)
+        return " Kitap teklif olarak %s’ye bırakıldı." % MODUL_AD[e["modul"]]
+    return ""
+
+
 def _teklif(con, e, kayit_id, now=None):
     """Ofisin urettigi kaydi module teklif eder. Cevap ayni yoldan doner."""
     if e["tur"] == "sinav.mufredat":
         return _teklif_mufredat(con, e, kayit_id, now=now)
+    if e["tur"] == "test.kitabi":
+        return _teklif_kitap(con, e, kayit_id, now=now)
     if e["tur"] != "hedef.plan":
         return ""
     k = bam.kayit_getir(con, kayit_id) or {}

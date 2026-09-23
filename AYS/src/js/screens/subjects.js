@@ -271,6 +271,8 @@ R.Screens.subjects = (function(){
         <div class="mt-6">${K.Button({ label:'Profili kaldır', size:'sm', act:'sp-sil',
           data:{ 'data-id':p.id } })}</div>
       </details>`)}
+      ${when(R.TestKitabi, () => html`<div class="mt-6">${K.Button({ label:'Test kitabı iste',
+        size:'sm', act:'kitap-iste', data:{ 'data-id':p.id } })}</div>`)}
     </div>`;
   }
 
@@ -323,6 +325,11 @@ R.Screens.subjects = (function(){
     async 'sp-iste'(){
       const inp = document.getElementById('sp-sinav');
       const r = await R.SinavProfil.iste(inp ? inp.value : '');
+      S.ui.spNot = r.metin;
+      R.App.render();
+    },
+    async 'kitap-iste'(el){
+      const r = await R.TestKitabi.iste(el.dataset.id);
       S.ui.spNot = r.metin;
       R.App.render();
     },
