@@ -311,6 +311,30 @@
       });
     });
 
+    it('tek dokunuş: aynı katalogdan geçer, bekleyen öneriyi kullanır, geri alınır', async () => {
+      /* Fikir 22: yanlış defterindeki «Tekrar kartı yap» öneri kuyruğunu
+         beklemez ama doğrulamayı ve geri almayı atlamaz. */
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        await M.saveError({ id:'e3', closedAt:null, topic:'Paragraf', tag:'K',
+          rootCause:'', principle:'', recipe:'Ana fikri önce bul', subjectId:SUBJECT.id, topicId:TOPIC.id });
+        /* Ofis zaten öneri kurmuş olabilir: ikinci satır açılmaz, o onaylanır. */
+        const bekleyen = await P.propose({ action:'card-from-error', agent:'analist', params:{ errorId:'e3' } });
+        const r = await P.hemen({ action:'card-from-error', params:{ errorId:'e3' } });
+        expect(r.ok).toBe(true);
+        expect(r.row.id).toBe(bekleyen.id);
+        expect(S.cards.filter(c => c.sourceRef === 'e3').length).toBe(1);
+        expect((await P.hemen({ action:'card-from-error', params:{ errorId:'e3' } })).ok).toBe(false);
+        await P.undo(r.row.id);
+        expect(S.cards.some(c => c.sourceRef === 'e3')).toBe(false);
+        /* Doğrulamadan geçmeyen eylem yazılmaz ve nedeni söylenir. */
+        await M.saveError({ id:'e4', closedAt:null, topic:'X', principle:'', recipe:'' });
+        const y = await P.hemen({ action:'card-from-error', params:{ errorId:'e4' } });
+        expect(y.ok).toBe(false);
+        expect(y.why).toContain('ilke');
+      });
+    });
+
     it('ilkesi yazılmamış yanlış karta dönüştürülemez', async () => {
       reset();
       await M.saveError({ id:'e2', closedAt:null, topic:'Konu', rootCause:'sebep',

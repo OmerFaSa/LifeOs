@@ -130,6 +130,12 @@ R.Screens.cards = (function(){
         when(e.seconds, () => K.Chip(e.seconds + ' sn')),
       ], { wrap:true })}
       <div class="tiny dim">Tekrar tarihleri: ${dueDates}</div>
+      ${when(!e.closedAt && String(e.principle || e.recipe || '').trim()
+        && !(S.cards || []).some(c => c.sourceRef === e.id), () => html`<div class="row gap-8 mt-4">
+        ${K.Button({ label:'Tekrar kartı yap', size:'sm', tone:'primary', icon:'plus',
+          act:'error-card', data:{ 'data-id':e.id } })}
+        <span class="tiny dim">İlk tekrar yarın; istersen geri alırsın.</span>
+      </div>`)}
       <div class="row between mt-4">
         ${e.repairDoneAt
           ? K.Badge({ label:'reçete yapıldı', tone:'ok' })
@@ -313,6 +319,19 @@ R.Screens.cards = (function(){
       if(!err.recipe) err.recipe = t.recipe;
       await M.saveError(err);
       UI.toast('Etiket: ' + t.name);
+      R.App.render();
+    },
+    /* Tek dokunuş tekrar kartı (fikir 22): Ofis'in «card-from-error» önerisiyle
+       AYNI eylem; doğrulanır, yazılır, «Geri al» ile geri alınır. */
+    async 'error-card'(el){
+      const r = await R.Proposals.hemen({ action:'card-from-error', agent:'analist',
+        params:{ errorId:el.dataset.id }, reason:'Yanlış defterinden tek dokunuş.' });
+      if(!r.ok){ UI.toast(r.why || 'Kart üretilemedi'); return; }
+      UI.toast('Tekrar kartı eklendi; ilk tekrar yarın', { undo:async () => {
+        await R.Proposals.undo(r.row.id);
+        UI.toast('Kart geri alındı');
+        R.App.render();
+      } });
       R.App.render();
     },
     async 'repair-done'(el){

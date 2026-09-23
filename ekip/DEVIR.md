@@ -19,7 +19,7 @@
 4. **KAYIP YOK:** her grup (ya da büyük madde) bitince commit + push (`main`) + burada ✅.
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
-**Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · 🔜 Grup 2 · ⏳ Grup 3 · ⏳ Grup 4 ·
+**Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · 🔜 Grup 4 ·
 ⏳ 8c-2 · ⏳ 8c-3 · ⏳ 8d · ⏳ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
@@ -175,6 +175,14 @@ Hâlâ açık: Y10 alıcısı · Y1'in yeri (HKM içi öneri) · telefonun ağda
     `kayit.add`; her biri modülün kendi yolundan geri alınır).
   - Grup 1 denetimi: HKM 553/553, AYS 1645, SPİ 1275, ESP 1317; üç duman testi, HKM yüzü ve
     `tools/entegre.js` (yeni §2.78 kısa kayıt + toplu onay, §2.79 yarın) temiz. MIMARI §8.31.
+  - ✅ 22 Yanlıştan tekrar kartı tek dokunuş: yanlış defterinde «Tekrar kartı yap» (etiket
+    seçilince reçete dolar, düğme çıkar). Aynı `card-from-error` eylemi; yeni genel
+    `R.Proposals.hemen` (bekleyen öneri varsa onu onaylar, doğrulama + «Geri al» korunur).
+  - ✅ 27 Test kitabında kaldığın sorudan devam: oturum her adımda `meta/testkitabiOturum`'a
+    yazılır; Kütüphanem'de «Devam et (soru N/M)» + «Baştan başla». Geçen süre saklanır (mola
+    çözme süresine girmez); bitince/vazgeçince/kitap silinince kayıt kalkar.
+  - ✅ 31 (Grup 3) zaten VARDI: SPİ Sepet › İkame fırsatları (Korunan/Düşen). Değişiklik yok;
+    otomatik muadil üretmek anlamsız eşleşme doğururdu, tablo elle seçilmiş kalır.
 
 ## Kullanıcı kolaylığı fikirleri · 16 hızlı kazanç ONAYLI, gerisi ÖNERİ
 

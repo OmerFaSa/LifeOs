@@ -805,6 +805,28 @@ R.Proposals = (function(){
     return { ok:true, row };
   }
 
+  /* TEK DOKUNUŞ (fikir 22): kullanıcının ekranda AÇIKÇA istediği eylem öneri
+     kuyruğunu beklemez; ama AYNI katalogdan geçer — doğrulama, anlık görüntü,
+     geri alma. Aynı eylemin bekleyen önerisi varsa ikinci satır açılmaz, o
+     onaylanır. */
+  async function hemen(p){
+    /* Eylemi kim önerebiliyorsa onun adına: kullanıcının kendi isteği bir
+       ajanın alanını genişletmez, katalogdaki ilk yetkili ajan yazılır. */
+    const def = R.ACTION_BY_ID[p && p.action];
+    const istek = Object.assign({ agent:def && def.agents[0], source:'istek' }, p);
+    let row = await propose(istek);
+    if(!row){
+      const fp = fingerprint(istek);
+      row = (S.officeProposals || []).find(x => x.status === 'pending' && fingerprint(x) === fp) || null;
+    }
+    if(!row){
+      const c = check(istek);
+      return { ok:false, why:c.ok ? 'Öneri kurulamadı.' : c.why };
+    }
+    const r = await approve(row.id);
+    return r && r.ok ? { ok:true, row:r.row } : { ok:false, why:(r && r.why) || 'Uygulanamadı.' };
+  }
+
   async function reject(id){
     const row = (S.officeProposals || []).find(p => p.id === id);
     if(!row || row.status !== 'pending') return null;
@@ -980,7 +1002,7 @@ R.Proposals = (function(){
 
   return {
     all, pending, applied, actionable, check, preview,
-    propose, approve, reject, undo, clearResolved,
+    propose, approve, hemen, reject, undo, clearResolved,
     talep, otomatikMi, ayar, SEVIYELER, MODLAR,
     suggest, refresh, fromModel, catalogPrompt, splitAction, stripTrailingJson,
     load, save, MAX,

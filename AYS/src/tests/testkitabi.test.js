@@ -155,6 +155,34 @@
       expect(T().bul('kitap-77').sonuclar[1].yanlis).toBe(1);
     });
 
+    it('yarım bölüm sayfa yenilense de kaldığı sorudan sürer (fikir 27)', async () => {
+      await kur();
+      T().baslat('kitap-77', 1);
+      T().sec(1); T().git(2); T().sec(0);
+      await new Promise(r => setTimeout(r, 20));            /* kalıcı yazım tamamlansın */
+      await T().yukle();                                     /* sayfa yenilendi */
+      expect(T().aktif()).toBe(null);
+      const y = T().yarim();
+      expect([y.kitapId, y.no, y.index, y.cevapli, y.toplam]).toEqual(['kitap-77', 1, 2, 2, 3]);
+      expect(T().devam().ok).toBe(true);
+      const m = T().mevcut();
+      expect([m.index, m.cevaplar]).toEqual([2, [1, null, 0]]);
+      /* Bitince ya da vazgeçilince yarım kayıt kalmaz. */
+      await T().bitir();
+      await T().yukle();
+      expect(T().yarim()).toBe(null);
+      T().baslat('kitap-77', 1); T().sec(2); T().vazgec();
+      await new Promise(r => setTimeout(r, 20));
+      await T().yukle();
+      expect(T().yarim()).toBe(null);
+      /* Kitap silinmişse yarım kayıt yok sayılır. */
+      T().baslat('kitap-77', 1); T().sec(2);
+      await new Promise(r => setTimeout(r, 20));
+      await T().sil('kitap-77');
+      await T().yukle();
+      expect(T().yarim()).toBe(null);
+    });
+
     it('soruya atlanır; çözülen bölüm yeniden açılır; kullanım hesaplanır', async () => {
       await kur();
       expect(T().ilerleme(T().bul('kitap-77'))).toEqual({ bolum:0, toplamBolum:1, soru:0,

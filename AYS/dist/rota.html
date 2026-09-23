@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'a6581f7', at:'2026-09-23 22:48', dirty:true };
+R.BUILD = { id:'ee9ed4b', at:'2026-09-23 22:55', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -34389,6 +34389,28 @@ R.Proposals = (function(){
     return { ok:true, row };
   }
 
+  /* TEK DOKUNUŞ (fikir 22): kullanıcının ekranda AÇIKÇA istediği eylem öneri
+     kuyruğunu beklemez; ama AYNI katalogdan geçer — doğrulama, anlık görüntü,
+     geri alma. Aynı eylemin bekleyen önerisi varsa ikinci satır açılmaz, o
+     onaylanır. */
+  async function hemen(p){
+    /* Eylemi kim önerebiliyorsa onun adına: kullanıcının kendi isteği bir
+       ajanın alanını genişletmez, katalogdaki ilk yetkili ajan yazılır. */
+    const def = R.ACTION_BY_ID[p && p.action];
+    const istek = Object.assign({ agent:def && def.agents[0], source:'istek' }, p);
+    let row = await propose(istek);
+    if(!row){
+      const fp = fingerprint(istek);
+      row = (S.officeProposals || []).find(x => x.status === 'pending' && fingerprint(x) === fp) || null;
+    }
+    if(!row){
+      const c = check(istek);
+      return { ok:false, why:c.ok ? 'Öneri kurulamadı.' : c.why };
+    }
+    const r = await approve(row.id);
+    return r && r.ok ? { ok:true, row:r.row } : { ok:false, why:(r && r.why) || 'Uygulanamadı.' };
+  }
+
   async function reject(id){
     const row = (S.officeProposals || []).find(p => p.id === id);
     if(!row || row.status !== 'pending') return null;
@@ -34564,7 +34586,7 @@ R.Proposals = (function(){
 
   return {
     all, pending, applied, actionable, check, preview,
-    propose, approve, reject, undo, clearResolved,
+    propose, approve, hemen, reject, undo, clearResolved,
     talep, otomatikMi, ayar, SEVIYELER, MODLAR,
     suggest, refresh, fromModel, catalogPrompt, splitAction, stripTrailingJson,
     load, save, MAX,
@@ -35705,6 +35727,11 @@ R.TestKitabi = (function(){
 
   let oturum = null;         /* { kitapId, no, index, cevaplar, basla } */
   let ozet = null;           /* son biten bölümün sonucu (gözden geçirme) */
+  /* YARIM BÖLÜM (fikir 27): oturum her adımda depoya yazılır; sayfa yenilense
+     de kaldığın sorudan sürer. Geçen süre saklanır ki aradaki mola sonuca
+     «çözme süresi» diye girmesin. */
+  const YARIM = 'meta/testkitabiOturum';
+  let yarimK = null;         /* { kitapId, no, index, cevaplar, gecen_ms } */
 
   function bosluk(s){ return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
   function kucuk(s){ return bosluk(s).replace(/I/g, 'ı').replace(/İ/g, 'i').toLocaleLowerCase('tr'); }
@@ -35826,11 +35853,44 @@ R.TestKitabi = (function(){
   async function yukle(){
     const l = (await R.Store.list('testkitabi')) || [];
     R.S.testKitaplari = l.filter(k => k && typeof k.id === 'string' && Array.isArray(k.bolumler));
+    oturum = null;
+    let y = null;
+    try{ y = await R.Store.get(YARIM); }catch(e){ y = null; }
+    const b = y && bolumOf(bul(y.kitapId), Number(y.no));
+    yarimK = b && Array.isArray(y.cevaplar) && y.cevaplar.length === b.sorular.length ? y : null;
+  }
+
+  function kalici(){
+    const x = oturum ? { kitapId:oturum.kitapId, no:oturum.no, index:oturum.index,
+      cevaplar:oturum.cevaplar.slice(), gecen_ms:Math.max(0, Date.now() - oturum.basla) } : null;
+    yarimK = x;
+    try{
+      const p = x ? R.Store.set(YARIM, x) : R.Store.remove(YARIM);
+      if(p && typeof p.catch === 'function') p.catch(() => {});
+    }catch(e){ /* kalıcı yazım akışı bozmaz */ }
+  }
+
+  function yarim(){
+    if(!yarimK || oturum) return null;
+    const b = bolumOf(bul(yarimK.kitapId), yarimK.no);
+    if(!b) return null;
+    return { kitapId:yarimK.kitapId, no:yarimK.no, index:yarimK.index, toplam:b.sorular.length,
+      cevapli:yarimK.cevaplar.filter(x => x != null).length };
+  }
+
+  function devam(){
+    const y = yarim();
+    if(!y) return { ok:false, why:'Yarım kalmış bir bölüm yok.' };
+    oturum = { kitapId:yarimK.kitapId, no:yarimK.no, index:yarimK.index,
+      cevaplar:yarimK.cevaplar.slice(), basla:Date.now() - (Number(yarimK.gecen_ms) || 0) };
+    ozet = null;
+    return { ok:true };
   }
 
   async function sil(id){
     if(!bul(id)) return { ok:false, why:'Kitap bulunamadı.' };
-    if(oturum && oturum.kitapId === id) oturum = null;
+    if(oturum && oturum.kitapId === id){ oturum = null; kalici(); }
+    if(yarimK && yarimK.kitapId === id){ yarimK = null; kalici(); }
     R.S.testKitaplari = kitaplar().filter(k => k.id !== id);
     await R.Store.remove('testkitabi/' + id);
     return { ok:true };
@@ -35862,6 +35922,7 @@ R.TestKitabi = (function(){
     if(!b) return { ok:false, why:'Bölüm bulunamadı.' };
     oturum = { kitapId, no:b.no, index:0, cevaplar:b.sorular.map(() => null), basla:Date.now() };
     ozet = null;
+    kalici();
     return { ok:true, toplam:b.sorular.length };
   }
 
@@ -35880,12 +35941,14 @@ R.TestKitabi = (function(){
   function sec(i){
     if(!oturum || !(i >= 0 && i < 5)) return;
     oturum.cevaplar[oturum.index] = oturum.cevaplar[oturum.index] === i ? null : i;
+    kalici();
   }
 
   function git(fark){
     const m = mevcut();
     if(!m) return;
     oturum.index = Math.max(0, Math.min(m.toplam - 1, oturum.index + fark));
+    kalici();
   }
 
   /* Soruya atla (Part 8b): kitapta sayfa çevirir gibi. */
@@ -35893,9 +35956,10 @@ R.TestKitabi = (function(){
     const m = mevcut();
     if(!m || !(i >= 0 && i < m.toplam)) return;
     oturum.index = i;
+    kalici();
   }
 
-  function vazgec(){ oturum = null; }
+  function vazgec(){ oturum = null; kalici(); }
 
   function anahtar(no, i){ return no + '-' + i; }
 
@@ -35927,6 +35991,7 @@ R.TestKitabi = (function(){
     await kaydet(Object.assign({}, m.kitap, { sonuclar }));
     ozet = { kitapId:m.kitap.id, no:m.bolum.no };
     oturum = null;
+    kalici();
     return sonuc;
   }
 
@@ -36041,6 +36106,7 @@ R.TestKitabi = (function(){
 
   return { ZORLUKLAR, VARSAYILAN, SINIR, kitaplar, bul, istekGovdesi, iste, kayittan,
     yukle, kaydet, sil, teklifUygula, baslat, aktif, mevcut, sec, git, gitNo, vazgec, bitir,
+    yarim, devam,
     sonOzet, ozetKapat, ozetAc, ilerleme, yanlislar, yanlislariDeftere, defterdenGeriAl,
     hataliIsaretle, hesapla, sohbet, maliyetOku, HARF };
 })();
@@ -40404,6 +40470,12 @@ R.Screens.cards = (function(){
         when(e.seconds, () => K.Chip(e.seconds + ' sn')),
       ], { wrap:true })}
       <div class="tiny dim">Tekrar tarihleri: ${dueDates}</div>
+      ${when(!e.closedAt && String(e.principle || e.recipe || '').trim()
+        && !(S.cards || []).some(c => c.sourceRef === e.id), () => html`<div class="row gap-8 mt-4">
+        ${K.Button({ label:'Tekrar kartı yap', size:'sm', tone:'primary', icon:'plus',
+          act:'error-card', data:{ 'data-id':e.id } })}
+        <span class="tiny dim">İlk tekrar yarın; istersen geri alırsın.</span>
+      </div>`)}
       <div class="row between mt-4">
         ${e.repairDoneAt
           ? K.Badge({ label:'reçete yapıldı', tone:'ok' })
@@ -40587,6 +40659,19 @@ R.Screens.cards = (function(){
       if(!err.recipe) err.recipe = t.recipe;
       await M.saveError(err);
       UI.toast('Etiket: ' + t.name);
+      R.App.render();
+    },
+    /* Tek dokunuş tekrar kartı (fikir 22): Ofis'in «card-from-error» önerisiyle
+       AYNI eylem; doğrulanır, yazılır, «Geri al» ile geri alınır. */
+    async 'error-card'(el){
+      const r = await R.Proposals.hemen({ action:'card-from-error', agent:'analist',
+        params:{ errorId:el.dataset.id }, reason:'Yanlış defterinden tek dokunuş.' });
+      if(!r.ok){ UI.toast(r.why || 'Kart üretilemedi'); return; }
+      UI.toast('Tekrar kartı eklendi; ilk tekrar yarın', { undo:async () => {
+        await R.Proposals.undo(r.row.id);
+        UI.toast('Kart geri alındı');
+        R.App.render();
+      } });
       R.App.render();
     },
     async 'repair-done'(el){
@@ -41471,12 +41556,16 @@ R.Screens.quiz = (function(){
           ? ' · eklendi ' + U.fmtShort(k.eklenme) : ''}</div>
         ${map(k.bolumler, b => {
           const s = (k.sonuclar || {})[b.no];
+          const y = TK().yarim();
+          const yarimBu = y && y.kitapId === k.id && y.no === b.no;
           return html`<div class="row between wrap mt-6">
             <span class="small">${b.no}. ${b.ad} · ${b.sorular.length} soru${s
               ? ' · son: ' + s.dogru + ' doğru, ' + s.yanlis + ' yanlış, ' + s.bos + ' boş' : ''}</span>
             <span class="row-sm wrap">${when(s, () => K.Button({ label:'Gözden geçir', size:'sm',
               tone:'ghost', act:'kitap-ozet', data:{ 'data-id':k.id, 'data-no':String(b.no) } }))}
-            ${K.Button({ label:s ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'kitap-baslat',
+            ${when(yarimBu, () => K.Button({ label:'Devam et (soru ' + (y.index + 1) + '/' + y.toplam + ')',
+              size:'sm', tone:'primary', act:'kitap-devam' }))}
+            ${K.Button({ label:yarimBu ? 'Baştan başla' : s ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'kitap-baslat',
               data:{ 'data-id':k.id, 'data-no':String(b.no) } })}</span></div>`;
         })}</div>`;
       })}</div>` });
@@ -41590,6 +41679,11 @@ R.Screens.quiz = (function(){
     async 'quiz-say'(){ speak(); },
     async 'kitap-baslat'(el){
       const r = TK().baslat(el.dataset.id, Number(el.dataset.no));
+      if(!r.ok){ UI.toast(r.why); return; }
+      R.App.render();
+    },
+    async 'kitap-devam'(){
+      const r = TK().devam();
       if(!r.ok){ UI.toast(r.why); return; }
       R.App.render();
     },

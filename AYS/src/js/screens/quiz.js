@@ -240,12 +240,16 @@ R.Screens.quiz = (function(){
           ? ' · eklendi ' + U.fmtShort(k.eklenme) : ''}</div>
         ${map(k.bolumler, b => {
           const s = (k.sonuclar || {})[b.no];
+          const y = TK().yarim();
+          const yarimBu = y && y.kitapId === k.id && y.no === b.no;
           return html`<div class="row between wrap mt-6">
             <span class="small">${b.no}. ${b.ad} · ${b.sorular.length} soru${s
               ? ' · son: ' + s.dogru + ' doğru, ' + s.yanlis + ' yanlış, ' + s.bos + ' boş' : ''}</span>
             <span class="row-sm wrap">${when(s, () => K.Button({ label:'Gözden geçir', size:'sm',
               tone:'ghost', act:'kitap-ozet', data:{ 'data-id':k.id, 'data-no':String(b.no) } }))}
-            ${K.Button({ label:s ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'kitap-baslat',
+            ${when(yarimBu, () => K.Button({ label:'Devam et (soru ' + (y.index + 1) + '/' + y.toplam + ')',
+              size:'sm', tone:'primary', act:'kitap-devam' }))}
+            ${K.Button({ label:yarimBu ? 'Baştan başla' : s ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'kitap-baslat',
               data:{ 'data-id':k.id, 'data-no':String(b.no) } })}</span></div>`;
         })}</div>`;
       })}</div>` });
@@ -359,6 +363,11 @@ R.Screens.quiz = (function(){
     async 'quiz-say'(){ speak(); },
     async 'kitap-baslat'(el){
       const r = TK().baslat(el.dataset.id, Number(el.dataset.no));
+      if(!r.ok){ UI.toast(r.why); return; }
+      R.App.render();
+    },
+    async 'kitap-devam'(){
+      const r = TK().devam();
       if(!r.ok){ UI.toast(r.why); return; }
       R.App.render();
     },

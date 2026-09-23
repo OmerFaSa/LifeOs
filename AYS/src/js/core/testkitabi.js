@@ -27,6 +27,11 @@ R.TestKitabi = (function(){
 
   let oturum = null;         /* { kitapId, no, index, cevaplar, basla } */
   let ozet = null;           /* son biten bölümün sonucu (gözden geçirme) */
+  /* YARIM BÖLÜM (fikir 27): oturum her adımda depoya yazılır; sayfa yenilense
+     de kaldığın sorudan sürer. Geçen süre saklanır ki aradaki mola sonuca
+     «çözme süresi» diye girmesin. */
+  const YARIM = 'meta/testkitabiOturum';
+  let yarimK = null;         /* { kitapId, no, index, cevaplar, gecen_ms } */
 
   function bosluk(s){ return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
   function kucuk(s){ return bosluk(s).replace(/I/g, 'ı').replace(/İ/g, 'i').toLocaleLowerCase('tr'); }
@@ -148,11 +153,44 @@ R.TestKitabi = (function(){
   async function yukle(){
     const l = (await R.Store.list('testkitabi')) || [];
     R.S.testKitaplari = l.filter(k => k && typeof k.id === 'string' && Array.isArray(k.bolumler));
+    oturum = null;
+    let y = null;
+    try{ y = await R.Store.get(YARIM); }catch(e){ y = null; }
+    const b = y && bolumOf(bul(y.kitapId), Number(y.no));
+    yarimK = b && Array.isArray(y.cevaplar) && y.cevaplar.length === b.sorular.length ? y : null;
+  }
+
+  function kalici(){
+    const x = oturum ? { kitapId:oturum.kitapId, no:oturum.no, index:oturum.index,
+      cevaplar:oturum.cevaplar.slice(), gecen_ms:Math.max(0, Date.now() - oturum.basla) } : null;
+    yarimK = x;
+    try{
+      const p = x ? R.Store.set(YARIM, x) : R.Store.remove(YARIM);
+      if(p && typeof p.catch === 'function') p.catch(() => {});
+    }catch(e){ /* kalıcı yazım akışı bozmaz */ }
+  }
+
+  function yarim(){
+    if(!yarimK || oturum) return null;
+    const b = bolumOf(bul(yarimK.kitapId), yarimK.no);
+    if(!b) return null;
+    return { kitapId:yarimK.kitapId, no:yarimK.no, index:yarimK.index, toplam:b.sorular.length,
+      cevapli:yarimK.cevaplar.filter(x => x != null).length };
+  }
+
+  function devam(){
+    const y = yarim();
+    if(!y) return { ok:false, why:'Yarım kalmış bir bölüm yok.' };
+    oturum = { kitapId:yarimK.kitapId, no:yarimK.no, index:yarimK.index,
+      cevaplar:yarimK.cevaplar.slice(), basla:Date.now() - (Number(yarimK.gecen_ms) || 0) };
+    ozet = null;
+    return { ok:true };
   }
 
   async function sil(id){
     if(!bul(id)) return { ok:false, why:'Kitap bulunamadı.' };
-    if(oturum && oturum.kitapId === id) oturum = null;
+    if(oturum && oturum.kitapId === id){ oturum = null; kalici(); }
+    if(yarimK && yarimK.kitapId === id){ yarimK = null; kalici(); }
     R.S.testKitaplari = kitaplar().filter(k => k.id !== id);
     await R.Store.remove('testkitabi/' + id);
     return { ok:true };
@@ -184,6 +222,7 @@ R.TestKitabi = (function(){
     if(!b) return { ok:false, why:'Bölüm bulunamadı.' };
     oturum = { kitapId, no:b.no, index:0, cevaplar:b.sorular.map(() => null), basla:Date.now() };
     ozet = null;
+    kalici();
     return { ok:true, toplam:b.sorular.length };
   }
 
@@ -202,12 +241,14 @@ R.TestKitabi = (function(){
   function sec(i){
     if(!oturum || !(i >= 0 && i < 5)) return;
     oturum.cevaplar[oturum.index] = oturum.cevaplar[oturum.index] === i ? null : i;
+    kalici();
   }
 
   function git(fark){
     const m = mevcut();
     if(!m) return;
     oturum.index = Math.max(0, Math.min(m.toplam - 1, oturum.index + fark));
+    kalici();
   }
 
   /* Soruya atla (Part 8b): kitapta sayfa çevirir gibi. */
@@ -215,9 +256,10 @@ R.TestKitabi = (function(){
     const m = mevcut();
     if(!m || !(i >= 0 && i < m.toplam)) return;
     oturum.index = i;
+    kalici();
   }
 
-  function vazgec(){ oturum = null; }
+  function vazgec(){ oturum = null; kalici(); }
 
   function anahtar(no, i){ return no + '-' + i; }
 
@@ -249,6 +291,7 @@ R.TestKitabi = (function(){
     await kaydet(Object.assign({}, m.kitap, { sonuclar }));
     ozet = { kitapId:m.kitap.id, no:m.bolum.no };
     oturum = null;
+    kalici();
     return sonuc;
   }
 
@@ -363,6 +406,7 @@ R.TestKitabi = (function(){
 
   return { ZORLUKLAR, VARSAYILAN, SINIR, kitaplar, bul, istekGovdesi, iste, kayittan,
     yukle, kaydet, sil, teklifUygula, baslat, aktif, mevcut, sec, git, gitNo, vazgec, bitir,
+    yarim, devam,
     sonOzet, ozetKapat, ozetAc, ilerleme, yanlislar, yanlislariDeftere, defterdenGeriAl,
     hataliIsaretle, hesapla, sohbet, maliyetOku, HARF };
 })();
