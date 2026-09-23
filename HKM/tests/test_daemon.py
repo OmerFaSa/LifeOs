@@ -630,3 +630,18 @@ def run_extra(S):
         ok(r["streaks"])
         eq(S.call("/api/streak?days=abc")[0], 400)
     test("seri ucnoktasi calisir", t_streak_endpoint)
+
+    def t_memory_sync_endpoint():
+        kayit = {"id": "h1", "metin": "Pazar çalışmam", "katman": "soz",
+                 "kaynak": "kullanici", "at": "2026-09-20T10:00:00"}
+        eq(S.call("/api/memory/sync/ays", body={"items": [kayit]}, token=None)[0], 401)
+        kod, r = S.call("/api/memory/sync/ays", body={"items": [kayit]})
+        eq((kod, r["eklenen"]), (200, 1))
+        kod, r = S.call("/api/memory/sync/ays", body={"items": [kayit]})
+        eq((kod, r["eklenen"], r["dusen"]), (200, 0, 0))
+        eq(S.call("/api/memory/sync/king", body={"items": []})[0], 422)
+        eq(S.call("/api/memory/sync/ays", body=[1])[0], 400)
+        kod, r = S.call("/api/memory?scope=king")
+        ok(any(m["modul"] == "ays" and m["text"] == "Pazar çalışmam" for m in r["memories"]))
+    test("modul hafizasi esitleme ucu yetki ister ve idempotenttir",
+         t_memory_sync_endpoint)

@@ -24,7 +24,7 @@ ESP.Screens.profile = (function(){
     return K.Entry({
       label:'HAFIZAM',
       meta:l.length ? l.length + ' kayıt' : 'boş',
-      note:'Ofisin senin hakkında hatırladıkları; yalnız bu cihazda durur. '
+      note:'Ofisin senin hakkında hatırladıkları; bu cihazda durur, HKM bağlıysa King de görür. '
          + 'Danışma’da «hatırla: …» diye de yazabilirsin.',
       wide:true,
       body:html`

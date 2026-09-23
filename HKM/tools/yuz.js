@@ -68,6 +68,13 @@ async function tohum(){
       date:t, metrics:{ questions:{ value:40 + (i % 60), cert:'measured' },
         study_minutes:{ value:60 + (i % 90), cert:'measured' } } }) });
   }
+  /* Hafiza: Profil'deki «King senin hakkında ne biliyor?» kartı dolu
+     haliyle ölçülsün — boş kart düğme ve uzun satır taşımaz. */
+  await api('/api/memory', { method:'POST', body:JSON.stringify({
+    text:'Sabahları daha verimliyim; akşam 10’dan sonra ağır konu çalışmam.' }) });
+  await api('/api/memory/sync/ays', { method:'POST', body:JSON.stringify({ items:[
+    { id:'h1', metin:'Pazar günleri çalışmam', katman:'soz', kaynak:'kullanici' },
+    { id:'h2', metin:'Deneme haftalarında uyku düşüyor', katman:'cikarim', kaynak:'kural' }] }) });
   await api('/api/briefing?date=' + bugun.toISOString().slice(0, 10));
 }
 

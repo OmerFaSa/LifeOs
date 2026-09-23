@@ -1215,7 +1215,8 @@ R.Model = (function(){
     if(R.Bolum) await R.Bolum.yukle();
     /* Hafiza bu modulun KENDI deposundadir: HKM kapaliyken de hatirlanir. */
     if(window.LIFEOS && LIFEOS.Hafiza){
-      R.Hafizam = R.Hafizam || LIFEOS.Hafiza.kur({ store:() => R.Store, durum:() => R.S });
+      R.Hafizam = R.Hafizam || LIFEOS.Hafiza.kur({ store:() => R.Store, durum:() => R.S,
+        hkm:() => R.Beacon });
       await R.Hafizam.yukle();
     }
     if(R.Friction) await R.Friction.load();
@@ -1224,6 +1225,9 @@ R.Model = (function(){
     /* Isaret ayari en sonda yuklenir ve yuklenmezse KAPALI kalir:
        kullanicinin secmedigi bir gonderim varsayilan olamaz. */
     if(R.Beacon) await R.Beacon.load();
+    /* Hafizanin anlik goruntusu HKM'ye (bagliysa). BEKLENMEZ: HKM kapaliyken
+       acilis bir milisaniye bile yavaslamaz (AGENTS.md §1.4). */
+    if(R.Hafizam) R.Hafizam.hkmeGonder();
     if(R.Storage){ await R.Storage.load(); await R.Storage.sample(); }
 
     for(const s of R.SUBJECTS){ await ensureTopics(s.id); }

@@ -188,7 +188,9 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     bg = baglam(con, date, gorevli, th=th)
     hb = memory.context(con, user=user, scope=gorevli)
     if hb:
-        bg += "\nKullanıcının açıkça kaydettiği hafıza:\n" + hb
+        bg += ("\nKullanıcı hakkında hatırlananlar (etiketiyle; «tahmin» kesin "
+               "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
+               "sen yazamazsın):\n" + hb)
     g = GOREVLILER[gorevli]
     sistem = SISTEM_METNI % {"ad": g["ad"], "is": g["is"], "baglam": bg}
     mesajlar = list(gecmis or []) + [{"role": "user", "content": metin}]

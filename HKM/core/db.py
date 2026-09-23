@@ -308,6 +308,12 @@ MIGRATIONS = [
     ("attachments", "downloaded_at", "TEXT"),
     ("attachments", "analyzed_at", "TEXT"),
     ("attachments", "error", "TEXT"),
+    # Hafiza katmani (soz / sohbet / cikarim) ve modulden gelen kaydin
+    # kimligi — core/memory.py. Eski satirlarda katman bostur: onlar
+    # yalniz acik komutla yazilabiliyordu, yani «senin sozun»dur.
+    ("memories", "katman", "TEXT"),
+    ("memories", "modul", "TEXT"),
+    ("memories", "dis_id", "TEXT"),
 ]
 
 

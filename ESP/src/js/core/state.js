@@ -1344,7 +1344,8 @@ ESP.Model = (function(){
     S.proposals = ((await ESP.Store.list('proposals')) || []);
     /* Hafiza: senin sozun, sohbetten, cikarim — core/hafiza.js (ortak). */
     if(window.LIFEOS && LIFEOS.Hafiza){
-      ESP.Hafizam = ESP.Hafizam || LIFEOS.Hafiza.kur({ store:() => ESP.Store, durum:() => ESP.S });
+      ESP.Hafizam = ESP.Hafizam || LIFEOS.Hafiza.kur({ store:() => ESP.Store, durum:() => ESP.S,
+        hkm:() => ESP.Beacon });
       await ESP.Hafizam.yukle();
     }
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
@@ -1366,6 +1367,9 @@ ESP.Model = (function(){
     /* Isaret ayari en sonda yuklenir ve yuklenmezse KAPALI kalir:
        kullanicinin secmedigi bir gonderim varsayilan olamaz. */
     if(ESP.Beacon) await ESP.Beacon.load();
+    /* Hafizanin anlik goruntusu HKM'ye (bagliysa). BEKLENMEZ: HKM kapaliyken
+       acilis bir milisaniye bile yavaslamaz (AGENTS.md §1.4). */
+    if(ESP.Hafizam) ESP.Hafizam.hkmeGonder();
     if(ESP.Storage){ await ESP.Storage.load(); await ESP.Storage.sample(); }
 
     S.storeHealth = ESP.Store.health();

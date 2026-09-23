@@ -860,7 +860,8 @@ SP.Model = (function(){
     if(SP.Bolum) await SP.Bolum.yukle();
     /* Hafiza: senin sozun, sohbetten, cikarim — core/hafiza.js (ortak). */
     if(window.LIFEOS && LIFEOS.Hafiza){
-      SP.Hafizam = SP.Hafizam || LIFEOS.Hafiza.kur({ store:() => SP.Store, durum:() => SP.S });
+      SP.Hafizam = SP.Hafizam || LIFEOS.Hafiza.kur({ store:() => SP.Store, durum:() => SP.S,
+        hkm:() => SP.Beacon });
       await SP.Hafizam.yukle();
     }
 
@@ -883,6 +884,9 @@ SP.Model = (function(){
     /* Isaret ayari en sonda yuklenir ve yuklenmezse KAPALI kalir:
        kullanicinin secmedigi bir gonderim varsayilan olamaz. */
     if(SP.Beacon) await SP.Beacon.load();
+    /* Hafizanin anlik goruntusu HKM'ye (bagliysa). BEKLENMEZ: HKM kapaliyken
+       acilis bir milisaniye bile yavaslamaz (AGENTS.md §1.4). */
+    if(SP.Hafizam) SP.Hafizam.hkmeGonder();
     if(SP.Storage){ await SP.Storage.load(); await SP.Storage.sample(); }
 
     S.ready = true;

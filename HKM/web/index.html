@@ -640,6 +640,7 @@ details.detay > summary:hover{ color:var(--fg); }
     <div data-bolme="profil" hidden>
       <div class="gun"><h1>Profil</h1></div>
       <div class="card" id="profil-kimlik"></div>
+      <div class="card" id="profil-hafiza"></div>
       <div id="profil-onur"></div>
       <div class="card" id="profil-kademe"><p class="muted">Yükleniyor…</p></div>
       <div id="profil-rozet"></div>
@@ -3521,7 +3522,79 @@ details.detay > summary:hover{ color:var(--fg); }
       + 'hangi belgeye baktığını başlığı okumadan söyler.</p>';
   }
 
+  /* KING SENİN HAKKINDA NE BİLİYOR? — hafıza (core/memory.py).
+
+     Her satır katmanını ve geldiği modülü söyler: «tahmin» kesin
+     değildir, «senin sözün» senin cümlendir. Model buraya yazamaz.
+     Modülden gelen bir kaydı burada unutmak HKM kopyasını kapatır;
+     modüldeki asıl kayıt orada durur — HKM modüle yazmaz (AGENTS.md
+     §1.4) ve bu ekran bunu SÖYLER, «silindi» deyip geçmez. */
+  var HAFIZA_KATMAN = { soz:'Senin sözün', sohbet:'Sohbetten', cikarim:'Tahmin' };
+  var HAFIZA_KAYNAK = [['', 'HKM'], ['ays', 'AYS'], ['spi', 'SPİ'], ['esp', 'ESP']];
+
+  function profilHafizaCiz(liste){
+    var k = $('profil-hafiza');
+    var h = '<div class="tag"><span lang="en">King</span> senin hakkında ne biliyor?</div>';
+    if(!liste.length){
+      h += '<p class="muted">Henüz hiçbir şey. Aşağıya yazabilir ya da sohbette '
+        + '«hatırla: …» diyebilirsin. AYS, SPİ ve ESP’de hafızana yazdıkların '
+        + 'HKM bağlıysa buraya da gelir.</p>';
+    }
+    HAFIZA_KAYNAK.forEach(function(g){
+      var l = liste.filter(function(m){ return (m.modul || '') === g[0]; });
+      if(!l.length) return;
+      h += '<p class="muted" style="margin:12px 0 4px"><b>' + esc(g[1]) + '</b> · '
+        + l.length + ' kayıt</p>';
+      l.forEach(function(m){
+        h += '<div class="row" style="justify-content:space-between;align-items:flex-start;'
+          + 'flex-wrap:nowrap;padding:6px 0;border-top:1px solid var(--line)">'
+          + '<span><span class="muted">' + esc(HAFIZA_KATMAN[m.katman] || 'Senin sözün')
+          + '</span><br/>' + esc(m.text) + '</span>'
+          + '<button data-hafiza-unut="' + esc(m.id) + '" data-hafiza-modul="'
+          + esc(m.modul || '') + '" aria-label="Unut: ' + esc(m.text) + '">Unut</button></div>';
+      });
+    });
+    h += '<div class="row" style="margin-top:12px">'
+      + '<input id="hafiza-yeni" type="text" maxlength="600" style="flex:1"'
+      + ' placeholder="Örn. Sabahları daha verimliyim" aria-label="Hatırlanacak şey"/>'
+      + '<button id="hafiza-ekle">Hatırla</button></div>'
+      + '<p class="muted" style="margin-top:8px">Model hafızaya yazamaz: «senin sözün»ü '
+      + 'yalnız sen yazarsın, «tahmin» satırları kural motorunun bulgusudur ve silinebilir.</p>';
+    k.innerHTML = h;
+  }
+
+  async function yukleHafiza(){
+    var r = await api('/api/memory?scope=king&limit=200');
+    if(r.status !== 200){
+      $('profil-hafiza').innerHTML = '<div class="tag"><span lang="en">King</span> senin hakkında ne biliyor?</div>'
+        + '<p class="muted">Hafıza okunamadı.</p>';
+      return;
+    }
+    profilHafizaCiz(r.body.memories || []);
+  }
+
+  document.addEventListener('click', async function(ev){
+    var el = ev.target.closest ? ev.target.closest('[data-hafiza-unut],#hafiza-ekle') : null;
+    if(!el) return;
+    if(el.id === 'hafiza-ekle'){
+      var metin = (($('hafiza-yeni') || {}).value || '').trim();
+      if(!metin) return;
+      var r = await api('/api/memory', { method:'POST', body:JSON.stringify({ text:metin }) });
+      if(r.status !== 200){ alert((r.body && r.body.note) || 'Kaydedilemedi.'); return; }
+      return yukleHafiza();
+    }
+    var modul = el.dataset.hafizaModul;
+    if(modul){
+      var ad = { ays:'AYS', spi:'SPİ', esp:'ESP' }[modul] || modul;
+      if(!confirm('King bu kaydı artık kullanmaz. ' + ad + '’deki asıl kayıt orada '
+        + 'durur; onu ' + ad + '’nin Hafızam kartından silersin. Devam edilsin mi?')) return;
+    }
+    await api('/api/memory/' + el.dataset.hafizaUnut + '/forget', { method:'POST' });
+    return yukleHafiza();
+  });
+
   async function yukleProfil(t){
+    yukleHafiza();
     var p = await api('/api/profil?date=' + t);
     if(p.status !== 200){
       $('profil-kademe').innerHTML = '<p class="muted">Profil okunamadı.</p>';

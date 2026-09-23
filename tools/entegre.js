@@ -211,6 +211,35 @@ async function main(){
       else console.log('  ' + s.id + ' → gecmis: ' + gecmis.sent + ' gun gonderildi, '
         + gecmis.empty + ' gun olcumsuz (dogru davranis)');
 
+      /* 2.6 — HAFIZA: modulde «hatirla» denen sey King'e ulasir;
+         modulde unutulan HKM'de de etkinligini yitirir. Anlik goruntu
+         esitlemesi (HKM core/memory.py esitle). */
+      const metin = s.id + ' hafıza denemesi';
+      const hafiza = await page.evaluate(async ([ns, metin]) => {
+        const H = window[ns].Hafizam;
+        if(!H) return { yok:true };
+        const e = await H.ekle(metin, { katman:'soz', kaynak:'kullanici' });
+        const g = await H.hkmeGonder();
+        return { ok:e.ok && g.ok, id:e.kayit && e.kayit.id, status:g.status };
+      }, [s.ns, metin]);
+      const kral = await (await hkmFetch('/api/memory?scope=king&limit=200')).json();
+      const gorunen = (kral.memories || []).filter(m => m.text === metin && m.modul === s.mod);
+      if(hafiza.yok) hatalar.push(s.id + ': hafiza kurulmamis');
+      else if(!hafiza.ok || gorunen.length !== 1){
+        hatalar.push(s.id + ': hafiza King\'e ulasmadi (' + hafiza.status + ')');
+      }else{
+        await page.evaluate(async ([ns, id]) => {
+          await window[ns].Hafizam.unut(id);
+          await window[ns].Hafizam.hkmeGonder();
+        }, [s.ns, hafiza.id]);
+        const sonra = await (await hkmFetch('/api/memory?scope=king&limit=200')).json();
+        if((sonra.memories || []).some(m => m.text === metin)){
+          hatalar.push(s.id + ': modulde unutulan hafiza HKM\'de etkin kaldi');
+        }else{
+          console.log('  ' + s.id + ' → hafiza King\'e ulasti, modulde unutulunca HKM\'de de dustu');
+        }
+      }
+
       /* 2.7 — NIYET: arayuz kuyrugu alir, UYGULAYAN kendi kodudur.
          Yalniz AYS icin denenir: teklif oraya birakildi. */
       if(s.id === 'AYS'){

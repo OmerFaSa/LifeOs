@@ -95,4 +95,66 @@
       expect(await h.komutIsle('bugün nasılım')).toBe(null);
     });
   });
+
+  /* HKM'ye bildirim: modül hafızasının ANLIK GÖRÜNTÜSÜ gider, HKM kendi
+     kopyasını eşitler (HKM core/memory.py esitle). HKM isteğe bağlıdır
+     (AGENTS.md §1.4): kapalıyken hiçbir şey gitmez, ağ hatası fırlatmaz. */
+  describe('Hafıza — HKM\'ye bildirim', () => {
+    function ortam(ayar, fetchFn){
+      const veri = {}, S = {};
+      const giden = [];
+      const h = H().kur({
+        store:() => ({ async get(k){ return veri[k] || null; }, async set(k, v){ veri[k] = v; } }),
+        durum:() => S,
+        hkm:() => ({ MODULE:'ays', settings:() => ayar, urlOk:u => /^https?:\/\//.test(u || '') }),
+        fetch:fetchFn || (async (url, o) => { giden.push({ url, o }); return { status:200 }; }),
+      });
+      return { h, giden };
+    }
+    const ACIK = { enabled:true, token:'jeton', url:'http://127.0.0.1:8787/' };
+
+    it('HKM kapalıyken ya da ayarsızken hiçbir şey gitmez', async () => {
+      const a = ortam({ enabled:false, token:'jeton', url:ACIK.url });
+      await a.h.yukle();
+      expect((await a.h.hkmeGonder()).reason).toBe('off');
+      const b = ortam({ enabled:true, token:'', url:ACIK.url });
+      await b.h.yukle();
+      expect((await b.h.hkmeGonder()).ok).toBe(false);
+      expect(a.giden.length + b.giden.length).toBe(0);
+    });
+
+    it('anlık görüntü gider: etkin kayıtlar, katmanı ve kaynağıyla', async () => {
+      const a = ortam(ACIK);
+      await a.h.yukle();
+      await a.h.ekle('Pazar çalışmam', { katman:'soz', kaynak:'kullanici' });
+      const u = await a.h.ekle('sabah verimliyim', { katman:'soz', kaynak:'kullanici' });
+      await a.h.unut(u.kayit.id);
+      const r = await a.h.hkmeGonder();
+      expect(r.ok).toBe(true);
+      const son = a.giden[a.giden.length - 1];
+      expect(son.url).toBe('http://127.0.0.1:8787/api/memory/sync/ays');
+      expect(son.o.headers.Authorization).toBe('Bearer jeton');
+      const items = JSON.parse(son.o.body).items;
+      expect(items.map(x => x.metin)).toEqual(['Pazar çalışmam']);
+      expect(items[0].katman).toBe('soz');
+      expect(items[0].kaynak).toBe('kullanici');
+    });
+
+    it('ekleme ve unutma HKM\'ye kendiliğinden bildirilir', async () => {
+      const a = ortam(ACIK);
+      await a.h.yukle();
+      await a.h.ekle('Pazar çalışmam', { katman:'soz', kaynak:'kullanici' });
+      await new Promise(r => setTimeout(r, 0));
+      expect(a.giden.length).toBe(1);
+    });
+
+    it('ağ hatası fırlatmaz; kayıt yerelde durur', async () => {
+      const a = ortam(ACIK, async () => { throw new Error('bağlantı reddedildi'); });
+      await a.h.yukle();
+      const e = await a.h.ekle('Pazar çalışmam', { katman:'soz', kaynak:'kullanici' });
+      expect(e.ok).toBe(true);
+      expect((await a.h.hkmeGonder()).ok).toBe(false);
+      expect(a.h.etkin()).toHaveLength(1);
+    });
+  });
 })();

@@ -127,7 +127,7 @@ SP.Screens.guide = (function(){
     const H = window.LIFEOS.Hafiza;
     const l = SP.Hafizam.etkin();
     return K.Card({
-      title:'Hafızam', sub:'Ofisin senin hakkında hatırladıkları — yalnız bu cihazda',
+      title:'Hafızam', sub:'Ofisin senin hakkında hatırladıkları — bu cihazda; HKM bağlıysa King de görür',
       body:html`
         ${when(!l.length, () => html`<p class="small dim">Henüz bir şey yok. Aşağıya yaz ya da
           Danışma’da «hatırla: laktoz bana dokunuyor» de.</p>`)}

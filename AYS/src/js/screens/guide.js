@@ -519,7 +519,7 @@ R.Screens.guide = (function(){
   function hafizaCard(){
     const H = window.LIFEOS.Hafiza;
     const l = R.Hafizam.etkin();
-    return K.Card({ title:'Hafızam', sub:'Ofisin senin hakkında hatırladıkları — yalnız bu cihazda',
+    return K.Card({ title:'Hafızam', sub:'Ofisin senin hakkında hatırladıkları — bu cihazda; HKM bağlıysa King de görür',
       body:html`
         ${when(!l.length, () => html`<p class="small dim">Henüz bir şey yok. Aşağıya yaz ya da
           sohbette «hatırla: sabahları daha verimliyim» de.</p>`)}

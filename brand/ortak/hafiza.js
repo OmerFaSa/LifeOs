@@ -26,7 +26,10 @@
    sözün»e yalnız `kullanici`, «çıkarım»a yalnız `kural` yazar.
 
    HER MODÜL KENDİ HAFIZASINI TUTAR. HKM kapalıyken de hatırlanır
-   (AGENTS.md §1.4); HKM'ye bildirim ayrı bir iştir.
+   (AGENTS.md §1.4). HKM bağlıysa (işaret açık, jeton var) her
+   değişiklikte hafızanın ANLIK GÖRÜNTÜSÜ HKM'ye gider ve King onu
+   okur; HKM kendi kopyasını eşitler (HKM core/memory.py esitle).
+   Gönderim beklenmez ve hiçbir koşulda fırlatmaz.
 
    KOMUTLAR HKM ile aynıdır — iki yerde iki ayrı dil öğrenilmesin:
      «hatırla: …» · «bunu hatırla: …» · «unutma: …» · «aklında tut: …»
@@ -149,8 +152,9 @@ LIFEOS.Hafiza = (function(){
   /* --------------------------------------------------------- depo
 
      Her uygulama kendi deposunu verir: `kur({ store:() => R.Store,
-     durum:() => R.S })`. Getter kullanılır çünkü testler depoyu her
-     seferinde değiştirir. */
+     durum:() => R.S, hkm:() => R.Beacon })`. Getter kullanılır çünkü
+     testler depoyu her seferinde değiştirir. `hkm` verilmezse HKM'ye
+     hiçbir şey gitmez. */
   function kur(ortam){
     const store = () => ortam.store();
     const durum = () => ortam.durum();
@@ -166,14 +170,46 @@ LIFEOS.Hafiza = (function(){
       durum().hafiza = l;
       await store().set(ANAHTAR, { items:l });
     }
+    /* HKM'ye bildirim — anlık görüntü. HKM isteğe bağlıdır: kapalıysa,
+       yanıt vermezse ya da hata verirse hiçbir şey bozulmaz. Kaçan bir
+       bildirim kaybolmaz: bir sonraki değişiklikte ya da açılışta
+       hafızanın TAMAMI yeniden gider. */
+    async function hkmeGonder(){
+      try{
+        const b = ortam.hkm ? ortam.hkm() : null;
+        if(!b || typeof b.settings !== 'function') return { ok:false, reason:'yok' };
+        const a = b.settings() || {};
+        if(!a.enabled) return { ok:false, reason:'off' };
+        if(!a.token || !b.urlOk(a.url)) return { ok:false, reason:'ayar' };
+        const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
+        if(!f) return { ok:false, reason:'yok' };
+        const items = etkin(liste()).map(x => ({ id:x.id, metin:x.metin, katman:x.katman,
+          kaynak:x.kaynak, at:x.at }));
+        const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+        const zaman = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;
+        try{
+          const res = await f(String(a.url).replace(/\/$/, '') + '/api/memory/sync/' + b.MODULE, {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + a.token },
+            body:JSON.stringify({ items }),
+            signal:ctrl ? ctrl.signal : undefined,
+          });
+          return { ok:res.status === 200, status:res.status };
+        }finally{
+          if(zaman) clearTimeout(zaman);
+        }
+      }catch(e){
+        return { ok:false, reason:'ag' };
+      }
+    }
     async function ekleK(metin, opts){
       const r = ekle(liste(), Object.assign({ metin }, opts || {}));
-      if(r.ok) await yaz(r.liste);
+      if(r.ok){ await yaz(r.liste); hkmeGonder(); }
       return r;
     }
     async function unutK(id){
       const r = unut(liste(), id);
-      if(r.ok) await yaz(r.liste);
+      if(r.ok){ await yaz(r.liste); hkmeGonder(); }
       return r;
     }
     /* Sohbet cümlesi bir hafıza komutuysa işler ve cevabı döndürür;
@@ -195,7 +231,7 @@ LIFEOS.Hafiza = (function(){
       }
       return null;
     }
-    return { yukle, liste, ekle:ekleK, unut:unutK,
+    return { yukle, liste, ekle:ekleK, unut:unutK, hkmeGonder,
       etkin:kapsam => etkin(liste(), kapsam),
       baglam:opts => baglam(liste(), opts), komutIsle };
   }

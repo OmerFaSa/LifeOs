@@ -637,8 +637,12 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/memory":
             user = (q.get("user") or ["ben"])[0]
             scope = (q.get("scope") or [None])[0]
+            try:
+                limit = int((q.get("limit") or ["50"])[0])
+            except ValueError:
+                return self._send(400, {"error": "limit sayi olmali"})
             return self._send(200, {"memories": memory.list_active(
-                self.con, user=user, scope=scope)})
+                self.con, user=user, scope=scope, limit=limit)})
 
         # ---- Hayat Mottosu: kullanicinin KENDI dusunce agi ----
         #
@@ -833,6 +837,21 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200 if r.get("ok") else 404, r)
             return self._send(404, {"error": "bilinmeyen motto ucu"})
 
+        # Modul hafizasinin anlik goruntusu (core/memory.py esitle). Modul
+        # TAMAMINI yollar, HKM kendi kopyasini esitler; ayni goruntu iki
+        # kez gelirse hicbir sey degismez.
+        if u.path.startswith("/api/memory/sync/"):
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            if not isinstance(body, dict):
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
+            r = memory.esitle(self.con, u.path.rsplit("/", 1)[-1], body.get("items"))
+            return self._send(200 if r.get("ok") else 422, r)
         if u.path.startswith("/api/memory/") and u.path.endswith("/forget"):
             parca = u.path.strip("/").split("/")
             try:
