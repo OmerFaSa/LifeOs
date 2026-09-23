@@ -41,7 +41,8 @@ LIFEOS.HedefAg = (function(){
     };
   }
 
-  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…], yarin?:async () => ({gun, isler}) })`
+  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…], yarin?:async () => ({gun, isler}),
+           tatil?:() => ({bas, bit, donus_planli}) | null })`
      → { gonder(), planla(), cek(), butce() } */
   function kur(ortam){
     let zaman = null;
@@ -103,6 +104,15 @@ LIFEOS.HedefAg = (function(){
       const govde = { hedefler:l };
       const y = await yarin();
       if(y) govde.yarin = y;
+      /* Tatil modu (seri.js): yalnız tarih. Yoksa açıkça null: HKM siler. */
+      if(typeof ortam.tatil === 'function'){
+        try{
+          const t = ortam.tatil();
+          const iso = /^\d{4}-\d{2}-\d{2}$/;
+          govde.tatil = t && iso.test(String(t.bas)) && iso.test(String(t.bit))
+            ? { bas:t.bas, bit:t.bit, donus_planli:!!t.donus_planli } : null;
+        }catch(e){ /* kanca bozuksa tatil gönderilmez */ }
+      }
       const g = await istek('/api/hedef/sync/' + ortam.modul, govde);
       if(g && g.butce) son = g.butce;
       return { ok:!!(g && g.ok), butce:son };

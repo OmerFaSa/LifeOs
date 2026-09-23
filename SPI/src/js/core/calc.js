@@ -64,6 +64,8 @@ SP.Calc = (function(){
       /* Bugun henuz bitmedi: tamamlanmamis olmasi seriyi kirmaz. */
       if(i === 0 && !minimumDay(d).complete) continue;
       if(minimumDay(d).complete) n++;
+      /* Dondurulmus gun (hasta, izin, tatil — brand/ortak/seri.js) bozmaz. */
+      else if(SP.Seri && SP.Seri.donmusMu(d)) continue;
       else break;
     }
     return n;

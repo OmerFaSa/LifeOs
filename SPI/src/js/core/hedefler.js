@@ -317,7 +317,8 @@ SP.Hedefler = (function(){
     return { gun:u.iso(u.addDays(u.parse(bugun), 1)), isler };
   }
   const ag = window.LIFEOS && LIFEOS.HedefAg
-    ? LIFEOS.HedefAg.kur({ hkm:() => SP.Beacon, modul:'spi', ozetler, yarin }) : null;
+    ? LIFEOS.HedefAg.kur({ hkm:() => SP.Beacon, modul:'spi', ozetler, yarin,
+        tatil:() => SP.Seri ? SP.Seri.hkmTatil() : null }) : null;
 
   /* Motorun sohbet akışı SPİ paketiyle. Model çağrılmaz. */
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({

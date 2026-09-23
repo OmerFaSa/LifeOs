@@ -19,7 +19,7 @@
 4. **KAYIP YOK:** her grup (ya da büyük madde) bitince commit + push (`main`) + burada ✅.
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
-**Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · 🔜 Grup 4 ·
+**Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · ✅ Grup 4 ·
 ⏳ 8c-2 · ⏳ 8c-3 · ⏳ 8d · ⏳ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
@@ -183,6 +183,25 @@ Hâlâ açık: Y10 alıcısı · Y1'in yeri (HKM içi öneri) · telefonun ağda
     çözme süresine girmez); bitince/vazgeçince/kitap silinince kayıt kalkar.
   - ✅ 31 (Grup 3) zaten VARDI: SPİ Sepet › İkame fırsatları (Korunan/Düşen). Değişiklik yok;
     otomatik muadil üretmek anlamsız eşleşme doğururdu, tablo elle seçilmiş kalır.
+  - ✅ 5 Dünkünün aynısı: SPİ Bugün başında ve ESP giriş satırlarında dünün bugün OLMAYAN
+    öğünü/antrenmanı/oturumu tek dokunuşla bugüne (`SP.Dunku`, `ESP.Dunku`); gıda etiketi
+    korunur, RPE kopyalanmaz, «Geri al» kalır. AYS'de BİLEREK yok: gün planı motordan gelir
+    (gün şablonu + haftanın konuları), dünün bloğunu kopyalamak motoru ezer (§1.1); dünün
+    SONUCUNU kopyalamak ölçüm uydurmaktır (§1.2).
+  - ✅ 50 Seri dondurma: ortak `brand/ortak/seri.js` (hasta/izin/tatil; en çok 7 gün geri,
+    tek kayıt 21 gün, hasta 3 gün, ayda 6). Üç modülün seri hesabı donmuş günü atlar;
+    Bugün'de «Seriyi dondur» satırı. Kısa sayı girişi de burada: SPİ «su 2» = 2 litre
+    (`suMiktari`), AYS «matematik soru 30», ESP «gitar 30» = dakika.
+  - ✅ 56 Tatil modu: AYS `R.Tatil.baslat(n)` (ara günleri + dönüşte iki gün yarım süre),
+    `bitir()`; tatil TARİHİ hedef eşitlemesiyle HKM'ye (`tatil_ozet`); tatilde yoklama/soru
+    yok, dönüş sabahı `load.reduce` teklifi. HKM MIMARI §8.32.
+  - ✅ 49 Haftalık «Bu hafta neler kazandın»: `weekly.kazanimlar` (yönü belli ölçü, ≥%5,
+    en çok 3 + düzen; «hesaplandı»; XP yok; yoksa dürüstçe «artış yok»). Mesaj, belge ve
+    HKM yüzünde. Bulunan HATA düzeltildi: haftalık mesaj ve yüz ham anahtar yazıyordu
+    («questions», «rhr»); `adlar.METRIK`'e 16 eksik ad eklendi, `cross.py` cümleleri
+    ASCII'ydi («medyani», «DEGILDIR») → düzgün Türkçe (AGENTS §1.8), testleri önce yazıldı.
+  - Grup 4 denetimi: HKM 562/562; üç duman testi, HKM yüzü, `tools/entegre.js` temiz;
+    `ortak.py --denetle` 42 dosya/125 kopya aynı.
 
 ## Kullanıcı kolaylığı fikirleri · 16 hızlı kazanç ONAYLI, gerisi ÖNERİ
 

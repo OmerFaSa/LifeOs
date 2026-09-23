@@ -878,6 +878,12 @@ SP.Model = (function(){
       SP.Urunler = SP.Urunler || LIFEOS.Urun.kur({ store:() => SP.Store, hkm:() => SP.Beacon });
       await SP.Urunler.yukle();
     }
+    /* Seri dondurma ve tatil modu (brand/ortak/seri.js): dondurulmuş gün
+       seriyi bozmaz; tatildeyken HKM soru sormaz. */
+    if(window.LIFEOS && LIFEOS.Seri){
+      SP.Seri = SP.Seri || LIFEOS.Seri.kur({ store:() => SP.Store, bugun:() => SP.U.todayISO() });
+      await SP.Seri.yukle();
+    }
 
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);

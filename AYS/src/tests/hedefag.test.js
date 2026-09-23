@@ -86,6 +86,21 @@
       expect(giden[1].hedefler.length).toBe(1);
     });
 
+    it('tatil yalnız tarihle gider; yoksa null (HKM siler)', async () => {
+      const giden = [];
+      const f = async (url, o) => { giden.push(JSON.parse(o.body));
+        return { status:200, json:async () => ({ ok:true }) }; };
+      let t = { bas:'2026-09-24', bit:'2026-09-30', neden:'gizli', donus_planli:true };
+      const ag = A().kur({ hkm:() => beacon(true), modul:'ays', ozetler:() => [], tatil:() => t, fetch:f });
+      await ag.gonder();
+      expect(giden[0].tatil).toEqual({ bas:'2026-09-24', bit:'2026-09-30', donus_planli:true });
+      t = null;
+      await ag.gonder();
+      expect(giden[1].tatil).toBe(null);
+      await A().kur({ hkm:() => beacon(true), modul:'spi', ozetler:() => [], fetch:f }).gonder();
+      expect('tatil' in giden[2]).toBe(false);
+    });
+
     it('HKM hata verirse sessizce düşer', async () => {
       const ag = A().kur({ hkm:() => beacon(true), modul:'spi', ozetler:() => [],
         fetch:async () => { throw new Error('ağ yok'); } });

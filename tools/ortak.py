@@ -208,6 +208,9 @@ DOSYALAR = {
     "urun.test.js":   "tests",
     # CEVRIMDISI KABUK — yalniz sunucuyla acilinca (http/https). Kabuk
     # `src/` kokunde durur: kapsami sayfanin klasorudur.
+    # SERI DONDURMA ve TATIL — dondurulmus gunler (fikir 50, 56).
+    "seri.js":        "js/core",
+    "seri.test.js":   "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     "sw.js":          ".",

@@ -127,6 +127,21 @@
       });
     });
 
+    it('dondurulmus bos gun seriyi bozmaz, sayilmaz da (seri.js)', async () => {
+      const m = {};
+      ESP.Seri = window.LIFEOS.Seri.kur({ store:() => ({ get:async k => m[k] || null,
+        set:async (k, v) => { m[k] = v; } }), bugun:() => '2026-09-12' });
+      try{
+        expect((await ESP.Seri.dondur('2026-09-10', null, 'hasta')).ok).toBe(true);
+        withToday('2026-09-12', () => {
+          resetState();
+          pushSession('2026-09-11', 'lang', 20);
+          pushSession('2026-09-09', 'lang', 20);
+          expect(M.streak()).toBe(2);
+        });
+      }finally{ delete ESP.Seri; }
+    });
+
     it('yalnız kart çalışılan gün de seriye girer', () => {
       /* `grade-card` (ekran) SRS'e yazar, OTURUM açmaz. Kullanıcı o gün
          yalnız kart çalışıp `log-review`e hiç basmasa, gün "dokunulmamış"

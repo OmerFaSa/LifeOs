@@ -21,6 +21,35 @@ from core import cross, impact, manager, twin
 
 ASGARI_GUN = 3          # bir olcunun haftalik ortancasi icin
 
+# ------------------------------------------------------------ kazanimlar
+#
+# Fikir 49 — «bu hafta neler kazandin»: OLCULMUS en cok uc iyi sey.
+#
+#   1. YALNIZ YONU BELLI OLCU. «Cok soru iyidir» kodun bildigi bir yondur;
+#      kilo, nabiz, tansiyon, su gibi yonu kisiye ve duruma bagli olculer
+#      burada YOKTUR (SPI teshis koymaz, yorum da kurmaz). Uyku «ne kadar
+#      cok o kadar iyi» degildir: yalniz tabana (esik) ya da bandin icine
+#      YAKLASAN hareket kazanimdir.
+#   2. ESIK. %5'in altindaki hareket gurultudur, kazanim sayilmaz.
+#   3. DUZEN DE OLCULMUSTUR: 7 gunun en az DUZEN_GUN'unde kayit.
+#   4. XP BAKILMAZ (AGENTS.md §1.6): seviye/rozet sayaclari burada yok.
+#   5. KAZANIM YOKSA UYDURULMAZ: «olculmus bir artis yok» yazilir.
+YON = {
+    # AYS
+    "questions": 1, "study_minutes": 1, "correct_questions": 1, "paragraph_done": 1,
+    "problem_done": 1, "blocks_done": 1, "plan_done": 1, "topics_done": 1,
+    "mock_net": 1, "correct_ratio": 1, "plan_adherence": 1, "errors_open": -1,
+    # SPI — yalniz modulun kendi hareket/toparlanma olculeri
+    "recovery": 1, "steps": 1, "train_minutes": 1, "training_minutes": 1,
+    # ESP
+    "practice_minutes": 1, "reading_minutes": 1, "retention": 1, "cards_done": 1,
+    "sessions": 1, "cards_due": -1, "synthesis_gap_days": -1,
+}
+UYKU_UST = 9.0          # bandin ustu; alt sinir kullanicinin esigi (bio.sleep_hours_min)
+KAZANIM_ESIK = 5        # yuzde
+KAZANIM_EN_COK = 3
+DUZEN_GUN = 5
+
 
 def _hafta(bugun, geri=0):
     t = datetime.date.fromisoformat(bugun) - datetime.timedelta(days=7 * geri)
@@ -80,17 +109,69 @@ def report(con, date, th=None):
     # birakmak, ayni veriyi iki yerde yorumlamak olurdu.
     satirlar.sort(key=lambda x: -abs(x.get("change") or 0))
 
+    from core import adlar
+    for x in satirlar:
+        # Ekran adi da BURADA verilir: yuz, mesaj ve belge ayni adi yazar.
+        x["ad"] = adlar.metrik(x["metric"])
+        x["degisim"] = _degisim(x)
+
     kapsam = twin.snapshot(con, bu_son, 7)
     capraz = cross.findings(con, bu_son, 60)
     etki = impact.summary(con)
+    gorulen = {m: kapsam["modules"][m]["days_seen"] for m in kapsam["modules"]}
     return {"from": bu_bas, "to": bu_son, "previous": [on_bas, on_son],
             "rows": satirlar, "coverage": kapsam["coverage"],
-            "days_seen": {m: kapsam["modules"][m]["days_seen"]
-                          for m in kapsam["modules"]},
+            "days_seen": gorulen,
+            "kazanimlar": kazanimlar(satirlar, gorulen, th),
             "cross": capraz[:2], "impact": etki["verdict"],
             "note": "Hafta bir toplam değil bir kapsamdır: eksik günleri "
                     "saymadan verilen bir ortalama, ölçülmeyen günleri sıfır "
                     "saymaktır."}
+
+
+def _uyku_uzaklik(x, alt):
+    return alt - x if x < alt else (x - UYKU_UST if x > UYKU_UST else 0.0)
+
+
+def _iyilesme(s, alt_uyku):
+    """Satirin iyi yondeki hareketi (0..1+) ya da None. Yon kodda durur."""
+    if s.get("status") != "compared" or s.get("change") is None:
+        return None
+    m = s["metric"]
+    if m == "sleep_hours":
+        once, simdi = _uyku_uzaklik(s["previous"], alt_uyku), _uyku_uzaklik(s["median"], alt_uyku)
+        return abs(s["change"]) if once > 0 and simdi < once else None
+    yon = YON.get(m)
+    if not yon:
+        return None
+    iyi = s["change"] * yon
+    return iyi if iyi > 0 else None
+
+
+def kazanimlar(satirlar, gorulen, th=None):
+    """En cok KAZANIM_EN_COK olculmus iyi sey; hepsi «hesaplandı» etiketli."""
+    from core import adlar
+    alt = float(((th or {}).get("bio") or {}).get("sleep_hours_min", 7.0))
+    aday = []
+    for s in satirlar:
+        iyi = _iyilesme(s, alt)
+        if iyi is None or iyi * 100 < KAZANIM_ESIK:
+            continue
+        aday.append((-iyi, s["key"], {
+            "metric": s["metric"], "module": s["module"], "etiket": "hesaplandı",
+            "change_pct": s["change_pct"],
+            "metin": "%s (%s): ortanca %s → %s (%s)" % (
+                adlar.metrik(s["metric"]), adlar.modul(s["module"]),
+                _fmt(s["previous"]), _fmt(s["median"]), _degisim(s))}))
+    aday.sort(key=lambda x: (x[0], x[1]))
+    out = [x[2] for x in aday[:KAZANIM_EN_COK]]
+    duzenli = [m for m in ("ays", "spi", "esp") if (gorulen or {}).get(m, 0) >= DUZEN_GUN]
+    if duzenli and len(out) < KAZANIM_EN_COK:
+        out.append({"metric": "duzen", "module": None, "etiket": "hesaplandı",
+                    "change_pct": None,
+                    "metin": " · ".join("%s: 7 günde %d gün kayıt"
+                                        % (adlar.modul(m), gorulen[m]) for m in duzenli)})
+    return out
 
 
 def _fmt(v):
@@ -111,10 +192,16 @@ def message(con, date, th=None):
     karsilastirilan = [s for s in r["rows"] if s["status"] == "compared"]
     karsilastirilan.sort(key=lambda s: -abs(s.get("change") or 0))
     for s in karsilastirilan[:4]:
-        parca.append("• %s: %s" % (s["metric"], s["note"]))
+        parca.append("• %s: %s" % (s["ad"], s["note"]))
     if not karsilastirilan:
         parca.append("Haftalık karşılaştırma için yeterli ölçüm yok. "
                      "Bu, «kötü hafta» demek değildir.")
+    if r["kazanimlar"]:
+        parca.append("Bu hafta neler kazandın (hesaplandı):")
+        parca.extend("✓ " + k["metin"] for k in r["kazanimlar"])
+    else:
+        parca.append("Bu hafta ölçülmüş bir artış yok."
+                     + (" Bu, «kötü hafta» demek değildir." if karsilastirilan else ""))
     for c in r["cross"]:
         parca.append("Çapraz: " + c["note"])
     if (r["impact"] or {}).get("note"):
@@ -165,6 +252,13 @@ def belge(con, date, th=None):
     else:
         bol.append({"baslik": "Ölçüler", "bloklar": [
             {"t": "p", "metin": "Bu hafta ölçü gelmedi. Bu, «kötü hafta» demek değildir."}]})
+
+    if r["kazanimlar"]:
+        bol.append({"baslik": "Neler kazandın", "bloklar": [
+            {"t": "liste", "maddeler": [k["metin"] for k in r["kazanimlar"]]},
+            {"t": "not", "metin": "Yalnız yönü belli ölçüler; %%%d'in altındaki hareket "
+                                  "sayılmaz. Düzen: 7 günün en az %d'inde kayıt. XP'ye "
+                                  "bakılmaz." % (KAZANIM_ESIK, DUZEN_GUN)}]})
 
     p = hedefag.pano(con)
     etkin = [h for h in p["hedefler"] if h["durum"] == "aktif"]

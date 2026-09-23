@@ -1236,6 +1236,12 @@ R.Model = (function(){
       R.Urunler = R.Urunler || LIFEOS.Urun.kur({ store:() => R.Store, hkm:() => R.Beacon });
       await R.Urunler.yukle();
     }
+    /* Seri dondurma ve tatil modu (brand/ortak/seri.js): dondurulmuş gün
+       seriyi bozmaz; tatildeyken HKM soru sormaz. */
+    if(window.LIFEOS && LIFEOS.Seri){
+      R.Seri = R.Seri || LIFEOS.Seri.kur({ store:() => R.Store, bugun:() => R.U.todayISO() });
+      await R.Seri.yukle();
+    }
     if(R.Friction) await R.Friction.load();
     if(R.Calib) await R.Calib.load();
     if(R.Signals) await R.Signals.load();

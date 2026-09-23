@@ -493,8 +493,12 @@ R.Calc = (function(){
       if(iso < R.PLAN.startISO) break;
       const met = minimumDayMet(iso);
       const isSunday = U.weekdayIndex(iso) === 6;
-      if(i < 14) days.unshift({ iso, met, isSunday, today:i === 0 });
+      /* Dondurulmus gun (hasta, izin, tatil — brand/ortak/seri.js) seriyi
+         BOZMAZ; tutulduysa yine sayilir. */
+      const donmus = !!(R.Seri && R.Seri.donmusMu(iso));
+      if(i < 14) days.unshift({ iso, met, isSunday, today:i === 0, donmus });
       if(i === 0 && !met) { checking = 1; continue; }   // bugun henuz bitmedi, seriyi kirma
+      if(!met && donmus) continue;
       if(met) streak++;
       else if(isSunday) continue;                       // pazar dinlenme
       else break;

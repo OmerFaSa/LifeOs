@@ -211,7 +211,10 @@ def bayatlari_kapat(con, cfg, now):
     King'in onay bekleyen teklifi iptal olur, BAM'da is acilmamistir.
     Kapananlar tek mesajda soylenir; kanal yoksa HKM sohbetine yazilir.
     Donus: kapananlarin satirlari."""
-    from core import db, king, outbox, patron, schedule
+    from core import db, hedefag, king, outbox, patron, schedule
+    if hedefag.tatilde(con, now.date().isoformat()):
+        # Tatildeyken teklif kapanmaz: donuste kullanici hepsini gorur.
+        return []
     gun = int(settings(cfg).get("teklif_omru_gun") or 3)
     sinir = (now - datetime.timedelta(days=gun)).isoformat(timespec="seconds")
     t = now.isoformat(timespec="seconds")

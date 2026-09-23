@@ -32,6 +32,7 @@ def main():
     test_bildirim.run_eksik()
     test_bildirim.run_bayat()
     test_bildirim.run_yarin()
+    test_bildirim.run_tatil()
 
     suite = None
     fails = 0

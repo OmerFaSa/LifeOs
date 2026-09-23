@@ -41,47 +41,47 @@ PENCERE = 60             # gun
 PAIRS = [
     {"id": "sleep-vs-questions",
      "a": {"module": "spi", "metric": "sleep_hours", "label": "uyku saati"},
-     "b": {"module": "ays", "metric": "questions", "label": "ertesi gun soru sayisi"},
+     "b": {"module": "ays", "metric": "questions", "label": "ertesi gün soru sayısı"},
      "lag": 1,
-     "question": "Iyi uyunan gecelerin ertesi gunu gercekten daha mi verimli "
-                 "geciyor — yoksa oyle oldugunu mu varsayiyorsun?"},
+     "question": "İyi uyunan gecelerin ertesi günü gerçekten daha mı verimli "
+                 "geçiyor — yoksa öyle olduğunu mu varsayıyorsun?"},
     {"id": "sleep-vs-practice",
      "a": {"module": "spi", "metric": "sleep_hours", "label": "uyku saati"},
-     "b": {"module": "esp", "metric": "practice_minutes", "label": "ertesi gun pratik dakikasi"},
+     "b": {"module": "esp", "metric": "practice_minutes", "label": "ertesi gün pratik dakikası"},
      "lag": 1,
-     "question": "Uykunun pratige etkisi, calismaya etkisiyle ayni mi?"},
+     "question": "Uykunun pratiğe etkisi, çalışmaya etkisiyle aynı mı?"},
     {"id": "recovery-vs-study",
      "a": {"module": "spi", "metric": "recovery", "label": "toparlanma skoru"},
-     "b": {"module": "ays", "metric": "study_minutes", "label": "ayni gun calisma dakikasi"},
+     "b": {"module": "ays", "metric": "study_minutes", "label": "aynı gün çalışma dakikası"},
      "lag": 0,
-     "question": "Toparlanmanin dusuk oldugu gunlerde plani kucultmek mi "
-                 "gerekiyor, yoksa plan zaten kendiliginden mi kuculuyor?"},
+     "question": "Toparlanmanın düşük olduğu günlerde planı küçültmek mi "
+                 "gerekiyor, yoksa plan zaten kendiliğinden mi küçülüyor?"},
     {"id": "study-vs-practice",
-     "a": {"module": "ays", "metric": "study_minutes", "label": "calisma dakikasi"},
-     "b": {"module": "esp", "metric": "practice_minutes", "label": "ayni gun pratik dakikasi"},
+     "a": {"module": "ays", "metric": "study_minutes", "label": "çalışma dakikası"},
+     "b": {"module": "esp", "metric": "practice_minutes", "label": "aynı gün pratik dakikası"},
      "lag": 0,
-     "question": "Ikisi ayni gunun ayni saatlerinden besleniyor. Biri "
-                 "buyurken digeri kuculuyorsa, bu bir tercih mi bir kayip mi?"},
+     "question": "İkisi aynı günün aynı saatlerinden besleniyor. Biri "
+                 "büyürken diğeri küçülüyorsa, bu bir tercih mi bir kayıp mı?"},
     # --- gelismis kapsam ciftleri ---
     # Bu ikisi yalniz «gelismis» kapsamda veri bulur; ozet kapsamda
     # eslesmis gun sayisi esigi gecmez ve dogru sekilde «veri yok» der.
     {"id": "training-vs-next-day-study",
-     "a": {"module": "spi", "metric": "train_minutes", "label": "antrenman dakikasi"},
-     "b": {"module": "ays", "metric": "study_minutes", "label": "ertesi gun calisma dakikasi"},
+     "a": {"module": "spi", "metric": "train_minutes", "label": "antrenman dakikası"},
+     "b": {"module": "ays", "metric": "study_minutes", "label": "ertesi gün çalışma dakikası"},
      "lag": 1,
-     "question": "Agir antrenman gunlerinin ertesi gunu masada ne oluyor? "
-                 "Ikisi ayni gunun enerjisinden besleniyor."},
+     "question": "Ağır antrenman günlerinin ertesi günü masada ne oluyor? "
+                 "İkisi aynı günün enerjisinden besleniyor."},
     {"id": "protein-vs-next-day-recovery",
-     "a": {"module": "spi", "metric": "protein_g", "label": "gunluk protein"},
-     "b": {"module": "spi", "metric": "recovery", "label": "ertesi gun toparlanma"},
+     "a": {"module": "spi", "metric": "protein_g", "label": "günlük protein"},
+     "b": {"module": "spi", "metric": "recovery", "label": "ertesi gün toparlanma"},
      "lag": 1,
-     "question": "Protein alimi ile ertesi gunun toparlanmasi birlikte mi "
+     "question": "Protein alımı ile ertesi günün toparlanması birlikte mi "
                  "hareket ediyor?"},
     {"id": "sleep-vs-retention",
      "a": {"module": "spi", "metric": "sleep_hours", "label": "uyku saati"},
-     "b": {"module": "esp", "metric": "retention", "label": "ertesi gun retansiyon"},
+     "b": {"module": "esp", "metric": "retention", "label": "ertesi gün kalıcılık"},
      "lag": 1,
-     "question": "Hatirlama, uykuyla birlikte mi degisiyor?"},
+     "question": "Hatırlama, uykuyla birlikte mi değişiyor?"},
 ]
 
 
@@ -134,8 +134,8 @@ def pair(defn, seri):
 
     if len(eslesme) < ASGARI_GUN:
         return dict(base, status="missing", cert="missing", n=len(eslesme),
-                    note="Eslesmis gun sayisi %d; hukum icin %d gerekir. Az veri "
-                         "«iliski yok» demek DEGILDIR." % (len(eslesme), ASGARI_GUN))
+                    note="Eşleşmiş gün sayısı %d; hüküm için %d gerekir. Az veri "
+                         "«ilişki yok» demek DEĞİLDİR." % (len(eslesme), ASGARI_GUN))
 
     esik = _median([x[1] for x in eslesme])
     ust = [x for x in eslesme if x[1] > esik]
@@ -153,8 +153,8 @@ def pair(defn, seri):
     if len(ust) < ASGARI_YARI or len(alt) < ASGARI_YARI:
         return dict(base, status="missing", cert="missing", n=len(eslesme),
                     threshold=esik,
-                    note="Olcumlerin neredeyse hepsi ayni bantta (%d/%d). Iki yari "
-                         "olusmadan karsilastirma yapilamaz." % (len(ust), len(alt)))
+                    note="Ölçümlerin neredeyse hepsi aynı bantta (%d/%d). İki yarı "
+                         "oluşmadan karşılaştırma yapılamaz." % (len(ust), len(alt)))
 
     ustOrt = _median([x[2] for x in ust])
     altOrt = _median([x[2] for x in alt])
@@ -175,19 +175,19 @@ def pair(defn, seri):
 
     if fark is None or abs(fark) < FARK_ESIGI:
         return dict(ortak, status="flat",
-                    note="%s medyani %s; ustunde kalan %d gunde %s ortancasi %s, "
-                         "altinda kalan %d gunde %s. Fark, bu olcunun genisliginin "
-                         "altinda: gorunur bir ayrisma yok."
+                    note="%s medyanı %s; üstünde kalan %d günde %s ortancası %s, "
+                         "altında kalan %d günde %s. Fark, bu ölçünün genişliğinin "
+                         "altında: görünür bir ayrışma yok."
                          % (defn["a"]["label"], _fmt(esik), len(ust), defn["b"]["label"],
                             _fmt(ustOrt), len(alt), _fmt(altOrt)))
 
     return dict(ortak, status="higher" if fark > 0 else "lower",
-                note="%s medyani %s. Ustunde kalan %d gunde %s ortancasi %s, "
-                     "altinda kalan %d gunde %s — %%%d %s. Bu bir ESLESMEDIR, "
-                     "neden-sonuc degil: ayni gunlerde baska her sey de degisti."
+                note="%s medyanı %s. Üstünde kalan %d günde %s ortancası %s, "
+                     "altında kalan %d günde %s — %%%d %s. Bu bir EŞLEŞMEDİR, "
+                     "neden-sonuç değil: aynı günlerde başka her şey de değişti."
                      % (defn["a"]["label"], _fmt(esik), len(ust), defn["b"]["label"],
                         _fmt(ustOrt), len(alt), _fmt(altOrt),
-                        round(abs(fark) * 100), "yukarida" if fark > 0 else "asagida"))
+                        round(abs(fark) * 100), "yukarıda" if fark > 0 else "aşağıda"))
 
 
 def _fmt(v):

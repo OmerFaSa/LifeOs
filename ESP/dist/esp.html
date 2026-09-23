@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'a6581f7', at:'2026-09-23 22:48', dirty:true };
+ESP.BUILD = { id:'08f1086', at:'2026-09-23 23:07', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10650,7 +10650,8 @@ LIFEOS.HedefAg = (function(){
     };
   }
 
-  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…], yarin?:async () => ({gun, isler}) })`
+  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…], yarin?:async () => ({gun, isler}),
+           tatil?:() => ({bas, bit, donus_planli}) | null })`
      → { gonder(), planla(), cek(), butce() } */
   function kur(ortam){
     let zaman = null;
@@ -10712,6 +10713,15 @@ LIFEOS.HedefAg = (function(){
       const govde = { hedefler:l };
       const y = await yarin();
       if(y) govde.yarin = y;
+      /* Tatil modu (seri.js): yalnız tarih. Yoksa açıkça null: HKM siler. */
+      if(typeof ortam.tatil === 'function'){
+        try{
+          const t = ortam.tatil();
+          const iso = /^\d{4}-\d{2}-\d{2}$/;
+          govde.tatil = t && iso.test(String(t.bas)) && iso.test(String(t.bit))
+            ? { bas:t.bas, bit:t.bit, donus_planli:!!t.donus_planli } : null;
+        }catch(e){ /* kanca bozuksa tatil gönderilmez */ }
+      }
       const g = await istek('/api/hedef/sync/' + ortam.modul, govde);
       if(g && g.butce) son = g.butce;
       return { ok:!!(g && g.ok), butce:son };
@@ -11363,7 +11373,8 @@ ESP.Hedefler = (function(){
     return { gun:tarih, isler };
   }
   const ag = window.LIFEOS && LIFEOS.HedefAg
-    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler, yarin }) : null;
+    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler, yarin,
+        tatil:() => ESP.Seri ? ESP.Seri.hkmTatil() : null }) : null;
 
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'esp', durum:() => ({}), bugun:() => U().todayISO(),
@@ -11950,6 +11961,145 @@ LIFEOS.Gorsel = (function(){
   }
 
   L.Pwa = { uygun, adresler, kaydet, EN_COK };
+})();
+
+/* ==== js/core/seri.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/seri.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* SERİ DONDURMA ve TATİL MODU — dondurulmuş günler (fikir 50, 56).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/seri.js`; `tools/ortak.py --yay` ile üç arayüzün
+   `src/js/core/` klasörüne birebir kopyalanır.
+
+   Hasta olduğun gün ya da tatil haftası, bir alışkanlık serisini
+   kırmamalı: seriyi kıran şey vazgeçmektir, hastalık değil. Ama dondurma
+   bir BAHANE makinesi de olmamalı.
+
+   Sözler:
+     1. KULLANICI İŞARETLER. Sistem kendiliğinden gün dondurmaz; «dün de
+        hastaydım» denebilir ama en çok GERI_GUN gün geriye.
+     2. DONDURULAN GÜN SERİYİ BOZMAZ, SAYILMAZ DA. O gün kayıt girildiyse
+        seri yine sayar; girilmediyse seri o günü atlar. «Donmuş» bir ölçüm
+        değildir: veri yok gününe sıfır yazılmaz, «tamamlandı» da yazılmaz.
+     3. SINIRLI. Tek kayıt en çok EN_UZUN gün; bir takvim ayında en çok
+        AYLIK_HASTA hasta/izin günü (tatil ayrı sayılır, kendi sınırıyla).
+     4. GERİ ALINIR. Her kayıt kimliğiyle silinir; geçmiş sessizce
+        değişmez, «çöz» denince seri yeniden hesaplanır.
+     5. HKM'YE YALNIZ TATİLİN TARİHİ GİDER (hedefag.js): tatildeyken HKM
+        soru sormaz; dönüşte yük azaltma teklifi bırakır. Neden gitmez. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.Seri = (function(){
+  const NEDEN = { hasta:'Hasta', izin:'İzin', tatil:'Tatil' };
+  const EN_UZUN = 21;
+  const GERI_GUN = 7;
+  const AYLIK_HASTA = 6;
+  const ANAHTAR = 'meta/seriDondurma';
+  const DONUS_BILDIR = 3;
+
+  function isoOku(iso){ const p = String(iso).split('-').map(Number); return new Date(Date.UTC(p[0], p[1] - 1, p[2])); }
+  function isoYaz(d){ return d.toISOString().slice(0, 10); }
+  function gunEkle(iso, n){ const d = isoOku(iso); d.setUTCDate(d.getUTCDate() + n); return isoYaz(d); }
+  function fark(a, b){ return Math.round((isoOku(b) - isoOku(a)) / 86400000); }
+  const ISO = /^\d{4}-\d{2}-\d{2}$/;
+
+  function gecerli(x){
+    return x && typeof x.id === 'string' && ISO.test(x.bas || '') && ISO.test(x.bit || '')
+      && x.bas <= x.bit && NEDEN[x.neden];
+  }
+
+  /* `kur({ store:() => Store, bugun:() => iso })` */
+  function kur(o){
+    let liste = [];
+
+    async function yukle(){
+      try{
+        const d = await o.store().get(ANAHTAR);
+        liste = d && Array.isArray(d.liste) ? d.liste.filter(gecerli) : [];
+      }catch(e){ liste = []; }
+      return liste;
+    }
+    async function yaz(){ await o.store().set(ANAHTAR, { liste }); }
+
+    function kayitOf(iso){ return liste.find(x => x.bas <= iso && iso <= x.bit) || null; }
+    function donmusMu(iso){ return !!kayitOf(iso); }
+
+    function buAyHasta(iso, haric){
+      const ay = String(iso).slice(0, 7);
+      let n = 0;
+      liste.filter(x => x.neden !== 'tatil' && x !== haric).forEach(x => {
+        for(let d = x.bas; d <= x.bit; d = gunEkle(d, 1)) if(d.slice(0, 7) === ay) n++;
+      });
+      return n;
+    }
+
+    async function dondur(bas, bit, neden){
+      const bugun = o.bugun();
+      bit = bit || bas;
+      if(!ISO.test(String(bas)) || !ISO.test(String(bit)) || bas > bit) return { ok:false, why:'Tarih geçersiz.' };
+      if(!NEDEN[neden]) return { ok:false, why:'Neden hasta, izin ya da tatil olmalı.' };
+      if(fark(bas, bugun) > GERI_GUN) return { ok:false, why:'En çok ' + GERI_GUN + ' gün geriye işaretlenebilir.' };
+      const gun = fark(bas, bit) + 1;
+      if(gun > EN_UZUN) return { ok:false, why:'Tek seferde en çok ' + EN_UZUN + ' gün.' };
+      if(neden !== 'tatil' && neden !== 'izin' && gun > 3) return { ok:false, why:'Hasta günü tek seferde en çok 3 gün; daha uzunsa tatil/izin seç.' };
+      for(let d = bas; d <= bit; d = gunEkle(d, 1)) if(donmusMu(d)) return { ok:false, why:d + ' zaten dondurulmuş.' };
+      if(neden !== 'tatil'){
+        let ek = 0; for(let d = bas; d <= bit; d = gunEkle(d, 1)) ek++;
+        if(buAyHasta(bas) + ek > AYLIK_HASTA) return { ok:false, why:'Bu ay en çok ' + AYLIK_HASTA + ' hasta/izin günü dondurulabilir.' };
+      }
+      const kayit = { id:'sd-' + bas + '-' + Math.random().toString(36).slice(2, 7), bas, bit, neden,
+        at:new Date().toISOString() };
+      liste = liste.concat([kayit]);
+      await yaz();
+      return { ok:true, kayit, gun };
+    }
+
+    async function coz(id){
+      const k = liste.find(x => x.id === id);
+      if(!k) return { ok:false, why:'Kayıt bulunamadı.' };
+      liste = liste.filter(x => x.id !== id);
+      await yaz();
+      return { ok:true, kayit:k };
+    }
+
+    /* Tatili bugün BİTİR: geçmiş günler donmuş kalır, yarın ve sonrası çözülür. */
+    async function tatiliBitir(){
+      const t = aktifTatil();
+      if(!t) return { ok:false, why:'Etkin bir tatil yok.' };
+      const bugun = o.bugun();
+      if(t.bas >= bugun) liste = liste.filter(x => x !== t);
+      else t.bit = gunEkle(bugun, -1) < t.bas ? t.bas : gunEkle(bugun, -1);
+      await yaz();
+      return { ok:true, kayit:t };
+    }
+
+    function aktifTatil(iso){
+      const g = iso || o.bugun();
+      return liste.find(x => x.neden === 'tatil' && x.bas <= g && g <= x.bit) || null;
+    }
+
+    /* HKM'ye giden: yalnız tatilin TARİHİ (hedefag.js) — etkin, yaklaşan ya da
+       son DONUS_BILDIR gün içinde biten. Biteni de bildirmek gerekir: HKM
+       dönüş sabahı yük azaltma teklifi bırakır; erken bitirilen tatilin
+       yeni bitişini ancak böyle öğrenir. */
+    function hkmTatil(){
+      const g = o.bugun();
+      const alt = gunEkle(g, -DONUS_BILDIR);
+      const l = liste.filter(x => x.neden === 'tatil' && x.bit >= alt);
+      const t = l.find(x => x.bas <= g && g <= x.bit)
+        || l.filter(x => x.bas > g).sort((a, b) => a.bas.localeCompare(b.bas))[0]
+        || l.sort((a, b) => b.bit.localeCompare(a.bit))[0];
+      return t ? { bas:t.bas, bit:t.bit } : null;
+    }
+
+    return { yukle, dondur, coz, tatiliBitir, donmusMu, kayitOf, aktifTatil, hkmTatil,
+      liste:() => liste.slice(), gunEkle };
+  }
+
+  return { kur, NEDEN, EN_UZUN, GERI_GUN, AYLIK_HASTA, ANAHTAR };
 })();
 
 /* ==== js/core/medya.js ==== */
@@ -18086,6 +18236,8 @@ ESP.Model = (function(){
     for(let i = 1; i < 400; i++){
       const d = U.iso(U.addDays(U.parse(bugun), -i));
       if(dokunuldu(d)) n++;
+      /* Dondurulmus gun (hasta, izin, tatil — brand/ortak/seri.js) bozmaz. */
+      else if(ESP.Seri && ESP.Seri.donmusMu(d)) continue;
       else break;
     }
     return n;
@@ -18916,6 +19068,12 @@ ESP.Model = (function(){
     if(window.LIFEOS && LIFEOS.Urun){
       ESP.Urunler = ESP.Urunler || LIFEOS.Urun.kur({ store:() => ESP.Store, hkm:() => ESP.Beacon });
       await ESP.Urunler.yukle();
+    }
+    /* Seri dondurma ve tatil modu (brand/ortak/seri.js): dondurulmuş gün
+       seriyi bozmaz; tatildeyken HKM soru sormaz. */
+    if(window.LIFEOS && LIFEOS.Seri){
+      ESP.Seri = ESP.Seri || LIFEOS.Seri.kur({ store:() => ESP.Store, bugun:() => ESP.U.todayISO() });
+      await ESP.Seri.yukle();
     }
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
@@ -28988,6 +29146,45 @@ ESP.Parse = (function(){
   return { AYRAC, ALIASES, parseSession, parseVocab, parseArgument, extractConcepts };
 })();
 
+/* ==== js/core/dunku.js ==== */
+/* DÜNKÜNÜN AYNISI (fikir 5) — dünün çalışma oturumu tek dokunuşla bugüne.
+
+   Sözler: kullanıcı seçer (kendiliğinden kopya yok); kopya bugünün kaydıdır
+   (süre ve sayım aslındaki gibi, «kalite» kopyalanmaz — o günün hissidir);
+   bugün aynı disipline zaten oturum girildiyse önerilmez; geri alınır. */
+
+window.ESP = window.ESP || {};
+
+ESP.Dunku = (function(){
+  const U = () => ESP.U;
+  function dun(bugun){ return U().iso(U().addDays(U().parse(bugun), -1)); }
+
+  function adaylar(bugun){
+    const d = dun(bugun);
+    const var_ = new Set(ESP.Model.sessionsOf(bugun).map(s => s.disc));
+    const oturumlar = ESP.Model.sessionsOf(d).filter(s => s.minutes > 0 && !var_.has(s.disc)).map(s => {
+      const disc = ESP.DISCIPLINE_BY_ID[s.disc];
+      return { id:s.id, disc:s.disc, ad:disc ? disc.label : s.disc, dk:s.minutes,
+        sayim:s.count != null ? s.count + (s.countWhat ? ' ' + s.countWhat : '') : null };
+    });
+    return { dun:d, oturumlar };
+  }
+
+  async function kopyala(bugun, id){
+    const s = ESP.Model.sessionsOf(dun(bugun)).find(x => x.id === id);
+    if(!s) return { ok:false, why:'Dünün oturumu bulunamadı.' };
+    if(!adaylar(bugun).oturumlar.some(x => x.id === id)) return { ok:false, why:'Bugün bu disipline zaten oturum girilmiş.' };
+    const yeni = await ESP.Model.addSession(bugun, { disc:s.disc, minutes:s.minutes, count:s.count,
+      countWhat:s.countWhat, note:'Dünün aynısı' });
+    const disc = ESP.DISCIPLINE_BY_ID[s.disc];
+    return { ok:true, id:yeni.id, ad:disc ? disc.label : s.disc };
+  }
+
+  async function geriAl(bugun, id){ await ESP.Model.deleteSession(bugun, id); return { ok:true }; }
+
+  return { adaylar, kopyala, geriAl };
+})();
+
 /* ==== js/core/voice.js ==== */
 /* Ses ile dikte.
 
@@ -34710,6 +34907,48 @@ ESP.Screens.today = (function(){
     ];
   }
 
+  /* Dünkünün aynısı (core/dunku.js): dünün oturumu tek dokunuşla bugüne.
+     Yalnız bugün dokunulmamış disiplin önerilir; seçili gün bugün değilse yok. */
+  function dunkuRow(){
+    if(!ESP.Dunku || gun() !== U.todayISO()) return null;
+    const a = ESP.Dunku.adaylar(U.todayISO());
+    if(!a.oturumlar.length) return null;
+    return K.Entry({ label:'DÜNKÜNÜN AYNISI', meta:U.fmtShort(a.dun), wide:true,
+      note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; kalite puanı kopyalanmaz.',
+      body:html`${map(a.oturumlar, o => html`<div class="row between wrap gap-6 mt-4">
+        <span class="small"><b>${o.ad}</b> <span class="tiny dim">${o.dk} dk${o.sayim ? ' · ' + o.sayim : ''}</span></span>
+        ${K.Button({ label:'Bugüne ekle', size:'sm', act:'dunku-oturum', data:{ 'data-id':o.id } })}</div>`)}` });
+  }
+
+  /* Seri satiri Giris sekmesinde: «Bugün hastayım» ve «Tatil modu» aranmaz. */
+  function seriRow(){
+    if(!ESP.Seri) return null;
+    return K.Entry({ label:'SERİ', hint:'streak', meta:M.streak() + ' gün', wide:true,
+      body:seriKontrol() });
+  }
+
+  /* Seri dondurma ve tatil modu (brand/ortak/seri.js): hasta gün ve tatil
+     seriyi bozmaz; tatildeyken HKM soru sormaz. */
+  function seriKontrol(){
+    if(!ESP.Seri) return '';
+    const bugun = U.todayISO();
+    const t = ESP.Seri.aktifTatil(bugun);
+    const k = ESP.Seri.kayitOf(bugun);
+    if(t) return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Tatil modu: ${U.fmtShort(t.bas)} – ${U.fmtShort(t.bit)} · seri korunuyor, HKM soru sormuyor</span>
+      ${K.Button({ label:'Tatili bitir', size:'sm', act:'seri-tatil-bitir' })}</div>`;
+    if(k) return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Bugün dondurulmuş (${LIFEOS.Seri.NEDEN[k.neden].toLocaleLowerCase('tr')}) · seri bozulmaz</span>
+      ${K.Button({ label:'Geri al', size:'sm', act:'seri-coz', data:{ 'data-id':k.id } })}</div>`;
+    if(S.ui.tatilSec) return html`<div class="row wrap gap-6 mt-6">
+      <span class="tiny">Kaç gün?</span>
+      ${map([3, 7, 14], n => K.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
+      ${K.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>`;
+    return html`<div class="row wrap gap-6 mt-6">
+      ${K.Button({ label:'Bugün hastayım · seri donsun', size:'sm', act:'seri-hasta' })}
+      ${K.Button({ label:'Tatil modu', size:'sm', act:'seri-tatil' })}</div>`;
+  }
+
   /* ---------------------------------------------------------------- gecmis */
 
   function historyRows(){
@@ -35082,7 +35321,7 @@ ESP.Screens.today = (function(){
     const rows = [yedekRow()].concat(
       tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [kingTeklifRow(), hkmTeklifRow(), hkmSeritRow(), nextCard(), signalRow(), planRow(),
+      : [kingTeklifRow(), hkmTeklifRow(), hkmSeritRow(), seriRow(), dunkuRow(), nextCard(), signalRow(), planRow(),
           planRowToday(), reminderRow(),
           entryForm(), quickForm(), sessionList()])
           .filter(Boolean);
@@ -35142,6 +35381,39 @@ ESP.Screens.today = (function(){
   }
 
   const handle = {
+    async 'dunku-oturum'(el){
+      const bugun = U.todayISO();
+      const r = await ESP.Dunku.kopyala(bugun, el.dataset.id);
+      if(!r.ok){ ESP.UI.toast(r.why); return; }
+      ESP.UI.toast(r.ad + ' bugüne eklendi', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
+      ESP.App.render();
+    },
+    async 'seri-hasta'(){
+      const r = await ESP.Seri.dondur(U.todayISO(), null, 'hasta');
+      if(!r.ok){ ESP.UI.toast(r.why); return; }
+      ESP.UI.toast('Bugün donduruldu; seri bozulmaz. Geçmiş olsun.', { undo:async () => {
+        await ESP.Seri.coz(r.kayit.id); ESP.App.render(); } });
+      ESP.App.render();
+    },
+    async 'seri-coz'(el){ await ESP.Seri.coz(el.dataset.id); ESP.UI.toast('Dondurma geri alındı'); ESP.App.render(); },
+    async 'seri-tatil'(){ S.ui.tatilSec = true; ESP.App.render(); },
+    async 'seri-tatil-vazgec'(){ S.ui.tatilSec = false; ESP.App.render(); },
+    async 'seri-tatil-gun'(el){
+      S.ui.tatilSec = false;
+      const bugun = U.todayISO();
+      const bit = ESP.Seri.gunEkle(bugun, Number(el.dataset.gun) - 1);
+      const r = await ESP.Seri.dondur(bugun, bit, 'tatil');
+      ESP.UI.toast(r.ok ? 'Tatil modu ' + U.fmtShort(bugun) + ' – ' + U.fmtShort(bit) + ': seri korunuyor, HKM soru sormuyor'
+        : r.why, { life:5000 });
+      if(r.ok && ESP.Hedefler && ESP.Hedefler.ag) ESP.Hedefler.ag.planla();
+      ESP.App.render();
+    },
+    async 'seri-tatil-bitir'(){
+      const r = await ESP.Seri.tatiliBitir();
+      ESP.UI.toast(r.ok ? 'Tatil bitti; hoş geldin' : r.why);
+      if(r.ok && ESP.Hedefler && ESP.Hedefler.ag) ESP.Hedefler.ag.planla();
+      ESP.App.render();
+    },
     /* Elle gonderim: kullanicinin ACIKCA istedigi an. Kapaliyken
        zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
        olmasini anlamsiz kilardi. */

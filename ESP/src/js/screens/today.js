@@ -432,6 +432,48 @@ ESP.Screens.today = (function(){
     ];
   }
 
+  /* Dünkünün aynısı (core/dunku.js): dünün oturumu tek dokunuşla bugüne.
+     Yalnız bugün dokunulmamış disiplin önerilir; seçili gün bugün değilse yok. */
+  function dunkuRow(){
+    if(!ESP.Dunku || gun() !== U.todayISO()) return null;
+    const a = ESP.Dunku.adaylar(U.todayISO());
+    if(!a.oturumlar.length) return null;
+    return K.Entry({ label:'DÜNKÜNÜN AYNISI', meta:U.fmtShort(a.dun), wide:true,
+      note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; kalite puanı kopyalanmaz.',
+      body:html`${map(a.oturumlar, o => html`<div class="row between wrap gap-6 mt-4">
+        <span class="small"><b>${o.ad}</b> <span class="tiny dim">${o.dk} dk${o.sayim ? ' · ' + o.sayim : ''}</span></span>
+        ${K.Button({ label:'Bugüne ekle', size:'sm', act:'dunku-oturum', data:{ 'data-id':o.id } })}</div>`)}` });
+  }
+
+  /* Seri satiri Giris sekmesinde: «Bugün hastayım» ve «Tatil modu» aranmaz. */
+  function seriRow(){
+    if(!ESP.Seri) return null;
+    return K.Entry({ label:'SERİ', hint:'streak', meta:M.streak() + ' gün', wide:true,
+      body:seriKontrol() });
+  }
+
+  /* Seri dondurma ve tatil modu (brand/ortak/seri.js): hasta gün ve tatil
+     seriyi bozmaz; tatildeyken HKM soru sormaz. */
+  function seriKontrol(){
+    if(!ESP.Seri) return '';
+    const bugun = U.todayISO();
+    const t = ESP.Seri.aktifTatil(bugun);
+    const k = ESP.Seri.kayitOf(bugun);
+    if(t) return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Tatil modu: ${U.fmtShort(t.bas)} – ${U.fmtShort(t.bit)} · seri korunuyor, HKM soru sormuyor</span>
+      ${K.Button({ label:'Tatili bitir', size:'sm', act:'seri-tatil-bitir' })}</div>`;
+    if(k) return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Bugün dondurulmuş (${LIFEOS.Seri.NEDEN[k.neden].toLocaleLowerCase('tr')}) · seri bozulmaz</span>
+      ${K.Button({ label:'Geri al', size:'sm', act:'seri-coz', data:{ 'data-id':k.id } })}</div>`;
+    if(S.ui.tatilSec) return html`<div class="row wrap gap-6 mt-6">
+      <span class="tiny">Kaç gün?</span>
+      ${map([3, 7, 14], n => K.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
+      ${K.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>`;
+    return html`<div class="row wrap gap-6 mt-6">
+      ${K.Button({ label:'Bugün hastayım · seri donsun', size:'sm', act:'seri-hasta' })}
+      ${K.Button({ label:'Tatil modu', size:'sm', act:'seri-tatil' })}</div>`;
+  }
+
   /* ---------------------------------------------------------------- gecmis */
 
   function historyRows(){
@@ -804,7 +846,7 @@ ESP.Screens.today = (function(){
     const rows = [yedekRow()].concat(
       tab === 'ozet' ? summaryRows()
       : tab === 'gecmis' ? historyRows()
-      : [kingTeklifRow(), hkmTeklifRow(), hkmSeritRow(), nextCard(), signalRow(), planRow(),
+      : [kingTeklifRow(), hkmTeklifRow(), hkmSeritRow(), seriRow(), dunkuRow(), nextCard(), signalRow(), planRow(),
           planRowToday(), reminderRow(),
           entryForm(), quickForm(), sessionList()])
           .filter(Boolean);
@@ -864,6 +906,39 @@ ESP.Screens.today = (function(){
   }
 
   const handle = {
+    async 'dunku-oturum'(el){
+      const bugun = U.todayISO();
+      const r = await ESP.Dunku.kopyala(bugun, el.dataset.id);
+      if(!r.ok){ ESP.UI.toast(r.why); return; }
+      ESP.UI.toast(r.ad + ' bugüne eklendi', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
+      ESP.App.render();
+    },
+    async 'seri-hasta'(){
+      const r = await ESP.Seri.dondur(U.todayISO(), null, 'hasta');
+      if(!r.ok){ ESP.UI.toast(r.why); return; }
+      ESP.UI.toast('Bugün donduruldu; seri bozulmaz. Geçmiş olsun.', { undo:async () => {
+        await ESP.Seri.coz(r.kayit.id); ESP.App.render(); } });
+      ESP.App.render();
+    },
+    async 'seri-coz'(el){ await ESP.Seri.coz(el.dataset.id); ESP.UI.toast('Dondurma geri alındı'); ESP.App.render(); },
+    async 'seri-tatil'(){ S.ui.tatilSec = true; ESP.App.render(); },
+    async 'seri-tatil-vazgec'(){ S.ui.tatilSec = false; ESP.App.render(); },
+    async 'seri-tatil-gun'(el){
+      S.ui.tatilSec = false;
+      const bugun = U.todayISO();
+      const bit = ESP.Seri.gunEkle(bugun, Number(el.dataset.gun) - 1);
+      const r = await ESP.Seri.dondur(bugun, bit, 'tatil');
+      ESP.UI.toast(r.ok ? 'Tatil modu ' + U.fmtShort(bugun) + ' – ' + U.fmtShort(bit) + ': seri korunuyor, HKM soru sormuyor'
+        : r.why, { life:5000 });
+      if(r.ok && ESP.Hedefler && ESP.Hedefler.ag) ESP.Hedefler.ag.planla();
+      ESP.App.render();
+    },
+    async 'seri-tatil-bitir'(){
+      const r = await ESP.Seri.tatiliBitir();
+      ESP.UI.toast(r.ok ? 'Tatil bitti; hoş geldin' : r.why);
+      if(r.ok && ESP.Hedefler && ESP.Hedefler.ag) ESP.Hedefler.ag.planla();
+      ESP.App.render();
+    },
     /* Elle gonderim: kullanicinin ACIKCA istedigi an. Kapaliyken
        zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
        olmasini anlamsiz kilardi. */

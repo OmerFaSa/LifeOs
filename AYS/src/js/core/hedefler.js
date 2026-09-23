@@ -500,7 +500,8 @@ R.Hedefler = (function(){
     return { gun:tarih, isler };
   }
   const ag = window.LIFEOS && LIFEOS.HedefAg
-    ? LIFEOS.HedefAg.kur({ hkm:() => R.Beacon, modul:'ays', ozetler, yarin }) : null;
+    ? LIFEOS.HedefAg.kur({ hkm:() => R.Beacon, modul:'ays', ozetler, yarin,
+        tatil:() => { const t = R.Seri && R.Seri.hkmTatil(); return t ? Object.assign(t, { donus_planli:!!R.Tatil }) : null; } }) : null;
 
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'ays', durum:() => ({}), bugun:() => U().todayISO(),

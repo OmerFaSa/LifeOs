@@ -30,6 +30,7 @@ python3 tools/ortak.py --denetle   # kopyalar kaynakla aynı mı
 | `aliskanlik.*` | `js/core`, `tests` | hedef motorunun alışkanlık paketi: sıklık ve süre okuma, tabandan karar, kayıttan ilerleme |
 | `urun.*` | `js/core`, `tests` | BAM ürünleri (özet, rapor, sunum, pankart): ön süzgeç, modülün kendi denetimi, sandbox iframe, kendi deposu |
 | `pwa.*` | `js/core`, `tests` | çevrimdışı kabuğun kaydı — yalnız sunucuyla (http/https); ilk açılışın dosyalarını kabuğa gönderir |
+| `seri.*` | `js/core`, `tests` | seri dondurma ve tatil modu: kullanıcı işaretler (en çok 7 gün geri), sınırlı (21 gün; hasta/izin ayda 6), geri alınır; HKM'ye yalnız tatilin tarihi gider |
 | `sw.js` | `src/` kökü | çevrimdışı kabuk (service worker): ağ önce, ağ yoksa son kopya; `build.py` `dist/` yanına da koyar |
 
 Kopyalar «ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME» başlığı taşır. Elle

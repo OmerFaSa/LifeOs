@@ -178,7 +178,30 @@ R.Screens.today = (function(){
             title="${U.fmtShort(d.iso)}${d.met ? ' · tamam' : ''}"></span>`)}
         </div>
       </div>
-      <p class="tiny dim">${s.streak === 0 ? 'Minimum standardı tutturunca seri başlar.' : 'Ödül nete değil düzene bağlı.'}</p>` });
+      <p class="tiny dim">${s.streak === 0 ? 'Minimum standardı tutturunca seri başlar.' : 'Ödül nete değil düzene bağlı.'}</p>
+      ${SeriKontrol()}` });
+  }
+
+  /* Seri dondurma ve tatil modu (brand/ortak/seri.js, core/tatil.js): hasta
+     gün ve tatil seriyi bozmaz; tatilde plan ara, dönüşte iki gün yarım süre. */
+  function SeriKontrol(){
+    if(!R.Seri) return '';
+    const bugun = U.todayISO();
+    const t = R.Seri.aktifTatil(bugun);
+    const k = R.Seri.kayitOf(bugun);
+    if(t) return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Tatil modu: ${U.fmtShort(t.bas)} – ${U.fmtShort(t.bit)} · seri korunuyor, HKM soru sormuyor</span>
+      ${c.Button({ label:'Tatili bitir', size:'sm', act:'seri-tatil-bitir' })}</div>`;
+    if(k) return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Bugün dondurulmuş (${LIFEOS.Seri.NEDEN[k.neden].toLocaleLowerCase('tr')}) · seri bozulmaz</span>
+      ${c.Button({ label:'Geri al', size:'sm', act:'seri-coz', data:{ 'data-id':k.id } })}</div>`;
+    if(S.ui.tatilSec) return html`<div class="row wrap gap-6 mt-6">
+      <span class="tiny">Kaç gün?</span>
+      ${map([3, 7, 14], n => c.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
+      ${c.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>`;
+    return html`<div class="row wrap gap-6 mt-6">
+      ${c.Button({ label:'Bugün hastayım · seri donsun', size:'sm', act:'seri-hasta' })}
+      ${c.Button({ label:'Tatil modu', size:'sm', act:'seri-tatil' })}</div>`;
   }
 
   function SleepCard(day){
@@ -1025,6 +1048,32 @@ R.Screens.today = (function(){
 
   /* ---------- eylemler ---------- */
   const handle = {
+    async 'seri-hasta'(){
+      const r = await R.Seri.dondur(U.todayISO(), null, 'hasta');
+      if(!r.ok){ UI.toast(r.why); return; }
+      UI.toast('Bugün donduruldu; seri bozulmaz. Geçmiş olsun.', { undo:async () => {
+        await R.Seri.coz(r.kayit.id); R.App.render(); } });
+      R.App.render();
+    },
+    async 'seri-coz'(el){ await R.Seri.coz(el.dataset.id); UI.toast('Dondurma geri alındı'); R.App.render(); },
+    async 'seri-tatil'(){ S.ui.tatilSec = true; R.App.render(); },
+    async 'seri-tatil-vazgec'(){ S.ui.tatilSec = false; R.App.render(); },
+    async 'seri-tatil-gun'(el){
+      S.ui.tatilSec = false;
+      const r = await R.Tatil.baslat(Number(el.dataset.gun));
+      if(!r.ok){ UI.toast(r.why); R.App.render(); return; }
+      UI.toast('Tatil modu ' + U.fmtShort(r.bas) + ' – ' + U.fmtShort(r.bit) + ': plan ara, seri korunuyor'
+        + (r.donus ? '; dönüşte 2 gün ' + r.donus.dakika + ' dk' : ''), { life:6000 });
+      if(R.Hedefler && R.Hedefler.ag) R.Hedefler.ag.planla();
+      R.App.render();
+    },
+    async 'seri-tatil-bitir'(){
+      const r = await R.Tatil.bitir();
+      UI.toast(r.ok ? 'Tatil bitti; bugünden kademeli dönüş' + (r.donus ? ' (' + r.donus.dakika + ' dk)' : '')
+        : r.why, { life:5000 });
+      if(R.Hedefler && R.Hedefler.ag) R.Hedefler.ag.planla();
+      R.App.render();
+    },
     'istisna-bitir'(el){
       const id = el.dataset.id;
       UI.confirmSheet('Arayı bugün bitir',

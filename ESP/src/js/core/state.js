@@ -526,6 +526,8 @@ ESP.Model = (function(){
     for(let i = 1; i < 400; i++){
       const d = U.iso(U.addDays(U.parse(bugun), -i));
       if(dokunuldu(d)) n++;
+      /* Dondurulmus gun (hasta, izin, tatil — brand/ortak/seri.js) bozmaz. */
+      else if(ESP.Seri && ESP.Seri.donmusMu(d)) continue;
       else break;
     }
     return n;
@@ -1356,6 +1358,12 @@ ESP.Model = (function(){
     if(window.LIFEOS && LIFEOS.Urun){
       ESP.Urunler = ESP.Urunler || LIFEOS.Urun.kur({ store:() => ESP.Store, hkm:() => ESP.Beacon });
       await ESP.Urunler.yukle();
+    }
+    /* Seri dondurma ve tatil modu (brand/ortak/seri.js): dondurulmuş gün
+       seriyi bozmaz; tatildeyken HKM soru sormaz. */
+    if(window.LIFEOS && LIFEOS.Seri){
+      ESP.Seri = ESP.Seri || LIFEOS.Seri.kur({ store:() => ESP.Store, bugun:() => ESP.U.todayISO() });
+      await ESP.Seri.yukle();
     }
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */

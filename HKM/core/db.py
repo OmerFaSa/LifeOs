@@ -305,6 +305,17 @@ CREATE TABLE IF NOT EXISTS yarin_ozet (
   guncelleme  TEXT NOT NULL
 );
 
+/* Modulun TATIL MODU tarihi (brand/ortak/seri.js hkmTatil). Tatildeyken
+   HKM soru sormaz; donus sabahi yuk azaltma teklifi birakir. Yalniz tarih
+   gelir; neden gelmez. `donus_planli`: modul donusu kendi plani ile kurdu. */
+CREATE TABLE IF NOT EXISTS tatil_ozet (
+  modul        TEXT PRIMARY KEY,
+  bas          TEXT NOT NULL,
+  bit          TEXT NOT NULL,
+  donus_planli INTEGER NOT NULL DEFAULT 0,
+  guncelleme   TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS hedef_ozet (
   modul       TEXT NOT NULL,
   dis_id      TEXT NOT NULL,

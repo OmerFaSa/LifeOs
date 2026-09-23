@@ -332,3 +332,58 @@ def run_yarin():
                 con.execute("SELECT module, kind, payload FROM intents")]
         eq(rows, [("ays", "load.reduce", {"date": "2026-09-24", "why": "Akşam özetinden: yarını hafiflet."})])
     test("yarin hafif tek kelime", t_one_word_change)
+
+
+def run_tatil():
+    import json
+    from core import hedefag, schedule
+    suite("tatil modu (HKM)")
+    CFGT = {"channels": {"telegram": {"enabled": True, "bot_token": "T", "allow_from": ["7"]}},
+            "schedule": {"enabled": True, "morning": "08:00", "evening": "21:00", "checkin": "21:30"}}
+
+    def t_tatil_yaz():
+        con = db.connect(":memory:")
+        ok(hedefag.tatil_yaz(con, "spi", {"bas": "2026-09-24", "bit": "2026-09-30"})["ok"])
+        eq(hedefag.tatilde(con, "2026-09-26"), {"moduller": ["spi"], "bit": "2026-09-30"})
+        eq(hedefag.tatilde(con, "2026-10-01"), None)
+        no(hedefag.tatil_yaz(con, "spi", {"bas": "2026-09-30", "bit": "2026-09-24"})["ok"])
+        no(hedefag.tatil_yaz(con, "spi", {"bas": "x", "bit": "2026-09-24"})["ok"])
+        ok(hedefag.tatil_yaz(con, "spi", None)["ok"])
+        eq(hedefag.tatilde(con, "2026-09-26"), None)
+    test("tatil tarihi dogrulanir; null siler", t_tatil_yaz)
+
+    def t_no_questions_on_vacation():
+        """Tatilde yoklama sorulmaz, eksik soru ve yarin ozeti eklenmez, teklif kapanmaz."""
+        con = db.connect(":memory:")
+        hedefag.tatil_yaz(con, "ays", {"bas": "2026-09-24", "bit": "2026-09-30"})
+        db.insert_event(con, "spi", "2026-09-20", "2026-09-20T21:00:00",
+                        {"module": "spi", "date": "2026-09-20",
+                         "metrics": {"sleep_hours": {"value": 7, "cert": "measured"}}})
+        hedefag.yarin_yaz(con, "ays", {"gun": "2026-09-26", "isler": [{"metin": "Mat", "dk": 30}]})
+        r = schedule.run(con, CFGT, {"kind": "checkin"}, now=datetime.datetime(2026, 9, 25, 21, 31))
+        eq((r["queued"], r.get("note")), (False, "tatil"))
+        schedule.run(con, CFGT, {"kind": "daily"}, now=datetime.datetime(2026, 9, 25, 8, 1))
+        m = con.execute("SELECT text FROM outbox WHERE kind='daily'").fetchone()["text"]
+        ok("Tatil modundasın" in m and "uyku kaydı yok" not in m, m)
+        schedule.run(con, CFGT, {"kind": "evening"}, now=datetime.datetime(2026, 9, 25, 21, 1))
+        ok("Yarın şunlar var" not in con.execute(
+            "SELECT text FROM outbox WHERE kind='evening'").fetchone()["text"])
+        db.insert_intent(con, "spi", "kayit.add", {"date": "2026-09-20", "metin": "su 2"}, "SPİ",
+                         "patron", created_at="2026-09-20T09:00:00")
+        eq(bildirim.bayatlari_kapat(con, CFGT, datetime.datetime(2026, 9, 25, 12)), [])
+    test("tatilde soru yok, teklif kapanmaz", t_no_questions_on_vacation)
+
+    def t_return_offers():
+        """Donus sabahi: donusu kendisi planlamayan module iki gunluk yuk azaltma teklifi."""
+        con = db.connect(":memory:")
+        hedefag.tatil_yaz(con, "spi", {"bas": "2026-09-24", "bit": "2026-09-30"})
+        hedefag.tatil_yaz(con, "ays", {"bas": "2026-09-24", "bit": "2026-09-30", "donus_planli": True})
+        schedule.run(con, CFGT, {"kind": "daily"}, now=datetime.datetime(2026, 10, 1, 8, 1))
+        m = con.execute("SELECT text FROM outbox WHERE kind='daily'").fetchone()["text"]
+        ok("Tatilden dönüş" in m and "SPİ için yük azaltma" in m and "AYS dönüşü kendi" in m, m)
+        rows = sorted((x["module"], json.loads(x["payload"])["date"]) for x in
+                      con.execute("SELECT module, payload FROM intents WHERE kind='load.reduce'"))
+        eq(rows, [("spi", "2026-10-01"), ("spi", "2026-10-02")])
+        schedule.donus_teklifi(con, "2026-10-01")
+        eq(con.execute("SELECT COUNT(*) FROM intents").fetchone()[0], 2)
+    test("donus sabahi yuk azaltma teklifi", t_return_offers)

@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'ee9ed4b', at:'2026-09-23 22:55', dirty:true };
+R.BUILD = { id:'08f1086', at:'2026-09-23 23:03', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -11359,7 +11359,8 @@ LIFEOS.HedefAg = (function(){
     };
   }
 
-  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…], yarin?:async () => ({gun, isler}) })`
+  /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…], yarin?:async () => ({gun, isler}),
+           tatil?:() => ({bas, bit, donus_planli}) | null })`
      → { gonder(), planla(), cek(), butce() } */
   function kur(ortam){
     let zaman = null;
@@ -11421,6 +11422,15 @@ LIFEOS.HedefAg = (function(){
       const govde = { hedefler:l };
       const y = await yarin();
       if(y) govde.yarin = y;
+      /* Tatil modu (seri.js): yalnız tarih. Yoksa açıkça null: HKM siler. */
+      if(typeof ortam.tatil === 'function'){
+        try{
+          const t = ortam.tatil();
+          const iso = /^\d{4}-\d{2}-\d{2}$/;
+          govde.tatil = t && iso.test(String(t.bas)) && iso.test(String(t.bit))
+            ? { bas:t.bas, bit:t.bit, donus_planli:!!t.donus_planli } : null;
+        }catch(e){ /* kanca bozuksa tatil gönderilmez */ }
+      }
       const g = await istek('/api/hedef/sync/' + ortam.modul, govde);
       if(g && g.butce) son = g.butce;
       return { ok:!!(g && g.ok), butce:son };
@@ -11966,6 +11976,145 @@ LIFEOS.Gorsel = (function(){
   }
 
   L.Pwa = { uygun, adresler, kaydet, EN_COK };
+})();
+
+/* ==== js/core/seri.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/seri.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* SERİ DONDURMA ve TATİL MODU — dondurulmuş günler (fikir 50, 56).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/seri.js`; `tools/ortak.py --yay` ile üç arayüzün
+   `src/js/core/` klasörüne birebir kopyalanır.
+
+   Hasta olduğun gün ya da tatil haftası, bir alışkanlık serisini
+   kırmamalı: seriyi kıran şey vazgeçmektir, hastalık değil. Ama dondurma
+   bir BAHANE makinesi de olmamalı.
+
+   Sözler:
+     1. KULLANICI İŞARETLER. Sistem kendiliğinden gün dondurmaz; «dün de
+        hastaydım» denebilir ama en çok GERI_GUN gün geriye.
+     2. DONDURULAN GÜN SERİYİ BOZMAZ, SAYILMAZ DA. O gün kayıt girildiyse
+        seri yine sayar; girilmediyse seri o günü atlar. «Donmuş» bir ölçüm
+        değildir: veri yok gününe sıfır yazılmaz, «tamamlandı» da yazılmaz.
+     3. SINIRLI. Tek kayıt en çok EN_UZUN gün; bir takvim ayında en çok
+        AYLIK_HASTA hasta/izin günü (tatil ayrı sayılır, kendi sınırıyla).
+     4. GERİ ALINIR. Her kayıt kimliğiyle silinir; geçmiş sessizce
+        değişmez, «çöz» denince seri yeniden hesaplanır.
+     5. HKM'YE YALNIZ TATİLİN TARİHİ GİDER (hedefag.js): tatildeyken HKM
+        soru sormaz; dönüşte yük azaltma teklifi bırakır. Neden gitmez. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.Seri = (function(){
+  const NEDEN = { hasta:'Hasta', izin:'İzin', tatil:'Tatil' };
+  const EN_UZUN = 21;
+  const GERI_GUN = 7;
+  const AYLIK_HASTA = 6;
+  const ANAHTAR = 'meta/seriDondurma';
+  const DONUS_BILDIR = 3;
+
+  function isoOku(iso){ const p = String(iso).split('-').map(Number); return new Date(Date.UTC(p[0], p[1] - 1, p[2])); }
+  function isoYaz(d){ return d.toISOString().slice(0, 10); }
+  function gunEkle(iso, n){ const d = isoOku(iso); d.setUTCDate(d.getUTCDate() + n); return isoYaz(d); }
+  function fark(a, b){ return Math.round((isoOku(b) - isoOku(a)) / 86400000); }
+  const ISO = /^\d{4}-\d{2}-\d{2}$/;
+
+  function gecerli(x){
+    return x && typeof x.id === 'string' && ISO.test(x.bas || '') && ISO.test(x.bit || '')
+      && x.bas <= x.bit && NEDEN[x.neden];
+  }
+
+  /* `kur({ store:() => Store, bugun:() => iso })` */
+  function kur(o){
+    let liste = [];
+
+    async function yukle(){
+      try{
+        const d = await o.store().get(ANAHTAR);
+        liste = d && Array.isArray(d.liste) ? d.liste.filter(gecerli) : [];
+      }catch(e){ liste = []; }
+      return liste;
+    }
+    async function yaz(){ await o.store().set(ANAHTAR, { liste }); }
+
+    function kayitOf(iso){ return liste.find(x => x.bas <= iso && iso <= x.bit) || null; }
+    function donmusMu(iso){ return !!kayitOf(iso); }
+
+    function buAyHasta(iso, haric){
+      const ay = String(iso).slice(0, 7);
+      let n = 0;
+      liste.filter(x => x.neden !== 'tatil' && x !== haric).forEach(x => {
+        for(let d = x.bas; d <= x.bit; d = gunEkle(d, 1)) if(d.slice(0, 7) === ay) n++;
+      });
+      return n;
+    }
+
+    async function dondur(bas, bit, neden){
+      const bugun = o.bugun();
+      bit = bit || bas;
+      if(!ISO.test(String(bas)) || !ISO.test(String(bit)) || bas > bit) return { ok:false, why:'Tarih geçersiz.' };
+      if(!NEDEN[neden]) return { ok:false, why:'Neden hasta, izin ya da tatil olmalı.' };
+      if(fark(bas, bugun) > GERI_GUN) return { ok:false, why:'En çok ' + GERI_GUN + ' gün geriye işaretlenebilir.' };
+      const gun = fark(bas, bit) + 1;
+      if(gun > EN_UZUN) return { ok:false, why:'Tek seferde en çok ' + EN_UZUN + ' gün.' };
+      if(neden !== 'tatil' && neden !== 'izin' && gun > 3) return { ok:false, why:'Hasta günü tek seferde en çok 3 gün; daha uzunsa tatil/izin seç.' };
+      for(let d = bas; d <= bit; d = gunEkle(d, 1)) if(donmusMu(d)) return { ok:false, why:d + ' zaten dondurulmuş.' };
+      if(neden !== 'tatil'){
+        let ek = 0; for(let d = bas; d <= bit; d = gunEkle(d, 1)) ek++;
+        if(buAyHasta(bas) + ek > AYLIK_HASTA) return { ok:false, why:'Bu ay en çok ' + AYLIK_HASTA + ' hasta/izin günü dondurulabilir.' };
+      }
+      const kayit = { id:'sd-' + bas + '-' + Math.random().toString(36).slice(2, 7), bas, bit, neden,
+        at:new Date().toISOString() };
+      liste = liste.concat([kayit]);
+      await yaz();
+      return { ok:true, kayit, gun };
+    }
+
+    async function coz(id){
+      const k = liste.find(x => x.id === id);
+      if(!k) return { ok:false, why:'Kayıt bulunamadı.' };
+      liste = liste.filter(x => x.id !== id);
+      await yaz();
+      return { ok:true, kayit:k };
+    }
+
+    /* Tatili bugün BİTİR: geçmiş günler donmuş kalır, yarın ve sonrası çözülür. */
+    async function tatiliBitir(){
+      const t = aktifTatil();
+      if(!t) return { ok:false, why:'Etkin bir tatil yok.' };
+      const bugun = o.bugun();
+      if(t.bas >= bugun) liste = liste.filter(x => x !== t);
+      else t.bit = gunEkle(bugun, -1) < t.bas ? t.bas : gunEkle(bugun, -1);
+      await yaz();
+      return { ok:true, kayit:t };
+    }
+
+    function aktifTatil(iso){
+      const g = iso || o.bugun();
+      return liste.find(x => x.neden === 'tatil' && x.bas <= g && g <= x.bit) || null;
+    }
+
+    /* HKM'ye giden: yalnız tatilin TARİHİ (hedefag.js) — etkin, yaklaşan ya da
+       son DONUS_BILDIR gün içinde biten. Biteni de bildirmek gerekir: HKM
+       dönüş sabahı yük azaltma teklifi bırakır; erken bitirilen tatilin
+       yeni bitişini ancak böyle öğrenir. */
+    function hkmTatil(){
+      const g = o.bugun();
+      const alt = gunEkle(g, -DONUS_BILDIR);
+      const l = liste.filter(x => x.neden === 'tatil' && x.bit >= alt);
+      const t = l.find(x => x.bas <= g && g <= x.bit)
+        || l.filter(x => x.bas > g).sort((a, b) => a.bas.localeCompare(b.bas))[0]
+        || l.sort((a, b) => b.bit.localeCompare(a.bit))[0];
+      return t ? { bas:t.bas, bit:t.bit } : null;
+    }
+
+    return { yukle, dondur, coz, tatiliBitir, donmusMu, kayitOf, aktifTatil, hkmTatil,
+      liste:() => liste.slice(), gunEkle };
+  }
+
+  return { kur, NEDEN, EN_UZUN, GERI_GUN, AYLIK_HASTA, ANAHTAR };
 })();
 
 /* ==== js/core/medya.js ==== */
@@ -17659,6 +17808,12 @@ R.Model = (function(){
       R.Urunler = R.Urunler || LIFEOS.Urun.kur({ store:() => R.Store, hkm:() => R.Beacon });
       await R.Urunler.yukle();
     }
+    /* Seri dondurma ve tatil modu (brand/ortak/seri.js): dondurulmuş gün
+       seriyi bozmaz; tatildeyken HKM soru sormaz. */
+    if(window.LIFEOS && LIFEOS.Seri){
+      R.Seri = R.Seri || LIFEOS.Seri.kur({ store:() => R.Store, bugun:() => R.U.todayISO() });
+      await R.Seri.yukle();
+    }
     if(R.Friction) await R.Friction.load();
     if(R.Calib) await R.Calib.load();
     if(R.Signals) await R.Signals.load();
@@ -20700,6 +20855,74 @@ R.Takvim = (function(){
   return { yaz, oku, onizle, iceAl, disa, turOner, katla, DURUM_ADI, TURLER, EN_UZUN_GUN };
 })();
 
+/* ==== js/core/tatil.js ==== */
+/* TATİL MODU — AYS tarafı (fikir 56).
+
+   Seri dondurma ortaktır (brand/ortak/seri.js): tatil günleri seriyi
+   bozmaz ve HKM tatildeyken soru sormaz. Burada yalnız PLANIN karşılığı:
+
+     tatil günleri   ARA günüdür (istisna «ara»): blok yok, hedef yok,
+                     «kaçırılmış gün» sayılmaz.
+     dönüş           ilk DONUS_GUN gün YARIM süre (istisna «sure»):
+                     bir haftalık aradan sonra tam yükle başlamak,
+                     ilk günü kırılmaya çevirmektir.
+
+   İkisi de sıradan istisnadır: Rehber › İstisnalar'da görünür, «Bitir»
+   ile geri döner, geçmişe yazılmaz (core/istisna.js). Tatil erken
+   bitirilirse ara dünde biter, dönüş bugüne kayar. */
+
+window.R = window.R || {};
+
+R.Tatil = (function(){
+  const DONUS_GUN = 2;
+  const NEDEN_TATIL = 'Tatil modu';
+  const NEDEN_DONUS = 'Tatil dönüşü: kademeli';
+  const U = () => R.U;
+  function gun(iso, n){ return U().iso(U().addDays(U().parse(iso), n)); }
+
+  function donusDakikasi(iso){
+    const I = R.Istisna;
+    const temel = I.temelDakika(iso) || I.sablonDakikasi() || 120;
+    return Math.max(I.DAKIKA.min, Math.round(temel / 2));
+  }
+
+  async function donusKur(from){
+    return await R.Istisna.ekle({ tur:'sure', from, to:gun(from, DONUS_GUN - 1),
+      dakika:donusDakikasi(from), neden:NEDEN_DONUS });
+  }
+
+  async function baslat(n){
+    if(!R.Seri || !R.Istisna) return { ok:false, why:'Tatil modu yüklenmedi.' };
+    const gunSayisi = Math.round(Number(n));
+    if(!(gunSayisi >= 1 && gunSayisi <= 21)) return { ok:false, why:'Tatil 1–21 gün olabilir.' };
+    const bugun = U().todayISO();
+    const bit = gun(bugun, gunSayisi - 1);
+    const s = await R.Seri.dondur(bugun, bit, 'tatil');
+    if(!s.ok) return s;
+    const a = await R.Istisna.ekle({ tur:'ara', from:bugun, to:bit, neden:NEDEN_TATIL });
+    const d = await donusKur(gun(bit, 1));
+    return { ok:true, bas:bugun, bit, ara:!!a.ok, donus:d.ok ? { from:gun(bit, 1),
+      dakika:d.kayit.dakika } : null };
+  }
+
+  async function bitir(){
+    if(!R.Seri || !R.Istisna) return { ok:false, why:'Tatil modu yüklenmedi.' };
+    const bugun = U().todayISO();
+    const r = await R.Seri.tatiliBitir();
+    if(!r.ok) return r;
+    for(const x of R.Istisna.liste().filter(x => x.neden === NEDEN_TATIL && x.to >= bugun)){
+      await R.Istisna.bitir(x.id);
+    }
+    for(const x of R.Istisna.liste().filter(x => x.neden === NEDEN_DONUS && x.from > bugun)){
+      await R.Istisna.kaldir(x.id);
+    }
+    const d = await donusKur(bugun);
+    return { ok:true, donus:d.ok ? { from:bugun, dakika:d.kayit.dakika } : null };
+  }
+
+  return { baslat, bitir, donusDakikasi, DONUS_GUN, NEDEN_TATIL, NEDEN_DONUS };
+})();
+
 /* ==== js/core/bolum.js ==== */
 /* BÖLÜM GİZLEME — sistemi kullanıcının hayatına göre daraltmak.
 
@@ -21532,8 +21755,12 @@ R.Calc = (function(){
       if(iso < R.PLAN.startISO) break;
       const met = minimumDayMet(iso);
       const isSunday = U.weekdayIndex(iso) === 6;
-      if(i < 14) days.unshift({ iso, met, isSunday, today:i === 0 });
+      /* Dondurulmus gun (hasta, izin, tatil — brand/ortak/seri.js) seriyi
+         BOZMAZ; tutulduysa yine sayilir. */
+      const donmus = !!(R.Seri && R.Seri.donmusMu(iso));
+      if(i < 14) days.unshift({ iso, met, isSunday, today:i === 0, donmus });
       if(i === 0 && !met) { checking = 1; continue; }   // bugun henuz bitmedi, seriyi kirma
+      if(!met && donmus) continue;
       if(met) streak++;
       else if(isSunday) continue;                       // pazar dinlenme
       else break;
@@ -35096,7 +35323,8 @@ R.Hedefler = (function(){
     return { gun:tarih, isler };
   }
   const ag = window.LIFEOS && LIFEOS.HedefAg
-    ? LIFEOS.HedefAg.kur({ hkm:() => R.Beacon, modul:'ays', ozetler, yarin }) : null;
+    ? LIFEOS.HedefAg.kur({ hkm:() => R.Beacon, modul:'ays', ozetler, yarin,
+        tatil:() => { const t = R.Seri && R.Seri.hkmTatil(); return t ? Object.assign(t, { donus_planli:!!R.Tatil }) : null; } }) : null;
 
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
     paketler:PAKETLER, modul:'ays', durum:() => ({}), bugun:() => U().todayISO(),
@@ -37850,7 +38078,30 @@ R.Screens.today = (function(){
             title="${U.fmtShort(d.iso)}${d.met ? ' · tamam' : ''}"></span>`)}
         </div>
       </div>
-      <p class="tiny dim">${s.streak === 0 ? 'Minimum standardı tutturunca seri başlar.' : 'Ödül nete değil düzene bağlı.'}</p>` });
+      <p class="tiny dim">${s.streak === 0 ? 'Minimum standardı tutturunca seri başlar.' : 'Ödül nete değil düzene bağlı.'}</p>
+      ${SeriKontrol()}` });
+  }
+
+  /* Seri dondurma ve tatil modu (brand/ortak/seri.js, core/tatil.js): hasta
+     gün ve tatil seriyi bozmaz; tatilde plan ara, dönüşte iki gün yarım süre. */
+  function SeriKontrol(){
+    if(!R.Seri) return '';
+    const bugun = U.todayISO();
+    const t = R.Seri.aktifTatil(bugun);
+    const k = R.Seri.kayitOf(bugun);
+    if(t) return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Tatil modu: ${U.fmtShort(t.bas)} – ${U.fmtShort(t.bit)} · seri korunuyor, HKM soru sormuyor</span>
+      ${c.Button({ label:'Tatili bitir', size:'sm', act:'seri-tatil-bitir' })}</div>`;
+    if(k) return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Bugün dondurulmuş (${LIFEOS.Seri.NEDEN[k.neden].toLocaleLowerCase('tr')}) · seri bozulmaz</span>
+      ${c.Button({ label:'Geri al', size:'sm', act:'seri-coz', data:{ 'data-id':k.id } })}</div>`;
+    if(S.ui.tatilSec) return html`<div class="row wrap gap-6 mt-6">
+      <span class="tiny">Kaç gün?</span>
+      ${map([3, 7, 14], n => c.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
+      ${c.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>`;
+    return html`<div class="row wrap gap-6 mt-6">
+      ${c.Button({ label:'Bugün hastayım · seri donsun', size:'sm', act:'seri-hasta' })}
+      ${c.Button({ label:'Tatil modu', size:'sm', act:'seri-tatil' })}</div>`;
   }
 
   function SleepCard(day){
@@ -38697,6 +38948,32 @@ R.Screens.today = (function(){
 
   /* ---------- eylemler ---------- */
   const handle = {
+    async 'seri-hasta'(){
+      const r = await R.Seri.dondur(U.todayISO(), null, 'hasta');
+      if(!r.ok){ UI.toast(r.why); return; }
+      UI.toast('Bugün donduruldu; seri bozulmaz. Geçmiş olsun.', { undo:async () => {
+        await R.Seri.coz(r.kayit.id); R.App.render(); } });
+      R.App.render();
+    },
+    async 'seri-coz'(el){ await R.Seri.coz(el.dataset.id); UI.toast('Dondurma geri alındı'); R.App.render(); },
+    async 'seri-tatil'(){ S.ui.tatilSec = true; R.App.render(); },
+    async 'seri-tatil-vazgec'(){ S.ui.tatilSec = false; R.App.render(); },
+    async 'seri-tatil-gun'(el){
+      S.ui.tatilSec = false;
+      const r = await R.Tatil.baslat(Number(el.dataset.gun));
+      if(!r.ok){ UI.toast(r.why); R.App.render(); return; }
+      UI.toast('Tatil modu ' + U.fmtShort(r.bas) + ' – ' + U.fmtShort(r.bit) + ': plan ara, seri korunuyor'
+        + (r.donus ? '; dönüşte 2 gün ' + r.donus.dakika + ' dk' : ''), { life:6000 });
+      if(R.Hedefler && R.Hedefler.ag) R.Hedefler.ag.planla();
+      R.App.render();
+    },
+    async 'seri-tatil-bitir'(){
+      const r = await R.Tatil.bitir();
+      UI.toast(r.ok ? 'Tatil bitti; bugünden kademeli dönüş' + (r.donus ? ' (' + r.donus.dakika + ' dk)' : '')
+        : r.why, { life:5000 });
+      if(R.Hedefler && R.Hedefler.ag) R.Hedefler.ag.planla();
+      R.App.render();
+    },
     'istisna-bitir'(el){
       const id = el.dataset.id;
       UI.confirmSheet('Arayı bugün bitir',

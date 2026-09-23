@@ -1165,16 +1165,24 @@ details.detay > summary:hover{ color:var(--fg); }
          + '<th class="num">Fark</th><th class="num">Gün</th></tr></thead><tbody>';
       /* Sıralama ve yüzde daemon'dan gelir; burada yalnızca YAZILIR. */
       karsilastirilan.forEach(function(x){
-        h += '<tr><td>' + esc(x.metric) + '</td>'
+        h += '<tr><td>' + esc(x.ad || x.metric) + '</td>'
            + '<td class="num">' + esc(x.median) + '</td>'
            + '<td class="num">' + esc(x.previous) + '</td>'
-           + '<td class="num">%' + esc(x.change_pct) + '</td>'
+           + '<td class="num">' + esc(x.degisim || ('%' + x.change_pct)) + '</td>'
            + '<td class="num">' + esc(x.n) + '</td></tr>';
       });
       h += '</tbody></table></div>';
     }else{
       h += '<p class="muted">Haftalık karşılaştırma için yeterli ölçüm yok. '
          + 'Bu, «kötü hafta» demek değildir.</p>';
+    }
+    /* Neler kazandın (fikir 49): liste ve etiket daemon'dan gelir. */
+    var kz = r.kazanimlar || [];
+    if(kz.length){
+      h += '<h3>Bu hafta neler kazandın <span class="muted">· hesaplandı</span></h3><ul>'
+         + kz.map(function(k){ return '<li>' + esc(k.metin) + '</li>'; }).join('') + '</ul>';
+    }else if(r.kazanimlar){
+      h += '<p class="muted">Bu hafta ölçülmüş bir artış yok.</p>';
     }
     if(yalniz.length || az.length){
       h += '<p class="muted">' + esc(yalniz.length) + ' ölçünün önceki haftası yok, '

@@ -151,6 +151,21 @@
         expect(C.behaviorStreak().streak).toBe(3);
       });
     });
+    it('dondurulmuş boş gün (hasta) seriyi bozmaz, sayılmaz da (seri.js)', async function(){
+      const m = {};
+      R.Seri = window.LIFEOS.Seri.kur({ store:() => ({ get:async k => m[k] || null,
+        set:async (k, v) => { m[k] = v; } }), bugun:() => '2026-09-24' });
+      try{
+        expect((await R.Seri.dondur('2026-09-23', null, 'hasta')).ok).toBe(true);
+        resetState();
+        withToday('2026-09-24', function(){
+          ['2026-09-22','2026-09-24'].forEach(met);
+          const s = C.behaviorStreak();
+          expect(s.streak).toBe(2);
+          expect(s.days.find(d => d.iso === '2026-09-23').donmus).toBe(true);
+        });
+      }finally{ delete R.Seri; }
+    });
     it('bugün henüz tamamlanmadıysa seriyi kırmaz', function(){
       resetState();
       withToday('2026-09-24', function(){

@@ -230,6 +230,79 @@ def run():
         ok("Kayıtlı gün" in metin)
     test("haftalik mesaj emir kipi tasimaz", t_weekly_message_is_advisory)
 
+    # Fikir 49 — «bu hafta neler kazandin»: olculmus en cok uc iyi sey.
+    def _iki_hafta(con, modul, anahtar, once, sonra, gunler=range(14)):
+        for i in gunler:
+            sync_engine.ingest(con, {"module": modul, "date": gun(i),
+                                     "metrics": {anahtar: metric(once if i < 7 else sonra)}},
+                               now=gun(i) + "T09:00:00")
+
+    def t_kazanim_yonlu_ve_esikli():
+        """Yalniz YONU belli olculer; %5'in alti kazanim sayilmaz; en cok uc."""
+        con = _con()
+        _iki_hafta(con, "ays", "questions", 60, 90)          # +%50 iyi
+        _iki_hafta(con, "esp", "cards_due", 40, 20)          # -%50 iyi (az birikmis)
+        _iki_hafta(con, "esp", "practice_minutes", 30, 31)   # +%3 esik alti
+        _iki_hafta(con, "ays", "study_minutes", 100, 70)     # dusus: kazanim degil
+        _iki_hafta(con, "spi", "weight", 70, 80)             # yonu belirsiz: hic
+        r = weekly.report(con, gun(13))
+        k = r["kazanimlar"]
+        eq([x["metric"] for x in k], ["questions", "cards_due", "duzen"][:len(k)])
+        eq(k[0]["etiket"], "hesaplandı")
+        ok("çözülen soru" in k[0]["metin"] and "+%50" in k[0]["metin"], k[0]["metin"])
+        ok(len(k) <= 3)
+        no(any(x["metric"] in ("weight", "study_minutes", "practice_minutes") for x in k))
+    test("kazanimlar: yonlu, esikli, en cok uc", t_kazanim_yonlu_ve_esikli)
+
+    def t_kazanim_uyku_bant():
+        """Uyku «ne kadar cok o kadar iyi» degildir: yalniz 7-9 bandina
+        yaklasan artis kazanimdir; 9'un ustune cikmak kazanim sayilmaz."""
+        con = _con()
+        _iki_hafta(con, "spi", "sleep_hours", 6.0, 7.2)
+        eq([x["metric"] for x in weekly.report(con, gun(13))["kazanimlar"]
+            if x["metric"] != "duzen"], ["sleep_hours"])
+        con = _con()
+        _iki_hafta(con, "spi", "sleep_hours", 8.5, 10.0)
+        eq([x["metric"] for x in weekly.report(con, gun(13))["kazanimlar"]
+            if x["metric"] != "duzen"], [])
+    test("kazanim: uyku bandi", t_kazanim_uyku_bant)
+
+    def t_kazanim_yoksa_durust():
+        """Artis yoksa uydurulmaz; eksik hafta «kotu hafta» sayilmaz."""
+        con = _con()
+        for i in (1, 3, 9, 11):
+            sync_engine.ingest(con, {"module": "ays", "date": gun(i),
+                                     "metrics": {"questions": metric(50)}},
+                               now=gun(i) + "T09:00:00")
+        r = weekly.report(con, gun(13))
+        eq(r["kazanimlar"], [])
+        metin = weekly.message(con, gun(13))
+        ok("ölçülmüş bir artış yok" in metin, metin)
+    test("kazanim yoksa durust soylenir", t_kazanim_yoksa_durust)
+
+    def t_kazanim_duzen_ve_mesaj():
+        """Duzen de olculmus bir seydir: 7 gunun en az 5'inde kayit. Mesaj
+        olcu ADINI yazar, ham anahtari degil; emir kipi tasimaz."""
+        from core import manager
+        con = _con()
+        _iki_hafta(con, "ays", "questions", 60, 90)
+        metin = weekly.message(con, gun(13))
+        ok("Bu hafta neler kazandın" in metin, metin)
+        ok("AYS: 7 günde 7 gün kayıt" in metin, metin)
+        no("questions" in metin, metin)
+        no(manager.imperatives(metin), metin)
+        b = weekly.belge(con, gun(13))
+        ok(any(x["baslik"] == "Neler kazandın" for x in b["bolumler"]))
+    test("kazanim: duzen ve mesaj", t_kazanim_duzen_ve_mesaj)
+
+    def t_xp_kazanim_sayilmaz():
+        """XP karar vermez (AGENTS.md §1.6): haftalik kazanim XP'ye bakmaz."""
+        con = _con()
+        _iki_hafta(con, "ays", "xp_today", 100, 400, gunler=range(14))
+        no(any(x["metric"].startswith(("xp_", "level_", "badge_"))
+               for x in weekly.report(con, gun(13))["kazanimlar"]))
+    test("kazanim XP'ye bakmaz", t_xp_kazanim_sayilmaz)
+
     # Y6 — haftalik rapor basilir: Telegram'a PDF, WhatsApp'a indirme yolu.
     def _hafta_con():
         con = _con()

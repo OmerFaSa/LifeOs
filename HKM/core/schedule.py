@@ -112,6 +112,11 @@ def run(con, cfg, job, now=None, th=None):
         return {"ok": False, "reason": "no-channel",
                 "note": "Açık bir sohbet kanalı yok."}
 
+    from core import hedefag
+    tatil = hedefag.tatilde(con, gun)
+    if tatil and job["kind"] == "checkin":
+        # Tatil modu (seri.js): tatildeyken soru SORULMAZ.
+        return {"ok": True, "queued": False, "kind": "checkin", "note": "tatil"}
     if job["kind"] == "weekly":
         from core import weekly
         metin = weekly.message(con, gun, th=th)
@@ -130,12 +135,19 @@ def run(con, cfg, job, now=None, th=None):
         if not m["ok"]:
             return {"ok": False, "reason": "imperative", "note": m["error"]}
         metin = m["text"]
-        # Dunun eksik kalan TEK olcumu sorulur (core/eksik.py); cevap «7»
-        # gibi tek sayi olabilir ve ilgili module teklif olur.
-        from core import eksik
-        soru = eksik.sor(con, gun, kanal=kanal, now=now)
-        if soru:
-            metin += "\n\n" + soru
+        if tatil:
+            metin += ("\n\nTatil modundasın (%s’e kadar): soru sormuyorum, seri korunuyor."
+                      % tatil["bit"])
+        else:
+            # Dunun eksik kalan TEK olcumu sorulur (core/eksik.py); cevap «7»
+            # gibi tek sayi olabilir ve ilgili module teklif olur.
+            from core import eksik
+            soru = eksik.sor(con, gun, kanal=kanal, now=now)
+            if soru:
+                metin += "\n\n" + soru
+        donus = donus_teklifi(con, gun)
+        if donus:
+            metin += "\n\n" + donus
 
     if manager.imperatives(metin):
         # Reddet-ve-dus: zamanlanmis bir mesaj da emir kipi tasiyamaz.
@@ -193,11 +205,44 @@ def yarin_metni(con, gun):
 
 
 def _yarin_ekle(con, cfg, gun, metin):
-    from core import bildirim
+    from core import bildirim, hedefag
     if not bildirim.settings(cfg).get("yarin") or bildirim.susturuldu_mu(con, "yarin"):
+        return metin
+    if hedefag.tatilde(con, gun):
         return metin
     y = yarin_metni(con, gun)
     return metin + "\n\n" + y if y else metin
+
+
+DONUS_GUN = 2
+
+
+def donus_teklifi(con, gun):
+    """Tatilden DONUS sabahi: tatili dun biten ve donusu kendisi planlamayan
+    modullere ilk iki gun icin yuk azaltma TEKLIFI (orani modul secer).
+    Ayni teklif iki kez yazilmaz (intents tekrar denetimi)."""
+    from core import hedefag, intents
+    donen = hedefag.donenler(con, gun)
+    if not donen:
+        return None
+    ad = dict(YARIN_SIRA)
+    birakilan, kendi = [], []
+    for mod, planli in donen:
+        if planli:
+            kendi.append(ad.get(mod, mod))
+            continue
+        for i in range(DONUS_GUN):
+            g = (datetime.date.fromisoformat(gun) + datetime.timedelta(days=i)).isoformat()
+            intents.create(con, mod, "load.reduce", {"date": g, "why": "Tatil dönüşü: kademeli."},
+                           "", source="patron")
+        birakilan.append(ad.get(mod, mod))
+    p = ["Tatilden dönüş: ilk %d gün hafif başlamak kırılmayı önler." % DONUS_GUN]
+    if birakilan:
+        p.append("%s için yük azaltma teklifi bıraktım; ne kadar azalacağına modül karar verir."
+                 % ", ".join(birakilan))
+    if kendi:
+        p.append("%s dönüşü kendi planında kurdu." % ", ".join(kendi))
+    return " ".join(p)
 
 
 def yoklama_metni(con, gun):

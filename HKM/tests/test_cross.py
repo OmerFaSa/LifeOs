@@ -47,7 +47,7 @@ def run():
         p = [x for x in cross.scan(con, gun(3)) if x["id"] == "sleep-vs-questions"][0]
         eq(p["status"], "missing")
         eq(p["cert"], "missing")
-        ok("DEGILDIR" in p["note"])
+        ok("DEĞİLDİR" in p["note"])
     test("az veride hukum kurulmaz", t_few_days_no_verdict)
 
     def t_missing_is_not_no_relation():
@@ -55,7 +55,7 @@ def run():
         con = _con()
         kurgu(con, 4, lambda i: 7.0, lambda i: 100)
         p = cross.scan(con, gun(3))[0]
-        no("iliski yok" in p["note"].replace("«iliski yok»", ""))
+        no("ilişki yok" in p["note"].replace("«ilişki yok»", ""))
     test("eksik veri iliskisizlik diye sunulmaz", t_missing_is_not_no_relation)
 
     def t_pairs_respect_lag():
@@ -90,9 +90,26 @@ def run():
               lambda i: 102 if i % 2 == 1 else 100)
         p = [x for x in cross.scan(con, gun(29)) if x["id"] == "sleep-vs-questions"][0]
         eq(p["status"], "flat")
-        ok("gorunur bir ayrisma yok" in p["note"])
+        ok("görünür bir ayrışma yok" in p["note"])
         eq(len([x for x in cross.findings(con, gun(29)) if x["id"] == p["id"]]), 0)
     test("kucuk fark bulgu sayilmaz", t_small_difference_is_not_a_finding)
+
+    def t_user_text_is_turkish():
+        """Kullaniciya giden metin duzgun Turkcedir (AGENTS.md §1.8): cift
+        etiketleri, sorular ve bulgu cumlesi Turkce harfle yazilir."""
+        con = _con()
+        kurgu(con, 30, lambda i: 8.0 if i % 2 == 0 else 5.0,
+              lambda i: 150 if i % 2 == 1 else 60)
+        p = [x for x in cross.scan(con, gun(29)) if x["id"] == "sleep-vs-questions"][0]
+        ok("medyanı" in p["note"] and "Üstünde kalan" in p["note"] and "EŞLEŞMEDİR" in p["note"],
+           p["note"])
+        eq(p["bLabel"], "ertesi gün soru sayısı")
+        for d in cross.PAIRS:
+            for kelime in ("gun ", "gunun", "Iyi ", "calisma", "dusuk", "Hatirlama", "degis",
+                           "pratige", "alimi", "Agir"):
+                no(kelime in d["question"] + " " + d["a"]["label"] + " " + d["b"]["label"],
+                   "%s: %s" % (d["id"], kelime))
+    test("kullaniciya giden metin Turkce", t_user_text_is_turkish)
 
     def t_two_valued_split_not_lost():
         """Iki degerli dagilimda medyan ust degere esit dusebilir: veri
@@ -112,11 +129,11 @@ def run():
               lambda i: 150 if i % 2 == 1 else 60)
         for p in cross.scan(con, gun(29)):
             metin = p["note"].lower()
-            for kelime in ("cunku", "çünkü", "sebebiyle", "yol acti", "neden oldu"):
+            for kelime in ("cunku", "çünkü", "sebebiyle", "yol acti", "yol açtı", "neden oldu"):
                 no(kelime in metin, "neden-sonuc dili sizdi: " + p["note"])
         bulgu = cross.findings(con, gun(29))
         ok(bulgu)
-        ok(all("neden-sonuc degil" in b["note"] for b in bulgu))
+        ok(all("neden-sonuç değil" in b["note"] for b in bulgu))
     test("neden-sonuc kurulmaz ve bu yazilir", t_no_causal_language)
 
     def t_certainty_downgrades():

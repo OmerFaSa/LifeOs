@@ -83,6 +83,24 @@
         expect(SP.Calc.streak()).toBe(1);
       });
     });
+
+    it('dondurulmuş boş gün (hasta) seriyi bozmaz, sayılmaz da (seri.js)', async () => {
+      const m = {};
+      SP.Seri = window.LIFEOS.Seri.kur({ store:() => ({ get:async k => m[k] || null,
+        set:async (k, v) => { m[k] = v; } }), bugun:() => '2026-03-05' });
+      try{
+        expect((await SP.Seri.dondur('2026-03-03', null, 'hasta')).ok).toBe(true);
+        resetState();
+        withToday('2026-03-05', () => {
+          ['2026-03-04', '2026-03-02'].forEach(d => {
+            pushVitals(d, { sleep:8, water:2200 });
+            pushMeal(d, 'ogle', [['tavuk-gogsu', 350]]);
+            pushWorkout(d, { minutes:30, rpe:5 });
+          });
+          expect(SP.Calc.streak()).toBe(2);
+        });
+      }finally{ delete SP.Seri; }
+    });
   });
 
   describe('Calc — sıradaki hamle', () => {

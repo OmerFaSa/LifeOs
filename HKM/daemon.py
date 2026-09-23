@@ -1052,6 +1052,10 @@ class Handler(BaseHTTPRequestHandler):
             r = hedefag.esitle(self.con, u.path.rsplit("/", 1)[-1], body.get("hedefler"))
             if r.get("ok"):
                 r["butce"] = hedefag.butce(self.con)
+                if "tatil" in body:
+                    # Tatil modu (brand/ortak/seri.js): yalniz tarih; null siler.
+                    r["tatil"] = hedefag.tatil_yaz(self.con, u.path.rsplit("/", 1)[-1],
+                                                   body.get("tatil"))
                 if body.get("yarin") is not None:
                     # Aksam «yarin sunlar var» (core/schedule.py): modulun sectigi isler.
                     r["yarin"] = hedefag.yarin_yaz(self.con, u.path.rsplit("/", 1)[-1],

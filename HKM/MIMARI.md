@@ -1012,6 +1012,26 @@ Kullanıcının dikkati korunur, hiçbir mesaj kaybolmaz:
 Testler: `tests/test_bildirim.py`, `tests/test_teklif.py` (önce depo), `tools/entegre.js`
 §2.78–2.79.
 
+## 8.32 Tatil ve haftalık kazanımlar — `core/hedefag.py`, `core/weekly.py` (Grup 4)
+
+- **Tatil modu** (fikir 56): modül tatili `brand/ortak/seri.js` ile işaretler; hedef
+  eşitlemesi yalnız TARİHİ yollar (`tatil_ozet`). Tatildeyken yoklama sorulmaz, sabah
+  brifingi «Tatil modundasın» der, eksik veri sorusu ve akşam «yarın» özeti gitmez,
+  bayat teklif kapatma bekler. Dönüş sabahı (`donus_teklifi`) modüllere tek seferlik
+  `load.reduce` teklifi bırakılır; oranı modül seçer (AYS `core/tatil.js`: dönüşün ilk
+  iki günü yarım süre).
+- **Seri dondurma** (50): hasta/izin/tatil günü seriyi kırmaz, sayılmaz da; üç modülün
+  seri hesabı (`calc.js` / `state.js`) donmuş günü atlar. HKM'ye neden gitmez.
+- **Neler kazandın** (49): `weekly.kazanimlar` — yalnız yönü kodda belli ölçüler (`YON`;
+  kilo, nabız, tansiyon, su YOK), en az %5 iyi yönde hareket, en çok üç; uyku yalnız
+  tabana/banda (esik – 9 saat) yaklaşınca; ardından düzen (7 günün en az 5'inde kayıt).
+  Hepsi «hesaplandı»; XP'ye bakılmaz; yoksa «ölçülmüş bir artış yok». Rapor satırları
+  artık ekran adını (`ad`) ve Türkçe yüzdeyi (`degisim`) taşır; mesaj, yüz ve belge
+  ham anahtar yazmaz. `cross.py` cümleleri Türkçe harfle.
+
+Testler: `tests/test_ritim.py` (kazanımlar), `tests/test_bildirim.py` (tatil),
+`tests/test_cross.py` (Türkçe metin).
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

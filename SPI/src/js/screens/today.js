@@ -317,6 +317,51 @@ SP.Screens.today = (function(){
     });
   }
 
+  /* Dünkünün aynısı (core/dunku.js): dünün öğünü ya da antrenmanı tek
+     dokunuşla bugüne. Yalnız bugün girilmemiş olan önerilir. */
+  function dunkuEntry(){
+    if(!SP.Dunku) return null;
+    const a = SP.Dunku.adaylar(U.todayISO());
+    if(!a.ogunler.length && !a.antrenmanlar.length) return null;
+    return K.Entry({ label:'DÜNKÜNÜN AYNISI', meta:U.fmtShort(a.dun), wide:true,
+      note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; zorlanma puanı kopyalanmaz, sorulur.',
+      body:html`${map(a.ogunler, o => html`<div class="row between wrap gap-6 mt-4">
+          <span class="small"><b>${o.ad}</b> <span class="tiny dim">${o.ozet}</span></span>
+          ${K.Button({ label:'Bugüne ekle', size:'sm', act:'dunku-ogun', data:{ 'data-id':o.id } })}</div>`)}
+        ${map(a.antrenmanlar, w => html`<div class="row between wrap gap-6 mt-4">
+          <span class="small"><b>${w.ad}</b> <span class="tiny dim">${w.dk} dk</span></span>
+          ${K.Button({ label:'Bugüne ekle', size:'sm', act:'dunku-antrenman', data:{ 'data-id':w.id } })}</div>`)}` });
+  }
+
+  /* Seri satiri her sekmede ustte: «Bugün hastayım» ve «Tatil modu» aranmaz. */
+  function seriRow(){
+    if(!SP.Seri) return null;
+    return K.Entry({ label:'SERİ', hint:'streak', meta:SP.Calc.streak() + ' gün', wide:true,
+      body:seriKontrol() });
+  }
+
+  /* Seri dondurma ve tatil modu (brand/ortak/seri.js): hasta gün ve tatil
+     seriyi bozmaz; tatildeyken HKM soru sormaz. */
+  function seriKontrol(){
+    if(!SP.Seri) return '';
+    const bugun = U.todayISO();
+    const t = SP.Seri.aktifTatil(bugun);
+    const k = SP.Seri.kayitOf(bugun);
+    if(t) return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Tatil modu: ${U.fmtShort(t.bas)} – ${U.fmtShort(t.bit)} · seri korunuyor, HKM soru sormuyor</span>
+      ${K.Button({ label:'Tatili bitir', size:'sm', act:'seri-tatil-bitir' })}</div>`;
+    if(k) return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Bugün dondurulmuş (${LIFEOS.Seri.NEDEN[k.neden].toLocaleLowerCase('tr')}) · seri bozulmaz</span>
+      ${K.Button({ label:'Geri al', size:'sm', act:'seri-coz', data:{ 'data-id':k.id } })}</div>`;
+    if(S.ui.tatilSec) return html`<div class="row wrap gap-6 mt-6">
+      <span class="tiny">Kaç gün?</span>
+      ${map([3, 7, 14], n => K.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
+      ${K.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>`;
+    return html`<div class="row wrap gap-6 mt-6">
+      ${K.Button({ label:'Bugün hastayım · seri donsun', size:'sm', act:'seri-hasta' })}
+      ${K.Button({ label:'Tatil modu', size:'sm', act:'seri-tatil' })}</div>`;
+  }
+
   function readinessEntry(){
     const rx = SP.Move.prescription();
     const r = rx.readiness;
@@ -850,6 +895,7 @@ SP.Screens.today = (function(){
       ${when((S.ui.hkmIntents || []).length, () => html`<div class="mb-16">${K.Ledger([hkmTeklifRow()])}</div>`)}
       ${when((S.ui.hkmBildirim || []).length, () => html`<div class="mb-16">${K.Ledger([kingBildirimRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>
+      ${when(SP.Seri, () => html`<div class="mb-16">${K.Ledger([seriRow()])}</div>`)}
       <div class="mb-8">${tabs()}</div>`;
 
     if(tab === 'ozet'){
@@ -865,7 +911,7 @@ SP.Screens.today = (function(){
     }
 
     return String(html`${head}${K.Ledger([
-      signalEntry(), formEntry(), symptomEntry(), quickEntry(), statusEntry(), whyEntry(),
+      signalEntry(), dunkuEntry(), formEntry(), symptomEntry(), quickEntry(), statusEntry(), whyEntry(),
     ].filter(Boolean))}
     <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'certainty']))}</div>`);
   }
@@ -899,6 +945,14 @@ SP.Screens.today = (function(){
     SP.App.render();
   }
 
+  async function dunkuEkle(tur, id){
+    const bugun = U.todayISO();
+    const r = tur === 'ogun' ? await SP.Dunku.ogunKopyala(bugun, id) : await SP.Dunku.antrenmanKopyala(bugun, id);
+    if(!r.ok){ UI.toast(r.why); return; }
+    UI.toast(r.ad + ' bugüne eklendi', { undo:async () => { await SP.Dunku.geriAl(bugun, tur, r.id); SP.App.render(); } });
+    SP.App.render();
+  }
+
   async function hkmCevap(id, action){
     const liste = S.ui.hkmIntents || [];
     const n = liste.filter(x => String(x.id) === String(id))[0];
@@ -920,6 +974,34 @@ SP.Screens.today = (function(){
   }
 
   const handle = {
+    async 'dunku-ogun'(el){ await dunkuEkle('ogun', el.dataset.id); },
+    async 'dunku-antrenman'(el){ await dunkuEkle('antrenman', el.dataset.id); },
+    async 'seri-hasta'(){
+      const r = await SP.Seri.dondur(U.todayISO(), null, 'hasta');
+      if(!r.ok){ UI.toast(r.why); return; }
+      UI.toast('Bugün donduruldu; seri bozulmaz. Geçmiş olsun.', { undo:async () => {
+        await SP.Seri.coz(r.kayit.id); SP.App.render(); } });
+      SP.App.render();
+    },
+    async 'seri-coz'(el){ await SP.Seri.coz(el.dataset.id); UI.toast('Dondurma geri alındı'); SP.App.render(); },
+    async 'seri-tatil'(){ S.ui.tatilSec = true; SP.App.render(); },
+    async 'seri-tatil-vazgec'(){ S.ui.tatilSec = false; SP.App.render(); },
+    async 'seri-tatil-gun'(el){
+      S.ui.tatilSec = false;
+      const bugun = U.todayISO();
+      const bit = SP.Seri.gunEkle(bugun, Number(el.dataset.gun) - 1);
+      const r = await SP.Seri.dondur(bugun, bit, 'tatil');
+      UI.toast(r.ok ? 'Tatil modu ' + U.fmtShort(bugun) + ' – ' + U.fmtShort(bit) + ': seri korunuyor, HKM soru sormuyor'
+        : r.why, { life:5000 });
+      if(r.ok && SP.Hedefler && SP.Hedefler.ag) SP.Hedefler.ag.planla();
+      SP.App.render();
+    },
+    async 'seri-tatil-bitir'(){
+      const r = await SP.Seri.tatiliBitir();
+      UI.toast(r.ok ? 'Tatil bitti; hoş geldin' : r.why);
+      if(r.ok && SP.Hedefler && SP.Hedefler.ag) SP.Hedefler.ag.planla();
+      SP.App.render();
+    },
     async 'hedef-durum'(el){
       const r = await SP.Hedefler.durumDegistir(el.dataset.id, el.dataset.durum);
       UI.toast(r.ok ? 'Hedef güncellendi' + (r.not ? '. ' + r.not : '') : r.why);

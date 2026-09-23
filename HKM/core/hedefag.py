@@ -176,6 +176,44 @@ def yarin_oku(con, gun):
     return out
 
 
+def tatil_yaz(con, modul, tatil, now=None):
+    """Modulun tatil tarihi. None: silinir (tatil yok)."""
+    if modul not in MODULLER:
+        return {"ok": False, "note": "Bilinmeyen modül."}
+    if tatil is None:
+        con.execute("DELETE FROM tatil_ozet WHERE modul=?", (modul,))
+        return {"ok": True, "tatil": None}
+    if not isinstance(tatil, dict):
+        return {"ok": False, "note": "Tatil bir nesne olmalı."}
+    try:
+        bas = datetime.date.fromisoformat(str(tatil.get("bas")))
+        bit = datetime.date.fromisoformat(str(tatil.get("bit")))
+    except ValueError:
+        return {"ok": False, "note": "Tatil tarihi geçersiz."}
+    if bit < bas or (bit - bas).days > 30:
+        return {"ok": False, "note": "Tatil aralığı geçersiz."}
+    con.execute("INSERT OR REPLACE INTO tatil_ozet(modul, bas, bit, donus_planli, guncelleme) "
+                "VALUES (?,?,?,?,?)", (modul, bas.isoformat(), bit.isoformat(),
+                                       1 if tatil.get("donus_planli") else 0, _simdi(now)))
+    return {"ok": True, "tatil": {"bas": bas.isoformat(), "bit": bit.isoformat()}}
+
+
+def tatilde(con, gun):
+    """O gun tatilde olan moduller ve en gec bitis: {moduller, bit} ya da None."""
+    rows = con.execute("SELECT modul, bit FROM tatil_ozet WHERE bas<=? AND bit>=?",
+                       (gun, gun)).fetchall()
+    if not rows:
+        return None
+    return {"moduller": [r["modul"] for r in rows], "bit": max(r["bit"] for r in rows)}
+
+
+def donenler(con, gun):
+    """Tatili DUN biten moduller: [(modul, donus_planli)]."""
+    dun = (datetime.date.fromisoformat(gun) - datetime.timedelta(days=1)).isoformat()
+    return [(r["modul"], bool(r["donus_planli"])) for r in con.execute(
+        "SELECT modul, donus_planli FROM tatil_ozet WHERE bit=?", (dun,)).fetchall()]
+
+
 def hedefler(con):
     out = []
     for r in con.execute("SELECT modul, govde, guncelleme FROM hedef_ozet "
