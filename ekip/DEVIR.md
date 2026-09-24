@@ -132,8 +132,14 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   üretmek belge değil; telaffuz kuralı mı, konuşmacı/metin örneği mi? Cevap gelmeden yapılmaz.
 
 ### Cevabı gelen maddeler (sıra: Part 8'den sonra)
-- ⏳ Y5 Sağlık verisi içe aktarma — iPhone `export.xml` + Android Health Connect; önizleme
-  + onay (Y3 .ics yolu gibi), ölçüldü etiketi, SPİ kendi koduyla yazar.
+- ✅ Y5 Sağlık verisi içe aktarma — `SPI/src/js/core/saglikice.js` (SP.SaglikIce), Ayarlar ›
+  Rehber › Veri › «Telefondan sağlık verisi». iPhone export.zip (tarayıcının DecompressionStream'i,
+  sıfır bağımlılık; ZIP64 yok ve söylenir) ya da export.xml parça parça; Android: genel CSV
+  (tarih, ölçü, değer) — **Health Connect'in doğrudan dışa aktarma biçimi DOĞRULANMADI**.
+  Alınanlar: uyku (gece başına en büyük kaynak, uyanılan güne), kilo (lb→kg), nabız, tansiyon,
+  SpO2 (oran→%), bel, yağ, su (L/fl oz→ml). Alınmayanlar söylenir: HRV (Apple SDNN ≠ SPİ
+  RMSSD), adım (alan yok). Senin değerin ezilmez (çakışma gösterilir), aralık dışı düşer,
+  «Geri al» sonradan değiştirdiğini korur. SPİ 1301/1301, duman/a11y/390px, tarayıcıda denendi.
 - ⏳ Y1 Para kolu — girişler Telegram yazışması, King/akşam sohbeti, fiş fotoğrafı; öneri
   HKM içinde bir bölüm (ilk adımda bir cümleyle teyit). Fişten okunan «tahmin», önizleme +
   onay; tutarı kod hesaplar.

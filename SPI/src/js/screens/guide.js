@@ -339,6 +339,39 @@ SP.Screens.guide = (function(){
     });
   }
 
+  /* TELEFONDAN SAĞLIK VERİSİ (Y5, core/saglikice.js). iPhone'un dışa
+     aktarması (export.zip / export.xml) ya da Android uygulamalarının CSV'si
+     okunur; önce önizlenir, onayla yazılır, «Geri al» kalır. Senin girdiğin
+     değer ezilmez. */
+  function saglikCard(){
+    return K.Card({
+      title:'Telefondan sağlık verisi', hint:'backup',
+      body:html`<p class="small muted">iPhone: Sağlık › profil › «Tüm sağlık verilerini dışa
+        aktar» ile gelen export.zip. Android: Health Connect verisini dışa aktaran bir uygulamanın
+        CSV’si (tarih, ölçü, değer). Alınanlar: uyku, kilo, istirahat nabzı, tansiyon, oksijen, bel,
+        yağ oranı, su. Önce ne yazılacağını görürsün; senin girdiğin değer ezilmez.</p>`,
+      foot:K.Button({ label:'Dosya seç ve önizle', size:'sm', tone:'primary', act:'saglik-ac' }),
+    });
+  }
+
+  let saglikDosya = null, saglikOnizleme = null;
+
+  function saglikOnizlemeBody(o){
+    return String(K.Stack([
+      K.Table({ tight:true, headers:['Ölçü', { label:'Yeni gün', num:true }, { label:'Dolu gün', num:true }, 'Aralık'],
+        rows:o.alanlar.map(a => [a.ad, String(a.yeni), String(a.cakisma), a.bas + ' → ' + a.bit]) }),
+      when(o.cakisma.length, () => K.Notice({ tone:'info', title:'Senin değerin kalır:',
+        body:o.cakisma.slice(0, 5).map(c => c.gun + ' ' + SP.SaglikIce.AD[c.alan] + ': sende ' + c.mevcut
+          + ', dosyada ' + c.gelen).join(' · ') + (o.cakisma.length > 5 ? ' …' : '') })),
+      when(o.aralikDisi, () => K.Notice({ tone:'warn', body:o.aralikDisi + ' günlük değer olası aralığın '
+        + 'dışında olduğu için alınmadı.' })),
+      when(o.alinmayan.length, () => K.Notice({ tone:'info', title:'Alınmayanlar:',
+        body:o.alinmayan.map(x => x.ad + ' (' + x.adet + ' kayıt)').join(' · ') })),
+      html`<p class="small muted">${o.satir} kayıt okundu. Yazılacak: ${o.yaz.length} ölçüm.
+        İçe aktarılan değer «ölçüldü» sayılır (cihazın ölçümü).</p>`,
+    ]));
+  }
+
   function storageCard(){
     const h = SP.Store.health();
     return K.Card({
@@ -499,7 +532,7 @@ SP.Screens.guide = (function(){
     }
     if(tab === 'veri'){
       return String(html`${head}
-        ${K.Ledger(() => [dataCard(), storageHorizonCard(), storageCard(), hkmCard()])}
+        ${K.Ledger(() => [dataCard(), saglikCard(), storageHorizonCard(), storageCard(), hkmCard()])}
         <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`);
     }
     if(tab === 'sinir'){
@@ -518,6 +551,44 @@ SP.Screens.guide = (function(){
   }
 
   const handle = {
+    async 'saglik-ac'(){
+      saglikDosya = null; saglikOnizleme = null;
+      UI.sheet({ title:'Telefondan sağlık verisi', subtitle:'önce önizleme, sonra onay', wide:true,
+        body:String(K.Stack([
+          K.Drop({ act:'saglik-dosya', label:'export.zip, export.xml ya da CSV', icon:'upload',
+            accept:'.zip,.xml,.csv,.txt' }),
+          html`<div id="saglik-ad" class="small dim"></div>`,
+          K.Field({ label:'Ne kadar geriye', input:K.Select({ id:'saglik-gun', value:'90',
+            options:[{ value:'30', label:'Son 30 gün' }, { value:'90', label:'Son 90 gün' },
+              { value:'365', label:'Son 1 yıl' }] }) }),
+        ])),
+        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+          ${K.Button({ label:'Oku', tone:'primary', act:'saglik-oku' })}`) });
+    },
+
+    async 'saglik-oku'(){
+      if(!saglikDosya){ UI.toast('Önce bir dosya seç'); return; }
+      const g = document.getElementById('saglik-gun');
+      const o = await UI.withBusy('Dosya okunuyor', 'büyük dosyada bir dakika sürebilir',
+        () => SP.SaglikIce.dosyadanOku(saglikDosya, { gun:Number(g ? g.value : 90) || 90 }));
+      if(!o.ok && !(o.alanlar || []).length){ UI.toast(o.why); return; }
+      saglikOnizleme = o;
+      UI.sheet({ title:'İçe aktarma önizlemesi', subtitle:saglikDosya.name, wide:true,
+        body:saglikOnizlemeBody(o),
+        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+          ${when(o.yaz.length, () => K.Button({ label:'Yaz (' + o.yaz.length + ' ölçüm)', tone:'primary',
+            act:'saglik-yaz' }))}`) });
+    },
+
+    async 'saglik-yaz'(){
+      if(!saglikOnizleme) return;
+      const r = await SP.SaglikIce.uygula(saglikOnizleme);
+      saglikOnizleme = null;
+      UI.closeSheet();
+      if(!r.ok){ UI.toast(r.why); return; }
+      UI.toast(r.note, { undo:async () => { await SP.SaglikIce.geriAl(r.id); SP.App.render(); } });
+      SP.App.render();
+    },
     /* Ayarlardan elle acip kapatmak da oneri kutusundan gecer ki Danisma'da
        «geri al» ile geri alinabilsin. Kutuyu isaretleyen kullanicidir:
        onay burada verilmis sayilir. */
@@ -667,6 +738,11 @@ SP.Screens.guide = (function(){
   };
 
   const change = {
+    async 'saglik-dosya'(el){
+      saglikDosya = (el.files && el.files[0]) || null;
+      const g = document.getElementById('saglik-ad');
+      if(g) g.textContent = saglikDosya ? saglikDosya.name : '';
+    },
     async 'hkm-url'(el){ await SP.Beacon.save({ url:el.value.trim() }); SP.App.render(); },
     async 'hkm-token'(el){ await SP.Beacon.save({ token:el.value.trim() }); },
     async 'hkm-interval'(el){
