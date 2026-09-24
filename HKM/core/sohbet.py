@@ -438,6 +438,24 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
 
     # 0a — TEKLIFE CEVAP (core/king.py teklif_cevap): «1», «2», «iptal».
     # Acik teklif yoksa None doner ve kelime olagan sohbete gecer.
+    # HATALAR Y-9: acik bir soru varken («Dün kaç saat uyudun?») tek sayi ya da
+    # «bilmiyorum» SORUNUN cevabidir; teklif cevabindan ONCE denenir. Teklif
+    # acik bicimle («onayla 2») onaylanir. Aksi halde «4 saat» uyuyan
+    # kullanicinin cevabi kayboluyor, «2» ucretli bir isi onayliyordu.
+    if gorevli == "king":
+        from core import eksik
+        ham = " ".join(str(metin or "").strip().split())
+        if eksik.SAYI.match(ham) or eksik.BILMIYORUM.match(ham):
+            ec = eksik.cevap(con, metin, date)
+            if ec:
+                from core import king
+                if king.acik_teklif(con, kanal, hedef):
+                    ec += " (Açık teklifi onaylamak istiyorsan «onayla 1» gibi yaz.)"
+                if kayit:
+                    patron.log(con, kanal, "user", metin, agent=gorevli)
+                    patron.log(con, kanal, "manager", ec, agent=gorevli)
+                return {"ok": True, "mode": "komut", "command": "soru", "text": ec,
+                        "agent": gorevli}
     if gorevli == "king":
         from core import king
         tc = king.teklif_cevap(con, cfg, metin, kanal=kanal, hedef=hedef)

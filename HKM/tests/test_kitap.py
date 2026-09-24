@@ -194,3 +194,28 @@ def run():
         eq(king.emir(con, r["emir"]["id"])["durum"], "bitti")
         eq(king.teklif_cevap(con, cfg, "dur", **kw), None)   # acik ara onay yok
     test("parca parca sohbetten: «3» secer, «devam» der", t_parca_sohbet)
+
+    def t_soru_cevabi_teklifi_onaylamaz():
+        """HATALAR Y-9: ayni kanalda acik bir teklif ve acik bir soru varken
+        soruya verilen tek sayi («4» saat uyudum) teklifi onayliyordu ya da
+        «o secenek yok» deyip cevabi yutuyordu. Acik soru varken tek sayi
+        SORUNUN cevabidir; teklif «onayla 2» ile onaylanir."""
+        import datetime as _dt
+        from core import eksik, sohbet
+        con, cfg = db.connect(":memory:"), _cfg()
+        kw = dict(kanal="telegram", hedef="7")
+        e = king.emir_ac(con, cfg, "ays", "test.kitabi", {"kitap": _govde()}, now=AN, **kw)["emir"]
+        db.insert_event(con, "spi", "2026-09-22", "2026-09-22T21:00:00",
+                        {"module": "spi", "date": "2026-09-22",
+                         "metrics": {"sleep_hours": {"value": 7, "cert": "measured"}}})
+        ok(eksik.sor(con, "2026-09-24", kanal="telegram", now=_dt.datetime(2026, 9, 24, 8, 0)))
+        r = sohbet.konus(con, cfg, "2", "2026-09-24", gorevli="king", kayit=False, **kw)
+        eq(r["command"], "soru", r)
+        ok("onayla 1" in r["text"], r["text"])
+        eq(king.emir(con, e["id"])["durum"], "teklif", "soru cevabi teklifi onaylamaz")
+        eq(con.execute("SELECT kind FROM intents").fetchone()["kind"], "kayit.add")
+        # Acikca «onayla 2»: teklif onaylanir.
+        r = sohbet.konus(con, cfg, "onayla 2", "2026-09-24", gorevli="king", kayit=False, **kw)
+        eq(r["command"], "teklif", r)
+        no(king.emir(con, e["id"])["durum"] == "teklif")
+    test("acik soru varken tek sayi soruya gider, teklifi onaylamaz (Y-9)", t_soru_cevabi_teklifi_onaylamaz)

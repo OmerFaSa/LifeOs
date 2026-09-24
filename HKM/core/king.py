@@ -798,8 +798,22 @@ def parca(con, id_, karar, now=None):
                      "Durduruldu: kitap üretilen bölümlerle bitiyor; teklif olarak gelir.")}
 
 
-CEVAP = re.compile(r"^\s*(1|2|3|4|tam|küçük|kucuk|depo|iptal|vazgeç|vazgec|devam|dur)\s*[.!]?\s*$",
+# «onayla 2» / «seçenek 2»: acik bir SORU varken tek sayi soruya gider
+# (HATALAR Y-9); teklif bu acik bicimle onaylanir.
+CEVAP = re.compile(r"^\s*(?:(?:onayla|onay|seçenek|secenek)\s+)?"
+                   r"(1|2|3|4|tam|küçük|kucuk|depo|iptal|vazgeç|vazgec|devam|dur)\s*[.!]?\s*$",
                    re.I)
+
+
+def acik_teklif(con, kanal="local", hedef=None):
+    """Bu kanalda (ve alicida) onay bekleyen teklif var mi?"""
+    if kanal in TESLIM_KANALLARI:
+        r = con.execute("SELECT 1 FROM is_emirleri WHERE durum='teklif' AND kanal=? AND "
+                        "(hedef=? OR hedef IS NULL) LIMIT 1", (kanal, hedef)).fetchone()
+    else:
+        r = con.execute("SELECT 1 FROM is_emirleri WHERE durum='teklif' AND kanal IS NULL "
+                        "AND modul='hkm' LIMIT 1").fetchone()
+    return bool(r)
 
 
 def teklif_cevap(con, cfg, metin, kanal="local", hedef=None, now=None):
