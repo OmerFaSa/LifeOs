@@ -82,6 +82,12 @@ jobs:
         with:
           python-version: '3.12'
 
+      # HATALAR D-14: duman testi dist/'teki TEK DOSYAYI geziyor. Kaynak
+      # degisip dist unutulursa test edilen sey kaynak olmaz; derleyici
+      # bellekte derler ve depodaki dist ile karsilastirir.
+      - name: Tek dosya kaynaktan derlenmiş hâliyle aynı mı
+        run: python3 build.py --denetle
+
       - name: Bağımlılıkları kur
         run: npm ci
 

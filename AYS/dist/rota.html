@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'313a704', at:'2026-09-24 11:35', dirty:true };
+R.BUILD = { id:'34b0949', at:'2026-09-24 11:37', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -12287,6 +12287,9 @@ LIFEOS.Gorsel = (function(){
         değildir: veri yok gününe sıfır yazılmaz, «tamamlandı» da yazılmaz.
      3. SINIRLI. Tek kayıt en çok EN_UZUN gün; bir takvim ayında en çok
         AYLIK_HASTA hasta/izin günü (tatil ayrı sayılır, kendi sınırıyla).
+        Ay dönümünü geçen kayıt DOKUNDUĞU HER AYIN sınırına bakar. Tatil
+        bir takvim yılında en çok YILLIK_TATIL gün (HATALAR D-19: önce
+        21 günlük tatiller art arda eklenebiliyordu).
      4. GERİ ALINIR. Her kayıt kimliğiyle silinir; geçmiş sessizce
         değişmez, «çöz» denince seri yeniden hesaplanır.
      5. HKM'YE YALNIZ TATİLİN TARİHİ GİDER (hedefag.js): tatildeyken HKM
@@ -12299,6 +12302,9 @@ LIFEOS.Seri = (function(){
   const EN_UZUN = 21;
   const GERI_GUN = 7;
   const AYLIK_HASTA = 6;
+  const YILLIK_TATIL = 2 * EN_UZUN;        /* 42 gün: iki tam tatil */
+  const AY_AD = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz',
+    'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
   const ANAHTAR = 'meta/seriDondurma';
   const DONUS_BILDIR = 3;
 
@@ -12329,13 +12335,23 @@ LIFEOS.Seri = (function(){
     function kayitOf(iso){ return liste.find(x => x.bas <= iso && iso <= x.bit) || null; }
     function donmusMu(iso){ return !!kayitOf(iso); }
 
-    function buAyHasta(iso, haric){
-      const ay = String(iso).slice(0, 7);
+    /* Bir dönemde (ay 'yyyy-aa' ya da yıl 'yyyy') verilen türden kaç gün donmuş. */
+    function donemGunu(onek, tatilMi){
       let n = 0;
-      liste.filter(x => x.neden !== 'tatil' && x !== haric).forEach(x => {
-        for(let d = x.bas; d <= x.bit; d = gunEkle(d, 1)) if(d.slice(0, 7) === ay) n++;
+      liste.filter(x => (x.neden === 'tatil') === tatilMi).forEach(x => {
+        for(let d = x.bas; d <= x.bit; d = gunEkle(d, 1)) if(d.indexOf(onek) === 0) n++;
       });
       return n;
+    }
+
+    /* Yeni kaydın dönemlere düşen günleri: { 'yyyy-aa' | 'yyyy': gün }. */
+    function donemler(bas, bit, uzunluk){
+      const out = {};
+      for(let d = bas; d <= bit; d = gunEkle(d, 1)){
+        const k = d.slice(0, uzunluk);
+        out[k] = (out[k] || 0) + 1;
+      }
+      return out;
     }
 
     async function dondur(bas, bit, neden){
@@ -12349,8 +12365,22 @@ LIFEOS.Seri = (function(){
       if(neden !== 'tatil' && neden !== 'izin' && gun > 3) return { ok:false, why:'Hasta günü tek seferde en çok 3 gün; daha uzunsa tatil/izin seç.' };
       for(let d = bas; d <= bit; d = gunEkle(d, 1)) if(donmusMu(d)) return { ok:false, why:d + ' zaten dondurulmuş.' };
       if(neden !== 'tatil'){
-        let ek = 0; for(let d = bas; d <= bit; d = gunEkle(d, 1)) ek++;
-        if(buAyHasta(bas) + ek > AYLIK_HASTA) return { ok:false, why:'Bu ay en çok ' + AYLIK_HASTA + ' hasta/izin günü dondurulabilir.' };
+        /* Ay dönümünü geçen kayıt dokunduğu HER ayın sınırına bakar (D-19). */
+        const aylar = donemler(bas, bit, 7);
+        for(const ay of Object.keys(aylar)){
+          if(donemGunu(ay, false) + aylar[ay] > AYLIK_HASTA){
+            const ad = ay === bas.slice(0, 7) ? 'Bu ay' : AY_AD[Number(ay.slice(5, 7)) - 1] + ' ayında';
+            return { ok:false, why:ad + ' en çok ' + AYLIK_HASTA + ' hasta/izin günü dondurulabilir.' };
+          }
+        }
+      } else {
+        const yillar = donemler(bas, bit, 4);
+        for(const yil of Object.keys(yillar)){
+          if(donemGunu(yil, true) + yillar[yil] > YILLIK_TATIL){
+            return { ok:false, why:yil + ' yılında en çok ' + YILLIK_TATIL + ' tatil günü dondurulabilir; '
+              + 'kalan: ' + Math.max(0, YILLIK_TATIL - donemGunu(yil, true)) + ' gün.' };
+          }
+        }
       }
       const kayit = { id:'sd-' + bas + '-' + Math.random().toString(36).slice(2, 7), bas, bit, neden,
         at:new Date().toISOString() };
@@ -12401,7 +12431,7 @@ LIFEOS.Seri = (function(){
       liste:() => liste.slice(), gunEkle };
   }
 
-  return { kur, NEDEN, EN_UZUN, GERI_GUN, AYLIK_HASTA, ANAHTAR };
+  return { kur, NEDEN, EN_UZUN, GERI_GUN, AYLIK_HASTA, YILLIK_TATIL, ANAHTAR };
 })();
 
 /* ==== js/core/medya.js ==== */
@@ -16880,15 +16910,28 @@ R.Store = (function(){
      Kesin deger okunamaz; bu yuzden 5 MB varsayilip doluluk yuzdesi tahmin edilir.
      %75 uzerinde kullaniciyi uyarmak icin `near` isaretlenir. */
   const LOCAL_QUOTA = 5 * 1024 * 1024;
+  /* HATALAR D-17: sinir KAYNAK basinadir. Oteki profiller, «.oncesi»
+     kopyasi ve ayar anahtarlari da ayni kotadan yer; yalniz etkin profili
+     olcmek dolulugu eksik gosteriyordu. `profile` bu profilin payidir. */
+  function originSize(){
+    try{
+      let n = 0;
+      for(let i = 0; i < localStorage.length; i++){
+        const k = localStorage.key(i);
+        n += k.length + (localStorage.getItem(k) || '').length;
+      }
+      return n;
+    }catch(e){ return localSize(); }
+  }
   function localQuota(){
-    const bytes = localSize();
+    const bytes = originSize();
     const pct = Math.min(100, Math.round(100*bytes/LOCAL_QUOTA));
-    return { bytes, limit:LOCAL_QUOTA, pct, near:pct >= 75, full:pct >= 92 };
+    return { bytes, profile:localSize(), limit:LOCAL_QUOTA, pct, near:pct >= 75, full:pct >= 92 };
   }
 
   return {
     init, get, set, remove, list,
-    exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, localQuota, sizeByCollection,
+    exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, originSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
     set onExternalWrite(fn){ onExternalWrite = fn; },

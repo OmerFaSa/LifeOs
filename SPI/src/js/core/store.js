@@ -430,15 +430,28 @@ SP.Store = (function(){
      Kesin deger okunamaz; bu yuzden 5 MB varsayilip doluluk yuzdesi tahmin edilir.
      %75 uzerinde kullaniciyi uyarmak icin `near` isaretlenir. */
   const LOCAL_QUOTA = 5 * 1024 * 1024;
+  /* HATALAR D-17: sinir KAYNAK basinadir. Oteki profiller, «.oncesi»
+     kopyasi ve ayar anahtarlari da ayni kotadan yer; yalniz etkin profili
+     olcmek dolulugu eksik gosteriyordu. `profile` bu profilin payidir. */
+  function originSize(){
+    try{
+      let n = 0;
+      for(let i = 0; i < localStorage.length; i++){
+        const k = localStorage.key(i);
+        n += k.length + (localStorage.getItem(k) || '').length;
+      }
+      return n;
+    }catch(e){ return localSize(); }
+  }
   function localQuota(){
-    const bytes = localSize();
+    const bytes = originSize();
     const pct = Math.min(100, Math.round(100*bytes/LOCAL_QUOTA));
-    return { bytes, limit:LOCAL_QUOTA, pct, near:pct >= 75, full:pct >= 92 };
+    return { bytes, profile:localSize(), limit:LOCAL_QUOTA, pct, near:pct >= 75, full:pct >= 92 };
   }
 
   return {
     init, get, set, remove, list,
-    exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, localQuota, sizeByCollection,
+    exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, originSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
     set onError(fn){ onError = fn; },
     set onExternalWrite(fn){ onExternalWrite = fn; },

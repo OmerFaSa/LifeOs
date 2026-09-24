@@ -306,6 +306,24 @@
       await temizle();
     });
 
+    /* HATALAR D-17: doluluk yalnız etkin profilin anahtarından ölçülüyordu;
+       tarayıcının sınırı ise KAYNAK başınadır — öteki profiller ve
+       «.oncesi» kopyası da aynı kotadan yer. */
+    it('kota bütün kaynağı ölçer; profil ölçüsü ayrı kalır (D-17)', async function(){
+      const k = (await yerelAnahtar()) + '.zzbaska-profil';
+      const once = S.localQuota().bytes;
+      const profil = S.localSize();
+      localStorage.setItem(k, 'x'.repeat(50000));
+      try{
+        const q = S.localQuota();
+        expect(q.bytes).toBeGreaterThan(once + 49000);
+        expect(S.localSize()).toBe(profil);
+        expect(q.profile).toBe(profil);
+      }finally{
+        localStorage.removeItem(k);
+      }
+    });
+
     it('kota yüzdesi sınırlar içinde kalır', function(){
       const q = S.localQuota();
       expect(q.pct).toBeGreaterThan(-1);

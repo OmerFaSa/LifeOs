@@ -378,6 +378,21 @@ her madde önce kırmızı test, sonra düzeltme:
 | D-5 (atanmamıştı, HKM) | Program kapasitesi toplamı aşmaz; bir dilim bile yetmiyorsa kritik «dilim» denetimi | (bu commit) |
 | KO-1 · B-4 · B-1 | Süreç açılışında saat dilimi (config `saat_dilimi` > Europe/Istanbul); KURULUM: UMask, ReadWritePaths HKM (config yazılabilsin), üç bearer'sız yol | 1ac5fd8 |
 
+**B'den devralınan D grubu** (kullanıcı iletti, 2026-09-24):
+
+| Kod | Ne değişti | Commit |
+|---|---|---|
+| D-8 | AYS: cevaplanmamış testin doğruluğu «—»; üç `fmtMin` önce yuvarlar (119,6 → «2 sa») | 34b0949 |
+| D-9 | Üç `ui.js` target/shield, ESP `hints.js` ladder çift tanımı silindi; testler kaynağı okur | 34b0949 |
+| D-10 | AYS `examOpen = examOpen` kaldırıldı, niyet yorumda (davranış aynı) | 34b0949 |
+| D-11 | ESP SRS «İyi»de ease/2.5 çarpanı (varsayılan kartta aralık aynı) | 34b0949 |
+| D-14 | Üç `build.py --denetle` (bellekte derle, dist ile karşılaştır); CI adımı | (sonraki) |
+| D-17 | `localQuota` kaynağın tamamını ölçer (`originSize`); `profile` ayrı | (sonraki) |
+| D-19 | Ay dönümünü geçen kayıt her ayın sınırına bakar; tatil yılda en çok 42 gün | (sonraki) |
+
+**Kullanıcıya sorulacak tek sayı:** D-19'daki yıllık tatil sınırı 42 gün (2 × tek kaydın
+en uzunu 21) bir tasarım seçimi; `brand/ortak/seri.js` `YILLIK_TATIL`.
+
 Denetim (A, son): HKM 628/628, `perf.py` bütçede, HKM yüzü 56 görünüm temiz,
 `tools/entegre.js` temiz. **Kalan (A):** B bitince `python3 tools/sayilar.py --tam --yaz`.
 README'deki elle yazılmış «312 test» (B-1'in README yarısı) B'nin dosyasında.

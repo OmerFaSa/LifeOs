@@ -47,6 +47,31 @@
       expect((await s.dondur('2026-10-01', '2026-10-25', 'tatil')).ok).toBe(false); /* 25 gün */
     });
 
+    /* HATALAR D-19: aylık sınır yalnız kaydın BAŞLADIĞI ayı sayıyordu; ay
+       dönümünü geçen izin öteki ayın sınırına bakmıyordu. */
+    it('ay dönümünü geçen kayıt iki ayın sınırına da bakar', async () => {
+      const { s } = kur('2026-10-07');
+      expect((await s.dondur('2026-10-04', '2026-10-06', 'hasta')).ok).toBe(true);
+      expect((await s.dondur('2026-10-07', null, 'izin')).ok).toBe(true);     /* Ekim: 4 */
+      const r = await s.dondur('2026-09-30', '2026-10-03', 'izin');           /* +3 Ekim = 7 */
+      expect(r.ok).toBe(false);
+      expect(r.why).toContain('Ekim');
+      expect((await s.dondur('2026-09-30', '2026-10-01', 'izin')).ok).toBe(true); /* +1 = 5 */
+    });
+
+    /* HATALAR D-19: tatilin toplam sınırı yoktu; 21 günlük kayıtlar art arda
+       eklenebiliyordu («bahane makinesi olmamalı»). */
+    it('tatil bir takvim yılında en çok 42 gün', async () => {
+      const { s } = kur('2026-07-01');
+      expect((await s.dondur('2026-07-01', '2026-07-21', 'tatil')).ok).toBe(true);
+      expect((await s.dondur('2026-07-22', '2026-08-11', 'tatil')).ok).toBe(true);
+      const r = await s.dondur('2026-08-12', '2026-08-14', 'tatil');
+      expect(r.ok).toBe(false);
+      expect(r.why).toContain('42');
+      /* Öteki yılın sınırı ayrıdır. */
+      expect((await s.dondur('2027-01-04', '2027-01-10', 'tatil')).ok).toBe(true);
+    });
+
     it('tatil: etkin tatil, HKM’ye yalnız tarih; bugün bitirilince geçmiş donmuş kalır', async () => {
       const { s } = kur('2026-09-26');
       await s.dondur('2026-09-24', '2026-09-30', 'tatil');

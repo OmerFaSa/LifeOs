@@ -16,6 +16,9 @@
         değildir: veri yok gününe sıfır yazılmaz, «tamamlandı» da yazılmaz.
      3. SINIRLI. Tek kayıt en çok EN_UZUN gün; bir takvim ayında en çok
         AYLIK_HASTA hasta/izin günü (tatil ayrı sayılır, kendi sınırıyla).
+        Ay dönümünü geçen kayıt DOKUNDUĞU HER AYIN sınırına bakar. Tatil
+        bir takvim yılında en çok YILLIK_TATIL gün (HATALAR D-19: önce
+        21 günlük tatiller art arda eklenebiliyordu).
      4. GERİ ALINIR. Her kayıt kimliğiyle silinir; geçmiş sessizce
         değişmez, «çöz» denince seri yeniden hesaplanır.
      5. HKM'YE YALNIZ TATİLİN TARİHİ GİDER (hedefag.js): tatildeyken HKM
@@ -28,6 +31,9 @@ LIFEOS.Seri = (function(){
   const EN_UZUN = 21;
   const GERI_GUN = 7;
   const AYLIK_HASTA = 6;
+  const YILLIK_TATIL = 2 * EN_UZUN;        /* 42 gün: iki tam tatil */
+  const AY_AD = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz',
+    'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
   const ANAHTAR = 'meta/seriDondurma';
   const DONUS_BILDIR = 3;
 
@@ -58,13 +64,23 @@ LIFEOS.Seri = (function(){
     function kayitOf(iso){ return liste.find(x => x.bas <= iso && iso <= x.bit) || null; }
     function donmusMu(iso){ return !!kayitOf(iso); }
 
-    function buAyHasta(iso, haric){
-      const ay = String(iso).slice(0, 7);
+    /* Bir dönemde (ay 'yyyy-aa' ya da yıl 'yyyy') verilen türden kaç gün donmuş. */
+    function donemGunu(onek, tatilMi){
       let n = 0;
-      liste.filter(x => x.neden !== 'tatil' && x !== haric).forEach(x => {
-        for(let d = x.bas; d <= x.bit; d = gunEkle(d, 1)) if(d.slice(0, 7) === ay) n++;
+      liste.filter(x => (x.neden === 'tatil') === tatilMi).forEach(x => {
+        for(let d = x.bas; d <= x.bit; d = gunEkle(d, 1)) if(d.indexOf(onek) === 0) n++;
       });
       return n;
+    }
+
+    /* Yeni kaydın dönemlere düşen günleri: { 'yyyy-aa' | 'yyyy': gün }. */
+    function donemler(bas, bit, uzunluk){
+      const out = {};
+      for(let d = bas; d <= bit; d = gunEkle(d, 1)){
+        const k = d.slice(0, uzunluk);
+        out[k] = (out[k] || 0) + 1;
+      }
+      return out;
     }
 
     async function dondur(bas, bit, neden){
@@ -78,8 +94,22 @@ LIFEOS.Seri = (function(){
       if(neden !== 'tatil' && neden !== 'izin' && gun > 3) return { ok:false, why:'Hasta günü tek seferde en çok 3 gün; daha uzunsa tatil/izin seç.' };
       for(let d = bas; d <= bit; d = gunEkle(d, 1)) if(donmusMu(d)) return { ok:false, why:d + ' zaten dondurulmuş.' };
       if(neden !== 'tatil'){
-        let ek = 0; for(let d = bas; d <= bit; d = gunEkle(d, 1)) ek++;
-        if(buAyHasta(bas) + ek > AYLIK_HASTA) return { ok:false, why:'Bu ay en çok ' + AYLIK_HASTA + ' hasta/izin günü dondurulabilir.' };
+        /* Ay dönümünü geçen kayıt dokunduğu HER ayın sınırına bakar (D-19). */
+        const aylar = donemler(bas, bit, 7);
+        for(const ay of Object.keys(aylar)){
+          if(donemGunu(ay, false) + aylar[ay] > AYLIK_HASTA){
+            const ad = ay === bas.slice(0, 7) ? 'Bu ay' : AY_AD[Number(ay.slice(5, 7)) - 1] + ' ayında';
+            return { ok:false, why:ad + ' en çok ' + AYLIK_HASTA + ' hasta/izin günü dondurulabilir.' };
+          }
+        }
+      } else {
+        const yillar = donemler(bas, bit, 4);
+        for(const yil of Object.keys(yillar)){
+          if(donemGunu(yil, true) + yillar[yil] > YILLIK_TATIL){
+            return { ok:false, why:yil + ' yılında en çok ' + YILLIK_TATIL + ' tatil günü dondurulabilir; '
+              + 'kalan: ' + Math.max(0, YILLIK_TATIL - donemGunu(yil, true)) + ' gün.' };
+          }
+        }
       }
       const kayit = { id:'sd-' + bas + '-' + Math.random().toString(36).slice(2, 7), bas, bit, neden,
         at:new Date().toISOString() };
@@ -130,5 +160,5 @@ LIFEOS.Seri = (function(){
       liste:() => liste.slice(), gunEkle };
   }
 
-  return { kur, NEDEN, EN_UZUN, GERI_GUN, AYLIK_HASTA, ANAHTAR };
+  return { kur, NEDEN, EN_UZUN, GERI_GUN, AYLIK_HASTA, YILLIK_TATIL, ANAHTAR };
 })();

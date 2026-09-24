@@ -8,6 +8,7 @@ Artifact olarak yayimlanabilir bir parca (fragment) uretir: dist/esp.html
 Kullanim:
   python build.py              # okunabilir cikti (varsayilan)
   python build.py --minify     # CSS sikistirilir, JS yorum/bosluklari azaltilir
+  python build.py --denetle    # dist kaynaktan derlenmis haliyle ayni mi (CI)
 """
 
 import base64
@@ -309,12 +310,14 @@ def ikonu_gom(etiketler: list) -> list:
             for e in etiketler]
 
 
-def build(minify: bool = False) -> None:
+def build(minify: bool = False, denetle: bool = False):
     for name in REQUIRED:
         if not (SRC / name).exists():
             sys.exit(f"HATA: src/{name} yok")
 
-    damga = stamp()
+    # Denetimde damga YENIDEN yazilmaz: dist, depodaki build.js ile
+    # derlenmistir ve karsilastirma o dosyayla yapilir.
+    damga = None if denetle else stamp()
 
     html = read("index.html")
     title_match = re.search(r"<title>(.*?)</title>", html, re.S)
@@ -347,8 +350,10 @@ def build(minify: bool = False) -> None:
     parts.extend(script_blocks)
     output = "\n".join(parts) + "\n"
 
-    DIST.mkdir(exist_ok=True)
     out_path = DIST / "esp.html"
+    if denetle:
+        return denetle_dist(out_path, output)
+    DIST.mkdir(exist_ok=True)
     out_path.write_text(output, encoding="utf-8")
     copy_brand_assets()
     copy_level_assets()
@@ -361,5 +366,28 @@ def build(minify: bool = False) -> None:
     print(f"     damga {damga}")
 
 
+def denetle_dist(out_path, output: str) -> int:
+    """HATALAR D-14: tek dosya surumu depoda duruyor ve duman testi ONU
+    geziyor; ama kaynaktan derlenmis haliyle ayni oldugunu hicbir sey
+    sinamiyordu. Kaynak degisip dist unutulursa test edilen sey kaynak
+    olmazdi. Bellekte derler, diske yazmadan karsilastirir."""
+    try:
+        mevcut = out_path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        print(f"KIRMIZI  {out_path} yok; python3 build.py kos.")
+        return 1
+    if mevcut == output:
+        print(f"OK   {out_path.name} kaynaktan derlenmis haliyle ayni")
+        return 0
+    a, b = mevcut.split("\n"), output.split("\n")
+    n = next((i for i, (x, y) in enumerate(zip(a, b)) if x != y), min(len(a), len(b)))
+    print(f"KIRMIZI  {out_path.name} kaynaktan derlenmis haliyle ayni degil "
+          f"(ilk fark: satir {n + 1}). python3 build.py kos ve dist'i kaynakla "
+          f"ayni commit'e koy.")
+    return 1
+
+
 if __name__ == "__main__":
+    if "--denetle" in sys.argv:
+        sys.exit(build(minify="--minify" in sys.argv, denetle=True))
     build(minify="--minify" in sys.argv)
