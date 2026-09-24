@@ -1,5 +1,8 @@
 # Çekmece haritası — Part 9 önerisi (ONAY BEKLİYOR, uygulanmadı)
 
+> 2026-09-24: Bu harita artık `ekip/EKIP-PLANI.md`'nin girdisidir. Dört soru o planın §8'inde
+> (T0) kullanıcıya soruluyor; cevabı TASARIM rolü buraya işler.
+
 > Bu belge bir **öneridir**. Kod değişmedi. Kullanıcı onaylarsa (ya da düzeltirse)
 > Part 9 buna göre uygulanır. Görsel tasarım (renk, yazı, boşluk) ayrı adımdır; burada
 > yalnız **düzen** var: ne nerede durur.
