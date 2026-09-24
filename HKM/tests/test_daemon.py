@@ -827,6 +827,8 @@ def run_extra(S):
     test("yedek uclari: yazar, listeler, indirir — yetkili ve modulune ait", t_yedek_endpoints)
 
     def t_weekly_belge_endpoints():
+        kod, hw = S.call("/api/weekly?date=2026-09-14")
+        eq((kod, hw["gecmis"][0]["to"], hw["gecmis"][0]["durum"]), (200, "2026-09-14", "bu hafta"))
         eq(S.call("/api/weekly/belge?date=2026-09-14", token=None)[0], 401)
         eq(S.call("/api/weekly/belge?date=2026-09-14&bicim=svg")[0], 400)
         req = urllib.request.Request(S.url("/api/weekly/belge?date=2026-09-14&bicim=html"))

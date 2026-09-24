@@ -887,8 +887,9 @@ class Handler(BaseHTTPRequestHandler):
                                         self.con, date, max(7, min(days, 365)),
                                         th=self.server.thresholds)})
         if u.path == "/api/weekly":
-            return self._send(200, weekly.report(self.con, date,
-                                                 th=self.server.thresholds))
+            govde = weekly.report(self.con, date, th=self.server.thresholds)
+            govde["gecmis"] = weekly.gecmis(self.con, date)
+            return self._send(200, govde)
         if u.path == "/api/weekly/belge":
             # Haftalik raporun basilir hali. PDF cizilemezse HTML'e duser ve
             # bu dosyanin adiyla (uzantisiyla) soylenir.

@@ -1199,6 +1199,19 @@ details.detay > summary:hover{ color:var(--fg); }
        + '<button id="hafta-gonder">Sohbet kanalına gönder</button></div>'
        + '<p class="muted" id="hafta-not">Telegram’a metin ve PDF gider; WhatsApp’a yalnız '
        + 'metin gider, PDF buradan indirilir.</p>';
+    /* Geçmiş haftalar (kullanıcı 2026-09-24): kanala giden raporlar giden
+       kutusundan okunur; her birinin PDF'i o haftanın günüyle yeniden basılır. */
+    var gh = (r.gecmis || []).slice(1);
+    if(gh.length){
+      h += '<h3>Geçmiş haftalar</h3><div class="scroll"><table><thead><tr><th>Hafta</th>'
+        + '<th>Kanal</th><th></th></tr></thead><tbody>' + gh.map(function(x){
+          return '<tr><td>' + esc(x.from) + ' → ' + esc(x.to) + '</td><td>' + esc(x.durum) + '</td>'
+            + '<td><button data-hafta-belge="' + esc(x.to) + '">PDF</button></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }else{
+      h += '<p class="muted">Henüz kanala giden haftalık rapor yok. Otomatik mesajlar açıkken '
+        + '«Haftalık rapor» alanına bir gün yazınca her hafta Telegram’a gider ve burada listelenir.</p>';
+    }
     $('hafta').innerHTML = h;
   }
 

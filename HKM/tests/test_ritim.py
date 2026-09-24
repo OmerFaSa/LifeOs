@@ -419,6 +419,23 @@ def run():
         ok(settings.validate({"schedule": {"dil_karti": "07:15"}})[0])
     test("gunun dil karti: ESP yollar, HKM saatinde dizer", t_dil_karti)
 
+    def t_gecmis_haftalar():
+        """Kullanici 2026-09-24: haftalik PDF Telegram'a gider VE sistemde gorunur.
+        Liste: bu hafta + giden kutusundaki haftalik raporlar (en yeni once).
+        Durum giden kutusundan OKUNUR, uydurulmaz."""
+        con = _con()
+        eq([(x["to"], x["durum"]) for x in weekly.gecmis(con, "2026-09-24")],
+           [("2026-09-24", "bu hafta")])
+        outbox.enqueue(con, "telegram", "weekly", "2026-09-14", "rapor", now=_an(13, 9))
+        con.execute("UPDATE outbox SET state='sent', sent_at='2026-09-14T09:01:00' WHERE kind='weekly'")
+        outbox.enqueue(con, "telegram", "weekly", "2026-09-21", "rapor", now=_an(20, 9))
+        outbox.enqueue(con, "telegram", "daily", "2026-09-22", "brifing", now=_an(21, 8))
+        l = weekly.gecmis(con, "2026-09-24", n=4)
+        eq([(x["to"], x["durum"]) for x in l],
+           [("2026-09-24", "bu hafta"), ("2026-09-21", "kuyrukta"), ("2026-09-14", "gönderildi")])
+        eq(l[1]["from"], "2026-09-15")
+    test("gecmis haftalar: kanala gidis giden kutusundan okunur", t_gecmis_haftalar)
+
     run_cli()
     run_kurtarma()
     run_bakim()

@@ -64,6 +64,22 @@ PENCERE = {"hafta": {"asgari": ASGARI_GUN, "duzen": DUZEN_GUN, "onceki": "öncek
                   "olcul": "önceki ay ölçülmedi", "ad": "ay"}}
 
 
+GECMIS_DURUM = {"sent": "gönderildi", "queued": "kuyrukta", "failed": "gönderilemedi",
+                "given_up": "gönderilemedi"}
+
+
+def gecmis(con, date, n=8):
+    """Bu hafta + kanala giden haftalik raporlar (en yeni once). Durum giden
+    kutusundan okunur (kullanici 2026-09-24: PDF Telegram'a gider VE sistemde
+    gorunur). Her satirin PDF'i ayni rapordan, o haftanin gunuyle basilir."""
+    out = [{"from": _hafta(date)[0], "to": date, "durum": "bu hafta"}]
+    for r in con.execute("SELECT day, state FROM outbox WHERE kind='weekly' AND day<? "
+                         "ORDER BY day DESC LIMIT ?", (date, max(0, n - 1))).fetchall():
+        out.append({"from": _hafta(r["day"])[0], "to": r["day"],
+                    "durum": GECMIS_DURUM.get(r["state"], r["state"])})
+    return out
+
+
 def _ortanca(xs):
     s = sorted(xs)
     n = len(s)
