@@ -24,7 +24,11 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## KARTLAR (K)
 
-- **Şu an:** K1 P1 bitti (22/22, ekrana dokunmadan); sıradaki K1 P2
+- **Şu an:** K1 P2 (kullanıcı onayıyla, K2 AYS teslimini beklerken): 15 170 (`sayi.js`) → 29 30 31
+  33 34 38 39 (`grafik.js`) → 113 123 124 127 (`oneri.js`). Dokunduğum yer YALNIZ bu üç dosya,
+  testleri ve `kart.css` (+ ortak.py kopyaları). Ekran, `index.html`, `ui.js`, T ve H dosyası yok.
+  `sayi.js` ve `kart.css` uygulama paketinde: her push'ta üç `dist`'i ben derliyorum; çakışırsa §7.4.
+  T teslim edince P2'yi yarıda bırakıp K2'ye geçerim.
 - **Sahiplendiğim çekirdek dosyalar:** — (üç `ui.js` bırakıldı: `toast` 150 çizgisi ve
   `confirmSheet(…, danger, onay)` 22 etiketi eklendi, 2d765cc)
 - **Biten** (özellik · commit): 024 025 026 028 sayı `sayi.js` · 009cf92; 027 035 037 041 grafik
