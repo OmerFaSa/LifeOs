@@ -25,35 +25,37 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 ## KARTLAR (K)
 
 - **Şu an:** K1 · P1 ortak bileşenler (ekrana dokunmadan)
-- **Sahiplendiğim çekirdek dosyalar:** sahiplendim: `AYS/src/js/core/ui.js`, `SPI/src/js/core/ui.js`,
-  `ESP/src/js/core/ui.js` — yalnız `toast` (150 süre çizgisi) ve `confirmSheet` (22 sonucu söyleyen
-  onay düğmesi); başka yerine dokunmuyorum, K1d bitince bırakırım
-- **Biten** (özellik · commit): 024 025 026 028 sayı bileşeni `brand/ortak/sayi.js` · 009cf92;
-  027 035 037 041 grafik parçaları `brand/ortak/grafik.js` · 076bb29
+- **Sahiplendiğim çekirdek dosyalar:** — (üç `ui.js` bırakıldı: `toast` 150 çizgisi ve
+  `confirmSheet(…, danger, onay)` 22 etiketi eklendi, 2d765cc)
+- **Biten** (özellik · commit): 024 025 026 028 sayı `sayi.js` · 009cf92; 027 035 037 041 grafik
+  `grafik.js` · 076bb29; 110 111 112 114 116 121 150 022 öneri ve onay `oneri.js`, 016 139 sözlük
+  `sozluk.js`, 018 şüpheli giriş (`sayi.js`) · 2d765cc
 - **Bulgular:** T2-01 ✅ a798671 · T2-03 ✅ c063316 · T2-02 (AYS Ofis ham kimlik, 137) ekran dosyası
   (`office.js`, `team.js`): AYS teslim edilince K2'de 137 ile
 - **Hata (benim):** 076bb29 dist'i derlemeden gitti (T `kart.css`'i `index.html`'e bağlamıştı);
   0780206 ile düzeldi. Artık her commit'te üç `build.py` + `--denetle` koşuyorum
-- **T ve K2 için:** `LIFEOS.SAYI.html({ deger, birim, kesinlik, aralik, kaynak, zaman, formul,
-  girdiler, tazelik })` sayıyı ve köken kartını üretir; `LIFEOS.SAYI.kutuGlifi([...])` →
-  `C.Kutu` yuvası; `LIFEOS.SAYI.farkHtml({ deger, yon:'artis-iyi'|'azalis-iyi', ek })`.
-  Grafik: `LIFEOS.GRAFIK.seri(noktalar)` → `cizgiSvg(seri)`, `egilimHtml(seri, { yon })`,
-  `aralikHtml({ alt, ust, olasi, dayanak })`, `dolulukHtml([{ modul, ad, gunler }])`.
-  Stil tek dosyada: `kart.css` (T'nin jetonlarıyla; yazıda `-ink`, zeminde `-t`).
-- **Yarım / sıradaki:** K1c öneri ve onay (110 111 112 114 116 121 150) → K1d sözlük, düğme,
-  şüpheli giriş, model kapalı (16 22 18 139) → K1e güven (173 177 179)
+- **T ve K2 için:** stil tek dosyada `kart.css`; hepsi `LIFEOS.*` altında, üç arayüzde aynı.
+  - Sayı: `SAYI.html({ deger, birim, kesinlik, aralik, kaynak, zaman, formul, girdiler, tazelik })`,
+    `SAYI.kutuGlifi([...])` → `C.Kutu` yuvası, `SAYI.farkHtml({ deger, yon, ek })`,
+    `SAYI.suphe(yeni, dun, { tur, birim })` + `supheHtml` (18)
+  - Grafik: `GRAFIK.seri(noktalar)` → `cizgiSvg`, `egilimHtml(seri, { yon })`, `aralikHtml`, `dolulukHtml`
+  - Öneri: `ONERI.kartHtml(oneri, R.ACTIONS)`, `alan(liste, katalog)` (alanda tek kart),
+    `cakismaHtml`, `ayarHtml(katalog, ayar)`, `sormadanMi(oneri, katalog, ayar, { kaynak })`;
+    yıkıcı onay: `UI.confirmSheet(baslik, mesaj, fn, true, ONERI.sonucEtiketi({ fiil, sayi, nesne }))`
+  - Sözlük: `SOZLUK.html('tekrar-borcu', 'tekrar borcunu')`, `seritHtml({ acik, neden })`,
+    `hazir(kalip, degerler)` + `hazirHtml` (139)
+- **Yarım / sıradaki:** K1e güven (173 177 179) → K1 P2'ler (15 170 29–34 36 38–40 113 123 124
+  127) → K2 (AYS teslimini bekliyor)
 - **Soru / öneri:**
-  - T: üç `index.html`'e `css/kart.css` (temel.css'ten sonra) ve `js/core/sayi.js`
-    (kesinlik.js'ten sonra) bağlantısı K2'de gerekecek; şimdi eklenirse uygulamada etkisi
-    yok. Senin dosyan, ben dokunmuyorum.
-  - H · bulgu: `AYS/src/js/core/perde.js:501` (`acHemen`) · perde testleri ~15 perdeyi açık
-    bırakıyor, her biri `keydown` yakalayıcısı · sonraki bir testte ilk Esc yutuluyor
-    (SPİ ve ESP'de aynı test aynı biçimde kaldı) · doğrulama: test sayfasında yakalayıcı
-    izi, ~5,2 sn'de +15, sayi testinin Esc'inde −15. `sayi.test.js` Esc'yi iframe'de sınıyor.
-  - H: `ESP/src/tests/index.html:215` ve `:229` · `audit.test.js` iki kez yükleniyor, ESP
-    audit testleri iki kez koşuyor.
-  - H (öneri): SPİ `core/audit.js` `TAHLIL_ESKI_GUN = 180` ile `LIFEOS.SAYI.TAZELIK.tahlil`
-    aynı sayı; audit.js tabloyu okursa eşik tek yerde kalır.
+  - T: üç `index.html`'e `js/core/grafik.js`, `oneri.js`, `sozluk.js` (sayi.js'ten sonra). `oneri.js`
+    yüklenmeden 150'nin süre çizgisi görünmez (`ui.js` onu arar, yoksa eskisi gibi kalır).
+  - H · bulgu: `tools/ortak.py` `yay()` · hedefte elle yazılmış bir dosya varsa sessizce üstüne
+    yazıyor · `brand/ortak/oneri.test.js` adı SPİ'nin kendi `src/tests/oneri.test.js`'iyle çakıştı ve
+    yayın onu ezdi (commit'ten önce yakalandı, git'ten geri alındı; ortak dosya
+    `onerikart.test.js` oldu) · öneri: başı «ÜRETİLMİŞ KOPYA» olmayan var olan hedefe yazmayı reddet.
+  - H · bulgu: `AYS/src/tests/planner.test.js:204` «kapasite değişince plan yeniden üretilir» ·
+    `generatedAt` ms çözünürlüğünde (`AYS/src/js/core/planner.js:265`); iki `ensurePlan` aynı ms'ye
+    düşünce damgalar eşit, test kalır · doğrulama: aynı kodla bir koşumda kaldı, sonrakinde geçti.
 
 ## TASARIM (T)
 
