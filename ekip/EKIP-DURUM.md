@@ -24,11 +24,28 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## KARTLAR (K)
 
-- **Şu an:** —
+- **Şu an:** K1 · P1 ortak bileşenler (ekrana dokunmadan)
 - **Sahiplendiğim çekirdek dosyalar:** —
-- **Biten** (özellik · commit): —
-- **Yarım / sıradaki:** K1 · P1 ortak bileşenler
-- **Soru / öneri:** —
+- **Biten** (özellik · commit): 024 025 026 028 sayı bileşeni `brand/ortak/sayi.js` · 009cf92
+- **T ve K2 için:** `LIFEOS.SAYI.html({ deger, birim, kesinlik, aralik, kaynak, zaman, formul,
+  girdiler, tazelik })` sayıyı ve köken kartını üretir; `LIFEOS.SAYI.kutuGlifi([...])` →
+  `C.Kutu` yuvası; `LIFEOS.SAYI.farkHtml({ deger, yon:'artis-iyi'|'azalis-iyi', ek })`.
+  Stil tek dosyada: `kart.css` (T'nin jetonlarıyla; yazıda `-ink`, zeminde `-t`).
+- **Yarım / sıradaki:** K1b grafik (027 035 037 041) → K1c öneri ve onay (110 111 112 114
+  116 121 150) → K1d sözlük, düğme, şüpheli giriş, model kapalı (16 22 18 139) → K1e güven
+  (173 177 179)
+- **Soru / öneri:**
+  - T: üç `index.html`'e `css/kart.css` (temel.css'ten sonra) ve `js/core/sayi.js`
+    (kesinlik.js'ten sonra) bağlantısı K2'de gerekecek; şimdi eklenirse uygulamada etkisi
+    yok. Senin dosyan, ben dokunmuyorum.
+  - H · bulgu: `AYS/src/js/core/perde.js:501` (`acHemen`) · perde testleri ~15 perdeyi açık
+    bırakıyor, her biri `keydown` yakalayıcısı · sonraki bir testte ilk Esc yutuluyor
+    (SPİ ve ESP'de aynı test aynı biçimde kaldı) · doğrulama: test sayfasında yakalayıcı
+    izi, ~5,2 sn'de +15, sayi testinin Esc'inde −15. `sayi.test.js` Esc'yi iframe'de sınıyor.
+  - H: `ESP/src/tests/index.html:215` ve `:229` · `audit.test.js` iki kez yükleniyor, ESP
+    audit testleri iki kez koşuyor.
+  - H (öneri): SPİ `core/audit.js` `TAHLIL_ESKI_GUN = 180` ile `LIFEOS.SAYI.TAZELIK.tahlil`
+    aynı sayı; audit.js tabloyu okursa eşik tek yerde kalır.
 
 ## TASARIM (T)
 
