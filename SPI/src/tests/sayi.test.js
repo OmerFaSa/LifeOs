@@ -335,6 +335,26 @@ describe('028 · Anlamlı fark rozeti', () => {
     expect(f.metin).toBe('+0,4');
   });
 
+  it('oz-028 yuvarlanınca 0 olan fark «değişmedi» ve nötr; anlam gösterilen değerden (T2-01)', () => {
+    const Y = S().YON;
+    const a = S().fark({ deger:0.3, yon:Y.ARTIS_IYI, ondalik:0, ek:'dünden' });
+    expect(a.anlam).toBe('notr');
+    expect(a.metin).toBe('değişmedi');
+    expect(a.sr).toBe('dünden değişmedi');
+    const b = S().fark({ deger:-0.04, yon:Y.AZALIS_IYI, ondalik:1, birim:'kg' });
+    expect(b.anlam).toBe('notr');
+    expect(b.metin).toBe('değişmedi');
+    /* Ondalık yazılmazsa `bicim` ile aynı varsayılan: 0,04 → «0». */
+    expect(S().fark({ deger:0.04, yon:Y.ARTIS_IYI }).metin).toBe('değişmedi');
+    /* Yuvarlanan değer sıfır değilse yazı ve anlam o değerden. */
+    const c = S().fark({ deger:0.06, yon:Y.ARTIS_IYI, ondalik:1 });
+    expect(c.metin).toBe('+0,1');
+    expect(c.anlam).toBe('iyi');
+    const d = S().fark({ deger:-0.05, yon:Y.ARTIS_IYI, ondalik:1 });
+    expect(d.metin).toBe('−0,1');   // yarım sıfırdan uzağa: iki yönde aynı
+    expect(d.anlam).toBe('kotu');
+  });
+
   it('oz-028 sıfır fark «değişmedi», olmayan fark «—»', () => {
     expect(S().fark({ deger:0, yon:S().YON.ARTIS_IYI }).metin).toBe('değişmedi');
     const y = S().fark({ deger:null, ek:'önceki denemeden' });

@@ -9661,7 +9661,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'3ae7470', at:'2026-09-24 14:59', dirty:false };
+R.BUILD = { id:'0780206', at:'2026-09-24 15:02', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10110,7 +10110,12 @@ window.LIFEOS = window.LIFEOS || {};
       return { anlam:'yok', sinif:'fark fark--yok', metin:'—',
         sr:(f.ek ? f.ek + ' ' : '') + 'karşılaştırılacak değer yok' };
     }
-    const v = f.deger;
+    /* Karar GÖSTERİLEN değerden verilir (ekip/HATALAR.md T2-01): ham 0,3
+       ekrana «0» yazılırken «+0, iyi yönde» denmez. Hassasiyet `bicim`'in
+       varsayılanıyla aynı; yuvarlama yarımda sıfırdan uzağa, iki yönde eşit. */
+    const od = f.ondalik == null ? (Number.isInteger(f.deger) ? 0 : 1) : f.ondalik;
+    const kat = Math.pow(10, od);
+    const v = (f.deger < 0 ? -1 : 1) * Math.round(Math.abs(f.deger) * kat) / kat;
     const esik = sayiMi(f.esik) ? Math.abs(f.esik) : 0;
     const yonlu = f.yon === YON.ARTIS_IYI || f.yon === YON.AZALIS_IYI;
     let anlam = 'notr';
@@ -10122,7 +10127,7 @@ window.LIFEOS = window.LIFEOS || {};
       return { anlam:'notr', sinif:'fark fark--notr', metin:'değişmedi',
         sr:(f.ek ? f.ek + ' ' : '') + 'değişmedi' };
     }
-    const mut = bicim(Math.abs(v), f.ondalik);
+    const mut = bicim(Math.abs(v), od);
     const isaret = v > 0 ? '+' : '−';
     const m = birimli(isaret + mut, f.birim === '%' ? null : f.birim);
     const yazi = (f.birim === '%' ? isaret + '%' + mut : m) + (f.ek ? ' ' + f.ek : '');
