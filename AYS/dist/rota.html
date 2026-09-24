@@ -80,7 +80,9 @@
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/jeton.css içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* ORTAK JETONLAR — v4 görsel dili (ekip/EKIP-PLANI.md §2).
+/* ORTAK JETONLAR — v5 görsel dili (LifeOS Tasarım Dili ve Plan, sürüm 5).
+   v4'ten fark: yön metinleri koyulaştı, koyu nötrler ve modül zeminleri
+   tuvalin değerleri, yön zeminleri --ok-t --bad-t eklendi.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/jeton.css`; `tools/ortak.py --yay` ile üç arayüzün
@@ -128,12 +130,12 @@
   /* ---- modül renkleri: işaret (v4) + yazı (AA) + açık ton ---- */
   --ays:#2D5BE3;  --ays-ink:#2D5BE3;  --ays-t:#EEF2FD;
   --spi:#0E8C79;  --spi-ink:#0A7A69;  --spi-t:#E7F4F1;
-  --esp:#C8741C;  --esp-ink:#A65B0F;  --esp-t:#FBF1E6;
-  --mer:#7453D4;  --mer-ink:#7453D4;  --mer-t:#F2EEFC;
+  --esp:#C8741C;  --esp-ink:#A65B0F;  --esp-t:#FBF2E7;
+  --mer:#7453D4;  --mer-ink:#7453D4;  --mer-t:#F1EEFB;
 
   /* ---- yön: yalnız iyi / kötü / şimdi ---- */
-  --ok:#1E8A55;   --ok-ink:#1A7A4B;
-  --bad:#D0433B;  --bad-ink:#C23A32;
+  --ok:#1E8A55;   --ok-ink:#17784A;  --ok-t:#E8F4EE;
+  --bad:#D0433B;  --bad-ink:#C0372F; --bad-t:#FBECEB;
   --now:#E5484D;
 
   /* ---- anlam renkleri (eski adlar) ----
@@ -233,24 +235,24 @@
      Yalnız aşağıdaki iki eşleme bloğunda kullanılır. */
   --d-bg:#09090B;
   --d-surface:#111215;
-  --d-surface-2:#15171B;
+  --d-surface-2:#18191D;
   --d-surface-3:#22252B;
   --d-surface-hover:#181A1F;
   --d-sidebar:#0D0E10;
   --d-sidebar-active:#15171B;
   --d-text:#EDEEF0;
-  --d-text-2:#A3A6AD;
-  --d-text-3:#8B8F98;    /* vitrinin #6E727B'si koyu kartta 3,9:1 */
-  --d-border:#23262C;
+  --d-text-2:#A3A9B4;
+  --d-text-3:#8B919C;    /* vitrinin #6E727B'si koyu kartta 3,9:1 */
+  --d-border:#222429;
   --d-border-soft:#1A1C21;
-  --d-border-strong:#2C3037;
-  --d-ays:#4F86FF;  --d-ays-t:#16203A;
-  --d-spi:#2EC4A9;  --d-spi-t:#0F2723;
-  --d-esp:#F2A93B;  --d-esp-t:#2A1F0E;
-  --d-mer:#9A86FF;  --d-mer-t:#1F1A38;
-  --d-ok:#4ADE80;
-  --d-bad:#F87171;
-  --d-now:#F87171;
+  --d-border-strong:#32353C;
+  --d-ays:#4F86FF;  --d-ays-t:#121A2C;
+  --d-spi:#2EC4A9;  --d-spi-t:#0E211E;
+  --d-esp:#F2A93B;  --d-esp-t:#241A0D;
+  --d-mer:#9A86FF;  --d-mer-t:#1B1730;
+  --d-ok:#3FBF7F;   --d-ok-t:#0F2118;
+  --d-bad:#F06A62;  --d-bad-t:#2A1413;
+  --d-now:#FF5C61;
   --d-accent:#D9A441;
   --d-info:#A3A6AD;
   --d-ink:#050506;
@@ -272,6 +274,7 @@
     --esp:var(--d-esp); --esp-ink:var(--d-esp); --esp-t:var(--d-esp-t);
     --mer:var(--d-mer); --mer-ink:var(--d-mer); --mer-t:var(--d-mer-t);
     --ok:var(--d-ok); --ok-ink:var(--d-ok); --bad:var(--d-bad); --bad-ink:var(--d-bad);
+    --ok-t:var(--d-ok-t); --bad-t:var(--d-bad-t);
     --now:var(--d-now);
     --primary-hover:color-mix(in oklab, var(--primary) 86%, #FFFFFF);
     --primary-ink:var(--d-ink);
@@ -292,6 +295,7 @@
   --esp:var(--d-esp); --esp-ink:var(--d-esp); --esp-t:var(--d-esp-t);
   --mer:var(--d-mer); --mer-ink:var(--d-mer); --mer-t:var(--d-mer-t);
   --ok:var(--d-ok); --ok-ink:var(--d-ok); --bad:var(--d-bad); --bad-ink:var(--d-bad);
+  --ok-t:var(--d-ok-t); --bad-t:var(--d-bad-t);
   --now:var(--d-now);
   --primary-hover:color-mix(in oklab, var(--primary) 86%, #FFFFFF);
   --primary-ink:var(--d-ink);
@@ -10375,7 +10379,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'e25f3dd', at:'2026-09-24 21:15', dirty:true };
+R.BUILD = { id:'b11b860', at:'2026-09-24 22:22', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.

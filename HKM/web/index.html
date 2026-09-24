@@ -24,7 +24,7 @@
    Tek vurgu rengi vardir ve yalniz bir seye ayrilmistir: kullanicinin
    karar vermesi beklenen yere. Her yerde vurgu, hicbir yerde vurgudur.
 
-   AYNI DIL (K7, ekip/EKIP-PLANI.md §8-9): degerler uc arayuzun v4
+   AYNI DIL (K7, ekip/EKIP-PLANI.md §8-9): degerler uc arayuzun v5
    jetonlaridir (brand/ortak/jeton.css). Yuz TEK DOSYA kalir ve ortak
    dosyayi YUKLEMEZ (AGENTS §1.4; tools/ortak.py «HKM'nin yuzu yayilmaz»):
    ad HKM'nindir, deger ortaktir. Renk sahipligi burada da soyler: HKM
@@ -36,9 +36,9 @@
   --bg:#F7F8FA; --yuzey:#FFFFFF; --fg:#111318; --dim:#5E6572;
   --line:#E8EAEE; --line-strong:#D3D7DE;
   /* yon ve uyari: --ok-ink --accent --bad-ink */
-  --ok:#1A7A4B; --warn:#8C6400; --danger:#C23A32;
+  --ok:#17784A; --warn:#8C6400; --danger:#C0372F;
   /* Merkez moru (--mer-ink): kullanicinin karar verecegi yer. */
-  --accent:#7453D4; --mer-t:#F2EEFC; --yuzey-2:#F1F2F5;
+  --accent:#7453D4; --mer-t:#F1EEFB; --yuzey-2:#F1F2F5;
   /* Vurgu renginin UZERINE gelen metin ayri bir jetondur: koyu temada
      vurgu acilir ve uzerine beyaz yazmak kontrasti 2,2'ye dusuruyordu. */
   --on-accent:#ffffff;
@@ -52,16 +52,16 @@
 /* Koyu: jeton.css'in --d-* degerleri (vitrinin koyu temasi). */
 @media (prefers-color-scheme: dark){
   html:not([data-tema="acik"]) {
-    --bg:#09090B; --yuzey:#111215; --fg:#EDEEF0; --dim:#A3A6AD;
-    --line:#23262C; --line-strong:#2C3037;
-    --ok:#4ADE80; --warn:#D9A441; --danger:#F87171;
-    --accent:#9A86FF; --on-accent:#09090B; --mer-t:#1F1A38; --yuzey-2:#15171B; }
+    --bg:#09090B; --yuzey:#111215; --fg:#EDEEF0; --dim:#A3A9B4;
+    --line:#222429; --line-strong:#32353C;
+    --ok:#3FBF7F; --warn:#D9A441; --danger:#F06A62;
+    --accent:#9A86FF; --on-accent:#09090B; --mer-t:#1B1730; --yuzey-2:#18191D; }
 }
 html[data-tema="koyu"]{
-  --bg:#09090B; --yuzey:#111215; --fg:#EDEEF0; --dim:#A3A6AD;
-  --line:#23262C; --line-strong:#2C3037;
-  --ok:#4ADE80; --warn:#D9A441; --danger:#F87171;
-  --accent:#9A86FF; --on-accent:#09090B; --mer-t:#1F1A38; --yuzey-2:#15171B;
+  --bg:#09090B; --yuzey:#111215; --fg:#EDEEF0; --dim:#A3A9B4;
+  --line:#222429; --line-strong:#32353C;
+  --ok:#3FBF7F; --warn:#D9A441; --danger:#F06A62;
+  --accent:#9A86FF; --on-accent:#09090B; --mer-t:#1B1730; --yuzey-2:#18191D;
 }
 *{ box-sizing:border-box; }
 /* [hidden] ozniteligi, .row gibi display veren bir SINIFA yenilir:
