@@ -50,10 +50,10 @@ Eşik ancak gerekçesi EKIP-DURUM'a yazılıp kullanıcı onay verince değişir
 | Ölçü | Bugün (boş profil, 2026-09-24) | Hedef |
 |---|---|---|
 | İç içelik | 4–5 kat (menü › grup › ekran › sekme › alt sekme) | **≤ 2** (çekmece › bölüm) |
-| Ekran içi sekme | AYS Bugün'de 12 | **0** |
+| Ekran içi sekme (ilk görünüm, envanter ölçümü) | AYS 23 · SPİ 37 · ESP 103 | **0** |
 | AYS Bugün sayfa boyu (1440 px genişlik) | 4 482 px | **≤ 1 800 px** |
 | AYS Bugün'de görünen düğme | 52 | **≤ 14** |
-| 30 kelimeyi aşan paragraf | AYS'de 43 | **0**; açıklama ⓘ'ye taşınır |
+| 30 kelimeyi aşan tek parça yazı (envanter ölçümü) | AYS 6 · SPİ 4 · ESP 9 | **0**; açıklama ⓘ'ye taşınır |
 | Dolu (birincil) düğme | ölçülmedi | ekran başına **≤ 1** |
 | Aynı anda hareket eden öğe | ölçülmedi | **≤ 1**: sıradaki iş (özellik 12) |
 | Halka grafiği | ölçülmedi | ekran başına **≤ 1** |

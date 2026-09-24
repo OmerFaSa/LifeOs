@@ -1,0 +1,7079 @@
+{
+ "surum": 1,
+ "tarih": "2026-09-24",
+ "commit": "c719243",
+ "aciklama": "Tek tasarima gecmeden onceki uygulamanin kaydi (ekip/EKIP-PLANI.md, H0). Bir kez alinir, elle degistirilmez. Karsilastirma: node tools/envanter.js",
+ "genislik": [
+  1440,
+  390
+ ],
+ "profil": [
+  "bos",
+  "dolu"
+ ],
+ "moduller": {
+  "AYS": {
+   "rotalar": {
+    "today": {
+     "baslik": "Bugün",
+     "sekmeler": [],
+     "alanlar": [
+      "block-topic",
+      "block-subject",
+      "block-topic-ref",
+      "day-note",
+      "sleep",
+      "contract-0",
+      "contract-1",
+      "contract-2",
+      "contract-3"
+     ]
+    },
+    "week": {
+     "baslik": "Hafta",
+     "sekmeler": [],
+     "alanlar": [
+      "topic-name",
+      "topic-q",
+      "topic-acc",
+      "topic-subject",
+      "week-q",
+      "week-cap",
+      "week-behavior"
+     ]
+    },
+    "plan": {
+     "baslik": "Program",
+     "sekmeler": [],
+     "alanlar": []
+    },
+    "subjects": {
+     "baslik": "Dersler",
+     "sekmeler": [],
+     "alanlar": [
+      "topic-search",
+      "sp-sinav",
+      "sp-yukle-ad",
+      "sp-yukle-metin",
+      "so-egitim",
+      "so-hedef"
+     ]
+    },
+    "target": {
+     "baslik": "Hedef",
+     "sekmeler": [],
+     "alanlar": [
+      "pref-program",
+      "pref-rank",
+      "tg-diploma"
+     ]
+    },
+    "learn": {
+     "baslik": "Öğrenme",
+     "sekmeler": [],
+     "alanlar": [
+      "learn-search"
+     ]
+    },
+    "exams": {
+     "baslik": "Deneme",
+     "sekmeler": [],
+     "alanlar": []
+    },
+    "cards": {
+     "baslik": "Tekrar",
+     "sekmeler": [
+      "Bugün due (0)",
+      "Tüm kartlar (0)",
+      "Yanlış defteri (0)",
+      "Bugün due (8)",
+      "Tüm kartlar (12)",
+      "Yanlış defteri (3)"
+     ],
+     "alanlar": [
+      "card-search"
+     ]
+    },
+    "quiz": {
+     "baslik": "Sınama",
+     "sekmeler": [],
+     "alanlar": [
+      "qz-mode"
+     ]
+    },
+    "solve": {
+     "baslik": "Soru çöz",
+     "sekmeler": [],
+     "alanlar": [
+      "q-file",
+      "q-text",
+      "q-note"
+     ]
+    },
+    "progress": {
+     "baslik": "İlerleme",
+     "sekmeler": [],
+     "alanlar": [
+      "gate-opt"
+     ]
+    },
+    "analytics": {
+     "baslik": "Analiz",
+     "sekmeler": [
+      "Karşılaştırma",
+      "Hata haritası",
+      "Sıra geçmişi",
+      "Hız ve isabet",
+      "Konu değeri",
+      "Alışkanlık",
+      "Denetim",
+      "Dürüstlük"
+     ],
+     "alanlar": [
+      "ay-calib-kind",
+      "ay-calib-guess",
+      "cmp-a",
+      "cmp-b"
+     ]
+    },
+    "protocols": {
+     "baslik": "Telafi",
+     "sekmeler": [],
+     "alanlar": []
+    },
+    "guide": {
+     "baslik": "Rehber",
+     "sekmeler": [
+      "Analiz protokolü",
+      "Kontrol listeleri",
+      "Resmî takvim",
+      "Takvim istisnaları",
+      "Sınav haftası",
+      "Eşiklerin dayanağı",
+      "Ayarlar"
+     ],
+     "alanlar": [
+      "contract-0",
+      "contract-1",
+      "contract-2",
+      "contract-3",
+      "exam-0",
+      "exam-1",
+      "exam-2",
+      "exam-3",
+      "review-0",
+      "review-1",
+      "review-2",
+      "review-3",
+      "monthly-0",
+      "monthly-1",
+      "monthly-2",
+      "monthly-3",
+      "cal-kind",
+      "cal-from",
+      "cal-to",
+      "cal-note",
+      "ics-sec",
+      "st-name",
+      "st-city",
+      "st-cap",
+      "st-sleep",
+      "st-diploma",
+      "st-rank",
+      "ay-hkm-url",
+      "ay-hkm-token",
+      "ay-hkm-int",
+      "ay-hkm-level",
+      "hafiza-yeni"
+     ]
+    },
+    "profiles": {
+     "baslik": "Profiller",
+     "sekmeler": [],
+     "alanlar": []
+    },
+    "office": {
+     "baslik": "Ofis",
+     "sekmeler": [],
+     "alanlar": []
+    },
+    "team": {
+     "baslik": "Ekip sohbeti",
+     "sekmeler": [],
+     "alanlar": [
+      "team-input"
+     ]
+    },
+    "meeting": {
+     "baslik": "Toplantı odası",
+     "sekmeler": [],
+     "alanlar": [
+      "meet-agenda"
+     ]
+    },
+    "rutbe": {
+     "baslik": "Rütbe",
+     "sekmeler": [
+      "Şu an",
+      "Merdiven",
+      "Başarımlar",
+      "XP nereden gelir",
+      "Defter"
+     ],
+     "alanlar": []
+    }
+   },
+   "eylemler": {
+    "analytics-tab": {
+     "rotalar": [
+      "analytics"
+     ],
+     "gorunur": true,
+     "etiket": "Karşılaştırma"
+    },
+    "anchor": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "azalt"
+    },
+    "ask-agent": {
+     "rotalar": [
+      "subjects",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Patron’a sor"
+    },
+    "auto-replan": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Planı yeniden hesapla"
+    },
+    "auto-sync-blocks": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Uygula"
+    },
+    "bad-day": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "İşaretle"
+    },
+    "block-status": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Bekliyor"
+    },
+    "bolum-toggle": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": ""
+    },
+    "break-take": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Aldım"
+    },
+    "cal-add": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Ekle"
+    },
+    "calib-open": {
+     "rotalar": [
+      "analytics"
+     ],
+     "gorunur": true,
+     "etiket": "Tahmini kaydet"
+    },
+    "card-tab": {
+     "rotalar": [
+      "cards"
+     ],
+     "gorunur": true,
+     "etiket": "Bugün due (0)"
+    },
+    "checklist": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": ""
+    },
+    "close-error": {
+     "rotalar": [
+      "cards"
+     ],
+     "gorunur": true,
+     "etiket": "Kapat (çözümsüz doğru)"
+    },
+    "distract": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "+1 bölündüm"
+    },
+    "edit-card": {
+     "rotalar": [
+      "cards"
+     ],
+     "gorunur": true,
+     "etiket": "Düzenle"
+    },
+    "energy-set": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "1Bitkin"
+    },
+    "exam-filter": {
+     "rotalar": [
+      "exams"
+     ],
+     "gorunur": true,
+     "etiket": "Tümü"
+    },
+    "export-data": {
+     "rotalar": [
+      "guide",
+      "profiles",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Yedek al (JSON)"
+    },
+    "flip": {
+     "rotalar": [
+      "cards",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Ön soru 0"
+    },
+    "go": {
+     "rotalar": [
+      "(kabuk)",
+      "analytics",
+      "meeting",
+      "office",
+      "progress",
+      "solve",
+      "target",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "İncele"
+    },
+    "guide-check": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": ""
+    },
+    "guide-tab": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Analiz protokolü"
+    },
+    "hafiza-ekle": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Hatırla"
+    },
+    "hard-reload": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "tazele"
+    },
+    "hint": {
+     "rotalar": [
+      "analytics",
+      "cards",
+      "exams",
+      "guide",
+      "learn",
+      "meeting",
+      "office",
+      "plan",
+      "progress",
+      "protocols",
+      "quiz",
+      "subjects",
+      "target",
+      "team",
+      "today",
+      "week"
+     ],
+     "gorunur": true,
+     "etiket": "HKM işareti hakkında bilgi"
+    },
+    "hkm-backfill": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Geçmişi gönder (60 gün)"
+    },
+    "hkm-pair": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Bağlan"
+    },
+    "hkm-send": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Şimdi gönder"
+    },
+    "hkm-toggle": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": ""
+    },
+    "ics-disa": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Takvime aktar (.ics)"
+    },
+    "import-data": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Yedekten yükle"
+    },
+    "istisna-ac": {
+     "rotalar": [
+      "week"
+     ],
+     "gorunur": true,
+     "etiket": "Değiştir"
+    },
+    "kitap-iste": {
+     "rotalar": [
+      "subjects"
+     ],
+     "gorunur": true,
+     "etiket": "Test kitabı iste"
+    },
+    "learn-filter": {
+     "rotalar": [
+      "learn"
+     ],
+     "gorunur": true,
+     "etiket": "Tümü"
+    },
+    "meet-pace": {
+     "rotalar": [
+      "meeting"
+     ],
+     "gorunur": true,
+     "etiket": "Hızlı"
+    },
+    "meet-start": {
+     "rotalar": [
+      "meeting"
+     ],
+     "gorunur": true,
+     "etiket": "Toplantıyı başlat"
+    },
+    "meet-talk": {
+     "rotalar": [
+      "meeting"
+     ],
+     "gorunur": true,
+     "etiket": "P Patron Ekibi yönetir, raporları birleştirir, t"
+    },
+    "meet-voice": {
+     "rotalar": [
+      "meeting"
+     ],
+     "gorunur": true,
+     "etiket": "Sesli dinle"
+    },
+    "new-card": {
+     "rotalar": [
+      "(kabuk)",
+      "cards"
+     ],
+     "gorunur": true,
+     "etiket": "Kart ekle"
+    },
+    "new-exam": {
+     "rotalar": [
+      "(kabuk)",
+      "exams"
+     ],
+     "gorunur": true,
+     "etiket": "İlk denemeyi ekle"
+    },
+    "note-new": {
+     "rotalar": [
+      "(kabuk)",
+      "learn"
+     ],
+     "gorunur": true,
+     "etiket": "İlk dersi ekle"
+    },
+    "notebook-filter": {
+     "rotalar": [
+      "cards"
+     ],
+     "gorunur": true,
+     "etiket": "Açık (0)"
+    },
+    "office-briefing": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Yenile"
+    },
+    "office-desk": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "P Patron"
+    },
+    "office-meet": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Toplantı başlat"
+    },
+    "office-scan": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Masaları tara"
+    },
+    "office-settings": {
+     "rotalar": [
+      "(kabuk)",
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Bağla"
+    },
+    "office-talk": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Patron’a danış"
+    },
+    "office-turn": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Odayı sola çevir"
+    },
+    "office-view": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Kat planı"
+    },
+    "open-appearance": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Görünüm"
+    },
+    "open-day": {
+     "rotalar": [
+      "week"
+     ],
+     "gorunur": true,
+     "etiket": "Pzt 21 Eyl Ana dersTYT / AYT Matematikİkinci der"
+    },
+    "open-exam": {
+     "rotalar": [
+      "exams"
+     ],
+     "gorunur": true,
+     "etiket": "42,50 net Tam TYTTYT 24 Eylül 2026 · 345 · 2 hat"
+    },
+    "open-palette": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Komut paleti (Ctrl+K)"
+    },
+    "open-review": {
+     "rotalar": [
+      "(kabuk)",
+      "week"
+     ],
+     "gorunur": true,
+     "etiket": "Review’u doldur"
+    },
+    "open-subject": {
+     "rotalar": [
+      "subjects"
+     ],
+     "gorunur": true,
+     "etiket": "TYT Türkçe 0/21 konu kapandı"
+    },
+    "open-topic": {
+     "rotalar": [
+      "subjects"
+     ],
+     "gorunur": true,
+     "etiket": "62 Sözcükte anlam TYT Türkçe · başlanmadı · yüks"
+    },
+    "open-week": {
+     "rotalar": [
+      "plan"
+     ],
+     "gorunur": true,
+     "etiket": "H1 14–20 Eyl Kalibrasyon: TYT Türkçe ve Temel Ma"
+    },
+    "prof-export-setup": {
+     "rotalar": [
+      "profiles"
+     ],
+     "gorunur": true,
+     "etiket": "Yalnız kurulumu dışa aktar"
+    },
+    "prof-import-setup": {
+     "rotalar": [
+      "profiles"
+     ],
+     "gorunur": true,
+     "etiket": "Kurulum yükle"
+    },
+    "prof-new": {
+     "rotalar": [
+      "profiles"
+     ],
+     "gorunur": true,
+     "etiket": "Profil ekle"
+    },
+    "prof-snapshot": {
+     "rotalar": [
+      "profiles"
+     ],
+     "gorunur": true,
+     "etiket": "Özeti yenile"
+    },
+    "proto-start": {
+     "rotalar": [
+      "protocols"
+     ],
+     "gorunur": true,
+     "etiket": "Protokolü başlat"
+    },
+    "prune-storage": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Seçilenleri buda"
+    },
+    "q-pick": {
+     "rotalar": [
+      "solve"
+     ],
+     "gorunur": true,
+     "etiket": "Soru fotoğrafı seç"
+    },
+    "q-solve": {
+     "rotalar": [
+      "solve"
+     ],
+     "gorunur": true,
+     "etiket": "Çöz ve anlat"
+    },
+    "q-src-new": {
+     "rotalar": [
+      "solve"
+     ],
+     "gorunur": true,
+     "etiket": "Kaynak ekle"
+    },
+    "q-src-seed": {
+     "rotalar": [
+      "solve"
+     ],
+     "gorunur": true,
+     "etiket": "Kaynakları yükle"
+    },
+    "quiz-format": {
+     "rotalar": [
+      "quiz"
+     ],
+     "gorunur": true,
+     "etiket": "Açık uçlu"
+    },
+    "quiz-size": {
+     "rotalar": [
+      "quiz"
+     ],
+     "gorunur": true,
+     "etiket": "5"
+    },
+    "quiz-start": {
+     "rotalar": [
+      "quiz"
+     ],
+     "gorunur": true,
+     "etiket": "Sınamayı başlat"
+    },
+    "quiz-timer": {
+     "rotalar": [
+      "quiz"
+     ],
+     "gorunur": true,
+     "etiket": "süresiz"
+    },
+    "quiz-voice": {
+     "rotalar": [
+      "quiz"
+     ],
+     "gorunur": true,
+     "etiket": "Sessiz"
+    },
+    "rail-toggle": {
+     "rotalar": [
+      "analytics",
+      "cards",
+      "exams",
+      "guide",
+      "learn",
+      "meeting",
+      "office",
+      "progress",
+      "protocols",
+      "quiz",
+      "subjects",
+      "target",
+      "team",
+      "today",
+      "week"
+     ],
+     "gorunur": true,
+     "etiket": "Bu ekran nasıl okunur6"
+    },
+    "repair-done": {
+     "rotalar": [
+      "cards",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Yapıldı"
+    },
+    "reset-data": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Tümünü sıfırla"
+    },
+    "rozet-ac": {
+     "rotalar": [
+      "rutbe"
+     ],
+     "gorunur": true,
+     "etiket": "Görev 100 görev · %0"
+    },
+    "run-open": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Süreli oturum"
+    },
+    "rutbe-git": {
+     "rotalar": [
+      "rutbe"
+     ],
+     "gorunur": true,
+     "etiket": "Git"
+    },
+    "rutbe-tab": {
+     "rotalar": [
+      "rutbe"
+     ],
+     "gorunur": true,
+     "etiket": "Şu an"
+    },
+    "save-decision": {
+     "rotalar": [
+      "progress"
+     ],
+     "gorunur": true,
+     "etiket": "Ana müdahaleyi kaydet"
+    },
+    "save-profile": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Kaydet"
+    },
+    "seri-hasta": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Bugün hastayım · seri donsun"
+    },
+    "seri-tatil": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Tatil modu"
+    },
+    "set-design": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "DefterVarsayılan — solda künye sütunu, kutusuz s"
+    },
+    "set-palette": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "KâğıtVarsayılan — sıcak kâğıt, derin yeşil"
+    },
+    "set-theme": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Sistem"
+    },
+    "set-tone": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Sert"
+    },
+    "setup-open": {
+     "rotalar": [
+      "analytics",
+      "guide",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Başla"
+    },
+    "share-week": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Özeti paylaş"
+    },
+    "sp-iste": {
+     "rotalar": [
+      "subjects"
+     ],
+     "gorunur": true,
+     "etiket": "Müfredatını iste"
+    },
+    "sp-yukle": {
+     "rotalar": [
+      "subjects"
+     ],
+     "gorunur": false,
+     "etiket": "Profili ekle"
+    },
+    "talk-start": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Sesli sohbeti başlat"
+    },
+    "team-agent": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "P Patron"
+    },
+    "team-brief": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Brifing"
+    },
+    "team-send": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Sor"
+    },
+    "team-suggest": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Bu hafta tek iş olsa ne olurdu?"
+    },
+    "timer-start": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Başlat"
+    },
+    "toggle-backup-shape": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Yedek dosyası neyi içerir? JSON yapısı"
+    },
+    "toggle-kpi-ref": {
+     "rotalar": [
+      "progress"
+     ],
+     "gorunur": true,
+     "etiket": "KPI sözlüğü formül ve müdahale"
+    },
+    "toggle-month-curve": {
+     "rotalar": [
+      "progress"
+     ],
+     "gorunur": true,
+     "etiket": "Aylık net gelişim eğrisi koçluk bandı"
+    },
+    "toggle-placed": {
+     "rotalar": [
+      "target"
+     ],
+     "gorunur": true,
+     "etiket": ""
+    },
+    "toggle-proto": {
+     "rotalar": [
+      "protocols"
+     ],
+     "gorunur": true,
+     "etiket": "5 adımı gör"
+    },
+    "toggle-routine": {
+     "rotalar": [
+      "protocols"
+     ],
+     "gorunur": true,
+     "etiket": "Motivasyon ve dalgalanma 4 kural"
+    },
+    "toggle-sidebar": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Bölümler"
+    },
+    "topic-filter": {
+     "rotalar": [
+      "subjects"
+     ],
+     "gorunur": true,
+     "etiket": "Tümü"
+    },
+    "topic-open": {
+     "rotalar": [
+      "subjects"
+     ],
+     "gorunur": true,
+     "etiket": "1 Sözcükte anlam 2 gün · Yüksek frekans Başlanma"
+    },
+    "topic-remove": {
+     "rotalar": [
+      "week"
+     ],
+     "gorunur": true,
+     "etiket": "konuyu kaldır"
+    },
+    "trend-family": {
+     "rotalar": [
+      "progress"
+     ],
+     "gorunur": true,
+     "etiket": "TYT"
+    },
+    "week-nav": {
+     "rotalar": [
+      "week"
+     ],
+     "gorunur": true,
+     "etiket": "önceki hafta"
+    },
+    "week-sign": {
+     "rotalar": [
+      "week"
+     ],
+     "gorunur": true,
+     "etiket": "Haftayı imzala"
+    }
+   },
+   "ekranKaydi": {
+    "analytics": [
+     "analytics-tab",
+     "calib-open",
+     "calib-settle"
+    ],
+    "cards": [
+     "card-page",
+     "card-search-clear",
+     "card-tab",
+     "close-error",
+     "delete-card",
+     "edit-card",
+     "error-card",
+     "error-tag",
+     "flip",
+     "nb-page",
+     "new-card",
+     "note-goto",
+     "notebook-filter",
+     "rate",
+     "repair-done",
+     "save-card"
+    ],
+    "exams": [
+     "complete-analysis",
+     "delete-error",
+     "delete-exam",
+     "edit-error",
+     "exam-back",
+     "exam-filter",
+     "exam-page",
+     "new-error",
+     "new-exam",
+     "open-exam",
+     "protocol-step",
+     "run-cancel",
+     "run-finish",
+     "run-goto",
+     "run-mark",
+     "run-next",
+     "run-open",
+     "run-pause",
+     "run-save",
+     "run-start",
+     "run-undo",
+     "save-error",
+     "save-exam"
+    ],
+    "guide": [
+     "bolum-toggle",
+     "cal-add",
+     "cal-del",
+     "export-data",
+     "guide-check",
+     "guide-tab",
+     "hafiza-ekle",
+     "hafiza-unut",
+     "hkm-backfill",
+     "hkm-pair",
+     "hkm-send",
+     "hkm-toggle",
+     "ics-disa",
+     "ics-ekle",
+     "ics-vazgec",
+     "import-data",
+     "import-run",
+     "prune-storage",
+     "reset-data",
+     "restore-hkm",
+     "save-profile",
+     "set-design",
+     "set-palette",
+     "set-theme",
+     "set-tone",
+     "toggle-backup-shape",
+     "undo-import"
+    ],
+    "learn": [
+     "learn-filter",
+     "learn-reset",
+     "note-ai-accept",
+     "note-ai-cards",
+     "note-ai-drop",
+     "note-back",
+     "note-cards-all",
+     "note-create",
+     "note-delete",
+     "note-new",
+     "note-open",
+     "note-page",
+     "note-seg-add",
+     "note-seg-card",
+     "note-seg-del",
+     "note-split",
+     "note-split-apply",
+     "note-tag",
+     "note-template",
+     "note-toggle-done",
+     "note-toggle-transcript",
+     "note-voice"
+    ],
+    "meeting": [
+     "meet-copy",
+     "meet-decide",
+     "meet-delete",
+     "meet-download",
+     "meet-finish",
+     "meet-new",
+     "meet-open",
+     "meet-pace",
+     "meet-pause",
+     "meet-resume",
+     "meet-say",
+     "meet-say-send",
+     "meet-search-clear",
+     "meet-start",
+     "meet-talk",
+     "meet-voice"
+    ],
+    "office": [
+     "office-approve",
+     "office-briefing",
+     "office-decision",
+     "office-desk",
+     "office-diagnose",
+     "office-forget",
+     "office-meet",
+     "office-models",
+     "office-notify",
+     "office-peragent",
+     "office-reject",
+     "office-rpd",
+     "office-save",
+     "office-scan",
+     "office-settings",
+     "office-talk",
+     "office-test",
+     "office-toggle-briefing",
+     "office-toggle-fallback",
+     "office-turn",
+     "office-undo",
+     "office-view",
+     "office-voice-try",
+     "office-voices",
+     "urun-ac",
+     "urun-sil"
+    ],
+    "plan": [
+     "open-dropped",
+     "open-week",
+     "toggle-dropped"
+    ],
+    "profiles": [
+     "prof-create",
+     "prof-export-setup",
+     "prof-import-run",
+     "prof-import-setup",
+     "prof-new",
+     "prof-snapshot",
+     "prof-switch"
+    ],
+    "progress": [
+     "clear-decision",
+     "save-decision",
+     "toggle-kpi-ref",
+     "toggle-month-curve",
+     "trend-family"
+    ],
+    "protocols": [
+     "proto-finish",
+     "proto-finish-save",
+     "proto-start",
+     "proto-step",
+     "toggle-proto",
+     "toggle-routine"
+    ],
+    "quiz": [
+     "kitap-baslat",
+     "kitap-bitir",
+     "kitap-deftere",
+     "kitap-devam",
+     "kitap-git",
+     "kitap-hatali",
+     "kitap-kapat",
+     "kitap-no",
+     "kitap-ozet",
+     "kitap-sec",
+     "kitap-vazgec",
+     "quiz-answer",
+     "quiz-cancel",
+     "quiz-format",
+     "quiz-pick",
+     "quiz-reveal",
+     "quiz-say",
+     "quiz-size",
+     "quiz-skip",
+     "quiz-start",
+     "quiz-timer",
+     "quiz-voice"
+    ],
+    "rutbe": [
+     "rozet-ac",
+     "rutbe-git",
+     "rutbe-tab"
+    ],
+    "solve": [
+     "q-cancel",
+     "q-check",
+     "q-clear-image",
+     "q-del",
+     "q-follow",
+     "q-pick",
+     "q-reset",
+     "q-save",
+     "q-save-error",
+     "q-solve",
+     "q-src-del",
+     "q-src-edit",
+     "q-src-new",
+     "q-src-save",
+     "q-src-seed",
+     "q-thread-clear",
+     "q-topic-clear",
+     "q-topic-pick"
+    ],
+    "subjects": [
+     "kitap-iste",
+     "open-subject",
+     "open-topic",
+     "save-topic",
+     "so-iste",
+     "sp-iste",
+     "sp-konu",
+     "sp-sil",
+     "sp-yukle",
+     "topic-filter",
+     "topic-open",
+     "topic-reset"
+    ],
+    "target": [
+     "toggle-placed"
+    ],
+    "team": [
+     "chat-onayla",
+     "chat-vazgec",
+     "talk-cut",
+     "talk-start",
+     "talk-stop",
+     "team-agent",
+     "team-brief",
+     "team-clear",
+     "team-send",
+     "team-suggest"
+    ],
+    "today": [
+     "anchor",
+     "bad-day",
+     "bad-day-undo",
+     "block-status",
+     "break-take",
+     "checklist",
+     "distract",
+     "distract-reset",
+     "energy-set",
+     "flip",
+     "hedef-durum",
+     "hedef-plan-geri",
+     "hedef-plan-kapat",
+     "hedef-plan-onizle",
+     "hedef-plan-uygula",
+     "hedef-uyarla-ac",
+     "hedef-uyarla-kapat",
+     "hedef-uyarla-sec",
+     "hkm-doubt-ok",
+     "hkm-gonder",
+     "hkm-intent-no",
+     "hkm-intent-seen",
+     "hkm-intent-yes",
+     "hkm-toplu",
+     "istisna-bitir",
+     "king-iptal",
+     "king-onayla",
+     "king-parca",
+     "onbes-dk",
+     "open-review",
+     "rate",
+     "repair-done",
+     "seri-coz",
+     "seri-hasta",
+     "seri-tatil",
+     "seri-tatil-bitir",
+     "seri-tatil-gun",
+     "seri-tatil-sinir",
+     "seri-tatil-vazgec",
+     "share-week",
+     "share-week-copy",
+     "share-week-send",
+     "signal-answer",
+     "signal-dismiss",
+     "skip-reason",
+     "timer-start",
+     "timer-stop"
+    ],
+    "topic": [
+     "topic-add-card",
+     "topic-add-note",
+     "topic-edit",
+     "topic-quiz"
+    ],
+    "week": [
+     "create-day",
+     "day-status",
+     "istisna-ac",
+     "istisna-bitir",
+     "istisna-onizle",
+     "istisna-uygula",
+     "open-day",
+     "open-review",
+     "save-review",
+     "topic-add",
+     "topic-remove",
+     "week-nav",
+     "week-revise",
+     "week-revise-save",
+     "week-sign"
+    ]
+   },
+   "kaynakEylemleri": [
+    "analytics-tab",
+    "anchor",
+    "ask-agent",
+    "auto-close-week",
+    "auto-draft-apply",
+    "auto-draft-week",
+    "auto-exam-week",
+    "auto-replan",
+    "auto-sync-blocks",
+    "bad-day",
+    "bad-day-undo",
+    "block-status",
+    "bolum-toggle",
+    "break-take",
+    "cal-add",
+    "cal-del",
+    "calib-open",
+    "calib-settle",
+    "card-page",
+    "card-search-clear",
+    "card-tab",
+    "chat-onayla",
+    "chat-vazgec",
+    "checklist",
+    "clear-decision",
+    "close-error",
+    "complete-analysis",
+    "confirm-yes",
+    "create-day",
+    "day-status",
+    "delete-card",
+    "delete-error",
+    "delete-exam",
+    "dictate",
+    "distract",
+    "distract-reset",
+    "edit-card",
+    "edit-error",
+    "energy-set",
+    "error-card",
+    "error-tag",
+    "ex-foto",
+    "exam-back",
+    "exam-filter",
+    "exam-page",
+    "export-data",
+    "flip",
+    "focus-close",
+    "focus-finish",
+    "focus-open",
+    "go",
+    "guide-check",
+    "guide-tab",
+    "hafiza-ekle",
+    "hafiza-unut",
+    "hard-reload",
+    "hedef-durum",
+    "hedef-plan-geri",
+    "hedef-plan-kapat",
+    "hedef-plan-onizle",
+    "hedef-plan-uygula",
+    "hedef-uyarla-ac",
+    "hedef-uyarla-kapat",
+    "hedef-uyarla-sec",
+    "hint",
+    "hkm-backfill",
+    "hkm-doubt-ok",
+    "hkm-gonder",
+    "hkm-intent-no",
+    "hkm-intent-seen",
+    "hkm-intent-yes",
+    "hkm-pair",
+    "hkm-send",
+    "hkm-toggle",
+    "hkm-toplu",
+    "ics-disa",
+    "ics-ekle",
+    "ics-sec",
+    "ics-vazgec",
+    "import-data",
+    "import-run",
+    "istisna-ac",
+    "istisna-bitir",
+    "istisna-onizle",
+    "istisna-uygula",
+    "king-iptal",
+    "king-onayla",
+    "king-parca",
+    "kitap-baslat",
+    "kitap-bitir",
+    "kitap-deftere",
+    "kitap-devam",
+    "kitap-git",
+    "kitap-hatali",
+    "kitap-iste",
+    "kitap-kapat",
+    "kitap-no",
+    "kitap-ozet",
+    "kitap-sec",
+    "kitap-vazgec",
+    "learn-filter",
+    "learn-reset",
+    "meet-copy",
+    "meet-decide",
+    "meet-delete",
+    "meet-download",
+    "meet-finish",
+    "meet-new",
+    "meet-open",
+    "meet-pace",
+    "meet-pause",
+    "meet-resume",
+    "meet-say",
+    "meet-say-send",
+    "meet-search-clear",
+    "meet-start",
+    "meet-talk",
+    "meet-voice",
+    "nb-page",
+    "new-card",
+    "new-error",
+    "new-exam",
+    "next-action",
+    "note-ai-accept",
+    "note-ai-cards",
+    "note-ai-drop",
+    "note-back",
+    "note-cards-all",
+    "note-create",
+    "note-delete",
+    "note-goto",
+    "note-new",
+    "note-open",
+    "note-page",
+    "note-seg-add",
+    "note-seg-card",
+    "note-seg-del",
+    "note-split",
+    "note-split-apply",
+    "note-template",
+    "note-toggle-done",
+    "note-toggle-transcript",
+    "note-voice",
+    "notebook-filter",
+    "office-approve",
+    "office-briefing",
+    "office-decision",
+    "office-desk",
+    "office-diagnose",
+    "office-forget",
+    "office-meet",
+    "office-models",
+    "office-notify",
+    "office-peragent",
+    "office-reject",
+    "office-rpd",
+    "office-save",
+    "office-scan",
+    "office-settings",
+    "office-talk",
+    "office-test",
+    "office-toggle-briefing",
+    "office-toggle-fallback",
+    "office-turn",
+    "office-undo",
+    "office-view",
+    "office-voice-try",
+    "office-voices",
+    "onbes-dk",
+    "open-appearance",
+    "open-day",
+    "open-dropped",
+    "open-exam",
+    "open-palette",
+    "open-review",
+    "open-subject",
+    "open-topic",
+    "open-week",
+    "prof-create",
+    "prof-export-setup",
+    "prof-import-run",
+    "prof-import-setup",
+    "prof-new",
+    "prof-snapshot",
+    "prof-switch",
+    "proto-finish",
+    "proto-finish-save",
+    "proto-start",
+    "proto-step",
+    "protocol-step",
+    "prune-storage",
+    "pwa-install",
+    "q-cancel",
+    "q-check",
+    "q-clear-image",
+    "q-del",
+    "q-follow",
+    "q-pick",
+    "q-reset",
+    "q-save",
+    "q-save-error",
+    "q-solve",
+    "q-src-del",
+    "q-src-edit",
+    "q-src-new",
+    "q-src-save",
+    "q-src-seed",
+    "q-thread-clear",
+    "q-topic-clear",
+    "q-topic-pick",
+    "quiz-answer",
+    "quiz-cancel",
+    "quiz-format",
+    "quiz-pick",
+    "quiz-reveal",
+    "quiz-size",
+    "quiz-skip",
+    "quiz-start",
+    "quiz-timer",
+    "quiz-voice",
+    "rail-toggle",
+    "rate",
+    "reload",
+    "repair-done",
+    "reset-data",
+    "restore-hkm",
+    "rozet-ac",
+    "run-cancel",
+    "run-finish",
+    "run-goto",
+    "run-mark",
+    "run-next",
+    "run-open",
+    "run-pause",
+    "run-save",
+    "run-start",
+    "run-undo",
+    "rutbe-git",
+    "rutbe-tab",
+    "save-card",
+    "save-decision",
+    "save-error",
+    "save-exam",
+    "save-profile",
+    "save-review",
+    "save-topic",
+    "seri-coz",
+    "seri-hasta",
+    "seri-tatil",
+    "seri-tatil-bitir",
+    "seri-tatil-gun",
+    "seri-tatil-sinir",
+    "seri-tatil-vazgec",
+    "set-design",
+    "set-palette",
+    "set-theme",
+    "set-tone",
+    "setup-back",
+    "setup-level",
+    "setup-next",
+    "setup-open",
+    "setup-quick",
+    "setup-save",
+    "setup-weak",
+    "share-week",
+    "share-week-copy",
+    "share-week-send",
+    "sheet-close",
+    "show-store-error",
+    "signal-answer",
+    "signal-dismiss",
+    "skip-reason",
+    "so-iste",
+    "sp-iste",
+    "sp-konu",
+    "sp-sil",
+    "sp-yukle",
+    "talk-cut",
+    "talk-start",
+    "talk-stop",
+    "tanitim-adim",
+    "team-agent",
+    "team-brief",
+    "team-clear",
+    "team-send",
+    "team-suggest",
+    "timer-start",
+    "timer-stop",
+    "toggle-backup-shape",
+    "toggle-dropped",
+    "toggle-kpi-ref",
+    "toggle-month-curve",
+    "toggle-placed",
+    "toggle-proto",
+    "toggle-routine",
+    "toggle-sidebar",
+    "topic-add",
+    "topic-add-card",
+    "topic-add-note",
+    "topic-edit",
+    "topic-filter",
+    "topic-open",
+    "topic-quiz",
+    "topic-remove",
+    "topic-reset",
+    "trend-family",
+    "undo-import",
+    "urun-ac",
+    "urun-sil",
+    "veri-kaydet",
+    "week-nav",
+    "week-revise",
+    "week-revise-save",
+    "week-sign"
+   ],
+   "olcu": {
+    "bos": {
+     "390": {
+      "today": {
+       "kelime": 572,
+       "dugme": 52,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 6125
+      },
+      "week": {
+       "kelime": 362,
+       "dugme": 20,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 5321
+      },
+      "plan": {
+       "kelime": 1213,
+       "dugme": 41,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 9334
+      },
+      "subjects": {
+       "kelime": 589,
+       "dugme": 48,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 1,
+       "simge": 0,
+       "xp": 0,
+       "boy": 5814
+      },
+      "target": {
+       "kelime": 479,
+       "dugme": 8,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 3,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 5728
+      },
+      "learn": {
+       "kelime": 91,
+       "dugme": 5,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1835
+      },
+      "exams": {
+       "kelime": 143,
+       "dugme": 7,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2103
+      },
+      "cards": {
+       "kelime": 89,
+       "dugme": 6,
+       "dolu": 1,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1855
+      },
+      "quiz": {
+       "kelime": 146,
+       "dugme": 13,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2169
+      },
+      "solve": {
+       "kelime": 104,
+       "dugme": 5,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2524
+      },
+      "progress": {
+       "kelime": 339,
+       "dugme": 7,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3904
+      },
+      "analytics": {
+       "kelime": 22,
+       "dugme": 9,
+       "dolu": 1,
+       "sekme": 8,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1151
+      },
+      "protocols": {
+       "kelime": 201,
+       "dugme": 15,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2904
+      },
+      "guide": {
+       "kelime": 400,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 7,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3102
+      },
+      "profiles": {
+       "kelime": 128,
+       "dugme": 5,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2125
+      },
+      "office": {
+       "kelime": 415,
+       "dugme": 37,
+       "dolu": 9,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4863
+      },
+      "team": {
+       "kelime": 246,
+       "dugme": 19,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2722
+      },
+      "meeting": {
+       "kelime": 199,
+       "dugme": 13,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2034
+      },
+      "rutbe": {
+       "kelime": 101,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 6,
+       "boy": 2623
+      }
+     },
+     "1440": {
+      "today": {
+       "kelime": 572,
+       "dugme": 52,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4482
+      },
+      "week": {
+       "kelime": 362,
+       "dugme": 20,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2875
+      },
+      "plan": {
+       "kelime": 1213,
+       "dugme": 41,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 5113
+      },
+      "subjects": {
+       "kelime": 589,
+       "dugme": 48,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 1,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4608
+      },
+      "target": {
+       "kelime": 479,
+       "dugme": 8,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 3,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4269
+      },
+      "learn": {
+       "kelime": 91,
+       "dugme": 5,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1429
+      },
+      "exams": {
+       "kelime": 143,
+       "dugme": 7,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1780
+      },
+      "cards": {
+       "kelime": 89,
+       "dugme": 6,
+       "dolu": 1,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1585
+      },
+      "quiz": {
+       "kelime": 146,
+       "dugme": 13,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1469
+      },
+      "solve": {
+       "kelime": 104,
+       "dugme": 5,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1977
+      },
+      "progress": {
+       "kelime": 339,
+       "dugme": 7,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2907
+      },
+      "analytics": {
+       "kelime": 22,
+       "dugme": 9,
+       "dolu": 1,
+       "sekme": 8,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1049
+      },
+      "protocols": {
+       "kelime": 201,
+       "dugme": 15,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2429
+      },
+      "guide": {
+       "kelime": 400,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 7,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2375
+      },
+      "profiles": {
+       "kelime": 128,
+       "dugme": 5,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1497
+      },
+      "office": {
+       "kelime": 415,
+       "dugme": 37,
+       "dolu": 9,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3133
+      },
+      "team": {
+       "kelime": 252,
+       "dugme": 19,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2086
+      },
+      "meeting": {
+       "kelime": 199,
+       "dugme": 13,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1631
+      },
+      "rutbe": {
+       "kelime": 101,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 6,
+       "boy": 2477
+      }
+     }
+    },
+    "dolu": {
+     "390": {
+      "today": {
+       "kelime": 590,
+       "dugme": 52,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 6728
+      },
+      "week": {
+       "kelime": 354,
+       "dugme": 20,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 5216
+      },
+      "plan": {
+       "kelime": 1215,
+       "dugme": 41,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 9334
+      },
+      "subjects": {
+       "kelime": 591,
+       "dugme": 48,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 1,
+       "simge": 0,
+       "xp": 0,
+       "boy": 5814
+      },
+      "target": {
+       "kelime": 576,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 3,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 6201
+      },
+      "learn": {
+       "kelime": 91,
+       "dugme": 5,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1835
+      },
+      "exams": {
+       "kelime": 186,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2173
+      },
+      "cards": {
+       "kelime": 122,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1899
+      },
+      "quiz": {
+       "kelime": 131,
+       "dugme": 14,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2120
+      },
+      "solve": {
+       "kelime": 104,
+       "dugme": 5,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2524
+      },
+      "progress": {
+       "kelime": 449,
+       "dugme": 6,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4624
+      },
+      "analytics": {
+       "kelime": 177,
+       "dugme": 9,
+       "dolu": 0,
+       "sekme": 8,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2167
+      },
+      "protocols": {
+       "kelime": 205,
+       "dugme": 15,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2887
+      },
+      "guide": {
+       "kelime": 400,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 7,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3102
+      },
+      "profiles": {
+       "kelime": 128,
+       "dugme": 5,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2125
+      },
+      "office": {
+       "kelime": 470,
+       "dugme": 39,
+       "dolu": 9,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 5094
+      },
+      "team": {
+       "kelime": 248,
+       "dugme": 19,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2761
+      },
+      "meeting": {
+       "kelime": 204,
+       "dugme": 13,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2034
+      },
+      "rutbe": {
+       "kelime": 130,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 6,
+       "boy": 2583
+      }
+     },
+     "1440": {
+      "today": {
+       "kelime": 590,
+       "dugme": 52,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4919
+      },
+      "week": {
+       "kelime": 354,
+       "dugme": 20,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2837
+      },
+      "plan": {
+       "kelime": 1215,
+       "dugme": 41,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 5113
+      },
+      "subjects": {
+       "kelime": 591,
+       "dugme": 48,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 1,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4608
+      },
+      "target": {
+       "kelime": 576,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 3,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4490
+      },
+      "learn": {
+       "kelime": 91,
+       "dugme": 5,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1429
+      },
+      "exams": {
+       "kelime": 186,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1829
+      },
+      "cards": {
+       "kelime": 122,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1594
+      },
+      "quiz": {
+       "kelime": 131,
+       "dugme": 14,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1461
+      },
+      "solve": {
+       "kelime": 104,
+       "dugme": 5,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1977
+      },
+      "progress": {
+       "kelime": 449,
+       "dugme": 6,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3351
+      },
+      "analytics": {
+       "kelime": 177,
+       "dugme": 9,
+       "dolu": 0,
+       "sekme": 8,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1605
+      },
+      "protocols": {
+       "kelime": 205,
+       "dugme": 15,
+       "dolu": 0,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2438
+      },
+      "guide": {
+       "kelime": 400,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 7,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2375
+      },
+      "profiles": {
+       "kelime": 128,
+       "dugme": 5,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1497
+      },
+      "office": {
+       "kelime": 470,
+       "dugme": 39,
+       "dolu": 9,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3227
+      },
+      "team": {
+       "kelime": 254,
+       "dugme": 19,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2086
+      },
+      "meeting": {
+       "kelime": 204,
+       "dugme": 13,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1631
+      },
+      "rutbe": {
+       "kelime": 130,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 6,
+       "boy": 2428
+      }
+     }
+    }
+   },
+   "oz": [],
+   "hatalar": []
+  },
+  "SPI": {
+   "rotalar": {
+    "today": {
+     "baslik": "Bugünün verisi henüz girilmedi.",
+     "sekmeler": [
+      "Giriş",
+      "Özet",
+      "Geçmiş"
+     ],
+     "alanlar": [
+      "v-sleep",
+      "v-rhr",
+      "v-hrv",
+      "v-sbp",
+      "v-dbp",
+      "v-spo2",
+      "v-temp",
+      "v-weight",
+      "v-waist",
+      "v-bodyfat",
+      "v-water",
+      "v-note",
+      "quick-meal"
+     ]
+    },
+    "labs": {
+     "baslik": "Henüz test girilmedi.",
+     "sekmeler": [
+      "Sonuçlar",
+      "Test gir",
+      "Geçmiş",
+      "Karşılaştır",
+      "Paneller",
+      "İlaç",
+      "Eğilim"
+     ],
+     "alanlar": [
+      "entry-date",
+      "entry-lab",
+      "entry-fasting",
+      "entry-time",
+      "entry-q",
+      "e-sbp",
+      "e-dbp",
+      "e-rhr",
+      "e-hrv",
+      "e-spo2",
+      "e-temp",
+      "e-sleep",
+      "e-weight",
+      "e-waist",
+      "e-bodyfat",
+      "e-hgb",
+      "e-hct",
+      "e-mcv",
+      "e-rdw",
+      "e-wbc",
+      "e-plt",
+      "e-ferritin",
+      "e-iron_s",
+      "e-tibc",
+      "e-glucose",
+      "e-hba1c",
+      "e-insulin",
+      "e-chol",
+      "e-ldl",
+      "e-hdl",
+      "e-trig",
+      "e-alt",
+      "e-ast",
+      "e-ggt",
+      "e-alb",
+      "e-creat",
+      "e-urea",
+      "e-uric",
+      "e-egfr",
+      "e-na",
+      "e-k",
+      "e-ca",
+      "e-mg",
+      "e-vitd",
+      "e-b12",
+      "e-folate",
+      "e-zinc",
+      "e-tsh",
+      "e-ft4",
+      "e-ft3",
+      "e-testo",
+      "e-cortisol",
+      "e-crp",
+      "e-esr",
+      "hk-metin",
+      "hk-tarih",
+      "pick-marker",
+      "lab-q",
+      "cmp-a",
+      "cmp-b"
+     ]
+    },
+    "meals": {
+     "baslik": "Hedef için profil eksik.",
+     "sekmeler": [
+      "Öğünler",
+      "Öneri",
+      "Besin değeri"
+     ],
+     "alanlar": [
+      "meal-slot",
+      "meal-text"
+     ]
+    },
+    "kitchen": {
+     "baslik": "Tek tencere, tek porsiyon.",
+     "sekmeler": [],
+     "alanlar": [
+      "pick-dish",
+      "kitchen-g",
+      "evdeki-q",
+      "bilgi-tur",
+      "bilgi-ad"
+     ]
+    },
+    "move": {
+     "baslik": "Toparlanma ölçümü bekliyor.",
+     "sekmeler": [
+      "Bugün",
+      "Kardiyo",
+      "Kuvvet",
+      "Esneklik",
+      "Dinlenme",
+      "İlerleme"
+     ],
+     "alanlar": []
+    },
+    "basket": {
+     "baslik": "Bütçe için henüz veri yok.",
+     "sekmeler": [
+      "Bütçe",
+      "Sepet",
+      "İkame",
+      "Fiyat"
+     ],
+     "alanlar": [
+      "price-q",
+      "set-price"
+     ]
+    },
+    "office": {
+     "baslik": "1 masada dikkat isteyen not var · 1 devir bekliyor.",
+     "sekmeler": [],
+     "alanlar": []
+    },
+    "team": {
+     "baslik": "Danışma",
+     "sekmeler": [],
+     "alanlar": [
+      "chat-text"
+     ]
+    },
+    "meeting": {
+     "baslik": "Toplantı",
+     "sekmeler": [],
+     "alanlar": []
+    },
+    "analytics": {
+     "baslik": "Belirgin bir bağ bulunamadı.",
+     "sekmeler": [
+      "Çapraz bağlar",
+      "Haftalık rapor",
+      "Seriler",
+      "Denetim",
+      "Dürüstlük"
+     ],
+     "alanlar": [
+      "pair-a",
+      "pair-b",
+      "pick-series",
+      "sp-calib-kind",
+      "sp-calib-guess"
+     ]
+    },
+    "rutbe": {
+     "baslik": "Rütbe",
+     "sekmeler": [
+      "Şu an",
+      "Merdiven",
+      "Başarımlar",
+      "XP nereden gelir",
+      "Defter"
+     ],
+     "alanlar": []
+    },
+    "family": {
+     "baslik": "Profil eksik.",
+     "sekmeler": [],
+     "alanlar": [
+      "p-name",
+      "p-birth",
+      "p-sex",
+      "p-height",
+      "p-weight",
+      "p-activity",
+      "p-goal",
+      "pref-theme",
+      "pref-palette",
+      "pref-design",
+      "pref-size"
+     ]
+    },
+    "guide": {
+     "baslik": "Rehber",
+     "sekmeler": [
+      "Kullanım",
+      "Model",
+      "Veri",
+      "Sınırlar"
+     ],
+     "alanlar": [
+      "m-provider",
+      "m-model",
+      "m-otomatik",
+      "hafiza-yeni",
+      "sp-hkm-url",
+      "sp-hkm-token",
+      "sp-hkm-int",
+      "sp-hkm-level"
+     ]
+    }
+   },
+   "eylemler": {
+    "add-decision": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Karar ekle"
+    },
+    "add-food": {
+     "rotalar": [
+      "kitchen"
+     ],
+     "gorunur": true,
+     "etiket": "Elle ekle"
+    },
+    "add-meal": {
+     "rotalar": [
+      "meals"
+     ],
+     "gorunur": true,
+     "etiket": "Ekle"
+    },
+    "add-med": {
+     "rotalar": [
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Ekle"
+    },
+    "add-profile": {
+     "rotalar": [
+      "family"
+     ],
+     "gorunur": true,
+     "etiket": "Profil ekle"
+    },
+    "an-tab": {
+     "rotalar": [
+      "analytics"
+     ],
+     "gorunur": true,
+     "etiket": "Çapraz bağlar"
+    },
+    "ask-agent": {
+     "rotalar": [
+      "basket",
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Sedef'e sor"
+    },
+    "backup": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Yedek indir"
+    },
+    "basket-tab": {
+     "rotalar": [
+      "basket"
+     ],
+     "gorunur": true,
+     "etiket": "Bütçe"
+    },
+    "bilgi-iste": {
+     "rotalar": [
+      "kitchen"
+     ],
+     "gorunur": true,
+     "etiket": "King’e ilet"
+    },
+    "bolum-toggle": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": ""
+    },
+    "calib-open": {
+     "rotalar": [
+      "analytics"
+     ],
+     "gorunur": true,
+     "etiket": "Tahmini kaydet"
+    },
+    "clear-chat": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Sohbeti temizle"
+    },
+    "cycle-symptom": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Olağandışı yorgunluk"
+    },
+    "day-tab": {
+     "rotalar": [
+      "(kabuk)",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Giriş"
+    },
+    "del-item": {
+     "rotalar": [
+      "meals"
+     ],
+     "gorunur": true,
+     "etiket": "Çıkar"
+    },
+    "del-lab": {
+     "rotalar": [
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Sil"
+    },
+    "del-meal": {
+     "rotalar": [
+      "meals"
+     ],
+     "gorunur": true,
+     "etiket": "Öğünü sil"
+    },
+    "del-med": {
+     "rotalar": [
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Sil"
+    },
+    "del-session": {
+     "rotalar": [
+      "move"
+     ],
+     "gorunur": true,
+     "etiket": "Sil"
+    },
+    "dictate": {
+     "rotalar": [
+      "meals",
+      "team",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Sesle yaz"
+    },
+    "edit-med": {
+     "rotalar": [
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Düzelt"
+    },
+    "edit-session": {
+     "rotalar": [
+      "move"
+     ],
+     "gorunur": true,
+     "etiket": "Düzenle"
+    },
+    "entry-save": {
+     "rotalar": [
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Testi kaydet"
+    },
+    "evdeki-sepet": {
+     "rotalar": [
+      "kitchen"
+     ],
+     "gorunur": true,
+     "etiket": "Sepetimdekiler"
+    },
+    "focus-meal": {
+     "rotalar": [
+      "meals"
+     ],
+     "gorunur": true,
+     "etiket": "Öğün ekle"
+    },
+    "go": {
+     "rotalar": [
+      "(kabuk)",
+      "analytics",
+      "kitchen",
+      "meals",
+      "move",
+      "office",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Bütün öğünler"
+    },
+    "guide-tab": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Kullanım"
+    },
+    "hafiza-ekle": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Hatırla"
+    },
+    "handoff": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "B→K Vital girişi"
+    },
+    "hard-reload": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "tazele"
+    },
+    "hekim-ekle": {
+     "rotalar": [
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Talimatı ekle"
+    },
+    "hint": {
+     "rotalar": [
+      "analytics",
+      "basket",
+      "family",
+      "guide",
+      "kitchen",
+      "labs",
+      "meals",
+      "meeting",
+      "move",
+      "office",
+      "team",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "HKM işareti hakkında bilgi"
+    },
+    "hkm-backfill": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Geçmişi gönder (60 gün)"
+    },
+    "hkm-pair": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Bağlan"
+    },
+    "hkm-send": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Şimdi gönder"
+    },
+    "hkm-toggle": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": ""
+    },
+    "ht-ac": {
+     "rotalar": [
+      "labs",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Hatırlatma ekle"
+    },
+    "kotu-gun": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Kötü gün"
+    },
+    "lab-filter": {
+     "rotalar": [
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Tümü7"
+    },
+    "lab-tab": {
+     "rotalar": [
+      "(kabuk)",
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Sonuçlar"
+    },
+    "meal-tab": {
+     "rotalar": [
+      "(kabuk)",
+      "meals"
+     ],
+     "gorunur": true,
+     "etiket": "Öğünler"
+    },
+    "move-tab": {
+     "rotalar": [
+      "move"
+     ],
+     "gorunur": true,
+     "etiket": "Bugün"
+    },
+    "no-symptoms": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Şikâyetim yok"
+    },
+    "open-add": {
+     "rotalar": [
+      "(kabuk)",
+      "basket"
+     ],
+     "gorunur": true,
+     "etiket": "Kalem ekle"
+    },
+    "open-appearance": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Görünüm"
+    },
+    "open-day": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "11"
+    },
+    "open-doctor": {
+     "rotalar": [
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Hekime götür"
+    },
+    "open-lab": {
+     "rotalar": [
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Aç"
+    },
+    "open-label": {
+     "rotalar": [
+      "kitchen"
+     ],
+     "gorunur": true,
+     "etiket": "Etiketten oku"
+    },
+    "open-limit": {
+     "rotalar": [
+      "basket"
+     ],
+     "gorunur": true,
+     "etiket": "Haftalık sınır"
+    },
+    "open-limits": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Sınır ve ücretler"
+    },
+    "open-marker": {
+     "rotalar": [
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Ferritin Demir 50ng/mL hedefin altı ▼ 24 Eyl"
+    },
+    "open-marker-x": {
+     "rotalar": [
+      "meals"
+     ],
+     "gorunur": true,
+     "etiket": "Ferritin"
+    },
+    "open-ogun-liste": {
+     "rotalar": [
+      "basket"
+     ],
+     "gorunur": true,
+     "etiket": "Öğünlerimden liste"
+    },
+    "open-palette": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Komut paleti (Ctrl+K)"
+    },
+    "open-paste": {
+     "rotalar": [
+      "(kabuk)",
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Rapor yapıştır"
+    },
+    "open-photo": {
+     "rotalar": [
+      "meals"
+     ],
+     "gorunur": true,
+     "etiket": "Fotoğraftan"
+    },
+    "open-receipt": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Fiş oku"
+    },
+    "open-search": {
+     "rotalar": [
+      "meals"
+     ],
+     "gorunur": true,
+     "etiket": "Besin ara"
+    },
+    "pick-agenda": {
+     "rotalar": [
+      "meeting"
+     ],
+     "gorunur": true,
+     "etiket": "Hedef gözden geçirme 15 Açık bir sorun yok; hede"
+    },
+    "pick-agent": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "P Patron Orkestratör"
+    },
+    "pick-level": {
+     "rotalar": [
+      "move"
+     ],
+     "gorunur": true,
+     "etiket": "Basamak seç"
+    },
+    "pick-pattern": {
+     "rotalar": [
+      "move"
+     ],
+     "gorunur": true,
+     "etiket": "İtme · Göğüs, omuz, arka kol 0"
+    },
+    "pick-pattern-tab": {
+     "rotalar": [
+      "move"
+     ],
+     "gorunur": true,
+     "etiket": "Tümü8"
+    },
+    "price-page": {
+     "rotalar": [
+      "basket"
+     ],
+     "gorunur": true,
+     "etiket": "Önceki"
+    },
+    "prune-storage": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Seçilenleri buda"
+    },
+    "quick-ask": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Bu hafta neye odaklanmalıyım?"
+    },
+    "quick-meal": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Öğüne ekle"
+    },
+    "rail-toggle": {
+     "rotalar": [
+      "analytics",
+      "basket",
+      "family",
+      "guide",
+      "kitchen",
+      "labs",
+      "meals",
+      "meeting",
+      "move",
+      "office",
+      "team",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Bu ekran nasıl okunur3"
+    },
+    "refresh-briefing": {
+     "rotalar": [
+      "office",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Tazele"
+    },
+    "restore": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Yedek yükle"
+    },
+    "rozet-ac": {
+     "rotalar": [
+      "rutbe"
+     ],
+     "gorunur": true,
+     "etiket": "Görev 100 görev · %0"
+    },
+    "run-meeting": {
+     "rotalar": [
+      "meeting"
+     ],
+     "gorunur": true,
+     "etiket": "Toplantıyı başlat"
+    },
+    "rutbe-git": {
+     "rotalar": [
+      "rutbe"
+     ],
+     "gorunur": true,
+     "etiket": "Git"
+    },
+    "rutbe-tab": {
+     "rotalar": [
+      "rutbe"
+     ],
+     "gorunur": true,
+     "etiket": "Şu an"
+    },
+    "saglik-ac": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Dosya seç ve önizle"
+    },
+    "save-model": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Kaydet"
+    },
+    "save-prefs": {
+     "rotalar": [
+      "family"
+     ],
+     "gorunur": true,
+     "etiket": "Kaydet"
+    },
+    "save-profile": {
+     "rotalar": [
+      "family"
+     ],
+     "gorunur": true,
+     "etiket": "Kaydet"
+    },
+    "save-vitals": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Kaydet"
+    },
+    "send-chat": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Gönder"
+    },
+    "seri-hasta": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Bugün hastayım · seri donsun"
+    },
+    "seri-tatil": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Tatil modu"
+    },
+    "set-soreness": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "1 · bitkin"
+    },
+    "shift-day": {
+     "rotalar": [
+      "meals"
+     ],
+     "gorunur": true,
+     "etiket": "‹"
+    },
+    "start-area": {
+     "rotalar": [
+      "move"
+     ],
+     "gorunur": true,
+     "etiket": "Seans ekle"
+    },
+    "start-session": {
+     "rotalar": [
+      "(kabuk)",
+      "move"
+     ],
+     "gorunur": true,
+     "etiket": "★ Tam vücut A · önerilen 45 dk · 4 hareket — İtm"
+    },
+    "stop-med": {
+     "rotalar": [
+      "labs"
+     ],
+     "gorunur": true,
+     "etiket": "Bıraktım"
+    },
+    "talk-start": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Sesli sohbeti başlat"
+    },
+    "test-model": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Bağlantıyı dene"
+    },
+    "toggle-brief": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Ajanın gördüğü brifing JSON"
+    },
+    "toggle-desk": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Raporu aç"
+    },
+    "toggle-menu": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Bölümler"
+    },
+    "wipe": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Bütün veriyi sil"
+    }
+   },
+   "ekranKaydi": {
+    "analytics": [
+     "an-tab",
+     "calib-open",
+     "calib-settle"
+    ],
+    "basket": [
+     "add-page",
+     "basket-tab",
+     "del-item",
+     "do-swap",
+     "open-add",
+     "open-cheap",
+     "open-limit",
+     "open-limits",
+     "open-ogun-liste",
+     "open-receipt",
+     "pick-basket",
+     "price-page",
+     "run-receipt",
+     "save-kg",
+     "save-limit",
+     "save-limits",
+     "save-ogun-liste",
+     "save-receipt",
+     "toggle-liste-row",
+     "toggle-receipt-row"
+    ],
+    "family": [
+     "add-profile",
+     "remove-profile",
+     "save-new-profile",
+     "save-prefs",
+     "save-profile",
+     "switch-profile"
+    ],
+    "guide": [
+     "backup",
+     "bolum-toggle",
+     "guide-tab",
+     "hafiza-ekle",
+     "hafiza-unut",
+     "hkm-backfill",
+     "hkm-pair",
+     "hkm-send",
+     "hkm-toggle",
+     "prune-storage",
+     "restore",
+     "restore-hkm",
+     "saglik-ac",
+     "saglik-oku",
+     "saglik-yaz",
+     "save-model",
+     "test-model",
+     "undo-import",
+     "wipe"
+    ],
+    "kitchen": [
+     "add-food",
+     "bilgi-iste",
+     "del-food",
+     "edit-food",
+     "evdeki-sec",
+     "evdeki-sepet",
+     "open-label",
+     "run-label",
+     "save-food",
+     "yer-sil"
+    ],
+    "labs": [
+     "add-med",
+     "del-lab",
+     "del-med",
+     "edit-med",
+     "entry-clear",
+     "entry-save",
+     "goto-trend",
+     "hekim-ekle",
+     "hekim-sil",
+     "lab-filter",
+     "lab-tab",
+     "open-doctor",
+     "open-lab",
+     "open-marker",
+     "open-paste",
+     "pdf-doctor",
+     "print-doctor",
+     "run-paste",
+     "save-inline",
+     "save-med",
+     "save-paste",
+     "stop-med",
+     "toggle-empty",
+     "toggle-pin",
+     "toggle-row",
+     "toggle-unmatched"
+    ],
+    "meals": [
+     "add-grams",
+     "add-meal",
+     "add-portion",
+     "barkod-ac",
+     "barkod-bagla",
+     "barkod-bul",
+     "del-item",
+     "del-meal",
+     "focus-meal",
+     "food-page",
+     "meal-tab",
+     "open-marker-x",
+     "open-nutrient",
+     "open-photo",
+     "open-search",
+     "pick-food",
+     "run-photo",
+     "save-photo",
+     "shift-day",
+     "toggle-photo-row"
+    ],
+    "meeting": [
+     "open-minutes",
+     "pick-agenda",
+     "play-minutes",
+     "run-meeting",
+     "stop-minutes",
+     "track-decision"
+    ],
+    "move": [
+     "advance",
+     "del-session",
+     "edit-session",
+     "move-tab",
+     "pick-level",
+     "pick-pattern",
+     "pick-pattern-tab",
+     "save-session",
+     "set-level",
+     "start-area",
+     "start-session",
+     "toggle-ex"
+    ],
+    "office": [
+     "add-decision",
+     "close-decision",
+     "handoff",
+     "refresh-briefing",
+     "save-close",
+     "save-decision",
+     "toggle-desk",
+     "urun-ac",
+     "urun-sil"
+    ],
+    "rutbe": [
+     "rozet-ac",
+     "rutbe-git",
+     "rutbe-tab"
+    ],
+    "team": [
+     "clear-chat",
+     "devret",
+     "oneri-geri",
+     "oneri-onay",
+     "oneri-ret",
+     "pick-agent",
+     "quick-ask",
+     "send-chat",
+     "talk-cut",
+     "talk-start",
+     "talk-stop",
+     "toggle-brief"
+    ],
+    "today": [
+     "bekleyen-onay",
+     "bekleyen-ret",
+     "cycle-symptom",
+     "day-tab",
+     "dunku-antrenman",
+     "dunku-ogun",
+     "flag-ack",
+     "hedef-durum",
+     "hedef-plan-geri",
+     "hedef-plan-kapat",
+     "hedef-plan-king",
+     "hedef-plan-onizle",
+     "hedef-plan-uygula",
+     "hedef-uyarla-ac",
+     "hedef-uyarla-kapat",
+     "hedef-uyarla-sec",
+     "hkm-gonder",
+     "hkm-intent-apply",
+     "hkm-intent-no",
+     "hkm-intent-yes",
+     "hkm-toplu",
+     "king-bildirim-okundu",
+     "king-iptal",
+     "king-onayla",
+     "king-parca",
+     "kotu-gun",
+     "kotu-gun-kapat",
+     "no-symptoms",
+     "open-day",
+     "quick-meal",
+     "refresh-briefing",
+     "save-vitals",
+     "seri-coz",
+     "seri-hasta",
+     "seri-tatil",
+     "seri-tatil-bitir",
+     "seri-tatil-gun",
+     "seri-tatil-sinir",
+     "seri-tatil-vazgec",
+     "set-soreness",
+     "shift-day",
+     "signal-answer",
+     "signal-dismiss",
+     "toggle-period"
+    ]
+   },
+   "kaynakEylemleri": [
+    "add-decision",
+    "add-food",
+    "add-grams",
+    "add-meal",
+    "add-med",
+    "add-page",
+    "add-portion",
+    "add-profile",
+    "advance",
+    "an-tab",
+    "ask-agent",
+    "backup",
+    "barkod-ac",
+    "barkod-bagla",
+    "barkod-bul",
+    "barkod-foto",
+    "basket-tab",
+    "bekleyen-onay",
+    "bekleyen-ret",
+    "bilgi-iste",
+    "bolum-toggle",
+    "calib-open",
+    "calib-settle",
+    "clear-chat",
+    "close-decision",
+    "cmdk-run",
+    "confirm-yes",
+    "cycle-symptom",
+    "day-tab",
+    "del-food",
+    "del-item",
+    "del-lab",
+    "del-meal",
+    "del-med",
+    "del-session",
+    "devret",
+    "dictate",
+    "do-swap",
+    "dunku-antrenman",
+    "dunku-ogun",
+    "edit-food",
+    "edit-med",
+    "edit-session",
+    "entry-clear",
+    "entry-save",
+    "evdeki-sec",
+    "evdeki-sepet",
+    "flag-ack",
+    "food-page",
+    "go",
+    "goto-trend",
+    "guide-tab",
+    "hafiza-ekle",
+    "hafiza-unut",
+    "handoff",
+    "hard-reload",
+    "hedef-durum",
+    "hedef-plan-geri",
+    "hedef-plan-kapat",
+    "hedef-plan-king",
+    "hedef-plan-onizle",
+    "hedef-plan-uygula",
+    "hedef-uyarla-ac",
+    "hedef-uyarla-kapat",
+    "hedef-uyarla-sec",
+    "hekim-ekle",
+    "hekim-sil",
+    "hint",
+    "hkm-backfill",
+    "hkm-gonder",
+    "hkm-intent-apply",
+    "hkm-intent-no",
+    "hkm-intent-yes",
+    "hkm-pair",
+    "hkm-send",
+    "hkm-toggle",
+    "hkm-toplu",
+    "ht-ac",
+    "ht-bildirim",
+    "ht-isaret",
+    "ht-kaydet",
+    "ht-sil",
+    "king-bildirim-okundu",
+    "king-iptal",
+    "king-onayla",
+    "king-parca",
+    "kotu-gun",
+    "kotu-gun-kapat",
+    "lab-file",
+    "lab-filter",
+    "lab-tab",
+    "label-file",
+    "meal-photo",
+    "meal-tab",
+    "move-tab",
+    "no-symptoms",
+    "oneri-geri",
+    "oneri-onay",
+    "oneri-ret",
+    "open-add",
+    "open-appearance",
+    "open-cheap",
+    "open-day",
+    "open-doctor",
+    "open-lab",
+    "open-label",
+    "open-limit",
+    "open-limits",
+    "open-marker",
+    "open-marker-x",
+    "open-minutes",
+    "open-nutrient",
+    "open-ogun-liste",
+    "open-palette",
+    "open-paste",
+    "open-photo",
+    "open-receipt",
+    "open-search",
+    "pdf-doctor",
+    "pick-agenda",
+    "pick-agent",
+    "pick-basket",
+    "pick-food",
+    "pick-level",
+    "pick-pattern",
+    "pick-pattern-tab",
+    "play-minutes",
+    "price-page",
+    "print-doctor",
+    "prune-storage",
+    "quick-ask",
+    "quick-meal",
+    "quick-save",
+    "rail-toggle",
+    "receipt-file",
+    "refresh-briefing",
+    "reload",
+    "remove-profile",
+    "restore",
+    "restore-hkm",
+    "rozet-ac",
+    "run-label",
+    "run-meeting",
+    "run-paste",
+    "run-photo",
+    "run-receipt",
+    "rutbe-git",
+    "rutbe-tab",
+    "saglik-ac",
+    "saglik-dosya",
+    "saglik-oku",
+    "saglik-yaz",
+    "save-close",
+    "save-decision",
+    "save-exam",
+    "save-food",
+    "save-inline",
+    "save-kg",
+    "save-limit",
+    "save-limits",
+    "save-med",
+    "save-model",
+    "save-new-profile",
+    "save-ogun-liste",
+    "save-paste",
+    "save-photo",
+    "save-prefs",
+    "save-profile",
+    "save-receipt",
+    "save-session",
+    "save-vitals",
+    "send-chat",
+    "seri-coz",
+    "seri-hasta",
+    "seri-tatil",
+    "seri-tatil-bitir",
+    "seri-tatil-gun",
+    "seri-tatil-sinir",
+    "seri-tatil-vazgec",
+    "set-design",
+    "set-level",
+    "set-palette",
+    "set-soreness",
+    "set-theme",
+    "setup-save",
+    "setup-skip",
+    "sheet-close",
+    "shift-day",
+    "show-store-error",
+    "signal-answer",
+    "signal-dismiss",
+    "start-area",
+    "start-session",
+    "stop-med",
+    "stop-minutes",
+    "switch-profile",
+    "talk-cut",
+    "talk-start",
+    "talk-stop",
+    "tanitim-adim",
+    "test-model",
+    "toggle-brief",
+    "toggle-desk",
+    "toggle-ex",
+    "toggle-liste-row",
+    "toggle-menu",
+    "toggle-period",
+    "toggle-photo-row",
+    "toggle-pin",
+    "toggle-receipt-row",
+    "toggle-row",
+    "toggle-unmatched",
+    "track-decision",
+    "undo-import",
+    "urun-ac",
+    "urun-sil",
+    "wipe",
+    "yer-sil"
+   ],
+   "olcu": {
+    "bos": {
+     "390": {
+      "today": {
+       "kelime": 263,
+       "dugme": 52,
+       "dolu": 2,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3431
+      },
+      "labs": {
+       "kelime": 57,
+       "dugme": 9,
+       "dolu": 1,
+       "sekme": 7,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1491
+      },
+      "meals": {
+       "kelime": 75,
+       "dugme": 14,
+       "dolu": 3,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1876
+      },
+      "kitchen": {
+       "kelime": 297,
+       "dugme": 9,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3046
+      },
+      "move": {
+       "kelime": 213,
+       "dugme": 22,
+       "dolu": 1,
+       "sekme": 6,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 1,
+       "xp": 0,
+       "boy": 2688
+      },
+      "basket": {
+       "kelime": 186,
+       "dugme": 11,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2543
+      },
+      "office": {
+       "kelime": 414,
+       "dugme": 23,
+       "dolu": 6,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4312
+      },
+      "team": {
+       "kelime": 152,
+       "dugme": 14,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2424
+      },
+      "meeting": {
+       "kelime": 155,
+       "dugme": 4,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1999
+      },
+      "analytics": {
+       "kelime": 198,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2058
+      },
+      "rutbe": {
+       "kelime": 101,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 6,
+       "boy": 2690
+      },
+      "family": {
+       "kelime": 133,
+       "dugme": 6,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2082
+      },
+      "guide": {
+       "kelime": 369,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 2,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2940
+      }
+     },
+     "1440": {
+      "today": {
+       "kelime": 263,
+       "dugme": 52,
+       "dolu": 2,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2382
+      },
+      "labs": {
+       "kelime": 57,
+       "dugme": 9,
+       "dolu": 1,
+       "sekme": 7,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1163
+      },
+      "meals": {
+       "kelime": 75,
+       "dugme": 14,
+       "dolu": 3,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1550
+      },
+      "kitchen": {
+       "kelime": 297,
+       "dugme": 9,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2182
+      },
+      "move": {
+       "kelime": 213,
+       "dugme": 22,
+       "dolu": 1,
+       "sekme": 6,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 1,
+       "xp": 0,
+       "boy": 2038
+      },
+      "basket": {
+       "kelime": 186,
+       "dugme": 11,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1882
+      },
+      "office": {
+       "kelime": 414,
+       "dugme": 23,
+       "dolu": 6,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3052
+      },
+      "team": {
+       "kelime": 152,
+       "dugme": 14,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1840
+      },
+      "meeting": {
+       "kelime": 155,
+       "dugme": 4,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1560
+      },
+      "analytics": {
+       "kelime": 198,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1551
+      },
+      "rutbe": {
+       "kelime": 101,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 6,
+       "boy": 2453
+      },
+      "family": {
+       "kelime": 133,
+       "dugme": 6,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1471
+      },
+      "guide": {
+       "kelime": 369,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 2,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2185
+      }
+     }
+    },
+    "dolu": {
+     "390": {
+      "today": {
+       "kelime": 368,
+       "dugme": 54,
+       "dolu": 2,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4228
+      },
+      "labs": {
+       "kelime": 278,
+       "dugme": 23,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3297
+      },
+      "meals": {
+       "kelime": 114,
+       "dugme": 18,
+       "dolu": 2,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2357
+      },
+      "kitchen": {
+       "kelime": 297,
+       "dugme": 9,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3046
+      },
+      "move": {
+       "kelime": 203,
+       "dugme": 23,
+       "dolu": 0,
+       "sekme": 6,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 1,
+       "xp": 0,
+       "boy": 2609
+      },
+      "basket": {
+       "kelime": 186,
+       "dugme": 11,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2543
+      },
+      "office": {
+       "kelime": 476,
+       "dugme": 23,
+       "dolu": 6,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4544
+      },
+      "team": {
+       "kelime": 152,
+       "dugme": 14,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2424
+      },
+      "meeting": {
+       "kelime": 185,
+       "dugme": 5,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2148
+      },
+      "analytics": {
+       "kelime": 227,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2306
+      },
+      "rutbe": {
+       "kelime": 162,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 9,
+       "boy": 2770
+      },
+      "family": {
+       "kelime": 133,
+       "dugme": 6,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2082
+      },
+      "guide": {
+       "kelime": 369,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 2,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2940
+      }
+     },
+     "1440": {
+      "today": {
+       "kelime": 368,
+       "dugme": 54,
+       "dolu": 2,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3064
+      },
+      "labs": {
+       "kelime": 278,
+       "dugme": 23,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2022
+      },
+      "meals": {
+       "kelime": 114,
+       "dugme": 18,
+       "dolu": 2,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3047
+      },
+      "kitchen": {
+       "kelime": 297,
+       "dugme": 9,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2182
+      },
+      "move": {
+       "kelime": 203,
+       "dugme": 23,
+       "dolu": 0,
+       "sekme": 6,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 1,
+       "xp": 0,
+       "boy": 1936
+      },
+      "basket": {
+       "kelime": 186,
+       "dugme": 11,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1882
+      },
+      "office": {
+       "kelime": 476,
+       "dugme": 23,
+       "dolu": 6,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3021
+      },
+      "team": {
+       "kelime": 152,
+       "dugme": 14,
+       "dolu": 2,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1840
+      },
+      "meeting": {
+       "kelime": 185,
+       "dugme": 5,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1560
+      },
+      "analytics": {
+       "kelime": 227,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1895
+      },
+      "rutbe": {
+       "kelime": 162,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 9,
+       "boy": 2547
+      },
+      "family": {
+       "kelime": 133,
+       "dugme": 6,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1471
+      },
+      "guide": {
+       "kelime": 369,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 2,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2185
+      }
+     }
+    }
+   },
+   "oz": [],
+   "hatalar": []
+  },
+  "ESP": {
+   "rotalar": {
+    "today": {
+     "baslik": "Yabancı Dil — Son 14 günün 5'inde çalışıldı — önce bunu ölç",
+     "sekmeler": [
+      "Giriş",
+      "Özet",
+      "Geçmiş"
+     ],
+     "alanlar": [
+      "s-min",
+      "s-count",
+      "s-note",
+      "quick-text"
+     ]
+    },
+    "ladder": {
+     "baslik": "Merdiven henüz başlamadı.",
+     "sekmeler": [
+      "Genel",
+      "Yol",
+      "Seviye tespiti"
+     ],
+     "alanlar": [
+      "lad-disc",
+      "pl-disc",
+      "pl-years",
+      "pl-output",
+      "pl-teach"
+     ]
+    },
+    "lang": {
+     "baslik": "Deste boş.",
+     "sekmeler": [
+      "Çalış",
+      "Kartlar",
+      "Ekle",
+      "Öğren",
+      "Dilbilgisi",
+      "İlerleme",
+      "Reçete",
+      "Koç",
+      "Harita",
+      "Ekler",
+      "Hatırlatma",
+      "Plan",
+      "Denetim"
+     ],
+     "alanlar": [
+      "deck-lang",
+      "card-q",
+      "vocab-text",
+      "vocab-lang",
+      "c-front",
+      "c-back",
+      "c-ctx",
+      "unite-duzey",
+      "unite-konu",
+      "er-kind",
+      "er-wrong",
+      "er-right",
+      "desk-ask-lang",
+      "as-kind-lang",
+      "as-title-lang",
+      "as-url-lang",
+      "as-text-lang",
+      "rm-text-lang",
+      "rm-due-lang",
+      "rm-rep-lang"
+     ]
+    },
+    "symposium": {
+     "baslik": "Henüz tez yok.",
+     "sekmeler": [
+      "Açık",
+      "Kapalı",
+      "Ekle",
+      "Metinler",
+      "Deneyler",
+      "Öğren",
+      "Reçete",
+      "Koç",
+      "Harita",
+      "Ekler",
+      "Hatırlatma",
+      "Plan",
+      "Denetim"
+     ],
+     "alanlar": [
+      "arg-text",
+      "belge-felsefe",
+      "canon-pick",
+      "b-title",
+      "b-author",
+      "b-kind",
+      "exp-field",
+      "desk-ask-philo",
+      "as-kind-philo",
+      "as-title-philo",
+      "as-url-philo",
+      "as-text-philo",
+      "rm-text-philo",
+      "rm-due-philo",
+      "rm-rep-philo"
+     ]
+    },
+    "history": {
+     "baslik": "Zaman şeridi boş.",
+     "sekmeler": [
+      "Şerit",
+      "Olaylar",
+      "Kaynaklar",
+      "Zincir",
+      "Öğren",
+      "Çalışma",
+      "Reçete",
+      "Koç",
+      "Harita",
+      "Ekler",
+      "Hatırlatma",
+      "Plan",
+      "Denetim"
+     ],
+     "alanlar": [
+      "ev-title",
+      "ev-year",
+      "ev-kind",
+      "ev-region",
+      "ev-why",
+      "belge-tarih",
+      "sr-title",
+      "sr-author",
+      "sr-kind",
+      "sr-year",
+      "sr-school",
+      "desk-ask-history",
+      "as-kind-history",
+      "as-title-history",
+      "as-url-history",
+      "as-text-history",
+      "rm-text-history",
+      "rm-due-history",
+      "rm-rep-history",
+      "ev-q",
+      "ch-event",
+      "ch-q"
+     ]
+    },
+    "studio": {
+     "baslik": "Henüz parça ya da teknik yok.",
+     "sekmeler": [
+      "Müzik",
+      "Diksiyon",
+      "Kulak",
+      "Öğren",
+      "İlerleme"
+     ],
+     "alanlar": [
+      "metro-sig",
+      "p-name",
+      "p-kind",
+      "p-target",
+      "gitar-duzey",
+      "gitar-konu",
+      "tw-pick",
+      "belge-diksiyon",
+      "r-sec",
+      "r-words",
+      "r-err",
+      "att-piece"
+     ]
+    },
+    "library": {
+     "baslik": "Henüz atomik not yok.",
+     "sekmeler": [
+      "Notlar",
+      "Matris",
+      "Kaynaklar",
+      "Yöntem",
+      "Öğren",
+      "Reçete",
+      "Koç",
+      "Harita",
+      "Ekler",
+      "Hatırlatma",
+      "Plan",
+      "Denetim"
+     ],
+     "alanlar": [
+      "note-text",
+      "note-book",
+      "belge-okuma",
+      "lb-title",
+      "lb-author",
+      "lb-kind",
+      "desk-ask-reading",
+      "as-kind-reading",
+      "as-title-reading",
+      "as-url-reading",
+      "as-text-reading",
+      "rm-text-reading",
+      "rm-due-reading",
+      "rm-rep-reading",
+      "note-q"
+     ]
+    },
+    "writing": {
+     "baslik": "Henüz taslak yok.",
+     "sekmeler": [
+      "Taslaklar",
+      "Ölçüm",
+      "Araçlar",
+      "Öğren",
+      "Reçete",
+      "Koç",
+      "Harita",
+      "Ekler",
+      "Hatırlatma",
+      "Plan",
+      "Denetim"
+     ],
+     "alanlar": [
+      "belge-yazi",
+      "desk-ask-writing",
+      "as-kind-writing",
+      "as-title-writing",
+      "as-url-writing",
+      "as-text-writing",
+      "rm-text-writing",
+      "rm-due-writing",
+      "rm-rep-writing"
+     ]
+    },
+    "office": {
+     "baslik": "Masalarda bekleyen bulgu yok.",
+     "sekmeler": [],
+     "alanlar": []
+    },
+    "team": {
+     "baslik": "Patron — baş danışman.",
+     "sekmeler": [
+      "Patron",
+      "Polyglot",
+      "Socrates",
+      "Maestro",
+      "Demosthenes",
+      "Aristoteles",
+      "Montaigne",
+      "Herodot",
+      "Mnemosyne"
+     ],
+     "alanlar": [
+      "chat-input"
+     ]
+    },
+    "meeting": {
+     "baslik": "Gündem: kapıda bekleyen kademe.",
+     "sekmeler": [],
+     "alanlar": []
+    },
+    "analytics": {
+     "baslik": "Ölçülecek veri yok.",
+     "sekmeler": [
+      "Radar",
+      "Seriler",
+      "Rapor",
+      "Dürüstlük"
+     ],
+     "alanlar": [
+      "radar-window",
+      "series-disc",
+      "calib-kind",
+      "calib-guess"
+     ]
+    },
+    "rutbe": {
+     "baslik": "Rütbe",
+     "sekmeler": [
+      "Şu an",
+      "Merdiven",
+      "Başarımlar",
+      "XP nereden gelir",
+      "Defter"
+     ],
+     "alanlar": []
+    },
+    "profile": {
+     "baslik": "Profil henüz doldurulmadı.",
+     "sekmeler": [],
+     "alanlar": [
+      "pf-name",
+      "pf-focus",
+      "pf-instrument",
+      "pf-lang",
+      "pf-minutes",
+      "pf-otomatik",
+      "hafiza-yeni",
+      "pf-new",
+      "hkm-url",
+      "hkm-token",
+      "hkm-int",
+      "hkm-level"
+     ]
+    },
+    "guide": {
+     "baslik": "Sistem ne yapar — ve ne yapmaz.",
+     "sekmeler": [
+      "Kullanım",
+      "Model",
+      "Veri",
+      "Sınırlar",
+      "Dayanak"
+     ],
+     "alanlar": [
+      "md-provider",
+      "md-model",
+      "md-key",
+      "restore-drop"
+     ]
+    }
+   },
+   "eylemler": {
+    "add-book": {
+     "rotalar": [
+      "symposium"
+     ],
+     "gorunur": true,
+     "etiket": "Elle ekle"
+    },
+    "add-book2": {
+     "rotalar": [
+      "library"
+     ],
+     "gorunur": true,
+     "etiket": "Ekle"
+    },
+    "add-canon": {
+     "rotalar": [
+      "symposium"
+     ],
+     "gorunur": true,
+     "etiket": "Ekle"
+    },
+    "add-card": {
+     "rotalar": [
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": "Kart ekle"
+    },
+    "add-chain": {
+     "rotalar": [
+      "history"
+     ],
+     "gorunur": true,
+     "etiket": "Zincir aç"
+    },
+    "add-error": {
+     "rotalar": [
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": "Karta çevir"
+    },
+    "add-event": {
+     "rotalar": [
+      "history"
+     ],
+     "gorunur": true,
+     "etiket": "Olayı ekle"
+    },
+    "add-note": {
+     "rotalar": [
+      "library"
+     ],
+     "gorunur": true,
+     "etiket": "Notu ekle"
+    },
+    "add-piece": {
+     "rotalar": [
+      "studio"
+     ],
+     "gorunur": true,
+     "etiket": "Ekle"
+    },
+    "add-profile": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "Ekle"
+    },
+    "add-recording": {
+     "rotalar": [
+      "studio"
+     ],
+     "gorunur": true,
+     "etiket": "Ölçümü kaydet"
+    },
+    "add-session": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Oturumu kaydet"
+    },
+    "add-source": {
+     "rotalar": [
+      "history"
+     ],
+     "gorunur": true,
+     "etiket": "Kaynağı ekle"
+    },
+    "add-technique": {
+     "rotalar": [
+      "studio"
+     ],
+     "gorunur": true,
+     "etiket": "Dönüşümlü mızrap"
+    },
+    "ana-tab": {
+     "rotalar": [
+      "analytics"
+     ],
+     "gorunur": true,
+     "etiket": "Radar"
+    },
+    "belge-iste": {
+     "rotalar": [
+      "history",
+      "library",
+      "studio",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "King’e ilet"
+    },
+    "bpm": {
+     "rotalar": [
+      "studio"
+     ],
+     "gorunur": true,
+     "etiket": "5 azalt"
+    },
+    "calib-open": {
+     "rotalar": [
+      "analytics"
+     ],
+     "gorunur": true,
+     "etiket": "Tahmini kaydet"
+    },
+    "contemp": {
+     "rotalar": [
+      "history"
+     ],
+     "gorunur": true,
+     "etiket": "Eşzamanlı"
+    },
+    "day-tab": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Giriş"
+    },
+    "dayanak-iste": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "CEFR tablosunu kaynağa bağla"
+    },
+    "del-book": {
+     "rotalar": [
+      "symposium"
+     ],
+     "gorunur": true,
+     "etiket": "Sil"
+    },
+    "del-book2": {
+     "rotalar": [
+      "library"
+     ],
+     "gorunur": true,
+     "etiket": "Sil"
+    },
+    "del-card": {
+     "rotalar": [
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": "Sil"
+    },
+    "del-event": {
+     "rotalar": [
+      "history"
+     ],
+     "gorunur": true,
+     "etiket": "Sil"
+    },
+    "del-note": {
+     "rotalar": [
+      "library"
+     ],
+     "gorunur": true,
+     "etiket": "Sil"
+    },
+    "del-piece": {
+     "rotalar": [
+      "studio"
+     ],
+     "gorunur": true,
+     "etiket": "Sil"
+    },
+    "del-session": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Sil"
+    },
+    "desk-add-asset": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Ekle"
+    },
+    "desk-add-rem": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Hatırlat"
+    },
+    "desk-ladder": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Tam haritayı aç"
+    },
+    "desk-open-team": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Danışma ekranı"
+    },
+    "desk-send": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Gönder"
+    },
+    "desk-tab": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "studio",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Reçete"
+    },
+    "desk-talk": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Sesli sohbet"
+    },
+    "desk-toggle": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "studio",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Kapat"
+    },
+    "dictate": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "symposium",
+      "team",
+      "today",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Sesle yaz"
+    },
+    "dunku-oturum": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Bugüne ekle"
+    },
+    "exp-to-thesis": {
+     "rotalar": [
+      "symposium"
+     ],
+     "gorunur": true,
+     "etiket": "Tez yap"
+    },
+    "export-data": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "Yedek indir"
+    },
+    "export-data2": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Yedek indir"
+    },
+    "filter-concept": {
+     "rotalar": [
+      "library"
+     ],
+     "gorunur": true,
+     "etiket": "Zaman"
+    },
+    "gen-briefing": {
+     "rotalar": [
+      "analytics"
+     ],
+     "gorunur": true,
+     "etiket": "Yeniden üret"
+    },
+    "gitar-iste": {
+     "rotalar": [
+      "studio"
+     ],
+     "gorunur": true,
+     "etiket": "King’e ilet"
+    },
+    "go": {
+     "rotalar": [
+      "(kabuk)",
+      "analytics",
+      "guide",
+      "history",
+      "ladder",
+      "lang",
+      "library",
+      "office",
+      "profile",
+      "studio",
+      "symposium",
+      "today",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Aç"
+    },
+    "go-cards": {
+     "rotalar": [
+      "history"
+     ],
+     "gorunur": true,
+     "etiket": "Tekrara başla"
+    },
+    "guide-tab": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Kullanım"
+    },
+    "hafiza-ekle": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "Hatırla"
+    },
+    "hard-reload": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "tazele"
+    },
+    "hint": {
+     "rotalar": [
+      "analytics",
+      "guide",
+      "history",
+      "ladder",
+      "lang",
+      "library",
+      "office",
+      "profile",
+      "studio",
+      "symposium",
+      "team",
+      "today",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "HKM işareti hakkında bilgi"
+    },
+    "hkm-backfill": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "Geçmişi gönder (60 gün)"
+    },
+    "hkm-pair": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "Bağlan"
+    },
+    "hkm-send": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "Şimdi gönder"
+    },
+    "hkm-toggle": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": ""
+    },
+    "import-data": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "Yedekten yükle"
+    },
+    "kotu-gun": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Kötü gün"
+    },
+    "lang-tab": {
+     "rotalar": [
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": "Çalış"
+    },
+    "log-clean": {
+     "rotalar": [
+      "studio"
+     ],
+     "gorunur": true,
+     "etiket": "Temiz tekrar"
+    },
+    "log-dirty": {
+     "rotalar": [
+      "studio"
+     ],
+     "gorunur": true,
+     "etiket": "Hatalı tekrar"
+    },
+    "log-drill": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "studio",
+      "symposium",
+      "today",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "İşle"
+    },
+    "mark-topic": {
+     "rotalar": [
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": ""
+    },
+    "metro-toggle": {
+     "rotalar": [
+      "studio"
+     ],
+     "gorunur": true,
+     "etiket": "Başlat"
+    },
+    "new-chain": {
+     "rotalar": [
+      "history"
+     ],
+     "gorunur": true,
+     "etiket": "Zincir kur"
+    },
+    "new-draft": {
+     "rotalar": [
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Yeni taslak"
+    },
+    "open-agent": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Danış"
+    },
+    "open-appearance": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Görünüm"
+    },
+    "open-draft": {
+     "rotalar": [
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Aç"
+    },
+    "open-link": {
+     "rotalar": [
+      "library"
+     ],
+     "gorunur": true,
+     "etiket": "Bağla"
+    },
+    "open-palette": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Komut paleti (Ctrl+K)"
+    },
+    "parse-arg": {
+     "rotalar": [
+      "symposium"
+     ],
+     "gorunur": true,
+     "etiket": "Çöz"
+    },
+    "parse-quick": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Çöz"
+    },
+    "parse-vocab": {
+     "rotalar": [
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": "Çöz"
+    },
+    "philo-tab": {
+     "rotalar": [
+      "symposium"
+     ],
+     "gorunur": true,
+     "etiket": "Açık"
+    },
+    "pick-agenda": {
+     "rotalar": [
+      "meeting"
+     ],
+     "gorunur": true,
+     "etiket": "✓ Kapıda bekleyen kademe 7 kapı ölçülemiyor."
+    },
+    "pick-agent": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Patron"
+    },
+    "pick-day": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "24 —"
+    },
+    "pick-disc": {
+     "rotalar": [
+      "ladder",
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "✓ Dil dakika"
+    },
+    "pick-era": {
+     "rotalar": [
+      "history"
+     ],
+     "gorunur": true,
+     "etiket": "Tarih öncesi MÖ 3000000 – MÖ 3201 0"
+    },
+    "pick-tab": {
+     "rotalar": [
+      "history",
+      "ladder"
+     ],
+     "gorunur": true,
+     "etiket": "Genel"
+    },
+    "plan-make": {
+     "rotalar": [
+      "office"
+     ],
+     "gorunur": true,
+     "etiket": "Plan kur"
+    },
+    "prac-start": {
+     "rotalar": [
+      "history",
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": "Pratiğe başla"
+    },
+    "prop-accept": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "office",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Onayla"
+    },
+    "prop-decline": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "office",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Reddet"
+    },
+    "prune-storage": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Seçilenleri buda"
+    },
+    "read-tab": {
+     "rotalar": [
+      "library"
+     ],
+     "gorunur": true,
+     "etiket": "Notlar"
+    },
+    "rozet-ac": {
+     "rotalar": [
+      "rutbe"
+     ],
+     "gorunur": true,
+     "etiket": "Görev 100 görev · %0"
+    },
+    "run-meeting": {
+     "rotalar": [
+      "meeting"
+     ],
+     "gorunur": true,
+     "etiket": "Toplantıyı başlat"
+    },
+    "rutbe-git": {
+     "rotalar": [
+      "rutbe"
+     ],
+     "gorunur": true,
+     "etiket": "Git"
+    },
+    "rutbe-tab": {
+     "rotalar": [
+      "rutbe"
+     ],
+     "gorunur": true,
+     "etiket": "Şu an"
+    },
+    "rx-open": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "studio",
+      "symposium",
+      "today",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Isınma Ses ısınması"
+    },
+    "save-arg-raw": {
+     "rotalar": [
+      "symposium"
+     ],
+     "gorunur": true,
+     "etiket": "Olduğu gibi kaydet"
+    },
+    "save-model": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Kaydet"
+    },
+    "save-placement": {
+     "rotalar": [
+      "ladder"
+     ],
+     "gorunur": true,
+     "etiket": "Tahmini kaydet"
+    },
+    "save-profile": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "Kaydet"
+    },
+    "seed": {
+     "rotalar": [
+      "history"
+     ],
+     "gorunur": true,
+     "etiket": "Tohumu yükle"
+    },
+    "seed-cards": {
+     "rotalar": [
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": "Tohum desteyi ekle"
+    },
+    "send-chat": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Gönder"
+    },
+    "seri-hasta": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Bugün hastayım · seri donsun"
+    },
+    "seri-tatil": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Tatil modu"
+    },
+    "set-design": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "✓ Defter Varsayılan — solda künye sütunu, kutusu"
+    },
+    "set-palette": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "✓ Kâğıt Varsayılan — sıcak kâğıt, derin yeşil"
+    },
+    "set-theme": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "✓ Sistem Cihazın ayarına uyar"
+    },
+    "start-review": {
+     "rotalar": [
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": "12 kartı çalış"
+    },
+    "studio-tab": {
+     "rotalar": [
+      "studio"
+     ],
+     "gorunur": true,
+     "etiket": "Müzik"
+    },
+    "tab-ekle": {
+     "rotalar": [
+      "lang",
+      "symposium"
+     ],
+     "gorunur": true,
+     "etiket": "Kart ekle"
+    },
+    "timer-start": {
+     "rotalar": [
+      "today"
+     ],
+     "gorunur": true,
+     "etiket": "Sayacı başlat"
+    },
+    "to-cards": {
+     "rotalar": [
+      "history"
+     ],
+     "gorunur": true,
+     "etiket": "Karta çevir"
+    },
+    "toggle-active": {
+     "rotalar": [
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": ""
+    },
+    "toggle-book": {
+     "rotalar": [
+      "library"
+     ],
+     "gorunur": true,
+     "etiket": "Bitir"
+    },
+    "toggle-brief": {
+     "rotalar": [
+      "team"
+     ],
+     "gorunur": true,
+     "etiket": "Ham brifing (JSON)"
+    },
+    "toggle-err": {
+     "rotalar": [
+      "studio"
+     ],
+     "gorunur": true,
+     "etiket": "Yutulan hece"
+    },
+    "toggle-menu": {
+     "rotalar": [
+      "(kabuk)"
+     ],
+     "gorunur": true,
+     "etiket": "Bölümler"
+    },
+    "toggle-mod": {
+     "rotalar": [
+      "profile"
+     ],
+     "gorunur": true,
+     "etiket": "✓ Yabancı Dil Kelime kartları, aralıklı tekrar, "
+    },
+    "topic-open": {
+     "rotalar": [
+      "history",
+      "lang",
+      "library",
+      "studio",
+      "symposium",
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "I Ses ve alfabe Hedef dilin seslerini tanımak ve"
+    },
+    "unit-open": {
+     "rotalar": [
+      "history",
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": "Aç"
+    },
+    "unite-iste": {
+     "rotalar": [
+      "lang"
+     ],
+     "gorunur": true,
+     "etiket": "King’e ilet"
+    },
+    "wipe-data": {
+     "rotalar": [
+      "guide"
+     ],
+     "gorunur": true,
+     "etiket": "Bu profilin verisini sil"
+    },
+    "write-tab": {
+     "rotalar": [
+      "writing"
+     ],
+     "gorunur": true,
+     "etiket": "Taslaklar"
+    }
+   },
+   "ekranKaydi": {
+    "analytics": [
+     "ana-tab",
+     "calib-open",
+     "calib-settle",
+     "gen-briefing"
+    ],
+    "guide": [
+     "dayanak-iste",
+     "export-data2",
+     "guide-tab",
+     "prune-storage",
+     "restore-hkm",
+     "save-model",
+     "undo-import",
+     "wipe-data"
+    ],
+    "history": [
+     "add-chain",
+     "add-event",
+     "add-link",
+     "add-source",
+     "belge-iste",
+     "contemp",
+     "del-chain",
+     "del-event",
+     "del-link",
+     "del-source",
+     "go-cards",
+     "new-chain",
+     "open-chain",
+     "open-source",
+     "pick-era",
+     "pick-tab",
+     "save-critique",
+     "seed",
+     "to-cards"
+    ],
+    "ladder": [
+     "pick-disc",
+     "pick-tab",
+     "save-placement"
+    ],
+    "lang": [
+     "add-card",
+     "add-error",
+     "clear-vocab",
+     "del-card",
+     "end-review",
+     "grade-card",
+     "lang-tab",
+     "log-review",
+     "mark-topic",
+     "parse-vocab",
+     "reveal-card",
+     "save-vocab",
+     "seed-cards",
+     "start-review",
+     "tab-ekle",
+     "toggle-active",
+     "unite-iste"
+    ],
+    "library": [
+     "add-book2",
+     "add-note",
+     "anlat-kaydet",
+     "anlat-olc",
+     "belge-iste",
+     "clear-concept",
+     "close-link",
+     "del-book2",
+     "del-note",
+     "do-link",
+     "filter-concept",
+     "open-link",
+     "read-tab",
+     "toggle-book",
+     "unlink"
+    ],
+    "meeting": [
+     "close-decision",
+     "pick-agenda",
+     "run-meeting",
+     "toggle-minutes",
+     "track-decision"
+    ],
+    "office": [
+     "open-agent",
+     "urun-ac",
+     "urun-sil"
+    ],
+    "profile": [
+     "add-profile",
+     "export-data",
+     "hafiza-ekle",
+     "hafiza-unut",
+     "hkm-backfill",
+     "hkm-pair",
+     "hkm-send",
+     "hkm-toggle",
+     "import-data",
+     "remove-profile",
+     "save-profile",
+     "switch-profile",
+     "toggle-mod"
+    ],
+    "rutbe": [
+     "rozet-ac",
+     "rutbe-git",
+     "rutbe-tab"
+    ],
+    "studio": [
+     "add-piece",
+     "add-recording",
+     "add-technique",
+     "belge-iste",
+     "bpm",
+     "del-piece",
+     "del-rec",
+     "gitar-iste",
+     "log-clean",
+     "log-dirty",
+     "metro-toggle",
+     "studio-tab",
+     "toggle-err"
+    ],
+    "symposium": [
+     "add-book",
+     "add-canon",
+     "add-obj",
+     "add-support",
+     "answer-obj",
+     "ask-socrates",
+     "belge-iste",
+     "clear-arg",
+     "close-arg",
+     "del-arg",
+     "del-book",
+     "exp-to-thesis",
+     "parse-arg",
+     "philo-tab",
+     "save-arg",
+     "save-arg-raw",
+     "socratic-q",
+     "tab-ekle"
+    ],
+    "team": [
+     "clear-chat",
+     "pick-agent",
+     "send-chat",
+     "toggle-brief"
+    ],
+    "today": [
+     "add-session",
+     "clear-quick",
+     "day-tab",
+     "del-session",
+     "dunku-oturum",
+     "hedef-durum",
+     "hedef-plan-geri",
+     "hedef-plan-kapat",
+     "hedef-plan-onizle",
+     "hedef-plan-uygula",
+     "hedef-uyarla-ac",
+     "hedef-uyarla-kapat",
+     "hedef-uyarla-sec",
+     "hkm-doubt-ok",
+     "hkm-gonder",
+     "hkm-intent-no",
+     "hkm-intent-seen",
+     "hkm-intent-yes",
+     "hkm-toplu",
+     "king-iptal",
+     "king-onayla",
+     "king-parca",
+     "kotu-gun",
+     "kotu-gun-kapat",
+     "parse-quick",
+     "pick-day",
+     "pick-disc",
+     "save-quick",
+     "seri-coz",
+     "seri-hasta",
+     "seri-tatil",
+     "seri-tatil-bitir",
+     "seri-tatil-gun",
+     "seri-tatil-sinir",
+     "seri-tatil-vazgec",
+     "signal-answer",
+     "signal-dismiss",
+     "timer-pause",
+     "timer-reset",
+     "timer-resume",
+     "timer-start",
+     "timer-stop",
+     "today-back"
+    ],
+    "writing": [
+     "belge-iste",
+     "close-draft",
+     "del-draft",
+     "do-log-writing",
+     "log-writing",
+     "new-draft",
+     "open-draft",
+     "save-draft",
+     "save-revision",
+     "write-tab"
+    ]
+   },
+   "kaynakEylemleri": [
+    "add-book",
+    "add-book2",
+    "add-canon",
+    "add-card",
+    "add-chain",
+    "add-error",
+    "add-event",
+    "add-link",
+    "add-note",
+    "add-obj",
+    "add-piece",
+    "add-profile",
+    "add-recording",
+    "add-session",
+    "add-source",
+    "add-support",
+    "add-technique",
+    "ana-tab",
+    "anlat-kaydet",
+    "anlat-olc",
+    "answer-obj",
+    "ask-socrates",
+    "belge-iste",
+    "bpm",
+    "calib-open",
+    "calib-settle",
+    "clear-arg",
+    "clear-chat",
+    "clear-concept",
+    "clear-quick",
+    "clear-vocab",
+    "close-arg",
+    "close-decision",
+    "close-draft",
+    "close-link",
+    "cmdk-run",
+    "confirm-yes",
+    "contemp",
+    "day-tab",
+    "dayanak-iste",
+    "del-arg",
+    "del-book",
+    "del-book2",
+    "del-card",
+    "del-chain",
+    "del-draft",
+    "del-event",
+    "del-link",
+    "del-note",
+    "del-piece",
+    "del-rec",
+    "del-session",
+    "del-source",
+    "desk-add-asset",
+    "desk-add-rem",
+    "desk-clear",
+    "desk-del-asset",
+    "desk-del-rem",
+    "desk-done-rem",
+    "desk-ladder",
+    "desk-listen",
+    "desk-open-team",
+    "desk-send",
+    "desk-tab",
+    "desk-talk",
+    "desk-toggle",
+    "dictate",
+    "do-link",
+    "do-log-writing",
+    "dunku-oturum",
+    "edit-med",
+    "end-review",
+    "exp-to-thesis",
+    "export-data",
+    "export-data2",
+    "filter-concept",
+    "gen-briefing",
+    "gitar-iste",
+    "go",
+    "go-cards",
+    "go-office",
+    "go-profile",
+    "go-today",
+    "grade-card",
+    "guide-tab",
+    "hafiza-ekle",
+    "hafiza-unut",
+    "hard-reload",
+    "hedef-durum",
+    "hedef-plan-geri",
+    "hedef-plan-kapat",
+    "hedef-plan-onizle",
+    "hedef-plan-uygula",
+    "hedef-uyarla-ac",
+    "hedef-uyarla-kapat",
+    "hedef-uyarla-sec",
+    "hint",
+    "hkm-backfill",
+    "hkm-doubt-ok",
+    "hkm-gonder",
+    "hkm-intent-no",
+    "hkm-intent-seen",
+    "hkm-intent-yes",
+    "hkm-pair",
+    "hkm-send",
+    "hkm-toggle",
+    "hkm-toplu",
+    "import-data",
+    "king-iptal",
+    "king-onayla",
+    "king-parca",
+    "kotu-gun",
+    "kotu-gun-kapat",
+    "lang-tab",
+    "log-clean",
+    "log-dirty",
+    "log-drill",
+    "log-review",
+    "log-writing",
+    "mark-topic",
+    "metro-toggle",
+    "new-chain",
+    "new-draft",
+    "open-agent",
+    "open-appearance",
+    "open-chain",
+    "open-day",
+    "open-draft",
+    "open-lab",
+    "open-link",
+    "open-marker",
+    "open-palette",
+    "open-source",
+    "parse-arg",
+    "parse-quick",
+    "parse-vocab",
+    "philo-tab",
+    "pick-agenda",
+    "pick-agent",
+    "pick-day",
+    "pick-disc",
+    "pick-era",
+    "pick-tab",
+    "plan-clear",
+    "plan-make",
+    "prac-answer",
+    "prac-clear-order",
+    "prac-close",
+    "prac-log",
+    "prac-pick",
+    "prac-skip",
+    "prac-start",
+    "prop-accept",
+    "prop-decline",
+    "prune-storage",
+    "quick-save",
+    "rail-toggle",
+    "read-tab",
+    "reload",
+    "remove-profile",
+    "restore-file",
+    "restore-hkm",
+    "reveal-card",
+    "rozet-ac",
+    "run-meeting",
+    "rutbe-git",
+    "rutbe-tab",
+    "rx-open",
+    "save-arg",
+    "save-arg-raw",
+    "save-critique",
+    "save-draft",
+    "save-exam",
+    "save-model",
+    "save-placement",
+    "save-profile",
+    "save-quick",
+    "save-revision",
+    "save-vocab",
+    "seed",
+    "seed-cards",
+    "send-chat",
+    "seri-coz",
+    "seri-hasta",
+    "seri-tatil",
+    "seri-tatil-bitir",
+    "seri-tatil-gun",
+    "seri-tatil-sinir",
+    "seri-tatil-vazgec",
+    "set-design",
+    "set-palette",
+    "set-theme",
+    "setup-mod",
+    "setup-save",
+    "setup-skip",
+    "sheet-close",
+    "show-store-error",
+    "signal-answer",
+    "signal-dismiss",
+    "socratic-q",
+    "start-review",
+    "studio-tab",
+    "switch-profile",
+    "tab-ekle",
+    "tanitim-adim",
+    "timer-hint",
+    "timer-pause",
+    "timer-reset",
+    "timer-resume",
+    "timer-start",
+    "timer-stop",
+    "to-cards",
+    "today-back",
+    "toggle-active",
+    "toggle-book",
+    "toggle-brief",
+    "toggle-err",
+    "toggle-menu",
+    "toggle-minutes",
+    "toggle-mod",
+    "topic-mark",
+    "topic-open",
+    "track-decision",
+    "undo-import",
+    "unit-add",
+    "unit-open",
+    "unit-sinav",
+    "unite-iste",
+    "unlink",
+    "urun-ac",
+    "urun-sil",
+    "wipe-data",
+    "write-tab"
+   ],
+   "olcu": {
+    "bos": {
+     "390": {
+      "today": {
+       "kelime": 267,
+       "dugme": 38,
+       "dolu": 2,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3849
+      },
+      "ladder": {
+       "kelime": 180,
+       "dugme": 19,
+       "dolu": 0,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2841
+      },
+      "lang": {
+       "kelime": 87,
+       "dugme": 23,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1867
+      },
+      "symposium": {
+       "kelime": 65,
+       "dugme": 21,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1726
+      },
+      "history": {
+       "kelime": 98,
+       "dugme": 24,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1985
+      },
+      "studio": {
+       "kelime": 192,
+       "dugme": 36,
+       "dolu": 3,
+       "sekme": 12,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2869
+      },
+      "library": {
+       "kelime": 94,
+       "dugme": 21,
+       "dolu": 1,
+       "sekme": 12,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2060
+      },
+      "writing": {
+       "kelime": 65,
+       "dugme": 20,
+       "dolu": 2,
+       "sekme": 11,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1798
+      },
+      "office": {
+       "kelime": 1244,
+       "dugme": 83,
+       "dolu": 26,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 10169
+      },
+      "team": {
+       "kelime": 134,
+       "dugme": 14,
+       "dolu": 1,
+       "sekme": 9,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2034
+      },
+      "meeting": {
+       "kelime": 34,
+       "dugme": 3,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1541
+      },
+      "analytics": {
+       "kelime": 245,
+       "dugme": 5,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 2,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2864
+      },
+      "rutbe": {
+       "kelime": 101,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 6,
+       "boy": 2710
+      },
+      "profile": {
+       "kelime": 746,
+       "dugme": 34,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 6398
+      },
+      "guide": {
+       "kelime": 510,
+       "dugme": 9,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 4,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4415
+      }
+     },
+     "1440": {
+      "today": {
+       "kelime": 267,
+       "dugme": 38,
+       "dolu": 2,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2689
+      },
+      "ladder": {
+       "kelime": 180,
+       "dugme": 19,
+       "dolu": 0,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1900
+      },
+      "lang": {
+       "kelime": 87,
+       "dugme": 23,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1458
+      },
+      "symposium": {
+       "kelime": 65,
+       "dugme": 21,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1412
+      },
+      "history": {
+       "kelime": 98,
+       "dugme": 24,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1497
+      },
+      "studio": {
+       "kelime": 192,
+       "dugme": 36,
+       "dolu": 3,
+       "sekme": 12,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2116
+      },
+      "library": {
+       "kelime": 94,
+       "dugme": 21,
+       "dolu": 1,
+       "sekme": 12,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1651
+      },
+      "writing": {
+       "kelime": 65,
+       "dugme": 20,
+       "dolu": 2,
+       "sekme": 11,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1432
+      },
+      "office": {
+       "kelime": 1244,
+       "dugme": 83,
+       "dolu": 26,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 5222
+      },
+      "team": {
+       "kelime": 134,
+       "dugme": 14,
+       "dolu": 1,
+       "sekme": 9,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1748
+      },
+      "meeting": {
+       "kelime": 34,
+       "dugme": 3,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1224
+      },
+      "analytics": {
+       "kelime": 245,
+       "dugme": 5,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 2,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2277
+      },
+      "rutbe": {
+       "kelime": 101,
+       "dugme": 7,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 6,
+       "boy": 2473
+      },
+      "profile": {
+       "kelime": 746,
+       "dugme": 34,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4187
+      },
+      "guide": {
+       "kelime": 510,
+       "dugme": 9,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 4,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2898
+      }
+     }
+    },
+    "dolu": {
+     "390": {
+      "today": {
+       "kelime": 296,
+       "dugme": 39,
+       "dolu": 3,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3922
+      },
+      "ladder": {
+       "kelime": 147,
+       "dugme": 15,
+       "dolu": 0,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2642
+      },
+      "lang": {
+       "kelime": 88,
+       "dugme": 22,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1643
+      },
+      "symposium": {
+       "kelime": 65,
+       "dugme": 21,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1726
+      },
+      "history": {
+       "kelime": 199,
+       "dugme": 32,
+       "dolu": 0,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2971
+      },
+      "studio": {
+       "kelime": 367,
+       "dugme": 44,
+       "dolu": 4,
+       "sekme": 12,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4671
+      },
+      "library": {
+       "kelime": 138,
+       "dugme": 39,
+       "dolu": 1,
+       "sekme": 12,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2515
+      },
+      "writing": {
+       "kelime": 93,
+       "dugme": 25,
+       "dolu": 1,
+       "sekme": 11,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1892
+      },
+      "office": {
+       "kelime": 1200,
+       "dugme": 82,
+       "dolu": 24,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 9742
+      },
+      "team": {
+       "kelime": 129,
+       "dugme": 14,
+       "dolu": 1,
+       "sekme": 9,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2013
+      },
+      "meeting": {
+       "kelime": 56,
+       "dugme": 7,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1776
+      },
+      "analytics": {
+       "kelime": 247,
+       "dugme": 5,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2898
+      },
+      "rutbe": {
+       "kelime": 166,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 8,
+       "boy": 2790
+      },
+      "profile": {
+       "kelime": 761,
+       "dugme": 34,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 6482
+      },
+      "guide": {
+       "kelime": 510,
+       "dugme": 9,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 4,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4415
+      }
+     },
+     "1440": {
+      "today": {
+       "kelime": 296,
+       "dugme": 39,
+       "dolu": 3,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2813
+      },
+      "ladder": {
+       "kelime": 147,
+       "dugme": 15,
+       "dolu": 0,
+       "sekme": 3,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1724
+      },
+      "lang": {
+       "kelime": 88,
+       "dugme": 22,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1250
+      },
+      "symposium": {
+       "kelime": 65,
+       "dugme": 21,
+       "dolu": 1,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1412
+      },
+      "history": {
+       "kelime": 199,
+       "dugme": 32,
+       "dolu": 0,
+       "sekme": 13,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1982
+      },
+      "studio": {
+       "kelime": 367,
+       "dugme": 44,
+       "dolu": 4,
+       "sekme": 12,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 3329
+      },
+      "library": {
+       "kelime": 138,
+       "dugme": 39,
+       "dolu": 1,
+       "sekme": 12,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2147
+      },
+      "writing": {
+       "kelime": 93,
+       "dugme": 25,
+       "dolu": 1,
+       "sekme": 11,
+       "sekmeGrubu": 2,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1524
+      },
+      "office": {
+       "kelime": 1200,
+       "dugme": 82,
+       "dolu": 24,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4935
+      },
+      "team": {
+       "kelime": 129,
+       "dugme": 14,
+       "dolu": 1,
+       "sekme": 9,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1748
+      },
+      "meeting": {
+       "kelime": 56,
+       "dugme": 7,
+       "dolu": 1,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 1277
+      },
+      "analytics": {
+       "kelime": 247,
+       "dugme": 5,
+       "dolu": 0,
+       "sekme": 4,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2388
+      },
+      "rutbe": {
+       "kelime": 166,
+       "dugme": 6,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 0,
+       "halka": 0,
+       "simge": 0,
+       "xp": 8,
+       "boy": 2550
+      },
+      "profile": {
+       "kelime": 761,
+       "dugme": 34,
+       "dolu": 3,
+       "sekme": 0,
+       "sekmeGrubu": 0,
+       "uzunParagraf": 1,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 4251
+      },
+      "guide": {
+       "kelime": 510,
+       "dugme": 9,
+       "dolu": 0,
+       "sekme": 5,
+       "sekmeGrubu": 1,
+       "uzunParagraf": 4,
+       "halka": 0,
+       "simge": 0,
+       "xp": 0,
+       "boy": 2898
+      }
+     }
+    }
+   },
+   "oz": [],
+   "hatalar": []
+  }
+ }
+}

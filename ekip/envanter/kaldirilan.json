@@ -1,0 +1,18 @@
+{
+  "_oku": "Tabanda olup bilerek kaldirilan ya da adi degisen seyler. Her satir KULLANICI ONAYIYLA eklenir: anahtar eski ad, deger gerekce ya da yeni ad (ör. \"yeni ad: plan-open · kullanici onayi 2026-09-25\"). Burada olmayan her kayip KIRMIZIDIR.",
+  "AYS": {
+    "eylem": {},
+    "isleyici": {},
+    "alan": {}
+  },
+  "SPI": {
+    "eylem": {},
+    "isleyici": {},
+    "alan": {}
+  },
+  "ESP": {
+    "eylem": {},
+    "isleyici": {},
+    "alan": {}
+  }
+}
