@@ -518,7 +518,9 @@ window.LIFEOS = window.LIFEOS || {};
     const olcek = sayiMi(h.olcek) && h.olcek > 0 ? h.olcek : 100;
     const var_ = sayiMi(h.deger) && h.kesinlik !== 'missing';
     const oran = var_ ? Math.max(0, Math.min(100, yuvarla(h.deger / olcek * 100))) : 0;
-    const sayi = L.SAYI ? L.SAYI.html({ deger:var_ ? h.deger : null, birim:h.birim, kesinlik:var_ ? (h.kesinlik || 'computed') : 'missing',
+    /* Kesinlik kaynaktan gelir, bileşen uydurmaz (T2-10): verilmemişse sayı
+       yine yazılır ama SAYI.html onu `data-etiketsiz` ile işaretler. */
+    const sayi = L.SAYI ? L.SAYI.html({ deger:var_ ? h.deger : null, birim:h.birim, kesinlik:var_ ? h.kesinlik : 'missing',
       ondalik:h.ondalik }, { koken:false }) : kac(var_ ? h.deger : '—');
     return '<span class="hucre' + (var_ ? '' : ' hucre--yok') + '" data-oz="038" style="--hucre-oran:' + oran + '%">'
       + sayi + '</span>';
@@ -550,8 +552,10 @@ window.LIFEOS = window.LIFEOS || {};
     xs.forEach((x, i) => { const r = ys[i] - (kesen + egim * x); sse += r * r; });
     const se = Math.sqrt(sse / Math.max(1, xs.length - 2) / sxx);
     const son = nk[nk.length - 1];
-    const sonX = gunFarki(t0, son.t);
-    const kalan = hedef - (kesen + egim * sonX);
+    /* Kalan mesafe son GERÇEK ölçümden (T2-09): doğrunun son noktadaki
+       değerinden ölçülseydi, son ölçüm hedefin altında ama doğru üstündeyken
+       kalan eksi çıkar, «en olası» tarih son ölçümden önceye düşerdi. */
+    const kalan = hedef - son.v;
     /* Yön İLK ölçümden: hedef başlangıcın üstündeyse yukarı gidilir.
        Son ölçüme göre kurulsaydı hedefi geçmiş bir seri «ulaşılmadı»
        görünürdü. */

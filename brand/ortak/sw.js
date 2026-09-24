@@ -120,6 +120,8 @@ self.addEventListener('notificationclick', e => {
   const d = (n && n.data) || {};
   if(n) n.close();
   const mesaj = { tur:'bildirim', eylem:e.action || 'ac', rota:d.rota || '', modul:d.modul || '' };
+  const ad = e.action && d.adlar && d.adlar[e.action];
+  if(ad) mesaj.ad = ad;
   e.waitUntil((async () => {
     const pencereler = await self.clients.matchAll({ type:'window', includeUncontrolled:true });
     const p = pencereler[0];
@@ -128,6 +130,16 @@ self.addEventListener('notificationclick', e => {
       if(typeof p.focus === 'function') await p.focus();
       return;
     }
-    if(self.clients.openWindow) await self.clients.openWindow(self.registration.scope + (d.rota ? '#' + d.rota : ''));
+    /* Pencere yok (T2-11): basılan eylem düşmesin diye ADRESE yazılır;
+       uygulama açılınca pwa.js `bildirimDinle` onu olay olarak verir ve
+       kullanıcıya sorar. Burada yine hiçbir şey uygulanmaz. */
+    let adres = self.registration.scope;
+    if(e.action){
+      const q = new URLSearchParams({ bildirim:e.action });
+      if(ad) q.set('ad', ad);
+      if(mesaj.modul) q.set('modul', mesaj.modul);
+      adres += '?' + q.toString();
+    }
+    if(self.clients.openWindow) await self.clients.openWindow(adres + (d.rota ? '#' + d.rota : ''));
   })());
 });

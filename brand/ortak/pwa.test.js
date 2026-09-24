@@ -97,7 +97,8 @@
       expect(k.baslik).toBe('AYS · Sıradaki 20:30');
       expect(k.secenek.body).toBe('Paragraf · akşam bloğu, 30 soru.');
       expect(k.secenek.actions).toEqual([{ action:'basla', title:'Başla' }, { action:'ertele', title:'15 dk ertele' }]);
-      expect(k.secenek.data).toEqual({ modul:'ays', rota:'today', eylemler:['basla', 'ertele'] });
+      expect(k.secenek.data).toEqual({ modul:'ays', rota:'today', eylemler:['basla', 'ertele'],
+        adlar:{ basla:'Başla', ertele:'15 dk ertele' } });
       expect(P().EN_COK_EYLEM).toBe(2);
     });
 
@@ -157,6 +158,76 @@
       dinleyici({ data:{ tur:'bildirim', eylem:'ertele', rota:'today', modul:'ays' } });
       expect(gelen).toEqual([{ eylem:'ertele', rota:'today', modul:'ays' }]);
       expect(P().bildirimDinle({ navigator:{} , hedef:hedef })).toBeFalsy();
+    });
+
+    /* T2-11: uygulama kapalıyken basılan eylem kaybolmaz. sw.js'in KENDİSİ
+       sahte bir `self` ile koşar: pencere yoksa eylem adrese taşınır; uygulama
+       açılınca bildirimDinle onu olay olarak verir ve adresten siler. SW yine
+       hiçbir şeyi uygulamaz. */
+    async function swKos(pencereler){
+      const metin = await (await fetch('../sw.js', { cache:'no-store' })).text();
+      const dinle = {}, acilan = [], giden = [];
+      const sahte = {
+        addEventListener:(t, f) => { dinle[t] = f; },
+        location:{ origin:'http://yerel' },
+        registration:{ scope:'http://yerel/ays/' },
+        clients:{
+          matchAll:async () => pencereler.map(p => ({ postMessage:m => giden.push(m), focus:async () => {} })),
+          openWindow:async u => { acilan.push(u); return null; },
+        },
+      };
+      new Function('self', 'caches', 'fetch', metin)(sahte, {}, () => Promise.reject(new Error('ag yok')));
+      return { dinle, acilan, giden };
+    }
+    function tik(sw, eylem){
+      let is = null;
+      sw.dinle.notificationclick({ action:eylem, waitUntil:p => { is = p; },
+        notification:{ close:() => {}, data:{ modul:'ays', rota:'today', eylemler:['bitti', 'ertele'],
+          adlar:{ bitti:'Bitti', ertele:'Yarına ertele' } } } });
+      return is;
+    }
+
+    it('T2-11 uygulama kapalıyken bildirimdeki eylem adrese taşınır, kaybolmaz', async () => {
+      const kapali = await swKos([]);
+      await tik(kapali, 'bitti');
+      expect(kapali.acilan).toHaveLength(1);
+      const u = new URL(kapali.acilan[0]);
+      expect(u.searchParams.get('bildirim')).toBe('bitti');
+      expect(u.searchParams.get('ad')).toBe('Bitti');
+      expect(u.searchParams.get('modul')).toBe('ays');
+      expect(u.hash).toBe('#today');
+      /* Gövdeye basmak (eylem yok) yalnız rotayı açar; soracak bir şey yok. */
+      await tik(kapali, '');
+      expect(kapali.acilan[1]).toBe('http://yerel/ays/#today');
+      /* Pencere açıksa eylem adıyla birlikte iletilir. */
+      const acik = await swKos([{}]);
+      await tik(acik, 'ertele');
+      expect(acik.acilan).toHaveLength(0);
+      expect(acik.giden).toEqual([{ tur:'bildirim', eylem:'ertele', ad:'Yarına ertele', rota:'today', modul:'ays' }]);
+    });
+
+    it('T2-11 uygulama açılınca bekleyen eylem olay olur, adresten silinir ve SORULUR', () => {
+      const nav = { serviceWorker:{ addEventListener:() => {} } };
+      const hedef = document.createElement('div');
+      const gelen = [], yazilan = [];
+      hedef.addEventListener('lifeos:bildirim', e => gelen.push(e.detail));
+      const konum = { pathname:'/ays/', search:'?bildirim=bitti&ad=Bitti&modul=ays', hash:'#today' };
+      const gecmis = { replaceState:(a, b, u) => yazilan.push(u) };
+      expect(P().bildirimDinle({ navigator:nav, hedef:hedef, konum:konum, gecmis:gecmis })).toBeTruthy();
+      expect(gelen).toEqual([{ eylem:'bitti', ad:'Bitti', rota:'today', modul:'ays', kapaliyken:true }]);
+      expect(yazilan).toEqual(['/ays/#today']);
+      expect(P().bildirimSorusu(gelen[0])).toBe('Bildirimde «Bitti» dedin; şimdi uygulansın mı?');
+      /* Adreste bildirim yoksa olay da yok. */
+      const bos = [];
+      hedef.addEventListener('lifeos:bildirim', e => bos.push(e.detail));
+      P().bildirimDinle({ navigator:nav, hedef:hedef, konum:{ pathname:'/ays/', search:'', hash:'' }, gecmis:gecmis });
+      expect(bos).toHaveLength(0);
+    });
+
+    it('T2-11 bildirim kartı eylem adlarını SW için taşır', () => {
+      const k = P().bildirimKarti({ modul:'ays', baslik:'Sıradaki', cumle:'Paragraf 20:30’da.',
+        rota:'today', eylemler:[{ id:'bitti', ad:'Bitti' }] }, { eylem:2 });
+      expect(k.secenek.data.adlar).toEqual({ bitti:'Bitti' });
     });
   });
 

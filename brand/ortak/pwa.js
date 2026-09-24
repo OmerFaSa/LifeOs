@@ -114,7 +114,9 @@
       secenek:{
         body:c,
         tag:k.etiket || (k.modul + ':' + (k.rota || 'genel')),
-        data:{ modul:k.modul, rota:k.rota || '', eylemler:eylemler.map(e => e.id) },
+        /* adlar: uygulama kapalıyken SW eylemin ADINI adrese yazar (T2-11). */
+        data:{ modul:k.modul, rota:k.rota || '', eylemler:eylemler.map(e => e.id),
+          adlar:eylemler.reduce((a, e) => { a[e.id] = e.ad; return a; }, {}) },
         actions:gosterilen.map(e => ({ action:e.id, title:e.ad })),
       },
       gizlenenEylem:eylemler.length - gosterilen.length,
@@ -149,8 +151,14 @@
   }
 
   /* Service worker'ın ilettiği eylemi uygulamaya olay olarak verir:
-     `window` üstünde `lifeos:bildirim` { eylem, rota, modul }. Dinleyen
-     modül kendi koduyla karar verir; kimse dinlemiyorsa hiçbir şey olmaz. */
+     `window` üstünde `lifeos:bildirim` { eylem, ad?, rota, modul }. Dinleyen
+     modül kendi koduyla karar verir; kimse dinlemiyorsa hiçbir şey olmaz.
+
+     Uygulama KAPALIYKEN basılan eylem (T2-11) adreste gelir
+     (`?bildirim=…&ad=…&modul=…`): olay `kapaliyken:true` ile HEMEN verilir
+     ve adres temizlenir (yenileyince ikinci kez sorulmaz). Bu yüzden
+     `lifeos:bildirim` dinleyicisi bu çağrıdan ÖNCE kurulur. Kapalıyken
+     basılan eylem sessizce uygulanmaz: modül `bildirimSorusu` ile sorar. */
   function bildirimDinle(o){
     o = o || {};
     const nav = o.navigator || (typeof navigator !== 'undefined' ? navigator : null);
@@ -159,11 +167,41 @@
     nav.serviceWorker.addEventListener('message', ev => {
       const m = ev && ev.data;
       if(!m || m.tur !== 'bildirim') return;
-      hedef.dispatchEvent(new CustomEvent('lifeos:bildirim', { detail:{ eylem:m.eylem, rota:m.rota, modul:m.modul } }));
+      const detay = { eylem:m.eylem, rota:m.rota, modul:m.modul };
+      if(m.ad) detay.ad = m.ad;
+      hedef.dispatchEvent(new CustomEvent('lifeos:bildirim', { detail:detay }));
     });
+    bekleyenBildirim(o, hedef);
     return true;
   }
 
+  function bekleyenBildirim(o, hedef){
+    const konum = o.konum || (typeof location !== 'undefined' ? location : null);
+    if(!konum || !konum.search || typeof URLSearchParams === 'undefined') return;
+    const q = new URLSearchParams(konum.search);
+    const eylem = q.get('bildirim');
+    if(!eylem) return;
+    const detay = { eylem:eylem, rota:String(konum.hash || '').replace(/^#/, ''), modul:q.get('modul') || '',
+      kapaliyken:true };
+    if(q.get('ad')) detay.ad = q.get('ad');
+    ['bildirim', 'ad', 'modul'].forEach(k => q.delete(k));
+    const gecmis = o.gecmis || (typeof history !== 'undefined' ? history : null);
+    const kalan = q.toString();
+    try{
+      if(gecmis && typeof gecmis.replaceState === 'function'){
+        gecmis.replaceState(null, '', konum.pathname + (kalan ? '?' + kalan : '') + (konum.hash || ''));
+      }
+    }catch(e){ /* adres temizlenemedi: olay yine verilir */ }
+    hedef.dispatchEvent(new CustomEvent('lifeos:bildirim', { detail:detay }));
+  }
+
+  /* Kapalıyken basılan eylem için modülün soracağı tek cümle. */
+  function bildirimSorusu(d){
+    d = d || {};
+    const ad = String(d.ad || d.eylem || '').trim();
+    return ad ? 'Bildirimde «' + ad + '» dedin; şimdi uygulansın mı?' : '';
+  }
+
   L.Pwa = { uygun, adresler, kaydet, EN_COK,
-    EN_COK_EYLEM, bildirimDestegi, bildirimKarti, bildir, izinIste, bildirimDinle };
+    EN_COK_EYLEM, bildirimDestegi, bildirimKarti, bildir, izinIste, bildirimDinle, bildirimSorusu };
 })();

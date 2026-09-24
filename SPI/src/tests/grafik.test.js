@@ -409,6 +409,38 @@ describe('P2 · Grafik ekleri (029 030 031 033 034 038 039)', () => {
   });
 });
 
+describe('Tur 2 bulguları (H → K)', () => {
+  it('T2-09 hız tahmini hedefe ulaşılmamışken son ölçümden ÖNCE bir tarih vermez', () => {
+    /* H'nin tekrar girdisi: doğru hedefin üstünde, son ölçüm altında. */
+    const d = [0, 60, 80, 100, 65].map((v, i) => ({ tarih:G().gunEkle('2026-09-20', i), deger:v }));
+    const r = G().hizTahmini(d, 70);
+    expect(r.yeterli).toBeTruthy();
+    expect(r.ulasti).toBeFalsy();
+    expect(r.olasi > '2026-09-24').toBeTruthy();
+    expect(r.erken > '2026-09-24').toBeTruthy();
+    expect(r.erken <= r.olasi).toBeTruthy();
+    if(r.gec != null) expect(r.olasi <= r.gec).toBeTruthy();
+    /* Aşağı giden hedefte de aynı: son ölçüm hedefin üstünde, doğru altında. */
+    const a = [100, 40, 20, 0, 35].map((v, i) => ({ tarih:G().gunEkle('2026-09-20', i), deger:v }));
+    const q = G().hizTahmini(a, 30);
+    expect(q.ulasti).toBeFalsy();
+    expect(q.olasi > '2026-09-24').toBeTruthy();
+    expect(q.erken <= q.olasi).toBeTruthy();
+  });
+
+  it('T2-10 kesinliği verilmemiş tablo hücresi «hesaplandı» sayılmaz; etiketsiz işaretlenir', () => {
+    const k = sahne(G().hucreHtml({ deger:42, birim:'%' }) + G().hucreHtml({ deger:42, birim:'%', kesinlik:'measured' }));
+    try{
+      const [a, b] = k.querySelectorAll('[data-oz="038"] .sayi');
+      expect(a.getAttribute('data-kesinlik')).toBe('');
+      expect(a.hasAttribute('data-etiketsiz')).toBeTruthy();
+      expect(b.getAttribute('data-kesinlik')).toBe('measured');
+      expect(b.hasAttribute('data-etiketsiz')).toBeFalsy();
+      expect(window.LIFEOS.SAYI.etiketsizler(k)).toHaveLength(1);
+    }finally{ k.remove(); }
+  });
+});
+
 describe('P3 · Grafik ekleri (032 036 040)', () => {
 
   it('oz-032 Geçen dönem soluk kesik çizgi olarak arkada durur.', () => {
