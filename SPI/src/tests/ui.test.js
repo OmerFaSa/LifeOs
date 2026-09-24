@@ -180,8 +180,8 @@
   });
 
   describe('Ekranlar — sözleşme', () => {
-    const ids = ['today', 'labs', 'meals', 'kitchen', 'move', 'basket',
-      'analytics', 'office', 'team', 'meeting', 'family', 'rutbe', 'guide'];
+    const ids = ['today', 'hedefler', 'labs', 'meals', 'kitchen', 'move', 'basket',
+      'analytics', 'onaylar', 'office', 'team', 'meeting', 'kutuphane', 'family', 'rutbe', 'guide'];
 
     it('bütün ekranlar kayıtlı', () => {
       ids.forEach(id => expect(SP.Screens[id]).toBeTruthy());

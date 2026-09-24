@@ -674,40 +674,6 @@ SP.Screens.today = (function(){
       aria:'Günlük görünümü' });
   }
 
-  /* ---- bekleyen oneriler -------------------------------------------
-
-     Danisma ekraninda konusurken uretilen bir oneri onaylanmadan
-     baska bir ekrana gecilirse GORUNMEZ olur ve kullanici
-     kaydettigini saniyor olabilir. Bekleyen oneri Gunluk'un en
-     ustunde durur: onaylanmamis bir kayit, unutulmus bir kayittir. */
-  function bekleyenOneriler(){
-    const liste = SP.Proposals ? SP.Proposals.pending() : [];
-    if(!liste.length) return raw('');
-    return html`<div class="bekleyen mb-16">
-      <div class="bekleyen__bas">
-        <b>${liste.length === 1 ? 'Bir kayıt onayını bekliyor'
-          : liste.length + ' kayıt onayını bekliyor'}</b>
-        <span class="tiny dim">Onaylanana kadar hiçbiri yazılmadı.</span>
-      </div>
-      ${map(liste.slice(0, 4), o => {
-        const e = SP.Proposals.eylem(o.action);
-        const pv = SP.Proposals.preview(o);
-        return html`<div class="bekleyen__satir">
-          <span class="bekleyen__ne">${e ? e.label : o.action}</span>
-          <span class="bekleyen__ne2">${pv.ok && pv.rows.length
-            ? pv.rows.map(r => r.alan + ' → ' + r.sonra).join(' · ') : (pv.why || '')}</span>
-          <span class="bekleyen__dug">
-            ${K.Button({ label:'Kaydet', size:'sm', tone:'primary',
-              act:'bekleyen-onay', data:{ 'data-id':o.id } })}
-            ${K.Button({ label:'Vazgeç', size:'sm', act:'bekleyen-ret', data:{ 'data-id':o.id } })}
-          </span>
-        </div>`;
-      })}
-      ${when(liste.length > 4, () => html`<p class="tiny dim">
-        ${liste.length - 4} kayıt daha — Danışma ekranında.</p>`)}
-    </div>`;
-  }
-
   /* Denetim sorusu — AYRI EKRAN DEĞİL, Bugün akışının içinde tek kart.
 
      Nöbetçi (core/goodhart.js) ve sürtünme ölçer (core/friction.js) arka
@@ -743,114 +709,8 @@ SP.Screens.today = (function(){
     });
   }
 
-  /* ---------- HKM teklifleri ----------
-
-     HKM bu sisteme YAZMAZ: kuyruktan gelen her satir bir TEKLIFTIR ve
-     kullanici gormeden hicbir sey uygulanmaz. Uygulayan da HKM degil,
-     SPİ'in kendi kodudur. Kuyruk bossa hic cizilmez. */
-  /* ---------- King teklifi (Part 8a-3b) ----------
-
-     Ücretli iş King'in onay kapısında bekler (HKM core/king.py). Seçenek
-     metni ve sayılar HKM'den gelir; satır yalnız yazar ve onayı iletir. */
-  function kingTeklifRow(){
-    const liste = S.ui.kingTeklifler || [];
-    if(!liste.length) return '';
-    return K.Entry({ label:'KING TEKLİFİ', hint:'hkm', meta:liste.length + ' iş', wide:true,
-      body:html`
-        ${map(liste.filter(t => t.durum === 'ara_onay'), t => html`<div class="mt-8">
-          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
-          <div class="tiny mt-4">${t.metin}</div>
-          <div class="row wrap gap-8 mt-8">
-            ${K.Button({ label:'Devam', size:'sm', tone:'primary', act:'king-parca',
-              data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
-            ${K.Button({ label:'Dur ve bitir', size:'sm', act:'king-parca',
-              data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}
-          </div>
-        </div>`)}
-        ${map(liste.filter(t => t.durum !== 'ara_onay'), t => html`<div class="mt-8">
-          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
-          ${map(t.secenekler, (x, i) => html`<div class="tiny mt-4">${i + 1}) ${x.metin}</div>`)}
-          ${when(t.neden, () => K.Notice({ tone:'info', class:'mt-8',
-            body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
-              + ' — ' + t.neden + '.' }))}
-          <div class="row wrap gap-8 mt-8">
-            ${/* Düğme kısa: seçeneğin adı ve sayıları yukarıdaki satırda yazılı;
-                  uzun ad 390 pikselde satırdan taşıyordu. */''}
-            ${map(t.secenekler, (x, i) => K.Button({ label:(i + 1) + '. seçeneği onayla',
-              size:'sm', tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla',
-              data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
-            ${K.Button({ label:'İptal', size:'sm', act:'king-iptal',
-              data:{ 'data-id':String(t.id) } })}
-          </div>
-        </div>`)}
-        <p class="tiny dim mt-10">King ücretli bir işi onayın olmadan açmaz. Sınıf, maliyet
-          ve süre King’in hesabıdır (tahmin); sen onaylayınca iş BAM’da başlar ve sonucu
-          teklif olarak buraya gelir.</p>` });
-  }
-
-  function hkmTeklifRow(){
-    const liste = S.ui.hkmIntents || [];
-    if(!liste.length) return '';
-    return K.Entry({ label:'HKM TEKLİFİ', hint:'hkm',
-      meta:liste.length + ' teklif', wide:true,
-      body:html`
-        ${when(topluKayitlar().length >= 2, () => html`<div class="row gap-8 mt-8">
-          ${K.Button({ label:'Hepsini kaydet (' + topluKayitlar().length + ')', size:'sm',
-            tone:'primary', act:'hkm-toplu' })}
-          <span class="tiny dim">Yalnız okunabilen günlük kayıtlar; her biri Danışma ekranından geri alınır.</span>
-        </div>`)}
-        ${map(liste, n => html`<div class="mt-8">
-          ${K.Notice({ tone:'info', body:n.note })}
-          ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
-          ${when(SP.Bilgi && SP.Bilgi.NIYET[n.kind], () => bilgiOnizleme(n))}
-          <div class="row gap-8 mt-8">
-            ${SP.Beacon.canApply(n)
-              ? K.Button({ label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'besin.add':'Ekle',
-                'fiyat.add':'Ekle', 'yer.add':'Ekle' })[n.kind] || 'Planına ekle',
-                size:'sm', tone:'primary',
-                act:'hkm-intent-apply', data:{ 'data-id':String(n.id) } })
-              : K.Button({ label:'Gördüm', size:'sm', tone:'primary',
-                act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
-            ${K.Button({ label:'İstemiyorum', size:'sm',
-              act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
-          </div>
-        </div>`)}
-        <p class="tiny dim mt-10">Bu satırlar birer tekliftir. Onaylarsan
-          SPİ kendi kaydına yazar; reddedersen HKM kaydı silmez,
-          «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş
-          bir teklif ayrı şeylerdir.</p>` });
-  }
-
-  /* Gunun kaydi: SPİ cumleyi NASIL OKUDU. Onaydan once gorunur; yazilamayan
-     ve anlasilmayan parca da SEBEBIYLE yazilir. */
-  /* BAM bilgisi: SPİ kaydı KENDİ koduyla sınadı; ne ekleneceği ya da neden
-     eklenemeyeceği onaydan ÖNCE görünür (core/bilgi.js). */
-  function bilgiOnizleme(n){
-    const b = n.bilgi;
-    if(!b) return html`<p class="tiny dim mt-8">SPİ bu kaydı sınayamadı.</p>`;
-    if(!b.ok) return html`<p class="tiny dim mt-8">Eklenmeyecek: ${b.why}</p>`;
-    const o = b.onizleme;
-    return html`<div class="mt-8">
-      <p class="tiny"><b>SPİ şunu ekleyecek:</b> ${o.baslik}</p>
-      <ul class="tiny mt-4">${map(o.satirlar, s => html`<li>${s}</li>`)}</ul>
-      ${map(o.uyari || [], u => html`<p class="tiny dim">${u}</p>`)}
-    </div>`;
-  }
-
-  function kayitOkuma(n){
-    const o = n.okuma;
-    if(!o) return html`<p class="tiny dim mt-8">SPİ bu kaydı okuyamadı.</p>`;
-    return html`<div class="mt-8">
-      <p class="tiny"><b>SPİ şöyle okudu</b> (${o.gun}):</p>
-      <ul class="tiny mt-4">
-        ${map(o.yazilacak, y => html`<li>${y.baslik}: ${y.satirlar.join('; ')}</li>`)}
-        ${map(o.yazilamaz, y => html`<li class="dim">«${y.metin}» — yazılmayacak: ${y.why}</li>`)}
-        ${map(o.anlasilmayan, m => html`<li class="dim">«${m}» — anlaşılmadı, yazılmayacak.</li>`)}
-      </ul>
-      ${when(!o.yazilacak.length, () => html`<p class="tiny dim">Bu cümleden SPİ'ye
-        yazılacak bir şey çıkmadı; istersen kaydı elle gir.</p>`)}
-    </div>`;
-  }
+  /* King ve HKM teklifleri, Danışma'nın bekleyen kayıtları Onaylar'da
+     (screens/onaylar.js). Bugün yalnız en öndeki kartı gösterir. */
 
   /* ---------- HKM seridi: KUCUK ve HER GUN ORADA
 
@@ -926,13 +786,13 @@ SP.Screens.today = (function(){
   async function render(){
     const tab = S.ui.dayTab || 'giris';
     const flags = M.openFlags();
+    /* Onaylar tek çekmecede: burada yalnız en öndeki kart (screens/onaylar.js). */
+    const oneri = SP.Screens.onaylar && SP.Screens.onaylar.bekleyen() ? SP.Screens.onaylar.oneriAlani() : '';
 
     const head = html`
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${yedekUyarisi()}
-      ${bekleyenOneriler()}
-      ${when((S.ui.kingTeklifler || []).length, () => html`<div class="mb-16">${K.Ledger([kingTeklifRow()])}</div>`)}
-      ${when((S.ui.hkmIntents || []).length, () => html`<div class="mb-16">${K.Ledger([hkmTeklifRow()])}</div>`)}
+      ${when(oneri, () => html`<div class="mb-16">${oneri}</div>`)}
       ${when((S.ui.hkmBildirim || []).length, () => html`<div class="mb-16">${K.Ledger([kingBildirimRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>
       ${when(SP.Seri, () => html`<div class="mb-16">${K.Ledger([seriRow()])}</div>`)}
@@ -941,7 +801,7 @@ SP.Screens.today = (function(){
 
     if(tab === 'ozet'){
       return String(html`${head}${K.Ledger([
-        hedefEntry(), readinessEntry(), nutritionEntry(), minimumEntry(),
+        readinessEntry(), nutritionEntry(), minimumEntry(),
         SP.HatirlatUI ? SP.HatirlatUI.ozetEntry() : null, officeEntry(), moneyEntry(),
       ].filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['next-action', 'minimum-day', 'readiness', 'certainty']))}</div>`);
@@ -958,33 +818,14 @@ SP.Screens.today = (function(){
     <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'certainty']))}</div>`);
   }
 
-  /* HKM teklifine verilen cevabin TEK yolu: yerel kayit AG'DAN ONCE
-     yazilir, bildirim sonra denenir. «İşaretlendi ama merkeze
-     bildirilemedi» hali yutulmaz, SOYLENIR.
-
-     SPİ'de «Gördüm» bir UYGULAMA değildir: ölçüm de yük de kullanıcının
-     kararıdır. Merkeze de öyle bildirilir — «uygulandı» değil «görüldü». */
-  /* TOPLU ONAY yalniz KUCUK tekliflerde: gunluk kayit (kayit.add), SPI'nin
-     okuyabildigi ve Danisma'dan geri alinabilen (AGENTS.md §1.9). */
-  function topluKayitlar(){
-    return (S.ui.hkmIntents || []).filter(n => n.kind === 'kayit.add'
-      && n.okuma && n.okuma.yazilacak && n.okuma.yazilacak.length && SP.Beacon.canApply(n));
-  }
-
-  async function hkmToplu(){
-    const l = topluKayitlar();
-    let yazilan = 0, kalan = 0;
-    for(const n of l){
-      const r = await SP.Beacon.resolveIntent(n, 'apply');
-      if(r.ok){
-        yazilan++;
-        S.ui.hkmIntents = (S.ui.hkmIntents || []).filter(x => x.id !== n.id);
-      }else kalan++;
-    }
-    if(yazilan) SP.UI.onayMuhru();
-    UI.toast(yazilan + ' kayıt yazıldı' + (kalan ? ', ' + kalan + ' tanesi yazılamadı (kartta duruyor)' : '')
-      + '. Yanlış olanı Danışma ekranından geri alabilirsin.');
-    SP.App.render();
+  /* PLAN › HEDEFLER. Hedefler Bugün'ün Özet sekmesindeydi; kural «Plan:
+     hafta, hedefler, merdiven tek yerde» (CEKMECE-HARITASI). Kart ve
+     işleyiciler aynı: plan önizlemesi, uyarlama ve geri alma burada. */
+  async function renderHedefler(){
+    const e = hedefEntry();
+    if(!e) return String(K.Kutu({ ad:'Hedef motoru yüklenmedi',
+      govde:html`<p class="small muted">Hedefler bu derlemede yok; diğer ekranlar çalışmaya devam eder.</p>` }));
+    return String(html`${K.Ledger([e])}`);
   }
 
   async function dunkuEkle(tur, id){
@@ -995,31 +836,11 @@ SP.Screens.today = (function(){
     SP.App.render();
   }
 
-  async function hkmCevap(id, action){
-    const liste = S.ui.hkmIntents || [];
-    const n = liste.filter(x => String(x.id) === String(id))[0];
-    if(!n) return;
-    const r = await SP.Beacon.resolveIntent(n, action);
-    /* MUHUR YALNIZ ONAYDA BASILIR. Reddetmek de bir cevaptir ama
-       onay degildir; ikisine ayni muhru basmak, muhru anlamsiz
-       kilardi. */
-    if(r.ok && action !== 'reject' && action !== 'dismiss') SP.UI.onayMuhru();
-    if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
-    S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
-    const bas = r.state === 'applied' ? (r.note || 'Uygulandı')
-      : r.state === 'acknowledged'
-        ? (r.note || 'Görüldü olarak işaretlendi')
-        : 'İstenmedi olarak işaretlendi';
-    const metin = r.reported ? bas
-      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.';
-    /* BAM bilgisi geri alınır: gıda silinir, tahmin fiyat eski hâline döner. */
-    if(r.geriAl && SP.Bilgi){
-      UI.toast(metin, { undo:async () => { await SP.Bilgi.geriAl(r.geriAl); SP.App.render(); } });
-    }else{
-      UI.toast(metin);
-    }
-    SP.App.render();
-  }
+  /* Öneri alanındaki kartın düğmeleri Onaylar ekranının işleyicilerine
+     gider: onay TEK yoldan geçer, iki ekranda iki ayrı kod durmaz. */
+  const ONAY_EYLEMLERI = ['king-onayla', 'king-parca', 'king-iptal', 'hkm-toplu', 'hkm-intent-yes',
+    'hkm-intent-apply', 'hkm-intent-no', 'hkm-doubt-ok', 'bekleyen-onay', 'bekleyen-ret'];
+  const onayIsleyici = a => el => SP.Screens.onaylar.handle[a](el);
 
   const handle = {
     async 'dunku-ogun'(el){ await dunkuEkle('ogun', el.dataset.id); },
@@ -1134,36 +955,6 @@ SP.Screens.today = (function(){
       SP.App.render();
     },
 
-    /* King'in teklifi (brand/ortak/kingteklif.js): onay ve iptal HKM'nin
-       tek kapısına gider; cevabı HKM kurar. */
-    async 'king-onayla'(el){
-      if(!SP.KingTeklif) return;
-      el.disabled = true;
-      const r = await SP.KingTeklif.onayla(el.dataset.id, el.dataset.secenek);
-      UI.toast(r.metin);
-      S.ui.kingTeklifler = SP.KingTeklif.liste();
-      SP.App.render();
-    },
-    async 'king-parca'(el){
-      if(!SP.KingTeklif) return;
-      el.disabled = true;
-      const r = await SP.KingTeklif.parca(el.dataset.id, el.dataset.karar);
-      UI.toast(r.metin);
-      S.ui.kingTeklifler = SP.KingTeklif.liste();
-      SP.App.render();
-    },
-    async 'king-iptal'(el){
-      if(!SP.KingTeklif) return;
-      const r = await SP.KingTeklif.iptal(el.dataset.id);
-      UI.toast(r.metin);
-      S.ui.kingTeklifler = SP.KingTeklif.liste();
-      SP.App.render();
-    },
-    async 'hkm-toplu'(){ await hkmToplu(); },
-    async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'seen'); },
-    async 'hkm-intent-apply'(el){ await hkmCevap(el.dataset.id, 'apply'); },
-    async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
-
     async 'signal-answer'(el){
       const inp = document.getElementById('sig-answer');
       const r = await SP.Signals.answer(el.dataset.id, inp ? inp.value : '');
@@ -1178,15 +969,6 @@ SP.Screens.today = (function(){
       SP.App.render();
     },
 
-    async 'bekleyen-onay'(el){
-      const r = await SP.Proposals.approve(el.dataset.id);
-      UI.toast(r.ok ? 'Kaydedildi' : (r.why || 'Kaydedilemedi'));
-      SP.App.render();
-    },
-    async 'bekleyen-ret'(el){
-      await SP.Proposals.reject(el.dataset.id);
-      SP.App.render();
-    },
     async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; SP.App.render(); },
     async 'shift-day'(el){
       const n = Number(el.dataset.value);
@@ -1266,9 +1048,11 @@ SP.Screens.today = (function(){
     },
   };
 
+  ONAY_EYLEMLERI.forEach(a => { handle[a] = onayIsleyici(a); });
+
   return {
     id:'today',
-    title:'Günlük',
+    title:'Bugün',
     /* Bu sayfanın başlığı BUGÜNÜ anlatır. Sıradaki hamle başka bir
        bölüme aitse (tahlil, sepet) onu buraya başlık yapmak kafa
        karıştırıyordu: kullanıcı günlük sayfasını açıp tahlil cümlesi
@@ -1318,5 +1102,19 @@ SP.Screens.today = (function(){
           size:'sm', act:'go', data:{ 'data-route':n.route } }))}`);
     },
     render, handle,
+    /* Plan › Hedefler: aynı işleyiciler, ayrı bir çizim. */
+    hedefler:{
+      id:'hedefler',
+      title:'Hedefler',
+      subtitle(){
+        const n = SP.Hedefler ? SP.Hedefler.aktifler().length : 0;
+        return n ? n + ' etkin hedef' : 'henüz hedef yok';
+      },
+      lede(){ return 'Hedef Danışma’da konuşularak konur; planı burada önizler, onaylar ya da geri alırsın.'; },
+      actions(){ return ''; },
+      render:renderHedefler, handle,
+    },
   };
 })();
+
+SP.Screens.hedefler = SP.Screens.today.hedefler;

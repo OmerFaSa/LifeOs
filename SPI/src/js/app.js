@@ -10,78 +10,78 @@ SP.App = (function(){
   const U = SP.U, M = SP.Model, UI = SP.UI, S = SP.S;
   const { html, raw, when, map, cls, attrs } = SP.h;
 
-  /* Yedi bölüm.
+  /* SEKİZ ÇEKMECE (ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
 
-     Kullanıcı bu sistemi "tahlil mi hareket mi" diye değil, hayatının hangi
-     alanına baktığına göre açar. Bölümler o alanlardır ve sırası kasıtlıdır:
-     önce ölçülen (test), sonra ölçüme göre karar verilen (besin, hareket),
-     sonra bunların bedeli (finans), sonra günün kaydı, sonra danışma, en
-     sonda ayar.
+     Üç modülde aynı ad ve sıra; adlar tek kaynaktan gelir
+     (`LIFEOS.KABUK.CEKMECELER`). İç içelik en çok iki kat: çekmece ›
+     bölüm. Bölümler üst çubukta değil, sayfa başının altındaki bölüm
+     çubuğunda durur. Tek bölümlü çekmecede o çubuk çizilmez.
 
-     `views` bir bölümün sayfalarıdır. Tek sayfalı bölümde sayfa şeridi
-     çizilmez: tek sekmelik bir sekme çubuğu gürültüden başka bir şey
-     değildir. */
+     Yönlendirme kimlikleri değişmedi (komut paleti, testler ve derin
+     bağlantılar bozulmaz); değişen yalnız gruplama. Önceki yedi bölümden
+     nereye: Günlük → Bugün; Testler, Besin, Hareket, Finans → Çalışma;
+     Ofis › Analiz → Analiz; Rütbe → Ayarlar › Rütbe; Hane → Ayarlar ›
+     Profil. Yeni: Plan › Hedefler (Bugün'ün Özet sekmesindeydi), Onaylar
+     (Bugün'ün başındaki teklifler), Kütüphanem (BAM'ın ürettikleri). */
+  const K = window.LIFEOS.KABUK;
+  const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
   const SECTIONS = [
-    { id:'gunluk', num:'01', icon:'pulse', label:'Günlük',
-      note:'Günün verisini gir, karşılığını gör',
-      views:[{ route:'today', label:'Günlük', icon:'pulse' }] },
-
-    { id:'testler', num:'02', icon:'flask', label:'Testler',
-      note:'Hastane testini gir, sonucu izle',
-      views:[{ route:'labs', label:'Testler', icon:'flask' }] },
-
-    { id:'besin', num:'03', icon:'meal', label:'Besin',
-      note:'Bazal metabolizma, hedef ve öğün önerisi',
-      views:[
-        { route:'meals',   label:'Öğünler', icon:'meal' },
-        { route:'kitchen', label:'Mutfak',  icon:'leaf' },
-      ] },
-
-    { id:'hareket', num:'04', icon:'dumbbell', label:'Hareket',
-      note:'Kardiyo, kuvvet, esneklik ve dinlenme',
-      views:[{ route:'move', label:'Hareket', icon:'dumbbell' }] },
-
-    { id:'finans', num:'05', icon:'wallet', label:'Finans',
-      note:'Bu işin bütçesi',
-      views:[{ route:'basket', label:'Finans', icon:'wallet' }] },
-
-    { id:'ofis', num:'06', icon:'users', label:'Ofis',
-      note:'Patron ve dört koç',
-      views:[
-        { route:'office',    label:'Masalar',  icon:'users' },
-        { route:'team',      label:'Danışma',  icon:'zap' },
-        { route:'meeting',   label:'Toplantı', icon:'list' },
-        { route:'analytics', label:'Analiz',   icon:'chart' },
-      ] },
-
-    /* Rütbe kendi bölümü — Rehber'in bir sekmesi değil. Seviye orada
-       bir ayar gibi duruyordu; oysa merdiven, kartlar ve «XP nereden
-       gelir» kendi başına bakılacak bir yer. */
-    { id:'rutbe', num:'07', icon:'layers', label:'Rütbe',
-      note:'Kademe, merdiven ve XP kaynakları',
-      views:[{ route:'rutbe', label:'Rütbe', icon:'layers' }] },
-
-    { id:'ayarlar', num:'08', icon:'sliders', label:'Ayarlar',
-      note:'Hane, görünüm, veri ve rehber',
-      views:[
-        { route:'family', label:'Hane',   icon:'heart' },
-        { route:'guide',  label:'Rehber', icon:'guide' },
-      ] },
+    { id:'bugun', label:CEK('bugun'), views:[
+      { route:'today', label:'Bugün' },
+    ]},
+    { id:'plan', label:CEK('plan'), views:[
+      { route:'hedefler', label:'Hedefler' },
+    ]},
+    { id:'calisma', label:CEK('calisma'), views:[
+      { route:'labs',    label:'Testler' },
+      { route:'meals',   label:'Öğün' },
+      { route:'kitchen', label:'Mutfak' },
+      { route:'move',    label:'Hareket' },
+      { route:'basket',  label:'Bütçe' },
+    ]},
+    { id:'analiz', label:CEK('analiz'), views:[
+      { route:'analytics', label:'Analiz' },
+    ]},
+    { id:'onaylar', label:CEK('onaylar'), views:[
+      { route:'onaylar', label:'Bekleyen' },
+    ]},
+    { id:'ofis', label:CEK('ofis'), views:[
+      { route:'office',  label:'Masalar' },
+      { route:'team',    label:'Danışma' },
+      { route:'meeting', label:'Toplantı' },
+    ]},
+    { id:'kutuphane', label:CEK('kutuphane'), views:[
+      { route:'kutuphane', label:'Bilgi ve ürünler' },
+    ]},
+    /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
+       buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
+    { id:'ayarlar', label:CEK('ayarlar'), views:[
+      { route:'family', label:'Profil' },
+      { route:'guide',  label:'Genel' },
+      { route:'rutbe',  label:'Rütbe' },
+    ]},
   ];
 
-  /* Yönlendirme kimlikleri değişmedi; değişen yalnızca kullanıcıya görünen
-     gruplama. Bu sayede komut paleti, testler ve derin bağlantılar bozulmaz. */
+  /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
+  const UST = {};
+
+  /* Telefon alt bandı (karar 3): Bugün · Plan · Çalışma · Menü. */
+  const BANT = ['bugun', 'plan', 'calisma'];
+
   const SECTION_OF = (function(){
     const m = {};
     SECTIONS.forEach(sec => sec.views.forEach(v => { m[v.route] = sec; }));
     return m;
   })();
 
-  function sectionOf(route){ return SECTION_OF[route] || SECTIONS[0]; }
+  function sectionOf(route){ return SECTION_OF[UST[route] || route] || SECTIONS[0]; }
+  function viewOf(route){
+    const r = UST[route] || route;
+    return SECTIONS.reduce((f, s) => f || s.views.find(v => v.route === r), null);
+  }
 
-
-  /* Gizlenen bolum (core/bolum.js) gezinmeden, alt sekmelerden ve
-     yonlendirmeden kalkar; bos kalan grup da gorunmez. */
+  /* Gizlenen bolum (core/bolum.js) gezinmeden, alt banttan ve
+     yonlendirmeden kalkar; bos kalan cekmece de gorunmez. */
   function gizliMi(route){ return !!(SP.Bolum && SP.Bolum.gizli(route)); }
   function sectionsGorunen(){
     return SECTIONS.map(s => Object.assign({}, s, { views:s.views.filter(v => !gizliMi(v.route)) }))
@@ -93,17 +93,13 @@ SP.App = (function(){
     return SP.Screens[S.route] || SP.Screens.today;
   }
 
-  /* Kenar çubuğundaki sayaçlar — bekleyen işi gizlemez. */
+  /* Bölüm çubuğundaki sayaçlar — bekleyen işi gizlemez. */
   function badgeFor(id){
     if(id === 'labs'){
       const f = M.openFlags().filter(x => !x.ack).length;
       if(f) return { text:String(f), quiet:false };
       const due = SP.Bio.overdue().length;
       return due ? { text:String(due), quiet:true } : null;
-    }
-    if(id === 'today'){
-      const v = S.vitals[U.todayISO()];
-      return (!v || v.sleep == null) ? { text:'!', quiet:true } : null;
     }
     if(id === 'meals'){
       const g = SP.Nutri.gaps(7);
@@ -120,6 +116,13 @@ SP.App = (function(){
     return null;
   }
 
+  /* Onaylar'ın bekleyeni: King teklifi, HKM teklifi, bekleyen kayıt.
+     Hepsi tek çekmecede durur; sayı da onların toplamıdır. */
+  function onaySayisi(){
+    try{ return SP.Screens.onaylar ? SP.Screens.onaylar.bekleyen() : 0; }
+    catch(e){ console.error(e); return 0; }
+  }
+
   /* Marka satırı profilden gelir; sabit bir slogan yoktur. */
   function brandLine(){
     const p = S.profile;
@@ -128,172 +131,201 @@ SP.App = (function(){
     return p.name + (goal ? ' · ' + goal.label.toLocaleLowerCase('tr-TR') : '');
   }
 
+  function profilVerisi(){
+    const p = S.profile || {};
+    return { ad:p.name || '', harf:(p.name || 'Ben').trim().charAt(0) };
+  }
+
   function safe(fn, fallback){
     try{ return fn(); }
     catch(e){ console.error(e); return fallback || ''; }
   }
 
-  /* Bölümün rozeti: içindeki sayfaların bekleyen işlerinin toplamı.
-     Sesli olan (kırmızı) sessiz olanı yutar. */
-  function sectionBadge(sec){
-    let quiet = 0, loud = 0;
-    sec.views.forEach(v => {
-      const b = safe(() => badgeFor(v.route), null);
-      if(!b) return;
-      const n = b.text === '!' ? 1 : Number(b.text) || 1;
-      if(b.quiet) quiet += n; else loud += n;
+  function saatOf(iso){
+    if(!iso) return '';
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return '';
+    if(U.iso(d) === U.todayISO()) return K.saatMetni(d);
+    return d.toLocaleDateString('tr-TR', { day:'numeric', month:'short' }) + ' ' + K.saatMetni(d);
+  }
+
+  /* Bağlantı noktası (118). Çizim ağa ÇIKMAZ: durum son gönderimin
+     kaydından okunur. Hiç gönderilmemişse «bağlı» denmez — ölçülmemiştir. */
+  function baglantiVerisi(){
+    if(!SP.Beacon) return { durum:'kapali', route:'guide' };
+    const a = SP.Beacon.settings();
+    if(!a.enabled) return { durum:'kapali', route:'guide' };
+    const bozuk = a.lastStatus !== null && a.lastStatus !== undefined && a.lastStatus !== 202;
+    if(bozuk) return { durum:'ulasilamadi', saat:saatOf(a.lastAt), route:'guide' };
+    if(a.lastOkAt) return { durum:'bagli', saat:saatOf(a.lastOkAt), route:'guide' };
+    return { durum:'bekliyor', route:'guide' };
+  }
+
+  /* Rütbe çipi (140). Defter yüklenmemişse çip hiç çizilmez: «0 XP»
+     çizmek, bilinmeyeni sıfır saymak olurdu. */
+  function rutbeVerisi(){
+    if(!SP.XP) return null;
+    let d;
+    try{ d = SP.XP.durum(); }catch(e){ return null; }
+    if(!d || !d.kademeBilgi) return null;
+    let gorsel = '';
+    try{ gorsel = new URL('img/seviye/onay-' + d.kademe + '.webp', location.href).href; }catch(e){}
+    return { ad:d.kademeBilgi.ad, etiket:d.etiket, kademe:d.kademe, oran:d.oran, tamam:d.tamam,
+      icinde:d.icinde, gereken:d.gereken,
+      icindeMetin:U.fmtNum(d.icinde), gerekenMetin:U.fmtNum(d.gereken),
+      renk:d.kademeBilgi.renk, gorsel, route:'rutbe' };
+  }
+
+  /* Gruplu bildirimler (09): bu modülün uyarıları ve Merkez'in önerileri
+     ayrı kümede. Kaynakları rozetlerle aynıdır; iki yerde iki ayrı sayı
+     durmasın diye aynı hesaplardan okunur. */
+  function bildirimGruplari(){
+    const spi = [];
+    const bayrak = M.openFlags().filter(x => !x.ack).length;
+    if(bayrak) spi.push({ metin:bayrak + ' kırmızı bayrak açık', route:'today', acil:true });
+    const gecen = SP.Bio.overdue().length;
+    if(gecen) spi.push({ metin:gecen + ' testin zamanı geçti', route:'labs' });
+    const v = S.vitals[U.todayISO()];
+    if(!v || v.sleep == null) spi.push({ metin:'Bugünün ölçümü girilmedi', route:'today' });
+    if(SP.Money.basketTotal().over) spi.push({ metin:'Haftalık bütçe aşıldı', route:'basket', acil:true });
+    if(M.backupDue()) spi.push({ metin:'Yedek alma zamanı', route:'guide' });
+    if(S.storeHealth && S.storeHealth.error) spi.push({ metin:'Kayıt sorunu var', act:'show-store-error', acil:true });
+    const mer = [];
+    const onay = onaySayisi();
+    if(onay) mer.push({ metin:onay + ' öneri Onaylar’da bekliyor', route:'onaylar' });
+    const king = (S.ui.hkmBildirim || []).length;
+    if(king) mer.push({ metin:king + ' King bildirimi', route:'today' });
+    return [{ modul:'spi', satirlar:spi }, { modul:'mer', satirlar:mer }];
+  }
+
+  function ustCubukHtml(sc){
+    const aktif = sectionOf(sc.id);
+    const onay = onaySayisi();
+    const gruplar = safe(bildirimGruplari, []) || [];
+    const bil = gruplar.reduce((t, g) => t + g.satirlar.length, 0);
+    const acil = gruplar.some(g => g.satirlar.some(s => s.acil));
+    return K.ustCubuk({
+      modul:'spi',
+      cekmeceler:sectionsGorunen().map(g => ({ id:g.id, ad:g.label, route:g.views[0].route,
+        on:g.id === aktif.id, sayac:g.id === 'onaylar' ? onay : 0 })),
+      onay:{ sayi:onay, route:'onaylar' },
+      bildirim:{ sayi:bil, acil },
+      baglanti:safe(baglantiVerisi, null) || { durum:'kapali' },
+      rutbe:safe(rutbeVerisi, null) || null,
+      profil:profilVerisi(),
     });
-    if(loud) return { text:String(loud), quiet:false };
-    if(quiet) return { text:String(quiet), quiet:true };
-    return null;
   }
 
-  /* ---------- üst gezinme ----------
-
-     Sabit sol menü yerine ince bir site çubuğu. Yedi bölüm tek satırda
-     durur; dar ekranda menüye iner. Sağdaki üç araç her yerde aynı yerde
-     kalır: arama, görünüm, ayarlar. */
-  /* ---------- künye ----------
-
-     Uygulama çubuğu değil KÜNYE. İki satır:
-
-       1. kimlik · tarih · araçlar   — sayfayla birlikte yukarı kayar
-       2. numaralı bölümler          — kaydırınca üstte yapışır
-
-     İlk satırın kaymasına izin vermek kasıtlıdır: okurken kimliğe
-     ihtiyaç yoktur, gezinmeye vardır. Böylece sabit kalan çubuk yarı
-     yüksekliğe iner ve içerik nefes alır. */
-  function mastheadHtml(sc){
-    const now = new Date();
-    const gun = now.toLocaleDateString('tr-TR', { weekday:'long' });
-    return html`
-      <div class="masthead">
-        <div class="wrapc masthead__in">
-          <button class="brand" data-act="go" data-route="today" aria-label="Günlük bölümüne git">
-            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
-            <span class="brand__text"><b>SPİ</b><span>${brandLine()}</span></span>
-          </button>
-
-          <div class="masthead__date">
-            <span class="masthead__day">${U.fmtDate(U.todayISO())}</span>
-            <span class="masthead__wd">${gun}</span>
-          </div>
-
-          <div class="navtools">
-            ${SP.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
-            ${SP.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema: Açık · Koyu · Sistem',
-              act:'open-appearance', data:{ id:'appearance-btn' } })}
-            ${SP.C.IconButton({ icon:'sliders', aria:'Ayarlar', act:'go', data:{ 'data-route':'family' } })}
-            ${SP.C.IconButton({ icon:'menu', aria:'Bölümler', act:'toggle-menu', class:'sitenav__menu' })}
-          </div>
-        </div>
-      </div>`;
+  /* ---------- gün şeridi ----------
+     SPİ'nin günü saatli bloklardan değil ASGARİ GÜNÜN dört adımından
+     oluşur (protein, su, yürüyüş, uyku; core/calc.js minimumDay): şeritte
+     sıra olarak durur, tutulan adım «bitti». Girilmemiş adım «bitti»
+     sayılmaz ama «yapılmadı» da denmez — bekliyor kalır. */
+  function haftaVerisi(){
+    const bugun = U.todayISO();
+    const i = U.weekdayIndex(bugun);
+    const AD = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+    return AD.map((ad, k) => {
+      const iso = U.iso(U.addDays(U.today(), k - i));
+      const gelecek = iso > bugun;
+      const veri = !!(S.vitals[iso] || (S.meals[iso] && S.meals[iso].length)
+        || SP.Model.workoutsOf(iso).length);
+      const durum = gelecek ? 'gelecek'
+        : !veri ? 'bos'
+        : (SP.Calc.minimumDay(iso).complete ? 'tamam' : 'eksik');
+      return { ad, gun:Number(iso.slice(8, 10)), bugun:iso === bugun, gelecek,
+        noktalar:[{ modul:'spi', durum }] };
+    });
   }
 
-  /* Numaralı bölüm şeridi. Numara bir süs değil: yedi bölümün SIRASI
-     anlamlıdır (önce yazılan, sonra okunan) ve numara o sırayı görünür
-     kılar. */
-  function sitenavHtml(sc){
-    const active = sectionOf(sc.id);
-    return html`
-      <nav class="sitenav" aria-label="Bölümler">
-        <div class="wrapc navlinks">${map(sectionsGorunen(), sec => {
-          const on = sec.id === active.id;
-          const b = sectionBadge(sec);
-          return html`<button class="${cls('navlink', on && 'is-active')}"
-            data-act="go" data-route="${sec.views[0].route}"
-            ${when(on, () => attrs({ 'aria-current':'page' }))}>
-            <span class="navlink__num" aria-hidden="true">${sec.num}</span>
-            <span class="navlink__label">${sec.label}</span>
-            ${when(b, () => html`<span class="${cls('navlink__badge', b.quiet && 'is-quiet')}"
-              aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
-          </button>`;
-        })}</div>
-      </nav>`;
+  function gunSeridiHtml(){
+    const m = SP.Calc.minimumDay();
+    const n = new Date();
+    const tarih = n.toLocaleDateString('tr-TR', { weekday:'short' }) + ' '
+      + n.toLocaleDateString('tr-TR', { day:'numeric', month:'short' });
+    return K.gunSeridi({
+      tarih,
+      simdi:new Date(),
+      seritler:[{ modul:'spi', ozet:m.done + '/' + m.total + ' asgari',
+        bloklar:m.rows.map(r => ({ ad:r.label + ' · ' + r.detail, dk:1, durum:r.ok ? 'bitti' : 'bekliyor' })) }],
+      kalan:m.total - m.done,
+      hafta:S.ui.haftaAcik ? haftaVerisi() : null,
+      haftaAcik:!!S.ui.haftaAcik,
+    });
   }
 
-  /* ---------- alt bant ----------
-
-     Her sayfa bir yerde biter. Koyu bant hem sayfayı sonlandırır hem de
-     sistemin iki değişmez cümlesini —klinik sınır ve mahremiyet— her
-     ekranda bir kez söyler. Bunları kart olarak sayfanın ortasına koymak
-     her seferinde içeriği bölüyordu. */
-  /* Seviye rozeti — bu sistemin KENDİ kademesi (core/xp.js).
-
-     Şimdilik alt bantta duruyor: her ekranda var, hiçbir ekranı
-     kalabalıklaştırmıyor. Künyeye ya da bir ekranın içine taşımak,
-     `SP.XP.rozetHtml()` çıktısını oraya koymaktan ibarettir.
-
-     Defter yüklenmemişse BOŞ döner — «0 XP» çizmek, bilinmeyeni sıfır
-     saymak olurdu. */
-  function seviyeRozeti(){
-    if(!SP.XP) return '';
-    try{ return SP.XP.rozetHtml(); }catch(e){ return ''; }
+  /* ---------- sayfa başı ----------
+     Yol («Çalışma › Testler»), başlık, tek cümle ve ekranın eylemleri.
+     Tek bölümlü çekmecede yol yazılmaz: «Onaylar › Bekleyen» bir şey
+     söylemez. */
+  function yolOf(route){
+    const sec = sectionOf(route);
+    const oge = viewOf(route);
+    const sc = SP.Screens[route] || {};
+    const ad = oge ? oge.label : sc.title;
+    const yol = sec.views.length > 1 && ad !== sec.label ? [sec.label, ad] : [sec.label];
+    if(UST[route]) yol.push(sc.title);
+    return yol;
   }
 
-  function footerHtml(){
-    return html`
-      <footer class="sitefoot">
-        <div class="wrapc sitefoot__in">
-          <div class="sitefoot__brand">
-            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
-            <div>
-              <b>Sağlık Performans İzleyicisi</b>
-              <span class="sitefoot__sub">Kişisel ve aile odaklı sağlık sistemi</span>
-              ${raw(seviyeRozeti())}
-            </div>
-          </div>
-          <div class="sitefoot__notes">
-            <p><span class="sitefoot__k">Sınır</span> ${SP.CLINICAL.disclaimer}</p>
-            <p><span class="sitefoot__k">Mahremiyet</span> Veriler bu cihazda tutulur.
-              Ad ve doğum yılı hiçbir modele gönderilmez.</p>
-            ${raw(buildStampHtml())}
-          </div>
-        </div>
-      </footer>`;
+  function sayfaBasiHtml(sc){
+    const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
+    const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
+    const eylem = safe(() => sc.actions ? sc.actions() : '');
+    return K.sayfaBasi({ yol:yolOf(sc.id), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
   }
 
-  /* ---------- telefonda alt gezinme ----------
+  function bolumCubuguHtml(sc){
+    const sec = sectionOf(sc.id);
+    const r = UST[sc.id] || sc.id;
+    return K.bolumCubugu({ cekmece:sec.label, bolumler:sec.views.filter(v => !gizliMi(v.route)).map(v => ({
+      route:v.route, ad:v.label, on:v.route === r, rozet:safe(() => badgeFor(v.route), null) || null })) });
+  }
 
-     Telefonda HER ŞEY hamburger menüden geçiyordu. Veri girişinin çoğu
-     telefonda yapılacak; en çok kullanılan yollar başparmağın altında
-     olmalı, iki dokunuş arkasında değil.
+  function menuHtml(sc){
+    const aktif = UST[sc.id] || sc.id;
+    const onay = onaySayisi();
+    return K.menuSayfasi({
+      cekmeceler:sectionsGorunen().map(g => ({ id:g.id, ad:g.label, sayac:g.id === 'onaylar' ? onay : 0,
+        bolumler:g.views.map(v => ({ route:v.route, ad:v.label, on:v.route === aktif })) })),
+      ayak:storeHealthHtml(),
+    });
+  }
 
-     Beş yuva: dört yol + menü. Yedi bölümün hepsi buraya sığmaz ve
-     sığdırmaya çalışmak beşini de okunmaz yapardı; menü yuvası tam
-     listeyi açar.
+  function altBantHtml(sc){
+    const aktif = sectionOf(sc.id).id;
+    const g = sectionsGorunen();
+    const sekmeler = BANT.map(id => g.find(x => x.id === id)).filter(Boolean)
+      .map(x => ({ id:x.id, ad:x.label, route:x.views[0].route, on:x.id === aktif }));
+    /* Bandın Menü'sü SPİ'nin kendi eylem adını taşır (`toggle-menu`):
+       üst çubuktaki kabuk düğmesi `toggle-sidebar` der; ikisi aynı işi
+       yapar, eski ad kaybolmaz (envanter tabanı). */
+    sekmeler.push({ id:'menu', ad:'Menü', act:'toggle-menu', on:false });
+    return K.altBant({ sekmeler });
+  }
 
-     Yalnız 860 pikselin altında çizilir. */
-  const TABBAR = [
-    { route:'today', label:'Günlük',  icon:'pulse' },
-    { route:'meals', label:'Öğün',    icon:'meal' },
-    { route:'labs',  label:'Testler', icon:'flask' },
-    { route:'move',  label:'Hareket', icon:'dumbbell' },
+  /* Hızlı ekle (166): SPİ'nin en sık dört kaydı. Komut paletinin kendi
+     eylemleri çağrılır (`cmdk-run`): aynı iş iki yerde iki ayrı kodla
+     yazılmaz. */
+  const HIZLI = [
+    { ad:'Öğün ekle', act:'cmdk-run', data:{ 'data-id':'act:meal' } },
+    { ad:'Günün ölçümünü gir', act:'cmdk-run', data:{ 'data-id':'act:vitals' } },
+    { ad:'Antrenman seansı ekle', act:'cmdk-run', data:{ 'data-id':'act:session' } },
+    { ad:'Tahlil raporu yapıştır', act:'cmdk-run', data:{ 'data-id':'act:paste' } },
   ];
 
-  function tabbarHtml(sc){
-    const aktif = sectionOf(sc.id);
+  /* Sayfa sonu: sistemin iki değişmez cümlesi —klinik sınır ve
+     mahremiyet— her ekranda bir kez; yanında derleme damgası. Seviye
+     rozeti burada durmaz: üst çubuktaki rütbe çipi onu gösterir. */
+  function footerHtml(){
     return html`
-      <nav class="tabbar" aria-label="Hızlı gezinme">
-        ${map(TABBAR.filter(t => !gizliMi(t.route)), t => {
-          const sec = sectionOf(t.route);
-          const on = sec.id === aktif.id;
-          const b = safe(() => badgeFor(t.route), null);
-          return html`<button class="${cls('tabbtn', on && 'is-active')}"
-            data-act="go" data-route="${t.route}"
-            ${when(on, () => attrs({ 'aria-current':'page' }))}>
-            <span class="tabbtn__ic" aria-hidden="true">${raw(UI.icon(t.icon))}</span>
-            <span class="tabbtn__t">${t.label}</span>
-            ${when(b, () => html`<span class="${cls('tabbtn__b', b.quiet && 'is-quiet')}"
-              aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
-          </button>`;
-        })}
-        <button class="${cls('tabbtn', S.sidebarOpen && 'is-active')}" data-act="toggle-menu"
-          aria-label="Bütün bölümler">
-          <span class="tabbtn__ic" aria-hidden="true">${raw(UI.icon('menu'))}</span>
-          <span class="tabbtn__t">Menü</span>
-        </button>
-      </nav>`;
+      <footer class="sayfasonu">
+        <div class="wrapc sayfasonu__ic">
+          <p><span class="sitefoot__k">Sınır</span> ${SP.CLINICAL.disclaimer}</p>
+          <p>Veriler bu cihazda tutulur. Ad ve doğum yılı hiçbir modele gönderilmez.</p>
+          ${raw(buildStampHtml())}
+        </div>
+      </footer>`;
   }
 
   /* ---------- derleme damgası ----------
@@ -321,97 +353,11 @@ SP.App = (function(){
     </p>`);
   }
 
-  /* Dar ekranda bölümler tam ekran menüye açılır. Alt sekme çubuğu bir
-     panel dilidir; site dilinde karşılığı budur. */
-  function navsheetHtml(sc){
-    const active = sectionOf(sc.id);
-    return html`
-      <div class="navsheet" role="dialog" aria-label="Bölümler">
-        <div class="navsheet__head">
-          <div class="brand">
-            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
-            <span class="brand__text"><b>SPİ</b><span>${brandLine()}</span></span>
-          </div>
-          ${SP.C.IconButton({ icon:'close', aria:'Kapat', act:'toggle-menu' })}
-        </div>
-        <div class="navsheet__body">
-          <div class="navsheet__grid">${map(sectionsGorunen(), sec => html`
-            <button class="${cls('navsheet__item', sec.id === active.id && 'is-active')}"
-              data-act="go" data-route="${sec.views[0].route}" data-num="${sec.num}">
-              <b>${sec.label}</b>
-              <span>${sec.note}</span>
-            </button>`)}
-          </div>
-          ${storeHealthHtml()}
-        </div>
-      </div>`;
-  }
-
-  /* ---------- hero ----------
-
-     Her bölüm bir cümleyle açılır. Panel dilinde ekranın adı yazardı
-     ("Tahliller") ve durumu okumak için aşağı bakmak gerekirdi; burada
-     BAŞLIK durumun kendisidir, alt satır ne yapılacağını söyler.
-
-     `headline` ve `lede` ekranın kendi sözleşmesindendir; vermeyen ekran
-     için başlık ve alt başlık kullanılır. */
-  function heroHtml(sc){
-    const sec = sectionOf(sc.id);
-    const headline = safe(() => sc.headline ? sc.headline() : '') || sc.title;
-    const lede = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
-    const stats = safe(() => sc.stats ? sc.stats() : [], []) || [];
-    const actions = safe(() => sc.actions ? sc.actions() : '');
-
-    return html`
-      <div class="hero" data-num="${sec.num}">
-        <div class="wrapc hero__in">
-          <div class="hero__main">
-            <div class="hero__eyebrow">
-              <span class="hero__num">${sec.num}</span>
-              ${raw(UI.icon(sec.icon))}
-              <span>${sec.label}</span>
-            </div>
-            <h1 class="hero__title">${headline}</h1>
-            ${when(lede, () => html`<p class="hero__lede">${raw(lede)}</p>`)}
-            ${when(actions, () => html`<div class="hero__actions">${raw(actions)}</div>`)}
-          </div>
-          ${when(stats.length, () => html`<div class="hero__side">${map(stats, st => html`
-            <div class="herostat">
-              <span class="herostat__value">${st.value}${when(st.unit,
-                () => html`<small>${st.unit}</small>`)}</span>
-              <span class="herostat__label">${st.label}</span>
-            </div>`)}</div>`)}
-          <div class="hero__motif" aria-hidden="true">${raw(UI.motif(sec.id))}</div>
-        </div>
-      </div>`;
-  }
-
-  /* Bölümün sayfaları. Tek sayfalıysa çizilmez. */
-  function pagenavHtml(sc){
-    const sec = sectionOf(sc.id);
-    if(sec.views.length < 2) return '';
-    return html`
-      <nav class="pagenav" aria-label="${sec.label + ' sayfaları'}">
-        <div class="wrapc pagenav__in">${map(sec.views, v => {
-          const on = v.route === sc.id;
-          const b = safe(() => badgeFor(v.route), null);
-          return html`<button class="${cls('pagelink', on && 'is-active')}"
-            data-act="go" data-route="${v.route}"
-            ${when(on, () => attrs({ 'aria-current':'page' }))}>
-            ${raw(UI.icon(v.icon))}<span>${v.label}</span>
-            ${when(b, () => html`<span class="pagelink__count">${b.text}</span>`)}
-          </button>`;
-        })}</div>
-      </nav>`;
-  }
-
   /* ------------------------------------------------------------- görünüm
 
-     Tema ve palet üst çubuktan tek dokunuşla değişir. Ayarların dördüncü
-     sekmesine gömülü bir tercih, hiç kullanılmayan bir tercihtir.
-
-     Seçim profile yazılır; yani cihaz değil KİŞİ hatırlanır ve hane
-     profilleri arasında geçerken herkesin kendi görünümü gelir. */
+     Tema üst çubuktaki profil düğmesinden tek dokunuşla değişir. Seçim
+     profile yazılır; yani cihaz değil KİŞİ hatırlanır ve hane profilleri
+     arasında geçerken herkesin kendi görünümü gelir. */
   const THEMES = [
     { id:'system', icon:'monitor', label:'Sistem' },
     { id:'light',  icon:'sun',     label:'Açık' },
@@ -421,8 +367,14 @@ SP.App = (function(){
   function appearanceHtml(){
     const p = S.profile || {};
     const theme = p.theme || 'system';
+    const ad = (p.name || '').trim();
     return String(html`
-      <div class="appear" id="appearance" role="dialog" aria-label="Görünüm">
+      <div class="katman appear" id="appearance" role="dialog" aria-label="Profil ve görünüm">
+        <div class="appear__profil">
+          <span class="ust__profil" aria-hidden="true">${(ad || 'Ben').charAt(0).toLocaleUpperCase('tr-TR')}</span>
+          <span class="minw0"><b>${ad || 'Profil'}</b><small>${brandLine()}</small></span>
+          ${SP.C.Button({ label:'Profil', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'family' } })}
+        </div>
         <div class="appear__label">Tema</div>
         <div class="appear__themes">${map(THEMES, t => html`
           <button class="${cls('themebtn', t.id === theme && 'is-on')}"
@@ -437,45 +389,13 @@ SP.App = (function(){
       </div>`);
   }
 
-  function openAppearance(anchor){
-    closeAppearance();
-    const root = document.getElementById('overlay-root');
-    const el = document.createElement('div');
-    el.innerHTML = appearanceHtml();
-    const panel = el.firstElementChild;
-    root.appendChild(panel);
-
-    /* Çapaya göre konumla; ekranın dışına taşarsa içeri çek. */
-    const r = anchor.getBoundingClientRect();
-    const w = panel.offsetWidth;
-    let left = r.right - w;
-    left = Math.max(12, Math.min(left, window.innerWidth - w - 12));
-    let top = r.bottom + 8;
-    if(top + panel.offsetHeight > window.innerHeight - 12){
-      top = Math.max(12, r.top - panel.offsetHeight - 8);
-    }
-    panel.style.left = left + 'px';
-    panel.style.top = top + 'px';
-  }
-  function closeAppearance(){
-    const el = document.getElementById('appearance');
-    if(el) el.remove();
-  }
-  function isAppearanceOpen(){ return !!document.getElementById('appearance'); }
-
-  /* Paneli yerinde tazele: tema değişince sayfa yeniden çizilmez, yalnızca
-     kök nitelikleri ve panelin işaretli düğmesi değişir. Böylece açık panel
-     kapanmaz ve seçimin etkisi anında görülür. */
-  function refreshAppearance(){
-    const el = document.getElementById('appearance');
-    if(!el) return;
-    const left = el.style.left, top = el.style.top;
-    const wrap = document.createElement('div');
-    wrap.innerHTML = appearanceHtml();
-    const next = wrap.firstElementChild;
-    next.style.left = left; next.style.top = top;
-    el.replaceWith(next);
-  }
+  /* Panel kabuğun katman yöneticisinden açılır (LIFEOS.KABUK): dışarı
+     tıklayınca, Esc'de ve pencere boyutu değişince kapanır; telefonda
+     alttan açılır. Tema değişince yerinde tazelenir, kapanmaz. */
+  function openAppearance(anchor){ K.katmanAc('appearance', appearanceHtml(), anchor); }
+  function closeAppearance(){ if(K.katmanAcik('appearance')) K.katmanKapat(); }
+  function isAppearanceOpen(){ return K.katmanAcik('appearance'); }
+  function refreshAppearance(){ K.katmanTazele('appearance', appearanceHtml()); }
 
   function errorPanel(err){
     const msg = (err && err.message) ? err.message : String(err);
@@ -635,20 +555,25 @@ SP.App = (function(){
         body = errorPanel(err);
       }
 
+      /* v4 iskeleti (ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
+         sayfa başı · bölüm çubuğu · ekran · sayfa sonu; telefonda alt bant
+         ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
       const markup = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
-        <div class="site">
-          ${safe(() => mastheadHtml(sc))}
-          ${safe(() => sitenavHtml(sc))}
-          ${safe(() => heroHtml(sc))}
-          ${safe(() => pagenavHtml(sc))}
+        <div class="site site--v4">
+          ${raw(safe(() => ustCubukHtml(sc)))}
+          ${raw(safe(gunSeridiHtml))}
           <div class="site__body">
-            <main class="wrapc content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
+            <div class="wrapc sayfa">
+              ${raw(safe(() => sayfaBasiHtml(sc)))}
+              ${raw(safe(() => bolumCubuguHtml(sc)))}
+              <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
+            </div>
           </div>
           ${safe(footerHtml)}
-          ${safe(() => tabbarHtml(sc))}
+          ${raw(safe(() => altBantHtml(sc)))}
         </div>
-        ${when(S.sidebarOpen, () => safe(() => navsheetHtml(sc)))}`);
+        ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`);
 
       await withTransition(() => { document.getElementById('app').innerHTML = markup; });
 
@@ -689,14 +614,6 @@ SP.App = (function(){
     }
   }
 
-  /* Bölümün rengi kökte durur: CSS `--sec` jetonunu buradan okur.
-     Yeniden çizimde değil YÖNLENDIRMEDE yazılır ki her karede DOM'a
-     dokunulmasın. */
-  function applySection(route){
-    const sec = sectionOf(route);
-    document.documentElement.setAttribute('data-section', sec.id);
-  }
-
   function go(route){
     /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
@@ -709,12 +626,12 @@ SP.App = (function(){
        icin sonuc: tikladiginda hicbir sey olmayan bir dugme. (ESP'de duman
        testi bunu "olu dugme" olarak yakaladi.) */
     if(UI.isSheetOpen && UI.isSheetOpen()) UI.closeSheet();
-    /* Gizlenmis bolumun adresi Gunluk'e doner. */
+    K.katmanKapat();
+    /* Gizlenmis bolumun adresi Bugun'e doner. */
     if(gizliMi(route)) route = 'today';
     S.route = route;
     S.sidebarOpen = false;
     rotaDegisti = true;
-    applySection(route);
     window.scrollTo(0, 0);
     render();
   }
@@ -770,7 +687,25 @@ SP.App = (function(){
   /* ---------------------------------------------------------- küresel eylemler */
   const globalHandle = {
     async go(el){ go(el.dataset.route); },
-    async 'toggle-menu'(){ S.sidebarOpen = !S.sidebarOpen; render(); },
+    /* Menü (telefonda alt bandın dördüncü sekmesi). `toggle-menu` eski
+       adıdır; klavye kısayolları ve eski bağlantılar için kalır. */
+    async 'toggle-sidebar'(){ K.katmanKapat(); S.sidebarOpen = !S.sidebarOpen; render(); },
+    async 'toggle-menu'(){ K.katmanKapat(); S.sidebarOpen = !S.sidebarOpen; render(); },
+    /* Kabuğun açılır panelleri (LIFEOS.KABUK): ikinci basış kapatır. */
+    async 'modul-menu'(el){
+      if(K.katmanAcik('kabuk-modul')){ K.katmanKapat(); return; }
+      K.katmanAc('kabuk-modul', K.modulMenusu({ modul:'spi' }), el);
+    },
+    async 'bildirim-ac'(el){
+      if(K.katmanAcik('kabuk-bildirim')){ K.katmanKapat(); return; }
+      K.katmanAc('kabuk-bildirim', K.bildirimPaneli({ gruplar:bildirimGruplari() }), el);
+    },
+    async 'hizli-ekle'(el){
+      if(K.katmanAcik('kabuk-hizli')){ K.katmanKapat(); return; }
+      K.katmanAc('kabuk-hizli', K.hizliEkle({ modul:'spi', satirlar:HIZLI }), el);
+    },
+    /* Gün şeridindeki tarih (05): yedi gün açılır ya da kapanır. */
+    async 'hafta-ac'(){ S.ui.haftaAcik = !S.ui.haftaAcik; render(); },
     async hint(el){
       if(UI.isHintOpen() && el.dataset.hint === UI._lastHint){ UI.closeHint(); UI._lastHint = null; return; }
       UI._lastHint = el.dataset.hint;
@@ -1062,7 +997,7 @@ SP.App = (function(){
     if(e.key === 'Escape'){
       if(SP.Talk && SP.Talk.isActive()){ SP.Talk.stop(); render(); return; }
       if(SP.Palette.isOpen()){ SP.Palette.close(); return; }
-      if(isAppearanceOpen()){ closeAppearance(); return; }
+      if(K.katmanAcik()){ K.katmanKapat(); return; }
       if(UI.isHintOpen()){ UI.closeHint(); return; }
       if(UI.isSheetOpen()){ UI.closeSheet(); return; }
       if(S.sidebarOpen){ S.sidebarOpen = false; render(); return; }
@@ -1164,21 +1099,15 @@ SP.App = (function(){
     if(fn) await fn({ files:[file], value:'' }, e);
   });
 
-  /* Açık katmanları dışarıya tıklayınca kapat. */
+  /* İpucu balonu dışarıya tıklayınca kapanır. Kabuğun panelleri
+     (görünüm, modül menüsü, bildirimler, hızlı ekle) bunu LIFEOS.KABUK
+     katman yöneticisinde yapar: dışarı tıklama, Esc, boyut değişimi. */
   document.addEventListener('mousedown', e => {
     if(UI.isHintOpen()
       && !e.target.closest('#popover') && !e.target.closest('[data-act="hint"]')){
       UI.closeHint();
     }
-    if(isAppearanceOpen()
-      && !e.target.closest('#appearance') && !e.target.closest('[data-act="open-appearance"]')){
-      closeAppearance();
-    }
   });
-
-  /* Pencere boyutu değişince panelin çapası kayar; yeniden konumlamak
-     yerine kapatmak daha dürüst: kullanıcı nereye tıkladığını bilir. */
-  window.addEventListener('resize', () => { if(isAppearanceOpen()) closeAppearance(); });
 
   /* ------------------------------------------------------- sürtünme ölçümü
 
@@ -1324,7 +1253,6 @@ SP.App = (function(){
         console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
       }
       applyTheme();
-      applySection(S.route);
       await render();
       installManifest();
       /* Çevrimdışı kabuk: yalnız sunucuyla açılınca (brand/ortak/pwa.js). */
@@ -1481,8 +1409,8 @@ SP.App = (function(){
     }
   }
 
-  return { boot, render, go, applyTheme, applySection, SECTIONS, sectionOf, THEMES, installManifest,
-    openAppearance, closeAppearance, isAppearanceOpen };
+  return { boot, render, go, applyTheme, SECTIONS, sectionOf, yolOf, THEMES, installManifest,
+    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
 })();
 
 /* Test paketi bu dosyayı da yükler (ekran sözleşmelerini denetlemek için)

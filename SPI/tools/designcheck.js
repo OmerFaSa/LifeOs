@@ -220,8 +220,11 @@ let DUZEN_SAYISI = 0;
             /* Üst çubuk araçları sağ uçta durur. Bir düzen aradaki
                esneyen ögeyi gizlediğinde araçlar markanın dibine
                yığılıyor ve künye bozuk görünüyor. */
-            const bar = document.querySelector('.masthead__in');
-            const tools = document.querySelector('.navtools');
+            /* v4 kabuğunda üst çubuk `.ust__ic`, araçlar `.ust__sag`
+               (brand/ortak/kabuk.js). Eski künye seçicisi kalınca ölçüm
+               hiçbir şey bulmuyor ve sessizce «0 px» diyordu. */
+            const bar = document.querySelector('.ust__ic') || document.querySelector('.masthead__in');
+            const tools = document.querySelector('.ust__sag') || document.querySelector('.navtools');
             let aracBosluk = 0;
             if(bar && tools)
               aracBosluk = Math.round(bar.getBoundingClientRect().right

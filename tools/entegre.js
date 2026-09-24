@@ -477,10 +477,18 @@ async function main(){
         else if(!urun.ok || urun.adet !== 1) hatalar.push(s.id + ': urun eklenemedi — ' + urun.not);
         else{
           if(!urun.bildirildi) hatalar.push(s.id + ': urun cevabi merkeze bildirilemedi');
-          await page.evaluate(([ns]) => window[ns].App.go('office'), [s.ns]);
+          /* Urunun ekrani modulden OKUNUR: `urun-ac` isleyicisini tasiyan
+             ekran (AYS/ESP Ofis, SPİ Kutuphanem). Sabit yazilsaydi urun
+             yer degistirince bu adim ya kirmizi ya da yanlis ekranda
+             yesil olurdu. */
+          const urunEkrani = await page.evaluate(([ns]) => {
+            const E = window[ns].Screens;
+            return Object.keys(E).find(k => E[k] && E[k].handle && E[k].handle['urun-ac']) || 'office';
+          }, [s.ns]);
+          await page.evaluate(([ns, r]) => window[ns].App.go(r), [s.ns, urunEkrani]);
           await wait(600);
           const dugme = await page.$('[data-act="urun-ac"][data-id="' + urun.id + '"]');
-          if(!dugme) hatalar.push(s.id + ': Ofis ekraninda BAM urunu gorunmedi');
+          if(!dugme) hatalar.push(s.id + ': ' + urunEkrani + ' ekraninda BAM urunu gorunmedi');
           else{
             await dugme.click();
             await wait(400);
@@ -493,7 +501,7 @@ async function main(){
               hatalar.push(s.id + ': urun sandbox iframe’de acilmadi');
             }else{
               console.log('  ' + s.id + ' → BAM urunu kendi koduyla sinandi, depoya yazildi, '
-                + 'Ofis’te sandbox iframe’de acildi');
+                + urunEkrani + ' ekraninda sandbox iframe’de acildi');
             }
             await page.evaluate(([ns]) => window[ns].UI.closeSheet(), [s.ns]);
           }
@@ -554,7 +562,8 @@ async function main(){
         const tk = await page.evaluate(async ([ns]) => {
           const N = window[ns];
           N.S.ui.hkmIntents = await N.Beacon.intents();
-          N.App.go('today');
+          /* Onaylar tek cekmecede: Bugun yalniz en ondeki karti gosterir. */
+          N.App.go(N.Screens.onaylar ? 'onaylar' : 'today');
           await new Promise(r => setTimeout(r, 500));
           const d = document.querySelector('[data-act="hkm-toplu"]');
           if(!d) return { dugmeYok:true, n:N.S.ui.hkmIntents.length,
@@ -601,7 +610,7 @@ async function main(){
           const n = (await SP.Beacon.intents()).find(x => x.kind === 'besin.add');
           if(!n) return { yok:true };
           SP.S.ui.hkmIntents = [n];
-          SP.App.go('today');
+          SP.App.go(SP.Screens.onaylar ? 'onaylar' : 'today');
           await new Promise(r => setTimeout(r, 400));
           const kart = document.body.textContent.indexOf('SPİ şunu ekleyecek') >= 0;
           const r = await SP.Beacon.resolveIntent(n, 'apply');

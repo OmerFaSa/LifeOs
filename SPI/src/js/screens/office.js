@@ -280,23 +280,8 @@ SP.Screens.office = (function(){
     });
   }
 
-  /* ---------- BAM ürünleri (core/urun.js, ortak) ----------
-     HKM'nin Üretim Bürosu'ndan gelen ve onaylanan özet, rapor, sunum,
-     pankart. Basılı hâl bu modülün deposundadır: HKM kapalıyken de açılır.
-     Liste boşsa bölüm çizilmez. */
-  function urunlerKart(){
-    const l = SP.Urunler ? SP.Urunler.liste() : [];
-    if(!l.length) return '';
-    const govde = html`<div class="stack-xs">${map(l, u => html`<div class="row gap-8 wrap">
-      <span class="minw0"><b>${u.baslik}</b> <span class="tiny dim">· ${u.urunAd}
-        · ${LIFEOS.Urun.etiketAdi(u.dogruluk)}</span></span>
-      ${K.Button({ label:'Aç', size:'sm', act:'urun-ac', data:{ 'data-id':u.id } })}
-      ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
-    </div>`)}</div>`;
-    return K.Entry({ label:'BAM ÜRÜNLERİ', hint:'hkm', meta:l.length + ' ürün', wide:true,
-      note:'Sohbette «… hakkında özet hazırla» dersen King’e iletilir; bitince teklif olarak gelir.',
-      body:html`${govde}` });
-  }
+  /* BAM ürünleri Kütüphanem'de (screens/kutuphane.js): «Kütüphane»
+     BAM'ın ürettiklerinin tek yeri. */
 
   async function render(){
     const flags = SP.Model.openFlags();
@@ -313,7 +298,7 @@ SP.Screens.office = (function(){
           note:'Her uzman yalnız kendi alanına bakar. Yetki dışına çıkmaz; '
             + 'çıkarsa çıktısı basılmaz.',
           body:html`<div class="desks">${map(COACHES, deskCard)}</div>` }),
-        agendaCard(), decisionCard(), urunlerKart(),
+        agendaCard(), decisionCard(),
         K.Entry({ label:'Yetki ayrımı', hint:'office', meta:'kim neye bakar',
           body:html`<ul class="bullets small muted">${map(SP.AGENTS, a => html`
             <li><b>${a.name}</b> — ${a.scope}</li>`)}</ul>` }),
@@ -322,21 +307,6 @@ SP.Screens.office = (function(){
   }
 
   const handle = {
-    /* Ürün KUTUDA açılır: sandbox iframe, betik çalışmaz (core/urun.js). */
-    async 'urun-ac'(el){
-      const u = SP.Urunler && SP.Urunler.bul(el.dataset.id);
-      if(!u) return;
-      UI.sheet({ title:u.baslik, wide:true,
-        subtitle:u.urunAd + ' · ' + LIFEOS.Urun.etiketAdi(u.dogruluk),
-        note:u.dogruluk === 'dogrulanmadi' ? 'Doğrulanmadı: kaynaksız, modelin bilgisidir. '
-          + 'Karar vermeden önce bir kaynağa bak.' : null,
-        body:LIFEOS.Urun.cerceve(u) });
-    },
-    async 'urun-sil'(el){
-      const id = el.dataset.id;
-      UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
-        async () => { await SP.Urunler.sil(id); UI.toast('Silindi'); SP.App.render(); }, true);
-    },
     /* Devri tamamlayan hareket: bulgunun DUSTUGU ekrani, dogru sekmesi
        ve dogru satiri acik halde ac. Yoksa devir bir cumleden ibaret
        kalir. */
