@@ -137,6 +137,37 @@ ESP.C = (function(){
       </div>`;
   }
 
+  /* Kutu (katalog 02): TEK KUTU İSKELETİ — v4. Her ekranda aynı: solda simge
+     ve ad, sağda KESİNLİK YUVASI. Yuva boşken de durur; içini K'nin sayı
+     bileşeni doldurur (kesinlik glifi, tazelik). Kart gölgesizdir: yüzey ton
+     ve ince çizgiyle ayrılır (temel.css). `bitisik`: gövde kendi dolgusunu
+     taşır (tablo, liste satırları). */
+  function Kutu(o){
+    const bas = o.ad || o.simge || o.yuva != null;
+    return html`<section class="${cls('kutu', o.class)}" data-oz="002" ${when(o.id, () => attrs({ id:o.id }))}>
+      ${when(bas, () => html`<header class="kutu__bas">
+        ${when(o.simge, () => html`<span class="kutu__simge" aria-hidden="true">${icon(o.simge)}</span>`)}
+        ${when(o.ad, () => html`<h3 class="kutu__ad">${o.ad}${when(o.ipucu, () => raw(ESP.UI.hint(o.ipucu)))}</h3>`)}
+        <span class="kutu__yuva">${o.yuva == null ? '' : o.yuva}</span>
+      </header>`)}
+      ${when(o.govde != null, () => html`<div class="${cls('kutu__govde', o.bitisik && 'kutu__govde--bitisik')}">${o.govde}</div>`)}
+      ${when(o.ayak, () => html`<footer class="kutu__ayak">${o.ayak}</footer>`)}
+    </section>`;
+  }
+
+  /* ModulIsareti (katalog 165): RENKSİZ DE AYIRT EDİLİR. Modül = renk + harf
+     + şekil: AYS kare, SPİ daire, ESP karo, Merkez altıgen. Renk körlüğünde
+     ve gri baskıda da hangi modül olduğu okunur. */
+  const MODUL = { ays:{ harf:'A', ad:'AYS' }, spi:{ harf:'S', ad:'SPİ' },
+    esp:{ harf:'E', ad:'ESP' }, mer:{ harf:'M', ad:'Merkez' } };
+  function ModulIsareti(o){
+    const k = typeof o === 'string' ? o : (o && o.modul);
+    const m = MODUL[k];
+    if(!m) return '';
+    return html`<span class="${cls('modis', 'modis--' + k, o && o.buyuk && 'modis--lg')}" data-oz="165"
+      role="img" aria-label="${m.ad}">${m.harf}</span>`;
+  }
+
   /* ---------- etiket ---------- */
 
   function Badge(o){
@@ -481,7 +512,7 @@ ESP.C = (function(){
   const SectionTitle = (title, right) => html`<div class="section-title"><h2>${title}</h2>${when(right, right)}</div>`;
 
   return {
-    Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Kutu, ModulIsareti, Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     Entry, Ledger,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, Busy, NextUp, Table, Pager, paginate,

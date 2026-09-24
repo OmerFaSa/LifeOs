@@ -34,8 +34,18 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 - **Şu an:** T1 temel (jetonlar, tema, Inter, temel bileşenler)
 - **T0 kararları:** soruldu (2026-09-24), cevap bekleniyor — T2 menüsü ve T3 cevaba kadar başlamaz
-- **Biten** (adım ya da özellik · commit): —
-- **Yarım / sıradaki:** T1 → (Kapı 1 + T0 cevabı) → T2 kabuk, T3 AYS
+- **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
+  T1 temel kalıplar `brand/ortak/temel.css` + `C.Kutu` (02) + `C.ModulIsareti` (165) +
+  alt çekmece tutamağı (162) · (bu commit)
+- **K için:** renk/ölçü/süre yalnız jetonlardan: `--ays --spi --esp --mer` (+ `-ink` yazı,
+  `-t` açık ton), `--ok --bad --now`, `--r-xs/-sm/-md/-r`, `--sp-*`, `--dur-press/--dur/
+  --dur-lg/--dur-in`. Kart iskeleti: `C.Kutu({ simge, ad, yuva, govde, ayak, bitisik })`;
+  yuva = kesinlik yeri (sizin sayı bileşeniniz). Düğme tonları: `primary` (modül),
+  `ink` (siyah), `ghost`.
+- **Not (H):** üç `src/tests/index.html`'e `jeton.css` ve `temel.css` bağlantısı eklendi
+  (test sayfası gerçek stil ortamında koşsun diye); test değiştirilmedi.
+- **Yarım / sıradaki:** T1 sürüyor (paletler/düzenler §8-4 cevabını bekliyor) →
+  (Kapı 1 + T0 cevabı) → T2 kabuk, T3 AYS
 - **Soru / öneri:** —
 
 ## HATA (H)

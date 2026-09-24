@@ -1,5 +1,35 @@
 # ESP — Stil Rehberi
 
+> ## v4 — geçerli görsel dil (2026-09-24, ekip/EKIP-PLANI.md §2)
+>
+> Bu bölüm aşağıdaki **Renk, Tipografi, Ölçü ve Hareket** bölümlerinin
+> üstündedir; çelişkide v4 geçer. Aşağıdakiler T3 bitince yeniden yazılır.
+>
+> - **Jetonlar tek kaynakta:** `brand/ortak/jeton.css` → `src/css/jeton.css`
+>   (kopyayı elle düzenleme; `python3 tools/ortak.py --yay`). Modülün
+>   `tokens.css`'i yalnız kuyruktur: `--mod-*` bağlaması, ajan, makro ve
+>   grafik serisi renkleri. Yükleme: `fonts → jeton → tokens → palettes`.
+> - **Renk sahipliği söyler:** mavi AYS (`--ays`), yeşil SPİ (`--spi`),
+>   turuncu ESP (`--esp`), mor Merkez (`--mer`). Yeşil ve kırmızı yalnız
+>   yön bildirir (`--ok`, `--bad`, `--now`). Derse, kategoriye, süse renk yok.
+> - **Her rengin iki jetonu:** v4 tonu (`--spi`) işaret içindir (nokta,
+>   çubuk, çizgi); yazı ve dolu düğme aynı ailenin AA tonunu kullanır
+>   (`--spi-ink`). `--primary` modülün `-ink` tonudur.
+> - **Yüzey:** ton + ince çizgi (`--border`, `--border-soft`). Kartta gölge
+>   yok; gölge (`--shadow-lg`) yalnız açılır katmanda.
+> - **Yazı:** Inter tek aile; rakamlar her yerde tablo hizalı (`tnum`). Rol
+>   ayrımı boyut ve ağırlıkla: sayfa başlığı `--fs-display` 26, kutu adı
+>   `--fs-md` 15/600, büyük sayı `--fs-hero` 28/700.
+> - **Köşe:** rozet `--r-xs` 6 · düğme `--r-sm` 8 · iç kart `--r-md` 10 ·
+>   kart `--r` 14. **Hareket:** basma 120 · geçiş 200 · açılma 320 ·
+>   giriş 700 ms; azaltılmış harekette hepsi 0.
+> - **Temel kalıplar** `brand/ortak/temel.css`'te: `C.Kutu` (katalog 02:
+>   simge · ad · sağda kesinlik yuvası), `C.ModulIsareti` (165: renk + harf
+>   + şekil), düğme (`primary` modül rengi, `ink` siyah, `ghost`), çip
+>   (köşeli), rozet (hap), alt çekmece tutamağı (162).
+> - **Hap biçimi** yalnız etkin sekmede ve rozette.
+
+
 Tasarım sistemi kardeş projelerle **ortaktır**: aynı jetonlar, aynı kart, düğme
 ve tablo dili, aynı defter düzeni. Bu kasıtlıdır — üç uygulama aynı kişinin gün
 içinde dönüşümlü kullandığı üç araçtır ve aynı yerde durmalıdır.

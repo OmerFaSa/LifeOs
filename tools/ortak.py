@@ -212,6 +212,8 @@ DOSYALAR = {
     # SERI DONDURMA ve TATIL — dondurulmus gunler (fikir 50, 56).
     "seri.js":        "js/core",
     "seri.test.js":   "tests",
+    "temel.css":      "css",
+    "temel.test.js":  "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     "sw.js":          ".",
