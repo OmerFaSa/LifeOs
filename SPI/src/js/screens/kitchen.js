@@ -109,6 +109,37 @@ SP.Screens.kitchen = (function(){
     });
   }
 
+  /* Evdekinden yemek (core/evdeki.js, fikir 29): model yok, tarif yok —
+     «bu malzemelerle hangi ev yemeği olur» ve eksiği ne. */
+  function evdekiCard(){
+    if(!SP.Evdeki) return null;
+    const metin = S.ui.evdeki || '';
+    const okunan = SP.Evdeki.oku(metin);
+    const l = metin.trim() ? SP.Evdeki.oner(okunan.var) : [];
+    return K.Card({
+      title:'Evde ne var?', sub:'Malzemeyi yaz; hangi yemeğin olduğu ve neyin eksik kaldığı',
+      body:html`
+        <div class="row gap-6 wrap">
+          ${K.Input({ id:'evdeki-q', value:metin, class:'grow', aria:'Evdeki malzemeler',
+            placeholder:'yumurta, domates, biber, soğan…', change:'evdeki', data:{ 'data-debounce':'300' } })}
+          ${K.Button({ label:'Sepetimdekiler', size:'sm', act:'evdeki-sepet' })}
+        </div>
+        ${when(okunan.taninmayan.length, () => html`<p class="tiny dim mt-6">Tanınmadı:
+          ${okunan.taninmayan.join(', ')} — bu malzemeyi listede bulamadım.</p>`)}
+        ${when(metin.trim() && !l.length, () => html`<p class="small dim mt-10">Bu malzemelerle listedeki
+          ev yemeklerinden biri çıkmıyor.</p>`)}
+        ${when(l.length, () => html`<div class="mt-10">${K.Table({ tight:true,
+          headers:['Yemek', 'Durum', ''],
+          rows:l.slice(0, 8).map(r => [
+            html`<b>${r.yemek.name}</b>${when(r.arti.length, () => html`<div class="tiny dim">+ ${r.arti.join(', ')}</div>`)}`,
+            r.eksik.length ? 'eksik: ' + r.eksik.join(', ') : 'yapılabilir',
+            K.Button({ label:'Seç', size:'sm', act:'evdeki-sec', data:{ 'data-id':r.yemek.id } }),
+          ]) })}</div>`)}
+        <p class="tiny dim mt-10">Genel ev usulü malzeme listesi; miktar ve tarif değil. Yağ ve tuz
+          sayılmaz.</p>`,
+    });
+  }
+
   function dishInfoCard(){
     const f = SP.FOOD_BY_ID[S.ui.kitchenDish || 'kuru-fasulye-etli'];
     if(!f) return null;
@@ -255,8 +286,8 @@ SP.Screens.kitchen = (function(){
 
   async function render(){
     return String(html`
-      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), customCard(), bilgiCard(), yerCard(),
-        dishInfoCard()])}
+      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), evdekiCard(), customCard(), bilgiCard(), yerCard(),
+        dishInfoCard()].filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['household', 'portion', 'profiles']))}</div>`);
   }
 
@@ -273,6 +304,18 @@ SP.Screens.kitchen = (function(){
   }
 
   const handle = {
+    async 'evdeki-sepet'(){
+      const m = SP.Evdeki.sepettenMalzeme().map(id => SP.Evdeki.MALZEME[id].ad);
+      if(!m.length){ UI.toast('Sepette malzemeye çevrilebilen bir şey yok'); return; }
+      const var_ = String(S.ui.evdeki || '').trim();
+      S.ui.evdeki = (var_ ? var_ + ', ' : '') + m.join(', ');
+      SP.App.render();
+    },
+    async 'evdeki-sec'(el){
+      S.ui.kitchenDish = el.dataset.id;
+      UI.toast(SP.FOOD_BY_ID[el.dataset.id].name + ' seçildi · tencereyi paylaştırabilirsin');
+      SP.App.render();
+    },
     async 'add-food'(){ openFoodSheet(M.newFood(), null); },
 
     async 'edit-food'(el){
@@ -359,6 +402,7 @@ SP.Screens.kitchen = (function(){
       if(g) g.textContent = labelFile ? labelFile.name : '';
     },
     async 'pick-dish'(el){ S.ui.kitchenDish = el.value; SP.App.render(); },
+    async 'evdeki'(el){ S.ui.evdeki = el.value; SP.App.render(); },
     async 'bilgi-tur'(el){ S.ui.bilgiTur = el.value; SP.App.render(); },
     async 'set-grams'(el){
       const v = Number(el.value);

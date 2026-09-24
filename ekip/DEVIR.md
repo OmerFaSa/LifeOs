@@ -427,6 +427,10 @@ doldur») · ✅ 21 verimli saat (AYS blokları saate bağlı DEĞİL; zamanlay�
 artık `blok.oturumlar` olarak ölçülür; `calc.verimliSaat`: 4 bant, blok çoğunluk dakikasının bandına,
 bant başına ≥ 40 soru ve ≥ 3 blok yoksa veri yok, iki bant arası < 5 puan ise «fark yok»; İlerleme ›
 Süreç göstergeleri. Veri bu sürümden sonra birikir; plan saati değiştirilmez, bilgi verilir). AYS 1681.
+· ✅ 29 evdekinden yemek (SPİ `core/evdeki.js`: model YOK, tarif YOK — 14 ev yemeğinin genel
+gerekli/isteğe bağlı malzeme listesi; «evde ne var» metni okunur, tanınmayan parça geri söylenir,
+en uzun ad eşleşir; tam olan önce, en çok 2 eksikle olan eksiğin ADIYLA; «Sepetimdekiler»; «Seç»
+tencere paylaştırmaya gider; Mutfak › «Evde ne var?»). SPİ 1329; duman, 390 px, erişilebilirlik temiz.
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 
