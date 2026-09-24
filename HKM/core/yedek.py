@@ -30,6 +30,8 @@ import hashlib
 import json
 import os
 import re
+import tempfile
+import threading
 
 from core.planlama import _tarih_yaz
 
@@ -42,6 +44,10 @@ AYLIK = 6
 KUCULME = 0.5
 AD = re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$")
 ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+_KILITLER = {}
+_KILITLER_KILIDI = threading.Lock()
 
 
 def kok(db_path):
@@ -116,14 +122,32 @@ def kaydet(klasor_kok, modul, ham, bugun=None):
 
     klasor = os.path.join(klasor_kok, modul)
     os.makedirs(klasor, exist_ok=True)
+    # HATALAR D-4: iki sekme ayni anda yollarsa ayni gecici ad ve geri okuma
+    # yarisiyordu. Yazma + dogrulama + dondurme klasor basina TEK is
+    # parcaciginda; gecici ad yine de tekildir.
+    with _kilit(klasor):
+        return _kaydet(klasor, modul, ham, tarih)
+
+
+def _kilit(klasor):
+    with _KILITLER_KILIDI:
+        return _KILITLER.setdefault(os.path.abspath(klasor), threading.Lock())
+
+
+def _kaydet(klasor, modul, ham, tarih):
     onceki = [d for d in _dosyalar(klasor) if d[0] != tarih]
     yol = os.path.join(klasor, tarih + ".json")
-    gecici = yol + ".yaziliyor"
-    with open(gecici, "wb") as f:
-        f.write(ham)
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(gecici, yol)
+    fd, gecici = tempfile.mkstemp(dir=klasor, prefix=tarih + ".", suffix=".yaziliyor")
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(ham)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(gecici, yol)
+    except BaseException:
+        if os.path.exists(gecici):
+            os.remove(gecici)
+        raise
 
     bayt, sha = _ozet(ham)
     with open(yol, "rb") as f:

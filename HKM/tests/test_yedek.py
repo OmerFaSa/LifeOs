@@ -70,6 +70,36 @@ def run():
             shutil.rmtree(kok)
     test("baska modulun, LifeOS olmayan ve bozuk govde reddedilir", t_red)
 
+    def t_eszamanli():
+        """HATALAR D-4: iki sekme ayni modulun yedegini ayni anda yollarsa
+        ikisi de ayni «.yaziliyor» adini kullaniyordu; biri FileNotFoundError
+        ile kopabiliyor ya da geri okumada otekinin baytlarini gorup
+        «yazilmadi» diyordu."""
+        import threading
+        kok = tempfile.mkdtemp(prefix="hkm-yedek-yaris-")
+        try:
+            sonuc, hata = [], []
+
+            def yaz(i):
+                try:
+                    for _ in range(15):
+                        sonuc.append(yedek.kaydet(kok, "ays", _govde(kayit=i + 1),
+                                                  bugun="2026-09-20"))
+                except Exception as e:          # noqa: BLE001
+                    hata.append(repr(e))
+            ipler = [threading.Thread(target=yaz, args=(i,)) for i in range(6)]
+            for t in ipler:
+                t.start()
+            for t in ipler:
+                t.join()
+            eq(hata, [])
+            eq([r for r in sonuc if not r.get("ok")], [])
+            eq([d for d in os.listdir(os.path.join(kok, "ays"))
+                 if d.endswith(".yaziliyor")], [])
+        finally:
+            shutil.rmtree(kok, ignore_errors=True)
+    test("ayni modulun eszamanli iki yedegi birbirini bozmaz (D-4)", t_eszamanli)
+
     def t_dondurme():
         kok = tempfile.mkdtemp(prefix="hkm-yedek-")
         try:
