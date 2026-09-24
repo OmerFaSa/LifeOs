@@ -31,8 +31,11 @@ import re
 
 from core import spibilgi
 
-ALANLAR = ("tarih", "felsefe")
-ALAN_AD = {"tarih": "tarih belgesi", "felsefe": "felsefe belgesi"}
+ALANLAR = ("tarih", "felsefe", "okuma", "yazi")
+ALAN_AD = {"tarih": "tarih belgesi", "felsefe": "felsefe belgesi", "okuma": "okuma listesi",
+           "yazi": "yazı örnekleri"}
+ESER_ALANLARI = ("okuma", "yazi")
+MAX_ESER = 10
 TURLER = ("siyasi", "ekonomik", "dusunsel", "toplumsal")
 BOLGELER = ("anadolu", "avrupa", "ortadogu", "asya", "afrika", "amerika", "dunya")
 YIL = (-3500, 2100)
@@ -64,7 +67,7 @@ def temizle(govde):
             hata.append("belge: bilinmeyen alan %s" % k)
     alan = govde.get("alan")
     if alan not in ALANLAR:
-        hata.append("alan tarih ya da felsefe olmalı")
+        hata.append("alan tarih, felsefe, okuma ya da yazi olmalı")
     konu = _bosluk(govde.get("konu"))
     if not (2 <= len(konu) <= MAX_KONU):
         hata.append("konu 2-%d karakter olmalı" % MAX_KONU)
@@ -95,12 +98,21 @@ def sorgular(g):
     """Arama sorgulari KURALLA kurulur; model cagrilmaz."""
     if g["alan"] == "tarih":
         return [g["konu"], "%s tarihi olaylar" % g["konu"]]
+    if g["alan"] == "okuma":
+        return ["%s kitapları" % g["konu"], "%s okuma listesi" % g["konu"]]
+    if g["alan"] == "yazi":
+        return ["%s yazarları üslup" % g["konu"], "%s örnek metinler" % g["konu"]]
     return [g["konu"], "%s filozoflar eserleri" % g["konu"]]
 
 
 def istem(g):
     if g["alan"] == "tarih":
         return "Konu: %s\nBu konunun önemli olaylarını kaynaklardan çıkar." % g["konu"]
+    if g["alan"] == "okuma":
+        return "Konu: %s\nBu konuda okunacak temel eserleri kaynaklardan çıkar." % g["konu"]
+    if g["alan"] == "yazi":
+        return ("Konu: %s\nBu konuda üslubu örnek gösterilen yazarları ve eserlerini kaynaklardan "
+                "çıkar." % g["konu"])
     return "Konu: %s\nBu konunun düşünürlerini, eserlerini ve ana tezlerini kaynaklardan çıkar." % g["konu"]
 
 
@@ -114,7 +126,18 @@ KONUMUN VE SINIRIN
   karakterlik bir parça. Kod bu parçayı kaynakta arayacak.
 """
 
+_ESER_BICIM = """NE YAZARSIN
+- Eserler: yazar; eser adı; yılı (biliniyorsa tam sayı, MÖ ise eksi; bilinmiyorsa null);
+  «not»: %s (tek cümle, kaynağa dayanarak).
+- Alıntı yazarın ADINI içermeli.
+
+ÇIKTI: Yalnız şu biçimde tek bir JSON nesnesi döndür, başka hiçbir şey yazma:
+{"eserler": [{"yazar": "...", "eser": "...", "yil": null, "not": "...",
+  "kaynak": 1, "alinti": "..."}]}"""
+
 _BICIM = {
+    "okuma": _ESER_BICIM % "bu eserin konu için neden temel sayıldığı",
+    "yazi": _ESER_BICIM % "bu yazarın üslubunda örnek gösterilen özellik",
     "tarih": """NE YAZARSIN
 - Konunun olayları: kısa başlık; yıl (tam sayı; Milattan önce ise EKSİ, örneğin -480);
   tür (yalnız: siyasi, ekonomik, dusunsel, toplumsal); bölge (yalnız: anadolu, avrupa,
@@ -180,6 +203,27 @@ def ayikla(d, g):
         if not satirlar:
             return None, "Kaynaklarda yılı ve türüyle yazılmış olay çıkmadı."
         return {"tur": "tarih", "konu": g["konu"], "olaylar": satirlar, "bicim_dusen": dusen}, None
+    if g["alan"] in ESER_ALANLARI:
+        for x in (d.get("eserler") if isinstance(d.get("eserler"), list) else [])[:MAX_ESER * 2]:
+            if not isinstance(x, dict):
+                dusen += 1
+                continue
+            yazar, eser = _metin(x.get("yazar"), 2, 80), _metin(x.get("eser"), 2, 120)
+            yil, yok = _yil(x.get("yil"), bos_olur=True)
+            n = _kaynak_no(x)
+            if not yazar or not eser or not yok or n is None:
+                dusen += 1
+                continue
+            k = (_kucuk(yazar), _kucuk(eser))
+            if k in gorulen or len(satirlar) >= MAX_ESER:
+                continue
+            gorulen.add(k)
+            satirlar.append({"yazar": yazar, "eser": eser, "yil": yil,
+                             "not": _metin(x.get("not"), 4, 240), "kaynak": n,
+                             "alinti": _bosluk(x.get("alinti"))[:400]})
+        if not satirlar:
+            return None, "Kaynaklarda yazarı ve adıyla yazılmış eser çıkmadı."
+        return {"tur": g["alan"], "konu": g["konu"], "eserler": satirlar, "bicim_dusen": dusen}, None
     for x in (d.get("dusunurler") if isinstance(d.get("dusunurler"), list) else [])[:MAX_DUSUNUR * 2]:
         if not isinstance(x, dict):
             dusen += 1
@@ -228,6 +272,19 @@ def dogrula(govde, metinler, alinti_dogru_mu):
             return None, "Hiçbir olay kaynağındaki alıntıyla doğrulanamadı; kayıt yazılmadı."
         govde["olaylar"] = kalan
         return "kaynakli", None
+    if govde["tur"] in ESER_ALANLARI:
+        kalan = []
+        for x in govde["eserler"]:
+            if not (kaynakta(x) and _ad_alintida(x["yazar"], x["alinti"])):
+                continue
+            if x["yil"] is not None and not _yil_alintida(x["yil"], x["alinti"]):
+                x["yil"] = None
+            kalan.append(x)
+        govde["dusen"] = len(govde["eserler"]) - len(kalan)
+        if not kalan:
+            return None, "Hiçbir eser kaynağındaki alıntıyla doğrulanamadı; kayıt yazılmadı."
+        govde["eserler"] = kalan
+        return "kaynakli", None
     kalan = []
     for x in govde["dusunurler"]:
         if not (kaynakta(x) and _ad_alintida(x["ad"], x["alinti"])):
@@ -242,7 +299,17 @@ def dogrula(govde, metinler, alinti_dogru_mu):
     return "kaynakli", None
 
 
+def satirlar(govde):
+    """Kaydin satirlari — ture gore (teklif sayisi ve ozet icin)."""
+    return (govde.get("olaylar") if govde.get("tur") == "tarih"
+            else govde.get("eserler") if govde.get("tur") in ESER_ALANLARI
+            else govde.get("dusunurler")) or []
+
+
 def ozet(govde):
+    if govde["tur"] in ESER_ALANLARI:
+        return "%s: %d eser (%s, kaynaklı)." % (govde["konu"], len(govde["eserler"]),
+                                                ALAN_AD[govde["tur"]])
     if govde["tur"] == "tarih":
         return "%s: %d olay (kaynaklı, yıl alıntıda)." % (govde["konu"], len(govde["olaylar"]))
     return "%s: %d düşünür, eser ve tez (kaynaklı)." % (govde["konu"], len(govde["dusunurler"]))

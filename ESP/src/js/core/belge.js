@@ -65,7 +65,7 @@ ESP.Belge = (function(){
 
   function istekTemizle(o){
     const alan = o && o.alan;
-    if(alan !== 'tarih' && alan !== 'felsefe') return { ok:false, why:'Alan tarih ya da felsefe olmalı.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi'].indexOf(alan) < 0) return { ok:false, why:'Alan tarih, felsefe, okuma ya da yazı olmalı.' };
     const konu = bosluk(o.konu);
     if(konu.length < 2 || konu.length > 80) return { ok:false, why:'Konu 2–80 karakter olmalı.' };
     return { ok:true, belge:{ alan, konu } };
@@ -75,7 +75,8 @@ ESP.Belge = (function(){
     const t = istekTemizle(o);
     if(!t.ok) return { ok:false, metin:t.why };
     const r = await istek('/api/king/emir', { modul:'esp', tur:'esp.belge', konu:'',
-      neden:'ESP ' + (t.belge.alan === 'tarih' ? 'Tarih' : 'Sempozyum') + ' ekranından belge istendi.',
+      neden:'ESP ' + ({ tarih:'Tarih', felsefe:'Sempozyum', okuma:'Okuma', yazi:'Yazı' })[t.belge.alan]
+        + ' ekranından belge istendi.',
       govde:{ belge:t.belge } });
     if(!r.bagli) return { ok:false, metin:'Belgeyi HKM’deki Araştırma Bürosu kaynaklardan çıkarır ama HKM '
       + 'bağlı değil. Rehber › HKM’den bağlanınca yeniden iste.' };
@@ -111,7 +112,7 @@ ESP.Belge = (function(){
     if(!g || !Number.isInteger(kid) || kid < 1 || kid !== Number(p && p.kayit_id)){
       return { ok:false, why:'Kayıt teklifle eşleşmiyor.' };
     }
-    if(g.tur !== 'tarih' && g.tur !== 'felsefe') return { ok:false, why:'Kayıt ESP belgesi biçiminde değil.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi'].indexOf(g.tur) < 0) return { ok:false, why:'Kayıt ESP belgesi biçiminde değil.' };
     if(kayit.dogruluk !== 'kaynakli') return { ok:false, why:'Kaynaksız belge eklenmez: belge kaynaktır.' };
     const hepsi = [].concat(ESP.S.events || [], ESP.S.sources || [], ESP.S.books || [], ESP.S.args || []);
     if(hepsi.some(x => x && x.bam && x.bam.kayitId === kid)) return { ok:false, why:'Bu belge zaten eklenmiş.' };
@@ -148,6 +149,34 @@ ESP.Belge = (function(){
 
     const kitapVar = {};
     (ESP.S.books || []).forEach(b => { kitapVar[U().norm(b.title) + '|' + U().norm(b.author)] = b; });
+
+    /* OKUMA ve YAZI: eser listesi → Kütüphane (başlanmadı). BAM'ın notu
+       kitabın üstünde durur; kullanıcının atomik notlarına YAZILMAZ (notlar
+       senin fikrindir ve sentez ölçüsüne girer). */
+    if(g.tur === 'okuma' || g.tur === 'yazi'){
+      const yeni = [];
+      (Array.isArray(g.eserler) ? g.eserler : []).slice(0, 20).forEach(x => {
+        const yazar = metin(x && x.yazar, 2, 80), eser = metin(x && x.eser, 2, 120);
+        if(!yazar || !eser || !(x && kaynaklar[x.kaynak]) || (x.yil != null && !yilOk(x.yil))){ dusen++; return; }
+        const anahtar = U().norm(eser) + '|' + U().norm(yazar);
+        if(kitapVar[anahtar]){ atlanan++; return; }
+        const b = ESP.Model.newBook({ title:eser, author:yazar, kind:'primary', startedAt:null,
+          year:x.yil == null ? null : x.yil,
+          bam:{ kayitId:kid, alan:g.tur, not:metin(x.not, 4, 240) } });
+        kitapVar[anahtar] = b;
+        yeni.push(b);
+      });
+      if(!yeni.length) return { ok:false, why:'Belgeden Kütüphane’ye eklenecek yeni eser çıkmadı.' };
+      const uyari = [];
+      if(dusen) uyari.push(dusen + ' eser ESP’nin denetimini geçmedi (yazar, ad, yıl ya da kaynak).');
+      if(atlanan) uyari.push(atlanan + ' eser Kütüphane’de zaten var; yeniden eklenmeyecek.');
+      uyari.push('Eserler Okuma › Kaynaklar’a «başlanmadı» olarak girer.');
+      return { ok:true, tur:g.tur, books:yeni, args:[], kayitId:kid,
+        onizleme:{ baslik:bosluk(g.konu) + ' — ' + yeni.length + ' eser (' + (g.tur === 'okuma'
+            ? 'okuma listesi' : 'yazı örnekleri') + ', kaynaklı)',
+          satirlar:yeni.map(b => b.author + ' — ' + b.title + (b.year != null ? ' (' + yilYaz(b.year) + ')' : '')
+            + (b.bam.not ? ': ' + b.bam.not : '')), uyari } };
+    }
     const tezVar = {};
     (ESP.S.args || []).forEach(a => { tezVar[U().norm(a.thesis)] = 1; });
     const books = [], args = [];
@@ -204,6 +233,10 @@ ESP.Belge = (function(){
     }
     for(const b of s.books) await ESP.Model.saveBook(b);
     for(const a of s.args) await ESP.Model.saveArgument(a);
+    if(s.tur !== 'felsefe'){
+      return { ok:true, note:s.books.length + ' eser Okuma › Kaynaklar’a «başlanmadı» olarak eklendi.',
+        geriAl:{ kayitId:kid } };
+    }
     return { ok:true, note:s.args.length + ' tez Sempozyum’a açık tartışma olarak, ' + s.books.length
       + ' eser Kütüphane’ye eklendi.', geriAl:{ kayitId:kid } };
   }
@@ -219,7 +252,8 @@ ESP.Belge = (function(){
       await ESP.Model.deleteArgument(a.id); silinen++;
     }
     for(const b of (S.books || []).filter(x => bamOf(x, kid))){
-      if((S.args || []).some(a => a.sourceId === b.id) || b.startedAt){ kalan++; continue; }
+      if((S.args || []).some(a => a.sourceId === b.id) || b.startedAt
+        || (S.notes || []).some(n => n.bookId === b.id)){ kalan++; continue; }
       await ESP.Model.deleteBook(b.id); silinen++;
     }
     for(const e of (S.events || []).filter(x => bamOf(x, kid))){

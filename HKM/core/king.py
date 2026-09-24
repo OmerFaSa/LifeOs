@@ -910,7 +910,7 @@ def _teklif_espbelge(con, e, kayit_id, now=None):
     """Tarih ya da felsefe belgesini ESP'ye teklif olarak birakir."""
     k = bam.kayit_getir(con, kayit_id) or {}
     g = k.get("govde") or {}
-    satir = g.get("olaylar") if g.get("tur") == "tarih" else g.get("dusunurler")
+    satir = espbelge.satirlar(g)
     if g.get("tur") not in espbelge.ALANLAR or not satir:
         return " Kayıt ESP belgesi biçiminde değil; teklif bırakılmadı."
     payload = {"kayit_id": int(kayit_id), "baslik": str(k.get("baslik") or g.get("konu") or "Belge")[:120],
@@ -1174,7 +1174,7 @@ def bekci(con, cfg, now=None, tasiyici=None):
                "güncel değeri alabilirsin." % k["baslik"], now=at)
         bildir(con, "hkm", None, "guncellik", neden, now=at)
         return out
-    if g.get("tur") in espbelge.ALANLAR and (g.get("olaylar") or g.get("dusunurler")):
+    if g.get("tur") in espbelge.ALANLAR and espbelge.satirlar(g):
         bildir(con, "esp", None, "guncellik", "«%s» kaynakları değişti. Yeniden isteyerek "
                "güncel belgeyi alabilirsin." % k["baslik"], now=at)
         bildir(con, "hkm", None, "guncellik", neden, now=at)

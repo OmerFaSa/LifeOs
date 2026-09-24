@@ -117,6 +117,26 @@ def run():
         ok(espbelge._yil_alintida(-300, "MÖ 300 dolaylarında"))
     test("alinti kaynakta; yil ve ad alintida; sozluk disi duser", t_suzgec_ve_dogrulama)
 
+    def t_okuma_yazi():
+        """Okuma ve yazi: eser listesi; yazar adi alintida, yil alintida degilse bilinmiyor."""
+        eq(espbelge.temizle({"alan": "okuma", "konu": "Stoacılık"})[1], [])
+        g = {"alan": "okuma", "konu": "Stoacılık"}
+        d = {"eserler": [
+            {"yazar": "Epiktetos", "eser": "Encheiridion", "yil": 125, "not": "Temel el kitabı.",
+             "kaynak": 2, "alinti": "Epiktetos, Encheiridion adlı el kitabında insanın yalnız kendi "
+                                    "yargılarını denetleyebileceğini söyler."},
+            {"yazar": "Seneca", "eser": "Mektuplar", "kaynak": 2,
+             "alinti": "Marcus Aurelius Kendime Düşünceler'i yazdı."},
+            {"yazar": "", "eser": "Adsız", "kaynak": 2, "alinti": "x"}]}
+        govde, hata = espbelge.ayikla(d, g)
+        eq((hata, len(govde["eserler"]), govde["bicim_dusen"]), (None, 2, 1))
+        etiket, hata = espbelge.dogrula(govde, {2: SAYFA["Stoacılık"]}, lambda a, m: a in m)
+        eq((etiket, [x["yazar"] for x in govde["eserler"]], govde["eserler"][0]["yil"]),
+           ("kaynakli", ["Epiktetos"], None))
+        eq(espbelge.ozet(govde), "Stoacılık: 1 eser (okuma listesi, kaynaklı).")
+        ok("üslubunda" in espbelge.sistem("yazi"))
+    test("okuma ve yazi: eser listesi, yazar alintida", t_okuma_yazi)
+
     def t_web_kapali():
         con = db.connect(":memory:")
         m = _Model()

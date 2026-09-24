@@ -20,7 +20,7 @@
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
 **Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · ✅ Grup 4 ·
-✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ✅ tam koşum (2026-09-24, 24/24) · ✅ SPİ su hatası · ✅ 8f ESP belge (tarih + felsefe) · 🔜 8f-2 (okuma, yazı, diksiyon) · ⏳ cevaplı maddeler · ⏳ Part 9 (harita ONAY BEKLİYOR: `ekip/CEKMECE-HARITASI.md`)
+✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ✅ tam koşum (2026-09-24, 24/24) · ✅ SPİ su hatası · ✅ 8f ESP belge (tarih + felsefe) · ✅ 8f-2 (okuma, yazı) · ❓ diksiyon belgesi (soru) · ⏳ cevaplı maddeler · ⏳ Part 9 (harita ONAY BEKLİYOR: `ekip/CEKMECE-HARITASI.md`)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
 
@@ -125,9 +125,11 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   HKM MIMARI §8.35. King `esp.belge` (web zorunlu, alıntı + yıl/ad kodla) → `belge.add` → ESP
   `core/belge.js`: olay + kaynak Kronoloji'ye, eser + açık tez Sempozyum'a; geri alınır.
   HKM 574/574, ESP 1332/1332, duman + a11y + 390px, `tools/entegre.js` §2.82 temiz.
-- 🔜 **8f-2 kalan alanlar:** okuma (kitap/kaynak listesi → Kütüphane «başlanmadı»), yazı
-  (örnek metin/retorik → Yazı Lab.), diksiyon. Aynı kalıp: önce ESP şemasına bak
-  (`library.js`, `writing.js`, `studio.js` diksiyon), sonra `espbelge.ALANLAR`'a ekle.
+- ✅ **8f-2 okuma + yazı** (MIMARI §8.35): eser listesi → Okuma › Kaynaklar «başlanmadı»;
+  BAM notu kitabın üstünde, kullanıcı notlarına yazılmaz. Hata düzeltildi: başlanmamış kitap
+  «okunuyor» görünüyordu (`ESP.Model.bookStatus`). HKM 575, ESP 1334, duman/a11y/390px temiz.
+- ❓ **Diksiyon (ve müzik dışı ses) için «belge» ne olmalı — kullanıcıya soruldu.** Tekerleme
+  üretmek belge değil; telaffuz kuralı mı, konuşmacı/metin örneği mi? Cevap gelmeden yapılmaz.
 
 ### Cevabı gelen maddeler (sıra: Part 8'den sonra)
 - ⏳ Y5 Sağlık verisi içe aktarma — iPhone `export.xml` + Android Health Connect; önizleme

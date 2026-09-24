@@ -279,17 +279,31 @@ ESP.Screens.library = (function(){
           ? K.Table({ tight:true,
               headers:['Eser', 'Yazar', 'Tür', { label:'Not', num:true }, 'Durum', ''],
               rows:kitaplar.map(b => [
-                b.title, b.author,
+                html`${b.title}${when(b.bam && b.bam.not, () => html`<div class="tiny dim">BAM · ${b.bam.not}</div>`)}`,
+                b.author,
                 b.kind === 'primary' ? 'primer' : 'yorum',
                 String(notSayisi(b.id)),
-                b.finishedAt ? 'bitti' : 'okunuyor',
-                html`${K.Button({ label:b.finishedAt ? 'Yeniden aç' : 'Bitir', size:'sm',
+                M.bookStatus(b).label,
+                html`${K.Button({ label:M.bookStatus(b).action, size:'sm',
                     act:'toggle-book', data:{ 'data-id':b.id } })}
                   ${K.Button({ label:'Sil', size:'sm', act:'del-book2',
                     data:{ 'data-id':b.id } })}`,
               ]) })
           : K.Empty({ text:'Kaynak listesi boş. Sempozyum → Metinler sekmesinden '
               + 'kanondan da ekleyebilirsin.' }),
+      }),
+
+      K.Entry({
+        label:'OKUMA LİSTESİ İSTE', hint:'primary-text',
+        meta:'okuma · HKM',
+        note:'Konunun temel eserleri web kaynaklarından çıkarılır; yazar adı alıntıda doğrulanır. '
+           + 'Eserler «başlanmadı» olarak gelir. Web kapalıysa liste yazılmaz.',
+        body:html`<div class="row gap-8 wrap">
+          ${K.Input({ id:'belge-okuma', placeholder:'Konu: Stoacılık, bilim tarihi…', aria:'Okuma konusu',
+            size:'sm', class:'grow' })}
+          ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+            data:{ 'data-alan':'okuma' } })}
+        </div>`,
       }),
 
       K.Entry({
@@ -348,6 +362,12 @@ ESP.Screens.library = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'belge-iste'(el){
+      const k = document.getElementById('belge-' + el.dataset.alan);
+      const r = await ESP.Belge.iste({ alan:el.dataset.alan, konu:k ? k.value : '' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'read-tab'(el){ S.ui.readTab = el.dataset.tab; ESP.App.render(); },
 
     async 'add-note'(){
@@ -417,7 +437,9 @@ ESP.Screens.library = (function(){
     async 'toggle-book'(el){
       const b = bookOf(el.dataset.id);
       if(!b) return;
-      b.finishedAt = b.finishedAt ? null : U.todayISO();
+      /* Başlanmamış kitapta ilk dokunuş «Başla»dır, «Bitir» değil. */
+      if(!b.startedAt && !b.finishedAt) b.startedAt = U.todayISO();
+      else b.finishedAt = b.finishedAt ? null : U.todayISO();
       await M.saveBook(b);
       ESP.Memo.bitir();
       ESP.App.render();

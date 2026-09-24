@@ -709,6 +709,15 @@ ESP.Model = (function(){
     }, patch || {});
   }
 
+  /* Başlanmamış kitap «okunuyor» görünmez: BAM'ın önerdiği eser listeye
+     başlanmadan girer (core/belge.js); okumadığın kitap okunuyor sayılmaz. */
+  function bookStatus(b){
+    if(!b) return null;
+    if(b.finishedAt) return { id:'bitti', label:'bitti', action:'Yeniden aç' };
+    if(b.startedAt) return { id:'okunuyor', label:'okunuyor', action:'Bitir' };
+    return { id:'baslanmadi', label:'başlanmadı', action:'Başla' };
+  }
+
   async function saveBook(rec){
     const b = Object.assign(newBook(), obj(rec));
     const i = S.books.findIndex(x => x.id === b.id);
@@ -1417,7 +1426,7 @@ ESP.Model = (function(){
     newArgument, saveArgument, deleteArgument, argumentOpen,
     /* okuma */
     newNote, saveNote, deleteNote, linkNotes, unlinkNotes,
-    newBook, saveBook, deleteBook,
+    newBook, saveBook, deleteBook, bookStatus,
     /* muzik */
     newPiece, savePiece, deletePiece,
     /* diksiyon */

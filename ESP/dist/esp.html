@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'2093470', at:'2026-09-24 00:35', dirty:true };
+ESP.BUILD = { id:'a41e0ba', at:'2026-09-24 00:41', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -18419,6 +18419,15 @@ ESP.Model = (function(){
     }, patch || {});
   }
 
+  /* Başlanmamış kitap «okunuyor» görünmez: BAM'ın önerdiği eser listeye
+     başlanmadan girer (core/belge.js); okumadığın kitap okunuyor sayılmaz. */
+  function bookStatus(b){
+    if(!b) return null;
+    if(b.finishedAt) return { id:'bitti', label:'bitti', action:'Yeniden aç' };
+    if(b.startedAt) return { id:'okunuyor', label:'okunuyor', action:'Bitir' };
+    return { id:'baslanmadi', label:'başlanmadı', action:'Başla' };
+  }
+
   async function saveBook(rec){
     const b = Object.assign(newBook(), obj(rec));
     const i = S.books.findIndex(x => x.id === b.id);
@@ -19127,7 +19136,7 @@ ESP.Model = (function(){
     newArgument, saveArgument, deleteArgument, argumentOpen,
     /* okuma */
     newNote, saveNote, deleteNote, linkNotes, unlinkNotes,
-    newBook, saveBook, deleteBook,
+    newBook, saveBook, deleteBook, bookStatus,
     /* muzik */
     newPiece, savePiece, deletePiece,
     /* diksiyon */
@@ -29580,7 +29589,7 @@ ESP.Belge = (function(){
 
   function istekTemizle(o){
     const alan = o && o.alan;
-    if(alan !== 'tarih' && alan !== 'felsefe') return { ok:false, why:'Alan tarih ya da felsefe olmalı.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi'].indexOf(alan) < 0) return { ok:false, why:'Alan tarih, felsefe, okuma ya da yazı olmalı.' };
     const konu = bosluk(o.konu);
     if(konu.length < 2 || konu.length > 80) return { ok:false, why:'Konu 2–80 karakter olmalı.' };
     return { ok:true, belge:{ alan, konu } };
@@ -29590,7 +29599,8 @@ ESP.Belge = (function(){
     const t = istekTemizle(o);
     if(!t.ok) return { ok:false, metin:t.why };
     const r = await istek('/api/king/emir', { modul:'esp', tur:'esp.belge', konu:'',
-      neden:'ESP ' + (t.belge.alan === 'tarih' ? 'Tarih' : 'Sempozyum') + ' ekranından belge istendi.',
+      neden:'ESP ' + ({ tarih:'Tarih', felsefe:'Sempozyum', okuma:'Okuma', yazi:'Yazı' })[t.belge.alan]
+        + ' ekranından belge istendi.',
       govde:{ belge:t.belge } });
     if(!r.bagli) return { ok:false, metin:'Belgeyi HKM’deki Araştırma Bürosu kaynaklardan çıkarır ama HKM '
       + 'bağlı değil. Rehber › HKM’den bağlanınca yeniden iste.' };
@@ -29626,7 +29636,7 @@ ESP.Belge = (function(){
     if(!g || !Number.isInteger(kid) || kid < 1 || kid !== Number(p && p.kayit_id)){
       return { ok:false, why:'Kayıt teklifle eşleşmiyor.' };
     }
-    if(g.tur !== 'tarih' && g.tur !== 'felsefe') return { ok:false, why:'Kayıt ESP belgesi biçiminde değil.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi'].indexOf(g.tur) < 0) return { ok:false, why:'Kayıt ESP belgesi biçiminde değil.' };
     if(kayit.dogruluk !== 'kaynakli') return { ok:false, why:'Kaynaksız belge eklenmez: belge kaynaktır.' };
     const hepsi = [].concat(ESP.S.events || [], ESP.S.sources || [], ESP.S.books || [], ESP.S.args || []);
     if(hepsi.some(x => x && x.bam && x.bam.kayitId === kid)) return { ok:false, why:'Bu belge zaten eklenmiş.' };
@@ -29663,6 +29673,34 @@ ESP.Belge = (function(){
 
     const kitapVar = {};
     (ESP.S.books || []).forEach(b => { kitapVar[U().norm(b.title) + '|' + U().norm(b.author)] = b; });
+
+    /* OKUMA ve YAZI: eser listesi → Kütüphane (başlanmadı). BAM'ın notu
+       kitabın üstünde durur; kullanıcının atomik notlarına YAZILMAZ (notlar
+       senin fikrindir ve sentez ölçüsüne girer). */
+    if(g.tur === 'okuma' || g.tur === 'yazi'){
+      const yeni = [];
+      (Array.isArray(g.eserler) ? g.eserler : []).slice(0, 20).forEach(x => {
+        const yazar = metin(x && x.yazar, 2, 80), eser = metin(x && x.eser, 2, 120);
+        if(!yazar || !eser || !(x && kaynaklar[x.kaynak]) || (x.yil != null && !yilOk(x.yil))){ dusen++; return; }
+        const anahtar = U().norm(eser) + '|' + U().norm(yazar);
+        if(kitapVar[anahtar]){ atlanan++; return; }
+        const b = ESP.Model.newBook({ title:eser, author:yazar, kind:'primary', startedAt:null,
+          year:x.yil == null ? null : x.yil,
+          bam:{ kayitId:kid, alan:g.tur, not:metin(x.not, 4, 240) } });
+        kitapVar[anahtar] = b;
+        yeni.push(b);
+      });
+      if(!yeni.length) return { ok:false, why:'Belgeden Kütüphane’ye eklenecek yeni eser çıkmadı.' };
+      const uyari = [];
+      if(dusen) uyari.push(dusen + ' eser ESP’nin denetimini geçmedi (yazar, ad, yıl ya da kaynak).');
+      if(atlanan) uyari.push(atlanan + ' eser Kütüphane’de zaten var; yeniden eklenmeyecek.');
+      uyari.push('Eserler Okuma › Kaynaklar’a «başlanmadı» olarak girer.');
+      return { ok:true, tur:g.tur, books:yeni, args:[], kayitId:kid,
+        onizleme:{ baslik:bosluk(g.konu) + ' — ' + yeni.length + ' eser (' + (g.tur === 'okuma'
+            ? 'okuma listesi' : 'yazı örnekleri') + ', kaynaklı)',
+          satirlar:yeni.map(b => b.author + ' — ' + b.title + (b.year != null ? ' (' + yilYaz(b.year) + ')' : '')
+            + (b.bam.not ? ': ' + b.bam.not : '')), uyari } };
+    }
     const tezVar = {};
     (ESP.S.args || []).forEach(a => { tezVar[U().norm(a.thesis)] = 1; });
     const books = [], args = [];
@@ -29719,6 +29757,10 @@ ESP.Belge = (function(){
     }
     for(const b of s.books) await ESP.Model.saveBook(b);
     for(const a of s.args) await ESP.Model.saveArgument(a);
+    if(s.tur !== 'felsefe'){
+      return { ok:true, note:s.books.length + ' eser Okuma › Kaynaklar’a «başlanmadı» olarak eklendi.',
+        geriAl:{ kayitId:kid } };
+    }
     return { ok:true, note:s.args.length + ' tez Sempozyum’a açık tartışma olarak, ' + s.books.length
       + ' eser Kütüphane’ye eklendi.', geriAl:{ kayitId:kid } };
   }
@@ -29734,7 +29776,8 @@ ESP.Belge = (function(){
       await ESP.Model.deleteArgument(a.id); silinen++;
     }
     for(const b of (S.books || []).filter(x => bamOf(x, kid))){
-      if((S.args || []).some(a => a.sourceId === b.id) || b.startedAt){ kalan++; continue; }
+      if((S.args || []).some(a => a.sourceId === b.id) || b.startedAt
+        || (S.notes || []).some(n => n.bookId === b.id)){ kalan++; continue; }
       await ESP.Model.deleteBook(b.id); silinen++;
     }
     for(const e of (S.events || []).filter(x => bamOf(x, kid))){
@@ -39456,17 +39499,31 @@ ESP.Screens.library = (function(){
           ? K.Table({ tight:true,
               headers:['Eser', 'Yazar', 'Tür', { label:'Not', num:true }, 'Durum', ''],
               rows:kitaplar.map(b => [
-                b.title, b.author,
+                html`${b.title}${when(b.bam && b.bam.not, () => html`<div class="tiny dim">BAM · ${b.bam.not}</div>`)}`,
+                b.author,
                 b.kind === 'primary' ? 'primer' : 'yorum',
                 String(notSayisi(b.id)),
-                b.finishedAt ? 'bitti' : 'okunuyor',
-                html`${K.Button({ label:b.finishedAt ? 'Yeniden aç' : 'Bitir', size:'sm',
+                M.bookStatus(b).label,
+                html`${K.Button({ label:M.bookStatus(b).action, size:'sm',
                     act:'toggle-book', data:{ 'data-id':b.id } })}
                   ${K.Button({ label:'Sil', size:'sm', act:'del-book2',
                     data:{ 'data-id':b.id } })}`,
               ]) })
           : K.Empty({ text:'Kaynak listesi boş. Sempozyum → Metinler sekmesinden '
               + 'kanondan da ekleyebilirsin.' }),
+      }),
+
+      K.Entry({
+        label:'OKUMA LİSTESİ İSTE', hint:'primary-text',
+        meta:'okuma · HKM',
+        note:'Konunun temel eserleri web kaynaklarından çıkarılır; yazar adı alıntıda doğrulanır. '
+           + 'Eserler «başlanmadı» olarak gelir. Web kapalıysa liste yazılmaz.',
+        body:html`<div class="row gap-8 wrap">
+          ${K.Input({ id:'belge-okuma', placeholder:'Konu: Stoacılık, bilim tarihi…', aria:'Okuma konusu',
+            size:'sm', class:'grow' })}
+          ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+            data:{ 'data-alan':'okuma' } })}
+        </div>`,
       }),
 
       K.Entry({
@@ -39525,6 +39582,12 @@ ESP.Screens.library = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'belge-iste'(el){
+      const k = document.getElementById('belge-' + el.dataset.alan);
+      const r = await ESP.Belge.iste({ alan:el.dataset.alan, konu:k ? k.value : '' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'read-tab'(el){ S.ui.readTab = el.dataset.tab; ESP.App.render(); },
 
     async 'add-note'(){
@@ -39594,7 +39657,9 @@ ESP.Screens.library = (function(){
     async 'toggle-book'(el){
       const b = bookOf(el.dataset.id);
       if(!b) return;
-      b.finishedAt = b.finishedAt ? null : U.todayISO();
+      /* Başlanmamış kitapta ilk dokunuş «Başla»dır, «Bitir» değil. */
+      if(!b.startedAt && !b.finishedAt) b.startedAt = U.todayISO();
+      else b.finishedAt = b.finishedAt ? null : U.todayISO();
       await M.saveBook(b);
       ESP.Memo.bitir();
       ESP.App.render();
@@ -39677,6 +39742,21 @@ ESP.Screens.writing = (function(){
   function toolRows(){
     const K2 = ESP.C;
     return [
+      /* BAM'dan yazı örnekleri (Part 8f-2): üslubu örnek gösterilen yazarlar
+         ve eserleri; kaynaklı. Eserler Okuma › Kaynaklar'a «başlanmadı» girer. */
+      K2.Entry({
+        label:'YAZI ÖRNEKLERİ İSTE', hint:'revision',
+        meta:'yazı · HKM',
+        note:'Üslubu örnek gösterilen yazarlar ve eserleri web kaynaklarından çıkarılır; yazar '
+           + 'adı alıntıda doğrulanır. Eserler Okuma › Kaynaklar’a gelir.',
+        wide:true,
+        body:html`<div class="row gap-8 wrap">
+          ${K2.Input({ id:'belge-yazi', placeholder:'Konu: deneme, kısa öykü…', aria:'Yazı konusu',
+            size:'sm', class:'grow' })}
+          ${K2.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+            data:{ 'data-alan':'yazi' } })}
+        </div>`,
+      }),
       K2.Entry({
         label:'REVİZYON GEÇİŞLERİ', hint:'revision',
         meta:ESP.REVISION_PASSES.length + ' geçiş',
@@ -39919,6 +39999,12 @@ ESP.Screens.writing = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value : ''; }
 
   const handle = {
+    async 'belge-iste'(el){
+      const k = document.getElementById('belge-' + el.dataset.alan);
+      const r = await ESP.Belge.iste({ alan:el.dataset.alan, konu:k ? k.value : '' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'write-tab'(el){ S.ui.writeTab = el.dataset.tab; ESP.App.render(); },
 
     async 'new-draft'(){

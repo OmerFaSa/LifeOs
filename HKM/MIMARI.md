@@ -1111,6 +1111,13 @@ kullanıcı yazar). Geri almada kullanıcının üzerinde çalıştığı kayıt
 itirazlı tez ve eseri) kalır. Testler: `tests/test_espbelge.py`, `ESP/src/tests/belge.test.js`,
 `tools/entegre.js` §2.82.
 
+**Okuma ve yazı (8f-2):** `alan: okuma` (okuma listesi) ve `alan: yazi` (üslubu örnek
+gösterilen yazarlar) aynı işi kullanır; çıktı eser listesidir (yazar, eser, yıl, not), yazar
+adı alıntıda aranır. ESP eserleri Okuma › Kaynaklar'a «başlanmadı» olarak ekler; BAM'ın
+notu kitabın üstünde durur, kullanıcının atomik notlarına YAZILMAZ (notlar sentez ölçüsüne
+girer). İstek: Okuma › Kaynaklar ve Yazı › Araçlar. Yolda düzeltilen hata: başlanmamış
+kitap «okunuyor» görünüyordu (`ESP.Model.bookStatus`: bitti / okunuyor / başlanmadı).
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

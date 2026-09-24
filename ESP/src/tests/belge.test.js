@@ -76,6 +76,44 @@
     });
   });
 
+  describe('BAM belgesi — okuma ve yazı', () => {
+    function okuma(tur){
+      return { id:43, tur:'arastirma', baslik:'Okuma listesi: Stoacılık', dogruluk:'kaynakli',
+        govde:{ tur:tur || 'okuma', konu:'Stoacılık', kaynaklar:KAYNAK, eserler:[
+          { yazar:'Epiktetos', eser:'Encheiridion', yil:null, not:'Temel el kitabı.', kaynak:2 },
+          { yazar:'Seneca', eser:'Lucilius’a Mektuplar', yil:65, kaynak:2 },
+          { yazar:'', eser:'Adsız', kaynak:2 } ] } };
+    }
+    it('eserler başlanmadı olarak Kütüphane’ye; not kitabın üstünde, notlara yazılmaz', async () => {
+      resetState();
+      await ESP.Model.saveBook(ESP.Model.newBook({ title:'Lucilius’a Mektuplar', author:'Seneca' }));
+      const s = Be().sina(okuma(), { kayit_id:43 });
+      expect(s.ok).toBe(true);
+      expect(s.books.map(b => [b.author, b.startedAt, b.bam.not])).toEqual([['Epiktetos', null, 'Temel el kitabı.']]);
+      expect(s.onizleme.uyari.join(' ')).toContain('1 eser Kütüphane’de zaten var');
+      expect(Be().sina(okuma('yazi'), { kayit_id:43 }).onizleme.baslik).toContain('yazı örnekleri');
+      await withHkm({ 43:okuma() }, async () => {
+        const r = await Be().uygula({ kayit_id:43 });
+        expect(r.ok).toBe(true);
+        expect((ESP.S.notes || []).length).toBe(0);
+        const g = await Be().geriAl(r.geriAl);
+        expect([g.silinen, ESP.S.books.filter(b => b.bam).length]).toEqual([1, 0]);
+      });
+    });
+  });
+
+  /* Hata: başlanmamış kitap Okuma › Kaynaklar'da «okunuyor» görünüyordu. */
+  describe('Kütüphane durumu', () => {
+    it('başlanmamış kitap «başlanmadı» görünür, düğmesi «Başla»dır', async () => {
+      resetState();
+      const M = ESP.Model;
+      const b = M.newBook({ title:'Encheiridion', author:'Epiktetos', startedAt:null });
+      expect([M.bookStatus(b).label, M.bookStatus(b).action]).toEqual(['başlanmadı', 'Başla']);
+      expect(M.bookStatus(Object.assign({}, b, { startedAt:'2026-09-01' })).label).toBe('okunuyor');
+      expect(M.bookStatus(Object.assign({}, b, { startedAt:'2026-09-01', finishedAt:'2026-09-20' })).label).toBe('bitti');
+    });
+  });
+
   describe('BAM belgesi — HKM ile', () => {
     it('onayla eklenir, tekrar eklenmez; geri almada üzerinde çalışılan kalır', async () => {
       resetState();

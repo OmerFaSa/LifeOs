@@ -37,6 +37,21 @@ ESP.Screens.writing = (function(){
   function toolRows(){
     const K2 = ESP.C;
     return [
+      /* BAM'dan yazı örnekleri (Part 8f-2): üslubu örnek gösterilen yazarlar
+         ve eserleri; kaynaklı. Eserler Okuma › Kaynaklar'a «başlanmadı» girer. */
+      K2.Entry({
+        label:'YAZI ÖRNEKLERİ İSTE', hint:'revision',
+        meta:'yazı · HKM',
+        note:'Üslubu örnek gösterilen yazarlar ve eserleri web kaynaklarından çıkarılır; yazar '
+           + 'adı alıntıda doğrulanır. Eserler Okuma › Kaynaklar’a gelir.',
+        wide:true,
+        body:html`<div class="row gap-8 wrap">
+          ${K2.Input({ id:'belge-yazi', placeholder:'Konu: deneme, kısa öykü…', aria:'Yazı konusu',
+            size:'sm', class:'grow' })}
+          ${K2.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+            data:{ 'data-alan':'yazi' } })}
+        </div>`,
+      }),
       K2.Entry({
         label:'REVİZYON GEÇİŞLERİ', hint:'revision',
         meta:ESP.REVISION_PASSES.length + ' geçiş',
@@ -279,6 +294,12 @@ ESP.Screens.writing = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value : ''; }
 
   const handle = {
+    async 'belge-iste'(el){
+      const k = document.getElementById('belge-' + el.dataset.alan);
+      const r = await ESP.Belge.iste({ alan:el.dataset.alan, konu:k ? k.value : '' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'write-tab'(el){ S.ui.writeTab = el.dataset.tab; ESP.App.render(); },
 
     async 'new-draft'(){
