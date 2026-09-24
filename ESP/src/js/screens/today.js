@@ -464,6 +464,17 @@ ESP.Screens.today = (function(){
 
   /* Seri dondurma ve tatil modu (brand/ortak/seri.js): hasta gün ve tatil
      seriyi bozmaz; tatildeyken HKM soru sormaz. */
+  /* Yıllık tatil sınırı kullanıcının ayarıdır (kullanıcı kararı 2026-09-24;
+     brand/ortak/seri.js). Düşürmek var olan tatili silmez. */
+  function TatilSiniri(){
+    const sinir = ESP.Seri.yillikTatil(), kalan = ESP.Seri.kalanTatil();
+    return html`<div class="row wrap gap-6 mt-6">
+      <span class="tiny dim">Yıllık tatil sınırı: bu yıl kalan ${kalan} / ${sinir} gün</span>
+      ${K.Input({ id:'seri-tatil-sinir', type:'number', size:'sm', numeric:true, value:sinir,
+        aria:'yıllık tatil sınırı, gün' })}
+      ${K.Button({ label:'Sınırı kaydet', size:'sm', act:'seri-tatil-sinir' })}</div>`;
+  }
+
   function seriKontrol(){
     if(!ESP.Seri) return '';
     const bugun = U.todayISO();
@@ -478,7 +489,8 @@ ESP.Screens.today = (function(){
     if(S.ui.tatilSec) return html`<div class="row wrap gap-6 mt-6">
       <span class="tiny">Kaç gün?</span>
       ${map([3, 7, 14], n => K.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
-      ${K.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>`;
+      ${K.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>
+      ${TatilSiniri()}`;
     const kotu = ESP.KotuGun && ESP.KotuGun.aktif(bugun);
     return html`${when(kotu, () => html`<div class="row between wrap gap-6 mt-6">
       <span class="tiny">Kötü gün modu: vadesi gelen tekrar yerinde, genişleme yok; bugün asgari gün yeter</span>
@@ -977,6 +989,16 @@ ESP.Screens.today = (function(){
     async 'seri-coz'(el){ await ESP.Seri.coz(el.dataset.id); ESP.UI.toast('Dondurma geri alındı'); ESP.App.render(); },
     async 'seri-tatil'(){ S.ui.tatilSec = true; ESP.App.render(); },
     async 'seri-tatil-vazgec'(){ S.ui.tatilSec = false; ESP.App.render(); },
+    async 'seri-tatil-sinir'(){
+      const e = document.getElementById('seri-tatil-sinir');
+      const ham = e ? String(e.value).trim() : '';
+      if(!ham){ ESP.UI.toast('Yıllık tatil sınırı için bir gün sayısı yaz.'); return; }
+      const r = await ESP.Seri.yillikTatilAyarla(Number(ham));
+      if(!r.ok){ ESP.UI.toast(r.why, { life:5000 }); return; }
+      ESP.App.render();
+      ESP.UI.toast('Yıllık tatil sınırı ' + r.sinir + ' gün', { undo:async () => {
+        await ESP.Seri.yillikTatilAyarla(r.onceki); ESP.App.render(); } });
+    },
     async 'seri-tatil-gun'(el){
       S.ui.tatilSec = false;
       const bugun = U.todayISO();

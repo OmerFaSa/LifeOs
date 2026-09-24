@@ -21,7 +21,9 @@
         AYLIK_HASTA hasta/izin günü (tatil ayrı sayılır, kendi sınırıyla).
         Ay dönümünü geçen kayıt DOKUNDUĞU HER AYIN sınırına bakar. Tatil
         bir takvim yılında en çok YILLIK_TATIL gün (HATALAR D-19: önce
-        21 günlük tatiller art arda eklenebiliyordu).
+        21 günlük tatiller art arda eklenebiliyordu). Bu sınır KULLANICININ
+        ayarıdır (0–365; kullanıcı kararı 2026-09-24): düşürmek var olan
+        kaydı silmez, yalnız yeni kaydı sınırlar.
      4. GERİ ALINIR. Her kayıt kimliğiyle silinir; geçmiş sessizce
         değişmez, «çöz» denince seri yeniden hesaplanır.
      5. HKM'YE YALNIZ TATİLİN TARİHİ GİDER (hedefag.js): tatildeyken HKM
@@ -54,15 +56,34 @@ LIFEOS.Seri = (function(){
   /* `kur({ store:() => Store, bugun:() => iso })` */
   function kur(o){
     let liste = [];
+    let yillikAyar = null;                /* null: varsayılan YILLIK_TATIL */
+
+    function gecerliSinir(n){ return Number.isInteger(n) && n >= 0 && n <= 365; }
 
     async function yukle(){
       try{
         const d = await o.store().get(ANAHTAR);
         liste = d && Array.isArray(d.liste) ? d.liste.filter(gecerli) : [];
-      }catch(e){ liste = []; }
+        yillikAyar = d && gecerliSinir(d.yillikTatil) ? d.yillikTatil : null;
+      }catch(e){ liste = []; yillikAyar = null; }
       return liste;
     }
-    async function yaz(){ await o.store().set(ANAHTAR, { liste }); }
+    async function yaz(){
+      const govde = { liste };
+      if(yillikAyar != null) govde.yillikTatil = yillikAyar;
+      await o.store().set(ANAHTAR, govde);
+    }
+
+    function yillikTatil(){ return yillikAyar == null ? YILLIK_TATIL : yillikAyar; }
+
+    /* Küçük aksiyon: tek ayar, geri alınır (dönen `onceki` ile). */
+    async function yillikTatilAyarla(n){
+      if(!gecerliSinir(n)) return { ok:false, why:'Yıllık tatil sınırı 0 ile 365 arasında tam gün olmalı.' };
+      const onceki = yillikTatil();
+      yillikAyar = n;
+      await yaz();
+      return { ok:true, onceki, sinir:n };
+    }
 
     function kayitOf(iso){ return liste.find(x => x.bas <= iso && iso <= x.bit) || null; }
     function donmusMu(iso){ return !!kayitOf(iso); }
@@ -107,10 +128,11 @@ LIFEOS.Seri = (function(){
         }
       } else {
         const yillar = donemler(bas, bit, 4);
+        const sinir = yillikTatil();
         for(const yil of Object.keys(yillar)){
-          if(donemGunu(yil, true) + yillar[yil] > YILLIK_TATIL){
-            return { ok:false, why:yil + ' yılında en çok ' + YILLIK_TATIL + ' tatil günü dondurulabilir; '
-              + 'kalan: ' + Math.max(0, YILLIK_TATIL - donemGunu(yil, true)) + ' gün.' };
+          if(donemGunu(yil, true) + yillar[yil] > sinir){
+            return { ok:false, why:yil + ' yılında en çok ' + sinir + ' tatil günü dondurulabilir; '
+              + 'kalan: ' + kalanTatil(yil) + ' gün. Sınırı Tatil modu satırından değiştirebilirsin.' };
           }
         }
       }
@@ -140,6 +162,10 @@ LIFEOS.Seri = (function(){
       return { ok:true, kayit:t };
     }
 
+    function kalanTatil(yil){
+      return Math.max(0, yillikTatil() - donemGunu(String(yil || o.bugun().slice(0, 4)), true));
+    }
+
     function aktifTatil(iso){
       const g = iso || o.bugun();
       return liste.find(x => x.neden === 'tatil' && x.bas <= g && g <= x.bit) || null;
@@ -160,6 +186,7 @@ LIFEOS.Seri = (function(){
     }
 
     return { yukle, dondur, coz, tatiliBitir, donmusMu, kayitOf, aktifTatil, hkmTatil,
+      yillikTatil, yillikTatilAyarla, kalanTatil,
       liste:() => liste.slice(), gunEkle };
   }
 

@@ -48,4 +48,23 @@
       }
     });
   });
+
+  /* Kullanıcı kararı (2026-09-24): yıllık tatil sınırı değiştirilebilir.
+     «Tatil modu» açılınca sınır ve bu yıl kalan gün görünür. */
+  describe('Tatil sınırı alanı', () => {
+    it('tatil seçiminde yıllık sınır ve kalan gün görünür', async () => {
+      resetState();
+      /* Uygulamada state.js kurar; test ortamında kurulmamış olabilir. */
+      const kurduk = !ESP.Seri;
+      if(kurduk) ESP.Seri = LIFEOS.Seri.kur({ store:() => ESP.Store, bugun:() => ESP.U.todayISO() });
+      await ESP.Seri.yukle();
+      ESP.S.ui.tatilSec = true;
+      const out = String(await ESP.Screens.today.render());
+      ESP.S.ui.tatilSec = false;
+      if(kurduk) delete ESP.Seri;
+      expect(out.indexOf('id="seri-tatil-sinir"') >= 0).toBe(true);
+      expect(out.indexOf('data-act="seri-tatil-sinir"') >= 0).toBe(true);
+      expect(out.indexOf('Yıllık tatil sınırı') >= 0).toBe(true);
+    });
+  });
 })();

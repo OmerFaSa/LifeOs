@@ -370,8 +370,12 @@ test») A tarafından kaldırıldı; sayılar yalnız README'nin sayılar bloğu
   sayıyor. Paragraf ayrı tutulsun istenirse tek satırlık değişiklik.
 - Listede olmayan bir hata da düzeldi: ağ hatasında geçmiş gönderimi «202» diyordu.
 
-**Kullanıcı kararı bekleyen iki sayı/tanım:** (1) yıllık tatil sınırı 42 gün
-(`brand/ortak/seri.js` `YILLIK_TATIL`); (2) günün sorusuna paragraf ve problem dahil mi.
+**Kullanıcının cevabı (2026-09-24):** (1) yıllık tatil sınırı DEĞİŞTİRİLEBİLİR olsun →
+yapıldı: varsayılan 42, «Tatil modu» satırında 0–365 gün, «Geri al»lı küçük aksiyon
+(`LIFEOS.Seri.yillikTatilAyarla`, `meta/seriDondurma.yillikTatil`). (2) günün sorusunu
+SİSTEM belirlesin → B'nin birleşik tanımı (blok + serbest + paragraf + problem) kalır.
+(3) Sunucu şimdilik tek (ev) ağında; iş büyüyüp herkese açılınca sunucu üzerinden.
+(4) Fiş okuma gibi özellikler eklensin (HKM para kolu). (5) Tasarım (Part 9) bekliyor.
 
 B'nin ilerlemesi `ekip/HATALAR-ILERLEME-B.md`'de. A'nın payı (yalnız `HKM/`) **bitti**;
 her madde önce kırmızı test, sonra düzeltme:

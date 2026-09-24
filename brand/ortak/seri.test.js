@@ -72,6 +72,34 @@
       expect((await s.dondur('2027-01-04', '2027-01-10', 'tatil')).ok).toBe(true);
     });
 
+    /* Kullanıcı kararı (2026-09-24): yıllık tatil sınırı değiştirilebilir.
+       Varsayılan 42; 0–365 arası tam sayı; kalıcı; düşürmek var olan
+       kaydı silmez, yalnız yeni kaydı sınırlar. */
+    it('yıllık tatil sınırı kullanıcı ayarıdır', async () => {
+      const { s, d } = kur('2026-07-01');
+      expect(s.yillikTatil()).toBe(42);
+      expect((await s.yillikTatilAyarla(60)).ok).toBe(true);
+      expect((await s.dondur('2026-07-01', '2026-07-21', 'tatil')).ok).toBe(true);
+      expect((await s.dondur('2026-07-22', '2026-08-11', 'tatil')).ok).toBe(true);
+      expect((await s.dondur('2026-08-12', '2026-08-14', 'tatil')).ok).toBe(true);   /* 45 ≤ 60 */
+      expect(s.kalanTatil('2026')).toBe(15);
+      expect((await s.yillikTatilAyarla(-1)).ok).toBe(false);
+      expect((await s.yillikTatilAyarla(400)).ok).toBe(false);
+      expect((await s.yillikTatilAyarla('abc')).ok).toBe(false);
+      expect((await s.yillikTatilAyarla(2.5)).ok).toBe(false);
+      const s2 = S().kur({ store:() => d, bugun:() => '2026-07-01' });
+      await s2.yukle();
+      expect(s2.yillikTatil()).toBe(60);
+      const r = await s2.yillikTatilAyarla(10);
+      expect(r.ok).toBe(true);
+      expect(r.onceki).toBe(60);
+      expect(s2.liste().length).toBe(3);
+      const red = await s2.dondur('2026-09-01', null, 'tatil');
+      expect(red.ok).toBe(false);
+      expect(red.why).toContain('10');
+      expect(s2.kalanTatil('2026')).toBe(0);
+    });
+
     it('tatil: etkin tatil, HKM’ye yalnız tarih; bugün bitirilince geçmiş donmuş kalır', async () => {
       const { s } = kur('2026-09-26');
       await s.dondur('2026-09-24', '2026-09-30', 'tatil');
