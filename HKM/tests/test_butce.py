@@ -84,6 +84,86 @@ def run():
         ok("Kural motoru" in r["note"])        # ucretsiz yol calisir
     test("sinirda ucretli cagri durur", t_ceiling_stops_paid_calls)
 
+    def _ai_cfg(tavan_usd):
+        from core import models
+        cfg = {"local_token": "x",
+               "budget": {"ceiling_currency": "usd", "monthly_usd": tavan_usd,
+                          "usd_try": 0.0, "rate_date": ""}}
+        return models.apply(cfg, {"keys": {"google": "AIza-test"},
+                                  "assignments": {"king": {"provider": "google",
+                                                           "model": "gemini-2.5-pro"}}})
+
+    def t_kullanim_yoksa_sifir_olculmez():
+        """HATALAR D-16: saglayici kullanim bilgisi dondurmezse jeton 0,
+        maliyet «0 USD, olculdu» yaziliyordu; tavan hic dolmazdi. Olculmeyen
+        sifir degildir: jeton metinden TAHMIN edilir ve oyle isaretlenir."""
+        from core import ai
+        con = _con()
+        r = ai.ask(con, _ai_cfg(20.0), "king", "sohbet",
+                   [{"role": "user", "content": "Merhaba, bugün ne çalışayım?" * 10}],
+                   transport=lambda *a: ("Önce matematik tekrarı öneririm." * 5,
+                                         None, None))
+        ok(r["ok"], r)
+        u = con.execute("SELECT * FROM usage").fetchone()
+        ok(u["in_tok"] > 0 and u["out_tok"] > 0, dict(u))
+        ok(u["usd"] > 0, dict(u))
+        ok("tahmini-jeton" in u["note"], u["note"])
+        ok(r["tokens_estimated"])
+        # Kullanim bilgisi gelen cagri olcumdur.
+        ai.ask(con, _ai_cfg(20.0), "king", "sohbet",
+               [{"role": "user", "content": "Selam"}],
+               transport=lambda *a: ("Cevap.", 100, 20))
+        u2 = con.execute("SELECT * FROM usage ORDER BY id DESC").fetchone()
+        eq((u2["in_tok"], u2["out_tok"]), (100, 20))
+        no("tahmini-jeton" in (u2["note"] or ""))
+    test("kullanim bilgisi yoksa maliyet sifir olculmez (D-16)",
+         t_kullanim_yoksa_sifir_olculmez)
+
+    def t_is_maliyeti_tahmini_jetonu_soyler():
+        con = _con()
+        butce.record(con, role="bam.uretim", task="bam", provider="google",
+                     model="gemini-2.5-pro", user="ben", in_tok=100, out_tok=50,
+                     usd=0.001, rate=0, ok=True, note="tahmini-jeton", is_id=7)
+        eq(butce.is_maliyeti(con, 7)["etiket"], "tahmin")
+    test("is maliyeti tahmini jetonu tahmin sayar (D-16)",
+         t_is_maliyeti_tahmini_jetonu_soyler)
+
+    def t_tavan_cagrinin_maliyetini_hesaba_katar():
+        """HATALAR D-18: USD tavaninda yalniz «harcanan >= sinir» soruluyordu;
+        cagrinin kendi maliyeti eklenmiyordu ve eszamanli iki cagri (ritim
+        BAM + sohbet) ikisi de geciyordu."""
+        con = _con()
+        cfg = {"local_token": "x",
+               "budget": {"ceiling_currency": "usd", "monthly_usd": 1.0,
+                          "usd_try": 0.0, "rate_date": ""}}
+        _yaz(con, BUGUN, 0.95)
+        ok(butce.guard(con, cfg, BUGUN)["ok"])
+        r = butce.guard(con, cfg, BUGUN, cost_usd=0.10)
+        no(r["ok"])
+        eq(r["reason"], "ceiling")
+        ok(butce.guard(con, cfg, BUGUN, cost_usd=0.04)["ok"])
+        # Yoldaki cagri ayrilmis sayilir: ikincisi ayni payi kullanamaz.
+        with butce.ayir(0.04):
+            no(butce.guard(con, cfg, BUGUN, cost_usd=0.04)["ok"])
+        ok(butce.guard(con, cfg, BUGUN, cost_usd=0.04)["ok"])
+    test("tavan cagrinin maliyetini ve yoldaki cagriyi sayar (D-18)",
+         t_tavan_cagrinin_maliyetini_hesaba_katar)
+
+    def t_pahali_cagri_tavani_asmaz():
+        """Tek pahali cagri tavani asamaz: cagri oncesi en kotu durum
+        (istem + en uzun cevap) tavana eklenir; asiyorsa model cagrilmaz."""
+        from core import ai
+        con = _con()
+        cfg = _ai_cfg(0.01)
+        cagrildi = []
+        r = ai.ask(con, cfg, "king", "sohbet",
+                   [{"role": "user", "content": "x" * 40000}],
+                   transport=lambda *a: (cagrildi.append(1), ("c", 10, 10))[1])
+        no(r["ok"])
+        eq(r["reason"], "budget")
+        eq(cagrildi, [])
+    test("tek pahali cagri tavani asmaz (D-18)", t_pahali_cagri_tavani_asmaz)
+
     def t_no_rate_no_paid_call():
         """TL tavani secilmisse ve kur girilmemisse TL hesabi yapilamaz;
         hesaplanamayan bir maliyetle harcama yapmak, sinirsiz

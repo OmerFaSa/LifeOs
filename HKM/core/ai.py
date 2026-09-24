@@ -94,7 +94,8 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
         secim = (y.get("choices") or [{}])[0]
         metin = (secim.get("message") or {}).get("content") or ""
         k = y.get("usage") or {}
-        return (metin, k.get("prompt_tokens", 0), k.get("completion_tokens", 0),
+        # Kullanim bilgisi yoksa None: olculmeyen sifir degildir (D-16).
+        return (metin, k.get("prompt_tokens"), k.get("completion_tokens"),
                 secim.get("finish_reason") in KESILDI)
 
     if provider == "anthropic":
@@ -109,8 +110,8 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
         parca = [p.get("text", "") for p in (y.get("content") or [])
                  if p.get("type") == "text"]
         k = y.get("usage") or {}
-        return ("\n".join(parca), k.get("input_tokens", 0),
-                k.get("output_tokens", 0),
+        return ("\n".join(parca), k.get("input_tokens"),
+                k.get("output_tokens"),
                 y.get("stop_reason") in KESILDI)
 
     if provider == "google":
@@ -127,8 +128,8 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
         parca = [p.get("text", "") for p in
                  ((aday.get("content") or {}).get("parts") or [])]
         k = y.get("usageMetadata") or {}
-        return ("\n".join(parca), k.get("promptTokenCount", 0),
-                k.get("candidatesTokenCount", 0),
+        return ("\n".join(parca), k.get("promptTokenCount"),
+                k.get("candidatesTokenCount"),
                 aday.get("finishReason") in KESILDI)
 
     raise ValueError("bilinmeyen saglayici: %s" % provider)
@@ -349,14 +350,25 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
 
     def _tur(sistem_metni, gecmis):
         """Bir cagri: butce sorulur, gidilir, deftere yazilir."""
-        izin = butce.guard(con, cfg)
+        # HATALAR D-18: tavan cagri ONCESI en kotu durumla sorulur (istem
+        # + en uzun cevap) ve cagri suresince bu pay AYRILIR: eszamanli
+        # ikinci cagri ayni bos payi kullanamaz.
+        istem_jeton = _jeton_tahmini(sistem_metni, *[m.get("content")
+                                                      for m in gecmis])
+        en_kotu = _fiyat(a["provider"], a["model"], istem_jeton, EN_COK_JETON)
+        izin = butce.guard(con, cfg, cost_usd=en_kotu)
         if not izin["ok"]:
             return {"ok": False, "reason": "budget", "text": None,
                     "note": izin["note"]}
+        with butce.ayir(en_kotu):
+            return _gonder(sistem_metni, gecmis, istem_jeton)
+
+    def _gonder(sistem_metni, gecmis, istem_jeton):
         hata = None
         metin = None
         gir = cik = 0
         kesildi = False
+        jeton_tahmini = False
         try:
             cagir = transport if transport is not None else _cagir
             sonuc = cagir(a["provider"], anahtar, a["model"], sistem_metni,
@@ -371,6 +383,14 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
             hata = _saglayici_hatasi(e)
         except Exception as e:                  # noqa: BLE001
             hata = "%s: %s" % (type(e).__name__, e)
+        if hata is None and (gir is None or cik is None):
+            # HATALAR D-16: saglayici kullanim bilgisi dondurmedi. 0 yazmak
+            # «0 USD, olculdu» demekti ve tavan hic dolmazdi. Metinden
+            # TAHMIN edilir ve oyle isaretlenir.
+            jeton_tahmini = True
+            gir = istem_jeton if gir is None else gir
+            cik = _jeton_tahmini(metin) if cik is None else cik
+        gir, cik = int(gir or 0), int(cik or 0)
 
         # HER CAGRI DEFTERE YAZILIR — basarisiz olan da.
         usd = _fiyat(a["provider"], a["model"], gir, cik)
@@ -383,7 +403,9 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                      model=a["model"], user=user, in_tok=gir, out_tok=cik,
                      usd=usd, rate=float(b.get("usd_try") or 0),
                      ok=(hata is None),
-                     note=hata or ("tahmini-fiyat" if tahmini else ""),
+                     note=hata or ",".join(
+                         n for n, var in (("tahmini-fiyat", tahmini),
+                                          ("tahmini-jeton", jeton_tahmini)) if var),
                      now=now,
                      # Gizlilik panosu (fikir 55): modele giden veri TURU.
                      # BAM istemi konu metni ve web kaynagidir (kitap.py kural 5).
@@ -392,7 +414,8 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
             return {"ok": False, "reason": "provider", "text": None,
                     "note": "Model çağrısı başarısız: %s" % hata}
         return {"ok": True, "raw": metin, "in_tok": gir, "out_tok": cik,
-                "usd": usd, "price_estimated": tahmini, "truncated": kesildi}
+                "usd": usd, "price_estimated": tahmini,
+                "tokens_estimated": jeton_tahmini, "truncated": kesildi}
 
     r = _tur(sistem, mesajlar)
     if not r["ok"]:
@@ -437,6 +460,7 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
             "provider": a["provider"], "in_tok": r["in_tok"],
             "out_tok": r["out_tok"], "usd": r["usd"],
             "price_estimated": r.get("price_estimated", False),
+            "tokens_estimated": r.get("tokens_estimated", False),
             "truncated": bool(r.get("truncated")),
             "seconds": round((datetime.datetime.now() - t0).total_seconds(), 1)}
 
@@ -461,6 +485,16 @@ FIYAT = {
     "gpt-5": (1.25, 10.00),
 }
 BILINMEYEN_FIYAT = (1.00, 5.00)     # tahmini taban — bedava DEGIL
+
+
+# Kullanim bilgisi gelmeyen cagri ve cagri oncesi en kotu durum icin kaba
+# olcu: ~4 karakter bir jeton. Bir OLCUM degil, etiketli bir TAHMINDIR.
+KARAKTER_BASINA_JETON = 4
+
+
+def _jeton_tahmini(*metinler):
+    n = sum(len(str(m or "")) for m in metinler)
+    return (n + KARAKTER_BASINA_JETON - 1) // KARAKTER_BASINA_JETON
 
 
 def fiyat_bilinir(provider, model):

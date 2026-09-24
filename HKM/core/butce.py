@@ -166,11 +166,12 @@ def is_maliyeti(con, is_id):
     """Bir BAM isinin OLCULEN maliyeti: o ise yazilmis cagrilarin toplami.
     Basarisiz cagri da sayilir; para cevapsiz da harcanmis olabilir."""
     r = con.execute("SELECT COUNT(*) n, COALESCE(SUM(usd),0) usd, COALESCE(SUM(in_tok),0) gir, "
-                    "COALESCE(SUM(out_tok),0) cik, COALESCE(SUM(CASE WHEN note='tahmini-fiyat' "
+                    "COALESCE(SUM(out_tok),0) cik, COALESCE(SUM(CASE WHEN note LIKE '%tahmini-%' "
                     "THEN 1 ELSE 0 END),0) tahmini FROM usage WHERE is_id=?",
                     (int(is_id),)).fetchone()
     return {"cagri": r["n"], "usd": round(r["usd"], 6), "in_tok": r["gir"], "out_tok": r["cik"],
-            # Tarifesi bilinmeyen modelde fiyat tahmindir; bu soylenir.
+            # Tarifesi bilinmeyen modelde fiyat, kullanim bilgisi gelmeyen
+            # cagrida jeton tahmindir (D-16); bu soylenir.
             "etiket": "tahmin" if r["tahmini"] else "olculdu"}
 
 
@@ -284,12 +285,34 @@ def _bant(oran, bantlar):
     return asilan[-1] if asilan else 0
 
 
-def guard(con, cfg, date=None, cost_try=0.0):
+# HATALAR D-18: yoldaki (gonderilmis, henuz deftere yazilmamis) cagrilarin
+# en kotu durum maliyeti. Eszamanli iki cagri (ritim BAM + sohbet) ayni
+# bos payi iki kez kullanamaz.
+_AYRILAN = [0.0]
+_AYRILAN_KILIDI = threading.Lock()
+
+
+@contextlib.contextmanager
+def ayir(usd):
+    usd = max(0.0, float(usd or 0))
+    with _AYRILAN_KILIDI:
+        _AYRILAN[0] += usd
+    try:
+        yield
+    finally:
+        with _AYRILAN_KILIDI:
+            _AYRILAN[0] = max(0.0, _AYRILAN[0] - usd)
+
+
+def guard(con, cfg, date=None, cost_try=0.0, cost_usd=0.0):
     """Ucretli bir cagri YAPILABILIR MI.
 
     Sinirda «birazcik asalim» diyen bir sistem, sinirin kendisini kaldirmis
     olur. Ucretsiz yollar (kural motoru) bundan etkilenmez: HKM modelsiz de
-    calisir."""
+    calisir.
+
+    `cost_usd`: bu cagrinin EN KOTU DURUM maliyeti (istem + en uzun cevap).
+    Yoldaki cagrilarin ayrilmis payi da eklenir (D-18)."""
     d = month(con, cfg, date)
     tavan = d["ceiling"]
     if not tavan:
@@ -306,17 +329,29 @@ def guard(con, cfg, date=None, cost_try=0.0):
                         "ya da tavanı USD'ye çevir."}
     dur = tavan * (float(d["stop_at_pct"] or 100) / 100.0)
     harcanan = d["spent"]
+    with _AYRILAN_KILIDI:
+        yolda = _AYRILAN[0]
+    ek_usd = max(0.0, float(cost_usd or 0)) + yolda
     if d["currency"] == "try":
-        harcanan += float(cost_try or 0)
+        harcanan += float(cost_try or 0) + ek_usd * float(d["rate"] or 0)
+    else:
+        harcanan += ek_usd
     # SINIRA VARMAK da durdurur: «%100'e varildiginda ucretli cagri
     # YAPILMAZ». Tam tavanda bir cagriya daha izin vermek, tavani bir
     # cagri kadar yukari tasimakti.
     if harcanan >= dur:
+        if d["spent"] >= dur:
+            neden = "Aylık sınıra varıldı"
+        else:
+            # Harcanan sinirin altinda; ama bu cagrinin en kotu durumu ve
+            # yoldaki cagrilar eklenince asiyor (D-18).
+            neden = ("Bu çağrı aylık sınırı aşabilirdi (yanıtın en uzun hâli ve "
+                     "süren çağrılar dahil)")
         return {"ok": False, "reason": "ceiling",
                 "spent": d["spent"], "limit": round(dur, 2),
-                "note": "Aylık sınıra varıldı (%s %s / %s %s); ücretli çağrı "
+                "note": "%s (%s %s / %s %s); ücretli çağrı "
                         "durduruldu. Kural motoru çalışmaya devam eder."
-                        % (d["spent"], d["currency_label"], round(dur, 2),
+                        % (neden, d["spent"], d["currency_label"], round(dur, 2),
                            d["currency_label"])}
     return {"ok": True, "spent": d["spent"], "limit": round(dur, 2),
             "currency": d["currency_label"]}
