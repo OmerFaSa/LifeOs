@@ -72,6 +72,32 @@ def run():
         ok(program.on_denetim(_g(haftalik_dk=2400, gunler=["pzt", "sal"])))
     test("girdi kapali; hafta ve sure zorunlu; gunluk sinir", t_girdi)
 
+    def t_kapasite_toplami_asmaz():
+        """HATALAR D-5: yorum «toplam ogrenme suresini asmaz» diyordu ama
+        sifir dilim alan birime max(1, t) dilim eklenince toplam asiliyordu.
+        60 dk'lik haftada bir agir + bes hafif birim 85 dk'ya cikiyordu."""
+        g = _g(hafta=1, haftalik_dk=60)
+        birimler = [{"ad": "Ana konu", "agirlik": 100, "tahmini_saat": None, "onkosul": []}]
+        birimler += [{"ad": "Yan %d" % i, "agirlik": 1, "tahmini_saat": None, "onkosul": []}
+                     for i in range(5)]
+        k = program.kapasite(g, birimler)
+        ok(sum(b["dk"] for b in birimler) <= k["ogrenme_dk"],
+           [b["dk"] for b in birimler])
+        ok(all(b["dk"] >= program.DILIM for b in birimler))
+        ok(birimler[0]["dk"] > birimler[1]["dk"])        # agirlik korunur
+        no(k.get("sigmiyor"))
+        # Her birime bir dilim bile yetmiyorsa bu SOYLENIR ve plan gecmez.
+        g2 = _g(hafta=1, haftalik_dk=30)
+        cok = [{"ad": "Birim %d" % i, "agirlik": 1, "tahmini_saat": None, "onkosul": []}
+               for i in range(10)]
+        r = program.kur(g2, cok, [], datetime.date(2026, 9, 23))
+        ok(r["kapasite"]["sigmiyor"])
+        madde = [d for d in r["denetim"] if d["ad"] == "dilim"][0]
+        no(madde["ok"])
+        ok(madde["kritik"])
+        no(r["gecti"])
+    test("kapasite dagitimi ogrenme suresini asmaz (D-5)", t_kapasite_toplami_asmaz)
+
     def t_kur():
         g = _g()
         b, notlar, hata = program.ayikla(BIRIMLER)

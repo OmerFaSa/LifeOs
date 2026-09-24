@@ -232,14 +232,27 @@ def kapasite(g, birimler):
     agirlik = sum(b["agirlik"] for b in birimler)
     # En buyuk kalanla dagitim, 5 dakikalik dilimlerle: toplam ogrenme
     # suresini asmaz, her birim en az bir dilim alir.
+    #
+    # HATALAR D-5: sifir dilim alan birime sonradan max(1, t) eklemek
+    # toplami asiyordu. Artik eksik dilim EN COK dilim alan birimden
+    # alinir (toplam sabit). Her birime bir dilim bile yetmiyorsa bu
+    # uydurulmaz: «sigmiyor» isaretlenir ve denetim kritik olarak dusurur.
     dilim = int(ogrenme // DILIM)
     ham = [dilim * b["agirlik"] / float(agirlik) for b in birimler]
     taban = [int(x) for x in ham]
     for i in sorted(range(len(ham)), key=lambda i: -(ham[i] - taban[i]))[:dilim - sum(taban)]:
         taban[i] += 1
+    sigmiyor = dilim < len(birimler)
+    if not sigmiyor:
+        for i in range(len(taban)):
+            if taban[i] == 0:
+                veren = max(range(len(taban)), key=lambda j: (taban[j], -j))
+                taban[veren] -= 1
+                taban[i] = 1
     for b, t in zip(birimler, taban):
         b["dk"] = max(1, t) * DILIM
     out = {"toplam_dk": toplam, "ogrenme_dk": int(round(ogrenme)),
+           "sigmiyor": sigmiyor,
            "tekrar_dk": int(round(toplam - ogrenme)), "gunluk_dk": _yuvarla(gunluk_dk(g)),
            "etiket": "hesaplandi"}
     tahminli = [b for b in birimler if b["tahmini_saat"]]
@@ -329,6 +342,10 @@ def denetle(g, birimler, haftalar, kap):
 
     gd = gunluk_dk(g)
     madde("gunluk", gd <= GUNLUK_EN_COK, "Günlük süre %s (sınır 6 sa)." % sure_yaz(gd), True)
+    if kap.get("sigmiyor"):
+        madde("dilim", False, "%d birim var ama öğrenmeye ayrılan süre %s: her birime en az "
+              "%d dakika düşmüyor. Süreyi artır ya da birim sayısını azalt."
+              % (len(birimler), sure_yaz(kap["ogrenme_dk"]), DILIM), True)
     yerlesen = {c["birim"] for h in haftalar for c in h["calisma"]}
     eksik = [b["ad"] for i, b in enumerate(birimler) if i + 1 not in yerlesen]
     madde("yerlesim", not eksik, "Bütün birimler haftalara yerleşti." if not eksik else
