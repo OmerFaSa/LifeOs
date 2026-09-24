@@ -332,6 +332,31 @@ push + burada ✅. Doktrin onayla değişmez (AGENTS §1): sayı kod, model yaln
 ve her okuma önizleme + onaydan geçer; teşhis/doz yok; HKM modüle yazmaz; eksik veri sıfır
 değil. Part 9 (tasarım) yine EN SON.
 
+### 41 madde tarama sonucu (2026-09-24)
+
+**VAR / başka işe bağlı (yeniden yazılmaz):** 17 .ics içe aktarma (AYS `takvim.js`) · 24 iki
+deneme karşılaştırması (`analytics.compareExams`) · 32 tahlil yaşı (SPİ `audit.js`
+`TAHLIL_ESKI_GUN` 180) · 33 tahlil grafiği (SPİ Testler › Eğilim, `Bio.trendOf`) · 40 gitar
+tempo (ESP `targetBpm` / ölçülen `cleanBpm` / deneme bpm) · 45 tahmin–gerçek maliyet
+(`king.maliyet_sapmasi`) · 57 çok profil (AYS `profiles.js`, ESP `addProfile`, SPİ hane) ·
+10 tek onay kutusu → Part 9 «Onaylar» çekmecesi (harita onayında yapılır).
+**KISMEN (eksik kısmı yapılır):** 1 ses (modüllerde `voice/listen` var, üç modüle tek cümle
+yok) · 16 kötü gün (AYS var; SPİ/ESP'de seri dondurma var, gün modu yok) · 20 gerçekçilik
+(sınava kalan gün var; «bu hızla» projeksiyonu yok) · 23 mini test (Sınama modları var; zayıf
+konu modu yok) · 25 süre (deneme oturumunda soru süresi var; analiz yok) · 26 konu notu
+(yanlışta `topicRef` var; not bağı yok) · 28 paylaşılabilir (HKM haftalık PDF var; AYS'den
+paylaş yok) · 36 hekim özeti (SPİ «Hekime götür» var; PDF yok) · 37 yer karşılaştırma (liste
+var; tablo yok) · 39 okuma (ESP bilerek sayfa saymaz; `okuma_hizi` tablosu var) · 44 iş
+geçmişi (King kuyruğu var; zaman çizelgesi yok) · 47 bütçe (aylık toplam var; modül dağılımı
+yok) · 48 tanı (sohbette «tani» var; tek ekran yok) · 52 rekor (başarımda günlük en iyi var).
+**YOK:** 2 fiş fotoğrafı · 3 etiket fotoğrafı · 4 barkod · 6 şablon gün · 7 deneme sonucu
+fotoğrafı · 18 «15 dakikam var» · 21 verimli saat · 29 evdekinden tarif · 30 plandan alışveriş
+listesi · 34 ilaç/takviye hatırlatma · 35 su/hareket dürtmesi · 38 Telegram dil kartı · 41
+ünite sonu sınav · 42 sesli anlatım · 43 çok modüllü tek cümle · 51 ay sonu mektubu · 53 tek
+zip · 54 taşıma sihirbazı · 55 gizlilik panosu.
+**Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
+35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
+
 Onaylı: 5, 8, 9, 11–15, 19, 22, 27, 31, 46, 49, 50, 56. Gerisini uygulamadan önce: depoda
 var mı bak, kullanıcıya bir cümleyle sor. Boy: **K** küçük · **O** orta · **B** büyük.
 
