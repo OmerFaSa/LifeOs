@@ -2,8 +2,8 @@
 
 > ## v4 — geçerli görsel dil (2026-09-24, ekip/EKIP-PLANI.md §2)
 >
-> Bu bölüm aşağıdaki **Renk, Tipografi, Ölçü ve Hareket** bölümlerinin
-> üstündedir; çelişkide v4 geçer. Aşağıdakiler T3 bitince yeniden yazılır.
+> Özet budur; ayrıntı aşağıdaki **Renk, Tipografi, Ölçü** bölümlerindedir
+> (T3 sonrası yeniden yazıldı). Çelişkide jetonun kendisi (`jeton.css`) geçer.
 >
 > - **Jetonlar tek kaynakta:** `brand/ortak/jeton.css` → `src/css/jeton.css`
 >   (kopyayı elle düzenleme; `python3 tools/ortak.py --yay`). Modülün
@@ -40,85 +40,92 @@
 >   durum bir `C.Kutu` + tek eylemdir; kutu başlığı `h2`'dir.
 
 
-Tek token kaynağı: `css/tokens.css`. Bileşenler yalnız bu değişkenleri kullanır;
-ham renk veya ölçü yazılmaz.
-
 ## Renk
 
-İki eksen vardır ve birbirinden bağımsızdır:
+Tek tasarım, üç tema: **Açık · Koyu · Sistem** (`data-theme`, varsayılan
+Sistem). Palet ve düzen seçimi yoktur (EKIP-PLANI §8-4). Bütün renkler
+`jeton.css`'tedir; modülün `tokens.css`'i yalnız `--mod-*` bağlamasını ve
+kimlik renklerini (ajan, grafik serisi) ekler. Ham renk yazılmaz.
 
-| Eksen | Nitelik | Değerler |
-|---|---|---|
-| Tema | `data-theme` | açık · koyu · sistem (varsayılan) |
-| Palet | `data-palette` | indigo (varsayılan) · grafit · okyanus · mor · bordo · orman |
+**Renk sahipliği söyler, süs değildir.** Her ailenin üç jetonu vardır:
+işaret (nokta, çubuk, çizgi), yazı ve dolu düğme için AA tonu (`-ink`),
+açık zemin (`-t`).
 
-`tokens.css` taban paleti (indigo) tanımlar; `palettes.css` yalnız HUE'ye bağlı
-jetonları yeniden yazar. Ölçü, tipografi, gölge ve hareket palete göre değişmez.
-Yeni palet eklerken her iki temanın da tanımlanması ve AA kontrastının
-korunması zorunludur.
+| Aile | İşaret | Yazı (`-ink`) | Kimin |
+|---|---|---|---|
+| `--ays` | #2D5BE3 | #2D5BE3 | AYS |
+| `--spi` | #0E8C79 | #0A7A69 | SPİ |
+| `--esp` | #C8741C | #A65B0F | ESP |
+| `--mer` | #7453D4 | #7453D4 | Merkez (HKM) |
 
-Dört anlam rengi, gerisi nötr.
+`--primary` modülün `-ink` tonudur (`--mod-ink`), `--primary-soft` açık
+tonu. Mor yalnız Merkez'indir; sadelik ölçümü «Merkez dışında mor»u sayar.
 
-| Rol | Token | Kullanım |
-|---|---|---|
-| Birincil | `--primary` | Ana eylem, tamamlanan durum, olumlu ölçüm |
-| Vurgu | `--accent` | Uyarı, eşik altı, bekleyen ölçüm |
-| Tehlike | `--danger` | Borç, gecikme, yıkıcı işlem |
-| Bilgi | `--info` | Nötr açıklama, kesinlik etiketi |
+**Yön renkleri yalnız iyi / kötü / şimdi söyler:** `--ok` yeşil, `--bad`
+kırmızı, `--now` şimdi çizgisi. Derse, kategoriye, bölüme renk verilmez.
+`--accent` koyu hardaldır (uyarı); `--info` nötrdür (bilgi kutusu mavi
+değildir, mavi AYS'nindir); `--danger` (`--bad-ink`) yalnız yıkıcı eylem
+ve borç içindir.
 
-Yüzeyler `--bg → --surface → --surface-2 → --surface-3` sırasıyla derinleşir.
-Metin `--text → --text-2 → --text-3` sırasıyla soluklaşır.
+Yüzey `--bg → --surface → --surface-2 → --surface-3` derinleşir, çizgi
+`--border-soft → --border → --border-strong` koyulaşır, metin `--text →
+--text-2 → --text-3` soluklaşır (beyaz üzerinde 5,9:1 ve 4,9:1). Kontrastı
+`tools/palettecheck.js` iki temada ölçer; hepsi AA.
 
-**Kontrast (ölçülmüş, her iki tema):** `--text` 15.6:1 · `--text-2` 5.6:1 ·
-`--text-3` 4.5:1 · anlam renkleri yüzey üzerinde 4.9–7.3:1. Hepsi WCAG AA.
-
-**Renk tek başına anlam taşımaz.** Durum her zaman ikon veya metinle birlikte
-verilir (`C.Badge` tone'a göre ikon ekler).
-
-Ofis ajanlarının beş kimlik rengi (`--agent-patron` … `--agent-analist`) bundan
-ayrıdır: durum değil **kimlik** taşırlar. Avatarda, masanın kimlik şeridinde ve
-3B odadaki silüette görünürler (`--seat-color`); hepsi "bu masa kimin" sorusunun
-cevabıdır. Ajanın **durumu** her zaman ayrıca ışık ve metinle verilir — kimlik
-rengi hiçbir yerde durum anlamına gelmez. Beyaz harf üzerinde ölçülen kontrast
-5,3–8,9:1'dir.
+**Renk tek başına anlam taşımaz:** durum her zaman ikon ya da metinle
+birlikte verilir (`C.Badge` tona göre ikon ekler). Ajan renkleri durum
+değil **imza**dır: masanın kime ait olduğunu söyler.
 
 ## Tipografi
 
-İki aile: **Manrope** (başlık, sayı) · **Inter** (gövde, veri).
-Ağırlıklar: 400 / 600 / 700 / 800.
+Tek aile: **Inter** (`--font-body`; `--font-display` ve `--font-serif`
+eski adlar kırılmasın diye aynı aileye bağlıdır). Rakamlar her yerde tablo
+hizalıdır (`tnum`). Rol ayrımı boyut ve ağırlıkla yapılır:
 
-| Adım | Token | Kullanım |
+| Jeton | Boyut | Kullanım |
 |---|---|---|
-| xs | 11.5px | Etiket, mono-label, yardımcı bilgi |
-| sm | 13px | İkincil metin, tablo hücresi |
-| base | 14.5px | Gövde, form |
-| md | 16px | Kart başlığı (h3) |
-| lg | 20px | Bölüm başlığı (h2) |
-| xl | 28px | Ekran başlığı (h1), KPI sayısı |
+| `--fs-xs` | 11.5px | etiket, yardımcı bilgi |
+| `--fs-sm` | 12.75px | ikincil metin, tablo hücresi |
+| `--fs-base` | 14px | gövde, form |
+| `--fs-md` | 15px | kutu adı (600) |
+| `--fs-lg` | 18px | bölüm başlığı |
+| `--fs-xl` | 22px | ara başlık |
+| `--fs-display` | 26px | yalnız sayfa başlığı |
+| `--fs-hero` | 28px | yalnız özet kutusundaki büyük sayı (700) |
 
-Sayısal veride `.num` (tabular-nums) zorunlu.
+Ekranda 30 kelimeyi aşan tek parça yazı durmaz: kısa cümle görünür,
+gerekçe `C.Ayrinti`'nin («Neden?») altına iner. Hiçbir metin silinmez,
+yalnız katmanı değişir.
 
 ## Ölçü
 
-**Boşluk 8px ritmi:** 4 · 8 · 12 · 16 · 24 · 32 · 40.
+**Boşluk 4'ün katları:** `--sp-1` 4 · `--sp-2` 8 · `--sp-3` 12 ·
+`--sp-4` 16 · `--sp-6` 24 · `--sp-8` 32 · `--sp-10` 40. Tekrar eden boşluk
+için yardımcı sınıf (`gap-*`, `mt-*`); `style=""` yalnız değere bağlı
+yerde kalır (çubuk genişliği, iskelet satırı).
 
-Tekrar eden boşluk/hizalama için `style=""` yerine yardımcı sınıf kullanılır:
-`gap-4/6/8/14` · `mt-2/4/5/6/8/10/12/14/16` · `mb-10/12` · `minw0` · `jc-end` ·
-`as-center` · `ml-auto` · `right` · adlandırılmış genişlikler (`mw-66`, `w-46` …).
-`style=""` yalnız **değere bağlı** yerlerde kalır: bar genişliği, iskelet satırı,
-etiket rengi ve 3B ofis odasının konum/kamera değişkenleri (`--x`, `--y`,
-`--turn`) — sonuncusu sınıfa çevrilemez, çünkü değeri sürüklerken sürekli
-değişir. Denetimde bugün ekranlarda 7 tanesi var; hepsi bu dört durumdan biri.
-**Yarıçap iki seviye:** `--r-sm` 8px (kontrol) · `--r` 14px (kart, panel).
-**Gölge iki seviye:** `--shadow` (kart) · `--shadow-lg` (katman: sheet, palet, popover).
-**Perde:** `--scrim` — sheet, palet ve mobil kenar çubuğunun arkasındaki karartma;
-koyu temada ayrıca tanımlıdır.
+**Köşe:** rozet `--r-xs` 6 · düğme ve kontrol `--r-sm` 8 · iç kart
+`--r-md` 10 · kart `--r` 14 · hap `--r-pill` (yalnız rozette ve etkin
+seçimde).
+
+**Yüzey:** ton + ince çizgi. Kartta gölge yok (`--shadow:none`);
+`--shadow-lg` yalnız açılır katmanda (alt sayfa, komut paleti, açılır
+menü), arkasında `--scrim` perdesi.
+
+**Dokunma:** her hedef en az 24 px; açılır satır başlığı 40 px
+(`tools/layoutcheck.js`, 390 px'te).
+
+**Sadelik bütçesi** (ekran başına, `tools/sadelik.js`; teslim edilen
+modülde CI'da kırmızı): ekran içi sekme 0 · dolu (birincil) düğme en çok
+1 · 30+ kelimelik tek parça yazı 0 · resimsi simge (emoji) 0 · Bugün
+≤ 1 800 px ve ≤ 14 düğme.
 
 ## Hareket
 
-Tek easing `--ease`, iki süre: `--dur` 160ms (durum değişimi) ·
-`--dur-lg` 220ms (panel açılış). Animasyon yalnız durum değişimi ve geri
-bildirim için. `prefers-reduced-motion` süreleri 0'a çeker — ek kural gerekmez.
+Tek easing `--ease`, dört süre: basma `--dur-press` 120 · geçiş `--dur`
+200 · açılma `--dur-lg` 320 · giriş `--dur-in` 700 ms. Animasyon yalnız
+durum değişimi ve geri bildirim içindir. `prefers-reduced-motion` süreleri
+0'a çeker — ek kural gerekmez. (Bu bölüm T4'te yeniden yazılır.)
 
 Tanımlı hareketler bunlarla sınırlıdır:
 
@@ -144,19 +151,16 @@ iş bitince durur; `prefers-reduced-motion` hepsini kapatır.
 
 ## Ekranlar
 
-Altı gezinme grubu, on sekiz ekran:
+Sekiz çekmece (`LIFEOS.KABUK.CEKMECELER`: Bugün · Plan · Çalışma · Analiz ·
+Onaylar · Ofis · Kütüphanem · Ayarlar); hangi ekranın hangi çekmecede
+durduğu `R.App.NAV`'da, yolu `R.App.yolOf(rota)`'da, gerekçesi
+`ekip/CEKMECE-HARITASI.md`'de. Liste burada tekrar yazılmaz: kopya bir gün
+kaynağından ayrışır.
 
-| Grup | Ekranlar |
-|---|---|
-| Günlük | Bugün · Hafta |
-| Plan | Program · Dersler · Hedef |
-| Kayıt | Öğrenme · Deneme · Tekrar · Sınama · **Soru çöz** |
-| Analiz | İlerleme · **Analiz** · Telafi |
-| Rehber | Rehber · **Profiller** |
-| Ofis | **Ofis** · Ekip sohbeti · Toplantı |
-
-`Analiz` altı alt sekmedir: deneme karşılaştırma · boş bırakma · hata haritası ·
-sıra geçmişi · unutma eğrisi · kapasite gerçekliği. Hepsi `R.Analytics`
+Ekranın içinde sekme yoktur (T3): parçalar alt alta bölümdür
+(`C.SayfaBolumleri`), bölüm çubuğu (019) aralarında kaydırır. `Analiz`
+altı bölümdür: deneme karşılaştırma · boş bırakma · hata haritası · sıra
+geçmişi · unutma eğrisi · kapasite gerçekliği. Hepsi `R.Analytics`
 üzerinden okur; hiçbiri yazmaz.
 
 `Profiller` çok kullanıcılıdır: her profil kendi `localStorage` anahtarında
@@ -174,6 +178,9 @@ zinciri gösterir: **izle → not → soru → kart → mola**. Her adım bir ek
 tamamlananlar sönükleşir, tamamlanmayanların yanında “Git” durur.
 
 ## Bileşen sözlüğü
+
+v4: `C.Kutu` `C.ModulIsareti` `C.SayfaBolumleri` (+ `C.bolumeGit`)
+`C.Ayrinti` `C.SakinHata`
 
 `C.Card` `C.Collapsible` `C.Stat` `C.Bar` `C.Meter` `C.Badge` `C.Chip`
 `C.Button` `C.IconButton` `C.Segmented` `C.Subtabs` `C.Field` `C.Input`
@@ -209,10 +216,14 @@ başlık yanında rozet kullanılır. Kart içinde en fazla üç bilgi katmanı.
 
 Her ekran üç durumu tanımlar:
 
-- **Boş** → `C.Empty({ text, action })` — tek net eylem sunar.
+- **Boş** → `C.Empty({ text, action })` (katalog 010) — küçük çizim, tek
+  cümle, en çok tek eylem. Boş grafik ya da «0» gösterilmez: «ölçüldü ve
+  sıfır» diye okunur.
 - **Yükleniyor** → `C.Skeleton({ rows })` — spinner değil iskelet.
 - **Süzgeç boş** → `C.Empty` + “süzgeci sıfırla” eylemi; kullanıcı çıkmaza düşmez.
-- **Hata** → `C.Notice({ tone:'danger' })` veya kabuk düzeyinde hata paneli;
+- **Hata** → `C.SakinHata` (katalog 011): kırmızı yok, ilk cümle «Verin
+  yerinde; hiçbir kayıt silinmedi.», tek düğme, teknik ileti «Teknik
+  ayrıntı» altında. Ekran, kabuk ve açılış hatası aynı kalıbı kullanır;
   diğer ekranlar açılmaya devam eder.
 
 ## Erişilebilirlik kuralları

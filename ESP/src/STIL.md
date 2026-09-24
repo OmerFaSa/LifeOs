@@ -2,8 +2,8 @@
 
 > ## v4 — geçerli görsel dil (2026-09-24, ekip/EKIP-PLANI.md §2)
 >
-> Bu bölüm aşağıdaki **Renk, Tipografi, Ölçü ve Hareket** bölümlerinin
-> üstündedir; çelişkide v4 geçer. Aşağıdakiler T3 bitince yeniden yazılır.
+> Özet budur; Renk, Tipografi ve Ölçü'nün ayrıntısı üç modülde aynıdır ve
+> `AYS/src/STIL.md`'de durur (jetonlar ortak). Çelişkide `jeton.css` geçer.
 >
 > - **Jetonlar tek kaynakta:** `brand/ortak/jeton.css` → `src/css/jeton.css`
 >   (kopyayı elle düzenleme; `python3 tools/ortak.py --yay`). Modülün

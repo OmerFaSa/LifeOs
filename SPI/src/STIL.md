@@ -2,8 +2,8 @@
 
 > ## v4 — geçerli görsel dil (2026-09-24, ekip/EKIP-PLANI.md §2)
 >
-> Bu bölüm aşağıdaki **Renk, Tipografi, Ölçü ve Hareket** bölümlerinin
-> üstündedir; çelişkide v4 geçer. Aşağıdakiler T3 bitince yeniden yazılır.
+> Özet budur; ayrıntı aşağıdaki **Renk, Tipografi, Ölçü** bölümlerindedir
+> (T3 sonrası yeniden yazıldı). Çelişkide jetonun kendisi (`jeton.css`) geçer.
 >
 > - **Jetonlar tek kaynakta:** `brand/ortak/jeton.css` → `src/css/jeton.css`
 >   (kopyayı elle düzenleme; `python3 tools/ortak.py --yay`). Modülün
@@ -40,145 +40,90 @@ yapılardır: referans aralığı çubuğu, öğün kartı, porsiyon paylaştır
 
 ## Renk
 
-İki eksen vardır ve birbirinden bağımsızdır:
+Tek tasarım, üç tema: **Açık · Koyu · Sistem** (`data-theme`, varsayılan
+Sistem). Palet ve düzen seçimi yoktur (EKIP-PLANI §8-4). Bütün renkler
+`jeton.css`'tedir; modülün `tokens.css`'i yalnız `--mod-*` bağlamasını ve
+kimlik renklerini (ajan, grafik serisi) ekler. Ham renk yazılmaz.
 
-| Eksen | Nitelik | Değerler |
-|---|---|---|
-| Tema | `data-theme` | açık · koyu · sistem (varsayılan) |
-| Palet | `data-palette` | **kâğıt** (varsayılan) · indigo · grafit · okyanus · mor · bordo · orman |
+**Renk sahipliği söyler, süs değildir.** Her ailenin üç jetonu vardır:
+işaret (nokta, çubuk, çizgi), yazı ve dolu düğme için AA tonu (`-ink`),
+açık zemin (`-t`).
 
-**Varsayılan palet «kâğıt»tır:** sıcak kırık beyaz bir zemin üzerinde derin
-yeşil. İki tercih de kasıtlı:
+| Aile | İşaret | Yazı (`-ink`) | Kimin |
+|---|---|---|---|
+| `--ays` | #2D5BE3 | #2D5BE3 | AYS |
+| `--spi` | #0E8C79 | #0A7A69 | SPİ |
+| `--esp` | #C8741C | #A65B0F | ESP |
+| `--mer` | #7453D4 | #7453D4 | Merkez (HKM) |
 
-- Zemin saf gri değildir. Saf gri bir zemin ekranda klinik ve ucuz durur;
-  bir derece sıcaklık aynı düzeni pahalı gösterir.
-- Ana renk mavi-mor değildir. Mavi-mor her yönetim panelinin varsayılanıdır
-  ve kimlik taşımaz. Derin yeşil sağlıkla ilişkilidir, doygundur ama
-  bağırmaz.
+`--primary` modülün `-ink` tonudur (`--mod-ink`), `--primary-soft` açık
+tonu. Mor yalnız Merkez'indir; sadelik ölçümü «Merkez dışında mor»u sayar.
 
-Eski indigo palet kaybolmadı; seçilebilir bir palet olarak duruyor.
+**Yön renkleri yalnız iyi / kötü / şimdi söyler:** `--ok` yeşil, `--bad`
+kırmızı, `--now` şimdi çizgisi. Derse, kategoriye, bölüme renk verilmez.
+`--accent` koyu hardaldır (uyarı); `--info` nötrdür (bilgi kutusu mavi
+değildir, mavi AYS'nindir); `--danger` (`--bad-ink`) yalnız yıkıcı eylem
+ve borç içindir.
 
-Dört anlam rengi, gerisi nötr.
+Yüzey `--bg → --surface → --surface-2 → --surface-3` derinleşir, çizgi
+`--border-soft → --border → --border-strong` koyulaşır, metin `--text →
+--text-2 → --text-3` soluklaşır (beyaz üzerinde 5,9:1 ve 4,9:1). Kontrastı
+`tools/palettecheck.js` iki temada ölçer; hepsi AA.
 
-| Rol | Token | Kullanım |
-|---|---|---|
-| Birincil | `--primary` | Ana eylem, hedefte olan ölçüm, tamamlanan durum |
-| Vurgu | `--accent` | Uyarı, hedef bandın dışı, bekleyen ölçüm |
-| Tehlike | `--danger` | Kırmızı bayrak, referans dışı, yıkıcı işlem |
-| Bilgi | `--info` | Nötr açıklama, kesinlik etiketi |
-
-**Mürekkep** (`--ink`) saf siyah değil, koyu çamdır: klinik bir kesinlik
-verir ama soğumaz. Marka işaretinde, alt bantta ve ölçüm cetvelinin
-ibresinde kullanılır. Her sayfada en az bir koyu öge bulunması kasıtlıdır —
-baştan sona açık bir sayfanın ağırlık merkezi olmaz.
-
-Yüzeyler `--bg → --surface → --surface-2 → --surface-3` sırasıyla derinleşir.
-Metin `--text → --text-2 → --text-3` sırasıyla soluklaşır.
-`--surface-hover` yalnız fare üstündeyken, `--ring` yalnız odak halkasında.
-
-### Türetilen jetonlar
-
-Bir jeton yedi palette de elle yazılırsa biri mutlaka unutulur — nitekim
-unutulmuştu: `--ink`, `--rule` ve `--surface-hover` yalnız varsayılan
-palette tanımlıydı, diğer altı palette varsayılanın sıcak yeşil değerleri
-kalıyordu. Alt bant mavi bir palette yeşil, cetvel çizgisi soğuk bir
-zeminde bej duruyordu.
-
-Bunlar artık **türetilir**:
-
-| Jeton | Nereden |
-|---|---|
-| `--surface-hover` | `--surface` ile `--bg` arası bir adım |
-| `--ink` | `--primary` ile tonlanmış çok koyu renk (koyu temada zeminden bir kat koyu) |
-| `--ink-2` / `--ink-on` / `--ink-on-2` | `--ink` ve `--bg`'den |
-| `--rule` | `--border-strong` |
-| `--sec` | bölüm tonunun `--primary` ile %70/%30 harmanı |
-| `--primary-soft` · `--accent-soft` · `--danger-soft` · `--info-soft` | rengin kendi `--surface`'ine karışmış hâli |
-
-Yumuşak zeminlerin türetilmesi ikinci bir palet hatasını kapattı: `--danger`
-beş palette, `--info` dördünde tanımlı değildi ve varsayılan paletin soğuk
-gri-mavisi miras alınıyordu. Bordo temada bilgi kutuları sıcak bir sayfada
-yabancı bir beyaz gibi duruyordu.
-
-Yeni bir palet eklemek için yalnız temel renkleri yazmak yeterlidir;
-gerisi kendiliğinden doğru gelir.
-
-Yedi palet × iki tema × yedi bölüm kombinasyonu `tools/` altındaki kontrast
-denetimiyle ölçülür: metin, ikincil metin, bölüm rengi, düğme yazısı ve alt
-bant yazısı **her kombinasyonda AA** geçer.
-
-Koyu palet **tek yerde** tanımlanır: `--d-*` değişkenleri. `data-theme="dark"`
-ve `prefers-color-scheme:dark` bu tek kaynağı eşler. Bir rengin koyu karşılığı
-iki yere yazılmaz.
-
-**Renk tek başına anlam taşımaz.** Bu kural sağlık verisinde ihmal edilemez:
-bir tahlil değeri asla yalnızca renkle «kötü» gösterilmez. Durum her zaman
-metinle birlikte verilir; referans çubuğunun yanında daima sayı, birim ve
-gerekçe durur.
-
-İki renk grubu **kimlik** taşır, durum değil:
-
-- **Ajan renkleri** (`--agent-patron` … `--agent-money`) yalnız avatarda
-  kullanılır. Ajanın durumu her zaman ayrıca rozetle verilir.
-- **Makro renkleri** (`--macro-protein` · `--macro-fat` · `--macro-carb`)
-  yalnız makro şeridinde. Şeridin altında her dilimin yazılı etiketi durur.
+**Renk tek başına anlam taşımaz:** durum her zaman ikon ya da metinle
+birlikte verilir (`C.Badge` tona göre ikon ekler). Ajan renkleri durum
+değil **imza**dır: masanın kime ait olduğunu söyler.
 
 ## Tipografi
 
-**Üç aile, her birinin tek işi var.** Karıştırıldıklarında üçü de amatörleşir.
+Tek aile: **Inter** (`--font-body`; `--font-display` ve `--font-serif`
+eski adlar kırılmasın diye aynı aileye bağlıdır). Rakamlar her yerde tablo
+hizalıdır (`tnum`). Rol ayrımı boyut ve ağırlıkla yapılır:
 
-| Aile | Nerede | Kural |
+| Jeton | Boyut | Kullanım |
 |---|---|---|
-| `--font-serif` (Newsreader) | Hero başlığı, bölüm başlığı, kart başlığı | Hiçbir yerde **sayı** taşımaz |
-| `--font-display` (Manrope) | Sayı, KPI, ölçüm değeri | Hiçbir yerde **paragraf** taşımaz |
-| `--font-body` (Inter) | Geri kalan her şey | — |
+| `--fs-xs` | 11.5px | etiket, yardımcı bilgi |
+| `--fs-sm` | 12.75px | ikincil metin, tablo hücresi |
+| `--fs-base` | 14px | gövde, form |
+| `--fs-md` | 15px | kutu adı (600) |
+| `--fs-lg` | 18px | bölüm başlığı |
+| `--fs-xl` | 22px | ara başlık |
+| `--fs-display` | 26px | yalnız sayfa başlığı |
+| `--fs-hero` | 28px | yalnız özet kutusundaki büyük sayı (700) |
 
-Serif başlıklar kasıtlıdır: bir yönetim panelinin dili kalın sans başlıktır;
-editoryal bir serif aynı içeriği bir yayın gibi okutur.
-
-| Adım | Token | Kullanım |
-|---|---|---|
-| xs | 11.5px | Etiket, kesinlik rozeti, yardımcı bilgi |
-| sm | 12.75px | İkincil metin, tablo hücresi |
-| base | 14px | Gövde, form |
-| md | 15.5px | Ölçüm değeri |
-| lg | 19px | — |
-| xl | 24px | — |
-| hero | 30px | Yalnız KPI sayısı |
-| display | 40px | Yalnız hero başlığı (serif) |
-
-Ölçek bilinçli olarak dardır. Hiyerarşi punto sıçratarak değil **aile,
-ağırlık, renk ve boşlukla** kurulur. Bir ekranda en fazla bir `display`
-başlık ve bir `hero` sayı bulunur.
-
-Sayısal veride `.num` (tabular-nums) zorunlu. Ölçüm değerleri, gramajlar ve
-fiyatlar hizalanmadan okunamaz.
-
-**Gezinmede ikon yoktur.** Yedi ikon + yedi etiket + dört araç ikonu aynı
-satırda yarışınca hiçbiri okunmaz. Üst gezinme ve sayfa sekmeleri yalnız
-metindir; ikon, anlamı metnin taşımadığı yerlerde kalır (araç düğmeleri,
-boş durum, uyarı).
+Ekranda 30 kelimeyi aşan tek parça yazı durmaz: kısa cümle görünür,
+gerekçe `C.Ayrinti`'nin («Neden?») altına iner. Hiçbir metin silinmez,
+yalnız katmanı değişir.
 
 ## Ölçü
 
-**Boşluk 8px ritmi:** 4 · 8 · 12 · 16 · 24 · 32 · 40.
+**Boşluk 4'ün katları:** `--sp-1` 4 · `--sp-2` 8 · `--sp-3` 12 ·
+`--sp-4` 16 · `--sp-6` 24 · `--sp-8` 32 · `--sp-10` 40. Tekrar eden boşluk
+için yardımcı sınıf (`gap-*`, `mt-*`); `style=""` yalnız değere bağlı
+yerde kalır (çubuk genişliği, iskelet satırı).
 
-Tekrar eden boşluk/hizalama için `style=""` yerine yardımcı sınıf kullanılır:
-`mt-2/4/8/10/12`, `row`, `row-sm`, `wrap`, `grow`, `minw0`, `cols-2/3/4`.
-`style=""` yalnız **değere bağlı** yerlerde kalır: çubuk genişliği, referans
-çubuğundaki işaret konumu, iskelet satırı.
+**Köşe:** rozet `--r-xs` 6 · düğme ve kontrol `--r-sm` 8 · iç kart
+`--r-md` 10 · kart `--r` 14 · hap `--r-pill` (yalnız rozette ve etkin
+seçimde).
 
-**Yarıçap üç seviye:** `--r-sm` 9px (kontrol) · `--r` 16px (kart, panel) ·
-`--r-pill` (sekme hapı, rozet, avatar).
-**Gölge iki seviye:** `--shadow` (kart) · `--shadow-lg` (katman). Kart gölgesi
-kasıtlı olarak çok soluktur: derinlik gölgeyle değil kenarlıkla anlatılır,
-gölge yalnız yüzeyi zeminden ayırır.
-**Perde:** `--scrim` — sheet, palet ve mobil kenar çubuğunun arkasındaki karartma.
+**Yüzey:** ton + ince çizgi. Kartta gölge yok (`--shadow:none`);
+`--shadow-lg` yalnız açılır katmanda (alt sayfa, komut paleti, açılır
+menü), arkasında `--scrim` perdesi.
+
+**Dokunma:** her hedef en az 24 px; açılır satır başlığı 40 px
+(`tools/layoutcheck.js`, 390 px'te).
+
+**Sadelik bütçesi** (ekran başına, `tools/sadelik.js`; teslim edilen
+modülde CI'da kırmızı): ekran içi sekme 0 · dolu (birincil) düğme en çok
+1 · 30+ kelimelik tek parça yazı 0 · resimsi simge (emoji) 0 · Bugün
+≤ 1 800 px ve ≤ 14 düğme.
 
 ## Hareket
 
-Tek easing `--ease`, iki süre: `--dur` 160ms (durum değişimi) ·
-`--dur-lg` 220ms (panel açılış). `prefers-reduced-motion` süreleri sıfıra çeker.
+Tek easing `--ease`, dört süre: basma `--dur-press` 120 · geçiş `--dur`
+200 · açılma `--dur-lg` 320 · giriş `--dur-in` 700 ms. Animasyon yalnız
+durum değişimi ve geri bildirim içindir. `prefers-reduced-motion` süreleri
+0'a çeker — ek kural gerekmez. (Bu bölüm T4'te yeniden yazılır.)
 
 Dikkat çekmek için animasyon yoktur: yanıp sönme, zıplama, sürekli döngü
 (iskelet ve açılış çubuğu dışında) kullanılmaz. Bir kırmızı bayrak yanıp
@@ -378,93 +323,37 @@ hedef 80–250 · 400 ng/mL» yazmak satırı okunmaz hâle getiriyordu.
 
 ## Gezinme
 
-Yedi bölüm, on iki sayfa. Bölüm alana göre değil **işe** göre ayrılır.
+Sekiz çekmece (`LIFEOS.KABUK.CEKMECELER`: Bugün · Plan · Çalışma · Analiz ·
+Onaylar · Ofis · Kütüphanem · Ayarlar); hangi ekranın hangi çekmecede
+durduğu `SP.App.SECTIONS`'ta, yolu `SP.App.yolOf(rota)`'da, gerekçesi
+`ekip/CEKMECE-HARITASI.md`'de. Liste burada tekrar yazılmaz: kopya bir gün
+kaynağından ayrışır. Kabuk (üst çubuk, gün şeridi, sayfa başı, bölüm
+çubuğu, telefonda alt bant) `brand/ortak/kabuk.js`'tedir.
 
-| # | Bölüm | Sayfalar |
-|---|---|---|
-| 01 | **Günlük** | Günlük |
-| 02 | Testler | Testler |
-| 03 | Besin | Öğünler · Mutfak |
-| 04 | Hareket | Hareket |
-| 05 | Finans | Finans |
-| 06 | Ofis | Masalar · Danışma · Toplantı · Analiz |
-| 07 | Ayarlar | Hane · Rehber |
+### Ekranın içinde sekme yok
 
-**Günlük ilk sıradadır ve tek sayfadır.** Önce «Bugün» (özet) ve «Günlük
-ölçüm» (giriş) diye iki ayrı ekran vardı; ikisi de aynı günü anlatıyor,
-kullanıcı hangisine gireceğini düşünmek zorunda kalıyordu. Şimdi tek sayfa,
-üç sekme — ve **Giriş varsayılan sekmedir**: bu sayfaya girmenin sebebi çoğu
-zaman okumak değil yazmaktır.
+T3'ten beri ekranın parçaları alt alta bölümdür (`C.SayfaBolumleri`);
+bölüm çubuğu (019) aralarında kaydırır, eski `*-tab` eylemi çubuğun
+düğmesinde kalır. Bugün üç alandır: Şimdi · Durum · Öneri; geri kalan
+satırlar Bugün › Ayrıntı'dadır.
 
-Gezinmedeki **numara süs değildir**: yedi bölümün sırası anlamlıdır (önce
-yazılan, sonra okunan) ve numara o sırayı görünür kılar.
+### Görünüm
 
-860px altında bölümler tam ekran bir **içindekiler** sayfasına iner:
-numaralı, serif, tek sütun. Alt sekme çubuğu yoktur — o bir panel dilidir.
+Tema **Açık · Koyu · Sistem**'dir; üst çubuktaki «Profil ve görünüm»
+katmanından ve Ayarlar › Hane'den seçilir, profile yazılır. Palet ve düzen
+seçimi kalktı (§8-4): tek tasarım.
 
-### Ekran içi sekmeler
+### Kalıcı CSS kuralları
 
-Ekranın kendi bölümleri hap biçimli `Subtabs`'tır: seçilen dolu, seçilmeyen
-boş. Alt çizgi kullanılmaz — dokunmatikte hedef alanı belirsizdir.
+Beş düzen kalktı ama o dönemde öğrenilen üç kural geçerlidir:
 
-| Ekran | Sekmeler |
-|---|---|
-| Günlük | **Giriş** · Özet · Geçmiş |
-| Testler | Sonuçlar · Test gir · Geçmiş · Eğilim |
-| Öğünler | Öğünler · Öneri · Besin değeri |
-| Hareket | Bugün · Kardiyo · Kuvvet · Esneklik · Dinlenme · İlerleme |
-| Finans | Bütçe · Sepet · İkame · Fiyat |
-| Analiz | Çapraz bağlar · Haftalık rapor · Seriler |
-| Rehber | Kullanım · Model · Veri · Sınırlar |
-
-`Hareket` **iki** şerit taşır: üstte alan, kuvvetin içinde hareket kalıbı
-(itme · çekme · çömelme · kalça · gövde · taşıma). İkinci şerit yalnız
-kuvvette çizilir; kardiyoda ve esneklikte kalıp yoktur, orada şerit çizmek
-boş bir seçim sunmak olurdu.
-
-### Görünüm paneli
-
-Tema, palet ve düzen üst çubuktaki palet düğmesinden açılır (`.appear`),
-ekranın içine gömülmez. Panel üç satırdır: üç tema düğmesi (Sistem · Açık ·
-Koyu), yedi palet, beş düzen. Seçim profile yazılır ve anında uygulanır;
-`Escape`, dışarı tıklama ve pencere boyutu değişimi paneli kapatır. Aynı üç
-tercih Ayarlar → Hane ekranından da seçilebilir.
-
-## Düzenler — seçilebilir tasarım dilleri
-
-Palet **rengi** değiştirir; düzen **iskeleti** değiştirir: gezinmenin nerede
-durduğunu, bir satırın kutu mu çizgi mi olduğunu, neyin büyük neyin küçük
-yazıldığını.
-
-| Düzen | İskelet |
-|---|---|
-| **Defter** (varsayılan) | Solda künye sütunu, kutusuz satırlar, ince çizgiler |
-| **Odak** | Sayfa 880 px'e daralır ve ortalanır; başlık 74 px, ilk özet sayı serifle 188 px'e kadar. Kutu, gölge ve yuvarlak köşe tamamen kalkar; gezinme numarasız fısıldar |
-| **Kraft** | Gövde, sayı ve etiketlerin hepsi **tek aralıklı** olur (yalnız başlıklar serif kalır). Kâğıt dokusu, kesikli cetveller, etkin bölüm `[köşeli parantez]` içinde, düğmelerde sert kayma gölgesi |
-| **Katmanlı** | Yedi bölüm **koyu** sol kenar çubuğuna iner, çalışma alanı temiz yüzeye oturur; künye sütunu bölüm renginde bir şeritle panele döner |
-| **Harita** | Sayfa 1380 px'e açılır, gövde noktalı tuval olur, defter satırları gölgeli düğüm kartlara döner; gezinme tuvalin üstünde yüzen haplar |
-
-Kurallar:
-
-1. **Beşi de aynı DOM üzerinde çalışır.** Ekranlar hangi düzenin seçili
-   olduğunu bilmez ve bilmemelidir; yoksa her ekran beş kez yazılırdı.
-   Düzen yalnız `:root[data-design]` altındaki CSS'tir (`css/designs.css`).
-2. **Ham renk yazılmaz.** Dördü de yedi palet ve karanlık tema altında
-   çalışmak zorunda; renk her zaman jetondan türetilir.
-3. **Durum renkleri düzenden düzene geçmez.** Bir tahlil sonucunun rengi
-   hangi düzen seçildiğine göre değişemez. Kesinlik etiketleri
-   (ölçüldü/tahmin) de hiçbir düzende gizlenmez.
-4. **Bir düzen seçimi ağ isteği doğurmaz.** Kraft'ın daktilo künyesi yeni
-   bir yazı tipi indirmez; sistemin kendi tek aralıklı yazısını kullanır.
-5. Varsayılan düzen köke **hiçbir şey yazmaz** (`data-design` kaldırılır),
-   böylece `designs.css` yalnız bir seçim yapıldığında devreye girer.
-6. **Bir jeton kendi türevine dayanamaz.** `--bg`yi `--surface-2`den,
+1. **Bir jeton kendi türevine dayanamaz.** `--bg`yi `--surface-2`den,
    `--surface-2`yi de `--bg`den türetmek CSS özel değişken DÖNGÜSÜ kurar
    ve zincirdeki her değer geçersiz olur — ekran sessizce zeminsiz kalır,
    metin görünmez olur. Kraft'ta tam olarak bu oldu: koyu temada kâğıt
    paletinde kontrast 1.00'e düştü. Kural: bir düzenin türettiği her renk,
    o düzenin **yeniden tanımlamadığı** jetonlara dayanmalıdır.
-7. **Bileşenler PENCEREYE değil KENDİ KUTULARINA göre daralır.**
+2. **Bileşenler PENCEREYE değil KENDİ KUTULARINA göre daralır.**
    Duyarlı kurallar `@media` ile pencere genişliğine bağlandığında
    düzenler bozuluyor: «Katmanlı» raf için 228 px alıyor, «Harita»
    satırı bir karta sokuyor. Masaüstü genişliğinde bir pencerede satır
@@ -474,24 +363,14 @@ Kurallar:
    dar kalıplarını `@container satir (max-width: …)` ile açar. Pencere
    sorgusu yanında **durur**, yerine geçmez: kapsayıcısı olmayan bir
    yerde kullanılan bileşen yine de daralabilsin diye.
-8. **Metin merdiveni sıralı kalır.** `--text-2` her zaman `--text-3`ten
+3. **Metin merdiveni sıralı kalır.** `--text-2` her zaman `--text-3`ten
    güçlüdür; bir düzen jetonları yeniden türetirken bu sıra bozulabilir ve
    gözle fark edilmez. `palettecheck.js` bunu ölçer.
 
-Denetim: `tools/designcheck.js` beş düzeni **iki temada, altı genişlikte**
-ve on iki ekranda gezer; taşmayı, **kırpılan içeriği** (bir kap taşmayı
-yutuyorsa veri hiç görünmez ve kaydırarak da ulaşılamaz), boyanmış
-zeminin kontrastını, künye araçlarının hizasını ve açılan katmanları
-(görünüm kâğıdı, komut paleti) denetler. Ekranları **dolu veriyle** gezer:
-boş bir uygulama düzen hatalarını gizler. `tools/palettecheck.js` ise
-dört düzeni yedi palet ve iki temada kontrast için ölçer.
+Üst çubukta ekrana ait eylem durmaz; bir eylem hangi sayfaya aitse o
+sayfanın başında görünür.
 
-Üst çubuk tek satırdır ve şu sırayla okunur: marka → yedi bölüm → arama →
-palet → ayarlar → menü. Ekrana ait eylemler üst çubukta değil **hero'da**
-durur; bir eylem hangi sayfaya aitse orada görünür.
-
-`Mutfak` tek tencereyi hane hedeflerine göre paylaştırır; Besin bölümünün
-ikinci sayfasıdır.
+`Mutfak` tek tencereyi hane hedeflerine göre paylaştırır.
 
 `Ofis` beş ajanlıdır: Patron ekibi yönetir, Kerem laboratuvara, Nesrin
 beslenmeye, Barış harekete, Sedef ekonomiye bakar. Ayrıntı için `src/OFIS.md`.
@@ -499,6 +378,9 @@ beslenmeye, Barış harekete, Sedef ekonomiye bakar. Ayrıntı için `src/OFIS.m
 ## Bileşen sözlüğü
 
 Genel (uygulamadan bağımsız, `core/components.js`):
+
+v4: `C.Kutu` `C.ModulIsareti` `C.SayfaBolumleri` (+ `C.bolumeGit`)
+`C.Ayrinti` `C.Katmanli` `C.SakinHata`
 
 `C.Card` `C.Collapsible` `C.Stat` `C.Bar` `C.Meter` `C.Badge` `C.Chip`
 `C.Button` `C.IconButton` `C.Segmented` `C.Subtabs` `C.PickCard` `C.Toolbar`
@@ -619,11 +501,15 @@ bileşen eklemez; var olanların okunuşunu düzeltir.
 
 Her ekran dört durumu tanımlar:
 
-- **Boş** → `C.Empty({ text, action })` — tek net eylem sunar.
+- **Boş** → `C.Empty({ text, action })` (katalog 010) — küçük çizim, tek
+  cümle, en çok tek eylem. Boş grafik ya da «0» gösterilmez: «ölçüldü ve
+  sıfır» diye okunur.
 - **Yükleniyor** → `C.Skeleton({ rows })` — spinner değil iskelet.
 - **Veri yetersiz** → `C.Notice({ tone:'info' })` — *neyin* eksik olduğunu ve
   kaç tane gerektiğini söyler. «Eğilim için en az 3 ölçüm gerekir; 2 var.»
-- **Hata** → `C.Notice({ tone:'danger' })` veya kabuk düzeyinde hata paneli;
+- **Hata** → `C.SakinHata` (katalog 011): kırmızı yok, ilk cümle «Verin
+  yerinde; hiçbir kayıt silinmedi.», tek düğme, teknik ileti «Teknik
+  ayrıntı» altında. Ekran, kabuk ve açılış hatası aynı kalıbı kullanır;
   diğer ekranlar açılmaya devam eder.
 
 Üçüncüsü bu uygulamada özellikle önemlidir: sağlık verisi seyrektir ve boş

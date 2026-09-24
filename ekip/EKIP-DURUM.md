@@ -112,7 +112,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem 6c92411 · ✅ **T3 ESP 2204fa3 → teslim** (tabloda). Sıradaki: AYS küçükleri (§2.C: 011 sakin hata, 010 boş durum işareti, app.js:842 onay etiketi, STIL.md) → T4 → T5; T6 yalnız kullanıcı «başla» derse.
+- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem 6c92411 · ✅ **T3 ESP 2204fa3 → teslim** (tabloda). ✅ AYS küçükleri (§2.C): 011 sakin hata + 010 boş durum işareti + 022 plan onay etiketi d83d085 · STIL.md (bu commit). Sıradaki: T4 hareket → T5 ayarlar; T6 yalnız kullanıcı «başla» derse.
 - **K yürütüyor (kullanıcı talimatı, 2026-09-24 akşam):** T-DEVIR §5'ten devam. ✅ T2-13 designcheck d58720d · ✅ entegre.js koştu (temiz) · ✅ yarım T3 SPİ yaması 826fbe3 · ✅ **T3 SPİ → teslim 59e7276** (sekme 0, tek dolu düğme, 30+ kelime katmanda, T2-14) · ✅ **T2 ESP ccedf0a** (kabuk + sekiz çekmece; disiplin bölüm düzeyinde). Sıradaki: ESP Onaylar + Kütüphanem → T3 ESP (sekmeler, Bugün üç alan, Ofis dolu düğme) → teslim → AYS küçükleri (§2.C) → T4 → T5; T6 yalnız kullanıcı «başla» derse. **⏸ K'nin limiti doldu → T'ye döndü: `ekip/T-DEVIR.md` §6** (kalan: ESP Onaylar + Kütüphanem → T3 ESP → AYS küçükleri → T4 → T5).
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
@@ -165,6 +165,18 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   güncellendi: alan Bugün + `ESP.Screens.gun` çiziminde aranıyor (Seri satırı Ayrıntı'ya geçti).
   Test senin; istersen kendi diline çevir. Yeni: `ESP/src/tests/bolumler.test.js` (sekme yok,
   bölüm adları, tezgâh açılır satırları).
+- **§2.C (d83d085 + bu commit):** `C.SakinHata` üç modülde (011: kırmızı yok, ilk cümle «Verin
+  yerinde; hiçbir kayıt silinmedi.», tek düğme, teknik ileti «Teknik ayrıntı» altında) — ekran,
+  kabuk ve açılış hatası bunu kullanır. `C.Empty` `data-oz="010"`; **hata düzeldi:** motifi olmayan
+  bölümde (yeni çekmeceler) boş durum çizimsizdi, artık ikon düşer. AYS `auto-replan` onayı «Kalan
+  N haftayı yeniden diz» (022). Test `durum.test.js` (üç modül). STIL.md: AYS ve SPİ'de Renk,
+  Tipografi, Ölçü v4 jetonlarından yeniden yazıldı; Hareket süreleri düzeldi (tam metin T4'te);
+  AYS Ekranlar ve SPİ Gezinme/Görünüm/Düzenler çekmecelere ve tek tasarıma çekildi. **Göremedim:**
+  SPİ STIL.md'nin «Düzen — bir sağlık defteri», «Bölüm kimlikleri», «Filigran numara» bölümleri
+  serif ve eski düzene değiniyor olabilir; T5'te okunacak.
+- **K için (010):** Onaylar ve Kütüphanem'in boş durumu `C.Kutu` + tek düğme; `C.Empty({ text,
+  action })`'ı Kutu'nun gövdesine koyarsan 010 işareti ve çizim kendiliğinden gelir (ekranlar
+  senin). 022'nin kalan «varsayılan Evet, devam et» çağrıları (sadelik ölçümü) ekran dosyalarında.
 - **H · bulgu:** `tools/envanter.js:296` · `BLOK` `table`'ı içeriyor, tablonun çocukları
   (`table-row-group`) BLOK değil → her tablo «30+ kelimelik tek parça yazı» sayılıyor · AYS target 2,
   cards 2, analytics 1, guide 6 aşımın hepsi tablo · doğrulama: aşan öğelerin etiketi TABLE.
