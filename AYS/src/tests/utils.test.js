@@ -118,6 +118,19 @@
     });
   });
 
+  describe('U.fmtMin (HATALAR D-8)', function(){
+    it('119,6 dakika «1 sa 60 dk» degil «2 sa»', function(){
+      expect(U.fmtMin(119.6)).toBe('2 sa');
+      expect(U.fmtMin(59.6)).toBe('1 sa');
+      expect(U.fmtMin(90)).toBe('1 sa 30 dk');
+      expect(U.fmtMin(0)).toBe('0 dk');
+    });
+    it('sayi olmayan sure «—»', function(){
+      expect(U.fmtMin(NaN)).toBe('—');
+      expect(U.fmtMin(undefined)).toBe('—');
+    });
+  });
+
   describe('U.fmtNet', function(){
     it('neti iki ondalikla Turkce bicimde yazar', function(){
       expect(U.fmtNet(19.5)).toBe('19,50');

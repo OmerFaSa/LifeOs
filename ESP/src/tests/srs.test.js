@@ -14,6 +14,17 @@
       expect(n.due > '2026-09-12').toBe(true);
     });
 
+    /* HATALAR D-11: baslik «EASE ince ayardir; ayni kutudaki iki kart ayni
+       hizda uzamaz» diyordu ama «İyi» cevapta ease hic kullanilmiyordu. */
+    it('ayni kutuda zor kart «İyi»de kolay karttan kisa aralik alir', () => {
+      const zor = SRS.schedule(ESP.Model.newCard({ box:3, ease:1.5, reps:5 }), 'good', '2026-09-12');
+      const kolay = SRS.schedule(ESP.Model.newCard({ box:3, ease:2.7, reps:5 }), 'good', '2026-09-12');
+      const orta = SRS.schedule(ESP.Model.newCard({ box:3, ease:2.5, reps:5 }), 'good', '2026-09-12');
+      expect(zor.interval < orta.interval).toBe(true);
+      expect(orta.interval <= kolay.interval).toBe(true);
+      expect(orta.interval).toBe(7);              // varsayilan ease'te kutu tabani
+    });
+
     it('yanlis cevap kutuyu basa dondurur ama ease\'i SIFIRLAMAZ', () => {
       const c = ESP.Model.newCard({ box:4, ease:2.5, interval:7, reps:6 });
       const n = SRS.schedule(c, 'again', '2026-09-12');

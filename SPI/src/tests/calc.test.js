@@ -316,4 +316,12 @@
       });
     });
   });
+
+  describe('U.fmtMin (HATALAR D-8)', () => {
+    it('119,6 dakika «1 sa 60 dk» degil «2 sa»; sayi olmayan «—»', () => {
+      expect(SP.U.fmtMin(119.6)).toBe('2 sa');
+      expect(SP.U.fmtMin(90)).toBe('1 sa 30 dk');
+      expect(SP.U.fmtMin(NaN)).toBe('—');
+    });
+  });
 })();

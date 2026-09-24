@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'e68c718', at:'2026-09-24 11:33', dirty:true };
+R.BUILD = { id:'313a704', at:'2026-09-24 11:35', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -16312,8 +16312,10 @@ R.U = (function(){
     return Number(x).toLocaleString('tr-TR');
   }
   function fmtMin(mins){
-    if(mins == null) return '—';
-    const h = Math.floor(mins/60), m = Math.round(mins%60);
+    /* HATALAR D-8: once toplam yuvarlanir; 119,6 «1 sa 60 dk» yaziliyordu. */
+    if(mins == null || !isFinite(mins)) return '—';
+    const t = Math.round(mins);
+    const h = Math.floor(t/60), m = t%60;
     if(h && m) return h+' sa '+m+' dk';
     if(h) return h+' sa';
     return m+' dk';
@@ -23152,9 +23154,7 @@ R.UI = (function(){
     cards:'<rect x="3" y="7.5" width="13" height="13" rx="2"/><path d="M7.5 7.5v-2A1.5 1.5 0 019 4h10.5A1.5 1.5 0 0121 5.5V16a1.5 1.5 0 01-1.5 1.5H17"/>',
     book:'<path d="M4 5.5A2.5 2.5 0 016.5 3H19v15H6.5A2.5 2.5 0 004 20.5z"/><path d="M4 20.5A2.5 2.5 0 016.5 18H19v3H6.5A2.5 2.5 0 014 20.5z"/>',
     map:'<path d="M9 4.5L3.5 7v13L9 17.5l6 3 5.5-2.5v-13L15 7.5z"/><path d="M9 4.5v13M15 7.5v13"/>',
-    target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8" fill="currentColor"/>',
     chart:'<path d="M4 20V11M10 20V4M16 20v-6M22 20H2"/>',
-    shield:'<path d="M12 3l7.5 3v5.5c0 4.6-3.1 8.3-7.5 9.5-4.4-1.2-7.5-4.9-7.5-9.5V6z"/><path d="M9 12l2 2 4-4"/>',
     guide:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 114 2.4c-.9.6-1.6 1.1-1.6 2.2M12 17.2v.01"/>',
     menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
     close:'<path d="M6 6l12 12M18 6L6 18"/>',
@@ -41003,7 +41003,8 @@ R.Screens.exams = (function(){
     const rows = exam.tests.map((t, i) => {
       const net = M.testNet(t);
       const answered = t.correct + t.wrong;
-      const acc = answered ? U.pct(t.correct, answered) : 0;
+      // HATALAR D-8: cevaplanmamis test olculmemistir; «%0» degil «—».
+      const acc = answered ? U.pct(t.correct, answered) : null;
       const band = R.TEST_BANDS.find(b => b.exam === exam.family && b.testKey && t.name.indexOf(b.testKey) >= 0);
       const num = (field, label) => NumCell({ value:t[field], aria:t.name+' '+label,
         change:'test-num', data:{ 'data-i':i, 'data-field':field } });
@@ -41011,7 +41012,8 @@ R.Screens.exams = (function(){
         t.name,
         num('correct', 'doğru'), num('wrong', 'yanlış'), num('blank', 'boş'),
         html`<b class="num">${U.fmtNet(net)}</b>${when(band, () => html`<div class="tiny dim">hedef ${band.low}–${band.high}</div>`)}`,
-        html`<span class="${acc >= 70 ? 'num' : 'num dim'}">%${acc}</span>`,
+        acc == null ? html`<span class="num dim" title="veri yok">—</span>`
+          : html`<span class="${acc >= 70 ? 'num' : 'num dim'}">%${acc}</span>`,
       ];
     });
     return K.Table({ rows, headers:['Test', { label:'D', num:true }, { label:'Y', num:true },
@@ -52046,7 +52048,9 @@ R.App = (function(){
     rotaDegisti = true;
     applySection(route);
     S.sidebarOpen = false;
-    if(route !== 'exams') S.ui.examOpen = S.ui.examOpen;
+    /* Açık deneme ayrıntısı gezinmede KAPANMAZ: Deneme'ye dönen kişi
+       bıraktığı denemeyi görür. (Burada `examOpen = examOpen` diye hiçbir şey
+       yapmayan bir satır vardı; niyeti bu davranıştı — HATALAR D-10.) */
     window.scrollTo(0,0);
     render();
   }

@@ -112,8 +112,10 @@ R.U = (function(){
     return Number(x).toLocaleString('tr-TR');
   }
   function fmtMin(mins){
-    if(mins == null) return '—';
-    const h = Math.floor(mins/60), m = Math.round(mins%60);
+    /* HATALAR D-8: once toplam yuvarlanir; 119,6 «1 sa 60 dk» yaziliyordu. */
+    if(mins == null || !isFinite(mins)) return '—';
+    const t = Math.round(mins);
+    const h = Math.floor(t/60), m = t%60;
     if(h && m) return h+' sa '+m+' dk';
     if(h) return h+' sa';
     return m+' dk';

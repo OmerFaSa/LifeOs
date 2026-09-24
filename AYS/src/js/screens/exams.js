@@ -112,7 +112,8 @@ R.Screens.exams = (function(){
     const rows = exam.tests.map((t, i) => {
       const net = M.testNet(t);
       const answered = t.correct + t.wrong;
-      const acc = answered ? U.pct(t.correct, answered) : 0;
+      // HATALAR D-8: cevaplanmamis test olculmemistir; «%0» degil «—».
+      const acc = answered ? U.pct(t.correct, answered) : null;
       const band = R.TEST_BANDS.find(b => b.exam === exam.family && b.testKey && t.name.indexOf(b.testKey) >= 0);
       const num = (field, label) => NumCell({ value:t[field], aria:t.name+' '+label,
         change:'test-num', data:{ 'data-i':i, 'data-field':field } });
@@ -120,7 +121,8 @@ R.Screens.exams = (function(){
         t.name,
         num('correct', 'doğru'), num('wrong', 'yanlış'), num('blank', 'boş'),
         html`<b class="num">${U.fmtNet(net)}</b>${when(band, () => html`<div class="tiny dim">hedef ${band.low}–${band.high}</div>`)}`,
-        html`<span class="${acc >= 70 ? 'num' : 'num dim'}">%${acc}</span>`,
+        acc == null ? html`<span class="num dim" title="veri yok">—</span>`
+          : html`<span class="${acc >= 70 ? 'num' : 'num dim'}">%${acc}</span>`,
       ];
     });
     return K.Table({ rows, headers:['Test', { label:'D', num:true }, { label:'Y', num:true },

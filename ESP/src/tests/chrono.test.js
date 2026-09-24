@@ -221,4 +221,12 @@
       expect(f[0].label).toBe('Boş kronoloji');
     });
   });
+
+  describe('U.fmtMin (HATALAR D-8)', () => {
+    it('119,6 dakika «1 sa 60 dk» degil «2 sa»; sayi olmayan «—»', () => {
+      expect(ESP.U.fmtMin(119.6)).toBe('2 sa');
+      expect(ESP.U.fmtMin(90)).toBe('1 sa 30 dk');
+      expect(ESP.U.fmtMin(NaN)).toBe('—');
+    });
+  });
 })();

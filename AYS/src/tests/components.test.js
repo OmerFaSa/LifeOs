@@ -211,4 +211,24 @@
       expect(String(R.C.Notice({ body:'gövde', tone:'warn', title:'Başlık' }))).toContain('Başlık');
     });
   });
+
+  /* HATALAR D-9: nesne sabitinde iki kez yazılan anahtarın ilki ölüdür ve
+     sessizce ezilir (tarayıcı hata vermez). Kaynak okunur, çift aranır. */
+  describe('Kaynak — çift anahtar yok (D-9)', () => {
+    async function ciftler(yol, bas){
+      const src = await (await fetch(yol)).text();
+      const i = src.indexOf(bas);
+      const j = src.indexOf('\n  };', i);
+      const blok = src.slice(i, j);
+      const re = /^\s{4}(?:'([^']+)'|([A-Za-z_$][\w$]*))\s*:/gm;
+      const adlar = [];
+      let m;
+      while((m = re.exec(blok))) adlar.push(m[1] || m[2]);
+      return adlar.filter((k, n) => adlar.indexOf(k) !== n);
+    }
+    it('ikon tablosu içinde çift anahtar yok', async () => {
+      const c = await ciftler('../js/core/ui.js', 'const PATHS = {');
+      expect(c.join(', ')).toBe('');
+    });
+  });
 })();

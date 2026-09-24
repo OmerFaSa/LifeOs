@@ -90,7 +90,11 @@ ESP.SRS = (function(){
     /* Zor cevap kutuyu yukseltmez ama araligi da tamamen dondurmaz:
        kartin bir onceki araligina gore kucuk bir ilerleme verir. */
     const taban = boxDays(yeniKutu) || 1;
-    const carpan = g.quality === 3 ? 0.6 : (g.quality === 5 ? ease / 2 + 0.5 : 1);
+    /* «İyi»de de ease ince ayardir (baslik sozu, HATALAR D-11): varsayilan
+       ease'te (2.5) kutu tabani aynen; «Zor» gecmisi olan kart daha erken,
+       kolay kart biraz daha gec gelir. */
+    const carpan = g.quality === 3 ? 0.6
+      : (g.quality === 5 ? ease / 2 + 0.5 : ease / EASE_START);
     const interval = Math.max(1, Math.round(taban * carpan));
 
     return {

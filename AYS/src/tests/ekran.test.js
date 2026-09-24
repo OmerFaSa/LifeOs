@@ -73,6 +73,21 @@
       expect(out.indexOf('Başka konu') < 0).toBe(true);
     });
 
+    /* HATALAR D-8: doğru ve yanlışı 0 olan test (hepsi boş ya da girilmemiş)
+       «Doğruluk %0» gösteriyordu; cevaplanmamış test ölçülmemiştir. */
+    it('cevaplanmamış testin doğruluğu «%0» değil «—»', async () => {
+      resetState();
+      const ex = R.Test.makeExam({ tests:[
+        { name:'Türkçe', correct:0, wrong:0, blank:40, minutes:null },
+        { name:'Matematik', correct:30, wrong:10, blank:0, minutes:null }] });
+      R.S.exams = [ex];
+      R.S.ui.examOpen = ex.id;
+      const out = String(await R.Screens.exams.render());
+      expect(out.indexOf('>%0<') < 0).toBe(true);
+      expect(out.indexOf('>%75<') >= 0).toBe(true);
+      expect(out.indexOf('title="veri yok"') >= 0).toBe(true);
+    });
+
     it('plan dışı çözülen soru Bugün ekranında görünür', async () => {
       resetState();
       await withTodayAsync('2026-10-12', async () => {

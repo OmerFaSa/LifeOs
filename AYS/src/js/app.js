@@ -653,7 +653,9 @@ R.App = (function(){
     rotaDegisti = true;
     applySection(route);
     S.sidebarOpen = false;
-    if(route !== 'exams') S.ui.examOpen = S.ui.examOpen;
+    /* Açık deneme ayrıntısı gezinmede KAPANMAZ: Deneme'ye dönen kişi
+       bıraktığı denemeyi görür. (Burada `examOpen = examOpen` diye hiçbir şey
+       yapmayan bir satır vardı; niyeti bu davranıştı — HATALAR D-10.) */
     window.scrollTo(0,0);
     render();
   }

@@ -101,8 +101,6 @@ ESP.HINTS = {
   /* --- merdiven ve koç --- */
   'level':{ t:'Kademe', b:'Ölçülmüş üretimin merdivende karşıladığı basamak.',
     more:'Kademe kişiye değil ÜRETİME verilir: «Kalfa\'sın» denmez, «son 30 günün ölçülmüş üretimi Kalfa kapılarını karşılıyor» denir. Üretim durursa kademe de durur. Genel kademe disiplinlerin ortalaması değildir; ortalama ile en düşüğün arasıdır.' },
-  'ladder':{ t:'Merdiven', b:'Bir disiplinin sıfırdan üstatlığa beş basamağı ve her basamağın ölçülebilir kapıları.',
-    more:'Merdiven ardışıktır: alttaki kapı atlanarak üsttekine geçilmez. Sebebi pedagojik — atlanan kapı ileride geri gelir ve üstüne kurulan her şeyi çökertir. Süre tahmini yoktur: «üç ayda usta olursun» sonuç garantisi yasağına girer.' },
   'unknown-gate':{ t:'Ölçülemeyen kapı', b:'Ne geçilmiş ne kalınmış: o kapı için henüz ölçüm yok.',
     more:'Üçüncü durum sistemin dürüstlüğüdür. Ölçülmemiş bir kapıyı «kalındı» saymak da «geçildi» saymak da yalan olurdu. Burada istenen şey çalışmak değil ölçmek — ve bu sistemde ölçmek çoğu zaman işin kendisidir: retansiyonu ölçmek kart cevaplamak, temiz BPM\'i ölçmek metronomla çalmaktır.' },
   'placement':{ t:'Seviye tespiti', b:'Sıfırdan başlamayanlar için bir başlangıç TAHMİNİ.',
