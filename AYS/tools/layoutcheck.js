@@ -154,7 +154,31 @@ function waitForServer(url, tries){
                 if(kucuk.indexOf(ad) < 0) kucuk.push(ad);
               }
             });
-          return { tasma, sucluler:sucluler.slice(0, 4), kucuk:kucuk.slice(0, 4) };
+          /* PENCERE KENARINA YAPIŞIK: taşmıyor ama kenara 4 pikselden
+             yakın biten öğe. Sayfanın 16 px'lik kenar boşluğu var; oraya
+             giren bir düğme sığmıyor demektir ve başka bir tarayıcının
+             yazı çizimiyle birkaç piksel genişleyince taşar. Nitekim SPİ
+             Rehber › Veri'deki düğme satırı yerelde 387 px'te bitip
+             geçiyor, CI'da 11 px taşıyordu (ekip/HATALAR.md T2-06).
+             Yalnız yapraklar ve düğmeler sayılır; kasıtlı kaydırma kabı
+             sayılmaz. */
+          const yapisik = [];
+          document.querySelectorAll('#main *').forEach(el => {
+            const r = el.getBoundingClientRect();
+            if(!r.width || r.right <= window.innerWidth - 4 || r.right > window.innerWidth + 1) return;
+            if(el.firstElementChild && !/^(BUTTON|A|INPUT|SELECT|TEXTAREA|SPAN|P|H[1-6]|LABEL|IMG|SVG)$/i.test(el.tagName)) return;
+            let p = el;
+            while(p && p !== document.body){
+              const st = getComputedStyle(p);
+              if(st.overflowX === 'auto' || st.overflowX === 'scroll') return;
+              p = p.parentElement;
+            }
+            const ad = el.tagName.toLowerCase()
+              + (el.className ? '.' + String(el.className).split(' ').filter(Boolean).slice(0, 2).join('.') : '')
+              + ' ' + Math.round(r.right) + 'px';
+            if(yapisik.indexOf(ad) < 0) yapisik.push(ad);
+          });
+          return { tasma, sucluler:sucluler.slice(0, 4), kucuk:kucuk.slice(0, 4), yapisik:yapisik.slice(0, 4) };
         }, { minTap:MIN_TAP, allow:TAP_ALLOW });
 
         const yer = r + (t ? '/' + t : '');
@@ -164,6 +188,9 @@ function waitForServer(url, tries){
             + (sonuc.sucluler.length ? ' — ' + sonuc.sucluler.join(', ') : ''));
         }
         sonuc.kucuk.forEach(k => errors.push(yer + ': küçük dokunma hedefi — ' + k));
+        if(sonuc.tasma <= 1){
+          sonuc.yapisik.forEach(k => errors.push(yer + ': pencere kenarına yapışık (başka tarayıcıda taşar) — ' + k));
+        }
       }
     }
 
