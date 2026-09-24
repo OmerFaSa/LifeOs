@@ -25,7 +25,7 @@ python3 tools/ortak.py --denetle   # kopyalar kaynakla aynı mı
 | `medya.js` | `js/core` | **üretilmiş** künye — hangi görsel gerçekten var (`tools/marka.py --kunye`) |
 | `quota.js` | `js/core` | ücretsiz modelin istek sınırı — **kalıp** |
 | `quota.test.js` | `tests` | kotanın 20 testi — **kalıp** |
-| `llm.js` | `js/core` | model taşıma katmanı — **kalıp**, yalnız SPİ + ESP |
+| `llm.js`, `providers.js` | `js/core`, `js/data` | model taşıma katmanı ve sağlayıcı kataloğu — **kalıp**, üç arayüze (2026-09-24'ten beri AYS'ninki tek kaynak) |
 | `store.test.js` | `tests` | gerçek deponun 24 testi — **kalıp** |
 | `aliskanlik.*` | `js/core`, `tests` | hedef motorunun alışkanlık paketi: sıklık ve süre okuma, tabandan karar, kayıttan ilerleme |
 | `urun.*` | `js/core`, `tests` | BAM ürünleri (özet, rapor, sunum, pankart): ön süzgeç, modülün kendi denetimi, sandbox iframe, kendi deposu |
@@ -71,12 +71,11 @@ söylemedi. Tek kaynak bunu imkânsız kılar.
 ## Her dosya üç sisteme gitmez
 
 `tools/ortak.py` içindeki `YALNIZ` tablosunda adı geçen dosya yalnız
-orada yazan sistemlere yayılır. `llm.js` böyledir: SPİ ile ESP
-kopyaları aynı dosyanın iki kopyasıydı (737 satır, fark yalnız ad
-alanı), **AYS'ninki ise başka bir şeydir** — 1337 satır ve otuz fazla
-işlev (`diagnose`, `listModels`, `visionChain`, `stripThinking`,
-`keyProblem`, `classify`…). Üç kopyayı zorla birleştirmek AYS'nin
-gelişimini geri almak olurdu.
+orada yazan sistemlere yayılır. Tablo bugün **boştur**: `llm.js` bir
+süre yalnız SPİ ile ESP'ye gidiyordu, AYS'ninki ayrı yaşıyordu; 2026-09-24'te
+AYS'nin gelişmiş hâli (`providers.js` ile birlikte) tek kaynak oldu ve üç
+arayüze birden yayılıyor. Bir dosya bir gün yine yalnız bazı sistemlere
+gerekirse yeri bu tablodur.
 
 ## Burada olmayanlar — ve nedenleri
 

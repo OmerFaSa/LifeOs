@@ -1092,7 +1092,7 @@ aynı şemayı döner (§9.4).
 | ne | nereye | not |
 |---|---|---|
 | `quota.js` x3 | `brand/ortak/quota.js` | `__NS__`, `__DEPO__` yer tutucu |
-| `llm.js` x2 | `brand/ortak/llm.js` | YALNIZ SPİ + ESP'ye yayılır |
+| `llm.js` x2 | `brand/ortak/llm.js` | YALNIZ SPİ + ESP'ye yayılıyordu; 2026-09-24'ten beri üç arayüze (AYS'ninki tek kaynak) |
 | kota testi | `brand/ortak/quota.test.js` | 20 test, üç arayüzde birden |
 | depo testi | `brand/ortak/store.test.js` | 24 test; üç `store.js` aynı dosya DEĞİL ama aynı YÜZEYİ açar — paket gövdeyi değil sözü sınar |
 
@@ -1549,7 +1549,7 @@ yazmamış olurdum.
 | `AYS/core/office.js` 2049 satır | — | düşük | kapsam **%84** — «%59» eskimiş bir sayıydı |
 | ~~`AYS/core/store.js` kapsamı %46~~ | — | — | **kapandı** — `store.test.js` 28 test, kapsam %88; §7.2'de ölçüm |
 | ~~ESP'de `ui.js`/`components.js` %0~~ | — | — | **kapandı** — `components.test.js`, 49 test |
-| ~~`llm.js` SPİ ve ESP'de İKİ KOPYA~~ | — | — | **kapandı** — `brand/ortak/llm.js`, yalnız SPİ+ESP'ye yayılır |
+| ~~`llm.js` SPİ ve ESP'de İKİ KOPYA~~ | — | — | **kapandı** — `brand/ortak/llm.js`; önce yalnız SPİ+ESP'ye yayılıyordu, 2026-09-24'ten beri üç arayüze (aşağıdaki satır) |
 | ~~`quota.js` ÜÇ KOPYA~~ | — | — | **kapandı** — `brand/ortak/quota.js` + `quota.test.js` (20 test x3) |
 | ~~`AYS/core/llm.js` ayrı yaşıyor~~ | — | — | **kapandı** (2026-09-24) — AYS'nin `llm.js` ve `providers.js`'i kalıp olarak tek kaynak (`brand/ortak/`), üç arayüze yayılır; SPİ/ESP model listeleme, teşhis, görsel zinciri ve güncel kataloğu aldı (eski listede Mart 2026'da emekli Gemini 2.0 Flash duruyordu) |
 | ~~Ortak CSS kopyaları~~ | — | — | **kapandı** — `brand/ortak/` + `tools/ortak.py` |

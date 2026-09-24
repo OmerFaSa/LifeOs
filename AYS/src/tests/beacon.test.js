@@ -419,6 +419,26 @@
       } finally { window.fetch = eski; }
     });
 
+    /* HATALAR Y-2: sınav tarihi geçince `exam_days_left` eksi gidiyor, HKM
+       her gün «Sınava −N gün kaldı» diyordu; başlık da eksi yazıyordu.
+       Sınavdan sonra «kalan gün» yoktur: «veri yok». Sınav günü 0'dır. */
+    it('sınav tarihi geçince kalan gün eksi gitmez, «veri yok» olur', async () => {
+      resetState();
+      const sinav = R.PLAN.examTytISO;
+      const sonra = R.U.iso(R.U.addDays(R.U.parse(sinav), 12));
+      await withTodayAsync(sonra, async () => {
+        expect(R.PLAN.kalanGun()).toBe(null);
+        const m = B().collect(sonra).exam_days_left;
+        expect(m.cert).toBe('missing');
+        expect(m.value).toBe(null);
+        expect(R.Tools && R.Tools.durum ? R.Tools.durum().sinavaKalanGun : null).toBe(null);
+      });
+      await withTodayAsync(sinav, async () => {
+        expect(R.PLAN.kalanGun()).toBe(0);
+        expect(B().collect(sinav).exam_days_left.value).toBe(0);
+      });
+    });
+
     it('ölçülmüş gün gerçekten gönderilir', async () => {
       resetState();
       olculmusGun();

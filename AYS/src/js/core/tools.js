@@ -23,7 +23,7 @@ R.Tools = (function(){
       bugun:U.todayISO(),
       programHaftasi:n,
       toplamHafta:R.PLAN.totalWeeks,
-      sinavaKalanGun:U.diffDays(U.todayISO(), R.PLAN.examTytISO),
+      sinavaKalanGun:R.PLAN.kalanGun(),
       haftaBasligi:week ? week.title : null,
       haftaImzalandi:!!(week && week.signedAt),
       planTamamlama:C.planCompletion(n),

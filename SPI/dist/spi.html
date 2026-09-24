@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'4d79a17', at:'2026-09-24 11:28', dirty:true };
+SP.BUILD = { id:'e68c718', at:'2026-09-24 11:33', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10297,7 +10297,21 @@ LIFEOS.YedekAg = (function(){
     }
   }
 
-  return { kur, hkmdenCek };
+  /* ONAY KARTININ SÖZÜ — üç arayüzün HKM kartı bu cümleyi gösterir.
+     Kart «HKM'nin var olduğunu bilmez, işaret tek yönlüdür, tahlil GİTMEZ»
+     diyordu; oysa aynı anahtar günde bir kez modülün BÜTÜN verisini
+     yedek olarak HKM'ye yolluyor (ekip/HATALAR.md Y-8, B-2). Anahtarın
+     neyi açtığı, açılmadan önce eksiksiz söylenir. */
+  function kartNotu(ad){
+    const a = String(ad || 'Bu modül');
+    return a + ', HKM\'nin varlığını bilir ama ona bağımlı değildir: HKM kapalıyken, '
+      + 'yavaşken ya da hata verirken ' + a + ' olduğu gibi çalışır. Bu anahtar iki şeyi '
+      + 'birlikte açar: günün özeti (aşağıdaki tablo) ve günde bir kez ' + a + '\'nin '
+      + 'BÜTÜN verisinin HKM\'ye yedeklenmesi; hafıza ve hedef özetleri ile HKM\'nin iş '
+      + 'emirleri de aynı anahtarla gider. HKM başka bir makinedeyse bu veri cihazdan çıkar.';
+  }
+
+  return { kur, hkmdenCek, kartNotu };
 })();
 
 /* ==== js/core/kingteklif.js ==== */
@@ -15248,7 +15262,7 @@ SP.HINTS = {
   'audit':{ t:'Bakım borcu', b:'Beş alanda birikmiş bozukluk var mı?',
     more:'Bu denetim TEŞHİS KOYMAZ: bir değerin ne anlama geldiği hekimin işidir. Söyleyebileceği tek şey kaydın durumudur — tahlil eskimiş, kırmızı bayrak açık kalmış, RPE girilmemiş, gıda tanınmamış. Her bulgu eyleme bağlıdır ve hiçbiri suçlamaz. Veri eşiğin altındaysa bulgu değil «ölçülmedi» döner: ölçülmemiş bir tablo temiz değildir.' },
   'hkm':{ t:'HKM işareti', b:'İsteğe bağlı dördüncü katmana günün özetini gönderir.',
-    more:'SPİ, HKM\'nin var olduğunu bilmez: işaret tek yönlüdür, hiçbir çizimde çalışmaz ve hiçbir kaydı bekletmez. Varsayılan kapalıdır ve açılmadan önce ne gönderileceği satır satır gösterilir. Tahlil değeri, ilaç adı, semptom ve öğün gitmez; giden şey yük kararını etkileyen dört sayıdır ve her biri kesinlik etiketiyle gider — değeri olmayan alan «veri yok» gider, sıfır değil. Klinik sınır burada da geçerlidir.' },
+    more:'SPİ, HKM\'nin varlığını bilir ama ona bağımlı değildir: işaret hiçbir çizimde çalışmaz ve hiçbir kaydı bekletmez, HKM kapalıyken SPİ olduğu gibi çalışır. Varsayılan kapalıdır ve açılmadan önce ne gönderileceği satır satır gösterilir. Aynı anahtar günde bir kez SPİ\'nin bütün verisini HKM\'ye yedekler. Günün özetinde tahlil değeri, ilaç adı, semptom ve öğün gitmez; giden şey yük kararını etkileyen dört sayıdır ve her biri kesinlik etiketiyle gider — değeri olmayan alan «veri yok» gider, sıfır değil. Klinik sınır burada da geçerlidir.' },
   'storage':{ t:'Depo ufku', b:'Bu sistem dokuz ay her gün kullanılırsa depo dolar mı?',
     more:'«Depo %80 dolu» tek başına işe yaramaz: ne zaman dolacağını ve NEYİN şiştiğini söylemez. Büyüme hızı her açılıştaki bir ölçümden HESAPLANIR; iki ölçümden az varsa hız bilinmiyordur. Budama yalnızca sistemin kendi ürettiği kayıtlara dokunur: tahlil, ölçüm, öğün ve antrenman kayıtların hiçbir koşulda yer açmak için silinmez.' },
   'friction':{ t:'Sürtünme', b:'Takip ekranlarında geçen süre — günlük bütçeye göre.',
@@ -42006,9 +42020,7 @@ SP.Screens.guide = (function(){
       badge:a.enabled ? K.Badge({ label:'açık', tone:'ok' })
         : K.Badge({ label:'kapalı', tone:'warn' }),
       body:html`
-        ${K.Notice({ tone:'info', body:'SPİ, HKM\'nin var olduğunu bilmez. '
-          + 'İşaret tek yönlüdür, hiçbir çizimde çalışmaz ve hiçbir kaydı '
-          + 'bekletmez: HKM kapalıyken SPİ olduğu gibi çalışır.' })}
+        ${K.Notice({ tone:'info', body:window.LIFEOS.YedekAg.kartNotu('SPİ') })}
 
         <div class="mt-12">
           ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
@@ -42038,8 +42050,9 @@ SP.Screens.guide = (function(){
               change:'hkm-level', aria:'Gönderim kapsamı',
               options:SP.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
           <p class="tiny dim">${(SP.Beacon.LEVELS.find(l => l.id === SP.Beacon.levelOf()) || {}).note}
-            Gelişmiş kapsamda bile tahlil değeri, ilaç adı ve semptomun kendisi
-            GİTMEZ — semptom yalnızca sayı olarak gider.</p>
+            Günün özetinde, gelişmiş kapsamda bile tahlil değeri, ilaç adı ve
+            semptomun kendisi GİTMEZ — semptom yalnızca sayı olarak gider.
+            Tam yedekte ise hepsi vardır (yukarıdaki not).</p>
         </div>
 
         <div class="mt-12">${K.SectionTitle('Bugün ne gidiyor')}</div>
@@ -42051,7 +42064,7 @@ SP.Screens.guide = (function(){
                kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
                aynı kelimeyi göstermek zorunda. */
             raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
-        <p class="tiny dim mt-8">Tahlil değeri, ilaç adı, semptom ve öğün GİTMEZ.
+        <p class="tiny dim mt-8">Günün özetinde tahlil değeri, ilaç adı, semptom ve öğün GİTMEZ.
           Giden şey yük kararını etkileyen dört sayıdır; değeri olmayan alan
           «veri yok» gider, sıfır değil. Klinik sınır burada da geçerlidir.</p>
 

@@ -143,5 +143,19 @@ LIFEOS.YedekAg = (function(){
     }
   }
 
-  return { kur, hkmdenCek };
+  /* ONAY KARTININ SÖZÜ — üç arayüzün HKM kartı bu cümleyi gösterir.
+     Kart «HKM'nin var olduğunu bilmez, işaret tek yönlüdür, tahlil GİTMEZ»
+     diyordu; oysa aynı anahtar günde bir kez modülün BÜTÜN verisini
+     yedek olarak HKM'ye yolluyor (ekip/HATALAR.md Y-8, B-2). Anahtarın
+     neyi açtığı, açılmadan önce eksiksiz söylenir. */
+  function kartNotu(ad){
+    const a = String(ad || 'Bu modül');
+    return a + ', HKM\'nin varlığını bilir ama ona bağımlı değildir: HKM kapalıyken, '
+      + 'yavaşken ya da hata verirken ' + a + ' olduğu gibi çalışır. Bu anahtar iki şeyi '
+      + 'birlikte açar: günün özeti (aşağıdaki tablo) ve günde bir kez ' + a + '\'nin '
+      + 'BÜTÜN verisinin HKM\'ye yedeklenmesi; hafıza ve hedef özetleri ile HKM\'nin iş '
+      + 'emirleri de aynı anahtarla gider. HKM başka bir makinedeyse bu veri cihazdan çıkar.';
+  }
+
+  return { kur, hkmdenCek, kartNotu };
 })();

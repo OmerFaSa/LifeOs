@@ -245,9 +245,7 @@ SP.Screens.guide = (function(){
       badge:a.enabled ? K.Badge({ label:'açık', tone:'ok' })
         : K.Badge({ label:'kapalı', tone:'warn' }),
       body:html`
-        ${K.Notice({ tone:'info', body:'SPİ, HKM\'nin var olduğunu bilmez. '
-          + 'İşaret tek yönlüdür, hiçbir çizimde çalışmaz ve hiçbir kaydı '
-          + 'bekletmez: HKM kapalıyken SPİ olduğu gibi çalışır.' })}
+        ${K.Notice({ tone:'info', body:window.LIFEOS.YedekAg.kartNotu('SPİ') })}
 
         <div class="mt-12">
           ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
@@ -277,8 +275,9 @@ SP.Screens.guide = (function(){
               change:'hkm-level', aria:'Gönderim kapsamı',
               options:SP.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
           <p class="tiny dim">${(SP.Beacon.LEVELS.find(l => l.id === SP.Beacon.levelOf()) || {}).note}
-            Gelişmiş kapsamda bile tahlil değeri, ilaç adı ve semptomun kendisi
-            GİTMEZ — semptom yalnızca sayı olarak gider.</p>
+            Günün özetinde, gelişmiş kapsamda bile tahlil değeri, ilaç adı ve
+            semptomun kendisi GİTMEZ — semptom yalnızca sayı olarak gider.
+            Tam yedekte ise hepsi vardır (yukarıdaki not).</p>
         </div>
 
         <div class="mt-12">${K.SectionTitle('Bugün ne gidiyor')}</div>
@@ -290,7 +289,7 @@ SP.Screens.guide = (function(){
                kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
                aynı kelimeyi göstermek zorunda. */
             raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
-        <p class="tiny dim mt-8">Tahlil değeri, ilaç adı, semptom ve öğün GİTMEZ.
+        <p class="tiny dim mt-8">Günün özetinde tahlil değeri, ilaç adı, semptom ve öğün GİTMEZ.
           Giden şey yük kararını etkileyen dört sayıdır; değeri olmayan alan
           «veri yok» gider, sıfır değil. Klinik sınır burada da geçerlidir.</p>
 

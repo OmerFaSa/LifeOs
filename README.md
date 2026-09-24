@@ -34,11 +34,15 @@ kendi doktrini "ikon yok, sözcük var" der (bkz. dosyanın baş yorumu). Markan
 kendisi bir içerik ikonu değildir: sekme ikonu ve künyedeki küçük görsel
 `HKM/brand/` klasöründen gelir, panonun içi yine sözcüklerle çalışır.
 
-HKM üçünün **üstünde değil yanındadır**: üç sistem onun var olduğunu bilmez ve
-o kapalıyken hiçbiri bozulmaz. Tek bağ, her arayüzdeki `core/beacon.js`
-işaretidir: **varsayılan kapalı**, tek yönlü, hiçbir çizimde çalışmayan ve
-hiçbir kaydı bekletmeyen bir en-iyi-çaba gönderimi. Giden şey günün
-özetidir — birkaç sayı, her biri kesinlik etiketiyle; içerik gitmez.
+HKM üç sistemin **bildiği ama bağımlı olmadığı** katmandır (`AGENTS.md` §1.4):
+üçü de onunla konuşabilir, ama o kapalıyken, yavaşken ya da hata verirken
+hiçbiri bozulmaz, yavaşlamaz, veri kaybetmez. HKM hiçbir modüle yazmaz;
+teklif yazar, modül kendi koduyla uygular. Bağ her arayüzdeki `core/beacon.js`
+işaretiyle kurulur: **varsayılan kapalı**, hiçbir çizimde çalışmayan ve hiçbir
+kaydı bekletmeyen bir en-iyi-çaba bağlantısı. Aynı anahtar iki şeyi açar:
+**günün özeti** (birkaç sayı, her biri kesinlik etiketiyle; içerik gitmez) ve
+günde bir kez modülün **bütün verisinin yedeği** (`core/yedekag.js`);
+hafıza ve hedef özetleri ile niyet kuyruğu da aynı anahtarla konuşur.
 
 İki tarafın gerçekten konuşup konuşmadığını `node tools/entegre.js`
 denetler: HKM'yi geçici bir veritabanıyla ayağa kaldırır, üç arayüzü gerçek

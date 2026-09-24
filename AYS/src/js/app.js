@@ -197,7 +197,7 @@ R.App = (function(){
     const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
     const eylem = safe(() => sc.actions ? sc.actions() : '');
     const cur = M.currentWeek();
-    const kalan = U.diffDays(U.todayISO(), R.PLAN.examTytISO);
+    const kalan = R.PLAN.kalanGun();
 
     return html`
       <div class="hero" data-num="${sec.num}">
@@ -214,8 +214,8 @@ R.App = (function(){
           </div>
           <div class="hero__side">
             <div class="herostat">
-              <span class="herostat__value">${kalan}<small>gün</small></span>
-              <span class="herostat__label">TYT (tahmini)</span>
+              <span class="herostat__value">${kalan == null ? '—' : kalan}${when(kalan != null, () => html`<small>gün</small>`)}</span>
+              <span class="herostat__label">${kalan == null ? 'TYT tarihi geçti' : 'TYT (tahmini)'}</span>
             </div>
             <div class="herostat">
               <span class="herostat__value">${cur}<small>/${R.PLAN.totalWeeks}</small></span>

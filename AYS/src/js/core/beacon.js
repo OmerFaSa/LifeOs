@@ -198,9 +198,10 @@ R.Beacon = (function(){
     out.mock_net_baseline = netler.length >= 6
       ? metric(ortanca(netler.slice(-6, -3)), 'computed') : metric(null, 'missing');
 
-    /* Sınava kalan gün her tarih için hesaplanabilir: sabit bir takvim. */
-    const kalan = U.diffDays(d, R.PLAN.examTytISO);
-    out.exam_days_left = isFinite(kalan) ? metric(kalan, 'computed')
+    /* Sınava kalan gün her tarih için hesaplanabilir: sabit bir takvim.
+       Sınavdan sonra kalan gün yoktur: «veri yok» (HATALAR Y-2). */
+    const kalan = R.PLAN.kalanGun(d);
+    out.exam_days_left = kalan != null ? metric(kalan, 'computed')
       : metric(null, 'missing');
 
 

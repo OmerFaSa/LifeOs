@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'4d79a17', at:'2026-09-24 11:28', dirty:true };
+ESP.BUILD = { id:'e68c718', at:'2026-09-24 11:33', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -11136,7 +11136,21 @@ LIFEOS.YedekAg = (function(){
     }
   }
 
-  return { kur, hkmdenCek };
+  /* ONAY KARTININ SÖZÜ — üç arayüzün HKM kartı bu cümleyi gösterir.
+     Kart «HKM'nin var olduğunu bilmez, işaret tek yönlüdür, tahlil GİTMEZ»
+     diyordu; oysa aynı anahtar günde bir kez modülün BÜTÜN verisini
+     yedek olarak HKM'ye yolluyor (ekip/HATALAR.md Y-8, B-2). Anahtarın
+     neyi açtığı, açılmadan önce eksiksiz söylenir. */
+  function kartNotu(ad){
+    const a = String(ad || 'Bu modül');
+    return a + ', HKM\'nin varlığını bilir ama ona bağımlı değildir: HKM kapalıyken, '
+      + 'yavaşken ya da hata verirken ' + a + ' olduğu gibi çalışır. Bu anahtar iki şeyi '
+      + 'birlikte açar: günün özeti (aşağıdaki tablo) ve günde bir kez ' + a + '\'nin '
+      + 'BÜTÜN verisinin HKM\'ye yedeklenmesi; hafıza ve hedef özetleri ile HKM\'nin iş '
+      + 'emirleri de aynı anahtarla gider. HKM başka bir makinedeyse bu veri cihazdan çıkar.';
+  }
+
+  return { kur, hkmdenCek, kartNotu };
 })();
 
 /* ==== js/core/kingteklif.js ==== */
@@ -16784,7 +16798,7 @@ ESP.HINTS = {
   'audit':{ t:'Bölüm denetimi', b:'Bu disiplinde birikmiş bakım borcu var mı?',
     more:'Merdiven NEREDE olduğunu, reçete NE yapılacağını söyler; denetim «bir şey ters gidiyor mu?» sorusunu cevaplar. Sülük kartlar, yetim notlar, itirazsız argümanlar, elden geçmemiş taslaklar — hepsi kademe tablosunda «ilerleme» gibi görünür. Her bulgu eyleme bağlıdır ve hiçbiri kişiyi suçlamaz: «dağınık çalışıyorsun» denmez, «şu kayıtlar şu durumda» denir. Veri eşiğin altındaysa bulgu değil «veri yok» döner.' },
   'hkm':{ t:'HKM işareti', b:'İsteğe bağlı dördüncü katmana günün özetini gönderir.',
-    more:'ESP, HKM\'nin var olduğunu bilmez: işaret tek yönlüdür, hiçbir çizimde çalışmaz ve hiçbir kaydı bekletmez. Varsayılan kapalıdır ve açılmadan önce ne gönderileceği satır satır gösterilir. Kart metni, not içeriği ve kitap adı gitmez; giden şey dört sayıdır ve her biri kesinlik etiketiyle gider — değeri olmayan alan «veri yok» gider, sıfır değil.' },
+    more:'ESP, HKM\'nin varlığını bilir ama ona bağımlı değildir: işaret hiçbir çizimde çalışmaz ve hiçbir kaydı bekletmez, HKM kapalıyken ESP olduğu gibi çalışır. Varsayılan kapalıdır ve açılmadan önce ne gönderileceği satır satır gösterilir. Aynı anahtar günde bir kez ESP\'nin bütün verisini HKM\'ye yedekler. Günün özetinde kart metni, not içeriği ve kitap adı gitmez; giden şey dört sayıdır ve her biri kesinlik etiketiyle gider — değeri olmayan alan «veri yok» gider, sıfır değil.' },
   'storage':{ t:'Depo ufku', b:'Bu sistem dokuz ay her gün kullanılırsa depo dolar mı?',
     more:'«Depo %80 dolu» tek başına işe yaramaz: ne zaman dolacağını ve NEYİN şiştiğini söylemez, ikisi bambaşka kararlar gerektirir. Büyüme hızı her açılıştaki bir ölçümden HESAPLANIR; iki ölçümden az varsa hız bilinmiyordur ve bilinmeyen hız sıfır hız değildir. Budama yalnızca sistemin kendi ürettiği kayıtlara dokunur: kullanıcının girdiği tek bir oturum, kart ya da not hiçbir koşulda silinmez.' },
   'evidence':{ t:'Eşiğin dayanağı', b:'Her eşik kendi kaynağını taşır; kaynağın türü kademe ilerlemesinde ne kadar söz hakkı olduğunu belirler.',
@@ -43205,9 +43219,7 @@ ESP.Screens.profile = (function(){
     return K.Entry({
       label:'HKM İŞARETİ', hint:'hkm',
       meta:a.enabled ? 'açık' : 'kapalı',
-      note:'ESP, HKM\'nin var olduğunu bilmez. İşaret tek yönlüdür, hiçbir '
-         + 'çizimde çalışmaz ve hiçbir kaydı bekletmez: HKM kapalıyken ESP '
-         + 'olduğu gibi çalışır.',
+      note:window.LIFEOS.YedekAg.kartNotu('ESP'),
       wide:true,
       body:html`
         ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
@@ -43248,7 +43260,8 @@ ESP.Screens.profile = (function(){
                  kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
                  aynı kelimeyi göstermek zorunda. */
               raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
-          <p class="small muted mt-8">Kart metni, not içeriği ve kitap adı GİTMEZ.
+          <p class="small muted mt-8">Günün özetinde kart metni, not içeriği ve kitap adı
+            GİTMEZ (tam yedekte vardır).
             Giden şey bu dört sayıdır; değeri olmayan alan «veri yok» gider,
             sıfır değil.</p>
         </div>

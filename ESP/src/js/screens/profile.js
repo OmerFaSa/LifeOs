@@ -251,9 +251,7 @@ ESP.Screens.profile = (function(){
     return K.Entry({
       label:'HKM İŞARETİ', hint:'hkm',
       meta:a.enabled ? 'açık' : 'kapalı',
-      note:'ESP, HKM\'nin var olduğunu bilmez. İşaret tek yönlüdür, hiçbir '
-         + 'çizimde çalışmaz ve hiçbir kaydı bekletmez: HKM kapalıyken ESP '
-         + 'olduğu gibi çalışır.',
+      note:window.LIFEOS.YedekAg.kartNotu('ESP'),
       wide:true,
       body:html`
         ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
@@ -294,7 +292,8 @@ ESP.Screens.profile = (function(){
                  kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
                  aynı kelimeyi göstermek zorunda. */
               raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
-          <p class="small muted mt-8">Kart metni, not içeriği ve kitap adı GİTMEZ.
+          <p class="small muted mt-8">Günün özetinde kart metni, not içeriği ve kitap adı
+            GİTMEZ (tam yedekte vardır).
             Giden şey bu dört sayıdır; değeri olmayan alan «veri yok» gider,
             sıfır değil.</p>
         </div>

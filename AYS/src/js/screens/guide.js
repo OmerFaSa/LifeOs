@@ -489,9 +489,7 @@ R.Screens.guide = (function(){
     return K.Card({ title:'HKM işareti', hint:'hkm',
       sub:'İsteğe bağlı dördüncü katmana günün özeti',
       body:html`
-        ${K.Notice({ tone:'info', body:'AYS, HKM\'nin var olduğunu bilmez. '
-          + 'İşaret tek yönlüdür, hiçbir çizimde çalışmaz ve hiçbir kaydı '
-          + 'bekletmez: HKM kapalıyken AYS olduğu gibi çalışır.' })}
+        ${K.Notice({ tone:'info', body:window.LIFEOS.YedekAg.kartNotu('AYS') })}
 
         <div class="mt-12">
           ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)', checked:!!a.enabled,
@@ -534,8 +532,8 @@ R.Screens.guide = (function(){
                  kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
                  aynı kelimeyi göstermek zorunda. */
               raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
-          <p class="tiny dim mt-8">Soru metni, hata defteri ve deneme ayrıntısı
-            GİTMEZ. Giden şey bu dört beş sayıdır; değeri olmayan alan «veri yok»
+          <p class="tiny dim mt-8">Günün özetinde soru metni, hata defteri ve deneme
+            ayrıntısı GİTMEZ (tam yedekte vardır). Giden şey bu dört beş sayıdır; değeri olmayan alan «veri yok»
             gider, sıfır değil.</p>
         </div>
 

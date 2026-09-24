@@ -122,4 +122,18 @@
       expect((await Y().hkmdenCek({ hkm:() => beacon(true), modul:'ays', fetch:dusuk })).ok).toBe(false);
     });
   });
+  /* HATALAR Y-8, B-2: kart «HKM'nin var olduğunu bilmez», «tahlil GİTMEZ»
+     diyordu; aynı anahtar tam veri yedeğini de açıyor. */
+  describe('Otomatik yedek — onay kartının sözü', () => {
+    it('anahtarın tam yedeği de açtığını söyler, «bilmez» demez', () => {
+      const t = window.LIFEOS.YedekAg.kartNotu('SPİ');
+      expect(t).toContain('BÜTÜN verisinin');
+      expect(t).toContain('yedeklenmesi');
+      expect(t).toContain('günün özeti');
+      expect(t).toContain('cihazdan çıkar');
+      expect(t).toContain('SPİ\'nin');
+      expect(t.indexOf('bilmez') < 0).toBe(true);
+      expect(t.indexOf('tek yönlü') < 0).toBe(true);
+    });
+  });
 })();

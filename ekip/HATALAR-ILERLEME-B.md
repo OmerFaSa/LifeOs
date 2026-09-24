@@ -14,10 +14,10 @@ D-8, D-9, D-10, D-11, D-14, D-17, D-19.
 |---|---|---|
 | KR-1 | düzeltildi | 29cb138 |
 | Y-6 | düzeltildi | 4d79a17 |
-| Y-5 + O-4 + D-6 | düzeltildi | (bu commit) |
-| Y-4 | düzeltildi | (bu commit) |
-| Y-8 + B-2 + B-3 | sırada | |
-| Y-2 (AYS) | sırada | |
+| Y-5 + O-4 + D-6 | düzeltildi | e68c718 |
+| Y-4 | düzeltildi | e68c718 |
+| Y-8 + B-2 + B-3 | düzeltildi | (bu commit) |
+| Y-2 (AYS) | düzeltildi | (bu commit) |
 | Y-7 (modül) | sırada | |
 | O-3, O-5, O-8, O-10, O-11 | sırada | |
 | D-8, D-9, D-10, D-11, D-14, D-17, D-19 | **Claude A'ya geçti** (kullanıcı kararı); B dokunmaz | |
@@ -205,5 +205,44 @@ AYS  node tools/runtests.js   1711/1711 gecti
 SPI  node tools/runtests.js   1354/1354 gecti
 ESP  node tools/runtests.js   1372/1372 gecti
 AYS/SPI/ESP  node tools/smoke.js   Duman testi temiz (38 / 26 / 30 ekran, 2 hedefte)
+python3 build.py (üçü)        dist yeniden derlendi
+```
+
+---
+
+## Y-8 + B-2 + B-3 · Onay kartının sözü ve belgeler · Y-2 · Sınav sonrası
+
+**Y-8 / B-2.** Kartın metni artık tek kaynaktan gelir:
+`brand/ortak/yedekag.js` `LIFEOS.YedekAg.kartNotu(ad)` — «HKM'nin varlığını
+bilir ama ona bağımlı değildir … Bu anahtar iki şeyi birlikte açar: günün
+özeti ve günde bir kez bütün verinin HKM'ye yedeklenmesi; hafıza ve hedef
+özetleri ile iş emirleri de aynı anahtarla gider. HKM başka bir makinedeyse
+bu veri cihazdan çıkar.» Üç kart (AYS `screens/guide.js`, SPİ
+`screens/guide.js`, ESP `screens/profile.js`) bunu gösterir; «GİTMEZ»
+cümleleri «günün özetinde … gitmez (tam yedekte vardır)» oldu. Aynı yanlış
+söz üç `data/hints.js` «hkm» yardım metninde de vardı; düzeltildi.
+`README.md` HKM paragrafı AGENTS.md §1.4 ile aynı dili konuşur (bilir,
+bağımlı değil; özet + tam yedek). Test: `brand/ortak/yedekag.test.js`
+«onay kartının sözü».
+
+**B-3.** `brand/ortak/OKU.md` tablo satırı ve «Her dosya üç sisteme
+gitmez» bölümü, `NOTLAR.md` iki satırı: `llm.js`/`providers.js` üç
+arayüze yayılır, `YALNIZ` tablosu boştur.
+
+**Y-2 (AYS tarafı).** `R.PLAN.kalanGun(gun)`: sınav günü 0, sınavdan sonra
+`null`. `beacon.js` `exam_days_left` sınavdan sonra «veri yok» gider;
+başlık «— · TYT tarihi geçti» yazar; model aracı (`tools.js`
+`sinavaKalanGun`) da eksi sayı vermez. HKM tarafı (precedence) A'nındır.
+Test: AYS `tests/beacon.test.js` «sınav tarihi geçince kalan gün eksi
+gitmez» (önce kırmızı: `kalanGun` yoktu, değer −12 gidiyordu).
+
+**Koşturulan denetimler ve çıktı.**
+
+```
+AYS  node tools/runtests.js   1713/1713 gecti
+SPI  node tools/runtests.js   1355/1355 gecti
+ESP  node tools/runtests.js   1373/1373 gecti
+AYS/SPI/ESP  node tools/smoke.js   Duman testi temiz (38 / 26 / 30 ekran, 2 hedefte)
+python3 tools/ortak.py --denetle   kopyalar kaynakla ayni (45 dosya, 135 kopya)
 python3 build.py (üçü)        dist yeniden derlendi
 ```
