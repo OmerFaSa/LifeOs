@@ -251,3 +251,34 @@ def run():
             ok(len(c["intent"]["note"]) > 10, tur)
     test("bos cumle uydurulmaz ama bos da birakilmaz",
          t_empty_note_gets_a_sentence)
+
+    def t_katalog_modullerle_ayni():
+        """HATALAR D-12: niyet katalogu dort yerde yazili (HKM + uc
+        beacon.js). HKM'ye bir tur eklenip modul listesi unutulursa teklif
+        modulde SESSIZCE atlanir, HKM'de uc gun sonra «expired» kapanir;
+        kullanici teklifi hic gormemis olur. Bu test o unutmayi yakalar."""
+        import os
+        import re
+        kok = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        adlar = {"ays": "AYS", "spi": "SPI", "esp": "ESP"}
+        eksik = []
+        for mod, klasor in adlar.items():
+            yol = os.path.join(kok, klasor, "src", "js", "core", "beacon.js")
+            with open(yol, encoding="utf-8") as f:
+                kaynak = f.read()
+
+            def liste(ad):
+                m = re.search(r"const %s = \[([^\]]*)\]" % ad, kaynak)
+                ok(m, "%s: %s bulunamadi" % (klasor, ad))
+                return set(re.findall(r"'([a-z]+\.[a-z]+)'", m.group(1)))
+            tanir, uygular = liste("INTENT_KINDS"), liste("APPLIABLE")
+            hkm = {k for k, v in intents.KINDS.items() if mod in v["modules"]}
+            for k in sorted(hkm - tanir):
+                eksik.append("%s INTENT_KINDS'te yok: %s" % (klasor, k))
+            for k in sorted(uygular - tanir):
+                eksik.append("%s APPLIABLE'da var, INTENT_KINDS'te yok: %s" % (klasor, k))
+            for k in sorted(uygular - hkm):
+                eksik.append("%s uygular ama HKM bu module yollamaz: %s" % (klasor, k))
+        eq(eksik, [])
+    test("niyet katalogu uc modulun listesiyle tutarli (D-12)",
+         t_katalog_modullerle_ayni)
