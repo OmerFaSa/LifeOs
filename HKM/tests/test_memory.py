@@ -180,6 +180,34 @@ def run():
         eq(memory.list_active(con, scope="esp"), [])
     test("HKM'de unutulan modul kaydi geri gelmez", t_forgotten_in_hkm_stays_forgotten)
 
+    def t_goruntude_olmayan_kayit_diriltilebilir():
+        """HATALAR O-6: modulun goruntusunde olmayan kayit «forgotten»
+        oluyordu — kullanicinin «unut» sozuyle AYNI durum, bir daha
+        dirilmiyordu. Hafizasi eksik eski bir yedek iceri alininca
+        HKM'deki kayitlar unutuluyor, yeni yedek geri yuklense de
+        gelmiyordu. Goruntuden dusmek «unut» degildir."""
+        con = db.connect(":memory:")
+        memory.esitle(con, "ays", [_kayit("a", "Pazar çalışmam"),
+                                   _kayit("b", "sabah daha verimliyim")])
+        r = memory.esitle(con, "ays", [_kayit("a", "Pazar çalışmam")])  # eski yedek
+        eq(r["dusen"], 1)
+        eq([x["text"] for x in memory.list_active(con, scope="ays")], ["Pazar çalışmam"])
+        r = memory.esitle(con, "ays", [_kayit("a", "Pazar çalışmam"),
+                                       _kayit("b", "sabah daha verimliyim")])  # yeni yedek
+        eq(r["dirilen"], 1)
+        eq(sorted(x["text"] for x in memory.list_active(con, scope="ays")),
+           ["Pazar çalışmam", "sabah daha verimliyim"])
+        # Kullanicinin «unut»u ise ezilmez.
+        id_ = [x for x in memory.list_active(con, scope="ays")
+               if x["text"] == "Pazar çalışmam"][0]["id"]
+        ok(memory.forget(con, id_)["ok"])
+        memory.esitle(con, "ays", [_kayit("a", "Pazar çalışmam"),
+                                   _kayit("b", "sabah daha verimliyim")])
+        eq([x["text"] for x in memory.list_active(con, scope="ays")],
+           ["sabah daha verimliyim"])
+    test("goruntuden dusen kayit geri gelince dirilir; «unut» dirilmez (O-6)",
+         t_goruntude_olmayan_kayit_diriltilebilir)
+
     def t_module_sync_rejects_bad_input():
         con = db.connect(":memory:")
         no(memory.esitle(con, "king", [])["ok"])

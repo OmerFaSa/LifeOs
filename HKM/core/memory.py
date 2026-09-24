@@ -160,7 +160,10 @@ def esitle(con, modul, kayitlar, user="ben", now=None):
     """Modul hafizasinin ANLIK GORUNTUSUNU HKM kopyasina esitler.
 
     - Ayni goruntu iki kez gelirse hicbir sey degismez (idempotent).
-    - Modulde degisen kayit guncellenir; modulde olmayan kayit dusar.
+    - Modulde degisen kayit guncellenir; modulde olmayan kayit DUSER
+      (durum «dustu») — ama «unutuldu» OLMAZ: sonraki goruntude yeniden
+      gelirse dirilir (HATALAR O-6: eksik eski bir yedek HKM'deki kayitlari
+      kalici olarak unutturuyordu).
     - HKM'de UNUTULMUS kayit geri gelmez: HKM module yazamaz ve
       kullanicinin «unut» sozu bir senkronla ezilemez.
     - Modelden gelen ya da bozuk kayit reddedilir ve SAYILIR."""
@@ -184,7 +187,7 @@ def esitle(con, modul, kayitlar, user="ben", now=None):
         var = {r["dis_id"]: dict(r) for r in con.execute(
             "SELECT id,dis_id,text,COALESCE(katman,'soz') AS katman,state FROM memories "
             "WHERE user=? AND modul=? AND dis_id IS NOT NULL", (user, modul)).fetchall()}
-        eklenen = guncellenen = reddedilen = dusen = 0
+        eklenen = guncellenen = reddedilen = dusen = dirilen = 0
         gelen = set()
         for ham in kayitlar:
             k = _gecerli_kayit(ham)
@@ -199,6 +202,11 @@ def esitle(con, modul, kayitlar, user="ben", now=None):
                             (user, modul, k["metin"], k["kaynak"], k["at"] or at,
                              k["katman"], modul, k["dis_id"]))
                 eklenen += 1
+            elif onceki["state"] == "dustu":
+                con.execute("UPDATE memories SET state='active',forgotten_at=NULL,"
+                            "text=?,katman=? WHERE id=?",
+                            (k["metin"], k["katman"], onceki["id"]))
+                dirilen += 1
             elif onceki["state"] == "active" and (onceki["text"] != k["metin"]
                                                   or onceki["katman"] != k["katman"]):
                 con.execute("UPDATE memories SET text=?,katman=? WHERE id=?",
@@ -206,7 +214,7 @@ def esitle(con, modul, kayitlar, user="ben", now=None):
                 guncellenen += 1
         for dis_id, r in var.items():
             if r["state"] == "active" and dis_id not in gelen:
-                con.execute("UPDATE memories SET state='forgotten',forgotten_at=? WHERE id=?",
+                con.execute("UPDATE memories SET state='dustu',forgotten_at=? WHERE id=?",
                             (at, r["id"]))
                 dusen += 1
         if kendi:
@@ -216,4 +224,4 @@ def esitle(con, modul, kayitlar, user="ben", now=None):
             con.execute("ROLLBACK")
         raise
     return {"ok": True, "modul": modul, "eklenen": eklenen, "guncellenen": guncellenen,
-            "dusen": dusen, "reddedilen": reddedilen}
+            "dusen": dusen, "dirilen": dirilen, "reddedilen": reddedilen}
