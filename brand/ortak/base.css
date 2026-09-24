@@ -190,7 +190,9 @@ table td, table th{
   from{ opacity:0; transform:translateY(6px); }
   to{ opacity:1; transform:none; }
 }
-.content{ animation:content-in var(--dur-lg) var(--ease); }
+/* Yalnız YENİ ekranda (`.h-yeni`, hareket.js): uygulama her eylemde
+   yeniden çizdiği için burada koşulsuz bir animasyon her tıklamada
+   sayfayı yeniden «getiriyordu» (T4). */
 
 /* ---------- görünüm geçişi ----------
 

@@ -525,8 +525,12 @@ SP.App = (function(){
   function withTransition(fn){
     const changed = lastRoute !== null && lastRoute !== S.route;
     lastRoute = S.route;
-    const ok = changed
-      && typeof document.startViewTransition === 'function'
+    if(!changed) return fn();
+    /* Destek ve azaltılmış hareket denetimi hareket.js'te; basılan kart
+       varsa yeni ekrana büyür (T4, 153). */
+    const H = window.LIFEOS && window.LIFEOS.HAREKET;
+    if(H) return H.gecis(fn);
+    const ok = typeof document.startViewTransition === 'function'
       && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(!ok) return fn();
     try{ return document.startViewTransition(fn).updateCallbackDone; }
@@ -573,11 +577,17 @@ SP.App = (function(){
         </div>
         ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`);
 
-      await withTransition(() => { document.getElementById('app').innerHTML = markup; });
+      /* Hareket (T4): çizimden önce fotoğraf, sonra karşılaştırma — yalnız
+         değişen öğe hareket eder. */
+      const appEl = document.getElementById('app');
+      const H = window.LIFEOS && window.LIFEOS.HAREKET;
+      if(H) H.once(appEl);
+      await withTransition(() => { appEl.innerHTML = markup; });
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
+      if(H) H.sonra(appEl, S.route);
       revealActiveTab();
       /* Odağı ancak YÖNLENDİRMEDEN sonra taşı: sıradan bir yeniden
          çizimde taşımak, yazan kullanıcının imlecini alandan koparırdı. */
@@ -683,7 +693,10 @@ SP.App = (function(){
 
   /* ---------------------------------------------------------- küresel eylemler */
   const globalHandle = {
-    async go(el){ go(el.dataset.route); },
+    async go(el){
+      if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kaynak(el);
+      go(el.dataset.route);
+    },
     /* Menü (telefonda alt bandın dördüncü sekmesi). `toggle-menu` eski
        adıdır; klavye kısayolları ve eski bağlantılar için kalır. */
     async 'toggle-sidebar'(){ K.katmanKapat(); S.sidebarOpen = !S.sidebarOpen; render(); },
@@ -1216,6 +1229,15 @@ SP.App = (function(){
   /* ------------------------------------------------------------------ açılış */
   async function boot(){
     try{
+      /* Hareket (T4, hareket.js): odak halkası, önizleme, odak kapısı.
+         Önizleme ekranın kendi başlığını ve tek cümlesini okur. */
+      if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kur({ onizle(route){
+        const hs = SP.Screens[route];
+        if(!hs) return null;
+        let cumle = '';
+        try{ cumle = hs.headline ? String(hs.headline() || '') : ''; }catch(e){}
+        return { baslik:hs.title, cumle };
+      } });
       /* Arayüz Türkçe: CSS büyük harfe çevirirken "i" → "İ" olsun.
          Tek dosya sürümünde <html> kabuğu dışarıdan gelir, bu yüzden burada. */
       const root = document.documentElement;

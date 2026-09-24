@@ -218,6 +218,12 @@ DOSYALAR = {
     "kabuk.js":       "js/core",
     "kabuk.css":      "css",
     "kabuk.test.js":  "tests",
+    # HAREKET (T4) — once/sonra fotografi: yalniz DEGISEN oge hareket eder
+    # (sayi, tik, satir kapanma), tek canli oge, kucülen baslik, odak
+    # halkasi, onizleme, odak kapisi. Azaltilmis harekette hepsi kapali.
+    "hareket.js":     "js/core",
+    "hareket.css":    "css",
+    "hareket.test.js": "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     "sw.js":          ".",

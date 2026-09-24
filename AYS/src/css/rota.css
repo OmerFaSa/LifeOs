@@ -308,13 +308,20 @@ tbody tr:hover{ background:var(--surface-2); }
 
 .coachnote{ font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:var(--fs-sm); line-height:1.5; }
 
-/* ---------- odak modu ---------- */
+/* ---------- odak modu (odak kapısı, katalog 014) ----------
+   Yalnız süren iş ve süresi kalır; arkadaki sayfa silinmez, SİSLE örtülür
+   (yerin kaybolmadığı görünsün). Esc ya da «Arkaplana al» çıkarır. */
 .focusmode{
   position:fixed; inset:0; z-index:var(--z-toast);
-  background:var(--bg);
+  background:color-mix(in oklab, var(--bg) 86%, transparent);
+  -webkit-backdrop-filter:blur(10px) saturate(.6);
+  backdrop-filter:blur(10px) saturate(.6);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:26px; padding:24px; text-align:center;
+  animation:odak-gir var(--dur-lg) var(--ease) both;
 }
+@keyframes odak-gir{ from{ opacity:0; transform:scale(.985); } }
+@media (prefers-reduced-motion:reduce){ .focusmode{ animation:none; } }
 
 .focusmode__slot{ font-size:var(--fs-xs); font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-3); }
 

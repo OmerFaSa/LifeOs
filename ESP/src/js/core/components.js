@@ -103,7 +103,7 @@ ESP.C = (function(){
     return html`
       <div class="${cls('stat', o.tone && 'stat--'+o.tone)}">
         <span class="stat__label">${o.label}${when(o.hint, () => raw(ESP.UI.hint(o.hint)))}</span>
-        <span class="stat__value">${o.value}${when(o.unit, () => html`<small>${o.unit}</small>`)}</span>
+        <span class="stat__value" data-h-sayi="${'stat:' + hAnahtar(o.label)}">${o.value}${when(o.unit, () => html`<small>${o.unit}</small>`)}</span>
         ${when(o.spark, o.spark)}
         ${when(pct != null, () => html`<span class="stat__bar" aria-hidden="true">
           <i style="width:${pct}%"></i></span>`)}
@@ -131,7 +131,7 @@ ESP.C = (function(){
     const pct = Math.max(0, Math.min(100, Number(o.value) || 0));
     return html`
       <div class="meter">
-        <div class="meter__top"><span class="muted">${o.label}</span><b class="num">${o.text != null ? o.text : '%'+Math.round(o.value)}</b></div>
+        <div class="meter__top"><span class="muted">${o.label}</span><b class="num" data-h-sayi="${'meter:' + hAnahtar(o.label)}">${o.text != null ? o.text : '%'+Math.round(o.value)}</b></div>
         ${Bar({ value:pct, tone:o.tone, large:o.large })}
         ${when(o.note, () => html`<span class="tiny dim">${o.note}</span>`)}
       </div>`;
@@ -192,6 +192,11 @@ ESP.C = (function(){
      ekranda tek parça durmaz. Kısa cümle görünür kalır; gerekçe ya da
      ayrıntı bir dokunuşla açılır. Hiçbir metin silinmez, yalnız katmanı
      değişir. */
+  /* Hareket anahtarı (T4, hareket.js): etiketin düz metni. Aynı ekranda
+     aynı etiketli iki sayı olursa ikisi de «değişti» sayılabilir; zararı
+     yalnız fazladan bir yuvarlanmadır. */
+  function hAnahtar(x){ return String(x == null ? '' : x).replace(/<[^>]*>/g, '').trim().slice(0, 60); }
+
   function Ayrinti(o){
     return html`<div class="${cls('ayrinti', o.class)}">
       ${when(o.ozet, () => html`<p class="ayrinti__ozet">${o.ozet}</p>`)}
@@ -432,7 +437,10 @@ ESP.C = (function(){
   }
 
   function Checkbox(o){
-    return html`<label class="${cls('check', o.checked && 'is-done')}">
+    /* 152: `data-h-bitti` 0'dan 1'e dönünce hareket.js tiki çizer. */
+    return html`<label class="${cls('check', o.checked && 'is-done')}"
+      data-h="${'check:' + (o.act || '') + ':' + hAnahtar((o.data && (o.data['data-id'] || o.data['data-key'])) || o.label)}"
+      data-h-bitti="${o.checked ? '1' : '0'}">
       <input type="checkbox" ${o.checked ? raw('checked') : ''}
         ${attrs(Object.assign({ 'data-act':o.act }, o.data || {}))}/>
       <span>${o.label}</span>
@@ -515,7 +523,7 @@ ESP.C = (function(){
      Dosya yoksa `onerror` düğümü kaldırır ve satır eskisi gibi kalır. */
   function NextUp(o){
     return html`
-      <div class="${cls('nextup', o.calm && 'nextup--calm', o.sanat && 'nextup--sanat')}">
+      <div class="${cls('nextup', o.calm && 'nextup--calm', o.sanat && 'nextup--sanat', !o.calm && 'h-canli')}">
         ${when(o.calm && o.sanat, () => html`<img class="nextup__sanat"
           src="${'img/marka/durum-tamamlandi-' + o.sanat + '.webp'}"
           alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">`)}

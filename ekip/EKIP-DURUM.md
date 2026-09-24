@@ -112,7 +112,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem 6c92411 · ✅ **T3 ESP 2204fa3 → teslim** (tabloda). ✅ AYS küçükleri (§2.C): 011 sakin hata + 010 boş durum işareti + 022 plan onay etiketi d83d085 · STIL.md (bu commit). Sıradaki: T4 hareket → T5 ayarlar; T6 yalnız kullanıcı «başla» derse.
+- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem 6c92411 · ✅ **T3 ESP 2204fa3 → teslim** (tabloda). ✅ AYS küçükleri (§2.C): 011 sakin hata + 010 boş durum işareti + 022 plan onay etiketi d83d085 · STIL.md 334f4db · ✅ **T4 hareket** (bu commit). Sıradaki: T5 ayarlar (21, 181, 182, 183, 171, 176, 17); T6 yalnız kullanıcı «başla» derse.
 - **K yürütüyor (kullanıcı talimatı, 2026-09-24 akşam):** T-DEVIR §5'ten devam. ✅ T2-13 designcheck d58720d · ✅ entegre.js koştu (temiz) · ✅ yarım T3 SPİ yaması 826fbe3 · ✅ **T3 SPİ → teslim 59e7276** (sekme 0, tek dolu düğme, 30+ kelime katmanda, T2-14) · ✅ **T2 ESP ccedf0a** (kabuk + sekiz çekmece; disiplin bölüm düzeyinde). Sıradaki: ESP Onaylar + Kütüphanem → T3 ESP (sekmeler, Bugün üç alan, Ofis dolu düğme) → teslim → AYS küçükleri (§2.C) → T4 → T5; T6 yalnız kullanıcı «başla» derse. **⏸ K'nin limiti doldu → T'ye döndü: `ekip/T-DEVIR.md` §6** (kalan: ESP Onaylar + Kütüphanem → T3 ESP → AYS küçükleri → T4 → T5).
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
@@ -174,6 +174,24 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   AYS Ekranlar ve SPİ Gezinme/Görünüm/Düzenler çekmecelere ve tek tasarıma çekildi. **Göremedim:**
   SPİ STIL.md'nin «Düzen — bir sağlık defteri», «Bölüm kimlikleri», «Filigran numara» bölümleri
   serif ve eski düzene değiniyor olabilir; T5'te okunacak.
+- **T4 hareket (bu commit):** `brand/ortak/hareket.{js,css,test.js}` → üç arayüz. Uygulama her eylemde
+  #app'i baştan çizdiği için hareket CSS'e bırakılmadı: çizimden önce/sonra fotoğraf, yalnız DEĞİŞEN öğe
+  hareket eder. 12 tek canlı öğe (sakin olmayan `C.NextUp`; ikincisi `.h-sakin`) · 14 odak kapısı (AYS odak
+  modu sis katmanı + `data-oz="014"`; ESP kart tekrarı `data-h-odak`, Esc «Oturumu bitir») · 149 sayı
+  (`C.Stat`, `C.Meter`, üst çubuk sayaçları) · 152 tik (`C.Checkbox`) · 153 kart → ekran görünüm geçişi
+  (AYS'de de artık yönlendirme geçişi var) · 154 küçülen başlık (≤ 1039 px) · 156 odak halkası akışı · 158
+  satır kapanma · 159 önizleme (`.linkbtn`/`a`/`[data-h-onizle]` + `data-route`). **Düzelen iki hata:**
+  `.content` ve üst çubuğun renk çizgisi her yeniden çizimde, yani her tıklamada, baştan oynuyordu; artık
+  yalnız yeni ekranda / ilk açılışta. Denetim: runtests AYS 1936 · SPİ 1584 · ESP 1569; duman, a11y, 390 px,
+  palet, perf, SPİ designcheck, dist, ortak temiz; sadelik üçü bütçede; envanter temiz; tarayıcıda: aynı
+  ekranda yeniden çizim içerik animasyonu üretmiyor, yeni ekranda üretiyor; ESP tekrarında üst çubuk .28
+  sis, kart 1; Esc oturumu bitiriyor.
+- **K için (T4 sözleşmesi, ekranlar senin):** hareket istersen yalnız işaretle — satır listesi
+  `data-h-satir="<kimlik>"` (silinen satır yerinde kapanır), bitirilen iş `data-h="<kimlik>"
+  data-h-bitti="0|1"` (tik çizilir), değişen büyük sayı `data-h-sayi="<anahtar>"`, süren iş
+  `data-h-odak` + çıkış düğmesinde `data-h-odak-cik`. **Senin dosyana dokundum:** `ESP/src/js/screens/
+  lang.js` kart tekrarında iki öznitelik (`data-h-odak` sarmalayıcı, «Oturumu bitir»e `data-h-odak-cik`)
+  — 14'ün ESP yeri orasıydı; başka satır değişmedi.
 - **K için (010):** Onaylar ve Kütüphanem'in boş durumu `C.Kutu` + tek düğme; `C.Empty({ text,
   action })`'ı Kutu'nun gövdesine koyarsan 010 işareti ve çizim kendiliğinden gelir (ekranlar
   senin). 022'nin kalan «varsayılan Evet, devam et» çağrıları (sadelik ölçümü) ekran dosyalarında.

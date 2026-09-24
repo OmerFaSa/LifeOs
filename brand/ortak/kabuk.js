@@ -132,7 +132,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   function cekmeceDugmesi(c, telefon){
     const on = !!c.on;
-    const sayac = c.sayac ? '<span class="ust__sayac" data-oz="115" aria-label="' + kac(c.sayac + ' bekleyen') + '">'
+    const sayac = c.sayac ? '<span class="ust__sayac" data-oz="115" data-h-sayi="cekmece:' + kac(c.id) + '" aria-label="' + kac(c.sayac + ' bekleyen') + '">'
       + kac(c.sayac) + '</span>' : '';
     return '<button class="ust__cekmece' + (on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(c.route) + '"'
       + ' data-cekmece="' + kac(c.id) + '"' + (on ? ' aria-current="page"' : '') + '>'
@@ -186,11 +186,14 @@ window.LIFEOS = window.LIFEOS || {};
       +   ' aria-label="' + kac(m.ad + ' — sistemler arası geçiş') + '">'
       +   modulIsareti(o.modul || 'ays', true)
       +   '<span class="ust__marka-ad">' + kac(m.ad) + '</span>' + simge('asagi') + '</button>'
+      /* Küçülen başlık (154): içini hareket.js sayfa başlığından doldurur;
+         sayfanın h1'i yerinde durduğu için ekran okuyucuya ikinci kez okunmaz. */
+      + '<span class="ust__baslik" aria-hidden="true"></span>'
       + '<nav class="ust__nav" aria-label="Çekmeceler">' + liste + '</nav>'
       + '<div class="ust__sag">'
       +   (onay.sayi ? '<button class="ust__onay" data-oz="115" data-act="go" data-route="' + kac(onay.route || 'onaylar') + '"'
       +     ' aria-label="' + kac(onay.sayi + ' öneri onay bekliyor') + '">' + simge('onaylar')
-      +     '<span class="ust__sayac">' + kac(onay.sayi) + '</span></button>' : '')
+      +     '<span class="ust__sayac" data-h-sayi="onay">' + kac(onay.sayi) + '</span></button>' : '')
       +   '<button class="ust__ara" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)">'
       +     simge('ara') + '<span class="ust__ara-yazi">Ara</span><kbd>Ctrl K</kbd></button>'
       +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'

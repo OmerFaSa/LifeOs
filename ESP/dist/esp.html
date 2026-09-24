@@ -560,7 +560,9 @@ table td, table th{
   from{ opacity:0; transform:translateY(6px); }
   to{ opacity:1; transform:none; }
 }
-.content{ animation:content-in var(--dur-lg) var(--ease); }
+/* Yalnız YENİ ekranda (`.h-yeni`, hareket.js): uygulama her eylemde
+   yeniden çizdiği için burada koşulsuz bir animasyon her tıklamada
+   sayfayı yeniden «getiriyordu» (T4). */
 
 /* ---------- görünüm geçişi ----------
 
@@ -7719,9 +7721,11 @@ button.rutbe-rozet:focus-visible{
   content:''; position:absolute; left:0; right:0; top:0; height:2px;
   background:var(--mod);
   transform-origin:left center;
-  animation:ust-cizgi var(--dur-in) var(--ease) both;
   transition:background-color var(--dur-lg) var(--ease);
 }
+/* Çizgi yalnız İLK çizimde uzar (`.h-ilk`, hareket.js); eskiden her yeniden
+   çizimde, yani her tıklamada, baştan uzuyordu. */
+.ust.h-ilk::before{ animation:ust-cizgi var(--dur-in) var(--ease) both; }
 .ust[data-gecis="ays"]::before{ background:var(--ays); }
 .ust[data-gecis="spi"]::before{ background:var(--spi); }
 .ust[data-gecis="esp"]::before{ background:var(--esp); }
@@ -8257,6 +8261,140 @@ a.kmenu__satir:hover{ background:var(--surface-2); }
 /* Yönlendirmede odak `<main>`'e taşınır (ekran okuyucu yeni ekranı
    duysun diye); main bir etkileşim öğesi değildir, halka çizilmez. */
 #main[tabindex="-1"]:focus-visible{ outline:none; }
+
+/* ==== css/hareket.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* HAREKET — T4 (ekip/EKIP-PLANI.md §4.2). Kaynak: brand/ortak/hareket.css;
+   `tools/ortak.py --yay` üç arayüze kopyalar. Sınıfları `hareket.js` koyar:
+   yalnız DEĞİŞEN öğe hareket eder, yeniden çizim animasyonu tekrarlatmaz.
+   Azaltılmış harekette hepsi kapanır (en altta). */
+
+/* ------------------------------------------------ 12 · tek canlı öğe
+   Ekranda yalnız bir şey nabız atar: sıradaki iş. İkincisi `.h-sakin`. */
+.nextup.h-canli .nextup__icon{ position:relative; }
+.nextup.h-canli .nextup__icon::after{
+  content:''; position:absolute; inset:-4px; border-radius:inherit;
+  box-shadow:0 0 0 2px var(--primary);
+  opacity:0; pointer-events:none;
+  animation:h-nabiz 2.6s var(--ease) infinite;
+}
+@keyframes h-nabiz{
+  0%{ opacity:.5; transform:scale(.9); }
+  60%{ opacity:0; transform:scale(1.2); }
+  100%{ opacity:0; transform:scale(1.2); }
+}
+.h-sakin, .h-sakin::after, .h-sakin .nextup__icon::after{ animation:none !important; }
+
+/* ------------------------------------------------ ekran değişimi bir kez
+   İçerik yalnız YENİ ekranda yükselir; aynı ekranda yeniden çizim
+   (bir onay kutusu, bir kayıt) sayfayı yeniden «getirmez». */
+.content.h-yeni{ animation:content-in var(--dur-lg) var(--ease); }
+
+/* ------------------------------------------------ 149 · sayı yuvarlanması */
+.h-yuvarla{ animation:h-yuvarla var(--dur-lg) var(--ease) both; }
+span.h-yuvarla, b.h-yuvarla, small.h-yuvarla{ display:inline-block; }
+@keyframes h-yuvarla{
+  from{ transform:translateY(.5em); opacity:0; }
+  to{ transform:none; opacity:1; }
+}
+
+/* ------------------------------------------------ 152 · tik çizimi
+   İş bitince tik çizilir, satır yavaşça kendi «bitti» görünümüne iner. */
+.h-tik{ animation:h-solukla 900ms var(--ease) both; }
+@keyframes h-solukla{ from{ opacity:1; } }
+.h-tik svg path, .h-tik svg polyline{
+  stroke-dasharray:32; stroke-dashoffset:32;
+  animation:h-tik-ciz 380ms var(--ease) 60ms forwards;
+}
+@keyframes h-tik-ciz{ to{ stroke-dashoffset:0; } }
+.h-tik input[type="checkbox"]{ animation:h-tik-bas var(--dur-lg) var(--ease); }
+@keyframes h-tik-bas{ 0%{ transform:scale(.7); } 60%{ transform:scale(1.12); } 100%{ transform:none; } }
+
+/* ------------------------------------------------ 158 · satır kapanma
+   Kaldırılan satırın kopyası yerinde kapanır; alttakiler onunla birlikte
+   yukarı kayar. Kopya okunmaz ve dokunulmaz (aria-hidden, inert). */
+.h-kapanan{
+  overflow:hidden; pointer-events:none;
+  transition:height var(--dur-lg) var(--ease), opacity var(--dur) var(--ease);
+}
+.h-kapanan.is-kapali{ height:0 !important; opacity:0; }
+
+/* ------------------------------------------------ 154 · küçülen başlık
+   Dar ekranda (çekmece listesi Menü'ye inince) sayfa başlığı kaydırılıp
+   görünmez olunca üst çubuğa küçülerek yerleşir. Geniş ekranda üst çubuk
+   çekmeceleri taşır; başlık orada sayfada kalır. */
+.ust__baslik{ display:none; }
+@media (max-width:1039px){
+  .ust__baslik{
+    display:block; flex:1 1 auto; min-width:0;
+    overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+    font-size:var(--fs-md); font-weight:600; color:var(--text);
+    opacity:0; transform:translateY(6px);
+    transition:opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .ust.is-kucuk .ust__baslik{ opacity:1; transform:none; }
+  .ust.is-kucuk .ust__marka-ad{ display:none; }
+}
+
+/* ------------------------------------------------ 153 · kart açılma geçişi
+   Basılan kart ile yeni ekranın içeriği aynı adı taşır: tarayıcı kartı
+   yerinde büyüterek ayrıntıya çevirir. */
+::view-transition-group(h-kart){ animation-duration:var(--dur-lg); animation-timing-function:var(--ease); }
+::view-transition-old(h-kart), ::view-transition-new(h-kart){ height:100%; object-fit:cover; overflow:clip; }
+
+/* ------------------------------------------------ 156 · odak halkası akışı
+   Klavyeyle gezerken halka bir önceki düğmeden kayarak gelir ve yerine
+   varınca söner; kalıcı halka tarayıcının kendi :focus-visible halkasıdır. */
+.h-halka{
+  position:fixed; left:0; top:0; z-index:2147483000;
+  pointer-events:none; border-radius:var(--r-sm);
+  box-shadow:0 0 0 2px var(--primary);
+  opacity:0;
+  transition:transform var(--dur) var(--ease), width var(--dur) var(--ease),
+             height var(--dur) var(--ease), opacity var(--dur-lg) var(--ease);
+}
+.h-halka.is-acik{ opacity:.9; }
+.h-halka.is-anlik{ transition:none; }
+
+/* ------------------------------------------------ 159 · üzerine gelince önizleme */
+.h-onizle{
+  position:fixed; z-index:2147482000; max-width:280px;
+  display:flex; flex-direction:column; gap:2px;
+  padding:10px 12px;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border); border-radius:var(--r-md);
+  box-shadow:var(--shadow-lg);
+  font-size:var(--fs-sm); line-height:1.4;
+  pointer-events:none;
+  animation:h-onizle-ac var(--dur) var(--ease) both;
+}
+.h-onizle__ad{ font-weight:600; }
+.h-onizle__cumle{ color:var(--text-2); }
+@keyframes h-onizle-ac{ from{ opacity:0; transform:translateY(4px); } }
+
+/* ------------------------------------------------ 14 · odak kapısı
+   Sayfada süren iş (`data-h-odak`) varken geri kalan her şey sisle örtülür;
+   Esc (`hareket.js`) ya da işin kendi «bitir» düğmesi çıkarır. Sis yalnız
+   görünüştür: tıklama ve klavye çalışmaya devam eder. */
+.site:has([data-h-odak]) :is(.ust, .gunserit, .sayfabasi, .bolumcubugu, .sayfasonu, .altbant),
+.site:has([data-h-odak]) .sayfabolum:not(:has([data-h-odak])),
+.site:has([data-h-odak]) .sayfabolum:has([data-h-odak]) :is(.lrow, .kutu):not(:has([data-h-odak])):not([data-h-odak]):not(:is(.lrow, .kutu) :is(.lrow, .kutu)){
+  opacity:.28; filter:blur(2px) saturate(.5);
+  transition:opacity var(--dur-lg) var(--ease), filter var(--dur-lg) var(--ease);
+}
+[data-h-odak]{ position:relative; }
+
+/* ------------------------------------------------ azaltılmış hareket */
+@media (prefers-reduced-motion:reduce){
+  .nextup.h-canli .nextup__icon::after, .content.h-yeni, .h-yuvarla, .h-tik,
+  .h-tik svg path, .h-tik svg polyline, .h-tik input[type="checkbox"], .h-onizle{ animation:none; }
+  .h-tik svg path, .h-tik svg polyline{ stroke-dashoffset:0; }
+  .h-kapanan, .h-halka, .ust__baslik{ transition:none; }
+  .h-halka{ display:none; }
+  ::view-transition-group(h-kart){ animation:none; }
+}
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -9351,7 +9489,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'b1c9302', at:'2026-09-24 19:54', dirty:true };
+ESP.BUILD = { id:'334f4db', at:'2026-09-24 20:16', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -12079,7 +12217,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   function cekmeceDugmesi(c, telefon){
     const on = !!c.on;
-    const sayac = c.sayac ? '<span class="ust__sayac" data-oz="115" aria-label="' + kac(c.sayac + ' bekleyen') + '">'
+    const sayac = c.sayac ? '<span class="ust__sayac" data-oz="115" data-h-sayi="cekmece:' + kac(c.id) + '" aria-label="' + kac(c.sayac + ' bekleyen') + '">'
       + kac(c.sayac) + '</span>' : '';
     return '<button class="ust__cekmece' + (on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(c.route) + '"'
       + ' data-cekmece="' + kac(c.id) + '"' + (on ? ' aria-current="page"' : '') + '>'
@@ -12133,11 +12271,14 @@ window.LIFEOS = window.LIFEOS || {};
       +   ' aria-label="' + kac(m.ad + ' — sistemler arası geçiş') + '">'
       +   modulIsareti(o.modul || 'ays', true)
       +   '<span class="ust__marka-ad">' + kac(m.ad) + '</span>' + simge('asagi') + '</button>'
+      /* Küçülen başlık (154): içini hareket.js sayfa başlığından doldurur;
+         sayfanın h1'i yerinde durduğu için ekran okuyucuya ikinci kez okunmaz. */
+      + '<span class="ust__baslik" aria-hidden="true"></span>'
       + '<nav class="ust__nav" aria-label="Çekmeceler">' + liste + '</nav>'
       + '<div class="ust__sag">'
       +   (onay.sayi ? '<button class="ust__onay" data-oz="115" data-act="go" data-route="' + kac(onay.route || 'onaylar') + '"'
       +     ' aria-label="' + kac(onay.sayi + ' öneri onay bekliyor') + '">' + simge('onaylar')
-      +     '<span class="ust__sayac">' + kac(onay.sayi) + '</span></button>' : '')
+      +     '<span class="ust__sayac" data-h-sayi="onay">' + kac(onay.sayi) + '</span></button>' : '')
       +   '<button class="ust__ara" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)">'
       +     simge('ara') + '<span class="ust__ara-yazi">Ara</span><kbd>Ctrl K</kbd></button>'
       +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
@@ -12461,6 +12602,312 @@ window.LIFEOS = window.LIFEOS || {};
     modulMenusu, bildirimPaneli, hizliEkle,
     katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis,
   });
+})();
+
+/* ==== js/core/hareket.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/hareket.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* HAREKET — T4 (ekip/EKIP-PLANI.md §4.2): hareket ve odak, üç arayüzde aynı.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/hareket.js`; `tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne birebir kopyalanır.
+
+   Uygulama her eylemde #app'i BAŞTAN çiziyor (innerHTML). O yüzden hareket
+   CSS'e bırakılamaz: bir animasyon her yeniden çizimde baştan oynar. Burada
+   çizimden ÖNCE bir fotoğraf alınır (`once`), çizimden SONRA yenisiyle
+   karşılaştırılır (`sonra`) ve yalnız DEĞİŞEN öğe hareket eder:
+
+     12  tek canlı öğe      ekranda yalnız ilk `.h-canli` nabız atar
+     149 sayı yuvarlanması  `data-h-sayi` metni değiştiyse rakam yukarı kayar
+     152 tik çizimi         `data-h-bitti` 0'dan 1'e döndüyse tik çizilir
+     158 satır kapanma      `data-h-satir` kaybolduysa yerinde kapanır
+     154 küçülen başlık     sayfa başlığı görünmezse üst çubuğa küçülür
+     153 kart açılma        yönlendirmede basılan kart ayrıntıya büyür
+     156 odak halkası akışı klavyeyle gezerken halka kayarak geçer
+     159 önizleme           metindeki bağlantının üstünde küçük kart
+     14  odak kapısı        `data-h-odak` varken gerisi sis; Esc çıkar
+
+   Sözleşme: hareket BİLGİ taşımaz, yalnız değişikliği gösterir. Azaltılmış
+   harekette hiçbiri çalışmaz; çalışmaması hiçbir işlevi bozmaz. Ekran
+   hangi öğenin hareket edeceğini yalnız `data-h-*` ile söyler. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.HAREKET = (function(){
+  const CANLI = '.h-canli, .gunserit__blok--suruyor';
+  /* Bir çizimde bundan fazla satır kaybolduysa bu bir süzgeç ya da ekran
+     değişimidir, silme değil: hayalet satır çizilmez. */
+  const EN_COK_KAPANAN = 3;
+
+  let foto = null;
+  let ilkCizim = true;
+  /* Ekranda ŞU AN çizili olan rota. Çağıranın `S.route`'u yönlendirmede
+     çizimden ÖNCE değişir; «yeni ekran mı» ancak buradan bilinir. */
+  let cizilenRota;
+  let kaynakEl = null;
+  let gozcu = null;
+
+  function azMi(){
+    try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+    catch(e){ return true; }
+  }
+  function gorunur(e){ return !!(e && (e.offsetWidth || e.offsetHeight || e.getClientRects().length)); }
+  function kac(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+  function sec(kok, s){ return kok ? Array.from(kok.querySelectorAll(s)) : []; }
+
+  /* ---------------------------------------------------------- fotoğraf */
+
+  function once(kok){
+    const f = { rota:cizilenRota, sayi:new Map(), bitti:new Map(), satir:[] };
+    sec(kok, '[data-h-sayi]').forEach(e => f.sayi.set(e.getAttribute('data-h-sayi'), e.textContent.trim()));
+    sec(kok, '[data-h][data-h-bitti]').forEach(e =>
+      f.bitti.set(e.getAttribute('data-h'), e.getAttribute('data-h-bitti') === '1'));
+    sec(kok, '[data-h-satir]').forEach(e => f.satir.push({
+      k:e.getAttribute('data-h-satir'), h:e.offsetHeight, html:e.outerHTML }));
+    foto = f;
+    return f;
+  }
+
+  /* o.az: test ya da çağıran azaltılmış hareketi kendisi söyler. */
+  function sonra(kok, rota, o){
+    o = o || {};
+    const az = o.az != null ? !!o.az : azMi();
+    const onceki = foto; foto = null;
+    const yeni = !onceki || onceki.rota !== rota;
+    cizilenRota = rota;
+    const sonuc = { yuvarla:0, tik:0, kapanan:0 };
+    if(!kok) return sonuc;
+
+    tekCanli(kok);
+    baslikKopyala(kok);
+    if(!az){
+      const ust = kok.querySelector('.ust');
+      if(ust && ilkCizim) ust.classList.add('h-ilk');
+      const main = kok.querySelector('#main, .content');
+      if(main && yeni) main.classList.add('h-yeni');
+    }
+    ilkCizim = false;
+    baslikGozcusu(kok);
+    if(az || yeni) return sonuc;
+
+    /* 149 — değeri değişen sayı */
+    sec(kok, '[data-h-sayi]').forEach(e => {
+      const eski = onceki.sayi.get(e.getAttribute('data-h-sayi'));
+      if(eski != null && eski !== e.textContent.trim()){ e.classList.add('h-yuvarla'); sonuc.yuvarla++; }
+    });
+    /* 152 — yeni biten iş */
+    sec(kok, '[data-h][data-h-bitti="1"]').forEach(e => {
+      if(onceki.bitti.get(e.getAttribute('data-h')) === false){ e.classList.add('h-tik'); sonuc.tik++; }
+    });
+    /* 158 — kaybolan satır yerinde kapanır */
+    const simdi = new Map(sec(kok, '[data-h-satir]').map(e => [e.getAttribute('data-h-satir'), e]));
+    const giden = onceki.satir.filter(s => !simdi.has(s.k));
+    if(giden.length && giden.length <= EN_COK_KAPANAN){
+      onceki.satir.forEach((s, i) => {
+        if(simdi.has(s.k)) return;
+        const sonraki = onceki.satir.slice(i + 1).find(x => simdi.has(x.k));
+        const oncekiSatir = onceki.satir.slice(0, i).reverse().find(x => simdi.has(x.k));
+        const komsu = sonraki ? simdi.get(sonraki.k) : oncekiSatir ? simdi.get(oncekiSatir.k) : null;
+        if(!komsu || !komsu.parentNode) return;
+        const h = hayalet(s);
+        komsu.parentNode.insertBefore(h, sonraki ? komsu : komsu.nextSibling);
+        kapat(h);
+        sonuc.kapanan++;
+      });
+    }
+    return sonuc;
+  }
+
+  /* Eski satırın kopyası: okunur ama dokunulamaz, kimlik taşımaz. */
+  function hayalet(s){
+    const kap = document.createElement('div');
+    kap.className = 'h-kapanan';
+    kap.setAttribute('aria-hidden', 'true');
+    kap.setAttribute('inert', '');
+    kap.style.height = s.h + 'px';
+    kap.innerHTML = s.html;
+    kap.querySelectorAll('[id], [data-act], [data-change], [data-h-satir], [name]').forEach(e => {
+      ['id', 'data-act', 'data-change', 'data-h-satir', 'name'].forEach(a => e.removeAttribute(a));
+    });
+    return kap;
+  }
+  function kapat(h){
+    const bitir = () => { if(h.parentNode) h.parentNode.removeChild(h); };
+    requestAnimationFrame(() => requestAnimationFrame(() => { h.classList.add('is-kapali'); }));
+    h.addEventListener('transitionend', e => { if(e.propertyName === 'height') bitir(); });
+    setTimeout(bitir, 700);
+  }
+
+  /* ---------------------------------------------------------- 12 */
+
+  function tekCanli(kok){
+    const c = sec(kok, CANLI).filter(gorunur);
+    c.slice(1).forEach(e => e.classList.add('h-sakin'));
+    return c.length ? c[0] : null;
+  }
+
+  /* ---------------------------------------------------------- 154 */
+
+  function baslikKopyala(kok){
+    const h1 = kok.querySelector('.sayfabasi__baslik');
+    const yuva = kok.querySelector('.ust__baslik');
+    if(yuva) yuva.textContent = h1 ? h1.textContent.trim() : '';
+  }
+  function baslikGozcusu(kok){
+    if(gozcu){ try{ gozcu.disconnect(); }catch(e){} gozcu = null; }
+    const h1 = kok.querySelector('.sayfabasi__baslik');
+    const ust = kok.querySelector('.ust');
+    if(!h1 || !ust || typeof IntersectionObserver !== 'function') return;
+    const payi = ust.offsetHeight || 64;
+    gozcu = new IntersectionObserver(g => {
+      const e = g[g.length - 1];
+      ust.classList.toggle('is-kucuk', !e.isIntersecting && e.boundingClientRect.top < payi);
+    }, { rootMargin:'-' + payi + 'px 0px 0px 0px', threshold:0 });
+    gozcu.observe(h1);
+  }
+
+  /* ---------------------------------------------------------- 153 */
+
+  /* Yönlendirmeyi başlatan öğe (bir kerelik). */
+  function kaynak(el){ kaynakEl = el || null; }
+
+  /* fn DOM'u değiştirir. Tarayıcı görünüm geçişini desteklemiyorsa ya da
+     hareket azaltılmışsa fn doğrudan çalışır: geçiş süs değil akıcılıktır,
+     olmaması işleyişi bozmaz. */
+  function gecis(fn, o){
+    o = o || {};
+    const el = kaynakEl; kaynakEl = null;
+    const az = o.az != null ? !!o.az : azMi();
+    if(az || typeof document.startViewTransition !== 'function') return fn();
+    const kart = el && el.closest ? el.closest('.kutu, .card, .lrow, .nextup, .okart') : null;
+    try{
+      if(kart) kart.style.viewTransitionName = 'h-kart';
+      const t = document.startViewTransition(async () => {
+        await fn();
+        const m = document.getElementById('main');
+        if(kart && m) m.style.viewTransitionName = 'h-kart';
+      });
+      const temizle = () => { const m = document.getElementById('main'); if(m) m.style.viewTransitionName = ''; };
+      t.finished.then(temizle, temizle);
+      return t.updateCallbackDone;
+    }catch(e){
+      if(kart) kart.style.viewTransitionName = '';
+      return fn();
+    }
+  }
+
+  /* ---------------------------------------------------------- 156 */
+
+  let halkaEl = null, halkaZaman = null;
+  function halka(hedef){
+    if(!hedef || azMi() || !hedef.getBoundingClientRect) return;
+    let gorunurOdak = true;
+    try{ gorunurOdak = hedef.matches(':focus-visible'); }catch(e){}
+    if(!gorunurOdak) return;
+    const r = hedef.getBoundingClientRect();
+    if(!r.width || !r.height) return;
+    const yeni = !halkaEl || !halkaEl.isConnected;
+    if(yeni){
+      halkaEl = document.createElement('div');
+      halkaEl.className = 'h-halka';
+      halkaEl.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(halkaEl);
+    }
+    const once = halkaEl.classList.contains('is-acik');
+    if(!once) halkaEl.classList.add('is-anlik');
+    halkaEl.style.transform = 'translate(' + Math.round(r.left - 3) + 'px,' + Math.round(r.top - 3) + 'px)';
+    halkaEl.style.width = Math.round(r.width + 6) + 'px';
+    halkaEl.style.height = Math.round(r.height + 6) + 'px';
+    halkaEl.getBoundingClientRect();
+    halkaEl.classList.remove('is-anlik');
+    halkaEl.classList.add('is-acik');
+    clearTimeout(halkaZaman);
+    /* Yerine varınca söner: kalıcı halka tarayıcının kendi odak halkasıdır. */
+    halkaZaman = setTimeout(() => { if(halkaEl) halkaEl.classList.remove('is-acik'); }, 420);
+  }
+
+  /* ---------------------------------------------------------- 159 */
+
+  const ONIZLE = '.linkbtn[data-route], a[data-route], [data-h-onizle][data-route]';
+  let onizleEl = null, onizleZaman = null, cozucu = null;
+
+  function onizleIcerik(route, coz){
+    let b = null;
+    try{ b = coz ? coz(route) : null; }catch(e){ b = null; }
+    if(!b || !b.baslik) return '';
+    return '<b class="h-onizle__ad">' + kac(b.baslik) + '</b>'
+      + (b.cumle ? '<span class="h-onizle__cumle">' + kac(b.cumle) + '</span>' : '');
+  }
+  function onizleKapat(){
+    clearTimeout(onizleZaman);
+    if(onizleEl){ onizleEl.remove(); onizleEl = null; }
+  }
+  function onizleAc(el){
+    const ic = onizleIcerik(el.getAttribute('data-route'), cozucu);
+    if(!ic) return;
+    onizleKapat();
+    onizleEl = document.createElement('div');
+    onizleEl.className = 'h-onizle';
+    onizleEl.setAttribute('role', 'tooltip');
+    onizleEl.innerHTML = ic;
+    document.body.appendChild(onizleEl);
+    const r = el.getBoundingClientRect();
+    const w = onizleEl.offsetWidth, h = onizleEl.offsetHeight;
+    const x = Math.max(8, Math.min(window.innerWidth - w - 8, r.left));
+    const y = r.bottom + 8 + h > window.innerHeight ? r.top - h - 8 : r.bottom + 8;
+    onizleEl.style.left = Math.round(x) + 'px';
+    onizleEl.style.top = Math.round(Math.max(8, y)) + 'px';
+  }
+
+  /* ---------------------------------------------------------- 14 */
+
+  function odakCik(){
+    /* Açık bir katman (alt sayfa, komut paleti, menü) varsa Esc önce onu
+       kapatır; odak kapısı sıradadır. Katmanların hepsi #overlay-root'ta. */
+    const kat = document.getElementById('overlay-root');
+    if(kat && kat.children.length) return false;
+    const b = document.querySelector('[data-h-odak] [data-h-odak-cik], [data-h-odak-cik]');
+    if(!document.querySelector('[data-h-odak]') || !b) return false;
+    b.click();
+    return true;
+  }
+
+  /* ---------------------------------------------------------- kurulum */
+
+  let kuruldu = false;
+  function kur(o){
+    o = o || {};
+    cozucu = o.onizle || cozucu;
+    if(kuruldu) return;
+    kuruldu = true;
+    document.addEventListener('focusin', e => halka(e.target));
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape' && !e.defaultPrevented && odakCik()) e.preventDefault();
+    });
+    let fareVar = false;
+    try{ fareVar = window.matchMedia('(hover: hover)').matches; }catch(e){}
+    if(!fareVar) return;
+    document.addEventListener('pointerover', e => {
+      const el = e.target.closest && e.target.closest(ONIZLE);
+      if(!el){ return; }
+      clearTimeout(onizleZaman);
+      onizleZaman = setTimeout(() => onizleAc(el), 450);
+    });
+    document.addEventListener('pointerout', e => {
+      const el = e.target.closest && e.target.closest(ONIZLE);
+      if(el && !(e.relatedTarget && el.contains(e.relatedTarget))) onizleKapat();
+    });
+    document.addEventListener('pointerdown', onizleKapat, true);
+    window.addEventListener('scroll', onizleKapat, true);
+  }
+
+  return { once, sonra, tekCanli, baslikKopyala, kaynak, gecis, halka, onizleIcerik, odakCik, kur,
+    EN_COK_KAPANAN };
 })();
 
 /* ==== js/core/olumsuz.js ==== */
@@ -36369,7 +36816,7 @@ ESP.C = (function(){
     return html`
       <div class="${cls('stat', o.tone && 'stat--'+o.tone)}">
         <span class="stat__label">${o.label}${when(o.hint, () => raw(ESP.UI.hint(o.hint)))}</span>
-        <span class="stat__value">${o.value}${when(o.unit, () => html`<small>${o.unit}</small>`)}</span>
+        <span class="stat__value" data-h-sayi="${'stat:' + hAnahtar(o.label)}">${o.value}${when(o.unit, () => html`<small>${o.unit}</small>`)}</span>
         ${when(o.spark, o.spark)}
         ${when(pct != null, () => html`<span class="stat__bar" aria-hidden="true">
           <i style="width:${pct}%"></i></span>`)}
@@ -36397,7 +36844,7 @@ ESP.C = (function(){
     const pct = Math.max(0, Math.min(100, Number(o.value) || 0));
     return html`
       <div class="meter">
-        <div class="meter__top"><span class="muted">${o.label}</span><b class="num">${o.text != null ? o.text : '%'+Math.round(o.value)}</b></div>
+        <div class="meter__top"><span class="muted">${o.label}</span><b class="num" data-h-sayi="${'meter:' + hAnahtar(o.label)}">${o.text != null ? o.text : '%'+Math.round(o.value)}</b></div>
         ${Bar({ value:pct, tone:o.tone, large:o.large })}
         ${when(o.note, () => html`<span class="tiny dim">${o.note}</span>`)}
       </div>`;
@@ -36458,6 +36905,11 @@ ESP.C = (function(){
      ekranda tek parça durmaz. Kısa cümle görünür kalır; gerekçe ya da
      ayrıntı bir dokunuşla açılır. Hiçbir metin silinmez, yalnız katmanı
      değişir. */
+  /* Hareket anahtarı (T4, hareket.js): etiketin düz metni. Aynı ekranda
+     aynı etiketli iki sayı olursa ikisi de «değişti» sayılabilir; zararı
+     yalnız fazladan bir yuvarlanmadır. */
+  function hAnahtar(x){ return String(x == null ? '' : x).replace(/<[^>]*>/g, '').trim().slice(0, 60); }
+
   function Ayrinti(o){
     return html`<div class="${cls('ayrinti', o.class)}">
       ${when(o.ozet, () => html`<p class="ayrinti__ozet">${o.ozet}</p>`)}
@@ -36698,7 +37150,10 @@ ESP.C = (function(){
   }
 
   function Checkbox(o){
-    return html`<label class="${cls('check', o.checked && 'is-done')}">
+    /* 152: `data-h-bitti` 0'dan 1'e dönünce hareket.js tiki çizer. */
+    return html`<label class="${cls('check', o.checked && 'is-done')}"
+      data-h="${'check:' + (o.act || '') + ':' + hAnahtar((o.data && (o.data['data-id'] || o.data['data-key'])) || o.label)}"
+      data-h-bitti="${o.checked ? '1' : '0'}">
       <input type="checkbox" ${o.checked ? raw('checked') : ''}
         ${attrs(Object.assign({ 'data-act':o.act }, o.data || {}))}/>
       <span>${o.label}</span>
@@ -36781,7 +37236,7 @@ ESP.C = (function(){
      Dosya yoksa `onerror` düğümü kaldırır ve satır eskisi gibi kalır. */
   function NextUp(o){
     return html`
-      <div class="${cls('nextup', o.calm && 'nextup--calm', o.sanat && 'nextup--sanat')}">
+      <div class="${cls('nextup', o.calm && 'nextup--calm', o.sanat && 'nextup--sanat', !o.calm && 'h-canli')}">
         ${when(o.calm && o.sanat, () => html`<img class="nextup__sanat"
           src="${'img/marka/durum-tamamlandi-' + o.sanat + '.webp'}"
           alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">`)}
@@ -41951,9 +42406,11 @@ ESP.Screens.lang = (function(){
       label:'KART ' + (q.pos + 1) + '/' + q.ids.length,
       meta:(ESP.LANG_BY_ID[kart.lang] || {}).label || kart.lang,
       note:gecikme ? gecikme + ' gündür bekliyor.' : 'Bugün vadeli.',
-      action:K.Button({ label:'Oturumu bitir', size:'sm', act:'end-review' }),
+      action:K.Button({ label:'Oturumu bitir', size:'sm', act:'end-review', data:{ 'data-h-odak-cik':'1' } }),
       wide:true,
-      body:html`
+      /* Odak kapısı (014, hareket.css): oturum sürerken sayfanın geri kalanı
+         sisle örtülür; Esc «Oturumu bitir»e basar. */
+      body:html`<div data-h-odak>
         <div class="srscard">
           <div class="srscard__front">${kart.front}</div>
           ${when(kart.context, () => html`<p class="srscard__ctx">${kart.context}</p>`)}
@@ -41975,7 +42432,8 @@ ESP.Screens.lang = (function(){
           </div>
           <p class="small muted mt-8">Kutu ${kart.box} · kolaylık
             ${U.fmtNum(Math.round(kart.ease * 100) / 100)} · ${kart.reps} tekrar,
-            ${kart.lapses} unutma</p>`)}`,
+            ${kart.lapses} unutma</p>`)}
+      </div>`,
     })];
   }
 
@@ -49781,8 +50239,12 @@ ESP.App = (function(){
   function withTransition(fn){
     const changed = lastRoute !== null && lastRoute !== S.route;
     lastRoute = S.route;
-    const ok = changed
-      && typeof document.startViewTransition === 'function'
+    if(!changed) return fn();
+    /* Destek ve azaltılmış hareket denetimi hareket.js'te; basılan kart
+       varsa yeni ekrana büyür (T4, 153). */
+    const H = window.LIFEOS && window.LIFEOS.HAREKET;
+    if(H) return H.gecis(fn);
+    const ok = typeof document.startViewTransition === 'function'
       && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(!ok) return fn();
     try{ return document.startViewTransition(fn).updateCallbackDone; }
@@ -49830,11 +50292,17 @@ ESP.App = (function(){
         </div>
         ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`);
 
-      await withTransition(() => { document.getElementById('app').innerHTML = markup; });
+      /* Hareket (T4): çizimden önce fotoğraf, sonra karşılaştırma — yalnız
+         değişen öğe hareket eder. */
+      const appEl = document.getElementById('app');
+      const H = window.LIFEOS && window.LIFEOS.HAREKET;
+      if(H) H.once(appEl);
+      await withTransition(() => { appEl.innerHTML = markup; });
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
+      if(H) H.sonra(appEl, S.route);
       revealActiveTab();
       /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
          `inert` onunla birlikte silinir ve arka plan yeniden okunur
@@ -49916,7 +50384,10 @@ ESP.App = (function(){
 
   /* ---------------------------------------------------------- küresel eylemler */
   const globalHandle = {
-    async go(el){ go(el.dataset.route); },
+    async go(el){
+      if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kaynak(el);
+      go(el.dataset.route);
+    },
 
     /* Egzersiz isleme ORTAK bir eylemdir: koç kutusu yedi ekranda birden
        duruyor ve her ekranda ayri bir islem yazmak, yedi kez bozulabilecek
@@ -50735,6 +51206,15 @@ ESP.App = (function(){
 
   async function boot(){
     try{
+      /* Hareket (T4, hareket.js): odak halkası, önizleme, odak kapısı.
+         Önizleme ekranın kendi başlığını ve tek cümlesini okur. */
+      if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kur({ onizle(route){
+        const hs = ESP.Screens[route];
+        if(!hs) return null;
+        let cumle = '';
+        try{ cumle = hs.headline ? String(hs.headline() || '') : ''; }catch(e){}
+        return { baslik:hs.title, cumle };
+      } });
       /* Arayüz Türkçe: CSS büyük harfe çevirirken "i" → "İ" olsun.
          Tek dosya sürümünde <html> kabuğu dışarıdan gelir, bu yüzden burada. */
       const root = document.documentElement;

@@ -1,0 +1,182 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/hareket.test.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* Hareket — T4 (ekip/EKIP-PLANI.md §4.2).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/hareket.test.js`; `tools/ortak.py --yay` ile üç
+   arayüzün `src/tests/` klasörüne birebir kopyalanır.
+
+   Kanıtladığı sözler (katalog numarasıyla): ekranda yalnız bir öğe nabız
+   atar (12); yeniden çizimde yalnız DEĞİŞEN sayı yuvarlanır, aynı sayı ve
+   yeni ekran yuvarlanmaz (149); tik yalnız 0'dan 1'e dönen işte çizilir
+   (152); kaybolan satır yerinde, dokunulamaz bir kopya olarak kapanır,
+   süzgeç gibi toplu kayıpta hayalet çizilmez (158); küçülen başlık sayfa
+   başlığını taşır (154); geçiş desteklenmiyorsa ya da hareket azaltılmışsa
+   iş doğrudan yapılır (153); önizleme metni kaçışlanır (159); odak kapısı
+   Esc'te işin kendi çıkış düğmesine basar, açık katman varken basmaz (14);
+   azaltılmış harekette hiçbir sınıf konmaz. Bileşenler kancaları taşır. */
+
+(function(){
+  const NS = window.R || window.SP || window.ESP;
+  const { describe, it, expect } = NS.Test;
+  const H = window.LIFEOS.HAREKET;
+
+  function kok(icerik){
+    const d = document.createElement('div');
+    d.innerHTML = icerik;
+    document.body.appendChild(d);
+    return d;
+  }
+
+  describe('Hareket (T4)', () => {
+    it('12 tek canlı öğe: yalnız ilki nabız atar', () => {
+      const d = kok('<div class="h-canli">a</div><div class="h-canli">b</div><div class="h-canli" hidden>c</div>');
+      try{
+        const ilk = H.tekCanli(d);
+        const c = d.querySelectorAll('.h-canli');
+        expect(ilk).toBe(c[0]);
+        expect(c[0].classList.contains('h-sakin')).toBe(false);
+        expect(c[1].classList.contains('h-sakin')).toBe(true);
+      }finally{ d.remove(); }
+    });
+
+    it('149 yalnız değişen sayı yuvarlanır; yeni ekranda hiçbiri', () => {
+      const d = kok('<b data-h-sayi="a">3</b><b data-h-sayi="b">7</b>');
+      try{
+        H.sonra(d, 'x', { az:false });
+        H.once(d);
+        d.innerHTML = '<b data-h-sayi="a">4</b><b data-h-sayi="b">7</b>';
+        const r = H.sonra(d, 'x', { az:false });
+        expect(r.yuvarla).toBe(1);
+        expect(d.querySelector('[data-h-sayi="a"]').classList.contains('h-yuvarla')).toBe(true);
+        expect(d.querySelector('[data-h-sayi="b"]').classList.contains('h-yuvarla')).toBe(false);
+
+        /* Yönlendirmede çağıranın rotası çizimden önce değişir; «yeni
+           ekran» çizili olan rotaya göre bilinir, çağıranınkine göre değil. */
+        H.once(d);
+        d.innerHTML = '<b data-h-sayi="a">9</b><main id="main" class="content"></main>';
+        expect(H.sonra(d, 'y', { az:false }).yuvarla).toBe(0);
+        expect(d.querySelector('#main').classList.contains('h-yeni')).toBe(true);
+      }finally{ d.remove(); }
+    });
+
+    it('152 tik yalnız yeni biten işte çizilir', () => {
+      const d = kok('<p data-h="k1" data-h-bitti="0">a</p><p data-h="k2" data-h-bitti="1">b</p>');
+      try{
+        H.sonra(d, 'x', { az:false });
+        H.once(d);
+        d.innerHTML = '<p data-h="k1" data-h-bitti="1">a</p><p data-h="k2" data-h-bitti="1">b</p>';
+        expect(H.sonra(d, 'x', { az:false }).tik).toBe(1);
+        expect(d.querySelector('[data-h="k1"]').classList.contains('h-tik')).toBe(true);
+        expect(d.querySelector('[data-h="k2"]').classList.contains('h-tik')).toBe(false);
+      }finally{ d.remove(); }
+    });
+
+    it('158 kaybolan satır yerinde kapanır; kopya dokunulamaz ve kimlik taşımaz', () => {
+      const satir = k => '<div data-h-satir="' + k + '"><button id="b-' + k + '" data-act="sil">' + k + '</button></div>';
+      const d = kok('<div class="liste">' + satir('a') + satir('b') + satir('c') + '</div>');
+      try{
+        H.sonra(d, 'x', { az:false });
+        H.once(d);
+        d.querySelector('.liste').innerHTML = satir('a') + satir('c');
+        expect(H.sonra(d, 'x', { az:false }).kapanan).toBe(1);
+        const h = d.querySelector('.h-kapanan');
+        expect(!!h).toBe(true);
+        expect(h.nextElementSibling.getAttribute('data-h-satir')).toBe('c');
+        expect(h.getAttribute('aria-hidden')).toBe('true');
+        expect(h.hasAttribute('inert')).toBe(true);
+        expect(h.querySelectorAll('[id], [data-act], [data-h-satir]').length).toBe(0);
+        expect(h.textContent).toContain('b');
+      }finally{ d.remove(); }
+    });
+
+    it('158 toplu kayıp (süzgeç) hayalet çizmez', () => {
+      const satir = k => '<div data-h-satir="' + k + '">' + k + '</div>';
+      const d = kok(['a', 'b', 'c', 'd', 'e', 'f'].map(satir).join(''));
+      try{
+        H.sonra(d, 'x', { az:false });
+        H.once(d);
+        d.innerHTML = satir('a') + satir('f');
+        expect(H.sonra(d, 'x', { az:false }).kapanan).toBe(0);
+        expect(d.querySelectorAll('.h-kapanan').length).toBe(0);
+      }finally{ d.remove(); }
+    });
+
+    it('azaltılmış harekette sınıf konmaz', () => {
+      const d = kok('<b data-h-sayi="a">3</b><p data-h="k" data-h-bitti="0">x</p><main id="main" class="content"></main>');
+      try{
+        H.sonra(d, 'x', { az:true });
+        H.once(d);
+        d.innerHTML = '<b data-h-sayi="a">4</b><p data-h="k" data-h-bitti="1">x</p><main id="main" class="content"></main>';
+        const r = H.sonra(d, 'x', { az:true });
+        expect(r.yuvarla + r.tik + r.kapanan).toBe(0);
+        expect(d.querySelectorAll('.h-yuvarla, .h-tik, .h-yeni').length).toBe(0);
+      }finally{ d.remove(); }
+    });
+
+    it('154 üst çubuktaki küçük başlık sayfa başlığını taşır', () => {
+      const d = kok('<header class="ust"><span class="ust__baslik" aria-hidden="true"></span></header>'
+        + '<h1 class="sayfabasi__baslik"> Plan › Hafta </h1>');
+      try{
+        H.baslikKopyala(d);
+        expect(d.querySelector('.ust__baslik').textContent).toBe('Plan › Hafta');
+        expect(d.querySelector('.ust__baslik').getAttribute('aria-hidden')).toBe('true');
+      }finally{ d.remove(); }
+    });
+
+    it('153 geçiş yoksa ya da hareket azaltılmışsa iş doğrudan yapılır', async () => {
+      let n = 0;
+      const sonuc = H.gecis(() => { n++; return 'tamam'; }, { az:true });
+      expect(n).toBe(1);
+      expect(sonuc).toBe('tamam');
+    });
+
+    it('159 önizleme ekran adını ve cümlesini kaçışlayarak verir', () => {
+      const ic = H.onizleIcerik('x', r => ({ baslik:'<Plan>', cumle:'3 blok & 1 deneme' }));
+      expect(ic).toContain('&lt;Plan&gt;');
+      expect(ic).toContain('3 blok &amp; 1 deneme');
+      expect(H.onizleIcerik('yok', () => null)).toBe('');
+      expect(H.onizleIcerik('x', () => { throw new Error('bozuk'); })).toBe('');
+    });
+
+    it('14 odak kapısı: Esc işin çıkış düğmesine basar; açık katman varken basmaz', () => {
+      let basildi = 0;
+      const d = kok('<div data-h-odak><button data-h-odak-cik="1">Oturumu bitir</button></div>');
+      d.querySelector('button').addEventListener('click', () => basildi++);
+      let kat = document.getElementById('overlay-root'), kurdum = false;
+      if(!kat){ kat = document.createElement('div'); kat.id = 'overlay-root'; document.body.appendChild(kat); kurdum = true; }
+      const eski = Array.from(kat.children);
+      eski.forEach(e => e.remove());
+      try{
+        expect(H.odakCik()).toBe(true);
+        expect(basildi).toBe(1);
+        const katman = document.createElement('div'); kat.appendChild(katman);
+        expect(H.odakCik()).toBe(false);
+        expect(basildi).toBe(1);
+        katman.remove();
+      }finally{
+        d.remove();
+        eski.forEach(e => kat.appendChild(e));
+        if(kurdum) kat.remove();
+      }
+    });
+
+    it('bileşenler kancaları taşır: sıradaki iş canlı, sakin değil; sayı ve tik anahtarlı', () => {
+      const C = NS.C;
+      const k = kok(String(C.NextUp({ icon:'check', label:'Sıradaki', title:'Matematik' }))
+        + String(C.NextUp({ icon:'check', calm:true, label:'Sıradaki', title:'Bitti' }))
+        + String(C.Stat({ label:'Bugün', value:'42' }))
+        + String(C.Checkbox({ label:'Su içtim', act:'x', checked:true })));
+      try{
+        const n = k.querySelectorAll('.nextup');
+        expect(n[0].classList.contains('h-canli')).toBe(true);
+        expect(n[1].classList.contains('h-canli')).toBe(false);
+        expect(k.querySelector('.stat__value').getAttribute('data-h-sayi')).toBe('stat:Bugün');
+        const c = k.querySelector('.check');
+        expect(c.getAttribute('data-h-bitti')).toBe('1');
+        expect(!!c.getAttribute('data-h')).toBe(true);
+      }finally{ k.remove(); }
+    });
+  });
+})();

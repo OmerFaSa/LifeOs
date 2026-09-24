@@ -97,9 +97,11 @@ ESP.Screens.lang = (function(){
       label:'KART ' + (q.pos + 1) + '/' + q.ids.length,
       meta:(ESP.LANG_BY_ID[kart.lang] || {}).label || kart.lang,
       note:gecikme ? gecikme + ' gündür bekliyor.' : 'Bugün vadeli.',
-      action:K.Button({ label:'Oturumu bitir', size:'sm', act:'end-review' }),
+      action:K.Button({ label:'Oturumu bitir', size:'sm', act:'end-review', data:{ 'data-h-odak-cik':'1' } }),
       wide:true,
-      body:html`
+      /* Odak kapısı (014, hareket.css): oturum sürerken sayfanın geri kalanı
+         sisle örtülür; Esc «Oturumu bitir»e basar. */
+      body:html`<div data-h-odak>
         <div class="srscard">
           <div class="srscard__front">${kart.front}</div>
           ${when(kart.context, () => html`<p class="srscard__ctx">${kart.context}</p>`)}
@@ -121,7 +123,8 @@ ESP.Screens.lang = (function(){
           </div>
           <p class="small muted mt-8">Kutu ${kart.box} · kolaylık
             ${U.fmtNum(Math.round(kart.ease * 100) / 100)} · ${kart.reps} tekrar,
-            ${kart.lapses} unutma</p>`)}`,
+            ${kart.lapses} unutma</p>`)}
+      </div>`,
     })];
   }
 

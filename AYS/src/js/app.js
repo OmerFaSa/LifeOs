@@ -516,7 +516,12 @@ R.App = (function(){
       /* v4 iskeleti (ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
          sayfa başı · bölüm çubuğu · ekran · sayfa sonu; telefonda alt bant
          ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
-      document.getElementById('app').innerHTML = String(html`
+      /* Hareket (T4): çizimden önce fotoğraf, sonra karşılaştırma — yalnız
+         değişen öğe hareket eder. Yönlendirmede basılan kart ayrıntıya büyür. */
+      const appEl = document.getElementById('app');
+      const H = window.LIFEOS && window.LIFEOS.HAREKET;
+      if(H) H.once(appEl);
+      const ciz = () => { appEl.innerHTML = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
         <div class="site site--v4">
           ${raw(safe(() => ustCubukHtml(sc)))}
@@ -531,11 +536,13 @@ R.App = (function(){
           ${safe(footerHtml)}
           ${raw(safe(() => altBantHtml(sc)))}
         </div>
-        ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`);
+        ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`); };
+      if(H && rotaDegisti) await H.gecis(ciz); else ciz();
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
+      if(H) H.sonra(appEl, S.route);
       /* Odağı ancak YÖNLENDİRMEDEN sonra taşı: sıradan bir yeniden
          çizimde taşımak, yazan kullanıcının imlecini alandan koparırdı. */
       if(rotaDegisti){ rotaDegisti = false; rotayaOdaklan(sc); }
@@ -649,6 +656,7 @@ R.App = (function(){
   const globalHandle = {
     async go(el){
       if(el.dataset.tab) S.ui.cardTab = el.dataset.tab;
+      if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kaynak(el);
       go(el.dataset.route);
     },
     async 'toggle-sidebar'(){ K.katmanKapat(); S.sidebarOpen = !S.sidebarOpen; render(); },
@@ -1233,6 +1241,15 @@ R.App = (function(){
   /* ---------- acilis ---------- */
   async function boot(){
     try{
+      /* Hareket (T4, hareket.js): odak halkası, önizleme, odak kapısı.
+         Önizleme ekranın kendi başlığını ve tek cümlesini okur. */
+      if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kur({ onizle(route){
+        const hs = R.Screens[route];
+        if(!hs) return null;
+        let cumle = '';
+        try{ cumle = hs.headline ? String(hs.headline() || '') : ''; }catch(e){}
+        return { baslik:hs.title, cumle };
+      } });
       // Arayuz Turkce: CSS buyuk harfe cevirirken "i" → "İ" olsun.
       // (Tek dosya surumunde <html> kabugu disaridan gelir, bu yuzden burada.)
       const root = document.documentElement;

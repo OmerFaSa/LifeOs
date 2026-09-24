@@ -480,6 +480,7 @@ R.Palette = (function(){
     const el = document.createElement('div');
     el.className = 'focusmode';
     el.id = 'focusmode';
+    el.setAttribute('data-oz', '014');
     el.innerHTML = String(html`
       ${K.IconButton({ icon:'close', aria:'Odak modundan çık', act:'focus-close', class:'focusmode__esc' })}
       <div class="focusmode__slot">${b.slot}</div>

@@ -28,9 +28,11 @@
   content:''; position:absolute; left:0; right:0; top:0; height:2px;
   background:var(--mod);
   transform-origin:left center;
-  animation:ust-cizgi var(--dur-in) var(--ease) both;
   transition:background-color var(--dur-lg) var(--ease);
 }
+/* Çizgi yalnız İLK çizimde uzar (`.h-ilk`, hareket.js); eskiden her yeniden
+   çizimde, yani her tıklamada, baştan uzuyordu. */
+.ust.h-ilk::before{ animation:ust-cizgi var(--dur-in) var(--ease) both; }
 .ust[data-gecis="ays"]::before{ background:var(--ays); }
 .ust[data-gecis="spi"]::before{ background:var(--spi); }
 .ust[data-gecis="esp"]::before{ background:var(--esp); }

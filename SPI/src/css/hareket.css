@@ -1,0 +1,132 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* HAREKET — T4 (ekip/EKIP-PLANI.md §4.2). Kaynak: brand/ortak/hareket.css;
+   `tools/ortak.py --yay` üç arayüze kopyalar. Sınıfları `hareket.js` koyar:
+   yalnız DEĞİŞEN öğe hareket eder, yeniden çizim animasyonu tekrarlatmaz.
+   Azaltılmış harekette hepsi kapanır (en altta). */
+
+/* ------------------------------------------------ 12 · tek canlı öğe
+   Ekranda yalnız bir şey nabız atar: sıradaki iş. İkincisi `.h-sakin`. */
+.nextup.h-canli .nextup__icon{ position:relative; }
+.nextup.h-canli .nextup__icon::after{
+  content:''; position:absolute; inset:-4px; border-radius:inherit;
+  box-shadow:0 0 0 2px var(--primary);
+  opacity:0; pointer-events:none;
+  animation:h-nabiz 2.6s var(--ease) infinite;
+}
+@keyframes h-nabiz{
+  0%{ opacity:.5; transform:scale(.9); }
+  60%{ opacity:0; transform:scale(1.2); }
+  100%{ opacity:0; transform:scale(1.2); }
+}
+.h-sakin, .h-sakin::after, .h-sakin .nextup__icon::after{ animation:none !important; }
+
+/* ------------------------------------------------ ekran değişimi bir kez
+   İçerik yalnız YENİ ekranda yükselir; aynı ekranda yeniden çizim
+   (bir onay kutusu, bir kayıt) sayfayı yeniden «getirmez». */
+.content.h-yeni{ animation:content-in var(--dur-lg) var(--ease); }
+
+/* ------------------------------------------------ 149 · sayı yuvarlanması */
+.h-yuvarla{ animation:h-yuvarla var(--dur-lg) var(--ease) both; }
+span.h-yuvarla, b.h-yuvarla, small.h-yuvarla{ display:inline-block; }
+@keyframes h-yuvarla{
+  from{ transform:translateY(.5em); opacity:0; }
+  to{ transform:none; opacity:1; }
+}
+
+/* ------------------------------------------------ 152 · tik çizimi
+   İş bitince tik çizilir, satır yavaşça kendi «bitti» görünümüne iner. */
+.h-tik{ animation:h-solukla 900ms var(--ease) both; }
+@keyframes h-solukla{ from{ opacity:1; } }
+.h-tik svg path, .h-tik svg polyline{
+  stroke-dasharray:32; stroke-dashoffset:32;
+  animation:h-tik-ciz 380ms var(--ease) 60ms forwards;
+}
+@keyframes h-tik-ciz{ to{ stroke-dashoffset:0; } }
+.h-tik input[type="checkbox"]{ animation:h-tik-bas var(--dur-lg) var(--ease); }
+@keyframes h-tik-bas{ 0%{ transform:scale(.7); } 60%{ transform:scale(1.12); } 100%{ transform:none; } }
+
+/* ------------------------------------------------ 158 · satır kapanma
+   Kaldırılan satırın kopyası yerinde kapanır; alttakiler onunla birlikte
+   yukarı kayar. Kopya okunmaz ve dokunulmaz (aria-hidden, inert). */
+.h-kapanan{
+  overflow:hidden; pointer-events:none;
+  transition:height var(--dur-lg) var(--ease), opacity var(--dur) var(--ease);
+}
+.h-kapanan.is-kapali{ height:0 !important; opacity:0; }
+
+/* ------------------------------------------------ 154 · küçülen başlık
+   Dar ekranda (çekmece listesi Menü'ye inince) sayfa başlığı kaydırılıp
+   görünmez olunca üst çubuğa küçülerek yerleşir. Geniş ekranda üst çubuk
+   çekmeceleri taşır; başlık orada sayfada kalır. */
+.ust__baslik{ display:none; }
+@media (max-width:1039px){
+  .ust__baslik{
+    display:block; flex:1 1 auto; min-width:0;
+    overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+    font-size:var(--fs-md); font-weight:600; color:var(--text);
+    opacity:0; transform:translateY(6px);
+    transition:opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .ust.is-kucuk .ust__baslik{ opacity:1; transform:none; }
+  .ust.is-kucuk .ust__marka-ad{ display:none; }
+}
+
+/* ------------------------------------------------ 153 · kart açılma geçişi
+   Basılan kart ile yeni ekranın içeriği aynı adı taşır: tarayıcı kartı
+   yerinde büyüterek ayrıntıya çevirir. */
+::view-transition-group(h-kart){ animation-duration:var(--dur-lg); animation-timing-function:var(--ease); }
+::view-transition-old(h-kart), ::view-transition-new(h-kart){ height:100%; object-fit:cover; overflow:clip; }
+
+/* ------------------------------------------------ 156 · odak halkası akışı
+   Klavyeyle gezerken halka bir önceki düğmeden kayarak gelir ve yerine
+   varınca söner; kalıcı halka tarayıcının kendi :focus-visible halkasıdır. */
+.h-halka{
+  position:fixed; left:0; top:0; z-index:2147483000;
+  pointer-events:none; border-radius:var(--r-sm);
+  box-shadow:0 0 0 2px var(--primary);
+  opacity:0;
+  transition:transform var(--dur) var(--ease), width var(--dur) var(--ease),
+             height var(--dur) var(--ease), opacity var(--dur-lg) var(--ease);
+}
+.h-halka.is-acik{ opacity:.9; }
+.h-halka.is-anlik{ transition:none; }
+
+/* ------------------------------------------------ 159 · üzerine gelince önizleme */
+.h-onizle{
+  position:fixed; z-index:2147482000; max-width:280px;
+  display:flex; flex-direction:column; gap:2px;
+  padding:10px 12px;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border); border-radius:var(--r-md);
+  box-shadow:var(--shadow-lg);
+  font-size:var(--fs-sm); line-height:1.4;
+  pointer-events:none;
+  animation:h-onizle-ac var(--dur) var(--ease) both;
+}
+.h-onizle__ad{ font-weight:600; }
+.h-onizle__cumle{ color:var(--text-2); }
+@keyframes h-onizle-ac{ from{ opacity:0; transform:translateY(4px); } }
+
+/* ------------------------------------------------ 14 · odak kapısı
+   Sayfada süren iş (`data-h-odak`) varken geri kalan her şey sisle örtülür;
+   Esc (`hareket.js`) ya da işin kendi «bitir» düğmesi çıkarır. Sis yalnız
+   görünüştür: tıklama ve klavye çalışmaya devam eder. */
+.site:has([data-h-odak]) :is(.ust, .gunserit, .sayfabasi, .bolumcubugu, .sayfasonu, .altbant),
+.site:has([data-h-odak]) .sayfabolum:not(:has([data-h-odak])),
+.site:has([data-h-odak]) .sayfabolum:has([data-h-odak]) :is(.lrow, .kutu):not(:has([data-h-odak])):not([data-h-odak]):not(:is(.lrow, .kutu) :is(.lrow, .kutu)){
+  opacity:.28; filter:blur(2px) saturate(.5);
+  transition:opacity var(--dur-lg) var(--ease), filter var(--dur-lg) var(--ease);
+}
+[data-h-odak]{ position:relative; }
+
+/* ------------------------------------------------ azaltılmış hareket */
+@media (prefers-reduced-motion:reduce){
+  .nextup.h-canli .nextup__icon::after, .content.h-yeni, .h-yuvarla, .h-tik,
+  .h-tik svg path, .h-tik svg polyline, .h-tik input[type="checkbox"], .h-onizle{ animation:none; }
+  .h-tik svg path, .h-tik svg polyline{ stroke-dashoffset:0; }
+  .h-kapanan, .h-halka, .ust__baslik{ transition:none; }
+  .h-halka{ display:none; }
+  ::view-transition-group(h-kart){ animation:none; }
+}

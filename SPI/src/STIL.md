@@ -121,13 +121,35 @@ modülde CI'da kırmızı): ekran içi sekme 0 · dolu (birincil) düğme en ço
 ## Hareket
 
 Tek easing `--ease`, dört süre: basma `--dur-press` 120 · geçiş `--dur`
-200 · açılma `--dur-lg` 320 · giriş `--dur-in` 700 ms. Animasyon yalnız
-durum değişimi ve geri bildirim içindir. `prefers-reduced-motion` süreleri
-0'a çeker — ek kural gerekmez. (Bu bölüm T4'te yeniden yazılır.)
+200 · açılma `--dur-lg` 320 · giriş `--dur-in` 700 ms. Hareket bilgi
+taşımaz, yalnız DEĞİŞİKLİĞİ gösterir. Azaltılmış harekette hepsi kapanır
+ve hiçbir işlev bozulmaz.
 
-Dikkat çekmek için animasyon yoktur: yanıp sönme, zıplama, sürekli döngü
-(iskelet ve açılış çubuğu dışında) kullanılmaz. Bir kırmızı bayrak yanıp
-sönerek değil, sayfanın en üstünde durarak dikkat çeker.
+Uygulama her eylemde sayfayı baştan çizer; bu yüzden hareket CSS'e
+bırakılmaz (her tıklamada baştan oynardı). `LIFEOS.HAREKET`
+(`brand/ortak/hareket.js` + `hareket.css`, T4) çizimden önce fotoğraf
+alır, sonra karşılaştırır: yalnız değişen öğe hareket eder. Ekran hangi
+öğenin izlendiğini `data-h-*` ile söyler.
+
+| Katalog | Ne | Nasıl işaretlenir |
+|---|---|---|
+| 12 | Tek canlı öğe: yalnız sıradaki iş nabız atar | sakin olmayan `C.NextUp` ve gün şeridindeki süren blok; ikincisi `.h-sakin` |
+| 14 | Odak kapısı: süren iş kalır, gerisi sis; Esc çıkar | `data-h-odak`, çıkış düğmesinde `data-h-odak-cik` (AYS odak modu kendi katmanı) |
+| 149 | Sayı yuvarlanması | `data-h-sayi="<anahtar>"` — `C.Stat`, `C.Meter`, üst çubuk sayaçları |
+| 152 | Tik çizimi, satır yavaşça solar | `data-h="<anahtar>" data-h-bitti="0/1"` — `C.Checkbox` |
+| 153 | Kart açılma geçişi | yönlendirmede basılan kutu, kart, satır yeni ekrana büyür (görünüm geçişi) |
+| 154 | Küçülen başlık | dar ekranda (≤ 1039 px) sayfa başlığı üst çubuğa yerleşir |
+| 156 | Odak halkası akışı | klavye odağında halka kayarak gelir, varınca söner; kalıcı halka `:focus-visible` |
+| 158 | Satır kapanma | `data-h-satir="<anahtar>"`; bir çizimde en çok 3 satır kaybolursa |
+| 159 | Üzerine gelince önizleme | `.linkbtn`, `a` ya da `[data-h-onizle]` taşıyan `data-route`; yalnız fareli cihazda |
+
+İçerik yalnız YENİ ekranda yükselir (`.content.h-yeni`); üst çubuğun renk
+çizgisi yalnız ilk açılışta uzar. Düğme basınca oturur, katman yükselir,
+bildirim alttan girer.
+
+Dikkat çekmek için animasyon yoktur: yanıp sönme, zıplama kullanılmaz.
+Döngü yalnız **süren bir işi** gösterir (iskelet parıltısı, açılış çubuğu,
+konuşmakta olan ajanın nabzı) ve iş bitince durur.
 
 ## Düzen — bir sağlık defteri
 
