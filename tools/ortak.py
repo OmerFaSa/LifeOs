@@ -243,6 +243,9 @@ DOSYALAR = {
     # Tek sozluk: 016 terim ipucu, 139 model kapali kipi (hazir cumle).
     "sozluk.js":      "js/core",
     "sozluk.test.js": "tests",
+    # Guven: 173 yedek durumu, 177 kalici silme kapisi, 179 kayit gecmisi.
+    "guven.js":       "js/core",
+    "guven.test.js":  "tests",
     "kart.css":       "css",
     # MODEL KATMANI — uc arayuz (2026-09-24'ten beri AYS'ninki tek kaynak).
     "llm.js":        "js/core",

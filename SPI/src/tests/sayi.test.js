@@ -295,6 +295,12 @@ describe('026 · Veri tazeliği', () => {
     expect(S().yasMetni(0)).toBe('bugün');
   });
 
+  it('oz-026 bozuk tarih (31 Şubat) yaş üretmez: kaymış bir gün «taze» görünmez', () => {
+    expect(S().yas('2026-02-31', SIMDI)).toBeNull();
+    expect(S().tazelik('2026-02-31', 'gunluk', SIMDI).gun).toBeNull();
+    expect(S().zamanMetni('2026-02-31', SIMDI)).toBe('');
+  });
+
   it('oz-026 ileri tarihli ölçüm «bugün» diye gizlenmez', () => {
     expect(S().yasMetni(S().yas('2026-09-30', SIMDI))).toBe('ileri tarihli');
     expect(S().tazelik('2026-09-30', 'gunluk', SIMDI).bayat).toBeFalsy();

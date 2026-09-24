@@ -69,7 +69,12 @@ window.LIFEOS = window.LIFEOS || {};
     if(z instanceof Date) return isNaN(z) ? null : [z.getFullYear(), z.getMonth(), z.getDate()];
     const s = String(z == null ? '' : z);
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
-    if(m) return [+m[1], +m[2] - 1, +m[3]];
+    if(m){
+      /* Bozuk tarih (2026-02-31) sessizce kaymasın: geri çevirip aynı
+         günü gösterdiğini doğrula (`yedek.js` ile aynı sınama). */
+      const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+      return d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3] ? [+m[1], +m[2] - 1, +m[3]] : null;
+    }
     if(!/^\d{4}-\d{2}-\d{2}T/.test(s)) return null;
     const d = new Date(s);
     return isNaN(d) ? null : [d.getFullYear(), d.getMonth(), d.getDate()];

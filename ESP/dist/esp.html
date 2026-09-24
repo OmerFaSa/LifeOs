@@ -4781,6 +4781,62 @@ body.is-dragging .drop.is-over{
 .suphe__soru{ margin:0; font-size:var(--fs-sm); font-weight:500; }
 .suphe__eylem{ display:flex; flex-wrap:wrap; gap:var(--sp-2); }
 
+/* ================================================================
+   173 · YEDEK DURUMU — tarih, boyut, iki haftalık iz, tek düğme
+   İzin kareleri 041'in karesidir (.doluluk__k); tek biçim.
+   ================================================================ */
+
+.yedek{ display:grid; gap:var(--sp-2); justify-items:start; }
+.yedek__bas{ margin:0; font-weight:600; }
+.yedek__alt{ margin:0; font-size:var(--fs-sm); color:var(--text-2); font-variant-numeric:tabular-nums; }
+.yedek--gerekli .yedek__bas{ color:var(--bad-ink); }
+.yedek__iz{ display:flex; flex-wrap:wrap; gap:var(--sp-1); --doluluk-renk:var(--primary); }
+
+/* ================================================================
+   177 · KALICI SİLME KAPISI — dönüş noktası → yazılı onay → sayılı düğme
+   ================================================================ */
+
+.silme{ display:grid; gap:var(--sp-3); justify-items:start; }
+.silme__adimlar{ display:grid; gap:var(--sp-3); margin:0; padding-left:var(--sp-6); }
+.silme__adim{ font-size:var(--fs-sm); color:var(--text-2); }
+.silme__adim .btn{ margin-top:var(--sp-2); }
+.silme__adim--tamam{ color:var(--text-3); }
+.silme__adim label{ display:block; margin-bottom:var(--sp-1); }
+.silme__giris{
+  width:12em;
+  max-width:100%;
+  padding:var(--sp-2) var(--sp-3);
+  font:inherit;
+  font-variant-numeric:tabular-nums;
+  color:var(--text);
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:var(--r-sm);
+}
+.silme__giris:disabled{ background:var(--surface-2); color:var(--text-3); }
+
+/* ================================================================
+   179 · KAYIT GEÇMİŞİ — her değişiklik kaynağıyla; onaysız öneri uyarılı
+   ================================================================ */
+
+.gecmis{ display:grid; margin:0; padding:0; list-style:none; }
+.gecmis--bos{ color:var(--text-3); font-size:var(--fs-sm); }
+.gecmis__s{
+  display:grid;
+  grid-template-columns:minmax(0, 9em) minmax(0, 1fr);
+  gap:var(--sp-1) var(--sp-3);
+  padding:var(--sp-2) 0;
+  border-top:1px solid var(--border-soft);
+  font-size:var(--fs-sm);
+}
+.gecmis__s:first-child{ border-top:0; }
+.gecmis__zaman{ color:var(--text-3); font-variant-numeric:tabular-nums; }
+.gecmis__kaynak{ font-weight:500; }
+.gecmis__degisim{ grid-column:2; color:var(--text-2); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.gecmis__alan{ color:var(--text-3); }
+.gecmis__s[data-kaynak="merkez"] .gecmis__kaynak{ color:var(--mer-ink); }
+.gecmis__s[data-uyari] .gecmis__kaynak{ color:var(--bad-ink); }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -9252,7 +9308,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'0b04e12', at:'2026-09-24 15:13', dirty:true };
+ESP.BUILD = { id:'8257689', at:'2026-09-24 15:19', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -9482,7 +9538,10 @@ window.LIFEOS = window.LIFEOS || {};
     if(z instanceof Date) return isNaN(z) ? null : [z.getFullYear(), z.getMonth(), z.getDate()];
     const s = String(z);
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
-    if(m) return [+m[1], +m[2] - 1, +m[3]];   // yalnız tarih: YEREL gün
+    if(m){   // yalnız tarih: YEREL gün; bozuk tarih (31 Şubat) kaymaz, reddedilir
+      const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+      return d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3] ? [+m[1], +m[2] - 1, +m[3]] : null;
+    }
     const d = new Date(s);
     return isNaN(d) ? null : [d.getFullYear(), d.getMonth(), d.getDate()];
   }

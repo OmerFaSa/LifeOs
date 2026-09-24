@@ -85,6 +85,13 @@ describe('027 · Eksik gün boşluğu', () => {
     expect(s.map(p => p.tarih + '=' + p.deger).join(',')).toBe('2026-09-24=4,2026-09-25=5');
   });
 
+  it('oz-027 bozuk tarih (31 Şubat) sessizce kaymaz: yok sayılır', () => {
+    expect(G().gunISO('2026-02-31')).toBeNull();
+    expect(G().seri([{ tarih:'2026-02-31', deger:1 }])).toEqual([]);
+    expect(G().doluluk({ gunler:['2026-02-31'] }, { bitis:'2026-03-03', gun:7 }).dolu).toBe(0);
+    expect(G().gunISO('2026-02-28')).toBe('2026-02-28');
+  });
+
   it('oz-027 gün ekleme yaz saati geçişinde kaymaz', () => {
     expect(G().gunEkle('2026-03-28', 1)).toBe('2026-03-29');
     expect(G().gunEkle('2026-10-24', 2)).toBe('2026-10-26');
