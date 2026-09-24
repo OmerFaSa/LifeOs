@@ -134,6 +134,28 @@ def _mark(con, row_id, **alanlar):
     con.commit()
 
 
+# HATALAR D-15: gondermeden once satir SAHIPLENIR. Kosullu UPDATE (okunan
+# degerler hala ayniysa next_at'i kira kadar ileri al) atomiktir: ayni anda
+# calisan ikinci flush — baska is parcaciginda ya da baska surecte (hkm.py)
+# — satiri ya hic gormez ya da sahiplenemez. Sahiplenen surec cokerse satir
+# kira dolunca yeniden vadesi gelir: kaybolmaz, en fazla gec gider.
+KIRA_DAKIKA = 15
+
+
+def sahiplen(con, row, now=None):
+    t = _now(now)
+    kira = _iso(t + datetime.timedelta(minutes=KIRA_DAKIKA))
+    cur = con.execute(
+        "UPDATE outbox SET next_at=? WHERE id=? AND state=? AND attempts=? "
+        "AND next_at=?", (kira, row["id"], row["state"], row["attempts"],
+                          row["next_at"]))
+    con.commit()
+    if cur.rowcount != 1:
+        return False
+    row["next_at"] = kira
+    return True
+
+
 def flush(con, cfg, now=None, transport=None, limit=20):
     """Vadesi gelmis satirlari gonderir. Sonuc ozetini dondurur."""
     t = _now(now)
@@ -152,6 +174,10 @@ def flush(con, cfg, now=None, transport=None, limit=20):
             # Kaybolmaz, bekler: vadesi sabaha kayar (bildirim kurali 2).
             _mark(con, row["id"], next_at=_iso(ne_zaman), ertelendi=1)
             ozet["deferred"] += 1
+            continue
+        if not sahiplen(con, row, t):
+            # Baska bir flush bu satiri aldi ya da degistirdi.
+            ozet["claimed"] = ozet.get("claimed", 0) + 1
             continue
         if row.get("ek"):
             r = _belge_gonder(con, cfg, row, transport)

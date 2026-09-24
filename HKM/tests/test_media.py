@@ -30,6 +30,31 @@ def run():
             eq(row["sha256"], r["sha256"])
     test("Telegram dosyasi sinirli ve atomik indirilir", t_download_is_bounded_and_persisted)
 
+    def t_ayni_ek_iki_kez_islenmez():
+        """HATALAR D-15: ritim ve «Ekleri isle» dugmesi ayni anda ayni «received»
+        satirini aliyor, ikisi de indiriyor ve ayni «.yeni» gecici adina
+        yaziyordu. Indirme SURERKEN ikinci cagri yapilir."""
+        con = db.connect(":memory:")
+        _ek(con)
+        cfg = {"channels": {"telegram": {"bot_token": "T"}}}
+        with tempfile.TemporaryDirectory() as kok:
+            ic, indirilen = [], []
+
+            def j(url):
+                return {"ok": True, "result": {"file_path": "docs/a.txt"}}
+
+            def b(url, limit):
+                indirilen.append(url)
+                if len(indirilen) == 1:
+                    ic.append(media.process_next(con, cfg, transport=(j, b), root=kok))
+                return b"test"
+            r = media.process_next(con, cfg, transport=(j, b), root=kok)
+            ok(r["ok"])
+            eq(len(indirilen), 1)
+            eq(ic[0].get("processed"), 0)
+            eq(con.execute("SELECT state FROM attachments").fetchone()[0], "ready")
+    test("ayni ek iki cagrida iki kez islenmez (D-15)", t_ayni_ek_iki_kez_islenmez)
+
     def t_known_oversize_never_calls_network():
         con = db.connect(":memory:")
         _ek(con, size=3 * 1024 * 1024)

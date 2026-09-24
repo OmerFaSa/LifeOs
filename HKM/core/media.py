@@ -4,6 +4,8 @@ import datetime
 import hashlib
 import json
 import os
+import tempfile
+import threading
 import urllib.parse
 import urllib.request
 
@@ -61,8 +63,23 @@ def _get_bytes(url, limit):
     return veri
 
 
+_ISLENIYOR = threading.Lock()
+
+
 def process_next(con, cfg, transport=None, root=None, now=None):
-    """Bekleyen tek eki işler; bütün hataları kalıcı bir duruma çevirir."""
+    """Bekleyen tek eki işler; bütün hataları kalıcı bir duruma çevirir.
+
+    HATALAR D-15: iki çağıran (ritim, «Ekleri işle») aynı anda aynı satırı
+    alıyordu. İşlem süreç içinde tek; ikinci çağrı beklemez, «meşgul» der."""
+    if not _ISLENIYOR.acquire(blocking=False):
+        return {"ok": True, "processed": 0, "busy": True}
+    try:
+        return _process_next(con, cfg, transport, root, now)
+    finally:
+        _ISLENIYOR.release()
+
+
+def _process_next(con, cfg, transport=None, root=None, now=None):
     a = settings(cfg)
     if not a["enabled"]:
         return {"ok": False, "reason": "off"}
@@ -95,8 +112,8 @@ def process_next(con, cfg, transport=None, root=None, now=None):
         os.makedirs(kok, exist_ok=True)
         hedef = os.path.join(kok, digest + os.path.splitext(file_path)[1][:12])
         if not os.path.exists(hedef):
-            gecici = hedef + ".yeni"
-            with open(gecici, "wb") as f:
+            fd, gecici = tempfile.mkstemp(dir=kok, suffix=".yeni")
+            with os.fdopen(fd, "wb") as f:
                 f.write(veri)
             os.replace(gecici, hedef)
         at = now or datetime.datetime.now().isoformat(timespec="seconds")

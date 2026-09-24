@@ -45,6 +45,42 @@ def run():
         eq(bildirim.sabah(c, _an(24, 2, 0)), _an(24, 8, 0))
     test("sessiz saat penceresi", t_quiet_window)
 
+    def t_ikinci_flush_ayni_satiri_gondermez():
+        """HATALAR D-15: vadesi gelenleri okuma ile «gonderildi» isareti
+        arasinda kilit yoktu. Ritim gonderirken Telegram'dan gelen mesajin
+        flush'u ayni satiri (sabah brifingi, haftalik PDF) ikinci kez
+        yolluyordu. Gonderim SURERKEN ikinci flush cagrilir."""
+        con = db.connect(":memory:")
+        outbox.enqueue(con, "telegram", "daily", "2026-09-24", "Sabah brifingi.",
+                       target="7", now=_an(24, 8, 0))
+        giden, ic = [], []
+
+        def tasima(*a):
+            giden.append(a)
+            if len(giden) == 1:
+                ic.append(outbox.flush(con, CFG, now=_an(24, 8, 1),
+                                       transport=_tas(giden)))
+            return 200, "{}"
+        dis = outbox.flush(con, CFG, now=_an(24, 8, 1), transport=tasima)
+        eq(len(giden), 1)
+        eq(dis["sent"], 1)
+        eq(ic[0]["sent"], 0)
+        eq(con.execute("SELECT state FROM outbox").fetchone()[0], "sent")
+    test("gonderim surerken ikinci flush ayni satiri gondermez (D-15)",
+         t_ikinci_flush_ayni_satiri_gondermez)
+
+    def t_yarida_kalan_gonderim_kaybolmaz():
+        """Gonderimi alan surec cokerse satir sonsuza kadar asili kalmaz:
+        kira suresi dolunca yeniden vadesi gelir."""
+        con = db.connect(":memory:")
+        outbox.enqueue(con, "telegram", "daily", "2026-09-24", "Sabah brifingi.",
+                       target="7", now=_an(24, 8, 0))
+        ok(outbox.sahiplen(con, outbox.due(con, _an(24, 8, 1))[0], _an(24, 8, 1)))
+        eq(outbox.due(con, _an(24, 8, 2)), [])
+        eq(len(outbox.due(con, _an(24, 8, 30))), 1)
+    test("yarida kalan gonderim kira dolunca yeniden denenir (D-15)",
+         t_yarida_kalan_gonderim_kaybolmaz)
+
     def t_quiet_defers_and_merges():
         """Gece gelen iki bildirim bekler, sabah TEK ozette gider; kullanicinin
         mesajina verilen cevap beklemez."""
