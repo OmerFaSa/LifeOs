@@ -239,6 +239,25 @@ def t_sakin_hata():
     ok("catch" in api and "status:0" in api)
 
 
+
+def t_ne_degisti():
+    """017 (K7c): gezinme degisti (Teklifler → Onaylar; Profil, Motto →
+    Ayarlar; Para → Sistemler); guncellemeden sonraki ilk acilista tek kart
+    soyler, «Kapat» deyince bir daha cikmaz. Yalniz HKM'yi ONCEDEN kullanana
+    (acilista jetonu kayitli) gorunur; yeni kullaniciya surum sessizce
+    yazilir — «ne degisti» sorusunu eskisini bilmeyen sormaz."""
+    m = _yuz()
+    ok("function yenilikKarti(" in m and "function yenilikKarari(" in m)
+    kart = m[m.index("var YENILIK = ["):]
+    kart = kart[:kart.index("];")]
+    for s in ("Onaylar", "Profil", "Motto", "Para", "dört bölüm", "Yükleniyor"):
+        ok(s in kart)
+    karar = m[m.index("function yenilikKarari("):]
+    karar = karar[:karar.index("\n  }\n")]
+    ok("ilkJeton" in karar and "YENILIK_SURUM" in karar)
+    ok('data-oz="017"' in m and "Ne değişti?" in m and "data-yenilik-kapat" in m)
+
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -253,4 +272,5 @@ def run():
     test("yedi çekmece; bölümler; ayarlar dört bölüm (K7)", t_cekmeceler)
     test("jetonlar ortak değerlerde; vurgu Merkez moru (K7a)", t_jetonlar_ortak)
     test("sakin hata: kırmızı satır yok, ortak cümle (011)", t_sakin_hata)
+    test("ne değişti: tek kart, yalnız eski kullanıcıya (017)", t_ne_degisti)
     test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)

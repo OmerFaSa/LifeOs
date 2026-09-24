@@ -227,6 +227,16 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
 .sakinhata__ayr summary{ cursor:pointer; min-height:24px; line-height:24px; }
 .sakinhata__ayr code{ display:block; margin-top:4px; }
 
+/* ---- ne degisti (017, K7c): tek kart, Merkez moru kenar ---- */
+.yenilik{ border:1px solid var(--line); border-left:3px solid var(--accent);
+  background:var(--yuzey); border-radius:10px; padding:12px 16px; margin:16px 0; }
+.yenilik__bas{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.yenilik__ad{ margin:0; font-size:16px; }
+.yenilik__baslik{ margin:10px 0 2px; font:11px/1.4 var(--mono); letter-spacing:.1em;
+  text-transform:uppercase; color:var(--dim); font-weight:400; }
+.yenilik ul{ margin:0; padding-left:18px; }
+.yenilik li{ margin:2px 0; font-size:14px; }
+
 /* ---- bölüm çubuğu (K7): çekmecenin bölümleri, ALT ÇİZGİ ---- */
 .bolumcubugu{ border-top:1px solid var(--line); }
 .bolumcubugu__ic{ max-width:900px; margin:0 auto; padding:0 20px;
@@ -898,6 +908,8 @@ details.detay > summary:hover{ color:var(--fg); }
   var TOKEN_KEY = 'hkm.token';
   var token = null;
   try{ token = localStorage.getItem(TOKEN_KEY); }catch(e){ token = null; }
+  /* Acilista jeton kayitli miydi: HKM'yi ONCEDEN kullanan biri (017). */
+  var ilkJeton = !!token;
 
   var $ = function(id){ return document.getElementById(id); };
   function esc(s){
@@ -918,6 +930,60 @@ details.detay > summary:hover{ color:var(--fg); }
       + (ayr ? '<details class="sakinhata__ayr"><summary>Teknik ayrıntı</summary><code>' + esc(ayr) + '</code></details>' : '')
       + '<button type="button" data-yenile>Yeniden dene</button>'
       + '</div>';
+  }
+
+  /* NE DEGISTI? (017, K7c) — guncellemeden sonraki ILK acilista tek kart;
+     «Kapat» deyince bir daha cikmaz. Uc arayuzun kartiyla (brand/ortak/
+     yenilik.js) ayni kalip: yeni · duzeltilen · kaldirilan; madde yalniz
+     kullanicinin GORDUGU seyi soyler. YENI SURUMDE: YENILIK_SURUM'u
+     degistir ve listeyi bastan yaz. */
+  var YENILIK_KEY = 'hkm.yenilik';
+  var YENILIK_SURUM = '2026-09-25';
+  var YENILIK = [
+    { tur:'yeni', metin:'Yedi çekmece: Bugün, Onaylar, Hedefler, Sistemler, Ofis, Sohbet, Ayarlar. «Teklifler» artık «Onaylar».' },
+    { tur:'yeni', metin:'Profil ve Motto Ayarlar\'ın, Para Sistemler\'in bölümü: başlığın altındaki çubuktan açılır. Adresler değişmedi.' },
+    { tur:'yeni', metin:'Ayarlar dört bölüm: Yapay zekâ ve bütçe · Kanallar ve cihazlar · Eşikler · Sunucu.' },
+    { tur:'yeni', metin:'Renkler üç sistemle aynı; HKM\'nin tek vurgusu Merkez moru.' },
+    { tur:'duzeltilen', metin:'HKM yanıt vermeyince bölüm «Yükleniyor…»da kalıyordu: artık sakin bir kart, verinin yerinde olduğu ve «Yeniden dene».' },
+  ];
+  var YENILIK_BASLIK = { yeni:'Yeni', duzeltilen:'Düzeltilen', kaldirilan:'Kaldırılan' };
+
+  /* Gosterilmeli mi? Depo yoksa hic. Yeni kullaniciya (acilista jetonu
+     yoktu) surum sessizce yazilir: eskisini bilmeyen «ne degisti» sormaz. */
+  function yenilikKarari(){
+    var son;
+    try{ son = localStorage.getItem(YENILIK_KEY); }catch(e){ return false; }
+    if(son === YENILIK_SURUM) return false;
+    if(son === null && !ilkJeton){
+      try{ localStorage.setItem(YENILIK_KEY, YENILIK_SURUM); }catch(e){}
+      return false;
+    }
+    return true;
+  }
+
+  function yenilikKarti(){
+    var grup = Object.keys(YENILIK_BASLIK).map(function(tur){
+      var l = YENILIK.filter(function(x){ return x.tur === tur; });
+      if(!l.length) return '';
+      return '<div class="yenilik__grup"><h3 class="yenilik__baslik">' + YENILIK_BASLIK[tur] + '</h3><ul>'
+        + l.map(function(x){ return '<li>' + esc(x.metin) + '</li>'; }).join('') + '</ul></div>';
+    }).join('');
+    return '<section class="yenilik" data-yenilik data-oz="017" aria-labelledby="yenilik-ad">'
+      + '<header class="yenilik__bas"><h2 class="yenilik__ad" id="yenilik-ad">Ne değişti?</h2>'
+      + '<button type="button" data-yenilik-kapat>Kapat</button></header>'
+      + grup + '</section>';
+  }
+
+  function yenilikYerlestir(){
+    var g = $('govde');
+    if(!g || g.querySelector('[data-yenilik]') || !yenilikKarari()) return;
+    g.insertAdjacentHTML('afterbegin', yenilikKarti());
+    var k = g.querySelector('[data-yenilik-kapat]');
+    if(k) k.addEventListener('click', function(){
+      try{ localStorage.setItem(YENILIK_KEY, YENILIK_SURUM); }catch(e){}
+      var s = g.querySelector('[data-yenilik]');
+      if(s) s.remove();
+    });
   }
   /* YEREL gün. `toISOString()` UTC'dir: Türkiye'de gece 00:00–03:00 arası
      «bugün» dün çıkıyordu (modüllerdeki `gunOf` hatasının aynısı). */
@@ -5059,6 +5125,7 @@ details.detay > summary:hover{ color:var(--fg); }
     $('ust-araclar').hidden = false;
     $('gez').hidden = false;
     gorunumSec(yolOku(), false);
+    yenilikYerlestir();
     await yukle();
   }
 
