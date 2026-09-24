@@ -1289,6 +1289,12 @@ details.detay > summary:hover{ color:var(--fg); }
       + ritimSaat('ritim-hgun', 'Haftalık rapor',
           'Gün adı yaz (pazartesi, salı…). Boş bırakırsan gönderilmez',
           z.weekly_day, 'pazartesi', 'text')
+      + '<div class="metric"><div class="metric__name">Ay sonu mektubu'
+      + '<div class="muted" style="font-size:11px">Ayın ilk günü, haftalık rapor saatinde: '
+      + 'geçen ay, bir önceki ayla karşılaştırmalı</div></div>'
+      + '<div class="metric__val"><input type="checkbox" id="ritim-ay"'
+      + (z.monthly ? ' checked' : '') + ' aria-label="Ay sonu mektubu"/>'
+      + '</div></div>'
       + '<div class="tag" style="margin-top:14px">Sessizlik ve sınır</div>'
       + '<p class="muted">Sessiz saatte ve günlük sınır dolunca gelen mesajlar '
       + '<b>kaybolmaz</b>: bekler, sabah tek bir özet olarak gelir. Senin yazdığın '
@@ -1357,6 +1363,7 @@ details.detay > summary:hover{ color:var(--fg); }
       evening:$('ritim-aksam').value.trim(),
       checkin:$('ritim-yoklama').value.trim(),
       weekly_day:$('ritim-hgun').value.trim().toLowerCase(),
+      monthly:$('ritim-ay').checked,
     }, bildirim:{
       sessiz_bas:$('ritim-sbas').value.trim(),
       sessiz_bit:$('ritim-sbit').value.trim(),
@@ -1965,6 +1972,21 @@ details.detay > summary:hover{ color:var(--fg); }
             : '<span class="muted">ölçülmedi</span>') + '</td></tr>';
     });
     h += '</tbody></table></div>';
+
+    /* Modul basina (fikir 47): HKM uzerinden yapilan harcama; modullerin
+       kendi anahtarlariyla yaptigi cagri burada yok. */
+    var MODUL_ADI = { ays:'AYS', spi:'SPİ', esp:'ESP', hkm:'HKM (sohbet, King)' };
+    h += '<div class="scroll"><table><thead><tr><th>Modül</th>'
+      + '<th class="num">Bu ay</th><th class="num">Çağrı</th></tr></thead><tbody>';
+    (a.by_modul || []).forEach(function(m){
+      h += '<tr><td>' + esc(MODUL_ADI[m.modul] || m.modul) + '</td>'
+        + '<td class="num">' + (m.measured ? esc(m['try']) + ' TL'
+            : '<span class="muted">ölçülmedi</span>') + '</td>'
+        + '<td class="num">' + (m.measured ? esc(m.calls) : '—') + '</td></tr>';
+    });
+    h += '</tbody></table></div>'
+      + '<p class="muted">Modüllerin kendi anahtarlarıyla yaptığı çağrılar HKM’den '
+      + 'geçmez; burada görünmez.</p>';
 
     var kisiler = Object.keys(a.by_user || {});
     if(kisiler.length){

@@ -51,10 +51,17 @@ KAZANIM_EN_COK = 3
 DUZEN_GUN = 5
 
 
-def _hafta(bugun, geri=0):
-    t = datetime.date.fromisoformat(bugun) - datetime.timedelta(days=7 * geri)
-    bas = t - datetime.timedelta(days=6)
+def _hafta(bugun, geri=0, uzunluk=7):
+    t = datetime.date.fromisoformat(bugun) - datetime.timedelta(days=uzunluk * geri)
+    bas = t - datetime.timedelta(days=uzunluk - 1)
     return bas.isoformat(), t.isoformat()
+
+
+# Pencere: hafta (7 gun) ya da ay (fikir 51). Ayni hesap, baska sozcuk.
+PENCERE = {"hafta": {"asgari": ASGARI_GUN, "duzen": DUZEN_GUN, "onceki": "önceki haftaya",
+                     "olcul": "önceki hafta ölçülmedi", "ad": "hafta"},
+           "ay": {"asgari": 8, "duzen": 20, "onceki": "önceki aya",
+                  "olcul": "önceki ay ölçülmedi", "ad": "ay"}}
 
 
 def _ortanca(xs):
@@ -65,12 +72,18 @@ def _ortanca(xs):
     return s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2.0
 
 
-def report(con, date, th=None):
-    """Haftalik rapor — sayilar ve hareket, hukum degil."""
-    bu_bas, bu_son = _hafta(date, 0)
-    on_bas, on_son = _hafta(date, 1)
-    bu = twin.series(con, bu_son, 7)
-    onceki = twin.series(con, on_son, 7)
+def report(con, date, th=None, gun=7, onceki_gun=None, pencere="hafta"):
+    """Haftalik rapor — sayilar ve hareket, hukum degil. Ay sonu mektubu
+    ayni hesabi takvim ayiyla kullanir (gun = ayin uzunlugu, onceki_gun =
+    onceki ayin uzunlugu)."""
+    pn = PENCERE[pencere]
+    bu_bas, bu_son = _hafta(date, 0, gun)
+    on_son = (datetime.date.fromisoformat(bu_bas) - datetime.timedelta(days=1)).isoformat()
+    on_gun = onceki_gun or gun
+    on_bas = _hafta(on_son, 0, on_gun)[0]
+    bu = twin.series(con, bu_son, gun)
+    onceki = twin.series(con, on_son, on_gun)
+    ASGARI_GUN = pn["asgari"]
 
     satirlar = []
     for anahtar in sorted(bu):
@@ -80,8 +93,8 @@ def report(con, date, th=None):
             satirlar.append({"key": anahtar, "module": kayit["module"],
                              "metric": kayit["metric"], "n": len(degerler),
                              "status": "missing",
-                             "note": "%d gün ölçüldü; haftalık ortanca için %d "
-                                     "gerekir." % (len(degerler), ASGARI_GUN)})
+                             "note": "%d gün ölçüldü; %s ortancası için %d "
+                                     "gerekir." % (len(degerler), pn["ad"], ASGARI_GUN)})
             continue
         simdi = _ortanca(degerler)
         eski_kayit = onceki.get(anahtar)
@@ -99,11 +112,10 @@ def report(con, date, th=None):
             "certs": kayit["certs"],
             "note": ("%d gün ölçüldü, ortanca %s%s"
                      % (len(degerler), _fmt(simdi),
-                        ("; önceki haftaya göre %%%d %s"
-                         % (round(abs(fark) * 100),
+                        ("; %s göre %%%d %s"
+                         % (pn["onceki"], round(abs(fark) * 100),
                             "yukarıda" if fark > 0 else "aşağıda"))
-                        if fark is not None else " (önceki hafta ölçülmedi, "
-                                                 "karşılaştırma yok)"))})
+                        if fark is not None else " (%s, karşılaştırma yok)" % pn["olcul"]))})
 
     # Sirali gelsin: en cok hareket eden olcu once. Siralamayi arayuze
     # birakmak, ayni veriyi iki yerde yorumlamak olurdu.
@@ -115,14 +127,14 @@ def report(con, date, th=None):
         x["ad"] = adlar.metrik(x["metric"])
         x["degisim"] = _degisim(x)
 
-    kapsam = twin.snapshot(con, bu_son, 7)
+    kapsam = twin.snapshot(con, bu_son, gun)
     capraz = cross.findings(con, bu_son, 60)
     etki = impact.summary(con)
     gorulen = {m: kapsam["modules"][m]["days_seen"] for m in kapsam["modules"]}
     return {"from": bu_bas, "to": bu_son, "previous": [on_bas, on_son],
             "rows": satirlar, "coverage": kapsam["coverage"],
             "days_seen": gorulen,
-            "kazanimlar": kazanimlar(satirlar, gorulen, th),
+            "kazanimlar": kazanimlar(satirlar, gorulen, th, gun=gun, pencere=pencere),
             "cross": capraz[:2], "impact": etki["verdict"],
             "note": "Hafta bir toplam değil bir kapsamdır: eksik günleri "
                     "saymadan verilen bir ortalama, ölçülmeyen günleri sıfır "
@@ -148,7 +160,7 @@ def _iyilesme(s, alt_uyku):
     return iyi if iyi > 0 else None
 
 
-def kazanimlar(satirlar, gorulen, th=None):
+def kazanimlar(satirlar, gorulen, th=None, gun=7, pencere="hafta"):
     """En cok KAZANIM_EN_COK olculmus iyi sey; hepsi «hesaplandı» etiketli."""
     from core import adlar
     alt = float(((th or {}).get("bio") or {}).get("sleep_hours_min", 7.0))
@@ -165,12 +177,13 @@ def kazanimlar(satirlar, gorulen, th=None):
                 _fmt(s["previous"]), _fmt(s["median"]), _degisim(s))}))
     aday.sort(key=lambda x: (x[0], x[1]))
     out = [x[2] for x in aday[:KAZANIM_EN_COK]]
-    duzenli = [m for m in ("ays", "spi", "esp") if (gorulen or {}).get(m, 0) >= DUZEN_GUN]
+    esik = PENCERE[pencere]["duzen"]
+    duzenli = [m for m in ("ays", "spi", "esp") if (gorulen or {}).get(m, 0) >= esik]
     if duzenli and len(out) < KAZANIM_EN_COK:
         out.append({"metric": "duzen", "module": None, "etiket": "hesaplandı",
                     "change_pct": None,
-                    "metin": " · ".join("%s: 7 günde %d gün kayıt"
-                                        % (adlar.modul(m), gorulen[m]) for m in duzenli)})
+                    "metin": " · ".join("%s: %d günde %d gün kayıt"
+                                        % (adlar.modul(m), gun, gorulen[m]) for m in duzenli)})
     return out
 
 
@@ -209,6 +222,37 @@ def message(con, date, th=None):
     metin = "\n".join(parca)
     if manager.imperatives(metin):
         return "Haftalık rapor buyurgan kip taşıdığı için düşürüldü."
+    return metin
+
+
+# ------------------------------------------------------------ ay sonu
+#
+# Fikir 51 — ay sonu mektubu: haftalik raporun ayni hesabi, 30 gunluk
+# pencere. Ayin ilk gunu ONCEKI ayi (ayin son gunu, 30 gun) gecen ayla
+# karsilastirir. Sayi burada uretilmez, report()'tan gelir.
+
+def aylik_mesaj(con, date, th=None):
+    """`date`: ayin son gunu (ya da ayin icinde bir gun: 1'inden o gune)."""
+    d = datetime.date.fromisoformat(date)
+    onceki_son = d.replace(day=1) - datetime.timedelta(days=1)
+    r = report(con, date, th=th, gun=d.day, onceki_gun=onceki_son.day, pencere="ay")
+    parca = ["HKM · ay sonu mektubu · %s → %s (geçen ayla)" % (r["from"], r["to"])]
+    g = r["days_seen"]
+    parca.append("Kayıtlı gün: AYS %d · SPİ %d · ESP %d (%d günde)"
+                 % (g.get("ays", 0), g.get("spi", 0), g.get("esp", 0), d.day))
+    kars = [s for s in r["rows"] if s["status"] == "compared"]
+    for s in kars[:5]:
+        parca.append("• %s: %s" % (s["ad"], s["note"]))
+    if not kars:
+        parca.append("Aylık karşılaştırma için yeterli ölçüm yok. Bu, «kötü ay» demek değildir.")
+    if r["kazanimlar"]:
+        parca.append("Bu ay neler kazandın (hesaplandı):")
+        parca.extend("✓ " + k["metin"] for k in r["kazanimlar"])
+    else:
+        parca.append("Bu ay ölçülmüş bir artış yok.")
+    metin = "\n".join(parca)
+    if manager.imperatives(metin):
+        return "Aylık mektup buyurgan kip taşıdığı için düşürüldü."
     return metin
 
 

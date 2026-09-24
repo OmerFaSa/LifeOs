@@ -37,6 +37,8 @@ VARSAYILAN = {
     "checkin": "",           # bos: kapali — ornek "21:30"
     "weekly_day": "",        # ornek: "pazartesi" — bos: kapali
     "weekly_time": "09:00",
+    # Ay sonu mektubu (fikir 51): ayin ilk gunu, haftalik saatinde, onceki ay.
+    "monthly": False,
     "tolerance_minutes": 90,
     # Bakim AYRI bir anahtarla acilir: kanal ayari kapaliyken de yedek
     # alinabilmeli. «Mesaj gondermiyorum» ile «kendimi korumuyorum» ayri
@@ -99,6 +101,10 @@ def due(cfg, now):
         dk = _dakika(a.get("weekly_time"))
         if dk is not None and 0 <= simdi - dk <= tolerans:
             isler.append({"kind": "weekly", "at": a.get("weekly_time")})
+    if a.get("monthly") and now.day == 1:
+        dk = _dakika(a.get("weekly_time"))
+        if dk is not None and 0 <= simdi - dk <= tolerans:
+            isler.append({"kind": "monthly", "at": a.get("weekly_time")})
     return isler
 
 
@@ -120,6 +126,10 @@ def run(con, cfg, job, now=None, th=None):
     if job["kind"] == "weekly":
         from core import weekly
         metin = weekly.message(con, gun, th=th)
+    elif job["kind"] == "monthly":
+        from core import weekly
+        dun = (now.date() - datetime.timedelta(days=1)).isoformat()
+        metin = weekly.aylik_mesaj(con, dun, th=th)
     elif job["kind"] == "checkin":
         metin = yoklama_metni(con, gun)
         # Aksam kapanisi kapaliysa «yarin sunlar var» yoklamaya eklenir.

@@ -210,6 +210,23 @@ def month(con, cfg, date=None):
         harcanan = toplam
     oran = (harcanan / tavan * 100.0) if tavan else None
 
+    # Modul basina (fikir 47): BAM isinin cagrisi o isi isteyen modulun,
+    # «ays.» rollu cagri AYS'nin, gerisi (sohbet, King) HKM'nin. Modullerin
+    # KENDI anahtarlariyla yaptigi cagrilar HKM'den gecmez, burada yoktur.
+    modul = {r["m"]: r for r in con.execute(
+        "SELECT CASE WHEN e.modul IS NOT NULL THEN e.modul "
+        "WHEN u.role LIKE 'ays.%' THEN 'ays' WHEN u.role LIKE 'spi.%' THEN 'spi' "
+        "WHEN u.role LIKE 'esp.%' THEN 'esp' ELSE 'hkm' END m, "
+        "SUM(u.try_) t, SUM(u.usd) usd, COUNT(*) n FROM usage u "
+        "LEFT JOIN (SELECT bam_is_id, MIN(modul) modul FROM is_emirleri "
+        "WHERE bam_is_id IS NOT NULL GROUP BY bam_is_id) e ON e.bam_is_id = u.is_id "
+        "WHERE u.day>=? AND u.day<? GROUP BY m", (bas, son))}
+    modul_satir = [{"modul": k, "measured": k in modul,
+                    "try": round(modul[k]["t"], 2) if k in modul else None,
+                    "usd": round(modul[k]["usd"], 4) if k in modul else None,
+                    "calls": modul[k]["n"] if k in modul else None}
+                   for k in ("ays", "spi", "esp", "hkm")]
+
     # Olculmeyen kategori SIFIR DEGILDIR.
     gorev_satir = []
     for g in GOREVLER:
@@ -236,6 +253,7 @@ def month(con, cfg, date=None):
         "cached": sum(r["c"] for r in satirlar),
         "by_user": {k: round(v, 2) for k, v in sorted(kisi.items())},
         "by_task": gorev_satir,
+        "by_modul": modul_satir,
         "days_elapsed": gun_sayisi, "days_left": kalan_gun,
         "rate": a.get("usd_try") or 0,
         "rate_date": a.get("rate_date") or "",

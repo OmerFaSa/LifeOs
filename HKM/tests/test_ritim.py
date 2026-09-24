@@ -359,6 +359,33 @@ def run():
         ok("Sistemler › Haftalık karşılaştırma" in satir[0]["text"])
     test("WhatsApp'a belge gitmez; PDF'in yeri soylenir", t_weekly_whatsapp_yolu)
 
+    # Fikir 51 — ay sonu mektubu: ayni hesap, 30 gunluk pencere; ayin
+    # ilk gunu ONCEKI ayi «gecen ayla» karsilastirir. Varsayilani kapali.
+    def t_ay_sonu_mektubu():
+        from core import manager
+        con = _con()
+        for i in range(0, 62):                  # 2026-07-01 .. 2026-08-31
+            d = (datetime.date(2026, 7, 1) + datetime.timedelta(days=i)).isoformat()
+            deger = 40 if d < "2026-08-01" else 60
+            sync_engine.ingest(con, {"module": "ays", "date": d,
+                                     "metrics": {"questions": metric(deger)}}, now=d + "T09:00:00")
+        m = weekly.aylik_mesaj(con, "2026-08-31")
+        ok("2026-08-01 → 2026-08-31" in m.split("\n")[0], m)
+        ok("AYS 31" in m, m)
+        ok("önceki aya göre %50 yukarıda" in m, m)
+        ok("Bu ay neler kazandın" in m, m)
+        no(manager.imperatives(m))
+        # Varsayilan kapali; acikken ayin 1'inde haftalik saatinde, onceki ay.
+        no(any(j["kind"] == "monthly" for j in schedule.due(CFG, datetime.datetime(2026, 9, 1, 9, 5))))
+        cfg = dict(CFG, schedule=dict(CFG["schedule"], monthly=True))
+        ok(any(j["kind"] == "monthly" for j in schedule.due(cfg, datetime.datetime(2026, 9, 1, 9, 5))))
+        no(any(j["kind"] == "monthly" for j in schedule.due(cfg, datetime.datetime(2026, 9, 2, 9, 5))))
+        r = schedule.run(con, cfg, {"kind": "monthly"}, now=datetime.datetime(2026, 9, 1, 9, 5))
+        ok(r["ok"])
+        metin = con.execute("SELECT text FROM outbox WHERE kind='monthly'").fetchone()["text"]
+        ok("2026-08-01 → 2026-08-31" in metin, metin)
+    test("ay sonu mektubu: onceki ay, gecen ayla; varsayilan kapali", t_ay_sonu_mektubu)
+
     run_cli()
     run_kurtarma()
     run_bakim()

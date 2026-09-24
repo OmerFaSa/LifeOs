@@ -49,7 +49,8 @@ THRESHOLD_RANGE = {
 
 SCHEDULE_FIELDS = {
     "enabled": bool, "channel": str, "morning": str, "evening": str,
-    "checkin": str, "weekly_day": str, "weekly_time": str, "tolerance_minutes": int,
+    "checkin": str, "weekly_day": str, "weekly_time": str, "monthly": bool,
+    "tolerance_minutes": int,
     "maintenance": bool, "maintenance_time": str, "keep_days": int,
 }
 

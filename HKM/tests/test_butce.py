@@ -246,3 +246,22 @@ def run():
         eq((m["cagri"], m["usd"], m["etiket"]), (2, 0.5, "olculdu"))
         eq(butce.is_maliyeti(con, 99)["cagri"], 0)
     test("cagri isine yazilir; isin maliyeti olculur", t_is_baglami)
+
+    def t_modul_dagilimi():
+        # Fikir 47: aylik harcama MODUL basina. BAM isinin cagrisi o isi
+        # isteyen modulun, «ays.» rollu cagri AYS'nin, sohbet HKM'nindir.
+        # Harcamasi olmayan modul SIFIR degil «olculmedi».
+        con = _con()
+        con.execute("INSERT INTO is_emirleri(modul, tur, konu, govde, karar, durum, created_at, "
+                    "updated_at, bam_is_id) VALUES ('spi','spi.bilgi','x','{}','onay','bitti',?,?,7)",
+                    (BUGUN, BUGUN))
+        an = datetime.datetime.combine(datetime.date.fromisoformat(BUGUN), datetime.time(12))
+        butce.record(con, role="bam.arastirma", task="arastirma", provider="p", model="m",
+                     usd=0.2, rate=KUR, is_id=7, now=an)
+        butce.record(con, role="ays.gorsel", task="gorsel_oku", provider="p", model="m",
+                     usd=0.1, rate=KUR, now=an)
+        _yaz(con, BUGUN, 0.05)
+        d = {x["modul"]: x for x in butce.month(con, _cfg(), BUGUN)["by_modul"]}
+        eq((d["spi"]["usd"], d["ays"]["usd"], d["hkm"]["usd"]), (0.2, 0.1, 0.05))
+        eq((d["spi"]["calls"], d["esp"]["measured"], d["esp"]["usd"]), (1, False, None))
+    test("aylik harcama modul basina; harcamasiz modul olculmedi", t_modul_dagilimi)

@@ -354,6 +354,11 @@ fotoğrafı · 18 «15 dakikam var» · 21 verimli saat · 29 evdekinden tarif �
 listesi · 34 ilaç/takviye hatırlatma · 35 su/hareket dürtmesi · 38 Telegram dil kartı · 41
 ünite sonu sınav · 42 sesli anlatım · 43 çok modüllü tek cümle · 51 ay sonu mektubu · 53 tek
 zip · 54 taşıma sihirbazı · 55 gizlilik panosu.
+**İlerleme:** ✅ 47 aylık bütçe modül başına (`butce.month` `by_modul`: BAM işi → isteyen
+modül, `ays.` rolü → AYS, gerisi HKM; harcamasız modül «ölçülmedi»; HKM Ayarlar › Bütçe
+tablosu) · ✅ 51 ay sonu mektubu (`weekly.aylik_mesaj`: haftalık hesabın takvim ayı hâli,
+geçen ayla; `schedule.monthly` varsayılan KAPALI, ayın 1'i haftalık saatinde; HKM › Otomatik
+mesajlar kutusu). HKM 580, yüz temiz.
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 
