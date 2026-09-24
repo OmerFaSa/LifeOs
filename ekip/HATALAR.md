@@ -20,6 +20,9 @@
 
 | Kod | Sahip | Durum | Özet |
 |---|---|---|---|
+| T2-11 | K | açık | Bildirim kartı: uygulama kapalıyken basılan eylem (ör. «Bitti») kayboluyor, kullanıcıya söylenmiyor |
+| T2-10 | K | açık | Tablo hücresi (038) kesinliği verilmemiş sayıyı «hesaplandı» sayıyor: etiketsiz sayı etiketli görünür |
+| T2-09 | K | açık | Hız tahmini (039) hedefe ulaşılmamışken GEÇMİŞ bir tarihi «en olası» diye veriyor |
 | T2-08 | H | ✅ e60fb1e | AYS planner testi `generatedAt` ms damgasına bakıyordu: aynı ms'de rastgele kalıyordu (bulan: K) |
 | T2-07 | H | ✅ e60fb1e | `ortak.py`/`seviye.py --yay` hedefte aynı adlı ELLE yazılmış dosyayı sessizce eziyordu (bulan: K) |
 | T2-06 | T | ✅ 4656788 (H doğruladı: sıkı 390 px denetimi temiz) | SPİ Rehber › Veri: HKM düğme satırı 390 px'te taşıyor (CI'da 11 px); `.lrow__act` telefonda sarmıyor |
@@ -28,6 +31,43 @@
 | T2-03 | K | ✅ c063316 (H doğruladı) | Grafik parçaları zaman damgasından UTC gününü alıyor (gece 00–03 kaydı düne düşer) |
 | T2-02 | K (137) | açık | AYS Ofis ve Danışma'da ajanın okuduğu veri ham kimlikle yazılıyor |
 | T2-01 | K | ✅ a798671 (H doğruladı) | Fark rozeti yuvarlanıp 0 olan farkı «+0» ve iyi/kötü renkle gösteriyor |
+
+### T2-11 · Bildirim kartı: uygulama kapalıyken eylem kayboluyor (düşük)
+
+- **Konum:** `brand/ortak/sw.js:131` (`notificationclick`), kopyaları üç `sw.js`.
+- **Ne yanlış:** açık pencere varsa eylem `postMessage` ile iletiliyor; pencere YOKSA
+  `openWindow` yalnız rotayı açıyor, `e.action` (ör. «Bitti», «Ertele») düşüyor. Kullanıcı
+  bildirimde «Bitti»ye bastığını sanıyor, uygulama açılıyor ama hiçbir şey yazılmıyor ve
+  söylenmiyor. Katalog 164 «uygulamayı açmadan karar verilir» diyor.
+- **Tekrar:** uygulama kapalıyken bildirimdeki bir eylem düğmesine bas.
+- **Düzeltme yönü:** eylemi adrese taşı (`#rota?eylem=…` ya da `sessionStorage`), uygulama
+  açılınca kendi koduyla uygulasın ya da «Bildirimde “Bitti” dedin — kaydedeyim mi?» diye
+  sorsun (SW yine uygulamaz; doktrin korunur). Test: pencere yokken eylemin kaybolmaması.
+
+### T2-10 · Tablo hücresi kesinliği varsayıyor (düşük, doktrin)
+
+- **Konum:** `brand/ortak/grafik.js:518` (`hucreHtml`):
+  `kesinlik: var_ ? (h.kesinlik || 'computed') : 'missing'`.
+- **Ne yanlış:** kesinliği verilmemiş bir değer «hesaplandı» etiketiyle çiziliyor. Etiketsiz
+  sayı böylece etiketli görünüyor; `SAYI.html`'in `data-etiketsiz` işareti ve sadelik
+  denetimindeki «kesinliği olmayan sayı 0» kuralı onu hiç göremiyor (AGENTS §1.2: etiketsiz
+  sayı hiçbir katmana girmez; etiket kaynaktan gelir, bileşen uydurmaz).
+- **Tekrar:** `GRAFIK.hucreHtml({ deger:42, birim:'%' })` tarayıcıda → `data-kesinlik="computed"`.
+- **Düzeltme yönü:** `h.kesinlik`'i olduğu gibi geçir (yoksa etiketsiz işaretlensin) ya da
+  zorunlu yap; test: kesinliksiz hücre `data-etiketsiz` taşır.
+
+### T2-09 · Hız tahmini geçmiş tarih veriyor (orta)
+
+- **Konum:** `brand/ortak/grafik.js:551` (`hizTahmini`): `kalan = hedef − (kesen + eğim·sonX)`.
+- **Ne yanlış:** kalan mesafe regresyon doğrusunun son noktadaki değerinden ölçülüyor, son
+  GERÇEK ölçümden değil. Son ölçüm hedefin altında ama doğru hedefin üstündeyse `kalan` eksi
+  çıkıyor; «en olası» tarih son ölçümden ÖNCE düşüyor ve «erken» sınırdan bile erken oluyor.
+- **Tekrar:** 20–24 Eylül değerleri 0, 60, 80, 100, 65; hedef 70 →
+  `{ ulasti:false, olasi:'2026-09-23', erken:'2026-09-24', metin:'Bu hızla 24 Eylül ya da daha
+  geç; en olası 23 Eylül …' }`: hedefe ulaşılmamış, en olası tarih dün, erkenden önce.
+- **Doğrulama:** `node -e` ile yukarıdaki beş nokta (window stub + sayi.js + grafik.js).
+- **Düzeltme yönü:** kalanı son gerçek ölçümden hesapla (`hedef − son.v`) ya da tarihleri son
+  ölçüm gününden önceye düşürme; olası ⊂ [erken, geç] olmalı. Önce bu girdiyle kırmızı test.
 
 ### T2-08 · AYS planner testi zaman damgasına bakıyordu (düşük, rastgele kırmızı) — düzeltildi
 
