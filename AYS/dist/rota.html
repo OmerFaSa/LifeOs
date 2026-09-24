@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'01a6876', at:'2026-09-24 11:17', dirty:true };
+R.BUILD = { id:'29cb138', at:'2026-09-24 11:23', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -34548,6 +34548,73 @@ R.Proposals = (function(){
   function fail(why){ return { ok:false, why }; }
   function pass(ctx){ return { ok:true, ctx:ctx || {} }; }
 
+  /* ==================== geri alma: fark tabanli ====================
+
+     «Geri al» eski degeri MUTLAK yaziyordu: ayni gun iki kayit girilip
+     ilki geri alininca ikincisi de siliniyor, sonra ikincisi geri alininca
+     geri alinmis ilki diriliyordu; blok «tamamlandi» kaliyordu
+     (ekip/HATALAR.md Y-6). Kural: geri alma yalniz O KAYDIN yaptigini geri
+     cevirir.
+
+       toplamali alan  bu kaydin ekledigi cikarilir; geriye yalniz bu kaydin
+                       payi kalmissa alan eski haline doner (girilmemis alan
+                       yine girilmemis olur, sifir degil). Elle azaltilmis
+                       ve cikarma eksiye dusuyorsa dokunulmaz.
+       deger yazan     sonra ayni alana yazan bir kayit varsa deger ONUN
+                       degeridir, dokunulmaz; yoksa alan hala bu kaydin
+                       degerindeyse eski haline doner (elle degistirilmisse
+                       dokunulmaz).
+       zincir          sonraki kayitlarin anlik goruntusu bu kayit hic
+                       olmamis gibi duzeltilir; boylece onlar da dogru
+                       geri alinir.
+       blok durumu     bu kayit blogu «bekliyor»dan «tamamlandi»ya cektiyse
+                       ve blokta baska is kalmadiysa geri doner; kaldiysa
+                       sorumluluk sonraki kayda devredilir. */
+  function farkGeri(cur, n, eski){
+    const kalan = (Number(cur) || 0) - n;
+    if(kalan < 0) return cur;
+    return kalan === (Number(eski) || 0) ? eski : kalan;
+  }
+
+  function farkZincir(sonrakiEski, n, eski){
+    const v = Math.max(0, (Number(sonrakiEski) || 0) - n);
+    return v === (Number(eski) || 0) ? eski : v;
+  }
+
+  /* Bu kayittan SONRA uygulanmis, ayni hedefe dokunan kayitlarin anlik
+     goruntuleri — uygulama sirasina gore. */
+  function ayniHedef(o, action, kosul){
+    return ((o && o.sonraki) || []).filter(x => x.action === action && x.undo && kosul(x.undo))
+      .map(x => x.undo);
+  }
+
+  function durumGeri(b, s, o){
+    if(!s.durum || b.status !== 'done') return;
+    const is = (Number(b.actualQ) || 0) > 0 || (Number(b.actualMin) || 0) > 0;
+    if(!is){ b.status = s.durum; return; }
+    const devr = ((o && o.sonraki) || []).find(x => (x.action === 'soru-yaz' || x.action === 'sure-yaz')
+      && x.undo && x.undo.date === s.date && x.undo.blockId === b.id && !x.undo.durum);
+    if(devr) devr.undo.durum = s.durum;
+  }
+
+  /* Uygulama sirasi. `appliedAt` ayni milisaniyeye dusebilir; `sira`
+     tekdir. Sirasi olmayan eski kayit, sirasi olandan once uygulanmistir. */
+  function sonraMi(x, row){
+    const a = Number(x.sira) || 0, b = Number(row.sira) || 0;
+    if(a || b) return a > b;
+    return String(x.appliedAt || '') > String(row.appliedAt || '');
+  }
+
+  function sonrakiler(row){
+    return (S.officeProposals || [])
+      .filter(x => x !== row && x.status === 'applied' && sonraMi(x, row))
+      .sort((x, y) => sonraMi(x, y) ? 1 : sonraMi(y, x) ? -1 : 0);
+  }
+
+  function yeniSira(){
+    return (S.officeProposals || []).reduce((m, x) => Math.max(m, Number(x.sira) || 0), 0) + 1;
+  }
+
   const IMPL = {
 
     'topic-review':{
@@ -34744,11 +34811,23 @@ R.Proposals = (function(){
         ctx.week.questionTarget = ctx.q;
         ctx.week.planLoad = U.sum(M.weekDates(ctx.n).map(d => M.dayLoad(U.iso(d)).load)) / 7;
         await M.saveWeek(ctx.n);
-        return Object.assign({ n:ctx.n }, before);
+        return Object.assign({ n:ctx.n, yeni:ctx.q }, before);
       },
-      async revert(s){
+      async revert(s, o){
         const week = S.weeks[M.weekId(s.n)];
         if(!week) return;
+        /* Sonraki bir hedef degisikligi varsa o kalir; onun anlik goruntusu
+           bu kayit hic olmamis gibi duzeltilir (HATALAR Y-6). */
+        const yeni = s.yeni != null ? s.yeni : Math.round(Number(((o && o.params) || {}).questionTarget) || 0);
+        const sonraki = ayniHedef(o, 'week-target', x => x.n === s.n)[0];
+        if(sonraki){
+          if(sonraki.questionTarget === yeni){
+            sonraki.questionTarget = s.questionTarget;
+            sonraki.planLoad = s.planLoad;
+          }
+          return;
+        }
+        if(Number(week.questionTarget) !== yeni) return;
         week.questionTarget = s.questionTarget;
         if(s.planLoad == null) delete week.planLoad; else week.planLoad = s.planLoad;
         await M.saveWeek(s.n);
@@ -34953,7 +35032,9 @@ R.Proposals = (function(){
       async apply(p, ctx){
         const geri = { date:p.date, blockId:ctx.blok ? ctx.blok.id : null,
           eskiQ:ctx.blok ? ctx.blok.actualQ : (ctx.day.freeQ || 0),
-          eskiC:ctx.blok ? ctx.blok.correctQ : (ctx.day.freeCorrect || 0) };
+          eskiC:ctx.blok ? ctx.blok.correctQ : (ctx.day.freeCorrect || 0),
+          n:ctx.n, dogru:ctx.dogru,
+          durum:ctx.blok && ctx.blok.status === 'pending' ? 'pending' : null };
         if(ctx.blok){
           ctx.blok.actualQ = (Number(ctx.blok.actualQ) || 0) + ctx.n;
           if(ctx.dogru != null) ctx.blok.correctQ = (Number(ctx.blok.correctQ) || 0) + ctx.dogru;
@@ -34968,13 +35049,29 @@ R.Proposals = (function(){
         await R.Model.saveDay(p.date);
         return geri;
       },
-      async revert(s){
+      async revert(s, o){
         const day = R.S.days[s.date];
         if(!day) return;
+        const pr = (o && o.params) || {};
+        const n = s.n != null ? s.n : Math.round(Number(pr.count) || 0);
+        const d = s.n != null ? s.dogru
+          : (pr.correct == null || !isFinite(Number(pr.correct)) ? null : Math.round(Number(pr.correct)));
         if(s.blockId){
           const b = (day.blocks || []).find(x => x.id === s.blockId);
-          if(b){ b.actualQ = s.eskiQ; b.correctQ = s.eskiC; }
-        }else{ day.freeQ = s.eskiQ; day.freeCorrect = s.eskiC; }
+          if(b){
+            b.actualQ = farkGeri(b.actualQ, n, s.eskiQ);
+            if(d != null) b.correctQ = farkGeri(b.correctQ, d, s.eskiC);
+            durumGeri(b, s, o);
+          }
+        }else{
+          day.freeQ = farkGeri(day.freeQ, n, s.eskiQ);
+          if(d != null) day.freeCorrect = farkGeri(day.freeCorrect, d, s.eskiC);
+        }
+        ayniHedef(o, 'soru-yaz', x => x.date === s.date && (x.blockId || null) === (s.blockId || null))
+          .forEach(x => {
+            x.eskiQ = farkZincir(x.eskiQ, n, s.eskiQ);
+            if(d != null) x.eskiC = farkZincir(x.eskiC, d, s.eskiC);
+          });
         await R.Model.saveDay(s.date);
       },
     },
@@ -34992,15 +35089,17 @@ R.Proposals = (function(){
           after:String((ctx.day.paragraphActual || 0) + ctx.n) }];
       },
       async apply(p, ctx){
-        const geri = { date:p.date, eski:ctx.day.paragraphActual || 0 };
+        const geri = { date:p.date, eski:ctx.day.paragraphActual || 0, n:ctx.n };
         ctx.day.paragraphActual = (ctx.day.paragraphActual || 0) + ctx.n;
         await R.Model.saveDay(p.date);
         return geri;
       },
-      async revert(s){
+      async revert(s, o){
         const day = R.S.days[s.date];
         if(!day) return;
-        day.paragraphActual = s.eski;
+        const n = s.n != null ? s.n : Math.round(Number(((o && o.params) || {}).count) || 0);
+        day.paragraphActual = farkGeri(day.paragraphActual, n, s.eski);
+        ayniHedef(o, 'paragraf-yaz', x => x.date === s.date).forEach(x => { x.eski = farkZincir(x.eski, n, s.eski); });
         await R.Model.saveDay(s.date);
       },
     },
@@ -35018,15 +35117,17 @@ R.Proposals = (function(){
           after:String((ctx.day.problemActual || 0) + ctx.n) }];
       },
       async apply(p, ctx){
-        const geri = { date:p.date, eski:ctx.day.problemActual || 0 };
+        const geri = { date:p.date, eski:ctx.day.problemActual || 0, n:ctx.n };
         ctx.day.problemActual = (ctx.day.problemActual || 0) + ctx.n;
         await R.Model.saveDay(p.date);
         return geri;
       },
-      async revert(s){
+      async revert(s, o){
         const day = R.S.days[s.date];
         if(!day) return;
-        day.problemActual = s.eski;
+        const n = s.n != null ? s.n : Math.round(Number(((o && o.params) || {}).count) || 0);
+        day.problemActual = farkGeri(day.problemActual, n, s.eski);
+        ayniHedef(o, 'problem-yaz', x => x.date === s.date).forEach(x => { x.eski = farkZincir(x.eski, n, s.eski); });
         await R.Model.saveDay(s.date);
       },
     },
@@ -35045,15 +35146,18 @@ R.Proposals = (function(){
           after:ctx.h + ' saat' }];
       },
       async apply(p, ctx){
-        const geri = { date:p.date, eski:ctx.day.sleepHours };
+        const geri = { date:p.date, eski:ctx.day.sleepHours, yeni:ctx.h };
         ctx.day.sleepHours = ctx.h;
         await R.Model.saveDay(p.date);
         return geri;
       },
-      async revert(s){
+      async revert(s, o){
         const day = R.S.days[s.date];
         if(!day) return;
-        day.sleepHours = s.eski;
+        const yeni = s.yeni != null ? s.yeni : Number(((o && o.params) || {}).hours);
+        const sonraki = ayniHedef(o, 'uyku-yaz', x => x.date === s.date)[0];
+        if(sonraki){ if(sonraki.eski === yeni) sonraki.eski = s.eski; }
+        else if(day.sleepHours === yeni) day.sleepHours = s.eski;
         await R.Model.saveDay(s.date);
       },
     },
@@ -35078,17 +35182,24 @@ R.Proposals = (function(){
           after:((Number(ctx.blok.actualMin) || 0) + ctx.dk) + ' dk' }];
       },
       async apply(p, ctx){
-        const geri = { date:p.date, blockId:ctx.blok.id, eski:ctx.blok.actualMin };
+        const geri = { date:p.date, blockId:ctx.blok.id, eski:ctx.blok.actualMin, dk:ctx.dk,
+          durum:ctx.blok.status === 'pending' ? 'pending' : null };
         ctx.blok.actualMin = (Number(ctx.blok.actualMin) || 0) + ctx.dk;
         if(ctx.blok.status === 'pending') ctx.blok.status = 'done';
         await R.Model.saveDay(p.date);
         return geri;
       },
-      async revert(s){
+      async revert(s, o){
         const day = R.S.days[s.date];
         if(!day) return;
+        const dk = s.dk != null ? s.dk : Math.round(Number(((o && o.params) || {}).minutes) || 0);
         const b = (day.blocks || []).find(x => x.id === s.blockId);
-        if(b) b.actualMin = s.eski;
+        if(b){
+          b.actualMin = farkGeri(b.actualMin, dk, s.eski);
+          durumGeri(b, s, o);
+        }
+        ayniHedef(o, 'sure-yaz', x => x.date === s.date && x.blockId === s.blockId)
+          .forEach(x => { x.eski = farkZincir(x.eski, dk, s.eski); });
         await R.Model.saveDay(s.date);
       },
     },
@@ -35280,6 +35391,7 @@ R.Proposals = (function(){
     row.undo = await impl.apply(row.params || {}, res.ctx);
     row.status = 'applied';
     row.appliedAt = new Date().toISOString();
+    row.sira = yeniSira();
     await save();
     return { ok:true, row };
   }
@@ -35318,7 +35430,7 @@ R.Proposals = (function(){
     const row = (S.officeProposals || []).find(p => p.id === id);
     if(!row || row.status !== 'applied') return null;
     const impl = IMPL[row.action];
-    await impl.revert(row.undo || {});
+    await impl.revert(row.undo || {}, { params:row.params || {}, sonraki:sonrakiler(row) });
     row.status = 'undone';
     row.undoneAt = new Date().toISOString();
     await save();

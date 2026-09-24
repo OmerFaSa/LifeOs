@@ -750,4 +750,61 @@
       });
     });
   });
+  /* ==================== geri alma: sıra (HATALAR Y-6) ====================
+
+     «uyku 7» sonra «uyku 7,5» girilip ilki geri alınınca uyku boşalıyordu:
+     geri alma eski değeri mutlak yazıyordu. Geri alma yalnız O kaydın
+     yazdığını geri çevirir; sonraki kaydı ve elle düzenlemeyi ezmez. */
+
+  describe('Öneri — geri alma sırası (Y-6)', () => {
+    const G = '2026-03-01';
+    async function yaz(action, params){
+      const row = await SP.Proposals.propose({ action, source:'istek', kaynak:'rules',
+        params:Object.assign({ date:G }, params) });
+      expect((await SP.Proposals.approve(row.id)).ok).toBe(true);
+      return row;
+    }
+    const uyku = () => { const v = SP.Model.vitalsOf(G); return v ? v.sleep : null; };
+
+    it('değer yazan kayıt: sonraki değeri ezmez, geri alınmış değer dirilmez', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const a = await yaz('vital-yaz', { field:'sleep', value:7 });
+        const b = await yaz('vital-yaz', { field:'sleep', value:7.5 });
+        await SP.Proposals.undo(a.id);
+        expect(uyku()).toBe(7.5);
+        await SP.Proposals.undo(b.id);
+        expect(uyku() == null).toBe(true);
+        const c = await yaz('vital-yaz', { field:'sleep', value:7 });
+        const e = await yaz('vital-yaz', { field:'sleep', value:7 });
+        await SP.Proposals.undo(c.id);
+        expect(uyku()).toBe(7);
+        await SP.Proposals.undo(e.id);
+        expect(uyku() == null).toBe(true);
+      });
+    });
+
+    it('sonradan elle yapılan düzenleme silinmez', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const a = await yaz('vital-yaz', { field:'sleep', value:7 });
+        await SP.Model.saveVitals(G, { sleep:8 });
+        await SP.Proposals.undo(a.id);
+        expect(uyku()).toBe(8);
+      });
+    });
+
+    it('şikâyet şiddeti de aynı kurala uyar', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const id = SP.SYMPTOMS[0].id;
+        const a = await yaz('semptom-isaretle', { symptomId:id, severity:1 });
+        const b = await yaz('semptom-isaretle', { symptomId:id, severity:3 });
+        await SP.Proposals.undo(a.id);
+        expect(SP.Symptom.ofDay(G)[id]).toBe(3);
+        await SP.Proposals.undo(b.id);
+        expect(SP.Symptom.ofDay(G)[id] || 0).toBe(0);
+      });
+    });
+  });
 })();

@@ -700,4 +700,143 @@
       });
     });
   });
+  /* ==================== geri alma: fark tabanlı (HATALAR Y-6) ====================
+
+     «Geri al» eski değeri MUTLAK yazıyordu: sabah 40, akşam 20 soru girilip
+     sabahki geri alınınca 60 → 0 oluyor, akşamki geri alınınca geri
+     alınmış 40 diriliyordu; blok «tamamlandı» kalıyordu. Geri alma yalnız
+     O kaydın yaptığını geri çevirir: sonraki kaydı ve elle düzenlemeyi
+     silmez, girilmemiş alanı sıfıra çevirmez. */
+
+  describe('Öneri — geri alma sırası (Y-6)', () => {
+    const mat = () => (R.SUBJECTS || []).find(x => (x.aliases || []).indexOf('matematik') >= 0) || SUBJECT;
+    async function gun(){
+      reset();
+      await M.ensureDay(TODAY);
+      S.days[TODAY].freeQ = 0; S.days[TODAY].freeCorrect = 0;
+      S.days[TODAY].paragraphActual = 0; S.days[TODAY].sleepHours = null;
+      S.days[TODAY].blocks = [{ id:'b1', slot:'Ders', subject:mat().name, subjectId:mat().id,
+        topic:'Türev', topicId:null, targetMin:60, targetQ:0, status:'pending',
+        actualMin:null, actualQ:null, correctQ:null }];
+      return S.days[TODAY];
+    }
+    const yaz = (action, params) => P.hemen({ action, params:Object.assign({ date:TODAY }, params) });
+
+    it('toplamalı kayıt: sıradan bağımsız, sonraki kaydı silmez, geri alınan dirilmez', async () => {
+      await withTodayAsync(TODAY, async () => {
+        const d = await gun();
+        const a = await yaz('soru-yaz', { count:40 });
+        const b = await yaz('soru-yaz', { count:20 });
+        expect(d.freeQ).toBe(60);
+        await P.undo(a.row.id);
+        expect(d.freeQ).toBe(20);
+        await P.undo(b.row.id);
+        expect(d.freeQ).toBe(0);
+
+        const c = await yaz('paragraf-yaz', { count:10 });
+        const e = await yaz('paragraf-yaz', { count:5 });
+        await P.undo(e.row.id);
+        expect(d.paragraphActual).toBe(10);
+        await P.undo(c.row.id);
+        expect(d.paragraphActual).toBe(0);
+      });
+    });
+
+    it('bloğa yazılan soru ve doğru: girilmemiş alan geri alınınca yine girilmemiş, blok «bekliyor»', async () => {
+      await withTodayAsync(TODAY, async () => {
+        const d = await gun();
+        const b = d.blocks[0];
+        const a = await yaz('soru-yaz', { count:40, correct:30, subjectId:mat().id });
+        const c = await yaz('soru-yaz', { count:20, correct:15, subjectId:mat().id });
+        expect([b.actualQ, b.correctQ, b.status]).toEqual([60, 45, 'done']);
+        await P.undo(a.row.id);
+        expect([b.actualQ, b.correctQ, b.status]).toEqual([20, 15, 'done']);
+        await P.undo(c.row.id);
+        expect([b.actualQ, b.correctQ, b.status]).toEqual([null, null, 'pending']);
+      });
+    });
+
+    it('süre kaydı geri alınınca blok durumu da geri döner; başka iş kaldıysa «tamamlandı» kalır', async () => {
+      await withTodayAsync(TODAY, async () => {
+        const d = await gun();
+        const b = d.blocks[0];
+        const a = await yaz('sure-yaz', { minutes:60, subjectId:mat().id });
+        expect([b.actualMin, b.status]).toEqual([60, 'done']);
+        await P.undo(a.row.id);
+        expect([b.actualMin, b.status]).toEqual([null, 'pending']);
+
+        const s1 = await yaz('sure-yaz', { minutes:60, subjectId:mat().id });
+        const q1 = await yaz('soru-yaz', { count:20, subjectId:mat().id });
+        await P.undo(s1.row.id);
+        expect([b.actualMin, b.actualQ, b.status]).toEqual([null, 20, 'done']);
+        await P.undo(q1.row.id);
+        expect([b.actualMin, b.actualQ, b.status]).toEqual([null, null, 'pending']);
+      });
+    });
+
+    it('değer yazan kayıt: sonraki değeri ezmez, geri alınmış değer dirilmez', async () => {
+      await withTodayAsync(TODAY, async () => {
+        const d = await gun();
+        const a = await yaz('uyku-yaz', { hours:7 });
+        const b = await yaz('uyku-yaz', { hours:7.5 });
+        await P.undo(a.row.id);
+        expect(d.sleepHours).toBe(7.5);
+        await P.undo(b.row.id);
+        expect(d.sleepHours).toBe(null);
+        /* aynı değer iki kez */
+        const c = await yaz('uyku-yaz', { hours:7 });
+        const e = await yaz('uyku-yaz', { hours:7 });
+        await P.undo(c.row.id);
+        expect(d.sleepHours).toBe(7);
+        await P.undo(e.row.id);
+        expect(d.sleepHours).toBe(null);
+      });
+    });
+
+    it('sonradan elle yapılan düzenleme silinmez', async () => {
+      await withTodayAsync(TODAY, async () => {
+        const d = await gun();
+        const a = await yaz('uyku-yaz', { hours:7 });
+        d.sleepHours = 8;
+        await P.undo(a.row.id);
+        expect(d.sleepHours).toBe(8);
+        const q = await yaz('soru-yaz', { count:40 });
+        d.freeQ = 10;                 /* elle azaltılmış: 40 çıkarılamaz */
+        await P.undo(q.row.id);
+        expect(d.freeQ).toBe(10);
+        const r = await yaz('soru-yaz', { count:20 });
+        d.freeQ += 5;                 /* elle eklenmiş 5 kalır */
+        await P.undo(r.row.id);
+        expect(d.freeQ).toBe(15);
+      });
+    });
+
+    it('haftalık hedef: sonraki hedef değişikliğini ezmez', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const n = M.currentWeek();
+        await M.ensureWeek(n);
+        const w = S.weeks[M.weekId(n)];
+        const once = w.questionTarget;
+        const a = await P.hemen({ action:'week-target', params:{ weekN:n, questionTarget:once === 600 ? 650 : 600 } });
+        const b = await P.hemen({ action:'week-target', params:{ weekN:n, questionTarget:700 } });
+        await P.undo(a.row.id);
+        expect(w.questionTarget).toBe(700);
+        await P.undo(b.row.id);
+        expect(w.questionTarget).toBe(once);
+      });
+    });
+
+    it('eski biçimli anlık görüntü (fark bilgisi yok) önerinin parametresinden geri alınır', async () => {
+      await withTodayAsync(TODAY, async () => {
+        const d = await gun();
+        const a = await yaz('soru-yaz', { count:40 });
+        const b = await yaz('soru-yaz', { count:20 });
+        delete a.row.undo.n; delete a.row.undo.dogru; delete a.row.sira;
+        delete b.row.undo.n; delete b.row.undo.dogru;
+        await P.undo(a.row.id);
+        expect(d.freeQ).toBe(20);
+      });
+    });
+  });
 })();

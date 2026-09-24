@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'01a6876', at:'2026-09-24 11:17', dirty:true };
+SP.BUILD = { id:'29cb138', at:'2026-09-24 11:23', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -32250,6 +32250,36 @@ SP.Proposals = (function(){
        apply   : değişikliği yazar, geri alma anlık görüntüsünü DÖNDÜRÜR
        revert  : o anlık görüntüden geri alır */
 
+  /* ==================== geri alma sırası ====================
+
+     «uyku 7» sonra «uyku 7,5» girilip ilki geri alınınca uyku boşalıyordu:
+     geri alma eski değeri MUTLAK yazıyordu (ekip/HATALAR.md Y-6). Kural:
+     aynı alana sonra yazan bir kayıt varsa değer onundur, dokunulmaz ve
+     onun anlık görüntüsü bu kayıt hiç olmamış gibi düzeltilir; yoksa alan
+     hâlâ bu kaydın değerindeyse eski hâline döner, elle değiştirilmişse
+     dokunulmaz. */
+  function ayniHedef(o, action, kosul){
+    return ((o && o.sonraki) || []).filter(x => x.action === action && x.undo && kosul(x.undo))
+      .map(x => x.undo);
+  }
+
+  /* Uygulama sırası. `appliedAt` aynı milisaniyeye düşebilir; `sira` tekdir.
+     Sırası olmayan eski kayıt, sırası olandan önce uygulanmıştır. */
+  function sonraMi(x, row){
+    const a = Number(x.sira) || 0, b = Number(row.sira) || 0;
+    if(a || b) return a > b;
+    return String(x.appliedAt || '') > String(row.appliedAt || '');
+  }
+
+  function sonrakiler(row){
+    return liste().filter(x => x !== row && x.status === 'applied' && sonraMi(x, row))
+      .sort((x, y) => sonraMi(x, y) ? 1 : sonraMi(y, x) ? -1 : 0);
+  }
+
+  function yeniSira(){
+    return liste().reduce((m, x) => Math.max(m, Number(x.sira) || 0), 0) + 1;
+  }
+
   const KATALOG = {
 
     /* ---------------------------------------------------- vital yaz */
@@ -32277,13 +32307,20 @@ SP.Proposals = (function(){
       async apply(p, ctx){
         const eski = M.vitalsOf(p.date);
         const geri = { date:p.date, field:ctx.f.id,
-          value:eski ? eski[ctx.f.id] : null };
+          value:eski ? eski[ctx.f.id] : null, yeni:ctx.v };
         const patch = {};
         patch[ctx.f.id] = ctx.v;
         await M.saveVitals(p.date, patch);
         return geri;
       },
-      async revert(geri){
+      /* Sonraki kaydı ve elle düzenlemeyi ezmez (HATALAR Y-6). */
+      async revert(geri, o){
+        const yeni = geri.yeni != null ? geri.yeni : Number(((o && o.params) || {}).value);
+        const sonraki = ayniHedef(o, 'vital-yaz',
+          x => x.date === geri.date && x.field === geri.field)[0];
+        if(sonraki){ if(sonraki.value === yeni) sonraki.value = geri.value; return; }
+        const v = M.vitalsOf(geri.date);
+        if(!v || v[geri.field] !== yeni) return;
         const patch = {};
         patch[geri.field] = geri.value;
         await M.saveVitals(geri.date, patch);
@@ -32518,9 +32555,14 @@ SP.Proposals = (function(){
       async apply(p, ctx){
         const onceki = SP.Symptom.ofDay(p.date)[ctx.s.id] || 0;
         await SP.Symptom.setSymptom(p.date, ctx.s.id, ctx.sd);
-        return { date:p.date, symptomId:ctx.s.id, onceki };
+        return { date:p.date, symptomId:ctx.s.id, onceki, yeni:ctx.sd };
       },
-      async revert(geri){
+      async revert(geri, o){
+        const yeni = geri.yeni != null ? geri.yeni : Math.round(Number(((o && o.params) || {}).severity) || 0);
+        const sonraki = ayniHedef(o, 'semptom-isaretle',
+          x => x.date === geri.date && x.symptomId === geri.symptomId)[0];
+        if(sonraki){ if(sonraki.onceki === yeni) sonraki.onceki = geri.onceki; return; }
+        if((SP.Symptom.ofDay(geri.date)[geri.symptomId] || 0) !== yeni) return;
         await SP.Symptom.setSymptom(geri.date, geri.symptomId, geri.onceki);
       },
     },
@@ -32766,6 +32808,7 @@ SP.Proposals = (function(){
       p.undo = await eylem(p.action).apply(p.params, c.ctx);
       p.status = 'applied';
       p.appliedAt = new Date().toISOString();
+      p.sira = yeniSira();
       await save();
       return { ok:true, proposal:p };
     }catch(err){
@@ -32787,7 +32830,7 @@ SP.Proposals = (function(){
     const p = liste().find(x => x.id === id);
     if(!p || p.status !== 'applied' || !p.undo) return { ok:false, why:'Geri alınacak bir şey yok.' };
     try{
-      await eylem(p.action).revert(p.undo);
+      await eylem(p.action).revert(p.undo, { params:p.params || {}, sonraki:sonrakiler(p) });
       p.status = 'undone';
       await save();
       return { ok:true };

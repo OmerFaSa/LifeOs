@@ -12,8 +12,8 @@ D-8, D-9, D-10, D-11, D-14, D-17, D-19.
 
 | Kod | Durum | Commit |
 |---|---|---|
-| KR-1 | düzeltildi | (bu commit) |
-| Y-6 | sırada | |
+| KR-1 | düzeltildi | 29cb138 |
+| Y-6 | düzeltildi | (bu commit) |
 | Y-5 + O-4 + D-6 | sırada | |
 | Y-4 | sırada | |
 | Y-8 + B-2 + B-3 | sırada | |
@@ -116,3 +116,53 @@ komut olarak kalıyor.
 - Rozetlerin «olay» sayılıp geri almada kalıcı kalması (KR-1 etki
   paragrafı) ayrı bir tasarım konusudur; KR-1'in kökü (sahte ölçüm)
   kapandığı için bu yoldan artık rozet doğmuyor.
+
+---
+
+## Y-6 · «Geri al» sonraki kayıtları siliyordu
+
+**Ne değişti.** `AYS/src/js/core/proposals.js` ve `SPI/src/js/core/proposals.js`:
+
+- **Toplamalı alan** (`soru-yaz`, `paragraf-yaz`, `problem-yaz`, `sure-yaz`):
+  geri alma yalnız o kaydın eklediğini çıkarır (`farkGeri`). Geriye yalnız
+  bu kaydın payı kalmışsa alan eski hâline döner — girilmemiş blok alanı
+  yine «girilmemiş» olur, sıfır değil. Elle azaltılmış ve çıkarma eksiye
+  düşüyorsa dokunulmaz.
+- **Değer yazan alan** (AYS `uyku-yaz`, `week-target`; SPİ `vital-yaz`,
+  `semptom-isaretle`): aynı alana sonra yazan bir kayıt varsa değer onundur,
+  dokunulmaz; yoksa alan hâlâ bu kaydın değerindeyse eski hâline döner,
+  elle değiştirilmişse dokunulmaz.
+- **Zincir:** sonraki kayıtların anlık görüntüsü bu kayıt hiç olmamış gibi
+  düzeltilir; böylece geri alınmış kayıt sonradan «dirilmez».
+- **Blok durumu:** `soru-yaz`/`sure-yaz` bloğu «bekliyor»dan «tamamlandı»ya
+  çektiyse ve blokta başka iş kalmadıysa geri döner; kaldıysa sorumluluk
+  sonraki kayda devredilir.
+- **Uygulama sırası:** `approve` her kayda tekil bir `sira` yazar
+  (`appliedAt` aynı milisaniyeye düşebiliyordu). Sırası olmayan eski kayıt
+  önce uygulanmış sayılır; fark bilgisi olmayan eski anlık görüntü önerinin
+  parametresinden geri alınır (göç gerekmez).
+
+HATALAR konum listesinde olmayan ama bulgunun «bütün küçük eylemlerde»
+cümlesine giren `week-target` ve SPİ `semptom-isaretle` aynı kurala
+bağlandı. Kayıt oluşturan eylemler (`seans-ekle`, `ogun-ekle`, `block-add`
+vb.) zaten kimlikle siler; değişmedi.
+
+**Önce yazılan, kırmızı görülen testler:** AYS `tests/proposals.test.js`
+«Öneri — geri alma sırası (Y-6)» (7 test, 7 kırmızı), SPİ
+`tests/oneri.test.js` aynı başlık (3 test, 3 kırmızı). HATALAR'daki tekrar
+birebir testtedir: 40 + 20 → ilki geri → 20, ikincisi geri → 0.
+
+**Koşturulan denetimler ve çıktı.**
+
+```
+AYS  node tools/runtests.js   1709/1709 gecti
+SPI  node tools/runtests.js   1350/1350 gecti
+AYS  node tools/smoke.js      Duman testi temiz — 2 hedefte 38 ekran, 46 sekme
+SPI  node tools/smoke.js      Duman testi temiz — 2 hedefte 26 ekran, 74 sekme
+python3 build.py (AYS, SPI)   dist yeniden derlendi
+```
+
+**Bilinen sınır.** Elle yapılan bir düzenleme kaydın payını kısmen
+silmişse (ör. 40 eklendi, elle 20'ye indirildi, sonra 20 daha eklendi)
+hangi sayının kime ait olduğu belirsizdir; kural «eksiye düşüyorsa
+dokunma, düşmüyorsa yalnız bu kaydın payını çıkar»dır, tahmin etmez.
