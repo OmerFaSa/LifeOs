@@ -25,6 +25,20 @@
       });
     });
 
+    /* EKSİK VERİ SIFIR DEĞİLDİR: yalnız uyku girilen günde su «0 ml,
+       biliniyor» sayılıyordu (varsayılan kayıt suyu 0 başlatıyordu). */
+    it('yalnız uyku girilen günde su bilinmiyor sayılır', () => {
+      resetState();
+      pushVitals('2026-03-01', { sleep:8 });
+      const w = SP.Calc.minimumDay('2026-03-01').rows.find(r => r.id === 'water');
+      expect(w.known).toBeFalsy();
+      expect(w.detail).toBe('girilmedi');
+      expect(SP.Model.defaultVitals('2026-03-01').water).toBe(null);
+      /* Eski kayıttaki 0 ml gerçek bir ölçüm olamaz: yüklenirken «girilmemiş» olur. */
+      expect(SP.Model.normVitals({ date:'2026-03-01', sleep:7, water:0 }).water).toBe(null);
+      expect(SP.Model.normVitals({ date:'2026-03-01', water:1500 }).water).toBe(1500);
+    });
+
     it('kilosu bilinmeyende protein satırı bilinmiyor sayılır', () => {
       resetState();
       SP.S.profile.weightKg = null;

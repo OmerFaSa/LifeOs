@@ -42,7 +42,7 @@ SP.Calc = (function(){
           : Math.round(totals.protein) + ' / ' + proteinFloor + ' g' },
       { id:'water', label:SP.MINIMUM_DAY.water,
         ok:(v.water || 0) >= 2000, known:v.water != null,
-        detail:U.fmtNum(v.water || 0) + ' / 2.000 ml' },
+        detail:v.water != null ? U.fmtNum(v.water) + ' / 2.000 ml' : 'girilmedi' },
       { id:'move', label:SP.MINIMUM_DAY.move,
         ok:moveMin >= SP.LOAD_RULES.minDay.minutes, known:true,
         detail:moveMin + ' / ' + SP.LOAD_RULES.minDay.minutes + ' dk' },

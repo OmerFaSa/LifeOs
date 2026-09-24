@@ -281,6 +281,15 @@
       });
     });
 
+    /* Yalniz uyku girilen gun HKM'ye «su 0 ml, olculdu» gidiyordu. */
+    it('girilmeyen su HKM’ye veri yok olarak gider', async () => {
+      resetState();
+      SP.S.vitals[BUGUN] = Object.assign(SP.Model.defaultVitals(BUGUN), { sleep:7 });
+      await B().save({ level:'gelismis' });
+      const w = B().payload(BUGUN).metrics.water;
+      expect([w.value, w.cert]).toEqual([null, 'missing']);
+    });
+
     /* Bugunku degeri dunun tarihiyle yollamak, ambara SAHTE bir olcum
        yazmaktir: bugunden turetilen alanlar gecmis gunde gitmez. */
     it('bugünden türetilen alan geçmiş güne yazılmaz', async () => {

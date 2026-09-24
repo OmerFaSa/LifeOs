@@ -521,7 +521,9 @@ SP.Model = (function(){
 
   function defaultVitals(dateISO){
     return { date:dateISO, sbp:null, dbp:null, rhr:null, hrv:null, spo2:null, temp:null,
-      sleep:null, weight:null, waist:null, bodyfat:null, soreness:null, water:0, note:'',
+      /* Su da EKSİKSE null'dır: varsayılan 0, yalnız uyku girilen günü «0 ml
+         su, ölçüldü» diye HKM'ye ve asgari güne yazıyordu (AGENTS §1.2). */
+      sleep:null, weight:null, waist:null, bodyfat:null, soreness:null, water:null, note:'',
       /* Semptomlar: id -> şiddet (1-3). Boş nesne «şikâyet yok» demek
          DEĞİL «girilmemiş» demektir; ikisini ayırmak için ayrı bayrak. */
       symptoms:{}, symptomsLogged:false,
@@ -531,6 +533,15 @@ SP.Model = (function(){
 
   function vitalsOf(dateISO){
     return SP.S.vitals[dateISO] || null;
+  }
+
+  /* Depodan okunan kayıt. Eski kayıtlardaki su 0'ı varsayılandan kalmadır:
+     günde 0 ml su gerçek bir ölçüm olamaz, «girilmemiş» (null) okunur. */
+  function normVitals(row){
+    const d = row.date || row.id;
+    const v = Object.assign(defaultVitals(d), row);
+    if(v.water === 0) v.water = null;
+    return v;
   }
 
   function ensureVitals(dateISO){
@@ -846,7 +857,7 @@ SP.Model = (function(){
     S.vitals = {};
     ((await SP.Store.list('vitals')) || []).forEach(row => {
       const d = row.date || row.id;
-      S.vitals[d] = Object.assign(defaultVitals(d), row);
+      S.vitals[d] = normVitals(row);
     });
 
     S.meals = {};
@@ -929,7 +940,7 @@ SP.Model = (function(){
     /* tahlil */
     newLab, saveLab, deleteLab, applyDerived, seriesOf, latestOf, latestAll,
     /* gunluk olcum */
-    defaultVitals, vitalsOf, ensureVitals, saveVitals,
+    defaultVitals, normVitals, vitalsOf, ensureVitals, saveVitals,
     /* ogun */
     mealsOf, newMeal, saveMeals, addMeal, deleteMeal,
     /* antrenman */
