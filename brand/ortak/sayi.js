@@ -21,6 +21,10 @@
      028  Anlamlı fark        fark rozetinin rengi İŞARETTEN değil
                               metriğin YÖN tanımından gelir: +41 tekrar
                               borcu kötü, +3 net iyidir.
+     015  Son bilinen değer   yenilenirken iskelet değil son değer ve saati;
+                              ince, HAREKETSİZ bir tarama çizgisi.
+     170  Sesli okuma         ekran okuyucu birimi, etiketi, kesinliği ve
+                              farkı duyar (`sesli`, `html(…, { etiket, fark })`).
      018  Şüpheli giriş       dünkü değerden eşik kadar sapan giriş
                               kaydedilmeden önce sorulur; kod en olası
                               düzeltmeyi önerir. Eşik TEK YERDE: `SUPHE`.
@@ -274,7 +278,9 @@ window.LIFEOS = window.LIFEOS || {};
     }else{
       const d = sayiMi(s.deger) ? bicim(s.deger, s.ondalik) : String(s.deger);
       const b = s.birim && s.birim !== '%' ? '<span class="sayi__b">' + kac(s.birim) + '</span>' : '';
-      govde = '<span class="sayi__d">' + kac(s.birim === '%' ? '%' + d : d) + '</span>' + b;
+      /* Değer ile birim arasındaki boşluk görünmez (inline-flex, gap) ama
+         metinde durur: ekran okuyucu «268gün» diye birleşik okumaz (170). */
+      govde = '<span class="sayi__d">' + kac(s.birim === '%' ? '%' + d : d) + '</span>' + (b ? ' ' + b : '');
       if(tur === 'estimated' && Array.isArray(s.aralik) && s.aralik.length === 2
         && sayiMi(s.aralik[0]) && sayiMi(s.aralik[1])){
         govde += '<span class="sayi__ar">' + kac(bicim(s.aralik[0], s.ondalik) + '–'
@@ -291,8 +297,24 @@ window.LIFEOS = window.LIFEOS || {};
       }
     }
 
+    /* 015 — yenilenirken son bilinen değer ve saati DURUR: ekran boşalıp
+       dolmaz, iskelet yok. Tarama çizgisi HAREKETSİZDİR: aynı anda
+       hareket eden tek öğe sıradaki iştir (sadelik bütçesi, EKIP-PLANI
+       §1.2); yenilenen her sayı nabız atsaydı bütçe aşılırdı. */
+    let yenile = '', mesgul = '';
+    if(o.yenileniyor){
+      sinif.push('sayi--yenileniyor');
+      mesgul = ' aria-busy="true"';
+      yenile = '<span class="sayi__tarama" data-oz="015" aria-hidden="true"></span>'
+        + (!yok && s.zaman && !yasHtml ? '<span class="sayi__yas">' + kac(zamanMetni(s.zaman, o.simdi)) + '</span>' : '');
+    }
+
+    /* 170 — ekran okuyucu birimi, etiketi, kesinliği ve farkı duyar. */
     const ek = srEk(tur, s);
-    const sr = ek ? '<span class="sr-only">, ' + kac(ek) + '</span>' : '';
+    const once = o.etiket ? '<span class="sr-only">' + kac(o.etiket) + ': </span>' : '';
+    const sr = (ek ? '<span class="sr-only">, ' + kac(ek) + '</span>' : '')
+      + (o.fark ? '<span class="sr-only">, ' + kac(fark(o.fark).sr) + '</span>' : '')
+      + (o.yenileniyor ? '<span class="sr-only">, yenileniyor</span>' : '');
 
     let kart = '', odak = '';
     if(o.koken !== false && tur){
@@ -303,7 +325,31 @@ window.LIFEOS = window.LIFEOS || {};
 
     return '<span class="' + sinif.join(' ') + '" data-oz="024"'
       + ' data-kesinlik="' + kac(tur || '') + '"' + (tur ? '' : ' data-etiketsiz="1"')
-      + odak + '>' + govde + yasHtml + sr + kart + '</span>';
+      + mesgul + odak + '>' + once + govde + yasHtml + yenile + sr + kart + '</span>';
+  }
+
+  /* 170 — sayının SESLİ okunuşu, tek dize: grafik, çip ya da bildirim gibi
+     `aria-label` isteyen yerler için. Kesinlik her zaman söylenir (ölçüldü
+     de): kulakta alt çizgi yoktur. Etiketsiz sayı etiketsiz diye okunur. */
+  function sesli(s, o){
+    s = s || {};
+    o = o || {};
+    const id = kesinlikOf(s);
+    const yok = id === 'missing' || !varMi(s);
+    let t = o.etiket ? o.etiket + ': ' : '';
+    if(yok){
+      t += 'veri yok';
+    }else{
+      t += birimli(sayiMi(s.deger) ? bicim(s.deger, s.ondalik) : String(s.deger), s.birim);
+      const e = L.KESINLIK_ILE ? L.KESINLIK_ILE(id) : null;
+      t += e ? ', ' + e.ad : ', kesinlik etiketi yok';
+      if(id === 'estimated' && Array.isArray(s.aralik) && sayiMi(s.aralik[0]) && sayiMi(s.aralik[1])){
+        t += ', ' + bicim(s.aralik[0], s.ondalik) + ' ile ' + bicim(s.aralik[1], s.ondalik) + ' arası';
+      }
+    }
+    if(o.fark) t += ', ' + fark(o.fark).sr;
+    if(o.yenileniyor) t += ', yenileniyor';
+    return t;
   }
 
   /* Düz metin: model istemine, bildirime, dışa aktarıma. Etiket yazıda
@@ -500,6 +546,7 @@ window.LIFEOS = window.LIFEOS || {};
     kokenHtml:kokenHtml,
     html:html,
     metin:metin,
+    sesli:sesli,
     kutuKesinligi:kutuKesinligi,
     kutuGlifi:kutuGlifi,
     fark:fark,

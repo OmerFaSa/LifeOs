@@ -453,4 +453,62 @@ describe('018 · Şüpheli giriş sorusu', () => {
   });
 });
 
+describe('015 · Son bilinen değer', () => {
+
+  it('oz-015 Veri yenilenirken iskelet yerine son bilinen değer ve saati durur; üstte ince bir tarama çizgisi.', () => {
+    const s = { deger:71.4, birim:'kg', kesinlik:'measured', zaman:new Date(2026, 8, 24, 14, 10).toISOString() };
+    const k = sahne(S().html(s, { yenileniyor:true, koken:false, simdi:new Date(2026, 8, 24, 15, 0) }));
+    try{
+      const el = k.querySelector('.sayi');
+      expect(el.classList.contains('sayi--yenileniyor')).toBeTruthy();
+      expect(el.getAttribute('aria-busy')).toBe('true');
+      expect(el.querySelector('.sayi__d').textContent).toBe('71,4');       // değer kaybolmaz
+      expect(el.querySelector('.sayi__yas').textContent).toBe('bugün 14:10');
+      const c = el.querySelector('.sayi__tarama');
+      expect(c.getAttribute('data-oz')).toBe('015');
+      const st = getComputedStyle(c);
+      expect(st.position).toBe('absolute');
+      /* Tarama çizgisi hareket etmez: tek canlı öğe sıradaki iştir. */
+      expect(st.animationName).toBe('none');
+    }finally{ k.remove(); }
+  });
+
+  it('oz-015 hiç değer yokken yenilenen sayı iskelet değil «—»', () => {
+    const h = S().html({ deger:null, kesinlik:'missing' }, { yenileniyor:true, koken:false });
+    expect(h).toContain('—');
+    expect(h).toContain('sayi__tarama');
+    expect(h.indexOf('sayi__yas') < 0).toBeTruthy();
+  });
+
+  it('oz-015 yenilenmiyorsa çizgi ve meşgul işareti yok', () => {
+    const h = S().html({ deger:1, kesinlik:'measured' }, { koken:false });
+    expect(h.indexOf('sayi__tarama') < 0).toBeTruthy();
+    expect(h.indexOf('aria-busy') < 0).toBeTruthy();
+  });
+});
+
+describe('170 · Sesli okuma metni', () => {
+
+  it('oz-170 Her sayı ekran okuyucuya birimi, etiketi ve farkıyla birlikte okunur.', () => {
+    const o = { etiket:'Son net', fark:{ deger:3, yon:S().YON.ARTIS_IYI, ek:'önceki denemeden' } };
+    expect(S().sesli({ deger:82, kesinlik:'computed' }, o)).toBe('Son net: 82, hesaplandı, önceki denemeden 3 arttı, iyi yönde');
+    const k = sahne(S().html({ deger:82, kesinlik:'computed' }, Object.assign({ koken:false }, o))
+      + S().html({ deger:268, birim:'gün', kesinlik:'estimated' }, { etiket:'Sınava kalan', koken:false }));
+    try{
+      const [a, b] = k.querySelectorAll('.sayi');
+      expect(a.textContent).toBe('Son net: 82, hesaplandı, önceki denemeden 3 arttı, iyi yönde');
+      expect(b.textContent).toBe('Sınava kalan: 268 gün, tahmin');
+    }finally{ k.remove(); }
+  });
+
+  it('oz-170 kesinlik kulakta da söylenir; etiketsiz sayı etiketsiz diye okunur', () => {
+    expect(S().sesli({ deger:71.4, birim:'kg', kesinlik:'measured' })).toBe('71,4 kg, ölçüldü');
+    expect(S().sesli({ deger:5 })).toBe('5, kesinlik etiketi yok');
+    expect(S().sesli({ deger:0, kesinlik:'missing' }, { etiket:'Uyku' })).toBe('Uyku: veri yok');
+    expect(S().sesli({ deger:268, birim:'gün', kesinlik:'estimated', aralik:[250, 290] }))
+      .toBe('268 gün, tahmin, 250 ile 290 arası');
+    expect(S().sesli({ deger:34, birim:'%', kesinlik:'computed' })).toBe('%34, hesaplandı');
+  });
+});
+
 })();

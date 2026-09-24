@@ -63,6 +63,23 @@
 }
 
 /* ================================================================
+   015 · SON BİLİNEN DEĞER — yenilenirken değer ve saati durur
+   Tarama çizgisi HAREKETSİZ: tek canlı öğe sıradaki iştir (§1.2).
+   ================================================================ */
+
+.sayi__tarama{
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(-1 * var(--sp-1));
+  height:2px;
+  background:var(--primary);
+  opacity:.35;
+  border-radius:1px;
+}
+.sayi--yenileniyor > .sayi__d{ color:var(--text-2); }
+
+/* ================================================================
    025 · KÖKEN KARTI — üzerine gelince, odakta ya da basılı tutunca
    016 · TERİM İPUCU aynı açılır kalıbı kullanır: tek davranış öğrenilir.
    Açılır katmandır; gölge YALNIZ burada (§1.2).
