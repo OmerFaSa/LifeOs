@@ -11,6 +11,51 @@
 
 ---
 
+## Tur 2 — tek tasarım (ekip/EKIP-PLANI.md) · H yazar
+
+> Tur 1 (aşağıda) kapalıdır; kodda ona bağlantı var, silinmez. Tur 2 bulguları
+> buraya, en yenisi üstte, `T2-NN` koduyla yazılır. Biçim AGENTS §4:
+> `dosya:satır · ne yanlış · hangi girdide bozulur · nasıl doğrulanır`.
+> Sahibi düzeltince satırın «Durum» hücresine commit yazılır.
+
+| Kod | Sahip | Durum | Özet |
+|---|---|---|---|
+| T2-02 | K (137) | açık | AYS Ofis ve Danışma'da ajanın okuduğu veri ham kimlikle yazılıyor |
+| T2-01 | K | açık | Fark rozeti yuvarlanıp 0 olan farkı «+0» ve iyi/kötü renkle gösteriyor |
+
+### T2-02 · AYS Ofis'te ham veri kimlikleri ekranda (düşük)
+
+- **Konum:** `AYS/src/js/screens/office.js:108` («Masasındaki veri: …»),
+  `AYS/src/js/screens/team.js:300` («Okuduğu veri: …»); veri
+  `AYS/src/js/data/agents.js` `reads` dizileri.
+- **Ne yanlış:** `agent.reads.join(' · ')` iç kimlikleri olduğu gibi basıyor:
+  «durum_ozeti · konu_riski · puan_tahmini · gunun_akisi», «haftalar (review)».
+  Ekranda alt çizgili ASCII Türkçe ve İngilizce kelime (AGENTS §1.8).
+- **Tekrar:** AYS › Ofis ya da Danışma › herhangi bir koç (boş profil yeter).
+- **Doğrulama:** AYS › Ofis'i aç, koç kartının altında «gunun_akisi» okunur. Bulan:
+  ekrandaki bütün metinde hem «günün» hem «gunun» geçen kelimeleri arayan tek
+  seferlik tarama (tek aday buydu; ESP'deki «olur» gerçek kelime). SPİ ve ESP bu
+  listeyi ekrana basmıyor.
+- **Düzeltme yönü:** katalog 137 «Ajanın baktığı veri» bu satırı zaten yeniden
+  yazıyor: kimlik → Türkçe ad eşlemesi (tek tabloda), çip + kesinlik etiketi.
+
+### T2-01 · Fark rozeti: yuvarlanınca 0 olan fark «+0» ve renkli (düşük)
+
+- **Konum:** `brand/ortak/sayi.js:351-356` (`fark`), kopyaları üç arayüzde.
+- **Ne yanlış:** «değişmedi» kararı HAM değere bakıyor (`v === 0`), yazılan ise
+  YUVARLANMIŞ değer. Gösterilen hassasiyette sıfır olan fark «+0» diye yazılıyor
+  ve yönüne göre iyi/kötü renk alıyor; ekran okuyucu «0 arttı, iyi yönde» diyor.
+- **Tekrar:** `fark({ deger:0.3, yon:'artis-iyi', ondalik:0, ek:'dünden' })` →
+  `{ anlam:'iyi', metin:'+0 dünden', sr:'dünden 0 arttı, iyi yönde' }`;
+  `fark({ deger:-0.04, yon:'azalis-iyi', ondalik:1, birim:'kg' })` → «−0 kg», iyi.
+- **Doğrulama:** `node -e "global.window={};require('./brand/ortak/sayi.js');
+  console.log(window.LIFEOS.SAYI.fark({deger:0.3,yon:'artis-iyi',ondalik:0}))"`.
+- **Düzeltme yönü:** önce yuvarla (`bicim` ile aynı hassasiyet), yuvarlanmış
+  değer 0 ise «değişmedi» / nötr; anlam da yuvarlanmış değerden. Önce bu iki
+  girdiyle kırmızı test (`oz-028`).
+
+---
+
 ## 0. Yönetici özeti
 
 Depo kendi ölçütleriyle temiz: birleştirilmiş taban üzerinde **4 936 birim
