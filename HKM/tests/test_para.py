@@ -17,7 +17,8 @@ def run():
         r = para.tani("market 450 TL, kahve 85,50 ve kira 12.500 lira")
         eq([(x["kategori"], x["kurus"], x["yon"]) for x in r["kayitlar"]],
            [("Gıda", 45000, "gider"), ("Dışarıda yemek", 8550, "gider"), ("Konut", 1250000, "gider")])
-        eq(para.tani("maaş 30.000 geldi")["kayitlar"][0][ "yon"], "gelir")
+        eq(para.tani("maaş 30.000 geldi")["kayitlar"][0]["yon"], "gelir")
+        eq(para.tani("kirayı ödedim 12.000")["kayitlar"][0]["kategori"], "Konut")
         eq(para.tani("dün taksiye 120 tl verdim")["gun_kayma"], -1)
         eq(para.tani("dün taksiye 120 tl verdim")["kayitlar"][0]["kategori"], "Ulaşım")
         eq(para.tani("20 $ kitap")["kayitlar"][0]["birim"], "USD")
@@ -27,7 +28,10 @@ def run():
         eq(para.tani("uyku 7"), None)
         eq(para.tani("para geri al"), None)
         # Modul kisa kayitlari para DEGILDIR: kategori sozcugu tek basina kanit degil.
-        for m in ("kitap 30", "spor 45", "deneme 80", "yemek 2", "yol 5"):
+        for m in ("kitap 30", "spor 45", "deneme 80", "yemek 2", "yol 5",
+                  # entegre.js yakaladi: «paragraf» «para» ile baslar ama para degildir.
+                  "paragraf 20", "30 dakika ara verdim", "2 saat ders aldım",
+                  "deneme sonucu 85 geldi", "kiraz 50"):
             eq(para.tani(m), None, m)
         # Ayni mesajda acik bir para parcasi varsa oteki tutarlar da paradir.
         eq(len(para.tani("kitap 120 ve market 300 tl")["kayitlar"]), 2)

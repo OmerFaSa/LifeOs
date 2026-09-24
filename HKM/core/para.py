@@ -30,10 +30,16 @@ BIRIM = {"tl": "TRY", "₺": "TRY", "lira": "TRY", "try": "TRY",
 BIRIM_YAZ = {"TRY": "TL", "USD": "USD", "EUR": "EUR"}
 TUTAR = re.compile(r"(?<![\w.,])(₺\s?)?(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d{1,2})|\.(\d{1,2}))?(?![\d])"
                    r"\s*(tl|₺|lira|try|\$|usd|dolar|€|eur|euro|avro)?(?![\wçğıöşü])", re.I)
+# YON sozcukleri: kayit zaten para ise gelir mi gider mi. KANIT degildir:
+# «deneme sonucu 85 geldi» para degildir.
 GELIR = ("maaş", "maas", "gelir", "geldi", "yattı", "yatti", "kazandım", "kazandim", "harçlık",
-         "harclik", "burs", "iade", "ödeme aldım", "odeme aldim", "satış", "satis", "prim")
-PARA_SOZ = ("harcadım", "harcadim", "harcama", "ödedim", "odedim", "ödeme", "odeme", "verdim",
-            "aldım", "aldim", "fatura", "kira", "market", "maaş", "maas", "borç", "borc", "para")
+         "harclik", "burs", "iade", "satış", "satis", "prim")
+# KANIT sozcukleri: tek basina «bu para» dedirten sozcukler. «aldım», «verdim»
+# ve «para» bilerek YOK: «2 saat ders aldım», «30 dakika ara verdim»,
+# «paragraf 20» para degildir (entegre.js bu son hatayi yakaladi).
+PARA_SOZ = ("harcadım", "harcadim", "harcama", "ödedim", "odedim", "ödeme", "odeme",
+            "fatura", "kira", "market", "maaş", "maas", "borç", "borc", "burs", "harçlık",
+            "harclik", "gelir", "lira")
 KATEGORI = (
     ("Gıda", ("market", "manav", "bakkal", "fırın", "firin", "kasap", "pazar", "migros", "bim", "a101", "şok")),
     ("Dışarıda yemek", ("kafe", "kahve", "restoran", "lokanta", "döner", "doner", "yemek", "pizza")),
@@ -65,8 +71,13 @@ def _tutar(m):
     return kurus, birim
 
 
+# Sozcuk KENDISI ya da yaygin bir ekle: «kira», «kirayı», «kirası»; ama «kiraz»
+# ya da «paragraf» degil.
+EK = r"(?:[ıiuü]|y[ıiuüae]|s[ıiuü]|[ıiuü]n[ıiuü]|y[ıiuü]|y[ae]|d[ae]n?|t[ae]n?|[ıiuü]m|[ıiuü]n|l[ae]r[ıi]?|n[ıi])?"
+
+
 def _kelime_var(k, sozler):
-    return any(re.search(r"(?<![\wçğıöşü])" + re.escape(s), k) for s in sozler)
+    return any(re.search(r"(?<![\wçğıöşü])" + re.escape(s) + EK + r"(?![\wçğıöşü])", k) for s in sozler)
 
 
 def _acik(p):
@@ -74,7 +85,7 @@ def _acik(p):
     («kitap», «spor») tek basina kanit DEGIL: «kitap 30» ESP'nin, «spor 45»
     SPI'nin kisa kaydidir."""
     m = TUTAR.search(p)
-    return bool(m and (_tutar(m)[1] or _kelime_var(_kucuk(p), PARA_SOZ + GELIR)))
+    return bool(m and (_tutar(m)[1] or _kelime_var(_kucuk(p), PARA_SOZ)))
 
 
 def _parca(p, baglam=False):
