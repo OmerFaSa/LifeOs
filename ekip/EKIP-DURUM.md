@@ -24,8 +24,9 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## KARTLAR (K)
 
-- **Şu an:** K1 P2 bitti (13/13, ekrana dokunmadan). Dokunduğum yer yalnız
-  `brand/ortak/{sayi,grafik,oneri}.js`, testleri ve `kart.css` (+ ortak.py kopyaları, dist)
+- **Şu an:** K1 P3 (kullanıcı onayıyla): 32 geçen dönem gölgesi, 36 dağılım şeridi, 40 birikim eğrisi.
+  Dokunduğum yer YALNIZ `brand/ortak/grafik.js`, `grafik.test.js`, `kart.css` (+ ortak.py kopyaları,
+  dist). Ekran, `index.html`, T ve H dosyası yok. AYS teslim edilirse bırakıp K2'ye geçerim.
 - **Sahiplendiğim çekirdek dosyalar:** — (üç `ui.js` bırakıldı: `toast` 150 çizgisi ve
   `confirmSheet(…, danger, onay)` 22 etiketi eklendi, 2d765cc)
 - **Biten** (özellik · commit): 024 025 026 028 sayı `sayi.js` · 009cf92; 027 035 037 041 grafik
