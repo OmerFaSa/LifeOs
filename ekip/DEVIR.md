@@ -157,7 +157,11 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   değil. Kullanıcıya soruldu; onaysız yapılmaz.
 - ✅ 16 İlk kurulum testleri: `setup.test.js` üçünde (gerçek alt sayfa + form; AYS takvim
   doğrulaması, hedef sırası, plan üretimi). Kapsam AYS %13→%75, SPİ %20→%86, ESP %0→%100.
-- ⏳ 17 ekran sözleşmesi AYS/ESP · 18 labs.js ve AYS llm.js.
+- ✅ 17 Ekran sözleşmesi AYS/ESP: `ekran.test.js` (kayıt, sözleşme alanları, gezinme → ekran,
+  her ekran tek bölümde, boş/dolu çizim çökmez). Test sayfaları bütün ekranları + `app.js`'i
+  yükler (AYS'ye `__AYS_NO_BOOT__` bayrağı eklendi; eksik 4 dosya: build, designs, listen, talk).
+  AYS 1664, ESP 1339; AYS duman temiz.
+- ⏳ 18 labs.js ve AYS llm.js.
 
 ### Part 9 — Tek tasarım + çekmece düzeni (EN SON)
 **Kullanıcı 2026-09-24: «tasarımı en son yapacağız, benden onay isteyeceksin; onun harici

@@ -1507,4 +1507,6 @@ R.App = (function(){
     notifyState, askNotify, notifyFromOffice };
 })();
 
-R.App.boot();
+/* Test paketi bu dosyayı da yükler (ekran sözleşmesini denetlemek için)
+   ama açılışı tetiklememelidir: test sayfasında #app kabuğu yoktur. */
+if(!window.__AYS_NO_BOOT__) R.App.boot();

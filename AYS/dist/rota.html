@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'246d08b', at:'2026-09-24 00:44', dirty:true };
+R.BUILD = { id:'a97f1c6', at:'2026-09-24 00:57', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -51889,5 +51889,7 @@ R.App = (function(){
     notifyState, askNotify, notifyFromOffice };
 })();
 
-R.App.boot();
+/* Test paketi bu dosyayı da yükler (ekran sözleşmesini denetlemek için)
+   ama açılışı tetiklememelidir: test sayfasında #app kabuğu yoktur. */
+if(!window.__AYS_NO_BOOT__) R.App.boot();
 </script>

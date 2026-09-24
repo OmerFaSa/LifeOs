@@ -27,6 +27,8 @@
 </style>
 </head>
 <body>
+<div id="overlay-root"></div>
+<script>window.__AYS_NO_BOOT__ = true;</script>
 
 <div class="head">
   <h1 style="font-size:22px">Rota — Test Paketi</h1>
@@ -34,10 +36,9 @@
 </div>
 <div id="out" class="muted">Testler çalışıyor…</div>
 
-<!-- uygulama modulleri. app.js YUKLENMEZ: acilis tetiklenmesin.
-     Ekranlardan yalniz ofis ekrani yuklenir; kendisi bir IIFE'dir ve
-     yuklendiginde R.Screens.office'i tanimlamaktan baska bir sey yapmaz.
-     3B oda ve ayar sayfasi testleri bu yuzden gercek cizimi olcebiliyor. -->
+<!-- uygulama modulleri. Ekranlar ve app.js en sonda yuklenir (ekran
+     sozlesmesi); acilis __AYS_NO_BOOT__ ile tetiklenmez. Her ekran bir
+     IIFE'dir ve yuklendiginde yalniz R.Screens.<id>'yi tanimlar. -->
 <!-- veri once, cekirdek sonra: index.html ile ayni sira -->
 <script src="../js/data/kademeler.js"></script>
 <script src="../js/data/basarimlar.js"></script>
@@ -118,12 +119,35 @@
 <script src="../js/core/entry.js"></script>
 <script src="../js/core/komut.js"></script>
 <script src="../js/core/palette.js"></script>
+<!-- uygulamanin yukledigi ama testlerin yuklemedigi dort dosya (ekran sozlesmesi icin) -->
+<script src="../js/data/build.js"></script>
+<script src="../js/data/designs.js"></script>
+<script src="../js/core/listen.js"></script>
+<script src="../js/core/talk.js"></script>
 <script src="../js/core/setup.js"></script>
-<script src="../js/screens/office.js"></script>
+<!-- Ekran sozlesmesi (borc 17): BUTUN ekranlar ve kabuk yuklenir; acilis
+     __AYS_NO_BOOT__ ile tetiklenmez. -->
+<script src="../js/screens/today.js"></script>
+<script src="../js/screens/week.js"></script>
+<script src="../js/screens/exams.js"></script>
+<script src="../js/screens/cards.js"></script>
+<script src="../js/screens/learn.js"></script>
+<script src="../js/screens/quiz.js"></script>
 <script src="../js/screens/solve.js"></script>
-<!-- sekme seridi testi bu iki ekrani cizer -->
+<script src="../js/screens/subjects.js"></script>
+<script src="../js/screens/topic.js"></script>
+<script src="../js/screens/plan.js"></script>
+<script src="../js/screens/target.js"></script>
+<script src="../js/screens/progress.js"></script>
 <script src="../js/screens/analytics.js"></script>
+<script src="../js/screens/protocols.js"></script>
+<script src="../js/screens/rutbe.js"></script>
 <script src="../js/screens/guide.js"></script>
+<script src="../js/screens/profiles.js"></script>
+<script src="../js/screens/office.js"></script>
+<script src="../js/screens/team.js"></script>
+<script src="../js/screens/meeting.js"></script>
+<script src="../js/app.js"></script>
 
 <!-- test altyapisi ve paketler -->
 <script src="harness.js"></script>
@@ -146,6 +170,7 @@
 <script src="sinavprofil.test.js"></script>
 <script src="sinavoneri.test.js"></script>
 <script src="setup.test.js"></script>
+<script src="ekran.test.js"></script>
 <script src="testkitabi.test.js"></script>
 <script src="tanitim.test.js"></script>
 <script src="simge.test.js"></script>

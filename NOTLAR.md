@@ -1558,7 +1558,7 @@ yazmamış olurdum.
 | ~~ESP ses katmanı sınanmıyor~~ | — | — | **kapandı** — `ses.test.js`; %50 / %50 / %67. Kalanı gerçek mikrofon ister |
 | ~~ESP komut paleti %0~~ | — | — | **kapandı** — `palet.test.js`; %41. Kalanı `onayGoster`/`saveQuick`, gerçek alt sayfa ister |
 | ~~`setup.js` üçünde de düşük~~ | — | — | **kapandı** — `setup.test.js` üçünde (gerçek alt sayfa + form); AYS %13 → %75 · SPİ %20 → %86 · ESP %0 → %100 |
-| Ekran sözleşmesi yalnız SPİ'de | test sayfaları | orta | AYS 20 ekranın 4'ünü, ESP 15 ekranın 0'ını yüklüyor; SPİ'deki «Ekranlar — sözleşme» paketi taşınmalı |
+| ~~Ekran sözleşmesi yalnız SPİ'de~~ | — | — | **kapandı** — `ekran.test.js` AYS (20/20 ekran, boş + dolu çizim) ve ESP (15/15, iç sekmeler dahil); iki test sayfası bütün ekranları ve `app.js`'i yükler, açılış `__AYS_NO_BOOT__` / `__ESP_NO_BOOT__` ile tetiklenmez |
 | ~~ESP `state.js` silme yolları~~ | — | — | **kapandı** — `silme.test.js`, on üç aile tek tabloda; %66 → %92 |
 | ~~ESP `store.js` kapsamı %54~~ | — | — | **kapandı** — ortak `store.test.js` üçüne birden yayılıyor; %86 |
 
