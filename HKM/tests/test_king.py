@@ -348,3 +348,21 @@ def run():
             metin = " ".join(r["errors"])
             ok(any(h in metin for h in "ıİşŞğĞüÜöÖçÇ"), "%s: %s" % (tur, metin))
     test("reddedilen istegin cumlesi duzgun Turkce", t_hata_turkce)
+
+    def t_is_gecmisi():
+        # Fikir 44: is gecmisi — istek, cikti, tahmini/gercek sure, cikti
+        # kullanildi mi (niyetin cevabi). Olculmeyen maliyet «veri yok».
+        con = db.connect(":memory:")
+        e = _ac(con)["emir"]
+        _bitir(con)
+        g = king.gecmis(con)
+        eq([x["id"] for x in g["isler"]], [e["id"]])
+        x = g["isler"][0]
+        eq((x["modul"], x["durum"]), ("spi", "bitti"))
+        ok(x["sure"]["tahmin"] and x["sure"]["gercek"], x["sure"])
+        eq(x["maliyet"]["etiket"], "veri yok")          # kural isi: cagri yok
+        ok(x["cikti"]["kayit_id"])
+        eq(x["kullanim"]["durum"], "bekliyor")           # teklif modulde bekliyor
+        con.execute("UPDATE intents SET state='applied'")
+        eq(king.gecmis(con)["isler"][0]["kullanim"]["durum"], "uygulandı")
+    test("is gecmisi: istek, cikti, sure, maliyet, kullanim", t_is_gecmisi)

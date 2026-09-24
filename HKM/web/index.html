@@ -653,6 +653,7 @@ details.detay > summary:hover{ color:var(--fg); }
     <!-- =========================== SİSTEMLER ========================= -->
     <div data-bolme="sistemler" hidden>
       <div class="gun"><h1>Sistemler</h1></div>
+      <div class="card" id="tani"></div>
       <div class="card" id="sistemler"><p class="muted">Yükleniyor…</p></div>
       <details class="detay">
         <summary>Haftalık karşılaştırma</summary>
@@ -3190,6 +3191,24 @@ details.detay > summary:hover{ color:var(--fg); }
     if(sp && sp.metin) h += '<p class="muted" style="margin-top:8px">' + esc(sp.metin) + '</p>';
     var mp = k && k.maliyet_sapmasi;
     if(mp && mp.metin) h += '<p class="muted">' + esc(mp.metin) + '</p>';
+    /* İş geçmişi (fikir 44): istek, çıktı, tahmin ve gerçek, çıktının modülde
+       ne olduğu. Sayılar HKM'den; ölçülmeyen «veri yok». */
+    var gc = (k && k.gecmis && k.gecmis.isler) || [];
+    if(gc.length){
+      h += '<div class="tag" style="margin-top:14px">İş geçmişi</div><div class="scroll"><table>'
+        + '<thead><tr><th>Tarih</th><th>İş</th><th>Süre (tahmin → gerçek)</th>'
+        + '<th>Maliyet (tahmin → gerçek)</th><th>Çıktı</th></tr></thead><tbody>'
+        + gc.map(function(x){
+          var usd = function(v){ return v == null ? '—' : '$' + Number(v).toFixed(4); };
+          return '<tr><td>' + esc(x.tarih) + '</td><td>' + esc(MODUL[x.modul] || String(x.modul).toUpperCase()) + ' · '
+            + esc(x.konu || x.ad) + ' <span class="muted">(' + esc(EMIR_DURUM[x.durum] || x.durum)
+            + ')</span></td><td>' + esc(x.sure.tahmin || '—') + ' → ' + esc(x.sure.gercek || 'veri yok')
+            + '</td><td>' + usd(x.maliyet.tahmin_usd) + ' → '
+            + (x.maliyet.gercek_usd == null ? esc(x.maliyet.etiket) : usd(x.maliyet.gercek_usd))
+            + '</td><td>' + (x.cikti.kayit_id ? 'kayıt #' + esc(x.cikti.kayit_id) + ' · ' : '')
+            + esc(x.kullanim.durum) + '</td></tr>';
+        }).join('') + '</tbody></table></div><p class="muted">' + esc(k.gecmis.not) + '</p>';
+    }
     $('ofis-king').innerHTML = h;
   }
 
@@ -4626,7 +4645,23 @@ details.detay > summary:hover{ color:var(--fg); }
     profilMuhurCiz(p.body.muhurler);
   }
 
+  /* Bozuk olanı söyleyen tek ekran (fikir 48, core/tani.py): durum, cümle
+     ve düzeltme yeri HKM'den; bu sayfa yalnız yazar. */
+  function taniCiz(r){
+    var IZ = { tamam:['tamam', 'ok'], uyari:['uyarı', 'warn'], bozuk:['bozuk', 'danger'] };
+    $('tani').innerHTML = '<div class="tag">Durum · ne çalışıyor, ne bozuk</div>'
+      + '<p><b>' + esc(r.metin) + '</b></p><div class="scroll"><table><tbody>'
+      + r.maddeler.map(function(m){
+        var iz = IZ[m.durum] || [m.durum, ''];
+        return '<tr><td>' + esc(m.ad) + '</td><td class="' + iz[1] + '">' + esc(iz[0]) + '</td><td>'
+          + esc(m.metin) + (m.nerede ? ' <span class="muted">→ ' + esc(m.nerede) + '</span>' : '')
+          + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+
   async function yukleSistemler(t){
+    var tn = await api('/api/tani');
+    if(tn.status === 200) taniCiz(tn.body);
     var ser = await api('/api/series?date=' + t + '&days=60');
     if(ser.status === 200) sistemlerCiz(ser.body);
     var i = await api('/api/twin?date=' + t);

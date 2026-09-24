@@ -1202,6 +1202,46 @@ def iptal(con, id_, now=None):
     return {"ok": True, "note": "İş emri iptal edildi."}
 
 
+# Niyetin durumu -> ekranda. Teklif bekleyen cikti «kullanilmadi» DEGILDIR.
+KULLANIM_AD = {"pending": "bekliyor", "delivered": "bekliyor", "applied": "uygulandı",
+               "acknowledged": "görüldü", "dismissed": "istenmedi", "expired": "süresi doldu",
+               "unknown": "bilinmiyor"}
+
+
+def gecmis(con, limit=30):
+    """Is gecmisi (fikir 44): her emir icin istek, cikti, tahmini ve gercek
+    sure/maliyet, ciktinin modulde ne oldugu. Sayilar emrin kendi kaydindan;
+    olculmeyen «veri yok» kalir."""
+    out = []
+    for e in emirler(con, limit):
+        t, s = e.get("tahmin") or {}, e.get("sonuc") or {}
+        tk = e.get("teklif") or {}
+        sec = next((x for x in tk.get("secenekler") or [] if x.get("id") == tk.get("secilen", "tam")),
+                   None)
+        tah_usd = ((sec or {}).get("maliyet") or {}).get("usd")
+        m = s.get("maliyet") or {}
+        olculdu = bool(m.get("cagri"))
+        kid = s.get("kayit_id")
+        kullanim = {"durum": "teklif yok", "tur": None}
+        if kid:
+            n = con.execute("SELECT kind, state FROM intents WHERE json_extract(payload, '$.kayit_id')=? "
+                            "ORDER BY id DESC LIMIT 1", (int(kid),)).fetchone()
+            if n:
+                kullanim = {"durum": KULLANIM_AD.get(n["state"], n["state"]), "tur": n["kind"]}
+        out.append({
+            "id": e["id"], "tarih": str(e.get("created_at") or "")[:16].replace("T", " "),
+            "modul": e["modul"], "tur": e["tur"], "ad": (TURLER.get(e["tur"]) or {}).get("ad", e["tur"]),
+            "konu": e.get("konu"), "durum": e["durum"],
+            "sure": {"tahmin": t.get("metin"),
+                     "gercek": _sure_yaz(s["gercek_sn"]) if s.get("gercek_sn") is not None else None},
+            "maliyet": {"tahmin_usd": tah_usd, "gercek_usd": m.get("usd") if olculdu else None,
+                        "etiket": (m.get("etiket") or "ölçüldü") if olculdu else "veri yok"},
+            "cikti": {"kayit_id": kid},
+            "kullanim": kullanim})
+    return {"isler": out, "not": "Tahmin «tahmin», gerçek süre ve maliyet ölçümdür; ölçülmeyen "
+                                "«veri yok» yazar, sıfır değil."}
+
+
 def ozet(con):
     sayac = {r["durum"]: r["n"] for r in con.execute(
         "SELECT durum, COUNT(*) AS n FROM is_emirleri GROUP BY durum")}
@@ -1209,4 +1249,4 @@ def ozet(con):
                            "ofisler": v["ofisler"], "model": v["model"]}
                        for k, v in TURLER.items()},
             "emirler": emirler(con, 30), "sayac": sayac, "sure_sapmasi": sure_sapmasi(con),
-            "maliyet_sapmasi": maliyet_sapmasi(con)}
+            "maliyet_sapmasi": maliyet_sapmasi(con), "gecmis": gecmis(con)}

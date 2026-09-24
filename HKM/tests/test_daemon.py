@@ -809,6 +809,13 @@ def run_extra(S):
         import io
         import zipfile
         eq(S.call("/api/disa-aktar", token=None)[0], 401)
+        # Fikir 48 ve 55: durum ve gizlilik uclari calisir, jetonsuz yok.
+        kod, tn = S.call("/api/tani")
+        eq(kod, 200)
+        ok(tn["maddeler"] and "metin" in tn)
+        eq(S.call("/api/tani", token=None)[0], 401)
+        kod, gz = S.call("/api/gizlilik")
+        eq((kod, "saglik" in gz), (200, True))
         req = urllib.request.Request(S.url("/api/disa-aktar"),
                                      headers={"Authorization": "Bearer " + TOKEN})
         with urllib.request.urlopen(req, timeout=10) as yan:

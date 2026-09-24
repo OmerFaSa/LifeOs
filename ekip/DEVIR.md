@@ -364,6 +364,11 @@ Sistemler › «Her şeyi tek zip olarak indir») · ✅ 55 gizlilik panosu (`us
 modele giden veri TÜRÜNÜ yazar — mesaj, sağlık/çalışma/gelişim özeti, ilkeler, hatırlananlar,
 BAM isteği; `core/gizlilik.py`, `GET /api/gizlilik`, HKM › Sistemler kartı: sağlık özeti gitti mi,
 kaç kez, son ne zaman; modüllerin kendi çağrıları HKM'den geçmez ve bu söylenir). HKM 582.
+· ✅ 44 iş geçmişi (`king.gecmis`: istek, çıktı kaydı, süre ve maliyet tahmin → gerçek, çıktının
+modüldeki durumu — bekliyor/uygulandı/istenmedi; ölçülmeyen «veri yok»; HKM › Ofis › King) ·
+✅ 48 durum ekranı (`core/tani.py`, `GET /api/tani`, HKM › Sistemler en üstte: sohbet ve BAM
+modeli, web, kanal, üç modülün bağlantısı ve yedeği, bütçe/kur — tamam/uyarı/bozuk + nerede
+düzeltilir; veri gelmemiş modül «tamam» sayılmaz). HKM 584, yüz temiz. **HKM grubu bitti.**
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 
