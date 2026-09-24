@@ -455,6 +455,10 @@ def run_cli():
     gecici = os.path.join(tempfile.mkdtemp(prefix="hkm-cli-"), "hkm.db")
     eski_yukle = cli.load_config
     cli.load_config = lambda: {"db_path": gecici, "local_token": "test"}
+    # cli.main saat dilimini SUREC icin kurar (KO-1); oteki paketler
+    # etkilenmesin diye sonunda geri konur.
+    import time
+    eski_tz = os.environ.get("TZ")
 
     def t_help_and_unknown():
         eq(cli.main([]), 0)
@@ -483,6 +487,12 @@ def run_cli():
     test("cli yalniz kendi ambarina yazar", t_cli_wrote_only_to_temp)
 
     cli.load_config = eski_yukle
+    if eski_tz is None:
+        os.environ.pop("TZ", None)
+    else:
+        os.environ["TZ"] = eski_tz
+    if hasattr(time, "tzset"):
+        time.tzset()
 
 
 def run_kurtarma():

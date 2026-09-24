@@ -223,6 +223,8 @@ def main(argv=None):
         yaz("Şunlar var: " + ", ".join(sorted(KOMUTLAR)))
         return 1
     cfg = load_config()
+    from core import saat
+    saat.dilimi_kur(cfg)          # HATALAR KO-1: gun kullanicinin gunudur
     con = _con(cfg)
     try:
         return fn(con, cfg, argv[1:]) or 0

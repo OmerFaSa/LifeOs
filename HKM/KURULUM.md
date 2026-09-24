@@ -65,11 +65,16 @@ ExecStart=/usr/bin/python3 /opt/lifeos/HKM/daemon.py
 Restart=on-failure
 RestartSec=5
 # Sertlestirme: servis kendi dizini disinda hicbir yere yazamaz.
+# HKM klasoru yazilabilir olmali: Ayarlar ekrani config.json'u yazar
+# (gecici dosya + yer degistirme). Yalniz db/ yazilabilir olursa ayar
+# ekrandan kaydedilemez.
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/opt/lifeos/HKM/db
+ReadWritePaths=/opt/lifeos/HKM
+# Yazilan her dosya yalniz sahibine acik (HKM acilista da bunu yapar).
+UMask=0077
 
 [Install]
 WantedBy=multi-user.target
@@ -79,6 +84,17 @@ WantedBy=multi-user.target
 sudo systemctl enable --now hkm
 journalctl -u hkm -f
 ```
+
+**Saat dilimi.** HKM'nin günü **Europe/Istanbul**'a göre döner; sunucunun
+kendi saat dilimi (çoğu VPS'te ve kapta UTC) önemli değildir. Başka bir
+dilim için `config.json`'a `"saat_dilimi": "Europe/Berlin"` yaz. Tanınmayan
+bir ad kurulmaz, günlüğe yazılır. Etkin dilim `/api/tani` cevabında
+`saat_dilimi` alanında görünür.
+
+**Dosya izinleri.** `config.json` (jetonlar, anahtarlar), ambar, kopyalar,
+`db/yedek/` ve `db/media/` yalnız HKM'yi çalıştıran kullanıcıya açıktır
+(dosya 0600, klasör 0700). Daha önce geniş izinle yazılmış olanlar açılışta
+daraltılır; ambarın durduğu üst klasöre dokunulmaz.
 
 **Yedek:** bütün durum tek bir dosyadadır — `HKM/db/hkm.db`. Kopyalamak
 yeterlidir; kopyalamamak, dokuz aylık kaydı tek bir disk hatasına bağlar.
@@ -119,11 +135,16 @@ Webhook kurulumunda Meta önce bir `GET` doğrulaması yapar; HKM yalnızca
 
 ### Neden bu iki yol bearer istemez
 
-`POST /api/wa/webhook` HKM'nin **tek** bearer'sız POST yoludur: isteği Meta
-yollar ve bearer taşıyamaz. Kapısı **imzadır** — gövde, uygulama sırrıyla
-HMAC-SHA256 imzalanmamışsa ayrıştırılmaz bile. Telegram imza yerine
-kurulumda verdiğin gizli başlığı geri gönderir; sır tanımsızsa o webhook
-kapalıdır.
+Bearer'sız POST yolu **üçtür**; her birinin kendi kapısı vardır:
+
+- `POST /api/wa/webhook` — isteği Meta yollar ve bearer taşıyamaz. Kapısı
+  **imzadır**: gövde, uygulama sırrıyla HMAC-SHA256 imzalanmamışsa
+  ayrıştırılmaz bile.
+- `POST /api/tg/webhook` — Telegram imza yerine kurulumda verdiğin **gizli
+  başlığı** geri gönderir; sır tanımsızsa bu webhook kapalıdır.
+- `POST /api/pair` — cihaz eşleme. İsteyen taraf jetonu zaten bilmez;
+  kapısı HKM yüzünde «Cihazları bağla» ile açılan **tek kullanımlık, süreli
+  pencere**, yalnız yerel köken ve deneme sınırıdır.
 
 ## 4. Telegram — iki yol, biri hiçbir kapı açmaz
 

@@ -839,6 +839,8 @@ class Handler(BaseHTTPRequestHandler):
             r = tani.ozet(self.con, self.server.config,
                           datetime.date.today().isoformat(), self.server.db_path)
             # O-7: cevapsiz kopus artik yok; beklenmeyen hata SAYILIR.
+            r["saat_dilimi"] = {"ad": os.environ.get("TZ"),
+                                "fark": time.strftime("%z")}
             r["beklenmeyen_hata"] = {
                 "sayi": getattr(self.server, "beklenmeyen", 0),
                 "son": getattr(self.server, "son_beklenmeyen", None)}
@@ -1575,6 +1577,10 @@ def main():
     if os.name == "posix":
         os.umask(0o077)
     cfg = load_config()
+    from core import saat
+    if saat.dilimi_kur(cfg) is None:
+        sys.stderr.write("[hkm] saat dilimi kurulamadi (%r); sunucunun yerel "
+                         "saati kullaniliyor.\n" % cfg.get("saat_dilimi"))
     if not cfg.get("local_token"):
         sys.stderr.write(
             "config.json yok ya da local_token bos. config.example.json'u "

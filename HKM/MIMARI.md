@@ -9,8 +9,10 @@ değil, yanında** duran isteğe bağlı bir servistir.
 **Artık kapalı bir döngü var: veri → denetim → öneri → cevap.**
 Faz 1–3 (şema, sync, VP konseyi, öncelik sırası, dijital ikiz, Yönetici,
 öneri yaşam döngüsü), Faz 4–5'in metin tarafı (Büyük Patron, kanal katmanı,
-WhatsApp geçidi) ve Faz 6 (üç arayüzden işaret) yazıldı. **106 HKM testi**
-ve depo kökündeki `tools/entegre.js` bütünleşme denetimi geçiyor. Ses
+WhatsApp geçidi) ve Faz 6 (üç arayüzden işaret) yazıldı. HKM testleri
+(`python3 -m tests.run`) ve depo kökündeki `tools/entegre.js` bütünleşme
+denetimi geçiyor; güncel sayılar elle yazılmaz, `README.md`'deki sayılar
+bloğunda (`tools/sayilar.py`). Ses
 (konuşma girişi) yazılmadı.
 
 ---
@@ -397,8 +399,11 @@ ağa çıkmaz: `transport` bağımlılığı dışarıdan verilebilir.
 
 ### Uç noktalar ve kimlik
 
-`/api/wa/webhook` HKM'nin **tek** bearer'sız POST yoludur; isteği Meta
-yollar, bearer taşıyamaz. Kapısı imzadır. `GET` tarafı yalnız doğru
+Bearer'sız POST yolu üçtür ve her birinin kendi kapısı vardır:
+`/api/wa/webhook` (isteği Meta yollar; kapısı HMAC imzası),
+`/api/tg/webhook` (kapısı kurulumdaki gizli başlık; sır yoksa kapalı) ve
+`/api/pair` (kapısı HKM yüzünde açılan tek kullanımlık, süreli eşleme
+penceresi, yalnız yerel köken). WhatsApp'ın `GET` tarafı yalnız doğru
 `verify_token` ile gelen meydan okumayı yansıtır.
 
 WhatsApp'ın çalışması için HKM'nin dışarıdan erişilebilir olması gerekir
