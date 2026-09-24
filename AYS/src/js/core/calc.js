@@ -392,6 +392,93 @@ R.Calc = (function(){
   /* ---------- siradaki hamle ----------
      Karar yorgunlugunu azaltmak icin tek bir oncelik dondurur.
      Sira sabittir: borc > gecikme > gunun rituali > olcum > blok > cipa. */
+  /* «Bu hızla» (fikir 20): son 4 haftada kapanan konu (ikinci testin
+     tarihi) → haftalık hız; hız × sınava kalan hafta, kalan konuya
+     oranlanır. Hız ÖLÇÜLEMİYORSA (son 4 haftada < 2 kapanış) sayı
+     uydurulmaz: «veri yok». Sonuç «tahmin»dir ve dayanağı yazılır. */
+  function buHizla(){
+    const bugun = U.todayISO();
+    const sinir = U.iso(U.addDays(U.today(), -28));
+    let toplam = 0, kapali = 0, son4 = 0;
+    (R.SUBJECTS || []).forEach(sub => (sub.topics || []).forEach(t => {
+      toplam++;
+      const st = M.topicState(sub.id, t.id);
+      if(st.state !== 'closed') return;
+      kapali++;
+      const d = st.secondAt || st.firstAt;
+      if(d && String(d).slice(0, 10) >= sinir && String(d).slice(0, 10) <= bugun) son4++;
+    }));
+    const kalanGun = U.diffDays(bugun, R.PLAN.examTytISO);
+    if(son4 < 2 || !(kalanGun > 0)){
+      return { etiket:'veri yok', kapali, toplam, kalanGun,
+        metin:'Hız ölçülemiyor: son 4 haftada ' + son4 + ' konu kapandı (en az 2 gerekir). '
+          + 'Kapanan konu arttıkça «bu hızla» tahmini açılır.' };
+    }
+    const hiz = son4 / 4;
+    const hafta = kalanGun / 7;
+    const beklenen = Math.min(toplam, Math.round(kapali + hiz * hafta));
+    const yuzde = Math.round(100 * beklenen / toplam);
+    return { etiket:'tahmin', hiz, kapali, toplam, kalanGun, beklenen, yuzde,
+      metin:'Bu hızla (haftada ' + U.round(hiz, 1) + ' konu, son 4 hafta) sınava kadar ~'
+        + beklenen + '/' + toplam + ' konu kapanır, %' + yuzde + ' (tahmin; hız değişirse değişir).' };
+  }
+
+  /* «15 dakikam var» (fikir 18): nextAction'ın süreye SIĞAN hali. Yalnız
+     `dk` dakikada bitebilecek iş önerilir; süreler kabadır ve «tahmin»dir
+     (kart ~1 dk, paragraf ~3 dk, reçete ~10 dk). Öncelik: gecikmiş kart >
+     açık yanlışın reçetesi > paragraf/problem eksiği > vadesi gelen kart >
+     sıradaki bloğun ilk dakikaları. */
+  function onbesDakika(dk){
+    const sure = dk || 15;
+    const day = S.days[U.todayISO()];
+    const kart = n => Math.min(n, sure);
+    const gecikmis = overdueCards();
+    if(gecikmis.length){
+      const n = kart(gecikmis.length);
+      return { key:'onbes-kart-gecikmis', icon:'cards', label:sure + ' dakikam var',
+        title:n + ' kart tekrar et', dk:n,
+        why:gecikmis.length + ' kartın vadesi geçti; kart başı ~1 dakika (tahmin). Gecikme en pahalı borçtur.',
+        route:'cards', tone:'normal' };
+    }
+    const recete = openErrors().filter(e => !e.repairDoneAt && e.recipe);
+    if(recete.length){
+      return { key:'onbes-recete', icon:'edit', label:sure + ' dakikam var',
+        title:(recete[0].topic || 'Bir yanlış') + ': reçeteyi yap', dk:10,
+        why:'Açık yanlışın reçetesi: «' + String(recete[0].recipe).slice(0, 80) + '» (~10 dakika, tahmin).',
+        route:'cards', tone:'normal' };
+    }
+    if(day && day.paragraphActual < day.paragraphTarget){
+      const n = Math.min(day.paragraphTarget - day.paragraphActual, Math.floor(sure / 3));
+      return { key:'onbes-paragraf', icon:'book', label:sure + ' dakikam var',
+        title:n + ' paragraf sorusu çöz', dk:n * 3,
+        why:'Günün paragraf çıpasından ' + (day.paragraphTarget - day.paragraphActual)
+          + ' kaldı; soru başı ~3 dakika (tahmin).', tone:'normal' };
+    }
+    if(day && day.problemActual < day.problemTarget){
+      const n = Math.min(day.problemTarget - day.problemActual, Math.floor(sure / 3));
+      return { key:'onbes-problem', icon:'chart', label:sure + ' dakikam var',
+        title:n + ' problem sorusu çöz', dk:n * 3,
+        why:'Günün problem çıpasından ' + (day.problemTarget - day.problemActual) + ' kaldı.', tone:'normal' };
+    }
+    const vade = dueCards();
+    if(vade.length){
+      const n = kart(vade.length);
+      return { key:'onbes-kart', icon:'cards', label:sure + ' dakikam var',
+        title:n + ' kart tekrar et', dk:n,
+        why:'Bugün vadesi gelen ' + vade.length + ' kart var; kart başı ~1 dakika (tahmin).',
+        route:'cards', tone:'normal' };
+    }
+    const next = day && day.blocks.find(b => b.status === 'pending' && b.slot !== 'Dinlenme');
+    if(next){
+      return { key:'onbes-blok', icon:'play', label:sure + ' dakikam var',
+        title:next.topic, dk:sure, blockId:next.id, act:'timer-start',
+        why:'Sıradaki bloğun ilk ' + sure + ' dakikası; bitmezse blok kaldığı yerden sürer.', tone:'normal' };
+    }
+    return { key:'onbes-yok', icon:'check', label:sure + ' dakikam var',
+      title:'Bugünün işi bitti', dk:0,
+      why:'Süreye sığan açık iş yok. Dinlenmek de plandır.', tone:'calm' };
+  }
+
   function nextAction(){
     const todayISO = U.todayISO();
     const day = S.days[todayISO];
@@ -897,6 +984,7 @@ R.Calc = (function(){
   }
 
   return {
+    onbesDakika, buHizla,
     fullExams, comparableNets, medianTrend, examBase, testMedian, analysisDebt, examVolumeProgress,
     errorDistribution, errorPareto, topTags, openErrors,
     dueCards, overdueCards, cardDebt,

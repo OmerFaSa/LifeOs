@@ -369,6 +369,11 @@ modüldeki durumu — bekliyor/uygulandı/istenmedi; ölçülmeyen «veri yok»;
 ✅ 48 durum ekranı (`core/tani.py`, `GET /api/tani`, HKM › Sistemler en üstte: sohbet ve BAM
 modeli, web, kanal, üç modülün bağlantısı ve yedeği, bütçe/kur — tamam/uyarı/bozuk + nerede
 düzeltilir; veri gelmemiş modül «tamam» sayılmaz). HKM 584, yüz temiz. **HKM grubu bitti.**
+· ✅ 18 «15 dakikam var» (`calc.onbesDakika`: gecikmiş kart > açık yanlış reçetesi > paragraf/
+problem eksiği > vadesi gelen kart > sıradaki bloğun ilk 15 dk; süreler «tahmin»; Bugün ›
+sıradaki iş kartında düğme, «Tam plan» ile döner) · ✅ 20 «bu hızla» (`calc.buHizla`: son 4
+haftanın konu kapanış hızı × kalan hafta → sınava kadar kapanacak konu yüzdesi, tahmin; son 4
+haftada < 2 kapanış → veri yok; İlerleme › Süreç göstergeleri). AYS 1672, duman temiz.
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 

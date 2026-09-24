@@ -470,4 +470,59 @@
       });
     });
   });
+
+  /* Fikir 18 — «15 dakikam var»: yalnız süreye SIĞAN iş önerilir; öncelik
+     gecikmiş kart > açık yanlışın reçetesi > paragraf/problem eksiği >
+     vadesi gelen kart > sıradaki bloğun ilk 15 dakikası. */
+  describe('15 dakikam var', () => {
+    it('süreye sığan en değerli küçük iş, gerekçesiyle', () => {
+      withToday('2026-10-13', () => {
+        resetState();
+        const bugun = U.todayISO();
+        S.days[bugun] = { date:bugun, dow:1, paragraphActual:0, paragraphTarget:18,
+          problemActual:18, problemTarget:18,
+          blocks:[{ id:'b1', slot:'Sabah', topic:'Türev', subject:'Matematik', targetMin:90,
+            status:'pending' }] };
+        let a = C.onbesDakika();
+        expect(a.key).toBe('onbes-paragraf');
+        expect(a.dk <= 15).toBe(true);
+        S.errors = [{ id:'e1', createdAt:bugun, closedAt:null, repairDoneAt:null, tag:'K',
+          recipe:'Konuyu yeniden çalış', topic:'Türev' }];
+        a = C.onbesDakika();
+        expect(a.key).toBe('onbes-recete');
+        S.cards = Array.from({ length:30 }, (_, i) => ({ id:'c' + i, dueAt:'2026-10-01' }));
+        a = C.onbesDakika();
+        expect([a.key, a.title.indexOf('15 kart') >= 0]).toEqual(['onbes-kart-gecikmis', true]);
+        S.cards = []; S.errors = []; S.days[bugun].paragraphActual = 18;
+        a = C.onbesDakika();
+        expect([a.key, a.blockId]).toEqual(['onbes-blok', 'b1']);
+        expect(a.why.indexOf('ilk 15 dakika') >= 0).toBe(true);
+      });
+    });
+  });
+
+  /* Fikir 20 — «bu hızla»: son 4 haftanın kapanış hızı × kalan hafta.
+     Hız ölçülemiyorsa (son 4 haftada < 2 kapanış) veri yok; tahmin etiketli. */
+  describe('Bu hızla', () => {
+    it('kapanış hızından sınava yetişme tahmini; az veride veri yok', () => {
+      withToday('2026-10-13', () => {
+        resetState();
+        const top = R.SUBJECTS.reduce((a, x) => a + x.topics.length, 0);
+        expect(C.buHizla().etiket).toBe('veri yok');
+        const sub = R.SUBJECTS[0];
+        S.topics[sub.id] = { subjectId:sub.id, states:{} };
+        ['2026-09-20', '2026-09-29', '2026-10-06', '2026-10-10'].forEach((d, i) => {
+          S.topics[sub.id].states[sub.topics[i].id] = { state:'closed', first:80, second:75,
+            firstAt:d, secondAt:d };
+        });
+        const r = C.buHizla();
+        expect(r.etiket).toBe('tahmin');
+        expect(r.hiz).toBe(1);                              /* 4 kapanış / 4 hafta */
+        expect(r.kapali).toBe(4);
+        expect(r.toplam).toBe(top);
+        expect(r.yuzde > 0 && r.yuzde <= 100).toBe(true);
+        expect(r.metin.indexOf('tahmin') >= 0).toBe(true);
+      });
+    });
+  });
 })();

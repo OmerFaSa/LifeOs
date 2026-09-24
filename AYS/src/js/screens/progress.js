@@ -265,6 +265,8 @@ R.Screens.progress = (function(){
         K.Card({ title:'Süreç göstergeleri', sub:'Nete değil sürece bakar', body:K.Stack([
           K.Meter({ label:'Tekrar borcu', value:debt, text:'%'+debt, tone:debt > 10 ? 'danger' : '' }),
           K.Meter({ label:'Konu kapanışı', value:closure, text:'%'+closure }),
+          /* «Bu hızla» (fikir 20): kapanış hızından sınava yetişme — tahmin. */
+          html`<p class="tiny dim">${C.buHizla().metin}</p>`,
           when(sleep != null, () => K.Meter({ label:'Uyku (7 gün ort.)',
             value:U.pct(sleep, S.profile.sleepTarget), text:sleep+' / '+S.profile.sleepTarget+' sa' })),
         ], 'sm') }),

@@ -159,15 +159,19 @@ R.Screens.today = (function(){
     return [{ value:'', label:'— konu —' }].concat(s.topics.map(t => ({ value:t.id, label:t.name })));
   }
 
+  /* «15 dakikam var» (fikir 18): aynı kart, süreye SIĞAN öneriyle
+     (calc.js onbesDakika). «Tam plan» normal sıradaki işe döner. */
   function NextUpCard(){
-    const a = C.nextAction();
+    const kisa = !!S.ui.onbesDk;
+    const a = kisa ? C.onbesDakika(15) : C.nextAction();
     const clickable = a.route || a.act;
     return c.NextUp({
       icon:a.icon, label:a.label, title:a.title, why:a.why, hint:'next-action', calm:a.tone === 'calm',
       /* Yalniz sakin halde cizilir: AYS'nin isi hedeftir. */
       sanat:'hedef',
-      action:when(clickable, () => c.Button({ label:'Başla', tone:'primary', act:'next-action',
-        data:{ 'data-route':a.route || '', 'data-next':a.act || '', 'data-block':a.blockId || '' } })),
+      action:html`${when(clickable, () => c.Button({ label:'Başla', tone:'primary', act:'next-action',
+        data:{ 'data-route':a.route || '', 'data-next':a.act || '', 'data-block':a.blockId || '' } }))}
+        ${c.Button({ label:kisa ? 'Tam plan' : '15 dakikam var', size:'sm', tone:'ghost', act:'onbes-dk' })}`,
     });
   }
 
@@ -1163,6 +1167,7 @@ R.Screens.today = (function(){
       R.App.render();
     },
     async 'hkm-toplu'(){ await hkmToplu(); },
+    async 'onbes-dk'(){ S.ui.onbesDk = !S.ui.onbesDk; R.App.render(); },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-seen'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
