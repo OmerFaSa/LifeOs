@@ -308,11 +308,30 @@ def hedefler(ad: str):
         yield sistem, kok / "src" / Path(klasor) / ad
 
 
+URETILMIS_ISARET = "/* ÜRETİLMİŞ KOPYA"
+
+
+def elle_yazilmis(hedef: Path) -> bool:
+    """Hedef VAR ve basinda uretilmis kopya isareti YOKSA elle yazilmistir.
+
+    Yayim bir dosyanin ustune yalniz kendi urettigi kopyanin ustune
+    yazar. Isaretsiz bir hedef, arayuzun KENDI dosyasidir ve ortak
+    kaynakla ayni adi tasiyordur: `brand/ortak/oneri.test.js` eklenince
+    yayim SPI'nin kendi `src/tests/oneri.test.js`'ini sessizce ezdi
+    (K yakaladi, ekip/HATALAR.md T2-07)."""
+    if not hedef.exists():
+        return False
+    with open(hedef, encoding="utf-8") as f:
+        bas = f.read(len(URETILMIS_ISARET) + 8)
+    return not bas.startswith(URETILMIS_ISARET)
+
+
 def yay() -> int:
     if not KAYNAK.is_dir():
         print("HATA: %s yok" % KAYNAK)
         return 1
     n = 0
+    reddedilen = []
     for ad in DOSYALAR:
         if not (KAYNAK / ad).exists():
             print("  ! brand/ortak/%s yok, atlandi" % ad)
@@ -320,6 +339,9 @@ def yay() -> int:
         for sistem, hedef in hedefler(ad):
             yeni = uret(ad, sistem)
             hedef.parent.mkdir(parents=True, exist_ok=True)
+            if elle_yazilmis(hedef):
+                reddedilen.append(hedef.relative_to(KOK))
+                continue
             eski = hedef.read_text(encoding="utf-8") if hedef.exists() else None
             if eski == yeni:
                 continue
@@ -329,6 +351,13 @@ def yay() -> int:
     print("\n%d dosya yazildi." % n if n else "\nHepsi zaten guncel.")
     if n:
         print("Unutma: src/ degisti — uc `build.py` yeniden kosmali.")
+    if reddedilen:
+        print("\nYAZILMADI — hedefte ayni adli ELLE YAZILMIS dosya var "
+              "(basinda uretilmis kopya isareti yok):")
+        for r in reddedilen:
+            print("  ✕ %s" % r)
+        print("Ortak kaynaga baska bir ad ver ya da o dosyayi bilerek kaldir.")
+        return 1
     return 0
 
 
@@ -345,6 +374,11 @@ def denetle() -> int:
             yeni = uret(ad, sistem)
             if not hedef.exists():
                 hatalar.append("%s yok — `python3 tools/ortak.py --yay`"
+                               % hedef.relative_to(KOK))
+                continue
+            if elle_yazilmis(hedef):
+                hatalar.append("%s ELLE YAZILMIS bir dosya ve ortak kaynakla "
+                               "ayni adi tasiyor — ortak dosyaya baska ad ver"
                                % hedef.relative_to(KOK))
                 continue
             if hedef.read_text(encoding="utf-8") != yeni:

@@ -20,12 +20,39 @@
 
 | Kod | Sahip | Durum | Özet |
 |---|---|---|---|
+| T2-08 | H | ✅ (bu commit) | AYS planner testi `generatedAt` ms damgasına bakıyordu: aynı ms'de rastgele kalıyordu (bulan: K) |
+| T2-07 | H | ✅ (bu commit) | `ortak.py`/`seviye.py --yay` hedefte aynı adlı ELLE yazılmış dosyayı sessizce eziyordu (bulan: K) |
 | T2-06 | T | **açık · ACİL (main CI kırmızı)** | SPİ Rehber › Veri: HKM düğme satırı 390 px'te taşıyor (CI'da 11 px); `.lrow__act` telefonda sarmıyor |
 | T2-05 | H | ✅ b32fe7f | ESP test sayfası `audit.test.js`'i iki kez yüklüyordu (21 test iki kez koşuyordu) |
 | T2-04 | H | ✅ b32fe7f | Perde `hepsiniKapat` dinleyici ve sayaç bırakıyordu: sonraki ilk Esc yutuluyor, haberci 3 sn sonra perde açıyordu |
 | T2-03 | K | ✅ c063316 (H doğruladı) | Grafik parçaları zaman damgasından UTC gününü alıyor (gece 00–03 kaydı düne düşer) |
 | T2-02 | K (137) | açık | AYS Ofis ve Danışma'da ajanın okuduğu veri ham kimlikle yazılıyor |
 | T2-01 | K | ✅ a798671 (H doğruladı) | Fark rozeti yuvarlanıp 0 olan farkı «+0» ve iyi/kötü renkle gösteriyor |
+
+### T2-08 · AYS planner testi zaman damgasına bakıyordu (düşük, rastgele kırmızı) — düzeltildi
+
+- **Konum:** `AYS/src/tests/planner.test.js:204` «kapasite değişince plan yeniden
+  üretilir»; damga `AYS/src/js/core/planner.js:265` (`generatedAt`, ms). Bulan: K.
+- **Ne yanlış:** test iki `ensurePlan`'ın damgalarının FARKLI olmasını istiyordu; ikisi
+  aynı milisaniyeye düşünce eşit, test kalıyordu (aynı kodla bir koşumda kırmızı,
+  sonrakinde yeşil). Uygulamada damgayı karşılaştıran kod yok (grep).
+- **Düzeltme:** yeniden üretimin kanıtı kapasitenin kendisi: önce eski planın kapasitesi
+  35 olmadığı, sonra yenisinin 35 olduğu ve yeni nesne olduğu sınanır; damga karşılaştırması
+  kalktı.
+
+### T2-07 · Yayım aynı adlı elle yazılmış dosyayı eziyordu (orta) — düzeltildi
+
+- **Konum:** `tools/ortak.py` `yay()`; aynı sınıf `tools/seviye.py` `yay()`. Bulan: K.
+- **Ne yanlış:** hedefte aynı adlı dosya varsa, ÜRETİLMİŞ KOPYA değil de arayüzün kendi
+  dosyası olsa bile üstüne yazılıyordu. `brand/ortak/oneri.test.js` eklenince SPİ'nin kendi
+  `src/tests/oneri.test.js`'i ezildi (K commit'ten önce yakaladı; ortak dosya
+  `onerikart.test.js` oldu).
+- **Tekrar:** `AYS/src/js/core/olumsuz.js`'i elle yazılmış bir içerikle değiştir,
+  `python3 tools/ortak.py --yay` → düzeltmeden önce «✓ yazıldı», dosya ezildi.
+- **Düzeltme:** iki araç da başında `/* ÜRETİLMİŞ KOPYA` olmayan var olan hedefe YAZMAZ,
+  listeler ve 1 ile çıkar; `ortak.py --denetle` aynı durumu kırmızı yazar. Aynı deneme
+  düzeltmeden sonra: «YAZILMADI … ✕ AYS/src/js/core/olumsuz.js», dosya korunuyor
+  (seviye.py için `xp.js` ile aynı deneme).
 
 ### T2-06 · SPİ Rehber › Veri: düğme satırı telefonda taşıyor — main CI kırmızı (yüksek)
 

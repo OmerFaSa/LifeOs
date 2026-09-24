@@ -206,10 +206,15 @@
         resetState();
         S.profile.setupDone = true;
         const a = await M.ensurePlan(true);
+        /* Yeniden üretimin kanıtı kapasitenin kendisidir. Önceden
+           `generatedAt` damgalarının farklı olması da isteniyordu; damga
+           milisaniye çözünürlükte ve iki üretim aynı milisaniyeye düşünce
+           test rastgele kalıyordu (ekip/HATALAR.md T2-08). */
+        expect(a.meta.capacityHoursPerWeek === 35).toBeFalsy();
         S.profile.capacityHoursPerWeek = 35;
         const b = await M.ensurePlan();
         expect(b.meta.capacityHoursPerWeek).toBe(35);
-        expect(b.meta.generatedAt === a.meta.generatedAt).toBeFalsy();
+        expect(b === a).toBeFalsy();
       });
     });
     it('hafta sözleşmesi plandaki konuya bağlanır', async function(){

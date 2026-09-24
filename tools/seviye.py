@@ -248,11 +248,22 @@ def _bloklar():
         yield (g, KART_BAS, KART_BIT, kart_govdesi(), "rutbe kart adi")
 
 
+def elle_yazilmis(hedef) -> bool:
+    """Hedef var ve basinda uretilmis kopya isareti yoksa elle yazilmistir;
+    yayim onun ustune yazmaz (ayni sinifin `ortak.py` ornegi: ortak bir
+    dosya arayuzun kendi ayni adli testini ezdi, ekip/HATALAR.md T2-07)."""
+    if not hedef.exists():
+        return False
+    with open(hedef, encoding="utf-8") as f:
+        return not f.read(24).startswith("/* ÜRETİLMİŞ KOPYA")
+
+
 def yay() -> int:
     if not KAYNAK.is_dir():
         print("HATA: %s yok" % KAYNAK)
         return 1
     n = 0
+    reddedilen = []
     for klasor, ad_alani, mod in SISTEMLER:
         kok = KOK / klasor
         if not (kok / "src").is_dir():
@@ -262,6 +273,9 @@ def yay() -> int:
             hedef = kok / hedef_yol
             hedef.parent.mkdir(parents=True, exist_ok=True)
             yeni = uret(ad, ad_alani, mod, degistir)
+            if elle_yazilmis(hedef):
+                reddedilen.append(hedef.relative_to(KOK))
+                continue
             eski = hedef.read_text(encoding="utf-8") if hedef.exists() else None
             if eski == yeni:
                 continue
@@ -278,6 +292,11 @@ def yay() -> int:
             print("  ✓ %s (%s)" % (goreli, etiket))
             n += 1
     print("\n%d dosya yazildi." % n if n else "\nHepsi zaten guncel.")
+    if reddedilen:
+        print("\nYAZILMADI — hedefte ayni adli ELLE YAZILMIS dosya var:")
+        for r in reddedilen:
+            print("  ✕ %s" % r)
+        return 1
     return 0
 
 
