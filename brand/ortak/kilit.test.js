@@ -79,5 +79,36 @@
         expect(d.textContent).toContain('kapalı');
       }finally{ L.kaldir(M); d.remove(); }
     });
+
+    /* K'nin kararı (EKIP-PLANI §8-12): unutan kilitli KALMAZ (veri kaybı
+       olmaz) ama kapı yanındaki birinin bekleyip geçeceği kadar kısa da
+       değildir; kilit bu yolla kalkarsa sahibi bunu Ayarlar'da görür. */
+    it('oz-176 «Kodu unuttum» beş dakika bekletir; kaldırılan kilit iz bırakır, yeniden kurulunca iz silinir', async () => {
+      L.kaldir(M); L.izSil(M);
+      try{
+        expect(L.UNUTTUM_SN).toBe(300);
+        expect(L.sureMetni(300)).toBe('5 dakika');
+        expect(L.sureMetni(299)).toBe('4 dakika 59 saniye');
+        expect(L.sureMetni(45)).toBe('45 saniye');
+        await L.kur(M, '1122');
+        L.unutuldu(M, new Date(2026, 8, 24, 21, 30));
+        expect(L.aktifMi(M)).toBe(false);
+        expect(L.izOku(M).tur).toBe('unutuldu');
+        const d = document.createElement('div');
+        d.innerHTML = L.ayarHtml(M, { govde:true });
+        try{
+          const iz = d.querySelector('[data-kilit-iz]');
+          expect(iz.textContent).toContain('«Kodu unuttum» ile kaldırıldı');
+          expect(iz.textContent).toContain('24 Eylül');
+          expect(iz.textContent).toContain('21:30');
+          expect(d.textContent).toContain('beş dakika');
+        }finally{ d.remove(); }
+        await L.kur(M, '3344');
+        expect(L.izOku(M)).toBeNull();
+        const e = document.createElement('div');
+        e.innerHTML = L.ayarHtml(M, { govde:true });
+        expect(e.querySelector('[data-kilit-iz]')).toBeNull();
+      }finally{ L.kaldir(M); L.izSil(M); }
+    });
   });
 })();

@@ -11,6 +11,10 @@ R.Setup = (function(){
   const { html, raw, when, map } = R.h;
   const K = R.C;
 
+  /* BEŞ ADIM KALIR (K'nin kararı, EKIP-PLANI §8-11): katalog 171 «her adım
+     tek soru» der; AYS'nin beş adımı plan motorunun beş ayrı sorusudur (kim,
+     hedef, takvim, kapasite, seviye). Üçe indirmek adım başına iki soru
+     demekti. SPİ/ESP üç adımdır çünkü onlarınki tanıtım · sınır · form. */
   const STEPS = [
     { id:'kim',      title:'Seni tanıyalım',     note:'Bu bilgiler cihazda kalır, koça gönderilmez' },
     { id:'hedef',    title:'Hedefin ne?',        note:'Program adı ve hedef başarı sırası' },

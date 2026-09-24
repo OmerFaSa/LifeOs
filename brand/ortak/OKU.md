@@ -35,7 +35,7 @@ python3 tools/ortak.py --denetle   # kopyalar kaynakla aynı mı
 | `hareket.*` | `js/core`, `css`, `tests` | T4 hareket ve odak: çizimden önce/sonra fotoğraf, yalnız değişen öğe hareket eder (sayı, tik, satır kapanma), tek canlı öğe, küçülen başlık, kart geçişi, odak halkası, önizleme, odak kapısı; azaltılmış harekette kapalı |
 | `ayar.*` | `js/core`, `css`, `tests` | T5 ayar ekranları: kaydedilmemiş değişiklik şeridi (21), varsayılana dön (`data-varsayilan`, 182), ayar arama ve tam yol (183), tema önizlemesi (`C.TemaSecici`, 181; açık örnek `--l-*` jetonlarından) |
 | `yenilik.*` | `js/core`, `css`, `tests` | «Ne değişti?» (17): güncellemeden sonraki ilk açılışta sayfanın başında tek kart; ilk kez açana ve kurulumu bitmemişe gösterilmez. Yeni sürümde `SURUM` ve maddeler baştan yazılır |
-| `kilit.*` | `js/core`, `css`, `tests` | gizlilik kilidi (176): açılışta dört haneli kod, çizimden önce; perde, kasa değil (veriyi şifrelemez); «Kodu unuttum» bir dakika sonra kilidi kaldırır |
+| `kilit.*` | `js/core`, `css`, `tests` | gizlilik kilidi (176): açılışta dört haneli kod, çizimden önce; perde, kasa değil (veriyi şifrelemez); «Kodu unuttum» beş dakika sonra kilidi kaldırır ve iz bırakır (Ayarlar yazar; K kararı §8-12) |
 | `sw.js` | `src/` kökü | çevrimdışı kabuk (service worker): ağ önce, ağ yoksa son kopya; `build.py` `dist/` yanına da koyar |
 
 Kopyalar «ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME» başlığı taşır. Elle

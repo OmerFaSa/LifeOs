@@ -9683,7 +9683,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'e0b2385', at:'2026-09-24 20:46', dirty:true };
+ESP.BUILD = { id:'e25f3dd', at:'2026-09-24 21:17', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13549,15 +13549,22 @@ window.LIFEOS.YENILIK = (function(){
    tutulur (tarayıcı desteklemiyorsa basit bir özet — ikisi de perde için
    yeterli, kasa için değil).
 
-   KODU UNUTAN KİLİTLİ KALMAZ: «Kodu unuttum» bir dakika bekletir, sonra
+   KODU UNUTAN KİLİTLİ KALMAZ: «Kodu unuttum» beş dakika bekletir, sonra
    kilidi kaldırır ve uygulamayı açar. Verisine ulaşamayan bir kullanıcı,
-   verisini kaybetmiş bir kullanıcıdır — perde bunun bedeli olamaz. */
+   verisini kaybetmiş bir kullanıcıdır — perde bunun bedeli olamaz.
+
+   Süre K'nin kararı (EKIP-PLANI §8-12): bir dakika, yanındaki meraklı
+   birinin bekleyip geçeceği kadar kısaydı; beş dakika kasıtlı bir bekleyiş
+   ister, unutan için bir kerelik bir bedeldir. Kilit bu yolla kalkarsa İZ
+   kalır (`lifeos.kilit.<modül>.iz`): Ayarlar'daki kutu kilidin ne zaman
+   «Kodu unuttum» ile kaldırıldığını söyler; kilit yeniden kurulunca silinir.
+   Sessizce kalkan perde, sahibinin haberi olmadan açılmış perdedir. */
 
 window.LIFEOS = window.LIFEOS || {};
 
 window.LIFEOS.KILIT = (function(){
   const UZUNLUK = 4;
-  const UNUTTUM_SN = 60;
+  const UNUTTUM_SN = 300;
   const BEKLE_SN = 5;          // üç yanlıştan sonra
   const AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
 
@@ -13599,9 +13606,39 @@ window.LIFEOS.KILIT = (function(){
     if(!gecerliMi(kod)) return { ok:false, neden:'Kod dört rakam olmalı.' };
     const tuz = tuzUret();
     const ok = yaz(modul, { surum:1, tuz, ozet:await ozetle(tuz, kod) });
+    if(ok) izSil(modul);
     return ok ? { ok:true } : { ok:false, neden:'Bu tarayıcı kilidi saklayamıyor (site verisi kapalı).' };
   }
   function kaldir(modul){ try{ window.localStorage.removeItem(anahtar(modul)); }catch(e){} }
+
+  /* İz: kilit «Kodu unuttum» ile kalktıysa ne zaman. */
+  function izAnahtar(modul){ return anahtar(modul) + '.iz'; }
+  function izOku(modul){
+    try{ const v = window.localStorage.getItem(izAnahtar(modul)); return v ? JSON.parse(v) : null; }
+    catch(e){ return null; }
+  }
+  function izSil(modul){ try{ window.localStorage.removeItem(izAnahtar(modul)); }catch(e){} }
+  function unutuldu(modul, zaman){
+    kaldir(modul);
+    try{ window.localStorage.setItem(izAnahtar(modul),
+      JSON.stringify({ tur:'unutuldu', zaman:(zaman || new Date()).toISOString() })); }catch(e){}
+  }
+
+  /* «4 dakika 59 saniye» — geri sayım ve ayar metni için. */
+  function sureMetni(sn){
+    sn = Math.max(0, Math.round(Number(sn) || 0));
+    const dk = Math.floor(sn / 60), s = sn % 60;
+    if(!dk) return s + ' saniye';
+    return dk + ' dakika' + (s ? ' ' + s + ' saniye' : '');
+  }
+  const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos',
+    'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  function zamanMetni(iso){
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return '';
+    return d.getDate() + ' ' + AYLAR[d.getMonth()] + ' ' + d.getFullYear() + ' · '
+      + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
   async function dogrula(modul, kod){
     const v = oku(modul);
     if(!v) return true;
@@ -13666,11 +13703,11 @@ window.LIFEOS.KILIT = (function(){
         if(!b || sayac) return;
         let kalan = UNUTTUM_SN;
         b.disabled = true;
-        const yaz = () => { not.textContent = 'Kilit ' + kalan + ' saniye sonra kalkacak; uygulama açılacak ve kilit yeniden kurulana kadar kapalı kalacak.'; };
+        const yaz = () => { not.textContent = 'Kilit ' + sureMetni(kalan) + ' sonra kalkacak; uygulama açılacak, kilit yeniden kurulana kadar kapalı kalacak ve Ayarlar kaldırıldığını yazacak.'; };
         yaz();
         sayac = setInterval(() => {
           kalan--;
-          if(kalan <= 0){ kaldir(modul); bitir('unutuldu'); return; }
+          if(kalan <= 0){ unutuldu(modul); bitir('unutuldu'); return; }
           yaz();
         }, 1000);
       });
@@ -13686,6 +13723,7 @@ window.LIFEOS.KILIT = (function(){
   function ayarHtml(modul, o){
     o = o || {};
     const acik = aktifMi(modul);
+    const iz = izOku(modul);
     const m = kac(modul);
     const govde = '<div class="kilit-ayar" data-kilit-ayar="' + m + '"' + (o.govde ? ' data-kilit-govde' : '') + '>'
       + '<p class="small">Açılışta dört haneli kod sorar. Veriyi şifrelemez: yanındaki birinin gözünden korur.'
@@ -13703,7 +13741,10 @@ window.LIFEOS.KILIT = (function(){
       +   '<button type="button" class="btn btn--sm" data-kilit="kaydet" hidden>Kodu kaydet</button>'
       +   '<button type="button" class="btn btn--sm" data-kilit="vazgec" hidden>Vazgeç</button>'
       + '</div>'
-      + '<p class="tiny dim mt-8">Kodu unutursan kilit ekranındaki «Kodu unuttum» bir dakika sonra kilidi kaldırır.</p>'
+      + (!acik && iz && iz.tur === 'unutuldu'
+        ? '<p class="small kilit-ayar__iz mt-8" data-kilit-iz>Kilit «Kodu unuttum» ile kaldırıldı · ' + kac(zamanMetni(iz.zaman)) + '. Sen değilsen kodu yeniden kur.</p>'
+        : '')
+      + '<p class="tiny dim mt-8">Kodu unutursan kilit ekranındaki «Kodu unuttum» beş dakika sonra kilidi kaldırır; kaldırıldığı burada yazar.</p>'
       + '</div>';
     if(o.govde) return govde;
     return '<section class="kutu" data-oz="176"><header class="kutu__bas"><h2 class="kutu__ad">Gizlilik kilidi</h2>'
@@ -13757,7 +13798,7 @@ window.LIFEOS.KILIT = (function(){
   }
 
   return { UZUNLUK, UNUTTUM_SN, aktifMi, kur, kaldir, dogrula, ozetle, ekranHtml, ac,
-    ayarHtml, ayarEylem, kurDinle };
+    ayarHtml, ayarEylem, kurDinle, unutuldu, izOku, izSil, sureMetni };
 })();
 
 /* ==== js/core/olumsuz.js ==== */
