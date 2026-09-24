@@ -328,6 +328,7 @@
   color:var(--text-2);
 }
 .gerekce__satir .sayi{ font-weight:600; color:var(--text); }
+.gerekce__satir .sayi__b{ font-size:inherit; font-weight:400; color:var(--text-2); }
 .gerekce__ek::before{ content:"·"; margin-right:var(--sp-2); color:var(--text-3); }
 .gerekce__cubuk{
   position:relative;
@@ -711,3 +712,66 @@
   stroke-dasharray:2 var(--sp-1);
   vector-effect:non-scaling-stroke;
 }
+
+/* ================================================================
+   113 · ÖNCE / SONRA — yalnız değişen renkli, gerisi soluk
+   ================================================================ */
+
+.oncesonra{ display:grid; gap:var(--sp-2); }
+.oncesonra__ozet{ margin:0; font-size:var(--fs-sm); font-weight:600; }
+.oncesonra__iki{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3); }
+.oncesonra__bas{ margin:0 0 var(--sp-1); font-size:var(--fs-xs); font-weight:600; color:var(--text-3); }
+.oncesonra__l{ display:grid; gap:var(--sp-1); margin:0; padding:0; list-style:none; }
+.oncesonra__b{
+  display:grid;
+  padding:var(--sp-1) var(--sp-2);
+  border-radius:var(--r-xs);
+  font-size:var(--fs-sm);
+}
+/* Saat üstte, ad altta tam genişlikte: yan yana iki dar sütunda ad
+   kelime ortasından bölünüyordu. */
+.oncesonra__saat{ font-size:var(--fs-xs); font-variant-numeric:tabular-nums; color:var(--text-2); }
+.oncesonra__ad{ min-width:0; overflow-wrap:break-word; }
+.oncesonra__b--ayni{ color:var(--text-3); }
+.oncesonra__b--ayni .oncesonra__saat{ color:var(--text-3); }
+.oncesonra__b--degisen,
+.oncesonra__b--eklenen{ background:var(--primary-soft); color:var(--text); font-weight:500; }
+.oncesonra__b--silinen{ color:var(--text-3); text-decoration:line-through; }
+
+/* ================================================================
+   123 · GEÇME NEDENİ — isteğe bağlı çipler (T'nin .chip'i)
+   ================================================================ */
+
+.gecme{ display:grid; gap:var(--sp-2); justify-items:start; }
+.gecme__bas{ margin:0; font-size:var(--fs-sm); font-weight:500; }
+.gecme__ek{ color:var(--text-3); font-weight:400; }
+.gecme__cipler{ display:flex; flex-wrap:wrap; gap:var(--sp-2); }
+
+/* ================================================================
+   124 · ÇAPRAZ ETKİ — kaynak ve hedef ayrı renkte, ok Merkez'in
+   ================================================================ */
+
+.capraz{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2); font-size:var(--fs-xs); }
+.capraz__modul{ font-weight:600; padding:0 var(--sp-1); border-radius:var(--r-xs); }
+.capraz--ays{ color:var(--ays-ink); background:var(--ays-t); }
+.capraz--spi{ color:var(--spi-ink); background:var(--spi-t); }
+.capraz--esp{ color:var(--esp-ink); background:var(--esp-t); }
+.capraz__ok{ width:1.6em; height:.8em; fill:none; stroke:var(--mer); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.capraz__olcum{ color:var(--text-2); font-variant-numeric:tabular-nums; }
+
+/* ================================================================
+   127 · KAPSAM SEÇİMİ — süre uzadıkça seviye büyür
+   ================================================================ */
+
+.kapsam{ display:grid; gap:var(--sp-2); margin:0; padding:0; border:0; min-width:0; }
+.kapsam__bas{ padding:0; margin-bottom:var(--sp-1); font-size:var(--fs-sm); font-weight:600; }
+.kapsam__s{
+  display:grid;
+  grid-template-columns:auto minmax(0, 1fr);
+  column-gap:var(--sp-2);
+  align-items:baseline;
+  cursor:pointer;
+}
+.kapsam__s input{ grid-row:span 2; accent-color:var(--primary); }
+.kapsam__ad{ font-weight:500; }
+.kapsam__seviye{ grid-column:2; font-size:var(--fs-xs); color:var(--text-3); }

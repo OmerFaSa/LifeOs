@@ -32,6 +32,10 @@
      022  Sonucu söyleyen     yıkıcı düğme sonucu adıyla ve sayısıyla söyler:
           düğme               «14 bloğu sil». «Evet» ya da «Tamam» yok.
 
+     P2: 113 önce/sonra (yalnız değişen renkli) · 123 geçme nedeni (isteğe
+         bağlı çip) · 124 çapraz etki (kaynak → hedef, ok Merkez'in) ·
+         127 kapsam seçimi (süre uzadıkça seviye büyür, hiç küçülmez)
+
    DOKTRİN (AGENTS.md §1.1, §1.4, §1.9)
 
    Bu dosya hiçbir şeyi UYGULAMAZ. Karar verir (hangi kalıp, sormadan mı,
@@ -322,6 +326,7 @@ window.LIFEOS = window.LIFEOS || {};
       + ' data-seviye="' + k.seviye + '" data-oneri="' + kac(oneri.id || '') + '" aria-labelledby="' + kid + '">'
       + '<div class="okart__bas"><span class="okart__kaynak">' + (merkez ? 'Merkez önerisi' : 'Öneri') + '</span>'
       + seviyeRozeti(k.seviye) + '</div>'
+      + (oneri.capraz ? caprazHtml(oneri.capraz) : '')
       + '<h3 class="okart__baslik" id="' + kid + '">' + kac(oneri.baslik) + '</h3>'
       + '<p class="okart__alt">' + kac(alt.join(' · ')) + '</p>'
       + (oneri.gerekce ? gerekceHtml(oneri.gerekce, oneri.cumle) : '')
@@ -440,6 +445,140 @@ window.LIFEOS = window.LIFEOS || {};
     return el;
   }
 
+
+  /* ------------------------------------------------ 127 kapsam */
+
+  /* Kural 9 (AGENTS.md §1.9): süre uzadıkça seviye büyür. Kapsam seviyeyi
+     yalnız YÜKSELTİR; kataloğu orta olan bir aksiyon «yalnız bugün»
+     seçilince küçülmez. */
+  const KAPSAMLAR = Object.freeze([
+    Object.freeze({ id:'bugun', ad:'Yalnız bugün', seviye:'kucuk' }),
+    Object.freeze({ id:'hafta', ad:'Bu hafta', seviye:'orta' }),
+    Object.freeze({ id:'kalici', ad:'Kalıcı', seviye:'buyuk' }),
+  ]);
+  const KALIP_OZET = { kucuk:'tek dokunuş, «Geri al» kalır', orta:'önizleme ve tek onay',
+    buyuk:'önce/sonra, onay ve dönüş noktası' };
+
+  function kapsamSeviyesi(oneri, katalog, kapsamId){
+    const k = kalip(oneri, katalog);
+    if(!k) return null;
+    const kp = KAPSAMLAR.filter(x => x.id === kapsamId)[0];
+    if(!kp) return k.seviye;
+    return SEVIYELER[Math.max(SEVIYELER.indexOf(k.seviye), SEVIYELER.indexOf(kp.seviye))];
+  }
+
+  function kapsamHtml(oneri, katalog, secili){
+    if(!kalip(oneri, katalog)) return '';
+    const ad = 'kapsam-' + String((oneri && (oneri.id || oneri.eylem)) || 'x').replace(/[^a-zA-Z0-9_-]/g, '');
+    return '<fieldset class="kapsam" data-oz="127"><legend class="kapsam__bas">Ne kadar süre?</legend>'
+      + KAPSAMLAR.map(kp => {
+        const sev = kapsamSeviyesi(oneri, katalog, kp.id);
+        const id = ad + '-' + kp.id;
+        return '<label class="kapsam__s" for="' + id + '"><input type="radio" name="' + ad + '" id="' + id + '"'
+          + ' value="' + kp.id + '" data-act="oneri-kapsam" data-seviye="' + sev + '"' + (secili === kp.id ? ' checked' : '') + '>'
+          + '<span class="kapsam__ad">' + kac(kp.ad) + '</span>'
+          + '<span class="kapsam__seviye">' + kac(SEVIYE_AD[sev] + ' aksiyon · ' + KALIP_OZET[sev]) + '</span></label>';
+      }).join('') + '</fieldset>';
+  }
+
+  /* ------------------------------------------------ 123 geçme nedeni */
+
+  /* «Geç» dendiğinde İSTEĞE BAĞLI neden. Önerinin neden işe yaramadığı
+     tahminle değil kullanıcının sözüyle bilinir; neden seçmemek de bir
+     cevaptır ve öyle yazılır (null). */
+  const GECME_NEDENLERI = Object.freeze([
+    Object.freeze({ id:'zaman-yok', ad:'Zamanım yok' }),
+    Object.freeze({ id:'uymuyor', ad:'Bana uymuyor' }),
+    Object.freeze({ id:'zaten-yaptim', ad:'Zaten yaptım' }),
+    Object.freeze({ id:'veri-yanlis', ad:'Veri yanlış' }),
+    Object.freeze({ id:'sonra', ad:'Sonra bakarım' }),
+  ]);
+
+  function gecmeHtml(oneri){
+    const id = oneri && oneri.id != null ? String(oneri.id) : '';
+    return '<div class="gecme" data-oz="123" role="group" aria-label="Neden geçiyorsun? (isteğe bağlı)">'
+      + '<p class="gecme__bas">Neden geçiyorsun? <span class="gecme__ek">isteğe bağlı</span></p><div class="gecme__cipler">'
+      + GECME_NEDENLERI.map(n => '<button type="button" class="chip chip--tap" data-act="oneri-gec-neden"'
+        + ' data-oneri="' + kac(id) + '" data-neden="' + n.id + '">' + kac(n.ad) + '</button>').join('')
+      + '</div>' + dugme({ etiket:'Nedensiz geç', ton:'ghost', boy:'sm', act:'oneri-gec-neden', data:{ oneri:id, neden:'' } })
+      + '</div>';
+  }
+
+  /* Geçmişe yazılacak kayıt. Tanınmayan neden UYDURULMAZ: null olur. */
+  function gecmeKaydi(oneri, nedenId, zaman){
+    const n = GECME_NEDENLERI.filter(x => x.id === nedenId)[0] || null;
+    return { oneri:oneri && oneri.id != null ? oneri.id : null, eylem:oneri ? (oneri.eylem || oneri.action || null) : null,
+      neden:n ? n.id : null, nedenAd:n ? n.ad : null, zaman:zaman || new Date().toISOString() };
+  }
+
+  /* ------------------------------------------------ 124 çapraz etki */
+
+  const MODUL_AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+
+  /* c = { kaynak:'spi', hedef:'ays', olcum:'Uyku 5,1 saat' }
+     Kaynak ve hedef AYRI renkte, ok Merkez'in: Merkez her şeyi görür
+     ama modülleri karıştırmaz. Aynı modül çapraz etki değildir. */
+  function caprazHtml(c){
+    c = c || {};
+    if(!MODUL_AD[c.kaynak] || !MODUL_AD[c.hedef] || c.kaynak === c.hedef) return '';
+    const sr = MODUL_AD[c.kaynak] + ' ölçümü ' + MODUL_AD[c.hedef] + '’ye öneri' + (c.olcum ? ': ' + c.olcum : '');
+    return '<div class="capraz" data-oz="124" role="img" aria-label="' + kac(sr) + '">'
+      + '<span class="capraz__modul capraz--' + c.kaynak + '" aria-hidden="true">' + MODUL_AD[c.kaynak] + '</span>'
+      + '<svg class="capraz__ok" viewBox="0 0 20 10" aria-hidden="true"><path d="M1 5 H17 M13 1 L17 5 L13 9"/></svg>'
+      + '<span class="capraz__modul capraz--' + c.hedef + '" aria-hidden="true">' + MODUL_AD[c.hedef] + '</span>'
+      + (c.olcum ? '<span class="capraz__olcum" aria-hidden="true">' + kac(c.olcum) + '</span>' : '')
+      + '</div>';
+  }
+
+  /* ------------------------------------------------ 113 önce / sonra */
+
+  /* Bloklar: [{ id, ad, bas:'20:30', bit:'21:40', gun }]. Kimlikle eşlenir.
+     Değişen yalnız ad ya da saat farkıdır; sıra değişikliği değişiklik
+     sayılmaz (abartılmaz). */
+  function onceSonra(once, sonra){
+    const anah = b => b && b.id != null ? String(b.id) : null;
+    const A = {}, B = {};
+    (once || []).forEach(b => { const k = anah(b); if(k) A[k] = b; });
+    (sonra || []).forEach(b => { const k = anah(b); if(k) B[k] = b; });
+    const esit = (x, y) => x.ad === y.ad && x.bas === y.bas && x.bit === y.bit && (x.gun || null) === (y.gun || null);
+    const r = { ayni:[], degisen:[], eklenen:[], silinen:[] };
+    Object.keys(A).forEach(k => {
+      if(!B[k]) r.silinen.push(A[k]);
+      else if(esit(A[k], B[k])) r.ayni.push(B[k]);
+      else r.degisen.push({ once:A[k], sonra:B[k] });
+    });
+    Object.keys(B).forEach(k => { if(!A[k]) r.eklenen.push(B[k]); });
+    const parca = [];
+    if(r.degisen.length) parca.push(r.degisen.length + ' değişti');
+    if(r.eklenen.length) parca.push(r.eklenen.length + ' eklendi');
+    if(r.silinen.length) parca.push(r.silinen.length + ' silindi');
+    parca.push(r.ayni.length + ' aynı');
+    r.ozet = (r.degisen.length + r.eklenen.length + r.silinen.length) ? parca.join(' · ') : 'Değişiklik yok';
+    return r;
+  }
+
+  function onceSonraHtml(once, sonra){
+    const r = onceSonra(once, sonra);
+    const satir = (b, tur) => '<li class="oncesonra__b oncesonra__b--' + tur + '" data-blok="' + kac(b.id) + '">'
+      + '<span class="oncesonra__saat">' + kac((b.bas || '—') + '–' + (b.bit || '—')) + '</span>'
+      + '<span class="oncesonra__ad">' + kac(b.ad || '') + '</span></li>';
+    const degisenId = {};
+    r.degisen.forEach(d => { degisenId[String(d.once.id)] = 1; });
+    const sil = {};
+    r.silinen.forEach(b => { sil[String(b.id)] = 1; });
+    const ekl = {};
+    r.eklenen.forEach(b => { ekl[String(b.id)] = 1; });
+    const sol = (once || []).filter(b => b && b.id != null).map(b =>
+      satir(b, sil[String(b.id)] ? 'silinen' : degisenId[String(b.id)] ? 'degisen' : 'ayni')).join('');
+    const sag = (sonra || []).filter(b => b && b.id != null).map(b =>
+      satir(b, ekl[String(b.id)] ? 'eklenen' : degisenId[String(b.id)] ? 'degisen' : 'ayni')).join('');
+    return '<div class="oncesonra" data-oz="113">'
+      + '<p class="oncesonra__ozet">' + kac(r.ozet) + '</p><div class="oncesonra__iki">'
+      + '<section class="oncesonra__yan"><h4 class="oncesonra__bas">Önce</h4><ol class="oncesonra__l">' + sol + '</ol></section>'
+      + '<section class="oncesonra__yan"><h4 class="oncesonra__bas">Sonra</h4><ol class="oncesonra__l">' + sag + '</ol></section>'
+      + '</div></div>';
+  }
+
   L.ONERI = {
     SEVIYELER:SEVIYELER,
     SEVIYE_AD:SEVIYE_AD,
@@ -468,5 +607,14 @@ window.LIFEOS = window.LIFEOS || {};
     sonucEtiketi:sonucEtiketi,
     etiketGecerliMi:etiketGecerliMi,
     yikiciDugme:yikiciDugme,
+    KAPSAMLAR:KAPSAMLAR,
+    kapsamSeviyesi:kapsamSeviyesi,
+    kapsamHtml:kapsamHtml,
+    GECME_NEDENLERI:GECME_NEDENLERI,
+    gecmeHtml:gecmeHtml,
+    gecmeKaydi:gecmeKaydi,
+    caprazHtml:caprazHtml,
+    onceSonra:onceSonra,
+    onceSonraHtml:onceSonraHtml,
   };
 })();

@@ -420,4 +420,99 @@ describe('150 · Geri al şeridi (ui.js toast)', () => {
   });
 });
 
+describe('P2 · Öneri ekleri (113 123 124 127)', () => {
+
+  it('oz-127 Bir değişikliğin süresi seçilir: yalnız bugün, bu hafta, kalıcı; her birinin seviyesi altında.', () => {
+    const o = { id:'k1', eylem:'block-add' };
+    expect(O().KAPSAMLAR.map(k => k.id).join(',')).toBe('bugun,hafta,kalici');
+    expect(['bugun', 'hafta', 'kalici'].map(k => O().kapsamSeviyesi(o, KATALOG, k)).join(',')).toBe('kucuk,orta,buyuk');
+    const k = sahne(O().kapsamHtml(o, KATALOG, 'bugun'));
+    try{
+      const f = k.querySelector('[data-oz="127"]');
+      expect(f.tagName).toBe('FIELDSET');
+      const s = f.querySelectorAll('.kapsam__seviye');
+      expect(s[0].textContent).toBe('küçük aksiyon · tek dokunuş, «Geri al» kalır');
+      expect(s[1].textContent).toBe('orta aksiyon · önizleme ve tek onay');
+      expect(s[2].textContent).toBe('büyük aksiyon · önce/sonra, onay ve dönüş noktası');
+      expect(f.querySelector('input:checked').value).toBe('bugun');
+      f.querySelectorAll('input').forEach(i => expect(k.querySelector('label[for="' + i.id + '"]')).toBeTruthy());
+    }finally{ k.remove(); }
+  });
+
+  it('oz-127 kapsam seviyeyi yalnız YÜKSELTİR: kataloğu orta olan «yalnız bugün»de küçülmez', () => {
+    const o = { eylem:'cards-due-today' };
+    expect(O().kapsamSeviyesi(o, KATALOG, 'bugun')).toBe('orta');
+    expect(O().kapsamSeviyesi(o, KATALOG, 'kalici')).toBe('buyuk');
+    expect(O().kapsamSeviyesi(o, KATALOG, 'uydurma')).toBe('orta');
+    expect(O().kapsamSeviyesi({ eylem:'yok' }, KATALOG, 'bugun')).toBeNull();
+  });
+
+  it('oz-123 «Geç» dendiğinde isteğe bağlı neden çipleri; seçilen neden geçmişe yazılır.', () => {
+    const k = sahne(O().gecmeHtml({ id:'o1' }));
+    try{
+      const g = k.querySelector('[data-oz="123"]');
+      const cip = g.querySelectorAll('.chip');
+      expect(cip).toHaveLength(O().GECME_NEDENLERI.length);
+      expect(cip[0].getAttribute('data-neden')).toBe('zaman-yok');
+      expect(cip[0].getAttribute('data-oneri')).toBe('o1');
+      /* İsteğe bağlı: nedensiz geçmek de bir seçenek. */
+      const nedensiz = g.querySelector('.btn');
+      expect(nedensiz.textContent).toBe('Nedensiz geç');
+      expect(nedensiz.getAttribute('data-neden')).toBe('');
+    }finally{ k.remove(); }
+    const r = O().gecmeKaydi({ id:'o1', eylem:'block-add' }, 'veri-yanlis', '2026-09-24T10:00:00Z');
+    expect(r).toEqual({ oneri:'o1', eylem:'block-add', neden:'veri-yanlis', nedenAd:'Veri yanlış', zaman:'2026-09-24T10:00:00Z' });
+  });
+
+  it('oz-123 tanınmayan neden uydurulmaz: null yazılır', () => {
+    expect(O().gecmeKaydi({ id:'o1' }, 'canim-istemedi').neden).toBeNull();
+    expect(O().gecmeKaydi({ id:'o1' }, '').neden).toBeNull();
+    expect(Object.isFrozen(O().GECME_NEDENLERI)).toBeTruthy();
+  });
+
+  it('oz-124 Bir modüldeki ölçüm başka bir modüle öneri olur; iki modül yan yana, ok Merkez’in.', () => {
+    const o = Object.assign({}, MERKEZ, { capraz:{ kaynak:'spi', hedef:'ays', olcum:'Uyku 5,1 saat' } });
+    const k = sahne(O().kartHtml(o, KATALOG));
+    try{
+      const c = k.querySelector('[data-oz="124"]');
+      const m = c.querySelectorAll('.capraz__modul');
+      expect(m[0].textContent + '→' + m[1].textContent).toBe('SPİ→AYS');
+      expect(c.getAttribute('aria-label')).toBe('SPİ ölçümü AYS’ye öneri: Uyku 5,1 saat');
+      /* Kaynak ve hedef ayrı renkte; ok Merkez'in morunda. */
+      expect(getComputedStyle(m[0]).color === getComputedStyle(m[1]).color).toBeFalsy();
+      expect(getComputedStyle(c.querySelector('.capraz__ok')).stroke).toBe(renk(k, 'var(--mer)'));
+    }finally{ k.remove(); }
+  });
+
+  it('oz-124 aynı modül ya da bilinmeyen modül çapraz etki sayılmaz', () => {
+    expect(O().caprazHtml({ kaynak:'ays', hedef:'ays' })).toBe('');
+    expect(O().caprazHtml({ kaynak:'hkm', hedef:'ays' })).toBe('');
+  });
+
+  it('oz-113 Yalnız değişen blok renkli; gerisi soluk kalır.', () => {
+    const once = [{ id:1, ad:'Paragraf', bas:'08:00', bit:'09:00' }, { id:2, ad:'Problem', bas:'10:00', bit:'11:00' },
+      { id:3, ad:'Tekrar', bas:'12:00', bit:'13:00' }];
+    const sonra = [{ id:1, ad:'Paragraf', bas:'08:00', bit:'09:00' }, { id:2, ad:'Problem', bas:'10:30', bit:'11:30' },
+      { id:4, ad:'Geometri', bas:'14:00', bit:'15:00' }];
+    const k = sahne(O().onceSonraHtml(once, sonra));
+    try{
+      const el = k.querySelector('[data-oz="113"]');
+      expect(el.querySelector('.oncesonra__ozet').textContent).toBe('1 değişti · 1 eklendi · 1 silindi · 1 aynı');
+      const ayni = el.querySelector('.oncesonra__b--ayni'), deg = el.querySelector('.oncesonra__b--degisen');
+      expect(getComputedStyle(ayni).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+      expect(getComputedStyle(deg).backgroundColor === 'rgba(0, 0, 0, 0)').toBeFalsy();
+      expect(getComputedStyle(ayni).color === getComputedStyle(deg).color).toBeFalsy();
+      expect(el.querySelector('.oncesonra__b--silinen .oncesonra__ad').textContent).toBe('Tekrar');
+      expect(el.querySelector('.oncesonra__b--eklenen .oncesonra__ad').textContent).toBe('Geometri');
+    }finally{ k.remove(); }
+  });
+
+  it('oz-113 sıra değişikliği değişiklik sayılmaz; hiç fark yoksa bunu söyler', () => {
+    const a = [{ id:1, ad:'A', bas:'08:00', bit:'09:00' }, { id:2, ad:'B', bas:'10:00', bit:'11:00' }];
+    const r = O().onceSonra(a, [a[1], a[0]]);
+    expect(r.degisen).toHaveLength(0);
+    expect(r.ozet).toBe('Değişiklik yok');
+  });
+});
+
 })();
