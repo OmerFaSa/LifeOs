@@ -989,3 +989,4 @@
 .durumkart__fark.is-artti{ background:var(--ok-t); color:var(--ok-ink); }
 .durumkart__fark.is-azaldi{ background:var(--bad-t); color:var(--bad-ink); }
 .durumkart__not, .durumkart__bos{ margin:8px 0 0; font-size:13px; color:var(--text-2); }
+.site--v5 .gunserit{ margin-bottom:28px; }
