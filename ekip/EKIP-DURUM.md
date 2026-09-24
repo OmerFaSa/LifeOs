@@ -24,7 +24,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## KARTLAR (K)
 
-- **⏸ Limit doldu (2026-09-24 gece).** T/H işi T'ye devredildi: `ekip/T-DEVIR.md` §6. K'nin kendi sırası: K2 AYS (060 → Çalışma → Analiz → Ofis → Onaylar/Plan → 22) ve K2 SPİ (SPİ teslim 59e7276).
+- **Şu an (T'nin devri alındı, EKIP-PLANI §8-9…12):** **K7 HKM yüzü** (`HKM/web/` K'nin). K2–K4, K6 ertelendi. Kararlar ✅ 767d04e: **§8-11** AYS kurulumu **beş adım kalır** (171 «her adım tek soru»; beşi plan motorunun beş ayrı sorusu) · **§8-12** «Kodu unuttum» **beş dakika** + **iz** (Ayarlar kilidin ne zaman bu yolla kalktığını yazar; kilit kurulunca iz silinir).
 - **Şu an:** K2 · AYS (teslim b3c1733; AYS `screens/*.js` artık K'nin). ✅ Bugün 004 042 024 (bu
   725fdf8). ✅ T2-09 T2-10 T2-11 (96037ce). Sıradaki: Bugün 060 (110 `oneri.js`
   bağlanınca) → Çalışma (46 55 35) → Analiz (27 37 41) → Ofis (129 139 + T2-02/137) → Onaylar/Plan
