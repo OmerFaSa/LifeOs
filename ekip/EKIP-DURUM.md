@@ -145,7 +145,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## HATA (H)
 
-- **Şu an:** AYS teslimi (b3c1733) için H4 tam koşum (ayrı worktree, sürüyor) · K'nin ricaları: (a) ✅ bu commit, (b) okunuyor, (c) SPİ/ESP taraması zaten temiz (501 + 678 basış), H4 başladı
+- **Şu an:** ⚠ **main CI kırmızı — T2-12 → T:** T3 AYS üretilmiş kopya `AYS/src/js/screens/rutbe.js`'i elle değiştirdi, `seviye.py --denetle` kırmızı (koşu 230'dan beri). H4 tam koşum bunun dışında yeşil (AYS/SPİ/ESP her araç, HKM 640, yüz, entegre); `--yaz` bu yüzden belgeleri güncellemedi. K'nin ricaları: (a) ✅ ec55ed7 · (b) ✅ df4017e (T2-09, T2-10, T2-11) · (c) ✅ SPİ/ESP taraması temiz, H4 koşuldu.
 - **Biten:** H0 taban envanteri · 1600f75 — `node tools/envanter.js` her push'ta CI'da koşar
 - **Biten:** H0b tıklama taraması ilk tam koşum (T3'ten önceki kod): AYS 652 · SPİ 501 · ESP 678 düğmeye basıldı, **gerçek sorun 0**. AYS'de görülen 3 «Unexpected token '<<'» H'nin kendi rebase'inin çalışma alanında bıraktığı çakışma işaretinden (build.js) geldi; aynı ekran temiz ağaçta yeniden tarandı: 70 basış, 0 sorun. Ders: uzun koşumlar ayrı `git worktree`'de (plan §7 zaten böyle diyor).
 - **Biten:** H1 sadelik denetimi (`tools/sadelik.js`, plan §1.2 bütçesi) — CI'da envanterle aynı gezintiden; teslim tablosunda ✅ olan modülde kırmızı olur, diğerlerinde yalnız ölçer

@@ -20,6 +20,7 @@
 
 | Kod | Sahip | Durum | Özet |
 |---|---|---|---|
+| T2-12 | T | **açık · ACİL (main CI kırmızı)** | T3 AYS üretilmiş kopya `AYS/src/js/screens/rutbe.js`'i elle değiştirdi; `seviye.py --denetle` kırmızı |
 | T2-11 | K | açık | Bildirim kartı: uygulama kapalıyken basılan eylem (ör. «Bitti») kayboluyor, kullanıcıya söylenmiyor |
 | T2-10 | K | açık | Tablo hücresi (038) kesinliği verilmemiş sayıyı «hesaplandı» sayıyor: etiketsiz sayı etiketli görünür |
 | T2-09 | K | açık | Hız tahmini (039) hedefe ulaşılmamışken GEÇMİŞ bir tarihi «en olası» diye veriyor |
@@ -31,6 +32,21 @@
 | T2-03 | K | ✅ c063316 (H doğruladı) | Grafik parçaları zaman damgasından UTC gününü alıyor (gece 00–03 kaydı düne düşer) |
 | T2-02 | K (137) | açık | AYS Ofis ve Danışma'da ajanın okuduğu veri ham kimlikle yazılıyor |
 | T2-01 | K | ✅ a798671 (H doğruladı) | Fark rozeti yuvarlanıp 0 olan farkı «+0» ve iyi/kötü renkle gösteriyor |
+
+### T2-12 · T3 AYS üretilmiş kopyayı elle değiştirdi — main CI kırmızı (yüksek)
+
+- **Konum:** `AYS/src/js/screens/rutbe.js` (dd97f56). Dosya `brand/seviye/rutbe.js`'in
+  ÜRETİLMİŞ kopyası (`tools/seviye.py --yay`); başında «BURAYI DÜZENLEME» yazıyor.
+- **Ne yanlış:** sekme → bölüm değişikliği (C.SayfaBolumleri, `rutbe-tab` → `K.bolumeGit`,
+  `#888` → `var(--text-3)`) kopyaya yazıldı, kaynağa değil. `python3 tools/seviye.py --denetle`:
+  «✕ AYS/src/js/screens/rutbe.js kaynaktan AYRISMIS». CI «Tek kaynaklar» işi dd97f56'dan
+  beri her main push'unda kırmızı (koşu 230–232). Sonraki `seviye.py --yay` değişikliği
+  sessizce SİLER; AYS Rütbe'ye sekmeler geri gelir (sadelik AYS kırmızı olur).
+- **H'nin payı:** AYS teslim kapısında ortak.py'yi denetledim, seviye.py'yi DENETLEMEDİM;
+  H4 tam koşumu yakaladı. Kapı listeme `seviye.py --denetle` eklendi.
+- **Düzeltme yönü:** değişikliği `brand/seviye/rutbe.js`'e taşı ve `seviye.py --yay`
+  (SPİ/ESP Rütbe de bölüm olur; üç `components.js`'te `SayfaBolumleri`/`bolumeGit` var),
+  üç dist, üç modülün testleri. Sahibi T; T yokken karar kullanıcının.
 
 ### T2-11 · Bildirim kartı: uygulama kapalıyken eylem kayboluyor (düşük)
 
