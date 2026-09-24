@@ -216,6 +216,13 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
     (testi hatayı kural sanıyordu). **Birim testleri artık İstanbul saatiyle koşar**
     (`tools/runtests.js` `timezoneId`); yeni testler düzeltmesiz kırmızıydı. AYS 1670, SPİ
     1307, ESP 1342, üç duman temiz, dist derlendi.
+  · Tarama 2'de temiz bulunanlar: yedek/dışa aktarma bütün depo anahtarlarını kapsar (yeni
+    özelliklerin verisi dahil), budama yalnız listeli yeniden üretilebilir koleksiyonlara
+    dokunur; `await`'siz kayıt yok (bulunanlar bilinçli «yaz-unut» ya da eşzamanlı);
+    HKM jeton denetimi merkezî, statik yollarda `../` geçmez; HKM raporlarında eksik→0 yok.
+    Kapsamı en düşük dosyalar EKRAN işleyicileri (AYS learn/guide/exams %6–8, ESP studio/
+    symposium/history %6–7): duman testi çizer ama düğme işleyicilerini koşmaz — sıradaki
+    tarama adayı (Part 9 ekranları zaten yeniden yazacak; önce oraya test yatırımı sorulmalı).
   Bilinçli bırakılan: haftalık soru gerçekleşmesi yalnız plan bloklarını sayar (haftanın konu
   sözleşmesi; serbest soru konuya bağlı değil) — tasarım kararı, hata değil.
 - **Sıradaki:** açık sorular (❓ 10b, 14, Y1, Y10, diksiyon) kullanıcı cevabı bekliyor; Part 9
