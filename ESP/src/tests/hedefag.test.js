@@ -86,6 +86,25 @@
       expect(giden[1].hedefler.length).toBe(1);
     });
 
+    it('günün dil kartı yalnız kanca varsa gider; bozuk kart atlanır, en çok beş (fikir 38)', async () => {
+      const giden = [];
+      const f = async (url, o) => { giden.push(JSON.parse(o.body));
+        return { status:200, json:async () => ({ ok:true }) }; };
+      const ag = A().kur({ hkm:() => beacon(true), modul:'esp', ozetler:() => [],
+        dilKarti:() => ({ gun:'2026-09-24', kartlar:[{ on:'to be', arka:'olmak' }, { on:'', arka:'x' },
+          { on:'uzun '.repeat(40), arka:'y' }, 1, 2, 3].concat([1, 2, 3, 4, 5, 6].map(i => ({ on:'k' + i, arka:'a' }))) }),
+        fetch:f });
+      await ag.gonder();
+      const d = giden[0].dil_karti;
+      expect(d.gun).toBe('2026-09-24');
+      expect(d.kartlar.length).toBe(5);
+      expect(d.kartlar[0]).toEqual({ on:'to be', arka:'olmak' });
+      expect(d.kartlar[1].on.length <= 80).toBe(true);
+      const yok = A().kur({ hkm:() => beacon(true), modul:'ays', ozetler:() => [], fetch:f });
+      await yok.gonder();
+      expect(giden[1].dil_karti).toBe(undefined);
+    });
+
     it('tatil yalnız tarihle gider; yoksa null (HKM siler)', async () => {
       const giden = [];
       const f = async (url, o) => { giden.push(JSON.parse(o.body));

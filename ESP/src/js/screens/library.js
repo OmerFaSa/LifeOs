@@ -264,6 +264,16 @@ ESP.Screens.library = (function(){
 
   /* --------------------------------------------------------------- kaynaklar */
 
+  /* Kitap başına ÖLÇÜLMÜŞ okuma (fikir 39): yalnız kitaba bağlanmış
+     oturumlardan. Bağlı oturum yoksa «veri yok» — sıfır dakika değil. */
+  function okumaHucresi(b){
+    const o = M.kitapOkuma(b.id);
+    if(!o) return html`<span class="tiny dim">veri yok</span>`;
+    return html`<span class="num">${U.fmtMin(o.dakika)}</span>
+      <div class="tiny dim">${o.oturum} oturum${o.sayfa != null ? ' · ' + o.sayfa + ' sayfa' : ''}
+        · son ${U.fmtShort(o.sonGun)}${o.cert !== 'measured' ? ' · tahmin' : ''}</div>`;
+  }
+
   function bookRows(){
     const kitaplar = S.books || [];
     const notSayisi = id => (S.notes || []).filter(n => n.bookId === id).length;
@@ -277,12 +287,13 @@ ESP.Screens.library = (function(){
         wide:true,
         body:kitaplar.length
           ? K.Table({ tight:true,
-              headers:['Eser', 'Yazar', 'Tür', { label:'Not', num:true }, 'Durum', ''],
+              headers:['Eser', 'Yazar', 'Tür', { label:'Not', num:true }, 'Okuma', 'Durum', ''],
               rows:kitaplar.map(b => [
                 html`${b.title}${when(b.bam && b.bam.not, () => html`<div class="tiny dim">BAM · ${b.bam.not}</div>`)}`,
                 b.author,
                 b.kind === 'primary' ? 'primer' : 'yorum',
                 String(notSayisi(b.id)),
+                okumaHucresi(b),
                 M.bookStatus(b).label,
                 html`${K.Button({ label:M.bookStatus(b).action, size:'sm',
                     act:'toggle-book', data:{ 'data-id':b.id } })}

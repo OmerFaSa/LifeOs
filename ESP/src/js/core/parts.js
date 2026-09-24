@@ -436,9 +436,19 @@ ESP.Parts = (function(){
               ${when(p.total, () => html`
                 <ul class="unit__items">${map(ESP.Lesson.itemsOf(u, lang).slice(0, 12),
                   it => html`<li><b>${it.front}</b><span>${it.back}</span></li>`)}</ul>
-                ${K.Button({ label:p.added ? 'Eksikleri desteye ekle' : 'Desteye ekle',
-                  tone:'primary', size:'sm', act:'unit-add',
-                  data:{ 'data-id':u.id, 'data-disc':discId } })}`)}
+                <div class="row wrap gap-8">
+                  ${K.Button({ label:p.added ? 'Eksikleri desteye ekle' : 'Desteye ekle',
+                    tone:'primary', size:'sm', act:'unit-add',
+                    data:{ 'data-id':u.id, 'data-disc':discId } })}
+                  ${when(p.added >= ESP.Lesson.SINAV_EN_AZ, () => K.Button({ label:'Ünite sınavı',
+                    size:'sm', act:'unit-sinav',
+                    data:{ 'data-id':u.id, 'data-disc':discId, 'data-lang':lang || '' } }))}
+                </div>
+                ${when(ESP.Lesson.sonSinav(u.id), () => {
+                  const sn = ESP.Lesson.sonSinav(u.id);
+                  return html`<p class="tiny dim mt-6">Son ünite sınavı ${U.fmtShort(sn.gun)}:
+                    ${sn.dogru}/${sn.soru} doğru · ölçüldü</p>`;
+                })}`)}
             </div>`)}
         </div>`;
     })}</div>`;
@@ -501,7 +511,7 @@ ESP.Parts = (function(){
       const r = ESP.Lesson.result(s);
       return html`
         <div class="pracend">
-          ${K.NextUp({ icon:'check', calm:true, sanat:'gorev', label:'Oturum bitti',
+          ${K.NextUp({ icon:'check', calm:true, sanat:'gorev', label:s.unitId ? 'Ünite sınavı bitti' : 'Oturum bitti',
             title:r.right + '/' + r.asked + ' doğru',
             why:'İsabet bir not değil bir ölçümdür: yanlışlar destede başa döndü.' })}
           ${when(r.missed.length, () => html`
@@ -521,6 +531,7 @@ ESP.Parts = (function(){
     const gosterildi = ESP.S.ui.practiceShown;
     return html`
       <div class="prac">
+        ${when(s.unitId, () => html`<p class="small"><b>Ünite sınavı:</b> ${s.unitTitle}</p>`)}
         <div class="prac__top">
           <span class="tiny dim">${s.pos + 1} / ${s.questions.length}</span>
           ${K.Badge({ label:(ESP.PRACTICE_BY_ID[q.kind] || {}).label || q.kind,

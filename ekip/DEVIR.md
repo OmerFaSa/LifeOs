@@ -402,6 +402,20 @@ UPC-A = 0 + EAN-13; `BarcodeDetector` olan tarayıcıda fotoğraftan, yoksa elle
 indirir, dinlenme dinlenme kalır; Bugün › SERİ satırında «Kötü gün», asgari günün kalanı yazılır,
 «Normal güne dön»; seriyi dondurmaz). SPİ 1322; duman, erişilebilirlik, 390 px temiz.
 **SPİ grubu bitti.**
+· ✅ 39 okuma takibi (ESP sayfayı ödüllendirmez; oturum isteğe bağlı KİTABA bağlanır —
+Bugün › Oturum ekle › Okuma › «Kitap»; `Model.kitapOkuma`: bağlı oturumların ölçülmüş dakikası,
+oturum sayısı, sayfa YALNIZ girildiyse, son gün; bağlı oturum yoksa «veri yok»; Kütüphane ›
+Kaynaklar › «Okuma» sütunu) · ✅ 41 ünite sonu mini sınavı (`Lesson.uniteSinavi`: yalnız
+ünitenin destedeki kartları, en az 4, en çok 10 soru, vade önceliği yok; cevaplar SRS'e yazılır;
+«bitti» bayrağı YOK — son sınav «8/10 · ölçüldü» ünitenin yanında; Dil › Öğren › ünite › «Ünite
+sınavı») · ✅ 16 kötü gün ESP (`core/kotugun.js`: öncelik sırasının ilk üçü — tıkanma, tarihli
+hedef, vadeli tekrar — yerinde; sentez/genişleme yerine «asgari gün yeter»; Bugün › SERİ) ·
+✅ 38 günün dil kartı (ortak `hedefag.js` `dilKarti` kancası → `/api/hedef/sync/esp`
+`dil_karti`; kartları ESP seçer: vadeli, sonra en düşük kutu, en çok 5, tarih destesi yok;
+HKM `dil_karti` tablosu, `schedule.dil_karti` saati — varsayılan KAPALI, HKM › Otomatik
+mesajlar; liste 1 günden eskiyse ya da tatildeyse mesaj gitmez; Telegram'daki tekrar SRS'e
+YAZILMAZ ve bu mesajda söylenir). ESP 1351, AYS 1676, SPİ 1323, HKM 585; üç duman + yüz temiz.
+**ESP grubu bitti.**
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 

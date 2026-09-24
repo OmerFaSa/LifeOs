@@ -215,6 +215,19 @@ ESP.Planner = (function(){
       };
     }
 
+    /* Kötü gün (core/kotugun.js): ilk üç kural yerinde durur; sentez ve
+       genişleme yerine asgari gün gelir. */
+    if(ESP.KotuGun && ESP.KotuGun.aktif(today)){
+      return {
+        rank:0, id:'kotu-gun', agent:'patron', disc:null,
+        title:'Kötü gün: asgari gün yeter',
+        detail:ESP.MINIMUM_DAY.read + ' ve ' + ESP.MINIMUM_DAY.practice.toLocaleLowerCase('tr')
+          + '. ' + ESP.MINIMUM_DAY.note,
+        route:'today', tab:null,
+        why:'Kötü gün modu açık: tekrar ve tarih kuralları yerinde, genişleme bugün yok.',
+      };
+    }
+
     /* 4 — sentopik sentez */
     const sentez = ESP.Mod.isOn('reading') ? synthesisGap() : { unlinked:[], suggestions:[] };
     if(sentez.suggestions.length){

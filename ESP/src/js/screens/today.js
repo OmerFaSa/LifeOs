@@ -121,6 +121,11 @@ ESP.Screens.today = (function(){
           ${K.Field({ label:'Not', hint:'isteğe bağlı',
             input:K.Input({ id:'s-note', placeholder:'ne çalıştın?' }) })}
         </div>
+        ${when(d === 'reading' && okunanlar().length, () => html`<div class="mt-10">
+          ${K.Field({ label:'Kitap', hint:'isteğe bağlı — kitaba verdiğin süre Kütüphane’de görünür',
+            input:K.Select({ id:'s-book', value:'', aria:'Okunan kitap',
+              options:[{ value:'', label:'Kitaba bağlama' }].concat(okunanlar()
+                .map(b => ({ value:b.id, label:(b.author ? b.author + ' — ' : '') + b.title }))) }) })}</div>`)}
 
         <div class="row mt-10">
           ${K.Button({ label:'Oturumu kaydet', tone:'primary', act:'add-session' })}
@@ -130,6 +135,11 @@ ESP.Screens.today = (function(){
 
         <p class="small muted mt-10">${disc ? disc.note : ''}</p>`,
     });
+  }
+
+  /* Okunmakta olan kitaplar (başlanmış, bitmemiş) — oturum bağı için. */
+  function okunanlar(){
+    return (S.books || []).filter(b => M.bookStatus(b).id === 'okunuyor');
   }
 
   function countLabel(discId){
@@ -469,7 +479,12 @@ ESP.Screens.today = (function(){
       <span class="tiny">Kaç gün?</span>
       ${map([3, 7, 14], n => K.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
       ${K.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>`;
-    return html`<div class="row wrap gap-6 mt-6">
+    const kotu = ESP.KotuGun && ESP.KotuGun.aktif(bugun);
+    return html`${when(kotu, () => html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Kötü gün modu: vadesi gelen tekrar yerinde, genişleme yok; bugün asgari gün yeter</span>
+      ${K.Button({ label:'Normal güne dön', size:'sm', act:'kotu-gun-kapat' })}</div>`)}
+      <div class="row wrap gap-6 mt-6">
+      ${when(ESP.KotuGun && !kotu, () => K.Button({ label:'Kötü gün', size:'sm', act:'kotu-gun' }))}
       ${K.Button({ label:'Bugün hastayım · seri donsun', size:'sm', act:'seri-hasta' })}
       ${K.Button({ label:'Tatil modu', size:'sm', act:'seri-tatil' })}</div>`;
   }
@@ -936,6 +951,18 @@ ESP.Screens.today = (function(){
       ESP.UI.toast(r.ad + ' bugüne eklendi', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
       ESP.App.render();
     },
+    async 'kotu-gun'(){
+      const r = await ESP.KotuGun.ac();
+      if(!r.ok){ ESP.UI.toast(r.why); return; }
+      ESP.UI.toast('Kötü gün modu açık: asgari gün yeter.', { undo:async () => {
+        await ESP.KotuGun.kapat(r.gun); ESP.App.render(); } });
+      ESP.App.render();
+    },
+    async 'kotu-gun-kapat'(){
+      const r = await ESP.KotuGun.kapat();
+      if(r.ok) ESP.UI.toast('Normal güne dönüldü');
+      ESP.App.render();
+    },
     async 'seri-hasta'(){
       const r = await ESP.Seri.dondur(U.todayISO(), null, 'hasta');
       if(!r.ok){ ESP.UI.toast(r.why); return; }
@@ -1119,6 +1146,7 @@ ESP.Screens.today = (function(){
         minutes:dakika,
         count:val('s-count'),
         note:val('s-note'),
+        ref:(S.ui.sessionDisc === 'reading' && val('s-book')) || null,
       });
       ESP.Memo.bitir();
       ESP.UI.toast('Oturum kaydedildi');

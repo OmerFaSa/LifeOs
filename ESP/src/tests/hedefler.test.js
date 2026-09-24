@@ -318,4 +318,22 @@
       });
     });
   });
+
+  describe('günün dil kartı (fikir 38)', () => {
+    it('önce vadeli, sonra en düşük kutu; tarih destesi girmez; kart yoksa gönderilmez', () => {
+      ESP.Test.withToday('2026-09-24', () => {
+        ESP.Test.resetState();
+        const { pushCard } = ESP.Test;
+        pushCard({ front:'rahat', back:'easy', lang:'en', box:4, due:'2026-10-10' });
+        pushCard({ front:'zor', back:'hard', lang:'en', box:1, due:'2026-10-10' });
+        pushCard({ front:'vadeli', back:'due', lang:'en', box:3, due:'2026-09-20' });
+        pushCard({ front:'Malazgirt', back:'1071', lang:ESP.HISTORY_DECK, box:1, due:'2026-09-01' });
+        const d = ESP.Hedefler.dilKarti();
+        expect(d.gun).toBe('2026-09-24');
+        expect(d.kartlar.map(k => k.on)).toEqual(['vadeli', 'zor', 'rahat']);
+        ESP.S.cards = [];
+        expect(ESP.Hedefler.dilKarti()).toBe(null);
+      });
+    });
+  });
 })();

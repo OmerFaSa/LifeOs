@@ -45,7 +45,8 @@ LIFEOS.HedefAg = (function(){
   }
 
   /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…], yarin?:async () => ({gun, isler}),
-           tatil?:() => ({bas, bit, donus_planli}) | null })`
+           tatil?:() => ({bas, bit, donus_planli}) | null,
+           dilKarti?:() => ({gun, kartlar:[{on, arka}]}) })`
      → { gonder(), planla(), cek(), butce() } */
   function kur(ortam){
     let zaman = null;
@@ -101,12 +102,33 @@ LIFEOS.HedefAg = (function(){
       }
     }
 
+    /* Günün dil kartı (fikir 38, yalnız ESP): kartları modülün KENDİ kodu
+       seçer; HKM kullanıcının saatinde Telegram'a dizer. Kanca yoksa ya da
+       bozuksa gönderilmez. */
+    async function dilKarti(){
+      if(typeof ortam.dilKarti !== 'function') return undefined;
+      try{
+        const d = await ortam.dilKarti();
+        if(!d || !/^\d{4}-\d{2}-\d{2}$/.test(String(d.gun || ''))) return undefined;
+        const kisa = x => String(x == null ? '' : x).replace(/\s+/g, ' ').trim().slice(0, 80);
+        const kartlar = (Array.isArray(d.kartlar) ? d.kartlar : [])
+          .filter(k => k && typeof k === 'object')
+          .map(k => ({ on:kisa(k.on), arka:kisa(k.arka) }))
+          .filter(k => k.on && k.arka).slice(0, 5);
+        return { gun:d.gun, kartlar };
+      }catch(e){
+        return undefined;
+      }
+    }
+
     async function gonder(){
       let l = [];
       try{ l = (ortam.ozetler() || []).slice(0, 30); }catch(e){ return { ok:false }; }
       const govde = { hedefler:l };
       const y = await yarin();
       if(y) govde.yarin = y;
+      const dk = await dilKarti();
+      if(dk) govde.dil_karti = dk;
       /* Tatil modu (seri.js): yalnız tarih. Yoksa açıkça null: HKM siler. */
       if(typeof ortam.tatil === 'function'){
         try{

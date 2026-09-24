@@ -308,6 +308,16 @@ CREATE TABLE IF NOT EXISTS yarin_ozet (
 /* Modulun TATIL MODU tarihi (brand/ortak/seri.js hkmTatil). Tatildeyken
    HKM soru sormaz; donus sabahi yuk azaltma teklifi birakir. Yalniz tarih
    gelir; neden gelmez. `donus_planli`: modul donusu kendi plani ile kurdu. */
+/* Gunun dil karti (fikir 38, brand/ortak/hedefag.js `dilKarti` kancasi).
+   Kartlari ESP'nin KENDI kodu secer (vadesi gelen, yoksa en zayif); HKM
+   kullanicinin sectigi saatte yalniz dizer (core/schedule.py). */
+CREATE TABLE IF NOT EXISTS dil_karti (
+  modul       TEXT PRIMARY KEY,
+  gun         TEXT NOT NULL,
+  kartlar     TEXT NOT NULL,               -- JSON: [{on, arka}]
+  guncelleme  TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS tatil_ozet (
   modul        TEXT PRIMARY KEY,
   bas          TEXT NOT NULL,

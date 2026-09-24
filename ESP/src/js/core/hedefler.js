@@ -399,8 +399,21 @@ ESP.Hedefler = (function(){
     });
     return { gun:tarih, isler };
   }
+  /* Günün dil kartı (fikir 38): vadesi gelen dil kartları, yoksa en düşük
+     kutudakiler; en çok beş. Tarih destesi dil kartı değildir; dil modülü
+     kapalıysa gönderilmez. HKM yalnız dizer, SRS'e yazmaz. */
+  function dilKarti(){
+    const bugun = U().todayISO();
+    if(ESP.Mod && !ESP.Mod.isOn('lang')) return null;
+    const dilMi = c => c && c.lang && c.lang !== ESP.HISTORY_DECK && c.front && c.back;
+    const vadeli = (ESP.SRS ? ESP.SRS.dueCards(bugun) : []).filter(dilMi);
+    const kalan = (ESP.S.cards || []).filter(c => dilMi(c) && vadeli.indexOf(c) < 0)
+      .sort((a, b) => (a.box || 1) - (b.box || 1));
+    const kartlar = vadeli.concat(kalan).slice(0, 5).map(c => ({ on:c.front, arka:c.back }));
+    return kartlar.length ? { gun:bugun, kartlar } : null;
+  }
   const ag = window.LIFEOS && LIFEOS.HedefAg
-    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler, yarin,
+    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler, yarin, dilKarti,
         tatil:() => ESP.Seri ? ESP.Seri.hkmTatil() : null }) : null;
 
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
@@ -412,5 +425,5 @@ ESP.Hedefler = (function(){
 
   return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, ALISKANLIK, CEFR, CEFR_SAAT:CEFR_VARSAYILAN, CEFR_VARSAYILAN, cefrTablo, KITAP_SAAT_TAHMIN,
     kitapSaati, temizHiz, kademeBpm, kademeAdi, notlar, yukle, kaydet, liste, aktifler,
-    durumDegistir, ozet, sohbet, ozetler, yarin, ag };
+    durumDegistir, ozet, sohbet, ozetler, yarin, dilKarti, ag };
 })();
