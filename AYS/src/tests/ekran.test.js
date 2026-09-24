@@ -114,7 +114,10 @@
       if(kurduk) R.Seri = LIFEOS.Seri.kur({ store:() => R.Store, bugun:() => R.U.todayISO() });
       await R.Seri.yukle();
       R.S.ui.tatilSec = true;
-      const out = String(await R.Screens.today.render());
+      /* Seri kartı tek tasarımda Bugün'den «Bugün › Ayrıntı»ya (R.Screens.gun)
+         taşınıyor; alan hangisindeyse orada aranır. */
+      const out = String(await R.Screens.today.render())
+        + (R.Screens.gun ? String(await R.Screens.gun.render()) : '');
       R.S.ui.tatilSec = false;
       if(kurduk) delete R.Seri;
       expect(out.indexOf('id="seri-tatil-sinir"') >= 0).toBe(true);

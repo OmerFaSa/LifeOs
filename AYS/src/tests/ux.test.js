@@ -232,12 +232,17 @@
        `S.ui.analyticsTab` varsayılanı 'overview' idi; o adda bir sekme
        kalmamıştı. Şeritte hiçbir sekme seçili görünmüyor, gövdede ise
        karşılaştırma çiziliyordu — ekran nerede olduğunu yanlış söylüyordu.
-       Bu test adı tek tek bilmez; her sekmeli ekranda TAM BİR sekmenin
-       seçili olmasını ister, böylece aynı hata başka ekranda da yakalanır. */
-    it('sekmeli ekranlarda tam bir sekme seçilidir', async function(){
-      for(const route of ['analytics','guide']){
-        const out = await R.Screens[route].render();
-        const say = (String(out).match(/aria-selected="true"/g) || []).length;
+       Bu test adı tek tek bilmez; sekme ŞERİDİ olan her ekranda TAM BİR
+       sekmenin seçili olmasını ister, böylece aynı hata başka ekranda da
+       yakalanır. Tek tasarımda (ekip/EKIP-PLANI.md §1.2) ekran içi sekme
+       kalmıyor: şeridi olmayan ekran bu sözün dışındadır; «sekme yok»
+       kuralını tools/sadelik.js ölçer. Şerit varsa söz aynen geçerlidir. */
+    it('sekme şeridi olan ekranda tam bir sekme seçilidir', async function(){
+      for(const route of Object.keys(R.Screens)){
+        if(route === 'topic') continue;   // konu ayrıntısı; parametreyle açılır
+        const out = String(await R.Screens[route].render());
+        if(out.indexOf('role="tablist"') < 0) continue;
+        const say = (out.match(/role="tab"[^>]*aria-selected="true"|aria-selected="true"[^>]*role="tab"/g) || []).length;
         if(say !== 1) throw new Error(route+' ekranında seçili sekme sayısı: '+say);
       }
     });
